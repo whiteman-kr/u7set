@@ -217,6 +217,15 @@ public:
 		m_precision = std::clamp<qint16>(static_cast<qint16>(value), 0, 128);
 	}
 
+	quint16 viewOrder() const
+	{
+		return m_viewOrder;
+	}
+	void setViewOrder(quint16 value)
+	{
+		m_viewOrder = value;
+	}
+
 	virtual QVariant value() const = 0;
 	virtual void setValue(const QVariant& value) = 0;
 
@@ -247,8 +256,9 @@ protected:
 		m_category = source->m_category;
 		m_validator = source->m_validator;
 		m_flags = source->m_flags;
-		m_precision = source->m_precision;
 		m_specificEditor = source->m_specificEditor;
+		m_precision = source->m_precision;
+		m_viewOrder = source->m_viewOrder;
 
 		return;
 	}
@@ -276,6 +286,7 @@ private:
 
 	E::PropertySpecificEditor m_specificEditor = E::PropertySpecificEditor::None;
 	qint16 m_precision = 2;
+	quint16 m_viewOrder = 0xFFFF;
 };
 
 //
@@ -1974,7 +1985,7 @@ public:
 		return result;
 	}
 
-	static const int m_lastSpecificPropertiesVersion = 4;
+	static const int m_lastSpecificPropertiesVersion = 5;
 
 	static QString createSpecificPropertyStruct(const QString& name,
 										   const QString& category,
@@ -2041,6 +2052,9 @@ public:
 		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset	Expert		Description		Visible		Editor
 		4;          Port;	Server;		uint32_t;	1;			65535;		2345;               0;          false;				false;		IP Address;		true		None
 
+		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset	Expert		Description		Visible		Editor	ViewOrder
+		5;          Port;	Server;		uint32_t;	1;			65535;		2345;               0;          false;				false;		IP Address;		true		None	65535
+
 		version:            record version
 		name:               property name
 		category:           category name
@@ -2067,6 +2081,8 @@ public:
 
 		Editor				[Added in version 4] Property specific editor (emun E::PropertySpecificEditor )
 							can have values: None, Password, Script, TuningFilter, SpecificProperties
+
+		ViewOrder			[Added in version 5] View order for displaying in PropertyEditor
 		*/
 		QString m_specificPropertiesStructTrimmed = specificProperties;
 
@@ -2127,6 +2143,14 @@ public:
 			case 4:
 				{
 					auto parseResult = parseSpecificPropertiesStructV4(columns);
+
+					result.first &= parseResult.first;
+					result.second += parseResult.second;
+				}
+				break;
+			case 5:
+				{
+					auto parseResult = parseSpecificPropertiesStructV5(columns);
 
 					result.first &= parseResult.first;
 					result.second += parseResult.second;
@@ -2212,9 +2236,10 @@ public:
 											   defaultValue,
 											   strPrecision,
 											   strUpdateFromPreset,
-											   QLatin1String("false"),
-											   QLatin1String("true"),
-											   QLatin1String("None"));
+											   QLatin1String{"false"},
+											   QLatin1String{"true"},
+											   QLatin1String{"None"},
+											   QString{"65535"});
 
 		return result;
 	}
@@ -2256,8 +2281,9 @@ public:
 											   strPrecision,
 											   strUpdateFromPreset,
 											   strExpert,
-											   QLatin1String("true"),
-											   QLatin1String("None"));
+											   QLatin1String{"true"},
+											   QLatin1String{"None"},
+											   QString{"65535"});
 
 		return result;
 	}
@@ -2301,7 +2327,8 @@ public:
 											   strUpdateFromPreset,
 											   strExpert,
 											   strVisible,
-											   QLatin1String("None"));
+											   QLatin1String{"None"},
+											   QString{"65535"});
 
 		return result;
 	}
@@ -2346,7 +2373,55 @@ public:
 											   strUpdateFromPreset,
 											   strExpert,
 											   strVisible,
-											   strEditor);
+											   strEditor,
+											   QString{"65535"});
+
+		return result;
+	}
+
+	std::pair<bool, QString> parseSpecificPropertiesStructV5(const QStringList& columns)
+	{
+		std::pair<bool, QString> result = std::make_pair(true, "");
+
+		if (columns.count() != 14)
+		{
+			result.first = false;
+			result.second = "Wrong proprty struct version 5!\n"
+							"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor;viewOrder\n";
+
+			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 3!";
+			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor;viewOrder";
+			return result;
+		}
+
+		QString name(columns[1]);
+		QString category(columns[2]);
+		QString type(columns[3]);
+		QStringRef min(&columns[4]);
+		QStringRef max(&columns[5]);
+		QStringRef defaultValue(&columns[6]);
+		QStringRef strPrecision(&columns[7]);
+		QString strUpdateFromPreset(columns[8]);
+		QString strExpert(columns[9]);
+		QString description(columns[10]);
+		QString strVisible(columns[11]);
+		QString strEditor(columns[12]);
+		QString strViewOrder(columns[13]);
+
+		result = parseSpecificPropertiesCreate(5,
+											   name,
+											   category,
+											   description,
+											   type,
+											   min,
+											   max,
+											   defaultValue,
+											   strPrecision,
+											   strUpdateFromPreset,
+											   strExpert,
+											   strVisible,
+											   strEditor,
+											   strViewOrder);
 
 		return result;
 	}
@@ -2363,7 +2438,8 @@ public:
 														   const QString& strUpdateFromPreset,
 														   const QString& strExpert,
 														   const QString& strVisible,
-														   const QString& strEditor)
+														   const QString& strEditor,
+														   const QString& strViewOrder)
 	{
 		std::pair<bool, QString> result = std::make_pair(true, "");
 
@@ -2372,7 +2448,7 @@ public:
 			assert(false);
 
 			result.first = false;
-			result.second += "SpecificProperties: Unsupported version: " + version;
+			result.second += "SpecificProperties: Unsupported version: " + QString::number(version);
 			return result;
 		}
 
@@ -2397,9 +2473,23 @@ public:
 		if (editorOk == false)
 		{
 			result.first = false;
-			result.second = "SpecificProperties: Specific propertye editor is not recognized: " + strEditor + "\n";
+			result.second = "SpecificProperties: Specific property editor is not recognized: " + strEditor + "\n";
 
 			qDebug() << Q_FUNC_INFO << "SpecificProperties: Specific propertye editor is not recognized: " << strEditor;
+			return result;
+		}
+
+		// ViewOrder
+		//
+		bool viewOrderOk = true;
+		quint16 viewOrder = static_cast<quint16>(strViewOrder.toInt(&viewOrderOk, 10));
+
+		if (viewOrderOk == false)
+		{
+			result.first = false;
+			result.second = "SpecificProperties: Specific propertye ViewOrder is not recognized: " + strViewOrder + "\n";
+
+			qDebug() << Q_FUNC_INFO << "SpecificProperties: Specific propertye ViewOrder is not recognized: " + strViewOrder;
 			return result;
 		}
 
@@ -2617,6 +2707,7 @@ public:
 		addedProperty->setDescription(description);
 		addedProperty->setVisible(visible);
 		addedProperty->setSpecificEditor(editorType);
+		addedProperty->setViewOrder(viewOrder);
 
 		return result;
 	}

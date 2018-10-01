@@ -272,4 +272,8 @@ public:
 
 	Tcp::ConnectionState getConnectionState();
 	HostAddressPort getCurrentServerAddressPort();
+
+	void setConnectionParams(const SoftwareInfo& softwareInfo,
+	                         const HostAddressPort& serverAddressPort1,
+	                         const HostAddressPort& serverAddressPort2);
 };

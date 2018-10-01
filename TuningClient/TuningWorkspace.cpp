@@ -201,14 +201,6 @@ bool TuningWorkspace::hasPendingChanges()
 		}
 	}
 
-	if (m_singleTuningPage != nullptr)
-	{
-		if (m_singleTuningPage->hasPendingChanges() == true)
-		{
-			return true;
-		}
-	}
-
 	return false;
 }
 
@@ -229,14 +221,6 @@ bool TuningWorkspace::askForSavePendingChanges()
 		TuningWorkspace* tw = it.second;
 
 		if (tw->askForSavePendingChanges() == false)
-		{
-			return false;
-		}
-	}
-
-	if (m_singleTuningPage != nullptr)
-	{
-		if (m_singleTuningPage->askForSavePendingChanges() == false)
 		{
 			return false;
 		}

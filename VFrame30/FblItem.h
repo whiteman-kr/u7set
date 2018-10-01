@@ -86,7 +86,7 @@ namespace VFrame30
 		int afbOperandIndex() const;
 		void setAfbOperandIndex(int value);
 
-		E::SignalType signalType() const;			// Here we care ONLY about is it BUS or its regular signal, ceep in mind that a lot of code does not care about analog/discrete pin
+		E::SignalType signalType() const;			// Here we care ONLY about is it BUS or its regular signal, keep in mind that a lot of code does not care about analog/discrete pin
 		void setSignalType(E::SignalType value);
 
 		QString caption() const;

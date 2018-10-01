@@ -639,12 +639,35 @@ void MonitorMainWindow::showSettings()
 
 	if (result == QDialog::DialogCode::Accepted)
 	{
+		// --
+		//
+		bool needReconnect = false;
+
+		if (theSettings.instanceStrId() != d.settings().instanceStrId() ||
+			theSettings.configuratorAddress1() != d.settings().configuratorAddress1() ||
+			theSettings.configuratorAddress2() != d.settings().configuratorAddress2())
+		{
+			needReconnect = true;
+		}
+
+		// --
+		//
 		theSettings = d.settings();
 		theSettings.writeSystemScope();
 
 		// Apply settings here
 		//
 		showLogo();
+
+		// Reconnect
+		//
+		if (needReconnect == true)
+		{
+			m_configController.setConnectionParams(theSettings.instanceStrId(),
+												   theSettings.configuratorAddress1(),
+												   theSettings.configuratorAddress2());
+		}
+
 		return;
 	}
 

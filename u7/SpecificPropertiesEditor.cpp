@@ -8,7 +8,7 @@
 SpecificPropertyDescription::SpecificPropertyDescription()
 {
 	// Add editable properties
-
+	//
 	ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, SpecificPropertyDescription::caption, SpecificPropertyDescription::setCaption);
 	ADD_PROPERTY_GETTER_SETTER(QString, "Category", true, SpecificPropertyDescription::category, SpecificPropertyDescription::setCategory);
 	ADD_PROPERTY_GETTER_SETTER(QString, "Description", true, SpecificPropertyDescription::description, SpecificPropertyDescription::setDescription);
@@ -191,7 +191,7 @@ void SpecificPropertyDescription::setSpecificEditor(E::PropertySpecificEditor va
 void SpecificPropertyDescription::validateDynamicEnumType(QWidget* parent)
 {
 	// Show/hide dynamic enum property
-
+	//
 	std::shared_ptr<Property> p = propertyByCaption("TypeDynamicEnum");
 	if (p == nullptr)
 	{
@@ -206,7 +206,7 @@ void SpecificPropertyDescription::validateDynamicEnumType(QWidget* parent)
 		if (dynamicEnumVisible == true && typeDynamicEnum().isEmpty() == true)
 		{
 			// Create an example on showing
-
+			//
 			setTypeDynamicEnum("A=1, B=2");
 			setDefaultValue("A");
 		}
@@ -217,7 +217,7 @@ void SpecificPropertyDescription::validateDynamicEnumType(QWidget* parent)
 	}
 
 	// Validate TypeDynamicEnum property
-
+	//
 	if (dynamicEnumVisible == true)
 	{
 		bool propertyOk = false;
@@ -237,14 +237,13 @@ void SpecificPropertyDescription::validateDynamicEnumType(QWidget* parent)
 //
 // SpecificPropertiesEditor
 //
-
 SpecificPropertiesEditor::SpecificPropertiesEditor(QWidget* parent):
 	PropertyTextEditor(parent)
 {
 	m_hasOkCancelButtons = false;
 
 	// Create property list
-
+	//
 	m_propertiesList = new QTreeWidget();
 
 	QStringList l;
@@ -265,13 +264,13 @@ SpecificPropertiesEditor::SpecificPropertiesEditor(QWidget* parent):
 	connect(m_propertiesList, &QTreeWidget::itemSelectionChanged, this, &SpecificPropertiesEditor::onTreeSelectionChanged);
 
 	// Create property editor
-
+	//
 	m_propertyEditor = new ExtWidgets::PropertyEditor(this);
 	m_propertyEditor->setSplitterPosition(200);
 	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &SpecificPropertiesEditor::onPropertiesChanged);
 
 	// Buttons
-
+	//
 	QHBoxLayout* buttonLayout = new QHBoxLayout();
 
 	m_addButton = new QPushButton(tr("Add Property"));
@@ -300,14 +299,14 @@ SpecificPropertiesEditor::SpecificPropertiesEditor(QWidget* parent):
 	buttonLayout->addWidget(cancelButton);
 
 	// Top Layout
-
+	//
 	QHBoxLayout* topLayout = new QHBoxLayout();
 	topLayout->addWidget(m_propertiesList);
 	topLayout->addWidget(m_propertyEditor);
 	topLayout->setContentsMargins(0, 0, 0, 0);
 
 	// Main Layout
-
+	//
 	QVBoxLayout* mainLayout = new QVBoxLayout(this);
 	mainLayout->addLayout(topLayout);
 	mainLayout->addLayout(buttonLayout);
@@ -321,8 +320,7 @@ SpecificPropertiesEditor::~SpecificPropertiesEditor()
 
 void SpecificPropertiesEditor::setText(const QString& text)
 {
-
-	static_assert(PropertyObject::m_lastSpecificPropertiesVersion >= 1 && PropertyObject::m_lastSpecificPropertiesVersion <= 4);	// Editor must be reviewed if version is raised
+	static_assert(PropertyObject::m_lastSpecificPropertiesVersion >= 1 && PropertyObject::m_lastSpecificPropertiesVersion <= 5);	// Editor must be reviewed if version is raised
 
 	m_propertiesList->clear();
 	m_propertyDescriptionsMap.clear();
@@ -340,7 +338,7 @@ void SpecificPropertiesEditor::setText(const QString& text)
 		std::shared_ptr<SpecificPropertyDescription> spd = std::make_shared<SpecificPropertyDescription>();
 
 		// Initialize fields
-
+		//
 		QStringList columns = row.split(';');
 
 		for (QString& col : columns)
@@ -370,8 +368,8 @@ void SpecificPropertiesEditor::setText(const QString& text)
 
 			QString strType = columns[3];
 
+			// --
 			//
-
 			bool startedFromDynamicEnum = strType.trimmed().startsWith(QLatin1String("DynamicEnum"), Qt::CaseInsensitive);
 			int openBrace = strType.indexOf('[');
 			int closeBrace = strType.lastIndexOf(']');
@@ -455,11 +453,11 @@ void SpecificPropertiesEditor::setText(const QString& text)
 		}
 
 		// Show/hide dynamic enum property
-
+		//
 		spd->validateDynamicEnumType(this);
 
 		// Add the tree item
-
+		//
 		QTreeWidgetItem* item = new QTreeWidgetItem();
 
 		updatePropetyListItem(item, spd.get());
@@ -548,8 +546,8 @@ void SpecificPropertiesEditor::onTreeSelectionChanged()
 		m_removeButton->setEnabled(removeEnabled);
 	}
 
+	// --
 	//
-
 	std::vector<std::shared_ptr<PropertyObject>> objects;
 
 	for (QTreeWidgetItem* item : m_propertiesList->selectedItems())
@@ -621,7 +619,7 @@ void SpecificPropertiesEditor::onAddProperty()
 	spd->setVisible(true);
 
 	// Add the tree item
-
+	//
 	QTreeWidgetItem* item = new QTreeWidgetItem();
 
 	updatePropetyListItem(item, spd.get());
@@ -629,9 +627,7 @@ void SpecificPropertiesEditor::onAddProperty()
 	m_propertyDescriptionsMap[item] = spd;
 
 	m_propertiesList->addTopLevelItem(item);
-
 	m_propertiesList->clearSelection();
-
 	m_propertiesList->setCurrentItem(item);
 }
 
@@ -671,7 +667,7 @@ void SpecificPropertiesEditor::onCloneProperty()
 	spd->setCaption(spd->caption() + tr(" - clone"));
 
 	// Add the tree item
-
+	//
 	QTreeWidgetItem* item = new QTreeWidgetItem();
 
 	updatePropetyListItem(item, spd.get());
@@ -679,9 +675,7 @@ void SpecificPropertiesEditor::onCloneProperty()
 	m_propertyDescriptionsMap[item] = spd;
 
 	m_propertiesList->addTopLevelItem(item);
-
 	m_propertiesList->clearSelection();
-
 	m_propertiesList->setCurrentItem(item);
 }
 
@@ -694,7 +688,8 @@ void SpecificPropertiesEditor::onRemoveProperties()
 		return;
 	}
 
-	if (QMessageBox::question(this, qAppName(), tr("Are you sure you want to remove selected properties?"), QMessageBox::Yes|QMessageBox::No) != QMessageBox::Yes)
+	if (auto mbResult = QMessageBox::question(this, qAppName(), tr("Are you sure you want to remove selected properties?"), QMessageBox::Yes | QMessageBox::No);
+		mbResult != QMessageBox::Yes)
 	{
 		return;
 	}

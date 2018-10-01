@@ -998,6 +998,13 @@ HostAddressPort CfgLoaderThread::getCurrentServerAddressPort()
 }
 
 
-
+void CfgLoaderThread::setConnectionParams(const SoftwareInfo& softwareInfo,
+										  const HostAddressPort& serverAddressPort1,
+										  const HostAddressPort& serverAddressPort2)
+{
+	// https://jira.radiy.com/browse/RPCT-2140
+	//
+	int to_do_rpct_2140;
+}
 
 

@@ -517,7 +517,7 @@
 		</AFBComponent>
 	</AFBImplementation>
 	<AFBL>
-	    <AFB id="#bus_switch_v1"       Caption="bus_switch"       Version="1.0002">
+	    <AFB id="#bus_switch_v1"       Caption="bus_switch"       Version="1.0003">
 		    <Properties>
 			    <Description>Multiplexor Block selects one of two input bus signals and output result in accordance with control signal.</Description>
 				<Category>Bus Logic</Category>
@@ -542,7 +542,7 @@
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#bus_voter_v1"           Caption="bus_voter"           Version="1.0001">
+        <AFB id="#bus_voter_v1"           Caption="bus_voter"           Version="1.0002">
 		    <Properties>
 			    <Description>Majority Block is intended to define majority decision in accordance with control signal and received configuration.</Description>
 				<Category>Bus Logic</Category>
@@ -580,7 +580,7 @@
 					<HighLimit>15</HighLimit>
 					<Script>
 					    <Changed>
-						    function(videoItemFblElement, afbElement)
+						    (function(videoItemFblElement, afbElement)
 							{
 							    var xCount = videoItemFblElement.getParamIntValue("XCount");
 								if (xCount == -1)
@@ -600,7 +600,7 @@
 									return false;
 								}
 								return true;
-							}
+							})
 							</Changed>
 					</Script>
 				</Param>
@@ -611,7 +611,7 @@
 					<HighLimit>16</HighLimit>
 					<Script>
 					    <Changed>
-						    function(videoItemFblElement, afbElement)
+						    (function(videoItemFblElement, afbElement)
 							{
 							    var xCount = videoItemFblElement.getParamIntValue("XCount");
 								if (xCount == -1)
@@ -631,7 +631,7 @@
 								}
 
                                 return createInputSignals(videoItemFblElement, afbElement);
-							}
+							})
 							</Changed>
 					</Script>
 				</Param>
@@ -669,15 +669,15 @@
 					}
 					</Library>
 				<AfterCreation>
-				function(videoItemFblElement, afbElement)
+				(function(videoItemFblElement, afbElement)
 				{
 				    return createInputSignals(videoItemFblElement, afbElement);
-				}
+				})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#bus_not_v1"            Caption="bus_not"            Version="1.0001">
+        <AFB id="#bus_not_v1"            Caption="bus_not"            Version="1.0002">
 		    <Properties>
 			    <Description>NOT Block outputs the logical inverse of the input in accordance with control signal.</Description>
 				<Category>Bus Logic</Category>
@@ -700,7 +700,7 @@
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#bus_xor_v1"             Caption="bus_xor"             Version="1.0000">
+        <AFB id="#bus_xor_v1"             Caption="bus_xor"             Version="1.0001">
 		    <Properties>
 			    <Description>XOR Block outputs the logical XOR operation for inputs in accordance with control signal.</Description>
 				<Category>Bus Logic</Category>
@@ -738,10 +738,10 @@
 					<HighLimit>16</HighLimit>
 					<Script>
 					    <Changed>
-						    function(videoItemFblElement, afbElement)
+						    (function(videoItemFblElement, afbElement)
 							{
 							    return createInputSignals(videoItemFblElement, afbElement);
-							}
+							})
 							</Changed>
 					</Script>
 				</Param>
@@ -799,15 +799,15 @@
 					}
 					</Library>
 				<AfterCreation>
-				    function(videoItemFblElement, afbElement)
+				    (function(videoItemFblElement, afbElement)
 					{
 					    return createInputSignals(videoItemFblElement, afbElement);
-					}
+					})
 					</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#bus_or_v1"             Caption="bus_or"             Version="1.0002">
+        <AFB id="#bus_or_v1"             Caption="bus_or"             Version="1.0003">
 			<Properties>				
 				<Description>OR Block outputs the logical OR operation for inputs in accordance with control signal.</Description>
 				<Category>Bus Logic</Category>
@@ -845,10 +845,10 @@
 					<HighLimit>16</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createInputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -906,15 +906,15 @@ function createInputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createInputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#bus_simlock_v1"         Caption="bus_simlock"         Version="1.0002">
+        <AFB id="#bus_simlock_v1"         Caption="bus_simlock"         Version="1.0003">
 			<Properties>				
 				<Description>Locking and simulation module</Description>
 				<Category>Bus Logic</Category>
@@ -939,7 +939,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#bus_and_v1"          Caption="bus_and"          Version="1.0002">
+        <AFB id="#bus_and_v1"          Caption="bus_and"          Version="1.0003">
 			<Properties>
 				<Description>AND Block outputs the logical AND operation for inputs in accordance with control signal.</Description>
 				<Category>Bus Logic</Category>
@@ -977,10 +977,10 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>16</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createInputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1038,15 +1038,15 @@ function createInputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createInputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>	
 	
-		<AFB id="#add_fp_v1"       Caption="add_fp"       Version="1.0005">
+		<AFB id="#add_fp_v1"       Caption="add_fp"       Version="1.0006">
 			<Properties>
 				<Description>Adder Block with float data format</Description>
 				<Category>Math</Category>
@@ -1081,10 +1081,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}						
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1093,10 +1093,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}						
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1105,10 +1105,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1117,10 +1117,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1162,14 +1162,14 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-        <AFB id="#add_si_v1"       Caption="add_si"       Version="1.0005">
+        <AFB id="#add_si_v1"       Caption="add_si"       Version="1.0006">
 			<Properties>            
 				<Description>Adder Block with signed int data format</Description>
 				<Category>Math</Category>
@@ -1202,10 +1202,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1214,10 +1214,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1257,15 +1257,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#and_v1"          Caption="and"          Version="1.0004">
+		<AFB id="#and_v1"          Caption="and"          Version="1.0005">
 			<Properties>
 				<Description>AND Block outputs the logical AND operation for inputs in accordance with control signal.</Description>
 				<Category>Logic</Category>
@@ -1303,10 +1303,10 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>16</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createInputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1364,15 +1364,15 @@ function createInputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createInputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmp_dh_fp_eq_v1" Caption="cmp_dh_fp_eq" Version="1.0006">
+		<AFB id="#cmp_dh_fp_eq_v1" Caption="cmp_dh_fp_eq" Version="1.0007">
 			<Properties>								
 				<Description>Comparator Block, equal single-precision floating-point comparison (dynamic deadband)</Description>
 				<Category>Compare</Category>
@@ -1410,10 +1410,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1422,10 +1422,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1434,10 +1434,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1446,10 +1446,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1490,15 +1490,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>	
 
-		<AFB id="#cmp_dh_fp_gr_v1" Caption="cmp_dh_fp_gr" Version="1.0006">
+		<AFB id="#cmp_dh_fp_gr_v1" Caption="cmp_dh_fp_gr" Version="1.0007">
 			<Properties>												
 				<Description>Comparator Block, greater than single-precision floating-point format comparison (dynamic hysteresis)</Description>
 				 <Category>Compare</Category>
@@ -1534,10 +1534,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1546,10 +1546,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1558,10 +1558,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1570,10 +1570,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1613,15 +1613,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#cmp_dh_fp_ls_v1" Caption="cmp_dh_fp_ls" Version="1.0006">
+		<AFB id="#cmp_dh_fp_ls_v1" Caption="cmp_dh_fp_ls" Version="1.0007">
 			<Properties>												
 				<Description>Comparator Block, less than single-precision floating-point comparison (dynamic hysteresis)</Description>
 				<Category>Compare</Category>
@@ -1657,10 +1657,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1669,10 +1669,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1681,10 +1681,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1693,10 +1693,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1737,15 +1737,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#cmp_dh_fp_ne_v1" Caption="cmp_dh_fp_ne" Version="1.0006">
+		<AFB id="#cmp_dh_fp_ne_v1" Caption="cmp_dh_fp_ne" Version="1.0007">
 			<Properties>								
 				<Description>Comparator Block, not equal single-precision floating-point format comparison (dynamic deadband)</Description>
 				<Category>Compare</Category>
@@ -1781,10 +1781,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1793,10 +1793,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1805,10 +1805,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 			</Changed>
 					</Script>
 				</Param>
@@ -1817,10 +1817,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1861,15 +1861,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#cmp_fp_eq_v1"    Caption="cmp_fp_eq"    Version="1.0007">
+		<AFB id="#cmp_fp_eq_v1"    Caption="cmp_fp_eq"    Version="1.0008">
 			<Properties>
 				<Description>Comparator Block, equal single-precision floating-point comparison</Description>
 				<Category>Compare</Category>
@@ -1912,10 +1912,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1924,10 +1924,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1936,10 +1936,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -1979,15 +1979,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#cmp_fp_gr_v1"    Caption="cmp_fp_gr"    Version="1.0007">
+		<AFB id="#cmp_fp_gr_v1"    Caption="cmp_fp_gr"    Version="1.0008">
 			<Properties>				
 				<Description>Comparator Block, greater than single-precision floating-point format comparison</Description>
 				<Category>Compare</Category>
@@ -2031,10 +2031,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -2043,10 +2043,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -2055,10 +2055,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -2097,15 +2097,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>	
 
-		<AFB id="#cmp_fp_ls_v1"    Caption="cmp_fp_ls"    Version="1.0007">
+		<AFB id="#cmp_fp_ls_v1"    Caption="cmp_fp_ls"    Version="1.0008">
 			<Properties>
 				<Description>Comparator Block, less than single-precision floating-point comparison</Description>
 				<Category>Compare</Category>
@@ -2148,10 +2148,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -2160,10 +2160,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -2172,10 +2172,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -2215,15 +2215,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmp_fp_ne_v1"    Caption="cmp_fp_ne"    Version="1.0007">
+		<AFB id="#cmp_fp_ne_v1"    Caption="cmp_fp_ne"    Version="1.0008">
 			<Properties>				
 				<Description>Comparator Block, not equal single-precision floating-point format comparison</Description>
 				<Category>Compare</Category>
@@ -2266,10 +2266,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -2278,10 +2278,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -2290,10 +2290,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -2333,15 +2333,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmp_si_eq_v1"    Caption="cmp_si_eq"    Version="1.0006">
+		<AFB id="#cmp_si_eq_v1"    Caption="cmp_si_eq"    Version="1.0007">
 			<Properties>
 				<Description>Comparator Block, equal 32-bit signed int comparison</Description>
 				<Category>Compare</Category>
@@ -2383,7 +2383,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#cmp_si_gr_v1"    Caption="cmp_si_gr"    Version="1.0006">
+		<AFB id="#cmp_si_gr_v1"    Caption="cmp_si_gr"    Version="1.0007">
 			<Properties>								
 				<Description>Comparator Block, greater than 32-bit signed integer comparison</Description>
 				<Category>Compare</Category>
@@ -2425,7 +2425,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#cmp_si_ls_v1"    Caption="cmp_si_ls"    Version="1.0006">
+		<AFB id="#cmp_si_ls_v1"    Caption="cmp_si_ls"    Version="1.0007">
 			<Properties>								
 				<Description>Comparator Block, less than 32-bit signed integer comparison</Description>
 				<Category>Compare</Category>
@@ -2467,7 +2467,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#cmp_si_ne_v1"    Caption="cmp_si_ne"    Version="1.0006">
+		<AFB id="#cmp_si_ne_v1"    Caption="cmp_si_ne"    Version="1.0007">
 			<Properties>
 				<Description>Comparator Block, not equal 32-bit signed integer comparison</Description>
 				<Category>Compare</Category>
@@ -2509,7 +2509,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>	
 
-		<AFB id="#cmpc_fp_eq_v1"   Caption="cmpc_fp_eq"   Version="1.0007">
+		<AFB id="#cmpc_fp_eq_v1"   Caption="cmpc_fp_eq"   Version="1.0008">
 			<Properties>
 				<Description>Comparator Block, equal single-precision floating-point comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -2567,10 +2567,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -2608,15 +2608,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_fp_gr_v1"   Caption="cmpc_fp_gr"   Version="1.0007">
+		<AFB id="#cmpc_fp_gr_v1"   Caption="cmpc_fp_gr"   Version="1.0008">
 			<Properties>				
 				<Description>Comparator Block, greater than single-precision floating-point format comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -2674,10 +2674,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -2715,15 +2715,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_fp_ls_v1"   Caption="cmpc_fp_ls"   Version="1.0008">
+		<AFB id="#cmpc_fp_ls_v1"   Caption="cmpc_fp_ls"   Version="1.0009">
 			<Properties>								
 				<Description>Comparator Block, less than single-precision floating-point comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -2781,10 +2781,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -2822,15 +2822,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_fp_ne_v1"   Caption="cmpc_fp_ne"   Version="1.0007">
+		<AFB id="#cmpc_fp_ne_v1"   Caption="cmpc_fp_ne"   Version="1.0008">
 			<Properties>				
 				<Description>Comparator Block, not equal single-precision floating-point format comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -2888,10 +2888,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -2929,15 +2929,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_si_eq_v1"   Caption="cmpc_si_eq"   Version="1.0006">
+		<AFB id="#cmpc_si_eq_v1"   Caption="cmpc_si_eq"   Version="1.0007">
 			<Properties>
 				<Description>Comparator Block, equal 32-bit signed int comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -2996,7 +2996,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_si_gr_v1"   Caption="cmpc_si_gr"   Version="1.0006">
+		<AFB id="#cmpc_si_gr_v1"   Caption="cmpc_si_gr"   Version="1.0007">
 			<Properties>				
 				<Description>Comparator Block, greater than 32-bit signed integer comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -3055,7 +3055,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_si_ls_v1"   Caption="cmpc_si_ls"   Version="1.0006">
+		<AFB id="#cmpc_si_ls_v1"   Caption="cmpc_si_ls"   Version="1.0007">
 			<Properties>
 				<Description>Comparator Block, less than 32-bit signed integer comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -3114,7 +3114,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cmpc_si_ne_v1"   Caption="cmpc_si_ne"   Version="1.0006">
+		<AFB id="#cmpc_si_ne_v1"   Caption="cmpc_si_ne"   Version="1.0007">
 			<Properties>				
 				<Description>Comparator Block, not equal 32-bit signed integer comparison with constant value</Description>
 				<Category>Compare</Category>
@@ -3173,7 +3173,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cnt_dn_v1"	   Caption="cnt_dn"       Version="1.0005">
+		<AFB id="#cnt_dn_v1"	   Caption="cnt_dn"       Version="1.0006">
 			<Properties>
 				<Description>Down Counter Block performs the function of an Down Counter in accordance with control signal and received configuration.</Description>
 				<Category>Counter</Category>
@@ -3206,7 +3206,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cnt_up_v1"       Caption="cnt_up"       Version="1.0005">
+		<AFB id="#cnt_up_v1"       Caption="cnt_up"       Version="1.0006">
 			<Properties>				
 				<Description>Up Counter Block performs the function of an Up Counter in accordance with control signal and received configuration.</Description>
 				<Category>Counter</Category>
@@ -3239,7 +3239,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#cod_v1"          Caption="cod"          Version="1.0007">
+		<AFB id="#cod_v1"          Caption="cod"          Version="1.0008">
 			<Properties>
 				<Description>Binary Coder Block analyses input signals state strictly inorder in 32 downto in 1 and detects the number of inputs that are equal to 1. First detected number will be outputted in accordance with control signal.</Description>
 				<Category>Logic</Category>
@@ -3303,10 +3303,10 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>32</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createInputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -3352,15 +3352,15 @@ function(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createInputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 		
-		<AFB id="#cod_num_v1"          Caption="cod_num"          Version="1.0005">
+		<AFB id="#cod_num_v1"          Caption="cod_num"          Version="1.0006">
 			<Properties>
 				<Description>Binary Coder Bus Block analyses input signals state strictly inorder in 32 downto in 1 and detects the bit mask of inputs that are equal to 1. A bit mask will be outputted in accordance with control signal.</Description>
 				<Category>Logic</Category>
@@ -3423,10 +3423,10 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>32</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createInputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -3472,15 +3472,15 @@ function(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createInputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#damp_fp_v1"      Caption="damp_fp"      Version="1.0011">
+		<AFB id="#damp_fp_v1"      Caption="damp_fp"      Version="1.0012">
 			<Properties>				
 				<Description>Damper Block with float data format</Description>
 				<Category>Damper</Category>
@@ -3517,10 +3517,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -3529,10 +3529,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -3541,10 +3541,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -3553,10 +3553,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -3565,10 +3565,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -3615,16 +3615,16 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {	
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#damp_si_v1"      Caption="damp_si"      Version="1.0012">
+		<AFB id="#damp_si_v1"      Caption="damp_si"      Version="1.0013">
 			<Properties>				
 				<Description>Damper Block with signed int data format</Description>
 				<Category>Damper</Category>
@@ -3658,10 +3658,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -3670,10 +3670,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -3717,16 +3717,16 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {	
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#dampc_fp_v1"     Caption="dampc_fp"     Version="1.0012">
+		<AFB id="#dampc_fp_v1"     Caption="dampc_fp"     Version="1.0013">
 			<Properties>				
 				<Description>Damper Block with float data format</Description>
 				<Category>Damper</Category>
@@ -3779,10 +3779,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -3791,10 +3791,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -3803,10 +3803,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -3815,10 +3815,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -3827,10 +3827,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -3878,16 +3878,16 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {	
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#dampc_si_v1"     Caption="dampc_si"     Version="1.0013">
+		<AFB id="#dampc_si_v1"     Caption="dampc_si"     Version="1.0014">
 			<Properties>				
 				<Description>Damper Block with signed int data format</Description>
 				<Category>Damper</Category>
@@ -3936,10 +3936,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -3948,10 +3948,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -3995,16 +3995,16 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {	
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#db1_fp_v1"       Caption="db1_fp"       Version="1.0008">
+		<AFB id="#db1_fp_v1"       Caption="db1_fp"       Version="1.0009">
 			<Properties>				
 				<Description>Dead zone Block with float data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -4049,10 +4049,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4061,10 +4061,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4073,10 +4073,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4085,10 +4085,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4097,10 +4097,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4143,15 +4143,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#db1_si_v1"       Caption="db1_si"       Version="1.0007">
+		<AFB id="#db1_si_v1"       Caption="db1_si"       Version="1.0008">
 			<Properties>				
 				<Description>Dead zone Block with signed int data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -4194,10 +4194,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4206,10 +4206,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4249,15 +4249,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#db2_fp_v1"       Caption="db2_fp"       Version="1.0008">
+		<AFB id="#db2_fp_v1"       Caption="db2_fp"       Version="1.0009">
 			<Properties>
 				<Description>Dead zone Block with float data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -4302,10 +4302,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4314,10 +4314,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4326,10 +4326,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4338,10 +4338,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4350,10 +4350,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4396,15 +4396,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#db2_si_v1"       Caption="db2_si"       Version="1.0007">
+		<AFB id="#db2_si_v1"       Caption="db2_si"       Version="1.0008">
 			<Properties>
 				<Description>Dead zone Block with signed int data format generates zero output within a specified region in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -4447,10 +4447,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4459,10 +4459,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4502,15 +4502,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#dec_v1"          Caption="dec"          Version="1.0006">
+		<AFB id="#dec_v1"          Caption="dec"          Version="1.0007">
 			<Properties>				
 				<Description>Binary Decoder Block sets the needed output to state 1 in accordance with the received number and control signal.</Description>
 				<Category>Logic</Category>
@@ -4573,10 +4573,10 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>32</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4622,15 +4622,15 @@ function(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 		
-		<AFB id="#dec_num_v1"          Caption="dec_num"          Version="1.0003">
+		<AFB id="#dec_num_v1"          Caption="dec_num"          Version="1.0004">
 			<Properties>				
 				<Description>Binary Decoder Block sets outputs to state 1 in accordance with bits set in the received number and control signal.</Description>
 				<Category>Logic</Category>
@@ -4693,10 +4693,10 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>32</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4742,15 +4742,15 @@ function(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#deriv_v1"        Caption="deriv"        Version="1.0009">
+		<AFB id="#deriv_v1"        Caption="deriv"        Version="1.0010">
 			<Properties>				
 				<Description>Derive Block performs derivative calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
@@ -4800,10 +4800,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>            
@@ -4812,10 +4812,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4824,10 +4824,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4836,10 +4836,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4848,10 +4848,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4894,15 +4894,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#derivc_v1"       Caption="derivc"       Version="1.0009">
+        <AFB id="#derivc_v1"       Caption="derivc"       Version="1.0010">
 			<Properties>				
 				<Description>Derive Block performs derivative calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
@@ -4969,10 +4969,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>            
@@ -4981,10 +4981,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -4993,10 +4993,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5005,10 +5005,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5017,10 +5017,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5063,15 +5063,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#div_fp_v1"       Caption="div_fp"       Version="1.0005">
+		<AFB id="#div_fp_v1"       Caption="div_fp"       Version="1.0006">
 			<Properties>				
 				<Description>Divider Block with float data format</Description>
 				<Category>Math</Category>
@@ -5107,10 +5107,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5119,10 +5119,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5131,10 +5131,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5143,10 +5143,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5155,10 +5155,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5200,16 +5200,16 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
             
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#div_si_v1"       Caption="div_si"       Version="1.0005">
+		<AFB id="#div_si_v1"       Caption="div_si"       Version="1.0006">
 			<Properties>				
 				<Description>Divider Block with signed int data format</Description>
 				<Category>Math</Category>
@@ -5242,10 +5242,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5254,10 +5254,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5296,15 +5296,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#ff_d_decay_v1"   Caption="ff_d_decay"   Version="1.0005">
+		<AFB id="#ff_d_decay_v1"   Caption="ff_d_decay"   Version="1.0006">
 			<Properties>				
 				<Description>The D Flip-Flop Block captures the value of the D-input at a decay portion of the clock cycle.</Description>
 				<Category>FlipFlop</Category>
@@ -5334,7 +5334,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 		
-		<AFB id="#ff_d_front_v1"   Caption="ff_d_front"   Version="1.0005">
+		<AFB id="#ff_d_front_v1"   Caption="ff_d_front"   Version="1.0006">
 			<Properties>				
 				<Description>The D Flip-Flop Block captures the value of the D-input at a front portion of the clock cycle.</Description>
 				<Category>FlipFlop</Category>
@@ -5364,7 +5364,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#ff_rs_v1"        Caption="ff_rs"        Version="1.0005">
+		<AFB id="#ff_rs_v1"        Caption="ff_rs"        Version="1.0006">
 			<Properties>				
 				<Description>Set/Reset Block performs input data validity checking, sets or resets the input data to 1 or 0 state respectively and outputs the result. The Reset signal has the priority.</Description>
 				<Category>FlipFlop</Category>
@@ -5394,7 +5394,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#ff_sr_v1"        Caption="ff_sr"        Version="1.0005">
+		<AFB id="#ff_sr_v1"        Caption="ff_sr"        Version="1.0006">
 			<Properties>				
 				<Description>Set/Reset Block performs input data validity checking, sets or resets the input data to 1 or 0 state respectively and outputs the result. The Reset signal has the priority.</Description>
 				<Category>FlipFlop</Category>
@@ -5424,7 +5424,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#ff_t_decay_v1"   Caption="ff_t_decay"   Version="1.0005">
+		<AFB id="#ff_t_decay_v1"   Caption="ff_t_decay"   Version="1.0006">
 			<Properties>				
 				<Description>If the T input is high, the T Flip-Flop changes state ("toggles") whenever the clock input is strobed. If the T input is low, the Flip-Flop holds the previous value. Changes state at a decay.</Description>
 				<Category>FlipFlop</Category>
@@ -5453,7 +5453,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#ff_t_front_v1"   Caption="ff_t_front"   Version="1.0005">
+		<AFB id="#ff_t_front_v1"   Caption="ff_t_front"   Version="1.0006">
 			<Properties>				
 				<Description>If the T input is high, the T Flip-Flop changes state ("toggles") whenever the clock input is strobed. If the T input is low, the Flip-Flop holds the previous value. Changes state at a front.</Description>
 				<Category>FlipFlop</Category>
@@ -5482,7 +5482,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#integrator_v1"   Caption="integrator"   Version="1.0009">
+		<AFB id="#integrator_v1"   Caption="integrator"   Version="1.0010">
 			<Properties>				
 				<Description>Integral Block performs integral calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
@@ -5519,10 +5519,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>            
@@ -5531,10 +5531,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5543,10 +5543,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5555,10 +5555,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5567,10 +5567,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5613,15 +5613,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#integratorc_v1"  Caption="integratorc"  Version="1.0008">
+        <AFB id="#integratorc_v1"  Caption="integratorc"  Version="1.0009">
 			<Properties>
 				<Description>Integral Block performs integral calculation function in accordance with control signals.</Description>
 				<Category>Other</Category>
@@ -5699,10 +5699,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>            
@@ -5711,10 +5711,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5723,10 +5723,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5735,10 +5735,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5747,10 +5747,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -5793,15 +5793,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#latch_decay_fp_v1" Caption="latch_decay_fp" Version="1.0006">
+		<AFB id="#latch_decay_fp_v1" Caption="latch_decay_fp" Version="1.0007">
 			<Properties>				
 				<Description>Latch Block performs a latching of the input(floating-point) value by decay and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -5835,7 +5835,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#latch_decay_si_v1" Caption="latch_decay_si" Version="1.0006">
+		<AFB id="#latch_decay_si_v1" Caption="latch_decay_si" Version="1.0007">
 			<Properties>				
 				<Description>Latch Block performs a latching of the input(signed integer) value by decay and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -5869,7 +5869,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#latch_front_fp_v1" Caption="latch_front_fp" Version="1.0006">
+		<AFB id="#latch_front_fp_v1" Caption="latch_front_fp" Version="1.0007">
 			<Properties>				
 				<Description>Latch Block performs a latching of the input(floating-point) value by front and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -5903,7 +5903,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#latch_front_si_v1" Caption="latch_front_si" Version="1.0006">
+		<AFB id="#latch_front_si_v1" Caption="latch_front_si" Version="1.0007">
 			<Properties>				
 				<Description>Latch Block performs a latching of the input(signed integer) value by front and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -5937,7 +5937,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#latch_state_fp_v1" Caption="latch_state_fp" Version="1.0006">
+		<AFB id="#latch_state_fp_v1" Caption="latch_state_fp" Version="1.0007">
 			<Properties>
 				<Description>Latch Block performs a latching of the input(floating-point) value by state and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -5972,7 +5972,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#latch_state_si_v1" Caption="latch_state_si" Version="1.0006">
+		<AFB id="#latch_state_si_v1" Caption="latch_state_si" Version="1.0007">
 			<Properties>				
 				<Description>Latch Block performs a latching of the input(signed integer) value by state and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -6006,7 +6006,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#latch_tm1_fp_v1"   Caption="latch_tm1_fp"   Version="1.0005">
+		<AFB id="#latch_tm1_fp_v1"   Caption="latch_tm1_fp"   Version="1.0006">
 			<Properties>				
 				<Description>Latch Block performs a latching of the input(floating-point) value by one cycle and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -6039,7 +6039,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#latch_tm1_si_v1"   Caption="latch_tm1_si"   Version="1.0006">
+		<AFB id="#latch_tm1_si_v1"   Caption="latch_tm1_si"   Version="1.0007">
 			<Properties>				
 				<Description>Latch Block performs a latching of the input(signed integer) value by one cycle and outputs result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -6072,7 +6072,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#lim_fp_v1"         Caption="lim_fp"         Version="1.0010">
+        <AFB id="#lim_fp_v1"         Caption="lim_fp"         Version="1.0011">
 			<Properties>				
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
@@ -6108,10 +6108,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6120,10 +6120,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6132,10 +6132,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6144,10 +6144,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6188,15 +6188,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#lim_si_v1"         Caption="lim_si"         Version="1.0009">
+		<AFB id="#lim_si_v1"         Caption="lim_si"         Version="1.0010">
 			<Properties>				
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
@@ -6231,10 +6231,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6243,10 +6243,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6255,10 +6255,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6298,15 +6298,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 		
-		<AFB id="#limc_fp_v1"         Caption="limc_fp"         Version="1.0000">
+		<AFB id="#limc_fp_v1"         Caption="limc_fp"         Version="1.0001">
 			<Properties>				
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
@@ -6339,10 +6339,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6351,10 +6351,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6363,10 +6363,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6424,15 +6424,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#limc_si_v1"         Caption="limc_si"         Version="1.0000">
+		<AFB id="#limc_si_v1"         Caption="limc_si"         Version="1.0001">
 			<Properties>				
 				<Description>Limiter Block limits the value of a signal to be within the range specified by tunable limits.</Description>
 				<Category>Other</Category>
@@ -6464,10 +6464,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6476,10 +6476,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6536,15 +6536,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_abs_fp_v1"    Caption="math_abs_fp"    Version="1.0005">
+		<AFB id="#math_abs_fp_v1"    Caption="math_abs_fp"    Version="1.0006">
 			<Properties>								
 				<Description>Function Block outputs the absolute value of the input signal</Description>
 				<Category>Math</Category>
@@ -6577,7 +6577,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_abs_si_v1"    Caption="math_abs_si"    Version="1.0005">
+		<AFB id="#math_abs_si_v1"    Caption="math_abs_si"    Version="1.0006">
 			<Properties>				
 				<Description>Function Block outputs the absolute value of the input signal in signed integer data forma</Description>
 				<Category>Math</Category>
@@ -6609,7 +6609,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_cos_fp_v1"    Caption="math_cos_fp"    Version="1.0006">
+		<AFB id="#math_cos_fp_v1"    Caption="math_cos_fp"    Version="1.0007">
 			<Properties>				
 				<Description>mathtion Block outputs the cosine calculation result</Description>
 				<Category>Math</Category>
@@ -6641,7 +6641,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_exp_fp_v1"    Caption="math_exp_fp"    Version="1.0005">
+		<AFB id="#math_exp_fp_v1"    Caption="math_exp_fp"    Version="1.0006">
 			<Properties>				
 				<Description>Function Block outputs the exponential calculation result</Description>
 				<Category>Math</Category>
@@ -6675,10 +6675,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6687,10 +6687,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6699,10 +6699,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-	}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6711,10 +6711,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6755,15 +6755,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_inv_fp_v1"    Caption="math_inv_fp"    Version="1.0005">
+		<AFB id="#math_inv_fp_v1"    Caption="math_inv_fp"    Version="1.0006">
 			<Properties>				
 				<Description>Function Block outputs the inversion value of the input signal in accordance with control signals</Description>
 				<Category>Math</Category>
@@ -6797,10 +6797,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6809,10 +6809,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6821,10 +6821,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6833,10 +6833,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6877,15 +6877,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_loge_fp_v1"   Caption="math_loge_fp"   Version="1.0005">
+		<AFB id="#math_loge_fp_v1"   Caption="math_loge_fp"   Version="1.0006">
 			<Properties>				
 				<Description>Function Block outputs the natural logarithmic calculation result</Description>
 				<Category>Math</Category>
@@ -6918,10 +6918,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6930,10 +6930,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -6972,15 +6972,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_sin_fp_v1"    Caption="math_sin_fp"    Version="1.0005">
+		<AFB id="#math_sin_fp_v1"    Caption="math_sin_fp"    Version="1.0006">
 			<Properties>				
 				<Description>Function Block outputs the sine calculation result</Description>
 				<Category>Math</Category>
@@ -7013,7 +7013,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_sqrt_fp_v1"   Caption="math_sqrt_fp"   Version="1.0005">
+		<AFB id="#math_sqrt_fp_v1"   Caption="math_sqrt_fp"   Version="1.0006">
 			<Properties>				
 				<Description>Function Block outputs the square root calculation result</Description>
 				<Category>Math</Category>
@@ -7046,10 +7046,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>            
@@ -7058,10 +7058,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7070,10 +7070,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7113,15 +7113,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#median_fp_v1"      Caption="median_fp"      Version="1.0006">
+		<AFB id="#median_fp_v1"      Caption="median_fp"      Version="1.0007">
 			<Properties>				
 				<Description>Median and extremum Block outputs a median value and an extremum value (minimum and maximum) in accordance with control signals. Float data format</Description>
 				<Category>Logic</Category>
@@ -7169,10 +7169,10 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>8</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createInputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>            
@@ -7187,10 +7187,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7199,10 +7199,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7211,10 +7211,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7223,10 +7223,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7235,10 +7235,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7247,10 +7247,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7259,10 +7259,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7271,10 +7271,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7283,10 +7283,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7391,17 +7391,17 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	createInputSignals(videoItemFblElement, afbElement);
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#median_si_v1"      Caption="median_si"      Version="1.0005">
+		<AFB id="#median_si_v1"      Caption="median_si"      Version="1.0006">
 			<Properties>
 				<Description>Median and extremum Block outputs a median value and an extremum value (minimum and maximum) in accordance with control signals. Signed int data format</Description>
 				<Category>Logic</Category>
@@ -7444,10 +7444,10 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>8</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createInputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>            
@@ -7462,10 +7462,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7474,10 +7474,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7486,10 +7486,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7498,10 +7498,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7510,10 +7510,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7613,17 +7613,17 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	createInputSignals(videoItemFblElement, afbElement);
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_fp_v1"    Caption="mismatch_fp"    Version="1.0009">
+		<AFB id="#mismatch_fp_v1"    Caption="mismatch_fp"    Version="1.0010">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -7663,12 +7663,12 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>4</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	createInputSignals(videoItemFblElement, afbElement);
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7686,10 +7686,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>            
@@ -7698,10 +7698,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7710,10 +7710,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7722,10 +7722,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7734,10 +7734,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7836,17 +7836,17 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	createInputSignals(videoItemFblElement, afbElement);
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_d_fp_v1"    Caption="mismatch_d_fp"    Version="1.0001">
+		<AFB id="#mismatch_d_fp_v1"    Caption="mismatch_d_fp"    Version="1.0002">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -7887,12 +7887,12 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>4</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	createInputSignals(videoItemFblElement, afbElement);
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7901,10 +7901,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>            
@@ -7913,10 +7913,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7925,10 +7925,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7937,10 +7937,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -7949,10 +7949,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -8054,17 +8054,17 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	createInputSignals(videoItemFblElement, afbElement);
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_r_fp_v1"  Caption="mismatch_r_fp"  Version="1.0006">
+		<AFB id="#mismatch_r_fp_v1"  Caption="mismatch_r_fp"  Version="1.0007">
 			<Properties>				
 				<Description>Analog mismatch block with limits</Description>
 				<Category>Other</Category>
@@ -8104,12 +8104,12 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>4</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	createInputSignals(videoItemFblElement, afbElement);
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -8155,10 +8155,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>            
@@ -8167,10 +8167,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -8179,10 +8179,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -8191,10 +8191,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -8203,10 +8203,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -8305,17 +8305,17 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	createInputSignals(videoItemFblElement, afbElement);
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_r_si_v1"  Caption="mismatch_r_si"  Version="1.0007">
+		<AFB id="#mismatch_r_si_v1"  Caption="mismatch_r_si"  Version="1.0008">
 			<Properties>				
 				<Description>Analog mismatch block with limits</Description>
 				<Category>Other</Category>
@@ -8351,12 +8351,12 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>4</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	createInputSignals(videoItemFblElement, afbElement);
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -8402,10 +8402,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>  
@@ -8499,17 +8499,17 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	createInputSignals(videoItemFblElement, afbElement);
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_si_v1"    Caption="mismatch_si"    Version="1.0010">
+		<AFB id="#mismatch_si_v1"    Caption="mismatch_si"    Version="1.0011">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -8545,12 +8545,12 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>4</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	createInputSignals(videoItemFblElement, afbElement);
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -8568,10 +8568,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -8666,17 +8666,17 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	createInputSignals(videoItemFblElement, afbElement);
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_d_si_v1"    Caption="mismatch_d_si"    Version="1.0001">
+		<AFB id="#mismatch_d_si_v1"    Caption="mismatch_d_si"    Version="1.0002">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -8713,12 +8713,12 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>4</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	createInputSignals(videoItemFblElement, afbElement);
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -8727,10 +8727,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -8828,17 +8828,17 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	createInputSignals(videoItemFblElement, afbElement);
 	createOutputSignals(videoItemFblElement, afbElement);
 	return;
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#mul_fp_v1"         Caption="mul_fp"         Version="1.0005">
+		<AFB id="#mul_fp_v1"         Caption="mul_fp"         Version="1.0006">
 			<Properties>				
 				<Description>Multiply Block with float data format</Description>
 				<Category>Math</Category>
@@ -8873,10 +8873,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -8885,10 +8885,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -8897,10 +8897,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -8909,10 +8909,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -8953,15 +8953,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mul_si_v1"         Caption="mul_si"         Version="1.0005">
+		<AFB id="#mul_si_v1"         Caption="mul_si"         Version="1.0006">
 			<Properties>				
 				<Description>Multiply Block with signed int data format</Description>
 				<Category>Math</Category>
@@ -8994,10 +8994,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>            
@@ -9006,10 +9006,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -9048,15 +9048,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#not_v1"            Caption="not"            Version="1.0005">
+		<AFB id="#not_v1"            Caption="not"            Version="1.0006">
 			<Properties>				
 				<Description>NOT Block outputs the logical inverse of the input in accordance with control signal.</Description>
 				<Category>Logic</Category>
@@ -9079,7 +9079,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#or_v1"             Caption="or"             Version="1.0005">
+		<AFB id="#or_v1"             Caption="or"             Version="1.0006">
 			<Properties>				
 				<Description>OR Block outputs the logical OR operation for inputs in accordance with control signal.</Description>
 				<Category>Logic</Category>
@@ -9117,10 +9117,10 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>16</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createInputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -9178,15 +9178,15 @@ function createInputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createInputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#poly_v1"           Caption="poly"           Version="1.0004">
+		<AFB id="#poly_v1"           Caption="poly"           Version="1.0005">
 			<Properties>								
 				<Description>Polynomial function Block performs evaluation of polynomial coefficients on input values in accordance with control signal.</Description>
 				<Category>Math</Category>
@@ -9303,10 +9303,10 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>10</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return showCoeffitients(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -9315,10 +9315,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -9327,10 +9327,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -9339,10 +9339,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -9351,10 +9351,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>          
@@ -9414,17 +9414,17 @@ function showCoeffitients(videoItemFblElement, afbElement)
 
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	var result = showCoeffitients(videoItemFblElement, afbElement);
 	result &amp;= createOutputSignals(videoItemFblElement, afbElement);
 	return result;
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#scale_16ui_16ui_v1" Caption="scale_16ui_16ui" Version="1.0004">
+		<AFB id="#scale_16ui_16ui_v1" Caption="scale_16ui_16ui" Version="1.0005">
 			<Properties>				
 				<Description>Scaling Block, 16-bit unsigned integer to 16-bit unsigned integer</Description>
 				<Category>Scaling</Category>
@@ -9509,10 +9509,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>            
@@ -9521,10 +9521,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -9563,15 +9563,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#scale_16ui_fp_v1"   Caption="scale_16ui_fp"   Version="1.0004">
+		<AFB id="#scale_16ui_fp_v1"   Caption="scale_16ui_fp"   Version="1.0005">
 			<Properties>				
 				<Description>Scaling Block, 16-bit unsigned integer to single-precision floating-point</Description>
 				<Category>Scaling</Category>
@@ -9658,10 +9658,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -9670,10 +9670,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -9682,10 +9682,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -9694,10 +9694,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -9738,15 +9738,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#scale_16ui_si_v1"   Caption="scale_16ui_si"   Version="1.0004">
+		<AFB id="#scale_16ui_si_v1"   Caption="scale_16ui_si"   Version="1.0005">
 			<Properties>				
 				<Description>Scaling Block, 16-bit unsigned integer to 32-bit signed integer</Description>
 				<Category>Scaling</Category>
@@ -9831,10 +9831,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>           
@@ -9843,10 +9843,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -9885,15 +9885,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#scale_fp_16ui_v1"   Caption="scale_fp_16ui"   Version="1.0004">
+		<AFB id="#scale_fp_16ui_v1"   Caption="scale_fp_16ui"   Version="1.0005">
 			<Properties>
 				<Description>Scaling Block, single-precision floating-point to 16-bit unsigned integer</Description>
 				<Category>Scaling</Category>
@@ -9980,10 +9980,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -9992,10 +9992,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10004,10 +10004,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10016,10 +10016,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10060,15 +10060,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#scale_fp_fp_v1"     Caption="scale_fp_fp"     Version="1.0005">
+		<AFB id="#scale_fp_fp_v1"     Caption="scale_fp_fp"     Version="1.0006">
 			<Properties>				
 				<Description>Scaling Block, single-precision floating-point to single-precision floating-point</Description>
 				<Category>Scaling</Category>
@@ -10156,10 +10156,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10168,10 +10168,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10180,10 +10180,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10192,10 +10192,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10236,15 +10236,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#scale_fp_si_v1"     Caption="scale_fp_si"     Version="1.0005">
+		<AFB id="#scale_fp_si_v1"     Caption="scale_fp_si"     Version="1.0006">
 			<Properties>								
 				<Description>Scaling Block, single-precision floating-point to 32-bit signed integer</Description>
 				<Category>Scaling</Category>
@@ -10332,10 +10332,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10344,10 +10344,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10356,10 +10356,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10368,10 +10368,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10412,15 +10412,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#scale_si_16ui_v1"   Caption="scale_si_16ui"   Version="1.0004">
+		<AFB id="#scale_si_16ui_v1"   Caption="scale_si_16ui"   Version="1.0005">
 			<Properties>				
 				<Description>Scaling Block, 32-bit signed integer to 16-bit unsigned integer</Description>
 				<Category>Scaling</Category>
@@ -10505,10 +10505,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>           
@@ -10517,10 +10517,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10559,15 +10559,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#scale_si_fp_v1"     Caption="scale_si_fp"     Version="1.0005">
+		<AFB id="#scale_si_fp_v1"     Caption="scale_si_fp"     Version="1.0006">
 			<Properties>				
 				<Description>Scaling Block, 32-bit signed integer to single-precision floating-point</Description>
 				<Category>Scaling</Category>
@@ -10655,10 +10655,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10667,10 +10667,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10679,10 +10679,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10691,10 +10691,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10735,15 +10735,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#scale_si_si_v1"     Caption="scale_si_si"     Version="1.0005">
+		<AFB id="#scale_si_si_v1"     Caption="scale_si_si"     Version="1.0006">
 			<Properties>				
 				<Description>Scaling Block, 32-bit signed integer to 32-bit signed integer</Description>
 				<Category>Scaling</Category>
@@ -10829,10 +10829,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>            
@@ -10841,10 +10841,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10883,15 +10883,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-        <AFB id="#simlock_v1"         Caption="simlock"         Version="1.0007">
+        <AFB id="#simlock_v1"         Caption="simlock"         Version="1.0008">
 			<Properties>				
 				<Description>Locking and simulation module</Description>
 				<Category>Logic</Category>
@@ -10916,7 +10916,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#sub_fp_v1"          Caption="sub_fp"          Version="1.0005">
+		<AFB id="#sub_fp_v1"          Caption="sub_fp"          Version="1.0006">
 			<Properties>				
 				<Description>Subtract Block with float data format</Description>
 				<Category>Math</Category>
@@ -10951,10 +10951,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10963,10 +10963,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10975,10 +10975,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -10987,10 +10987,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -11031,15 +11031,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#sub_si_v1"          Caption="sub_si"          Version="1.0005">
+		<AFB id="#sub_si_v1"          Caption="sub_si"          Version="1.0006">
 			<Properties>				
 				<Description>Multiply Block with signed int data format.</Description>
 				<Category>Math</Category>
@@ -11072,10 +11072,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>            
@@ -11084,10 +11084,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -11126,15 +11126,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#switch_fp_v1"       Caption="switch_fp"       Version="1.0005">
+		<AFB id="#switch_fp_v1"       Caption="switch_fp"       Version="1.0006">
 			<Properties>				
 				<Description>Multiplexor Block selects one of two floating-point input signals and output result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -11159,7 +11159,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#switch_si_v1"       Caption="switch_si"       Version="1.0005">
+		<AFB id="#switch_si_v1"       Caption="switch_si"       Version="1.0006">
 			<Properties>				
 				<Description>Multiplexor Block selects one of two signed integer input signals and output result in accordance with control signal.</Description>
 				<Category>Other</Category>
@@ -11184,7 +11184,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tct_filter_v1"      Caption="tct_filter"      Version="1.0005">
+		<AFB id="#tct_filter_v1"      Caption="tct_filter"      Version="1.0006">
 			<Properties>				
 				<Description>Time Counter Block with dynamic time value, filtering function</Description>
 				<Category>Delay</Category>
@@ -11216,10 +11216,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -11257,15 +11257,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tct_off_v1"         Caption="tct_off"         Version="1.0005">
+		<AFB id="#tct_off_v1"         Caption="tct_off"         Version="1.0006">
 			<Properties>				
 				<Description>Time Counter Block with dynamic time value, turn off delay function</Description>
 				<Category>Delay</Category>
@@ -11297,10 +11297,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -11338,15 +11338,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tct_on_v1"          Caption="tct_on"          Version="1.0005">
+		<AFB id="#tct_on_v1"          Caption="tct_on"          Version="1.0006">
 			<Properties>
 				<Description>Time Counter Block with dynamic time value, turn on delay function</Description>
 				<Category>Delay</Category>
@@ -11378,10 +11378,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -11419,14 +11419,14 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#tct_rsv_v1"         Caption="tct_rsv"         Version="1.0005">
+		<AFB id="#tct_rsv_v1"         Caption="tct_rsv"         Version="1.0006">
 			<Properties>				
 				<Description>Time Counter Block with dynamic time value, delay function</Description>
 				<Category>Delay</Category>
@@ -11458,10 +11458,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -11499,14 +11499,14 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
-		<AFB id="#tct_vibr_v1"        Caption="tct_vibr"        Version="1.0005">
+		<AFB id="#tct_vibr_v1"        Caption="tct_vibr"        Version="1.0006">
 			<Properties>				
 				<Description>Time Counter Block with dynamic time value, single vibrator function</Description>
 				<Category>Delay</Category>
@@ -11538,10 +11538,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -11579,15 +11579,15 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tctc_filter_v1"     Caption="tctc_filter"     Version="1.0007">
+		<AFB id="#tctc_filter_v1"     Caption="tctc_filter"     Version="1.0008">
 			<Properties>				
 				<Description>Time Counter Block with constant time value, filtering function</Description>
 				<Category>Delay</Category>
@@ -11630,7 +11630,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tctc_off_v1"        Caption="tctc_off"        Version="1.0008">
+		<AFB id="#tctc_off_v1"        Caption="tctc_off"        Version="1.0009">
 			<Properties>				
 				<Description>Time Counter Block with constant time value, turn off delay function</Description>
 				<Category>Delay</Category>
@@ -11673,7 +11673,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tctc_on_v1"         Caption="tctc_on"         Version="1.0007">
+		<AFB id="#tctc_on_v1"         Caption="tctc_on"         Version="1.0008">
 			<Properties>				
 				<Description>Time Counter Block with constant time value, turn on delay function</Description>
 				<Category>Delay</Category>
@@ -11716,7 +11716,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tctc_rsv_v1"        Caption="tctc_rsv"        Version="1.0007">
+		<AFB id="#tctc_rsv_v1"        Caption="tctc_rsv"        Version="1.0008">
 			<Properties>				
 				<Description>Time Counter Block with constant time value, delay function</Description>
 				<Category>Delay</Category>
@@ -11759,7 +11759,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tctc_vibr_v1"       Caption="tctc_vibr"       Version="1.0007">
+		<AFB id="#tctc_vibr_v1"       Caption="tctc_vibr"       Version="1.0008">
 			<Properties>				
 				<Description>Time Counter Block with constant time value, single vibrator function</Description>
 				<Category>Delay</Category>
@@ -11802,7 +11802,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#voter_v1"           Caption="voter"           Version="1.0006">
+		<AFB id="#voter_v1"           Caption="voter"           Version="1.0007">
 			<Properties>				
 				<Description>Majority Block is intended to define majority decision in accordance with control signal and received configuration.</Description>
 				<Category>Logic</Category>
@@ -11842,7 +11842,7 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>15</HighLimit>
 					<Script>
 						<Changed>	
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	var xCount = videoItemFblElement.getParamIntValue("XCount");
 	if (xCount == -1)
@@ -11862,7 +11862,7 @@ function(videoItemFblElement, afbElement)
 		return false;
 	}
 	return true;
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -11873,7 +11873,7 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>16</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	var xCount = videoItemFblElement.getParamIntValue("XCount");
 	if (xCount == -1)
@@ -11893,7 +11893,7 @@ function(videoItemFblElement, afbElement)
 	}
 
 	return createInputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -11902,10 +11902,10 @@ function(videoItemFblElement, afbElement)
 					<Default>0</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -11914,10 +11914,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -11985,17 +11985,16 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	createOutputSignals(videoItemFblElement, afbElement);
 	return createInputSignals(videoItemFblElement, afbElement);
-	
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#xor_v1"             Caption="xor"             Version="1.0005">
+		<AFB id="#xor_v1"             Caption="xor"             Version="1.0006">
 			<Properties>				
 				<Description>XOR Block outputs the logical XOR operation for inputs in accordance with control signal.</Description>
 				<Category>Logic</Category>
@@ -12033,10 +12032,10 @@ function(videoItemFblElement, afbElement)
 					<HighLimit>16</HighLimit>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createInputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -12094,15 +12093,15 @@ function createInputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createInputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#be_to_le_16si_v1"       Caption="be_to_le_16si"       Version="1.0003">
+		<AFB id="#be_to_le_16si_v1"       Caption="be_to_le_16si"       Version="1.0004">
 			<Properties>
 				<Description>Converts big-endian to little-endian</Description>
 				<Category>Converter</Category>
@@ -12136,7 +12135,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
  
-		<AFB id="#le_to_be_16si_v1"       Caption="le_to_be_16si"       Version="1.0003">
+		<AFB id="#le_to_be_16si_v1"       Caption="le_to_be_16si"       Version="1.0004">
 			<Properties>
 				<Description>Converts big-endian to little-endian</Description>
 				<Category>Converter</Category>
@@ -12170,7 +12169,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#be_to_le_si_v1"       Caption="be_to_le_si"       Version="1.0004">
+		<AFB id="#be_to_le_si_v1"       Caption="be_to_le_si"       Version="1.0005">
 			<Properties>
 				<Description>Converts big-endian to little-endian</Description>
 				<Category>Converter</Category>
@@ -12204,7 +12203,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#le_to_be_si_v1"       Caption="le_to_be_si"       Version="1.0004">
+		<AFB id="#le_to_be_si_v1"       Caption="le_to_be_si"       Version="1.0005">
 			<Properties>
 				<Description>Converts little-endian to big-endian</Description>
 				<Category>Converter</Category>
@@ -12238,7 +12237,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#be_to_le_fp_v1"       Caption="be_to_le_fp"       Version="1.0004">
+		<AFB id="#be_to_le_fp_v1"       Caption="be_to_le_fp"       Version="1.0005">
 			<Properties>
 				<Description>Converts big-endian to liggle-endian</Description>
 				<Category>Converter</Category>
@@ -12272,7 +12271,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#le_to_be_fp_v1"       Caption="le_to_be_fp"       Version="1.0004">
+		<AFB id="#le_to_be_fp_v1"       Caption="le_to_be_fp"       Version="1.0005">
 			<Properties>
 				<Description>Converts little-endian to big-endian</Description>
 				<Category>Converter</Category>
@@ -12306,7 +12305,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#tconv_si_fp_v1"       Caption="tconv_si_fp"       Version="1.0003">
+		<AFB id="#tconv_si_fp_v1"       Caption="tconv_si_fp"       Version="1.0004">
 			<Properties>
 				<Description>Type converter block from signed int to floating point</Description>
 				<Category>Converter</Category>
@@ -12340,7 +12339,7 @@ function(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
  
-		<AFB id="#tconv_fp_si_v1"       Caption="tconv_fp_si"       Version="1.0003">
+		<AFB id="#tconv_fp_si_v1"       Caption="tconv_fp_si"       Version="1.0004">
 			<Properties>
 				<Description>Type converter block from floating point to signed int</Description>
 				<Category>Converter</Category>
@@ -12373,10 +12372,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}						
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -12385,10 +12384,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}						
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -12397,10 +12396,10 @@ function(videoItemFblElement, afbElement)
 					<Default>1</Default>
 					<Script>
 						<Changed>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 						</Changed>
 					</Script>
 				</Param>
@@ -12441,10 +12440,10 @@ function createOutputSignals(videoItemFblElement, afbElement)
 }
 				</Library>
 				<AfterCreation>
-function(videoItemFblElement, afbElement)
+(function(videoItemFblElement, afbElement)
 {
 	return createOutputSignals(videoItemFblElement, afbElement);
-}
+})
 				</AfterCreation>
 			</CommonScript>
 		</AFB>
