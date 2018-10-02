@@ -336,7 +336,9 @@ protected slots:
 
 	void exportToPdf();
 
-	void signalsProperties(QStringList strIds);
+	void appSignalsSelectedProperties();
+	void appSignalsProperties(QStringList strIds);
+	void addNewAppSignalSelected();
 	void addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> schemaItem);
 
 	void escapeKey();
@@ -681,6 +683,9 @@ private:
 	//QMenu* m_propertiesMenu = nullptr;
 	//QAction* m_propertiesAction = nullptr;
 	QAction* m_compareDiffAction = nullptr;
+
+	QAction* m_addAppSignalAction = nullptr;
+	QAction* m_appSignalPropertiesAction = nullptr;
 
 	// --
 	// End of ConextMenu
