@@ -2,7 +2,18 @@
 #define SPECIFICPROPERTIESEDITOR_H
 
 #include "../lib/PropertyEditor.h"
+#include <QSortFilterProxyModel>
 
+
+enum SpecificPropertyEditorColumns
+{
+	Category = 0,
+	Caption,
+	ViewOrder,
+	Type,
+	Count
+
+};
 
 class SpecificPropertyDescription : public PropertyObject
 {
@@ -51,7 +62,15 @@ public:
 	E::PropertySpecificEditor specificEditor() const;
 	void setSpecificEditor(E::PropertySpecificEditor value);
 
+	quint16 viewOrder() const;
+	void setViewOrder(quint16 value);
+
 	void validateDynamicEnumType(QWidget* parent);
+
+	std::tuple<quint16, QString, int, QString> tuple_order() const;
+	std::tuple<QString, quint16, int, QString> tuple_caption() const;
+	std::tuple<int, quint16, QString, QString> tuple_type() const;
+	std::tuple<QString, quint16, QString, int> tuple_category() const;
 
 private:
 	// Warning! Be sure to add new fields to the copy constructor!
@@ -69,6 +88,65 @@ private:
 	bool m_expert = false;
 	bool m_visible = true;
 	E::PropertySpecificEditor m_specificEditor = E::PropertySpecificEditor::None;
+	quint16 m_viewOrder = 65535;
+};
+
+class SpecificPropertyModel : public QAbstractTableModel
+{
+	Q_OBJECT
+public:
+	SpecificPropertyModel(QObject *parent);
+
+	void clear();
+
+	void add(std::shared_ptr<SpecificPropertyDescription> spd);
+
+	void remove(QModelIndexList indexes);
+
+	std::shared_ptr<SpecificPropertyDescription> get(int index) const;
+
+	int count() const;
+
+	void update();
+
+	void sort(int column, Qt::SortOrder order) override;
+
+	QString toText() const;
+
+
+protected:
+	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+
+private:
+
+	std::vector<std::shared_ptr<SpecificPropertyDescription>> m_propertyDescriptions;
+	std::vector<int> m_sortedIndexes;
+
+	int m_sortColumn = SpecificPropertyEditorColumns::ViewOrder;
+	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
+};
+
+class SpecificPropertyModelSorter
+{
+public:
+	SpecificPropertyModelSorter(int column, Qt::SortOrder order, std::vector<std::shared_ptr<SpecificPropertyDescription>>* propertyDescriptions);
+
+	bool operator()(int index1, int index2) const
+	{
+		return sortFunction(index1, index2, m_column, m_order);
+	}
+
+	bool sortFunction(int index1, int index2, int column, Qt::SortOrder order) const;
+
+private:
+	int m_column = -1;
+
+	Qt::SortOrder m_order = Qt::AscendingOrder;
+
+	std::vector<std::shared_ptr<SpecificPropertyDescription>>* m_propertyDescriptions = nullptr;
 };
 
 class SpecificPropertiesEditor : public ExtWidgets::PropertyTextEditor
@@ -84,8 +162,11 @@ public:
 	void setReadOnly(bool value) override;
 
 private slots:
-	void onTreeSelectionChanged();
+	void tableSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
 	void onPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
+	void sortIndicatorChanged(int column, Qt::SortOrder order);
+
+
 
 	void onAddProperty();
 	void onCloneProperty();
@@ -94,22 +175,18 @@ private slots:
 	void onOkClicked();
 	void onCancelClicked();
 
-private:
-	void updatePropetyListItem(QTreeWidgetItem* item, SpecificPropertyDescription* spd);
 
 private:
-	QTreeWidget* m_propertiesList = nullptr;
+	SpecificPropertyModel m_propertiesModel;
+
+	QTableView* m_propertiesTable = nullptr;
 	ExtWidgets::PropertyEditor* m_propertyEditor = nullptr;
+
 
 	QPushButton* m_addButton = nullptr;
 	QPushButton* m_cloneButton = nullptr;
 	QPushButton* m_removeButton = nullptr;
 
-	std::map<QTreeWidgetItem*, std::shared_ptr<SpecificPropertyDescription>> m_propertyDescriptionsMap;
-
-	const int m_columnCaption = 0;
-	const int m_columnType = 1;
-	const int m_columnCategory = 2;
 };
 
 #endif // SPECIFICPROPERTIESEDITOR_H

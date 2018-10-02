@@ -370,6 +370,16 @@ namespace ExtWidgets
 
 	// -------------------------------------------------------------------------------
 
+	struct CreatePropertyStruct
+	{
+		std::shared_ptr<Property> property;
+		QString caption;
+		QString description;
+		QString category;
+		bool sameValue = false;
+
+	};
+
 	class PropertyEditor : public QtTreePropertyBrowser
 	{
 		friend class MultiLineEdit;
@@ -431,6 +441,8 @@ namespace ExtWidgets
 
 		void createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, std::pair<QVariant, bool> > &values);
 		QtProperty* createProperty(QtProperty* parentProperty, const QString& caption, const QString& category, const QString &description, const std::shared_ptr<Property> value, bool sameValue);
+
+		static bool createPropertyStructsSortFunc(const CreatePropertyStruct& cs1, const CreatePropertyStruct& cs2);
 
 	private:
 		// Private Data

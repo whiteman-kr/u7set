@@ -1,4 +1,5 @@
-#include <QTreeWidget>
+#include <QTableView>
+#include <QAbstractTableModel>
 #include <QMessageBox>
 #include "SpecificPropertiesEditor.h"
 
@@ -19,6 +20,7 @@ SpecificPropertyDescription::SpecificPropertyDescription()
 	ADD_PROPERTY_GETTER_SETTER(QString, "HighLimit", true, SpecificPropertyDescription::highLimit, SpecificPropertyDescription::setHighLimit);
 	ADD_PROPERTY_GETTER_SETTER(QString, "Default", true, SpecificPropertyDescription::defaultValue, SpecificPropertyDescription::setDefaultValue);
 	ADD_PROPERTY_GETTER_SETTER(int, "Precision", true, SpecificPropertyDescription::precision, SpecificPropertyDescription::setPrecision);
+	ADD_PROPERTY_GETTER_SETTER(int, "ViewOrder", true, SpecificPropertyDescription::viewOrder, SpecificPropertyDescription::setViewOrder);
 
 	auto propBool = ADD_PROPERTY_GETTER_SETTER(bool, "UpdateFromPreset", true, SpecificPropertyDescription::updateFromPreset, SpecificPropertyDescription::setUpdateFromPreset);
 	propBool->setCategory(tr("Flags"));
@@ -188,6 +190,16 @@ void SpecificPropertyDescription::setSpecificEditor(E::PropertySpecificEditor va
 	m_specificEditor = value;
 }
 
+quint16 SpecificPropertyDescription::viewOrder() const
+{
+	return m_viewOrder;
+}
+
+void SpecificPropertyDescription::setViewOrder(quint16 value)
+{
+	m_viewOrder = value;
+}
+
 void SpecificPropertyDescription::validateDynamicEnumType(QWidget* parent)
 {
 	// Show/hide dynamic enum property
@@ -234,34 +246,391 @@ void SpecificPropertyDescription::validateDynamicEnumType(QWidget* parent)
 	}
 }
 
+std::tuple<quint16, QString, int, QString> SpecificPropertyDescription::tuple_order() const
+{
+	return std::make_tuple(m_viewOrder, m_caption, static_cast<int>(m_type), m_category);
+}
+
+std::tuple<QString, quint16, int, QString> SpecificPropertyDescription::tuple_caption() const
+{
+	return std::make_tuple(m_caption, m_viewOrder, static_cast<int>(m_type), m_category);
+}
+
+std::tuple<int, quint16, QString, QString> SpecificPropertyDescription::tuple_type() const
+{
+	return std::make_tuple(static_cast<int>(m_type), m_viewOrder, m_caption, m_category);
+}
+
+std::tuple<QString, quint16, QString, int> SpecificPropertyDescription::tuple_category() const
+{
+	return std::make_tuple(m_category, m_viewOrder, m_caption, static_cast<int>(m_type));
+}
+
+//
+// SpecificPropertyModel
+//
+
+SpecificPropertyModel::SpecificPropertyModel(QObject *parent):
+	QAbstractTableModel(parent)
+{
+
+}
+
+void SpecificPropertyModel::clear()
+{
+	m_sortedIndexes.clear();
+	m_propertyDescriptions.clear();
+}
+
+void SpecificPropertyModel::add(std::shared_ptr<SpecificPropertyDescription> spd)
+{
+	beginInsertRows(QModelIndex(), rowCount(), rowCount());
+
+	m_propertyDescriptions.push_back(spd);
+	m_sortedIndexes.push_back(static_cast<int>(m_propertyDescriptions.size() - 1));
+
+	endInsertRows();
+}
+
+void SpecificPropertyModel::remove(QModelIndexList indexes)
+{
+	if (indexes.isEmpty() == true)
+	{
+		assert(false);
+		return;
+	}
+
+	std::vector<int> rowsToDelete;
+
+	rowsToDelete.reserve(indexes.size());
+
+	for (const QModelIndex& mi : indexes)
+	{
+		if (mi.row() < 0 || mi.row() >= static_cast<int>(m_sortedIndexes.size()))
+		{
+			assert(false);
+			return;
+		}
+
+		rowsToDelete.push_back(m_sortedIndexes[mi.row()]);
+	}
+
+	std::sort(rowsToDelete.begin(), rowsToDelete.end(),  std::greater<int>());
+
+	beginRemoveRows(QModelIndex(), rowCount() - indexes.size(), rowCount() - 1);
+
+	for (int row : rowsToDelete)
+	{
+		if (row < 0 || row >= static_cast<int>(m_propertyDescriptions.size()))
+		{
+			assert(false);
+			return;
+		}
+
+		m_propertyDescriptions.erase(m_propertyDescriptions.begin() + row);
+	}
+
+
+	// Rebuild sorted indexes and re-sort them
+	//
+
+	m_sortedIndexes.resize(m_propertyDescriptions.size());
+
+	for (int i = 0; i < m_sortedIndexes.size(); i++)
+	{
+		m_sortedIndexes[i] = i;
+	}
+
+	sort(m_sortColumn, m_sortOrder);
+
+	//
+
+	endRemoveRows();
+
+}
+
+std::shared_ptr<SpecificPropertyDescription> SpecificPropertyModel::get(int index) const
+{
+	if (index < 0 || index >= rowCount())
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	int row = m_sortedIndexes[index];
+
+	if (row < 0 || row >= rowCount())
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	return m_propertyDescriptions[row];
+
+}
+
+int SpecificPropertyModel::count() const
+{
+	return rowCount();
+}
+
+void SpecificPropertyModel::update()
+{
+	emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
+}
+
+void SpecificPropertyModel::sort(int column, Qt::SortOrder order)
+{
+	if (m_sortedIndexes.empty() == true)
+	{
+		return;
+	}
+
+	if (column < 0 || column >= SpecificPropertyEditorColumns::Count)
+	{
+		assert(false);
+		return;
+	}
+
+	m_sortColumn = column;
+	m_sortOrder = order;
+
+	std::sort(m_sortedIndexes.begin(), m_sortedIndexes.end(), SpecificPropertyModelSorter(column, order, &m_propertyDescriptions));
+
+	return;
+}
+
+QString SpecificPropertyModel::toText() const
+{
+	QString result;
+
+	for (const std::shared_ptr<SpecificPropertyDescription>& spd : m_propertyDescriptions)
+	{
+		if (spd == nullptr)
+		{
+			assert(spd);
+			return QString();
+		}
+
+		QString strType;
+
+		switch (spd->type())
+		{
+		case E::SpecificPropertyType::pt_int32:			strType = "int32";					break;
+		case E::SpecificPropertyType::pt_uint32:		strType = "uint32";					break;
+		case E::SpecificPropertyType::pt_double:		strType = "double";					break;
+		case E::SpecificPropertyType::pt_string:		strType = "string";					break;
+		case E::SpecificPropertyType::pt_bool:			strType = "bool";					break;
+		case E::SpecificPropertyType::pt_e_channel:		strType = "E::Channel";				break;
+		case E::SpecificPropertyType::pt_dynamicEnum:
+		{
+			strType = tr("DynamicEnum [%1]").arg(spd->typeDynamicEnum());
+			break;
+		}
+		default:
+			assert(false);
+		}
+
+		result += PropertyObject::createSpecificPropertyStruct(spd->caption(),
+														spd->category(),
+														spd->description(),
+														strType,
+														spd->lowLimit(),
+														spd->highLimit(),
+														spd->defaultValue(),
+														spd->precision(),
+														spd->updateFromPreset(),
+														spd->expert(),
+														spd->visible(),
+														spd->specificEditor(),
+														spd->viewOrder());
+		result += "\r\n";
+	}
+
+	return result;
+}
+
+int SpecificPropertyModel::rowCount(const QModelIndex &parent) const
+{
+	Q_UNUSED(parent);
+	return static_cast<int>(m_propertyDescriptions.size());
+}
+
+int SpecificPropertyModel::columnCount(const QModelIndex &parent) const
+{
+	Q_UNUSED(parent);
+	return static_cast<int>(SpecificPropertyEditorColumns::Count);
+}
+
+QVariant SpecificPropertyModel::data(const QModelIndex &index, int role) const
+{
+	if (role == Qt::DisplayRole)
+	{
+		if (index.row() < 0 || index.row() >= static_cast<int>(m_sortedIndexes.size()))
+		{
+			assert(false);
+			return QVariant();
+		}
+
+		int row = m_sortedIndexes[index.row()];
+		if (row < 0 || row >= rowCount())
+		{
+			assert(false);
+			return QVariant();
+		}
+
+		const SpecificPropertyDescription* spd = m_propertyDescriptions[row].get();
+
+		if (spd == nullptr)
+		{
+			assert(spd);
+			return QVariant();
+		}
+
+		switch (index.column())
+		{
+		case SpecificPropertyEditorColumns::ViewOrder:
+		{
+			return QString::number(spd->viewOrder());
+		}
+		case SpecificPropertyEditorColumns::Caption:
+		{
+			return spd->caption();
+		}
+		case SpecificPropertyEditorColumns::Type:
+		{
+			return E::valueToString<E::SpecificPropertyType>(spd->type());
+		}
+		case SpecificPropertyEditorColumns::Category:
+		{
+			return spd->category();
+		}
+		default:
+			return QVariant();
+		}
+	}
+	return QVariant();
+}
+
+QVariant SpecificPropertyModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+	if (role == Qt::DisplayRole)
+	{
+		if (orientation == Qt::Horizontal)
+		{
+			switch (section)
+			{
+			case SpecificPropertyEditorColumns::ViewOrder:
+			{
+				return "#";
+			}
+			case SpecificPropertyEditorColumns::Caption:
+			{
+				return QString("Caption");
+			}
+			case SpecificPropertyEditorColumns::Type:
+			{
+				return QString("Type");
+			}
+			case SpecificPropertyEditorColumns::Category:
+			{
+				return QString("Category");
+			}
+			}
+		}
+	}
+	return QVariant();
+}
+
+SpecificPropertyModelSorter::SpecificPropertyModelSorter(int column, Qt::SortOrder order, std::vector<std::shared_ptr<SpecificPropertyDescription>>* propertyDescriptions):
+	m_column(column),
+	m_order(order),
+	m_propertyDescriptions(propertyDescriptions)
+{
+
+}
+
+bool SpecificPropertyModelSorter::sortFunction(int index1, int index2, int column, Qt::SortOrder order) const
+{
+	if (m_propertyDescriptions == nullptr)
+	{
+		assert(m_propertyDescriptions);
+		return false;
+	}
+
+	if (index1 < 0 || index1 >= static_cast<int>(m_propertyDescriptions->size()) ||
+		index2 < 0 || index2 >= static_cast<int>(m_propertyDescriptions->size()))
+	{
+		assert(false);
+		return false;
+	}
+
+	const SpecificPropertyDescription* spd1 = m_propertyDescriptions->at(index1).get();
+
+	const SpecificPropertyDescription* spd2 = m_propertyDescriptions->at(index2).get();
+
+	if (spd1 == nullptr || spd2 == nullptr)
+	{
+		assert(spd1);
+		assert(spd2);
+		return false;
+	}
+
+	if (order == Qt::DescendingOrder)
+	{
+		std::swap(spd1, spd2);
+	}
+
+	switch (column)
+	{
+	case SpecificPropertyEditorColumns::ViewOrder:
+	{
+		return spd1->tuple_order() < spd2->tuple_order();
+	}
+	case SpecificPropertyEditorColumns::Caption:
+	{
+		return spd1->tuple_caption() < spd2->tuple_caption();
+	}
+	case SpecificPropertyEditorColumns::Type:
+	{
+		return spd1->tuple_type() < spd2->tuple_type();
+	}
+	case SpecificPropertyEditorColumns::Category:
+	{
+		return spd1->tuple_category() < spd2->tuple_category();
+	}
+	default:
+		assert(false);
+		return spd1->tuple_caption() < spd2->tuple_caption();
+	}
+
+}
+
 //
 // SpecificPropertiesEditor
 //
 SpecificPropertiesEditor::SpecificPropertiesEditor(QWidget* parent):
-	PropertyTextEditor(parent)
+	PropertyTextEditor(parent),
+	m_propertiesModel(this)
 {
 	m_hasOkCancelButtons = false;
 
 	// Create property list
 	//
-	m_propertiesList = new QTreeWidget();
+	m_propertiesTable = new QTableView();
+	m_propertiesTable->setModel(&m_propertiesModel);
 
-	QStringList l;
-	l << tr("Caption");
-	l << tr("Type");
-	l << tr("Category");
+	m_propertiesTable->verticalHeader()->hide();
+	m_propertiesTable->verticalHeader()->sectionResizeMode(QHeaderView::Fixed);
+	m_propertiesTable->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+	m_propertiesTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
+	m_propertiesTable->setSortingEnabled(true);
+	m_propertiesTable->horizontalHeader()->setStretchLastSection(true);
+	m_propertiesTable->verticalHeader()->setResizeMode(QHeaderView::ResizeToContents);
+	connect(m_propertiesTable->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SpecificPropertiesEditor::tableSelectionChanged);
+	connect(m_propertiesTable->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &SpecificPropertiesEditor::sortIndicatorChanged);
 
-	m_propertiesList->setColumnCount(l.size());
-	m_propertiesList->setHeaderLabels(l);
 
-	int il = 0;
-	m_propertiesList->setColumnWidth(il++, 140);
-	m_propertiesList->setSortingEnabled(true);
-	m_propertiesList->setSelectionMode(QAbstractItemView::ExtendedSelection);
-	m_propertiesList->setContextMenuPolicy(Qt::CustomContextMenu);
-	m_propertiesList->setRootIsDecorated(false);
-
-	connect(m_propertiesList, &QTreeWidget::itemSelectionChanged, this, &SpecificPropertiesEditor::onTreeSelectionChanged);
 
 	// Create property editor
 	//
@@ -301,7 +670,7 @@ SpecificPropertiesEditor::SpecificPropertiesEditor(QWidget* parent):
 	// Top Layout
 	//
 	QHBoxLayout* topLayout = new QHBoxLayout();
-	topLayout->addWidget(m_propertiesList);
+	topLayout->addWidget(m_propertiesTable);
 	topLayout->addWidget(m_propertyEditor);
 	topLayout->setContentsMargins(0, 0, 0, 0);
 
@@ -322,8 +691,7 @@ void SpecificPropertiesEditor::setText(const QString& text)
 {
 	static_assert(PropertyObject::m_lastSpecificPropertiesVersion >= 1 && PropertyObject::m_lastSpecificPropertiesVersion <= 5);	// Editor must be reviewed if version is raised
 
-	m_propertiesList->clear();
-	m_propertyDescriptionsMap.clear();
+	m_propertiesModel.clear();
 
 	QStringList rows = text.split(QChar::LineFeed, QString::SkipEmptyParts);
 
@@ -452,81 +820,42 @@ void SpecificPropertiesEditor::setText(const QString& text)
 			}
 		}
 
+		if (version >= 5)
+		{
+			if (columns.size() < 14)
+			{
+				QString message = tr("SpecificProperties: Invalid specific property format: %1").arg(row);
+				QMessageBox::critical(this, qAppName(), message);
+				return;
+			}
+
+			spd->setViewOrder(columns[13].toInt());
+		}
+
 		// Show/hide dynamic enum property
 		//
 		spd->validateDynamicEnumType(this);
 
-		// Add the tree item
-		//
-		QTreeWidgetItem* item = new QTreeWidgetItem();
+		m_propertiesModel.add(spd);
 
-		updatePropetyListItem(item, spd.get());
-
-		m_propertyDescriptionsMap[item] = spd;
-
-		m_propertiesList->addTopLevelItem(item);
 	}
 
-	m_propertiesList->sortByColumn(m_columnCaption, Qt::AscendingOrder);
+	m_propertiesTable->setColumnWidth(SpecificPropertyEditorColumns::ViewOrder, 50);
+	m_propertiesTable->setColumnWidth(SpecificPropertyEditorColumns::Caption, 200);
+	m_propertiesTable->setColumnWidth(SpecificPropertyEditorColumns::Type, 100);
+	m_propertiesTable->setColumnWidth(SpecificPropertyEditorColumns::Category, 140);
+
+	// Sort
+
+	m_propertiesTable->horizontalHeader()->blockSignals(true);
+	m_propertiesTable->sortByColumn(SpecificPropertyEditorColumns::Category, Qt::AscendingOrder);
+	m_propertiesTable->horizontalHeader()->blockSignals(false);
 }
 
 
 QString SpecificPropertiesEditor::text()
 {
-	QString result;
-
-	for (int i = 0; i < m_propertiesList->topLevelItemCount(); i++)
-	{
-		QTreeWidgetItem* item = m_propertiesList->topLevelItem(i);
-		if (item == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
-		if (m_propertyDescriptionsMap.find(item) == m_propertyDescriptionsMap.end())
-		{
-			assert(false);
-			continue;
-		}
-
-		const std::shared_ptr<SpecificPropertyDescription>& spd = m_propertyDescriptionsMap[item];
-
-		QString strType;
-
-		switch (spd->type())
-		{
-		case E::SpecificPropertyType::pt_int32:			strType = "int32";					break;
-		case E::SpecificPropertyType::pt_uint32:		strType = "uint32";					break;
-		case E::SpecificPropertyType::pt_double:		strType = "double";					break;
-		case E::SpecificPropertyType::pt_string:		strType = "string";					break;
-		case E::SpecificPropertyType::pt_bool:			strType = "bool";					break;
-		case E::SpecificPropertyType::pt_e_channel:		strType = "E::Channel";				break;
-		case E::SpecificPropertyType::pt_dynamicEnum:
-		{
-			strType = tr("DynamicEnum [%1]").arg(spd->typeDynamicEnum());
-			break;
-		}
-		default:
-			assert(false);
-		}
-
-		result += PropertyObject::createSpecificPropertyStruct(spd->caption(),
-														spd->category(),
-														spd->description(),
-														strType,
-														spd->lowLimit(),
-														spd->highLimit(),
-														spd->defaultValue(),
-														spd->precision(),
-														spd->updateFromPreset(),
-														spd->expert(),
-														spd->visible(),
-														spd->specificEditor());
-		result += "\r\n";
-	}
-
-	return result;
+	return m_propertiesModel.toText();
 }
 
 void SpecificPropertiesEditor::setReadOnly(bool value)
@@ -535,10 +864,15 @@ void SpecificPropertiesEditor::setReadOnly(bool value)
 	m_removeButton->setEnabled(value == false);
 }
 
-void SpecificPropertiesEditor::onTreeSelectionChanged()
+void SpecificPropertiesEditor::tableSelectionChanged(const QItemSelection &selected, const QItemSelection &deselected)
 {
-	bool cloneEnabled = m_propertiesList->selectedItems().size() == 1;
-	bool removeEnabled = m_propertiesList->selectedItems().size() > 0;
+	Q_UNUSED(selected);
+	Q_UNUSED(deselected);
+
+	QModelIndexList selection = m_propertiesTable->selectionModel()->selectedRows();
+
+	bool cloneEnabled = selection.size() == 1;
+	bool removeEnabled = selection.size() > 0;
 
 	if (m_propertyEditor->readOnly() == false)
 	{
@@ -550,16 +884,9 @@ void SpecificPropertiesEditor::onTreeSelectionChanged()
 	//
 	std::vector<std::shared_ptr<PropertyObject>> objects;
 
-	for (QTreeWidgetItem* item : m_propertiesList->selectedItems())
+	for (const QModelIndex& mi : selection)
 	{
-
-		if (m_propertyDescriptionsMap.find(item) == m_propertyDescriptionsMap.end())
-		{
-			assert(false);
-			return;
-		}
-
-		std::shared_ptr<SpecificPropertyDescription> spd = m_propertyDescriptionsMap[item];
+		std::shared_ptr<SpecificPropertyDescription> spd = m_propertiesModel.get(mi.row());
 		if (spd == nullptr)
 		{
 			assert(spd);
@@ -576,38 +903,24 @@ void SpecificPropertiesEditor::onTreeSelectionChanged()
 	}
 
 	m_propertyEditor->setObjects(objects);
+
 }
 
 void SpecificPropertiesEditor::onPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects)
 {
 	Q_UNUSED(objects);
 
-	bool updatePropertiesList = false;
+	m_propertiesModel.update();
+}
 
-	for (QTreeWidgetItem* item : m_propertiesList->selectedItems())
-	{
-		if (m_propertyDescriptionsMap.find(item) == m_propertyDescriptionsMap.end())
-		{
-			assert(false);
-			return;
-		}
+void SpecificPropertiesEditor::sortIndicatorChanged(int column, Qt::SortOrder order)
+{
+	m_propertiesTable->clearSelection();
 
-		std::shared_ptr<SpecificPropertyDescription> spd = m_propertyDescriptionsMap[item];
-		if (spd == nullptr)
-		{
-			assert(spd);
-			return;
-		}
+	m_propertiesModel.sort(column, order);
 
-		spd->validateDynamicEnumType(this);
+	m_propertiesModel.update();
 
-		updatePropetyListItem(item, spd.get());
-	}
-
-	if (updatePropertiesList == true)
-	{
-
-	}
 }
 
 void SpecificPropertiesEditor::onAddProperty()
@@ -615,42 +928,27 @@ void SpecificPropertiesEditor::onAddProperty()
 	std::shared_ptr<SpecificPropertyDescription> spd = std::make_shared<SpecificPropertyDescription>();
 
 	spd->setCaption(tr("New Property"));
+	spd->setCategory(tr("Common"));
 	spd->setType(E::SpecificPropertyType::pt_uint32);
 	spd->setVisible(true);
 
 	// Add the tree item
 	//
-	QTreeWidgetItem* item = new QTreeWidgetItem();
 
-	updatePropetyListItem(item, spd.get());
-
-	m_propertyDescriptionsMap[item] = spd;
-
-	m_propertiesList->addTopLevelItem(item);
-	m_propertiesList->clearSelection();
-	m_propertiesList->setCurrentItem(item);
+	m_propertiesModel.add(spd);
 }
 
 void SpecificPropertiesEditor::onCloneProperty()
 {
-	QList<QTreeWidgetItem*> selected = m_propertiesList->selectedItems();
+	QModelIndexList selection = m_propertiesTable->selectionModel()->selectedRows();
 
-	if (selected.size() != 1)
+	if (selection.size() != 1)
 	{
 		return;
 	}
 
-	QTreeWidgetItem* sourceItem = selected[0];
+	std::shared_ptr<SpecificPropertyDescription> sourceSpd = m_propertiesModel.get(selection[0].row());
 
-	auto it = m_propertyDescriptionsMap.find(sourceItem);
-
-	if (it == m_propertyDescriptionsMap.end())
-	{
-		assert(false);
-		return;
-	}
-
-	std::shared_ptr<SpecificPropertyDescription> sourceSpd = it->second;
 	if (sourceSpd == nullptr)
 	{
 		assert(sourceSpd);
@@ -668,52 +966,36 @@ void SpecificPropertiesEditor::onCloneProperty()
 
 	// Add the tree item
 	//
-	QTreeWidgetItem* item = new QTreeWidgetItem();
 
-	updatePropetyListItem(item, spd.get());
+	m_propertiesModel.add(spd);
 
-	m_propertyDescriptionsMap[item] = spd;
+	// Select it
+	//
 
-	m_propertiesList->addTopLevelItem(item);
-	m_propertiesList->clearSelection();
-	m_propertiesList->setCurrentItem(item);
+	QModelIndex lastIndex = m_propertiesModel.index(m_propertiesModel.count() - 1, 0);
+
+	if (lastIndex.isValid() == false)
+	{
+		assert(false);
+		return;
+	}
+
+	m_propertiesTable->selectionModel()->select(lastIndex, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
 }
 
 void SpecificPropertiesEditor::onRemoveProperties()
 {
-	QList<QTreeWidgetItem*> selected = m_propertiesList->selectedItems();
+	QModelIndexList selection = m_propertiesTable->selectionModel()->selectedRows();
 
-	if (selected.empty() == true)
+	if (selection.isEmpty() == true)
 	{
 		return;
 	}
 
-	if (auto mbResult = QMessageBox::question(this, qAppName(), tr("Are you sure you want to remove selected properties?"), QMessageBox::Yes | QMessageBox::No);
-		mbResult != QMessageBox::Yes)
-	{
-		return;
-	}
+	m_propertiesModel.remove(selection);
 
-	for (QTreeWidgetItem* item : selected)
-	{
-		if (m_propertyDescriptionsMap.find(item) == m_propertyDescriptionsMap.end())
-		{
-			assert(false);
-			return;
-		}
+	m_propertiesTable->clearSelection();
 
-		int index = m_propertiesList->indexOfTopLevelItem(item);
-		if (index == -1)
-		{
-			assert(false);
-			return;
-		}
-
-		m_propertyDescriptionsMap.erase(item);
-
-		QTreeWidgetItem* itemToDelete = m_propertiesList->takeTopLevelItem(index);
-		delete itemToDelete;
-	}
 }
 
 void SpecificPropertiesEditor::onOkClicked()
@@ -724,11 +1006,4 @@ void SpecificPropertiesEditor::onOkClicked()
 void SpecificPropertiesEditor::onCancelClicked()
 {
 	cancelButtonPressed();
-}
-
-void SpecificPropertiesEditor::updatePropetyListItem(QTreeWidgetItem* item, SpecificPropertyDescription* spd)
-{
-	item->setText(m_columnCaption, spd->caption());
-	item->setText(m_columnType, E::valueToString<E::SpecificPropertyType>(spd->type()));
-	item->setText(m_columnCategory, spd->category());
 }
