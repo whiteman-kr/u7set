@@ -145,7 +145,7 @@ TuningSourceWidget::TuningSourceWidget(quint64 id, QString equipmentId, QWidget 
 
 	setWindowTitle(equipmentId);
 
-	setWindowPosition(this, "TuningSourceWidget/" + equipmentId + "/geometry");
+	setWindowPosition(this, "TuningSourceWidget/" + equipmentId);
 
 	QSettings settings;
 	m_splitter->restoreState(settings.value("TuningSourceWidget/" + equipmentId + "/splitterState", m_splitter->saveState()).toByteArray());
@@ -230,8 +230,9 @@ void TuningSourceWidget::unsetClientSocket()
 
 void TuningSourceWidget::closeEvent(QCloseEvent *event)
 {
+	saveWindowPosition(this, "TuningSourceWidget/" + m_equipmentId);
+
 	QSettings settings;
-	settings.setValue("TuningSourceWidget/" + m_equipmentId + "/geometry", geometry());
 	settings.setValue("TuningSourceWidget/" + m_equipmentId + "/splitterState", m_splitter->saveState());
 
 	settings.setValue("TuningSourceWidget/" + m_equipmentId + "/infoColumnWidth", m_infoTable->columnWidth(0));

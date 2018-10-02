@@ -1946,6 +1946,11 @@ namespace ExtWidgets
 
 	}
 
+	bool PropertyEditor::createPropertyStructsSortFunc(const CreatePropertyStruct& cs1, const CreatePropertyStruct& cs2)
+	{
+		return std::make_tuple(cs1.category, cs1.property->viewOrder(), cs1.caption)  < std::make_tuple(cs2.category, cs2.property->viewOrder(), cs2.caption);
+	}
+
 	void PropertyEditor::updatePropertyValues(const QString& propertyName)
 	{
         QSet<QtProperty*> props;
@@ -1994,6 +1999,8 @@ namespace ExtWidgets
 
 		QMap<QString, std::shared_ptr<Property>> propertyItems;
 		QList<QString> propertyNames;
+
+		std::vector<CreatePropertyStruct> createPropertyStructs;
 
 		// Create a map with all properties
 		//
@@ -2164,10 +2171,28 @@ namespace ExtWidgets
 				category = "Common";
 			}
 
-			createProperty(nullptr, p->caption(), category, description, p, sameValue);
+			CreatePropertyStruct cs;
+			cs.property = p;
+			cs.caption = p->caption();
+			cs.category = category;
+			cs.description = description;
+			cs.sameValue = sameValue;
+
+			createPropertyStructs.push_back(cs);
 		}
 
-		sortItems(0, Qt::AscendingOrder);
+		// Sort here
+
+		std::sort(createPropertyStructs.begin(), createPropertyStructs.end(), createPropertyStructsSortFunc);
+
+		// Sort
+
+		for (const CreatePropertyStruct& cs : createPropertyStructs)
+		{
+			createProperty(nullptr, cs.caption, cs.category, cs.description, cs.property, cs.sameValue);
+		}
+
+		//sortItems(0, Qt::AscendingOrder);
 	}
 
 	void PropertyEditor::clearProperties()

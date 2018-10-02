@@ -1998,8 +1998,11 @@ public:
 										   bool updateFromPreset,
 										   bool expert,
 										   bool visible,
-										   const E::PropertySpecificEditor editor)
+										   const E::PropertySpecificEditor editor,
+										   quint16 viewOrder)
 	{
+		static_assert(PropertyObject::m_lastSpecificPropertiesVersion >= 1 && PropertyObject::m_lastSpecificPropertiesVersion <= 5);	// Function must be reviewed if version is raised
+
 		QString result = QString("%1;").arg(m_lastSpecificPropertiesVersion);
 
 		result += name + ";";
@@ -2013,7 +2016,8 @@ public:
 		result += expert ? "true;" : "false;";
 		result += description + ";";
 		result += visible ? "true;" : "false;";
-		result += E::valueToString<E::PropertySpecificEditor>(editor);
+		result += E::valueToString<E::PropertySpecificEditor>(editor) + ";";
+		result += QString("%1").arg(viewOrder);
 
 		return result;
 

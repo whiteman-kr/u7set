@@ -5,21 +5,31 @@
 #include <QDesktopWidget>
 #include <QSettings>
 
-static void setWindowPosition(QWidget* window, QString savedGeometryKey)
+static void saveWindowPosition(QWidget* window, QString widgetKey)
+{
+	QSettings settings;
+	int screenNumber = QApplication::desktop()->screenNumber(window);
+	settings.setValue(widgetKey + "/screenNumber", screenNumber);
+	settings.setValue(widgetKey + "/geometry", window->geometry());
+}
+
+static void setWindowPosition(QWidget* window, QString widgetKey)
 {
 	if (window == nullptr)
 	{
 		return;
 	}
-	QRect screenRect = QApplication::desktop()->screenGeometry(window);
+	QSettings settings;
+	int screenNumber = settings.value(widgetKey + "/screenNumber", QApplication::desktop()->screenNumber(window)).toInt();
+
+	QRect screenRect = QApplication::desktop()->screenGeometry(screenNumber);
 	QPoint center = screenRect.center();
 
 	QRect baseWindowRect = screenRect;
 	baseWindowRect.setSize(QSize(screenRect.width() * 2 / 3, screenRect.height() * 2 / 3));
 	baseWindowRect.moveCenter(center);
 
-	QSettings settings;
-	QRect windowRect = settings.value(savedGeometryKey, baseWindowRect).toRect();
+	QRect windowRect = settings.value(widgetKey + "/geometry", baseWindowRect).toRect();
 
 	if (windowRect.height() > screenRect.height())
 	{
@@ -34,67 +44,21 @@ static void setWindowPosition(QWidget* window, QString savedGeometryKey)
 	{
 		windowRect.moveLeft(0);
 	}
-	if (windowRect.left() + windowRect.width() > screenRect.width())
+	if (windowRect.left() + windowRect.width() > screenRect.right())
 	{
-		windowRect.moveLeft(screenRect.width() - windowRect.width());
+		windowRect.moveLeft(screenRect.right() - windowRect.width());
 	}
 
 	if (windowRect.top() < 0)
 	{
 		windowRect.moveTop(0);
 	}
-	if (windowRect.top() + windowRect.height() > screenRect.height())
+	if (windowRect.top() + windowRect.height() > screenRect.bottom())
 	{
-		windowRect.moveTop(screenRect.height() - windowRect.height());
+		windowRect.moveTop(screenRect.bottom() - windowRect.height());
 	}
 
 	window->setGeometry(windowRect);
-}
-
-static void setWindowPosition(QWidget* window, QRect geometryRect)
-{
-	if (window == nullptr)
-	{
-		return;
-	}
-	QRect screenRect = QApplication::desktop()->screenGeometry(window);
-	QPoint center = screenRect.center();
-
-	if (geometryRect.isNull())
-	{
-		geometryRect = screenRect;
-		geometryRect.setSize(QSize(screenRect.width() * 2 / 3, screenRect.height() * 2 / 3));
-		geometryRect.moveCenter(center);
-	}
-
-	if (geometryRect.height() > screenRect.height())
-	{
-		geometryRect.setHeight(screenRect.height());
-	}
-	if (geometryRect.width() > screenRect.width())
-	{
-		geometryRect.setWidth(screenRect.width());
-	}
-
-	if (geometryRect.left() < 0)
-	{
-		geometryRect.moveLeft(0);
-	}
-	if (geometryRect.left() + geometryRect.width() > screenRect.width())
-	{
-		geometryRect.moveLeft(screenRect.width() - geometryRect.width());
-	}
-
-	if (geometryRect.top() < 0)
-	{
-		geometryRect.moveTop(0);
-	}
-	if (geometryRect.top() + geometryRect.height() > screenRect.height())
-	{
-		geometryRect.moveTop(screenRect.height() - geometryRect.height());
-	}
-
-	window->setGeometry(geometryRect);
 }
 
 #endif // WIDGETUTILS_H

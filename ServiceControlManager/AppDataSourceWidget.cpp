@@ -106,7 +106,7 @@ AppDataSourceWidget::AppDataSourceWidget(quint64 id, QString equipmentId, QWidge
 
 	setWindowTitle(equipmentId);
 
-	setWindowPosition(this, "AppDataSourceWidget/" + equipmentId + "/geometry");
+	setWindowPosition(this, "AppDataSourceWidget/" + equipmentId);
 
 	QSettings settings;
 	m_splitter->restoreState(settings.value("AppDataSourceWidget/" + equipmentId + "/splitterState", m_splitter->saveState()).toByteArray());
@@ -191,8 +191,9 @@ void AppDataSourceWidget::unsetClientSocket()
 
 void AppDataSourceWidget::closeEvent(QCloseEvent *event)
 {
+	saveWindowPosition(this, "AppDataSourceWidget/" + m_equipmentId);
+
 	QSettings settings;
-	settings.setValue("AppDataSourceWidget/" + m_equipmentId + "/geometry", geometry());
 	settings.setValue("AppDataSourceWidget/" + m_equipmentId + "/splitterState", m_splitter->saveState());
 
 	settings.setValue("AppDataSourceWidget/" + m_equipmentId + "/infoColumnWidth", m_infoTable->columnWidth(0));

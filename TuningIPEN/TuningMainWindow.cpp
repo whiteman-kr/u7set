@@ -62,7 +62,7 @@ namespace TuningIPEN
 
 		//Window geometry
 		//
-		setWindowPosition(this, "TuningMainWindow/geometry");
+		setWindowPosition(this, "TuningMainWindow");
 
 		setWindowTitle("Tuning IPEN");
 
