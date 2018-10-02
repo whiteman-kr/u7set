@@ -38,6 +38,10 @@ namespace Builder
 		//
 
 		bool conversionRequired() const;
+
+		bool hasKnownConversion() const;
+		bool is_SignedInt32_To_Unsigned16_BE_NoScale_coversion() const;
+
 		void init(const Busses& busses, const VFrame30::BusSignal& bs);
 		bool isOverlaped(const BusSignal& bs);
 

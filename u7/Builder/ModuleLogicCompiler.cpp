@@ -7337,8 +7337,7 @@ namespace Builder
 
 		if (busSignal.conversionRequired() == true)
 		{
-			LOG_INTERNAL_ERROR(m_log);				// bus signals conversion is not implemented now
-			return false;
+			return getAnalogSignalToInbusSignalConversionCode(code, inputSignal, busChildSignal, busSignal);
 		}
 
 		QString inputSignalIDs = inputSignal->refSignalIDsJoined();
@@ -7372,6 +7371,56 @@ namespace Builder
 
 			cmd.mov32(busChildSignal->ualAddr().offset(), inputSignal->ualAddr().offset());
 			cmd.setComment(QString("%1 <= %2").arg(busChildSignalIDs).arg(inputSignalIDs));
+		}
+
+		code->append(cmd);
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::getAnalogSignalToInbusSignalConversionCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal)
+	{
+		if (busSignal.hasKnownConversion() == false)
+		{
+			// Unknown conversion of signal %1 to inbus signal %2 (Logic schema %3)
+			//
+			m_log->errALC5153(inputSignal->appSignalID(), busChildSignal->appSignalID(), busChildSignal->ualItemSchemaID());
+			return false;
+		}
+
+		if (busSignal.is_SignedInt32_To_Unsigned16_BE_NoScale_coversion() == true)
+		{
+			return get_SignedInt32_To_Unsigned16_BE_NoScale_inbusSignalCoversionCode(code, inputSignal, busChildSignal, busSignal);
+		}
+
+		LOG_INTERNAL_ERROR(m_log);
+		return false;
+	}
+
+	bool ModuleLogicCompiler::get_SignedInt32_To_Unsigned16_BE_NoScale_inbusSignalCoversionCode(CodeSnippet* code,
+																								const UalSignal* inputSignal,
+																								const UalSignal* busChildSignal,
+																								const BusSignal& busSignal)
+	{
+		if (busSignal.is_SignedInt32_To_Unsigned16_BE_NoScale_coversion() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		CodeItem cmd;
+
+		if (inputSignal->isConst() == true)
+		{
+			quint16 constValue = inputSignal->constAnalogIntValue() & 0xFFFF;					// get low word of const
+
+			cmd.movConst(busChildSignal->ualAddr().offset(), constValue);
+			cmd.setComment(QString("%1 <= %2 (SignedInt32_To_Unsigned16_BE_NoScale)").arg(busChildSignal->refSignalIDsJoined()).arg(constValue));
+		}
+		else
+		{
+			cmd.mov(busChildSignal->ualAddr().offset(), inputSignal->ualAddr().offset() + 1);	// move low word of inputSignal only
+			cmd.setComment(QString("%1 <= %2 (SignedInt32_To_Unsigned16_BE_NoScale)").arg(busChildSignal->refSignalIDsJoined()).arg(inputSignal->refSignalIDsJoined()));
 		}
 
 		code->append(cmd);
