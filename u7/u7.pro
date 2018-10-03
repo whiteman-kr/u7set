@@ -229,7 +229,8 @@ SOURCES +=\
     Simulator/SimBasePage.cpp \
     ../lib/Times.cpp \
     Simulator/SimOverrideWidget.cpp \
-    SpecificPropertiesEditor.cpp
+    SpecificPropertiesEditor.cpp \
+    ../lib/Ui/DialogAbout.cpp
 
 
 HEADERS  += \
@@ -395,7 +396,8 @@ HEADERS  += \
     Builder/CfgFiles.h \
     ../lib/CommonTypes.h \
     ../lib/Times.h \
-    Simulator/SimOverrideWidget.h
+    Simulator/SimOverrideWidget.h \
+    ../lib/Ui/DialogAbout.h
 
 
 FORMS    += \

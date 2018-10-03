@@ -133,7 +133,8 @@ SOURCES += main.cpp \
     ../lib/Ui/DialogAlert.cpp \
     ../lib/Ui/UiTools.cpp \
     ../lib/Ui/DialogTuningSourceInfo.cpp \
-    ../lib/Ui/DialogTuningSources.cpp
+    ../lib/Ui/DialogTuningSources.cpp \
+    ../lib/Ui/DialogAbout.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -199,7 +200,8 @@ HEADERS  += \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/UiTools.h \
     ../lib/Ui/DialogTuningSourceInfo.h \
-    ../lib/Ui/DialogTuningSources.h
+    ../lib/Ui/DialogTuningSources.h \
+    ../lib/Ui/DialogAbout.h
 
 
 FORMS    += \
