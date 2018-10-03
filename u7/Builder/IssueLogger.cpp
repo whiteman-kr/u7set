@@ -4260,7 +4260,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5095,
-				  QString(tr("The bus size must be a multiple of 2 bytes (1 word) (bus type '%1').")).arg(busTypeID));
+				  QString(tr("The bus size must be a multiple of 2 bytes (1 word) (bus type %1).")).arg(busTypeID));
 	}
 
 	/// IssueCode: ALC5096
@@ -5468,6 +5468,68 @@ namespace Builder
 				  5150,
 				  QString(tr("Monitor %1 cannot be connected to TuningService %2 with enabled SingleLmControl mode.")).
 						arg(monitorID).arg(tuningServiceID));
+	}
+
+	/// IssueCode: ALC5151
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus type %1 has not initialized.
+	///
+	/// Parameters:
+	///		%1 Bus type ID
+	///
+	/// Description:
+	///		Bus type %1 has not initialized.
+	///
+	void IssueLogger::errALC5151(QString busTypeID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5151,
+				  QString(tr("Bus type %1 has not initialized.")).arg(busTypeID));
+	}
+
+	/// IssueCode: ALC5152
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus input signal %1 placement is out of bus size (bus type %2).
+	///
+	/// Parameters:
+	///		%1 Bus input signal ID
+	///		%2 Bus type ID
+	///
+	/// Description:
+	///		Bus input signal placement is out of bus size. Check bus input signal properties.
+	///
+	void IssueLogger::errALC5152(QString inBusSignal, QString busTypeID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5152,
+				  QString(tr("Bus input signal %1 placement is out of bus size (bus type %2).")).
+							arg(inBusSignal).arg(busTypeID));
+	}
+
+	/// IssueCode: ALC5153
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Unknown conversion of signal %1 to inbus signal %2 (Logic schema %3).
+	///
+	/// Parameters:
+	///		%1 Input signal appSignalID
+	///		%2 Bus child signal appSignalID
+	///		%3 Logic schemaID
+	///
+	/// Description:
+	///		Unknown conversion of signal to inbus signal. Check types of signals.
+	///
+	void IssueLogger::errALC5153(QString signalID, QString inbusSignalID, QString schemaID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5153,
+				  QString(tr("Unknown conversion of signal %1 to inbus signal %2 (Logic schema %3).")).
+							arg(signalID).arg(inbusSignalID).arg(schemaID));
 	}
 
 	//

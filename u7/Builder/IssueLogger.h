@@ -295,7 +295,7 @@ namespace Builder
 		void errALC5092(QString busTypeID, QString appSignalID);	// Bus type ID '%1' of signal '%2' is undefined.
 		void wrnALC5093(QString appSignalID);						// Coarse aperture of signal '%1' less then fine aperture.
 		void errALC5094(QString inBusSignalID, QString busTypeID);	// Size of in bus analog signal '%1' is not multiple 16 bits (bus type '%2').
-		void errALC5095(QString busTypeID);							// The bus size must be a multiple of 2 bytes (1 word) (bus type '%1').
+		void errALC5095(QString busTypeID);							// The bus size must be a multiple of 2 bytes (1 word) (bus type %1).
 		void errALC5096(QString inBusSignalID, QString busTypeID);	// Offset of in bus analog signal '%' is not multiple of 2 bytes (1 word) (bus type '%2').
 		void errALC5097(QString signalID1, QString signalID2, QString busTypeID);	// Bus signals '%1' and '%2' are overlapped (bus type '%3').
 		void errALC5098(QString signalID, QString busTypeID);						// Bus signal '%1' offset out of range (bus type '%2').
@@ -350,6 +350,9 @@ namespace Builder
 		void wrnALC5148(QString signalID);												// Internal signal %1 is unused.
 		void errALC5149(QString chassisEquipmentID);									// LM- or BVB-family module is not found in chassis %1
 		void errALC5150(QString monitorID, QString tuningServiceID);					// Monitor %1 cannot be connected to TuningService with enabled SingleLmControl mode.
+		void errALC5151(QString busTypeID);								// Bus type %1 has not initialized.
+		void errALC5152(QString inBusSignal, QString busTypeID);		// Bus input signal %1 placement is out of bus size (bus type %2).
+		void errALC5153(QString signalID, QString inbusSignalID, QString schemaID);		// Unknown conversion of signal %1 to inbus signal %2 (Logic schema %3)
 
 		void errALC5186(const QString& appSignalID, const QString& portEquipmentID);	// Signal '%1' is not found (opto port '%2' raw data description).
 		void errALC5187(const QString& port1ID, const QString & port2ID);				// Tx data memory areas of ports '%1' and '%2' are overlapped.

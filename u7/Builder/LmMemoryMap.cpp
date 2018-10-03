@@ -532,7 +532,13 @@ namespace Builder
 				ualSignal->setUalAddr(addr);
 			}
 
-			ualSignal->setRegBufAddr(addr);
+			bool res = ualSignal->setRegBufAddr(addr);
+
+			if (res == false)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+			}
 
 			addr.addWord(-m_appWordAdressed.memory.startAddress());			// minus is OK!
 
