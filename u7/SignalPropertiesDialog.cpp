@@ -325,7 +325,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 	vl->addWidget(m_buttonBox);
 	setLayout(vl);
 
-	setWindowPosition(this, "SignalPropertiesDialog/geometry");
+	setWindowPosition(this, "SignalPropertiesDialog");
 
 	m_isValid = true;
 }
@@ -423,8 +423,7 @@ void SignalPropertiesDialog::rejectCheckoutProperty()
 
 void SignalPropertiesDialog::saveDialogSettings()
 {
-	QSettings settings;
-	settings.setValue("SignalPropertiesDialog/geometry", geometry());
+	saveWindowPosition(this, "SignalPropertiesDialog");
 }
 
 void SignalPropertiesDialog::onSignalPropertyChanged(QList<std::shared_ptr<PropertyObject> > objects)
