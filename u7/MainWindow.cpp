@@ -75,24 +75,24 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 						  dbController(), nullptr,
 						  ::MvsFileExtension, ::MvsFileName, ::MvsTemplExtension, tr("Control"));
 
-	getCentralWidget()->addTabPage(m_projectsTab, tr("&Projects"));
-	getCentralWidget()->addTabPage(m_equipmentTab, tr("&Equipment"));
-	getCentralWidget()->addTabPage(m_signalsTab, tr("Application &Signals"));
+	getCentralWidget()->addTabPage(m_projectsTab, tr("Projects"));
+	getCentralWidget()->addTabPage(m_equipmentTab, tr("Equipment"));
+	getCentralWidget()->addTabPage(m_signalsTab, tr("Application Signals"));
 
 	m_filesTabPageIndex = getCentralWidget()->addTabPage(m_filesTabPage, m_filesTabPage->windowTitle());
 	getCentralWidget()->removeTab(m_filesTabPageIndex);	// It will be added in projectOpened slot if required
 
 	//m_diagSchema = SchemasTabPage::create<VFrame30::DiagSchema>(DvsFileExtension, dbController(), DvsFileName, nullptr);
 
-	getCentralWidget()->addTabPage(m_logicSchema, tr("Application &Logic"));
-	getCentralWidget()->addTabPage(m_monitorSchema, tr("&Monitor Schemas"));
+	getCentralWidget()->addTabPage(m_logicSchema, tr("Application Logic"));
+	getCentralWidget()->addTabPage(m_monitorSchema, tr("Monitor Schemas"));
 	//getCentralWidget()->addTabPage(m_diagSchema, tr("Diag Schemas"));
 
 	m_buildTabPage = new BuildTabPage(dbController(), nullptr);
-	getCentralWidget()->addTabPage(m_buildTabPage, tr("&Build"));
+	getCentralWidget()->addTabPage(m_buildTabPage, tr("Build"));
 
 	m_uploadTabPage = new UploadTabPage(dbController(), nullptr);
-	getCentralWidget()->addTabPage(m_uploadTabPage, tr("&Upload"));
+	getCentralWidget()->addTabPage(m_uploadTabPage, tr("Upload"));
 
 	//m_simulatorTabPage = new SimulatorTabPage(dbController(), nullptr);
 	//getCentralWidget()->addTabPage(m_simulatorTabPage, tr("Simulator"));
