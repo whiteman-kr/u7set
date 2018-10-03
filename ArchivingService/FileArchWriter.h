@@ -26,7 +26,7 @@ class ArchFile
 			double value;
 		} state;
 
-		quint32 CRC32;
+		quint16 crc16;
 	};
 
 #pragma pack(pop)

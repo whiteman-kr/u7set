@@ -24,5 +24,6 @@ SUBDIRS += qtservice \
     DiagDataService \
     TuningClient \
     TuningIPEN \
-mconf \
-Tools/PacketSource
+    mconf \
+    Tools/PacketSource
+

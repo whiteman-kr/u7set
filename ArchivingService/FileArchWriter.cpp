@@ -1,5 +1,5 @@
 #include "FileArchWriter.h"
-
+#include "../lib/Crc16.h"
 
 ArchFile::SignalState ArchFile::m_buffer[ArchFile::QUEUE_MAX_SIZE];
 
@@ -50,6 +50,7 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 	s.state.system = state.time.system.timeStamp;
 	s.state.flags = state.flags;
 	s.state.value = state.value;
+	s.crc16 = calcCrc16(&s.state, sizeof(s.state));
 
 	m_queue->push(s);
 

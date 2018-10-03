@@ -103,7 +103,8 @@ SOURCES += \
     ../lib/TuningValue.cpp \
     ../lib/Signal.cpp \
     ../lib/SignalProperties.cpp \
-    FileArchWriter.cpp
+    FileArchWriter.cpp \
+    ../lib/Crc16.cpp
 
 HEADERS += \
     version.h \
@@ -149,7 +150,8 @@ HEADERS += \
     ../lib/Signal.h \
     ../lib/Signal.h \
     ../lib/SignalProperties.h \
-    FileArchWriter.h
+    FileArchWriter.h \
+    ../lib/Crc16.h
 
 include(../qtservice/src/qtservice.pri)
 
