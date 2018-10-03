@@ -164,7 +164,8 @@ SOURCES +=\
     ../lib/Signal.cpp \
     ../lib/SignalProperties.cpp \
     ../lib/Ui/DialogAlert.cpp \
-    ../lib/Ui/UiTools.cpp
+    ../lib/Ui/UiTools.cpp \
+    ../lib/Ui/DialogAbout.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -224,7 +225,8 @@ HEADERS  += MainWindow.h \
     ../lib/Signal.h \
     ../lib/SignalProperties.h \
     ../lib/Ui/DialogAlert.h \
-    ../lib/Ui/UiTools.h
+    ../lib/Ui/UiTools.h \
+    ../lib/Ui/DialogAbout.h
 
 FORMS    += \
     DialogSettings.ui \
@@ -239,3 +241,9 @@ PRECOMPILED_HEADER = Stable.h
 include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 
 TRANSLATIONS = languages/TuningClient_ru.ts
+
+DISTFILES += \
+    Images/logo.png
+
+RESOURCES += \
+    Resources.qrc
