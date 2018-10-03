@@ -11,10 +11,10 @@
         <file>Images/About.svg</file>
         <file>Images/FindSignal.svg</file>
         <file>Images/Camera.svg</file>
-        <file>Images/Logo.png</file>
         <file>Images/Trends.svg</file>
         <file>Images/Archive.svg</file>
         <file>Images/Log.svg</file>
         <file>Images/TuningSources.svg</file>
+        <file>Images/logo.png</file>
     </qresource>
 </RCC>

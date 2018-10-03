@@ -12,6 +12,7 @@
 #include "../lib/Tuning/TuningLog.h"
 #include "../lib/Ui/DialogAlert.h"
 #include "../lib/Ui/UiTools.h"
+#include "../lib/Ui/DialogAbout.h"
 
 #include "Settings.h"
 #include "DialogSettings.h"
@@ -848,53 +849,8 @@ void MainWindow::showSignalsLog()
 
 void MainWindow::showAbout()
 {
-	QDialog aboutDialog(this, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
-
-	QHBoxLayout* hl = new QHBoxLayout;
-
-	/*QLabel* logo = new QLabel(&aboutDialog);
-	logo->setPixmap(QPixmap(":/Images/Images/logo.png"));
-
-	hl->addWidget(logo);*/
-
-	QVBoxLayout* vl = new QVBoxLayout;
-	hl->addLayout(vl);
-
-	QString text = "<h3>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h3>";
-#ifndef Q_DEBUG
-	text += "Build: Release";
-#else
-	text += "Build: Debug";
-#endif
-	text += "<br>Commit SHA1: " USED_SERVER_COMMIT_SHA;
-
-	QLabel* label = new QLabel(text, &aboutDialog);
-	label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
-	vl->addWidget(label);
-
-	label = new QLabel(&aboutDialog);
-	label->setText(qApp->applicationName() + " allows user to modify tuning values.");
-	label->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
-	label->setWordWrap(true);
-	vl->addWidget(label);
-
-	QPushButton* copyCommitSHA1Button = new QPushButton("Copy commit SHA1");
-	connect(copyCommitSHA1Button, &QPushButton::clicked, [](){
-		qApp->clipboard()->setText(USED_SERVER_COMMIT_SHA);
-	});
-
-	QDialogButtonBox* buttonBox = new QDialogButtonBox(Qt::Horizontal);
-	buttonBox->addButton(copyCommitSHA1Button, QDialogButtonBox::ActionRole);
-	buttonBox->addButton(QDialogButtonBox::Ok);
-
-	QVBoxLayout* mainLayout = new QVBoxLayout;
-	mainLayout->addLayout(hl);
-	mainLayout->addWidget(buttonBox);
-	aboutDialog.setLayout(mainLayout);
-
-	connect(buttonBox, &QDialogButtonBox::accepted, &aboutDialog, &QDialog::accept);
-
-	aboutDialog.exec();
+	QString text = qApp->applicationName() + tr(" allows user to modify tuning values.");
+	DialogAbout::show(this, text);
 }
 
 MainWindow* theMainWindow = nullptr;

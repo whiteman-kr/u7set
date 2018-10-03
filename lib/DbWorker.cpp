@@ -5616,6 +5616,7 @@ bool DbWorker::db_logIn(QSqlDatabase db, QString username, QString password, QSt
 	query.bindValue(":password", password);
 
 	bool result = query.exec();
+
 	if (result == false)
 	{
 		if (errorMessage != nullptr)

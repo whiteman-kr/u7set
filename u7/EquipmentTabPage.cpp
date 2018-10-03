@@ -4279,7 +4279,9 @@ void EquipmentTabPage::setActionState()
 	// about does parent have any checked out files
 	//
 	m_checkInAction->setEnabled(true);
-	m_deleteObjectAction->setEnabled(true);		// Allow to TRY to delete always
+	m_deleteObjectAction->setEnabled(true);		// Allow to TRY to delete always. Even part of preset in editConfigurationMode,
+												// It can be usefull to delete preset with all it's childer, especially if it was
+												// just created, the it will remove from the DB all records.
 
 	if (isPresetMode() == true)
 	{
@@ -4306,7 +4308,6 @@ void EquipmentTabPage::setActionState()
 	m_addWorkstationAction->setEnabled(false);
 	m_addSoftwareAction->setEnabled(false);
 
-	//m_deleteObjectAction->setEnabled(false);
 	m_checkOutAction->setEnabled(false);
 	//m_checkInAction->setEnabled(false);			// Check in is always true, as we perform check in is performed for the tree, and there is no iformation
 	m_undoChangesAction->setEnabled(false);
@@ -4531,34 +4532,6 @@ void EquipmentTabPage::setActionState()
 	{
 		m_showAppSignals->setEnabled(true);
 	}
-
-	// Delete Items action
-	//
-
-	// Allow to delete item always, even when it was already marked as deleted
-	//
-
-//	m_deleteObjectAction->setEnabled(false);
-//	for (const QModelIndex& mi : selectedIndexList)
-//	{
-//		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
-//		assert(device);
-
-//		if (device->fileInfo().state() == VcsState::CheckedIn /*&&
-//			device->fileInfo().action() != VcsItemAction::Deleted*/)
-//		{
-//			m_deleteObjectAction->setEnabled(true);
-//			break;
-//		}
-
-//		if (device->fileInfo().state() == VcsState::CheckedOut &&
-//			(device->fileInfo().userId() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
-//			&& device->fileInfo().action() != VcsItemAction::Deleted)
-//		{
-//			m_deleteObjectAction->setEnabled(true);
-//			break;
-//		}
-//	}
 
 	// CheckIn, CheckOut
 	//

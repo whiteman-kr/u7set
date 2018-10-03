@@ -2156,6 +2156,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_sameWidthAction = new QAction(tr("Same Width"), this);
 	m_sameWidthAction->setEnabled(false);
+	m_sameWidthAction->setShortcut(Qt::ALT + Qt::Key_W);
 	connect(m_sameWidthAction, &QAction::triggered, this, &EditSchemaWidget::sameWidth);
 	addAction(m_sameWidthAction);
 
@@ -2163,6 +2164,7 @@ void EditSchemaWidget::createActions()
 	//
 	m_sameHeightAction = new QAction(tr("Same Height"), this);
 	m_sameHeightAction->setEnabled(false);
+	m_sameHeightAction->setShortcut(Qt::ALT + Qt::Key_H);
 	connect(m_sameHeightAction, &QAction::triggered, this, &EditSchemaWidget::sameHeight);
 	addAction(m_sameHeightAction);
 
@@ -2371,6 +2373,20 @@ void EditSchemaWidget::createActions()
 			});
 
 	addAction(m_findPrevAction);
+
+	// Other
+	//
+	m_addAppSignalAction = new QAction(tr("AddAppSignal"), this);
+	m_addAppSignalAction->setShortcut(Qt::ALT + Qt::Key_N);
+	m_addAppSignalAction->setEnabled(false);
+	connect(m_addAppSignalAction, &QAction::triggered, this, &EditSchemaWidget::addNewAppSignalSelected);
+	addAction(m_addAppSignalAction);
+
+	m_appSignalPropertiesAction = new QAction(tr("AppSignalProperties"), this);
+	m_appSignalPropertiesAction->setShortcut(Qt::ALT + Qt::Key_S);
+	m_appSignalPropertiesAction->setEnabled(false);
+	connect(m_appSignalPropertiesAction, &QAction::triggered, this, &EditSchemaWidget::appSignalsSelectedProperties);
+	addAction(m_appSignalPropertiesAction);
 
 	//
 	// Create Sub Menus
@@ -5474,12 +5490,17 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 				for (QString s : signalStrIds)
 				{
 					QAction* signalAction = new QAction(s, &menu);
+					if (signalStrIds.size() == 1)	// If not 1, then this shorcut will be added to "All Signals %1 Properties..."
+					{
+						signalAction->setShortcut(Qt::ALT + Qt::Key_S);
+					}
+
 					connect(signalAction, &QAction::triggered,
 							[s, this](bool)
 							{
 								QStringList sl;
 								sl << s;
-								this->signalsProperties(sl);
+								this->appSignalsProperties(sl);
 							});
 
 					actions << signalAction;
@@ -5488,17 +5509,8 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 				if (signalStrIds.size() > 1)
 				{
 					QAction* allSignals = new QAction(tr("All Signals %1 Properties...").arg(signalStrIds.size()), &menu);
-					connect(allSignals, &QAction::triggered,
-							[signalStrIds, this](bool)
-							{
-								QStringList sl;
-								for (auto s : signalStrIds)
-								{
-									sl << s;
-								}
-
-								this->signalsProperties(sl);
-							});
+					allSignals->setShortcut(Qt::ALT + Qt::Key_S);
+					connect(allSignals, &QAction::triggered, this, &EditSchemaWidget::appSignalsSelectedProperties);
 
 					actions << allSignals;
 				}
@@ -5519,6 +5531,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 			if (itemSignal != nullptr)
 			{
 				QAction* addSignal = new QAction(tr("Add New App Signal..."), &menu);
+				addSignal->setShortcut(Qt::ALT + Qt::Key_N);
 
 				// Highlight this menu item if it was selected last time
 				//
@@ -5538,7 +5551,6 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 					});
 
 				actions << addSignal;
-
 			}
 			else
 			{
@@ -5593,12 +5605,62 @@ void EditSchemaWidget::exportToPdf()
 	return;
 }
 
-void EditSchemaWidget::signalsProperties(QStringList strIds)
+
+void EditSchemaWidget::appSignalsSelectedProperties()
+{
+	return appSignalsProperties(QStringList{});
+}
+
+void EditSchemaWidget::appSignalsProperties(QStringList strIds)
 {
 	if (isLogicSchema() == false)
 	{
 		assert(isLogicSchema() == false);
 		return;
+	}
+
+	if (strIds.isEmpty() == true && selectedItems().empty() == false)
+	{
+		// Get AppSignals from SchemaItems
+		//
+		QSet<QString> appSignalSet;		// QSet for unique strIds
+
+		auto& selected = selectedItems();
+		for (auto item : selected)
+		{
+			if (dynamic_cast<VFrame30::SchemaItemSignal*>(item.get()) != nullptr)
+			{
+				auto itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
+				assert(itemSignal);
+
+				const QStringList& signalStrIdList = itemSignal->appSignalIdList();
+
+				for (const QString& s : signalStrIdList)
+				{
+					if (s.isEmpty() == false)
+					{
+						appSignalSet << s;
+					}
+				}
+			}
+
+			if (dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get()) != nullptr)
+			{
+				VFrame30::SchemaItemReceiver* itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+				assert(itemReceiver);
+
+				const QString& appSignal = itemReceiver->appSignalId();
+				if (appSignal.isEmpty() == false)
+				{
+					appSignalSet << appSignal;
+				}
+			}
+		}
+
+		for (QString s : appSignalSet)
+		{
+			strIds << s;
+		}
 	}
 
 	if (strIds.isEmpty() == true)
@@ -5688,6 +5750,27 @@ void EditSchemaWidget::signalsProperties(QStringList strIds)
 	return;
 }
 
+void EditSchemaWidget::addNewAppSignalSelected()
+{
+	if (isLogicSchema() == false ||
+		selectedItems().size() != 1)
+	{
+		return;
+	}
+
+	std::shared_ptr<VFrame30::SchemaItem> selected = selectedItems().front();
+	auto itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(selected.get());
+
+	if (itemSignal == nullptr)
+	{
+		// it is not VFrame30::SchemaItemSignal
+		//
+		return;
+	}
+
+	return addNewAppSignal(selected);
+}
+
 void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> schemaItem)
 {
 	if (isLogicSchema() == false ||
@@ -5712,9 +5795,9 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 	QStringList itemsAppSignals = signalItem->appSignalIdList();
 
 	if (itemsAppSignals.size() == 1 &&
-		(itemsAppSignals[0] == QLatin1String("#OUT_STRID")) ||			// Not good, subject to change. must get default signals value from somewhere
-		(itemsAppSignals[0] == QLatin1String("#IN_STRID")) ||
-		(itemsAppSignals[0] == QLatin1String("#APPSIGNALID")))
+		(itemsAppSignals[0] == QLatin1String("#OUT_STRID") ||			// Not good, subject to change. must get default signals value from somewhere
+		itemsAppSignals[0] == QLatin1String("#IN_STRID") ||
+		itemsAppSignals[0] == QLatin1String("#APPSIGNALID")))
 	{
 		// This is just created signal item
 		//
@@ -7258,6 +7341,87 @@ void EditSchemaWidget::selectionChanged()
 	// --
 	//
 	clipboardDataChanged();
+
+	// AppSignal properties
+	//
+	bool enableAppSignalProperies = false;
+
+	if (isLogicSchema() == true)
+	{
+		QSet<QString> signalStrIds;		// QSet for unique strIds
+
+		if (selectedItems().empty() == false)
+		{
+			auto& selected = selectedItems();
+
+			for (auto item : selected)
+			{
+				if (dynamic_cast<VFrame30::SchemaItemSignal*>(item.get()) != nullptr)
+				{
+					auto itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
+					assert(itemSignal);
+
+					const QStringList& signalStrIdList = itemSignal->appSignalIdList();
+
+					for (const QString& s : signalStrIdList)
+					{
+						if (s.isEmpty() == false)
+						{
+							enableAppSignalProperies = true;
+							break;
+						}
+					}
+				}
+
+				if (dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get()) != nullptr)
+				{
+					VFrame30::SchemaItemReceiver* itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+					assert(itemReceiver);
+
+					const QString& appSignal = itemReceiver->appSignalId();
+
+					if (appSignal.isEmpty() == false)
+					{
+						enableAppSignalProperies = true;
+						break;
+					}
+				}
+			}
+
+			if (signalStrIds.empty() == false)
+			{
+				enableAppSignalProperies = true;
+			}
+		}
+	}
+
+	m_appSignalPropertiesAction->setEnabled(enableAppSignalProperies);
+
+	// Add new Application Logic signal
+	//
+	bool enableAddAppSignal = false;
+
+	if (isLogicSchema() == true)
+	{
+		if (selectedItems().size() == 1)
+		{
+			std::shared_ptr<VFrame30::SchemaItem> selected = selectedItems().front();
+
+			auto itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(selected.get());
+
+			if (itemSignal != nullptr)
+			{
+				enableAddAppSignal = true;
+			}
+			else
+			{
+				// it is not VFrame30::SchemaItemSignal
+				//
+			}
+		}
+	}
+
+	m_addAppSignalAction->setEnabled(enableAddAppSignal);
 
 	return;
 }

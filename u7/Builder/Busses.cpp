@@ -14,16 +14,16 @@ namespace Builder
 			case E::AnalogAppSignalFormat::Float32:
 				return !(inbusAnalogFormat == E::DataFormat::Float &&
 					inbusSizeBits == SIZE_32BIT &&
+					inbusAnalogByteOrder == E::ByteOrder::BigEndian &&
 					busAnalogLowLimit == inbusAnalogLowLimit &&
-					busAnalogHighLimit == inbusAnalogHighLimit &&
-					inbusAnalogByteOrder == E::ByteOrder::BigEndian);
+					busAnalogHighLimit == inbusAnalogHighLimit);
 
 			case E::AnalogAppSignalFormat::SignedInt32:
 				return !(inbusAnalogFormat == E::DataFormat::SignedInt &&
 					inbusSizeBits == SIZE_32BIT &&
+					inbusAnalogByteOrder == E::ByteOrder::BigEndian &&
 					busAnalogLowLimit == inbusAnalogLowLimit &&
-					busAnalogHighLimit == inbusAnalogHighLimit &&
-					inbusAnalogByteOrder == E::ByteOrder::BigEndian);
+					busAnalogHighLimit == inbusAnalogHighLimit);
 			}
 
 			// switch default
@@ -42,6 +42,26 @@ namespace Builder
 		assert(false);			// unknown  E::SignalType
 
 		return true;
+	}
+
+	bool BusSignal::hasKnownConversion() const
+	{
+		bool result = false;
+
+		result |= is_SignedInt32_To_Unsigned16_BE_NoScale_coversion();
+
+		return result;
+	}
+
+	bool BusSignal::is_SignedInt32_To_Unsigned16_BE_NoScale_coversion() const
+	{
+		return 	signalType == E::SignalType::Analog &&
+				analogFormat == E::AnalogAppSignalFormat::SignedInt32 &&
+				inbusAnalogFormat == E::DataFormat::UnsignedInt &&
+				inbusSizeBits == SIZE_16BIT &&
+				inbusAnalogByteOrder == E::ByteOrder::BigEndian &&
+				busAnalogLowLimit == inbusAnalogLowLimit &&
+				busAnalogHighLimit == inbusAnalogHighLimit;
 	}
 
 	void BusSignal::init(const Busses& busses, const VFrame30::BusSignal& bs)
@@ -349,7 +369,9 @@ namespace Builder
 
 					if (childBus->isInitialized() == false)
 					{
-						LOG_INTERNAL_ERROR(m_log);
+						// Bus type %1 has not initialized.
+						//
+						m_log->errALC5151(childBus->busTypeID());
 						return false;
 					}
 
@@ -538,6 +560,8 @@ namespace Builder
 		{
 			Address16 inBusAddr(0, 0);
 
+			int signalSizeBits = 0;
+
 			switch(busSignal.type())
 			{
 			case E::SignalType::Analog:
@@ -548,6 +572,8 @@ namespace Builder
 					m_log->errALC5094(busSignal.signalId(), m_srcBus.busTypeId());
 					return false;
 				}
+
+				signalSizeBits = busSignal.inbusAnalogSize();
 
 				if ((busSignal.inbusOffset() % WORD_SIZE_IN_BYTES) != 0)
 				{
@@ -580,6 +606,8 @@ namespace Builder
 							return false;
 						}
 
+						signalSizeBits = childBus->sizeBit();
+
 						if ((busSignal.inbusOffset() % WORD_SIZE_IN_BYTES) != 0)
 						{
 							// Offset of in bus analog (or bus) signal '%' is not multiple of 2 bytes (1 word) (bus type '%2')
@@ -596,11 +624,20 @@ namespace Builder
 
 			case E::SignalType::Discrete:
 				inBusAddr.addBit(busSignal.inbusOffset() * SIZE_8BIT + busSignal.inbusDiscreteBitNo());
+				signalSizeBits = 1;
 				break;
 
 			default:
 				assert(false);			// unknown in bus signal type
 				LOG_INTERNAL_ERROR(m_log);
+				return false;
+			}
+
+			if (inBusAddr.bitAddress() + signalSizeBits > m_sizeW * WORD_SIZE)
+			{
+				// Bus input signal %1 placement is out of bus size (bus type %2).
+				//
+				m_log->errALC5152(busSignal.signalId(), m_srcBus.busTypeId());
 				return false;
 			}
 
