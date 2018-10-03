@@ -4058,7 +4058,7 @@ void EquipmentTabPage::CreateActions()
 	m_showAppSignals->setEnabled(false);
 	connect(m_showAppSignals, &QAction::triggered, m_equipmentView, &EquipmentView::showAppSignals);
 
-	m_addAppSignal = new QAction(tr("Add Appliaction Signal"), this);
+	m_addAppSignal = new QAction(tr("Add Application Signal"), this);
 	m_addAppSignal->setStatusTip(tr("Add new application signal to device"));
 	m_addAppSignal->setEnabled(false);
 	connect(m_addAppSignal, &QAction::triggered, m_equipmentView, &EquipmentView::addAppSignal);
