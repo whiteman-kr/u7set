@@ -31,12 +31,12 @@ private:
 	TuningModel* m_model = nullptr;
 };
 
-class TuningModel : public QAbstractItemModel
+class TuningModel : public QAbstractTableModel
 {
 	Q_OBJECT
 
 public:
-	TuningModel(TuningSignalManager* tuningSignalManager, QWidget* parent);
+	TuningModel(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnSuffixes, QWidget* parent);
 	~TuningModel();
 
 	TuningValue defaultValue(const AppSignalParam& asp) const;
@@ -72,23 +72,29 @@ public:
 
 public:
 
+	// Columns processing
+
 	void addColumn(Columns column);
 	void removeColumn(Columns column);
 	int columnIndex(int index) const;
 	std::vector<int> columnsIndexes();
 	void setColumnsIndexes(std::vector<int> columnsIndexes);
 
+	// Font
+
 	void setFont(const QString& fontName, int fontSize, bool fontBold);
 	void setImportantFont(const QString& fontName, int fontSize, bool fontBold);
 
+	// Item count
+
 	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-	QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
+
+	// Sorting
 
 	void sort(int column, Qt::SortOrder order) override;
 
 protected:
-	QModelIndex parent(const QModelIndex& index) const override;
 	virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
@@ -109,6 +115,8 @@ protected:
 	std::map<Hash, TuningValue> m_defaultValues;
 
 	std::vector<int> m_columnsIndexes;
+
+	std::vector<QString> m_valueColumnSuffixes;
 
 };
 

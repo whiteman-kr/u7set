@@ -130,6 +130,7 @@ bool TuningFilterValue::save(QXmlStreamWriter& writer) const
 //
 // TuningFilter
 //
+#define MAX_VALUES_COLUMN_COUNT 4
 
 TuningFilter::TuningFilter()
 {
@@ -154,19 +155,22 @@ TuningFilter::TuningFilter()
 	propMask->setCategory("Masks");
 
 	auto propBackColor = ADD_PROPERTY_GETTER_SETTER(QColor, "BackColor", true, TuningFilter::backColor, TuningFilter::setBackColor);
-	propBackColor->setCategory("Button/Tab Appearance");
+	propBackColor->setCategory("Appearance");
 
 	auto propTextColor = ADD_PROPERTY_GETTER_SETTER(QColor, "TextColor", true, TuningFilter::textColor, TuningFilter::setTextColor);
-	propTextColor->setCategory("Button Appearance");
+	propTextColor->setCategory("Appearance");
 
 	auto propBackSelectedColor = ADD_PROPERTY_GETTER_SETTER(QColor, "SelectedBackColor", true, TuningFilter::backSelectedColor, TuningFilter::setBackSelectedColor);
-	propBackSelectedColor->setCategory("Button Appearance");
+	propBackSelectedColor->setCategory("Appearance");
 
 	auto propTextSelectedColor = ADD_PROPERTY_GETTER_SETTER(QColor, "SelectedTextColor", true, TuningFilter::textSelectedColor, TuningFilter::setTextSelectedColor);
-	propTextSelectedColor->setCategory("Button Appearance");
+	propTextSelectedColor->setCategory("Appearance");
 
 	auto propHasCounter = ADD_PROPERTY_GETTER_SETTER(bool, "HasDiscreteCounter", true, TuningFilter::hasDiscreteCounter, TuningFilter::setHasDiscreteCounter);
-	propHasCounter->setCategory("Appearance");
+	propHasCounter->setCategory("Functions");
+
+	auto propTabValuesCount = ADD_PROPERTY_GETTER_SETTER(int, "ValueColumnsCount", true, TuningFilter::valuesColumnCount, TuningFilter::setValuesColumnCount);
+	propTabValuesCount->setCategory("ValueColumns");
 
 }
 
@@ -174,12 +178,16 @@ TuningFilter::TuningFilter(const TuningFilter& That)
 	:TuningFilter()
 {
 	copy(That);
+
+	updateOptionalProperties();
 }
 
 TuningFilter::TuningFilter(InterfaceType interfaceType)
 	:TuningFilter()
 {
 	m_interfaceType = interfaceType;
+
+	updateOptionalProperties();
 }
 
 TuningFilter::~TuningFilter()
@@ -320,6 +328,41 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 				}
 			}
 		}
+
+		// ValueColumns
+
+		if (reader.attributes().hasAttribute("ValuesColumnCount"))
+		{
+			m_valueColumnsCount = reader.attributes().value("ValuesColumnCount").toInt();
+
+			if (m_valueColumnsCount < 0)
+			{
+				m_valueColumnsCount = 0;
+			}
+			if (m_valueColumnsCount > MAX_VALUES_COLUMN_COUNT)
+			{
+				m_valueColumnsCount = MAX_VALUES_COLUMN_COUNT;
+			}
+
+			m_valueColumnsSuffixes.resize(m_valueColumnsCount);
+
+			for (int i = 0; i < m_valueColumnsCount; i++)
+			{
+				QString propName = tr("ValueColumn%1Suffix").arg(i);
+
+				if (reader.attributes().hasAttribute(propName) == true)
+				{
+					QString masks = reader.attributes().value(propName).toString();
+
+					m_valueColumnsSuffixes[i] = masks;
+				}
+			}
+		}
+		else
+		{
+			m_valueColumnsCount = 0;
+			m_valueColumnsSuffixes.clear();
+		}
 	}
 
 	int recurseLevel = 0;		//recurseLevel 1 = "Values", recurseLevel 2 = "Value"
@@ -393,6 +436,7 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 		}
 	}while (t != QXmlStreamReader::EndElement);
 
+	updateOptionalProperties();
 
 	return true;
 }
@@ -457,6 +501,22 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 	writer.writeAttribute("SignalType", E::valueToString<SignalType>(static_cast<int>(signalType())));
 	writer.writeAttribute("Source", E::valueToString<Source>(static_cast<int>(source())));
 
+	// ValueColumns
+
+	if (static_cast<int>(m_valueColumnsSuffixes.size()) != valuesColumnCount())
+	{
+		assert(false);
+		return false;
+	}
+
+	writer.writeAttribute("ValuesColumnCount", QString::number(valuesColumnCount()));
+
+	for (int i = 0; i < valuesColumnCount(); i++)
+	{
+		QString propName = tr("ValueColumn%1Suffix").arg(i);
+		writer.writeAttribute(propName, m_valueColumnsSuffixes[i]);
+	}
+
 	writer.writeStartElement("Values");
 
 	std::vector <TuningFilterValue> valuesList = getValues();
@@ -466,13 +526,13 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 	}
 	writer.writeEndElement();
 
-
 	for (auto f : m_childFilters)
 	{
 		f->save(writer, filterBySourceType, saveSourceType);
 	}
 
 	writer.writeEndElement();
+
 	return true;
 }
 
@@ -942,6 +1002,31 @@ void TuningFilter::setCounters(TuningCounters value)
 	m_counters = value;
 }
 
+int TuningFilter::valuesColumnCount() const
+{
+	return m_valueColumnsCount;
+}
+
+void TuningFilter::setValuesColumnCount(int value)
+{
+	if (value < 0)
+	{
+		value = 0;
+	}
+	if (value > MAX_VALUES_COLUMN_COUNT)
+	{
+		value = MAX_VALUES_COLUMN_COUNT;
+	}
+
+	m_valueColumnsCount = value;
+
+	m_valueColumnsSuffixes.resize(m_valueColumnsCount);
+}
+
+std::vector<QString> TuningFilter::valueColumnsSuffixes() const
+{
+	return m_valueColumnsSuffixes;
+}
 
 TuningFilter* TuningFilter::parentFilter() const
 {
@@ -1074,6 +1159,98 @@ std::shared_ptr<TuningFilter> TuningFilter::childFilter(int index) const
 	}
 
 	return m_childFilters[index];
+}
+
+void TuningFilter::updateOptionalProperties()
+{
+	//
+
+	QLatin1String caption = QLatin1String("BackColor");
+	if (propertyExists(caption) == false)
+	{
+		assert(false);
+		return;
+	}
+	std::shared_ptr<Property> prop = propertyByCaption(caption);
+	prop->setVisible(interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
+
+	//
+
+	caption = QLatin1String("TextColor");
+	if (propertyExists(caption) == false)
+	{
+		assert(false);
+		return;
+	}
+	prop = propertyByCaption(caption);
+	prop->setVisible(interfaceType() == InterfaceType::Button);
+
+	//
+
+	caption = QLatin1String("SelectedBackColor");
+	if (propertyExists(caption) == false)
+	{
+		assert(false);
+		return;
+	}
+	prop = propertyByCaption(caption);
+	prop->setVisible(interfaceType() == InterfaceType::Button);
+
+	//
+
+	caption = QLatin1String("SelectedTextColor");
+	if (propertyExists(caption) == false)
+	{
+		assert(false);
+		return;
+	}
+	prop = propertyByCaption(caption);
+	prop->setVisible(interfaceType() == InterfaceType::Button);
+
+	// Value columns, add or remove unnecessary properties
+
+	caption = QLatin1String("ValueColumnsCount");
+	if (propertyExists(caption) == false)
+	{
+		assert(false);
+		return;
+	}
+	prop = propertyByCaption(caption);
+	prop->setVisible(interfaceType() == InterfaceType::Tab);
+
+	if (interfaceType() == InterfaceType::Tab)
+	{
+		if (static_cast<int>(m_valueColumnsSuffixes.size()) != valuesColumnCount())
+		{
+			m_valueColumnsSuffixes.resize(valuesColumnCount());
+		}
+
+		for (int i = 0; i < MAX_VALUES_COLUMN_COUNT; i++)
+		{
+			QString propName = tr("ValueColumn%1Suffix").arg(i);
+
+			if (i < valuesColumnCount())
+			{
+				if (propertyExists(propName) == false)
+				{
+					addProperty(propName, "ValueColumns", true, m_valueColumnsSuffixes[i]);
+				}
+				else
+				{
+					m_valueColumnsSuffixes[i] = propertyValue(propName).toString();
+				}
+			}
+			else
+			{
+				if (propertyExists(propName) == true)
+				{
+					removeProperty(propName);
+				}
+			}
+		}
+	}
+
+	//
 }
 
 void TuningFilter::copy(const TuningFilter& That)

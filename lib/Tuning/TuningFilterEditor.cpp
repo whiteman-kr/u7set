@@ -175,7 +175,7 @@ DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signal
 
 	// Objects and model
 	//
-	m_baseModel = new TuningModel(m_signalManager, this);
+	m_baseModel = new TuningModel(m_signalManager, std::vector<QString>(), this);
 
 	m_baseModel->addColumn(TuningModel::Columns::CustomAppSignalID);
 	m_baseModel->addColumn(TuningModel::Columns::AppSignalID);
@@ -913,6 +913,8 @@ void TuningFilterEditor::initUserInterface()
 
 	m_propertyEditor = new ExtWidgets::PropertyEditor(this);
 
+	m_propertyEditor->installEventFilter(this);
+
 	if (m_propertyEditorSplitterPos > 100)
 	{
 		m_propertyEditor->setSplitterPosition(m_propertyEditorSplitterPos);
@@ -1047,6 +1049,20 @@ void TuningFilterEditor::setFilterItemText(QTreeWidgetItem* item, TuningFilter* 
 	}
 }
 
+
+bool TuningFilterEditor::eventFilter(QObject *obj, QEvent *event)
+{
+	// Filter Enter key press from PropertyEditor, it will close the dialog
+
+	if (obj == m_propertyEditor && event->type() == QEvent::KeyPress)
+	{
+		return true;
+	}
+	else
+	{
+		return QWidget::eventFilter(obj, event);
+	}
+}
 
 void TuningFilterEditor::on_m_addPreset_clicked()
 {
@@ -1377,6 +1393,8 @@ void TuningFilterEditor::presetPropertiesChanged(QList<std::shared_ptr<PropertyO
 {
 	QList<QTreeWidgetItem*> selectedItems = m_presetsTree->selectedItems();
 
+	QList<std::shared_ptr<PropertyObject>> selectedFilters;
+
 	for (QTreeWidgetItem* item : selectedItems)
 	{
 		std::shared_ptr<TuningFilter> selectedFilter = item->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
@@ -1385,6 +1403,8 @@ void TuningFilterEditor::presetPropertiesChanged(QList<std::shared_ptr<PropertyO
 			assert(selectedFilter);
 			return;
 		}
+
+		selectedFilters.push_back(selectedFilter);
 
 		for (std::shared_ptr<PropertyObject> modifiedFilter : objects)
 		{
@@ -1397,6 +1417,8 @@ void TuningFilterEditor::presetPropertiesChanged(QList<std::shared_ptr<PropertyO
 
 			}
 
+			f->updateOptionalProperties();
+
 			if (selectedFilter->ID() == f->ID())
 			{
 				setFilterItemText(item, f);
@@ -1404,6 +1426,8 @@ void TuningFilterEditor::presetPropertiesChanged(QList<std::shared_ptr<PropertyO
 			}
 		}
 	}
+
+	//m_propertyEditor->setObjects(selectedFilters);
 }
 
 void TuningFilterEditor::on_m_presetsSignals_clicked()

@@ -214,8 +214,9 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 // TuningItemModel
 //
 
-TuningModel::TuningModel(TuningSignalManager* tuningSignalManager, QWidget* parent)
-	:QAbstractItemModel(parent),
+TuningModel::TuningModel(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnSuffixes, QWidget* parent)
+	:QAbstractTableModel(parent),
+	  m_valueColumnSuffixes(valueColumnSuffixes),
 	  m_tuningSignalManager(tuningSignalManager)
 {
 	// Fill column names
@@ -415,12 +416,6 @@ int TuningModel::columnCount(const QModelIndex& parent) const
 
 }
 
-QModelIndex TuningModel::index(int row, int column, const QModelIndex& parent) const
-{
-	Q_UNUSED(parent);
-	return createIndex(row, column);
-}
-
 void TuningModel::sort(int column, Qt::SortOrder order)
 {
 	if (column < 0 || column >= m_columnsIndexes.size())
@@ -441,13 +436,6 @@ void TuningModel::sort(int column, Qt::SortOrder order)
 	emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
 
 	return;
-}
-
-QModelIndex TuningModel::parent(const QModelIndex& index) const
-{
-	Q_UNUSED(index);
-	return QModelIndex();
-
 }
 
 QVariant TuningModel::data(const QModelIndex& index, int role) const

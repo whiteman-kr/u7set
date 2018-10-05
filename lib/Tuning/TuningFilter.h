@@ -170,6 +170,13 @@ public:
 	TuningCounters counters() const;
 	void setCounters(TuningCounters value);
 
+	// Tab appearance
+
+	int valuesColumnCount() const;
+	void setValuesColumnCount(int value);
+
+	std::vector<QString> valueColumnsSuffixes() const;
+
 public:
 	// Operations
 	//
@@ -194,6 +201,8 @@ public:
 
 	int childFiltersCount() const;
 	std::shared_ptr<TuningFilter> childFilter(int index) const;
+
+	void updateOptionalProperties();
 
 private:
 	void copy(const TuningFilter& That);
@@ -249,6 +258,11 @@ private:
 	// Counters
 
 	TuningCounters m_counters;
+
+	// Tab appearance
+
+	int m_valueColumnsCount = 0;
+	std::vector<QString> m_valueColumnsSuffixes;
 
 };
 

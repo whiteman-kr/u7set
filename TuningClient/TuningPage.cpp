@@ -13,8 +13,8 @@ using namespace std;
 //
 
 
-TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, QWidget* parent):
-	TuningModel(tuningSignalManager, parent)
+TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnSuffixes, QWidget* parent):
+	TuningModel(tuningSignalManager, valueColumnSuffixes, parent)
 {
 }
 
@@ -421,7 +421,11 @@ void TuningTableView::closeEditor(QWidget* editor, QAbstractItemDelegate::EndEdi
 
 int TuningPage::m_instanceCounter = 0;
 
-TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> pageFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
+TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
+					   std::shared_ptr<TuningFilter> pageFilter,
+					   TuningSignalManager* tuningSignalManager,
+					   TuningClientTcpClient* tuningTcpClient,
+					   QWidget* parent) :
 	QWidget(parent),
 	m_tuningSignalManager(tuningSignalManager),
 	m_tuningTcpClient(tuningTcpClient),
@@ -446,7 +450,24 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr
 
 	// Models and data
 	//
-	m_model = new TuningModelClient(m_tuningSignalManager, this);
+	std::vector<QString> valueColumnsSuffixes;
+
+	if (pageFilter != nullptr && pageFilter->isTab() == true)
+	{
+		valueColumnsSuffixes = pageFilter->valueColumnsSuffixes();
+	}
+
+	if (pageFilter != nullptr && pageFilter->isButton() == true)
+	{
+		TuningFilter* parent = pageFilter->parentFilter();
+
+		if (parent != nullptr && parent->isTab() == true)
+		{
+			valueColumnsSuffixes = parent->valueColumnsSuffixes();
+		}
+	}
+
+	m_model = new TuningModelClient(m_tuningSignalManager, valueColumnsSuffixes, this);
 	m_model->setFont(f.family(), f.pointSize(), false);
 	m_model->setImportantFont(f.family(), f.pointSize(), true);
 

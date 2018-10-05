@@ -11,7 +11,7 @@ class TuningModelClient : public TuningModel
 {
 	Q_OBJECT
 public:
-	TuningModelClient(TuningSignalManager* tuningSignalManager, QWidget* parent);
+	TuningModelClient(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnSuffixes, QWidget* parent);
 
 	void blink();
 
@@ -58,7 +58,11 @@ class TuningPage : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> pageFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent = 0);
+	explicit TuningPage(std::shared_ptr<TuningFilter> treeFilter,
+						std::shared_ptr<TuningFilter> pageFilter,
+						TuningSignalManager* tuningSignalManager,
+						TuningClientTcpClient* tuningTcpClient,
+						QWidget* parent = 0);
 	~TuningPage();
 
 	void fillObjectsList();
