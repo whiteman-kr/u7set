@@ -449,12 +449,12 @@ namespace Sim
 		ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::ReadWrite,
 								  memory.m_appLogicBitDataOffset,
 								  memory.m_appLogicBitDataSize,
-								  QLatin1String("Appliaction Logic Block (bit access)"));
+								  QLatin1String("Application Logic Block (bit access)"));
 
 		ok &= m_ram.addMemoryArea(E::LogicModuleRamAccess::ReadWrite,
 								  memory.m_appLogicWordDataOffset,
 								  memory.m_appLogicWordDataSize,
-								  QLatin1String("Appliaction Logic Block (word access)"));
+								  QLatin1String("Application Logic Block (word access)"));
 
 		// RAM - Tuninng Block
 		//
