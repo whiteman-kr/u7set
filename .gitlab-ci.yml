@@ -42,7 +42,8 @@ deploy job:
   stage: deploy
   only:
 #    - /^release.*$/
-    - master
+#    - master
+    - develop
   script:
     - "echo ------------------------------------"
     - "echo -   JOB STARTED: deploy            -"
