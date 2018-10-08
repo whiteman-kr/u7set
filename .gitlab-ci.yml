@@ -23,6 +23,7 @@ windows build job:
     - "echo ------------------------------------"
     - "echo -   JOB STARTED: windows build     -"
     - "echo ------------------------------------"
+    - "echo %CI_COMMIT_SHA%"
   after_script:
 #    - "echo ToDo: Clean up build stuff and evering else"
   artifacts:
