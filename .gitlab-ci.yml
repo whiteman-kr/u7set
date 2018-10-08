@@ -24,7 +24,7 @@ windows build job:
     - "echo -   JOB STARTED: windows build     -"
     - "echo ------------------------------------"
     - "echo %CI_COMMIT_SHA%"
-    - "\"C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Auxiliary/Build/vcvarsall.bat\" x86_amd64"
+    - "call \"C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Auxiliary/Build/vcvarsall.bat\" x86_amd64"
     - "echo ------------------------------------"
     - "echo -              QMAKE               -"
     - "echo ------------------------------------"
