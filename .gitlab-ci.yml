@@ -12,8 +12,8 @@ before_script:
   - dir
   - set
   
-after_script:
-  - echo after_script
+#after_script:
+#  - echo after_script
 
 windows build job:
   stage: build
@@ -35,8 +35,8 @@ windows build job:
     - "echo -              BUILD               -"
     - "echo ------------------------------------"    
     - "C:/Qt/Tools/QtCreator/bin/jom.exe"
-  after_script:
-#    - "echo ToDo: Clean up build stuff and evering else"
+#  after_script:
+#    - "echo ToDo: Clean up build stuff..."
 
 deploy job:
   stage: deploy
@@ -49,7 +49,6 @@ deploy job:
     - "echo -   JOB STARTED: deploy            -"
     - "echo ------------------------------------"
 #    - TO DO Upload zipped exe to drive.goodle...
-    - "dir *.zip"
   artifacts:
     name: "u7set_$CI_BUILD_REF_SLUG_$CI_BUILD_ID_$CI_COMMIT_SHA"
     paths:
