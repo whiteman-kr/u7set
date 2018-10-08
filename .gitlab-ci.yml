@@ -48,6 +48,8 @@ deploy job:
     - "echo ------------------------------------"
     - "echo -   JOB STARTED: deploy            -"
     - "echo ------------------------------------"
+    - "git status"
+    - "git log -1"
 #    - TO DO Upload zipped exe to drive.goodle...
   artifacts:
     name: "u7set_$CI_BUILD_REF_SLUG_$CI_BUILD_ID_$CI_COMMIT_SHA"
