@@ -3,8 +3,8 @@ variables:
   
 stages:
   - build
-  - test
-  - deploy
+#  - test
+#  - deploy
 
 before_script:
   - echo before_script
@@ -24,6 +24,8 @@ windows build job:
     - "echo -   JOB STARTED: windows build     -"
     - "echo ------------------------------------"
     - "echo %CI_COMMIT_SHA%"
+    - "git status"
+    - "git log -1"
     - "call \"C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Auxiliary/Build/vcvarsall.bat\" x86_amd64"
     - "echo ------------------------------------"
     - "echo -              QMAKE               -"
@@ -37,20 +39,6 @@ windows build job:
     - "C:/Qt/Tools/QtCreator/bin/jom.exe"
 #  after_script:
 #    - "echo ToDo: Clean up build stuff..."
-
-deploy job:
-  stage: deploy
-  only:
-#    - /^release.*$/
-#    - master
-    - develop
-  script:
-    - "echo ------------------------------------"
-    - "echo -   JOB STARTED: deploy            -"
-    - "echo ------------------------------------"
-    - "git status"
-    - "git log -1"
-#    - TO DO Upload zipped exe to drive.goodle...
   artifacts:
     name: "u7set_$CI_BUILD_REF_SLUG_$CI_BUILD_ID_$CI_COMMIT_SHA"
     paths:
@@ -58,3 +46,16 @@ deploy job:
       - bin/release/*.dll
       - bin/release/*.lib
       - bin/release/*.exp
+
+#deploy job:
+#  stage: deploy
+#  only:
+#    - /^release.*$/
+#    - master
+#    - develop
+#  script:
+#    - "echo ------------------------------------"
+#    - "echo -   JOB STARTED: deploy            -"
+#    - "echo ------------------------------------"
+#    - TO DO Upload zipped exe to drive.goodle...
+
