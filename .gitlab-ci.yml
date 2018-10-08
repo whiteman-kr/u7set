@@ -24,7 +24,7 @@ windows build job:
     - "echo -   JOB STARTED: windows build     -"
     - "echo ------------------------------------"
     - "echo %CI_COMMIT_SHA%"
-    - "C:\Qt\5.9.6\msvc2017_64\bin\qmake.exe" %CI_PROJECT_DIR%\u7set.pro -spec win32-msvc
+    - "C:/Qt/5.9.6/msvc2017_64/bin/qmake.exe" %CI_PROJECT_DIR%/u7set.pro -spec win32-msvc
   after_script:
 #    - "echo ToDo: Clean up build stuff and evering else"
   artifacts:
