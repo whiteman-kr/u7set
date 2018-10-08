@@ -20,7 +20,7 @@ windows build job:
   tags:
     - vs2017
   script:
-    - "echo ------------------------------------""
+    - "echo ------------------------------------"
     - "echo -   JOB STARTED: windows build     -"
     - "echo ------------------------------------"
     - "echo %CI_COMMIT_SHA%""
