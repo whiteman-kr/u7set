@@ -37,19 +37,22 @@ windows build job:
     - "C:/Qt/Tools/QtCreator/bin/jom.exe"
   after_script:
 #    - "echo ToDo: Clean up build stuff and evering else"
+
+deploy job:
+  stage: deploy
+  only:
+#    - /^release.*$/
+    - master
+  script:
+    - "echo ------------------------------------"
+    - "echo -   JOB STARTED: deploy            -"
+    - "echo ------------------------------------"
+#    - TO DO Upload zipped exe to drive.goodle...
+    - "dir *.zip"
   artifacts:
+    name: "u7set_$CI_BUILD_REF_SLUG_$CI_BUILD_ID_$CI_COMMIT_SHA"
     paths:
       - bin/release/*.exe
       - bin/release/*.dll
       - bin/release/*.lib
       - bin/release/*.exp
-
-deploy job:
-  stage: deploy
-  only:
-    - /^release.*$/
-  script:
-    - "echo ------------------------------------"
-    - "echo -   JOB STARTED: deploy            -"
-    - "echo ------------------------------------"
-#    - TO DO Upload zopped exe to drive.goodle...
