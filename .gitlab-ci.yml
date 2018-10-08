@@ -3,14 +3,14 @@ variables:
   
 stages:
   - build
-#  - test
-#  - deploy
+ # - test
+  - deploy
 
-before_script:
-  - echo before_script
-  - cd
-  - dir
-  - set
+#before_script:
+#  - echo before_script
+#  - cd
+#  - dir
+#  - set
   
 #after_script:
 #  - echo after_script
@@ -20,42 +20,33 @@ windows build job:
   tags:
     - vs2017
   script:
-    - "echo ------------------------------------"
-    - "echo -   JOB STARTED: windows build     -"
-    - "echo ------------------------------------"
     - "echo %CI_COMMIT_SHA%"
     - "git status"
     - "git log -1"
     - "call \"C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Auxiliary/Build/vcvarsall.bat\" x86_amd64"
-    - "echo ------------------------------------"
-    - "echo -              QMAKE               -"
-    - "echo ------------------------------------"
     - "cl.exe"
     - "C:/Qt/5.9.6/msvc2017_64/bin/qmake.exe %CI_PROJECT_DIR%/u7set.pro -spec win32-msvc"
     - "C:/Qt/Tools/QtCreator/bin/jom.exe qmake_all"
-    - "echo ------------------------------------"
-    - "echo -              BUILD               -"
-    - "echo ------------------------------------"    
     - "C:/Qt/Tools/QtCreator/bin/jom.exe"
 #  after_script:
 #    - "echo ToDo: Clean up build stuff..."
   artifacts:
-    name: "u7set_$CI_BUILD_REF_SLUG_$CI_BUILD_ID_$CI_COMMIT_SHA"
+    name: "u7set_%CI_BUILD_REF_SLUG%_0.8.%CI_BUILD_ID%_%CI_COMMIT_SHA%"
     paths:
       - bin/release/*.exe
       - bin/release/*.dll
       - bin/release/*.lib
       - bin/release/*.exp
 
-#deploy job:
-#  stage: deploy
-#  only:
+deploy job:
+  stage: deploy
+  tags:
+    - vs2017  
+  only:
 #    - /^release.*$/
 #    - master
-#    - develop
-#  script:
-#    - "echo ------------------------------------"
-#    - "echo -   JOB STARTED: deploy            -"
-#    - "echo ------------------------------------"
-#    - TO DO Upload zipped exe to drive.goodle...
+    - develop
+  script:
+    - "git tag v0.8.%CI_BUILD_ID%"
+    - "git push --tags"
 
