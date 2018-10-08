@@ -41,8 +41,8 @@ windows build job:
 #    - "echo ToDo: Clean up build stuff..."
   artifacts:
     name: "u7set_$CI_BUILD_REF_SLUG_$CI_BUILD_ID_$CI_COMMIT_SHA"
-  only:
-    - develop
+    only:
+        - develop
     paths:
       - bin/release/*.exe
       - bin/release/*.dll
