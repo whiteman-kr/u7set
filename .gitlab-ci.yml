@@ -20,15 +20,15 @@ windows build job:
   tags:
     - vs2017
   script:
-    - \@echo ------------------------------------
-    - \@echo -   JOB STARTED: windows build     -
-    - \@echo ------------------------------------
-    - echo %CI_COMMIT_SHA%"
+    - "\@echo ------------------------------------
+    - "\@echo -   JOB STARTED: windows build     -"
+    - "\@echo ------------------------------------"
+    - "echo %CI_COMMIT_SHA%""
     - "call \"C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Auxiliary/Build/vcvarsall.bat\" x86_amd64"
-    - \@echo ------------------------------------
-    - \@echo -              QMAKE               -
-    - \@echo ------------------------------------
-    - cl
+    - "\@echo ------------------------------------"
+    - "\@echo -              QMAKE               -"
+    - "\@echo ------------------------------------"
+    - "cl"
     - "C:/Qt/5.9.6/msvc2017_64/bin/qmake.exe %CI_PROJECT_DIR%/u7set.pro -spec win32-msvc"
   after_script:
 #    - "echo ToDo: Clean up build stuff and evering else"
