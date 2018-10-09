@@ -35,11 +35,13 @@ windows build job:
     - "echo #define BUILD_DATE \"%date% %time%\" >> gitlabci_version.h"
     
 #run QMAKE
+    - "C:/Qt/5.9.6/msvc2017_64/bin/qtenv2.bat"
     - "call \"C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Auxiliary/Build/vcvarsall.bat\" x86_amd64"
     - "cl.exe"
-    - "C:/Qt/5.9.6/msvc2017_64/bin/qmake.exe %CI_PROJECT_DIR%/u7set.pro -spec win32-msvc"
-    - "C:/Qt/Tools/QtCreator/bin/jom.exe qmake_all"
-    - "C:/Qt/Tools/QtCreator/bin/jom.exe"
+    - "qmake --version"
+    - "qmake.exe %CI_PROJECT_DIR%/u7set.pro -spec win32-msvc"
+    - "jom.exe qmake_all"
+    - "jom.exe"
 #  after_script:
 #    - "echo ToDo: Clean up build stuff..."
   artifacts:
