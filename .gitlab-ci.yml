@@ -17,6 +17,11 @@ before_script:
 
 windows build job:
   stage: build
+  only:
+#    - /^release.*$/
+    - master
+    - develop
+    - experimental
   tags:
     - vs2017
   script:
