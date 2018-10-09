@@ -40,10 +40,8 @@ windows build job:
     - "cl.exe"
     - "qmake --version"
     - "qmake.exe %CI_PROJECT_DIR%/u7set.pro -spec win32-msvc"
-    - "jom.exe qmake_all"
-    - "jom.exe"
-#  after_script:
-#    - "echo ToDo: Clean up build stuff..."
+    - "C:/Qt/Tools/QtCreator/bin/jom.exe qmake_all"
+    - "C:/Qt/Tools/QtCreator/bin/jom.exe"
   artifacts:
     name: "u7set_%CI_BUILD_REF_SLUG%_0.8.%CI_PIPELINE_IID%_%CI_COMMIT_SHA%"
     paths:
