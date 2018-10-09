@@ -133,35 +133,6 @@ CONFIG(release, debug|release) {
 	UI_DIR = release/ui
 }
 
-# Force prebuild version control info
-#
-win32 {
-        contains(QMAKE_TARGET.arch, x86_64){
-                QMAKE_CLEAN += $$PWD/../bin_Win64/GetGitProjectVersion.exe
-                system(IF NOT EXIST $$PWD/../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
-                        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-                        nmake))
-                system(chdir $$PWD & \
-                        $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/TuningIPEN.pro)
-        }
-        else{
-                QMAKE_CLEAN += $$PWD/../bin_Win32/GetGitProjectVersion.exe
-                system(IF NOT EXIST $$PWD/../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
-                        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-                        nmake))
-                system(chdir $$PWD & \
-                        $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/TuningIPEN.pro)
-        }
-}
-unix {
-        QMAKE_CLEAN += $$PWD/../bin_unix/GetGitProjectVersion
-        system(cd $$PWD/../GetGitProjectVersion; \
-                qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-                make;)
-        system(cd $$PWD; \
-                $$PWD/../bin_unix/GetGitProjectVersion $$PWD/TuningIPEN.pro)
-}
-
 
 #c++11 support for GCC
 #

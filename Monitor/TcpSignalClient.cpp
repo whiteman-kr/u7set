@@ -1,7 +1,6 @@
 #include "Stable.h"
 #include "TcpSignalClient.h"
 #include "Settings.h"
-#include "version.h"
 
 TcpSignalClient::TcpSignalClient(MonitorConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
 	Tcp::Client(configController->softwareInfo(), serverAddressPort1, serverAddressPort2),

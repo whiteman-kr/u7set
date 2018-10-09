@@ -1,6 +1,5 @@
 #include "TcpAppDataClient.h"
 #include "../lib/DataSource.h"
-#include "version.h"
 
 TcpAppDataClient::TcpAppDataClient(const SoftwareInfo& softwareInfo,
 								   const HostAddressPort& serverAddressPort1,

@@ -1,5 +1,5 @@
 #include "ConfigurationService.h"
-#include "version.h"
+
 
 #define CIRCULAR_LOGGER_PTR_ASSERTING
 

@@ -125,7 +125,7 @@ public:
 private:
 public:
 	DataSource();
-	~DataSource();
+	virtual ~DataSource();
 
 	bool getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
 								   DataType dataType,

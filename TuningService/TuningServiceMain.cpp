@@ -1,5 +1,4 @@
 #include "TuningService.h"
-#include "version.h"
 
 
 int main(int argc, char *argv[])

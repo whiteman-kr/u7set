@@ -1,5 +1,8 @@
 #include "SoftwareInfo.h"
-#include "version.h"
+
+#if __has_include("../gitlabci_version.h")
+#	include "../gitlabci_version.h"
+#endif
 
 const int SoftwareInfo::UNDEFINED_BUILD_NO = -1;
 
@@ -22,10 +25,18 @@ void SoftwareInfo::init(E::SoftwareType softwareType,
 	m_equipmentID = equipmentID;
 	m_majorVersion = majorVersion;
 	m_minorVersion = minorVersion;
-	m_buildBranch = BUILD_BRANCH;
-	m_commitSHA = USED_SERVER_COMMIT_SHA;
-	m_commitNo = USED_SERVER_COMMIT_NUMBER;
+
+#ifdef GITLAB_CI_BUILD
+	m_buildBranch = CI_BUILD_REF_SLUG;
+	m_commitSHA = CI_COMMIT_SHA;
+	m_commitNo = CI_PIPELINE_IID;
+#else
+	m_buildBranch = "LOCALBUILD";
+	m_commitSHA = "LOCALBUILD";
+	m_commitNo = 0;
+#endif
 	m_buildNo = buildNo;
+
 
 #ifdef Q_OS_LINUX
 	m_userName = getenv("USER");

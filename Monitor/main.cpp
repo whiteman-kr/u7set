@@ -6,7 +6,10 @@
 #include "MonitorMainWindow.h"
 #include "MonitorConfigController.h"
 #include "TcpSignalClient.h"
-#include "version.h"
+
+#if __has_include("../gitlabci_version.h")
+#	include "../gitlabci_version.h"
+#endif
 
 AppSignalManager theSignals;
 TuningSignalManager theTuningSignals;
@@ -24,11 +27,16 @@ int main(int argc, char *argv[])
 
 	// --
 	//
-	a.setApplicationName("Monitor 3.0");
+	a.setApplicationName("Monitor3");
 	a.setOrganizationName("Radiy");
 	a.setOrganizationDomain("radiy.com");
 
-	a.setApplicationVersion(QString("3.0.%1 (%2)").arg(USED_SERVER_COMMIT_NUMBER).arg(BUILD_BRANCH));
+#ifdef GITLAB_CI_BUILD
+	a.setApplicationVersion(QString("3.8.%1 (%2)").arg(CI_PIPELINE_IID).arg(CI_BUILD_REF_SLUG));
+#else
+	a.setApplicationVersion(QString("3.8.LOCALBUILD"));
+#endif
+
 
 
 	// --

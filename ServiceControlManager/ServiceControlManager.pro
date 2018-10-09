@@ -28,36 +28,6 @@ unix {
 }
 
 
-# Force prebuild version control info
-#
-win32 {
-    contains(QMAKE_TARGET.arch, x86_64){
-        QMAKE_CLEAN += $$PWD/../bin_Win64/GetGitProjectVersion.exe
-        system(IF NOT EXIST $$PWD/../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
-            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-            nmake))
-        system(chdir $$PWD & \
-            $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/ServiceControlManager.pro)
-    }
-    else{
-        QMAKE_CLEAN += $$PWD/../bin_Win32/GetGitProjectVersion.exe
-        system(IF NOT EXIST $$PWD/../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
-            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-            nmake))
-        system(chdir $$PWD & \
-            $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/ServiceControlManager.pro)
-    }
-}
-unix {
-    QMAKE_CLEAN += $$PWD/../bin_unix/GetGitProjectVersion
-    system(cd $$PWD/../GetGitProjectVersion; \
-        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-        make; \
-        cd $$PWD; \
-        $$PWD/../bin_unix/GetGitProjectVersion $$PWD/ServiceControlManager.pro)
-}
-
-
 SOURCES += MainWindow.cpp \
     ScanOptionsWidget.cpp \
     ServiceTableModel.cpp \
@@ -113,7 +83,6 @@ HEADERS  += MainWindow.h \
     ../lib/UdpSocket.h \
     ../lib/SocketIO.h \
     ../lib/DataSource.h \
-    version.h \
     BaseServiceStateWidget.h \
     ConfigurationServiceWidget.h \
     ../lib/SimpleThread.h \

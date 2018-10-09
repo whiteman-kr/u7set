@@ -1,5 +1,5 @@
 #include "TcpTuningClient.h"
-#include "version.h"
+
 
 namespace Tuning
 {

@@ -1,5 +1,4 @@
 #include "TcpAppDataClient.h"
-#include "version.h"
 
 
 TcpAppDataClient::TcpAppDataClient(const SoftwareInfo& softwareInfo,

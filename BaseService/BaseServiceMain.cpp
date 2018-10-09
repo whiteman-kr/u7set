@@ -2,8 +2,6 @@
 #include "../lib/WUtils.h"
 #include "../lib/CircularLogger.h"
 
-#include "version.h"
-
 
 class BaseServiceWorker : public ServiceWorker
 {
