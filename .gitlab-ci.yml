@@ -24,10 +24,10 @@ windows build job:
     - "git status"
     - "git log -1"
 #generation version file
-    - del gitlabci_version.h
-    - cat NUL > gitlabci_version.h
-    - echo #pragma once >> gitlabci_version.h
-    - echo. >> gitlabci_version.h
+    - "del gitlabci_version.h"
+    - "cat NUL > gitlabci_version.h"
+    - "echo #pragma once >> gitlabci_version.h"
+    - "echo. >> gitlabci_version.h"
     - "echo #define CI_BUILD_REF_SLUG \"%CI_BUILD_REF_SLUG%\" >> gitlabci_version.h"
     - "echo #define CI_COMMIT_SHA \"%CI_COMMIT_SHA%\" >> gitlabci_version.h"
     - "echo #define CI_BUILD_ID	%CI_BUILD_ID% >> gitlabci_version.h"
@@ -57,6 +57,7 @@ deploy job:
 #    - master
     - develop
   script:
-    - "git tag v0.8.%CI_BUILD_ID%"
-    - "git push --tags"
+    # cannot create a tag as REPO is read only (((  
+    #- "git tag v0.8.%CI_BUILD_ID%"
+    #- "git push --tags"
 
