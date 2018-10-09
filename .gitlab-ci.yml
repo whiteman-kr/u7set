@@ -23,6 +23,16 @@ windows build job:
     - "echo %CI_COMMIT_SHA%"
     - "git status"
     - "git log -1"
+#generation version file
+    - del gitlabci_version.h
+    - cat NUL > gitlabci_version.h
+    - echo #pragma once >> gitlabci_version.h
+    - echo. >> gitlabci_version.h
+    - "echo #define CI_BUILD_REF_SLUG \"%CI_BUILD_REF_SLUG%\" >> gitlabci_version.h"
+    - "echo #define CI_COMMIT_SHA \"%CI_COMMIT_SHA%\" >> gitlabci_version.h"
+    - "echo #define CI_BUILD_ID	%CI_BUILD_ID% >> gitlabci_version.h"
+    - "echo #define GITLAB_USER_NAME \"%GITLAB_USER_NAME%\" >> gitlabci_version.h"
+#run QMAKE
     - "call \"C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Auxiliary/Build/vcvarsall.bat\" x86_amd64"
     - "cl.exe"
     - "C:/Qt/5.9.6/msvc2017_64/bin/qmake.exe %CI_PROJECT_DIR%/u7set.pro -spec win32-msvc"
