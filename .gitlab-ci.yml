@@ -40,7 +40,7 @@ windows build job:
     - "echo #define BUILD_DATE \"%date% %time%\" >> gitlabci_version.h"
     
 #run QMAKE
-    - "call C:/Qt/5.9.6/msvc2017_64/bin/qtenv2.bat"
+    - "call C:/Qt/5.9.2/msvc2017_64/bin/qtenv2.bat"
     - "call \"C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Auxiliary/Build/vcvarsall.bat\" x86_amd64"
     - "cl.exe"
     - "qmake --version"
