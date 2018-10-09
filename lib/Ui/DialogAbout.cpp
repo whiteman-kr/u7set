@@ -1,7 +1,14 @@
 #include "../lib/Ui/DialogAbout.h"
-#include "version.h"
-
+#include <QApplication>
 #include <QDialog>
+#include <QHBoxLayout>
+#include <QLabel>
+#include <QPushButton>
+#include <QDialogButtonBox>
+
+#if __has_include("../gitlabci_version.h")
+#	include "../gitlabci_version.h"
+#endif
 
 void DialogAbout::show(QWidget* parent, const QString& description)
 {
@@ -18,13 +25,20 @@ void DialogAbout::show(QWidget* parent, const QString& description)
 	hl->addLayout(vl);
 
 	QString text = "<h3>" + qApp->applicationName() +" v" + qApp->applicationVersion() + "</h3>";
+
 #ifndef Q_DEBUG
 	text += "Build: Release";
 #else
 	text += "Build: Debug";
 #endif
-	text += "<br>Commit date: " LAST_SERVER_COMMIT_DATE;
-	text += "<br>Commit SHA1: " USED_SERVER_COMMIT_SHA;
+
+#ifdef CI_PIPELINE_IID
+	text += "<br>Commit date: " GITLAB_CI_BUILD;
+	text += "<br>Commit SHA1: " CI_COMMIT_SHA;
+#else
+	text += "<br>Commit date: LOCALBUILD";
+	text += "<br>Commit SHA1: LOCALBUILD";
+#endif
 
 	QLabel* label = new QLabel(text, &aboutDialog);
 	label->setIndent(10);
@@ -40,7 +54,9 @@ void DialogAbout::show(QWidget* parent, const QString& description)
 
 	QPushButton* copyCommitSHA1Button = new QPushButton("Copy commit SHA1");
 	connect(copyCommitSHA1Button, &QPushButton::clicked, [](){
-		qApp->clipboard()->setText(USED_SERVER_COMMIT_SHA);
+#ifdef CI_PIPELINE_IID
+		qApp->clipboard()->setText(CI_COMMIT_SHA);
+#endif
 	});
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(Qt::Horizontal);
@@ -56,4 +72,5 @@ void DialogAbout::show(QWidget* parent, const QString& description)
 
 	aboutDialog.exec();
 
+	return;
 }
