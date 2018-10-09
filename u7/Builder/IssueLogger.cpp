@@ -91,7 +91,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
+	/// Title: File loading/parsing error, file is damaged or has incompatible format, file name %1.
 	///
 	/// Parameters:
 	///		%1 File name
@@ -103,7 +103,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Common,
 				  10,
-				  tr("File loading/parsing error, file is damaged or has incompatible format, file name '%1'.")
+				  tr("File loading/parsing error, file is damaged or has incompatible format, file name %1.")
 				  .arg(fileName));
 	}
 
@@ -112,7 +112,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Can't create directory '%1'.
+	/// Title: Can't create directory %1.
 	///
 	/// Parameters:
 	///		%1 Directory name
@@ -124,7 +124,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Common,
 				  11,
-				  tr("Can't create directory '%1'.")
+				  tr("Can't create directory %1.")
 				  .arg(directory));
 	}
 
@@ -133,7 +133,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Can't create file '%1'.
+	/// Title: Can't create file %1.
 	///
 	/// Parameters:
 	///		%1 File name
@@ -145,7 +145,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Common,
 				  12,
-				  tr("Can't create file '%1'.")
+				  tr("Can't create file %1.")
 				  .arg(fileName));
 	}
 
@@ -154,7 +154,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Write error of file '%1'.
+	/// Title: Write error of file %1.
 	///
 	/// Parameters:
 	///		%1 File name
@@ -166,7 +166,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Common,
 				  13,
-				  tr("Write error of file '%1'.")
+				  tr("Write error of file %1.")
 				  .arg(fileName));
 	}
 
@@ -175,7 +175,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: File '%1' already exists.
+	/// Title: File %1 already exists.
 	///
 	/// Parameters:
 	///		%1 File name
@@ -187,7 +187,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Common,
 				  14,
-				  tr("File '%1' already exists.")
+				  tr("File %1 already exists.")
 				  .arg(fileName));
 	}
 
@@ -195,7 +195,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: '%1' and '%2' files have the same ID = '%3'.
+	/// Title: %1 and %2 files have the same ID = %3.
 	///
 	/// Parameters:
 	///		%1 File name 1
@@ -209,7 +209,7 @@ namespace Builder
 	{
 		LOG_WARNING0(IssueType::Common,
 				  15,
-				  tr("'%1' and '%2' files have the same ID = '%3'.")
+				  tr("%1 and %2 files have the same ID = %3.")
 				  .arg(fileName1).arg(fileName2).arg(id));
 	}
 
@@ -235,7 +235,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Can't open file '%1'.
+	/// Title: Can't open file %1.
 	///
 	/// Parameters:
 	///		%1 File name
@@ -247,7 +247,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Common,
 				  17,
-				  tr("Can't open file '%1'.")
+				  tr("Can't open file %1.")
 				  .arg(fileName));
 	}
 
@@ -357,7 +357,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Error of getting file list from the database, parent file ID %1, filter '%2', database message '%3'.
+	/// Title: Error of getting file list from the database, parent file ID %1, filter %2, database message %3.
 	///
 	/// Parameters:
 	///			%1 Parent file identifier
@@ -371,7 +371,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::ProjectDatabase,
 				  2001,
-				  tr("Error of getting file list from the database, parent file ID %1, filter '%2', database message '%3'.")
+				  tr("Error of getting file list from the database, parent file ID %1, filter %2, database message %3.")
 				  .arg(parentFileId)
 				  .arg(filter)
 				  .arg(databaseMessage));
@@ -381,7 +381,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Getting file instance error, file ID %1, file name '%2', database message '%3'.
+	/// Title: Getting file instance error, file ID %1, file name %2, database message %3.
 	///
 	/// Parameters:
 	///			%1 Database file identifier
@@ -395,7 +395,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::ProjectDatabase,
 				  2002,
-				  tr("Getting file instance error, file ID %1, file name '%2', database message '%3'.")
+				  tr("Getting file instance error, file ID %1, file name %2, database message %3.")
 				  .arg(fileId)
 				  .arg(fileName)
 				  .arg(databaseMessage));
@@ -463,7 +463,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property '%1' does not exist in object '%2'.
+	/// Title: Property %1 does not exist in object %2.
 	///
 	/// Parameters:
 	///         %1 Property name
@@ -476,7 +476,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3000,
-				  tr("Property '%1' does not exist in an object '%2'.")
+				  tr("Property %1 does not exist in an object %2.")
 				  .arg(propertyName)
 				  .arg(object));
 	}
@@ -485,7 +485,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Subsystem '%1' is not found in subsystem set (Logic Module '%2').
+	/// Title: Subsystem %1 is not found in subsystem set (Logic Module %2).
 	///
 	///
 	/// Parameters:
@@ -499,7 +499,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3001,
-				  tr("Subsystem '%1' is not found in subsystem set (Logic Module '%2').")
+				  tr("Subsystem %1 is not found in subsystem set (Logic Module %2).")
 				  .arg(subSysID)
 				  .arg(module));
 	}
@@ -508,7 +508,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property '%1' has wrong value (%2), valid range is %3..%4 (module '%5').
+	/// Title: Property %1 has wrong value (%2), valid range is %3..%4 (module %5).
 	///
 	/// Parameters:
 	///         %1 Property Name
@@ -524,7 +524,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3002,
-				  tr("Property '%1'' has wrong value (%2), valid range is %3..%4 (module '%5').")
+				  tr("Property %1 has wrong value (%2), valid range is %3..%4 (module %5).")
 				  .arg(name)
 				  .arg(value)
 				  .arg(min)
@@ -536,7 +536,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property System\\LMNumber (%1) is not unique in Logic Module '%2'.
+	/// Title: Property System\\LMNumber (%1) is not unique in Logic Module %2.
 	///
 	/// Parameters:
 	///         %1 LMNumber
@@ -549,7 +549,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3003,
-				  tr("Property System\\LMNumber (%1) is not unique in Logic Module '%2'.")
+				  tr("Property System\\LMNumber (%1) is not unique in Logic Module %2.")
 				  .arg(LMNumber)
 				  .arg(module));
 	}
@@ -559,7 +559,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Controller '%1' is not found in module '%2'.
+	/// Title: Controller %1 is not found in module %2.
 	///
 	/// Parameters:
 	///			%1 Controller StrID
@@ -572,7 +572,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3004,
-				  tr("Controller '%1' is not found in module '%2'.")
+				  tr("Controller %1 is not found in module %2.")
 				  .arg(controllerID)
 				  .arg(module));
 	}
@@ -582,7 +582,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Signal '%1' is not found in controller '%2'.
+	/// Title: Signal %1 is not found in controller %2.
 	///
 	/// Parameters:
 	///			%1 Signal StrID
@@ -595,7 +595,7 @@ namespace Builder
 	{
 		LOG_WARNING0(IssueType::FscConfiguration,
 				  3005,
-				  tr("Signal '%1' is not found in controller '%2'.")
+				  tr("Signal %1 is not found in controller %2.")
 				  .arg(signalID)
 				  .arg(controllerID));
 	}
@@ -604,7 +604,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Signal with place %1 is not found in controller '%2'.
+	/// Title: Signal with place %1 is not found in controller %2.
 	///
 	/// Parameters:
 	///			%1 Signal place
@@ -617,7 +617,7 @@ namespace Builder
 	{
 		LOG_WARNING0(IssueType::FscConfiguration,
 				  3006,
-				  tr("Signal with place %1 is not found in controller '%2'.")
+				  tr("Signal with place %1 is not found in controller %2.")
 				  .arg(place)
 				  .arg(controllerID));
 	}
@@ -627,7 +627,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Signal '%1' is not found in Application Signals.
+	/// Title: Signal %1 is not found in Application Signals.
 	///
 	/// Parameters:
 	///         %1 Signal StrID
@@ -639,7 +639,7 @@ namespace Builder
 	{
 		LOG_WARNING1(IssueType::FscConfiguration,
 				  3007,
-				  tr("Signal '%1' is not found in Application Signals.")
+				  tr("Signal %1 is not found in Application Signals.")
 				  .arg(signalID));
 	}
 
@@ -647,7 +647,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Software '%1' is not found (Logic Module '%2').
+	/// Title: Software %1 is not found (Logic Module %2).
 	///
 	/// Parameters:
 	///			%1 Software StrID
@@ -660,7 +660,7 @@ namespace Builder
 	{
 		LOG_WARNING1(IssueType::FscConfiguration,
 				  3008,
-				  tr("Software '%1' is not found (Logic Module '%2').")
+				  tr("Software %1 is not found (Logic Module %2).")
 				  .arg(softwareID)
 				  .arg(module));
 	}
@@ -670,7 +670,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Calculated SpreadTolerance ADC mismatch, signals %1 and %2 in module '%3'. Check High/LowEngineeringUints ranges, ADC range and SpreadTolerance value of signals.
+	/// Title: Calculated SpreadTolerance ADC mismatch, signals %1 and %2 in module %3. Check High/LowEngineeringUints ranges, ADC range and SpreadTolerance value of signals.
 	///
 	/// Parameters:
 	///         %1 Signal 1 StrID
@@ -684,7 +684,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3009,
-				  tr("Calculated SpreadTolerance ADC mismatch, signals %1 and %2 in module '%3'.")
+				  tr("Calculated SpreadTolerance ADC mismatch, signals %1 and %2 in module %3.")
 				  .arg(signalID1)
 				  .arg(signalID2)
 				  .arg(module));
@@ -694,7 +694,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property '%1' has wrong value (%2), valid range is %3..%4 [precision %5](signal '%6').
+	/// Title: Property %1 has wrong value (%2), valid range is %3..%4 [precision %5](signal %6).
 	///
 	/// Parameters:
 	///         %1 Property Name
@@ -715,7 +715,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3010,
-				  tr("Property '%1'' has wrong value (%2), valid range is %3..%4 (signal '%6').")
+				  tr("Property %1 has wrong value (%2), valid range is %3..%4 (signal %6).")
 				  .arg(name)
 				  .arg(sValue)
 				  .arg(sMin)
@@ -727,7 +727,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: IP address in property '%1' has undefined value (%2) in controller '%3'.
+	/// Title: IP address in property %1 has undefined value (%2) in controller %3.
 	///
 	/// Parameters:
 	///         %1 Address Property Name
@@ -748,7 +748,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3011,
-				  tr("IP address in property '%1' has undefined value (%2) in controller '%3'.")
+				  tr("IP address in property %1 has undefined value (%2) in controller %3.")
 				  .arg(addressProperty)
 				  .arg(str)
 				  .arg(controller));
@@ -758,7 +758,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Port in property '%1' has undefined value (%2) in controller '%3'.
+	/// Title: Port in property %1 has undefined value (%2) in controller %3.
 	///
 	/// Parameters:
 	///         %1 Port Property Name
@@ -772,7 +772,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3012,
-				  tr("Port in property '%1' has undefined value (%2) in controller '%3'.")
+				  tr("Port in property %1 has undefined value (%2) in controller %3.")
 				  .arg(portProperty)
 				  .arg(port)
 				  .arg(controller));
@@ -782,7 +782,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property '%1' (%2) is %3 property '%4' (%5) in signal '%6'.
+	/// Title: Property %1 (%2) is %3 property %4 (%5) in signal %6.
 	///
 	/// Parameters:
 	///         %1 Property 1 Name
@@ -813,7 +813,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3013,
-				  tr("Property '%1' (%2) is %3 property '%4' (%5) in signal '%6'")
+				  tr("Property %1 (%2) is %3 property %4 (%5) in signal %6")
 				  .arg(name1)
 				  .arg(sValue1)
 				  .arg(mode)
@@ -826,7 +826,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Can't find child object with suffix '%1' in object '%2'
+	/// Title: Can't find child object with suffix %1 in object %2
 	///
 	/// Parameters:
 	///         %1 Suffix
@@ -848,7 +848,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Property '%1.%2' is linked to undefined software ID '%3'.
+	/// Title: Property %1.%2 is linked to undefined software ID %3.
 	///
 	/// Parameters:
 	///         %1 Object ID
@@ -862,7 +862,7 @@ namespace Builder
 	{
 		LOG_WARNING1(IssueType::FscConfiguration,
 				  3015,
-				  tr("Property '%1.%2' is linked to undefined software ID '%3'.")
+				  tr("Property %1.%2 is linked to undefined software ID %3.")
 				  .arg(objectID)
 				  .arg(propertyName)
 				  .arg(softwareID));
@@ -872,7 +872,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Property '%1.%2' is empty.
+	/// Title: Property %1.%2 is empty.
 	///
 	/// Parameters:
 	///         %1 Object ID
@@ -885,7 +885,7 @@ namespace Builder
 	{
 		LOG_WARNING1(IssueType::FscConfiguration,
 				  3016,
-				  tr("Property '%1.%2' is empty.")
+				  tr("Property %1.%2 is empty.")
 				  .arg(objectID)
 				  .arg(propertyName));
 	}
@@ -894,7 +894,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property '%1.%2' is linked to not compatible software '%3'.
+	/// Title: Property %1.%2 is linked to not compatible software %3.
 	///
 	/// Parameters:
 	///         %1 Object ID
@@ -908,7 +908,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3017,
-				  tr("Property '%1.%2' is linked to not compatible software '%3'.")
+				  tr("Property %1.%2 is linked to not compatible software %3.")
 				  .arg(objectID)
 				  .arg(propertyName)
 				  .arg(softwareID));
@@ -918,7 +918,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Default '%1' IP address %2:%3 is used in controller %4.
+	/// Title: Default %1 IP address %2:%3 is used in controller %4.
 	///
 	/// Parameters:
 	///			%1 Software StrID
@@ -931,7 +931,7 @@ namespace Builder
 	{
 		LOG_WARNING2(IssueType::FscConfiguration,
 				  3018,
-				  tr("Default '%1' IP address %2:%3 is used in controller %4.")
+				  tr("Default %1 IP address %2:%3 is used in controller %4.")
 				  .arg(propertyName)
 				  .arg(ip)
 				  .arg(port)
@@ -942,7 +942,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property '%1.%2' write error.
+	/// Title: Property %1.%2 write error.
 	///
 	/// Parameters:
 	///			%1 Object equipmentID
@@ -955,14 +955,14 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3019,
-				  tr("Property '%1.%2' write error.").arg(objectID).arg(propertyName));
+				  tr("Property %1.%2 write error.").arg(objectID).arg(propertyName));
 	}
 
 	/// IssueCode: CFG3020
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property '%1.%2' is not found.
+	/// Title: Property %1.%2 is not found.
 	///
 	/// Parameters:
 	///			%1 Object equipmentID
@@ -975,14 +975,14 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3020,
-				  tr("Property '%1.%2' is not found.").arg(objectID).arg(propertyName));
+				  tr("Property %1.%2 is not found.").arg(objectID).arg(propertyName));
 	}
 
     /// IssueCode: CFG3021
     ///
     /// IssueType: Error
     ///
-    /// Title: Property '%1.%2' is linked to undefined software ID '%3'.
+	/// Title: Property %1.%2 is linked to undefined software ID %3.
     ///
     /// Parameters:
     ///         %1 Object ID
@@ -996,7 +996,7 @@ namespace Builder
     {
         LOG_ERROR(IssueType::FscConfiguration,
                   3021,
-				  tr("Property %1.%2 is linked to undefined software ID '%3'.")
+				  tr("Property %1.%2 is linked to undefined software ID %3.")
                   .arg(objectID)
                   .arg(propertyName)
                   .arg(softwareID));
@@ -1006,7 +1006,7 @@ namespace Builder
     ///
     /// IssueType: Error
     ///
-    /// Title: Property '%1.%2' is empty.
+	/// Title: Property %1.%2 is empty.
     ///
     /// Parameters:
     ///         %1 Object ID
@@ -1028,7 +1028,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property '%1.%2' conversion error.
+	/// Title: Property %1.%2 conversion error.
 	///
 	/// Parameters:
 	///			%1 Object equipmentID
@@ -1044,33 +1044,11 @@ namespace Builder
 				  tr("Property %1.%2 conversion error.").arg(objectID).arg(propertyName));
 	}
 
-	/// IssueCode: CFG3024
-	///
-	/// IssueType: Warning
-	///
-	/// Title: Both data channels of AppDataService '%1' is linked to same ArchivingService '%2'.
-	///
-	/// Parameters:
-	///         %1 AppDataService equipmentID
-	///         %2 ArchivingService equipmentID
-	///
-	/// Description:
-	///			Both data channels of specified AppDataService is linked to same ArchivingService. Check settings of AppDataService.
-	///
-	void IssueLogger::wrnCFG3024(QString appDataServiceID, QString archServiceID)
-	{
-		LOG_WARNING1(IssueType::FscConfiguration,
-				  3024,
-				  tr("Both data channels of AppDataService '%1' is linked to same ArchivingService '%2'.")
-				  .arg(appDataServiceID)
-				  .arg(archServiceID));
-	}
-
 	/// IssueCode: CFG3025
 	///
 	/// IssueType: Error
 	///
-	/// Title: Can't find child controller with suffix '%1' in object '%2'
+	/// Title: Can't find child controller with suffix %1 in object %2
 	///
 	/// Parameters:
 	///         %1 Suffix
@@ -1083,7 +1061,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3025,
-				  tr("Can't find child controller with suffix '%1' in object '%2'.")
+				  tr("Can't find child controller with suffix %1 in object %2.")
 				  .arg(suffix)
 				  .arg(objectID));
 	}
@@ -1132,7 +1110,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property '%4' must have same value in signals %1 and %2, module '%3'.
+	/// Title: Property %4 must have same value in signals %1 and %2, module %3.
 	///
 	/// Parameters:
 	///         %1 Signal 1 StrID
@@ -1147,7 +1125,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::FscConfiguration,
 				  3028,
-				  tr("Property '%4' must have same value in signals %1 and %2, module '%3'.")
+				  tr("Property %4 must have same value in signals %1 and %2, module %3.")
 				  .arg(signalID1)
 				  .arg(signalID2)
 				  .arg(module)
@@ -1224,7 +1202,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Branch has multiple outputs (Logic Schema '%1').
+	/// Title: Branch has multiple outputs (Logic Schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema StrID
@@ -1238,7 +1216,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4000,
-				  tr("Branch has multiple outputs (Logic Schema '%1').")
+				  tr("Branch has multiple outputs (Logic Schema %1).")
 				  .arg(schema));
 	}
 
@@ -1246,7 +1224,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property %1 for Schema is not set (LogicSchema '%2').
+	/// Title: Property %1 for Schema is not set (LogicSchema %2).
 	///
 	/// Parameters:
 	///		%1 Logic schema StrID
@@ -1261,7 +1239,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4001,
-				  tr("Property %1 for Schema is not set (LogicSchema '%2').")
+				  tr("Property %1 for Schema is not set (LogicSchema %2).")
 				  .arg(propertyName)
 				  .arg(schema));
 	}
@@ -1270,7 +1248,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: EquipmentID '%1' is not found in the project equipment (LogicSchema '%2').
+	/// Title: EquipmentID %1 is not found in the project equipment (LogicSchema %2).
 	///
 	/// Parameters:
 	///		%1 Logic modules StrID
@@ -1285,7 +1263,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4002,
-				  tr("EquipmentID '%1' is not found in the project equipment (LogicSchema '%2').")
+				  tr("EquipmentID %1 is not found in the project equipment (LogicSchema %2).")
 				  .arg(equipmentId)
 				  .arg(schema));
 	}
@@ -1294,7 +1272,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: EquipmentID '%1' must be LM family module type (LogicSchema '%2').
+	/// Title: EquipmentID %1 must be LM family module type (LogicSchema %2).
 	///
 	/// Parameters:
 	///		%1 Logic modules StrID
@@ -1309,7 +1287,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4003,
-				  tr("EquipmentID '%1' must be LM family module type (LogicSchema '%2').")
+				  tr("EquipmentID %1 must be LM family module type (LogicSchema %2).")
 				  .arg(equipmentId)
 				  .arg(schema));
 	}
@@ -1318,7 +1296,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Schema '%1' is excluded from build.
+	/// Title: Schema %1 is excluded from build.
 	///
 	/// Parameters:
 	///		%1 Schema StrID
@@ -1333,7 +1311,7 @@ namespace Builder
 
 		LOG_WARNING1(IssueType::AlParsing,
 					4004,
-					tr("Schema '%1' is excluded from build.")
+					tr("Schema %1 is excluded from build.")
 					.arg(schema));
 	}
 
@@ -1341,7 +1319,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Logic Schema is empty, there are no any functional blocks in the compile layer (Logic Schema '%1').
+	/// Title: Logic Schema is empty, there are no any functional blocks in the compile layer (Logic Schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema StrID
@@ -1355,7 +1333,7 @@ namespace Builder
 
 		LOG_WARNING2(IssueType::AlParsing,
 					4005,
-					tr("Logic Schema is empty, there are no any functional blocks in the compile layer (Logic Schema '%1').")
+					tr("Logic Schema is empty, there are no any functional blocks in the compile layer (Logic Schema %1).")
 					.arg(schema));
 	}
 
@@ -1363,7 +1341,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Schema item '%1' has unlinked pin(s) '%2' (Logic Schema '%3').
+	/// Title: Schema item %1 has unlinked pin(s) %2 (Logic Schema %3).
 	///
 	/// Parameters:
 	///		%1 Schema item description
@@ -1387,7 +1365,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4006,
-				  tr("Schema item '%1' has unlinked pin(s) '%2' (Logic Schema '%3').")
+				  tr("Schema item %1 has unlinked pin(s) %2 (Logic Schema %3).")
 				  .arg(schemaItem)
 				  .arg(pin)
 				  .arg(schema));
@@ -1397,7 +1375,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: AFB description '%1' is not found for schema item '%2' (Logic Schema '%3').
+	/// Title: AFB description %1 is not found for schema item %2 (Logic Schema %3).
 	///
 	/// Parameters:
 	///		%1 Application functional block StrID
@@ -1413,7 +1391,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4007,
-				  tr("AFB description '%1' is not found for schema item '%2' (Logic Schema '%3').")
+				  tr("AFB description %1 is not found for schema item %2 (Logic Schema %3).")
 				  .arg(afbElement)
 				  .arg(schemaItem)
 				  .arg(schema));
@@ -1423,7 +1401,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: SchemaItem '%1' has outdated AFB description version, item's AFB.version %2, the latest is %3 (LogicSchema '%4').
+	/// Title: SchemaItem %1 has outdated AFB description version, item's AFB.version %2, the latest is %3 (LogicSchema %4).
 	///
 	/// Parameters:
 	///		%1 Application functional block StrID
@@ -1439,7 +1417,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4008,
-				  tr("SchemaItem '%1' has outdated AFB description version, item's AFB.version %2, the latest is %3 (LogicSchema '%4').")
+				  tr("SchemaItem %1 has outdated AFB description version, item's AFB.version %2, the latest is %3 (LogicSchema %4).")
 				  .arg(schemaItem)
 				  .arg(schemaItemAfbVersion)
 				  .arg(latesAfbVersion)
@@ -1450,7 +1428,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: UFB schema '%1' is not found for schema item '%2' (Logic Schema '%3').
+	/// Title: UFB schema %1 is not found for schema item %2 (Logic Schema %3).
 	///
 	/// Parameters:
 	///		%1 UFB Schema ID
@@ -1466,7 +1444,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4009,
-				  tr("UFB schema '%1' is not found for schema item '%2' (Logic Schema '%3').")
+				  tr("UFB schema %1 is not found for schema item %2 (Logic Schema %3).")
 				  .arg(ufbElement)
 				  .arg(schemaItem)
 				  .arg(schema));
@@ -1476,7 +1454,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: SchemaItem '%1' has outdated UFB version, item's UFB.version %2, the latest is %3 (LogicSchema '%4').
+	/// Title: SchemaItem %1 has outdated UFB version, item's UFB.version %2, the latest is %3 (LogicSchema %4).
 	///
 	/// Parameters:
 	///		%1 UFB Schema ID
@@ -1484,7 +1462,7 @@ namespace Builder
 	///		%3 Logic schema StrID
 	///
 	/// Description:
-	///		SchemaItem '%1' has outdated UFB version, item's UFB.version %2, the latest is %3 (LogicSchema '%4'). Open schema to upfate AFBs.
+	///		SchemaItem %1 has outdated UFB version, item's UFB.version %2, the latest is %3 (LogicSchema %4). Open schema to upfate AFBs.
 	///
 	void IssueLogger::errALP4010(QString schema, QString schemaItem, int schemaItemUfbVersion, int latesUfbVersion, QUuid itemUuid)
 	{
@@ -1492,7 +1470,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4010,
-				  tr("SchemaItem '%1' has outdated UFB version, item's UFB.version %2, the latest is %3 (LogicSchema '%4').")
+				  tr("SchemaItem %1 has outdated UFB version, item's UFB.version %2, the latest is %3 (LogicSchema %4).")
 				  .arg(schemaItem)
 				  .arg(schemaItemUfbVersion)
 				  .arg(latesUfbVersion)
@@ -1503,7 +1481,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: User Functional Block cannot have nested another UFB, SchemaItem %1 (UfbSchema '%2').
+	/// Title: User Functional Block cannot have nested another UFB, SchemaItem %1 (UfbSchema %2).
 	///
 	/// Parameters:
 	///		%1 UFB SchemaItem
@@ -1518,7 +1496,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4011,
-				  tr("User Functional Block cannot have nested another UFB, SchemaItem %1 (UfbSchema '%2').")
+				  tr("User Functional Block cannot have nested another UFB, SchemaItem %1 (UfbSchema %2).")
 				  .arg(schemaItem)
 				  .arg(schema));
 	}
@@ -1527,7 +1505,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Cannot find %1 input/output in UFB %2, SchemaItem %1 (LogicSchema  '%3').
+	/// Title: Cannot find %1 input/output in UFB %2, SchemaItem %1 (LogicSchema  %3).
 	///
 	/// Parameters:
 	///		%1 UFB SchemaItem
@@ -1542,7 +1520,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4012,
-				  tr("Cannot find %1 input/output in UFB %2, SchemaItem %1 (LogicSchema '%3').")
+				  tr("Cannot find %1 input/output in UFB %2, SchemaItem %1 (LogicSchema %3).")
 				  .arg(pinCaption)
 				  .arg(schemaItem)
 				  .arg(schema));
@@ -1580,7 +1558,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: User Functional Block cannot contain %1, SchemaItem %2 (UfbSchema '%3').
+	/// Title: User Functional Block cannot contain %1, SchemaItem %2 (UfbSchema %3).
 	///
 	/// Parameters:
 	///		%1 SchemaItem type
@@ -1596,7 +1574,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4014,
-				  tr("User Functional Block cannot contain %1, SchemaItem %2 (UfbSchema '%3').")
+				  tr("User Functional Block cannot contain %1, SchemaItem %2 (UfbSchema %3).")
 				  .arg(itemType)
 				  .arg(schemaItem)
 				  .arg(schema));
@@ -1606,7 +1584,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: UFB Input or Output item must have only ONE assigned AppSignalIDs, SchemaItem %1 (UfbSchema '%2').
+	/// Title: UFB Input or Output item must have only ONE assigned AppSignalIDs, SchemaItem %1 (UfbSchema %2).
 	///
 	/// Parameters:
 	///		%1 UFB SchemaItem
@@ -1621,7 +1599,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4015,
-				  tr("UFB Schema Input or Output item must have only ONE assigned AppSignalIDs, SchemaItem %1 (UfbSchema '%2').")
+				  tr("UFB Schema Input or Output item must have only ONE assigned AppSignalIDs, SchemaItem %1 (UfbSchema %2).")
 				  .arg(schemaItem)
 				  .arg(schema));
 	}
@@ -1630,20 +1608,20 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: File LmDescriptionFile %1 is not found (Schema '%2').
+	/// Title: File LmDescriptionFile %1 is not found (Schema %2).
 	///
 	/// Parameters:
 	///		%1 SchemaID
 	///
 	/// Description:
-	///		File LmDescriptionFile %1 is not found (Schema '%2').
+	///		File LmDescriptionFile %1 is not found (Schema %2).
 	///
 	void IssueLogger::errALP4016(QString schema, QString lmDecriptionFile)
 	{
 		addSchemaIssue(OutputMessageLevel::Error, schema);
 		LOG_ERROR(IssueType::AlParsing,
 				  4016,
-				  tr("File LmDescriptionFile %1 is not found (Schema '%2').")
+				  tr("File LmDescriptionFile %1 is not found (Schema %2).")
 					.arg(lmDecriptionFile)
 					.arg(schema));
 	}
@@ -1652,7 +1630,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').
+	/// Title: AfbComponent with OpCode %1 is not found in file %2 (Schema %3).
 	///
 	/// Parameters:
 	///		%1 OpCode
@@ -1660,14 +1638,14 @@ namespace Builder
 	///		%3 Schema
 	///
 	/// Description:
-	///		AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').
+	///		AfbComponent with OpCode %1 is not found in file %2 (Schema %3).
 	///
 	void IssueLogger::errALP4017(QString schema, QString lmDecriptionFile, int opCode)
 	{
 		addSchemaIssue(OutputMessageLevel::Error, schema);
 		LOG_ERROR(IssueType::AlParsing,
 				  4017,
-				  tr("AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').")
+				  tr("AfbComponent with OpCode %1 is not found in file %2 (Schema %3).")
 					.arg(opCode)
 					.arg(lmDecriptionFile)
 					.arg(schema));
@@ -1677,7 +1655,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').
+	/// Title: AfbComponent with OpCode %1 is not found in file %2 (Schema %3).
 	///
 	/// Parameters:
 	///		%1 OpCode
@@ -1685,14 +1663,14 @@ namespace Builder
 	///		%3 Schema
 	///
 	/// Description:
-	///		AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').
+	///		AfbComponent with OpCode %1 is not found in file %2 (Schema %3).
 	///
 	void IssueLogger::errALP4017(QString schema, QString lmDecriptionFile, int opCode, QUuid itemUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
 		LOG_ERROR(IssueType::AlParsing,
 				  4017,
-				  tr("AfbComponent with OpCode %1 is not found in file %2 (Schema '%3').")
+				  tr("AfbComponent with OpCode %1 is not found in file %2 (Schema %3).")
 					.arg(opCode)
 					.arg(lmDecriptionFile)
 					.arg(schema));
@@ -1760,7 +1738,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: There is no any input element in applictaion logic for Logic Module '%1'.
+	/// Title: There is no any input element in applictaion logic for Logic Module %1.
 	///
 	/// Parameters:
 	///		%1 Logic module StrID
@@ -1772,7 +1750,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlParsing,
 				  4020,
-				  tr("There is no any input element in applictaion logic for Logic Module '%1'.")
+				  tr("There is no any input element in applictaion logic for Logic Module %1.")
 				  .arg(logicModule));
 	}
 
@@ -1780,7 +1758,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Duplicate output signal %1, item '%2' on schema '%3', item '%4' on schema '%5' (Logic Module '%6').
+	/// Title: Duplicate output signal %1, item %2 on schema %3, item %4 on schema %5 (Logic Module %6).
 	///
 	/// Parameters:
 	///		%1 Logic signal StrID
@@ -1798,7 +1776,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4021,
-				  tr("Duplicate output signal %1, item '%2' on schema '%3', item '%4' on schema '%5' (Logic Module '%6').")
+				  tr("Duplicate output signal %1, item %2 on schema %3, item %4 on schema %5 (Logic Module %6).")
 				  .arg(signalStrID)
 				  .arg(schemaItem1)
 				  .arg(schema1)
@@ -1812,7 +1790,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Schema does not have logic layer (Schema '%1').
+	/// Title: Schema does not have logic layer (Schema %1).
 	///
 	/// Parameters:
 	///		%1 SchemaID
@@ -1825,7 +1803,7 @@ namespace Builder
 		addSchemaIssue(OutputMessageLevel::Error, schema);
 		LOG_ERROR(IssueType::AlParsing,
 				  4022,
-				  tr("Schema does not have logic layer (Schema '%1').").arg(schema));
+				  tr("Schema does not have logic layer (Schema %1).").arg(schema));
 	}
 
 	/// IssueCode: ALP4023
@@ -1853,7 +1831,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: BusTypeID '%1' is not found for schema item '%2' (Logic Schema '%3').
+	/// Title: BusTypeID %1 is not found for schema item %2 (Logic Schema %3).
 	///
 	/// Parameters:
 	///		%1 BusTypeID
@@ -1869,7 +1847,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4040,
-				  tr("BusTypeID '%1' is not found for schema item '%2' (Logic Schema '%3').")
+				  tr("BusTypeID %1 is not found for schema item %2 (Logic Schema %3).")
 				  .arg(busTypeId)
 				  .arg(schemaItem)
 				  .arg(schema));
@@ -1880,7 +1858,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: SchemaItem '%1' has outdated BusType description (LogicSchema '%2').
+	/// Title: SchemaItem %1 has outdated BusType description (LogicSchema %2).
 	///
 	/// Parameters:
 	///		%1 Schema item description
@@ -1895,7 +1873,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4041,
-				  tr("SchemaItem '%1' has outdated BusType description (LogicSchema '%2').")
+				  tr("SchemaItem %1 has outdated BusType description (LogicSchema %2).")
 				  .arg(schemaItem)
 				  .arg(schema));
 	}
@@ -1904,7 +1882,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Loopback detected in LogicSchema %1, SchemaItem '%2'. To resolve issue use Loopback Source/Target items.
+	/// Title: Loopback detected in LogicSchema %1, SchemaItem %2. To resolve issue use Loopback Source/Target items.
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
@@ -1919,7 +1897,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4060,
-				  tr("Loopback detected in LogicSchema %1, SchemaItem '%2'. To resolve issue use Loopback Source/Target items.")
+				  tr("Loopback detected in LogicSchema %1, SchemaItem %2. To resolve issue use Loopback Source/Target items.")
 				  .arg(schema)
 				  .arg(schemaItem));
 	}
@@ -1928,7 +1906,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Two or more LoopbackSource have the same LoopbackID '%1', Schema '%2'.
+	/// Title: Two or more LoopbackSource have the same LoopbackID %1, Schema %2.
 	///
 	/// Parameters:
 	///		%1 LoopbackID
@@ -1943,7 +1921,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4061,
-				  tr("Two or more LoopbackSource have the same LoopbackID '%1', Schema '%2'.")
+				  tr("Two or more LoopbackSource have the same LoopbackID %1, Schema %2.")
 				  .arg(loopbackId)
 				  .arg(schema));
 	}
@@ -1952,7 +1930,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Schema '%1' has %2 commented functional item(s).
+	/// Title: Schema %1 has %2 commented functional item(s).
 	///
 	/// Parameters:
 	///		%1 Schema StrID
@@ -1967,7 +1945,7 @@ namespace Builder
 
 		LOG_WARNING2(IssueType::AlParsing,
 					4070,
-					tr("Schema '%1' has %2 commented functional item(s).")
+					tr("Schema %1 has %2 commented functional item(s).")
 						.arg(schema)
 						.arg(itemsUuids.size()));
 	}
@@ -1976,14 +1954,14 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Singlechannel Logic Schema '%1' cannot contain multichannel signal block ('%2').
+	/// Title: Singlechannel Logic Schema %1 cannot contain multichannel signal block (%2).
 	///
 	/// Parameters:
 	///		%1 Logic schema StrID
 	///		%2 Schema item description
 	///
 	/// Description:
-	///		Singlechannel Logic Schema '%1' cannot contain multichannel signal blocks ('%2'). Only one signal can be assigned for
+	///		Singlechannel Logic Schema %1 cannot contain multichannel signal blocks (%2). Only one signal can be assigned for
 	/// input/output/internal signal elements.
 	///
 	void IssueLogger::errALP4130(QString schema, QString schemaItem, QUuid itemUuid)
@@ -1992,7 +1970,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4130,
-				  tr("Singlechannel Logic Schema '%1' cannot contain multichannel signal block ('%2').")
+				  tr("Singlechannel Logic Schema %1 cannot contain multichannel signal block (%2).")
 				  .arg(schema)
 				  .arg(schemaItem));
 
@@ -2028,13 +2006,13 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Schema contains mixed singlechannel and multichannel SignalItems in the branch (LogicSchema '%1').
+	/// Title: Schema contains mixed singlechannel and multichannel SignalItems in the branch (LogicSchema %1).
 	///
 	/// Parameters:
 	///		%1 Logic Schema ID
 	///
 	/// Description:
-	///		Schema contains mixed singlechannel and multichannel SignalItems in the branch (LogicSchema '%1').
+	///		Schema contains mixed singlechannel and multichannel SignalItems in the branch (LogicSchema %1).
 	/// All Inputs/Outputs/Interconnection Signal elements must be the same type.
 	///
 	void IssueLogger::errALP4132(QString schema, const std::vector<QUuid>& itemsUuids)
@@ -2043,7 +2021,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4132,
-				  tr("Schema contains mixed singlechannel and multichannel SignalItems in the branch (LogicSchema '%1').")
+				  tr("Schema contains mixed singlechannel and multichannel SignalItems in the branch (LogicSchema %1).")
 				  .arg(schema));
 	}
 
@@ -2051,7 +2029,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Branch contains signals (%1) from different channels (LogicSchema '%2').
+	/// Title: Branch contains signals (%1) from different channels (LogicSchema %2).
 	///
 	/// Parameters:
 	///		%1 AppSignalID
@@ -2067,7 +2045,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4133,
-				  tr("Branch contains signals (%1) from different channels (LogicSchema '%2').")
+				  tr("Branch contains signals (%1) from different channels (LogicSchema %2).")
 				  .arg(appSignalId)
 				  .arg(schema));
 	}
@@ -2076,7 +2054,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal '%1' is not found (LogicSchema '%2', SchemaItem '%3').
+	/// Title: Signal %1 is not found (LogicSchema %2, SchemaItem %3).
 	///
 	/// Parameters:
 	///		%1 AppSignalID
@@ -2084,7 +2062,7 @@ namespace Builder
 	///		%3 SchemaItem description
 	///
 	/// Description:
-	///		Signal '%1' is not found (LogicSchema '%2', SchemaItem '%3').
+	///		Signal %1 is not found (LogicSchema %2, SchemaItem %3).
 	///
 	void IssueLogger::errALP4134(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid)
 	{
@@ -2092,7 +2070,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4134,
-				  tr("Signal '%1' is not found (LogicSchema '%2', SchemaItem '%3').")
+				  tr("Signal %1 is not found (LogicSchema %2, SchemaItem %3).")
 				  .arg(appSignalId)
 				  .arg(schema)
 				  .arg(schemaItem));
@@ -2102,7 +2080,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal '%1' does not have valid LM (LogicSchema '%2', SchemaItem '%3').
+	/// Title: Signal %1 does not have valid LM (LogicSchema %2, SchemaItem %3).
 	///
 	/// Parameters:
 	///		%1 AppSignalID
@@ -2110,7 +2088,7 @@ namespace Builder
 	///		%3 SchemaItem description
 	///
 	/// Description:
-	///		Signal '%1' does not have valid LM (LogicSchema '%2', SchemaItem '%3').
+	///		Signal %1 does not have valid LM (LogicSchema %2, SchemaItem %3).
 	///
 	void IssueLogger::errALP4135(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid)
 	{
@@ -2118,7 +2096,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4135,
-				  tr("Signal '%1' does not have valid LM (LogicSchema '%2', SchemaItem '%3').")
+				  tr("Signal %1 does not have valid LM (LogicSchema %2, SchemaItem %3).")
 				  .arg(appSignalId)
 				  .arg(schema)
 				  .arg(schemaItem));
@@ -2128,7 +2106,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal '%1' is not bound to any schema's EquipmentIds(LMs), (LogicSchema '%2', SchemaItem '%3').
+	/// Title: Signal %1 is not bound to any schema's EquipmentIds(LMs), (LogicSchema %2, SchemaItem %3).
 	///
 	/// Parameters:
 	///		%1 AppSignalID
@@ -2136,7 +2114,7 @@ namespace Builder
 	///		%3 SchemaItem description
 	///
 	/// Description:
-	///		Signal '%1' is not bound to any schema's EquipmentIds(LMs), (LogicSchema '%2', SchemaItem '%3').
+	///		Signal %1 is not bound to any schema's EquipmentIds(LMs), (LogicSchema %2, SchemaItem %3).
 	///
 	void IssueLogger::errALP4136(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid)
 	{
@@ -2144,7 +2122,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4136,
-				  tr("Signal '%1' is not bound to any schema's EquipmentIds(LMs), (LogicSchema '%2', SchemaItem '%3').")
+				  tr("Signal %1 is not bound to any schema's EquipmentIds(LMs), (LogicSchema %2, SchemaItem %3).")
 				  .arg(appSignalId)
 				  .arg(schema)
 				  .arg(schemaItem));
@@ -2154,7 +2132,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal '%1' is expected to be bound to EquipmentId(LM) %2 (LogicSchema '%3', SchemaItem '%4').
+	/// Title: Signal %1 is expected to be bound to EquipmentId(LM) %2 (LogicSchema %3, SchemaItem %4).
 	///
 	/// Parameters:
 	///		%1 AppSignalID
@@ -2163,7 +2141,7 @@ namespace Builder
 	///		%4 SchemaItem description
 	///
 	/// Description:
-	///		Signal '%1' is expected to be bound to EquipmentId(LM) %2 (LogicSchema '%3', SchemaItem '%4').
+	///		Signal %1 is expected to be bound to EquipmentId(LM) %2 (LogicSchema %3, SchemaItem %4).
 	///
 	void IssueLogger::errALP4137(QString schema, QString schemaItem, QString appSignalId, QString equipmentId, QUuid itemUuid)
 	{
@@ -2171,7 +2149,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4137,
-				  tr("Signal '%1' is expected to be bound to EquipmentId(LM) %2 (LogicSchema '%3', SchemaItem '%4').")
+				  tr("Signal %1 is expected to be bound to EquipmentId(LM) %2 (LogicSchema %3, SchemaItem %4).")
 				  .arg(appSignalId)
 				  .arg(equipmentId)
 				  .arg(schema)
@@ -2186,7 +2164,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal '%1' is not found in Application Signals (Logic schema '%2').
+	/// Title: Signal %1 is not found in Application Signals (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -2208,14 +2186,14 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5000,
-				  tr("Signal '%1' is not found in Application Signals (Logic schema '%2').").arg(appSignalID).arg(schemaID));
+				  tr("Signal %1 is not found in Application Signals (Logic schema %2).").arg(appSignalID).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5001
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Application logic for module '%1' is not found.
+	/// Title: Application logic for module %1 is not found.
 	///
 	/// Parameters:
 	///		%1 Logic Module (LM) equipment ID
@@ -2227,7 +2205,7 @@ namespace Builder
 	{
 		LOG_WARNING2(IssueType::AlCompiler,
 				  5001,
-				  tr("Application logic for module '%1' is not found.").arg(logicModuleID));
+				  tr("Application logic for module %1 is not found.").arg(logicModuleID));
 	}
 
 
@@ -2235,7 +2213,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Value of signal '%1' is undefined (Logic schema '%2').
+	/// Title: Value of signal %1 is undefined (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -2250,7 +2228,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5002,
-				  tr("Value of signal '%1' is undefined (Logic schema '%2').").
+				  tr("Value of signal %1 is undefined (Logic schema %2).").
 				  arg(appSignalID).arg(schemaID));
 	}
 
@@ -2258,7 +2236,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Analog output '%1.%2' is connected to discrete signal '%3'.
+	/// Title: Analog output %1.%2 is connected to discrete signal %3.
 	///
 	/// Parameters:
 	///		%1 AFB caption
@@ -2274,14 +2252,14 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5003,
-				  tr("Analog output '%1.%2' is connected to discrete signal '%3'.").arg(afbCaption).arg(output).arg(appSignalID));
+				  tr("Analog output %1.%2 is connected to discrete signal %3.").arg(afbCaption).arg(output).arg(appSignalID));
 	}
 
 	/// IssueCode: ALC5004
 	///
 	/// IssueType: Error
 	///
-	/// Title: Output '%1.%2' is connected to signal '%3' with uncompatible data format.
+	/// Title: Output %1.%2 is connected to signal %3 with uncompatible data format.
 	///
 	/// Parameters:
 	///		%1 AFB caption
@@ -2297,7 +2275,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5004,
-				  tr("Output '%1.%2' is connected to signal '%3' with uncompatible data format. (Logic schema '%4')").
+				  tr("Output %1.%2 is connected to signal %3 with uncompatible data format. (Logic schema %4)").
 						arg(afbCaption).arg(output).arg(appSignalID).arg(schemaID));
 	}
 
@@ -2305,7 +2283,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Output '%1.%2' is connected to signal '%3' with uncompatible data size.
+	/// Title: Output %1.%2 is connected to signal %3 with uncompatible data size.
 	///
 	/// Parameters:
 	///		%1 AFB caption
@@ -2321,14 +2299,14 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5005,
-				  tr("Output '%1.%2' is connected to signal '%3' with uncompatible data size.").arg(afbCaption).arg(output).arg(appSignalID));
+				  tr("Output %1.%2 is connected to signal %3 with uncompatible data size.").arg(afbCaption).arg(output).arg(appSignalID));
 	}
 
 	/// IssueCode: ALC5006
 	///
 	/// IssueType: Error
 	///
-	/// Title: Discrete output '%1.%2' is connected to analog signal '%3'.
+	/// Title: Discrete output %1.%2 is connected to analog signal %3.
 	///
 	/// Parameters:
 	///		%1 AFB caption
@@ -2344,7 +2322,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5006,
-				  tr("Discrete output '%1.%2' is connected to analog signal '%3'.").arg(afbCaption).arg(output).arg(appSignalID));
+				  tr("Discrete output %1.%2 is connected to analog signal %3.").arg(afbCaption).arg(output).arg(appSignalID));
 	}
 
 
@@ -2352,7 +2330,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Discrete signal '%1' is connected to analog input '%2.%3'.
+	/// Title: Discrete signal %1 is connected to analog input %2.%3.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -2368,14 +2346,14 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5007,
-				  tr("Discrete signal '%1' is connected to analog input '%2.%3'.").arg(appSignalID).arg(afbCaption).arg(input));
+				  tr("Discrete signal %1 is connected to analog input %2.%3.").arg(appSignalID).arg(afbCaption).arg(input));
 	}
 
 	/// IssueCode: ALC5008
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal '%1' is connected to input '%2.%3' with uncompatible data format.
+	/// Title: Signal %1 is connected to input %2.%3 with uncompatible data format.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -2392,7 +2370,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5008,
-				  tr("Signal '%1' is connected to input '%2.%3' with uncompatible data format. (Logic schema '%4')").
+				  tr("Signal %1 is connected to input %2.%3 with uncompatible data format. (Logic schema %4)").
 					arg(appSignalID).arg(afbCaption).arg(input).arg(schemaID));
 	}
 
@@ -2401,7 +2379,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal '%1' is connected to input '%2.%3' with uncompatible data size.
+	/// Title: Signal %1 is connected to input %2.%3 with uncompatible data size.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -2417,14 +2395,14 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5009,
-				  tr("Signal '%1' is connected to input '%2.%3' with uncompatible data size.").arg(appSignalID).arg(afbCaption).arg(input));
+				  tr("Signal %1 is connected to input %2.%3 with uncompatible data size.").arg(appSignalID).arg(afbCaption).arg(input));
 	}
 
 	/// IssueCode: ALC5010
 	///
 	/// IssueType: Error
 	///
-	/// Title: Analog signal '%1' is connected to discrete input '%2.%3' (Logic schema '%4').
+	/// Title: Analog signal %1 is connected to discrete input %2.%3 (Logic schema %4).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -2441,7 +2419,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5010,
-				  tr("Analog signal '%1' is connected to discrete input '%2.%3' (Logic schema '%4').").
+				  tr("Analog signal %1 is connected to discrete input %2.%3 (Logic schema %4).").
 				  arg(appSignalID).arg(afbCaption).arg(input).arg(schemaID));
 	}
 
@@ -2449,7 +2427,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Application item '%1' has unknown type, SchemaID '%2'.
+	/// Title: Application item %1 has unknown type, SchemaID %2.
 	///
 	/// Parameters:
 	///		%1 Item Uuid
@@ -2464,7 +2442,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5011,
-				  tr("Application item '%1' has unknown type, SchemaID '%2'. Contact to the RPCT developers.")
+				  tr("Application item %1 has unknown type, SchemaID %2. Contact to the RPCT developers.")
 					.arg(itemLabel)
 					.arg(schemaId));
 	}
@@ -2473,7 +2451,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Application signal '%1' is not bound to any device object.
+	/// Title: Application signal %1 is not bound to any device object.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -2485,14 +2463,14 @@ namespace Builder
 	{
 		LOG_WARNING1(IssueType::AlCompiler,
 				  5012,
-				  tr("Application signal '%1' is not bound to any device object.").arg(appSignalID));
+				  tr("Application signal %1 is not bound to any device object.").arg(appSignalID));
 	}
 
 	/// IssueCode: ALC5013
 	///
 	/// IssueType: Error
 	///
-	/// Title: Application signal '%1' is bound to unknown device object '%2'.
+	/// Title: Application signal %1 is bound to unknown device object %2.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -2505,7 +2483,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5013,
-				  tr("Application signal '%1' is bound to unknown device object '%2'.").
+				  tr("Application signal %1 is bound to unknown device object %2.").
 					arg(appSignalID).arg(equipmentID));
 	}
 
@@ -2513,7 +2491,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Discrete signal '%1' must have DataSize equal to 1.
+	/// Title: Discrete signal %1 must have DataSize equal to 1.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -2525,7 +2503,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5014,
-				  tr("Discrete signal '%1' must have DataSize equal to 1.").
+				  tr("Discrete signal %1 must have DataSize equal to 1.").
 					arg(appSignalID));
 	}
 
@@ -2533,7 +2511,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Analog signal '%1' must have DataSize equal to 32.
+	/// Title: Analog signal %1 must have DataSize equal to 32.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -2545,7 +2523,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5015,
-				  tr("Analog signal '%1' must have DataSize equal to 32.").
+				  tr("Analog signal %1 must have DataSize equal to 32.").
 					arg(appSignalID));
 	}
 
@@ -2553,7 +2531,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Application signal identifier '%1' is not unique.
+	/// Title: Application signal identifier %1 is not unique.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -2565,7 +2543,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5016,
-				  tr("Application signal identifier '%1' is not unique.").
+				  tr("Application signal identifier %1 is not unique.").
 					arg(appSignalID));
 	}
 
@@ -2573,7 +2551,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Custom application signal identifier '%1' is not unique.
+	/// Title: Custom application signal identifier %1 is not unique.
 	///
 	/// Parameters:
 	///		%1 Custom application signal ID
@@ -2585,7 +2563,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5017,
-				  tr("Custom application signal identifier '%1' is not unique.").
+				  tr("Custom application signal identifier %1 is not unique.").
 					arg(appSignalID));
 	}
 
@@ -2593,7 +2571,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Opto ports '%1' and '%2' are not compatible (connection '%3').
+	/// Title: Opto ports %1 and %2 are not compatible (connection %3).
 	///
 	/// Parameters:
 	///		%1 Opto port 1 EquipmentID
@@ -2608,7 +2586,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5018,
-				  QString(tr("Opto ports '%1' and '%2' are not compatible (connection '%3').")).
+				  QString(tr("Opto ports %1 and %2 are not compatible (connection %3).")).
 				  arg(port1).arg(port2).arg(connection));
 	}
 
@@ -2616,7 +2594,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Opto port '%1' of connection '%2' is already used in connection '%3'.
+	/// Title: Opto port %1 of connection %2 is already used in connection %3.
 	///
 	/// Parameters:
 	///		%1 Opto port EquipmentID
@@ -2630,7 +2608,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5019,
-				  QString(tr("Opto port '%1' of connection '%2' is already used in connection '%3'.")).
+				  QString(tr("Opto port %1 of connection %2 is already used in connection %3.")).
 				  arg(port).arg(connection1).arg(connection2));
 	}
 
@@ -2638,7 +2616,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: LM's opto port '%1' can't work in RS232/485 mode (connection '%2').
+	/// Title: LM's opto port %1 can't work in RS232/485 mode (connection %2).
 	///
 	/// Parameters:
 	///		%1 Opto port EquipmentID
@@ -2651,7 +2629,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5020,
-				  QString(tr("LM's opto port '%1' can't work in RS232/485 mode (connection '%2').")).
+				  QString(tr("LM's opto port %1 can't work in RS232/485 mode (connection %2).")).
 				  arg(port).arg(connection));
 	}
 
@@ -2659,7 +2637,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Undefined opto port '%1' in the connection '%2'.
+	/// Title: Undefined opto port %1 in the connection %2.
 	///
 	/// Parameters:
 	///		%1 Opto port EquipmentID
@@ -2672,7 +2650,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5021,
-				  QString(tr("Undefined opto port '%1' in the connection '%2'.")).
+				  QString(tr("Undefined opto port %1 in the connection %2.")).
 				  arg(port).arg(connection));
 	}
 
@@ -2680,7 +2658,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Opto ports of the same chassis is linked via connection '%1'.
+	/// Title: Opto ports of the same chassis is linked via connection %1.
 	///
 	/// Parameters:
 	///		%1 Connection ID
@@ -2692,7 +2670,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5022,
-				  QString(tr("Opto ports of the same chassis is linked via connection '%1'.")).
+				  QString(tr("Opto ports of the same chassis is linked via connection %1.")).
 				  arg(connection));
 	}
 
@@ -2700,7 +2678,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Opto connection ID '%1' is not unique.
+	/// Title: Opto connection ID %1 is not unique.
 	///
 	/// Parameters:
 	///		%1 Connection ID
@@ -2712,7 +2690,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5023,
-				  QString(tr("Opto connection ID '%1' is not unique.")).
+				  QString(tr("Opto connection ID %1 is not unique.")).
 				  arg(connection));
 	}
 
@@ -2720,7 +2698,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Transmitter is linked to unknown opto connection '%1' (Logic schema '%2').
+	/// Title: Transmitter is linked to unknown opto connection %1 (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 Connection ID
@@ -2735,7 +2713,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5024,
-				  QString(tr("Transmitter is linked to unknown opto connection '%1' (Logic schema '%2').")).
+				  QString(tr("Transmitter is linked to unknown opto connection %1 (Logic schema %2).")).
 				  arg(connection).arg(schemaID));
 	}
 
@@ -2743,7 +2721,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Receiver is linked to unknown opto connection '%1'.
+	/// Title: Receiver is linked to unknown opto connection %1.
 	///
 	/// Parameters:
 	///		%1 Connection ID
@@ -2758,7 +2736,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5025,
-				  QString(tr("Receiver is linked to unknown opto connection '%1' (Logic schema '%2').")).
+				  QString(tr("Receiver is linked to unknown opto connection %1 (Logic schema %2).")).
 				  arg(connection).arg(schemaID));
 	}
 
@@ -2835,7 +2813,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: The signal '%1' is not associated with LM '%2'.
+	/// Title: The signal %1 is not associated with LM %2.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -2851,7 +2829,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5030,
-				  QString(tr("The signal '%1' is not associated with LM '%2'.").
+				  QString(tr("The signal %1 is not associated with LM %2.").
 						  arg(appSignalID).arg(lmEquipmentID)));
 	}
 
@@ -2859,7 +2837,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: The signal '%1' can be bind only to Logic Module or Equipment Signal.
+	/// Title: The signal %1 can be bind only to Logic Module or Equipment Signal.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -2871,7 +2849,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5031,
-				  QString(tr("The signal '%1' can be bind only to Logic Module or Equipment Signal.").
+				  QString(tr("The signal %1 can be bind only to Logic Module or Equipment Signal.").
 						  arg(appSignalID)));
 	}
 
@@ -2880,7 +2858,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+	/// Title: TxData size (%1 words) of opto port %2 exceed value of OptoPortAppDataSize property of module %3 (%4 words).
 	///
 	/// Parameters:
 	///		%1 opto port txData size, words
@@ -2895,7 +2873,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5032,
-				  QString(tr("TxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).")).
+				  QString(tr("TxData size (%1 words) of opto port %2 exceed value of OptoPortAppDataSize property of module %3 (%4 words).")).
 						  arg(txDataSize).arg(optoPortID).arg(moduleID).arg(optoPortAppDataSize));
 	}
 
@@ -2904,7 +2882,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Can't find logic module associated with signal '%1' (no LM in chassis '%2').
+	/// Title: Can't find logic module associated with signal %1 (no LM in chassis %2).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -2917,7 +2895,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5033,
-				  QString(tr("Can't find logic module associated with signal '%1' (no LM in chassis '%2').").
+				  QString(tr("Can't find logic module associated with signal %1 (no LM in chassis %2).").
 						  arg(appSignalID).arg(chassisEquipmentID)));
 	}
 
@@ -2949,7 +2927,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: RxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).
+	/// Title: RxData size (%1 words) of opto port %2 exceed value of OptoPortAppDataSize property of module %3 (%4 words).
 	///
 	/// Parameters:
 	///		%1 opto port rxData size, words
@@ -2964,7 +2942,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5035,
-				  QString(tr("RxData size (%1 words) of opto port '%2' exceed value of OptoPortAppDataSize property of module '%3' (%4 words).")).
+				  QString(tr("RxData size (%1 words) of opto port %2 exceed value of OptoPortAppDataSize property of module %3 (%4 words).")).
 						  arg(rxDataSize).arg(optoPortID).arg(moduleID).arg(optoPortAppDataSize));
 	}
 
@@ -2972,7 +2950,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Analog signal '%1' is connected to discrete signal '%3'.
+	/// Title: Analog signal %1 is connected to discrete signal %3.
 	///
 	/// Parameters:
 	///		%1 analog signal ID
@@ -2990,7 +2968,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5036,
-				  QString(tr("Analog signal '%1' is connected to discrete signal '%2'.")).
+				  QString(tr("Analog signal %1 is connected to discrete signal %2.")).
 						  arg(srcSignalID).arg(destSignalID));
 	}
 
@@ -2999,7 +2977,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Discrete signal '%1' is connected to analog signal '%3'.
+	/// Title: Discrete signal %1 is connected to analog signal %3.
 	///
 	/// Parameters:
 	///		%1 discrete signal ID
@@ -3017,7 +2995,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5037,
-				  QString(tr("Discrete signal '%1' is connected to analog signal '%2'.")).
+				  QString(tr("Discrete signal %1 is connected to analog signal %2.")).
 						  arg(srcSignalID).arg(destSignalID));
 	}
 
@@ -3025,7 +3003,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signals '%1' and '%2' have different data format.
+	/// Title: Signals %1 and %2 have different data format.
 	///
 	/// Parameters:
 	///		%1 first signal ID
@@ -3043,7 +3021,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5038,
-				  QString(tr("Signals '%1' and '%2' have different data format.")).
+				  QString(tr("Signals %1 and %2 have different data format.")).
 						  arg(srcSignalID).arg(destSignalID));
 	}
 
@@ -3051,7 +3029,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signals '%1' and '%2' have different data size.
+	/// Title: Signals %1 and %2 have different data size.
 	///
 	/// Parameters:
 	///		%1 first signal ID
@@ -3069,7 +3047,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5039,
-				  QString(tr("Signals '%1' and '%2' have different data size.")).
+				  QString(tr("Signals %1 and %2 have different data size.")).
 						  arg(srcSignalID).arg(destSignalID));
 	}
 
@@ -3077,7 +3055,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Connection with ID '%1' is not found.
+	/// Title: Connection with ID %1 is not found.
 	///
 	/// Parameters:
 	///		%1 connection ID
@@ -3091,14 +3069,14 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5040,
-				  QString(tr("Connection with ID '%1' is not found.")).arg(connectionID));
+				  QString(tr("Connection with ID %1 is not found.")).arg(connectionID));
 	}
 
 	/// IssueCode: ALC5041
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal '%1' exists in LM '%2'. No receivers needed.
+	/// Title: Signal %1 exists in LM %2. No receivers needed.
 	///
 	/// Parameters:
 	///		%1 application signal ID
@@ -3113,7 +3091,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5041,
-				  QString(tr("Signal '%1' exists in LM '%2'. No receivers needed.")).
+				  QString(tr("Signal %1 exists in LM %2. No receivers needed.")).
 				  arg(appSignalID).arg(lmID));
 	}
 
@@ -3121,7 +3099,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal '%1' is not exists in connection '%2'.
+	/// Title: Signal %1 is not exists in connection %2.
 	///
 	/// Parameters:
 	///		%1 application signal ID
@@ -3146,7 +3124,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Value of parameter '%1.%2' must be greater or equal to 0.
+	/// Title: Value of parameter %1.%2 must be greater or equal to 0.
 	///
 	/// Parameters:
 	///		%1 functional block caption
@@ -3162,7 +3140,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5043,
-				  QString(tr("Value of parameter '%1.%2' must be greater or equal to 0.")).
+				  QString(tr("Value of parameter %1.%2 must be greater or equal to 0.")).
 				  arg(fbCaption).arg(paramCaption));
 	}
 
@@ -3170,7 +3148,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Parameter's calculation for AFB '%1' (opcode %2) is not implemented.
+	/// Title: Parameter's calculation for AFB %1 (opcode %2) is not implemented.
 	///
 	/// Parameters:
 	///		%1 functional block caption
@@ -3186,7 +3164,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5044,
-				  QString(tr("Parameter's calculation for AFB '%1' (opcode %2) is not implemented.")).
+				  QString(tr("Parameter's calculation for AFB %1 (opcode %2) is not implemented.")).
 				  arg(fbCaption).arg(opcode));
 	}
 
@@ -3194,7 +3172,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Required parameter '%1' of AFB '%2' is missing.
+	/// Title: Required parameter %1 of AFB %2 is missing.
 	///
 	/// Parameters:
 	///		%1 functional block parameter caption
@@ -3210,7 +3188,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5045,
-				  QString(tr("Required parameter '%1' of AFB '%2' is missing.")).
+				  QString(tr("Required parameter %1 of AFB %2 is missing.")).
 				  arg(paramCaption).arg(fbCaption));
 	}
 
@@ -3218,7 +3196,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Parameter '%1' of AFB '%2' must have type Unsigned Int.
+	/// Title: Parameter %1 of AFB %2 must have type Unsigned Int.
 	///
 	/// Parameters:
 	///		%1 functional block parameter caption
@@ -3234,7 +3212,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5046,
-				  QString(tr("Parameter '%1' of AFB '%2' must have type Unsigned Int.")).
+				  QString(tr("Parameter %1 of AFB %2 must have type Unsigned Int.")).
 				  arg(paramCaption).arg(fbCaption));
 	}
 
@@ -3242,7 +3220,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Parameter '%1' of AFB '%2' must have type 16-bit Unsigned Int.
+	/// Title: Parameter %1 of AFB %2 must have type 16-bit Unsigned Int.
 	///
 	/// Parameters:
 	///		%1 functional block parameter caption
@@ -3258,7 +3236,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5047,
-				  QString(tr("Parameter '%1' of AFB '%2' must have type 16-bit Unsigned Int.")).
+				  QString(tr("Parameter %1 of AFB %2 must have type 16-bit Unsigned Int.")).
 				  arg(paramCaption).arg(fbCaption));
 	}
 
@@ -3266,7 +3244,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Parameter '%1' of AFB '%2' must have type 32-bit Unsigned Int.
+	/// Title: Parameter %1 of AFB %2 must have type 32-bit Unsigned Int.
 	///
 	/// Parameters:
 	///		%1 functional block parameter caption
@@ -3282,7 +3260,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5048,
-				  QString(tr("Parameter '%1' of AFB '%2' must have type 32-bit Unsigned Int.")).
+				  QString(tr("Parameter %1 of AFB %2 must have type 32-bit Unsigned Int.")).
 				  arg(paramCaption).arg(fbCaption));
 	}
 
@@ -3290,7 +3268,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Parameter '%1' of AFB '%2' must have type 32-bit Signed Int.
+	/// Title: Parameter %1 of AFB %2 must have type 32-bit Signed Int.
 	///
 	/// Parameters:
 	///		%1 functional block parameter caption
@@ -3306,7 +3284,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5049,
-				  QString(tr("Parameter '%1' of AFB '%2' must have type 32-bit Signed Int.")).
+				  QString(tr("Parameter %1 of AFB %2 must have type 32-bit Signed Int.")).
 				  arg(paramCaption).arg(fbCaption));
 	}
 
@@ -3314,7 +3292,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Parameter '%1' of AFB '%2' must have type 32-bit Float.
+	/// Title: Parameter %1 of AFB %2 must have type 32-bit Float.
 	///
 	/// Parameters:
 	///		%1 functional block parameter caption
@@ -3330,7 +3308,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5050,
-				  QString(tr("Parameter '%1' of AFB '%2' must have type 32-bit Float.")).
+				  QString(tr("Parameter %1 of AFB %2 must have type 32-bit Float.")).
 				  arg(paramCaption).arg(fbCaption));
 	}
 
@@ -3338,7 +3316,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Value %1 of parameter '%2' of AFB '%3' is incorrect.
+	/// Title: Value %1 of parameter %2 of AFB %3 is incorrect.
 	///
 	/// Parameters:
 	///		%1 parameter value
@@ -3355,7 +3333,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5051,
-				  QString(tr("Value %1 of parameter '%2' of AFB '%3' is incorrect.")).
+				  QString(tr("Value %1 of parameter %2 of AFB %3 is incorrect.")).
 				  arg(paramValue).arg(paramCaption).arg(fbCaption));
 	}
 
@@ -3363,7 +3341,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Value of parameter '%1.%2' must be greate then the value of '%1.%3'.
+	/// Title: Value of parameter %1.%2 must be greate then the value of %1.%3.
 	///
 	/// Parameters:
 	///		%1 functional block caption
@@ -3388,14 +3366,14 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Automatic sorting of XY points of FB '%1' has been performed.
+	/// Title: Automatic sorting of XY points of FB %1 has been performed.
 	///
 	/// Parameters:
 	///		%1 functional block caption
 	///		%2 application logic item Uuid
 	///
 	/// Description:
-	///		Automatic sorting of XY points of FB '%1' has been performed. Check XY points values.
+	///		Automatic sorting of XY points of FB %1 has been performed. Check XY points values.
 	///
 	void IssueLogger::wrnALC5053(QString fbCaption, QUuid itemUuid)
 	{
@@ -3403,14 +3381,14 @@ namespace Builder
 
 		LOG_WARNING0(IssueType::AlCompiler,
 				  5053,
-				  QString(tr("Automatic sorting of XY points of FB '%1' has been performed.")).arg(fbCaption));
+				  QString(tr("Automatic sorting of XY points of FB %1 has been performed.")).arg(fbCaption));
 	}
 
 	/// IssueCode: ALC5054
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Parameters '%1' and '%2' of AFB '%3' can't be equal.
+	/// Title:	   Parameters %1 and %2 of AFB %3 can't be equal.
 	///
 	/// Parameters:
 	///		%1 functional block caption
@@ -3427,7 +3405,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5054,
-				  QString(tr("Parameters '%1' and '%2' of AFB '%3' can't be equal.")).
+				  QString(tr("Parameters %1 and %2 of AFB %3 can't be equal.")).
 				  arg(param1).arg(param2).arg(fbCaption));
 	}
 
@@ -3435,7 +3413,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title:	   Optical connection '%1' is configured manually.
+	/// Title:	   Optical connection %1 is configured manually.
 	///
 	/// Parameters:
 	///		%1 Optical connection ID
@@ -3447,14 +3425,14 @@ namespace Builder
 	{
 		LOG_WARNING2(IssueType::AlCompiler,
 				  5055,
-				  QString(tr("Optical connection '%1' is configured manually.")).arg(connectionID));
+				  QString(tr("Optical connection %1 is configured manually.")).arg(connectionID));
 	}
 
 	/// IssueCode: ALC5056
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.
+	/// Title:	   SubsystemID %1 assigned in LM %2 is not found in subsystem list.
 	///
 	/// Parameters:
 	///		%1 Subsystem ID
@@ -3467,7 +3445,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5056,
-				  QString(tr("SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.")).
+				  QString(tr("SubsystemID %1 assigned in LM %2 is not found in subsystem list.")).
 				  arg(subsystemID).arg(lmEquipmentID));
 	}
 
@@ -3476,7 +3454,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Uncompatible data format of analog AFB Signal '%1.%2'.
+	/// Title:	   Uncompatible data format of analog AFB Signal %1.%2.
 	///
 	/// Parameters:
 	///		%1 AFB caption
@@ -3492,7 +3470,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5057,
-				  QString(tr("Uncompatible data format of analog AFB signal '%1.%2'.")).
+				  QString(tr("Uncompatible data format of analog AFB signal %1.%2.")).
 				  arg(afbCaption).arg(afbSignal));
 	}
 
@@ -3500,7 +3478,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Parameter '%1' of AFB '%2' can't be 0.
+	/// Title:	   Parameter %1 of AFB %2 can't be 0.
 	///
 	/// Parameters:
 	///		%1 AFB parameter caption
@@ -3516,7 +3494,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5058,
-				  QString(tr("Parameter '%1' of AFB '%2' can't be 0.")).
+				  QString(tr("Parameter %1 of AFB %2 can't be 0.")).
 				  arg(paramCaption).arg(afbCaption));
 	}
 
@@ -3524,7 +3502,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Ports of connection '%1' are not accessible in LM '%2' (Logic schema '%3').
+	/// Title:	   Ports of connection %1 are not accessible in LM %2 (Logic schema %3).
 	///
 	/// Parameters:
 	///		%1 Opto connection ID
@@ -3540,7 +3518,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5059,
-				  QString(tr("Ports of connection '%1' are not accessible in LM '%2' (Logic schema '%3').")).
+				  QString(tr("Ports of connection %1 are not accessible in LM %2 (Logic schema %3).")).
 				  arg(connectionID).arg(lmID).arg(schemaID));
 	}
 
@@ -3548,7 +3526,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Float constant is connected to discrete input (Logic schema '%1').
+	/// Title:	   Float constant is connected to discrete input (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
@@ -3562,14 +3540,14 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5060,
-				  QString(tr("Float constant is connected to discrete input (Logic schema '%1').")).arg(schemaID));
+				  QString(tr("Float constant is connected to discrete input (Logic schema %1).")).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5061
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Float constant is connected to 16-bit input (Logic schema '%1').
+	/// Title:	   Float constant is connected to 16-bit input (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
@@ -3583,14 +3561,14 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5061,
-				  QString(tr("Float constant is connected to 16-bit input (Logic schema '%1').")).arg(schemaID));
+				  QString(tr("Float constant is connected to 16-bit input (Logic schema %1).")).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5062
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Float constant is connected to SignedInt input (Logic schema '%1').
+	/// Title:	   Float constant is connected to SignedInt input (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
@@ -3604,14 +3582,14 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5062,
-				  QString(tr("Float constant is connected to SignedInt input (Logic schema '%1').")).arg(schemaID));
+				  QString(tr("Float constant is connected to SignedInt input (Logic schema %1).")).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5063
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Integer constant is connected to Float input (Logic schema '%1').
+	/// Title:	   Integer constant is connected to Float input (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
@@ -3625,7 +3603,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5063,
-				  QString(tr("Integer constant is connected to Float input (Logic schema '%1').")).arg(schemaID));
+				  QString(tr("Integer constant is connected to Float input (Logic schema %1).")).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5064
@@ -3670,7 +3648,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Command 'MOVEMEM %1, %2, %3' can't write to bit-addressed memory.
+	/// Title:	   Command MOVEMEM %1, %2, %3 can't write to bit-addressed memory.
 	///
 	/// Parameters:
 	///		%1 Destination address
@@ -3678,13 +3656,13 @@ namespace Builder
 	///		%3 Memory size to move
 	///
 	/// Description:
-	///		Command 'MOVEMEM' can't write to bit-addressed memory. Contact to RPCT developers.
+	///		Command MOVEMEM can't write to bit-addressed memory. Contact to RPCT developers.
 	///
 	void IssueLogger::errALC5066(int addrTo, int addrFrom, int sizeW)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5066,
-				  QString(tr("Command 'MOVEMEM %1, %2, %3' can't write to bit-addressed memory.")).
+				  QString(tr("Command MOVEMEM %1, %2, %3 can't write to bit-addressed memory.")).
 					arg(addrTo).arg(addrFrom).arg(sizeW));
 	}
 
@@ -3692,7 +3670,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Command 'MOVBC %1[%2], #%3' can't write out of application bit- or word-addressed memory.
+	/// Title:	   Command MOVBC %1[%2], #%3 can't write out of application bit- or word-addressed memory.
 	///
 	/// Parameters:
 	///		%1 Destination address
@@ -3700,13 +3678,13 @@ namespace Builder
 	///		%3 Const bit value
 	///
 	/// Description:
-	///		Command 'MOVBC' can't write out of application bit- or word-addressed memory. Contact to RPCT developers.
+	///		Command MOVBC can't write out of application bit- or word-addressed memory. Contact to RPCT developers.
 	///
 	void IssueLogger::errALC5067(int addrTo, int bit, int value)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5067,
-				  QString(tr("Command 'MOVBC %1[%2], #%3' can't write out of application bit- or word-addressed memory.")).
+				  QString(tr("Command MOVBC %1[%2], #%3 can't write out of application bit- or word-addressed memory.")).
 					arg(addrTo).arg(bit).arg(value));
 	}
 
@@ -3758,7 +3736,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title:	   Signal '%1' has Little Endian byte order.
+	/// Title:	   Signal %1 has Little Endian byte order.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -3770,7 +3748,7 @@ namespace Builder
 	{
 		LOG_WARNING1(IssueType::AlCompiler,
 				  5070,
-				  QString(tr("Signal '%1' has Little Endian byte order.")).
+				  QString(tr("Signal %1 has Little Endian byte order.")).
 					arg(appSignalID));
 	}
 
@@ -3779,7 +3757,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Can't assign value to tuningable signal '%1' (Logic schema '%2').
+	/// Title:	   Can't assign value to tuningable signal %1 (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -3793,7 +3771,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5071,
-				  QString(tr("Can't assign value to tuningable signal '%1' (Logic schema '%2').")).
+				  QString(tr("Can't assign value to tuningable signal %1 (Logic schema %2).")).
 					arg(appSignalID).arg(schemaID));
 	}
 
@@ -3802,7 +3780,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Possible error. AFB 'Poly' CoefCount = %1, but coefficient '%2' is not equal to 0 (Logic schema %3).
+	/// Title: Possible error. AFB 'Poly' CoefCount = %1, but coefficient %2 is not equal to 0 (Logic schema %3).
 	///
 	/// Parameters:
 	/// 	%1 AFB Poly CoefCount parameters value
@@ -3819,7 +3797,7 @@ namespace Builder
 
 		LOG_WARNING1(IssueType::AlCompiler,
 				  5072,
-				  QString(tr("Possible error. AFB 'Poly' CoefCount = %1, but coefficient '%2' is not equal to 0 (Logic schema '%3').")).
+				  QString(tr("Possible error. AFB 'Poly' CoefCount = %1, but coefficient %2 is not equal to 0 (Logic schema %3).")).
 					 arg(coefCount).arg(coefCaption).arg(schemaID));
 	}
 
@@ -4009,7 +3987,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Receiver of connection '%1' (port '%2') is not associated with LM '%3'
+	/// Title: Receiver of connection %1 (port %2) is not associated with LM %3
 	///
 	/// Parameters:
 	///		%1 Connection ID
@@ -4025,7 +4003,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5083,
-				  QString(tr("Receiver of connection '%1' (port '%2') is not associated with LM '%3'.")).
+				  QString(tr("Receiver of connection %1 (port %2) is not associated with LM %3.")).
 						arg(connectionID).arg(receiverPortID).arg(lmID));
 	}
 
@@ -4033,7 +4011,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Rx data size of RS232/485 port '%1' is undefined (connection '%2').
+	/// Title: Rx data size of RS232/485 port %1 is undefined (connection %2).
 	///
 	/// Parameters:
 	///		%1 Serial port EquipmentID
@@ -4046,7 +4024,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5085,
-				  QString(tr("Rx data size of RS232/485 port '%1' is undefined (connection '%2').")).
+				  QString(tr("Rx data size of RS232/485 port %1 is undefined (connection %2).")).
 						arg(portEquipmentID).arg(connectionID));
 	}
 
@@ -4078,7 +4056,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Can't assign value to input signal '%1' (Logic schema '%2').
+	/// Title:	   Can't assign value to input signal %1 (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -4092,7 +4070,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5087,
-				  QString(tr("Can't assign value to input signal '%1' (Logic schema '%2').")).
+				  QString(tr("Can't assign value to input signal %1 (Logic schema %2).")).
 					arg(appSignalID).arg(schemaID));
 	}
 
@@ -4100,7 +4078,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Value of parameter '%1.%2' must be greater then 0.
+	/// Title: Value of parameter %1.%2 must be greater then 0.
 	///
 	/// Parameters:
 	///		%1 functional block caption
@@ -4116,7 +4094,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5088,
-				  QString(tr("Value of parameter '%1.%2' must be greater then 0.")).
+				  QString(tr("Value of parameter %1.%2 must be greater then 0.")).
 				  arg(fbCaption).arg(paramCaption));
 	}
 
@@ -4124,7 +4102,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Command 'MOVB %1[%2], %3[%4]' can't write out of application bit- or word-addressed memory.
+	/// Title:	   Command MOVB %1[%2], %3[%4] can't write out of application bit- or word-addressed memory.
 	///
 	/// Parameters:
 	///		%1 Destination address
@@ -4133,13 +4111,13 @@ namespace Builder
 	///		%4 Source bit
 	///
 	/// Description:
-	///		Command 'MOVB' can't write out of application bit- or word-addressed memory. Contact to RPCT developers.
+	///		Command MOVB can't write out of application bit- or word-addressed memory. Contact to RPCT developers.
 	///
 	void IssueLogger::errALC5089(int addrTo, int bitTo, int addrFrom, int bitFrom)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5089,
-				  QString(tr("Command 'MOVB %1[%2], %3[%4]' can't write out of application bit- or word-addressed memory.")).
+				  QString(tr("Command MOVB %1[%2], %3[%4] can't write out of application bit- or word-addressed memory.")).
 					arg(addrTo).arg(bitTo).arg(addrFrom).arg(bitFrom));
 	}
 
@@ -4147,7 +4125,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Analog signal '%1' aperture should be greate then 0.
+	/// Title:	   Analog signal %1 aperture should be greate then 0.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -4159,7 +4137,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5090,
-				  QString(tr("Analog signal '%1' aperture should be greate then 0.")).
+				  QString(tr("Analog signal %1 aperture should be greate then 0.")).
 					arg(appSignalID));
 	}
 
@@ -4167,7 +4145,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Input/output application signal '%1' should be bound to equipment signal.
+	/// Title:	   Input/output application signal %1 should be bound to equipment signal.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -4179,7 +4157,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5091,
-				  QString(tr("Input/output application signal '%1' should be bound to equipment signal.")).
+				  QString(tr("Input/output application signal %1 should be bound to equipment signal.")).
 					arg(appSignalID));
 	}
 
@@ -4187,7 +4165,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Bus type ID '%1' of signal '%2' is undefined.
+	/// Title:	   Bus type ID %1 of signal %2 is undefined.
 	///
 	/// Parameters:
 	///		%1 Bus type ID
@@ -4200,7 +4178,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5092,
-				  QString(tr("Bus type ID '%1' of signal '%2' is undefined.")).
+				  QString(tr("Bus type ID %1 of signal %2 is undefined.")).
 						arg(busTypeID).arg(appSignalID));
 	}
 
@@ -4208,7 +4186,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title:	   Coarse aperture of signal '%1' less then fine aperture.
+	/// Title:	   Coarse aperture of signal %1 less then fine aperture.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -4220,14 +4198,14 @@ namespace Builder
 	{
 		LOG_WARNING0(IssueType::AlCompiler,
 				  5093,
-				  QString(tr("Coarse aperture of signal '%1' less then fine aperture.")).arg(appSignalID));
+				  QString(tr("Coarse aperture of signal %1 less then fine aperture.")).arg(appSignalID));
 	}
 
 	/// IssueCode: ALC5094
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Size of in bus analog signal '%1' is not multiple 16 bits (bus type '%2').
+	/// Title:	   Size of in bus analog signal %1 is not multiple 16 bits (bus type %2).
 	///
 	/// Parameters:
 	///		%1 In bus signal ID
@@ -4240,7 +4218,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5094,
-				  QString(tr("Size of in bus analog signal '%1' is not multiple 16 bits (bus type '%2').")).
+				  QString(tr("Size of in bus analog signal %1 is not multiple 16 bits (bus type %2).")).
 						arg(inBusSignalID).arg(busTypeID));
 	}
 
@@ -4248,7 +4226,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   The bus size must be a multiple of 2 bytes (1 word) (bus type '%1').
+	/// Title:	   The bus size must be a multiple of 2 bytes (1 word) (bus type %1).
 	///
 	/// Parameters:
 	///		%1 Bus type ID
@@ -4260,14 +4238,14 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5095,
-				  QString(tr("The bus size must be a multiple of 2 bytes (1 word) (bus type '%1').")).arg(busTypeID));
+				  QString(tr("The bus size must be a multiple of 2 bytes (1 word) (bus type %1).")).arg(busTypeID));
 	}
 
 	/// IssueCode: ALC5096
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Offset of in bus analog (or bus) signal '%' is not multiple of 2 bytes (1 word) (bus type '%2').
+	/// Title:	   Offset of in bus analog (or bus) signal %1 is not multiple of 2 bytes (1 word) (bus type %2).
 	///
 	/// Parameters:
 	///		%1 In bus signal ID
@@ -4280,7 +4258,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5096,
-				  QString(tr("Offset of in-bus analog (or bus) signal '%1' is not multiple of 2 bytes (1 word) (bus type '%2').")).
+				  QString(tr("Offset of in-bus analog (or bus) signal %1 is not multiple of 2 bytes (1 word) (bus type %2).")).
 							arg(inBusSignalID).arg(busTypeID));
 	}
 
@@ -4288,7 +4266,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Bus signals '%1' and '%2' are overlapped (bus type '%3').
+	/// Title:	   Bus signals %1 and %2 are overlapped (bus type %3).
 	///
 	/// Parameters:
 	///		%1 Bus signal ID
@@ -4302,7 +4280,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5097,
-				  QString(tr("Bus signals '%1' and '%2' are overlapped (bus type '%3').")).
+				  QString(tr("Bus signals %1 and %2 are overlapped (bus type %3).")).
 							arg(signalID1).arg(signalID2).arg(busTypeID));
 	}
 
@@ -4310,7 +4288,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Bus signal '%1' offset out of range (bus type '%2').
+	/// Title:	   Bus signal %1 offset out of range (bus type %2).
 	///
 	/// Parameters:
 	///		%1 Bus signal ID
@@ -4323,7 +4301,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5098,
-				  QString(tr("Bus signal '%1' offset out of range (bus type '%2').")).
+				  QString(tr("Bus signal %1 offset out of range (bus type %2).")).
 							arg(signalID).arg(busTypeID));
 	}
 
@@ -4350,7 +4328,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Bus type ID '%1' is undefined (Logic schema '%2').
+	/// Title:	   Bus type ID %1 is undefined (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 Bus type ID
@@ -4365,7 +4343,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5100,
-				  QString(tr("Bus type ID '%1' is undefined (Logic schema '%2').")).arg(busTypeID).arg(schemaID));
+				  QString(tr("Bus type ID %1 is undefined (Logic schema %2).")).arg(busTypeID).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5102
@@ -4394,7 +4372,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Different bus types of bus composer and signal '%1' (Logic schema '%2').
+	/// Title:	   Different bus types of bus composer and signal %1 (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -4410,7 +4388,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5103,
-				  QString(tr("Different bus types of bus composer and signal '%1' (Logic schema '%2').")).
+				  QString(tr("Different bus types of bus composer and signal %1 (Logic schema %2).")).
 						arg(signalID).arg(schemaID));
 	}
 
@@ -4418,7 +4396,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Bus composer is connected to non-bus signal '%1' (Logic schema '%2').
+	/// Title:	   Bus composer is connected to non-bus signal %1 (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -4434,7 +4412,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5104,
-				  QString(tr("Bus composer is connected to non-bus signal '%1' (Logic schema '%2').")).
+				  QString(tr("Bus composer is connected to non-bus signal %1 (Logic schema %2).")).
 						arg(signalID).arg(schemaID));
 	}
 
@@ -4442,7 +4420,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Undefined UAL address of signal '%1' (Logic schema '%2').
+	/// Title:	   Undefined UAL address of signal %1 (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -4457,7 +4435,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5105,
-				  QString(tr("Undefined UAL address of signal '%1' (Logic schema '%2').")).
+				  QString(tr("Undefined UAL address of signal %1 (Logic schema %2).")).
 						arg(signalID).arg(schemaID));
 	}
 
@@ -4465,14 +4443,14 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Pin with caption '%1' is not found in schema item (Logic schema '%2').
+	/// Title:	   Pin with caption %1 is not found in schema item (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 Pin caption
 	///		%2 Logic schema ID
 	///
 	/// Description:
-	///		Pin with caption '%1' is not found in schema item. Contact with RPCT developers.
+	///		Pin with caption %1 is not found in schema item. Contact with RPCT developers.
 	///
 	void IssueLogger::errALC5106(QString pinCaption, QUuid schemaItemUuid, QString schemaID)
 	{
@@ -4480,7 +4458,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5106,
-				  QString(tr("Pin with caption '%1' is not found in schema item (Logic schema '%2').")).
+				  QString(tr("Pin with caption %1 is not found in schema item (Logic schema %2).")).
 						arg(pinCaption).arg(schemaID));
 	}
 
@@ -4488,7 +4466,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Afb's output cannot be directly connected to the transmitter. Intermediate app signal should be used (Logic schema '%1').
+	/// Title:	   Afb's output cannot be directly connected to the transmitter. Intermediate app signal should be used (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
@@ -4503,7 +4481,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5107,
-				  QString(tr("AFB's output cannot be directly connected to the transmitter. Intermediate app signal should be used (Logic schema '%1').")).
+				  QString(tr("AFB's output cannot be directly connected to the transmitter. Intermediate app signal should be used (Logic schema %1).")).
 								arg(schemaID));
 	}
 
@@ -4525,7 +4503,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5108,
-				  QString(tr("Cannot identify AFB bus type (Logic schema '%1'').").arg(schemaID)));
+				  QString(tr("Cannot identify AFB bus type (Logic schema %1).").arg(schemaID)));
 	}
 
 	/// IssueCode: ALC5109
@@ -4546,14 +4524,14 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5109,
-				  QString(tr("Different bus types on AFB inputs (Logic schema '%1'').").arg(schemaID)));
+				  QString(tr("Different bus types on AFB inputs (Logic schema %1).").arg(schemaID)));
 	}
 
 	/// IssueCode: ALC5110
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Non-bus output is connected to bus input (Logic schema '%1').
+	/// Title:	   Non-bus output is connected to bus input (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
@@ -4568,7 +4546,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5110,
-				  QString(tr("Non-bus output is connected to bus input (Logic schema '%1').")).
+				  QString(tr("Non-bus output is connected to bus input (Logic schema %1).")).
 						arg(schemaID));
 	}
 
@@ -4576,7 +4554,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Output of type 'Bus' is occured in non-bus processing AFB (Logic schema '%1').
+	/// Title:	   Output of type 'Bus' is occured in non-bus processing AFB (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
@@ -4590,7 +4568,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5111,
-				  QString(tr("Output of type 'Bus' is occured in non-bus processing AFB (Logic schema '%1'")).
+				  QString(tr("Output of type 'Bus' is occured in non-bus processing AFB (Logic schema %1")).
 						arg(schemaID));
 	}
 
@@ -4621,7 +4599,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Bus output is connected to non-bus input (Logic schema '%1').
+	/// Title:	   Bus output is connected to non-bus input (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
@@ -4636,7 +4614,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5113,
-				  QString(tr("Bus output is connected to non-bus input (Logic schema '%1').")).
+				  QString(tr("Bus output is connected to non-bus input (Logic schema %1).")).
 						arg(schemaID));
 	}
 
@@ -4644,7 +4622,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Bus size exceed max bus size of input '%1.%2'(Logic schema '%3').
+	/// Title:	   Bus size exceed max bus size of input %1.%2 (Logic schema %3).
 	///
 	/// Parameters:
 	///		%1 Logic item caption
@@ -4660,7 +4638,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5114,
-				  QString(tr("Bus size exceed max bus size of input '%1.%2'(Logic schema '%3').")).
+				  QString(tr("Bus size exceed max bus size of input %1.%2 (Logic schema %3).")).
 						arg(itemCaption).arg(inputCaption).arg(schemaID));
 	}
 
@@ -4668,7 +4646,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Uncompatible bus data format of UAL elements (Logic schema '%1').
+	/// Title:	   Uncompatible bus data format of UAL elements (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
@@ -4683,7 +4661,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5115,
-				  QString(tr("Uncompatible bus data format of UAL elements (Logic schema '%1').")).
+				  QString(tr("Uncompatible bus data format of UAL elements (Logic schema %1).")).
 						arg(schemaID));
 	}
 
@@ -4691,7 +4669,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Disallowed connection of UAL elements (Logic schema '%1').
+	/// Title:	   Disallowed connection of UAL elements (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
@@ -4706,7 +4684,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5116,
-				  QString(tr("Disallowed connection of UAL elements (Logic schema '%1').")).
+				  QString(tr("Disallowed connection of UAL elements (Logic schema %1).")).
 						arg(schemaID));
 	}
 
@@ -4714,7 +4692,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Uncompatible signals connection (Logic schema '%1').
+	/// Title:	   Uncompatible signals connection (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
@@ -4729,7 +4707,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5117,
-				  QString(tr("Uncompatible signals connection (items %1 and %2) (Logic schema '%3').")).
+				  QString(tr("Uncompatible signals connection (items %1 and %2) (Logic schema %3).")).
 						arg(label1).arg(label2).arg(schemaID));
 	}
 
@@ -4737,7 +4715,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Signal '%1' is not connected to any signal source. (Logic schema '%2').
+	/// Title:	   Signal %1 is not connected to any signal source. (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -4752,7 +4730,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5118,
-				  QString(tr("Signal '%1' is not connected to any signal source. (Logic schema '%2').")).
+				  QString(tr("Signal %1 is not connected to any signal source. (Logic schema %2).")).
 						arg(appSignalID).arg(schemaID));
 	}
 
@@ -4760,7 +4738,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Type of Constant is uncompatible with type of linked schema items (Logic schema '%1').
+	/// Title:	   Type of Constant is uncompatible with type of linked schema items (Logic schema %1).
 	///
 	/// Parameters:
 	///		%1 Logic schema ID
@@ -4774,14 +4752,14 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5119,
-				  QString(tr("Type of Constant is uncompatible with type of linked schema items (Logic schema '%1').")).arg(schemaID));
+				  QString(tr("Type of Constant is uncompatible with type of linked schema items (Logic schema %1).")).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5120
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   UalSignal is not found for pin '%1' (Logic schema '%2').
+	/// Title:	   UalSignal is not found for pin %1 (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 Schema item pin Guid
@@ -4796,7 +4774,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5120,
-				  QString(tr("UalSignal is not found for pin %1.%2 (Logic schema '%3').")).
+				  QString(tr("UalSignal is not found for pin %1.%2 (Logic schema %3).")).
 							arg(ualItemLabel).arg(pin).arg(schemaID));
 	}
 
@@ -5006,7 +4984,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Max instances (%1) of AFB component '%2' is used (Logic schema %3, item %4)
+	/// Title:	   Max instances (%1) of AFB component %2 is used (Logic schema %3, item %4)
 	///
 	/// Parameters:
 	///		%1 Max instances count
@@ -5023,7 +5001,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5130,
-				  QString(tr("Max instances (%1) of AFB component '%2' is used (Logic schema %3, item %4)")).
+				  QString(tr("Max instances (%1) of AFB component %2 is used (Logic schema %3, item %4)")).
 						arg(maxInstances).arg(afbComponentCaption).arg(schemaID).arg(itemLabel));
 	}
 
@@ -5470,13 +5448,94 @@ namespace Builder
 						arg(monitorID).arg(tuningServiceID));
 	}
 
+	/// IssueCode: ALC5151
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus type %1 has not initialized.
+	///
+	/// Parameters:
+	///		%1 Bus type ID
+	///
+	/// Description:
+	///		Bus type %1 has not initialized.
+	///
+	void IssueLogger::errALC5151(QString busTypeID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5151,
+				  QString(tr("Bus type %1 has not initialized.")).arg(busTypeID));
+	}
+
+	/// IssueCode: ALC5152
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Bus input signal %1 placement is out of bus size (bus type %2).
+	///
+	/// Parameters:
+	///		%1 Bus input signal ID
+	///		%2 Bus type ID
+	///
+	/// Description:
+	///		Bus input signal placement is out of bus size. Check bus input signal properties.
+	///
+	void IssueLogger::errALC5152(QString inBusSignal, QString busTypeID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5152,
+				  QString(tr("Bus input signal %1 placement is out of bus size (bus type %2).")).
+							arg(inBusSignal).arg(busTypeID));
+	}
+
+	/// IssueCode: ALC5153
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Unknown conversion of signal %1 to inbus signal %2 (Logic schema %3).
+	///
+	/// Parameters:
+	///		%1 Input signal appSignalID
+	///		%2 Bus child signal appSignalID
+	///		%3 Logic schemaID
+	///
+	/// Description:
+	///		Unknown conversion of signal to inbus signal. Check types of signals.
+	///
+	void IssueLogger::errALC5153(QString signalID, QString inbusSignalID, QString schemaID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5153,
+				  QString(tr("Unknown conversion of signal %1 to inbus signal %2 (Logic schema %3).")).
+							arg(signalID).arg(inbusSignalID).arg(schemaID));
+	}
+
+	/// IssueCode: ALC5154
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Associated logic module is not found. Signal %1 cannot be processed.
+	///
+	/// Parameters:
+	///		%1 AppSignalID
+	///
+	/// Description:
+	///		Logic module is not found in chassis with application signals. Check hardware configuration and append LM if necessary.
+	///
+	void IssueLogger::errALC5154(QString signalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5154,
+				  QString(tr("Associated logic module is not found. Signal %1 cannot be processed.")).arg(signalID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal '%1' is not found (opto port '%2' raw data description).
+	/// Title: Signal %1 is not found (opto port %2 raw data description).
 	///
 	/// Parameters:
 	///		%1 Application signalID
@@ -5489,7 +5548,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5186,
-				  QString(tr("Signal '%1' is not found (opto port '%2' raw data description).")).
+				  QString(tr("Signal %1 is not found (opto port %2 raw data description).")).
 						arg(appSignalID).arg(portEquipmentID));
 	}
 
@@ -5497,7 +5556,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Tx data memory areas of opto ports '%1' and '%2' are overlapped.
+	/// Title: Tx data memory areas of opto ports %1 and %2 are overlapped.
 	///
 	/// Parameters:
 	///		%1 Opto port 1 ID
@@ -5510,7 +5569,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5187,
-				  QString(tr("Tx data memory areas of opto ports '%1' and '%2' are overlapped.")).
+				  QString(tr("Tx data memory areas of opto ports %1 and %2 are overlapped.")).
 						arg(port1ID).arg(port2ID));
 	}
 
@@ -5518,7 +5577,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Duplicate signal ID '%1' in opto port '%2' raw data description.
+	/// Title: Duplicate signal ID %1 in opto port %2 raw data description.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -5531,7 +5590,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5188,
-				  QString(tr("Signal ID '%1' is duplicate in opto port '%2' raw data description.")).
+				  QString(tr("Signal ID %1 is duplicate in opto port %2 raw data description.")).
 						arg(appSignalID).arg(portID));
 	}
 
@@ -5539,7 +5598,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Tx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.
+	/// Title: Tx signal %1 specified in opto port %2 raw data description is not exists in LM %3.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -5553,7 +5612,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5189,
-				  QString(tr("Tx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.")).
+				  QString(tr("Tx signal %1 specified in opto port %2 raw data description is not exists in LM %3.")).
 						arg(appSignalID).arg(portID).arg(lmID));
 	}
 
@@ -5561,7 +5620,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Rx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.
+	/// Title: Rx signal %1 specified in opto port %2 raw data description is not exists in LM %3.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -5575,7 +5634,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5190,
-				  QString(tr("Rx signal '%1' specified in opto port '%2' raw data description is not exists in LM '%3'.")).
+				  QString(tr("Rx signal %1 specified in opto port %2 raw data description is not exists in LM %3.")).
 						arg(appSignalID).arg(portID).arg(lmID));
 	}
 
@@ -5583,7 +5642,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Serial Rx signal '%1' is not associated with LM '%2' (Logic schema '%3').
+	/// Title: Serial Rx signal %1 is not associated with LM %2 (Logic schema %3).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -5599,7 +5658,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5191,
-				  QString(tr("Serial Rx signal '%1' is not associated with LM '%2' (Logic schema '%3').")).
+				  QString(tr("Serial Rx signal %1 is not associated with LM %2 (Logic schema %3).")).
 						arg(appSignalID).arg(lmID).arg(schemaID));
 	}
 
@@ -5607,7 +5666,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Tx signal '%1' specified in port '%2' raw data description isn't connected to transmitter (Connection '%3').
+	/// Title: Tx signal %1 specified in port %2 raw data description isn't connected to transmitter (Connection %3).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -5621,7 +5680,7 @@ namespace Builder
 	{
 		LOG_WARNING0(IssueType::AlCompiler,
 				  5192,
-				  QString(tr("Tx signal '%1' specified in port '%2' raw data description isn't connected to transmitter (Connection '%3').")).
+				  QString(tr("Tx signal %1 specified in port %2 raw data description isn't connected to transmitter (Connection %3).")).
 						arg(appSignalID).arg(portID).arg(connectionID));
 	}
 
@@ -5629,7 +5688,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').
+	/// Title: Rx signal %1 specified in port %2 raw data description isn't assigned to receiver (Connection %3).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -5643,7 +5702,7 @@ namespace Builder
 	{
 		LOG_WARNING0(IssueType::AlCompiler,
 				  5193,
-				  QString(tr("Rx signal '%1' specified in port '%2' raw data description isn't assigned to receiver (Connection '%3').")).
+				  QString(tr("Rx signal %1 specified in port %2 raw data description isn't assigned to receiver (Connection %3).")).
 						arg(appSignalID).arg(portID).arg(connectionID));
 	}
 
@@ -5651,7 +5710,7 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Tx data memory areas of ports '%1' and '%2' with manual settings are overlapped.
+	/// Title: Tx data memory areas of ports %1 and %2 with manual settings are overlapped.
 	///
 	/// Parameters:
 	///		%1 Opto port 1 ID
@@ -5664,7 +5723,7 @@ namespace Builder
 	{
 		LOG_WARNING0(IssueType::AlCompiler,
 				  5194,
-				  QString(tr("Tx data memory areas of ports '%1' and '%2' with manual settings are overlapped.")).
+				  QString(tr("Tx data memory areas of ports %1 and %2 with manual settings are overlapped.")).
 						arg(port1ID).arg(port2ID));
 	}
 
@@ -5676,7 +5735,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property Place is less then 0 (Equipment object '%1').
+	/// Title: Property Place is less then 0 (Equipment object %1).
 	///
 	/// Parameters:
 	///		%1 Equipmnet object StrID
@@ -5691,7 +5750,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::Equipment,
 				  6000,
-				  tr("Property Place is less then 0 (Equipment object '%1').")
+				  tr("Property Place is less then 0 (Equipment object %1).")
 				  .arg(equipmemtId)
 				  );
 	}
@@ -5700,7 +5759,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Two or more equipment objects have the same EquipmentID '%1'.
+	/// Title: Two or more equipment objects have the same EquipmentID %1.
 	///
 	/// Parameters:
 	///		%1 Equipment object ID
@@ -5716,7 +5775,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::Equipment,
 				  6001,
-				  tr("Two or more equipment objects have the same EquipmentID '%1'.")
+				  tr("Two or more equipment objects have the same EquipmentID %1.")
 				  .arg(equipmemtId)
 				  );
 	}
@@ -5725,7 +5784,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Two or more equipment objects have the same Uuid '%1' (Object1 '%2', Object2 '%3').
+	/// Title: Two or more equipment objects have the same Uuid %1 (Object1 %2, Object2 %3).
 	///
 	/// Parameters:
 	///		%1 Equipmnet objects Uuid
@@ -5743,7 +5802,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::Equipment,
 				  6002,
-				  tr("Two or more equipment objects have the same Uuid '%1' (Object1 '%2', Object2 '%3')")
+				  tr("Two or more equipment objects have the same Uuid %1 (Object1 %2, Object2 %3)")
 				  .arg(equipmentUuid.toString())
 				  .arg(equipmentId1)
 				  .arg(equipmentId2)
@@ -5754,7 +5813,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Ethernet adapters of LMs '%1' and '%2' has duplicate IP address %3.
+	/// Title: Ethernet adapters of LMs %1 and %2 has duplicate IP address %3.
 	///
 	/// Parameters:
 	///		%1 First LM equipmentID
@@ -5773,7 +5832,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::Equipment,
 				  6003,
-				  tr("Ethernet adapters of LMs '%1' and '%2' has duplicate IP address %3.")
+				  tr("Ethernet adapters of LMs %1 and %2 has duplicate IP address %3.")
 				  .arg(lm1)
 				  .arg(lm2)
 				  .arg(ipAddress)
@@ -5869,7 +5928,7 @@ namespace Builder
     ///
     /// IssueType: Error
     ///
-    /// Title: Child '%1' with place '%2' is not allowed in parent '%3'.
+	/// Title: Child %1 with place %2 is not allowed in parent %3.
     ///
     ///
     /// Parameters:
@@ -5884,7 +5943,7 @@ namespace Builder
     {
         LOG_ERROR(IssueType::Equipment,
                   6008,
-                  tr("Child '%1' with place '%2' is not allowed in parent '%3'.")
+				  tr("Child %1 with place %2 is not allowed in parent %3.")
                   .arg(childEquipmentId)
                   .arg(childPlace)
                   .arg(equipmentId));
@@ -5894,7 +5953,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Property Place must be 0 (Equipment object '%1').
+	/// Title: Property Place must be 0 (Equipment object %1).
 	///
 	/// Parameters:
 	///		%1 Equipmnet object StrID
@@ -5908,7 +5967,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::Equipment,
 				  6009,
-				  tr("Property Place must be 0 (Equipment object '%1').")
+				  tr("Property Place must be 0 (Equipment object %1).")
 				  .arg(equipmemtId)
 				  );
 	}
@@ -5941,7 +6000,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Unknown software type (Software object StrID '%1').
+	/// Title: Unknown software type (Software object StrID %1).
 	///
 	/// Parameters:
 	///		%1 Equipmnet object StrID
@@ -5955,7 +6014,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::Equipment,
 				  6100,
-				  tr("Unknown software type (Software object StrID '%1').")
+				  tr("Unknown software type (Software object StrID %1).")
 				  .arg(softwareObjectStrId)
 				  );
 	}
@@ -6154,7 +6213,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Equipment ID '%1' specified in TuningSourceEquipmentID property of Tuning Client '%2' does not exist.
+	/// Title: Equipment ID %1 specified in TuningSourceEquipmentID property of Tuning Client %2 does not exist.
 	///
 	/// Parameters:
 	///		%1 Tuning Source Equipment ID
@@ -6167,7 +6226,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6109,
-				  tr("Equipment ID '%1' specified in TuningSourceEquipmentID property of Tuning Client '%2' does not exist.")
+				  tr("Equipment ID %1 specified in TuningSourceEquipmentID property of Tuning Client %2 does not exist.")
 				  .arg(equipmentId)
 				  .arg(tuningClientEquipmentId)
 				  );

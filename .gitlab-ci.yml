@@ -3,41 +3,63 @@ variables:
   
 stages:
   - build
-  - test
-  - deploy
+#  - test
+#  - deploy
 
 before_script:
-  - echo before_script
+#  - echo before_script
   - cd
-  - dir
+#  - dir
   - set
   
-after_script:
-  - echo after_script
+#after_script:
+#  - echo after_script
 
 windows build job:
   stage: build
   tags:
     - vs2017
   script:
-    - "echo ------------------------------------"
-    - "echo -   JOB STARTED: windows build     -"
-    - "echo ------------------------------------"
-  after_script:
-#    - "echo ToDo: Clean up build stuff and evering else"
+    - "echo %CI_COMMIT_SHA%"
+    - "git status"
+    - "git log -1"
+#generation version file
+    - "echo #pragma once > gitlabci_version.h"
+    - "echo. >> gitlabci_version.h"
+    - "echo #define GITLAB_CI_BUILD >> gitlabci_version.h"
+    - "echo #define CI_BUILD_REF_SLUG \"%CI_BUILD_REF_SLUG%\" >> gitlabci_version.h"
+    - "echo #define CI_COMMIT_SHA \"%CI_COMMIT_SHA%\" >> gitlabci_version.h"
+    - "echo #define GITLAB_USER_NAME \"%GITLAB_USER_NAME%\" >> gitlabci_version.h"
+    - "echo #define CI_PIPELINE_IID %CI_PIPELINE_IID% >> gitlabci_version.h"
+    - "echo #define COMPUTERNAME %COMPUTERNAME% >> gitlabci_version.h"
+    - "echo #define BUILD_DATE \"%date% %time%\" >> gitlabci_version.h"
+    
+#run QMAKE
+    - "call C:/Qt/5.9.6/msvc2017_64/bin/qtenv2.bat"
+    - "call \"C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Auxiliary/Build/vcvarsall.bat\" x86_amd64"
+    - "cl.exe"
+    - "qmake --version"
+    - "qmake.exe %CI_PROJECT_DIR%/u7set.pro -spec win32-msvc"
+    - "C:/Qt/Tools/QtCreator/bin/jom.exe qmake_all"
+    - "C:/Qt/Tools/QtCreator/bin/jom.exe"
   artifacts:
+    name: "u7set_%CI_BUILD_REF_SLUG%_0.8.%CI_PIPELINE_IID%_%CI_COMMIT_SHA%"
     paths:
       - bin/release/*.exe
       - bin/release/*.dll
       - bin/release/*.lib
       - bin/release/*.exp
 
-deploy job:
-  stage: deploy
-  only:
-    - /^release.*$/
-  script:
-    - "echo ------------------------------------"
-    - "echo -   JOB STARTED: deploy            -"
-    - "echo ------------------------------------"
-#    - TO DO Upload zopped exe to drive.goodle...
+#deploy job:
+#  stage: deploy
+#  tags:
+#    - vs2017  
+#  only:
+#    - /^release.*$/
+#    - master
+#    - develop
+#  script:
+    # cannot create a tag as REPO is read only (((  
+    #- "git tag v0.8.%CI_BUILD_ID%"
+    #- "git push --tags"
+

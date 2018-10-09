@@ -237,15 +237,6 @@ namespace Builder
 				continue;
 			}
 
-			if ((s.isInput() == true || s.isOutput() == true) && device->deviceType() != Hardware::DeviceType::Signal)
-			{
-				// The input (or output) signal %1 can be bind to Equipment Signal only.
-				m_log->errALC5136(s.appSignalID());
-				result = false;
-			}
-
-			bool deviceOK = false;
-
 			switch(device->deviceType())
 			{
 			case Hardware::DeviceType::Module:
@@ -255,7 +246,13 @@ namespace Builder
 					if (module != nullptr && (module->isLogicModule() == true || module->isBvb() == true))
 					{
 						s.setLm(module);
-						deviceOK = true;
+					}
+					else
+					{
+						// The signal %1 can be bind only to Logic Module or Equipment Signal.
+						//
+						m_log->errALC5031(s.appSignalID());
+						result = false;
 					}
 				}
 				break;
@@ -275,18 +272,33 @@ namespace Builder
 					if (module != nullptr && module->isLogicModule() == true)
 					{
 						s.setLm(module);
-						deviceOK = true;
+					}
+					else
+					{
+						// Associated logic module is not found. Signal %1 cannot be processed.
+						//
+						m_log->errALC5154(s.appSignalID());
+						result = false;
 					}
 				}
 				break;
-			}
 
-			if (deviceOK == false)
-			{
-				// The signal '%1' can be bind only to Logic Module or Equipment Signal.
-				//
-				m_log->errALC5031(s.appSignalID());
-				result = false;
+			default:
+
+				if (s.isInput() == true || s.isOutput() == true)
+				{
+					// The input (or output) signal %1 can be bind to Equipment Signal only.
+					//
+					m_log->errALC5136(s.appSignalID());
+					result = false;
+				}
+				else
+				{
+					// The signal %1 can be bind only to Logic Module or Equipment Signal.
+					//
+					m_log->errALC5031(s.appSignalID());
+					result = false;
+				}
 			}
 		}
 

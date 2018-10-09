@@ -143,7 +143,7 @@ namespace VFrame30
 	const QString PropertyNames::busInbusDiscreteBitNo("BitNo");
 	const QString PropertyNames::busInbusAnalogSize("Size");
 	const QString PropertyNames::busInbusAnalogFormat("Format");
-	const QString PropertyNames::busInbusAnalogByteOrder("ButeOrder");
+	const QString PropertyNames::busInbusAnalogByteOrder("ByteOrder");
 	const QString PropertyNames::busAnalogLowLimit("BusSignalLowLimit");
 	const QString PropertyNames::busAnalogHightLimit("BusSignalHighLimit");
 	const QString PropertyNames::busInbusAnalogLowLimit("InbusSignalLowLimit");
