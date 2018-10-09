@@ -28,8 +28,10 @@ windows build job:
     - "echo. >> gitlabci_version.h"
     - "echo #define CI_BUILD_REF_SLUG \"%CI_BUILD_REF_SLUG%\" >> gitlabci_version.h"
     - "echo #define CI_COMMIT_SHA \"%CI_COMMIT_SHA%\" >> gitlabci_version.h"
-    - "echo #define CI_BUILD_ID %CI_BUILD_ID% >> gitlabci_version.h"
     - "echo #define GITLAB_USER_NAME \"%GITLAB_USER_NAME%\" >> gitlabci_version.h"
+    - "echo #define CI_BUILD_ID %CI_BUILD_ID% >> gitlabci_version.h"
+    - "echo #define CI_PIPELINE_ID %CI_PIPELINE_ID% >> gitlabci_version.h"
+    - "echo #define CI_PIPELINE_IID %CI_PIPELINE_IID% >> gitlabci_version.h"
 #run QMAKE
     - "call \"C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Auxiliary/Build/vcvarsall.bat\" x86_amd64"
     - "cl.exe"
@@ -39,7 +41,7 @@ windows build job:
 #  after_script:
 #    - "echo ToDo: Clean up build stuff..."
   artifacts:
-    name: "u7set_%CI_BUILD_REF_SLUG%_0.8.%CI_BUILD_ID%_%CI_COMMIT_SHA%"
+    name: "u7set_%CI_BUILD_REF_SLUG%_0.8.%CI_PIPELINE_IID%_%CI_COMMIT_SHA%"
     paths:
       - bin/release/*.exe
       - bin/release/*.dll
