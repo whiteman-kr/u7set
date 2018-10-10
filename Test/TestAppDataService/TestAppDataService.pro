@@ -9,11 +9,23 @@ QT       += qml
 
 # QT       -= gui
 
-TARGET = tst_testappdataservice
+TARGET = testappdataservice
 CONFIG   += console
 CONFIG   -= app_bundle
 
 TEMPLATE = app
+
+# DESTDIR
+#
+win32 {
+    CONFIG(debug, debug|release): DESTDIR = ../../bin/debug
+    CONFIG(release, debug|release): DESTDIR = ../../bin/release
+}
+unix {
+    CONFIG(debug, debug|release): DESTDIR = ../../bin_unix/debug
+    CONFIG(release, debug|release): DESTDIR = ../../bin_unix/release
+}
+
 
 # Force prebuild version control info
 #
@@ -124,9 +136,9 @@ win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 
 win32 {
-    LIBS += -L$$DESTDIR -lprotobuf
+        LIBS += -L$$DESTDIR/. -lprotobuf
 
-    INCLUDEPATH += ./../Protobuf
+        INCLUDEPATH += $$PWD/../../Protobuf
 }
 unix {
     LIBS += -lprotobuf
