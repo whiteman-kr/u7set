@@ -38,13 +38,10 @@ windows build job:
     - "echo #define CI_PIPELINE_IID %CI_PIPELINE_IID% >> gitlabci_version.h"
     - "echo #define COMPUTERNAME \"%COMPUTERNAME%\" >> gitlabci_version.h"
     - "echo #define BUILD_DATE \"%date% %time%\" >> gitlabci_version.h"
-    
-#run QMAKE
-    - "call C:/Qt/5.9.2/msvc2017_64/bin/qtenv2.bat"
     - "call \"C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Auxiliary/Build/vcvarsall.bat\" x86_amd64"
     - "cl.exe"
-    - "qmake --version"
-    - "qmake.exe %CI_PROJECT_DIR%/u7set.pro -spec win32-msvc"
+    - "C:/Qt/5.9.2/msvc2017_64/bin/qmake --version"
+    - "C:/Qt/5.9.2/msvc2017_64/bin/qmake.exe %CI_PROJECT_DIR%/u7set.pro -spec win32-msvc"
     - "C:/Qt/Tools/QtCreator/bin/jom.exe qmake_all"
     - "C:/Qt/Tools/QtCreator/bin/jom.exe"
   artifacts:

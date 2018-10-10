@@ -1,4 +1,5 @@
 #include <QApplication>
+#include <QTranslator>
 
 #include "MainWindow.h"
 #include "Options.h"
@@ -21,6 +22,13 @@ int main(int argc, char *argv[])
 #else
 	a.setApplicationVersion(QString("1.8.LOCALBUILD"));
 #endif
+
+	QTranslator translator;
+	if (translator.load("Metrology_ru.qm", QApplication::applicationDirPath() + "/translations") == false)
+	{
+		qDebug() << "Options::loadLanguage() - didn't load language file";
+	}
+	qApp->installTranslator(&translator);
 
     theOptions.load();
 
