@@ -1,6 +1,5 @@
 #include "MainWindow.h"
 #include "TuningClientTcpClient.h"
-#include "version.h"
 
 TuningClientTcpClient::TuningClientTcpClient(const SoftwareInfo& softwareInfo,
 											 TuningSignalManager* signalManager,

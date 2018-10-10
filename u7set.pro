@@ -6,7 +6,6 @@ win32:SUBDIRS += Protobuf
 SUBDIRS += qtservice \
     qtpropertybrowser \
     QScintilla \
-    GetGitProjectVersion \
     ServiceControlManager \
     Metrology \
     TrendView \
@@ -26,4 +25,3 @@ SUBDIRS += qtservice \
     TuningIPEN \
     mconf \
     Tools/PacketSource
-

@@ -30,35 +30,6 @@ unix {
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
-# Force prebuild version control info
-#
-win32 {
-	contains(QMAKE_TARGET.arch, x86_64){
-		QMAKE_CLEAN += $$PWD/../bin_Win64/GetGitProjectVersion.exe
-		system(IF NOT EXIST $$PWD/../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
-			qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-			nmake))
-		system(chdir $$PWD & \
-			$$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/ConfigurationService.pro)
-	}
-	else{
-		QMAKE_CLEAN += $$PWD/../bin_Win32/GetGitProjectVersion.exe
-		system(IF NOT EXIST $$PWD/../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
-			qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-			nmake))
-		system(chdir $$PWD & \
-			$$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/ConfigurationService.pro)
-	}
-}
-unix {
-	QMAKE_CLEAN += $$PWD/../bin_unix/GetGitProjectVersion
-	system(cd $$PWD/../GetGitProjectVersion; \
-		qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-		make;)
-	system(cd $$PWD; \
-		$$PWD/../bin_unix/GetGitProjectVersion $$PWD/ConfigurationService.pro)
-}
-
 
 SOURCES += \
     ../lib/CfgServerLoader.cpp \
@@ -82,7 +53,6 @@ SOURCES += \
     ../lib/SoftwareInfo.cpp
 
 HEADERS += \
-    version.h \
     ../lib/CfgServerLoader.h \
     ../lib/Tcp.h \
     ../lib/TcpFileTransfer.h \

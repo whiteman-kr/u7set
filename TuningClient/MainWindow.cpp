@@ -1,6 +1,5 @@
 #include "Main.h"
 #include "MainWindow.h"
-#include "version.h"
 
 #include "DialogFilterEditor.h"
 
@@ -850,7 +849,7 @@ void MainWindow::showSignalsLog()
 void MainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to modify tuning values.");
-	DialogAbout::show(this, text);
+	DialogAbout::show(this, text, ":/Images/Images/logo.png");
 }
 
 MainWindow* theMainWindow = nullptr;

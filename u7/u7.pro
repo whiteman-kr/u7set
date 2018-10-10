@@ -241,7 +241,6 @@ HEADERS  += \
     BuildTabPage.h \
     ../lib/OutputLog.h \
     ../lib/DbProgress.h \
-    version.h \
     ../lib/Crc.h \
     DialogFileEditor.h \
     Builder/Builder.h \

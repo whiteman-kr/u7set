@@ -852,7 +852,7 @@ void MainWindow::showAbout()
 	QString text = "Supported project database version: " + QString::number(DbController::databaseVersion()) + "<br><br>";
 	text += qApp->applicationName() + " provides offline tools for FSC chassis configuration, application logic design and its compilation, visualization design and MATS software configuration.<br>";
 
-	DialogAbout::show(this, text);
+	DialogAbout::show(this, text, ":/Images/Images/logo.png");
 
 	return;
 }

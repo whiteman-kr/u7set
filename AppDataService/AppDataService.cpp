@@ -9,9 +9,6 @@
 #include "TcpArchiveClient.h"
 #include "RtTrendsServer.h"
 
-#include "version.h"
-
-
 // -------------------------------------------------------------------------------
 //
 // AppDataServiceWorker class implementation

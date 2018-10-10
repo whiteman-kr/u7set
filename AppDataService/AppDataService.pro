@@ -28,35 +28,6 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
-# Force prebuild version control info
-#
-win32 {
-	contains(QMAKE_TARGET.arch, x86_64){
-		QMAKE_CLEAN += $$PWD/../bin_Win64/GetGitProjectVersion.exe
-		system(IF NOT EXIST $$PWD/../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
-			qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-			nmake))
-		system(chdir $$PWD & \
-			$$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/AppDataService.pro)
-	}
-	else{
-		QMAKE_CLEAN += $$PWD/../bin_Win32/GetGitProjectVersion.exe
-		system(IF NOT EXIST $$PWD/../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
-			qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-			nmake))
-		system(chdir $$PWD & \
-			$$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/AppDataService.pro)
-	}
-}
-unix {
-	QMAKE_CLEAN += $$PWD/../bin_unix/GetGitProjectVersion
-	system(cd $$PWD/../GetGitProjectVersion; \
-		qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-		make;)
-	system(cd $$PWD; \
-		$$PWD/../bin_unix/GetGitProjectVersion $$PWD/AppDataService.pro)
-}
-
 
 SOURCES += \
 	../lib/UdpSocket.cpp \
@@ -112,7 +83,6 @@ HEADERS += \
     ../lib/Service.h \
     ../lib/CircularLogger.h \
     ../lib/DataSource.h \
-    version.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
     ../lib/ProtoSerialization.h \

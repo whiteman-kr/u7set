@@ -12,7 +12,6 @@
 #include "../lib/Ui/DialogTuningSources.h"
 #include "../lib/Ui/UiTools.h"
 #include "../lib/Ui/DialogAbout.h"
-#include "version.h"
 
 const QString MonitorMainWindow::m_monitorSingleInstanceKey = "MonitorInstanceCheckerKey";
 
@@ -678,8 +677,9 @@ void MonitorMainWindow::showSettings()
 void MonitorMainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to view schemas and trends.<br>");
+	DialogAbout::show(this, text, ":/Images/Images/logo.png");
 
-	DialogAbout::show(this, text);
+	return;
 }
 
 void MonitorMainWindow::debug()

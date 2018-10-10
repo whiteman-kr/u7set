@@ -1,5 +1,4 @@
 #include "TcpTuningServiceClient.h"
-#include "version.h"
 
 
 TcpTuningServiceClient::TcpTuningServiceClient(const SoftwareInfo& softwareInfo,

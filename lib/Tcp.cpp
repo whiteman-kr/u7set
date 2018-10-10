@@ -1,7 +1,6 @@
 #include "../lib/Tcp.h"
 #include "../Proto/network.pb.h"
 #include <stdlib.h>
-#include "version.h"
 
 namespace Tcp
 {

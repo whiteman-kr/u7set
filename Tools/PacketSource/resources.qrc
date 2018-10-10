@@ -6,5 +6,6 @@
         <file>icons/Stop.png</file>
         <file>icons/PacketSource.png</file>
         <file>icons/SelectAll.png</file>
+        <file>Images/logo.png</file>
     </qresource>
 </RCC>

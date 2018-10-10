@@ -1,23 +1,24 @@
-#include "../lib/Ui/DialogAbout.h"
+#include "DialogAbout.h"
 #include <QApplication>
 #include <QDialog>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
 #include <QDialogButtonBox>
+#include <QClipboard>
 
-#if __has_include("../gitlabci_version.h")
-#	include "../gitlabci_version.h"
+#if __has_include("../../gitlabci_version.h")
+#	include "../../gitlabci_version.h"
 #endif
 
-void DialogAbout::show(QWidget* parent, const QString& description)
+void DialogAbout::show(QWidget* parent, const QString& description, const QString& imagePath)
 {
 	QDialog aboutDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint);
 
 	QHBoxLayout* hl = new QHBoxLayout;
 
 	QLabel* logo = new QLabel(&aboutDialog);
-	logo->setPixmap(QPixmap(":/Images/Images/logo.png"));
+	logo->setPixmap(QPixmap(imagePath));
 
 	hl->addWidget(logo);
 
@@ -32,12 +33,16 @@ void DialogAbout::show(QWidget* parent, const QString& description)
 	text += "Build: Debug";
 #endif
 
-#ifdef CI_PIPELINE_IID
-	text += "<br>Commit date: " GITLAB_CI_BUILD;
-	text += "<br>Commit SHA1: " CI_COMMIT_SHA;
+#ifdef GITLAB_CI_BUILD
+	text += "<br>Commit SHA: "	CI_COMMIT_SHA;
+	text += "<br>Branch: "		CI_BUILD_REF_SLUG;
+	text += "<br>Build Date: "	BUILD_DATE;
+	text += "<br>Build Host: "	COMPUTERNAME;
 #else
-	text += "<br>Commit date: LOCALBUILD";
-	text += "<br>Commit SHA1: LOCALBUILD";
+	text += "<br>Commit SHA1: No data";
+	text += "<br>Branch: No data";
+	text += "<br>Date: No data";
+	text += "<br>Host: No data";
 #endif
 
 	QLabel* label = new QLabel(text, &aboutDialog);

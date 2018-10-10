@@ -16,7 +16,6 @@
 #	include "../gitlabci_version.h"
 #endif
 
-#include <QtQml>
 
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
 

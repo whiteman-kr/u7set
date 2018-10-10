@@ -1,7 +1,6 @@
 #include <QXmlStreamReader>
 #include <QMetaProperty>
 #include "ArchivingService.h"
-#include "version.h"
 
 // -------------------------------------------------------------------------------
 //
