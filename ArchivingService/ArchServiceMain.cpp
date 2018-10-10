@@ -44,9 +44,9 @@ int main(int argc, char *argv[])
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );	// Memory leak report on app exit
 #endif
 
-	testQueue();
+/*	testQueue();
 
-	return 1;
+	return 1;*/
 
 	QCoreApplication app(argc, argv);
 

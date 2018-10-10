@@ -8,6 +8,10 @@ ArchFile::ArchFile()
 {
 }
 
+ArchFile::~ArchFile()
+{
+}
+
 bool ArchFile::init(const FileArchWriter* writer, const QString& signalID, Hash hash, bool isAnalogSignal)
 {
 	TEST_PTR_RETURN_FALSE(writer);
@@ -57,9 +61,14 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 	return true;
 }
 
-void ArchFile::flush(qint64 curPartition)
+bool ArchFile::flush(qint64 curPartition)
 {
-	TEST_PTR_RETURN(m_queue);
+	TEST_PTR_RETURN_FALSE(m_queue);
+
+	if (m_queue->isEmpty() == true)
+	{
+		return false;
+	}
 
 	int copiedItemsCount = 0;
 
@@ -67,10 +76,19 @@ void ArchFile::flush(qint64 curPartition)
 
 	if (result == false || copiedItemsCount == 0)
 	{
-		return;
+		return false;
+	}
+
+	if (curPartition != m_prevPartition)
+	{
+		closeFile();
+
+		m_prevPartition = curPartition;
 	}
 
 	writeFile(curPartition, m_buffer, copiedItemsCount);
+
+	return true;
 }
 
 bool ArchFile::isEmergency() const
@@ -78,6 +96,12 @@ bool ArchFile::isEmergency() const
 	TEST_PTR_RETURN_FALSE(m_queue);
 
 	return m_queue->size() >= static_cast<int>(m_queue->queueSize() * QUEUE_EMERGENCY_LIMIT);
+}
+
+void ArchFile::shutdown(qint64 curPartition)
+{
+	flush(curPartition);
+	closeFile();
 }
 
 bool ArchFile::writeFile(qint64 partition, SignalState* buffer, int statesCount)
@@ -141,12 +165,17 @@ bool ArchFile::writeFile(qint64 partition, SignalState* buffer, int statesCount)
 		m_fileIsAligned = false;
 	}
 
+	qDebug() << C_STR(QString("Flush %1 states %2").arg(m_file.fileName()).arg(statesCount));
+
 	return true;
 }
 
-void ArchFile::close()
+void ArchFile::closeFile()
 {
-	assert(m_fileIsOpened == true);
+	if (m_fileIsOpened == false)
+	{
+		return;
+	}
 
 	m_file.close();
 
@@ -456,19 +485,15 @@ bool FileArchWriter::processSaveStatesQueue()
 
 		count++;
 	}
-	while(count < 100000);
-
-	if (count > 0)
-	{
-		qDebug() << C_STR(QString("%1 states processed").arg(count));
-	}
+	while(count < 10000);
 
 	return count > 0;
 }
 
 void FileArchWriter::updateCurrentPartition()
 {
-	const int PARTITTION_DIVIDER = 24 * 60 * 60 * 1000;			// each day
+	// const int PARTITTION_DIVIDER = 24 * 60 * 60 * 1000;			// each day
+	const int PARTITTION_DIVIDER = 60 * 1000;						// each minute
 
 	qint64 curPartition = (QDateTime::currentMSecsSinceEpoch() / PARTITTION_DIVIDER) * PARTITTION_DIVIDER;
 
@@ -497,6 +522,7 @@ void FileArchWriter::runArchiveMaintenance()
 bool FileArchWriter::writeEmergencyFiles()
 {
 	int count = 0;
+	int flushedCount = 0;
 
 	do
 	{
@@ -507,13 +533,18 @@ bool FileArchWriter::writeEmergencyFiles()
 			break;
 		}
 
-		emergencyFile->flush(m_curPartition);
+		bool res = emergencyFile->flush(m_curPartition);
+
+		if (res == true)
+		{
+			flushedCount++;
+		}
 
 		count++;
 	}
 	while(count < 200);
 
-	return count > 0;
+	return flushedCount > 0;
 }
 
 bool FileArchWriter::writeRegularFiles()
@@ -524,6 +555,7 @@ bool FileArchWriter::writeRegularFiles()
 	}
 
 	int count = 0;
+	int flashedCount = 0;
 
 	do
 	{
@@ -538,14 +570,19 @@ bool FileArchWriter::writeRegularFiles()
 
 		if (archFile != nullptr)
 		{
-			archFile->flush(m_curPartition);
+			bool res = archFile->flush(m_curPartition);
+
+			if (res == true)
+			{
+				flashedCount++;
+			}
 		}
 
 		count++;
 	}
 	while(count < 100);
 
-	return true;
+	return flashedCount > 0;
 }
 
 bool FileArchWriter::archiveMaintenance()
@@ -562,11 +599,17 @@ bool FileArchWriter::archiveMaintenance()
 
 void FileArchWriter::shutdown()
 {
-	if (m_archFiles != nullptr)
+	TEST_PTR_RETURN(m_archFiles);
+
+	for(int i = 0; i < m_archFilesCount; i++)
 	{
-		delete [] m_archFiles;
-		m_archFiles = nullptr;
+		ArchFile* archFile = m_archFiles + i;
+
+		archFile->shutdown(m_curPartition);
 	}
+
+	delete [] m_archFiles;
+	m_archFiles = nullptr;
 }
 
 void FileArchWriter::addEmergencyFile(ArchFile* file)

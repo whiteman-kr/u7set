@@ -33,18 +33,23 @@ class ArchFile
 
 public:
 	ArchFile();
+	~ArchFile();
 
 	bool init(const FileArchWriter* writer, const QString& signalID, Hash hash, bool isAnalogSignal);
 
 	bool pushState(qint64 archID, const SimpleAppSignalState& state);
 
-	void flush(qint64 curPartition);
+	bool flush(qint64 curPartition);
+
+	bool queueIsEmpty() const { return m_queue->isEmpty(); }
 
 	bool isEmergency() const;
 
+	void shutdown(qint64 curPartition);
+
 private:
 	bool writeFile(qint64 partition, SignalState* buffer, int statesCount);
-	void close();
+	void closeFile();
 
 private:
 	const FileArchWriter* m_archWriter = nullptr;
@@ -59,6 +64,7 @@ private:
 	bool m_pathIsExists = false;
 	bool m_fileIsOpened = false;
 	bool m_fileIsAligned = false;
+	qint64 m_prevPartition = -1;
 
 	FastQueue<SignalState>* m_queue = nullptr;
 
