@@ -1,6 +1,5 @@
 #include "../lib/WUtils.h"
 #include "TuningService.h"
-#include "version.h"
 
 
 namespace Tuning

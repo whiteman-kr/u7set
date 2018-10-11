@@ -3,7 +3,10 @@
 #include "../lib/Crc.h"
 #include "../lib/WUtils.h"
 #include <QtEndian>
-#include "version.h"
+
+#if __has_include("../gitlabci_version.h")
+#	include "../gitlabci_version.h"
+#endif
 
 //
 // JsVariantList
@@ -376,7 +379,13 @@ namespace Hardware
 #else
 		m_buildSoftware += ", debug";
 #endif
-		m_buildSoftware += ", commit SHA1: " USED_SERVER_COMMIT_SHA;
+
+#ifdef GITLAB_CI_BUILD
+		m_buildSoftware += ", commit SHA1: " CI_COMMIT_SHA;
+#else
+		m_buildSoftware += ", commit SHA1: LOCALBUILD";
+#endif
+
 
 		QString m_buildTime = QDateTime().currentDateTime().toString("dd.MM.yyyy hh:mm:ss");
 

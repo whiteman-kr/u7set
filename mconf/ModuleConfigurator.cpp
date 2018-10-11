@@ -5,6 +5,10 @@
 #include "DiagTabPage.h"
 #include "ApplicationTabPage.h"
 
+#if __has_include("../gitlabci_version.h")
+#	include "../gitlabci_version.h"
+#endif
+
 ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	: QMainWindow(parent)
 {
@@ -157,6 +161,16 @@ ModuleConfigurator::ModuleConfigurator(QWidget *parent)
 	// --
 	//
     theLog.writeMessage(tr("Programm is started"));
+	theLog.writeMessage(tr("Version %1").arg(qApp->applicationVersion()));
+
+#ifdef GITLAB_CI_BUILD
+	theLog.writeMessage(tr("Commit SHA: %1").arg(CI_COMMIT_SHA));
+	theLog.writeMessage(tr("Branch: %1").arg(CI_BUILD_REF_SLUG));
+	theLog.writeMessage(tr("Build Date: %1").arg(BUILD_DATE));
+	theLog.writeMessage(tr("Build Host: %1").arg(COMPUTERNAME));
+#else
+#endif
+
 	return;
 }
 

@@ -48,36 +48,6 @@ CONFIG(release, debug|release) {
 }
 
 
-# Force prebuild version control info
-#
-win32 {
-    contains(QMAKE_TARGET.arch, x86_64){
-        QMAKE_CLEAN += $$PWD/../bin_Win64/GetGitProjectVersion.exe
-        system(IF NOT EXIST $$PWD/../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
-            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-            nmake))
-        system(chdir $$PWD & \
-            $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/u7.pro)
-    }
-    else{
-        QMAKE_CLEAN += $$PWD/../bin_Win32/GetGitProjectVersion.exe
-        system(IF NOT EXIST $$PWD/../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
-            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-            nmake))
-        system(chdir $$PWD & \
-            $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/u7.pro)
-    }
-}
-unix {
-    QMAKE_CLEAN += $$PWD/../bin_unix/GetGitProjectVersion
-    system(cd $$PWD/../GetGitProjectVersion; \
-        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-        make; \
-        cd $$PWD; \
-        $$PWD/../bin_unix/GetGitProjectVersion $$PWD/u7.pro)
-}
-
-
 SOURCES +=\
     CentralWidget.cpp \
     CreateProjectDialog.cpp \
@@ -271,7 +241,6 @@ HEADERS  += \
     BuildTabPage.h \
     ../lib/OutputLog.h \
     ../lib/DbProgress.h \
-    version.h \
     ../lib/Crc.h \
     DialogFileEditor.h \
     Builder/Builder.h \

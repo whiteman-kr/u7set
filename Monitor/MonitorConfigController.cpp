@@ -2,7 +2,6 @@
 #include "../lib/ServiceSettings.h"
 #include "MonitorConfigController.h"
 #include "Settings.h"
-#include "version.h"
 
 ConfigConnection::ConfigConnection(QString EquipmentId, QString ipAddress, int port) :
 	m_equipmentId(EquipmentId),

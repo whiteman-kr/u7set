@@ -1,5 +1,4 @@
 #include "ArchivingService.h"
-#include "version.h"
 #include "../lib/WUtils.h"
 
 int main(int argc, char *argv[])

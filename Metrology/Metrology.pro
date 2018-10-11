@@ -32,35 +32,6 @@ unix {
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-# Force prebuild version control info
-#
-win32 {
-        contains(QMAKE_TARGET.arch, x86_64){
-            QMAKE_CLEAN += $$PWD/../bin_Win64/GetGitProjectVersion.exe
-            system(IF NOT EXIST $$PWD/../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
-            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-            nmake))
-            system(chdir $$PWD & \
-            $$PWD/../bin_Win64/GetGitProjectVersion.exe $$PWD/Metrology.pro)
-        }
-        else{
-            QMAKE_CLEAN += $$PWD/../bin_Win32/GetGitProjectVersion.exe
-            system(IF NOT EXIST $$PWD/../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../GetGitProjectVersion & \
-            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-            nmake))
-            system(chdir $$PWD & \
-            $$PWD/../bin_Win32/GetGitProjectVersion.exe $$PWD/Metrology.pro)
-        }
-}
-unix {
-        QMAKE_CLEAN += $$PWD/../bin_unix/GetGitProjectVersion
-    system(cd $$PWD/../GetGitProjectVersion; \
-        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-        make; \
-        cd $$PWD; \
-        $$PWD/../bin_unix/GetGitProjectVersion $$PWD/Metrology.pro)
-}
-
 
 SOURCES += \
     MainWindow.cpp \
@@ -126,7 +97,8 @@ SOURCES += \
     ../lib/TuningValue.cpp \
     ../lib/Signal.cpp \
     ../lib/PropertyObject.cpp \
-    ../lib/SignalProperties.cpp
+    ../lib/SignalProperties.cpp \
+    ../lib/Ui/DialogAbout.cpp
 
 #../lib/ExcelHelper.cpp
 
@@ -145,7 +117,6 @@ HEADERS  += \
     Delegate.h \
     FolderPropertyManager.h \
     Database.h \
-    version.h \
     Conversion.h \
     Calculator.h \
     Stable.h \
@@ -202,7 +173,8 @@ HEADERS  += \
     ../lib/TuningValue.h \
     ../u7/Builder/CfgFiles.h \
     ../lib/PropertyObject.h \
-    ../lib/SignalProperties.h
+    ../lib/SignalProperties.h \
+    ../lib/Ui/DialogAbout.h
 #../lib/ExcelHelper.h
 
 FORMS    +=

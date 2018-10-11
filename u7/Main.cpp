@@ -9,11 +9,13 @@
 #include "../lib/TimeStamp.h"
 #include "Builder/OptoModule.h"
 #include "Builder/ModuleFirmwareWriter.h"
-#include "version.h"
 #include "../lib/LmDescription.h"
 #include "../lib/Configurator.h"
 
-#include <QtQml>
+#if __has_include("../gitlabci_version.h")
+#	include "../gitlabci_version.h"
+#endif
+
 
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
 
@@ -102,7 +104,11 @@ int main(int argc, char *argv[])
 	a.setOrganizationName("Radiy");
 	a.setOrganizationDomain("radiy.com");
 
-	a.setApplicationVersion(QString("0.7.%1 (%2)").arg(USED_SERVER_COMMIT_NUMBER).arg(BUILD_BRANCH));
+#ifdef GITLAB_CI_BUILD
+	a.setApplicationVersion(QString("0.8.%1 (%2)").arg(CI_PIPELINE_IID).arg(CI_BUILD_REF_SLUG));
+#else
+	a.setApplicationVersion(QString("0.8.LOCALBUILD"));
+#endif
 
 	VFrame30::VFrame30Library::Init();
 	Hardware::Init();

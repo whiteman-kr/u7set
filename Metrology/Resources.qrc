@@ -38,5 +38,6 @@
         <file>icons/Comparator.png</file>
         <file>icons/InOut.png</file>
         <file>icons/Logo.png</file>
+        <file>Images/logo.png</file>
     </qresource>
 </RCC>

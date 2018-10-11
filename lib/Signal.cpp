@@ -1039,7 +1039,7 @@ void Signal::serializeFrom(const Proto::AppSignal& s)
 	// Signal specific properties
 
 	m_specPropStruct = QString::fromStdString(s.specpropstruct());
-	m_protoSpecPropValues.fromStdString(s.specpropvalues());
+	m_protoSpecPropValues = QByteArray::fromStdString(s.specpropvalues());
 
 	// Tuning signal properties
 

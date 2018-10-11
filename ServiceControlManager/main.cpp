@@ -11,7 +11,6 @@
 #include "../lib/SocketIO.h"
 #include "../lib/Tcp.h"
 
-#include "version.h"
 
 const char* const semaphoreString = "ServiceControlManagerSemaphore";
 const char* const sharedMemoryString = "ServiceControlManagerSharedMemory";

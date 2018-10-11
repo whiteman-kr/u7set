@@ -1,6 +1,7 @@
 *.user
 *.autosave
 version.h
+gitlab_version.h
 Makefile*
 *.o
 *embed.manifest

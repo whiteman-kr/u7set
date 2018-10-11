@@ -1,7 +1,6 @@
 #include "ConfigController.h"
 #include "MainWindow.h"
 #include "../lib/ServiceSettings.h"
-#include "version.h"
 
 //
 // ConfigController

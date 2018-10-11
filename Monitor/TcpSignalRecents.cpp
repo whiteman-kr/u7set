@@ -1,7 +1,6 @@
 #include "Stable.h"
 #include "TcpSignalRecents.h"
 #include "Settings.h"
-#include "version.h"
 
 
 RecentUsed::RecentUsed(int maxSize /*= 750*/) :
