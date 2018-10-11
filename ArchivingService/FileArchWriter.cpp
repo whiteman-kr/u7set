@@ -63,6 +63,11 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 
 bool ArchFile::flush(qint64 curPartition)
 {
+	SimpleMutexLocker locker(&m_flushMutex);
+
+	Q_UNUSED(locker);
+
+	QMutexLocker d;
 	TEST_PTR_RETURN_FALSE(m_queue);
 
 	if (m_queue->isEmpty() == true)

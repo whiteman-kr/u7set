@@ -68,6 +68,8 @@ private:
 
 	FastQueue<SignalState>* m_queue = nullptr;
 
+	SimpleMutex m_flushMutex;
+
 	const double QUEUE_EMERGENCY_LIMIT = 0.7;		// 70%
 	const double QUEUE_EXPAND_LIMIT = 0.9;			// 90%
 

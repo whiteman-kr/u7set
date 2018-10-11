@@ -3,6 +3,7 @@
 
 #include <QThread>
 #include <QEventLoop>
+#include <QMutex>
 #include <memory>
 #include <atomic>
 
@@ -93,4 +94,35 @@ public:
 											// return false if timeout elapsed
 
 	bool waitForever() { return wait(0); }
+};
+
+
+class SimpleMutex
+{
+public:
+	SimpleMutex();
+
+	void lock();
+	void lock(const QThread* currentThread);
+
+	void unlock();
+	void unlock(const QThread* currentThread);
+
+private:
+	std::atomic<const QThread*> m_currentOwner = { nullptr };
+};
+
+class SimpleMutexLocker
+{
+public:
+	SimpleMutexLocker(SimpleMutex* mutex);
+	SimpleMutexLocker(SimpleMutex* mutex, const QThread* currentThread);
+
+	~SimpleMutexLocker();
+
+private:
+
+private:
+	SimpleMutex* m_simpleMutex;
+	const QThread* m_currentThread = nullptr;
 };
