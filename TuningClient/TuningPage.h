@@ -172,7 +172,7 @@ private:
 
 	int m_instanceNo = -1;
 
-	std::vector<std::pair<TuningModel::Columns, double>> m_columnsArray;
+	std::vector<std::pair<TuningModelColumns, double>> m_columnsArray;
 
 };
 

@@ -5,6 +5,8 @@
 #include "../lib/Hash.h"
 #include "../VFrame30/Schema.h"
 
+#define MAX_VALUES_COLUMN_COUNT 6
+
 struct TuningCounters
 {
 	int errorCounter = 0;
@@ -211,6 +213,7 @@ private:
 
 private:
 
+	//
 	// Properties
 	//
 
@@ -233,11 +236,17 @@ private:
 	bool m_hasDiscreteCounter = false;
 
 	// Filters
-	//
+
 	QStringList m_customAppSignalIDMasks;
 	QStringList m_equipmentIDMasks;
 	QStringList m_appSignalIDMasks;
 
+	// Tab appearance
+
+	int m_valueColumnsCount = 0;
+	std::vector<QString> m_valueColumnsSuffixes;
+
+	//
 	// Values
 	//
 
@@ -245,7 +254,6 @@ private:
 	std::map <Hash, TuningFilterValue> m_signalValuesMap;
 
 	// Parent and child
-	//
 
 	TuningFilter* m_parentFilter = nullptr;
 	std::vector<std::shared_ptr<TuningFilter>> m_childFilters;
@@ -259,10 +267,6 @@ private:
 
 	TuningCounters m_counters;
 
-	// Tab appearance
-
-	int m_valueColumnsCount = 0;
-	std::vector<QString> m_valueColumnsSuffixes;
 
 };
 

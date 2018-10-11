@@ -130,7 +130,6 @@ bool TuningFilterValue::save(QXmlStreamWriter& writer) const
 //
 // TuningFilter
 //
-#define MAX_VALUES_COLUMN_COUNT 4
 
 TuningFilter::TuningFilter()
 {
@@ -1279,6 +1278,9 @@ void TuningFilter::copy(const TuningFilter& That)
 	m_backSelectedColor = That.m_backSelectedColor;
 	m_textSelectedColor = That.m_textSelectedColor;
 
+	m_valueColumnsCount = That.m_valueColumnsCount;
+	m_valueColumnsSuffixes = That.m_valueColumnsSuffixes;
+
 	for (auto f : That.m_childFilters)
 	{
 		TuningFilter* fi = f.get();
@@ -1558,7 +1560,7 @@ bool TuningFilterStorage::copyToClipboard(std::vector<std::shared_ptr<TuningFilt
 	{
 		std::shared_ptr<TuningFilter> filterCopy = std::make_shared<TuningFilter>();
 
-		* filterCopy =* filter;
+		*filterCopy = *filter;
 
 		root.addChild(filterCopy);
 	}

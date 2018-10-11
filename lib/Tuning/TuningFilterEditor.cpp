@@ -177,11 +177,11 @@ DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signal
 	//
 	m_baseModel = new TuningModel(m_signalManager, std::vector<QString>(), this);
 
-	m_baseModel->addColumn(TuningModel::Columns::CustomAppSignalID);
-	m_baseModel->addColumn(TuningModel::Columns::AppSignalID);
-	m_baseModel->addColumn(TuningModel::Columns::Type);
-	m_baseModel->addColumn(TuningModel::Columns::Caption);
-	m_baseModel->addColumn(TuningModel::Columns::Default);
+	m_baseModel->addColumn(TuningModelColumns::CustomAppSignalID);
+	m_baseModel->addColumn(TuningModelColumns::AppSignalID);
+	m_baseModel->addColumn(TuningModelColumns::Type);
+	m_baseModel->addColumn(TuningModelColumns::Caption);
+	m_baseModel->addColumn(TuningModelColumns::Default);
 
 	m_baseSignalsTable->setModel(m_baseModel);
 
@@ -332,7 +332,7 @@ void DialogChooseTuningSignals::fillFilterValuesList()
 
 void DialogChooseTuningSignals::on_m_add_clicked()
 {
-	std::vector<Hash> baseHashes  = m_baseModel->hashes();
+	std::vector<Hash> baseHashes  = m_baseModel->allHashes();
 
 	for (const QModelIndex& index : m_baseSignalsTable->selectionModel()->selectedRows())
 	{
