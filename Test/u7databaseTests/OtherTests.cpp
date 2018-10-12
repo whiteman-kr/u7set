@@ -7,6 +7,17 @@ OtherTests::OtherTests()
 {
 }
 
+void OtherTests::initTestCase()
+{
+	bool ok = createProjectDb();
+	QVERIFY2(ok == true, "Cannot create projectdatabase");
+}
+
+void OtherTests::cleanupTestCase()
+{
+	dropProjectDb();
+}
+
 void OtherTests::get_project_versionTest()
 {
 	QSqlQuery query;

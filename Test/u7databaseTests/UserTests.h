@@ -1,26 +1,19 @@
 #pragma once
 #include <QString>
-#include <QTest>
 #include <QtSql>
-#include <assert.h>
+#include "TestDbBase.h"
 
-class UserTests : public QObject
+class UserTests : public TestDbBase
 {
 	Q_OBJECT
 
 public:
 	UserTests();
 
-	void setDatabaseHost(QString host);
-	void setDatabaseUser(QString userName);
-	void setDatabaseUserPassword(QString password);
-	void setProjectName(QString projectName);
-
-	void setAdminPassword(QString password);
-
 private slots:
-	void initTestCase();
-	void cleanupTestCase();
+	virtual void initTestCase() override;
+	virtual void cleanupTestCase() override;
+
 	void logInOutTest();
 	void checkSessionKeyTest();
 	void createUserTest();
@@ -30,10 +23,10 @@ private slots:
 	void check_user_passwordTest();
 	void update_userTest();
 
-private:
-	QString m_dbHost = "127.0.0.1";
-	QString m_dbUser = "u7";
-	QString m_dbUserPassword = "P2ssw0rd";
-	QString m_adminPassword = "P2ssw0rd";
-	QString m_projectName = "testproject";
+//private:
+//	QString m_dbHost = "127.0.0.1";
+//	QString m_dbUser = "u7";
+//	QString m_dbUserPassword = "P2ssw0rd";
+//	QString m_adminPassword = "P2ssw0rd";
+//	QString m_projectName = "testproject";
 };
