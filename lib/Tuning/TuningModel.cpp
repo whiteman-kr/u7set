@@ -54,8 +54,6 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 		}
 	}
 
-	int todo_determineOtherSortingColumns;
-
 	bool ok = false;
 
 	asp1 = m_tuningSignalManager->signalParam(set1.firstHash(), &ok);
@@ -747,16 +745,31 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 		if (columnType == static_cast<int>(TuningModelColumns::CustomAppSignalID))
 		{
+			if (valueColumnsCount() > 1)
+			{
+				return tr("%1 [+%2]").arg(asp.customSignalId()).arg(valueColumnsCount() - 1);
+			}
+
 			return asp.customSignalId();
 		}
 
 		if (columnType == static_cast<int>(TuningModelColumns::EquipmentID))
 		{
+			if (valueColumnsCount() > 1)
+			{
+				return tr("%1 [+%2]").arg(asp.equipmentId()).arg(valueColumnsCount() - 1);
+			}
+
 			return asp.equipmentId();
 		}
 
 		if (columnType == static_cast<int>(TuningModelColumns::AppSignalID))
 		{
+			if (valueColumnsCount() > 1)
+			{
+				return tr("%1 [+%2]").arg(asp.appSignalId()).arg(valueColumnsCount() - 1);
+			}
+
 			return asp.appSignalId();
 		}
 
@@ -868,63 +881,83 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 			}
 		}
 
-		int todo_determine_columnLimitsRange;
+		const TuningModelHashSet& hashes = hashSetByIndex(row);
 
-		/*
-		if (displayIndex == static_cast<int>(Columns::LowLimit))
-		{
-			if (asp.isAnalog())
-			{
-				if (tss.limitsUnbalance(asp) == true)
-				{
-					QString str = tr("Base %1, read %2")
-							.arg(asp.tuningLowBound().toString(asp.precision()))
-							.arg(tss.lowBound().toString(asp.precision()));
-					return str;
-				}
-				else
-				{
-					return asp.tuningLowBound().toString(asp.precision());
-				}
-			}
-			else
-			{
-				return QString();
-			}
-		}
+		QString result;
 
-		if (displayIndex == static_cast<int>(Columns::HighLimit))
+		for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
 		{
-			if (asp.isAnalog())
+			const Hash tssHash = hashes.hash[c];
+
+			if (tssHash == UNDEFINED_HASH)
 			{
-				if (tss.limitsUnbalance(asp) == true)
+				continue;
+			}
+
+			const TuningSignalState tss = m_tuningSignalManager->state(tssHash, &ok);
+
+			if (columnType == static_cast<int>(TuningModelColumns::LowLimit))
+			{
+				if (asp.isAnalog())
 				{
-					QString str = tr("Base %1, read %2")
-							.arg(asp.tuningHighBound().toString(asp.precision()))
-							.arg(tss.highBound().toString(asp.precision()));
-					return str;
-				}
-				else
-				{
-					return asp.tuningHighBound().toString(asp.precision());
+					if (tss.limitsUnbalance(asp) == true)
+					{
+						result = tr("Base %1, read %2")
+								.arg(asp.tuningLowBound().toString(asp.precision()))
+								.arg(tss.lowBound().toString(asp.precision()));
+						break;
+					}
+					else
+					{
+						if (c == 0)
+						{
+							result = asp.tuningLowBound().toString(asp.precision());
+						}
+					}
 				}
 			}
-			else
+
+			if (columnType == static_cast<int>(TuningModelColumns::HighLimit))
 			{
-				return QString();
+				if (asp.isAnalog())
+				{
+					if (tss.limitsUnbalance(asp) == true)
+					{
+						result = tr("Base %1, read %2")
+								.arg(asp.tuningHighBound().toString(asp.precision()))
+								.arg(tss.highBound().toString(asp.precision()));
+						break;
+					}
+					else
+					{
+						if (c == 0)
+						{
+							result = asp.tuningHighBound().toString(asp.precision());
+						}
+					}
+				}
 			}
-		}*/
 
-		/*
-		if (displayIndex == static_cast<int>(Columns::Valid))
-		{
-			return (tss.valid() == true) ? tr("") : tr("VALID");
-		}
+			if (columnType == static_cast<int>(TuningModelColumns::Valid))
+			{
+				if (tss.valid() == false)
+				{
+					result = tr("VALID");
+					break;
+				}
+			}
 
-		if (displayIndex == static_cast<int>(Columns::OutOfRange))
-		{
-			return (tss.outOfRange() == true) ? tr("RANGE") : tr("");
-		}*/
+			if (columnType == static_cast<int>(TuningModelColumns::OutOfRange))
+			{
+				if (tss.outOfRange() == false)
+				{
+					result = tr("RANGE");
+					break;
+				}
+			}
+		}	// c
+
+		return result;
 	}
 	return QVariant();
 }

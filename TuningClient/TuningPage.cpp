@@ -100,58 +100,74 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 		}
 	}
 
-	int todo_otherColumnsBackColor;
+	QColor color;
 
-	/*if (columnType == static_cast<int>(Columns::Valid))
+	const TuningModelHashSet& hashes = hashSetByIndex(row);
+
+	for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
 	{
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+		const Hash hash = hashes.hash[c];
 
-		if (state.valid() == false)
+		if (hash == UNDEFINED_HASH)
 		{
-			QColor color = QColor(Qt::red);
-			return QBrush(color);
+			continue;
+		}
+
+		if (columnType == static_cast<int>(TuningModelColumns::Valid))
+		{
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.valid() == false)
+			{
+				color = QColor(Qt::red);
+				break;
+			}
+		}
+
+		if (columnType == static_cast<int>(TuningModelColumns::LowLimit) || columnType == static_cast<int>(TuningModelColumns::HighLimit))
+		{
+			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.limitsUnbalance(asp) == true)
+			{
+				color = QColor(Qt::red);
+				break;
+			}
+		}
+
+		if (columnType == static_cast<int>(TuningModelColumns::OutOfRange))
+		{
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.outOfRange() == true)
+			{
+				color = QColor(Qt::red);
+				break;
+			}
+		}
+
+		if (columnType == static_cast<int>(TuningModelColumns::Default))
+		{
+			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+			TuningValue defaultVal = defaultValue(asp);
+
+			if (defaultVal < asp.tuningLowBound() || defaultVal > asp.tuningHighBound())
+			{
+				color = QColor(Qt::red);
+				break;
+			}
+
+			color = QColor(Qt::gray);
 		}
 	}
 
-	if (columnType == static_cast<int>(Columns::LowLimit) || columnType == static_cast<int>(Columns::HighLimit))
+	if (color.isValid() == true)
 	{
-		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
-
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.limitsUnbalance(asp) == true)
-		{
-			QColor color = QColor(Qt::red);
-			return QBrush(color);
-		}
-	}
-
-	if (columnType == static_cast<int>(Columns::OutOfRange))
-	{
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.outOfRange() == true)
-		{
-			QColor color = QColor(Qt::red);
-			return QBrush(color);
-		}
-	}
-
-	if (columnType == static_cast<int>(Columns::Default))
-	{
-		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
-
-		TuningValue defaultVal = defaultValue(asp);
-
-		if (defaultVal < asp.tuningLowBound() || defaultVal > asp.tuningHighBound())
-		{
-			QColor color = QColor(Qt::red);
-			return QBrush(color);
-		}
-
-		QColor color = QColor(Qt::gray);
 		return QBrush(color);
-	}*/
+	}
 
 	return QBrush();
 }
@@ -207,52 +223,67 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 		}
 	}
 
-	int todo_otherColumnsForeColor;
+	QColor color;
 
-	/*
-	if (columnType == static_cast<int>(Columns::Valid))
+	const TuningModelHashSet& hashes = hashSetByIndex(row);
+
+	for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
 	{
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+		const Hash hash = hashes.hash[c];
 
-		if (state.valid() == false)
+		if (hash == UNDEFINED_HASH)
 		{
-			QColor color = QColor(Qt::white);
-			return QBrush(color);
+			continue;
+		}
+
+		if (columnType == static_cast<int>(TuningModelColumns::Valid))
+		{
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.valid() == false)
+			{
+				color = QColor(Qt::white);
+				break;
+			}
+		}
+
+		if (columnType == static_cast<int>(TuningModelColumns::LowLimit) || columnType == static_cast<int>(TuningModelColumns::HighLimit))
+		{
+			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.limitsUnbalance(asp) == true)
+			{
+				color = QColor(Qt::white);
+				break;
+			}
+		}
+
+		if (columnType == static_cast<int>(TuningModelColumns::OutOfRange))
+		{
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.outOfRange() == true)
+			{
+				color = QColor(Qt::white);
+				break;
+			}
+		}
+
+		if (columnType == static_cast<int>(TuningModelColumns::Default))
+		{
+			color = QColor(Qt::white);
+			break;
 		}
 	}
 
-	if (columnType == static_cast<int>(Columns::LowLimit) || columnType == static_cast<int>(Columns::HighLimit))
+	if (color.isValid() == true)
 	{
-		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
-
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.limitsUnbalance(asp) == true)
-		{
-			QColor color = QColor(Qt::white);
-			return QBrush(color);
-		}
-	}
-
-	if (columnType == static_cast<int>(Columns::OutOfRange))
-	{
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.outOfRange() == true)
-		{
-			QColor color = QColor(Qt::white);
-			return QBrush(color);
-		}
-	}
-
-	if (columnType == static_cast<int>(Columns::Default))
-	{
-		QColor color = QColor(Qt::white);
 		return QBrush(color);
-	}*/
+	}
 
 	return QBrush();
-
 }
 
 Qt::ItemFlags TuningModelClient::flags(const QModelIndex& index) const
