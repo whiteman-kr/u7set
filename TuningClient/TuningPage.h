@@ -11,7 +11,7 @@ class TuningModelClient : public TuningModel
 {
 	Q_OBJECT
 public:
-	TuningModelClient(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnSuffixes, QWidget* parent);
+	TuningModelClient(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
 
 	void blink();
 

@@ -5,7 +5,7 @@
 #include "../lib/Hash.h"
 #include "../VFrame30/Schema.h"
 
-#define MAX_VALUES_COLUMN_COUNT 6
+const int MAX_VALUES_COLUMN_COUNT = 6;
 
 struct TuningCounters
 {
@@ -39,7 +39,7 @@ public:
 private:
 
 	QString m_appSignalId;
-	Hash m_appSignalHash = 0;
+	Hash m_appSignalHash = UNDEFINED_HASH;
 
 	bool m_useValue = false;
 	TuningValue m_value;
@@ -177,7 +177,38 @@ public:
 	int valuesColumnCount() const;
 	void setValuesColumnCount(int value);
 
-	std::vector<QString> valueColumnsSuffixes() const;
+	std::vector<QString> valueColumnsAppSignalIdSuffixes() const;
+
+	bool columnCustomAppId() const;
+	void setColumnCustomAppId(bool value);
+
+	bool columnAppId() const;
+	void setColumnAppId(bool value);
+
+	bool columnEquipmentId() const;
+	void setColumnEquipmentId(bool value);
+
+	bool columnCaption() const;
+	void setColumnCaption(bool value);
+
+	bool columnUnits() const;
+	void setColumnUnits(bool value);
+
+	bool columnType() const;
+	void setColumnType(bool value);
+
+	bool columnLimits() const;
+	void setColumnLimits(bool value);
+
+	bool columnDefault() const;
+	void setColumnDefault(bool value);
+
+	bool columnValid() const;
+	void setColumnValid(bool value);
+
+	bool columnOutOfRange() const;
+	void setColumnOutOfRange(bool value);
+
 
 public:
 	// Operations
@@ -210,6 +241,8 @@ private:
 	void copy(const TuningFilter& That);
 
 	bool processMaskList(const QString& s, const QStringList& masks) const;
+
+	void setPropertyVisible(const QLatin1String& name, bool visible);
 
 private:
 
@@ -244,11 +277,26 @@ private:
 	// Tab appearance
 
 	int m_valueColumnsCount = 0;
-	std::vector<QString> m_valueColumnsSuffixes;
+	std::vector<QString> m_valueColumnsAppSignalIdSuffixes;
+
+	bool m_columnCustomAppId = true;
+	bool m_columnAppId = false;
+	bool m_columnEquipmentId = true;
+	bool m_columnCaption = true;
+	bool m_columnUnits = true;
+	bool m_columnType = true;
+	bool m_columnLimits = true;
+	bool m_columnDefault = true;
+	bool m_columnValid = false;
+	bool m_columnOutOfRange = false;
+
+private:
 
 	//
-	// Values
+	// Run-time data
 	//
+
+	// Values
 
 	std::vector<Hash> m_signalValuesVec;
 	std::map <Hash, TuningFilterValue> m_signalValuesMap;
@@ -266,6 +314,8 @@ private:
 	// Counters
 
 	TuningCounters m_counters;
+
+
 
 
 };

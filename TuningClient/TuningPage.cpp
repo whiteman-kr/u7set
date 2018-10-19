@@ -13,8 +13,8 @@ using namespace std;
 //
 
 
-TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnSuffixes, QWidget* parent):
-	TuningModel(tuningSignalManager, valueColumnSuffixes, parent)
+TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent):
+	TuningModel(tuningSignalManager, valueColumnsAppSignalIdSuffixes, parent)
 {
 }
 
@@ -563,11 +563,16 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 
 	// Models and data
 	//
-	std::vector<QString> valueColumnsSuffixes;
+
+	// Get the tab filter (if page filter is button, take its parent, if no tab exists - create an empty temporary)
+
+	std::shared_ptr<TuningFilter> emptyTabFilter = nullptr;
+
+	TuningFilter* tabFilter = nullptr;
 
 	if (pageFilter != nullptr && pageFilter->isTab() == true)
 	{
-		valueColumnsSuffixes = pageFilter->valueColumnsSuffixes();
+		tabFilter = pageFilter.get();
 	}
 
 	if (pageFilter != nullptr && pageFilter->isButton() == true)
@@ -576,21 +581,54 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 
 		if (parent != nullptr && parent->isTab() == true)
 		{
-			valueColumnsSuffixes = parent->valueColumnsSuffixes();
+			tabFilter = parent;
 		}
 	}
 
-	m_model = new TuningModelClient(m_tuningSignalManager, valueColumnsSuffixes, this);
+	if (tabFilter == nullptr)
+	{
+		emptyTabFilter = std::make_shared<TuningFilter>();
+		tabFilter = emptyTabFilter.get();
+	}
+
+	if (tabFilter == nullptr)
+	{
+		assert(tabFilter);
+		return;
+	}
+
+	std::vector<QString> valueColumnsAppSignalIdSuffixes = tabFilter->valueColumnsAppSignalIdSuffixes();
+
+	m_model = new TuningModelClient(m_tuningSignalManager, valueColumnsAppSignalIdSuffixes, this);
 	m_model->setFont(f.family(), f.pointSize(), false);
 	m_model->setImportantFont(f.family(), f.pointSize(), true);
 
-	m_columnsArray.push_back(std::make_pair(TuningModelColumns::CustomAppSignalID, 0.22));
-	m_columnsArray.push_back(std::make_pair(TuningModelColumns::EquipmentID, 0.2));
-	m_columnsArray.push_back(std::make_pair(TuningModelColumns::Caption, 0.15));
-	m_columnsArray.push_back(std::make_pair(TuningModelColumns::Units, 0.05));
-	m_columnsArray.push_back(std::make_pair(TuningModelColumns::Type, 0.1));
+	if (tabFilter->columnCustomAppId() == true)
+	{
+		m_columnsArray.push_back(std::make_pair(TuningModelColumns::CustomAppSignalID, 0.22));
+	}
+	if (tabFilter->columnAppId() == true)
+	{
+		m_columnsArray.push_back(std::make_pair(TuningModelColumns::AppSignalID, 0.22));
+	}
+	if (tabFilter->columnEquipmentId() == true)
+	{
+		m_columnsArray.push_back(std::make_pair(TuningModelColumns::EquipmentID, 0.2));
+	}
+	if (tabFilter->columnCaption() == true)
+	{
+		m_columnsArray.push_back(std::make_pair(TuningModelColumns::Caption, 0.15));
+	}
+	if (tabFilter->columnUnits() == true)
+	{
+		m_columnsArray.push_back(std::make_pair(TuningModelColumns::Units, 0.05));
+	}
+	if (tabFilter->columnType() == true)
+	{
+		m_columnsArray.push_back(std::make_pair(TuningModelColumns::Type, 0.1));
+	}
 
-	int valuesColumnsCount = static_cast<int>(valueColumnsSuffixes.size());
+	int valuesColumnsCount = static_cast<int>(valueColumnsAppSignalIdSuffixes.size());
 	if (valuesColumnsCount == 0)
 	{
 		valuesColumnsCount = 1;
@@ -602,9 +640,23 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 		m_columnsArray.push_back(std::make_pair(static_cast<TuningModelColumns>(valueColumn), 0.07 /*/ valuesColumnsCount*/));
 	}
 
-	m_columnsArray.push_back(std::make_pair(TuningModelColumns::LowLimit, 0.07));
-	m_columnsArray.push_back(std::make_pair(TuningModelColumns::HighLimit, 0.07));
-	m_columnsArray.push_back(std::make_pair(TuningModelColumns::Default, 0.07));
+	if (tabFilter->columnLimits() == true)
+	{
+		m_columnsArray.push_back(std::make_pair(TuningModelColumns::LowLimit, 0.07));
+		m_columnsArray.push_back(std::make_pair(TuningModelColumns::HighLimit, 0.07));
+	}
+	if (tabFilter->columnDefault() == true)
+	{
+		m_columnsArray.push_back(std::make_pair(TuningModelColumns::Default, 0.07));
+	}
+	if (tabFilter->columnValid() == true)
+	{
+		m_columnsArray.push_back(std::make_pair(TuningModelColumns::Valid, 0.07));
+	}
+	if (tabFilter->columnOutOfRange() == true)
+	{
+		m_columnsArray.push_back(std::make_pair(TuningModelColumns::OutOfRange, 0.07));
+	}
 
 	for (auto c : m_columnsArray)
 	{

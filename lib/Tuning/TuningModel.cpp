@@ -256,7 +256,7 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 // TuningItemModel
 //
 
-TuningModel::TuningModel(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnSuffixes, QWidget* parent)
+TuningModel::TuningModel(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent)
 	:QAbstractTableModel(parent),
 	  m_tuningSignalManager(tuningSignalManager)
 {
@@ -273,7 +273,14 @@ TuningModel::TuningModel(TuningSignalManager* tuningSignalManager, const std::ve
 	{
 		int valueColumn = static_cast<int>(TuningModelColumns::ValueFirst) + c;
 
-		m_columnsNamesMap[static_cast<TuningModelColumns>(valueColumn)] = tr("Value %1").arg(c);
+		if (c == 0 && valueColumnsAppSignalIdSuffixes.empty() == true)
+		{
+			m_columnsNamesMap[static_cast<TuningModelColumns>(valueColumn)] = tr("Value");
+		}
+		else
+		{
+			m_columnsNamesMap[static_cast<TuningModelColumns>(valueColumn)] = tr("Value %1").arg(c);
+		}
 	}
 
 	m_columnsNamesMap[TuningModelColumns::Type] = tr("Type");
@@ -283,10 +290,11 @@ TuningModel::TuningModel(TuningSignalManager* tuningSignalManager, const std::ve
 	m_columnsNamesMap[TuningModelColumns::Valid] = tr("Valid");
 	m_columnsNamesMap[TuningModelColumns::OutOfRange] = tr("OutOfRange");
 
-	//
-	for (const QString& s : valueColumnSuffixes)
+	// Convert suffixes strings to string lists
+
+	for (const QString& s : valueColumnsAppSignalIdSuffixes)
 	{
-		m_valueColumnSuffixes.push_back(s.split(';', QString::SkipEmptyParts));
+		m_valueColumnAppSignalIdSuffixes.push_back(s.split(';', QString::SkipEmptyParts));
 	}
 }
 
@@ -348,7 +356,7 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 
 	std::vector<TuningModelHashSet> hashSets;
 
-	int channelCount = static_cast<int>(m_valueColumnSuffixes.size());
+	int channelCount = static_cast<int>(m_valueColumnAppSignalIdSuffixes.size());
 
 	if (channelCount == 0)
 	{
@@ -385,17 +393,15 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 
 				AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
 
-				// MAYBE APPSIGNALID ALSO!
-				int todo_support_different_ids;
-				QString id = asp.customSignalId();
+				QString appSignalId = asp.appSignalId();
 
 				for (int c = 0; c < channelCount; c++)
 				{
-					const QStringList& channelSuffxes = m_valueColumnSuffixes[c];
+					const QStringList& channelSuffxes = m_valueColumnAppSignalIdSuffixes[c];
 
 					for (const QString& suffix : channelSuffxes)
 					{
-						if (id.contains(suffix) == false)
+						if (appSignalId.contains(suffix) == false)
 						{
 							continue;
 						}
@@ -408,11 +414,11 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 
 						if (hashGeneralHashIt == m_hashToGeneralHashMap.end())
 						{
-							QString generalCustomSignalId = id;
+							QString generalAppSignalId = appSignalId;
 
-							generalCustomSignalId.remove(suffix);
+							generalAppSignalId.remove(suffix);
 
-							m_hashToGeneralHashMap[hash] = ::calcHash(generalCustomSignalId);
+							m_hashToGeneralHashMap[hash] = ::calcHash(generalAppSignalId);
 
 						}
 
@@ -496,8 +502,6 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 
 		m_hashSets.swap(hashSets);
 
-		//insertRows(0, static_cast<int>(count));
-
 		endInsertRows();
 	}
 }
@@ -538,12 +542,12 @@ TuningSignalManager* TuningModel::tuningSignalManager()
 
 int TuningModel::valueColumnsCount() const
 {
-	if (m_valueColumnSuffixes.empty() == true)
+	if (m_valueColumnAppSignalIdSuffixes.empty() == true)
 	{
 		return 1;
 	}
 
-	return static_cast<int>(m_valueColumnSuffixes.size());
+	return static_cast<int>(m_valueColumnAppSignalIdSuffixes.size());
 }
 
 void TuningModel::addColumn(TuningModelColumns column)
@@ -565,7 +569,7 @@ void TuningModel::removeColumn(TuningModelColumns column)
 
 TuningModelColumns TuningModel::columnType(int index) const
 {
-	if (index <0 || index >= m_columnsTypes.size())
+	if (index < 0 || index >= m_columnsTypes.size())
 	{
 		assert(false);
 		return TuningModelColumns::EquipmentID;
@@ -586,8 +590,6 @@ void TuningModel::setColumnTypes(std::vector<TuningModelColumns> columnsIndexes)
 	{
 		beginRemoveColumns(QModelIndex(), 0, columnCount() - 1);
 
-		removeColumns(0, columnCount());
-
 		m_columnsTypes.clear();
 
 		endRemoveColumns();
@@ -596,8 +598,6 @@ void TuningModel::setColumnTypes(std::vector<TuningModelColumns> columnsIndexes)
 	beginInsertColumns(QModelIndex(), 0, static_cast<int>(columnsIndexes.size()) - 1);
 
 	m_columnsTypes = columnsIndexes;
-
-	insertColumns(0, static_cast<int>(m_columnsTypes.size()));
 
 	endInsertColumns();
 
@@ -942,14 +942,14 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 			{
 				if (tss.valid() == false)
 				{
-					result = tr("VALID");
+					result = tr("NO");
 					break;
 				}
 			}
 
 			if (columnType == static_cast<int>(TuningModelColumns::OutOfRange))
 			{
-				if (tss.outOfRange() == false)
+				if (tss.outOfRange() == true)
 				{
 					result = tr("RANGE");
 					break;

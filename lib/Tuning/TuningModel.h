@@ -63,7 +63,7 @@ class TuningModel : public QAbstractTableModel
 	Q_OBJECT
 
 public:
-	TuningModel(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnSuffixes, QWidget* parent);
+	TuningModel(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
 	~TuningModel();
 
 	TuningValue defaultValue(const AppSignalParam& asp) const;
@@ -136,7 +136,7 @@ protected:
 
 	std::vector<TuningModelColumns> m_columnsTypes;
 
-	std::vector<QStringList> m_valueColumnSuffixes;
+	std::vector<QStringList> m_valueColumnAppSignalIdSuffixes;
 
 };
 
