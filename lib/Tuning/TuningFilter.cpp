@@ -42,16 +42,16 @@ namespace TuningTags
 	static const QLatin1String prop_HasDiscreteCounter = QLatin1String("HasDiscreteCounter");
 	static const QLatin1String prop_ValueColumnsCount = QLatin1String("ValueColumnsCount");
 
-	static const QLatin1String prop_СolumnCustomAppId = QLatin1String("ColumnCustomAppId");
-	static const QLatin1String prop_СolumnAppId = QLatin1String("ColumnAppId");
-	static const QLatin1String prop_СolumnEquipmentId = QLatin1String("ColumnEquipmentId");
-	static const QLatin1String prop_СolumnCaption = QLatin1String("ColumnCaption");
-	static const QLatin1String prop_СolumnUnits = QLatin1String("ColumnUnits");
-	static const QLatin1String prop_СolumnType = QLatin1String("ColumnType");
-	static const QLatin1String prop_СolumnLimits = QLatin1String("ColumnLimits");
-	static const QLatin1String prop_СolumnDefault = QLatin1String("ColumnDefault");
-	static const QLatin1String prop_СolumnValid = QLatin1String("ColumnValid");
-	static const QLatin1String prop_СolumnOutOfRange = QLatin1String("ColumnOutOfRange");
+	static const QLatin1String prop_ColumnCustomAppId = QLatin1String("ColumnCustomAppId");
+	static const QLatin1String prop_ColumnAppId = QLatin1String("ColumnAppId");
+	static const QLatin1String prop_ColumnEquipmentId = QLatin1String("ColumnEquipmentId");
+	static const QLatin1String prop_ColumnCaption = QLatin1String("ColumnCaption");
+	static const QLatin1String prop_ColumnUnits = QLatin1String("ColumnUnits");
+	static const QLatin1String prop_ColumnType = QLatin1String("ColumnType");
+	static const QLatin1String prop_ColumnLimits = QLatin1String("ColumnLimits");
+	static const QLatin1String prop_ColumnDefault = QLatin1String("ColumnDefault");
+	static const QLatin1String prop_ColumnValid = QLatin1String("ColumnValid");
+	static const QLatin1String prop_ColumnOutOfRange = QLatin1String("ColumnOutOfRange");
 
 	static const QLatin1String category_Columns = QLatin1String("Columns");
 	static const QLatin1String category_ValueColumns = QLatin1String("ValueColumns");
@@ -229,43 +229,43 @@ TuningFilter::TuningFilter()
 
 	int order = 100;
 
-	auto propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_СolumnCustomAppId, true, TuningFilter::columnCustomAppId, TuningFilter::setColumnCustomAppId);
+	auto propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnCustomAppId, true, TuningFilter::columnCustomAppId, TuningFilter::setColumnCustomAppId);
 	propColumn->setCategory(TuningTags::category_Columns);
 	propColumn->setViewOrder(order++);
 
-	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_СolumnAppId, true, TuningFilter::columnAppId, TuningFilter::setColumnAppId);
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnAppId, true, TuningFilter::columnAppId, TuningFilter::setColumnAppId);
 	propColumn->setCategory(TuningTags::category_Columns);
 	propColumn->setViewOrder(order++);
 
-	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_СolumnEquipmentId, true, TuningFilter::columnEquipmentId, TuningFilter::setColumnEquipmentId);
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnEquipmentId, true, TuningFilter::columnEquipmentId, TuningFilter::setColumnEquipmentId);
 	propColumn->setCategory(TuningTags::category_Columns);
 	propColumn->setViewOrder(order++);
 
-	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_СolumnCaption, true, TuningFilter::columnCaption, TuningFilter::setColumnCaption);
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnCaption, true, TuningFilter::columnCaption, TuningFilter::setColumnCaption);
 	propColumn->setCategory(TuningTags::category_Columns);
 	propColumn->setViewOrder(order++);
 
-	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_СolumnUnits, true, TuningFilter::columnUnits, TuningFilter::setColumnUnits);
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnUnits, true, TuningFilter::columnUnits, TuningFilter::setColumnUnits);
 	propColumn->setCategory(TuningTags::category_Columns);
 	propColumn->setViewOrder(order++);
 
-	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_СolumnType, true, TuningFilter::columnType, TuningFilter::setColumnType);
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnType, true, TuningFilter::columnType, TuningFilter::setColumnType);
 	propColumn->setCategory(TuningTags::category_Columns);
 	propColumn->setViewOrder(order++);
 
-	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_СolumnLimits, true, TuningFilter::columnLimits, TuningFilter::setColumnLimits);
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnLimits, true, TuningFilter::columnLimits, TuningFilter::setColumnLimits);
 	propColumn->setCategory(TuningTags::category_Columns);
 	propColumn->setViewOrder(order++);
 
-	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_СolumnDefault, true, TuningFilter::columnDefault, TuningFilter::setColumnDefault);
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnDefault, true, TuningFilter::columnDefault, TuningFilter::setColumnDefault);
 	propColumn->setCategory(TuningTags::category_Columns);
 	propColumn->setViewOrder(order++);
 
-	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_СolumnValid, true, TuningFilter::columnValid, TuningFilter::setColumnValid);
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnValid, true, TuningFilter::columnValid, TuningFilter::setColumnValid);
 	propColumn->setCategory(TuningTags::category_Columns);
 	propColumn->setViewOrder(order++);
 
-	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_СolumnOutOfRange, true, TuningFilter::columnOutOfRange, TuningFilter::setColumnOutOfRange);
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnOutOfRange, true, TuningFilter::columnOutOfRange, TuningFilter::setColumnOutOfRange);
 	propColumn->setCategory(TuningTags::category_Columns);
 	propColumn->setViewOrder(order++);
 
@@ -479,45 +479,45 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 
 		// Columns
 
-		if (reader.attributes().hasAttribute(TuningTags::prop_СolumnCustomAppId))
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnCustomAppId))
 		{
-			setColumnCustomAppId(reader.attributes().value(TuningTags::prop_СolumnCustomAppId).toString() == TuningTags::tag_True);
+			setColumnCustomAppId(reader.attributes().value(TuningTags::prop_ColumnCustomAppId).toString() == TuningTags::tag_True);
 		}
-		if (reader.attributes().hasAttribute(TuningTags::prop_СolumnAppId))
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnAppId))
 		{
-			setColumnAppId(reader.attributes().value(TuningTags::prop_СolumnAppId).toString() == TuningTags::tag_True);
+			setColumnAppId(reader.attributes().value(TuningTags::prop_ColumnAppId).toString() == TuningTags::tag_True);
 		}
-		if (reader.attributes().hasAttribute(TuningTags::prop_СolumnEquipmentId))
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnEquipmentId))
 		{
-			setColumnEquipmentId(reader.attributes().value(TuningTags::prop_СolumnEquipmentId).toString() == TuningTags::tag_True);
+			setColumnEquipmentId(reader.attributes().value(TuningTags::prop_ColumnEquipmentId).toString() == TuningTags::tag_True);
 		}
-		if (reader.attributes().hasAttribute(TuningTags::prop_СolumnCaption))
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnCaption))
 		{
-			setColumnCaption(reader.attributes().value(TuningTags::prop_СolumnCaption).toString() == TuningTags::tag_True);
+			setColumnCaption(reader.attributes().value(TuningTags::prop_ColumnCaption).toString() == TuningTags::tag_True);
 		}
-		if (reader.attributes().hasAttribute(TuningTags::prop_СolumnUnits))
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnUnits))
 		{
-			setColumnUnits(reader.attributes().value(TuningTags::prop_СolumnUnits).toString() == TuningTags::tag_True);
+			setColumnUnits(reader.attributes().value(TuningTags::prop_ColumnUnits).toString() == TuningTags::tag_True);
 		}
-		if (reader.attributes().hasAttribute(TuningTags::prop_СolumnType))
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnType))
 		{
-			setColumnType(reader.attributes().value(TuningTags::prop_СolumnType).toString() == TuningTags::tag_True);
+			setColumnType(reader.attributes().value(TuningTags::prop_ColumnType).toString() == TuningTags::tag_True);
 		}
-		if (reader.attributes().hasAttribute(TuningTags::prop_СolumnLimits))
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnLimits))
 		{
-			setColumnLimits(reader.attributes().value(TuningTags::prop_СolumnLimits).toString() == TuningTags::tag_True);
+			setColumnLimits(reader.attributes().value(TuningTags::prop_ColumnLimits).toString() == TuningTags::tag_True);
 		}
-		if (reader.attributes().hasAttribute(TuningTags::prop_СolumnDefault))
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnDefault))
 		{
-			setColumnDefault(reader.attributes().value(TuningTags::prop_СolumnDefault).toString() == TuningTags::tag_True);
+			setColumnDefault(reader.attributes().value(TuningTags::prop_ColumnDefault).toString() == TuningTags::tag_True);
 		}
-		if (reader.attributes().hasAttribute(TuningTags::prop_СolumnValid))
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnValid))
 		{
-			setColumnValid(reader.attributes().value(TuningTags::prop_СolumnValid).toString() == TuningTags::tag_True);
+			setColumnValid(reader.attributes().value(TuningTags::prop_ColumnValid).toString() == TuningTags::tag_True);
 		}
-		if (reader.attributes().hasAttribute(TuningTags::prop_СolumnOutOfRange))
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnOutOfRange))
 		{
-			setColumnOutOfRange(reader.attributes().value(TuningTags::prop_СolumnOutOfRange).toString() == TuningTags::tag_True);
+			setColumnOutOfRange(reader.attributes().value(TuningTags::prop_ColumnOutOfRange).toString() == TuningTags::tag_True);
 		}
 
 	}
@@ -676,16 +676,16 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 
 	// Columns
 
-	writer.writeAttribute(TuningTags::prop_СolumnCustomAppId, columnCustomAppId() ? TuningTags::tag_True : TuningTags::tag_False);
-	writer.writeAttribute(TuningTags::prop_СolumnAppId, columnAppId() ? TuningTags::tag_True : TuningTags::tag_False);
-	writer.writeAttribute(TuningTags::prop_СolumnEquipmentId, columnEquipmentId() ? TuningTags::tag_True : TuningTags::tag_False);
-	writer.writeAttribute(TuningTags::prop_СolumnCaption, columnCaption() ? TuningTags::tag_True : TuningTags::tag_False);
-	writer.writeAttribute(TuningTags::prop_СolumnUnits, columnUnits() ? TuningTags::tag_True : TuningTags::tag_False);
-	writer.writeAttribute(TuningTags::prop_СolumnType, columnType() ? TuningTags::tag_True : TuningTags::tag_False);
-	writer.writeAttribute(TuningTags::prop_СolumnLimits, columnLimits() ? TuningTags::tag_True : TuningTags::tag_False);
-	writer.writeAttribute(TuningTags::prop_СolumnDefault, columnDefault() ? TuningTags::tag_True : TuningTags::tag_False);
-	writer.writeAttribute(TuningTags::prop_СolumnValid, columnValid() ? TuningTags::tag_True : TuningTags::tag_False);
-	writer.writeAttribute(TuningTags::prop_СolumnOutOfRange, columnOutOfRange() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnCustomAppId, columnCustomAppId() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnAppId, columnAppId() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnEquipmentId, columnEquipmentId() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnCaption, columnCaption() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnUnits, columnUnits() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnType, columnType() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnLimits, columnLimits() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnDefault, columnDefault() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnValid, columnValid() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnOutOfRange, columnOutOfRange() ? TuningTags::tag_True : TuningTags::tag_False);
 
 	writer.writeStartElement(TuningTags::tag_Values);
 
@@ -1446,16 +1446,16 @@ void TuningFilter::updateOptionalProperties()
 
 	setPropertyVisible(TuningTags::prop_ValueColumnsCount, interfaceType() == InterfaceType::Tab);
 
-	setPropertyVisible(TuningTags::prop_СolumnCustomAppId, interfaceType() == InterfaceType::Tab);
-	setPropertyVisible(TuningTags::prop_СolumnAppId, interfaceType() == InterfaceType::Tab);
-	setPropertyVisible(TuningTags::prop_СolumnEquipmentId, interfaceType() == InterfaceType::Tab);
-	setPropertyVisible(TuningTags::prop_СolumnCaption, interfaceType() == InterfaceType::Tab);
-	setPropertyVisible(TuningTags::prop_СolumnUnits, interfaceType() == InterfaceType::Tab);
-	setPropertyVisible(TuningTags::prop_СolumnType, interfaceType() == InterfaceType::Tab);
-	setPropertyVisible(TuningTags::prop_СolumnLimits, interfaceType() == InterfaceType::Tab);
-	setPropertyVisible(TuningTags::prop_СolumnDefault, interfaceType() == InterfaceType::Tab);
-	setPropertyVisible(TuningTags::prop_СolumnValid, interfaceType() == InterfaceType::Tab);
-	setPropertyVisible(TuningTags::prop_СolumnOutOfRange, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnCustomAppId, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnAppId, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnEquipmentId, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnCaption, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnUnits, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnType, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnLimits, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnDefault, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnValid, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnOutOfRange, interfaceType() == InterfaceType::Tab);
 
 	if (interfaceType() == InterfaceType::Tab)
 	{
