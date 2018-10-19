@@ -57,41 +57,27 @@ bool FileTests::logOut()
 
 void FileTests::initTestCase()
 {
-	QSqlQuery query;
+	bool ok = createProjectDb();
+	QVERIFY2(ok == true, "Cannot create projectdatabase");
 
-	// Alter Administrator user. Set administrator password "123412341234"
+	// Log in as Administartor to create test users
 	//
-	bool ok = query.exec("SELECT salt FROM users WHERE username = 'Administrator'");
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
-
-	QString passwordHashQuery = QString("user_api.password_hash('%1', '%2')").arg(query.value(0).toString()).arg(m_adminPassword);
-
-	ok = query.exec(QString("UPDATE users SET passwordhash = %1 WHERE username = 'Administrator'").arg(passwordHashQuery));
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-
-	ok = query.exec(QString("SELECT * FROM user_api.log_in('Administrator', '%1')").arg(m_adminPassword));
+	QSqlQuery query;
+	ok = query.exec(QString("SELECT * FROM user_api.log_in('%1', '%2')")
+						.arg(m_projectAdministratorName)
+						.arg(m_projectAdministratorPassword));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
 
 	QString session_key = query.value(0).toString();
 
-	// Files_exist & file_exist
-	//
-	ok = query.exec("UPDATE file SET Deleted = true WHERE fileid = 3");
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-
 	// Create Testers
 	//
 	ok = query.exec(QString("SELECT user_api.create_user('%1', '%2', '%2', '%2', '%3', false, false);")
 						.arg(session_key)
 						.arg(m_user1.username)
-						.arg(m_user1.password)
-					);
+						.arg(m_user1.password));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText() + ", Request:  " + query.lastQuery()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
@@ -103,15 +89,14 @@ void FileTests::initTestCase()
 	ok = query.exec(QString("SElECT user_api.create_user('%1', '%2', '%2', '%2', '%3', false, false);")
 						.arg(session_key)
 						.arg(m_user2.username)
-						.arg(m_user2.password)
-					);
+						.arg(m_user2.password));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 
 	m_user2.userId = query.value("create_user").toInt();
 
-	// Administartor LogOut
+	// Administartor Log out
 	//
 	ok = query.exec("SELECT * FROM user_api.log_out()");
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -121,6 +106,38 @@ void FileTests::initTestCase()
 
 void FileTests::cleanupTestCase()
 {
+	dropProjectDb();
+}
+
+void FileTests::apiFileExistsTest()
+{
+	// LogIn as Admin
+	//
+	QString session_key = logIn(m_user1);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// --
+	//
+	QSqlQuery query;
+
+	bool ok = query.exec(QString("SELECT api.is_file_exists('%1', 0, 'AL');").arg(session_key));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value(0).toInt() != 0, qPrintable("Expected some file id (2)"));
+
+	ok = query.exec(QString("SELECT api.is_file_exists('%1', 0, 'ALDOESND');").arg(session_key));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.value(0).isNull() == true, qPrintable("Null is expected, as file does not exists"));
+
+	// LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	return;
 }
 
 void FileTests::fileExistsTest()
@@ -139,11 +156,7 @@ void FileTests::fileExistsTest()
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.value("file_exists").toBool() == false, qPrintable("Error: false expected"));
 
-	ok = query.exec("SELECT file_exists(3);");
-
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.value("file_exists").toBool() == false, qPrintable("Error: false expected"));
+	return;
 }
 
 void FileTests::filesExistTest_data()
@@ -155,7 +168,7 @@ void FileTests::filesExistTest_data()
 	QTest::newRow("arrayExistingFiles") << "4,5,1" << "true,true,true";
 	QTest::newRow("invalidFileTest") << "8590" << "false";
 	QTest::newRow("arrayRandomFiles") << "67,99,9999" << "true,true,false";
-	QTest::newRow("deletedFile") << "3" << "false";
+	QTest::newRow("deletedFile") << "3" << "true";
 }
 
 void FileTests::filesExistTest()
@@ -168,7 +181,7 @@ void FileTests::filesExistTest()
 
 void FileTests::is_any_checked_outTest()
 {
-	QString session_key = logIn("Administrator", m_adminPassword);
+	QString session_key = logIn("Administrator", m_projectAdministratorPassword);
 	QVERIFY2(session_key.isEmpty() == false, "Log in error");
 
 	// --
@@ -181,8 +194,8 @@ void FileTests::is_any_checked_outTest()
 	bool ok = query.exec(queryText);
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.value("is_any_checked_out").toBool() == false, qPrintable("Error: no checkedOut files expected"));
+	QVERIFY2(query.next() == true, qPrintable("Error: no return value"));
+	QVERIFY2(query.value(0).toInt() == 0, qPrintable("Error: no checkedOut files expected"));
 
 	// Add file and chech if there are any checked out files
 	//
@@ -191,14 +204,13 @@ void FileTests::is_any_checked_outTest()
 	ok = query.exec(queryText);
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-
 	queryText = QString("SELECT * FROM api.is_any_checked_out('%1');").
 					arg(session_key);
 
 	ok = query.exec(queryText);
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.value("is_any_checked_out").toBool() == true, qPrintable("Error: some checkedOuted files expected"));
+	QVERIFY2(query.next() == true, qPrintable("Error: no return value"));
+	QVERIFY2(query.value(0).toInt() == 1, qPrintable("Error: some checkedOuted files expected"));
 
 	// --
 	//
@@ -219,7 +231,7 @@ void FileTests::filesAddTest_data()
 	QTest::newRow("checkingRandomFileRandomData") << 1 << "Test" << 2 << "Test" << "{\"Type\": \".hws\", \"Uuid\": \"{00000000-0000-0000-0000-000000000000}\", \"Place\": 0, \"StrID\": \"$(PARENT)_WS00\", \"Caption\": \"Workstation\"}" << true;
 	QTest::newRow("existingFile") << 1 << "Test" << 2 << "Test" << "{}" << false;
 	QTest::newRow("checkInvalidUserId") << 999 << "TestInvalidUserId" << 2 << "OneTwoThree" << "{}" << false;
-	QTest::newRow("checkInvalidParentId") << 1 << "TestInvalidParentId" << 999 << "OneTwoThreeFour" << "{}" << false;
+	QTest::newRow("checkInvalidParentId") << 1 << "TestInvalidParentId" << 999999 << "OneTwoThreeFour" << "{}" << false;
 	QTest::newRow("createdByUser") << m_user1.userId << "TestCreatedByUser" << 2 << "OneTwoThreeFourFive" << "{\"Type\": \".hws\", \"Uuid\": \"{00000000-0000-0000-0000-000000000001}\", \"Place\": 0, \"StrID\": \"$(PARENT)_WS00\", \"Caption\": \"Workstation\"}" << true;
 }
 
@@ -744,7 +756,7 @@ void FileTests::set_workcopyTest()
 	// --
 	// 12. LogIn as Administrtor
 	//
-	session_key = logIn("Administrator", m_adminPassword);
+	session_key = logIn("Administrator", m_projectAdministratorPassword);
 	QVERIFY2(session_key.isEmpty() == false, "Log in error");
 
 	// 13. Set workcopy for file checked out by User1 (expected success)
@@ -1184,7 +1196,7 @@ void FileTests::get_file_infoTest()
 {
 	// 1. LogIn as User1
 	//
-	QString session_key = logIn("Administrator", m_adminPassword);
+	QString session_key = logIn("Administrator", m_projectAdministratorPassword);
 	QVERIFY2(session_key.isEmpty() == false, "Log in error");
 
 	// --
@@ -2335,7 +2347,7 @@ void FileTests::add_or_update_fileTest()
 {
 	// 1. LogIn as Admin
 	//
-	QString session_key = logIn("Administrator", m_adminPassword);
+	QString session_key = logIn("Administrator", m_projectAdministratorPassword);
 	QVERIFY2(session_key.isEmpty() == false, "Log in error");
 
 	// --
@@ -2921,7 +2933,7 @@ void FileTests::get_checked_out_filesTest()
 {
 	// 1. LogIn as Admin
 	//
-	QString session_key = logIn("Administrator", m_adminPassword);
+	QString session_key = logIn("Administrator", m_projectAdministratorPassword);
 	QVERIFY2(session_key.isEmpty() == false, "Log in error");
 
 	// --

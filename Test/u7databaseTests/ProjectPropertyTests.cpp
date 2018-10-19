@@ -8,6 +8,17 @@ ProjectPropertyTests::ProjectPropertyTests()
 
 }
 
+void ProjectPropertyTests::initTestCase()
+{
+	bool ok = createProjectDb();
+	QVERIFY2(ok == true, "Cannot create projectdatabase");
+}
+
+void ProjectPropertyTests::cleanupTestCase()
+{
+	dropProjectDb();
+}
+
 void ProjectPropertyTests::set_project_property()
 {
 	QSqlQuery query;

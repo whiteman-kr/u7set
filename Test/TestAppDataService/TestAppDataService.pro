@@ -7,42 +7,27 @@
 QT       += testlib
 QT       += qml
 
-# QT       -= gui
-
-TARGET = tst_testappdataservice
+TARGET = testappdataservice
 CONFIG   += console
 CONFIG   -= app_bundle
 
 TEMPLATE = app
 
-# Force prebuild version control info
+# DESTDIR
 #
 win32 {
-    contains(QMAKE_TARGET.arch, x86_64){
-        QMAKE_CLEAN += $$PWD/../../bin_Win64/GetGitProjectVersion.exe
-        system(IF NOT EXIST $$PWD/../../bin_Win64/GetGitProjectVersion.exe (chdir $$PWD/../../GetGitProjectVersion & \
-            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-            nmake))
-        system(chdir $$PWD & \
-            $$PWD/../../bin_Win64/GetGitProjectVersion.exe $$PWD/TestAppDataService.pro)
-    }
-    else{
-        QMAKE_CLEAN += $$PWD/../../bin_Win32/GetGitProjectVersion.exe
-        system(IF NOT EXIST $$PWD/../../bin_Win32/GetGitProjectVersion.exe (chdir $$PWD/../../GetGitProjectVersion & \
-            qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\" & \
-            nmake))
-        system(chdir $$PWD & \
-            $$PWD/../../bin_Win32/GetGitProjectVersion.exe $$PWD/TestAppDataService.pro)
-    }
+    CONFIG(debug, debug|release): DESTDIR = ../../bin/debug
+    CONFIG(release, debug|release): DESTDIR = ../../bin/release
 }
 unix {
-    QMAKE_CLEAN += $$PWD/../../bin_unix/GetGitProjectVersion
-    system(cd $$PWD/../../GetGitProjectVersion; \
-        qmake \"OBJECTS_DIR = $$OUT_PWD/../GetGitProjectVersion/release\"; \
-        make; \
-        cd $$PWD; \
-        $$PWD/../../bin_unix/GetGitProjectVersion $$PWD/TestAppDataService.pro)
+    CONFIG(debug, debug|release): DESTDIR = ../../bin_unix/debug
+    CONFIG(release, debug|release): DESTDIR = ../../bin_unix/release
 }
+
+#c++17 support
+#
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which as been marked as deprecated (the exact warnings
@@ -81,8 +66,7 @@ HEADERS += tst_testappdataservice.h \
     ../../lib/Tcp.h \
     ../../Proto/network.pb.h \
     ../../lib/SocketIO.h \
-    ../../lib/CircularLogger.h \
-    version.h
+    ../../lib/CircularLogger.h
 
 
 SOURCES += \
@@ -113,20 +97,14 @@ SOURCES += \
     ../../lib/SocketIO.cpp \
     ../../lib/CircularLogger.cpp
 
-#c++14/17 support
-#
-CONFIG += c++14
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
-
 #protobuf
 #
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 
 win32 {
-    LIBS += -L$$DESTDIR -lprotobuf
+        LIBS += -L$$DESTDIR/. -lprotobuf
 
-    INCLUDEPATH += ./../Protobuf
+        INCLUDEPATH += $$PWD/../../Protobuf
 }
 unix {
     LIBS += -lprotobuf

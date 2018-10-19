@@ -2,12 +2,12 @@
 
 #include <QTest>
 #include <QtSql>
-
+#include "TestDbBase.h"
 #include "../../lib/Signal.h"
 #include "../../lib/DbWorker.h"
 #include "../../lib/WUtils.h"
 
-class SignalTests : public QObject
+class SignalTests : public TestDbBase
 {
 	Q_OBJECT
 
@@ -16,6 +16,8 @@ public:
 
 private slots:
 	void initTestCase();
+	void cleanupTestCase();
+
 	void add_signalTest();
 	void get_signal_IdsTest();
 	void get_signal_countTest();
