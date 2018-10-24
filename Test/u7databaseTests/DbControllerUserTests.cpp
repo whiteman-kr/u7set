@@ -1,55 +1,86 @@
-#include "DbControllerUserManagementTests.h"
+#include "DbControllerUserTests.h"
 #include <QSql>
 #include <QSqlError>
 
-DbControllerUserTests::DbControllerUserTests() :
-	m_db(new DbController())
+DbControllerUserTests::DbControllerUserTests()
 {
+	qRegisterMetaType<DbUser>("DbUser");
+
+	m_db.setHost(m_databaseHost);
+	m_db.setPort(m_databaseHostPort);
+	m_db.setServerUsername(m_databaseUser);
+	m_db.setServerPassword(m_databaseUserPassword);
 }
 
 void DbControllerUserTests::initTestCase()
 {
-	for (QString connection : QSqlDatabase::connectionNames())
+	QStringList connections = QSqlDatabase::connectionNames();
+	for (QString connection : connections)
 	{
 		QSqlDatabase::removeDatabase(connection);
 	}
 
-	m_db->setServerUsername(m_databaseUser);
-	m_db->setServerPassword(m_adminPassword);
+	dropProjectDb();
 
+	// --
+	//
+	bool ok = m_db.createProject(m_projectName, m_projectAdministratorPassword, nullptr);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not create project: " + m_db.lastError()));
+
+	ok = m_db.upgradeProject(m_projectName, m_projectAdministratorPassword, true, nullptr);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not upgrade project: " + m_db.lastError()));
+
+	ok = m_db.openProject(m_projectName, "Administrator", m_projectAdministratorPassword, nullptr);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not open project: " + m_db.lastError()));
+
+	// Create connection which will be used for all tests
+	//
 	QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL");
-
 	db.setHostName(m_databaseHost);
+	db.setPort(m_databaseHostPort);
 	db.setUserName(m_databaseUser);
-	db.setPassword(m_adminPassword);
-	db.setDatabaseName("postgres");
+	db.setPassword(m_databaseUserPassword);
+	db.setDatabaseName("u7_" + m_projectName);
 
-	QVERIFY2 (db.open() == true, qPrintable("Error: Can not connect to postgres database! " + db.lastError().databaseText()));
-
-	QSqlQuery query, tempQuery;
-	bool ok = query.exec("SELECT datname FROM pg_database WHERE datname LIKE 'u7_%' AND NOT datname LIKE 'u7u%'");
-	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
-
-	while (query.next() == true)
+	ok = db.open();
+	if (ok == false)
 	{
-		if (query.value(0).toString() == "u7_" + m_databaseName)
-		{
-			ok = tempQuery.exec(QString("DROP DATABASE %1").arg(query.value(0).toString()));
-			QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
-			qDebug() << "Project " << query.value(0).toString() << "dropped!";
-		}
+		QFAIL(qPrintable(db.lastError().databaseText()));
+	}
+
+	return;
+}
+
+void DbControllerUserTests::cleanupTestCase()
+{
+	// --
+	//
+	QSqlDatabase db = QSqlDatabase::database();
+	if (db.isOpen() == false)
+	{
+		QFAIL("Datatabase connection is not opened");
 	}
 
 	db.close();
 
-	ok = m_db->createProject(m_databaseName, m_adminPassword, nullptr);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not create project: " + m_db->lastError()));
+	// --
+	//
 
-	ok = m_db->upgradeProject(m_databaseName, m_adminPassword, true, nullptr);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not upgrade project: " + m_db->lastError()));
+	bool ok = m_db.closeProject(nullptr);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not close project: " + m_db.lastError()));
 
-	ok = m_db->openProject(m_databaseName, "Administrator", m_adminPassword, nullptr);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not open project: " + m_db->lastError()));
+	ok = m_db.deleteProject(m_projectName, m_projectAdministratorPassword, true, nullptr);
+	QVERIFY2 (ok == true, qPrintable ("Error: can not delete project: " + m_db.lastError()));
+
+	// --
+	//
+	QStringList connections = QSqlDatabase::connectionNames();
+	for (QString connection : connections)
+	{
+		QSqlDatabase::removeDatabase(connection);
+	}
+
+	return;
 }
 
 void DbControllerUserTests::createUserTest()
@@ -58,8 +89,6 @@ void DbControllerUserTests::createUserTest()
 	QString firstName = "TESTFIRSTNAME";
 	QString lastName = "TESTLASTNAME";
 	QString password = "TESTTEST";
-
-	qRegisterMetaType<DbUser>("DbUser");
 
 	DbUser newUser;
 	newUser.setUserId(1);
@@ -72,21 +101,19 @@ void DbControllerUserTests::createUserTest()
 	newUser.setDisabled(false);
 	newUser.setReadonly(false);
 
-	bool ok = m_db->createUser(newUser, 0);
-	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
+	bool ok = m_db.createUser(newUser, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db.lastError()));
 
+	// --
+	//
 	QSqlDatabase db = QSqlDatabase::database();
-
-	db.setHostName(m_databaseHost);
-	db.setUserName(m_databaseUser);
-	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
-
-	if (db.open() == false)
+	if (db.isOpen() == false)
 	{
-		QFAIL(qPrintable(db.lastError().databaseText()));
+		QFAIL("Datatabase connection is not opened");
 	}
 
+	// --
+	//
 	QSqlQuery query;
 	ok = query.exec(QString("SELECT * from Users WHERE username = \'%1\'").arg(userName));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
@@ -104,7 +131,6 @@ void DbControllerUserTests::createUserTest()
 
 	// Test createUser function with special symbols
 	//
-
 	userName = "\'\"\\" + userName + "\'\"\\";
 	firstName = "\'\"\\" + firstName + "\'\"\\";
 	lastName = "\'\"\\" + lastName + "\'\"\\";
@@ -116,8 +142,8 @@ void DbControllerUserTests::createUserTest()
 	newUser.setPassword(password);
 	newUser.setNewPassword(password);
 
-	ok = m_db->createUser(newUser, 0);
-	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
+	ok = m_db.createUser(newUser, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db.lastError()));
 
 	ok = query.exec("SELECT * from Users");
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
@@ -144,7 +170,7 @@ void DbControllerUserTests::createUserTest()
 		QFAIL ("Error: user with external symbols was not created");
 	}
 
-	db.close();
+	return;
 }
 
 void DbControllerUserTests::updateUserTest()
@@ -153,8 +179,6 @@ void DbControllerUserTests::updateUserTest()
 	QString firstName = "UPDATETESTFIRSTNAME";
 	QString lastName = "UPDATETESTLASTNAME";
 	QString password = "UPDATETESTTEST";
-
-	qRegisterMetaType<DbUser>("DbUser");
 
 	DbUser newUser;
 	newUser.setUserId(1);
@@ -167,8 +191,8 @@ void DbControllerUserTests::updateUserTest()
 	newUser.setDisabled(false);
 	newUser.setReadonly(false);
 
-	bool ok = m_db->createUser(newUser, 0);
-	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
+	bool ok = m_db.createUser(newUser, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db.lastError()));
 
 	firstName = firstName + "UPDATED";
 	lastName = lastName + "UPDATED";
@@ -181,21 +205,19 @@ void DbControllerUserTests::updateUserTest()
 	newUser.setDisabled(true);
 	newUser.setReadonly(true);
 
-	ok = m_db->updateUser(newUser, 0);
-	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
+	ok = m_db.updateUser(newUser, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db.lastError()));
 
+	// --
+	//
 	QSqlDatabase db = QSqlDatabase::database();
-
-	db.setHostName(m_databaseHost);
-	db.setUserName(m_databaseUser);
-	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
-
-	if (db.open() == false)
+	if (db.isOpen() == false)
 	{
-		QFAIL(qPrintable(db.lastError().databaseText()));
+		QFAIL("Datatabase connection is not opened");
 	}
 
+	// --
+	//
 	QSqlQuery query;
 	ok = query.exec(QString("SELECT * from Users WHERE username = \'%1\'").arg(userName));
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
@@ -212,7 +234,6 @@ void DbControllerUserTests::updateUserTest()
 
 	// Testing with special symbols
 	//
-
 	userName = "\"\'\\UPDATETESTNAME\"\'\\";
 	firstName = "\"\'\\UPDATETESTFIRSTNAME\"\'\\";
 	lastName = "\"\'\\UPDATETESTLASTNAME\"\'\\";
@@ -226,8 +247,8 @@ void DbControllerUserTests::updateUserTest()
 	newUser.setDisabled(false);
 	newUser.setReadonly(false);
 
-	ok = m_db->createUser(newUser, 0);
-	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
+	ok = m_db.createUser(newUser, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db.lastError()));
 
 	firstName = firstName + "UPDATED";
 	lastName = lastName + "UPDATED";
@@ -240,8 +261,8 @@ void DbControllerUserTests::updateUserTest()
 	newUser.setDisabled(true);
 	newUser.setReadonly(true);
 
-	ok = m_db->updateUser(newUser, 0);
-	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
+	ok = m_db.updateUser(newUser, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db.lastError()));
 
 	ok = query.exec("SELECT * from Users");
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
@@ -268,28 +289,26 @@ void DbControllerUserTests::updateUserTest()
 		QFAIL("Error: user with external symbols was not updated");
 	}
 
-	db.close();
+	return;
 }
 
 void DbControllerUserTests::getUserListTest()
 {
 	std::vector<DbUser> usersList;
 
-	bool ok = m_db->getUserList(&usersList, 0);
-	QVERIFY2 (ok == true, qPrintable(m_db->lastError()));
+	bool ok = m_db.getUserList(&usersList, 0);
+	QVERIFY2 (ok == true, qPrintable(m_db.lastError()));
 
+	// --
+	//
 	QSqlDatabase db = QSqlDatabase::database();
-
-	db.setHostName(m_databaseHost);
-	db.setUserName(m_databaseUser);
-	db.setPassword(m_adminPassword);
-	db.setDatabaseName("u7_" + m_databaseName);
-
-	if (db.open() == false)
+	if (db.isOpen() == false)
 	{
-		QFAIL(qPrintable(db.lastError().databaseText()));
+		QFAIL("Datatabase connection is not opened");
 	}
 
+	// --
+	//
 	QSqlQuery query;
 	ok = query.exec("SELECT * from Users");
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
@@ -312,10 +331,10 @@ void DbControllerUserTests::getUserListTest()
 
 	QVERIFY2 (uint(usersFromQuery.size()) == usersList.size(), qPrintable("Error: function getUsersList returned wrong amount of users"));
 
-	bool userExist = false;
-
 	for (DbUser buff : usersList)
 	{
+		bool userExist = false;
+
 		for (DbUser buffQuery : usersFromQuery)
 		{
 			if (buff.username() == buffQuery.username())
@@ -334,21 +353,6 @@ void DbControllerUserTests::getUserListTest()
 		userExist = false;
 	}
 
-	db.close();
-}
-
-void DbControllerUserTests::cleanupTestCase()
-{
-	bool ok = m_db->closeProject(0);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not close project: " + m_db->lastError()));
-
-	ok = m_db->deleteProject(m_databaseName, m_adminPassword, true, 0);
-	QVERIFY2 (ok == true, qPrintable ("Error: can not delete project: " + m_db->lastError()));
-
-	for (QString connection : QSqlDatabase::connectionNames())
-	{
-		QSqlDatabase::removeDatabase(connection);
-	}
-
 	return;
 }
+

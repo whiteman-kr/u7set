@@ -93,7 +93,9 @@ SC_FIRST_STATE_COLUMN = 2,
 SC_VALUE = 2,
 SC_VALID = 3,
 SC_UNIT = 4,
-SC_COUNT = 5;
+SC_LOW_VALID_RANGE = 5,
+SC_HIGH_VALID_RANGE = 6,
+SC_COUNT = 7;
 
 const char* const signalColumnStr[] =
 {
@@ -101,7 +103,9 @@ const char* const signalColumnStr[] =
 	"Caption",
 	"Value",
 	"Valid",
-	"Unit"
+	"Unit",
+	"LowValidRange",
+	"HighValidRange"
 };
 
 const int SIGNAL_COLUMN_COUNT = sizeof(signalColumnStr) / sizeof(signalColumnStr[0]);
@@ -290,8 +294,13 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, qui
 
 	// Signals
 	m_signalStateModel = new SignalStateModel(this);
+
+	QSortFilterProxyModel* sortModel = new QSortFilterProxyModel(this);
+	sortModel->setSourceModel(m_signalStateModel);
+
 	m_signalsView = addTabWithTableView(250, tr("Signals"));;
-	m_signalsView->setModel(m_signalStateModel);
+	m_signalsView->setModel(sortModel);
+	m_signalsView->setSortingEnabled(true);
 
 	// Clients
 	addClientsTab(false);
@@ -673,6 +682,8 @@ QVariant SignalStateModel::data(const QModelIndex& index, int role) const
 				return ass.m_flags.valid ? tr("Yes") : tr("No");
 			}
 			case SC_UNIT: return s.unit();
+			case SC_LOW_VALID_RANGE: return s.lowValidRange();
+			case SC_HIGH_VALID_RANGE: return s.highValidRange();
 			default:
 				assert(false);
 		}

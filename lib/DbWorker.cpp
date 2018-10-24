@@ -248,6 +248,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0228.sql", "Upgrade to version 228, Add Tuning confiruation properties to Monitor preset"},
 	{":/DatabaseUpgrade/Upgrade0229.sql", "Upgrade to version 229, Changed file ETC/SignalPropertiesBehavior.csv"},
 	{":/DatabaseUpgrade/Upgrade0230.sql", "Upgrade to version 230, Making scripts compatible to ECMAS"},
+	{":/DatabaseUpgrade/Upgrade0231.sql", "Upgrade to version 231, OCM and OCMN TxDiagDataSize update"},
 };
 
 

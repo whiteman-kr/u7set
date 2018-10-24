@@ -2,6 +2,7 @@
 #include <QString>
 #include <QTest>
 #include <QtSql>
+#include "TestDbBase.h"
 
 struct ObjectState;
 
@@ -12,7 +13,7 @@ struct User
 	int userId;
 };
 
-class FileTests : public QObject
+class FileTests : public TestDbBase
 {
 	Q_OBJECT
 
@@ -27,6 +28,8 @@ protected:
 private slots:
 	void initTestCase();
 	void cleanupTestCase();
+
+	void apiFileExistsTest();
 	void fileExistsTest();
 	void filesExistTest_data();
 	void filesExistTest();
@@ -70,6 +73,4 @@ public:
 
 private:
 	static void getObjectState(QSqlQuery& q, ObjectState& os);
-
-	QString m_adminPassword = "123412341234";
 };

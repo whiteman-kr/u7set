@@ -79,12 +79,13 @@ SignalTests::SignalTests()
 
 void SignalTests::initTestCase()
 {
-	QSqlQuery query;
+	bool ok = createProjectDb();
+	QVERIFY2(ok == true, "Cannot create projectdatabase");
 
 	// Alter Administrator user. Set administrator password "123412341234"
 	//
-
-	bool ok = query.exec("SELECT salt FROM users WHERE username = 'Administrator'");
+	QSqlQuery query;
+	ok = query.exec("SELECT salt FROM users WHERE username = 'Administrator'");
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
@@ -104,7 +105,6 @@ void SignalTests::initTestCase()
 
 	// Testers
 	//
-
 	ok = query.exec(QString("SELECT user_api.create_user('%1', 'signalTestUser1', 'FIRSTTEST', 'FIRSTTEST', '12341234', false, false);").arg(session_key));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -121,6 +121,11 @@ void SignalTests::initTestCase()
 
 	ok = query.exec("SELECT * FROM user_api.log_out()");
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+}
+
+void SignalTests::cleanupTestCase()
+{
+	dropProjectDb();
 }
 
 void SignalTests::add_signalTest()
