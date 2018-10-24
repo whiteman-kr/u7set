@@ -597,10 +597,6 @@ void TuningWorkspace::createTabPages()
 
 				singlePageFilter = std::make_shared<TuningFilter>();
 
-				QUuid uid = QUuid::createUuid();
-
-				singlePageFilter->setID(uid.toString());
-
 				singlePageFilter->setCaption(m_workspaceFilter->caption());
 
 				// Copy signals' hashes from parent filter to single page's filter

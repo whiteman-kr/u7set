@@ -32,6 +32,8 @@ struct TuningModelHashSet
 {
 	Hash firstHash() const;
 
+	int hashCount() const;
+
 	Hash hash[MAX_VALUES_COLUMN_COUNT];
 
 };

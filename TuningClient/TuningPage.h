@@ -54,6 +54,29 @@ private:
 };
 
 
+class TuningPageColumnsWidth
+{
+
+public:
+
+	TuningPageColumnsWidth();
+
+	bool load(const QString& pageId);
+	bool save() const;
+
+	int width(TuningModelColumns column) const;
+	void setWidth(TuningModelColumns column, int width);
+
+private:
+
+	QString m_pageId;
+
+	std::map<TuningModelColumns, int> m_widthMap;
+	std::map<TuningModelColumns, int> m_defaultWidthMap;
+
+};
+
+
 class TuningPage : public QWidget
 {
 	Q_OBJECT
@@ -111,8 +134,6 @@ private:
 private:
 
 	bool eventFilter(QObject* object, QEvent* event);
-
-	virtual void resizeEvent(QResizeEvent *event);
 
 	// Signals processing
 
@@ -172,7 +193,7 @@ private:
 
 	int m_instanceNo = -1;
 
-	std::vector<std::pair<TuningModelColumns, double>> m_columnsArray;
+	TuningPageColumnsWidth m_columnWidthStorage;
 
 };
 

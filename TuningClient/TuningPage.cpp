@@ -529,6 +529,110 @@ void TuningTableView::closeEditor(QWidget* editor, QAbstractItemDelegate::EndEdi
 }
 
 //
+// TuningPageColumnsWidth
+//
+
+TuningPageColumnsWidth::TuningPageColumnsWidth()
+{
+	m_defaultWidthMap[TuningModelColumns::CustomAppSignalID] = 180;
+	m_defaultWidthMap[TuningModelColumns::EquipmentID] = 180;
+	m_defaultWidthMap[TuningModelColumns::AppSignalID] = 180;
+	m_defaultWidthMap[TuningModelColumns::Caption] = 180;
+	m_defaultWidthMap[TuningModelColumns::Units] = 70;
+	m_defaultWidthMap[TuningModelColumns::Type] = 70;
+
+	for (int i = 0; i < MAX_VALUES_COLUMN_COUNT; i++)
+	{
+		int valueColumn = static_cast<int>(TuningModelColumns::ValueFirst) + i;
+		m_defaultWidthMap[static_cast<TuningModelColumns>(valueColumn)] = 70;
+	}
+
+	m_defaultWidthMap[TuningModelColumns::LowLimit] = 70;
+	m_defaultWidthMap[TuningModelColumns::HighLimit] = 70;
+	m_defaultWidthMap[TuningModelColumns::Default] = 70;
+	m_defaultWidthMap[TuningModelColumns::Valid] = 70;
+	m_defaultWidthMap[TuningModelColumns::OutOfRange] = 70;
+}
+
+bool TuningPageColumnsWidth::load(const QString& pageId)
+{
+	m_pageId = pageId;
+
+	m_widthMap.clear();
+
+	QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
+	QString value = settings.value(QString("PageColumnsWidth/%1").arg(m_pageId)).toString();
+
+	QStringList l = value.split(';', QString::SkipEmptyParts);
+
+	for (const QString& s : l)
+	{
+		QStringList pairList = s.split('=');
+		if (pairList.size() != 2)
+		{
+			assert(false);
+			return false;
+		}
+
+		TuningModelColumns column = static_cast<TuningModelColumns>(pairList[0].toInt());
+		int width = pairList[1].toInt();
+
+		setWidth(column, width);
+	}
+
+
+	return true;
+}
+
+bool TuningPageColumnsWidth::save() const
+{
+	if (m_pageId.isEmpty() == true)
+	{
+		assert(false);
+		return false;
+	}
+
+	QString value;
+
+	for (auto it : m_widthMap)
+	{
+		TuningModelColumns column = it.first;
+		int width = it.second;
+
+		value += QString("%1=%2;").arg(static_cast<int>(column)).arg(width);
+	}
+
+	QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
+	settings.setValue(QString("PageColumnsWidth/%1").arg(m_pageId), value);
+
+	return true;
+}
+
+int TuningPageColumnsWidth::width(TuningModelColumns column) const
+{
+	auto it = m_widthMap.find(column);
+	if (it != m_widthMap.end())
+	{
+		return it->second;
+	}
+
+	auto dit = m_defaultWidthMap.find(column);
+	if (dit != m_defaultWidthMap.end())
+	{
+		return dit->second;
+	}
+
+	assert(false);
+	return 100;
+
+}
+
+void TuningPageColumnsWidth::setWidth(TuningModelColumns column, int width)
+{
+	m_widthMap[column] = width;
+}
+
+//
 // TuningPage
 //
 
@@ -547,11 +651,17 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 {
 
 	//qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
+
 	m_instanceNo = m_instanceCounter;
 	m_instanceCounter++;
 
-	//assert(m_treeFilter);		They can be nullptr
-	//assert(m_buttonFilter);
+	//assert(m_treeFilter);		This can be nullptr
+
+	if (m_pageFilter == nullptr)
+	{
+		assert(m_pageFilter);
+		return;
+	}
 
 	assert(m_tuningSignalManager);
 
@@ -566,18 +676,11 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 
 	// Get the tab filter (if page filter is button, take its parent, if no tab exists - create an empty temporary)
 
-	std::shared_ptr<TuningFilter> emptyTabFilter = nullptr;
+	TuningFilter* tabFilter = m_pageFilter.get();
 
-	TuningFilter* tabFilter = nullptr;
-
-	if (pageFilter != nullptr && pageFilter->isTab() == true)
+	if (pageFilter->isButton() == true)
 	{
-		tabFilter = pageFilter.get();
-	}
-
-	if (pageFilter != nullptr && pageFilter->isButton() == true)
-	{
-		TuningFilter* parent = pageFilter->parentFilter();
+		TuningFilter* parent = m_pageFilter->parentFilter();
 
 		if (parent != nullptr && parent->isTab() == true)
 		{
@@ -587,13 +690,7 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 
 	if (tabFilter == nullptr)
 	{
-		emptyTabFilter = std::make_shared<TuningFilter>();
-		tabFilter = emptyTabFilter.get();
-	}
-
-	if (tabFilter == nullptr)
-	{
-		assert(tabFilter);
+		assert(false);	// page filter must exist !
 		return;
 	}
 
@@ -605,62 +702,52 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 
 	if (tabFilter->columnCustomAppId() == true)
 	{
-		m_columnsArray.push_back(std::make_pair(TuningModelColumns::CustomAppSignalID, 0.22));
+		m_model->addColumn(TuningModelColumns::CustomAppSignalID);
 	}
 	if (tabFilter->columnAppId() == true)
 	{
-		m_columnsArray.push_back(std::make_pair(TuningModelColumns::AppSignalID, 0.22));
+		m_model->addColumn(TuningModelColumns::AppSignalID);
 	}
 	if (tabFilter->columnEquipmentId() == true)
 	{
-		m_columnsArray.push_back(std::make_pair(TuningModelColumns::EquipmentID, 0.2));
+		m_model->addColumn(TuningModelColumns::EquipmentID);
 	}
 	if (tabFilter->columnCaption() == true)
 	{
-		m_columnsArray.push_back(std::make_pair(TuningModelColumns::Caption, 0.15));
+		m_model->addColumn(TuningModelColumns::Caption);
 	}
 	if (tabFilter->columnUnits() == true)
 	{
-		m_columnsArray.push_back(std::make_pair(TuningModelColumns::Units, 0.05));
+		m_model->addColumn(TuningModelColumns::Units);
 	}
 	if (tabFilter->columnType() == true)
 	{
-		m_columnsArray.push_back(std::make_pair(TuningModelColumns::Type, 0.1));
+		m_model->addColumn(TuningModelColumns::Type);
 	}
 
-	int valuesColumnsCount = static_cast<int>(valueColumnsAppSignalIdSuffixes.size());
-	if (valuesColumnsCount == 0)
-	{
-		valuesColumnsCount = 1;
-	}
-
+	int valuesColumnsCount = m_model->valueColumnsCount();
 	for (int c = 0; c < valuesColumnsCount; c++)
 	{
 		int valueColumn = static_cast<int>(TuningModelColumns::ValueFirst) + c;
-		m_columnsArray.push_back(std::make_pair(static_cast<TuningModelColumns>(valueColumn), 0.07 /*/ valuesColumnsCount*/));
+		m_model->addColumn(static_cast<TuningModelColumns>(valueColumn));
 	}
 
 	if (tabFilter->columnLimits() == true)
 	{
-		m_columnsArray.push_back(std::make_pair(TuningModelColumns::LowLimit, 0.07));
-		m_columnsArray.push_back(std::make_pair(TuningModelColumns::HighLimit, 0.07));
+		m_model->addColumn(TuningModelColumns::LowLimit);
+		m_model->addColumn(TuningModelColumns::HighLimit);
 	}
 	if (tabFilter->columnDefault() == true)
 	{
-		m_columnsArray.push_back(std::make_pair(TuningModelColumns::Default, 0.07));
+		m_model->addColumn(TuningModelColumns::Default);
 	}
 	if (tabFilter->columnValid() == true)
 	{
-		m_columnsArray.push_back(std::make_pair(TuningModelColumns::Valid, 0.07));
+		m_model->addColumn(TuningModelColumns::Valid);
 	}
 	if (tabFilter->columnOutOfRange() == true)
 	{
-		m_columnsArray.push_back(std::make_pair(TuningModelColumns::OutOfRange, 0.07));
-	}
-
-	for (auto c : m_columnsArray)
-	{
-		m_model->addColumn(c.first);
+		m_model->addColumn(TuningModelColumns::OutOfRange);
 	}
 
 	// Filter controls
@@ -741,8 +828,20 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 
 	m_objectList->installEventFilter(this);
 
-
 	fillObjectsList();
+
+	// load column width
+
+	m_columnWidthStorage.load(tabFilter->ID());
+
+	for (int c = 0; c < m_model->columnCount(); c++)
+	{
+		int width = m_columnWidthStorage.width(m_model->columnType(c));
+
+		m_objectList->setColumnWidth(c, width);
+	}
+
+
 
 	// Color
 
@@ -765,6 +864,14 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 
 TuningPage::~TuningPage()
 {
+	for (int c = 0; c < m_model->columnCount(); c++)
+	{
+		m_columnWidthStorage.setWidth(m_model->columnType(c), m_objectList->columnWidth(c));
+	}
+
+	m_columnWidthStorage.save();
+
+
 	m_instanceCounter--;
 	//qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
 }
@@ -1394,36 +1501,6 @@ bool TuningPage::eventFilter(QObject* object, QEvent* event)
 	}
 
 	return QWidget::eventFilter(object, event);
-}
-
-void TuningPage::resizeEvent(QResizeEvent *event)
-{
-
-	Q_UNUSED(event);
-
-	if (m_objectList == nullptr)
-	{
-		return;
-	}
-
-	QSize s = m_objectList->size();
-
-	double totalWidth = s.width() - 25;
-
-	for (int c = 0; c < m_columnsArray.size(); c++)
-	{
-		auto columnInfo = m_columnsArray[c];
-
-		int columnWidth = totalWidth * columnInfo.second;
-
-		if (columnWidth >= s.width())
-		{
-			columnWidth = 100;
-		}
-
-		m_objectList->setColumnWidth(c, columnWidth);
-	}
-
 }
 
 void TuningPage::invertValue()

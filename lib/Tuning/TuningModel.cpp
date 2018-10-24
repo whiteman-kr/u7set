@@ -16,6 +16,21 @@ Hash TuningModelHashSet::firstHash() const
 	return UNDEFINED_HASH;
 }
 
+int TuningModelHashSet::hashCount() const
+{
+	int result = 0;
+
+	for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
+	{
+		if (hash[c] != UNDEFINED_HASH)
+		{
+			result++;
+		}
+	}
+
+	return result;
+}
+
 //
 // TuningItemSorter
 //
@@ -737,6 +752,8 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 		Hash aspHash = hashSet.firstHash();
 
+		int hashCount = hashSet.hashCount();
+
 		bool ok = false;
 
 		const AppSignalParam asp = m_tuningSignalManager->signalParam(aspHash, &ok);
@@ -745,9 +762,9 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 		if (columnType == static_cast<int>(TuningModelColumns::CustomAppSignalID))
 		{
-			if (valueColumnsCount() > 1)
+			if (hashCount > 1)
 			{
-				return tr("%1 [+%2]").arg(asp.customSignalId()).arg(valueColumnsCount() - 1);
+				return tr("%1 [+%2]").arg(asp.customSignalId()).arg(hashCount - 1);
 			}
 
 			return asp.customSignalId();
@@ -755,9 +772,9 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 		if (columnType == static_cast<int>(TuningModelColumns::EquipmentID))
 		{
-			if (valueColumnsCount() > 1)
+			if (hashCount > 1)
 			{
-				return tr("%1 [+%2]").arg(asp.equipmentId()).arg(valueColumnsCount() - 1);
+				return tr("%1 [+%2]").arg(asp.equipmentId()).arg(hashCount - 1);
 			}
 
 			return asp.equipmentId();
@@ -765,9 +782,9 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 
 		if (columnType == static_cast<int>(TuningModelColumns::AppSignalID))
 		{
-			if (valueColumnsCount() > 1)
+			if (hashCount > 1)
 			{
-				return tr("%1 [+%2]").arg(asp.appSignalId()).arg(valueColumnsCount() - 1);
+				return tr("%1 [+%2]").arg(asp.appSignalId()).arg(hashCount - 1);
 			}
 
 			return asp.appSignalId();

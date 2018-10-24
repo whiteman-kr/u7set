@@ -250,7 +250,7 @@ private:
 	// Properties
 	//
 
-	QString m_ID;
+	QString m_ID = "ID";
 	QString m_customID;
 	QString m_caption;
 
