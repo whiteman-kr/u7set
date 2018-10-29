@@ -5,6 +5,7 @@ const char* ModuleRawDataDescription::APP_DATA16 = "APP_DATA16";
 const char* ModuleRawDataDescription::APP_DATA32 = "APP_DATA32";
 const char* ModuleRawDataDescription::DIAG_DATA16 = "DIAG_DATA16";
 const char* ModuleRawDataDescription::DIAG_DATA32 = "DIAG_DATA32";
+const char* ModuleRawDataDescription::TX_PREFIX = "TX_";
 
 
 ModuleRawDataDescription::ModuleRawDataDescription()
@@ -61,6 +62,11 @@ bool ModuleRawDataDescription::parse(const QString& moduleequipmentIdTemplate, c
 		str = str.trimmed();
 
 		QString itemTypeStr = str.section("=", 0, 0).trimmed();
+
+		if (itemTypeStr.startsWith(TX_PREFIX) == true)
+		{
+			itemTypeStr = itemTypeStr.mid(static_cast<int>(strlen(TX_PREFIX)));
+		}
 
 		QString valueStr = str.section("=", 1, 1).trimmed();
 

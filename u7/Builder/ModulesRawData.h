@@ -48,6 +48,7 @@ private:
 	static const char* APP_DATA32;
 	static const char* DIAG_DATA16;
 	static const char* DIAG_DATA32;
+	static const char* TX_PREFIX;
 
 	int m_rawDataSize = 0;
 
