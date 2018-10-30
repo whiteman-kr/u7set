@@ -5,6 +5,8 @@
 #include "../lib/Hash.h"
 #include "../VFrame30/Schema.h"
 
+const int MAX_VALUES_COLUMN_COUNT = 6;
+
 struct TuningCounters
 {
 	int errorCounter = 0;
@@ -37,7 +39,7 @@ public:
 private:
 
 	QString m_appSignalId;
-	Hash m_appSignalHash = 0;
+	Hash m_appSignalHash = UNDEFINED_HASH;
 
 	bool m_useValue = false;
 	TuningValue m_value;
@@ -170,6 +172,44 @@ public:
 	TuningCounters counters() const;
 	void setCounters(TuningCounters value);
 
+	// Tab appearance
+
+	int valuesColumnCount() const;
+	void setValuesColumnCount(int value);
+
+	std::vector<QString> valueColumnsAppSignalIdSuffixes() const;
+
+	bool columnCustomAppId() const;
+	void setColumnCustomAppId(bool value);
+
+	bool columnAppId() const;
+	void setColumnAppId(bool value);
+
+	bool columnEquipmentId() const;
+	void setColumnEquipmentId(bool value);
+
+	bool columnCaption() const;
+	void setColumnCaption(bool value);
+
+	bool columnUnits() const;
+	void setColumnUnits(bool value);
+
+	bool columnType() const;
+	void setColumnType(bool value);
+
+	bool columnLimits() const;
+	void setColumnLimits(bool value);
+
+	bool columnDefault() const;
+	void setColumnDefault(bool value);
+
+	bool columnValid() const;
+	void setColumnValid(bool value);
+
+	bool columnOutOfRange() const;
+	void setColumnOutOfRange(bool value);
+
+
 public:
 	// Operations
 	//
@@ -195,17 +235,22 @@ public:
 	int childFiltersCount() const;
 	std::shared_ptr<TuningFilter> childFilter(int index) const;
 
+	void updateOptionalProperties();
+
 private:
 	void copy(const TuningFilter& That);
 
 	bool processMaskList(const QString& s, const QStringList& masks) const;
 
+	void setPropertyVisible(const QLatin1String& name, bool visible);
+
 private:
 
+	//
 	// Properties
 	//
 
-	QString m_ID;
+	QString m_ID = "ID";
 	QString m_customID;
 	QString m_caption;
 
@@ -224,19 +269,39 @@ private:
 	bool m_hasDiscreteCounter = false;
 
 	// Filters
-	//
+
 	QStringList m_customAppSignalIDMasks;
 	QStringList m_equipmentIDMasks;
 	QStringList m_appSignalIDMasks;
 
-	// Values
+	// Tab appearance
+
+	int m_valueColumnsCount = 0;
+	std::vector<QString> m_valueColumnsAppSignalIdSuffixes;
+
+	bool m_columnCustomAppId = true;
+	bool m_columnAppId = false;
+	bool m_columnEquipmentId = true;
+	bool m_columnCaption = true;
+	bool m_columnUnits = true;
+	bool m_columnType = true;
+	bool m_columnLimits = true;
+	bool m_columnDefault = true;
+	bool m_columnValid = false;
+	bool m_columnOutOfRange = false;
+
+private:
+
 	//
+	// Run-time data
+	//
+
+	// Values
 
 	std::vector<Hash> m_signalValuesVec;
 	std::map <Hash, TuningFilterValue> m_signalValuesMap;
 
 	// Parent and child
-	//
 
 	TuningFilter* m_parentFilter = nullptr;
 	std::vector<std::shared_ptr<TuningFilter>> m_childFilters;
@@ -249,6 +314,9 @@ private:
 	// Counters
 
 	TuningCounters m_counters;
+
+
+
 
 };
 

@@ -37,6 +37,12 @@ unix {
     CONFIG(release, debug|release): DESTDIR = ../../bin_unix/release
 }
 
+#c++17 support
+#
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
+
 SOURCES += main.cpp \
     UserTests.cpp \
     FileTests.cpp \
@@ -55,14 +61,10 @@ SOURCES += main.cpp \
     ../../lib/Types.cpp \
     ../../Proto/network.pb.cc \
     ../../Proto/serialization.pb.cc \
-    MultiThreadFileTest.cpp \
-    MultiThreadSignalTests.cpp \
     PropertyObjectTests.cpp \
     ProjectPropertyTests.cpp \
     ../../lib/XmlHelper.cpp \
-    DbControllerProjectManagementTests.cpp \
     ../../lib/Queue.cpp \
-    DbControllerUserManagementTests.cpp \
     DbControllerFileManagementTests.cpp \
     ../../lib/WUtils.cpp \
     ../../lib/DataProtocols.cpp \
@@ -78,7 +80,10 @@ SOURCES += main.cpp \
     ../../u7/Builder/IssueLogger.cpp \
     ../../lib/DeviceHelper.cpp \
     ../../u7/Builder/ModulesRawData.cpp \
-    ../../lib/SignalProperties.cpp
+    ../../lib/SignalProperties.cpp \
+    TestDbBase.cpp \
+    DbControllerUserTests.cpp \
+    DbControllerProjectTests.cpp
 
 HEADERS += \
     UserTests.h \
@@ -100,14 +105,10 @@ HEADERS += \
     ../../lib/Types.h \
     ../../Proto/network.pb.h \
     ../../Proto/serialization.pb.h \
-    MultiThreadFileTest.h \
-    MultiThreadSignalTests.h \
     PropertyObjectTests.h \
     ProjectPropertyTests.h \
     ../../lib/XmlHelper.h \
-    DbControllerProjectManagementTests.h \
     ../../lib/Queue.h \
-    DbControllerUserManagementTests.h \
     DbControllerFileManagementTests.h \
     ../../lib/WUtils.h \
     ../../lib/DataProtocols.h \
@@ -123,17 +124,10 @@ HEADERS += \
     ../../u7/Builder/IssueLogger.h \
     ../../lib/DeviceHelper.h \
     ../../u7/Builder/ModulesRawData.h \
-    ../../lib/SignalProperties.h
-
-#c++11 support for GCC
-#
-#unix:QMAKE_CXXFLAGS += -std=c++11
-
-#c++14/17 support
-#
-CONFIG += c++14
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+    ../../lib/SignalProperties.h \
+    TestDbBase.h \
+    DbControllerUserTests.h \
+    DbControllerProjectTests.h
 
 # Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 #

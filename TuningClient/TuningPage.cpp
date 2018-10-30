@@ -13,8 +13,8 @@ using namespace std;
 //
 
 
-TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, QWidget* parent):
-	TuningModel(tuningSignalManager, parent)
+TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent):
+	TuningModel(tuningSignalManager, valueColumnsAppSignalIdSuffixes, parent)
 {
 }
 
@@ -25,9 +25,9 @@ void TuningModelClient::blink()
 
 bool TuningModelClient::hasPendingChanges()
 {
-	for (int row = 0; row < static_cast<int>(m_hashes.size()); row++)
+	for (int i = 0; i < static_cast<int>(m_allHashes.size()); i++)
 	{
-		Hash hash = m_hashes[row];
+		Hash hash = m_allHashes[i];
 
 		if (m_tuningSignalManager->newValueIsUnapplied(hash) == true)
 		{
@@ -41,21 +41,33 @@ bool TuningModelClient::hasPendingChanges()
 QBrush TuningModelClient::backColor(const QModelIndex& index) const
 {
 	int col = index.column();
-	int displayIndex = m_columnsIndexes[col];
+	int columnType = static_cast<int>(m_columnsTypes[col]);
 
 	int row = index.row();
-	if (row >= m_hashes.size())
+	if (row >= rowCount())
 	{
 		assert(false);
 		return QBrush();
 	}
 
-	Hash hash = m_hashes[row];
-
 	bool ok = false;
 
-	if (displayIndex == static_cast<int>(Columns::Value))
+	if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
+		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
+		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+		{
+			assert(false);
+			return QBrush();
+		}
+
+		Hash hash = hashByIndex(row, valueColumn);
+
+		if (hash == UNDEFINED_HASH)
+		{
+			return QBrush();
+		}
+
 		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
 
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
@@ -88,54 +100,72 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 		}
 	}
 
-	if (displayIndex == static_cast<int>(Columns::Valid))
-	{
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+	QColor color;
 
-		if (state.valid() == false)
+	const TuningModelHashSet& hashes = hashSetByIndex(row);
+
+	for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
+	{
+		const Hash hash = hashes.hash[c];
+
+		if (hash == UNDEFINED_HASH)
 		{
-			QColor color = QColor(Qt::red);
-			return QBrush(color);
+			continue;
+		}
+
+		if (columnType == static_cast<int>(TuningModelColumns::Valid))
+		{
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.valid() == false)
+			{
+				color = QColor(Qt::red);
+				break;
+			}
+		}
+
+		if (columnType == static_cast<int>(TuningModelColumns::LowLimit) || columnType == static_cast<int>(TuningModelColumns::HighLimit))
+		{
+			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.limitsUnbalance(asp) == true)
+			{
+				color = QColor(Qt::red);
+				break;
+			}
+		}
+
+		if (columnType == static_cast<int>(TuningModelColumns::OutOfRange))
+		{
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.outOfRange() == true)
+			{
+				color = QColor(Qt::red);
+				break;
+			}
+		}
+
+		if (columnType == static_cast<int>(TuningModelColumns::Default))
+		{
+			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+			TuningValue defaultVal = defaultValue(asp);
+
+			if (defaultVal < asp.tuningLowBound() || defaultVal > asp.tuningHighBound())
+			{
+				color = QColor(Qt::red);
+				break;
+			}
+
+			color = QColor(Qt::gray);
 		}
 	}
 
-	if (displayIndex == static_cast<int>(Columns::LowLimit) || displayIndex == static_cast<int>(Columns::HighLimit))
+	if (color.isValid() == true)
 	{
-		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
-
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.limitsUnbalance(asp) == true)
-		{
-			QColor color = QColor(Qt::red);
-			return QBrush(color);
-		}
-	}
-
-	if (displayIndex == static_cast<int>(Columns::OutOfRange))
-	{
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.outOfRange() == true)
-		{
-			QColor color = QColor(Qt::red);
-			return QBrush(color);
-		}
-	}
-
-	if (displayIndex == static_cast<int>(Columns::Default))
-	{
-		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
-
-		TuningValue defaultVal = defaultValue(asp);
-
-		if (defaultVal < asp.tuningLowBound() || defaultVal > asp.tuningHighBound())
-		{
-			QColor color = QColor(Qt::red);
-			return QBrush(color);
-		}
-
-		QColor color = QColor(Qt::gray);
 		return QBrush(color);
 	}
 
@@ -145,32 +175,33 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 {
 	int col = index.column();
-	int displayIndex = m_columnsIndexes[col];
+	int columnType = static_cast<int>(m_columnsTypes[col]);
 
 	int row = index.row();
-	if (row >= m_hashes.size())
+	if (row >= rowCount())
 	{
 		assert(false);
 		return QBrush();
 	}
 
-	Hash hash = m_hashes[row];
-
 	bool ok = false;
 
-	if (displayIndex == static_cast<int>(Columns::Valid))
+	if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.valid() == false)
+		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
+		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
 		{
-			QColor color = QColor(Qt::white);
-			return QBrush(color);
+			assert(false);
+			return QBrush();
 		}
-	}
 
-	if (displayIndex == static_cast<int>(Columns::Value))
-	{
+		Hash hash = hashByIndex(row, valueColumn);
+
+		if (hash == UNDEFINED_HASH)
+		{
+			return QBrush();
+		}
+
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
 		if (state.controlIsEnabled() == false)
@@ -192,39 +223,67 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 		}
 	}
 
-	if (displayIndex == static_cast<int>(Columns::LowLimit) || displayIndex == static_cast<int>(Columns::HighLimit))
+	QColor color;
+
+	const TuningModelHashSet& hashes = hashSetByIndex(row);
+
+	for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
 	{
-		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+		const Hash hash = hashes.hash[c];
 
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.limitsUnbalance(asp) == true)
+		if (hash == UNDEFINED_HASH)
 		{
-			QColor color = QColor(Qt::white);
-			return QBrush(color);
+			continue;
+		}
+
+		if (columnType == static_cast<int>(TuningModelColumns::Valid))
+		{
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.valid() == false)
+			{
+				color = QColor(Qt::white);
+				break;
+			}
+		}
+
+		if (columnType == static_cast<int>(TuningModelColumns::LowLimit) || columnType == static_cast<int>(TuningModelColumns::HighLimit))
+		{
+			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.limitsUnbalance(asp) == true)
+			{
+				color = QColor(Qt::white);
+				break;
+			}
+		}
+
+		if (columnType == static_cast<int>(TuningModelColumns::OutOfRange))
+		{
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.outOfRange() == true)
+			{
+				color = QColor(Qt::white);
+				break;
+			}
+		}
+
+		if (columnType == static_cast<int>(TuningModelColumns::Default))
+		{
+			color = QColor(Qt::white);
+			break;
 		}
 	}
 
-	if (displayIndex == static_cast<int>(Columns::OutOfRange))
+	if (color.isValid() == true)
 	{
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.outOfRange() == true)
-		{
-			QColor color = QColor(Qt::white);
-			return QBrush(color);
-		}
-	}
-
-	if (displayIndex == static_cast<int>(Columns::Default))
-	{
-		//int displayIndex = m_columnsIndexes[col];
-		QColor color = QColor(Qt::white);
 		return QBrush(color);
 	}
 
 	return QBrush();
-
 }
 
 Qt::ItemFlags TuningModelClient::flags(const QModelIndex& index) const
@@ -232,21 +291,33 @@ Qt::ItemFlags TuningModelClient::flags(const QModelIndex& index) const
 	Qt::ItemFlags f = TuningModel::flags(index);
 
 	int col = index.column();
-	int displayIndex = m_columnsIndexes[col];
+	int columnType = static_cast<int>(m_columnsTypes[col]);
 
 	int row = index.row();
-	if (row >= m_hashes.size())
+	if (row >= rowCount())
 	{
 		assert(false);
 		return f;
 	}
 
-	Hash hash = m_hashes[row];
-
-	bool ok = false;
-
-	if (displayIndex == static_cast<int>(Columns::Value))
+	if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
+		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
+		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+		{
+			assert(false);
+			return f;
+		}
+
+		Hash hash = hashByIndex(row, valueColumn);
+
+		if (hash == UNDEFINED_HASH)
+		{
+			return f;
+		}
+
+		bool ok = false;
+
 		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
 
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
@@ -271,37 +342,52 @@ Qt::ItemFlags TuningModelClient::flags(const QModelIndex& index) const
 QVariant TuningModelClient::data(const QModelIndex& index, int role) const
 {
 	int col = index.column();
-	int displayIndex = m_columnsIndexes[col];
+	int columnType = static_cast<int>(m_columnsTypes[col]);
 
 	int row = index.row();
-	if (row >= m_hashes.size())
+	if (row >= rowCount())
 	{
 		assert(false);
 		return QVariant();
 	}
 
-	Hash hash = m_hashes[row];
-
-	bool ok = false;
-
-	AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
-
-	TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-	if (role == Qt::CheckStateRole && displayIndex == static_cast<int>(Columns::Value) && asp.isDiscrete() == true && state.valid() == true)
+	if (role == Qt::CheckStateRole && columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
-		quint32 discreteValue = 0;
-
-		if (m_tuningSignalManager->newValueIsUnapplied(hash) == true)
+		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
+		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
 		{
-			discreteValue = m_tuningSignalManager->newValue(hash).discreteValue();
-		}
-		else
-		{
-			discreteValue = state.value().discreteValue();
+			assert(false);
+			return QVariant();
 		}
 
-		return (discreteValue == 0 ? Qt::Unchecked : Qt::Checked);
+		Hash hash = hashByIndex(index.row(), valueColumn);
+
+		if (hash == UNDEFINED_HASH)
+		{
+			return QVariant();
+		}
+
+		bool ok = false;
+
+		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+		if (asp.isDiscrete() == true && state.valid() == true)
+		{
+			quint32 discreteValue = 0;
+
+			if (m_tuningSignalManager->newValueIsUnapplied(hash) == true)
+			{
+				discreteValue = m_tuningSignalManager->newValue(hash).discreteValue();
+			}
+			else
+			{
+				discreteValue = state.value().discreteValue();
+			}
+
+			return (discreteValue == 0 ? Qt::Unchecked : Qt::Checked);
+		}
 	}
 
 	return TuningModel::data(index, role);
@@ -315,51 +401,64 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 	}
 
 	int col = index.column();
-	int displayIndex = m_columnsIndexes[col];
+	int columnType = static_cast<int>(m_columnsTypes[col]);
 
 	int row = index.row();
-	if (row >= m_hashes.size())
+	if (row >= rowCount())
 	{
 		assert(false);
 		return false;
 	}
 
-	Hash hash = m_hashes[row];
-
-	bool ok = false;
-
-	AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
-
-	TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-
-
-	if (role == Qt::EditRole && displayIndex == static_cast<int>(TuningModel::Columns::Value))
+	if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 	{
-		bool ok = false;
-		double v = value.toDouble(&ok);
-		if (ok == false)
+		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
+		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
 		{
+			assert(false);
 			return false;
 		}
 
-		m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), v));
-		return true;
+		Hash hash = hashByIndex(row, valueColumn);
+
+		if (hash == UNDEFINED_HASH)
+		{
+			assert(false);
+			return false;
+		}
+
+		bool ok = false;
+
+		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+		if (role == Qt::EditRole)
+		{
+			bool ok = false;
+			double v = value.toDouble(&ok);
+			if (ok == false)
+			{
+				return false;
+			}
+
+			m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), v));
+			return true;
+		}
+
+		if (role == Qt::CheckStateRole)
+		{
+			if ((Qt::CheckState)value.toInt() == Qt::Checked)
+			{
+				m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), 1));
+				return true;
+			}
+			else
+			{
+				m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), 0));
+				return true;
+			}
+		}
 	}
 
-	if (role == Qt::CheckStateRole && displayIndex == static_cast<int>(TuningModel::Columns::Value))
-	{
-		if ((Qt::CheckState)value.toInt() == Qt::Checked)
-		{
-			m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), 1));
-			return true;
-		}
-		else
-		{
-			m_tuningSignalManager->setNewValue(asp.hash(), TuningValue(asp.toTuningType(), 0));
-			return true;
-		}
-	}
 	return false;
 }
 
@@ -385,9 +484,23 @@ bool TuningTableView::edit(const QModelIndex&  index, EditTrigger trigger, QEven
 			return false;
 		}
 
-		int row = index.row();
+		int columnType = static_cast<int>(m_model->columnType(index.column()));
 
-		Hash hash = m_model->hashByIndex(row);
+		int row = index.row();
+		if (row >= m_model->rowCount())
+		{
+			assert(false);
+			return false;
+		}
+
+		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
+		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+		{
+			assert(false);
+			return false;
+		}
+
+		Hash hash = m_model->hashByIndex(row, valueColumn);
 
 		bool ok = false;
 
@@ -416,12 +529,120 @@ void TuningTableView::closeEditor(QWidget* editor, QAbstractItemDelegate::EndEdi
 }
 
 //
+// TuningPageColumnsWidth
+//
+
+TuningPageColumnsWidth::TuningPageColumnsWidth()
+{
+	m_defaultWidthMap[TuningModelColumns::CustomAppSignalID] = 180;
+	m_defaultWidthMap[TuningModelColumns::EquipmentID] = 180;
+	m_defaultWidthMap[TuningModelColumns::AppSignalID] = 180;
+	m_defaultWidthMap[TuningModelColumns::Caption] = 180;
+	m_defaultWidthMap[TuningModelColumns::Units] = 70;
+	m_defaultWidthMap[TuningModelColumns::Type] = 70;
+
+	for (int i = 0; i < MAX_VALUES_COLUMN_COUNT; i++)
+	{
+		int valueColumn = static_cast<int>(TuningModelColumns::ValueFirst) + i;
+		m_defaultWidthMap[static_cast<TuningModelColumns>(valueColumn)] = 70;
+	}
+
+	m_defaultWidthMap[TuningModelColumns::LowLimit] = 70;
+	m_defaultWidthMap[TuningModelColumns::HighLimit] = 70;
+	m_defaultWidthMap[TuningModelColumns::Default] = 70;
+	m_defaultWidthMap[TuningModelColumns::Valid] = 70;
+	m_defaultWidthMap[TuningModelColumns::OutOfRange] = 70;
+}
+
+bool TuningPageColumnsWidth::load(const QString& pageId)
+{
+	m_pageId = pageId;
+
+	m_widthMap.clear();
+
+	QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
+	QString value = settings.value(QString("PageColumnsWidth/%1").arg(m_pageId)).toString();
+
+	QStringList l = value.split(';', QString::SkipEmptyParts);
+
+	for (const QString& s : l)
+	{
+		QStringList pairList = s.split('=');
+		if (pairList.size() != 2)
+		{
+			assert(false);
+			return false;
+		}
+
+		TuningModelColumns column = static_cast<TuningModelColumns>(pairList[0].toInt());
+		int width = pairList[1].toInt();
+
+		setWidth(column, width);
+	}
+
+
+	return true;
+}
+
+bool TuningPageColumnsWidth::save() const
+{
+	if (m_pageId.isEmpty() == true)
+	{
+		assert(false);
+		return false;
+	}
+
+	QString value;
+
+	for (auto it : m_widthMap)
+	{
+		TuningModelColumns column = it.first;
+		int width = it.second;
+
+		value += QString("%1=%2;").arg(static_cast<int>(column)).arg(width);
+	}
+
+	QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
+	settings.setValue(QString("PageColumnsWidth/%1").arg(m_pageId), value);
+
+	return true;
+}
+
+int TuningPageColumnsWidth::width(TuningModelColumns column) const
+{
+	auto it = m_widthMap.find(column);
+	if (it != m_widthMap.end())
+	{
+		return it->second;
+	}
+
+	auto dit = m_defaultWidthMap.find(column);
+	if (dit != m_defaultWidthMap.end())
+	{
+		return dit->second;
+	}
+
+	assert(false);
+	return 100;
+
+}
+
+void TuningPageColumnsWidth::setWidth(TuningModelColumns column, int width)
+{
+	m_widthMap[column] = width;
+}
+
+//
 // TuningPage
 //
 
 int TuningPage::m_instanceCounter = 0;
 
-TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> pageFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
+TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
+					   std::shared_ptr<TuningFilter> pageFilter,
+					   TuningSignalManager* tuningSignalManager,
+					   TuningClientTcpClient* tuningTcpClient,
+					   QWidget* parent) :
 	QWidget(parent),
 	m_tuningSignalManager(tuningSignalManager),
 	m_tuningTcpClient(tuningTcpClient),
@@ -430,11 +651,17 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr
 {
 
 	//qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
+
 	m_instanceNo = m_instanceCounter;
 	m_instanceCounter++;
 
-	//assert(m_treeFilter);		They can be nullptr
-	//assert(m_buttonFilter);
+	//assert(m_treeFilter);		This can be nullptr
+
+	if (m_pageFilter == nullptr)
+	{
+		assert(m_pageFilter);
+		return;
+	}
 
 	assert(m_tuningSignalManager);
 
@@ -446,24 +673,81 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr
 
 	// Models and data
 	//
-	m_model = new TuningModelClient(m_tuningSignalManager, this);
+
+	// Get the tab filter (if page filter is button, take its parent, if no tab exists - create an empty temporary)
+
+	TuningFilter* tabFilter = m_pageFilter.get();
+
+	if (pageFilter->isButton() == true)
+	{
+		TuningFilter* parent = m_pageFilter->parentFilter();
+
+		if (parent != nullptr && parent->isTab() == true)
+		{
+			tabFilter = parent;
+		}
+	}
+
+	if (tabFilter == nullptr)
+	{
+		assert(false);	// page filter must exist !
+		return;
+	}
+
+	std::vector<QString> valueColumnsAppSignalIdSuffixes = tabFilter->valueColumnsAppSignalIdSuffixes();
+
+	m_model = new TuningModelClient(m_tuningSignalManager, valueColumnsAppSignalIdSuffixes, this);
 	m_model->setFont(f.family(), f.pointSize(), false);
 	m_model->setImportantFont(f.family(), f.pointSize(), true);
 
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::CustomAppSignalID, 0.22));
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::EquipmentID, 0.2));
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Caption, 0.15));
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Units, 0.05));
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Type, 0.1));
-
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Value, 0.07));
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::LowLimit, 0.07));
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::HighLimit, 0.07));
-	m_columnsArray.push_back(std::make_pair(TuningModel::Columns::Default, 0.07));
-
-	for (auto c : m_columnsArray)
+	if (tabFilter->columnCustomAppId() == true)
 	{
-		m_model->addColumn(c.first);
+		m_model->addColumn(TuningModelColumns::CustomAppSignalID);
+	}
+	if (tabFilter->columnAppId() == true)
+	{
+		m_model->addColumn(TuningModelColumns::AppSignalID);
+	}
+	if (tabFilter->columnEquipmentId() == true)
+	{
+		m_model->addColumn(TuningModelColumns::EquipmentID);
+	}
+	if (tabFilter->columnCaption() == true)
+	{
+		m_model->addColumn(TuningModelColumns::Caption);
+	}
+	if (tabFilter->columnUnits() == true)
+	{
+		m_model->addColumn(TuningModelColumns::Units);
+	}
+	if (tabFilter->columnType() == true)
+	{
+		m_model->addColumn(TuningModelColumns::Type);
+	}
+
+	int valuesColumnsCount = m_model->valueColumnsCount();
+	for (int c = 0; c < valuesColumnsCount; c++)
+	{
+		int valueColumn = static_cast<int>(TuningModelColumns::ValueFirst) + c;
+		m_model->addColumn(static_cast<TuningModelColumns>(valueColumn));
+	}
+
+	if (tabFilter->columnLimits() == true)
+	{
+		m_model->addColumn(TuningModelColumns::LowLimit);
+		m_model->addColumn(TuningModelColumns::HighLimit);
+	}
+	if (tabFilter->columnDefault() == true)
+	{
+		m_model->addColumn(TuningModelColumns::Default);
+	}
+	if (tabFilter->columnValid() == true)
+	{
+		m_model->addColumn(TuningModelColumns::Valid);
+	}
+	if (tabFilter->columnOutOfRange() == true)
+	{
+		m_model->addColumn(TuningModelColumns::OutOfRange);
 	}
 
 	// Filter controls
@@ -544,8 +828,20 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr
 
 	m_objectList->installEventFilter(this);
 
-
 	fillObjectsList();
+
+	// load column width
+
+	m_columnWidthStorage.load(tabFilter->ID());
+
+	for (int c = 0; c < m_model->columnCount(); c++)
+	{
+		int width = m_columnWidthStorage.width(m_model->columnType(c));
+
+		m_objectList->setColumnWidth(c, width);
+	}
+
+
 
 	// Color
 
@@ -568,6 +864,14 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr
 
 TuningPage::~TuningPage()
 {
+	for (int c = 0; c < m_model->columnCount(); c++)
+	{
+		m_columnWidthStorage.setWidth(m_model->columnType(c), m_objectList->columnWidth(c));
+	}
+
+	m_columnWidthStorage.save();
+
+
 	m_instanceCounter--;
 	//qDebug() << "TuningPage::TuningPage m_instanceCounter = " << m_instanceCounter;
 }
@@ -809,7 +1113,7 @@ bool TuningPage::write()
 	bool modifiedFound = false;
 	int modifiedCount = 0;
 
-	std::vector<Hash> hashes = m_model->hashes();
+	std::vector<Hash> hashes = m_model->allHashes();
 
 	bool ok = false;
 
@@ -990,75 +1294,89 @@ void TuningPage::slot_setValue()
 	TuningValue lowLimit;
 	TuningValue highLimit;
 
-	for (int i : selectedRows)
+	std::vector<Hash> selectedHashes;
+
+	for (int row : selectedRows)
 	{
-		Hash hash = m_model->hashByIndex(i);
+		const TuningModelHashSet& hashSet = m_model->hashSetByIndex(row);
 
-		bool ok = false;
-
-		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
-
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.valid() == false)
+		for (int c = 0; c < m_model->valueColumnsCount(); c++)
 		{
-			return;
-		}
+			Hash hash = hashSet.hash[c];
 
-		if (asp.isAnalog() == true)
-		{
-			if (state.limitsUnbalance(asp) == true)
+			if (hash == UNDEFINED_HASH)
 			{
-				QMessageBox::warning(this, tr("Set Value"), tr("There is limits mismatch in signal '%1'. Value setting is disabled.").arg(asp.customSignalId()));
-				return;
+				continue;
 			}
-		}
 
-		if (asp.isAnalog() == true)
-		{
-			if (asp.precision() > precision)
-			{
-				precision = asp.precision();
-			}
-		}
+			bool ok = false;
 
-		if (first == true)
-		{
-			value = state.value();
-			defaultValue = m_model->defaultValue(asp);
-			lowLimit = asp.tuningLowBound();
-			highLimit = asp.tuningHighBound();
-			first = false;
-		}
-		else
-		{
-			if (asp.toTuningType() != value.type())
+			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.valid() == false)
 			{
-				QMessageBox::warning(this, tr("Set Value"), tr("Please select objects of the same type."));
 				return;
 			}
 
 			if (asp.isAnalog() == true)
 			{
-				if (lowLimit != asp.tuningLowBound() || highLimit != asp.tuningHighBound())
+				if (state.limitsUnbalance(asp) == true)
 				{
-					QMessageBox::warning(this, tr("Set Value"), tr("Selected objects have different input range."));
+					QMessageBox::warning(this, tr("Set Value"), tr("There is limits mismatch in signal '%1'. Value setting is disabled.").arg(asp.customSignalId()));
 					return;
 				}
 			}
 
-			if (defaultValue != m_model->defaultValue(asp))
+			if (asp.isAnalog() == true)
 			{
-				QMessageBox::warning(this, tr("Set Value"), tr("Selected objects have different default values."));
-				return;
+				if (asp.precision() > precision)
+				{
+					precision = asp.precision();
+				}
 			}
 
-			if (value != state.value())
+			if (first == true)
 			{
-				sameValue = false;
+				value = state.value();
+				defaultValue = m_model->defaultValue(asp);
+				lowLimit = asp.tuningLowBound();
+				highLimit = asp.tuningHighBound();
+				first = false;
 			}
-		}
-	}
+			else
+			{
+				if (asp.toTuningType() != value.type())
+				{
+					QMessageBox::warning(this, tr("Set Value"), tr("Please select objects of the same type."));
+					return;
+				}
+
+				if (asp.isAnalog() == true)
+				{
+					if (lowLimit != asp.tuningLowBound() || highLimit != asp.tuningHighBound())
+					{
+						QMessageBox::warning(this, tr("Set Value"), tr("Selected objects have different input range."));
+						return;
+					}
+				}
+
+				if (defaultValue != m_model->defaultValue(asp))
+				{
+					QMessageBox::warning(this, tr("Set Value"), tr("Selected objects have different default values."));
+					return;
+				}
+
+				if (value != state.value())
+				{
+					sameValue = false;
+				}
+			}
+
+			selectedHashes.push_back(hash);
+		}	// c
+	}	// row
 
 	DialogInputTuningValue d(value, defaultValue, sameValue, lowLimit, highLimit, precision, this);
 	if (d.exec() != QDialog::Accepted)
@@ -1068,10 +1386,8 @@ void TuningPage::slot_setValue()
 
 	TuningValue newValue = d.value();
 
-	for (int i : selectedRows)
+	for (Hash hash : selectedHashes)
 	{
-		Hash hash = m_model->hashByIndex(i);
-
 		m_tuningSignalManager->setNewValue(hash, newValue);
 	}
 }
@@ -1096,38 +1412,50 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 		return;
 	}
 
-	Hash hash = m_model->hashByIndex(index.row());
-	if (hash == UNDEFINED_HASH)
-	{
-		assert(false);
-		return;
-	}
+	const TuningModelHashSet& hashes = m_model->hashSetByIndex(index.row());
 
 	QMenu menu(this);
 
-	bool found = false;
+	bool menuIsEmpty = true;
 
-	AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &found);
-
-	if (found == false)
+	for (int i = 0; i < m_model->valueColumnsCount(); i++)
 	{
-		assert(false);
-		return;
+		Hash hash = hashes.hash[i];
+
+		if (hash == UNDEFINED_HASH)
+		{
+			continue;
+		}
+
+		bool found = false;
+
+		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &found);
+
+		if (found == false)
+		{
+			assert(false);
+			return;
+		}
+
+		QAction* a = new QAction(tr("%1 - %2").arg(asp.customSignalId()).arg(asp.caption()), &menu);
+
+		auto f = [this, hash]() -> void
+		{
+			DialogSignalInfo* d = new DialogSignalInfo(hash, m_tuningTcpClient->instanceIdHash(), m_tuningSignalManager, this);
+			d->show();
+		};
+
+		connect(a, &QAction::triggered, this, f);
+
+		menu.addAction(a);
+
+		menuIsEmpty = false;
 	}
 
-	QAction* a = new QAction(tr("%1 - %2").arg(asp.customSignalId()).arg(asp.caption()), &menu);
-
-	auto f = [this, hash]() -> void
+	if (menuIsEmpty == false)
 	{
-		DialogSignalInfo* d = new DialogSignalInfo(hash, m_tuningTcpClient->instanceIdHash(), m_tuningSignalManager, this);
-		d->show();
-	};
-
-	connect(a, &QAction::triggered, this, f);
-
-	menu.addAction(a);
-
-	menu.exec(QCursor::pos());
+		menu.exec(QCursor::pos());
+	}
 
 }
 
@@ -1175,36 +1503,6 @@ bool TuningPage::eventFilter(QObject* object, QEvent* event)
 	return QWidget::eventFilter(object, event);
 }
 
-void TuningPage::resizeEvent(QResizeEvent *event)
-{
-
-	Q_UNUSED(event);
-
-	if (m_objectList == nullptr)
-	{
-		return;
-	}
-
-	QSize s = m_objectList->size();
-
-	double totalWidth = s.width() - 25;
-
-	for (int c = 0; c < m_columnsArray.size(); c++)
-	{
-		auto columnInfo = m_columnsArray[c];
-
-		int columnWidth = totalWidth * columnInfo.second;
-
-		if (columnWidth >= s.width())
-		{
-			columnWidth = 100;
-		}
-
-		m_objectList->setColumnWidth(c, columnWidth);
-	}
-
-}
-
 void TuningPage::invertValue()
 {
 	QModelIndexList selection = m_objectList->selectionModel()->selectedRows();
@@ -1223,33 +1521,43 @@ void TuningPage::invertValue()
 
 	bool ok = false;
 
-	for (int i : selectedRows)
+	for (int row : selectedRows)
 	{
-		Hash hash = m_model->hashByIndex(i);
+		const TuningModelHashSet& hashSet = m_model->hashSetByIndex(row);
 
-		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
-
-		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-		if (state.valid() == false)
+		for (int c = 0; c < m_model->valueColumnsCount(); c++)
 		{
-			return;
-		}
+			Hash hash = hashSet.hash[c];
 
-		if (asp.isDiscrete() == true)
-		{
-			TuningValue tv;
-
-			tv.setType(TuningValueType::Discrete);
-
-			tv.setDiscreteValue(0);
-
-			if (m_tuningSignalManager->newValue(hash).discreteValue() == 0)
+			if (hash == UNDEFINED_HASH)
 			{
-				tv.setDiscreteValue(1);
+				continue;
 			}
 
-			m_tuningSignalManager->setNewValue(hash, tv);
+			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (state.valid() == false)
+			{
+				return;
+			}
+
+			if (asp.isDiscrete() == true)
+			{
+				TuningValue tv;
+
+				tv.setType(TuningValueType::Discrete);
+
+				tv.setDiscreteValue(0);
+
+				if (m_tuningSignalManager->newValue(hash).discreteValue() == 0)
+				{
+					tv.setDiscreteValue(1);
+				}
+
+				m_tuningSignalManager->setNewValue(hash, tv);
+			}
 		}
 	}
 }
@@ -1314,13 +1622,11 @@ void TuningPage::slot_timerTick500()
 		//
 		for (int row = from; row <= to; row++)
 		{
-			//if (state->needRedraw() == true || state->userModified() == true)
-			//{
 			for (int col = 0; col < m_model->columnCount(); col++)
 			{
-				int displayIndex = m_model->columnIndex(col);
+				int columnType = static_cast<int>(m_model->columnType(col));
 
-				if (displayIndex >= static_cast<int>(TuningModel::Columns::Value))
+				if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst))
 				{
 					//QString str = QString("%1:%2").arg(row).arg(col);
 					//qDebug() << str;
@@ -1328,7 +1634,6 @@ void TuningPage::slot_timerTick500()
 					m_objectList->update(m_model->index(row, col));
 				}
 			}
-			//}
 		}
 	}
 
@@ -1341,7 +1646,7 @@ void TuningPage::slot_setAll()
 
 	// Check all signals to have correct limits
 	{
-		std::vector<Hash> hashes = m_model->hashes();
+		std::vector<Hash> hashes = m_model->allHashes();
 
 		bool ok = false;
 
@@ -1372,7 +1677,7 @@ void TuningPage::slot_setAll()
 
 	auto fAllToOn = [this]() -> void
 	{
-		std::vector<Hash> hashes = m_model->hashes();
+		std::vector<Hash> hashes = m_model->allHashes();
 
 		bool ok = false;
 
@@ -1403,7 +1708,7 @@ void TuningPage::slot_setAll()
 
 	auto fAllToOff = [this]() -> void
 	{
-		std::vector<Hash> hashes = m_model->hashes();
+		std::vector<Hash> hashes = m_model->allHashes();
 
 		bool ok = false;
 
@@ -1435,7 +1740,7 @@ void TuningPage::slot_setAll()
 
 	auto fAllToDefault = [this]() -> void
 	{
-		std::vector<Hash> hashes = m_model->hashes();
+		std::vector<Hash> hashes = m_model->allHashes();
 
 		bool ok = false;
 
@@ -1482,7 +1787,7 @@ void TuningPage::slot_setAll()
 
 void TuningPage::slot_undo()
 {
-	std::vector<Hash> hashes = m_model->hashes();
+	std::vector<Hash> hashes = m_model->allHashes();
 
 	bool ok = false;
 

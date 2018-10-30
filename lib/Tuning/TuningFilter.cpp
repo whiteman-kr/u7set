@@ -1,6 +1,62 @@
 #include "TuningFilter.h"
 #include "../lib/Types.h"
 
+namespace TuningTags
+{
+	static const QString tag_True = "true";
+	static const QString tag_False = "false";
+
+	static const QString tag_Tree = "Tree";
+	static const QString tag_Tab = "Tab";
+	static const QString tag_Button = "Button";
+	static const QString tag_Value = "Value";
+	static const QString tag_Values = "Values";
+
+	static const QString tag_All = "All";
+	static const QString tag_Analog = "Analog";
+	static const QString tag_Discrete = "Discrete";
+
+	static const QString tag_Project = "Project";
+	static const QString tag_Schema = "Schema";
+	static const QString tag_Equipment = "Equipment";
+	static const QString tag_User = "User";
+
+	static const char* prop_ValueColumn1AppSignalSuffixes = "Column%1AppSignalSuffixes";
+
+	// Property names
+
+	static const QLatin1String prop_Caption = QLatin1String("Caption");
+	static const QLatin1String prop_SignalType = QLatin1String("SignalType");
+	static const QLatin1String prop_Source = QLatin1String("Source");
+	static const QLatin1String prop_ID = QLatin1String("ID");
+	static const QLatin1String prop_CustomID = QLatin1String("CustomID");
+	static const QLatin1String prop_InterfaceType = QLatin1String("InterfaceType");
+	static const QLatin1String prop_CustomAppSignalMasks = QLatin1String("CustomAppSignalMasks");
+	static const QLatin1String prop_AppSignalMasks = QLatin1String("AppSignalMasks");
+	static const QLatin1String prop_EquipmentIDMasks = QLatin1String("EquipmentIDMasks");
+
+	static const QLatin1String prop_BackColor = QLatin1String("BackColor");
+	static const QLatin1String prop_TextColor = QLatin1String("TextColor");
+	static const QLatin1String prop_BackSelectedColor = QLatin1String("BackSelectedColor");
+	static const QLatin1String prop_TextSelectedColor = QLatin1String("TextSelectedColor");
+	static const QLatin1String prop_HasDiscreteCounter = QLatin1String("HasDiscreteCounter");
+	static const QLatin1String prop_ValueColumnsCount = QLatin1String("ValueColumnsCount");
+
+	static const QLatin1String prop_ColumnCustomAppId = QLatin1String("ColumnCustomAppId");
+	static const QLatin1String prop_ColumnAppId = QLatin1String("ColumnAppId");
+	static const QLatin1String prop_ColumnEquipmentId = QLatin1String("ColumnEquipmentId");
+	static const QLatin1String prop_ColumnCaption = QLatin1String("ColumnCaption");
+	static const QLatin1String prop_ColumnUnits = QLatin1String("ColumnUnits");
+	static const QLatin1String prop_ColumnType = QLatin1String("ColumnType");
+	static const QLatin1String prop_ColumnLimits = QLatin1String("ColumnLimits");
+	static const QLatin1String prop_ColumnDefault = QLatin1String("ColumnDefault");
+	static const QLatin1String prop_ColumnValid = QLatin1String("ColumnValid");
+	static const QLatin1String prop_ColumnOutOfRange = QLatin1String("ColumnOutOfRange");
+
+	static const QLatin1String category_Columns = QLatin1String("Columns");
+	static const QLatin1String category_ValueColumns = QLatin1String("ValueColumns");
+}
+
 TuningFilterValue::TuningFilterValue()
 {
 
@@ -51,7 +107,7 @@ bool TuningFilterValue::load(QXmlStreamReader& reader)
 
 	if (reader.attributes().hasAttribute("UseValue"))
 	{
-		setUseValue(reader.attributes().value("UseValue").toString() == "true");
+		setUseValue(reader.attributes().value("UseValue").toString() == TuningTags::tag_True);
 	}
 
 	if (reader.attributes().hasAttribute("ValueType"))
@@ -93,7 +149,7 @@ bool TuningFilterValue::save(QXmlStreamWriter& writer) const
 {
 	writer.writeStartElement("Value");
 	writer.writeAttribute("AppSignalId", m_appSignalId);
-	writer.writeAttribute("UseValue", m_useValue ? "true" : "false");
+	writer.writeAttribute("UseValue", m_useValue ? TuningTags::tag_True : TuningTags::tag_False);
 
 	writer.writeAttribute("ValueType", QString::number(static_cast<int>(m_value.type())));
 
@@ -133,40 +189,85 @@ bool TuningFilterValue::save(QXmlStreamWriter& writer) const
 
 TuningFilter::TuningFilter()
 {
-	ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, TuningFilter::caption, TuningFilter::setCaption);
-	ADD_PROPERTY_GETTER_SETTER(SignalType, "SignalType", true, TuningFilter::signalType, TuningFilter::setSignalType);
+	ADD_PROPERTY_GETTER_SETTER(QString, TuningTags::prop_Caption, true, TuningFilter::caption, TuningFilter::setCaption);
+	ADD_PROPERTY_GETTER_SETTER(SignalType, TuningTags::prop_SignalType, true, TuningFilter::signalType, TuningFilter::setSignalType);
 
-	//ADD_PROPERTY_GETTER_SETTER(QString, "ID", true, TuningFilter::ID, TuningFilter::setID);
-	ADD_PROPERTY_GETTER(QString, "ID", true, TuningFilter::ID);
+	ADD_PROPERTY_GETTER(QString, TuningTags::prop_ID, true, TuningFilter::ID);
 
-	ADD_PROPERTY_GETTER_SETTER(QString, "CustomID", true, TuningFilter::customID, TuningFilter::setCustomID);
+	ADD_PROPERTY_GETTER_SETTER(QString, TuningTags::prop_CustomID, true, TuningFilter::customID, TuningFilter::setCustomID);
 
-	//ADD_PROPERTY_GETTER_SETTER(InterfaceType, "InterfaceType", true, TuningFilter::interfaceType, TuningFilter::setInterfaceType);
-	ADD_PROPERTY_GETTER(InterfaceType, "InterfaceType", true, TuningFilter::interfaceType);
+	ADD_PROPERTY_GETTER(InterfaceType, TuningTags::prop_InterfaceType, true, TuningFilter::interfaceType);
 
-	auto propMask = ADD_PROPERTY_GETTER_SETTER(QString, "CustomAppSignalMasks", true, TuningFilter::customAppSignalIDMask, TuningFilter::setCustomAppSignalIDMask);
+	auto propMask = ADD_PROPERTY_GETTER_SETTER(QString, TuningTags::prop_CustomAppSignalMasks, true, TuningFilter::customAppSignalIDMask, TuningFilter::setCustomAppSignalIDMask);
 	propMask->setCategory("Masks");
 
-	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "AppSignalMasks", true, TuningFilter::appSignalIDMask, TuningFilter::setAppSignalIDMask);
+	propMask = ADD_PROPERTY_GETTER_SETTER(QString, TuningTags::prop_AppSignalMasks, true, TuningFilter::appSignalIDMask, TuningFilter::setAppSignalIDMask);
 	propMask->setCategory("Masks");
 
-	propMask = ADD_PROPERTY_GETTER_SETTER(QString, "EquipmentIDMasks", true, TuningFilter::equipmentIDMask, TuningFilter::setEquipmentIDMask);
+	propMask = ADD_PROPERTY_GETTER_SETTER(QString, TuningTags::prop_EquipmentIDMasks, true, TuningFilter::equipmentIDMask, TuningFilter::setEquipmentIDMask);
 	propMask->setCategory("Masks");
 
-	auto propBackColor = ADD_PROPERTY_GETTER_SETTER(QColor, "BackColor", true, TuningFilter::backColor, TuningFilter::setBackColor);
-	propBackColor->setCategory("Button/Tab Appearance");
+	auto propBackColor = ADD_PROPERTY_GETTER_SETTER(QColor, TuningTags::prop_BackColor, true, TuningFilter::backColor, TuningFilter::setBackColor);
+	propBackColor->setCategory("Appearance");
 
-	auto propTextColor = ADD_PROPERTY_GETTER_SETTER(QColor, "TextColor", true, TuningFilter::textColor, TuningFilter::setTextColor);
-	propTextColor->setCategory("Button Appearance");
+	auto propTextColor = ADD_PROPERTY_GETTER_SETTER(QColor, TuningTags::prop_TextColor, true, TuningFilter::textColor, TuningFilter::setTextColor);
+	propTextColor->setCategory("Appearance");
 
-	auto propBackSelectedColor = ADD_PROPERTY_GETTER_SETTER(QColor, "SelectedBackColor", true, TuningFilter::backSelectedColor, TuningFilter::setBackSelectedColor);
-	propBackSelectedColor->setCategory("Button Appearance");
+	auto propBackSelectedColor = ADD_PROPERTY_GETTER_SETTER(QColor, TuningTags::prop_BackSelectedColor, true, TuningFilter::backSelectedColor, TuningFilter::setBackSelectedColor);
+	propBackSelectedColor->setCategory("Appearance");
 
-	auto propTextSelectedColor = ADD_PROPERTY_GETTER_SETTER(QColor, "SelectedTextColor", true, TuningFilter::textSelectedColor, TuningFilter::setTextSelectedColor);
-	propTextSelectedColor->setCategory("Button Appearance");
+	auto propTextSelectedColor = ADD_PROPERTY_GETTER_SETTER(QColor, TuningTags::prop_TextSelectedColor, true, TuningFilter::textSelectedColor, TuningFilter::setTextSelectedColor);
+	propTextSelectedColor->setCategory("Appearance");
 
-	auto propHasCounter = ADD_PROPERTY_GETTER_SETTER(bool, "HasDiscreteCounter", true, TuningFilter::hasDiscreteCounter, TuningFilter::setHasDiscreteCounter);
-	propHasCounter->setCategory("Appearance");
+	auto propHasCounter = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_HasDiscreteCounter, true, TuningFilter::hasDiscreteCounter, TuningFilter::setHasDiscreteCounter);
+	propHasCounter->setCategory("Functions");
+
+	auto propTabValuesCount = ADD_PROPERTY_GETTER_SETTER(int, TuningTags::prop_ValueColumnsCount, true, TuningFilter::valuesColumnCount, TuningFilter::setValuesColumnCount);
+	propTabValuesCount->setCategory(TuningTags::category_ValueColumns);
+
+	// Columns
+
+	int order = 100;
+
+	auto propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnCustomAppId, true, TuningFilter::columnCustomAppId, TuningFilter::setColumnCustomAppId);
+	propColumn->setCategory(TuningTags::category_Columns);
+	propColumn->setViewOrder(order++);
+
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnAppId, true, TuningFilter::columnAppId, TuningFilter::setColumnAppId);
+	propColumn->setCategory(TuningTags::category_Columns);
+	propColumn->setViewOrder(order++);
+
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnEquipmentId, true, TuningFilter::columnEquipmentId, TuningFilter::setColumnEquipmentId);
+	propColumn->setCategory(TuningTags::category_Columns);
+	propColumn->setViewOrder(order++);
+
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnCaption, true, TuningFilter::columnCaption, TuningFilter::setColumnCaption);
+	propColumn->setCategory(TuningTags::category_Columns);
+	propColumn->setViewOrder(order++);
+
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnUnits, true, TuningFilter::columnUnits, TuningFilter::setColumnUnits);
+	propColumn->setCategory(TuningTags::category_Columns);
+	propColumn->setViewOrder(order++);
+
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnType, true, TuningFilter::columnType, TuningFilter::setColumnType);
+	propColumn->setCategory(TuningTags::category_Columns);
+	propColumn->setViewOrder(order++);
+
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnLimits, true, TuningFilter::columnLimits, TuningFilter::setColumnLimits);
+	propColumn->setCategory(TuningTags::category_Columns);
+	propColumn->setViewOrder(order++);
+
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnDefault, true, TuningFilter::columnDefault, TuningFilter::setColumnDefault);
+	propColumn->setCategory(TuningTags::category_Columns);
+	propColumn->setViewOrder(order++);
+
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnValid, true, TuningFilter::columnValid, TuningFilter::setColumnValid);
+	propColumn->setCategory(TuningTags::category_Columns);
+	propColumn->setViewOrder(order++);
+
+	propColumn = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_ColumnOutOfRange, true, TuningFilter::columnOutOfRange, TuningFilter::setColumnOutOfRange);
+	propColumn->setCategory(TuningTags::category_Columns);
+	propColumn->setViewOrder(order++);
 
 }
 
@@ -174,12 +275,16 @@ TuningFilter::TuningFilter(const TuningFilter& That)
 	:TuningFilter()
 {
 	copy(That);
+
+	updateOptionalProperties();
 }
 
 TuningFilter::TuningFilter(InterfaceType interfaceType)
 	:TuningFilter()
 {
 	m_interfaceType = interfaceType;
+
+	updateOptionalProperties();
 }
 
 TuningFilter::~TuningFilter()
@@ -198,82 +303,98 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 {
 	if (isRoot() == false)
 	{
+		// For compatibility
+
 		if (reader.attributes().hasAttribute("StrID"))  // This is for reading obsolete files!!!
 		{
 			setID(reader.attributes().value("StrID").toString());
 		}
-
-		if (reader.attributes().hasAttribute("ID"))
-		{
-			setID(reader.attributes().value("ID").toString());
-		}
-
-		if (reader.attributes().hasAttribute("CustomID"))
-		{
-			setCustomID(reader.attributes().value("CustomID").toString());
-		}
-
-		if (reader.attributes().hasAttribute("Caption"))
-		{
-			setCaption(reader.attributes().value("Caption").toString());
-		}
-
-		if (reader.attributes().hasAttribute("BackColor"))
-		{
-			setBackColor(QColor(reader.attributes().value("BackColor").toString()));
-		}
-
-		if (reader.attributes().hasAttribute("TextColor"))
-		{
-			setTextColor(QColor(reader.attributes().value("TextColor").toString()));
-		}
-
-		if (reader.attributes().hasAttribute("BackSelectedColor"))
-		{
-			setBackSelectedColor(QColor(reader.attributes().value("BackSelectedColor").toString()));
-		}
-
-		if (reader.attributes().hasAttribute("TextSelectedColor"))
-		{
-			setTextSelectedColor(QColor(reader.attributes().value("TextSelectedColor").toString()));
-		}
-
-		if (reader.attributes().hasAttribute("HasDiscreteCounter"))
-		{
-			setHasDiscreteCounter(reader.attributes().value("HasDiscreteCounter").toString() == "true");
-		}
-
 		if (reader.attributes().hasAttribute("CustomAppSignalIDMask"))
 		{
 			setCustomAppSignalIDMask(reader.attributes().value("CustomAppSignalIDMask").toString());
 		}
-
 		if (reader.attributes().hasAttribute("EquipmentIDMask"))
 		{
 			setEquipmentIDMask(reader.attributes().value("EquipmentIDMask").toString());
 		}
-
 		if (reader.attributes().hasAttribute("AppSignalIDMask"))
 		{
 			setAppSignalIDMask(reader.attributes().value("AppSignalIDMask").toString());
 		}
 
-		if (reader.attributes().hasAttribute("SignalType"))
+		// END For compatibility
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_ID))
 		{
-			QString v = reader.attributes().value("SignalType").toString();
-			if (v == "All")
+			setID(reader.attributes().value(TuningTags::prop_ID).toString());
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_CustomID))
+		{
+			setCustomID(reader.attributes().value(TuningTags::prop_CustomID).toString());
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_Caption))
+		{
+			setCaption(reader.attributes().value(TuningTags::prop_Caption).toString());
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_BackColor))
+		{
+			setBackColor(QColor(reader.attributes().value(TuningTags::prop_BackColor).toString()));
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_TextColor))
+		{
+			setTextColor(QColor(reader.attributes().value(TuningTags::prop_TextColor).toString()));
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_BackSelectedColor))
+		{
+			setBackSelectedColor(QColor(reader.attributes().value(TuningTags::prop_BackSelectedColor).toString()));
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_TextSelectedColor))
+		{
+			setTextSelectedColor(QColor(reader.attributes().value(TuningTags::prop_TextSelectedColor).toString()));
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_HasDiscreteCounter))
+		{
+			setHasDiscreteCounter(reader.attributes().value(TuningTags::prop_HasDiscreteCounter).toString() == TuningTags::tag_True);
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_CustomAppSignalMasks))
+		{
+			setCustomAppSignalIDMask(reader.attributes().value(TuningTags::prop_CustomAppSignalMasks).toString());
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_AppSignalMasks))
+		{
+			setAppSignalIDMask(reader.attributes().value(TuningTags::prop_AppSignalMasks).toString());
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_EquipmentIDMasks))
+		{
+			setEquipmentIDMask(reader.attributes().value(TuningTags::prop_EquipmentIDMasks).toString());
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_SignalType))
+		{
+			QString v = reader.attributes().value(TuningTags::prop_SignalType).toString();
+			if (v == TuningTags::tag_All)
 			{
 				setSignalType(SignalType::All);
 			}
 			else
 			{
-				if (v == "Analog")
+				if (v == TuningTags::tag_Analog)
 				{
 					setSignalType(SignalType::Analog);
 				}
 				else
 				{
-					if (v == "Discrete")
+					if (v == TuningTags::tag_Discrete)
 					{
 						setSignalType(SignalType::Discrete);
 					}
@@ -286,28 +407,28 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 			}
 		}
 
-		if (reader.attributes().hasAttribute("Source"))
+		if (reader.attributes().hasAttribute(TuningTags::prop_Source))
 		{
-			QString v = reader.attributes().value("Source").toString();
-			if (v == "Project")
+			QString v = reader.attributes().value(TuningTags::prop_Source).toString();
+			if (v == TuningTags::tag_Project)
 			{
 				setSource(Source::Project);
 			}
 			else
 			{
-				if (v == "Schema")
+				if (v == TuningTags::tag_Schema)
 				{
 					setSource(Source::Schema);
 				}
 				else
 				{
-					if (v == "Equipment")
+					if (v == TuningTags::tag_Equipment)
 					{
 						setSource(Source::Equipment);
 					}
 					else
 					{
-						if (v == "User")
+						if (v == TuningTags::tag_User)
 						{
 							setSource(Source::User);
 						}
@@ -320,6 +441,85 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 				}
 			}
 		}
+
+		// ValueColumns
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_ValueColumnsCount))
+		{
+			m_valueColumnsCount = reader.attributes().value(TuningTags::prop_ValueColumnsCount).toInt();
+
+			if (m_valueColumnsCount < 0)
+			{
+				m_valueColumnsCount = 0;
+			}
+			if (m_valueColumnsCount > MAX_VALUES_COLUMN_COUNT)
+			{
+				m_valueColumnsCount = MAX_VALUES_COLUMN_COUNT;
+			}
+
+			m_valueColumnsAppSignalIdSuffixes.resize(m_valueColumnsCount);
+
+			for (int i = 0; i < m_valueColumnsCount; i++)
+			{
+				QString propName = tr(TuningTags::prop_ValueColumn1AppSignalSuffixes).arg(i);
+
+				if (reader.attributes().hasAttribute(propName) == true)
+				{
+					QString masks = reader.attributes().value(propName).toString();
+
+					m_valueColumnsAppSignalIdSuffixes[i] = masks;
+				}
+			}
+		}
+		else
+		{
+			m_valueColumnsCount = 0;
+			m_valueColumnsAppSignalIdSuffixes.clear();
+		}
+
+		// Columns
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnCustomAppId))
+		{
+			setColumnCustomAppId(reader.attributes().value(TuningTags::prop_ColumnCustomAppId).toString() == TuningTags::tag_True);
+		}
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnAppId))
+		{
+			setColumnAppId(reader.attributes().value(TuningTags::prop_ColumnAppId).toString() == TuningTags::tag_True);
+		}
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnEquipmentId))
+		{
+			setColumnEquipmentId(reader.attributes().value(TuningTags::prop_ColumnEquipmentId).toString() == TuningTags::tag_True);
+		}
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnCaption))
+		{
+			setColumnCaption(reader.attributes().value(TuningTags::prop_ColumnCaption).toString() == TuningTags::tag_True);
+		}
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnUnits))
+		{
+			setColumnUnits(reader.attributes().value(TuningTags::prop_ColumnUnits).toString() == TuningTags::tag_True);
+		}
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnType))
+		{
+			setColumnType(reader.attributes().value(TuningTags::prop_ColumnType).toString() == TuningTags::tag_True);
+		}
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnLimits))
+		{
+			setColumnLimits(reader.attributes().value(TuningTags::prop_ColumnLimits).toString() == TuningTags::tag_True);
+		}
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnDefault))
+		{
+			setColumnDefault(reader.attributes().value(TuningTags::prop_ColumnDefault).toString() == TuningTags::tag_True);
+		}
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnValid))
+		{
+			setColumnValid(reader.attributes().value(TuningTags::prop_ColumnValid).toString() == TuningTags::tag_True);
+		}
+		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnOutOfRange))
+		{
+			setColumnOutOfRange(reader.attributes().value(TuningTags::prop_ColumnOutOfRange).toString() == TuningTags::tag_True);
+		}
+
 	}
 
 	int recurseLevel = 0;		//recurseLevel 1 = "Values", recurseLevel 2 = "Value"
@@ -342,14 +542,14 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 			QString tagName = reader.name().toString();
 
 
-			if (tagName == "Values")
+			if (tagName == TuningTags::tag_Values)
 			{
 				recurseLevel++;
 
 				continue;
 			}
 
-			if (tagName == "Value")
+			if (tagName == TuningTags::tag_Value)
 			{
 				recurseLevel++;
 
@@ -362,16 +562,16 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 				continue;
 			}
 
-			if (tagName == "Tree" || tagName == "Tab" || tagName == "Button")
+			if (tagName == TuningTags::tag_Tree || tagName == TuningTags::tag_Tab || tagName == TuningTags::tag_Button)
 			{
 				TuningFilter::InterfaceType filterType = TuningFilter::InterfaceType::Tree;
 
-				if (tagName == "Tab")
+				if (tagName == TuningTags::tag_Tab)
 				{
 					filterType = TuningFilter::InterfaceType::Tab;
 				}
 
-				if (tagName == "Button")
+				if (tagName == TuningTags::tag_Button)
 				{
 					filterType = TuningFilter::InterfaceType::Button;
 				}
@@ -393,6 +593,7 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 		}
 	}while (t != QXmlStreamReader::EndElement);
 
+	updateOptionalProperties();
 
 	return true;
 }
@@ -415,19 +616,19 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 
 		if (isTree() == true)
 		{
-			writer.writeStartElement("Tree");
+			writer.writeStartElement(TuningTags::tag_Tree);
 		}
 		else
 		{
 			if (isTab())
 			{
-				writer.writeStartElement("Tab");
+				writer.writeStartElement(TuningTags::tag_Tab);
 			}
 			else
 			{
 				if (isButton())
 				{
-					writer.writeStartElement("Button");
+					writer.writeStartElement(TuningTags::tag_Button);
 				}
 				else
 				{
@@ -438,26 +639,55 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 		}
 	}
 
-	writer.writeAttribute("ID", ID());
-	writer.writeAttribute("CustomID", customID());
-	writer.writeAttribute("Caption", caption());
+	writer.writeAttribute(TuningTags::prop_ID, ID());
+	writer.writeAttribute(TuningTags::prop_CustomID, customID());
+	writer.writeAttribute(TuningTags::prop_Caption, caption());
 
-	writer.writeAttribute("BackColor", backColor().name());
-	writer.writeAttribute("TextColor", textColor().name());
+	writer.writeAttribute(TuningTags::prop_BackColor, backColor().name());
+	writer.writeAttribute(TuningTags::prop_TextColor, textColor().name());
 
-	writer.writeAttribute("BackSelectedColor", backSelectedColor().name());
-	writer.writeAttribute("TextSelectedColor", textSelectedColor().name());
+	writer.writeAttribute(TuningTags::prop_BackSelectedColor, backSelectedColor().name());
+	writer.writeAttribute(TuningTags::prop_TextSelectedColor, textSelectedColor().name());
 
-	writer.writeAttribute("HasDiscreteCounter", hasDiscreteCounter() ? "true" : "false");
+	writer.writeAttribute(TuningTags::prop_HasDiscreteCounter, hasDiscreteCounter() ? TuningTags::tag_True : TuningTags::tag_False);
 
-	writer.writeAttribute("CustomAppSignalIDMask", customAppSignalIDMask());
-	writer.writeAttribute("EquipmentIDMask", equipmentIDMask());
-	writer.writeAttribute("AppSignalIDMask", appSignalIDMask());
+	writer.writeAttribute(TuningTags::prop_CustomAppSignalMasks, customAppSignalIDMask());
+	writer.writeAttribute(TuningTags::prop_AppSignalMasks, appSignalIDMask());
+	writer.writeAttribute(TuningTags::prop_EquipmentIDMasks, equipmentIDMask());
 
-	writer.writeAttribute("SignalType", E::valueToString<SignalType>(static_cast<int>(signalType())));
-	writer.writeAttribute("Source", E::valueToString<Source>(static_cast<int>(source())));
+	writer.writeAttribute(TuningTags::prop_SignalType, E::valueToString<SignalType>(static_cast<int>(signalType())));
+	writer.writeAttribute(TuningTags::prop_Source, E::valueToString<Source>(static_cast<int>(source())));
 
-	writer.writeStartElement("Values");
+	// ValueColumns
+
+	if (static_cast<int>(m_valueColumnsAppSignalIdSuffixes.size()) != valuesColumnCount())
+	{
+		assert(false);
+		return false;
+	}
+
+	writer.writeAttribute(TuningTags::prop_ValueColumnsCount, QString::number(valuesColumnCount()));
+
+	for (int i = 0; i < valuesColumnCount(); i++)
+	{
+		QString propName = tr(TuningTags::prop_ValueColumn1AppSignalSuffixes).arg(i);
+		writer.writeAttribute(propName, m_valueColumnsAppSignalIdSuffixes[i]);
+	}
+
+	// Columns
+
+	writer.writeAttribute(TuningTags::prop_ColumnCustomAppId, columnCustomAppId() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnAppId, columnAppId() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnEquipmentId, columnEquipmentId() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnCaption, columnCaption() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnUnits, columnUnits() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnType, columnType() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnLimits, columnLimits() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnDefault, columnDefault() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnValid, columnValid() ? TuningTags::tag_True : TuningTags::tag_False);
+	writer.writeAttribute(TuningTags::prop_ColumnOutOfRange, columnOutOfRange() ? TuningTags::tag_True : TuningTags::tag_False);
+
+	writer.writeStartElement(TuningTags::tag_Values);
 
 	std::vector <TuningFilterValue> valuesList = getValues();
 	for (const TuningFilterValue& v : valuesList)
@@ -466,13 +696,13 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 	}
 	writer.writeEndElement();
 
-
 	for (auto f : m_childFilters)
 	{
 		f->save(writer, filterBySourceType, saveSourceType);
 	}
 
 	writer.writeEndElement();
+
 	return true;
 }
 
@@ -942,6 +1172,132 @@ void TuningFilter::setCounters(TuningCounters value)
 	m_counters = value;
 }
 
+int TuningFilter::valuesColumnCount() const
+{
+	return m_valueColumnsCount;
+}
+
+void TuningFilter::setValuesColumnCount(int value)
+{
+	if (value < 0)
+	{
+		value = 0;
+	}
+	if (value > MAX_VALUES_COLUMN_COUNT)
+	{
+		value = MAX_VALUES_COLUMN_COUNT;
+	}
+
+	m_valueColumnsCount = value;
+
+	m_valueColumnsAppSignalIdSuffixes.resize(m_valueColumnsCount);
+}
+
+std::vector<QString> TuningFilter::valueColumnsAppSignalIdSuffixes() const
+{
+	return m_valueColumnsAppSignalIdSuffixes;
+}
+
+
+bool TuningFilter::columnCustomAppId() const
+{
+	return m_columnCustomAppId;
+}
+
+void TuningFilter::setColumnCustomAppId(bool value)
+{
+	m_columnCustomAppId = value;
+}
+
+bool TuningFilter::columnAppId() const
+{
+	return m_columnAppId;
+}
+
+void TuningFilter::setColumnAppId(bool value)
+{
+	m_columnAppId = value;
+}
+
+bool TuningFilter::columnEquipmentId() const
+{
+	return m_columnEquipmentId;
+}
+
+void TuningFilter::setColumnEquipmentId(bool value)
+{
+	m_columnEquipmentId= value;
+}
+
+bool TuningFilter::columnCaption() const
+{
+	return m_columnCaption;
+}
+
+void TuningFilter::setColumnCaption(bool value)
+{
+	m_columnCaption= value;
+}
+
+bool TuningFilter::columnUnits() const
+{
+	return m_columnUnits;
+}
+
+void TuningFilter::setColumnUnits(bool value)
+{
+	m_columnUnits = value;
+}
+
+bool TuningFilter::columnType() const
+{
+	return m_columnType;
+}
+
+void TuningFilter::setColumnType(bool value)
+{
+	m_columnType = value;
+}
+
+bool TuningFilter::columnLimits() const
+{
+	return m_columnLimits;
+}
+
+void TuningFilter::setColumnLimits(bool value)
+{
+	m_columnLimits = value;
+}
+
+bool TuningFilter::columnDefault() const
+{
+	return m_columnDefault;
+}
+
+void TuningFilter::setColumnDefault(bool value)
+{
+	m_columnDefault = value;
+}
+
+bool TuningFilter::columnValid() const
+{
+	return m_columnValid;
+}
+
+void TuningFilter::setColumnValid(bool value)
+{
+	m_columnValid = value;
+}
+
+bool TuningFilter::columnOutOfRange() const
+{
+	return m_columnOutOfRange;
+}
+
+void TuningFilter::setColumnOutOfRange(bool value)
+{
+	m_columnOutOfRange = value;
+}
 
 TuningFilter* TuningFilter::parentFilter() const
 {
@@ -1076,6 +1432,66 @@ std::shared_ptr<TuningFilter> TuningFilter::childFilter(int index) const
 	return m_childFilters[index];
 }
 
+void TuningFilter::updateOptionalProperties()
+{
+
+
+	setPropertyVisible(TuningTags::prop_BackColor, interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
+
+	setPropertyVisible(TuningTags::prop_TextColor, interfaceType() == InterfaceType::Button);
+	setPropertyVisible(TuningTags::prop_BackSelectedColor, interfaceType() == InterfaceType::Button);
+	setPropertyVisible(TuningTags::prop_TextSelectedColor, interfaceType() == InterfaceType::Button);
+
+	// Value columns, add or remove unnecessary properties
+
+	setPropertyVisible(TuningTags::prop_ValueColumnsCount, interfaceType() == InterfaceType::Tab);
+
+	setPropertyVisible(TuningTags::prop_ColumnCustomAppId, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnAppId, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnEquipmentId, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnCaption, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnUnits, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnType, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnLimits, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnDefault, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnValid, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_ColumnOutOfRange, interfaceType() == InterfaceType::Tab);
+
+	if (interfaceType() == InterfaceType::Tab)
+	{
+		if (static_cast<int>(m_valueColumnsAppSignalIdSuffixes.size()) != valuesColumnCount())
+		{
+			m_valueColumnsAppSignalIdSuffixes.resize(valuesColumnCount());
+		}
+
+		for (int i = 0; i < MAX_VALUES_COLUMN_COUNT; i++)
+		{
+			QString propName = tr(TuningTags::prop_ValueColumn1AppSignalSuffixes).arg(i);
+
+			if (i < valuesColumnCount())
+			{
+				if (propertyExists(propName) == false)
+				{
+					addProperty(propName, TuningTags::category_ValueColumns, true, m_valueColumnsAppSignalIdSuffixes[i]);
+				}
+				else
+				{
+					m_valueColumnsAppSignalIdSuffixes[i] = propertyValue(propName).toString();
+				}
+			}
+			else
+			{
+				if (propertyExists(propName) == true)
+				{
+					removeProperty(propName);
+				}
+			}
+		}
+	}
+
+	//
+}
+
 void TuningFilter::copy(const TuningFilter& That)
 {
 	m_ID = That.m_ID;
@@ -1101,6 +1517,9 @@ void TuningFilter::copy(const TuningFilter& That)
 
 	m_backSelectedColor = That.m_backSelectedColor;
 	m_textSelectedColor = That.m_textSelectedColor;
+
+	m_valueColumnsCount = That.m_valueColumnsCount;
+	m_valueColumnsAppSignalIdSuffixes = That.m_valueColumnsAppSignalIdSuffixes;
 
 	for (auto f : That.m_childFilters)
 	{
@@ -1173,6 +1592,18 @@ bool TuningFilter::processMaskList(const QString& s, const QStringList& masks) c
 	return result;
 
 }
+
+void TuningFilter::setPropertyVisible(const QLatin1String& name, bool visible)
+{
+	if (propertyExists(name) == false)
+	{
+		assert(false);
+		return;
+	}
+	std::shared_ptr<Property> prop = propertyByCaption(name);
+	prop->setVisible(visible);
+}
+
 //
 // ObjectFilterStorage
 //
@@ -1381,7 +1812,7 @@ bool TuningFilterStorage::copyToClipboard(std::vector<std::shared_ptr<TuningFilt
 	{
 		std::shared_ptr<TuningFilter> filterCopy = std::make_shared<TuningFilter>();
 
-		* filterCopy =* filter;
+		*filterCopy = *filter;
 
 		root.addChild(filterCopy);
 	}

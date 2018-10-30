@@ -3,11 +3,39 @@
 
 using namespace std;
 
+Hash TuningModelHashSet::firstHash() const
+{
+	for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
+	{
+		if (hash[c] != UNDEFINED_HASH)
+		{
+			return hash[c];
+		}
+	}
+
+	return UNDEFINED_HASH;
+}
+
+int TuningModelHashSet::hashCount() const
+{
+	int result = 0;
+
+	for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
+	{
+		if (hash[c] != UNDEFINED_HASH)
+		{
+			result++;
+		}
+	}
+
+	return result;
+}
+
 //
 // TuningItemSorter
 //
 
-TuningModelSorter::TuningModelSorter(int column, Qt::SortOrder order, TuningModel* model, TuningSignalManager* tuningSignalManager):
+TuningModelSorter::TuningModelSorter(TuningModelColumns column, Qt::SortOrder order, const TuningModel* model, const TuningSignalManager* tuningSignalManager):
 	m_column(column),
 	m_order(order),
 	m_tuningSignalManager(tuningSignalManager),
@@ -15,66 +43,95 @@ TuningModelSorter::TuningModelSorter(int column, Qt::SortOrder order, TuningMode
 {
 }
 
-bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::SortOrder order) const
+bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const TuningModelHashSet& set2, TuningModelColumns column, Qt::SortOrder order) const
 {
 
 	QVariant v1;
 	QVariant v2;
 
-	AppSignalParam asp1;
-	AppSignalParam asp2;
+	static AppSignalParam asp1;
+	static AppSignalParam asp2;
 
-	TuningSignalState tss1;
-	TuningSignalState tss2;
+	static TuningSignalState tss1;
+	static TuningSignalState tss2;
+
+	int valueColumnIndex = 0;
+
+	int columnIndex = static_cast<int>(column);
+
+	if (columnIndex >= static_cast<int>(TuningModelColumns::ValueFirst) && columnIndex <= static_cast<int>(TuningModelColumns::ValueLast))
+	{
+		valueColumnIndex = columnIndex - static_cast<int>(TuningModelColumns::ValueFirst);
+		if (valueColumnIndex < 0 || valueColumnIndex >= MAX_VALUES_COLUMN_COUNT)
+		{
+			assert(false);
+			return false;
+		}
+	}
 
 	bool ok = false;
 
-	asp1 = m_tuningSignalManager->signalParam(hash1, &ok);
-	asp2 = m_tuningSignalManager->signalParam(hash2, &ok);
+	asp1 = m_tuningSignalManager->signalParam(set1.firstHash(), &ok);
+	asp2 = m_tuningSignalManager->signalParam(set2.firstHash(), &ok);
 
-	tss1 = m_tuningSignalManager->state(hash1, &ok);
-	tss2 = m_tuningSignalManager->state(hash2, &ok);
-
-	switch (static_cast<TuningModel::Columns>(column))
+	if (set1.hash[valueColumnIndex] != UNDEFINED_HASH)
 	{
-	case TuningModel::Columns::CustomAppSignalID:
+		tss1 = m_tuningSignalManager->state(set1.hash[valueColumnIndex], &ok);
+	}
+	if (set2.hash[valueColumnIndex] != UNDEFINED_HASH)
+	{
+		tss2 = m_tuningSignalManager->state(set2.hash[valueColumnIndex], &ok);
+	}
+
+	//
+
+	TuningModelColumns sortColumn = column;
+
+	if (sortColumn >= TuningModelColumns::ValueFirst && sortColumn <= TuningModelColumns::ValueLast)
+	{
+		sortColumn = TuningModelColumns::ValueFirst;
+	}
+
+	switch (sortColumn)
+	{
+	case TuningModelColumns::CustomAppSignalID:
 	{
 		v1 = asp1.customSignalId();
 		v2 = asp2.customSignalId();
 	}
 		break;
-	case TuningModel::Columns::EquipmentID:
+	case TuningModelColumns::EquipmentID:
 	{
 		v1 = asp1.equipmentId();
 		v2 = asp2.equipmentId();
 	}
 		break;
-	case TuningModel::Columns::AppSignalID:
+	case TuningModelColumns::AppSignalID:
 	{
 		v1 = asp1.appSignalId();
 		v2 = asp2.appSignalId();
 	}
 		break;
-	case TuningModel::Columns::Caption:
+	case TuningModelColumns::Caption:
 	{
 		v1 = asp1.caption();
 		v2 = asp2.caption();
 	}
 		break;
-	case TuningModel::Columns::Units:
+	case TuningModelColumns::Units:
 	{
 		v1 = asp1.unit();
 		v2 = asp2.unit();
 	}
 		break;
-	case TuningModel::Columns::Type:
+	case TuningModelColumns::Type:
 	{
 		v1 = static_cast<int>(asp1.toTuningType());
 		v2 = static_cast<int>(asp2.toTuningType());
 	}
 		break;
 
-	case TuningModel::Columns::Default:
+	case TuningModelColumns::Default:
 	{
 		if (asp1.isAnalog() == asp2.isAnalog())
 		{
@@ -101,7 +158,7 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 		}
 	}
 		break;
-	case TuningModel::Columns::Value:
+	case TuningModelColumns::ValueFirst:
 	{
 		if (asp1.isAnalog() == asp2.isAnalog())
 		{
@@ -128,7 +185,7 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 		}
 	}
 		break;
-	case TuningModel::Columns::LowLimit:
+	case TuningModelColumns::LowLimit:
 	{
 		if (asp1.isAnalog() == asp2.isAnalog())
 		{
@@ -155,7 +212,7 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 		}
 	}
 		break;
-	case TuningModel::Columns::HighLimit:
+	case TuningModelColumns::HighLimit:
 	{
 		if (asp1.isAnalog() == asp2.isAnalog())
 		{
@@ -182,13 +239,13 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 		}
 	}
 		break;
-	case TuningModel::Columns::Valid:
+	case TuningModelColumns::Valid:
 	{
 		v1 = tss1.valid();
 		v2 = tss2.valid();
 	}
 		break;
-	case TuningModel::Columns::OutOfRange:
+	case TuningModelColumns::OutOfRange:
 	{
 		v1 = tss1.outOfRange();
 		v2 = tss2.outOfRange();
@@ -214,26 +271,46 @@ bool TuningModelSorter::sortFunction(Hash hash1, Hash hash2, int column, Qt::Sor
 // TuningItemModel
 //
 
-TuningModel::TuningModel(TuningSignalManager* tuningSignalManager, QWidget* parent)
-	:QAbstractItemModel(parent),
+TuningModel::TuningModel(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent)
+	:QAbstractTableModel(parent),
 	  m_tuningSignalManager(tuningSignalManager)
 {
 	// Fill column names
 
-	m_columnsNames << tr("Custom AppSignal ID");
-	m_columnsNames << tr("Equipment ID");
-	m_columnsNames << tr("App Signal ID");
-	m_columnsNames << tr("Caption");
-	m_columnsNames << tr("Units");
-	m_columnsNames << tr("Type");
+	m_columnsNamesMap[TuningModelColumns::CustomAppSignalID] = tr("Custom AppSignal ID");
+	m_columnsNamesMap[TuningModelColumns::EquipmentID] = tr("Equipment ID");
+	m_columnsNamesMap[TuningModelColumns::AppSignalID] = tr("App Signal ID");
+	m_columnsNamesMap[TuningModelColumns::Caption] = tr("Caption");
+	m_columnsNamesMap[TuningModelColumns::Units] = tr("Units");
+	m_columnsNamesMap[TuningModelColumns::Type] = tr("Type");
 
-	m_columnsNames << tr("Value");
-	m_columnsNames << tr("LowLimit");
-	m_columnsNames << tr("HighLimit");
-	m_columnsNames << tr("Default");
-	m_columnsNames << tr("Valid");
-	m_columnsNames << tr("Underflow");
-	m_columnsNames << tr("Overflow");
+	for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
+	{
+		int valueColumn = static_cast<int>(TuningModelColumns::ValueFirst) + c;
+
+		if (c == 0 && valueColumnsAppSignalIdSuffixes.empty() == true)
+		{
+			m_columnsNamesMap[static_cast<TuningModelColumns>(valueColumn)] = tr("Value");
+		}
+		else
+		{
+			m_columnsNamesMap[static_cast<TuningModelColumns>(valueColumn)] = tr("Value %1").arg(c);
+		}
+	}
+
+	m_columnsNamesMap[TuningModelColumns::Type] = tr("Type");
+	m_columnsNamesMap[TuningModelColumns::LowLimit] = tr("LowLimit");
+	m_columnsNamesMap[TuningModelColumns::HighLimit] = tr("HighLimit");
+	m_columnsNamesMap[TuningModelColumns::Default] = tr("Default");
+	m_columnsNamesMap[TuningModelColumns::Valid] = tr("Valid");
+	m_columnsNamesMap[TuningModelColumns::OutOfRange] = tr("OutOfRange");
+
+	// Convert suffixes strings to string lists
+
+	for (const QString& s : valueColumnsAppSignalIdSuffixes)
+	{
+		m_valueColumnAppSignalIdSuffixes.push_back(s.split(';', QString::SkipEmptyParts));
+	}
 }
 
 TuningModel::~TuningModel()
@@ -272,9 +349,9 @@ void TuningModel::setDefaultValues(const std::vector<std::pair<Hash, TuningValue
 	}
 }
 
-std::vector<Hash> TuningModel::hashes() const
+std::vector<Hash> TuningModel::allHashes() const
 {
-	return m_hashes;
+	return m_allHashes;
 }
 
 void TuningModel::setHashes(std::vector<Hash>& hashes)
@@ -283,37 +360,194 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 	{
 		beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
 
-		removeRows(0, rowCount());
-
-		m_hashes.clear();
+		m_hashSets.clear();
 
 		endRemoveRows();
 	}
 
-	//
-	if (hashes.empty() == false)
+	m_allHashes.swap(hashes);
+
+	// Build m_hashSets storage
+
+	std::vector<TuningModelHashSet> hashSets;
+
+	int channelCount = static_cast<int>(m_valueColumnAppSignalIdSuffixes.size());
+
+	if (channelCount == 0)
 	{
-		int count = static_cast<int>(hashes.size());
+		// Single channel mode - all hashes are copied to own set
+
+		hashSets.resize(m_allHashes.size());
+
+		int h = 0;
+
+		for (const Hash& hash : m_allHashes)
+		{
+			hashSets[h++].hash[0] = hash;
+		}
+
+	}
+	else
+	{
+		// Multi channel mode - hashes are distributed to sets by channels
+
+		m_generalHashToHashSetMap.clear();
+
+		for (const Hash& hash : m_allHashes)
+		{
+			// Determine channel
+
+			int hashChannel = -1;
+
+			auto hashChannelIt = m_hashToChannelMap.find(hash);
+			if (hashChannelIt == m_hashToChannelMap.end())
+			{
+				// Channel is unknown, try to determine it
+
+				bool ok = false;
+
+				AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+
+				QString appSignalId = asp.appSignalId();
+
+				for (int c = 0; c < channelCount; c++)
+				{
+					const QStringList& channelSuffxes = m_valueColumnAppSignalIdSuffixes[c];
+
+					for (const QString& suffix : channelSuffxes)
+					{
+						if (appSignalId.contains(suffix) == false)
+						{
+							continue;
+						}
+
+						hashChannel = c;
+
+						// Calculate general hash (without suffix) and put in into mapped cache
+
+						auto hashGeneralHashIt = m_hashToGeneralHashMap.find(hash);
+
+						if (hashGeneralHashIt == m_hashToGeneralHashMap.end())
+						{
+							QString generalAppSignalId = appSignalId;
+
+							generalAppSignalId.remove(suffix);
+
+							m_hashToGeneralHashMap[hash] = ::calcHash(generalAppSignalId);
+
+						}
+
+						break;
+					}
+				}
+
+				m_hashToChannelMap[hash] = hashChannel;
+			}
+			else
+			{
+				hashChannel = hashChannelIt->second;		// Channel is already cached
+			}
+
+			if (hashChannel == -1)
+			{
+				continue;	// No prefixes exist for this signal
+			}
+
+			if (hashChannel < 0 || hashChannel >= channelCount)
+			{
+				assert(false);
+				return;
+			}
+
+			// Get generalHash
+
+			Hash generalHash = UNDEFINED_HASH;
+
+			auto hashGeneralHashIt = m_hashToGeneralHashMap.find(hash);
+
+			if (hashGeneralHashIt == m_hashToGeneralHashMap.end())
+			{
+				assert(false);		// General hash must be calculated earlier
+				continue;
+			}
+			else
+			{
+				generalHash = hashGeneralHashIt->second;		// General hash is already cached
+			}
+
+			// Find a set that contains other channels of this signal (key is general hash), or create a new one if not found
+
+			auto hashSetIt = m_generalHashToHashSetMap.find(generalHash);
+			if (hashSetIt == m_generalHashToHashSetMap.end())
+			{
+				TuningModelHashSet set;
+
+				for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
+				{
+					set.hash[c] = UNDEFINED_HASH;
+				}
+				set.hash[hashChannel] = hash;
+
+				m_generalHashToHashSetMap[generalHash] = set;
+			}
+			else
+			{
+				TuningModelHashSet& set = hashSetIt->second;
+
+				set.hash[hashChannel] = hash;
+			}
+		}
+
+		// Copy map data to hashSets
+
+		hashSets.reserve(m_generalHashToHashSetMap.size());
+		for (auto setIt : m_generalHashToHashSetMap)
+		{
+			hashSets.push_back(setIt.second);
+		}
+	}
+
+	//
+
+	if (hashSets.empty() == false)
+	{
+		int count = static_cast<int>(hashSets.size());
 
 		beginInsertRows(QModelIndex(), 0, count - 1);
 
-		m_hashes.swap(hashes);
-
-		insertRows(0, static_cast<int>(count));
+		m_hashSets.swap(hashSets);
 
 		endInsertRows();
 	}
 }
 
-Hash TuningModel::hashByIndex(int index) const
+Hash TuningModel::hashByIndex(int row, int valueColumn) const
 {
-	if (index < 0 || index >= m_hashes.size())
+	if (row < 0 || row >= rowCount())
 	{
 		assert(false);
 		return UNDEFINED_HASH;
 	}
 
-	return m_hashes[index];
+	if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+	{
+		assert(false);
+		return UNDEFINED_HASH;
+	}
+
+	return m_hashSets[row].hash[valueColumn];
+}
+
+const TuningModelHashSet& TuningModel::hashSetByIndex(int row) const
+{
+	if (row < 0 || row >= rowCount())
+	{
+		assert(false);
+		static TuningModelHashSet err;
+		return err;
+	}
+
+	return m_hashSets[row];
 }
 
 TuningSignalManager* TuningModel::tuningSignalManager()
@@ -321,60 +555,64 @@ TuningSignalManager* TuningModel::tuningSignalManager()
 	return m_tuningSignalManager;
 }
 
-
-
-void TuningModel::addColumn(Columns column)
+int TuningModel::valueColumnsCount() const
 {
-	m_columnsIndexes.push_back(static_cast<int>(column));
+	if (m_valueColumnAppSignalIdSuffixes.empty() == true)
+	{
+		return 1;
+	}
+
+	return static_cast<int>(m_valueColumnAppSignalIdSuffixes.size());
 }
 
-void TuningModel::removeColumn(Columns column)
+void TuningModel::addColumn(TuningModelColumns column)
 {
-	for (auto it = m_columnsIndexes.begin(); it != m_columnsIndexes.end(); it++)
+	m_columnsTypes.push_back(column);
+}
+
+void TuningModel::removeColumn(TuningModelColumns column)
+{
+	for (auto it = m_columnsTypes.begin(); it != m_columnsTypes.end(); it++)
 	{
-		if (*it == static_cast<int>(column))
+		if (*it == column)
 		{
-			m_columnsIndexes.erase(it);
+			m_columnsTypes.erase(it);
 			break;
 		}
 	}
 }
 
-int TuningModel::columnIndex(int index) const
+TuningModelColumns TuningModel::columnType(int index) const
 {
-	if (index <0 || index >= m_columnsIndexes.size())
+	if (index < 0 || index >= m_columnsTypes.size())
 	{
 		assert(false);
-		return -1;
+		return TuningModelColumns::EquipmentID;
 	}
 
-	return m_columnsIndexes[index];
+	return m_columnsTypes[index];
 }
 
-std::vector<int> TuningModel::columnsIndexes()
+std::vector<TuningModelColumns> TuningModel::columnTypes()
 {
-	return m_columnsIndexes;
+	return m_columnsTypes;
 
 }
 
-void TuningModel::setColumnsIndexes(std::vector<int> columnsIndexes)
+void TuningModel::setColumnTypes(std::vector<TuningModelColumns> columnsIndexes)
 {
 	if (columnCount() > 0)
 	{
 		beginRemoveColumns(QModelIndex(), 0, columnCount() - 1);
 
-		removeColumns(0, columnCount());
-
-		m_columnsIndexes.clear();
+		m_columnsTypes.clear();
 
 		endRemoveColumns();
 	}
 
 	beginInsertColumns(QModelIndex(), 0, static_cast<int>(columnsIndexes.size()) - 1);
 
-	m_columnsIndexes = columnsIndexes;
-
-	insertColumns(0, static_cast<int>(m_columnsIndexes.size()));
+	m_columnsTypes = columnsIndexes;
 
 	endInsertColumns();
 
@@ -404,50 +642,37 @@ void TuningModel::setImportantFont(const QString& fontName, int fontSize, bool f
 int TuningModel::rowCount(const QModelIndex& parent) const
 {
 	Q_UNUSED(parent);
-	return static_cast<int>(m_hashes.size());
+	return static_cast<int>(m_hashSets.size());
 
 }
 
 int TuningModel::columnCount(const QModelIndex& parent) const
 {
 	Q_UNUSED(parent);
-	return static_cast<int>(m_columnsIndexes.size());
+	return static_cast<int>(m_columnsTypes.size());
 
-}
-
-QModelIndex TuningModel::index(int row, int column, const QModelIndex& parent) const
-{
-	Q_UNUSED(parent);
-	return createIndex(row, column);
 }
 
 void TuningModel::sort(int column, Qt::SortOrder order)
 {
-	if (column < 0 || column >= m_columnsIndexes.size())
+	if (column < 0 || column >= m_columnsTypes.size())
 	{
 		assert(false);
 		return;
 	}
 
-	if (m_hashes.empty() == true)
+	if (rowCount() == 0)
 	{
 		return;
 	}
 
-	int sortColumnIndex = m_columnsIndexes[column];
+	TuningModelColumns sortColumn = m_columnsTypes[column];
 
-	std::sort(m_hashes.begin(), m_hashes.end(), TuningModelSorter(sortColumnIndex, order, this, m_tuningSignalManager));
+	std::sort(m_hashSets.begin(), m_hashSets.end(), TuningModelSorter(sortColumn, order, this, m_tuningSignalManager));
 
 	emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
 
 	return;
-}
-
-QModelIndex TuningModel::parent(const QModelIndex& index) const
-{
-	Q_UNUSED(index);
-	return QModelIndex();
-
 }
 
 QVariant TuningModel::data(const QModelIndex& index, int role) const
@@ -465,9 +690,15 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 	if (role == Qt::FontRole)
 	{
 		int col = index.column();
-		int displayIndex = m_columnsIndexes[col];
+		if (col < 0 || col >= m_columnsTypes.size())
+		{
+			assert(false);
+			return QVariant();
+		}
 
-		if (m_importantFont != nullptr && displayIndex == static_cast<int>(Columns::Value))
+		int columnType = static_cast<int>(m_columnsTypes[col]);
+
+		if (m_importantFont != nullptr && (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast)))
 		{
 			return* m_importantFont;
 		}
@@ -482,9 +713,15 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 	{
 
 		int col = index.column();
-		int displayIndex = m_columnsIndexes[col];
+		if (col < 0 || col >= m_columnsTypes.size())
+		{
+			assert(false);
+			return QVariant();
+		}
 
-		if (displayIndex >= static_cast<int>(Columns::Value))
+		int columnType = static_cast<int>(m_columnsTypes[col]);
+
+		if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst))
 		{
 			return Qt::AlignCenter;
 		}
@@ -495,69 +732,113 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 	{
 
 		int col = index.column();
-
-		if (col < 0 || col >= m_columnsIndexes.size())
+		if (col < 0 || col >= m_columnsTypes.size())
 		{
 			assert(false);
 			return QVariant();
 		}
 
 		int row = index.row();
-		if (row >= m_hashes.size())
+		if (row >= rowCount())
 		{
 			assert(false);
 			return QVariant();
 		}
 
-		Hash hash = m_hashes[row];
+		const TuningModelHashSet& hashSet = m_hashSets[row];
 
 		//QString str = QString("%1:%2").arg(row).arg(col);
 		//qDebug() << str;
 
+		Hash aspHash = hashSet.firstHash();
+
+		int hashCount = hashSet.hashCount();
+
 		bool ok = false;
 
-		const AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
+		const AppSignalParam asp = m_tuningSignalManager->signalParam(aspHash, &ok);
 
-		int displayIndex = m_columnsIndexes[col];
+		int columnType = static_cast<int>(m_columnsTypes[col]);
 
-		if (displayIndex == static_cast<int>(Columns::CustomAppSignalID))
+		if (columnType == static_cast<int>(TuningModelColumns::CustomAppSignalID))
 		{
+			if (hashCount > 1)
+			{
+				return tr("%1 [+%2]").arg(asp.customSignalId()).arg(hashCount - 1);
+			}
+
 			return asp.customSignalId();
 		}
 
-		if (displayIndex == static_cast<int>(Columns::EquipmentID))
+		if (columnType == static_cast<int>(TuningModelColumns::EquipmentID))
 		{
+			if (hashCount > 1)
+			{
+				return tr("%1 [+%2]").arg(asp.equipmentId()).arg(hashCount - 1);
+			}
+
 			return asp.equipmentId();
 		}
 
-		if (displayIndex == static_cast<int>(Columns::AppSignalID))
+		if (columnType == static_cast<int>(TuningModelColumns::AppSignalID))
 		{
+			if (hashCount > 1)
+			{
+				return tr("%1 [+%2]").arg(asp.appSignalId()).arg(hashCount - 1);
+			}
+
 			return asp.appSignalId();
 		}
 
-		if (displayIndex == static_cast<int>(Columns::Caption))
+		if (columnType == static_cast<int>(TuningModelColumns::Caption))
 		{
 			return asp.caption();
 		}
 
-		if (displayIndex == static_cast<int>(Columns::Units))
+		if (columnType == static_cast<int>(TuningModelColumns::Units))
 		{
 			return asp.unit();
 		}
 
-		if (displayIndex == static_cast<int>(Columns::Type))
+		if (columnType == static_cast<int>(TuningModelColumns::Type))
 		{
 			return asp.tuningDefaultValue().tuningValueTypeString();
+		}
+
+		if (columnType == static_cast<int>(TuningModelColumns::Default))
+		{
+			if (asp.isAnalog())
+			{
+				return defaultValue(asp).toString(asp.precision());
+			}
+			else
+			{
+				return defaultValue(asp).toString();
+			}
 		}
 
 		//
 		// State
 		//
 
-		const TuningSignalState tss = m_tuningSignalManager->state(hash, &ok);
-
-		if (displayIndex == static_cast<int>(Columns::Value))
+		if (columnType >= static_cast<int>(TuningModelColumns::ValueFirst) && columnType <= static_cast<int>(TuningModelColumns::ValueLast))
 		{
+			int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
+			if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
+			{
+				assert(false);
+				return QVariant();
+			}
+
+			Hash tssHash = hashSet.hash[valueColumn];
+
+			if (tssHash == UNDEFINED_HASH)
+			{
+				return QVariant();
+			}
+
+			const TuningSignalState tss = m_tuningSignalManager->state(tssHash, &ok);
+
 			if (tss.controlIsEnabled() == false)
 			{
 				return tr("-");
@@ -566,13 +847,13 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 			{
 				if (tss.valid() == true)
 				{
-					TuningValue newValue = m_tuningSignalManager->newValue(hash);
+					TuningValue newValue = m_tuningSignalManager->newValue(tssHash);
 
 					if (asp.isAnalog() == false)
 					{
 						QString valueString = tss.value().toString();
 
-						if (m_tuningSignalManager->newValueIsUnapplied(hash) == true)
+						if (m_tuningSignalManager->newValueIsUnapplied(tssHash) == true)
 						{
 							QString editValueString = newValue.toString();
 							return tr("%1 => %2").arg(valueString).arg(editValueString);
@@ -590,7 +871,7 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 					{
 						QString valueString = tss.value().toString(asp.precision());
 
-						if (m_tuningSignalManager->newValueIsUnapplied(hash) == true)
+						if (m_tuningSignalManager->newValueIsUnapplied(tssHash) == true)
 						{
 							QString editValueString = newValue.toString(asp.precision());
 							return QString("%1 => %2").arg(valueString).arg(editValueString);
@@ -617,71 +898,83 @@ QVariant TuningModel::data(const QModelIndex& index, int role) const
 			}
 		}
 
-		if (displayIndex == static_cast<int>(Columns::LowLimit))
-		{
-			if (asp.isAnalog())
-			{
-				if (tss.limitsUnbalance(asp) == true)
-				{
-					QString str = tr("Base %1, read %2")
-							.arg(asp.tuningLowBound().toString(asp.precision()))
-							.arg(tss.lowBound().toString(asp.precision()));
-					return str;
-				}
-				else
-				{
-					return asp.tuningLowBound().toString(asp.precision());
-				}
-			}
-			else
-			{
-				return QString();
-			}
-		}
+		const TuningModelHashSet& hashes = hashSetByIndex(row);
 
-		if (displayIndex == static_cast<int>(Columns::HighLimit))
+		QString result;
+
+		for (int c = 0; c < MAX_VALUES_COLUMN_COUNT; c++)
 		{
-			if (asp.isAnalog())
+			const Hash tssHash = hashes.hash[c];
+
+			if (tssHash == UNDEFINED_HASH)
 			{
-				if (tss.limitsUnbalance(asp) == true)
+				continue;
+			}
+
+			const TuningSignalState tss = m_tuningSignalManager->state(tssHash, &ok);
+
+			if (columnType == static_cast<int>(TuningModelColumns::LowLimit))
+			{
+				if (asp.isAnalog())
 				{
-					QString str = tr("Base %1, read %2")
-							.arg(asp.tuningHighBound().toString(asp.precision()))
-							.arg(tss.highBound().toString(asp.precision()));
-					return str;
-				}
-				else
-				{
-					return asp.tuningHighBound().toString(asp.precision());
+					if (tss.limitsUnbalance(asp) == true)
+					{
+						result = tr("Base %1, read %2")
+								.arg(asp.tuningLowBound().toString(asp.precision()))
+								.arg(tss.lowBound().toString(asp.precision()));
+						break;
+					}
+					else
+					{
+						if (c == 0)
+						{
+							result = asp.tuningLowBound().toString(asp.precision());
+						}
+					}
 				}
 			}
-			else
-			{
-				return QString();
-			}
-		}
 
-		if (displayIndex == static_cast<int>(Columns::Default))
-		{
-			if (asp.isAnalog())
+			if (columnType == static_cast<int>(TuningModelColumns::HighLimit))
 			{
-				return defaultValue(asp).toString(asp.precision());
+				if (asp.isAnalog())
+				{
+					if (tss.limitsUnbalance(asp) == true)
+					{
+						result = tr("Base %1, read %2")
+								.arg(asp.tuningHighBound().toString(asp.precision()))
+								.arg(tss.highBound().toString(asp.precision()));
+						break;
+					}
+					else
+					{
+						if (c == 0)
+						{
+							result = asp.tuningHighBound().toString(asp.precision());
+						}
+					}
+				}
 			}
-			else
+
+			if (columnType == static_cast<int>(TuningModelColumns::Valid))
 			{
-				return defaultValue(asp).toString();
+				if (tss.valid() == false)
+				{
+					result = tr("NO");
+					break;
+				}
 			}
-		}
 
-		if (displayIndex == static_cast<int>(Columns::Valid))
-		{
-			return (tss.valid() == true) ? tr("") : tr("VALID");
-		}
+			if (columnType == static_cast<int>(TuningModelColumns::OutOfRange))
+			{
+				if (tss.outOfRange() == true)
+				{
+					result = tr("RANGE");
+					break;
+				}
+			}
+		}	// c
 
-		if (displayIndex == static_cast<int>(Columns::OutOfRange))
-		{
-			return (tss.outOfRange() == true) ? tr("RANGE") : tr("");
-		}
+		return result;
 	}
 	return QVariant();
 }
@@ -703,14 +996,21 @@ QVariant TuningModel::headerData(int section, Qt::Orientation orientation, int r
 {
 	if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
 	{
-		if (section < 0 || section >= m_columnsIndexes.size())
+		if (section < 0 || section >= m_columnsTypes.size())
 		{
 			assert(false);
 			return QVariant();
 		}
 
-		int displayIndex = m_columnsIndexes[section];
-		return m_columnsNames.at(displayIndex);
+		TuningModelColumns displayColumn = static_cast<TuningModelColumns>(m_columnsTypes[section]);
+
+		if (m_columnsNamesMap.find(displayColumn) == m_columnsNamesMap.end())
+		{
+			assert(false);
+			return QString();
+		}
+
+		return m_columnsNamesMap.at(displayColumn);
 	}
 
 	return QVariant();

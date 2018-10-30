@@ -597,10 +597,6 @@ void TuningWorkspace::createTabPages()
 
 				singlePageFilter = std::make_shared<TuningFilter>();
 
-				QUuid uid = QUuid::createUuid();
-
-				singlePageFilter->setID(uid.toString());
-
 				singlePageFilter->setCaption(m_workspaceFilter->caption());
 
 				// Copy signals' hashes from parent filter to single page's filter
@@ -659,7 +655,7 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 		auto it = m_tuningWorkspacesMap.find(childWorkspaceFilterId);
 		if (it == m_tuningWorkspacesMap.end())
 		{
-			TuningWorkspace* tw = new TuningWorkspace(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient);
+			TuningWorkspace* tw = new TuningWorkspace(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, this/*parent*/);
 
 			m_tuningWorkspacesMap[childWorkspaceFilterId] = tw;
 

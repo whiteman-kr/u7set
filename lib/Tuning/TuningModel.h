@@ -9,34 +9,63 @@
 
 class TuningModel;
 
+enum class TuningModelColumns
+{
+	CustomAppSignalID = 0,
+	EquipmentID,
+	AppSignalID,
+	Caption,
+	Units,
+	Type,
+
+	ValueFirst = 100,
+	ValueLast = ValueFirst + MAX_VALUES_COLUMN_COUNT - 1,
+
+	LowLimit,
+	HighLimit,
+	Default,
+	Valid,
+	OutOfRange
+};
+
+struct TuningModelHashSet
+{
+	Hash firstHash() const;
+
+	int hashCount() const;
+
+	Hash hash[MAX_VALUES_COLUMN_COUNT];
+
+};
+
 class TuningModelSorter
 {
 public:
-	TuningModelSorter(int column, Qt::SortOrder order, TuningModel* model, TuningSignalManager* tuningSignalManager);
+	TuningModelSorter(TuningModelColumns column, Qt::SortOrder order, const TuningModel* model, const TuningSignalManager* tuningSignalManager);
 
-	bool operator()(Hash hash1, Hash hash2) const
+	bool operator()(const TuningModelHashSet& set1, const TuningModelHashSet& set2) const
 	{
-		return sortFunction(hash1, hash2, m_column, m_order);
+		return sortFunction(set1, set2, m_column, m_order);
 	}
 
-	bool sortFunction(Hash hash1, Hash hash2, int column, Qt::SortOrder order) const;
+	bool sortFunction(const TuningModelHashSet& set1, const TuningModelHashSet& set2, TuningModelColumns column, Qt::SortOrder order) const;
 
 private:
-	int m_column = -1;
+	TuningModelColumns m_column = TuningModelColumns::AppSignalID;
 
 	Qt::SortOrder m_order = Qt::AscendingOrder;
 
-	TuningSignalManager* m_tuningSignalManager = nullptr;
+	const TuningSignalManager* m_tuningSignalManager = nullptr;
 
-	TuningModel* m_model = nullptr;
+	const TuningModel* m_model = nullptr;
 };
 
-class TuningModel : public QAbstractItemModel
+class TuningModel : public QAbstractTableModel
 {
 	Q_OBJECT
 
 public:
-	TuningModel(TuningSignalManager* tuningSignalManager, QWidget* parent);
+	TuningModel(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
 	~TuningModel();
 
 	TuningValue defaultValue(const AppSignalParam& asp) const;
@@ -44,51 +73,42 @@ public:
 
 public:
 
-	enum class Columns
-	{
-		CustomAppSignalID = 0,
-		EquipmentID,
-		AppSignalID,
-		Caption,
-		Units,
-		Type,
-
-		Value,
-		LowLimit,
-		HighLimit,
-		Default,
-		Valid,
-		OutOfRange
-	};
-
 
 public:
-	std::vector<Hash> hashes() const;
-	void setHashes(std::vector<Hash>& hashes);
+	std::vector<Hash> allHashes() const;
+	void setHashes(std::vector<Hash>& allHashes);
 
-	Hash hashByIndex(int index) const;
+	Hash hashByIndex(int row, int valueColumn) const;
+	const TuningModelHashSet& hashSetByIndex(int row) const;
 
 	TuningSignalManager* tuningSignalManager();
 
 public:
 
-	void addColumn(Columns column);
-	void removeColumn(Columns column);
-	int columnIndex(int index) const;
-	std::vector<int> columnsIndexes();
-	void setColumnsIndexes(std::vector<int> columnsIndexes);
+	// Columns processing
+	int valueColumnsCount() const;
+
+	void addColumn(TuningModelColumns column);
+	void removeColumn(TuningModelColumns column);
+	TuningModelColumns columnType(int index) const;
+	std::vector<TuningModelColumns> columnTypes();
+	void setColumnTypes(std::vector<TuningModelColumns> columnTypes);
+
+	// Font
 
 	void setFont(const QString& fontName, int fontSize, bool fontBold);
 	void setImportantFont(const QString& fontName, int fontSize, bool fontBold);
 
+	// Item count
+
 	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-	QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
+
+	// Sorting
 
 	void sort(int column, Qt::SortOrder order) override;
 
 protected:
-	QModelIndex parent(const QModelIndex& index) const override;
 	virtual	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
@@ -96,7 +116,7 @@ protected:
 	virtual QBrush foregroundColor(const QModelIndex& index) const;
 
 private:
-	QStringList m_columnsNames;
+	std::map<TuningModelColumns, QString> m_columnsNamesMap;
 
 	QFont* m_font = nullptr;
 	QFont* m_importantFont = nullptr;
@@ -104,11 +124,21 @@ private:
 protected:
 	TuningSignalManager* m_tuningSignalManager = nullptr;
 
-	std::vector<Hash> m_hashes;
+	std::vector<Hash> m_allHashes;
+
+	std::vector<TuningModelHashSet> m_hashSets;
+
+	std::map<Hash, int> m_hashToChannelMap;
+
+	std::map<Hash, Hash> m_hashToGeneralHashMap;
+
+	std::map<Hash, TuningModelHashSet> m_generalHashToHashSetMap;
 
 	std::map<Hash, TuningValue> m_defaultValues;
 
-	std::vector<int> m_columnsIndexes;
+	std::vector<TuningModelColumns> m_columnsTypes;
+
+	std::vector<QStringList> m_valueColumnAppSignalIdSuffixes;
 
 };
 

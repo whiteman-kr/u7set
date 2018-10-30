@@ -492,7 +492,9 @@ void Signal::cacheSpecPropValues()
 		m_cachedSpecPropValues = new SignalSpecPropValues;
 	}
 
-	m_cachedSpecPropValues->createFromSpecPropStruct(m_specPropStruct);
+	//m_cachedSpecPropValues->createFromSpecPropStruct(m_specPropStruct);
+
+	m_cachedSpecPropValues->parseValuesFromArray(m_protoSpecPropValues);
 }
 
 

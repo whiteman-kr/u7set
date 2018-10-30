@@ -145,6 +145,10 @@ signals:
 
 	void getCurrentSignalValue(Hash appSignalHash, TuningValue* value, bool* ok);	// Qt::DirectConnection!
 
+protected:
+
+	bool eventFilter(QObject *obj, QEvent *event) override;
+
 private slots:
 
 	void on_m_addPreset_clicked();
