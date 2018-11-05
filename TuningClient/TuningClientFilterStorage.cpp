@@ -6,7 +6,10 @@ TuningClientFilterStorage::TuningClientFilterStorage()
 
 }
 
-void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManager* objects, const std::vector<Hash>& allHashes, TuningFilter* filter)
+void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSignalManager* objects,
+															   const std::vector<Hash>& allHashes,
+															   TuningFilter* filter,
+															   bool userFiltersOnly)
 {
 	if (objects == nullptr)
 	{
@@ -25,33 +28,48 @@ void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSigna
 	std::vector<Hash> signalsHashes;
 	signalsHashes.reserve(allCount);
 
-	// Root filter
 
-	if (filter->isRoot() == true)
+	while (true)
 	{
-		// All signals ahashes are stored in root filter for discrete counter to work
-
-		signalsHashes = allHashes;
-
-		filter->setSignalsHashes(signalsHashes);
-	}
-
-	// Other filters
-
-	if (filter->isEmpty() == false)
-	{
-		if (filter->isSourceEquipment() == true)	// Equipment filters can be processed easier
+		if (userFiltersOnly == true && filter->isSourceUser() == false)
 		{
-			std::vector<Hash> equipmentHashes;
-			equipmentHashes.push_back(::calcHash(filter->caption()));
-			filter->setEquipmentHashes(equipmentHashes);
+			// Filter of non-processed type, skip it
+
+			signalsHashes = allHashes;
+
+			break;
 		}
+
+		if (filter->isRoot() == true)
+		{
+			// Root filter
+
+			// All signals ahashes are stored in root filter for discrete counter to work
+
+			signalsHashes = allHashes;
+
+			filter->setSignalsHashes(signalsHashes);
+
+			break;
+		}
+
+		if (filter->isEmpty() == true)
+		{
+			// Filter is empty
+
+			signalsHashes = allHashes;
+
+			break;
+		}
+
+		// Filter is not empty
 
 		std::map<Hash, int> equipmentHashesMap;
 
 		for (int i = 0; i < allCount; i++)
 		{
 			bool ok = false;
+
 			AppSignalParam asp = objects->signalParam(allHashes[i], &ok);
 			if (ok == false)
 			{
@@ -75,8 +93,10 @@ void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSigna
 
 		filter->setSignalsHashes(signalsHashes);
 
-		if (filter->isSourceEquipment() == false)	// Skip equipment filters
+		if (filter->isSourceEquipment() == false)
 		{
+			// Set equipment hashes
+
 			std::vector<Hash> equipmentHashes;
 			for (auto it : equipmentHashesMap)
 			{
@@ -84,16 +104,21 @@ void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSigna
 			}
 			filter->setEquipmentHashes(equipmentHashes);
 		}
-	}
-	else
-	{
-		signalsHashes = allHashes;
+		else
+		{
+			// Equipment filters can be processed easier
+
+			std::vector<Hash> equipmentHashes;
+			equipmentHashes.push_back(::calcHash(filter->caption()));
+			filter->setEquipmentHashes(equipmentHashes);
+		}
+
+		break;
 	}
 
-	int count = filter->childFiltersCount();
-	for (int i = 0; i < count; i++)
+	for (int i = 0; i < filter->childFiltersCount(); i++)
 	{
-		createSignalsAndEqipmentHashes(objects, signalsHashes, filter->childFilter(i).get());
+		createSignalsAndEqipmentHashes(objects, signalsHashes, filter->childFilter(i).get(), userFiltersOnly);
 	}
 }
 

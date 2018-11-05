@@ -235,6 +235,9 @@ public:
 	int childFiltersCount() const;
 	std::shared_ptr<TuningFilter> childFilter(int index) const;
 
+	std::shared_ptr<TuningFilter> childFilterByCaption(const QString& caption) const;
+
+
 	void updateOptionalProperties();
 
 private:

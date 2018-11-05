@@ -1085,13 +1085,12 @@ bool TuningFilter::valueExists(Hash hash) const
 void TuningFilter::addValue(const TuningFilterValue& value)
 {
 	Hash hash = value.appSignalHash();
-	if (valueExists(hash) == true)
+
+	if (valueExists(hash) == false)
 	{
-		assert(false);
-		return;
+		m_signalValuesVec.push_back(hash);
 	}
 
-	m_signalValuesVec.push_back(hash);
 	m_signalValuesMap[hash] = value;
 }
 
@@ -1430,6 +1429,19 @@ std::shared_ptr<TuningFilter> TuningFilter::childFilter(int index) const
 	}
 
 	return m_childFilters[index];
+}
+
+std::shared_ptr<TuningFilter> TuningFilter::childFilterByCaption(const QString& caption) const
+{
+	for (std::shared_ptr<TuningFilter> f : m_childFilters)
+	{
+		if (f->caption() == caption)
+		{
+			return f;
+		}
+	}
+
+	return nullptr;
 }
 
 void TuningFilter::updateOptionalProperties()

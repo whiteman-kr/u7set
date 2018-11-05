@@ -31,7 +31,13 @@ class TuningWorkspace : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent);
+	explicit TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter,
+							 std::shared_ptr<TuningFilter> workspaceFilter,
+							 TuningSignalManager* tuningSignalManager,
+							 TuningClientTcpClient* tuningTcpClient,
+							 TuningFilterStorage* tuningFilterStorage,
+							 QWidget* parent);
+
 	virtual ~TuningWorkspace();
 
 	bool hasPendingChanges();
@@ -75,6 +81,8 @@ private:
 	TuningSignalManager* m_tuningSignalManager = nullptr;
 
 	TuningClientTcpClient* m_tuningTcpClient = nullptr;
+
+	TuningFilterStorage* m_tuningFilterStorage = nullptr;
 
 	std::shared_ptr<TuningFilter> m_workspaceFilter;
 

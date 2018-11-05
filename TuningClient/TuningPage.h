@@ -85,6 +85,7 @@ public:
 						std::shared_ptr<TuningFilter> pageFilter,
 						TuningSignalManager* tuningSignalManager,
 						TuningClientTcpClient* tuningTcpClient,
+						TuningFilterStorage* tuningFilterStorage,
 						QWidget* parent = 0);
 	~TuningPage();
 
@@ -113,6 +114,12 @@ private slots:
 	void slot_FilterTypeIndexChanged(int index);
 
 	void slot_listContextMenuRequested(const QPoint& pos);
+
+	void slot_saveSignalsToNewFilter();
+
+	void slot_saveSignalsToExistingFilter();
+
+	void slot_restoreValuesFromExistingFilter();
 
 public slots:
 
@@ -143,6 +150,10 @@ private:
 
 	bool takeClientControl();
 
+	void addSelectedSignalsToFilter(TuningFilter* filter);
+
+	void restoreSignalsFromFilter(TuningFilter* filter);
+
 private slots:
 
 	void slot_timerTick500();
@@ -156,6 +167,8 @@ private:
 	TuningSignalManager* m_tuningSignalManager = nullptr;
 
 	TuningClientTcpClient* m_tuningTcpClient = nullptr;
+
+	TuningFilterStorage* m_tuningFilterStorage = nullptr;
 
 	TuningTableView* m_objectList = nullptr;
 
@@ -194,6 +207,8 @@ private:
 	int m_instanceNo = -1;
 
 	TuningPageColumnsWidth m_columnWidthStorage;
+
+	const QString m_autoFilterCaption = tr("Auto-Created Filters");
 
 };
 

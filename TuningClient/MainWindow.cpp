@@ -347,14 +347,9 @@ void MainWindow::timerEvent(QTimerEvent* event)
 	return;
 }
 
-void MainWindow::createWorkspace()
+void MainWindow::createAndCheckFiltersHashes(bool userFiltersOnly)
 {
-	if (m_tuningWorkspace != nullptr || m_schemasWorkspace != nullptr)
-	{
-		QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
-	}
-
-	m_filterStorage.createSignalsAndEqipmentHashes(&m_tuningSignalManager, m_tuningSignalManager.signalHashes(), m_filterStorage.root().get());
+	m_filterStorage.createSignalsAndEqipmentHashes(&m_tuningSignalManager, m_tuningSignalManager.signalHashes(), m_filterStorage.root().get(), userFiltersOnly);
 
 	// Find and possibly remove non-existing signals from the list
 
@@ -374,8 +369,16 @@ void MainWindow::createWorkspace()
 			QMessageBox::critical(this, tr("Error"), errorMsg);
 		}
 	}
+}
 
-	// Create workspaces
+void MainWindow::createWorkspace()
+{
+	if (m_tuningWorkspace != nullptr || m_schemasWorkspace != nullptr)
+	{
+		QMessageBox::warning(this, tr("Warning"), tr("Program configuration has been changed and will be updated."));
+	}
+
+	// Create main layout
 
 	if (m_mainLayout == nullptr)
 	{
@@ -384,6 +387,8 @@ void MainWindow::createWorkspace()
 		m_mainLayout->setContentsMargins(0, 0, 0, 0);
 		setCentralWidget(w);
 	}
+
+	// Delete old workspaces
 
 	if (m_logonWorkspace != nullptr)
 	{
@@ -409,6 +414,10 @@ void MainWindow::createWorkspace()
 		m_tabWidget = nullptr;
 	}
 
+	createAndCheckFiltersHashes(false/*userFiltersOnly*/);
+
+	// Create new workspaces
+
 	if (theConfigSettings.showSchemas == true && theConfigSettings.schemas.empty() == false)
 	{
 		m_schemasWorkspace = new SchemasWorkspace(&m_configController, &m_tuningSignalManager, m_tcpClient, this);
@@ -416,7 +425,7 @@ void MainWindow::createWorkspace()
 
 	if (theConfigSettings.showSignals == true)
 	{
-		m_tuningWorkspace = new TuningWorkspace(nullptr, m_filterStorage.root(), &m_tuningSignalManager, m_tcpClient, this);
+		m_tuningWorkspace = new TuningWorkspace(nullptr, m_filterStorage.root(), &m_tuningSignalManager, m_tcpClient, &m_filterStorage, this);
 	}
 
 	// Create login workspace
@@ -794,6 +803,17 @@ void MainWindow::runPresetEditor()
 		}
 
 		createWorkspace();
+
+		// Update user filters
+
+		int todo_make_dynamic_filters_reloading_remove_sharedptrs;
+
+		//createAndCheckFiltersHashes(true/*userFiltersOnly*/);
+/*
+		if (m_tuningWorkspace != nullptr)
+		{
+			m_tuningWorkspace->updateFiltersTree();
+		}*/
 	}
 }
 
@@ -850,6 +870,13 @@ void MainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to modify tuning values.");
 	DialogAbout::show(this, text, ":/Images/Images/logo.png");
+}
+
+void MainWindow::slot_filtersChanged()
+{
+	int todo_dynamically_update_tree;
+
+	createWorkspace();
 }
 
 MainWindow* theMainWindow = nullptr;

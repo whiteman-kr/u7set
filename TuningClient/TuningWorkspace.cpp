@@ -89,10 +89,11 @@ void FilterButton::slot_toggled(bool checked)
 
 int TuningWorkspace::m_instanceCounter = 0;
 
-TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
+TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, TuningFilterStorage* tuningFilterStorage, QWidget* parent) :
 	QWidget(parent),
 	m_tuningSignalManager(tuningSignalManager),
 	m_tuningTcpClient(tuningTcpClient),
+	m_tuningFilterStorage(tuningFilterStorage),
 	m_workspaceFilter(workspaceFilter),
 	m_treeFilter(treeFilter)
 {
@@ -103,6 +104,7 @@ TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::
 	assert(m_workspaceFilter);
 	assert(m_tuningSignalManager);
 	assert(m_tuningTcpClient);
+	assert(m_tuningFilterStorage);
 
 	QVBoxLayout* mainLayout = new QVBoxLayout();
 	setLayout(mainLayout);
@@ -655,7 +657,7 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 		auto it = m_tuningWorkspacesMap.find(childWorkspaceFilterId);
 		if (it == m_tuningWorkspacesMap.end())
 		{
-			TuningWorkspace* tw = new TuningWorkspace(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, this/*parent*/);
+			TuningWorkspace* tw = new TuningWorkspace(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage, this/*parent*/);
 
 			m_tuningWorkspacesMap[childWorkspaceFilterId] = tw;
 
@@ -675,7 +677,7 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 		auto it = m_tuningPagesMap.find(childWorkspaceFilterId);
 		if (it == m_tuningPagesMap.end())
 		{
-			TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient);
+			TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage);
 
 			m_tuningPagesMap[childWorkspaceFilterId] = tp;
 
