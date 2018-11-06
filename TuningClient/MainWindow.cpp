@@ -802,18 +802,7 @@ void MainWindow::runPresetEditor()
 			QMessageBox::critical(this, tr("Error"), errorMsg);
 		}
 
-		createWorkspace();
-
-		// Update user filters
-
-		int todo_make_dynamic_filters_reloading_remove_sharedptrs;
-
-		//createAndCheckFiltersHashes(true/*userFiltersOnly*/);
-/*
-		if (m_tuningWorkspace != nullptr)
-		{
-			m_tuningWorkspace->updateFiltersTree();
-		}*/
+		slot_userFiltersChanged();
 	}
 }
 
@@ -872,11 +861,17 @@ void MainWindow::showAbout()
 	DialogAbout::show(this, text, ":/Images/Images/logo.png");
 }
 
-void MainWindow::slot_filtersChanged()
+void MainWindow::slot_userFiltersChanged()
 {
-	int todo_dynamically_update_tree;
+	// Update user filters
 
-	createWorkspace();
+	createAndCheckFiltersHashes(true/*userFiltersOnly*/);
+
+	if (m_tuningWorkspace != nullptr)
+	{
+		m_tuningWorkspace->updateFiltersTree(m_filterStorage.root());
+	}
+
 }
 
 MainWindow* theMainWindow = nullptr;

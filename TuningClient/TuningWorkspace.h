@@ -46,11 +46,13 @@ public:
 
 	void onTimer();
 
+	// Tree update
+
+	void updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter);
+
 private:
 
 	// Initialization
-
-	void updateFiltersTree();
 
 	void createButtons();
 
@@ -69,6 +71,8 @@ private:
 	void updateTuningSourceTreeItem(QTreeWidgetItem* treeItem);
 
 	void activateControl(const QString& equipmentId, bool enable);
+
+	QTreeWidgetItem* findFilterWidget(const QString& id, QTreeWidgetItem* treeItem);
 
 protected:
 
@@ -131,7 +135,7 @@ static int m_instanceCounter;
 
 private slots:
 
-	void slot_currentTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
+	void slot_treeSelectionChanged();
 	void slot_treeContextMenuRequested(const QPoint& pos);
 
 

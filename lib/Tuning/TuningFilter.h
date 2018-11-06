@@ -233,10 +233,11 @@ public:
 	void removeChildren(Source source);
 
 	int childFiltersCount() const;
+
 	std::shared_ptr<TuningFilter> childFilter(int index) const;
+	std::shared_ptr<TuningFilter> childFilter(const QString& caption) const;
 
-	std::shared_ptr<TuningFilter> childFilterByCaption(const QString& caption) const;
-
+	std::shared_ptr<TuningFilter> findFilterById(const QString& id) const;	// Recursive search
 
 	void updateOptionalProperties();
 

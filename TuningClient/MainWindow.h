@@ -88,7 +88,7 @@ public slots:
 	void showSignalsLog();
 	void showAbout();
 
-	void slot_filtersChanged();
+	void slot_userFiltersChanged();
 
 private:
 

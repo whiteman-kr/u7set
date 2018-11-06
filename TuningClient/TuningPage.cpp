@@ -1506,7 +1506,7 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 		return;
 	}
 
-	std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilterByCaption(m_autoFilterCaption);
+	std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilter(m_autoFilterCaption);
 	if (autoCreatedFilter != nullptr)
 	{
 		submenuA->addSeparator();
@@ -1543,7 +1543,7 @@ void TuningPage::slot_saveSignalsToNewFilter()
 
 	// Get AutoFilter filter
 
-	std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilterByCaption(m_autoFilterCaption);
+	std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilter(m_autoFilterCaption);
 	if (autoCreatedFilter == nullptr)
 	{
 		autoCreatedFilter = std::make_shared<TuningFilter>();
@@ -1584,7 +1584,7 @@ void TuningPage::slot_saveSignalsToExistingFilter()
 
 	// Get AutoFilter filter
 
-	std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilterByCaption(m_autoFilterCaption);
+	std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilter(m_autoFilterCaption);
 	if (autoCreatedFilter == nullptr)
 	{
 		return;
@@ -1613,7 +1613,7 @@ void TuningPage::slot_restoreValuesFromExistingFilter()
 
 	// Get AutoFilter filter
 
-	std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilterByCaption(m_autoFilterCaption);
+	std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilter(m_autoFilterCaption);
 	if (autoCreatedFilter == nullptr)
 	{
 		QMessageBox::warning(this, qAppName(), tr("No auto-created filters exist."));
@@ -1773,12 +1773,15 @@ void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 		return;
 	}
 
+	int addedCount = 0;
+
 	QModelIndexList mi = m_objectList->selectionModel()->selectedRows();
 
 	for (const QModelIndex& index : mi)
 	{
 		if (index.isValid() == false)
 		{
+			assert(false);
 			return;
 		}
 
@@ -1807,8 +1810,7 @@ void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 
 			if (found == false)
 			{
-				assert(false);
-				return;
+				continue;
 			}
 
 			TuningFilterValue tv;
@@ -1822,7 +1824,15 @@ void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 			}
 
 			filter->addValue(tv);
+
+			addedCount++;
 		}
+	}
+
+	if (addedCount == 0)
+	{
+		QMessageBox::warning(this, qAppName(), tr("No signals were added."));
+		return;
 	}
 
 	QString errorMsg;
@@ -1835,7 +1845,7 @@ void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 
 	QMessageBox::information(this, qAppName(), tr("Adding signals complete."));
 
-	QTimer::singleShot(500, theMainWindow, &MainWindow::slot_filtersChanged);
+	QTimer::singleShot(500, theMainWindow, &MainWindow::slot_userFiltersChanged);
 }
 
 void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)

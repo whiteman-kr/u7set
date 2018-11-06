@@ -1431,7 +1431,7 @@ std::shared_ptr<TuningFilter> TuningFilter::childFilter(int index) const
 	return m_childFilters[index];
 }
 
-std::shared_ptr<TuningFilter> TuningFilter::childFilterByCaption(const QString& caption) const
+std::shared_ptr<TuningFilter> TuningFilter::childFilter(const QString& caption) const
 {
 	for (std::shared_ptr<TuningFilter> f : m_childFilters)
 	{
@@ -1444,10 +1444,27 @@ std::shared_ptr<TuningFilter> TuningFilter::childFilterByCaption(const QString& 
 	return nullptr;
 }
 
+std::shared_ptr<TuningFilter> TuningFilter::findFilterById(const QString& id) const
+{
+	for (std::shared_ptr<TuningFilter> f : m_childFilters)
+	{
+		if (f->ID() == id)
+		{
+			return f;
+		}
+
+		std::shared_ptr<TuningFilter> result = f->findFilterById(id);
+		if (result != nullptr)
+		{
+			return result;
+		}
+	}
+
+	return nullptr;
+}
+
 void TuningFilter::updateOptionalProperties()
 {
-
-
 	setPropertyVisible(TuningTags::prop_BackColor, interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
 
 	setPropertyVisible(TuningTags::prop_TextColor, interfaceType() == InterfaceType::Button);
@@ -1532,6 +1549,10 @@ void TuningFilter::copy(const TuningFilter& That)
 
 	m_valueColumnsCount = That.m_valueColumnsCount;
 	m_valueColumnsAppSignalIdSuffixes = That.m_valueColumnsAppSignalIdSuffixes;
+
+	m_equipmentHashes = That.m_equipmentHashes;
+	m_signalsHashes = That.m_signalsHashes;
+
 
 	for (auto f : That.m_childFilters)
 	{
