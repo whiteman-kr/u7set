@@ -17,7 +17,7 @@
 class TcpAppDataServer : public Tcp::Server
 {
 public:
-	TcpAppDataServer(const SoftwareInfo& softwareInfo, Queue<SimpleAppSignalState>& saveStatesQueue);
+	TcpAppDataServer(const SoftwareInfo& softwareInfo, Queue<SimpleAppSignalState>& dbSaveStatesQueue, Queue<SimpleAppSignalState>& saveStatesQueue);
 
 	virtual Tcp::Server* getNewInstance() override;
 	virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
@@ -32,6 +32,7 @@ private:
 	Network::SaveAppSignalsStatesToArchiveRequest m_saveStatesRequest;
 	Network::SaveAppSignalsStatesToArchiveReply m_saveStatesReply;
 
+	Queue<SimpleAppSignalState>& m_dbSaveStatesQueue;
 	Queue<SimpleAppSignalState>& m_saveStatesQueue;
 };
 

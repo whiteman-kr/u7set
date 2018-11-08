@@ -14,6 +14,7 @@ ArchivingServiceWorker::ArchivingServiceWorker(const SoftwareInfo& softwareInfo,
 											   char** argv,
 											   CircularLoggerShared logger) :
 	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
+	m_dbSaveStatesQueue(1024 * 1024),
 	m_saveStatesQueue(1024 * 1024)
 {
 }
@@ -125,14 +126,14 @@ void ArchivingServiceWorker::deleteArchive()
 
 void ArchivingServiceWorker::runArchWriteThread()
 {
-/*	assert(m_archWriteThread == nullptr);
+	assert(m_archWriteThread == nullptr);
 
 	m_archWriteThread = new ArchWriteThread(m_cfgSettings.dbHost,
 											m_archive,
-											m_saveStatesQueue,
+											m_dbSaveStatesQueue,
 											logger());
 
-	m_archWriteThread->start(); */
+	m_archWriteThread->start();
 
 	//
 
@@ -147,12 +148,12 @@ void ArchivingServiceWorker::runArchWriteThread()
 
 void ArchivingServiceWorker::stopArchWriteThread()
 {
-/*	if (m_archWriteThread != nullptr)
+	if (m_archWriteThread != nullptr)
 	{
 		m_archWriteThread->quitAndWait();
 		delete m_archWriteThread;
 		m_archWriteThread = nullptr;
-	}*/
+	}
 
 	//
 
@@ -168,7 +169,7 @@ void ArchivingServiceWorker::runTcpAppDataServerThread()
 {
 	assert(m_tcpAppDataServerThread == nullptr);
 
-	TcpAppDataServer* server = new TcpAppDataServer(softwareInfo(), m_saveStatesQueue);
+	TcpAppDataServer* server = new TcpAppDataServer(softwareInfo(), m_dbSaveStatesQueue, m_saveStatesQueue);
 
 	m_tcpAppDataServerThread = new TcpAppDataServerThread(m_cfgSettings.appDataServiceRequestIP, server, logger());
 
@@ -216,8 +217,9 @@ void ArchivingServiceWorker::stopTcpArchiveRequestsServerThread()
 void ArchivingServiceWorker::runArchRequestThread()
 {
 	assert(m_archRequestThread == nullptr);
+	assert(m_fileArchWriter != nullptr);
 
-	m_archRequestThread = new ArchRequestThread(m_archive, logger());
+	m_archRequestThread = new ArchRequestThread(m_archive, m_fileArchWriter, logger());
 
 	m_archRequestThread->start();
 }

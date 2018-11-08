@@ -39,6 +39,10 @@ bool ArchFile::init(const FileArchWriter* writer, const QString& signalID, Hash 
 
 bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 {
+	SimpleMutexLocker locker(&m_flushMutex);
+
+	Q_UNUSED(locker);
+
 	if (state.hash != m_hash)
 	{
 		assert(false);
@@ -61,13 +65,14 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 	return true;
 }
 
-bool ArchFile::flush(qint64 curPartition)
+bool ArchFile::flush(qint64 curPartition, qint64* totalFushedStatesCount)
 {
+	TEST_PTR_RETURN_FALSE(totalFushedStatesCount);
+
 	SimpleMutexLocker locker(&m_flushMutex);
 
 	Q_UNUSED(locker);
 
-	QMutexLocker d;
 	TEST_PTR_RETURN_FALSE(m_queue);
 
 	if (m_queue->isEmpty() == true)
@@ -91,7 +96,7 @@ bool ArchFile::flush(qint64 curPartition)
 		m_prevPartition = curPartition;
 	}
 
-	writeFile(curPartition, m_buffer, copiedItemsCount);
+	writeFile(curPartition, m_buffer, copiedItemsCount, totalFushedStatesCount);
 
 	return true;
 }
@@ -103,15 +108,16 @@ bool ArchFile::isEmergency() const
 	return m_queue->size() >= static_cast<int>(m_queue->queueSize() * QUEUE_EMERGENCY_LIMIT);
 }
 
-void ArchFile::shutdown(qint64 curPartition)
+void ArchFile::shutdown(qint64 curPartition, qint64* totalFlushedStatesCount)
 {
-	flush(curPartition);
+	flush(curPartition, totalFlushedStatesCount);
 	closeFile();
 }
 
-bool ArchFile::writeFile(qint64 partition, SignalState* buffer, int statesCount)
+bool ArchFile::writeFile(qint64 partition, SignalState* buffer, int statesCount, qint64* totalFushedStatesCount)
 {
 	TEST_PTR_RETURN_FALSE(buffer);
+	TEST_PTR_RETURN_FALSE(totalFushedStatesCount);
 
 	if (m_fileIsOpened == false)
 	{
@@ -170,7 +176,9 @@ bool ArchFile::writeFile(qint64 partition, SignalState* buffer, int statesCount)
 		m_fileIsAligned = false;
 	}
 
-	qDebug() << C_STR(QString("Flush %1 states %2").arg(m_file.fileName()).arg(statesCount));
+	*totalFushedStatesCount += statesCount;
+
+//	qDebug() << C_STR(QString("Flush %1 states %2").arg(m_file.fileName()).arg(statesCount));
 
 	return true;
 }
@@ -196,6 +204,30 @@ FileArchWriter::FileArchWriter(ArchiveShared archive,
 {
 }
 
+bool FileArchWriter::flushFileBeforeReading(Hash signalHash, QString* filePath)
+{
+	if (filePath == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	ArchFile* archFile = m_hashArchFiles.value(signalHash, nullptr);
+
+	if (archFile == nullptr)
+	{
+		return false;
+	}
+
+	qint64 flashedCount = 0;
+
+	archFile->flush(m_curPartition, &flashedCount);
+
+	*filePath = archFile->path();
+
+	return true;
+}
+
 void FileArchWriter::run()
 {
 	if (m_log == nullptr)
@@ -219,6 +251,8 @@ void FileArchWriter::run()
 		DEBUG_LOG_ERR(m_log, "FileArchWriter terminated (files initialization error). ");
 		return;
 	}
+
+	qint64 prevFlushedStatesCount = 0;
 
 	do
 	{
@@ -256,7 +290,13 @@ void FileArchWriter::run()
 
 		if (doWork == false)
 		{
-			msleep(5);
+			msleep(2);
+		}
+
+		if (m_totalFlushedStatesCount - prevFlushedStatesCount > 1000)
+		{
+			prevFlushedStatesCount = m_totalFlushedStatesCount;
+			qDebug() << "Flush states" << m_totalFlushedStatesCount;
 		}
 	}
 	while(isQuitRequested() == false);
@@ -502,6 +542,13 @@ void FileArchWriter::updateCurrentPartition()
 
 	qint64 curPartition = (QDateTime::currentMSecsSinceEpoch() / PARTITTION_DIVIDER) * PARTITTION_DIVIDER;
 
+	const int MINUTE_TIME = 60 * 1000;
+
+	if (curPartition / MINUTE_TIME != m_curPartition / MINUTE_TIME)
+	{
+		writeMinuteCheckpoint((curPartition / MINUTE_TIME) * MINUTE_TIME);		// trunc system time to minutes
+	}
+
 	if (m_curPartition == curPartition)
 	{
 		return;
@@ -518,6 +565,41 @@ void FileArchWriter::updateCurrentPartition()
 		runArchiveMaintenance();
 	}
 }
+
+bool FileArchWriter::writeMinuteCheckpoint(qint64 minuteSystemTime)
+{
+	QString fileName = m_archFullPath + "/mincheckpoints.dat";
+
+	QFile minuteCheckpointsFile(fileName);
+
+	if (minuteCheckpointsFile.open(QIODevice::ReadWrite) == false)
+	{
+		DEBUG_LOG_ERR(m_log, "Can't open minutes checkpoint file");
+		return false;
+	}
+
+	QFileInfo fi(minuteCheckpointsFile);
+
+	qint64 writePos = (fi.size() / sizeof(MinuteCheckpoint)) * sizeof(MinuteCheckpoint);
+
+	minuteCheckpointsFile.seek(writePos);
+
+	MinuteCheckpoint mc;
+
+	mc.checkpoint.minuteSystemTime = minuteSystemTime;
+	mc.checkpoint.archiveID = m_archID;
+
+	m_archID++;
+
+	mc.crc16 = calcCrc16(&mc.checkpoint, sizeof(mc.checkpoint));
+
+	minuteCheckpointsFile.write(reinterpret_cast<const char*>(&mc), sizeof(mc));
+
+	minuteCheckpointsFile.close();
+
+	return true;
+}
+
 
 void FileArchWriter::runArchiveMaintenance()
 {
@@ -538,7 +620,7 @@ bool FileArchWriter::writeEmergencyFiles()
 			break;
 		}
 
-		bool res = emergencyFile->flush(m_curPartition);
+		bool res = emergencyFile->flush(m_curPartition, &m_totalFlushedStatesCount);
 
 		if (res == true)
 		{
@@ -575,7 +657,7 @@ bool FileArchWriter::writeRegularFiles()
 
 		if (archFile != nullptr)
 		{
-			bool res = archFile->flush(m_curPartition);
+			bool res = archFile->flush(m_curPartition, &m_totalFlushedStatesCount);
 
 			if (res == true)
 			{
@@ -610,7 +692,7 @@ void FileArchWriter::shutdown()
 	{
 		ArchFile* archFile = m_archFiles + i;
 
-		archFile->shutdown(m_curPartition);
+		archFile->shutdown(m_curPartition, &m_totalFlushedStatesCount);
 	}
 
 	delete [] m_archFiles;
@@ -648,26 +730,22 @@ ArchFile* FileArchWriter::getNextEmergencyFile()
 	return emergencyFile;
 }
 
-/*
-void FileArchWriter::takeEmergencyFilesOwnership(const QThread* newOwner)
-{
-	bool result = false;
+// ---------------------------------------------------------------------------------------------
+//
+// FileArchReader class implementattion
+//
+// ---------------------------------------------------------------------------------------------
 
-	do
-	{
-		const QThread* expectedOwner = nullptr;
-		result = m_emergencyFilesOwner.compare_exchange_strong(expectedOwner, newOwner);
-	}
-	while(result == false);
+FileArchReader::FileArchReader(const QString& signalArchPath, E::TimeType timeType, qint64 startTime, qint64 endTime) :
+	m_signalArchPath(signalArchPath),
+	m_timeType(timeType),
+	m_startTime(startTime),
+	m_endTime(endTime)
+{
 }
 
-void FileArchWriter::releaseEmergencyFilesOwnership(const QThread* currentOwner)
+bool FileArchReader::findData()
 {
-	bool result = m_emergencyFilesOwner.compare_exchange_strong(currentOwner, nullptr);
-
-	assert(result == true);
-
-	Q_UNUSED(result);
+	return true;
 }
-*/
 

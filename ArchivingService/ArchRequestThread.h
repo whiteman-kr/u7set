@@ -14,6 +14,7 @@
 #include "Archive.h"
 
 class TcpArchRequestsServer;
+class FileArchWriter;
 
 struct ArchRequestParam
 {
@@ -37,30 +38,33 @@ struct ArchRequestParam
 	quint32 requestID = 0;
 };
 
-
 class ArchRequestContext
 {
 public:
 	ArchRequestContext(const ArchRequestParam& param, const QTime& startTime, CircularLoggerShared logger);
-	~ArchRequestContext();
+	virtual ~ArchRequestContext();
 
-	void checkSignalsHashes(ArchiveShared arch);
+	virtual bool executeSatesRequest(ArchiveShared archive, QSqlDatabase* db, FileArchWriter* fileArchWriter) = 0;
+	virtual void getNextStates() = 0;
 
+public:
 	quint32 requestID() const { return m_param.requestID; }
 	bool isDataReady() const { return m_dataReady; }
+	ArchiveError archError() const { return m_archError; }
+
+	int timeElapsed() const { return m_time.elapsed(); }
+
+	Network::GetAppSignalStatesFromArchiveNextReply& getNextReply() { return m_reply; }
+
+protected:
+	void checkSignalsHashes(ArchiveShared arch);
 
 	int totalStates() const { return m_totalStates; }
 	int sentStates() const { return m_sentStates; }
 
 	int signalCount() const { return m_param.signalHashesCount; }
 
-	ArchiveError archError() const { return m_archError; }
-
-	Network::GetAppSignalStatesFromArchiveNextReply& getNextReply() { return m_reply; }
-
 	Hash signalHash(int index);
-
-	int timeElapsed() const { return m_time.elapsed(); }
 
 	E::TimeType requestTimeType() const { return m_requestTimeType; }
 
@@ -70,17 +74,10 @@ public:
 	qint64 expandedRequestStartTime() const { return m_expandedRequestStartTime; }
 	qint64 expandedRequestEndTime() const { return m_expandedRequestEndTime; }
 
-	bool createGetSignalStatesQueryStr(ArchiveShared archive);
-
-	bool executeSatesRequest(ArchiveShared archive, QSqlDatabase& db);
-	bool initArchId(QSqlDatabase& db);
-
-	void getNextStates();
-
-private:
 	void setArchError(ArchiveError err) { m_archError = err; }
 	void setDataReady(bool ready) { m_dataReady = ready; }
 
+private:
 	E::TimeType timeType() const { return m_param.timeType; }
 
 	qint64 startTime() const { return m_param.startTime; }
@@ -92,10 +89,7 @@ private:
 	int signalHashesCount() const { return m_param.signalHashesCount; }
 	const Hash* signalHashes() const { return m_param.signalHashes; }
 
-	bool execQuery(QSqlDatabase& db, const QString& queryStr);
-	bool execQuery(QSqlQuery& query, const QString& queryStr);
-
-private:
+protected:
 	ArchRequestParam m_param;
 	QTime m_time;
 	CircularLoggerShared m_logger;
@@ -117,11 +111,6 @@ private:
 	qint64 m_startArchID = 0;
 	qint64 m_endArchID = 0;
 
-	//
-
-	QSqlQuery* m_statesQuery = nullptr;
-	QString m_statesQueryStr;
-
 	ArchiveError m_archError = ArchiveError::Success;
 
 	bool m_dataReady = false;
@@ -137,13 +126,48 @@ private:
 
 typedef std::shared_ptr<ArchRequestContext> ArchRequestContextShared;
 
+class DbArchRequestContext : public ArchRequestContext
+{
+public:
+	DbArchRequestContext(const ArchRequestParam& param, const QTime& startTime, CircularLoggerShared logger);
+	virtual ~DbArchRequestContext();
+
+	bool executeSatesRequest(ArchiveShared archive, QSqlDatabase* db, FileArchWriter* fileArchWriter) override;
+	void getNextStates() override;
+
+private:
+	bool initArchId(QSqlDatabase& db);
+	bool createGetSignalStatesQueryStr(ArchiveShared archive);
+
+	bool execQuery(QSqlDatabase& db, const QString& queryStr);
+	bool execQuery(QSqlQuery& query, const QString& queryStr);
+
+private:
+	//
+
+	QSqlQuery* m_statesQuery = nullptr;
+	QString m_statesQueryStr;
+};
+
+class FileArchRequestContext : public ArchRequestContext
+{
+public:
+	FileArchRequestContext(const ArchRequestParam& param, const QTime& startTime, CircularLoggerShared logger);
+	virtual ~FileArchRequestContext();
+
+	bool executeSatesRequest(ArchiveShared archive, QSqlDatabase* db, FileArchWriter* fileArchWriter) override;
+	void getNextStates() override;
+
+private:
+
+};
 
 class ArchRequestThreadWorker : public SimpleThreadWorker
 {
 	Q_OBJECT
 
 public:
-	ArchRequestThreadWorker(ArchiveShared archive, CircularLoggerShared& logger);
+	ArchRequestThreadWorker(ArchiveShared archive, FileArchWriter* fileArchWriter, CircularLoggerShared& logger);
 
 	ArchRequestContextShared startNewRequest(ArchRequestParam& param, const QTime &startTime);
 	void finalizeRequest(quint32 requestID);
@@ -168,6 +192,7 @@ private slots:
 
 private:
 	ArchiveShared m_archive;
+	FileArchWriter* m_fileArchWriter = nullptr;
 	CircularLoggerShared m_logger;
 
 	QSqlDatabase m_db;
@@ -185,7 +210,7 @@ private:
 class ArchRequestThread : public SimpleThread
 {
 public:
-	ArchRequestThread(ArchiveShared archive, CircularLoggerShared logger);
+	ArchRequestThread(ArchiveShared archive, FileArchWriter* fileArchWriter, CircularLoggerShared logger);
 
 	ArchRequestContextShared startNewRequest(ArchRequestParam& param, const QTime& startTime);
 	void finalizeRequest(quint32 requestID);

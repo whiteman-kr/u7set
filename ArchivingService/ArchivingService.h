@@ -81,6 +81,7 @@ private:
 
 	FileArchWriter* m_fileArchWriter = nullptr;
 
+	Queue<SimpleAppSignalState> m_dbSaveStatesQueue;
 	Queue<SimpleAppSignalState> m_saveStatesQueue;
 
 	ArchiveShared m_archive;

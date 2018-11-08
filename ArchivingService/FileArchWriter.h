@@ -7,6 +7,7 @@
 #include "Archive.h"
 
 class FileArchWriter;
+struct ArchRequestParam;
 
 class ArchFile
 {
@@ -39,16 +40,18 @@ public:
 
 	bool pushState(qint64 archID, const SimpleAppSignalState& state);
 
-	bool flush(qint64 curPartition);
+	bool flush(qint64 curPartition, qint64* totalFushedStatesCount);
 
 	bool queueIsEmpty() const { return m_queue->isEmpty(); }
 
 	bool isEmergency() const;
 
-	void shutdown(qint64 curPartition);
+	void shutdown(qint64 curPartition, qint64* totalFlushedStatesCount);
+
+	QString path() const { return m_path; }
 
 private:
-	bool writeFile(qint64 partition, SignalState* buffer, int statesCount);
+	bool writeFile(qint64 partition, SignalState* buffer, int statesCount, qint64* totalFushedStatesCount);
 	void closeFile();
 
 private:
@@ -88,6 +91,24 @@ public:
 				   CircularLoggerShared logger);
 
 	QString archFullPath() const { return m_archFullPath; }
+	bool flushFileBeforeReading(Hash signalHash, QString* filePath);
+
+private:
+
+#pragma pack(push, 1)
+
+	struct MinuteCheckpoint
+	{
+		struct
+		{
+			qint64 minuteSystemTime = 0;
+			qint64 archiveID = 0;
+		} checkpoint;
+
+		quint16 crc16 = 0;
+	};
+
+#pragma pack(pop)
 
 private:
 	void run() override;
@@ -99,6 +120,7 @@ private:
 
 	bool processSaveStatesQueue();
 	void updateCurrentPartition();
+	bool writeMinuteCheckpoint(qint64 minuteSystemTime);
 	void runArchiveMaintenance();
 	bool writeEmergencyFiles();
 	bool writeRegularFiles();
@@ -133,5 +155,24 @@ private:
 	std::atomic<const QThread*> m_emergencyFilesOwner = { nullptr };
 	QList<ArchFile*> m_emergencyFilesQueue;
 	QHash<ArchFile*, bool> m_emergencyFilesInQueue;
+
+	qint64 m_totalFlushedStatesCount = 0;
+};
+
+
+class FileArchReader
+{
+public:
+	FileArchReader(const QString& signalArchPath, E::TimeType timeType, qint64 startTime, qint64 endTime);
+
+	bool findData();
+
+private:
+	QString m_signalArchPath;
+	E::TimeType m_timeType = E::TimeType::System;
+	qint64 m_startTime = 0;
+	qint64 m_endTime = 0;
+
+	//
 };
 
