@@ -78,8 +78,9 @@ namespace Builder
 
 		if (ok == false)
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, db.lastError());
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("Opening project %1: error").arg(projectName()));
+			// Opening project %1 error (%2).
+			//
+			m_log->errPDB2006(projectName(), db.lastError());
 			return;
 		}
 		else
@@ -395,7 +396,6 @@ namespace Builder
 			//
 			// Write logic, configuration and tuning binary files
 			//
-
 
 			ok = writeBinaryFiles(buildWriter);
 

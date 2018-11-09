@@ -290,7 +290,7 @@ namespace Builder
 
 		if (lm == nullptr)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, QString("Not found LM with ID '%1'").arg(appDataSource.lmEquipmentID()));
+			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 

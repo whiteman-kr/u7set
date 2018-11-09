@@ -86,7 +86,7 @@ namespace Builder
 			m_connections == nullptr ||
 			m_busSet == nullptr)
 		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, tr("%1: Invalid params. Compilation aborted.").arg(__FUNCTION__));
+			LOG_NULLPTR_ERROR(m_log);
 			return false;
 		}
 

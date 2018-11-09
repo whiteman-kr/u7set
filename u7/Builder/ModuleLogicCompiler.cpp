@@ -368,7 +368,9 @@ namespace Builder
 
 		m_chassisSignals.clear();
 		m_ioSignals.clear();
-		m_linkedValidtySignalsID.clear();
+		m_signalsWithValidity.clear();
+
+		QVector<QPair<Signal*, QString>> acquiredInputSignalToLinkedValiditySignalID;	// Acquired input signal => linked validity signal EquipmentID
 
 		for(int i = 0; i < signalCount; i++)
 		{
@@ -448,14 +450,13 @@ namespace Builder
 
 					QString validitySignalID = deviceSignal->validitySignalId();
 
-					if (validitySignalID.isEmpty() == false)
+					if (s.isInput() == true &&
+						s.isAcquired() == true &&
+						validitySignalID.isEmpty() == false)
 					{
-						if (m_linkedValidtySignalsID.contains(deviceSignal->equipmentIdTemplate()) == false)
-						{
-							// DeviceSignalEquipmentID => LinkedValiditySignalEquipmentID
-							//
-							m_linkedValidtySignalsID.insert(deviceSignal->equipmentIdTemplate(), validitySignalID);
-						}
+						// DeviceSignalEquipmentID => LinkedValiditySignalEquipmentID
+						//
+						acquiredInputSignalToLinkedValiditySignalID.append(QPair<Signal*, QString>(&s, validitySignalID));
 					}
 				}
 
@@ -470,11 +471,6 @@ namespace Builder
 			{
 				assert(false);				// duplicate signal!
 				continue;
-			}
-
-			if (s.isAnalog() == true && s.dataSize() != SIZE_32BIT)
-			{
-				assert(false);
 			}
 
 			m_chassisSignals.insert(s.appSignalID(), &s);
@@ -492,8 +488,47 @@ namespace Builder
 					assert(false);
 				}
 			}
+		}
 
-			continue;
+		// Set Aquired property to TRUE for validity signals linked to acquired input signals
+		//
+		for(const QPair<Signal*, QString>& pair : acquiredInputSignalToLinkedValiditySignalID)
+		{
+			Signal* inputSignal = pair.first;
+			QString validitySignalEquipmentID = pair.second;
+
+			if (inputSignal == nullptr)
+			{
+				assert(false);
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			Signal* linkedValiditySignal = m_equipmentSignals.value(validitySignalEquipmentID, nullptr);
+
+			if (linkedValiditySignal == nullptr)
+			{
+				// Linked validity app signal with EquipmentID %1 is not found (input signal %2).
+				//
+				m_log->errALC5155(validitySignalEquipmentID, inputSignal->appSignalID());
+				result = false;
+				continue;
+			}
+
+			if (linkedValiditySignal->isInput() == false ||
+				linkedValiditySignal->isDiscrete() == false)
+			{
+				// Linked validity signal %1 shoud have Discrete Input type (input signal %2).
+				//
+				m_log->errALC5156(linkedValiditySignal->appSignalID(), inputSignal->appSignalID());
+				result = false;
+				continue;
+			}
+
+			linkedValiditySignal->setAcquire(true);
+
+			m_signalsWithValidity.append(QPair<Signal*, Signal*>(inputSignal, linkedValiditySignal));
 		}
 
 		return result;
@@ -1162,169 +1197,6 @@ namespace Builder
 
 		return result;
 	}
-
-/*	bool ModuleLogicCompiler::createUalSignalsFromLoopbackTargets()
-	{
-		bool result = true;
-
-		QVector<UalItem*> loopbackTargetItems;
-
-		for(UalItem* ualItem : m_ualItems)
-		{
-			if (ualItem == nullptr)
-			{
-				LOG_NULLPTR_ERROR(m_log);
-				result = false;
-				continue;
-			}
-
-			if (ualItem->isLoopbackTarget() == true)
-			{
-				loopbackTargetItems.append(ualItem);
-			}
-		}
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		// create signals from LoopbackTargets
-		//
-		for(UalItem* ualItem : loopbackTargetItems)
-		{
-			result &= createUalSignalsFromLoopbackTarget(ualItem);
-		}
-
-		// link signals connected to LoopbackTargets
-		//
-		for(UalItem* ualItem : loopbackTargetItems)
-		{
-			result &= linkUalSignalsConnectedToLoopbackTarget(ualItem);
-		}
-
-		return result;
-	}
-
-	bool ModuleLogicCompiler::createUalSignalsFromLoopbackTarget(UalItem* ualItem)
-	{
-		// Signal from loopback target is create only if SignalItem is connectet to LoopbackTarget item
-		// Otherwise loopback signals are created (really linked) from LoopbackSources
-		//
-		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
-
-		assert(ualItem->isLoopbackTarget() == true);
-
-		const UalLoopbackTarget* lbTarget = ualItem->ualLoopbackTarget();
-
-		TEST_PTR_LOG_RETURN_FALSE(lbTarget, m_log);
-
-		QString loopbackID = lbTarget->loopbackId();
-
-		if (m_usedLoopbacks.contains(loopbackID) == false)
-		{
-			m_usedLoopbacks.insert(loopbackID, nullptr);			// will be linked to LoopbackSource item later
-		}
-
-		const std::vector<LogicPin>& outputs = lbTarget->outputs();
-
-		if (outputs.size() != 1)
-		{
-			LOG_INTERNAL_ERROR(m_log);				// LoopbackTarget must have only one output pin
-			return false;
-		}
-
-		const LogicPin& outPin = outputs[0];
-
-		QList<UalItem*> connectedSignals;
-
-		bool result = getLinkedSignalItems(outPin, &connectedSignals);
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		if (connectedSignals.isEmpty() == true)
-		{
-			// it is Ok, has no SignalItems connected to LoopbackTarget item, nothing to create
-			// loopback signal will be create later from LoopbackSource item
-			//
-			return true;
-		}
-
-		UalSignal* loopbackSignal = m_loopbackSignals.value(loopbackID, nullptr);;
-
-		if (loopbackSignal != nullptr)
-		{
-			// signal for this looppback is already created
-			// link connected signals to loopbackSignal
-			//
-			return linkConnectedItems(ualItem, outPin, loopbackSignal);
-		}
-
-		result = checkLoopbackTargetSignalsCompatibility(lbTarget, connectedSignals);
-
-		if (result == false)
-		{
-			return false;
-		}
-
-		// loopback signal creation
-		//
-		UalItem* connectedSignalItem = connectedSignals.first();
-
-		TEST_PTR_LOG_RETURN_FALSE(connectedSignalItem, m_log);
-
-		Signal* connectedSignal = m_signals->getSignal(connectedSignalItem->strID());
-
-		if (connectedSignal == nullptr)
-		{
-			// Signal identifier '%1' is not found (Logic schema '%2').
-			//
-			m_log->errALC5000(connectedSignalItem->strID(), connectedSignalItem->guid(), connectedSignalItem->schemaID());
-			return false;
-		}
-
-		switch(connectedSignal->signalType())
-		{
-		case E::SignalType::Analog:
-		case E::SignalType::Discrete:
-			loopbackSignal = m_ualSignals.createSignal(ualItem, connectedSignal, outPin.guid());
-			break;
-
-		case E::SignalType::Bus:
-			loopbackSignal = createBusParentSignal(ualItem, outPin, connectedSignal, connectedSignal->busTypeID());
-			break;
-
-		default:
-			assert(false);
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		if (loopbackSignal == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		loopbackSignal->setLoopbackID(loopbackID);			// mark signal as loopback signal
-
-		m_loopbackSignals.insert(loopbackID, loopbackSignal);
-
-		// link connected signals to newly created loopback signal
-		//
-		result = linkConnectedItems(ualItem, outPin, loopbackSignal);
-
-		return result;
-	}
-
-	bool ModuleLogicCompiler::linkSignalsConnectedToLoopbackTarget(UalItem* ualItem)
-	{
-
-	}
-*/
 
 	bool ModuleLogicCompiler::createUalSignalsFromBusComposers()
 	{
@@ -2512,73 +2384,6 @@ namespace Builder
 		return result;
 	}
 
-/*	bool ModuleLogicCompiler::checkLoopbackTargetSignalsCompatibility(const UalLoopbackTarget* lbTarget, const QList<UalItem*>& signalItems)
-	{
-		Signal* firstSignal = nullptr;
-		const UalItem* firstSignalItem = nullptr;
-		bool isFirstSignal = true;
-
-		for(const UalItem* item : signalItems)
-		{
-			TEST_PTR_LOG_RETURN_FALSE(item, m_log);
-
-			if (item->isSignal() == false)
-			{
-				LOG_INTERNAL_ERROR(m_log);
-				return false;
-			}
-
-			Signal* s = m_signals->getSignal(item->strID());
-
-			if (s == nullptr)
-			{
-				// Signal identifier '%1' is not found (Logic schema '%2').
-				//
-				m_log->errALC5000(item->strID(), item->guid(), item->schemaID());
-				return false;
-			}
-
-			if (s->isInput() == true)
-			{
-				// Input signal %1 is connected to LoopbackTarget (Logic schema %2).
-				//
-				m_log->errALC5145(s->appSignalID(), item->guid(), item->schemaID());
-				return false;
-			}
-
-			if (s->enableTuning() == true)
-			{
-				// Tuningable signal %1 is connected to LoopbackTarget (Logic schema %2).
-				//
-				m_log->errALC5146(s->appSignalID(), item->guid(), item->schemaID());
-				return false;
-			}
-
-			if (isFirstSignal == true)
-			{
-				firstSignal = s;
-				firstSignalItem = item;
-				isFirstSignal = false;
-			}
-			else
-			{
-				if (firstSignal->isCompatibleFormat(*s) == false)
-				{
-					// Non compatible signals %1 and %2 are connected to same LoopbackTarget %3 (Logic schema %4)
-					//
-					m_log->errALC5144(firstSignal->appSignalID(), firstSignalItem->guid(),
-									  s->appSignalID(), item->guid(),
-									  lbTarget->loopbackId(), lbTarget->guid(),
-									  firstSignalItem->schemaID());
-					return false;
-				}
-			}
-
-		}
-
-		return true;
-	}*/
-
 	Signal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString& busTypeID)
 	{
 		const std::vector<QUuid>& connectedPinsUuids = outPin.associatedIOs();
@@ -3313,14 +3118,6 @@ namespace Builder
 			return false;
 		}
 
-		/*result = listsUniquenessCheck();
-
-		if (result == false)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}*/
-
 		sortSignalList(m_acquiredDiscreteInputSignals);
 		sortSignalList(m_acquiredDiscreteStrictOutputSignals);
 		sortSignalList(m_acquiredDiscreteInternalSignals);
@@ -3352,7 +3149,6 @@ namespace Builder
 	bool ModuleLogicCompiler::createAcquiredDiscreteInputSignalsList()
 	{
 		m_acquiredDiscreteInputSignals.clear();
-//		m_acquiredDiscreteInputSignalsMap.clear();
 
 		//	list include signals that:
 		//
@@ -3372,11 +3168,6 @@ namespace Builder
 				s->isInput() == true)
 			{
 				m_acquiredDiscreteInputSignals.append(s);
-
-				// if input signal is acquired, then validity signal (if exists) also always acquired
-				//
-
-				//appendLinkedValiditySignal(s);
 			}
 		}
 
@@ -3643,10 +3434,6 @@ namespace Builder
 				s->isInput() == true)
 			{
 				m_acquiredAnalogInputSignals.append(s);
-
-				// if input signal is acquired, then validity signal (if exists) also always acquired
-				//
-//				appendLinkedValiditySignal(s);
 			}
 		}
 
@@ -4185,36 +3972,43 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(s);
 
-		// if signal has linked validity signal, append validity signal to m_acquiredDiscreteInputSignals also
-		//
-/*		QString linkedValiditySignalEquipmentID  = m_linkedValidtySignalsID.value(s->equipmentID(), QString());
-
-		if (linkedValiditySignalEquipmentID.isEmpty() == false)
+/*		if (s->isInput() == false || s->isAcquired() == false)
 		{
-			Signal* linkedValiditySignal = m_equipmentSignals.value(linkedValiditySignalEquipmentID, nullptr);
+			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
 
-			if (linkedValiditySignal == nullptr)
-			{
-				LOG_WARNING_OBSOLETE(m_log, Builder:::IssueType::NotDefined,
-						  QString(tr("Linked validity signal with equipmentID '%1' is not found (input signal '%2')")).
-									 arg(linkedValiditySignalEquipmentID).
-									 arg(s->appSignalID()));
-				return true;
-			}
+		QString linkedValiditySignalEquipmentID  = m_linkedValidtySignalsID.value(s->equipmentID(), QString());
 
-			if (linkedValiditySignal->isInput() == false ||
-				linkedValiditySignal->isDiscrete() == false)
-			{
-				assert(false);							// validity signal must be discrete input signal
-														// no matter is "acquired" or not
-				return false;
-			}
+		if (linkedValiditySignalEquipmentID.isEmpty() == true)
+		{
+			return true;
+		}
 
-			if (m_acquiredDiscreteInputSignalsMap.contains(linkedValiditySignal) == false)
-			{
-				m_acquiredDiscreteInputSignals.append(linkedValiditySignal);
-				m_acquiredDiscreteInputSignalsMap.insert(linkedValiditySignal, linkedValiditySignal);
-			}
+		Signal* linkedValiditySignal = m_equipmentSignals.value(linkedValiditySignalEquipmentID, nullptr);
+
+		if (linkedValiditySignal == nullptr)
+		{
+			LOG_WARNING_OBSOLETE(m_log, Builder:::IssueType::NotDefined,
+					  QString(tr("Linked validity signal with equipmentID '%1' is not found (input signal '%2')")).
+								 arg(linkedValiditySignalEquipmentID).
+								 arg(s->appSignalID()));
+			return true;
+		}
+
+		if (linkedValiditySignal->isInput() == false ||
+			linkedValiditySignal->isDiscrete() == false)
+		{
+			assert(false);							// validity signal must be discrete input signal
+													// no matter is "acquired" or not
+			return false;
+		}
+
+		if (m_acquiredDiscreteInputSignalsMap.contains(linkedValiditySignal) == false)
+		{
+			m_acquiredDiscreteInputSignals.append(linkedValiditySignal);
+			m_acquiredDiscreteInputSignalsMap.insert(linkedValiditySignal, linkedValiditySignal);
 		}*/
 
 		return true;
@@ -4318,6 +4112,8 @@ namespace Builder
 			if (disposeNonAcquiredAnalogSignals() == false) break;
 
 			if (disposeNonAcquiredBuses() == false) break;
+
+			if (setInputSignalsValidityAddresses() == false) break;
 
 			result = true;
 		}
@@ -4610,6 +4406,27 @@ namespace Builder
 		return result;
 	}
 
+	bool ModuleLogicCompiler::setInputSignalsValidityAddresses()
+	{
+		bool result = true;
+
+		for(const QPair<Signal*, Signal*>& pair : m_signalsWithValidity)
+		{
+			Signal* inputSignal = pair.first;
+			Signal* validitySignal = pair.second;
+
+			if (inputSignal == nullptr || validitySignal == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			inputSignal->setRegValidityAddr(validitySignal->regValueAddr());
+		}
+		return result;
+	}
+
 	bool ModuleLogicCompiler::appendAfbsForAnalogInOutSignalsConversion()
 	{
 		if (findFbsForAnalogInOutSignalsConversion() == false)
@@ -4729,9 +4546,6 @@ namespace Builder
 			"scale_fp_16ui",				// FB_SCALE_FP_16UI_INDEX
 			"scale_si_16ui",				// FB_SCALE_SI_16UI_INDEX
 		};
-
-		/*const char* const FB_SCAL_K1_PARAM_CAPTION = "i_scal_k1_coef";
-		const char* const FB_SCAL_K2_PARAM_CAPTION = "i_scal_k2_coef";*/
 
 		const char* const FB_SCALE_X1_OPNAME = "x1";
 		const char* const FB_SCALE_X2_OPNAME = "x2";
@@ -10697,8 +10511,8 @@ namespace Builder
 		if (m_signalsID.isEmpty())
 		{
 			createDeviceBoundSignalsMap();
-		}*/
-	/*
+		}
+
 		equipmentWalker(m_chassis, [this](const Hardware::DeviceObject* device)
 		{
 			if (device->parent() == nullptr || !device->parent()->isModule())
@@ -11423,8 +11237,9 @@ namespace Builder
 
 			if (result == false)
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
-								   QString(tr("%1 finished with error")).arg(proc.second));
+				// %1 has been finished with errors.
+				//
+				m_log->errALC5999(proc.second);
 				break;
 			}
 		}
@@ -11444,8 +11259,9 @@ namespace Builder
 
 			if (result == false)
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
-								   QString(tr("%1 finished with error")).arg(proc.second));
+				// %1 has been finished with errors.
+				//
+				m_log->errALC5999(proc.second);
 				break;
 			}
 		}
