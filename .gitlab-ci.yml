@@ -49,9 +49,9 @@ windows build job:
     - "echo ----------------------------------------------"
     - "echo               Run unit tests"
     - "echo ----------------------------------------------"
-    - "./bin/release/u7databasetests.exe"
+    - "bin/release/u7databasetests.exe"
   artifacts:
-    name: "u7set_%CI_BUILD_REF_SLUG%_0.8.%CI_PIPELINE_IID%_%CI_COMMIT_SHA%"
+    name: "u7set_0.8.%CI_PIPELINE_IID%_%CI_BUILD_REF_SLUG%_%CI_COMMIT_SHA%"
     paths:
       - bin/release/*.exe
       - bin/release/*.dll
