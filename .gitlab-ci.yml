@@ -9,7 +9,7 @@ stages:
 before_script:
 #  - echo before_script
   - cd
-#  - dir
+  - dir
   - set
   
 #after_script:
@@ -45,11 +45,10 @@ windows build job:
     - "C:/Qt/Tools/QtCreator/bin/jom.exe qmake_all"
     - "C:/Qt/Tools/QtCreator/bin/jom.exe"
 #Run unit tests
-    - "@echo off"
     - "echo ----------------------------------------------"
     - "echo               Run unit tests"
     - "echo ----------------------------------------------"
-    - "%CI_PROJECT_DIR%/bin/release/u7databasetests.exe"
+    - "%CI_PROJECT_DIR%\bin\release\u7databasetests.exe"
   artifacts:
     name: "u7set_0.8.%CI_PIPELINE_IID%_%CI_BUILD_REF_SLUG%_%CI_COMMIT_SHA%"
     paths:
