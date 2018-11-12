@@ -141,7 +141,6 @@ void DbControllerHardwareConfigurationTests::getDeviceTreeLatestVersionTest()
 
 	// ParentDeviceForTest
 	//
-
 	parentDeviceForTest->setCaption("parentDeviceObjectTestDevice");
 	parentDeviceForTest->setObjectName("parentDeviceObjectTestDevice");
 	parentDeviceForTest->setPlace(1);
