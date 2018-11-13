@@ -250,6 +250,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0230.sql", "Upgrade to version 230, Making scripts compatible to ECMAS"},
 	{":/DatabaseUpgrade/Upgrade0231.sql", "Upgrade to version 231, OCM and OCMN TxDiagDataSize update"},
 	{":/DatabaseUpgrade/Upgrade0232.sql", "Upgrade to version 232, Adding LM1_SR03 preset and scripts"},
+	{":/DatabaseUpgrade/Upgrade0233.sql", "Upgrade to version 233, ArchService properties were removed from Monitor preset"},
 };
 
 
