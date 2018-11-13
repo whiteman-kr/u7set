@@ -4,6 +4,8 @@
 ArchFile::SignalState ArchFile::m_buffer[ArchFile::QUEUE_MAX_SIZE];
 
 
+const QString ArchFile::EXTENSION = "saf";		// Signal Archive File
+
 ArchFile::ArchFile()
 {
 }
@@ -130,13 +132,14 @@ bool ArchFile::writeFile(qint64 partition, SignalState* buffer, int statesCount,
 
 		QDateTime date = QDateTime::fromMSecsSinceEpoch(partition, Qt::UTC);
 
-		QString fileName = QString("%1/%2_%3_%4_%5_%6.dat").
+		QString fileName = QString("%1/%2_%3_%4_%5_%6.%7").
 								arg(m_path).
 								arg(date.date().year()).
 								arg(QString().sprintf("%02d", date.date().month())).
 								arg(QString().sprintf("%02d", date.date().day())).
 								arg(QString().sprintf("%02d", date.time().hour())).
-								arg(QString().sprintf("%02d", date.time().minute()));
+								arg(QString().sprintf("%02d", date.time().minute()),
+								EXTENSION);
 
 		m_file.setFileName(fileName);
 
@@ -542,12 +545,12 @@ void FileArchWriter::updateCurrentPartition()
 
 	qint64 curPartition = (QDateTime::currentMSecsSinceEpoch() / PARTITTION_DIVIDER) * PARTITTION_DIVIDER;
 
-	const int MINUTE_TIME = 60 * 1000;
+/*	const int MINUTE_TIME = 60 * 1000;
 
 	if (curPartition / MINUTE_TIME != m_curPartition / MINUTE_TIME)
 	{
 		writeMinuteCheckpoint((curPartition / MINUTE_TIME) * MINUTE_TIME);		// trunc system time to minutes
-	}
+	}*/
 
 	if (m_curPartition == curPartition)
 	{
@@ -728,24 +731,5 @@ ArchFile* FileArchWriter::getNextEmergencyFile()
 //	releaseEmergencyFilesOwnership(thread);
 
 	return emergencyFile;
-}
-
-// ---------------------------------------------------------------------------------------------
-//
-// FileArchReader class implementattion
-//
-// ---------------------------------------------------------------------------------------------
-
-FileArchReader::FileArchReader(const QString& signalArchPath, E::TimeType timeType, qint64 startTime, qint64 endTime) :
-	m_signalArchPath(signalArchPath),
-	m_timeType(timeType),
-	m_startTime(startTime),
-	m_endTime(endTime)
-{
-}
-
-bool FileArchReader::findData()
-{
-	return true;
 }
 

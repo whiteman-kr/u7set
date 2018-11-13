@@ -50,6 +50,8 @@ public:
 
 	QString path() const { return m_path; }
 
+	static const QString EXTENSION;
+
 private:
 	bool writeFile(qint64 partition, SignalState* buffer, int statesCount, qint64* totalFushedStatesCount);
 	void closeFile();
@@ -158,21 +160,3 @@ private:
 
 	qint64 m_totalFlushedStatesCount = 0;
 };
-
-
-class FileArchReader
-{
-public:
-	FileArchReader(const QString& signalArchPath, E::TimeType timeType, qint64 startTime, qint64 endTime);
-
-	bool findData();
-
-private:
-	QString m_signalArchPath;
-	E::TimeType m_timeType = E::TimeType::System;
-	qint64 m_startTime = 0;
-	qint64 m_endTime = 0;
-
-	//
-};
-

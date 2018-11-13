@@ -73,7 +73,8 @@ SOURCES += \
     ../lib/Signal.cpp \
     ../lib/SignalProperties.cpp \
     FileArchWriter.cpp \
-    ../lib/Crc16.cpp
+    ../lib/Crc16.cpp \
+    FileArchReader.cpp
 
 HEADERS += \
     ../lib/HostAddressPort.h \
@@ -119,7 +120,8 @@ HEADERS += \
     ../lib/Signal.h \
     ../lib/SignalProperties.h \
     FileArchWriter.h \
-    ../lib/Crc16.h
+    ../lib/Crc16.h \
+    FileArchReader.h
 
 include(../qtservice/src/qtservice.pri)
 
