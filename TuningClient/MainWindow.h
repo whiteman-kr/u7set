@@ -88,9 +88,13 @@ public slots:
 	void showSignalsLog();
 	void showAbout();
 
+	void slot_userFiltersChanged();
+
 private:
 
 	virtual void timerEvent(QTimerEvent* event) override;
+
+	void createAndCheckFiltersHashes(bool userFiltersOnly);
 
 	void createWorkspace();
 

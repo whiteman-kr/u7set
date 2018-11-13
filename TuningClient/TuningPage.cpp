@@ -5,6 +5,10 @@
 #include <QPushButton>
 #include "../VFrame30/DrawParam.h"
 #include "DialogSignalInfo.h"
+#include "DialogChooseFilter.h"
+
+#include <QTableView>
+#include <QInputDialog>
 
 using namespace std;
 
@@ -641,11 +645,12 @@ int TuningPage::m_instanceCounter = 0;
 TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 					   std::shared_ptr<TuningFilter> pageFilter,
 					   TuningSignalManager* tuningSignalManager,
-					   TuningClientTcpClient* tuningTcpClient,
+					   TuningClientTcpClient* tuningTcpClient, TuningFilterStorage* tuningFilterStorage,
 					   QWidget* parent) :
 	QWidget(parent),
 	m_tuningSignalManager(tuningSignalManager),
 	m_tuningTcpClient(tuningTcpClient),
+	m_tuningFilterStorage(tuningFilterStorage),
 	m_treeFilter(treeFilter),
 	m_pageFilter(pageFilter)
 {
@@ -664,6 +669,7 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 	}
 
 	assert(m_tuningSignalManager);
+	assert(m_tuningFilterStorage);
 
 	// Object List
 	//
@@ -1406,57 +1412,222 @@ void TuningPage::slot_FilterTypeIndexChanged(int index)
 
 void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 {
-	QModelIndex index =	m_objectList->indexAt(pos);
-	if (index.isValid() == false)
+	Q_UNUSED(pos);
+
+	QModelIndexList mi = m_objectList->selectionModel()->selectedRows();
+
+	QMenu menu(this);
+
+	int menuSignalCount = 0;
+
+	for (const QModelIndex& index : mi)
+	{
+		if (index.isValid() == false)
+		{
+			return;
+		}
+
+		const TuningModelHashSet& hashes = m_model->hashSetByIndex(index.row());
+
+		for (int i = 0; i < m_model->valueColumnsCount(); i++)
+		{
+			Hash hash = hashes.hash[i];
+
+			if (hash == UNDEFINED_HASH)
+			{
+				continue;
+			}
+
+			bool found = false;
+
+			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &found);
+
+			if (found == false)
+			{
+				assert(false);
+				return;
+			}
+
+			QAction* a = new QAction(tr("%1 - %2").arg(asp.customSignalId()).arg(asp.caption()), &menu);
+
+			auto f = [this, hash]() -> void
+			{
+				DialogSignalInfo* d = new DialogSignalInfo(hash, m_tuningTcpClient->instanceIdHash(), m_tuningSignalManager, this);
+				d->show();
+			};
+
+			connect(a, &QAction::triggered, this, f);
+
+			menu.addAction(a);
+
+			menuSignalCount++;
+
+			if (menuSignalCount > 16)
+			{
+				QAction* a = new QAction(tr("..."), &menu);
+				a->setEnabled(false);
+				menu.addAction(a);
+				break;
+			}
+		}
+
+		if (menuSignalCount > 16)
+		{
+			break;
+		}
+	}
+
+	if (menuSignalCount == 0)
 	{
 		return;
 	}
 
-	const TuningModelHashSet& hashes = m_model->hashSetByIndex(index.row());
+	// Add additional commands
 
-	QMenu menu(this);
+	menu.addSeparator();
 
-	bool menuIsEmpty = true;
+	QMenu* submenuA = menu.addMenu(tr("More"));
 
-	for (int i = 0; i < m_model->valueColumnsCount(); i++)
+	QAction* a = new QAction(tr("Add To New Filter..."), &menu);
+	connect(a, &QAction::triggered, this, &TuningPage::slot_saveSignalsToNewFilter);
+	submenuA->addAction(a);
+
+	a = new QAction(tr("Add To Existing Filter..."), &menu);
+	connect(a, &QAction::triggered, this, &TuningPage::slot_saveSignalsToExistingFilter);
+	submenuA->addAction(a);
+
+	// If AutoFilter filter exists, add Restore command
+
+	std::shared_ptr<TuningFilter> root = m_tuningFilterStorage->root();
+
+	if (root == nullptr)
 	{
-		Hash hash = hashes.hash[i];
-
-		if (hash == UNDEFINED_HASH)
-		{
-			continue;
-		}
-
-		bool found = false;
-
-		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &found);
-
-		if (found == false)
-		{
-			assert(false);
-			return;
-		}
-
-		QAction* a = new QAction(tr("%1 - %2").arg(asp.customSignalId()).arg(asp.caption()), &menu);
-
-		auto f = [this, hash]() -> void
-		{
-			DialogSignalInfo* d = new DialogSignalInfo(hash, m_tuningTcpClient->instanceIdHash(), m_tuningSignalManager, this);
-			d->show();
-		};
-
-		connect(a, &QAction::triggered, this, f);
-
-		menu.addAction(a);
-
-		menuIsEmpty = false;
+		assert(root);
+		return;
 	}
 
-	if (menuIsEmpty == false)
+	std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilter(m_autoFilterCaption);
+	if (autoCreatedFilter != nullptr)
 	{
-		menu.exec(QCursor::pos());
+		submenuA->addSeparator();
+
+		a = new QAction(tr("Restore Values From Filter..."), &menu);
+		connect(a, &QAction::triggered, this, &TuningPage::slot_restoreValuesFromExistingFilter);
+		submenuA->addAction(a);
 	}
 
+
+	menu.exec(QCursor::pos());
+
+}
+
+void TuningPage::slot_saveSignalsToNewFilter()
+{
+	bool ok;
+	QString filterName = QInputDialog::getText(this, tr("Add Signals To Filter"),
+											tr("Enter the filter name:"), QLineEdit::Normal,
+											tr("Name"), &ok);
+
+	if (ok == false)
+	{
+		return;
+	}
+
+	std::shared_ptr<TuningFilter> root = m_tuningFilterStorage->root();
+
+	if (root == nullptr)
+	{
+		assert(root);
+		return;
+	}
+
+	// Get AutoFilter filter
+
+	std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilter(m_autoFilterCaption);
+	if (autoCreatedFilter == nullptr)
+	{
+		autoCreatedFilter = std::make_shared<TuningFilter>();
+
+		QUuid uid = QUuid::createUuid();
+		autoCreatedFilter->setID(uid.toString());
+		autoCreatedFilter->setCaption(m_autoFilterCaption);
+		autoCreatedFilter->setSource(TuningFilter::Source::User);
+		autoCreatedFilter->setInterfaceType(TuningFilter::InterfaceType::Tree);
+
+		root->addChild(autoCreatedFilter);
+	}
+
+	// Create Filter
+
+	std::shared_ptr<TuningFilter> filter = std::make_shared<TuningFilter>();
+
+	QUuid uid = QUuid::createUuid();
+	filter->setID(uid.toString());
+	filter->setCaption(filterName);
+	filter->setSource(TuningFilter::Source::User);
+	filter->setInterfaceType(TuningFilter::InterfaceType::Tree);
+
+	autoCreatedFilter->addChild(filter);
+
+	addSelectedSignalsToFilter(filter.get());
+}
+
+void TuningPage::slot_saveSignalsToExistingFilter()
+{
+	std::shared_ptr<TuningFilter> root = m_tuningFilterStorage->root();
+
+	if (root == nullptr)
+	{
+		assert(root);
+		return;
+	}
+
+	// Get AutoFilter filter
+
+	std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilter(m_autoFilterCaption);
+	if (autoCreatedFilter == nullptr)
+	{
+		return;
+	}
+
+	DialogChooseFilter* d = new DialogChooseFilter(this, autoCreatedFilter.get(), TuningFilter::InterfaceType::Tree, TuningFilter::Source::User);
+
+	if (d->exec() != QDialog::Accepted || d->chosenFilter() == nullptr)
+	{
+		return;
+	}
+
+	addSelectedSignalsToFilter(d->chosenFilter());
+
+}
+
+void TuningPage::slot_restoreValuesFromExistingFilter()
+{
+	std::shared_ptr<TuningFilter> root = m_tuningFilterStorage->root();
+
+	if (root == nullptr)
+	{
+		assert(root);
+		return;
+	}
+
+	// Get AutoFilter filter
+
+	std::shared_ptr<TuningFilter> autoCreatedFilter = root->childFilter(m_autoFilterCaption);
+	if (autoCreatedFilter == nullptr)
+	{
+		QMessageBox::warning(this, qAppName(), tr("No auto-created filters exist."));
+		return;
+	}
+
+	DialogChooseFilter* d = new DialogChooseFilter(this, autoCreatedFilter.get(), TuningFilter::InterfaceType::Tree, TuningFilter::Source::User);
+
+	if (d->exec() != QDialog::Accepted || d->chosenFilter() == nullptr)
+	{
+		return;
+	}
+
+	restoreSignalsFromFilter(d->chosenFilter());
 }
 
 void TuningPage::slot_ApplyFilter()
@@ -1592,6 +1763,143 @@ bool TuningPage::takeClientControl()
 	}
 
 	return true;
+}
+
+void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
+{
+	if (filter == nullptr)
+	{
+		assert(filter);
+		return;
+	}
+
+	int addedCount = 0;
+
+	QModelIndexList mi = m_objectList->selectionModel()->selectedRows();
+
+	for (const QModelIndex& index : mi)
+	{
+		if (index.isValid() == false)
+		{
+			assert(false);
+			return;
+		}
+
+		const TuningModelHashSet& hashes = m_model->hashSetByIndex(index.row());
+
+		for (int i = 0; i < m_model->valueColumnsCount(); i++)
+		{
+			Hash hash = hashes.hash[i];
+
+			if (hash == UNDEFINED_HASH)
+			{
+				continue;
+			}
+
+			bool found = false;
+
+			AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &found);
+
+			if (found == false)
+			{
+				assert(false);
+				return;
+			}
+
+			TuningSignalState state = m_tuningSignalManager->state(hash, &found);
+
+			if (found == false)
+			{
+				continue;
+			}
+
+			TuningFilterValue tv;
+
+			tv.setAppSignalId(asp.appSignalId());
+
+			if (state.valid() == true)
+			{
+				tv.setUseValue(true);
+				tv.setValue(state.value());
+			}
+
+			filter->addValue(tv);
+
+			addedCount++;
+		}
+	}
+
+	if (addedCount == 0)
+	{
+		QMessageBox::warning(this, qAppName(), tr("No signals were added."));
+		return;
+	}
+
+	QString errorMsg;
+
+	if (m_tuningFilterStorage->save(theSettings.userFiltersFile(), &errorMsg, TuningFilter::Source::User) == false)
+	{
+		theLogFile->writeError(errorMsg);
+		QMessageBox::critical(this, tr("Error"), errorMsg);
+	}
+
+	QMessageBox::information(this, qAppName(), tr("Adding signals complete."));
+
+	QTimer::singleShot(500, theMainWindow, &MainWindow::slot_userFiltersChanged);
+}
+
+void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
+{
+	if (filter == nullptr)
+	{
+		assert(filter);
+		return;
+	}
+
+	int restoredCount = 0;
+
+	TuningFilterValue tv;
+
+	for (int r = 0; r < m_model->rowCount(); r++)
+	{
+		for (int c = 0; c < m_model->valueColumnsCount(); c++)
+		{
+			Hash hash = m_model->hashByIndex(r, c);
+
+			if (hash == UNDEFINED_HASH)
+			{
+				continue;
+			}
+
+			bool exists = filter->value(hash, tv);
+			if (exists == true)
+			{
+
+				bool found = false;
+
+				TuningSignalState state = m_tuningSignalManager->state(hash, &found);
+				if (found == false)
+				{
+					continue;
+				}
+
+				if (state.valid() == true && state.value() != tv.value())
+				{
+					m_tuningSignalManager->setNewValue(hash, tv.value());
+					restoredCount++;
+				}
+			}
+		}
+	}
+
+	if (restoredCount == 0)
+	{
+		QMessageBox::critical(this, qAppName(), tr("No values restored from the filter for current signals."));
+	}
+	else
+	{
+		QMessageBox::warning(this, qAppName(), tr("%1 values were restored from the filter. Check them and apply the changes.").arg(restoredCount));
+	}
 }
 
 void TuningPage::slot_timerTick500()

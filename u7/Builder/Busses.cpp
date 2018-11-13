@@ -361,9 +361,9 @@ namespace Builder
 
 					if (childBus == nullptr)
 					{
-						LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-										   QString("BusTypeID %1 of bus signal %2.%3 is undefined.").
-												arg(busSignal.busTypeId()).arg(busTypeID()).arg(busSignal.signalId()));
+						// Bus type ID %1 of signal %2 is undefined.
+						//
+						m_log->errALC5092(busSignal.busTypeId(), QString("%1.%2").arg(busTypeID()).arg(busSignal.signalId()));
 						return false;
 					}
 

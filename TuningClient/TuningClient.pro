@@ -135,7 +135,8 @@ SOURCES +=\
     ../lib/SignalProperties.cpp \
     ../lib/Ui/DialogAlert.cpp \
     ../lib/Ui/UiTools.cpp \
-    ../lib/Ui/DialogAbout.cpp
+    ../lib/Ui/DialogAbout.cpp \
+    DialogChooseFilter.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -196,7 +197,8 @@ HEADERS  += MainWindow.h \
     ../lib/SignalProperties.h \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/UiTools.h \
-    ../lib/Ui/DialogAbout.h
+    ../lib/Ui/DialogAbout.h \
+    DialogChooseFilter.h
 
 FORMS    += \
     DialogSettings.ui \

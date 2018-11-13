@@ -211,10 +211,6 @@ namespace Builder
 
 		bool createUalSignalsFromInputAndTuningAcquiredSignals();
 
-/*		bool createUalSignalsFromLoopbackTargets();
-		bool createUalSignalsFromLoopbackTarget(UalItem* ualItem);
-		bool linkSignalsConnectedToLoopbackTarget(UalItem* ualItem);*/
-
 		bool createUalSignalsFromBusComposers();
 		bool createUalSignalsFromBusComposer(UalItem* ualItem);
 		UalSignal* createBusParentSignal(UalItem* ualItem, const LogicPin& outPin, Signal* s, const QString& busTypeID);
@@ -242,8 +238,6 @@ namespace Builder
 		bool checkBusProcessingItemsConnections();
 
 		//
-
-		//bool checkLoopbackTargetSignalsCompatibility(const UalLoopbackTarget* lbTarget, const QList<UalItem*>& signalItems);
 
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString& busTypeID);
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal);
@@ -330,6 +324,8 @@ namespace Builder
 		//
 		bool disposeNonAcquiredAnalogSignals();
 		bool disposeNonAcquiredBuses();
+
+		bool setInputSignalsValidityAddresses();
 
 		bool appendAfbsForAnalogInOutSignalsConversion();
 		bool findFbsForAnalogInOutSignalsConversion();
@@ -575,8 +571,7 @@ namespace Builder
 		QHash<QString, Signal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => Signal*
 		QHash<QString, Signal*> m_equipmentSignals;				// equipment signals to app signals map, signal EquipmentID => Signal*
 
-		QHash<QString, QString> m_linkedValidtySignalsID;		// device signals with linked validity signals
-																// DeviceSignalEquipmentID => LinkedValiditySignalEquipmentID
+		QVector<QPair<Signal*, Signal*>> m_signalsWithValidity;		// device signals with linked validity signals
 
 		QHash<QString, Loopback*> m_loopbacks;
 		QHash<QString, Loopback*> m_signalsToLoopbacks;

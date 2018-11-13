@@ -77,7 +77,7 @@ namespace Builder
 		BuildResultWriter& m_buildResultWriter;
 		QByteArray m_fileData;
 		QXmlStreamWriter m_xmlWriter;
-		OutputLog* m_log = nullptr;
+		IssueLogger* m_log = nullptr;
 		QString m_subDir;
 
 		QList<BuildFile*> m_linkedFiles;

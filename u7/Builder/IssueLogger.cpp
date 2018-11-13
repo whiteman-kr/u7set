@@ -103,8 +103,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Common,
 				  10,
-				  tr("File loading/parsing error, file is damaged or has incompatible format, file name %1.")
-				  .arg(fileName));
+				  QString(tr("File loading/parsing error, file is damaged or has incompatible format, file name %1.")).arg(fileName));
 	}
 
 
@@ -124,8 +123,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Common,
 				  11,
-				  tr("Can't create directory %1.")
-				  .arg(directory));
+				  QString(tr("Can't create directory %1.")).arg(directory));
 	}
 
 
@@ -145,8 +143,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Common,
 				  12,
-				  tr("Can't create file %1.")
-				  .arg(fileName));
+				  QString(tr("Can't create file %1.")).arg(fileName));
 	}
 
 
@@ -166,8 +163,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Common,
 				  13,
-				  tr("Write error of file %1.")
-				  .arg(fileName));
+				  QString(tr("Write error of file %1.")).arg(fileName));
 	}
 
 
@@ -187,8 +183,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Common,
 				  14,
-				  tr("File %1 already exists.")
-				  .arg(fileName));
+				  QString(tr("File %1 already exists.")).arg(fileName));
 	}
 
 	/// IssueCode: CMN0015
@@ -209,8 +204,7 @@ namespace Builder
 	{
 		LOG_WARNING0(IssueType::Common,
 				  15,
-				  tr("%1 and %2 files have the same ID = %3.")
-				  .arg(fileName1).arg(fileName2).arg(id));
+				  QString(tr("%1 and %2 files have the same ID = %3.")).arg(fileName1).arg(fileName2).arg(id));
 	}
 
 	/// IssueCode: CMN0016
@@ -228,7 +222,7 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Common,
 				  16,
-				  tr("The build was cancelled."));
+				  QString(tr("The build was cancelled.")));
 	}
 
 	/// IssueCode: CMN0017
@@ -247,10 +241,28 @@ namespace Builder
 	{
 		LOG_ERROR(IssueType::Common,
 				  17,
-				  tr("Can't open file %1.")
-				  .arg(fileName));
+				  QString(tr("Can't open file %1.")).arg(fileName));
 	}
 
+	/// IssueCode: CMN0018
+	///
+	/// IssueType: Error
+	///
+	/// Title: Can't link build file %1 into /%2/configuration.xml.
+	///
+	/// Parameters:
+	///		%1 File name
+	///		%2 Configuration.xml file subdirectory
+	///
+	/// Description:
+	///		Program can't link specified build file into configuration.xml.
+	///
+	void IssueLogger::errCMN0018(QString fileName, QString cfgXmlSubdir)
+	{
+		LOG_ERROR(IssueType::Common,
+				  18,
+				  QString(tr("Can't link build file %1 into /%2/configuration.xml.")).arg(fileName).arg(cfgXmlSubdir));
+	}
 
 	// INT			Internal issues							1000-1999
 	//
@@ -455,6 +467,25 @@ namespace Builder
 				  tr("Load UFB schemas from the project database error."));
 	}
 
+	/// IssueCode: PDB2006
+	///
+	/// IssueType: Error
+	///
+	/// Title: Opening project %1 error (%2).
+	///
+	/// Parameters:
+	///			%1 RPCT project name
+	///			%2 Database last error value
+	///
+	/// Description:
+	///		RPCT project opening error due database error.
+	///
+	void IssueLogger::errPDB2006(QString projectName, QString dbLastError)
+	{
+		LOG_ERROR(IssueType::ProjectDatabase,
+				  2006,
+				  QString(tr("Opening project %1 error (%2).")).arg(projectName).arg(dbLastError));
+	}
 
 	// CFG			FSC configuration						3000-3999
 	//
@@ -3997,7 +4028,7 @@ namespace Builder
 	/// Description:
 	///		Receiver of connection is not associated with specified LM. Check receiver placement.
 	///
-	void IssueLogger::errALC5083(const QString& receiverPortID, const QString& connectionID, const QString& lmID, QUuid receiverUuid)
+	void IssueLogger::errALC5083(QString receiverPortID, QString connectionID, QString lmID, QUuid receiverUuid)
 	{
 		addItemsIssues(OutputMessageLevel::Error, receiverUuid);
 
@@ -4020,7 +4051,7 @@ namespace Builder
 	/// Description:
 	///		Receving data size of specified RS232/485 port is undefined. Use Manual Settings to determine Rx data size.
 	///
-	void IssueLogger::errALC5085(const QString& portEquipmentID, const QString& connectionID)
+	void IssueLogger::errALC5085(QString portEquipmentID, QString connectionID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5085,
@@ -4041,7 +4072,7 @@ namespace Builder
 	///		Discrete constant must have value 0 or 1. Check constant value.
 	///
 
-	void IssueLogger::errALC5086(QUuid constItemUuid, const QString& schemaID)
+	void IssueLogger::errALC5086(QUuid constItemUuid, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, constItemUuid, schemaID);
 
@@ -5529,6 +5560,48 @@ namespace Builder
 				  QString(tr("Associated logic module is not found. Signal %1 cannot be processed.")).arg(signalID));
 	}
 
+	/// IssueCode: ALC5155
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Linked validity signal with EquipmentID %1 is not found (input signal %2).
+	///
+	/// Parameters:
+	///		%1 Validity signal EquipmentID
+	///		%2 Input signal AppSignalID
+	///
+	/// Description:
+	///		Validity signal linked to input signal is not found.
+	///
+	void IssueLogger::errALC5155(QString validitySignalEquipmentID, QString inputSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5155,
+				  QString(tr("Linked validity signal with EquipmentID %1 is not found (input signal %2).")).
+								arg(validitySignalEquipmentID).arg(inputSignalID));
+	}
+
+	/// IssueCode: ALC5156
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Linked validity signal %1 shoud have Discrete Input type (input signal %2).
+	///
+	/// Parameters:
+	///		%1 Validity signal AppSignalID
+	///		%2 Input signal AppSignalID
+	///
+	/// Description:
+	///		Validity signal linked to input signal should have discrete input type.
+	///
+	void IssueLogger::errALC5156(QString validitySignalID, QString inputSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5156,
+				  QString(tr("Linked validity signal %1 shoud have Discrete Input type (input signal %2).")).
+								arg(validitySignalID).arg(inputSignalID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186
@@ -5544,7 +5617,7 @@ namespace Builder
 	/// Description:
 	///		Signal specified in opto port raw data description is not found. Check ID of signal.
 	///
-	void IssueLogger::errALC5186(const QString& appSignalID, const QString& portEquipmentID)
+	void IssueLogger::errALC5186(QString appSignalID, QString portEquipmentID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5186,
@@ -5565,7 +5638,7 @@ namespace Builder
 	/// Description:
 	///		Tx data memory areas of specified opto ports are overlapped. Check manual settinggs of opto ports.
 	///
-	void IssueLogger::errALC5187(const QString& port1ID, const QString &port2ID)
+	void IssueLogger::errALC5187(QString port1ID, QString port2ID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5187,
@@ -5586,7 +5659,7 @@ namespace Builder
 	/// Description:
 	///		Duplicate signal ID in specified opto port raw data description. Check description.
 	///
-	void IssueLogger::errALC5188(const QString& appSignalID, const QString &portID)
+	void IssueLogger::errALC5188(QString appSignalID, QString portID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5188,
@@ -5608,7 +5681,7 @@ namespace Builder
 	/// Description:
 	///		Transmitted signal specified in opto port raw data description is not exists in associated LM. Check description or signal ID.
 	///
-	void IssueLogger::errALC5189(const QString& appSignalID, const QString& portID, const QString& lmID)
+	void IssueLogger::errALC5189(QString appSignalID, QString portID, QString lmID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5189,
@@ -5630,7 +5703,7 @@ namespace Builder
 	/// Description:
 	///		Receiving signal specified in opto port raw data description is not exists in associated LM. Check description or signal ID.
 	///
-	void IssueLogger::errALC5190(const QString& appSignalID, const QString& portID, const QString& lmID)
+	void IssueLogger::errALC5190(QString appSignalID, QString portID, QString lmID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5190,
@@ -5652,7 +5725,7 @@ namespace Builder
 	/// Description:
 	///		Receiving signal specified in opto port raw data description is not exists in associated LM. Check description or signal ID.
 	///
-	void IssueLogger::errALC5191(const QString& appSignalID, const QString& lmID, QUuid itemID, const QString& schemaID)
+	void IssueLogger::errALC5191(QString appSignalID, QString lmID, QUuid itemID, QString schemaID)
 	{
 		addItemsIssues(OutputMessageLevel::Error, itemID, schemaID);
 
@@ -5676,7 +5749,7 @@ namespace Builder
 	/// Description:
 	///		Tx signal specified in port raw data description isn't connected to transmitter. Connect signal to transmitter.
 	///
-	void IssueLogger::wrnALC5192(const QString& appSignalID, const QString& portID, const QString& connectionID)
+	void IssueLogger::wrnALC5192(QString appSignalID, QString portID, QString connectionID)
 	{
 		LOG_WARNING0(IssueType::AlCompiler,
 				  5192,
@@ -5698,7 +5771,7 @@ namespace Builder
 	/// Description:
 	///		Rx signal specified in port raw data description isn't assigned to reciever.
 	///
-	void IssueLogger::wrnALC5193(const QString& appSignalID, const QString& portID, const QString& connectionID)
+	void IssueLogger::wrnALC5193(QString appSignalID, QString portID, QString connectionID)
 	{
 		LOG_WARNING0(IssueType::AlCompiler,
 				  5193,
@@ -5719,7 +5792,7 @@ namespace Builder
 	/// Description:
 	///		Tx data memory areas of specified opto ports are overlapped. Check manual settinggs of opto ports.
 	///
-	void IssueLogger::wrnALC5194(const QString& port1ID, const QString &port2ID)
+	void IssueLogger::wrnALC5194(QString port1ID, QString port2ID)
 	{
 		LOG_WARNING0(IssueType::AlCompiler,
 				  5194,
@@ -5727,6 +5800,25 @@ namespace Builder
 						arg(port1ID).arg(port2ID));
 	}
 
+	/// IssueCode: ALC5999
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   %1 has been finished with errors.
+	///
+	/// Parameters:
+	///		%1 Compilation procedure name
+	///
+	/// Description:
+	///		Specified compilation procedure has been finished with errors.
+	///
+	void IssueLogger::errALC5999(QString compilationProcedureName)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5999,
+				  QString(tr("%1 has been finished with errors.")).
+								arg(compilationProcedureName));
+	}
 
 	// EQP			Equipment issues						6000-6999
 	//

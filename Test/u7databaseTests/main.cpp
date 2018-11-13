@@ -13,7 +13,6 @@
 #include "DbControllerFileManagementTests.h"
 #include "DbControllerSignalManagementTests.h"
 #include "DbControllerHardwareConfigurationTests.h"
-#include "DbControllerBuildManagementTests.h"
 #include "DbControllerVersionControlTests.h"
 #include "../../lib/DbController.h"
 
@@ -78,20 +77,17 @@ int main(int argc, char *argv[])
 	DbControllerUserTests dbControllerUserTests;
 	returnCode |= QTest::qExec(&dbControllerUserTests, argc, argv);
 
-//	DbControllerFileTests dbControllerFileTests;
-//	returnCode |= QTest::qExec(&dbControllerFileTests, argc, argv);
+	DbControllerFileTests dbControllerFileTests;
+	returnCode |= QTest::qExec(&dbControllerFileTests, argc, argv);
 
 //	DbControllerSignalTests dbControllerSignalTests;
 //	returnCode |= QTest::qExec(&dbControllerSignalTests, argc, argv);
 
-//	DbControllerHardwareConfigurationTests dbControllerHardwareConfigurationTests;
-//	returnCode |= QTest::qExec(&dbControllerHardwareConfigurationTests, argc, argv);
+	DbControllerHardwareConfigurationTests dbControllerHardwareConfigurationTests;
+	returnCode |= QTest::qExec(&dbControllerHardwareConfigurationTests, argc, argv);
 
-//	DbControllerBuildTests dbControllerBuildTests;
-//	returnCode |= QTest::qExec(&dbControllerBuildTests, argc, argv);
-
-//	DbControllerVersionControlTests dbControllerVersionTests;
-//	returnCode |= QTest::qExec(&dbControllerVersionTests, argc, argv);
+	DbControllerVersionControlTests dbControllerVersionTests;
+	returnCode |= QTest::qExec(&dbControllerVersionTests, argc, argv);
 
 	// Shutting down
 	//

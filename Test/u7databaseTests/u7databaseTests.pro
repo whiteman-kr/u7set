@@ -72,7 +72,6 @@ SOURCES += main.cpp \
     DbControllerSignalManagementTests.cpp \
     DbControllerHardwareConfigurationTests.cpp \
     ../../lib/HostAddressPort.cpp \
-    DbControllerBuildManagementTests.cpp \
     DbControllerVersionControlTests.cpp \
     ../../lib/TuningValue.cpp \
     ../../lib/Times.cpp \
@@ -116,7 +115,6 @@ HEADERS += \
     DbControllerSignalManagementTests.h \
     DbControllerHardwareConfigurationTests.h \
     ../../lib/HostAddressPort.h \
-    DbControllerBuildManagementTests.h \
     DbControllerVersionControlTests.h \
     ../../lib/TuningValue.h \
     ../../lib/Times.h \

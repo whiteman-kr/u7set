@@ -31,7 +31,13 @@ class TuningWorkspace : public QWidget
 {
 	Q_OBJECT
 public:
-	explicit TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent);
+	explicit TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter,
+							 std::shared_ptr<TuningFilter> workspaceFilter,
+							 TuningSignalManager* tuningSignalManager,
+							 TuningClientTcpClient* tuningTcpClient,
+							 TuningFilterStorage* tuningFilterStorage,
+							 QWidget* parent);
+
 	virtual ~TuningWorkspace();
 
 	bool hasPendingChanges();
@@ -40,11 +46,13 @@ public:
 
 	void onTimer();
 
+	// Tree update
+
+	void updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter);
+
 private:
 
 	// Initialization
-
-	void updateFiltersTree();
 
 	void createButtons();
 
@@ -64,6 +72,8 @@ private:
 
 	void activateControl(const QString& equipmentId, bool enable);
 
+	QTreeWidgetItem* findFilterWidget(const QString& id, QTreeWidgetItem* treeItem);
+
 protected:
 
 	bool eventFilter(QObject *object, QEvent *event) override;
@@ -75,6 +85,8 @@ private:
 	TuningSignalManager* m_tuningSignalManager = nullptr;
 
 	TuningClientTcpClient* m_tuningTcpClient = nullptr;
+
+	TuningFilterStorage* m_tuningFilterStorage = nullptr;
 
 	std::shared_ptr<TuningFilter> m_workspaceFilter;
 
@@ -123,7 +135,7 @@ static int m_instanceCounter;
 
 private slots:
 
-	void slot_currentTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous);
+	void slot_treeSelectionChanged();
 	void slot_treeContextMenuRequested(const QPoint& pos);
 
 

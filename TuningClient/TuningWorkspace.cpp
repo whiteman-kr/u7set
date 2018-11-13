@@ -89,10 +89,11 @@ void FilterButton::slot_toggled(bool checked)
 
 int TuningWorkspace::m_instanceCounter = 0;
 
-TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, QWidget* parent) :
+TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, TuningFilterStorage* tuningFilterStorage, QWidget* parent) :
 	QWidget(parent),
 	m_tuningSignalManager(tuningSignalManager),
 	m_tuningTcpClient(tuningTcpClient),
+	m_tuningFilterStorage(tuningFilterStorage),
 	m_workspaceFilter(workspaceFilter),
 	m_treeFilter(treeFilter)
 {
@@ -103,6 +104,7 @@ TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::
 	assert(m_workspaceFilter);
 	assert(m_tuningSignalManager);
 	assert(m_tuningTcpClient);
+	assert(m_tuningFilterStorage);
 
 	QVBoxLayout* mainLayout = new QVBoxLayout();
 	setLayout(mainLayout);
@@ -115,7 +117,7 @@ TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::
 
 	//
 
-	updateFiltersTree();
+	updateFiltersTree(m_workspaceFilter);
 
 	//
 
@@ -248,11 +250,10 @@ void TuningWorkspace::onTimer()
 	}
 }
 
-void TuningWorkspace::updateFiltersTree()
+void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter)
 {
 	// Fill the filter tree
 	//
-	std::shared_ptr<TuningFilter> rootFilter = m_workspaceFilter;
 	if (rootFilter == nullptr)
 	{
 		assert(rootFilter);
@@ -291,7 +292,7 @@ void TuningWorkspace::updateFiltersTree()
 
 		m_filterTree->setContextMenuPolicy(Qt::CustomContextMenu);
 
-		connect(m_filterTree, &QTreeWidget::currentItemChanged, this, &TuningWorkspace::slot_currentTreeItemChanged);
+		connect(m_filterTree, &QTreeWidget::itemSelectionChanged, this, &TuningWorkspace::slot_treeSelectionChanged);
 		connect(m_filterTree, &QWidget::customContextMenuRequested, this, &TuningWorkspace::slot_treeContextMenuRequested);
 
 		int columnIndex = columnNameIndex;
@@ -368,14 +369,54 @@ void TuningWorkspace::updateFiltersTree()
 		m_filterTree->clear();
 	}
 
-	m_treeFilter = nullptr;
-
 	// Fill filters control
 	//
 
 	m_filterTree->addTopLevelItem(rootItem);
 
-	rootItem->setSelected(true);
+	// Restore selection
+
+	if (m_treeFilter == nullptr)
+	{
+		rootItem->setSelected(true);
+	}
+	else
+	{
+		// Find a pointer to previously selected tree filter (remember we are working with shared_ptrs)
+
+		m_treeFilter = rootFilter->findFilterById(m_treeFilter->ID());
+
+		if (m_treeFilter == nullptr)
+		{
+			// No such filter - select root
+
+			rootItem->setSelected(true);
+		}
+		else
+		{
+			// Find a tree item for restored selected filter and select it
+
+			QTreeWidgetItem* treeFilterWidget = findFilterWidget(m_treeFilter->ID(), rootItem);
+
+			if (treeFilterWidget == nullptr)
+			{
+				assert(treeFilterWidget);
+			}
+			else
+			{
+				treeFilterWidget->setSelected(true);
+
+				// Expand all parents
+
+				QTreeWidgetItem* parent = treeFilterWidget->parent();
+				while (parent != nullptr && parent != rootItem)
+				{
+					parent->setExpanded(true);
+					parent = parent->parent();
+				}
+			}
+		}
+	}
 
 	// Expand root item
 
@@ -412,6 +453,12 @@ void TuningWorkspace::updateFiltersTree()
 
 void TuningWorkspace::createButtons()
 {
+	if (m_workspaceFilter == nullptr)
+	{
+		assert(m_workspaceFilter);
+		return;
+	}
+
 	// Buttons
 	//
 	m_filterButtons.clear();
@@ -468,6 +515,12 @@ void TuningWorkspace::createButtons()
 
 void TuningWorkspace::createTabPages()
 {
+	if (m_workspaceFilter == nullptr)
+	{
+		assert(m_workspaceFilter);
+		return;
+	}
+
 	// Fill tab pages
 	//
 
@@ -655,7 +708,7 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 		auto it = m_tuningWorkspacesMap.find(childWorkspaceFilterId);
 		if (it == m_tuningWorkspacesMap.end())
 		{
-			TuningWorkspace* tw = new TuningWorkspace(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, this/*parent*/);
+			TuningWorkspace* tw = new TuningWorkspace(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage, this/*parent*/);
 
 			m_tuningWorkspacesMap[childWorkspaceFilterId] = tw;
 
@@ -675,7 +728,7 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 		auto it = m_tuningPagesMap.find(childWorkspaceFilterId);
 		if (it == m_tuningPagesMap.end())
 		{
-			TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient);
+			TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage);
 
 			m_tuningPagesMap[childWorkspaceFilterId] = tp;
 
@@ -1121,6 +1174,42 @@ void TuningWorkspace::activateControl(const QString& equipmentId, bool enable)
 	m_tuningTcpClient->activateTuningSourceControl(equipmentId, enable, forceTakeControl);
 }
 
+QTreeWidgetItem* TuningWorkspace::findFilterWidget(const QString& id, QTreeWidgetItem* treeItem)
+{
+	for (int i = 0; i < treeItem->childCount(); i++)
+	{
+		QTreeWidgetItem* childItem = treeItem->child(i);
+		if (childItem == nullptr)
+		{
+			assert(childItem);
+			return nullptr;
+		}
+
+		std::shared_ptr<TuningFilter> filter = childItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+		if (filter == nullptr)
+		{
+			assert(filter);
+			return nullptr;
+		}
+
+		if (filter->ID() == id)
+		{
+			return childItem;
+		}
+
+		// Recursive search
+
+		QTreeWidgetItem* result = findFilterWidget(id, childItem);
+
+		if (result != nullptr)
+		{
+			return result;
+		}
+	}
+
+	return nullptr;
+}
+
 bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
 {
 	if (m_tab != nullptr && object == m_tab->tabBar() &&
@@ -1162,21 +1251,23 @@ bool TuningWorkspace::eventFilter(QObject *object, QEvent *event)
 	return QWidget::eventFilter(object, event);
 }
 
-void TuningWorkspace::slot_currentTreeItemChanged(QTreeWidgetItem *current, QTreeWidgetItem *previous)
+void TuningWorkspace::slot_treeSelectionChanged()
 {
-	Q_UNUSED(previous);
+	QList <QTreeWidgetItem*> selectedItems = m_filterTree->selectedItems();
+	if (selectedItems.size() != 1)
+	{
+		return;
+	}
 
-	if (current == nullptr)
+	QTreeWidgetItem* selected = selectedItems[0];
+	if (selected == nullptr)
 	{
-		m_treeFilter = nullptr;
-		emit treeFilterSelectionChanged(nullptr);
+		return;
 	}
-	else
-	{
-		std::shared_ptr<TuningFilter> filter = current->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
-		m_treeFilter = filter;
-		emit treeFilterSelectionChanged(filter);
-	}
+
+	m_treeFilter = selected->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+
+	emit treeFilterSelectionChanged(m_treeFilter);
 }
 
 void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
@@ -1251,18 +1342,37 @@ void TuningWorkspace::slot_treeContextMenuRequested(const QPoint& pos)
 
 void TuningWorkspace::slot_maskReturnPressed()
 {
-	updateFiltersTree();
+	slot_maskApply();
 }
 
 void TuningWorkspace::slot_maskApply()
 {
-	updateFiltersTree();
+	if (m_filterTree->topLevelItemCount() != 1)
+	{
+		return;
+	}
+
+	QTreeWidgetItem* rootItem = m_filterTree->topLevelItem(0);
+	if (rootItem == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	std::shared_ptr<TuningFilter> rootFilter = rootItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+	if (rootFilter == nullptr)
+	{
+		assert(rootFilter);
+		return;
+	}
+
+	updateFiltersTree(rootFilter);
 }
 
 void TuningWorkspace::slot_parentTreeFilterChanged(std::shared_ptr<TuningFilter> filter)
 {
 	m_treeFilter = filter;
-	emit treeFilterSelectionChanged(filter);
+	emit treeFilterSelectionChanged(m_treeFilter);
 }
 
 void TuningWorkspace::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)
