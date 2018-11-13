@@ -277,18 +277,62 @@ namespace Builder
 
 	bool MonitorCfgGenerator::writeArchiveServiceSection(QXmlStreamWriter& xmlWriter)
 	{
-		bool ok1 = true;
-		bool ok2 = true;
+		QString archiveServiceId1;
+		QString archiveServiceId2;
 
-		// ArchiveServiceID1
+		// Get ArchServiceID from AppDataService
 		//
-		QString archiveServiceId1 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "ArchiveServiceID1", &ok1).trimmed();
-		QString archiveServiceId2 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "ArchiveServiceID2", &ok2).trimmed();
+		bool ok1 = false;
+		bool ok2 = false;
+
+		// AppDataServiceID
+		//
+		QString appDataServiceId1 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "AppDataServiceID1", &ok1).trimmed();
+		QString appDataServiceId2 = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "AppDataServiceID2", &ok2).trimmed();
 
 		if (ok1 == false || ok2 == false)
 		{
 			return false;
 		}
+
+		// Get ArchServiceID form AppDataService
+		//
+		ok1 = true;
+		ok2 = true;
+
+		if (appDataServiceId1.isEmpty() == false)
+		{
+			auto[archSrv1, ok] = getObjectProperty<QString>(appDataServiceId1, "ArchiveServiceID");
+
+			if (ok == false)
+			{
+				ok1 = false;
+			}
+
+			archiveServiceId1 = archSrv1;
+		}
+
+		if (appDataServiceId2.isEmpty() == false)
+		{
+			auto[archSrv2, ok] = getObjectProperty<QString>(appDataServiceId2, "ArchiveServiceID");
+
+			if (ok == false)
+			{
+				ok2 = false;
+			}
+
+			archiveServiceId2 = archSrv2;
+		}
+
+		if (ok1 == false || ok2 == false)
+		{
+			return false;
+		}
+
+		// --
+		//
+		ok1 = true;
+		ok2 = true;
 
 		// ArchiveServiceID1(2)->ClientRequestIP, ClientRequestPort
 		//
