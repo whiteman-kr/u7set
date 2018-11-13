@@ -154,7 +154,7 @@ function runConfigScript(configScript: string, confFirmware: ModuleFirmware, ioM
 
 var FamilyLMID: number = 0x1100;
 
-var LMDescriptionNumber: number = 2;
+var LMDescriptionNumber: number = 3;
 
 var UartID: number = 0;
 
