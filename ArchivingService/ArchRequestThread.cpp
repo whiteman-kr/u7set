@@ -2,6 +2,7 @@
 
 #include "ArchRequestThread.h"
 #include "FileArchWriter.h"
+#include "FileArchReader.h"
 #include "ArchWriteThread.h"
 
 // ---------------------------------------------------------------------------------------------

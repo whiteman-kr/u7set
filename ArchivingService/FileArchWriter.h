@@ -5,85 +5,9 @@
 #include "../lib/WUtils.h"
 
 #include "Archive.h"
+#include "ArchFile.h"
 
-class FileArchWriter;
 struct ArchRequestParam;
-
-class ArchFile
-{
-#pragma pack(push, 1)
-
-	struct SignalState
-	{
-		// light version of AppSignalState to use in queues and other AppDataService data structs
-		//
-		struct
-		{
-			qint64 archID;
-			qint64 system;
-			qint64 plant;
-
-			AppSignalStateFlags flags;
-			double value;
-		} state;
-
-		quint16 crc16;
-	};
-
-#pragma pack(pop)
-
-public:
-	ArchFile();
-	~ArchFile();
-
-	bool init(const FileArchWriter* writer, const QString& signalID, Hash hash, bool isAnalogSignal);
-
-	bool pushState(qint64 archID, const SimpleAppSignalState& state);
-
-	bool flush(qint64 curPartition, qint64* totalFushedStatesCount);
-
-	bool queueIsEmpty() const { return m_queue->isEmpty(); }
-
-	bool isEmergency() const;
-
-	void shutdown(qint64 curPartition, qint64* totalFlushedStatesCount);
-
-	QString path() const { return m_path; }
-
-	static const QString EXTENSION;
-
-private:
-	bool writeFile(qint64 partition, SignalState* buffer, int statesCount, qint64* totalFushedStatesCount);
-	void closeFile();
-
-private:
-	const FileArchWriter* m_archWriter = nullptr;
-	QString m_signalID;
-	Hash m_hash = 0;
-
-	QString m_path;
-
-	//
-
-	QFile m_file;
-	bool m_pathIsExists = false;
-	bool m_fileIsOpened = false;
-	bool m_fileIsAligned = false;
-	qint64 m_prevPartition = -1;
-
-	FastQueue<SignalState>* m_queue = nullptr;
-
-	SimpleMutex m_flushMutex;
-
-	const double QUEUE_EMERGENCY_LIMIT = 0.7;		// 70%
-	const double QUEUE_EXPAND_LIMIT = 0.9;			// 90%
-
-	static const int QUEUE_MIN_SIZE = 20;
-	static const int QUEUE_MAX_SIZE = 1280;		// 20 * 2^6
-
-	static SignalState m_buffer[QUEUE_MAX_SIZE];
-};
-
 
 class FileArchWriter : public RunOverrideThread
 {

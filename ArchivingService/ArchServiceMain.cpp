@@ -37,6 +37,12 @@ void testQueue()
 	}
 }
 
+// To increase time that system waiting to the service shutting down, change value:
+//
+// HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\WaitToKillServiceTimeout.
+//
+
+
 int main(int argc, char *argv[])
 {
 #if defined (Q_OS_WIN) && defined (Q_DEBUG)
