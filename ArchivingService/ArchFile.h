@@ -5,12 +5,8 @@
 #include "../lib/Crc16.h"
 #include "../lib/SimpleThread.h"
 
+class ArchSignal;
 class Archive;
-
-class Archive
-{
-	class Signal;
-};
 
 class FileArchWriter;
 
@@ -44,7 +40,7 @@ private:
 	};
 
 public:
-	ArchFile(Archive* archive, Archive::Signal* archiveSignal);
+	ArchFile(Archive* archive, ArchSignal* archSignal);
 	~ArchFile();
 
 	bool init(const FileArchWriter* writer, const QString& signalID, Hash hash, bool isAnalogSignal);
@@ -59,6 +55,9 @@ public:
 
 	void shutdown(qint64 curPartition, qint64* totalFlushedStatesCount);
 
+	void setRequiredImmediatelyFlushing(bool b) { m_requiredImmediatelyFlushing.store(b); }
+	bool isRequiredImmediatelyFlushing() const { return m_requiredImmediatelyFlushing.load(); }
+
 	QString path() const { return m_path; }
 
 	static const QString EXTENSION;
@@ -69,7 +68,7 @@ private:
 
 private:
 	Archive* m_archive = nullptr;
-	Archive::Signal* m_archiveSignal = nullptr;
+	ArchSignal* m_archSignal = nullptr;
 
 	QString m_path;
 
@@ -82,6 +81,8 @@ private:
 	qint64 m_prevPartition = -1;
 
 	FastQueue<Record>* m_queue = nullptr;
+
+	std::atomic<bool> m_requiredImmediatelyFlushing = { false };
 
 	SimpleMutex m_flushMutex;
 

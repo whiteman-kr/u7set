@@ -13,32 +13,6 @@ FileArchWriter::FileArchWriter(ArchiveShared archive,
 	m_log(logger)
 {
 	TEST_PTR_RETURN(archive);
-
-	m_saveStatesQueue = &archive->saveStatesQueue();
-}
-
-bool FileArchWriter::flushFileBeforeReading(Hash signalHash, QString* filePath)
-{
-	if (filePath == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
-	ArchFile* archFile = m_hashArchFiles.value(signalHash, nullptr);
-
-	if (archFile == nullptr)
-	{
-		return false;
-	}
-
-	qint64 flashedCount = 0;
-
-	archFile->flush(m_curPartition, &flashedCount);
-
-	*filePath = archFile->path();
-
-	return true;
 }
 
 void FileArchWriter::run()
@@ -57,7 +31,7 @@ void FileArchWriter::run()
 
 	m_thisThread = QThread::currentThread();
 
-	bool result = initFiles();
+	bool result = m_archive->checkAndCreateArchiveDirs();
 
 	if (result == false)
 	{
@@ -70,13 +44,6 @@ void FileArchWriter::run()
 	do
 	{
 		bool doWork = false;
-
-		doWork |= processSaveStatesQueue();
-
-		if (isQuitRequested() == true)
-		{
-			break;
-		}
 
 		updateCurrentPartition();
 
@@ -114,241 +81,10 @@ void FileArchWriter::run()
 	}
 	while(isQuitRequested() == false);
 
-	shutdown();
+	m_archive->shutdown();
 }
 
 
-bool FileArchWriter::initFiles()
-{
-	bool result = archDirIsWritableChecking();
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	result = createGroupDirs();
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	result = createArchFiles();
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	return true;
-}
-
-bool FileArchWriter::archDirIsWritableChecking()
-{
-	int pass = 1;
-
-	bool result = false;
-
-	do
-	{
-		if (pass == 1)
-		{
-			m_archFullPath = m_archive->archFullPath();
-		}
-		else
-		{
-			m_archFullPath = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::AppDataLocation);
-		}
-
-		m_archFullPath = QDir(m_archFullPath).absolutePath();
-
-		QDir d(m_archFullPath);
-
-		DEBUG_LOG_MSG(m_log, QString("Archive directory %1 checking...").arg(m_archFullPath));
-
-		if (d.exists() == false)
-		{
-			if (d.mkpath(m_archFullPath) == false)
-			{
-				DEBUG_LOG_ERR(m_log, QString("Archive directory %1 creation error").arg(m_archFullPath));
-				pass++;
-				continue;
-			}
-			else
-			{
-				DEBUG_LOG_MSG(m_log, QString("Archive directory %1 is created successfully").arg(m_archFullPath));
-			}
-		}
-		else
-		{
-			DEBUG_LOG_MSG(m_log, QString("Archive directory %1 allready exists").arg(m_archFullPath));
-		}
-
-		QFileInfo fi(m_archFullPath);
-
-		if (fi.isDir() == false)
-		{
-			DEBUG_LOG_ERR(m_log, QString("Path %1 is not a directory!").arg(m_archFullPath));
-			pass++;
-			continue;
-		}
-
-		if (fi.isWritable() == false)
-		{
-			DEBUG_LOG_ERR(m_log, QString("Directory %1 is not writable!").arg(m_archFullPath));
-			pass++;
-			continue;
-		}
-
-		qint64 time = QDateTime::currentMSecsSinceEpoch();
-
-		QString testDir = QString("%1/test_dir_%2").arg(m_archFullPath).arg(time);
-
-		if (d.mkpath(testDir) == false)
-		{
-			DEBUG_LOG_ERR(m_log, QString("Test directory %1 creation error!").arg(testDir));
-			pass++;
-			continue;
-		}
-
-		DEBUG_LOG_MSG(m_log, QString("Test directory %1 is created successfully").arg(testDir));
-
-		d.rmdir(testDir);
-
-		QString testFile = QString("%1/test_file_%2.dat").arg(m_archFullPath).arg(time);
-
-		QFile f(testFile);
-
-		if (f.open(QIODevice::ReadWrite) == false)
-		{
-			DEBUG_LOG_ERR(m_log, QString("Test file %1 creation error!").arg(testFile));
-			pass++;
-			continue;
-		}
-
-		DEBUG_LOG_MSG(m_log, QString("Test file %1 is created successfully").arg(testFile));
-
-		f.remove();
-
-		DEBUG_LOG_MSG(m_log, QString("Archive directory %1 checking succesfully completed").arg(m_archFullPath));
-
-		result = true;
-
-		break;
-	}
-	while(pass <= 2);
-
-	return result;
-}
-
-bool FileArchWriter::createGroupDirs()
-{
-	bool result = true;
-
-	for(int i = 0; i < 256; i++)
-	{
-		QString dir = QString("%1/%2").arg(m_archFullPath).arg(QString().sprintf("%02X", i));
-
-		QDir d;
-
-		bool res = d.mkpath(dir);
-
-		if (res == false)
-		{
-			DEBUG_LOG_ERR(m_log, QString("Directory %1 creation error!").arg(dir));
-
-			result = false;
-		}
-	}
-
-	return result;
-}
-
-bool FileArchWriter::createArchFiles()
-{
-	bool result = true;
-
-	const QHash<Hash, ArchSignal>& archSignals = m_archive->archSignals();
-
-	m_archFiles = new ArchFile[archSignals.size()];
-
-	TEST_PTR_RETURN_FALSE(m_archFiles);
-
-	int index = 0;
-
-	for(const ArchSignal& archSignal : archSignals)
-	{
-		Hash hash = archSignal.hash;
-
-		if (m_hashArchFiles.contains(hash) == true)
-		{
-			assert(false);
-			continue;
-		}
-
-		QString signalID = m_archive->getSignalID(hash);
-
-		if (signalID.isEmpty() == true)
-		{
-			assert(false);
-			continue;
-		}
-
-		ArchFile* archFile = m_archFiles + index;
-
-		result &= archFile->init(this, signalID, hash, archSignal.isAnalog);
-
-		m_hashArchFiles.insert(hash, archFile);
-
-		index++;
-	}
-
-	m_archFilesCount = index;
-
-	return result;
-}
-
-bool FileArchWriter::processSaveStatesQueue()
-{
-	TEST_PTR_RETURN_FALSE(m_saveStatesQueue);
-
-	SimpleAppSignalState state;
-
-	int count = 0;
-
-	do
-	{
-		bool result = m_saveStatesQueue->pop(&state);
-
-		if (result == false)
-		{
-			break;
-		}
-
-		ArchFile* archFile = m_hashArchFiles.value(state.hash, nullptr);
-
-		if (archFile == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
-		archFile->pushState(m_archID, state);
-
-		m_archID++;
-
-		if (archFile->isEmergency() == true)
-		{
-			addEmergencyFile(archFile);
-		}
-
-		count++;
-	}
-	while(count < 10000);
-
-	return count > 0;
-}
 
 void FileArchWriter::updateCurrentPartition()
 {
@@ -381,6 +117,7 @@ void FileArchWriter::updateCurrentPartition()
 	}
 }
 
+/*
 bool FileArchWriter::writeMinuteCheckpoint(qint64 minuteSystemTime)
 {
 	QString fileName = m_archFullPath + "/mincheckpoints.dat";
@@ -414,7 +151,7 @@ bool FileArchWriter::writeMinuteCheckpoint(qint64 minuteSystemTime)
 
 	return true;
 }
-
+*/
 
 void FileArchWriter::runArchiveMaintenance()
 {
@@ -428,7 +165,7 @@ bool FileArchWriter::writeEmergencyFiles()
 
 	do
 	{
-		ArchFile* emergencyFile = getNextEmergencyFile();
+		ArchFile* emergencyFile = m_archive->getNextEmergencyFile();
 
 		if (emergencyFile == nullptr)
 		{
@@ -451,24 +188,12 @@ bool FileArchWriter::writeEmergencyFiles()
 
 bool FileArchWriter::writeRegularFiles()
 {
-	if (m_regularArchFileIndex >= m_archFilesCount)
-	{
-		m_regularArchFileIndex = 0;
-	}
-
 	int count = 0;
 	int flashedCount = 0;
 
 	do
 	{
-		ArchFile* archFile = m_archFiles + m_regularArchFileIndex;
-
-		m_regularArchFileIndex++;
-
-		if (m_regularArchFileIndex >= m_archFilesCount)
-		{
-			m_regularArchFileIndex = 0;
-		}
+		ArchFile* archFile = m_archive->getNextRegularFile();
 
 		if (archFile != nullptr)
 		{
@@ -499,49 +224,5 @@ bool FileArchWriter::archiveMaintenance()
 	return true;
 }
 
-void FileArchWriter::shutdown()
-{
-	TEST_PTR_RETURN(m_archFiles);
 
-	for(int i = 0; i < m_archFilesCount; i++)
-	{
-		ArchFile* archFile = m_archFiles + i;
-
-		archFile->shutdown(m_curPartition, &m_totalFlushedStatesCount);
-	}
-
-	delete [] m_archFiles;
-	m_archFiles = nullptr;
-}
-
-void FileArchWriter::addEmergencyFile(ArchFile* file)
-{
-//	takeEmergencyFilesOwnership(thread);
-
-	if (m_emergencyFilesInQueue.contains(file) == false)
-	{
-		m_emergencyFilesQueue.append(file);
-		m_emergencyFilesInQueue.insert(file, true);
-	}
-
-//	releaseEmergencyFilesOwnership(thread);
-}
-
-ArchFile* FileArchWriter::getNextEmergencyFile()
-{
-	ArchFile* emergencyFile = nullptr;
-
-//	takeEmergencyFilesOwnership(thread);
-
-	if (m_emergencyFilesQueue.isEmpty() == false)
-	{
-		emergencyFile = m_emergencyFilesQueue.first();
-		m_emergencyFilesQueue.removeFirst();
-		m_emergencyFilesInQueue.remove(emergencyFile);
-	}
-
-//	releaseEmergencyFilesOwnership(thread);
-
-	return emergencyFile;
-}
 

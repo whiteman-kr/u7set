@@ -23,25 +23,16 @@ ArchFile::Record ArchFile::m_buffer[ArchFile::QUEUE_MAX_SIZE];
 
 const QString ArchFile::EXTENSION = "saf";		// Signal Archive File
 
-ArchFile::ArchFile()
+ArchFile::ArchFile(Archive* archive, ArchSignal* archSignal) :
+	m_archive(archive),
+	m_archSignal(archSignal)
 {
-}
-
-ArchFile::~ArchFile()
-{
-}
-
-bool ArchFile::init(const FileArchWriter* writer, const QString& signalID, Hash hash, bool isAnalogSignal)
-{
-	TEST_PTR_RETURN_FALSE(writer);
-
-	m_archWriter = writer;
-	m_signalID = signalID;
-	m_hash = hash;
+	TEST_PTR_RETURN(archive);
+	TEST_PTR_RETURN(archSignal);
 
 	int queueSize = QUEUE_MIN_SIZE;
 
-	if (isAnalogSignal == true)
+	if (archSignal->isAnalog == true)
 	{
 		queueSize = QUEUE_MIN_SIZE * 16;
 	}
@@ -49,26 +40,20 @@ bool ArchFile::init(const FileArchWriter* writer, const QString& signalID, Hash 
 	m_queue = new FastQueue<Record>(queueSize);
 
 	m_path = QString("%1/%2/%3").
-					arg(writer->archFullPath()).
-					arg(QString().sprintf("%02X", static_cast<int>(m_hash & 0xFF))).
-					arg(m_signalID.remove("#"));
+					arg(archive->archFullPath()).
+					arg(QString().sprintf("%02X", static_cast<int>(archSignal->hash & 0xFF))).
+					arg(archSignal->appSignalID.remove(QRegExp("[^A-Z][^a-z][^0-9][^_]")));
+}
 
-	return true;
+ArchFile::~ArchFile()
+{
 }
 
 bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 {
-	SimpleMutexLocker locker(&m_flushMutex);
-
-	Q_UNUSED(locker);
-
-	if (state.hash != m_hash)
-	{
-		assert(false);
-		return false;
-	}
-
 	TEST_PTR_RETURN_FALSE(m_queue);
+
+	m_lastState = state;
 
 	Record s;
 
@@ -78,6 +63,10 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 	s.state.flags = state.flags;
 	s.state.value = state.value;
 	s.crc16 = calcCrc16(&s.state, sizeof(s.state));
+
+	SimpleMutexLocker locker(&m_flushMutex);
+
+	Q_UNUSED(locker);
 
 	m_queue->push(s);
 
@@ -96,6 +85,7 @@ bool ArchFile::flush(qint64 curPartition, qint64* totalFushedStatesCount)
 
 	if (m_queue->isEmpty() == true)
 	{
+		setRequiredImmediatelyFlushing(false);
 		return false;
 	}
 
@@ -105,6 +95,7 @@ bool ArchFile::flush(qint64 curPartition, qint64* totalFushedStatesCount)
 
 	if (result == false || copiedItemsCount == 0)
 	{
+		setRequiredImmediatelyFlushing(false);
 		return false;
 	}
 
@@ -116,6 +107,8 @@ bool ArchFile::flush(qint64 curPartition, qint64* totalFushedStatesCount)
 	}
 
 	writeFile(curPartition, m_buffer, copiedItemsCount, totalFushedStatesCount);
+
+	setRequiredImmediatelyFlushing(false);
 
 	return true;
 }

@@ -15,9 +15,6 @@ public:
 	FileArchWriter(ArchiveShared archive,
 				   CircularLoggerShared logger);
 
-	QString archFullPath() const { return m_archFullPath; }
-	bool flushFileBeforeReading(Hash signalHash, QString* filePath);
-
 private:
 
 #pragma pack(push, 1)
@@ -38,27 +35,12 @@ private:
 private:
 	void run() override;
 
-	bool initFiles();
-	bool archDirIsWritableChecking();
-	bool createGroupDirs();
-	bool createArchFiles();
-
-	bool processSaveStatesQueue();
 	void updateCurrentPartition();
-	bool writeMinuteCheckpoint(qint64 minuteSystemTime);
+//	bool writeMinuteCheckpoint(qint64 minuteSystemTime);
 	void runArchiveMaintenance();
 	bool writeEmergencyFiles();
 	bool writeRegularFiles();
 	bool archiveMaintenance();
-
-	void shutdown();
-
-	void addEmergencyFile(ArchFile* file);
-	ArchFile* getNextEmergencyFile();
-
-
-//	void takeEmergencyFilesOwnership(const QThread* newOwner);
-//	void releaseEmergencyFilesOwnership(const QThread* currentOwner);
 
 private:
 	ArchiveShared m_archive;
@@ -66,20 +48,10 @@ private:
 	CircularLoggerShared m_log;
 	QThread* m_thisThread = nullptr;
 
-	QString m_archFullPath;
-	ArchFile* m_archFiles = nullptr;
-	int m_archFilesCount = 0;
-	int m_regularArchFileIndex = 0;
-	QHash<Hash, ArchFile*> m_hashArchFiles;
-
 	qint64 m_curPartition = -1;
 	qint64 m_archID = 0;
 
 	bool m_archMaintenanceIsRunning = false;
-
-	std::atomic<const QThread*> m_emergencyFilesOwner = { nullptr };
-	QList<ArchFile*> m_emergencyFilesQueue;
-	QHash<ArchFile*, bool> m_emergencyFilesInQueue;
 
 	qint64 m_totalFlushedStatesCount = 0;
 };

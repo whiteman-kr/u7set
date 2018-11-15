@@ -89,13 +89,11 @@ void ArchRequestContext::checkSignalsHashes(ArchiveShared arch)
 {
 	QVector<Hash> existingHashes;
 
-	const QHash<Hash, ArchSignal>& archSignals = arch->archSignals();
-
 	for(int i = 0; i < m_param.signalHashesCount; i++)
 	{
 		Hash signalHash = m_param.signalHashes[i];
 
-		if (archSignals.contains(signalHash) == true)
+		if (arch->isSignalExists(signalHash) == true)
 		{
 			existingHashes.append(signalHash);
 		}
@@ -419,8 +417,6 @@ bool DbArchRequestContext::createGetSignalStatesQueryStr(ArchiveShared archive)
 
 	int signalHashesCount = m_param.signalHashesCount;
 
-	const QHash<Hash, ArchSignal>& archSignals = archive->archSignals();
-
 	QString formatStr0 = QString("SELECT %1, %2, %3, %4, %5 AS hash FROM %6 WHERE %7 >= %8::bigint AND %7 <= %9::bigint ");
 
 	QString formatStrOthers = QString("UNION ALL SELECT %1, %2, %3, %4, %5 AS hash FROM %6 WHERE %7 >= %8::bigint AND %7 <= %9::bigint ");
@@ -437,7 +433,7 @@ bool DbArchRequestContext::createGetSignalStatesQueryStr(ArchiveShared archive)
 	{
 		Hash signalHash = m_param.signalHashes[i];
 
-		if (archSignals.contains(signalHash) == false)
+		if (archive->isSignalExists(signalHash) == false)
 		{
 			DEBUG_LOG_ERR(m_logger, QString("Unknown signal hash %1 in archive request").arg(signalHash));
 			continue;
@@ -554,15 +550,22 @@ bool FileArchRequestContext::executeSatesRequest(ArchiveShared archive, QSqlData
 		return false;
 	}
 
-	for(Hash hash : m_param.signalHashes)
+	// enqueue files for immediately flushing
+	//
+	for(int i = 0; i < m_param.signalHashesCount; i++)
 	{
-		QString signalArchivePath;
+		archive->flushImmediately(m_param.signalHashes[i]);
+	}
 
-		fileArchWriter->flushFileBeforeReading(hash, &signalArchivePath);
+	for(int i = 0; i < m_param.signalHashesCount; i++)
+	{
+//		QString signalArchivePath;
 
-		FileArchReader reader(signalArchivePath, m_param.timeType, m_param.startTime, m_param.endTime);
+//		fileArchWriter->flushFileBeforeReading(hash, &signalArchivePath);
 
-		bool res = reader.findData();
+//		FileArchReader reader(signalArchivePath, m_param.timeType, m_param.startTime, m_param.endTime);
+
+//		bool res = reader.findData();
 	}
 
 	return true;

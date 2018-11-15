@@ -13,6 +13,33 @@
 #include "../lib/AppSignal.h"
 #include "ArchFile.h"
 
+class Archive;
+
+class ArchSignal
+{
+public:
+	ArchSignal(Archive* archive, const Proto::ArchSignal& protoArchSignal);
+
+private:
+	Hash hash = 0;
+	QString appSignalID;
+	bool isAnalog = false;
+
+	//
+
+	bool isInitialized = false;
+	bool canReadWrite = false;
+
+	SimpleAppSignalState lastState;
+
+	ArchFile archFile;
+
+	//
+
+	friend class ArchFile;
+	friend class Archive;
+};
+
 class Archive
 {
 public:
@@ -32,28 +59,6 @@ public:
 		ReadArchive
 	};
 
-private:
-	class Signal
-	{
-	public:
-		Signal(const Proto::ArchSignal& protoArchSignal);
-
-		//
-
-		Hash hash = 0;
-		QString appSignalID;
-		bool isAnalog = false;
-
-		//
-
-		bool isInitialized = false;
-		bool canReadWrite = false;
-
-		//
-
-		ArchFile* archFile = nullptr;
-	};
-
 public:
 	Archive(const QString& projectID,
 			const QString& equipmentID,
@@ -70,6 +75,14 @@ public:
 	bool canReadWriteSignal(Hash signalHash);
 	void setCanReadWriteSignal(Hash signalHash, bool canWrite);
 
+	void setSignalInitialized(Hash signalHash, bool initilaized);
+
+	bool isSignalExists(Hash signalHash) const { return m_archSignals.contains(signalHash); }
+
+	void getArchSignalStatus(Hash signalHash, bool* canReadWrite, bool* isInitialized, bool* isAnalog);
+
+	void getSignalsHashes(QVector<Hash>* hashes);
+
 	QString postgresDatabaseName();
 	QString archiveDatabaseName();
 	static QString getTableName(Hash signalHash);
@@ -85,8 +98,6 @@ public:
 
 	static QString getCmpField(E::TimeType timeType);
 
-	void setSignalInitialized(Hash signalHash, bool initilaized);
-
 	QString archDir() const { return m_archDir; }
 	QString projectID() const { return m_projectID; }
 	QString equipmentID() const { return m_equipmentID; }
@@ -94,15 +105,31 @@ public:
 	QString archFullPath() const { return m_archFullPath; }
 
 	void saveState(const SimpleAppSignalState& state);
+	void addEmergencyFile(ArchFile* file);
+	ArchFile* getNextEmergencyFile();
+
+	bool flushImmediately(Hash signalHash);
+	bool waitingForImmediatelyFlushing(Hash signalHash, int waitTimeoutSeconds);
+
+	ArchFile* getNextRequredImediatelyFlushing();
+
+	ArchFile* getNextRegularFile();
 
 	Queue<SimpleAppSignalState>& dbSaveStatesQueue() { return m_dbSaveStatesQueue; }
-	Queue<SimpleAppSignalState>& saveStatesQueue() { return m_saveStatesQueue; }
+
+	bool checkAndCreateArchiveDirs();
+	bool archDirIsWritableChecking();
+	bool createGroupDirs();
+
+	bool shutdown();
 
 private:
 	void clear();
 
 	QSqlDatabase getDatabase(DbType dbType);
 	void removeDatabases();
+
+	ArchFile* getArchFile(Hash signalHash);
 
 private:
 	static const char* ARCH_DB_PREFIX;
@@ -113,12 +140,13 @@ private:
 	QString m_projectID;
 	QString m_equipmentID;
 
-	CircularLoggerShared m_logger;
+	CircularLoggerShared m_log;
 
-	QHash<Hash, Archive::Signal*> m_archiveSignals;
+	QHash<Hash, ArchSignal*> m_archSignals;
 
 	Queue<SimpleAppSignalState> m_dbSaveStatesQueue;
-	Queue<SimpleAppSignalState> m_saveStatesQueue;
+
+	qint64 m_archID = 0;
 
 	// Db Archive members
 
@@ -135,6 +163,16 @@ private:
 	QString m_archFullPath;
 
 	QVector<ArchFile*> m_archFiles;
+
+	QMutex m_emergencyFilesMutex;
+	QList<ArchFile*> m_emergencyFilesQueue;
+	QHash<ArchFile*, bool> m_emergencyFilesInQueue;
+
+	QMutex m_immedaitelyFlushingMutex;
+	QList<ArchFile*> m_requiredImmediatelyFlushing;			// files required immediately flushing (for example before reading)
+
+	QMutex m_regularFilesMutex;
+	int m_regularFileIndex = 0;
 
 	friend class ArchFile;
 };

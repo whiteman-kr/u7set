@@ -265,9 +265,9 @@ bool ArchWriteThreadWorker::checkAndCreateTables()
 		return false;
 	}
 
-	const QHash<Hash, ArchSignal>& archSignals = m_archive->archSignals();
+	QVector<Hash> hashes;
 
-	QHashIterator<Hash, ArchSignal> i(archSignals);
+	m_archive->getSignalsHashes(&hashes);
 
 	QString tableName;
 
@@ -276,12 +276,12 @@ bool ArchWriteThreadWorker::checkAndCreateTables()
 
 	int ctr = 0;
 
-	while(i.hasNext() == true && quitRequested() == false)
+	for(Hash signalHash : hashes)
 	{
-		i.next();
-
-		Hash signalHash = i.key();
-		const ArchSignal& archSignal = i.value();
+		if (quitRequested() == true)
+		{
+			break;
+		}
 
 		bool tableIsExists = false;
 
@@ -312,7 +312,7 @@ bool ArchWriteThreadWorker::checkAndCreateTables()
 			m_archive->appendExistingTable(tableName);
 		}
 
-		m_archive->setCanReadWriteSignal(archSignal.hash, tableIsExists);
+		m_archive->setCanReadWriteSignal(signalHash, tableIsExists);
 
 		if (createdTablesCount - ctr >= 500)
 		{
@@ -523,17 +523,21 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 		}*/
 		// DEBUG
 
-		ArchSignal archSignal = m_archive->getArchSignal(state.hash);
+		bool canReadWrite = false;
+		bool isInitialized = false;
+		bool isAnalog = false;
 
-		if (archSignal.canReadWrite == false)
+		m_archive->getArchSignalStatus(state.hash, &canReadWrite, &isInitialized, &isAnalog);
+
+		if (canReadWrite == false)
 		{
 			continue;
 		}
 
-		if (archSignal.isAnalog == false && state.flags.fineAperture == 1)
+		if (isAnalog == false && state.flags.fineAperture == 1)
 		{
 			assert(false);
-			state.flags.fineAperture = 0;		// hard reset state.flags.smoothAperture for discrete signals
+			state.flags.fineAperture = 0;		// hard reset state.flags.fineAperture for discrete signals
 		}
 
 		m_timeFilter.setTimes(state.time);
@@ -545,7 +549,7 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 			m_firstState = false;
 		}
 
-		if (archSignal.isInitialized == false)
+		if (isInitialized == false)
 		{
 			if (state.flags.valid == 1)
 			{

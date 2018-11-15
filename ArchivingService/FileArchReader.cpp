@@ -118,7 +118,7 @@ bool FileArchReader::findStartPosition()
 	{
 		startPartitionIndex = 0;
 	}
-}
 
-bool readRecord(ArchPartition& partition, qint64 recordNo);
+	return true;
+}
 
