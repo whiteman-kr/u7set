@@ -13,9 +13,7 @@ ArchivingServiceWorker::ArchivingServiceWorker(const SoftwareInfo& softwareInfo,
 											   int& argc,
 											   char** argv,
 											   CircularLoggerShared logger) :
-	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
-	m_dbSaveStatesQueue(1024 * 1024),
-	m_saveStatesQueue(1024 * 1024)
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger)
 {
 }
 
@@ -116,7 +114,7 @@ void ArchivingServiceWorker::createArchive()
 {
 	assert(m_archive == nullptr);
 
-	m_archive = std::make_shared<Archive>(m_projectID, m_cfgSettings.dbHost, logger());
+	m_archive = std::make_shared<Archive>(m_buildInfo.project, equipmentID(), "d:/Temp", m_cfgSettings.dbHost, logger());
 }
 
 void ArchivingServiceWorker::deleteArchive()
@@ -130,7 +128,6 @@ void ArchivingServiceWorker::runArchWriteThread()
 
 	m_archWriteThread = new ArchWriteThread(m_cfgSettings.dbHost,
 											m_archive,
-											m_dbSaveStatesQueue,
 											logger());
 
 	m_archWriteThread->start();
@@ -139,9 +136,7 @@ void ArchivingServiceWorker::runArchWriteThread()
 
 	assert(m_fileArchWriter == nullptr);
 
-	m_archive->setArchDir("d:/temp", m_projectID, softwareInfo().equipmentID());
-
-	m_fileArchWriter = new FileArchWriter(m_archive, m_saveStatesQueue, logger());
+	m_fileArchWriter = new FileArchWriter(m_archive, logger());
 
 	m_fileArchWriter->start();
 }
@@ -169,7 +164,7 @@ void ArchivingServiceWorker::runTcpAppDataServerThread()
 {
 	assert(m_tcpAppDataServerThread == nullptr);
 
-	TcpAppDataServer* server = new TcpAppDataServer(softwareInfo(), m_dbSaveStatesQueue, m_saveStatesQueue);
+	TcpAppDataServer* server = new TcpAppDataServer(softwareInfo(), m_archive);
 
 	m_tcpAppDataServerThread = new TcpAppDataServerThread(m_cfgSettings.appDataServiceRequestIP, server, logger());
 
@@ -289,11 +284,11 @@ bool ArchivingServiceWorker::loadConfigurationFromFile(const QString& fileName)
 	return result;
 }
 
-bool ArchivingServiceWorker::initArchSignalsMap(const QByteArray& fileData)
+bool ArchivingServiceWorker::initArchSignals(const QByteArray& fileData)
 {
-	Proto::ArchSignals msg;
+	Proto::ArchSignals archSignals;
 
-	bool result = msg.ParseFromArray(reinterpret_cast<const void*>(fileData.constData()), fileData.size());
+	bool result = archSignals.ParseFromArray(reinterpret_cast<const void*>(fileData.constData()), fileData.size());
 
 	if (result == false)
 	{
@@ -301,21 +296,7 @@ bool ArchivingServiceWorker::initArchSignalsMap(const QByteArray& fileData)
 		return false;
 	}
 
-	int count = msg.archsignals_size();
-
-	m_archive->initArchSignals(count);
-
-	for(int i = 0; i < count; i++)
-	{
-		const Proto::ArchSignal& protoArchSignal = msg.archsignals(i);
-
-		ArchSignal archSignal;
-
-		archSignal.hash = protoArchSignal.hash();
-		archSignal.isAnalog = protoArchSignal.isanalog();
-
-		m_archive->appendArchSignal(QString::fromStdString(protoArchSignal.appsignalid()), archSignal);
-	}
+	m_archive->initArchSignals(archSignals);
 
 	return true;
 }
@@ -340,7 +321,7 @@ void ArchivingServiceWorker::onConfigurationReady(const QByteArray configuration
 		return;
 	}
 
-	m_projectID = m_cfgLoaderThread->buildInfo().project;
+	m_buildInfo = m_cfgLoaderThread->buildInfo();
 
 	createArchive();
 
@@ -359,7 +340,7 @@ void ArchivingServiceWorker::onConfigurationReady(const QByteArray configuration
 
 		if (bfi.pathFileName.endsWith("ArchSignals.proto"))
 		{
-			initArchSignalsMap(fileData);
+			initArchSignals(fileData);
 		}
 
 		if (result == true)

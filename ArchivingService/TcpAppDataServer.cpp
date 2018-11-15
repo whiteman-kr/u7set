@@ -6,16 +6,15 @@
 //
 // -------------------------------------------------------------------------------
 
-TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo, Queue<SimpleAppSignalState>& dbSaveStatesQueue, Queue<SimpleAppSignalState>& saveStatesQueue) :
+TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo, ArchiveShared archive) :
 	Tcp::Server(softwareInfo),
-	m_dbSaveStatesQueue(dbSaveStatesQueue),
-	m_saveStatesQueue(saveStatesQueue)
+	m_archive(archive)
 {
 }
 
 Tcp::Server* TcpAppDataServer::getNewInstance()
 {
-	return new TcpAppDataServer(localSoftwareInfo(), m_dbSaveStatesQueue, m_saveStatesQueue);
+	return new TcpAppDataServer(localSoftwareInfo(), m_archive);
 }
 
 void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
@@ -65,8 +64,7 @@ void TcpAppDataServer::onSaveAppSignalsStatesToArchive(const char* requestData, 
 	{
 		state.load(m_saveStatesRequest.appsignalstates(i));
 
-		m_dbSaveStatesQueue.push(&state);
-		m_saveStatesQueue.push(&state);
+		m_archive->saveState(state);
 
 		// DEBUG
 /*		if (state.hash == testHash)

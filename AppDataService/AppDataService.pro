@@ -73,7 +73,6 @@ SOURCES += \
     SignalStatesProcessingThread.cpp \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp \
-    RtTrendsDatabase.cpp \
     RtTrendsServer.cpp
 
 HEADERS += \

@@ -8,12 +8,13 @@
 // -----------------------------------------------------------------------------------------------------------------------
 
 FileArchWriter::FileArchWriter(ArchiveShared archive,
-								Queue<SimpleAppSignalState>& saveStatesQueue,
 								CircularLoggerShared logger) :
 	m_archive(archive),
-	m_saveStatesQueue(saveStatesQueue),
 	m_log(logger)
 {
+	TEST_PTR_RETURN(archive);
+
+	m_saveStatesQueue = &archive->saveStatesQueue();
 }
 
 bool FileArchWriter::flushFileBeforeReading(Hash signalHash, QString* filePath)
@@ -310,13 +311,15 @@ bool FileArchWriter::createArchFiles()
 
 bool FileArchWriter::processSaveStatesQueue()
 {
+	TEST_PTR_RETURN_FALSE(m_saveStatesQueue);
+
 	SimpleAppSignalState state;
 
 	int count = 0;
 
 	do
 	{
-		bool result = m_saveStatesQueue.pop(&state);
+		bool result = m_saveStatesQueue->pop(&state);
 
 		if (result == false)
 		{

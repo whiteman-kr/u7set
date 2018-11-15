@@ -15,14 +15,15 @@ QString ArchWriteThreadWorker::m_format2(",row(%1,%2,%3,%4,%5)::AppSignalState")
 
 ArchWriteThreadWorker::ArchWriteThreadWorker(const HostAddressPort& dbHost,
 											 ArchiveShared archive,
-											 Queue<SimpleAppSignalState>& saveStatesQueue,
 											 CircularLoggerShared logger) :
 	m_dbHost(dbHost),
 	m_archive(archive),
-	m_saveStatesQueue(saveStatesQueue),
 	m_logger(logger),
 	m_timer(this)
 {
+	TEST_PTR_RETURN(m_archive);
+
+	m_dbSaveStatesQueue = &m_archive->dbSaveStatesQueue();
 }
 
 void ArchWriteThreadWorker::onThreadStarted()
@@ -30,7 +31,7 @@ void ArchWriteThreadWorker::onThreadStarted()
 	DEBUG_LOG_MSG(m_logger, "ArchWriteThread is started");
 
 	connect(&m_timer, &QTimer::timeout, this, &ArchWriteThreadWorker::onTimer);
-	connect(&m_saveStatesQueue, &Queue<SimpleAppSignalState>::queueNotEmpty, this, &ArchWriteThreadWorker::onSaveStatesQueueIsNotEmpty);
+	connect(m_dbSaveStatesQueue, &Queue<SimpleAppSignalState>::queueNotEmpty, this, &ArchWriteThreadWorker::onSaveStatesQueueIsNotEmpty);
 
 	m_timer.setInterval(1000);
 	m_timer.start();
@@ -472,14 +473,16 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 		return;
 	}
 
-	if (m_saveStatesQueue.isEmpty() == true)
+	TEST_PTR_RETURN(m_dbSaveStatesQueue);
+
+	if (m_dbSaveStatesQueue->isEmpty() == true)
 	{
 		return;
 	}
 
 	const int MAX_STATES_IN_QUERY = 1000;
 
-	if (writeNow == false && m_saveStatesQueue.size() < MAX_STATES_IN_QUERY)
+	if (writeNow == false && m_dbSaveStatesQueue->size() < MAX_STATES_IN_QUERY)
 	{
 		return;
 	}
@@ -501,7 +504,7 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 	{
 		SimpleAppSignalState state;
 
-		bool res = m_saveStatesQueue.pop(&state);
+		bool res = m_dbSaveStatesQueue->pop(&state);
 
 		if (res == false)
 		{
@@ -763,12 +766,10 @@ void ArchWriteThreadWorker::onSaveStatesQueueIsNotEmpty()
 
 ArchWriteThread::ArchWriteThread(const HostAddressPort& dbHost,
 								 ArchiveShared archive,
-								 Queue<SimpleAppSignalState>& saveStatesQueue,
 								 CircularLoggerShared logger)
 {
 	ArchWriteThreadWorker* worker = new ArchWriteThreadWorker(dbHost,
 															  archive,
-															  saveStatesQueue,
 															  logger);
 
 	addWorker(worker);

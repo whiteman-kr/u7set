@@ -13,7 +13,6 @@ class FileArchWriter : public RunOverrideThread
 {
 public:
 	FileArchWriter(ArchiveShared archive,
-				   Queue<SimpleAppSignalState>& saveStatesQueue,
 				   CircularLoggerShared logger);
 
 	QString archFullPath() const { return m_archFullPath; }
@@ -63,7 +62,7 @@ private:
 
 private:
 	ArchiveShared m_archive;
-	Queue<SimpleAppSignalState>& m_saveStatesQueue;
+	Queue<SimpleAppSignalState>* m_saveStatesQueue = nullptr;
 	CircularLoggerShared m_log;
 	QThread* m_thisThread = nullptr;
 

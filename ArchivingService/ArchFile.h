@@ -5,6 +5,13 @@
 #include "../lib/Crc16.h"
 #include "../lib/SimpleThread.h"
 
+class Archive;
+
+class Archive
+{
+	class Signal;
+};
+
 class FileArchWriter;
 
 class ArchFile
@@ -37,7 +44,7 @@ private:
 	};
 
 public:
-	ArchFile();
+	ArchFile(Archive* archive, Archive::Signal* archiveSignal);
 	~ArchFile();
 
 	bool init(const FileArchWriter* writer, const QString& signalID, Hash hash, bool isAnalogSignal);
@@ -61,9 +68,8 @@ private:
 	void closeFile();
 
 private:
-	const FileArchWriter* m_archWriter = nullptr;
-	QString m_signalID;
-	Hash m_hash = 0;
+	Archive* m_archive = nullptr;
+	Archive::Signal* m_archiveSignal = nullptr;
 
 	QString m_path;
 

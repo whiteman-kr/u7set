@@ -58,7 +58,7 @@ private:
 	bool readConfiguration(const QByteArray& fileData);
 	bool loadConfigurationFromFile(const QString& fileName);
 
-	bool initArchSignalsMap(const QByteArray& fileData);
+	bool initArchSignals(const QByteArray& fileData);
 
 private slots:
 	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
@@ -67,7 +67,7 @@ private:
 	QSettings m_settings;
 
 	ArchivingServiceSettings m_cfgSettings;
-	QString m_projectID;
+	Builder:: BuildInfo m_buildInfo;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
@@ -80,9 +80,6 @@ private:
 	ArchRequestThread* m_archRequestThread = nullptr;
 
 	FileArchWriter* m_fileArchWriter = nullptr;
-
-	Queue<SimpleAppSignalState> m_dbSaveStatesQueue;
-	Queue<SimpleAppSignalState> m_saveStatesQueue;
 
 	ArchiveShared m_archive;
 };

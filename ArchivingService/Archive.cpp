@@ -1,6 +1,25 @@
 #include "Archive.h"
 #include "../lib/WUtils.h"
 
+// ----------------------------------------------------------------------------------------------------------------------
+//
+// Archive::Signal class implementation
+//
+// ----------------------------------------------------------------------------------------------------------------------
+
+void Archive::Signal::Signal(const Proto::ArchSignal& protoArchSignal)
+{
+	hash = protoArchSignal.hash();
+	appSignalID = QString::fromStdString(protoArchSignal.appsignalid());
+	isAnalog = protoArchSignal.isanalog();
+}
+
+// ----------------------------------------------------------------------------------------------------------------------
+//
+// Archive class implementation
+//
+// ----------------------------------------------------------------------------------------------------------------------
+
 const char* Archive::ARCH_DB_PREFIX = "u7arch_";
 
 const char* Archive::FIELD_PLANT_TIME = "plantTime";
@@ -9,12 +28,23 @@ const char* Archive::FIELD_ARCH_ID = "archID";
 const char* Archive::FIELD_VALUE = "val";
 const char* Archive::FIELD_FLAGS = "flags";
 
-
-Archive::Archive(const QString& projectID, const HostAddressPort& dbHost, CircularLoggerShared logger) :
+Archive::Archive(const QString& projectID,
+				 const QString& equipmentID,
+				 const QString& archDir,
+				 const HostAddressPort& dbHost,
+				 CircularLoggerShared logger) :
+	m_projectID(projectID),
+	m_equipmentID(equipmentID),
+	m_archDir(archDir),
 	m_dbHost(dbHost),
 	m_logger(logger),
-	m_projectID(projectID)
+	m_dbSaveStatesQueue(1024 * 1024),
+	m_saveStatesQueue(1024 * 1024)
 {
+	m_archFullPath = QString("%1/%2-archive/%3").arg(m_archDir).arg(m_projectID).arg(m_equipmentID);
+
+	//
+
 	m_dbUser = "u7arch";
 	m_dbPassword =  "arch876436";
 }
@@ -65,33 +95,28 @@ bool Archive::openDatabase(DbType dbType, QSqlDatabase& destDb)
 	return false;
 }
 
-void Archive::initArchSignals(int count)
+void Archive::initArchSignals(const Proto::ArchSignals& archSignals)
 {
-	Q_UNUSED(count);
+	assert(m_archiveSignals.count() == 0);
+	assert(m_archFiles.count() == 0);
 
-	m_archSignals.clear();
-	m_signalIDs.clear();
+	int signalsCount = archSignals.archsignals_size();
 
-	/*m_archSignals.reserve(static_cast<int>(count * 1.2));
-	m_signalIDs.reserve(static_cast<int>(count * 1.2));*/
-}
+	m_archiveSignals.reserve(static_cast<int>(signalsCount * 1.2));
+	m_archFiles.resize(signalsCount);
 
-void Archive::appendArchSignal(const QString& appSignalID, const ArchSignal& archSignal)
-{
-	if (m_archSignals.contains(archSignal.hash) == true)
+	for(int i = 0; i < signalsCount; i++)
 	{
-		assert(false);
-	}
-	else
-	{
-		m_archSignals.insert(archSignal.hash, archSignal);
-		m_signalIDs.insert(archSignal.hash, appSignalID);
-	}
-}
+		const Proto::ArchSignal& protoArchSignal = archSignals.archsignals(i);
 
-ArchSignal Archive::getArchSignal(Hash signalHash)
-{
-	return m_archSignals.value(signalHash, ArchSignal());
+		Archive::Signal* archSignal = new Archive::Signal(protoArchSignal);
+
+		archSignal.archFile = new ArchFile(this, archSignal);
+
+		m_archiveSignals.insert(archSignal.hash, archSignal);
+
+		m_archFiles[i] = archSignal.archFile;
+	}
 }
 
 QString Archive::getSignalID(Hash signalHash)
@@ -101,23 +126,23 @@ QString Archive::getSignalID(Hash signalHash)
 
 bool Archive::canReadWriteSignal(Hash signalHash)
 {
-	if (m_archSignals.contains(signalHash) == false)
+	if (m_archiveSignals.contains(signalHash) == false)
 	{
 		return false;
 	}
 
-	return m_archSignals[signalHash].canReadWrite;
+	return m_archiveSignals[signalHash].canReadWrite;
 }
 
 void Archive::setCanReadWriteSignal(Hash signalHash, bool canReadWrite)
 {
-	if (m_archSignals.contains(signalHash) == false)
+	if (m_archiveSignals.contains(signalHash) == false)
 	{
 		assert(false);
 		return;
 	}
 
-	m_archSignals[signalHash].canReadWrite = canReadWrite;
+	m_archiveSignals[signalHash].canReadWrite = canReadWrite;
 }
 
 QString Archive::postgresDatabaseName()
@@ -139,31 +164,6 @@ QString Archive::archiveDatabaseName()
 QString Archive::getTableName(Hash signalHash)
 {
 	return QString("z_%1").arg(QString().setNum(signalHash, 16).rightJustified(sizeof(qint64) * 2, '0', false));
-/*
-	QString tableName;
-
-	switch(tableType)
-	{
-	case TableType::LongTerm:
-		tableName = LONG_TERM_TABLE_PREFIX;
-		break;
-
-	case TableType::ShortTerm:
-		tableName = SHORT_TERM_TABLE_PREFIX;
-		break;
-
-	default:
-		assert(false);
-	}
-
-	if (tableName.isEmpty() == true)
-	{
-		return tableName;
-	}
-
-	tableName += QString().setNum(signalHash, 16).rightJustified(sizeof(qint64) * 2, '0', false);
-
-	return tableName;*/
 }
 
 void Archive::appendExistingTable(const QString& tableName)
@@ -205,7 +205,6 @@ QString Archive::timeTypeStr(E::TimeType timeType)
 	return QString("???");
 }
 
-
 qint64 Archive::localTimeOffsetFromUtc()
 {
 	QDateTime local(QDateTime::currentDateTime());
@@ -243,30 +242,34 @@ QString Archive::getCmpField(E::TimeType timeType)
 
 void Archive::setSignalInitialized(Hash signalHash, bool initilaized)
 {
-	if (m_archSignals.contains(signalHash) == false)
+	if (m_archiveSignals.contains(signalHash) == false)
 	{
 		assert(false);
 		return;
 	}
 
-	m_archSignals[signalHash].isInitialized = initilaized;
+	m_archiveSignals[signalHash].isInitialized = initilaized;
 }
 
-void Archive::setArchDir(const QString& archDir, const QString& project, const QString& equipmentID)
+void Archive::saveState(const SimpleAppSignalState& state)
 {
-	m_archDir = archDir;
-	m_project = project;
-	m_equipmentID = equipmentID;
-
-	m_archFullPath = QString("%1/%2-archive/%3").arg(m_archDir).arg(m_project).arg(m_equipmentID);
+	m_dbSaveStatesQueue.push(&state);
+	m_saveStatesQueue.push(&state);
 }
 
 void Archive::clear()
 {
 	m_projectID.clear();
-	m_archSignals.clear();
-	m_signalIDs.clear();
+	m_archiveSignals.clear();
 	m_existingTables.clear();
+	m_archiveSignals.clear();
+
+	for(ArchFile* archFile : m_archFiles)
+	{
+		delete archFile;
+	}
+
+	m_archFiles.clear();
 
 	removeDatabases();
 }
