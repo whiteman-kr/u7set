@@ -38,7 +38,7 @@ function runConfigScript(configScript, confFirmware, ioModule, LMNumber, frame, 
 //
 "use strict";
 var FamilyLMID = 0x1100;
-var LMDescriptionNumber = 2;
+var LMDescriptionNumber = 3;
 var UartID = 0;
 //var configScriptVersion = 1;		// first logged version
 //var configScriptVersion = 2;		// TuningDataSize in LM port has been changed to 716 (1432 / 2)

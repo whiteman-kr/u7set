@@ -251,6 +251,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0231.sql", "Upgrade to version 231, OCM and OCMN TxDiagDataSize update"},
 	{":/DatabaseUpgrade/Upgrade0232.sql", "Upgrade to version 232, Adding LM1_SR03 preset and scripts"},
 	{":/DatabaseUpgrade/Upgrade0233.sql", "Upgrade to version 233, ArchService properties were removed from Monitor preset"},
+	{":/DatabaseUpgrade/Upgrade0234.sql", "Upgrade to version 234, Changed LM1_SR03 ID and DescriptionNumber"},
 };
 
 
