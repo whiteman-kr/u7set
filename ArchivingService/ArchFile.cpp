@@ -53,8 +53,6 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 {
 	TEST_PTR_RETURN_FALSE(m_queue);
 
-	m_lastState = state;
-
 	Record s;
 
 	s.state.archID = archID;
