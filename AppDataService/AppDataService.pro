@@ -125,7 +125,6 @@ HEADERS += \
     SignalStatesProcessingThread.h \
     ../lib/Times.h \
     ../lib/SignalProperties.h \
-    RtTrendsDatabase.h \
     RtTrendsServer.h
 
 include(../qtservice/src/qtservice.pri)

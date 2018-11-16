@@ -79,6 +79,8 @@ public:
 
 	bool isSignalExists(Hash signalHash) const { return m_archSignals.contains(signalHash); }
 
+	int getFilesCount() const { return m_archFiles.count(); }
+
 	void getArchSignalStatus(Hash signalHash, bool* canReadWrite, bool* isInitialized, bool* isAnalog);
 
 	void getSignalsHashes(QVector<Hash>* hashes);
@@ -105,15 +107,6 @@ public:
 	QString archFullPath() const { return m_archFullPath; }
 
 	void saveState(const SimpleAppSignalState& state);
-	void addEmergencyFile(ArchFile* file);
-	ArchFile* getNextEmergencyFile();
-
-	bool flushImmediately(Hash signalHash);
-	bool waitingForImmediatelyFlushing(Hash signalHash, int waitTimeoutSeconds);
-
-	ArchFile* getNextRequredImediatelyFlushing();
-
-	ArchFile* getNextRegularFile();
 
 	Queue<SimpleAppSignalState>& dbSaveStatesQueue() { return m_dbSaveStatesQueue; }
 
@@ -123,7 +116,31 @@ public:
 
 	bool shutdown();
 
+	// flushing controlling functions (public)
+
+	bool flushImmediately(Hash signalHash);											// will be called from FileArchReader
+	bool waitingForImmediatelyFlushing(Hash signalHash, int waitTimeoutSeconds);	// will be called from FileArchReader
+
+	ArchFile* getNextFileForFlushing(bool* flushAnyway);							// will be called from FileArchWriter
+
+	//
+
 private:
+
+	// flushing controlling functions (private)
+
+	ArchFile* getNextRequiredImediatelyFlushing();
+	void removeFromRequiredImmediatelyFlushing(ArchFile* file);
+
+	void appendEmergencyFile(ArchFile* file);
+	ArchFile* getNextEmergencyFile();
+	void removeFromEmergencyFiles(ArchFile* file);
+
+	ArchFile* getNextRegularFile();
+	void pushBackInRegularFilesQueue(ArchFile* file);
+
+	//
+
 	void clear();
 
 	QSqlDatabase getDatabase(DbType dbType);
@@ -164,15 +181,15 @@ private:
 
 	QVector<ArchFile*> m_archFiles;
 
-	QMutex m_emergencyFilesMutex;
-	QList<ArchFile*> m_emergencyFilesQueue;
-	QHash<ArchFile*, bool> m_emergencyFilesInQueue;
-
 	QMutex m_immedaitelyFlushingMutex;
 	QList<ArchFile*> m_requiredImmediatelyFlushing;			// files required immediately flushing (for example before reading)
+	QHash<ArchFile*, bool> m_alreadyInRequiredImmediatelyFlushing;
 
-	QMutex m_regularFilesMutex;
-	int m_regularFileIndex = 0;
+	QMutex m_emergencyFilesMutex;
+	QList<ArchFile*> m_emergencyFiles;
+	QHash<ArchFile*, bool> m_alreadyInEmergencyFiles;
+
+	QList<ArchFile*> m_regularFilesQueue;
 
 	friend class ArchFile;
 };

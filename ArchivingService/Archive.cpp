@@ -7,14 +7,15 @@
 //
 // ----------------------------------------------------------------------------------------------------------------------
 
-ArchSignal::ArchSignal(Archive* archive, const Proto::ArchSignal& protoArchSignal) :
-	archFile(archive, this)
+ArchSignal::ArchSignal(Archive* archive, const Proto::ArchSignal& protoArchSignal)
 {
 	hash = protoArchSignal.hash();
 	appSignalID = QString::fromStdString(protoArchSignal.appsignalid());
 	isAnalog = protoArchSignal.isanalog();
 
 	lastState.flags.valid = 0;
+
+	archFile.init(archive, this);
 }
 
 // ----------------------------------------------------------------------------------------------------------------------
@@ -112,6 +113,15 @@ void Archive::initArchSignals(const Proto::ArchSignals& archSignals)
 		m_archSignals.insert(archSignal->hash, archSignal);
 
 		m_archFiles[i] = &archSignal->archFile;
+	}
+
+	// init regular files flushing queue
+	//
+	m_regularFilesQueue.reserve(static_cast<int>(signalsCount * 1.2));
+
+	for(int i = 0; i < signalsCount; i++)
+	{
+		m_regularFilesQueue.append(m_archFiles[i]);
 	}
 }
 
@@ -301,7 +311,7 @@ QString Archive::getCmpField(E::TimeType timeType)
 
 void Archive::saveState(const SimpleAppSignalState& state)
 {
-	m_dbSaveStatesQueue.push(&state);
+//	m_dbSaveStatesQueue.push(&state);
 
 	//
 
@@ -321,129 +331,8 @@ void Archive::saveState(const SimpleAppSignalState& state)
 
 	if (archSignal->archFile.isEmergency() == true)
 	{
-		addEmergencyFile(&archSignal->archFile);
+		appendEmergencyFile(&archSignal->archFile);
 	}
-}
-
-void Archive::addEmergencyFile(ArchFile* file)
-{
-	QMutexLocker locker(&m_emergencyFilesMutex);
-
-	if (m_emergencyFilesInQueue.contains(file) == false)
-	{
-		m_emergencyFilesQueue.append(file);
-		m_emergencyFilesInQueue.insert(file, true);
-	}
-}
-
-ArchFile* Archive::getNextEmergencyFile()
-{
-	ArchFile* emergencyFile = nullptr;
-
-	QMutexLocker locker(&m_emergencyFilesMutex);
-
-	if (m_emergencyFilesQueue.isEmpty() == false)
-	{
-		emergencyFile = m_emergencyFilesQueue.first();
-		m_emergencyFilesQueue.removeFirst();
-		m_emergencyFilesInQueue.remove(emergencyFile);
-	}
-
-	return emergencyFile;
-}
-
-bool Archive::flushImmediately(Hash signalHash)
-{
-	ArchFile* archFile = getArchFile(signalHash);
-
-	TEST_PTR_RETURN_FALSE(archFile);
-
-	m_immedaitelyFlushingMutex.lock();
-
-	archFile->setRequiredImmediatelyFlushing(true);
-
-	m_requiredImmediatelyFlushing.append(archFile);
-
-	m_immedaitelyFlushingMutex.unlock();
-
-	return true;
-}
-
-bool Archive::waitingForImmediatelyFlushing(Hash signalHash, int waitTimeoutSeconds)
-{
-	ArchFile* archFile = getArchFile(signalHash);
-
-	TEST_PTR_RETURN_FALSE(archFile);
-
-	bool result = false;
-
-	const int WAIT_TIME_MCS = 500;											// 500 microseconds
-	int maxWaitCount = waitTimeoutSeconds * 1000 * 1000 / WAIT_TIME_MCS;
-
-	int waitCount = 0;
-
-	do
-	{
-		QThread::usleep(WAIT_TIME_MCS);
-
-		if (archFile->isRequiredImmediatelyFlushing() == false)
-		{
-			result = true;
-			break;
-		}
-
-		waitCount++;
-
-		if (waitCount >= maxWaitCount)
-		{
-			result = false;
-			break;
-		}
-	}
-	while(1);
-
-	return result;
-
-}
-
-
-ArchFile* Archive::getNextRequredImediatelyFlushing()
-{
-	ArchFile* archFile = nullptr;
-
-	QMutexLocker locker(&m_immedaitelyFlushingMutex);
-
-	if (m_requiredImmediatelyFlushing.isEmpty() == false)
-	{
-		archFile = m_requiredImmediatelyFlushing.first();
-
-		m_requiredImmediatelyFlushing.removeFirst();
-	}
-
-	return archFile;
-}
-
-ArchFile* Archive::getNextRegularFile()
-{
-	int archFilesCount = m_archFiles.count();
-
-	if (archFilesCount == 0)
-	{
-		return nullptr;
-	}
-
-	QMutexLocker locker(&m_regularFilesMutex);
-
-	if (m_regularFileIndex >= archFilesCount)
-	{
-		m_regularFileIndex = 0;
-	}
-
-	ArchFile* nextRegularFile = m_archFiles[m_regularFileIndex];
-
-	m_regularFileIndex++;
-
-	return nextRegularFile;
 }
 
 bool Archive::checkAndCreateArchiveDirs()
@@ -635,6 +524,205 @@ bool Archive::shutdown()
 	return true;
 }
 
+bool Archive::flushImmediately(Hash signalHash)
+{
+	ArchFile* archFile = getArchFile(signalHash);
+
+	TEST_PTR_RETURN_FALSE(archFile);
+
+	QMutexLocker locker(&m_immedaitelyFlushingMutex);
+
+	if (m_alreadyInRequiredImmediatelyFlushing.contains(archFile))
+	{
+		return true;
+	}
+
+	archFile->setRequiredImmediatelyFlushing(true);
+	m_requiredImmediatelyFlushing.append(archFile);
+	m_alreadyInRequiredImmediatelyFlushing.insert(archFile, true);
+
+	return true;
+}
+
+bool Archive::waitingForImmediatelyFlushing(Hash signalHash, int waitTimeoutSeconds)
+{
+	ArchFile* archFile = getArchFile(signalHash);
+
+	TEST_PTR_RETURN_FALSE(archFile);
+
+	bool result = false;
+
+	const int WAIT_TIME_MCS = 500;											// 500 microseconds
+	int maxWaitCount = waitTimeoutSeconds * 1000 * 1000 / WAIT_TIME_MCS;
+
+	int waitCount = 0;
+
+	do
+	{
+		QThread::usleep(WAIT_TIME_MCS);
+
+		if (archFile->isRequiredImmediatelyFlushing() == false)
+		{
+			result = true;
+			break;
+		}
+
+		waitCount++;
+
+		if (waitCount >= maxWaitCount)
+		{
+			result = false;
+			break;
+		}
+	}
+	while(1);
+
+	return result;
+
+}
+
+ArchFile* Archive::getNextFileForFlushing(bool* flushAnyway)
+{
+	if (flushAnyway == nullptr)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	ArchFile* archFile = nullptr;
+
+	// highest priority flushing
+	//
+	archFile = getNextRequiredImediatelyFlushing();
+
+	if (archFile != nullptr)
+	{
+		*flushAnyway = true;
+		return archFile;
+	}
+
+	// high priority flushing
+	//
+	archFile = getNextEmergencyFile();
+
+	if (archFile != nullptr)
+	{
+		*flushAnyway = true;
+		return archFile;
+	}
+
+	// low priority flushing
+	//
+	*flushAnyway = false;		// ! it is OK
+
+	archFile = getNextRegularFile();
+
+	return archFile;
+}
+
+ArchFile* Archive::getNextRequiredImediatelyFlushing()
+{
+	m_immedaitelyFlushingMutex.lock();
+
+	if (m_requiredImmediatelyFlushing.isEmpty() == true)
+	{
+		m_immedaitelyFlushingMutex.unlock();
+		return nullptr;
+	}
+
+	ArchFile* archFile = m_requiredImmediatelyFlushing.first();
+
+	m_requiredImmediatelyFlushing.removeAll(archFile);
+	m_alreadyInRequiredImmediatelyFlushing.remove(archFile);
+
+	m_immedaitelyFlushingMutex.unlock();
+
+	removeFromEmergencyFiles(archFile);
+	pushBackInRegularFilesQueue(archFile);
+
+	return archFile;
+}
+
+void Archive::removeFromRequiredImmediatelyFlushing(ArchFile* file)
+{
+	QMutexLocker locker(&m_immedaitelyFlushingMutex);
+
+	m_requiredImmediatelyFlushing.removeAll(file);
+	m_alreadyInRequiredImmediatelyFlushing.remove(file);
+}
+
+void Archive::appendEmergencyFile(ArchFile* file)
+{
+	QMutexLocker locker(&m_emergencyFilesMutex);
+
+	if (m_alreadyInEmergencyFiles.contains(file) == true)
+	{
+		return;
+	}
+
+	m_emergencyFiles.append(file);
+	m_alreadyInEmergencyFiles.insert(file, true);
+}
+
+ArchFile* Archive::getNextEmergencyFile()
+{
+	m_emergencyFilesMutex.lock();
+
+	if (m_emergencyFiles.isEmpty() == true)
+	{
+		m_emergencyFilesMutex.unlock();
+		return nullptr;
+	}
+
+	ArchFile* archFile = m_emergencyFiles.first();
+
+	m_emergencyFiles.removeAll(archFile);
+	m_alreadyInEmergencyFiles.remove(archFile);
+
+	m_emergencyFilesMutex.unlock();
+
+	removeFromRequiredImmediatelyFlushing(archFile);
+	pushBackInRegularFilesQueue(archFile);
+
+	return archFile;
+}
+
+void Archive::removeFromEmergencyFiles(ArchFile* file)
+{
+	QMutexLocker locker(&m_emergencyFilesMutex);
+
+	m_emergencyFiles.removeAll(file);
+	m_alreadyInEmergencyFiles.remove(file);
+}
+
+ArchFile* Archive::getNextRegularFile()
+{
+	if (m_regularFilesQueue.isEmpty() == true)
+	{
+		return nullptr;
+	}
+
+	ArchFile* archFile = m_regularFilesQueue.first();
+
+	m_regularFilesQueue.removeFirst();
+	m_regularFilesQueue.append(archFile);
+
+	return archFile;
+}
+
+void Archive::pushBackInRegularFilesQueue(ArchFile* file)
+{
+	int removed = m_regularFilesQueue.removeAll(file);
+
+	if (removed != 1)
+	{
+		assert(false);
+	}
+	else
+	{
+		m_regularFilesQueue.append(file);
+	}
+}
 
 void Archive::clear()
 {

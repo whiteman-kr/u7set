@@ -23,9 +23,11 @@ ArchFile::Record ArchFile::m_buffer[ArchFile::QUEUE_MAX_SIZE];
 
 const QString ArchFile::EXTENSION = "saf";		// Signal Archive File
 
-ArchFile::ArchFile(Archive* archive, ArchSignal* archSignal) :
-	m_archive(archive),
-	m_archSignal(archSignal)
+ArchFile::ArchFile()
+{
+}
+
+void ArchFile::init(Archive* archive, ArchSignal* archSignal)
 {
 	TEST_PTR_RETURN(archive);
 	TEST_PTR_RETURN(archSignal);
@@ -42,8 +44,9 @@ ArchFile::ArchFile(Archive* archive, ArchSignal* archSignal) :
 	m_path = QString("%1/%2/%3").
 					arg(archive->archFullPath()).
 					arg(QString().sprintf("%02X", static_cast<int>(archSignal->hash & 0xFF))).
-					arg(archSignal->appSignalID.remove(QRegExp("[^A-Z][^a-z][^0-9][^_]")));
+					arg(archSignal->appSignalID.remove(QRegExp("[^0-9A-Za-z_]")));
 }
+
 
 ArchFile::~ArchFile()
 {
@@ -71,7 +74,7 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 	return true;
 }
 
-bool ArchFile::flush(qint64 curPartition, qint64* totalFushedStatesCount)
+bool ArchFile::flush(qint64 curPartition, qint64* totalFushedStatesCount, bool flushAnyway)
 {
 	TEST_PTR_RETURN_FALSE(totalFushedStatesCount);
 
@@ -84,6 +87,11 @@ bool ArchFile::flush(qint64 curPartition, qint64* totalFushedStatesCount)
 	if (m_queue->isEmpty() == true)
 	{
 		setRequiredImmediatelyFlushing(false);
+		return false;
+	}
+
+	if (m_requiredImmediatelyFlushing == false && flushAnyway == false && m_queue->size() < 2 /* may be 3 or more? */)
+	{
 		return false;
 	}
 
@@ -120,7 +128,7 @@ bool ArchFile::isEmergency() const
 
 void ArchFile::shutdown(qint64 curPartition, qint64* totalFlushedStatesCount)
 {
-	flush(curPartition, totalFlushedStatesCount);
+	flush(curPartition, totalFlushedStatesCount, true);
 	closeFile();
 }
 
@@ -181,6 +189,8 @@ bool ArchFile::writeFile(qint64 partition, Record* buffer, int statesCount, qint
 	{
 		return false;
 	}
+
+	m_file.flush();
 
 	if (sizeToWrite != written)
 	{

@@ -110,11 +110,21 @@ void ArchivingServiceWorker::stopAllThread()
 	stopArchWriteThread();
 }
 
-void ArchivingServiceWorker::createArchive()
+bool ArchivingServiceWorker::createArchive()
 {
 	assert(m_archive == nullptr);
 
 	m_archive = std::make_shared<Archive>(m_buildInfo.project, equipmentID(), "d:/Temp", m_cfgSettings.dbHost, logger());
+
+	bool result = m_archive->checkAndCreateArchiveDirs();
+
+	if (result == false)
+	{
+		DEBUG_LOG_ERR(logger(), "Archive directories creation error");
+		return false;
+	}
+
+	return true;
 }
 
 void ArchivingServiceWorker::deleteArchive()
@@ -323,7 +333,12 @@ void ArchivingServiceWorker::onConfigurationReady(const QByteArray configuration
 
 	m_buildInfo = m_cfgLoaderThread->buildInfo();
 
-	createArchive();
+	bool res = createArchive();
+
+	if (res == false)
+	{
+		return;
+	}
 
 	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
 	{

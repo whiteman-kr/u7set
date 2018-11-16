@@ -40,14 +40,14 @@ private:
 	};
 
 public:
-	ArchFile(Archive* archive, ArchSignal* archSignal);
+	ArchFile();
 	~ArchFile();
 
-	bool init(const FileArchWriter* writer, const QString& signalID, Hash hash, bool isAnalogSignal);
+	void init(Archive* archive, ArchSignal* archSignal);
 
 	bool pushState(qint64 archID, const SimpleAppSignalState& state);
 
-	bool flush(qint64 curPartition, qint64* totalFushedStatesCount);
+	bool flush(qint64 curPartition, qint64* totalFushedStatesCount, bool flushAnyway);
 
 	bool queueIsEmpty() const { return m_queue->isEmpty(); }
 

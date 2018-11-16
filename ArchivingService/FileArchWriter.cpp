@@ -31,60 +31,75 @@ void FileArchWriter::run()
 
 	m_thisThread = QThread::currentThread();
 
-	bool result = m_archive->checkAndCreateArchiveDirs();
-
-	if (result == false)
-	{
-		DEBUG_LOG_ERR(m_log, "FileArchWriter terminated (files initialization error). ");
-		return;
-	}
-
 	qint64 prevFlushedStatesCount = 0;
+
+	int filesCount = m_archive->getFilesCount();
+
+	int noFlushingExecuted = 0;
+
+	QElapsedTimer t;
+
+	t.start();
+
+	int sleepTime = 0;
 
 	do
 	{
-		bool doWork = false;
+		if (filesCount == 0)
+		{
+			msleep(5);
+			continue;
+		}
 
 		updateCurrentPartition();
 
-		doWork |= writeEmergencyFiles();
+		bool flushAnyway = false;
 
-		if (isQuitRequested() == true)
+		ArchFile* fileToFlush = m_archive->getNextFileForFlushing(&flushAnyway);
+
+		if (fileToFlush == nullptr)
 		{
-			break;
+			msleep(1);
 		}
-
-		doWork |= writeRegularFiles();
-
-		if (isQuitRequested() == true)
+		else
 		{
-			break;
-		}
+			bool flushingExecuted = fileToFlush->flush(m_curPartition, &m_totalFlushedStatesCount, flushAnyway);
 
-		doWork |= archiveMaintenance();
+			if (flushingExecuted == false)
+			{
+				noFlushingExecuted++;
 
-		if (isQuitRequested() == true)
-		{
-			break;
-		}
-
-		if (doWork == false)
-		{
-			msleep(2);
+				if (noFlushingExecuted >= filesCount)
+				{
+					msleep(5);
+					sleepTime += 5;
+					noFlushingExecuted = 0;
+				}
+			}
+			else
+			{
+				noFlushingExecuted = 0;
+			}
 		}
 
 		if (m_totalFlushedStatesCount - prevFlushedStatesCount > 1000)
 		{
+			qint64 dn = m_totalFlushedStatesCount - prevFlushedStatesCount;
+
 			prevFlushedStatesCount = m_totalFlushedStatesCount;
-			qDebug() << "Flush states" << m_totalFlushedStatesCount;
+
+			int tel = t.elapsed() - sleepTime;
+
+			qDebug() << "Flush states" << dn << ", time" << tel << ", per state" << (tel * 1000) / dn << "mcs";
+
+			t.start();
+			sleepTime = 0;
 		}
 	}
 	while(isQuitRequested() == false);
 
 	m_archive->shutdown();
 }
-
-
 
 void FileArchWriter::updateCurrentPartition()
 {
@@ -113,7 +128,7 @@ void FileArchWriter::updateCurrentPartition()
 	{
 		m_curPartition = curPartition;
 
-		runArchiveMaintenance();
+		// needs runArchiveMaintenance(); here !!!
 	}
 }
 
@@ -152,77 +167,3 @@ bool FileArchWriter::writeMinuteCheckpoint(qint64 minuteSystemTime)
 	return true;
 }
 */
-
-void FileArchWriter::runArchiveMaintenance()
-{
-	m_archMaintenanceIsRunning = true;
-}
-
-bool FileArchWriter::writeEmergencyFiles()
-{
-	int count = 0;
-	int flushedCount = 0;
-
-	do
-	{
-		ArchFile* emergencyFile = m_archive->getNextEmergencyFile();
-
-		if (emergencyFile == nullptr)
-		{
-			break;
-		}
-
-		bool res = emergencyFile->flush(m_curPartition, &m_totalFlushedStatesCount);
-
-		if (res == true)
-		{
-			flushedCount++;
-		}
-
-		count++;
-	}
-	while(count < 200);
-
-	return flushedCount > 0;
-}
-
-bool FileArchWriter::writeRegularFiles()
-{
-	int count = 0;
-	int flashedCount = 0;
-
-	do
-	{
-		ArchFile* archFile = m_archive->getNextRegularFile();
-
-		if (archFile != nullptr)
-		{
-			bool res = archFile->flush(m_curPartition, &m_totalFlushedStatesCount);
-
-			if (res == true)
-			{
-				flashedCount++;
-			}
-		}
-
-		count++;
-	}
-	while(count < 100);
-
-	return flashedCount > 0;
-}
-
-bool FileArchWriter::archiveMaintenance()
-{
-	if (m_archMaintenanceIsRunning == false)
-	{
-		return false;
-	}
-
-	// do real work here !
-
-	return true;
-}
-
-
-

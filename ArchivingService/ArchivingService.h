@@ -40,7 +40,7 @@ private:
 	void runAllThreads();
 	void stopAllThread();
 
-	void createArchive();
+	bool createArchive();
 	void deleteArchive();
 
 	void runArchWriteThread();
