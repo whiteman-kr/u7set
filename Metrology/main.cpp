@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
     a.setOrganizationDomain("radiy.com");
 
 #ifdef GITLAB_CI_BUILD
-	a.setApplicationVersion(QString("1.8.%1 (%2)").arg(CI_PIPELINE_IID).arg(CI_BUILD_REF_SLUG));
+	a.setApplicationVersion(QString("1.8.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_BUILD_REF_SLUG));
 #else
 	a.setApplicationVersion(QString("1.8.LOCALBUILD"));
 #endif

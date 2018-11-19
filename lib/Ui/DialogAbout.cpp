@@ -59,7 +59,7 @@ void DialogAbout::show(QWidget* parent, const QString& description, const QStrin
 
 	QPushButton* copyCommitSHA1Button = new QPushButton("Copy commit SHA1");
 	connect(copyCommitSHA1Button, &QPushButton::clicked, [](){
-#ifdef CI_PIPELINE_IID
+#ifdef CI_PIPELINE_ID
 		qApp->clipboard()->setText(CI_COMMIT_SHA);
 #endif
 	});

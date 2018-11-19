@@ -29,7 +29,7 @@ void SoftwareInfo::init(E::SoftwareType softwareType,
 #ifdef GITLAB_CI_BUILD
 	m_buildBranch = CI_BUILD_REF_SLUG;
 	m_commitSHA = CI_COMMIT_SHA;
-	m_commitNo = CI_PIPELINE_IID;
+	m_commitNo = CI_PIPELINE_ID;
 #else
 	m_buildBranch = "LOCALBUILD";
 	m_commitSHA = "LOCALBUILD";
