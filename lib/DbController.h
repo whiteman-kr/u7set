@@ -11,10 +11,13 @@
 class DbController : public QObject
 {
 	Q_OBJECT
-public:
 
+public:
 	DbController();
 	~DbController();
+
+	static void init();
+	static void shutdown();
 
 	//
 	// Public signlas
@@ -131,12 +134,6 @@ public:
 	bool getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out, QWidget* parentWidget);
 
 	bool hasCheckedOutSignals(bool* hasCheckedOut, QWidget* parentWidget);
-
-	// Units management
-	//
-/*	bool getUnits(UnitList* units, QWidget* parentWidget);
-	bool addUnit(QString unitEn, QString unitRu, int* newUnitID, QWidget* parentWidget);
-	bool updateUnit(int unitID, QString unitEn, QString unitRu, int* result, QWidget* parentWidget);*/
 
 	// Build management
 	//

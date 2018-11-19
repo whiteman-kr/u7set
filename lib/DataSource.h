@@ -13,7 +13,7 @@
 #include "SimpleThread.h"
 #include "CommonTypes.h"
 
-#include "../u7/Builder/IssueLogger.h"
+#include "../Builder/IssueLogger.h"
 
 #include "WUtils.h"
 

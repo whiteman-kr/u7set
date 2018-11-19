@@ -7,10 +7,9 @@
 #include "../lib/DeviceObject.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/TimeStamp.h"
-#include "Builder/OptoModule.h"
-#include "Builder/ModuleFirmwareWriter.h"
 #include "../lib/LmDescription.h"
 #include "../lib/Configurator.h"
+#include "../Builder/Builder.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -110,8 +109,10 @@ int main(int argc, char *argv[])
 	a.setApplicationVersion(QString("0.8.LOCALBUILD"));
 #endif
 
-	VFrame30::VFrame30Library::Init();
-	Hardware::Init();
+	VFrame30::VFrame30Library::init();
+	Hardware::init();
+	DbController::init();
+	Builder::init();
 
 	GlobalMessanger::instance();		// Create instance of GlobalMessanger
 
@@ -119,25 +120,12 @@ int main(int argc, char *argv[])
 	//
 	theSettings.load();
 
-	qRegisterMetaType<DbUser>();
-	qRegisterMetaType<DbFileInfo>();
-	qRegisterMetaType<DbFile>();
-	qRegisterMetaType<DbChangeset>();
-	qRegisterMetaType<DbChangesetDetails>();
-	qRegisterMetaType<DbProject>();
-	qRegisterMetaType<std::vector<DbProject>>();
-	qRegisterMetaType<std::vector<DbFileInfo>>();
-	qRegisterMetaType<std::vector<std::shared_ptr<DbFile>>>();
 	qRegisterMetaType<std::vector<int>>();
-	qRegisterMetaType<std::vector<DbFileInfo>>();
 	qRegisterMetaType<E::SignalType>();
 	qRegisterMetaType<TimeStamp>();
 	qRegisterMetaType<TimeSpan>();
 	qRegisterMetaType<std::vector<UartPair>>();
 	qRegisterMetaType<std::map<QString, std::vector<UartPair>>>();
-
-	qmlRegisterType<JsVariantList>();
-    qmlRegisterType<Hardware::OptoPort>();
 
     // Start database communication thread
 	//
@@ -159,10 +147,14 @@ int main(int argc, char *argv[])
 
 	int result = a.exec();
 
+	// Shutting down
+	//
 	GlobalMessanger::free();		// Delete instance of GlobalMessanger
 
-	VFrame30::VFrame30Library::Shutdown();
-	Hardware::Shutdwon();
+	Builder::shutdown();
+	DbController::shutdown();
+	VFrame30::VFrame30Library::shutdown();
+	Hardware::shutdown();
 
 	google::protobuf::ShutdownProtobufLibrary();
 

@@ -1,7 +1,7 @@
 #include "../lib/CfgServerLoader.h"
 #include "../lib/CircularLogger.h"
 
-#include "../u7/Builder/CfgFiles.h"
+#include "../Builder/CfgFiles.h"
 
 #include <QXmlStreamReader>
 #include <QStandardPaths>

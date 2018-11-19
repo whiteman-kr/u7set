@@ -18,7 +18,7 @@
 PacketSourceModel::PacketSourceModel(QObject* parent) :
 	QAbstractItemModel(parent)
 {
-	Hardware::Init();
+	Hardware::init();
 	QTimer* timer = new QTimer(this);
 	connect(timer, &QTimer::timeout, this, &PacketSourceModel::updateSourceStatisticByTimer);
 	timer->start(100);

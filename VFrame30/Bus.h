@@ -1,6 +1,7 @@
 #ifndef BUS_H
 #define BUS_H
 
+#include "VFrame30Lib_global.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/ProtoSerialization.h"
 #include "../lib/Types.h"

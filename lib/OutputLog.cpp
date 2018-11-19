@@ -29,7 +29,40 @@ OutputLogItem::OutputLogItem(int messageNo,
 
 QString OutputLogItem::toText() const
 {
-	QString result;
+	QString level;
+
+	switch (m_level)
+	{
+	case OutputMessageLevel::Message:
+		level = " MSG";
+		break;
+	case OutputMessageLevel::Success:
+		level = " SCS";
+		break;
+	case OutputMessageLevel::Warning2:
+		level = "WRN2";
+		break;
+	case OutputMessageLevel::Warning1:
+		level = "WRN1";
+		break;
+	case OutputMessageLevel::Warning0:
+		level = "WRN0";
+		break;
+	case OutputMessageLevel::Error:
+		level = " ERR";
+		break;
+
+	default:
+		assert(false);
+		level = "UNK";
+	}
+
+	QString result = QString("%1 | %2 | %3 | %4")
+				.arg(m_no, 4, 10, QChar('0'))
+				.arg(m_time.toString("hh:mm:ss:zzz"))
+				.arg(level)
+				.arg(m_message);
+
 	return result;
 }
 
@@ -176,8 +209,8 @@ bool OutputLogItem::isMessage() const
 OutputLog::OutputLog(void) :
 	m_htmlFont("Courier")
 {
+	qRegisterMetaType<OutputLogItem>();
 }
-
 
 OutputLog::~OutputLog(void)
 {
@@ -223,7 +256,7 @@ void OutputLog::write(const QString& str, OutputMessageLevel level, QString file
 	}
 
 	QMutexLocker locker(&m_mutex);
-	OutputLogItem li(m_messagesNo ++, str, level, time, file, fileLine, func, htmlFont());
+	OutputLogItem li(m_messagesNo++, str, level, time, file, fileLine, func, htmlFont());
 	m_messages.push_back(li);
 
 	if (m_strLogging == true)
@@ -236,6 +269,7 @@ void OutputLog::write(const QString& str, OutputMessageLevel level, QString file
 
 	locker.unlock();
 
+	emit newLogItem(li);
 	return;
 }
 

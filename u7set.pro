@@ -12,7 +12,9 @@ SUBDIRS += qtservice \
 	VFrame30 \
     Simulator \
     SimulatorConsole \
-	u7 \
+    Builder \
+    BuilderConsole \
+    u7 \
     BaseService \
     ConfigurationService \
     ArchivingService \

@@ -1,7 +1,7 @@
 #pragma once
 #include "MainTabPage.h"
-#include "./Builder/Builder.h"
-#include "./Builder/IssueLogger.h"
+#include "../Builder/Builder.h"
+#include "../Builder/IssueLogger.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/OutputLog.h"
 #include <QTextCursor>
@@ -30,8 +30,6 @@ public:
 	// Public methods
 	//
 public:
-	//static BuildTabPage* instance();
-
 	bool isBuildRunning() const;
 
 	const std::map<QUuid, OutputMessageLevel>* itemsIssues() const;
@@ -57,7 +55,9 @@ public slots:
 
 protected slots:
 	void buildWasStarted();
-	void buildWasFinished();
+	void buildWasFinished(int errorCount);
+
+	//void newLogItem(OutputLogItem logItem);
 
 	void prevIssue();
 	void nextIssue();
@@ -95,7 +95,6 @@ private:
 	QCheckBox* m_debugCheckBox = nullptr;
 	QComboBox* m_warningsLevelComboBox = nullptr;
 
-	Builder::IssueLogger m_outputLog;
 	int m_logTimerId = -1;
 
 	QFile m_logFile;
@@ -103,7 +102,7 @@ private:
 
 	Builder::Builder m_builder;		// In constructor it receives pointer to m_outputLog, so m_outputLog must be created already!
 
-	std::map<QUuid, OutputMessageLevel> m_itemsIssues;		// contains QUuid of all schame items with issues
+	std::map<QUuid, OutputMessageLevel> m_itemsIssues;		// contains QUuid of all schemes items with issues
 
 	// Issue navigation
 	//

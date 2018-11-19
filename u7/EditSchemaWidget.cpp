@@ -15,7 +15,7 @@
 #include "./Forms/ChooseUfbDialog.h"
 #include "SignalPropertiesDialog.h"
 #include "GlobalMessanger.h"
-#include "Connection.h"
+#include "../lib/Connection.h"
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/SchemaItemLine.h"
 #include "../VFrame30/SchemaItemRect.h"
@@ -36,6 +36,7 @@
 #include "../lib/LmDescription.h"
 #include "SignalsTabPage.h"
 #include "Forms/ComparePropertyObjectDialog.h"
+#include "Settings.h"
 
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
@@ -92,6 +93,9 @@ EditSchemaView::EditSchemaView(QWidget* parent) :
 	m_activeLayer(0),
 	m_mouseState(MouseState::None)
 {
+	// Timer for updates of WRN/ERR count
+	//
+	m_updateDuringBuildTimer = startTimer(50);
 }
 
 EditSchemaView::EditSchemaView(std::shared_ptr<VFrame30::Schema>& schema, QWidget* parent)
@@ -99,10 +103,36 @@ EditSchemaView::EditSchemaView(std::shared_ptr<VFrame30::Schema>& schema, QWidge
 	m_activeLayer(0),
 	m_mouseState(MouseState::None)
 {
+	// Timer for updates of WRN/ERR count
+	//
+	m_updateDuringBuildTimer = startTimer(50);
 }
 
 EditSchemaView::~EditSchemaView()
 {
+}
+
+void EditSchemaView::timerEvent(QTimerEvent* event)
+{
+	VFrame30::SchemaView::timerEvent(event);
+
+	if (event->timerId() == m_updateDuringBuildTimer)
+	{
+		// Repaint schema if there are any new issues for it
+		//
+		Builder::BuildIssues::Counter schemaIssues = GlobalMessanger::instance()->buildIssues().issueForSchema(schema()->schemaId());
+
+		if (schemaIssues.errors !=  m_lastSchemaIssues.errors ||
+			schemaIssues.warnings !=  m_lastSchemaIssues.warnings)
+		{
+			m_lastSchemaIssues = schemaIssues;
+			update();
+		}
+
+		return;
+	}
+
+	return;
 }
 
 void EditSchemaView::paintEvent(QPaintEvent* /*pe*/)
@@ -4869,6 +4899,8 @@ void EditSchemaWidget::initMoveAfbsConnectionLinks(MouseState mouseState)
 		case MouseState::SizingLeft:
 		case MouseState::SizingBottomLeft:
 			inOuts.insert(inOuts.end(), inputs.begin(), inputs.end());
+			break;
+		default:
 			break;
 		}
 

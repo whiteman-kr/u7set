@@ -56,14 +56,14 @@ SOURCES += \
     ../lib/WUtils.cpp \
     TuningDataStorage.cpp \
     ../lib/DataProtocols.cpp \
-    ../u7/Builder/IssueLogger.cpp \
+    ../Builder/IssueLogger.cpp \
     ../lib/HostAddressPort.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
     TcpTuningServer.cpp \
     TcpTuningClient.cpp \
     TuningSource.cpp \
-    ../u7/Builder/ModulesRawData.cpp \
+    ../Builder/ModulesRawData.cpp \
     TuningMemory.cpp \
     TuningClientContext.cpp \
     ../lib/CommandLineParser.cpp \
@@ -73,7 +73,8 @@ SOURCES += \
     ../lib/TuningValue.cpp \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp \
-    TuningSourceThread.cpp
+    TuningSourceThread.cpp \
+    TuningDataStorage.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
@@ -101,16 +102,15 @@ HEADERS += \
     ../lib/Types.h \
     ../lib/Signal.h \
     ../lib/Crc.h \
-    TuningDataStorage.h \
     ../lib/Hash.h \
-    ../u7/Builder/IssueLogger.h \
+    ../Builder/IssueLogger.h \
     ../lib/HostAddressPort.h \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
     TcpTuningServer.h \
     TcpTuningClient.h \
     TuningSource.h \
-    ../u7/Builder/ModulesRawData.h \
+    ../Builder/ModulesRawData.h \
     ../lib/DataProtocols.h \
     TuningMemory.h \
     TuningClientContext.h \
@@ -120,7 +120,8 @@ HEADERS += \
     ../lib/TuningValue.h \
     ../lib/Times.h \
     ../lib/SignalProperties.h \
-    TuningSourceThread.h
+    TuningSourceThread.h \
+    TuningDataStorage.h
 
 include(../qtservice/src/qtservice.pri)
 

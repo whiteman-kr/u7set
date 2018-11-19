@@ -1,4 +1,5 @@
 #pragma once
+
 #include "VFrame30Lib_global.h"
 #include "SchemaPoint.h"
 #include "../lib/TypesAndEnums.h"
@@ -9,6 +10,7 @@
 #include <QJSValue>
 
 class QJSEngine;
+class QPaintDevice;
 
 namespace VFrame30
 {
@@ -292,6 +294,7 @@ namespace VFrame30
 #ifdef VFRAME30LIB_LIBRARY
 	extern Factory<VFrame30::SchemaItem> SchemaItemFactory;
 #endif
+
 }
 
 

@@ -116,6 +116,26 @@ DbController::~DbController()
 	m_thread.wait();
 }
 
+void DbController::init()
+{
+	qRegisterMetaType<DbUser>();
+	qRegisterMetaType<DbFileInfo>();
+	qRegisterMetaType<DbFile>();
+	qRegisterMetaType<DbChangeset>();
+	qRegisterMetaType<DbChangesetDetails>();
+	qRegisterMetaType<DbProject>();
+	qRegisterMetaType<std::vector<DbProject>>();
+	qRegisterMetaType<std::vector<DbFileInfo>>();
+	qRegisterMetaType<std::vector<std::shared_ptr<DbFile>>>();
+
+	return;
+}
+
+void DbController::shutdown()
+{
+	return;
+}
+
 bool DbController::getProjectList(std::vector<DbProject>* out, QWidget* parentWidget)
 {
 	// Check parameters

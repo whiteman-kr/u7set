@@ -2,7 +2,7 @@
 
 #include "../lib/DeviceHelper.h"
 #include "../lib/XmlHelper.h"
-#include "../u7/Builder/IssueLogger.h"
+#include "../Builder/IssueLogger.h"
 
 
 const char* const CFG_FILE_ID_APP_DATA_SOURCES = "APP_DATA_SOURCES";

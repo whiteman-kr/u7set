@@ -37,8 +37,6 @@ int main(int argc, char *argv[])
 	a.setApplicationVersion(QString("3.8.LOCALBUILD"));
 #endif
 
-
-
 	// --
 	//
 	qDebug() << "GUI Thread ID: " << QThread::currentThreadId();
@@ -102,7 +100,7 @@ int main(int argc, char *argv[])
 
 	// --
 	//
-	VFrame30::VFrame30Library::Init();
+	VFrame30::VFrame30Library::init();
 	//Hardware::Init();
 
 	SoftwareInfo si;
@@ -121,7 +119,7 @@ int main(int argc, char *argv[])
 	// Shutting down
 	//
 
-	VFrame30::VFrame30Library::Shutdown();
+	VFrame30::VFrame30Library::shutdown();
 	//Hardware::Shutdwon();
 	google::protobuf::ShutdownProtobufLibrary();
 

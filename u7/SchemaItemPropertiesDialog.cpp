@@ -2,6 +2,7 @@
 #include "ui_SchemaItemPropertiesDialog.h"
 #include "EditEngine/EditEngine.h"
 #include "../VFrame30/SchemaItemSignal.h"
+#include "Settings.h"
 
 
 SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* editEngine, QWidget* parent) :

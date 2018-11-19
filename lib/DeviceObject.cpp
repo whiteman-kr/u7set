@@ -43,7 +43,7 @@ namespace Hardware
 
 	Factory<Hardware::DeviceObject> DeviceObjectFactory;
 
-	void Init()
+	void init()
 	{
 #ifdef VFRAME30LIB_LIBRARY
 		qDebug() << "Hardware::Init" << " VFrame30 instance";
@@ -71,7 +71,7 @@ namespace Hardware
 	}
 
 
-	void Shutdwon()
+	void shutdown()
 	{
 #ifdef VFRAME30LIB_LIBRARY
 		qDebug() << "Hardware::Shutdown" << " VFrame30 instance";

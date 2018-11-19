@@ -40,7 +40,11 @@ bool DbProgress::init()
 
 bool DbProgress::run(QWidget* parentWidget, const QString& description)
 {
-	const bool isGuiThread = QThread::currentThread() == QCoreApplication::instance()->thread();
+	bool isGuiThread = false;
+	if (QCoreApplication::instance() != nullptr)
+	{
+		isGuiThread = QThread::currentThread() == QCoreApplication::instance()->thread();
+	}
 
 	if (m_progressEnabled == true)
 	{

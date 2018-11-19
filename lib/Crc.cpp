@@ -32,7 +32,9 @@ quint64 Crc::setDataBlockCrc(quint16 frameIndex, void* datablock, int blockSize)
 	// Check calculated data CRC
 	//
 	qint64 checkCrc = Crc::crc64(buffer.data(), buffer.size());
+
 	assert(checkCrc == 0ULL);
+	Q_UNUSED(checkCrc)
 
 	// Set crc as the last bytes in datablock
 	//

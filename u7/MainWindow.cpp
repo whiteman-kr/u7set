@@ -22,6 +22,7 @@
 #include "Forms/FileHistoryDialog.h"
 #include "../lib/Ui/DialogAbout.h"
 #include "../VFrame30/VFrame30.h"
+#include "../lib/LogicModuleSet.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"

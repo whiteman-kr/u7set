@@ -76,9 +76,9 @@ SOURCES += main.cpp \
     ../../lib/TuningValue.cpp \
     ../../lib/Times.cpp \
     ../../lib/OutputLog.cpp \
-    ../../u7/Builder/IssueLogger.cpp \
+    ../../Builder/IssueLogger.cpp \
     ../../lib/DeviceHelper.cpp \
-    ../../u7/Builder/ModulesRawData.cpp \
+    ../../Builder/ModulesRawData.cpp \
     ../../lib/SignalProperties.cpp \
     TestDbBase.cpp \
     DbControllerUserTests.cpp \
@@ -119,9 +119,9 @@ HEADERS += \
     ../../lib/TuningValue.h \
     ../../lib/Times.h \
     ../../lib/OutputLog.h \
-    ../../u7/Builder/IssueLogger.h \
+    ../../Builder/IssueLogger.h \
     ../../lib/DeviceHelper.h \
-    ../../u7/Builder/ModulesRawData.h \
+    ../../Builder/ModulesRawData.h \
     ../../lib/SignalProperties.h \
     TestDbBase.h \
     DbControllerUserTests.h \

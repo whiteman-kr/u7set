@@ -19,8 +19,8 @@ namespace Hardware
 	extern const std::array<QString, 9> DeviceObjectExtensions;
 	extern const std::array<QString, 9> DeviceTypeNames;
 
-	void Init();
-	void Shutdwon();
+	void init();
+	void shutdown();
 
 	class DeviceObject;
 	class DeviceRoot;

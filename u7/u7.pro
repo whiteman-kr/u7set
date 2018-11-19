@@ -85,31 +85,16 @@ SOURCES +=\
     ../lib/DbProgress.cpp \
     ../lib/Crc.cpp \
     DialogFileEditor.cpp \
-    Builder/Builder.cpp \
-    Builder/BuildResultWriter.cpp \
-    Builder/ConfigurationBuilder.cpp \
-    Builder/ApplicationLogicCode.cpp \
-    Builder/ApplicationLogicCompiler.cpp \
     DialogSubsystemListEditor.cpp \
-    Subsystem.cpp \
     EquipmentVcsDialog.cpp \
     ../lib/DataSource.cpp \
     ../lib/SocketIO.cpp \
-    Builder/FbParamCalculation.cpp \
     ../lib/PropertyEditorOld.cpp \
     ../lib/PropertyEditor.cpp \
     ../lib/Types.cpp \
-    Builder/Parser.cpp \
-    Connection.cpp \
     ../lib/PropertyEditorDialog.cpp \
-    Builder/SoftwareCfgGenerator.cpp \
     ../lib/BuildInfo.cpp \
-    Builder/TuningBuilder.cpp \
-    Builder/IssueLogger.cpp \
-    Builder/OptoModule.cpp \
     GlobalMessanger.cpp \
-    Builder/LmMemoryMap.cpp \
-    Builder/ModuleLogicCompiler.cpp \
     EditSchemaWidget.cpp \
     SchemaPropertiesDialog.cpp \
     SchemaItemPropertiesDialog.cpp \
@@ -120,29 +105,18 @@ SOURCES +=\
     EditEngine/EditEngineSetOrder.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/XmlHelper.cpp \
-    Builder/MonitorCfgGenerator.cpp \
     ../lib/ServiceSettings.cpp \
-    Builder/TuningServiceCfgGenerator.cpp \
-    Builder/AppDataServiceCfgGenerator.cpp \
-    Builder/DiagDataServiceCfgGenerator.cpp \
     ../lib/Queue.cpp \
     ../lib/ProtobufHelper.cpp \
     UploadTabPage.cpp \
-    ../TuningService/TuningSource.cpp \
     DialogChoosePreset.cpp \
     ../lib/WUtils.cpp \
-    ../TuningService/TuningDataStorage.cpp \
     ../lib/DataProtocols.cpp \
-    Builder/ModuleFirmwareWriter.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/SignalProperties.cpp \
     ../lib/Configurator.cpp \
     DialogSettingsConfigurator.cpp \
-    Builder/ArchivingServiceCfgGenerator.cpp \
-    Builder/TuningClientCfgGenerator.cpp \
     Forms/ChooseUfbDialog.cpp \
-    Builder/ModulesRawData.cpp \
-    Builder/BdfFile.cpp \
     SchemaListModel.cpp \
     Forms/SelectChangesetDialog.cpp \
     Forms/FileHistoryDialog.cpp \
@@ -151,24 +125,18 @@ SOURCES +=\
     Forms/ComparePropertyObjectDialog.cpp \
     ../TuningIPEN/TuningIPENDataStorage.cpp \
     DialogConnections.cpp \
-    Builder/MetrologyCfgGenerator.cpp \
     ../lib/MetrologySignal.cpp \
     ../lib/Tuning/TuningFilter.cpp \
     ../lib/Tuning/TuningFilterEditor.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     ../lib/Tuning/TuningModel.cpp \
-    Builder/ComparatorStorage.cpp \
-    Builder/RawDataDescription.cpp \
     ../lib/AppSignal.cpp \
     ../lib/CsvFile.cpp \
     DialogBusEditor.cpp \
     BusStorage.cpp \
     Forms/DialogUpdateFromPreset.cpp \
     Forms/ChooseAfbDialog.cpp \
-    Builder/SignalSet.cpp \
-    Builder/Busses.cpp \
     IdePropertyEditor.cpp \
-    Builder/UalItems.cpp \
     EditEngine/EditEngineSetObject.cpp \
     ../lib/Address16.cpp \
     EditConnectionLine.cpp \
@@ -176,12 +144,9 @@ SOURCES +=\
     CreateSignalDialog.cpp \
     ../lib/Tuning/TuningSignalManager.cpp \
     ../Proto/network.pb.cc \
-    LogicModuleSet.cpp \
     ../lib/LmDescription.cpp \
-    Builder/MemWriteMap.cpp \
     SimulatorTabPage.cpp \
     Simulator/SimIdeSimulator.cpp \
-    Builder/ConfigurationServiceCfgGenerator.cpp \
     ../lib/TuningValue.cpp \
     Simulator/SimSchemaWidget.cpp \
     Simulator/SimSchemaManager.cpp \
@@ -200,7 +165,10 @@ SOURCES +=\
     ../lib/Times.cpp \
     Simulator/SimOverrideWidget.cpp \
     SpecificPropertiesEditor.cpp \
-    ../lib/Ui/DialogAbout.cpp
+    ../lib/Ui/DialogAbout.cpp \
+    ../lib/Subsystem.cpp \
+    ../lib/Connection.cpp \
+    ../lib/LogicModuleSet.cpp
 
 
 HEADERS  += \
@@ -243,14 +211,8 @@ HEADERS  += \
     ../lib/DbProgress.h \
     ../lib/Crc.h \
     DialogFileEditor.h \
-    Builder/Builder.h \
-    Builder/BuildResultWriter.h \
-    Builder/ConfigurationBuilder.h \
-    Builder/ApplicationLogicCode.h \
-    Builder/ApplicationLogicCompiler.h \
     DialogSubsystemListEditor.h \
     ../lib/Types.h \
-    Subsystem.h \
     Forms/ChooseAfbDialog.h \
     EquipmentVcsDialog.h \
     ../lib/DataSource.h \
@@ -258,19 +220,11 @@ HEADERS  += \
     ../lib/PropertyObject.h \
     ../lib/PropertyEditorOld.h \
     ../lib/PropertyEditor.h \
-    Builder/Parser.h \
-    Connection.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/DebugInstCounter.h \
-    Builder/SoftwareCfgGenerator.h \
     ../lib/BuildInfo.h \
-    Builder/TuningBuilder.h \
-    Builder/IssueLogger.h \
-    Builder/OptoModule.h \
     GlobalMessanger.h \
-    Builder/LmMemoryMap.h \
     ../lib/Address16.h \
-    Builder/ModuleLogicCompiler.h \
     ../lib/WUtils.h \
     EditSchemaWidget.h \
     SchemaPropertiesDialog.h \
@@ -282,29 +236,18 @@ HEADERS  += \
     EditEngine/EditEngineSetOrder.h \
     ../lib/DeviceHelper.h \
     ../lib/XmlHelper.h \
-    Builder/MonitorCfgGenerator.h \
     ../lib/ServiceSettings.h \
-    Builder/TuningServiceCfgGenerator.h \
-    Builder/AppDataServiceCfgGenerator.h \
-    Builder/DiagDataServiceCfgGenerator.h \
     ../lib/Queue.h \
     ../lib/ProtobufHelper.h \
     UploadTabPage.h \
-    ../TuningService/TuningSource.h \
     DialogChoosePreset.h \
-    ../TuningService/TuningDataStorage.h \
     ../lib/DataProtocols.h \
-    Builder/ModuleFirmwareWriter.h \
     ../lib/HostAddressPort.h \
     ../lib/SignalProperties.h \
     ../lib/Configurator.h \
     DialogSettingsConfigurator.h \
-    Builder/ArchivingServiceCfgGenerator.h \
-    Builder/TuningClientCfgGenerator.h \
     Forms/ChooseUfbDialog.h \
     ../lib/LmLimits.h \
-    Builder/ModulesRawData.h \
-    Builder/BdfFile.h \
     SchemaListModel.h \
     Forms/SelectChangesetDialog.h \
     Forms/FileHistoryDialog.h \
@@ -314,36 +257,26 @@ HEADERS  += \
     ../lib/diff_match_patch.h \
     ../TuningIPEN/TuningIPENDataStorage.h \
     DialogConnections.h \
-    Builder/MetrologyCfgGenerator.h \
     ../lib/MetrologySignal.h \
     ../lib/Tuning/TuningFilter.h \
     ../lib/Tuning/TuningFilterEditor.h \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/Tuning/TuningModel.h \
-    Builder/ComparatorStorage.h \
-    Builder/RawDataDescription.h \
     ../lib/AppSignal.h \
     ../lib/CsvFile.h \
     ../lib/WidgetUtils.h \
     DialogBusEditor.h \
-    DbObjectStorage.h \
     BusStorage.h \
     Forms/DialogUpdateFromPreset.h \
-    Builder/SignalSet.h \
-    Builder/Busses.h \
     IdePropertyEditor.h \
-    Builder/UalItems.h \
     EditEngine/EditEngineSetObject.h \
     EditConnectionLine.h \
     EditEngine/EditEngineBatch.h \
     CreateSignalDialog.h \
     ../lib/Tuning/TuningSignalManager.h \
     ../Proto/network.pb.h \
-    LogicModuleSet.h \
     ../lib/LmDescription.h \
-    Builder/MemWriteMap.h \
     SimulatorTabPage.h \
-    Builder/ConfigurationServiceCfgGenerator.h \
     Simulator/SimIdeSimulator.h \
     ../lib/TuningValue.h \
     Simulator/SimSchemaWidget.h \
@@ -362,11 +295,14 @@ HEADERS  += \
     Simulator/SimProjectWidget.h \
     ../lib/TuningValue.h \
     SpecificPropertiesEditor.h \
-    Builder/CfgFiles.h \
     ../lib/CommonTypes.h \
     ../lib/Times.h \
     Simulator/SimOverrideWidget.h \
-    ../lib/Ui/DialogAbout.h
+    ../lib/Ui/DialogAbout.h \
+    ../lib/Subsystem.h \
+    ../lib/DbObjectStorage.h \
+    ../lib/Connection.h \
+    ../lib/LogicModuleSet.h
 
 
 FORMS    += \
@@ -476,7 +412,7 @@ unix {
     LIBS += -lprotobuf
 }
 
-#QScintilla
+# QScintilla
 #
 INCLUDEPATH += ./../QScintilla/Qt4Qt5
 DEPENDPATH += ./../QScintilla/Qt4Qt5
@@ -503,6 +439,21 @@ unix {
 
 INCLUDEPATH += ../VFrame30
 DEPENDPATH += ../VFrame30
+
+# Builder Lib
+#
+INCLUDEPATH += $$PWD/../Builder
+DEPENDPATH += $$PWD/../Builder
+
+win32 {
+    LIBS += -L$$DESTDIR -lBuilder
+
+    CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/debug/Builder.lib
+    CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../bin/release/Builder.lib
+}
+unix {
+    LIBS += -lBuilder
+}
 
 # QtPropertyBrowser
 #

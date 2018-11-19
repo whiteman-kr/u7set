@@ -549,6 +549,7 @@ void Signal::loadProtoData(const QByteArray& protoDataArray)
 	bool res = protoData.ParseFromArray(protoDataArray.constData(), protoDataArray.size());
 
 	assert(res == true);
+	Q_UNUSED(res)
 
 	loadProtoData(protoData);
 }

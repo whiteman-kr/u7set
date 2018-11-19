@@ -37,7 +37,6 @@ SOURCES += \
     ../lib/DataSource.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/ProtoSerialization.cpp \
     ../lib/Signal.cpp \
     ../lib/Types.cpp \
     ../lib/CfgServerLoader.cpp \
@@ -58,23 +57,24 @@ SOURCES += \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
     ../lib/AppSignal.cpp \
-    ../u7/Builder/IssueLogger.cpp \
+    ../Builder/IssueLogger.cpp \
     TcpAppDataClient.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
     AppDataSource.cpp \
-    ../u7/Builder/ModulesRawData.cpp \
+    ../Builder/ModulesRawData.cpp \
     ../lib/CommandLineParser.cpp \
     AppDataServiceMain.cpp \
     TcpArchiveClient.cpp \
     ../lib/SoftwareInfo.cpp \
-    ../lib/TuningValue.cpp \
     AppDataReceiver.cpp \
     SignalStatesProcessingThread.cpp \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp \
     RtTrendsDatabase.cpp \
-    RtTrendsServer.cpp
+    RtTrendsServer.cpp \
+    ../lib/ProtoSerialization.cpp \
+    ../lib/TuningValue.cpp
 
 HEADERS += \
 	Stable.h \
@@ -110,24 +110,25 @@ HEADERS += \
     ../lib/Hash.h \
     ../Proto/serialization.pb.h \
     ../lib/AppSignal.h \
-    ../u7/Builder/IssueLogger.h \
+    ../Builder/IssueLogger.h \
     TcpAppDataClient.h \
     ../lib/Crc.h \
     ../lib/HostAddressPort.h \
     AppDataSource.h \
-    ../u7/Builder/ModulesRawData.h \
+    ../Builder/ModulesRawData.h \
     ../lib/CommandLineParser.h \
     TcpArchiveClient.h \
     ../lib/TimeStamp.h \
     ../lib/SoftwareInfo.h \
-    ../lib/TuningValue.h \
     AppDataReceiver.h \
     ../lib/Socket.h \
     SignalStatesProcessingThread.h \
     ../lib/Times.h \
     ../lib/SignalProperties.h \
     RtTrendsDatabase.h \
-    RtTrendsServer.h
+    RtTrendsServer.h \
+    ../lib/ProtoSerialization.h \
+    ../lib/TuningValue.h
 
 include(../qtservice/src/qtservice.pri)
 
