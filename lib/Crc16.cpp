@@ -44,7 +44,7 @@ quint16 calcCrc16(const void* buf, int len)
 
 	for(int counter = 0; counter < len; counter++)
 	{
-		crc = (crc << 8) ^ crc16tab[((crc >> 8) ^ *ptr++) & 0x00FF];
+		crc = (crc >> 8) ^ crc16tab[(crc ^ static_cast<quint16>(*ptr++)) & 0x00FF];
 	}
 
 	return crc;

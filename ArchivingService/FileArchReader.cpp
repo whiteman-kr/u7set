@@ -11,17 +11,17 @@ bool operator < (const FileArchReader::ArchPartition& afi1, const FileArchReader
 //
 // ---------------------------------------------------------------------------------------------
 
-FileArchReader::FileArchReader(const QString& signalArchPath, E::TimeType timeType, qint64 startTime, qint64 endTime) :
-	m_signalArchPath(signalArchPath),
-	m_timeType(timeType),
-	m_startTime(startTime),
-	m_endTime(endTime)
+FileArchReader::FileArchReader(ArchiveShared archive, const ArchRequestParam& param) :
+	m_archive(archive),
+	m_requestParam(param)
 {
 }
 
 bool FileArchReader::findData()
 {
 	bool result = false;
+
+	result = archive->findData(m_param);
 
 	result = getArchPartitionsInfo();
 

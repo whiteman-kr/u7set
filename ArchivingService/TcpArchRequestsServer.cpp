@@ -110,11 +110,9 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 	param.startTime = request.starttime();
 	param.endTime = request.endtime();
 
-	param.signalHashesCount = requestSignalsCount;
-
 	for(int i = 0; i < requestSignalsCount; i++)
 	{
-		param.signalHashes[i] = request.signalhashes(i);
+		param.signalHashes.append(request.signalhashes(i));
 	}
 
 	param.requestID = newRequestID;

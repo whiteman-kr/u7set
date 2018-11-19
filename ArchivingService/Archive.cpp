@@ -472,6 +472,39 @@ bool Archive::createGroupDirs()
 }
 
 
+bool Archive::findData(const ArchRequestParam& param)
+{
+	int signalHashesCount = param.signalHashes.count();
+
+	// enqueue files for immediately flushing
+	//
+	for(Hash signalHash : param.signalHashes)
+	{
+		flushImmediately(signalHash);
+	}
+
+	//
+	//
+
+	bool dataIsFound = false;
+
+	for(Hash signalHash : param.signalHashes)
+	{
+
+		ArchSignal* archSignal = m_archSignals.value(signalHash, nullptr);
+
+		if (archSignal == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
+		dataIsFound |= archSignal->findData(param);
+	}
+
+
+}
+
 bool Archive::shutdown()
 {
 /*	if (m_lastState.flags.valid == 1)

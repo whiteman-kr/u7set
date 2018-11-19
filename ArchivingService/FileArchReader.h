@@ -18,7 +18,7 @@ public:
 	};
 
 public:
-	FileArchReader(const QString& signalArchPath, E::TimeType timeType, qint64 startTime, qint64 endTime);
+	FileArchReader(ArchiveShared archive, const ArchRequestParam& param);
 
 	bool findData();
 
@@ -35,10 +35,8 @@ private:
 	bool readRecord(ArchPartition& partition, qint64 recordNo);
 
 private:
-	QString m_signalArchPath;
-	E::TimeType m_timeType = E::TimeType::System;
-	qint64 m_startTime = 0;
-	qint64 m_endTime = 0;
+	ArchiveShared m_archive;
+	ArchRequestParam m_requestParam;
 
 	//
 

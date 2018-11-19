@@ -13,6 +13,155 @@ bool ArchFile::Record::isValid() const
 	return calcCrc16(this, sizeof(ArchFile::Record)) == 0;
 }
 
+
+// -----------------------------------------------------------------------------------------------------------------------
+//
+// ArchFile::Partition classimplementation
+//
+// -----------------------------------------------------------------------------------------------------------------------
+
+ArchFile::Partition::Partition(const ArchFile& archFile, bool writable) :
+	m_archFile(archFile),
+	m_isWritable(writable)
+{
+}
+
+qint64 ArchFile::Partition::recordsCount()
+{
+	if (m_size < 0)
+	{
+		assert(false);
+		return 0;
+	}
+
+	return m_size / sizeof(ArchFile::Record);
+}
+
+bool ArchFile::Partition::write(qint64 partition, Record* buffer, int statesCount, qint64* totalFushedStatesCount)
+{
+	TEST_PTR_RETURN_FALSE(buffer);
+	TEST_PTR_RETURN_FALSE(totalFushedStatesCount);
+
+	if (m_isWritable == false)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (m_startTime == -1)
+	{
+		m_startTime = partition;
+	}
+	else
+	{
+		if (m_startTime != partition)
+		{
+			closeFile();
+
+			m_startTime = partition;
+		}
+	}
+
+	if (m_file.isOpen() == false)
+	{
+		if (m_pathIsExists == false)
+		{
+			QDir d;
+
+			m_pathIsExists = d.mkpath(m_archFile.path());
+		}
+
+		QDateTime date = QDateTime::fromMSecsSinceEpoch(partition, Qt::UTC);
+
+		QString fileName = QString("%1/%2_%3_%4_%5_%6.%7").
+								arg(m_archFile.path()).
+								arg(date.date().year()).
+								arg(QString().sprintf("%02d", date.date().month())).
+								arg(QString().sprintf("%02d", date.date().day())).
+								arg(QString().sprintf("%02d", date.time().hour())).
+								arg(QString().sprintf("%02d", date.time().minute()),
+								EXTENSION);
+
+		m_file.setFileName(fileName);
+
+		if (m_file.open(QIODevice::Append) == false)
+		{
+			return false;
+		}
+
+		if (m_fileIsAligned == false)
+		{
+			QFileInfo fi(m_file);
+
+			m_size = fi.size();
+
+			if ((m_size % sizeof(Record)) != 0)
+			{
+				m_size = (m_size / sizeof(Record)) * sizeof(Record);
+
+				bool res = m_file.seek(m_size);
+
+				if (res == true)
+				{
+					m_fileIsAligned = true;
+				}
+			}
+			else
+			{
+				m_fileIsAligned = true;
+			}
+		}
+	}
+
+	qint64 sizeToWrite = statesCount * sizeof(Record);
+
+	qint64 written = m_file.write(reinterpret_cast<const char*>(buffer), sizeToWrite);
+
+	if (written == -1)
+	{
+		return false;
+	}
+
+	m_file.flush();
+
+	if (sizeToWrite != written)
+	{
+		m_fileIsAligned = false;
+	}
+	else
+	{
+		m_size += written;
+	}
+
+	*totalFushedStatesCount += statesCount;
+
+//	qDebug() << C_STR(QString("Flush %1 states %2").arg(m_file.fileName()).arg(statesCount));
+
+	return true;
+}
+
+bool ArchFile::Partition::close()
+{
+	closeFile();
+
+	return true;
+}
+
+void ArchFile::Partition::closeFile()
+{
+	if (m_file.isOpen() == true)
+	{
+		m_file.close();
+	}
+
+//	m_pathIsExists = false;
+	m_fileIsAligned = false;
+
+	m_startTime = -1;
+	m_size = -1;
+}
+
+
 // -----------------------------------------------------------------------------------------------------------------------
 //
 // ArchFile class implementation
@@ -23,7 +172,8 @@ ArchFile::Record ArchFile::m_buffer[ArchFile::QUEUE_MAX_SIZE];
 
 const QString ArchFile::EXTENSION = "saf";		// Signal Archive File
 
-ArchFile::ArchFile()
+ArchFile::ArchFile() :
+	m_writablePartition(*this, true)
 {
 }
 
@@ -31,6 +181,9 @@ void ArchFile::init(Archive* archive, ArchSignal* archSignal)
 {
 	TEST_PTR_RETURN(archive);
 	TEST_PTR_RETURN(archSignal);
+
+	m_archive = archive;
+	m_archSignal = archSignal;
 
 	int queueSize = QUEUE_MIN_SIZE;
 
@@ -50,6 +203,12 @@ void ArchFile::init(Archive* archive, ArchSignal* archSignal)
 
 ArchFile::~ArchFile()
 {
+	for(RequestContext* context : m_requestContexts)
+	{
+		delete context;
+	}
+
+	m_requestContexts.clear();
 }
 
 bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
@@ -63,7 +222,7 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 	s.state.systemTime = state.time.system.timeStamp;
 	s.state.flags = state.flags;
 	s.state.value = state.value;
-	s.crc16 = calcCrc16(&s.state, sizeof(s.state));
+	s.calcCRC16();
 
 	SimpleMutexLocker locker(&m_flushMutex);
 
@@ -105,14 +264,7 @@ bool ArchFile::flush(qint64 curPartition, qint64* totalFushedStatesCount, bool f
 		return false;
 	}
 
-	if (curPartition != m_prevPartition)
-	{
-		closeFile();
-
-		m_prevPartition = curPartition;
-	}
-
-	writeFile(curPartition, m_buffer, copiedItemsCount, totalFushedStatesCount);
+	m_writablePartition.write(curPartition, m_buffer, copiedItemsCount, totalFushedStatesCount);
 
 	setRequiredImmediatelyFlushing(false);
 
@@ -126,93 +278,31 @@ bool ArchFile::isEmergency() const
 	return m_queue->size() >= static_cast<int>(m_queue->queueSize() * QUEUE_EMERGENCY_LIMIT);
 }
 
-void ArchFile::shutdown(qint64 curPartition, qint64* totalFlushedStatesCount)
+bool ArchFile::findData(const ArchRequestParam& param)
 {
-	flush(curPartition, totalFlushedStatesCount, true);
-	closeFile();
-}
-
-bool ArchFile::writeFile(qint64 partition, Record* buffer, int statesCount, qint64* totalFushedStatesCount)
-{
-	TEST_PTR_RETURN_FALSE(buffer);
-	TEST_PTR_RETURN_FALSE(totalFushedStatesCount);
-
-	if (m_fileIsOpened == false)
+	if (m_requestContexts.contains(param.requestID) == true)
 	{
-		if (m_pathIsExists == false)
-		{
-			QDir d;
-
-			m_pathIsExists = d.mkpath(m_path);
-		}
-
-		QDateTime date = QDateTime::fromMSecsSinceEpoch(partition, Qt::UTC);
-
-		QString fileName = QString("%1/%2_%3_%4_%5_%6.%7").
-								arg(m_path).
-								arg(date.date().year()).
-								arg(QString().sprintf("%02d", date.date().month())).
-								arg(QString().sprintf("%02d", date.date().day())).
-								arg(QString().sprintf("%02d", date.time().hour())).
-								arg(QString().sprintf("%02d", date.time().minute()),
-								EXTENSION);
-
-		m_file.setFileName(fileName);
-
-		if (m_file.open(QIODevice::Append) == false)
-		{
-			return false;
-		}
-
-		m_fileIsOpened = true;
-
-		if (m_fileIsAligned == false)
-		{
-			QFileInfo fi(m_file);
-
-			qint64 fileSize = fi.size();
-
-			if ((fileSize % sizeof(Record)) != 0)
-			{
-				m_file.seek((fileSize / sizeof(Record)) * sizeof(Record));
-			}
-
-			m_fileIsAligned = true;
-		}
-	}
-
-	qint64 sizeToWrite = statesCount * sizeof(Record);
-
-	qint64 written = m_file.write(reinterpret_cast<const char*>(buffer), sizeToWrite);
-
-	if (written == -1)
-	{
+		assert(false);
 		return false;
 	}
 
-	m_file.flush();
+	RequestContext* rc = new RequestContext(param);
 
-	if (sizeToWrite != written)
-	{
-		m_fileIsAligned = false;
-	}
+	m_requestContexts.insert(param.requestID, rc);
 
-	*totalFushedStatesCount += statesCount;
+	return privateFindData(rc);
+}
 
-//	qDebug() << C_STR(QString("Flush %1 states %2").arg(m_file.fileName()).arg(statesCount));
+void ArchFile::shutdown(qint64 curPartition, qint64* totalFlushedStatesCount)
+{
+	flush(curPartition, totalFlushedStatesCount, true);
+}
+
+bool ArchFile::privateFindData(RequestContext* rc)
+{
+	TEST_PTR_RETURN_FALSE(rc);
 
 	return true;
 }
 
-void ArchFile::closeFile()
-{
-	if (m_fileIsOpened == false)
-	{
-		return;
-	}
-
-	m_file.close();
-
-	m_fileIsOpened = false;
-}
 

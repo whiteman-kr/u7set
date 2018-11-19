@@ -13,13 +13,11 @@
 
 ArchRequestParam::ArchRequestParam()
 {
-	clearSignalHashes();
 }
 
 void ArchRequestParam::clearSignalHashes()
 {
-	memset(signalHashes, 0, sizeof(signalHashes));
-	signalHashesCount = 0;
+	signalHashes.clear();
 }
 
 
@@ -87,31 +85,24 @@ ArchRequestContext::~ArchRequestContext()
 
 void ArchRequestContext::checkSignalsHashes(ArchiveShared arch)
 {
-	QVector<Hash> existingHashes;
-
-	for(int i = 0; i < m_param.signalHashesCount; i++)
-	{
-		Hash signalHash = m_param.signalHashes[i];
-
-		if (arch->isSignalExists(signalHash) == true)
-		{
-			existingHashes.append(signalHash);
-		}
-	}
+	QVector<Hash> hashesFromRequest = m_param.signalHashes;
 
 	m_param.clearSignalHashes();
 
-	for(int i = 0; i < existingHashes.count(); i++)
+	for(int i = 0; i < hashesFromRequest.count(); i++)
 	{
-		m_param.signalHashes[i] = existingHashes[i];
-	}
+		Hash signalHash = hashesFromRequest[i];
 
-	m_param.signalHashesCount = existingHashes.count();
+		if (arch->isSignalExists(signalHash) == true)
+		{
+			m_param.signalHashes.append(signalHash);
+		}
+	}
 }
 
 Hash ArchRequestContext::signalHash(int index)
 {
-	if (index < 0 || index >= m_param.signalHashesCount)
+	if (index < 0 || index >= m_param.signalHashes.count())
 	{
 		assert(false);
 		return UNDEFINED_HASH;
@@ -140,10 +131,8 @@ DbArchRequestContext::~DbArchRequestContext()
 	}
 }
 
-bool DbArchRequestContext::executeSatesRequest(ArchiveShared archive, QSqlDatabase* db, FileArchWriter* fileArchWriter)
+bool DbArchRequestContext::executeSatesRequest(ArchiveShared archive, QSqlDatabase* db)
 {
-	Q_UNUSED(fileArchWriter);
-
 	if (db == nullptr)
 	{
 		DEBUG_LOG_ERR(m_logger, QString("QSqlDatabase null pointer"));
@@ -239,7 +228,7 @@ void DbArchRequestContext::getNextStates()
 
 	t.start();
 
-	int signalHashesCount = m_param.signalHashesCount;
+	int signalHashesCount = m_param.signalHashes.count();
 
 	quint64 hash = signalHash(0);
 
@@ -415,7 +404,7 @@ bool DbArchRequestContext::createGetSignalStatesQueryStr(ArchiveShared archive)
 {
 	m_statesQueryStr.clear();
 
-	int signalHashesCount = m_param.signalHashesCount;
+	int signalHashesCount = m_param.signalHashes.count();
 
 	QString formatStr0 = QString("SELECT %1, %2, %3, %4, %5 AS hash FROM %6 WHERE %7 >= %8::bigint AND %7 <= %9::bigint ");
 
@@ -540,40 +529,17 @@ FileArchRequestContext::~FileArchRequestContext()
 {
 }
 
-bool FileArchRequestContext::executeSatesRequest(ArchiveShared archive, QSqlDatabase* db, FileArchWriter* fileArchWriter)
+bool FileArchRequestContext::executeSatesRequest(ArchiveShared archive, QSqlDatabase* db)
 {
 	Q_UNUSED(db);
 
-	if (fileArchWriter == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
-	// enqueue files for immediately flushing
-	//
-	for(int i = 0; i < m_param.signalHashesCount; i++)
-	{
-		archive->flushImmediately(m_param.signalHashes[i]);
-	}
-
-	for(int i = 0; i < m_param.signalHashesCount; i++)
-	{
-//		QString signalArchivePath;
-
-//		fileArchWriter->flushFileBeforeReading(hash, &signalArchivePath);
-
-//		FileArchReader reader(signalArchivePath, m_param.timeType, m_param.startTime, m_param.endTime);
-
-//		bool res = reader.findData();
-	}
+	return archive->findData();
 
 	return true;
 }
 
 void FileArchRequestContext::getNextStates()
 {
-
 }
 
 
@@ -702,7 +668,7 @@ void ArchRequestThreadWorker::onNewRequest(quint32 requestID)
 		return;
 	}
 
-	result = context->executeSatesRequest(m_archive, &m_db, m_fileArchWriter);
+	result = context->executeSatesRequest(m_archive, &m_db);
 
 	if (result == false)
 	{
