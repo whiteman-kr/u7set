@@ -33,8 +33,7 @@ private:
 	ArchRequestThread& m_archRequestThread;
 	CircularLoggerShared m_logger;
 
-	static QMutex m_requestNoMutex;
-	static quint32 m_nextRequestNo;
+	static std::atomic<quint32> m_nextRequestNo;
 
 	ArchRequestContextShared m_currentRequest;
 };

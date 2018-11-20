@@ -1,22 +1,42 @@
 #include "Archive.h"
 #include "../lib/WUtils.h"
 
+
 // ----------------------------------------------------------------------------------------------------------------------
 //
-// ArchSignal class implementation
+// Archive::RequestContext class implementation
 //
 // ----------------------------------------------------------------------------------------------------------------------
 
-ArchSignal::ArchSignal(Archive* archive, const Proto::ArchSignal& protoArchSignal)
+Archive::RequestContext::RequestContext(const ArchRequestParam& param) :
+	m_param(param)
 {
-	hash = protoArchSignal.hash();
-	appSignalID = QString::fromStdString(protoArchSignal.appsignalid());
-	isAnalog = protoArchSignal.isanalog();
-
-	lastState.flags.valid = 0;
-
-	archFile.init(archive, this);
 }
+
+void Archive::RequestContext::appendArchFile(ArchFile* f)
+{
+	TEST_PTR_RETURN(f);
+
+	m_archFiles.append(f);
+}
+
+bool Archive::RequestContext::findData()
+{
+	bool result = false;
+
+	for(ArchFile* archFile : m_archFiles)
+	{
+		bool res = archFile->findData(m_param);
+
+		if (res == true)
+		{
+			result = true;
+		}
+	}
+
+	return result;
+}
+
 
 // ----------------------------------------------------------------------------------------------------------------------
 //
@@ -96,23 +116,23 @@ bool Archive::openDatabase(DbType dbType, QSqlDatabase& destDb)
 
 void Archive::initArchSignals(const Proto::ArchSignals& archSignals)
 {
-	assert(m_archSignals.count() == 0);
+	assert(m_archFiles.count() == 0);
 	assert(m_archFiles.count() == 0);
 
 	int signalsCount = archSignals.archsignals_size();
 
-	m_archSignals.reserve(static_cast<int>(signalsCount * 1.2));
-	m_archFiles.resize(signalsCount);
+	m_archFiles.reserve(static_cast<int>(signalsCount * 1.2));
+	m_archFilesArray.resize(signalsCount);
 
 	for(int i = 0; i < signalsCount; i++)
 	{
 		const Proto::ArchSignal& protoArchSignal = archSignals.archsignals(i);
 
-		ArchSignal* archSignal = new ArchSignal(this, protoArchSignal);
+		ArchFile* archFile = new ArchFile(protoArchSignal, m_archFullPath);
 
-		m_archSignals.insert(archSignal->hash, archSignal);
+		m_archFiles.insert(archFile->hash(), archFile);
 
-		m_archFiles[i] = &archSignal->archFile;
+		m_archFilesArray[i] = archFile;
 	}
 
 	// init regular files flushing queue
@@ -127,54 +147,54 @@ void Archive::initArchSignals(const Proto::ArchSignals& archSignals)
 
 QString Archive::getSignalID(Hash signalHash)
 {
-	ArchSignal* archSignal = m_archSignals.value(signalHash, nullptr);
+	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
 
-	if (archSignal == nullptr)
+	if (archFile == nullptr)
 	{
 		assert(false);
 		return QString();
 	}
 
-	return archSignal->appSignalID;
+	return archFile->appSignalID();
 }
 
 bool Archive::canReadWriteSignal(Hash signalHash)
 {
-	ArchSignal* archSignal = m_archSignals.value(signalHash, nullptr);
+	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
 
-	if (archSignal == nullptr)
+	if (archFile == nullptr)
 	{
 		assert(false);
 		return false;
 	}
 
-	return archSignal->canReadWrite;
+	return archFile->canReadWrite();
 }
 
 void Archive::setCanReadWriteSignal(Hash signalHash, bool canReadWrite)
 {
-	ArchSignal* archSignal = m_archSignals.value(signalHash, nullptr);
+	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
 
-	if (archSignal == nullptr)
+	if (archFile == nullptr)
 	{
 		assert(false);
 		return;
 	}
 
-	archSignal->canReadWrite = canReadWrite;
+	archFile->setCanReadWrite(canReadWrite);
 }
 
 void Archive::setSignalInitialized(Hash signalHash, bool initilaized)
 {
-	ArchSignal* archSignal = m_archSignals.value(signalHash, nullptr);
+	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
 
-	if (archSignal == nullptr)
+	if (archFile == nullptr)
 	{
 		assert(false);
 		return;
 	}
 
-	archSignal->isInitialized = initilaized;
+	archFile->setInitialized(initilaized);
 }
 
 void Archive::getArchSignalStatus(Hash signalHash, bool* canReadWrite, bool* isInitialized, bool* isAnalog)
@@ -183,9 +203,9 @@ void Archive::getArchSignalStatus(Hash signalHash, bool* canReadWrite, bool* isI
 	TEST_PTR_RETURN(isInitialized);
 	TEST_PTR_RETURN(isAnalog);
 
-	ArchSignal* archSignal = m_archSignals.value(signalHash, nullptr);
+	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
 
-	if (archSignal == nullptr)
+	if (archFile == nullptr)
 	{
 		*canReadWrite = false;
 		*isInitialized = false;
@@ -193,9 +213,9 @@ void Archive::getArchSignalStatus(Hash signalHash, bool* canReadWrite, bool* isI
 		return;
 	}
 
-	*canReadWrite = archSignal->canReadWrite;
-	*isInitialized = archSignal->isInitialized;
-	*isAnalog = archSignal->isAnalog;
+	*canReadWrite = archFile->canReadWrite();
+	*isInitialized = archFile->isInitialized();
+	*isAnalog = archFile->isAnalog();
 }
 
 
@@ -203,13 +223,13 @@ void Archive::getSignalsHashes(QVector<Hash>* hashes)
 {
 	TEST_PTR_RETURN(hashes);
 
-	hashes->resize(m_archSignals.count());
+	hashes->resize(m_archFiles.count());
 
 	int i = 0;
 
-	for(ArchSignal* archSignal : m_archSignals)
+	for(ArchFile* archFile : m_archFiles)
 	{
-		(*hashes)[i] = archSignal->hash;
+		(*hashes)[i] = archFile->hash();
 		i++;
 	}
 }
@@ -315,23 +335,21 @@ void Archive::saveState(const SimpleAppSignalState& state)
 
 	//
 
-	ArchSignal* archSignal = m_archSignals.value(state.hash, nullptr);
+	ArchFile* archFile = m_archFiles.value(state.hash, nullptr);
 
-	if (archSignal == nullptr)
+	if (archFile == nullptr)
 	{
 		assert(false);
 		return;
 	}
 
-	archSignal->lastState = state;
-
 	m_archID++;
 
-	archSignal->archFile.pushState(m_archID, state);
+	archFile->pushState(m_archID, state);
 
-	if (archSignal->archFile.isEmergency() == true)
+	if (archFile->isEmergency() == true)
 	{
-		appendEmergencyFile(&archSignal->archFile);
+		appendEmergencyFile(archFile);
 	}
 }
 
@@ -474,35 +492,42 @@ bool Archive::createGroupDirs()
 
 bool Archive::findData(const ArchRequestParam& param)
 {
-	int signalHashesCount = param.signalHashes.count();
+	if (m_requestContexts.contains(param.requestID) == true)
+	{
+		assert(false);
+		return false;
+	}
+
+	RequestContext* reqContext = new RequestContext(param);
+
+	m_requestContexts.insert(param.requestID, reqContext);
 
 	// enqueue files for immediately flushing
 	//
 	for(Hash signalHash : param.signalHashes)
 	{
-		flushImmediately(signalHash);
-	}
+		ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
 
-	//
-	//
-
-	bool dataIsFound = false;
-
-	for(Hash signalHash : param.signalHashes)
-	{
-
-		ArchSignal* archSignal = m_archSignals.value(signalHash, nullptr);
-
-		if (archSignal == nullptr)
+		if (archFile == nullptr)
 		{
 			assert(false);
 			continue;
 		}
 
-		dataIsFound |= archSignal->findData(param);
+		reqContext->appendArchFile(archFile);
+
+		flushImmediately(archFile);
 	}
 
+	bool result = reqContext->findData();
 
+	if (result == false)
+	{
+		m_requestContexts.remove(reqContext->requestID());
+		delete reqContext;
+	}
+
+	return result;
 }
 
 bool Archive::shutdown()
@@ -549,18 +574,13 @@ bool Archive::shutdown()
 
 		archFile->shutdown(m_curPartition, &m_totalFlushedStatesCount);
 	}
-	while(1);
-}
-*/
-	assert(false);
+	while(1);*/
 
 	return true;
 }
 
-bool Archive::flushImmediately(Hash signalHash)
+bool Archive::flushImmediately(ArchFile* archFile)
 {
-	ArchFile* archFile = getArchFile(signalHash);
-
 	TEST_PTR_RETURN_FALSE(archFile);
 
 	QMutexLocker locker(&m_immedaitelyFlushingMutex);
@@ -571,6 +591,7 @@ bool Archive::flushImmediately(Hash signalHash)
 	}
 
 	archFile->setRequiredImmediatelyFlushing(true);
+
 	m_requiredImmediatelyFlushing.append(archFile);
 	m_alreadyInRequiredImmediatelyFlushing.insert(archFile, true);
 
@@ -579,7 +600,7 @@ bool Archive::flushImmediately(Hash signalHash)
 
 bool Archive::waitingForImmediatelyFlushing(Hash signalHash, int waitTimeoutSeconds)
 {
-	ArchFile* archFile = getArchFile(signalHash);
+	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
 
 	TEST_PTR_RETURN_FALSE(archFile);
 
@@ -764,12 +785,20 @@ void Archive::clear()
 
 	m_archFiles.clear();
 
-	for(ArchSignal* archSignal : m_archSignals)
+	for(ArchFile* archFile : m_archFiles)
 	{
-		delete archSignal;
+		delete archFile;
 	}
 
-	m_archSignals.clear();
+	m_archFiles.clear();
+	m_archFilesArray.clear();
+
+	for(RequestContext* reqContext : m_requestContexts)
+	{
+		delete reqContext;
+	}
+
+	m_requestContexts.clear();
 
 	removeDatabases();
 }
@@ -817,20 +846,3 @@ void Archive::removeDatabases()
 		QSqlDatabase::removeDatabase(connectionName);
 	}
 }
-
-ArchFile* Archive::getArchFile(Hash signalHash)
-{
-	ArchSignal* archSignal = m_archSignals.value(signalHash, nullptr);
-
-	if (archSignal == nullptr)
-	{
-		return nullptr;
-	}
-
-	return &archSignal->archFile;
-}
-
-
-
-
-

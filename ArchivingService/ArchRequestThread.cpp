@@ -533,9 +533,7 @@ bool FileArchRequestContext::executeSatesRequest(ArchiveShared archive, QSqlData
 {
 	Q_UNUSED(db);
 
-	return archive->findData();
-
-	return true;
+	return archive->findData(m_param);
 }
 
 void FileArchRequestContext::getNextStates()
@@ -562,7 +560,7 @@ ArchRequestContextShared ArchRequestThreadWorker::startNewRequest(ArchRequestPar
 	//
 	AUTO_LOCK(m_requestContextsMutex);
 
-	if (param.signalHashesCount == 0)
+	if (param.signalHashes.count() == 0)
 	{
 		assert(false);
 		return nullptr;

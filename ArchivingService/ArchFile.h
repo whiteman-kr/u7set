@@ -5,14 +5,19 @@
 #include "../lib/Crc16.h"
 #include "../lib/SimpleThread.h"
 
-class ArchSignal;
-class Archive;
 class ArchRequestParam;
-
-class FileArchWriter;
 
 class ArchFile
 {
+public:
+	class PartitionInfo
+	{
+	public:
+		QString fileName;
+		QDateTime date;
+		qint64 startTime;
+	};
+
 private:
 #pragma pack(push, 1)
 
@@ -63,42 +68,70 @@ private:
 		qint64 m_size = -1;				// partition's file size
 	};
 
-	class RequestContext
+	class RequestData
 	{
-		ArchRequestParam param;
+	public:
+		RequestData(ArchFile& archFile, const ArchRequestParam& param);
 
-		SimpleAppSignalState statesBuffer[1000];
+	public:
+		quint32 requestID = 0;
+		E::TimeType timeType = E::TimeType::System;
+		qint64 startTime = 0;
+		qint64 endTime = 0;
+
+		//
+
+		QVector<PartitionInfo> partitionsInfo;
+		Partition partitionToRead;
 	};
 
 public:
-	ArchFile();
+	ArchFile(const Proto::ArchSignal& protoArchSignal, const QString& archFullPath);
 	~ArchFile();
 
-	void init(Archive* archive, ArchSignal* archSignal);
-
 	bool pushState(qint64 archID, const SimpleAppSignalState& state);
-
 	bool flush(qint64 curPartition, qint64* totalFushedStatesCount, bool flushAnyway);
 
-	bool queueIsEmpty() const { return m_queue->isEmpty(); }
+	void setRequiredImmediatelyFlushing(bool b) { m_requiredImmediatelyFlushing.store(b); }
+	bool isRequiredImmediatelyFlushing() const { return m_requiredImmediatelyFlushing.load(); }
 
+	Hash hash() const { return m_hash; }
+	QString appSignalID() const { return m_appSignalID; }
+
+	bool canReadWrite() const { return m_canReadWrite; }
+	void setCanReadWrite(bool canReadWrite) { m_canReadWrite = canReadWrite; }
+
+	bool isInitialized() const { return m_isInitialized; }
+	void setInitialized(bool initialized) { m_isInitialized = initialized; }
+
+	bool isAnalog() const { return m_isAnalog; }
+
+	bool queueIsEmpty() const { return m_queue->isEmpty(); }
 	bool isEmergency() const;
+	QString path() const { return m_path; }
 
 	bool findData(const ArchRequestParam& param);
 
 	void shutdown(qint64 curPartition, qint64* totalFlushedStatesCount);
 
-	void setRequiredImmediatelyFlushing(bool b) { m_requiredImmediatelyFlushing.store(b); }
-	bool isRequiredImmediatelyFlushing() const { return m_requiredImmediatelyFlushing.load(); }
-
-	QString path() const { return m_path; }
+private:
+	bool getArchPartitionsInfo(RequestData* rd);
+	bool findStartPosition(RequestData* rd);
+	void cancelRequest(quint32 requestID);
 
 private:
-	bool privateFindData(RequestContext* rc);
+	Hash m_hash = 0;
+	QString m_appSignalID;
+	bool m_isAnalog = false;
 
-private:
-	Archive* m_archive = nullptr;
-	ArchSignal* m_archSignal = nullptr;
+	//
+
+	bool m_isInitialized = false;
+	bool m_canReadWrite = false;
+
+	//
+
+	SimpleAppSignalState m_lastState;
 
 	QString m_path;
 
@@ -112,6 +145,10 @@ private:
 
 	SimpleMutex m_flushMutex;
 
+	//
+
+	QHash<quint32, RequestData*> m_requestsData;
+
 	const double QUEUE_EMERGENCY_LIMIT = 0.7;		// 70%
 	const double QUEUE_EXPAND_LIMIT = 0.9;			// 90%
 
@@ -121,8 +158,7 @@ private:
 	static Record m_buffer[QUEUE_MAX_SIZE];
 
 	static const QString EXTENSION;
-
-	//
-
-	QHash<quint32, RequestContext*> m_requestContexts;
 };
+
+inline bool operator < (const ArchFile::PartitionInfo& p1, const ArchFile::PartitionInfo& p2) { return p1.startTime < p2.startTime; }
+

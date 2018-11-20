@@ -1,7 +1,6 @@
 #include "TcpArchRequestsServer.h"
 
-QMutex TcpArchRequestsServer::m_requestNoMutex;
-quint32 TcpArchRequestsServer::m_nextRequestNo = 1;
+std::atomic<quint32> TcpArchRequestsServer::m_nextRequestNo = { 1 };
 
 TcpArchRequestsServer::TcpArchRequestsServer(const SoftwareInfo& softwareInfo, ArchRequestThread& archRequestThread, CircularLoggerShared logger) :
 	Tcp::Server(softwareInfo),
@@ -234,20 +233,7 @@ void TcpArchRequestsServer::finalizeCurrentRequest()
 
 quint32 TcpArchRequestsServer::getNewRequestID()
 {
-	m_requestNoMutex.lock();
-
-	quint32 requestID = m_nextRequestNo;
-
-	m_nextRequestNo++;
-
-	if (m_nextRequestNo == 0)
-	{
-		m_nextRequestNo = 1;
-	}
-
-	m_requestNoMutex.unlock();
-
-	return requestID;
+	return m_nextRequestNo.fetch_add(1);
 }
 
 TcpArchiveRequestsServerThread::TcpArchiveRequestsServerThread(const HostAddressPort& listenAddressPort,
