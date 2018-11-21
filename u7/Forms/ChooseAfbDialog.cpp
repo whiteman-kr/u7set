@@ -9,7 +9,7 @@ QString ChooseAfbDialog::m_lastSelectedCategory = AllCategoryName;
 Qt::SortOrder ChooseAfbDialog::m_lastSortOrder = Qt::SortOrder::AscendingOrder;
 
 ChooseAfbDialog::ChooseAfbDialog(const std::vector<std::shared_ptr<Afb::AfbElement>>& elements, QWidget* parent) :
-	QDialog(parent),
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::ChooseAfbDialog)
 {
 	ui->setupUi(this);
