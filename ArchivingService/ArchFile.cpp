@@ -71,16 +71,7 @@ bool ArchFile::Partition::write(qint64 partition, Record* buffer, int statesCoun
 			m_pathIsExists = d.mkpath(m_archFile.path());
 		}
 
-		QDateTime date = QDateTime::fromMSecsSinceEpoch(partition, Qt::UTC);
-
-		QString fileName = QString("%1/%2_%3_%4_%5_%6.%7").
-								arg(m_archFile.path()).
-								arg(date.date().year()).
-								arg(QString().sprintf("%02d", date.date().month())).
-								arg(QString().sprintf("%02d", date.date().day())).
-								arg(QString().sprintf("%02d", date.time().hour())).
-								arg(QString().sprintf("%02d", date.time().minute()),
-								EXTENSION);
+		QString fileName = getFileName(partition);
 
 		m_file.setFileName(fileName);
 
@@ -140,11 +131,44 @@ bool ArchFile::Partition::write(qint64 partition, Record* buffer, int statesCoun
 	return true;
 }
 
+bool ArchFile::Partition::openForReading(qint64 partitionSystemTime)
+{
+	if (m_file.isOpen() == true)
+	{
+		m_file.close();
+	}
+
+	QString fileName = getFileName(partition);
+
+	m_file.setFileName(fileName);
+
+	bool result = m_file.open(QIODevice::ReadOnly);
+
+	return result;
+}
+
+
 bool ArchFile::Partition::close()
 {
 	closeFile();
 
 	return true;
+}
+
+QString ArchFile::Partition::getFileName(qint64 partitionStartTime)
+{
+	QDateTime date = QDateTime::fromMSecsSinceEpoch(partitionStartTime, Qt::UTC);
+
+	QString fileName = QString("%1/%2_%3_%4_%5_%6.%7").
+							arg(m_archFile.path()).
+							arg(date.date().year()).
+							arg(QString().sprintf("%02d", date.date().month())).
+							arg(QString().sprintf("%02d", date.date().day())).
+							arg(QString().sprintf("%02d", date.time().hour())).
+							arg(QString().sprintf("%02d", date.time().minute()),
+							EXTENSION);
+
+	return fileName;
 }
 
 void ArchFile::Partition::closeFile()
@@ -292,11 +316,12 @@ bool ArchFile::findData(const ArchRequestParam& param)
 	{
 		m_requestsData.remove(param.requestID);
 		delete rd;
+		rd = nullptr;
 	}
 
-	m_requestsData.insert(param.requestID, rd);
-
 	rd = new RequestData(*this, param);
+
+	m_requestsData.insert(param.requestID, rd);
 
 	bool result = false;
 
@@ -334,7 +359,7 @@ bool ArchFile::getArchPartitionsInfo(RequestData* rd)
 
 	QRegExp archFileNameTemplate(QString("2[0-9][0-9][0-9]_[0-1][0-9]_[0-3][0-9]_[0-2][0-9]_[0-5][0-9].%1").arg(ArchFile::EXTENSION));
 
-	QDirIterator di(m_path);
+	QDirIterator di(m_path, QDir::Files);
 
 	while(di.hasNext() == true)
 	{
@@ -390,9 +415,9 @@ bool ArchFile::findStartPosition(RequestData* rd)
 
 	// 2) Find LAST partition where systemTime < m_startTime
 
-	int startPartitionIndex = -1;
+	int startPartitionIndex = 0;
 
-	for(int i = 0; i < partitionsCount; i++)
+	for(int i = 1 /* it is Ok */ ; i < partitionsCount; i++)
 	{
 		const PartitionInfo& pi = rd->partitionsInfo[i];
 
@@ -404,10 +429,17 @@ bool ArchFile::findStartPosition(RequestData* rd)
 		startPartitionIndex = i;
 	}
 
-	if (startPartitionIndex == -1)
+	// 3) Read time of first and last records of this partition
+
+	bool result = rd->partitionToRead.openForReading(rd->partitionsInfo[startPartitionIndex]);
+
+	if (result == false)
 	{
-		startPartitionIndex = 0;
+		return false;
 	}
+
+
+
 
 	return true;
 }

@@ -50,9 +50,13 @@ private:
 		qint64 recordsCount();
 
 		bool write(qint64 partitionSystemTime, Record* buffer, int statesCount, qint64* totalFushedStatesCount);
+
+		bool openForReading(qint64 partitionSystemTime);
+
 		bool close();
 
 	private:
+		QString getFileName(qint64 partitionStartTime);
 		void closeFile();
 
 	private:

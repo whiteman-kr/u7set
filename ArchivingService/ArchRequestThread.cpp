@@ -572,9 +572,9 @@ ArchRequestContextShared ArchRequestThreadWorker::startNewRequest(ArchRequestPar
 		return nullptr;
 	}
 
-	//ArchRequestContextShared context = std::make_shared<ArchRequestContext>(param, startTime, m_logger);
+	// ArchRequestContextShared context = std::make_shared<DbArchRequestContext>(param, startTime, m_logger);
 
-	ArchRequestContextShared context = std::make_shared<DbArchRequestContext>(param, startTime, m_logger);
+	ArchRequestContextShared context = std::make_shared<FileArchRequestContext>(param, startTime, m_logger);
 
 	context->setDataReady(false);
 

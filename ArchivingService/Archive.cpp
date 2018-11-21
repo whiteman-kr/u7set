@@ -123,6 +123,7 @@ void Archive::initArchSignals(const Proto::ArchSignals& archSignals)
 
 	m_archFiles.reserve(static_cast<int>(signalsCount * 1.2));
 	m_archFilesArray.resize(signalsCount);
+	m_regularFilesQueue.reserve(static_cast<int>(signalsCount * 1.2));
 
 	for(int i = 0; i < signalsCount; i++)
 	{
@@ -133,15 +134,8 @@ void Archive::initArchSignals(const Proto::ArchSignals& archSignals)
 		m_archFiles.insert(archFile->hash(), archFile);
 
 		m_archFilesArray[i] = archFile;
-	}
 
-	// init regular files flushing queue
-	//
-	m_regularFilesQueue.reserve(static_cast<int>(signalsCount * 1.2));
-
-	for(int i = 0; i < signalsCount; i++)
-	{
-		m_regularFilesQueue.append(m_archFiles[i]);
+		m_regularFilesQueue.append(archFile);
 	}
 }
 
@@ -331,7 +325,7 @@ QString Archive::getCmpField(E::TimeType timeType)
 
 void Archive::saveState(const SimpleAppSignalState& state)
 {
-//	m_dbSaveStatesQueue.push(&state);
+	m_dbSaveStatesQueue.push(&state);
 
 	//
 
