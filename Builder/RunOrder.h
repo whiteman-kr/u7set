@@ -4,6 +4,7 @@
 #include <map>
 #include <QUuid>
 #include "../lib/Hash.h"
+#include <QMetaType>
 
 
 namespace Builder
