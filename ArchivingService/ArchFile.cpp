@@ -13,6 +13,44 @@ bool ArchFile::Record::isValid() const
 	return calcCrc16(this, sizeof(ArchFile::Record)) == 0;
 }
 
+bool ArchFile::Record::timeLessThen(E::TimeType timeType, qint64 time)
+{
+	assert(isValid());
+
+	switch(timeType)
+	{
+	case E::TimeType::System:
+		return state.systemTime < time;
+
+	case E::TimeType::Plant:
+		return state.plantTime < time;
+
+	default:
+		assert(false);
+	}
+
+	return false;
+}
+
+bool ArchFile::Record::timeGreateThen(E::TimeType timeType, qint64 time)
+{
+	assert(isValid());
+
+	switch(timeType)
+	{
+	case E::TimeType::System:
+		return state.systemTime > time;
+
+	case E::TimeType::Plant:
+		return state.plantTime > time;
+
+	default:
+		assert(false);
+	}
+
+	return false;
+}
+
 
 // -----------------------------------------------------------------------------------------------------------------------
 //
@@ -133,20 +171,150 @@ bool ArchFile::Partition::write(qint64 partition, Record* buffer, int statesCoun
 
 bool ArchFile::Partition::openForReading(qint64 partitionSystemTime)
 {
-	if (m_file.isOpen() == true)
-	{
-		m_file.close();
-	}
+	closeFile();
 
-	QString fileName = getFileName(partition);
+	QString fileName = getFileName(partitionSystemTime);
 
 	m_file.setFileName(fileName);
 
 	bool result = m_file.open(QIODevice::ReadOnly);
 
+	if (result == false)
+	{
+		return false;
+	}
+
+	QFileInfo fi(m_file);
+
+	m_size = (fi.size() / sizeof(Record)) * sizeof(Record);
+
 	return result;
 }
 
+bool ArchFile::Partition::getFirstAndLastRecords(Record* first, Record* last, bool* noRecords)
+{
+	TEST_PTR_RETURN_FALSE(first);
+	TEST_PTR_RETURN_FALSE(last);
+	TEST_PTR_RETURN_FALSE(noRecords);
+
+	if (m_file.isOpen() == false)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (m_size < sizeof(Record))
+	{
+		*noRecords = true;
+		return true;
+	}
+
+	bool result = true;
+
+	result &= readRecord(FIRST_RECORD, first);
+	result &= readRecord(LAST_RECORD, last);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool ArchFile::Partition::readRecord(qint64 recordIndex, Record* record)
+{
+	TEST_PTR_RETURN_FALSE(record);
+
+	if (recordIndex == LAST_RECORD)
+	{
+		recordIndex = m_size / sizeof(Record) - 1;
+	}
+
+	if (recordIndex < 0)
+	{
+		recordIndex = 0;
+	}
+
+	m_file.seek(recordIndex * sizeof(Record));
+
+	qint64 read =  m_file.read(reinterpret_cast<char*>(record), sizeof(Record));
+
+	if (read != sizeof(Record))
+	{
+		return false;
+	}
+
+	if (record->isValid() == false)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool ArchFile::Partition::findStartPosition(E::TimeType timeType, qint64 startTime, qint64 endTime, bool* positionFound)
+{
+	TEST_PTR_RETURN_FALSE(positionFound);
+
+	Record firstRecord;
+	Record lastRecord;
+	bool noRecords = false;
+
+	bool result = getFirstAndLastRecords(&firstRecord, &lastRecord, &noRecords);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	if (noRecords == true)
+	{
+		*positionFound = false;
+		return true;
+	}
+
+	//	S - request start time
+	//	E - request endTime
+	//	F - partition first record time
+	//	L - partition last record time
+	//
+	//							S					E
+	//							|<---- REQUEST ---->|
+	//
+	//													F				L
+	// 1)												[== PARTITION ==]	F > E				noPos
+	//
+	//								F				L
+	// 2)							[== PARTITION ==]						F > S && F <= E		pos == 0
+	//
+	//					F				L
+	// 3)				[== PARTITION ==]									F <= S				binary search pos
+	//
+	//		F				L
+	// 4)	[== PARTITION ==]												L < S				goto next partition
+	//
+	//
+
+	// case 1
+
+	if (firstRecord.timeGreateThen(timeType, endTime) == true)
+	{
+		*positionFound = false;
+		return false;
+	}
+
+	if (firstRecord.timeLessThen(timeType, startTime) == true)
+	{
+
+	}
+	else
+	{
+
+	}
+
+	return true;
+}
 
 bool ArchFile::Partition::close()
 {
@@ -429,17 +597,31 @@ bool ArchFile::findStartPosition(RequestData* rd)
 		startPartitionIndex = i;
 	}
 
-	// 3) Read time of first and last records of this partition
+	// 3)
 
-	bool result = rd->partitionToRead.openForReading(rd->partitionsInfo[startPartitionIndex]);
+	bool positionFound = false;
 
-	if (result == false)
 	{
-		return false;
+		bool result = rd->partitionToRead.openForReading(rd->partitionsInfo[startPartitionIndex].startTime);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		bool res = rd->partitionToRead.findStartPosition(rd->timeType, rd->startTime, rd->endTime, &positionFound);
+
+		if (res == false)
+		{
+			return false;
+		}
+
+		if (positionFound == true)
+		{
+			return true;
+		}
 	}
-
-
-
+	while(1);
 
 	return true;
 }

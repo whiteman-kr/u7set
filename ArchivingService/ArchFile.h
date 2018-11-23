@@ -38,6 +38,9 @@ private:
 		void calcCRC16() { crc16 = calcCrc16(&state, sizeof(state)); }
 		bool isValid() const;
 
+		bool timeLessThen(E::TimeType timeType, qint64 time);
+		bool timeGreateThen(E::TimeType timeType, qint64 time);
+
 	};
 
 #pragma pack(pop)
@@ -52,6 +55,12 @@ private:
 		bool write(qint64 partitionSystemTime, Record* buffer, int statesCount, qint64* totalFushedStatesCount);
 
 		bool openForReading(qint64 partitionSystemTime);
+
+		bool getFirstAndLastRecords(Record* first, Record* last, bool* noRecords);
+
+		bool readRecord(qint64 recordIndex, Record* record);
+
+		bool findStartPosition(E::TimeType timeType, qint64 startTime, qint64 endTime, bool* positionFound);
 
 		bool close();
 
@@ -70,6 +79,9 @@ private:
 
 		qint64 m_startTime = -1;		// system start time of partition (acquired from partition's file name)
 		qint64 m_size = -1;				// partition's file size
+
+		static const qint64 FIRST_RECORD = 0;
+		static const qint64 LAST_RECORD = -1;
 	};
 
 	class RequestData
