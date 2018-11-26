@@ -5,6 +5,7 @@ class CentralWidget;
 class DbController;
 class ProjectsTabPage;
 class SchemasTabPage;
+class SchemasTabPageEx;
 class EquipmentTabPage;
 class SignalsTabPage;
 class FilesTabPage;
@@ -107,6 +108,7 @@ private:
 	ProjectsTabPage* m_projectsTab = nullptr;
 	EquipmentTabPage* m_equipmentTab = nullptr;
 	SignalsTabPage* m_signalsTab = nullptr;
+	SchemasTabPageEx* m_logicSchemaTabPage = nullptr;
 	SchemasTabPage* m_logicSchema = nullptr;
 	SchemasTabPage* m_ufbLibrary = nullptr;
 	SchemasTabPage* m_monitorSchema = nullptr;

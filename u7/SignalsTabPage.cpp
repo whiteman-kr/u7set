@@ -1616,7 +1616,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	QToolBar* toolBar = new QToolBar(this);
 
-	connect(GlobalMessanger::instance(), &GlobalMessanger::showDeviceApplicationSignals, this, &SignalsTabPage::changeSignalIdFilter);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::showDeviceApplicationSignals, this, &SignalsTabPage::changeSignalIdFilter);
 
 	QToolBar* filterToolBar = new QToolBar(this);
 
@@ -1727,10 +1727,10 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// --
 	//
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SignalsTabPage::projectOpened);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SignalsTabPage::projectClosed);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SignalsTabPage::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SignalsTabPage::projectClosed);
 
-	connect(GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &SignalsTabPage::compareObject);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &SignalsTabPage::compareObject);
 
 	// Evidently, project is not opened yet
 	//
@@ -1752,7 +1752,7 @@ SignalsTabPage::~SignalsTabPage()
 	}
 }
 
-bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties)
+bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& /*forceUpdateProperties*/)
 {
 	TEST_PTR_RETURN_FALSE(dbc);
 
@@ -2449,7 +2449,7 @@ void SignalsTabPage::changeSignalIdFilter(QStringList strIds, bool refreshSignal
 
 	m_filterEdit->setText(newFilter);
 
-	GlobalMessanger::instance()->fireChangeCurrentTab(this);
+	GlobalMessanger::instance().fireChangeCurrentTab(this);
 }
 
 void SignalsTabPage::applySignalIdFilter()

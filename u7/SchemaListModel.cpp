@@ -77,8 +77,7 @@ QVariant SchemaListModel::data(const QModelIndex& index, int role /*= Qt::Displa
 
 					if (fn.isEmpty() == false)
 					{
-						auto gm = GlobalMessanger::instance();
-						auto issueCount = gm->issueForSchema(fn.front());
+						auto issueCount = GlobalMessanger::instance().issueForSchema(fn.front());
 
 						if (issueCount.errors == 0 && issueCount.warnings == 0)
 						{
@@ -175,8 +174,7 @@ QVariant SchemaListModel::data(const QModelIndex& index, int role /*= Qt::Displa
 
 				if (fn.isEmpty() == false)
 				{
-					auto gm = GlobalMessanger::instance();
-					auto issueCount = gm->issueForSchema(fn.front());
+					auto issueCount = GlobalMessanger::instance().issueForSchema(fn.front());
 
 					if (issueCount.errors > 0)
 					{

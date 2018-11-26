@@ -57,6 +57,9 @@ public:
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, bool removeDeleted, QWidget* parentWidget);
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted, QWidget* parentWidget);
 
+	bool getFileListTree(std::vector<DbFileInfo>* files, int parentId, bool removeDeleted, QWidget* parentWidget);
+	bool getFileListTree(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted, QWidget* parentWidget);
+
 	bool getFileInfo(int parentId, QString fileName, DbFileInfo* out, QWidget* parentWidget);
 	bool getFileInfo(int fileId, DbFileInfo* out, QWidget* parentWidget);
 	bool getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out, QWidget* parentWidget);

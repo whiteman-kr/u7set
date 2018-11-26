@@ -136,7 +136,7 @@ void ProjectsTabPage::projectOpened(DbProject project)
 	m_deleteProjectButton->setEnabled(false);
 	m_refreshProjectListButton->setEnabled(true);
 
-	GlobalMessanger::instance()->fireProjectOpened(project);
+	GlobalMessanger::instance().fireProjectOpened(project);
 }
 
 void ProjectsTabPage::projectClosed()
@@ -150,7 +150,7 @@ void ProjectsTabPage::projectClosed()
 	m_deleteProjectButton->setEnabled(true);
 	m_refreshProjectListButton->setEnabled(true);
 
-	GlobalMessanger::instance()->fireProjectClosed();
+	GlobalMessanger::instance().fireProjectClosed();
 }
 
 void ProjectsTabPage::createProject()

@@ -12,10 +12,10 @@ class DbController;
 // EquipmentModel
 //
 //
-
 class EquipmentModel : public QAbstractItemModel
 {
 	Q_OBJECT
+
 public:
 	EquipmentModel(DbController* dbcontroller, QWidget* parentWidget, QObject* parent);
 	virtual ~EquipmentModel();

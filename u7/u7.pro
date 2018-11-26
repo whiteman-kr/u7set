@@ -168,7 +168,8 @@ SOURCES +=\
     ../lib/Ui/DialogAbout.cpp \
     ../lib/Subsystem.cpp \
     ../lib/Connection.cpp \
-    ../lib/LogicModuleSet.cpp
+    ../lib/LogicModuleSet.cpp \
+    SchemaTabPageEx.cpp
 
 
 HEADERS  += \
@@ -302,7 +303,8 @@ HEADERS  += \
     ../lib/Subsystem.h \
     ../lib/DbObjectStorage.h \
     ../lib/Connection.h \
-    ../lib/LogicModuleSet.h
+    ../lib/LogicModuleSet.h \
+    SchemaTabPageEx.h
 
 
 FORMS    += \

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <QTableView>
+//#include <QTableView>
 #include "../lib/DbStruct.h"
 #include "../VFrame30/Schema.h"
 
@@ -8,6 +8,8 @@ class DbController;
 
 class SchemaListModel : public QAbstractTableModel
 {
+	Q_OBJECT
+
 public:
 	SchemaListModel(QObject* parent = nullptr);
 	virtual ~SchemaListModel();

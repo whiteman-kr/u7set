@@ -86,8 +86,8 @@ SchemaFileView::SchemaFileView(DbController* dbcontroller, const QString& parent
 
 	// --
 	//
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemaFileView::projectOpened);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemaFileView::projectClosed);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemaFileView::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemaFileView::projectClosed);
 
 	connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &SchemaFileView::filesViewSelectionChanged);
 
@@ -198,7 +198,7 @@ void SchemaFileView::timerEvent(QTimerEvent* event)
 {
 	QTableView::timerEvent(event);
 
-	int buildIuuseCount = GlobalMessanger::instance()->buildIssues().count();
+	int buildIuuseCount = GlobalMessanger::instance().buildIssues().count();
 
 	if (buildIuuseCount != m_lastBuildIssueCount)
 	{
@@ -930,10 +930,10 @@ SchemasTabPage::SchemasTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// --
 	//
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemasTabPage::projectOpened);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemasTabPage::projectClosed);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemasTabPage::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemasTabPage::projectClosed);
 
-	connect(GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &SchemasTabPage::compareObject);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &SchemasTabPage::compareObject);
 
 	// Evidently, project is not opened yet
 	//
@@ -1047,8 +1047,8 @@ void SchemasTabPage::projectOpened()
 
 void SchemasTabPage::projectClosed()
 {
-	GlobalMessanger::instance()->clearBuildSchemaIssues();
-	GlobalMessanger::instance()->clearSchemaItemRunOrder();
+	GlobalMessanger::instance().clearBuildSchemaIssues();
+	GlobalMessanger::instance().clearSchemaItemRunOrder();
 
 	// Close all opened documents
 	//
@@ -1378,8 +1378,8 @@ SchemaControlTabPage::SchemaControlTabPage(QString fileExt,
 
 	if (schema->isLogicSchema() == true)
 	{
-		connect(GlobalMessanger::instance(), &GlobalMessanger::addLogicSchema, this, &SchemaControlTabPage::addLogicSchema);
-		connect(GlobalMessanger::instance(), &GlobalMessanger::searchSchemaForLm, this, &SchemaControlTabPage::searchSchemaForLm);
+		connect(&GlobalMessanger::instance(), &GlobalMessanger::addLogicSchema, this, &SchemaControlTabPage::addLogicSchema);
+		connect(&GlobalMessanger::instance(), &GlobalMessanger::searchSchemaForLm, this, &SchemaControlTabPage::searchSchemaForLm);
 	}
 
 	return;
@@ -1447,7 +1447,7 @@ void SchemaControlTabPage::addLogicSchema(QStringList deviceStrIds, QString lmDe
 		parentTabWidget->setCurrentWidget(this);
 	}
 
-	GlobalMessanger::instance()->fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
+	GlobalMessanger::instance().fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
 
 	m_filesView->setFocus();
 
@@ -1922,7 +1922,7 @@ void SchemaControlTabPage::openFiles(std::vector<DbFileInfo> files)
 		return;
 	}
 
-	connect(GlobalMessanger::instance(), &GlobalMessanger::buildStarted, editTabPage, &EditSchemaTabPage::saveWorkcopy);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::buildStarted, editTabPage, &EditSchemaTabPage::saveWorkcopy);
 
 	// --
 	//
@@ -2367,7 +2367,7 @@ void SchemaControlTabPage::searchSchemaForLm(QString equipmentId)
 		parentTabWidget->setCurrentWidget(this);
 	}
 
-	GlobalMessanger::instance()->fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
+	GlobalMessanger::instance().fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
 
 	m_filesView->setFocus();
 

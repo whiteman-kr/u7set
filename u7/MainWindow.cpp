@@ -10,6 +10,7 @@
 #include "ProjectsTabPage.h"
 #include "FilesTabPage.h"
 #include "SchemaTabPage.h"
+#include "SchemaTabPageEx.h"
 #include "EquipmentTabPage.h"
 #include "SignalsTabPage.h"
 #include "DialogSubsystemListEditor.h"
@@ -47,9 +48,9 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	// --
 	//
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &MainWindow::projectOpened);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &MainWindow::projectClosed);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::changeCurrentTab, getCentralWidget(), &CentralWidget::setCurrentWidget);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &MainWindow::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &MainWindow::projectClosed);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::changeCurrentTab, getCentralWidget(), &CentralWidget::setCurrentWidget);
 
 	// Add main tab pages
 	//
@@ -60,23 +61,38 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	m_filesTabPage = new FilesTabPage(dbController(), nullptr);
 	m_filesTabPage->setWindowTitle(tr("Files"));
 
-//	m_logicSchema = SchemasTabPage::create<VFrame30::LogicSchema, VFrame30::UfbSchema>(
-//				dbController(), nullptr,
-//				::AlFileExtension, ::AlFileName, ::AlTemplExtension, tr("Control"),
-//				::UfbFileExtension, ::UfblFileName, ::UfbTemplExtension, tr("UFB Library"));
-
 	m_logicSchema = SchemasTabPage::create<VFrame30::LogicSchema>(
-						dbController(), nullptr,
-						::AlFileExtension, ::AlFileName, ::AlTemplExtension, tr("AppLogic"));
+						dbController(),
+						nullptr,
+						::AlFileExtension,
+						::AlFileName,
+						::AlTemplExtension,
+						tr("AppLogic"));
 
 	m_ufbLibrary = SchemasTabPage::create<VFrame30::UfbSchema>(
-					   dbController(), nullptr,
-					   ::UfbFileExtension, ::UfblFileName, ::UfbTemplExtension, tr("UFB Library"));
+					   dbController(),
+					   nullptr,
+					   ::UfbFileExtension,
+					   ::UfblFileName,
+					   ::UfbTemplExtension,
+					   tr("UFB Library"));
 	m_ufbLibrary->setWindowTitle(tr("UFB Library"));
 
 	m_monitorSchema = SchemasTabPage::create<VFrame30::MonitorSchema>(
-						  dbController(), nullptr,
-						  ::MvsFileExtension, ::MvsFileName, ::MvsTemplExtension, tr("Control"));
+						  dbController(),
+						  nullptr,
+						  ::MvsFileExtension,
+						  ::MvsFileName,
+						  ::MvsTemplExtension,
+						  tr("Control"));
+
+	m_logicSchemaTabPage = SchemasTabPageEx::create<VFrame30::LogicSchema>(
+							   dbController(),
+							   ::AlFileExtension,
+							   ::AlFileName,
+							   ::AlTemplExtension,
+							   tr("AppLogic"),
+							   nullptr);
 
 	getCentralWidget()->addTabPage(m_projectsTab, tr("Projects"));
 	getCentralWidget()->addTabPage(m_equipmentTab, tr("Equipment"));
@@ -87,6 +103,7 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	//m_diagSchema = SchemasTabPage::create<VFrame30::DiagSchema>(DvsFileExtension, dbController(), DvsFileName, nullptr);
 
+	getCentralWidget()->addTabPage(m_logicSchemaTabPage, tr("Application Logic Ex"));
 	getCentralWidget()->addTabPage(m_logicSchema, tr("Application Logic"));
 	getCentralWidget()->addTabPage(m_monitorSchema, tr("Monitor Schemas"));
 	//getCentralWidget()->addTabPage(m_diagSchema, tr("Diag Schemas"));
@@ -97,8 +114,8 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	m_uploadTabPage = new UploadTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(m_uploadTabPage, tr("Upload"));
 
-	//m_simulatorTabPage = new SimulatorTabPage(dbController(), nullptr);
-	//getCentralWidget()->addTabPage(m_simulatorTabPage, tr("Simulator"));
+	m_simulatorTabPage = new SimulatorTabPage(dbController(), nullptr);
+	getCentralWidget()->addTabPage(m_simulatorTabPage, tr("Simulator"));
 
 	// --
 	//
@@ -292,10 +309,10 @@ void MainWindow::createActions()
 	bks << QKeySequence(Qt::Key_F7);
 	m_startBuildAction->setShortcuts(bks);
 	connect(m_startBuildAction, &QAction::triggered, this, &MainWindow::startBuild);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::buildStarted, this, [this](){m_startBuildAction->setEnabled(false);});
-	connect(GlobalMessanger::instance(), &GlobalMessanger::buildFinished, this, [this](){m_startBuildAction->setEnabled(true);});
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_startBuildAction->setEnabled(true);});
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_startBuildAction->setEnabled(false);});
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::buildStarted, this, [this](){m_startBuildAction->setEnabled(false);});
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::buildFinished, this, [this](){m_startBuildAction->setEnabled(true);});
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_startBuildAction->setEnabled(true);});
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_startBuildAction->setEnabled(false);});
 	addAction(m_startBuildAction);
 
 
@@ -303,8 +320,8 @@ void MainWindow::createActions()
 	m_projectHistoryAction->setStatusTip(tr("Show project history"));
 	m_projectHistoryAction->setEnabled(false);
 	connect(m_projectHistoryAction, &QAction::triggered, this, &MainWindow::projectHistory);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_projectHistoryAction->setEnabled(true);});
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectHistoryAction->setEnabled(false);});
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_projectHistoryAction->setEnabled(true);});
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectHistoryAction->setEnabled(false);});
 	addAction(m_projectHistoryAction);
 
 	return;
@@ -562,7 +579,7 @@ void MainWindow::updateUfbsAfbsBusses()
 	}
 
 	showUfbLibraryTabPage(true);
-	GlobalMessanger::instance()->fireChangeCurrentTab(m_logicSchema);
+	GlobalMessanger::instance().fireChangeCurrentTab(m_logicSchema);
 
 	// Get Busses
 	//

@@ -18,7 +18,7 @@ const char* BuildTabPage::m_buildLogFileName = "buildlog.html";
 
 BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	MainTabPage(dbcontroller, parent),
-	m_builder(&GlobalMessanger::instance()->buildIssues())
+	m_builder(&GlobalMessanger::instance().buildIssues())
 {
 	assert(dbcontroller != nullptr);
 
@@ -143,10 +143,10 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// --
 	//
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &BuildTabPage::projectOpened);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &BuildTabPage::projectClosed);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &BuildTabPage::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &BuildTabPage::projectClosed);
 
-	connect(&m_builder, &Builder::Builder::runOrderReady, GlobalMessanger::instance(), &GlobalMessanger::runOrderReady);
+	connect(&m_builder, &Builder::Builder::runOrderReady, &GlobalMessanger::instance(), &GlobalMessanger::runOrderReady);
 
 	connect(m_buildButton, &QAbstractButton::clicked, this, &BuildTabPage::build);
 	connect(m_cancelButton, &QAbstractButton::clicked, this, &BuildTabPage::cancel);
@@ -357,7 +357,7 @@ void BuildTabPage::build()
 
 	// --
 	//
-	GlobalMessanger::instance()->fireBuildStarted();
+	GlobalMessanger::instance().fireBuildStarted();
 
 	bool debug = m_debugCheckBox->isChecked();
 
@@ -383,8 +383,8 @@ void BuildTabPage::cancel()
 
 void BuildTabPage::buildWasStarted()
 {
-	GlobalMessanger::instance()->clearBuildSchemaIssues();
-	GlobalMessanger::instance()->clearSchemaItemRunOrder();
+	GlobalMessanger::instance().clearBuildSchemaIssues();
+	GlobalMessanger::instance().clearSchemaItemRunOrder();
 
 	m_buildButton->setEnabled(false);
 	m_cancelButton->setEnabled(true);
@@ -397,7 +397,7 @@ void BuildTabPage::buildWasFinished(int errorCount)
 
 	m_itemsIssues.clear();
 
-	GlobalMessanger::instance()->fireBuildFinished(errorCount);
+	GlobalMessanger::instance().fireBuildFinished(errorCount);
 
 	return;
 }

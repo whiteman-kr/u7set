@@ -20,8 +20,6 @@ protected:
 	DbController* dbController();
 	DbController* db();
 
-	GlobalMessanger* globalMesssanger();
-
 	// Data
 	//
 private:

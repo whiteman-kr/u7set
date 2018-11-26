@@ -27,8 +27,8 @@ SimulatorTabPage::SimulatorTabPage(DbController* dbc, QWidget* parent) :
 
 	// --
 	//
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SimulatorTabPage::projectOpened);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SimulatorTabPage::projectClosed);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SimulatorTabPage::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SimulatorTabPage::projectClosed);
 
 	// Evidently, project is not opened yet
 	//

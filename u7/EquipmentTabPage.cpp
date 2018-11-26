@@ -45,8 +45,8 @@ EquipmentModel::EquipmentModel(DbController* dbcontroller, QWidget* parentWidget
 
 	m_root = m_configuration;	// Edit configuration default mode
 
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &EquipmentModel::projectOpened);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &EquipmentModel::projectClosed);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &EquipmentModel::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &EquipmentModel::projectClosed);
 }
 
 EquipmentModel::~EquipmentModel()
@@ -2366,7 +2366,7 @@ void EquipmentView::showAppSignals(bool refreshSignalList /*= false*/)
 		}
 	}
 
-	GlobalMessanger::instance()->fireShowDeviceApplicationSignals(strIds, refreshSignalList);
+	GlobalMessanger::instance().fireShowDeviceApplicationSignals(strIds, refreshSignalList);
 
 	return;
 }
@@ -2454,7 +2454,7 @@ void EquipmentView::addLogicSchemaToLm()
 		}
 	}
 
-	GlobalMessanger::instance()->fireAddLogicSchema(deviceStrIds, lmDescriptioFile);
+	GlobalMessanger::instance().fireAddLogicSchema(deviceStrIds, lmDescriptioFile);
 	return;
 }
 
@@ -2481,7 +2481,7 @@ void EquipmentView::showLogicSchemaForLm()
 		return;
 	}
 
-	GlobalMessanger::instance()->fireSearchSchemaForLm(module->equipmentId());
+	GlobalMessanger::instance().fireSearchSchemaForLm(module->equipmentId());
 
 	return;
 }
@@ -3916,8 +3916,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//
 	connect(QApplication::clipboard(), &QClipboard::dataChanged, this, &EquipmentTabPage::clipboardChanged);
 
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &EquipmentTabPage::projectOpened);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &EquipmentTabPage::projectClosed);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &EquipmentTabPage::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &EquipmentTabPage::projectClosed);
 
 	connect(m_equipmentView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &EquipmentTabPage::selectionChanged);
 
@@ -3928,7 +3928,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	connect(m_equipmentModel, &EquipmentModel::objectVcsStateChanged, this, &EquipmentTabPage::objectVcsStateChanged);
 
-	connect(GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &EquipmentTabPage::compareObject);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &EquipmentTabPage::compareObject);
 
 	// Evidently, project is not opened yet
 	//

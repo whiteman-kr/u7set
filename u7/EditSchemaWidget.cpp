@@ -120,7 +120,7 @@ void EditSchemaView::timerEvent(QTimerEvent* event)
 	{
 		// Repaint schema if there are any new issues for it
 		//
-		Builder::BuildIssues::Counter schemaIssues = GlobalMessanger::instance()->buildIssues().issueForSchema(schema()->schemaId());
+		Builder::BuildIssues::Counter schemaIssues = GlobalMessanger::instance().buildIssues().issueForSchema(schema()->schemaId());
 
 		if (schemaIssues.errors !=  m_lastSchemaIssues.errors ||
 			schemaIssues.warnings !=  m_lastSchemaIssues.warnings)
@@ -269,7 +269,7 @@ void EditSchemaView::drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF cli
 		{
 			const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
 
-			OutputMessageLevel issue = GlobalMessanger::instance()->issueForSchemaItem(item->guid());
+			OutputMessageLevel issue = GlobalMessanger::instance().issueForSchemaItem(item->guid());
 
 			if ((issue == OutputMessageLevel::Warning0 ||
 				 issue == OutputMessageLevel::Warning1 ||
@@ -345,7 +345,7 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 
 						for (int i = 0; i < eqIds.size(); i++)
 						{
-							auto runIndex = GlobalMessanger::instance()->schemaItemRunOrder(eqIds[i], item->guid());
+							auto runIndex = GlobalMessanger::instance().schemaItemRunOrder(eqIds[i], item->guid());
 
 							if (i == 0)
 							{
@@ -373,7 +373,7 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 					}
 					else
 					{
-						auto runIndex = GlobalMessanger::instance()->schemaItemRunOrder(logicSchema->equipmentIds(), item->guid());
+						auto runIndex = GlobalMessanger::instance().schemaItemRunOrder(logicSchema->equipmentIds(), item->guid());
 
 						if (runIndex.first == runIndex.second)
 						{
@@ -388,7 +388,7 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 
 				if (schema()->isUfbSchema() == true)
 				{
-					auto runIndex = GlobalMessanger::instance()->schemaItemRunOrder(schema()->schemaId(), item->guid());
+					auto runIndex = GlobalMessanger::instance().schemaItemRunOrder(schema()->schemaId(), item->guid());
 
 					if (runIndex.first == runIndex.second)
 					{

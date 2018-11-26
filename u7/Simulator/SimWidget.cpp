@@ -629,7 +629,7 @@ SimToolBar::SimToolBar(const QString& title, QWidget* parent) :
 	setMovable(false);
 	setObjectName("SimulatorToolBar");
 
-	setIconSize(iconSize() / 1.5);
+	setIconSize(iconSize() * 0.9);
 
 	toggleViewAction()->setDisabled(true);
 
