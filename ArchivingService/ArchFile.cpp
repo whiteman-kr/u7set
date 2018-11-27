@@ -32,6 +32,25 @@ bool ArchFile::Record::timeLessThen(E::TimeType timeType, qint64 time)
 	return false;
 }
 
+bool ArchFile::Record::timeLessOrEqualThen(E::TimeType timeType, qint64 time)
+{
+	assert(isValid());
+
+	switch(timeType)
+	{
+	case E::TimeType::System:
+		return state.systemTime <= time;
+
+	case E::TimeType::Plant:
+		return state.plantTime <= time;
+
+	default:
+		assert(false);
+	}
+
+	return false;
+}
+
 bool ArchFile::Record::timeGreateThen(E::TimeType timeType, qint64 time)
 {
 	assert(isValid());
@@ -50,6 +69,26 @@ bool ArchFile::Record::timeGreateThen(E::TimeType timeType, qint64 time)
 
 	return false;
 }
+
+bool ArchFile::Record::timeGreateOrEqualThen(E::TimeType timeType, qint64 time)
+{
+	assert(isValid());
+
+	switch(timeType)
+	{
+	case E::TimeType::System:
+		return state.systemTime >= time;
+
+	case E::TimeType::Plant:
+		return state.plantTime >= time;
+
+	default:
+		assert(false);
+	}
+
+	return false;
+}
+
 
 
 // -----------------------------------------------------------------------------------------------------------------------
@@ -288,31 +327,50 @@ bool ArchFile::Partition::findStartPosition(E::TimeType timeType, qint64 startTi
 	//								F				L
 	// 2)							[== PARTITION ==]						F > S && F <= E		pos == 0
 	//
-	//					F				L
-	// 3)				[== PARTITION ==]									F <= S				binary search pos
-	//
 	//		F				L
-	// 4)	[== PARTITION ==]												L < S				goto next partition
+	// 3)	[== PARTITION ==]												L < S				goto next partition
 	//
+	//					F				L
+	// 4)				[== PARTITION ==]									F <= S				binary search pos
 	//
 
-	// case 1
+	// case 1)
 
 	if (firstRecord.timeGreateThen(timeType, endTime) == true)
 	{
 		*positionFound = false;
-		return false;
+		return true;
 	}
 
-	if (firstRecord.timeLessThen(timeType, startTime) == true)
+	// case 2)
+
+	if (firstRecord.timeGreateThen(timeType, startTime) == true &&
+		firstRecord.timeLessOrEqualThen(timeType, endTime) == true)
 	{
-
+		*positionFound = true;
+		moveToRecord(0);
+		return true;
 	}
-	else
+
+	// case 3)
+
+	if (lastRecord.timeLessThen(timeType, startTime) == true)
 	{
-
+		*positionFound = false;
+		return true;
 	}
 
+	// case 4)
+
+	if (firstRecord.timeLessOrEqualThen(timeType, startTime) == true)
+	{
+		bool result = binarySearch(timeType, startTime);
+
+		*positionFound = result;
+		return result;
+	}
+
+	*positionFound = false;
 	return true;
 }
 
@@ -337,6 +395,80 @@ QString ArchFile::Partition::getFileName(qint64 partitionStartTime)
 							EXTENSION);
 
 	return fileName;
+}
+
+void ArchFile::Partition::moveToRecord(qint64 record)
+{
+	asser(m_file.isOpen() == true);
+
+	m_file.seek(record * sizeof(ArchFile::Record));
+}
+
+qint64 ArchFile::Partition::binarySearch(E::TimeType timeType, qint64 time)
+{
+	qint64 recordCount  = recordsCount();
+
+	if (recordCount == 0)
+	{
+		return POSITION_NOT_FOUND;
+	}
+
+	if (recordCount == 1)
+	{
+		Record record;
+
+		bool res = readRecord(0, &record);
+
+		if (res == false || record.timeLessThen(imtType, time) == true)
+		{
+			return POSITION_NOT_FOUND;
+		}
+
+		return 0;
+	}
+
+	int leftIndex = 0;
+	int rightIndex = recordCount - 1;
+
+	do
+	{
+		Record leftRecord;
+		Record rightRecord;
+
+		bool res = true;
+
+		res &= readRecord(leftIndex, &leftRecord);
+		res &= readRecord(rightIndex, &rightRecord);
+
+		if (res == false)
+		{
+			return READ_ERROR;
+		}
+
+		if (leftRecord.timeGreateOrEqualThen(timeType, time) == true)
+		{
+			return leftIndex;
+		}
+
+		// leftRecord.time is less then time, check rightRecord
+
+		if (rightRecord.timeGreateOrEqualThen(timeType, time) == true)
+		{
+			if (rightIndex - leftIndex <= 1)
+			{
+				return rightIndex;
+			}
+
+			left
+		}
+
+	}
+	while(1);
+
+
+
+
+
 }
 
 void ArchFile::Partition::closeFile()

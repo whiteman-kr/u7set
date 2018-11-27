@@ -39,8 +39,10 @@ private:
 		bool isValid() const;
 
 		bool timeLessThen(E::TimeType timeType, qint64 time);
-		bool timeGreateThen(E::TimeType timeType, qint64 time);
+		bool timeLessOrEqualThen(E::TimeType timeType, qint64 time);
 
+		bool timeGreateThen(E::TimeType timeType, qint64 time);
+		bool timeGreateOrEqualThen(E::TimeType timeType, qint64 time);
 	};
 
 #pragma pack(pop)
@@ -66,6 +68,10 @@ private:
 
 	private:
 		QString getFileName(qint64 partitionStartTime);
+
+		void moveToRecord(qint64 record);
+		qint64 binarySearch(E::TimeType timeType, qint64 time);
+
 		void closeFile();
 
 	private:
@@ -82,6 +88,9 @@ private:
 
 		static const qint64 FIRST_RECORD = 0;
 		static const qint64 LAST_RECORD = -1;
+
+		static const qint64 POSITION_NOT_FOUND = -999;
+		static const qint64 READ_ERROR = -9999;
 	};
 
 	class RequestData
