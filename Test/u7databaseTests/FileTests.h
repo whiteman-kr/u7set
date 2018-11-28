@@ -53,6 +53,7 @@ private slots:
 	void get_latest_file_versionTest();
 	void get_file_listIntegerIntegerTextTest();
 	void get_file_listIntegerIntegerTest();
+	void get_file_list_tree_test();
 	void get_latest_file_tree_versionTest();
 	void undo_changesTest();
 	void add_or_update_fileTest();

@@ -252,6 +252,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0232.sql", "Upgrade to version 232, Adding LM1_SR03 preset and scripts"},
 	{":/DatabaseUpgrade/Upgrade0233.sql", "Upgrade to version 233, ArchService properties were removed from Monitor preset"},
 	{":/DatabaseUpgrade/Upgrade0234.sql", "Upgrade to version 234, Changed LM1_SR03 ID and DescriptionNumber"},
+	{":/DatabaseUpgrade/Upgrade0235.sql", "Upgrade to version 235, Added function api.get_file_list_tree"},
 };
 
 
@@ -2361,6 +2362,70 @@ void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, 
 
 	return;
 }
+
+void DbWorker::slot_getFileListTree(DbFileTree* filesTree, int parentId, QString filter, bool removeDeleted)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (filesTree == nullptr)
+	{
+		assert(filesTree != nullptr);
+		return;
+	}
+
+	filesTree->clear();
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get file list tree. Database connection is not openned."));
+		return;
+	}
+
+	QSqlQuery q(db);
+	q.setForwardOnly(true);
+
+	q.prepare("SELECT * FROM api.get_file_list_tree(:session_key, :parentid, :filter, :remove_deleted);");
+	q.bindValue(":session_key", sessionKey());
+	q.bindValue(":parentid", parentId);
+	q.bindValue(":filter", "%" + filter);
+	q.bindValue(":remove_deleted", removeDeleted);
+
+	if (bool result = q.exec();
+		result == false)
+	{
+		emitError(db, tr("Can't get file list tree. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while (q.next())
+	{
+		std::shared_ptr<DbFileInfo> fileInfo = std::make_shared<DbFileInfo>();
+
+		bool fileParseOk = db_dbFileInfo(q, fileInfo.get());
+		if (fileParseOk == false)
+		{
+			assert(fileParseOk);
+			continue;
+		}
+
+		filesTree->addFile(fileInfo);
+	}
+
+	filesTree->setRoot(parentId);
+
+	return;
+}
+
 
 void DbWorker::slot_getFileInfo(int parentId, QString fileName, DbFileInfo* out)
 {

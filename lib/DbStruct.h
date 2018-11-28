@@ -1,11 +1,13 @@
 #pragma once
 
+#include <vector>
+#include <memory>
+#include <cassert>
+#include <map>
 #include <QString>
 #include <QDateTime>
 #include <QMetaType>
 #include <QtSql/QSqlRecord>
-#include <memory>
-#include <assert.h>
 
 class Signal;
 
@@ -226,6 +228,62 @@ private:
 	bool m_disabled = false;
 };
 
+//
+// DbFileTree
+//
+class DbFileInfo;
+
+class DbFileTree
+{
+public:
+	DbFileTree() = default;
+	DbFileTree(const DbFileTree&) = default;
+	DbFileTree& operator=(const DbFileTree&) = default;
+
+	DbFileTree(DbFileTree&& src);
+	DbFileTree& operator=(DbFileTree&& src);
+
+public:
+	void clear();
+
+	int size() const;
+
+	bool isDbFile() const;		// true if contains DbFile whith data or tree is empty
+	bool isDbFileInfo() const;	// true if contains DbFileInfo or tree is empty
+
+	bool isRoot(int fileId) const;
+	bool isRoot(const DbFileInfo& fileInfo) const;
+
+	std::shared_ptr<DbFileInfo> rootFile();
+	std::shared_ptr<DbFileInfo> rootFile() const;
+
+	std::shared_ptr<DbFileInfo> file(int fileId);
+	std::shared_ptr<DbFileInfo> file(int fileId) const;
+
+	std::vector<std::shared_ptr<DbFileInfo>> childeren(int parentId) const;
+	std::vector<std::shared_ptr<DbFileInfo>> childeren(const DbFileInfo& fileInfo) const;
+	std::vector<std::shared_ptr<DbFileInfo>> childeren(const std::shared_ptr<DbFileInfo>& fileInfo) const;
+
+	// Modifying structure
+	//
+	void setRoot(int rootFileId);
+
+	void addFile(const DbFileInfo& fileInfo);
+	void addFile(std::shared_ptr<DbFileInfo> fileInfo);
+
+	bool removeFile(int fileId);
+	bool removeFile(const DbFileInfo& fileInfo);
+	bool removeFile(std::shared_ptr<DbFileInfo> fileInfo);
+
+private:
+	// WARNING, assigment move is present, adding new member, modify operator=(DbFileTree&&)!!!
+	//
+	std::multimap<int, std::shared_ptr<DbFileInfo>> m_parentIdToChildren;	// Key is parent, values are its' parent children
+	std::map<int, std::shared_ptr<DbFileInfo>> m_files;						// Key if fileId, value is DbFile(Info) object
+	int m_rootFileId = -1;
+	// WARNING, assigment move is present, adding new member, modify operator=(DbFileTree&&)!!!
+	//
+};
 
 //
 //
@@ -465,6 +523,8 @@ private:
 	QString m_parent;
 };
 
+
+
 // WIN_64 PLATFORM C4267 WARNING ISSUE, IT IS NOT ENOUGH TO DISBALE THIS WARNING
 // To remove annoing warning c4267 under windows x64, go to qmetatype.h, line 897 (Qt 5.3.1) and set static_cast to int for the
 // returning value.
@@ -475,6 +535,7 @@ private:
 //
 
 Q_DECLARE_METATYPE(DbUser)
+Q_DECLARE_METATYPE(DbFileTree)
 Q_DECLARE_METATYPE(DbFileInfo)
 Q_DECLARE_METATYPE(DbFile)
 Q_DECLARE_METATYPE(DbChangeset)

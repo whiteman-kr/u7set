@@ -334,6 +334,255 @@ void DbUser::setDisabled(bool value)
 
 //
 //
+//	DbFileTree
+//
+//
+DbFileTree::DbFileTree(DbFileTree&& src)
+{
+	operator=(std::move(src));
+}
+
+DbFileTree& DbFileTree::operator=(DbFileTree&& src)
+{
+	qDebug() << "Move DbFileTree ))))";
+
+	m_parentIdToChildren = std::move(src.m_parentIdToChildren);
+	m_files = std::move(src.m_files);
+
+	m_rootFileId = src.m_rootFileId;
+	src.m_rootFileId = -1;
+
+	return *this;
+}
+
+
+void DbFileTree::clear()
+{
+	m_parentIdToChildren.clear();
+	m_files.clear();
+	m_rootFileId = -1;
+}
+
+int DbFileTree::size() const
+{
+	return static_cast<int>(m_files.size());
+}
+
+bool DbFileTree::isDbFile() const
+{
+	if (m_files.empty() == true)
+	{
+		return false;
+	}
+
+	bool result = std::dynamic_pointer_cast<DbFile>(m_files.cbegin()->second) != nullptr;
+	return result;
+}
+
+bool DbFileTree::isDbFileInfo() const
+{
+	if (m_files.empty() == true)
+	{
+		return false;
+	}
+
+	bool result = std::dynamic_pointer_cast<DbFileInfo>(m_files.cbegin()->second) != nullptr;
+	return result;
+}
+
+bool DbFileTree::isRoot(int fileId) const
+{
+	return fileId == m_rootFileId;
+}
+
+bool DbFileTree::isRoot(const DbFileInfo& fileInfo) const
+{
+	return fileInfo.fileId() == m_rootFileId;
+}
+
+std::shared_ptr<DbFileInfo> DbFileTree::rootFile()
+{
+	auto it = m_files.find(m_rootFileId);
+	if (it == std::end(m_files))
+	{
+		return {};
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+std::shared_ptr<DbFileInfo> DbFileTree::rootFile() const
+{
+	auto it = m_files.find(m_rootFileId);
+	if (it == std::end(m_files))
+	{
+		return {};
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+std::shared_ptr<DbFileInfo> DbFileTree::file(int fileId)
+{
+	auto it = m_files.find(fileId);
+	if (it == std::end(m_files))
+	{
+		return {};
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+std::shared_ptr<DbFileInfo> DbFileTree::file(int fileId) const
+{
+	auto it = m_files.find(fileId);
+	if (it == std::end(m_files))
+	{
+		return {};
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+std::vector<std::shared_ptr<DbFileInfo>> DbFileTree::childeren(int parentId) const
+{
+	std::vector<std::shared_ptr<DbFileInfo>> result;
+	result.reserve(16);
+
+	auto[pitBegin, pitEnd] = m_parentIdToChildren.equal_range(parentId);
+
+	for (auto pit = pitBegin; pit != pitEnd; ++pit)
+	{
+		std::shared_ptr<DbFileInfo> sp = pit->second;
+
+		if (sp == nullptr)
+		{
+			assert(sp != nullptr);
+			return result;
+		}
+
+		if (sp->parentId() != parentId)
+		{
+			assert(sp->parentId() != parentId);
+			continue;
+		}
+
+		result.push_back(sp);
+	}
+
+	return result;
+}
+
+std::vector<std::shared_ptr<DbFileInfo>> DbFileTree::childeren(const DbFileInfo& fileInfo) const
+{
+	return childeren(fileInfo.fileId());
+}
+
+std::vector<std::shared_ptr<DbFileInfo>> DbFileTree::childeren(const std::shared_ptr<DbFileInfo>& fileInfo) const
+{
+	if (fileInfo == nullptr)
+	{
+		assert(fileInfo != nullptr);
+		return {};
+	}
+
+	return childeren(fileInfo->fileId());
+}
+
+void DbFileTree::setRoot(int rootFileId)
+{
+	assert(m_files.count(rootFileId) == 1);
+	m_rootFileId = rootFileId;
+}
+
+void DbFileTree::addFile(const DbFileInfo& fileInfo)
+{
+	std::shared_ptr<DbFileInfo> sp = std::make_shared<DbFileInfo>(fileInfo);
+
+	m_files[fileInfo.fileId()] = sp;
+	m_parentIdToChildren.insert({fileInfo.parentId(), sp});
+
+	return;
+}
+
+void DbFileTree::addFile(std::shared_ptr<DbFileInfo> fileInfo)
+{
+	m_files[fileInfo->fileId()] = fileInfo;
+	m_parentIdToChildren.insert({fileInfo->parentId(), fileInfo});
+
+	return;
+}
+
+bool DbFileTree::removeFile(int fileId)
+{
+	auto fit = m_files.find(fileId);
+	if (fit == std::end(m_files))
+	{
+		assert(fit != std::end(m_files));
+		return false;
+	}
+
+	std::shared_ptr<DbFileInfo>& fileInfo = fit->second;
+	assert(fileId == fileInfo->fileId());
+
+	// m_parentIdToChildren is multimap,.
+	// so find the reange with key (parentId),
+	// iterate range, and delete the right one
+	//
+	auto[pitBegin, pitEnd] = m_parentIdToChildren.equal_range(fileInfo->parentId());
+	if (pitBegin == std::end(m_parentIdToChildren))
+	{
+		assert(false);
+		return false;
+	}
+
+	bool deleted = false;
+	for (auto pit = pitBegin; pit != pitEnd; ++pit)
+	{
+		if (pit->second == fileInfo)
+		{
+			m_parentIdToChildren.erase(pit);
+			deleted = true;
+			break;
+		}
+	}
+
+	if (deleted == false)
+	{
+		// Not found
+		//
+		assert(deleted);
+		return false;
+	}
+
+	// Remove from m_files
+	//
+	m_files.erase(fit);
+
+	return true;
+}
+
+bool DbFileTree::removeFile(const DbFileInfo& fileInfo)
+{
+	return removeFile(fileInfo.fileId());
+}
+
+bool DbFileTree::removeFile(std::shared_ptr<DbFileInfo> fileInfo)
+{
+	return removeFile(fileInfo->fileId());
+}
+
+
+//
+//
 //	DbFileInfo
 //
 //

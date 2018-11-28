@@ -39,6 +39,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_isFileExists, m_worker, &DbWorker::slot_isFileExists);
 
 	connect(this, &DbController::signal_getFileList, m_worker, &DbWorker::slot_getFileList);
+	connect(this, &DbController::signal_getFileListTree, m_worker, &DbWorker::slot_getFileListTree);
 
 	connect(this, &DbController::signal_getFileInfo, m_worker, &DbWorker::slot_getFileInfo);
 	connect(this, &DbController::signal_getFilesInfo, m_worker, &DbWorker::slot_getFilesInfo);
@@ -516,6 +517,37 @@ bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, QSt
 	emit signal_getFileList(files, parentId, filter, removeDeleted);
 
 	bool result = waitForComplete(parentWidget, tr("Geting file list"));
+	return result;
+}
+
+bool DbController::getFileListTree(DbFileTree* filesTree, int parentId, bool removeDeleted, QWidget* parentWidget)
+{
+	return getFileListTree(filesTree, parentId, QString{}, removeDeleted, parentWidget);
+}
+
+bool DbController::getFileListTree(DbFileTree* filesTree, int parentId, QString filter, bool removeDeleted, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (filesTree == nullptr)
+	{
+		assert(filesTree != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getFileListTree(filesTree, parentId, filter, removeDeleted);
+
+	bool result = waitForComplete(parentWidget, tr("Geting file list tree"));
 	return result;
 }
 

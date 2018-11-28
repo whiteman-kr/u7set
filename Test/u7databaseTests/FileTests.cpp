@@ -1772,7 +1772,6 @@ void FileTests::get_file_listIntegerIntegerTest()
 	// 2nd file must be checked in, 3rd file must be checked in - deleted - checked in
 	// 4th file must has wrong parent, and 5th file must has wrong name
 	//
-
 	bool ok = query.exec(QString("SELECT * FROM add_file(%1, 'randomParentNameForGetFileListTest', 1, 'FatherGentoo', '%2');").arg(m_user1.userId).arg(detail));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -2079,6 +2078,120 @@ void FileTests::get_file_listIntegerIntegerTest()
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == false, qPrintable("Empty row expected"));
+}
+
+void FileTests::get_file_list_tree_test()
+{
+	// 1. LogIn as User1
+	//
+	QString session_key = logIn("Administrator", m_projectAdministratorPassword);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	bool ok = true;
+
+	// 2. Create file tree:
+	//
+	// $root$/TestTreeRoot.ttr/
+	//                        File1.ttr
+	//                        File2.ttr/
+	//                                  File21.ttr
+	//                                  File22.asd
+	//                                  File23.ttr
+	//                       /File3.asd
+	//                                  File31.ttr
+	//                                  File32.asd
+	//
+	QSqlQuery query;
+
+	// first - parent file name, second file name
+	//
+	std::list<std::pair<QString, QString>> createFiles =
+		{
+			{"$root$",								"TestTreeRoot.ttr"},
+
+			{"$root$/TestTreeRoot.ttr",				"File1.ttr"},
+
+			{"$root$/TestTreeRoot.ttr",				"File2.ttr"},	// File2.ttr -> Deleted and not checked in, so shoud remain in result with all childer
+			{"$root$/TestTreeRoot.ttr/File2.ttr",	"File21.ttr"},
+			{"$root$/TestTreeRoot.ttr/File2.ttr",	"File22.asd"},
+			{"$root$/TestTreeRoot.ttr/File2.ttr",	"File23.ttr"},
+
+			{"$root$/TestTreeRoot.ttr",				"File3.asd"},
+			{"$root$/TestTreeRoot.ttr/File3.asd",	"File31.ttr"},
+			{"$root$/TestTreeRoot.ttr/File3.asd",	"File32.asd"},
+
+			{"$root$/TestTreeRoot.ttr",				"File4.ttr"},	// Deleted and checked in, it will not be in result if RemoveFromDeleted
+			{"$root$/TestTreeRoot.ttr/File4.ttr",	"File41.ttr"},	// Parent deleted and checked in, it will not be in result if RemoveFromDeleted
+			{"$root$/TestTreeRoot.ttr/File4.ttr",	"File42.ttr"}	// Parent deleted and checked in, it will not be in result if RemoveFromDeleted
+		};
+
+	std::set<int> fileIds;
+	int fileId_File2_ttr = -1;
+	int fileId_File4_ttr = -1;
+
+	for (auto[parentFileName, fileName] : createFiles)
+	{
+		QString request = QString("SELECT * FROM api.add_or_update_file('%1', '%2', '%3', 'Test function get_file_list_tree_test', '', '{}');")
+						  .arg(session_key)
+						  .arg(parentFileName)
+						  .arg(fileName);
+
+		ok = query.exec(request);
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.size() == 1, "api.add_or_update_file, expected 1 record result");
+
+		query.next();
+		int fileId = query.value(0).toInt();
+
+		fileIds.insert(fileId);
+
+		// --
+		//
+		if (fileName == "File2.ttr")
+		{
+			fileId_File2_ttr = fileId;
+		}
+
+		if (fileName == "File4.ttr")
+		{
+			fileId_File4_ttr = fileId;
+		}
+	}
+
+	// Delete file: File2.ttr -> Deleted and NOT checked in, so shoud remain in result with all childer
+	//
+	ok = query.exec(QString("SELECT * FROM public.delete_file(1, %1);").arg(fileId_File2_ttr));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// Delete file: File4.ttr -> Deleted and check in
+	//
+	ok = query.exec(QString("SELECT * FROM public.delete_file(1, %1);").arg(fileId_File4_ttr));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	ok = query.exec(QString("SELECT * FROM public.check_in(1, ARRAY[%1], 'Delete fileId_File4_ttr');").arg(fileId_File4_ttr));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+	// 3. Test 1, get files tree, filter by 'ttr', don't get deleted files
+	//
+	int parentId = *fileIds.begin();
+
+	ok = query.exec(QString("SELECT * FROM api.get_file_list_tree('%1', %2, '%ttr', true);").arg(session_key).arg(parentId));
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.numRowsAffected() == 5, "Expected 5 files, as filetre for %%ttr is applied");
+
+	while (query.next())
+	{
+		int fileId = query.value(0).toInt();
+		QVERIFY2(fileIds.count(fileId) == 1, "Not all files are found.");
+		fileIds.erase(fileId);	// Remove this file to avoid comparision to it again
+	}
+
+	// 7. LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	return;
 }
 
 void FileTests::get_latest_file_tree_versionTest()

@@ -17,6 +17,7 @@ protected:
 private slots:
 	void initTestCase();
 	void getFileListTest();
+	void getFileListTreeTest();
 	void addFileTest();
 	void addFilesTest();
 	void deleteFileTest();

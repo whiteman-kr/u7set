@@ -102,6 +102,8 @@ public slots:
     void slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted);
     void getFileList_worker(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted);
 
+	void slot_getFileListTree(DbFileTree* filesTree, int parentId, QString filter, bool removeDeleted);
+
 	void slot_getFileInfo(int parentId, QString fileName, DbFileInfo* out);
 	void slot_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
 
