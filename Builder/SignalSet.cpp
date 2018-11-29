@@ -138,6 +138,14 @@ namespace Builder
 					m_log->wrnALC5093(s.appSignalID());
 				}
 
+				if (s.coarseAperture() >= 100 ||
+					s.fineAperture() >= 100)
+				{
+					// Aperture of signal %1 should be less then 100.
+					//
+					m_log->errALC5157(s.appSignalID());
+				}
+
 				result &= checkSignalPropertiesRanges(s);
 
 				break;

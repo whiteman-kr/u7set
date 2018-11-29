@@ -365,6 +365,7 @@ namespace Builder
 		void errALC5154(QString signalID);												// Associated logic module is not found. Signal %1 cannot be processed.
 		void errALC5155(QString validitySignalEquipmentID, QString inputSignalID);		// Linked validity signal with EquipmentID %1 is not found (input signal %2).
 		void errALC5156(QString validitySignalID, QString inputSignalID);				// Linked validity signal %1 shoud have Discrete Input type (input signal %2).
+		void errALC5157(QString appSignalID);											// Analog signal %1 aperture should be less then 100.
 
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.
