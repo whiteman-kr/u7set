@@ -318,6 +318,17 @@ namespace Builder
 		}
 	}
 
+	QString SoftwareCfgGenerator::equipmentID() const
+	{
+		if (m_software == nullptr)
+		{
+			assert(false);
+			return QString();
+		}
+
+		return m_software->equipmentIdTemplate();
+	}
+
 	bool SoftwareCfgGenerator::buildLmList(Hardware::EquipmentSet* equipment, IssueLogger* log)
 	{
 		if (equipment == nullptr)

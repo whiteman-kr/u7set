@@ -91,10 +91,12 @@ namespace Builder
 		void errCMN0012(QString fileName);						// Can't create file %1.
 		void errCMN0013(QString fileName);						// Write error of file %1.
 		void errCMN0014(QString fileName);						// File %1 already exists.
-		void wrnCMN0015(QString fileName1, QString fileName2, QString id);		// %1 and %2 files have the same ID = %3.
+		void errCMN0015(QString fileName1, QString fileName2, QString id);		// %1 and %2 files have the same ID = %3.
 		void errCMN0016();										// The build was cancelled.
 		void errCMN0017(QString fileName);						// Can't open file %1.
 		void errCMN0018(QString fileName, QString cfgXmlSubdir);		// Can't link build file %1 into /%2/configuration.xml.
+		void errCMN0019(QString fileID, QString subDir);		// Can't find file with ID = %1 in build subdirectory %2.
+		void errCMN0020(QString fileName);						// Can't find build file %1.
 
 		// INT			Internal issues							1000-1999
 		//

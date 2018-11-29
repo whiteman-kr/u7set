@@ -225,7 +225,10 @@ namespace Builder
 	{
 		// add link to signals set file
 		//
-		BuildFile* buildFile = m_buildResultWriter->getBuildFileByID(CFG_FILE_ID_APP_SIGNAL_SET);
+		// After task RPCT-2170 resolving (separate signalset files for each AppDataService)
+		// this link should be removed !!!
+
+		BuildFile* buildFile = m_buildResultWriter->getBuildFileByID(DIR_COMMON, CFG_FILE_ID_APP_SIGNAL_SET);
 
 		if (buildFile == nullptr)
 		{
