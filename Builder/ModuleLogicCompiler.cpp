@@ -9763,7 +9763,7 @@ namespace Builder
 		code->append(cmd);
 		code->newLine();
 
-		*rawDataOffset++;
+		(*rawDataOffset)++;
 
 		return true;
 
