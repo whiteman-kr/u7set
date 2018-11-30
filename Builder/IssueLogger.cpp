@@ -234,7 +234,7 @@ namespace Builder
 
 	/// IssueCode: CMN0015
 	///
-	/// IssueType: Warning
+	/// IssueType: Error
 	///
 	/// Title: %1 and %2 files have the same ID = %3.
 	///
@@ -246,9 +246,9 @@ namespace Builder
 	/// Description:
 	///		Build files have same string identifier. Contact to th RPCT developers.
 	///
-	void IssueLogger::wrnCMN0015(QString fileName1, QString fileName2, QString id)
+	void IssueLogger::errCMN0015(QString fileName1, QString fileName2, QString id)
 	{
-		LOG_WARNING0(IssueType::Common,
+		LOG_ERROR(IssueType::Common,
 				  15,
 				  QString(tr("%1 and %2 files have the same ID = %3.")).arg(fileName1).arg(fileName2).arg(id));
 	}
@@ -308,6 +308,45 @@ namespace Builder
 		LOG_ERROR(IssueType::Common,
 				  18,
 				  QString(tr("Can't link build file %1 into /%2/configuration.xml.")).arg(fileName).arg(cfgXmlSubdir));
+	}
+
+	/// IssueCode: CMN0019
+	///
+	/// IssueType: Error
+	///
+	/// Title: Can't find file with ID = %1 in build subdirectory %2.
+	///
+	/// Parameters:
+	///		%1 File ID (string)
+	///		%2 Build subdirectory
+	///
+	/// Description:
+	///		Program can't find required file in specified build subdirectory.
+	///
+	void IssueLogger::errCMN0019(QString fileID, QString subDir)
+	{
+		LOG_ERROR(IssueType::Common,
+				  19,
+				  QString(tr("Can't find file with ID = %1 in build subdirectory %2.")).arg(fileID).arg(subDir));
+	}
+
+	/// IssueCode: CMN0020
+	///
+	/// IssueType: Error
+	///
+	/// Title: Can't find build file %1.
+	///
+	/// Parameters:
+	///		%1 File name
+	///
+	/// Description:
+	///		Program can't find required build file with specified file name.
+	///
+	void IssueLogger::errCMN0020(QString fileName)
+	{
+		LOG_ERROR(IssueType::Common,
+				  20,
+				  QString(tr("Can't find build file %1.")).arg(fileName));
 	}
 
 	// INT			Internal issues							1000-1999
@@ -5646,6 +5685,26 @@ namespace Builder
 				  5156,
 				  QString(tr("Linked validity signal %1 shoud have Discrete Input type (input signal %2).")).
 								arg(validitySignalID).arg(inputSignalID));
+	}
+
+	/// IssueCode: ALC5157
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Analog signal %1 aperture should be less then 100.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Analog signal aperture should be less then 100. Check properties of specified signal.
+	///
+	void IssueLogger::errALC5157(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5157,
+				  QString(tr("Analog signal %1 aperture should be less then 100.")).
+					arg(appSignalID));
 	}
 
 	//

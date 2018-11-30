@@ -669,7 +669,6 @@ namespace Builder
 		return addFile(subDir, fileName, "", "", dataString, compress);
 	}
 
-
 	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QStringList& stringList, bool compress)
 	{
 		return addFile(subDir, fileName, "", "", stringList, compress);
@@ -813,24 +812,41 @@ namespace Builder
 
 	BuildFile* BuildResultWriter::getBuildFile(const QString& pathFileName) const
 	{
-		if (m_buildFiles.contains(pathFileName))
+		BuildFile* buildFile = m_buildFiles.value(pathFileName, nullptr);
+
+		if (buildFile == nullptr)
 		{
-			return m_buildFiles[pathFileName];
+			// Can't find build file %1.
+			//
+			m_log->errCMN0020(pathFileName);
 		}
 
-		return nullptr;
+		return buildFile;
 	}
 
-	BuildFile* BuildResultWriter::getBuildFileByID(const QString& buildFileID) const
+	BuildFile* BuildResultWriter::getBuildFileByID(const QString& subDir /* same as EquipmentID or common dirs */, const QString& buildFileID) const
 	{
-		QString buildFilePathName = m_buildFileIDMap.value(buildFileID, QString());
-
-		if (buildFilePathName.isEmpty() == true)
+		if (m_buildFileIDMap.contains(subDir) == false)
 		{
+			// Can't find file with ID = %1 in build subdirectory %2.
+			//
+			m_log->errCMN0019(buildFileID, subDir);
 			return nullptr;
 		}
 
-		return m_buildFiles.value(buildFilePathName, nullptr);
+		const QHash<QString, QString>& subDirMap = m_buildFileIDMap[subDir];
+
+		QString buildFilePathName = subDirMap.value(buildFileID, QString());
+
+		if (buildFilePathName.isEmpty() == true)
+		{
+			// Can't find file with ID = %1 in build subdirectory %2.
+			//
+			m_log->errCMN0019(buildFileID, subDir);
+			return nullptr;
+		}
+
+		return getBuildFile(buildFilePathName);
 	}
 
 	bool BuildResultWriter::checkBuildFilePtr(const BuildFile* buildFile) const
@@ -883,17 +899,30 @@ namespace Builder
 
 		if (id.isEmpty() == false)
 		{
-			if (m_buildFileIDMap.contains(id))
+			if (m_buildFileIDMap.contains(subDir) == true)
 			{
-				QString file1 = m_buildFileIDMap[id];
+				QHash<QString, QString>& subDirMap = m_buildFileIDMap[subDir];
 
-				// '%1' and '%2' files have the same ID = '%3'.
-				//
-				m_log->wrnCMN0015(file1, pathFileName, id);
+				if (subDirMap.contains(id) == true)
+				{
+					QString file1 = subDirMap[id];
+
+					// '%1' and '%2' files have the same ID = '%3'.
+					//
+					m_log->errCMN0015(file1, pathFileName, id);
+				}
+				else
+				{
+					subDirMap.insert(id, pathFileName);
+				}
 			}
 			else
 			{
-				m_buildFileIDMap.insert(id, pathFileName);
+				QHash<QString, QString> newSubDirMap;
+
+				newSubDirMap.insert(id, pathFileName);
+
+				m_buildFileIDMap.insert(subDir, newSubDirMap);
 			}
 		}
 

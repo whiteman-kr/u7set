@@ -160,7 +160,7 @@ namespace Builder
 		Hardware::ModuleFirmwareWriter* firmwareWriter() { return &m_firmwareWriter; }
 
 		BuildFile* getBuildFile(const QString& pathFileName) const;
-		BuildFile* getBuildFileByID(const QString& buildFileID) const;
+		BuildFile* getBuildFileByID(const QString& subDir /* same as EquipmentID or common dirs */, const QString& buildFileID) const;
 
 		bool checkBuildFilePtr(const BuildFile* buildFile) const;
 
@@ -171,8 +171,6 @@ namespace Builder
 
 	private:
 		BuildFile* createBuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, bool compress);
-
-//		bool createFile(const QString &pathFileName, QFile& file, bool textMode);
 
 		bool createBuildResults();
 
@@ -195,7 +193,7 @@ namespace Builder
 
 		Hardware::ModuleFirmwareWriter m_firmwareWriter;
 
-		QMap<QString, QString> m_buildFileIDMap;
+		QHash<QString, QHash<QString, QString>> m_buildFileIDMap;		// subDir (same as EquipmentID) => (FileID => FileName)
 	};
 }
 

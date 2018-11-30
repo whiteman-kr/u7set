@@ -52,6 +52,8 @@ namespace Builder
 
 		void initSubsystemKeyMap(SubsystemKeyMap* subsystemKeyMap, const Hardware::SubsystemStorage* subsystems);
 
+		QString equipmentID() const;
+
 	protected:
 		static bool buildLmList(Hardware::EquipmentSet *equipment, IssueLogger* log);
 		static bool buildSoftwareList(Hardware::EquipmentSet *equipment, IssueLogger* log);
