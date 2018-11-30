@@ -1,4 +1,5 @@
 #pragma once
+#include "VFrame30Lib_global.h"
 
 namespace Proto
 {

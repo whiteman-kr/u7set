@@ -466,7 +466,7 @@ namespace Metrology
 
 		formatStr.sprintf("%%.%df", m_physicalPrecision);
 
-		range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii(), m_physicalLowLimit, m_physicalHighLimit);
+		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_physicalLowLimit, m_physicalHighLimit);
 
 		if (m_physicalUnit.isEmpty() == false)
 		{
@@ -501,7 +501,7 @@ namespace Metrology
 
 		formatStr.sprintf("%%.%df", m_electricPrecision);
 
-		range.sprintf(formatStr.toAscii() + " .. " + formatStr.toAscii(), m_electricLowLimit, m_electricHighLimit);
+		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_electricLowLimit, m_electricHighLimit);
 
 		if (m_electricUnit.isEmpty() == false)
 		{
@@ -540,7 +540,7 @@ namespace Metrology
 
 				formatStr.sprintf("%%.%df", m_physicalPrecision);
 
-				stateStr.sprintf(formatStr.toAscii(), m_tuningDefaultValue);
+				stateStr.sprintf(formatStr.toLocal8Bit(), m_tuningDefaultValue);
 
 				if (m_physicalUnit.isEmpty() == false)
 				{

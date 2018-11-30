@@ -48,10 +48,10 @@ SOURCES += main.cpp\
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
     ../lib/TuningValue.cpp \
-    ../u7/Builder/IssueLogger.cpp \
+    ../Builder/IssueLogger.cpp \
     ../lib/DeviceHelper.cpp \
     ../lib/OutputLog.cpp \
-    ../u7/Builder/ModulesRawData.cpp \
+    ../Builder/ModulesRawData.cpp \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp
 
@@ -77,10 +77,10 @@ HEADERS  += SourceListWidget.h \
     ../lib/Crc.h \
     ../lib/HostAddressPort.h \
     ../lib/TuningValue.h \
-    ../u7/Builder/IssueLogger.h \
+    ../Builder/IssueLogger.h \
     ../lib/DeviceHelper.h \
     ../lib/OutputLog.h \
-    ../u7/Builder/ModulesRawData.h \
+    ../Builder/ModulesRawData.h \
     ../lib/Times.h \
     ../lib/SignalProperties.h
 

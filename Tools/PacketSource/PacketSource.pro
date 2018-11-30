@@ -53,7 +53,7 @@ SourceBase.h \
 ../../lib/Crc.h \
 ../../lib/DataProtocols.h \
 ../../lib/WUtils.h \
-../../u7/Builder/CfgFiles.h \
+../../Builder/CfgFiles.h \
     ../../lib/Ui/DialogAbout.h
 
 RESOURCES += \

@@ -11,8 +11,8 @@ namespace VFrame30
 		
 		// Initialize VFrame30 Library, must be called before using any library classes
 		//
-		static bool Init();
-		static bool Shutdown();
+		static bool init();
+		static bool shutdown();
 	};
 }
 

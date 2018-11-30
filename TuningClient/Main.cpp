@@ -130,12 +130,12 @@ int main(int argc, char* argv[])
 
 
 #ifdef GITLAB_CI_BUILD
-	a.setApplicationVersion(QString("0.8.%1 (%2)").arg(CI_PIPELINE_IID).arg(CI_BUILD_REF_SLUG));
+	a.setApplicationVersion(QString("0.8.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_BUILD_REF_SLUG));
 #else
 	a.setApplicationVersion(QString("0.8.LOCALBUILD"));
 #endif
 
-	VFrame30::VFrame30Library::Init();
+	VFrame30::VFrame30Library::init();
 
 	theSettings.RestoreUser();
 	theSettings.RestoreSystem();
@@ -259,7 +259,7 @@ int main(int argc, char* argv[])
 	delete theSharedMemorySingleApp;
 	theSharedMemorySingleApp = nullptr;
 
-	VFrame30::VFrame30Library::Shutdown();
+	VFrame30::VFrame30Library::shutdown();
 	google::protobuf::ShutdownProtobufLibrary();
 
 #if defined (Q_OS_WIN)

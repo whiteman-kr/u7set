@@ -5,8 +5,8 @@
 #include "HostAddressPort.h"
 #include "Socket.h"
 
-#include "../u7/Builder/IssueLogger.h"
-#include "../u7/Builder/ModulesRawData.h"
+#include "../Builder/IssueLogger.h"
+#include "../Builder/ModulesRawData.h"
 
 
 class DeviceHelper : public QObject

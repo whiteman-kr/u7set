@@ -3,7 +3,7 @@
 #include "../lib/OutputLog.h"
 #include "../lib/ModuleFirmware.h"
 #include "../lib/Configurator.h"
-#include "Builder/IssueLogger.h"
+#include "../lib/OutputLog.h"
 
 class DbController;
 class QCheckBox;
@@ -124,7 +124,7 @@ private:
 
 	bool m_uploading = false;
 
-	Builder::IssueLogger m_outputLog;
+	OutputLog m_outputLog;
 
 	QString m_buildSearchPath;
 

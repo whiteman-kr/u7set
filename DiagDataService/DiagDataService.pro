@@ -52,12 +52,12 @@ SOURCES += \
     ../lib/Queue.cpp \
     ../lib/DataProtocols.cpp \
     ../lib/WUtils.cpp \
-    ../u7/Builder/IssueLogger.cpp \
+    ../Builder/IssueLogger.cpp \
     ../lib/Crc.cpp \
     ../lib/HostAddressPort.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
-    ../u7/Builder/ModulesRawData.cpp \
+    ../Builder/ModulesRawData.cpp \
     ../lib/CommandLineParser.cpp \
     DiagDataServiceMain.cpp \
     ../lib/SoftwareInfo.cpp \
@@ -92,12 +92,12 @@ HEADERS += \
     DiagDataService.h \
     ../lib/Queue.h \
     ../lib/WUtils.h \
-    ../u7/Builder/IssueLogger.h \
+    ../Builder/IssueLogger.h \
     ../lib/Crc.h \
     ../lib/HostAddressPort.h \
     ../Proto/network.pb.h \
     ../Proto/serialization.pb.h \
-    ../u7/Builder/ModulesRawData.h \
+    ../Builder/ModulesRawData.h \
     ../lib/CommandLineParser.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \

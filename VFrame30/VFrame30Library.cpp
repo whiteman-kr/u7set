@@ -32,7 +32,7 @@ namespace VFrame30
 		qDebug() << Q_FUNC_INFO;
 	}
 
-	bool VFrame30Library::Init()
+	bool VFrame30Library::init()
 	{
 		qDebug() << Q_FUNC_INFO;
 
@@ -80,7 +80,7 @@ namespace VFrame30
 		return true;
 	}
 
-	bool VFrame30Library::Shutdown()
+	bool VFrame30Library::shutdown()
 	{
 		qDebug() << Q_FUNC_INFO;
 

@@ -7,7 +7,7 @@
 #include "../lib/DbController.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/PropertyEditorDialog.h"
-#include "Connection.h"
+#include "../lib/Connection.h"
 
 class DialogConnections : public QDialog
 {

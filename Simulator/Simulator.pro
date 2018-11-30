@@ -9,15 +9,14 @@ QT		 += xml qml core concurrent network
 
 TARGET = Simulator
 TEMPLATE = lib
-
 CONFIG += staticlib
 
-CONFIG += c++17					# C++17 support is enabled.
+# C++17 support is enabled.
+#
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17
 
 CONFIG += warn_on				# The compiler should output as many warnings as possible. If warn_off is also specified, the last one takes effect.
-
 
 PRECOMPILED_HEADER = Stable.h
 
@@ -46,6 +45,10 @@ CONFIG(release, debug|release) {
     UI_DIR = release/ui
 }
 
+unix {
+    target.path = /usr/lib
+    INSTALLS += target
+}
 
 # The following define makes your compiler emit warnings if you use
 # any feature of Qt which has been marked as deprecated (the exact warnings
@@ -131,11 +134,6 @@ HEADERS += \
     SimCommandProcessor_LM1_SF00.h \
     SimOverrideSignals.h \
     ../lib/SignalProperties.h
-
-unix {
-    target.path = /usr/lib
-    INSTALLS += target
-}
 
 
 ## VFrame30 library

@@ -450,6 +450,99 @@ QString SpecificPropertyModel::toText() const
 	return result;
 }
 
+bool SpecificPropertyModel::checkLimits(QString* errorMsg)
+{
+	if (errorMsg == nullptr)
+	{
+		assert(errorMsg);
+		return false;
+	}
+
+	for (std::shared_ptr<SpecificPropertyDescription> spd : m_propertyDescriptions)
+	{
+		if (spd == nullptr)
+		{
+			assert(spd);
+			return false;
+		}
+
+		SpecificPropertyDescription* pd = spd.get();
+		if (pd == nullptr)
+		{
+			assert(pd);
+			return false;
+		}
+
+		if (pd->type() != E::SpecificPropertyType::pt_double &&
+				pd->type() != E::SpecificPropertyType::pt_int32 &&
+				pd->type() != E::SpecificPropertyType::pt_uint32
+				)
+		{
+			continue;
+		}
+
+
+		if (pd->lowLimit().isEmpty() != pd->highLimit().isEmpty())
+		{
+			*errorMsg = tr("Property '%1' error:\r\n\r\nBoth LowLimit and HighLimit properties must be set.").arg(pd->caption());
+			return false;
+		}
+
+		bool ok = false;
+
+		double defaultValue = 0;
+
+		if (pd->defaultValue().isEmpty() == false)
+		{
+			defaultValue = pd->defaultValue().toDouble(&ok);
+			if (ok == false)
+			{
+				*errorMsg = tr("Property '%1' error:\r\n\r\nDefault property value is invalid.").arg(pd->caption());
+				return false;
+			}
+		}
+
+		if (pd->lowLimit().isEmpty() == false && pd->highLimit().isEmpty() == false)
+		{
+			double lowLimit = pd->lowLimit().toDouble(&ok);
+			if (ok == false)
+			{
+				*errorMsg = tr("Property '%1' error:\r\n\r\nLowLimit property value is invalid.").arg(pd->caption());
+				return false;
+			}
+
+			double highLimit = pd->highLimit().toDouble(&ok);
+			if (ok == false)
+			{
+				*errorMsg = tr("Property '%1' error:\r\n\r\nHighLimit property value is invalid.").arg(pd->caption());
+				return false;
+			}
+
+			if (lowLimit >= highLimit)
+			{
+				*errorMsg = tr("Property '%1' error:\r\n\r\nHighLimit property value must be greater than LowLimit property value.").arg(pd->caption());
+				return false;
+			}
+
+			if (pd->defaultValue().isEmpty() == false)
+			{
+				if (defaultValue < lowLimit || defaultValue > highLimit)
+				{
+					*errorMsg = tr("Property '%1' error:\r\n\r\nDefault property value must be between to LowLimit and HighLimit property values or equal to one of them.").arg(pd->caption());
+					return false;
+				}
+			}
+			else
+			{
+				*errorMsg = tr("Property '%1' error:\r\n\r\nDefault property value must be defined.").arg(pd->caption());
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
 int SpecificPropertyModel::rowCount(const QModelIndex &parent) const
 {
 	Q_UNUSED(parent);
@@ -611,8 +704,11 @@ bool SpecificPropertyModelSorter::sortFunction(int index1, int index2, int colum
 //
 SpecificPropertiesEditor::SpecificPropertiesEditor(QWidget* parent):
 	PropertyTextEditor(parent),
+	m_parent(parent),
 	m_propertiesModel(this)
 {
+	assert(m_parent);
+
 	m_hasOkCancelButtons = false;
 
 	// Create property list
@@ -1000,6 +1096,13 @@ void SpecificPropertiesEditor::onRemoveProperties()
 
 void SpecificPropertiesEditor::onOkClicked()
 {
+	QString errorMsg;
+	if (m_propertiesModel.checkLimits(&errorMsg) == false)
+	{
+		QMessageBox::critical(m_parent, qAppName(), errorMsg);
+		return;
+	}
+
 	okButtonPressed();
 }
 

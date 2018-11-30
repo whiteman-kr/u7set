@@ -115,6 +115,7 @@ public:
 	// Painting
 	//
 protected:
+	virtual void timerEvent(QTimerEvent* event) override;
 	virtual void paintEvent(QPaintEvent*) override;
 
 	void drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF clipRect);
@@ -200,6 +201,11 @@ protected:
 	// Variables for changing ConnectionLine
 	//
 	std::list<EditConnectionLine> m_editConnectionLines;	// Add new or edit PosConnectionImpl items
+
+	// For updating schema in timerEvent during build
+	//
+	int m_updateDuringBuildTimer = -1;
+	Builder::BuildIssues::Counter m_lastSchemaIssues = {-1, -1};
 
 	// Temporary data can be changed in EditSchemaWidget
 	//

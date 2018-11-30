@@ -299,6 +299,7 @@ void SignalProperties::createSpecificProperties()
 		bool result = m_specPropValues.getValue(specificProperty->caption(), &qv);
 
 		assert(result == true);
+		Q_UNUSED(result)
 
 		specificProperty->setValue(qv);
 

@@ -113,6 +113,7 @@ public:
 
 	QString toText() const;
 
+	bool checkLimits(QString* errorMsg);
 
 protected:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -186,6 +187,8 @@ private:
 	QPushButton* m_addButton = nullptr;
 	QPushButton* m_cloneButton = nullptr;
 	QPushButton* m_removeButton = nullptr;
+
+	QWidget* m_parent = nullptr;
 
 };
 

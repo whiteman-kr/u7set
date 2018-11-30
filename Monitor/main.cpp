@@ -32,12 +32,10 @@ int main(int argc, char *argv[])
 	a.setOrganizationDomain("radiy.com");
 
 #ifdef GITLAB_CI_BUILD
-	a.setApplicationVersion(QString("3.8.%1 (%2)").arg(CI_PIPELINE_IID).arg(CI_BUILD_REF_SLUG));
+	a.setApplicationVersion(QString("3.8.%1 (%2)").arg(CI_PIPELINE_ID).arg(CI_BUILD_REF_SLUG));
 #else
 	a.setApplicationVersion(QString("3.8.LOCALBUILD"));
 #endif
-
-
 
 	// --
 	//
@@ -102,7 +100,7 @@ int main(int argc, char *argv[])
 
 	// --
 	//
-	VFrame30::VFrame30Library::Init();
+	VFrame30::VFrame30Library::init();
 	//Hardware::Init();
 
 	SoftwareInfo si;
@@ -121,7 +119,7 @@ int main(int argc, char *argv[])
 	// Shutting down
 	//
 
-	VFrame30::VFrame30Library::Shutdown();
+	VFrame30::VFrame30Library::shutdown();
 	//Hardware::Shutdwon();
 	google::protobuf::ShutdownProtobufLibrary();
 

@@ -18,7 +18,7 @@ const char* BuildTabPage::m_buildLogFileName = "buildlog.html";
 
 BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	MainTabPage(dbcontroller, parent),
-	m_builder(&m_outputLog)
+	m_builder(&GlobalMessanger::instance()->buildIssues())
 {
 	assert(dbcontroller != nullptr);
 
@@ -146,18 +146,20 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &BuildTabPage::projectOpened);
 	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &BuildTabPage::projectClosed);
 
+	connect(&m_builder, &Builder::Builder::runOrderReady, GlobalMessanger::instance(), &GlobalMessanger::runOrderReady);
+
 	connect(m_buildButton, &QAbstractButton::clicked, this, &BuildTabPage::build);
 	connect(m_cancelButton, &QAbstractButton::clicked, this, &BuildTabPage::cancel);
 
-	connect(GlobalMessanger::instance(), &GlobalMessanger::buildStarted, this, &BuildTabPage::buildWasStarted);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::buildFinished, this, &BuildTabPage::buildWasFinished);
+	connect(&m_builder, &Builder::Builder::started, this, &BuildTabPage::buildWasStarted);
+	connect(&m_builder, &Builder::Builder::finished, this, &BuildTabPage::buildWasFinished);
+	//connect(&m_builder.log(), &OutputLog::newLogItem, this, &BuildTabPage::newLogItem);
 
 	connect(m_warningsLevelComboBox , static_cast<void(QComboBox::*)(int)>(&QComboBox::currentIndexChanged),
 			[](int index)
 			{
 				theSettings.setBuildWarningLevel(index);
-			}
-			);
+			});
 
 	connect(m_prevIssueButton, &QPushButton::clicked, this, &BuildTabPage::prevIssue);
 	connect(m_nextIssueButton, &QPushButton::clicked, this, &BuildTabPage::nextIssue);
@@ -165,14 +167,11 @@ BuildTabPage::BuildTabPage(DbController* dbcontroller, QWidget* parent) :
 	connect(m_findTextEdit, &QLineEdit::returnPressed, this, &BuildTabPage::search);
 	connect(m_findTextButton, &QPushButton::clicked, this, &BuildTabPage::search);
 
-	////connect(m_buildButton, &QAbstractButton::clicked, this, &BuildTabPage::buildStarted);	// On button clicked event!!!
-	//connect(&m_builder, &Builder::Builder::buildFinished, this, &BuildTabPage::buildFinished);
-
 	// Output Log
 	//
 	m_logTimerId = startTimer(10);
 
-	m_outputLog.setHtmlFont("Verdana");
+	m_builder.log().setHtmlFont("Verdana");
 
 	// Evidently, project is not opened yet
 	//
@@ -243,7 +242,7 @@ void BuildTabPage::closeEvent(QCloseEvent* e)
 void BuildTabPage::timerEvent(QTimerEvent* event)
 {
 	if (event->timerId() == m_logTimerId &&
-		m_outputLog.isEmpty() == false &&
+		m_builder.log().isEmpty() == false &&
 		m_outputWidget != nullptr)
 	{
 		WarningShowLevel warningShowLevel = static_cast<WarningShowLevel>(theSettings.buildWarningLevel());
@@ -251,9 +250,9 @@ void BuildTabPage::timerEvent(QTimerEvent* event)
 		std::vector<OutputLogItem> messages;
 		messages.reserve(20);
 
-		if (m_outputLog.isEmpty() == false)
+		if (m_builder.log().isEmpty() == false)
 		{
-			m_outputLog.popMessages(&messages, 40);
+			m_builder.log().popMessages(&messages, 40);
 		}
 
 		QString outputMessagesBuffer;
@@ -319,7 +318,6 @@ void BuildTabPage::projectClosed()
 
 void BuildTabPage::build()
 {
-	m_outputLog.clear();
 	m_outputWidget->clear();
 
 	// init build log file
@@ -350,12 +348,11 @@ void BuildTabPage::build()
 
 	if (m_logFile.isOpen() == true)
 	{
-		LOG_MESSAGE((&m_outputLog), tr("Build log file: %1").arg(logFileName));
-
+		LOG_MESSAGE((&m_builder.log()), tr("Build log file: %1").arg(logFileName));
 	}
 	else
 	{
-		LOG_WARNING_OBSOLETE((&m_outputLog), Builder::IssueType::NotDefined,  tr("Cannot open output log file (%1) for writing").arg(logFileName));
+		LOG_WARNING_OBSOLETE((&m_builder.log()), Builder::IssueType::NotDefined,  tr("Cannot open output log file (%1) for writing").arg(logFileName));
 	}
 
 	// --
@@ -365,14 +362,16 @@ void BuildTabPage::build()
 	bool debug = m_debugCheckBox->isChecked();
 
 	m_builder.start(
-		db()->currentProject().projectName(),
 		db()->host(),
 		db()->port(),
 		db()->serverUsername(),
 		db()->serverPassword(),
+		db()->currentProject().projectName(),
 		db()->currentUser().username(),
 		db()->currentUser().password(),
-		debug);
+		theSettings.buildOutputPath(),
+		debug ? Builder::BuildType::Debug : Builder::BuildType::Release,
+		theSettings.isExpertMode());
 
 	return;
 }
@@ -384,19 +383,51 @@ void BuildTabPage::cancel()
 
 void BuildTabPage::buildWasStarted()
 {
+	GlobalMessanger::instance()->clearBuildSchemaIssues();
+	GlobalMessanger::instance()->clearSchemaItemRunOrder();
+
 	m_buildButton->setEnabled(false);
 	m_cancelButton->setEnabled(true);
 }
 
-void BuildTabPage::buildWasFinished()
+void BuildTabPage::buildWasFinished(int errorCount)
 {
 	m_buildButton->setEnabled(true);
 	m_cancelButton->setEnabled(false);
 
 	m_itemsIssues.clear();
 
+	GlobalMessanger::instance()->fireBuildFinished(errorCount);
+
 	return;
 }
+
+//void BuildTabPage::newLogItem(OutputLogItem logItem)
+//{
+//	WarningShowLevel warningShowLevel = static_cast<WarningShowLevel>(theSettings.buildWarningLevel());
+
+//	if (warningShowLevel == WarningShowLevel::HideAll &&
+//		logItem.isWarning() == true)
+//	{
+//		return;
+//	}
+
+//	if (warningShowLevel == WarningShowLevel::Important &&
+//		(logItem.isWarning1() == true || logItem.isWarning2() == true))
+//	{
+//		return;
+//	}
+
+//	if (warningShowLevel == WarningShowLevel::Middle && logItem.isWarning2() == true)
+//	{
+//		return;
+//	}
+
+//	QString s = logItem.toHtml();
+//	m_outputWidget->append(s);
+
+//	return;
+//}
 
 void BuildTabPage::prevIssue()
 {

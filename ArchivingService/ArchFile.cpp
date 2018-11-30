@@ -399,7 +399,7 @@ QString ArchFile::Partition::getFileName(qint64 partitionStartTime)
 
 void ArchFile::Partition::moveToRecord(qint64 record)
 {
-	asser(m_file.isOpen() == true);
+	assert(m_file.isOpen() == true);
 
 	m_file.seek(record * sizeof(ArchFile::Record));
 }
@@ -419,7 +419,7 @@ qint64 ArchFile::Partition::binarySearch(E::TimeType timeType, qint64 time)
 
 		bool res = readRecord(0, &record);
 
-		if (res == false || record.timeLessThen(imtType, time) == true)
+		if (res == false || record.timeLessThen(timeType, time) == true)
 		{
 			return POSITION_NOT_FOUND;
 		}
@@ -459,7 +459,7 @@ qint64 ArchFile::Partition::binarySearch(E::TimeType timeType, qint64 time)
 				return rightIndex;
 			}
 
-			left
+			//left
 		}
 
 	}

@@ -33,6 +33,8 @@
 class OutputLogItem
 {
 public:
+	OutputLogItem() = default;
+	OutputLogItem(const OutputLogItem&) = default;
 	OutputLogItem(int messageNo);
 	OutputLogItem(int messageNo,
 				  QString message,
@@ -66,6 +68,9 @@ public:
 	QString m_func;
 	QString m_htmlFont;
 };
+
+Q_DECLARE_METATYPE(OutputLogItem)
+
 
 class OutputLog : public QObject
 {
@@ -124,6 +129,7 @@ public:
 	// Signals
 	//
 signals:
+	void newLogItem(OutputLogItem logItem);
 	void errorCountChanged(int oldValue, int newValue);
 	void warningCountChanged(int oldValue, int newValue);
 

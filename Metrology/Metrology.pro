@@ -81,8 +81,8 @@ SOURCES += \
     ../lib/TcpFileTransfer.cpp \
     ../lib/ServiceSettings.cpp \
     ../lib/DeviceHelper.cpp \
-    ../u7/Builder/ModulesRawData.cpp \
-    ../u7/Builder/IssueLogger.cpp \
+    ../Builder/ModulesRawData.cpp \
+    ../Builder/IssueLogger.cpp \
     ../lib/OutputLog.cpp \
     ../lib/MetrologySignal.cpp \
     RackList.cpp \
@@ -157,8 +157,8 @@ HEADERS  += \
     ../lib/TcpFileTransfer.h \
     ../lib/ServiceSettings.h \
     ../lib/DeviceHelper.h \
-    ../u7/Builder/ModulesRawData.h \
-    ../u7/Builder/IssueLogger.h \
+    ../Builder/ModulesRawData.h \
+    ../Builder/IssueLogger.h \
     ../lib/OutputLog.h \
     ../lib/MetrologySignal.h \
     RackList.h \
@@ -171,7 +171,7 @@ HEADERS  += \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
-    ../u7/Builder/CfgFiles.h \
+    ../Builder/CfgFiles.h \
     ../lib/PropertyObject.h \
     ../lib/SignalProperties.h \
     ../lib/Ui/DialogAbout.h

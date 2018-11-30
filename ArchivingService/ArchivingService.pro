@@ -53,12 +53,12 @@ SOURCES += \
     ../lib/DeviceHelper.cpp \
     ../lib/TcpFileTransfer.cpp \
     ../lib/DeviceObject.cpp \
-    ../u7/Builder/IssueLogger.cpp \
+    ../Builder/IssueLogger.cpp \
     ../lib/DbStruct.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/OutputLog.cpp \
     ../lib/Types.cpp \
-    ../u7/Builder/ModulesRawData.cpp \
+    ../Builder/ModulesRawData.cpp \
     ../lib/CommandLineParser.cpp \
     ArchServiceMain.cpp \
     TcpAppDataServer.cpp \
@@ -99,13 +99,13 @@ HEADERS += \
     ../lib/DeviceHelper.h \
     ../lib/TcpFileTransfer.h \
     ../lib/DeviceObject.h \
-    ../u7/Builder/IssueLogger.h \
+    ../Builder/IssueLogger.h \
     ../lib/DbStruct.h \
     ../lib/ProtoSerialization.h \
     ../lib/OutputLog.h \
     ../lib/PropertyObject.h \
     ../lib/Types.h \
-    ../u7/Builder/ModulesRawData.h \
+    ../Builder/ModulesRawData.h \
     ../lib/CommandLineParser.h \
     TcpAppDataServer.h \
     ../lib/AppSignal.h \

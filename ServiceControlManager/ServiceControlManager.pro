@@ -67,9 +67,9 @@ SOURCES += MainWindow.cpp \
     ../lib/Tuning/TuningSourceState.cpp \
     TuningSourceWidget.cpp \
     ../lib/OutputLog.cpp \
-    ../u7/Builder/IssueLogger.cpp \
+    ../Builder/IssueLogger.cpp \
     ../lib/DeviceHelper.cpp \
-    ../u7/Builder/ModulesRawData.cpp \
+    ../Builder/ModulesRawData.cpp \
     AppDataSourceWidget.cpp \
     ../lib/Times.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
@@ -118,9 +118,9 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningSourceState.h \
     TuningSourceWidget.h \
     ../lib/OutputLog.h \
-    ../u7/Builder/IssueLogger.h \
+    ../Builder/IssueLogger.h \
     ../lib/DeviceHelper.h \
-    ../u7/Builder/ModulesRawData.h \
+    ../Builder/ModulesRawData.h \
     AppDataSourceWidget.h \
     ../lib/Times.h \
     ../lib/Tuning/TuningSignalState.h \

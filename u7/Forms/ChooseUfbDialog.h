@@ -23,7 +23,7 @@ protected:
 
 private:
 	void fillTree();
-	void itemSelected(QTreeWidgetItem* item, int column);
+	void itemSelectionChanged();
 	void itemDoubleClicked(QModelIndex index);
 
 public:

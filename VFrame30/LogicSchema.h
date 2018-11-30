@@ -1,5 +1,6 @@
 #pragma once
 
+#include "VFrame30Lib_global.h"
 #include "Schema.h"
 
 namespace VFrame30

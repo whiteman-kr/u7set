@@ -23,6 +23,8 @@ public:
 protected:
 	void CreateActions();
 
+	void timerEvent(QTimerEvent* event) override;
+
 	// Methods
 	//
 public:
@@ -90,6 +92,8 @@ private:
 
 	QString m_parentFileName;
 	DbFileInfo m_parentFile;
+
+	int m_lastBuildIssueCount = -1;
 
 	//	Contexet Menu
 	//

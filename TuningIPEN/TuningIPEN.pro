@@ -44,14 +44,14 @@ SOURCES +=\
 	AnalogSignalSetter.cpp \
     ../lib/WUtils.cpp \
     TuningIPENService.cpp \
-    ../u7/Builder/IssueLogger.cpp \
+    ../Builder/IssueLogger.cpp \
     ../lib/HostAddressPort.cpp \
     ../Proto/network.pb.cc \
     DiscreteSignalSetter.cpp \
     TripleChannelSignalsModel.cpp \
     TuningIPENSocket.cpp \
     TuningIPENSource.cpp \
-    ../u7/Builder/ModulesRawData.cpp \
+    ../Builder/ModulesRawData.cpp \
     TuningIPENDataStorage.cpp \
     ../TuningService/TuningDataStorage.cpp \
     ../lib/CommandLineParser.cpp \
@@ -87,14 +87,14 @@ HEADERS  += TuningMainWindow.h \
 	AnalogSignalSetter.h \
     ../lib/WUtils.h \
     TuningIPENService.h \
-    ../u7/Builder/IssueLogger.h \
+    ../Builder/IssueLogger.h \
     ../lib/HostAddressPort.h \
     ../Proto/network.pb.h \
     DiscreteSignalSetter.h \
     TripleChannelSignalsModel.h \
     TuningIPENSocket.h \
     TuningIPENSource.h \
-    ../u7/Builder/ModulesRawData.h \
+    ../Builder/ModulesRawData.h \
     TuningIPENDataStorage.h \
     ../TuningService/TuningDataStorage.h \
     ../lib/CommandLineParser.h \

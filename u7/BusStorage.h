@@ -2,7 +2,7 @@
 #define BUSSTORAGE_H
 
 #include "../lib/DbController.h"
-#include "DbObjectStorage.h"
+#include "../lib/DbObjectStorage.h"
 #include "../VFrame30/Bus.h"
 
 class BusStorage : public DbObjectStorage<std::shared_ptr<VFrame30::Bus>>

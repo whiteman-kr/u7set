@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 {
 	QApplication app(argc, argv);
 
-	Hardware::Init();
+	Hardware::init();
 
 	// --
 	//
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
 
 	// Shutting down
 	//
-	Hardware::Shutdwon();
+	Hardware::shutdown();
 
 	return returnCode;
 }

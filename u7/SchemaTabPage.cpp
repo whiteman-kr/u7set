@@ -8,6 +8,7 @@
 #include "Forms/ComparePropertyObjectDialog.h"
 #include "CheckInDialog.h"
 #include "GlobalMessanger.h"
+#include "Settings.h"
 #include "../lib/PropertyEditor.h"
 
 //
@@ -35,7 +36,9 @@ SchemaFileView::SchemaFileView(DbController* dbcontroller, const QString& parent
 	setModel(&m_filesModel);
 
 	setShowGrid(false);
+	setGridStyle(Qt::PenStyle::NoPen);
 	setSortingEnabled(true);
+	setWordWrap(false);
 	setSelectionBehavior(QAbstractItemView::SelectRows);
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 
@@ -91,6 +94,10 @@ SchemaFileView::SchemaFileView(DbController* dbcontroller, const QString& parent
 	connect(this, &QTableView::doubleClicked, this, &SchemaFileView::slot_doubleClicked);
 
 	setFont(qApp->font());
+
+	// Timer for updates of WRN/ERR count
+	//
+	startTimer(50);
 
 	return;
 }
@@ -183,6 +190,28 @@ void SchemaFileView::CreateActions()
 	m_propertiesAction->setStatusTip(tr("Edit schema properties..."));
 	m_propertiesAction->setEnabled(false);
 	connect(m_propertiesAction, &QAction::triggered, this, &SchemaFileView::slot_properties);
+
+	return;
+}
+
+void SchemaFileView::timerEvent(QTimerEvent* event)
+{
+	QTableView::timerEvent(event);
+
+	int buildIuuseCount = GlobalMessanger::instance()->buildIssues().count();
+
+	if (buildIuuseCount != m_lastBuildIssueCount)
+	{
+		m_lastBuildIssueCount = buildIuuseCount;
+
+		// Update and repoaint just don't work for me! What the fucking fuck!?
+		// So setShowGrid to tru then false is used to repaint and update data of build issues
+		//
+//		update(vr);
+//		repaint(vr);
+		setShowGrid(true);
+		setShowGrid(false);
+	}
 
 	return;
 }

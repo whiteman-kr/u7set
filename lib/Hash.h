@@ -2,6 +2,7 @@
 #include <assert.h>
 #include <type_traits>
 #include <QString>
+#include <QUuid>
 #include <QtGlobal>
 
 typedef quint64 Hash;
@@ -35,6 +36,20 @@ inline Hash calcHash(const QByteArray& data)
 	}
 
 	return hash;
+}
+
+// Custom specialization of std::hash for QUuid
+//
+namespace std
+{
+	template<>
+	struct hash<QUuid>
+	{
+		std::size_t operator()(const QUuid& u) const noexcept
+		{
+			return ::calcHash(u.toByteArray());
+		}
+	};
 }
 
 //inline HASH CalcHash(void* ptr, int nSize)

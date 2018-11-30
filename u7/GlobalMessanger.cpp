@@ -63,60 +63,24 @@ void GlobalMessanger::fireBuildStarted()
 	emit buildStarted();
 }
 
-void GlobalMessanger::fireBuildFinished()
+void GlobalMessanger::fireBuildFinished(int errorCount)
 {
-	emit buildFinished();
+	emit buildFinished(errorCount);
 }
 
 void GlobalMessanger::clearBuildSchemaIssues()
 {
-	QMutexLocker ml(&m_buildResultMutex);
 	m_buildIssues.clear();
-}
-
-void GlobalMessanger::swapSchemaIssues(Builder::BuildIssues* buildIssues)
-{
-	if (buildIssues == nullptr)
-	{
-		assert(buildIssues);
-		return;
-	}
-
-	QMutexLocker ml(&m_buildResultMutex);
-	m_buildIssues.swap(buildIssues);
-	return;
 }
 
 OutputMessageLevel GlobalMessanger::issueForSchemaItem(const QUuid& itemId) const
 {
-	QMutexLocker ml(&m_buildResultMutex);
-
-	auto it = m_buildIssues.m_items.find(itemId);
-
-	if (it == m_buildIssues.m_items.end())
-	{
-		// Either Success or did not take part in build
-		//
-		return OutputMessageLevel::Success;
-	}
-
-	return it->second;
+	return m_buildIssues.issueForSchemaItem(itemId);
 }
 
-Builder::BuildIssues::Counter GlobalMessanger::issueForSchema(const QString& schemeId) const
+Builder::BuildIssues::Counter GlobalMessanger::issueForSchema(const QString& schemaId) const
 {
-	QMutexLocker ml(&m_buildResultMutex);
-
-	auto it = m_buildIssues.m_schemas.find(schemeId);
-
-	if (it == m_buildIssues.m_schemas.end())
-	{
-		// Either Success or did not take part in build
-		//
-		return Builder::BuildIssues::Counter();
-	}
-
-	return it->second;
+	return m_buildIssues.issueForSchema(schemaId);
 }
 
 void GlobalMessanger::clearSchemaItemRunOrder()
@@ -125,36 +89,10 @@ void GlobalMessanger::clearSchemaItemRunOrder()
 	m_runOrder.clear();
 }
 
-void GlobalMessanger::setRunOrder(const QString& equipmentId, std::map<QUuid, std::pair<int, int>>& data)
-{
-	QMutexLocker ml(&m_buildResultMutex);
-
-	RunOrderDebugInfo ro = {equipmentId, data};
-	m_runOrder.push_back(ro);
-
-	return;
-}
-
 std::pair<int, int> GlobalMessanger::schemaItemRunOrder(const QString& equipmentId, const QUuid& itemId) const
 {
 	QMutexLocker ml(&m_buildResultMutex);
-
-	for (const RunOrderDebugInfo& ro : m_runOrder)
-	{
-		if (ro.equipmentId == equipmentId)
-		{
-			auto it = ro.schemaItemsRunOrder.find(itemId);
-
-			if (it == ro.schemaItemsRunOrder.end())
-			{
-				return {-1, -1};
-			}
-
-			return it->second;
-		}
-	}
-
-	return {-1, -1};
+	return m_runOrder.schemaItemRunOrder(equipmentId, itemId);
 }
 
 void GlobalMessanger::fireChangeCurrentTab(QWidget* tab)
@@ -165,4 +103,20 @@ void GlobalMessanger::fireChangeCurrentTab(QWidget* tab)
 void GlobalMessanger::fireCompareObject(DbChangesetObject object, CompareData compareData)
 {
 	emit compareObject(object, compareData);
+}
+
+void GlobalMessanger::runOrderReady(Builder::RunOrder runOrder)
+{
+	QMutexLocker ml(&m_buildResultMutex);
+	m_runOrder = std::move(runOrder);
+}
+
+Builder::BuildIssues& GlobalMessanger::buildIssues()
+{
+	return m_buildIssues;
+}
+
+const Builder::BuildIssues& GlobalMessanger::buildIssues() const
+{
+	return m_buildIssues;
 }

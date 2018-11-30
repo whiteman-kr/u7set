@@ -1,4 +1,5 @@
 #include "../lib/CsvFile.h"
+#include <QVariant>
 
 QString CsvFile::getCsvString(const QStringList& strings, bool replaceSeparatorsAndQuotes)
 {

@@ -99,7 +99,7 @@ SOURCES +=\
     ../lib/PropertyEditorDialog.cpp \
     ../lib/PropertyObject.cpp \
     ../lib/LogFile.cpp \
-    ../u7/Builder/IssueLogger.cpp \
+    ../Builder/IssueLogger.cpp \
     ../lib/OutputLog.cpp \
     UserManager.cpp \
     DialogProperties.cpp \
@@ -161,7 +161,7 @@ HEADERS  += MainWindow.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/PropertyObject.h \
     ../lib/LogFile.h \
-    ../u7/Builder/IssueLogger.h \
+    ../Builder/IssueLogger.h \
     ../lib/OutputLog.h \
     UserManager.h \
     DialogProperties.h \
