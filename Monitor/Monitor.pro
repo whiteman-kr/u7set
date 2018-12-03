@@ -16,6 +16,9 @@ INCLUDEPATH += $$PWD
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
+#Application icon
+win32:RC_ICONS += Images/Monitor.ico
+
 # DESTDIR
 #
 win32 {
@@ -255,7 +258,8 @@ DISTFILES += \
     ../Proto/serialization.proto \
     Images/Trends.svg \
     Images/Log.svg \
-    Images/TuningSources.svg
+    Images/TuningSources.svg \
+    Images/Monitor.ico
 
 # TrendView library
 #

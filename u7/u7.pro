@@ -18,6 +18,8 @@ INCLUDEPATH += $$PWD
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
+#Application icon
+win32:RC_ICONS += Images/u7.ico
 
 # DESTDIR
 # If you see somewhere 'LNK1146: no argument specified with option '/LIBPATH:' then most likely you have not added this section to a project file
@@ -373,7 +375,8 @@ DISTFILES += \
     LogicModuleDescription/BVB15Module0000.xml \
     LogicModuleDescription/LM1_SR02.xml \
     ../Etc/SignalPropertyBehavior/SignalPropertyBehavior.csv \
-    LogicModuleDescription/MSO3Module0000.xml
+    LogicModuleDescription/MSO3Module0000.xml \
+    Images/u7.ico
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 
