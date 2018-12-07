@@ -33,8 +33,10 @@ namespace Tcp
 		CantWriteLocalFile,
 		LocalFileReadingError,
 		ServerReplyTimeout,
+		TransferIsNotStarted,
 
 		ConfigurationIsNotReady,		// for CfgLoader class
+		UnknownClient,
 
 		InternalError,
 	};
@@ -165,6 +167,7 @@ namespace Tcp
 	protected:
 		virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
 		virtual bool checkFile(QString& pathFileName, QByteArray& fileData);
+		virtual bool checkClientID();
 
 	private:
 		void init();

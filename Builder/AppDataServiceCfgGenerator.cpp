@@ -1,6 +1,5 @@
 #include "AppDataServiceCfgGenerator.h"
 #include "../lib/ServiceSettings.h"
-#include "../lib/ProtobufHelper.h"
 #include "../lib/WUtils.h"
 #include "Builder.h"
 

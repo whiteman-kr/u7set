@@ -19,6 +19,7 @@ public:
 					 const QString& autoloadBuildPath,
 					 const QString& workDirectory,
 					 const QString& buildPath,
+					 const QStringList& knownClients,
 					 const CfgCheckerWorker& checkerWorker,
 					 std::shared_ptr<CircularLogger> logger);
 
@@ -27,6 +28,8 @@ public:
 	void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) final;
 
 private:
+	bool checkClientID() override;
+
 	void sendServiceState();
 	void sendLoadedBuildInfo();
 	void sendSettings();
@@ -37,4 +40,5 @@ private:
 	QString m_equipmentID;
 	QString m_autoloadBuildPath;
 	QString m_workDirectory;
+	QStringList m_knownClients;
 };
