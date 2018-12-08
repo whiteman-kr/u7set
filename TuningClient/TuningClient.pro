@@ -122,7 +122,6 @@ SOURCES +=\
     ../lib/XmlHelper.cpp \
     ../lib/Types.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/ProtobufHelper.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     DialogFilterEditor.cpp \
@@ -184,7 +183,6 @@ HEADERS  += MainWindow.h \
     ../lib/XmlHelper.h \
     ../lib/Types.h \
     ../lib/DbStruct.h \
-    ../lib/ProtobufHelper.h \
     ../lib/ProtoSerialization.h \
     ../lib/Tuning/TuningSignalState.h \
     DialogFilterEditor.h \

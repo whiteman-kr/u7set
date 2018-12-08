@@ -317,70 +317,77 @@ namespace Tcp
 
 		switch(errorCode)
 		{
-		case Ok:
+		case FileTransferResult::Ok:
 			// return ""
 			break;
 
-		case NotConnectedToServer:
+		case FileTransferResult::NotConnectedToServer:
 			str = QString(tr("Not connected to server"));
 			break;
 
-		case NotFoundRemoteFile:
+		case FileTransferResult::NotFoundRemoteFile:
 			str = QString(tr("Not found remote file"));
 			break;
 
-		case CantOpenRemoteFile:
+		case FileTransferResult::CantOpenRemoteFile:
 			str = QString(tr("Can't open remote file"));
 			break;
 
-		case CantReadRemoteFile:
+		case FileTransferResult::CantReadRemoteFile:
 			str = QString(tr("Can't read remote file"));
 			break;
 
-		case LocalFolderIsNotWriteable:
+		case FileTransferResult::LocalFolderIsNotWriteable:
 			str = QString(tr("Local folder is not writeable"));
 			break;
 
-		case CantCreateLocalFolder:
+		case FileTransferResult::CantCreateLocalFolder:
 			str = QString(tr("Can't create local folder"));
 			break;
 
-		case AlreadyDownloadFile:
+		case FileTransferResult::AlreadyDownloadFile:
 			str = QString(tr("Already download file now"));
 			break;
 
-		case CantSendRequest:
+		case FileTransferResult::CantSendRequest:
 			str = QString(tr("Can't send request"));
 			break;
 
-		case CantCreateLocalFile:
+		case FileTransferResult::CantCreateLocalFile:
 			str = QString(tr("Can't create local file"));
 			break;
 
-		case FileDataCorrupted:
+		case FileTransferResult::FileDataCorrupted:
 			str = QString(tr("File data corrupted"));
 			break;
 
-		case CantWriteLocalFile:
+		case FileTransferResult::CantWriteLocalFile:
 			str = QString(tr("Can't write local file"));
 			break;
 
-		case InternalError:
-			str = QString(tr("Internal error"));
-			break;
-
-		case LocalFileReadingError:
+		case FileTransferResult::LocalFileReadingError:
 			str = QString(tr("Local file reading error"));
 			break;
 
-		case ServerReplyTimeout:
+		case FileTransferResult::ServerReplyTimeout:
 			str = QString(tr("Server reply timeout"));
 			break;
 
-		case ConfigurationIsNotReady:
+		case FileTransferResult::TransferIsNotStarted:
+			str = QString(tr("File transferring is not started"));
+			break;
+
+		case FileTransferResult::ConfigurationIsNotReady:
 			str = QString(tr("Configuration is not ready"));
 			break;
 
+		case FileTransferResult::UnknownClient:
+			str = QString(tr("Unknown client's EquipmentID"));
+			break;
+
+		case FileTransferResult::InternalError:
+			str = QString(tr("Internal error"));
+			break;
 
 		default:
 			assert(false);
@@ -484,8 +491,23 @@ namespace Tcp
 		return true;
 	}
 
+	bool FileServer::checkClientID()
+	{
+		return true;			// real checking will be implemented in derived classes (if required)
+	}
+
 	void FileServer::sendFirstFilePart(const QString& fileName)
 	{
+		bool res = checkClientID();
+
+		if (res == false)
+		{
+			m_reply.errorCode = FileTransferResult::UnknownClient;
+			sendReply(m_reply, sizeof(m_reply));
+			init();
+			return;
+		}
+
 		init();
 
 		// start upload process
@@ -552,9 +574,16 @@ namespace Tcp
 		sendNextFilePart();
 	}
 
-
 	void FileServer::sendNextFilePart()
 	{
+		if (m_transferInProgress == false)
+		{
+			m_reply.errorCode = FileTransferResult::TransferIsNotStarted;
+			sendReply(m_reply, sizeof(m_reply));
+			init();
+			return;
+		}
+
 		int offset = m_reply.currentPart * FILE_PART_SIZE;
 
 		int size = m_fileData.size() - offset;

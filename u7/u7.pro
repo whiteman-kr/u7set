@@ -109,7 +109,6 @@ SOURCES +=\
     ../lib/XmlHelper.cpp \
     ../lib/ServiceSettings.cpp \
     ../lib/Queue.cpp \
-    ../lib/ProtobufHelper.cpp \
     UploadTabPage.cpp \
     DialogChoosePreset.cpp \
     ../lib/WUtils.cpp \
@@ -240,7 +239,6 @@ HEADERS  += \
     ../lib/XmlHelper.h \
     ../lib/ServiceSettings.h \
     ../lib/Queue.h \
-    ../lib/ProtobufHelper.h \
     UploadTabPage.h \
     DialogChoosePreset.h \
     ../lib/DataProtocols.h \

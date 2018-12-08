@@ -68,7 +68,6 @@ SOURCES += main.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/ProtobufHelper.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/AppSignal.cpp \
     ../lib/AppSignalManager.cpp \
@@ -132,7 +131,6 @@ HEADERS  += \
     ../lib/XmlHelper.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
-    ../lib/ProtobufHelper.h \
     ../lib/ProtoSerialization.h \
     ../lib/AppSignal.h \
     ../lib/AppSignalManager.h \

@@ -68,6 +68,10 @@ public:
 	static const char* PROP_CFG_SERVICE_IP2;
 	static const char* PROP_CFG_SERVICE_PORT2;
 
+	static const char* ATTR_COUNT;
+	static const char* ATTR_EQUIIPMENT_ID;
+	static const char* ATTR_SOFTWARE_TYPE;
+
 public:
 	static bool getSoftwareConnection(	const Hardware::EquipmentSet* equipment,
 										const Hardware::Software* thisSoftware,
@@ -88,7 +92,22 @@ public:
 
 class CfgServiceSettings : public ServiceSettings
 {
+private:
+	static const char* CLIENTS_SECTION;
+	static const char* CLIENT;
+	static const char* CLIENT_EQUIPMENT_ID;
+	static const char* CLIENT_SOFTWARE_TYPE;
+
 public:
+	HostAddressPort clientRequestIP;
+	QHostAddress clientRequestNetmask;
+
+	QList<QPair<QString, E::SoftwareType>> clients;
+
+	bool writeToXml(XmlWriteHelper& xml);
+	bool readFromXml(XmlReadHelper& xml);
+
+	QStringList knownClients();
 };
 
 class AppDataServiceSettings : public ServiceSettings
@@ -132,8 +151,6 @@ private:
 	static const char* TUNING_CLIENT;
 	static const char* TUNING_SOURCES;
 	static const char* TUNING_SOURCE;
-	static const char* ATTR_EQUIIPMENT_ID;
-	static const char* ATTR_COUNT;
 
 	bool fillTuningClientsInfo(Hardware::Software *software, bool singleLmControlEnabled, Builder::IssueLogger* log);
 

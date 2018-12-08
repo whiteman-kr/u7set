@@ -54,6 +54,10 @@ const char* ServiceSettings::PROP_CFG_SERVICE_ID2 = "ConfigurationServiceID2";
 const char* ServiceSettings::PROP_CFG_SERVICE_IP2 = "ConfigurationServiceIP2";
 const char* ServiceSettings::PROP_CFG_SERVICE_PORT2 = "ConfigurationServicePort2";
 
+const char* ServiceSettings::ATTR_COUNT = "Count";
+const char* ServiceSettings::ATTR_EQUIIPMENT_ID = "EquipmentID";
+const char* ServiceSettings::ATTR_SOFTWARE_TYPE = "SoftwareType";
+
 
 bool ServiceSettings::getSoftwareConnection(const Hardware::EquipmentSet* equipment,
 											const Hardware::Software* thisSoftware,
@@ -187,6 +191,112 @@ bool ServiceSettings::getCfgServiceConnection(	const Hardware::EquipmentSet *equ
 	return result;
 }
 
+// -------------------------------------------------------------------------------------
+//
+// CfgServiceSettings class implementation
+//
+// -------------------------------------------------------------------------------------
+
+const char* CfgServiceSettings::CLIENTS_SECTION = "Clients";
+const char* CfgServiceSettings::CLIENT = "Client";
+const char* CfgServiceSettings::CLIENT_EQUIPMENT_ID = "EquipmentID";
+const char* CfgServiceSettings::CLIENT_SOFTWARE_TYPE = "SoftwareType";
+
+
+bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml)
+{
+	xml.writeStartElement(SETTINGS_SECTION);
+
+	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, clientRequestIP);
+	xml.writeHostAddress(PROP_CLIENT_REQUEST_NETMASK, clientRequestNetmask);
+
+	xml.writeEndElement();	// </Settings>
+
+	xml.writeStartElement(CLIENTS_SECTION);
+	xml.writeIntAttribute(ATTR_COUNT, clients.count());
+
+	for(const QPair<QString, E::SoftwareType> pair : clients)
+	{
+		xml.writeStartElement(CLIENT);
+
+		xml.writeStringAttribute(ATTR_EQUIIPMENT_ID, pair.first);
+		xml.writeStringAttribute(ATTR_SOFTWARE_TYPE, E::valueToString(pair.second));
+
+		xml.writeEndElement();	// </Client>
+	}
+
+	xml.writeEndElement();	// </Clients>
+
+	return true;
+}
+
+bool CfgServiceSettings::readFromXml(XmlReadHelper& xml)
+{
+	clients.clear();
+
+	bool result = false;
+
+	result = xml.findElement(SETTINGS_SECTION);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &clientRequestIP);
+	result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
+
+	result = xml.findElement(CLIENTS_SECTION);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	int clientsCount = 0;
+
+	result &= xml.readIntAttribute(ATTR_COUNT, &clientsCount);
+
+	for(int i = 0; i < clientsCount; i++)
+	{
+		result &= xml.findElement(CLIENT);
+
+		QString equipmentID;
+		QString softwareTypeStr;
+
+		result &= xml.readStringAttribute(ATTR_EQUIIPMENT_ID, &equipmentID);
+		result &= xml.readStringAttribute(ATTR_SOFTWARE_TYPE, &softwareTypeStr);
+
+		QPair<QString, E::SoftwareType> pair;
+
+		pair.first = equipmentID;
+
+		bool ok = false;
+
+		pair.second = E::stringToValue<E::SoftwareType>(softwareTypeStr, &ok);
+
+		result &= ok;
+
+		if (result == true)
+		{
+			clients.append(pair);
+		}
+	}
+
+	return result;
+}
+
+QStringList CfgServiceSettings::knownClients()
+{
+	QStringList knownClients;
+
+	for(const QPair<QString, E::SoftwareType>& client : clients)
+	{
+		knownClients.append(client.first);
+	}
+
+	return knownClients;
+}
 
 // -------------------------------------------------------------------------------------
 //
@@ -320,9 +430,6 @@ const char* TuningServiceSettings::TUNING_CLIENTS = "TuningClients";
 const char* TuningServiceSettings::TUNING_CLIENT = "TuningClient";
 const char* TuningServiceSettings::TUNING_SOURCES = "TuningSources";
 const char* TuningServiceSettings::TUNING_SOURCE = "TuningSource";
-const char* TuningServiceSettings::ATTR_EQUIIPMENT_ID = "EquipmentID";
-const char* TuningServiceSettings::ATTR_COUNT = "Count";
-
 
 bool TuningServiceSettings::fillTuningClientsInfo(Hardware::Software *software, bool singleLmControlEnabled, Builder::IssueLogger* log)
 {
