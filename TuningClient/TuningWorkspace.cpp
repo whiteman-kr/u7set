@@ -812,26 +812,23 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 
 void TuningWorkspace::updateCounters()
 {
-	if (theConfigSettings.showDiscreteCounters == false)
-	{
-		return;
-	}
-
 	// Tab counters
 
 	if (m_tab != nullptr && m_tab->isVisible() == true)
 	{
-		int tabIndex = 0;
+		int tabFiltersCount = static_cast<int>(m_tabsFilters.size());
 
-		if (m_tab->count() != static_cast<int>(m_tabsFilters.size()))
+		if (m_tab->count() != tabFiltersCount)
 		{
 			//qDebug() << m_tab->count();
 			//qDebug() << static_cast<int>(m_tabsFilters.size());
-			assert(m_tab->count() == static_cast<int>(m_tabsFilters.size()));
+			assert(m_tab->count() == tabFiltersCount);
 		}
 
-		for (std::shared_ptr<TuningFilter> f : m_tabsFilters)
+		for (int ti = 0; ti < tabFiltersCount; ti++)
 		{
+			std::shared_ptr<TuningFilter> f = m_tabsFilters[ti];
+
 			if (f == nullptr)
 			{
 				assert(f);
@@ -858,15 +855,14 @@ void TuningWorkspace::updateCounters()
 			}
 			else
 			{
-				newCaption = QString("%1 [%2]").arg(f->caption()).arg(discreteCount);
+				newCaption = QString(" %1 [%2] ").arg(f->caption()).arg(discreteCount);
 			}
 
-			if (m_tab->tabText(tabIndex) != newCaption)
+			if (m_tab->tabText(ti) != newCaption)
 			{
-				m_tab->setTabText(tabIndex, newCaption);
+				m_tab->setTabText(ti, newCaption);
 			}
 
-			tabIndex++;
 		}
 	}
 
@@ -902,7 +898,7 @@ void TuningWorkspace::updateCounters()
 		}
 		else
 		{
-			newCaption = QString("%1 [%2]").arg(button->caption()).arg(discreteCount);
+			newCaption = QString(" %1 [%2] ").arg(button->caption()).arg(discreteCount);
 		}
 
 		if (button->text() != newCaption)
@@ -943,7 +939,7 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 		// Counters column
 
-		if (columnDiscreteCountIndex != -1 && theConfigSettings.showDiscreteCounters == true && filter->hasDiscreteCounter() == true)
+		if (columnDiscreteCountIndex != -1 && filter->hasDiscreteCounter() == true)
 		{
 			treeItem->setText(columnDiscreteCountIndex, QString("%1").arg(counters.discreteCounter));
 		}
