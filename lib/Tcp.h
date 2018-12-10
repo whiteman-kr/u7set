@@ -195,7 +195,6 @@ namespace Tcp
 		HostAddressPort peerAddr() const;
 	};
 
-
 	// -------------------------------------------------------------------------------------
 	//
 	// Tcp::Server class declaration
@@ -455,6 +454,10 @@ namespace Tcp
 
 		HostAddressPort currentServerAddressPort() const;
 		HostAddressPort serverAddressPort(int serverIndex) const;
+
+		HostAddressPort serverAddressPort1() const { return serverAddressPort(0); }
+		HostAddressPort serverAddressPort2() const { return serverAddressPort(1); }
+
 		int selectedServerIndex() { return m_selectedServerIndex; }
 
 		bool isAutoSwitchServer() const { return m_autoSwitchServer; }
@@ -480,13 +483,4 @@ namespace Tcp
 
 		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) = 0;
 	};
-
-
-	// -------------------------------------------------------------------------------------
-	//
-	// Tcp::Thread class declaration
-	//
-	// -------------------------------------------------------------------------------------
-
-	typedef SimpleThread Thread;
 }

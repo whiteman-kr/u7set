@@ -311,7 +311,7 @@ namespace Tcp
 	}
 
 
-	QString FileClient::getErrorStr(FileTransferResult errorCode)
+	QString FileClient::getErrorStr(FileTransferResult errorCode) const
 	{
 		QString str;
 

@@ -114,7 +114,7 @@ namespace Tcp
 		virtual void onClientThreadFinished() override;
 		virtual void onReplyTimeout() override;
 
-		QString getErrorStr(FileTransferResult errorCode);
+		QString getErrorStr(FileTransferResult errorCode) const;
 
 	protected slots:
 		void slot_downloadFile(const QString fileName);
