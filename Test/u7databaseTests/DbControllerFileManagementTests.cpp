@@ -244,7 +244,7 @@ void DbControllerFileTests::getFileListTreeTest()
 	QVERIFY2(fileTree.rootFile()->fileId() == parentId, "Returned wrong parent id");
 	QVERIFY2(fileTree.rootFile()->fileName() == "TestTreeRootDbc.ttr", "Returned wrong parent file name");
 
-	std::vector<std::shared_ptr<DbFileInfo>> parentChilder = fileTree.childeren(parentId);
+	std::vector<std::shared_ptr<DbFileInfo>> parentChilder = fileTree.children(parentId);
 
 	QVERIFY2(parentChilder.size() == 2, qPrintable(m_db->lastError()));
 

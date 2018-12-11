@@ -326,21 +326,36 @@ private:
 
 class HasDbController
 {
-
-private:
-	HasDbController();
 public:
+	HasDbController() = delete;
 	explicit HasDbController(DbController* db);
 
 	// Properties
 	//
 protected:
-	DbController* db();
-	const DbController* db() const;
+	DbController* db() noexcept
+	{
+		return m_db;
+	}
+
+	const DbController* db() const noexcept
+	{
+		return m_db;
+	}
+
+	DbController* dbc() noexcept
+	{
+		return m_db;
+	}
+
+	const DbController* dbc() const noexcept
+	{
+		return m_db;
+	}
 
 	// Data
 	//
 private:
-	DbController* m_db;
+	DbController* m_db = nullptr;
 };
 

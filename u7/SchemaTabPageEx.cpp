@@ -1,7 +1,7 @@
 #include "Stable.h"
 //#include <QJsonArray>
 #include "SchemaTabPageEx.h"
-//#include "CreateSchemaDialog.h"
+#include "CreateSchemaDialog.h"
 //#include "Forms/SelectChangesetDialog.h"
 //#include "Forms/FileHistoryDialog.h"
 //#include "Forms/CompareDialog.h"
@@ -17,39 +17,418 @@
 //
 //
 
-SchemaListModelEx::SchemaListModelEx(QObject* parent) :
-	QAbstractItemModel(parent)
+SchemaListModelEx::SchemaListModelEx(DbController* dbc, QString parentFileName, QWidget* parentWidget) :
+	QAbstractItemModel(parentWidget),
+	HasDbController(dbc),
+	m_parentFileName(parentFileName),
+	m_parentWidget(parentWidget)
 {
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemaListModelEx::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemaListModelEx::projectClosed);
 }
 
 QModelIndex SchemaListModelEx::index(int row, int column, const QModelIndex& parent/* = QModelIndex()*/) const
 {
-	return QModelIndex{};
+	if (hasIndex(row, column, parent) == false)
+	{
+		return {};
+	}
+
+	int parentFileId = -1;
+
+	if (parent.isValid() == false)
+	{
+		parentFileId = m_files.rootFileId();
+	}
+	else
+	{
+		parentFileId = parent.internalId();
+	}
+
+	auto file = m_files.child(parentFileId, row);		// sort !!!
+	if (file == nullptr)
+	{
+		assert(file);
+		return {};
+	}
+
+	return createIndex(row, column, static_cast<quintptr>(file->fileId()));
 }
 
 QModelIndex SchemaListModelEx::parent(const QModelIndex& index) const
 {
-	return QModelIndex{};
+	if (index.isValid() == false)
+	{
+		assert(false);
+		return {};
+	}
+
+	int fileId = index.internalId();
+	if (fileId == m_files.rootFileId())
+	{
+		return {};
+	}
+
+	auto file = m_files.file(fileId);
+	if (file == nullptr)
+	{
+		assert(file);
+		return {};
+	}
+
+	if (file->fileId() != fileId)
+	{
+		assert(file->fileId() == fileId);
+		return {};
+	}
+
+	if (file->parentId() == m_files.rootFileId())
+	{
+		return {};
+	}
+
+	auto parentFile = m_files.file(file->parentId());
+	if (parentFile == nullptr)
+	{
+		assert(parentFile);
+		return {};
+	}
+
+	assert(parentFile->fileId() == file->parentId());
+
+	// Determine the position of the parent in the parent's parent
+	//
+	int parentRow = m_files.indexInParent(parentFile->fileId());
+
+	if (parentRow == -1)
+	{
+		assert(parentRow != -1);
+		return {};
+	}
+
+	return createIndex(parentRow, index.column(), static_cast<quintptr>(file->parentId()));
 }
 
-int SchemaListModelEx::rowCount(const QModelIndex& parent/* = QModelIndex()*/) const
+int SchemaListModelEx::rowCount(const QModelIndex& parentIndex/* = QModelIndex()*/) const
 {
-	return 0;
+	if (m_files.empty() == true)
+	{
+		return 0;
+	}
+
+	if (parentIndex.isValid() == false)
+	{
+		return m_files.rootChildrenCount();
+	}
+
+	int fileId = parentIndex.internalId();
+	int rowCount = m_files.childrenCount(fileId);
+
+	return rowCount;
 }
 
-int SchemaListModelEx::columnCount(const QModelIndex& parent/* = QModelIndex()*/) const
+int SchemaListModelEx::columnCount(const QModelIndex& /*parent*//* = QModelIndex()*/) const
 {
-	return 0;
+	return static_cast<int>(Columns::ColumnCount);
 }
 
 QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::DisplayRole*/) const
 {
+	if (index.isValid() == false)
+	{
+		return {};
+	}
+
+	//int row = index.row();
+	Columns column = static_cast<Columns>(index.column());
+
+	int fileId = index.internalId();
+	auto file = m_files.file(fileId);
+
+	if (file == nullptr)
+	{
+		assert(file);
+		return {};
+	}
+
+	if (role == Qt::DisplayRole)
+	{
+		switch (column)
+		{
+		case Columns::FileNameColumn:
+			return file->fileName();
+
+		case Columns::CaptionColumn:
+			return fileCaption(fileId);
+
+		case Columns::FileStateColumn:
+			return file->state().text();
+
+		case Columns::FileActionColumn:
+			return file->action().text();
+
+		case Columns::ChangesetColumn:
+			return (file->state() == VcsState::CheckedIn) ? QVariant{file->changeset()} : QVariant{};
+
+		case Columns::FileUserColumn:
+			return usernameById(file->userId());
+
+		case Columns::IssuesColumn:
+			if (excludedFromBuild(file->fileId()) == true)
+			{
+				return QString("Excluded From Build");
+			}
+
+			if (QStringList fn = file->fileName().split('.');
+				fn.isEmpty() == false)
+			{
+				int to_do_issue_counter_for_child_schemas;
+
+				auto issueCount = GlobalMessanger::instance().issueForSchema(fn.front());
+
+				if (issueCount.errors == 0 && issueCount.warnings == 0)
+				{
+					return QString();
+				}
+
+				if (issueCount.errors > 0 && issueCount.warnings == 0)
+				{
+					return QString("ERR: %1").arg(issueCount.errors);
+				}
+
+				if (issueCount.errors > 0 && issueCount.warnings > 0)
+				{
+					return QString("ERR: %1, WRN: %2").arg(issueCount.errors).arg(issueCount.warnings);
+				}
+
+				if (issueCount.errors == 0 && issueCount.warnings > 0)
+				{
+					return QString("WRN: %2").arg(issueCount.warnings);
+				}
+
+				assert(false);
+				return {};
+			}
+			else
+			{
+				assert(fn.isEmpty() == false);		// Empty file name?
+			}
+			return {};
+
+		case Columns::DetailsColumn:
+			return detailsColumnText(file->fileId());
+
+		default:
+			assert(false);
+		}
+
+		return QVariant{};
+	}
+
 	return QVariant{};
 }
 
 QVariant SchemaListModelEx::headerData(int section, Qt::Orientation orientation, int role) const
 {
-	return QVariant{};
+	if (role == Qt::DisplayRole)
+	{
+		if (orientation == Qt::Horizontal)
+		{
+			switch (static_cast<Columns>(section))
+			{
+			case Columns::FileNameColumn:	return QStringLiteral("File Name");
+			case Columns::CaptionColumn:	return QStringLiteral("Caption");
+			case Columns::FileStateColumn:	return QStringLiteral("State");
+			case Columns::FileActionColumn:	return QStringLiteral("Action");
+			case Columns::ChangesetColumn:	return QStringLiteral("Changeset");
+			case Columns::FileUserColumn:	return QStringLiteral("User");
+			case Columns::IssuesColumn:	return QStringLiteral("Issues");
+			case Columns::DetailsColumn:	return QStringLiteral("Details");
+			default:
+				assert(false);
+			}
+		}
+
+		return {};
+	}
+
+	return {};
+}
+
+std::pair<QModelIndex, bool> SchemaListModelEx::addFile(QModelIndex parentIndex, std::shared_ptr<DbFileInfo> file)
+{
+	if (file == nullptr)
+	{
+		assert(file);
+		return {{}, false};
+	}
+
+	DbFileInfo parentFile = this->file(parentIndex);
+
+	if (file->parentId() != parentFile.fileId())
+	{
+		assert(file->parentId() == parentFile.fileId());
+		return {{}, false};
+	}
+
+	if (m_files.hasFile(file->parentId()) == false)
+	{
+		assert(m_files.hasFile(file->fileId()));
+		return {{}, false};
+	}
+
+	// --
+	//
+	if (m_files.empty() == true)
+	{
+		assert(m_files.empty() == false);
+		return {{}, false};		// At least parent must be present
+	}
+
+	// We rely that NEW (just created) fileId is always bigger the previously cretated files.
+	// It is required to update indexes, and for beginInsertRows to pointchich index has been added.
+	//
+	assert(file->fileId() > m_files.files().crbegin()->second->fileId());
+
+	// --
+	//
+	if (file->fileName().endsWith(m_filter, Qt::CaseInsensitive) == false)
+	{
+		return {{}, false};
+	}
+
+	int insertIndex = m_files.childrenCount(parentFile.fileId());
+
+	// --
+	//
+	beginInsertRows(parentIndex, insertIndex, insertIndex);
+
+	m_files.addFile(file);
+	if (m_files.hasFile(file->fileId()) == false)
+	{
+		assert(m_files.hasFile(file->fileId()));
+		return {{}, false};
+	}
+
+	VFrame30::SchemaDetails details;
+
+	bool ok = details.parseDetails(file->details());
+	if (ok == true)
+	{
+		m_details[file->fileId()] = details;
+	}
+
+	endInsertRows();
+
+	//
+	QModelIndex addedModelIndex = index(insertIndex, 0, parentIndex);
+	assert(addedModelIndex.isValid() == true);
+
+	return {addedModelIndex, true};
+}
+
+DbFileInfo SchemaListModelEx::file(const QModelIndex& modelIndex)
+{
+	if (modelIndex.isValid() == false)
+	{
+		return m_parentFile;
+	}
+
+	int fileId = modelIndex.internalId();
+	assert(fileId != -1);
+
+	auto foundFile = m_files.file(fileId);
+	if (foundFile != nullptr)
+	{
+		return *foundFile.get();
+	}
+	else
+	{
+		return {};
+	}
+}
+
+void SchemaListModelEx::refresh()
+{
+	// Get file tree
+	//
+	DbFileTree files;
+	bool ok = dbc()->getFileListTree(&files, m_parentFile.fileId(), filter(), true, m_parentWidget);
+
+	if (ok == false)
+	{
+		return;		// do not reset model, just leave it as is
+	}
+
+	// Get users
+	//
+	std::vector<DbUser> users;
+	users.reserve(32);
+
+	ok = dbc()->getUserList(&users, m_parentWidget);
+	if (ok == false)
+	{
+		// Clear users, but don't return, we still can show files
+		//
+		users.clear();
+	}
+
+	std::map<int, QString> usersMap;
+	for (const DbUser& u : users)
+	{
+		usersMap[u.userId()] = u.username();
+	}
+
+	// Parse file details
+	//
+	std::map<int, VFrame30::SchemaDetails> detailsMap;
+
+	for (auto& [fileId, fileInfo] : files.files())
+	{
+		if (fileInfo->fileName().endsWith(m_filter, Qt::CaseInsensitive) == true)
+		{
+			VFrame30::SchemaDetails details;
+			bool parsed = details.parseDetails(fileInfo->details());
+
+			if (parsed == true)
+			{
+				detailsMap[fileId] = std::move(details);
+			}
+		}
+	}
+
+	// Set all data
+	//
+	beginResetModel();
+	m_files = std::move(files);
+	m_users = std::move(usersMap);
+	m_details = std::move(detailsMap);
+	endResetModel();
+
+	return;
+}
+
+void SchemaListModelEx::projectOpened(DbProject /*project*/)
+{
+	m_parentFile = db()->systemFileInfo(m_parentFileName);
+	assert(m_parentFile.fileId() != -1);
+
+	refresh();
+
+	return;
+}
+
+void SchemaListModelEx::projectClosed()
+{
+	beginResetModel();
+	m_files.clear();
+	m_users.clear();
+	m_details.clear();
+	endResetModel();
+
+	m_parentFile = DbFileInfo();
+
+	return;
 }
 
 QString SchemaListModelEx::filter() const
@@ -62,17 +441,79 @@ void SchemaListModelEx::setFilter(const QString& value)
 	m_filter = value;
 }
 
+QString SchemaListModelEx::usernameById(int userId) const noexcept
+{
+	auto it = m_users.find(userId);
+
+	if (it == m_users.end())
+	{
+		return QStringLiteral("Undefined");
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+QString SchemaListModelEx::detailsColumnText(int fileId) const
+{
+	auto it = m_details.find(fileId);
+	if (it == m_details.end())
+	{
+		return {};
+	}
+
+	const VFrame30::SchemaDetails& d = it->second;
+	return d.m_equipmentId;
+}
+
+QString SchemaListModelEx::fileCaption(int fileId) const
+{
+	auto it = m_details.find(fileId);
+	if (it == m_details.end())
+	{
+		return {};
+	}
+
+	const VFrame30::SchemaDetails& d = it->second;
+	return d.m_caption;
+}
+
+bool SchemaListModelEx::excludedFromBuild(int fileId) const
+{
+	auto it = m_details.find(fileId);
+	if (it == m_details.end())
+	{
+		return false;
+	}
+
+	const VFrame30::SchemaDetails& d = it->second;
+	return d.m_excludedFromBuild;
+}
+
+const DbFileInfo& SchemaListModelEx::parentFile() const
+{
+	return m_parentFile;
+}
+
 //
 //
 //	SchemaFileView
 //
 //
 SchemaFileViewEx::SchemaFileViewEx(DbController* dbc, const QString& parentFileName) :
+	QTreeView(),
 	HasDbController(dbc),
-	m_parentFileName(parentFileName)
+	m_filesModel(dbc, parentFileName, this)
 {
 	assert(dbc != nullptr);
-	assert(m_parentFileName.isEmpty() == false);
+
+	setUniformRowHeights(true);
+	setSortingEnabled(true);
+	sortByColumn(0, Qt::AscendingOrder);
+	setSelectionMode(QAbstractItemView::ExtendedSelection);
+	setSelectionBehavior(QAbstractItemView::SelectRows);
+	setIndentation(10);
 
 	// --
 	//
@@ -84,7 +525,12 @@ SchemaFileViewEx::SchemaFileViewEx(DbController* dbc, const QString& parentFileN
 
 	// Adjust view
 	//
-	setModel(&m_filesModel);
+	m_proxyModel.setSortCaseSensitivity(Qt::CaseInsensitive);
+	//m_proxyModel.setDynamicSortFilter(false);
+	m_proxyModel.setSourceModel(&m_filesModel);
+
+
+	setModel(&m_proxyModel);
 
 //	setShowGrid(false);
 //	setGridStyle(Qt::PenStyle::NoPen);
@@ -362,25 +808,6 @@ SchemaFileViewEx::SchemaFileViewEx(DbController* dbc, const QString& parentFileN
 
 //	return;
 //}
-
-void SchemaFileViewEx::refreshFiles()
-{
-	//db()->getFileListTree()
-
-//	// Get file list from the DB
-//	//
-//	std::vector<DbFileInfo> files;
-
-//	db()->getFileList(&files, parentFile().fileId(), filesModel().filter(), true, this);
-
-//	// Set files to the view
-//	//
-//	setFiles(files);
-
-//	setSortingEnabled(true);	// it triggers setSortingEnabled() with the current sort section and order.
-
-	return;
-}
 
 //void SchemaFileView::projectOpened()
 //{
@@ -799,11 +1226,11 @@ void SchemaFileViewEx::refreshFiles()
 //	return;
 //}
 
-void SchemaFileViewEx::slot_refreshFiles()
-{
-	refreshFiles();
-	return;
-}
+//void SchemaFileViewEx::slot_refreshFiles()
+//{
+//	refreshFiles();
+//	return;
+//}
 
 //void SchemaFileView::slot_doubleClicked(const QModelIndex& index)
 //{
@@ -946,20 +1373,25 @@ SchemaListModelEx& SchemaFileViewEx::filesModel()
 	return m_filesModel;
 }
 
+QSortFilterProxyModel& SchemaFileViewEx::proxyModel()
+{
+	return m_proxyModel;
+}
+
 //const std::vector<std::shared_ptr<DbFileInfo>>& SchemaFileView::files() const
 //{
 //	return m_filesModel.files();
 //}
 
-//const DbFileInfo& SchemaFileView::parentFile() const
-//{
-//	return m_parentFile;
-//}
+const DbFileInfo& SchemaFileViewEx::parentFile() const
+{
+	return m_filesModel.parentFile();
+}
 
-//int SchemaFileView::parentFileId() const
-//{
-//	return m_parentFile.fileId();
-//}
+int SchemaFileViewEx::parentFileId() const
+{
+	return m_filesModel.parentFile().fileId();
+}
 
 
 
@@ -1408,7 +1840,8 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(QString fileExt,
 	m_filesView = new SchemaFileViewEx(db, parentFileName);
 	m_filesView->filesModel().setFilter("." + fileExt);
 
-	connect(m_refreshFileAction, &QAction::triggered, m_filesView, &SchemaFileViewEx::slot_refreshFiles);
+	connect(m_newFileAction, &QAction::triggered, this, &SchemaControlTabPageEx::addFile);
+	connect(m_refreshFileAction, &QAction::triggered, &m_filesView->filesModel(), &SchemaListModelEx::refresh);
 
 	// --
 	//
@@ -1446,6 +1879,8 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(QString fileExt,
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemaControlTabPageEx::projectOpened);
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemaControlTabPageEx::projectClosed);
 
+        connect(m_filesView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SchemaControlTabPageEx::selectionChanged);
+
 //	connect(m_filesView, &SchemaFileView::openFileSignal, this, &SchemaControlTabPage::openFiles);
 //	connect(m_filesView, &SchemaFileView::viewFileSignal, this, &SchemaControlTabPage::viewFiles);
 //	connect(m_filesView, &SchemaFileView::cloneFileSignal, this, &SchemaControlTabPage::cloneFile);
@@ -1459,13 +1894,13 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(QString fileExt,
 //	connect(m_searchEdit, &QLineEdit::returnPressed, this, &SchemaControlTabPage::search);
 //	connect(m_searchButton, &QPushButton::clicked, this, &SchemaControlTabPage::search);
 
-//	auto schema = createSchemaFunc();
+	auto schema = createSchemaFunc();
 
-//	if (schema->isLogicSchema() == true)
-//	{
-//		connect(GlobalMessanger::instance(), &GlobalMessanger::addLogicSchema, this, &SchemaControlTabPage::addLogicSchema);
-//		connect(GlobalMessanger::instance(), &GlobalMessanger::searchSchemaForLm, this, &SchemaControlTabPage::searchSchemaForLm);
-//	}
+	if (schema->isLogicSchema() == true)
+	{
+		//connect(GlobalMessanger::instance(), &GlobalMessanger::addLogicSchema, this, &SchemaControlTabPageEx::addLogicSchema);
+		//connect(GlobalMessanger::instance(), &GlobalMessanger::searchSchemaForLm, this, &SchemaControlTabPageEx::searchSchemaForLm);
+	}
 
 	return;
 }
@@ -1485,6 +1920,7 @@ void SchemaControlTabPageEx::createActions()
 	m_newFileAction = new QAction(tr("New Schema.."), this);
 	m_newFileAction->setIcon(QIcon(":/Images/Images/SchemaAddFile.svg"));
 	m_newFileAction->setEnabled(false);
+	m_newFileAction->setShortcut(QKeySequence::StandardKey::New);
 
 	m_cloneFileAction = new QAction(tr("Clone Schema"), this);
 	m_cloneFileAction->setIcon(QIcon(":/Images/Images/SchemaClone.svg"));
@@ -1586,18 +2022,29 @@ void SchemaControlTabPageEx::createActions()
 
 void SchemaControlTabPageEx::projectOpened()
 {
+	m_newFileAction->setEnabled(true);
 	m_refreshFileAction->setEnabled(true);
 }
 
 void SchemaControlTabPageEx::projectClosed()
 {
+	m_newFileAction->setEnabled(false);
 	m_refreshFileAction->setEnabled(false);
 }
 
-//void SchemaControlTabPage::addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile)
-//{
-//	// Create new Schema and add it to the vcs
-//	//
+void SchemaControlTabPageEx::selectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
+{
+    QModelIndexList s = m_filesView->selectionModel()->selectedRows();
+    m_newFileAction->setEnabled(s.size() == 0 || s.size() == 1);
+}
+
+void SchemaControlTabPageEx::addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile)
+{
+	// Create new Schema and add it to the vcs
+	//
+	int to_do_where_to_add_this_schema_question;
+	int to_do_show_kind_of_select_folder_dialog;
+
 //	std::shared_ptr<VFrame30::Schema> schema(m_createSchemaFunc());
 
 //	if (schema->isLogicSchema() == false)
@@ -1643,141 +2090,182 @@ void SchemaControlTabPageEx::projectClosed()
 
 //	m_filesView->setFocus();
 
-//	return;
-//}
+	return;
+}
 
-//void SchemaControlTabPage::addFile()
-//{
-//	// Create new Schema and add it to the vcs
-//	//
-//	std::shared_ptr<VFrame30::Schema> schema(m_createSchemaFunc());
+void SchemaControlTabPageEx::addFile()
+{
+    QModelIndexList selectedRows = m_filesView->selectionModel()->selectedRows();
+    if (selectedRows.size() != 0 && selectedRows.size() != 1)
+    {
+        assert(selectedRows.size() == 0 || selectedRows.size() == 1);
+        return;
+    }
 
-//	// Set New Guid
-//	//
-//	schema->setGuid(QUuid::createUuid());
+    // Create new Schema and add it to the vcs
+    //
+    std::shared_ptr<VFrame30::Schema> schema(m_createSchemaFunc());
 
-//	int sequenceNo = db()->nextCounterValue();
+    // Set New Guid
+    //
+    schema->setGuid(QUuid::createUuid());
 
-//	// Set default ID
-//	//
-//	QString defaultId = "SCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
+    int sequenceNo = db()->nextCounterValue();
 
-//	if (schema->isLogicSchema() == true)
-//	{
-//		defaultId = "APPSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
-//	}
+    // Set default ID
+    //
+    QString defaultId = "SCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
 
-//	if (schema->isUfbSchema() == true)
-//	{
-//		defaultId = "UFBID" + QString::number(sequenceNo).rightJustified(6, '0');
-//	}
+    if (schema->isLogicSchema() == true)
+    {
+        defaultId = "APPSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
+    }
 
-//	if (schema->isMonitorSchema() == true)
-//	{
-//		defaultId = "MONITORSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
-//	}
+    if (schema->isUfbSchema() == true)
+    {
+        defaultId = "UFBID" + QString::number(sequenceNo).rightJustified(6, '0');
+    }
 
-//	if (schema->isDiagSchema() == true)
-//	{
-//		defaultId = "DIAGSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
-//	}
+    if (schema->isMonitorSchema() == true)
+    {
+        defaultId = "MONITORSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
+    }
 
-//	schema->setSchemaId(defaultId);
+    if (schema->isDiagSchema() == true)
+    {
+        defaultId = "DIAGSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
+    }
 
-//	// Set Caption
-//	//
-//	schema->setCaption("Caption "  + QString::number(sequenceNo).rightJustified(6, '0'));
+    schema->setSchemaId(defaultId);
 
-//	// Set default EqupmnetIDs for LogicSchema
-//	//
-//	if (dynamic_cast<VFrame30::LogicSchema*>(schema.get()) != nullptr)
-//	{
-//		VFrame30::LogicSchema* logicSchema = dynamic_cast<VFrame30::LogicSchema*>(schema.get());
-//		logicSchema->setEquipmentIds("SYSTEMID_RACKID_CH01_MD00");
-//	}
+    // Set Caption
+    //
+    schema->setCaption("Caption "  + QString::number(sequenceNo).rightJustified(6, '0'));
 
-//	// Set Width and Height
-//	//
-//	if (schema->unit() == VFrame30::SchemaUnit::Display)
-//	{
-//		schema->setDocWidth(1280);
-//		schema->setDocHeight(1024);
-//	}
-//	else
-//	{
-//		// A3 Landscape
-//		//
-//		if (schema->isUfbSchema() == true)
-//		{
-//			schema->setDocWidth(297.0 / 25.4);
-//			schema->setDocHeight(210.0 / 25.4);
-//		}
-//		else
-//		{
-//			schema->setDocWidth(420.0 / 25.4);
-//			schema->setDocHeight(297.0 / 25.4);
-//		}
-//	}
+    // Set default EqupmnetIDs for LogicSchema
+    //
+    if (dynamic_cast<VFrame30::LogicSchema*>(schema.get()) != nullptr)
+    {
+        VFrame30::LogicSchema* logicSchema = dynamic_cast<VFrame30::LogicSchema*>(schema.get());
+        logicSchema->setEquipmentIds("SYSTEMID_RACKID_CH01_MD00");
+    }
 
-//	addSchemaFile(schema, false);
+    // Set Width and Height
+    //
+    if (schema->unit() == VFrame30::SchemaUnit::Display)
+    {
+        schema->setDocWidth(1280);
+        schema->setDocHeight(1024);
+    }
+    else
+    {
+        // A3 Landscape
+        //
+        if (schema->isUfbSchema() == true)
+        {
+            schema->setDocWidth(297.0 / 25.4);
+            schema->setDocHeight(210.0 / 25.4);
+        }
+        else
+        {
+            schema->setDocWidth(420.0 / 25.4);
+            schema->setDocHeight(297.0 / 25.4);
+        }
+    }
 
-//	return;
-//}
+    addSchemaFile(schema, false);
 
-//void SchemaControlTabPage::addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, bool dontShowPropDialog)
-//{
-//	// Show dialog to edit schema properties
-//	//
-//	if (dontShowPropDialog == false)
-//	{
-//		CreateSchemaDialog propertiesDialog(schema, db(), parentFile().fileId(), m_templateFileExtension, this);
+    return;
+}
 
-//		if (propertiesDialog.exec() != QDialog::Accepted)
-//		{
-//			return;
-//		}
-//	}
+void SchemaControlTabPageEx::addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, bool dontShowPropDialog)
+{
+    QModelIndexList selectedRows = m_filesView->selectionModel()->selectedRows();
+    if (selectedRows.size() != 0 && selectedRows.size() != 1)
+    {
+        assert(selectedRows.size() == 0 || selectedRows.size() == 1);
+        return;
+    }
 
-//	//  Save file in DB
-//	//
-//	QByteArray data;
-//	schema->Save(data);
+    QModelIndex parentModelIndex;
+    if (selectedRows.size() == 1)
+    {
+        parentModelIndex = selectedRows.front();
+    }
 
-//	std::shared_ptr<DbFile> vfFile = std::make_shared<DbFile>();
+	parentModelIndex = m_filesView->proxyModel().mapToSource(parentModelIndex);
 
-//	vfFile->setFileName(schema->schemaId() + m_filesView->filesModel().filter());
-//	vfFile->setDetails(schema->details());
-//	vfFile->swapData(data);
+    // Show dialog to edit schema properties
+    //
+    if (dontShowPropDialog == false)
+    {
+        CreateSchemaDialog propertiesDialog(schema, db(), parentFile().fileId(), m_templateFileExtension, this);
 
-//	std::vector<std::shared_ptr<DbFile>> addFilesList;
-//	addFilesList.push_back(vfFile);
+        if (propertiesDialog.exec() != QDialog::Accepted)
+        {
+            return;
+        }
+    }
 
-//	db()->addFiles(&addFilesList, parentFile().fileId(), this);
+    //  Save file in DB
+    //
+    QByteArray data;
+    schema->Save(data);
 
-//	// Add file to the FileModel and select it
-//	//
-//	std::shared_ptr<DbFileInfo> file = std::make_shared<DbFileInfo>(*vfFile.get());
+	std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 
-//	if (file->fileId() != -1)
-//	{
-//		m_filesView->selectionModel()->clear();
+	file->setFileName(schema->schemaId() + m_filesView->filesModel().filter());
+	file->setDetails(schema->details());
+	file->swapData(data);
 
-//		m_filesView->filesModel().addFile(file);
+	std::vector<std::shared_ptr<DbFile>> addFilesList;
+	addFilesList.push_back(file);
 
-//		int fileRow = m_filesView->filesModel().getFileRow(file->fileId());
+	int parentFileId = -1;
 
-//		if (fileRow != -1)
-//		{
-//			QModelIndex md = m_filesView->filesModel().index(fileRow, 0);		// m_filesModel.columnCount()
-//			m_filesView->selectionModel()->select(md, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+	if (parentModelIndex.isValid() == false)
+	{
+		parentFileId = parentFile().fileId();
+	}
+	else
+	{
+		parentFileId = static_cast<int>(parentModelIndex.internalId());
+	}
 
-//			m_filesView->scrollTo(md);
-//		}
-//	}
+	if (bool ok = db()->addFiles(&addFilesList, parentFileId, this);
+		ok == false)
+	{
+		return;
+	}
+
+	// Add file to the FileModel and select it
+	//
+	if (file->fileId() != -1)
+	{
+		// Clear file data, we don't need it anymore, if file will be added to the model with data it will just waste memory
+		//
+		file->clearData();
+
+		m_filesView->selectionModel()->clear();
+		auto [addedModelIndex, addResult] = m_filesView->filesModel().addFile(parentModelIndex, file);
+
+		if (addResult == true)
+		{
+			QModelIndex addedProxyIndex = m_filesView->proxyModel().mapFromSource(addedModelIndex);
+			QModelIndex parentProxyIndex = addedProxyIndex.parent();
+
+			if (m_filesView->isExpanded(parentProxyIndex) == false)
+			{
+				m_filesView->expand(parentProxyIndex);
+			}
+			m_filesView->scrollTo(addedProxyIndex);
+			m_filesView->selectionModel()->select(addedProxyIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+		}
+	}
 
 //	m_filesView->filesViewSelectionChanged(QItemSelection(), QItemSelection());
-//	return;
-//}
+	return;
+}
 
 //void SchemaControlTabPage::deleteFile(std::vector<DbFileInfo> files)
 //{
@@ -2571,10 +3059,10 @@ void SchemaControlTabPageEx::projectClosed()
 //	return;
 //}
 
-//const DbFileInfo& SchemaControlTabPage::parentFile() const
-//{
-//	return m_filesView->parentFile();
-//}
+const DbFileInfo& SchemaControlTabPageEx::parentFile() const
+{
+	return m_filesView->parentFile();
+}
 
 
 ////

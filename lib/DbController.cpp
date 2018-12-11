@@ -2449,25 +2449,9 @@ QString DbController::username(int userId) const
 	}
 }
 
-
-HasDbController::HasDbController()
-{
-	assert(false);
-}
-
 HasDbController::HasDbController(DbController* dbcontroller) :
 	m_db(dbcontroller)
 {
 	assert(dbcontroller);
-}
-
-DbController* HasDbController::db()
-{
-	return m_db;
-}
-
-const DbController* HasDbController::db() const
-{
-	return m_db;
 }
 

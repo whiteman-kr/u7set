@@ -50,7 +50,7 @@ void DbControllerSignalTests::initTestCase()
 	ok = m_dbController->upgradeProject(m_databaseName, m_adminPassword, true, 0);
 	QVERIFY2 (ok == true, qPrintable ("Error: can not upgrade project: " + m_dbController->lastError()));
 
-	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, 0);
+	ok = m_dbController->openProject(m_databaseName, "Administrator", m_adminPassword, nullptr);
 	QVERIFY2 (ok == true, qPrintable ("Error: can not open project: " + m_dbController->lastError()));
 }
 

@@ -111,7 +111,7 @@ void DbControllerProjectTests::getProjectListTest()
 
 	// Get project list from db controller
 	//
-	ok = m_db.openProject(m_projectName, "Administrator", m_projectAdministratorPassword, 0);
+	ok = m_db.openProject(m_projectName, "Administrator", m_projectAdministratorPassword, nullptr);
 	QVERIFY2 (ok == true, qPrintable(m_db.lastError()));
 
 	std::vector<DbProject> outputData;
@@ -140,7 +140,7 @@ void DbControllerProjectTests::ProjectPropertyTest()
 	ok = m_db.upgradeProject(m_projectName, m_projectAdministratorPassword, true, 0);
 	QVERIFY2 (ok == true, qPrintable(m_db.lastError()));
 
-	ok = m_db.openProject(m_projectName, "Administrator", m_projectAdministratorPassword, 0);
+	ok = m_db.openProject(m_projectName, "Administrator", m_projectAdministratorPassword, nullptr);
 	QVERIFY2 (m_db.currentProject().databaseName() == qPrintable("u7_" + m_projectName), qPrintable("Error: openProject() function is not opened project"));
 
 	QString testPropertyName = "TestPropertyName";
@@ -204,7 +204,7 @@ void DbControllerProjectTests::isProjectOpenedTest()
 	ok = m_db.upgradeProject(m_projectName, m_projectAdministratorPassword, true, 0);
 	QVERIFY2 (ok == true, qPrintable(m_db.lastError()));
 
-	ok = m_db.openProject(m_projectName, "Administrator", m_projectAdministratorPassword, 0);
+	ok = m_db.openProject(m_projectName, "Administrator", m_projectAdministratorPassword, nullptr);
 	QVERIFY2 (ok == true, qPrintable(m_db.lastError()));
 
 	ok = m_db.isProjectOpened();
@@ -227,7 +227,7 @@ void DbControllerProjectTests::connectionInfoTest()
 	ok = m_db.upgradeProject(m_projectName, m_projectAdministratorPassword, true, 0);
 	QVERIFY2 (ok == true, qPrintable(m_db.lastError()));
 
-	ok = m_db.openProject(m_projectName, "Administrator", m_projectAdministratorPassword, 0);
+	ok = m_db.openProject(m_projectName, "Administrator", m_projectAdministratorPassword, nullptr);
 	QVERIFY2 (ok == true, qPrintable(m_db.lastError()));
 
 	// Host testing

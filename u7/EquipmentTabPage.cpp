@@ -1220,13 +1220,9 @@ EquipmentView::EquipmentView(DbController* dbcontroller) :
 {
 	assert(m_dbController);
 
-	setUniformRowHeights(true);
-
 	setSortingEnabled(true);
-
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 	setSelectionBehavior(QAbstractItemView::SelectRows);
-
 	setUniformRowHeights(true);
 	setIndentation(10);
 
@@ -1237,16 +1233,16 @@ EquipmentView::EquipmentView(DbController* dbcontroller) :
 	// And the same situation was seen in QtCreator, I think it's some kind of bug, so, just set come colors
 	// for selection
 	//
-	auto p = qApp->palette("QListView");
+//	auto p = qApp->palette("QListView");
 
-	QColor highlight = p.highlight().color();
-	QColor highlightText = p.highlightedText().color();
+//	QColor highlight = p.highlight().color();
+//	QColor highlightText = p.highlightedText().color();
 
-	QString selectionColor = QString("QTreeView::item:selected { background-color: %1; color: %2; }")
-							 .arg(highlight.name())
-							 .arg(highlightText.name());
+//	QString selectionColor = QString("QTreeView::item:selected { background-color: %1; color: %2; }")
+//							 .arg(highlight.name())
+//							 .arg(highlightText.name());
 
-	setStyleSheet(selectionColor);
+//	setStyleSheet(selectionColor);
 
 	// end of RPCT-633
 	//

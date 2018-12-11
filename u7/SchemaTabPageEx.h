@@ -5,7 +5,7 @@
 #include "../lib/DbController.h"
 //#include "EditSchemaWidget.h"
 #include "GlobalMessanger.h"
-#include "../VFrame30/Schema.h"
+#include "../VFrame30/LogicSchema.h"
 
 
 //
@@ -13,34 +13,42 @@
 // SchemaListModelEx
 //
 //
-class SchemaListModelEx : public QAbstractItemModel
+class SchemaListModelEx : public QAbstractItemModel, protected HasDbController
 {
 	Q_OBJECT
 
 public:
-	SchemaListModelEx(QObject* parent = nullptr);
+	SchemaListModelEx(DbController* dbc, QString parentFileName, QWidget* parentWidget);
 
 public:
 	virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
 	virtual QModelIndex parent(const QModelIndex& index) const override;
 
-	virtual int rowCount(const QModelIndex& parent = QModelIndex()) const override;
+	virtual int rowCount(const QModelIndex& parentIndex = QModelIndex()) const override;
 	virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
 	virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-	//virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+public:
+	std::pair<QModelIndex, bool> addFile(QModelIndex parentIndex, std::shared_ptr<DbFileInfo> file);
 
-	//void addFile(std::shared_ptr<DbFileInfo> file);
+	//	void setFiles(const std::vector<DbFileInfo>& files, const std::vector<DbUser>& users);
+	//	void clear();
 
-//	void setFiles(const std::vector<DbFileInfo>& files, const std::vector<DbUser>& users);
-//	void clear();
+	//	std::shared_ptr<DbFileInfo> fileByRow(int row);
+	//	std::shared_ptr<DbFileInfo> fileByFileId(int fileId);
 
-//	std::shared_ptr<DbFileInfo> fileByRow(int row);
-//	std::shared_ptr<DbFileInfo> fileByFileId(int fileId);
+	//	int getFileRow(int fileId) const;
+private:
+	DbFileInfo file(const QModelIndex& modelIndex);
 
-//	int getFileRow(int fileId) const;
+public slots:
+	void refresh();
+
+private slots:
+	void projectOpened(DbProject project);
+	void projectClosed();
 
 	// Properties
 	//
@@ -48,26 +56,27 @@ public:
 	QString filter() const;
 	void setFilter(const QString& value);		// "" -- no filter, "cdd" -- just cdd files
 
-//	const std::vector<std::shared_ptr<DbFileInfo>>& files() const;
+	QString usernameById(int userId) const noexcept;
 
-//	QString usernameById(int userId) const;
+	QString detailsColumnText(int fileId) const;
+	QString fileCaption(int fileId) const;
+	bool excludedFromBuild(int fileId) const;
 
-//	QString detailsColumnText(int fileId) const;
-//	QString fileCaption(int fileId) const;
-//	bool excludedFromBuild(int fileId) const;
+	const DbFileInfo& parentFile() const;
 
 	// Data
 	//
 public:
-	enum Columns
+	enum class Columns
 	{
 		FileNameColumn,
-		FileCaptionColumn,
+		CaptionColumn,
 		FileStateColumn,
-		FileUserColumn,
 		FileActionColumn,
-		FileIssuesColumn,
-		FileDetailsColumn,
+		ChangesetColumn,
+		FileUserColumn,
+		IssuesColumn,
+		DetailsColumn,
 
 		// Add other column befor this line
 		//
@@ -75,11 +84,19 @@ public:
 	};
 
 private:
-//	std::vector<std::shared_ptr<DbFileInfo>> m_files;
+	QString m_parentFileName;
+	DbFileInfo m_parentFile;
+
+	QWidget* m_parentWidget = nullptr;	// Inside this model DbController is used, and it requires parent widget for
+										// displaying progress and error messages
+	DbFileTree m_files;
 	QString m_filter;
 
-	std::map<int, QString> m_users;
-	std::map<int, VFrame30::SchemaDetails> m_details;		// Key is FileID
+	std::map<int, QString> m_users;							// Key is UserID
+	std::map<int, VFrame30::SchemaDetails> m_details; 		// Key is FileID
+
+//	Columns m_sortColumn = Columns::FileNameColumn;
+//	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 };
 
 
@@ -98,107 +115,109 @@ public:
 	// Methods
 	//
 protected:
-//	void CreateActions();
+	//	void CreateActions();
 
-//	void timerEvent(QTimerEvent* event) override;
+	//	void timerEvent(QTimerEvent* event) override;
 
 	// Methods
 	//
 public:
-//	void setFiles(const std::vector<DbFileInfo>& files);
-//	void clear();
+	//	void setFiles(const std::vector<DbFileInfo>& files);
+	//	void clear();
 
-//	void getSelectedFiles(std::vector<DbFileInfo>* out);
+	//	void getSelectedFiles(std::vector<DbFileInfo>* out);
 
-	void refreshFiles();
+	//	void refreshFiles();
 
-//signals:
-//	void openFileSignal(std::vector<DbFileInfo> files);
-//	void viewFileSignal(std::vector<DbFileInfo> files);
-//	void cloneFileSignal(DbFileInfo file);
-//	void addFileSignal();
-//	void deleteFileSignal(std::vector<DbFileInfo> files);
-//	void checkInSignal(std::vector<DbFileInfo> files);
-//	void undoChangesSignal(std::vector<DbFileInfo> files);
-//	void editSchemasProperties(std::vector<DbFileInfo> files);
+	//signals:
+	//	void openFileSignal(std::vector<DbFileInfo> files);
+	//	void viewFileSignal(std::vector<DbFileInfo> files);
+	//	void cloneFileSignal(DbFileInfo file);
+	//	void addFileSignal();
+	//	void deleteFileSignal(std::vector<DbFileInfo> files);
+	//	void checkInSignal(std::vector<DbFileInfo> files);
+	//	void undoChangesSignal(std::vector<DbFileInfo> files);
+	//	void editSchemasProperties(std::vector<DbFileInfo> files);
 
 	// Protected slots
 	//
 public slots:
-//	void projectOpened();
-//	void projectClosed();
+	//	void projectOpened();
+	//	void projectClosed();
 
-//	void slot_OpenFile();
-//	void slot_ViewFile();
-//	void slot_CheckOut();
-//	void slot_CheckIn();
-//	void slot_UndoChanges();
-//	void slot_showHistory();
-//	void slot_compare();
-//	void slot_showHistoryForAllSchemas();
-//	void slot_AddFile();
-//	void slot_cloneFile();
-//	void slot_DeleteFile();
-//	void slot_GetWorkcopy();
-//	void slot_SetWorkcopy();
-	void slot_refreshFiles();
-//	void slot_doubleClicked(const QModelIndex& index);
-//	void slot_properties();
+	//	void slot_OpenFile();
+	//	void slot_ViewFile();
+	//	void slot_CheckOut();
+	//	void slot_CheckIn();
+	//	void slot_UndoChanges();
+	//	void slot_showHistory();
+	//	void slot_compare();
+	//	void slot_showHistoryForAllSchemas();
+	//	void slot_AddFile();
+	//	void slot_cloneFile();
+	//	void slot_DeleteFile();
+	//	void slot_GetWorkcopy();
+	//	void slot_SetWorkcopy();
+	//	void slot_refreshFiles();
+	//	void slot_doubleClicked(const QModelIndex& index);
+	//	void slot_properties();
 
-//public slots:
-//	void filesViewSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+	//public slots:
+	//	void filesViewSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
 	// Public properties
 	//
 public:
 	SchemaListModelEx& filesModel();
+	QSortFilterProxyModel& proxyModel();
 
-//	const std::vector<std::shared_ptr<DbFileInfo>>& files() const;
+	//	const std::vector<std::shared_ptr<DbFileInfo>>& files() const;
 
-//	const DbFileInfo& parentFile() const;
-//	int parentFileId() const;
+	const DbFileInfo& parentFile() const;
+	int parentFileId() const;
 
-//	// Protected properties
-//	//
-//protected:
+	//	// Protected properties
+	//	//
+	//protected:
 
 	// Data
 	//
 private:
 	SchemaListModelEx m_filesModel;
+	QSortFilterProxyModel m_proxyModel;
 
-	QString m_parentFileName;
-	DbFileInfo m_parentFile;
+	//QString m_parentFileName;
+	//DbFileInfo m_parentFile;
 
 	int m_lastBuildIssueCount = -1;
 
-//	//	Contexet Menu
-//	//
-//protected:
-//	QAction* m_openFileAction = nullptr;
-//	QAction* m_viewFileAction = nullptr;
-//	// --
-//	QAction* m_separatorAction0 = nullptr;
-//	QAction* m_checkOutAction = nullptr;
-//	QAction* m_checkInAction = nullptr;
-//	QAction* m_undoChangesAction = nullptr;
-//	QAction* m_historyAction = nullptr;
-//	QAction* m_compareAction = nullptr;
-//	QAction* m_allSchemasHistoryAction = nullptr;
-//	// --
-//	QAction* m_separatorAction1 = nullptr;
-//	QAction* m_addFileAction = nullptr;
-//	QAction* m_cloneFileAction = nullptr;
-//	QAction* m_deleteFileAction = nullptr;
-//	// --
-//	QAction* m_separatorAction2 = nullptr;
-//	QAction* m_exportWorkingcopyAction = nullptr;
-//	QAction* m_importWorkingcopyAction = nullptr;
-//	// --
-//	QAction* m_separatorAction3 = nullptr;
-//	QAction* m_refreshFileAction = nullptr;
-//	QAction* m_propertiesAction = nullptr;
-//	// End of ConextMenu
+	//	//	Contexet Menu
+	//	//
+	//protected:
+	//	QAction* m_openFileAction = nullptr;
+	//	QAction* m_viewFileAction = nullptr;
+	//	// --
+	//	QAction* m_separatorAction0 = nullptr;
+	//	QAction* m_checkOutAction = nullptr;
+	//	QAction* m_checkInAction = nullptr;
+	//	QAction* m_undoChangesAction = nullptr;
+	//	QAction* m_historyAction = nullptr;
+	//	QAction* m_compareAction = nullptr;
+	//	QAction* m_allSchemasHistoryAction = nullptr;
+	//	// --
+	//	QAction* m_separatorAction1 = nullptr;
+	//	QAction* m_addFileAction = nullptr;
+	//	QAction* m_cloneFileAction = nullptr;
+	//	QAction* m_deleteFileAction = nullptr;
+	//	// --
+	//	QAction* m_separatorAction2 = nullptr;
+	//	QAction* m_exportWorkingcopyAction = nullptr;
+	//	QAction* m_importWorkingcopyAction = nullptr;
+	//	// --
+	//	QAction* m_separatorAction3 = nullptr;
+	//	QAction* m_refreshFileAction = nullptr;
+	//	QAction* m_propertiesAction = nullptr;
+	//	// End of ConextMenu
 };
 
 
@@ -226,40 +245,42 @@ public:
 private:
 	void createActions();
 
-//signals:
+	//signals:
 
-//public slots:
-//	void refreshFiles();
+	//public slots:
+	//	void refreshFiles();
 
 protected slots:
 	void projectOpened();
 	void projectClosed();
 
-//	void addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
-//	void addFile();
-//	void addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, bool dontShowPropDialog);
+	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
-//	void deleteFile(std::vector<DbFileInfo> files);
+	void addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
+	void addFile();
+	void addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, bool dontShowPropDialog);
 
-//	void checkIn(std::vector<DbFileInfo> files);
-//	void undoChanges(std::vector<DbFileInfo> files);
+	//	void deleteFile(std::vector<DbFileInfo> files);
 
-//	void openFiles(std::vector<DbFileInfo> files);
-//	void viewFiles(std::vector<DbFileInfo> files);
-//	void cloneFile(DbFileInfo file);
+	//	void checkIn(std::vector<DbFileInfo> files);
+	//	void undoChanges(std::vector<DbFileInfo> files);
 
-//	void editSchemasProperties(std::vector<DbFileInfo> selectedFiles);
+	//	void openFiles(std::vector<DbFileInfo> files);
+	//	void viewFiles(std::vector<DbFileInfo> files);
+	//	void cloneFile(DbFileInfo file);
+
+	//	void editSchemasProperties(std::vector<DbFileInfo> selectedFiles);
 
 
-//private slots:
-//	void ctrlF();
-//	void search();
-//	void searchSchemaForLm(QString equipmentId);
+	//private slots:
+	//	void ctrlF();
+	//	void search();
+	//	void searchSchemaForLm(QString equipmentId);
 
 	// Properties
 	//
 public:
-//	const DbFileInfo& parentFile() const;
+	const DbFileInfo& parentFile() const;
 
 	// Data
 	//
@@ -366,10 +387,10 @@ SchemasTabPageEx* SchemasTabPageEx::create(DbController* dbc,
 	// Create Schema function, will be stored in two places, SchemaTabPage and SchemaControlTabPage
 	//
 	std::function<VFrame30::Schema*()> createFunc(
-		[]() -> VFrame30::Schema*
-		{
-			return new SchemaType();
-		});
+				[]() -> VFrame30::Schema*
+	{
+					return new SchemaType();
+				});
 
 	// Add control page
 	//
