@@ -272,7 +272,7 @@ signals:
 	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 private:
-	void initThread(CfgLoader* cfgLoader);
+	void initThread();
 	void shutdownThread(bool* restartThread);
 
 private:

@@ -878,7 +878,7 @@ CfgLoaderThread::CfgLoaderThread(	const SoftwareInfo& softwareInfo,
 {
 	AUTO_LOCK(m_mutex);
 
-	initThread(nullptr);
+	initThread();
 }
 
 CfgLoaderThread::~CfgLoaderThread()
@@ -1023,7 +1023,7 @@ void CfgLoaderThread::setConnectionParams(const SoftwareInfo& softwareInfo,
 	m_mutex.lock();
 
 	shutdownThread(&restartThread);
-	initThread(nullptr);
+	initThread();
 
 	m_mutex.unlock();
 
@@ -1033,26 +1033,19 @@ void CfgLoaderThread::setConnectionParams(const SoftwareInfo& softwareInfo,
 	}
 }
 
-void CfgLoaderThread::initThread(CfgLoader* cfgLoader)
+void CfgLoaderThread::initThread()
 {
 	assert(m_cfgLoader == nullptr);
 	assert(m_thread == nullptr);
 
 	m_thread = new SimpleThread;
 
-	if (cfgLoader == nullptr)
-	{
-		m_cfgLoader = new CfgLoader(m_softwareInfo,
-									m_appInstance,
-									m_server1,
-									m_server2,
-									m_enableDownloadCfg,
-									m_logger);
-	}
-	else
-	{
-		m_cfgLoader = cfgLoader;
-	}
+	m_cfgLoader = new CfgLoader(m_softwareInfo,
+								m_appInstance,
+								m_server1,
+								m_server2,
+								m_enableDownloadCfg,
+								m_logger);
 
 	m_thread->addWorker(m_cfgLoader); // this instance of CfgLoader will be deleted during SimpleThread destruction
 
