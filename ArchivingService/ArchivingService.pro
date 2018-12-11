@@ -123,7 +123,8 @@ HEADERS += \
     FileArchWriter.h \
     ../lib/Crc16.h \
     FileArchReader.h \
-    ArchFile.h
+    ArchFile.h \
+    BinSearch.h
 
 include(../qtservice/src/qtservice.pri)
 
