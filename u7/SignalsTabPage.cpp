@@ -1754,6 +1754,8 @@ SignalsTabPage::~SignalsTabPage()
 
 bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties)
 {
+	Q_UNUSED(forceUpdateProperties)
+
 	TEST_PTR_RETURN_FALSE(dbc);
 
 	bool result = true;

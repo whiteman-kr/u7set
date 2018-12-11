@@ -62,7 +62,6 @@ SOURCES += \
     ../lib/DbWorker.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/Connection.cpp \
-    ../TuningService/TuningSource.cpp \
     ../TuningService/TuningDataStorage.cpp \
     ../TuningService/TuningSource.cpp \
     ../lib/LogicModuleSet.cpp \
@@ -115,11 +114,9 @@ SOURCES += \
     TuningClientCfgGenerator.cpp \
     TuningServiceCfgGenerator.cpp \
     ConfigurationServiceCfgGenerator.cpp \
-    ConfigurationServiceCfgGenerator.cpp \
     ArchivingServiceCfgGenerator.cpp \
     MetrologyCfgGenerator.cpp \
     LmDescriptionSet.cpp \
-    BdfFile.cpp \
     BdfFile.cpp \
     FbParamCalculation.cpp \
     TuningBuilder.cpp \
