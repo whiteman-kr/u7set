@@ -240,7 +240,6 @@ public:
 					bool enableDownloadCfg,
 					std::shared_ptr<CircularLogger> logger);
 
-	CfgLoaderThread(CfgLoader* cfgLoader);
 	virtual ~CfgLoaderThread();
 
 	void start();

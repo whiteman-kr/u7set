@@ -881,27 +881,6 @@ CfgLoaderThread::CfgLoaderThread(	const SoftwareInfo& softwareInfo,
 	initThread(nullptr);
 }
 
-CfgLoaderThread::CfgLoaderThread(CfgLoader* cfgLoader) :
-	m_cfgLoader(cfgLoader)
-{
-	if (m_cfgLoader == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	m_softwareInfo = cfgLoader->softwareInfo();
-	m_appInstance = cfgLoader->appInstance();
-	m_server1 = cfgLoader->serverAddressPort1();
-	m_server2 = cfgLoader->serverAddressPort2();
-	m_enableDownloadCfg = cfgLoader->enableDownloadCfg();
-	m_logger = cfgLoader->logger();
-
-	AUTO_LOCK(m_mutex);
-
-	initThread(cfgLoader);
-}
-
 CfgLoaderThread::~CfgLoaderThread()
 {
 	AUTO_LOCK(m_mutex);
