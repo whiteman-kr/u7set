@@ -27,6 +27,9 @@ TEMPLATE = app
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
+#Application icon
+win32:RC_ICONS += Images/MConf.ico
+
 # DESTDIR
 #
 win32 {
@@ -122,4 +125,7 @@ win32 {
 unix {
 	LIBS += -lprotobuf
 }
+
+DISTFILES += \
+    Images/MConf.ico
 

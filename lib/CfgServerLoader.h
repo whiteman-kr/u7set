@@ -31,7 +31,6 @@ private:
 	static bool m_BuildFileInfoArrayRegistered;
 };
 
-
 // -------------------------------------------------------------------------------------
 //
 // CfgServer class declaration
@@ -82,85 +81,57 @@ class CfgLoader: public Tcp::FileClient, public CfgServerLoaderBase
 {
 	Q_OBJECT
 
+public:
+	CfgLoader(const SoftwareInfo& softwareInfo,
+				int appInstance,
+				const HostAddressPort& serverAddressPort1,
+				const HostAddressPort& serverAddressPort2,
+				bool enableDownloadCfg,
+				std::shared_ptr<CircularLogger> logger);
+
+	virtual void onClientThreadStarted() override;
+
+	void changeApp(const QString& appEquipmentID, int appInstance);
+
+	bool getFileBlocked(QString pathFileName, QByteArray* fileData, QString *errorStr);
+	bool getFile(QString pathFileName, QByteArray* fileData);
+
+	bool getFileBlockedByID(QString fileID, QByteArray* fileData, QString *errorStr);
+	bool getFileByID(QString fileID, QByteArray* fileData);
+
+	Tcp::FileTransferResult getLastError() const { return m_lastError; }
+	QString getLastErrorStr() const { return getErrorStr(getLastError()); }
+
+	bool isFileReady();
+
+	Builder::BuildInfo buildInfo();
+	SoftwareInfo softwareInfo() const { return localSoftwareInfo(); }
+	int appInstance() const { return m_appInstance; }
+	bool enableDownloadCfg() const { return m_enableDownloadConfiguration; }
+	std::shared_ptr<CircularLogger> logger() { return m_logger; }
+
+	virtual void onTryConnectToServer(const HostAddressPort& serverAddr) override;
+	virtual void onConnection() override;
+	virtual void onDisconnection() override;
+	virtual void onStartDownload(const QString& fileName);
+	virtual void onEndDownload(const QString& fileName, Tcp::FileTransferResult errorCode);
+
+	friend class CfgLoaderThread;
+
+signals:
+	void signal_enableDownloadConfiguration();
+	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void signal_getFile(const QString& fileName, QByteArray* fileData);
+	void signal_fileReady();					// emit only for manual requests
+	void signal_configurationChanged();
+
+private slots:
+	void slot_enableDownloadConfiguration();
+	void slot_getFile(QString fileName, QByteArray *fileData);
+	void slot_onTimer();
+
 private:
-	static const int CONFIGURATION_XML = 0;
-
-	QMutex mutex;
-
-	struct CfgFileInfo : public Builder::BuildFileInfo
-	{
-		QByteArray fileData;
-		bool md5IsValid = false;
-	};
-
-	typedef HashedVector<QString, CfgFileInfo> CfgFilesInfo;
-
-	struct FileDownloadRequest
-	{
-		QString pathFileName;
-		QString etalonMD5;
-		bool needUncompress = false;
-
-		bool isAutoRequest = false;
-		bool isTestCfgRequest = false;						// does matter only for Configuration.xml file request
-		QByteArray* fileData = nullptr;						// sets for manual requests only
-		Tcp::FileTransferResult* errorCode = nullptr;		// sets for manual requests only
-
-		void clear()
-		{
-			pathFileName = "";
-			etalonMD5 = "";
-			isAutoRequest = false;
-			isTestCfgRequest = false;
-			fileData = nullptr;
-			errorCode = nullptr;
-		}
-
-		void setErrorCode(Tcp::FileTransferResult result)
-		{
-			if (errorCode != nullptr)
-			{
-				*errorCode = result;
-			}
-		}
-	};
-
-	QString m_appEquipmentID;
-	int m_appInstance;
-
-	QString m_appDataPath;
-	QString m_rootFolder;
-	QString m_configurationXmlPathFileName;
-	QString m_configurationXmlMd5;
-
-	QByteArray m_localFileData;
-
-	std::shared_ptr<CircularLogger> m_logger;
-
-	QList<FileDownloadRequest> m_downloadQueue;
-	FileDownloadRequest m_currentDownloadRequest;
-
-	QTimer m_timer;
-	bool m_configurationXmlReady = false;
-	bool m_allFilesLoaded = false;
-	int m_autoDownloadIndex = 0;
-
-	Builder::BuildInfo m_buildInfo;
-	CfgFilesInfo m_cfgFilesInfo;
-
-	bool m_hasValidSavedConfiguration = false;
-	HashedVector<QString, CfgFileInfo> m_savedCfgFileInfo;
-
-	bool m_fileReady = false;
-	Tcp::FileTransferResult m_lastError = Tcp::FileTransferResult::Ok;
-
-	QMap<QString, QString> m_fileIDPathMap;
-
-	volatile bool m_enableDownloadConfiguration = false;
-
 	void shutdown();
-
-	void onTimer();
 
 	void startDownload();
 	void resetStatuses();
@@ -183,49 +154,71 @@ private:
 
 	QString getFilePathNameByID(QString fileID);
 
-signals:
-	void signal_enableDownloadConfiguration();
-	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
-	void signal_getFile(const QString& fileName, QByteArray* fileData);
-	void signal_fileReady();					// emit only for manual requests
-	void signal_configurationChanged();
+private:
+	struct CfgFileInfo : public Builder::BuildFileInfo
+	{
+		QByteArray fileData;
+		bool md5IsValid = false;
+	};
 
-private slots:
-	void slot_enableDownloadConfiguration();
-	void slot_getFile(QString fileName, QByteArray *fileData);
+	typedef HashedVector<QString, CfgFileInfo> CfgFilesInfo;
 
-public:
-	CfgLoader(const SoftwareInfo& softwareInfo,
-				int appInstance,
-				const HostAddressPort& serverAddressPort1,
-				const HostAddressPort& serverAddressPort2,
-				bool enableDownloadCfg,
-				std::shared_ptr<CircularLogger> logger);
+	struct FileDownloadRequest
+	{
+		QString pathFileName;
+		QString etalonMD5;
+		bool needUncompress = false;
 
-	virtual void onClientThreadStarted() override;
+		bool isAutoRequest = false;
+		bool isTestCfgRequest = false;						// does matter only for Configuration.xml file request
+		QByteArray* fileData = nullptr;						// sets for manual requests only
+		Tcp::FileTransferResult* errorCode = nullptr;		// sets for manual requests only
 
-	void changeApp(const QString& appEquipmentID, int appInstance);
+		void clear();
+		void setErrorCode(Tcp::FileTransferResult result);
+	};
 
-	bool getFileBlocked(QString pathFileName, QByteArray* fileData, QString *errorStr);
-	bool getFile(QString pathFileName, QByteArray* fileData);
+	//
 
-	bool getFileBlockedByID(QString fileID, QByteArray* fileData, QString *errorStr);
-	bool getFileByID(QString fileID, QByteArray* fileData);
+	int m_appInstance = 0;
+	volatile bool m_enableDownloadConfiguration = false;
 
-	Tcp::FileTransferResult getLastError() const { return m_lastError; }
-	QString getLastErrorStr();
+	//
 
-	bool isFileReady();
+	static const int CONFIGURATION_XML_FILE_INDEX = 0;
 
-	Builder::BuildInfo buildInfo();
+	QMutex m_mutex;
 
-	virtual void onTryConnectToServer(const HostAddressPort& serverAddr) override;
-	virtual void onConnection() override;
-	virtual void onDisconnection() override;
-	virtual void onStartDownload(const QString& fileName);
-	virtual void onEndDownload(const QString& fileName, Tcp::FileTransferResult errorCode);
+	QString m_appEquipmentID;
 
-	friend class CfgLoaderThread;
+	QString m_appDataPath;
+	QString m_rootFolder;
+	QString m_configurationXmlPathFileName;
+	QString m_configurationXmlMd5;
+
+	QByteArray m_localFileData;
+
+	std::shared_ptr<CircularLogger> m_logger;
+
+	QList<FileDownloadRequest> m_downloadQueue;
+	FileDownloadRequest m_currentDownloadRequest;
+
+	QTimer m_timer;
+	bool m_configurationXmlReady = false;
+	bool m_allFilesLoaded = false;
+	int m_autoDownloadIndex = 0;
+
+	Builder::BuildInfo m_buildInfo;
+	CfgFilesInfo m_cfgFilesInfo;
+
+	bool m_hasValidSavedConfiguration = false;
+	CfgFilesInfo m_savedCfgFileInfo;
+
+	bool m_fileReady = false;
+	Tcp::FileTransferResult m_lastError = Tcp::FileTransferResult::Ok;
+
+	QMap<QString, QString> m_fileIDPathMap;
+
 };
 
 
@@ -235,16 +228,9 @@ public:
 //
 // -------------------------------------------------------------------------------------
 
-class CfgLoaderThread : public Tcp::Thread
+class CfgLoaderThread : public QObject
 {
 	Q_OBJECT
-
-private:
-	CfgLoader* m_cfgLoader = nullptr;
-
-signals:
-	void signal_configurationChanged();
-	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 public:
 	CfgLoaderThread(const SoftwareInfo& softwareInfo,
@@ -255,6 +241,11 @@ public:
 					std::shared_ptr<CircularLogger> logger);
 
 	CfgLoaderThread(CfgLoader* cfgLoader);
+	virtual ~CfgLoaderThread();
+
+	void start();
+	void quit();
+	void quitAndWait();
 
 	void enableDownloadConfiguration();
 
@@ -274,6 +265,29 @@ public:
 	HostAddressPort getCurrentServerAddressPort();
 
 	void setConnectionParams(const SoftwareInfo& softwareInfo,
-	                         const HostAddressPort& serverAddressPort1,
-	                         const HostAddressPort& serverAddressPort2);
+							 const HostAddressPort& serverAddressPort1,
+							 const HostAddressPort& serverAddressPort2,
+							 bool enableDownloadConfiguration);
+signals:
+	void signal_configurationChanged();
+	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+
+private:
+	void initThread(CfgLoader* cfgLoader);
+	void shutdownThread(bool* restartThread);
+
+private:
+	SoftwareInfo m_softwareInfo;
+	int m_appInstance;
+	HostAddressPort m_server1;
+	HostAddressPort m_server2;
+	bool m_enableDownloadCfg;
+	std::shared_ptr<CircularLogger> m_logger;
+
+	//
+
+	QMutex m_mutex;
+
+	CfgLoader* m_cfgLoader = nullptr;
+	SimpleThread* m_thread = nullptr;
 };

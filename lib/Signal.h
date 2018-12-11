@@ -9,7 +9,6 @@
 #include "DeviceObject.h"
 #include "Address16.h"
 #include "../VFrame30/Afb.h"
-#include "ProtobufHelper.h"
 #include "Hash.h"
 #include "TuningValue.h"
 

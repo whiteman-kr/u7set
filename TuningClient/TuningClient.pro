@@ -17,6 +17,9 @@ INCLUDEPATH += $$PWD
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
+#Application icon
+win32:RC_ICONS += Images/TuningClient.ico
+
 # DESTDIR
 # If you see somewhere 'LNK1146: no argument specified with option '/LIBPATH:' then most likely you have not added this section to a project file
 #
@@ -119,7 +122,6 @@ SOURCES +=\
     ../lib/XmlHelper.cpp \
     ../lib/Types.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/ProtobufHelper.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
     DialogFilterEditor.cpp \
@@ -181,7 +183,6 @@ HEADERS  += MainWindow.h \
     ../lib/XmlHelper.h \
     ../lib/Types.h \
     ../lib/DbStruct.h \
-    ../lib/ProtobufHelper.h \
     ../lib/ProtoSerialization.h \
     ../lib/Tuning/TuningSignalState.h \
     DialogFilterEditor.h \
@@ -215,7 +216,8 @@ include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 TRANSLATIONS = languages/TuningClient_ru.ts
 
 DISTFILES += \
-    Images/logo.png
+    Images/logo.png \
+    Images/TuningClient.ico
 
 RESOURCES += \
     Resources.qrc

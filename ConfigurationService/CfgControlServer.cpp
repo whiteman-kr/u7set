@@ -12,6 +12,7 @@ CfgControlServer::CfgControlServer(const SoftwareInfo& softwareInfo,
 								   const QString& autoloadBuildPath,
 								   const QString& workDirectory,
 								   const QString& buildPath,
+								   const QStringList& knownClients,
 								   const CfgCheckerWorker& checkerWorker,
 								   std::shared_ptr<CircularLogger> logger) :
 	CfgServer(softwareInfo, buildPath, logger),
@@ -19,13 +20,15 @@ CfgControlServer::CfgControlServer(const SoftwareInfo& softwareInfo,
 	m_checkerWorker(checkerWorker),
 	m_equipmentID(softwareInfo.equipmentID()),
 	m_autoloadBuildPath(autoloadBuildPath),
-	m_workDirectory(workDirectory)
+	m_workDirectory(workDirectory),
+	m_knownClients(knownClients)
 {
 }
 
 CfgControlServer* CfgControlServer::getNewInstance()
 {
-	return new CfgControlServer(localSoftwareInfo(), m_autoloadBuildPath, m_workDirectory, m_rootFolder, m_checkerWorker, m_logger);
+	return new CfgControlServer(localSoftwareInfo(), m_autoloadBuildPath, m_workDirectory,
+								m_rootFolder, m_knownClients, m_checkerWorker, m_logger);
 }
 
 void CfgControlServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
@@ -55,6 +58,13 @@ void CfgControlServer::processRequest(quint32 requestID, const char* requestData
 		default:
 			CfgServer::processRequest(requestID, requestData, requestDataSize);
 	}
+}
+
+bool CfgControlServer::checkClientID()
+{
+	QString connectedClientID = connectedSoftwareInfo().equipmentID();
+
+	return m_knownClients.contains(connectedClientID);
 }
 
 void CfgControlServer::sendServiceState()

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SoftwareCfgGenerator.h"
+#include "../lib/ServiceSettings.h"
 
 namespace Builder
 {
@@ -19,9 +20,11 @@ namespace Builder
 		virtual bool generateConfiguration() override;
 
 	private:
-		bool checkProperties();
+		bool writeSettings();
 		bool writeBatFile();
 		bool writeShFile();
+
+		bool buildClientsList(CfgServiceSettings* settings);
 	};
 
 }

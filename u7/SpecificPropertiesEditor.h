@@ -122,6 +122,9 @@ protected:
 	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
 private:
+	QVariant stringToVariant(const QString& text, E::SpecificPropertyType type, bool* ok);
+
+private:
 
 	std::vector<std::shared_ptr<SpecificPropertyDescription>> m_propertyDescriptions;
 	std::vector<int> m_sortedIndexes;

@@ -15,7 +15,6 @@
 
 bool CfgServerLoaderBase::m_BuildFileInfoArrayRegistered = false;
 
-
 CfgServerLoaderBase::CfgServerLoaderBase()
 {
 	if (m_BuildFileInfoArrayRegistered == false)
@@ -24,7 +23,6 @@ CfgServerLoaderBase::CfgServerLoaderBase()
 		m_BuildFileInfoArrayRegistered = true;
 	}
 }
-
 
 // -------------------------------------------------------------------------------------
 //
@@ -38,12 +36,10 @@ CfgServer::CfgServer(const SoftwareInfo& softwareInfo, const QString& buildFolde
 {
 }
 
-
 CfgServer* CfgServer::getNewInstance()
 {
 	return new CfgServer(localSoftwareInfo(), m_rootFolder, m_logger);
 }
-
 
 void CfgServer::onServerThreadStarted()
 {
@@ -52,23 +48,19 @@ void CfgServer::onServerThreadStarted()
 	readBuildXml();
 }
 
-
 void CfgServer::onServerThreadFinished()
 {
 }
-
 
 void CfgServer::onConnection()
 {
 	DEBUG_LOG_MSG(m_logger, QString(tr("CfgServer new connection #%1 accepted from %2")).arg(id()).arg(peerAddr().addressStr()));
 }
 
-
 void CfgServer::onDisconnection()
 {
 	DEBUG_LOG_MSG(m_logger, QString(tr("CfgServer connection #%1 closed")).arg(id()));
 }
-
 
 void CfgServer::readBuildXml()
 {
@@ -151,6 +143,29 @@ bool CfgServer::checkFile(QString& pathFileName, QByteArray& fileData)
 	return true;
 }
 
+// -------------------------------------------------------------------------------------
+//
+// CfgLoader::FileDownloadRequest struct implementation
+//
+// -------------------------------------------------------------------------------------
+
+void CfgLoader::FileDownloadRequest::clear()
+{
+	pathFileName = "";
+	etalonMD5 = "";
+	isAutoRequest = false;
+	isTestCfgRequest = false;
+	fileData = nullptr;
+	errorCode = nullptr;
+}
+
+void CfgLoader::FileDownloadRequest::setErrorCode(Tcp::FileTransferResult result)
+{
+	if (errorCode != nullptr)
+	{
+		*errorCode = result;
+	}
+}
 
 // -------------------------------------------------------------------------------------
 //
@@ -178,19 +193,17 @@ CfgLoader::CfgLoader(const SoftwareInfo& softwareInfo,
 	// DELETE after periodic CFG requests to be added
 }
 
-
 void CfgLoader::onClientThreadStarted()
 {
 	Tcp::FileClient::onClientThreadStarted();
 
-	connect(&m_timer, &QTimer::timeout, this, &CfgLoader::onTimer);
+	connect(&m_timer, &QTimer::timeout, this, &CfgLoader::slot_onTimer);
 	connect(this, &CfgLoader::signal_getFile, this, &CfgLoader::slot_getFile);
 	connect(this, &CfgLoader::signal_enableDownloadConfiguration, this, &CfgLoader::slot_enableDownloadConfiguration);
 
 	m_timer.setInterval(2000);
 	m_timer.start();
 }
-
 
 void CfgLoader::changeApp(const QString& appEquipmentID, int appInstance)
 {
@@ -215,7 +228,6 @@ void CfgLoader::changeApp(const QString& appEquipmentID, int appInstance)
 
 	resetStatuses();
 }
-
 
 bool CfgLoader::getFileBlocked(QString pathFileName, QByteArray* fileData, QString* errorStr)
 {
@@ -255,7 +267,6 @@ bool CfgLoader::getFileBlocked(QString pathFileName, QByteArray* fileData, QStri
 	return false;
 }
 
-
 bool CfgLoader::getFile(QString pathFileName, QByteArray* fileData)
 {
 	// execute in context of calling thread
@@ -274,7 +285,6 @@ bool CfgLoader::getFile(QString pathFileName, QByteArray* fileData)
 
 	return true;
 }
-
 
 bool CfgLoader::getFileBlockedByID(QString fileID, QByteArray* fileData, QString *errorStr)
 {
@@ -295,7 +305,6 @@ bool CfgLoader::getFileBlockedByID(QString fileID, QByteArray* fileData, QString
 	return getFileBlocked(pathFileName, fileData, errorStr);
 }
 
-
 bool CfgLoader::getFileByID(QString fileID, QByteArray* fileData)
 {
 	QString pathFileName = getFilePathNameByID(fileID);
@@ -303,31 +312,13 @@ bool CfgLoader::getFileByID(QString fileID, QByteArray* fileData)
 	return getFile(pathFileName, fileData);
 }
 
-
-
-QString CfgLoader::getFilePathNameByID(QString fileID)
-{
-	QString pathFileName;
-
-	mutex.lock();
-
-	if (m_fileIDPathMap.contains(fileID))
-	{
-		pathFileName = m_fileIDPathMap[fileID];
-	}
-
-	mutex.unlock();
-
-	return pathFileName;
-}
-
 bool CfgLoader::isFileReady()
 {
-	mutex.lock();
+	m_mutex.lock();
 
 	bool result = m_fileReady;
 
-	mutex.unlock();
+	m_mutex.unlock();
 
 	return result;
 }
@@ -336,11 +327,11 @@ Builder::BuildInfo CfgLoader::buildInfo()
 {
 	Builder::BuildInfo buildInfo;
 
-	mutex.lock();
+	m_mutex.lock();
 
 	buildInfo = m_buildInfo;
 
-	mutex.unlock();
+	m_mutex.unlock();
 
 	return buildInfo;
 }
@@ -350,6 +341,14 @@ void CfgLoader::onTryConnectToServer(const HostAddressPort& serverAddr)
 	DEBUG_LOG_MSG(m_logger, QString(tr("Try connect to server %1").arg(serverAddr.addressPortStr())));
 }
 
+void CfgLoader::onConnection()
+{
+	DEBUG_LOG_MSG(m_logger, QString(tr("CfgLoader connected to server %1").arg(peerAddr().addressStr())));
+
+	resetStatuses();
+
+	startConfigurationXmlLoading();
+}
 
 void CfgLoader::onDisconnection()
 {
@@ -361,7 +360,6 @@ void CfgLoader::onStartDownload(const QString& fileName)
 {
 	DEBUG_LOG_MSG(m_logger, QString(tr("Start download: %1")).arg(fileName));
 }
-
 
 void CfgLoader::onEndDownload(const QString& fileName, Tcp::FileTransferResult errorCode)
 {
@@ -375,100 +373,9 @@ void CfgLoader::onEndDownload(const QString& fileName, Tcp::FileTransferResult e
 	}
 }
 
-
-QString CfgLoader::getLastErrorStr()
-{
-	return getErrorStr(getLastError());
-}
-
-
 void CfgLoader::slot_enableDownloadConfiguration()
 {
 	m_enableDownloadConfiguration = true;
-}
-
-
-void CfgLoader::shutdown()
-{
-}
-
-
-void CfgLoader::onConnection()
-{
-	DEBUG_LOG_MSG(m_logger, QString(tr("CfgLoader connected to server %1").arg(peerAddr().addressStr())));
-
-	resetStatuses();
-
-	startConfigurationXmlLoading();
-}
-
-
-void CfgLoader::configurationChanged()
-{
-	m_enableDownloadConfiguration = false;			// waiting for call slot_enableDownloadConfiguration
-
-	emit signal_configurationChanged();
-}
-
-
-void CfgLoader::setFileReady(bool value)
-{
-	mutex.lock();
-
-	m_fileReady = value;
-
-	mutex.unlock();
-
-	emit signal_fileReady();
-}
-
-
-bool CfgLoader::startConfigurationXmlLoading()
-{
-	if (m_enableDownloadConfiguration == false)
-	{
-		return true;
-	}
-
-	if (isConnected() == false)
-	{
-		return true;
-	}
-
-	if (m_transferInProgress == true)
-	{
-		return true;
-	}
-
-	m_configurationXmlReady = false;
-
-	FileDownloadRequest fdr;
-
-	fdr.pathFileName = m_configurationXmlPathFileName;
-
-	m_downloadQueue.push_front(fdr);
-
-	startDownload();
-
-	return true;
-}
-
-
-void CfgLoader::startDownload()
-{
-	if (m_downloadQueue.isEmpty())
-	{
-		assert(false);
-		return;
-	}
-
-	m_currentDownloadRequest = m_downloadQueue.first();
-
-	m_downloadQueue.removeFirst();
-
-	onStartDownload(m_currentDownloadRequest.pathFileName);
-
-	slot_downloadFile(m_currentDownloadRequest.pathFileName);	// TcpFileTransfer::slot_downloadFile
 }
 
 void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
@@ -524,111 +431,7 @@ void CfgLoader::slot_getFile(QString fileName, QByteArray* fileData)
 	}
 }
 
-
-void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResult errorCode, const QString md5)
-{
-	onEndDownload(fileName, errorCode);
-
-	if (errorCode != Tcp::FileTransferResult::Ok)
-	{
-		setFileReady(true);
-		return;
-	}
-
-	if (m_currentDownloadRequest.etalonMD5.isEmpty() == true)
-	{
-		// can be empty for Configuration.xml file only!!!
-		//
-		assert(m_currentDownloadRequest.pathFileName == m_configurationXmlPathFileName);
-	}
-	else
-	{
-		if (m_currentDownloadRequest.etalonMD5 != md5)
-		{
-			assert(false);
-
-			m_currentDownloadRequest.setErrorCode(Tcp::FileDataCorrupted);
-			setFileReady(true);
-			return;
-		}
-	}
-
-	if (fileName == m_configurationXmlPathFileName)
-	{
-		// Configuration.xml is loaded
-		//
-		if (m_currentDownloadRequest.isTestCfgRequest)
-		{
-			if (m_cfgFilesInfo[CONFIGURATION_XML].md5 != md5)
-			{
-				// configuration changed !!!!!!!!!!!!
-			}
-		}
-		else
-		{
-			qDebug() << "Downloaded Configuration.xml";
-
-			if (readConfigurationXml() == true)
-			{
-				m_configurationXmlReady = true;
-
-				BuildFileInfoArray bfiArray;
-
-				for(const CfgFileInfo& cfi : m_cfgFilesInfo)
-				{
-					Builder::BuildFileInfo bfi = cfi;
-
-					bfiArray.append(bfi);
-				}
-
-				qDebug() << "Read Configuration.xml";
-
-				emit signal_configurationReady(m_cfgFilesInfo[CONFIGURATION_XML].fileData, bfiArray);
-			}
-		}
-	}
-	else
-	{
-		qDebug() << "Downloaded " << (m_currentDownloadRequest.isAutoRequest ? "(auto) :" : "(manual) :")  << fileName;
-
-		if (m_currentDownloadRequest.isAutoRequest == false)
-		{
-			// emit signal_endFileDownload for "manual" requests only!
-			//
-			if(m_currentDownloadRequest.fileData == nullptr)
-			{
-				assert(false);
-				m_currentDownloadRequest.setErrorCode(Tcp::FileTransferResult::InternalError);
-				setFileReady(true);
-			}
-			else
-			{
-				if (readCfgFile(fileName, m_currentDownloadRequest.fileData, m_currentDownloadRequest.needUncompress) == false)
-				{
-					m_currentDownloadRequest.setErrorCode(Tcp::FileTransferResult::LocalFileReadingError);
-					setFileReady(true);
-				}
-				else
-				{
-					setFileReady(true);
-				}
-			}
-		}
-	}
-
-	if (m_autoDownloadIndex == m_cfgFilesInfo.count())
-	{
-		m_allFilesLoaded = true;
-	}
-
-	if (m_downloadQueue.isEmpty() == false)
-	{
-		startDownload();
-	}
-}
-
-
-void CfgLoader::onTimer()
+void CfgLoader::slot_onTimer()
 {
 	if (m_configurationXmlReady == false)
 	{
@@ -678,17 +481,26 @@ void CfgLoader::onTimer()
 	}
 }
 
-
-
-
-void CfgLoader::readSavedConfiguration()
+void CfgLoader::shutdown()
 {
-	// if exists, read previously loaded configuration
-	//
-
-   // if ()
 }
 
+void CfgLoader::startDownload()
+{
+	if (m_downloadQueue.isEmpty())
+	{
+		assert(false);
+		return;
+	}
+
+	m_currentDownloadRequest = m_downloadQueue.first();
+
+	m_downloadQueue.removeFirst();
+
+	onStartDownload(m_currentDownloadRequest.pathFileName);
+
+	slot_downloadFile(m_currentDownloadRequest.pathFileName);	// TcpFileTransfer::slot_downloadFile
+}
 
 void CfgLoader::resetStatuses()
 {
@@ -702,37 +514,137 @@ void CfgLoader::resetStatuses()
 	m_allFilesLoaded = false;
 }
 
-
-bool CfgLoader::isCfgFileIsExists(const QString& filePathName, const QString& etalonMd5)
+void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResult errorCode, const QString md5)
 {
-	QString fileName = m_rootFolder + filePathName;
+	onEndDownload(fileName, errorCode);
 
-	QFile file(fileName);
-
-	if (file.exists() == false)
+	if (errorCode != Tcp::FileTransferResult::Ok)
 	{
-		return false;
+		setFileReady(true);
+		return;
 	}
 
-	if (file.open(QIODevice::ReadOnly) == false)
+	if (m_currentDownloadRequest.etalonMD5.isEmpty() == true)
 	{
-		return false;
+		// can be empty for Configuration.xml file only!!!
+		//
+		assert(m_currentDownloadRequest.pathFileName == m_configurationXmlPathFileName);
+	}
+	else
+	{
+		if (m_currentDownloadRequest.etalonMD5 != md5)
+		{
+			assert(false);
+
+			m_currentDownloadRequest.setErrorCode(Tcp::FileDataCorrupted);
+			setFileReady(true);
+			return;
+		}
 	}
 
-	Md5Hash md5Hash;
+	if (fileName == m_configurationXmlPathFileName)
+	{
+		// Configuration.xml is loaded
+		//
+		if (m_currentDownloadRequest.isTestCfgRequest)
+		{
+			if (m_cfgFilesInfo[CONFIGURATION_XML_FILE_INDEX].md5 != md5)
+			{
+				// configuration changed !!!!!!!!!!!!
+			}
+		}
+		else
+		{
+			qDebug() << "Downloaded Configuration.xml";
 
-	md5Hash.addData(&file);
+			if (readConfigurationXml() == true)
+			{
+				m_configurationXmlReady = true;
 
-	file.close();
+				BuildFileInfoArray bfiArray;
 
-	if (md5Hash.resultStr() == etalonMd5)
+				for(const CfgFileInfo& cfi : m_cfgFilesInfo)
+				{
+					Builder::BuildFileInfo bfi = cfi;
+
+					bfiArray.append(bfi);
+				}
+
+				qDebug() << "Read Configuration.xml";
+
+				emit signal_configurationReady(m_cfgFilesInfo[CONFIGURATION_XML_FILE_INDEX].fileData, bfiArray);
+			}
+		}
+	}
+	else
+	{
+		qDebug() << "Downloaded " << (m_currentDownloadRequest.isAutoRequest ? "(auto) :" : "(manual) :")  << fileName;
+
+		if (m_currentDownloadRequest.isAutoRequest == false)
+		{
+			// emit signal_endFileDownload for "manual" requests only!
+			//
+			if(m_currentDownloadRequest.fileData == nullptr)
+			{
+				assert(false);
+				m_currentDownloadRequest.setErrorCode(Tcp::FileTransferResult::InternalError);
+				setFileReady(true);
+			}
+			else
+			{
+				if (readCfgFile(fileName, m_currentDownloadRequest.fileData, m_currentDownloadRequest.needUncompress) == false)
+				{
+					m_currentDownloadRequest.setErrorCode(Tcp::FileTransferResult::LocalFileReadingError);
+					setFileReady(true);
+				}
+				else
+				{
+					setFileReady(true);
+				}
+			}
+		}
+	}
+
+	if (m_autoDownloadIndex == m_cfgFilesInfo.count())
+	{
+		m_allFilesLoaded = true;
+	}
+
+	if (m_downloadQueue.isEmpty() == false)
+	{
+		startDownload();
+	}
+}
+
+bool CfgLoader::startConfigurationXmlLoading()
+{
+	if (m_enableDownloadConfiguration == false)
 	{
 		return true;
 	}
 
-	return false;
-}
+	if (isConnected() == false)
+	{
+		return true;
+	}
 
+	if (m_transferInProgress == true)
+	{
+		return true;
+	}
+
+	m_configurationXmlReady = false;
+
+	FileDownloadRequest fdr;
+
+	fdr.pathFileName = m_configurationXmlPathFileName;
+
+	m_downloadQueue.push_front(fdr);
+
+	startDownload();
+
+	return true;
+}
 
 bool CfgLoader::readConfigurationXml()
 {
@@ -743,7 +655,7 @@ bool CfgLoader::readConfigurationXml()
 		return false;
 	}
 
-	mutex.lock();
+	m_mutex.lock();
 
 	m_cfgFilesInfo.clear();
 	m_fileIDPathMap.clear();
@@ -793,11 +705,18 @@ bool CfgLoader::readConfigurationXml()
 		}
 	}
 
-	mutex.unlock();
+	m_mutex.unlock();
 
 	return true;
 }
 
+void CfgLoader::readSavedConfiguration()
+{
+	// if exists, read previously loaded configuration
+	//
+
+   // if ()
+}
 
 bool CfgLoader::readCfgFile(const QString& pathFileName, QByteArray* fileData, bool needUncompress)
 {
@@ -828,7 +747,6 @@ bool CfgLoader::readCfgFile(const QString& pathFileName, QByteArray* fileData, b
 
 	return true;
 }
-
 
 bool CfgLoader::readCfgFileIfExists(const QString& filePathName, QByteArray* fileData, const QString& etalonMd5, bool needUncompress)
 {
@@ -875,6 +793,69 @@ bool CfgLoader::readCfgFileIfExists(const QString& filePathName, QByteArray* fil
 	return false;
 }
 
+bool CfgLoader::isCfgFileIsExists(const QString& filePathName, const QString& etalonMd5)
+{
+	QString fileName = m_rootFolder + filePathName;
+
+	QFile file(fileName);
+
+	if (file.exists() == false)
+	{
+		return false;
+	}
+
+	if (file.open(QIODevice::ReadOnly) == false)
+	{
+		return false;
+	}
+
+	Md5Hash md5Hash;
+
+	md5Hash.addData(&file);
+
+	file.close();
+
+	if (md5Hash.resultStr() == etalonMd5)
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void CfgLoader::configurationChanged()
+{
+	m_enableDownloadConfiguration = false;			// waiting for call slot_enableDownloadConfiguration
+
+	emit signal_configurationChanged();
+}
+
+void CfgLoader::setFileReady(bool value)
+{
+	m_mutex.lock();
+
+	m_fileReady = value;
+
+	m_mutex.unlock();
+
+	emit signal_fileReady();
+}
+
+QString CfgLoader::getFilePathNameByID(QString fileID)
+{
+	QString pathFileName;
+
+	m_mutex.lock();
+
+	if (m_fileIDPathMap.contains(fileID))
+	{
+		pathFileName = m_fileIDPathMap[fileID];
+	}
+
+	m_mutex.unlock();
+
+	return pathFileName;
+}
 
 // -------------------------------------------------------------------------------------
 //
@@ -887,20 +868,18 @@ CfgLoaderThread::CfgLoaderThread(	const SoftwareInfo& softwareInfo,
 									const HostAddressPort& serverAddressPort1,
 									const HostAddressPort& serverAddressPort2,
 									bool enableDownloadCfg,
-									std::shared_ptr<CircularLogger> logger)
+									std::shared_ptr<CircularLogger> logger) :
+	m_softwareInfo(softwareInfo),
+	m_appInstance(appInstance),
+	m_server1(serverAddressPort1),
+	m_server2(serverAddressPort2),
+	m_enableDownloadCfg(enableDownloadCfg),
+	m_logger(logger)
 {
-	m_cfgLoader = new CfgLoader(softwareInfo,
-								appInstance,
-								serverAddressPort1,
-								serverAddressPort2,
-								enableDownloadCfg,
-								logger);		// it will be deleted during SimpleThread destruction
+	AUTO_LOCK(m_mutex);
 
-	addWorker(m_cfgLoader);
-
-	connect(m_cfgLoader, &CfgLoader::signal_configurationReady, this, &CfgLoaderThread::signal_configurationReady);
+	initThread(nullptr);
 }
-
 
 CfgLoaderThread::CfgLoaderThread(CfgLoader* cfgLoader) :
 	m_cfgLoader(cfgLoader)
@@ -911,100 +890,221 @@ CfgLoaderThread::CfgLoaderThread(CfgLoader* cfgLoader) :
 		return;
 	}
 
-	addWorker(m_cfgLoader);
+	m_softwareInfo = cfgLoader->softwareInfo();
+	m_appInstance = cfgLoader->appInstance();
+	m_server1 = cfgLoader->serverAddressPort1();
+	m_server2 = cfgLoader->serverAddressPort2();
+	m_enableDownloadCfg = cfgLoader->enableDownloadCfg();
+	m_logger = cfgLoader->logger();
 
-	connect(m_cfgLoader, &CfgLoader::signal_configurationReady, this, &CfgLoaderThread::signal_configurationReady);
+	AUTO_LOCK(m_mutex);
+
+	initThread(cfgLoader);
 }
 
+CfgLoaderThread::~CfgLoaderThread()
+{
+	AUTO_LOCK(m_mutex);
+
+	shutdownThread(nullptr);
+}
+
+
+void CfgLoaderThread::start()
+{
+	AUTO_LOCK(m_mutex);
+
+	if (m_thread == nullptr || m_cfgLoader == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	m_thread->start();
+}
+
+void CfgLoaderThread::quit()
+{
+	AUTO_LOCK(m_mutex);
+
+	if (m_thread == nullptr || m_cfgLoader == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	m_thread->quit();
+}
+
+void CfgLoaderThread::quitAndWait()
+{
+	AUTO_LOCK(m_mutex);
+
+	if (m_thread == nullptr || m_cfgLoader == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	m_thread->quitAndWait();
+}
 
 void CfgLoaderThread::enableDownloadConfiguration()
 {
+	AUTO_LOCK(m_mutex);
+
 	m_cfgLoader->slot_enableDownloadConfiguration();
 }
 
-
-bool CfgLoaderThread::getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString *errorStr)
+bool CfgLoaderThread::getFileBlocked(const QString& pathFileName, QByteArray* fileData, QString* errorStr)
 {
-	if (fileData == nullptr || errorStr == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(fileData);
+	TEST_PTR_RETURN_FALSE(errorStr);
 
-	return m_cfgLoader->getFileBlocked(pathFileName, fileData, errorStr);
+	AUTO_LOCK(m_mutex);
+
+	return m_cfgLoader->getFileBlocked(pathFileName, fileData, errorStr);;
 }
-
 
 bool CfgLoaderThread::getFile(const QString& pathFileName, QByteArray* fileData)
 {
-	if (fileData == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(fileData);
+
+	AUTO_LOCK(m_mutex);
 
 	return m_cfgLoader->getFile(pathFileName, fileData);
 }
 
-
-bool CfgLoaderThread::getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString *errorStr)
+bool CfgLoaderThread::getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString* errorStr)
 {
-	if (fileData == nullptr || errorStr == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(fileData);
+	TEST_PTR_RETURN_FALSE(errorStr);
 
-	return m_cfgLoader->getFileBlockedByID(fileID, fileData, errorStr);
+	AUTO_LOCK(m_mutex);
+
+	return m_cfgLoader->getFileBlockedByID(fileID, fileData, errorStr);;
 }
-
 
 bool CfgLoaderThread::getFileByID(const QString& fileID, QByteArray* fileData)
 {
-	if (fileData == nullptr)
-	{
-		assert(false);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(fileData);
 
-	return m_cfgLoader->getFileByID(fileID, fileData);
+	AUTO_LOCK(m_mutex);
+
+	return m_cfgLoader->getFileByID(fileID, fileData);;
 }
-
 
 bool CfgLoaderThread::isFileReady()
 {
-	return m_cfgLoader->isFileReady();
+	AUTO_LOCK(m_mutex);
+
+	return m_cfgLoader->isFileReady();;
 }
 
 Builder::BuildInfo CfgLoaderThread::buildInfo()
 {
+	AUTO_LOCK(m_mutex);
+
 	return m_cfgLoader->buildInfo();
 }
 
 QString CfgLoaderThread::getLastErrorStr()
 {
+	AUTO_LOCK(m_mutex);
+
 	return m_cfgLoader->getLastErrorStr();
 }
 
-
 Tcp::ConnectionState CfgLoaderThread::getConnectionState()
 {
+	AUTO_LOCK(m_mutex);
+
 	return m_cfgLoader->getConnectionState();
 }
 
 HostAddressPort CfgLoaderThread::getCurrentServerAddressPort()
 {
+	AUTO_LOCK(m_mutex);
+
 	return m_cfgLoader->currentServerAddressPort();
 }
 
-
 void CfgLoaderThread::setConnectionParams(const SoftwareInfo& softwareInfo,
 										  const HostAddressPort& serverAddressPort1,
-										  const HostAddressPort& serverAddressPort2)
+										  const HostAddressPort& serverAddressPort2,
+										  bool enableDownloadConfiguration)
 {
-	// https://jira.radiy.com/browse/RPCT-2140
-	//
-	int to_do_rpct_2140;
+	m_softwareInfo = softwareInfo;
+	m_server1 = serverAddressPort1;
+	m_server2 = serverAddressPort2;
+	m_enableDownloadCfg = enableDownloadConfiguration;
+
+	bool restartThread = false;
+
+	m_mutex.lock();
+
+	shutdownThread(&restartThread);
+	initThread(nullptr);
+
+	m_mutex.unlock();
+
+	if (restartThread == true)
+	{
+		start();
+	}
 }
 
+void CfgLoaderThread::initThread(CfgLoader* cfgLoader)
+{
+	assert(m_cfgLoader == nullptr);
+	assert(m_thread == nullptr);
 
+	m_thread = new SimpleThread;
+
+	if (cfgLoader == nullptr)
+	{
+		m_cfgLoader = new CfgLoader(m_softwareInfo,
+									m_appInstance,
+									m_server1,
+									m_server2,
+									m_enableDownloadCfg,
+									m_logger);
+	}
+	else
+	{
+		m_cfgLoader = cfgLoader;
+	}
+
+	m_thread->addWorker(m_cfgLoader); // this instance of CfgLoader will be deleted during SimpleThread destruction
+
+	connect(m_cfgLoader, &CfgLoader::signal_configurationReady, this, &CfgLoaderThread::signal_configurationReady);
+}
+
+void CfgLoaderThread::shutdownThread(bool* restartThread)
+{
+	// restartThread can be == nullptr
+
+	if (m_thread != nullptr)
+	{
+		bool threadIsRunning = m_thread->isRunning();
+
+		if (threadIsRunning == true)
+		{
+			m_thread->quitAndWait();			// m_cfgLoader will be deleted here
+		}
+
+		delete m_thread;
+
+		m_thread = nullptr;
+		m_cfgLoader = nullptr;
+
+		if (restartThread != nullptr)
+		{
+			*restartThread = threadIsRunning;
+		}
+	}
+	else
+	{
+		assert(false);
+	}
+}

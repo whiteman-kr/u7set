@@ -1,7 +1,6 @@
 #include "MetrologyCfgGenerator.h"
 #include "../lib/MetrologySignal.h"
 #include "../lib/ServiceSettings.h"
-#include "../lib/ProtobufHelper.h"
 #include "../lib/DeviceObject.h"
 
 namespace Builder
