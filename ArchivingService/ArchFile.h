@@ -18,6 +18,15 @@ public:
 		qint64 startTime;
 	};
 
+	enum class FindResult
+	{
+		NotFound,
+		Found,
+
+		SearchError,
+		ReadError
+	};
+
 private:
 #pragma pack(push, 1)
 
@@ -25,7 +34,7 @@ private:
 	{
 		struct
 		{
-			qint64 archID;
+//			qint64 archID;
 			qint64 systemTime;
 			qint64 plantTime;
 
@@ -43,6 +52,8 @@ private:
 
 		bool timeGreateThen(E::TimeType timeType, qint64 time);
 		bool timeGreateOrEqualThen(E::TimeType timeType, qint64 time);
+
+		qint64 getTime(E::TimeType timeType);
 	};
 
 #pragma pack(pop)
@@ -62,7 +73,7 @@ private:
 
 		bool readRecord(qint64 recordIndex, Record* record);
 
-		bool findStartPosition(E::TimeType timeType, qint64 startTime, qint64 endTime, bool* positionFound);
+		FindResult findStartPosition(E::TimeType timeType, qint64 startTime, qint64 endTime);
 
 		bool close();
 
@@ -70,7 +81,7 @@ private:
 		QString getFileName(qint64 partitionStartTime);
 
 		void moveToRecord(qint64 record);
-		qint64 binarySearch(E::TimeType timeType, qint64 time);
+		FindResult binarySearch(E::TimeType timeType, qint64 time, qint64* startPosition);
 
 		void closeFile();
 
@@ -88,9 +99,6 @@ private:
 
 		static const qint64 FIRST_RECORD = 0;
 		static const qint64 LAST_RECORD = -1;
-
-		static const qint64 POSITION_NOT_FOUND = -999;
-		static const qint64 READ_ERROR = -9999;
 	};
 
 	class RequestData
@@ -135,13 +143,13 @@ public:
 	bool isEmergency() const;
 	QString path() const { return m_path; }
 
-	bool findData(const ArchRequestParam& param);
+	FindResult findData(const ArchRequestParam& param);
 
 	void shutdown(qint64 curPartition, qint64* totalFlushedStatesCount);
 
 private:
-	bool getArchPartitionsInfo(RequestData* rd);
-	bool findStartPosition(RequestData* rd);
+	FindResult getArchPartitionsInfo(RequestData* rd);
+	FindResult findStartPosition(RequestData* rd);
 	void cancelRequest(quint32 requestID);
 
 private:
@@ -153,6 +161,8 @@ private:
 
 	bool m_isInitialized = false;
 	bool m_canReadWrite = false;
+
+	FindResult m_findResult = FindResult::NotFound;
 
 	//
 

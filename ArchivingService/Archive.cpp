@@ -26,9 +26,9 @@ bool Archive::RequestContext::findData()
 
 	for(ArchFile* archFile : m_archFiles)
 	{
-		bool res = archFile->findData(m_param);
+		ArchFile::FindResult res = archFile->findData(m_param);
 
-		if (res == true)
+		if (res == ArchFile::FindResult::Found)
 		{
 			result = true;
 		}

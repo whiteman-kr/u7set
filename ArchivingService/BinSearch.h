@@ -3,7 +3,7 @@
 #include <QtGlobal>
 #include <cassert>
 
-enum class BinarySearchResult
+enum class BinSearchResult
 {
 	RequireNextItem,
 	NotFound,
@@ -13,19 +13,19 @@ enum class BinarySearchResult
 };
 
 template <typename TYPE>
-class BinarySearch
+class BinSearch
 {
 public:
-	BinarySearch(TYPE soughtItem, qint64 itemsCount, TYPE leftItem, TYPE rightItem);
+	BinSearch(TYPE soughtItem, qint64 itemsCount, TYPE leftItem, TYPE rightItem);
 
-	BinarySearchResult result() const { return m_result; }
+	BinSearchResult result() const { return m_result; }
 
-	BinarySearchResult checkNextItem(TYPE nextItem);
+	BinSearchResult checkNextItem(TYPE nextItem);
 
-	qint64 nextItemIndex() const { assert(m_result == BinarySearchResult::RequireNextItem && m_nextIndex != -1); return m_nextIndex; }
+	qint64 nextItemIndex() const { assert(m_result == BinSearchResult::RequireNextItem && m_nextIndex != -1); return m_nextIndex; }
 
-	qint64 foundIndex() const { assert(m_result == BinarySearchResult::Found && m_foundIndex != -1); return m_foundIndex; }
-	TYPE foundItem() const { assert(m_result == BinarySearchResult::Found); return m_foundItem; }
+	qint64 foundIndex() const { assert(m_result == BinSearchResult::Found && m_foundIndex != -1); return m_foundIndex; }
+	TYPE foundItem() const { assert(m_result == BinSearchResult::Found); return m_foundItem; }
 
 	int iterations() const { return m_iteration; }
 
@@ -47,13 +47,13 @@ private:
 
 	qint64 m_nextIndex = -1;
 
-	BinarySearchResult m_result = BinarySearchResult::NotFound;
+	BinSearchResult m_result = BinSearchResult::NotFound;
 
 	int m_iteration = 0;
 };
 
 template <typename TYPE>
-BinarySearch<TYPE>::BinarySearch(TYPE soughtItem, qint64 itemsCount, TYPE leftItem, TYPE rightItem) :
+BinSearch<TYPE>::BinSearch(TYPE soughtItem, qint64 itemsCount, TYPE leftItem, TYPE rightItem) :
 	m_soughtItem(soughtItem),
 	m_itemsCount(itemsCount),
 	m_leftItem(leftItem),
@@ -65,7 +65,7 @@ BinarySearch<TYPE>::BinarySearch(TYPE soughtItem, qint64 itemsCount, TYPE leftIt
 
 	if (itemsCount == 0)
 	{
-		m_result = BinarySearchResult::NotFound;
+		m_result = BinSearchResult::NotFound;
 		return;
 	}
 
@@ -80,7 +80,7 @@ BinarySearch<TYPE>::BinarySearch(TYPE soughtItem, qint64 itemsCount, TYPE leftIt
 	{
 		m_foundItem = leftItem;
 		m_foundIndex = 0;
-		m_result = BinarySearchResult::Found;
+		m_result = BinSearchResult::Found;
 		return;
 	}
 
@@ -88,25 +88,17 @@ BinarySearch<TYPE>::BinarySearch(TYPE soughtItem, qint64 itemsCount, TYPE leftIt
 	//
 	if (soughtItem > rightItem)
 	{
-		m_result = BinarySearchResult::NotFound;
+		m_result = BinSearchResult::NotFound;
 		return;
 	}
 
-	if (soughtItem == rightItem)
-	{
-		m_foundItem = rightItem;
-		m_foundIndex = itemsCount - 1;
-		m_result = BinarySearchResult::Found;
-		return;
-	}
-
-	if (itemsCount == 2 && soughtItem < rightItem)
+	if (itemsCount == 2 && soughtItem <= rightItem)
 	{
 		assert(soughtItem > leftItem);
 
 		m_foundItem = rightItem;
 		m_foundIndex = 1;
-		m_result = BinarySearchResult::Found;
+		m_result = BinSearchResult::Found;
 		return;
 	}
 
@@ -118,11 +110,11 @@ BinarySearch<TYPE>::BinarySearch(TYPE soughtItem, qint64 itemsCount, TYPE leftIt
 
 	m_nextIndex = m_leftIndex + (m_rightIndex - m_leftIndex) / 2;
 
-	m_result = BinarySearchResult::RequireNextItem;
+	m_result = BinSearchResult::RequireNextItem;
 }
 
 template <typename TYPE>
-BinarySearchResult BinarySearch<TYPE>::checkNextItem(TYPE nextItem)
+BinSearchResult BinSearch<TYPE>::checkNextItem(TYPE nextItem)
 {
 	m_iteration++;
 
@@ -130,24 +122,18 @@ BinarySearchResult BinarySearch<TYPE>::checkNextItem(TYPE nextItem)
 
 	if (nextItem < m_leftItem || nextItem > m_rightItem)
 	{
-		m_result = BinarySearchResult::SearchError;
+		m_result = BinSearchResult::SearchError;
 		return m_result;
 	}
 
-	if (nextItem == m_soughtItem)
-	{
-		m_foundItem = nextItem;
-		m_foundIndex = m_nextIndex;
-		m_result = BinarySearchResult::Found;
-		return m_result;
-	}
-
-	if (nextItem > m_soughtItem)
+	if (nextItem >= m_soughtItem)
 	{
 		// move right bound
 		//
 		m_rightIndex = m_nextIndex;
 		m_rightItem = nextItem;
+
+		m_nextIndex = -1;
 	}
 	else
 	{
@@ -157,6 +143,8 @@ BinarySearchResult BinarySearch<TYPE>::checkNextItem(TYPE nextItem)
 		//
 		m_leftIndex = m_nextIndex;
 		m_leftItem = nextItem;
+
+		m_nextIndex = -1;
 	}
 
 	qint64 distance = m_rightIndex - m_leftIndex;
@@ -164,7 +152,7 @@ BinarySearchResult BinarySearch<TYPE>::checkNextItem(TYPE nextItem)
 	if (distance >= 2)
 	{
 		m_nextIndex = m_leftIndex + distance / 2;
-		m_result = BinarySearchResult::RequireNextItem;
+		m_result = BinSearchResult::RequireNextItem;
 	}
 	else
 	{
@@ -172,15 +160,15 @@ BinarySearchResult BinarySearch<TYPE>::checkNextItem(TYPE nextItem)
 		//
 		if (distance != 1 ||
 			m_leftItem >= m_soughtItem ||
-			m_rightItem <= m_soughtItem)
+			m_rightItem < m_soughtItem)
 		{
-			m_result = BinarySearchResult::SearchError;
+			m_result = BinSearchResult::SearchError;
 		}
 		else
 		{
 			m_foundItem = m_rightItem;
 			m_foundIndex = m_rightIndex;
-			m_result = BinarySearchResult::Found;
+			m_result = BinSearchResult::Found;
 		}
 	}
 
