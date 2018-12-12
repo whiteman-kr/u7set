@@ -13,14 +13,17 @@ class Signal;
 
 // System files names
 //
-extern const char* const rootFileName;			// root file name
+extern const char* const RootFileName;			// root file name
 extern const char* const AfblFileName;			// Application Functional Block Library
+
+extern const char* const SchemasFileName;		// Schemas root fie
 extern const char* const UfblFileName;			// User Functional Block Library
 extern const char* const AlFileName;			// Application Logic Schemas
-extern const char* const HcFileName;			// Hardware Configuratiun
-extern const char* const HpFileName;			// Hardware Presets
 extern const char* const MvsFileName;			// Monitor Video Schemas
 extern const char* const DvsFileName;			// Diagnostics Video Schemas
+
+extern const char* const HcFileName;			// Hardware Configuratiun
+extern const char* const HpFileName;			// Hardware Presets
 extern const char* const McFileName;			// Modules Configurations
 extern const char* const ConnectionsFileName;	// Connections
 extern const char* const BusTypesFileName;		// Bus types
@@ -43,6 +46,8 @@ extern const char* const DvsTemplExtension;		// Diagnostics schema template file
 extern const char* const OclFileExtension;		// (Optical) Connection Link
 extern const char* const BusFileExtension;		// Bus types
 
+extern const char* const AppSignalFileExtension;	// Application signal file extention (::Proto::AppSignal message)
+extern const char* const AppSignalSetFileExtension;	// Application signals set file extention (::Proto::AppSignalSet message)
 
 //
 //
@@ -398,6 +403,8 @@ protected:
 
 public:
 	static const int Null = -1;
+
+	static QString fullPathToFileName(const QString& fullPathName);		// $root$/Schemas/Monitor -> Monitor
 };
 
 //

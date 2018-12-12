@@ -8,6 +8,8 @@ DbController::DbController() :
 	m_operationMutex(QMutex::NonRecursive)
 
 {
+	m_thread.setObjectName("DbWorkerThread");
+
 	m_worker = new DbWorker(&m_progress);
 	m_worker->moveToThread(&m_thread);
 
@@ -2388,15 +2390,17 @@ std::vector<DbFileInfo> DbController::systemFiles() const
 
 DbFileInfo DbController::systemFileInfo(const QString& fileName) const
 {
+	QString shortFileName = DbFileInfo::fullPathToFileName(fileName);
+
 	DbFileInfo result;
 	result.setFileId(-1);
 
 	std::vector<DbFileInfo> systemFiles = m_worker->systemFiles();
 
 	auto pos = std::find_if(systemFiles.begin(), systemFiles.end(),
-		[&fileName](const DbFileInfo& fi)
+		[&shortFileName](const DbFileInfo& fi)
 		{
-			return fi.fileName() == fileName;
+			return fi.fileName() == shortFileName;
 		});
 
 	if (pos != systemFiles.end())

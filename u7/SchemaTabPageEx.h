@@ -111,11 +111,13 @@ class SchemaFileViewEx : public QTreeView, public HasDbController
 
 public:
 	SchemaFileViewEx(DbController* dbc, const QString& parentFileName);
+	virtual ~SchemaFileViewEx();
 
 	// Methods
 	//
 protected:
-	//	void CreateActions();
+	void createActions();
+	void createContextMenu();
 
 	//	void timerEvent(QTimerEvent* event) override;
 
@@ -142,8 +144,8 @@ public:
 	// Protected slots
 	//
 public slots:
-	//	void projectOpened();
-	//	void projectClosed();
+	void projectOpened();
+	void projectClosed();
 
 	//	void slot_OpenFile();
 	//	void slot_ViewFile();
@@ -162,7 +164,8 @@ public slots:
 	//	void slot_doubleClicked(const QModelIndex& index);
 	//	void slot_properties();
 
-	//public slots:
+public slots:
+	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 	//	void filesViewSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
 	// Public properties
@@ -191,33 +194,31 @@ private:
 
 	int m_lastBuildIssueCount = -1;
 
-	//	//	Contexet Menu
-	//	//
-	//protected:
-	//	QAction* m_openFileAction = nullptr;
-	//	QAction* m_viewFileAction = nullptr;
-	//	// --
-	//	QAction* m_separatorAction0 = nullptr;
-	//	QAction* m_checkOutAction = nullptr;
-	//	QAction* m_checkInAction = nullptr;
-	//	QAction* m_undoChangesAction = nullptr;
-	//	QAction* m_historyAction = nullptr;
-	//	QAction* m_compareAction = nullptr;
-	//	QAction* m_allSchemasHistoryAction = nullptr;
-	//	// --
-	//	QAction* m_separatorAction1 = nullptr;
-	//	QAction* m_addFileAction = nullptr;
-	//	QAction* m_cloneFileAction = nullptr;
-	//	QAction* m_deleteFileAction = nullptr;
-	//	// --
-	//	QAction* m_separatorAction2 = nullptr;
-	//	QAction* m_exportWorkingcopyAction = nullptr;
-	//	QAction* m_importWorkingcopyAction = nullptr;
-	//	// --
-	//	QAction* m_separatorAction3 = nullptr;
-	//	QAction* m_refreshFileAction = nullptr;
-	//	QAction* m_propertiesAction = nullptr;
-	//	// End of ConextMenu
+	// Actions, public becaus they are used in control page toolbar
+	//
+public:
+	// --
+	QAction* m_newFileAction = nullptr;
+	QAction* m_openAction = nullptr;
+	QAction* m_viewAction = nullptr;
+	QAction* m_cloneFileAction = nullptr;
+	QAction* m_deleteAction = nullptr;
+
+	// --
+	QAction* m_checkOutAction = nullptr;
+	QAction* m_checkInAction = nullptr;
+	QAction* m_undoChangesAction = nullptr;
+	QAction* m_historyAction = nullptr;
+	QAction* m_compareAction = nullptr;
+	QAction* m_allSchemasHistoryAction = nullptr;
+
+	// --
+	QAction* m_exportWorkingcopyAction = nullptr;
+	QAction* m_importWorkingcopyAction = nullptr;
+
+	// --
+	QAction* m_refreshFileAction = nullptr;
+	QAction* m_propertiesAction = nullptr;
 };
 
 
@@ -243,7 +244,7 @@ public:
 	VFrame30::Schema* createSchema() const;
 
 private:
-	void createActions();
+	void createToolBar();
 
 	//signals:
 
@@ -253,8 +254,6 @@ private:
 protected slots:
 	void projectOpened();
 	void projectClosed();
-
-	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
 	void addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
 	void addFile();
@@ -290,29 +289,6 @@ private:
 	QString m_templateFileExtension;
 
 	QToolBar* m_toolBar = nullptr;
-
-	// --
-	QAction* m_newFileAction = nullptr;
-	QAction* m_openAction = nullptr;
-	QAction* m_viewAction = nullptr;
-	QAction* m_cloneFileAction = nullptr;
-	QAction* m_deleteAction = nullptr;
-
-	// --
-	QAction* m_checkOutAction = nullptr;
-	QAction* m_checkInAction = nullptr;
-	QAction* m_undoChangesAction = nullptr;
-	QAction* m_historyAction = nullptr;
-	QAction* m_compareAction = nullptr;
-	QAction* m_allSchemasHistoryAction = nullptr;
-
-	// --
-	QAction* m_exportWorkingcopyAction = nullptr;
-	QAction* m_importWorkingcopyAction = nullptr;
-
-	// --
-	QAction* m_refreshFileAction = nullptr;
-	QAction* m_propertiesAction = nullptr;
 
 	QLineEdit* m_searchEdit = nullptr;
 	QPushButton* m_searchButton = nullptr;

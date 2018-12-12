@@ -54,6 +54,7 @@ public:
 
     int rootFileId() const;
     int afblFileId() const;
+	int schemasFileId() const;
 	int ufblFileId() const;
     int alFileId() const;
     int hcFileId() const;
@@ -106,6 +107,8 @@ public slots:
 
 	void slot_getFileInfo(int parentId, QString fileName, DbFileInfo* out);
 	void slot_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
+
+	bool worker_getFilesInfo(const std::vector<QString>& fullPathFileNames, std::vector<DbFileInfo>* out);
 
     void slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId);
     void slot_deleteFiles(std::vector<DbFileInfo>* files);
@@ -263,6 +266,7 @@ private:
     DbProject m_currentProject;
 
 	int m_afblFileId = -1;			// Application Functional Block Library
+	int m_schemasFileId = -1;			// User Functional Block Libabry
 	int m_ufblFileId = -1;			// User Functional Block Libabry
 	int m_alFileId = -1;			// Application Logic
 	int m_hcFileId = -1;			// Hardware Configuration

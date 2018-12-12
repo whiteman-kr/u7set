@@ -6,18 +6,21 @@
 #include <QDebug>
 #include "Signal.h"
 
-const char* const rootFileName = "$root$";				// root file name
-const char* const AfblFileName = "AFBL";				// Application Functional Block Library
-const char* const UfblFileName = "UFBL";				// User Functional Block Library
-const char* const AlFileName = "AL";					// Application Logic Schemas
-const char* const HcFileName = "HC";					// Hardware Configuratiun
-const char* const HpFileName = "HP";					// Hardware Presets
-const char* const MvsFileName = "MVS";					// Monitor Video Schemas
-const char* const DvsFileName = "DVS";					// Diagnostics Video Schemas
-const char* const McFileName = "MC";					// Module Configuration
-const char* const ConnectionsFileName = "CONNECTIONS";	// Connections
-const char* const BusTypesFileName = "BUSTYPES";		// BustTypes
-const char* const EtcFileName = "ETC";					//
+const char* const RootFileName = "$root$";							// root file name
+const char* const AfblFileName = "$root$/AFBL";						// Application Functional Block Library
+
+const char* const SchemasFileName = "$root$/Schemas";				// Schemas root fie
+const char* const UfblFileName = "$root$/Schemas/UFBL";				// User Functional Block Library
+const char* const AlFileName = "$root$/Schemas/ApplicationLogic";	// Application Logic Schemas
+const char* const MvsFileName = "$root$/Schemas/Monitor";			// Monitor Video Schemas
+const char* const DvsFileName = "$root$/Schemas/Diagnostics";		// Diagnostics Video Schemas
+
+const char* const HcFileName = "$root$/HC";							// Hardware Configuratiun
+const char* const HpFileName = "$root$/HP";							// Hardware Presets
+const char* const McFileName = "$root$/MC";							// Module Configuration
+const char* const ConnectionsFileName = "$root$/CONNECTIONS";		// Connections
+const char* const BusTypesFileName = "$root$/BUSTYPES";				// BustTypes
+const char* const EtcFileName = "$root$/ETC";						//
 
 const char* const SignalPropertyBehaviorFileName = "SignalPropertyBehavior.csv";
 
@@ -885,6 +888,18 @@ void DbFileInfo::setDetails(const QString& value)
 	}
 
 	return;
+}
+
+QString DbFileInfo::fullPathToFileName(const QString& fullPathName)
+{
+	int pos = fullPathName.lastIndexOf('/');
+	if (pos == -1)
+	{
+		return fullPathName;
+	}
+
+	QString result = fullPathName.right(fullPathName.size() - pos - 1);
+	return result;
 }
 
 //

@@ -1109,30 +1109,13 @@ void FileTests::get_file_IdIntegerTextTest()
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	int fileId = query.value("id").toInt();
 
-	ok = query.exec(QString("SELECT * FROM get_file_id(%1, '///$root$/MC/getFileIdTest///');").arg(m_user1.userId));
+	ok = query.exec(QString("SELECT * FROM api.get_file_id('%1', '///$root$/MC/getFileIdTest///');").arg(session_key));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(fileId == query.value(0).toInt(), qPrintable("Error: fileId not match!"));
 
-	ok = query.exec("SELECT * FROM get_file_id(1, '///$root$/MC/getFileIdTest///');");
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(fileId == query.value(0).toInt(), qPrintable("Error: fileId not match!"));
-
-	ok = query.exec(QString("SELECT * FROM get_file_id(%1, '///$root$/MC/getFileIdTest///');").arg(m_user2.userId));
-	QVERIFY2(ok == false, qPrintable("Wrong user error expected"));
-
-	ok = query.exec("SELECT * FROM get_file_id(1, '///$root$/MC/abcdef///');");
-	QVERIFY2(ok == false, qPrintable("NULL fileId error expected"));
-
-	ok = query.exec(QString("SELECT * FROM api.add_or_update_file('%1', '$root$/MC/', 'getFileIdTest', 'simple comment', 'foxes everywhere', '{}');").arg(session_key));
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-
-	ok = query.exec(QString("SELECT * FROM get_file_id(%1, '///$root$/MC/getFileIdTest///');").arg(m_user2.userId));
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(fileId == query.value(0).toInt(), qPrintable("Error: other user must has acsess to file after update"));
+	ok = query.exec(QString("SELECT * FROM api.get_file_id('%1', '///$root$/MC/getFileIdTestAleluyz/');").arg(session_key));
+	QVERIFY(ok == false);
 
 	// 7. LogOut
 	//

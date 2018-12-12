@@ -509,24 +509,26 @@ SchemaFileViewEx::SchemaFileViewEx(DbController* dbc, const QString& parentFileN
 	assert(dbc != nullptr);
 
 	setUniformRowHeights(true);
+
 	setSortingEnabled(true);
 	sortByColumn(0, Qt::AscendingOrder);
+	//setIndentation(10);
+
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 	setSelectionBehavior(QAbstractItemView::SelectRows);
-	setIndentation(10);
 
 	// --
 	//
 	filesModel().setFilter("vfr");
 
-//	// --
-//	//
-//	CreateActions();
+	// --
+	//
+	createActions();
+	createContextMenu();
 
 	// Adjust view
 	//
-	m_proxyModel.setSortCaseSensitivity(Qt::CaseInsensitive);
-	//m_proxyModel.setDynamicSortFilter(false);
+	//m_proxyModel.setSortCaseSensitivity(Qt::CaseInsensitive);
 	m_proxyModel.setSourceModel(&m_filesModel);
 
 
@@ -583,10 +585,11 @@ SchemaFileViewEx::SchemaFileViewEx(DbController* dbc, const QString& parentFileN
 
 //	// --
 //	//
-//	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemaFileView::projectOpened);
-//	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemaFileView::projectClosed);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemaFileViewEx::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemaFileViewEx::projectClosed);
 
 //	connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &SchemaFileView::filesViewSelectionChanged);
+	connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &SchemaFileViewEx::selectionChanged);
 
 //	connect(this, &QTableView::doubleClicked, this, &SchemaFileView::slot_doubleClicked);
 
@@ -596,11 +599,90 @@ SchemaFileViewEx::SchemaFileViewEx(DbController* dbc, const QString& parentFileN
 //	//
 //	startTimer(50);
 
+	// --
+	//
+	QByteArray lastState = QSettings{}.value("SchemeEditor/SchemaFileViewEx/State").toByteArray();
+	header()->restoreState(lastState);
+
 	return;
 }
 
-//void SchemaFileView::CreateActions()
-//{
+SchemaFileViewEx::~SchemaFileViewEx()
+{
+	QSettings{}.setValue("SchemeEditor/SchemaFileViewEx/State", header()->saveState());
+}
+
+void SchemaFileViewEx::createActions()
+{
+	m_newFileAction = new QAction(tr("New Schema.."), parent());
+	m_newFileAction->setIcon(QIcon(":/Images/Images/SchemaAddFile.svg"));
+	m_newFileAction->setEnabled(false);
+	m_newFileAction->setShortcut(QKeySequence::StandardKey::New);
+
+	m_cloneFileAction = new QAction(tr("Clone Schema"), parent());
+	m_cloneFileAction->setIcon(QIcon(":/Images/Images/SchemaClone.svg"));
+	m_cloneFileAction->setEnabled(false);
+
+	m_openAction = new QAction(tr("Open Schema"), parent());
+	m_openAction->setIcon(QIcon(":/Images/Images/SchemaOpen.svg"));
+	m_openAction->setEnabled(false);
+
+	m_viewAction = new QAction(tr("View Schema..."), parent());
+	m_viewAction->setIcon(QIcon(":/Images/Images/SchemaView.svg"));
+	m_viewAction->setEnabled(false);
+
+	m_deleteAction = new QAction(tr("Delete"), parent());
+	m_deleteAction->setIcon(QIcon(":/Images/Images/SchemaDelete.svg"));
+	m_deleteAction->setEnabled(false);
+
+	// --
+	//
+	m_checkOutAction = new QAction(tr("Check Out"), parent());
+	m_checkOutAction->setIcon(QIcon(":/Images/Images/SchemaCheckOut.svg"));
+	m_checkOutAction->setEnabled(false);
+
+	m_checkInAction = new QAction(tr("Check In"), parent());
+	m_checkInAction->setIcon(QIcon(":/Images/Images/SchemaCheckIn.svg"));
+	m_checkInAction->setEnabled(false);
+
+	m_undoChangesAction = new QAction(tr("Undo Changes"), parent());
+	m_undoChangesAction->setIcon(QIcon(":/Images/Images/SchemaUndo.svg"));
+	m_undoChangesAction->setEnabled(false);
+
+	m_historyAction = new QAction(tr("Histrory..."), parent());
+	m_historyAction->setIcon(QIcon(":/Images/Images/SchemaHistory.svg"));
+	m_historyAction->setEnabled(false);
+
+	// --
+	//
+	m_compareAction = new QAction(tr("Compare..."), parent());
+	m_compareAction->setEnabled(false);
+
+	m_allSchemasHistoryAction = new QAction(tr("All Schemas History..."), parent());
+	m_allSchemasHistoryAction->setEnabled(false);
+
+	// --
+	//
+	m_exportWorkingcopyAction = new QAction(tr("Export Working Copy..."), parent());
+	m_exportWorkingcopyAction->setIcon(QIcon(":/Images/Images/SchemaDownload.svg"));
+	m_exportWorkingcopyAction->setEnabled(false);
+
+	m_importWorkingcopyAction = new QAction(tr("Import Working Copy..."), parent());
+	m_importWorkingcopyAction->setIcon(QIcon(":/Images/Images/SchemaUpload.svg"));
+	m_importWorkingcopyAction->setEnabled(false);
+
+	// --
+	//
+	m_refreshFileAction = new QAction(tr("Refresh"), parent());
+	m_refreshFileAction->setIcon(QIcon(":/Images/Images/SchemaRefresh.svg"));
+	m_refreshFileAction->setEnabled(false);
+	m_refreshFileAction->setShortcut(QKeySequence::StandardKey::Refresh);
+
+	m_propertiesAction = new QAction(tr("Properties..."), parent());
+	m_propertiesAction->setIcon(QIcon(":/Images/Images/SchemaProperties.svg"));
+	m_propertiesAction->setEnabled(false);
+
+
 //	m_openFileAction = new QAction(tr("Open..."), this);
 //	m_openFileAction->setStatusTip(tr("Open file for edit..."));
 //	m_openFileAction->setEnabled(false);
@@ -688,8 +770,59 @@ SchemaFileViewEx::SchemaFileViewEx(DbController* dbc, const QString& parentFileN
 //	m_propertiesAction->setEnabled(false);
 //	connect(m_propertiesAction, &QAction::triggered, this, &SchemaFileView::slot_properties);
 
-//	return;
-//}
+	return;
+}
+
+void SchemaFileViewEx::createContextMenu()
+{
+	setContextMenuPolicy(Qt::ActionsContextMenu);
+
+	addAction(m_openAction);
+	addAction(m_viewAction);
+
+	// --
+	//
+	QAction* separator = new QAction(this);
+	separator->setSeparator(true);
+	addAction(separator);
+
+	addAction(m_newFileAction);
+	addAction(m_cloneFileAction);
+	addAction(m_deleteAction);
+
+	// --
+	//
+	separator = new QAction(this);
+	separator->setSeparator(true);
+	addAction(separator);
+
+	addAction(m_checkOutAction);
+	addAction(m_checkInAction);
+	addAction(m_undoChangesAction);
+	addAction(m_historyAction);
+	addAction(m_compareAction);
+	addAction(m_allSchemasHistoryAction);
+
+	// --
+	//
+	separator = new QAction(this);
+	separator->setSeparator(true);
+	addAction(separator);
+
+	addAction(m_exportWorkingcopyAction);
+	addAction(m_importWorkingcopyAction);
+
+	// --
+	//
+	separator = new QAction(this);
+	separator->setSeparator(true);
+	addAction(separator);
+
+	addAction(m_refreshFileAction);
+	addAction(m_propertiesAction);
+
+	return;
+}
 
 //void SchemaFileView::timerEvent(QTimerEvent* event)
 //{
@@ -809,36 +942,22 @@ SchemaFileViewEx::SchemaFileViewEx(DbController* dbc, const QString& parentFileN
 //	return;
 //}
 
-//void SchemaFileView::projectOpened()
-//{
-//	this->setEnabled(true);
+void SchemaFileViewEx::projectOpened()
+{
+	m_refreshFileAction->setEnabled(true);
 
-//	filesViewSelectionChanged(QItemSelection(), QItemSelection());
+	selectionChanged({}, {});
 
-//	m_addFileAction->setEnabled(true);
-//	m_refreshFileAction->setEnabled(true);
+	return;
+}
 
-//	m_parentFile = db()->systemFileInfo(m_parentFileName);
-//	assert(m_parentFile.fileId() != -1);
+void SchemaFileViewEx::projectClosed()
+{
+	m_newFileAction->setEnabled(false);
+	m_refreshFileAction->setEnabled(false);
 
-//	// Refresh file list in FileModel
-//	//
-//	refreshFiles();
-
-//	return;
-//}
-
-//void SchemaFileView::projectClosed()
-//{
-//	this->setEnabled(false);
-
-//	m_addFileAction->setEnabled(false);
-//	m_refreshFileAction->setEnabled(false);
-
-//	m_parentFile = DbFileInfo();
-
-//	clear();
-//}
+	return;
+}
 
 //void SchemaFileView::slot_OpenFile()
 //{
@@ -1275,6 +1394,16 @@ SchemaFileViewEx::SchemaFileViewEx(DbController* dbc, const QString& parentFileN
 
 //	return;
 //}
+
+void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
+{
+	QTreeView::selectionChanged(selected, deselected);
+
+	QModelIndexList s = selectionModel()->selectedRows();
+	m_newFileAction->setEnabled(s.size() == 0 || s.size() == 1);
+
+	return;
+}
 
 //void SchemaFileView::filesViewSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
 //{
@@ -1828,20 +1957,20 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(QString fileExt,
 {
 	// Create controls
 	//
+	m_filesView = new SchemaFileViewEx(db, parentFileName);
+	m_filesView->filesModel().setFilter("." + fileExt);
+
+	// --
+	//
 	m_toolBar = new QToolBar{};
 
-	createActions();
+	createToolBar();
 
 	m_toolBar->setStyleSheet("QToolButton { padding-top: 6px; padding-bottom: 6px; padding-left: 6px; padding-right: 6px;}");
 	m_toolBar->setIconSize(m_toolBar->iconSize() * 0.9);
 
-	// --
-	//
-	m_filesView = new SchemaFileViewEx(db, parentFileName);
-	m_filesView->filesModel().setFilter("." + fileExt);
-
-	connect(m_newFileAction, &QAction::triggered, this, &SchemaControlTabPageEx::addFile);
-	connect(m_refreshFileAction, &QAction::triggered, &m_filesView->filesModel(), &SchemaListModelEx::refresh);
+	connect(m_filesView->m_newFileAction, &QAction::triggered, this, &SchemaControlTabPageEx::addFile);
+	connect(m_filesView->m_refreshFileAction, &QAction::triggered, &m_filesView->filesModel(), &SchemaListModelEx::refresh);
 
 	// --
 	//
@@ -1879,8 +2008,6 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(QString fileExt,
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemaControlTabPageEx::projectOpened);
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemaControlTabPageEx::projectClosed);
 
-        connect(m_filesView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &SchemaControlTabPageEx::selectionChanged);
-
 //	connect(m_filesView, &SchemaFileView::openFileSignal, this, &SchemaControlTabPage::openFiles);
 //	connect(m_filesView, &SchemaFileView::viewFileSignal, this, &SchemaControlTabPage::viewFiles);
 //	connect(m_filesView, &SchemaFileView::cloneFileSignal, this, &SchemaControlTabPage::cloneFile);
@@ -1915,98 +2042,31 @@ VFrame30::Schema* SchemaControlTabPageEx::createSchema() const
 	return m_createSchemaFunc();
 }
 
-void SchemaControlTabPageEx::createActions()
+void SchemaControlTabPageEx::createToolBar()
 {
-	m_newFileAction = new QAction(tr("New Schema.."), this);
-	m_newFileAction->setIcon(QIcon(":/Images/Images/SchemaAddFile.svg"));
-	m_newFileAction->setEnabled(false);
-	m_newFileAction->setShortcut(QKeySequence::StandardKey::New);
-
-	m_cloneFileAction = new QAction(tr("Clone Schema"), this);
-	m_cloneFileAction->setIcon(QIcon(":/Images/Images/SchemaClone.svg"));
-	m_cloneFileAction->setEnabled(false);
-
-	m_openAction = new QAction(tr("Open Schema"), this);
-	m_openAction->setIcon(QIcon(":/Images/Images/SchemaOpen.svg"));
-	m_openAction->setEnabled(false);
-
-	m_viewAction = new QAction(tr("View Schema..."), this);
-	m_viewAction->setIcon(QIcon(":/Images/Images/SchemaView.svg"));
-	m_viewAction->setEnabled(false);
-
-	m_deleteAction = new QAction(tr("Delete"), this);
-	m_deleteAction->setIcon(QIcon(":/Images/Images/SchemaDelete.svg"));
-	m_deleteAction->setEnabled(false);
-
-	// --
+	// Actions created in SchemaVileViewEx
 	//
-	m_checkOutAction = new QAction(tr("Check Out"), this);
-	m_checkOutAction->setIcon(QIcon(":/Images/Images/SchemaCheckOut.svg"));
-	m_checkOutAction->setEnabled(false);
-
-	m_checkInAction = new QAction(tr("Check In"), this);
-	m_checkInAction->setIcon(QIcon(":/Images/Images/SchemaCheckIn.svg"));
-	m_checkInAction->setEnabled(false);
-
-	m_undoChangesAction = new QAction(tr("Undo Changes"), this);
-	m_undoChangesAction->setIcon(QIcon(":/Images/Images/SchemaUndo.svg"));
-	m_undoChangesAction->setEnabled(false);
-
-	m_historyAction = new QAction(tr("Histrory..."), this);
-	m_historyAction->setIcon(QIcon(":/Images/Images/SchemaHistory.svg"));
-	m_historyAction->setEnabled(false);
-
-	// --
-	//
-	m_compareAction = new QAction(tr("Compare..."), this);
-	m_compareAction->setEnabled(false);
-
-	m_allSchemasHistoryAction = new QAction(tr("All Schemas History..."), this);
-	m_allSchemasHistoryAction->setEnabled(false);
-
-	// --
-	//
-	m_exportWorkingcopyAction = new QAction(tr("Export Working Copy..."), this);
-	m_exportWorkingcopyAction->setIcon(QIcon(":/Images/Images/SchemaDownload.svg"));
-	m_exportWorkingcopyAction->setEnabled(false);
-
-	m_importWorkingcopyAction = new QAction(tr("Import Working Copy..."), this);
-	m_importWorkingcopyAction->setIcon(QIcon(":/Images/Images/SchemaUpload.svg"));
-	m_importWorkingcopyAction->setEnabled(false);
-
-	// --
-	//
-	m_refreshFileAction = new QAction(tr("Refresh"), this);
-	m_refreshFileAction->setIcon(QIcon(":/Images/Images/SchemaRefresh.svg"));
-	m_refreshFileAction->setEnabled(false);
-	m_refreshFileAction->setShortcut(QKeySequence::StandardKey::Refresh);
-
-	m_propertiesAction = new QAction(tr("Properties..."), this);
-	m_propertiesAction->setIcon(QIcon(":/Images/Images/SchemaProperties.svg"));
-	m_propertiesAction->setEnabled(false);
-
-
-	// --
-	//
-	m_toolBar->addAction(m_newFileAction);
-	m_toolBar->addAction(m_cloneFileAction);
-	m_toolBar->addAction(m_openAction);
-	m_toolBar->addAction(m_viewAction);
-	m_toolBar->addAction(m_deleteAction);
+	m_toolBar->addAction(m_filesView->m_openAction);
+	m_toolBar->addAction(m_filesView->m_viewAction);
 
 	m_toolBar->addSeparator();
-	m_toolBar->addAction(m_checkOutAction);
-	m_toolBar->addAction(m_checkInAction);
-	m_toolBar->addAction(m_undoChangesAction);
-	m_toolBar->addAction(m_historyAction);
+	m_toolBar->addAction(m_filesView->m_newFileAction);
+	m_toolBar->addAction(m_filesView->m_cloneFileAction);
+	m_toolBar->addAction(m_filesView->m_deleteAction);
 
 	m_toolBar->addSeparator();
-	m_toolBar->addAction(m_exportWorkingcopyAction);
-	m_toolBar->addAction(m_importWorkingcopyAction);
+	m_toolBar->addAction(m_filesView->m_checkOutAction);
+	m_toolBar->addAction(m_filesView->m_checkInAction);
+	m_toolBar->addAction(m_filesView->m_undoChangesAction);
+	m_toolBar->addAction(m_filesView->m_historyAction);
 
 	m_toolBar->addSeparator();
-	m_toolBar->addAction(m_refreshFileAction);
-	m_toolBar->addAction(m_propertiesAction);
+	m_toolBar->addAction(m_filesView->m_exportWorkingcopyAction);
+	m_toolBar->addAction(m_filesView->m_importWorkingcopyAction);
+
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_filesView->m_refreshFileAction);
+	m_toolBar->addAction(m_filesView->m_propertiesAction);
 
 	m_toolBar->addSeparator();
 
@@ -2022,20 +2082,12 @@ void SchemaControlTabPageEx::createActions()
 
 void SchemaControlTabPageEx::projectOpened()
 {
-	m_newFileAction->setEnabled(true);
-	m_refreshFileAction->setEnabled(true);
+	setEnabled(true);
 }
 
 void SchemaControlTabPageEx::projectClosed()
 {
-	m_newFileAction->setEnabled(false);
-	m_refreshFileAction->setEnabled(false);
-}
-
-void SchemaControlTabPageEx::selectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
-{
-    QModelIndexList s = m_filesView->selectionModel()->selectedRows();
-    m_newFileAction->setEnabled(s.size() == 0 || s.size() == 1);
+	setEnabled(false);
 }
 
 void SchemaControlTabPageEx::addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile)
