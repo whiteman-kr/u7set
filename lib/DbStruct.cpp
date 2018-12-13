@@ -13,7 +13,8 @@ const char* const SchemasFileName = "$root$/Schemas";				// Schemas root fie
 const char* const UfblFileName = "$root$/Schemas/UFBL";				// User Functional Block Library
 const char* const AlFileName = "$root$/Schemas/ApplicationLogic";	// Application Logic Schemas
 const char* const MvsFileName = "$root$/Schemas/Monitor";			// Monitor Video Schemas
-const char* const DvsFileName = "$root$/Schemas/Diagnostics";		// Diagnostics Video Schemas
+const char* const TvsFileName = "$root$/Schemas/Tuning";			// Tuning Video Schemas
+const char* const DvsFileName = "$root$/Diagnostics";				// Diagnostics Video Schemas -> will be moved to $root$/Schemas,  see update 235
 
 const char* const HcFileName = "$root$/HC";							// Hardware Configuratiun
 const char* const HpFileName = "$root$/HP";							// Hardware Presets
@@ -703,6 +704,47 @@ bool DbFileTree::removeFile(std::shared_ptr<DbFileInfo> fileInfo)
 	return removeFile(fileInfo->fileId());
 }
 
+bool DbFileTree::removeFilesWithExtension(QString ext)
+{
+	// Remove all file with extension
+	//
+	if (ext.isEmpty() == true)
+	{
+		return false;
+	}
+
+	// Find all files with extension
+	//
+	std::vector<std::shared_ptr<DbFileInfo>> filesToRemove;
+	filesToRemove.reserve(64);
+
+	for (auto[fileId, fileInfo] : m_files)
+	{
+		if (fileId != fileInfo->fileId())
+		{
+			assert(fileId != fileInfo->fileId());
+			continue;
+		}
+
+		if (fileInfo->extension().compare(ext, Qt::CaseInsensitive) == 0)
+		{
+			filesToRemove.push_back(fileInfo);
+		}
+	}
+
+	// Remove all files with extension
+	//
+	bool ok = true;
+	for (std::shared_ptr<DbFileInfo> file : filesToRemove)
+	{
+		ok &= removeFile(file);
+	}
+
+	assert(m_files.size() == m_parentIdToChildren.size());
+
+	return ok;
+}
+
 
 //
 //
@@ -742,6 +784,17 @@ const QString& DbFileInfo::fileName() const noexcept
 void DbFileInfo::setFileName(const QString& value)
 {
 	m_fileName = value;
+}
+
+QString DbFileInfo::extension() const noexcept
+{
+	int pointPos = m_fileName.lastIndexOf('.');
+	if (pointPos == -1)
+	{
+		return {};
+	}
+
+	return m_fileName.right(m_fileName.size() - pointPos - 1);
 }
 
 int DbFileInfo::size() const

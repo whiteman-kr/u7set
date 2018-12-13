@@ -308,7 +308,7 @@ SELECT * FROM api.add_or_update_file('$(SessionKey)', '$root$', 'Schemas', 'Upda
 --
 UPDATE File SET Name = 'ApplicationLogic' WHERE Name = 'AL' AND ParentID = 0;
 UPDATE File SET Name = 'Monitor' WHERE Name = 'MVS' AND ParentID = 0;
-UPDATE File SET Name = 'Wiring' WHERE Name = 'WVS' AND ParentID = 0;
+UPDATE File SET Name = 'Wiring' WHERE Name = 'WVS' AND ParentID = 0;	
 UPDATE File SET Name = 'Diagnostics' WHERE Name = 'DVS' AND ParentID = 0;
 
 -- Set parent for schemas, $root$/ApplicationLogic -> $root$/Schemas/ApplicationLogic
@@ -317,8 +317,6 @@ UPDATE File
     SET ParentID = (SELECT FileID FROM File WHERE Name = 'Schemas' AND ParentID = 0)
     WHERE   (Name = 'ApplicationLogic' OR 
             Name = 'Monitor' OR
-            Name = 'Wiring' OR 
-            Name = 'Diagnostics' OR
             Name = 'UFBL') AND ParentID = 0;
 
 -- Create $root$/Schemas/Tuning

@@ -60,6 +60,7 @@ public:
     int hcFileId() const;
     int hpFileId() const;
     int mvsFileId() const;
+	int tvsFileId() const;
     int dvsFileId() const;
     int mcFileId() const;
 	int connectionsFileId() const;
@@ -272,6 +273,7 @@ private:
 	int m_hcFileId = -1;			// Hardware Configuration
 	int m_hpFileId = -1;			// Hardware Presets
 	int m_mvsFileId = -1;			// Monitor Visualization Schemas
+	int m_tvsFileId = -1;			// TuningClient Visualization Schemas
 	int m_dvsFileId = -1;			// Diagnostics Visualization Schemas
 	int m_mcFileId = -1;			// Module Configuration Template
 	int m_connectionsFileId = -1;	// Connections

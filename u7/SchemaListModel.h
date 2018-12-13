@@ -1,6 +1,6 @@
 #pragma once
 
-//#include <QTableView>
+#include <QTableView>
 #include "../lib/DbStruct.h"
 #include "../VFrame30/Schema.h"
 
@@ -22,6 +22,7 @@ public:
 
 	virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
 
+public:
 	void addFile(std::shared_ptr<DbFileInfo> file);
 
 	void setFiles(const std::vector<DbFileInfo>& files, const std::vector<DbUser>& users);

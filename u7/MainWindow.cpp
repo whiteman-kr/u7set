@@ -86,13 +86,7 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 						  ::MvsTemplExtension,
 						  tr("Control"));
 
-	m_logicSchemaTabPage = SchemasTabPageEx::create<VFrame30::LogicSchema>(
-							   dbController(),
-							   ::AlFileExtension,
-							   ::AlFileName,
-							   ::AlTemplExtension,
-							   tr("AppLogic"),
-							   nullptr);
+	m_logicSchemaTabPage = new SchemasTabPageEx{db(), this};
 
 	getCentralWidget()->addTabPage(m_projectsTab, tr("Projects"));
 	getCentralWidget()->addTabPage(m_equipmentTab, tr("Equipment"));

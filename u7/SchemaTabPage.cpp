@@ -1538,7 +1538,7 @@ void SchemaControlTabPage::addSchemaFile(std::shared_ptr<VFrame30::Schema> schem
 	//
 	if (dontShowPropDialog == false)
 	{
-		CreateSchemaDialog propertiesDialog(schema, db(), parentFile().fileId(), m_templateFileExtension, this);
+		CreateSchemaDialog propertiesDialog(schema, db(), this);
 
 		if (propertiesDialog.exec() != QDialog::Accepted)
 		{

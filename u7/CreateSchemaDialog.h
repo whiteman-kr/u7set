@@ -21,7 +21,7 @@ class CreateSchemaDialog : public QDialog
 	Q_OBJECT
 	
 public:
-	CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema, DbController* db, int tempateParentFileId, QString templateFileExtension, QWidget* parent);
+	CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema, DbController* db, QWidget* parent);
 	virtual ~CreateSchemaDialog();
 
 protected slots:

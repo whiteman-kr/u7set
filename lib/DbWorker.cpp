@@ -430,6 +430,12 @@ int DbWorker::mvsFileId() const
 	return m_mvsFileId;
 }
 
+int DbWorker::tvsFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_tvsFileId;
+}
+
 int DbWorker::dvsFileId() const
 {
 	QMutexLocker m(&m_mutex);
@@ -995,8 +1001,8 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	//
 	std::vector<DbFileInfo> systemFiles;
 	std::vector<QString> systemFileNames = {::AfblFileName, ::SchemasFileName, ::UfblFileName, ::AlFileName, ::HcFileName,
-											::HpFileName, ::MvsFileName, ::DvsFileName, ::McFileName, ::ConnectionsFileName,
-											::BusTypesFileName, ::EtcFileName};
+											::HpFileName, ::MvsFileName,::TvsFileName, ::DvsFileName, ::McFileName,
+											::ConnectionsFileName, ::BusTypesFileName, ::EtcFileName};
 
 	bool ok = worker_getFilesInfo(systemFileNames, &systemFiles);
 	if (ok == false)
@@ -1016,6 +1022,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 		m_hcFileId = -1;
 		m_hpFileId = -1;
 		m_mvsFileId = -1;
+		m_tvsFileId = -1;
 		m_dvsFileId = -1;
 		m_mcFileId = -1;
 		m_connectionsFileId = -1;
@@ -1094,6 +1101,14 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(::TvsFileName))
+		{
+			QMutexLocker locker(&m_mutex);
+			m_tvsFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
+			continue;
+		}
+
 		if (fi.fileName() == DbFileInfo::fullPathToFileName(::DvsFileName))
 		{
 			QMutexLocker locker(&m_mutex);
@@ -1146,6 +1161,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 		result &= m_hcFileId != -1;
 		result &= m_hpFileId != -1;
 		result &= m_mvsFileId != -1;
+		result &= m_tvsFileId != -1;
 		result &= m_dvsFileId != -1;
 		result &= m_mcFileId != -1;
 		result &= m_connectionsFileId != -1;

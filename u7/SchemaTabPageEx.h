@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QTableView>
 #include "MainTabPage.h"
 //#include "SchemaListModel.h"
 #include "../lib/DbController.h"
@@ -18,7 +19,7 @@ class SchemaListModelEx : public QAbstractItemModel, protected HasDbController
 	Q_OBJECT
 
 public:
-	SchemaListModelEx(DbController* dbc, QString parentFileName, QWidget* parentWidget);
+	SchemaListModelEx(DbController* dbc, QWidget* parentWidget);
 
 public:
 	virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
@@ -40,7 +41,7 @@ public:
 	//	std::shared_ptr<DbFileInfo> fileByFileId(int fileId);
 
 	//	int getFileRow(int fileId) const;
-private:
+
 	DbFileInfo file(const QModelIndex& modelIndex);
 
 public slots:
@@ -84,7 +85,6 @@ public:
 	};
 
 private:
-	QString m_parentFileName;
 	DbFileInfo m_parentFile;
 
 	QWidget* m_parentWidget = nullptr;	// Inside this model DbController is used, and it requires parent widget for
@@ -110,7 +110,7 @@ class SchemaFileViewEx : public QTreeView, public HasDbController
 	Q_OBJECT
 
 public:
-	SchemaFileViewEx(DbController* dbc, const QString& parentFileName);
+	SchemaFileViewEx(DbController* dbc);
 	virtual ~SchemaFileViewEx();
 
 	// Methods
@@ -210,7 +210,7 @@ public:
 	QAction* m_undoChangesAction = nullptr;
 	QAction* m_historyAction = nullptr;
 	QAction* m_compareAction = nullptr;
-	QAction* m_allSchemasHistoryAction = nullptr;
+	QAction* m_treeSchemasHistoryAction = nullptr;
 
 	// --
 	QAction* m_exportWorkingcopyAction = nullptr;
@@ -232,11 +232,7 @@ class SchemaControlTabPageEx : public QWidget, public HasDbController
 	Q_OBJECT
 
 public:
-	SchemaControlTabPageEx(QString fileExt,
-						   DbController* db,
-						   QString parentFileName,
-						   QString templateFileExtension,
-						   std::function<VFrame30::Schema*()> createSchemaFunc);
+	SchemaControlTabPageEx(DbController* db);
 
 	virtual ~SchemaControlTabPageEx();
 
@@ -246,10 +242,7 @@ public:
 private:
 	void createToolBar();
 
-	//signals:
-
-	//public slots:
-	//	void refreshFiles();
+	std::shared_ptr<VFrame30::Schema> createSchema(const DbFileInfo& parentFile) const;
 
 protected slots:
 	void projectOpened();
@@ -284,9 +277,9 @@ public:
 	// Data
 	//
 private:
-	std::function<VFrame30::Schema*()> m_createSchemaFunc;
+	//std::function<VFrame30::Schema*()> m_createSchemaFunc;
 	SchemaFileViewEx* m_filesView = nullptr;
-	QString m_templateFileExtension;
+	//QString m_templateFileExtension;
 
 	QToolBar* m_toolBar = nullptr;
 
@@ -304,21 +297,11 @@ class SchemasTabPageEx : public MainTabPage
 {
 	Q_OBJECT
 
-private:
-	explicit SchemasTabPageEx(DbController* dbcontroller, QWidget* parent);
-
 public:
+	explicit SchemasTabPageEx(DbController* dbc, QWidget* parent);
 	virtual ~SchemasTabPageEx();
 
 public:
-	template<typename SchemaType>
-	static SchemasTabPageEx* create(DbController* dbc,
-									QString fileExt,
-									QString parentFileName,
-									QString templFileExt,
-									QString caption,
-									QWidget* parent);
-
 	bool hasUnsavedSchemas() const;
 	bool saveUnsavedSchemas();
 
@@ -341,42 +324,6 @@ protected:
 	QString m_templFileExtension;
 };
 
-
-// Create MainTab!!!
-//
-template<typename SchemaType>
-SchemasTabPageEx* SchemasTabPageEx::create(DbController* dbc,
-										   QString fileExt,
-										   QString parentFileName,
-										   QString templFileExt,
-										   QString caption,
-										   QWidget* parent)
-{
-	static_assert(std::is_base_of<VFrame30::Schema, SchemaType>::value, "Base class must be VFrame30::Schema");
-	assert(dbc != nullptr);
-
-	SchemasTabPageEx* p = new SchemasTabPageEx(dbc, parent);
-
-	p->m_fileExtension = fileExt;
-	p->m_templFileExtension = templFileExt;
-
-	// Create Schema function, will be stored in two places, SchemaTabPage and SchemaControlTabPage
-	//
-	std::function<VFrame30::Schema*()> createFunc(
-				[]() -> VFrame30::Schema*
-	{
-					return new SchemaType();
-				});
-
-	// Add control page
-	//
-	SchemaControlTabPageEx* controlTabPage =
-			new SchemaControlTabPageEx(fileExt, dbc, parentFileName, templFileExt, createFunc);
-
-	p->m_tabWidget->addTab(controlTabPage, caption);
-
-	return p;
-}
 
 
 //

@@ -20,6 +20,7 @@ extern const char* const SchemasFileName;		// Schemas root fie
 extern const char* const UfblFileName;			// User Functional Block Library
 extern const char* const AlFileName;			// Application Logic Schemas
 extern const char* const MvsFileName;			// Monitor Video Schemas
+extern const char* const TvsFileName;			// Tuning Video Schemas
 extern const char* const DvsFileName;			// Diagnostics Video Schemas
 
 extern const char* const HcFileName;			// Hardware Configuratiun
@@ -307,6 +308,8 @@ public:
 	bool removeFile(const DbFileInfo& fileInfo);
 	bool removeFile(std::shared_ptr<DbFileInfo> fileInfo);
 
+	bool removeFilesWithExtension(QString ext);
+
 private:
 	// WARNING, assigment move is present, adding new member, modify operator=(DbFileTree&&)!!!
 	//
@@ -342,6 +345,8 @@ public:
 public:
 	const QString& fileName() const noexcept;
 	void setFileName(const QString& value);
+
+	QString extension() const noexcept;
 
 	int fileId() const noexcept;
 	void setFileId(int value);
