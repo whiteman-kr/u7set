@@ -62,6 +62,7 @@ private:
 	{
 	public:
 		Partition(const ArchFile& archFile, bool writable);
+		virtual ~Partition();
 
 		qint64 recordsCount();
 
@@ -115,6 +116,8 @@ private:
 		//
 
 		QVector<PartitionInfo> partitionsInfo;
+
+		int partitionToReadIndex = -1;
 		Partition partitionToRead;
 	};
 

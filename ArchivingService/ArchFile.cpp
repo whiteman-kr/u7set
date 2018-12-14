@@ -122,6 +122,11 @@ ArchFile::Partition::Partition(const ArchFile& archFile, bool writable) :
 {
 }
 
+ArchFile::Partition::~Partition()
+{
+	closeFile();
+}
+
 qint64 ArchFile::Partition::recordsCount()
 {
 	if (m_size < 0)
@@ -569,6 +574,8 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 {
 	TEST_PTR_RETURN_FALSE(m_queue);
 
+	Q_UNUSED(archID)
+
 	m_lastState = state;
 
 	Record s;
@@ -770,24 +777,53 @@ ArchFile::FindResult ArchFile::findStartPosition(RequestData* rd)
 
 	// 3)
 
-	bool positionFound = false;
+	rd->partitionToReadIndex = startPartitionIndex;
 
+	while(rd->partitionToReadIndex < rd->partitionsInfo.count());
 	{
-		bool res = rd->partitionToRead.openForReading(rd->partitionsInfo[startPartitionIndex].startTime);
+		bool res = rd->partitionToRead.openForReading(rd->partitionsInfo[rd->partitionToReadIndex].startTime);
 
 		if (res == false)
 		{
 			return FindResult::ReadError;
 		}
 
-		FindResult result = rd->partitionToRead.findStartPosition(rd->timeType, rd->startTime, rd->endTime, &positionFound);
+		FindResult result = rd->partitionToRead.findStartPosition(rd->timeType, rd->startTime, rd->endTime);
 
-		if ()dfwefwe fwefw efw ef wef wef ????
+		switch(result)
+		{
+		case FindResult::Found:
+			return FindResult::Found;
+
+		case FindResult::NotFound:
+
+			rd->partitionToReadIndex++;
+
+			if (rd->partitionToReadIndex >= rd->partitionsInfo.count())
+			{
+				rd->partitionToRead.close();
+				rd->partitionToReadIndex = -1;
+
+				return FindResult::NotFound;
+			}
+
+			break;
+
+		case FindResult::ReadError:
+		case FindResult::SearchError:
+
+			rd->partitionToRead.close();
+			rd->partitionToReadIndex = -1;
+
+			return result;
+
+		default:
+			assert(false);
+		}
 
 	}
-	while(1);
 
-	return true;
+	return FindResult::SearchError;
 }
 
 void ArchFile::cancelRequest(quint32 requestID)
