@@ -584,3 +584,97 @@ BEGIN
 END
 $BODY$
   LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION api.add_file(
+    session_key text,
+    file_name text,
+    parent_id integer,
+    file_data bytea,
+    details text)
+  RETURNS objectstate AS
+$BODY$
+DECLARE
+    exists int;
+    user_id integer;
+	newfileid int;
+	newfileinstanceid uuid;
+	return_value ObjectState;
+BEGIN
+    -- Check session_key and raise error if it is wrong
+	--
+	PERFORM user_api.check_session_key(session_key, TRUE);
+
+	user_id := user_api.current_user_id(session_key);    
+
+    SELECT count(*) INTO exists FROM File WHERE Name = file_name AND ParentID = parent_id AND Deleted = false;
+	IF (exists > 0) THEN
+	    RAISE 'File % already exists', file_name;
+	END IF;
+
+    INSERT INTO File (Name, ParentID, Deleted)
+	    VALUES (file_name, parent_id, false) RETURNING FileID INTO newfileid;
+
+    INSERT INTO CheckOut (UserID, FileID)
+	    VALUES (user_id, newfileid);
+
+    INSERT INTO FileInstance (FileID, Size, Data, Action, Details, md5)
+	    VALUES (newfileid, length(file_data), file_data, 1, details::jsonb, md5(file_data))
+		RETURNING FileInstanceID INTO newfileinstanceid;
+
+    UPDATE File SET CheckedOutInstanceID = newfileinstanceid WHERE FileID = newfileid;
+
+    return_value := ROW(newfileid, FALSE, TRUE, 1, user_id, 0);
+	RETURN return_value;
+END
+$BODY$
+  LANGUAGE plpgsql;
+
+
+CREATE OR REPLACE FUNCTION api.add_unique_file(
+    session_key text,
+    file_name text,
+    parent_id int,
+    unique_from_file_id int,
+    file_data bytea,
+    details text)
+  RETURNS objectstate AS
+$BODY$
+DECLARE
+	user_id integer;
+    file_id integer;
+    file_exists int;
+	file_pattern text;
+	return_value ObjectState;
+BEGIN
+    -- Check session_key and raise error if it is wrong
+	--
+	PERFORM user_api.check_session_key(session_key, TRUE);
+
+	user_id := user_api.current_user_id(session_key);
+
+	-- Cut of extension as compariosion is done without it
+	--
+	file_pattern := left(file_name, char_length(file_name) - position('.' in reverse(file_name)));
+
+    SELECT count(*) 
+        INTO 
+            file_exists 
+        FROM 
+            api.get_file_list_tree(session_key, unique_from_file_id, '%', true) AS F
+        WHERE
+            file_pattern ILIKE left(F.Name, char_length(F.Name) - position('.' in reverse(F.Name)));
+
+	IF (file_exists > 0) THEN
+	    RAISE 'File % is not unique, take into account that files are compared without extensions and compariosion is case insensetive.', file_pattern;
+	END IF;	
+
+    -- try to add file (it will be checked out)
+    --
+    return_value := api.add_file(session_key, file_name, parent_id, file_data, details);
+
+    RETURN return_value;
+END
+$BODY$
+LANGUAGE plpgsql;
+

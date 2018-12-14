@@ -296,11 +296,6 @@ std::pair<QModelIndex, bool> SchemaListModelEx::addFile(QModelIndex parentIndex,
 
 	// --
 	//
-	if (file->fileName().endsWith(m_filter, Qt::CaseInsensitive) == false)
-	{
-		return {{}, false};
-	}
-
 	int insertIndex = m_files.childrenCount(parentFile.fileId());
 
 	// --
@@ -394,8 +389,8 @@ void SchemaListModelEx::refresh()
 
 	for (auto& [fileId, fileInfo] : files.files())
 	{
-		if (fileInfo->fileName().endsWith(m_filter, Qt::CaseInsensitive) == true)
-		{
+//		if (fileInfo->fileName().endsWith(m_filter, Qt::CaseInsensitive) == true)
+//		{
 			VFrame30::SchemaDetails details;
 			bool parsed = details.parseDetails(fileInfo->details());
 
@@ -403,7 +398,7 @@ void SchemaListModelEx::refresh()
 			{
 				detailsMap[fileId] = std::move(details);
 			}
-		}
+//		}
 	}
 
 	// Set all data
@@ -440,15 +435,15 @@ void SchemaListModelEx::projectClosed()
 	return;
 }
 
-QString SchemaListModelEx::filter() const
-{
-	return m_filter;
-}
+//QString SchemaListModelEx::filter() const
+//{
+//	return m_filter;
+//}
 
-void SchemaListModelEx::setFilter(const QString& value)
-{
-	m_filter = value;
-}
+//void SchemaListModelEx::setFilter(const QString& value)
+//{
+//	m_filter = value;
+//}
 
 QString SchemaListModelEx::usernameById(int userId) const noexcept
 {
@@ -532,7 +527,7 @@ SchemaFileViewEx::SchemaFileViewEx(DbController* dbc) :
 
 	// --
 	//
-	filesModel().setFilter("vfr");
+	//filesModel().setFilter("vfr");
 
 	// --
 	//
@@ -2153,26 +2148,33 @@ void SchemaControlTabPageEx::addFile()
     //
 	int sequenceNo = db()->nextCounterValue();
     QString defaultId = "SCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
+	QString extension;
 
     if (schema->isLogicSchema() == true)
     {
         defaultId = "APPSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
+		extension = ::AlFileExtension;
     }
 
     if (schema->isUfbSchema() == true)
     {
         defaultId = "UFBID" + QString::number(sequenceNo).rightJustified(6, '0');
+		extension = ::UfbFileExtension;
     }
 
     if (schema->isMonitorSchema() == true)
     {
         defaultId = "MONITORSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
+		extension = ::MvsFileExtension;
     }
 
     if (schema->isDiagSchema() == true)
     {
         defaultId = "DIAGSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
+		extension = ::DvsFileExtension;
     }
+
+	assert(extension.isEmpty() == false);
 
     schema->setSchemaId(defaultId);
 
@@ -2211,12 +2213,12 @@ void SchemaControlTabPageEx::addFile()
         }
     }
 
-	addSchemaFile(schema, false);
+	addSchemaFile(schema, extension, false);
 
     return;
 }
 
-void SchemaControlTabPageEx::addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, bool dontShowPropDialog)
+void SchemaControlTabPageEx::addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, QString fileExtension, bool dontShowPropDialog)
 {
     QModelIndexList selectedRows = m_filesView->selectionModel()->selectedRows();
     if (selectedRows.size() != 0 && selectedRows.size() != 1)
@@ -2247,17 +2249,20 @@ void SchemaControlTabPageEx::addSchemaFile(std::shared_ptr<VFrame30::Schema> sch
 
     //  Save file in DB
     //
+	if (fileExtension.isEmpty() == false &&
+		fileExtension.startsWith('.') == false)
+	{
+		fileExtension = '.' + fileExtension;
+	}
+
     QByteArray data;
     schema->Save(data);
 
 	std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 
-	file->setFileName(schema->schemaId() + m_filesView->filesModel().filter());
+	file->setFileName(schema->schemaId() + fileExtension);
 	file->setDetails(schema->details());
 	file->swapData(data);
-
-	std::vector<std::shared_ptr<DbFile>> addFilesList;
-	addFilesList.push_back(file);
 
 	int parentFileId = -1;
 
@@ -2270,7 +2275,7 @@ void SchemaControlTabPageEx::addSchemaFile(std::shared_ptr<VFrame30::Schema> sch
 		parentFileId = static_cast<int>(parentModelIndex.internalId());
 	}
 
-	if (bool ok = db()->addFiles(&addFilesList, parentFileId, this);
+	if (bool ok = db()->addUniqueFile(file, parentFileId, db()->schemaFileId(), this);
 		ok == false)
 	{
 		return;

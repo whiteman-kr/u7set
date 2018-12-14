@@ -111,7 +111,7 @@ public slots:
 
 	bool worker_getFilesInfo(const std::vector<QString>& fullPathFileNames, std::vector<DbFileInfo>* out);
 
-    void slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId);
+	void slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId);
     void slot_deleteFiles(std::vector<DbFileInfo>* files);
 
     void slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);

@@ -2646,7 +2646,7 @@ bool DbWorker::worker_getFilesInfo(const std::vector<QString>& fullPathFileNames
 	return true;
 }
 
-void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId)
+void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId)
 {
 	// Init automitic varaiables
 	//
@@ -2706,13 +2706,30 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 		QSqlQuery q(db);
 		q.setForwardOnly(true);
 
-		q.prepare("SELECT * FROM add_file(:userid, :filename, :parentid, :filedata, :details);");
+		if (ensureUniquesInParentTree == false)
+		{
+			q.prepare("SELECT * FROM api.add_file(:sessionkey, :filename, :parentid, :filedata, :details);");
 
-		q.bindValue(":userid", currentUser().userId());
-		q.bindValue(":filename", file->fileName());
-		q.bindValue(":parentid", parentId);
-		q.bindValue(":filedata", file->data());
-		q.bindValue(":details", file->details());
+			q.bindValue(":sessionkey", sessionKey());
+			q.bindValue(":filename", file->fileName());
+			q.bindValue(":parentid", parentId);
+			q.bindValue(":filedata", file->data());
+			q.bindValue(":details", file->details());
+		}
+		else
+		{
+			// api.add_unique_file scans parent tree and finds any files with the same name.
+			// Comparsion done without extension, case insensetive
+			//
+			q.prepare("SELECT * FROM api.add_unique_file(:sessionkey, :filename, :parentid, :uniquefromfileid,  :filedata, :details);");
+
+			q.bindValue(":sessionkey", sessionKey());
+			q.bindValue(":filename", file->fileName());
+			q.bindValue(":parentid", parentId);
+			q.bindValue(":uniquefromfileid", uniqueFromFileId);
+			q.bindValue(":filedata", file->data());
+			q.bindValue(":details", file->details());
+		}
 
 		bool result = q.exec();
 

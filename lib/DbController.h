@@ -64,8 +64,10 @@ public:
 	bool getFileInfo(int fileId, DbFileInfo* out, QWidget* parentWidget);
 	bool getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out, QWidget* parentWidget);
 
+	bool addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId, QWidget* parentWidget);
 	bool addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, QWidget* parentWidget);
 	bool addFile(const std::shared_ptr<DbFile>& file, int parentId, QWidget* parentWidget);
+	bool addUniqueFile(const std::shared_ptr<DbFile>& file, int parentId, int uniqueFromFileId, QWidget* parentWidget);
 
 	bool deleteFiles(std::vector<std::shared_ptr<DbFileInfo> >* files, QWidget* parentWidget);
 	bool deleteFiles(std::vector<DbFileInfo>* files, QWidget* parentWidget);
@@ -177,7 +179,7 @@ signals:
 	void signal_getFileInfo(int parentId, QString fileName, DbFileInfo* out);
 	void signal_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
 
-	void signal_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId);
+	void signal_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId);
 	void signal_deleteFiles(std::vector<DbFileInfo>* files);
 
 	void signal_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
@@ -282,6 +284,7 @@ public:
 	void setCurrentProject(const DbProject& project);
 
 	int rootFileId() const;			// Root file
+	int schemaFileId() const;		// $root$/Schemas file id
 	int afblFileId() const;			// Application Functional Block Library
 	int ufblFileId() const;			// User Functional Block Library
 	int alFileId() const;			// Application Logic

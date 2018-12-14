@@ -54,8 +54,8 @@ private slots:
 	// Properties
 	//
 public:
-	QString filter() const;
-	void setFilter(const QString& value);		// "" -- no filter, "cdd" -- just cdd files
+//	QString filter() const;
+//	void setFilter(const QString& value);		// "" -- no filter, "cdd" -- just cdd files
 
 	QString usernameById(int userId) const noexcept;
 
@@ -90,7 +90,7 @@ private:
 	QWidget* m_parentWidget = nullptr;	// Inside this model DbController is used, and it requires parent widget for
 										// displaying progress and error messages
 	DbFileTree m_files;
-	QString m_filter;
+	//QString m_filter;
 
 	std::map<int, QString> m_users;							// Key is UserID
 	std::map<int, VFrame30::SchemaDetails> m_details; 		// Key is FileID
@@ -250,7 +250,7 @@ protected slots:
 
 	void addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
 	void addFile();
-	void addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, bool dontShowPropDialog);
+	void addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, QString fileExtension, bool dontShowPropDialog);
 
 	//	void deleteFile(std::vector<DbFileInfo> files);
 

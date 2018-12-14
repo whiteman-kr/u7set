@@ -635,7 +635,11 @@ bool DbController::getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo
 	return result;
 }
 
-bool DbController::addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, QWidget* parentWidget)
+bool DbController::addFiles(std::vector<std::shared_ptr<DbFile>>* files,
+							int parentId,
+							bool ensureUniquesInParentTree,
+							int uniqueFromFileId,
+							QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -655,10 +659,15 @@ bool DbController::addFiles(std::vector<std::shared_ptr<DbFile>>* files, int par
 
 	// Emit signal end wait for complete
 	//
-	emit signal_addFiles(files, parentId);
+	emit signal_addFiles(files, parentId, ensureUniquesInParentTree, uniqueFromFileId);
 
 	bool result = waitForComplete(parentWidget, tr("Adding files"));
 	return result;
+}
+
+bool DbController::addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, QWidget* parentWidget)
+{
+	return addFiles(files, parentId, false, -1, parentWidget);
 }
 
 bool DbController::addFile(const std::shared_ptr<DbFile>& file, int parentId, QWidget* parentWidget)
@@ -666,7 +675,15 @@ bool DbController::addFile(const std::shared_ptr<DbFile>& file, int parentId, QW
 	std::vector<std::shared_ptr<DbFile>> v;
 	v.push_back(file);
 
-	return addFiles(&v, parentId, parentWidget);
+	return addFiles(&v, parentId, false, -1, parentWidget);
+}
+
+bool DbController::addUniqueFile(const std::shared_ptr<DbFile>& file, int parentId, int uniqueFromFileId, QWidget* parentWidget)
+{
+	std::vector<std::shared_ptr<DbFile>> v;
+	v.push_back(file);
+
+	return addFiles(&v, parentId, true, uniqueFromFileId, parentWidget);
 }
 
 bool DbController::deleteFiles(std::vector<std::shared_ptr<DbFileInfo>>* files, QWidget* parentWidget)
@@ -2326,6 +2343,11 @@ void DbController::setCurrentProject(const DbProject& /*project*/)
 int DbController::rootFileId() const
 {
 	return m_worker->rootFileId();
+}
+
+int DbController::schemaFileId() const
+{
+	return m_worker->schemasFileId();
 }
 
 int DbController::afblFileId() const
