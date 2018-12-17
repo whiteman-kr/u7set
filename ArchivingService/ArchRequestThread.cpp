@@ -533,7 +533,51 @@ bool FileArchRequestContext::executeSatesRequest(ArchiveShared archive, QSqlData
 {
 	Q_UNUSED(db);
 
-	return archive->findData(m_param);
+	ArchFile::FindResult result = archive->findData(m_param);
+
+	switch()
+	{
+	case ArchFile::FindResult::Found:
+		m_totalStates = m_statesQuery->size();
+		m_sentStates = 0;
+		m_dataReady = false;
+
+		DEBUG_LOG_MSG(m_logger, QString("RequestID %1: result %2 records").arg(m_param.requestID).arg(m_totalStates));
+
+		m_reply.set_error(static_cast<int>(NetworkError::Success));
+		m_reply.set_archerror(static_cast<int>(ArchiveError::Success));
+		m_reply.set_requestid(m_param.requestID);
+		m_reply.set_dataready(false);
+		m_reply.set_totalstatescount(m_totalStates);
+		m_reply.set_sentstatescount(m_sentStates);
+		m_reply.set_statesinpartcount(0);
+		m_reply.set_islastpart(false);
+
+		m_reply.clear_appsignalstates();
+		break;
+
+	case ArchFile::FindResult::NotFound:
+		m_totalStates = m_statesQuery->size();
+		m_sentStates = 0;
+		m_dataReady = false;
+
+		DEBUG_LOG_MSG(m_logger, QString("RequestID %1: result %2 records").arg(m_param.requestID).arg(m_totalStates));
+
+		m_reply.set_error(static_cast<int>(NetworkError::Success));
+		m_reply.set_archerror(static_cast<int>(ArchiveError::Success));
+		m_reply.set_requestid(m_param.requestID);
+		m_reply.set_dataready(false);
+		m_reply.set_totalstatescount(m_totalStates);
+		m_reply.set_sentstatescount(m_sentStates);
+		m_reply.set_statesinpartcount(0);
+		m_reply.set_islastpart(false);
+
+		m_reply.clear_appsignalstates();
+
+	default:
+		return false;
+	}
+
 }
 
 void FileArchRequestContext::getNextStates()

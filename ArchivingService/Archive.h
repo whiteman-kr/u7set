@@ -66,7 +66,7 @@ public:
 
 		void appendArchFile(ArchFile* f);
 
-		bool findData();
+		ArchFile::FindResult findData();
 
 	private:
 		ArchRequestParam m_param;

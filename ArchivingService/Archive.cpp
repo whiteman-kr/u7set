@@ -20,9 +20,9 @@ void Archive::RequestContext::appendArchFile(ArchFile* f)
 	m_archFiles.append(f);
 }
 
-bool Archive::RequestContext::findData()
+ArchFile::FindResult Archive::RequestContext::findData()
 {
-	bool result = false;
+	ArchFile::FindResult result = ArchFile::FindResult::NotFound;
 
 	for(ArchFile* archFile : m_archFiles)
 	{
@@ -30,7 +30,7 @@ bool Archive::RequestContext::findData()
 
 		if (res == ArchFile::FindResult::Found)
 		{
-			result = true;
+			result = ArchFile::FindResult::Found;
 		}
 	}
 

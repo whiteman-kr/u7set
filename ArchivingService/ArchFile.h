@@ -96,7 +96,8 @@ private:
 		bool m_fileIsAligned = false;	// partition's file is aligned on sizeof(Record)
 
 		qint64 m_startTime = -1;		// system start time of partition (acquired from partition's file name)
-		qint64 m_size = -1;				// partition's file size
+		qint64 m_size = -1;				// partition's file size in Bytes (multiple to sizeof(Record))
+		qint64 m_recordCount = -1;		// partition's record count
 
 		static const qint64 FIRST_RECORD = 0;
 		static const qint64 LAST_RECORD = -1;
@@ -119,6 +120,8 @@ private:
 
 		int partitionToReadIndex = -1;
 		Partition partitionToRead;
+
+		FindResult findResult = FindResult::NotFound;
 	};
 
 public:
@@ -151,8 +154,8 @@ public:
 	void shutdown(qint64 curPartition, qint64* totalFlushedStatesCount);
 
 private:
-	FindResult getArchPartitionsInfo(RequestData* rd);
-	FindResult findStartPosition(RequestData* rd);
+	void getArchPartitionsInfo(RequestData* rd);
+	void findStartPosition(RequestData* rd);
 	void cancelRequest(quint32 requestID);
 
 private:
@@ -164,8 +167,6 @@ private:
 
 	bool m_isInitialized = false;
 	bool m_canReadWrite = false;
-
-	FindResult m_findResult = FindResult::NotFound;
 
 	//
 
