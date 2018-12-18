@@ -1,6 +1,9 @@
 #pragma once
 
 #include <QTableView>
+#ifdef _DEBUG
+	#include <QAbstractItemModelTester>
+#endif
 #include "MainTabPage.h"
 //#include "SchemaListModel.h"
 #include "../lib/DbController.h"
@@ -42,7 +45,7 @@ public:
 
 	//	int getFileRow(int fileId) const;
 
-	DbFileInfo file(const QModelIndex& modelIndex);
+	DbFileInfo file(const QModelIndex& modelIndex) const;
 
 public slots:
 	void refresh();
@@ -110,7 +113,7 @@ class SchemaFileViewEx : public QTreeView, public HasDbController
 	Q_OBJECT
 
 public:
-	SchemaFileViewEx(DbController* dbc);
+	SchemaFileViewEx(DbController* dbc, QWidget* parent);
 	virtual ~SchemaFileViewEx();
 
 	// Methods
@@ -127,7 +130,7 @@ public:
 	//	void setFiles(const std::vector<DbFileInfo>& files);
 	//	void clear();
 
-	//	void getSelectedFiles(std::vector<DbFileInfo>* out);
+	std::vector<DbFileInfo> selectedFiles() const;
 
 	//	void refreshFiles();
 
@@ -248,9 +251,16 @@ protected slots:
 	void projectOpened();
 	void projectClosed();
 
+	int showSelectFileDialog(int currentSelectionFileId);
+
 	void addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
 	void addFile();
+
 	void addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, QString fileExtension, bool dontShowPropDialog);
+	void addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, QString fileExtension, int parentFileId);
+	void addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, QString fileExtension, QModelIndex parentIndex);
+
+	void cloneFile();
 
 	//	void deleteFile(std::vector<DbFileInfo> files);
 

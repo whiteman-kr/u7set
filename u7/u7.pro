@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets sql network xmlpatterns qml svg serialport xml
+QT       += core gui widgets sql network xmlpatterns qml svg serialport xml testlib
 
 TARGET = u7
 TEMPLATE = app
