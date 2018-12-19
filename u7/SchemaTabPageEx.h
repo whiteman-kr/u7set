@@ -38,6 +38,8 @@ public:
 	std::pair<QModelIndex, bool> addFile(QModelIndex parentIndex, std::shared_ptr<DbFileInfo> file);
 	bool deleteFiles(const QModelIndexList& selectedIndexes, const std::vector<std::shared_ptr<DbFileInfo>>& files);
 
+	bool updateFiles(const QModelIndexList& selectedIndexes, const std::vector<DbFileInfo>& files);
+
 	//	void setFiles(const std::vector<DbFileInfo>& files, const std::vector<DbUser>& users);
 	//	void clear();
 
@@ -262,15 +264,16 @@ protected slots:
 	void addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, QString fileExtension, QModelIndex parentIndex);
 
 	void cloneFile();
-
 	void deleteFiles();
+
+	void checkOutFiles();
+	void checkInFiles();
 
 	//	void checkIn(std::vector<DbFileInfo> files);
 	//	void undoChanges(std::vector<DbFileInfo> files);
 
 	//	void openFiles(std::vector<DbFileInfo> files);
 	//	void viewFiles(std::vector<DbFileInfo> files);
-	//	void cloneFile(DbFileInfo file);
 
 	//	void editSchemasProperties(std::vector<DbFileInfo> selectedFiles);
 

@@ -401,21 +401,33 @@ std::pair<QModelIndex, bool> SchemaListModelEx::addFile(QModelIndex parentIndex,
 bool SchemaListModelEx::deleteFiles(const QModelIndexList& selectedIndexes,
 									const std::vector<std::shared_ptr<DbFileInfo>>& deletedFiles)
 {
+	std::vector<DbFileInfo> files;
+	files.resize(deletedFiles.size());
+
+	for (const std::shared_ptr<DbFileInfo>& f : deletedFiles)
+	{
+		files.push_back(*f);
+	}
+
+	return updateFiles(selectedIndexes, files);
+}
+
+bool SchemaListModelEx::updateFiles(const QModelIndexList& selectedIndexes, const std::vector<DbFileInfo>& files)
+{
 	// assert(deletedFiles.size() == selectedIndexes.size()); -- sizes can be different, from deletedFiles
 	// could be removed system files before. Do not uncommnet this assertion
 	//
-	if (deletedFiles.empty() == true)
+	if (files.empty() == true)
 	{
 		return false;
 	}
 
 	// Some files can be completely removed, other could be just marked as deleted
 	//
-	std::map<int, std::shared_ptr<DbFileInfo>> filesMap;
-
-	for (const std::shared_ptr<DbFileInfo>& f : deletedFiles)
+	std::map<int, DbFileInfo> filesMap;
+	for (const DbFileInfo& f : files)
 	{
-		filesMap[f->fileId()] = f;
+		filesMap[f.fileId()] = f;
 	}
 
 	// As some rows can be deleted during update model,
@@ -437,7 +449,7 @@ bool SchemaListModelEx::deleteFiles(const QModelIndexList& selectedIndexes,
 		int fileId = static_cast<int>(index.internalId());
 		auto file = filesMap[fileId];
 
-		if (file == nullptr)
+		if (file.isNull() == true)
 		{
 			// It could be system file, which was removed from input deletedFiles
 			// No assertion here, just contuinue
@@ -445,13 +457,13 @@ bool SchemaListModelEx::deleteFiles(const QModelIndexList& selectedIndexes,
 			continue;
 		}
 
-		if (file->fileId() != fileId)
+		if (file.fileId() != fileId)
 		{
-			assert(file->fileId() == fileId);
+			assert(file.fileId() == fileId);
 			continue;
 		}
 
-		if (file->deleted() == true)
+		if (file.deleted() == true)
 		{
 			QModelIndex pi = index.parent();
 			int childIndex = m_files.indexInParent(fileId);
@@ -462,16 +474,16 @@ bool SchemaListModelEx::deleteFiles(const QModelIndexList& selectedIndexes,
 		}
 		else
 		{
-			auto modelFile = m_files.file(file->fileId());
+			auto modelFile = m_files.file(file.fileId());
 
 			if (modelFile == nullptr)
 			{
-				assert(m_files.hasFile(file->fileId()) == true);
+				assert(m_files.hasFile(file.fileId()) == true);
 				continue;
 			}
 			else
 			{
-				modelFile->operator=(*file);
+				modelFile->operator=(file);
 			}
 
 			QModelIndex bottomRight = this->index(index.row(), static_cast<int>(Columns::ColumnCount) - 1, index.parent());
@@ -1466,26 +1478,50 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 	// --
 	//
 	int currentUserId = dbc()->currentUser().userId();
+	bool currentUserIsAdmin = dbc()->currentUser().isAdminstrator();
 
 	bool hasDeletePossibility = false;
+	bool hasCheckOutPossibility = false;
+	bool hasCheckInPossibility = false;
 
 	for (const DbFileInfo& file : selectedFiles)
 	{
 		bool fileIsSystem = dbc()->systemFileInfo(file.fileId()).isNull() == false;
 
+		if (fileIsSystem == true)	// No any possibilty on system files
+		{
+			continue;
+		}
+
 		// hasDeletePossibility
 		//
-		if (fileIsSystem == false &&
-			((file.state() == VcsState::CheckedOut && file.userId() == currentUserId) ||
-			file.state() == VcsState::CheckedIn))
+		if ((file.state() == VcsState::CheckedOut && file.userId() == currentUserId) ||
+			file.state() == VcsState::CheckedIn)
 		{
 			hasDeletePossibility = true;
+		}
+
+		// hasCheckOutPossibility
+		//
+		if (file.state() == VcsState::CheckedIn)
+		{
+			hasCheckOutPossibility = true;
+		}
+
+		// hasCheckInPossibility
+		//
+		if (file.state() == VcsState::CheckedOut &&
+			(file.userId() == currentUserId  || currentUserIsAdmin == true))
+		{
+			hasCheckInPossibility = true;
 		}
 	}
 
 	// --
 	//
 	m_deleteAction->setEnabled(hasDeletePossibility);
+	m_checkOutAction->setEnabled(hasCheckOutPossibility);
+	m_checkInAction->setEnabled(hasCheckInPossibility);
 
 	return;
 }
@@ -2051,6 +2087,9 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 	connect(m_filesView->m_newFileAction, &QAction::triggered, this, &SchemaControlTabPageEx::addFile);
 	connect(m_filesView->m_cloneFileAction, &QAction::triggered, this, &SchemaControlTabPageEx::cloneFile);
 	connect(m_filesView->m_deleteAction, &QAction::triggered, this, &SchemaControlTabPageEx::deleteFiles);
+
+	connect(m_filesView->m_checkOutAction, &QAction::triggered, this, &SchemaControlTabPageEx::checkOutFiles);
+	connect(m_filesView->m_checkInAction, &QAction::triggered, this, &SchemaControlTabPageEx::checkInFiles);
 
 	connect(m_filesView->m_refreshFileAction, &QAction::triggered, &m_filesView->filesModel(), &SchemaListModelEx::refresh);
 
@@ -2804,7 +2843,7 @@ void SchemaControlTabPageEx::deleteFiles()
 //	if (tabWidget == nullptr)
 //	{
 //		assert(tabWidget != nullptr);
-//		return;
+//		return;Вас там засыпает уже снегом?
 //	}
 
 //	for (int i = 0; i < tabWidget->count(); i++)
@@ -2824,6 +2863,191 @@ void SchemaControlTabPageEx::deleteFiles()
 //				tb->setReadOnly(true);
 //				tb->setFileInfo(*(fi.get()));
 //				tb->setPageTitle();
+//				break;
+//			}
+//		}
+//	}
+
+	return;
+}
+
+void SchemaControlTabPageEx::checkOutFiles()
+{
+	QModelIndexList	selectedIndexes = m_filesView->selectionModel()->selectedRows();
+	for (QModelIndex& mi: selectedIndexes)
+	{
+		mi = m_filesView->proxyModel().mapToSource(mi);
+	}
+
+	std::vector<DbFileInfo> files = m_filesView->selectedFiles();
+	if (files.empty() == true)
+	{
+		assert(files.empty() == false);
+		return;
+	}
+
+	assert(selectedIndexes.size() == files.size());
+
+	// --
+	//
+	std::vector<DbFileInfo> checkOutFiles;
+	checkOutFiles.reserve(files.size());
+
+	for(const DbFileInfo& f : files)
+	{
+		if (dbc()->isSystemFile(f.fileId()) == true)
+		{
+			continue;
+		}
+
+		if (f.state() == VcsState::CheckedIn)
+		{
+			checkOutFiles.emplace_back(f);
+		}
+	}
+
+	if (checkOutFiles.empty() == true)
+	{
+		return;
+	}
+
+	bool ok = db()->checkOut(files, this);
+	if (ok == false)
+	{
+		return;
+	}
+
+	ok = m_filesView->filesModel().updateFiles(selectedIndexes, files);
+	if (ok == false)
+	{
+		return;
+	}
+
+	return;
+}
+
+void SchemaControlTabPageEx::checkInFiles()
+{
+	QModelIndexList	selectedIndexes = m_filesView->selectionModel()->selectedRows();
+	for (QModelIndex& mi: selectedIndexes)
+	{
+		mi = m_filesView->proxyModel().mapToSource(mi);
+	}
+
+	std::vector<DbFileInfo> files = m_filesView->selectedFiles();
+	if (files.empty() == true)
+	{
+		assert(files.empty() == false);
+		return;
+	}
+
+	assert(selectedIndexes.size() == files.size());
+
+	// --
+	//
+	std::vector<DbFileInfo> checkInFiles;
+	checkInFiles.reserve(files.size());
+
+	for(const DbFileInfo& file : files)
+	{
+		if (dbc()->isSystemFile(file.fileId()) == true)
+		{
+			continue;
+		}
+
+		if (file.userId() == db()->currentUser().userId() ||
+			db()->currentUser().isAdminstrator() == true)
+		{
+			files.push_back(file);
+		}
+	}
+
+	if (checkInFiles.empty() == true)
+	{
+		return;
+	}
+
+	// --
+	//
+	assert(false);
+	int to_do_check_in;
+
+//	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
+//	if (tabWidget == nullptr)
+//	{
+//		assert(tabWidget != nullptr);
+//		return;
+//	}
+
+//	// Save file if it is open
+//	//
+//	for (int i = 0; i < tabWidget->count(); i++)
+//	{
+//		EditSchemaTabPage* tb = dynamic_cast<EditSchemaTabPage*>(tabWidget->widget(i));
+//		if (tb == nullptr)
+//		{
+//			// It can be control tab page
+//			//
+//			continue;
+//		}
+
+//		for (const DbFileInfo& fi : files)
+//		{
+//			if (tb->fileInfo().fileId() == fi.fileId() && tb->readOnly() == false && tb->modified() == true)
+//			{
+//				tb->saveWorkcopy();
+//				break;
+//			}
+//		}
+//	}
+
+//	// Check in file
+//	//
+//	std::vector<DbFileInfo> updatedFiles;
+
+//	bool ok = CheckInDialog::checkIn(files, false, &updatedFiles, db(), this);
+//	if (ok == false)
+//	{
+//		return;
+//	}
+
+//	refreshFiles();
+
+//	// Refresh fileInfo from the Db
+//	//
+//	std::vector<int> fileIds;
+//	fileIds.reserve(files.size());
+
+//	for (const DbFileInfo& fi : files)
+//	{
+//		fileIds.push_back(fi.fileId());
+//	}
+
+//	db()->getFileInfo(&fileIds, &files, this);
+
+//	// Remove deleted files
+//	//
+//	files.erase(std::remove_if(files.begin(), files.end(), [](const auto& file) { return file.deleted();}),
+//				files.end());
+
+//	// Set readonly to file if it is open
+//	//
+//	for (int i = 0; i < tabWidget->count(); i++)
+//	{
+//		EditSchemaTabPage* tb = dynamic_cast<EditSchemaTabPage*>(tabWidget->widget(i));
+//		if (tb == nullptr)
+//		{
+//			// It can be control tab page
+//			//
+//			continue;
+//		}
+
+//		for (const DbFileInfo& fi : files)
+//		{
+//			if (tb->fileInfo().fileId() == fi.fileId() && tb->readOnly() == false)
+//			{
+//				tb->setReadOnly(true);
+//				tb->setFileInfo(fi);
 //				break;
 //			}
 //		}
