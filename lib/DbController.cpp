@@ -2385,6 +2385,11 @@ int DbController::mvsFileId() const
 	return m_worker->mvsFileId();
 }
 
+int DbController::tvsFileId() const
+{
+	return m_worker->tvsFileId();
+}
+
 int DbController::dvsFileId() const
 {
 	return m_worker->dvsFileId();
@@ -2452,6 +2457,19 @@ DbFileInfo DbController::systemFileInfo(int fileId) const
 	}
 
 	return result;
+}
+
+bool DbController::isSystemFile(int fileId) const
+{
+	std::vector<DbFileInfo> systemFiles = m_worker->systemFiles();
+
+	auto pos = std::find_if(systemFiles.begin(), systemFiles.end(),
+		[&fileId](const DbFileInfo& fi)
+		{
+			return fi.fileId() == fileId;
+		});
+
+	return pos != systemFiles.end();
 }
 
 QString DbController::lastError() const

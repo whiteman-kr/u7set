@@ -291,7 +291,8 @@ public:
 	int hcFileId() const;			// Hardware Configuration
 	int hpFileId() const;			// Hadware Presets
 	int mcFileId() const;			// Module Configuration
-	int mvsFileId() const;			// Monotor Video Schemas
+	int mvsFileId() const;			// Monitor Video Schemas
+	int tvsFileId() const;			// Tuning Video Schemas
 	int dvsFileId() const;			// Diaginostics Video Schemas
 	int connectionsFileId() const;	// Connections
 	int busTypesFileId() const;		// BusTypes
@@ -301,6 +302,7 @@ public:
 
 	DbFileInfo systemFileInfo(const QString& fileName) const;
 	DbFileInfo systemFileInfo(int fileId) const;
+	bool isSystemFile(int fileId) const;
 
 	QString lastError() const;
 

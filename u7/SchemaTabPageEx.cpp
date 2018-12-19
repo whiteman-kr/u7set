@@ -146,11 +146,11 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 		return {};
 	}
 
-	//int row = index.row();
+	int row = index.row();
 	Columns column = static_cast<Columns>(index.column());
 
 	int fileId = index.internalId();
-	auto file = m_files.file(fileId);
+	std::shared_ptr<DbFileInfo> file = m_files.file(fileId);
 
 	if (file == nullptr)
 	{
@@ -235,6 +235,70 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 		}
 
 		return QVariant{};
+	}
+
+	if (role == Qt::BackgroundRole)
+	{
+		if (file->state() == VcsState::CheckedOut)
+		{
+			QBrush b(QColor(0xFF, 0xFF, 0xFF));
+
+			switch (file->action().value())
+			{
+			case VcsItemAction::Added:
+				b.setColor(QColor(0xF9, 0xFF, 0xF9));
+				break;
+			case VcsItemAction::Modified:
+				b.setColor(QColor(0xEA, 0xF0, 0xFF));
+				break;
+			case VcsItemAction::Deleted:
+				b.setColor(QColor(0xFF, 0xF4, 0xF4));
+				break;
+			default:
+				assert(false);
+			}
+
+			return {b};
+		}
+	}
+
+	if (role == Qt::TextColorRole)
+	{
+		if (column == Columns::IssuesColumn)
+		{
+			if (excludedFromBuild(file->fileId()) == true)
+			{
+				return {};
+			}
+
+			QStringList fn = file->fileName().split('.');
+
+			if (fn.isEmpty() == false)
+			{
+				auto issueCount = GlobalMessanger::instance().issueForSchema(fn.front());
+
+				if (issueCount.errors > 0)
+				{
+					return QBrush(QColor(0xE0, 0x33, 0x33, 0xFF));
+				}
+
+				if (issueCount.warnings > 0)
+				{
+					return QBrush(QColor(0xE8, 0x72, 0x17, 0xFF));
+				}
+
+				return {};
+			}
+			else
+			{
+				assert(fn.isEmpty() == false);		// Empty file name?
+				return {};
+			}
+		}
+		else
+		{
+			return {};
+		}
 	}
 
 	return QVariant{};
@@ -332,6 +396,90 @@ std::pair<QModelIndex, bool> SchemaListModelEx::addFile(QModelIndex parentIndex,
 	assert(addedModelIndex.isValid() == true);
 
 	return {addedModelIndex, true};
+}
+
+bool SchemaListModelEx::deleteFiles(const QModelIndexList& selectedIndexes,
+									const std::vector<std::shared_ptr<DbFileInfo>>& deletedFiles)
+{
+	// assert(deletedFiles.size() == selectedIndexes.size()); -- sizes can be different, from deletedFiles
+	// could be removed system files before. Do not uncommnet this assertion
+	//
+	if (deletedFiles.empty() == true)
+	{
+		return false;
+	}
+
+	// Some files can be completely removed, other could be just marked as deleted
+	//
+	std::map<int, std::shared_ptr<DbFileInfo>> filesMap;
+
+	for (const std::shared_ptr<DbFileInfo>& f : deletedFiles)
+	{
+		filesMap[f->fileId()] = f;
+	}
+
+	// As some rows can be deleted during update model,
+	// rowList must be sorted in FileID descending order,
+	// to delete first children and then their parents
+	//
+	QModelIndexList sortedRowList = selectedIndexes;
+
+	qSort(sortedRowList.begin(), sortedRowList.end(),
+		[](QModelIndex& m1, QModelIndex m2)
+		{
+			return m1.internalId() >= m2.internalId();
+		});
+
+	// Update model
+	//
+	for (QModelIndex& index : sortedRowList)
+	{
+		int fileId = static_cast<int>(index.internalId());
+		auto file = filesMap[fileId];
+
+		if (file == nullptr)
+		{
+			// It could be system file, which was removed from input deletedFiles
+			// No assertion here, just contuinue
+			//
+			continue;
+		}
+
+		if (file->fileId() != fileId)
+		{
+			assert(file->fileId() == fileId);
+			continue;
+		}
+
+		if (file->deleted() == true)
+		{
+			QModelIndex pi = index.parent();
+			int childIndex = m_files.indexInParent(fileId);
+
+			beginRemoveRows(pi, childIndex, childIndex);
+			m_files.removeFile(file);
+			endRemoveRows();
+		}
+		else
+		{
+			auto modelFile = m_files.file(file->fileId());
+
+			if (modelFile == nullptr)
+			{
+				assert(m_files.hasFile(file->fileId()) == true);
+				continue;
+			}
+			else
+			{
+				modelFile->operator=(*file);
+			}
+
+			QModelIndex bottomRight = this->index(index.row(), static_cast<int>(Columns::ColumnCount) - 1, index.parent());
+			emit dataChanged(index, bottomRight);
+		}
+	}
+
+	return true;
 }
 
 DbFileInfo SchemaListModelEx::file(const QModelIndex& modelIndex) const
@@ -605,6 +753,7 @@ void SchemaFileViewEx::createActions()
 	m_deleteAction->setIcon(QIcon(":/Images/Images/SchemaDelete.svg"));
 	m_deleteAction->setStatusTip(tr("Mark file as deleted..."));
 	m_deleteAction->setEnabled(false);
+	m_deleteAction->setShortcut(QKeySequence::Delete);
 
 	// --
 	//
@@ -1308,11 +1457,35 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 	QTreeView::selectionChanged(selected, deselected);
 
 	QModelIndexList s = selectionModel()->selectedRows();
-	auto sel = selectedFiles();
-	bool selectedOneNonSystemFile = sel.size() == 1 && db()->systemFileInfo(sel.front().fileId()).isNull() == true;
+	std::vector<DbFileInfo> selectedFiles = this->selectedFiles();
+	bool selectedOneNonSystemFile = selectedFiles.size() == 1 && db()->systemFileInfo(selectedFiles.front().fileId()).isNull() == true;
 
 	m_newFileAction->setEnabled(s.size() == 1);
 	m_cloneFileAction->setEnabled(selectedOneNonSystemFile);
+
+	// --
+	//
+	int currentUserId = dbc()->currentUser().userId();
+
+	bool hasDeletePossibility = false;
+
+	for (const DbFileInfo& file : selectedFiles)
+	{
+		bool fileIsSystem = dbc()->systemFileInfo(file.fileId()).isNull() == false;
+
+		// hasDeletePossibility
+		//
+		if (fileIsSystem == false &&
+			((file.state() == VcsState::CheckedOut && file.userId() == currentUserId) ||
+			file.state() == VcsState::CheckedIn))
+		{
+			hasDeletePossibility = true;
+		}
+	}
+
+	// --
+	//
+	m_deleteAction->setEnabled(hasDeletePossibility);
 
 	return;
 }
@@ -1328,7 +1501,6 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 //	bool hasUndoPossibility = false;
 //	bool canGetWorkcopy = false;
 //	int canSetWorkcopy = 0;
-//	bool hasDeletePossibility = false;
 //	bool schemaPoperties = (s.empty() == false);
 
 //	int currentUserId = db()->currentUser().userId();
@@ -1379,13 +1551,6 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 //			canGetWorkcopy = true;
 //			canSetWorkcopy ++;
 //		}
-
-//		// hasDeletePossibility
-//		if ((fileInfo->state() == VcsState::CheckedOut && fileInfo->userId() == currentUserId) ||
-//			fileInfo->state() == VcsState::CheckedIn)
-//		{
-//			hasDeletePossibility = true;
-//		}
 //	}
 
 //	m_openFileAction->setEnabled(hasOpenPossibility);
@@ -1400,8 +1565,6 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 
 //	m_exportWorkingcopyAction->setEnabled(canGetWorkcopy);
 //	m_importWorkingcopyAction->setEnabled(canSetWorkcopy == 1);			// can set work copy just for one file
-
-//	m_deleteFileAction->setEnabled(hasDeletePossibility);
 
 //	m_propertiesAction->setEnabled(schemaPoperties);
 
@@ -1887,6 +2050,8 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 
 	connect(m_filesView->m_newFileAction, &QAction::triggered, this, &SchemaControlTabPageEx::addFile);
 	connect(m_filesView->m_cloneFileAction, &QAction::triggered, this, &SchemaControlTabPageEx::cloneFile);
+	connect(m_filesView->m_deleteAction, &QAction::triggered, this, &SchemaControlTabPageEx::deleteFiles);
+
 	connect(m_filesView->m_refreshFileAction, &QAction::triggered, &m_filesView->filesModel(), &SchemaListModelEx::refresh);
 
 	// --
@@ -2016,7 +2181,8 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPageEx::createSchema(const DbF
 		return createAppLogicSchema();
 	}
 
-	if (parentFile.fileId() == dbc()->mvsFileId())
+	if (parentFile.fileId() == dbc()->mvsFileId() ||
+		parentFile.fileId() == dbc()->tvsFileId())
 	{
 		return createMonitorSchema();
 	}
@@ -2035,7 +2201,8 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPageEx::createSchema(const DbF
 		return createAppLogicSchema();
 	}
 
-	if (parentFileExt.compare(::MvsFileExtension, Qt::CaseInsensitive) == 0)
+	if (parentFileExt.compare(::MvsFileExtension, Qt::CaseInsensitive) == 0 ||
+		parentFileExt.compare(::TvsFileName, Qt::CaseInsensitive) == 0)
 	{
 		return createMonitorSchema();
 	}
@@ -2280,7 +2447,7 @@ void SchemaControlTabPageEx::addFile()
 		extension = ::UfbFileExtension;
     }
 
-    if (schema->isMonitorSchema() == true)
+	if (schema->isMonitorSchema() == true)
     {
         defaultId = "MONITORSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
 		extension = ::MvsFileExtension;
@@ -2451,7 +2618,7 @@ void SchemaControlTabPageEx::addSchemaFile(std::shared_ptr<VFrame30::Schema> sch
 			}
 
 			m_filesView->scrollTo(addedProxyIndex);
-			m_filesView->selectionModel()->select(addedProxyIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+			m_filesView->selectionModel()->setCurrentIndex(addedProxyIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);	//
 		}
 	}
 
@@ -2558,45 +2725,81 @@ void SchemaControlTabPageEx::cloneFile()
 	return;
 }
 
-//void SchemaControlTabPage::deleteFile(std::vector<DbFileInfo> files)
-//{
-//	if (files.empty() == true)
-//	{
-//		assert(files.empty() == false);
-//		return;
-//	}
+void SchemaControlTabPageEx::deleteFiles()
+{
+	QModelIndexList	selectedIndexes = m_filesView->selectionModel()->selectedRows();
+	for (QModelIndex& mi: selectedIndexes)
+	{
+		mi = m_filesView->proxyModel().mapToSource(mi);
+	}
 
-//	// Ask user to confirm operation
-//	//
-//	QMessageBox mb(this);
-//	mb.setWindowTitle(qApp->applicationName());
-//	mb.setText(tr("Are you sure you want to delete selected file(s)"));
-//	mb.setInformativeText(tr("If files have not been checked in before they will be deleted permanently.\nIf files were checked in at least one time they will be marked as deleted, to confirm operation perform Check In."));
-//	mb.setIcon(QMessageBox::Question);
-//	mb.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+	std::vector<DbFileInfo> files = m_filesView->selectedFiles();
 
-//	int mbResult = mb.exec();
+	if (files.empty() == true)
+	{
+		assert(files.empty() == false);
+		return;
+	}
 
-//	if (mbResult == QMessageBox::Cancel)
-//	{
-//		return;
-//	}
+	assert(selectedIndexes.size() == files.size());
 
-//	// --
-//	//
-//	std::vector<std::shared_ptr<DbFileInfo>> deleteFiles;
+	// --
+	//
+	std::vector<std::shared_ptr<DbFileInfo>> deleteFiles;
+	deleteFiles.reserve(files.size());
 
-//	for(const DbFileInfo& f : files)
-//	{
-//		deleteFiles.push_back(std::make_shared<DbFileInfo>(f));
-//	}
+	for(const DbFileInfo& f : files)
+	{
+		if (dbc()->isSystemFile(f.fileId()) == true)
+		{
+			continue;
+		}
 
-//	db()->deleteFiles(&deleteFiles, this);
+		deleteFiles.push_back(std::make_shared<DbFileInfo>(f));
+	}
 
-//	refreshFiles();
+	// Ask user to confirm operation
+	//
+	QMessageBox mb(this);
 
-//	// Update open tab pages
-//	//
+	mb.setWindowTitle(qApp->applicationName());
+	mb.setText(tr("Are you sure you want to delete selected %1 file(s)").arg(deleteFiles.size()));
+	mb.setInformativeText(tr("If files have not been checked in before they will be deleted permanently.\nIf files were checked in at least one time they will be marked as deleted, to confirm operation perform Check In."));
+
+	QString detailedText;
+	for(auto f : deleteFiles)
+	{
+		detailedText += f->fileName() + "\n";
+	}
+	mb.setDetailedText(detailedText.trimmed());
+
+	mb.setIcon(QMessageBox::Question);
+	mb.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+
+	if (int mbResult = mb.exec();
+		mbResult == QMessageBox::Cancel)
+	{
+		return;
+	}
+
+	// --
+	//
+	bool ok = db()->deleteFiles(&deleteFiles, this);
+	if (ok == false)
+	{
+		return;
+	}
+
+	ok = m_filesView->filesModel().deleteFiles(selectedIndexes, deleteFiles);
+	if (ok == false)
+	{
+		return;
+	}
+
+	int to_do_update_tab_pages;
+
+	// Update open tab pages
+	//
 //	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
 //	if (tabWidget == nullptr)
 //	{
@@ -2626,8 +2829,8 @@ void SchemaControlTabPageEx::cloneFile()
 //		}
 //	}
 
-//	return;
-//}
+	return;
+}
 
 //void SchemaControlTabPage::checkIn(std::vector<DbFileInfo> files)
 //{

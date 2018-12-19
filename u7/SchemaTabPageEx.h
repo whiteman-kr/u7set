@@ -36,6 +36,7 @@ public:
 
 public:
 	std::pair<QModelIndex, bool> addFile(QModelIndex parentIndex, std::shared_ptr<DbFileInfo> file);
+	bool deleteFiles(const QModelIndexList& selectedIndexes, const std::vector<std::shared_ptr<DbFileInfo>>& files);
 
 	//	void setFiles(const std::vector<DbFileInfo>& files, const std::vector<DbUser>& users);
 	//	void clear();
@@ -262,7 +263,7 @@ protected slots:
 
 	void cloneFile();
 
-	//	void deleteFile(std::vector<DbFileInfo> files);
+	void deleteFiles();
 
 	//	void checkIn(std::vector<DbFileInfo> files);
 	//	void undoChanges(std::vector<DbFileInfo> files);

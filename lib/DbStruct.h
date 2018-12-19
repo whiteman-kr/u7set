@@ -250,17 +250,6 @@ public:
 	DbFileTree& operator=(DbFileTree&& src);
 
 public:
-//	enum class SortBy
-//	{
-//		FileId,
-//		FileName,
-//		DetailsCaption
-//		FileState,
-//		FileUser,
-//		FileAction,
-//	};
-
-public:
 	void clear();
 
 	int size() const;

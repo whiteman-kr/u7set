@@ -108,8 +108,9 @@ QString VcsItemAction::text() const noexcept
 	case Unknown:		return QStringLiteral("Unknown");
 	case Added:			return QStringLiteral("Added");
 	case Modified:		return QStringLiteral("Modified");
-	case Deleted:		QStringLiteral("Deleted");
+	case Deleted:		return QStringLiteral("Deleted");
 	default:
+		qDebug() << static_cast<int>(m_action);
 		assert(false);
 	}
 

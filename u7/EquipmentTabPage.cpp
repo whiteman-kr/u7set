@@ -490,11 +490,11 @@ bool EquipmentModel::insertDeviceObject(std::shared_ptr<Hardware::DeviceObject> 
 	return true;
 }
 
-void EquipmentModel::deleteDeviceObject(QModelIndexList& rowList)
+void EquipmentModel::deleteDeviceObject(const QModelIndexList& rowList)
 {
 	std::vector<Hardware::DeviceObject*> devices;
 
-	for (QModelIndex& index : rowList)
+	for (QModelIndex index : rowList)
 	{
 		Hardware::DeviceObject* d = deviceObject(index);
 		assert(d);
@@ -545,7 +545,7 @@ void EquipmentModel::deleteDeviceObject(QModelIndexList& rowList)
 		}
 		else
 		{
-			QModelIndex bottomRightIndex = this->index(index.row(), ColumnCount, index.parent());
+			QModelIndex bottomRightIndex = this->index(index.row(), ColumnCount - 1, index.parent());
 			emit dataChanged(index, bottomRightIndex);
 		}
 	}
