@@ -535,10 +535,10 @@ bool FileArchRequestContext::executeSatesRequest(ArchiveShared archive, QSqlData
 
 	ArchFile::FindResult result = archive->findData(m_param);
 
-	switch()
+	switch(result)
 	{
 	case ArchFile::FindResult::Found:
-		m_totalStates = m_statesQuery->size();
+		m_totalStates = 0;
 		m_sentStates = 0;
 		m_dataReady = false;
 
@@ -552,12 +552,12 @@ bool FileArchRequestContext::executeSatesRequest(ArchiveShared archive, QSqlData
 		m_reply.set_sentstatescount(m_sentStates);
 		m_reply.set_statesinpartcount(0);
 		m_reply.set_islastpart(false);
-
 		m_reply.clear_appsignalstates();
+
 		break;
 
 	case ArchFile::FindResult::NotFound:
-		m_totalStates = m_statesQuery->size();
+		m_totalStates = 0;
 		m_sentStates = 0;
 		m_dataReady = false;
 
@@ -566,13 +566,14 @@ bool FileArchRequestContext::executeSatesRequest(ArchiveShared archive, QSqlData
 		m_reply.set_error(static_cast<int>(NetworkError::Success));
 		m_reply.set_archerror(static_cast<int>(ArchiveError::Success));
 		m_reply.set_requestid(m_param.requestID);
-		m_reply.set_dataready(false);
+		m_reply.set_dataready(true);
 		m_reply.set_totalstatescount(m_totalStates);
 		m_reply.set_sentstatescount(m_sentStates);
 		m_reply.set_statesinpartcount(0);
-		m_reply.set_islastpart(false);
-
+		m_reply.set_islastpart(true);
 		m_reply.clear_appsignalstates();
+
+		break;
 
 	default:
 		return false;
