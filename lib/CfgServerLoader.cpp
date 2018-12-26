@@ -874,7 +874,8 @@ CfgLoaderThread::CfgLoaderThread(	const SoftwareInfo& softwareInfo,
 	m_server1(serverAddressPort1),
 	m_server2(serverAddressPort2),
 	m_enableDownloadCfg(enableDownloadCfg),
-	m_logger(logger)
+	m_logger(logger),
+	m_mutex(QMutex::Recursive)
 {
 	AUTO_LOCK(m_mutex);
 
