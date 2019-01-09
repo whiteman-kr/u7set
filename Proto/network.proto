@@ -137,6 +137,7 @@ message AppDataSourceState
     optional int64 errorFrameSize = 24 [default = 0];
     optional int64 errorDuplicatePlantTime = 25 [default = 0];
     optional int64 errorNonmonotonicPlantTime = 26 [default = 0];
+    optional string lmEquipmentID = 27;
 }
 
 

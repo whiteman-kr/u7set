@@ -41,8 +41,8 @@ private:
 
 	void onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize);
 
-	void onGetDataSourcesInfoRequest();
-	void onGetDataSourcesStatesRequest();
+	void onGetAppDataSourcesInfoRequest();
+	void onGetAppDataSourcesStatesRequest();
 
 	void onGetUnitsRequest();
 

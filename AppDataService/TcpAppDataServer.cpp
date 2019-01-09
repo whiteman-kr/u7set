@@ -120,12 +120,12 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 		onGetAppSignalStateRequest(requestData, requestDataSize);
 		break;
 
-	case ADS_GET_DATA_SOURCES_INFO:
-		onGetDataSourcesInfoRequest();
+	case ADS_GET_APP_DATA_SOURCES_INFO:
+		onGetAppDataSourcesInfoRequest();
 		break;
 
-	case ADS_GET_DATA_SOURCES_STATES:
-		onGetDataSourcesStatesRequest();
+	case ADS_GET_APP_DATA_SOURCES_STATES:
+		onGetAppDataSourcesStatesRequest();
 		break;
 
 	case ADS_GET_UNITS:
@@ -371,7 +371,7 @@ bool TcpAppDataServer::getAppSignalStateState(Hash hash, AppSignalState& state)
 }
 
 
-void TcpAppDataServer::onGetDataSourcesInfoRequest()
+void TcpAppDataServer::onGetAppDataSourcesInfoRequest()
 {
 	m_getDataSourcesInfoReply.Clear();
 
@@ -389,7 +389,7 @@ void TcpAppDataServer::onGetDataSourcesInfoRequest()
 }
 
 
-void TcpAppDataServer::onGetDataSourcesStatesRequest()
+void TcpAppDataServer::onGetAppDataSourcesStatesRequest()
 {
 	m_getAppDataSourcesStatesReply.Clear();
 
