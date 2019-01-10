@@ -10,30 +10,24 @@
 // AppDataReceiver is receives RUP datagrams and push it in AppDataSource's queues
 //
 
-class AppDataReceiver : public SimpleThreadWorker
+class AppDataReceiverThread : public RunOverrideThread
 {
 	Q_OBJECT
 
 public:
-	AppDataReceiver(const HostAddressPort& dataReceivingIP,
+	AppDataReceiverThread(const HostAddressPort& dataReceivingIP,
 					const AppDataSourcesIP& appDataSourcesIP,
 					CircularLoggerShared log);
 
-	virtual ~AppDataReceiver();
-
-signals:
-	void rupFrameIsReceived(quint32 appDataSourceIP);
+	virtual ~AppDataReceiverThread();
 
 private:
-	virtual void onThreadStarted() override;
-	virtual void onThreadFinished() override;
+	virtual void run() override;
 
-	void createAndBindSocket();
+	bool tryCreateAndBindSocket();
 	void closeSocket();
 
-private slots:	
-	void onTimer1s();
-	void onSocketReadyRead();
+	void receivePackets();
 
 private:
 	HostAddressPort m_dataReceivingIP;
@@ -42,11 +36,9 @@ private:
 
 	//
 
-	QTimer m_timer1s;
-	QTimer m_shortTimer;
-
+	int m_counter200ms = 0;
 	QUdpSocket* m_socket = nullptr;
-	bool m_socketBound = false;
+	bool m_socketIsWorkable = false;				// true if socket is created and bound
 
 	HashedVector<quint32, quint32> m_unknownAppDataSourcesIP;
 	qint64 m_unknownAppDataSourcesCount = 0;
@@ -55,24 +47,8 @@ private:
 
 	//
 
-	qint64 m_simFrameCount = 0;
-
+	qint64 m_simFramesCount = 0;
 	qint64 m_errDatagramSize = 0;
 	qint64 m_errSimVersion = 0;
 	qint64 m_errUnknownAppDataSourceIP = 0;
 };
-
-
-class AppDataReceiverThread : public SimpleThread
-{
-public:
-	AppDataReceiverThread(const HostAddressPort& dataRecievingIP,
-						  const AppDataSourcesIP& appDataSourcesIP,
-						  CircularLoggerShared log);
-
-	AppDataReceiver* appDataReceiver() { return m_appDataReceiver; }
-
-private:
-	AppDataReceiver* m_appDataReceiver = nullptr;
-};
-

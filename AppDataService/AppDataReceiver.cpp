@@ -5,114 +5,123 @@
 
 // -------------------------------------------------------------------------------
 //
-// AppDataReceiver class implementation
+// AppDataReceiverThread class implementation
 //
 // -------------------------------------------------------------------------------
 
-AppDataReceiver::AppDataReceiver(const HostAddressPort& dataReceivingIP,
+AppDataReceiverThread::AppDataReceiverThread(const HostAddressPort& dataReceivingIP,
 								 const AppDataSourcesIP& appDataSourcesIP,
 								 CircularLoggerShared log) :
 	m_dataReceivingIP(dataReceivingIP),
 	m_appDataSourcesIP(appDataSourcesIP),
-	m_log(log),
-	m_timer1s(this),
-	m_shortTimer(this)
+	m_log(log)
 {
 }
 
-AppDataReceiver::~AppDataReceiver()
+AppDataReceiverThread::~AppDataReceiverThread()
 {
 }
 
-void AppDataReceiver::onThreadStarted()
+void AppDataReceiverThread::run()
 {
-	connect(&m_timer1s, &QTimer::timeout, this, &AppDataReceiver::onTimer1s);
-	connect(&m_shortTimer, &QTimer::timeout, this, &AppDataReceiver::onSocketReadyRead);
-	
-	m_timer1s.setInterval(1000);
-	m_timer1s.start();
-
-	m_shortTimer.setInterval(5);
-	m_shortTimer.start();
-
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread is started (receiving IP %1)").arg(m_dataReceivingIP.addressPortStr()));
-}
 
-void AppDataReceiver::onThreadFinished()
-{
-	m_timer1s.stop();
+	while(isQuitRequested() == false)
+	{
+		bool result = tryCreateAndBindSocket();
+
+		if (result == false)
+		{
+			continue;
+		}
+
+		receivePackets();
+	}
 
 	closeSocket();
 
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread is finished (receiving IP %1)").arg(m_dataReceivingIP.addressPortStr()));
 }
 
-void AppDataReceiver::createAndBindSocket()
+bool AppDataReceiverThread::tryCreateAndBindSocket()
 {
-	if (m_socket == nullptr)
+	if (m_socketIsWorkable == true)
 	{
-		m_socket = new QUdpSocket(this);
-
-		DEBUG_LOG_MSG(m_log, QString("AppDataReceiver listening socket is created"));
-
-		connect(m_socket, &QUdpSocket::readyRead, this, &AppDataReceiver::onSocketReadyRead);
+		return true;
 	}
 
-	if (m_socketBound == false)
-	{
-		m_socketBound = m_socket->bind(m_dataReceivingIP.address(), m_dataReceivingIP.port());
+	m_counter200ms++;
 
-		if (m_socketBound == true)
-		{
-			DEBUG_LOG_MSG(m_log, QString("AppDataReceiver listening socket is bound to %1").arg(m_dataReceivingIP.addressPortStr()));
-		}
+	if (m_counter200ms < 5)
+	{
+		msleep(200);
+		return false;
 	}
+
+	m_counter200ms = 0;
+
+	m_socket = new QUdpSocket(this);
+
+	bool result = m_socket->bind(m_dataReceivingIP.address(), m_dataReceivingIP.port());
+
+	if (result == true)
+	{
+		DEBUG_LOG_MSG(m_log, QString("AppDataReceiver listening socket is created and bound to %1").arg(m_dataReceivingIP.addressPortStr()));
+
+		m_socketIsWorkable = true;
+
+		return true;
+	}
+
+	closeSocket();
+
+	msleep(200);
+
+	return false;
 }
 
-void AppDataReceiver::closeSocket()
+void AppDataReceiverThread::closeSocket()
 {
 	if (m_socket != nullptr)
 	{
 		m_socket->close();
 		delete m_socket;
 		m_socket = nullptr;
-
-		DEBUG_LOG_WRN(m_log, QString("AppDataReceiver listening socket %1 is closed").arg(m_dataReceivingIP.addressPortStr()));
 	}
 
-	m_socketBound = false;
+	m_socketIsWorkable = false;
 }
 
-void AppDataReceiver::onTimer1s()
+void AppDataReceiverThread::receivePackets()
 {
-	createAndBindSocket();
-
-	if (m_receivedFramesCount != 0)
+	if (m_socketIsWorkable == false || m_socket == nullptr)
 	{
-		qDebug() << "Receive per second " << m_receivedFramesCount;
-
-		m_receivedFramesCount = 0;
-	}
-}
-
-void AppDataReceiver::onSocketReadyRead()
-{
-	if (m_socket == nullptr)
-	{
+		assert(false);
 		return;
 	}
 
 	QHostAddress from;
 	Rup::SimFrame simFrame;
 
-	do
+	while(isQuitRequested() == false)
 	{
 		qint64 size = m_socket->pendingDatagramSize();
 
-		if (size == -1 || size > sizeof(simFrame))
+		if (size == -1)
 		{
-			break;				// exit from loop if no pending datagram exists
-								// or datagram size is exceeded sizeof(simFrame)
+			// is no datagram available, short sleep on 200mcs
+			//
+			usleep(200);
+			continue;
+		}
+
+		if (size > sizeof(Rup::SimFrame))
+		{
+			// received datagram too large, skip this datagram
+			//
+			m_socket->readDatagram(reinterpret_cast<char*>(&simFrame), size, &from);
+			m_errDatagramSize++;
+			continue;
 		}
 
 		size = m_socket->readDatagram(reinterpret_cast<char*>(&simFrame), size, &from);
@@ -123,6 +132,8 @@ void AppDataReceiver::onSocketReadyRead()
 								arg(m_dataReceivingIP.addressPortStr()).arg(m_socket->error()));
 
 			closeSocket();
+
+			m_counter200ms = 5;			// for immediately socket creation
 
 			return;
 		}
@@ -147,7 +158,7 @@ void AppDataReceiver::onSocketReadyRead()
 
 				ip = reverseUint32(simFrame.sourceIP);
 
-				m_simFrameCount++;
+				m_simFramesCount++;
 			}
 			else
 			{
@@ -181,26 +192,5 @@ void AppDataReceiver::onSocketReadyRead()
 		}
 
 		dataSource->pushRupFrame(serverTime, simFrame.rupFrame);
-
-		//	emit rupFrameIsReceived(ip);			uncomment if using AppDataProcessingThread class to process data
-		//
-		//											for AppDataProcessingThread2 class this imit is not requred!
 	}
-	while(quitRequested() == false);
-}
-
-
-// -------------------------------------------------------------------------------
-//
-// AppDataChannelThread class implementation
-//
-// -------------------------------------------------------------------------------
-
-AppDataReceiverThread::AppDataReceiverThread(const HostAddressPort& dataRecievingIP,
-											 const AppDataSourcesIP& appDataSourcesIP,
-											 CircularLoggerShared log)
-{
-	m_appDataReceiver = new AppDataReceiver(dataRecievingIP, appDataSourcesIP, log);
-
-	addWorker(m_appDataReceiver);
 }
