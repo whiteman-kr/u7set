@@ -492,11 +492,6 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 
 	QString	arrayStr;
 
-	// DEBUG
-	//Hash testHash = 0x612a4feb53b2378all;
-	//static qint64 prevSystemTime = 0;
-	// DEBUG
-
 	do
 	{
 		SimpleAppSignalState state;
@@ -507,18 +502,6 @@ void ArchWriteThreadWorker::writeStatesToArchive(bool writeNow)
 		{
 			break;
 		}
-
-		// DEBUG
-		/*if (state.hash == testHash)
-		{
-			if (prevSystemTime > state.time.system.timeStamp)
-			{
-				assert(false);
-			}
-
-			prevSystemTime = state.time.system.timeStamp;
-		}*/
-		// DEBUG
 
 		ArchSignal archSignal = m_archive->getArchSignal(state.hash);
 
