@@ -37,6 +37,7 @@
 #include "SignalsTabPage.h"
 #include "Forms/ComparePropertyObjectDialog.h"
 #include "Settings.h"
+#include "../lib/SignalProperties.h"
 
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
@@ -6106,6 +6107,7 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 
 	QLabel* appSignalIdLabel = new QLabel("AppSignalID:");
 	QLineEdit* appSignalIdEdit = new QLineEdit(appSignalId);
+	appSignalIdEdit->setValidator(new QRegExpValidator(QRegExp(SignalProperties::cacheValidator), this));
 
 	QWidget* spacer = new QWidget;
 	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);

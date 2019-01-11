@@ -300,12 +300,13 @@ namespace VFrame30
 								 SchemaItemReceiver::showValidity,
 								 SchemaItemReceiver::setShowValidity);
 
-		ADD_PROPERTY_GET_SET_CAT(QString,
+		auto strIdProperty = ADD_PROPERTY_GET_SET_CAT(QString,
 								 PropertyNames::appSignalId,
 								 PropertyNames::functionalCategory,
 								 true,
 								 SchemaItemReceiver::appSignalId,
 								 SchemaItemReceiver::setAppSignalId);
+		strIdProperty->setValidator(PropertyNames::appSignalIdValidator);
 
 		ADD_PROPERTY_GET_SET_CAT(E::ColumnData,
 								 PropertyNames::dataType,

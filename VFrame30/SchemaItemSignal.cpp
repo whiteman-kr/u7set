@@ -32,7 +32,9 @@ namespace VFrame30
 		c1.data = E::ColumnData::State;
 		c1.horzAlign = E::HorzAlign::AlignHCenter;
 
-		addProperty<QString, SchemaItemSignal, &SchemaItemSignal::appSignalIds, &SchemaItemSignal::setAppSignalIds>(PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true);
+		auto strIdProperty = addProperty<QString, SchemaItemSignal, &SchemaItemSignal::appSignalIds, &SchemaItemSignal::setAppSignalIds>(PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true);
+		strIdProperty->setValidator(PropertyNames::appSignalIdValidator);
+
 		addProperty<bool, SchemaItemSignal, &SchemaItemSignal::multiLine, &SchemaItemSignal::setMultiLine>(PropertyNames::multiLine, PropertyNames::appearanceCategory, true);
 		addProperty<int, SchemaItemSignal, &SchemaItemSignal::precision, &SchemaItemSignal::setPrecision>(PropertyNames::precision, PropertyNames::monitorCategory, true);
 		addProperty<E::AnalogFormat, SchemaItemSignal, &SchemaItemSignal::analogFormat, &SchemaItemSignal::setAnalogFormat>(PropertyNames::analogFormat, PropertyNames::monitorCategory, true);
