@@ -1676,6 +1676,18 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 errornonmonotonicplanttime() const;
   inline void set_errornonmonotonicplanttime(::google::protobuf::int64 value);
 
+  // optional string lmEquipmentID = 27;
+  inline bool has_lmequipmentid() const;
+  inline void clear_lmequipmentid();
+  static const int kLmEquipmentIDFieldNumber = 27;
+  inline const ::std::string& lmequipmentid() const;
+  inline void set_lmequipmentid(const ::std::string& value);
+  inline void set_lmequipmentid(const char* value);
+  inline void set_lmequipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_lmequipmentid();
+  inline ::std::string* release_lmequipmentid();
+  inline void set_allocated_lmequipmentid(::std::string* lmequipmentid);
+
   // @@protoc_insertion_point(class_scope:Network.AppDataSourceState)
  private:
   inline void set_has_id();
@@ -1730,6 +1742,8 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline void clear_has_errorduplicateplanttime();
   inline void set_has_errornonmonotonicplanttime();
   inline void clear_has_errornonmonotonicplanttime();
+  inline void set_has_lmequipmentid();
+  inline void clear_has_lmequipmentid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1758,10 +1772,11 @@ class AppDataSourceState : public ::google::protobuf::Message {
   ::google::protobuf::int64 errorframesize_;
   ::google::protobuf::int64 errorduplicateplanttime_;
   ::google::protobuf::int64 errornonmonotonicplanttime_;
+  ::std::string* lmequipmentid_;
   ::google::protobuf::int32 acquiredsignalscount_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(26 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(27 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -8763,6 +8778,76 @@ inline ::google::protobuf::int64 AppDataSourceState::errornonmonotonicplanttime(
 inline void AppDataSourceState::set_errornonmonotonicplanttime(::google::protobuf::int64 value) {
   set_has_errornonmonotonicplanttime();
   errornonmonotonicplanttime_ = value;
+}
+
+// optional string lmEquipmentID = 27;
+inline bool AppDataSourceState::has_lmequipmentid() const {
+  return (_has_bits_[0] & 0x04000000u) != 0;
+}
+inline void AppDataSourceState::set_has_lmequipmentid() {
+  _has_bits_[0] |= 0x04000000u;
+}
+inline void AppDataSourceState::clear_has_lmequipmentid() {
+  _has_bits_[0] &= ~0x04000000u;
+}
+inline void AppDataSourceState::clear_lmequipmentid() {
+  if (lmequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_->clear();
+  }
+  clear_has_lmequipmentid();
+}
+inline const ::std::string& AppDataSourceState::lmequipmentid() const {
+  return *lmequipmentid_;
+}
+inline void AppDataSourceState::set_lmequipmentid(const ::std::string& value) {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
+  }
+  lmequipmentid_->assign(value);
+}
+inline void AppDataSourceState::set_lmequipmentid(const char* value) {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
+  }
+  lmequipmentid_->assign(value);
+}
+inline void AppDataSourceState::set_lmequipmentid(const char* value, size_t size) {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
+  }
+  lmequipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* AppDataSourceState::mutable_lmequipmentid() {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
+  }
+  return lmequipmentid_;
+}
+inline ::std::string* AppDataSourceState::release_lmequipmentid() {
+  clear_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = lmequipmentid_;
+    lmequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void AppDataSourceState::set_allocated_lmequipmentid(::std::string* lmequipmentid) {
+  if (lmequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete lmequipmentid_;
+  }
+  if (lmequipmentid) {
+    set_has_lmequipmentid();
+    lmequipmentid_ = lmequipmentid;
+  } else {
+    clear_has_lmequipmentid();
+    lmequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------
