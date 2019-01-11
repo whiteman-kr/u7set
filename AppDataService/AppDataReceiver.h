@@ -12,8 +12,6 @@
 
 class AppDataReceiverThread : public RunOverrideThread
 {
-	Q_OBJECT
-
 public:
 	AppDataReceiverThread(const HostAddressPort& dataReceivingIP,
 					const AppDataSourcesIP& appDataSourcesIP,
@@ -36,9 +34,7 @@ private:
 
 	//
 
-	int m_counter200ms = 0;
 	QUdpSocket* m_socket = nullptr;
-	bool m_socketIsWorkable = false;				// true if socket is created and bound
 
 	HashedVector<quint32, quint32> m_unknownAppDataSourcesIP;
 	qint64 m_unknownAppDataSourcesCount = 0;

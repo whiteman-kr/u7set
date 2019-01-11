@@ -45,39 +45,44 @@ void AppDataReceiverThread::run()
 
 bool AppDataReceiverThread::tryCreateAndBindSocket()
 {
-	if (m_socketIsWorkable == true)
+	if (m_socket != nullptr)
 	{
-		return true;
+		closeSocket();
 	}
 
-	m_counter200ms++;
+	qint64 prevServerTime = -1;
 
-	if (m_counter200ms < 5)
+	while(isQuitRequested() == false)
 	{
+		qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
+
+		if (prevServerTime != -1 && serverTime - prevServerTime < 1000)
+		{
+			continue;
+		}
+
+		prevServerTime = serverTime;
+
+		qDebug() << C_STR(QString("Try create AppDataReceiverThread listening socket on %1").arg(m_dataReceivingIP.addressPortStr()));
+
+		m_socket = new QUdpSocket();
+
+		bool result = m_socket->bind(m_dataReceivingIP.address(), m_dataReceivingIP.port());
+
+		if (result == true)
+		{
+			DEBUG_LOG_MSG(m_log, QString("AppDataReceiver listening socket is created and bound to %1").arg(m_dataReceivingIP.addressPortStr()));
+			break;
+		}
+
+		qDebug() << C_STR(QString("AppDataReceiverThread listening socket binding error").arg(m_dataReceivingIP.addressPortStr()));
+
+		closeSocket();
+
 		msleep(200);
-		return false;
 	}
 
-	m_counter200ms = 0;
-
-	m_socket = new QUdpSocket(this);
-
-	bool result = m_socket->bind(m_dataReceivingIP.address(), m_dataReceivingIP.port());
-
-	if (result == true)
-	{
-		DEBUG_LOG_MSG(m_log, QString("AppDataReceiver listening socket is created and bound to %1").arg(m_dataReceivingIP.addressPortStr()));
-
-		m_socketIsWorkable = true;
-
-		return true;
-	}
-
-	closeSocket();
-
-	msleep(200);
-
-	return false;
+	return m_socket != nullptr;
 }
 
 void AppDataReceiverThread::closeSocket()
@@ -89,31 +94,46 @@ void AppDataReceiverThread::closeSocket()
 		m_socket = nullptr;
 	}
 
-	m_socketIsWorkable = false;
+	qDebug() << "AppDataReceiverThread listening socket closed";
 }
 
 void AppDataReceiverThread::receivePackets()
 {
-	if (m_socketIsWorkable == false || m_socket == nullptr)
+	if (m_socket == nullptr)
 	{
-		assert(false);
 		return;
 	}
 
 	QHostAddress from;
 	Rup::SimFrame simFrame;
 
+	qint64 prevServerTime = QDateTime::currentMSecsSinceEpoch();
+	qint64 lastPacketTime = prevServerTime;
+
+	qint64 prevReceivedFramesCount = 0;
+
 	while(isQuitRequested() == false)
 	{
+		qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
+
 		qint64 size = m_socket->pendingDatagramSize();
 
 		if (size == -1)
 		{
+			if (serverTime - lastPacketTime > 3000)
+			{
+				qDebug() << "No RUP packets received in 3 seconds";
+				closeSocket();
+				return;
+			}
+
 			// is no datagram available, short sleep on 200mcs
 			//
 			usleep(200);
 			continue;
 		}
+
+		lastPacketTime = serverTime;
 
 		if (size > sizeof(Rup::SimFrame))
 		{
@@ -128,13 +148,9 @@ void AppDataReceiverThread::receivePackets()
 
 		if (size == -1)
 		{
-			DEBUG_LOG_ERR(m_log, QString("AppDataReceiver %1 read socket error %2").
+			DEBUG_LOG_ERR(m_log, QString("AppDataReceiver %1 read socket error %2.").
 								arg(m_dataReceivingIP.addressPortStr()).arg(m_socket->error()));
-
 			closeSocket();
-
-			m_counter200ms = 5;			// for immediately socket creation
-
 			return;
 		}
 
@@ -176,7 +192,14 @@ void AppDataReceiverThread::receivePackets()
 		//
 		m_receivedFramesCount++;
 
-		qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
+		if (serverTime - prevServerTime > 1000)
+		{
+			prevServerTime = serverTime;
+
+			qDebug() << C_STR(QString("Receive RUP frames %1/s").arg(m_receivedFramesCount - prevReceivedFramesCount));
+
+			prevReceivedFramesCount = m_receivedFramesCount;
+		}
 
 		AppDataSourceShared dataSource = m_appDataSourcesIP.value(ip, nullptr);
 
