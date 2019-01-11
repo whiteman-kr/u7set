@@ -126,6 +126,7 @@ interface OptoModuleStorage {
 }
 
 interface LogicModule {
+	descriptionNumber(): number;
 	jsConfigurationStringFile(): string;
 
 	FlashMemory_ConfigFramePayload: number;
@@ -153,8 +154,6 @@ function runConfigScript(configScript: string, confFirmware: ModuleFirmware, ioM
 "use strict";
 
 var FamilyLMID: number = 0x1100;
-
-var LMDescriptionNumber: number = 0;
 
 var UartID: number = 0;
 
@@ -445,7 +444,7 @@ function generate_lm_1_rev3(builder: Builder, module: DeviceObject, root: Device
 	confFirmware.writeLog("UartID = " + uartId + "\r\n");
 	confFirmware.writeLog("Frame size = " + frameSize + "\r\n");
 	confFirmware.writeLog("LMNumber = " + LMNumber + "\r\n");
-	confFirmware.writeLog("LMDescriptionNumber = " + LMDescriptionNumber + "\r\n");
+	confFirmware.writeLog("LMDescriptionNumber = " + logicModuleDescription.descriptionNumber() + "\r\n");
 
 	// Configuration storage format
 	//
@@ -481,10 +480,10 @@ function generate_lm_1_rev3(builder: Builder, module: DeviceObject, root: Device
 	confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] BuildNo = " + buildNo + "\r\n");
 	ptr += 2;
 
-	if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "LMDescriptionNumber", LMDescriptionNumber) == false) {
+	if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "LMDescriptionNumber", logicModuleDescription.descriptionNumber()) == false) {
 		return false;
 	}
-	confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] LMDescriptionNumber = " + LMDescriptionNumber + "\r\n");
+	confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] LMDescriptionNumber = " + logicModuleDescription.descriptionNumber() + "\r\n");
 	ptr += 2;
 
 	// reserved

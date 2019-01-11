@@ -11,6 +11,7 @@
 #include "BusStorage.h"
 #include "SignalsTabPage.h"
 #include "SignalPropertiesDialog.h"
+#include "../lib/SignalProperties.h"
 
 void CreatingSignalDialogOptions::init(QString schemaId, QString schemaCaption, QStringList equipmentIds, QStringList proposedAppSignalIds)
 {
@@ -43,10 +44,12 @@ CreateSignalDialog::CreateSignalDialog(DbController* dbc, CreatingSignalDialogOp
 
 		QLineEdit* appSiganalIdEdit = new QLineEdit;
 		appSiganalIdEdit->setPlaceholderText(tr("#APPSIGNALID"));
+		appSiganalIdEdit->setValidator(new QRegExpValidator(QRegExp(SignalProperties::cacheValidator), this));
 		m_appSiganalIds.push_back(appSiganalIdEdit);
 
 		QLineEdit* customSiganalIdEdit = new QLineEdit;
 		customSiganalIdEdit->setPlaceholderText(tr("SIGNALID"));
+		customSiganalIdEdit->setValidator(new QRegExpValidator(QRegExp(SignalProperties::cacheValidator), this));
 		m_customSiganalIds.push_back(customSiganalIdEdit);
 	}
 

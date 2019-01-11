@@ -158,7 +158,7 @@ void AppDataServiceWorker::runAppDataProcessingThreads()
 
 	m_appDataProcessingThreadsPool.startProcessingThreads(m_appDataProcessingThreadCount,
 														  m_appDataSourcesIP,
-														  m_appDataReceiverThread->appDataReceiver(),
+														  m_appDataReceiverThread,
 														  logger());
 }
 

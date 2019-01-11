@@ -252,6 +252,9 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0232.sql", "Upgrade to version 232, Adding LM1_SR03 preset and scripts"},
 	{":/DatabaseUpgrade/Upgrade0233.sql", "Upgrade to version 233, ArchService properties were removed from Monitor preset"},
 	{":/DatabaseUpgrade/Upgrade0234.sql", "Upgrade to version 234, Changed LM1_SR03 ID and DescriptionNumber"},
+	{":/DatabaseUpgrade/Upgrade0235.sql", "Upgrade to version 235, Added Blink signal to LM1_SR03 preset"},
+	{":/DatabaseUpgrade/Upgrade0236.sql", "Upgrade to version 236, Added LM1_SF00_4PH, AIM_4PH, AOM_4PH, and some corrections in WAIM, RIM, TIM"},
+	{":/DatabaseUpgrade/Upgrade0237.sql", "Upgrade to version 237, LM modules have the same configuration script"},
 };
 
 

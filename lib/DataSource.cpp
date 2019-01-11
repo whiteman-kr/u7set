@@ -682,8 +682,6 @@ void DataSourceOnline::resume()
 
 void DataSourceOnline::pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame)
 {
-	assert(m_rupFrameTimeQueue.isFull() == false);
-
 	RupFrameTime* rupFrameTime = m_rupFrameTimeQueue.beginPush();
 
 	if (rupFrameTime != nullptr)
