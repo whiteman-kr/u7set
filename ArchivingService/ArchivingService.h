@@ -7,7 +7,6 @@
 
 #include "TcpAppDataServer.h"
 #include "Archive.h"
-#include "ArchWriteThread.h"
 #include "TcpArchRequestsServer.h"
 #include "ArchRequestThread.h"
 #include "FileArchWriter.h"
@@ -38,7 +37,7 @@ private:
 	void stopCfgLoaderThread();
 
 	void runAllThreads();
-	void stopAllThread();
+	void stopAllThreads();
 
 	bool createArchive();
 	void deleteArchive();
@@ -76,10 +75,5 @@ private:
 	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
 	TcpArchiveRequestsServerThread* m_tcpArchiveRequestsServerThread = nullptr;
 
-	ArchWriteThread* m_archWriteThread = nullptr;
-	ArchRequestThread* m_archRequestThread = nullptr;
-
-	FileArchWriter* m_fileArchWriter = nullptr;
-
-	ArchiveShared m_archive;
+	Archive* m_archive = nullptr;
 };

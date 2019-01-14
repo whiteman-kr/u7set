@@ -63,7 +63,6 @@ SOURCES += \
     ArchServiceMain.cpp \
     TcpAppDataServer.cpp \
     ../lib/AppSignal.cpp \
-    ArchWriteThread.cpp \
     ArchRequestThread.cpp \
     TcpArchRequestsServer.cpp \
     Archive.cpp \
@@ -109,7 +108,6 @@ HEADERS += \
     ../lib/CommandLineParser.h \
     TcpAppDataServer.h \
     ../lib/AppSignal.h \
-    ArchWriteThread.h \
     ArchRequestThread.h \
     TcpArchRequestsServer.h \
     Archive.h \

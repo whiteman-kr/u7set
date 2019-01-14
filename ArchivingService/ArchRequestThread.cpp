@@ -3,17 +3,12 @@
 #include "ArchRequestThread.h"
 #include "FileArchWriter.h"
 #include "FileArchReader.h"
-#include "ArchWriteThread.h"
 
 // ---------------------------------------------------------------------------------------------
 //
 // ArchRequestParam struct implementattion
 //
 // ---------------------------------------------------------------------------------------------
-
-ArchRequestParam::ArchRequestParam()
-{
-}
 
 void ArchRequestParam::clearSignalHashes()
 {

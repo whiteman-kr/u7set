@@ -1,5 +1,7 @@
-#include "Archive.h"
 #include "../lib/WUtils.h"
+
+#include "Archive.h"
+#include "ArchFile.h"
 
 
 // ----------------------------------------------------------------------------------------------------------------------
@@ -20,17 +22,17 @@ void Archive::RequestContext::appendArchFile(ArchFile* f)
 	m_archFiles.append(f);
 }
 
-ArchFile::FindResult Archive::RequestContext::findData()
+Archive::FindResult Archive::RequestContext::findData()
 {
-	ArchFile::FindResult result = ArchFile::FindResult::NotFound;
+	Archive::FindResult result = Archive::FindResult::NotFound;
 
 	for(ArchFile* archFile : m_archFiles)
 	{
-		ArchFile::FindResult res = archFile->findData(m_param);
+		Archive::FindResult res = archFile->findData(m_param);
 
-		if (res == ArchFile::FindResult::Found)
+		if (res == Archive::FindResult::Found)
 		{
-			result = ArchFile::FindResult::Found;
+			result = Archive::FindResult::Found;
 		}
 	}
 
@@ -55,17 +57,14 @@ const char* Archive::FIELD_FLAGS = "flags";
 Archive::Archive(const QString& projectID,
 				 const QString& equipmentID,
 				 const QString& archDir,
-				 const HostAddressPort& dbHost,
 				 CircularLoggerShared logger) :
 	m_projectID(projectID),
 	m_equipmentID(equipmentID),
 	m_archDir(archDir),
-	m_dbHost(dbHost),
-	m_log(logger),
-	m_dbSaveStatesQueue(1024 * 1024)
+	m_log(logger)
 {
-	m_dbUser = "u7arch";
-	m_dbPassword =  "arch876436";
+	m_archRequestThread = new ArchRequestThread(this, m_log);
+	m_fileArchWriter = new FileArchWriter();
 }
 
 Archive::~Archive()
@@ -73,46 +72,18 @@ Archive::~Archive()
 	clear();
 }
 
-bool Archive::openDatabase(DbType dbType, QSqlDatabase& destDb)
+void Archive::start()
 {
-	QSqlDatabase db = getDatabase(dbType);
-
-	if (db.isValid() == false)
-	{
-		DEBUG_LOG_MSG(m_log, QString("Database '%1' is invalid").arg(db.connectionName()));
-		return false;
-	}
-
-	if (db.isOpen() == true)
-	{
-		destDb = db;
-		return true;
-	}
-
-	QString databaseName = postgresDatabaseName();
-
-	if (dbType != DbType::Postgres)
-	{
-		databaseName = archiveDatabaseName();
-	}
-
-	db.setHostName(m_dbHost.addressStr());
-	db.setPort(m_dbHost.port());
-	db.setDatabaseName(databaseName);
-	db.setUserName(m_dbUser);
-	db.setPassword(m_dbPassword);
-
-	bool res = db.open();
-
-	if (res == true)
-	{
-		destDb = db;
-		return true;
-	}
-
-	DEBUG_LOG_ERR(m_log, db.lastError().text());
-	return false;
+	m_archRequestThread->start();
+	m_fileArchWriter->start();
 }
+
+void Archive::stop()
+{
+	m_archRequestThread->quitAndWait();
+	m_fileArchWriter->quitAndWait();
+}
+
 
 void Archive::initArchSignals(const Proto::ArchSignals& archSignals)
 {
@@ -228,43 +199,6 @@ void Archive::getSignalsHashes(QVector<Hash>* hashes)
 	}
 }
 
-QString Archive::postgresDatabaseName()
-{
-	return "postgres";
-}
-
-QString Archive::archiveDatabaseName()
-{
-	assert(m_projectID.isEmpty() == false);
-
-	QString dbName = QString(ARCH_DB_PREFIX) + m_projectID;
-
-	dbName = dbName.toLower();
-
-	return dbName;
-}
-
-QString Archive::getTableName(Hash signalHash)
-{
-	return QString("z_%1").arg(QString().setNum(signalHash, 16).rightJustified(sizeof(qint64) * 2, '0', false));
-}
-
-void Archive::appendExistingTable(const QString& tableName)
-{
-	if (m_existingTables.contains(tableName) == true)
-	{
-		assert(false);
-		return;
-	}
-
-	m_existingTables.insert(tableName, tableName);
-}
-
-bool Archive::tableIsExists(const QString& tableName)
-{
-	return m_existingTables.contains(tableName);
-}
-
 QString Archive::timeTypeStr(E::TimeType timeType)
 {
 	switch(timeType)
@@ -297,38 +231,8 @@ qint64 Archive::localTimeOffsetFromUtc()
 	return offset;
 }
 
-QString Archive::getCmpField(E::TimeType timeType)
-{
-	QString cmpField;
-
-	switch(timeType)
-	{
-	case E::TimeType::Plant:
-		cmpField = FIELD_PLANT_TIME;
-		break;
-
-	case E::TimeType::System:
-	case E::TimeType::Local:						// local time search also use systemtime field in requests
-		cmpField = FIELD_SYSTEM_TIME;
-		break;
-
-	case E::TimeType::ArchiveId:
-		cmpField = FIELD_ARCH_ID;
-		break;
-
-	default:
-		assert(false);
-	}
-
-	return cmpField;
-}
-
 void Archive::saveState(const SimpleAppSignalState& state)
 {
-	m_dbSaveStatesQueue.push(&state);
-
-	//
-
 	ArchFile* archFile = m_archFiles.value(state.hash, nullptr);
 
 	if (archFile == nullptr)
@@ -484,12 +388,12 @@ bool Archive::createGroupDirs()
 }
 
 
-bool Archive::findData(const ArchRequestParam& param)
+Archive::FindResult Archive::findData(const ArchRequestParam& param)
 {
 	if (m_requestContexts.contains(param.requestID) == true)
 	{
 		assert(false);
-		return false;
+		return Archive::FindResult::SearchError;
 	}
 
 	RequestContext* reqContext = new RequestContext(param);
@@ -513,9 +417,9 @@ bool Archive::findData(const ArchRequestParam& param)
 		flushImmediately(archFile);
 	}
 
-	bool result = reqContext->findData();
+	Archive::FindResult result = reqContext->findData();
 
-	if (result == false)
+	if (result == Archive::FindResult::NotFound)
 	{
 		m_requestContexts.remove(reqContext->requestID());
 		delete reqContext;
@@ -775,8 +679,6 @@ void Archive::pushBackInRegularFilesQueue(ArchFile* file)
 void Archive::clear()
 {
 	m_projectID.clear();
-	m_existingTables.clear();
-
 	m_archFiles.clear();
 
 	for(ArchFile* archFile : m_archFiles)
@@ -793,50 +695,4 @@ void Archive::clear()
 	}
 
 	m_requestContexts.clear();
-
-	removeDatabases();
-}
-
-QSqlDatabase Archive::getDatabase(DbType dbType)
-{
-	QString connectionName;
-
-	switch(dbType)
-	{
-	case DbType::Postgres:
-		connectionName = "PostgresConnection";
-		break;
-
-	case DbType::WriteArchive:
-		connectionName = "WriteArchiveConnection";
-		break;
-
-	case DbType::ReadArchive:
-		connectionName = "ReadArchiveConnection";
-		break;
-
-	default:
-		assert(false);
-	}
-
-	AUTO_LOCK(m_dbMutex);
-
-	if (QSqlDatabase::contains(connectionName) == true)
-	{
-		return QSqlDatabase::database(connectionName, false);
-	}
-
-	return QSqlDatabase::addDatabase("QPSQL", connectionName);
-}
-
-void Archive::removeDatabases()
-{
-	AUTO_LOCK(m_dbMutex);
-
-	QStringList connectionNames = QSqlDatabase::connectionNames();
-
-	for(QString& connectionName : connectionNames)
-	{
-		QSqlDatabase::removeDatabase(connectionName);
-	}
 }

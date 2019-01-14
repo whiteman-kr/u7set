@@ -11,15 +11,13 @@
 #include "../lib/Types.h"
 #include "../lib/Queue.h"
 #include "../lib/AppSignal.h"
-#include "ArchFile.h"
 
-class Archive;
+#include "ArchRequestThread.h"
+#include "FileArchWriter.h"
 
 class ArchRequestParam
 {
 public:
-	ArchRequestParam();
-
 	void clearSignalHashes();
 
 public:
@@ -37,6 +35,7 @@ public:
 	QVector<Hash> signalHashes;
 };
 
+class ArchFile;
 
 class Archive
 {
@@ -50,11 +49,12 @@ public:
 	static const char* FIELD_VALUE;
 	static const char* FIELD_FLAGS;
 
-	enum DbType
+	enum class FindResult
 	{
-		Postgres,
-		WriteArchive,
-		ReadArchive
+		NotFound,
+		Found,
+
+		SearchError
 	};
 
 	class RequestContext
@@ -66,7 +66,7 @@ public:
 
 		void appendArchFile(ArchFile* f);
 
-		ArchFile::FindResult findData();
+		FindResult findData();
 
 	private:
 		ArchRequestParam m_param;
@@ -83,11 +83,10 @@ public:
 	Archive(const QString& projectID,
 			const QString& equipmentID,
 			const QString& archDir,
-			const HostAddressPort& dbHost,
 			CircularLoggerShared logger);
 	~Archive();
 
-	bool openDatabase(DbType dbType, QSqlDatabase& destDb);
+	void start();
 
 	void initArchSignals(const Proto::ArchSignals& archSignals);
 	QString getSignalID(Hash signalHash);
@@ -105,20 +104,8 @@ public:
 
 	void getSignalsHashes(QVector<Hash>* hashes);
 
-	QString postgresDatabaseName();
-	QString archiveDatabaseName();
-	static QString getTableName(Hash signalHash);
-
-//	const QHash<Hash, Archive::Signal>& archSignals() const { return m_archSignals; }
-
-	void appendExistingTable(const QString& tableName);
-	bool tableIsExists(const QString& tableName);
-
 	static QString timeTypeStr(E::TimeType timeType);
-
 	static qint64 localTimeOffsetFromUtc();
-
-	static QString getCmpField(E::TimeType timeType);
 
 	QString archDir() const { return m_archDir; }
 	QString projectID() const { return m_projectID; }
@@ -127,8 +114,6 @@ public:
 	QString archFullPath() const { return m_archFullPath; }
 
 	void saveState(const SimpleAppSignalState& state);
-
-	Queue<SimpleAppSignalState>& dbSaveStatesQueue() { return m_dbSaveStatesQueue; }
 
 	bool checkAndCreateArchiveDirs();
 	bool archDirIsWritableChecking();
@@ -145,7 +130,7 @@ public:
 
 	//
 
-	bool findData(const ArchRequestParam& param);
+	FindResult findData(const ArchRequestParam& param);
 
 private:
 
@@ -165,9 +150,6 @@ private:
 
 	void clear();
 
-	QSqlDatabase getDatabase(DbType dbType);
-	void removeDatabases();
-
 private:
 	static const char* ARCH_DB_PREFIX;
 	static const char* LONG_TERM_TABLE_PREFIX;
@@ -179,20 +161,16 @@ private:
 
 	CircularLoggerShared m_log;
 
+	//
+
+	ArchRequestThread* m_archRequestThread = nullptr;
+	FileArchWriter* m_fileArchWriter = nullptr;
+
+	//
+
 	QHash<Hash, ArchFile*> m_archFiles;
 
-	Queue<SimpleAppSignalState> m_dbSaveStatesQueue;
-
 	qint64 m_archID = 0;
-
-	// Db Archive members
-
-	HostAddressPort m_dbHost;
-	QString m_dbUser;
-	QString m_dbPassword;
-
-	QHash<QString, QString> m_existingTables;
-	QMutex m_dbMutex;
 
 	// File Archive members
 
@@ -217,5 +195,3 @@ private:
 
 	friend class ArchFile;
 };
-
-typedef std::shared_ptr<Archive> ArchiveShared;

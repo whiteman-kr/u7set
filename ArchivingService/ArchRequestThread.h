@@ -15,6 +15,7 @@
 
 class TcpArchRequestsServer;
 class FileArchWriter;
+class ArchRequestParam;
 
 class ArchRequestContext
 {
@@ -22,7 +23,7 @@ public:
 	ArchRequestContext(const ArchRequestParam& param, const QTime& startTime, CircularLoggerShared logger);
 	virtual ~ArchRequestContext();
 
-	virtual bool executeSatesRequest(ArchiveShared archive, QSqlDatabase* db) = 0;
+	virtual bool executeSatesRequest() = 0;
 	virtual void getNextStates() = 0;
 
 public:
@@ -35,7 +36,7 @@ public:
 	Network::GetAppSignalStatesFromArchiveNextReply& getNextReply() { return m_reply; }
 
 protected:
-	void checkSignalsHashes(ArchiveShared arch);
+	void checkSignalsHashes();
 
 	int totalStates() const { return m_totalStates; }
 	int sentStates() const { return m_sentStates; }

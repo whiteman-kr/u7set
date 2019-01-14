@@ -5,6 +5,8 @@
 #include "../lib/Crc16.h"
 #include "../lib/SimpleThread.h"
 
+#include "Archive.h"
+
 class ArchRequestParam;
 
 class ArchFile
@@ -16,15 +18,6 @@ public:
 		QString fileName;
 		QDateTime date;
 		qint64 startTime;
-	};
-
-	enum class FindResult
-	{
-		NotFound,
-		Found,
-
-		SearchError,
-		ReadError
 	};
 
 private:
@@ -74,7 +67,7 @@ private:
 
 		bool readRecord(qint64 recordIndex, Record* record);
 
-		FindResult findStartPosition(E::TimeType timeType, qint64 startTime, qint64 endTime);
+		Archive::FindResult findStartPosition(E::TimeType timeType, qint64 startTime, qint64 endTime);
 
 		bool close();
 
@@ -82,7 +75,7 @@ private:
 		QString getFileName(qint64 partitionStartTime);
 
 		void moveToRecord(qint64 record);
-		FindResult binarySearch(E::TimeType timeType, qint64 time, qint64* startPosition);
+		Archive::FindResult binarySearch(E::TimeType timeType, qint64 time, qint64* startPosition);
 
 		void closeFile();
 
@@ -121,7 +114,7 @@ private:
 		int partitionToReadIndex = -1;
 		Partition partitionToRead;
 
-		FindResult findResult = FindResult::NotFound;
+		Archive::FindResult findResult = Archive::FindResult::NotFound;
 	};
 
 public:
@@ -149,13 +142,13 @@ public:
 	bool isEmergency() const;
 	QString path() const { return m_path; }
 
-	FindResult findData(const ArchRequestParam& param);
+	Archive::FindResult findData(const ArchRequestParam& param);
 
 	void shutdown(qint64 curPartition, qint64* totalFlushedStatesCount);
 
 private:
 	void getArchPartitionsInfo(RequestData* rd);
-	void findStartPosition(RequestData* rd);
+	Archive::FindResult findStartPosition(RequestData* rd);
 	void cancelRequest(quint32 requestID);
 
 private:

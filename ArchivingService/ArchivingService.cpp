@@ -67,7 +67,7 @@ void ArchivingServiceWorker::shutdown()
 {
 	// Service Main Function deinitialization
 	//
-	stopAllThread();
+	stopAllThreads();
 
 	stopCfgLoaderThread();
 
@@ -96,18 +96,16 @@ void ArchivingServiceWorker::stopCfgLoaderThread()
 
 void ArchivingServiceWorker::runAllThreads()
 {
-	runArchWriteThread();
-	runArchRequestThread();
+	createArchive();
 	runTcpAppDataServerThread();
 	runTcpArchRequestsServerThread();
 }
 
-void ArchivingServiceWorker::stopAllThread()
+void ArchivingServiceWorker::stopAllThreads()
 {
 	stopTcpArchiveRequestsServerThread();
 	stopTcpAppDataServerThread();
-	stopArchRequestThread();
-	stopArchWriteThread();
+	deleteArchive();
 }
 
 bool ArchivingServiceWorker::createArchive()
@@ -134,16 +132,6 @@ void ArchivingServiceWorker::deleteArchive()
 
 void ArchivingServiceWorker::runArchWriteThread()
 {
-	assert(m_archWriteThread == nullptr);
-
-	m_archWriteThread = new ArchWriteThread(m_cfgSettings.dbHost,
-											m_archive,
-											logger());
-
-	m_archWriteThread->start();
-
-	//
-
 	assert(m_fileArchWriter == nullptr);
 
 	m_fileArchWriter = new FileArchWriter(m_archive, logger());
@@ -153,15 +141,6 @@ void ArchivingServiceWorker::runArchWriteThread()
 
 void ArchivingServiceWorker::stopArchWriteThread()
 {
-	if (m_archWriteThread != nullptr)
-	{
-		m_archWriteThread->quitAndWait();
-		delete m_archWriteThread;
-		m_archWriteThread = nullptr;
-	}
-
-	//
-
 	if (m_fileArchWriter != nullptr)
 	{
 		m_fileArchWriter->quitAndWait();
@@ -320,9 +299,7 @@ void ArchivingServiceWorker::onConfigurationReady(const QByteArray configuration
 		return;
 	}
 
-	stopAllThread();
-
-	deleteArchive();
+	stopAllThreads();
 
 	bool result = readConfiguration(configurationXmlData);
 
