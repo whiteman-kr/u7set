@@ -657,7 +657,22 @@ namespace ExtWidgets
 			return;
 		}
 
-		m_text = m_editor->text();
+		QString text = m_editor->text();
+
+		if (m_property->validator().isEmpty() == false)
+		{
+			QRegExpValidator* validator = new QRegExpValidator(QRegExp(m_property->validator()), this);
+
+			int pos = 0;
+
+			if (validator->validate(text, pos) != QValidator::Acceptable)
+			{
+				QMessageBox::critical(this, qAppName(), tr("The string does match the validator (%1).").arg(m_property->validator()), QMessageBox::Ok);
+				return;
+			}
+		}
+
+		m_text = text;
 
 		QDialog::accept();
 	}
@@ -709,7 +724,7 @@ namespace ExtWidgets
 		connect(m_lineEdit, &QLineEdit::editingFinished, this, &QtMultiTextEdit::onEditingFinished);
 		connect(m_lineEdit, &QLineEdit::textEdited, this, &QtMultiTextEdit::onTextEdited);
 
-		if (m_userType == QVariant::String && p->validator().isEmpty() == true && p->password() == false)
+		if (m_userType == QVariant::String && p->password() == false)
 		{
 			m_button = new QToolButton(parent);
 			m_button->setText("...");

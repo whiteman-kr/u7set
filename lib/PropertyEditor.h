@@ -103,11 +103,11 @@ namespace ExtWidgets
 	public:
 		PropertyPlainTextEditor(QWidget* parent);
 
-		virtual void setText(const QString& text);
+		virtual void setText(const QString& text) override;
 
-		virtual QString text();
+		virtual QString text() override;
 
-		virtual void setReadOnly(bool value);
+		virtual void setReadOnly(bool value) override;
 
 	protected:
 		bool eventFilter(QObject* obj, QEvent* event);
