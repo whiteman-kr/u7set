@@ -1,6 +1,6 @@
 #include "ArchFile.h"
 
-#include "FileArchWriter.h"
+#include "ArchWriterThread.h"
 #include "BinSearch.h"
 
 // -----------------------------------------------------------------------------------------------------------------------
@@ -314,7 +314,7 @@ bool ArchFile::Partition::readRecord(qint64 recordIndex, Record* record)
 	return true;
 }
 
-Archive::FindResult ArchFile::Partition::findStartPosition(E::TimeType timeType, qint64 startTime, qint64 endTime)
+ArchFindResult ArchFile::Partition::findStartPosition(E::TimeType timeType, qint64 startTime, qint64 endTime)
 {
 	Record firstRecord;
 	Record lastRecord;
@@ -324,12 +324,12 @@ Archive::FindResult ArchFile::Partition::findStartPosition(E::TimeType timeType,
 
 	if (res == false)
 	{
-		return Archive::FindResult::SearchError;
+		return ArchFindResult::SearchError;
 	}
 
 	if (noRecords == true)
 	{
-		return Archive::FindResult::NotFound;
+		return ArchFindResult::NotFound;
 	}
 
 	//	S - request start time
@@ -357,7 +357,7 @@ Archive::FindResult ArchFile::Partition::findStartPosition(E::TimeType timeType,
 
 	if (firstRecord.timeGreateThen(timeType, endTime) == true)
 	{
-		return Archive::FindResult::NotFound;
+		return ArchFindResult::NotFound;
 	}
 
 	// case 2)
@@ -366,14 +366,14 @@ Archive::FindResult ArchFile::Partition::findStartPosition(E::TimeType timeType,
 		firstRecord.timeLessOrEqualThen(timeType, endTime) == true)
 	{
 		moveToRecord(0);
-		return Archive::FindResult::Found;
+		return ArchFindResult::Found;
 	}
 
 	// case 3)
 
 	if (lastRecord.timeLessThen(timeType, startTime) == true)
 	{
-		return Archive::FindResult::NotFound;
+		return ArchFindResult::NotFound;
 	}
 
 	// case 4)
@@ -382,9 +382,9 @@ Archive::FindResult ArchFile::Partition::findStartPosition(E::TimeType timeType,
 	{
 		qint64 startPosition = 0;
 
-		Archive::FindResult result = binarySearch(timeType, startTime, &startPosition);
+		ArchFindResult result = binarySearch(timeType, startTime, &startPosition);
 
-		if (result == Archive::FindResult::Found)
+		if (result == ArchFindResult::Found)
 		{
 			moveToRecord(startPosition);
 		}
@@ -392,7 +392,7 @@ Archive::FindResult ArchFile::Partition::findStartPosition(E::TimeType timeType,
 		return result;
 	}
 
-	return Archive::FindResult::NotFound;
+	return ArchFindResult::NotFound;
 }
 
 bool ArchFile::Partition::close()
@@ -425,12 +425,12 @@ void ArchFile::Partition::moveToRecord(qint64 record)
 	m_file.seek(record * sizeof(ArchFile::Record));
 }
 
-Archive::FindResult ArchFile::Partition::binarySearch(E::TimeType timeType, qint64 time, qint64* startPosition)
+ArchFindResult ArchFile::Partition::binarySearch(E::TimeType timeType, qint64 time, qint64* startPosition)
 {
 	if (startPosition == nullptr)
 	{
 		assert(false);
-		return Archive::FindResult::SearchError;
+		return ArchFindResult::SearchError;
 	}
 
 	*startPosition = -1;
@@ -439,7 +439,7 @@ Archive::FindResult ArchFile::Partition::binarySearch(E::TimeType timeType, qint
 
 	if (recordCount == 0)
 	{
-		return Archive::FindResult::NotFound;
+		return ArchFindResult::NotFound;
 	}
 
 	bool result = true;
@@ -452,7 +452,7 @@ Archive::FindResult ArchFile::Partition::binarySearch(E::TimeType timeType, qint
 
 	if (result == false)
 	{
-		return Archive::FindResult::SearchError;
+		return ArchFindResult::SearchError;
 	}
 
 	BinSearch<qint64> binSearch(time, recordCount, leftRecord.getTime(timeType), rightRecord.getTime(timeType));
@@ -473,7 +473,7 @@ Archive::FindResult ArchFile::Partition::binarySearch(E::TimeType timeType, qint
 
 				if (result == false)
 				{
-					return Archive::FindResult::SearchError;
+					return ArchFindResult::SearchError;
 				}
 
 				binSearch.checkNextItem(requiredRecord.getTime(timeType));
@@ -482,13 +482,13 @@ Archive::FindResult ArchFile::Partition::binarySearch(E::TimeType timeType, qint
 
 		case BinSearchResult::Found:
 			*startPosition = binSearch.foundIndex();
-			return Archive::FindResult::Found;
+			return ArchFindResult::Found;
 
 		case BinSearchResult::NotFound:
-			return Archive::FindResult::NotFound;
+			return ArchFindResult::NotFound;
 
 		case BinSearchResult::SearchError:
-			return Archive::FindResult::SearchError;
+			return ArchFindResult::SearchError;
 
 		default:
 			assert(false);
@@ -497,7 +497,7 @@ Archive::FindResult ArchFile::Partition::binarySearch(E::TimeType timeType, qint
 	}
 	while(1);
 
-	return Archive::FindResult::SearchError;
+	return ArchFindResult::SearchError;
 }
 
 void ArchFile::Partition::closeFile()
@@ -639,7 +639,7 @@ bool ArchFile::isEmergency() const
 	return m_queue->size() >= static_cast<int>(m_queue->queueSize() * QUEUE_EMERGENCY_LIMIT);
 }
 
-Archive::FindResult ArchFile::findData(const ArchRequestParam& param)
+ArchFindResult ArchFile::findData(const ArchRequestParam& param)
 {
 	RequestData* rd = m_requestsData.value(param.requestID, nullptr);
 
@@ -656,7 +656,7 @@ Archive::FindResult ArchFile::findData(const ArchRequestParam& param)
 
 	getArchPartitionsInfo(rd);
 
-	if (rd->findResult != Archive::FindResult::Found)
+	if (rd->findResult != ArchFindResult::Found)
 	{
 		cancelRequest(rd->requestID);
 		return rd->findResult;
@@ -677,7 +677,7 @@ void ArchFile::getArchPartitionsInfo(RequestData* rd)
 	if (rd == nullptr)
 	{
 		assert(false);
-		rd->findResult = Archive::FindResult::SearchError;
+		rd->findResult = ArchFindResult::SearchError;
 		return;
 	}
 
@@ -724,29 +724,29 @@ void ArchFile::getArchPartitionsInfo(RequestData* rd)
 
 	if (rd->partitionsInfo.count() > 0)
 	{
-		rd->findResult = Archive::FindResult::Found;
+		rd->findResult = ArchFindResult::Found;
 	}
 	else
 	{
-		rd->findResult = Archive::FindResult::NotFound;
+		rd->findResult = ArchFindResult::NotFound;
 	}
 
 	return;
 }
 
-Archive::FindResult ArchFile::findStartPosition(RequestData* rd)
+ArchFindResult ArchFile::findStartPosition(RequestData* rd)
 {
 	if (rd == nullptr)
 	{
 		assert(false);
-		return Archive::FindResult::SearchError;
+		return ArchFindResult::SearchError;
 	}
 
 	int partitionsCount = rd->partitionsInfo.count();
 
 	if (partitionsCount == 0)
 	{
-		return Archive::FindResult::NotFound;
+		return ArchFindResult::NotFound;
 	}
 
 	// 1) Sort m_archPartitionsInfo by systemTime ascending
@@ -780,17 +780,17 @@ Archive::FindResult ArchFile::findStartPosition(RequestData* rd)
 
 		if (res == false)
 		{
-			return Archive::FindResult::SearchError;
+			return ArchFindResult::SearchError;
 		}
 
-		Archive::FindResult result = rd->partitionToRead.findStartPosition(rd->timeType, rd->startTime, rd->endTime);
+		ArchFindResult result = rd->partitionToRead.findStartPosition(rd->timeType, rd->startTime, rd->endTime);
 
 		switch(result)
 		{
-		case Archive::FindResult::Found:
-			return Archive::FindResult::Found;
+		case ArchFindResult::Found:
+			return ArchFindResult::Found;
 
-		case Archive::FindResult::NotFound:
+		case ArchFindResult::NotFound:
 
 			rd->partitionToReadIndex++;
 
@@ -799,12 +799,12 @@ Archive::FindResult ArchFile::findStartPosition(RequestData* rd)
 				rd->partitionToRead.close();
 				rd->partitionToReadIndex = -1;
 
-				return Archive::FindResult::NotFound;
+				return ArchFindResult::NotFound;
 			}
 
 			break;
 
-		case Archive::FindResult::SearchError:
+		case ArchFindResult::SearchError:
 
 			rd->partitionToRead.close();
 			rd->partitionToReadIndex = -1;
@@ -817,7 +817,7 @@ Archive::FindResult ArchFile::findStartPosition(RequestData* rd)
 
 	}
 
-	return Archive::FindResult::SearchError;
+	return ArchFindResult::SearchError;
 }
 
 void ArchFile::cancelRequest(quint32 requestID)

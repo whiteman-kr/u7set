@@ -7,11 +7,11 @@ bool operator < (const FileArchReader::ArchPartition& afi1, const FileArchReader
 
 // ---------------------------------------------------------------------------------------------
 //
-// FileArchReader class implementattion
+// FileArchReader class implementation
 //
 // ---------------------------------------------------------------------------------------------
 
-FileArchReader::FileArchReader(ArchiveShared archive, const ArchRequestParam& param) :
+FileArchReader::FileArchReader(Archive* archive, const ArchRequestParam& param) :
 	m_archive(archive),
 	m_requestParam(param)
 {

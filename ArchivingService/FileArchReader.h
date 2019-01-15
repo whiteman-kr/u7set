@@ -4,7 +4,7 @@
 #include <QDateTime>
 
 #include "../lib/Types.h"
-#include "FileArchWriter.h"
+#include "ArchWriterThread.h"
 
 class FileArchReader
 {
@@ -18,7 +18,7 @@ public:
 	};
 
 public:
-	FileArchReader(ArchiveShared archive, const ArchRequestParam& param);
+	FileArchReader(Archive* archive, const ArchRequestParam& param);
 
 	bool findData();
 
@@ -35,7 +35,7 @@ private:
 	bool readRecord(ArchPartition& partition, qint64 recordNo);
 
 private:
-	ArchiveShared m_archive;
+	Archive* m_archive = nullptr;
 	ArchRequestParam m_requestParam;
 
 	//

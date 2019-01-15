@@ -2,7 +2,8 @@
 
 #include "Archive.h"
 #include "ArchFile.h"
-
+#include "ArchRequest.h"
+#include "ArchWriterThread.h"
 
 // ----------------------------------------------------------------------------------------------------------------------
 //
@@ -22,17 +23,17 @@ void Archive::RequestContext::appendArchFile(ArchFile* f)
 	m_archFiles.append(f);
 }
 
-Archive::FindResult Archive::RequestContext::findData()
+ArchFindResult Archive::RequestContext::findData()
 {
-	Archive::FindResult result = Archive::FindResult::NotFound;
+	ArchFindResult result = ArchFindResult::NotFound;
 
 	for(ArchFile* archFile : m_archFiles)
 	{
-		Archive::FindResult res = archFile->findData(m_param);
+		ArchFindResult res = archFile->findData(m_param);
 
-		if (res == Archive::FindResult::Found)
+		if (res == ArchFindResult::Found)
 		{
-			result = Archive::FindResult::Found;
+			result = ArchFindResult::Found;
 		}
 	}
 
@@ -46,13 +47,8 @@ Archive::FindResult Archive::RequestContext::findData()
 //
 // ----------------------------------------------------------------------------------------------------------------------
 
-const char* Archive::ARCH_DB_PREFIX = "u7arch_";
+std::atomic<quint32> Archive::m_nextRequestID = { 1 };
 
-const char* Archive::FIELD_PLANT_TIME = "plantTime";
-const char* Archive::FIELD_SYSTEM_TIME = "sysTime";
-const char* Archive::FIELD_ARCH_ID = "archID";
-const char* Archive::FIELD_VALUE = "val";
-const char* Archive::FIELD_FLAGS = "flags";
 
 Archive::Archive(const QString& projectID,
 				 const QString& equipmentID,
@@ -63,8 +59,6 @@ Archive::Archive(const QString& projectID,
 	m_archDir(archDir),
 	m_log(logger)
 {
-	m_archRequestThread = new ArchRequestThread(this, m_log);
-	m_fileArchWriter = new FileArchWriter();
 }
 
 Archive::~Archive()
@@ -74,14 +68,53 @@ Archive::~Archive()
 
 void Archive::start()
 {
+	m_isWorkable = false;
+
+	bool result = checkAndCreateArchiveDirs();
+
+	if (result == false)
+	{
+		DEBUG_LOG_ERR(logger(), "Archive directories creation error");
+		return;
+	}
+
+	assert(m_archWriterThread == nullptr);
+
+	m_archWriterThread = new ArchWriterThread(this, m_log);
+	m_archWriterThread->start();
+
+	assert(m_archRequestThread == nullptr);
+
+	m_archRequestThread = new ArchRequestThread(this, m_log);
 	m_archRequestThread->start();
-	m_fileArchWriter->start();
+
+	m_isWorkable = true;
+
+	return true;
 }
 
 void Archive::stop()
 {
-	m_archRequestThread->quitAndWait();
-	m_fileArchWriter->quitAndWait();
+	if (m_archRequestThread != nullptr)
+	{
+		m_archRequestThread->quitAndWait();
+		delete m_archRequestThread;
+		m_archRequestThread = nullptr;
+	}
+
+	if (m_archWriterThread != nullptr)
+	{
+		m_archWriterThread->quitAndWait();
+		delete m_archWriterThread;
+		m_archWriterThread = nullptr;
+	}
+
+	m_isWorkable = false;
+}
+
+ArchRequest* Archive::createNewRequest(E::TimeType timeType, qint64 sartTime, qint64 endTime, const QVector<Hash>& signalHashes)
+{
+	assert(false);		// to do
 }
 
 
@@ -388,45 +421,12 @@ bool Archive::createGroupDirs()
 }
 
 
-Archive::FindResult Archive::findData(const ArchRequestParam& param)
+quint32 Archive::getNewRequestID()
 {
-	if (m_requestContexts.contains(param.requestID) == true)
-	{
-		assert(false);
-		return Archive::FindResult::SearchError;
-	}
-
-	RequestContext* reqContext = new RequestContext(param);
-
-	m_requestContexts.insert(param.requestID, reqContext);
-
-	// enqueue files for immediately flushing
-	//
-	for(Hash signalHash : param.signalHashes)
-	{
-		ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
-
-		if (archFile == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
-		reqContext->appendArchFile(archFile);
-
-		flushImmediately(archFile);
-	}
-
-	Archive::FindResult result = reqContext->findData();
-
-	if (result == Archive::FindResult::NotFound)
-	{
-		m_requestContexts.remove(reqContext->requestID());
-		delete reqContext;
-	}
-
-	return result;
+	return m_nextRequestID.fetch_add(1);
 }
+
+
 
 bool Archive::shutdown()
 {

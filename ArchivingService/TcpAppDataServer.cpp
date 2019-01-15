@@ -6,7 +6,7 @@
 //
 // -------------------------------------------------------------------------------
 
-TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo, ArchiveShared archive) :
+TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo, Archive* archive) :
 	Tcp::Server(softwareInfo),
 	m_archive(archive)
 {
@@ -96,18 +96,4 @@ void TcpAppDataServer::onDisconnection()
 	qDebug() << C_STR(QString(tr("TcpAppDataServer disconnected")));
 }
 
-
-// -------------------------------------------------------------------------------
-//
-// TcpAppDataServer class implementation
-//
-// -------------------------------------------------------------------------------
-
-TcpAppDataServerThread::TcpAppDataServerThread(const HostAddressPort& listenAddressPort,
-			 Tcp::Server* server,
-			 std::shared_ptr<CircularLogger> logger) :
-	Tcp::ServerThread(listenAddressPort, server, logger)
-{
-
-}
 

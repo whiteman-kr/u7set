@@ -1,4 +1,4 @@
-#include "FileArchWriter.h"
+#include "ArchWriterThread.h"
 #include "../lib/Crc16.h"
 
 // -----------------------------------------------------------------------------------------------------------------------
@@ -7,15 +7,15 @@
 //
 // -----------------------------------------------------------------------------------------------------------------------
 
-FileArchWriter::FileArchWriter(ArchiveShared archive,
-								CircularLoggerShared logger) :
+ArchWriterThread::ArchWriterThread(Archive* archive,
+									CircularLoggerShared logger) :
 	m_archive(archive),
 	m_log(logger)
 {
 	TEST_PTR_RETURN(archive);
 }
 
-void FileArchWriter::run()
+void ArchWriterThread::run()
 {
 	if (m_log == nullptr)
 	{
@@ -101,7 +101,7 @@ void FileArchWriter::run()
 	m_archive->shutdown();
 }
 
-void FileArchWriter::updateCurrentPartition()
+void ArchWriterThread::updateCurrentPartition()
 {
 	// const int PARTITTION_DIVIDER = 24 * 60 * 60 * 1000;			// each day
 	const int PARTITTION_DIVIDER = 60 * 1000;						// each minute

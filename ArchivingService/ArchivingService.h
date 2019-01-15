@@ -8,8 +8,8 @@
 #include "TcpAppDataServer.h"
 #include "Archive.h"
 #include "TcpArchRequestsServer.h"
-#include "ArchRequestThread.h"
-#include "FileArchWriter.h"
+#include "ArchRequest.h"
+#include "ArchWriterThread.h"
 
 class ArchivingServiceWorker : public ServiceWorker
 {
@@ -36,23 +36,17 @@ private:
 	void runCfgLoaderThread();
 	void stopCfgLoaderThread();
 
-	void runAllThreads();
+	void startAllThreads();
 	void stopAllThreads();
 
-	bool createArchive();
-	void deleteArchive();
+	void startArchive();
+	void stopArchive();
 
-	void runArchWriteThread();
-	void stopArchWriteThread();
-
-	void runTcpAppDataServerThread();
+	void startTcpAppDataServerThread();
 	void stopTcpAppDataServerThread();
 
-	void runTcpArchRequestsServerThread();
+	void startTcpArchRequestsServerThread();
 	void stopTcpArchiveRequestsServerThread();
-
-	void runArchRequestThread();
-	void stopArchRequestThread();
 
 	bool readConfiguration(const QByteArray& fileData);
 	bool loadConfigurationFromFile(const QString& fileName);
@@ -72,8 +66,8 @@ private:
 
 	//
 
-	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
-	TcpArchiveRequestsServerThread* m_tcpArchiveRequestsServerThread = nullptr;
+	Tcp::ServerThread* m_tcpAppDataServerThread = nullptr;
+	Tcp::ServerThread* m_tcpArchRequestsServerThread = nullptr;
 
 	Archive* m_archive = nullptr;
 };

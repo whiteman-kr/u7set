@@ -13,20 +13,20 @@
 
 #include "Archive.h"
 
-class TcpArchRequestsServer;
-class FileArchWriter;
+class ArchWriterThread;
 class ArchRequestParam;
 
-class ArchRequestContext
+class ArchRequest
 {
-public:
-	ArchRequestContext(const ArchRequestParam& param, const QTime& startTime, CircularLoggerShared logger);
-	virtual ~ArchRequestContext();
-
-	virtual bool executeSatesRequest() = 0;
-	virtual void getNextStates() = 0;
+	Q_OBJECT
 
 public:
+	ArchRequest(const ArchRequestParam& param, const QTime& startTime, CircularLoggerShared logger);
+	virtual ~ArchRequest();
+
+	void startRequestProcessing();
+	void stopRequestProcessing();
+
 	quint32 requestID() const { return m_param.requestID; }
 	bool isDataReady() const { return m_dataReady; }
 	ArchiveError archError() const { return m_archError; }
@@ -34,6 +34,9 @@ public:
 	int timeElapsed() const { return m_time.elapsed(); }
 
 	Network::GetAppSignalStatesFromArchiveNextReply& getNextReply() { return m_reply; }
+
+signals:
+	void getNextData();
 
 protected:
 	void checkSignalsHashes();
@@ -100,68 +103,26 @@ protected:
 
 	friend class ArchRequestThreadWorker;
 
-};
-
-typedef std::shared_ptr<ArchRequestContext> ArchRequestContextShared;
-
-class DbArchRequestContext : public ArchRequestContext
-{
-public:
-	DbArchRequestContext(const ArchRequestParam& param, const QTime& startTime, CircularLoggerShared logger);
-	virtual ~DbArchRequestContext();
-
-	bool executeSatesRequest(ArchiveShared archive, QSqlDatabase* db) override;
-	void getNextStates() override;
-
-private:
-	bool initArchId(QSqlDatabase& db);
-	bool createGetSignalStatesQueryStr(ArchiveShared archive);
-
-	bool execQuery(QSqlDatabase& db, const QString& queryStr);
-	bool execQuery(QSqlQuery& query, const QString& queryStr);
-
-private:
 	//
 
-	QSqlQuery* m_statesQuery = nullptr;
-	QString m_statesQueryStr;
+	SimpleThread* m_requestThread;
 };
 
-class FileArchRequestContext : public ArchRequestContext
-{
-public:
-	FileArchRequestContext(const ArchRequestParam& param, const QTime& startTime, CircularLoggerShared logger);
-	virtual ~FileArchRequestContext();
-
-	bool executeSatesRequest(ArchiveShared archive, QSqlDatabase* db) override;
-	void getNextStates() override;
-
-private:
-
-};
 
 class ArchRequestThreadWorker : public SimpleThreadWorker
 {
 	Q_OBJECT
 
 public:
-	ArchRequestThreadWorker(ArchiveShared archive, FileArchWriter* fileArchWriter, CircularLoggerShared& logger);
+	ArchRequestThreadWorker(ArchRequest* request, CircularLoggerShared& logger);
 
-	ArchRequestContextShared startNewRequest(ArchRequestParam& param, const QTime &startTime);
 	void finalizeRequest(quint32 requestID);
 
-	void getNextData(ArchRequestContextShared context);
-
-signals:
-	void newRequestSignal(quint32 requestID);
-	void getNextDataSignal(quint32 requestID);
-	void finalizeRequestSignal(quint32 requestID);
+	void getNextData();
 
 private:
 	virtual void onThreadStarted() override;
 	virtual void onThreadFinished() override;
-
-	bool tryConnectToDatabase();
 
 private slots:
 	void onNewRequest(quint32 requestID);
@@ -169,33 +130,6 @@ private slots:
 	void onFinalizeRequest(quint32 requestID);
 
 private:
-	ArchiveShared m_archive;
-	FileArchWriter* m_fileArchWriter = nullptr;
+	ArchRequest* m_request = nullptr;
 	CircularLoggerShared m_logger;
-
-	QSqlDatabase m_db;
-
-	QMutex m_requestContextsMutex;
-
-	QHash<quint32, ArchRequestContextShared> m_requestContexts;		//	requestID => ArchRequestContext
-
-	QQueue<ArchRequestContextShared> m_newRequests;
-
-	ArchRequestContextShared m_currentRequest;
 };
-
-
-class ArchRequestThread : public SimpleThread
-{
-public:
-	ArchRequestThread(ArchiveShared archive, FileArchWriter* fileArchWriter, CircularLoggerShared logger);
-
-	ArchRequestContextShared startNewRequest(ArchRequestParam& param, const QTime& startTime);
-	void finalizeRequest(quint32 requestID);
-
-	void getNextData(ArchRequestContextShared context);
-
-private:
-	ArchRequestThreadWorker* m_worker = nullptr;
-};
-

@@ -1,23 +1,25 @@
 #include "TcpArchRequestsServer.h"
+#include "ArchRequest.h"
 
-std::atomic<quint32> TcpArchRequestsServer::m_nextRequestNo = { 1 };
-
-TcpArchRequestsServer::TcpArchRequestsServer(const SoftwareInfo& softwareInfo, ArchRequestThread& archRequestThread, CircularLoggerShared logger) :
+TcpArchRequestsServer::TcpArchRequestsServer(const SoftwareInfo& softwareInfo, Archive* archive, CircularLoggerShared logger) :
 	Tcp::Server(softwareInfo),
-	m_archRequestThread(archRequestThread),
-    m_logger(logger)
+	m_archive(archive),
+	m_logger(logger)
 {
+	assert(m_archive != nullptr);
 }
 
 Tcp::Server* TcpArchRequestsServer::getNewInstance()
 {
-	return new TcpArchRequestsServer(localSoftwareInfo(), m_archRequestThread, m_logger);
+	return new TcpArchRequestsServer(localSoftwareInfo(), m_archive, m_logger);
 }
 
 void TcpArchRequestsServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
 {
-    switch(requestID)
-    {
+	TEST_PTR_RETURN(m_archive);
+
+	switch(requestID)
+	{
 	case ARCHS_GET_APP_SIGNALS_STATES_START:
 		onGetSignalStatesFromArchiveStart(requestData, requestDataSize);
 		break;
@@ -30,19 +32,23 @@ void TcpArchRequestsServer::processRequest(quint32 requestID, const char* reques
 		onGetSignalStatesFromArchiveCancel(requestData, requestDataSize);
 		break;
 
-    default:
+	default:
 		assert(false);
-    }
+	}
 }
 
 void TcpArchRequestsServer::onServerThreadStarted()
 {
-	DEBUG_LOG_MSG(m_logger, "TcpArchiveRequestsServer thread started");
+	DEBUG_LOG_MSG(m_logger, QString("TcpArchiveRequestsServer thread started (connected sw %1, %2)").
+								arg(connectedSoftwareInfo().equipmentID()).
+								arg(peerAddr().addressPortStr()));
 }
 
 void TcpArchRequestsServer::onServerThreadFinished()
 {
-	DEBUG_LOG_MSG(m_logger, "TcpArchiveRequestsServer thread finished");
+	DEBUG_LOG_MSG(m_logger, QString("TcpArchiveRequestsServer thread finished  (connected sw %1, %2)").
+								arg(connectedSoftwareInfo().equipmentID()).
+								arg(peerAddr().addressPortStr()));
 
 	finalizeCurrentRequest();
 }
@@ -67,9 +73,10 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 
 	//
 	// check request.clear_clientequipmentid() here!!!
+	assert(false);
 	//
 
-	if (m_currentRequest != nullptr)
+	if (m_request != nullptr)
 	{
 		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
 		reply.set_archerror(static_cast<int>(ArchiveError::PreviousArchRequestIsNotFinished));
@@ -79,12 +86,6 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 
 	int requestSignalsCount = request.signalhashes_size();
 
-	if (requestSignalsCount <= 0)
-	{
-		assert(false);
-		return;
-	}
-
 	if (requestSignalsCount > ARCH_REQUEST_MAX_SIGNALS)
 	{
 		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
@@ -93,30 +94,43 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 		return;
 	}
 
-	quint32 newRequestID = getNewRequestID();
-
-	reply.set_error(static_cast<int>(NetworkError::Success));
-	reply.set_requestid(newRequestID);
-
-	sendReply(reply);
-
-	// pass request to ArchRequestThread
-
-	ArchRequestParam param;
-
-	param.timeType = static_cast<E::TimeType>(request.timetype());
-
-	param.startTime = request.starttime();
-	param.endTime = request.endtime();
+	QVector<Hash> signalHashes;
 
 	for(int i = 0; i < requestSignalsCount; i++)
 	{
-		param.signalHashes.append(request.signalhashes(i));
+		Hash signalHash = request.signalhashes(i);
+
+		if (m_archive->isSignalExists(signalHash) == true)
+		{
+			signalHashes.append(signalHash);
+		}
 	}
 
-	param.requestID = newRequestID;
+	if (signalHashes.count() == 0)
+	{
+		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
+		reply.set_archerror(static_cast<int>(ArchiveError::NoSignals));
+		sendReply(reply);
+		return;
+	}
 
-	m_currentRequest = m_archRequestThread.startNewRequest(param, startTime);
+	m_request = m_archive->createNewRequest(static_cast<E::TimeType>(request.timetype()),
+														 request.starttime(),
+														 request.endtime(),
+														 signalHashes);
+
+	if (m_request == nullptr)
+	{
+		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
+		reply.set_archerror(static_cast<int>(ArchiveError::RequestStartError));
+		sendReply(reply);
+		return;
+	}
+
+	reply.set_error(static_cast<int>(NetworkError::Success));
+	reply.set_requestid(m_request->ID());
+
+	sendReply(reply);
 }
 
 void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* requestData, quint32 requestDataSize)
@@ -134,7 +148,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 		return;
 	}
 
-	if (m_currentRequest == nullptr || m_currentRequest->requestID() != request.requestid())
+	if (m_currentRequestID == ArchRequestParam::NO_REQUEST || m_currentRequestID != request.requestid())
 	{
 		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
 		reply.set_archerror(static_cast<int>(ArchiveError::UnknownArchRequestID));
@@ -236,7 +250,7 @@ quint32 TcpArchRequestsServer::getNewRequestID()
 	return m_nextRequestNo.fetch_add(1);
 }
 
-TcpArchiveRequestsServerThread::TcpArchiveRequestsServerThread(const HostAddressPort& listenAddressPort,
+TcpArchRequestsServerThread::TcpArchRequestsServerThread(const HostAddressPort& listenAddressPort,
 			 Tcp::Server* server,
 			 std::shared_ptr<CircularLogger> logger) :
 	Tcp::ServerThread(listenAddressPort, server, logger)

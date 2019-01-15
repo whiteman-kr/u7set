@@ -269,10 +269,11 @@ enum class ArchiveError
 	ArchRequestSignalsExceed,
 	UnknownArchRequestID,
 	PreviousArchRequestIsNotFinished,			// use ARCHS_GET_APP_SIGNALS_STATES_CANCEL to finish requests
-	DbConnectionError,
-	ExecQueryError,
+//	DbConnectionError,
+//	ExecQueryError,
 	NoSignals,
-	BuildQueryError,
+//	BuildQueryError,
+	RequestStartError
 };
 
 

@@ -94,69 +94,65 @@ void ArchivingServiceWorker::stopCfgLoaderThread()
 	}
 }
 
-void ArchivingServiceWorker::runAllThreads()
+void ArchivingServiceWorker::startAllThreads()
 {
-	createArchive();
-	runTcpAppDataServerThread();
-	runTcpArchRequestsServerThread();
+	startArchive();
+
+	if (m_archive->isWorkable() == true)
+	{
+		startTcpAppDataServerThread();
+		startTcpArchRequestsServerThread();
+	}
 }
 
 void ArchivingServiceWorker::stopAllThreads()
 {
-	stopTcpArchiveRequestsServerThread();
 	stopTcpAppDataServerThread();
-	deleteArchive();
+	stopTcpArchiveRequestsServerThread();
+
+	stopArchive();
 }
 
-bool ArchivingServiceWorker::createArchive()
+void ArchivingServiceWorker::startArchive()
 {
-	assert(m_archive == nullptr);
-
-	m_archive = std::make_shared<Archive>(m_buildInfo.project, equipmentID(), "d:/Temp", m_cfgSettings.dbHost, logger());
-
-	bool result = m_archive->checkAndCreateArchiveDirs();
-
-	if (result == false)
+	if (m_archive == nullptr)
 	{
-		DEBUG_LOG_ERR(logger(), "Archive directories creation error");
-		return false;
+		m_archive = new Archive(m_buildInfo.project, equipmentID(), "d:/Temp", logger());
+		m_archive->start();
+
+		if (m_archive->isWorkable() == true)
+		{
+			DEBUG_LOG_MSG(logger(), QString("Archive is workable. Directory: %1").arg(m_archive->archFullPath()));
+		}
+		else
+		{
+			DEBUG_LOG_ERR(logger(), QString("Archive is NOT WORKABLE!"));
+		}
 	}
-
-	return true;
-}
-
-void ArchivingServiceWorker::deleteArchive()
-{
-	m_archive.reset();
-}
-
-void ArchivingServiceWorker::runArchWriteThread()
-{
-	assert(m_fileArchWriter == nullptr);
-
-	m_fileArchWriter = new FileArchWriter(m_archive, logger());
-
-	m_fileArchWriter->start();
-}
-
-void ArchivingServiceWorker::stopArchWriteThread()
-{
-	if (m_fileArchWriter != nullptr)
+	else
 	{
-		m_fileArchWriter->quitAndWait();
-		delete m_fileArchWriter;
-		m_fileArchWriter = nullptr;
+		assert(false);
 	}
 }
 
-void ArchivingServiceWorker::runTcpAppDataServerThread()
+void ArchivingServiceWorker::stopArchive()
+{
+	if (m_archive != nullptr)
+	{
+		m_archive->stop();
+		delete m_archive;
+		m_archive = nullptr;
+	}
+}
+
+void ArchivingServiceWorker::startTcpAppDataServerThread()
 {
 	assert(m_tcpAppDataServerThread == nullptr);
+	assert(m_archive != nullptr);
 
 	TcpAppDataServer* server = new TcpAppDataServer(softwareInfo(), m_archive);
 
-	m_tcpAppDataServerThread = new TcpAppDataServerThread(m_cfgSettings.appDataServiceRequestIP, server, logger());
-
+	m_tcpAppDataServerThread = new Tcp::ServerThread(m_cfgSettings.appDataServiceRequestIP, server, logger());
 	m_tcpAppDataServerThread->start();
 }
 
@@ -170,51 +166,30 @@ void ArchivingServiceWorker::stopTcpAppDataServerThread()
 	}
 }
 
-void ArchivingServiceWorker::runTcpArchRequestsServerThread()
+void ArchivingServiceWorker::startTcpArchRequestsServerThread()
 {
-	assert(m_tcpArchiveRequestsServerThread == nullptr);
+	assert(m_tcpArchRequestsServerThread == nullptr);
+	assert(m_archive != nullptr);
 
-	if (m_archRequestThread == nullptr)
+	if (m_archive == nullptr)
 	{
 		assert(false);
 		return;
 	}
 
-	TcpArchRequestsServer* server = new TcpArchRequestsServer(softwareInfo(), *m_archRequestThread, logger());
+	TcpArchRequestsServer* server = new TcpArchRequestsServer(softwareInfo(), m_archive, logger());
 
-	m_tcpArchiveRequestsServerThread = new TcpArchiveRequestsServerThread(m_cfgSettings.clientRequestIP,
-																		  server,
-																		  logger());
-	m_tcpArchiveRequestsServerThread->start();
+	m_tcpArchRequestsServerThread = new Tcp::ServerThread(m_cfgSettings.clientRequestIP, server, logger());
+	m_tcpArchRequestsServerThread->start();
 }
 
 void ArchivingServiceWorker::stopTcpArchiveRequestsServerThread()
 {
-	if (m_tcpArchiveRequestsServerThread != nullptr)
+	if (m_tcpArchRequestsServerThread != nullptr)
 	{
-		m_tcpArchiveRequestsServerThread->quitAndWait();
-		delete m_tcpArchiveRequestsServerThread;
-		m_tcpArchiveRequestsServerThread = nullptr;
-	}
-}
-
-void ArchivingServiceWorker::runArchRequestThread()
-{
-	assert(m_archRequestThread == nullptr);
-	assert(m_fileArchWriter != nullptr);
-
-	m_archRequestThread = new ArchRequestThread(m_archive, m_fileArchWriter, logger());
-
-	m_archRequestThread->start();
-}
-
-void ArchivingServiceWorker::stopArchRequestThread()
-{
-	if (m_archRequestThread != nullptr)
-	{
-		m_archRequestThread->quitAndWait();
-		delete m_archRequestThread;
-		m_archRequestThread = nullptr;
+		m_tcpArchRequestsServerThread->quitAndWait();
+		delete m_tcpArchRequestsServerThread;
+		m_tcpArchRequestsServerThread = nullptr;
 	}
 }
 
@@ -226,11 +201,11 @@ bool ArchivingServiceWorker::readConfiguration(const QByteArray& fileData)
 
 	if (result == true)
 	{
-		qDebug() << "Reading settings - OK";
+		DEBUG_LOG_MSG(logger(),"Configuration.xml read Ok");
 	}
 	else
 	{
-		qDebug() << "Settings read ERROR!";
+		DEBUG_LOG_ERR(logger(),"Configuration.xml reading ERROR.");
 	}
 
 	return result;
@@ -253,22 +228,9 @@ bool ArchivingServiceWorker::loadConfigurationFromFile(const QString& fileName)
 		return false;
 	}
 
-	bool result = true;
-
 	cfgXmlData = file.readAll();
 
-	result = readConfiguration(cfgXmlData);
-
-	if  (result == true)
-	{
-		str = QString("Configuration is loaded from file: %1").arg(fileName);
-	}
-	else
-	{
-		str = QString("Loading configuration error from file: %1").arg(fileName);
-	}
-
-	qDebug() << C_STR(str);
+	bool result = readConfiguration(cfgXmlData);
 
 	return result;
 }
@@ -310,13 +272,6 @@ void ArchivingServiceWorker::onConfigurationReady(const QByteArray configuration
 
 	m_buildInfo = m_cfgLoaderThread->buildInfo();
 
-	bool res = createArchive();
-
-	if (res == false)
-	{
-		return;
-	}
-
 	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
 	{
 		QByteArray fileData;
@@ -348,7 +303,7 @@ void ArchivingServiceWorker::onConfigurationReady(const QByteArray configuration
 
 	if (result == true)
 	{
-		runAllThreads();
+		startAllThreads();
 	}
 }
 

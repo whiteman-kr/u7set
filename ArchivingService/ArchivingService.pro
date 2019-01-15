@@ -63,7 +63,6 @@ SOURCES += \
     ArchServiceMain.cpp \
     TcpAppDataServer.cpp \
     ../lib/AppSignal.cpp \
-    ArchRequestThread.cpp \
     TcpArchRequestsServer.cpp \
     Archive.cpp \
     TimeFilter.cpp \
@@ -71,10 +70,11 @@ SOURCES += \
     ../lib/TuningValue.cpp \
     ../lib/Signal.cpp \
     ../lib/SignalProperties.cpp \
-    FileArchWriter.cpp \
     ../lib/Crc16.cpp \
     FileArchReader.cpp \
-    ArchFile.cpp
+    ArchFile.cpp \
+    ArchWriterThread.cpp \
+    ArchRequest.cpp
 
 HEADERS += \
     ../lib/HostAddressPort.h \
@@ -108,7 +108,6 @@ HEADERS += \
     ../lib/CommandLineParser.h \
     TcpAppDataServer.h \
     ../lib/AppSignal.h \
-    ArchRequestThread.h \
     TcpArchRequestsServer.h \
     Archive.h \
     ../lib/TimeStamp.h \
@@ -118,11 +117,12 @@ HEADERS += \
     ../lib/Signal.h \
     ../lib/Signal.h \
     ../lib/SignalProperties.h \
-    FileArchWriter.h \
     ../lib/Crc16.h \
     FileArchReader.h \
     ArchFile.h \
-    BinSearch.h
+    BinSearch.h \
+    ArchWriterThread.h \
+    ArchRequest.h
 
 include(../qtservice/src/qtservice.pri)
 

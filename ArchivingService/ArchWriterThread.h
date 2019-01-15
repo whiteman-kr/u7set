@@ -7,11 +7,11 @@
 #include "Archive.h"
 #include "ArchFile.h"
 
-class FileArchWriter : public RunOverrideThread
+class ArchWriterThread : public RunOverrideThread
 {
 public:
-	FileArchWriter(ArchiveShared archive,
-				   CircularLoggerShared logger);
+	ArchWriterThread(Archive* archive,
+						CircularLoggerShared logger);
 
 private:
 
@@ -37,8 +37,11 @@ private:
 //	bool writeMinuteCheckpoint(qint64 minuteSystemTime);
 
 private:
-	ArchiveShared m_archive;
+	Archive* m_archive = nullptr;
 	CircularLoggerShared m_log;
+
+	//
+
 	QThread* m_thisThread = nullptr;
 
 	qint64 m_curPartition = -1;

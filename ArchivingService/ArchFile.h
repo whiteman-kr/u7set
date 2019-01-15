@@ -67,7 +67,7 @@ private:
 
 		bool readRecord(qint64 recordIndex, Record* record);
 
-		Archive::FindResult findStartPosition(E::TimeType timeType, qint64 startTime, qint64 endTime);
+		ArchFindResult findStartPosition(E::TimeType timeType, qint64 startTime, qint64 endTime);
 
 		bool close();
 
@@ -75,7 +75,7 @@ private:
 		QString getFileName(qint64 partitionStartTime);
 
 		void moveToRecord(qint64 record);
-		Archive::FindResult binarySearch(E::TimeType timeType, qint64 time, qint64* startPosition);
+		ArchFindResult binarySearch(E::TimeType timeType, qint64 time, qint64* startPosition);
 
 		void closeFile();
 
@@ -114,7 +114,7 @@ private:
 		int partitionToReadIndex = -1;
 		Partition partitionToRead;
 
-		Archive::FindResult findResult = Archive::FindResult::NotFound;
+		ArchFindResult findResult = ArchFindResult::NotFound;
 	};
 
 public:
@@ -142,13 +142,13 @@ public:
 	bool isEmergency() const;
 	QString path() const { return m_path; }
 
-	Archive::FindResult findData(const ArchRequestParam& param);
+	ArchFindResult findData(const ArchRequestParam& param);
 
 	void shutdown(qint64 curPartition, qint64* totalFlushedStatesCount);
 
 private:
 	void getArchPartitionsInfo(RequestData* rd);
-	Archive::FindResult findStartPosition(RequestData* rd);
+	ArchFindResult findStartPosition(RequestData* rd);
 	void cancelRequest(quint32 requestID);
 
 private:
