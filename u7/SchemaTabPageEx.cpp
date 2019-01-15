@@ -1,12 +1,12 @@
 #include "Stable.h"
-//#include <QJsonArray>
+#include <QJsonArray>
 #include "SchemaTabPageEx.h"
 #include "CreateSchemaDialog.h"
-//#include "Forms/SelectChangesetDialog.h"
-//#include "Forms/FileHistoryDialog.h"
-//#include "Forms/CompareDialog.h"
-//#include "Forms/ComparePropertyObjectDialog.h"
-//#include "CheckInDialog.h"
+#include "Forms/SelectChangesetDialog.h"
+#include "Forms/FileHistoryDialog.h"
+#include "Forms/CompareDialog.h"
+#include "Forms/ComparePropertyObjectDialog.h"
+#include "CheckInDialog.h"
 #include "Settings.h"
 #include "../lib/PropertyEditor.h"
 
@@ -22,7 +22,6 @@
 // SchemaListModelEx
 //
 //
-
 SchemaListModelEx::SchemaListModelEx(DbController* dbc, QWidget* parentWidget) :
 	QAbstractItemModel(parentWidget),
 	HasDbController(dbc),
@@ -517,6 +516,12 @@ DbFileInfo SchemaListModelEx::file(const QModelIndex& modelIndex) const
 
 void SchemaListModelEx::refresh()
 {
+	if (db()->isProjectOpened() == false)
+	{
+		projectClosed();
+		return;
+	}
+
 	// Get file tree
 	//
 	DbFileTree files;
@@ -665,6 +670,56 @@ const DbFileInfo& SchemaListModelEx::parentFile() const
 	return m_parentFile;
 }
 
+SchemaProxyListModel::SchemaProxyListModel(QObject* parent) :
+	QSortFilterProxyModel(parent)
+{
+}
+
+
+SchemaProxyListModel::~SchemaProxyListModel()
+{
+}
+
+void SchemaProxyListModel::setSourceModel(QAbstractItemModel* sourceModel)
+{
+	QSortFilterProxyModel::setSourceModel(sourceModel);
+
+	m_sourceModel = dynamic_cast<SchemaListModelEx*>(sourceModel);
+	assert(m_sourceModel != nullptr);
+
+	return;
+}
+
+DbFileInfo SchemaProxyListModel::file(const QModelIndex& mi) const
+{
+	QModelIndex mapped = mapToSource(mi);
+	if (mapped.isValid() == false)
+	{
+		return {};
+	}
+
+	return m_sourceModel->file(mapped);
+}
+
+std::vector<int> SchemaProxyListModel::expandedFileIds()
+{
+	std::vector<int> fileIds;
+	fileIds.reserve(32);
+
+	QModelIndexList indexes = persistentIndexList();
+
+	for (QModelIndex& mi : indexes)
+	{
+		int fileId = file(mi).fileId();
+		if (fileId != DbFileInfo::Null)
+		{
+			fileIds.push_back(fileId);
+		}
+	}
+
+	return fileIds;
+}
+
 //
 //
 //	SchemaFileView
@@ -719,7 +774,7 @@ SchemaFileViewEx::SchemaFileViewEx(DbController* dbc, QWidget* parent) :
 
 	connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &SchemaFileViewEx::selectionChanged);
 
-//	connect(this, &QTableView::doubleClicked, this, &SchemaFileView::slot_doubleClicked);
+	connect(this, &QTreeView::doubleClicked, this, &SchemaFileViewEx::slot_doubleClicked);
 
 //	// Timer for updates of WRN/ERR count
 //	//
@@ -843,7 +898,7 @@ void SchemaFileViewEx::createActions()
 //	connect(m_exportWorkingcopyAction, &QAction::triggered, this, &SchemaFileView::slot_GetWorkcopy);
 //	connect(m_importWorkingcopyAction, &QAction::triggered, this, &SchemaFileView::slot_SetWorkcopy);
 
-//	connect(m_refreshFileAction, &QAction::triggered, this, &SchemaFileView::slot_RefreshFiles);
+	connect(m_refreshFileAction, &QAction::triggered, this, &SchemaFileViewEx::slot_refreshFiles);
 //	connect(m_propertiesAction, &QAction::triggered, this, &SchemaFileView::slot_properties);
 
 	return;
@@ -1008,6 +1063,92 @@ std::vector<DbFileInfo> SchemaFileViewEx::selectedFiles() const
 	}
 
 	return result;
+}
+
+void SchemaFileViewEx::refreshFiles()
+{
+	// Save old selection and expansion
+	//
+	const QItemSelection proxySelection = selectionModel()->selection();
+	const QItemSelection mappedSelection = m_proxyModel.mapSelectionToSource(proxySelection);
+
+	std::vector<int> selectedFilesIds;
+	selectedFilesIds.reserve(mappedSelection.size());
+
+	for (QModelIndex mi : mappedSelection.indexes())
+	{
+		DbFileInfo file = m_filesModel.file(mi);
+		if (file.isNull() == false)
+		{
+			selectedFilesIds.push_back(file.fileId());
+		}
+	}
+
+	std::vector<int> expandedFileIds = m_proxyModel.expandedFileIds();
+
+	selectionModel()->reset();
+
+	// Update model
+	//
+	m_filesModel.refresh();
+
+	// Restore selection
+	//
+	selectionModel()->blockSignals(true);
+
+	// Select
+	//
+	for (int fileId : selectedFilesIds)
+	{
+		QModelIndexList matched = filesModel().match(m_filesModel.index(0, 0),
+													 Qt::UserRole,
+													 QVariant::fromValue(fileId),
+													 1,
+													 Qt::MatchExactly | Qt::MatchRecursive);
+
+		if (matched.size() == 1)
+		{
+			QModelIndex fileModelIndex = matched.front();
+			QModelIndex mappedModelIndex = m_proxyModel.mapFromSource(fileModelIndex);
+
+			selectionModel()->select(mappedModelIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+
+			QModelIndex expandParent = mappedModelIndex.parent();
+			while (expandParent.isValid() == true)
+			{
+				expand(expandParent);
+				expandParent = expandParent.parent();
+			}
+		}
+	}
+
+	// Expand
+	//
+	for (int fileId : expandedFileIds)
+	{
+		QModelIndexList matched = filesModel().match(m_filesModel.index(0, 0),
+													 Qt::UserRole,
+													 QVariant::fromValue(fileId),
+													 1,
+													 Qt::MatchExactly | Qt::MatchRecursive);
+
+		if (matched.size() == 1)
+		{
+			QModelIndex fileModelIndex = matched.front();
+			QModelIndex mappedModelIndex = m_proxyModel.mapFromSource(fileModelIndex);
+
+			QModelIndex expandIndex = mappedModelIndex;
+			while (expandIndex.isValid() == true)
+			{
+				expand(expandIndex);
+				expandIndex = expandIndex.parent();
+			}
+		}
+	}
+
+	selectionModel()->blockSignals(false);
+
+	return;
 }
 
 void SchemaFileViewEx::projectOpened()
@@ -1414,40 +1555,46 @@ void SchemaFileViewEx::projectClosed()
 //	return;
 //}
 
-//void SchemaFileViewEx::slot_refreshFiles()
-//{
-//	refreshFiles();
-//	return;
-//}
+void SchemaFileViewEx::slot_refreshFiles()
+{
+	refreshFiles();
+	return;
+}
 
-//void SchemaFileView::slot_doubleClicked(const QModelIndex& index)
-//{
-//	if (index.isValid() == true)
-//	{
-//		std::shared_ptr<DbFileInfo> file = m_filesModel.fileByRow(index.row());
+void SchemaFileViewEx::slot_doubleClicked(const QModelIndex& index)
+{
+	if (index.isValid() == false)
+	{
+		return;
+	}
 
-//		if (file.get() != nullptr)
-//		{
-//			std::vector<DbFileInfo> v;
-//			v.push_back(*file.get());
+	DbFileInfo file = m_proxyModel.file(index);
+	if (file.isNull() == true)
+	{
+		return;
+	}
 
-//			if (file->state() == VcsState::CheckedOut)
-//			{
-//				emit openFileSignal(v);
-//			}
-//			else
-//			{
-//				emit viewFileSignal(v);
-//			}
-//		}
-//		else
-//		{
-//			assert(file.get() != nullptr);
-//		}
-//	}
+	if (dbc()->isSystemFile(file.fileId()) == true)
+	{
+		this->blockSignals(true);	// to prevent call of this function again
 
-//	return;
-//}
+		QTreeView::doubleClicked(index);	// Default action for system files
+
+		this->blockSignals(false);
+		return;
+	}
+
+	if (file.state() == VcsState::CheckedOut)
+	{
+		emit openFileSignal(file);
+	}
+	else
+	{
+		emit viewFileSignal(file);
+	}
+
+	return;
+}
 
 //void SchemaFileView::slot_properties()
 //{
@@ -1483,6 +1630,16 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 	bool hasDeletePossibility = false;
 	bool hasCheckOutPossibility = false;
 	bool hasCheckInPossibility = false;
+	bool hasAbilityToOpen = false;
+
+	// hasAbilityToOpen
+	//
+	if (selectedFiles.size() == 1 &&
+		selectedFiles.front().state() == VcsState::CheckedOut &&
+		(selectedFiles.front().userId() == currentUserId  || currentUserIsAdmin == true))
+	{
+		hasAbilityToOpen = true;
+	}
 
 	for (const DbFileInfo& file : selectedFiles)
 	{
@@ -1510,8 +1667,7 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 
 		// hasCheckInPossibility
 		//
-		if (file.state() == VcsState::CheckedOut &&
-			(file.userId() == currentUserId  || currentUserIsAdmin == true))
+		if (file.state() == VcsState::CheckedOut && file.userId() == currentUserId)
 		{
 			hasCheckInPossibility = true;
 		}
@@ -1519,6 +1675,8 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 
 	// --
 	//
+	m_openAction->setEnabled(hasAbilityToOpen);
+
 	m_deleteAction->setEnabled(hasDeletePossibility);
 	m_checkOutAction->setEnabled(hasCheckOutPossibility);
 	m_checkInAction->setEnabled(hasCheckInPossibility);
@@ -1613,7 +1771,7 @@ SchemaListModelEx& SchemaFileViewEx::filesModel()
 	return m_filesModel;
 }
 
-QSortFilterProxyModel& SchemaFileViewEx::proxyModel()
+SchemaProxyListModel& SchemaFileViewEx::proxyModel()
 {
 	return m_proxyModel;
 }
@@ -1794,6 +1952,8 @@ void SchemasTabPageEx::projectClosed()
 	//
 	int to_do_close_opened_documents;
 //	assert(m_tabWidget);
+
+//	m_openFiles.clear....
 
 //	for (int i = m_tabWidget->count() - 1; i >= 0; i--)
 //	{
@@ -2084,14 +2244,15 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 	m_toolBar->setStyleSheet("QToolButton { padding-top: 6px; padding-bottom: 6px; padding-left: 6px; padding-right: 6px;}");
 	m_toolBar->setIconSize(m_toolBar->iconSize() * 0.9);
 
+	connect(m_filesView->m_openAction, &QAction::triggered, this, &SchemaControlTabPageEx::openSelectedFile);
+	connect(m_filesView->m_viewAction, &QAction::triggered, this, &SchemaControlTabPageEx::viewSelectedFile);
+
 	connect(m_filesView->m_newFileAction, &QAction::triggered, this, &SchemaControlTabPageEx::addFile);
 	connect(m_filesView->m_cloneFileAction, &QAction::triggered, this, &SchemaControlTabPageEx::cloneFile);
 	connect(m_filesView->m_deleteAction, &QAction::triggered, this, &SchemaControlTabPageEx::deleteFiles);
 
 	connect(m_filesView->m_checkOutAction, &QAction::triggered, this, &SchemaControlTabPageEx::checkOutFiles);
 	connect(m_filesView->m_checkInAction, &QAction::triggered, this, &SchemaControlTabPageEx::checkInFiles);
-
-	connect(m_filesView->m_refreshFileAction, &QAction::triggered, &m_filesView->filesModel(), &SchemaListModelEx::refresh);
 
 	// --
 	//
@@ -2129,8 +2290,8 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemaControlTabPageEx::projectOpened);
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemaControlTabPageEx::projectClosed);
 
-//	connect(m_filesView, &SchemaFileView::openFileSignal, this, &SchemaControlTabPage::openFiles);
-//	connect(m_filesView, &SchemaFileView::viewFileSignal, this, &SchemaControlTabPage::viewFiles);
+	connect(m_filesView, &SchemaFileViewEx::openFileSignal, this, &SchemaControlTabPageEx::openFile);
+	connect(m_filesView, &SchemaFileViewEx::viewFileSignal, this, &SchemaControlTabPageEx::viewFile);
 //	connect(m_filesView, &SchemaFileView::cloneFileSignal, this, &SchemaControlTabPage::cloneFile);
 //	connect(m_filesView, &SchemaFileView::addFileSignal, this, &SchemaControlTabPage::addFile);
 //	connect(m_filesView, &SchemaFileView::deleteFileSignal, this, &SchemaControlTabPage::deleteFile);
@@ -2376,6 +2537,156 @@ int SchemaControlTabPageEx::showSelectFileDialog(int currentSelectionFileId)
 	}
 
 	return -1;
+}
+
+void SchemaControlTabPageEx::openSelectedFile()
+{
+	auto selectedFiles = m_filesView->selectedFiles();
+	if (selectedFiles.size() != 1)
+	{
+		assert(selectedFiles.size() == 1);
+		return;
+	}
+
+	const DbFileInfo file = selectedFiles.front();
+
+	return openFile(file);
+}
+
+void SchemaControlTabPageEx::viewSelectedFile()
+{
+	int to_do;
+	assert(false);
+	// use void viewFile(const DbFileInfo& file);
+}
+
+void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
+{
+	if (file.isNull() == true)
+	{
+		assert(file.isNull() == false);
+		return;
+	}
+
+	if (file.state() != VcsState::CheckedOut)
+	{
+		QMessageBox mb(this);
+		mb.setText(tr("Check Out file for edit first."));
+		mb.exec();
+		return;
+	}
+
+	if (file.state() == VcsState::CheckedOut &&
+		file.userId() != db()->currentUser().userId())
+	{
+		QMessageBox mb(this);
+		QString username = db()->username(file.userId());
+		mb.setText(tr("File %1 is already checked out by user <b>%2</b>.").arg(file.fileName()).arg(username));
+		mb.exec();
+		return;
+	}
+
+	assert(file.state() == VcsState::CheckedOut && file.userId() == db()->currentUser().userId());
+
+	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
+	if (tabWidget == nullptr)
+	{
+		assert(tabWidget != nullptr);
+		return;
+	}
+
+	// Check if file already open, and activate it if it's so
+	//
+	if (auto fit = m_openedFiles.find(file.fileId());
+		fit != m_openedFiles.end())
+	{
+		// File already opened, check if it is opened for edit then activate this tab
+		//
+		EditSchemaTabPageEx* editTabPage = fit->second;
+		assert(editTabPage);
+
+		if (editTabPage->readOnly() == false &&
+			editTabPage->fileInfo().fileId() == file.fileId() &&
+			editTabPage->fileInfo().changeset() == file.changeset())
+		{
+			if (tabWidget->indexOf(editTabPage) != -1)
+			{
+				tabWidget->activateWindow();
+				tabWidget->setCurrentWidget(editTabPage);
+			}
+			else
+			{
+				editTabPage->activateWindow();
+			}
+
+			return;
+		}
+	}
+
+	// Get file from the DB
+	//
+	std::vector<std::shared_ptr<DbFile>> out;
+	std::vector<DbFileInfo> files{file};
+
+	bool result = db()->getWorkcopy(files, &out, this);
+	if (result == false || out.size() != files.size())
+	{
+		QMessageBox::critical(this, tr("Error"), "Can't get file from the database.");
+		return;
+	}
+
+	// Load file
+	//
+	std::shared_ptr<VFrame30::Schema> vf(VFrame30::Schema::Create(out[0].get()->data()));
+
+	if (vf == nullptr)
+	{
+		assert(vf != nullptr);
+		return;
+	}
+
+	// Create TabPage and add it to the TabControl
+	//
+	DbFileInfo fi(*(out.front().get()));
+
+	EditSchemaTabPageEx* editTabPage = new EditSchemaTabPageEx(tabWidget, vf, fi, db());
+
+	connect(editTabPage, &EditSchemaTabPageEx::vcsFileStateChanged, m_filesView, &SchemaFileViewEx::slot_refreshFiles);
+
+	assert(tabWidget->parent());
+
+	SchemasTabPageEx* schemasTabPage = dynamic_cast<SchemasTabPageEx*>(tabWidget->parent());
+	if (schemasTabPage == nullptr)
+	{
+		assert(dynamic_cast<SchemasTabPageEx*>(tabWidget->parent()));
+		return;
+	}
+
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::buildStarted, editTabPage, &EditSchemaTabPageEx::saveWorkcopy);
+
+	// --
+	//
+	editTabPage->setReadOnly(false);
+
+	tabWidget->addTab(editTabPage, editTabPage->windowTitle());
+	tabWidget->setCurrentWidget(editTabPage);
+
+	m_openedFiles[fi.fileId()] = editTabPage;
+
+	// Update AFBs/UFBs after creating tab page, so it will be possible to set new (modified) caption
+	// to the tab page title
+	//
+	editTabPage->updateAfbSchemaItems();
+	editTabPage->updateUfbSchemaItems();
+	editTabPage->updateBussesSchemaItems();
+
+	return;
+}
+
+void SchemaControlTabPageEx::viewFile(const DbFileInfo& file)
+{
+	int to_do;
+	assert(false);
 }
 
 void SchemaControlTabPageEx::addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile)
@@ -2958,7 +3269,7 @@ void SchemaControlTabPageEx::checkInFiles()
 		if (file.userId() == db()->currentUser().userId() ||
 			db()->currentUser().isAdminstrator() == true)
 		{
-			files.push_back(file);
+			checkInFiles.push_back(file);
 		}
 	}
 
@@ -3783,267 +4094,268 @@ const DbFileInfo& SchemaControlTabPageEx::parentFile() const
 }
 
 
-////
-////
-//// EditSchemaTabPage
-////
-////
-//EditSchemaTabPage::EditSchemaTabPage(QTabWidget* tabWidget, std::shared_ptr<VFrame30::Schema> schema, const DbFileInfo& fileInfo, DbController* dbcontroller) :
-//	HasDbController(dbcontroller),
-//	m_schemaWidget(nullptr),
-//	m_tabWidget(tabWidget)
-//{
-//	assert(m_tabWidget);
-//	assert(schema.get() != nullptr);
+//
+//
+// EditSchemaTabPage
+//
+//
+EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
+										 std::shared_ptr<VFrame30::Schema> schema,
+										 const DbFileInfo& fileInfo,
+										 DbController* dbcontroller) :
+	HasDbController(dbcontroller),
+	m_schemaWidget(nullptr),
+	m_tabWidget(tabWidget)
+{
+	assert(m_tabWidget);
+	assert(schema.get() != nullptr);
 
-//	setWindowTitle(schema->schemaId());
+	setWindowTitle(schema->schemaId());
 
-//	// Create controls
-//	//
-//	schema->setChangeset(fileInfo.changeset());
+	// Create controls
+	//
+	schema->setChangeset(fileInfo.changeset());
 
-//	m_schemaWidget = new EditSchemaWidget(schema, fileInfo, dbcontroller);
+	m_schemaWidget = new EditSchemaWidget(schema, fileInfo, dbcontroller);
 
-//	connect(m_schemaWidget, &EditSchemaWidget::closeTab, this, &EditSchemaTabPage::closeTab);
-//	connect(m_schemaWidget, &EditSchemaWidget::modifiedChanged, this, &EditSchemaTabPage::modifiedChanged);
-//	connect(m_schemaWidget, &EditSchemaWidget::saveWorkcopy, this, &EditSchemaTabPage::saveWorkcopy);
-//	connect(m_schemaWidget, &EditSchemaWidget::checkInFile, this, &EditSchemaTabPage::checkInFile);
-//	connect(m_schemaWidget, &EditSchemaWidget::checkOutFile, this, &EditSchemaTabPage::checkOutFile);
-//	connect(m_schemaWidget, &EditSchemaWidget::undoChangesFile, this, &EditSchemaTabPage::undoChangesFile);
-//	connect(m_schemaWidget, &EditSchemaWidget::getCurrentWorkcopy, this, &EditSchemaTabPage::getCurrentWorkcopy);
-//	connect(m_schemaWidget, &EditSchemaWidget::setCurrentWorkcopy, this, &EditSchemaTabPage::setCurrentWorkcopy);
+	connect(m_schemaWidget, &EditSchemaWidget::closeTab, this, &EditSchemaTabPageEx::closeTab);
+	connect(m_schemaWidget, &EditSchemaWidget::modifiedChanged, this, &EditSchemaTabPageEx::modifiedChanged);
+	connect(m_schemaWidget, &EditSchemaWidget::saveWorkcopy, this, &EditSchemaTabPageEx::saveWorkcopy);
+	connect(m_schemaWidget, &EditSchemaWidget::checkInFile, this, &EditSchemaTabPageEx::checkInFile);
+	connect(m_schemaWidget, &EditSchemaWidget::checkOutFile, this, &EditSchemaTabPageEx::checkOutFile);
+	connect(m_schemaWidget, &EditSchemaWidget::undoChangesFile, this, &EditSchemaTabPageEx::undoChangesFile);
+	connect(m_schemaWidget, &EditSchemaWidget::getCurrentWorkcopy, this, &EditSchemaTabPageEx::getCurrentWorkcopy);
+	connect(m_schemaWidget, &EditSchemaWidget::setCurrentWorkcopy, this, &EditSchemaTabPageEx::setCurrentWorkcopy);
 
+	// ToolBar
+	//
+	m_toolBar = new QToolBar(this);
+	m_toolBar->setOrientation(Qt::Vertical);
 
-//	// ToolBar
-//	//
-//	m_toolBar = new QToolBar(this);
-//	m_toolBar->setOrientation(Qt::Vertical);
+	m_toolBar->addAction(m_schemaWidget->m_fileAction);
 
-//	m_toolBar->addAction(m_schemaWidget->m_fileAction);
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_schemaWidget->m_addLineAction);
+	m_toolBar->addAction(m_schemaWidget->m_addRectAction);
+	m_toolBar->addAction(m_schemaWidget->m_addPathAction);
+	m_toolBar->addAction(m_schemaWidget->m_addTextAction);
 
-//	m_toolBar->addSeparator();
-//	m_toolBar->addAction(m_schemaWidget->m_addLineAction);
-//	m_toolBar->addAction(m_schemaWidget->m_addRectAction);
-//	m_toolBar->addAction(m_schemaWidget->m_addPathAction);
-//	m_toolBar->addAction(m_schemaWidget->m_addTextAction);
+	if (schema->isLogicSchema() == true)
+	{
+		m_toolBar->addSeparator();
+		m_toolBar->addAction(m_schemaWidget->m_addLinkAction);
+		m_toolBar->addAction(m_schemaWidget->m_addInputSignalAction);
+		m_toolBar->addAction(m_schemaWidget->m_addInOutSignalAction);
+		m_toolBar->addAction(m_schemaWidget->m_addOutputSignalAction);
+		m_toolBar->addAction(m_schemaWidget->m_addConstantAction);
+		m_toolBar->addAction(m_schemaWidget->m_addTerminatorAction);
 
-//	if (schema->isLogicSchema() == true)
-//	{
-//		m_toolBar->addSeparator();
-//		m_toolBar->addAction(m_schemaWidget->m_addLinkAction);
-//		m_toolBar->addAction(m_schemaWidget->m_addInputSignalAction);
-//		m_toolBar->addAction(m_schemaWidget->m_addInOutSignalAction);
-//		m_toolBar->addAction(m_schemaWidget->m_addOutputSignalAction);
-//		m_toolBar->addAction(m_schemaWidget->m_addConstantAction);
-//		m_toolBar->addAction(m_schemaWidget->m_addTerminatorAction);
+		m_toolBar->addAction(m_schemaWidget->m_addSeparatorAfb);
+		m_toolBar->addAction(m_schemaWidget->m_addAfbAction);
+		m_toolBar->addAction(m_schemaWidget->m_addUfbAction);
 
-//		m_toolBar->addAction(m_schemaWidget->m_addSeparatorAfb);
-//		m_toolBar->addAction(m_schemaWidget->m_addAfbAction);
-//		m_toolBar->addAction(m_schemaWidget->m_addUfbAction);
+		m_toolBar->addAction(m_schemaWidget->m_addSeparatorConn);
+		m_toolBar->addAction(m_schemaWidget->m_addTransmitter);
+		m_toolBar->addAction(m_schemaWidget->m_addReceiver);
 
-//		m_toolBar->addAction(m_schemaWidget->m_addSeparatorConn);
-//		m_toolBar->addAction(m_schemaWidget->m_addTransmitter);
-//		m_toolBar->addAction(m_schemaWidget->m_addReceiver);
+		m_toolBar->addAction(m_schemaWidget->m_addSeparatorLoop);
+		m_toolBar->addAction(m_schemaWidget->m_addLoopbackSource);
+		m_toolBar->addAction(m_schemaWidget->m_addLoopbackTarget);
 
-//		m_toolBar->addAction(m_schemaWidget->m_addSeparatorLoop);
-//		m_toolBar->addAction(m_schemaWidget->m_addLoopbackSource);
-//		m_toolBar->addAction(m_schemaWidget->m_addLoopbackTarget);
+		m_toolBar->addAction(m_schemaWidget->m_addSeparatorBus);
+		m_toolBar->addAction(m_schemaWidget->m_addBusComposer);
+		m_toolBar->addAction(m_schemaWidget->m_addBusExtractor);
+	}
 
-//		m_toolBar->addAction(m_schemaWidget->m_addSeparatorBus);
-//		m_toolBar->addAction(m_schemaWidget->m_addBusComposer);
-//		m_toolBar->addAction(m_schemaWidget->m_addBusExtractor);
-//	}
+	if (schema->isUfbSchema())
+	{
+		m_toolBar->addSeparator();
+		m_toolBar->addAction(m_schemaWidget->m_addLinkAction);
+		m_toolBar->addAction(m_schemaWidget->m_addInputSignalAction);
+		m_toolBar->addAction(m_schemaWidget->m_addOutputSignalAction);
+		m_toolBar->addAction(m_schemaWidget->m_addConstantAction);
+		m_toolBar->addAction(m_schemaWidget->m_addTerminatorAction);
 
-//	if (schema->isUfbSchema())
-//	{
-//		m_toolBar->addSeparator();
-//		m_toolBar->addAction(m_schemaWidget->m_addLinkAction);
-//		m_toolBar->addAction(m_schemaWidget->m_addInputSignalAction);
-//		m_toolBar->addAction(m_schemaWidget->m_addOutputSignalAction);
-//		m_toolBar->addAction(m_schemaWidget->m_addConstantAction);
-//		m_toolBar->addAction(m_schemaWidget->m_addTerminatorAction);
+		m_toolBar->addAction(m_schemaWidget->m_addSeparatorAfb);
+		m_toolBar->addAction(m_schemaWidget->m_addAfbAction);
 
-//		m_toolBar->addAction(m_schemaWidget->m_addSeparatorAfb);
-//		m_toolBar->addAction(m_schemaWidget->m_addAfbAction);
+		m_toolBar->addAction(m_schemaWidget->m_addSeparatorLoop);
+		m_toolBar->addAction(m_schemaWidget->m_addLoopbackSource);
+		m_toolBar->addAction(m_schemaWidget->m_addLoopbackTarget);
 
-//		m_toolBar->addAction(m_schemaWidget->m_addSeparatorLoop);
-//		m_toolBar->addAction(m_schemaWidget->m_addLoopbackSource);
-//		m_toolBar->addAction(m_schemaWidget->m_addLoopbackTarget);
+		m_toolBar->addAction(m_schemaWidget->m_addSeparatorBus);
+		m_toolBar->addAction(m_schemaWidget->m_addBusComposer);
+		m_toolBar->addAction(m_schemaWidget->m_addBusExtractor);
+	}
 
-//		m_toolBar->addAction(m_schemaWidget->m_addSeparatorBus);
-//		m_toolBar->addAction(m_schemaWidget->m_addBusComposer);
-//		m_toolBar->addAction(m_schemaWidget->m_addBusExtractor);
-//	}
+	if (schema->isMonitorSchema())
+	{
+		m_toolBar->addSeparator();
+		m_toolBar->addAction(m_schemaWidget->m_addValueAction);
+		m_toolBar->addAction(m_schemaWidget->m_addPushButtonAction);
+		m_toolBar->addAction(m_schemaWidget->m_addLineEditAction);
+	}
 
-//	if (schema->isMonitorSchema())
-//	{
-//		m_toolBar->addSeparator();
-//		m_toolBar->addAction(m_schemaWidget->m_addValueAction);
-//		m_toolBar->addAction(m_schemaWidget->m_addPushButtonAction);
-//		m_toolBar->addAction(m_schemaWidget->m_addLineEditAction);
-//	}
+	m_toolBar->addSeparator();
+	m_toolBar->addAction(m_schemaWidget->m_orderAction);
+	m_toolBar->addAction(m_schemaWidget->m_sizeAndPosAction);
 
-//	m_toolBar->addSeparator();
-//	m_toolBar->addAction(m_schemaWidget->m_orderAction);
-//	m_toolBar->addAction(m_schemaWidget->m_sizeAndPosAction);
+	m_toolBar->addAction(m_schemaWidget->m_infoModeAction);
 
-//	m_toolBar->addAction(m_schemaWidget->m_infoModeAction);
+	// --
+	//
+	QHBoxLayout* pMainLayout = new QHBoxLayout();
 
-//	// --
-//	//
-//	CreateActions();
+	pMainLayout->setContentsMargins(0, 5, 0, 5);
+	pMainLayout->setSpacing(0);
 
-//	// --
-//	//
-//	QHBoxLayout* pMainLayout = new QHBoxLayout();
+	pMainLayout->addWidget(m_toolBar);
+	pMainLayout->addWidget(m_schemaWidget);
 
-//	pMainLayout->setContentsMargins(0, 5, 0, 5);
-//	pMainLayout->setSpacing(0);
+	setLayout(pMainLayout);
 
-//	pMainLayout->addWidget(m_toolBar);
-//	pMainLayout->addWidget(m_schemaWidget);
+	// --
+	//
+	connect(m_schemaWidget->m_fileAction, &QAction::triggered, this, &EditSchemaTabPageEx::fileMenuTriggered);
+	connect(m_schemaWidget->m_orderAction, &QAction::triggered, this, &EditSchemaTabPageEx::itemsOrderTriggered);
+	connect(m_schemaWidget->m_sizeAndPosAction, &QAction::triggered, this, &EditSchemaTabPageEx::sizeAndPosMenuTriggered);
 
-//	setLayout(pMainLayout);
+	connect(m_tabWidget, &QTabWidget::currentChanged, m_schemaWidget, &EditSchemaWidget::hideWorkDialogs);
 
-//	// --
-//	//
-//	connect(m_schemaWidget->m_fileAction, &QAction::triggered, this, &EditSchemaTabPage::fileMenuTriggered);
-//	connect(m_schemaWidget->m_orderAction, &QAction::triggered, this, &EditSchemaTabPage::itemsOrderTriggered);
-//	connect(m_schemaWidget->m_sizeAndPosAction, &QAction::triggered, this, &EditSchemaTabPage::sizeAndPosMenuTriggered);
+	return;
+}
 
-//	connect(m_tabWidget, &QTabWidget::currentChanged, m_schemaWidget, &EditSchemaWidget::hideWorkDialogs);
+EditSchemaTabPageEx::~EditSchemaTabPageEx()
+{
+}
 
-//	return;
-//}
+void EditSchemaTabPageEx::setPageTitle()
+{
+	QWidget* thisParent = parentWidget();
+	if (thisParent == nullptr)
+	{
+		// This widget has not been created yet?
+		//
+		return;
+	}
 
-//EditSchemaTabPage::~EditSchemaTabPage()
-//{
-//}
+	QString newTitle;
 
-//void EditSchemaTabPage::setPageTitle()
-//{
-//	QWidget* thisParent = parentWidget();
-//	if (thisParent == nullptr)
-//	{
-//		// This widget has not been created yet?
-//		//
-//		return;
-//	}
+	if (readOnly() == true || fileInfo().userId() != db()->currentUser().userId())
+	{
+		if (fileInfo().changeset() == -1 || fileInfo().changeset() == 0)
+		{
+			newTitle = QString("%1: ReadOnly").arg(m_schemaWidget->schema()->schemaId());
+		}
+		else
+		{
+			newTitle = QString("%1: %2 ReadOnly").arg(m_schemaWidget->schema()->schemaId()).arg(fileInfo().changeset());
+		}
 
-//	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(thisParent->parentWidget());
-//	if (tabWidget == nullptr)
-//	{
-//		assert(tabWidget != nullptr);
-//		return;
-//	}
+		if (fileInfo().deleted() == true)
+		{
+			newTitle += QString(", deleted");
+		}
+	}
+	else
+	{
+		if (modified() == true)
+		{
+			newTitle = m_schemaWidget->schema()->schemaId() + "*";
+		}
+		else
+		{
+			newTitle = m_schemaWidget->schema()->schemaId();
+		}
+	}
 
-//	QString newTitle;
+	setWindowTitle(newTitle);
 
-//	if (readOnly() == true || fileInfo().userId() != db()->currentUser().userId())
-//	{
-//		if (fileInfo().changeset() == -1 || fileInfo().changeset() == 0)
-//		{
-//			newTitle = QString("%1: ReadOnly").arg(m_schemaWidget->schema()->schemaId());
-//		}
-//		else
-//		{
-//			newTitle = QString("%1: %2 ReadOnly").arg(m_schemaWidget->schema()->schemaId()).arg(fileInfo().changeset());
-//		}
+	if (QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(thisParent->parentWidget());
+		tabWidget != nullptr)
+	{
+		for (int i = 0; i < tabWidget->count(); i++)
+		{
+			if (tabWidget->widget(i) == this)
+			{
+				tabWidget->setTabText(i, newTitle);
+				return;
+			}
+		}
 
-//		if (fileInfo().deleted() == true)
-//		{
-//			newTitle += QString(", deleted");
-//		}
-//	}
-//	else
-//	{
-//		if (modified() == true)
-//		{
-//			newTitle = m_schemaWidget->schema()->schemaId() + "*";
-//		}
-//		else
-//		{
-//			newTitle = m_schemaWidget->schema()->schemaId();
-//		}
-//	}
+	}
 
-//	for (int i = 0; i < tabWidget->count(); i++)
-//	{
-//		if (tabWidget->widget(i) == this)
-//		{
-//			tabWidget->setTabText(i, newTitle);
-//			return;
-//		}
-//	}
-//}
+	return;
+}
 
-//void EditSchemaTabPage::updateAfbSchemaItems()
-//{
-//	if (m_schemaWidget == nullptr)
-//	{
-//		assert(m_schemaWidget);
-//		return;
-//	}
+void EditSchemaTabPageEx::updateAfbSchemaItems()
+{
+	if (m_schemaWidget == nullptr)
+	{
+		assert(m_schemaWidget);
+		return;
+	}
 
-//	m_schemaWidget->updateAfbsForSchema();
+	m_schemaWidget->updateAfbsForSchema();
 
-//	return;
-//}
+	return;
+}
 
-//void EditSchemaTabPage::updateUfbSchemaItems()
-//{
-//	if (m_schemaWidget == nullptr)
-//	{
-//		assert(m_schemaWidget);
-//		return;
-//	}
+void EditSchemaTabPageEx::updateUfbSchemaItems()
+{
+	if (m_schemaWidget == nullptr)
+	{
+		assert(m_schemaWidget);
+		return;
+	}
 
-//	m_schemaWidget->updateUfbsForSchema();
+	m_schemaWidget->updateUfbsForSchema();
 
-//	return;
-//}
+	return;
+}
 
-//void EditSchemaTabPage::updateBussesSchemaItems()
-//{
-//	if (m_schemaWidget == nullptr)
-//	{
-//		assert(m_schemaWidget);
-//		return;
-//	}
+void EditSchemaTabPageEx::updateBussesSchemaItems()
+{
+	if (m_schemaWidget == nullptr)
+	{
+		assert(m_schemaWidget);
+		return;
+	}
 
-//	m_schemaWidget->updateBussesForSchema();
+	m_schemaWidget->updateBussesForSchema();
 
-//	return;
-//}
+	return;
+}
 
 
-//void EditSchemaTabPage::CreateActions()
-//{
-//}
+void EditSchemaTabPageEx::closeTab()
+{
+	if (m_schemaWidget->modified() == true)
+	{
+		QMessageBox mb(this);
+		mb.setText(tr("The document has been modified."));
+		mb.setInformativeText(tr("Do you want to save chages to %1?").arg(fileInfo().fileName()));
+		mb.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+		mb.setDefaultButton(QMessageBox::Save);
 
-//void EditSchemaTabPage::closeTab()
-//{
-//	if (m_schemaWidget->modified() == true)
-//	{
-//		QMessageBox mb(this);
-//		mb.setText(tr("The document has been modified."));
-//		mb.setInformativeText(tr("Do you want to save chages to %1?").arg(fileInfo().fileName()));
-//		mb.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-//		mb.setDefaultButton(QMessageBox::Save);
+		int result = mb.exec();
 
-//		int result = mb.exec();
+		switch (result)
+		{
+		case QMessageBox::Save:
+			saveWorkcopy();
+			break;
+		case QMessageBox::Discard:
+			break;
+		case QMessageBox::Cancel:
+			return;
+		default:
+			assert(false);
+		}
+	}
 
-//		switch (result)
-//		{
-//		case QMessageBox::Save:
-//			saveWorkcopy();
-//			break;
-//		case QMessageBox::Discard:
-//			break;
-//		case QMessageBox::Cancel:
-//			return;
-//		}
-//	}
+	assert(false);
+	int to_do_closeTab;
 
 //	// Find current tab and close it
 //	//
@@ -4063,394 +4375,394 @@ const DbFileInfo& SchemaControlTabPageEx::parentFile() const
 //	}
 
 //	this->deleteLater();
-//	return;
-//}
-
-//void EditSchemaTabPage::modifiedChanged(bool /*modified*/)
-//{
-//	setPageTitle();
-//}
-
-//void EditSchemaTabPage::checkInFile()
-//{
-//	if (readOnly() == true ||
-//		fileInfo().state() != VcsState::CheckedOut ||
-//		(fileInfo().userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
-//	{
-//		return;
-//	}
-
-//	// Save workcopy and checkin
-//	//
-//	if (modified() == true)
-//	{
-//		bool saveResult = saveWorkcopy();
-
-//		if (saveResult == false)
-//		{
-//			return;
-//		}
-//	}
-
-//	std::vector<DbFileInfo> files;
-//	files.push_back(fileInfo());
-
-//	std::vector<DbFileInfo> updatedFiles;
-
-//	bool checkInResult = CheckInDialog::checkIn(files, false, &updatedFiles, db(), this);
-//	if (checkInResult == false)
-//	{
-//		return;
-//	}
-
-//	emit vcsFileStateChanged();
-
-//	DbFileInfo fi;
-//	db()->getFileInfo(fileInfo().fileId(), &fi, this);
-
-//	setFileInfo(fi);
-
-//	setReadOnly(true);
-
-//	setPageTitle();
-
-//	return;
-//}
-
-//void EditSchemaTabPage::checkOutFile()
-//{
-//	if (readOnly() == false ||
-//		fileInfo().state() != VcsState::CheckedIn)
-//	{
-//		return;
-//	}
-
-//	std::vector<DbFileInfo> files;
-//	files.push_back(fileInfo());
-
-//	bool result = db()->checkOut(files, this);
-//	if (result == false)
-//	{
-//		return;
-//	}
-
-//	// Read the workcopy and load it to the current document
-//	//
-//	std::vector<std::shared_ptr<DbFile>> out;
-
-//	result = db()->getWorkcopy(files, &out, this);
-//	if (result == false || out.size() != files.size())
-//	{
-//		return;
-//	}
-
-//	m_schemaWidget->schema()->Load(out[0].get()->data());
-
-//	setFileInfo(*(out.front().get()));
-
-//	setReadOnly(false);
-//	setPageTitle();
-
-//	m_schemaWidget->resetAction();
-//	m_schemaWidget->clearSelection();
-
-//	m_schemaWidget->update();
-
-//	emit vcsFileStateChanged();
-//	return;
-//}
-
-//void EditSchemaTabPage::undoChangesFile()
-//{
-//	// 1 Ask user to confirm operation
-//	// 2 Undo changes to database
-//	// 3 Set frame to readonly mode
-//	//
-//	if (readOnly() == true ||
-//		fileInfo().state() != VcsState::CheckedOut ||
-//		fileInfo().userId() != db()->currentUser().userId())
-//	{
-//		assert(fileInfo().userId() == db()->currentUser().userId());
-//		return;
-//	}
-
-//	QMessageBox mb(this);
-//	mb.setText(tr("This operation will undo all pending changes for the document and will revert it to the prior state!"));
-//	mb.setInformativeText(tr("Do you want to undo pending changes?"));
-//	mb.setIcon(QMessageBox::Question);
-//	mb.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-
-//	if (mb.exec() == QMessageBox::Ok)
-//	{
-//		DbFileInfo fi = fileInfo();
-
-//		bool result = db()->undoChanges(fi, this);
-
-//		if (result == true)
-//		{
-//			setFileInfo(fi);
-
-//			setReadOnly(true);
-//			setPageTitle();
-
-//			m_schemaWidget->resetAction();
-//			m_schemaWidget->clearSelection();
-
-//			m_schemaWidget->update();
-//		}
-//	}
-
-//	emit vcsFileStateChanged();
-//	return;
-//}
-
-//void EditSchemaTabPage::fileMenuTriggered()
-//{
-//	if (m_toolBar == nullptr)
-//	{
-//		assert(m_toolBar);
-//		return;
-//	}
-
-//	QWidget* w = m_toolBar->widgetForAction(m_schemaWidget->m_fileAction);
-
-//	if (w == nullptr)
-//	{
-//		assert(w);
-//		return;
-//	}
-
-//	QPoint pt = w->pos();
-//	pt.rx() += w->width();
-
-//	m_schemaWidget->m_fileMenu->popup(m_toolBar->mapToGlobal(pt));
-
-//	return;
-//}
-
-//void EditSchemaTabPage::sizeAndPosMenuTriggered()
-//{
-//	if (m_toolBar == nullptr)
-//	{
-//		assert(m_toolBar);
-//		return;
-//	}
-
-//	QWidget* w = m_toolBar->widgetForAction(m_schemaWidget->m_sizeAndPosAction);
-
-//	if (w == nullptr)
-//	{
-//		assert(w);
-//		return;
-//	}
-
-//	QPoint pt = w->pos();
-//	pt.rx() += w->width();
-
-//	m_schemaWidget->m_sizeAndPosMenu->popup(m_toolBar->mapToGlobal(pt));
-
-//	return;
-//}
-
-//void EditSchemaTabPage::itemsOrderTriggered()
-//{
-//	if (m_toolBar == nullptr)
-//	{
-//		assert(m_toolBar);
-//		return;
-//	}
-
-//	QWidget* w = m_toolBar->widgetForAction(m_schemaWidget->m_orderAction);
-
-//	if (w == nullptr)
-//	{
-//		assert(w);
-//		return;
-//	}
-
-//	QPoint pt = w->pos();
-//	pt.rx() += w->width();
-
-//	m_schemaWidget->m_orderMenu->popup(m_toolBar->mapToGlobal(pt));
-
-//	return;
-//}
-
-//bool EditSchemaTabPage::saveWorkcopy()
-//{
-//	if (readOnly() == true ||
-//		modified() == false ||
-//		fileInfo().state() != VcsState::CheckedOut ||
-//		fileInfo().userId() != db()->currentUser().userId())
-//	{
-//		assert(fileInfo().userId() == db()->currentUser().userId());
-//		return false;
-//	}
-
-//	QByteArray data;
-//	m_schemaWidget->schema()->Save(data);
-
-//	if (data.isEmpty() == true)
-//	{
-//		assert(data.isEmpty() == false);
-//		return false;
-//	}
-
-//	std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
-//	static_cast<DbFileInfo*>(file.get())->operator=(fileInfo());
-//	file->swapData(data);
-
-//	QString detailsString = m_schemaWidget->schema()->details();
-//	file->setDetails(detailsString);
-
-//	bool result = db()->setWorkcopy(file, this);
-//	if (result == true)
-//	{
-//		resetModified();
-//		return true;
-//	}
-
-//	return false;
-//}
-
-//void EditSchemaTabPage::getCurrentWorkcopy()
-//{
-//	// Select destination folder
-//	//
-//	QString dir = QFileDialog::getExistingDirectory(this, tr("Select Directory"), QString(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-//	if (dir.isEmpty() == true)
-//	{
-//		return;
-//	}
-
-//	if (dir[dir.length() - 1] != '/')
-//	{
-//		dir.append("/");
-//	}
-
-//	// Save files to disk
-//	//
-//	QString fileName = dir + fileInfo().fileName();
-
-//	bool writeResult = m_schemaWidget->schema()->Save(fileName);
-
-//	if (writeResult == false)
-//	{
-//		QMessageBox msgBox(this);
-//		msgBox.setText(tr("Write file error."));
-//		msgBox.setInformativeText(tr("Cannot write file %1.").arg(fileInfo().fileName()));
-//		msgBox.exec();
-//	}
-
-//	return;
-//}
-
-//void EditSchemaTabPage::setCurrentWorkcopy()
-//{
-//	if (readOnly() == true ||
-//		fileInfo().state() != VcsState::CheckedOut ||
-//		(fileInfo().userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
-//	{
-//		assert(fileInfo().userId() == db()->currentUser().userId());
-//		return;
-//	}
-
-//	// Select file
-//	//
-//	QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"));
-//	if (fileName.isEmpty() == true)
-//	{
-//		return;
-//	}
-
-//	// Load file
-//	//
-//	bool readResult = m_schemaWidget->schema()->Load(fileName);
-//	if (readResult == false)
-//	{
-//		QMessageBox mb(this);
-//		mb.setText(tr("Can't read file %1.").arg(fileName));
-//		mb.exec();
-//		return;
-//	}
-
-//	// --
-//	setPageTitle();
-
-//	m_schemaWidget->resetAction();
-//	m_schemaWidget->clearSelection();
-
-//	m_schemaWidget->resetEditEngine();
-//	m_schemaWidget->setModified();
-
-//	m_schemaWidget->update();
-
-//	return;
-//}
-
-//std::shared_ptr<VFrame30::Schema> EditSchemaTabPage::schema()
-//{
-//	assert(m_schemaWidget);
-//	std::shared_ptr<VFrame30::Schema> s = m_schemaWidget->schema();
-//	return s;
-//}
-
-//const DbFileInfo& EditSchemaTabPage::fileInfo() const
-//{
-//	assert(m_schemaWidget);
-//	return m_schemaWidget->fileInfo();
-//}
-
-//void EditSchemaTabPage::setFileInfo(const DbFileInfo& fi)
-//{
-//	assert(m_schemaWidget);
-//	m_schemaWidget->setFileInfo(fi);
-
-//	m_schemaWidget->schema()->setChangeset(fi.changeset());
-
-//	setPageTitle();
-//}
-
-//bool EditSchemaTabPage::readOnly() const
-//{
-//	assert(m_schemaWidget);
-//	return m_schemaWidget->readOnly();
-//}
-
-//void EditSchemaTabPage::setReadOnly(bool value)
-//{
-//	assert(m_schemaWidget);
-//	m_schemaWidget->setReadOnly(value);
-//}
-
-//bool EditSchemaTabPage::modified() const
-//{
-//	assert(m_schemaWidget);
-//	return m_schemaWidget->modified();
-//}
-
-//void EditSchemaTabPage::resetModified()
-//{
-//	assert(m_schemaWidget);
-//	return m_schemaWidget->resetModified();
-//}
-
-//bool EditSchemaTabPage::compareWidget() const
-//{
-//	return m_schemaWidget->compareWidget();
-//}
-
-//bool EditSchemaTabPage::isCompareWidget() const
-//{
-//	return m_schemaWidget->compareWidget();
-//}
-
-//void EditSchemaTabPage::setCompareWidget(bool value, std::shared_ptr<VFrame30::Schema> source, std::shared_ptr<VFrame30::Schema> target)
-//{
-//	return m_schemaWidget->setCompareWidget(value, source, target);
-//}
-
-//void EditSchemaTabPage::setCompareItemActions(const std::map<QUuid, CompareAction>& itemsActions)
-//{
-//	m_schemaWidget->setCompareItemActions(itemsActions);
-//}
+	return;
+}
+
+void EditSchemaTabPageEx::modifiedChanged(bool /*modified*/)
+{
+	setPageTitle();
+}
+
+void EditSchemaTabPageEx::checkInFile()
+{
+	if (readOnly() == true ||
+		fileInfo().state() != VcsState::CheckedOut ||
+		(fileInfo().userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
+	{
+		return;
+	}
+
+	// Save workcopy and checkin
+	//
+	if (modified() == true)
+	{
+		bool saveResult = saveWorkcopy();
+
+		if (saveResult == false)
+		{
+			return;
+		}
+	}
+
+	std::vector<DbFileInfo> files;
+	files.push_back(fileInfo());
+
+	std::vector<DbFileInfo> updatedFiles;
+
+	bool checkInResult = CheckInDialog::checkIn(files, false, &updatedFiles, db(), this);
+	if (checkInResult == false)
+	{
+		return;
+	}
+
+	emit vcsFileStateChanged();
+
+	DbFileInfo fi;
+	db()->getFileInfo(fileInfo().fileId(), &fi, this);
+
+	setFileInfo(fi);
+
+	setReadOnly(true);
+
+	setPageTitle();
+
+	return;
+}
+
+void EditSchemaTabPageEx::checkOutFile()
+{
+	if (readOnly() == false ||
+		fileInfo().state() != VcsState::CheckedIn)
+	{
+		return;
+	}
+
+	std::vector<DbFileInfo> files;
+	files.push_back(fileInfo());
+
+	bool result = db()->checkOut(files, this);
+	if (result == false)
+	{
+		return;
+	}
+
+	// Read the workcopy and load it to the current document
+	//
+	std::vector<std::shared_ptr<DbFile>> out;
+
+	result = db()->getWorkcopy(files, &out, this);
+	if (result == false || out.size() != files.size())
+	{
+		return;
+	}
+
+	m_schemaWidget->schema()->Load(out[0].get()->data());
+
+	setFileInfo(*(out.front().get()));
+
+	setReadOnly(false);
+	setPageTitle();
+
+	m_schemaWidget->resetAction();
+	m_schemaWidget->clearSelection();
+
+	m_schemaWidget->update();
+
+	emit vcsFileStateChanged();
+	return;
+}
+
+void EditSchemaTabPageEx::undoChangesFile()
+{
+	// 1 Ask user to confirm operation
+	// 2 Undo changes to database
+	// 3 Set frame to readonly mode
+	//
+	if (readOnly() == true ||
+		fileInfo().state() != VcsState::CheckedOut ||
+		fileInfo().userId() != db()->currentUser().userId())
+	{
+		assert(fileInfo().userId() == db()->currentUser().userId());
+		return;
+	}
+
+	QMessageBox mb(this);
+	mb.setText(tr("This operation will undo all pending changes for the document and will revert it to the prior state!"));
+	mb.setInformativeText(tr("Do you want to undo pending changes?"));
+	mb.setIcon(QMessageBox::Question);
+	mb.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+
+	if (mb.exec() == QMessageBox::Ok)
+	{
+		DbFileInfo fi = fileInfo();
+
+		bool result = db()->undoChanges(fi, this);
+
+		if (result == true)
+		{
+			setFileInfo(fi);
+
+			setReadOnly(true);
+			setPageTitle();
+
+			m_schemaWidget->resetAction();
+			m_schemaWidget->clearSelection();
+
+			m_schemaWidget->update();
+		}
+	}
+
+	emit vcsFileStateChanged();
+	return;
+}
+
+void EditSchemaTabPageEx::fileMenuTriggered()
+{
+	if (m_toolBar == nullptr)
+	{
+		assert(m_toolBar);
+		return;
+	}
+
+	QWidget* w = m_toolBar->widgetForAction(m_schemaWidget->m_fileAction);
+
+	if (w == nullptr)
+	{
+		assert(w);
+		return;
+	}
+
+	QPoint pt = w->pos();
+	pt.rx() += w->width();
+
+	m_schemaWidget->m_fileMenu->popup(m_toolBar->mapToGlobal(pt));
+
+	return;
+}
+
+void EditSchemaTabPageEx::sizeAndPosMenuTriggered()
+{
+	if (m_toolBar == nullptr)
+	{
+		assert(m_toolBar);
+		return;
+	}
+
+	QWidget* w = m_toolBar->widgetForAction(m_schemaWidget->m_sizeAndPosAction);
+
+	if (w == nullptr)
+	{
+		assert(w);
+		return;
+	}
+
+	QPoint pt = w->pos();
+	pt.rx() += w->width();
+
+	m_schemaWidget->m_sizeAndPosMenu->popup(m_toolBar->mapToGlobal(pt));
+
+	return;
+}
+
+void EditSchemaTabPageEx::itemsOrderTriggered()
+{
+	if (m_toolBar == nullptr)
+	{
+		assert(m_toolBar);
+		return;
+	}
+
+	QWidget* w = m_toolBar->widgetForAction(m_schemaWidget->m_orderAction);
+
+	if (w == nullptr)
+	{
+		assert(w);
+		return;
+	}
+
+	QPoint pt = w->pos();
+	pt.rx() += w->width();
+
+	m_schemaWidget->m_orderMenu->popup(m_toolBar->mapToGlobal(pt));
+
+	return;
+}
+
+bool EditSchemaTabPageEx::saveWorkcopy()
+{
+	if (readOnly() == true ||
+		modified() == false ||
+		fileInfo().state() != VcsState::CheckedOut ||
+		fileInfo().userId() != db()->currentUser().userId())
+	{
+		assert(fileInfo().userId() == db()->currentUser().userId());
+		return false;
+	}
+
+	QByteArray data;
+	m_schemaWidget->schema()->Save(data);
+
+	if (data.isEmpty() == true)
+	{
+		assert(data.isEmpty() == false);
+		return false;
+	}
+
+	std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+	static_cast<DbFileInfo*>(file.get())->operator=(fileInfo());
+	file->swapData(data);
+
+	QString detailsString = m_schemaWidget->schema()->details();
+	file->setDetails(detailsString);
+
+	bool result = db()->setWorkcopy(file, this);
+	if (result == true)
+	{
+		resetModified();
+		return true;
+	}
+
+	return false;
+}
+
+void EditSchemaTabPageEx::getCurrentWorkcopy()
+{
+	// Select destination folder
+	//
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Select Directory"), QString(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	if (dir.isEmpty() == true)
+	{
+		return;
+	}
+
+	if (dir[dir.length() - 1] != '/')
+	{
+		dir.append("/");
+	}
+
+	// Save files to disk
+	//
+	QString fileName = dir + fileInfo().fileName();
+
+	bool writeResult = m_schemaWidget->schema()->Save(fileName);
+
+	if (writeResult == false)
+	{
+		QMessageBox msgBox(this);
+		msgBox.setText(tr("Write file error."));
+		msgBox.setInformativeText(tr("Cannot write file %1.").arg(fileInfo().fileName()));
+		msgBox.exec();
+	}
+
+	return;
+}
+
+void EditSchemaTabPageEx::setCurrentWorkcopy()
+{
+	if (readOnly() == true ||
+		fileInfo().state() != VcsState::CheckedOut ||
+		(fileInfo().userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
+	{
+		assert(fileInfo().userId() == db()->currentUser().userId());
+		return;
+	}
+
+	// Select file
+	//
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"));
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	// Load file
+	//
+	bool readResult = m_schemaWidget->schema()->Load(fileName);
+	if (readResult == false)
+	{
+		QMessageBox mb(this);
+		mb.setText(tr("Can't read file %1.").arg(fileName));
+		mb.exec();
+		return;
+	}
+
+	// --
+	setPageTitle();
+
+	m_schemaWidget->resetAction();
+	m_schemaWidget->clearSelection();
+
+	m_schemaWidget->resetEditEngine();
+	m_schemaWidget->setModified();
+
+	m_schemaWidget->update();
+
+	return;
+}
+
+std::shared_ptr<VFrame30::Schema> EditSchemaTabPageEx::schema()
+{
+	assert(m_schemaWidget);
+	std::shared_ptr<VFrame30::Schema> s = m_schemaWidget->schema();
+	return s;
+}
+
+const DbFileInfo& EditSchemaTabPageEx::fileInfo() const
+{
+	assert(m_schemaWidget);
+	return m_schemaWidget->fileInfo();
+}
+
+void EditSchemaTabPageEx::setFileInfo(const DbFileInfo& fi)
+{
+	assert(m_schemaWidget);
+	m_schemaWidget->setFileInfo(fi);
+
+	m_schemaWidget->schema()->setChangeset(fi.changeset());
+
+	setPageTitle();
+}
+
+bool EditSchemaTabPageEx::readOnly() const
+{
+	assert(m_schemaWidget);
+	return m_schemaWidget->readOnly();
+}
+
+void EditSchemaTabPageEx::setReadOnly(bool value)
+{
+	assert(m_schemaWidget);
+	m_schemaWidget->setReadOnly(value);
+}
+
+bool EditSchemaTabPageEx::modified() const
+{
+	assert(m_schemaWidget);
+	return m_schemaWidget->modified();
+}
+
+void EditSchemaTabPageEx::resetModified()
+{
+	assert(m_schemaWidget);
+	return m_schemaWidget->resetModified();
+}
+
+bool EditSchemaTabPageEx::compareWidget() const
+{
+	return m_schemaWidget->compareWidget();
+}
+
+bool EditSchemaTabPageEx::isCompareWidget() const
+{
+	return m_schemaWidget->compareWidget();
+}
+
+void EditSchemaTabPageEx::setCompareWidget(bool value, std::shared_ptr<VFrame30::Schema> source, std::shared_ptr<VFrame30::Schema> target)
+{
+	return m_schemaWidget->setCompareWidget(value, source, target);
+}
+
+void EditSchemaTabPageEx::setCompareItemActions(const std::map<QUuid, CompareAction>& itemsActions)
+{
+	m_schemaWidget->setCompareItemActions(itemsActions);
+}

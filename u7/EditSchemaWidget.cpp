@@ -5229,6 +5229,8 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 	//
 	std::vector<DbFileInfo> fileList;
 
+	int to_do_getFileList_make_recursive;
+
 	bool ok = db()->getFileList(&fileList, db()->ufblFileId(), QString(".") + UfbFileExtension, true, this);
 	if (ok == false)
 	{
@@ -5327,6 +5329,8 @@ bool EditSchemaWidget::loadBusses(DbController* db, std::vector<VFrame30::Bus>* 
 	// Get Busses
 	//
 	std::vector<DbFileInfo> fileList;
+
+	int to_do_getFileList_make_recursive;
 
 	bool ok = db->getFileList(&fileList, db->busTypesFileId(), ::BusFileExtension, true, parentWidget);
 	if (ok == false)

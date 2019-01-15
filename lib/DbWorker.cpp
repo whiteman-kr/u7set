@@ -469,7 +469,10 @@ int DbWorker::etcFileId() const
 std::vector<DbFileInfo> DbWorker::systemFiles() const
 {
 	QMutexLocker m(&m_mutex);
-	std::vector<DbFileInfo> copy(m_systemFiles);
+
+	std::vector<DbFileInfo> copy;
+	copy.assign(m_systemFiles.begin(),m_systemFiles.end());
+
 	return copy;
 }
 

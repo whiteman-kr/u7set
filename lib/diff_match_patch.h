@@ -23,6 +23,15 @@
 #ifndef DIFF_MATCH_PATCH_H
 #define DIFF_MATCH_PATCH_H
 
+// in winnt.h can be defined DELETE, so undefine it to make possible to compile this file
+//
+#ifdef Q_OS_WIN
+    #ifdef DELETE
+        #undef DELETE
+    #endif
+#endif
+
+
 #include <limits>
 #include <list>
 #include <map>
@@ -90,6 +99,8 @@ class diff_match_patch {
   * which means: delete "Hello", add "Goodbye" and keep " world."
   */
   enum Operation {
+	  // If you see compile error here, it can be defined DELETE in winnt.h
+	  //
     DELETE, INSERT, EQUAL
   };
 

@@ -7,9 +7,12 @@
 #include "MainTabPage.h"
 //#include "SchemaListModel.h"
 #include "../lib/DbController.h"
-//#include "EditSchemaWidget.h"
 #include "GlobalMessanger.h"
+#include "EditSchemaWidget.h"
 #include "../VFrame30/LogicSchema.h"
+
+
+class EditSchemaTabPageEx;
 
 
 //
@@ -45,8 +48,6 @@ public:
 
 	//	std::shared_ptr<DbFileInfo> fileByRow(int row);
 	//	std::shared_ptr<DbFileInfo> fileByFileId(int fileId);
-
-	//	int getFileRow(int fileId) const;
 
 	DbFileInfo file(const QModelIndex& modelIndex) const;
 
@@ -106,6 +107,24 @@ private:
 };
 
 
+class SchemaProxyListModel : public QSortFilterProxyModel
+{
+	Q_OBJECT
+
+public:
+	SchemaProxyListModel(QObject* parent = nullptr);
+	virtual ~SchemaProxyListModel();
+
+	virtual void setSourceModel(QAbstractItemModel* sourceModel) override;
+
+public:
+	DbFileInfo file(const QModelIndex& mi) const;
+	std::vector<int> expandedFileIds();
+
+private:
+	SchemaListModelEx* m_sourceModel = nullptr;
+};
+
 //
 //
 // SchemaFileViewEx
@@ -135,11 +154,11 @@ public:
 
 	std::vector<DbFileInfo> selectedFiles() const;
 
-	//	void refreshFiles();
+	void refreshFiles();
 
-	//signals:
-	//	void openFileSignal(std::vector<DbFileInfo> files);
-	//	void viewFileSignal(std::vector<DbFileInfo> files);
+signals:
+	void openFileSignal(DbFileInfo files);
+	void viewFileSignal(DbFileInfo files);
 	//	void cloneFileSignal(DbFileInfo file);
 	//	void addFileSignal();
 	//	void deleteFileSignal(std::vector<DbFileInfo> files);
@@ -166,8 +185,8 @@ public slots:
 	//	void slot_DeleteFile();
 	//	void slot_GetWorkcopy();
 	//	void slot_SetWorkcopy();
-	//	void slot_refreshFiles();
-	//	void slot_doubleClicked(const QModelIndex& index);
+		void slot_refreshFiles();
+		void slot_doubleClicked(const QModelIndex& index);
 	//	void slot_properties();
 
 public slots:
@@ -178,7 +197,7 @@ public slots:
 	//
 public:
 	SchemaListModelEx& filesModel();
-	QSortFilterProxyModel& proxyModel();
+	SchemaProxyListModel& proxyModel();
 
 	//	const std::vector<std::shared_ptr<DbFileInfo>>& files() const;
 
@@ -193,7 +212,7 @@ public:
 	//
 private:
 	SchemaListModelEx m_filesModel;
-	QSortFilterProxyModel m_proxyModel;
+	SchemaProxyListModel m_proxyModel;
 
 	//QString m_parentFileName;
 	//DbFileInfo m_parentFile;
@@ -256,6 +275,12 @@ protected slots:
 
 	int showSelectFileDialog(int currentSelectionFileId);
 
+	void openSelectedFile();
+	void viewSelectedFile();
+
+	void openFile(const DbFileInfo& file);
+	void viewFile(const DbFileInfo& file);
+
 	void addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
 	void addFile();
 
@@ -299,12 +324,14 @@ private:
 
 	QLineEdit* m_searchEdit = nullptr;
 	QPushButton* m_searchButton = nullptr;
+
+	std::map<int, EditSchemaTabPageEx*> m_openedFiles;	// Opened files (for edit and view), key is fileId
 };
 
 
 //
 //
-// SchemasTabPage
+// SchemasTabPage - the main tab page added to IDE
 //
 //
 class SchemasTabPageEx : public MainTabPage
@@ -345,78 +372,73 @@ protected:
 // EditSchemaTabPage
 //
 //
-//class EditSchemaTabPageEx : public QWidget, public HasDbController
-//{
-//	Q_OBJECT
+class EditSchemaTabPageEx : public QWidget, public HasDbController
+{
+	Q_OBJECT
 
-//public:
-//	EditSchemaTabPageEx() = delete;
-//	EditSchemaTabPageEx(QTabWidget* tabWidget,
-//					  std::shared_ptr<VFrame30::Schema> schema,
-//					  const DbFileInfo& fileInfo,
-//					  DbController* db,
-//					  QObject* parent);
+public:
+	EditSchemaTabPageEx() = delete;
+	EditSchemaTabPageEx(QTabWidget* tabWidget,
+					  std::shared_ptr<VFrame30::Schema> schema,
+					  const DbFileInfo& fileInfo,
+					  DbController* db);
+	virtual ~EditSchemaTabPageEx();
 
-//	virtual ~EditSchemaTabPageEx();
+	// Public methods
+	//
+public:
+	void setPageTitle();
 
-//	// Public methods
-//	//
-//public:
-//	void setPageTitle();
+	void updateAfbSchemaItems();
+	void updateUfbSchemaItems();
+	void updateBussesSchemaItems();
 
-//	void updateAfbSchemaItems();
-//	void updateUfbSchemaItems();
-//	void updateBussesSchemaItems();
+signals:
+	void vcsFileStateChanged();
 
-//protected:
-//	void CreateActions();
+protected slots:
+	void closeTab();
+	void modifiedChanged(bool modified);
 
-//signals:
-//	void vcsFileStateChanged();
+	void checkInFile();
+	void checkOutFile();
+	void undoChangesFile();
 
-//protected slots:
-//	void closeTab();
-//	void modifiedChanged(bool modified);
+	void fileMenuTriggered();
+	void sizeAndPosMenuTriggered();
+	void itemsOrderTriggered();
 
-//	void checkInFile();
-//	void checkOutFile();
-//	void undoChangesFile();
+public:
+	bool saveWorkcopy();
 
-//	void fileMenuTriggered();
-//	void sizeAndPosMenuTriggered();
-//	void itemsOrderTriggered();
+protected:
+	void getCurrentWorkcopy();				// Save current schema to a file
+	void setCurrentWorkcopy();				// Load a schema from a file
 
-//public:
-//	bool saveWorkcopy();
+	// Properties
+	//
+public:
+	std::shared_ptr<VFrame30::Schema> schema();
 
-//protected:
-//	void getCurrentWorkcopy();				// Save current schema to a file
-//	void setCurrentWorkcopy();				// Load a schema from a file
+	const DbFileInfo& fileInfo() const;
+	void setFileInfo(const DbFileInfo& fi);
 
-//	// Properties
-//	//
-//public:
-//	std::shared_ptr<VFrame30::Schema> schema();
+	bool readOnly() const;
+	void setReadOnly(bool value);
 
-//	const DbFileInfo& fileInfo() const;
-//	void setFileInfo(const DbFileInfo& fi);
+	bool modified() const;
+	void resetModified();
 
-//	bool readOnly() const;
-//	void setReadOnly(bool value);
+	bool compareWidget() const;
+	bool isCompareWidget() const;
+	void setCompareWidget(bool value, std::shared_ptr<VFrame30::Schema> source, std::shared_ptr<VFrame30::Schema> target);
 
-//	bool modified() const;
-//	void resetModified();
+	void setCompareItemActions(const std::map<QUuid, CompareAction>& itemsActions);
 
-//	bool compareWidget() const;
-//	bool isCompareWidget() const;
-//	void setCompareWidget(bool value, std::shared_ptr<VFrame30::Schema> source, std::shared_ptr<VFrame30::Schema> target);
-
-//	void setCompareItemActions(const std::map<QUuid, CompareAction>& itemsActions);
-
-//	// Data
-//	//
-//private:
-//	EditSchemaWidget* m_schemaWidget = nullptr;
-//	QToolBar* m_toolBar = nullptr;
-//	QTabWidget* m_tabWidget = nullptr;
-//};
+	// Data
+	//
+private:
+	EditSchemaWidget* m_schemaWidget = nullptr;
+	QToolBar* m_toolBar = nullptr;
+	QTabWidget* m_tabWidget = nullptr;
+};

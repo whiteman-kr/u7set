@@ -549,6 +549,7 @@ private:
 	//	Contexet Menu
 	//
 friend class EditSchemaTabPage;		// EditSchemaTabPage has toolbar, and it will contain some actions from this class
+friend class EditSchemaTabPageEx;	// EditSchemaTabPageEx has toolbar, and it will contain some actions from this class
 
 private:
 	// File
