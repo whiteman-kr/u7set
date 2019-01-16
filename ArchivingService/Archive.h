@@ -79,6 +79,7 @@ public:
 	Archive(const QString& projectID,
 			const QString& equipmentID,
 			const QString& archDir,
+			const Proto::ArchSignals& protoArchSignals,
 			CircularLoggerShared logger);
 	~Archive();
 
@@ -89,7 +90,6 @@ public:
 
 	bool isWorkable() const { return m_isWorkable; }
 
-	void initArchSignals(const Proto::ArchSignals& archSignals);
 	QString getSignalID(Hash signalHash);
 
 	bool canReadWriteSignal(Hash signalHash);

@@ -75,7 +75,7 @@ bool AppDataReceiverThread::tryCreateAndBindSocket()
 			break;
 		}
 
-		qDebug() << C_STR(QString("AppDataReceiverThread listening socket binding error").arg(m_dataReceivingIP.addressPortStr()));
+		qDebug() << C_STR(QString("AppDataReceiverThread listening socket binding error to %1").arg(m_dataReceivingIP.addressPortStr()));
 
 		closeSocket();
 

@@ -28,8 +28,6 @@ private:
 
 	void finalizeCurrentRequest();
 
-	quint32 getNewRequestID();
-
 private:
 	Archive* m_archive = nullptr;
 	CircularLoggerShared m_logger;

@@ -9,7 +9,7 @@
 // ArchRequestContext class implementattion
 //
 // ---------------------------------------------------------------------------------------------
-
+/*
 ArchRequest::ArchRequest(const ArchRequestParam& param, const QTime& startTime, CircularLoggerShared logger) :
 	m_param(param),
 	m_time(startTime),
@@ -344,3 +344,4 @@ void ArchRequestThread::getNextData(ArchRequestContextShared context)
 }
 
 
+*/

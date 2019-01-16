@@ -18,8 +18,6 @@ class ArchRequestParam;
 
 class ArchRequest
 {
-	Q_OBJECT
-
 public:
 	ArchRequest(const ArchRequestParam& param, const QTime& startTime, CircularLoggerShared logger);
 	virtual ~ArchRequest();
@@ -31,12 +29,9 @@ public:
 	bool isDataReady() const { return m_dataReady; }
 	ArchiveError archError() const { return m_archError; }
 
-	int timeElapsed() const { return m_time.elapsed(); }
+	int timeElapsed() const { return m_startTime.elapsed(); }
 
 	Network::GetAppSignalStatesFromArchiveNextReply& getNextReply() { return m_reply; }
-
-signals:
-	void getNextData();
 
 protected:
 	void checkSignalsHashes();
@@ -72,8 +67,9 @@ private:
 
 protected:
 	ArchRequestParam m_param;
-	QTime m_time;
 	CircularLoggerShared m_logger;
+
+	QTime m_startTime;
 
 	//
 
@@ -102,13 +98,16 @@ protected:
 	Network::GetAppSignalStatesFromArchiveNextReply m_reply;
 
 	friend class ArchRequestThreadWorker;
-
-	//
-
-	SimpleThread* m_requestThread;
 };
 
 
+struct RequestProcessingContext
+{
+	ArchRequest* request = nullptr;
+	std::atomic<QThread*> processingThread = { nullptr };
+};
+
+/*
 class ArchRequestThreadWorker : public SimpleThreadWorker
 {
 	Q_OBJECT
@@ -132,4 +131,4 @@ private slots:
 private:
 	ArchRequest* m_request = nullptr;
 	CircularLoggerShared m_logger;
-};
+};*/

@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
 	si.init(E::SoftwareType::ArchiveService, "", 1, 0);
 
-	ArchivingServiceWorker archServiceWorker(si, "RPCT Archiving Service", argc, argv, logger);
+	ArchivingService archServiceWorker(si, "RPCT Archiving Service", argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, archServiceWorker, logger);
 

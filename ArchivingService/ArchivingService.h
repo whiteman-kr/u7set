@@ -11,17 +11,30 @@
 #include "ArchRequest.h"
 #include "ArchWriterThread.h"
 
-class ArchivingServiceWorker : public ServiceWorker
+class ArchivingService : public ServiceWorker
 {
 	Q_OBJECT
 
+private:
+	class Configuration
+	{
+	public:
+		virtual ~NewConfiguration();
+
+		ArchivingServiceSettings serviceSettings;
+		Builder:: BuildInfo buildInfo;
+		Proto::ArchSignals* m_protoArchSignals = nullptr;
+
+		bool loadResult = true;
+	};
+
 public:
-	ArchivingServiceWorker(const SoftwareInfo& softwareInfo,
+	ArchivingService(const SoftwareInfo& softwareInfo,
 						   const QString &serviceName,
 						   int &argc,
 						   char **argv,
 						   std::shared_ptr<CircularLogger> logger);
-	~ArchivingServiceWorker();
+	~ArchivingService();
 
 	virtual ServiceWorker* createInstance() const override;
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const override;
@@ -51,7 +64,7 @@ private:
 	bool readConfiguration(const QByteArray& fileData);
 	bool loadConfigurationFromFile(const QString& fileName);
 
-	bool initArchSignals(const QByteArray& fileData);
+	bool loadArchSignalsProto(const QByteArray& fileData);
 
 private slots:
 	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
@@ -63,6 +76,10 @@ private:
 	Builder:: BuildInfo m_buildInfo;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
+
+	//
+
+	Proto::ArchSignals* m_protoArchSignals = nullptr;
 
 	//
 

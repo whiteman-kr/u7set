@@ -127,8 +127,8 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 		return;
 	}
 
-	reply.set_error(static_cast<int>(NetworkError::Success));
-	reply.set_requestid(m_request->ID());
+/*	reply.set_error(static_cast<int>(NetworkError::Success));
+	reply.set_requestid(m_request->ID());*/
 
 	sendReply(reply);
 }
@@ -148,7 +148,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 		return;
 	}
 
-	if (m_currentRequestID == ArchRequestParam::NO_REQUEST || m_currentRequestID != request.requestid())
+/*	if (m_currentRequestID == ArchRequestParam::NO_REQUEST || m_currentRequestID != request.requestid())
 	{
 		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
 		reply.set_archerror(static_cast<int>(ArchiveError::UnknownArchRequestID));
@@ -163,9 +163,6 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 		reply.set_archerror(static_cast<int>(ArchiveError::Success));
 		reply.set_requestid(m_currentRequest->requestID());
 		reply.set_dataready(false);
-/*		DEBUG_LOG_MSG(m_logger, QString("RequestID %1: send next reply, no data ready (elapsed %2)").
-					  arg(m_currentRequest->requestID()).
-					  arg(m_currentRequest->timeElapsed()));*/
 		sendReply(reply);
 		return;
 	}
@@ -200,7 +197,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 	else
 	{
 		finalizeCurrentRequest();
-	}
+	}*/
 }
 
 void TcpArchRequestsServer::onGetSignalStatesFromArchiveCancel(const char* requestData, quint32 requestDataSize)
@@ -217,13 +214,13 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveCancel(const char* reque
 		return;
 	}
 
-	if (m_currentRequest == nullptr || m_currentRequest->requestID() != request.requestid())
+/*	if (m_currentRequest == nullptr || m_currentRequest->requestID() != request.requestid())
 	{
 		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
 		reply.set_archerror(static_cast<int>(ArchiveError::UnknownArchRequestID));
 		sendReply(reply);
 		return;
-	}
+	}*/
 
 	reply.set_error(static_cast<int>(NetworkError::Success));
 	sendReply(reply);
@@ -233,7 +230,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveCancel(const char* reque
 
 void TcpArchRequestsServer::finalizeCurrentRequest()
 {
-	if (m_currentRequest == nullptr)
+/*	if (m_currentRequest == nullptr)
 	{
 		return;
 	}
@@ -242,17 +239,5 @@ void TcpArchRequestsServer::finalizeCurrentRequest()
 
 	m_currentRequest.reset();
 
-	m_archRequestThread.finalizeRequest(requestID);
-}
-
-quint32 TcpArchRequestsServer::getNewRequestID()
-{
-	return m_nextRequestNo.fetch_add(1);
-}
-
-TcpArchRequestsServerThread::TcpArchRequestsServerThread(const HostAddressPort& listenAddressPort,
-			 Tcp::Server* server,
-			 std::shared_ptr<CircularLogger> logger) :
-	Tcp::ServerThread(listenAddressPort, server, logger)
-{
+	m_archRequestThread.finalizeRequest(requestID);*/
 }

@@ -53,12 +53,31 @@ std::atomic<quint32> Archive::m_nextRequestID = { 1 };
 Archive::Archive(const QString& projectID,
 				 const QString& equipmentID,
 				 const QString& archDir,
+				 const Proto::ArchSignals& protoArchSignals,
 				 CircularLoggerShared logger) :
 	m_projectID(projectID),
 	m_equipmentID(equipmentID),
 	m_archDir(archDir),
 	m_log(logger)
 {
+	int signalsCount = protoArchSignals.archsignals_size();
+
+	m_archFiles.reserve(static_cast<int>(signalsCount * 1.2));
+	m_archFilesArray.resize(signalsCount);
+	m_regularFilesQueue.reserve(static_cast<int>(signalsCount * 1.2));
+
+	for(int i = 0; i < signalsCount; i++)
+	{
+		const Proto::ArchSignal& protoArchSignal = protoArchSignals.archsignals(i);
+
+		ArchFile* archFile = new ArchFile(protoArchSignal, m_archFullPath);
+
+		m_archFiles.insert(archFile->hash(), archFile);
+
+		m_archFilesArray[i] = archFile;
+
+		m_regularFilesQueue.append(archFile);
+	}
 }
 
 Archive::~Archive()
@@ -74,7 +93,7 @@ void Archive::start()
 
 	if (result == false)
 	{
-		DEBUG_LOG_ERR(logger(), "Archive directories creation error");
+		DEBUG_LOG_ERR(m_log, "Archive directories creation error");
 		return;
 	}
 
@@ -83,24 +102,22 @@ void Archive::start()
 	m_archWriterThread = new ArchWriterThread(this, m_log);
 	m_archWriterThread->start();
 
-	assert(m_archRequestThread == nullptr);
+/*	assert(m_archRequestThread == nullptr);
 
 	m_archRequestThread = new ArchRequestThread(this, m_log);
-	m_archRequestThread->start();
+	m_archRequestThread->start();*/
 
 	m_isWorkable = true;
-
-	return true;
 }
 
 void Archive::stop()
 {
-	if (m_archRequestThread != nullptr)
+/*	if (m_archRequestThread != nullptr)
 	{
 		m_archRequestThread->quitAndWait();
 		delete m_archRequestThread;
 		m_archRequestThread = nullptr;
-	}
+	}*/
 
 	if (m_archWriterThread != nullptr)
 	{
@@ -115,32 +132,7 @@ void Archive::stop()
 ArchRequest* Archive::createNewRequest(E::TimeType timeType, qint64 sartTime, qint64 endTime, const QVector<Hash>& signalHashes)
 {
 	assert(false);		// to do
-}
-
-
-void Archive::initArchSignals(const Proto::ArchSignals& archSignals)
-{
-	assert(m_archFiles.count() == 0);
-	assert(m_archFiles.count() == 0);
-
-	int signalsCount = archSignals.archsignals_size();
-
-	m_archFiles.reserve(static_cast<int>(signalsCount * 1.2));
-	m_archFilesArray.resize(signalsCount);
-	m_regularFilesQueue.reserve(static_cast<int>(signalsCount * 1.2));
-
-	for(int i = 0; i < signalsCount; i++)
-	{
-		const Proto::ArchSignal& protoArchSignal = archSignals.archsignals(i);
-
-		ArchFile* archFile = new ArchFile(protoArchSignal, m_archFullPath);
-
-		m_archFiles.insert(archFile->hash(), archFile);
-
-		m_archFilesArray[i] = archFile;
-
-		m_regularFilesQueue.append(archFile);
-	}
+	return nullptr;
 }
 
 QString Archive::getSignalID(Hash signalHash)
@@ -688,11 +680,11 @@ void Archive::clear()
 
 	m_archFiles.clear();
 	m_archFilesArray.clear();
-
+/*
 	for(RequestContext* reqContext : m_requestContexts)
 	{
 		delete reqContext;
 	}
 
-	m_requestContexts.clear();
+	m_requestContexts.clear();*/
 }
