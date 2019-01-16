@@ -15,19 +15,6 @@ class ArchivingService : public ServiceWorker
 {
 	Q_OBJECT
 
-private:
-	class Configuration
-	{
-	public:
-		virtual ~NewConfiguration();
-
-		ArchivingServiceSettings serviceSettings;
-		Builder:: BuildInfo buildInfo;
-		Proto::ArchSignals* m_protoArchSignals = nullptr;
-
-		bool loadResult = true;
-	};
-
 public:
 	ArchivingService(const SoftwareInfo& softwareInfo,
 						   const QString &serviceName,
@@ -61,10 +48,12 @@ private:
 	void startTcpArchRequestsServerThread();
 	void stopTcpArchiveRequestsServerThread();
 
-	bool readConfiguration(const QByteArray& fileData);
-	bool loadConfigurationFromFile(const QString& fileName);
+	bool loadConfigurationXml(const QByteArray& fileData, ArchivingServiceSettings* settings);
 
 	bool loadArchSignalsProto(const QByteArray& fileData);
+	void deleteArchSignalsProto();
+
+	void logFileLoadResult(bool loadOk, const QString& fileName);
 
 private slots:
 	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
@@ -72,16 +61,11 @@ private slots:
 private:
 	QSettings m_settings;
 
-	ArchivingServiceSettings m_cfgSettings;
+	ArchivingServiceSettings m_serviceSettings;
 	Builder:: BuildInfo m_buildInfo;
+	Proto::ArchSignals* m_archSignalsProto = nullptr;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
-
-	//
-
-	Proto::ArchSignals* m_protoArchSignals = nullptr;
-
-	//
 
 	Tcp::ServerThread* m_tcpAppDataServerThread = nullptr;
 	Tcp::ServerThread* m_tcpArchRequestsServerThread = nullptr;

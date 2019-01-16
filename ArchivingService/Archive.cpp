@@ -49,7 +49,6 @@ ArchFindResult Archive::RequestContext::findData()
 
 std::atomic<quint32> Archive::m_nextRequestID = { 1 };
 
-
 Archive::Archive(const QString& projectID,
 				 const QString& equipmentID,
 				 const QString& archDir,

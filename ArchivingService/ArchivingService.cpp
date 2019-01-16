@@ -2,10 +2,6 @@
 #include <QMetaProperty>
 #include "ArchivingService.h"
 
-ArchivingService::Configuration::~NewConfiguration()
-{
-};
-
 
 // -------------------------------------------------------------------------------
 //
@@ -25,6 +21,7 @@ ArchivingService::ArchivingService(const SoftwareInfo& softwareInfo,
 
 ArchivingService::~ArchivingService()
 {
+	deleteArchSignalsProto();
 }
 
 ServiceWorker* ArchivingService::createInstance() const
@@ -38,8 +35,8 @@ ServiceWorker* ArchivingService::createInstance() const
 
 void ArchivingService::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
-	serviceInfo.set_clientrequestip(m_cfgSettings.clientRequestIP.address32());
-	serviceInfo.set_clientrequestport(m_cfgSettings.clientRequestIP.port());
+	serviceInfo.set_clientrequestip(m_serviceSettings.clientRequestIP.address32());
+	serviceInfo.set_clientrequestport(m_serviceSettings.clientRequestIP.port());
 }
 
 void ArchivingService::initCmdLineParser()
@@ -120,11 +117,13 @@ void ArchivingService::stopAllThreads()
 
 void ArchivingService::startArchive()
 {
+	TEST_PTR_RETURN(m_archSignalsProto);
+
 	if (m_archive == nullptr)
 	{
-		m_archive = new Archive(m_buildInfo.project, equipmentID(), "d:/Temp", m_protoArchSignals, logger());
+		m_archive = new Archive(m_buildInfo.project, equipmentID(), "d:/Temp", *m_archSignalsProto, logger());
 
-		m_protoArchSignals.Clear();				// no more required
+		deleteArchSignalsProto();				// no more required
 
 		m_archive->start();
 
@@ -160,7 +159,7 @@ void ArchivingService::startTcpAppDataServerThread()
 
 	TcpAppDataServer* server = new TcpAppDataServer(softwareInfo(), m_archive);
 
-	m_tcpAppDataServerThread = new Tcp::ServerThread(m_cfgSettings.appDataServiceRequestIP, server, logger());
+	m_tcpAppDataServerThread = new Tcp::ServerThread(m_serviceSettings.appDataServiceRequestIP, server, logger());
 	m_tcpAppDataServerThread->start();
 }
 
@@ -187,7 +186,7 @@ void ArchivingService::startTcpArchRequestsServerThread()
 
 	TcpArchRequestsServer* server = new TcpArchRequestsServer(softwareInfo(), m_archive, logger());
 
-	m_tcpArchRequestsServerThread = new Tcp::ServerThread(m_cfgSettings.clientRequestIP, server, logger());
+	m_tcpArchRequestsServerThread = new Tcp::ServerThread(m_serviceSettings.clientRequestIP, server, logger());
 	m_tcpArchRequestsServerThread->start();
 }
 
@@ -201,87 +200,65 @@ void ArchivingService::stopTcpArchiveRequestsServerThread()
 	}
 }
 
-bool ArchivingService::readConfiguration(const QByteArray& fileData)
+bool ArchivingService::loadConfigurationXml(const QByteArray& fileData, ArchivingServiceSettings* settings)
 {
+	TEST_PTR_RETURN_FALSE(settings);
+
 	XmlReadHelper xml(fileData);
 
-	bool result = m_cfgSettings.readFromXml(xml);
-
-	if (result == true)
-	{
-		DEBUG_LOG_MSG(logger(),"Configuration.xml read Ok");
-	}
-	else
-	{
-		DEBUG_LOG_ERR(logger(),"Configuration.xml reading ERROR.");
-	}
-
-	return result;
-}
-
-bool ArchivingService::loadConfigurationFromFile(const QString& fileName)
-{
-	QString str;
-
-	QByteArray cfgXmlData;
-
-	QFile file(fileName);
-
-	if (file.open(QIODevice::ReadOnly) == false)
-	{
-		str = QString("Error open configuration file: %1").arg(fileName);
-
-		qDebug() << C_STR(str);
-
-		return false;
-	}
-
-	cfgXmlData = file.readAll();
-
-	bool result = readConfiguration(cfgXmlData);
+	bool result = settings->readFromXml(xml);
 
 	return result;
 }
 
 bool ArchivingService::loadArchSignalsProto(const QByteArray& fileData)
 {
-	if (m_protoArchSignals != nullptr)
+	deleteArchSignalsProto();
+
+	m_archSignalsProto = new Proto::ArchSignals;
+
+	bool result = m_archSignalsProto->ParseFromArray(reinterpret_cast<const void*>(fileData.constData()), fileData.size());
+
+	return result;
+}
+
+void ArchivingService::deleteArchSignalsProto()
+{
+	if (m_archSignalsProto != nullptr)
 	{
-		delete m_protoArchSignals;
-		m_protoArchSignals = nullptr;
-
+		delete m_archSignalsProto;
+		m_archSignalsProto = nullptr;
 	}
+}
 
-	fileResult = m_protoArchSignals.ParseFromArray(reinterpret_cast<const void*>(fileData.constData()), fileData.size());
-
-	if (fileResult == false)
+void ArchivingService::logFileLoadResult(bool loadOk, const QString& fileName)
+{
+	if (loadOk == true)
 	{
-		result = false;
+		DEBUG_LOG_MSG(logger(), QString("Load file % OK").arg(fileName));
 	}
-
+	else
+	{
+		DEBUG_LOG_ERR(logger(), QString("Load file % ERROR").arg(fileName));
+	}
 }
 
 void ArchivingService::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 {
-	qDebug() << "Configuration Ready!";
+	TEST_PTR_RETURN(m_cfgLoaderThread);
 
-	if (m_cfgLoaderThread == nullptr)
+	DEBUG_LOG_MSG(logger(), "Trying new configuration loading.");
+
+	ArchivingServiceSettings newServiceSettings;
+
+	bool fileResult = loadConfigurationXml(configurationXmlData, &newServiceSettings);
+
+	logFileLoadResult(fileResult, "Configuration.xml");
+
+	if (fileResult == false)
 	{
 		return;
 	}
-
-	stopAllThreads();
-
-	bool result = readConfiguration(configurationXmlData);
-
-	if (result == false)
-	{
-		return;
-	}
-
-	m_buildInfo = m_cfgLoaderThread->buildInfo();
-
-	result = true;
 
 	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
 	{
@@ -301,22 +278,33 @@ void ArchivingService::onConfigurationReady(const QByteArray configurationXmlDat
 		if (bfi.pathFileName.endsWith("ArchSignals.proto"))
 		{
 			fileResult = loadArchSignalsProto(fileData);
+
+			logFileLoadResult(fileResult, bfi.pathFileName);
 		}
 
-		if (fileResult == true)
+		if (fileResult == false)
 		{
-			qDebug() << "Read file " << bfi.pathFileName << " OK";
-		}
-		else
-		{
-			qDebug() << "Read file " << bfi.pathFileName << " ERROR";
 			break;
 		}
 	}
 
-	if (result == true)
+	if (fileResult == false)
 	{
-		startAllThreads();
+		DEBUG_LOG_ERR(logger(), "New configuration loading ERROR.");
+		return;
 	}
+
+	DEBUG_LOG_MSG(logger(), "New configuration loading OK.");
+
+	//
+
+	DEBUG_LOG_MSG(logger(), "Applying new configuration.");
+
+	stopAllThreads();
+
+	m_buildInfo = m_cfgLoaderThread->buildInfo();
+	m_serviceSettings = newServiceSettings;
+
+	startAllThreads();
 }
 
