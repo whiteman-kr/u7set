@@ -1631,6 +1631,7 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 	bool hasCheckOutPossibility = false;
 	bool hasCheckInPossibility = false;
 	bool hasAbilityToOpen = false;
+	bool hasViewPossibility = false;
 
 	// hasAbilityToOpen
 	//
@@ -1639,6 +1640,13 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 		(selectedFiles.front().userId() == currentUserId  || currentUserIsAdmin == true))
 	{
 		hasAbilityToOpen = true;
+	}
+
+	// hasViewPossibility
+	//
+	if (selectedFiles.size() == 1)
+	{
+		hasViewPossibility = true;
 	}
 
 	for (const DbFileInfo& file : selectedFiles)
@@ -1676,6 +1684,7 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 	// --
 	//
 	m_openAction->setEnabled(hasAbilityToOpen);
+	m_viewAction->setEnabled(hasViewPossibility);
 
 	m_deleteAction->setEnabled(hasDeletePossibility);
 	m_checkOutAction->setEnabled(hasCheckOutPossibility);
@@ -2555,9 +2564,16 @@ void SchemaControlTabPageEx::openSelectedFile()
 
 void SchemaControlTabPageEx::viewSelectedFile()
 {
-	int to_do;
-	assert(false);
-	// use void viewFile(const DbFileInfo& file);
+	auto selectedFiles = m_filesView->selectedFiles();
+	if (selectedFiles.size() != 1)
+	{
+		assert(selectedFiles.size() == 1);
+		return;
+	}
+
+	const DbFileInfo file = selectedFiles.front();
+
+	return viewFile(file);
 }
 
 void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
@@ -2597,7 +2613,7 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 
 	// Check if file already open, and activate it if it's so
 	//
-	if (auto fit = m_openedFiles.find(file.fileId());
+	if (auto fit = m_openedFiles.find(file);
 		fit != m_openedFiles.end())
 	{
 		// File already opened, check if it is opened for edit then activate this tab
@@ -2671,7 +2687,7 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 	tabWidget->addTab(editTabPage, editTabPage->windowTitle());
 	tabWidget->setCurrentWidget(editTabPage);
 
-	m_openedFiles[fi.fileId()] = editTabPage;
+	m_openedFiles[fi] = editTabPage;
 
 	// Update AFBs/UFBs after creating tab page, so it will be possible to set new (modified) caption
 	// to the tab page title
@@ -2685,8 +2701,87 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 
 void SchemaControlTabPageEx::viewFile(const DbFileInfo& file)
 {
-	int to_do;
-	assert(false);
+	if (file.isNull() == true)
+	{
+		assert(file.isNull() == false);
+		return;
+	}
+
+	// --
+	//
+	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
+	if (tabWidget == nullptr)
+	{
+		assert(tabWidget != nullptr);
+		return;
+	}
+
+	// Show chageset dialog
+	//
+	int changesetId = SelectChangesetDialog::getFileChangeset(db(), file, this);
+	if (changesetId == -1)
+	{
+		return;
+	}
+
+	// Get file with choosen changeset
+	//
+	std::shared_ptr<DbFile> out;
+
+	bool result = db()->getSpecificCopy(file, changesetId, &out, this);
+	if (result == false || out == nullptr)
+	{
+		return;
+	}
+
+	DbFileInfo fi(*out);
+
+	// Load file
+	//
+	std::shared_ptr<VFrame30::Schema> vf(VFrame30::Schema::Create(out->data()));
+
+	QString tabPageTitle;
+	tabPageTitle = QString("%1: %2 ReadOnly").arg(vf->schemaId()).arg(changesetId);
+
+	// Find the opened read only file with the same changeset
+	//
+	if (auto fit = m_openedFiles.find(fi);
+		fit != m_openedFiles.end())
+	{
+		// File already opened, check if it is opened for edit then activate this tab
+		//
+		EditSchemaTabPageEx* editTabPage = fit->second;
+		assert(editTabPage);
+
+		if (editTabPage->readOnly() == true &&
+			editTabPage->fileInfo().fileId() == fi.fileId() &&
+			editTabPage->fileInfo().changeset() == fi.changeset())
+		{
+			if (tabWidget->indexOf(editTabPage) != -1)
+			{
+				tabWidget->activateWindow();
+				tabWidget->setCurrentWidget(editTabPage);
+			}
+			else
+			{
+				editTabPage->activateWindow();
+			}
+
+			return;
+		}
+	}
+
+	// Create TabPage and add it to the TabControl
+	//
+	EditSchemaTabPageEx* editTabPage = new EditSchemaTabPageEx(tabWidget, vf, fi, db());
+	editTabPage->setReadOnly(true);
+
+	tabWidget->addTab(editTabPage, tabPageTitle);
+	tabWidget->setCurrentWidget(editTabPage);
+
+	m_openedFiles[fi] = editTabPage;
+
+	return;
 }
 
 void SchemaControlTabPageEx::addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile)

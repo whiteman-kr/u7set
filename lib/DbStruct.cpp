@@ -71,6 +71,11 @@ QString VcsState::text() const noexcept
 	return {};
 }
 
+VcsState::VcsStateType VcsState::value() const noexcept
+{
+	return m_state;
+}
+
 bool operator== (const VcsState& s1, const VcsState& s2) noexcept
 {
 	return s1.m_state == s2.m_state;
@@ -775,6 +780,10 @@ void DbFileInfo::trace() const
 	qDebug() << "	Name: " << m_fileName;
 	qDebug() << "	ID: " << m_fileId;
 	qDebug() << "	ParentID: " << m_parentId;
+	qDebug() << "	Changeset: " << m_changeset;
+	qDebug() << "	State: " << m_state.text();
+
+	return;
 }
 
 const QString& DbFileInfo::fileName() const noexcept
@@ -954,6 +963,16 @@ QString DbFileInfo::fullPathToFileName(const QString& fullPathName)
 
 	QString result = fullPathName.right(fullPathName.size() - pos - 1);
 	return result;
+}
+
+bool operator< (const DbFileInfo& a, const DbFileInfo& b)
+{
+	// Used in SchemaTabPage for map
+	// DO NOT add to this m_state, as it will break finding open windows in SchemaTab
+	//
+	quint64 ax = (static_cast<quint64>(a.m_fileId) << 32) | static_cast<quint64>(a.m_changeset);
+	quint64 bx = (static_cast<quint64>(b.m_fileId) << 32) | static_cast<quint64>(b.m_changeset);
+	return ax < bx;
 }
 
 //

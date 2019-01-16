@@ -68,6 +68,7 @@ public:
 	VcsState(VcsStateType s) noexcept;
 
 	QString text() const noexcept;
+	VcsStateType value() const noexcept;
 
 private:
 	VcsStateType m_state;
@@ -399,6 +400,8 @@ public:
 	static const int Null = -1;
 
 	static QString fullPathToFileName(const QString& fullPathName);		// $root$/Schemas/Monitor -> Monitor
+
+	friend bool operator< (const DbFileInfo& a, const DbFileInfo& b);
 };
 
 //

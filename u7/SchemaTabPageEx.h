@@ -325,7 +325,7 @@ private:
 	QLineEdit* m_searchEdit = nullptr;
 	QPushButton* m_searchButton = nullptr;
 
-	std::map<int, EditSchemaTabPageEx*> m_openedFiles;	// Opened files (for edit and view), key is fileId
+	std::map<DbFileInfo, EditSchemaTabPageEx*> m_openedFiles;	// Opened files (for edit and view), key is fileId
 };
 
 
