@@ -733,7 +733,7 @@ SpecificPropertiesEditor::SpecificPropertiesEditor(QWidget* parent):
 {
 	assert(m_parent);
 
-	m_hasOkCancelButtons = false;
+	setHasOkCancelButtons(false);
 
 	// Create property list
 	//

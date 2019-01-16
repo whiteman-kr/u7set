@@ -38,6 +38,7 @@
 #include "Forms/ComparePropertyObjectDialog.h"
 #include "Settings.h"
 #include "../lib/SignalProperties.h"
+#include "DialogInputEx.h"
 
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
@@ -6504,9 +6505,13 @@ void EditSchemaWidget::f2KeyForSignal(std::shared_ptr<VFrame30::SchemaItem> item
 
 	// Show input dialog
 	//
-	bool ok;
-	QString newValue = QInputDialog::getMultiLineText(this, tr("Set AppSignalID(s)"),
-													  tr("AppSignalID(s):"), appSignalId, &ok).trimmed();
+	bool ok = false;
+	QString newValue = DialogInputEx::getMultiLineText(this,
+													   tr("Set AppSignalID(s)"),
+													   tr("AppSignalID(s):"),
+													   appSignalId,
+													   &ok,
+													   VFrame30::PropertyNames::appSignalIDsValidator).trimmed();
 	if (ok == true &&
 		newValue.isEmpty() == false &&
 		newValue != appSignalId)
@@ -6578,21 +6583,18 @@ void EditSchemaWidget::f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item)
 
 	// Show input dialog
 	//
-	QInputDialog inputDialog(this);
+	bool ok = false;
+	QString newValue = DialogInputEx::getSingleLineText(this,
+														tr("Set AppSignalID"),
+														tr("AppSignalID:"),
+														text,
+														&ok,
+														VFrame30::PropertyNames::appSignalIdValidator,
+														400).trimmed();
 
-	inputDialog.setInputMode(QInputDialog::InputMode::TextInput);
-	inputDialog.setWindowTitle("Set AppSignalID");
-	inputDialog.setLabelText(tr("AppSignalID:"));
-	inputDialog.setTextEchoMode(QLineEdit::Normal);
-	inputDialog.resize(400, inputDialog.height());
-	inputDialog.setTextValue(text);
-
-	int inputDialogRecult = inputDialog.exec();
-	QString newValue = inputDialog.textValue();
-
-	if (inputDialogRecult == QDialog::Accepted &&
-		newValue.isNull() == false &&
-		text != newValue)
+	if (ok == true &&
+			newValue.isEmpty() == false &&
+			newValue != text)
 	{
 		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newValue), item);
 		editSchemaView()->update();

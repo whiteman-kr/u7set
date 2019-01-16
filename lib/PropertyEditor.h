@@ -71,13 +71,16 @@ namespace ExtWidgets
 
 		virtual void setReadOnly(bool value) = 0;
 
+		void setValidator(const QString& validator);
+
 		bool modified();
 
 		bool hasOkCancelButtons();
+	protected:
+		void setHasOkCancelButtons(bool value);
 
 	signals:
 		void escapePressed();
-
 		void okPressed();
 		void cancelPressed();
 
@@ -88,12 +91,13 @@ namespace ExtWidgets
 		void okButtonPressed();
 		void cancelButtonPressed();
 
-
 	protected:
+		QRegExpValidator* m_regExpValidator = nullptr;
+
+	private:
 		bool m_modified = false;
 
 		bool m_hasOkCancelButtons = true;
-
 	};
 
 	class PropertyPlainTextEditor : public PropertyTextEditor
@@ -112,8 +116,13 @@ namespace ExtWidgets
 	protected:
 		bool eventFilter(QObject* obj, QEvent* event);
 
+	private slots:
+		void onPlainTextContentsChange(int position, int charsRemoved, int charsAdded);
+
 	private:
-		QPlainTextEdit* m_textEdit = nullptr;
+		QPlainTextEdit* m_plainTextEdit = nullptr;
+
+		QString m_prevPlainText;
 
 	};
 
