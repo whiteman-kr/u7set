@@ -326,6 +326,7 @@ public:
 	// Signals
 	//
 signals:
+	void detachOrAttachWindow();			// Command to the owner to attach or detach window from tab
 	void closeTab(QWidget* tabWidget);		// Command to the owner to Close current tab
 	void checkInFile();						// Command to the owner to CheckIn the file.
 	void checkOutFile();					// Command to the owner to CheckOut the file.
@@ -555,7 +556,10 @@ private:
 	// File
 	//
 	QMenu* m_fileMenu = nullptr;
+
 	QAction* m_fileAction = nullptr;
+		QAction* m_detachWindow = nullptr;
+		// ------------------------------
 		QAction* m_fileCheckOutAction = nullptr;
 		QAction* m_fileCheckInAction = nullptr;
 		QAction* m_fileUndoChangesAction = nullptr;

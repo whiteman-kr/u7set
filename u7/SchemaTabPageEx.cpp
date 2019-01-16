@@ -1957,30 +1957,6 @@ void SchemasTabPageEx::projectClosed()
 
 	refreshControlTabPage();
 
-	// Close all opened documents
-	//
-	int to_do_close_opened_documents;
-//	assert(m_tabWidget);
-
-//	m_openFiles.clear....
-
-//	for (int i = m_tabWidget->count() - 1; i >= 0; i--)
-//	{
-//		QWidget* tabPage = m_tabWidget->widget(i);
-
-//		if (dynamic_cast<SchemaControlTabPage*>(tabPage) == nullptr)
-//		{
-//			int tabIndex = m_tabWidget->indexOf(tabPage);
-//			assert(tabIndex != -1);
-
-//			if (tabIndex != -1)
-//			{
-//				m_tabWidget->removeTab(i);
-//				delete tabPage;
-//			}
-//		}
-//	}
-
 	this->setEnabled(false);
 	return;
 }
@@ -2428,6 +2404,87 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPageEx::createSchema(const DbF
 	return {};
 }
 
+void SchemaControlTabPageEx::closeFile(EditSchemaTabPageEx* editTabPage)
+{
+	if (editTabPage == nullptr)
+	{
+		assert(editTabPage);
+		return;
+	}
+
+	if (editTabPage->fileInfo().isNull() == true)
+	{
+		assert(editTabPage->fileInfo().isNull() == false);
+		return;
+	}
+
+	const DbFileInfo& file = editTabPage->fileInfo();
+
+	auto it = m_openedFiles.find(file);
+	if (it == m_openedFiles.end())
+	{
+		assert(false);
+		return;
+	}
+
+	m_openedFiles.erase(file);
+
+	return;
+}
+
+void SchemaControlTabPageEx::detachOrAttachWindow(EditSchemaTabPageEx* editTabPage)
+{
+	if (editTabPage == nullptr)
+	{
+		assert(editTabPage);
+		return;
+	}
+
+	// --
+	//
+	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
+	if (tabWidget == nullptr)
+	{
+		assert(tabWidget != nullptr);
+		return;
+	}
+
+	// --
+	//
+	if (auto it = m_openedFiles.find(editTabPage->fileInfo());
+		it == m_openedFiles.end())
+	{
+		assert(it != m_openedFiles.end());
+		return;
+	}
+
+	if (tabWidget->indexOf(editTabPage) != -1)
+	{
+		// Detach from TabWidget
+		//
+		tabWidget->removeTab(tabWidget->indexOf(editTabPage));
+
+		editTabPage->setWindowFlag(Qt::WindowType::Window);
+		editTabPage->setParent(nullptr);
+		editTabPage->setVisible(true);
+
+		editTabPage->activateWindow();
+	}
+	else
+	{
+		// Attach to TabWidget
+		//
+		editTabPage->setWindowFlag(Qt::WindowType::Widget);
+
+		tabWidget->addTab(editTabPage, editTabPage->windowTitle());
+
+		tabWidget->activateWindow();
+		tabWidget->setCurrentWidget(editTabPage);
+	}
+
+	return;
+}
+
 void SchemaControlTabPageEx::projectOpened()
 {
 	setEnabled(true);
@@ -2668,6 +2725,8 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 	EditSchemaTabPageEx* editTabPage = new EditSchemaTabPageEx(tabWidget, vf, fi, db());
 
 	connect(editTabPage, &EditSchemaTabPageEx::vcsFileStateChanged, m_filesView, &SchemaFileViewEx::slot_refreshFiles);
+	connect(editTabPage, &EditSchemaTabPageEx::aboutToClose, this, &SchemaControlTabPageEx::closeFile);
+	connect(editTabPage, &EditSchemaTabPageEx::pleaseDetachOrAttachWindow, this, &SchemaControlTabPageEx::detachOrAttachWindow);
 
 	assert(tabWidget->parent());
 
@@ -2740,9 +2799,6 @@ void SchemaControlTabPageEx::viewFile(const DbFileInfo& file)
 	//
 	std::shared_ptr<VFrame30::Schema> vf(VFrame30::Schema::Create(out->data()));
 
-	QString tabPageTitle;
-	tabPageTitle = QString("%1: %2 ReadOnly").arg(vf->schemaId()).arg(changesetId);
-
 	// Find the opened read only file with the same changeset
 	//
 	if (auto fit = m_openedFiles.find(fi);
@@ -2774,9 +2830,13 @@ void SchemaControlTabPageEx::viewFile(const DbFileInfo& file)
 	// Create TabPage and add it to the TabControl
 	//
 	EditSchemaTabPageEx* editTabPage = new EditSchemaTabPageEx(tabWidget, vf, fi, db());
+
+	connect(editTabPage, &EditSchemaTabPageEx::aboutToClose, this, &SchemaControlTabPageEx::closeFile);
+	connect(editTabPage, &EditSchemaTabPageEx::pleaseDetachOrAttachWindow, this, &SchemaControlTabPageEx::detachOrAttachWindow);
+
 	editTabPage->setReadOnly(true);
 
-	tabWidget->addTab(editTabPage, tabPageTitle);
+	tabWidget->addTab(editTabPage, editTabPage->windowTitle());
 	tabWidget->setCurrentWidget(editTabPage);
 
 	m_openedFiles[fi] = editTabPage;
@@ -2790,6 +2850,7 @@ void SchemaControlTabPageEx::addLogicSchema(QStringList deviceStrIds, QString lm
 	//
 	int to_do_where_to_add_this_schema_question;
 	int to_do_show_kind_of_select_folder_dialog;
+	assert(false);
 
 //	std::shared_ptr<VFrame30::Schema> schema(m_createSchemaFunc());
 
@@ -4198,6 +4259,7 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 										 std::shared_ptr<VFrame30::Schema> schema,
 										 const DbFileInfo& fileInfo,
 										 DbController* dbcontroller) :
+	QMainWindow(nullptr, Qt::WindowType::Widget),	// Always created as widget as from start it's attached to TabWidget, later can be switcher to Qt::Window
 	HasDbController(dbcontroller),
 	m_schemaWidget(nullptr),
 	m_tabWidget(tabWidget)
@@ -4213,6 +4275,7 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 
 	m_schemaWidget = new EditSchemaWidget(schema, fileInfo, dbcontroller);
 
+	connect(m_schemaWidget, &EditSchemaWidget::detachOrAttachWindow, this, &EditSchemaTabPageEx::detachOrAttachWindow);
 	connect(m_schemaWidget, &EditSchemaWidget::closeTab, this, &EditSchemaTabPageEx::closeTab);
 	connect(m_schemaWidget, &EditSchemaWidget::modifiedChanged, this, &EditSchemaTabPageEx::modifiedChanged);
 	connect(m_schemaWidget, &EditSchemaWidget::saveWorkcopy, this, &EditSchemaTabPageEx::saveWorkcopy);
@@ -4224,8 +4287,11 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 
 	// ToolBar
 	//
-	m_toolBar = new QToolBar(this);
+	m_toolBar = new QToolBar(tr("Toolbar"), this);
 	m_toolBar->setOrientation(Qt::Vertical);
+	m_toolBar->setFloatable(false);
+	m_toolBar->setMovable(false);
+	m_toolBar->toggleViewAction()->setDisabled(true);		// Disables hide toobar from context menu
 
 	m_toolBar->addAction(m_schemaWidget->m_fileAction);
 
@@ -4299,15 +4365,8 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 
 	// --
 	//
-	QHBoxLayout* pMainLayout = new QHBoxLayout();
-
-	pMainLayout->setContentsMargins(0, 5, 0, 5);
-	pMainLayout->setSpacing(0);
-
-	pMainLayout->addWidget(m_toolBar);
-	pMainLayout->addWidget(m_schemaWidget);
-
-	setLayout(pMainLayout);
+	setCentralWidget(m_schemaWidget);
+	addToolBar(Qt::ToolBarArea::LeftToolBarArea, m_toolBar);
 
 	// --
 	//
@@ -4317,23 +4376,67 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 
 	connect(m_tabWidget, &QTabWidget::currentChanged, m_schemaWidget, &EditSchemaWidget::hideWorkDialogs);
 
+	connect(dbc(), &DbController::projectClosed, this, &EditSchemaTabPageEx::projectClosed);
+
+	setPageTitle();
+
 	return;
 }
 
 EditSchemaTabPageEx::~EditSchemaTabPageEx()
 {
+	qDebug() << Q_FUNC_INFO;
+}
+
+void EditSchemaTabPageEx::closeEvent(QCloseEvent* event)
+{
+	if (windowFlags() == Qt::WindowType::Widget)
+	{
+		// If windowFlags() == Qt::WindowType::Widget then it is attachet to TabWidget, and close is
+		// processed in slot closeTab
+		//
+		event->accept();
+		return;
+	}
+
+	// Else (windowFlags() == Qt::WindowType::Window)
+	// This is free floating window, ask for saving result
+	//
+	if (m_schemaWidget->modified() == true)
+	{
+		QMessageBox mb(this);
+		mb.setText(tr("The document has been modified."));
+		mb.setInformativeText(tr("Do you want to save chages to %1?").arg(fileInfo().fileName()));
+		mb.setStandardButtons(QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+		mb.setDefaultButton(QMessageBox::Save);
+
+		int result = mb.exec();
+
+		switch (result)
+		{
+		case QMessageBox::Save:
+			saveWorkcopy();
+			break;
+		case QMessageBox::Discard:
+			break;
+		case QMessageBox::Cancel:
+			event->ignore();
+			return;
+		default:
+			assert(false);
+		}
+	}
+
+	// Find current tab and close it
+	//
+	emit aboutToClose(this);
+	event->accept();
+
+	return;
 }
 
 void EditSchemaTabPageEx::setPageTitle()
 {
-	QWidget* thisParent = parentWidget();
-	if (thisParent == nullptr)
-	{
-		// This widget has not been created yet?
-		//
-		return;
-	}
-
 	QString newTitle;
 
 	if (readOnly() == true || fileInfo().userId() != db()->currentUser().userId())
@@ -4354,30 +4457,29 @@ void EditSchemaTabPageEx::setPageTitle()
 	}
 	else
 	{
+		newTitle = m_schemaWidget->schema()->schemaId();
 		if (modified() == true)
 		{
-			newTitle = m_schemaWidget->schema()->schemaId() + "*";
-		}
-		else
-		{
-			newTitle = m_schemaWidget->schema()->schemaId();
+			 newTitle += "*";
 		}
 	}
 
 	setWindowTitle(newTitle);
 
-	if (QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(thisParent->parentWidget());
-		tabWidget != nullptr)
+	if (parentWidget() != nullptr)
 	{
-		for (int i = 0; i < tabWidget->count(); i++)
+		if (QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
+			tabWidget != nullptr)
 		{
-			if (tabWidget->widget(i) == this)
+			for (int i = 0; i < tabWidget->count(); i++)
 			{
-				tabWidget->setTabText(i, newTitle);
-				return;
+				if (tabWidget->widget(i) == this)
+				{
+					tabWidget->setTabText(i, newTitle);
+					return;
+				}
 			}
 		}
-
 	}
 
 	return;
@@ -4422,6 +4524,21 @@ void EditSchemaTabPageEx::updateBussesSchemaItems()
 	return;
 }
 
+void EditSchemaTabPageEx::detachOrAttachWindow()
+{
+	emit pleaseDetachOrAttachWindow(this);
+}
+
+void EditSchemaTabPageEx::projectClosed()
+{
+	// Find current tab and close it
+	//
+	emit aboutToClose(this);
+
+	this->deleteLater();
+
+	return;
+}
 
 void EditSchemaTabPageEx::closeTab()
 {
@@ -4449,27 +4566,11 @@ void EditSchemaTabPageEx::closeTab()
 		}
 	}
 
-	assert(false);
-	int to_do_closeTab;
+	// Find current tab and close it
+	//
+	emit aboutToClose(this);
 
-//	// Find current tab and close it
-//	//
-//	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
-//	if (tabWidget == nullptr)
-//	{
-//		assert(tabWidget != nullptr);
-//		return;
-//	}
-
-//	for (int i = 0; i < tabWidget->count(); i++)
-//	{
-//		if (tabWidget->widget(i) == this)
-//		{
-//			tabWidget->removeTab(i);
-//		}
-//	}
-
-//	this->deleteLater();
+	this->deleteLater();
 	return;
 }
 
@@ -4828,6 +4929,7 @@ void EditSchemaTabPageEx::setReadOnly(bool value)
 {
 	assert(m_schemaWidget);
 	m_schemaWidget->setReadOnly(value);
+	setPageTitle();
 }
 
 bool EditSchemaTabPageEx::modified() const

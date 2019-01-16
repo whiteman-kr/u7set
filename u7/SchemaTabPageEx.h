@@ -269,6 +269,10 @@ private:
 
 	std::shared_ptr<VFrame30::Schema> createSchema(const DbFileInfo& parentFile) const;
 
+public slots:
+	void closeFile(EditSchemaTabPageEx* editTabPage);
+	void detachOrAttachWindow(EditSchemaTabPageEx* editTabPage);
+
 protected slots:
 	void projectOpened();
 	void projectClosed();
@@ -357,7 +361,7 @@ public slots:
 	void compareObject(DbChangesetObject object, CompareData compareData);
 
 	// Data
-	//
+	//setWindowFl
 protected:
 	QTabWidget* m_tabWidget;
 
@@ -372,7 +376,7 @@ protected:
 // EditSchemaTabPage
 //
 //
-class EditSchemaTabPageEx : public QWidget, public HasDbController
+class EditSchemaTabPageEx : public QMainWindow, public HasDbController
 {
 	Q_OBJECT
 
@@ -383,6 +387,9 @@ public:
 					  const DbFileInfo& fileInfo,
 					  DbController* db);
 	virtual ~EditSchemaTabPageEx();
+
+protected:
+	virtual void closeEvent(QCloseEvent* event) override;
 
 	// Public methods
 	//
@@ -395,8 +402,15 @@ public:
 
 signals:
 	void vcsFileStateChanged();
+	void aboutToClose(EditSchemaTabPageEx*);
+	void pleaseDetachOrAttachWindow(EditSchemaTabPageEx*);
+
+public slots:
+	void detachOrAttachWindow();
 
 protected slots:
+	void projectClosed();
+
 	void closeTab();
 	void modifiedChanged(bool modified);
 

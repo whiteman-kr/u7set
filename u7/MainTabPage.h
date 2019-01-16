@@ -7,12 +7,9 @@ class MainTabPage : public QWidget
 {
 	Q_OBJECT
 
-private:
-	MainTabPage();
 public:
+	MainTabPage() = delete;
 	MainTabPage(DbController* dbcontroller, QWidget* parent);
-	
-signals:
 	
 	// Properties
 	//

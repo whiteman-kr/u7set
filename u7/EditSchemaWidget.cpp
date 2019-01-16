@@ -1825,6 +1825,11 @@ void EditSchemaWidget::createActions()
 	m_fileAction = new QAction(tr("File"), this);
 	m_fileAction->setEnabled(true);
 
+	m_detachWindow = new QAction(tr("Detach/Attach Window"), this);
+	m_detachWindow->setStatusTip(tr("Detach/attach window..."));
+	m_detachWindow->setEnabled(true);
+	connect(m_detachWindow, &QAction::triggered, this, &EditSchemaWidget::detachOrAttachWindow);
+
 	m_fileCheckInAction = new QAction(tr("Check In"), this);
 	m_fileCheckInAction->setStatusTip(tr("Check In changes..."));
 	m_fileCheckInAction->setEnabled(false);
@@ -2423,6 +2428,8 @@ void EditSchemaWidget::createActions()
 	//
 	m_fileMenu = new QMenu(this);
 	m_fileAction->setMenu(m_fileMenu);
+		m_fileMenu->addAction(m_detachWindow);
+		m_fileMenu->addSeparator();
 		m_fileMenu->addAction(m_fileCheckOutAction);
 		m_fileMenu->addAction(m_fileCheckInAction);
 		m_fileMenu->addAction(m_fileUndoChangesAction);
@@ -3359,13 +3366,14 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 
 		if (itemsForMove.empty() == false)
 		{
-			m_editEngine->startBatch();
+			if (bool ok = m_editEngine->startBatch();
+				ok == true)
+			{
+				m_editEngine->runMoveItem(xdif, ydif, itemsForMove, snapToGrid());
+				finishMoveAfbsConnectionLinks();
 
-			m_editEngine->runMoveItem(xdif, ydif, itemsForMove, snapToGrid());
-
-			finishMoveAfbsConnectionLinks();
-
-			m_editEngine->endBatch();
+				m_editEngine->endBatch();
+			}
 		}
 	}
 	else
@@ -3484,12 +3492,14 @@ void EditSchemaWidget::mouseLeftUp_SizingRect(QMouseEvent* event)
 	itemPoints.push_back(VFrame30::SchemaPoint(newItemRect.topLeft()));
 	itemPoints.push_back(VFrame30::SchemaPoint(newItemRect.bottomRight()));
 
-	m_editEngine->startBatch();
+	if (bool ok = m_editEngine->startBatch();
+		ok == true)
 	{
 		m_editEngine->runSetPoints(itemPoints, si, true);
 		finishMoveAfbsConnectionLinks();
+
+		m_editEngine->endBatch();
 	}
-	m_editEngine->endBatch();
 
 	resetAction();
 	return;
@@ -6149,10 +6159,14 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 		{
 			if (setViaEditEngine == true)
 			{
-				m_editEngine->startBatch();
-				m_editEngine->runSetProperty(VFrame30::PropertyNames::connectionId, QVariant(newConnectionId), item);
-				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newAppSignalId), item);
-				m_editEngine->endBatch();
+				if (bool ok = m_editEngine->startBatch();
+					ok == true)
+				{
+					m_editEngine->runSetProperty(VFrame30::PropertyNames::connectionId, QVariant(newConnectionId), item);
+					m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newAppSignalId), item);
+
+					m_editEngine->endBatch();
+				}
 			}
 			else
 			{
@@ -7911,12 +7925,14 @@ void EditSchemaWidget::onLeftKey()
 		initMoveAfbsConnectionLinks(MouseState::Moving);
 		moveAfbsConnectionLinks(QPointF(dif, 0), MouseState::Moving);
 		{
-			m_editEngine->startBatch();
-			m_editEngine->runMoveItem(dif, 0, itemsForMove, snapToGrid());
+			if (bool ok = m_editEngine->startBatch();
+				ok == true)
+			{
+				m_editEngine->runMoveItem(dif, 0, itemsForMove, snapToGrid());
+				finishMoveAfbsConnectionLinks();
 
-			finishMoveAfbsConnectionLinks();
-
-			m_editEngine->endBatch();
+				m_editEngine->endBatch();
+			}
 		}
 	}
 
@@ -7949,10 +7965,11 @@ void EditSchemaWidget::onRightKey()
 
 		initMoveAfbsConnectionLinks(MouseState::Moving);
 		moveAfbsConnectionLinks(QPointF(dif, 0), MouseState::Moving);
-		{
-			m_editEngine->startBatch();
-			m_editEngine->runMoveItem(dif, 0, itemsForMove, snapToGrid());
 
+		if (bool ok = m_editEngine->startBatch();
+			ok == true)
+		{
+			m_editEngine->runMoveItem(dif, 0, itemsForMove, snapToGrid());
 			finishMoveAfbsConnectionLinks();
 
 			m_editEngine->endBatch();
@@ -7988,10 +8005,11 @@ void EditSchemaWidget::onUpKey()
 
 		initMoveAfbsConnectionLinks(MouseState::Moving);
 		moveAfbsConnectionLinks(QPointF(0, dif), MouseState::Moving);
-		{
-			m_editEngine->startBatch();
-			m_editEngine->runMoveItem(0, dif, itemsForMove, snapToGrid());
 
+		if (bool ok = m_editEngine->startBatch();
+			ok == true)
+		{
+			m_editEngine->runMoveItem(0, dif, itemsForMove, snapToGrid());
 			finishMoveAfbsConnectionLinks();
 
 			m_editEngine->endBatch();
@@ -8027,10 +8045,11 @@ void EditSchemaWidget::onDownKey()
 
 		initMoveAfbsConnectionLinks(MouseState::Moving);
 		moveAfbsConnectionLinks(QPointF(0, dif), MouseState::Moving);
-		{
-			m_editEngine->startBatch();
-			m_editEngine->runMoveItem(0, dif, itemsForMove, snapToGrid());
 
+		if (bool ok = m_editEngine->startBatch();
+			ok == true)
+		{
+			m_editEngine->runMoveItem(0, dif, itemsForMove, snapToGrid());
 			finishMoveAfbsConnectionLinks();
 
 			m_editEngine->endBatch();
@@ -8702,10 +8721,14 @@ void EditSchemaWidget::transformIntoInput()
 		newItems.push_back(transformedItem);
 	}
 
-	m_editEngine->startBatch();
+	if (bool ok = m_editEngine->startBatch();
+		ok == true)
+	{
 		m_editEngine->runDeleteItem(selected, activeLayer());
 		m_editEngine->runAddItem(newItems, activeLayer());
-	m_editEngine->endBatch();
+
+		m_editEngine->endBatch();
+	}
 
 	return;
 }
@@ -8740,10 +8763,14 @@ void EditSchemaWidget::transformIntoInOut()
 		newItems.push_back(transformedItem);
 	}
 
-	m_editEngine->startBatch();
+	if (bool ok = m_editEngine->startBatch();
+		ok == true)
+	{
 		m_editEngine->runDeleteItem(selected, activeLayer());
 		m_editEngine->runAddItem(newItems, activeLayer());
-	m_editEngine->endBatch();
+
+		m_editEngine->endBatch();
+	}
 
 	return;
 }
@@ -8778,10 +8805,14 @@ void EditSchemaWidget::transformIntoOutput()
 		newItems.push_back(transformedItem);
 	}
 
-	m_editEngine->startBatch();
+	if (bool ok = m_editEngine->startBatch();
+		ok == true)
+	{
 		m_editEngine->runDeleteItem(selected, activeLayer());
 		m_editEngine->runAddItem(newItems, activeLayer());
-	m_editEngine->endBatch();
+
+		m_editEngine->endBatch();
+	}
 
 	return;
 }

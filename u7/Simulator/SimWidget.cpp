@@ -87,12 +87,9 @@ void SimWidget::createToolBar()
 	m_toolBar = new SimToolBar("ToolBar");
 	addToolBar(m_toolBar);
 
-	//m_toolBar->setToolButtonStyle(Qt::ToolButtonTextUnderIcon);
-
 	m_openProjectAction = new QAction(QIcon(":/Images/Images/SimOpen.svg"), tr("Open Build"), this);
 	m_openProjectAction->setShortcut(QKeySequence::Open);
 	connect(m_openProjectAction, &QAction::triggered, this, &SimWidget::openBuild);
-
 
 	m_closeProjectAction = new QAction(QIcon(":/Images/Images/SimClose.svg"), tr("Close"), this);
 	m_closeProjectAction->setShortcut(QKeySequence::Close);
