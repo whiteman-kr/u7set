@@ -15,7 +15,7 @@
 
 class ArchRequestParam;
 
-class ArchRequest : public QThread
+class ArchRequest : public RunOverrideThread
 {
 public:
 	ArchRequest(Archive& archive, const ArchRequestParam& param, CircularLoggerShared logger);
@@ -23,12 +23,16 @@ public:
 
 	void run() override;
 
+	quint32 requestID() const { return m_param.requestID(); }
+
+	void nextDataRequired() { m_nextDataRequired.store(true); }
 	bool isDataReady() const { return m_dataReady.load(); }
+
+	Network::GetAppSignalStatesFromArchiveNextReply& getNextReply() { return m_reply; }
+
 	ArchiveError archError() const { return m_archError; }
 
 	int timeElapsed() const { return QDateTime::currentMSecsSinceEpoch() - m_startTime; }
-
-	Network::GetAppSignalStatesFromArchiveNextReply& getNextReply() { return m_reply; }
 
 protected:
 	int totalStates() const { return m_totalStates; }
@@ -49,7 +53,19 @@ protected:
 	void setArchError(ArchiveError err) { m_archError = err; }
 	void setDataReady(bool ready) { m_dataReady = ready; }
 
+	bool isNextDataRequired() { return m_nextDataRequired.load(); }
+
 private:
+
+	void prepareFiles();
+	ArchFindResult findData();
+	void getNextData();
+
+	void reportErrorAndWaitForQuit();
+	void reportNoDataAndWaitForQuit();
+
+	void waitForQuit();
+
 //	E::TimeType timeType() const { return m_param.timeType; }
 
 //	qint64 startTime() const { return m_param.startTime; }
@@ -70,29 +86,18 @@ protected:
 
 	ArchRequestParam m_execParam;
 
-	qint64 m_localTimeOffset = 0;
+	QHash<Hash, ArchFile*> m_archFiles;
+	QVector<ArchFile*> m_archFilesArray;
 
-/*	E::TimeType m_requestTimeType = E::TimeType::System;
-
-	qint64 m_requestStartTime = 0;
-	qint64 m_requestEndTime = 0;
-
-	qint64 m_expandedRequestStartTime = 0;
-	qint64 m_expandedRequestEndTime = 0;*/
-
-	qint64 m_startArchID = 0;
-	qint64 m_endArchID = 0;
+	std::atomic<bool> m_nextDataRequired = { false };
+	std::atomic<bool> m_dataReady = { false };
+	bool m_noMoreData = false;
 
 	ArchiveError m_archError = ArchiveError::Success;
-
-	std::atomic<bool> m_dataReady = { false };
+	Network::GetAppSignalStatesFromArchiveNextReply m_reply;
 
 	int m_totalStates = 0;
 	int m_sentStates = 0;
-
-	Network::GetAppSignalStatesFromArchiveNextReply m_reply;
-
-	friend class ArchRequestThreadWorker;
 };
 
 typedef std::shared_ptr<ArchRequest> ArchRequestShared;

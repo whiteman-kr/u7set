@@ -26,7 +26,7 @@ private:
 	void onGetSignalStatesFromArchiveNext(const char* requestData, quint32 requestDataSize);
 	void onGetSignalStatesFromArchiveCancel(const char* requestData, quint32 requestDataSize);
 
-	void finalizeCurrentRequest();
+	void finalizeArchRequest();
 
 private:
 	Archive* m_archive = nullptr;
@@ -34,5 +34,5 @@ private:
 
 	//
 
-	ArchRequest* m_request = nullptr;
+	std::shared_ptr<ArchRequest> m_archRequest;
 };

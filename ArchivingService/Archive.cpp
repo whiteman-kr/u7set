@@ -5,6 +5,12 @@
 #include "ArchRequest.h"
 #include "ArchWriterThread.h"
 
+// ----------------------------------------------------------------------------------------------------------------------
+//
+// ArchRequestParam class implementation
+//
+// ----------------------------------------------------------------------------------------------------------------------
+
 ArchRequestParam::ArchRequestParam(quint32 requestID, E::TimeType timeType, qint64 startTime,
 								   qint64 endTime, const QVector<Hash>& signalHashes) :
 	m_requestID(requestID),
@@ -27,42 +33,6 @@ void ArchRequestParam::expandTimes(qint64 expandTime)
 
 	m_endTime += expandTime;
 }
-
-// ----------------------------------------------------------------------------------------------------------------------
-//
-// Archive::RequestContext class implementation
-//
-// ----------------------------------------------------------------------------------------------------------------------
-
-Archive::RequestContext::RequestContext(const ArchRequestParam& param) :
-	m_param(param)
-{
-}
-
-void Archive::RequestContext::appendArchFile(ArchFile* f)
-{
-	TEST_PTR_RETURN(f);
-
-	m_archFiles.append(f);
-}
-
-ArchFindResult Archive::RequestContext::findData()
-{
-	ArchFindResult result = ArchFindResult::NotFound;
-
-	for(ArchFile* archFile : m_archFiles)
-	{
-		ArchFindResult res = archFile->findData(m_param);
-
-		if (res == ArchFindResult::Found)
-		{
-			result = ArchFindResult::Found;
-		}
-	}
-
-	return result;
-}
-
 
 // ----------------------------------------------------------------------------------------------------------------------
 //
@@ -121,6 +91,12 @@ void Archive::start()
 
 	for(ArchFile* archFile : m_archFilesArray)
 	{
+		if (archFile == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+
 		archFile->setArchFullPath(m_archFullPath);
 	}
 
@@ -129,22 +105,28 @@ void Archive::start()
 	m_archWriterThread = new ArchWriterThread(this, m_log);
 	m_archWriterThread->start();
 
-/*	assert(m_archRequestThread == nullptr);
-
-	m_archRequestThread = new ArchRequestThread(this, m_log);
-	m_archRequestThread->start();*/
-
 	m_isWorkable = true;
 }
 
 void Archive::stop()
 {
-/*	if (m_archRequestThread != nullptr)
+	m_requestsMutex.lock();
+
+	assert(m_requests.count() == 0);
+
+	for(ArchRequestShared archRequest : m_requests)
 	{
-		m_archRequestThread->quitAndWait();
-		delete m_archRequestThread;
-		m_archRequestThread = nullptr;
-	}*/
+		if (archRequest != nullptr)
+		{
+			archRequest->quitAndWait();
+		}
+	}
+
+	m_requests.clear();
+
+	m_requestsMutex.unlock();
+
+	//
 
 	if (m_archWriterThread != nullptr)
 	{
@@ -156,7 +138,7 @@ void Archive::stop()
 	m_isWorkable = false;
 }
 
-ArchRequestShared Archive::createNewRequest(E::TimeType timeType, qint64 startTime, qint64 endTime, const QVector<Hash>& signalHashes)
+std::shared_ptr<ArchRequest> Archive::startNewRequest(E::TimeType timeType, qint64 startTime, qint64 endTime, const QVector<Hash>& signalHashes)
 {
 	ArchRequestParam param(getNewRequestID(), timeType, startTime, endTime, signalHashes);
 
@@ -172,6 +154,23 @@ ArchRequestShared Archive::createNewRequest(E::TimeType timeType, qint64 startTi
 
 	return archRequest;
 }
+
+void Archive::finalizeRequest(quint32 requestID)
+{
+	m_requestsMutex.lock();
+
+	ArchRequestShared archRequest = m_requests.value(requestID, nullptr);
+
+	if (archRequest != nullptr)
+	{
+		archRequest->quitAndWait();
+
+		m_requests.remove(requestID);
+	}
+
+	m_requestsMutex.unlock();
+}
+
 
 QString Archive::getSignalID(Hash signalHash)
 {

@@ -106,7 +106,7 @@ public:
 	void lock(const QThread* currentThread);
 
 	bool tryLock();
-	void tryLock(const QThread* currentThread);
+	bool tryLock(const QThread* currentThread);
 
 	void unlock();
 	void unlock(const QThread* currentThread);

@@ -17,7 +17,7 @@ ArchRequest::ArchRequest(Archive& archive, const ArchRequestParam& param, Circul
 	m_logger(logger),
 	m_execParam(m_param)
 {
-	m_localTimeOffset = Archive::localTimeOffsetFromUtc();
+	qint64 localTimeOffset = Archive::localTimeOffsetFromUtc();
 
 	switch(m_param.timeType())
 	{
@@ -30,8 +30,8 @@ ArchRequest::ArchRequest(Archive& archive, const ArchRequestParam& param, Circul
 		{
 			// convert local time to system time
 			//
-			m_execParam.setStartTime(m_param.startTime() - m_localTimeOffset);
-			m_execParam.setEndTime(m_param.endTime() - m_localTimeOffset);
+			m_execParam.setStartTime(m_param.startTime() - localTimeOffset);
+			m_execParam.setEndTime(m_param.endTime() - localTimeOffset);
 			m_execParam.setTimeType(E::TimeType::System);
 		}
 		break;
@@ -43,54 +43,69 @@ ArchRequest::ArchRequest(Archive& archive, const ArchRequestParam& param, Circul
 	// expand request time from both sides
 	//
 	m_execParam.expandTimes(Archive::TIME_TO_EXPAND_REQUEST);
+
+	DEBUG_LOG_MSG(m_logger, QString("ArchRequest ID = %1 is created").arg(m_param.requestID()));
+
+/*	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: %2, time = %3, start = %4, end = %5, signals = %6").
+				  arg(context->requestID()).
+				  arg(m_archive->getSignalID(context->signalHash(0))).
+				  arg(Archive::timeTypeStr(context->timeType())).
+				  arg(start.toDateTime().toString("yyyy-MM-dd HH:mm:ss")).
+				  arg(end.toDateTime().toString("yyyy-MM-dd HH:mm:ss")).
+				  arg(context->signalCount()));*/
 }
 
 ArchRequest::~ArchRequest()
 {
+	DEBUG_LOG_MSG(m_logger, QString("ArchRequest ID = %1 is deleted").arg(m_param.requestID()));
 }
 
 void ArchRequest::run()
 {
+	prepareFiles();
 
-}
+	ArchFindResult findResult = findData();
 
-/*
-void ArchRequest::startRequestProcessing()
-{
-	m_requestThread = new SimpleThread(new ArchRequestThreadWorker(this, m_logger));
-
-	m_requestThread->start();
-}
-
-void ArchRequest::stopRequestProcessing()
-{
-	if (m_requestThread != nullptr)
+	if (findResult == ArchFindResult::SearchError)
 	{
-		m_requestThread->quitAndWait();
-	}
-	else
-	{
-		assert(false);
-	}
-}
-
-ArchFindResult ArchRequest::findData()
-{
-	if (m_requestContexts.contains(param.requestID) == true)
-	{
-		assert(false);
-		return ArchFindResult::SearchError;
+		reportErrorAndWaitForQuit();
+		return;
 	}
 
-	RequestContext* reqContext = new RequestContext(param);
+	if (findResult == ArchFindResult::NotFound)
+	{
+		reportNoDataAndWaitForQuit();
+		return;
+	}
 
-	m_requestContexts.insert(param.requestID, reqContext);
+	nextDataRequired();
 
-	// enqueue files for immediately flushing
+	do
+	{
+		if (isNextDataRequired() == true)
+		{
+			getNextData();
+		}
+		else
+		{
+			usleep(200);
+		}
+	}
+
+	while(isQuitRequested() == false);
+}
+
+void ArchRequest::prepareFiles()
+{
+	assert(m_archFiles.count() == 0);
+	assert(m_archFilesArray.count() == 0);
+
+	// filling m_archFiles and m_archFilesArray
+	// and enqueue files for immediately flushing
 	//
-	for(Hash signalHash : param.signalHashes)
+	for(Hash signalHash : m_param.signalHashes())
 	{
-		ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
+		ArchFile* archFile = m_archive.getArchFile(signalHash);
 
 		if (archFile == nullptr)
 		{
@@ -98,34 +113,59 @@ ArchFindResult ArchRequest::findData()
 			continue;
 		}
 
-		reqContext->appendArchFile(archFile);
+		m_archFiles.insert(signalHash, archFile);
+		m_archFilesArray.append(archFile);
 
-		flushImmediately(archFile);
+		m_archive.flushImmediately(archFile);
 	}
+}
 
-	ArchFindResult result = reqContext->findData();
+ArchFindResult ArchRequest::findData()
+{
+	ArchFindResult result = ArchFindResult::NotFound;
 
-	if (result == ArchFindResult::NotFound)
+	for(ArchFile* archFile : m_archFilesArray)
 	{
-		m_requestContexts.remove(reqContext->requestID());
-		delete reqContext;
+		ArchFindResult res = archFile->findData(m_execParam);
+
+		if (res == ArchFindResult::Found)
+		{
+			result = ArchFindResult::Found;
+		}
 	}
 
 	return result;
 }
 
-
-
-Hash ArchRequest::signalHash(int index)
+void ArchRequest::getNextData()
 {
-	if (index < 0 || index >= m_param.signalHashes.count())
+	if (m_noMoreData == true)
 	{
-		assert(false);
-		return UNDEFINED_HASH;
+		return;
 	}
 
-	return m_param.signalHashes[index];
+	//
 }
+
+void ArchRequest::reportErrorAndWaitForQuit()
+{
+	waitForQuit();
+}
+
+void ArchRequest::reportNoDataAndWaitForQuit()
+{
+	waitForQuit();
+}
+
+void ArchRequest::waitForQuit()
+{
+	while(isQuitRequested() == false)
+	{
+		usleep(200);
+	}
+}
+
+/*
 
 // ---------------------------------------------------------------------------------------------
 //

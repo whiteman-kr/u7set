@@ -61,28 +61,6 @@ public:
 	static const int TIME_1S = 1000;								// 1000 millisecond
 	static const int TIME_TO_EXPAND_REQUEST = 31 * TIME_1S;			// 31 seconds
 
-	class RequestContext
-	{
-	public:
-		RequestContext(const ArchRequestParam& param);
-
-		quint32 requestID() const { return m_param.requestID(); }
-
-		void appendArchFile(ArchFile* f);
-
-		ArchFindResult findData();
-
-	private:
-		ArchRequestParam m_param;
-
-		QVector<ArchFile*> m_archFiles;
-
-		static const int REQUEST_CONTEXT_MAX_STATES = 60000;
-
-		int m_statesInBuffer = 0;
-		SimpleAppSignalState m_statesBuffer[REQUEST_CONTEXT_MAX_STATES];
-	};
-
 public:
 	Archive(const QString& projectID,
 			const QString& equipmentID,
@@ -94,7 +72,8 @@ public:
 	void start();
 	void stop();
 
-	ArchRequest* createNewRequest(E::TimeType timeType, qint64 sartTime, qint64 endTime, const QVector<Hash>& signalHashes);
+	std::shared_ptr<ArchRequest> startNewRequest(E::TimeType timeType, qint64 sartTime, qint64 endTime, const QVector<Hash>& signalHashes);
+	void finalizeRequest(quint32 requestID);
 
 	bool isWorkable() const { return m_isWorkable; }
 
@@ -140,6 +119,8 @@ public:
 	//
 
 	ArchFindResult findData(const ArchRequestParam& param);
+
+	ArchFile* getArchFile(Hash signalHash) { return m_archFiles.value(signalHash, nullptr); }
 
 private:
 	quint32 getNewRequestID();
@@ -202,7 +183,10 @@ private:
 	//
 
 	QMutex m_requestsMutex;
-	QHash<quint32, ArchRequest*> m_requests;
+	QHash<quint32, std::shared_ptr<ArchRequest>> m_requests;
 
-	friend class ArchFile;
+	//
+
+//	friend class ArchFile;
+	friend class ArchRequest;
 };

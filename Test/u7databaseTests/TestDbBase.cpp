@@ -71,16 +71,19 @@ bool TestDbBase::createProjectDb()
 		db.setPassword(m_databaseUserPassword);
 		db.setDatabaseName(QString("u7_") + m_projectName);
 
-		if (bool ok = db.open();
-			ok == false)
+		bool ok = db.open();
+
+		if (ok == false)
 		{
 			qDebug() << "Cannot connect to database. Error: " << db.lastError();
 			throw false;
 		}
 
 		QSqlQuery query;
-		if (bool result = query.exec("SELECT MAX(VersionNo) FROM Version");
-			result == false)
+
+		bool result = query.exec("SELECT MAX(VersionNo) FROM Version");
+
+		if (result == false)
 		{
 			qDebug() << "Get test ProjectDB version error: " << query.lastError();
 			throw false;

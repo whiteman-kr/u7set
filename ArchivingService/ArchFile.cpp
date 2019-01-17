@@ -521,10 +521,10 @@ void ArchFile::Partition::closeFile()
 // ----------------------------------------------------------------------------------------------------------------------
 
 ArchFile::RequestData::RequestData(ArchFile& archFile, const ArchRequestParam& param) :
-	requestID(param.requestID),
-	timeType(param.timeType),
-	startTime(param.startTime),
-	endTime(param.endTime),
+	requestID(param.requestID()),
+	timeType(param.timeType()),
+	startTime(param.startTime()),
+	endTime(param.endTime()),
 	partitionToRead(archFile, false)
 {
 }
@@ -644,18 +644,18 @@ bool ArchFile::isEmergency() const
 
 ArchFindResult ArchFile::findData(const ArchRequestParam& param)
 {
-	RequestData* rd = m_requestsData.value(param.requestID, nullptr);
+	RequestData* rd = m_requestsData.value(param.requestID(), nullptr);
 
 	if (rd != nullptr)
 	{
-		m_requestsData.remove(param.requestID);
+		m_requestsData.remove(param.requestID());
 		delete rd;
 		rd = nullptr;
 	}
 
 	rd = new RequestData(*this, param);
 
-	m_requestsData.insert(param.requestID, rd);
+	m_requestsData.insert(param.requestID(), rd);
 
 	getArchPartitionsInfo(rd);
 

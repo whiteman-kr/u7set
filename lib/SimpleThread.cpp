@@ -215,7 +215,7 @@ bool SimpleMutex::tryLock()
 	return tryLock(QThread::currentThread());
 }
 
-void SimpleMutex::tryLock(const QThread* currentThread)
+bool SimpleMutex::tryLock(const QThread* currentThread)
 {
 	const QThread* expectedOwner = nullptr;
 
