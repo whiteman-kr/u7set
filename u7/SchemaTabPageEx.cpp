@@ -1576,7 +1576,7 @@ void SchemaFileViewEx::slot_doubleClicked(const QModelIndex& index)
 
 	if (dbc()->isSystemFile(file.fileId()) == true)
 	{
-		this->blockSignals(true);	// to prevent call of this function again
+		this->blockSignals(true);			// To prevent call of this function again
 
 		QTreeView::doubleClicked(index);	// Default action for system files
 
@@ -1833,8 +1833,8 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 
 	// Add control page
 	//
-	SchemaControlTabPageEx* controlTabPage = new SchemaControlTabPageEx(dbc);
-	m_tabWidget->addTab(controlTabPage, tr("Schemas Control"));
+	m_controlTabPage = new SchemaControlTabPageEx(dbc);
+	m_tabWidget->addTab(m_controlTabPage, tr("Schemas Control"));
 
 	return;
 }
@@ -1845,58 +1845,17 @@ SchemasTabPageEx::~SchemasTabPageEx()
 
 bool SchemasTabPageEx::hasUnsavedSchemas() const
 {
-	int to_do_save_unsaved;
-//	for (int i = 0; i < m_tabWidget->count(); i++)
-//	{
-//		QWidget* tab = m_tabWidget->widget(i);
-
-//		if (tab == nullptr)
-//		{
-//			assert(tab);
-//			continue;
-//		}
-
-//		EditSchemaTabPage* schemaTabPage = dynamic_cast<EditSchemaTabPage*>(tab);
-//		if (schemaTabPage != nullptr)
-//		{
-//			if (schemaTabPage->modified() == true)
-//			{
-//				return true;
-//			}
-//		}
-//	}
-
-	return false;
+	return m_controlTabPage->hasUnsavedSchemas();
 }
 
 bool SchemasTabPageEx::saveUnsavedSchemas()
 {
-	int to_do_save_unsaved;
-	return false;
+	return m_controlTabPage->saveUnsavedSchemas();
+}
 
-//	bool ok = true;
-
-//	for (int i = 0; i < m_tabWidget->count(); i++)
-//	{
-//		QWidget* tab = m_tabWidget->widget(i);
-
-//		if (tab == nullptr)
-//		{
-//			assert(tab);
-//			continue;
-//		}
-
-//		EditSchemaTabPage* schemaTabPage = dynamic_cast<EditSchemaTabPage*>(tab);
-//		if (schemaTabPage != nullptr)
-//		{
-//			if (schemaTabPage->modified() == true)
-//			{
-//				ok &= schemaTabPage->saveWorkcopy();
-//			}
-//		}
-//	}
-
-//	return ok;
+bool SchemasTabPageEx::resetModified()
+{
+	return m_controlTabPage->resetModified();
 }
 
 void SchemasTabPageEx::refreshControlTabPage()
@@ -2308,7 +2267,44 @@ VFrame30::Schema* SchemaControlTabPageEx::createSchema() const
 {
 	assert(false);
 	return nullptr;
-	//return m_createSchemaFunc();
+}
+
+bool SchemaControlTabPageEx::hasUnsavedSchemas() const
+{
+	bool result = false;
+	for (auto[file, editWidget] : m_openedFiles)
+	{
+		result |= editWidget->modified();
+	}
+
+	return result;
+}
+
+bool SchemaControlTabPageEx::saveUnsavedSchemas()
+{
+	bool ok = true;
+
+	for (auto[file, editWidget] : m_openedFiles)
+	{
+		if (editWidget->modified() == true)
+		{
+			ok &= editWidget->saveWorkcopy();
+		}
+	}
+
+	return ok;
+}
+
+bool SchemaControlTabPageEx::resetModified()
+{
+	bool ok = true;
+
+	for (auto[file, editWidget] : m_openedFiles)
+	{
+		editWidget->resetModified();
+	}
+
+	return ok;
 }
 
 void SchemaControlTabPageEx::createToolBar()
@@ -2464,11 +2460,9 @@ void SchemaControlTabPageEx::detachOrAttachWindow(EditSchemaTabPageEx* editTabPa
 		//
 		tabWidget->removeTab(tabWidget->indexOf(editTabPage));
 
-		editTabPage->setWindowFlag(Qt::WindowType::Window);
 		editTabPage->setParent(nullptr);
-		editTabPage->setVisible(true);
-
-		editTabPage->activateWindow();
+		editTabPage->setWindowFlag(Qt::WindowType::Window);
+		editTabPage->setWindowState(Qt::WindowMaximized);
 	}
 	else
 	{
@@ -2478,9 +2472,12 @@ void SchemaControlTabPageEx::detachOrAttachWindow(EditSchemaTabPageEx* editTabPa
 
 		tabWidget->addTab(editTabPage, editTabPage->windowTitle());
 
-		tabWidget->activateWindow();
 		tabWidget->setCurrentWidget(editTabPage);
 	}
+
+	editTabPage->updateZoomAndScrolls(false);
+	editTabPage->setVisible(true);
+	editTabPage->activateWindow();
 
 	return;
 }
@@ -2690,6 +2687,8 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 			else
 			{
 				editTabPage->activateWindow();
+				editTabPage->raise();
+				QApplication::alert(editTabPage, 500);
 			}
 
 			return;
@@ -2821,6 +2820,8 @@ void SchemaControlTabPageEx::viewFile(const DbFileInfo& file)
 			else
 			{
 				editTabPage->activateWindow();
+				editTabPage->raise();
+				QApplication::alert(editTabPage, 500);
 			}
 
 			return;
@@ -4291,7 +4292,7 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 	m_toolBar->setOrientation(Qt::Vertical);
 	m_toolBar->setFloatable(false);
 	m_toolBar->setMovable(false);
-	m_toolBar->toggleViewAction()->setDisabled(true);		// Disables hide toobar from context menu
+	m_toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
 
 	m_toolBar->addAction(m_schemaWidget->m_fileAction);
 
@@ -4430,7 +4431,37 @@ void EditSchemaTabPageEx::closeEvent(QCloseEvent* event)
 	// Find current tab and close it
 	//
 	emit aboutToClose(this);
+	this->deleteLater();
+
 	event->accept();
+	return;
+}
+
+void EditSchemaTabPageEx::ensureVisible()
+{
+	setVisible(true);	// Widget must be visible for correct work of QApplication::desktop()->screenGeometry
+
+	QRect screenRect  = QApplication::desktop()->availableGeometry(this);
+	QRect intersectRect = screenRect.intersected(frameGeometry());
+
+	if (isMinimized() == true)
+	{
+		showNormal();
+	}
+
+	if (isMaximized() == false &&
+		(intersectRect.width() < size().width() ||
+		 intersectRect.height() < size().height()))
+	{
+		move(screenRect.topLeft());
+	}
+
+	if (isMaximized() == false &&
+		(frameGeometry().width() > screenRect.width() ||
+		 frameGeometry().height() > screenRect.height()))
+	{
+		resize(screenRect.width() * 0.7, screenRect.height() * 0.7);
+	}
 
 	return;
 }
@@ -4482,6 +4513,12 @@ void EditSchemaTabPageEx::setPageTitle()
 		}
 	}
 
+	return;
+}
+
+void EditSchemaTabPageEx::updateZoomAndScrolls(bool repaint)
+{
+	m_schemaWidget->setZoom(m_schemaWidget->zoom(), repaint);
 	return;
 }
 

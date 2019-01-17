@@ -108,7 +108,7 @@ private:
 	ProjectsTabPage* m_projectsTab = nullptr;
 	EquipmentTabPage* m_equipmentTab = nullptr;
 	SignalsTabPage* m_signalsTab = nullptr;
-	SchemasTabPageEx* m_logicSchemaTabPage = nullptr;
+	SchemasTabPageEx* m_editSchemaTabPage = nullptr;
 	SchemasTabPage* m_logicSchema = nullptr;
 	SchemasTabPage* m_ufbLibrary = nullptr;
 	SchemasTabPage* m_monitorSchema = nullptr;

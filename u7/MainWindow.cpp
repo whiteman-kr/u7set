@@ -86,7 +86,7 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 						  ::MvsTemplExtension,
 						  tr("Control"));
 
-	m_logicSchemaTabPage = new SchemasTabPageEx{db(), this};
+	m_editSchemaTabPage = new SchemasTabPageEx{db(), this};
 
 	getCentralWidget()->addTabPage(m_projectsTab, tr("Projects"));
 	getCentralWidget()->addTabPage(m_equipmentTab, tr("Equipment"));
@@ -97,7 +97,7 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 
 	//m_diagSchema = SchemasTabPage::create<VFrame30::DiagSchema>(DvsFileExtension, dbController(), DvsFileName, nullptr);
 
-	getCentralWidget()->addTabPage(m_logicSchemaTabPage, tr("Application Logic Ex"));
+	getCentralWidget()->addTabPage(m_editSchemaTabPage, tr("Application Logic Ex"));
 	getCentralWidget()->addTabPage(m_logicSchema, tr("Application Logic"));
 	getCentralWidget()->addTabPage(m_monitorSchema, tr("Monitor Schemas"));
 	//getCentralWidget()->addTabPage(m_diagSchema, tr("Diag Schemas"));
@@ -146,20 +146,14 @@ void MainWindow::closeEvent(QCloseEvent* e)
 
 	// check if any schema is not saved
 	//
-	if (m_logicSchema == nullptr ||
-		m_monitorSchema == nullptr)
-		//m_diagSchema == nullptr)
+	if (m_editSchemaTabPage == nullptr)
 	{
-		assert(m_logicSchema);
-		assert(m_monitorSchema);
-		//assert(m_diagSchema);
+		assert(m_editSchemaTabPage);
 		e->accept();
 		return;
 	}
 
-	if (m_logicSchema->hasUnsavedSchemas() == true ||
-		m_monitorSchema->hasUnsavedSchemas() == true)
-		//m_diagSchema->hasUnsavedSchemas() == true)
+	if (m_editSchemaTabPage->hasUnsavedSchemas() == true)
 	{
 		QMessageBox::StandardButton result = QMessageBox::question(this, QApplication::applicationName(),
 																   tr("Some schemas have unsaved changes."),
@@ -174,9 +168,13 @@ void MainWindow::closeEvent(QCloseEvent* e)
 
 		if (result == QMessageBox::SaveAll)
 		{
-			m_logicSchema->saveUnsavedSchemas();
-			m_monitorSchema->saveUnsavedSchemas();
-			//m_diagSchema->saveUnsavedSchemas();
+			m_editSchemaTabPage->saveUnsavedSchemas();	// It will reset modified flag
+		}
+
+		if (result == QMessageBox::Discard)
+		{
+			m_editSchemaTabPage->resetModified();		// Reset modidied flag for all opened files, so on closeEvent for tese files
+														// prompt to save them will not be shown
 		}
 	}
 
@@ -185,6 +183,8 @@ void MainWindow::closeEvent(QCloseEvent* e)
 	saveWindowState();
 
 	e->accept();
+
+	qApp->closeAllWindows();
 
 	return;
 }
@@ -404,7 +404,7 @@ CentralWidget* MainWindow::getCentralWidget()
 
 void MainWindow::exit()
 {
-	close();
+	qApp->closeAllWindows();
 }
 
 void MainWindow::userManagement()

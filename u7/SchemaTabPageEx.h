@@ -11,9 +11,7 @@
 #include "EditSchemaWidget.h"
 #include "../VFrame30/LogicSchema.h"
 
-
 class EditSchemaTabPageEx;
-
 
 //
 //
@@ -101,9 +99,6 @@ private:
 
 	std::map<int, QString> m_users;							// Key is UserID
 	std::map<int, VFrame30::SchemaDetails> m_details; 		// Key is FileID
-
-//	Columns m_sortColumn = Columns::FileNameColumn;
-//	Qt::SortOrder m_sortOrder = Qt::AscendingOrder;
 };
 
 
@@ -204,18 +199,15 @@ public:
 	const DbFileInfo& parentFile() const;
 	int parentFileId() const;
 
-	//	// Protected properties
-	//	//
-	//protected:
+	// Protected properties
+	//
+protected:
 
 	// Data
 	//
 private:
 	SchemaListModelEx m_filesModel;
 	SchemaProxyListModel m_proxyModel;
-
-	//QString m_parentFileName;
-	//DbFileInfo m_parentFile;
 
 	int m_lastBuildIssueCount = -1;
 
@@ -258,11 +250,14 @@ class SchemaControlTabPageEx : public QWidget, public HasDbController
 
 public:
 	SchemaControlTabPageEx(DbController* db);
-
 	virtual ~SchemaControlTabPageEx();
 
 public:
-	VFrame30::Schema* createSchema() const;
+	VFrame30::Schema* createSchema() const;		// To delete????
+
+	bool hasUnsavedSchemas() const;
+	bool saveUnsavedSchemas();
+	bool resetModified();
 
 private:
 	void createToolBar();
@@ -320,22 +315,18 @@ public:
 	// Data
 	//
 private:
-	//std::function<VFrame30::Schema*()> m_createSchemaFunc;
 	SchemaFileViewEx* m_filesView = nullptr;
-	//QString m_templateFileExtension;
-
 	QToolBar* m_toolBar = nullptr;
-
 	QLineEdit* m_searchEdit = nullptr;
 	QPushButton* m_searchButton = nullptr;
 
-	std::map<DbFileInfo, EditSchemaTabPageEx*> m_openedFiles;	// Opened files (for edit and view), key is fileId
+	std::map<DbFileInfo, EditSchemaTabPageEx*> m_openedFiles;	// Opened files (for edit and view)
 };
 
 
 //
 //
-// SchemasTabPage - the main tab page added to IDE
+// SchemasTabPageEx - the main tab page added to IDE
 //
 //
 class SchemasTabPageEx : public MainTabPage
@@ -349,6 +340,7 @@ public:
 public:
 	bool hasUnsavedSchemas() const;
 	bool saveUnsavedSchemas();
+	bool resetModified();
 
 	void refreshControlTabPage();
 
@@ -361,14 +353,14 @@ public slots:
 	void compareObject(DbChangesetObject object, CompareData compareData);
 
 	// Data
-	//setWindowFl
+	//
 protected:
-	QTabWidget* m_tabWidget;
+	QTabWidget* m_tabWidget = nullptr;
+	SchemaControlTabPageEx* m_controlTabPage = nullptr;
 
 	QString m_fileExtension;
 	QString m_templFileExtension;
 };
-
 
 
 //
@@ -394,7 +386,9 @@ protected:
 	// Public methods
 	//
 public:
+	void ensureVisible();
 	void setPageTitle();
+	void updateZoomAndScrolls(bool repaint);
 
 	void updateAfbSchemaItems();
 	void updateUfbSchemaItems();

@@ -1801,6 +1801,7 @@ void EditSchemaWidget::createActions()
 	m_f2Action->setEnabled(true);
 	m_f2Action->setMenuRole(QAction::NoRole);
 	m_f2Action->setShortcut(QKeySequence(Qt::Key_F2));
+	m_f2Action->setShortcutVisibleInContextMenu(true);
 	connect(m_f2Action, &QAction::triggered, this, &EditSchemaWidget::f2Key);
 	addAction(m_f2Action);
 
@@ -1812,6 +1813,7 @@ void EditSchemaWidget::createActions()
 	m_infoModeAction->setChecked(theSettings.isInfoMode());
 	m_infoModeAction->setMenuRole(QAction::NoRole);
 	m_infoModeAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_I));
+	m_infoModeAction->setShortcutVisibleInContextMenu(true);
 	connect(m_infoModeAction, &QAction::toggled, this, [this](bool checked)
 		{
 			theSettings.setInfoMode(checked);
@@ -1828,6 +1830,8 @@ void EditSchemaWidget::createActions()
 	m_detachWindow = new QAction(tr("Detach/Attach Window"), this);
 	m_detachWindow->setStatusTip(tr("Detach/attach window..."));
 	m_detachWindow->setEnabled(true);
+	m_detachWindow->setShortcut(Qt::ALT + Qt::Key_D);
+	m_detachWindow->setShortcutVisibleInContextMenu(true);
 	connect(m_detachWindow, &QAction::triggered, this, &EditSchemaWidget::detachOrAttachWindow);
 
 	m_fileCheckInAction = new QAction(tr("Check In"), this);
@@ -1852,6 +1856,7 @@ void EditSchemaWidget::createActions()
 	m_fileSaveAction->setStatusTip(tr("Save current changes..."));
 	m_fileSaveAction->setEnabled(false);
 	m_fileSaveAction->setShortcuts(QKeySequence::Save);
+	m_fileSaveAction->setShortcutVisibleInContextMenu(true);
 	connect(m_fileSaveAction, &QAction::triggered, this, &EditSchemaWidget::saveWorkcopy);
 	addAction(m_fileSaveAction);
 
@@ -1889,6 +1894,7 @@ void EditSchemaWidget::createActions()
 	m_fileCloseAction->setStatusTip(tr("Close file"));
 	m_fileCloseAction->setEnabled(true);
 	m_fileCloseAction->setShortcuts(QKeySequence::Close);
+	m_fileCloseAction->setShortcutVisibleInContextMenu(true);
 	connect(m_fileCloseAction, &QAction::triggered, [this](bool) { emit closeTab(this); });
 	addAction(m_fileCloseAction);
 
@@ -2097,6 +2103,7 @@ void EditSchemaWidget::createActions()
 	m_undoAction = new QAction(tr("Undo"), this);
 	m_undoAction->setEnabled(false);
 	m_undoAction->setShortcuts(QKeySequence::Undo);
+	m_undoAction->setShortcutVisibleInContextMenu(true);
 	connect(m_undoAction, &QAction::triggered, this, &EditSchemaWidget::undo);
 	addAction(m_undoAction);
 
@@ -2105,6 +2112,7 @@ void EditSchemaWidget::createActions()
 	m_redoAction = new QAction(tr("Redo"), this);
 	m_redoAction->setEnabled(false);
 	m_redoAction->setShortcuts(QKeySequence::Redo);
+	m_redoAction->setShortcutVisibleInContextMenu(true);
 	connect(m_redoAction, &QAction::triggered, this, &EditSchemaWidget::redo);
 	addAction(m_redoAction);
 
@@ -2118,6 +2126,7 @@ void EditSchemaWidget::createActions()
 	m_selectAllAction = new QAction(tr("Select All"), this);
 	m_selectAllAction->setEnabled(true);
 	m_selectAllAction->setShortcuts(QKeySequence::SelectAll);
+	m_selectAllAction->setShortcutVisibleInContextMenu(true);
 	connect(m_selectAllAction, &QAction::triggered, this, &EditSchemaWidget::selectAll);
 	addAction(m_selectAllAction);
 
@@ -2131,6 +2140,7 @@ void EditSchemaWidget::createActions()
 	m_editCutAction = new QAction(tr("Cut"), this);
 	m_editCutAction->setEnabled(false);
 	m_editCutAction->setShortcuts(QKeySequence::Cut);
+	m_editCutAction->setShortcutVisibleInContextMenu(true);
 	connect(m_editCutAction, &QAction::triggered, this, &EditSchemaWidget::editCut);
 	addAction(m_editCutAction);
 
@@ -2139,6 +2149,7 @@ void EditSchemaWidget::createActions()
 	m_editCopyAction = new QAction(tr("Copy"), this);
 	m_editCopyAction->setEnabled(false);
 	m_editCopyAction->setShortcuts(QKeySequence::Copy);
+	m_editCopyAction->setShortcutVisibleInContextMenu(true);
 	connect(m_editCopyAction, &QAction::triggered, this, &EditSchemaWidget::editCopy);
 	addAction(m_editCopyAction);
 
@@ -2147,6 +2158,7 @@ void EditSchemaWidget::createActions()
 	m_editPasteAction = new QAction(tr("Paste"), this);
 	m_editPasteAction->setEnabled(false);
 	m_editPasteAction->setShortcuts(QKeySequence::Paste);
+	m_editPasteAction->setShortcutVisibleInContextMenu(true);
 	connect(m_editPasteAction, &QAction::triggered, this, &EditSchemaWidget::editPaste);
 	addAction(m_editPasteAction);
 
@@ -2161,6 +2173,7 @@ void EditSchemaWidget::createActions()
 	m_deleteAction->setEnabled(false);
 	m_deleteAction->setMenuRole(QAction::NoRole);
 	m_deleteAction->setShortcut(QKeySequence(Qt::Key_Delete));
+	m_deleteAction->setShortcutVisibleInContextMenu(true);
 	connect(m_deleteAction, &QAction::triggered, this, &EditSchemaWidget::deleteKey);
 	addAction(m_deleteAction);
 
@@ -2175,6 +2188,7 @@ void EditSchemaWidget::createActions()
 	m_propertiesAction->setEnabled(true);
 	m_propertiesAction->setMenuRole(QAction::NoRole);
 	m_propertiesAction->setShortcut(QKeySequence(tr("Alt+Return")));
+	m_propertiesAction->setShortcutVisibleInContextMenu(true);
 	// Shortcuts Alt+Return and Alt+Numeric Enter are different,
 	// Look for real call of EditSchemaWidget::properties in keyPressEvent!!!!
 	//
@@ -2192,6 +2206,7 @@ void EditSchemaWidget::createActions()
 	m_sameWidthAction = new QAction(tr("Same Width"), this);
 	m_sameWidthAction->setEnabled(false);
 	m_sameWidthAction->setShortcut(Qt::ALT + Qt::Key_W);
+	m_sameWidthAction->setShortcutVisibleInContextMenu(true);
 	connect(m_sameWidthAction, &QAction::triggered, this, &EditSchemaWidget::sameWidth);
 	addAction(m_sameWidthAction);
 
@@ -2200,6 +2215,7 @@ void EditSchemaWidget::createActions()
 	m_sameHeightAction = new QAction(tr("Same Height"), this);
 	m_sameHeightAction->setEnabled(false);
 	m_sameHeightAction->setShortcut(Qt::ALT + Qt::Key_H);
+	m_sameHeightAction->setShortcutVisibleInContextMenu(true);
 	connect(m_sameHeightAction, &QAction::triggered, this, &EditSchemaWidget::sameHeight);
 	addAction(m_sameHeightAction);
 
@@ -2254,6 +2270,7 @@ void EditSchemaWidget::createActions()
 	m_bringToFrontAction = new QAction(tr("Bring to Front"), this);
 	m_bringToFrontAction->setEnabled(false);
 	m_bringToFrontAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Home));
+	m_bringToFrontAction->setShortcutVisibleInContextMenu(true);
 	connect(m_bringToFrontAction, &QAction::triggered, this, &EditSchemaWidget::bringToFront);
 	addAction(m_bringToFrontAction);
 
@@ -2262,6 +2279,7 @@ void EditSchemaWidget::createActions()
 	m_bringForwardAction = new QAction(tr("Bring Forward"), this);
 	m_bringForwardAction->setEnabled(false);
 	m_bringForwardAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_PageUp));
+	m_bringForwardAction->setShortcutVisibleInContextMenu(true);
 	connect(m_bringForwardAction, &QAction::triggered, this, &EditSchemaWidget::bringForward);
 	addAction(m_bringForwardAction);
 
@@ -2270,6 +2288,7 @@ void EditSchemaWidget::createActions()
 	m_sendToBackAction = new QAction(tr("Send to Back"), this);
 	m_sendToBackAction->setEnabled(false);
 	m_sendToBackAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_End));
+	m_sendToBackAction->setShortcutVisibleInContextMenu(true);
 	connect(m_sendToBackAction, &QAction::triggered, this, &EditSchemaWidget::sendToBack);
 	addAction(m_sendToBackAction);
 
@@ -2278,6 +2297,7 @@ void EditSchemaWidget::createActions()
 	m_sendBackwardAction = new QAction(tr("Send Backward"), this);
 	m_sendBackwardAction->setEnabled(false);
 	m_sendBackwardAction->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_PageDown));
+	m_sendBackwardAction->setShortcutVisibleInContextMenu(true);
 	connect(m_sendBackwardAction, &QAction::triggered, this, &EditSchemaWidget::sendBackward);
 	addAction(m_sendBackwardAction);
 
@@ -2313,6 +2333,7 @@ void EditSchemaWidget::createActions()
 	m_zoomInAction = new QAction(tr("Zoom In"), this);
 	m_zoomInAction->setEnabled(true);
 	m_zoomInAction->setShortcut(QKeySequence::ZoomIn);
+	m_zoomInAction->setShortcutVisibleInContextMenu(true);
 	connect(m_zoomInAction, &QAction::triggered, this, &VFrame30::BaseSchemaWidget::zoomIn);
 	addAction(m_zoomInAction);
 
@@ -2321,6 +2342,7 @@ void EditSchemaWidget::createActions()
 	m_zoomOutAction = new QAction(tr("Zoom Out"), this);
 	m_zoomOutAction->setEnabled(true);
 	m_zoomOutAction->setShortcut(QKeySequence::ZoomOut);
+	m_zoomOutAction->setShortcutVisibleInContextMenu(true);
 	connect(m_zoomOutAction, &QAction::triggered, this, &VFrame30::BaseSchemaWidget::zoomOut);
 	addAction(m_zoomOutAction);
 
@@ -2329,6 +2351,7 @@ void EditSchemaWidget::createActions()
 	m_zoom100Action = new QAction(tr("Zoom 100%"), this);
 	m_zoom100Action->setEnabled(true);
 	m_zoom100Action->setShortcut(QKeySequence(Qt::CTRL + Qt::Key_Asterisk));
+	m_zoom100Action->setShortcutVisibleInContextMenu(true);
 	connect(m_zoom100Action, &QAction::triggered, this, &VFrame30::BaseSchemaWidget::zoom100);
 	addAction(m_zoom100Action);
 
@@ -2356,6 +2379,7 @@ void EditSchemaWidget::createActions()
 	m_layersAction->setEnabled(true);
 	//m_layersAction->setMenuRole(QAction::NoRole);
 	//m_layersAction->setShortcut(QKeySequence(Qt::ALT + Qt::Key_Enter));
+	//m_layersAction->setShortcutVisibleInContextMenu(true);
 	connect(m_layersAction, &QAction::triggered, this, &EditSchemaWidget::layers);
 	addAction(m_layersAction);
 
@@ -2369,6 +2393,7 @@ void EditSchemaWidget::createActions()
 	m_toggleCommentAction = new QAction(tr("Comment/Uncomment"), this);
 	m_toggleCommentAction->setEnabled(false);
 	m_toggleCommentAction->setShortcut(Qt::CTRL + Qt::Key_Slash);
+	m_toggleCommentAction->setShortcutVisibleInContextMenu(true);
 	connect(m_toggleCommentAction, &QAction::triggered, this, &EditSchemaWidget::toggleComment);
 	addAction(m_toggleCommentAction);
 
@@ -2377,6 +2402,7 @@ void EditSchemaWidget::createActions()
 	m_lockAction = new QAction(tr("Lock/Unlock"), this);
 	m_lockAction->setEnabled(false);
 	m_lockAction->setShortcut(Qt::CTRL + Qt::Key_L);
+	m_lockAction->setShortcutVisibleInContextMenu(true);
 	connect(m_lockAction, &QAction::triggered, this, &EditSchemaWidget::toggleLock);
 	addAction(m_lockAction);
 
@@ -2385,12 +2411,14 @@ void EditSchemaWidget::createActions()
 	m_findAction = new QAction(tr("Find..."), this);
 	m_findAction->setEnabled(true);
 	m_findAction->setShortcut(QKeySequence::Find);
+	m_findAction->setShortcutVisibleInContextMenu(true);
 	connect(m_findAction, &QAction::triggered, this, &EditSchemaWidget::find);
 	addAction(m_findAction);
 
 	m_findNextAction = new QAction(tr("Find Next"), this);
 	m_findNextAction->setEnabled(true);
 	m_findNextAction->setShortcut(QKeySequence::FindNext);
+	m_findNextAction->setShortcutVisibleInContextMenu(true);
 	connect(m_findNextAction, &QAction::triggered, this,
 			[this]()
 			{
@@ -2401,6 +2429,7 @@ void EditSchemaWidget::createActions()
 	m_findPrevAction = new QAction(tr("Find Previous"), this);
 	m_findPrevAction->setEnabled(true);
 	m_findPrevAction->setShortcut(QKeySequence::FindPrevious);
+	m_findPrevAction->setShortcutVisibleInContextMenu(true);
 	connect(m_findPrevAction, &QAction::triggered, this,
 			[this]()
 			{
@@ -2413,12 +2442,14 @@ void EditSchemaWidget::createActions()
 	//
 	m_addAppSignalAction = new QAction(tr("AddAppSignal"), this);
 	m_addAppSignalAction->setShortcut(Qt::ALT + Qt::Key_N);
+	m_addAppSignalAction->setShortcutVisibleInContextMenu(true);
 	m_addAppSignalAction->setEnabled(false);
 	connect(m_addAppSignalAction, &QAction::triggered, this, &EditSchemaWidget::addNewAppSignalSelected);
 	addAction(m_addAppSignalAction);
 
 	m_appSignalPropertiesAction = new QAction(tr("AppSignalProperties"), this);
 	m_appSignalPropertiesAction->setShortcut(Qt::ALT + Qt::Key_S);
+	m_appSignalPropertiesAction->setShortcutVisibleInContextMenu(true);
 	m_appSignalPropertiesAction->setEnabled(false);
 	connect(m_appSignalPropertiesAction, &QAction::triggered, this, &EditSchemaWidget::appSignalsSelectedProperties);
 	addAction(m_appSignalPropertiesAction);
@@ -4486,6 +4517,9 @@ QPointF EditSchemaWidget::snapToGrid(QPointF pt) const
 
 bool EditSchemaWidget::updateAfbsForSchema()
 {
+	QApplication::setOverrideCursor(Qt::WaitCursor);
+	QApplication::processEvents();
+
 	// Update Afb list
 	//
 	std::vector<std::shared_ptr<Afb::AfbElement>> afbs;
@@ -4493,12 +4527,16 @@ bool EditSchemaWidget::updateAfbsForSchema()
 	bool ok = loadAfbsDescriptions(&afbs);
 	if (ok == false)
 	{
+		QApplication::restoreOverrideCursor();
 		return false;
 	}
 
 	QString errorMessage;
 	int updatedItemCount = 0;
+
 	ok = schema()->updateAllSchemaItemFbs(afbs, &updatedItemCount, &errorMessage);
+
+	QApplication::restoreOverrideCursor();
 
 	if (ok == false)
 	{
@@ -4522,6 +4560,9 @@ bool EditSchemaWidget::updateAfbsForSchema()
 
 bool EditSchemaWidget::updateUfbsForSchema()
 {
+	QApplication::setOverrideCursor(Qt::WaitCursor);
+	QApplication::processEvents();
+
 	// Get Ufb list
 	//
 	std::vector<std::shared_ptr<VFrame30::UfbSchema>> ufbs;
@@ -4530,6 +4571,7 @@ bool EditSchemaWidget::updateUfbsForSchema()
 
 	if (ok == false)
 	{
+		QApplication::restoreOverrideCursor();
 		return false;
 	}
 
@@ -4539,6 +4581,8 @@ bool EditSchemaWidget::updateUfbsForSchema()
 	int updatedItemCount = 0;
 
 	ok = schema()->updateAllSchemaItemUfb(ufbs, &updatedItemCount, &errorMessage);
+
+	QApplication::restoreOverrideCursor();
 
 	if (ok == false)
 	{
@@ -4562,6 +4606,9 @@ bool EditSchemaWidget::updateUfbsForSchema()
 
 bool EditSchemaWidget::updateBussesForSchema()
 {
+	QApplication::setOverrideCursor(Qt::WaitCursor);
+	QApplication::processEvents();
+
 	// Get Bus list
 	//
 	std::vector<VFrame30::Bus> busses;
@@ -4570,6 +4617,7 @@ bool EditSchemaWidget::updateBussesForSchema()
 
 	if (ok == false)
 	{
+		QApplication::restoreOverrideCursor();
 		return false;
 	}
 
@@ -4579,6 +4627,8 @@ bool EditSchemaWidget::updateBussesForSchema()
 	int updatedItemCount = 0;
 
 	ok = schema()->updateAllSchemaItemBusses(busses, &updatedItemCount, &errorMessage);
+
+	QApplication::restoreOverrideCursor();
 
 	if (ok == false)
 	{
@@ -5539,6 +5589,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 					if (signalStrIds.size() == 1)	// If not 1, then this shorcut will be added to "All Signals %1 Properties..."
 					{
 						signalAction->setShortcut(Qt::ALT + Qt::Key_S);
+						signalAction->setShortcutVisibleInContextMenu(true);
 					}
 
 					connect(signalAction, &QAction::triggered,
@@ -5556,6 +5607,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 				{
 					QAction* allSignals = new QAction(tr("All Signals %1 Properties...").arg(signalStrIds.size()), &menu);
 					allSignals->setShortcut(Qt::ALT + Qt::Key_S);
+					allSignals->setShortcutVisibleInContextMenu(true);
 					connect(allSignals, &QAction::triggered, this, &EditSchemaWidget::appSignalsSelectedProperties);
 
 					actions << allSignals;
@@ -5578,6 +5630,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 			{
 				QAction* addSignal = new QAction(tr("Add New App Signal..."), &menu);
 				addSignal->setShortcut(Qt::ALT + Qt::Key_N);
+				addSignal->setShortcutVisibleInContextMenu(true);
 
 				// Highlight this menu item if it was selected last time
 				//
@@ -9535,7 +9588,9 @@ SchemaFindDialog::SchemaFindDialog(QWidget* parent) :
 	m_nextButton = new QPushButton(tr("Find Next"));
 
 	//m_nextButton->setShortcut(QKeySequence::FindNext);		// Done via Actions, works much faster
+	//m_nextButton->setShortcutVisibleInContextMenu(true);
 	//m_prevButton->setShortcut(QKeySequence::FindPrevious);	// Done via Actions, works much faster
+	//m_prevButton->setShortcutVisibleInContextMenu(true);
 
 	// Replace buttons
 	//
@@ -9571,10 +9626,12 @@ SchemaFindDialog::SchemaFindDialog(QWidget* parent) :
 
 	QAction* nextAction = new QAction(tr("Find Next"), this);
 	nextAction->setShortcut(QKeySequence::FindNext);
+	nextAction->setShortcutVisibleInContextMenu(true);
 	addAction(nextAction);
 
 	QAction* prevAction = new QAction(tr("Find Prev"), this);
 	prevAction->setShortcut(QKeySequence::FindPrevious);
+	prevAction->setShortcutVisibleInContextMenu(true);
 	addAction(prevAction);
 
 	// Find buttons
