@@ -5,6 +5,29 @@
 #include "ArchRequest.h"
 #include "ArchWriterThread.h"
 
+ArchRequestParam::ArchRequestParam(quint32 requestID, E::TimeType timeType, qint64 startTime,
+								   qint64 endTime, const QVector<Hash>& signalHashes) :
+	m_requestID(requestID),
+	m_timeType(timeType),
+	m_startTime(startTime),
+	m_endTime(endTime),
+	m_signalHashes(signalHashes)
+{
+}
+
+void ArchRequestParam::expandTimes(qint64 expandTime)
+{
+	m_startTime -= expandTime;
+
+	if (m_startTime < 0)
+	{
+		assert(false);
+		m_startTime = 0;
+	}
+
+	m_endTime += expandTime;
+}
+
 // ----------------------------------------------------------------------------------------------------------------------
 //
 // Archive::RequestContext class implementation
@@ -69,7 +92,7 @@ Archive::Archive(const QString& projectID,
 	{
 		const Proto::ArchSignal& protoArchSignal = protoArchSignals.archsignals(i);
 
-		ArchFile* archFile = new ArchFile(protoArchSignal, m_archFullPath);
+		ArchFile* archFile = new ArchFile(protoArchSignal);
 
 		m_archFiles.insert(archFile->hash(), archFile);
 
@@ -94,6 +117,11 @@ void Archive::start()
 	{
 		DEBUG_LOG_ERR(m_log, "Archive directories creation error");
 		return;
+	}
+
+	for(ArchFile* archFile : m_archFilesArray)
+	{
+		archFile->setArchFullPath(m_archFullPath);
 	}
 
 	assert(m_archWriterThread == nullptr);
@@ -128,10 +156,21 @@ void Archive::stop()
 	m_isWorkable = false;
 }
 
-ArchRequest* Archive::createNewRequest(E::TimeType timeType, qint64 sartTime, qint64 endTime, const QVector<Hash>& signalHashes)
+ArchRequestShared Archive::createNewRequest(E::TimeType timeType, qint64 startTime, qint64 endTime, const QVector<Hash>& signalHashes)
 {
-	assert(false);		// to do
-	return nullptr;
+	ArchRequestParam param(getNewRequestID(), timeType, startTime, endTime, signalHashes);
+
+	ArchRequestShared archRequest = std::make_shared<ArchRequest>(*this, param, m_log);
+
+	m_requestsMutex.lock();
+
+	m_requests.insert(param.requestID(), archRequest);
+
+	m_requestsMutex.unlock();
+
+	archRequest->start();
+
+	return archRequest;
 }
 
 QString Archive::getSignalID(Hash signalHash)
@@ -412,11 +451,6 @@ bool Archive::createGroupDirs()
 }
 
 
-quint32 Archive::getNewRequestID()
-{
-	return m_nextRequestID.fetch_add(1);
-}
-
 
 
 bool Archive::shutdown()
@@ -561,6 +595,11 @@ ArchFile* Archive::getNextFileForFlushing(bool* flushAnyway)
 	archFile = getNextRegularFile();
 
 	return archFile;
+}
+
+quint32 Archive::getNewRequestID()
+{
+	return m_nextRequestID.fetch_add(1);
 }
 
 ArchFile* Archive::getNextRequiredImediatelyFlushing()

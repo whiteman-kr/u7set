@@ -235,11 +235,11 @@ void ArchivingService::logFileLoadResult(bool loadOk, const QString& fileName)
 {
 	if (loadOk == true)
 	{
-		DEBUG_LOG_MSG(logger(), QString("Load file % OK").arg(fileName));
+		DEBUG_LOG_MSG(logger(), QString("Load file %1 OK").arg(fileName));
 	}
 	else
 	{
-		DEBUG_LOG_ERR(logger(), QString("Load file % ERROR").arg(fileName));
+		DEBUG_LOG_ERR(logger(), QString("Load file %1 ERROR").arg(fileName));
 	}
 }
 

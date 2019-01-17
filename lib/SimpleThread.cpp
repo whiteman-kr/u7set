@@ -210,6 +210,18 @@ void SimpleMutex::lock(const QThread* currentThread)
 	while(result == false);
 }
 
+bool SimpleMutex::tryLock()
+{
+	return tryLock(QThread::currentThread());
+}
+
+void SimpleMutex::tryLock(const QThread* currentThread)
+{
+	const QThread* expectedOwner = nullptr;
+
+	return m_currentOwner.compare_exchange_strong(expectedOwner, currentThread);
+}
+
 void SimpleMutex::unlock()
 {
 	unlock(QThread::currentThread());

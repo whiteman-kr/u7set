@@ -118,8 +118,10 @@ private:
 	};
 
 public:
-	ArchFile(const Proto::ArchSignal& protoArchSignal, const QString& archFullPath);
+	ArchFile(const Proto::ArchSignal& protoArchSignal);
 	~ArchFile();
+
+	void setArchFullPath(const QString& archFullPath);
 
 	bool pushState(qint64 archID, const SimpleAppSignalState& state);
 	bool flush(qint64 curPartition, qint64* totalFushedStatesCount, bool flushAnyway);

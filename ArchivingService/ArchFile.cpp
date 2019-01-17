@@ -539,7 +539,7 @@ ArchFile::Record ArchFile::m_buffer[ArchFile::QUEUE_MAX_SIZE];
 
 const QString ArchFile::EXTENSION = "saf";		// Signal Archive File
 
-ArchFile::ArchFile(const Proto::ArchSignal& protoArchSignal, const QString& archFullPath) :
+ArchFile::ArchFile(const Proto::ArchSignal& protoArchSignal) :
 	m_writablePartition(*this, true)
 
 {
@@ -557,15 +557,18 @@ ArchFile::ArchFile(const Proto::ArchSignal& protoArchSignal, const QString& arch
 	}
 
 	m_queue = new FastQueue<Record>(queueSize);
-
-	m_path = QString("%1/%2/%3").
-					arg(archFullPath).
-					arg(QString().sprintf("%02X", static_cast<int>(m_hash & 0xFF))).
-					arg(m_appSignalID.remove(QRegExp("[^0-9A-Za-z_]")));
 }
 
 ArchFile::~ArchFile()
 {
+}
+
+void ArchFile::setArchFullPath(const QString& archFullPath)
+{
+	m_path = QString("%1/%2/%3").
+					arg(archFullPath).
+					arg(QString().sprintf("%02X", static_cast<int>(m_hash & 0xFF))).
+					arg(m_appSignalID.remove(QRegExp("[^0-9A-Za-z_]")));
 }
 
 bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)

@@ -6,38 +6,33 @@
 
 // ---------------------------------------------------------------------------------------------
 //
-// ArchRequestContext class implementattion
+// ArchRequest class implementattion
 //
 // ---------------------------------------------------------------------------------------------
-/*
-ArchRequest::ArchRequest(const ArchRequestParam& param, const QTime& startTime, CircularLoggerShared logger) :
+
+ArchRequest::ArchRequest(Archive& archive, const ArchRequestParam& param, CircularLoggerShared logger) :
+	m_archive(archive),
 	m_param(param),
-	m_time(startTime),
-	m_logger(logger)
+	m_startTime(QDateTime::currentMSecsSinceEpoch()),
+	m_logger(logger),
+	m_execParam(m_param)
 {
 	m_localTimeOffset = Archive::localTimeOffsetFromUtc();
 
-	m_requestTimeType = param.timeType;
-
-	switch(m_requestTimeType)
+	switch(m_param.timeType())
 	{
 	case E::TimeType::Plant:
 	case E::TimeType::System:
-	case E::TimeType::ArchiveId:
-
-		m_requestStartTime = param.startTime;
-		m_requestEndTime = param.endTime;
-
+//	case E::TimeType::ArchiveId:
 		break;
 
 	case E::TimeType::Local:
 		{
 			// convert local time to system time
 			//
-			m_requestStartTime = param.startTime - m_localTimeOffset;
-			m_requestEndTime = param.endTime - m_localTimeOffset;
-
-			m_requestTimeType = E::TimeType::System;
+			m_execParam.setStartTime(m_param.startTime() - m_localTimeOffset);
+			m_execParam.setEndTime(m_param.endTime() - m_localTimeOffset);
+			m_execParam.setTimeType(E::TimeType::System);
 		}
 		break;
 
@@ -45,25 +40,21 @@ ArchRequest::ArchRequest(const ArchRequestParam& param, const QTime& startTime, 
 		assert(false);
 	}
 
-	if (m_requestTimeType != E::TimeType::ArchiveId)
-	{
-		// expand request time from both sides
-		//
-		m_expandedRequestStartTime = m_requestStartTime - Archive::TIME_TO_EXPAND_REQUEST;
-
-		if (m_expandedRequestStartTime < 0)
-		{
-			m_expandedRequestStartTime = 0;
-		}
-
-		m_expandedRequestEndTime = m_requestEndTime + Archive::TIME_TO_EXPAND_REQUEST;
-	}
+	// expand request time from both sides
+	//
+	m_execParam.expandTimes(Archive::TIME_TO_EXPAND_REQUEST);
 }
 
 ArchRequest::~ArchRequest()
 {
 }
 
+void ArchRequest::run()
+{
+
+}
+
+/*
 void ArchRequest::startRequestProcessing()
 {
 	m_requestThread = new SimpleThread(new ArchRequestThreadWorker(this, m_logger));
