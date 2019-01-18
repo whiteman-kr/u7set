@@ -6169,29 +6169,6 @@ namespace Builder
 				  );
 	}
 
-	/// IssueCode: EQP6009
-	///
-	/// IssueType: Error
-	///
-	/// Title: Property Place must be 0 (Equipment object %1).
-	///
-	/// Parameters:
-	///		%1 Equipmnet object StrID
-	///
-	/// Description:
-	///		Property Place for Logic Module must be set to 0.
-	///
-	void IssueLogger::errEQP6009(QString equipmemtId, QUuid equpmentUuid)
-	{
-		addItemsIssues(OutputMessageLevel::Error, equpmentUuid);
-
-		LOG_ERROR(IssueType::Equipment,
-				  6009,
-				  tr("Property Place must be 0 (Equipment object %1).")
-				  .arg(equipmemtId)
-				  );
-	}
-
 	/// IssueCode: EQP6020
 	///
 	/// IssueType: Error

@@ -1,5 +1,5 @@
 #include "TestClientCfgGenerator.h"
-#include "../lib/ServiceSettings.h".h"
+#include "../lib/ServiceSettings.h"
 
 namespace Builder
 {
