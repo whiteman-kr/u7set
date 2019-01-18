@@ -58,7 +58,6 @@ const char* ServiceSettings::ATTR_COUNT = "Count";
 const char* ServiceSettings::ATTR_EQUIIPMENT_ID = "EquipmentID";
 const char* ServiceSettings::ATTR_SOFTWARE_TYPE = "SoftwareType";
 
-
 bool ServiceSettings::getSoftwareConnection(const Hardware::EquipmentSet* equipment,
 											const Hardware::Software* thisSoftware,
 											const QString& propConnectedSoftwareID,
@@ -139,7 +138,6 @@ bool ServiceSettings::getSoftwareConnection(const Hardware::EquipmentSet* equipm
 												emptyAllowed, defaultIP, defaultPort, log);
 	return result;
 }
-
 
 bool ServiceSettings::getCfgServiceConnection(	const Hardware::EquipmentSet *equipment,
 												const Hardware::Software* software,
@@ -306,7 +304,6 @@ QStringList CfgServiceSettings::knownClients()
 
 const char* AppDataServiceSettings::PROP_AUTO_ARCHIVE_INTERVAL = "AutoArchiveInterval";
 
-
 bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log)
 {
 	TEST_PTR_RETURN_FALSE(log);
@@ -351,7 +348,6 @@ bool AppDataServiceSettings::readFromDevice(Hardware::EquipmentSet* equipment, H
 
 	return result;
 }
-
 
 bool AppDataServiceSettings::writeToXml(XmlWriteHelper& xml)
 {
@@ -415,7 +411,6 @@ bool AppDataServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	return result;
 }
-
 
 // -------------------------------------------------------------------------------------
 //
@@ -573,7 +568,6 @@ bool TuningServiceSettings::readFromDevice(Hardware::Software *software, Builder
 	return result;
 }
 
-
 bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
 {
 	xml.writeStartElement(SETTINGS_SECTION);
@@ -619,7 +613,6 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
 
 	return true;
 }
-
 
 bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 {
@@ -747,7 +740,6 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 	return result;
 }
 
-
 // -------------------------------------------------------------------------------------
 //
 // ArchivingServiceSettings class implementation
@@ -811,7 +803,6 @@ bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Buil
 	return result;
 }
 
-
 bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml)
 {
 	bool result = true;
@@ -834,7 +825,6 @@ bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml)
 	return result;
 }
 
-
 bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 {
 	bool result = false;
@@ -856,6 +846,99 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddress(PROP_DIAG_DATA_RECEIVING_NETMASK, &diagDataServiceRequestNetmask);
 
 	result &= xml.readHostAddressPort(PROP_ARCHIVE_DB_HOST_IP, PROP_ARCHIVE_DB_HOST_PORT, &dbHost);
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------
+//
+// TestClientSettings class implementation
+//
+// -------------------------------------------------------------------------------------
+
+const char* TestClientSettings::CFG_SERVICE1_SECTION = "CfgService1";
+const char* TestClientSettings::CFG_SERVICE2_SECTION = "CfgService2";
+const char* TestClientSettings::APP_DATA_SERVICE_SECTION = "AppDataService";
+const char* TestClientSettings::DIAG_DATA_SERVICE_SECTION = "DiagDataService";
+const char* TestClientSettings::ARCH_SERVICE_SECTION = "ArchService";
+const char* TestClientSettings::TUNING_SERVICE_SECTION = "TuningService";
+
+bool TestClientSettings::readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log)
+{
+	bool result = true;
+
+	result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID1, &cfgService1_equipmentID, log);
+	result &= DeviceHelper::getStrProperty(software, PROP_CFG_SERVICE_ID2, &cfgService2_equipmentID, log);
+	result &= DeviceHelper::getStrProperty(software, PROP_APP_DATA_SERVICE_ID, &appDataService_equipmentID, log);
+	result &= DeviceHelper::getStrProperty(software, PROP_DIAG_DATA_SERVICE_ID, &diagDataService_equipmentID, log);
+	result &= DeviceHelper::getStrProperty(software, PROP_TUNING_SERVICE_ID, &tuningService_equipmentID, log);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	//
+
+	if (cfgService1_equipmentID.isEmpty() == true && cfgService2_equipmentID.isEmpty() == true)
+	{
+		// Software %1 is not linked to ConfigurationService.
+		//
+		log->errCFG3029(software->equipmentIdTemplate());
+		return false;
+	}
+
+	if (cfgService1_equipmentID.isEmpty() == false)
+	{
+		const Hardware::DeviceObject* device = equipment->deviceObject(cfgService1_equipmentID);
+
+		if (device == nullptr)
+		{
+			// Property %1.%2 is linked to undefined software ID %3.
+			//
+			log->errCFG3021(software->equipmentIdTemplate(), PROP_CFG_SERVICE_ID1, cfgService1_equipmentID);
+			return false;
+		}
+
+		const Hardware::Software* cfgService1 = device->toSoftware();
+
+		if (cfgService1 == nullptr)
+		{
+
+		}
+	}
+
+	return result;
+}
+
+bool TestClientSettings::writeToXml(XmlWriteHelper& xml)
+{
+	xml.writeStartElement(SETTINGS_SECTION);
+
+	//
+
+	xml.writeStartElement(CFG_SERVICE1_SECTION);
+	xml.writeStringAttribute(ATTR_EQUIIPMENT_ID, cfgService1_equipmentID);
+
+	xml.writeEndElement();	// </CgService1>
+
+	//
+
+	xml.writeStartElement(CFG_SERVICE2_SECTION);
+	xml.writeStringAttribute(ATTR_EQUIIPMENT_ID, cfgService2_equipmentID);
+
+	xml.writeEndElement();	// </CgService2>
+
+	//
+
+	xml.writeEndElement();	// </Settings>
+
+	return true;
+}
+
+bool TestClientSettings::readFromXml(XmlReadHelper& xml)
+{
+	bool result = true;
 
 	return result;
 }

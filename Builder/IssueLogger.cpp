@@ -1094,31 +1094,31 @@ namespace Builder
 				  tr("Property %1.%2 is not found.").arg(objectID).arg(propertyName));
 	}
 
-    /// IssueCode: CFG3021
-    ///
-    /// IssueType: Error
-    ///
+	/// IssueCode: CFG3021
+	///
+	/// IssueType: Error
+	///
 	/// Title: Property %1.%2 is linked to undefined software ID %3.
-    ///
-    /// Parameters:
-    ///         %1 Object ID
-    ///         %2 Property name
-    ///			%3 Software ID
-    ///
-    /// Description:
-    ///			Occurs if adapter property is linked to undefined software ID.
-    ///
-    void IssueLogger::errCFG3021(QString objectID, QString propertyName, QString softwareID)
-    {
-        LOG_ERROR(IssueType::FscConfiguration,
-                  3021,
+	///
+	/// Parameters:
+	///         %1 Object ID
+	///         %2 Property name
+	///			%3 Software ID
+	///
+	/// Description:
+	///			Occurs if adapter property is linked to undefined software ID.
+	///
+	void IssueLogger::errCFG3021(QString objectID, QString propertyName, QString softwareID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3021,
 				  tr("Property %1.%2 is linked to undefined software ID %3.")
-                  .arg(objectID)
-                  .arg(propertyName)
-                  .arg(softwareID));
-    }
+				  .arg(objectID)
+				  .arg(propertyName)
+				  .arg(softwareID));
+	}
 
-    /// IssueCode: CFG3022
+	/// IssueCode: CFG3022
     ///
     /// IssueType: Error
     ///
@@ -6169,6 +6169,28 @@ namespace Builder
 				  );
 	}
 
+	/// IssueCode: EQP6009
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property Place must be 0 (Equipment object %1).
+	///
+	/// Parameters:
+	///		%1 Equipmnet object StrID
+	///
+	/// Description:
+	///		Property Place for Logic Module must be set to 0.
+	///
+	void IssueLogger::errEQP6009(QString equipmemtId, QUuid equpmentUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, equpmentUuid);
+
+		LOG_ERROR(IssueType::Equipment,
+				  6009,
+				  tr("Property Place must be 0 (Equipment object %1).")
+				  .arg(equipmemtId)
+				  );
+	}
 
 	/// IssueCode: EQP6020
 	///
