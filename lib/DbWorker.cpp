@@ -255,6 +255,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0235.sql", "Upgrade to version 235, Added Blink signal to LM1_SR03 preset"},
 	{":/DatabaseUpgrade/Upgrade0236.sql", "Upgrade to version 236, Added LM1_SF00_4PH, AIM_4PH, AOM_4PH, and some corrections in WAIM, RIM, TIM"},
 	{":/DatabaseUpgrade/Upgrade0237.sql", "Upgrade to version 237, LM modules have the same configuration script"},
+	{":/DatabaseUpgrade/Upgrade0238.sql", "Upgrade to version 238, Metrology Preset Update"},
+	{":/DatabaseUpgrade/Upgrade0239.sql", "Upgrade to version 239, TestClient Preset added"},
 };
 
 

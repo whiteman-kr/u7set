@@ -178,6 +178,7 @@ public:
 		TuningClient = 9006,
 		Metrology = 9007,
 		ServiceControlManager = 9008,
+		TestClient = 9009
 	};
 	Q_ENUM(SoftwareType)
 

@@ -556,11 +556,26 @@ void MeasureThread::measureLinearity()
 			double physicalVal = (point.percent() * (param.physicalHighLimit() - param.physicalLowLimit()) / 100) + param.physicalLowLimit();
 			double electricVal = conversion(physicalVal, CT_PHYSICAL_TO_ELECTRIC, param);
 
+
+			// polarity test
+			//
+			if (electricVal < 0 && m_activeSignalParam[c].isNegativeRange() == false)
+			{
+				m_activeSignalParam[c].setNegativeRange(true);
+				emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the negative (-) part of the electrical range.").arg(m_activeSignalParam[c].calibratorManager()->calibratorChannel() + 1));
+			}
+
+			if (electricVal >= 0 && m_activeSignalParam[c].isNegativeRange() == true)
+			{
+				m_activeSignalParam[c].setNegativeRange(false);
+				emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the positive (+) part of the electrical range.").arg(m_activeSignalParam[c].calibratorManager()->calibratorChannel() + 1));
+			}
+
 			switch (m_activeSignalParam[c].outputSignalType())
 			{
 				case OUTPUT_SIGNAL_TYPE_UNUSED:
-				case OUTPUT_SIGNAL_TYPE_FROM_INPUT:		pCalibratorManager->setValue(electricVal);								break;
-				case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	theSignalBase.tuning().appendCmdFowWrite(param.hash(), physicalVal);	break;
+				case OUTPUT_SIGNAL_TYPE_FROM_INPUT:		pCalibratorManager->setValue(m_activeSignalParam[c].isNegativeRange() ? -electricVal : electricVal);	break;
+				case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	theSignalBase.tuning().appendCmdFowWrite(param.hash(), physicalVal);									break;
 				default:								assert(0);
 			}
 		}

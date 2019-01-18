@@ -77,11 +77,11 @@ public:
     IdeCodeEditor(CodeType codeType, QWidget* parent);
     ~IdeCodeEditor();
 
-    virtual void setText(const QString& text);
+	virtual void setText(const QString& text) override;
 
-    virtual QString text();
+	virtual QString text() override;
 
-    virtual void setReadOnly(bool value);
+	virtual void setReadOnly(bool value) override;
 
 public slots:
     void findFirst(QString findText);

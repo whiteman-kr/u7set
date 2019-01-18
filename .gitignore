@@ -13,3 +13,4 @@ GetGitProjectVersion
 Scripts/out
 Test/build-u7database*/**
 Test/bin/**
+Metrology/Metrology.db

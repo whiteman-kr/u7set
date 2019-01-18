@@ -128,17 +128,17 @@ void SignalPropertyDialog::createPropertyList()
 			positionGroup->addSubProperty(item);
 
 			item = m_pManager->addProperty(QVariant::Int, tr("Chassis"));
-			item->setValue(m_param.location().chassis() + 1);
+			item->setValue(m_param.location().chassis());
 			item->setAttribute(QLatin1String("readOnly"), true);
 			positionGroup->addSubProperty(item);
 
 			item = m_pManager->addProperty(QVariant::Int, tr("Module"));
-			item->setValue(m_param.location().module() + 1);
+			item->setValue(m_param.location().module());
 			item->setAttribute(QLatin1String("readOnly"), true);
 			positionGroup->addSubProperty(item);
 
 			item = m_pManager->addProperty(QVariant::Int, tr("Place"));
-			item->setValue(m_param.location().place() + 1);
+			item->setValue(m_param.location().place());
 			item->setAttribute(QLatin1String("readOnly"), true);
 			positionGroup->addSubProperty(item);
 

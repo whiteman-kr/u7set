@@ -907,21 +907,21 @@ void MainWindow::updateSignalsOnToolBar()
 		{
 			chassisMap.insert(signal.location().chassis(), s);
 
-			m_asChassisCombo->addItem(QString::number(signal.location().chassis() + 1), signal.location().chassis());
+			m_asChassisCombo->addItem(QString::number(signal.location().chassis()), signal.location().chassis());
 		}
 
 		if (moduleMap.contains(signal.location().module()) == false)
 		{
 			moduleMap.insert(signal.location().module(), s);
 
-			m_asModuleCombo->addItem(QString::number(signal.location().module() + 1), signal.location().module());
+			m_asModuleCombo->addItem(QString::number(signal.location().module()), signal.location().module());
 		}
 
 		if (placeMap.contains(signal.location().place()) == false)
 		{
 			placeMap.insert(signal.location().place(), s);
 
-			m_asPlaceCombo->addItem(QString::number(signal.location().place() + 1), signal.location().place());
+			m_asPlaceCombo->addItem(QString::number(signal.location().place()), signal.location().place());
 		}
 	}
 
@@ -1021,7 +1021,7 @@ void MainWindow::updateChassisOnToolBar(const Metrology::SignalLocation& locatio
 		{
 			chassisMap.insert(signal.location().chassis(), s);
 
-			m_asChassisCombo->addItem(QString::number(signal.location().chassis() + 1), signal.location().chassis());
+			m_asChassisCombo->addItem(QString::number(signal.location().chassis()), signal.location().chassis());
 		}
 	}
 
@@ -1114,7 +1114,7 @@ void MainWindow::updateModuleOnToolBar(const Metrology::SignalLocation& location
 		{
 			moduleMap.insert(signal.location().module(), s);
 
-			m_asModuleCombo->addItem(QString::number(signal.location().module() + 1), signal.location().module());
+			m_asModuleCombo->addItem(QString::number(signal.location().module()), signal.location().module());
 		}
 	}
 
@@ -1206,7 +1206,7 @@ void MainWindow::updatePlaceOnToolBar(const Metrology::SignalLocation& location)
 		{
 			placeMap.insert(signal.location().place(), s);
 
-			m_asPlaceCombo->addItem(QString::number(signal.location().place() + 1), signal.location().place());
+			m_asPlaceCombo->addItem(QString::number(signal.location().place()), signal.location().place());
 		}
 	}
 
@@ -1669,9 +1669,9 @@ void MainWindow::setMeasureSignal(int index)
 		return;
 	}
 
-	m_asChassisCombo->setCurrentText(QString::number(signal.location().chassis() + 1));
-	m_asModuleCombo->setCurrentText(QString::number(signal.location().module() + 1));
-	m_asPlaceCombo->setCurrentText(QString::number(signal.location().place() + 1));
+	m_asChassisCombo->setCurrentText(QString::number(signal.location().chassis()));
+	m_asModuleCombo->setCurrentText(QString::number(signal.location().module()));
+	m_asPlaceCombo->setCurrentText(QString::number(signal.location().place()));
 }
 
 // -------------------------------------------------------------------------------------------------------------------

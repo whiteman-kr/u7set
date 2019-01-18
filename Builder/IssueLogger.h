@@ -394,7 +394,8 @@ namespace Builder
         void errEQP6008(QString equipmentId, QString childEquipmentId, int childPlace); // Child childEquipmentId is not allowed in parent equipmentId
 		void errEQP6009(QString equipmemtId, QUuid equpmentUuid);
 
-		void errEQP6020(QString lm, QUuid lmUuid);					//	Property lmDescriptionFile is empty
+		void errEQP6020(QString lm, QUuid lmUuid);		//	Property lmDescriptionFile is empty
+
 
 		// Subset of EQP -- Generation Software Configuration
 		//

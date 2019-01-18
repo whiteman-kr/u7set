@@ -59,6 +59,7 @@ public:
 	static const char* PROP_TUNING_SERVICE_ID;
 	static const char* PROP_TUNING_SERVICE_IP;
 	static const char* PROP_TUNING_SERVICE_PORT;
+	static const char* PROP_TUNING_SOURCE_EQUIPMENT_ID;
 
 	static const char* PROP_CFG_SERVICE_ID1;
 	static const char* PROP_CFG_SERVICE_IP1;
@@ -73,14 +74,17 @@ public:
 	static const char* ATTR_SOFTWARE_TYPE;
 
 public:
-	static bool getSoftwareConnection(	const Hardware::EquipmentSet* equipment,
+	static bool getSoftwareConnection(const Hardware::EquipmentSet* equipment,
 										const Hardware::Software* thisSoftware,
 										const QString& propConnectedSoftwareID,
 										const QString& propConnectedSoftwareIP,
 										const QString& propConnectedSoftwarePort,
 										QString* connectedSoftwareID,
 										HostAddressPort* connectedSoftwareIP,
-										bool emptyAllowed, const QString &defaultIP, int defaultPort,
+										bool emptyAllowed,
+										const QString &defaultIP,
+										int defaultPort,
+										E::SoftwareType requiredSoftwareType,
 										Builder::IssueLogger* log);
 
 	static bool getCfgServiceConnection(const Hardware::EquipmentSet* equipment,
@@ -140,7 +144,6 @@ public:
 	bool readFromXml(XmlReadHelper& xml);
 };
 
-
 class TuningServiceSettings : public ServiceSettings
 {
 private:
@@ -176,7 +179,6 @@ public:
 	bool readFromXml(XmlReadHelper& xml);
 };
 
-
 class ArchivingServiceSettings : public ServiceSettings
 {
 public:
@@ -187,15 +189,56 @@ public:
 	HostAddressPort clientRequestIP;
 	QHostAddress clientRequestNetmask;
 
-	HostAddressPort appDataServiceRequestIP;
-	QHostAddress appDataServiceRequestNetmask;
+	HostAddressPort appDataRecevingIP;
+	QHostAddress appDataReceivingNetmask;
 
-	HostAddressPort diagDataServiceRequestIP;
-	QHostAddress diagDataServiceRequestNetmask;
+	HostAddressPort diagDataReceivingIP;
+	QHostAddress diagDataReceivingNetmask;
 
 	HostAddressPort dbHost = HostAddressPort("127.0.0.1", 5432);
 
 	bool readFromDevice(Hardware::Software *software, Builder::IssueLogger* log);
+	bool writeToXml(XmlWriteHelper& xml);
+	bool readFromXml(XmlReadHelper& xml);
+};
+
+class TestClientSettings : public ServiceSettings
+{
+public:
+	static const char* CFG_SERVICE1_SECTION;
+	static const char* CFG_SERVICE2_SECTION;
+	static const char* APP_DATA_SERVICE_SECTION;
+	static const char* DIAG_DATA_SERVICE_SECTION;
+	static const char* ARCH_SERVICE_SECTION;
+	static const char* TUNING_SERVICE_SECTION;
+	static const char* PROP_TUNING_SERVICE_SECTION;
+
+public:
+	QString			cfgService1_equipmentID;
+	HostAddressPort cfgService1_clientRequestIP;
+
+	QString			cfgService2_equipmentID;
+	HostAddressPort cfgService2_clientRequestIP;
+
+	QString			appDataService_equipmentID;
+	HostAddressPort appDataService_appDataReceivingIP;
+	HostAddressPort appDataService_clientRequestIP;
+
+	QString			diagDataService_equipmentID;
+	HostAddressPort diagDataService_diagDataReceivingIP;
+	HostAddressPort diagDataService_clientRequestIP;
+
+	QString			archService_equipmentID;
+	HostAddressPort archService_appDataReceivingIP;
+	HostAddressPort archService_diagDataReceivingIP;
+	HostAddressPort archService_clientRequestIP;
+
+	QString			tuningService_equipmentID;
+	HostAddressPort tuningService_tuningDataIP;
+	HostAddressPort tuningService_clientRequestIP;
+	QStringList		tuningService_tuningSources;
+
+	bool readFromDevice(Hardware::EquipmentSet* equipment, Hardware::Software* software, Builder::IssueLogger* log);
 	bool writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);
 };
