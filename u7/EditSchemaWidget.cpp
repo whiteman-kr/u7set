@@ -2585,6 +2585,20 @@ void EditSchemaWidget::createActions()
 	return;
 }
 
+void EditSchemaWidget::updateFileActions()
+{
+	// Version Control enable/disable items
+	//
+	m_fileSaveAction->setEnabled(readOnly() == false && modified() == true);
+	m_fileCheckInAction->setEnabled(readOnly() == false && fileInfo().state() == VcsState::CheckedOut);
+	m_fileCheckOutAction->setEnabled(readOnly() == true && fileInfo().state() == VcsState::CheckedIn);
+	m_fileUndoChangesAction->setEnabled(readOnly() == false && fileInfo().state() == VcsState::CheckedOut);
+	m_fileExportAction->setEnabled(true);
+	m_fileImportAction->setEnabled(readOnly() == false && fileInfo().state() == VcsState::CheckedOut);
+
+	return;
+}
+
 bool EditSchemaWidget::event(QEvent* event)
 {
 	// Show tool tip
@@ -5506,15 +5520,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 	// Disable some actions in ReadOnly mode
 	//
 	m_addAction->setDisabled(readOnly());
-
-	// Version Control enable/disable items
-	//
-	m_fileSaveAction->setEnabled(readOnly() == false && modified() == true);
-	m_fileCheckInAction->setEnabled(readOnly() == false && fileInfo().state() == VcsState::CheckedOut);
-	m_fileCheckOutAction->setEnabled(readOnly() == true && fileInfo().state() == VcsState::CheckedIn);
-	m_fileUndoChangesAction->setEnabled(readOnly() == false && fileInfo().state() == VcsState::CheckedOut);
-	m_fileExportAction->setEnabled(true);
-	m_fileImportAction->setEnabled(readOnly() == false && fileInfo().state() == VcsState::CheckedOut);
+	updateFileActions();
 
 	m_propertiesAction->setDisabled(editSchemaView()->selectedItems().empty());
 

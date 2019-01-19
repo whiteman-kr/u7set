@@ -231,6 +231,7 @@ public:
 	
 protected:
 	void createActions();
+	void updateFileActions();
 
 	virtual bool event(QEvent* event) override;
 	virtual void keyPressEvent(QKeyEvent* event) override;

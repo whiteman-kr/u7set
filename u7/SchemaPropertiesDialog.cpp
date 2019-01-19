@@ -17,6 +17,8 @@ SchemaPropertiesDialog::SchemaPropertiesDialog(EditEngine::EditEngine* editEngin
 		m_propertyEditor->setFontSizeF(m_propertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
 	}
 
+	m_propertyEditor->setReadOnly(editEngine->readOnly());
+
 	ui->horizontalLayout->addWidget(m_propertyEditor);
 	return;
 }

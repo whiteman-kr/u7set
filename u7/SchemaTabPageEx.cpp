@@ -145,7 +145,7 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 		return {};
 	}
 
-	int row = index.row();
+	//int row = index.row();
 	Columns column = static_cast<Columns>(index.column());
 
 	int fileId = index.internalId();
@@ -187,8 +187,10 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 		case Columns::IssuesColumn:
 			if (excludedFromBuild(file->fileId()) == true)
 			{
-				return QString("Excluded From Build");
+				return QString("Excluded");
 			}
+
+			int to_do_message_for_childer;
 
 			if (QStringList fn = file->fileName().split('.');
 				fn.isEmpty() == false)
@@ -701,7 +703,7 @@ DbFileInfo SchemaProxyListModel::file(const QModelIndex& mi) const
 	return m_sourceModel->file(mapped);
 }
 
-std::vector<int> SchemaProxyListModel::expandedFileIds()
+std::vector<int> SchemaProxyListModel::expandedFileIds(QTreeView* treeView)
 {
 	std::vector<int> fileIds;
 	fileIds.reserve(32);
@@ -711,7 +713,9 @@ std::vector<int> SchemaProxyListModel::expandedFileIds()
 	for (QModelIndex& mi : indexes)
 	{
 		int fileId = file(mi).fileId();
-		if (fileId != DbFileInfo::Null)
+
+		if (treeView->isExpanded(mi) == true &&
+			fileId != DbFileInfo::Null)
 		{
 			fileIds.push_back(fileId);
 		}
@@ -839,20 +843,21 @@ void SchemaFileViewEx::createActions()
 	m_undoChangesAction->setStatusTip(tr("Undo Pending Changes..."));
 	m_undoChangesAction->setEnabled(false);
 
-	m_historyAction = new QAction(tr("Histrory..."), parent());
+	m_historyAction = new QAction(tr("History..."), parent());
 	m_historyAction->setIcon(QIcon(":/Images/Images/SchemaHistory.svg"));
 	m_historyAction->setStatusTip(tr("Show file history..."));
 	m_historyAction->setEnabled(false);
+
+	m_recursiveHistoryAction = new QAction(tr("Recursive History..."), parent());
+	m_recursiveHistoryAction->setIcon(QIcon(":/Images/Images/SchemaHistory.svg"));
+	m_recursiveHistoryAction->setStatusTip(tr("Show file history recursively for all childern..."));
+	m_recursiveHistoryAction->setEnabled(false);
 
 	// --
 	//
 	m_compareAction = new QAction(tr("Compare..."), parent());
 	m_compareAction->setStatusTip(tr("Compare file..."));
 	m_compareAction->setEnabled(false);
-
-	m_treeSchemasHistoryAction = new QAction(tr("Tree Schemas History..."), parent());
-	m_treeSchemasHistoryAction->setStatusTip(tr("Show tree schemas history..."));
-	m_treeSchemasHistoryAction->setEnabled(false);
 
 	// --
 	//
@@ -879,28 +884,7 @@ void SchemaFileViewEx::createActions()
 	m_propertiesAction->setStatusTip(tr("Edit schema properties..."));
 	m_propertiesAction->setEnabled(false);
 
-
-//	connect(m_openFileAction, &QAction::triggered, this, &SchemaFileView::slot_OpenFile);
-//	connect(m_viewFileAction, &QAction::triggered, this, &SchemaFileView::slot_ViewFile);
-
-//	connect(m_checkOutAction, &QAction::triggered, this, &SchemaFileView::slot_CheckOut);
-//	connect(m_checkInAction, &QAction::triggered, this, &SchemaFileView::slot_CheckIn);
-//	connect(m_undoChangesAction, &QAction::triggered, this, &SchemaFileView::slot_UndoChanges);
-
-//	connect(m_historyAction, &QAction::triggered, this, &SchemaFileView::slot_showHistory);
-//	connect(m_compareAction, &QAction::triggered, this, &SchemaFileView::slot_compare);
-//	connect(m_allSchemasHistoryAction, &QAction::triggered, this, &SchemaFileView::slot_showHistoryForAllSchemas);
-
-//	connect(m_addFileAction, &QAction::triggered, this, &SchemaFileView::slot_AddFile);
-//	connect(m_cloneFileAction, &QAction::triggered, this, &SchemaFileView::slot_cloneFile);
-//	connect(m_deleteFileAction , &QAction::triggered, this, &SchemaFileView::slot_DeleteFile);
-
-//	connect(m_exportWorkingcopyAction, &QAction::triggered, this, &SchemaFileView::slot_GetWorkcopy);
-//	connect(m_importWorkingcopyAction, &QAction::triggered, this, &SchemaFileView::slot_SetWorkcopy);
-
 	connect(m_refreshFileAction, &QAction::triggered, this, &SchemaFileViewEx::slot_refreshFiles);
-//	connect(m_propertiesAction, &QAction::triggered, this, &SchemaFileView::slot_properties);
-
 	return;
 }
 
@@ -931,8 +915,8 @@ void SchemaFileViewEx::createContextMenu()
 	addAction(m_checkInAction);
 	addAction(m_undoChangesAction);
 	addAction(m_historyAction);
+	addAction(m_recursiveHistoryAction);
 	addAction(m_compareAction);
-	addAction(m_treeSchemasHistoryAction);
 
 	// --
 	//
@@ -975,63 +959,6 @@ void SchemaFileViewEx::createContextMenu()
 //	}
 
 //	return;
-//}
-
-//void SchemaFileView::setFiles(const std::vector<DbFileInfo>& files)
-//{
-//	// Save old selection
-//	//
-//	QItemSelectionModel* selModel = this->selectionModel();
-//	QModelIndexList	s = selModel->selectedRows();
-
-//	std::vector<int> filesIds;
-//	filesIds.reserve(s.size());
-
-//	for (int i = 0; i < s.size(); i++)
-//	{
-//		std::shared_ptr<DbFileInfo> file = filesModel().fileByRow(s[i].row());
-//		if (file.get() == nullptr)
-//		{
-//			continue;
-//		}
-
-//		int fileId = file->fileId();
-//		if (fileId != -1)
-//		{
-//			filesIds.push_back(fileId);
-//		}
-//	}
-
-//	selModel->reset();
-
-//	// Get file list from the DB
-//	//
-//	std::vector<DbUser> users;
-//	db()->getUserList(&users, this);
-
-//	filesModel().setFiles(files, users);
-
-//	// Restore selection
-//	//
-//	selModel->blockSignals(true);
-//	for (unsigned int i = 0; i < filesIds.size(); i++)
-//	{
-//		int selectRow = filesModel().getFileRow(filesIds[i]);
-
-//		if (selectRow != -1)
-//		{
-//			QModelIndex md = filesModel().index(selectRow, 0);
-//			selModel->select(md, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-//		}
-//	}
-//	selModel->blockSignals(false);
-
-//	return;
-//}
-
-//void SchemaFileView::clear()
-//{
-//	m_filesModel.clear();
 //}
 
 std::vector<DbFileInfo> SchemaFileViewEx::selectedFiles() const
@@ -1084,7 +1011,7 @@ void SchemaFileViewEx::refreshFiles()
 		}
 	}
 
-	std::vector<int> expandedFileIds = m_proxyModel.expandedFileIds();
+	std::vector<int> expandedFileIds = m_proxyModel.expandedFileIds(this);
 
 	selectionModel()->reset();
 
@@ -1169,392 +1096,6 @@ void SchemaFileViewEx::projectClosed()
 	return;
 }
 
-//void SchemaFileView::slot_OpenFile()
-//{
-//	std::vector<DbFileInfo> selectedFiles;
-//	getSelectedFiles(&selectedFiles);
-
-//	std::vector<DbFileInfo> files;
-//	files.reserve(selectedFiles.size());
-
-//	for (unsigned int i = 0; i < selectedFiles.size(); i++)
-//	{
-//		auto file = selectedFiles[i];
-
-//		if (file.state() == VcsState::CheckedOut &&
-//			(file.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator()))
-//		{
-//			files.push_back(file);
-//		}
-//	}
-
-//	if (files.empty() == true)
-//	{
-//		return;
-//	}
-
-//	emit openFileSignal(files);
-
-//	return;
-//}
-
-//void SchemaFileView::slot_ViewFile()
-//{
-//	std::vector<DbFileInfo> selectedFiles;
-//	getSelectedFiles(&selectedFiles);
-
-//	if (selectedFiles.empty() == true)
-//	{
-//		return;
-//	}
-
-//	emit viewFileSignal(selectedFiles);
-
-//	return;
-//}
-
-//void SchemaFileView::slot_CheckOut()
-//{
-//	std::vector<DbFileInfo> selectedFiles;
-//	getSelectedFiles(&selectedFiles);
-
-//	std::vector<DbFileInfo> files;
-//	files.reserve(selectedFiles.size());
-
-//	for (unsigned int i = 0; i < selectedFiles.size(); i++)
-//	{
-//		auto file = selectedFiles[i];
-
-//		if (file.state() == VcsState::CheckedIn)
-//		{
-//			files.push_back(file);
-//		}
-//	}
-
-//	if (files.empty() == true)
-//	{
-//		return;
-//	}
-
-//	db()->checkOut(files, this);
-//	refreshFiles();
-
-//	return;
-//}
-
-//void SchemaFileView::slot_CheckIn()
-//{
-//	std::vector<DbFileInfo> selectedFiles;
-//	getSelectedFiles(&selectedFiles);
-
-//	std::vector<DbFileInfo> files;
-//	files.reserve(selectedFiles.size());
-
-//	for (unsigned int i = 0; i < selectedFiles.size(); i++)
-//	{
-//		auto file = selectedFiles[i];
-
-//		if (file.userId() == db()->currentUser().userId() ||
-//			db()->currentUser().isAdminstrator() == true)
-//		{
-//			files.push_back(file);
-//		}
-//	}
-
-//	if (files.empty() == true)
-//	{
-//		return;
-//	}
-
-//	emit checkInSignal(files);
-
-//	return;
-//}
-
-//void SchemaFileView::slot_UndoChanges()
-//{
-//	std::vector<DbFileInfo> selectedFiles;
-//	getSelectedFiles(&selectedFiles);
-
-//	std::vector<DbFileInfo> files;
-//	files.reserve(selectedFiles.size());
-
-//	for (size_t i = 0; i < selectedFiles.size(); i++)
-//	{
-//		DbFileInfo& file = selectedFiles[i];
-
-//		if (file.state() != VcsState::CheckedOut)
-//		{
-//			continue;
-//		}
-
-//		if (file.userId() == db()->currentUser().userId() ||
-//			db()->currentUser().isAdminstrator() == true)
-//		{
-//			files.push_back(file);
-//		}
-//	}
-
-//	if (files.empty() == true)
-//	{
-//		return;
-//	}
-
-//	emit undoChangesSignal(files);
-
-//	return;
-//}
-
-//void SchemaFileView::slot_showHistory()
-//{
-//	std::vector<DbFileInfo> selectedFiles;
-//	getSelectedFiles(&selectedFiles);
-
-//	if (selectedFiles.size() != 1)
-//	{
-//		return;
-//	}
-
-//	// Get file history
-//	//
-//	DbFileInfo file = selectedFiles.front();
-//	std::vector<DbChangeset> fileHistory;
-
-//	bool ok = db()->getFileHistoryRecursive(file, &fileHistory, this);
-//	if (ok == false)
-//	{
-//		return;
-//	}
-
-//	// Show history dialog
-//	//
-//	FileHistoryDialog::showHistory(db(), file.fileName(), fileHistory, this);
-
-//	return;
-//}
-
-//void SchemaFileView::slot_compare()
-//{
-//	std::vector<DbFileInfo> selectedFiles;
-//	getSelectedFiles(&selectedFiles);
-
-//	if (selectedFiles.size() != 1)
-//	{
-//		return;
-//	}
-
-//	// --
-//	//
-//	DbFileInfo file = selectedFiles.front();
-
-//	CompareDialog::showCompare(db(), DbChangesetObject(file), -1, this);
-
-//	return;
-//}
-
-//void SchemaFileView::slot_showHistoryForAllSchemas()
-//{
-//	// Get file history
-//	//
-//	std::vector<DbChangeset> fileHistory;
-
-//	bool ok = db()->getFileHistoryRecursive(m_parentFile, &fileHistory, this);
-//	if (ok == false)
-//	{
-//		return;
-//	}
-
-//	// Show history dialog
-//	//
-//	FileHistoryDialog::showHistory(db(), m_parentFile.fileName(), fileHistory, this);
-
-//	return;
-//}
-
-//void SchemaFileView::slot_AddFile()
-//{
-//	emit addFileSignal();
-
-//	//  setSortingEnabled() triggers a call to sortByColumn() with the current sort section and order.
-//	//
-//	setSortingEnabled(true);
-
-//	return;
-//}
-
-//void SchemaFileView::slot_cloneFile()
-//{
-//	std::vector<DbFileInfo> selectedFiles;
-//	getSelectedFiles(&selectedFiles);
-
-//	if (selectedFiles.size() != 1)
-//	{
-//		return;
-//	}
-
-//	emit cloneFileSignal(selectedFiles.front());
-
-//	return;
-//}
-
-//void SchemaFileView::slot_DeleteFile()
-//{
-//	std::vector<DbFileInfo> selectedFiles;
-//	getSelectedFiles(&selectedFiles);
-
-//	std::vector<DbFileInfo> files;
-//	files.reserve(selectedFiles.size());
-
-//	for (unsigned int i = 0; i < selectedFiles.size(); i++)
-//	{
-//		auto file = selectedFiles[i];
-
-//		if (file.state() == VcsState::CheckedIn ||
-//			(file.state() == VcsState::CheckedOut && file.userId() == db()->currentUser().userId()))
-//		{
-//			files.push_back(file);
-//		}
-//	}
-
-//	if (files.empty() == true)
-//	{
-//		return;
-//	}
-
-//	emit deleteFileSignal(files);
-
-//	return;
-//}
-
-//void SchemaFileView::slot_GetWorkcopy()
-//{
-//	// Get files workcopies form the database
-//	//
-//	std::vector<DbFileInfo> selectedFiles;
-//	getSelectedFiles(&selectedFiles);
-
-//	std::vector<DbFileInfo> files;
-//	files.reserve(selectedFiles.size());
-
-//	for (unsigned int i = 0; i < selectedFiles.size(); i++)
-//	{
-//		auto file = selectedFiles[i];
-
-//		if (file.state() == VcsState::CheckedOut && file.userId() == db()->currentUser().userId())
-//		{
-//			files.push_back(file);
-//		}
-//	}
-
-//	if (files.empty() == true)
-//	{
-//		return;
-//	}
-
-//	// --
-//	//
-//	// Select destination folder
-//	//
-//	QString dir = QFileDialog::getExistingDirectory(this, tr("Select Directory"), QString(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
-//	if (dir.isEmpty() == true)
-//	{
-//		return;
-//	}
-
-//	// Get files from the database
-//	//
-//	std::vector<std::shared_ptr<DbFile>> out;
-//	db()->getWorkcopy(files, &out, this);
-
-//	// Save files to disk
-//	//
-//	for (unsigned int i = 0; i < out.size(); i++)
-//	{
-//		bool writeResult = out[i]->writeToDisk(dir);
-
-//		if (writeResult == false)
-//		{
-//			QMessageBox msgBox;
-//			msgBox.setText(tr("Write file error."));
-//			msgBox.setInformativeText(tr("Cannot write file %1.").arg(out[i]->fileName()));
-//			msgBox.exec();
-//		}
-//	}
-
-//	return;
-//}
-
-//void SchemaFileView::slot_SetWorkcopy()
-//{
-//	std::vector<DbFileInfo> selectedFiles;
-//	getSelectedFiles(&selectedFiles);
-
-//	std::vector<DbFileInfo> files;
-//	files.reserve(selectedFiles.size());
-
-//	for (unsigned int i = 0; i < selectedFiles.size(); i++)
-//	{
-//		auto file = selectedFiles[i];
-
-//		if (file.state() == VcsState::CheckedOut && file.userId() == db()->currentUser().userId())
-//		{
-//			files.push_back(file);
-//		}
-//	}
-
-//	if (files.empty() == true)
-//	{
-//		return;
-//	}
-
-//	// --
-//	//
-//	if (files.size() != 1)
-//	{
-//		return;
-//	}
-
-//	auto fileInfo = files[0];
-
-//	if (fileInfo.state() != VcsState::CheckedOut || fileInfo.userId() != db()->currentUser().userId())
-//	{
-//		return;
-//	}
-
-//	// Select file
-//	//
-//	QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"));
-//	if (fileName.isEmpty() == true)
-//	{
-//		return;
-//	}
-
-//	std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
-//	static_cast<DbFileInfo*>(file.get())->operator=(fileInfo);
-
-//	bool readResult = file->readFromDisk(fileName);
-//	if (readResult == false)
-//	{
-//		QMessageBox mb(this);
-//		mb.setText(tr("Can't read file %1.").arg(fileName));
-//		mb.exec();
-//		return;
-//	}
-
-//	// Set file id for DbStore setWorkcopy
-//	//
-//	file->setFileId(fileInfo.fileId());
-
-//	std::vector<std::shared_ptr<DbFile>> workcopyFiles;
-//	workcopyFiles.push_back(file);
-
-//	db()->setWorkcopy(workcopyFiles, this);
-
-//	refreshFiles();
-
-//	return;
-//}
-
 void SchemaFileViewEx::slot_refreshFiles()
 {
 	refreshFiles();
@@ -1630,8 +1171,14 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 	bool hasDeletePossibility = false;
 	bool hasCheckOutPossibility = false;
 	bool hasCheckInPossibility = false;
+	bool hasUndoPossibility = false;
 	bool hasAbilityToOpen = false;
 	bool hasViewPossibility = false;
+
+	bool canGetWorkcopy = false;
+	int canSetWorkcopy = 0;
+
+	bool schemaPoperties = (s.empty() == false);
 
 	// hasAbilityToOpen
 	//
@@ -1679,6 +1226,22 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 		{
 			hasCheckInPossibility = true;
 		}
+
+		// hasUndoPossibility
+		//
+		if (file.state() == VcsState::CheckedOut &&
+			(file.userId() == currentUserId || currentUserIsAdmin == true))
+		{
+			hasUndoPossibility = true;
+		}
+
+		// canGetWorkcopy, canSetWorkcopy
+		//
+		if (file.state() == VcsState::CheckedOut && file.userId() == currentUserId)
+		{
+			canGetWorkcopy = true;
+			canSetWorkcopy ++;
+		}
 	}
 
 	// --
@@ -1689,6 +1252,16 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 	m_deleteAction->setEnabled(hasDeletePossibility);
 	m_checkOutAction->setEnabled(hasCheckOutPossibility);
 	m_checkInAction->setEnabled(hasCheckInPossibility);
+	m_undoChangesAction->setEnabled(hasUndoPossibility);
+
+	m_historyAction->setEnabled(s.size() == 1);
+	m_recursiveHistoryAction->setEnabled(s.size() == 1);
+	m_compareAction->setEnabled(s.size() == 1);
+
+	m_exportWorkingcopyAction->setEnabled(canGetWorkcopy);
+	m_importWorkingcopyAction->setEnabled(canSetWorkcopy == 1);			// can set work copy just for one file
+
+	m_propertiesAction->setEnabled(schemaPoperties);			// can set work copy just for one file
 
 	return;
 }
@@ -1800,8 +1373,6 @@ int SchemaFileViewEx::parentFileId() const
 	return m_filesModel.parentFile().fileId();
 }
 
-
-
 //
 //
 // SchemasTabPage
@@ -1824,8 +1395,6 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 	//
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemasTabPageEx::projectOpened);
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SchemasTabPageEx::projectClosed);
-
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &SchemasTabPageEx::compareObject);
 
 	// Evidently, project is not opened yet
 	//
@@ -1858,28 +1427,7 @@ bool SchemasTabPageEx::resetModified()
 	return m_controlTabPage->resetModified();
 }
 
-void SchemasTabPageEx::refreshControlTabPage()
-{
-	int to_do_refreshControlTabPage;
-
-//	assert(m_tabWidget);
-
-//	for (int i = 0; i < m_tabWidget->count(); i++)
-//	{
-//		QWidget* tabPage = m_tabWidget->widget(i);
-
-//		if (qobject_cast<SchemaControlTabPage*>(tabPage) != nullptr)
-//		{
-//			SchemaControlTabPage* controlTabPage = dynamic_cast<SchemaControlTabPage*>(tabPage);
-//			controlTabPage->refreshFiles();
-//			break;
-//		}
-//	}
-
-	return;
-}
-
-//std::vector<EditSchemaTabPage*> SchemasTabPage::getOpenSchemas()
+//std::vector<EditSchemaTabPage*> SchemasTabPage::openSchemas()
 //{
 //	std::vector<EditSchemaTabPage*> result;
 //	result.reserve(32);
@@ -1914,252 +1462,9 @@ void SchemasTabPageEx::projectClosed()
 	GlobalMessanger::instance().clearBuildSchemaIssues();
 	GlobalMessanger::instance().clearSchemaItemRunOrder();
 
-	refreshControlTabPage();
-
 	this->setEnabled(false);
 	return;
 }
-
-void SchemasTabPageEx::compareObject(DbChangesetObject object, CompareData compareData)
-{
-	int to_do_compareObject;
-	assert(false);
-
-//	// Can compare only files which are EquipmentObjects
-//	//
-//	if (object.isFile() == false)
-//	{
-//		return;
-//	}
-
-//	// Check file extension,
-//	// can compare	next files
-//	//
-//	if (object.name().endsWith("." + m_fileExtension) == false &&
-//		object.name().endsWith("." + m_templFileExtension) == false)
-//	{
-//		return;
-//	}
-
-//	// Get versions from the project database
-//	//
-//	std::shared_ptr<VFrame30::Schema> source = nullptr;
-
-//	switch (compareData.sourceVersionType)
-//	{
-//	case CompareVersionType::Changeset:
-//		{
-//			DbFileInfo file;
-//			file.setFileId(object.id());
-
-//			std::shared_ptr<DbFile> outFile;
-
-//			bool ok = db()->getSpecificCopy(file, compareData.sourceChangeset, &outFile, this);
-//			if (ok == true)
-//			{
-//				source = VFrame30::Schema::Create(outFile->data());
-//			}
-//		}
-//		break;
-//	case CompareVersionType::Date:
-//		{
-//			DbFileInfo file;
-//			file.setFileId(object.id());
-
-//			std::shared_ptr<DbFile> outFile;
-
-//			bool ok = db()->getSpecificCopy(file, compareData.sourceDate, &outFile, this);
-//			if (ok == true)
-//			{
-//				source = VFrame30::Schema::Create(outFile->data());
-//			}
-//		}
-//		break;
-//	case CompareVersionType::LatestVersion:
-//		{
-//			DbFileInfo file;
-//			file.setFileId(object.id());
-
-//			std::shared_ptr<DbFile> outFile;
-
-//			bool ok = db()->getLatestVersion(file, &outFile, this);
-//			if (ok == true)
-//			{
-//				source = VFrame30::Schema::Create(outFile->data());
-//			}
-//		}
-//		break;
-//		break;
-//	default:
-//		assert(false);
-//	}
-
-//	if (source == nullptr)
-//	{
-//		return;
-//	}
-
-//	// Get target file version
-//	//
-//	std::shared_ptr<VFrame30::Schema> target = nullptr;
-
-//	switch (compareData.targetVersionType)
-//	{
-//	case CompareVersionType::Changeset:
-//		{
-//			DbFileInfo file;
-//			file.setFileId(object.id());
-
-//			std::shared_ptr<DbFile> outFile;
-
-//			bool ok = db()->getSpecificCopy(file, compareData.targetChangeset, &outFile, this);
-//			if (ok == true)
-//			{
-//				target = VFrame30::Schema::Create(outFile->data());
-//			}
-//		}
-//		break;
-//	case CompareVersionType::Date:
-//		{
-//			DbFileInfo file;
-//			file.setFileId(object.id());
-
-//			std::shared_ptr<DbFile> outFile;
-
-//			bool ok = db()->getSpecificCopy(file, compareData.targetDate, &outFile, this);
-//			if (ok == true)
-//			{
-//				target = VFrame30::Schema::Create(outFile->data());
-//			}
-//		}
-//		break;
-//	case CompareVersionType::LatestVersion:
-//		{
-//			DbFileInfo file;
-//			file.setFileId(object.id());
-
-//			std::shared_ptr<DbFile> outFile;
-
-//			bool ok = db()->getLatestVersion(file, &outFile, this);
-//			if (ok == true)
-//			{
-//				target = VFrame30::Schema::Create(outFile->data());
-//			}
-//		}
-//		break;
-//	default:
-//		assert(false);
-//	}
-
-//	if (target == nullptr)
-//	{
-//		return;
-//	}
-
-//	// Make single schema
-//	//
-//	std::map<QUuid, CompareAction> itemsActions;
-
-//	for (std::shared_ptr<VFrame30::SchemaLayer> targetLayer : target->Layers)
-//	{
-//		for (std::shared_ptr<VFrame30::SchemaItem> targetItem : targetLayer->Items)
-//		{
-//			// Look for this item in source
-//			//
-//			std::shared_ptr<VFrame30::SchemaItem> sourceItem = source->getItemById(targetItem->guid());
-
-//			if (sourceItem != nullptr)
-//			{
-//				// Item is found, so it was modified
-//				//
-
-//				// Check if properties where modified
-//				//
-//				QString sourceStr = ComparePropertyObjectDialog::objedctToCompareString(sourceItem.get());
-//				QString targetStr = ComparePropertyObjectDialog::objedctToCompareString(targetItem.get());
-
-//				if (sourceStr == targetStr)
-//				{
-//					// Check if position was changed
-//					//
-//					std::vector<VFrame30::SchemaPoint> sourcePoints = sourceItem->getPointList();
-//					std::vector<VFrame30::SchemaPoint> targetPoints = targetItem->getPointList();
-
-//					if (sourcePoints == targetPoints)
-//					{
-//						itemsActions[targetItem->guid()] = CompareAction::Unmodified;
-//					}
-//					else
-//					{
-//						itemsActions[targetItem->guid()] = CompareAction::Modified;
-//					}
-//				}
-//				else
-//				{
-//					itemsActions[targetItem->guid()] = CompareAction::Modified;
-//				}
-
-//				continue;
-//			}
-
-//			if (sourceItem == nullptr)
-//			{
-//				// Item was added to targer
-//				//
-//				itemsActions[targetItem->guid()] = CompareAction::Added;
-//				continue;
-//			}
-//		}
-//	}
-
-//	// Look for deteled items (in target)
-//	//
-//	for (std::shared_ptr<VFrame30::SchemaLayer> sourceLayer : source->Layers)
-//	{
-//		for (std::shared_ptr<VFrame30::SchemaItem> sourceItem : sourceLayer->Items)
-//		{
-//			// Look for this item in source
-//			//
-//			std::shared_ptr<VFrame30::SchemaItem> targetItem = target->getItemById(sourceItem->guid());
-
-//			if (targetItem == nullptr)
-//			{
-//				// Item is found, so it was deleted in target
-//				//
-//				itemsActions[sourceItem->guid()] = CompareAction::Deleted;
-
-//				// Add item to target
-//				//
-//				bool layerFound = false;
-//				for (std::shared_ptr<VFrame30::SchemaLayer> targetLayer : target->Layers)
-//				{
-//					if (targetLayer->guid() == sourceLayer->guid())
-//					{
-//						targetLayer->Items.push_back(sourceItem);
-//						layerFound = true;
-//						break;
-//					}
-//				}
-
-//				assert(layerFound);
-//			}
-//		}
-//	}
-
-//	// Create tab page and add it to TabWidget
-//	//
-//	EditSchemaTabPage* compareTabPage = new EditSchemaTabPage(m_tabWidget, target, DbFileInfo(), db());
-
-//	compareTabPage->setReadOnly(true);
-//	compareTabPage->setCompareWidget(true, source, target);
-//	compareTabPage->setCompareItemActions(itemsActions);
-
-//	m_tabWidget->addTab(compareTabPage, "Compare " + target->schemaId());
-//	m_tabWidget->setCurrentWidget(compareTabPage);
-
-	return;
-}
-
 
 //
 //
@@ -2197,6 +1502,16 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 
 	connect(m_filesView->m_checkOutAction, &QAction::triggered, this, &SchemaControlTabPageEx::checkOutFiles);
 	connect(m_filesView->m_checkInAction, &QAction::triggered, this, &SchemaControlTabPageEx::checkInFiles);
+	connect(m_filesView->m_undoChangesAction, &QAction::triggered, this, &SchemaControlTabPageEx::undoChangesFiles);
+
+	connect(m_filesView->m_historyAction, &QAction::triggered, this, &SchemaControlTabPageEx::showFileHistory);
+	connect(m_filesView->m_recursiveHistoryAction, &QAction::triggered, this, &SchemaControlTabPageEx::showFileHistoryRecursive);
+	connect(m_filesView->m_compareAction, &QAction::triggered, this, &SchemaControlTabPageEx::compareSelectedFile);
+
+	connect(m_filesView->m_exportWorkingcopyAction, &QAction::triggered, this, &SchemaControlTabPageEx::exportWorkcopy);
+	connect(m_filesView->m_importWorkingcopyAction, &QAction::triggered, this, &SchemaControlTabPageEx::importWorkcopy);
+
+	connect(m_filesView->m_propertiesAction, &QAction::triggered, this, &SchemaControlTabPageEx::showFileProperties);
 
 	// --
 	//
@@ -2222,13 +1537,6 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 
 //	this->addAction(m_searchAction);
 
-	// Actions
-	//
-//	m_refreshAction = new QAction(tr("Refresh"), this);
-//	m_refreshAction->setShortcut(QKeySequence::StandardKey::Refresh);
-//	connect(m_refreshAction, &QAction::triggered, this, &SchemaControlTabPage::refreshFiles);
-//	addAction(m_refreshAction);
-
 	// --
 	//
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SchemaControlTabPageEx::projectOpened);
@@ -2236,11 +1544,6 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 
 	connect(m_filesView, &SchemaFileViewEx::openFileSignal, this, &SchemaControlTabPageEx::openFile);
 	connect(m_filesView, &SchemaFileViewEx::viewFileSignal, this, &SchemaControlTabPageEx::viewFile);
-//	connect(m_filesView, &SchemaFileView::cloneFileSignal, this, &SchemaControlTabPage::cloneFile);
-//	connect(m_filesView, &SchemaFileView::addFileSignal, this, &SchemaControlTabPage::addFile);
-//	connect(m_filesView, &SchemaFileView::deleteFileSignal, this, &SchemaControlTabPage::deleteFile);
-//	connect(m_filesView, &SchemaFileView::checkInSignal, this, &SchemaControlTabPage::checkIn);
-//	connect(m_filesView, &SchemaFileView::undoChangesSignal, this, &SchemaControlTabPage::undoChanges);
 //	connect(m_filesView, &SchemaFileView::editSchemasProperties, this, &SchemaControlTabPage::editSchemasProperties);
 
 //	connect(m_searchAction, &QAction::triggered, this, &SchemaControlTabPage::ctrlF);
@@ -2254,6 +1557,8 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 		//connect(GlobalMessanger::instance(), &GlobalMessanger::addLogicSchema, this, &SchemaControlTabPageEx::addLogicSchema);
 		//connect(GlobalMessanger::instance(), &GlobalMessanger::searchSchemaForLm, this, &SchemaControlTabPageEx::searchSchemaForLm);
 //	}
+
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &SchemaControlTabPageEx::compareObject);
 
 	return;
 }
@@ -2272,7 +1577,7 @@ VFrame30::Schema* SchemaControlTabPageEx::createSchema() const
 bool SchemaControlTabPageEx::hasUnsavedSchemas() const
 {
 	bool result = false;
-	for (auto[file, editWidget] : m_openedFiles)
+	for (auto editWidget : m_openedFiles)
 	{
 		result |= editWidget->modified();
 	}
@@ -2284,7 +1589,7 @@ bool SchemaControlTabPageEx::saveUnsavedSchemas()
 {
 	bool ok = true;
 
-	for (auto[file, editWidget] : m_openedFiles)
+	for (auto editWidget : m_openedFiles)
 	{
 		if (editWidget->modified() == true)
 		{
@@ -2299,7 +1604,7 @@ bool SchemaControlTabPageEx::resetModified()
 {
 	bool ok = true;
 
-	for (auto[file, editWidget] : m_openedFiles)
+	for (auto editWidget : m_openedFiles)
 	{
 		editWidget->resetModified();
 	}
@@ -2400,7 +1705,33 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPageEx::createSchema(const DbF
 	return {};
 }
 
-void SchemaControlTabPageEx::closeFile(EditSchemaTabPageEx* editTabPage)
+EditSchemaTabPageEx* SchemaControlTabPageEx::findOpenedFile(const DbFileInfo& file, bool readOnly)
+{
+	for (auto editSchema : m_openedFiles)
+	{
+		if (readOnly == false)
+		{
+			if (editSchema->fileInfo().fileId() == file.fileId() &&
+				editSchema->readOnly() == false)
+			{
+				return editSchema;
+			}
+		}
+		else
+		{
+			if (editSchema->fileInfo().fileId() == file.fileId() &&
+				editSchema->readOnly() == true &&
+				editSchema->fileInfo().changeset() == file.changeset())
+			{
+				return editSchema;
+			}
+		}
+	}
+
+	return nullptr;
+}
+
+void SchemaControlTabPageEx::removeFromOpenedList(EditSchemaTabPageEx* editTabPage)
 {
 	if (editTabPage == nullptr)
 	{
@@ -2408,23 +1739,7 @@ void SchemaControlTabPageEx::closeFile(EditSchemaTabPageEx* editTabPage)
 		return;
 	}
 
-	if (editTabPage->fileInfo().isNull() == true)
-	{
-		assert(editTabPage->fileInfo().isNull() == false);
-		return;
-	}
-
-	const DbFileInfo& file = editTabPage->fileInfo();
-
-	auto it = m_openedFiles.find(file);
-	if (it == m_openedFiles.end())
-	{
-		assert(false);
-		return;
-	}
-
-	m_openedFiles.erase(file);
-
+	m_openedFiles.remove(editTabPage);
 	return;
 }
 
@@ -2445,15 +1760,6 @@ void SchemaControlTabPageEx::detachOrAttachWindow(EditSchemaTabPageEx* editTabPa
 		return;
 	}
 
-	// --
-	//
-	if (auto it = m_openedFiles.find(editTabPage->fileInfo());
-		it == m_openedFiles.end())
-	{
-		assert(it != m_openedFiles.end());
-		return;
-	}
-
 	if (tabWidget->indexOf(editTabPage) != -1)
 	{
 		// Detach from TabWidget
@@ -2469,9 +1775,7 @@ void SchemaControlTabPageEx::detachOrAttachWindow(EditSchemaTabPageEx* editTabPa
 		// Attach to TabWidget
 		//
 		editTabPage->setWindowFlag(Qt::WindowType::Widget);
-
 		tabWidget->addTab(editTabPage, editTabPage->windowTitle());
-
 		tabWidget->setCurrentWidget(editTabPage);
 	}
 
@@ -2667,14 +1971,11 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 
 	// Check if file already open, and activate it if it's so
 	//
-	if (auto fit = m_openedFiles.find(file);
-		fit != m_openedFiles.end())
+	if (auto editTabPage = findOpenedFile(file, false);
+		editTabPage != nullptr)
 	{
 		// File already opened, check if it is opened for edit then activate this tab
 		//
-		EditSchemaTabPageEx* editTabPage = fit->second;
-		assert(editTabPage);
-
 		if (editTabPage->readOnly() == false &&
 			editTabPage->fileInfo().fileId() == file.fileId() &&
 			editTabPage->fileInfo().changeset() == file.changeset())
@@ -2724,7 +2025,7 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 	EditSchemaTabPageEx* editTabPage = new EditSchemaTabPageEx(tabWidget, vf, fi, db());
 
 	connect(editTabPage, &EditSchemaTabPageEx::vcsFileStateChanged, m_filesView, &SchemaFileViewEx::slot_refreshFiles);
-	connect(editTabPage, &EditSchemaTabPageEx::aboutToClose, this, &SchemaControlTabPageEx::closeFile);
+	connect(editTabPage, &EditSchemaTabPageEx::aboutToClose, this, &SchemaControlTabPageEx::removeFromOpenedList);
 	connect(editTabPage, &EditSchemaTabPageEx::pleaseDetachOrAttachWindow, this, &SchemaControlTabPageEx::detachOrAttachWindow);
 
 	assert(tabWidget->parent());
@@ -2745,7 +2046,7 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 	tabWidget->addTab(editTabPage, editTabPage->windowTitle());
 	tabWidget->setCurrentWidget(editTabPage);
 
-	m_openedFiles[fi] = editTabPage;
+	m_openedFiles.push_back(editTabPage);
 
 	// Update AFBs/UFBs after creating tab page, so it will be possible to set new (modified) caption
 	// to the tab page title
@@ -2800,14 +2101,11 @@ void SchemaControlTabPageEx::viewFile(const DbFileInfo& file)
 
 	// Find the opened read only file with the same changeset
 	//
-	if (auto fit = m_openedFiles.find(fi);
-		fit != m_openedFiles.end())
+	if (auto editTabPage = findOpenedFile(fi, true);
+		editTabPage != nullptr)
 	{
 		// File already opened, check if it is opened for edit then activate this tab
 		//
-		EditSchemaTabPageEx* editTabPage = fit->second;
-		assert(editTabPage);
-
 		if (editTabPage->readOnly() == true &&
 			editTabPage->fileInfo().fileId() == fi.fileId() &&
 			editTabPage->fileInfo().changeset() == fi.changeset())
@@ -2832,7 +2130,7 @@ void SchemaControlTabPageEx::viewFile(const DbFileInfo& file)
 	//
 	EditSchemaTabPageEx* editTabPage = new EditSchemaTabPageEx(tabWidget, vf, fi, db());
 
-	connect(editTabPage, &EditSchemaTabPageEx::aboutToClose, this, &SchemaControlTabPageEx::closeFile);
+	connect(editTabPage, &EditSchemaTabPageEx::aboutToClose, this, &SchemaControlTabPageEx::removeFromOpenedList);
 	connect(editTabPage, &EditSchemaTabPageEx::pleaseDetachOrAttachWindow, this, &SchemaControlTabPageEx::detachOrAttachWindow);
 
 	editTabPage->setReadOnly(true);
@@ -2840,7 +2138,7 @@ void SchemaControlTabPageEx::viewFile(const DbFileInfo& file)
 	tabWidget->addTab(editTabPage, editTabPage->windowTitle());
 	tabWidget->setCurrentWidget(editTabPage);
 
-	m_openedFiles[fi] = editTabPage;
+	m_openedFiles.push_back(editTabPage);
 
 	return;
 }
@@ -3303,38 +2601,23 @@ void SchemaControlTabPageEx::deleteFiles()
 		return;
 	}
 
-	int to_do_update_tab_pages;
-
 	// Update open tab pages
 	//
-//	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
-//	if (tabWidget == nullptr)
-//	{
-//		assert(tabWidget != nullptr);
-//		return;Вас там засыпает уже снегом?
-//	}
+	for (auto editWidget : m_openedFiles)
+	{
+		assert(editWidget);
 
-//	for (int i = 0; i < tabWidget->count(); i++)
-//	{
-//		EditSchemaTabPage* tb = dynamic_cast<EditSchemaTabPage*>(tabWidget->widget(i));
-//		if (tb == nullptr)
-//		{
-//			// It can be control tab page
-//			//
-//			continue;
-//		}
-
-//		for (std::shared_ptr<DbFileInfo> fi: deleteFiles)
-//		{
-//			if (tb->fileInfo().fileId() == fi->fileId() && tb->readOnly() == false)
-//			{
-//				tb->setReadOnly(true);
-//				tb->setFileInfo(*(fi.get()));
-//				tb->setPageTitle();
-//				break;
-//			}
-//		}
-//	}
+		for (std::shared_ptr<DbFileInfo> fi : deleteFiles)
+		{
+			if (editWidget->fileInfo().fileId() == fi->fileId() && editWidget->readOnly() == false)
+			{
+				editWidget->setReadOnly(true);
+				editWidget->setFileInfo(*(fi.get()));
+				editWidget->setPageTitle();
+				break;
+			}
+		}
+	}
 
 	return;
 }
@@ -3402,21 +2685,21 @@ void SchemaControlTabPageEx::checkInFiles()
 		mi = m_filesView->proxyModel().mapToSource(mi);
 	}
 
-	std::vector<DbFileInfo> files = m_filesView->selectedFiles();
-	if (files.empty() == true)
+	std::vector<DbFileInfo> selectedFiles = m_filesView->selectedFiles();
+	if (selectedFiles.empty() == true)
 	{
-		assert(files.empty() == false);
+		assert(selectedFiles.empty() == false);
 		return;
 	}
 
-	assert(selectedIndexes.size() == files.size());
+	assert(selectedIndexes.size() == selectedFiles.size());
 
 	// --
 	//
 	std::vector<DbFileInfo> checkInFiles;
-	checkInFiles.reserve(files.size());
+	checkInFiles.reserve(selectedFiles.size());
 
-	for(const DbFileInfo& file : files)
+	for(const DbFileInfo& file : selectedFiles)
 	{
 		if (dbc()->isSystemFile(file.fileId()) == true)
 		{
@@ -3435,546 +2718,612 @@ void SchemaControlTabPageEx::checkInFiles()
 		return;
 	}
 
-	// --
+	// Save file if it is open
 	//
-	assert(false);
-	int to_do_check_in;
+	for (auto editWidget : m_openedFiles)
+	{
+		if (editWidget == nullptr)
+		{
+			assert(editWidget);
+			continue;
+		}
 
-//	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
-//	if (tabWidget == nullptr)
-//	{
-//		assert(tabWidget != nullptr);
-//		return;
-//	}
+		if (editWidget->readOnly() == true || editWidget->modified() == false)
+		{
+			continue;
+		}
 
-//	// Save file if it is open
-//	//
-//	for (int i = 0; i < tabWidget->count(); i++)
-//	{
-//		EditSchemaTabPage* tb = dynamic_cast<EditSchemaTabPage*>(tabWidget->widget(i));
-//		if (tb == nullptr)
-//		{
-//			// It can be control tab page
-//			//
-//			continue;
-//		}
+		auto it = std::find_if(checkInFiles.begin(), checkInFiles.end(),
+							   [&editWidget](const DbFileInfo& fi)
+							   {
+									return fi.fileId() == editWidget->fileInfo().fileId();
+							   });
 
-//		for (const DbFileInfo& fi : files)
-//		{
-//			if (tb->fileInfo().fileId() == fi.fileId() && tb->readOnly() == false && tb->modified() == true)
-//			{
-//				tb->saveWorkcopy();
-//				break;
-//			}
-//		}
-//	}
+		if (it != checkInFiles.end())
+		{
+			editWidget->saveWorkcopy();
+		}
+	}
 
-//	// Check in file
-//	//
-//	std::vector<DbFileInfo> updatedFiles;
+	// Check in file
+	//
+	std::vector<DbFileInfo> updatedFiles;
+	bool ok = CheckInDialog::checkIn(checkInFiles, false, &updatedFiles, db(), this);
+	if (ok == false)
+	{
+		return;
+	}
 
-//	bool ok = CheckInDialog::checkIn(files, false, &updatedFiles, db(), this);
-//	if (ok == false)
-//	{
-//		return;
-//	}
+	m_filesView->refreshFiles();
 
-//	refreshFiles();
+	// Refresh fileInfo from the Db
+	//
+	std::vector<int> fileIds;
+	fileIds.reserve(checkInFiles.size());
 
-//	// Refresh fileInfo from the Db
-//	//
-//	std::vector<int> fileIds;
-//	fileIds.reserve(files.size());
+	for (const DbFileInfo& fi : checkInFiles)
+	{
+		fileIds.push_back(fi.fileId());
+	}
 
-//	for (const DbFileInfo& fi : files)
-//	{
-//		fileIds.push_back(fi.fileId());
-//	}
+	db()->getFileInfo(&fileIds, &checkInFiles, this);
 
-//	db()->getFileInfo(&fileIds, &files, this);
+	// Remove deleted files
+	//
+	checkInFiles.erase(std::remove_if(checkInFiles.begin(), checkInFiles.end(), [](const auto& file) { return file.deleted();}),
+					   checkInFiles.end());
 
-//	// Remove deleted files
-//	//
-//	files.erase(std::remove_if(files.begin(), files.end(), [](const auto& file) { return file.deleted();}),
-//				files.end());
+	// Set readonly to file if it is open
+	//
+	for (auto editWidget : m_openedFiles)
+	{
+		if (editWidget == nullptr)
+		{
+			assert(editWidget);
+			continue;
+		}
 
-//	// Set readonly to file if it is open
-//	//
-//	for (int i = 0; i < tabWidget->count(); i++)
-//	{
-//		EditSchemaTabPage* tb = dynamic_cast<EditSchemaTabPage*>(tabWidget->widget(i));
-//		if (tb == nullptr)
-//		{
-//			// It can be control tab page
-//			//
-//			continue;
-//		}
-
-//		for (const DbFileInfo& fi : files)
-//		{
-//			if (tb->fileInfo().fileId() == fi.fileId() && tb->readOnly() == false)
-//			{
-//				tb->setReadOnly(true);
-//				tb->setFileInfo(fi);
-//				break;
-//			}
-//		}
-//	}
+		for (const DbFileInfo& fi : checkInFiles)
+		{
+			if (editWidget->fileInfo().fileId() == fi.fileId() && editWidget->readOnly() == false)
+			{
+				editWidget->setReadOnly(true);
+				editWidget->setFileInfo(fi);
+				break;
+			}
+		}
+	}
 
 	return;
 }
 
-//void SchemaControlTabPage::checkIn(std::vector<DbFileInfo> files)
-//{
-//	if (files.empty() == true)
-//	{
-//		return;
-//	}
-
-//	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
-//	if (tabWidget == nullptr)
-//	{
-//		assert(tabWidget != nullptr);
-//		return;
-//	}
-
-//	// Save file if it is open
-//	//
-//	for (int i = 0; i < tabWidget->count(); i++)
-//	{
-//		EditSchemaTabPage* tb = dynamic_cast<EditSchemaTabPage*>(tabWidget->widget(i));
-//		if (tb == nullptr)
-//		{
-//			// It can be control tab page
-//			//
-//			continue;
-//		}
-
-//		for (const DbFileInfo& fi : files)
-//		{
-//			if (tb->fileInfo().fileId() == fi.fileId() && tb->readOnly() == false && tb->modified() == true)
-//			{
-//				tb->saveWorkcopy();
-//				break;
-//			}
-//		}
-//	}
-
-//	// Check in file
-//	//
-//	std::vector<DbFileInfo> updatedFiles;
-
-//	bool ok = CheckInDialog::checkIn(files, false, &updatedFiles, db(), this);
-//	if (ok == false)
-//	{
-//		return;
-//	}
-
-//	refreshFiles();
-
-//	// Refresh fileInfo from the Db
-//	//
-//	std::vector<int> fileIds;
-//	fileIds.reserve(files.size());
-
-//	for (const DbFileInfo& fi : files)
-//	{
-//		fileIds.push_back(fi.fileId());
-//	}
-
-//	db()->getFileInfo(&fileIds, &files, this);
-
-//	// Remove deleted files
-//	//
-//	files.erase(std::remove_if(files.begin(), files.end(), [](const auto& file) { return file.deleted();}),
-//				files.end());
-
-//	// Set readonly to file if it is open
-//	//
-//	for (int i = 0; i < tabWidget->count(); i++)
-//	{
-//		EditSchemaTabPage* tb = dynamic_cast<EditSchemaTabPage*>(tabWidget->widget(i));
-//		if (tb == nullptr)
-//		{
-//			// It can be control tab page
-//			//
-//			continue;
-//		}
-
-//		for (const DbFileInfo& fi : files)
-//		{
-//			if (tb->fileInfo().fileId() == fi.fileId() && tb->readOnly() == false)
-//			{
-//				tb->setReadOnly(true);
-//				tb->setFileInfo(fi);
-//				break;
-//			}
-//		}
-//	}
-
-//	return;
-//}
-
-//void SchemaControlTabPage::undoChanges(std::vector<DbFileInfo> files)
-//{
-//	// 1 Ask user to confirm operation
-//	// 2 Undo changes to database
-//	// 3 Set frame to readonly mode
-//	//
-
-//	std::vector<DbFileInfo> undoFiles;
-
-//	for (const DbFileInfo& fi : files)
-//	{
-//		if (fi.state() == VcsState::CheckedOut &&
-//			(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator() == true))
-//		{
-//			undoFiles.push_back(fi);
-//		}
-//	}
-
-//	if (undoFiles.empty() == true)
-//	{
-//		// Nothing to undo
-//		//
-//		return;
-//	}
-
-//	QMessageBox mb(this);
-//	mb.setText(tr("This operation will undo all pending changes for the document and will revert it to the prior state!"));
-//	mb.setInformativeText(tr("Do you want to undo pending changes?"));
-//	mb.setIcon(QMessageBox::Question);
-//	mb.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-
-//	if (mb.exec() != QMessageBox::Ok)
-//	{
-//		return;
-//	}
-
-//	// Undo changes in DB
-//	//
-//	db()->undoChanges(undoFiles, this);
-
-//	// Update open tab pages
-//	//
-//	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
-//	if (tabWidget == nullptr)
-//	{
-//		assert(tabWidget != nullptr);
-//		return;
-//	}
-
-//	for (int i = 0; i < tabWidget->count(); i++)
-//	{
-//		EditSchemaTabPage* tb = dynamic_cast<EditSchemaTabPage*>(tabWidget->widget(i));
-//		if (tb == nullptr)
-//		{
-//			// It can be control tab page
-//			//
-//			continue;
-//		}
-
-//		for (const DbFileInfo& fi : undoFiles)
-//		{
-//			if (tb->fileInfo().fileId() == fi.fileId() && tb->readOnly() == false)
-//			{
-//				tb->setReadOnly(true);
-//				tb->setFileInfo(fi);
-//				tb->setPageTitle();
-//				break;
-//			}
-//		}
-//	}
-
-//	refreshFiles();
-//}
-
-//void SchemaControlTabPage::openFiles(std::vector<DbFileInfo> files)
-//{
-//	if (files.empty() == true || files.size() != 1)
-//	{
-//		assert(files.empty() == false);
-//		return;
-//	}
-
-//	const DbFileInfo file = files[0];
-
-//	if (file.state() != VcsState::CheckedOut)
-//	{
-//		QMessageBox mb(this);
-//		mb.setText(tr("Check out file for edit first."));
-//		mb.exec();
-//		return;
-//	}
-
-//	if (file.state() == VcsState::CheckedOut &&
-//		file.userId() != db()->currentUser().userId())
-//	{
-//		QMessageBox mb(this);
-//		QString username = db()->username(file.userId());
-//		mb.setText(tr("File %1 is already checked out by user <b>%2</b>.").arg(file.fileName()).arg(username));
-//		mb.exec();
-//		return;
-//	}
-
-//	assert(file.state() == VcsState::CheckedOut && file.userId() == db()->currentUser().userId());
-
-//	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
-//	if (tabWidget == nullptr)
-//	{
-//		assert(tabWidget != nullptr);
-//		return;
-//	}
-
-//	// Check if file already open, and activate file tab if it is
-//	//
-
-//	// Find the opened file, bu filId
-//	//
-//	for (int i = 0; i < tabWidget->count(); i++)
-//	{
-//		EditSchemaTabPage* tb = dynamic_cast<EditSchemaTabPage*>(tabWidget->widget(i));
-//		if (tb == nullptr)
-//		{
-//			// It can be control tab page
-//			//
-//			continue;
-//		}
-
-//		if (tb->fileInfo().fileId() == file.fileId() &&
-//			tb->fileInfo().changeset() == file.changeset() &&
-//			tb->readOnly() == false)
-//		{
-//			tabWidget->setCurrentIndex(i);
-//			return;
-//		}
-//	}
-
-//	// Get file from the DB
-//	//
-//	std::vector<std::shared_ptr<DbFile>> out;
-
-//	bool result = db()->getWorkcopy(files, &out, this);
-//	if (result == false || out.size() != files.size())
-//	{
-//		QMessageBox::critical(this, tr("Error"), "Can't get file from the database.");
-//		return;
-//	}
-
-//	// Load file
-//	//
-//	std::shared_ptr<VFrame30::Schema> vf(VFrame30::Schema::Create(out[0].get()->data()));
-
-//	if (vf == nullptr)
-//	{
-//		assert(vf != nullptr);
-//		return;
-//	}
-
-//	// Create TabPage and add it to the TabControl
-//	//
-//	DbFileInfo fi(*(out.front().get()));
-
-//	EditSchemaTabPage* editTabPage = new EditSchemaTabPage(tabWidget, vf, fi, db());
-
-//	connect(editTabPage, &EditSchemaTabPage::vcsFileStateChanged, this, &SchemaControlTabPage::refreshFiles);
-
-//	assert(tabWidget->parent());
-
-//	SchemasTabPage* schemasTabPage = dynamic_cast<SchemasTabPage*>(tabWidget->parent());
-//	if (schemasTabPage == nullptr)
-//	{
-//		assert(dynamic_cast<SchemasTabPage*>(tabWidget->parent()));
-//		return;
-//	}
-
-//	connect(GlobalMessanger::instance(), &GlobalMessanger::buildStarted, editTabPage, &EditSchemaTabPage::saveWorkcopy);
-
-//	// --
-//	//
-//	editTabPage->setReadOnly(false);
-
-//	tabWidget->addTab(editTabPage, editTabPage->windowTitle());
-//	tabWidget->setCurrentWidget(editTabPage);
-
-//	// Update AFBs/UFBs after creating tab page, so it will be possible to set new (modified) caption
-//	// to the tab page title
-//	//
-//	editTabPage->updateAfbSchemaItems();
-//	editTabPage->updateUfbSchemaItems();
-//	editTabPage->updateBussesSchemaItems();
-
-//	return;
-//}
-
-//void SchemaControlTabPage::viewFiles(std::vector<DbFileInfo> files)
-//{
-//	if (files.empty() == true || files.size() != 1)
-//	{
-//		assert(files.empty() == false);
-//		return;
-//	}
-
-//	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
-//	if (tabWidget == nullptr)
-//	{
-//		assert(tabWidget != nullptr);
-//		return;
-//	}
-
-//	const DbFileInfo file = files[0];
-
-//	// Show chageset dialog
-//	//
-//	int changesetId = SelectChangesetDialog::getFileChangeset(db(), file, this);
-
-//	if (changesetId == -1)
-//	{
-//		return;
-//	}
-
-//	// Get file with choosen changeset
-//	//
-//	std::vector<std::shared_ptr<DbFile>> out;
-
-//	bool result = db()->getSpecificCopy(files, changesetId, &out, this);
-//	if (result == false || out.size() != files.size())
-//	{
-//		return;
-//	}
-
-//	DbFileInfo fi(*(out.front().get()));
-
-//	// Load file
-//	//
-//	std::shared_ptr<VFrame30::Schema> vf(VFrame30::Schema::Create(out[0].get()->data()));
-
-//	QString tabPageTitle;
-//	tabPageTitle = QString("%1: %2 ReadOnly").arg(vf->schemaId()).arg(changesetId);
-
-//	// Find the opened file,
-//	//
-//	for (int i = 0; i < tabWidget->count(); i++)
-//	{
-//		EditSchemaTabPage* tb = dynamic_cast<EditSchemaTabPage*>(tabWidget->widget(i));
-//		if (tb == nullptr)
-//		{
-//			// It can be control tab page
-//			//
-//			continue;
-//		}
-
-//		if (tb->fileInfo().fileId() == fi.fileId() &&
-//			tb->fileInfo().changeset() == fi.changeset() &&
-//			tb->readOnly() == true)
-//		{
-//			tabWidget->setCurrentIndex(i);
-//			return;
-//		}
-//	}
-
-//	// Create TabPage and add it to the TabControl
-//	//
-
-//	EditSchemaTabPage* editTabPage = new EditSchemaTabPage(tabWidget, vf, fi, db());
-//	editTabPage->setReadOnly(true);
-
-//	tabWidget->addTab(editTabPage, tabPageTitle);
-//	tabWidget->setCurrentWidget(editTabPage);
-
-//	return;
-//}
-
-//void SchemaControlTabPage::cloneFile(DbFileInfo file)
-//{
-//	// Get file from the DB
-//	//
-//	std::shared_ptr<DbFile> out;
-
-//	bool result = db()->getLatestVersion(file, &out, this);
-//	if (result == false || out == nullptr)
-//	{
-//		return;
-//	}
-
-//	// Load file
-//	//
-//	std::shared_ptr<VFrame30::Schema> schema(VFrame30::Schema::Create(out->data()));
-//	if (schema == nullptr)
-//	{
-//		assert(schema != nullptr);
-//		return;
-//	}
-
-//	// Get new SchemaID
-//	//
-//	bool ok = false;
-//	int globalCounter = db()->nextCounterValue();
-//	QString newSchemaId = QInputDialog::getText(this, qAppName(), tr("New SchemaID <b>(cannot be changed later)</b>:"),
-//												QLineEdit::Normal,
-//												schema->schemaId() + QString::number(globalCounter), &ok,
-//												Qt::WindowFlags() & (~Qt::WindowContextHelpButtonHint));
-
-//	if (ok == false || newSchemaId.isEmpty() == true)
-//	{
-//		return;
-//	}
-
-//	// Set new lables and guids
-//	//
-//	schema->setSchemaId(newSchemaId);
-//	schema->setGuid(QUuid::createUuid());
-
-//#ifdef _DEBUG
-//	std::vector<QUuid> oldGuids = schema->getGuids();
-//	std::set<QUuid> oldGuidsMap = {oldGuids.begin(), oldGuids.end()};
-//#endif
-//	for (std::shared_ptr<VFrame30::SchemaLayer> layer : schema->Layers)
-//	{
-//		layer->setGuid(QUuid::createUuid());
-
-//		for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
-//		{
-//			item->setNewGuid();
-
-//			if (item->isFblItemRect() == true)
-//			{
-//				globalCounter = db()->nextCounterValue();
-//				item->toFblItemRect()->setLabel(schema->schemaId() + "_" + QString::number(globalCounter));
-//			}
-//		}
-//	}
-
-//#ifdef _DEBUG
-//	// Check if all guids were updated
-//	//
-//	std::vector<QUuid> newGuids = schema->getGuids();
-//	for (const QUuid& guid : newGuids)
-//	{
-//		size_t c = oldGuidsMap.count(guid);
-//		assert(c == 0);
-//	}
-//#endif
-
-//	addSchemaFile(schema, true);
-//	return;
-//}
-
-//void SchemaControlTabPage::editSchemasProperties(std::vector<DbFileInfo> selectedFiles)
-//{
-//	bool readOnly = true;
-
-//	for (const DbFileInfo& file : selectedFiles)
-//	{
-//		if (file.state() == VcsState::CheckedOut &&
-//			(file.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator() == true))
-//		{
-//			readOnly = false;
-//		}
-//	}
-
-//	// If schema is opened, can't edit its' properties
-//	//
+void SchemaControlTabPageEx::undoChangesFiles()
+{
+	// 1 Ask user to confirm operation
+	// 2 Undo changes to database
+	// 3 Set frame to readonly mode
+	//
+	std::vector<DbFileInfo> selectedFiles = m_filesView->selectedFiles();
+	std::vector<DbFileInfo> undoFiles;
+	undoFiles.reserve(selectedFiles.size());
+
+	for (const DbFileInfo& fi : selectedFiles)
+	{
+		if (fi.state() == VcsState::CheckedOut &&
+			(fi.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator() == true))
+		{
+			undoFiles.push_back(fi);
+		}
+	}
+
+	if (undoFiles.empty() == true)
+	{
+		// Nothing to undo
+		//
+		return;
+	}
+
+	QMessageBox mb(this);
+	mb.setText(tr("This operation will undo all pending changes for the document and will revert it to the prior state!"));
+	mb.setInformativeText(tr("Do you want to undo pending changes?"));
+	mb.setIcon(QMessageBox::Question);
+	mb.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+
+	if (mb.exec() != QMessageBox::Ok)
+	{
+		return;
+	}
+
+	// Undo changes in DB
+	//
+	db()->undoChanges(undoFiles, this);
+
+	// Update open tab pages
+	//
+	for (auto editWidget : m_openedFiles)
+	{
+		assert(editWidget);
+
+		for (const DbFileInfo& fi : undoFiles)
+		{
+			if (editWidget->fileInfo().fileId() == fi.fileId() &&
+				editWidget->readOnly() == false)
+			{
+				editWidget->setReadOnly(true);
+				editWidget->setFileInfo(fi);
+				editWidget->setPageTitle();
+				break;
+			}
+		}
+	}
+
+	m_filesView->refreshFiles();
+	return;
+}
+
+void SchemaControlTabPageEx::showFileHistory()
+{
+	std::vector<DbFileInfo> selectedFiles = m_filesView->selectedFiles();
+	if (selectedFiles.size() != 1)
+	{
+		return;
+	}
+
+	// Get file history
+	//
+	const DbFileInfo& file = selectedFiles.front();
+	std::vector<DbChangeset> fileHistory;
+
+	bool ok = db()->getFileHistory(file, &fileHistory, this);
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Show history dialog
+	//
+	FileHistoryDialog::showHistory(db(), file.fileName(), fileHistory, this);
+	return;
+}
+
+void SchemaControlTabPageEx::showFileHistoryRecursive()
+{
+	std::vector<DbFileInfo> selectedFiles = m_filesView->selectedFiles();
+	if (selectedFiles.size() != 1)
+	{
+		return;
+	}
+
+	// Get file history
+	//
+	const DbFileInfo& file = selectedFiles.front();
+	std::vector<DbChangeset> fileHistory;
+
+	bool ok = db()->getFileHistoryRecursive(file, &fileHistory, this);
+	if (ok == false)
+	{
+		return;
+	}
+
+	// Show history dialog
+	//
+	FileHistoryDialog::showHistory(db(), file.fileName(), fileHistory, this);
+	return;
+}
+
+void SchemaControlTabPageEx::compareSelectedFile()
+{
+	std::vector<DbFileInfo> selectedFiles = m_filesView->selectedFiles();
+	if (selectedFiles.size() != 1)
+	{
+		return;
+	}
+
+	// --
+	//
+	const DbFileInfo& file = selectedFiles.front();
+
+	CompareDialog::showCompare(db(), DbChangesetObject(file), -1, this);
+
+	return;
+}
+
+void SchemaControlTabPageEx::compareObject(DbChangesetObject object, CompareData compareData)
+{
+	// Can compare only files which are EquipmentObjects
+	//
+	if (object.isFile() == false)
+	{
+		return;
+	}
+
+	// Check file extension,
+	// can compare next files
+	//
+	if (object.name().endsWith("." + QString(::AlFileExtension)) == false &&
+		object.name().endsWith("." + QString(::AlTemplExtension)) == false &&
+		object.name().endsWith("." + QString(::UfbFileExtension)) == false &&
+		object.name().endsWith("." + QString(::UfbTemplExtension)) == false &&
+		object.name().endsWith("." + QString(::MvsFileExtension)) == false &&
+		object.name().endsWith("." + QString(::MvsTemplExtension)) == false &&
+		object.name().endsWith("." + QString(::DvsFileExtension)) == false &&
+		object.name().endsWith("." + QString(::DvsTemplExtension)) == false)
+	{
+		return;
+	}
+
+	// Get versions from the project database
+	//
+	std::shared_ptr<VFrame30::Schema> source = nullptr;
+
+	switch (compareData.sourceVersionType)
+	{
+	case CompareVersionType::Changeset:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.sourceChangeset, &outFile, this);
+			if (ok == true)
+			{
+				source = VFrame30::Schema::Create(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::Date:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.sourceDate, &outFile, this);
+			if (ok == true)
+			{
+				source = VFrame30::Schema::Create(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::LatestVersion:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getLatestVersion(file, &outFile, this);
+			if (ok == true)
+			{
+				source = VFrame30::Schema::Create(outFile->data());
+			}
+		}
+		break;
+	default:
+		assert(false);
+	}
+
+	if (source == nullptr)
+	{
+		return;
+	}
+
+	// Get target file version
+	//
+	std::shared_ptr<VFrame30::Schema> target = nullptr;
+
+	switch (compareData.targetVersionType)
+	{
+	case CompareVersionType::Changeset:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.targetChangeset, &outFile, this);
+			if (ok == true)
+			{
+				target = VFrame30::Schema::Create(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::Date:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getSpecificCopy(file, compareData.targetDate, &outFile, this);
+			if (ok == true)
+			{
+				target = VFrame30::Schema::Create(outFile->data());
+			}
+		}
+		break;
+	case CompareVersionType::LatestVersion:
+		{
+			DbFileInfo file;
+			file.setFileId(object.id());
+
+			std::shared_ptr<DbFile> outFile;
+
+			bool ok = db()->getLatestVersion(file, &outFile, this);
+			if (ok == true)
+			{
+				target = VFrame30::Schema::Create(outFile->data());
+			}
+		}
+		break;
+	default:
+		assert(false);
+	}
+
+	if (target == nullptr)
+	{
+		return;
+	}
+
+	// Make single schema
+	//
+	std::map<QUuid, CompareAction> itemsActions;
+
+	for (std::shared_ptr<VFrame30::SchemaLayer> targetLayer : target->Layers)
+	{
+		for (std::shared_ptr<VFrame30::SchemaItem> targetItem : targetLayer->Items)
+		{
+			// Look for this item in source
+			//
+			std::shared_ptr<VFrame30::SchemaItem> sourceItem = source->getItemById(targetItem->guid());
+
+			if (sourceItem != nullptr)
+			{
+				// Item is found, so it was modified
+				//
+
+				// Check if properties where modified
+				//
+				QString sourceStr = ComparePropertyObjectDialog::objedctToCompareString(sourceItem.get());
+				QString targetStr = ComparePropertyObjectDialog::objedctToCompareString(targetItem.get());
+
+				if (sourceStr == targetStr)
+				{
+					// Check if position was changed
+					//
+					std::vector<VFrame30::SchemaPoint> sourcePoints = sourceItem->getPointList();
+					std::vector<VFrame30::SchemaPoint> targetPoints = targetItem->getPointList();
+
+					if (sourcePoints == targetPoints)
+					{
+						itemsActions[targetItem->guid()] = CompareAction::Unmodified;
+					}
+					else
+					{
+						itemsActions[targetItem->guid()] = CompareAction::Modified;
+					}
+				}
+				else
+				{
+					itemsActions[targetItem->guid()] = CompareAction::Modified;
+				}
+
+				continue;
+			}
+
+			if (sourceItem == nullptr)
+			{
+				// Item was added to targer
+				//
+				itemsActions[targetItem->guid()] = CompareAction::Added;
+				continue;
+			}
+		}
+	}
+
+	// Look for deteled items (in target)
+	//
+	for (std::shared_ptr<VFrame30::SchemaLayer> sourceLayer : source->Layers)
+	{
+		for (std::shared_ptr<VFrame30::SchemaItem> sourceItem : sourceLayer->Items)
+		{
+			// Look for this item in source
+			//
+			std::shared_ptr<VFrame30::SchemaItem> targetItem = target->getItemById(sourceItem->guid());
+
+			if (targetItem == nullptr)
+			{
+				// Item is found, so it was deleted in target
+				//
+				itemsActions[sourceItem->guid()] = CompareAction::Deleted;
+
+				// Add item to target
+				//
+				bool layerFound = false;
+				for (std::shared_ptr<VFrame30::SchemaLayer> targetLayer : target->Layers)
+				{
+					if (targetLayer->guid() == sourceLayer->guid())
+					{
+						targetLayer->Items.push_back(sourceItem);
+						layerFound = true;
+						break;
+					}
+				}
+
+				assert(layerFound);
+			}
+		}
+	}
+
+	// Create tab page and add it to TabWidget
+	//
+	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
+	if (tabWidget == nullptr)
+	{
+		assert(tabWidget != nullptr);
+		return;
+	}
+
+	EditSchemaTabPageEx* compareTabPage = new EditSchemaTabPageEx(tabWidget, target, DbFileInfo(), db());
+
+	connect(compareTabPage, &EditSchemaTabPageEx::aboutToClose, this, &SchemaControlTabPageEx::removeFromOpenedList);
+	connect(compareTabPage, &EditSchemaTabPageEx::pleaseDetachOrAttachWindow, this, &SchemaControlTabPageEx::detachOrAttachWindow);
+
+	compareTabPage->setReadOnly(true);
+	compareTabPage->setCompareWidget(true, source, target);
+	compareTabPage->setCompareItemActions(itemsActions);
+
+	compareTabPage->setWindowTitle("Compare " + target->schemaId());
+
+	tabWidget->addTab(compareTabPage, compareTabPage->windowTitle());
+	tabWidget->setCurrentWidget(compareTabPage);
+
+	m_openedFiles.push_back(compareTabPage);
+
+	return;
+}
+
+void SchemaControlTabPageEx::exportWorkcopy()
+{
+	// Get files workcopies form the database
+	//
+	std::vector<DbFileInfo> selectedFiles = m_filesView->selectedFiles();
+
+	std::vector<DbFileInfo> files;
+	files.reserve(selectedFiles.size());
+
+	for (auto file : selectedFiles)
+	{
+		if (file.state() == VcsState::CheckedOut &&
+			file.userId() == db()->currentUser().userId())
+		{
+			files.push_back(file);
+		}
+	}
+
+	if (files.empty() == true)
+	{
+		return;
+	}
+
+	// Select destination folder
+	//
+	QString dir = QFileDialog::getExistingDirectory(this, tr("Select Directory"), QString(), QFileDialog::ShowDirsOnly | QFileDialog::DontResolveSymlinks);
+	if (dir.isEmpty() == true)
+	{
+		return;
+	}
+
+	// Get files from the database
+	//
+	std::vector<std::shared_ptr<DbFile>> out;
+	db()->getWorkcopy(files, &out, this);
+
+	// Save files to disk
+	//
+	for (unsigned int i = 0; i < out.size(); i++)
+	{
+		bool writeResult = out[i]->writeToDisk(dir);
+
+		if (writeResult == false)
+		{
+			QMessageBox msgBox;
+			msgBox.setText(tr("Write file error."));
+			msgBox.setInformativeText(tr("Cannot write file %1.").arg(out[i]->fileName()));
+			msgBox.exec();
+		}
+	}
+
+	return;
+}
+
+void SchemaControlTabPageEx::importWorkcopy()
+{
+	std::vector<DbFileInfo> selectedFiles = m_filesView->selectedFiles();
+
+	std::vector<DbFileInfo> files;
+	files.reserve(selectedFiles.size());
+
+	for (unsigned int i = 0; i < selectedFiles.size(); i++)
+	{
+		auto file = selectedFiles[i];
+
+		if (file.state() == VcsState::CheckedOut && file.userId() == db()->currentUser().userId())
+		{
+			files.push_back(file);
+		}
+	}
+
+	if (files.empty() == true)
+	{
+		return;
+	}
+
+	// --
+	//
+	if (files.size() != 1)
+	{
+		return;
+	}
+
+	auto fileInfo = files[0];
+
+	if (fileInfo.state() != VcsState::CheckedOut || fileInfo.userId() != db()->currentUser().userId())
+	{
+		return;
+	}
+
+	// Select file
+	//
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"));
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+	static_cast<DbFileInfo*>(file.get())->operator=(fileInfo);
+
+	bool readResult = file->readFromDisk(fileName);
+	if (readResult == false)
+	{
+		QMessageBox mb(this);
+		mb.setText(tr("Can't read file %1.").arg(fileName));
+		mb.exec();
+		return;
+	}
+
+	// Set file id for DbStore setWorkcopy
+	//
+	file->setFileId(fileInfo.fileId());
+
+	std::vector<std::shared_ptr<DbFile>> workcopyFiles;
+	workcopyFiles.push_back(file);
+
+	db()->setWorkcopy(workcopyFiles, this);
+
+	m_filesView->refreshFiles();
+	return;
+}
+
+void SchemaControlTabPageEx::showFileProperties()
+{
+	std::vector<DbFileInfo> selectedFiles = m_filesView->selectedFiles();
+
+	bool readOnly = true;
+
+	for (const DbFileInfo& file : selectedFiles)
+	{
+		if (file.state() == VcsState::CheckedOut &&
+			(file.userId() == db()->currentUser().userId() || db()->currentUser().isAdminstrator() == true))
+		{
+			readOnly = false;
+		}
+	}
+
+	// If schema is opened, can't edit its' properties
+	//
 //	SchemasTabPage* parent = dynamic_cast<SchemasTabPage*>(this->parentWidget()->parentWidget()->parentWidget());
 //	if (parent == nullptr)
 //	{
@@ -3982,142 +3331,139 @@ void SchemaControlTabPageEx::checkInFiles()
 //		return;
 //	}
 
-//	std::vector<EditSchemaTabPage*> openedSchames = parent->getOpenSchemas();
+	for (const DbFileInfo& file : selectedFiles)
+	{
+		auto foundTab = std::find_if(m_openedFiles.begin(), m_openedFiles.end(),
+					[&file](const EditSchemaTabPageEx* tabPage)
+					{
+						assert(tabPage);
+						return	tabPage->fileInfo().fileId() == file.fileId() &&
+								tabPage->readOnly() == false;
+					});
 
-//	for (const DbFileInfo& file : selectedFiles)
-//	{
-//		auto foundTab = std::find_if(openedSchames.begin(), openedSchames.end(),
-//					[&file](const EditSchemaTabPage* tabPage)
-//					{
-//						assert(tabPage);
-//						return	tabPage->fileInfo().fileId() == file.fileId() &&
-//								tabPage->readOnly() == false;
-//					});
+		if (foundTab != m_openedFiles.end())
+		{
+			EditSchemaTabPageEx* tab = *foundTab;
+			QMessageBox::critical(this, qAppName(), tr("Can't edit %1 schema properties, as it is opened for edit. Close schema to edit it's properties.").arg(tab->schema()->schemaId()));
+			return;
+		}
+	}
 
-//		if (foundTab != openedSchames.end())
-//		{
-//			EditSchemaTabPage* tab = *foundTab;
-//			QMessageBox::critical(this, qAppName(), tr("Can't edit %1 schema properties, as it is opened for edit. Close schema to edit it's properties.").arg(tab->schema()->schemaId()));
-//			return;
-//		}
-//	}
+	// Load schemas
+	//
+	std::vector<std::shared_ptr<DbFile>> out;
 
-//	// Load schemas
-//	//
-//	std::vector<std::shared_ptr<DbFile>> out;
+	bool ok = db()->getLatestVersion(selectedFiles, & out, this);
+	if (ok == false)
+	{
+		return;
+	}
 
-//	bool ok = db()->getLatestVersion(selectedFiles, & out, this);
+	// Read schemas
+	//
+	std::vector<std::pair<std::shared_ptr<DbFile>, std::shared_ptr<VFrame30::Schema>>> schemas;
 
-//	if (ok == false)
-//	{
-//		return;
-//	}
+	schemas.reserve(out.size());
 
-//	// Read schemas
-//	//
-//	std::vector<std::pair<std::shared_ptr<DbFile>, std::shared_ptr<VFrame30::Schema>>> schemas;
+	for (std::shared_ptr<DbFile> file : out)
+	{
+		std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file->data());
+		if (schema == nullptr)
+		{
+			assert(schema != nullptr);
+			return;
+		}
 
-//	schemas.reserve(out.size());
+		schemas.push_back({file, schema});
+	}
 
-//	for (std::shared_ptr<DbFile> file : out)
-//	{
-//		std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file->data());
-//		if (schema == nullptr)
-//		{
-//			assert(schema != nullptr);
-//			return;
-//		}
+	// Show schema properties dialog
+	//
+	QDialog d(this);
 
-//		schemas.push_back({file, schema});
-//	}
+	d.setWindowTitle(tr("Schema(s) Properties"));
+	d.setWindowFlags((d.windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
-//	// Show schema properties dialog
-//	//
-//	QDialog d(this);
+	ExtWidgets::PropertyEditor* propertyEditor = new ExtWidgets::PropertyEditor(this);
+	propertyEditor->setReadOnly(readOnly);
+	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
+	{
+		propertyEditor->setFontSizeF(propertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
+	}
 
-//	d.setWindowTitle(tr("Schema(s) Properties"));
-//	d.setWindowFlags((d.windowFlags() &
-//					~Qt::WindowMinimizeButtonHint &
-//					~Qt::WindowMaximizeButtonHint &
-//					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+	std::vector<std::shared_ptr<PropertyObject>> propertyObjects;
+	propertyObjects.reserve(schemas.size());
 
-//	ExtWidgets::PropertyEditor* propertyEditor = new ExtWidgets::PropertyEditor(this);
-//	propertyEditor->setReadOnly(readOnly);
-//	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
-//	{
-//		propertyEditor->setFontSizeF(propertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
-//	}
+	for (std::pair<std::shared_ptr<DbFile>, std::shared_ptr<VFrame30::Schema>> s : schemas)
+	{
+		propertyObjects.push_back(s.second);
+		assert(propertyObjects.back() != nullptr);
+	}
 
-//	std::vector<std::shared_ptr<PropertyObject>> propertyObjects;
-//	propertyObjects.reserve(schemas.size());
+	propertyEditor->setObjects(propertyObjects);
 
-//	for (std::pair<std::shared_ptr<DbFile>, std::shared_ptr<VFrame30::Schema>> s : schemas)
-//	{
-//		propertyObjects.push_back(s.second);
-//		assert(propertyObjects.back() != nullptr);
-//	}
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
-//	propertyEditor->setObjects(propertyObjects);
+	QVBoxLayout* layout = new QVBoxLayout;
 
-//	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+	layout->addWidget(propertyEditor);
+	layout->addWidget(buttonBox);
 
-//	QVBoxLayout* layout = new QVBoxLayout;
+	d.setLayout(layout);
 
-//	layout->addWidget(propertyEditor);
-//	layout->addWidget(buttonBox);
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
 
-//	d.setLayout(layout);
+	d.resize(d.sizeHint() * 1.5);
 
-//	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
-//	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+	int result = d.exec();
 
-//	d.resize(d.sizeHint() * 1.5);
+	if (result == QDialog::Accepted)
+	{
+		std::vector<std::shared_ptr<DbFile>> filesToSave;
+		filesToSave.reserve(schemas.size());
 
-//	int result = d.exec();
+		for (std::pair<std::shared_ptr<DbFile>, std::shared_ptr<VFrame30::Schema>> s : schemas)
+		{
+			std::shared_ptr<DbFile> file = s.first;
+			std::shared_ptr<VFrame30::Schema> schema = s.second;
 
-//	if (result == QDialog::Accepted)
-//	{
-//		std::vector<std::shared_ptr<DbFile>> filesToSave;
-//		filesToSave.reserve(schemas.size());
+			if (file->state() != VcsState::CheckedOut ||
+				(file->userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
+			{
+				continue;
+			}
 
-//		for (std::pair<std::shared_ptr<DbFile>, std::shared_ptr<VFrame30::Schema>> s : schemas)
-//		{
-//			std::shared_ptr<DbFile> file = s.first;
-//			std::shared_ptr<VFrame30::Schema> schema = s.second;
+			QByteArray data;
+			schema->Save(data);
 
-//			if (file->state() != VcsState::CheckedOut ||
-//				(file->userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
-//			{
-//				continue;
-//			}
+			if (data.isEmpty() == true)
+			{
+				assert(data.isEmpty() == false);
+				return;
+			}
 
-//			QByteArray data;
-//			schema->Save(data);
+			file->swapData(data);
 
-//			if (data.isEmpty() == true)
-//			{
-//				assert(data.isEmpty() == false);
-//				return;
-//			}
+			QString detailsString = schema->details();
+			file->setDetails(detailsString);
 
-//			file->swapData(data);
+			filesToSave.push_back(file);
+		}
 
-//			QString detailsString = schema->details();
-//			file->setDetails(detailsString);
+		if (filesToSave.empty() == false)
+		{
+			db()->setWorkcopy(filesToSave, this);
 
-//			filesToSave.push_back(file);
-//		}
+			m_filesView->refreshFiles();
+		}
+	}
 
-//		if (filesToSave.empty() == false)
-//		{
-//			db()->setWorkcopy(filesToSave, this);
-
-//			refreshFiles();
-//		}
-//	}
-
-//	return;
-//}
+	return;
+}
 
 //void SchemaControlTabPage::ctrlF()
 //{
@@ -4757,6 +4103,7 @@ void EditSchemaTabPageEx::fileMenuTriggered()
 		return;
 	}
 
+	m_schemaWidget->updateFileActions();
 	QWidget* w = m_toolBar->widgetForAction(m_schemaWidget->m_fileAction);
 
 	if (w == nullptr)

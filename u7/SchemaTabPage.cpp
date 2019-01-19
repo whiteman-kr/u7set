@@ -2814,6 +2814,9 @@ void EditSchemaTabPage::fileMenuTriggered()
 		return;
 	}
 
+	assert(m_schemaWidget);
+
+	m_schemaWidget->updateFileActions();
 	QWidget* w = m_toolBar->widgetForAction(m_schemaWidget->m_fileAction);
 
 	if (w == nullptr)

@@ -12,6 +12,7 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 	ui->setupUi(this);
 
 	m_propertyEditor = new SchemaItemPropertyEditor(editEngine, this);
+	m_propertyEditor->setReadOnly(editEngine->readOnly());
 
 	m_propertyEditor->setSplitterPosition(theSettings.m_schemaItemSplitterState);
 	if (theSettings.m_schemaItemPropertiesWindowPos.x() != -1 && theSettings.m_schemaItemPropertiesWindowPos.y() != -1)

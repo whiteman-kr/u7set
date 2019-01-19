@@ -114,7 +114,7 @@ public:
 
 public:
 	DbFileInfo file(const QModelIndex& mi) const;
-	std::vector<int> expandedFileIds();
+	std::vector<int> expandedFileIds(QTreeView* treeView);
 
 private:
 	SchemaListModelEx* m_sourceModel = nullptr;
@@ -167,21 +167,8 @@ public slots:
 	void projectOpened();
 	void projectClosed();
 
-	//	void slot_OpenFile();
-	//	void slot_ViewFile();
-	//	void slot_CheckOut();
-	//	void slot_CheckIn();
-	//	void slot_UndoChanges();
-	//	void slot_showHistory();
-	//	void slot_compare();
-	//	void slot_showHistoryForAllSchemas();
-	//	void slot_AddFile();
-	//	void slot_cloneFile();
-	//	void slot_DeleteFile();
-	//	void slot_GetWorkcopy();
-	//	void slot_SetWorkcopy();
-		void slot_refreshFiles();
-		void slot_doubleClicked(const QModelIndex& index);
+	void slot_refreshFiles();
+	void slot_doubleClicked(const QModelIndex& index);
 	//	void slot_properties();
 
 public slots:
@@ -226,8 +213,8 @@ public:
 	QAction* m_checkInAction = nullptr;
 	QAction* m_undoChangesAction = nullptr;
 	QAction* m_historyAction = nullptr;
+	QAction* m_recursiveHistoryAction = nullptr;
 	QAction* m_compareAction = nullptr;
-	QAction* m_treeSchemasHistoryAction = nullptr;
 
 	// --
 	QAction* m_exportWorkingcopyAction = nullptr;
@@ -264,8 +251,10 @@ private:
 
 	std::shared_ptr<VFrame30::Schema> createSchema(const DbFileInfo& parentFile) const;
 
+	EditSchemaTabPageEx* findOpenedFile(const DbFileInfo& file, bool readOnly);
+
 public slots:
-	void closeFile(EditSchemaTabPageEx* editTabPage);
+	void removeFromOpenedList(EditSchemaTabPageEx* editTabPage);
 	void detachOrAttachWindow(EditSchemaTabPageEx* editTabPage);
 
 protected slots:
@@ -292,15 +281,19 @@ protected slots:
 
 	void checkOutFiles();
 	void checkInFiles();
+	void undoChangesFiles();
 
-	//	void checkIn(std::vector<DbFileInfo> files);
-	//	void undoChanges(std::vector<DbFileInfo> files);
+	void showFileHistory();
+	void showFileHistoryRecursive();
+	void compareSelectedFile();
+	void compareObject(DbChangesetObject object, CompareData compareData);
 
-	//	void openFiles(std::vector<DbFileInfo> files);
-	//	void viewFiles(std::vector<DbFileInfo> files);
+	void exportWorkcopy();
+	void importWorkcopy();
+
+	void showFileProperties();
 
 	//	void editSchemasProperties(std::vector<DbFileInfo> selectedFiles);
-
 
 	//private slots:
 	//	void ctrlF();
@@ -320,7 +313,7 @@ private:
 	QLineEdit* m_searchEdit = nullptr;
 	QPushButton* m_searchButton = nullptr;
 
-	std::map<DbFileInfo, EditSchemaTabPageEx*> m_openedFiles;	// Opened files (for edit and view)
+	std::list<EditSchemaTabPageEx*> m_openedFiles;		// Opened files (for edit and view)
 };
 
 
@@ -342,15 +335,11 @@ public:
 	bool saveUnsavedSchemas();
 	bool resetModified();
 
-	void refreshControlTabPage();
-
-	//std::vector<EditSchemaTabPageEx*> getOpenSchemas();
+	//std::vector<EditSchemaTabPageEx*> openSchemas();
 
 public slots:
 	void projectOpened();
 	void projectClosed();
-
-	void compareObject(DbChangesetObject object, CompareData compareData);
 
 	// Data
 	//
