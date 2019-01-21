@@ -41,13 +41,9 @@ public:
 
 	bool updateFiles(const QModelIndexList& selectedIndexes, const std::vector<DbFileInfo>& files);
 
-	//	void setFiles(const std::vector<DbFileInfo>& files, const std::vector<DbUser>& users);
-	//	void clear();
-
-	//	std::shared_ptr<DbFileInfo> fileByRow(int row);
-	//	std::shared_ptr<DbFileInfo> fileByFileId(int fileId);
-
 	DbFileInfo file(const QModelIndex& modelIndex) const;
+
+	QModelIndexList searchFor(const QString searchText);
 
 public slots:
 	void refresh();
@@ -59,9 +55,6 @@ private slots:
 	// Properties
 	//
 public:
-//	QString filter() const;
-//	void setFilter(const QString& value);		// "" -- no filter, "cdd" -- just cdd files
-
 	QString usernameById(int userId) const noexcept;
 
 	QString detailsColumnText(int fileId) const;
@@ -89,13 +82,15 @@ public:
 		ColumnCount
 	};
 
+	static const int SearchSchemaRole = Qt::UserRole + 1;
+
 private:
 	DbFileInfo m_parentFile;
 
 	QWidget* m_parentWidget = nullptr;	// Inside this model DbController is used, and it requires parent widget for
 										// displaying progress and error messages
 	DbFileTree m_files;
-	//QString m_filter;
+	mutable QString m_searchText;		// Set in match(), used in data for SearchSchemaRole()
 
 	std::map<int, QString> m_users;							// Key is UserID
 	std::map<int, VFrame30::SchemaDetails> m_details; 		// Key is FileID
@@ -150,6 +145,8 @@ public:
 	std::vector<DbFileInfo> selectedFiles() const;
 
 	void refreshFiles();
+
+	void searchAndSelect(QString searchText);
 
 signals:
 	void openFileSignal(DbFileInfo files);
@@ -295,10 +292,10 @@ protected slots:
 
 	//	void editSchemasProperties(std::vector<DbFileInfo> selectedFiles);
 
-	//private slots:
-	//	void ctrlF();
-	//	void search();
-	//	void searchSchemaForLm(QString equipmentId);
+private slots:
+	void ctrlF();
+	void search();
+	void searchSchemaForLm(QString equipmentId);
 
 	// Properties
 	//
@@ -310,7 +307,10 @@ public:
 private:
 	SchemaFileViewEx* m_filesView = nullptr;
 	QToolBar* m_toolBar = nullptr;
+
+	QAction* m_searchAction = nullptr;
 	QLineEdit* m_searchEdit = nullptr;
+	QCompleter* m_searchCompleter = nullptr;
 	QPushButton* m_searchButton = nullptr;
 
 	std::list<EditSchemaTabPageEx*> m_openedFiles;		// Opened files (for edit and view)

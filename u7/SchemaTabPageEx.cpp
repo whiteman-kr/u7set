@@ -157,11 +157,6 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 		return {};
 	}
 
-	if (role == Qt::UserRole)
-	{
-		return fileId;
-	}
-
 	if (role == Qt::DisplayRole)
 	{
 		switch (column)
@@ -300,6 +295,31 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 		{
 			return {};
 		}
+	}
+
+	if (role == Qt::UserRole)
+	{
+		return fileId;
+	}
+
+	if (role == SearchSchemaRole)
+	{
+		if (dbc()->isSystemFile(file->fileId()))
+		{
+			return false;
+		}
+
+		if (file->fileName().contains(m_searchText, Qt::CaseInsensitive) == true)
+		{
+			return true;
+		}
+
+		// Parse details
+		//
+		VFrame30::SchemaDetails details{file->details()};
+
+		bool searchResult = details.searchForString(m_searchText);
+		return searchResult;
 	}
 
 	return QVariant{};
@@ -514,6 +534,12 @@ DbFileInfo SchemaListModelEx::file(const QModelIndex& modelIndex) const
 	{
 		return {};
 	}
+}
+
+QModelIndexList SchemaListModelEx::searchFor(const QString searchText)
+{
+	m_searchText = searchText;
+	return match(index(0, 0), SearchSchemaRole, QVariant::fromValue(true), -1, Qt::MatchExactly | Qt::MatchRecursive);
 }
 
 void SchemaListModelEx::refresh()
@@ -1078,6 +1104,42 @@ void SchemaFileViewEx::refreshFiles()
 	return;
 }
 
+void SchemaFileViewEx::searchAndSelect(QString searchText)
+{
+	clearSelection();
+
+	QModelIndexList matched = m_filesModel.searchFor(searchText);
+	if (matched.isEmpty() == true)
+	{
+		return;
+	}
+
+	for (QModelIndex& fileModelIndex : matched)
+	{
+		QModelIndex mappedModelIndex = m_proxyModel.mapFromSource(fileModelIndex);
+
+		selectionModel()->select(mappedModelIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+
+		QModelIndex expandParent = mappedModelIndex.parent();
+		while (expandParent.isValid() == true)
+		{
+			expand(expandParent);
+			expandParent = expandParent.parent();
+		}
+	}
+
+	// Scroll to somewhere, unfortuanatelly selectedIndexes does not provide sorted list, so it's just scroll somewhere
+	//
+	if (selectedIndexes().isEmpty() == false)
+	{
+		scrollTo(selectedIndexes().front());
+	}
+
+	QMessageBox::information(this, qAppName(), tr("Found %1 schema(s)").arg(matched.size()));
+
+	return;
+}
+
 void SchemaFileViewEx::projectOpened()
 {
 	m_refreshFileAction->setEnabled(true);
@@ -1515,9 +1577,19 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 
 	// --
 	//
+	m_searchAction = new QAction(tr("Edit Search"), this);
+	m_searchAction->setShortcut(QKeySequence::Find);
+	addAction(m_searchAction);
+
 	m_searchEdit = new QLineEdit(this);
 	m_searchEdit->setPlaceholderText(tr("Search Text"));
 	m_searchEdit->setMinimumWidth(400);
+
+	QStringList completerStringList = QSettings{}.value("SchemaControlTabPageEx/SearchCompleter").toStringList();
+	m_searchCompleter = new QCompleter(completerStringList, this);
+	m_searchCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+
+	m_searchEdit->setCompleter(m_searchCompleter);
 
 	m_searchButton = new QPushButton(tr("Search"));
 
@@ -1546,9 +1618,9 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 	connect(m_filesView, &SchemaFileViewEx::viewFileSignal, this, &SchemaControlTabPageEx::viewFile);
 //	connect(m_filesView, &SchemaFileView::editSchemasProperties, this, &SchemaControlTabPage::editSchemasProperties);
 
-//	connect(m_searchAction, &QAction::triggered, this, &SchemaControlTabPage::ctrlF);
-//	connect(m_searchEdit, &QLineEdit::returnPressed, this, &SchemaControlTabPage::search);
-//	connect(m_searchButton, &QPushButton::clicked, this, &SchemaControlTabPage::search);
+	connect(m_searchAction, &QAction::triggered, this, &SchemaControlTabPageEx::ctrlF);
+	connect(m_searchEdit, &QLineEdit::returnPressed, this, &SchemaControlTabPageEx::search);
+	connect(m_searchButton, &QPushButton::clicked, this, &SchemaControlTabPageEx::search);
 
 //	auto schema = createSchemaFunc();
 
@@ -3465,108 +3537,59 @@ void SchemaControlTabPageEx::showFileProperties()
 	return;
 }
 
-//void SchemaControlTabPage::ctrlF()
-//{
-//	assert(m_searchEdit);
-//	m_searchEdit->setFocus();
-//	m_searchEdit->selectAll();
+void SchemaControlTabPageEx::ctrlF()
+{
+	assert(m_searchEdit);
+	m_searchEdit->setFocus();
+	m_searchEdit->selectAll();
 
-//	return;
-//}
+	return;
+}
 
-//void SchemaControlTabPage::search()
-//{
+void SchemaControlTabPageEx::search()
+{
+	// Search for text in schemas
+	//
+	assert(m_filesView);
+	assert(m_searchEdit);
 
-//	// Search for text in schemas
-//	//
-//	assert(m_filesView);
-//	assert(m_searchEdit);
+	QString searchText = m_searchEdit->text().trimmed();
 
-//	QString searchText = m_searchEdit->text().trimmed();
+	if (searchText.isEmpty() == true)
+	{
+		m_filesView->clearSelection();
+		return;
+	}
 
-//	if (searchText.isEmpty() == true)
-//	{
-//		m_filesView->clearSelection();
-//		return;
-//	}
+	QStringList completerStringList = QSettings{}.value("SchemaControlTabPageEx/SearchCompleter").toStringList();
 
-//	// --
-//	//
-//	const std::vector<std::shared_ptr<DbFileInfo>>& files = m_filesView->files();
+	if (completerStringList.contains(searchText, Qt::CaseInsensitive) == false)
+	{
+		completerStringList.push_back(searchText);
+		QSettings{}.setValue("SchemaControlTabPageEx/SearchCompleter", completerStringList);
 
-//	std::vector<std::shared_ptr<DbFileInfo>> foundFiles;
-//	foundFiles.reserve(files.size());
+		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_searchCompleter->model());
+		assert(completerModel);
 
-//	for (std::shared_ptr<DbFileInfo> f : files)
-//	{
-//		if (f->fileName().contains(searchText, Qt::CaseInsensitive) == true)
-//		{
-//			foundFiles.push_back(f);
-//			continue;
-//		}
+		if (completerModel != nullptr)
+		{
+			completerModel->setStringList(completerStringList);
+		}
+	}
 
-//		// Parse details
-//		//
-//		VFrame30::SchemaDetails details;
+	// --
+	//
+	m_filesView->searchAndSelect(searchText);
 
-//		bool ok = details.parseDetails(f->details());
-//		if (ok == false)
-//		{
-//			continue;
-//		}
+	m_filesView->setFocus();
 
-//		bool searchResult = details.searchForString(searchText);
-//		if (searchResult == true)
-//		{
-//			foundFiles.push_back(f);
-//			continue;
-//		}
-//	}
+	return;
+}
 
-//	// Select found schemas
-//	//
-//	m_filesView->selectionModel()->clearSelection();
-
-//	QModelIndex firstModeleIndexToScroll;						// The first found ModelIndex will be kept here, to scroll to it (EnsureVisible)
-
-//	for (std::shared_ptr<DbFileInfo> f : foundFiles)
-//	{
-//		int fileRow = m_filesView->filesModel().getFileRow(f->fileId());
-//		assert(fileRow != -1);
-
-//		if (fileRow == -1)
-//		{
-//			continue;
-//		}
-
-//		QModelIndex md = m_filesView->filesModel().index(fileRow, 0);
-//		assert(md.isValid() == true);
-
-//		if (md.isValid() == true)
-//		{
-//			m_filesView->selectionModel()->select(md, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-
-//			if (firstModeleIndexToScroll.isValid() == false)	// Save only first time
-//			{
-//				firstModeleIndexToScroll = md;
-//			}
-//		}
-//	}
-
-//	m_filesView->filesViewSelectionChanged(QItemSelection(), QItemSelection());
-
-//	if (firstModeleIndexToScroll.isValid() == true)
-//	{
-//		m_filesView->scrollTo(firstModeleIndexToScroll);
-//	}
-
-//	m_filesView->setFocus();
-
-//	return;
-//}
-
-//void SchemaControlTabPage::searchSchemaForLm(QString equipmentId)
-//{
+void SchemaControlTabPageEx::searchSchemaForLm(QString equipmentId)
+{
+	int to_do;
+	assert(false);
 //	// Set focus to LogicSchemaTabPage and to ControlTabPage
 //	//
 //	QTabWidget* parentTabWidget = dynamic_cast<QTabWidget*>(this->parentWidget()->parentWidget());
@@ -3588,8 +3611,8 @@ void SchemaControlTabPageEx::showFileProperties()
 //	m_searchEdit->setText(equipmentId.trimmed());
 //	search();
 
-//	return;
-//}
+	return;
+}
 
 const DbFileInfo& SchemaControlTabPageEx::parentFile() const
 {
