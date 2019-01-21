@@ -33,6 +33,7 @@ namespace Builder
 								SignalSet* signalSet,
 								Hardware::EquipmentSet* equipment,
 								BuildResultWriter* buildResultWriter);
+		virtual ~SoftwareCfgGenerator();
 
 		bool run();
 

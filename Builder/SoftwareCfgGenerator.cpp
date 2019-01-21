@@ -1,5 +1,5 @@
-#include "../Builder/SoftwareCfgGenerator.h"
-#include "../Builder/ApplicationLogicCompiler.h"
+#include "SoftwareCfgGenerator.h"
+#include "ApplicationLogicCompiler.h"
 #include "IssueLogger.h"
 #include "../lib/DeviceHelper.h"
 #include "../lib/ServiceSettings.h"
@@ -31,6 +31,9 @@ namespace Builder
 	{
 	}
 
+	SoftwareCfgGenerator::~SoftwareCfgGenerator()
+	{
+	}
 
 	bool SoftwareCfgGenerator::run()
 	{

@@ -84,6 +84,36 @@ bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QS
 	return true;
 }
 
+bool DeviceHelper::getStrListProperty(const Hardware::DeviceObject* device, const QString& name, QStringList* strList, Builder::IssueLogger* log)
+{
+	if (device == nullptr ||
+		strList == nullptr ||
+		log == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	bool result = true;
+
+	QString str;
+
+	result &= DeviceHelper::getStrProperty(device, name, &str, log);
+
+	str.replace(' ', ';');
+	str.replace('\n', ';');
+	str.remove('\r');
+
+	*strList = str.split(";", QString::SkipEmptyParts);
+
+	for (QString& s : *strList)
+	{
+		s = s.trimmed();
+	}
+
+	return result;
+}
+
 bool DeviceHelper::getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, Builder::IssueLogger *log)
 {
 	if (device == nullptr ||
