@@ -33,14 +33,26 @@ const UnitSensorTypePair SensorTypeByUnit[] =
 	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_50_W1426 },
 	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_100_W1426 },
 
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Ni50_W1617 },
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Ni100_W1617 },
+
 	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt21 },
 	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu23 },
 
 	// types of thermocouple
 	//
-	{ E::ElectricUnit::mV, 	E::SensorType::mV_K_TXA },
-	{ E::ElectricUnit::mV, 	E::SensorType::mV_L_TXK },
-	{ E::ElectricUnit::mV, 	E::SensorType::mV_N_THH },
+	{ E::ElectricUnit::mV,		E::SensorType::mV_K_TXA },
+	{ E::ElectricUnit::mV,		E::SensorType::mV_L_TXK },
+	{ E::ElectricUnit::mV,		E::SensorType::mV_N_THH },
+
+	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_B },
+	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_E },
+	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_J },
+	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_K },
+	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_N },
+	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_R },
+	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_S },
+	{ E::ElectricUnit::mV,		E::SensorType::mV_Type_T },
 };
 
 const int	SENSOR_TYPE_BY_UNIT_COUNT = sizeof(SensorTypeByUnit) / sizeof(SensorTypeByUnit[0]);

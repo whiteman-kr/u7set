@@ -71,10 +71,11 @@ void SignalPropertyDialog::createPropertyList()
 
 	setWindowTitle(tr("Properties - %1").arg(m_param.appSignalID()));
 
+	QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 	QStringList electricUnitList;
-	for(int u = 0; u < ELECTRIC_UNIT_COUNT; u++)
+	for(int u = 0; u < meu.keyCount(); u++)
 	{
-		electricUnitList.append(ElectricUnitStr[u]);
+		electricUnitList.append(meu.key(u));
 	}
 
 
@@ -207,10 +208,11 @@ void SignalPropertyDialog::createPropertyList()
 			electricRangeGroup->addSubProperty(item);
 
 			item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Sensor type"));
+			QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
 			QStringList sensorList;
-			for(int s = 0; s < SENSOR_TYPE_COUNT; s++)
+			for(int s = 0; s < mst.keyCount(); s++)
 			{
-				sensorList.append(SensorTypeStr[ s ]);
+				sensorList.append(mst.key(s));
 			}
 			item->setAttribute(QLatin1String("enumNames"), sensorList);
 			item->setValue(m_param.electricSensorType());
@@ -309,7 +311,8 @@ void SignalPropertyDialog::onPropertyValueChanged(QtProperty *property, const QV
 		return;
 	}
 
-	QMetaEnum me = QMetaEnum::fromType<E::ElectricUnit>();
+	QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
+	QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
 
 	int groupIndex = -1;
 
@@ -329,10 +332,10 @@ void SignalPropertyDialog::onPropertyValueChanged(QtProperty *property, const QV
 		//
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_LOW:			m_param.setElectricLowLimit(value.toDouble());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_HIGH:		m_param.setElectricHighLimit(value.toDouble());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EL_RANGE_UNIT:		m_param.setElectricUnitID(static_cast<E::ElectricUnit>(me.value(value.toInt())));
-														m_param.setElectricUnit(ElectricUnitStr[me.value(value.toInt())]);					groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_EL_RANGE_UNIT:		m_param.setElectricUnitID(static_cast<E::ElectricUnit>(meu.value(value.toInt())));
+														m_param.setElectricUnit(meu.key(value.toInt()));									groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR:		m_param.setElectricSensorType(static_cast<E::SensorType>(value.toInt()));
-														m_param.setElectricSensor(SensorTypeStr[value.toInt()]);							groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
+														m_param.setElectricSensor(mst.key(value.toInt()));									groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION:	m_param.setElectricPrecision(value.toInt());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 	}
 
