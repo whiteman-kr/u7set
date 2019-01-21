@@ -34,6 +34,16 @@ void ArchRequestParam::expandTimes(qint64 expandTime)
 	m_endTime += expandTime;
 }
 
+QString ArchRequestParam::print()
+{
+	return QString("ID=%1, timeType=%2, startTime=%3, endTime=%4, signals=%5").
+				arg(m_requestID).
+				arg(Archive::timeTypeStr(m_timeType)).
+				arg(Archive::formatTime(m_startTime)).
+				arg(Archive::formatTime(m_endTime)).
+				arg(m_signalHashes.count());
+}
+
 // ----------------------------------------------------------------------------------------------------------------------
 //
 // Archive class implementation
@@ -41,6 +51,11 @@ void ArchRequestParam::expandTimes(qint64 expandTime)
 // ----------------------------------------------------------------------------------------------------------------------
 
 std::atomic<quint32> Archive::m_nextRequestID = { 1 };
+
+QString Archive::formatTime(qint64 time)
+{
+	return QDateTime::fromMSecsSinceEpoch(time, Qt::TimeSpec::UTC).toString("yyyy-MM-dd HH:mm:ss");
+}
 
 Archive::Archive(const QString& projectID,
 				 const QString& equipmentID,
@@ -140,11 +155,11 @@ void Archive::stop()
 
 std::shared_ptr<ArchRequest> Archive::startNewRequest(E::TimeType timeType, qint64 startTime, qint64 endTime, const QVector<Hash>& signalHashes)
 {
+	m_requestsMutex.lock();
+
 	ArchRequestParam param(getNewRequestID(), timeType, startTime, endTime, signalHashes);
 
 	ArchRequestShared archRequest = std::make_shared<ArchRequest>(*this, param, m_log);
-
-	m_requestsMutex.lock();
 
 	m_requests.insert(param.requestID(), archRequest);
 

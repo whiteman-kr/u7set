@@ -273,7 +273,8 @@ enum class ArchiveError
 //	ExecQueryError,
 	NoSignals,
 //	BuildQueryError,
-	RequestStartError
+	RequestStartError,
+	SearchError
 };
 
 

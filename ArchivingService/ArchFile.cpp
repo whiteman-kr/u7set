@@ -314,8 +314,31 @@ bool ArchFile::Partition::readRecord(qint64 recordIndex, Record* record)
 	return true;
 }
 
-ArchFindResult ArchFile::Partition::findStartPosition(E::TimeType timeType, qint64 startTime, qint64 endTime)
+bool ArchFile::Partition::read(Record* recordBuffer, int maxRecordsToRead, int* readCount)
 {
+	TEST_PTR_RETURN_FALSE(recordBuffer);
+	TEST_PTR_RETURN_FALSE(readCount);
+
+	// HERE:
+	//	do read to intermediate buffer
+	//	and do records consistency checking
+	//	align to record and return valid records
+
+	qint64 readSize =  m_file.read(reinterpret_cast<char*>(recordBuffer), sizeof(Record) * maxRecordsToRead);
+
+	*readCount = readSize / sizeof(Record);
+
+	return true;
+}
+
+ArchFindResult ArchFile::Partition::findStartPosition(RequestData* rd)
+{
+	if (rd == nullptr)
+	{
+		assert(false);
+		return ArchFindResult::SearchError;
+	}
+
 	Record firstRecord;
 	Record lastRecord;
 	bool noRecords = false;
@@ -331,6 +354,10 @@ ArchFindResult ArchFile::Partition::findStartPosition(E::TimeType timeType, qint
 	{
 		return ArchFindResult::NotFound;
 	}
+
+	E::TimeType timeType = rd->timeType;
+	qint64 startTime = rd->startTime;
+	qint64 endTime = rd->endTime;
 
 	//	S - request start time
 	//	E - request endTime
@@ -365,6 +392,7 @@ ArchFindResult ArchFile::Partition::findStartPosition(E::TimeType timeType, qint
 	if (firstRecord.timeGreateThen(timeType, startTime) == true &&
 		firstRecord.timeLessOrEqualThen(timeType, endTime) == true)
 	{
+		rd->startRecord = 0;
 		moveToRecord(0);
 		return ArchFindResult::Found;
 	}
@@ -386,6 +414,7 @@ ArchFindResult ArchFile::Partition::findStartPosition(E::TimeType timeType, qint
 
 		if (result == ArchFindResult::Found)
 		{
+			rd->startRecord = startPosition;
 			moveToRecord(startPosition);
 		}
 
@@ -529,6 +558,86 @@ ArchFile::RequestData::RequestData(ArchFile& archFile, const ArchRequestParam& p
 {
 }
 
+ArchFile::PartitionInfo ArchFile::RequestData::partitionToReadInfo()
+{
+	if (partitionToReadIndex >= 0 && partitionToReadIndex < partitionsInfo.count())
+	{
+		return partitionsInfo[partitionToReadIndex];
+	}
+
+	assert(false);
+
+	return PartitionInfo();
+}
+
+bool ArchFile::RequestData::getRecord(ArchFile::Record* record)
+{
+	TEST_PTR_RETURN_FALSE(record);
+
+	if (noMoreData == true)
+	{
+		return false;
+	}
+
+	if (recordsInBuffer == 0 || nextRecordIndex >= recordsInBuffer)
+	{
+		fillBuffer();
+
+		if (recordsInBuffer == 0)
+		{
+			sdflmsl;dfmslkdfm slakdmf lsakdmf lsakdfm lskmf
+			return false;
+		}
+	}
+
+	*record = records[nextRecordIndex];
+
+	return true;
+}
+
+bool ArchFile::RequestData::gotoNextRecord()
+{
+	nextRecordIndex++;
+}
+
+void ArchFile::RequestData::fillBuffer()
+{
+	int readCount = 0;
+
+	int maxRecordsToRead = RECORDS_BUFFER_SIZE;
+	recordsInBuffer = 0;
+	nextRecordIndex = 0;
+
+	do
+	{
+		partitionToRead.read(records + recordsInBuffer, maxRecordsToRead, &readCount);
+
+		recordsInBuffer += readCount;
+		maxRecordsToRead -= readCount;
+
+		if (readCount < RECORDS_BUFFER_SIZE)
+		{
+			partitionToReadIndex++;
+
+			if (partitionToReadIndex >= partitionsInfo.count())
+			{
+				noMoreData = true;
+				return;
+			}
+
+			bool res = partitionToRead.openForReading(partitionsInfo[partitionToReadIndex].startTime);
+
+			if (res == false)
+			{
+				noMoreData = true;
+				return;
+			}
+		}
+	}
+	while(recordsInBuffer < RECORDS_BUFFER_SIZE);
+}
+
+
 // ----------------------------------------------------------------------------------------------------------------------
 //
 // ArchFile class implementation
@@ -644,30 +753,39 @@ bool ArchFile::isEmergency() const
 
 ArchFindResult ArchFile::findData(const ArchRequestParam& param)
 {
-	RequestData* rd = m_requestsData.value(param.requestID(), nullptr);
-
-	if (rd != nullptr)
-	{
-		m_requestsData.remove(param.requestID());
-		delete rd;
-		rd = nullptr;
-	}
-
-	rd = new RequestData(*this, param);
-
-	m_requestsData.insert(param.requestID(), rd);
+	RequestData* rd = createRequestData(param);
 
 	getArchPartitionsInfo(rd);
 
 	if (rd->findResult != ArchFindResult::Found)
 	{
-		cancelRequest(rd->requestID);
+		finalizeRequest(rd->requestID);
 		return rd->findResult;
 	}
 
 	findStartPosition(rd);
 
+	if (rd->findResult == ArchFindResult::Found)
+	{
+		qDebug() << C_STR(QString("ArchRequest ID=%1, signal %2 data found, partition %3, record=%4").
+								arg(param.requestID()).
+								arg(m_appSignalID).
+								arg(rd->partitionToReadInfo().fileName).
+								arg(rd->startRecord));
+	}
+	else
+	{
+		qDebug() << C_STR(QString("ArchRequest ID=%1, signal %2 data NOT found").
+								arg(param.requestID()).
+								arg(m_appSignalID));
+	}
+
 	return rd->findResult;
+}
+
+void ArchFile::finalizeRequest(quint32 requestID)
+{
+	clearRequestData(requestID);
 }
 
 void ArchFile::shutdown(qint64 curPartition, qint64* totalFlushedStatesCount)
@@ -737,19 +855,20 @@ void ArchFile::getArchPartitionsInfo(RequestData* rd)
 	return;
 }
 
-ArchFindResult ArchFile::findStartPosition(RequestData* rd)
+void ArchFile::findStartPosition(RequestData* rd)
 {
 	if (rd == nullptr)
 	{
 		assert(false);
-		return ArchFindResult::SearchError;
+		return;
 	}
 
 	int partitionsCount = rd->partitionsInfo.count();
 
 	if (partitionsCount == 0)
 	{
-		return ArchFindResult::NotFound;
+		rd->findResult = ArchFindResult::NotFound;
+		return;
 	}
 
 	// 1) Sort m_archPartitionsInfo by systemTime ascending
@@ -783,28 +902,20 @@ ArchFindResult ArchFile::findStartPosition(RequestData* rd)
 
 		if (res == false)
 		{
-			return ArchFindResult::SearchError;
+			rd->findResult = ArchFindResult::SearchError;
+			return;
 		}
 
-		ArchFindResult result = rd->partitionToRead.findStartPosition(rd->timeType, rd->startTime, rd->endTime);
+		ArchFindResult result = rd->partitionToRead.findStartPosition(rd);
 
 		switch(result)
 		{
 		case ArchFindResult::Found:
-			return ArchFindResult::Found;
+			rd->findResult = ArchFindResult::Found;
+			return;
 
 		case ArchFindResult::NotFound:
-
 			rd->partitionToReadIndex++;
-
-			if (rd->partitionToReadIndex >= rd->partitionsInfo.count())
-			{
-				rd->partitionToRead.close();
-				rd->partitionToReadIndex = -1;
-
-				return ArchFindResult::NotFound;
-			}
-
 			break;
 
 		case ArchFindResult::SearchError:
@@ -812,19 +923,47 @@ ArchFindResult ArchFile::findStartPosition(RequestData* rd)
 			rd->partitionToRead.close();
 			rd->partitionToReadIndex = -1;
 
-			return result;
+			rd->findResult = ArchFindResult::NotFound;
+			return;
 
 		default:
 			assert(false);
 		}
-
 	}
 
-	return ArchFindResult::SearchError;
+	rd->partitionToRead.close();
+	rd->partitionToReadIndex = -1;
+
+	rd->findResult = ArchFindResult::NotFound;
 }
 
-void ArchFile::cancelRequest(quint32 requestID)
+ArchFile::RequestData* ArchFile::createRequestData(const ArchRequestParam& param)
 {
+	m_requestsDataMutex.lock();
+
+	RequestData* rd = m_requestsData.value(param.requestID(), nullptr);
+
+	if (rd != nullptr)
+	{
+		assert(false);
+		m_requestsData.remove(param.requestID());
+		delete rd;
+		rd = nullptr;
+	}
+
+	rd = new RequestData(*this, param);
+
+	m_requestsData.insert(param.requestID(), rd);
+
+	m_requestsDataMutex.unlock();
+
+	return rd;
+}
+
+void ArchFile::clearRequestData(quint32 requestID)
+{
+	m_requestsDataMutex.lock();
+
 	RequestData* rd = m_requestsData.value(requestID, nullptr);
 
 	if (rd == nullptr)
@@ -835,5 +974,6 @@ void ArchFile::cancelRequest(quint32 requestID)
 
 	m_requestsData.remove(requestID);
 	delete rd;
-}
 
+	m_requestsDataMutex.unlock();
+}

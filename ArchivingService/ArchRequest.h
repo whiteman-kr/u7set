@@ -25,18 +25,15 @@ public:
 
 	quint32 requestID() const { return m_param.requestID(); }
 
-	void nextDataRequired() { m_nextDataRequired.store(true); }
+	void nextDataRequired() { m_dataReady.store(false); m_nextDataRequired.store(true);  }
+
 	bool isDataReady() const { return m_dataReady.load(); }
 
 	Network::GetAppSignalStatesFromArchiveNextReply& getNextReply() { return m_reply; }
 
-	ArchiveError archError() const { return m_archError; }
-
 	int timeElapsed() const { return QDateTime::currentMSecsSinceEpoch() - m_startTime; }
 
-protected:
-	int totalStates() const { return m_totalStates; }
-	int sentStates() const { return m_sentStates; }
+	void setErrorMessage(const QString& errMsg) { m_errMsg = errMsg; }
 
 //	int signalCount() const { return m_param.signalHashes.count(); }
 
@@ -50,21 +47,24 @@ protected:
 //	qint64 expandedRequestStartTime() const { return m_expandedRequestStartTime; }
 //	qint64 expandedRequestEndTime() const { return m_expandedRequestEndTime; }
 
-	void setArchError(ArchiveError err) { m_archError = err; }
-	void setDataReady(bool ready) { m_dataReady = ready; }
-
-	bool isNextDataRequired() { return m_nextDataRequired.load(); }
 
 private:
+	bool isNextDataRequired() { return m_nextDataRequired.load(); }
+	void resetNextDataRequired() { m_nextDataRequired.store(false); }
 
 	void prepareFiles();
 	ArchFindResult findData();
 	void getNextData();
 
-	void reportErrorAndWaitForQuit();
-	void reportNoDataAndWaitForQuit();
+	void reportError();
+	void reportNoData();
+	void reportDataReady();
 
 	void waitForQuit();
+
+	void finalizeRequest();
+
+	void setDataReady() { m_dataReady.store(true); }
 
 //	E::TimeType timeType() const { return m_param.timeType; }
 
@@ -93,8 +93,8 @@ protected:
 	std::atomic<bool> m_dataReady = { false };
 	bool m_noMoreData = false;
 
-	ArchiveError m_archError = ArchiveError::Success;
 	Network::GetAppSignalStatesFromArchiveNextReply m_reply;
+	QString m_errMsg;
 
 	int m_totalStates = 0;
 	int m_sentStates = 0;

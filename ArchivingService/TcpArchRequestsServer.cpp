@@ -39,8 +39,7 @@ void TcpArchRequestsServer::processRequest(quint32 requestID, const char* reques
 
 void TcpArchRequestsServer::onServerThreadStarted()
 {
-	DEBUG_LOG_MSG(m_logger, QString("TcpArchiveRequestsServer thread started (connected sw %1, %2)").
-								arg(connectedSoftwareInfo().equipmentID()).
+	DEBUG_LOG_MSG(m_logger, QString("TcpArchiveRequestsServer thread started (connected %1)").
 								arg(peerAddr().addressPortStr()));
 }
 
@@ -71,9 +70,6 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 		return;
 	}
 
-	//
-	// check request.clear_clientequipmentid() here!!!
-	assert(false);
 	//
 
 	if (m_archRequest != nullptr)
@@ -175,18 +171,6 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 		return;
 	}
 
-	if (m_archRequest->archError() != ArchiveError::Success)
-	{
-		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
-		reply.set_archerror(static_cast<int>(m_archRequest->archError()));
-		reply.set_requestid(requestID);
-		sendReply(reply);
-
-		finalizeArchRequest();
-
-		return;
-	}
-
 	Network::GetAppSignalStatesFromArchiveNextReply& nextReply = m_archRequest->getNextReply();
 
 	sendReply(nextReply);
@@ -236,11 +220,12 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveCancel(const char* reque
 
 void TcpArchRequestsServer::finalizeArchRequest()
 {
-	TEST_PTR_RETURN(m_archRequest);
+	if (m_archRequest != nullptr)
+	{
+		quint32 requestID = m_archRequest->requestID();
 
-	quint32 requestID = m_archRequest->requestID();
+		m_archRequest.reset();
 
-	m_archRequest.reset();
-
-	m_archive->finalizeRequest(requestID);
+		m_archive->finalizeRequest(requestID);
+	}
 }

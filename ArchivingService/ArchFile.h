@@ -51,6 +51,8 @@ private:
 
 #pragma pack(pop)
 
+	class RequestData;
+
 	class Partition
 	{
 	public:
@@ -67,7 +69,9 @@ private:
 
 		bool readRecord(qint64 recordIndex, Record* record);
 
-		ArchFindResult findStartPosition(E::TimeType timeType, qint64 startTime, qint64 endTime);
+		bool read(Record* recordBuffer, int maxRecordsToRead, int* readCount);
+
+		ArchFindResult findStartPosition(RequestData* rd);
 
 		bool close();
 
@@ -101,6 +105,13 @@ private:
 	public:
 		RequestData(ArchFile& archFile, const ArchRequestParam& param);
 
+		PartitionInfo partitionToReadInfo();
+		bool getNextRecord(ArchFile::Record* record);
+		bool gotoNextRecord();
+
+	private:
+		void fillBuffer();
+
 	public:
 		quint32 requestID = 0;
 		E::TimeType timeType = E::TimeType::System;
@@ -113,8 +124,19 @@ private:
 
 		int partitionToReadIndex = -1;
 		Partition partitionToRead;
+		qint64 startRecord = -1;
 
 		ArchFindResult findResult = ArchFindResult::NotFound;
+
+		//
+	private:
+
+		static const int RECORDS_BUFFER_SIZE = 50000;
+
+		Record records[RECORDS_BUFFER_SIZE];
+		int recordsInBuffer = 0;
+		int nextRecordIndex = 0;
+		bool noMoreData = false;
 	};
 
 public:
@@ -145,13 +167,16 @@ public:
 	QString path() const { return m_path; }
 
 	ArchFindResult findData(const ArchRequestParam& param);
+	void finalizeRequest(quint32 requestID);
 
 	void shutdown(qint64 curPartition, qint64* totalFlushedStatesCount);
 
 private:
 	void getArchPartitionsInfo(RequestData* rd);
-	ArchFindResult findStartPosition(RequestData* rd);
-	void cancelRequest(quint32 requestID);
+	void findStartPosition(RequestData* rd);
+
+	RequestData* createRequestData(const ArchRequestParam& param);
+	void clearRequestData(quint32 requestID);
 
 private:
 	Hash m_hash = 0;
@@ -181,6 +206,7 @@ private:
 
 	//
 
+	QMutex m_requestsDataMutex;
 	QHash<quint32, RequestData*> m_requestsData;
 
 	const double QUEUE_EMERGENCY_LIMIT = 0.7;		// 70%
