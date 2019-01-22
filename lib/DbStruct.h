@@ -4,6 +4,7 @@
 #include <memory>
 #include <cassert>
 #include <map>
+#include <functional>
 #include <QString>
 #include <QDateTime>
 #include <QMetaType>
@@ -289,6 +290,8 @@ public:
 
 	int indexInParent(int fileId) const;
 	int indexInParent(const DbFileInfo& fileId) const;
+
+	int calcIf(int startFromFileId, std::function<int(const DbFileInfo&)> pred) const;
 
 	// Modifying structure
 	//

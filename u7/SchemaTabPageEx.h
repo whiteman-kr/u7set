@@ -87,6 +87,7 @@ public:
 	};
 
 	static const int SearchSchemaRole = Qt::UserRole + 1;
+	static const int ExcludedSchemaRole = Qt::UserRole + 2;
 
 private:
 	DbFileInfo m_parentFile;
@@ -139,7 +140,7 @@ protected:
 	void createActions();
 	void createContextMenu();
 
-	//	void timerEvent(QTimerEvent* event) override;
+	virtual void timerEvent(QTimerEvent* event) override;
 
 	// Methods
 	//

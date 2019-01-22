@@ -677,6 +677,28 @@ int DbFileTree::indexInParent(const DbFileInfo& fileInfo) const
 	return indexInParent(fileInfo.fileId());
 }
 
+int DbFileTree::calcIf(int startFromFileId, std::function<int(const DbFileInfo&)> pred) const
+{
+	auto it = m_files.find(startFromFileId);
+	if (it == m_files.end())
+	{
+		assert(it != m_files.end());
+		return 0;
+	}
+
+	const DbFileInfo& file = *it->second;
+
+	int result = pred(file);
+
+	auto fileChildren = children(file);
+	for (auto& child : fileChildren)
+	{
+		result += calcIf(child->fileId(), pred);
+	}
+
+	return result;
+}
+
 void DbFileTree::setRoot(int rootFileId)
 {
 	assert(m_files.count(rootFileId) == 1);

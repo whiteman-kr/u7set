@@ -151,6 +151,8 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 	int fileId = index.internalId();
 	std::shared_ptr<DbFileInfo> file = m_files.file(fileId);
 
+	bool systemFile = db()->isSystemFile(fileId);
+
 	if (file == nullptr)
 	{
 		assert(file);
@@ -180,48 +182,101 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 			return usernameById(file->userId());
 
 		case Columns::IssuesColumn:
-			if (excludedFromBuild(file->fileId()) == true)
 			{
-				return QString("Excluded");
+				if (systemFile == true)
+				{
+					return {};
+				}
+
+				QString result;
+
+				bool excludedThis = false;
+				if (excludedFromBuild(file->fileId()) == true)
+				{
+					excludedThis = true;
+				}
+
+				int excludedCount = m_files.calcIf(file->fileId(),
+													[this](const DbFileInfo& f) -> int
+													{
+														return excludedFromBuild(f.fileId()) ? 1 : 0;
+													});
+
+				Builder::BuildIssues::Counter issues;
+
+				m_files.calcIf(file->fileId(),
+								[&issues](const DbFileInfo& f) -> int
+								{
+									QStringList fn = f.fileName().split('.');
+									if (fn.empty() == false)
+									{
+										auto issueCount = GlobalMessanger::instance().issueForSchema(fn.front());
+										issues.errors += issueCount.errors;
+										issues.warnings += issueCount.warnings;
+									}
+									return 0;
+								});
+
+				if (excludedCount != 0 && excludedThis == true)
+				{
+					excludedCount --;	// match includes file itself
+				}
+
+				if (excludedThis)
+				{
+					result = tr("Excluded");
+				}
+
+				if (excludedCount != 0)
+				{
+					if (result.isEmpty() == false)
+					{
+						result += tr(", + %1 schema(s)").arg(excludedCount);
+					}
+					else
+					{
+						result = tr("Excluded %1 schema(s)").arg(excludedCount);
+					}
+				}
+
+				// -- Issuese
+				//
+				if (issues.errors == 0 && issues.warnings == 0)
+				{
+				}
+
+				if (issues.errors > 0 && issues.warnings == 0)
+				{
+					if (result.isEmpty() == false)
+					{
+						result += ", ";
+					}
+
+					result += QString("ERR: %1").arg(issues.errors);
+				}
+
+				if (issues.errors > 0 && issues.warnings > 0)
+				{
+					if (result.isEmpty() == false)
+					{
+						result += ", ";
+					}
+
+					result += QString("ERR: %1, WRN: %2").arg(issues.errors).arg(issues.warnings);
+				}
+
+				if (issues.errors == 0 && issues.warnings > 0)
+				{
+					if (result.isEmpty() == false)
+					{
+						result += ", ";
+					}
+
+					result += QString("WRN: %2").arg(issues.warnings);
+				}
+
+				return result;
 			}
-
-			int to_do_message_for_childer;
-
-			if (QStringList fn = file->fileName().split('.');
-				fn.isEmpty() == false)
-			{
-				int to_do_issue_counter_for_child_schemas;
-
-				auto issueCount = GlobalMessanger::instance().issueForSchema(fn.front());
-
-				if (issueCount.errors == 0 && issueCount.warnings == 0)
-				{
-					return QString();
-				}
-
-				if (issueCount.errors > 0 && issueCount.warnings == 0)
-				{
-					return QString("ERR: %1").arg(issueCount.errors);
-				}
-
-				if (issueCount.errors > 0 && issueCount.warnings > 0)
-				{
-					return QString("ERR: %1, WRN: %2").arg(issueCount.errors).arg(issueCount.warnings);
-				}
-
-				if (issueCount.errors == 0 && issueCount.warnings > 0)
-				{
-					return QString("WRN: %2").arg(issueCount.warnings);
-				}
-
-				assert(false);
-				return {};
-			}
-			else
-			{
-				assert(fn.isEmpty() == false);		// Empty file name?
-			}
-			return {};
 
 		case Columns::DetailsColumn:
 			return detailsColumnText(file->fileId());
@@ -262,10 +317,10 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 	{
 		if (column == Columns::IssuesColumn)
 		{
-			if (excludedFromBuild(file->fileId()) == true)
-			{
-				return {};
-			}
+//			if (excludedFromBuild(file->fileId()) == true)
+//			{
+//				return {};
+//			}
 
 			QStringList fn = file->fileName().split('.');
 
@@ -320,6 +375,12 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 
 		bool searchResult = details.searchForString(m_searchText);
 		return searchResult;
+	}
+
+	if (role == ExcludedSchemaRole)
+	{
+		bool excluded = excludedFromBuild(file->fileId());
+		return excluded;
 	}
 
 	return QVariant{};
@@ -857,17 +918,14 @@ SchemaFileViewEx::SchemaFileViewEx(DbController* dbc, QWidget* parent) :
 
 	setUniformRowHeights(true);
 	setWordWrap(false);
+	setExpandsOnDoubleClick(false);		// DoubleClick signal is used
 
 	setSortingEnabled(true);
 	sortByColumn(0, Qt::AscendingOrder);
 	//setIndentation(10);
 
-	//	setShowGrid(false);
-	//	setGridStyle(Qt::PenStyle::NoPen);
-
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 	setSelectionBehavior(QAbstractItemView::SelectRows);
-
 
 	// --
 	//
@@ -896,9 +954,9 @@ SchemaFileViewEx::SchemaFileViewEx(DbController* dbc, QWidget* parent) :
 
 	connect(this, &QTreeView::doubleClicked, this, &SchemaFileViewEx::slot_doubleClicked);
 
-//	// Timer for updates of WRN/ERR count
-//	//
-//	startTimer(50);
+	// Timer for updates of WRN/ERR count
+	//
+	startTimer(50);
 
 	// --
 	//
@@ -1055,27 +1113,25 @@ void SchemaFileViewEx::createContextMenu()
 	return;
 }
 
-//void SchemaFileView::timerEvent(QTimerEvent* event)
-//{
-//	QTableView::timerEvent(event);
+void SchemaFileViewEx::timerEvent(QTimerEvent* event)
+{
+	QTreeView::timerEvent(event);
 
-//	int buildIuuseCount = GlobalMessanger::instance()->buildIssues().count();
+	if (int buildIuuseCount = GlobalMessanger::instance().buildIssues().count();
+		buildIuuseCount != m_lastBuildIssueCount)
+	{
+		m_lastBuildIssueCount = buildIuuseCount;
 
-//	if (buildIuuseCount != m_lastBuildIssueCount)
-//	{
-//		m_lastBuildIssueCount = buildIuuseCount;
+		// Update and repaint don't work (((
+		//
+		setUpdatesEnabled(false);
+		setRootIsDecorated(false);
+		setRootIsDecorated(true);
+		setUpdatesEnabled(true);
+	}
 
-//		// Update and repoaint just don't work for me! What the fucking fuck!?
-//		// So setShowGrid to tru then false is used to repaint and update data of build issues
-//		//
-//		// update(vr);
-//		// repaint(vr);
-//		setShowGrid(true);
-//		setShowGrid(false);
-//	}
-
-//	return;
-//}
+	return;
+}
 
 std::vector<DbFileInfo> SchemaFileViewEx::selectedFiles() const
 {
@@ -1279,42 +1335,31 @@ void SchemaFileViewEx::slot_doubleClicked(const QModelIndex& index)
 		return;
 	}
 
-	if (dbc()->isSystemFile(file.fileId()) == true)
-	{
-		this->blockSignals(true);			// To prevent call of this function again
+	// Open on double click confuses!!!
+	// So, for now default action - expand
+	//
+	QModelIndex column0Index = index.siblingAtColumn(0);
+	setExpanded(column0Index, !isExpanded(column0Index));
 
-		QTreeView::doubleClicked(index);	// Default action for system files
-
-		this->blockSignals(false);
-		return;
-	}
-
-	if (file.state() == VcsState::CheckedOut)
-	{
-		emit openFileSignal(file);
-	}
-	else
-	{
-		emit viewFileSignal(file);
-	}
-
-	return;
-}
-
-//void SchemaFileView::slot_properties()
-//{
-//	std::vector<DbFileInfo> selectedFiles;
-//	getSelectedFiles(&selectedFiles);
-
-//	if (selectedFiles.empty() == true)
+//	if (dbc()->isSystemFile(file.fileId()) == true)
 //	{
+//		this->blockSignals(true);			// To prevent call of this function again
+//		QTreeView::doubleClicked(index);	// Default action for system files
+//		this->blockSignals(false);
 //		return;
 //	}
 
-//	emit editSchemasProperties(selectedFiles);
+//	if (file.state() == VcsState::CheckedOut)
+//	{
+//		emit openFileSignal(file);
+//	}
+//	else
+//	{
+//		emit viewFileSignal(file);
+//	}
 
-//	return;
-//}
+	return;
+}
 
 void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
@@ -1429,88 +1474,6 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 
 	return;
 }
-
-//void SchemaFileView::filesViewSelectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
-//{
-//	QModelIndexList	s = selectionModel()->selectedRows();
-
-//	bool hasOpenPossibility = false;
-//	int hasViewPossibility = false;
-//	bool hasCheckOutPossibility = false;
-//	bool hasCheckInPossibility = false;
-//	bool hasUndoPossibility = false;
-//	bool canGetWorkcopy = false;
-//	int canSetWorkcopy = 0;
-//	bool schemaPoperties = (s.empty() == false);
-
-//	int currentUserId = db()->currentUser().userId();
-//	bool currentUserIsAdmin = db()->currentUser().isAdminstrator();
-
-//	for (auto i = s.begin(); i != s.end(); ++i)
-//	{
-//		const std::shared_ptr<DbFileInfo> fileInfo = filesModel().fileByRow(i->row());
-
-//		// hasViewPossibility -- almost any file SINGLE can be opened
-//		//
-//		hasViewPossibility ++;
-
-//		// hasOpenPossibility -- almost any file can be opened
-//		//
-//		if (fileInfo->state() == VcsState::CheckedOut && fileInfo->userId() == currentUserId)
-//		{
-//			hasOpenPossibility = true;
-//		}
-
-//		// hasCheckInPossibility
-//		//
-//		if (fileInfo->state() == VcsState::CheckedOut &&
-//			(fileInfo->userId() == currentUserId  || currentUserIsAdmin == true))
-//		{
-//			hasCheckInPossibility = true;
-//		}
-
-//		// hasUndoPossibility
-//		//
-//		if (fileInfo->state() == VcsState::CheckedOut &&
-//			(fileInfo->userId() == currentUserId || currentUserIsAdmin == true))
-//		{
-//			hasUndoPossibility = true;
-//		}
-
-//		// hasCheckOutPossibility
-//		//
-//		if (fileInfo->state() == VcsState::CheckedIn)
-//		{
-//			hasCheckOutPossibility = true;
-//		}
-
-//		// canGetWorkcopy, canSetWorkcopy
-//		//
-//		if (fileInfo->state() == VcsState::CheckedOut && fileInfo->userId() == currentUserId)
-//		{
-//			canGetWorkcopy = true;
-//			canSetWorkcopy ++;
-//		}
-//	}
-
-//	m_openFileAction->setEnabled(hasOpenPossibility);
-//	m_viewFileAction->setEnabled(hasViewPossibility == 1);
-//	m_cloneFileAction->setEnabled(hasViewPossibility == 1);
-
-//	m_checkOutAction->setEnabled(hasCheckOutPossibility);
-//	m_checkInAction->setEnabled(hasCheckInPossibility);
-//	m_undoChangesAction->setEnabled(hasUndoPossibility);
-//	m_historyAction->setEnabled(s.size() == 1);
-//	m_compareAction->setEnabled(s.size() == 1);
-
-//	m_exportWorkingcopyAction->setEnabled(canGetWorkcopy);
-//	m_importWorkingcopyAction->setEnabled(canSetWorkcopy == 1);			// can set work copy just for one file
-
-//	m_propertiesAction->setEnabled(schemaPoperties);
-
-//	return;
-//}
-
 
 SchemaListModelEx& SchemaFileViewEx::filesModel()
 {

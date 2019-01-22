@@ -196,8 +196,14 @@ namespace VFrame30
 	{
 	public:
 		BusSet() = default;
+		BusSet(const BusSet&) = default;
+		BusSet(BusSet&&) = default;
+		BusSet& operator=(const BusSet&) = default;
+		BusSet& operator=(BusSet&&) = default;
+		~BusSet() = default;
 
 	public:
+		void clear();
 		bool hasBus(QString busTypeId) const;
 
 		const VFrame30::Bus& bus(QString busTypeId) const;

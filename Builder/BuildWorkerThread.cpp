@@ -930,6 +930,8 @@ namespace Builder
 			return false;
 		}
 
+		out->clear();
+
 		// Get Busses
 		//
 		std::vector<DbFileInfo> fileList;
@@ -938,6 +940,11 @@ namespace Builder
 		if (ok == false)
 		{
 			return false;
+		}
+
+		if (fileList.empty() == true)
+		{
+			return true;
 		}
 
 		// Get Busses latest version from the DB
