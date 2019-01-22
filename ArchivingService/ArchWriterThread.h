@@ -3,9 +3,7 @@
 #include "../lib/AppSignal.h"
 #include "../lib/CircularLogger.h"
 #include "../lib/WUtils.h"
-
 #include "Archive.h"
-#include "ArchFile.h"
 
 class ArchWriterThread : public RunOverrideThread
 {

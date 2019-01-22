@@ -8,12 +8,107 @@
 #include "../lib/Hash.h"
 #include "../lib/Queue.h"
 #include "../lib/SocketIO.h"
-
 #include "../Proto/network.pb.h"
+#include "ArchFile.h"
 
-#include "Archive.h"
+class ArchRequestParam
+{
+public:
+	ArchRequestParam(quint32 requestID, E::TimeType timeType, qint64 startTime, qint64 endTime, const QVector<Hash>& signalHashes);
 
-class ArchRequestParam;
+	quint32 requestID() const { return m_requestID; }
+
+	E::TimeType timeType() const { return m_timeType; }
+	void setTimeType(E::TimeType timeType) { m_timeType = timeType; }
+
+	qint64 startTime() const { return m_startTime; }
+	void setStartTime(qint64 startTime) { m_startTime = startTime; }
+
+	qint64 endTime() const { return m_endTime; }
+	void setEndTime(qint64 endTime) { m_endTime = endTime; }
+
+	const QVector<Hash>& signalHashes() const { return m_signalHashes; }
+
+	void expandTimes(qint64 expandTime);
+
+	QString print();
+
+private:
+	quint32 m_requestID = 0;
+
+	E::TimeType m_timeType = E::TimeType::System;
+
+	qint64 m_startTime = 0;
+	qint64 m_endTime = 0;
+
+	QVector<Hash> m_signalHashes;
+};
+
+class ArchFileRequestData
+{
+public:
+	struct PartitionInfo
+	{
+		QString fileName;
+		QDateTime date;
+		qint64 startTime;
+	};
+
+public:
+	ArchFileRequestData(const ArchFile& archFile, const ArchRequestParam& param);
+	~ArchFileRequestData();
+
+	void findData();
+
+	PartitionInfo partitionToReadInfo();
+	bool getRecord(ArchFileRecord* record);
+	bool gotoNextRecord();
+
+	bool hasData() { return m_hasData; }
+
+	qint64 startTime() const { return m_startTime; }
+
+	ArchFindResult findResult() const { return m_findResult; }
+
+private:
+	void getArchPartitionsInfo();
+	void findStartPosition();
+
+	bool fillBuffer();
+
+private:
+	QString m_archFilePath;
+	QString m_appSignalID;
+	quint32 m_requestID = 0;
+	E::TimeType m_timeType = E::TimeType::System;
+	qint64 m_startTime = 0;
+	qint64 m_endTime = 0;
+
+	//
+
+	QVector<PartitionInfo> m_partitionsInfo;
+
+	int m_partitionToReadIndex = -1;
+	ArchFilePartition m_partitionToRead;
+	qint64 m_startRecord = -1;
+
+	ArchFindResult m_findResult = ArchFindResult::NotFound;
+
+	//
+
+	static const int RECORDS_BUFFER_SIZE = 50000;
+
+	ArchFileRecord* m_readBuffer = nullptr;
+	int m_recordsInBuffer = 0;
+	int m_nextRecordIndex = 0;
+	bool m_hasData = true;
+};
+
+inline bool operator < (const ArchFileRequestData::PartitionInfo& p1, const ArchFileRequestData::PartitionInfo& p2) { return p1.startTime < p2.startTime; }
+
+//
+
+class Archive;
 
 class ArchRequest : public RunOverrideThread
 {
@@ -52,8 +147,8 @@ private:
 	bool isNextDataRequired() { return m_nextDataRequired.load(); }
 	void resetNextDataRequired() { m_nextDataRequired.store(false); }
 
-	void prepareFiles();
-	ArchFindResult findData();
+	void prepareArchRequestData();
+	bool findData();
 	void getNextData();
 
 	void reportError();
@@ -66,28 +161,34 @@ private:
 
 	void setDataReady() { m_dataReady.store(true); }
 
-//	E::TimeType timeType() const { return m_param.timeType; }
-
-//	qint64 startTime() const { return m_param.startTime; }
 	QString startTimeStr() const { return TimeStamp(m_param.startTime()).toDateTime().toString("yyyy-MM-dd HH:mm:ss"); }
-
-//	qint64 endTime() const { return m_param.endTime; }
 	QString endTimeStr() const { return TimeStamp(m_param.endTime()).toDateTime().toString("yyyy-MM-dd HH:mm:ss"); }
 
-//	const QVector<Hash>& signalHashes() const { return m_param.signalHashes; }
+private:
 
-protected:
+	struct ArchFileData
+	{
+		bool hasMoreData = false;
+
+		ArchFileRecord record;
+		qint64 recordTime = 0;
+	};
+
+private:
 	Archive& m_archive;
 	ArchRequestParam m_param;
 	CircularLoggerShared m_logger;
-	qint64 m_startTime;
+	qint64 m_startTime = 0;
 
 	//
 
 	ArchRequestParam m_execParam;
 
-	QHash<Hash, ArchFile*> m_archFiles;
-	QVector<ArchFile*> m_archFilesArray;
+	QHash<Hash, ArchFileRequestData*> m_requestData;
+	QVector<ArchFileRequestData*> m_requestDataArray;
+	QVector<ArchFileRequestData*> m_filesWithData;
+	QVector<ArchFileData> m_fileData;
+	bool m_firstCallOfGetNextData = true;
 
 	std::atomic<bool> m_nextDataRequired = { false };
 	std::atomic<bool> m_dataReady = { false };

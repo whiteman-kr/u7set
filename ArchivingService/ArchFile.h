@@ -5,140 +5,95 @@
 #include "../lib/Crc16.h"
 #include "../lib/SimpleThread.h"
 
-#include "Archive.h"
-
-class ArchRequestParam;
-
-class ArchFile
-{
-public:
-	class PartitionInfo
-	{
-	public:
-		QString fileName;
-		QDateTime date;
-		qint64 startTime;
-	};
-
-private:
 #pragma pack(push, 1)
 
-	struct Record
+struct ArchFileRecord
+{
+	struct
 	{
-		struct
-		{
 //			qint64 archID;
-			qint64 systemTime;
-			qint64 plantTime;
+		qint64 systemTime;
+		qint64 plantTime;
 
-			AppSignalStateFlags flags;
-			double value;
-		} state;
+		AppSignalStateFlags flags;
+		double value;
+	} state;
 
-		quint16 crc16;
+	quint16 crc16;
 
-		void calcCRC16() { crc16 = calcCrc16(&state, sizeof(state)); }
-		bool isValid() const;
+	void calcCRC16() { crc16 = calcCrc16(&state, sizeof(state)); }
+	bool isValid() const;
 
-		bool timeLessThen(E::TimeType timeType, qint64 time);
-		bool timeLessOrEqualThen(E::TimeType timeType, qint64 time);
+	bool timeLessThen(E::TimeType timeType, qint64 time);
+	bool timeLessOrEqualThen(E::TimeType timeType, qint64 time);
 
-		bool timeGreateThen(E::TimeType timeType, qint64 time);
-		bool timeGreateOrEqualThen(E::TimeType timeType, qint64 time);
+	bool timeGreateThen(E::TimeType timeType, qint64 time);
+	bool timeGreateOrEqualThen(E::TimeType timeType, qint64 time);
 
-		qint64 getTime(E::TimeType timeType);
-	};
+	qint64 getTime(E::TimeType timeType);
+};
 
 #pragma pack(pop)
 
-	class RequestData;
+enum class ArchFindResult
+{
+	NotFound,
+	Found,
 
-	class Partition
-	{
-	public:
-		Partition(const ArchFile& archFile, bool writable);
-		virtual ~Partition();
+	SearchError
+};
 
-		qint64 recordsCount();
+class ArchFilePartition
+{
+public:
+	ArchFilePartition();
 
-		bool write(qint64 partitionSystemTime, Record* buffer, int statesCount, qint64* totalFushedStatesCount);
+	void init(const QString& archFilePath, bool writable);
 
-		bool openForReading(qint64 partitionSystemTime);
+	virtual ~ArchFilePartition();
 
-		bool getFirstAndLastRecords(Record* first, Record* last, bool* noRecords);
+	qint64 recordsCount();
 
-		bool readRecord(qint64 recordIndex, Record* record);
+	bool write(qint64 partitionSystemTime, ArchFileRecord* buffer, int statesCount, qint64* totalFushedStatesCount);
 
-		bool read(Record* recordBuffer, int maxRecordsToRead, int* readCount);
+	//
 
-		ArchFindResult findStartPosition(RequestData* rd);
+	bool openForReading(qint64 partitionSystemTime);
+	bool getFirstAndLastRecords(ArchFileRecord* first, ArchFileRecord* last, bool* noRecords);
+	bool readRecord(qint64 recordIndex, ArchFileRecord* record);
+	bool read(ArchFileRecord* recordBuffer, int maxRecordsToRead, int* readCount);
 
-		bool close();
+	ArchFindResult findStartPosition(E::TimeType timeType, qint64 startTime, qint64 endTime, qint64* startRecord);
 
-	private:
-		QString getFileName(qint64 partitionStartTime);
+	bool close();
 
-		void moveToRecord(qint64 record);
-		ArchFindResult binarySearch(E::TimeType timeType, qint64 time, qint64* startPosition);
+private:
+	QString getFileName(qint64 partitionStartTime);
 
-		void closeFile();
+	void moveToRecord(qint64 record);
+	ArchFindResult binarySearch(E::TimeType timeType, qint64 time, qint64* startPosition);
 
-	private:
-		const ArchFile& m_archFile;
-		bool m_isWritable = false;
+	void closeFile();
 
-		QFile m_file;
+private:
+	QString m_archFilePath;
+	bool m_isWritable = false;
 
-		bool m_pathIsExists = false;
-		bool m_fileIsAligned = false;	// partition's file is aligned on sizeof(Record)
+	QFile m_file;
 
-		qint64 m_startTime = -1;		// system start time of partition (acquired from partition's file name)
-		qint64 m_size = -1;				// partition's file size in Bytes (multiple to sizeof(Record))
-		qint64 m_recordCount = -1;		// partition's record count
+	bool m_pathIsExists = false;
+	bool m_fileIsAligned = false;	// partition's file is aligned on sizeof(Record)
 
-		static const qint64 FIRST_RECORD = 0;
-		static const qint64 LAST_RECORD = -1;
-	};
+	qint64 m_startTime = -1;		// system start time of partition (acquired from partition's file name)
+	qint64 m_size = -1;				// partition's file size in Bytes (multiple to sizeof(Record))
+	qint64 m_recordCount = -1;		// partition's record count
 
-	class RequestData
-	{
-	public:
-		RequestData(ArchFile& archFile, const ArchRequestParam& param);
+	static const qint64 FIRST_RECORD = 0;
+	static const qint64 LAST_RECORD = -1;
+};
 
-		PartitionInfo partitionToReadInfo();
-		bool getNextRecord(ArchFile::Record* record);
-		bool gotoNextRecord();
-
-	private:
-		void fillBuffer();
-
-	public:
-		quint32 requestID = 0;
-		E::TimeType timeType = E::TimeType::System;
-		qint64 startTime = 0;
-		qint64 endTime = 0;
-
-		//
-
-		QVector<PartitionInfo> partitionsInfo;
-
-		int partitionToReadIndex = -1;
-		Partition partitionToRead;
-		qint64 startRecord = -1;
-
-		ArchFindResult findResult = ArchFindResult::NotFound;
-
-		//
-	private:
-
-		static const int RECORDS_BUFFER_SIZE = 50000;
-
-		Record records[RECORDS_BUFFER_SIZE];
-		int recordsInBuffer = 0;
-		int nextRecordIndex = 0;
-		bool noMoreData = false;
-	};
-
+class ArchFile
+{
 public:
 	ArchFile(const Proto::ArchSignal& protoArchSignal);
 	~ArchFile();
@@ -166,17 +121,10 @@ public:
 	bool isEmergency() const;
 	QString path() const { return m_path; }
 
-	ArchFindResult findData(const ArchRequestParam& param);
-	void finalizeRequest(quint32 requestID);
-
 	void shutdown(qint64 curPartition, qint64* totalFlushedStatesCount);
 
-private:
-	void getArchPartitionsInfo(RequestData* rd);
-	void findStartPosition(RequestData* rd);
-
-	RequestData* createRequestData(const ArchRequestParam& param);
-	void clearRequestData(quint32 requestID);
+public:
+	static const QString EXTENSION;
 
 private:
 	Hash m_hash = 0;
@@ -196,18 +144,13 @@ private:
 
 	//
 
-	Partition m_writablePartition;
+	ArchFilePartition m_writablePartition;
 
-	FastQueue<Record>* m_queue = nullptr;
+	FastQueue<ArchFileRecord>* m_queue = nullptr;
 
 	std::atomic<bool> m_requiredImmediatelyFlushing = { false };
 
 	SimpleMutex m_flushMutex;
-
-	//
-
-	QMutex m_requestsDataMutex;
-	QHash<quint32, RequestData*> m_requestsData;
 
 	const double QUEUE_EMERGENCY_LIMIT = 0.7;		// 70%
 	const double QUEUE_EXPAND_LIMIT = 0.9;			// 90%
@@ -215,10 +158,5 @@ private:
 	static const int QUEUE_MIN_SIZE = 20;
 	static const int QUEUE_MAX_SIZE = 1280;			// 20 * 2^6
 
-	static Record m_buffer[QUEUE_MAX_SIZE];
-
-	static const QString EXTENSION;
+	static ArchFileRecord m_buffer[QUEUE_MAX_SIZE];
 };
-
-inline bool operator < (const ArchFile::PartitionInfo& p1, const ArchFile::PartitionInfo& p2) { return p1.startTime < p2.startTime; }
-

@@ -11,51 +11,9 @@
 #include "../lib/Types.h"
 #include "../lib/Queue.h"
 #include "../lib/AppSignal.h"
+#include "ArchRequest.h"
 
-class ArchRequest;
 class ArchWriterThread;
-class ArchFile;
-
-class ArchRequestParam
-{
-public:
-	ArchRequestParam(quint32 requestID, E::TimeType timeType, qint64 startTime, qint64 endTime, const QVector<Hash>& signalHashes);
-
-	quint32 requestID() const { return m_requestID; }
-
-	E::TimeType timeType() const { return m_timeType; }
-	void setTimeType(E::TimeType timeType) { m_timeType = timeType; }
-
-	qint64 startTime() const { return m_startTime; }
-	void setStartTime(qint64 startTime) { m_startTime = startTime; }
-
-	qint64 endTime() const { return m_endTime; }
-	void setEndTime(qint64 endTime) { m_endTime = endTime; }
-
-	const QVector<Hash>& signalHashes() const { return m_signalHashes; }
-
-	void expandTimes(qint64 expandTime);
-
-	QString print();
-
-private:
-	quint32 m_requestID = 0;
-
-	E::TimeType m_timeType = E::TimeType::System;
-
-	qint64 m_startTime = 0;
-	qint64 m_endTime = 0;
-
-	QVector<Hash> m_signalHashes;
-};
-
-enum class ArchFindResult
-{
-	NotFound,
-	Found,
-
-	SearchError
-};
 
 class Archive
 {
