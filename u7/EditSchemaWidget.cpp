@@ -5301,15 +5301,15 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 
 	// Get User Functional Block List
 	//
-	std::vector<DbFileInfo> fileList;
+	DbFileTree filesTree;
 
-	int to_do_getFileList_make_recursive;
-
-	bool ok = db()->getFileList(&fileList, db()->ufblFileId(), QString(".") + UfbFileExtension, true, this);
+	bool ok = db()->getFileListTree(&filesTree, db()->ufblFileId(), QString(".") + UfbFileExtension, true, this);
 	if (ok == false)
 	{
 		return false;
 	}
+
+	std::vector<DbFileInfo> fileList = filesTree.toVector(true);
 
 	// Get UFBs where LmDescriptionFile same with this chema
 	//
@@ -5318,7 +5318,7 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 
 	if (schema()->isLogicSchema() == true)
 	{
-		for (const DbFileInfo& fi : fileList)
+		for (const auto& fi : fileList)
 		{
 			VFrame30::SchemaDetails details(fi.details());
 
@@ -5402,14 +5402,25 @@ bool EditSchemaWidget::loadBusses(DbController* db, std::vector<VFrame30::Bus>* 
 
 	// Get Busses
 	//
-	std::vector<DbFileInfo> fileList;
+	DbFileTree filesTree;
 
-	int to_do_getFileList_make_recursive;
-
-	bool ok = db->getFileList(&fileList, db->busTypesFileId(), ::BusFileExtension, true, parentWidget);
+	bool ok = db->getFileListTree(&filesTree, db->busTypesFileId(), QString(".") + ::BusFileExtension, true, parentWidget);
 	if (ok == false)
 	{
 		return false;
+	}
+
+	const auto& fileMap = filesTree.files();
+
+	std::vector<DbFileInfo> fileList;
+	fileList.reserve(fileMap.size());
+
+	for (auto&[fileId, fileInfo] : fileMap)
+	{
+		if (fileId != db->busTypesFileId())
+		{
+			fileList.push_back(*fileInfo);
+		}
 	}
 
 	if (fileList.empty() == true)

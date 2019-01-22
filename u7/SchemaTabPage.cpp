@@ -1378,8 +1378,8 @@ SchemaControlTabPage::SchemaControlTabPage(QString fileExt,
 
 	if (schema->isLogicSchema() == true)
 	{
-		connect(&GlobalMessanger::instance(), &GlobalMessanger::addLogicSchema, this, &SchemaControlTabPage::addLogicSchema);
-		connect(&GlobalMessanger::instance(), &GlobalMessanger::searchSchemaForLm, this, &SchemaControlTabPage::searchSchemaForLm);
+		//connect(&GlobalMessanger::instance(), &GlobalMessanger::addLogicSchema, this, &SchemaControlTabPage::addLogicSchema);
+		//connect(&GlobalMessanger::instance(), &GlobalMessanger::searchSchemaForLm, this, &SchemaControlTabPage::searchSchemaForLm);
 	}
 
 	return;
@@ -1922,7 +1922,7 @@ void SchemaControlTabPage::openFiles(std::vector<DbFileInfo> files)
 		return;
 	}
 
-	connect(&GlobalMessanger::instance(), &GlobalMessanger::buildStarted, editTabPage, &EditSchemaTabPage::saveWorkcopy);
+	//connect(&GlobalMessanger::instance(), &GlobalMessanger::buildStarted, editTabPage, &EditSchemaTabPage::saveWorkcopy);
 
 	// --
 	//

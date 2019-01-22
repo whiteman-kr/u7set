@@ -192,12 +192,16 @@ namespace Builder
 		}
 		else
 		{
-			 result = db->getFileList(&fileList, parentFileId, fileExtension, true, nullptr);
-			 if (result == false)
-			 {
-				 log->errPDB2001(parentFileId, fileExtension, db->lastError());
-				 return false;
-			 }
+			DbFileTree filesTree;
+
+			result = db->getFileListTree(&filesTree, parentFileId, fileExtension, true, nullptr);
+			if (result == false)
+			{
+				log->errPDB2001(parentFileId, fileExtension, db->lastError());
+				return false;
+			}
+
+			fileList = filesTree.toVector(true);
 		}
 
 		// Get file instance and parse it

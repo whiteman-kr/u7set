@@ -61,7 +61,6 @@ protected slots:
 	void showSettings();
 
 	void runConfigurator();
-	void showUfbLibraryTabPage(bool show);
 	void runSubsystemListEditor();
     void runConnectionsEditor();
 	void runBusEditor();
@@ -90,7 +89,6 @@ private:
 	QAction* m_logAction = nullptr;
 	QAction* m_settingsAction = nullptr;
 
-	QAction* m_ufbLibraryAction = nullptr;
 	QAction* m_subsystemListEditorAction = nullptr;
     QAction* m_connectionsEditorAction = nullptr;
 	QAction* m_busEditorAction = nullptr;
@@ -109,13 +107,9 @@ private:
 	EquipmentTabPage* m_equipmentTab = nullptr;
 	SignalsTabPage* m_signalsTab = nullptr;
 	SchemasTabPageEx* m_editSchemaTabPage = nullptr;
-	SchemasTabPage* m_logicSchema = nullptr;
-	SchemasTabPage* m_ufbLibrary = nullptr;
-	SchemasTabPage* m_monitorSchema = nullptr;
 	BuildTabPage* m_buildTabPage = nullptr;
 	UploadTabPage* m_uploadTabPage = nullptr;
 	SimulatorTabPage* m_simulatorTabPage = nullptr;
-	//SchemasTabPage* m_diagSchema = nullptr;
 
 	DbController* m_dbController = nullptr;
 

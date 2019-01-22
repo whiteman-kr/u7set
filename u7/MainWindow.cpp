@@ -61,33 +61,6 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	m_filesTabPage = new FilesTabPage(dbController(), nullptr);
 	m_filesTabPage->setWindowTitle(tr("Files"));
 
-	m_logicSchema = SchemasTabPage::create<VFrame30::LogicSchema>(
-						dbController(),
-						nullptr,
-						::AlFileExtension,
-						::AlFileName,
-						::AlTemplExtension,
-						tr("AppLogic"));
-
-	m_ufbLibrary = SchemasTabPage::create<VFrame30::UfbSchema>(
-					   dbController(),
-					   nullptr,
-					   ::UfbFileExtension,
-					   ::UfblFileName,
-					   ::UfbTemplExtension,
-					   tr("UFB Library"));
-	m_ufbLibrary->setWindowTitle(tr("UFB Library"));
-
-	m_monitorSchema = SchemasTabPage::create<VFrame30::MonitorSchema>(
-						  dbController(),
-						  nullptr,
-						  ::MvsFileExtension,
-						  ::MvsFileName,
-						  ::MvsTemplExtension,
-						  tr("Control"));
-
-	m_editSchemaTabPage = new SchemasTabPageEx{db(), this};
-
 	getCentralWidget()->addTabPage(m_projectsTab, tr("Projects"));
 	getCentralWidget()->addTabPage(m_equipmentTab, tr("Equipment"));
 	getCentralWidget()->addTabPage(m_signalsTab, tr("Application Signals"));
@@ -95,12 +68,8 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	m_filesTabPageIndex = getCentralWidget()->addTabPage(m_filesTabPage, m_filesTabPage->windowTitle());
 	getCentralWidget()->removeTab(m_filesTabPageIndex);	// It will be added in projectOpened slot if required
 
-	//m_diagSchema = SchemasTabPage::create<VFrame30::DiagSchema>(DvsFileExtension, dbController(), DvsFileName, nullptr);
-
-	getCentralWidget()->addTabPage(m_editSchemaTabPage, tr("Application Logic Ex"));
-	getCentralWidget()->addTabPage(m_logicSchema, tr("Application Logic"));
-	getCentralWidget()->addTabPage(m_monitorSchema, tr("Monitor Schemas"));
-	//getCentralWidget()->addTabPage(m_diagSchema, tr("Diag Schemas"));
+	m_editSchemaTabPage = new SchemasTabPageEx{db(), this};
+	getCentralWidget()->addTabPage(m_editSchemaTabPage, tr("Schemas"));
 
 	m_buildTabPage = new BuildTabPage(dbController(), nullptr);
 	getCentralWidget()->addTabPage(m_buildTabPage, tr("Build"));
@@ -124,11 +93,6 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 MainWindow::~MainWindow()
 {
 	qDebug() << Q_FUNC_INFO;
-
-	if (m_ufbLibrary->parent() == nullptr)
-	{
-		delete m_ufbLibrary;
-	}
 }
 
 void MainWindow::closeEvent(QCloseEvent* e)
@@ -257,12 +221,6 @@ void MainWindow::createActions()
 	m_settingsAction->setEnabled(true);
 	connect(m_settingsAction, &QAction::triggered, this, &MainWindow::showSettings);
 
-	m_ufbLibraryAction = new QAction(tr("UFB Library..."), this);
-	m_ufbLibraryAction->setStatusTip(tr("Run UFB Library Editor"));
-	m_ufbLibraryAction->setEnabled(false);
-	m_ufbLibraryAction->setCheckable(true);
-	connect(m_ufbLibraryAction, &QAction::toggled, this, &MainWindow::showUfbLibraryTabPage);
-
 	m_subsystemListEditorAction = new QAction(tr("Subsystems..."), this);
 	m_subsystemListEditorAction->setStatusTip(tr("Run Subsystem List Editor"));
 	m_subsystemListEditorAction->setEnabled(false);
@@ -346,7 +304,6 @@ void MainWindow::createMenus()
 	//
 	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
 
-	pToolsMenu->addAction(m_ufbLibraryAction);
 	pToolsMenu->addAction(m_subsystemListEditorAction);
 	pToolsMenu->addAction(m_connectionsEditorAction);
 	pToolsMenu->addAction(m_busEditorAction);
@@ -450,49 +407,6 @@ void MainWindow::runConfigurator()
 {
 }
 
-void MainWindow::showUfbLibraryTabPage(bool show)
-{
-	qDebug() << "Show Ufb Library TabPage, show = " << show;
-
-	if (m_ufbLibrary == nullptr ||
-		m_logicSchema == nullptr)
-	{
-		assert(m_logicSchema);
-		assert(m_ufbLibrary);
-		return;
-	}
-
-	if (show == true)
-	{
-		// Add m_ufbLibrary to TabPage after AppSchema
-		//
-		int logicSchemaTabIndex = getCentralWidget()->indexOf(m_logicSchema);
-
-		if (logicSchemaTabIndex == -1)
-		{
-			assert(logicSchemaTabIndex != -1);
-			return;
-		}
-
-		getCentralWidget()->insertTab(logicSchemaTabIndex + 1, m_ufbLibrary, m_ufbLibrary->windowTitle());
-		getCentralWidget()->setCurrentWidget(m_ufbLibrary);
-	}
-	else
-	{
-		int tabIndex = getCentralWidget()->indexOf(m_ufbLibrary);
-
-		if (tabIndex == -1)
-		{
-			assert(tabIndex != -1);
-			return;
-		}
-
-		getCentralWidget()->removeTab(tabIndex);
-	}
-
-	return;
-}
-
 void MainWindow::runSubsystemListEditor()
 {
 	if (dbController()->isProjectOpened() == false)
@@ -550,14 +464,6 @@ void MainWindow::updateUfbsAfbsBusses()
 		return;
 	}
 
-	if (m_ufbLibrary == nullptr ||
-		m_logicSchema == nullptr)
-	{
-		assert(m_logicSchema);
-		assert(m_ufbLibrary);
-		return;
-	}
-
 	QMessageBox mb(this);
 	mb.setText(tr("Update schemas AFBs/UFBs/Bussus."));
 	mb.setInformativeText(tr("To perform operation all Application Logic and UFB schemas must be checked in."));
@@ -572,8 +478,7 @@ void MainWindow::updateUfbsAfbsBusses()
 		return;
 	}
 
-	showUfbLibraryTabPage(true);
-	GlobalMessanger::instance().fireChangeCurrentTab(m_logicSchema);
+	GlobalMessanger::instance().fireChangeCurrentTab(m_editSchemaTabPage);
 
 	// Get Busses
 	//
@@ -589,8 +494,10 @@ void MainWindow::updateUfbsAfbsBusses()
 	//
 	QStringList checkedOutFiles;
 
-	std::vector<DbFileInfo>	ufbSchemaFileInfos;
-	db()->getFileList(&ufbSchemaFileInfos, db()->ufblFileId(), QLatin1String(".") + ::UfbFileExtension, true, this);
+	DbFileTree filesTree;
+	db()->getFileListTree(&filesTree, db()->ufblFileId(), QLatin1String(".") + ::UfbFileExtension, true, this);
+
+	std::vector<DbFileInfo>	ufbSchemaFileInfos = filesTree.toVector(true);
 
 	for (const DbFileInfo& f : ufbSchemaFileInfos)
 	{
@@ -602,8 +509,10 @@ void MainWindow::updateUfbsAfbsBusses()
 
 	// Get ApplicationLogic schema list
 	//
-	std::vector<DbFileInfo>	alSchemaFileInfos;
-	db()->getFileList(&alSchemaFileInfos, db()->alFileId(), QLatin1String(".") + ::AlFileExtension, true, this);
+	filesTree.clear();
+	db()->getFileListTree(&filesTree, db()->alFileId(), QLatin1String(".") + ::AlFileExtension, true, this);
+
+	std::vector<DbFileInfo>	alSchemaFileInfos = filesTree.toVector(true);
 
 	for (const DbFileInfo& f : alSchemaFileInfos)
 	{
@@ -846,14 +755,9 @@ void MainWindow::updateUfbsAfbsBusses()
 
 	// Refresh view
 	//
-	if (m_logicSchema != nullptr)
+	if (m_editSchemaTabPage != nullptr)
 	{
-		m_logicSchema->refreshControlTabPage();
-	}
-
-	if (m_ufbLibrary != nullptr)
-	{
-		m_ufbLibrary->refreshControlTabPage();
+		m_editSchemaTabPage->refreshControlTabPage();
 	}
 
 	return;
@@ -935,12 +839,10 @@ void MainWindow::projectOpened(DbProject project)
 	assert(m_usersAction != nullptr);
 
 	m_usersAction->setEnabled(true);
-	m_ufbLibraryAction->setEnabled(true);
 	m_subsystemListEditorAction->setEnabled(true);
     m_connectionsEditorAction->setEnabled(true);
 	m_busEditorAction->setEnabled(true);
 	m_updateUfbsAfbs->setEnabled(true);
-
 
 	// Status bar
 	//
@@ -967,7 +869,6 @@ void MainWindow::projectClosed()
 	assert(m_usersAction != nullptr);
 
 	m_usersAction->setEnabled(false);
-	m_ufbLibraryAction->setEnabled(false);
 	m_subsystemListEditorAction->setEnabled(false);
     m_connectionsEditorAction->setEnabled(false);
 	m_busEditorAction->setEnabled(false);

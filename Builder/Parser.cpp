@@ -2752,10 +2752,18 @@ namespace Builder
 		// Get application logic file list from the DB
 		//
 		bool ok = false;
-		std::vector<DbFileInfo> fileList;
+		DbFileTree filesTree;
 
-		ok = db->getFileList(&fileList, parentFileId, filter, true, nullptr);
+		ok = db->getFileListTree(&filesTree, parentFileId, filter, true, nullptr);
+		if (ok == false)
+		{
+			return false;
+		}
 
+		std::vector<DbFileInfo> fileList = filesTree.toVector(true);
+
+		// --
+		//
 		std::vector<DbFileInfo> markedAsDeletedRemoved;
 		markedAsDeletedRemoved.reserve(fileList.size());
 

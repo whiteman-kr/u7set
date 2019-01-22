@@ -1,5 +1,6 @@
 #include "MonitorSchema.h"
 #include "Settings.h"
+#include "SchemaItemValue.h"
 
 namespace VFrame30
 {
@@ -31,7 +32,40 @@ namespace VFrame30
 
 	QStringList MonitorSchema::getSignalList() const
 	{
+		std::set<QString> signalMap;	// signal ids can be duplicated, std::set removes dupilcates
+
+		for (std::shared_ptr<SchemaLayer> layer : Layers)
+		{
+			// Get all signals
+			//
+			for (std::shared_ptr<SchemaItem> item : layer->Items)
+			{
+				if (item->isType<VFrame30::SchemaItemValue>() == true)
+				{
+					const VFrame30::SchemaItemValue* itemValue = item->toType<VFrame30::SchemaItemValue>();
+					assert(itemValue);
+
+					QStringList appSignals;
+					appSignals << itemValue->signalId();
+
+					for (const QString& id : appSignals)
+					{
+						signalMap.insert(id);
+					}
+				}
+			}
+		}
+
+		// Move set to list
+		//
 		QStringList result;
+		result.reserve(static_cast<int>(signalMap.size()));
+
+		for (const QString& id : signalMap)
+		{
+			result.append(id);
+		}
+
 		return result;
 	}
 }

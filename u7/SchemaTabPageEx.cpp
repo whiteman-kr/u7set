@@ -423,7 +423,7 @@ bool SchemaListModelEx::deleteFiles(const QModelIndexList& selectedIndexes,
 									const std::vector<std::shared_ptr<DbFileInfo>>& deletedFiles)
 {
 	std::vector<DbFileInfo> files;
-	files.resize(deletedFiles.size());
+	files.reserve(deletedFiles.size());
 
 	for (const std::shared_ptr<DbFileInfo>& f : deletedFiles)
 	{
@@ -495,7 +495,7 @@ bool SchemaListModelEx::updateFiles(const QModelIndexList& selectedIndexes, cons
 		}
 		else
 		{
-			auto modelFile = m_files.file(file.fileId());
+			std::shared_ptr<DbFileInfo> modelFile = m_files.file(file.fileId());
 
 			if (modelFile == nullptr)
 			{
@@ -542,6 +542,107 @@ QModelIndexList SchemaListModelEx::searchFor(const QString searchText)
 	return match(index(0, 0), SearchSchemaRole, QVariant::fromValue(true), -1, Qt::MatchExactly | Qt::MatchRecursive);
 }
 
+void SchemaListModelEx::setFilter(QString filter)
+{
+	m_filterText = filter;
+	refresh();
+}
+
+void SchemaListModelEx::applyFilter(QString filterText, DbFileTree* filesTree)
+{
+	if (filterText.isEmpty() == true)
+	{
+		return;
+	}
+
+	// Apply filter, if parent has any file with filterText, then this parent must be left in tree.
+	// So, in tree are files with filterText and they parents
+	// System files like Application Logic, Monitor, Tuning.... must be left
+	//
+	const std::map<int, std::shared_ptr<DbFileInfo>>& files = filesTree->files();
+	int rootFileId = filesTree->rootFileId();
+
+	// Filter files
+	//
+	std::map<int, std::shared_ptr<DbFileInfo>> filteredFiles;
+
+	for (const auto&[fileId, file] : files)
+	{
+		if (dbc()->isSystemFile(fileId) ||
+			fileId == rootFileId)
+		{
+			filteredFiles[fileId] = file;
+			continue;
+		}
+
+		if (file->fileName().contains(filterText, Qt::CaseInsensitive) == true)
+		{
+			filteredFiles[fileId] = file;
+			continue;
+		}
+
+		VFrame30::SchemaDetails details{file->details()};
+
+		if (bool searchResult = details.searchForString(filterText);
+			searchResult == true)
+		{
+			filteredFiles[fileId] = file;
+			continue;
+		}
+	}
+
+	// Add parents
+	//
+	std::map<int, std::shared_ptr<DbFileInfo>> parentFiles;
+
+	for (auto&[fileId, file] : filteredFiles)
+	{
+		if (dbc()->isSystemFile(fileId) ||
+			fileId == rootFileId)
+		{
+			continue;
+		}
+
+		auto parentIt = files.find(file->parentId());
+		if (parentIt == files.end())
+		{
+			assert(false);
+			continue;
+		}
+
+		std::shared_ptr<DbFileInfo> parentFile = parentIt->second;
+
+		while (parentFile != nullptr &&
+			   parentFile->isNull() == false &&
+			   dbc()->isSystemFile(parentFile->fileId()) == false)
+		{
+			parentFiles[parentFile->fileId()] = parentFile;
+
+			auto parentIt = files.find(parentFile->parentId());
+			if (parentIt == files.end())
+			{
+				assert(false);
+				parentFile.reset();
+			}
+			else
+			{
+				parentFile = parentIt->second;
+			}
+		}
+	}
+
+	for (auto&[fileId, file] : parentFiles)
+	{
+		filteredFiles[fileId] = file;
+	}
+
+	// --
+	//
+	*filesTree = std::move(DbFileTree{filteredFiles, rootFileId});
+
+	return;
+}
+
 void SchemaListModelEx::refresh()
 {
 	if (db()->isProjectOpened() == false)
@@ -564,6 +665,8 @@ void SchemaListModelEx::refresh()
 	files.removeFilesWithExtension(::MvsTemplExtension);
 	files.removeFilesWithExtension(::UfbTemplExtension);
 	files.removeFilesWithExtension(::DvsTemplExtension);
+
+	applyFilter(m_filterText, &files);
 
 	// Get users
 	//
@@ -632,16 +735,6 @@ void SchemaListModelEx::projectClosed()
 
 	return;
 }
-
-//QString SchemaListModelEx::filter() const
-//{
-//	return m_filter;
-//}
-
-//void SchemaListModelEx::setFilter(const QString& value)
-//{
-//	m_filter = value;
-//}
 
 QString SchemaListModelEx::usernameById(int userId) const noexcept
 {
@@ -775,9 +868,6 @@ SchemaFileViewEx::SchemaFileViewEx(DbController* dbc, QWidget* parent) :
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 	setSelectionBehavior(QAbstractItemView::SelectRows);
 
-	// --
-	//
-	//filesModel().setFilter("vfr");
 
 	// --
 	//
@@ -1140,6 +1230,18 @@ void SchemaFileViewEx::searchAndSelect(QString searchText)
 	return;
 }
 
+void SchemaFileViewEx::setFilter(QString filter)
+{
+	m_filesModel.setFilter(filter);
+
+	if (filter.trimmed().isEmpty() == false)
+	{
+		expandAll();
+	}
+
+	return;
+}
+
 void SchemaFileViewEx::projectOpened()
 {
 	m_refreshFileAction->setEnabled(true);
@@ -1489,6 +1591,14 @@ bool SchemasTabPageEx::resetModified()
 	return m_controlTabPage->resetModified();
 }
 
+void SchemasTabPageEx::refreshControlTabPage()
+{
+	assert(m_controlTabPage);
+	m_controlTabPage->refresh();
+
+	return;
+}
+
 //std::vector<EditSchemaTabPage*> SchemasTabPage::openSchemas()
 //{
 //	std::vector<EditSchemaTabPage*> result;
@@ -1544,7 +1654,6 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 	// Create controls
 	//
 	m_filesView = new SchemaFileViewEx(db, this);
-	//m_filesView->filesModel().setFilter("." + fileExt);
 
 	// --
 	//
@@ -1592,6 +1701,7 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 	m_searchEdit->setCompleter(m_searchCompleter);
 
 	m_searchButton = new QPushButton(tr("Search"));
+	m_filterButton = new QPushButton(tr("Filter"));
 
 	// --
 	//
@@ -1600,6 +1710,7 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 	layout->addWidget(m_filesView, 0, 0, 1, 6);
 	layout->addWidget(m_searchEdit, 1, 0, 1, 2);
 	layout->addWidget(m_searchButton, 1, 2, 1, 1);
+	layout->addWidget(m_filterButton, 1, 3, 1, 1);
 	layout->setColumnStretch(4, 100);
 
 	setLayout(layout);
@@ -1621,14 +1732,10 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 	connect(m_searchAction, &QAction::triggered, this, &SchemaControlTabPageEx::ctrlF);
 	connect(m_searchEdit, &QLineEdit::returnPressed, this, &SchemaControlTabPageEx::search);
 	connect(m_searchButton, &QPushButton::clicked, this, &SchemaControlTabPageEx::search);
+	connect(m_filterButton, &QPushButton::clicked, this, &SchemaControlTabPageEx::filter);
 
-//	auto schema = createSchemaFunc();
-
-//	if (schema->isLogicSchema() == true)
-//	{
-		//connect(GlobalMessanger::instance(), &GlobalMessanger::addLogicSchema, this, &SchemaControlTabPageEx::addLogicSchema);
-		//connect(GlobalMessanger::instance(), &GlobalMessanger::searchSchemaForLm, this, &SchemaControlTabPageEx::searchSchemaForLm);
-//	}
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::addLogicSchema, this, &SchemaControlTabPageEx::addLogicSchema);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::searchSchemaForLm, this, &SchemaControlTabPageEx::searchSchemaForLm);
 
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &SchemaControlTabPageEx::compareObject);
 
@@ -1684,6 +1791,18 @@ bool SchemaControlTabPageEx::resetModified()
 	return ok;
 }
 
+void SchemaControlTabPageEx::refresh()
+{
+	assert(m_filesView);
+
+	if (m_filesView != nullptr)
+	{
+		m_filesView->refreshFiles();
+	}
+
+	return;
+}
+
 void SchemaControlTabPageEx::createToolBar()
 {
 	// Actions created in SchemaVileViewEx
@@ -1722,7 +1841,6 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPageEx::createSchema(const DbF
 		assert(parentFile.fileId() != -1);
 		return {};
 	}
-
 
 	// Create schema depends on parent file extension, or if it is root file (like $root$/Schemas/ApplicatinLogic)
 	// then on file name
@@ -1860,15 +1978,17 @@ void SchemaControlTabPageEx::detachOrAttachWindow(EditSchemaTabPageEx* editTabPa
 
 void SchemaControlTabPageEx::projectOpened()
 {
+	m_lastSelectedNewSchemaForLmFileId = db()->alFileId();
 	setEnabled(true);
 }
 
 void SchemaControlTabPageEx::projectClosed()
 {
+	m_lastSelectedNewSchemaForLmFileId = -1;
 	setEnabled(false);
 }
 
-int SchemaControlTabPageEx::showSelectFileDialog(int currentSelectionFileId)
+int SchemaControlTabPageEx::showSelectFileDialog(int parentFileId, int currentSelectionFileId)
 {
 	// Show dialog with file tree to select file, can be used as parent.
 	// function returns selected file id or -1 if operation canceled
@@ -1889,7 +2009,7 @@ int SchemaControlTabPageEx::showSelectFileDialog(int currentSelectionFileId)
 
 	DbFileTree files;
 
-	if (bool ok = dbc()->getFileListTree(&files, dbc()->schemaFileId(), true, this);
+	if (bool ok = dbc()->getFileListTree(&files, parentFileId, true, this);
 		ok == false)
 	{
 		return -1;
@@ -2217,56 +2337,56 @@ void SchemaControlTabPageEx::viewFile(const DbFileInfo& file)
 
 void SchemaControlTabPageEx::addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile)
 {
+	int parentFileId = showSelectFileDialog(dbc()->alFileId(), m_lastSelectedNewSchemaForLmFileId);
+	if (parentFileId == -1)
+	{
+		return;
+	}
+
 	// Create new Schema and add it to the vcs
 	//
-	int to_do_where_to_add_this_schema_question;
-	int to_do_show_kind_of_select_folder_dialog;
-	assert(false);
+	DbFileInfo parentFile;
 
-//	std::shared_ptr<VFrame30::Schema> schema(m_createSchemaFunc());
+	bool ok = db()->getFileInfo(parentFileId, &parentFile, this);
+	if (ok == false)
+	{
+		return;
+	}
 
-//	if (schema->isLogicSchema() == false)
-//	{
-//		assert(schema->isLogicSchema());
-//		return;
-//	}
+	std::shared_ptr<VFrame30::Schema> schema = createSchema(parentFile);
+	if (schema->isLogicSchema() == false)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Can add Logic Schema only to '%1' or it's descendands.").arg(::AlFileName));
+		return;
+	}
 
-//	// Set New Guid
-//	//
-//	schema->setGuid(QUuid::createUuid());
+	// Set New Guid
+	//
+	schema->setGuid(QUuid::createUuid());
+	int sequenceNo = db()->nextCounterValue();
 
-//	int sequenceNo = db()->nextCounterValue();
+	// Set default properties
+	//
+	schema->setSchemaId("APPSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0'));
+	schema->setCaption("Caption "  + QString::number(sequenceNo).rightJustified(6, '0'));
 
-//	// Set default properties
-//	//
-//	schema->setSchemaId("APPSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0'));
-//	schema->setCaption("Caption "  + QString::number(sequenceNo).rightJustified(6, '0'));
+	schema->setDocWidth(420.0 / 25.4);
+	schema->setDocHeight(297.0 / 25.4);
 
-//	schema->setDocWidth(420.0 / 25.4);
-//	schema->setDocHeight(297.0 / 25.4);
+	if (VFrame30::LogicSchema* logicSchema = dynamic_cast<VFrame30::LogicSchema*>(schema.get());
+		logicSchema != nullptr)
+	{
+		logicSchema->setEquipmentIdList(deviceStrIds);
+		logicSchema->setPropertyValue(Hardware::PropertyNames::lmDescriptionFile, QVariant(lmDescriptionFile));
+	}
 
-//	VFrame30::LogicSchema* logicSchema = dynamic_cast<VFrame30::LogicSchema*>(schema.get());
-//	logicSchema->setEquipmentIdList(deviceStrIds);
+	// --
+	//
+	addSchemaFile(schema, ::AlFileExtension, false);
 
-//	logicSchema->setPropertyValue(Hardware::PropertyNames::lmDescriptionFile, QVariant(lmDescriptionFile));
+	GlobalMessanger::instance().fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
 
-//	// --
-//	//
-//	addSchemaFile(schema, false);
-
-//	QTabWidget* parentTabWidget = dynamic_cast<QTabWidget*>(this->parentWidget()->parentWidget());
-//	if (parentTabWidget == nullptr)
-//	{
-//		assert(parentTabWidget);
-//	}
-//	else
-//	{
-//		parentTabWidget->setCurrentWidget(this);
-//	}
-
-//	GlobalMessanger::instance()->fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
-
-//	m_filesView->setFocus();
+	m_filesView->setFocus();
 
 	return;
 }
@@ -2591,7 +2711,7 @@ void SchemaControlTabPageEx::cloneFile()
 
 	}
 
-	int parentFileId = showSelectFileDialog(fileToClone.parentId());
+	int parentFileId = showSelectFileDialog(dbc()->schemaFileId(), fileToClone.parentId());
 	if (parentFileId == -1)
 	{
 		return;
@@ -3396,13 +3516,6 @@ void SchemaControlTabPageEx::showFileProperties()
 
 	// If schema is opened, can't edit its' properties
 	//
-//	SchemasTabPage* parent = dynamic_cast<SchemasTabPage*>(this->parentWidget()->parentWidget()->parentWidget());
-//	if (parent == nullptr)
-//	{
-//		assert(parent);
-//		return;
-//	}
-
 	for (const DbFileInfo& file : selectedFiles)
 	{
 		auto foundTab = std::find_if(m_openedFiles.begin(), m_openedFiles.end(),
@@ -3561,6 +3674,8 @@ void SchemaControlTabPageEx::search()
 		return;
 	}
 
+	// Save completer
+	//
 	QStringList completerStringList = QSettings{}.value("SchemaControlTabPageEx/SearchCompleter").toStringList();
 
 	if (completerStringList.contains(searchText, Qt::CaseInsensitive) == false)
@@ -3577,7 +3692,7 @@ void SchemaControlTabPageEx::search()
 		}
 	}
 
-	// --
+	// Search for text and select schemas with it
 	//
 	m_filesView->searchAndSelect(searchText);
 
@@ -3588,28 +3703,62 @@ void SchemaControlTabPageEx::search()
 
 void SchemaControlTabPageEx::searchSchemaForLm(QString equipmentId)
 {
-	int to_do;
-	assert(false);
-//	// Set focus to LogicSchemaTabPage and to ControlTabPage
-//	//
-//	QTabWidget* parentTabWidget = dynamic_cast<QTabWidget*>(this->parentWidget()->parentWidget());
-//	if (parentTabWidget == nullptr)
-//	{
-//		assert(parentTabWidget);
-//	}
-//	else
-//	{
-//		parentTabWidget->setCurrentWidget(this);
-//	}
+	// Set focus to LogicSchemaTabPage and to ControlTabPage
+	//
+	QTabWidget* parentTabWidget = dynamic_cast<QTabWidget*>(this->parentWidget()->parentWidget());
+	if (parentTabWidget == nullptr)
+	{
+		assert(parentTabWidget);
+	}
+	else
+	{
+		parentTabWidget->setCurrentWidget(this);
+	}
 
-//	GlobalMessanger::instance()->fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
+	GlobalMessanger::instance().fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
 
-//	m_filesView->setFocus();
+	m_filesView->setFocus();
 
-//	// Set Search string and perform search
-//	//
-//	m_searchEdit->setText(equipmentId.trimmed());
-//	search();
+	// Set Search string and perform search
+	//
+	m_searchEdit->setText(equipmentId.trimmed());
+	search();
+
+	return;
+}
+
+void SchemaControlTabPageEx::filter()
+{
+	// Search for text in schemas
+	//
+	assert(m_filesView);
+	assert(m_searchEdit);
+
+	QString filterText = m_searchEdit->text().trimmed();
+
+	// Save completer
+	//
+	QStringList completerStringList = QSettings{}.value("SchemaControlTabPageEx/SearchCompleter").toStringList();
+
+	if (completerStringList.contains(filterText, Qt::CaseInsensitive) == false)
+	{
+		completerStringList.push_back(filterText);
+		QSettings{}.setValue("SchemaControlTabPageEx/SearchCompleter", completerStringList);
+
+		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_searchCompleter->model());
+		assert(completerModel);
+
+		if (completerModel != nullptr)
+		{
+			completerModel->setStringList(completerStringList);
+		}
+	}
+
+	// Search for text and select schemas with it
+	//
+	m_filesView->setFilter(filterText);
+
+	m_filesView->setFocus();
 
 	return;
 }

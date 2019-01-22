@@ -341,6 +341,31 @@ void DbUser::setDisabled(bool value)
 //	DbFileTree
 //
 //
+DbFileTree::DbFileTree(const std::vector<std::shared_ptr<DbFileInfo>>& files, int rootFileId)
+{
+	for (const std::shared_ptr<DbFileInfo>& file : files)
+	{
+		addFile(file);
+	}
+
+	setRoot(rootFileId);
+
+	return;
+}
+
+DbFileTree::DbFileTree(const std::map<int, std::shared_ptr<DbFileInfo>>& files, int rootFileId)
+{
+	for (const auto&[fileId, file] : files)
+	{
+		Q_UNUSED(fileId);
+		addFile(file);
+	}
+
+	setRoot(rootFileId);
+
+	return;
+}
+
 DbFileTree::DbFileTree(DbFileTree&& src)
 {
 	operator=(std::move(src));
@@ -470,6 +495,42 @@ std::shared_ptr<DbFileInfo> DbFileTree::file(int fileId) const
 const std::map<int, std::shared_ptr<DbFileInfo>>& DbFileTree::files() const
 {
 	return m_files;
+}
+
+std::vector<DbFileInfo> DbFileTree::toVector(bool excludeRoot) const
+{
+	std::vector<DbFileInfo> fileList;
+	fileList.reserve(m_files.size());
+
+	for (auto&[fileId, fileInfo] : m_files)
+	{
+		if (excludeRoot == true && fileId == rootFileId())
+		{
+			continue;
+		}
+
+		fileList.push_back(*fileInfo);
+	}
+
+	return fileList;
+}
+
+std::vector<std::shared_ptr<DbFileInfo> > DbFileTree::toVectorOfSharedPointers(bool excludeRoot) const
+{
+	std::vector<std::shared_ptr<DbFileInfo>> fileList;
+	fileList.reserve(m_files.size());
+
+	for (auto&[fileId, fileInfo] : m_files)
+	{
+		if (excludeRoot == true && fileId == rootFileId())
+		{
+			continue;
+		}
+
+		fileList.push_back(fileInfo);
+	}
+
+	return fileList;
 }
 
 std::vector<std::shared_ptr<DbFileInfo>> DbFileTree::children(int parentId) const

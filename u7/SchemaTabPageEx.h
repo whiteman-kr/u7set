@@ -5,7 +5,6 @@
 	#include <QAbstractItemModelTester>
 #endif
 #include "MainTabPage.h"
-//#include "SchemaListModel.h"
 #include "../lib/DbController.h"
 #include "GlobalMessanger.h"
 #include "EditSchemaWidget.h"
@@ -44,6 +43,11 @@ public:
 	DbFileInfo file(const QModelIndex& modelIndex) const;
 
 	QModelIndexList searchFor(const QString searchText);
+	void setFilter(QString filter);
+
+protected:
+private:
+	void applyFilter(QString filterText, DbFileTree* filesTree);
 
 public slots:
 	void refresh();
@@ -91,6 +95,7 @@ private:
 										// displaying progress and error messages
 	DbFileTree m_files;
 	mutable QString m_searchText;		// Set in match(), used in data for SearchSchemaRole()
+	mutable QString m_filterText;
 
 	std::map<int, QString> m_users;							// Key is UserID
 	std::map<int, VFrame30::SchemaDetails> m_details; 		// Key is FileID
@@ -143,20 +148,13 @@ public:
 	//	void clear();
 
 	std::vector<DbFileInfo> selectedFiles() const;
-
 	void refreshFiles();
-
 	void searchAndSelect(QString searchText);
+	void setFilter(QString filter);
 
 signals:
 	void openFileSignal(DbFileInfo files);
 	void viewFileSignal(DbFileInfo files);
-	//	void cloneFileSignal(DbFileInfo file);
-	//	void addFileSignal();
-	//	void deleteFileSignal(std::vector<DbFileInfo> files);
-	//	void checkInSignal(std::vector<DbFileInfo> files);
-	//	void undoChangesSignal(std::vector<DbFileInfo> files);
-	//	void editSchemasProperties(std::vector<DbFileInfo> files);
 
 	// Protected slots
 	//
@@ -243,6 +241,8 @@ public:
 	bool saveUnsavedSchemas();
 	bool resetModified();
 
+	void refresh();
+
 private:
 	void createToolBar();
 
@@ -258,7 +258,7 @@ protected slots:
 	void projectOpened();
 	void projectClosed();
 
-	int showSelectFileDialog(int currentSelectionFileId);
+	int showSelectFileDialog(int parentFileId, int currentSelectionFileId);
 
 	void openSelectedFile();
 	void viewSelectedFile();
@@ -297,6 +297,8 @@ private slots:
 	void search();
 	void searchSchemaForLm(QString equipmentId);
 
+	void filter();
+
 	// Properties
 	//
 public:
@@ -312,8 +314,11 @@ private:
 	QLineEdit* m_searchEdit = nullptr;
 	QCompleter* m_searchCompleter = nullptr;
 	QPushButton* m_searchButton = nullptr;
+	QPushButton* m_filterButton = nullptr;
 
 	std::list<EditSchemaTabPageEx*> m_openedFiles;		// Opened files (for edit and view)
+
+	int m_lastSelectedNewSchemaForLmFileId = -1;
 };
 
 
@@ -335,7 +340,7 @@ public:
 	bool saveUnsavedSchemas();
 	bool resetModified();
 
-	//std::vector<EditSchemaTabPageEx*> openSchemas();
+	void refreshControlTabPage();
 
 public slots:
 	void projectOpened();

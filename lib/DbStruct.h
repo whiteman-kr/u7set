@@ -246,6 +246,8 @@ public:
 	DbFileTree() = default;
 	DbFileTree(const DbFileTree&) = default;
 	DbFileTree& operator=(const DbFileTree&) = default;
+	DbFileTree(const std::vector<std::shared_ptr<DbFileInfo>>& files, int rootFileId);
+	DbFileTree(const std::map<int, std::shared_ptr<DbFileInfo>>& files, int rootFileId);
 
 	DbFileTree(DbFileTree&& src);
 	DbFileTree& operator=(DbFileTree&& src);
@@ -271,6 +273,8 @@ public:
 	std::shared_ptr<DbFileInfo> file(int fileId) const;
 
 	const std::map<int, std::shared_ptr<DbFileInfo>>& files() const;
+	std::vector<DbFileInfo> toVector(bool excludeRoot) const;
+	std::vector<std::shared_ptr<DbFileInfo>> toVectorOfSharedPointers(bool excludeRoot) const;
 
 	std::vector<std::shared_ptr<DbFileInfo>> children(int parentId) const;
 	std::vector<std::shared_ptr<DbFileInfo>> children(const DbFileInfo& fileInfo) const;
