@@ -257,6 +257,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0237.sql", "Upgrade to version 237, LM modules have the same configuration script"},
 	{":/DatabaseUpgrade/Upgrade0238.sql", "Upgrade to version 238, Metrology Preset Update"},
 	{":/DatabaseUpgrade/Upgrade0239.sql", "Upgrade to version 239, TestClient Preset added"},
+	{":/DatabaseUpgrade/Upgrade0240.sql", "Upgrade to version 240, AOM-4PH Preset corrections"},
 };
 
 
