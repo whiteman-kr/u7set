@@ -519,9 +519,11 @@ int SignalsModel::columnCount(const QModelIndex &) const
 
 QString SignalsModel::getSensorStr(int sensorType) const
 {
-	if (sensorType >= 0 && sensorType < SENSOR_TYPE_COUNT)
+	QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
+
+	if (sensorType >= 0 && sensorType < mst.keyCount())
 	{
-		return SensorTypeStr[sensorType];
+		return mst.key(sensorType);
 	}
 	else
 	{
@@ -1752,8 +1754,10 @@ SignalsTabPage::~SignalsTabPage()
 	}
 }
 
-bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& /*forceUpdateProperties*/)
+bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties)
 {
+	Q_UNUSED(forceUpdateProperties)
+
 	TEST_PTR_RETURN_FALSE(dbc);
 
 	bool result = true;

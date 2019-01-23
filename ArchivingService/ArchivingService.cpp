@@ -151,7 +151,7 @@ void ArchivingServiceWorker::runTcpAppDataServerThread()
 
 	TcpAppDataServer* server = new TcpAppDataServer(softwareInfo(), m_saveStatesQueue);
 
-	m_tcpAppDataServerThread = new TcpAppDataServerThread(m_cfgSettings.appDataServiceRequestIP, server, logger());
+	m_tcpAppDataServerThread = new TcpAppDataServerThread(m_cfgSettings.appDataRecevingIP, server, logger());
 
 	m_tcpAppDataServerThread->start();
 }

@@ -11,7 +11,7 @@
 #include "ConfigurationServiceCfgGenerator.h"
 #include "ArchivingServiceCfgGenerator.h"
 #include "MetrologyCfgGenerator.h"
-
+#include "TestClientCfgGenerator.h"
 
 namespace Builder
 {
@@ -1214,6 +1214,10 @@ namespace Builder
 
 				case E::SoftwareType::Metrology:
 					softwareCfgGenerator = new MetrologyCfgGenerator(db, subsystems, software, signalSet, equipment, buildResultWriter);
+					break;
+
+				case E::SoftwareType::TestClient:
+					softwareCfgGenerator = new TestClientCfgGenerator(db, software, signalSet, equipment, buildResultWriter);
 					break;
 
 				default:

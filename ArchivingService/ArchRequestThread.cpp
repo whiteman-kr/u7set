@@ -201,11 +201,11 @@ bool ArchRequestContext::createGetSignalStatesQueryStr(ArchiveShared archive)
 	{
 		if (signalHashesCount > 1)
 		{
-			m_statesQueryStr.append(QString("ORDER BY %1").arg(m_cmpField));
+			m_statesQueryStr.append(QString("ORDER BY %1, %2").arg(m_cmpField).arg(Archive::FIELD_ARCH_ID));
 		}
 		else
 		{
-			m_statesQueryStr.append(QString("ORDER BY %1").arg(m_cmpField));		// !!!
+			m_statesQueryStr.append(QString("ORDER BY %1, %2").arg(m_cmpField).arg(Archive::FIELD_ARCH_ID));		// !!!
 
 //			m_statesQueryStr.append(QString("ORDER BY %1").arg(Archive::FIELD_ARCH_ID));
 		}

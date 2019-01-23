@@ -163,7 +163,7 @@ void MonitorConfigController::setConnectionParams(QString equipmentId, HostAddre
 
 	m_softwareInfo.setEquipmentID(equipmentId);
 
-	m_cfgLoaderThread->setConnectionParams(m_softwareInfo, address1, address2);
+	m_cfgLoaderThread->setConnectionParams(m_softwareInfo, address1, address2, true);
 
 	return;
 }

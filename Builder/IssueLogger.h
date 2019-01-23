@@ -91,10 +91,12 @@ namespace Builder
 		void errCMN0012(QString fileName);						// Can't create file %1.
 		void errCMN0013(QString fileName);						// Write error of file %1.
 		void errCMN0014(QString fileName);						// File %1 already exists.
-		void wrnCMN0015(QString fileName1, QString fileName2, QString id);		// %1 and %2 files have the same ID = %3.
+		void errCMN0015(QString fileName1, QString fileName2, QString id);		// %1 and %2 files have the same ID = %3.
 		void errCMN0016();										// The build was cancelled.
 		void errCMN0017(QString fileName);						// Can't open file %1.
 		void errCMN0018(QString fileName, QString cfgXmlSubdir);		// Can't link build file %1 into /%2/configuration.xml.
+		void errCMN0019(QString fileID, QString subDir);		// Can't find file with ID = %1 in build subdirectory %2.
+		void errCMN0020(QString fileName);						// Can't find build file %1.
 
 		// INT			Internal issues							1000-1999
 		//
@@ -363,6 +365,7 @@ namespace Builder
 		void errALC5154(QString signalID);												// Associated logic module is not found. Signal %1 cannot be processed.
 		void errALC5155(QString validitySignalEquipmentID, QString inputSignalID);		// Linked validity signal with EquipmentID %1 is not found (input signal %2).
 		void errALC5156(QString validitySignalID, QString inputSignalID);				// Linked validity signal %1 shoud have Discrete Input type (input signal %2).
+		void errALC5157(QString appSignalID);											// Analog signal %1 aperture should be less then 100.
 
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.
@@ -391,7 +394,8 @@ namespace Builder
         void errEQP6008(QString equipmentId, QString childEquipmentId, int childPlace); // Child childEquipmentId is not allowed in parent equipmentId
 		void errEQP6009(QString equipmemtId, QUuid equpmentUuid);
 
-		void errEQP6020(QString lm, QUuid lmUuid);					//	Property lmDescriptionFile is empty
+		void errEQP6020(QString lm, QUuid lmUuid);		//	Property lmDescriptionFile is empty
+
 
 		// Subset of EQP -- Generation Software Configuration
 		//

@@ -200,7 +200,7 @@ public:
 
 	void			virtual clear();
 
-	void			fill_measure_aim(const MeasureMultiParam& measureParam);
+	void			fill_measure_aim(const MeasureMultiParam& measureParam, bool isNegativeRange);
 	void			fill_measure_aom(const MeasureMultiParam& measureParam);
 
 	void			setLimits(const Metrology::SignalParam& param);

@@ -123,7 +123,9 @@ namespace VFrame30
 	const QString PropertyNames::units("Units");
 
 	const QString PropertyNames::appSignalIDs("AppSignalIDs");
+	const QString PropertyNames::appSignalIDsValidator("^[#]?([A-Za-z\\d_]+((;[#]?)?\\r?(\\n[#]?)?))+$");
 	const QString PropertyNames::appSignalId("AppSignalID");
+	const QString PropertyNames::appSignalIdValidator("^[#]?[A-Za-z\\d_]+$");
 	const QString PropertyNames::connectionId("ConnectionID");
 	const QString PropertyNames::signalSource("SignalSource");
 

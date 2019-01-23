@@ -66,8 +66,14 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditor::createPropertyTextEditor(Prop
 		return editor;
 	}
 
-	CodeType codeType = property->isScript() ? CodeType::Cpp : CodeType::Unknown;
-    return new IdeCodeEditor(codeType, parent);
+	if (property->isScript() == false)
+	{
+		return new ExtWidgets::PropertyPlainTextEditor(parent);
+	}
+	else
+	{
+		return new IdeCodeEditor(CodeType::Cpp, parent);
+	}
 }
 
 //

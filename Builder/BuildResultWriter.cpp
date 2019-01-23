@@ -29,73 +29,6 @@ namespace Builder
 		m_info.compressed = compress;
 	}
 
-
-	QString BuildFile::removeHeadTailSeparator(const QString& str)
-	{
-		QString result = str;
-
-		if (result.isEmpty())
-		{
-			return result;
-		}
-
-		// remove head separator
-		//
-		if (result.startsWith("/") == true || result.startsWith("\\") == true)
-		{
-			result = result.remove(0, 1);
-		}
-
-		if (result.isEmpty())
-		{
-			return result;
-		}
-
-		// remove tail separator
-		//
-		if (result.endsWith("/") == true || result.endsWith("\\") == true)
-		{
-			result.truncate(result.length() - 1);
-		}
-
-		return result;
-	}
-
-
-	QString BuildFile::constructPathFileName(const QString& subDir, const QString& fileName)
-	{
-		QString pathFileName;
-
-		QString fName = removeHeadTailSeparator(fileName);
-
-		if (subDir.isEmpty())
-		{
-			pathFileName = "/" + fName;
-		}
-		else
-		{
-			pathFileName = "/" + removeHeadTailSeparator(subDir) + "/" + fName;
-		}
-
-		return pathFileName;
-	}
-
-
-	void BuildFile::addMetadata(const QString& name, const QString& value)
-	{
-		m_info.metadata.insert(name, value);
-	}
-
-
-	void BuildFile::addMetadata(QList<StringPair>& nameValueList)
-	{
-		for(const StringPair& p : nameValueList)
-		{
-			m_info.metadata.insert(p.first, p.second);
-		}
-	}
-
-
 	bool BuildFile::open(const BuildResult& buildResult, bool textMode, IssueLogger* log)
 	{
 		QString fullPathFileName = buildResult.fullPath() + m_info.pathFileName;
@@ -137,6 +70,133 @@ namespace Builder
 		return true;
 	}
 
+	bool BuildFile::write(const BuildResult& buildResult, const QByteArray& data, IssueLogger* log)
+	{
+		if (open(buildResult, false, log) == false)
+		{
+			return false;
+		}
+
+		qint64 written = 0;
+
+		if (m_info.compressed == true)
+		{
+			written = m_file.write(qCompress(data));
+		}
+		else
+		{
+			written = m_file.write(data);
+		}
+
+		if (written == -1)
+		{
+			log->errCMN0013(m_info.pathFileName);
+			return false;
+		}
+
+		m_file.flush();
+
+		m_file.close();
+
+		return getFileInfo(log);
+	}
+
+	bool BuildFile::write(const BuildResult& buildResult, const QString& dataString, IssueLogger* log)
+	{
+		if (open(buildResult, false, log) == false)
+		{
+			return false;
+		}
+
+		QByteArray data;
+
+		QTextStream textStream(&data);
+
+		textStream << dataString;
+
+		textStream.flush();
+
+		if (m_info.compressed == true)
+		{
+			m_file.write(qCompress(data));
+		}
+		else
+		{
+			m_file.write(data);
+		}
+
+		m_file.flush();
+
+		m_file.close();
+
+		return getFileInfo(log);
+	}
+
+	bool BuildFile::write(const BuildResult& buildResult, const QStringList& stringList, IssueLogger* log)
+	{
+		if (open(buildResult, true, log) == false)
+		{
+			return false;
+		}
+
+		QByteArray data;
+
+		QTextStream textStream(&data);
+
+		for(auto string : stringList)
+		{
+			textStream << string << "\n";
+		}
+
+		textStream.flush();
+
+		if (m_info.compressed == true)
+		{
+			m_file.write(qCompress(data));
+		}
+		else
+		{
+			m_file.write(data);
+		}
+
+		m_file.flush();
+
+		m_file.close();
+
+		return getFileInfo(log);
+	}
+
+	QString BuildFile::constructPathFileName(const QString& subDir, const QString& fileName)
+	{
+		QString pathFileName;
+
+		QString fName = removeHeadTailSeparator(fileName);
+
+		if (subDir.isEmpty())
+		{
+			pathFileName = "/" + fName;
+		}
+		else
+		{
+			pathFileName = "/" + removeHeadTailSeparator(subDir) + "/" + fName;
+		}
+
+		return pathFileName;
+	}
+
+	void BuildFile::addMetadata(const QString& name, const QString& value)
+	{
+		m_info.metadata.insert(name, value);
+	}
+
+
+	void BuildFile::addMetadata(QList<StringPair>& nameValueList)
+	{
+		for(const StringPair& p : nameValueList)
+		{
+			m_info.metadata.insert(p.first, p.second);
+		}
+	}
 
 	bool BuildFile::getFileInfo(IssueLogger* log)
 	{
@@ -178,105 +238,36 @@ namespace Builder
 		return true;
 	}
 
-
-	bool BuildFile::write(const BuildResult& buildResult, const QByteArray& data, IssueLogger* log)
+	QString BuildFile::removeHeadTailSeparator(const QString& str)
 	{
-		if (open(buildResult, false, log) == false)
+		QString result = str;
+
+		if (result.isEmpty())
 		{
-			return false;
+			return result;
 		}
 
-		qint64 written = 0;
-
-		if (m_info.compressed == true)
+		// remove head separator
+		//
+		if (result.startsWith("/") == true || result.startsWith("\\") == true)
 		{
-			written = m_file.write(qCompress(data));
-		}
-		else
-		{
-			written = m_file.write(data);
+			result = result.remove(0, 1);
 		}
 
-		if (written == -1)
+		if (result.isEmpty())
 		{
-			log->errCMN0013(m_info.pathFileName);
-			return false;
+			return result;
 		}
 
-		m_file.flush();
+		// remove tail separator
+		//
+		if (result.endsWith("/") == true || result.endsWith("\\") == true)
+		{
+			result.truncate(result.length() - 1);
+		}
 
-		m_file.close();
-
-		return getFileInfo(log);
+		return result;
 	}
-
-
-	bool BuildFile::write(const BuildResult& buildResult, const QString& dataString, IssueLogger* log)
-	{
-		if (open(buildResult, false, log) == false)
-		{
-			return false;
-		}
-
-		QByteArray data;
-
-		QTextStream textStream(&data);
-
-		textStream << dataString;
-
-		textStream.flush();
-
-		if (m_info.compressed == true)
-		{
-			m_file.write(qCompress(data));
-		}
-		else
-		{
-			m_file.write(data);
-		}
-
-		m_file.flush();
-
-		m_file.close();
-
-		return getFileInfo(log);
-	}
-
-
-	bool BuildFile::write(const BuildResult& buildResult, const QStringList& stringList, IssueLogger* log)
-	{
-		if (open(buildResult, true, log) == false)
-		{
-			return false;
-		}
-
-		QByteArray data;
-
-		QTextStream textStream(&data);
-
-		for(auto string : stringList)
-		{
-			textStream << string << "\n";
-		}
-
-		textStream.flush();
-
-		if (m_info.compressed == true)
-		{
-			m_file.write(qCompress(data));
-		}
-		else
-		{
-			m_file.write(data);
-		}
-
-		m_file.flush();
-
-		m_file.close();
-
-		return getFileInfo(log);
-	}
-
 
 	// --------------------------------------------------------------------------------------
 	//
@@ -301,7 +292,6 @@ namespace Builder
 		bi.writeToXml(m_xmlWriter);
 	}
 
-
 	bool ConfigurationXmlFile::addLinkToFile(BuildFile* buildFile)
 	{
 		if (buildFile == nullptr)
@@ -324,7 +314,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool ConfigurationXmlFile::addLinkToFile(const QString& subDir, const QString& fileName)
 	{
@@ -366,7 +355,6 @@ namespace Builder
 		return true;
 	}
 
-
 	void ConfigurationXmlFile::finalize()
 	{
 		m_xmlWriter.writeStartElement("Files");
@@ -399,9 +387,7 @@ namespace Builder
 
 	BuildResult::BuildResult()
 	{
-
 	}
-
 
 	bool BuildResult::create(const QString& buildDir, const QString& fullPath, const BuildInfo& buildInfo, IssueLogger* log)
 	{
@@ -411,13 +397,17 @@ namespace Builder
 
 		bool result = true;
 
-		result &= createBuildDirectory();
+		result = createBuildDirectory();
 
-		result &= createBuildXml(buildInfo);
+		if (result == false)
+		{
+			return false;
+		}
+
+		result = createBuildXml(buildInfo);
 
 		return result;
 	}
-
 
 	bool BuildResult::finalize(const HashedVector<QString, BuildFile*>& buildFiles)
 	{
@@ -428,7 +418,6 @@ namespace Builder
 
 		return result;
 	}
-
 
 	bool BuildResult::createBuildDirectory()
 	{
@@ -444,7 +433,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool BuildResult::clearDirectory(const QString &directory)
 	{
@@ -472,9 +460,9 @@ namespace Builder
 				}
 			}
 		}
+
 		return result;
 	}
-
 
 	bool BuildResult::createBuildXml(const BuildInfo& buildInfo)
 	{
@@ -498,7 +486,6 @@ namespace Builder
 		return true;
 	}
 
-
 	bool BuildResult::writeBuildXmlFilesSection(const HashedVector<QString, BuildFile *>& buildFiles)
 	{
 		m_xmlWriter.writeStartElement("Files");
@@ -519,7 +506,6 @@ namespace Builder
 
 		return true;
 	}
-
 
 	bool BuildResult::closeBuildXml()
 	{
@@ -545,11 +531,17 @@ namespace Builder
 	// --------------------------------------------------------------------------------------
 
 	BuildResultWriter::BuildResultWriter(QString outputPath, QObject* parent) :
-		QObject(parent),
-		m_outputPath(outputPath)
+		QObject(parent)
 	{
-	}
+		if (outputPath.isEmpty() == true)
+		{
+			outputPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+		}
 
+		QDir dir(outputPath);
+
+		m_outputPath = dir.absolutePath();
+	}
 
 	BuildResultWriter::~BuildResultWriter()
 	{
@@ -566,7 +558,6 @@ namespace Builder
 
 		m_buildFiles.clear();
 	}
-
 
 	bool BuildResultWriter::start(DbController* db, IssueLogger* log, bool release, int changesetID)
 	{
@@ -621,7 +612,6 @@ namespace Builder
 		return true;
 	}
 
-
 	bool BuildResultWriter::finish()
 	{
 		if (m_buildInfo.id == -1)
@@ -668,86 +658,6 @@ namespace Builder
 		return result;
 	}
 
-
-	bool BuildResultWriter::createBuildResults()
-	{
-		QString appDataPath = QDir::fromNativeSeparators(m_outputPath);
-
-		if (appDataPath.endsWith("/") == true)
-		{
-			appDataPath.truncate(appDataPath.length() - 1);
-		}
-
-		bool result = true;
-
-		QString buildNoStr;
-
-		buildNoStr.sprintf("%06d", m_buildInfo.id);
-
-		QString buildDir = QString("%1-%2/build-%3")
-				.arg(m_dbController->currentProject().projectName())
-				.arg(m_buildInfo.typeStr()).arg(buildNoStr);
-
-		QString buildFullPath = appDataPath + "/" + buildDir;
-
-		result &= m_buildResults[0].create(buildDir, buildFullPath, m_buildInfo, m_log);
-
-		// create build in fixed path
-		//
-		buildDir = QString("%1-%2/build")
-					.arg(m_dbController->currentProject().projectName())
-					.arg(m_buildInfo.typeStr());
-
-		buildFullPath = appDataPath + "/" + buildDir;
-
-		result &= m_buildResults[1].create(buildDir, buildFullPath, m_buildInfo, m_log);
-
-		m_buildResults[1].setEnableMessages(false);
-
-		return result;
-	}
-
-	BuildFile* BuildResultWriter::createBuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, bool compress)
-	{
-		assert(fileName.isEmpty() == false);
-
-		BuildFile* buildFile = new BuildFile(subDir, fileName, id, tag, compress);
-
-		QString pathFileName = buildFile->pathFileName();
-
-		if (m_buildFiles.contains(pathFileName))
-		{
-			// File '%1' already exists.
-			//
-			m_log->errCMN0014(pathFileName);
-
-			delete buildFile;
-
-			return nullptr;
-		}
-
-		m_buildFiles.insert(pathFileName, buildFile);
-
-		if (id.isEmpty() == false)
-		{
-			if (m_buildFileIDMap.contains(id))
-			{
-				QString file1 = m_buildFileIDMap[id];
-
-				// '%1' and '%2' files have the same ID = '%3'.
-				//
-				m_log->wrnCMN0015(file1, pathFileName, id);
-			}
-			else
-			{
-				m_buildFileIDMap.insert(id, pathFileName);
-			}
-		}
-
-		return buildFile;
-	}
-
-
 	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QByteArray& data, bool compress)
 	{
 		return addFile(subDir, fileName, "", "", data, compress);
@@ -759,12 +669,10 @@ namespace Builder
 		return addFile(subDir, fileName, "", "", dataString, compress);
 	}
 
-
 	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QStringList& stringList, bool compress)
 	{
 		return addFile(subDir, fileName, "", "", stringList, compress);
 	}
-
 
 	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QByteArray& data, bool compress)
 	{
@@ -786,7 +694,6 @@ namespace Builder
 		return buildFile;
 	}
 
-
 	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QString& dataString, bool compress)
 	{
 		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag, compress);
@@ -807,7 +714,6 @@ namespace Builder
 		return buildFile;
 	}
 
-
 	BuildFile* BuildResultWriter::addFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, const QStringList& stringList, bool compress)
 	{
 		BuildFile* buildFile = createBuildFile(subDir, fileName, id, tag, compress);
@@ -826,6 +732,44 @@ namespace Builder
 		}
 
 		return buildFile;
+	}
+
+	ConfigurationXmlFile* BuildResultWriter::createConfigurationXmlFile(const QString& subDir)
+	{
+		if (m_cfgFiles.contains(subDir))
+		{
+			return m_cfgFiles[subDir];
+		}
+
+		ConfigurationXmlFile* cfgFile = new ConfigurationXmlFile(*this, subDir);
+
+		m_cfgFiles.insert(subDir, cfgFile);
+
+		return cfgFile;
+	}
+
+	bool BuildResultWriter::writeBinaryFiles()
+	{
+		bool result = true;
+
+		QByteArray fileData;
+
+		if (m_firmwareWriter.save(fileData, m_log) == true)
+		{
+			BuildFile* buildFile = addFile("", QString("%1-%2.bts").arg(m_buildInfo.project).arg(QString::number(m_buildInfo.id).rightJustified(6, '0')), fileData);
+
+			if (buildFile == nullptr)
+			{
+				result = false;
+			}
+		}
+		else
+		{
+			//assert(false);
+			result = false;
+		}
+
+		return result;
 	}
 
 	bool BuildResultWriter::writeConfigurationXmlFiles()
@@ -866,66 +810,43 @@ namespace Builder
 		return result;
 	}
 
-	bool BuildResultWriter::writeBinaryFiles()
-	{
-		bool result = true;
-
-		QByteArray fileData;
-
-		if (m_firmwareWriter.save(fileData, m_log) == true)
-		{
-			BuildFile* buildFile = addFile("", QString("%1-%2.bts").arg(m_buildInfo.project).arg(QString::number(m_buildInfo.id).rightJustified(6, '0')), fileData);
-
-			if (buildFile == nullptr)
-			{
-				result = false;
-			}
-		}
-		else
-		{
-			//assert(false);
-			result = false;
-		}
-
-		return result;
-	}
-
-
-	ConfigurationXmlFile* BuildResultWriter::createConfigurationXmlFile(const QString& subDir)
-	{
-		if (m_cfgFiles.contains(subDir))
-		{
-			return m_cfgFiles[subDir];
-		}
-
-		ConfigurationXmlFile* cfgFile = new ConfigurationXmlFile(*this, subDir);
-
-		m_cfgFiles.insert(subDir, cfgFile);
-
-		return cfgFile;
-	}
-
-
 	BuildFile* BuildResultWriter::getBuildFile(const QString& pathFileName) const
 	{
-		if (m_buildFiles.contains(pathFileName))
+		BuildFile* buildFile = m_buildFiles.value(pathFileName, nullptr);
+
+		if (buildFile == nullptr)
 		{
-			return m_buildFiles[pathFileName];
+			// Can't find build file %1.
+			//
+			m_log->errCMN0020(pathFileName);
 		}
 
-		return nullptr;
+		return buildFile;
 	}
 
-	BuildFile* BuildResultWriter::getBuildFileByID(const QString& buildFileID) const
+	BuildFile* BuildResultWriter::getBuildFileByID(const QString& subDir /* same as EquipmentID or common dirs */, const QString& buildFileID) const
 	{
-		QString buildFilePathName = m_buildFileIDMap.value(buildFileID, QString());
-
-		if (buildFilePathName.isEmpty() == true)
+		if (m_buildFileIDMap.contains(subDir) == false)
 		{
+			// Can't find file with ID = %1 in build subdirectory %2.
+			//
+			m_log->errCMN0019(buildFileID, subDir);
 			return nullptr;
 		}
 
-		return m_buildFiles.value(buildFilePathName, nullptr);
+		const QHash<QString, QString>& subDirMap = m_buildFileIDMap[subDir];
+
+		QString buildFilePathName = subDirMap.value(buildFileID, QString());
+
+		if (buildFilePathName.isEmpty() == true)
+		{
+			// Can't find file with ID = %1 in build subdirectory %2.
+			//
+			m_log->errCMN0019(buildFileID, subDir);
+			return nullptr;
+		}
+
+		return getBuildFile(buildFilePathName);
 	}
 
 	bool BuildResultWriter::checkBuildFilePtr(const BuildFile* buildFile) const
@@ -953,5 +874,96 @@ namespace Builder
 	QString BuildResultWriter::outputPath() const
 	{
 		return m_outputPath;
+	}
+
+	BuildFile* BuildResultWriter::createBuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, bool compress)
+	{
+		assert(fileName.isEmpty() == false);
+
+		BuildFile* buildFile = new BuildFile(subDir, fileName, id, tag, compress);
+
+		QString pathFileName = buildFile->pathFileName();
+
+		if (m_buildFiles.contains(pathFileName))
+		{
+			// File '%1' already exists.
+			//
+			m_log->errCMN0014(pathFileName);
+
+			delete buildFile;
+
+			return nullptr;
+		}
+
+		m_buildFiles.insert(pathFileName, buildFile);
+
+		if (id.isEmpty() == false)
+		{
+			if (m_buildFileIDMap.contains(subDir) == true)
+			{
+				QHash<QString, QString>& subDirMap = m_buildFileIDMap[subDir];
+
+				if (subDirMap.contains(id) == true)
+				{
+					QString file1 = subDirMap[id];
+
+					// '%1' and '%2' files have the same ID = '%3'.
+					//
+					m_log->errCMN0015(file1, pathFileName, id);
+				}
+				else
+				{
+					subDirMap.insert(id, pathFileName);
+				}
+			}
+			else
+			{
+				QHash<QString, QString> newSubDirMap;
+
+				newSubDirMap.insert(id, pathFileName);
+
+				m_buildFileIDMap.insert(subDir, newSubDirMap);
+			}
+		}
+
+		return buildFile;
+	}
+
+	bool BuildResultWriter::createBuildResults()
+	{
+		QString appDataPath = QDir::fromNativeSeparators(m_outputPath);
+
+		if (appDataPath.endsWith("/") == true)
+		{
+			appDataPath.truncate(appDataPath.length() - 1);
+		}
+
+		bool result = true;
+
+		QString buildNoStr;
+
+		buildNoStr.sprintf("%06d", m_buildInfo.id);
+
+		QString buildDir = QString("%1-%2/build-%3")
+				.arg(m_dbController->currentProject().projectName())
+				.arg(m_buildInfo.typeStr()).arg(buildNoStr);
+
+		QString buildFullPath = appDataPath + "/" + buildDir;
+
+		result &= m_buildResults[0].create(buildDir, buildFullPath, m_buildInfo, m_log);
+
+		// create build in fixed path
+		//
+		buildDir = QString("%1-%2/build")
+					.arg(m_dbController->currentProject().projectName())
+					.arg(m_buildInfo.typeStr());
+
+		buildFullPath = appDataPath + "/" + buildDir;
+
+		result &= m_buildResults[1].create(buildDir, buildFullPath, m_buildInfo, m_log);
+
+		m_buildResults[1].setEnableMessages(false);
+
+		return result;
 	}
 }

@@ -432,22 +432,102 @@ QString SpecificPropertyModel::toText() const
 		}
 
 		result += PropertyObject::createSpecificPropertyStruct(spd->caption(),
-														spd->category(),
-														spd->description(),
-														strType,
-														spd->lowLimit(),
-														spd->highLimit(),
-														spd->defaultValue(),
-														spd->precision(),
-														spd->updateFromPreset(),
-														spd->expert(),
-														spd->visible(),
-														spd->specificEditor(),
-														spd->viewOrder());
+															   spd->category(),
+															   spd->description(),
+															   strType,
+															   spd->lowLimit(),
+															   spd->highLimit(),
+															   spd->defaultValue(),
+															   spd->precision(),
+															   spd->updateFromPreset(),
+															   spd->expert(),
+															   spd->visible(),
+															   spd->specificEditor(),
+															   spd->viewOrder());
 		result += "\r\n";
 	}
 
 	return result;
+}
+
+bool SpecificPropertyModel::checkLimits(QString* errorMsg)
+{
+	if (errorMsg == nullptr)
+	{
+		assert(errorMsg);
+		return false;
+	}
+
+	for (std::shared_ptr<SpecificPropertyDescription> spd : m_propertyDescriptions)
+	{
+		if (spd == nullptr)
+		{
+			assert(spd);
+			return false;
+		}
+
+		if (spd->type() == E::SpecificPropertyType::pt_e_channel ||
+				spd->type() == E::SpecificPropertyType::pt_string ||
+				spd->type() == E::SpecificPropertyType::pt_dynamicEnum ||
+				spd->type() == E::SpecificPropertyType::pt_bool)
+		{
+			continue;
+		}
+
+		if (spd->lowLimit().isEmpty() != spd->highLimit().isEmpty())
+		{
+			*errorMsg = tr("Property '%1' error:\r\n\r\nBoth LowLimit and HighLimit properties must be set.").arg(spd->caption());
+			return false;
+		}
+
+		bool ok = false;
+
+		QVariant defaultValue = stringToVariant(spd->defaultValue(), spd->type(), &ok);
+		if (ok == false)
+		{
+			*errorMsg = tr("Property '%1' error:\r\n\r\nDefault property value is invalid.").arg(spd->caption());
+			return false;
+		}
+
+		QVariant lowLimit = stringToVariant(spd->lowLimit(), spd->type(), &ok);
+		if (ok == false)
+		{
+			*errorMsg = tr("Property '%1' error:\r\n\r\nLowLimit property value is invalid.").arg(spd->caption());
+			return false;
+		}
+
+		QVariant highLimit = stringToVariant(spd->highLimit(), spd->type(), &ok);
+		if (ok == false)
+		{
+			*errorMsg = tr("Property '%1' error:\r\n\r\nHighLimit property value is invalid.").arg(spd->caption());
+			return false;
+		}
+
+		if (lowLimit.isNull() == false && highLimit.isNull() == false)
+		{
+			if (lowLimit >= highLimit)
+			{
+				*errorMsg = tr("Property '%1' error:\r\n\r\nHighLimit property value must be greater than LowLimit property value.").arg(spd->caption());
+				return false;
+			}
+
+			if (defaultValue.isNull() == false)
+			{
+				if (defaultValue < lowLimit || defaultValue > highLimit)
+				{
+					*errorMsg = tr("Property '%1' error:\r\n\r\nDefault property value must be in range from LowLimit to HighLimit property values.").arg(spd->caption());
+					return false;
+				}
+			}
+			else
+			{
+				*errorMsg = tr("Property '%1' error:\r\n\r\nDefault property value must be defined.").arg(spd->caption());
+				return false;
+			}
+		}
+	}
+
+	return true;
 }
 
 int SpecificPropertyModel::rowCount(const QModelIndex &parent) const
@@ -542,6 +622,43 @@ QVariant SpecificPropertyModel::headerData(int section, Qt::Orientation orientat
 	return QVariant();
 }
 
+QVariant SpecificPropertyModel::stringToVariant(const QString& text, E::SpecificPropertyType type, bool* ok)
+{
+	if (ok == nullptr)
+	{
+		assert(ok);
+		return QVariant();
+	}
+
+	if (text.isEmpty() == true)
+	{
+		*ok = true;
+		return QVariant();
+	}
+
+	switch (type)
+	{
+	case E::SpecificPropertyType::pt_int32:
+	{
+		return text.toInt(ok);
+	}
+	case E::SpecificPropertyType::pt_uint32:
+	{
+		return text.toUInt(ok);
+	}
+	case E::SpecificPropertyType::pt_double:
+	{
+		return text.toDouble(ok);
+	}
+	default:
+		// Unsupported type
+		assert(false);
+	}
+
+	*ok = false;
+	return QVariant();
+}
+
 SpecificPropertyModelSorter::SpecificPropertyModelSorter(int column, Qt::SortOrder order, std::vector<std::shared_ptr<SpecificPropertyDescription>>* propertyDescriptions):
 	m_column(column),
 	m_order(order),
@@ -559,7 +676,7 @@ bool SpecificPropertyModelSorter::sortFunction(int index1, int index2, int colum
 	}
 
 	if (index1 < 0 || index1 >= static_cast<int>(m_propertyDescriptions->size()) ||
-		index2 < 0 || index2 >= static_cast<int>(m_propertyDescriptions->size()))
+			index2 < 0 || index2 >= static_cast<int>(m_propertyDescriptions->size()))
 	{
 		assert(false);
 		return false;
@@ -611,9 +728,12 @@ bool SpecificPropertyModelSorter::sortFunction(int index1, int index2, int colum
 //
 SpecificPropertiesEditor::SpecificPropertiesEditor(QWidget* parent):
 	PropertyTextEditor(parent),
+	m_parent(parent),
 	m_propertiesModel(this)
 {
-	m_hasOkCancelButtons = false;
+	assert(m_parent);
+
+	setHasOkCancelButtons(false);
 
 	// Create property list
 	//
@@ -757,7 +877,7 @@ void SpecificPropertiesEditor::setText(const QString& text)
 			{
 				auto [propertyType, propertyOk] = PropertyObject::parseSpecificPropertyType(strType);
 
-				if (propertyOk == false)
+						if (propertyOk == false)
 				{
 					QString message = tr("SpecificProperties: Specific property type is not recognized: %1").arg(strType);
 					QMessageBox::critical(this, qAppName(), message);
@@ -809,7 +929,7 @@ void SpecificPropertiesEditor::setText(const QString& text)
 			}
 
 			auto[editorType, editorOk] = E::stringToValue<E::PropertySpecificEditor>(columns[12]);
-			if (editorOk == true)
+					if (editorOk == true)
 			{
 				spd->setSpecificEditor(editorType);
 			}
@@ -1000,6 +1120,13 @@ void SpecificPropertiesEditor::onRemoveProperties()
 
 void SpecificPropertiesEditor::onOkClicked()
 {
+	QString errorMsg;
+	if (m_propertiesModel.checkLimits(&errorMsg) == false)
+	{
+		QMessageBox::critical(m_parent, qAppName(), errorMsg);
+		return;
+	}
+
 	okButtonPressed();
 }
 

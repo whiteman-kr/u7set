@@ -416,7 +416,27 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 
 					for (const QString& suffix : channelSuffxes)
 					{
-						if (appSignalId.contains(suffix) == false)
+						// Get separate parts of suffix set, separated by '+'. Example TZB5_GENERAL_1SF will give TZB5+_1SF
+
+						QStringList suffixSet = suffix.split('+', QString::SkipEmptyParts);
+
+						if (suffixSet.isEmpty() == true)
+						{
+							continue;
+						}
+
+						bool containsSuffix = true;
+
+						for (const QString& suffixPart : suffixSet)
+						{
+							if (appSignalId.contains(suffixPart) == false)
+							{
+								containsSuffix = false;
+								break;
+							}
+						}
+
+						if (containsSuffix == false)
 						{
 							continue;
 						}
@@ -431,7 +451,10 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 						{
 							QString generalAppSignalId = appSignalId;
 
-							generalAppSignalId.remove(suffix);
+							for (const QString& suffixPart : suffixSet)
+							{
+								generalAppSignalId.remove(suffixPart);
+							}
 
 							m_hashToGeneralHashMap[hash] = ::calcHash(generalAppSignalId);
 

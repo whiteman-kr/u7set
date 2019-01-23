@@ -1,6 +1,8 @@
 #pragma once
 
 #include "../lib/Service.h"
+#include "../lib/ServiceSettings.h"
+#include "../Builder/CfgFiles.h"
 #include "CfgControlServer.h"
 
 // ------------------------------------------------------------------------------------
@@ -33,6 +35,8 @@ private:
 	virtual void initCmdLineParser() override;
 	virtual void loadSettings() override;
 
+	bool loadCfgServiceSettings(const QString& buildPath);
+
 	virtual void initialize() override;
 	virtual void shutdown() override;
 
@@ -64,4 +68,6 @@ private:
 	QString m_workDirectory;
 
 	HostAddressPort m_clientIP;
+
+	CfgServiceSettings m_cfgServiceSettings;
 };

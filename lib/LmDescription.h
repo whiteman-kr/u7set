@@ -157,7 +157,7 @@ public:
 public:
 	QString name() const;
 
-	int descriptionNumber() const;
+	Q_INVOKABLE int descriptionNumber() const;
 
 	const QString& configurationStringFile() const;
 	Q_INVOKABLE QString jsConfigurationStringFile() const;

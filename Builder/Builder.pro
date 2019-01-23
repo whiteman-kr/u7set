@@ -62,7 +62,6 @@ SOURCES += \
     ../lib/DbWorker.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/Connection.cpp \
-    ../TuningService/TuningSource.cpp \
     ../TuningService/TuningDataStorage.cpp \
     ../TuningService/TuningSource.cpp \
     ../lib/LogicModuleSet.cpp \
@@ -115,11 +114,9 @@ SOURCES += \
     TuningClientCfgGenerator.cpp \
     TuningServiceCfgGenerator.cpp \
     ConfigurationServiceCfgGenerator.cpp \
-    ConfigurationServiceCfgGenerator.cpp \
     ArchivingServiceCfgGenerator.cpp \
     MetrologyCfgGenerator.cpp \
     LmDescriptionSet.cpp \
-    BdfFile.cpp \
     BdfFile.cpp \
     FbParamCalculation.cpp \
     TuningBuilder.cpp \
@@ -131,7 +128,8 @@ SOURCES += \
     ../lib/DataProtocols.cpp \
     ../lib/DbProgressDialog.cpp \
     ../lib/MetrologySignal.cpp \
-    RunOrder.cpp
+    RunOrder.cpp \
+    TestClientCfgGenerator.cpp
 
 HEADERS += \
     ../lib/OutputLog.h \
@@ -213,7 +211,8 @@ HEADERS += \
     ../lib/DataProtocols.h \
     ../lib/DbProgressDialog.h \
     ../lib/MetrologySignal.h \
-    RunOrder.h
+    RunOrder.h \
+    TestClientCfgGenerator.h
 
 
 unix {

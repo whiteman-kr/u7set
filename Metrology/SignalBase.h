@@ -65,6 +65,7 @@ private:
 
 	CalibratorManager*		m_pCalibratorManager = nullptr;
 	double					m_percent = 0;
+	bool					m_negativeRange = false;
 
 public:
 
@@ -94,7 +95,10 @@ public:
 	void					setCalibratorManager(CalibratorManager* pCalibratorManager) { m_pCalibratorManager = pCalibratorManager; }
 
 	double					percent() const { return m_percent; }
-	void					setPercent(double percent) { m_percent= percent; }
+	void					setPercent(double percent) { m_percent = percent; }
+
+	bool					isNegativeRange() const { return m_negativeRange; }
+	void					setNegativeRange(bool negativeRange) { m_negativeRange = negativeRange; }
 
 	MeasureMultiParam&		operator=(const MeasureMultiParam& from);
 };

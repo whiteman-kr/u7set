@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM1_SR01" DescriptionNumber="1" ConfigurationScriptFile="LM1_SR01_Conf.js" Version="1.0017">
+<LogicModule Name="LM1_SR01" DescriptionNumber="1" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0017">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>

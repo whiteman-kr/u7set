@@ -9,48 +9,12 @@
 #include "DeviceObject.h"
 #include "Address16.h"
 #include "../VFrame30/Afb.h"
-#include "ProtobufHelper.h"
 #include "Hash.h"
 #include "TuningValue.h"
 
 class QXmlStreamAttributes;
 class XmlWriteHelper;
 class XmlReadHelper;
-
-const char* const ElectricUnitStr[] =
-{
-	"",
-	"mA",
-	"mV",
-	"Ohm",
-	"V",
-};
-
-const int ELECTRIC_UNIT_COUNT = sizeof(ElectricUnitStr) / sizeof(ElectricUnitStr[0]);
-
-const char* const SensorTypeStr[] =
-{
-	"Not used",
-
-	"Pt50 W=1.391",
-	"Pt100 W=1.391",
-	"Pt50 W=1.385",
-	"Pt100 W=1.385",
-
-	"Cu50 W=1.428",
-	"Cu100 W=1.428",
-	"Cu50 W=1.426",
-	"Cu100 W=1.426",
-
-	"Pt21",
-	"Cu23",
-
-	"K (TXA)",
-	"L (TXK)",
-	"N (THH)",
-};
-
-const int SENSOR_TYPE_COUNT = sizeof(SensorTypeStr) / sizeof(SensorTypeStr[0]);
 
 const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
 

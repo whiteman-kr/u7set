@@ -1,4 +1,5 @@
 #include "MemWriteMap.h"
+#include <assert.h>
 
 MemWriteMap::MemWriteMap(int startAddr, int size, bool checkRewrite) :
 	m_startAddr(startAddr),

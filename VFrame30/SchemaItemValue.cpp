@@ -76,7 +76,9 @@ namespace VFrame30
 
 		// Funtional
 		//
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalId, PropertyNames::functionalCategory, true, SchemaItemValue::signalId, SchemaItemValue::setSignalId);
+		auto strIdProperty = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalId, PropertyNames::functionalCategory, true, SchemaItemValue::signalId, SchemaItemValue::setSignalId);
+		strIdProperty->setValidator(PropertyNames::appSignalIdValidator);
+
 		ADD_PROPERTY_GET_SET_CAT(E::SignalSource, PropertyNames::signalSource, PropertyNames::functionalCategory, true, SchemaItemValue::signalSource, SchemaItemValue::setSignalSource);
 
 		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::textAnalog, PropertyNames::functionalCategory, true, SchemaItemValue::textAnalog, SchemaItemValue::setTextAnalog);

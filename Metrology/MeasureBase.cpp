@@ -96,7 +96,7 @@ LinearityMeasurement::LinearityMeasurement(const MeasureMultiParam &measureParam
 
 	switch (outputSignalType)
 	{
-		case OUTPUT_SIGNAL_TYPE_UNUSED:			fill_measure_aim(measureParam);	break;
+		case OUTPUT_SIGNAL_TYPE_UNUSED:			fill_measure_aim(measureParam, measureParam.isNegativeRange());	break;
 		case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
 		case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	fill_measure_aom(measureParam);	break;
 		default:								assert(0);
@@ -159,7 +159,7 @@ void LinearityMeasurement::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearityMeasurement::fill_measure_aim(const MeasureMultiParam &measureParam)
+void LinearityMeasurement::fill_measure_aim(const MeasureMultiParam &measureParam, bool isNegativeRange)
 {
 	if (measureParam.isValid() == false)
 	{
@@ -204,7 +204,7 @@ void LinearityMeasurement::fill_measure_aim(const MeasureMultiParam &measurePara
 	// nominal
 	//
 
-	double electric = pCalibrator->sourceValue();
+	double electric = isNegativeRange ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();
 	double physical = conversion(electric, CT_ELECTRIC_TO_PHYSICAL, inParam);
 
 	setPercent(((physical - inParam.physicalLowLimit()) * 100)/(inParam.physicalHighLimit() - inParam.physicalLowLimit()));

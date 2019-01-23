@@ -158,7 +158,7 @@ void AppDataServiceWorker::runAppDataProcessingThreads()
 
 	m_appDataProcessingThreadsPool.startProcessingThreads(m_appDataProcessingThreadCount,
 														  m_appDataSourcesIP,
-														  m_appDataReceiverThread->appDataReceiver(),
+														  m_appDataReceiverThread,
 														  logger());
 }
 
@@ -285,9 +285,7 @@ void AppDataServiceWorker::runCfgLoaderThread()
 {
 	assert(m_cfgLoaderThread == nullptr);			// once should be runned
 
-	CfgLoader* cfgLoader = new CfgLoader(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
-
-	m_cfgLoaderThread = new CfgLoaderThread(cfgLoader);
+	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &AppDataServiceWorker::onConfigurationReady);
 

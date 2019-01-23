@@ -113,12 +113,16 @@ public:
 
 	QString toText() const;
 
+	bool checkLimits(QString* errorMsg);
 
 protected:
 	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+
+private:
+	QVariant stringToVariant(const QString& text, E::SpecificPropertyType type, bool* ok);
 
 private:
 
@@ -186,6 +190,8 @@ private:
 	QPushButton* m_addButton = nullptr;
 	QPushButton* m_cloneButton = nullptr;
 	QPushButton* m_removeButton = nullptr;
+
+	QWidget* m_parent = nullptr;
 
 };
 

@@ -32,7 +32,9 @@ namespace VFrame30
 		c1.data = E::ColumnData::State;
 		c1.horzAlign = E::HorzAlign::AlignHCenter;
 
-		addProperty<QString, SchemaItemSignal, &SchemaItemSignal::appSignalIds, &SchemaItemSignal::setAppSignalIds>(PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true);
+		auto strIdProperty = addProperty<QString, SchemaItemSignal, &SchemaItemSignal::appSignalIds, &SchemaItemSignal::setAppSignalIds>(PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true);
+		strIdProperty->setValidator(PropertyNames::appSignalIDsValidator);
+
 		addProperty<bool, SchemaItemSignal, &SchemaItemSignal::multiLine, &SchemaItemSignal::setMultiLine>(PropertyNames::multiLine, PropertyNames::appearanceCategory, true);
 		addProperty<int, SchemaItemSignal, &SchemaItemSignal::precision, &SchemaItemSignal::setPrecision>(PropertyNames::precision, PropertyNames::monitorCategory, true);
 		addProperty<E::AnalogFormat, SchemaItemSignal, &SchemaItemSignal::analogFormat, &SchemaItemSignal::setAnalogFormat>(PropertyNames::analogFormat, PropertyNames::monitorCategory, true);
@@ -877,7 +879,18 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 
 	void SchemaItemSignal::setAppSignalIds(const QString& s)
 	{
-		m_appSignalIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
+		if (s.contains(';') == true)
+		{
+			QString sLineFeed(s);
+
+			sLineFeed.replace(';', QChar::LineFeed);
+
+			m_appSignalIds = sLineFeed.split(QChar::LineFeed, QString::SkipEmptyParts);
+		}
+		else
+		{
+			m_appSignalIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
+		}
 
 		for (QString& s : m_appSignalIds)
 		{

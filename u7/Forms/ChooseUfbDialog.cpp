@@ -2,8 +2,8 @@
 #include "ui_ChooseUfbDialog.h"
 
 ChooseUfbDialog::ChooseUfbDialog(const std::vector<std::shared_ptr<VFrame30::UfbSchema>>& ufbs, QWidget* parent) :
-    QDialog(parent),
-    ui(new Ui::ChooseUfbDialog)
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+	ui(new Ui::ChooseUfbDialog)
 {
 	ui->setupUi(this);
 
@@ -19,7 +19,7 @@ ChooseUfbDialog::ChooseUfbDialog(const std::vector<std::shared_ptr<VFrame30::Ufb
 	ui->ok->setEnabled(false);
 
 	connect (ui->quickSearch, &QLineEdit::textChanged, this, &ChooseUfbDialog::fillTree);
-	connect (ui->ufbElements, &QTreeWidget::itemClicked, this, &ChooseUfbDialog::itemSelected);
+	connect (ui->ufbElements, &QTreeWidget::itemSelectionChanged, this, &ChooseUfbDialog::itemSelectionChanged);
 
 	connect (ui->ok, &QPushButton::clicked, this, &ChooseUfbDialog::accept);
 	connect (ui->cancel, &QPushButton::clicked, this, &ChooseUfbDialog::reject);
@@ -85,23 +85,42 @@ void ChooseUfbDialog::fillTree()
 	ui->ufbElements->expandAll();
 }
 
-void ChooseUfbDialog::itemSelected(QTreeWidgetItem* item, int column)
+void ChooseUfbDialog::itemSelectionChanged()
 {
-	Q_UNUSED(column);
-
-	for (std::shared_ptr<VFrame30::UfbSchema> ufb : m_ufbs)
+	QList<QTreeWidgetItem*> selectedItems = ui->ufbElements->selectedItems();
+	if (selectedItems.size() == 1)
 	{
-		if (ufb->caption() == item->text(0))
+		QTreeWidgetItem* item = selectedItems[0];
+		if (item == nullptr)
 		{
-			m_selectedUfb = ufb;
+			assert(item);
+			return;
+		}
 
-			ui->caption->setText(ufb->caption());
-			ui->description->setPlainText(ufb->description());
-			ui->ok->setEnabled(true);
+		for (std::shared_ptr<VFrame30::UfbSchema> ufb : m_ufbs)
+		{
+			if (ufb->caption() == item->text(0))
+			{
+				// UFB was found
 
-			break;
+				m_selectedUfb = ufb;
+
+				ui->caption->setText(ufb->caption());
+				ui->description->setPlainText(ufb->description());
+				ui->ok->setEnabled(true);
+
+				return;
+			}
 		}
 	}
+
+	// No UFB was found
+
+	m_selectedUfb = nullptr;
+
+	ui->caption->setText(QString());
+	ui->description->setPlainText(QString());
+	ui->ok->setEnabled(false);
 
 	return;
 }

@@ -54,7 +54,6 @@ SOURCES += \
     ../lib/Signal.cpp \
     ../lib/Crc.cpp \
     ../lib/WUtils.cpp \
-    TuningDataStorage.cpp \
     ../lib/DataProtocols.cpp \
     ../Builder/IssueLogger.cpp \
     ../lib/HostAddressPort.cpp \

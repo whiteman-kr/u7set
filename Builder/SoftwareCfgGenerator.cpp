@@ -1,5 +1,5 @@
-#include "../Builder/SoftwareCfgGenerator.h"
-#include "../Builder/ApplicationLogicCompiler.h"
+#include "SoftwareCfgGenerator.h"
+#include "ApplicationLogicCompiler.h"
 #include "IssueLogger.h"
 #include "../lib/DeviceHelper.h"
 #include "../lib/ServiceSettings.h"
@@ -31,6 +31,9 @@ namespace Builder
 	{
 	}
 
+	SoftwareCfgGenerator::~SoftwareCfgGenerator()
+	{
+	}
 
 	bool SoftwareCfgGenerator::run()
 	{
@@ -320,6 +323,17 @@ namespace Builder
 
 			subsystemKeyMap->insert(subsystem->subsystemId(), subsystem->key());
 		}
+	}
+
+	QString SoftwareCfgGenerator::equipmentID() const
+	{
+		if (m_software == nullptr)
+		{
+			assert(false);
+			return QString();
+		}
+
+		return m_software->equipmentIdTemplate();
 	}
 
 	bool SoftwareCfgGenerator::buildLmList(Hardware::EquipmentSet* equipment, IssueLogger* log)

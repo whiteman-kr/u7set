@@ -87,8 +87,26 @@ namespace ExtWidgets
 
     PropertyTextEditor::~PropertyTextEditor()
     {
+		if (m_regExpValidator != nullptr)
+		{
+			delete m_regExpValidator;
+			m_regExpValidator = nullptr;
+		}
+	}
 
-    }
+	void PropertyTextEditor::setValidator(const QString& validator)
+	{
+		if (m_regExpValidator != nullptr)
+		{
+			delete m_regExpValidator;
+			m_regExpValidator = nullptr;
+		}
+
+		if (validator.isEmpty() == false)
+		{
+			m_regExpValidator = new QRegExpValidator(QRegExp(validator), this);
+		}
+	}
 
 	bool PropertyTextEditor::modified()
 	{
@@ -98,6 +116,11 @@ namespace ExtWidgets
 	bool PropertyTextEditor::hasOkCancelButtons()
 	{
 		return m_hasOkCancelButtons;
+	}
+
+	void PropertyTextEditor::setHasOkCancelButtons(bool value)
+	{
+		m_hasOkCancelButtons = value;
 	}
 
 	void PropertyTextEditor::textChanged()
@@ -121,15 +144,16 @@ namespace ExtWidgets
 	PropertyPlainTextEditor::PropertyPlainTextEditor(QWidget* parent) :
 		PropertyTextEditor(parent)
 	{
-		m_textEdit = new QPlainTextEdit();
+		m_plainTextEdit = new QPlainTextEdit();
 
 		QHBoxLayout* l = new QHBoxLayout(this);
-		l->addWidget(m_textEdit);
+		l->addWidget(m_plainTextEdit);
+		l->setContentsMargins(0, 0, 0, 0);
 
-		m_textEdit->setTabChangesFocus(false);
-		m_textEdit->setFont(QFont("Courier", font().pointSize() + 2));
+		m_plainTextEdit->setTabChangesFocus(false);
+		m_plainTextEdit->setFont(QFont("Courier", font().pointSize() + 2));
 
-		QFontMetrics metrics(m_textEdit->font());
+		QFontMetrics metrics(m_plainTextEdit->font());
 
 		const int tabStop = 4;  // 4 characters
 		QString spaces;
@@ -138,34 +162,36 @@ namespace ExtWidgets
 			spaces += " ";
 		}
 
-		m_textEdit->setTabStopWidth(metrics.width(spaces));
+		m_plainTextEdit->setTabStopWidth(metrics.width(spaces));
 
-		connect(m_textEdit, &QPlainTextEdit::textChanged, this, &PropertyPlainTextEditor::textChanged);
-
+		connect(m_plainTextEdit, &QPlainTextEdit::textChanged, this, &PropertyPlainTextEditor::textChanged);
+		connect(m_plainTextEdit->document(), &QTextDocument::contentsChange, this, &PropertyPlainTextEditor::onPlainTextContentsChange);
 	}
 
 	void PropertyPlainTextEditor::setText(const QString& text)
 	{
-		m_textEdit->blockSignals(true);
+		m_plainTextEdit->blockSignals(true);
 
-		m_textEdit->setPlainText(text);
+		m_plainTextEdit->setPlainText(text);
 
-		m_textEdit->blockSignals(false);
+		m_plainTextEdit->blockSignals(false);
+
+		m_prevPlainText = text;
 	}
 
 	QString PropertyPlainTextEditor::text()
 	{
-		return m_textEdit->toPlainText();
+		return m_plainTextEdit->toPlainText();
 	}
 
 	void PropertyPlainTextEditor::setReadOnly(bool value)
 	{
-		m_textEdit->setReadOnly(value);
+		m_plainTextEdit->setReadOnly(value);
 	}
 
 	bool PropertyPlainTextEditor::eventFilter(QObject* obj, QEvent* event)
 	{
-		if (obj == m_textEdit)
+		if (obj == m_plainTextEdit)
 		{
 			if (event->type() == QEvent::KeyPress)
 			{
@@ -182,6 +208,57 @@ namespace ExtWidgets
 		// pass the event on to the parent class
 		return PropertyTextEditor::eventFilter(obj, event);
 	}
+
+	void PropertyPlainTextEditor::onPlainTextContentsChange(int position, int charsRemoved, int charsAdded)
+	{
+		Q_UNUSED(charsAdded);
+
+		if (m_plainTextEdit == nullptr)
+		{
+			assert(m_plainTextEdit);
+			return;
+		}
+
+		if (m_regExpValidator == nullptr)
+		{
+			return;
+		}
+
+		QString newText = text();
+
+		int pos = 0;
+
+		if (m_regExpValidator->validate(newText, pos) == QValidator::Invalid)
+		{
+			// Restore text
+
+			bool oldBlockState = m_plainTextEdit->document()->blockSignals(true);
+
+			m_plainTextEdit->setPlainText(m_prevPlainText);
+
+			m_plainTextEdit->document()->blockSignals(oldBlockState);
+
+			// Restore cursor position
+
+			QTextCursor c = m_plainTextEdit->textCursor();
+
+			if (charsRemoved > 0)
+			{
+				c.setPosition(position + charsRemoved);
+			}
+			else
+			{
+				c.setPosition(position);
+			}
+
+			m_plainTextEdit->setTextCursor(c);
+
+			return;
+		}
+
+		m_prevPlainText = newText;
+	}
+
 
 	//
 	// ------------ QtMultiFilePathEdit ------------
@@ -530,6 +607,11 @@ namespace ExtWidgets
 
 		m_editor->setText(text);
 
+		if (m_property->validator().isEmpty() == false)
+		{
+			m_editor->setValidator(m_property->validator());
+		}
+
 		connect(m_editor, &PropertyTextEditor::escapePressed, this, &MultiLineEdit::reject);
 
 		// Buttons
@@ -709,7 +791,7 @@ namespace ExtWidgets
 		connect(m_lineEdit, &QLineEdit::editingFinished, this, &QtMultiTextEdit::onEditingFinished);
 		connect(m_lineEdit, &QLineEdit::textEdited, this, &QtMultiTextEdit::onTextEdited);
 
-		if (m_userType == QVariant::String && p->validator().isEmpty() == true && p->password() == false)
+		if (m_userType == QVariant::String && p->password() == false)
 		{
 			m_button = new QToolButton(parent);
 			m_button->setText("...");
@@ -783,6 +865,17 @@ namespace ExtWidgets
 		{
 			editText = multlLineEdit->text();
 
+			if (editText != m_oldValue)
+			{
+				 emit valueChanged(editText);
+			}
+
+			editText = m_property->value().toString();
+
+			m_oldValue = editText;
+
+			// update LineEdit
+
 			m_lineEdit->blockSignals(true);
 
 			bool longText = editText.length() > PropertyEditorTextMaxLength;
@@ -797,13 +890,6 @@ namespace ExtWidgets
 			{
 				m_lineEdit->setText(editText);
 			}
-
-			if (editText != m_oldValue)
-            {
-				 emit valueChanged(editText);
-            }
-
-			m_oldValue = editText;
 
             m_lineEdit->blockSignals(false);
         }

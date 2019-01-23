@@ -16,6 +16,9 @@ INCLUDEPATH += $$PWD
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
+#Application icon
+win32:RC_ICONS += Images/Monitor.ico
+
 # DESTDIR
 #
 win32 {
@@ -65,7 +68,6 @@ SOURCES += main.cpp \
     ../lib/XmlHelper.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/ProtobufHelper.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/AppSignal.cpp \
     ../lib/AppSignalManager.cpp \
@@ -129,7 +131,6 @@ HEADERS  += \
     ../lib/XmlHelper.h \
     ../lib/DeviceObject.h \
     ../lib/DbStruct.h \
-    ../lib/ProtobufHelper.h \
     ../lib/ProtoSerialization.h \
     ../lib/AppSignal.h \
     ../lib/AppSignalManager.h \
@@ -255,7 +256,8 @@ DISTFILES += \
     ../Proto/serialization.proto \
     Images/Trends.svg \
     Images/Log.svg \
-    Images/TuningSources.svg
+    Images/TuningSources.svg \
+    Images/Monitor.ico
 
 # TrendView library
 #

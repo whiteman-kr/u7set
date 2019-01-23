@@ -178,21 +178,21 @@ namespace Metrology
 
 	QString SignalLocation::chassisStr() const
 	{
-		return m_chassis == -1 ? QString("N/A") : QString::number(m_chassis + 1);
+		return m_chassis == -1 ? QString("N/A") : QString::number(m_chassis);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	QString SignalLocation::moduleStr() const
 	{
-		return m_module == -1 ? QString("N/A") : QString::number(m_module + 1);
+		return m_module == -1 ? QString("N/A") : QString::number(m_module);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	QString SignalLocation::placeStr() const
 	{
-		return m_place == -1 ? QString("N/A") : QString::number(m_place + 1);
+		return m_place == -1 ? QString("N/A") : QString::number(m_place);
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

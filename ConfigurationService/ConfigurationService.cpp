@@ -41,12 +41,18 @@ void ConfigurationServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& se
 	serviceInfo.set_clientrequestport(m_clientIP.port());
 }
 
-
 void ConfigurationServiceWorker::onBuildPathChanged(QString newBuildPath)
 {
 	stopCfgServerThread();
 
 	emit renameWorkBuildToBackupExcept(newBuildPath);
+
+	bool result = loadCfgServiceSettings(newBuildPath);
+
+	if (result == false)
+	{
+		return;
+	}
 
 	startCfgServerThread(newBuildPath);
 }
@@ -67,8 +73,6 @@ void ConfigurationServiceWorker::loadSettings()
 	m_clientIPStr = getStrSetting(SETTING_CLIENT_REQUEST_IP);
 	m_workDirectory = getStrSetting(SETTING_WORK_DIRECTORY);
 
-	m_clientIP.setAddressPort(m_clientIPStr, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
-
 	DEBUG_LOG_MSG(m_logger, QString("Load settings:"));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_AUTOLOAD_BUILD_PATH).arg(m_autoloadBuildPath));
@@ -76,6 +80,37 @@ void ConfigurationServiceWorker::loadSettings()
 	DEBUG_LOG_MSG(m_logger, QString("%1 = %2").arg(SETTING_WORK_DIRECTORY).arg(m_workDirectory));
 }
 
+bool ConfigurationServiceWorker::loadCfgServiceSettings(const QString& buildPath)
+{
+	QString cfgXmlPath = QString("%1/%2/%3").arg(buildPath).arg(equipmentID()).arg(Builder::FILE_CONFIGURATION_XML);
+
+	QFile cfgXmlFile(cfgXmlPath);
+
+	if (cfgXmlFile.open(QIODevice::ReadOnly) == false)
+	{
+		DEBUG_LOG_ERR(m_logger, QString("Error opening: %1").arg(cfgXmlPath));
+		return false;
+	}
+
+	QByteArray cfgXmlData = cfgXmlFile.readAll();
+
+	cfgXmlFile.close();
+
+	XmlReadHelper xml(cfgXmlData);
+
+	bool res = m_cfgServiceSettings.readFromXml(xml);
+
+	if (m_clientIPStr.isEmpty() == true)
+	{
+		m_clientIP = m_cfgServiceSettings.clientRequestIP;
+	}
+	else
+	{
+		m_clientIP.setAddressPortStr(m_clientIPStr, PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
+	}
+
+	return res;
+}
 
 void ConfigurationServiceWorker::initialize()
 {
@@ -97,10 +132,12 @@ void ConfigurationServiceWorker::shutdown()
 
 void ConfigurationServiceWorker::startCfgServerThread(const QString& buildPath)
 {
+
 	CfgControlServer* cfgControlServer = new CfgControlServer(softwareInfo(),
 															  m_autoloadBuildPath,
 															  m_workDirectory,
 															  buildPath,
+															  m_cfgServiceSettings.knownClients(),
 															  *m_cfgCheckerWorker,
 															  m_logger);
 

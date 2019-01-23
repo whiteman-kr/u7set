@@ -50,7 +50,16 @@ SOURCES += \
     ../lib/XmlHelper.cpp \
     CfgChecker.cpp \
     CfgControlServer.cpp \
-    ../lib/SoftwareInfo.cpp
+    ../lib/SoftwareInfo.cpp \
+    ../lib/ServiceSettings.cpp \
+    ../lib/DeviceHelper.cpp \
+    ../lib/DeviceObject.cpp \
+    ../Builder/IssueLogger.cpp \
+    ../lib/OutputLog.cpp \
+    ../Builder/ModulesRawData.cpp \
+    ../lib/DbStruct.cpp \
+    ../lib/PropertyObject.cpp \
+    ../lib/ProtoSerialization.cpp
 
 HEADERS += \
     ../lib/CfgServerLoader.h \
@@ -71,7 +80,16 @@ HEADERS += \
     CfgChecker.h \
     CfgControlServer.h \
     ../lib/Types.h \
-    ../lib/SoftwareInfo.h
+    ../lib/SoftwareInfo.h \
+    ../lib/ServiceSettings.h \
+    ../lib/DeviceHelper.h \
+    ../lib/DeviceObject.h \
+    ../Builder/IssueLogger.h \
+    ../lib/OutputLog.h \
+    ../Builder/ModulesRawData.h \
+    ../lib/DbStruct.h \
+    ../lib/PropertyObject.h \
+    ../lib/ProtoSerialization.h
 
 include(../qtservice/src/qtservice.pri)
 
