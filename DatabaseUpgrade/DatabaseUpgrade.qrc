@@ -1,4 +1,4 @@
-<RCC> 
+<RCC>
     <qresource prefix="/DatabaseUpgrade">
         <file>Upgrade0001.sql</file>
         <file>Upgrade0002.sql</file>
@@ -240,7 +240,8 @@
         <file>Upgrade0238.sql</file>
         <file>Upgrade0239.sql</file>
         <file>Upgrade0240.sql</file>
-        <file>Upgrade0241.sql</file>        
+        <file>Upgrade0241.sql</file>
+        <file>Upgrade0242.sql</file>
     </qresource>
     <qresource prefix="/"/>
 </RCC>

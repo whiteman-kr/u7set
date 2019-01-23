@@ -259,6 +259,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0239.sql", "Upgrade to version 239, TestClient Preset added"},
 	{":/DatabaseUpgrade/Upgrade0240.sql", "Upgrade to version 240, AOM-4PH Preset corrections"},
 	{":/DatabaseUpgrade/Upgrade0241.sql", "Upgrade to version 241, Added function api.get_file_list_tree"},	
+	{":/DatabaseUpgrade/Upgrade0242.sql", "Upgrade to version 242, AOM-4PH Preset corrections"},
 };
 
 
