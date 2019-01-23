@@ -519,9 +519,11 @@ int SignalsModel::columnCount(const QModelIndex &) const
 
 QString SignalsModel::getSensorStr(int sensorType) const
 {
-	if (sensorType >= 0 && sensorType < SENSOR_TYPE_COUNT)
+	QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
+
+	if (sensorType >= 0 && sensorType < mst.keyCount())
 	{
-		return SensorTypeStr[sensorType];
+		return mst.key(sensorType);
 	}
 	else
 	{

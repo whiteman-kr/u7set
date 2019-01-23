@@ -108,8 +108,6 @@ const QString SignalProperties::defaultBusChildAnalogSpecPropStruct(
 
 const QString SignalProperties::lastEditedSignalFieldValuePlace("SignalsTabPage/LastEditedSignal/");
 
-std::shared_ptr<OrderedHash<int, QString>> SignalProperties::m_sensorTypeHash = generateOrderedHashFromStringArray(SensorTypeStr, SENSOR_TYPE_COUNT);
-
 
 SignalProperties::SignalProperties(Signal& signal) :
 	m_signal(signal)

@@ -1681,6 +1681,9 @@ void SignalBase::initSignals()
 
 	m_signalMutex.lock();
 
+		QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
+		QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
+
 		int count = m_signalList.count();
 
 		for(int i = 0; i < count; i ++)
@@ -1693,17 +1696,17 @@ void SignalBase::initSignals()
 
 			// units
 			//
-			if (param.electricUnitID() >= 0 && param.electricUnitID() < ELECTRIC_UNIT_COUNT)
+			if (param.electricUnitID() >= 0 && param.electricUnitID() < meu.keyCount())
 			{
-				param.setElectricUnit(ElectricUnitStr[param.electricUnitID()]);
+				param.setElectricUnit(meu.key(param.electricUnitID()));
 			}
 
 			// sensors
 			//
 			int sensorType = param.electricSensorType();
-			if (sensorType >= 0 && sensorType < SENSOR_TYPE_COUNT)
+			if (sensorType >= 0 && sensorType < mst.keyCount())
 			{
-				param.setElectricSensor(SensorTypeStr[ sensorType ]);
+				param.setElectricSensor(mst.key(sensorType));
 			}
 
 			// places for tuning signals
