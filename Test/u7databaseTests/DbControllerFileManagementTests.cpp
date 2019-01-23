@@ -2294,7 +2294,7 @@ void DbControllerFileTests::systemFilesTest()
 	int al = 0;
 	int mc = 0;
 	int mvs = 0;
-	int dvs = 0;
+	//int dvs = 0;
 	int hc = 0;
 	int hp = 0;
 
@@ -2304,7 +2304,7 @@ void DbControllerFileTests::systemFilesTest()
 
 	afbl = query.value("fileId").toInt();
 
-	ok = query.exec("SELECT * FROM file WHERE name = 'AL'");
+	ok = query.exec("SELECT * FROM file WHERE name = 'ApplicationLogic'");
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
 
@@ -2316,17 +2316,17 @@ void DbControllerFileTests::systemFilesTest()
 
 	mc = query.value("fileId").toInt();
 
-	ok = query.exec("SELECT * FROM file WHERE name = 'MVS'");
+	ok = query.exec("SELECT * FROM file WHERE name = 'Monitor'");
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
 
 	mvs = query.value("fileId").toInt();
 
-	ok = query.exec("SELECT * FROM file WHERE name = 'DVS'");
-	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
+//	ok = query.exec("SELECT * FROM file WHERE name = 'DVS'");
+//	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
+//	QVERIFY2 (query.next() == true, qPrintable(query.lastError().databaseText()));
 
-	dvs = query.value("fileId").toInt();
+//	dvs = query.value("fileId").toInt();
 
 	ok = query.exec("SELECT * FROM file WHERE name = 'HC'");
 	QVERIFY2 (ok == true, qPrintable(query.lastError().databaseText()));
@@ -2345,7 +2345,7 @@ void DbControllerFileTests::systemFilesTest()
 	QVERIFY2 (m_db->alFileId() == al, qPrintable("Error: Wrong AL id returned"));
 	QVERIFY2 (m_db->mcFileId() == mc, qPrintable("Error: Wrong MC id returned"));
 	QVERIFY2 (m_db->mvsFileId() == mvs, qPrintable("Error: Wrong MVS id returned"));
-	QVERIFY2 (m_db->dvsFileId() == dvs, qPrintable("Error: Wrong DVS id returned"));
+	//QVERIFY2 (m_db->dvsFileId() == dvs, qPrintable("Error: Wrong DVS id returned"));
 	QVERIFY2 (m_db->hcFileId() == hc, qPrintable("Error: Wrong HC id returned"));
 	QVERIFY2 (m_db->hpFileId() == hp, qPrintable("Error: Wrong HP id returned"));
 
@@ -2364,7 +2364,7 @@ void DbControllerFileTests::systemFilesTest()
 	QVERIFY2 (fileIds.contains(al) == true, qPrintable("Error: systemFiles function has not added AL file to output!"));
 	QVERIFY2 (fileIds.contains(mc) == true, qPrintable("Error: systemFiles function has not added MC file to output!"));
 	QVERIFY2 (fileIds.contains(mvs) == true, qPrintable("Error: systemFiles function has not added MVS file to output!"));
-	QVERIFY2 (fileIds.contains(dvs) == true, qPrintable("Error: systemFiles function has not added DVS file to output!"));
+	//QVERIFY2 (fileIds.contains(dvs) == true, qPrintable("Error: systemFiles function has not added DVS file to output!"));
 	QVERIFY2 (fileIds.contains(hc) == true, qPrintable("Error: systemFiles function has not added HC file to output!"));
 	QVERIFY2 (fileIds.contains(hp) == true, qPrintable("Error: systemFiles function has not added HP file to output!"));
 
