@@ -120,7 +120,7 @@ void FileTests::apiFileExistsTest()
 	//
 	QSqlQuery query;
 
-	bool ok = query.exec(QString("SELECT api.is_file_exists('%1', 0, 'AL');").arg(session_key));
+	bool ok = query.exec(QString("SELECT api.is_file_exists('%1', 0, 'Schemas');").arg(session_key));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
