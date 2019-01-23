@@ -444,7 +444,7 @@ std::pair<QModelIndex, bool> SchemaListModelEx::addFile(QModelIndex parentIndex,
 	}
 
 	// We rely that NEW (just created) fileId is always bigger the previously cretated files.
-	// It is required to update indexes, and for beginInsertRows to pointchich index has been added.
+	// It is required to update indexes, and for beginInsertRows to point chich index has been added.
 	//
 	assert(file->fileId() > m_files.files().crbegin()->second->fileId());
 
