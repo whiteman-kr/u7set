@@ -373,10 +373,8 @@ DbFileTree::DbFileTree(DbFileTree&& src)
 
 DbFileTree& DbFileTree::operator=(DbFileTree&& src)
 {
-	m_parentIdToChildren = std::move(src.m_parentIdToChildren);
+	m_fileIdToChildren = std::move(src.m_fileIdToChildren);
 	m_files = std::move(src.m_files);
-
-	assert(m_files.size() == m_parentIdToChildren.size());
 
 	m_rootFileId = src.m_rootFileId;
 	src.m_rootFileId = -1;
@@ -387,7 +385,7 @@ DbFileTree& DbFileTree::operator=(DbFileTree&& src)
 
 void DbFileTree::clear()
 {
-	m_parentIdToChildren.clear();
+	m_fileIdToChildren.clear();
 	m_files.clear();
 	m_rootFileId = -1;
 }
@@ -533,46 +531,48 @@ std::vector<std::shared_ptr<DbFileInfo> > DbFileTree::toVectorOfSharedPointers(b
 	return fileList;
 }
 
-std::vector<std::shared_ptr<DbFileInfo>> DbFileTree::children(int parentId) const
+bool DbFileTree::hasChildren(int fileId) const
 {
-	std::vector<std::shared_ptr<DbFileInfo>> result;
-	result.reserve(16);
-
-	auto[pitBegin, pitEnd] = m_parentIdToChildren.equal_range(parentId);
-
-	for (auto pit = pitBegin; pit != pitEnd; ++pit)
+	auto it = m_fileIdToChildren.find(fileId);
+	if (it == m_fileIdToChildren.end())
 	{
-		std::shared_ptr<DbFileInfo> sp = pit->second;
-
-		if (sp == nullptr)
-		{
-			assert(sp != nullptr);
-			return result;
-		}
-
-		if (sp->parentId() != parentId)
-		{
-			assert(sp->parentId() != parentId);
-			continue;
-		}
-
-		result.push_back(sp);
+		return false;
 	}
 
-	return result;
+	const auto& ch = it->second;
+	assert(ch.m_fileId == fileId);
+
+	return ch.m_children.empty() == false;
 }
 
-std::vector<std::shared_ptr<DbFileInfo>> DbFileTree::children(const DbFileInfo& fileInfo) const
+const std::vector<std::shared_ptr<DbFileInfo>>& DbFileTree::children(int parentId) const
+{
+	auto it = m_fileIdToChildren.find(parentId);
+	if (it == m_fileIdToChildren.end())
+	{
+		static const std::vector<std::shared_ptr<DbFileInfo>> dummy;
+		return dummy;
+	}
+
+	const auto& ch = it->second;
+	assert(ch.m_fileId == parentId);
+
+	return ch.m_children;
+}
+
+const std::vector<std::shared_ptr<DbFileInfo>>& DbFileTree::children(const DbFileInfo& fileInfo) const
 {
 	return children(fileInfo.fileId());
 }
 
-std::vector<std::shared_ptr<DbFileInfo>> DbFileTree::children(const std::shared_ptr<DbFileInfo>& fileInfo) const
+const std::vector<std::shared_ptr<DbFileInfo>>& DbFileTree::children(const std::shared_ptr<DbFileInfo>& fileInfo) const
 {
 	if (fileInfo == nullptr)
 	{
 		assert(fileInfo != nullptr);
-		return {};
+
+		static const std::vector<std::shared_ptr<DbFileInfo>> dummy;
+		return dummy;
 	}
 
 	return children(fileInfo->fileId());
@@ -580,32 +580,22 @@ std::vector<std::shared_ptr<DbFileInfo>> DbFileTree::children(const std::shared_
 
 std::shared_ptr<DbFileInfo> DbFileTree::child(int parentId, int index) const
 {
-	auto[pitBegin, pitEnd] = m_parentIdToChildren.equal_range(parentId);
-
-	for (auto pit = pitBegin; pit != pitEnd && index >= 0; ++pit, --index)
+	auto it = m_fileIdToChildren.find(parentId);
+	if (it == m_fileIdToChildren.end())
 	{
-		if (index == 0)
-		{
-			const std::shared_ptr<DbFileInfo>& sp = pit->second;
-
-			if (sp == nullptr)
-			{
-				assert(sp != nullptr);
-				return {};
-			}
-
-			if (sp->parentId() != parentId)
-			{
-				assert(sp->parentId() != parentId);
-				return {};
-			}
-
-			return sp;
-		}
+		return {};
 	}
 
-	assert(false);	// wrong index
-	return {};
+	const auto& ch = it->second;
+	assert(ch.m_fileId == parentId);
+
+	if (index >= ch.m_children.size())
+	{
+		assert(index < ch.m_children.size());
+		return {};
+	}
+
+	return ch.m_children.at(index);
 }
 
 std::shared_ptr<DbFileInfo> DbFileTree::child(const DbFileInfo& parentFileInfo, int index) const
@@ -632,12 +622,21 @@ int DbFileTree::rootChildrenCount() const
 
 int DbFileTree::childrenCount(int parentFileId) const
 {
-	size_t cc = m_parentIdToChildren.count(parentFileId);
-	return static_cast<int>(cc);
+	auto it = m_fileIdToChildren.find(parentFileId);
+	if (it == m_fileIdToChildren.end())
+	{
+		return 0;
+	}
+
+	const auto& ch = it->second;
+	assert(ch.m_fileId == parentFileId);
+
+	return static_cast<int>(ch.m_children.size());
 }
 
 int DbFileTree::indexInParent(int fileId) const
 {
+
 	// Get the file itself
 	//
 	auto fit = m_files.find(fileId);
@@ -656,17 +655,25 @@ int DbFileTree::indexInParent(int fileId) const
 
 	// Find file's position in it's parent
 	//
-	auto[pitBegin, pitEnd] = m_parentIdToChildren.equal_range(file->parentId());
+	auto it = m_fileIdToChildren.find(file->parentId());
+	if (it == m_fileIdToChildren.end())
+	{
+		assert(it != m_fileIdToChildren.end());	// Why do we asking index in parent for this fileId, it really can be an error
+		return -1;
+	}
+
+	const auto& ch = it->second;
+	assert(ch.m_fileId == file->parentId());
 
 	int index = 0;
-	for (auto pit = pitBegin; pit != pitEnd; ++pit, ++index)
+	for (auto file : ch.m_children)
 	{
-		std::shared_ptr<DbFileInfo> sp = pit->second;
-
-		if (sp->fileId() == fileId)
+		if (file->fileId() == fileId)
 		{
 			return index;
 		}
+
+		index ++;
 	}
 
 	return -1;
@@ -713,21 +720,31 @@ int DbFileTree::rootFileId() const
 void DbFileTree::addFile(const DbFileInfo& fileInfo)
 {
 	std::shared_ptr<DbFileInfo> sp = std::make_shared<DbFileInfo>(fileInfo);
-
-	m_files[fileInfo.fileId()] = sp;
-	m_parentIdToChildren.insert({fileInfo.parentId(), sp});
-
-	assert(m_files.size() == m_parentIdToChildren.size());
-
-	return;
+	return addFile(sp);
 }
 
 void DbFileTree::addFile(std::shared_ptr<DbFileInfo> fileInfo)
 {
+	// Add File
+	//
 	m_files[fileInfo->fileId()] = fileInfo;
-	m_parentIdToChildren.insert({fileInfo->parentId(), fileInfo});
 
-	assert(m_files.size() == m_parentIdToChildren.size());
+	// Add children record to parent
+	//
+	int parentId = fileInfo->parentId();
+
+	FileChildren& fileChildren = m_fileIdToChildren[parentId];
+
+	if (fileChildren.m_children.empty() == true)
+	{
+		fileChildren.m_fileId = parentId;							// Just created
+	}
+	else
+	{
+		assert(fileChildren.m_fileId == parentId);
+	}
+
+	fileChildren.m_children.push_back(fileInfo);
 
 	return;
 }
@@ -744,41 +761,30 @@ bool DbFileTree::removeFile(int fileId)
 	std::shared_ptr<DbFileInfo>& fileInfo = fit->second;
 	assert(fileId == fileInfo->fileId());
 
-	// m_parentIdToChildren is multimap,.
-	// so find the reange with key (parentId),
-	// iterate range, and delete the right one
+	// Remove from children record
 	//
-	auto[pitBegin, pitEnd] = m_parentIdToChildren.equal_range(fileInfo->parentId());
-	if (pitBegin == std::end(m_parentIdToChildren))
+	if (auto it = m_fileIdToChildren.find(fileInfo->parentId());
+		it == m_fileIdToChildren.end())
 	{
-		assert(false);
-		return false;
+		assert(it != m_fileIdToChildren.end());
 	}
-
-	bool deleted = false;
-	for (auto pit = pitBegin; pit != pitEnd; ++pit)
+	else
 	{
-		if (pit->second == fileInfo)
-		{
-			m_parentIdToChildren.erase(pit);
-			deleted = true;
-			break;
-		}
-	}
+		auto& ch = it->second;
+		assert(ch.m_fileId == fileInfo->parentId());
 
-	if (deleted == false)
-	{
-		// Not found
-		//
-		assert(deleted);
-		return false;
+		ch.m_children.erase(std::remove_if(ch.m_children.begin(),
+										   ch.m_children.end(),
+										   [fileId](const auto& f)
+										   {
+												return f->fileId() == fileId;
+										   }),
+							ch.m_children.end());
 	}
 
 	// Remove from m_files
 	//
 	m_files.erase(fit);
-
-	assert(m_files.size() == m_parentIdToChildren.size());
 
 	return true;
 }
@@ -828,8 +834,6 @@ bool DbFileTree::removeFilesWithExtension(QString ext)
 	{
 		ok &= removeFile(file);
 	}
-
-	assert(m_files.size() == m_parentIdToChildren.size());
 
 	return ok;
 }

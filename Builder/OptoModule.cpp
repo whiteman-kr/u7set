@@ -790,7 +790,7 @@ namespace Hardware
 
 		OptoPortShared linkedPort = OptoModuleStorage::getOptoPort(m_linkedPortID);
 
-		qDebug() << "This port " << m_equipmentID;
+		//qDebug() << "This port " << m_equipmentID;
 
 		if (linkedPort == nullptr)
 		{

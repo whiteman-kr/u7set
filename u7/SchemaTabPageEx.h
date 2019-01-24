@@ -1,5 +1,6 @@
 #pragma once
 
+#include <type_traits>
 #include <QTableView>
 #ifdef _DEBUG
 	#include <QAbstractItemModelTester>
@@ -28,6 +29,7 @@ public:
 	virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
 	virtual QModelIndex parent(const QModelIndex& index) const override;
 
+	//virtual bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
 	virtual int rowCount(const QModelIndex& parentIndex = QModelIndex()) const override;
 	virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
@@ -41,6 +43,7 @@ public:
 	bool updateFiles(const QModelIndexList& selectedIndexes, const std::vector<DbFileInfo>& files);
 
 	DbFileInfo file(const QModelIndex& modelIndex) const;
+	std::shared_ptr<DbFileInfo> fileSharedPtr(const QModelIndex& modelIndex) const;
 
 	QModelIndexList searchFor(const QString searchText);
 	void setFilter(QString filter);
@@ -48,6 +51,7 @@ public:
 protected:
 private:
 	void applyFilter(QString filterText, DbFileTree* filesTree);
+	bool isSystemFile(int fileId) const;
 
 public slots:
 	void refresh();
@@ -100,7 +104,15 @@ private:
 
 	std::map<int, QString> m_users;							// Key is UserID
 	std::map<int, VFrame30::SchemaDetails> m_details; 		// Key is FileID
+
+	// Cache for creating index
+	//
+private:
+	//mutable std::unordered_map<SchemaModelCacheKey, SchemaModelCacheVale, SchemaModelCacheKey> m_cache;	// Cache for fast creaing indexes, value is FileId
+	std::set<int> m_systemFiles;	// Key is fileid
 };
+
+
 
 
 class SchemaProxyListModel : public QSortFilterProxyModel
@@ -148,7 +160,7 @@ public:
 	//	void setFiles(const std::vector<DbFileInfo>& files);
 	//	void clear();
 
-	std::vector<DbFileInfo> selectedFiles() const;
+	std::vector<std::shared_ptr<DbFileInfo> > selectedFiles() const;
 	void refreshFiles();
 	void searchAndSelect(QString searchText);
 	void setFilter(QString filter);
@@ -299,6 +311,7 @@ private slots:
 	void searchSchemaForLm(QString equipmentId);
 
 	void filter();
+	void resetFilter();
 
 	// Properties
 	//
@@ -316,6 +329,7 @@ private:
 	QCompleter* m_searchCompleter = nullptr;
 	QPushButton* m_searchButton = nullptr;
 	QPushButton* m_filterButton = nullptr;
+	QPushButton* m_resetFilterButton = nullptr;
 
 	std::list<EditSchemaTabPageEx*> m_openedFiles;		// Opened files (for edit and view)
 
