@@ -434,7 +434,7 @@ void ArchRequest::getNextData()
 	m_reply.clear_errorstring();
 
 	m_reply.Clear();
-	m_reply.appsignalstates.Reserve(ARCH_REQUEST_MAX_STATES);
+//	m_reply.appsignalstates.Reserve(ARCH_REQUEST_MAX_STATES);
 
 	int statesInPeplyCount = 0;
 
@@ -463,7 +463,7 @@ void ArchRequest::getNextData()
 	m_reply.set_totalstatescount(0);
 	m_reply.set_sentstatescount(0);
 
-	m_reply.set_statesinpartcount(statesCount);
+	m_reply.set_statesinpartcount(statesInPeplyCount);
 	m_reply.set_islastpart(m_noMoreData);
 	m_reply.set_dataready(true);
 
