@@ -519,9 +519,11 @@ int SignalsModel::columnCount(const QModelIndex &) const
 
 QString SignalsModel::getSensorStr(int sensorType) const
 {
-	if (sensorType >= 0 && sensorType < SENSOR_TYPE_COUNT)
+	QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
+
+	if (sensorType >= 0 && sensorType < mst.keyCount())
 	{
-		return SensorTypeStr[sensorType];
+		return mst.key(sensorType);
 	}
 	else
 	{
@@ -1616,7 +1618,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	QToolBar* toolBar = new QToolBar(this);
 
-	connect(GlobalMessanger::instance(), &GlobalMessanger::showDeviceApplicationSignals, this, &SignalsTabPage::changeSignalIdFilter);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::showDeviceApplicationSignals, this, &SignalsTabPage::changeSignalIdFilter);
 
 	QToolBar* filterToolBar = new QToolBar(this);
 
@@ -1727,10 +1729,10 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// --
 	//
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SignalsTabPage::projectOpened);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SignalsTabPage::projectClosed);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &SignalsTabPage::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &SignalsTabPage::projectClosed);
 
-	connect(GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &SignalsTabPage::compareObject);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &SignalsTabPage::compareObject);
 
 	// Evidently, project is not opened yet
 	//
@@ -2451,7 +2453,7 @@ void SignalsTabPage::changeSignalIdFilter(QStringList strIds, bool refreshSignal
 
 	m_filterEdit->setText(newFilter);
 
-	GlobalMessanger::instance()->fireChangeCurrentTab(this);
+	GlobalMessanger::instance().fireChangeCurrentTab(this);
 }
 
 void SignalsTabPage::applySignalIdFilter()

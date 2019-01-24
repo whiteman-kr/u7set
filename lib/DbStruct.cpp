@@ -6,18 +6,22 @@
 #include <QDebug>
 #include "Signal.h"
 
-const char* const rootFileName = "$root$";				// root file name
-const char* const AfblFileName = "AFBL";				// Application Functional Block Library
-const char* const UfblFileName = "UFBL";				// User Functional Block Library
-const char* const AlFileName = "AL";					// Application Logic Schemas
-const char* const HcFileName = "HC";					// Hardware Configuratiun
-const char* const HpFileName = "HP";					// Hardware Presets
-const char* const MvsFileName = "MVS";					// Monitor Video Schemas
-const char* const DvsFileName = "DVS";					// Diagnostics Video Schemas
-const char* const McFileName = "MC";					// Module Configuration
-const char* const ConnectionsFileName = "CONNECTIONS";	// Connections
-const char* const BusTypesFileName = "BUSTYPES";		// BustTypes
-const char* const EtcFileName = "ETC";					//
+const char* const RootFileName = "$root$";							// root file name
+const char* const AfblFileName = "$root$/AFBL";						// Application Functional Block Library
+
+const char* const SchemasFileName = "$root$/Schemas";				// Schemas root fie
+const char* const UfblFileName = "$root$/Schemas/UFBL";				// User Functional Block Library
+const char* const AlFileName = "$root$/Schemas/ApplicationLogic";	// Application Logic Schemas
+const char* const MvsFileName = "$root$/Schemas/Monitor";			// Monitor Video Schemas
+const char* const TvsFileName = "$root$/Schemas/Tuning";			// Tuning Video Schemas
+const char* const DvsFileName = "$root$/Diagnostics";				// Diagnostics Video Schemas -> will be moved to $root$/Schemas,  see update 235
+
+const char* const HcFileName = "$root$/HC";							// Hardware Configuratiun
+const char* const HpFileName = "$root$/HP";							// Hardware Presets
+const char* const McFileName = "$root$/MC";							// Module Configuration
+const char* const ConnectionsFileName = "$root$/CONNECTIONS";		// Connections
+const char* const BusTypesFileName = "$root$/BUSTYPES";				// BustTypes
+const char* const EtcFileName = "$root$/ETC";						//
 
 const char* const SignalPropertyBehaviorFileName = "SignalPropertyBehavior.csv";
 
@@ -44,42 +48,45 @@ const char* const AppSignalSetFileExtension = "asgs";	// Application signals set
 //
 //
 
-VcsState::VcsState() :
+VcsState::VcsState()  noexcept:
 	m_state(CheckedIn)
 {
 }
 
-VcsState::VcsState(VcsStateType s) :
+VcsState::VcsState(VcsStateType s) noexcept :
 	m_state(s)
 {
 }
 
-QString VcsState::text() const
+QString VcsState::text() const noexcept
 {
 	switch (m_state)
 	{
-	case CheckedIn:
-		return QObject::tr("Checked In");
-	case CheckedOut:
-		return QObject::tr("Checked Out");
+	case CheckedIn:		return QStringLiteral("Checked In");
+	case CheckedOut:	return QStringLiteral("Checked Out");
 	default:
 		assert(false);
 	}
 
-	return QString();
+	return {};
 }
 
-bool operator== (const VcsState& s1, const VcsState& s2)
+VcsState::VcsStateType VcsState::value() const noexcept
+{
+	return m_state;
+}
+
+bool operator== (const VcsState& s1, const VcsState& s2) noexcept
 {
 	return s1.m_state == s2.m_state;
 }
 
-bool operator!= (const VcsState& s1, const VcsState& s2)
+bool operator!= (const VcsState& s1, const VcsState& s2) noexcept
 {
 	return s1.m_state != s2.m_state;
 }
 
-bool operator< (const VcsState& s1, const VcsState& s2)
+bool operator< (const VcsState& s1, const VcsState& s2) noexcept
 {
 	return s1.m_state < s2.m_state;
 }
@@ -89,51 +96,48 @@ bool operator< (const VcsState& s1, const VcsState& s2)
 // VcsItemAction
 //
 //
-VcsItemAction::VcsItemAction() :
+VcsItemAction::VcsItemAction() noexcept :
 	m_action(Added)
 {
 }
 
-VcsItemAction::VcsItemAction(VcsItemActionType s) :
+VcsItemAction::VcsItemAction(VcsItemActionType s) noexcept :
 	m_action(s)
 {
 }
 
-QString VcsItemAction::text() const
+QString VcsItemAction::text() const noexcept
 {
 	switch (m_action)
 	{
-	case Unknown:
-		return QObject::tr("Unknown");
-	case Added:
-		return QObject::tr("Added");
-	case Modified:
-		return QObject::tr("Modified");
-	case Deleted:
-		return QObject::tr("Deleted");
+	case Unknown:		return QStringLiteral("Unknown");
+	case Added:			return QStringLiteral("Added");
+	case Modified:		return QStringLiteral("Modified");
+	case Deleted:		return QStringLiteral("Deleted");
 	default:
+		qDebug() << static_cast<int>(m_action);
 		assert(false);
 	}
 
-	return QString();
+	return {};
 }
 
-int VcsItemAction::toInt() const
+int VcsItemAction::toInt() const noexcept
 {
 	return static_cast<int>(m_action);
 }
 
-VcsItemAction::VcsItemActionType VcsItemAction::value() const
+VcsItemAction::VcsItemActionType VcsItemAction::value() const noexcept
 {
 	return m_action;
 }
 
-bool operator== (const VcsItemAction& s1, const VcsItemAction& s2)
+bool operator== (const VcsItemAction& s1, const VcsItemAction& s2) noexcept
 {
 	return s1.m_action == s2.m_action;
 }
 
-bool operator!= (const VcsItemAction& s1, const VcsItemAction& s2)
+bool operator!= (const VcsItemAction& s1, const VcsItemAction& s2) noexcept
 {
 	return s1.m_action != s2.m_action;
 }
@@ -334,17 +338,516 @@ void DbUser::setDisabled(bool value)
 
 //
 //
+//	DbFileTree
+//
+//
+DbFileTree::DbFileTree(const std::vector<std::shared_ptr<DbFileInfo>>& files, int rootFileId)
+{
+	for (const std::shared_ptr<DbFileInfo>& file : files)
+	{
+		addFile(file);
+	}
+
+	setRoot(rootFileId);
+
+	return;
+}
+
+DbFileTree::DbFileTree(const std::map<int, std::shared_ptr<DbFileInfo>>& files, int rootFileId)
+{
+	for (const auto&[fileId, file] : files)
+	{
+		Q_UNUSED(fileId);
+		addFile(file);
+	}
+
+	setRoot(rootFileId);
+
+	return;
+}
+
+DbFileTree::DbFileTree(DbFileTree&& src)
+{
+	operator=(std::move(src));
+}
+
+DbFileTree& DbFileTree::operator=(DbFileTree&& src)
+{
+	m_parentIdToChildren = std::move(src.m_parentIdToChildren);
+	m_files = std::move(src.m_files);
+
+	assert(m_files.size() == m_parentIdToChildren.size());
+
+	m_rootFileId = src.m_rootFileId;
+	src.m_rootFileId = -1;
+
+	return *this;
+}
+
+
+void DbFileTree::clear()
+{
+	m_parentIdToChildren.clear();
+	m_files.clear();
+	m_rootFileId = -1;
+}
+
+int DbFileTree::size() const
+{
+	return static_cast<int>(m_files.size());
+}
+
+bool DbFileTree::empty() const
+{
+	return m_files.empty();
+}
+
+bool DbFileTree::isDbFile() const
+{
+	if (m_files.empty() == true)
+	{
+		return false;
+	}
+
+	bool result = std::dynamic_pointer_cast<DbFile>(m_files.cbegin()->second) != nullptr;
+	return result;
+}
+
+bool DbFileTree::isDbFileInfo() const
+{
+	if (m_files.empty() == true)
+	{
+		return false;
+	}
+
+	bool result = std::dynamic_pointer_cast<DbFileInfo>(m_files.cbegin()->second) != nullptr;
+	return result;
+}
+
+bool DbFileTree::isRoot(int fileId) const
+{
+	return fileId == m_rootFileId;
+}
+
+bool DbFileTree::isRoot(const DbFileInfo& fileInfo) const
+{
+	return fileInfo.fileId() == m_rootFileId;
+}
+
+bool DbFileTree::hasFile(int fileId) const
+{
+	return m_files.find(fileId) != std::cend(m_files);
+}
+
+std::shared_ptr<DbFileInfo> DbFileTree::rootFile()
+{
+	auto it = m_files.find(m_rootFileId);
+	if (it == std::end(m_files))
+	{
+		return {};
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+std::shared_ptr<DbFileInfo> DbFileTree::rootFile() const
+{
+	auto it = m_files.find(m_rootFileId);
+	if (it == std::end(m_files))
+	{
+		return {};
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+std::shared_ptr<DbFileInfo> DbFileTree::file(int fileId)
+{
+	auto it = m_files.find(fileId);
+	if (it == std::end(m_files))
+	{
+		return {};
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+std::shared_ptr<DbFileInfo> DbFileTree::file(int fileId) const
+{
+	auto it = m_files.find(fileId);
+	if (it == std::end(m_files))
+	{
+		return {};
+	}
+	else
+	{
+		assert(it->second->fileId() == fileId);
+		return it->second;
+	}
+}
+
+const std::map<int, std::shared_ptr<DbFileInfo>>& DbFileTree::files() const
+{
+	return m_files;
+}
+
+std::vector<DbFileInfo> DbFileTree::toVector(bool excludeRoot) const
+{
+	std::vector<DbFileInfo> fileList;
+	fileList.reserve(m_files.size());
+
+	for (auto&[fileId, fileInfo] : m_files)
+	{
+		if (excludeRoot == true && fileId == rootFileId())
+		{
+			continue;
+		}
+
+		fileList.push_back(*fileInfo);
+	}
+
+	return fileList;
+}
+
+std::vector<std::shared_ptr<DbFileInfo> > DbFileTree::toVectorOfSharedPointers(bool excludeRoot) const
+{
+	std::vector<std::shared_ptr<DbFileInfo>> fileList;
+	fileList.reserve(m_files.size());
+
+	for (auto&[fileId, fileInfo] : m_files)
+	{
+		if (excludeRoot == true && fileId == rootFileId())
+		{
+			continue;
+		}
+
+		fileList.push_back(fileInfo);
+	}
+
+	return fileList;
+}
+
+std::vector<std::shared_ptr<DbFileInfo>> DbFileTree::children(int parentId) const
+{
+	std::vector<std::shared_ptr<DbFileInfo>> result;
+	result.reserve(16);
+
+	auto[pitBegin, pitEnd] = m_parentIdToChildren.equal_range(parentId);
+
+	for (auto pit = pitBegin; pit != pitEnd; ++pit)
+	{
+		std::shared_ptr<DbFileInfo> sp = pit->second;
+
+		if (sp == nullptr)
+		{
+			assert(sp != nullptr);
+			return result;
+		}
+
+		if (sp->parentId() != parentId)
+		{
+			assert(sp->parentId() != parentId);
+			continue;
+		}
+
+		result.push_back(sp);
+	}
+
+	return result;
+}
+
+std::vector<std::shared_ptr<DbFileInfo>> DbFileTree::children(const DbFileInfo& fileInfo) const
+{
+	return children(fileInfo.fileId());
+}
+
+std::vector<std::shared_ptr<DbFileInfo>> DbFileTree::children(const std::shared_ptr<DbFileInfo>& fileInfo) const
+{
+	if (fileInfo == nullptr)
+	{
+		assert(fileInfo != nullptr);
+		return {};
+	}
+
+	return children(fileInfo->fileId());
+}
+
+std::shared_ptr<DbFileInfo> DbFileTree::child(int parentId, int index) const
+{
+	auto[pitBegin, pitEnd] = m_parentIdToChildren.equal_range(parentId);
+
+	for (auto pit = pitBegin; pit != pitEnd && index >= 0; ++pit, --index)
+	{
+		if (index == 0)
+		{
+			const std::shared_ptr<DbFileInfo>& sp = pit->second;
+
+			if (sp == nullptr)
+			{
+				assert(sp != nullptr);
+				return {};
+			}
+
+			if (sp->parentId() != parentId)
+			{
+				assert(sp->parentId() != parentId);
+				return {};
+			}
+
+			return sp;
+		}
+	}
+
+	assert(false);	// wrong index
+	return {};
+}
+
+std::shared_ptr<DbFileInfo> DbFileTree::child(const DbFileInfo& parentFileInfo, int index) const
+{
+	return child(parentFileInfo.fileId(), index);
+}
+
+std::shared_ptr<DbFileInfo> DbFileTree::child(const std::shared_ptr<DbFileInfo>& parentFileInfo, int index) const
+{
+	if (parentFileInfo == nullptr)
+	{
+		assert(parentFileInfo);
+		return {};
+	}
+
+	return child(parentFileInfo->fileId(), index);
+}
+
+int DbFileTree::rootChildrenCount() const
+{
+	assert(m_rootFileId != -1);
+	return childrenCount(m_rootFileId);
+}
+
+int DbFileTree::childrenCount(int parentFileId) const
+{
+	size_t cc = m_parentIdToChildren.count(parentFileId);
+	return static_cast<int>(cc);
+}
+
+int DbFileTree::indexInParent(int fileId) const
+{
+	// Get the file itself
+	//
+	auto fit = m_files.find(fileId);
+	if (fit == std::end(m_files))
+	{
+		assert(fit != std::end(m_files));
+		return -1;
+	}
+
+	auto file = fit->second;
+	if (file == nullptr)
+	{
+		assert(file);
+		return -1;
+	}
+
+	// Find file's position in it's parent
+	//
+	auto[pitBegin, pitEnd] = m_parentIdToChildren.equal_range(file->parentId());
+
+	int index = 0;
+	for (auto pit = pitBegin; pit != pitEnd; ++pit, ++index)
+	{
+		std::shared_ptr<DbFileInfo> sp = pit->second;
+
+		if (sp->fileId() == fileId)
+		{
+			return index;
+		}
+	}
+
+	return -1;
+}
+
+int DbFileTree::indexInParent(const DbFileInfo& fileInfo) const
+{
+	return indexInParent(fileInfo.fileId());
+}
+
+int DbFileTree::calcIf(int startFromFileId, std::function<int(const DbFileInfo&)> pred) const
+{
+	auto it = m_files.find(startFromFileId);
+	if (it == m_files.end())
+	{
+		assert(it != m_files.end());
+		return 0;
+	}
+
+	const DbFileInfo& file = *it->second;
+
+	int result = pred(file);
+
+	auto fileChildren = children(file);
+	for (auto& child : fileChildren)
+	{
+		result += calcIf(child->fileId(), pred);
+	}
+
+	return result;
+}
+
+void DbFileTree::setRoot(int rootFileId)
+{
+	assert(m_files.count(rootFileId) == 1);
+	m_rootFileId = rootFileId;
+}
+
+int DbFileTree::rootFileId() const
+{
+	return m_rootFileId;
+}
+
+void DbFileTree::addFile(const DbFileInfo& fileInfo)
+{
+	std::shared_ptr<DbFileInfo> sp = std::make_shared<DbFileInfo>(fileInfo);
+
+	m_files[fileInfo.fileId()] = sp;
+	m_parentIdToChildren.insert({fileInfo.parentId(), sp});
+
+	assert(m_files.size() == m_parentIdToChildren.size());
+
+	return;
+}
+
+void DbFileTree::addFile(std::shared_ptr<DbFileInfo> fileInfo)
+{
+	m_files[fileInfo->fileId()] = fileInfo;
+	m_parentIdToChildren.insert({fileInfo->parentId(), fileInfo});
+
+	assert(m_files.size() == m_parentIdToChildren.size());
+
+	return;
+}
+
+bool DbFileTree::removeFile(int fileId)
+{
+	auto fit = m_files.find(fileId);
+	if (fit == std::end(m_files))
+	{
+		assert(fit != std::end(m_files));
+		return false;
+	}
+
+	std::shared_ptr<DbFileInfo>& fileInfo = fit->second;
+	assert(fileId == fileInfo->fileId());
+
+	// m_parentIdToChildren is multimap,.
+	// so find the reange with key (parentId),
+	// iterate range, and delete the right one
+	//
+	auto[pitBegin, pitEnd] = m_parentIdToChildren.equal_range(fileInfo->parentId());
+	if (pitBegin == std::end(m_parentIdToChildren))
+	{
+		assert(false);
+		return false;
+	}
+
+	bool deleted = false;
+	for (auto pit = pitBegin; pit != pitEnd; ++pit)
+	{
+		if (pit->second == fileInfo)
+		{
+			m_parentIdToChildren.erase(pit);
+			deleted = true;
+			break;
+		}
+	}
+
+	if (deleted == false)
+	{
+		// Not found
+		//
+		assert(deleted);
+		return false;
+	}
+
+	// Remove from m_files
+	//
+	m_files.erase(fit);
+
+	assert(m_files.size() == m_parentIdToChildren.size());
+
+	return true;
+}
+
+bool DbFileTree::removeFile(const DbFileInfo& fileInfo)
+{
+	return removeFile(fileInfo.fileId());
+}
+
+bool DbFileTree::removeFile(std::shared_ptr<DbFileInfo> fileInfo)
+{
+	return removeFile(fileInfo->fileId());
+}
+
+bool DbFileTree::removeFilesWithExtension(QString ext)
+{
+	// Remove all file with extension
+	//
+	if (ext.isEmpty() == true)
+	{
+		return false;
+	}
+
+	// Find all files with extension
+	//
+	std::vector<std::shared_ptr<DbFileInfo>> filesToRemove;
+	filesToRemove.reserve(64);
+
+	for (auto[fileId, fileInfo] : m_files)
+	{
+		if (fileId != fileInfo->fileId())
+		{
+			assert(fileId != fileInfo->fileId());
+			continue;
+		}
+
+		if (fileInfo->extension().compare(ext, Qt::CaseInsensitive) == 0)
+		{
+			filesToRemove.push_back(fileInfo);
+		}
+	}
+
+	// Remove all files with extension
+	//
+	bool ok = true;
+	for (std::shared_ptr<DbFileInfo> file : filesToRemove)
+	{
+		ok &= removeFile(file);
+	}
+
+	assert(m_files.size() == m_parentIdToChildren.size());
+
+	return ok;
+}
+
+
+//
+//
 //	DbFileInfo
 //
 //
-DbFileInfo::DbFileInfo() :
+DbFileInfo::DbFileInfo() noexcept :
 	m_state(VcsState::CheckedIn),
 	m_action(VcsItemAction::Added),
 	m_details("{}")
 {
 }
 
-DbFileInfo::DbFileInfo(const DbFile& file)
+DbFileInfo::DbFileInfo(const DbFile& file) noexcept
 {
 	*this = file;
 	m_size = file.size();
@@ -354,7 +857,19 @@ DbFileInfo::~DbFileInfo()
 {
 }
 
-QString DbFileInfo::fileName() const
+void DbFileInfo::trace() const
+{
+	qDebug() << "File:";
+	qDebug() << "	Name: " << m_fileName;
+	qDebug() << "	ID: " << m_fileId;
+	qDebug() << "	ParentID: " << m_parentId;
+	qDebug() << "	Changeset: " << m_changeset;
+	qDebug() << "	State: " << m_state.text();
+
+	return;
+}
+
+const QString& DbFileInfo::fileName() const noexcept
 {
 	return m_fileName;
 }
@@ -362,6 +877,17 @@ QString DbFileInfo::fileName() const
 void DbFileInfo::setFileName(const QString& value)
 {
 	m_fileName = value;
+}
+
+QString DbFileInfo::extension() const noexcept
+{
+	int pointPos = m_fileName.lastIndexOf('.');
+	if (pointPos == -1)
+	{
+		return {};
+	}
+
+	return m_fileName.right(m_fileName.size() - pointPos - 1);
 }
 
 int DbFileInfo::size() const
@@ -375,7 +901,7 @@ void DbFileInfo::setSize(int size)
 	m_size = size;
 }
 
-int DbFileInfo::fileId() const
+int DbFileInfo::fileId() const noexcept
 {
 	return m_fileId;
 }
@@ -395,12 +921,12 @@ bool DbFileInfo::hasFileId() const
 	return m_fileId != DbFileInfo::Null;
 }
 
-bool DbFileInfo::isNull() const
+bool DbFileInfo::isNull() const noexcept
 {
 	return m_fileId == DbFileInfo::Null;
 }
 
-int DbFileInfo::parentId() const
+int DbFileInfo::parentId() const noexcept
 {
 	return m_parentId;
 }
@@ -420,7 +946,7 @@ void DbFileInfo::setDeleted(bool value)
 	m_deleted = value;
 }
 
-int DbFileInfo::changeset() const
+int DbFileInfo::changeset() const noexcept
 {
 	return m_changeset;
 }
@@ -463,7 +989,7 @@ void DbFileInfo::setLastCheckIn(const QString& value)
 	setLastCheckIn(dt);
 }
 
-const VcsState& DbFileInfo::state() const
+const VcsState& DbFileInfo::state() const noexcept
 {
 	return m_state;
 }
@@ -473,7 +999,7 @@ void DbFileInfo::setState(const VcsState& state)
 	m_state = state;
 }
 
-const VcsItemAction& DbFileInfo::action() const
+const VcsItemAction& DbFileInfo::action() const noexcept
 {
 	return m_action;
 }
@@ -483,7 +1009,7 @@ void DbFileInfo::setAction(const VcsItemAction& action)
 	m_action = action;
 }
 
-int DbFileInfo::userId() const
+int DbFileInfo::userId() const noexcept
 {
 	return m_userId;
 }
@@ -493,7 +1019,7 @@ void DbFileInfo::setUserId(int value)
 	m_userId = value;
 }
 
-QString DbFileInfo::details() const
+const QString& DbFileInfo::details() const noexcept
 {
 	return m_details;
 }
@@ -508,6 +1034,28 @@ void DbFileInfo::setDetails(const QString& value)
 	}
 
 	return;
+}
+
+QString DbFileInfo::fullPathToFileName(const QString& fullPathName)
+{
+	int pos = fullPathName.lastIndexOf('/');
+	if (pos == -1)
+	{
+		return fullPathName;
+	}
+
+	QString result = fullPathName.right(fullPathName.size() - pos - 1);
+	return result;
+}
+
+bool operator< (const DbFileInfo& a, const DbFileInfo& b)
+{
+	// Used in SchemaTabPage for map
+	// DO NOT add to this m_state, as it will break finding open windows in SchemaTab
+	//
+	quint64 ax = (static_cast<quint64>(a.m_fileId) << 32) | static_cast<quint64>(a.m_changeset);
+	quint64 bx = (static_cast<quint64>(b.m_fileId) << 32) | static_cast<quint64>(b.m_changeset);
+	return ax < bx;
 }
 
 //

@@ -45,8 +45,8 @@ EquipmentModel::EquipmentModel(DbController* dbcontroller, QWidget* parentWidget
 
 	m_root = m_configuration;	// Edit configuration default mode
 
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &EquipmentModel::projectOpened);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &EquipmentModel::projectClosed);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &EquipmentModel::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &EquipmentModel::projectClosed);
 }
 
 EquipmentModel::~EquipmentModel()
@@ -490,11 +490,11 @@ bool EquipmentModel::insertDeviceObject(std::shared_ptr<Hardware::DeviceObject> 
 	return true;
 }
 
-void EquipmentModel::deleteDeviceObject(QModelIndexList& rowList)
+void EquipmentModel::deleteDeviceObject(const QModelIndexList& rowList)
 {
 	std::vector<Hardware::DeviceObject*> devices;
 
-	for (QModelIndex& index : rowList)
+	for (QModelIndex index : rowList)
 	{
 		Hardware::DeviceObject* d = deviceObject(index);
 		assert(d);
@@ -545,7 +545,7 @@ void EquipmentModel::deleteDeviceObject(QModelIndexList& rowList)
 		}
 		else
 		{
-			QModelIndex bottomRightIndex = this->index(index.row(), ColumnCount, index.parent());
+			QModelIndex bottomRightIndex = this->index(index.row(), ColumnCount - 1, index.parent());
 			emit dataChanged(index, bottomRightIndex);
 		}
 	}
@@ -1220,13 +1220,9 @@ EquipmentView::EquipmentView(DbController* dbcontroller) :
 {
 	assert(m_dbController);
 
-	setUniformRowHeights(true);
-
 	setSortingEnabled(true);
-
 	setSelectionMode(QAbstractItemView::ExtendedSelection);
 	setSelectionBehavior(QAbstractItemView::SelectRows);
-
 	setUniformRowHeights(true);
 	setIndentation(10);
 
@@ -1237,16 +1233,16 @@ EquipmentView::EquipmentView(DbController* dbcontroller) :
 	// And the same situation was seen in QtCreator, I think it's some kind of bug, so, just set come colors
 	// for selection
 	//
-	auto p = qApp->palette("QListView");
+//	auto p = qApp->palette("QListView");
 
-	QColor highlight = p.highlight().color();
-	QColor highlightText = p.highlightedText().color();
+//	QColor highlight = p.highlight().color();
+//	QColor highlightText = p.highlightedText().color();
 
-	QString selectionColor = QString("QTreeView::item:selected { background-color: %1; color: %2; }")
-							 .arg(highlight.name())
-							 .arg(highlightText.name());
+//	QString selectionColor = QString("QTreeView::item:selected { background-color: %1; color: %2; }")
+//							 .arg(highlight.name())
+//							 .arg(highlightText.name());
 
-	setStyleSheet(selectionColor);
+//	setStyleSheet(selectionColor);
 
 	// end of RPCT-633
 	//
@@ -2366,7 +2362,7 @@ void EquipmentView::showAppSignals(bool refreshSignalList /*= false*/)
 		}
 	}
 
-	GlobalMessanger::instance()->fireShowDeviceApplicationSignals(strIds, refreshSignalList);
+	GlobalMessanger::instance().fireShowDeviceApplicationSignals(strIds, refreshSignalList);
 
 	return;
 }
@@ -2454,7 +2450,7 @@ void EquipmentView::addLogicSchemaToLm()
 		}
 	}
 
-	GlobalMessanger::instance()->fireAddLogicSchema(deviceStrIds, lmDescriptioFile);
+	GlobalMessanger::instance().fireAddLogicSchema(deviceStrIds, lmDescriptioFile);
 	return;
 }
 
@@ -2481,7 +2477,7 @@ void EquipmentView::showLogicSchemaForLm()
 		return;
 	}
 
-	GlobalMessanger::instance()->fireSearchSchemaForLm(module->equipmentId());
+	GlobalMessanger::instance().fireSearchSchemaForLm(module->equipmentId());
 
 	return;
 }
@@ -3916,8 +3912,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//
 	connect(QApplication::clipboard(), &QClipboard::dataChanged, this, &EquipmentTabPage::clipboardChanged);
 
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &EquipmentTabPage::projectOpened);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &EquipmentTabPage::projectClosed);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &EquipmentTabPage::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &EquipmentTabPage::projectClosed);
 
 	connect(m_equipmentView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &EquipmentTabPage::selectionChanged);
 
@@ -3928,7 +3924,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	connect(m_equipmentModel, &EquipmentModel::objectVcsStateChanged, this, &EquipmentTabPage::objectVcsStateChanged);
 
-	connect(GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &EquipmentTabPage::compareObject);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &EquipmentTabPage::compareObject);
 
 	// Evidently, project is not opened yet
 	//

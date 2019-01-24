@@ -54,11 +54,13 @@ public:
 
     int rootFileId() const;
     int afblFileId() const;
+	int schemasFileId() const;
 	int ufblFileId() const;
     int alFileId() const;
     int hcFileId() const;
     int hpFileId() const;
     int mvsFileId() const;
+	int tvsFileId() const;
     int dvsFileId() const;
     int mcFileId() const;
 	int connectionsFileId() const;
@@ -102,10 +104,14 @@ public slots:
     void slot_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted);
     void getFileList_worker(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted);
 
+	void slot_getFileListTree(DbFileTree* filesTree, int parentId, QString filter, bool removeDeleted);
+
 	void slot_getFileInfo(int parentId, QString fileName, DbFileInfo* out);
 	void slot_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
 
-    void slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId);
+	bool worker_getFilesInfo(const std::vector<QString>& fullPathFileNames, std::vector<DbFileInfo>* out);
+
+	void slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId);
     void slot_deleteFiles(std::vector<DbFileInfo>* files);
 
     void slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
@@ -261,11 +267,13 @@ private:
     DbProject m_currentProject;
 
 	int m_afblFileId = -1;			// Application Functional Block Library
+	int m_schemasFileId = -1;			// User Functional Block Libabry
 	int m_ufblFileId = -1;			// User Functional Block Libabry
 	int m_alFileId = -1;			// Application Logic
 	int m_hcFileId = -1;			// Hardware Configuration
 	int m_hpFileId = -1;			// Hardware Presets
 	int m_mvsFileId = -1;			// Monitor Visualization Schemas
+	int m_tvsFileId = -1;			// TuningClient Visualization Schemas
 	int m_dvsFileId = -1;			// Diagnostics Visualization Schemas
 	int m_mcFileId = -1;			// Module Configuration Template
 	int m_connectionsFileId = -1;	// Connections

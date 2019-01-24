@@ -7,7 +7,7 @@
 QT       += testlib
 QT       += qml
 
-TARGET = testappdataservice
+TARGET = TestAppDataSrv
 CONFIG   += console
 CONFIG   -= app_bundle
 

@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets sql network xmlpatterns qml svg serialport xml
+QT       += core gui widgets sql network xmlpatterns qml svg serialport xml testlib
 
 TARGET = u7
 TEMPLATE = app
@@ -170,6 +170,7 @@ SOURCES +=\
     ../lib/Subsystem.cpp \
     ../lib/Connection.cpp \
     ../lib/LogicModuleSet.cpp \
+    SchemaTabPageEx.cpp \
     DialogInputEx.cpp
 
 
@@ -304,6 +305,7 @@ HEADERS  += \
     ../lib/DbObjectStorage.h \
     ../lib/Connection.h \
     ../lib/LogicModuleSet.h \
+    SchemaTabPageEx.h \
     DialogInputEx.h
 
 

@@ -930,6 +930,8 @@ namespace Builder
 			return false;
 		}
 
+		out->clear();
+
 		// Get Busses
 		//
 		std::vector<DbFileInfo> fileList;

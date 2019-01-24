@@ -179,12 +179,17 @@ namespace VFrame30
 	class VFRAME30LIBSHARED_EXPORT SchemaDetails
 	{
 	public:
-		SchemaDetails();
-		SchemaDetails(const QString& details);
+		SchemaDetails() noexcept;
+		SchemaDetails(const SchemaDetails&) = default;
+		SchemaDetails(SchemaDetails&&) = default;
+		SchemaDetails(const QString& details) noexcept;
+
+		SchemaDetails& operator=(const SchemaDetails&) = default;
+		SchemaDetails& operator=(SchemaDetails&&) = default;
+
+		bool operator<(const SchemaDetails& b) const noexcept;
 
 	public:
-		bool operator< (const SchemaDetails& b) const;
-
 		static QString getDetailsString(const Schema* schema);
 		bool parseDetails(const QString& details);
 

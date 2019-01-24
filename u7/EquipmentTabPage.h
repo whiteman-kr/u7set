@@ -12,10 +12,10 @@ class DbController;
 // EquipmentModel
 //
 //
-
 class EquipmentModel : public QAbstractItemModel
 {
 	Q_OBJECT
+
 public:
 	EquipmentModel(DbController* dbcontroller, QWidget* parentWidget, QObject* parent);
 	virtual ~EquipmentModel();
@@ -43,7 +43,7 @@ public:
 	//
 public:
 	bool insertDeviceObject(std::shared_ptr<Hardware::DeviceObject> object, QModelIndex parentIndex);
-	void deleteDeviceObject(QModelIndexList& rowList);
+	void deleteDeviceObject(const QModelIndexList& rowList);
 
 private:
 	void updateRowFuncOnCheckIn(QModelIndex modelIndex, const std::map<int, DbFileInfo>& updateFiles, std::set<void*>& updatedModelIndexes);

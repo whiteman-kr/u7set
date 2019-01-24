@@ -1,24 +1,31 @@
 #pragma once
 
+#include <vector>
+#include <memory>
+#include <cassert>
+#include <map>
+#include <functional>
 #include <QString>
 #include <QDateTime>
 #include <QMetaType>
 #include <QtSql/QSqlRecord>
-#include <memory>
-#include <assert.h>
 
 class Signal;
 
 // System files names
 //
-extern const char* const rootFileName;			// root file name
+extern const char* const RootFileName;			// root file name
 extern const char* const AfblFileName;			// Application Functional Block Library
+
+extern const char* const SchemasFileName;		// Schemas root fie
 extern const char* const UfblFileName;			// User Functional Block Library
 extern const char* const AlFileName;			// Application Logic Schemas
+extern const char* const MvsFileName;			// Monitor Video Schemas
+extern const char* const TvsFileName;			// Tuning Video Schemas
+extern const char* const DvsFileName;			// Diagnostics Video Schemas
+
 extern const char* const HcFileName;			// Hardware Configuratiun
 extern const char* const HpFileName;			// Hardware Presets
-extern const char* const MvsFileName;			// Monitor Video Schemas
-extern const char* const DvsFileName;			// Diagnostics Video Schemas
 extern const char* const McFileName;			// Modules Configurations
 extern const char* const ConnectionsFileName;	// Connections
 extern const char* const BusTypesFileName;		// Bus types
@@ -41,6 +48,8 @@ extern const char* const DvsTemplExtension;		// Diagnostics schema template file
 extern const char* const OclFileExtension;		// (Optical) Connection Link
 extern const char* const BusFileExtension;		// Bus types
 
+extern const char* const AppSignalFileExtension;	// Application signal file extention (::Proto::AppSignal message)
+extern const char* const AppSignalSetFileExtension;	// Application signals set file extention (::Proto::AppSignalSet message)
 
 //
 //
@@ -56,22 +65,23 @@ public:
 		CheckedOut
 	};
 
-	VcsState();
-	VcsState(VcsStateType s);
+	VcsState() noexcept;
+	VcsState(VcsStateType s) noexcept;
 
-	QString text() const;
+	QString text() const noexcept;
+	VcsStateType value() const noexcept;
 
 private:
 	VcsStateType m_state;
 
-	friend bool operator== (const VcsState& s1, const VcsState& s2);
-	friend bool operator!= (const VcsState& s1, const VcsState& s2);
-	friend bool operator< (const VcsState& s1, const VcsState& s2);
+	friend bool operator== (const VcsState& s1, const VcsState& s2) noexcept;
+	friend bool operator!= (const VcsState& s1, const VcsState& s2) noexcept;
+	friend bool operator< (const VcsState& s1, const VcsState& s2) noexcept;
 };
 
-bool operator== (const VcsState& s1, const VcsState& s2);
-bool operator!= (const VcsState& s1, const VcsState& s2);
-bool operator<  (const VcsState& s1, const VcsState& s2);
+bool operator== (const VcsState& s1, const VcsState& s2) noexcept;
+bool operator!= (const VcsState& s1, const VcsState& s2) noexcept;
+bool operator<  (const VcsState& s1, const VcsState& s2) noexcept;
 
 //
 //
@@ -89,19 +99,19 @@ public:
 		Deleted = 3			// Don't change values, they are stored in DB
 	};
 
-	VcsItemAction();
-	VcsItemAction(VcsItemActionType s);
+	VcsItemAction() noexcept;
+	VcsItemAction(VcsItemActionType s) noexcept;
 
-	QString text() const;
-	int toInt() const;
+	QString text() const noexcept;
+	int toInt() const noexcept;
 
-	VcsItemActionType value() const;
+	VcsItemActionType value() const noexcept;
 
 private:
 	VcsItemActionType m_action;
 
-	friend bool operator== (const VcsItemAction& s1, const VcsItemAction& s2);
-	friend bool operator!= (const VcsItemAction& s1, const VcsItemAction& s2);
+	friend bool operator== (const VcsItemAction& s1, const VcsItemAction& s2) noexcept;
+	friend bool operator!= (const VcsItemAction& s1, const VcsItemAction& s2) noexcept;
 };
 
 
@@ -226,6 +236,86 @@ private:
 	bool m_disabled = false;
 };
 
+//
+// DbFileTree
+//
+class DbFileInfo;
+
+class DbFileTree
+{
+public:
+	DbFileTree() = default;
+	DbFileTree(const DbFileTree&) = default;
+	DbFileTree& operator=(const DbFileTree&) = default;
+	DbFileTree(const std::vector<std::shared_ptr<DbFileInfo>>& files, int rootFileId);
+	DbFileTree(const std::map<int, std::shared_ptr<DbFileInfo>>& files, int rootFileId);
+
+	DbFileTree(DbFileTree&& src);
+	DbFileTree& operator=(DbFileTree&& src);
+
+public:
+	void clear();
+
+	int size() const;
+	bool empty() const;
+
+	bool isDbFile() const;		// true if contains DbFile whith data or tree is empty
+	bool isDbFileInfo() const;	// true if contains DbFileInfo or tree is empty
+
+	bool isRoot(int fileId) const;
+	bool isRoot(const DbFileInfo& fileInfo) const;
+
+	bool hasFile(int fileId) const;
+
+	std::shared_ptr<DbFileInfo> rootFile();
+	std::shared_ptr<DbFileInfo> rootFile() const;
+
+	std::shared_ptr<DbFileInfo> file(int fileId);
+	std::shared_ptr<DbFileInfo> file(int fileId) const;
+
+	const std::map<int, std::shared_ptr<DbFileInfo>>& files() const;
+	std::vector<DbFileInfo> toVector(bool excludeRoot) const;
+	std::vector<std::shared_ptr<DbFileInfo>> toVectorOfSharedPointers(bool excludeRoot) const;
+
+	std::vector<std::shared_ptr<DbFileInfo>> children(int parentId) const;
+	std::vector<std::shared_ptr<DbFileInfo>> children(const DbFileInfo& fileInfo) const;
+	std::vector<std::shared_ptr<DbFileInfo>> children(const std::shared_ptr<DbFileInfo>& fileInfo) const;
+
+	std::shared_ptr<DbFileInfo> child(int parentId, int index) const;
+	std::shared_ptr<DbFileInfo> child(const DbFileInfo& parentFileInfo, int index) const;
+	std::shared_ptr<DbFileInfo> child(const std::shared_ptr<DbFileInfo>& parentFileInfo, int index) const;
+
+	int rootChildrenCount() const;
+	int childrenCount(int parentFileId) const;
+
+	int indexInParent(int fileId) const;
+	int indexInParent(const DbFileInfo& fileId) const;
+
+	int calcIf(int startFromFileId, std::function<int(const DbFileInfo&)> pred) const;
+
+	// Modifying structure
+	//
+	void setRoot(int rootFileId);
+	int rootFileId() const;
+
+	void addFile(const DbFileInfo& fileInfo);
+	void addFile(std::shared_ptr<DbFileInfo> fileInfo);
+
+	bool removeFile(int fileId);
+	bool removeFile(const DbFileInfo& fileInfo);
+	bool removeFile(std::shared_ptr<DbFileInfo> fileInfo);
+
+	bool removeFilesWithExtension(QString ext);
+
+private:
+	// WARNING, assigment move is present, adding new member, modify operator=(DbFileTree&&)!!!
+	//
+	std::multimap<int, std::shared_ptr<DbFileInfo>> m_parentIdToChildren;	// Key is parent, values are its' parent children
+	std::map<int, std::shared_ptr<DbFileInfo>> m_files;						// Key if fileId, value is DbFile(Info) object
+	int m_rootFileId = -1;
+	// WARNING, assigment move is present, adding new member, modify operator=(DbFileTree&&)!!!
+	//
+};
 
 //
 //
@@ -237,29 +327,32 @@ class DbFile;
 class DbFileInfo
 {
 public:
-	DbFileInfo();
-	DbFileInfo(const DbFileInfo& fileInfo) = default;
-	DbFileInfo(const DbFile& file);
+	DbFileInfo() noexcept;
+	DbFileInfo(const DbFileInfo& fileInfo) noexcept = default;
+	DbFileInfo(const DbFile& file) noexcept;
 	virtual ~DbFileInfo();
 
 	// Methods
 	//
 public:
+	void trace() const;
 
 	// Properties
 	//
 public:
-	QString fileName() const;
+	const QString& fileName() const noexcept;
 	void setFileName(const QString& value);
 
-	int fileId() const;
+	QString extension() const noexcept;
+
+	int fileId() const noexcept;
 	void setFileId(int value);
 	void resetFileId();
 	bool hasFileId() const;
 
-	bool isNull() const;
+	bool isNull() const noexcept;
 
-	int parentId() const;
+	int parentId() const noexcept;
 	void setParentId(int value);
 
 	virtual int size() const;
@@ -268,7 +361,7 @@ public:
 	bool deleted() const;
 	void setDeleted(bool value);
 
-	int changeset() const;
+	int changeset() const noexcept;
 	void setChangeset(int value);
 
 	QDateTime created() const;
@@ -279,16 +372,16 @@ public:
 	void setLastCheckIn(const QDateTime& value);
 	void setLastCheckIn(const QString& value);
 
-	const VcsState& state() const;
+	const VcsState& state() const noexcept;
 	void setState(const VcsState& state);
 
-	const VcsItemAction& action() const;
+	const VcsItemAction& action() const noexcept;
 	void setAction(const VcsItemAction& action);
 
-	int userId() const;
+	int userId() const noexcept;
 	void setUserId(int value);
 
-	QString details() const;
+	const QString& details() const noexcept;
 	void setDetails(const QString& value);		// Value must be valid JSON, Example: "{}"
 
 	// Data
@@ -312,6 +405,10 @@ protected:
 
 public:
 	static const int Null = -1;
+
+	static QString fullPathToFileName(const QString& fullPathName);		// $root$/Schemas/Monitor -> Monitor
+
+	friend bool operator< (const DbFileInfo& a, const DbFileInfo& b);
 };
 
 //
@@ -465,6 +562,8 @@ private:
 	QString m_parent;
 };
 
+
+
 // WIN_64 PLATFORM C4267 WARNING ISSUE, IT IS NOT ENOUGH TO DISBALE THIS WARNING
 // To remove annoing warning c4267 under windows x64, go to qmetatype.h, line 897 (Qt 5.3.1) and set static_cast to int for the
 // returning value.
@@ -475,6 +574,7 @@ private:
 //
 
 Q_DECLARE_METATYPE(DbUser)
+Q_DECLARE_METATYPE(DbFileTree)
 Q_DECLARE_METATYPE(DbFileInfo)
 Q_DECLARE_METATYPE(DbFile)
 Q_DECLARE_METATYPE(DbChangeset)

@@ -54,13 +54,47 @@ namespace Builder
 
 	bool TestClientCfgGenerator::writeBatFile()
 	{
-		bool result = true;
-		return result;
+		TEST_PTR_RETURN_FALSE(m_software);
+
+		QString content = getBuildInfoCommentsForBat();
+
+		content += "TestAppDataSrv.exe";
+
+		QString parameters;
+		if (getServiceParameters(parameters) == false)
+		{
+			return false;
+		}
+		content += parameters.mid(3);	// Skip -e parameter
+
+		BuildFile* buildFile = m_buildResultWriter->addFile(Builder::DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
+
+		TEST_PTR_RETURN_FALSE(buildFile);
+
+		return true;
 	}
 
 	bool TestClientCfgGenerator::writeShFile()
 	{
-		bool result = true;
-		return result;
+		TEST_PTR_RETURN_FALSE(m_software);
+
+		QString content = getBuildInfoCommentsForSh();
+
+		content += "./TestAppDataSrv";
+
+		QString parameters;
+
+		if (getServiceParameters(parameters) == false)
+		{
+			return false;
+		}
+
+		content += parameters.mid(3);	// Skip -e parameter
+
+		BuildFile* buildFile = m_buildResultWriter->addFile(Builder::DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".sh", content);
+
+		TEST_PTR_RETURN_FALSE(buildFile);
+
+		return true;
 	}
 }

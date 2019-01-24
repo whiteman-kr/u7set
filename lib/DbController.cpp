@@ -8,6 +8,8 @@ DbController::DbController() :
 	m_operationMutex(QMutex::NonRecursive)
 
 {
+	m_thread.setObjectName("DbWorkerThread");
+
 	m_worker = new DbWorker(&m_progress);
 	m_worker->moveToThread(&m_thread);
 
@@ -39,6 +41,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_isFileExists, m_worker, &DbWorker::slot_isFileExists);
 
 	connect(this, &DbController::signal_getFileList, m_worker, &DbWorker::slot_getFileList);
+	connect(this, &DbController::signal_getFileListTree, m_worker, &DbWorker::slot_getFileListTree);
 
 	connect(this, &DbController::signal_getFileInfo, m_worker, &DbWorker::slot_getFileInfo);
 	connect(this, &DbController::signal_getFilesInfo, m_worker, &DbWorker::slot_getFilesInfo);
@@ -519,6 +522,37 @@ bool DbController::getFileList(std::vector<DbFileInfo>* files, int parentId, QSt
 	return result;
 }
 
+bool DbController::getFileListTree(DbFileTree* filesTree, int parentId, bool removeDeleted, QWidget* parentWidget)
+{
+	return getFileListTree(filesTree, parentId, QString{}, removeDeleted, parentWidget);
+}
+
+bool DbController::getFileListTree(DbFileTree* filesTree, int parentId, QString filter, bool removeDeleted, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (filesTree == nullptr)
+	{
+		assert(filesTree != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_getFileListTree(filesTree, parentId, filter, removeDeleted);
+
+	bool result = waitForComplete(parentWidget, tr("Geting file list tree"));
+	return result;
+}
+
 bool DbController::getFileInfo(int parentId, QString fileName, DbFileInfo* out, QWidget* parentWidget)
 {
 	// Check parameters
@@ -601,7 +635,11 @@ bool DbController::getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo
 	return result;
 }
 
-bool DbController::addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, QWidget* parentWidget)
+bool DbController::addFiles(std::vector<std::shared_ptr<DbFile>>* files,
+							int parentId,
+							bool ensureUniquesInParentTree,
+							int uniqueFromFileId,
+							QWidget* parentWidget)
 {
 	// Check parameters
 	//
@@ -621,10 +659,15 @@ bool DbController::addFiles(std::vector<std::shared_ptr<DbFile>>* files, int par
 
 	// Emit signal end wait for complete
 	//
-	emit signal_addFiles(files, parentId);
+	emit signal_addFiles(files, parentId, ensureUniquesInParentTree, uniqueFromFileId);
 
 	bool result = waitForComplete(parentWidget, tr("Adding files"));
 	return result;
+}
+
+bool DbController::addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, QWidget* parentWidget)
+{
+	return addFiles(files, parentId, false, -1, parentWidget);
 }
 
 bool DbController::addFile(const std::shared_ptr<DbFile>& file, int parentId, QWidget* parentWidget)
@@ -632,7 +675,15 @@ bool DbController::addFile(const std::shared_ptr<DbFile>& file, int parentId, QW
 	std::vector<std::shared_ptr<DbFile>> v;
 	v.push_back(file);
 
-	return addFiles(&v, parentId, parentWidget);
+	return addFiles(&v, parentId, false, -1, parentWidget);
+}
+
+bool DbController::addUniqueFile(const std::shared_ptr<DbFile>& file, int parentId, int uniqueFromFileId, QWidget* parentWidget)
+{
+	std::vector<std::shared_ptr<DbFile>> v;
+	v.push_back(file);
+
+	return addFiles(&v, parentId, true, uniqueFromFileId, parentWidget);
 }
 
 bool DbController::deleteFiles(std::vector<std::shared_ptr<DbFileInfo>>* files, QWidget* parentWidget)
@@ -2294,6 +2345,11 @@ int DbController::rootFileId() const
 	return m_worker->rootFileId();
 }
 
+int DbController::schemaFileId() const
+{
+	return m_worker->schemasFileId();
+}
+
 int DbController::afblFileId() const
 {
 	return m_worker->afblFileId();
@@ -2329,6 +2385,11 @@ int DbController::mvsFileId() const
 	return m_worker->mvsFileId();
 }
 
+int DbController::tvsFileId() const
+{
+	return m_worker->tvsFileId();
+}
+
 int DbController::dvsFileId() const
 {
 	return m_worker->dvsFileId();
@@ -2356,15 +2417,17 @@ std::vector<DbFileInfo> DbController::systemFiles() const
 
 DbFileInfo DbController::systemFileInfo(const QString& fileName) const
 {
+	QString shortFileName = DbFileInfo::fullPathToFileName(fileName);
+
 	DbFileInfo result;
 	result.setFileId(-1);
 
 	std::vector<DbFileInfo> systemFiles = m_worker->systemFiles();
 
 	auto pos = std::find_if(systemFiles.begin(), systemFiles.end(),
-		[&fileName](const DbFileInfo& fi)
+		[&shortFileName](const DbFileInfo& fi)
 		{
-			return fi.fileName() == fileName;
+			return fi.fileName() == shortFileName;
 		});
 
 	if (pos != systemFiles.end())
@@ -2396,6 +2459,19 @@ DbFileInfo DbController::systemFileInfo(int fileId) const
 	return result;
 }
 
+bool DbController::isSystemFile(int fileId) const
+{
+	std::vector<DbFileInfo> systemFiles = m_worker->systemFiles();
+
+	auto pos = std::find_if(systemFiles.begin(), systemFiles.end(),
+		[&fileId](const DbFileInfo& fi)
+		{
+			return fi.fileId() == fileId;
+		});
+
+	return pos != systemFiles.end();
+}
+
 QString DbController::lastError() const
 {
 	return m_lastError;
@@ -2417,25 +2493,9 @@ QString DbController::username(int userId) const
 	}
 }
 
-
-HasDbController::HasDbController()
-{
-	assert(false);
-}
-
 HasDbController::HasDbController(DbController* dbcontroller) :
 	m_db(dbcontroller)
 {
 	assert(dbcontroller);
-}
-
-DbController* HasDbController::db()
-{
-	return m_db;
-}
-
-const DbController* HasDbController::db() const
-{
-	return m_db;
 }
 

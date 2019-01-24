@@ -21,7 +21,3 @@ DbController* MainTabPage::db()
 	return m_dbController;
 }
 
-GlobalMessanger* MainTabPage::globalMesssanger()
-{
-	return GlobalMessanger::instance();
-}

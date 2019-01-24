@@ -192,6 +192,8 @@ void Calculator::initDialog()
 	setWindowIcon(QIcon(":/icons/Calculator.png"));
 	setWindowTitle(tr("Metrological calculator"));
 
+	QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
+
 	// Thermistor
 	//
 	m_pTrDegreeRadio->setChecked(true);
@@ -204,7 +206,7 @@ void Calculator::initDialog()
 			continue;
 		}
 
-		if (pair.sensorType < 0 || pair.sensorType >= SENSOR_TYPE_COUNT)
+		if (pair.sensorType < 0 || pair.sensorType >= mst.keyCount())
 		{
 			continue;
 		}
@@ -214,7 +216,7 @@ void Calculator::initDialog()
 			continue;
 		}
 
-		m_pTrList->addItem(SensorTypeStr[pair.sensorType], pair.sensorType);
+		m_pTrList->addItem(mst.key(pair.sensorType), pair.sensorType);
 	}
 	m_pTrList->setCurrentIndex(0);
 
@@ -241,7 +243,7 @@ void Calculator::initDialog()
 			continue;
 		}
 
-		if (pair.sensorType < 0 || pair.sensorType >= SENSOR_TYPE_COUNT)
+		if (pair.sensorType < 0 || pair.sensorType >= mst.keyCount())
 		{
 			continue;
 		}
@@ -251,7 +253,7 @@ void Calculator::initDialog()
 			continue;
 		}
 
-		m_pTcList->addItem(SensorTypeStr[ pair.sensorType ], pair.sensorType);
+		m_pTcList->addItem(mst.key(pair.sensorType), pair.sensorType);
 	}
 	m_pTcList->setCurrentIndex(0);
 
@@ -304,8 +306,10 @@ void Calculator::conversionTr()
 		return;
 	}
 
+	QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
 	E::SensorType sensorType = static_cast<E::SensorType>(m_pTrList->itemData(index).toInt());
-	if (sensorType < 0 || sensorType >= SENSOR_TYPE_COUNT)
+
+	if (sensorType < 0 || sensorType >= mst.keyCount())
 	{
 		return;
 	}
@@ -346,8 +350,10 @@ void Calculator::conversionTc()
 		return;
 	}
 
+	QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
 	E::SensorType sensorType = static_cast<E::SensorType>(m_pTcList->itemData(index).toInt());
-	if (sensorType < 0 || sensorType >= SENSOR_TYPE_COUNT)
+
+	if (sensorType < 0 || sensorType >= mst.keyCount())
 	{
 		return;
 	}

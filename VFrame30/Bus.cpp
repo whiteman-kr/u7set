@@ -551,6 +551,11 @@ namespace VFrame30
 	//
 	// BusSet
 	//
+	void BusSet::clear()
+	{
+		m_busses.clear();
+	}
+
 	bool BusSet::hasBus(QString busTypeId) const
 	{
 		auto it = std::find_if(m_busses.begin(), m_busses.end(),

@@ -1116,16 +1116,16 @@ namespace VFrame30
 	//
 	//
 
-	SchemaDetails::SchemaDetails()
+	SchemaDetails::SchemaDetails() noexcept
 	{
 	}
 
-	SchemaDetails::SchemaDetails(const QString& details)
+	SchemaDetails::SchemaDetails(const QString& details) noexcept
 	{
 		parseDetails(details);
 	}
 
-	bool SchemaDetails::operator< (const SchemaDetails& b) const
+	bool SchemaDetails::operator< (const SchemaDetails& b) const noexcept
 	{
 		return this->m_schemaId < b.m_schemaId;
 	}

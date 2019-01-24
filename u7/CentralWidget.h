@@ -6,7 +6,7 @@ class CentralWidget : public QTabWidget
 {
 	Q_OBJECT
 public:
-	explicit CentralWidget(QWidget *parent = 0);
+	explicit CentralWidget(QWidget* parent = nullptr);
 
 	// public methods
 	//

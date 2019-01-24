@@ -285,7 +285,7 @@ void CompareDialog::done(int r)
 
 	// Emit signal
 	//
-	GlobalMessanger::instance()->fireCompareObject(m_object, compareData);
+	GlobalMessanger::instance().fireCompareObject(m_object, compareData);
 
 	QDialog::done(r);
 }

@@ -297,6 +297,8 @@ namespace Builder
 				//
 				QVector<Metrology::SignalParam> signalsToWrite;
 
+				QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
+
 				int signalCount = m_signalSet->count();
 
 				for(int i = 0; i < signalCount; i++)
@@ -305,7 +307,7 @@ namespace Builder
 
 					bool hasWrongField = false;
 
-					if (signal.sensorType() < 0 || signal.sensorType() >= SENSOR_TYPE_COUNT)
+					if (signal.sensorType() < 0 || signal.sensorType() >= mst.keyCount())
 					{
 						// Signal %1 has wrong type of sensor: %2.
 						//

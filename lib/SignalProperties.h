@@ -215,7 +215,6 @@ private:
 	Signal m_signal;
 	SignalSpecPropValues m_specPropValues;
 
-	static std::shared_ptr<OrderedHash<int, QString>> m_sensorTypeHash;
 	static std::shared_ptr<OrderedHash<int, QString>> m_outputModeHash;
 };
 

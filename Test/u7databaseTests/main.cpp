@@ -40,8 +40,8 @@ int main(int argc, char *argv[])
 	//
 	// Database Signal functions
 	//
-	//SignalTests signalTests;
-	//returnCode |= QTest::qExec(&signalTests, argc, argv);
+	////SignalTests signalTests;
+	////returnCode |= QTest::qExec(&signalTests, argc, argv);
 
 	// Database User Management functions
 	//
@@ -80,8 +80,8 @@ int main(int argc, char *argv[])
 	DbControllerFileTests dbControllerFileTests;
 	returnCode |= QTest::qExec(&dbControllerFileTests, argc, argv);
 
-//	DbControllerSignalTests dbControllerSignalTests;
-//	returnCode |= QTest::qExec(&dbControllerSignalTests, argc, argv);
+////	DbControllerSignalTests dbControllerSignalTests;
+////	returnCode |= QTest::qExec(&dbControllerSignalTests, argc, argv);
 
 	DbControllerHardwareConfigurationTests dbControllerHardwareConfigurationTests;
 	returnCode |= QTest::qExec(&dbControllerHardwareConfigurationTests, argc, argv);

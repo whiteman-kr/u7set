@@ -134,8 +134,8 @@ FileTreeModel::FileTreeModel(DbController* dbcontroller, QWidget* parentWidget, 
 {
 	assert(m_dbc);
 
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &FileTreeModel::projectOpened);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &FileTreeModel::projectClosed);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &FileTreeModel::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &FileTreeModel::projectClosed);
 }
 
 FileTreeModel::~FileTreeModel()
@@ -1616,13 +1616,13 @@ FilesTabPage::FilesTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// --
 	//
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &FilesTabPage::projectOpened);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &FilesTabPage::projectClosed);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &FilesTabPage::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &FilesTabPage::projectClosed);
 
 	connect(m_fileView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &FilesTabPage::selectionChanged);
 	connect(m_fileModel, &FileTreeModel::dataChanged, this, &FilesTabPage::modelDataChanged);
 
-	connect(GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &FilesTabPage::compareObject);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::compareObject, this, &FilesTabPage::compareObject);
 
 	// Evidently, project is not opened yet
 	//

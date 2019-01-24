@@ -8,6 +8,8 @@ class DbController;
 
 class SchemaListModel : public QAbstractTableModel
 {
+	Q_OBJECT
+
 public:
 	SchemaListModel(QObject* parent = nullptr);
 	virtual ~SchemaListModel();
@@ -20,6 +22,7 @@ public:
 
 	virtual void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
 
+public:
 	void addFile(std::shared_ptr<DbFileInfo> file);
 
 	void setFiles(const std::vector<DbFileInfo>& files, const std::vector<DbUser>& users);

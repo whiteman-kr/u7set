@@ -1,6 +1,7 @@
 #include "BaseSchemaWidget.h"
 #include "SchemaView.h"
 #include "Schema.h"
+#include <QWindow>
 
 namespace VFrame30
 {
@@ -25,6 +26,23 @@ namespace VFrame30
 		// --
 		//
 		createActions();
+
+		// Create a widget, make it invisible and set Qt::WA_NativeWindow to it, then
+		// connect slot to it QWindow::screenChanged.
+		// The problem was, to get QWindow from widget it must be native window, as I don't want to make
+		// BaseSchemaWidget native, I have created this small invisible wiget
+		//
+		QWidget* dummyNativeWidget = new QWidget(this);
+		dummyNativeWidget->setAttribute(Qt::WA_NativeWindow, true);
+
+		if (dummyNativeWidget->windowHandle() != nullptr)
+		{
+			connect(dummyNativeWidget->windowHandle(), &QWindow::screenChanged, this, &BaseSchemaWidget::screenChanged);
+		}
+		else
+		{
+			assert(dummyNativeWidget->windowHandle());
+		}
 
 		return;
 	}
@@ -260,6 +278,14 @@ namespace VFrame30
 	{
 		setZoom(100, false);
 		return;
+	}
+
+	void BaseSchemaWidget::screenChanged(QScreen* /*screen*/)
+	{
+		// If we have several screens with different resolution or DPI, this slot is requeired to recalculate
+		// zoom params
+		//
+		setZoom(zoom(), true);
 	}
 
 	std::shared_ptr<VFrame30::Schema> BaseSchemaWidget::schema()

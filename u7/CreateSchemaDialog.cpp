@@ -7,7 +7,7 @@
 #include "../VFrame30/Settings.h"
 #include "../VFrame30/FblItemRect.h"
 
-CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema, DbController* db, int tempateParentFileId, QString templateFileExtension, QWidget* parent) :
+CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema, DbController* db, QWidget* parent) :
 	QDialog(parent),
 	ui(new Ui::CreateSchemaDialog),
 	m_db(db),
@@ -20,31 +20,44 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 	// Set StrID label
 	//
-	QString idLable = "ID";
+	QString idLabel;
+	int tempateParentFileId = -1;
+	QString templateFileExtension;
 
 	if (dynamic_cast<VFrame30::LogicSchema*>(m_schema.get()) != nullptr)
 	{
-		idLable = "AppSchemaID";
+		idLabel = "AppSchemaID";
+
+		tempateParentFileId = db->alFileId();
+		templateFileExtension = ::AlTemplExtension;
 	}
 
 	if (dynamic_cast<VFrame30::UfbSchema*>(m_schema.get()) != nullptr)
 	{
-		idLable = "UserFunctionalBlock ID";
+		idLabel = "UserFunctionalBlock ID";
+
+		tempateParentFileId = db->ufblFileId();
+		templateFileExtension = ::UfbTemplExtension;
 	}
 
 	if (isMonitorSchema() == true)
 	{
-		idLable = "MonitorSchemaID";
+		idLabel = "MonitorSchemaID";
+
+		tempateParentFileId = db->mvsFileId();
+		templateFileExtension = ::MvsTemplExtension;
 	}
 
 	if (isDiagSchema() == true)
 	{
-		idLable = "DiagSchemaID";
+		idLabel = "DiagSchemaID";
 	}
 
-	assert(idLable != "ID");			// Should be corresponded to schema type
+	assert(tempateParentFileId != -1);
+	assert(templateFileExtension.isEmpty() == false);
+	assert(idLabel.isEmpty() == false);							// Should be corresponded to schema type
 
-	ui->strIdLabel->setText(idLable);
+	ui->strIdLabel->setText(idLabel);
 
 	// Set height and width
 	//
@@ -140,10 +153,9 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 
 	// Fill Template combo box
 	//
-	ui->templateComboBox->addItem(tr("Blank"), QVariant(-1));		// -1 means Blnk, any othe number is DbFileID
+	ui->templateComboBox->addItem(tr("Blank"), QVariant(-1));		// -1 means Blank, any other number is DbFileID
 
 	std::vector<DbFileInfo> templates;
-
 	bool ok = db->getFileList(&templates, tempateParentFileId, templateFileExtension, true, parent);
 
 	if (ok == true)

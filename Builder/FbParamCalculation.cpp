@@ -224,11 +224,12 @@ namespace Builder
 
 		switch(i_conf.unsignedIntValue())
 		{
-		case 1:			// tct_on,		tctc_on
-		case 2:			// tct_off,		tctc_off
-		case 3:			// tct_vibr,	tctc_vibr
-		case 4:			// tct_filter,	tctc_filter
-		case 5:			// tct_rsv,		tctc_rsv
+		case 1:			// tct_on,			tctc_on
+		case 2:			// tct_off,			tctc_off
+		case 3:			// tct_vibr,		tctc_vibr
+		case 4:			// tct_filter,		tctc_filter
+		case 5:			// tct_rsv,			tctc_rsv
+		case 6:			// tct_rcfilter,	tctc_rcfilter
 			break;
 
 		default:

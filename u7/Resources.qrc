@@ -1,4 +1,4 @@
-<RCC>  
+<RCC> 
     <qresource prefix="/Images">
         <file>Images/cross.png</file>
         <file>Images/lock.png</file>
@@ -38,7 +38,21 @@
         <file>Images/SimAddWindow.svg</file>
         <file>Images/SimPause.svg</file>
         <file>Images/SimRun.svg</file>
-        <file>Images/SimStop.svg</file>        
+        <file>Images/SimStop.svg</file>
+        <file>Images/SchemaAddFile.svg</file>
+        <file>Images/SchemaClone.svg</file>
+        <file>Images/SchemaAddFolder.svg</file>
+        <file>Images/SchemaDelete.svg</file>
+        <file>Images/SchemaOpen.svg</file>
+        <file>Images/SchemaView.svg</file>
+        <file>Images/SchemaCheckOut.svg</file>
+        <file>Images/SchemaCheckIn.svg</file>
+        <file>Images/SchemaUndo.svg</file>
+        <file>Images/SchemaHistory.svg</file>
+        <file>Images/SchemaDownload.svg</file>
+        <file>Images/SchemaUpload.svg</file>
+        <file>Images/SchemaRefresh.svg</file>
+        <file>Images/SchemaProperties.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>

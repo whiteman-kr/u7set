@@ -172,7 +172,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		m_propertyEditor->setFontSizeF(m_propertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
 	}
 
-	DbFileInfo mcInfo = dbController->systemFileInfo(EtcFileName);
+	DbFileInfo mcInfo = dbController->systemFileInfo(dbController->etcFileId());
 
 	if (mcInfo.isNull() == true)
 	{

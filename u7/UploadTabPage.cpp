@@ -163,8 +163,8 @@ UploadTabPage::UploadTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	// --
 	//
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &UploadTabPage::projectOpened);
-	connect(GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &UploadTabPage::projectClosed);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, &UploadTabPage::projectOpened);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, &UploadTabPage::projectClosed);
 
 	connect(m_pReadToFileButton, &QAbstractButton::clicked, this, &UploadTabPage::read);
 	connect(m_pDetectSubsystemButton, &QAbstractButton::clicked, this, &UploadTabPage::detectSubsystem);

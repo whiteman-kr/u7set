@@ -149,8 +149,6 @@ int main(int argc, char *argv[])
 
 	// Shutting down
 	//
-	GlobalMessanger::free();		// Delete instance of GlobalMessanger
-
 	Builder::shutdown();
 	DbController::shutdown();
 	VFrame30::VFrame30Library::shutdown();

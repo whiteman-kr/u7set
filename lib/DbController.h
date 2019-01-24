@@ -57,12 +57,17 @@ public:
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, bool removeDeleted, QWidget* parentWidget);
 	bool getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted, QWidget* parentWidget);
 
+	bool getFileListTree(DbFileTree* filesTree, int parentId, bool removeDeleted, QWidget* parentWidget);
+	bool getFileListTree(DbFileTree* filesTree, int parentId, QString filter, bool removeDeleted, QWidget* parentWidget);
+
 	bool getFileInfo(int parentId, QString fileName, DbFileInfo* out, QWidget* parentWidget);
 	bool getFileInfo(int fileId, DbFileInfo* out, QWidget* parentWidget);
 	bool getFileInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out, QWidget* parentWidget);
 
+	bool addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId, QWidget* parentWidget);
 	bool addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, QWidget* parentWidget);
 	bool addFile(const std::shared_ptr<DbFile>& file, int parentId, QWidget* parentWidget);
+	bool addUniqueFile(const std::shared_ptr<DbFile>& file, int parentId, int uniqueFromFileId, QWidget* parentWidget);
 
 	bool deleteFiles(std::vector<std::shared_ptr<DbFileInfo> >* files, QWidget* parentWidget);
 	bool deleteFiles(std::vector<DbFileInfo>* files, QWidget* parentWidget);
@@ -169,11 +174,12 @@ signals:
 	bool signal_isFileExists(QString fileName, int parentId, int* fileId);
 
 	void signal_getFileList(std::vector<DbFileInfo>* files, int parentId, QString filter, bool removeDeleted);
+	void signal_getFileListTree(DbFileTree* filesTree, int parentId, QString filter, bool removeDeleted);
 
 	void signal_getFileInfo(int parentId, QString fileName, DbFileInfo* out);
 	void signal_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileInfo>* out);
 
-	void signal_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId);
+	void signal_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId);
 	void signal_deleteFiles(std::vector<DbFileInfo>* files);
 
 	void signal_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
@@ -278,13 +284,15 @@ public:
 	void setCurrentProject(const DbProject& project);
 
 	int rootFileId() const;			// Root file
+	int schemaFileId() const;		// $root$/Schemas file id
 	int afblFileId() const;			// Application Functional Block Library
 	int ufblFileId() const;			// User Functional Block Library
 	int alFileId() const;			// Application Logic
 	int hcFileId() const;			// Hardware Configuration
 	int hpFileId() const;			// Hadware Presets
 	int mcFileId() const;			// Module Configuration
-	int mvsFileId() const;			// Monotor Video Schemas
+	int mvsFileId() const;			// Monitor Video Schemas
+	int tvsFileId() const;			// Tuning Video Schemas
 	int dvsFileId() const;			// Diaginostics Video Schemas
 	int connectionsFileId() const;	// Connections
 	int busTypesFileId() const;		// BusTypes
@@ -294,6 +302,7 @@ public:
 
 	DbFileInfo systemFileInfo(const QString& fileName) const;
 	DbFileInfo systemFileInfo(int fileId) const;
+	bool isSystemFile(int fileId) const;
 
 	QString lastError() const;
 
@@ -322,21 +331,36 @@ private:
 
 class HasDbController
 {
-
-private:
-	HasDbController();
 public:
+	HasDbController() = delete;
 	explicit HasDbController(DbController* db);
 
 	// Properties
 	//
 protected:
-	DbController* db();
-	const DbController* db() const;
+	DbController* db() noexcept
+	{
+		return m_db;
+	}
+
+	const DbController* db() const noexcept
+	{
+		return m_db;
+	}
+
+	DbController* dbc() noexcept
+	{
+		return m_db;
+	}
+
+	const DbController* dbc() const noexcept
+	{
+		return m_db;
+	}
 
 	// Data
 	//
 private:
-	DbController* m_db;
+	DbController* m_db = nullptr;
 };
 

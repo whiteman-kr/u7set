@@ -257,6 +257,9 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0237.sql", "Upgrade to version 237, LM modules have the same configuration script"},
 	{":/DatabaseUpgrade/Upgrade0238.sql", "Upgrade to version 238, Metrology Preset Update"},
 	{":/DatabaseUpgrade/Upgrade0239.sql", "Upgrade to version 239, TestClient Preset added"},
+	{":/DatabaseUpgrade/Upgrade0240.sql", "Upgrade to version 240, AOM-4PH Preset corrections"},
+	{":/DatabaseUpgrade/Upgrade0241.sql", "Upgrade to version 241, Added function api.get_file_list_tree"},	
+	{":/DatabaseUpgrade/Upgrade0242.sql", "Upgrade to version 242, AOM-4PH Preset corrections"},
 };
 
 
@@ -389,13 +392,19 @@ bool DbWorker::isProjectOpened() const
 
 int DbWorker::rootFileId() const
 {
-	return 0;
+	return 0;	// For now, $root$ fileId is always 0, as it was created first
 }
 
 int DbWorker::afblFileId() const
 {
 	QMutexLocker m(&m_mutex);
 	return m_afblFileId;
+}
+
+int DbWorker::schemasFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_schemasFileId;
 }
 
 int DbWorker::ufblFileId() const
@@ -426,6 +435,12 @@ int DbWorker::mvsFileId() const
 {
 	QMutexLocker m(&m_mutex);
 	return m_mvsFileId;
+}
+
+int DbWorker::tvsFileId() const
+{
+	QMutexLocker m(&m_mutex);
+	return m_tvsFileId;
 }
 
 int DbWorker::dvsFileId() const
@@ -461,7 +476,10 @@ int DbWorker::etcFileId() const
 std::vector<DbFileInfo> DbWorker::systemFiles() const
 {
 	QMutexLocker m(&m_mutex);
-	std::vector<DbFileInfo> copy(m_systemFiles);
+
+	std::vector<DbFileInfo> copy;
+	copy.assign(m_systemFiles.begin(),m_systemFiles.end());
+
 	return copy;
 }
 
@@ -992,39 +1010,52 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	// Set System Folders File ID
 	//
 	std::vector<DbFileInfo> systemFiles;
+	std::vector<QString> systemFileNames = {::AfblFileName, ::SchemasFileName, ::UfblFileName, ::AlFileName, ::HcFileName,
+											::HpFileName, ::MvsFileName,::TvsFileName, ::DvsFileName, ::McFileName,
+											::ConnectionsFileName, ::BusTypesFileName, ::EtcFileName};
 
-	getFileList_worker(&systemFiles, rootFileId(), "", true);
+	bool ok = worker_getFilesInfo(systemFileNames, &systemFiles);
+	if (ok == false)
+	{
+		emitError(db, tr("Can't get system files.") + db.lastError().text());
+		db.close();
+		return;
+	}
 
-	m_mutex.lock();
-	m_afblFileId = -1;
-	m_ufblFileId = -1;
-	m_alFileId = -1;
-	m_hcFileId = -1;
-	m_hpFileId = -1;
-	m_mvsFileId = -1;
-	m_dvsFileId = -1;
-	m_mcFileId = -1;
-	m_connectionsFileId = -1;
-	m_busTypesFileId = -1;
-	m_etcFileId = -1;
+	{
+		QMutexLocker locker(&m_mutex);
 
-	m_systemFiles.clear();
-	m_mutex.unlock();
+		m_afblFileId = -1;
+		m_schemasFileId = -1;
+		m_ufblFileId = -1;
+		m_alFileId = -1;
+		m_hcFileId = -1;
+		m_hpFileId = -1;
+		m_mvsFileId = -1;
+		m_tvsFileId = -1;
+		m_dvsFileId = -1;
+		m_mcFileId = -1;
+		m_connectionsFileId = -1;
+		m_busTypesFileId = -1;
+		m_etcFileId = -1;
 
-	// Root file is filling manually
+		m_systemFiles.clear();
+	}
+
+	// Root file is filled manually
 	//
 	{
 		QMutexLocker locker(&m_mutex);
 
 		DbFileInfo rfi;
 		rfi.setFileId(rootFileId());
-		rfi.setFileName(rootFileName);
+		rfi.setFileName(RootFileName);
 		m_systemFiles.push_back(rfi);
 	}
 
 	for (const DbFileInfo& fi : systemFiles)
 	{
-		if (fi.fileName() == ::AfblFileName)
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(::AfblFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_afblFileId = fi.fileId();
@@ -1032,7 +1063,15 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == ::UfblFileName)
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(::SchemasFileName))
+		{
+			QMutexLocker locker(&m_mutex);
+			m_schemasFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
+			continue;
+		}
+
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(::UfblFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_ufblFileId = fi.fileId();
@@ -1040,7 +1079,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == ::AlFileName)
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(::AlFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_alFileId = fi.fileId();
@@ -1048,7 +1087,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == ::HcFileName)
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(::HcFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_hcFileId = fi.fileId();
@@ -1056,7 +1095,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == ::HpFileName)
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(::HpFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_hpFileId = fi.fileId();
@@ -1064,7 +1103,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == ::MvsFileName)
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(::MvsFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_mvsFileId = fi.fileId();
@@ -1072,7 +1111,15 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == ::DvsFileName)
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(::TvsFileName))
+		{
+			QMutexLocker locker(&m_mutex);
+			m_tvsFileId = fi.fileId();
+			m_systemFiles.push_back(fi);
+			continue;
+		}
+
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(::DvsFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_dvsFileId = fi.fileId();
@@ -1080,7 +1127,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == ::McFileName)
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(::McFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_mcFileId = fi.fileId();
@@ -1088,7 +1135,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == ::ConnectionsFileName)
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(::ConnectionsFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_connectionsFileId = fi.fileId();
@@ -1096,7 +1143,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == ::BusTypesFileName)
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(::BusTypesFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_busTypesFileId = fi.fileId();
@@ -1104,7 +1151,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == ::EtcFileName)
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(::EtcFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_etcFileId = fi.fileId();
@@ -1114,36 +1161,30 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	}
 
 
-	m_mutex.lock();
-	result = m_afblFileId != -1;
-	result &= m_ufblFileId != -1;
-	result &= m_alFileId != -1;
-	result &= m_hcFileId != -1;
-	result &= m_hpFileId != -1;
-	result &= m_mvsFileId != -1;
-	result &= m_dvsFileId != -1;
-	result &= m_mcFileId != -1;
-	result &= m_connectionsFileId != -1;
-	result &= m_busTypesFileId != -1;
-	result &= m_etcFileId != -1;
-	m_mutex.unlock();
+	{
+		QMutexLocker locker(&m_mutex);
+
+		result = m_afblFileId != -1;
+		result &= m_schemasFileId != -1;
+		result &= m_ufblFileId != -1;
+		result &= m_alFileId != -1;
+		result &= m_hcFileId != -1;
+		result &= m_hpFileId != -1;
+		result &= m_mvsFileId != -1;
+		result &= m_tvsFileId != -1;
+		result &= m_dvsFileId != -1;
+		result &= m_mcFileId != -1;
+		result &= m_connectionsFileId != -1;
+		result &= m_busTypesFileId != -1;
+		result &= m_etcFileId != -1;
+	}
 
 	if (result == false)
 	{
 		emitError(db, tr("Can't get system folder.") + db.lastError().text());
 		db.close();
 
-		// Lock is nit necessare, we will crash anyway!
-		//
-		assert(m_afblFileId != -1);
-		assert(m_ufblFileId != -1);
-		assert(m_alFileId != -1);
-		assert(m_hcFileId != -1);
-		assert(m_hpFileId != -1);
-		assert(m_mvsFileId != -1);
-		assert(m_dvsFileId != -1);
-		assert(m_mcFileId != -1);
-
+		assert(result);
 		return;
 	}
 
@@ -2367,6 +2408,70 @@ void DbWorker::getFileList_worker(std::vector<DbFileInfo>* files, int parentId, 
 	return;
 }
 
+void DbWorker::slot_getFileListTree(DbFileTree* filesTree, int parentId, QString filter, bool removeDeleted)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (filesTree == nullptr)
+	{
+		assert(filesTree != nullptr);
+		return;
+	}
+
+	filesTree->clear();
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get file list tree. Database connection is not openned."));
+		return;
+	}
+
+	QSqlQuery q(db);
+	q.setForwardOnly(true);
+
+	q.prepare("SELECT * FROM api.get_file_list_tree(:session_key, :parentid, :filter, :remove_deleted);");
+	q.bindValue(":session_key", sessionKey());
+	q.bindValue(":parentid", parentId);
+	q.bindValue(":filter", "%" + filter);
+	q.bindValue(":remove_deleted", removeDeleted);
+
+	if (bool result = q.exec();
+		result == false)
+	{
+		emitError(db, tr("Can't get file list tree. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while (q.next())
+	{
+		std::shared_ptr<DbFileInfo> fileInfo = std::make_shared<DbFileInfo>();
+
+		bool fileParseOk = db_dbFileInfo(q, fileInfo.get());
+		if (fileParseOk == false)
+		{
+			assert(fileParseOk);
+			continue;
+		}
+
+		filesTree->addFile(fileInfo);
+	}
+
+	filesTree->setRoot(parentId);
+
+	return;
+}
+
+
 void DbWorker::slot_getFileInfo(int parentId, QString fileName, DbFileInfo* out)
 {
 	// Init automitic varaiables
@@ -2492,7 +2597,66 @@ void DbWorker::slot_getFilesInfo(std::vector<int>* fileIds, std::vector<DbFileIn
 	return;
 }
 
-void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId)
+bool DbWorker::worker_getFilesInfo(const std::vector<QString>& fullPathFileNames, std::vector<DbFileInfo>* out)
+{
+	// Check parameters
+	//
+	if (fullPathFileNames.empty() == true ||
+		out == nullptr)
+	{
+		assert(out != nullptr);
+		return false;
+	}
+
+	out->clear();
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get file list. Database connection is not openned."));
+		return false;
+	}
+
+	QString request = QString("SELECT * FROM api.get_file_info('%1', ARRAY[")
+			.arg(sessionKey());
+
+	for (auto it = fullPathFileNames.begin(); it != fullPathFileNames.end(); ++it)
+	{
+		if (it == fullPathFileNames.begin())
+		{
+			request += QString("'%1'").arg(*it);
+		}
+		else
+		{
+			request += QString(", '%1'").arg(*it);
+		}
+	}
+
+	request += "]);";
+
+	QSqlQuery q(db);
+	q.setForwardOnly(true);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(db, tr("Can't get file info. Error: ") +  q.lastError().text());
+		return false;
+	}
+
+	while (q.next())
+	{
+		out->emplace_back();
+		db_dbFileInfo(q, &out->back());
+	}
+
+	return true;
+}
+
+void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId)
 {
 	// Init automitic varaiables
 	//
@@ -2552,13 +2716,30 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 		QSqlQuery q(db);
 		q.setForwardOnly(true);
 
-		q.prepare("SELECT * FROM add_file(:userid, :filename, :parentid, :filedata, :details);");
+		if (ensureUniquesInParentTree == false)
+		{
+			q.prepare("SELECT * FROM api.add_file(:sessionkey, :filename, :parentid, :filedata, :details);");
 
-		q.bindValue(":userid", currentUser().userId());
-		q.bindValue(":filename", file->fileName());
-		q.bindValue(":parentid", parentId);
-		q.bindValue(":filedata", file->data());
-		q.bindValue(":details", file->details());
+			q.bindValue(":sessionkey", sessionKey());
+			q.bindValue(":filename", file->fileName());
+			q.bindValue(":parentid", parentId);
+			q.bindValue(":filedata", file->data());
+			q.bindValue(":details", file->details());
+		}
+		else
+		{
+			// api.add_unique_file scans parent tree and finds any files with the same name.
+			// Comparsion done without extension, case insensetive
+			//
+			q.prepare("SELECT * FROM api.add_unique_file(:sessionkey, :filename, :parentid, :uniquefromfileid,  :filedata, :details);");
+
+			q.bindValue(":sessionkey", sessionKey());
+			q.bindValue(":filename", file->fileName());
+			q.bindValue(":parentid", parentId);
+			q.bindValue(":uniquefromfileid", uniqueFromFileId);
+			q.bindValue(":filedata", file->data());
+			q.bindValue(":details", file->details());
+		}
 
 		bool result = q.exec();
 

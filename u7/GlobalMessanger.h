@@ -39,8 +39,11 @@ private:
 	GlobalMessanger();
 
 public:
-	static GlobalMessanger* instance();
-	static void free();
+	GlobalMessanger(const GlobalMessanger&) = delete;
+	GlobalMessanger& operator=(const GlobalMessanger&) = delete;
+
+public:
+	static GlobalMessanger& instance();
 
 	// Project management
 	//
