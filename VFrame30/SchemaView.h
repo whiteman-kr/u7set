@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QJSEngine>
 #include "Session.h"
 #include "VFrame30Lib_global.h"
 

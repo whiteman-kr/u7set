@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QMutex>
 #include <../lib/SocketIO.h>
 #include "DialogSignalSnapshot.h"
 

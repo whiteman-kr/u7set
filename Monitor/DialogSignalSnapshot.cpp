@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "DialogSignalSnapshot.h"
 #include "ui_DialogSignalSnapshot.h"
 #include "Settings.h"

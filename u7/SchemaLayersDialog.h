@@ -1,9 +1,7 @@
 #pragma once
 
-#include <QDialog>
-
 namespace Ui {
-class SchemaLayersDialog;
+	class SchemaLayersDialog;
 }
 
 class EditSchemaView;

@@ -1,7 +1,4 @@
 #include "../u7/Settings.h"
-#include <QStandardPaths>
-#include <QDir>
-#include <QSettings>
 #include "../Tools/qtkeychain-0.8/keychain.h"
 
 Settings theSettings;

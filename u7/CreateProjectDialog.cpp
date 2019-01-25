@@ -1,7 +1,7 @@
 #include "CreateProjectDialog.h"
 #include "ui_CreateProjectDialog.h"
 #include "PasswordService.h"
-#include <QMessageBox>
+
 
 CreateProjectDialog::CreateProjectDialog(QWidget *parent) :
 	QDialog(parent),

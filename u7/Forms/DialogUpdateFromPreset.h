@@ -1,6 +1,5 @@
 #ifndef DIALOGUPDATEFROMPRESET_H
 #define DIALOGUPDATEFROMPRESET_H
-#include <QDialog>
 
 class QTextEdit;
 class QListWidget;

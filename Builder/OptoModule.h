@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QObject>
-
 #include "../lib/OrderedHash.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/Address16.h"

@@ -1,10 +1,6 @@
 #ifndef SELECTSCHEMAWIDGET_H
 #define SELECTSCHEMAWIDGET_H
 
-#include <QWidget>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QTableWidget>
 #include "MonitorCentralWidget.h"
 #include "MonitorConfigController.h"
 

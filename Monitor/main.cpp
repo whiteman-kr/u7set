@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "../lib/SimpleThread.h"
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../VFrame30/VFrame30Library.h"

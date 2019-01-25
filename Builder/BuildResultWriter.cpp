@@ -1,8 +1,3 @@
-#include <QHostInfo>
-#include <QStandardPaths>
-#include <QDir>
-#include <QCryptographicHash>
-
 #include "BuildResultWriter.h"
 #include "IssueLogger.h"
 #include "../u7/Settings.h"

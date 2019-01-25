@@ -1,9 +1,6 @@
 #ifndef DIALOGCONNECTIONS_H
 #define DIALOGCONNECTIONS_H
 
-#include "Stable.h"
-#include <QItemDelegate>
-#include <QCompleter>
 #include "../lib/DbController.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/PropertyEditorDialog.h"

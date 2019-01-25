@@ -1,6 +1,4 @@
 #pragma once
-#include <memory>
-#include <QScrollArea>
 #include "VFrame30Lib_global.h"
 
 namespace VFrame30

@@ -1,8 +1,5 @@
 #pragma once
 
-#include <QDialog>
-#include <QCompleter>
-
 namespace Ui {
 	class LoginDialog;
 }

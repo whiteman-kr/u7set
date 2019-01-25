@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QDialog>
 #include "Settings.h"
 
 namespace Ui {

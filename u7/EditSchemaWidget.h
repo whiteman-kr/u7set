@@ -1,5 +1,4 @@
 #pragma once
-#include <QHostInfo>
 #include "../VFrame30/PosConnectionImpl.h"
 #include "../VFrame30/BaseSchemaWidget.h"
 #include "../VFrame30/LogicSchema.h"

@@ -1,8 +1,6 @@
 #ifndef EQUIPMENTVCSDIALOG_H
 #define EQUIPMENTVCSDIALOG_H
 
-#include <QDialog>
-
 namespace Ui {
 	class EquipmentVcsDialog;
 }

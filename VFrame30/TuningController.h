@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QObject>
 #include "../lib/Tuning/ITuningSignalManager.h"
 #include "../lib/Tuning/ITuningTcpClient.h"
 #include "VFrame30Lib_global.h"

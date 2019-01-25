@@ -1,7 +1,6 @@
 #ifndef COMPAREPROPERTYOBJECTDIALOG_H
 #define COMPAREPROPERTYOBJECTDIALOG_H
 
-#include <QDialog>
 #include "GlobalMessanger.h"
 #include "../../lib/DbStruct.h"
 #include "../../lib/PropertyObject.h"

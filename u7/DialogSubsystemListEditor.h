@@ -1,8 +1,6 @@
 #ifndef DIALOGSUBSYSTEMLISTEDITOR_H
 #define DIALOGSUBSYSTEMLISTEDITOR_H
 
-#include <QDialog>
-#include <QItemDelegate>
 #include "../lib/DbController.h"
 #include "../lib/Subsystem.h"
 

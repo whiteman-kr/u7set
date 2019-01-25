@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "ProjectsTabPage.h"
 #include "../lib/DbController.h"
 #include "CreateProjectDialog.h"

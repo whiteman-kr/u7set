@@ -1,7 +1,6 @@
 #ifndef TCPSIGNALCLIENT_H
 #define TCPSIGNALCLIENT_H
 
-#include <QStringList>
 #include "../lib/Tcp.h"
 #include "../lib/Hash.h"
 #include "../Proto/network.pb.h"

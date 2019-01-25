@@ -1,6 +1,5 @@
 #ifndef ARCHIVEMODELVIEW_H
 #define ARCHIVEMODELVIEW_H
-#include <QTableView>
 #include "ArchiveData.h"
 
 enum class ArchiveColumns

@@ -1,8 +1,6 @@
 #ifndef DIALOGCHOOSEPRESET_H
 #define DIALOGCHOOSEPRESET_H
 
-#include <QDialog>
-
 #include "../lib/DbController.h"
 
 namespace Ui {

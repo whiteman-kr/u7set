@@ -3,8 +3,6 @@
 #include "IdePropertyEditor.h"
 #include "SpecificPropertiesEditor.h"
 
-#include <QMessageBox>
-#include <QHBoxLayout>
 
 //
 // IdePropertyEditor

@@ -1,9 +1,9 @@
-#include "Stable.h"
 #include "UploadTabPage.h"
 #include "Settings.h"
 #include "GlobalMessanger.h"
-#include "../lib/DbController.h"
 #include "DialogSettingsConfigurator.h"
+#include "../lib/DbController.h"
+
 
 //
 //

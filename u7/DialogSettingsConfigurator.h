@@ -1,10 +1,9 @@
 #ifndef DIALOGSETTINGSCONFIGURATOR_H
 #define DIALOGSETTINGSCONFIGURATOR_H
 
-#include <QDialog>
 
 namespace Ui {
-class DialogSettingsConfigurator;
+	class DialogSettingsConfigurator;
 }
 
 class DialogSettingsConfigurator : public QDialog

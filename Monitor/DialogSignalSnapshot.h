@@ -1,8 +1,6 @@
 #ifndef DIALOGSIGNALSNAPSHOT_H
 #define DIALOGSIGNALSNAPSHOT_H
 
-#include <QDialog>
-#include <QAbstractItemModel>
 #include "../lib/AppSignalManager.h"
 #include "DialogColumns.h"
 #include "MonitorConfigController.h"

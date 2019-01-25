@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "ArchiveTrendTcpClient.h"
 #include "Settings.h"
 

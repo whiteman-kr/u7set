@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QThread>
-#include <set>
 #include "../VFrame30/SchemaItemAfb.h"
 #include "RunOrder.h"
 

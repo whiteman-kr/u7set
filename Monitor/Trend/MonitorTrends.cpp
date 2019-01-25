@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "MonitorTrends.h"
 #include "DialogChooseTrendSignals.h"
 #include "../TrendView/TrendWidget.h"

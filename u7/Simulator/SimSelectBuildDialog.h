@@ -1,8 +1,6 @@
 #ifndef SIMULATORSELECTBUILDDIALOG_H
 #define SIMULATORSELECTBUILDDIALOG_H
 
-#include <QDialog>
-
 namespace Ui {
 	class SimulatorSelectBuildDialog;
 }

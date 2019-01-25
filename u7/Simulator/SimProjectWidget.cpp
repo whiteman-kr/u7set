@@ -1,7 +1,6 @@
 #include "SimProjectWidget.h"
-#include <QVBoxLayout>
-#include <QMenu>
 #include "../Settings.h"
+
 
 SimProjectWidget::SimProjectWidget(SimIdeSimulator* simulator, QWidget* parent) :
 	QWidget(parent),

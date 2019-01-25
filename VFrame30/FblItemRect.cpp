@@ -1,5 +1,4 @@
 #include "FblItemRect.h"
-#include <QPainter>
 #include "SchemaLayer.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"

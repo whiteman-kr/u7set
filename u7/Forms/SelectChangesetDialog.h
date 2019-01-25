@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QDialog>
 #include "../lib/DbController.h"
 #include "../lib/DbStruct.h"
 

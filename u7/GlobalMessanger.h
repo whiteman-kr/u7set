@@ -1,8 +1,6 @@
 #ifndef GLOBALMESSANGER_H
 #define GLOBALMESSANGER_H
 
-#include <QObject>
-#include <QMutex>
 #include "../lib/OutputLog.h"
 #include "../lib/DbStruct.h"
 #include "../Builder/IssueLogger.h"

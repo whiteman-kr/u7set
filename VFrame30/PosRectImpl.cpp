@@ -1,5 +1,4 @@
 #include "PosRectImpl.h"
-#include <QRect>
 #include "DrawParam.h"
 
 namespace VFrame30

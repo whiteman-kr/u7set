@@ -1,7 +1,6 @@
 #ifndef CHANGESETDETAILSDIALOG_H
 #define CHANGESETDETAILSDIALOG_H
 
-#include <QDialog>
 #include "../lib/DbController.h"
 
 namespace Ui {

@@ -1,5 +1,4 @@
 #include "ClientSchemaWidget.h"
-#include <QDrag>
 #include "LogicSchema.h"
 #include "../VFrame30/SchemaItemSignal.h"
 

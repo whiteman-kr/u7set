@@ -1,6 +1,5 @@
 #include "DialogChoosePreset.h"
 #include "ui_DialogChoosePreset.h"
-
 #include "../lib/DeviceObject.h"
 
 int DialogChoosePreset::m_lastSortColumn = 0;

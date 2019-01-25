@@ -1,6 +1,3 @@
-#ifndef EDITENGINESETPROPERTIY_H
-#define EDITENGINESETPROPERTIY_H
-
 #pragma once
 
 #include "EditEngine.h"
@@ -42,5 +39,3 @@ namespace EditEngine
 
 }
 
-
-#endif // EDITENGINESETPROPERTIY_H

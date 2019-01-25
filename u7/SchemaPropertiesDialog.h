@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QDialog>
 #include "../VFrame30/Schema.h"
 #include "../lib/PropertyEditor.h"
 

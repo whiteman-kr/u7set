@@ -1,15 +1,12 @@
-#include "Stable.h"
-#include <QJsonArray>
 #include "SchemaTabPageEx.h"
 #include "CreateSchemaDialog.h"
+#include "CheckInDialog.h"
+#include "Settings.h"
 #include "Forms/SelectChangesetDialog.h"
 #include "Forms/FileHistoryDialog.h"
 #include "Forms/CompareDialog.h"
 #include "Forms/ComparePropertyObjectDialog.h"
-#include "CheckInDialog.h"
-#include "Settings.h"
 #include "../lib/PropertyEditor.h"
-
 #include "../VFrame30/LogicSchema.h"
 #include "../VFrame30/MonitorSchema.h"
 #include "../VFrame30/WiringSchema.h"

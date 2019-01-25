@@ -2,8 +2,6 @@
 #define SPECIFICPROPERTIESEDITOR_H
 
 #include "../lib/PropertyEditor.h"
-#include <QSortFilterProxyModel>
-
 
 enum SpecificPropertyEditorColumns
 {

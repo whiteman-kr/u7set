@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "MonitorMainWindow.h"
 #include "MonitorCentralWidget.h"
 #include "Settings.h"

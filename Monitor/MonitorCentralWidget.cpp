@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "MonitorCentralWidget.h"
 #include "MonitorSchemaManager.h"
 #include "../VFrame30/MonitorSchema.h"

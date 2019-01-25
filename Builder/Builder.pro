@@ -1,4 +1,4 @@
-QT       += qml sql xml widgets
+QT       += qml sql xml widgets concurrent
 
 TARGET = Builder
 TEMPLATE = lib

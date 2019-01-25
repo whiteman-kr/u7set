@@ -1,5 +1,4 @@
 #include "SimIdeSimulator.h"
-#include <QDir>
 
 SimIdeSimulator::SimIdeSimulator() :
 	Sim::Simulator()

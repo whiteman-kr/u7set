@@ -1,5 +1,4 @@
 #include "RunOrder.h"
-#include <cassert>
 
 namespace Builder
 {

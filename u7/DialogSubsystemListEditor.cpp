@@ -1,15 +1,12 @@
 #include "DialogSubsystemListEditor.h"
 #include "ui_DialogSubsystemListEditor.h"
-#include <QMessageBox>
-#include <QInputDialog>
-#include <set>
+
 
 //
 //
 // SubsystemListEditorDelegate
 //
 //
-
 SubsystemListEditorDelegate::SubsystemListEditorDelegate(QObject *parent):QItemDelegate(parent)
 {
 }

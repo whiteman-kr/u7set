@@ -1,9 +1,6 @@
 #pragma once
 
 #include "MainTabPage.h"
-#include <QAbstractTableModel>
-#include <QStyledItemDelegate>
-#include <QSortFilterProxyModel>
 #include "GlobalMessanger.h"
 #include "../lib/Signal.h"
 

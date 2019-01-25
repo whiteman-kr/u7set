@@ -1,7 +1,6 @@
 #ifndef MONITORSCHEMAMANAGER_H
 #define MONITORSCHEMAMANAGER_H
 
-#include <QObject>
 #include "../VFrame30/Schema.h"
 #include "../VFrame30/SchemaManager.h"
 #include "MonitorConfigController.h"

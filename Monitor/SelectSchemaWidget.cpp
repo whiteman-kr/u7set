@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "SelectSchemaWidget.h"
 
 SelectSchemaWidget::SelectSchemaWidget(MonitorConfigController* configController, MonitorCentralWidget* centralWidget) :

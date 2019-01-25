@@ -1,9 +1,6 @@
 #ifndef SIMCODEPAGE_H
 #define SIMCODEPAGE_H
 
-#include <memory>
-#include <QAbstractTableModel>
-#include <QTreeView>
 #include "SimBasePage.h"
 #include "SimLogicModule.h"
 

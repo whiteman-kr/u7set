@@ -1,7 +1,7 @@
 #include "DrawParam.h"
 #include "Schema.h"
 #include "ClientSchemaView.h"
-#include <QFont>
+
 
 namespace VFrame30
 {

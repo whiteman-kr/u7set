@@ -1,6 +1,5 @@
 #include "SimOutputWidget.h"
-#include <QMenu>
-#include <QAction>
+
 
 QtMessageHandler SimOutputWidget::simOriginalMessageHandler = 0;
 QMutex SimOutputWidget::m_mutex;

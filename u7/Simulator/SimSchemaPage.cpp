@@ -1,8 +1,5 @@
 #include "SimSchemaPage.h"
-#include <QGridLayout>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QMenu>
+
 
 SimSchemaPage::SimSchemaPage(std::shared_ptr<VFrame30::Schema> schema,
 							 SimIdeSimulator* simulator,

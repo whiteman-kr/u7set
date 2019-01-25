@@ -1,9 +1,6 @@
 #ifndef SCHEMAMANAGER_H
 #define SCHEMAMANAGER_H
 
-#include <memory>
-#include <QObject>
-#include <QJSEngine>
 #include "Schema.h"
 #include "VFrame30Lib_global.h"
 

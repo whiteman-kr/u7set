@@ -1,10 +1,9 @@
 #ifndef DIALOGCOLUMNS_H
 #define DIALOGCOLUMNS_H
 
-#include <QDialog>
 
 namespace Ui {
-class DialogColumns;
+	class DialogColumns;
 }
 
 

@@ -1,8 +1,6 @@
 #ifndef DIALOGSIGNALINFO_H
 #define DIALOGSIGNALINFO_H
 
-#include <QDialog>
-#include <QLabel>
 #include "../lib/AppSignalManager.h"
 
 namespace Ui {

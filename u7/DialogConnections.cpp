@@ -1,8 +1,7 @@
 #include "DialogConnections.h"
 #include "../lib/PropertyEditorDialog.h"
 #include "Settings.h"
-#include <QMessageBox>
-#include <QFileDialog>
+
 
 DialogConnections* theDialogConnections = nullptr;
 

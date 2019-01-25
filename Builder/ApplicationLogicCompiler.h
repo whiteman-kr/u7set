@@ -1,8 +1,5 @@
 #pragma once
 
-#include <QObject>
-#include <QTranslator>
-#include <QUuid>
 #include "../lib/Subsystem.h"
 #include "../VFrame30/Bus.h"
 #include "ModuleLogicCompiler.h"

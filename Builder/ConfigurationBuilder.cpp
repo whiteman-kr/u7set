@@ -7,7 +7,6 @@
 #include "../lib/Connection.h"
 #include "IssueLogger.h"
 #include "SignalSet.h"
-#include <QQmlEngine>
 
 namespace Builder
 {

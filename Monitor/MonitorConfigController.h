@@ -1,9 +1,6 @@
 #ifndef MONITORCONFIGTHREAD_H
 #define MONITORCONFIGTHREAD_H
 
-#include <vector>
-#include <set>
-#include <QThread>
 #include "../lib/CfgServerLoader.h"
 #include "../lib/SocketIO.h"
 #include "../VFrame30/Schema.h"

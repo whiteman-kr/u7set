@@ -1,7 +1,6 @@
 #ifndef COMPAREDIALOG_H
 #define COMPAREDIALOG_H
 
-#include <QDialog>
 #include "../../lib/DbStruct.h"
 
 namespace Ui {

@@ -1,7 +1,4 @@
 #include "SimCodePage.h"
-#include <QGridLayout>
-#include <QMenu>
-#include <QFontDatabase>
 
 //
 // SimCodeModel

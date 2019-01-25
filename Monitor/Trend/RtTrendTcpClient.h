@@ -1,7 +1,6 @@
 #ifndef RTTRENDTCPCLIENT_H
 #define RTTRENDTCPCLIENT_H
 
-#include <atomic>
 #include "../lib/Tcp.h"
 #include "../lib/Hash.h"
 #include "../lib/TimeStamp.h"

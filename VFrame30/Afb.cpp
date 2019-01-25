@@ -1,6 +1,4 @@
 #include "Afb.h"
-#include <QDomElement>
-#include <QXmlStreamReader>
 
 
 namespace Afb

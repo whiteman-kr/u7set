@@ -26,6 +26,8 @@
 #include <QtWidgets>
 #include <QtXml>
 #include <QtPrintSupport>
+#include <QtQml>
+
 
 // Other stable includes
 //

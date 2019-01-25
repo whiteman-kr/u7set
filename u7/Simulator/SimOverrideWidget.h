@@ -1,8 +1,6 @@
 #ifndef SIMOVERRIDEWIDGET_H
 #define SIMOVERRIDEWIDGET_H
 
-#include <QWidget>
-#include <QTreeWidget>
 #include "../../Simulator/Simulator.h"
 
 // TO DO:

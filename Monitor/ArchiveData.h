@@ -1,8 +1,5 @@
 #ifndef ARCHIVEDATA_H
 #define ARCHIVEDATA_H
-#include <list>
-#include <map>
-#include <memory>
 #include "../lib/TimeStamp.h"
 #include "../lib/AppSignal.h"
 

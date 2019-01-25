@@ -1,12 +1,6 @@
 #ifndef SIMULATORCONTROLPAGE_H
 #define SIMULATORCONTROLPAGE_H
 
-#include <memory>
-#include <QSplitter>
-#include <QLabel>
-#include <QPushButton>
-#include <QTreeWidget>
-#include <QLineEdit>
 #include "SimBasePage.h"
 #include "SimLogicModule.h"
 

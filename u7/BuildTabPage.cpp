@@ -1,18 +1,14 @@
-#include "Stable.h"
 #include "BuildTabPage.h"
 #include "Settings.h"
 #include "GlobalMessanger.h"
 #include "../lib/DbController.h"
-#include <QTextBlock>
-#include <QComboBox>
-#include <QCompleter>
+
 
 //
 //
 // BuildTabPage
 //
 //
-//BuildTabPage* BuildTabPage::m_this = nullptr;
 const char* BuildTabPage::m_buildLogFileName = "buildlog.html";
 
 

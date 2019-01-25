@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QtCore>
-
 #include "../lib/Signal.h"
 #include "../lib/WUtils.h"
 

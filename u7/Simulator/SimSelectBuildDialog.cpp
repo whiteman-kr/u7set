@@ -1,6 +1,5 @@
 #include "SimSelectBuildDialog.h"
 #include "ui_SimulatorSelectBuildDialog.h"
-#include <QDir>
 #include "../Settings.h"
 
 SimSelectBuildDialog::SimSelectBuildDialog(QString currentProject,
