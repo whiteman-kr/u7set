@@ -1978,7 +1978,7 @@ void SchemaControlTabPageEx::projectClosed()
 	setEnabled(false);
 }
 
-int SchemaControlTabPageEx::showSelectFileDialog(int parentFileId, int currentSelectionFileId)
+int SchemaControlTabPageEx::showSelectFileDialog(int parentFileId, int currentSelectionFileId, bool showRootFile)
 {
 	// Show dialog with file tree to select file, can be used as parent.
 	// function returns selected file id or -1 if operation canceled
@@ -2051,7 +2051,20 @@ int SchemaControlTabPageEx::showSelectFileDialog(int parentFileId, int currentSe
 			}
 		};
 
-	addChilderenFilesFunc(schemaFile, nullptr);
+	QTreeWidgetItem* rootTreeItem = nullptr;
+	if (showRootFile == true)
+	{
+		rootTreeItem = new QTreeWidgetItem(treeWidget, {schemaFile->fileName()}, schemaFile->fileId()) ;
+		treeWidget->addTopLevelItem(rootTreeItem);
+
+		if (schemaFile->fileId() == currentSelectionFileId)
+		{
+			rootTreeItem->setSelected(true);
+			treeItemToSelect = rootTreeItem;
+		}
+	}
+
+	addChilderenFilesFunc(schemaFile, rootTreeItem);
 
 	if (treeItemToSelect != nullptr)
 	{
@@ -2327,7 +2340,7 @@ void SchemaControlTabPageEx::viewFile(const DbFileInfo& file)
 
 void SchemaControlTabPageEx::addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile)
 {
-	int parentFileId = showSelectFileDialog(dbc()->alFileId(), m_lastSelectedNewSchemaForLmFileId);
+	int parentFileId = showSelectFileDialog(dbc()->alFileId(), m_lastSelectedNewSchemaForLmFileId, true);
 	if (parentFileId == -1)
 	{
 		return;
@@ -2372,7 +2385,7 @@ void SchemaControlTabPageEx::addLogicSchema(QStringList deviceStrIds, QString lm
 
 	// --
 	//
-	addSchemaFile(schema, ::AlFileExtension, false);
+	addSchemaFile(schema, ::AlFileExtension, parentFile.fileId());
 
 	GlobalMessanger::instance().fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
 
@@ -2701,7 +2714,7 @@ void SchemaControlTabPageEx::cloneFile()
 
 	}
 
-	int parentFileId = showSelectFileDialog(dbc()->schemaFileId(), fileToClone.parentId());
+	int parentFileId = showSelectFileDialog(dbc()->schemaFileId(), fileToClone.parentId(), false);
 	if (parentFileId == -1)
 	{
 		return;
