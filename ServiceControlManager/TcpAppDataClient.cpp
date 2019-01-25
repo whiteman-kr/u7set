@@ -459,17 +459,6 @@ void TcpAppDataClient::onGetAppSignalStateReply(const char* replyData, quint32 r
 	m_getStatesCurrentPart++;
 }
 
-void TcpAppDataClient::onGetUnitsReply(const char* replyData, quint32 replyDataSize)
-{
-	bool result = m_getUnitsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
-
-	if (result == false)
-	{
-		assert(false);
-		return;
-	}
-}
-
 void TcpAppDataClient::onGetServiceState(const char* replyData, quint32 replyDataSize)
 {
 	bool result = m_getAppDataServiceState.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
