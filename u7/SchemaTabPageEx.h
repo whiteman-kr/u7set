@@ -209,6 +209,7 @@ private:
 public:
 	// --
 	QAction* m_newFileAction = nullptr;
+	QAction* m_newFolderAction = nullptr;
 	QAction* m_openAction = nullptr;
 	QAction* m_viewAction = nullptr;
 	QAction* m_cloneFileAction = nullptr;

@@ -1004,11 +1004,16 @@ SchemaFileViewEx::~SchemaFileViewEx()
 
 void SchemaFileViewEx::createActions()
 {
-	m_newFileAction = new QAction(tr("New Schema.."), parent());
+	m_newFileAction = new QAction(tr("New Schema..."), parent());
 	m_newFileAction->setIcon(QIcon(":/Images/Images/SchemaAddFile.svg"));
 	m_newFileAction->setStatusTip(tr("Add new schema to version control..."));
 	m_newFileAction->setEnabled(false);
 	m_newFileAction->setShortcut(QKeySequence::StandardKey::New);
+
+	m_newFolderAction = new QAction(tr("New Folder..."), parent());
+	m_newFolderAction->setIcon(QIcon(":/Images/Images/SchemaAddFolder2.svg"));
+	m_newFolderAction->setStatusTip(tr("Add new folder to version control..."));
+	m_newFolderAction->setEnabled(false);
 
 	m_cloneFileAction = new QAction(tr("Clone Schema"), parent());
 	m_cloneFileAction->setIcon(QIcon(":/Images/Images/SchemaClone.svg"));
@@ -1107,6 +1112,7 @@ void SchemaFileViewEx::createContextMenu()
 	addAction(separator);
 
 	addAction(m_newFileAction);
+	addAction(m_newFolderAction);
 	addAction(m_cloneFileAction);
 	addAction(m_deleteAction);
 
@@ -1345,6 +1351,7 @@ void SchemaFileViewEx::projectOpened()
 void SchemaFileViewEx::projectClosed()
 {
 	m_newFileAction->setEnabled(false);
+	m_newFolderAction->setEnabled(false);
 	m_cloneFileAction->setEnabled(false);
 	m_refreshFileAction->setEnabled(false);
 
@@ -1660,6 +1667,7 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 	connect(m_filesView->m_viewAction, &QAction::triggered, this, &SchemaControlTabPageEx::viewSelectedFile);
 
 	connect(m_filesView->m_newFileAction, &QAction::triggered, this, &SchemaControlTabPageEx::addFile);
+	//connect(m_filesView->..., &QAction::triggered, this, &SchemaControlTabPageEx::addFile);
 	connect(m_filesView->m_cloneFileAction, &QAction::triggered, this, &SchemaControlTabPageEx::cloneFile);
 	connect(m_filesView->m_deleteAction, &QAction::triggered, this, &SchemaControlTabPageEx::deleteFiles);
 
@@ -1802,6 +1810,7 @@ void SchemaControlTabPageEx::createToolBar()
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_filesView->m_newFileAction);
+	m_toolBar->addAction(m_filesView->m_newFolderAction);
 	m_toolBar->addAction(m_filesView->m_cloneFileAction);
 	m_toolBar->addAction(m_filesView->m_deleteAction);
 
