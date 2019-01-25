@@ -9,7 +9,7 @@
 #include "../Proto/network.pb.h"
 
 class DataSource;
-
+/*
 class TcpAppDataClient : public Tcp::Client
 {
 private:
@@ -82,4 +82,4 @@ public:
 
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
-};
+};*/

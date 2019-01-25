@@ -22,7 +22,7 @@ public:
 	TcpAppDataClient(const SoftwareInfo& softwareInfo,
 					 const HostAddressPort& serverAddressPort1,
 					 const HostAddressPort& serverAddressPort2);
-	virtual ~TcpAppDataClient();
+	virtual ~TcpAppDataClient() override;
 
 	virtual void onClientThreadStarted() override;
 	virtual void onClientThreadFinished() override;
