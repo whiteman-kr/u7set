@@ -37,7 +37,7 @@ void UalTester::getCmdLineParams(int& argc, char** argv)
 	cmdLineParser.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "IPv4");
 	cmdLineParser.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "IPv4");
 	cmdLineParser.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "EquipmentID.", "EQUIPMENT_ID");
-	cmdLineParser.addSingleValueOption("-f", SETTING_TEST_FILE_NAME, "Test file name", "TestFileName");
+	cmdLineParser.addSingleValueOption("f", SETTING_TEST_FILE_NAME, "Test file name", "TestFileName");
 
 	cmdLineParser.parse();
 
