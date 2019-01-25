@@ -150,9 +150,11 @@ private:
 	void prepareArchRequestData();
 	bool findData();
 	void getNextData();
+	bool getNextRecord(Hash* hash, ArchFileRecord* record);
 
 	void reportError();
 	void reportNoData();
+	void reportNoMoreData();
 	void reportDataReady();
 
 	void waitForQuit();
@@ -193,6 +195,7 @@ private:
 	std::atomic<bool> m_nextDataRequired = { false };
 	std::atomic<bool> m_dataReady = { false };
 	bool m_noMoreData = false;
+	int m_sentStatesCount = 0;
 
 	Network::GetAppSignalStatesFromArchiveNextReply m_reply;
 	QString m_errMsg;

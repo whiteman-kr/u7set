@@ -275,8 +275,8 @@ bool ArchFileRequestData::fillBuffer()
 ArchRequest::ArchRequest(Archive& archive, const ArchRequestParam& param, CircularLoggerShared logger) :
 	m_archive(archive),
 	m_param(param),
-	m_startTime(QDateTime::currentMSecsSinceEpoch()),
 	m_logger(logger),
+	m_startTime(QDateTime::currentMSecsSinceEpoch()),
 	m_execParam(m_param)
 {
 	qint64 localTimeOffset = Archive::localTimeOffsetFromUtc();
@@ -342,6 +342,8 @@ void ArchRequest::run()
 		if (isNextDataRequired() == true)
 		{
 			getNextData();
+
+			resetNextDataRequired();
 		}
 		else
 		{
@@ -402,6 +404,7 @@ void ArchRequest::getNextData()
 {
 	if (m_noMoreData == true)
 	{
+		reportNoMoreData();
 		return;
 	}
 
@@ -438,39 +441,68 @@ void ArchRequest::getNextData()
 
 	int statesInPeplyCount = 0;
 
-	qint64 minTime = -1;
+	bool hasMoreData = false;
+	ArchFileRecord record;
+	Hash signalHash;
 
 	do
 	{
-		bool hasData = false;
+		bool hasMoreData = getNextRecord(&signalHash, &record);
 
-		for(ArchFileRequestData* requestData : m_filesWithData)
+		if (hasMoreData == false)
 		{
-			ArchFileRecord record;
+			break;
+		}
 
-			bool res = requestData->getRecord(&record);
+		Proto::AppSignalState* protoAppSignalState = m_reply.add_appsignalstates();
 
-			if (res == false)
-			{
-				continue;
-			}
-			zxdcvwevsvd
+		protoAppSignalState->set_hash(signalHash);
+		record.save(protoAppSignalState);
 
+		statesInPeplyCount++;
+
+		if (statesInPeplyCount >= ARCH_REQUEST_MAX_STATES)
+		{
+			break;
 		}
 	}
 	while(1);
 
+	if (hasMoreData == false)
+	{
+		m_noMoreData = true;
+	}
+
+	m_sentStatesCount += statesInPeplyCount;
+
 	m_reply.set_totalstatescount(0);
-	m_reply.set_sentstatescount(0);
+	m_reply.set_sentstatescount(m_sentStatesCount);
 
 	m_reply.set_statesinpartcount(statesInPeplyCount);
 	m_reply.set_islastpart(m_noMoreData);
 	m_reply.set_dataready(true);
 
 	setDataReady();
+}
+
+bool ArchRequest::getNextRecord(Hash* hash, ArchFileRecord* record)
+{
 
 
-	resetNextDataRequired();
+	for(ArchFileRequestData* requestData : m_filesWithData)
+	{
+		ArchFileRecord record;
+
+		bool res = requestData->getRecord(&record);
+
+		if (res == false)
+		{
+			continue;
+		}
+
+
+	}
+
 }
 
 void ArchRequest::reportError()
@@ -517,6 +549,29 @@ void ArchRequest::reportNoData()
 	setDataReady();
 
 	m_noMoreData = true;
+}
+
+void ArchRequest::reportNoMoreData()
+{
+	assert(m_noMoreData == true);
+
+	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: has no more data!").arg(m_param.requestID()));
+
+	m_reply.set_requestid(m_param.requestID());
+
+	m_reply.set_error(static_cast<int>(NetworkError::Success));
+	m_reply.set_archerror(static_cast<int>(ArchiveError::Success));
+	m_reply.clear_errorstring();
+
+	m_reply.set_totalstatescount(0);
+	m_reply.set_sentstatescount(m_sentStatesCount);
+	m_reply.set_statesinpartcount(0);
+	m_reply.set_islastpart(true);
+	m_reply.clear_appsignalstates();
+
+	m_reply.set_dataready(true);
+
+	setDataReady();
 }
 
 void ArchRequest::reportDataReady()

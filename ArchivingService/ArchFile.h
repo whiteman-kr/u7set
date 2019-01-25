@@ -31,6 +31,8 @@ struct ArchFileRecord
 	bool timeGreateOrEqualThen(E::TimeType timeType, qint64 time);
 
 	qint64 getTime(E::TimeType timeType);
+
+	void save(Proto::AppSignalState* proto);
 };
 
 #pragma pack(pop)

@@ -111,6 +111,13 @@ qint64 ArchFileRecord::getTime(E::TimeType timeType)
 	return 0;
 }
 
+void ArchFileRecord::save(Proto::AppSignalState* proto)
+{
+	TEST_PTR_RETURN(proto);
+
+	proto->
+}
+
 // -----------------------------------------------------------------------------------------------------------------------
 //
 // ArchFilePartition class implementation
