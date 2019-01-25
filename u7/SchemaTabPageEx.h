@@ -269,7 +269,7 @@ protected slots:
 	void projectOpened();
 	void projectClosed();
 
-	int showSelectFileDialog(int parentFileId, int currentSelectionFileId);
+	int showSelectFileDialog(int parentFileId, int currentSelectionFileId, bool showRootFile);
 
 	void openSelectedFile();
 	void viewSelectedFile();
