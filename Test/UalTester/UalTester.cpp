@@ -37,7 +37,7 @@ void UalTester::getCmdLineParams(int& argc, char** argv)
 	cmdLineParser.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "IPv4");
 	cmdLineParser.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "IPv4");
 	cmdLineParser.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "EquipmentID.", "EQUIPMENT_ID");
-	cmdLineParser.addSingleValueOption("f", SETTING_TEST_FILE_NAME, "Test file name", "testFileName");
+	cmdLineParser.addSingleValueOption("-f", SETTING_TEST_FILE_NAME, "Test file name", "TestFileName");
 
 	cmdLineParser.parse();
 
@@ -115,7 +115,7 @@ bool UalTester::start()
 
 	// init tuning socket thread
 	//
-	//HostAddressPort tuningSocketAddress;
+	//HostAddressPort tuningSocketAddress; = theOptions.socket().client(SOCKET_TYPE_TUNING).address(SOCKET_SERVER_TYPE_PRIMARY);
 
 	//m_pTuningSocket = new TuningSocket(softwareInfo, tuningSocketAddress);
 	//m_pTuningSocketThread = new SimpleThread(m_pTuningSocket);
