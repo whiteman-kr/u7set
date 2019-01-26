@@ -393,6 +393,14 @@ public:
 	const QString& details() const noexcept;
 	void setDetails(const QString& value);		// Value must be valid JSON, Example: "{}"
 
+	// File Attributes
+	//
+	qint32 attributes() const;
+	void setAttributes(qint32 value);
+
+	bool directoryAttribute() const;
+	void setDirectoryAttribute(bool value);
+
 	// Data
 	//
 protected:
@@ -411,6 +419,15 @@ protected:
 	int m_userId = -1;
 
 	QString m_details;
+
+	union
+	{
+		struct
+		{
+			qint32 m_attrDirectory	: 1;
+		};
+		qint32 m_attributes;
+	};
 
 public:
 	static const int Null = -1;

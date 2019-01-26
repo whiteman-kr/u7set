@@ -140,6 +140,63 @@ void FileTests::apiFileExistsTest()
 	return;
 }
 
+void FileTests::api_set_file_attributes()
+{
+	// LogIn as Admin
+	//
+	QString session_key = logIn(m_user1);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// FUNCTION api.set_file_attributes(session_key text, full_file_name text, attr integer)
+	//
+	{
+		QSqlQuery query;
+		bool ok = query.exec(QString("SELECT api.set_file_attributes('%1', '%2', 123);")
+								.arg(session_key)
+								.arg(::AlFileName)	// "$root$/Schemas/ApplicationLogic"
+							 );
+
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+		ok = query.exec(QString("SELECT F.Attributes FROM File F WHERE FileID = (SELECT api.get_file_id('%1', '%2'));")
+								.arg(session_key)
+								.arg(::AlFileName)	// "$root$/Schemas/ApplicationLogic"
+							 );
+
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.value(0).toInt() == 123, qPrintable("Expected new attribute value 123"));
+	}
+
+	// FUNCTION api.set_file_attributes(text, integer, integer);
+	//
+	{
+		QSqlQuery query;
+		bool ok = query.exec(QString("SELECT api.set_file_attributes('%1', (SELECT api.get_file_id('%1', '%2')), 225);")
+								.arg(session_key)
+								.arg(::AlFileName)	// "$root$/Schemas/ApplicationLogic"
+							 );
+
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+		ok = query.exec(QString("SELECT F.Attributes FROM File F WHERE FileID = (SELECT api.get_file_id('%1', '%2'));")
+								.arg(session_key)
+								.arg(::AlFileName)	// "$root$/Schemas/ApplicationLogic"
+							 );
+
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.value(0).toInt() == 225, qPrintable("Expected new attribute value 123"));
+	}
+
+	// LogOut
+	//
+	bool ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	return;
+}
+
 void FileTests::fileExistsTest()
 {
 	QSqlQuery query;

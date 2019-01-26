@@ -261,6 +261,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0241.sql", "Upgrade to version 241, Added function api.get_file_list_tree"},	
 	{":/DatabaseUpgrade/Upgrade0242.sql", "Upgrade to version 242, AOM-4PH Preset corrections"},
 	{":/DatabaseUpgrade/Upgrade0243.sql", "Upgrade to version 243, AIM-4PH Preset corrections"},
+	{":/DatabaseUpgrade/Upgrade0244.sql", "Upgrade to version 244, Add attributes to file system"},
 };
 
 
@@ -2719,20 +2720,21 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 
 		if (ensureUniquesInParentTree == false)
 		{
-			q.prepare("SELECT * FROM api.add_file(:sessionkey, :filename, :parentid, :filedata, :details);");
+			q.prepare("SELECT * FROM api.add_file(:sessionkey, :filename, :parentid, :filedata, :details, :attributes);");
 
 			q.bindValue(":sessionkey", sessionKey());
 			q.bindValue(":filename", file->fileName());
 			q.bindValue(":parentid", parentId);
 			q.bindValue(":filedata", file->data());
 			q.bindValue(":details", file->details());
+			q.bindValue(":attributes", file->attributes());
 		}
 		else
 		{
 			// api.add_unique_file scans parent tree and finds any files with the same name.
 			// Comparsion done without extension, case insensetive
 			//
-			q.prepare("SELECT * FROM api.add_unique_file(:sessionkey, :filename, :parentid, :uniquefromfileid,  :filedata, :details);");
+			q.prepare("SELECT * FROM api.add_unique_file(:sessionkey, :filename, :parentid, :uniquefromfileid,  :filedata, :details, :attributes);");
 
 			q.bindValue(":sessionkey", sessionKey());
 			q.bindValue(":filename", file->fileName());
@@ -2740,6 +2742,7 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 			q.bindValue(":uniquefromfileid", uniqueFromFileId);
 			q.bindValue(":filedata", file->data());
 			q.bindValue(":details", file->details());
+			q.bindValue(":attributes", file->attributes());
 		}
 
 		bool result = q.exec();
@@ -6132,6 +6135,7 @@ static thread_local int actionNo = -1;
 static thread_local int userIdNo = -1;
 static thread_local int detailsNo = -1;
 static thread_local int dataNo = -1;
+static thread_local int attributesNo = -1;
 
 	QSqlRecord record = q.record();
 
@@ -6151,6 +6155,7 @@ static thread_local int dataNo = -1;
 		userIdNo = record.indexOf("UserID");
 		detailsNo = record.indexOf("Details");
 		dataNo = record.indexOf("Data");
+		attributesNo = record.indexOf("Attributes");
 
 		if (fileIdNo == -1 ||
 		    deletedNo == -1 ||
@@ -6163,7 +6168,8 @@ static thread_local int dataNo = -1;
 		    actionNo == -1 ||
 		    userIdNo == -1 ||
 		    detailsNo == -1 ||
-		    dataNo == -1)
+			dataNo == -1 ||
+			attributesNo == -1)
 		{
 			assert(false);
 			return false;
@@ -6189,6 +6195,8 @@ static thread_local int dataNo = -1;
 	QByteArray data = record.value(dataNo).toByteArray();
 	file->swapData(data);
 
+	file->setAttributes(record.value(attributesNo).toInt());
+
 	return true;
 }
 
@@ -6208,7 +6216,8 @@ bool DbWorker::db_dbFileInfo(const QSqlQuery& q, DbFileInfo* fileInfo)
 	//	    checkouttime timestamp with time zone,
 	//	    userid integer,
 	//	    action integer,
-	//	    details text);
+	//	    details text,
+	//		attributes integer);
 	//	ALTER TYPE dbfileinfo
 	//	  OWNER TO postgres;
 
@@ -6226,6 +6235,7 @@ bool DbWorker::db_dbFileInfo(const QSqlQuery& q, DbFileInfo* fileInfo)
 	fileInfo->setUserId(q.value(9).toInt());
 	fileInfo->setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(10).toInt()));
 	fileInfo->setDetails(q.value(11).toString());
+	fileInfo->setAttributes(q.value(12).toInt());
 
 	return true;
 }

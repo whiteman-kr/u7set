@@ -30,6 +30,8 @@ private slots:
 	void cleanupTestCase();
 
 	void apiFileExistsTest();
+	void api_set_file_attributes();
+
 	void fileExistsTest();
 	void filesExistTest_data();
 	void filesExistTest();

@@ -1040,6 +1040,26 @@ void DbFileInfo::setDetails(const QString& value)
 	return;
 }
 
+qint32 DbFileInfo::attributes() const
+{
+	return m_attributes;
+}
+
+void DbFileInfo::setAttributes(qint32 value)
+{
+	m_attributes = value;
+}
+
+bool DbFileInfo::directoryAttribute() const
+{
+	return m_attrDirectory;
+}
+
+void DbFileInfo::setDirectoryAttribute(bool value)
+{
+	m_attrDirectory = value ? 1 : 0;
+}
+
 QString DbFileInfo::fullPathToFileName(const QString& fullPathName)
 {
 	int pos = fullPathName.lastIndexOf('/');
