@@ -31,7 +31,7 @@ private slots:
 
 	void apiFileExistsTest();
 	void api_set_file_attributes();
-
+	void api_add_file();
 	void fileExistsTest();
 	void filesExistTest_data();
 	void filesExistTest();

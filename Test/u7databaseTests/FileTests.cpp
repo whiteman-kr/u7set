@@ -197,6 +197,96 @@ void FileTests::api_set_file_attributes()
 	return;
 }
 
+void FileTests::api_add_file()
+{
+	// LogIn as Admin
+	//
+	QString session_key = logIn(m_user1);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	/*
+		FUNCTION api.add_file(
+			session_key text,
+			file_name text,
+			parent_id integer,
+			file_data bytea,
+			details text,
+			attributes integer)
+		  RETURNS objectstate AS
+	*/
+
+	{
+		QString fileName = "AddFileTest.txt";
+		int attributes = 15;
+
+		QSqlQuery query;
+		bool ok = query.exec(QString("SELECT * FROM api.add_file('%1', '%2', (SELECT api.get_file_id('%1', '%3')), '1234567890', '{}', %4);")
+								.arg(session_key)
+								.arg(fileName)
+								.arg(::AlFileName)	// "$root$/Schemas/ApplicationLogic"
+								.arg(attributes)
+							 );
+
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+		ObjectState os;
+		DbWorker::db_objectState(query, &os);
+
+		int fileId = os.id;
+
+		QVERIFY2(os.errCode == 0, qPrintable("Expected no error while creating file"));
+		QVERIFY2(os.action == VcsItemAction::Added, qPrintable("Expected VcsItemAction::Added"));
+		QVERIFY2(os.checkedOut == true, qPrintable("Expected CheckedOut"));
+		QVERIFY2(os.deleted == false, qPrintable("Expected not deleted"));
+
+		// Check created file info
+		//
+		ok = query.exec(QString("SELECT * FROM api.get_file_info('%1', '%2');")
+								.arg(session_key)
+								.arg(QString(::AlFileName) + "/" + fileName)	// "$root$/Schemas/ApplicationLogic/AddFileTest.txt"
+							 );
+
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+		DbFileInfo fi;
+		bool parseOk = DbWorker::db_dbFileInfo(query, &fi);
+		QVERIFY2(parseOk == true, qPrintable("Can't parse DbFileInfo"));
+
+		QVERIFY2(fi.fileId() == fileId, qPrintable("Wrong FileID"));
+		QVERIFY2(fi.fileName() == fileName, qPrintable("Wrong FileName"));
+		QVERIFY2(fi.deleted() == false, qPrintable("Wrong Deleted attribute"));
+		QVERIFY2(fi.attributes() == attributes, qPrintable("Wrong attributes value"));
+
+		// Check that for created file we have one instance
+		//
+		ok = query.exec(QString("SELECT count(*) FROM FileInstance WHERE FileID = %1;").arg(fileId));
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.value(0).toInt() == 1, qPrintable("Expected one record in FileInstance"));
+
+		// Remove File
+		//
+		ok = query.exec(QString("UPDATE File SET CheckedOutInstanceId = NULL WHERE FileID = %1;").arg(fileId));
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+		ok = query.exec(QString("DELETE FROM CheckOut WHERE FileID = %1;").arg(fileId));
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+		ok = query.exec(QString("DELETE FROM FileInstance WHERE FileID = %1;").arg(fileId));
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+		ok = query.exec(QString("DELETE FROM File WHERE FileID = %1;").arg(fileId));
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	}
+
+	// LogOut
+	//
+	bool ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+}
+
 void FileTests::fileExistsTest()
 {
 	QSqlQuery query;
