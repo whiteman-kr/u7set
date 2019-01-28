@@ -408,28 +408,6 @@ void ArchRequest::getNextData()
 		return;
 	}
 
-	int filesWithDataCount = m_filesWithData.count();
-
-	if (m_firstCallOfGetNextData == true)
-	{
-		m_fileData.resize(filesWithDataCount);
-
-		for(int i = 0; i < filesWithDataCount; i++)
-		{
-			ArchFileData& afd = m_fileData[i];
-
-			afd.hasMoreData = m_filesWithData[i]->getRecord(&afd.record);
-
-			if (afd.hasMoreData == true)
-			{
-				afd.recordTime = afd.record.getTime(m_execParam.timeType());
-				m_noMoreData = false;
-			}
-		}
-
-		m_firstCallOfGetNextData = false;
-	}
-
 	m_reply.set_requestid(m_param.requestID());
 
 	m_reply.set_error(static_cast<int>(NetworkError::Success));
@@ -487,6 +465,29 @@ void ArchRequest::getNextData()
 
 bool ArchRequest::getNextRecord(Hash* hash, ArchFileRecord* record)
 {
+
+	int filesWithDataCount = m_filesWithData.count();
+
+	if (m_firstCallOfGetNextRecord == true)
+	{
+		m_fileData.resize(filesWithDataCount);
+
+		for(int i = 0; i < filesWithDataCount; i++)
+		{
+			ArchFileData& afd = m_fileData[i];
+
+			afd.hasMoreData = m_filesWithData[i]->getRecord(&afd.record);
+
+			if (afd.hasMoreData == true)
+			{
+				afd.recordTime = afd.record.getTime(m_execParam.timeType());
+				m_noMoreData = false;
+			}
+		}
+
+		m_firstCallOfGetNextRecord = false;
+	}
+
 
 
 	for(ArchFileRequestData* requestData : m_filesWithData)

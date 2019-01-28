@@ -190,7 +190,10 @@ private:
 	QVector<ArchFileRequestData*> m_requestDataArray;
 	QVector<ArchFileRequestData*> m_filesWithData;
 	QVector<ArchFileData> m_fileData;
-	bool m_firstCallOfGetNextData = true;
+
+	bool m_firstCallOfGetNextRecord = true;
+	qint64 m_minTime = -1;
+	qint64 m_minTimeIndex = -1;
 
 	std::atomic<bool> m_nextDataRequired = { false };
 	std::atomic<bool> m_dataReady = { false };
