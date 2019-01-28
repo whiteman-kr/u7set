@@ -22,7 +22,7 @@ public:
 	TcpAppDataClient(const SoftwareInfo& softwareInfo,
 					 const HostAddressPort& serverAddressPort1,
 					 const HostAddressPort& serverAddressPort2);
-	virtual ~TcpAppDataClient();
+	virtual ~TcpAppDataClient() override;
 
 	virtual void onClientThreadStarted() override;
 	virtual void onClientThreadFinished() override;
@@ -81,10 +81,7 @@ private:
 	void onGetAppSignalReply(const char* replyData, quint32 replyDataSize);
 	void onGetAppSignalStateReply(const char* replyData, quint32 replyDataSize);
 
-	void onGetUnitsReply(const char* replyData, quint32 replyDataSize);
-
 	void onGetServiceState(const char* replyData, quint32 replyDataSize);
-
 	void onGetServiceSettings(const char* replyData, quint32 replyDataSize);
 
 	//
@@ -125,8 +122,6 @@ private:
 
 	Network::GetAppSignalStateRequest m_getSignalStateRequest;
 	Network::GetAppSignalStateReply m_getSignalStateReply;
-
-	Network::GetUnitsReply m_getUnitsReply;
 
 	Network::AppDataServiceState m_getAppDataServiceState;
 
