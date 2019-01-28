@@ -3,7 +3,8 @@
 
 #include <QObject>
 
-#include "../../lib/HostAddressPort.h"
+#include "../../lib/CfgServerLoader.h"
+#include "../../lib/ServiceSettings.h"
 
 class UalTester : public QObject
 {
@@ -30,32 +31,46 @@ protected:
 
 private:
 
-	QString			m_cfgServiceIP1;
-	QString			m_cfgServiceIP2;
-	QString			m_equipmentID;
-	QString			m_testFileName;
+	QString m_cfgServiceIP1;
+	QString m_cfgServiceIP2;
+	QString m_equipmentID;
+	QString m_testFileName;
 
-	QString			m_errorIngnoreStr;
-	QString			m_testID;
-	QString			m_fromTestID;
-	QString			m_traceStr;
-	QString			m_reportFileName;
-	QString			m_presetLM;
+	QString m_errorIngnoreStr;
+	QString m_testID;
+	QString m_fromTestID;
+	QString m_traceStr;
+	QString m_reportFileName;
+	QString m_presetLM;
 
 	HostAddressPort m_cfgSocketAddress1;
 	HostAddressPort m_cfgSocketAddress2;
 
-	bool			m_errorIngnore = true;
-	bool			m_trace = false;
+	bool m_errorIngnore = true;
+	bool m_trace = false;
 
-	void			getCmdLineParams(int& argc, char** argv);
-	bool			cmdLineParamsIsValid();
+	void getCmdLineParams(int& argc, char** argv);
+	bool cmdLineParamsIsValid();
+
+	CfgLoaderThread* m_cfgLoaderThread = nullptr;
+	bool runCfgLoaderThread();
+	void stopCfgLoaderThread();
+
+	TestClientSettings m_cfgSettings;
+	bool readConfiguration(const QByteArray& cfgFileData);
 
 public:
 
-	bool			start();
+	bool start();
 
 signals:
+
+	void signal_configurationLoaded();
+
+private slots:
+
+	void slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void slot_runManageSignalThread();
 
 public slots:
 

@@ -1,8 +1,6 @@
 #include <QCoreApplication>
 #include <UalTester.h>
 
-// #include "../../lib/ProtoSerialization.h"
-
 int main(int argc, char *argv[])
 {
 	QCoreApplication a(argc, argv);
@@ -14,7 +12,7 @@ int main(int argc, char *argv[])
 	UalTester ualTester(argc, argv);
 	ualTester.start();
 
-	// google::protobuf::ShutdownProtobufLibrary();
+	google::protobuf::ShutdownProtobufLibrary();
 
 	return a.exec();
 }

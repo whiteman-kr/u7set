@@ -3,6 +3,7 @@
 
 #include "../../lib/CommandLineParser.h"
 #include "../../lib/SocketIO.h"
+#include "../../lib/XmlHelper.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 //
@@ -25,10 +26,13 @@ const char* const UalTester::SETTING_PRESET_LM = "TestFileName";
 UalTester::UalTester(int& argc, char** argv)
 {
 	getCmdLineParams(argc, argv);
+
+	connect(this, &UalTester::signal_configurationLoaded, this, &UalTester::slot_runManageSignalThread);
 }
 
 UalTester::~UalTester()
 {
+	stopCfgLoaderThread();
 }
 
 void UalTester::getCmdLineParams(int& argc, char** argv)
@@ -160,6 +164,43 @@ bool UalTester::cmdLineParamsIsValid()
 	return true;
 }
 
+bool UalTester::runCfgLoaderThread()
+{
+	SoftwareInfo softwareInfo;
+	softwareInfo.init(E::SoftwareType::TestClient, m_equipmentID, 1, 0);
+
+	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo,
+											1,
+											m_cfgSocketAddress1,
+											m_cfgSocketAddress2,
+											false,
+											nullptr);
+
+	if (m_cfgLoaderThread == nullptr)
+	{
+		return false;
+	}
+
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &UalTester::slot_configurationReady);
+
+	m_cfgLoaderThread->start();
+	m_cfgLoaderThread->enableDownloadConfiguration();
+
+	return true;
+}
+
+void UalTester::stopCfgLoaderThread()
+{
+	if (m_cfgLoaderThread == nullptr)
+	{
+		return;
+	}
+
+	m_cfgLoaderThread->quit();
+	delete m_cfgLoaderThread;
+	m_cfgLoaderThread = nullptr;
+}
+
 bool UalTester::start()
 {
 	if (cmdLineParamsIsValid() == false )
@@ -167,31 +208,101 @@ bool UalTester::start()
 		return false;
 	}
 
-	//SoftwareInfo softwareInfo;
-	//si.init(E::SoftwareType::Unknown, "", 1, 0);
+	if (runCfgLoaderThread() == false)
+	{
+		qDebug() << "Error running CfgLoaderThread";
+		return false;
+	}
 
+	return true;
+}
+
+void UalTester::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+{
+	Q_UNUSED(buildFileInfoArray);
+
+	if (m_cfgLoaderThread == nullptr)
+	{
+		return;
+	}
+
+	// load configuration
+	//
+
+	bool result = false;
+
+	result = readConfiguration(configurationXmlData);
+	if (result == false)
+	{
+		return;
+	}
+	else
+	{
+		emit signal_configurationLoaded();
+	}
+
+	// load signal list
+	//
+
+	//	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
+	//	{
+	//		QByteArray fileData;
+	//		QString errStr;
+
+	//		m_cfgLoaderThread->getFileBlocked(bfi.pathFileName, &fileData, &errStr);
+
+	//		if (errStr.isEmpty() == false)
+	//		{
+	//			qDebug() << errStr;
+	//			continue;
+	//		}
+
+	//		result = true;
+
+	//		if (bfi.ID == CFG_FILE_ID_UALTESTER_SIGNALS)
+	//		{
+	//			result &= readUalTesterSignals(fileData);				// fill UalTesterSignals
+	//		}
+	//	}
+
+	return;
+}
+
+bool UalTester::readConfiguration(const QByteArray& cfgFileData)
+{
+	XmlReadHelper xml(cfgFileData);
+
+	bool result = m_cfgSettings.readFromXml(xml);
+	if (result == false)
+	{
+		qDebug() << "Configuration settings are not valid";
+	}
+
+	return result;
+}
+
+void UalTester::slot_runManageSignalThread()
+{
 	// -------------------------------------
 
-	// init config socket thread
+	// init tuning socket thread - TuningSrv
 	//
-	//	m_pConfigSocket = new ConfigSocket(m_cfgSocketAddress1, m_cfgSocketAddress2, softwareInfo);
-
-	//	connect(m_pConfigSocket, &ConfigSocket::socketConnected, this, &MainWindow::configSocketConnected, Qt::QueuedConnection);
-	//	connect(m_pConfigSocket, &ConfigSocket::socketDisconnected, this, &MainWindow::configSocketDisconnected, Qt::QueuedConnection);
-	//	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &MainWindow::configSocketConfigurationLoaded);
-
-	//	m_pConfigSocket->start();
-
-	// -------------------------------------
-
-	// init tuning socket thread
-	//
-	//HostAddressPort tuningSocketAddress; = theOptions.socket().client(SOCKET_TYPE_TUNING).address(SOCKET_SERVER_TYPE_PRIMARY);
 
 	//m_pTuningSocket = new TuningSocket(softwareInfo, tuningSocketAddress);
 	//m_pTuningSocketThread = new SimpleThread(m_pTuningSocket);
 
 	// m_pTuningSocketThread->start();
 
-	return true;
+	// -------------------------------------
+
+	// init signal socket thread - AppDataSrv
+	//
+
+	//	m_pSignalSocket = new SignalSocket(softwareInfo, signalSocketAddress1, signalSocketAddress2);
+	//	m_pSignalSocketThread = new SimpleThread(m_pSignalSocket);
+
+	//	connect(m_pSignalSocket, &SignalSocket::socketConnected, this, &UalTester::signalSocketConnected, Qt::QueuedConnection);
+	//	connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &UalTester::signalSocketDisconnected, Qt::QueuedConnection);
+	//	connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &UalTester::updateStartStopActions, Qt::QueuedConnection);
 }
+
