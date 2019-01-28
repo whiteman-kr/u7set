@@ -48,8 +48,8 @@ HEADERS += tst_testappdataservice.h \
     ../../lib/OutputLog.h \
     ../../lib/DeviceHelper.h \
     ../../lib/DeviceObject.h \
-    ../../u7/Builder/IssueLogger.h \
-    ../../u7/Builder/ModulesRawData.h \
+    ../../Builder/IssueLogger.h \
+    ../../Builder/ModulesRawData.h \
     ../../lib/DbStruct.h \
     ../../lib/ProtoSerialization.h \
     ../../lib/Types.h \
@@ -77,8 +77,8 @@ SOURCES += \
     ../../lib/OutputLog.cpp \
     ../../lib/DeviceHelper.cpp \
     ../../lib/DeviceObject.cpp \
-    ../../u7/Builder/IssueLogger.cpp \
-    ../../u7/Builder/ModulesRawData.cpp \
+    ../../Builder/IssueLogger.cpp \
+    ../../Builder/ModulesRawData.cpp \
     ../../lib/DbStruct.cpp \
     ../../lib/ProtoSerialization.cpp \
     ../../lib/Types.cpp \

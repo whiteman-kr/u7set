@@ -110,7 +110,8 @@ win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
 win32 {
 		LIBS += -L$$DESTDIR -lprotobuf
 
-		INCLUDEPATH += ./../../Protobuf
+		#INCLUDEPATH += ./../../Protobuf
+		INCLUDEPATH += $$PWD/../../Protobuf
 }
 unix {
 		LIBS += -lprotobuf
