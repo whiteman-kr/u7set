@@ -5,7 +5,7 @@
 #-------------------------------------------------
 
 QT       += core gui widgets sql network xmlpatterns qml svg xml
-
+ 
 
 TARGET = TuningClient
 TEMPLATE = app
