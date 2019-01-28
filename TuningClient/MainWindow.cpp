@@ -102,6 +102,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 
 	m_dialogAlert = new DialogAlert(this);
 	connect(theLogFile, &Log::LogFile::alertArrived, m_dialogAlert, &DialogAlert::onAlertArrived);
+	connect(theLogFile, &Log::LogFile::writeFailure, m_dialogAlert, &DialogAlert::onAlertArrived);
 
 	// Load user filters
 
