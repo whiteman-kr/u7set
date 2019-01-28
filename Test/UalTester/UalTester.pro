@@ -53,7 +53,14 @@ SOURCES += \
     ../../Builder/ModulesRawData.cpp \
     ../../lib/OutputLog.cpp \
     ../../lib/DbStruct.cpp \
-    ../../lib/PropertyObject.cpp
+    ../../lib/PropertyObject.cpp \
+    ../../lib/AppSignal.cpp \
+    SignalStateSocket.cpp \
+    ../../lib/Signal.cpp \
+    ../../lib/Tuning/TuningSignalState.cpp \
+    ../../lib/TuningValue.cpp \
+    ../../lib/SignalProperties.cpp \
+    SignalBase.cpp
 
 
 HEADERS += \
@@ -82,7 +89,15 @@ HEADERS += \
     ../../Builder/ModulesRawData.h \
     ../../lib/OutputLog.h \
     ../../lib/DbStruct.h \
-    ../../lib/PropertyObject.h
+    ../../lib/PropertyObject.h \
+    ../../lib/AppSignal.h \
+    ../../lib/Hash.h \
+    SignalStateSocket.h \
+    ../../lib/Signal.h \
+    ../../lib/Tuning/TuningSignalState.h \
+    ../../lib/TuningValue.h \
+    ../../lib/SignalProperties.h \
+    SignalBase.h
 
 
 

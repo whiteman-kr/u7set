@@ -6,6 +6,8 @@
 #include "../../lib/CfgServerLoader.h"
 #include "../../lib/ServiceSettings.h"
 
+#include "SignalStateSocket.h"
+
 class UalTester : public QObject
 {
 	Q_OBJECT
@@ -52,12 +54,21 @@ private:
 	void getCmdLineParams(int& argc, char** argv);
 	bool cmdLineParamsIsValid();
 
+	SoftwareInfo m_softwareInfo;
+
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 	bool runCfgLoaderThread();
 	void stopCfgLoaderThread();
 
 	TestClientSettings m_cfgSettings;
 	bool readConfiguration(const QByteArray& cfgFileData);
+	bool readAppSignals(const QByteArray& fileData);
+
+	SignalStateSocket* m_pSignalStateSocket = nullptr;
+	SimpleThread* m_pSignalStateSocketThread = nullptr;
+	bool runSignalStateThread();
+	void stopSignalStateThread();
+
 
 public:
 
