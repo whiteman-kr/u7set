@@ -251,7 +251,7 @@ namespace Builder
 		UalAfb(const UalItem &appItem, bool isBusProcessingAfb);
 
 		quint16 instance() const { return m_instance; }
-		quint16 opcode() const { return afb().opCode(); }		// return FB type
+		quint16 opcode() const { return static_cast<quint16>(afb().opCode()); }		// return FB type
 		QString caption() const { return afb().caption(); }
 		QString typeCaption() const { return afb().componentCaption(); }
 		int number() const { return m_number; }
