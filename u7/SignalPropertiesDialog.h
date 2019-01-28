@@ -1,8 +1,6 @@
 #ifndef SIGNALPROPERTIESDIALOG_H
 #define SIGNALPROPERTIESDIALOG_H
 
-#include <QDialog>
-#include <QMap>
 #include "../lib/Signal.h"
 #include "IdePropertyEditor.h"
 

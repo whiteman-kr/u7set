@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "MonitorArchive.h"
 #include "Settings.h"
 #include "DialogSignalInfo.h"

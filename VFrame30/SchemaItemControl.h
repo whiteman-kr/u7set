@@ -1,7 +1,6 @@
 #pragma once
 
 #include "PosRectImpl.h"
-#include <QJSEngine>
 
 namespace VFrame30
 {

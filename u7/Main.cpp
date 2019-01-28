@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "MainWindow.h"
 #include "Settings.h"
 #include "GlobalMessanger.h"

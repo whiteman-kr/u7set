@@ -1,5 +1,4 @@
 #pragma once
-#include <memory>
 #include "VFrame30Lib_global.h"
 #include "../lib/Types.h"
 

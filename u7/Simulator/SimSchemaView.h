@@ -1,6 +1,5 @@
 #pragma once
 
-#include <QJSEngine>
 #include "../VFrame30/ClientSchemaView.h"
 #include "SimSchemaManager.h"
 

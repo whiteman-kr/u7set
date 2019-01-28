@@ -2,7 +2,6 @@
 #define DIALOGSIGNALSEARCH_H
 
 #include "../lib/AppSignal.h"
-#include <QDialog>
 
 namespace Ui {
 	class DialogSignalSearch;

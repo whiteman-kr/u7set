@@ -1,9 +1,5 @@
 #pragma once
 
-#include <QHash>
-#include <memory>
-#include <QUuid>
-
 #include "../lib/Types.h"
 
 namespace Builder

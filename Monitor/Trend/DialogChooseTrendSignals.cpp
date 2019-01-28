@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "DialogChooseTrendSignals.h"
 #include "ui_DialogChooseTrendSignals.h"
 #include "Settings.h"

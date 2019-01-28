@@ -1,6 +1,5 @@
 #pragma once
 
-#include <memory>
 #include "SimBasePage.h"
 #include "SimLogicModule.h"
 #include "SimSchemaWidget.h"

@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "EquipmentTabPage.h"
 #include "../lib/DbController.h"
 #include "../lib/Subsystem.h"
@@ -15,8 +14,6 @@
 #include "./Forms/DialogUpdateFromPreset.h"
 #include "CreateSignalDialog.h"
 
-#include <QPalette>
-#include <QDialog>
 #include <QtTreePropertyBrowser>
 #include <QtGroupPropertyManager>
 #include <QtStringPropertyManager>
@@ -25,14 +22,13 @@
 #include <QtDoublePropertyManager>
 #include <QtBoolPropertyManager>
 #include <QtSpinBoxFactory>
-#include <QMimeData>
+
 
 //
 //
 // EquipmentModel
 //
 //
-
 EquipmentModel::EquipmentModel(DbController* dbcontroller, QWidget* parentWidget, QObject* parent) :
 	QAbstractItemModel(parent),
 	m_dbController(dbcontroller),

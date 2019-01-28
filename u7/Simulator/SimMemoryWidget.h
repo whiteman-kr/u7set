@@ -1,5 +1,4 @@
 #pragma once
-#include <QtWidgets>
 #include "../Simulator/SimRam.h"
 
 class MemoryView;

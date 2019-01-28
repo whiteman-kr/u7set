@@ -1,7 +1,6 @@
 #ifndef CLIENTSCHEMAWIDGET_H
 #define CLIENTSCHEMAWIDGET_H
 
-#include <memory>
 #include "VFrame30Lib_global.h"
 #include "BaseSchemaWidget.h"
 #include "ClientSchemaView.h"

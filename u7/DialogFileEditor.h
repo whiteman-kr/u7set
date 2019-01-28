@@ -1,7 +1,6 @@
 #ifndef DIALOGFILEEDITOR_H
 #define DIALOGFILEEDITOR_H
 
-#include <QDialog>
 #include "IdePropertyEditor.h"
 #include "../lib/DbController.h"
 

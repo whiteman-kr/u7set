@@ -1,14 +1,10 @@
 #include "SignalPropertiesDialog.h"
 #include "SignalsTabPage.h"
-#include <QVBoxLayout>
-#include <QDialogButtonBox>
-#include <QMessageBox>
 #include "Settings.h"
 #include "../lib/SignalProperties.h"
 #include "../lib/PropertyEditor.h"
 #include "../lib/DbController.h"
 #include "../lib/WidgetUtils.h"
-#include "Stable.h"
 
 const std::vector<std::pair<E::SignalType, E::SignalInOutType>> signalTypeSequence =
 {

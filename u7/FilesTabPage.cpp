@@ -1,10 +1,5 @@
 #include "FilesTabPage.h"
-
-#include <QDir>
-#include <QMessageBox>
-
 #include "../lib/DbController.h"
-
 #include "DialogFileEditor.h"
 #include "CheckInDialog.h"
 #include "GlobalMessanger.h"

@@ -1,7 +1,6 @@
 #ifndef BUILDWORKERTHREAD_H
 #define BUILDWORKERTHREAD_H
 
-#include <QJSEngine>
 #include "../lib/DbController.h"
 #include "../lib/Subsystem.h"
 #include "../lib/CommonTypes.h"

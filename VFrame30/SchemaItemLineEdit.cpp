@@ -1,7 +1,6 @@
 #include "SchemaItemLineEdit.h"
 #include "ClientSchemaView.h"
 #include "TuningController.h"
-#include <QLineEdit>
 
 namespace VFrame30
 {

@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "CreateUserDialogDialog.h"
 #include "ui_CreateUserDialogDialog.h"
 #include "PasswordService.h"

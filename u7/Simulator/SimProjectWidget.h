@@ -1,10 +1,5 @@
 #ifndef SIMULATORPROJECTWIDGET_H
 #define SIMULATORPROJECTWIDGET_H
-#include <memory>
-#include <QWidget>
-#include <QLabel>
-#include <QAction>
-#include <QTreeWidget>
 #include "SimIdeSimulator.h"
 
 // Widget for selection build and module

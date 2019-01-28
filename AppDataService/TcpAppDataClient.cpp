@@ -1,6 +1,6 @@
 #include "TcpAppDataClient.h"
 #include "../lib/DataSource.h"
-
+/*
 TcpAppDataClient::TcpAppDataClient(const SoftwareInfo& softwareInfo,
 								   const HostAddressPort& serverAddressPort1,
 								   const HostAddressPort& serverAddressPort2) :
@@ -362,3 +362,4 @@ void TcpAppDataClient::onGetAppSignalStateReply(const char* replyData, quint32 r
 
 	getNextParamPart();
 }
+*/

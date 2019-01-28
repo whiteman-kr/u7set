@@ -1,11 +1,6 @@
 #pragma once
 
-#include <unordered_map>
-#include <map>
-#include <QUuid>
 #include "../lib/Hash.h"
-#include <QMetaType>
-
 
 namespace Builder
 {

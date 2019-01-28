@@ -1,7 +1,6 @@
 #include "Bus.h"
 #include "PropertyNames.h"
-#include <QDomDocument>
-#include <QXmlStreamWriter>
+
 
 namespace VFrame30
 {

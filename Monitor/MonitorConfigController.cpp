@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "../lib/ServiceSettings.h"
 #include "MonitorConfigController.h"
 #include "Settings.h"

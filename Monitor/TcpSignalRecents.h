@@ -1,7 +1,6 @@
 #ifndef TCPSIGNALRECENTS_H
 #define TCPSIGNALRECENTS_H
 
-#include <QStringList>
 #include "../lib/Tcp.h"
 #include "../lib/Hash.h"
 #include "../Proto/network.pb.h"

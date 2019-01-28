@@ -48,6 +48,7 @@
 #include <qglobal.h>
 #include <QApplication>
 #include <QMainWindow>
+#include <QWindow>
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QMessageBox>
@@ -66,6 +67,7 @@
 #include <QJSEngine>
 #include <QQmlEngine>
 #include <QAction>
+#include <QDrag>
 #include <QPdfWriter>
 
 #include <QXmlStreamReader>

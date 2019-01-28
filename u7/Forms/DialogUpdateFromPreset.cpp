@@ -1,12 +1,5 @@
 #include "DialogUpdateFromPreset.h"
-#include <cassert>
-#include <QGridLayout>
-#include <QLabel>
-#include <QPushButton>
-#include <QCheckBox>
-#include <QListWidget>
-#include <QTextEdit>
-#include <QDialogButtonBox>
+
 
 DialogUpdateFromPreset::DialogUpdateFromPreset(bool expertOptions, QStringList& availablePresets, QWidget* parent) :
 	QDialog(parent),

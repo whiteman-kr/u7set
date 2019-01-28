@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "UserManagementDialog.h"
 #include "ui_UserManagementDialog.h"
 #include "CreateUserDialogDialog.h"

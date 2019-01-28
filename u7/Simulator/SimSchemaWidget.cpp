@@ -1,9 +1,6 @@
-#include <QMessageBox>
-#include <QMenu>
 #include "SimSchemaWidget.h"
 #include "SimSchemaView.h"
 #include "SimSchemaManager.h"
-//#include "DialogSignalInfo.h"
 #include "../VFrame30/SchemaItemSignal.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/AppSignalController.h"

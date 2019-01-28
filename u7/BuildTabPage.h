@@ -4,8 +4,6 @@
 #include "../Builder/IssueLogger.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/OutputLog.h"
-#include <QTextCursor>
-#include <QLineEdit>
 
 class DbController;
 class QCheckBox;

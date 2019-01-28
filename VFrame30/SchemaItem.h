@@ -7,7 +7,7 @@
 #include "../lib/ProtoSerialization.h"
 #include "../lib/DebugInstCounter.h"
 #include "../lib/OutputLog.h"
-#include <QJSValue>
+
 
 class QJSEngine;
 class QPaintDevice;

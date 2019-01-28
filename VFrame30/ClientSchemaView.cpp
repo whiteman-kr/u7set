@@ -1,7 +1,4 @@
 #include "ClientSchemaView.h"
-#include <QPainter>
-#include <QQmlEngine>
-#include <QMessageBox>
 #include "DrawParam.h"
 #include "PropertyNames.h"
 #include "../lib/TimeStamp.h"

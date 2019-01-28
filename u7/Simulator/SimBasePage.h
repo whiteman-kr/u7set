@@ -1,10 +1,6 @@
 #ifndef SIMULATORBASEPAGE_H
 #define SIMULATORBASEPAGE_H
 
-#include <list>
-#include <utility>
-#include <QWidget>
-#include <QAction>
 #include "SimIdeSimulator.h"
 
 class SimControlPage;

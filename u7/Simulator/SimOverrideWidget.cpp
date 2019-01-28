@@ -1,18 +1,6 @@
 #include "SimOverrideWidget.h"
-#include <QGridLayout>
-#include <QMenu>
-#include <QActionGroup>
-#include <QLabel>
-#include <QDialog>
-#include <QDialogButtonBox>
-#include <QLineEdit>
-#include <QIntValidator>
-#include <QDoubleValidator>
-#include <QSettings>
-#include <QClipboard>
-#include <QHeaderView>
-#include <QDragEnterEvent>
 #include "../../lib/AppSignal.h"
+
 
 SimOverrideWidget::SimOverrideWidget(Sim::Simulator* simulator, QWidget* parent) :
 	QWidget(parent),

@@ -1,6 +1,3 @@
-#include <QTableView>
-#include <QAbstractTableModel>
-#include <QMessageBox>
 #include "SpecificPropertiesEditor.h"
 
 //

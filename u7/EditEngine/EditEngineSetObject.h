@@ -1,5 +1,4 @@
-#ifndef EDITENGINESETOBJECT_H
-#define EDITENGINESETOBJECT_H
+#pragma once
 
 #include "EditEngine.h"
 
@@ -39,5 +38,3 @@ namespace EditEngine
 
 }
 
-
-#endif // EDITENGINESETOBJECT_H

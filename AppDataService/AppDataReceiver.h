@@ -17,7 +17,7 @@ public:
 					const AppDataSourcesIP& appDataSourcesIP,
 					CircularLoggerShared log);
 
-	virtual ~AppDataReceiverThread();
+	virtual ~AppDataReceiverThread() override;
 
 private:
 	virtual void run() override;
@@ -37,7 +37,6 @@ private:
 	QUdpSocket* m_socket = nullptr;
 
 	HashedVector<quint32, quint32> m_unknownAppDataSourcesIP;
-	qint64 m_unknownAppDataSourcesCount = 0;
 
 	int m_receivedFramesCount = 0;
 

@@ -1,32 +1,13 @@
-#include "Stable.h"
-
-#include <QFormLayout>
-#include <QComboBox>
-#include <QDialogButtonBox>
-#include <QToolBar>
-#include <QDesktopWidget>
-#include <QCheckBox>
-#include <QPlainTextEdit>
-#include <QRadioButton>
-#include <QButtonGroup>
-#include <QToolButton>
-#include <QTimer>
-#include <QCompleter>
-#include <QStringListModel>
-#include <QGroupBox>
-#include <QSet>
-#include <QStandardItemModel>
-
-#include "../lib/DbController.h"
-
 #include "SignalsTabPage.h"
 #include "Settings.h"
+#include "SignalPropertiesDialog.h"
+#include "BusStorage.h"
+#include "../lib/DbController.h"
 #include "../lib/SignalProperties.h"
 #include "../lib/WidgetUtils.h"
-#include "SignalPropertiesDialog.h"
-#include "./Forms/ComparePropertyObjectDialog.h"
-#include "BusStorage.h"
 #include "../lib/WUtils.h"
+#include "./Forms/ComparePropertyObjectDialog.h"
+
 
 const int SC_STR_ID = 0,
 SC_EXT_STR_ID = 1,

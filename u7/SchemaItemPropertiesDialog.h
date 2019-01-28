@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QDialog>
-#include <memory>
 #include "../VFrame30/SchemaItem.h"
 #include "IdePropertyEditor.h"
 

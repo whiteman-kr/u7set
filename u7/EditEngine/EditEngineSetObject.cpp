@@ -2,7 +2,6 @@
 #include "EditSchemaWidget.h"
 #include "../../VFrame30/SchemaItemAfb.h"
 #include "../../VFrame30/SchemaItemBus.h"
-#include <QMessageBox>
 
 namespace EditEngine
 {

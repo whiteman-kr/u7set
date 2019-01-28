@@ -1,12 +1,4 @@
 #include "CreateSignalDialog.h"
-#include <QGridLayout>
-#include <QDialogButtonBox>
-#include <QCheckBox>
-#include <QRadioButton>
-#include <QLineEdit>
-#include <QComboBox>
-#include <QGroupBox>
-#include <QMessageBox>
 #include "../lib/DbController.h"
 #include "BusStorage.h"
 #include "SignalsTabPage.h"

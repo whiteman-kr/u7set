@@ -3,12 +3,6 @@
 #include "../lib/Crc.h"
 #include "../lib/WUtils.h"
 #include "../lib/CUtils.h"
-#include <QtEndian>
-#include <QQmlEngine>
-#include <QJsonObject>
-#include <QJsonArray>
-#include <QDebug>
-#include <QJsonDocument>
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"

@@ -7,9 +7,6 @@
 
 #include "BusStorage.h"
 
-#include <QMessageBox>
-#include <QItemDelegate>
-
 class DialogBusEditor : public QDialog
 {
 	Q_OBJECT

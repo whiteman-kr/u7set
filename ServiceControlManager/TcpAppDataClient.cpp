@@ -129,11 +129,6 @@ void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, qu
 		sendNextRequest(ADS_GET_DATA_SOURCES_INFO);
 		break;
 
-	case ADS_GET_UNITS:
-		onGetUnitsReply(replyData, replyDataSize);
-		sendNextRequest(ADS_GET_UNITS);
-		break;
-
 	case ADS_GET_APP_SIGNAL_LIST_START:
 		onGetAppSignalListStartReply(replyData, replyDataSize);
 		sendNextRequest(ADS_GET_APP_SIGNAL_LIST_START);
@@ -464,17 +459,6 @@ void TcpAppDataClient::onGetAppSignalStateReply(const char* replyData, quint32 r
 	m_getStatesCurrentPart++;
 }
 
-void TcpAppDataClient::onGetUnitsReply(const char* replyData, quint32 replyDataSize)
-{
-	bool result = m_getUnitsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
-
-	if (result == false)
-	{
-		assert(false);
-		return;
-	}
-}
-
 void TcpAppDataClient::onGetServiceState(const char* replyData, quint32 replyDataSize)
 {
 	bool result = m_getAppDataServiceState.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
@@ -514,10 +498,6 @@ void TcpAppDataClient::sendNextRequest(quint32 processedRequestID)
 	// Static data requests
 	//
 	case ADS_GET_DATA_SOURCES_INFO:
-		sendRequest(ADS_GET_UNITS);
-		break;
-
-	case ADS_GET_UNITS:
 		sendRequest(ADS_GET_APP_SIGNAL_LIST_START);
 		break;
 
@@ -525,7 +505,7 @@ void TcpAppDataClient::sendNextRequest(quint32 processedRequestID)
 		if (m_partCount > 0)
 		{
 			m_hash2Index.clear();
-			m_hash2Index.reserve(m_signalHashes.count() * 1.3);
+			m_hash2Index.reserve(static_cast<int>(m_signalHashes.count() * 1.3));
 
 			m_currentPart = 0;
 			getNextItemsPart();

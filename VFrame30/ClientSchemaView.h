@@ -1,8 +1,6 @@
 #ifndef CLIENTSCHEMAVIEW_H
 #define CLIENTSCHEMAVIEW_H
 
-#include <memory>
-#include <QJSEngine>
 #include "SchemaView.h"
 #include "SchemaManager.h"
 #include "TuningController.h"

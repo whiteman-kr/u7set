@@ -38,6 +38,20 @@ inline Hash calcHash(const QByteArray& data)
 	return hash;
 }
 
+inline Hash calcHash(const void* data, size_t byteSize)
+{
+	Hash hash = 0;
+	const char* prt = (const char*)data;
+
+	for (size_t i = 0; i < byteSize; ++i)
+	{
+		hash += (hash << 5) + *prt;
+		prt++;
+	}
+
+	return hash;
+}
+
 // Custom specialization of std::hash for QUuid
 //
 namespace std

@@ -1,7 +1,6 @@
 #ifndef DIALOGCHOOSETRENDSIGNALS_H
 #define DIALOGCHOOSETRENDSIGNALS_H
 
-#include <QDialog>
 #include "../lib/AppSignalManager.h"
 #include "../TrendView/TrendSignal.h"
 

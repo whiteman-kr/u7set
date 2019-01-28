@@ -1,5 +1,4 @@
 #pragma once
-#include <QUuid>
 #include "SchemaPoint.h"
 #include "../lib/Types.h"
 #include "VFrame30Lib_global.h"

@@ -1,8 +1,5 @@
 #include "SimControlPage.h"
-#include <QGridLayout>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QMenu>
+
 
 SimControlPage::SimControlPage(SimIdeSimulator* simulator,
 							   QString equipmentId,

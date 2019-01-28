@@ -2,7 +2,6 @@
 #include "Schema.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
-#include <QPainter>
 
 namespace VFrame30
 {

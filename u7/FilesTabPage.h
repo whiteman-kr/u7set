@@ -1,8 +1,6 @@
 #pragma once
 
 #include "MainTabPage.h"
-#include <vector>
-#include <memory>
 #include "../lib/DbStruct.h"
 #include "GlobalMessanger.h"
 

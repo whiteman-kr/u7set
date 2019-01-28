@@ -1,7 +1,6 @@
 #ifndef APPSIGNALCONTROLLER_H
 #define APPSIGNALCONTROLLER_H
 
-#include <QObject>
 #include "VFrame30Lib_global.h"
 #include "../lib/IAppSignalManager.h"
 

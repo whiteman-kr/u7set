@@ -1,6 +1,4 @@
 #include "Stable.h"
-#include <QCloseEvent>
-#include <QDialogButtonBox>
 #include "MainWindow.h"
 #include "CentralWidget.h"
 #include "Settings.h"
@@ -9,7 +7,6 @@
 #include "UserManagementDialog.h"
 #include "ProjectsTabPage.h"
 #include "FilesTabPage.h"
-#include "SchemaTabPage.h"
 #include "SchemaTabPageEx.h"
 #include "EquipmentTabPage.h"
 #include "SignalsTabPage.h"

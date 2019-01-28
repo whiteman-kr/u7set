@@ -1,5 +1,4 @@
 #include "Parser.h"
-#include <QtConcurrent/QtConcurrent>
 
 #include "../lib/DbController.h"
 #include "../lib/LmDescription.h"
@@ -19,7 +18,6 @@
 #include "../VFrame30/HorzVertLinks.h"
 #include "../VFrame30/PropertyNames.h"
 
-//#include "GlobalMessanger.h"
 #include "LmDescriptionSet.h"
 #include "IssueLogger.h"
 #include "SignalSet.h"

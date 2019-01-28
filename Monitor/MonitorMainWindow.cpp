@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "MonitorMainWindow.h"
 #include "MonitorCentralWidget.h"
 #include "Settings.h"
@@ -53,6 +52,7 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 	// DialogAlert
 
 	connect(&m_LogFile, &Log::LogFile::alertArrived, &m_dialogAlert, &DialogAlert::onAlertArrived);
+	connect(&m_LogFile, &Log::LogFile::writeFailure, &m_dialogAlert, &DialogAlert::onAlertArrived);
 
 	// Creating signals controllers for VFrame30
 	//

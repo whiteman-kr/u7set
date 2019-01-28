@@ -1,9 +1,6 @@
 #ifndef CHOOSEUFBDIALOG_H
 #define CHOOSEUFBDIALOG_H
 
-#include <QDialog>
-#include <QTreeWidgetItem>
-#include <QMessageBox>
 #include "../VFrame30/UfbSchema.h"
 
 namespace Ui {

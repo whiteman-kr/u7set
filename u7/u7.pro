@@ -101,7 +101,6 @@ SOURCES +=\
     SchemaPropertiesDialog.cpp \
     SchemaItemPropertiesDialog.cpp \
     SchemaLayersDialog.cpp \
-    SchemaTabPage.cpp \
     CreateSchemaDialog.cpp \
     EditEngine/EditEngineSetSchemaProperty.cpp \
     EditEngine/EditEngineSetOrder.cpp \
@@ -118,7 +117,6 @@ SOURCES +=\
     ../lib/Configurator.cpp \
     DialogSettingsConfigurator.cpp \
     Forms/ChooseUfbDialog.cpp \
-    SchemaListModel.cpp \
     Forms/SelectChangesetDialog.cpp \
     Forms/FileHistoryDialog.cpp \
     Forms/ChangesetDetailsDialog.cpp \
@@ -232,7 +230,6 @@ HEADERS  += \
     EditSchemaWidget.h \
     SchemaPropertiesDialog.h \
     SchemaItemPropertiesDialog.h \
-    SchemaTabPage.h \
     SchemaLayersDialog.h \
     CreateSchemaDialog.h \
     EditEngine/EditEngineSetSchemaProperty.h \
@@ -250,7 +247,6 @@ HEADERS  += \
     DialogSettingsConfigurator.h \
     Forms/ChooseUfbDialog.h \
     ../lib/LmLimits.h \
-    SchemaListModel.h \
     Forms/SelectChangesetDialog.h \
     Forms/FileHistoryDialog.h \
     Forms/ChangesetDetailsDialog.h \

@@ -1,11 +1,5 @@
 #pragma once
 
-#include <QObject>
-#include <QFile>
-#include <QXmlStreamWriter>
-#include <QVector>
-#include <QHash>
-
 #include "../lib/OutputLog.h"
 #include "../lib/OrderedHash.h"
 #include "../lib/DeviceObject.h"

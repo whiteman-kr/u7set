@@ -1,7 +1,7 @@
 #include "BaseSchemaWidget.h"
 #include "SchemaView.h"
 #include "Schema.h"
-#include <QWindow>
+
 
 namespace VFrame30
 {

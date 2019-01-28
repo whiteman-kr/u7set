@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "ChooseAfbDialog.h"
 #include "ui_ChooseAfbDialog.h"
 #include "../VFrame30/SchemaItemAfb.h"

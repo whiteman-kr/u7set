@@ -1,11 +1,5 @@
 #include "DialogBusEditor.h"
-
 #include "Settings.h"
-
-#include <QTreeWidget>
-#include <QMenu>
-#include <QGridLayout>
-#include <QInputDialog>
 #include "../lib/PropertyEditorDialog.h"
 
 //

@@ -1,7 +1,6 @@
 #ifndef CHOOSEAFBDIALOG_H
 #define CHOOSEAFBDIALOG_H
 
-#include <QDialog>
 #include "../VFrame30/Afb.h"
 
 namespace Ui {

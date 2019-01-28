@@ -1,8 +1,6 @@
 #ifndef CREATESIGNALDIALOG_H
 #define CREATESIGNALDIALOG_H
 
-#include <QDialog>
-#include <QRadioButton>
 #include "../lib/Types.h"
 
 

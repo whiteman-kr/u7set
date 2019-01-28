@@ -1,7 +1,7 @@
 #include "DialogSettingsConfigurator.h"
 #include "ui_DialogSettingsConfigurator.h"
 #include "Settings.h"
-#include <QSerialPortInfo>
+
 
 DialogSettingsConfigurator::DialogSettingsConfigurator(QWidget *parent) :
 	QDialog(parent),

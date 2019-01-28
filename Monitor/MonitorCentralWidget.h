@@ -1,7 +1,6 @@
 #ifndef MONITORCENTRALWIDGET_H
 #define MONITORCENTRALWIDGET_H
 
-#include "QTabWidget"
 #include "MonitorSchemaWidget.h"
 #include "MonitorSchemaManager.h"
 #include "../VFrame30/AppSignalController.h"

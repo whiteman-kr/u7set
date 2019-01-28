@@ -1,7 +1,5 @@
 #include "PasswordService.h"
-#include <QString>
-#include <QWidget>
-#include <QMessageBox>
+
 
 PasswordService::PasswordService()
 {

@@ -1,5 +1,4 @@
 #pragma once
-#include <functional>
 #include "Settings.h"
 #include "../lib/TypesAndEnums.h"
 

@@ -49,6 +49,16 @@ namespace Builder
 			result = settings.writeToXml(xml);
 		}
 
+		bool res = m_cfgXml->addLinkToFile(DIR_COMMON, FILE_APP_SIGNALS_ASGS);
+
+		if (res == false)
+		{
+			// Can't link build file %1 into /%2/configuration.xml.
+			//
+			m_log->errCMN0018(QString("%1\\%2").arg(DIR_COMMON).arg(FILE_APP_SIGNALS_ASGS), equipmentID());
+			result = false;
+		}
+
 		return result;
 	}
 

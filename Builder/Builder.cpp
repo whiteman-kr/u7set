@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "Builder.h"
 #include "BuildWorkerThread.h"
 

@@ -4,7 +4,6 @@
 #include "DrawParam.h"
 #include "PropertyNames.h"
 #include "SchemaView.h"
-#include <QPainter>
 
 namespace VFrame30
 {

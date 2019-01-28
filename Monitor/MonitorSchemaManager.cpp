@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "MonitorSchemaManager.h"
 
 MonitorSchemaManager::MonitorSchemaManager(MonitorConfigController* configController, QObject* parent /*= nullptr*/) :

@@ -1,11 +1,3 @@
-#include "Stable.h"
-#include <QRubberBand>
-#include <QClipboard>
-#include <QComboBox>
-#include <QCompleter>
-#include <QMimeData>
-#include <QToolTip>
-#include <QGroupBox>
 #include "EditEngine/EditEngine.h"
 #include "EditSchemaWidget.h"
 #include "SchemaPropertiesDialog.h"

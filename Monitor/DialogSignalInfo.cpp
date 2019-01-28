@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "DialogSignalInfo.h"
 #include "ui_DialogSignalInfo.h"
 #include "../lib/Types.h"

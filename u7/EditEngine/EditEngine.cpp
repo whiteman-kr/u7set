@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "EditEngine.h"
 #include "EditSchemaWidget.h"
 #include "EditEngineAddItem.h"

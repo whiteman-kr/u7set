@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "DialogColumns.h"
 #include "ui_DialogColumns.h"
 

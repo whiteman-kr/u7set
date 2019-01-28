@@ -1,4 +1,3 @@
-#include "Stable.h"
 #include "MonitorView.h"
 #include "MonitorSchemaManager.h"
 #include "../lib/AppSignalManager.h"

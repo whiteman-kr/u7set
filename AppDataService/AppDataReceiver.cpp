@@ -183,14 +183,25 @@ void AppDataReceiverThread::receivePackets()
 			}
 		}
 
-		//
+		AppDataSourceShared dataSource = m_appDataSourcesIP.value(ip, nullptr);
 
-		Rup::Header h = simFrame.rupFrame.header;
+		if (dataSource == nullptr)
+		{
+			m_errUnknownAppDataSourceIP++;
 
-		h.reverseBytes();
+			if (m_unknownAppDataSourcesIP.contains(ip) == false && m_unknownAppDataSourcesIP.count() < 500)
+			{
+				m_unknownAppDataSourcesIP.insert(ip, ip);
+			}
 
-		//
+			continue;
+		}
+
 		m_receivedFramesCount++;
+
+		dataSource->pushRupFrame(serverTime, simFrame.rupFrame);
+
+		//
 
 		if (serverTime - prevServerTime > 1000)
 		{
@@ -200,20 +211,5 @@ void AppDataReceiverThread::receivePackets()
 
 			prevReceivedFramesCount = m_receivedFramesCount;
 		}
-
-		AppDataSourceShared dataSource = m_appDataSourcesIP.value(ip, nullptr);
-
-		if (dataSource == nullptr)
-		{
-			if (m_unknownAppDataSourcesIP.contains(ip) == false && m_unknownAppDataSourcesIP.count() < 500)
-			{
-				m_unknownAppDataSourcesIP.insert(ip, ip);
-				m_unknownAppDataSourcesCount++;
-			}
-
-			continue;
-		}
-
-		dataSource->pushRupFrame(serverTime, simFrame.rupFrame);
 	}
 }

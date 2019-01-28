@@ -277,9 +277,11 @@ public:
 	std::vector<DbFileInfo> toVector(bool excludeRoot) const;
 	std::vector<std::shared_ptr<DbFileInfo>> toVectorOfSharedPointers(bool excludeRoot) const;
 
-	std::vector<std::shared_ptr<DbFileInfo>> children(int parentId) const;
-	std::vector<std::shared_ptr<DbFileInfo>> children(const DbFileInfo& fileInfo) const;
-	std::vector<std::shared_ptr<DbFileInfo>> children(const std::shared_ptr<DbFileInfo>& fileInfo) const;
+	bool hasChildren(int fileId) const;
+
+	const std::vector<std::shared_ptr<DbFileInfo>>& children(int parentId) const;
+	const std::vector<std::shared_ptr<DbFileInfo>>& children(const DbFileInfo& fileInfo) const;
+	const std::vector<std::shared_ptr<DbFileInfo>>& children(const std::shared_ptr<DbFileInfo>& fileInfo) const;
 
 	std::shared_ptr<DbFileInfo> child(int parentId, int index) const;
 	std::shared_ptr<DbFileInfo> child(const DbFileInfo& parentFileInfo, int index) const;
@@ -308,10 +310,17 @@ public:
 	bool removeFilesWithExtension(QString ext);
 
 private:
+	struct FileChildren
+	{
+		int m_fileId;
+		std::vector<std::shared_ptr<DbFileInfo>> m_children;
+	};
+
+private:
 	// WARNING, assigment move is present, adding new member, modify operator=(DbFileTree&&)!!!
 	//
-	std::multimap<int, std::shared_ptr<DbFileInfo>> m_parentIdToChildren;	// Key is parent, values are its' parent children
-	std::map<int, std::shared_ptr<DbFileInfo>> m_files;						// Key if fileId, value is DbFile(Info) object
+	std::map<int, FileChildren> m_fileIdToChildren;				// Key is fileid, values are its' children
+	std::map<int, std::shared_ptr<DbFileInfo>> m_files;			// Key if fileId, value is DbFile(Info) object
 	int m_rootFileId = -1;
 	// WARNING, assigment move is present, adding new member, modify operator=(DbFileTree&&)!!!
 	//

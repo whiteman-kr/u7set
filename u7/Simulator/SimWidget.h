@@ -1,8 +1,6 @@
 #ifndef SIMULATORWIDGET_H
 #define SIMULATORWIDGET_H
 
-#include <QMainWindow>
-#include <QtWidgets>
 #include "../lib/DbController.h"
 #include "SimIdeSimulator.h"
 #include "SimSchemaManager.h"

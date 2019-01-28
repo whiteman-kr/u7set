@@ -1,10 +1,6 @@
 #ifndef SIMULATOROUTPUTWIDGET_H
 #define SIMULATOROUTPUTWIDGET_H
 
-#include <QWidget>
-#include <QTextEdit>
-#include <QMutex>
-
 class SimOutputWidget : public QTextEdit
 {
 	Q_OBJECT

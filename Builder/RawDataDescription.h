@@ -1,7 +1,5 @@
 #pragma once
 
-#include <QVector>
-
 #include "../lib/Types.h"
 #include "IssueLogger.h"
 

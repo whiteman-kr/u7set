@@ -4,17 +4,6 @@
 
 namespace VFrame30
 {
-/*
-	class QMyWidget : public QWidget
-	{
-	public:
-		void Create(HWND hWnd)
-		{
-			create((WId)hWnd, false, false);
-		}
-
-	};*/
-
 	CPrint::CPrint(void)
 	{
 	}

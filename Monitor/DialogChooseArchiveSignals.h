@@ -1,7 +1,6 @@
 #ifndef DIALOGCHOOSEARCHIVESIGNALS_H
 #define DIALOGCHOOSEARCHIVESIGNALS_H
 
-#include <QDialog>
 #include "../lib/AppSignalManager.h"
 #include "../VFrame30/Schema.h"
 #include "ArchiveData.h"
