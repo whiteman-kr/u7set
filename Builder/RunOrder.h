@@ -2,6 +2,10 @@
 
 #include "../lib/Hash.h"
 
+#include <unordered_map>
+#include <map>
+#include <QMetaType>
+
 namespace Builder
 {
 	class RunOrder

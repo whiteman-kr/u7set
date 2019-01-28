@@ -4,6 +4,7 @@
 #include "SchemaLayer.h"
 #include "../lib/PropertyObject.h"
 #include "../lib/TypesAndEnums.h"
+#include <QColor>
 
 
 namespace Afb

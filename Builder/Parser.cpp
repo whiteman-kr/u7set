@@ -22,6 +22,8 @@
 #include "IssueLogger.h"
 #include "SignalSet.h"
 
+#include <QtConcurrentRun>
+
 
 namespace Builder
 {
