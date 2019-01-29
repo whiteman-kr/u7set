@@ -44,7 +44,7 @@ private:
 	QVector<Hash> m_signalHashes;
 };
 
-class ArchFileRequestData
+class ArchFileToRead
 {
 public:
 	struct PartitionInfo
@@ -55,8 +55,8 @@ public:
 	};
 
 public:
-	ArchFileRequestData(const ArchFile& archFile, const ArchRequestParam& param);
-	~ArchFileRequestData();
+	ArchFileToRead(const ArchFile& archFile, const ArchRequestParam& param);
+	~ArchFileToRead();
 
 	void findData();
 
@@ -79,6 +79,7 @@ private:
 private:
 	QString m_archFilePath;
 	QString m_appSignalID;
+	Hash m_hash = 0;
 	quint32 m_requestID = 0;
 	E::TimeType m_timeType = E::TimeType::System;
 	qint64 m_startTime = 0;
@@ -104,7 +105,7 @@ private:
 	bool m_hasData = true;
 };
 
-inline bool operator < (const ArchFileRequestData::PartitionInfo& p1, const ArchFileRequestData::PartitionInfo& p2) { return p1.startTime < p2.startTime; }
+inline bool operator < (const ArchFileToRead::PartitionInfo& p1, const ArchFileToRead::PartitionInfo& p2) { return p1.startTime < p2.startTime; }
 
 //
 
@@ -114,7 +115,7 @@ class ArchRequest : public RunOverrideThread
 {
 public:
 	ArchRequest(Archive& archive, const ArchRequestParam& param, CircularLoggerShared logger);
-	virtual ~ArchRequest();
+	virtual ~ArchRequest() override;
 
 	void run() override;
 
@@ -147,9 +148,9 @@ private:
 	bool isNextDataRequired() { return m_nextDataRequired.load(); }
 	void resetNextDataRequired() { m_nextDataRequired.store(false); }
 
-	void prepareArchRequestData();
-	bool findData();
+	bool prepareArchFilesToRead();
 	void getNextData();
+	bool getSignalStates();
 	bool getNextRecord(Hash* hash, ArchFileRecord* record);
 
 	void reportError();
@@ -167,16 +168,6 @@ private:
 	QString endTimeStr() const { return TimeStamp(m_param.endTime()).toDateTime().toString("yyyy-MM-dd HH:mm:ss"); }
 
 private:
-
-	struct ArchFileData
-	{
-		bool hasMoreData = false;
-
-		ArchFileRecord record;
-		qint64 recordTime = 0;
-	};
-
-private:
 	Archive& m_archive;
 	ArchRequestParam m_param;
 	CircularLoggerShared m_logger;
@@ -186,13 +177,10 @@ private:
 
 	ArchRequestParam m_execParam;
 
-	QHash<Hash, ArchFileRequestData*> m_requestData;
-	QVector<ArchFileRequestData*> m_requestDataArray;
-	QVector<ArchFileRequestData*> m_filesWithData;
-	QVector<ArchFileData> m_fileData;
+	QVector<ArchFileToRead*> m_archFileToRead;
 
 	bool m_firstCallOfGetNextRecord = true;
-	qint64 m_minTime = -1;
+	qint64 m_minTime = std::numeric_limits<qint64>::max();
 	qint64 m_minTimeIndex = -1;
 
 	std::atomic<bool> m_nextDataRequired = { false };
