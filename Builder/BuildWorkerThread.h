@@ -11,6 +11,7 @@
 #include "TuningBuilder.h"
 #include "OptoModule.h"
 #include "ComparatorStorage.h"
+#include <QJSEngine>
 
 namespace Builder
 {

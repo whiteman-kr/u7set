@@ -233,6 +233,17 @@ namespace Builder
 		m_expertMode = value;
 	}
 
+	int ModuleLogicCompiler::lmDescriptionNumber() const
+	{
+		if (m_lmDescription == nullptr)
+		{
+			assert(false);
+			return 0;
+		}
+
+		return m_lmDescription->descriptionNumber();
+	}
+
 	bool ModuleLogicCompiler::loadLMSettings()
 	{
 		bool result = true;
@@ -644,6 +655,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createUalAfbsMap()
 	{
+		bool result = true;
+
 		for(UalItem* ualItem : m_ualItems)
 		{
 			if (ualItem->isAfb() == false)
@@ -655,11 +668,11 @@ namespace Builder
 
 			if (ualAfb == nullptr)
 			{
-				return false;
+				result = false;
 			}
 		}
 
-		return true;
+		return result;
 	}
 
 	bool ModuleLogicCompiler::createUalSignals()

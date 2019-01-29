@@ -3457,7 +3457,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Value of parameter %1.%2 must be greate then the value of %1.%3.
+	/// Title: Value of parameter %1.%2 must be greater then the value of %1.%3.
 	///
 	/// Parameters:
 	///		%1 functional block caption
@@ -3466,7 +3466,7 @@ namespace Builder
 	///		%4 application logic item Uuid
 	///
 	/// Description:
-	///		Value of first specified parameter must be greate then the value of second parameneter. Correct prameter's values.
+	///		Value of first specified parameter must be greater then the value of second parameneter. Correct prameter's values.
 	///
 	void IssueLogger::errALC5052(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel)
 	{
@@ -3474,7 +3474,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5052,
-				  QString(tr("Value of parameter %1.%2 must be greate then the value of %1.%3 (Logic schema %4, item %5).")).
+				  QString(tr("Value of parameter %1.%2 must be greater then the value of %1.%3 (Logic schema %4, item %5).")).
 					arg(fbCaption).arg(param1).arg(param2).arg(schemaID).arg(itemLabel));
 	}
 
@@ -5706,6 +5706,32 @@ namespace Builder
 				  QString(tr("Analog signal %1 aperture should be less then 100.")).
 					arg(appSignalID));
 	}
+
+	/// IssueCode: ALC5158
+	///
+	/// IssueType: Error
+	///
+	/// Title: Value of parameter %1.%2 must be greater or equal then the value of %1.%3.
+	///
+	/// Parameters:
+	///		%1 functional block caption
+	///		%2 parameter 1 caption
+	///		%3 parameter 2 caption
+	///		%4 application logic item Uuid
+	///
+	/// Description:
+	///		Value of first specified parameter must be greater or equal then the value of second parameneter. Correct prameter's values.
+	///
+	void IssueLogger::errALC5158(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5158,
+				  QString(tr("Value of parameter %1.%2 must be greater or equal then the value of %1.%3 (Logic schema %4, item %5).")).
+					arg(fbCaption).arg(param1).arg(param2).arg(schemaID).arg(itemLabel));
+	}
+
 
 	//
 

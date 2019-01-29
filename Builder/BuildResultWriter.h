@@ -6,6 +6,7 @@
 #include "../lib/BuildInfo.h"
 #include "CfgFiles.h"
 #include "ModuleFirmwareWriter.h"
+#include <QFile>
 
 class DbController;
 

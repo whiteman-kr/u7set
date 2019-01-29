@@ -303,6 +303,7 @@ namespace Builder
 		bool calculate_LATCH_paramValues();
 		bool calculate_LIM_paramValues();
 		bool calculate_DEAD_ZONE_paramValues();
+		bool calculate_DEAD_ZONE_paramValues_ldn4();
 		bool calculate_POL_paramValues();
 		bool calculate_DER_paramValues();
 		bool calculate_MISMATCH_paramValues();
@@ -321,6 +322,8 @@ namespace Builder
 		bool checkUnsignedInt32(const AppFbParamValue& paramValue);
 		bool checkSignedInt32(const AppFbParamValue& paramValue);
 		bool checkFloat32(const AppFbParamValue& paramValue);
+
+		int lmDescriptionNumber() const;
 
 	private:
 		quint16 m_instance = -1;

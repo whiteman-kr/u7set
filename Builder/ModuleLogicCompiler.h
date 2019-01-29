@@ -178,6 +178,8 @@ namespace Builder
 		bool expertMode() const;
 		void setExpertMode(bool value);
 
+		int lmDescriptionNumber() const;
+
 	private:
 		// pass #1 compilation functions
 		//
