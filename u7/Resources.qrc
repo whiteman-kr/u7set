@@ -54,9 +54,9 @@
         <file>Images/SchemaRefresh.svg</file>
         <file>Images/SchemaProperties.svg</file>
         <file>Images/SchemaAddFolder2.svg</file>
+        <file>Images/SchemaFolder.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>
     </qresource>
 </RCC>
- 

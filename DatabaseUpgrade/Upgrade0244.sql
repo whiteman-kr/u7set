@@ -1016,3 +1016,12 @@ UNION
 
 $BODY$
   LANGUAGE sql;
+
+
+-- Set Folder attribute
+--
+SELECT * FROM api.set_file_attributes('$(SessionKey)', '$root$/Schemas', 1);
+SELECT * FROM api.set_file_attributes('$(SessionKey)', '$root$/Schemas/UFBL', 1);
+SELECT * FROM api.set_file_attributes('$(SessionKey)', '$root$/Schemas/ApplicationLogic', 1);
+SELECT * FROM api.set_file_attributes('$(SessionKey)', '$root$/Schemas/Monitor', 1);
+SELECT * FROM api.set_file_attributes('$(SessionKey)', '$root$/Schemas/Tuning', 1);

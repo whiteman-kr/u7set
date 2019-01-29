@@ -513,6 +513,24 @@ std::vector<DbFileInfo> DbFileTree::toVector(bool excludeRoot) const
 	return fileList;
 }
 
+std::vector<DbFileInfo> DbFileTree::toVectorIf(std::function<bool(const DbFileInfo&)> pred) const
+{
+	std::vector<DbFileInfo> fileList;
+	fileList.reserve(m_files.size());
+
+	for (auto&[fileId, fileInfo] : m_files)
+	{
+		if (pred(*fileInfo) == false)
+		{
+			continue;
+		}
+
+		fileList.push_back(*fileInfo);
+	}
+
+	return fileList;
+}
+
 std::vector<std::shared_ptr<DbFileInfo> > DbFileTree::toVectorOfSharedPointers(bool excludeRoot) const
 {
 	std::vector<std::shared_ptr<DbFileInfo>> fileList;
@@ -838,6 +856,36 @@ bool DbFileTree::removeFilesWithExtension(QString ext)
 	return ok;
 }
 
+bool DbFileTree::removeIf(std::function<bool(const DbFileInfo&)> pred)
+{
+	std::vector<std::shared_ptr<DbFileInfo>> filesToRemove;
+	filesToRemove.reserve(64);
+
+	for (auto[fileId, fileInfo] : m_files)
+	{
+		if (fileId != fileInfo->fileId())
+		{
+			assert(fileId != fileInfo->fileId());
+			continue;
+		}
+
+		if (pred(*fileInfo) == true)
+		{
+			filesToRemove.push_back(fileInfo);
+		}
+	}
+
+	// Remove files
+	//
+	bool ok = true;
+	for (std::shared_ptr<DbFileInfo> file : filesToRemove)
+	{
+		ok &= removeFile(file);
+	}
+
+	return true;
+}
+
 
 //
 //
@@ -869,6 +917,7 @@ void DbFileInfo::trace() const
 	qDebug() << "	ParentID: " << m_parentId;
 	qDebug() << "	Changeset: " << m_changeset;
 	qDebug() << "	State: " << m_state.text();
+	qDebug() << "	Attributes: " << m_attributes;
 
 	return;
 }
@@ -1048,6 +1097,11 @@ qint32 DbFileInfo::attributes() const
 void DbFileInfo::setAttributes(qint32 value)
 {
 	m_attributes = value;
+}
+
+bool DbFileInfo::isFolder() const
+{
+	return m_attrDirectory;
 }
 
 bool DbFileInfo::directoryAttribute() const
@@ -1233,9 +1287,15 @@ const QByteArray& DbFile::data() const
 	return m_data;
 }
 
-QByteArray& DbFile::data()
+//QByteArray& DbFile::data()
+//{
+//	return m_data;
+//}
+
+void DbFile::setData(const QByteArray& data)
 {
-	return m_data;
+	m_data = data;
+	m_size = m_data.size();
 }
 
 void DbFile::swapData(QByteArray& data)

@@ -2725,9 +2725,18 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 			q.bindValue(":sessionkey", sessionKey());
 			q.bindValue(":filename", file->fileName());
 			q.bindValue(":parentid", parentId);
-			q.bindValue(":filedata", file->data());
+			if (file->data().isEmpty() == false)
+			{
+				q.bindValue(":filedata", file->data());
+			}
+			else
+			{
+				q.bindValue(":filedata", "");
+			}
 			q.bindValue(":details", file->details());
 			q.bindValue(":attributes", file->attributes());
+
+			qDebug() << q.lastQuery();
 		}
 		else
 		{
@@ -2740,7 +2749,14 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 			q.bindValue(":filename", file->fileName());
 			q.bindValue(":parentid", parentId);
 			q.bindValue(":uniquefromfileid", uniqueFromFileId);
-			q.bindValue(":filedata", file->data());
+			if (file->data().isEmpty() == false)
+			{
+				q.bindValue(":filedata", file->data());
+			}
+			else
+			{
+				q.bindValue(":filedata", "");
+			}
 			q.bindValue(":details", file->details());
 			q.bindValue(":attributes", file->attributes());
 		}
@@ -4170,7 +4186,7 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 		// FUNCTION add_device(user_id integer, file_data bytea, parent_id integer, file_extension text, details text)
 		//
 		QByteArray data;
-		bool result = current->Save(data);
+		bool result = current->saveToByteArray(&data);
 		if (result == false)
 		{
 			assert(result);

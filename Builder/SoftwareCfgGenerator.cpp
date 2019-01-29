@@ -197,14 +197,19 @@ namespace Builder
 		{
 			DbFileTree filesTree;
 
-			result = db->getFileListTree(&filesTree, parentFileId, fileExtension, true, nullptr);
+			result = db->getFileListTree(&filesTree, parentFileId, "%", true, nullptr);
 			if (result == false)
 			{
-				log->errPDB2001(parentFileId, fileExtension, db->lastError());
+				log->errPDB2001(parentFileId, "%", db->lastError());
 				return false;
 			}
 
-			fileList = filesTree.toVector(true);
+			fileList = filesTree.toVectorIf(
+				[&fileExtension](const DbFileInfo& file)
+				{
+				   return file.fileName().endsWith(fileExtension, Qt::CaseInsensitive) == true &&
+					   file.isFolder() == false;
+				});
 		}
 
 		// Get file instance and parse it
@@ -292,7 +297,7 @@ namespace Builder
 		}
 
 		QByteArray fileData;
-		sds.Save(fileData);
+		sds.saveToByteArray(&fileData);
 
 		buildResultWriter->addFile(dir, "SchemaDetails.pbuf", fileData, false);
 

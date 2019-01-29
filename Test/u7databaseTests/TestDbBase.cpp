@@ -92,10 +92,10 @@ bool TestDbBase::createProjectDb()
 			throw false;
 		}
 
-		int version = query.value(0).toInt();
-
 		// !!!! It is commented, as it calls too many fails on automated CI tests
 		//
+//		int version = query.value(0).toInt();
+
 //		if (version != ProjectDatabaseVersion)
 //		{
 //			qDebug() << "Get test ProjectDB version error: Invalid database version, " << ProjectDatabaseVersion << " required, current: " << version;

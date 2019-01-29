@@ -1246,6 +1246,12 @@ namespace VFrame30
 
 	bool SchemaDetails::parseDetails(const QString& details)
 	{
+		if (details.trimmed().isEmpty() == true)
+		{
+			*this = SchemaDetails{};
+			return true;
+		}
+
 		// parse details section (from DB), result is signal list
 		//
 		QByteArray data = details.toUtf8();
