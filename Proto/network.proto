@@ -107,6 +107,16 @@ message GetDataSourcesInfoReply
 }
 
 
+message AppDataReceiveState
+{
+    optional int64 receivedFramesCount = 1 [default = 0];
+    optional int64 framesReceivedPerSecond = 2 [default = 0];
+    optional int64 simFramesCount = 3 [default = 0];
+    optional int64 errDatagramSize = 4 [default = 0];
+    optional int64 errSimVersion = 5 [default = 0];
+    optional int64 errUnknownAppDataSourceIP = 6 [default = 0];
+}
+
 // Getting Application Data Sources states
 //
 message AppDataSourceState
@@ -147,24 +157,6 @@ message GetAppDataSourcesStatesReply
 }
 
 
-// Get Units
-//
-message GetUnitsRequest
-{
-}
-
-message Unit
-{
-    optional int32 id = 1;
-    optional string unit = 2;
-}
-
-message GetUnitsReply
-{
-    optional int32 error = 1 [default = 0];
-    repeated Unit units = 2;
-}
-
 message AppDataServiceState
 {
     required bool CfgServiceIsConnected = 1 [default = false];
@@ -175,7 +167,7 @@ message AppDataServiceState
     optional uint32 ArchiveServiceIp = 5 [default = 0];
     optional int32 ArchiveServicePort = 6 [default = 0];
 
-
+    optional AppDataReceiveState appDataReceiveState = 7;
 }
 
 

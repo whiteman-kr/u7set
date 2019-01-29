@@ -128,10 +128,6 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 		onGetDataSourcesStatesRequest();
 		break;
 
-	case ADS_GET_UNITS:
-		onGetUnitsRequest();
-		break;
-
 	case ADS_GET_SETTINGS:
 		onGetSettings();
 		break;
@@ -395,7 +391,7 @@ void TcpAppDataServer::onGetDataSourcesStatesRequest()
 
 	const AppDataSourcesIP& dataSources = appDataSources();
 
-	for (const AppDataSourceShared source : dataSources)
+	for (const AppDataSourceShared& source : dataSources)
 	{
 		Network::AppDataSourceState* state = m_getAppDataSourcesStatesReply.add_appdatasourcesstates();
 		source->getState(state);
@@ -405,15 +401,6 @@ void TcpAppDataServer::onGetDataSourcesStatesRequest()
 
 	sendReply(m_getAppDataSourcesStatesReply);
 }
-
-
-void TcpAppDataServer::onGetUnitsRequest()
-{
-	m_getUnitsReply.Clear();
-
-	sendReply(m_getUnitsReply);
-}
-
 
 void TcpAppDataServer::onGetSettings()
 {

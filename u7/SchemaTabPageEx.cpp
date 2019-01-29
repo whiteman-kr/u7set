@@ -2198,8 +2198,7 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 		// File already opened, check if it is opened for edit then activate this tab
 		//
 		if (editTabPage->readOnly() == false &&
-			editTabPage->fileInfo().fileId() == file.fileId() &&
-			editTabPage->fileInfo().changeset() == file.changeset())
+			editTabPage->fileInfo().fileId() == file.fileId())
 		{
 			if (tabWidget->indexOf(editTabPage) != -1)
 			{

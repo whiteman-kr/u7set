@@ -916,6 +916,16 @@ namespace Builder
 		return false;
 	}
 
+	int UalAfb::lmDescriptionNumber() const
+	{
+		if (m_compiler == nullptr)
+		{
+			assert(false);
+			return 0;
+		}
+
+		return m_compiler->lmDescriptionNumber();
+	}
 
 	// ---------------------------------------------------------------------------------------
 	//

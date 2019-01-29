@@ -27,7 +27,7 @@ private:
 	int m_signalCount = 0;
 	int m_signalListPartCount = 0;
 
-	virtual Server* getNewInstance();
+	virtual Server* getNewInstance() override;
 
 	// Request processing functions
 	//
@@ -43,8 +43,6 @@ private:
 
 	void onGetDataSourcesInfoRequest();
 	void onGetDataSourcesStatesRequest();
-
-	void onGetUnitsRequest();
 
 	void onGetSettings();
 
@@ -66,8 +64,6 @@ private:
 	Network::GetAppSignalStateRequest m_getAppSignalStateRequest;
 	Network::GetAppSignalStateReply m_getAppSignalStateReply;
 
-	Network::GetUnitsReply m_getUnitsReply;
-
 	//
 
 	Network::GetDataSourcesInfoReply m_getDataSourcesInfoReply;
@@ -88,7 +84,7 @@ private:
 
 public:
 	TcpAppDataServer(const SoftwareInfo& softwareInfo);
-	virtual ~TcpAppDataServer();
+	virtual ~TcpAppDataServer() override;
 
 	virtual void onServerThreadStarted() override;
 	virtual void onServerThreadFinished() override;

@@ -1521,6 +1521,11 @@ namespace Builder
 
 	bool UalAfb::calculate_DEAD_ZONE_paramValues()
 	{
+		if (lmDescriptionNumber() == 4)
+		{
+			return calculate_DEAD_ZONE_paramValues_ldn4();
+		}
+
 		QStringList requiredParams;
 
 		requiredParams.append("i_conf");
@@ -1570,13 +1575,116 @@ namespace Builder
 		default:
 			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
 			//
-			m_log->errALC5051(i_conf.unsignedIntValue(), i_conf.caption(), caption(), guid());
+			m_log->errALC5051(static_cast<int>(i_conf.unsignedIntValue()), i_conf.caption(), caption(), guid());
 
 			return false;
 		}
 
 		return true;
 	}
+
+	bool UalAfb::calculate_DEAD_ZONE_paramValues_ldn4()
+	{
+		QStringList requiredParams;
+
+		requiredParams.append("i_conf");
+		requiredParams.append("i_data_x1");
+		requiredParams.append("i_data_x2");
+
+		CHECK_REQUIRED_PARAMETERS(requiredParams);
+
+		AppFbParamValue& i_conf = m_paramValuesArray["i_conf"];
+		AppFbParamValue& i_data_x1 = m_paramValuesArray["i_data_x1"];
+		AppFbParamValue& i_data_x2 = m_paramValuesArray["i_data_x2"];
+
+		CHECK_UNSIGNED_INT(i_conf);
+
+		m_runTime = 5 + 4;
+
+		switch(i_conf.unsignedIntValue())
+		{
+		case 1:								// signed int dead zone
+		case 2:
+			CHECK_SIGNED_INT32(i_data_x1);
+
+			if (i_data_x1.signedIntValue() < 0)
+			{
+				// Value of parameter '%1.%2' must be greater or equal to 0.
+				//
+				m_log->errALC5043(caption(), i_data_x1.caption(), guid());
+
+				return false;
+			}
+
+			CHECK_SIGNED_INT32(i_data_x2);
+
+			if (i_data_x2.signedIntValue() < 0)
+			{
+				// Value of parameter '%1.%2' must be greater or equal to 0.
+				//
+				m_log->errALC5043(caption(), i_data_x2.caption(), guid());
+
+				return false;
+			}
+
+			if (i_data_x2.signedIntValue() < i_data_x1.signedIntValue())
+			{
+				// Value of parameter %1.%2 must be greater or equal then the value of %1.%3.
+				//
+				m_log->errALC5158(caption(), i_data_x2.caption(), i_data_x1.caption(), guid(), schemaID(), label());
+
+				return false;
+			}
+
+			break;
+
+		case 3:								// float dead zone
+		case 4:
+			CHECK_FLOAT32(i_data_x1);
+
+			if (i_data_x1.floatValue() < 0)
+			{
+				// Value of parameter '%1.%2' must be greater or equal to 0.
+				//
+				m_log->errALC5043(caption(), i_data_x1.caption(), guid());
+
+				return false;
+			}
+
+			CHECK_FLOAT32(i_data_x2);
+
+			if (i_data_x2.floatValue() < 0)
+			{
+				// Value of parameter '%1.%2' must be greater or equal to 0.
+				//
+				m_log->errALC5043(caption(), i_data_x2.caption(), guid());
+
+				return false;
+			}
+
+			if (i_data_x2.floatValue() < i_data_x1.floatValue())
+			{
+				// Value of parameter %1.%2 must be greater or equal then the value of %1.%3.
+				//
+				m_log->errALC5158(caption(), i_data_x2.caption(), i_data_x1.caption(), guid(), schemaID(), label());
+
+				return false;
+			}
+
+			break;
+
+		default:
+			// Value %1 of parameter '%2' of AFB '%3' is incorrect.
+			//
+			m_log->errALC5051(static_cast<int>(i_conf.unsignedIntValue()), i_conf.caption(), caption(), guid());
+
+			return false;
+		}
+
+		return true;
+
+	}
+
 
 	bool UalAfb::calculate_POL_paramValues()
 	{

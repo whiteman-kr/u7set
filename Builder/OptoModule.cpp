@@ -5,6 +5,7 @@
 #include "../Builder/Builder.h"
 #include "../Builder/ApplicationLogicCompiler.h"
 #include "LmDescriptionSet.h"
+#include <QQmlEngine>
 
 
 namespace Hardware

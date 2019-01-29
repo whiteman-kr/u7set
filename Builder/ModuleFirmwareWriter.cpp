@@ -4,6 +4,13 @@
 #include "../lib/WUtils.h"
 #include "../lib/CUtils.h"
 
+#include <qqml.h>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QDebug>
+#include <QJsonDocument>
+#include <QtEndian>
+
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
 #endif

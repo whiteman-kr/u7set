@@ -3,6 +3,11 @@
 #include "../u7/Settings.h"
 #include "../lib/DbController.h"
 #include "../lib/WUtils.h"
+#include <QFileInfo>
+#include <QDir>
+#include <QCryptographicHash>
+#include <QStandardPaths>
+#include <QHostInfo>
 
 namespace Builder
 {
