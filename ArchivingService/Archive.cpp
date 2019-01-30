@@ -153,13 +153,17 @@ void Archive::stop()
 	m_isWorkable = false;
 }
 
-std::shared_ptr<ArchRequest> Archive::startNewRequest(E::TimeType timeType, qint64 startTime, qint64 endTime, const QVector<Hash>& signalHashes)
+std::shared_ptr<ArchRequest> Archive::startNewRequest(E::TimeType timeType,
+													  qint64 startTime,
+													  qint64 endTime,
+													  const QVector<Hash>& signalHashes,
+													  std::shared_ptr<Network::GetAppSignalStatesFromArchiveNextReply> getNextReply)
 {
 	m_requestsMutex.lock();
 
 	ArchRequestParam param(getNewRequestID(), timeType, startTime, endTime, signalHashes);
 
-	ArchRequestShared archRequest = std::make_shared<ArchRequest>(*this, param, m_log);
+	ArchRequestShared archRequest = std::make_shared<ArchRequest>(*this, param, getNextReply, m_log);
 
 	m_requests.insert(param.requestID(), archRequest);
 

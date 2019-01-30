@@ -34,7 +34,11 @@ public:
 	void start();
 	void stop();
 
-	std::shared_ptr<ArchRequest> startNewRequest(E::TimeType timeType, qint64 sartTime, qint64 endTime, const QVector<Hash>& signalHashes);
+	std::shared_ptr<ArchRequest> startNewRequest(E::TimeType timeType,
+												 qint64 sartTime,
+												 qint64 endTime,
+												 const QVector<Hash>& signalHashes,
+												 std::shared_ptr<Network::GetAppSignalStatesFromArchiveNextReply> getNextReply);
 	void finalizeRequest(quint32 requestID);
 
 	bool isWorkable() const { return m_isWorkable; }

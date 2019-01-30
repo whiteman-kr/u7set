@@ -24,7 +24,6 @@ ArchFileToRead::ArchFileToRead(const ArchFile& archFile, const ArchRequestParam&
 
 ArchFileToRead::~ArchFileToRead()
 {
-//	delete m_partitionToRead;
 }
 
 void ArchFileToRead::findData()
@@ -45,7 +44,7 @@ void ArchFileToRead::findData()
 								arg(m_requestID).
 								arg(m_appSignalID).
 								arg(partitionToReadInfo().fileName).
-								arg(m_startRecord));
+								arg(m_startReadFromRecord));
 	}
 	else
 	{
@@ -67,26 +66,65 @@ ArchFileToRead::PartitionInfo ArchFileToRead::partitionToReadInfo()
 	return PartitionInfo();
 }
 
-bool ArchFileToRead::getRecord(ArchFileRecord* record)
+bool ArchFileToRead::fillBuffer()
 {
-	if (m_hasData == false)
+	if (m_hasDataToRead == false)
 	{
 		return false;
 	}
 
+	m_recordsInBuffer = 0;
+	m_nextRecordIndex = 0;
+
+	do
+	{
+		int maxRecordsToRead = READ_BUFFER_SIZE - m_recordsInBuffer;
+		int readCount = 0;
+
+		m_partitionToRead.read(m_readBuffer + m_recordsInBuffer, maxRecordsToRead, &readCount);
+
+		m_recordsInBuffer += readCount;
+
+		if (m_recordsInBuffer < READ_BUFFER_SIZE)
+		{
+			m_partitionToReadIndex++;
+
+			if (m_partitionToReadIndex >= m_partitionsInfo.count())
+			{
+				m_hasDataToRead = false;
+				break;
+			}
+
+			bool res = m_partitionToRead.openForReading(m_partitionsInfo[m_partitionToReadIndex].startTime);
+
+			if (res == false)
+			{
+				m_hasDataToRead = false;
+				break;
+			}
+		}
+	}
+	while(m_recordsInBuffer < READ_BUFFER_SIZE);
+
+	return m_recordsInBuffer != 0;
+}
+
+bool ArchFileToRead::getRecord(Hash* signalHash, ArchFileRecord* record)
+{
 	if (m_nextRecordIndex >= m_recordsInBuffer)
 	{
-		fillBuffer();
+		bool hasRecordsInBuffer = fillBuffer();
 
-		if (m_recordsInBuffer == 0)
+		if (hasRecordsInBuffer == false)
 		{
 			return false;
 		}
 	}
 
+	*signalHash = m_hash;
 	*record = m_readBuffer[m_nextRecordIndex];
 
-	return true;
+	return true;			// record is valid
 }
 
 bool ArchFileToRead::gotoNextRecord()
@@ -149,7 +187,7 @@ void ArchFileToRead::getArchPartitionsInfo()
 void ArchFileToRead::findStartPosition()
 {
 	m_findResult = ArchFindResult::NotFound;
-	m_hasData = false;
+	m_hasDataToRead = false;
 
 	int partitionsCount = m_partitionsInfo.count();
 
@@ -193,16 +231,29 @@ void ArchFileToRead::findStartPosition()
 			continue;
 		}
 
-		ArchFindResult result = m_partitionToRead.findStartPosition(m_timeType, m_startTime, m_endTime,& m_startRecord);
+		bool noNeedReadNextPartitions = false;
+
+		ArchFindResult result = m_partitionToRead.findStartPosition(m_timeType,
+																	m_startTime,
+																	m_endTime,
+																	&m_startReadFromRecord,
+																	&noNeedReadNextPartitions);
 
 		switch(result)
 		{
 		case ArchFindResult::Found:
 			m_findResult = ArchFindResult::Found;
-			m_hasData = true;
+			m_hasDataToRead = true;
 			return;
 
 		case ArchFindResult::NotFound:
+
+			if (noNeedReadNextPartitions == true)
+			{
+				m_findResult = ArchFindResult::NotFound;
+				return;
+			}
+
 			m_partitionToReadIndex++;
 			break;
 
@@ -221,51 +272,6 @@ void ArchFileToRead::findStartPosition()
 	m_partitionToReadIndex = -1;
 }
 
-bool ArchFileToRead::fillBuffer()
-{
-	if (m_hasData == false)
-	{
-		return false;
-	}
-
-	m_recordsInBuffer = 0;
-	m_nextRecordIndex = 0;
-
-	do
-	{
-		int maxRecordsToRead = RECORDS_BUFFER_SIZE - m_recordsInBuffer;
-		int readCount = 0;
-
-		m_partitionToRead.read(m_readBuffer + m_recordsInBuffer, maxRecordsToRead, &readCount);
-
-		m_recordsInBuffer += readCount;
-		maxRecordsToRead -= readCount;
-
-		if (m_recordsInBuffer < RECORDS_BUFFER_SIZE)
-		{
-			m_partitionToReadIndex++;
-
-			if (m_partitionToReadIndex >= m_partitionsInfo.count())
-			{
-				m_hasData = false;
-				break;
-			}
-
-			bool res = m_partitionToRead.openForReading(m_partitionsInfo[m_partitionToReadIndex].startTime);
-
-			if (res == false)
-			{
-				m_hasData = false;
-				break;
-			}
-		}
-	}
-	while(m_recordsInBuffer < RECORDS_BUFFER_SIZE);
-
-	return m_recordsInBuffer != 0;
-}
-
-
 
 // ---------------------------------------------------------------------------------------------
 //
@@ -273,9 +279,13 @@ bool ArchFileToRead::fillBuffer()
 //
 // ---------------------------------------------------------------------------------------------
 
-ArchRequest::ArchRequest(Archive& archive, const ArchRequestParam& param, CircularLoggerShared logger) :
+ArchRequest::ArchRequest(Archive& archive,
+						 const ArchRequestParam& param,
+						 std::shared_ptr<Network::GetAppSignalStatesFromArchiveNextReply> getNextReply,
+						 CircularLoggerShared logger) :
 	m_archive(archive),
 	m_param(param),
+	m_getNextReply(getNextReply),
 	m_logger(logger),
 	m_startTime(QDateTime::currentMSecsSinceEpoch()),
 	m_execParam(m_param)
@@ -313,11 +323,17 @@ ArchRequest::ArchRequest(Archive& archive, const ArchRequestParam& param, Circul
 
 ArchRequest::~ArchRequest()
 {
-	DEBUG_LOG_MSG(m_logger, QString("ArchRequest is deleted: ID = %1").arg(m_param.requestID()));
+	DEBUG_LOG_MSG(m_logger, QString("ArchRequest is deleted: ID = %1, states sent = %2").
+							arg(m_param.requestID()).arg(m_sentStatesCount));
 }
 
 void ArchRequest::run()
 {
+/*	if (m_execParam.print().contains(" 15:00:31") == true)
+	{
+		DEBUG_STOP;
+	}*/
+
 	bool dataFound = prepareArchFilesToRead();
 
 	if (dataFound == false)
@@ -327,13 +343,17 @@ void ArchRequest::run()
 		return;
 	}
 
-	getNextData();
+	// revert m_execParam times to initial values!
+	//
+	m_execParam.expandTimes(-Archive::TIME_TO_EXPAND_REQUEST);		// minus is OK!
 
-	do
+	prepareGetNextReply();
+
+	while(isQuitRequested() == false)
 	{
 		if (isNextDataRequired() == true)
 		{
-			getNextData();
+			prepareGetNextReply();
 
 			resetNextDataRequired();
 		}
@@ -343,14 +363,12 @@ void ArchRequest::run()
 		}
 	}
 
-	while(isQuitRequested() == false);
-
 	finalizeRequest();
 }
 
 bool ArchRequest::prepareArchFilesToRead()
 {
-	assert(m_archFileToRead.count() == 0);
+	assert(m_archFilesToRead.count() == 0);
 
 	QVector<ArchFile*> filesToRead;
 
@@ -377,24 +395,35 @@ bool ArchRequest::prepareArchFilesToRead()
 	//
 	for(ArchFile* fileToRead : filesToRead)
 	{
+		if (isQuitRequested() == true)
+		{
+			break;
+		}
+
 		ArchFileToRead* archFileToRead = new ArchFileToRead(*fileToRead, m_execParam);
 
 		archFileToRead->findData();
 
 		if (archFileToRead->findResult() == ArchFindResult::Found)
 		{
-			m_archFileToRead.append(archFileToRead);		//
+			// initial fileToread buffer filling
+			//
+			bool hasRecordsInBuffer = archFileToRead->fillBuffer();
+
+			if (hasRecordsInBuffer == true)
+			{
+				m_archFilesToRead.append(archFileToRead);
+				continue;
+			}
 		}
-		else
-		{
-			delete archFileToRead;							// nothing to read
-		}
+
+		delete archFileToRead;							// nothing to read
 	}
 
-	return m_archFileToRead.count() > 0;
+	return m_archFilesToRead.count() > 0;
 }
 
-void ArchRequest::getNextData()
+void ArchRequest::prepareGetNextReply()
 {
 	if (m_noMoreData == true)
 	{
@@ -402,64 +431,117 @@ void ArchRequest::getNextData()
 		return;
 	}
 
-	m_reply.Clear();
+	if (m_sentStatesCount > 0)
+	{
+		DEBUG_STOP;
+	}
 
-	getSignalStates();		// fills m_reply.appsignalstates
+	m_getNextReply->Clear();
 
-	int statesInReply = m_reply.appsignalstates_size();
+	getSignalStates();		// fills m_getNextReply->appsignalstates
 
-	m_reply.set_requestid(m_param.requestID());
+	int statesInReply = m_getNextReply->appsignalstates_size();
 
-	m_reply.set_error(static_cast<int>(NetworkError::Success));
-	m_reply.set_archerror(static_cast<int>(ArchiveError::Success));
-	m_reply.clear_errorstring();
+	m_getNextReply->set_requestid(m_param.requestID());
+
+	m_getNextReply->set_error(static_cast<int>(NetworkError::Success));
+	m_getNextReply->set_archerror(static_cast<int>(ArchiveError::Success));
+	m_getNextReply->clear_errorstring();
 
 	m_sentStatesCount += statesInReply;
 
-	m_reply.set_totalstatescount(0);
-	m_reply.set_sentstatescount(m_sentStatesCount);
+	m_getNextReply->set_totalstatescount(0);
+	m_getNextReply->set_sentstatescount(m_sentStatesCount);
 
-	m_reply.set_statesinpartcount(statesInReply);
-	m_reply.set_islastpart(m_noMoreData);
-	m_reply.set_dataready(true);
+	m_getNextReply->set_statesinpartcount(statesInReply);
+	m_getNextReply->set_islastpart(m_noMoreData);
+	m_getNextReply->set_dataready(true);
 
 	setDataReady();
 }
 
-bool ArchRequest::getSignalStates()
+void ArchRequest::getSignalStates()
 {
-	::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >* states = m_reply.mutable_appsignalstates();
+	::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >* states = m_getNextReply->mutable_appsignalstates();
 
 	if (states == nullptr)
 	{
 		assert(false);
-		return false;
+		return;
 	}
+
+	//if (m_sentStates)
 
 	states->Reserve(ARCH_REQUEST_MAX_STATES);
 
 	int stateIndex = 0;
 
+	ArchFileRecord record;
+	Hash signalHash = 0;
+
+	bool singleFileRequest = m_archFilesToRead.count() == 1;
+
 	do
 	{
-		for(ArchFileToRead* file : m_archFileToRead)
+		if (singleFileRequest == true)
 		{
-
-			bool hasMoreData = getNextRecord(&signalHash, &record);
-
-			if (hasMoreData == false)
-			{
-				break;
-			}
+			m_noMoreData = getSingleFileNextRecord(&signalHash, &record);
+		}
+		else
+		{
+			m_noMoreData = getMultipleFilesNextRecord(&signalHash, &record);
 		}
 
-		Proto::AppSignalState* state = states->Mutable(stateIndex);
+		if (m_noMoreData == true)
+		{
+			break;
+		}
+
+		if (record.isValid() == false)
+		{
+			continue;
+		}
+
+		qint64 recordTime = record.getTime(m_execParam.timeType());
+
+		if (recordTime < m_execParam.startTime())
+		{
+			continue;
+		}
+
+		if (recordTime > m_execParam.endTime())
+		{
+			m_noMoreData = true;
+			break;
+		}
+
+		// add record to reply
+		//
+		Proto::AppSignalState* state = states->Add();
 
 		if (state == nullptr)
 		{
 			assert(false);
 			break;
 		}
+
+		state->set_hash(signalHash);
+		state->set_value(record.state.value);
+		state->set_flags(record.state.flags.all);
+		state->set_planttime(record.state.plantTime);
+		state->set_systemtime(record.state.systemTime);
+
+		// conversion from UTC to localtime
+		//
+		QDateTime localDateTime = QDateTime::fromMSecsSinceEpoch(record.state.systemTime);
+
+		localDateTime.setTimeSpec(Qt::UTC);		// to prevent time shifting in next convertion toMSecsSinceEpoch
+
+		qint64 localTime = localDateTime.toMSecsSinceEpoch();
+
+		state->set_localtime(localTime);
+
+		state->set_archiveid(0);
 
 		stateIndex++;
 
@@ -469,75 +551,118 @@ bool ArchRequest::getSignalStates()
 		}
 	}
 	while(1);
-
-	if (hasMoreData == false)
-	{
-		m_noMoreData = true;
-	}
-
-
 }
 
-bool ArchRequest::getNextRecord(Hash* hash, ArchFileRecord* record)
+bool ArchRequest::getSingleFileNextRecord(Hash* hash, ArchFileRecord* record)
 {
+	assert(m_archFilesToRead.count() == 1);
 
-	int filesWithDataCount = m_filesWithData.count();
+	ArchFileToRead* archFileToRead = m_archFilesToRead[0];
 
-	if (m_firstCallOfGetNextRecord == true)
+	bool recordIsValid = archFileToRead->getRecord(hash, record);
+
+	if (recordIsValid == false)
 	{
-		m_fileData.resize(filesWithDataCount);
-
-		for(int i = 0; i < filesWithDataCount; i++)
-		{
-			ArchFileData& afd = m_fileData[i];
-
-			afd.hasMoreData = m_filesWithData[i]->getRecord(&afd.record);
-
-			if (afd.hasMoreData == true)
-			{
-				afd.recordTime = afd.record.getTime(m_execParam.timeType());
-				m_noMoreData = false;
-			}
-		}
-
-		m_firstCallOfGetNextRecord = false;
+		return true;		// TRUE - if no more data exists
 	}
 
+	archFileToRead->gotoNextRecord();
 
+	return false;			// FALSE - if more data exists
+}
 
-	for(ArchFileToRead* requestData : m_filesWithData)
+bool ArchRequest::getMultipleFilesNextRecord(Hash* hash, ArchFileRecord* record)
+{
+	assert(m_archFilesToRead.count() > 1);
+
+	// function returns TRUE! if NO MORE data exists
+
+	if (m_lastFileIndex != -1)
 	{
-		ArchFileRecord record;
+		// records of one file (signal) with same time should be returned sequentlial
+		// checking next record of previously read file
 
-		bool res = requestData->getRecord(&record);
+		ArchFileToRead* archFileToRead = m_archFilesToRead[m_lastFileIndex];
 
-		if (res == false)
+		bool recordIsValid = archFileToRead->getRecord(hash, record);
+
+		if (recordIsValid == true)
+		{
+			if (record->getTime(m_execParam.timeType()) == m_lastRecordTime)
+			{
+				// m_lastFileIndex no change
+				// m_lastRecordTime no change
+				//
+				archFileToRead->gotoNextRecord();
+				return false;
+			}
+		}
+	}
+
+	//
+
+	Hash h;
+	ArchFileRecord rec;
+	qint64 minTime = std::numeric_limits<qint64>::max();
+	bool noMoreData = true;
+
+	m_lastFileIndex = -1;
+
+	int archFileToReadCount = m_archFilesToRead.count();
+
+	for(int i = 0 ; i < archFileToReadCount; i++)
+	{
+		ArchFileToRead* archFileToRead = m_archFilesToRead[i];
+
+		bool recordIsValid = archFileToRead->getRecord(&h, &rec);
+
+		if (recordIsValid == false)
 		{
 			continue;
 		}
 
+		noMoreData = false;
 
+		qint64 recordTime = record->getTime(m_execParam.timeType());
+
+		if (recordTime < minTime)
+		{
+			minTime = recordTime;
+
+			m_lastRecordTime = recordTime;
+			m_lastFileIndex = i;
+
+			*record = rec;
+			*hash = h;
+		}
 	}
 
+	if (noMoreData == false)
+	{
+		assert(m_lastFileIndex != -1);
+		m_archFilesToRead[m_lastFileIndex]->gotoNextRecord();
+	}
+
+	return noMoreData;
 }
 
 void ArchRequest::reportError()
 {
 	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: error occured!").arg(m_param.requestID()));
 
-	m_reply.set_requestid(m_param.requestID());
+	m_getNextReply->set_requestid(m_param.requestID());
 
-	m_reply.set_error(static_cast<int>(NetworkError::ArchiveError));
-	m_reply.set_archerror(static_cast<int>(ArchiveError::SearchError));
-	m_reply.set_errorstring(m_errMsg.toStdString());
+	m_getNextReply->set_error(static_cast<int>(NetworkError::ArchiveError));
+	m_getNextReply->set_archerror(static_cast<int>(ArchiveError::SearchError));
+	m_getNextReply->set_errorstring(m_errMsg.toStdString());
 
-	m_reply.set_totalstatescount(0);
-	m_reply.set_sentstatescount(0);
-	m_reply.set_statesinpartcount(0);
-	m_reply.set_islastpart(true);
-	m_reply.clear_appsignalstates();
+	m_getNextReply->set_totalstatescount(0);
+	m_getNextReply->set_sentstatescount(0);
+	m_getNextReply->set_statesinpartcount(0);
+	m_getNextReply->set_islastpart(true);
+	m_getNextReply->clear_appsignalstates();
 
-	m_reply.set_dataready(true);
+	m_getNextReply->set_dataready(true);
 
 	setDataReady();
 
@@ -548,19 +673,19 @@ void ArchRequest::reportNoData()
 {
 	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: data not found!").arg(m_param.requestID()));
 
-	m_reply.set_requestid(m_param.requestID());
+	m_getNextReply->set_requestid(m_param.requestID());
 
-	m_reply.set_error(static_cast<int>(NetworkError::Success));
-	m_reply.set_archerror(static_cast<int>(ArchiveError::Success));
-	m_reply.clear_errorstring();
+	m_getNextReply->set_error(static_cast<int>(NetworkError::Success));
+	m_getNextReply->set_archerror(static_cast<int>(ArchiveError::Success));
+	m_getNextReply->clear_errorstring();
 
-	m_reply.set_totalstatescount(0);
-	m_reply.set_sentstatescount(0);
-	m_reply.set_statesinpartcount(0);
-	m_reply.set_islastpart(true);
-	m_reply.clear_appsignalstates();
+	m_getNextReply->set_totalstatescount(0);
+	m_getNextReply->set_sentstatescount(0);
+	m_getNextReply->set_statesinpartcount(0);
+	m_getNextReply->set_islastpart(true);
+	m_getNextReply->clear_appsignalstates();
 
-	m_reply.set_dataready(true);
+	m_getNextReply->set_dataready(true);
 
 	setDataReady();
 
@@ -573,19 +698,19 @@ void ArchRequest::reportNoMoreData()
 
 	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: has no more data!").arg(m_param.requestID()));
 
-	m_reply.set_requestid(m_param.requestID());
+	m_getNextReply->set_requestid(m_param.requestID());
 
-	m_reply.set_error(static_cast<int>(NetworkError::Success));
-	m_reply.set_archerror(static_cast<int>(ArchiveError::Success));
-	m_reply.clear_errorstring();
+	m_getNextReply->set_error(static_cast<int>(NetworkError::Success));
+	m_getNextReply->set_archerror(static_cast<int>(ArchiveError::Success));
+	m_getNextReply->clear_errorstring();
 
-	m_reply.set_totalstatescount(0);
-	m_reply.set_sentstatescount(m_sentStatesCount);
-	m_reply.set_statesinpartcount(0);
-	m_reply.set_islastpart(true);
-	m_reply.clear_appsignalstates();
+	m_getNextReply->set_totalstatescount(0);
+	m_getNextReply->set_sentstatescount(m_sentStatesCount);
+	m_getNextReply->set_statesinpartcount(0);
+	m_getNextReply->set_islastpart(true);
+	m_getNextReply->clear_appsignalstates();
 
-	m_reply.set_dataready(true);
+	m_getNextReply->set_dataready(true);
 
 	setDataReady();
 }
@@ -607,6 +732,12 @@ void ArchRequest::waitForQuit()
 
 void ArchRequest::finalizeRequest()
 {
+	for(ArchFileToRead* fileToRead : m_archFilesToRead)
+	{
+		delete fileToRead;
+	}
+
+	m_archFilesToRead.clear();
 }
 
 

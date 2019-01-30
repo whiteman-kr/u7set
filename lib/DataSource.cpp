@@ -789,10 +789,10 @@ bool DataSourceOnline::processRupFrameTimeQueue()
 
 				if (m_errorDataID > 0 && (m_errorDataID % 500) == 0)
 				{
-					QString msg = QString("Wrong DataID from %1 (%2, waiting %3), packet processing skiped").
+					QString msg = QString("Wrong DataID from %1 (0x%2, waiting 0x%3), packet processing skiped").
 							arg(lmAddressPort().addressStr()).
-							arg(rupFrameHeader.dataId).
-							arg(lmDataID());
+							arg(QString::number(rupFrameHeader.dataId, 16)).
+							arg(QString::number(lmDataID(), 16));
 
 					qDebug() << C_STR(msg);
 				}

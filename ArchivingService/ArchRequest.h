@@ -61,10 +61,12 @@ public:
 	void findData();
 
 	PartitionInfo partitionToReadInfo();
-	bool getRecord(ArchFileRecord* record);
+
+	bool fillBuffer();
+	bool getRecord(Hash* signalHash, ArchFileRecord* record);
 	bool gotoNextRecord();
 
-	bool hasData() { return m_hasData; }
+	bool hasData() { return m_hasDataToRead; }
 
 	qint64 startTime() const { return m_startTime; }
 
@@ -74,7 +76,6 @@ private:
 	void getArchPartitionsInfo();
 	void findStartPosition();
 
-	bool fillBuffer();
 
 private:
 	QString m_archFilePath;
@@ -91,18 +92,18 @@ private:
 
 	int m_partitionToReadIndex = -1;
 	ArchFilePartition m_partitionToRead;
-	qint64 m_startRecord = -1;
+	qint64 m_startReadFromRecord = -1;
 
 	ArchFindResult m_findResult = ArchFindResult::NotFound;
 
 	//
 
-	static const int RECORDS_BUFFER_SIZE = 50000;
+	static const int READ_BUFFER_SIZE = ARCH_REQUEST_MAX_STATES;
 
-	ArchFileRecord* m_readBuffer = nullptr;
+	ArchFileRecord m_readBuffer[READ_BUFFER_SIZE];
 	int m_recordsInBuffer = 0;
 	int m_nextRecordIndex = 0;
-	bool m_hasData = true;
+	bool m_hasDataToRead = true;
 };
 
 inline bool operator < (const ArchFileToRead::PartitionInfo& p1, const ArchFileToRead::PartitionInfo& p2) { return p1.startTime < p2.startTime; }
@@ -114,7 +115,10 @@ class Archive;
 class ArchRequest : public RunOverrideThread
 {
 public:
-	ArchRequest(Archive& archive, const ArchRequestParam& param, CircularLoggerShared logger);
+	ArchRequest(Archive& archive,
+				const ArchRequestParam& param,
+				std::shared_ptr<Network::GetAppSignalStatesFromArchiveNextReply> getNextReply,
+				CircularLoggerShared logger);
 	virtual ~ArchRequest() override;
 
 	void run() override;
@@ -125,7 +129,7 @@ public:
 
 	bool isDataReady() const { return m_dataReady.load(); }
 
-	Network::GetAppSignalStatesFromArchiveNextReply& getNextReply() { return m_reply; }
+//	Network::GetAppSignalStatesFromArchiveNextReply& getNextReply() { return m_reply; }
 
 	int timeElapsed() const { return QDateTime::currentMSecsSinceEpoch() - m_startTime; }
 
@@ -149,9 +153,11 @@ private:
 	void resetNextDataRequired() { m_nextDataRequired.store(false); }
 
 	bool prepareArchFilesToRead();
-	void getNextData();
-	bool getSignalStates();
-	bool getNextRecord(Hash* hash, ArchFileRecord* record);
+	void prepareGetNextReply();
+	void getSignalStates();
+
+	bool getSingleFileNextRecord(Hash* hash, ArchFileRecord* record);
+	bool getMultipleFilesNextRecord(Hash* hash, ArchFileRecord* record);		// return TRUE! if no more data exists
 
 	void reportError();
 	void reportNoData();
@@ -170,6 +176,7 @@ private:
 private:
 	Archive& m_archive;
 	ArchRequestParam m_param;
+	std::shared_ptr<Network::GetAppSignalStatesFromArchiveNextReply> m_getNextReply;
 	CircularLoggerShared m_logger;
 	qint64 m_startTime = 0;
 
@@ -177,48 +184,26 @@ private:
 
 	ArchRequestParam m_execParam;
 
-	QVector<ArchFileToRead*> m_archFileToRead;
+	QVector<ArchFileToRead*> m_archFilesToRead;
 
-	bool m_firstCallOfGetNextRecord = true;
+	// getNextRecord function variables
+	//
 	qint64 m_minTime = std::numeric_limits<qint64>::max();
 	qint64 m_minTimeIndex = -1;
+
+	int m_lastFileIndex = -1;
+	qint64 m_lastRecordTime = 0;
+
+	//
 
 	std::atomic<bool> m_nextDataRequired = { false };
 	std::atomic<bool> m_dataReady = { false };
 	bool m_noMoreData = false;
 	int m_sentStatesCount = 0;
 
-	Network::GetAppSignalStatesFromArchiveNextReply m_reply;
+	//Network::GetAppSignalStatesFromArchiveNextReply m_reply;
 	QString m_errMsg;
-
-	int m_totalStates = 0;
-	int m_sentStates = 0;
 };
 
 typedef std::shared_ptr<ArchRequest> ArchRequestShared;
 
-/*
-class ArchRequestThreadWorker : public SimpleThreadWorker
-{
-	Q_OBJECT
-
-public:
-	ArchRequestThreadWorker(ArchRequest* request, CircularLoggerShared& logger);
-
-	void finalizeRequest(quint32 requestID);
-
-	void getNextData();
-
-private:
-	virtual void onThreadStarted() override;
-	virtual void onThreadFinished() override;
-
-private slots:
-	void onNewRequest(quint32 requestID);
-	void onGetNextData(quint32 requestID);
-	void onFinalizeRequest(quint32 requestID);
-
-private:
-	ArchRequest* m_request = nullptr;
-	CircularLoggerShared m_logger;
-};*/

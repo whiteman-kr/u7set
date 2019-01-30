@@ -35,4 +35,5 @@ private:
 	//
 
 	std::shared_ptr<ArchRequest> m_archRequest;
+	std::shared_ptr<Network::GetAppSignalStatesFromArchiveNextReply> m_getNextReply;
 };

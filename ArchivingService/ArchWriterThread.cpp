@@ -90,7 +90,7 @@ void ArchWriterThread::run()
 
 			int tel = t.elapsed() - sleepTime;
 
-			qDebug() << "Flush states" << dn << ", time" << tel << ", per state" << (tel * 1000) / dn << "mcs";
+//			qDebug() << "Flush states" << dn << ", time" << tel << ", per state" << (tel * 1000) / dn << "mcs";
 
 			t.start();
 			sleepTime = 0;

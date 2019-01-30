@@ -41,6 +41,26 @@ void TcpArchRequestsServer::onServerThreadStarted()
 {
 	DEBUG_LOG_MSG(m_logger, QString("TcpArchiveRequestsServer thread started (connected %1)").
 								arg(peerAddr().addressPortStr()));
+
+	m_getNextReply = std::make_shared<Network::GetAppSignalStatesFromArchiveNextReply>();
+
+	::google::protobuf::RepeatedPtrField<::Proto::AppSignalState>* states = m_getNextReply->mutable_appsignalstates();
+
+	if (states != nullptr)
+	{
+		// allocate memory for states (slow operation)
+		//
+		states->Reserve(ARCH_REQUEST_MAX_STATES);
+
+		for(int i = 0; i < ARCH_REQUEST_MAX_STATES; i++)
+		{
+			states->Add();
+		}
+	}
+	else
+	{
+		assert(false);
+	}
 }
 
 void TcpArchRequestsServer::onServerThreadFinished()
@@ -120,7 +140,8 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveStart(const char* reques
 	m_archRequest = m_archive->startNewRequest(static_cast<E::TimeType>(request.timetype()),
 														 request.starttime(),
 														 request.endtime(),
-														 signalHashes);
+														 signalHashes,
+											   m_getNextReply);
 	if (m_archRequest == nullptr)
 	{
 		reply.set_error(static_cast<int>(NetworkError::ArchiveError));
@@ -168,10 +189,12 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 		reply.set_requestid(requestID);
 		reply.set_dataready(false);
 		sendReply(reply);
+
+		qDebug() << "Data not ready";
 		return;
 	}
 
-	Network::GetAppSignalStatesFromArchiveNextReply& nextReply = m_archRequest->getNextReply();
+	Network::GetAppSignalStatesFromArchiveNextReply& nextReply = *m_getNextReply.get();
 
 	sendReply(nextReply);
 

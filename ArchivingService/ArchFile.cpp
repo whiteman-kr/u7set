@@ -111,13 +111,6 @@ qint64 ArchFileRecord::getTime(E::TimeType timeType)
 	return 0;
 }
 
-void ArchFileRecord::save(Proto::AppSignalState* proto)
-{
-	TEST_PTR_RETURN(proto);
-
-	proto->
-}
-
 // -----------------------------------------------------------------------------------------------------------------------
 //
 // ArchFilePartition class implementation
@@ -345,13 +338,19 @@ bool ArchFilePartition::read(ArchFileRecord* recordBuffer, int maxRecordsToRead,
 	return true;
 }
 
-ArchFindResult ArchFilePartition::findStartPosition(E::TimeType timeType, qint64 startTime, qint64 endTime, qint64* startRecord)
+ArchFindResult ArchFilePartition::findStartPosition(E::TimeType timeType,
+													qint64 startTime,
+													qint64 endTime,
+													qint64* startReadFromRecord,
+													bool* noNeedReadNextPartitions)
 {
-	if (startRecord == nullptr)
+	if (startReadFromRecord == nullptr || noNeedReadNextPartitions == nullptr)
 	{
 		assert(false);
 		return ArchFindResult::SearchError;
 	}
+
+	*noNeedReadNextPartitions = false;
 
 	ArchFileRecord firstRecord;
 	ArchFileRecord lastRecord;
@@ -394,6 +393,7 @@ ArchFindResult ArchFilePartition::findStartPosition(E::TimeType timeType, qint64
 
 	if (firstRecord.timeGreateThen(timeType, endTime) == true)
 	{
+		*noNeedReadNextPartitions = true;
 		return ArchFindResult::NotFound;
 	}
 
@@ -402,7 +402,7 @@ ArchFindResult ArchFilePartition::findStartPosition(E::TimeType timeType, qint64
 	if (firstRecord.timeGreateThen(timeType, startTime) == true &&
 		firstRecord.timeLessOrEqualThen(timeType, endTime) == true)
 	{
-		*startRecord = 0;
+		*startReadFromRecord = 0;
 		moveToRecord(0);
 		return ArchFindResult::Found;
 	}
@@ -418,11 +418,11 @@ ArchFindResult ArchFilePartition::findStartPosition(E::TimeType timeType, qint64
 
 	if (firstRecord.timeLessOrEqualThen(timeType, startTime) == true)
 	{
-		ArchFindResult result = binarySearch(timeType, startTime, startRecord);
+		ArchFindResult result = binarySearch(timeType, startTime, startReadFromRecord);
 
 		if (result == ArchFindResult::Found)
 		{
-			moveToRecord(*startRecord);
+			moveToRecord(*startReadFromRecord);
 		}
 
 		return result;

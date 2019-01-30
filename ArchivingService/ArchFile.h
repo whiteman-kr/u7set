@@ -31,8 +31,6 @@ struct ArchFileRecord
 	bool timeGreateOrEqualThen(E::TimeType timeType, qint64 time);
 
 	qint64 getTime(E::TimeType timeType);
-
-	void save(Proto::AppSignalState* proto);
 };
 
 #pragma pack(pop)
@@ -65,7 +63,11 @@ public:
 	bool readRecord(qint64 recordIndex, ArchFileRecord* record);
 	bool read(ArchFileRecord* recordBuffer, int maxRecordsToRead, int* readCount);
 
-	ArchFindResult findStartPosition(E::TimeType timeType, qint64 startTime, qint64 endTime, qint64* startRecord);
+	ArchFindResult findStartPosition(E::TimeType timeType,
+									 qint64 startTime,
+									 qint64 endTime,
+									 qint64* startReadFromRecord,
+									 bool* noNeedReadNextPartitions);
 
 	bool close();
 
