@@ -16,7 +16,7 @@ AppDataServiceClient::AppDataServiceClient(Network::GetAppDataSourcesStatesReply
 
 	m_tcpSocket->setSocketOption(QAbstractSocket::LowDelayOption, QVariant(1));
 
-	QObject::connect(m_tcpSocket, &QTcpSocket::readyRead, &signalWaiter, &QEventLoop::quit);
+	QObject::connect(m_tcpSocket, &QTcpSocket::readyRead, &m_signalWaiter, &QEventLoop::quit);
 }
 
 AppDataServiceClient::~AppDataServiceClient()
@@ -142,6 +142,37 @@ bool AppDataServiceClient::sendRequestAndWaitForResponse(quint32 requestID, cons
 	return true;
 }
 
+void AppDataServiceClient::initDataSourceArray(QVector<DataSource>& dataSourceArray)
+{
+	int sourcesQuantity = m_dataSourceInfoMessage.datasourceinfo_size();
+
+	dataSourceArray.clear();
+	dataSourceArray.reserve(sourcesQuantity);
+
+	for(int i = 0; i < sourcesQuantity; i++)
+	{
+		DataSource nextSource;
+		nextSource.setInfo(m_dataSourceInfoMessage.datasourceinfo(i));
+
+		bool alreadyExists = false;
+		for (int j = 0; j < dataSourceArray.size(); j++)
+		{
+			if (dataSourceArray[j].ID() == nextSource.ID())
+			{
+				alreadyExists = true;
+				break;
+			}
+		}
+
+		if (alreadyExists == false)
+		{
+			dataSourceArray.push_back(nextSource);
+		}
+	}
+
+	dataSourceArray.squeeze();
+}
+
 bool AppDataServiceClient::ensureConnectedToService(QString& error)
 {
 	if (m_tcpSocket->state() == QAbstractSocket::ConnectedState)
@@ -169,7 +200,7 @@ bool AppDataServiceClient::ensureConnectedToService(QString& error)
 
 bool AppDataServiceClient::socketWrite(const char* data, quint32 dataSize, QString& error)
 {
-	int writtenQuantity = m_tcpSocket->write(data, dataSize);
+	qint64 writtenQuantity = m_tcpSocket->write(data, dataSize);
 
 	if (writtenQuantity == -1)
 	{
@@ -183,8 +214,8 @@ bool AppDataServiceClient::socketWrite(const char* data, quint32 dataSize, QStri
 		return false;
 	}
 
-	QTimer::singleShot(Tcp::TCP_BYTES_WRITTEN_TIMEOUT, &signalWaiter, SLOT(quit()));
-	signalWaiter.exec();
+	QTimer::singleShot(Tcp::TCP_BYTES_WRITTEN_TIMEOUT, &m_signalWaiter, SLOT(quit()));
+	m_signalWaiter.exec();
 
 	if (m_tcpSocket->bytesToWrite() > 0)
 	{
@@ -201,10 +232,10 @@ bool AppDataServiceClient::socketRead(char* data, quint32 dataSize, QString& err
 
 	while (totalBytesRead < dataSize)
 	{
-		QTimer::singleShot(Tcp::TCP_ON_CLIENT_REQUEST_REPLY_TIMEOUT, &signalWaiter, SLOT(quit()));
-		signalWaiter.exec();
+		QTimer::singleShot(Tcp::TCP_ON_CLIENT_REQUEST_REPLY_TIMEOUT, &m_signalWaiter, SLOT(quit()));
+		m_signalWaiter.exec();
 
-		int bytesAvailable = m_tcpSocket->bytesAvailable();
+		qint64 bytesAvailable = m_tcpSocket->bytesAvailable();
 		if (bytesAvailable <= 0)
 		{
 			error = QString("Socket read error: %1").arg(m_tcpSocket->errorString());
@@ -213,7 +244,7 @@ bool AppDataServiceClient::socketRead(char* data, quint32 dataSize, QString& err
 
 		int bytesToRead = std::min(dataSize - totalBytesRead, static_cast<quint32>(bytesAvailable));
 
-		int bytesRead = m_tcpSocket->read(data, bytesToRead);
+		qint64 bytesRead = m_tcpSocket->read(data, bytesToRead);
 
 		if (bytesRead < bytesToRead)
 		{
@@ -255,9 +286,16 @@ bool AppDataServiceClient::processData(QString& error)
 			return false;
 		}
 		break;
+	case ADS_GET_DATA_SOURCES_INFO:
+		if (parseMessageLoggingErrors(m_dataSourceInfoMessage, error) == false)
+		{
+			error = "Reply ADS_GET_DATA_SOURCES_INFO protobuf error: " + error;
+			return false;
+		}
+		break;
 	default:
 		error = QString("Unknown Reply header ID: %1").arg(m_receiveReplyHeader.id);
-		break;
+		return false;
 	}
 	return true;
 }
