@@ -6,6 +6,8 @@
 #include "../../lib/CfgServerLoader.h"
 #include "../../lib/ServiceSettings.h"
 
+#include "SignalBase.h"
+#include "TestFile.h"
 #include "SignalStateSocket.h"
 
 class UalTester : public QObject
@@ -62,13 +64,25 @@ private:
 
 	TestClientSettings m_cfgSettings;
 	bool readConfiguration(const QByteArray& cfgFileData);
-	bool readAppSignals(const QByteArray& fileData);
+	bool readAppSignals(const QByteArray& cfgFileData);
+
+	TestFile m_testfile;
+	bool parseTestFile();
+	bool testSignalListIsValid();
 
 	SignalStateSocket* m_pSignalStateSocket = nullptr;
 	SimpleThread* m_pSignalStateSocketThread = nullptr;
 	bool runSignalStateThread();
 	void stopSignalStateThread();
+	bool signalStateSocketIsConnected();
 
+	SimpleThread* m_pTuningSocketThread = nullptr;
+	bool runTuningThread();
+	void stopTuningThread();
+	bool tuningSocketIsConnected();
+
+	QTimer m_waitSocketsConnectionTimer;
+	void runWaitSocketsConnectionTimer();
 
 public:
 
@@ -76,12 +90,16 @@ public:
 
 signals:
 
-	void signal_configurationLoaded();
+	void signal_configurationParsed();
+	void signal_socketsConnected();
 
 private slots:
 
-	void slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
-	void slot_runManageSignalThread();
+	void slot_configurationReceived(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+	void slot_prepareToStartTest();
+
+	void slot_waitSocketsConnection();
+	void slot_socketsConnected();
 
 public slots:
 

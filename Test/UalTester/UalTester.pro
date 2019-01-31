@@ -60,7 +60,8 @@ SOURCES += \
     ../../lib/Tuning/TuningSignalState.cpp \
     ../../lib/TuningValue.cpp \
     ../../lib/SignalProperties.cpp \
-    SignalBase.cpp
+    SignalBase.cpp \
+    TestFile.cpp
 
 
 HEADERS += \
@@ -97,7 +98,8 @@ HEADERS += \
     ../../lib/Tuning/TuningSignalState.h \
     ../../lib/TuningValue.h \
     ../../lib/SignalProperties.h \
-    SignalBase.h
+    SignalBase.h \
+    TestFile.h
 
 
 
@@ -110,8 +112,7 @@ win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
 win32 {
 		LIBS += -L$$DESTDIR -lprotobuf
 
-		#INCLUDEPATH += ./../../Protobuf
-		INCLUDEPATH += $$PWD/../../Protobuf
+		INCLUDEPATH += ./../../Protobuf
 }
 unix {
 		LIBS += -lprotobuf

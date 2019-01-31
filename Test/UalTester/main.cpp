@@ -12,7 +12,9 @@ int main(int argc, char *argv[])
 	UalTester ualTester(argc, argv);
 	ualTester.start();
 
+	int result = a.exec();
+
 	google::protobuf::ShutdownProtobufLibrary();
 
-	return a.exec();
+	return result;
 }
