@@ -190,7 +190,7 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 		reply.set_dataready(false);
 		sendReply(reply);
 
-		qDebug() << "Data not ready";
+		//qDebug() << "Data not ready";
 		return;
 	}
 

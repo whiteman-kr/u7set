@@ -290,18 +290,19 @@ ArchRequest::ArchRequest(Archive& archive,
 	m_startTime(QDateTime::currentMSecsSinceEpoch()),
 	m_execParam(m_param)
 {
-	qint64 localTimeOffset = Archive::localTimeOffsetFromUtc();
+
 
 	switch(m_param.timeType())
 	{
-	case E::TimeType::Plant:
 	case E::TimeType::System:
-//	case E::TimeType::ArchiveId:
 		break;
 
+	case E::TimeType::Plant:
 	case E::TimeType::Local:
 		{
-			// convert local time to system time
+			qint64 localTimeOffset = Archive::localTimeOffsetFromUtc();
+
+			// convert plant and local time to system time
 			//
 			m_execParam.setStartTime(m_param.startTime() - localTimeOffset);
 			m_execParam.setEndTime(m_param.endTime() - localTimeOffset);
@@ -345,7 +346,7 @@ void ArchRequest::run()
 
 	// revert m_execParam times to initial values!
 	//
-	m_execParam.expandTimes(-Archive::TIME_TO_EXPAND_REQUEST);		// minus is OK!
+	//m_execParam.expandTimes(-Archive::TIME_TO_EXPAND_REQUEST);		// minus is OK!
 
 	prepareGetNextReply();
 
@@ -502,14 +503,14 @@ void ArchRequest::getSignalStates()
 			continue;
 		}
 
-		qint64 recordTime = record.getTime(m_execParam.timeType());
+		qint64 recordTime = record.getTime(m_param.timeType());
 
-		if (recordTime < m_execParam.startTime())
+		if (recordTime < m_param.startTime())
 		{
 			continue;
 		}
 
-		if (recordTime > m_execParam.endTime())
+		if (recordTime > m_param.endTime())
 		{
 			m_noMoreData = true;
 			break;
@@ -530,16 +531,17 @@ void ArchRequest::getSignalStates()
 		state->set_flags(record.state.flags.all);
 		state->set_planttime(record.state.plantTime);
 		state->set_systemtime(record.state.systemTime);
+		state->set_localtime(record.state.localTime);
 
 		// conversion from UTC to localtime
 		//
-		QDateTime localDateTime = QDateTime::fromMSecsSinceEpoch(record.state.systemTime);
+/*		QDateTime localDateTime = QDateTime::fromMSecsSinceEpoch(record.state.systemTime);
 
 		localDateTime.setTimeSpec(Qt::UTC);		// to prevent time shifting in next convertion toMSecsSinceEpoch
 
 		qint64 localTime = localDateTime.toMSecsSinceEpoch();
 
-		state->set_localtime(localTime);
+		state->set_localtime(localTime);*/
 
 		state->set_archiveid(0);
 
@@ -608,6 +610,8 @@ bool ArchRequest::getMultipleFilesNextRecord(Hash* hash, ArchFileRecord* record)
 
 	m_lastFileIndex = -1;
 
+	E::TimeType requestTimeType = m_execParam.timeType();
+
 	int archFileToReadCount = m_archFilesToRead.count();
 
 	for(int i = 0 ; i < archFileToReadCount; i++)
@@ -623,7 +627,7 @@ bool ArchRequest::getMultipleFilesNextRecord(Hash* hash, ArchFileRecord* record)
 
 		noMoreData = false;
 
-		qint64 recordTime = record->getTime(m_execParam.timeType());
+		qint64 recordTime = rec.getTime(requestTimeType);
 
 		if (recordTime < minTime)
 		{

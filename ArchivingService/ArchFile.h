@@ -12,6 +12,7 @@ struct ArchFileRecord
 	struct
 	{
 //			qint64 archID;
+		qint64 localTime;
 		qint64 systemTime;
 		qint64 plantTime;
 

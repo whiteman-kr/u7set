@@ -21,6 +21,9 @@ bool ArchFileRecord::timeLessThen(E::TimeType timeType, qint64 time)
 
 	switch(timeType)
 	{
+/*	case E::TimeType::Local:
+		return state.localTime < time; */
+
 	case E::TimeType::System:
 		return state.systemTime < time;
 
@@ -40,6 +43,9 @@ bool ArchFileRecord::timeLessOrEqualThen(E::TimeType timeType, qint64 time)
 
 	switch(timeType)
 	{
+/*	case E::TimeType::Local:
+		return state.localTime <= time;*/
+
 	case E::TimeType::System:
 		return state.systemTime <= time;
 
@@ -59,6 +65,9 @@ bool ArchFileRecord::timeGreateThen(E::TimeType timeType, qint64 time)
 
 	switch(timeType)
 	{
+/*	case E::TimeType::Local:
+		return state.localTime > time;*/
+
 	case E::TimeType::System:
 		return state.systemTime > time;
 
@@ -78,6 +87,9 @@ bool ArchFileRecord::timeGreateOrEqualThen(E::TimeType timeType, qint64 time)
 
 	switch(timeType)
 	{
+/*	case E::TimeType::Local:
+		return state.localTime >= time;*/
+
 	case E::TimeType::System:
 		return state.systemTime >= time;
 
@@ -95,13 +107,15 @@ qint64 ArchFileRecord::getTime(E::TimeType timeType)
 {
 	switch(timeType)
 	{
-	case E::TimeType::Plant:
-		return state.plantTime;
+	case E::TimeType::Local:
+		return state.localTime;
 
 	case E::TimeType::System:
 		return state.systemTime;
 
-	case E::TimeType::Local:
+	case E::TimeType::Plant:
+		return state.plantTime;
+
 	case E::TimeType::ArchiveId:
 		assert(false);				// not implemented now
 		return 0;
@@ -603,9 +617,10 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 
 	ArchFileRecord s;
 
-//	s.state.archID = archID;
-	s.state.plantTime = state.time.plant.timeStamp;
+	s.state.localTime = state.time.local.timeStamp;
 	s.state.systemTime = state.time.system.timeStamp;
+	s.state.plantTime = state.time.plant.timeStamp;
+	//	s.state.archID = archID;
 	s.state.flags = state.flags;
 	s.state.value = state.value;
 	s.calcCRC16();

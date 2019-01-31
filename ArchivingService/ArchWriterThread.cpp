@@ -82,15 +82,20 @@ void ArchWriterThread::run()
 			}
 		}
 
-		if (m_totalFlushedStatesCount - prevFlushedStatesCount > 1000)
+		if (m_totalFlushedStatesCount - prevFlushedStatesCount > 10000)
 		{
 			qint64 dn = m_totalFlushedStatesCount - prevFlushedStatesCount;
 
 			prevFlushedStatesCount = m_totalFlushedStatesCount;
 
-			int tel = t.elapsed() - sleepTime;
+			qint64 elapsedTime = t.elapsed();
 
-//			qDebug() << "Flush states" << dn << ", time" << tel << ", per state" << (tel * 1000) / dn << "mcs";
+			qint64 dt_clear = elapsedTime - sleepTime;
+
+			qint64 sleepPercent = sleepTime * 100 / elapsedTime;
+
+			qDebug() << C_STR(QString("Flush states %1 time %2 (sleep %3%) (per state %4 mcs)").
+							  arg(dn).arg(elapsedTime).arg(sleepPercent).arg((dt_clear * 1000) / dn));
 
 			t.start();
 			sleepTime = 0;
