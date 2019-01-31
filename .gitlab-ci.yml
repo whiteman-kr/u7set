@@ -47,7 +47,8 @@ windows build job:
 #Copy Qt DLLs to bin/release
     - "echo ----------------------------------------------"
     - "echo               Copy Qt DLL's"
-    - "echo ----------------------------------------------"        
+    - "echo ----------------------------------------------"
+    - "copy \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Redist\\MSVC\\14.15.26706\\vcredist_x64.exe\" \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy C:\\libpq_my_build\\libpq.dll \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy C:\\Qt\\5.12.0\\msvc2017_64\\bin\\libEGL.dll \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy C:\\Qt\\5.12.0\\msvc2017_64\\bin\\libEGLd.dll \"%CI_PROJECT_DIR%/bin/release/\""
@@ -81,8 +82,6 @@ windows build job:
     paths:
       - bin/release/*.exe
       - bin/release/*.dll
-      - bin/release/*.lib
-      - bin/release/*.exp
 
 #deploy job:
 #  stage: deploy
