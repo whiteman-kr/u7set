@@ -186,30 +186,71 @@ void ArchFileToRead::getArchPartitionsInfo()
 
 void ArchFileToRead::findStartPosition()
 {
-	m_findResult = ArchFindResult::NotFound;
-	m_hasDataToRead = false;
+	m_findResult = openPartitionToStartReading();
 
+	if (m_findResult == ArchFindResult::Found)
+	{
+		m_hasDataToRead = true;
+	}
+	else
+	{
+		m_hasDataToRead = false;
+
+		m_partitionToRead.close();
+		m_partitionToReadIndex = -1;
+	}
+}
+
+ArchFindResult ArchFileToRead::openPartitionToStartReading()
+{
 	int partitionsCount = m_partitionsInfo.count();
 
 	if (partitionsCount == 0)
 	{
-		return;
+		return ArchFindResult::NotFound;
 	}
 
-	// 1) Sort m_archPartitionsInfo by systemTime ascending
+	// Sort m_archPartitionsInfo by systemTime ascending
 	//
-
 	qSort(m_partitionsInfo);
 
-	// 2) Find LAST partition where systemTime < m_startTime
+	for(int i = 0; i < partitionsCount; i++)
+	{
+		m_partitionsInfo[i].index = i;
+	}
 
+	qint64 sysTimeToFindPartition = 0;
+
+	switch(m_timeType)
+	{
+	case E::TimeType::Local:
+	case E::TimeType::Plant:
+		{
+			// convert m_startTime to system time
+			//
+			QDateTime localTime = QDateTime::fromMSecsSinceEpoch(m_startTime, Qt::UTC);
+			sysTimeToFindPartition = localTime.toMSecsSinceEpoch();
+		}
+		break;
+
+	case E::TimeType::System:
+		sysTimeToFindPartition = m_startTime;
+		break;
+
+	default:
+		assert(false);
+		return ArchFindResult::SearchError;
+	}
+
+	// find last partition with startTime less then sysTimeToFindPartition (that equal to request start time - m_startTime)
+	//
 	m_partitionToReadIndex = 0;
 
 	for(int i = 1 /* it is Ok */ ; i < partitionsCount; i++)
 	{
 		const PartitionInfo& pi = m_partitionsInfo[i];
 
-		if (pi.startTime >= m_startTime)
+		if (pi.startTime >= sysTimeToFindPartition)
 		{
 			break;
 		}
@@ -217,61 +258,70 @@ void ArchFileToRead::findStartPosition()
 		m_partitionToReadIndex = i;
 	}
 
-	// 3)
+	int prevMoveDirection = 0;
+	int prevPartitionToReadIndex = m_partitionToReadIndex;
 
-	while(m_partitionToReadIndex < partitionsCount)
+	do
 	{
-		const PartitionInfo& partitionToReadInfo = m_partitionsInfo[m_partitionToReadIndex];
+		PartitionInfo pi = m_partitionsInfo[m_partitionToReadIndex];
 
-		bool res = m_partitionToRead.openForReading(partitionToReadInfo.startTime);
+		int moveDirection = 1;
 
-		if (res == false)
+		bool res = m_partitionToRead.openForReading(pi.startTime);
+
+		if (res == true)
 		{
-			m_partitionToReadIndex++;
-			continue;
+			m_partitionToRead.checkTimesAndGetMoveDirection( m_timeType, m_startTime, &moveDirection);
 		}
 
-		bool noNeedReadNextPartitions = false;
-
-		ArchFindResult result = m_partitionToRead.findStartPosition(m_timeType,
-																	m_startTime,
-																	m_endTime,
-																	&m_startReadFromRecord,
-																	&noNeedReadNextPartitions);
-
-		switch(result)
+		if (moveDirection == 0)
 		{
-		case ArchFindResult::Found:
-			m_findResult = ArchFindResult::Found;
-			m_hasDataToRead = true;
-			return;
+			// partition to read is found
+			//
+			ArchFindResult result = m_partitionToRead.binarySearch(m_timeType, m_startTime, &m_startReadFromRecord);
+			return result;
+		}
 
-		case ArchFindResult::NotFound:
+		// moving to another partition required
 
-			if (noNeedReadNextPartitions == true)
+		if (prevMoveDirection == 0 || prevMoveDirection == moveDirection)
+		{
+			prevMoveDirection = moveDirection;
+			prevPartitionToReadIndex = m_partitionToReadIndex;
+
+			m_partitionToReadIndex += moveDirection;
+
+			if (m_partitionToReadIndex >= 0 && m_partitionToReadIndex < partitionsCount)
 			{
-				m_findResult = ArchFindResult::NotFound;
-				return;
+				continue;
 			}
-
-			m_partitionToReadIndex++;
-			break;
-
-		case ArchFindResult::SearchError:
-
-			m_partitionToRead.close();
-			m_partitionToReadIndex = -1;
-			return;
-
-		default:
-			assert(false);
 		}
+
+		// here if prevMoveDirection != moveDirection or m_partitionToReadIndex out of range
+		//
+		// direction changed - stop moving, use prevPartition for reading from firsRecord
+		//
+		m_partitionToRead.close();
+
+		m_partitionToReadIndex = prevPartitionToReadIndex;
+
+		m_startReadFromRecord = 0;
+
+		res = m_partitionToRead.openForReading(m_partitionsInfo[m_partitionToReadIndex].startTime);
+
+		if (res == true)
+		{
+			return ArchFindResult::Found;
+		}
+
+		break;
 	}
+	while(1);
 
-	m_partitionToRead.close();
-	m_partitionToReadIndex = -1;
+	assert(false);
+
+	return ArchFindResult::NotFound;
 }
-
 
 // ---------------------------------------------------------------------------------------------
 //
@@ -287,39 +337,9 @@ ArchRequest::ArchRequest(Archive& archive,
 	m_param(param),
 	m_getNextReply(getNextReply),
 	m_logger(logger),
-	m_startTime(QDateTime::currentMSecsSinceEpoch()),
-	m_execParam(m_param)
+	m_startTime(QDateTime::currentMSecsSinceEpoch())
 {
-
-
-	switch(m_param.timeType())
-	{
-	case E::TimeType::System:
-		break;
-
-	case E::TimeType::Plant:
-	case E::TimeType::Local:
-		{
-			qint64 localTimeOffset = Archive::localTimeOffsetFromUtc();
-
-			// convert plant and local time to system time
-			//
-			m_execParam.setStartTime(m_param.startTime() - localTimeOffset);
-			m_execParam.setEndTime(m_param.endTime() - localTimeOffset);
-			m_execParam.setTimeType(E::TimeType::System);
-		}
-		break;
-
-	default:
-		assert(false);
-	}
-
-	// expand request time from both sides
-	//
-	m_execParam.expandTimes(Archive::TIME_TO_EXPAND_REQUEST);
-
 	DEBUG_LOG_MSG(m_logger, QString("ArchRequest created: %1").arg(m_param.print()));
-	DEBUG_LOG_MSG(m_logger, QString("ArchRequest to exec: %1").arg(m_execParam.print()));
 }
 
 ArchRequest::~ArchRequest()
@@ -330,10 +350,11 @@ ArchRequest::~ArchRequest()
 
 void ArchRequest::run()
 {
-/*	if (m_execParam.print().contains(" 15:00:31") == true)
-	{
-		DEBUG_STOP;
-	}*/
+	// expand request time from both sides
+	//
+	m_param.expandTimes(Archive::TIME_TO_EXPAND_REQUEST);
+
+	DEBUG_LOG_MSG(m_logger, QString("ArchRequest to exec: %1").arg(m_param.print()));
 
 	bool dataFound = prepareArchFilesToRead();
 
@@ -346,7 +367,7 @@ void ArchRequest::run()
 
 	// revert m_execParam times to initial values!
 	//
-	//m_execParam.expandTimes(-Archive::TIME_TO_EXPAND_REQUEST);		// minus is OK!
+	m_param.expandTimes(-Archive::TIME_TO_EXPAND_REQUEST);		// minus is OK!
 
 	prepareGetNextReply();
 
@@ -401,7 +422,7 @@ bool ArchRequest::prepareArchFilesToRead()
 			break;
 		}
 
-		ArchFileToRead* archFileToRead = new ArchFileToRead(*fileToRead, m_execParam);
+		ArchFileToRead* archFileToRead = new ArchFileToRead(*fileToRead, m_param);
 
 		archFileToRead->findData();
 
@@ -579,6 +600,8 @@ bool ArchRequest::getMultipleFilesNextRecord(Hash* hash, ArchFileRecord* record)
 
 	// function returns TRUE! if NO MORE data exists
 
+	E::TimeType requestTimeType = m_param.timeType();
+
 	if (m_lastFileIndex != -1)
 	{
 		// records of one file (signal) with same time should be returned sequentlial
@@ -590,7 +613,7 @@ bool ArchRequest::getMultipleFilesNextRecord(Hash* hash, ArchFileRecord* record)
 
 		if (recordIsValid == true)
 		{
-			if (record->getTime(m_execParam.timeType()) == m_lastRecordTime)
+			if (record->getTime(requestTimeType) == m_lastRecordTime)
 			{
 				// m_lastFileIndex no change
 				// m_lastRecordTime no change
@@ -609,8 +632,6 @@ bool ArchRequest::getMultipleFilesNextRecord(Hash* hash, ArchFileRecord* record)
 	bool noMoreData = true;
 
 	m_lastFileIndex = -1;
-
-	E::TimeType requestTimeType = m_execParam.timeType();
 
 	int archFileToReadCount = m_archFilesToRead.count();
 

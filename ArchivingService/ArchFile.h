@@ -60,15 +60,15 @@ public:
 	//
 
 	bool openForReading(qint64 partitionSystemTime);
-	bool getFirstAndLastRecords(ArchFileRecord* first, ArchFileRecord* last, bool* noRecords);
+	bool getFirstAndLastRecords(ArchFileRecord* first, ArchFileRecord* last);
 	bool readRecord(qint64 recordIndex, ArchFileRecord* record);
 	bool read(ArchFileRecord* recordBuffer, int maxRecordsToRead, int* readCount);
 
-	ArchFindResult findStartPosition(E::TimeType timeType,
-									 qint64 startTime,
-									 qint64 endTime,
-									 qint64* startReadFromRecord,
-									 bool* noNeedReadNextPartitions);
+	bool checkTimesAndGetMoveDirection(E::TimeType requestedTimeType,
+									   qint64 requestedTime,
+									   int* moveDirection);
+
+	ArchFindResult binarySearch(E::TimeType timeType, qint64 time, qint64* startPosition);
 
 	bool close();
 
@@ -76,7 +76,6 @@ private:
 	QString getFileName(qint64 partitionStartTime);
 
 	void moveToRecord(qint64 record);
-	ArchFindResult binarySearch(E::TimeType timeType, qint64 time, qint64* startPosition);
 
 	void closeFile();
 

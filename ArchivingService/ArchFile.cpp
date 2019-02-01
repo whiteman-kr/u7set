@@ -276,11 +276,10 @@ bool ArchFilePartition::openForReading(qint64 partitionSystemTime)
 	return result;
 }
 
-bool ArchFilePartition::getFirstAndLastRecords(ArchFileRecord* first, ArchFileRecord* last, bool* noRecords)
+bool ArchFilePartition::getFirstAndLastRecords(ArchFileRecord* first, ArchFileRecord* last)
 {
 	TEST_PTR_RETURN_FALSE(first);
 	TEST_PTR_RETURN_FALSE(last);
-	TEST_PTR_RETURN_FALSE(noRecords);
 
 	if (m_file.isOpen() == false)
 	{
@@ -292,8 +291,7 @@ bool ArchFilePartition::getFirstAndLastRecords(ArchFileRecord* first, ArchFileRe
 
 	if (m_recordCount == 0)
 	{
-		*noRecords = true;
-		return true;
+		return false;
 	}
 
 	bool result = true;
@@ -347,102 +345,43 @@ bool ArchFilePartition::read(ArchFileRecord* recordBuffer, int maxRecordsToRead,
 
 	qint64 readSize =  m_file.read(reinterpret_cast<char*>(recordBuffer), sizeof(ArchFileRecord) * maxRecordsToRead);
 
-	*readCount = readSize / static_cast<int>(sizeof(ArchFileRecord));
+	*readCount = readSize / sizeof(ArchFileRecord);
 
 	return true;
 }
 
-ArchFindResult ArchFilePartition::findStartPosition(E::TimeType timeType,
-													qint64 startTime,
-													qint64 endTime,
-													qint64* startReadFromRecord,
-													bool* noNeedReadNextPartitions)
+bool ArchFilePartition::checkTimesAndGetMoveDirection(	E::TimeType requestedTimeType,
+														qint64 requestedTime,
+														int* moveDirection)
 {
-	if (startReadFromRecord == nullptr || noNeedReadNextPartitions == nullptr)
-	{
-		assert(false);
-		return ArchFindResult::SearchError;
-	}
-
-	*noNeedReadNextPartitions = false;
+	TEST_PTR_RETURN_FALSE(moveDirection);
 
 	ArchFileRecord firstRecord;
 	ArchFileRecord lastRecord;
-	bool noRecords = false;
 
-	bool res = getFirstAndLastRecords(&firstRecord, &lastRecord, &noRecords);
+	bool res = getFirstAndLastRecords(&firstRecord, &lastRecord);
 
 	if (res == false)
 	{
-		return ArchFindResult::SearchError;
+		return false;
 	}
 
-	if (noRecords == true)
+	if (requestedTime < firstRecord.getTime(requestedTimeType))
 	{
-		return ArchFindResult::NotFound;
+		*moveDirection = -1;			// move to previous partition
+		return true;
 	}
 
-	//	S - request start time
-	//	E - request endTime
-	//	F - partition first record time
-	//	L - partition last record time
-	//
-	//							S					E
-	//							|<---- REQUEST ---->|
-	//
-	//													F				L
-	// 1)												[== PARTITION ==]	F > E				noPos
-	//
-	//								F				L
-	// 2)							[== PARTITION ==]						F > S && F <= E		pos == 0
-	//
-	//		F				L
-	// 3)	[== PARTITION ==]												L < S				goto next partition
-	//
-	//					F				L
-	// 4)				[== PARTITION ==]									F <= S				binary search pos
-	//
-
-	// case 1)
-
-	if (firstRecord.timeGreateThen(timeType, endTime) == true)
+	if (requestedTime > lastRecord.getTime(requestedTimeType))
 	{
-		*noNeedReadNextPartitions = true;
-		return ArchFindResult::NotFound;
+		*moveDirection = 1;			// move to next partition
+		return true;
 	}
 
-	// case 2)
+	//	firstRecord.getTime <=	requestedTime  <= lastRecord.getTime
 
-	if (firstRecord.timeGreateThen(timeType, startTime) == true &&
-		firstRecord.timeLessOrEqualThen(timeType, endTime) == true)
-	{
-		*startReadFromRecord = 0;
-		moveToRecord(0);
-		return ArchFindResult::Found;
-	}
-
-	// case 3)
-
-	if (lastRecord.timeLessThen(timeType, startTime) == true)
-	{
-		return ArchFindResult::NotFound;
-	}
-
-	// case 4)
-
-	if (firstRecord.timeLessOrEqualThen(timeType, startTime) == true)
-	{
-		ArchFindResult result = binarySearch(timeType, startTime, startReadFromRecord);
-
-		if (result == ArchFindResult::Found)
-		{
-			moveToRecord(*startReadFromRecord);
-		}
-
-		return result;
-	}
-
-	return ArchFindResult::NotFound;
+	*moveDirection = 0;
+	return true;
 }
 
 bool ArchFilePartition::close()

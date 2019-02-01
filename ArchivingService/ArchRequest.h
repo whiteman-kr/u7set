@@ -49,9 +49,12 @@ class ArchFileToRead
 public:
 	struct PartitionInfo
 	{
+		int index = -1;
 		QString fileName;
 		QDateTime date;
-		qint64 startTime;
+		qint64 startTime = 0;
+		ArchFileRecord firstRecord;
+		ArchFileRecord lastRecord;
 	};
 
 public:
@@ -75,7 +78,7 @@ public:
 private:
 	void getArchPartitionsInfo();
 	void findStartPosition();
-
+	ArchFindResult openPartitionToStartReading();
 
 private:
 	QString m_archFilePath;
@@ -98,7 +101,7 @@ private:
 
 	//
 
-	static const int READ_BUFFER_SIZE = ARCH_REQUEST_MAX_STATES;
+	static const int READ_BUFFER_SIZE = 50000;
 
 	ArchFileRecord m_readBuffer[READ_BUFFER_SIZE];
 	int m_recordsInBuffer = 0;
@@ -181,8 +184,6 @@ private:
 	qint64 m_startTime = 0;
 
 	//
-
-	ArchRequestParam m_execParam;
 
 	QVector<ArchFileToRead*> m_archFilesToRead;
 
