@@ -109,7 +109,7 @@ void FileTests::cleanupTestCase()
 	dropProjectDb();
 }
 
-void FileTests::apiFileExistsTest()
+void FileTests::api_is_file_exists()
 {
 	// LogIn as Admin
 	//
@@ -287,6 +287,381 @@ void FileTests::api_add_file()
 	QVERIFY2(ok == true, "Log out error");
 }
 
+void FileTests::api_move_file()
+{
+	// LogIn as Admin
+	//
+	QString session_key = logIn(m_user1);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	{
+		/*
+		FUNCTION api.move_file(
+			session_key text,
+			file_id integer,
+			move_to_parent_id integer)
+		RETURNS objectstate
+		*/
+
+		QString fileNameParent = "MoveFileTestParent.txt";
+		QString fileNameParentChild = "MoveFileTestParentChild.txt";
+
+		QString moveFileFrom = ::AlFileName;	// "$root$/Schemas/ApplicationLogic"
+		QString moveFileTo = ::MvsFileName;		// "$root$/Schemas/Monitor"
+
+		int moveFileFromId = -1;
+		int moveFileToId = -1;
+
+		QSqlQuery query;
+		bool ok = false;
+
+		// 0. Get parent files ids
+		//
+		ok = query.exec(QString("SELECT * FROM api.get_file_id('%1', '%2');").arg(session_key).arg(moveFileFrom));
+
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+		moveFileFromId = query.value(0).toInt(&ok);
+		QVERIFY2(ok == true, "Can't convert moveFileFromId");
+
+		ok = query.exec(QString("SELECT * FROM api.get_file_id('%1', '%2');").arg(session_key).arg(moveFileTo));
+
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+		moveFileToId = query.value(0).toInt(&ok);
+		QVERIFY2(ok == true, "Can't convert moveFileToid");
+
+		// Check if the file is going to be moved to itself
+		//
+		{
+			ok = query.exec(QString("SELECT * FROM api.add_or_update_file('%1', '%2', '%3', 'Check In comment', '', '{}');")
+									.arg(session_key)
+									.arg(moveFileFrom)
+									.arg("TestToMoveToItself.txt"));
+			QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+			QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+			int fileId = query.value(0).toInt();
+
+			ok = query.exec(QString("SELECT * FROM api.move_file('%1', %2, %3);")
+									.arg(session_key)
+									.arg(fileId)
+									.arg(moveFileFrom));
+			QVERIFY2(ok == false, "Expected that is not possible to move file to itself");
+		}
+
+		// File with children cannot be moved
+		//
+		{
+			// Create parent file
+			//
+			ok = query.exec(QString("SELECT * FROM api.add_or_update_file('%1', '%2', '%3', 'Check In comment', '', '{}');")
+									.arg(session_key)
+									.arg(moveFileFrom)
+									.arg(fileNameParent));
+
+			QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+			QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+			int parentFileId = query.value(0).toInt();
+
+			// Create child file
+			//
+			ok = query.exec(QString("SELECT * FROM api.add_or_update_file('%1', '%2', '%3', 'Check In comment', '', '{}');")
+									.arg(session_key)
+									.arg(moveFileFrom + "/" + fileNameParent)
+									.arg(fileNameParentChild));
+
+			QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+			QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+			// Try to move parent, expected error, as file with children cannot be moved
+			//
+			ok = query.exec(QString("SELECT * FROM api.move_file('%1', %2, %3);")
+									.arg(session_key)
+									.arg(parentFileId)
+									.arg(moveFileTo));
+			QVERIFY2(ok == false, "Expected that is not possible to move file to itself");
+		}
+
+		// Check if the destination file already exists, error expected
+		//
+		{
+			// Create source file
+			//
+			ok = query.exec(QString("SELECT * FROM api.add_or_update_file('%1', '%2', '%3', 'Check In comment', '', '{}');")
+									.arg(session_key)
+									.arg(moveFileFrom)
+									.arg("Source.test"));
+
+			QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+			QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+			int sourceFileId = query.value(0).toInt();
+
+			// Create destionation file
+			//
+			ok = query.exec(QString("SELECT * FROM api.add_or_update_file('%1', '%2', '%3', 'Check In comment', '', '{}');")
+									.arg(session_key)
+									.arg(moveFileTo)
+									.arg("Destination.test"));
+
+			QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+			QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+			// Try to move parent, expected error, as file with children cannot be moved
+			//
+			ok = query.exec(QString("SELECT * FROM api.move_file('%1', %2, %3);")
+									.arg(session_key)
+									.arg(sourceFileId)
+									.arg(moveFileTo));
+
+			QVERIFY2(ok == false, "Expected error if destination file already exists");
+		}
+
+		// Expected error if file is not checked out
+		// moveFileFromId/fileNameToMove -> moveFileToId/fileNameToMove
+		//
+		{
+			QString fileNameToMove = "MoveFileTest.txt";
+
+			// Create source file
+			//
+			ok = query.exec(QString("SELECT * FROM api.add_file('%1', '%2', %3, '', '{}', 0);")
+									.arg(session_key)
+									.arg(fileNameToMove)
+									.arg(moveFileFromId));
+
+			QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+			QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+			int oldFileId = query.value(0).toInt();
+
+			// Move to moveFileToId
+			//
+			ok = query.exec(QString("SELECT * FROM api.move_file('%1', %2, %3);")
+									.arg(session_key)
+									.arg(oldFileId)
+									.arg(moveFileToId));
+
+			QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+			QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+			ObjectState os;
+			DbWorker::db_objectState(query, &os);
+
+			int newFileId = os.id;
+			QVERIFY2(oldFileId < newFileId, "Expected new file id for moved file");
+
+			// Check table File, FileID = oldFileId must be removed
+			//
+			ok = query.exec(QString("SELECT COUNT(*) FROM File WHERE FileID = %1;").arg(oldFileId));
+			QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+			QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+			int oldFileIdCount = query.value(0).toInt();
+			QVERIFY2(oldFileIdCount == 0, "Expected that old record was removed");
+
+			ok = query.exec(QString("SELECT COUNT(*) FROM File WHERE FileID = %1;").arg(newFileId));
+			QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+			QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+			int newFileIdCount = query.value(0).toInt();
+			QVERIFY2(newFileIdCount == 1, "Expected that new recrd is added");
+
+			// Check table FileInstance
+			//
+			ok = query.exec(QString("SELECT COUNT(*) FROM FileInstance WHERE FileID = %1;").arg(oldFileId));
+			QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+			QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+			oldFileIdCount = query.value(0).toInt();
+			QVERIFY2(oldFileIdCount == 0, "Expected that old record was removed");
+
+			ok = query.exec(QString("SELECT COUNT(*) FROM FileInstance WHERE FileID = %1;").arg(newFileId));
+			QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+			QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+			newFileIdCount = query.value(0).toInt();
+			QVERIFY2(newFileIdCount == 1, "Expected that new recrd is added");
+
+			// Check:	FileInstance.BeforeMoveFileID
+			//			FileInstance.MovedFromParentID
+			//			FileInstance.MovedToParentID
+			//			FileInstance.MovedText
+			//
+			ok = query.exec(QString("SELECT BeforeMoveFileID, MovedFromParentID, MovedToParentID, MoveText FROM FileInstance WHERE FileID = %1;").arg(newFileId));
+
+			QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+			QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+			int beforeMoveFileID = query.value(0).toInt();
+			int movedFromParentID = query.value(1).toInt();
+			int movedToParentID = query.value(2).toInt();
+			QString moveText = query.value(3).toString();
+
+			QVERIFY(beforeMoveFileID == oldFileId);
+			QVERIFY(movedFromParentID == moveFileFromId);
+			QVERIFY(movedToParentID == moveFileToId);
+			QVERIFY(moveText.isEmpty() == false);
+
+			// Check table CheckOut
+			//
+			ok = query.exec(QString("SELECT COUNT(*) FROM CheckOut WHERE FileID = %1;").arg(oldFileId));
+			QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+			QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+			oldFileIdCount = query.value(0).toInt();
+			QVERIFY2(oldFileIdCount == 0, "Expected that old record was removed");
+
+			ok = query.exec(QString("SELECT COUNT(*) FROM CheckOut WHERE FileID = %1;").arg(newFileId));
+			QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+			QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+			newFileIdCount = query.value(0).toInt();
+			QVERIFY2(newFileIdCount == 1, "Expected that new recrd is added");
+
+			// CheckIn file, as if it is not checked in, then it can have influence on following tests
+			//
+			ok = query.exec(QString("SELECT check_in(1, ARRAY[%1], 'Commnet');").arg(newFileId));
+			QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		}
+	}
+
+	// LogOut
+	//
+	bool ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+}
+
+void FileTests::api_undo_cahnges_after_move_file()
+{
+	// LogIn as Admin
+	//
+	QString session_key = logIn(m_projectAdministratorName, m_projectAdministratorPassword);
+	QVERIFY2(session_key.isEmpty() == false, "Log in error");
+
+	// --
+	//
+	QString moveFileFrom = ::AlFileName;	// "$root$/Schemas/ApplicationLogic"
+	QString moveFileTo = ::MvsFileName;		// "$root$/Schemas/Monitor"
+	int moveFileFromId = -1;
+	int moveFileToId = -1;
+
+	QSqlQuery query;
+	bool ok = false;
+
+	// 0. Get parent files ids
+	//
+	ok = query.exec(QString("SELECT * FROM api.get_file_id('%1', '%2');").arg(session_key).arg(moveFileFrom));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	moveFileFromId = query.value(0).toInt(&ok);
+	QVERIFY2(ok == true, "Can't convert moveFileFromId");
+
+	ok = query.exec(QString("SELECT * FROM api.get_file_id('%1', '%2');").arg(session_key).arg(moveFileTo));
+
+	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+	QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+	moveFileToId = query.value(0).toInt(&ok);
+	QVERIFY2(ok == true, "Can't convert moveFileToid");
+
+	// 1. Create file, check it in and checkout (so will be 2 records in FileInstance)
+	// 2. Move it
+	// 4. Undo changes
+	// 5. Check that everything came back
+	//
+	{
+		QString fileName = "UndoMoved.test";
+		int fileIdInitial = -1;
+		int fileIdMoved = -1;
+
+		// (1) Create file and check it out
+		//
+		ok = query.exec(QString("SELECT * FROM api.add_or_update_file('%1', '%2', '%3', 'Check In comment', '', '{}');")
+								.arg(session_key)
+								.arg(moveFileFrom)
+								.arg(fileName));
+
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+		fileIdInitial = query.value(0).toInt();
+
+		ok = query.exec(QString("SELECT * FROM check_out(1, ARRAY[%1]);").arg(fileIdInitial));
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+		// (2) Move it
+		//
+		ok = query.exec(QString("SELECT * FROM api.move_file('%1', %2, %3);")
+								.arg(session_key)
+								.arg(fileIdInitial)
+								.arg(moveFileToId));
+
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+		fileIdMoved = query.value(0).toInt();
+
+		QVERIFY(fileIdInitial < fileIdMoved);
+
+		// (3) Undo changes
+		//
+		ok = query.exec(QString("SELECT * FROM undo_changes(1, ARRAY[%1]);").arg(fileIdMoved));
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+
+		// (4) Checks for table FileInstance
+		//
+		ok = query.exec(QString("SELECT COUNT(*) FROM FileInstance WHERE FileID = %1;").arg(fileIdMoved));
+
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+		int movedFileIdCount = query.value(0).toInt();
+		QVERIFY(movedFileIdCount == 0);
+
+		// --
+		//
+		ok = query.exec(QString("SELECT COUNT(*) FROM FileInstance WHERE FileID = %1;").arg(fileIdInitial));
+
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+		int originalFileIdCount = query.value(0).toInt();
+		QVERIFY(originalFileIdCount == 1);
+
+		// --
+		//
+		ok = query.exec(QString("SELECT COUNT(*) FROM File WHERE FileID = %1;").arg(fileIdMoved));
+
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+		int movedFileCount = query.value(0).toInt();
+		QVERIFY(movedFileCount == 0);
+
+		// --
+		//
+		ok = query.exec(QString("SELECT COUNT(*) FROM File WHERE FileID = %1;").arg(fileIdInitial));
+
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+		int originalFileCount = query.value(0).toInt();
+		QVERIFY(originalFileCount == 1);
+
+		//--
+		//
+		ok = query.exec(QString("SELECT ParentID FROM File WHERE FileID = %1;").arg(fileIdInitial));
+
+		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
+		QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
+
+		int originalParenId = query.value(0).toInt();
+		QVERIFY(originalParenId == moveFileFromId);
+	}
+
+	// LogOut
+	//
+	ok = logOut();
+	QVERIFY2(ok == true, "Log out error");
+
+	return;
+}
+
 void FileTests::fileExistsTest()
 {
 	QSqlQuery query;
@@ -326,7 +701,7 @@ void FileTests::filesExistTest()
 	QCOMPARE(FileTests::filesExist(fileID), result);
 }
 
-void FileTests::is_any_checked_outTest()
+void FileTests::api_is_any_checked_out()
 {
 	QString session_key = logIn("Administrator", m_projectAdministratorPassword);
 	QVERIFY2(session_key.isEmpty() == false, "Log in error");
@@ -2579,11 +2954,10 @@ void FileTests::undo_changesTest()
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	// Call error of not checkedOut file
+	// Now this test is forbidden, as I have changed undo_changes, for checked out files undo is ignored
 	//
-
-	ok = query.exec(QString("SELECT * FROM undo_changes(1, '{%1}');").arg(errorCallFileId));
-
-	QVERIFY2(ok == false, qPrintable("File is not checkedOut error expected"));
+	//ok = query.exec(QString("SELECT * FROM undo_changes(1, '{%1}');").arg(errorCallFileId));
+	//QVERIFY2(ok == false, qPrintable("File is not checkedOut error expected"));
 }
 
 void FileTests::add_or_update_fileTest()

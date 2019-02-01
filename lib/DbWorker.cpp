@@ -264,6 +264,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0244.sql", "Upgrade to version 244, Blink signal was added to LM1-SR04, LM1-SF00-4PH Presets"},
 	{":/DatabaseUpgrade/Upgrade0245.sql", "Upgrade to version 245, Unit have been made editable for output analog signals"},
 	{":/DatabaseUpgrade/Upgrade0246.sql", "Upgrade to version 246, Add attributes to file system"},	
+
+	{":/DatabaseUpgrade/Upgrade0247.sql", "Upgrade to version 247, Add functions api.get_file_full_path, api.move_file"},
 };
 
 
@@ -1744,7 +1746,8 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 				//
 				QFile upgradeFile(ui.upgradeFileName);
 
-				//qDebug() << "Begin upgrade: item " << i << " completed, file: " << ui.upgradeFileName;
+				//qDebug() << "Upgrade Project Database, file " << ui.upgradeFileName;
+				m_progress->setCurrentOperation(tr("Upgrading... %1").arg(ui.upgradeFileName));
 
 				result = upgradeFile.open(QIODevice::ReadOnly | QIODevice::Text);
 
