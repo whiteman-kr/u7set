@@ -8513,11 +8513,13 @@ double findConversionVal(double val, double* pArray, int size, bool isDegree)
 			if (val == pArray[i])
 			{
 				retVal = pArray[i+1];
+				break;
 			}
 
 			if ((val > pArray[i]) && (val < pArray[i+2]))
 			{
 				retVal = ((pArray[i+3] - pArray[i+1])*(val-pArray[i]))/(pArray[i+2]-pArray[i])+pArray[i+1];
+				break;
 			}
 		}
 		else
@@ -8525,11 +8527,13 @@ double findConversionVal(double val, double* pArray, int size, bool isDegree)
 			if (val == pArray[i+1])
 			{
 				retVal = pArray[i];
+				break;
 			}
 
 			if ((val > pArray[i+1]) && (val < pArray[i+3]))
 			{
 				retVal = ((pArray[i+2] - pArray[i])*(val-pArray[i+1]))/(pArray[i+3]-pArray[i+1])+pArray[i];
+				break;
 			}
 
 		}
@@ -8601,6 +8605,14 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 						case E::SensorType::mV_Type_S:			retVal = findConversionVal(val, &MV_TYPE_S[0][0], MV_TYPE_S_COUNT, true);			break;
 						case E::SensorType::mV_Type_T:			retVal = findConversionVal(val, &MV_TYPE_T[0][0], MV_TYPE_T_COUNT, true);			break;
 
+						case E::SensorType::mV_Raw_Mul_8:
+						case E::SensorType::mV_Raw_Mul_32:
+
+							retVal = (val - param.physicalLowLimit())*(param.electricHighLimit() - param.electricLowLimit())/(param.physicalHighLimit() - param.physicalLowLimit()) + param.electricLowLimit();
+
+							break;
+
+
 						default:								assert(0);
 					}
 
@@ -8628,7 +8640,6 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 
 					switch(param.electricSensorType())
 					{
-
 						case E::SensorType::NoSensor:			retVal = (val - param.electricLowLimit())*(param.physicalHighLimit() - param.physicalLowLimit())/(param.electricHighLimit() - param.electricLowLimit()) + param.physicalLowLimit();	break;
 
 						case E::SensorType::Ohm_Pt50_W1391:		retVal = findConversionVal(val, &PT_50_W_1391[0][0], PT_50_W_1391_COUNT, false);	break;
@@ -8670,6 +8681,13 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 						case E::SensorType::mV_Type_R:			retVal = findConversionVal(val, &MV_TYPE_R[0][0], MV_TYPE_R_COUNT, false);			break;
 						case E::SensorType::mV_Type_S:			retVal = findConversionVal(val, &MV_TYPE_S[0][0], MV_TYPE_S_COUNT, false);			break;
 						case E::SensorType::mV_Type_T:			retVal = findConversionVal(val, &MV_TYPE_T[0][0], MV_TYPE_T_COUNT, false);			break;
+
+						case E::SensorType::mV_Raw_Mul_8:
+						case E::SensorType::mV_Raw_Mul_32:
+
+							retVal = (val - param.electricLowLimit())*(param.physicalHighLimit() - param.physicalLowLimit())/(param.electricHighLimit() - param.electricLowLimit()) + param.physicalLowLimit();
+
+							break;
 
 						default:								assert(0);
 					}
