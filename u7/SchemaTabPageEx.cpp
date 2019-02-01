@@ -170,7 +170,14 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 			return fileCaption(fileId);
 
 		case Columns::FileStateColumn:
-			return file->state().text();
+			if (file->state() == VcsState::CheckedIn)
+			{
+				return {};
+			}
+			else
+			{
+				return file->state().text();
+			}
 
 		case Columns::FileActionColumn:
 			return file->action().text();
@@ -657,6 +664,8 @@ void SchemaListModelEx::applyFilter(QString filterText, DbFileTree* filesTree)
 		return;
 	}
 
+	int schemaFilterCount = 0;
+
 	// Apply filter, if parent has any file with filterText, then this parent must be left in tree.
 	// So, in tree are files with filterText and they parents
 	// System files like Application Logic, Monitor, Tuning.... must be left
@@ -680,6 +689,8 @@ void SchemaListModelEx::applyFilter(QString filterText, DbFileTree* filesTree)
 		if (file->fileName().contains(filterText, Qt::CaseInsensitive) == true)
 		{
 			filteredFiles[fileId] = file;
+
+			schemaFilterCount++;
 			continue;
 		}
 
@@ -689,6 +700,8 @@ void SchemaListModelEx::applyFilter(QString filterText, DbFileTree* filesTree)
 			searchResult == true)
 		{
 			filteredFiles[fileId] = file;
+
+			schemaFilterCount++;
 			continue;
 		}
 	}
@@ -741,6 +754,8 @@ void SchemaListModelEx::applyFilter(QString filterText, DbFileTree* filesTree)
 	// --
 	//
 	*filesTree = std::move(DbFileTree{filteredFiles, rootFileId});
+
+	m_schemaFilterCount = schemaFilterCount;
 
 	return;
 }
@@ -846,6 +861,7 @@ void SchemaListModelEx::projectClosed()
 
 	m_parentFile = DbFileInfo();
 	m_systemFiles.clear();
+	m_schemaFilterCount = 0;
 
 	return;
 }
@@ -905,6 +921,14 @@ const DbFileInfo& SchemaListModelEx::parentFile() const
 	return m_parentFile;
 }
 
+int SchemaListModelEx::schemaFilterCount() const
+{
+	return m_schemaFilterCount;
+}
+
+//
+// class SchemaProxyListModel
+//
 SchemaProxyListModel::SchemaProxyListModel(QObject* parent) :
 	QSortFilterProxyModel(parent)
 {
@@ -1728,7 +1752,9 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 
 	m_searchButton = new QPushButton(tr("Search"));
 	m_filterButton = new QPushButton(tr("Filter"));
+
 	m_resetFilterButton = new QPushButton(tr("Reset Filter"));
+	m_resetFilterButton->setDisabled(true);
 
 	// --
 	//
@@ -3915,6 +3941,19 @@ void SchemaControlTabPageEx::filter()
 	m_filesView->setFilter(filterText);
 	m_filesView->setFocus();
 
+	int schemaFiletrCount = m_filesView->filesModel().schemaFilterCount();
+
+	if (filterText.trimmed().isEmpty() == false)
+	{
+		m_filterButton->setText(tr("Filter: %1 Schema(s)").arg(schemaFiletrCount));
+	}
+	else
+	{
+		m_filterButton->setText(tr("Filter"));
+	}
+
+	m_resetFilterButton->setDisabled(filterText.trimmed().isEmpty());
+
 	return;
 }
 
@@ -3924,6 +3963,9 @@ void SchemaControlTabPageEx::resetFilter()
 
 	m_filesView->setFilter("");
 	m_filesView->setFocus();
+
+	m_filterButton->setText(tr("Filter"));
+	m_resetFilterButton->setDisabled(true);
 
 	return;
 }

@@ -69,6 +69,8 @@ public:
 
 	const DbFileInfo& parentFile() const;
 
+	int schemaFilterCount() const;
+
 	// Data
 	//
 public:
@@ -104,6 +106,8 @@ private:
 	std::map<int, VFrame30::SchemaDetails> m_details; 		// Key is FileID
 
 	std::set<int> m_systemFiles;	// Key is fileid
+
+	int m_schemaFilterCount = 0;
 };
 
 
