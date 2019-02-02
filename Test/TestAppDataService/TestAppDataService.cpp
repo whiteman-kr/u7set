@@ -158,7 +158,7 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 {
 	// Getting all counters before sending any udp
 	//
-	if (m_tcpClientSocket->sendRequestAndWaitForResponse(ADS_GET_DATA_SOURCES_STATES, error) == false)
+	if (m_tcpClientSocket->sendRequestAndWaitForResponse(ADS_GET_APP_DATA_SOURCES_STATES, error) == false)
 	{
 		error = "Got error while getting AppDataSource state: " + error;
 		return false;
@@ -231,7 +231,7 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 	// Getting all counters after sending udp
 	//
 	m_previousDataSourceStateMessage = m_nextDataSourceStateMessage;
-	if (m_tcpClientSocket->sendRequestAndWaitForResponse(ADS_GET_DATA_SOURCES_STATES, error) == false)
+	if (m_tcpClientSocket->sendRequestAndWaitForResponse(ADS_GET_APP_DATA_SOURCES_STATES, error) == false)
 	{
 		error = "Got error while getting AppDataSource state: " + error;
 		return false;
@@ -484,7 +484,7 @@ void TestAppDataService::initTestCase()
 		QVERIFY2(false, qPrintable(error));
 	}
 
-	result = m_tcpClientSocket->sendRequestAndWaitForResponse(ADS_GET_DATA_SOURCES_INFO, error);
+	result = m_tcpClientSocket->sendRequestAndWaitForResponse(ADS_GET_APP_DATA_SOURCES_INFO, error);
 	if (result == false)
 	{
 		QVERIFY2(false, qPrintable(error));

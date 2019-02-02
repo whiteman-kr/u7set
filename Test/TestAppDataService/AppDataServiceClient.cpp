@@ -279,14 +279,14 @@ bool AppDataServiceClient::processData(QString& error)
 		}
 		break;
 	}
-	case ADS_GET_DATA_SOURCES_STATES:
+	case ADS_GET_APP_DATA_SOURCES_STATES:
 		if (parseMessageLoggingErrors(m_dataSourceStateMessage, error) == false)
 		{
 			error = "Reply ADS_GET_DATA_SOURCES_STATES protobuf error: " + error;
 			return false;
 		}
 		break;
-	case ADS_GET_DATA_SOURCES_INFO:
+	case ADS_GET_APP_DATA_SOURCES_INFO:
 		if (parseMessageLoggingErrors(m_dataSourceInfoMessage, error) == false)
 		{
 			error = "Reply ADS_GET_DATA_SOURCES_INFO protobuf error: " + error;

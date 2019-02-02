@@ -22,6 +22,16 @@ AppDataReceiverThread::~AppDataReceiverThread()
 {
 }
 
+void AppDataReceiverThread::fillAppDataReceiveState(Network::AppDataReceiveState *adrs)
+{
+	adrs->set_receivedframescount(m_receivedFramesCount);
+
+	adrs->set_simframescount(m_simFramesCount);
+	adrs->set_errdatagramsize(m_errDatagramSize);
+	adrs->set_errsimversion(m_errSimVersion);
+	adrs->set_errunknownappdatasourceip(m_errUnknownAppDataSourceIP);
+}
+
 void AppDataReceiverThread::run()
 {
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread is started (receiving IP %1)").arg(m_dataReceivingIP.addressPortStr()));
