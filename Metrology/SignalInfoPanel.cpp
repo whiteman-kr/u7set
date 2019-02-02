@@ -1,6 +1,7 @@
 #include "SignalInfoPanel.h"
 
 #include <QApplication>
+#include <QMainWindow>
 #include <QIcon>
 #include <QHeaderView>
 #include <QVBoxLayout>
@@ -109,9 +110,10 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 			case SIGNAL_INFO_COLUMN_MODULE:			result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_PLACE:			result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_CAPTION:		result = Qt::AlignLeft;		break;
-			case SIGNAL_INFO_COLUMN_PH_RANGE:		result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_EL_RANGE:		result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_EL_SENSOR:		result = Qt::AlignCenter;	break;
+			case SIGNAL_INFO_COLUMN_PH_RANGE:		result = Qt::AlignCenter;	break;
+			case SIGNAL_INFO_COLUMN_EN_RANGE:		result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_CALIBRATOR:		result = Qt::AlignCenter;	break;
 			default:								assert(0);
 		}
@@ -233,9 +235,10 @@ QString SignalInfoTable::text(int row, int column, const MeasureMultiParam& meas
 		case SIGNAL_INFO_COLUMN_MODULE:			result = measureParam.moduleStr();				break;
 		case SIGNAL_INFO_COLUMN_PLACE:			result = measureParam.placeStr();				break;
 		case SIGNAL_INFO_COLUMN_CAPTION:		result = measureParam.caption();				break;
-		case SIGNAL_INFO_COLUMN_PH_RANGE:		result = measureParam.physicalRangeStr();		break;
 		case SIGNAL_INFO_COLUMN_EL_RANGE:		result = measureParam.electricRangeStr();		break;
 		case SIGNAL_INFO_COLUMN_EL_SENSOR:		result = measureParam.electricSensorStr();		break;
+		case SIGNAL_INFO_COLUMN_PH_RANGE:		result = measureParam.physicalRangeStr();		break;
+		case SIGNAL_INFO_COLUMN_EN_RANGE:		result = measureParam.engeneeringRangeStr();	break;
 		case SIGNAL_INFO_COLUMN_CALIBRATOR:		result = measureParam.calibratorStr();			break;
 		default:								assert(0);
 	}
@@ -259,13 +262,13 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 
 	QString stateStr, formatStr;
 
-	formatStr.sprintf(("%%.%df"), param.physicalPrecision());
+	formatStr.sprintf(("%%.%df"), param.engeneeringPrecision());
 
 	stateStr.sprintf(formatStr.toAscii(), state.value());
 
-	if (param.physicalUnit().isEmpty() == false)
+	if (param.engeneeringUnit().isEmpty() == false)
 	{
-		stateStr.append(" " + param.physicalUnit());
+		stateStr.append(" " + param.engeneeringUnit());
 	}
 
 	// append electrical equivalent
@@ -274,7 +277,7 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 	{
 		if (param.isInput() == true || param.isOutput() == true)
 		{
-			double electric = conversion(state.value(), CT_PHYSICAL_TO_ELECTRIC, param);
+			double electric = conversion(state.value(), CT_ENGENEER_TO_ELECTRIC, param);
 			stateStr.append(" = " + QString::number(electric, 10, param.electricPrecision()));
 
 			if (param.electricUnit().isEmpty() == false)
@@ -282,24 +285,6 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 				stateStr.append(" " + param.electricUnit());
 			}
 		}
-	}
-
-	// append adc equivalent in Dec
-	//
-	if (theOptions.signalInfo().showAdcState() == true)
-	{
-		int adc = (state.value() - param.physicalLowLimit())*(param.highADC() - param.lowADC())/(param.physicalHighLimit() - param.physicalLowLimit()) + param.lowADC();
-		stateStr.append(" = " + QString::number(adc, 10));
-	}
-
-	// append adc equivalent in Hex
-	//
-	if (theOptions.signalInfo().showAdcHexState() == true)
-	{
-		QString adcHexValue;
-		int adc = (state.value() - param.physicalLowLimit())* (param.highADC() - param.lowADC())/ (param.physicalHighLimit() - param.physicalLowLimit()) + param.lowADC();
-		adcHexValue.sprintf(" = 0x%04X", adc);
-		stateStr.append(adcHexValue);
 	}
 
 	// check flags
@@ -462,6 +447,7 @@ SignalInfoPanel::SignalInfoPanel(QWidget* parent) :
 	hideColumn(SIGNAL_INFO_COLUMN_MODULE, true);
 	hideColumn(SIGNAL_INFO_COLUMN_PLACE, true);
 	hideColumn(SIGNAL_INFO_COLUMN_EL_SENSOR, true);
+	hideColumn(SIGNAL_INFO_COLUMN_PH_RANGE, true);
 
 	startSignalStateTimer();
 }
@@ -543,15 +529,6 @@ void SignalInfoPanel::createContextMenu()
 	m_pShowElectricValueAction->setCheckable(true);
 	m_pShowElectricValueAction->setChecked(theOptions.signalInfo().showElectricState());
 
-
-	m_pShowAdcValueAction = m_pShowMenu->addAction(tr("ADC state"));
-	m_pShowAdcValueAction->setCheckable(true);
-	m_pShowAdcValueAction->setChecked(theOptions.signalInfo().showAdcState());
-
-	m_pShowAdcHexValueAction = m_pShowMenu->addAction(tr("ADC (hex) state"));
-	m_pShowAdcHexValueAction->setCheckable(true);
-	m_pShowAdcHexValueAction->setChecked(theOptions.signalInfo().showAdcHexState());
-
 	m_pContextMenu->addMenu(m_pShowMenu);
 
 	m_pContextMenu->addSeparator();
@@ -561,10 +538,7 @@ void SignalInfoPanel::createContextMenu()
 
 	connect(m_pCopyAction, &QAction::triggered, this, &SignalInfoPanel::copy);
 	connect(m_pShowElectricValueAction, &QAction::triggered, this, &SignalInfoPanel::showElectricValue);
-	connect(m_pShowAdcValueAction, &QAction::triggered, this, &SignalInfoPanel::showAdcValue);
-	connect(m_pShowAdcHexValueAction, &QAction::triggered, this, &SignalInfoPanel::showAdcHexValue);
 	connect(m_pSignalPropertyAction, &QAction::triggered, this, &SignalInfoPanel::signalProperty);
-
 
 	// init context menu
 	//
@@ -621,8 +595,6 @@ void SignalInfoPanel::stopSignalStateTimer()
 void SignalInfoPanel::onContextMenu(QPoint)
 {
 	m_pShowElectricValueAction->setChecked(theOptions.signalInfo().showElectricState());
-	m_pShowAdcValueAction->setChecked(theOptions.signalInfo().showAdcState());
-	m_pShowAdcHexValueAction->setChecked(theOptions.signalInfo().showAdcHexState());
 
 	m_pContextMenu->exec(QCursor::pos());
 }
@@ -682,21 +654,6 @@ void SignalInfoPanel::showElectricValue()
 {
 	theOptions.signalInfo().setShowElectricState(m_pShowElectricValueAction->isChecked());
 }
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalInfoPanel::showAdcValue()
-{
-	theOptions.signalInfo().setShowAdcState(m_pShowAdcValueAction->isChecked());
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void SignalInfoPanel::showAdcHexValue()
-{
-	theOptions.signalInfo().setShowAdcHexState(m_pShowAdcHexValueAction->isChecked());
-}
-
 
 // -------------------------------------------------------------------------------------------------------------------
 

@@ -474,7 +474,7 @@ QString TuningSignalTable::text(int row, int column, Metrology::Signal* pSignal)
 		case TUN_SIGNAL_LIST_COLUMN_CAPTION:		result = param.caption();					break;
 		case TUN_SIGNAL_LIST_COLUMN_STATE:			result = signalStateStr(pSignal);			break;
 		case TUN_SIGNAL_LIST_COLUMN_DEFAULT:		result = param.tuningDefaultValueStr();		break;
-		case TUN_SIGNAL_LIST_COLUMN_RANGE:			result = param.physicalRangeStr();			break;
+		case TUN_SIGNAL_LIST_COLUMN_RANGE:			result = param.engeneeringRangeStr();		break;
 		default:									assert(0);
 	}
 
@@ -507,13 +507,13 @@ QString TuningSignalTable::signalStateStr(Metrology::Signal* pSignal) const
 	{
 		case E::SignalType::Analog:
 
-			formatStr.sprintf("%%.%df", param.physicalPrecision());
+			formatStr.sprintf("%%.%df", param.engeneeringPrecision());
 
 			stateStr.sprintf(formatStr.toAscii(), pSignal->state().value());
 
-			if (param.physicalUnit().isEmpty() == false)
+			if (param.engeneeringUnit().isEmpty() == false)
 			{
-				stateStr.append(" " + param.physicalUnit());
+				stateStr.append(" " + param.engeneeringUnit());
 			}
 
 			break;
@@ -1224,7 +1224,7 @@ void TuningSignalStateDialog::createInterface()
 				m_stateEdit->setAlignment(Qt::AlignHCenter);
 				m_stateEdit->setValidator(validator);
 
-				QLabel* rangeLabel = new QLabel(m_param.physicalRangeStr());
+				QLabel* rangeLabel = new QLabel(m_param.engeneeringRangeStr());
 				rangeLabel->setAlignment(Qt::AlignHCenter);
 
 				// buttons
@@ -1287,15 +1287,15 @@ void TuningSignalStateDialog::onOk()
 {
 	double state = m_stateEdit->text().toDouble();
 
-	if (state < m_param.physicalLowLimit() || state > m_param.physicalHighLimit())
+	if (state < m_param.engeneeringLowLimit() || state > m_param.engeneeringHighLimit())
 	{
 		QString str, formatStr;
 
-		formatStr.sprintf("%%.%df", m_param.physicalPrecision());
+		formatStr.sprintf("%%.%df", m_param.engeneeringPrecision());
 
 		str.sprintf("Failed input value: " + formatStr.toAscii(), state);
-		str += tr(" %1").arg(m_param.physicalUnit());
-		str += tr("\nRange of signal: %1").arg(m_param.physicalRangeStr());
+		str += tr(" %1").arg(m_param.engeneeringUnit());
+		str += tr("\nRange of signal: %1").arg(m_param.engeneeringRangeStr());
 
 		QMessageBox::critical(this, windowTitle(), str);
 		return;

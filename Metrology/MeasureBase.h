@@ -55,14 +55,14 @@ const int	MEASURE_KIND_UNKNOWN	= -1,
 const char* const MeasureLimitType[] =
 {
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Electric"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Physical"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Engeneering"),
 };
 
 const int	MEASURE_LIMIT_TYPE_COUNT		= sizeof(MeasureLimitType)/sizeof(MeasureLimitType[0]);
 
 const int	MEASURE_LIMIT_TYPE_UNDEFINED	= -1,
 			MEASURE_LIMIT_TYPE_ELECTRIC		= 0,
-			MEASURE_LIMIT_TYPE_PHYSICAL		= 1;
+			MEASURE_LIMIT_TYPE_ENGENEER		= 1;
 
 // ==============================================================================================
 

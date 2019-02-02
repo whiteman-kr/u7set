@@ -174,7 +174,7 @@ bool MeasureThread::setActiveSignalParam()
 				continue;
 			}
 
-//			if (param.physicalRangeIsValid() == false || param.electricRangeIsValid() == false)
+//			if (param.physicalRangeIsValid() == false || param.engeneeringRangeIsValid() == false || param.electricRangeIsValid() == false)
 //			{
 //				continue;
 //			}
@@ -550,11 +550,11 @@ void MeasureThread::measureLinearity()
 
 			m_activeSignalParam[c].setPercent(point.percent());
 
-			// at the beginning we need get physical value because if range is not Linear (for instance Ohm or mV)
-			// then by physical value we may get electric value
+			// at the beginning we need get engeneering value because if range is not Linear (for instance Ohm or mV)
+			// then by engeneering value we may get electric value
 			//
-			double physicalVal = (point.percent() * (param.physicalHighLimit() - param.physicalLowLimit()) / 100) + param.physicalLowLimit();
-			double electricVal = conversion(physicalVal, CT_PHYSICAL_TO_ELECTRIC, param);
+			double engeneeringVal = (point.percent() * (param.engeneeringHighLimit() - param.engeneeringLowLimit()) / 100) + param.engeneeringLowLimit();
+			double electricVal = conversion(engeneeringVal, CT_ENGENEER_TO_ELECTRIC, param);
 
 
 			// polarity test
@@ -577,7 +577,7 @@ void MeasureThread::measureLinearity()
 			{
 				case OUTPUT_SIGNAL_TYPE_UNUSED:
 				case OUTPUT_SIGNAL_TYPE_FROM_INPUT:		pCalibratorManager->setValue(m_activeSignalParam[c].isNegativeRange() ? -electricVal : electricVal);	break;
-				case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	theSignalBase.tuning().appendCmdFowWrite(param.hash(), physicalVal);									break;
+				case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	theSignalBase.tuning().appendCmdFowWrite(param.hash(), engeneeringVal);									break;
 				default:								assert(0);
 			}
 		}

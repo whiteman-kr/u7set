@@ -491,7 +491,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					showcolumnGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_SHOW_PHYSICAL_VALUE]);
-					item->setValue(m_options.linearity().showPhyscalValueColumn());
+					item->setValue(m_options.linearity().showEngeneeringValueColumn());
 					appendProperty(item, page, LO_PARAM_SHOW_PHYSICAL_VALUE);
 					showcolumnGroup->addSubProperty(item);
 
@@ -623,16 +623,6 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					item = manager->addProperty(QVariant::Bool, SignalInfoParam[SIO_PARAM_ELECTRIC_STATE]);
 					item->setValue(m_options.signalInfo().showElectricState());
 					appendProperty(item, page, SIO_PARAM_ELECTRIC_STATE);
-					measureGroup->addSubProperty(item);
-
-					item = manager->addProperty(QVariant::Bool, SignalInfoParam[SIO_PARAM_ADC_STATE]);
-					item->setValue(m_options.signalInfo().showAdcState());
-					appendProperty(item, page, SIO_PARAM_ADC_STATE);
-					measureGroup->addSubProperty(item);
-
-					item = manager->addProperty(QVariant::Bool, SignalInfoParam[SIO_PARAM_ADC_HEX_STATE]);
-					item->setValue(m_options.signalInfo().showAdcHexState());
-					appendProperty(item, page, SIO_PARAM_ADC_HEX_STATE);
 					measureGroup->addSubProperty(item);
 
 				QtProperty *colorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Colors"));
@@ -1101,8 +1091,6 @@ void OptionsDialog::applyProperty()
 			{
 				case SIO_PARAM_FONT:					m_options.signalInfo().font().fromString(value.toString());				break;
 				case SIO_PARAM_ELECTRIC_STATE:			m_options.signalInfo().setShowElectricState(value.toBool());			break;
-				case SIO_PARAM_ADC_STATE:				m_options.signalInfo().setShowAdcState(value.toBool());					break;
-				case SIO_PARAM_ADC_HEX_STATE:			m_options.signalInfo().setShowAdcHexState(value.toBool());				break;
 				case SIO_PARAM_COLOR_FLAG_VALID:		m_options.signalInfo().setColorFlagValid(QColor(value.toString()));		break;
 				case SIO_PARAM_COLOR_FLAG_OVERFLOW:		m_options.signalInfo().setColorFlagOverflow(QColor(value.toString()));	break;
 				case SIO_PARAM_COLOR_FLAG_UNDERFLOW:	m_options.signalInfo().setColorFlagUnderflow(QColor(value.toString()));	break;

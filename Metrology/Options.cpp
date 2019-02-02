@@ -638,8 +638,6 @@ void SignalInfoOption::load()
 	m_font.fromString(s.value(QString("%1Font").arg(SIGNAL_INFO_OPTIONS_KEY), "Segoe UI, 10").toString());
 
 	m_showElectricState = s.value(QString("%1ShowElectricState").arg(SIGNAL_INFO_OPTIONS_KEY), false).toBool();
-	m_showAdcState = s.value(QString("%1ShowAdcState").arg(SIGNAL_INFO_OPTIONS_KEY), false).toBool();
-	m_showAdcHexState = s.value(QString("%1ShowAdcHexState").arg(SIGNAL_INFO_OPTIONS_KEY), false).toBool();
 
 	m_colorFlagValid = s.value(QString("%1ColorFlagValid").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_VALID.rgb()).toInt();
 	m_colorFlagOverflow = s.value(QString("%1ColorFlagOverflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERFLOW.rgb()).toInt();
@@ -655,9 +653,6 @@ void SignalInfoOption::save()
 	s.setValue(QString("%1Font").arg(SIGNAL_INFO_OPTIONS_KEY), m_font.toString());
 
 	s.setValue(QString("%1ShowElectricState").arg(SIGNAL_INFO_OPTIONS_KEY), m_showElectricState);
-	s.setValue(QString("%1ShowAdcState").arg(SIGNAL_INFO_OPTIONS_KEY), m_showAdcState);
-	s.setValue(QString("%1ShowAdcHexState").arg(SIGNAL_INFO_OPTIONS_KEY), m_showAdcHexState);
-
 
 	s.setValue(QString("%1ColorFlagValid").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagValid.rgb());
 	s.setValue(QString("%1ColorFlagOverflow").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagOverflow.rgb());
@@ -671,8 +666,6 @@ SignalInfoOption& SignalInfoOption::operator=(const SignalInfoOption& from)
 	m_font.fromString(from.m_font.toString());
 
 	m_showElectricState = from.m_showElectricState;
-	m_showAdcState = from.m_showAdcState;
-	m_showAdcHexState = from.m_showAdcHexState;
 
 	m_colorFlagValid = from.m_colorFlagValid;
 	m_colorFlagOverflow = from.m_colorFlagOverflow;
@@ -979,7 +972,7 @@ void LinearityOption::load()
 	m_highLimitRange = s.value(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), 100).toDouble();
 
 	m_viewType = s.value(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), LO_VIEW_TYPE_SIMPLE).toInt();
-	m_showPhyscalValueColumn = s.value(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), true).toBool();
+	m_showEngeneeringValueColumn = s.value(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), true).toBool();
 
 	m_warningIfMeasured = s.value(QString("%1WarningIfMeasured").arg(LINEARITY_OPTIONS_KEY), true).toBool();
 	m_measureEntireModule = s.value(QString("%1MeasureEntireModule").arg(LINEARITY_OPTIONS_KEY), false).toBool();
@@ -1003,7 +996,7 @@ void LinearityOption::save()
 	s.setValue(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), m_highLimitRange);
 
 	s.setValue(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), m_viewType);
-	s.setValue(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), m_showPhyscalValueColumn);
+	s.setValue(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), m_showEngeneeringValueColumn);
 
 	s.setValue(QString("%1WarningIfMeasured").arg(LINEARITY_OPTIONS_KEY), m_warningIfMeasured);
 	s.setValue(QString("%1MeasureEntireModule").arg(LINEARITY_OPTIONS_KEY), m_measureEntireModule);
@@ -1029,7 +1022,7 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 	m_highLimitRange = from.m_highLimitRange;
 
 	m_viewType = from.m_viewType;
-	m_showPhyscalValueColumn = from.m_showPhyscalValueColumn;
+	m_showEngeneeringValueColumn = from.m_showEngeneeringValueColumn;
 
 	m_warningIfMeasured = from.m_warningIfMeasured;
 	m_measureEntireModule = from.m_measureEntireModule;
