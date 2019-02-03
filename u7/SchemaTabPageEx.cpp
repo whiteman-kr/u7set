@@ -1082,6 +1082,10 @@ void SchemaFileViewEx::createActions()
 	m_deleteAction->setEnabled(false);
 	m_deleteAction->setShortcut(QKeySequence::Delete);
 
+	m_moveFileAction = new QAction(tr("Move Schema(s)"), parent());
+	m_moveFileAction->setStatusTip(tr("Move Schema(s) to another folder..."));
+	m_moveFileAction->setEnabled(false);
+
 	// --
 	//
 	m_checkOutAction = new QAction(tr("Check Out"), parent());
@@ -1161,6 +1165,7 @@ void SchemaFileViewEx::createContextMenu()
 	addAction(m_newFolderAction);
 	addAction(m_cloneFileAction);
 	addAction(m_deleteAction);
+	addAction(m_moveFileAction);
 
 	// --
 	//
@@ -1465,6 +1470,7 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 	bool currentUserIsAdmin = dbc()->currentUser().isAdminstrator();
 
 	bool hasDeletePossibility = false;
+	bool hasMovePossibility = false;
 	bool hasCheckOutPossibility = false;
 	bool hasCheckInPossibility = false;
 	bool hasUndoPossibility = false;
@@ -1511,6 +1517,13 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 			hasDeletePossibility = true;
 		}
 
+		// hasMovePossibility
+		//
+		if (file->state() == VcsState::CheckedOut && file->userId() == currentUserId)
+		{
+			hasMovePossibility = true;
+		}
+
 		// hasCheckOutPossibility
 		//
 		if (file->state() == VcsState::CheckedIn)
@@ -1550,6 +1563,7 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 	m_viewAction->setEnabled(hasViewPossibility);
 
 	m_deleteAction->setEnabled(hasDeletePossibility);
+	m_moveFileAction->setEnabled(hasMovePossibility);
 	m_checkOutAction->setEnabled(hasCheckOutPossibility);
 	m_checkInAction->setEnabled(hasCheckInPossibility);
 	m_undoChangesAction->setEnabled(hasUndoPossibility);
@@ -1720,6 +1734,7 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 	connect(m_filesView->m_newFolderAction, &QAction::triggered, this, &SchemaControlTabPageEx::addFolder);
 	connect(m_filesView->m_cloneFileAction, &QAction::triggered, this, &SchemaControlTabPageEx::cloneFile);
 	connect(m_filesView->m_deleteAction, &QAction::triggered, this, &SchemaControlTabPageEx::deleteFiles);
+	connect(m_filesView->m_moveFileAction, &QAction::triggered, this, &SchemaControlTabPageEx::moveFiles);
 
 	connect(m_filesView->m_checkOutAction, &QAction::triggered, this, &SchemaControlTabPageEx::checkOutFiles);
 	connect(m_filesView->m_checkInAction, &QAction::triggered, this, &SchemaControlTabPageEx::checkInFiles);
@@ -1865,6 +1880,7 @@ void SchemaControlTabPageEx::createToolBar()
 	m_toolBar->addAction(m_filesView->m_newFolderAction);
 	m_toolBar->addAction(m_filesView->m_cloneFileAction);
 	m_toolBar->addAction(m_filesView->m_deleteAction);
+	//m_toolBar->addAction(m_filesView->m_moveFileAction);
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_filesView->m_checkOutAction);
@@ -2979,6 +2995,108 @@ void SchemaControlTabPageEx::deleteFiles()
 	}
 
 	return;
+}
+
+void SchemaControlTabPageEx::moveFiles()
+{
+	QModelIndexList	selectedIndexes = m_filesView->selectionModel()->selectedRows();
+	for (QModelIndex& mi: selectedIndexes)
+	{
+		mi = m_filesView->proxyModel().mapToSource(mi);
+	}
+
+	const std::vector<std::shared_ptr<DbFileInfo>> files = m_filesView->selectedFiles();
+
+	if (files.empty() == true)
+	{
+		assert(files.empty() == false);
+		return;
+	}
+
+	assert(selectedIndexes.size() == files.size());
+
+	// --
+	//
+	std::vector<std::shared_ptr<DbFileInfo>> moveFiles;
+	moveFiles.reserve(files.size());
+
+	for(const std::shared_ptr<DbFileInfo>& f : files)
+	{
+		if (dbc()->isSystemFile(f->fileId()) == true ||
+			f->state() != VcsState::CheckedOut)
+		{
+			continue;
+		}
+
+		moveFiles.push_back(f);
+	}
+
+	if (moveFiles.empty() == true)
+	{
+		assert(moveFiles.empty() == false);
+		return;
+	}
+
+	// Get destination folder
+	//
+
+//	// Ask user to confirm operation
+//	//
+//	QMessageBox mb(this);
+
+//	mb.setWindowTitle(qApp->applicationName());
+//	mb.setText(tr("Are you sure you want to delete selected %1 file(s)").arg(deleteFiles.size()));
+//	mb.setInformativeText(tr("If files have not been checked in before they will be deleted permanently.\nIf files were checked in at least one time they will be marked as deleted, to confirm operation perform Check In."));
+
+//	QString detailedText;
+//	for(auto f : deleteFiles)
+//	{
+//		detailedText += f->fileName() + "\n";
+//	}
+//	mb.setDetailedText(detailedText.trimmed());
+
+//	mb.setIcon(QMessageBox::Question);
+//	mb.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+
+//	if (int mbResult = mb.exec();
+//		mbResult == QMessageBox::Cancel)
+//	{
+//		return;
+//	}
+
+//	// --
+//	//
+//	bool ok = db()->deleteFiles(&deleteFiles, this);
+//	if (ok == false)
+//	{
+//		return;
+//	}
+
+//	ok = m_filesView->filesModel().deleteFiles(selectedIndexes, deleteFiles);
+//	if (ok == false)
+//	{
+//		return;
+//	}
+
+//	// Update open tab pages
+//	//
+//	for (auto editWidget : m_openedFiles)
+//	{
+//		assert(editWidget);
+
+//		for (std::shared_ptr<DbFileInfo> fi : deleteFiles)
+//		{
+//			if (editWidget->fileInfo().fileId() == fi->fileId() && editWidget->readOnly() == false)
+//			{
+//				editWidget->setReadOnly(true);
+//				editWidget->setFileInfo(*(fi.get()));
+//				editWidget->setPageTitle();
+//				break;
+//			}
+//		}
+//	}
+
+//	return;
 }
 
 void SchemaControlTabPageEx::checkOutFiles()

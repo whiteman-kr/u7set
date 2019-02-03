@@ -208,6 +208,7 @@ public:
 	QAction* m_viewAction = nullptr;
 	QAction* m_cloneFileAction = nullptr;
 	QAction* m_deleteAction = nullptr;
+	QAction* m_moveFileAction = nullptr;
 
 	// --
 	QAction* m_checkOutAction = nullptr;
@@ -282,6 +283,7 @@ protected slots:
 
 	void cloneFile();
 	void deleteFiles();
+	void moveFiles();
 
 	void checkOutFiles();
 	void checkInFiles();

@@ -58,6 +58,7 @@ DECLARE
     file_name text;
     user_id integer;
     file_user_id integer;
+    initial_file_id int;            -- This file id when file was checked out or created, as two move opeartion can take place during singles checkout we don't want to spoil initial file id ( If FileInstance.BeforeMoveFileID != -1) then initial_file_id = FileInstance.BeforeMoveFileID;
 	new_file_id int;
 	move_from_parent_id int;
 	fileinstance_uuid uuid;
@@ -117,6 +118,18 @@ BEGIN
 		RAISE 'User % has no right to perform operation.', user_id;
 	END IF;
 
+	-- This file id when file was checked out or created, as two move opeartion can take place during singles checkout we don't want to spoil initial file id 
+	-- If FileInstance.BeforeMoveFileID != -1) then initial_file_id = FileInstance.BeforeMoveFileID;
+	--
+	initial_file_id := (SELECT BeforeMoveFileID FROM FileInstance WHERE FileID = file_id AND ChangesetID IS NULL);
+	IF (initial_file_id = -1) THEN
+        initial_file_id := file_id;
+	END IF;
+
+	IF ((SELECT MovedFromParentID FROM FileInstance WHERE FileID = file_id AND ChangesetID IS NULL) <> -1) THEN
+        move_from_parent_id := (SELECT MovedFromParentID FROM FileInstance WHERE FileID = file_id AND ChangesetID IS NULL);  -- If two move oparations were, then take initaial move_from_parent_id
+    END IF;
+
     -- Create the new record in Files table, with the new FileID
     --
     INSERT INTO File (Name, Created, ParentID, Deleted, CheckedInInstanceId, CheckedOutInstanceID, Attributes) 
@@ -141,7 +154,7 @@ BEGIN
         SET 
             MovedFromParentID = move_from_parent_id,
             MovedToParentID = move_to_parent_id,
-            BeforeMoveFileID = file_id,
+            BeforeMoveFileID = initial_file_id, 
             MoveText = move_text
         WHERE FileInstanceID = fileinstance_uuid;
 
