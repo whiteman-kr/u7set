@@ -191,7 +191,7 @@ private:
 
 	TuningValueType			m_type = TuningValueType::Discrete;
 	Hash					m_signalHash;
-	double					m_value;
+	QVariant				m_value;
 
 public:
 
@@ -202,8 +202,8 @@ public:
 	Hash					signalHash() const { return m_signalHash; }
 	void					setSignalHash(Hash hash) { m_signalHash = hash; }
 
-	double					value() const { return m_value; }
-	void					setValue(double value) { m_value = value; }
+	QVariant				value() const { return m_value; }
+	void					setValue(QVariant value) { m_value = value; }
 };
 
 // ==============================================================================================
