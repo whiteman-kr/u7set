@@ -6,8 +6,6 @@
 //
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalBase theSignalBase;
-
 SignalBase::SignalBase(QObject *parent) :
 	QObject(parent)
 {

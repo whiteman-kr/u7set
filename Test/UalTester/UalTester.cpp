@@ -200,7 +200,7 @@ bool UalTester::runCfgLoaderThread()
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &UalTester::slot_configurationReceived);
 
-	connect(this, &UalTester::signal_configurationParsed, this, &UalTester::slot_prepareToStartTest);
+	connect(this, &UalTester::signal_configurationParsed, this, &UalTester::slot_parseTestFile);
 
 	m_cfgLoaderThread->start();
 	m_cfgLoaderThread->enableDownloadConfiguration();
@@ -223,11 +223,6 @@ void UalTester::stopCfgLoaderThread()
 bool UalTester::start()
 {
 	if (cmdLineParamsIsValid() == false)
-	{
-		return false;
-	}
-
-	if (parseTestFile()  == false)
 	{
 		return false;
 	}
@@ -338,21 +333,67 @@ bool UalTester::readAppSignals(const QByteArray& cfgFileData)
 			continue;
 		}
 
-		theSignalBase.appendSignal(signal);
+		m_signalBase.appendSignal(signal);
 	}
 
-	if (theSignalBase.signalCount() == 0)
+	if (m_signalBase.signalCount() == 0)
 	{
-		qDebug() << "Error: Configuration does not contain any signals from AppDataSrv";
+		qDebug() << "Error: Configuration does not contain any signals for AppDataSrv";
 		return false;
 	}
 
 	return true;
 }
 
+bool UalTester::parseTestFile()
+{
+	qDebug() << "Parse test file:" << m_testFileName;
+
+	m_testfile.setFileName(m_testFileName);
+	if (m_testfile.open() == false)
+	{
+		return false;
+	}
+
+	m_testfile.setSignalBase(&m_signalBase);
+
+	if (m_testfile.parse() == false)
+	{
+		m_testfile.close();
+		return false;
+	}
+
+	m_testfile.close();
+
+	qDebug() << "Test file was parsed successfully";
+
+	return true;
+}
+
+void UalTester::slot_parseTestFile()
+{
+	// parse Test file
+	//
+	if (parseTestFile() == false)
+	{
+		return;
+	}
+
+	// run sockets to get AppSignalState and to set TuningState
+	//
+	if (runSockets() == false)
+	{
+		return;
+	}
+
+	connect(this, &UalTester::signal_socketsConnected, this, &UalTester::slot_socketsConnected);
+
+	runWaitSocketsConnectionTimer();
+}
+
 bool UalTester::runSignalStateThread()
 {
-	m_pSignalStateSocket = new SignalStateSocket(m_softwareInfo, m_cfgSettings.appDataService_clientRequestIP);
+	m_pSignalStateSocket = new SignalStateSocket(m_softwareInfo, m_cfgSettings.appDataService_clientRequestIP, &m_signalBase);
 	if (m_pSignalStateSocket == nullptr)
 	{
 		return false;
@@ -398,100 +439,66 @@ bool UalTester::runTuningThread()
 {
 	// init tuning socket thread - TuningSrv
 	//
+	m_pTuningSocket = new TuningSocket(m_softwareInfo, m_cfgSettings.tuningService_clientRequestIP, &m_tuningBase);
+	if (m_pTuningSocket == nullptr)
+	{
+		return false;
+	}
 
-	//	m_pTuningSocket = new TuningSocket(m_softwareInfo, m_cfgSettings.tuningService_clientRequestIP);
-	//	if (m_pTuningSocket == nullptr)
-	//	{
-	//		return false;
-	//	}
+	m_pTuningSocketThread = new SimpleThread(m_pTuningSocket);
+	if (m_pTuningSocketThread == nullptr)
+	{
+		return false;
+	}
 
-	//	m_pTuningSocketThread = new SimpleThread(m_pTuningSocket);
-	//	if (m_pTuningSocketThread == nullptr)
-	//	{
-	//		return false;
-	//	}
-
-	//	m_pTuningSocketThread->start();
+	m_pTuningSocketThread->start();
 
 	return true;
 }
 
 void UalTester::stopTuningThread()
 {
-//	if (m_pTuningSocketThread != nullptr)
-//	{
-//		m_pTuningSocketThread->quitAndWait(10000);
-//		delete m_pTuningSocketThread;
-//		m_pTuningSocketThread = nullptr;
-//	}
+	if (m_pTuningSocketThread != nullptr)
+	{
+		m_pTuningSocketThread->quitAndWait(10000);
+		delete m_pTuningSocketThread;
+		m_pTuningSocketThread = nullptr;
+	}
 }
 
 bool UalTester::tuningSocketIsConnected()
 {
-//	if (m_pTuningSocket == nullptr || m_pTuningSocketThread == nullptr)
-//	{
-//		return false;
-//	}
+	if (m_pTuningSocket == nullptr || m_pTuningSocketThread == nullptr)
+	{
+		return false;
+	}
 
-//	if (m_pTuningSocket->isConnected() == false)
-//	{
-//		return false;
-//	}
+	if (m_pTuningSocket->isConnected() == false)
+	{
+		return false;
+	}
 
 	return true;
 }
 
-void UalTester::slot_prepareToStartTest()
+bool UalTester::runSockets()
 {
-	//
-	//
-	if (testSignalListIsValid() == false)
-	{
-		return;
-	}
-
-	// run sockets to get AppSignalState and to set TuningState
-	//
-	connect(this, &UalTester::signal_socketsConnected, this, &UalTester::slot_socketsConnected);
-
-	runWaitSocketsConnectionTimer();
-
-	// init signal state socket thread - connect to AppDataSrv
+	// run signal state socket thread - connect to AppDataSrv
 	//
 	if (runSignalStateThread() == false)
 	{
-		return;
+		qDebug() << "Error: Signal state socket did not run";
+		return false;
 	}
 
-	// init tuning socket thread - connect to TuningSrv
+	// run tuning socket thread - connect to TuningSrv
 	//
 	if (runTuningThread() == false)
 	{
-		return;
-	}
-}
-
-bool UalTester::parseTestFile()
-{
-	m_testfile.setFileName(m_testFileName);
-	if (m_testfile.open() == false)
-	{
+		qDebug() << "Error: Tuning socket did not run";
 		return false;
 	}
 
-	if (m_testfile.parse() == false)
-	{
-		m_testfile.close();
-		return false;
-	}
-
-	m_testfile.close();
-
-	return true;
-}
-
-bool UalTester::testSignalListIsValid()
-{
 	return true;
 }
 
@@ -516,7 +523,7 @@ void UalTester::slot_waitSocketsConnection()
 
 void UalTester::slot_socketsConnected()
 {
-	qDebug() << "Start test file";
+	qDebug() << "Run test file";
 }
 
 

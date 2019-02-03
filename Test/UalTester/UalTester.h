@@ -7,8 +7,10 @@
 #include "../../lib/ServiceSettings.h"
 
 #include "SignalBase.h"
+#include "TuningSignalBase.h"
 #include "TestFile.h"
 #include "SignalStateSocket.h"
+#include "TuningSocket.h"
 
 class UalTester : public QObject
 {
@@ -56,6 +58,9 @@ private:
 	void getCmdLineParams(int& argc, char** argv);
 	bool cmdLineParamsIsValid();
 
+	SignalBase m_signalBase;
+	TuningBase m_tuningBase;
+
 	SoftwareInfo m_softwareInfo;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
@@ -68,7 +73,6 @@ private:
 
 	TestFile m_testfile;
 	bool parseTestFile();
-	bool testSignalListIsValid();
 
 	SignalStateSocket* m_pSignalStateSocket = nullptr;
 	SimpleThread* m_pSignalStateSocketThread = nullptr;
@@ -76,11 +80,13 @@ private:
 	void stopSignalStateThread();
 	bool signalStateSocketIsConnected();
 
+	TuningSocket* m_pTuningSocket = nullptr;
 	SimpleThread* m_pTuningSocketThread = nullptr;
 	bool runTuningThread();
 	void stopTuningThread();
 	bool tuningSocketIsConnected();
 
+	bool runSockets();
 	QTimer m_waitSocketsConnectionTimer;
 	void runWaitSocketsConnectionTimer();
 
@@ -96,7 +102,7 @@ signals:
 private slots:
 
 	void slot_configurationReceived(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
-	void slot_prepareToStartTest();
+	void slot_parseTestFile();
 
 	void slot_waitSocketsConnection();
 	void slot_socketsConnected();

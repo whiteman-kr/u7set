@@ -1,24 +1,14 @@
 #include "SignalStateSocket.h"
 
-#include <assert.h>
-
-#include "SignalBase.h"
-
 // -------------------------------------------------------------------------------------------------------------------
 //
 // SignalStateSocket class implementation
 //
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalStateSocket::SignalStateSocket(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort) :
-	Tcp::Client(softwareInfo, serverAddressPort)
-{
-}
-
-SignalStateSocket::SignalStateSocket(const SoftwareInfo& softwareInfo,
-						   const HostAddressPort& serverAddressPort1,
-						   const HostAddressPort& serverAddressPort2) :
-	Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2)
+SignalStateSocket::SignalStateSocket(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort, SignalBase* pSignalBase)
+	: Tcp::Client(softwareInfo, serverAddressPort)
+	, m_pSignalBase(pSignalBase)
 {
 }
 
@@ -70,11 +60,17 @@ void SignalStateSocket::processReply(quint32 requestID, const char* replyData, q
 
 void SignalStateSocket::requestSignalState()
 {
+	if (m_pSignalBase == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
 	assert(isClearToSendRequest());
 
 	QThread::msleep(SIGNAL_SOCKET_TIMEOUT_STATE);
 
-	int hashCount = theSignalBase.hashForRequestStateCount();
+	int hashCount = m_pSignalBase->hashForRequestStateCount();
 
 	m_getSignalStateRequest.mutable_signalhashes()->Clear();
 	m_getSignalStateRequest.mutable_signalhashes()->Reserve(SIGNAL_SOCKET_MAX_READ_SIGNAL);
@@ -89,7 +85,7 @@ void SignalStateSocket::requestSignalState()
 			break;
 		}
 
-		Hash hash = theSignalBase.hashForRequestState(i + startIndex);
+		Hash hash = m_pSignalBase->hashForRequestState(i + startIndex);
 		if (hash == 0)
 		{
 			assert(hash != 0);
@@ -106,6 +102,12 @@ void SignalStateSocket::requestSignalState()
 
 void SignalStateSocket::replySignalState(const char* replyData, quint32 replyDataSize)
 {
+	if (m_pSignalBase == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
 	if (replyData == nullptr)
 	{
 		assert(replyData);
@@ -145,7 +147,7 @@ void SignalStateSocket::replySignalState(const char* replyData, quint32 replyDat
 		//appState.m_flags.valid = 1;
 		//appState.m_value = 2.5;
 
-		 theSignalBase.setSignalState(hash, appState);
+		 m_pSignalBase->setSignalState(hash, appState);
 	}
 
 	requestSignalState();

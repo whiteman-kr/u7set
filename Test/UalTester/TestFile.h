@@ -4,9 +4,11 @@
 #include <QObject>
 #include <QFile>
 
+#include "SignalBase.h"
+
 // ==============================================================================================
 
-const char* const TF_Cmd[] =
+const char* const TestFileCmd[] =
 {
 				QT_TRANSLATE_NOOP("TestFile.h", ""),
 				QT_TRANSLATE_NOOP("TestFile.h", "test"),
@@ -21,7 +23,7 @@ const char* const TF_Cmd[] =
 				QT_TRANSLATE_NOOP("TestFile.h", "delay"),
 };
 
-const int		TF_CMD_COUNT = sizeof(TF_Cmd)/sizeof(TF_Cmd[0]);
+const int		TF_CMD_COUNT = sizeof(TestFileCmd)/sizeof(TestFileCmd[0]);
 
 const int		TF_CMD_UNKNOWN = -1,
 				TF_CMD_EMPTY = 0,
@@ -38,54 +40,105 @@ const int		TF_CMD_UNKNOWN = -1,
 
 // ==============================================================================================
 
-class TestFileLine
+enum class TestCmdParamType
+{
+	Undefined,
+	Discrete,
+	SignedInt32,
+	SignedInt64,
+	Float,
+	Double,
+	String
+};
+
+class TestCmdParam
 {
 
 public:
 
-	explicit TestFileLine(int number, const QString& line);
-	virtual ~TestFileLine();
+	TestCmdParam() { clear(); }
+	TestCmdParam(const TestCmdParam& from) { *this = from; }
+	virtual ~TestCmdParam() {}
 
 private:
 
-	int m_number = -1;
-	QString m_line;
-
-	int m_cmdType = TF_CMD_UNKNOWN;
-
-	QString m_testID;
-	QString m_testDescription;
-	QString m_schemaID;
-	QStringList m_compatibleList;
-	int m_delay_ms;
-
-	QString m_errorStr;
+	QString m_name;
+	TestCmdParamType m_type = TestCmdParamType::Undefined;
+	QVariant m_value;
 
 public:
 
-	//
-	//
+	QString name() const { return m_name; }
+	void setName(const QString& name) { m_name = name; }
+
+	TestCmdParamType type() const { return m_type; }
+	void setType(TestCmdParamType type) { m_type = type; }
+
+	QVariant value() const { return m_value; }
+	void setValue(const QVariant& value) { m_value = value; }
+
+	void clear()
+	{
+		m_name.clear();
+		m_type = TestCmdParamType::Undefined;
+		m_value.clear();
+	}
+
+	TestCmdParam& operator=(const TestCmdParam& from)
+	{
+		m_name = from.m_name;
+		m_type = from.m_type;
+		m_value = from.m_value;
+
+		return *this;
+	}
+};
+
+// ==============================================================================================
+
+class TestCommand
+{
+
+public:
+
+	TestCommand();
+	explicit TestCommand(SignalBase* pSignalBase);
+	virtual ~TestCommand();
+
+private:
+
+	SignalBase* m_pSignalBase = nullptr;
+
+	int m_lineIndex;
+	bool m_foundEndOfTest;
+
+	int m_cmdType = TF_CMD_UNKNOWN;
+	QVector<TestCmdParam> m_paramList;
+
+	QString m_line;
+	QStringList m_errorList;
+
+public:
+
+	int lineIndex() { return m_lineIndex; }
+	bool foundEndOfTest() { return m_foundEndOfTest; }
+
 	int cmdType() const { return m_cmdType; }
-
-	QString testID() const { return m_testID; }
-	QString testDescription() const { return m_testDescription; }
-	QString schemaID() const { return m_schemaID; }
-	const QStringList& compatibleList() const { return m_compatibleList; }
-	int delay_ms() const { return m_delay_ms; }
-
-	//
-	//
 	int getCmdType(const QString& line);
 
-	QString parse();
-	QString parseCmdTest();
-	QString parseCmdSchema();
-	QString parseCmdCompatible();
-	//QString parseCmdConst();
-	//QString parseCmdVar();
-	QString parseCmdSet();
-	//QString parseCmdCheck();
-	QString parseCmdDelay();
+	bool parse(const QString& line);
+	bool parseCmdTest();
+	bool parseCmdEndtest();
+	bool parseCmdSchema();
+	bool parseCmdCompatible();
+	bool parseCmdConst();
+	bool parseCmdVar();
+	bool parseCmdSet();
+	bool parseCmdCheck();
+	bool parseCmdDelay();
+
+	const QVector<TestCmdParam>& paramList() const { return m_paramList; }
+	const QStringList& errorList() const { return m_errorList; }
 };
 
 // ==============================================================================================
@@ -102,30 +155,34 @@ public:
 private:
 
 	QString m_fileName;
-
 	QFile m_file;
 
-	int m_lineNumber = 0;
+	SignalBase* m_pSignalBase = nullptr;
 
-	bool m_foundEndOfTest = true;
-	int m_foundEndOfComment = -1;
+	int m_lineIndex = 0;
 
-
-	QStringList m_commandList;
+	QVector<TestCommand> m_commandList;
 	QStringList m_errorList;
-	QStringList m_testSignalList;
+
+	void printErrorlist();
 
 public:
 
+	//
+	//
 	QString fileName() const { return m_fileName; }
 	void setFileName(const QString& fileName) { m_fileName = fileName; }
 
-	const QStringList& testSignalList() const { return m_testSignalList; }
+	SignalBase* signalBase() const { return m_pSignalBase; }
+	void setSignalBase(SignalBase* pSignalBase) { m_pSignalBase = pSignalBase; }
 
-
+	//
+	//
 	bool open();
 	bool parse();
 	void close();
+
+	void run();
 
 signals:
 

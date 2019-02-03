@@ -1,6 +1,7 @@
 #ifndef SIGNALSOCKET_H
 #define SIGNALSOCKET_H
 
+#include <assert.h>
 
 #include "../../lib/Tcp.h"
 #include "../../lib/SocketIO.h"
@@ -8,6 +9,8 @@
 #include "../../lib/AppSignal.h"
 
 #include "../../Proto/network.pb.h"
+
+#include "SignalBase.h"
 
 // ==============================================================================================
 
@@ -25,16 +28,12 @@ class SignalStateSocket : public Tcp::Client
 
 public:
 
-	SignalStateSocket(const SoftwareInfo& softwareInfo,
-				 const HostAddressPort& serverAddressPort);
-
-	SignalStateSocket(const SoftwareInfo& softwareInfo,
-				 const HostAddressPort& serverAddressPort1,
-				 const HostAddressPort& serverAddressPort2);
-
+	SignalStateSocket(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort, SignalBase* pSignalBase);
 	virtual ~SignalStateSocket();
 
 private:
+
+	SignalBase* m_pSignalBase = nullptr;
 
 	// protobuf messages
 	//

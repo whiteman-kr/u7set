@@ -61,7 +61,9 @@ SOURCES += \
     ../../lib/TuningValue.cpp \
     ../../lib/SignalProperties.cpp \
     SignalBase.cpp \
-    TestFile.cpp
+    TestFile.cpp \
+    TuningSocket.cpp \
+    TuningSignalBase.cpp
 
 
 HEADERS += \
@@ -99,7 +101,9 @@ HEADERS += \
     ../../lib/TuningValue.h \
     ../../lib/SignalProperties.h \
     SignalBase.h \
-    TestFile.h
+    TestFile.h \
+    TuningSocket.h \
+    TuningSignalBase.h
 
 
 
