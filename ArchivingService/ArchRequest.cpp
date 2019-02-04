@@ -28,7 +28,7 @@ ArchFileToRead::~ArchFileToRead()
 
 void ArchFileToRead::findData()
 {
-	getArchPartitionsInfo();
+	m_partitionsInfo = ArchFile::getArchPartitionsInfo(m_archFilePath);
 
 	if (m_partitionsInfo.count() == 0)
 	{
@@ -54,7 +54,7 @@ void ArchFileToRead::findData()
 	}
 }
 
-ArchFileToRead::PartitionInfo ArchFileToRead::partitionToReadInfo()
+ArchFilePartition::Info ArchFileToRead::partitionToReadInfo()
 {
 	if (m_partitionToReadIndex >= 0 && m_partitionToReadIndex < m_partitionsInfo.count())
 	{
@@ -63,7 +63,7 @@ ArchFileToRead::PartitionInfo ArchFileToRead::partitionToReadInfo()
 
 	assert(false);
 
-	return PartitionInfo();
+	return ArchFilePartition::Info();
 }
 
 bool ArchFileToRead::fillBuffer()
@@ -140,50 +140,6 @@ bool ArchFileToRead::gotoNextRecord()
 	return true;
 }
 
-void ArchFileToRead::getArchPartitionsInfo()
-{
-	m_partitionsInfo.clear();
-
-	// Arch file name format: 2018_12_31_23_59.saf (year_month_day_hour_minute.saf)
-
-	QRegExp archFileNameTemplate(QString("2[0-9][0-9][0-9]_[0-1][0-9]_[0-3][0-9]_[0-2][0-9]_[0-5][0-9].%1").arg(ArchFile::EXTENSION));
-
-	QDirIterator di(m_archFilePath, QDir::Files);
-
-	while(di.hasNext() == true)
-	{
-		QString nextFilePath = di.next();
-
-		if (nextFilePath.isEmpty() == true)
-		{
-			break;
-		}
-
-		QFileInfo fi = di.fileInfo();
-
-		if (fi.isFile() == false &&
-			fi.fileName().contains(archFileNameTemplate) == false)
-		{
-			continue;
-		}
-
-		PartitionInfo pi;
-
-		pi.fileName = fi.fileName();
-
-		int year = pi.fileName.mid(0, 4).toInt();
-		int month = pi.fileName.mid(5, 2).toInt();
-		int day = pi.fileName.mid(8, 2).toInt();
-		int hour = pi.fileName.mid(11, 2).toInt();
-		int minute = pi.fileName.mid(14, 2).toInt();
-
-		pi.date = QDateTime(QDate(year, month, day), QTime(hour, minute, 0, 0), Qt::TimeSpec::UTC);
-		pi.startTime = pi.date.toMSecsSinceEpoch();
-
-		m_partitionsInfo.append(pi);
-	}
-}
-
 void ArchFileToRead::findStartPosition()
 {
 	m_findResult = openPartitionToStartReading();
@@ -248,7 +204,7 @@ ArchFindResult ArchFileToRead::openPartitionToStartReading()
 
 	for(int i = 1 /* it is Ok */ ; i < partitionsCount; i++)
 	{
-		const PartitionInfo& pi = m_partitionsInfo[i];
+		const ArchFilePartition::Info& pi = m_partitionsInfo[i];
 
 		if (pi.startTime >= sysTimeToFindPartition)
 		{
@@ -263,7 +219,7 @@ ArchFindResult ArchFileToRead::openPartitionToStartReading()
 
 	do
 	{
-		PartitionInfo pi = m_partitionsInfo[m_partitionToReadIndex];
+		ArchFilePartition::Info pi = m_partitionsInfo[m_partitionToReadIndex];
 
 		int moveDirection = 1;
 

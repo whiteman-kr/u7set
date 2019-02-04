@@ -47,6 +47,17 @@ enum class ArchFindResult
 class ArchFilePartition
 {
 public:
+	struct Info
+	{
+		int index = -1;
+		QString fileName;
+		QDateTime date;
+		qint64 startTime = 0;
+		ArchFileRecord firstRecord;
+		ArchFileRecord lastRecord;
+	};
+
+public:
 	ArchFilePartition();
 
 	void init(const QString& archFilePath, bool writable);
@@ -96,6 +107,8 @@ private:
 	static const qint64 LAST_RECORD = -1;
 };
 
+inline bool operator < (const ArchFilePartition::Info& p1, const ArchFilePartition::Info& p2) { return p1.startTime < p2.startTime; }
+
 class ArchFile
 {
 public:
@@ -124,6 +137,8 @@ public:
 	bool queueIsEmpty() const { return m_queue->isEmpty(); }
 	bool isEmergency() const;
 	QString path() const { return m_path; }
+
+	static QVector<ArchFilePartition::Info> getArchPartitionsInfo(const QString& path);
 
 	void shutdown(qint64 curPartition, qint64* totalFlushedStatesCount);
 

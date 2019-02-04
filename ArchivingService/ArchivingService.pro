@@ -74,7 +74,8 @@ SOURCES += \
     FileArchReader.cpp \
     ArchFile.cpp \
     ArchWriterThread.cpp \
-    ArchRequest.cpp
+    ArchRequest.cpp \
+    ArchMaintenance.cpp
 
 HEADERS += \
     ../lib/HostAddressPort.h \
@@ -122,7 +123,8 @@ HEADERS += \
     ArchFile.h \
     BinSearch.h \
     ArchWriterThread.h \
-    ArchRequest.h
+    ArchRequest.h \
+    ArchMaintenance.h
 
 include(../qtservice/src/qtservice.pri)
 

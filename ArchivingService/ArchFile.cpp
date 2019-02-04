@@ -618,6 +618,52 @@ bool ArchFile::isEmergency() const
 	return m_queue->size() >= static_cast<int>(m_queue->queueSize() * QUEUE_EMERGENCY_LIMIT);
 }
 
+QVector<ArchFilePartition::Info> ArchFile::getArchPartitionsInfo(const QString& path)
+{
+	QVector<ArchFilePartition::Info> partitionsInfo;
+
+	// Arch file name format: 2018_12_31_23_59.saf (year_month_day_hour_minute.saf)
+
+	QRegExp archFileNameTemplate(QString("2[0-9][0-9][0-9]_[0-1][0-9]_[0-3][0-9]_[0-2][0-9]_[0-5][0-9].%1").arg(ArchFile::EXTENSION));
+
+	QDirIterator di(path, QDir::Files);
+
+	while(di.hasNext() == true)
+	{
+		QString nextFilePath = di.next();
+
+		if (nextFilePath.isEmpty() == true)
+		{
+			break;
+		}
+
+		QFileInfo fi = di.fileInfo();
+
+		if (fi.isFile() == false &&
+			fi.fileName().contains(archFileNameTemplate) == false)
+		{
+			continue;
+		}
+
+		ArchFilePartition::Info pi;
+
+		pi.fileName = fi.fileName();
+
+		int year = pi.fileName.mid(0, 4).toInt();
+		int month = pi.fileName.mid(5, 2).toInt();
+		int day = pi.fileName.mid(8, 2).toInt();
+		int hour = pi.fileName.mid(11, 2).toInt();
+		int minute = pi.fileName.mid(14, 2).toInt();
+
+		pi.date = QDateTime(QDate(year, month, day), QTime(hour, minute, 0, 0), Qt::TimeSpec::UTC);
+		pi.startTime = pi.date.toMSecsSinceEpoch();
+
+		partitionsInfo.append(pi);
+	}
+
+	return partitionsInfo;
+}
+
 void ArchFile::shutdown(qint64 curPartition, qint64* totalFlushedStatesCount)
 {
 	flush(curPartition, totalFlushedStatesCount, true);

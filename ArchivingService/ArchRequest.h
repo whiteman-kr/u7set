@@ -47,23 +47,12 @@ private:
 class ArchFileToRead
 {
 public:
-	struct PartitionInfo
-	{
-		int index = -1;
-		QString fileName;
-		QDateTime date;
-		qint64 startTime = 0;
-		ArchFileRecord firstRecord;
-		ArchFileRecord lastRecord;
-	};
-
-public:
 	ArchFileToRead(const ArchFile& archFile, const ArchRequestParam& param);
 	~ArchFileToRead();
 
 	void findData();
 
-	PartitionInfo partitionToReadInfo();
+	ArchFilePartition::Info partitionToReadInfo();
 
 	bool fillBuffer();
 	bool getRecord(Hash* signalHash, ArchFileRecord* record);
@@ -91,8 +80,7 @@ private:
 
 	//
 
-	QVector<PartitionInfo> m_partitionsInfo;
-
+	QVector<ArchFilePartition::Info> m_partitionsInfo;
 	int m_partitionToReadIndex = -1;
 	ArchFilePartition m_partitionToRead;
 	qint64 m_startReadFromRecord = -1;
@@ -109,7 +97,6 @@ private:
 	bool m_hasDataToRead = true;
 };
 
-inline bool operator < (const ArchFileToRead::PartitionInfo& p1, const ArchFileToRead::PartitionInfo& p2) { return p1.startTime < p2.startTime; }
 
 //
 
