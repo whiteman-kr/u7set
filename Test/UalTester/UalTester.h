@@ -97,7 +97,7 @@ public:
 signals:
 
 	void signal_configurationParsed();
-	void signal_socketsConnected();
+	void signal_socketsReady();
 
 private slots:
 
@@ -105,7 +105,7 @@ private slots:
 	void slot_parseTestFile();
 
 	void slot_waitSocketsConnection();
-	void slot_socketsConnected();
+	void slot_socketsReady();
 
 public slots:
 

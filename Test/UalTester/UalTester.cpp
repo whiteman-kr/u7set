@@ -284,11 +284,8 @@ void UalTester::slot_configurationReceived(const QByteArray configurationXmlData
 	{
 		return;
 	}
-	else
-	{
-		qDebug() << "Configuration was read successfully";
-		emit signal_configurationParsed();
-	}
+
+	emit signal_configurationParsed();
 
 	return;
 }
@@ -302,6 +299,8 @@ bool UalTester::readConfiguration(const QByteArray& cfgFileData)
 		qDebug() << "Error: Configuration settings are not valid";
 		return false;
 	}
+
+	qDebug() << "Configuration was read successfully";
 
 	return true;
 }
@@ -341,6 +340,8 @@ bool UalTester::readAppSignals(const QByteArray& cfgFileData)
 		qDebug() << "Error: Configuration does not contain any signals for AppDataSrv";
 		return false;
 	}
+
+	qDebug() << "Loaded signals:" << m_signalBase.signalCount();
 
 	return true;
 }
@@ -386,7 +387,7 @@ void UalTester::slot_parseTestFile()
 		return;
 	}
 
-	connect(this, &UalTester::signal_socketsConnected, this, &UalTester::slot_socketsConnected);
+	connect(this, &UalTester::signal_socketsReady, this, &UalTester::slot_socketsReady);
 
 	runWaitSocketsConnectionTimer();
 }
@@ -483,16 +484,20 @@ bool UalTester::tuningSocketIsConnected()
 
 bool UalTester::runSockets()
 {
+	qDebug() << "Waiting connect to AppDataSrv and TuningSrv";
+
 	// run signal state socket thread - connect to AppDataSrv
 	//
+	qDebug() << "Run connect to AppDataSrv";
 	if (runSignalStateThread() == false)
 	{
 		qDebug() << "Error: Signal state socket did not run";
 		return false;
 	}
 
-	// run tuning socket thread - connect to TuningSrv
+	// run connect to TuningSrv
 	//
+	qDebug() << "Run connect to TuningSrv";
 	if (runTuningThread() == false)
 	{
 		qDebug() << "Error: Tuning socket did not run";
@@ -518,12 +523,22 @@ void UalTester::slot_waitSocketsConnection()
 
 	m_waitSocketsConnectionTimer.stop();
 
-	emit signal_socketsConnected();
+	emit signal_socketsReady();
 }
 
-void UalTester::slot_socketsConnected()
+void UalTester::slot_socketsReady()
 {
 	qDebug() << "Run test file";
+
+	int cmdCount = m_testfile.cmdCount();
+	for(int i = 0; i < cmdCount; i++)
+	{
+		TestCommand cmd = m_testfile.cmd(i);
+		if (cmd.type() == TF_CMD_UNKNOWN)
+		{
+			continue;
+		}
+	}
 }
 
 

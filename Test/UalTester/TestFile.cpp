@@ -7,6 +7,10 @@
 //
 // -------------------------------------------------------------------------------------------------------------------
 
+const char* const TestCommand::PARAM_TEST_ID = "TestID";
+const char* const TestCommand::PARAM_TEST_DESCRIPTION = "TestDescription";
+const char* const TestCommand::PARAM_SCHEMA_ID = "SchemaID";
+
 TestCommand::TestCommand()
 {
 }
@@ -73,8 +77,8 @@ bool TestCommand::parse(const QString& line)
 
 	// parse line
 	//
-	m_cmdType = getCmdType(m_line);
-	if (m_cmdType < 0 || m_cmdType >= TF_CMD_COUNT)
+	m_type = getCmdType(m_line);
+	if (m_type < 0 || m_type >= TF_CMD_COUNT)
 	{
 		QString errorStr = QString("(%1) Error : Failed command - %2").arg(m_lineIndex).arg(m_line);
 		m_errorList.append(errorStr);
@@ -83,7 +87,7 @@ bool TestCommand::parse(const QString& line)
 
 	bool resultCmd = true;
 
-	switch (m_cmdType)
+	switch (m_type)
 	{
 		case TF_CMD_TEST:		resultCmd = parseCmdTest();			break;
 		case TF_CMD_ENDTEST:	resultCmd = parseCmdEndtest();		break;
@@ -129,7 +133,7 @@ bool TestCommand::parseCmdTest()
 		return false;
 	}
 
-	param.setName("TestID");
+	param.setName(PARAM_TEST_ID);
 	param.setType(TestCmdParamType::String);
 	param.setValue(testID);
 	m_paramList.append(param);
@@ -142,7 +146,7 @@ bool TestCommand::parseCmdTest()
 		return false;
 	}
 
-	param.setName("TestDescription");
+	param.setName(PARAM_TEST_DESCRIPTION);
 	param.setType(TestCmdParamType::String);
 	param.setValue(testDescription);
 	m_paramList.append(param);
@@ -192,7 +196,7 @@ bool TestCommand::parseCmdSchema()
 	}
 
 	TestCmdParam param;
-	param.setName("SchemaID");
+	param.setName(PARAM_SCHEMA_ID);
 	param.setType(TestCmdParamType::String);
 	param.setValue(schemaID);
 	m_paramList.append(param);
@@ -391,7 +395,7 @@ bool TestCommand::parseCmdSet()
 
 						default:
 
-							QString errorStr = QString("(%1) Error : Signal %2 failed type of signal (int or float) ").arg(m_lineIndex).arg(signalID);
+							QString errorStr = QString("(%1) Error : Signal %2 failed type of signal (int or float)").arg(m_lineIndex).arg(signalID);
 							m_errorList.append(errorStr);
 							continue;
 					}
@@ -731,7 +735,32 @@ void TestFile::close()
 	m_file.close();
 }
 
-void TestFile::run()
+int TestFile::cmdCount()
 {
+	int count = 0;
+
+	m_mutex.lock();
+
+		count = m_commandList.count();
+
+	m_mutex.unlock();
+
+	return count;
+}
+
+TestCommand TestFile::cmd(int index)
+{
+	TestCommand cmd;
+
+	m_mutex.lock();
+
+		if (index >= 0 && index < m_commandList.count())
+		{
+			cmd = m_commandList[index];
+		}
+
+	m_mutex.unlock();
+
+	return cmd;
 
 }

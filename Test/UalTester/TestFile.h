@@ -10,17 +10,17 @@
 
 const char* const TestFileCmd[] =
 {
-				QT_TRANSLATE_NOOP("TestFile.h", ""),
-				QT_TRANSLATE_NOOP("TestFile.h", "test"),
-				QT_TRANSLATE_NOOP("TestFile.h", "endtest"),
-				QT_TRANSLATE_NOOP("TestFile.h", "schema"),
-				QT_TRANSLATE_NOOP("TestFile.h", "compatible"),
-				QT_TRANSLATE_NOOP("TestFile.h", "const"),
-				QT_TRANSLATE_NOOP("TestFile.h", "var"),
-				QT_TRANSLATE_NOOP("TestFile.h", "set"),
-				QT_TRANSLATE_NOOP("TestFile.h", "check"),
-				QT_TRANSLATE_NOOP("TestFile.h", "apply"),
-				QT_TRANSLATE_NOOP("TestFile.h", "delay"),
+				"",
+				"test",
+				"endtest",
+				"schema",
+				"compatible",
+				"const",
+				"var",
+				"set",
+				"check",
+				"apply",
+				"delay",
 };
 
 const int		TF_CMD_COUNT = sizeof(TestFileCmd)/sizeof(TestFileCmd[0]);
@@ -107,12 +107,16 @@ public:
 
 private:
 
+	static const char* const PARAM_TEST_ID;
+	static const char* const PARAM_TEST_DESCRIPTION;
+	static const char* const PARAM_SCHEMA_ID;
+
 	SignalBase* m_pSignalBase = nullptr;
 
 	int m_lineIndex;
 	bool m_foundEndOfTest;
 
-	int m_cmdType = TF_CMD_UNKNOWN;
+	int m_type = TF_CMD_UNKNOWN;
 	QVector<TestCmdParam> m_paramList;
 
 	QString m_line;
@@ -123,7 +127,7 @@ public:
 	int lineIndex() { return m_lineIndex; }
 	bool foundEndOfTest() { return m_foundEndOfTest; }
 
-	int cmdType() const { return m_cmdType; }
+	int type() const { return m_type; }
 	int getCmdType(const QString& line);
 
 	bool parse(const QString& line);
@@ -154,12 +158,12 @@ public:
 
 private:
 
+	mutable QMutex m_mutex;
+
 	QString m_fileName;
 	QFile m_file;
 
 	SignalBase* m_pSignalBase = nullptr;
-
-	int m_lineIndex = 0;
 
 	QVector<TestCommand> m_commandList;
 	QStringList m_errorList;
@@ -182,7 +186,10 @@ public:
 	bool parse();
 	void close();
 
-	void run();
+	//
+	//
+	int cmdCount();
+	TestCommand cmd(int index);
 
 signals:
 
