@@ -2887,6 +2887,97 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 	return;
 }
 
+void DbWorker::slot_moveFiles(const std::vector<DbFileInfo>* files, int moveToParentId, std::vector<DbFileInfo>* movedFiles)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (movedFiles == nullptr)
+	{
+		assert(movedFiles != nullptr);
+		return;
+	}
+
+	if (files == nullptr ||
+		files->empty() == true ||
+		moveToParentId == DbFileInfo::Null)
+	{
+		assert(files != nullptr);
+		assert(files->empty() != true);
+		assert(moveToParentId != DbFileInfo::Null);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Database connection is not openned."));
+		return;
+	}
+
+	// Log action
+	//
+	QString logMessage = QString("slot_moveFiles: moveToParentId %1, FileCount %2, FileNames: ")
+							 .arg(moveToParentId)
+							 .arg(files->size());
+	for (auto& f : *files)
+	{
+		logMessage += f.fileName() + QLatin1String(" ");
+	}
+
+	addLogRecord(db, logMessage);
+
+	// Form request string
+	//
+	QString request = QString("SELECT * FROM api.move_files('%1', ARRAY[")
+									.arg(sessionKey());
+
+	for (auto it = files->begin(); it != files->end(); ++it)
+	{
+		if (it == files->begin())
+		{
+			request += QString("%1").arg(it->fileId());
+		}
+		else
+		{
+			request += QString(", %1").arg(it->fileId());
+		}
+	}
+
+	request += QString("], %1);").arg(moveToParentId);
+
+	// --
+	//
+	QSqlQuery q(db);
+	q.setForwardOnly(true);
+
+	if (bool result = q.exec(request);
+		result == false)
+	{
+		emitError(db, tr("Can't move file. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	movedFiles->clear();
+	movedFiles->reserve(files->size());
+
+	while (q.next())
+	{
+		DbFileInfo& fileInfo = movedFiles->emplace_back();
+		db_dbFileInfo(q, &fileInfo);	// FileID will be changed here
+	}
+
+	return;
+}
+
 void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out)
 {
 	// Init automitic varaiables

@@ -445,10 +445,10 @@ void FileTests::api_move_file()
 			QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 			QVERIFY2(query.next() == true, qPrintable(query.lastError().databaseText()));
 
-			ObjectState os;
-			DbWorker::db_objectState(query, &os);
+			DbFileInfo fi;
+			DbWorker::db_dbFileInfo(query, &fi);
 
-			int newFileId = os.id;
+			int newFileId = fi.fileId();
 			QVERIFY2(oldFileId < newFileId, "Expected new file id for moved file");
 
 			// Check table File, FileID = oldFileId must be removed

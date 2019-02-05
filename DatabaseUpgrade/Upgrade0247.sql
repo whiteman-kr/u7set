@@ -50,7 +50,7 @@ CREATE OR REPLACE FUNCTION api.move_file(
     session_key text,
     file_id integer,
     move_to_parent_id integer)
-    RETURNS objectstate AS
+  RETURNS dbfileinfo AS
 $BODY$
 DECLARE
     already_exists int;
@@ -63,7 +63,6 @@ DECLARE
 	move_from_parent_id int;
 	fileinstance_uuid uuid;
 	move_text text;
-	return_value ObjectState;
 BEGIN
     -- Check session_key and raise error if it is wrong
 	--
@@ -93,7 +92,7 @@ BEGIN
 	file_has_children := (SELECT COUNT(*) FROM File WHERE ParentID = file_id AND Deleted = FALSE);
 
 	IF (file_has_children > 0) THEN
-	    RAISE 'File % cnnot be moved as it has % child(ren)', file_name, file_has_children;
+	    RAISE 'File % cannot be moved as it has % child(ren)', file_name, file_has_children;
 	END IF;	
 
     -- Check if the destination file already exists
@@ -164,16 +163,43 @@ BEGIN
 
     -- That's it
     --
-    SELECT F.FileID, F.Deleted, true, FI.Action, CO.UserID, 0 
-        INTO return_value
-        FROM File F, FileInstance FI, CheckOut CO 
-        WHERE F.FileId = new_file_id AND FI.FileInstanceID = F.CheckedOutInstanceID AND CO.FileID = new_file_id;
-    
- 	RETURN return_value;
+    --SELECT F.FileID, F.Deleted, true, FI.Action, CO.UserID, 0 
+    --    INTO return_value
+    --    FROM File F, FileInstance FI, CheckOut CO 
+    --    WHERE F.FileId = new_file_id AND FI.FileInstanceID = F.CheckedOutInstanceID AND CO.FileID = new_file_id;
+
+    RETURN api.get_file_info(session_key, new_file_id);
 END
 $BODY$
 LANGUAGE plpgsql;
 
+
+CREATE OR REPLACE FUNCTION api.move_files(
+	session_key text,
+	file_ids integer[],
+	move_to_parent_id integer)
+	RETURNS SETOF dbfileinfo AS
+$BODY$
+DECLARE
+	file_id integer;
+	file_result dbfileinfo;
+BEGIN
+	-- Check session_key and raise error if it is wrong
+	--
+	PERFORM user_api.check_session_key(session_key, TRUE);
+
+	-- Move files
+	--
+	FOREACH file_id IN ARRAY file_ids
+	LOOP
+		file_result := api.move_file(session_key, file_id, move_to_parent_id);
+		RETURN NEXT file_result;
+	END LOOP;
+
+	RETURN;
+END
+$BODY$
+LANGUAGE plpgsql;
 
 
 CREATE OR REPLACE FUNCTION public.undo_changes(

@@ -510,8 +510,8 @@ std::pair<QModelIndex, bool> SchemaListModelEx::addFile(QModelIndex parentIndex,
 	return {addedModelIndex, true};
 }
 
-bool SchemaListModelEx::deleteFiles(const QModelIndexList& selectedIndexes,
-									const std::vector<std::shared_ptr<DbFileInfo>>& deletedFiles)
+bool SchemaListModelEx::deleteFilesUpdate(const QModelIndexList& selectedIndexes,
+										  const std::vector<std::shared_ptr<DbFileInfo>>& deletedFiles)
 {
 	std::vector<DbFileInfo> files;
 	files.reserve(deletedFiles.size());
@@ -522,6 +522,98 @@ bool SchemaListModelEx::deleteFiles(const QModelIndexList& selectedIndexes,
 	}
 
 	return updateFiles(selectedIndexes, files);
+}
+
+bool SchemaListModelEx::moveFilesUpdate(const QModelIndexList& selectedIndexes,
+										int movedToParnetId,
+										const std::vector<DbFileInfo>& movedFiles,
+										std::vector<QModelIndex>* addedFilesIndexes)
+{
+	if (addedFilesIndexes == nullptr)
+	{
+		assert(addedFilesIndexes);
+
+		refresh();
+		return false;
+	}
+
+	if (movedFiles.empty() == true)
+	{
+		assert(movedFiles.empty() == false);
+
+		refresh();
+		return false;
+	}
+
+	if (movedToParnetId == DbFileInfo::Null)
+	{
+		assert(movedToParnetId != DbFileInfo::Null);
+		refresh();
+		return false;
+	}
+
+	// Remove moved files
+	//
+	for (const QModelIndex& index : selectedIndexes)
+	{
+		int fileId = static_cast<int>(index.internalId());
+
+		QModelIndex pi = index.parent();
+		int childIndex = m_files.indexInParent(fileId);
+
+		beginRemoveRows(pi, childIndex, childIndex);
+		m_files.removeFile(fileId);
+		endRemoveRows();
+	}
+
+	// Get parent index where files were moved
+	//
+	QModelIndexList matched = match(index(0, 0),
+									Qt::UserRole,
+									QVariant::fromValue(movedToParnetId),
+									1,
+									Qt::MatchExactly | Qt::MatchRecursive);
+
+	if (matched.size() != 1)
+	{
+		// Cant find ModelIndex for parent
+		//
+		assert(matched.size() != 1);
+
+		// Mitigate error
+		//
+		refresh();
+		return false;
+	}
+
+	QModelIndex movedToParentIndex = matched.front();
+	assert(movedToParentIndex.isValid());
+
+	if (movedToParnetId != file(movedToParentIndex).fileId())
+	{
+		assert(movedToParnetId == file(movedToParentIndex).fileId());
+
+		refresh();
+		return false;
+	}
+
+	// Add moved files to destination index
+	//
+	for (const DbFileInfo& f : movedFiles)
+	{
+		auto[mi, ok] = addFile(movedToParentIndex, std::make_shared<DbFileInfo>(f));
+
+		if (ok == true)
+		{
+			addedFilesIndexes->push_back(mi);
+		}
+		else
+		{
+			assert(ok);
+		}
+	}
+
+	return true;
 }
 
 bool SchemaListModelEx::updateFiles(const QModelIndexList& selectedIndexes, const std::vector<DbFileInfo>& files)
@@ -1756,8 +1848,10 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 	addAction(m_searchAction);
 
 	m_searchEdit = new QLineEdit(this);
-	m_searchEdit->setPlaceholderText(tr("Search Text"));
+	m_searchEdit->setPlaceholderText(tr("Search or Filter Text"));
+	m_searchEdit->setClearButtonEnabled(true);
 	m_searchEdit->setMinimumWidth(400);
+
 
 	QStringList completerStringList = QSettings{}.value("SchemaControlTabPageEx/SearchCompleter").toStringList();
 	m_searchCompleter = new QCompleter(completerStringList, this);
@@ -2894,6 +2988,8 @@ void SchemaControlTabPageEx::cloneFile()
 
 	}
 
+	// Get folder for clonned schema
+	//
 	int parentFileId = showSelectFolderDialog(dbc()->schemaFileId(), fileToClone.parentId(), false);
 	if (parentFileId == -1)
 	{
@@ -2970,7 +3066,7 @@ void SchemaControlTabPageEx::deleteFiles()
 		return;
 	}
 
-	ok = m_filesView->filesModel().deleteFiles(selectedIndexes, deleteFiles);
+	ok = m_filesView->filesModel().deleteFilesUpdate(selectedIndexes, deleteFiles);
 	if (ok == false)
 	{
 		return;
@@ -3015,10 +3111,30 @@ void SchemaControlTabPageEx::moveFiles()
 
 	assert(selectedIndexes.size() == files.size());
 
+	// If schema is opened, can't move it
+	//
+	for (const auto& file : files)
+	{
+		auto foundTab = std::find_if(m_openedFiles.begin(), m_openedFiles.end(),
+					[&file](const EditSchemaTabPageEx* tabPage)
+					{
+						assert(tabPage);
+						return	tabPage->fileInfo().fileId() == file->fileId() &&
+								tabPage->readOnly() == false;
+					});
+
+		if (foundTab != m_openedFiles.end())
+		{
+			EditSchemaTabPageEx* tab = *foundTab;
+			QMessageBox::critical(this, qAppName(), tr("Can't move schema %1, as it is opened for edit. Close schema and repeat operation.").arg(tab->schema()->schemaId()));
+			return;
+		}
+	}
+
 	// --
 	//
-	std::vector<std::shared_ptr<DbFileInfo>> moveFiles;
-	moveFiles.reserve(files.size());
+	std::vector<DbFileInfo> filesToMove;
+	filesToMove.reserve(files.size());
 
 	for(const std::shared_ptr<DbFileInfo>& f : files)
 	{
@@ -3028,75 +3144,82 @@ void SchemaControlTabPageEx::moveFiles()
 			continue;
 		}
 
-		moveFiles.push_back(f);
+		filesToMove.push_back(*f);
 	}
 
-	if (moveFiles.empty() == true)
+	if (filesToMove.empty() == true)
 	{
-		assert(moveFiles.empty() == false);
+		assert(filesToMove.empty() == false);
 		return;
 	}
 
 	// Get destination folder
 	//
+	int moveToFileId = showSelectFolderDialog(dbc()->schemaFileId(), filesToMove.front().parentId(), false);
+	if (moveToFileId == -1)
+	{
+		return;
+	}
 
-//	// Ask user to confirm operation
-//	//
-//	QMessageBox mb(this);
+	// Move files in DB
+	//
+	std::vector<DbFileInfo> movedFiles;
 
-//	mb.setWindowTitle(qApp->applicationName());
-//	mb.setText(tr("Are you sure you want to delete selected %1 file(s)").arg(deleteFiles.size()));
-//	mb.setInformativeText(tr("If files have not been checked in before they will be deleted permanently.\nIf files were checked in at least one time they will be marked as deleted, to confirm operation perform Check In."));
+	if (bool ok = db()->moveFiles(filesToMove, moveToFileId, &movedFiles, this);
+		ok == false)
+	{
+		return;
+	}
 
-//	QString detailedText;
-//	for(auto f : deleteFiles)
-//	{
-//		detailedText += f->fileName() + "\n";
-//	}
-//	mb.setDetailedText(detailedText.trimmed());
+	// Update model/view
+	//
+	std::vector<QModelIndex> addedIndexes;
+	addedIndexes.reserve(selectedIndexes.size());
 
-//	mb.setIcon(QMessageBox::Question);
-//	mb.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
+	if (bool ok = m_filesView->filesModel().moveFilesUpdate(selectedIndexes, moveToFileId, movedFiles, &addedIndexes);
+		ok == false)
+	{
+		return;
+	}
 
-//	if (int mbResult = mb.exec();
-//		mbResult == QMessageBox::Cancel)
-//	{
-//		return;
-//	}
+	// Expand parent
+	//
+	QModelIndexList matched = m_filesView->filesModel().match(m_filesView->filesModel().index(0, 0),
+															  Qt::UserRole,
+															  QVariant::fromValue(moveToFileId),
+															  1,
+															  Qt::MatchExactly | Qt::MatchRecursive);
+	assert(matched.size() == 1);
 
-//	// --
-//	//
-//	bool ok = db()->deleteFiles(&deleteFiles, this);
-//	if (ok == false)
-//	{
-//		return;
-//	}
+	if (matched.size() == 1)
+	{
+		QModelIndex fileModelIndex = matched.front();
+		QModelIndex mappedModelIndex = m_filesView->proxyModel().mapFromSource(fileModelIndex);
 
-//	ok = m_filesView->filesModel().deleteFiles(selectedIndexes, deleteFiles);
-//	if (ok == false)
-//	{
-//		return;
-//	}
+		QModelIndex expandParent = mappedModelIndex;
+		while (expandParent.isValid() == true)
+		{
+			m_filesView->expand(expandParent);
+			expandParent = expandParent.parent();
+		}
+	}
 
-//	// Update open tab pages
-//	//
-//	for (auto editWidget : m_openedFiles)
-//	{
-//		assert(editWidget);
 
-//		for (std::shared_ptr<DbFileInfo> fi : deleteFiles)
-//		{
-//			if (editWidget->fileInfo().fileId() == fi->fileId() && editWidget->readOnly() == false)
-//			{
-//				editWidget->setReadOnly(true);
-//				editWidget->setFileInfo(*(fi.get()));
-//				editWidget->setPageTitle();
-//				break;
-//			}
-//		}
-//	}
+	// Select moved files
+	//
+	QItemSelectionModel* selectionModel = m_filesView->selectionModel();
+	assert(selectionModel);
 
-//	return;
+	selectionModel->reset();
+
+	for (const QModelIndex& mi : addedIndexes)
+	{
+		QModelIndex mappedToProxy = m_filesView->proxyModel().mapFromSource(mi);
+
+		selectionModel->select(mappedToProxy, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+	}
+
+	return;
 }
 
 void SchemaControlTabPageEx::checkOutFiles()
@@ -4063,11 +4186,19 @@ void SchemaControlTabPageEx::filter()
 
 	if (filterText.trimmed().isEmpty() == false)
 	{
-		m_filterButton->setText(tr("Filter: %1 Schema(s)").arg(schemaFiletrCount));
+		m_filterButton->setText(tr("Filter: %1 found").arg(schemaFiletrCount));
+
+		QFont font = m_filterButton->font();
+		font.setBold(true);
+		m_filterButton->setFont(font);
 	}
 	else
 	{
 		m_filterButton->setText(tr("Filter"));
+
+		QFont font = m_filterButton->font();
+		font.setBold(false);
+		m_filterButton->setFont(font);
 	}
 
 	m_resetFilterButton->setDisabled(filterText.trimmed().isEmpty());
@@ -4083,6 +4214,10 @@ void SchemaControlTabPageEx::resetFilter()
 	m_filesView->setFocus();
 
 	m_filterButton->setText(tr("Filter"));
+	QFont font = m_filterButton->font();
+	font.setBold(false);
+	m_filterButton->setFont(font);
+
 	m_resetFilterButton->setDisabled(true);
 
 	return;

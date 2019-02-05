@@ -35,7 +35,8 @@ public:
 
 public:
 	std::pair<QModelIndex, bool> addFile(QModelIndex parentIndex, std::shared_ptr<DbFileInfo> file);
-	bool deleteFiles(const QModelIndexList& selectedIndexes, const std::vector<std::shared_ptr<DbFileInfo>>& files);
+	bool deleteFilesUpdate(const QModelIndexList& selectedIndexes, const std::vector<std::shared_ptr<DbFileInfo>>& files);
+	bool moveFilesUpdate(const QModelIndexList& selectedIndexes, int movedToParnetId, const std::vector<DbFileInfo>& movedFiles, std::vector<QModelIndex>* addedFilesIndexes);
 
 	bool updateFiles(const QModelIndexList& selectedIndexes, const std::vector<DbFileInfo>& files);
 

@@ -48,6 +48,7 @@ DbController::DbController() :
 
 	connect(this, &DbController::signal_addFiles, m_worker, &DbWorker::slot_addFiles);
 	connect(this, &DbController::signal_deleteFiles, m_worker, &DbWorker::slot_deleteFiles);
+	connect(this, &DbController::signal_moveFiles, m_worker, &DbWorker::slot_moveFiles);
 
 	connect(this, &DbController::signal_getLatestVersion, m_worker, &DbWorker::slot_getLatestVersion);
 	connect(this, &DbController::signal_getLatestTreeVersion, m_worker, &DbWorker::slot_getLatestTreeVersion);
@@ -695,6 +696,7 @@ bool DbController::deleteFiles(std::vector<std::shared_ptr<DbFileInfo>>* files, 
 	}
 
 	std::vector<DbFileInfo> v;
+	v.reserve(files->size());
 
 	for (auto& f : *files)
 	{
@@ -760,6 +762,55 @@ bool DbController::deleteFiles(std::vector<DbFileInfo>* files, QWidget* parentWi
 	emit signal_deleteFiles(files);
 
 	bool result = waitForComplete(parentWidget, tr("Deleting files"));
+	return result;
+}
+
+bool DbController::moveFiles(const std::vector<std::shared_ptr<DbFileInfo>>& files,
+							 int moveToParentId,
+							 std::vector<DbFileInfo>* movedFiles,
+							 QWidget* parentWidget)
+{
+	if (movedFiles == nullptr)
+	{
+		assert(movedFiles);
+		return false;
+	}
+
+	std::vector<DbFileInfo> v;
+	v.reserve(files.size());
+
+	for (auto& f : files)
+	{
+		v.push_back(*(f.get()));
+	}
+
+	bool result = moveFiles(v, moveToParentId, movedFiles, parentWidget);
+	return result;
+}
+
+bool DbController::moveFiles(const std::vector<DbFileInfo>& files, int moveToParentId, std::vector<DbFileInfo>* movedFiles, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (movedFiles == nullptr)
+	{
+		assert(movedFiles != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_moveFiles(&files, moveToParentId, movedFiles);
+
+	bool result = waitForComplete(parentWidget, tr("Moving files"));
 	return result;
 }
 

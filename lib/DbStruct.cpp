@@ -707,6 +707,7 @@ int DbFileTree::calcIf(int startFromFileId, std::function<int(const DbFileInfo&)
 	auto it = m_files.find(startFromFileId);
 	if (it == m_files.end())
 	{
+		qDebug() << "DbFileTree::calcIf: Cant find file" << startFromFileId;
 		assert(it != m_files.end());
 		return 0;
 	}
