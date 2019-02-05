@@ -997,7 +997,7 @@ namespace ExtWidgets
 		{
 		case QVariant::String:
 			{
-				if (m_lineEdit->text() != m_oldValue.toString())
+				if (m_lineEdit->text() != m_oldValue.toString() || m_oldValue.isNull() == true)
 				{
 					m_oldValue = m_lineEdit->text();
 					emit valueChanged(m_lineEdit->text());
@@ -1008,7 +1008,8 @@ namespace ExtWidgets
 			{
 				bool ok = false;
 				int value = m_lineEdit->text().toInt(&ok);
-				if (ok == true && value != m_oldValue.toInt())
+				if (ok == true &&
+						(value != m_oldValue.toInt() || m_oldValue.isNull() == true))
 				{
 					m_oldValue = value;
 					emit valueChanged(value);
@@ -1019,7 +1020,8 @@ namespace ExtWidgets
 			{
 				bool ok = false;
 				uint value = m_lineEdit->text().toUInt(&ok);
-				if (ok == true && value != m_oldValue.toUInt())
+				if (ok == true &&
+						(value != m_oldValue.toUInt() || m_oldValue.isNull() == true))
 				{
 					m_oldValue = value;
 					emit valueChanged(value);
@@ -1030,7 +1032,8 @@ namespace ExtWidgets
 			{
 				bool ok = false;
 				float value = m_lineEdit->text().toFloat(&ok);
-				if (ok == true && value != m_oldValue.toFloat())
+				if (ok == true &&
+						(value != m_oldValue.toFloat() || m_oldValue.isNull() == true))
 				{
 					m_oldValue = value;
 					emit valueChanged(value);
@@ -1041,7 +1044,8 @@ namespace ExtWidgets
 			{
 				bool ok = false;
 				double value = m_lineEdit->text().toDouble(&ok);
-				if (ok == true && value != m_oldValue.toDouble())
+				if (ok == true &&
+						(value != m_oldValue.toDouble() || m_oldValue.isNull() == true))
 				{
 					m_oldValue = value;
 					emit valueChanged(value);
@@ -1055,7 +1059,8 @@ namespace ExtWidgets
 				TuningValue oldValue = m_oldValue.value<TuningValue>();
 				TuningValue value(oldValue);
 				value.fromString(m_lineEdit->text(), &ok);
-				if (ok == true && value != oldValue)
+				if (ok == true &&
+						(value != oldValue || m_oldValue.isNull() == true))
 				{
 					m_oldValue.setValue(value);
 					emit valueChanged(m_oldValue);
