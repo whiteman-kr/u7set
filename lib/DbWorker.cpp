@@ -4206,14 +4206,6 @@ void DbWorker::slot_getChangesetDetails(int changeset, DbChangesetDetails* out)
 
 	// --
 	//
-
-//	QMapIterator<QString, QVariant> i(q.boundValues());
-//	while (i.hasNext())
-//	{
-//		i.next();
-//		qDebug() << i.key().toUtf8().data() << ": " << i.value().toString().toUtf8().data() << endl;
-//	}
-
 	while (q.next())
 	{
 		db_dbChangesetObject(q, out);
@@ -6397,6 +6389,8 @@ bool DbWorker::db_dbChangesetObject(const QSqlQuery& q, DbChangesetDetails* dest
 	csObject.setCaption(q.value(6 + 3).toString());
 	csObject.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(6 + 4).toInt()));
 	csObject.setParent(q.value(6 + 5).toString());
+	csObject.setFileMoveText(q.value(6 + 6).toString());
+	csObject.setFileRenameText(q.value(6 + 7).toString());
 
 	destination->addObject(csObject);
 
