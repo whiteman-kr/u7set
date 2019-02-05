@@ -1942,6 +1942,45 @@ namespace Builder
 				  tr("UFB schema has duplicate pins %1 (UFB schema %2).").arg(pinCaption).arg(schema));
 	}
 
+	/// IssueCode: ALP4024
+	///
+	/// IssueType: Error
+	///
+	/// Title: Schema details parsing error, filename %1, details string %2.
+	///
+	/// Parameters:
+	///		%1 Schema file name
+	///		%2 Detaisl string
+	///
+	/// Description:
+	///		Schema details parsing error.
+	///
+	void IssueLogger::errALP4024(QString fileName, QString details)
+	{
+		LOG_ERROR(IssueType::AlParsing,
+				  4024,
+				  tr("Schema details parsing error, filename %1, details string %2.").arg(fileName).arg(details));
+	}
+
+	/// IssueCode: ALP4025
+	///
+	/// IssueType: Error
+	///
+	/// Title: Duplicate SchemaIDs %1, all schemas (including Monitor, Tuning, etc) must have unique SchemaIDs.
+	///
+	/// Parameters:
+	///		%1 SchemaID
+	///
+	/// Description:
+	///		$root$/Schema/ Has duplicate SchemaIDs.
+	///
+	void IssueLogger::errALP4025(QString schema)
+	{
+		LOG_ERROR(IssueType::AlParsing,
+				  4025,
+				  tr("Duplicate SchemaIDs %1, all schemas (including Monitor, Tuning, etc) must have unique SchemaIDs.").arg(schema));
+	}
+
 
 	/// IssueCode: ALP4040
 	///
