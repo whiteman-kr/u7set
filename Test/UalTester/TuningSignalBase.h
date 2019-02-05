@@ -117,7 +117,7 @@ class TuningSourceBase : public QObject
 
 public:
 
-	explicit TuningSourceBase(QObject *parent = 0);
+	explicit TuningSourceBase(QObject *parent = nullptr);
 	virtual ~TuningSourceBase();
 
 private:
@@ -153,7 +153,7 @@ class TuningSignalBase : public QObject
 
 public:
 
-	explicit TuningSignalBase(QObject *parent = 0);
+	explicit TuningSignalBase(QObject *parent = nullptr);
 	virtual ~TuningSignalBase();
 
 private:
@@ -183,17 +183,34 @@ class TuningWriteCmd
 {
 public:
 
-	TuningWriteCmd() {}
+	TuningWriteCmd() { clear(); }
 	TuningWriteCmd(const Hash &signalHash, TuningValueType type, double value) : m_signalHash (signalHash), m_type (type), m_value (value) {}
 	virtual ~TuningWriteCmd() {}
 
 private:
 
-	Hash					m_signalHash;
+	Hash					m_signalHash = UNDEFINED_HASH;
 	TuningValueType			m_type = TuningValueType::Discrete;
 	QVariant				m_value;
 
 public:
+
+	void					clear()
+	{
+		m_signalHash = UNDEFINED_HASH;
+		m_type = TuningValueType::Discrete;
+		m_value.clear();
+	}
+
+	bool					isEmpty()
+	{
+		if (m_signalHash == UNDEFINED_HASH)
+		{
+			return true;
+		}
+
+		return false;
+	}
 
 	Hash					signalHash() const { return m_signalHash; }
 	void					setSignalHash(Hash hash) { m_signalHash = hash; }
@@ -214,7 +231,7 @@ class TuningBase: public QObject
 
 public:
 
-	explicit TuningBase(QObject *parent = 0);
+	explicit TuningBase(QObject *parent = nullptr);
 	virtual ~TuningBase();
 
 private:
