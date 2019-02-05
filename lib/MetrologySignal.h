@@ -160,8 +160,9 @@ namespace Metrology
 		QString					m_customAppSignalID;
 		QString					m_caption;
 
-		E::SignalType			m_signalType = E::SignalType::Analog;
 		E::SignalInOutType		m_inOutType = E::SignalInOutType::Internal;
+		E::SignalType			m_signalType = E::SignalType::Analog;
+		E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;		// discrete signals is always treat as UnsignedInt and dataSize == 1
 
 		SignalLocation			m_location;
 
@@ -204,11 +205,15 @@ namespace Metrology
 		QString					caption() const { return m_caption; }
 		void					setCaption(const QString& caption) { m_caption = caption; }
 
+		E::SignalInOutType		inOutType() const { return m_inOutType; }
+		void					setInOutType(E::SignalInOutType inOutType) { m_inOutType = inOutType; }
+
 		E::SignalType			signalType() const { return m_signalType; }
 		void					setSignalType(E::SignalType type) { m_signalType = type; }
 
-		E::SignalInOutType		inOutType() const { return m_inOutType; }
-		void					setInOutType(E::SignalInOutType inOutType) { m_inOutType = inOutType; }
+		E::AnalogAppSignalFormat analogSignalFormat() const { return m_analogSignalFormat; }
+		int						analogSignalFormatInt() const { return TO_INT(m_analogSignalFormat); }
+		void					setAnalogSignalFormat(E::AnalogAppSignalFormat dataFormat) { m_analogSignalFormat = dataFormat; }
 
 		bool					isAnalog() const { return m_signalType == E::SignalType::Analog; }
 		bool					isDiscrete() const { return m_signalType == E::SignalType::Discrete; }
@@ -287,6 +292,8 @@ namespace Metrology
 		double					tuningDefaultValue() const { return m_tuningDefaultValue; }
 		QString					tuningDefaultValueStr() const;
 		void					setTuningDefaultValue(double value) { m_tuningDefaultValue = value; }
+
+		TuningValueType			tuningValueType();
 
 		bool					readFromXml(XmlReadHelper& xml);
 		void					writeToXml(XmlWriteHelper& xml);

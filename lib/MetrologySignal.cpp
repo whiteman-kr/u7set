@@ -273,8 +273,9 @@ namespace Metrology
 		m_customAppSignalID = signal.customAppSignalID();
 		m_caption = signal.caption();
 
-		m_signalType = signal.signalType();
 		m_inOutType = signal.inOutType();
+		m_signalType = signal.signalType();
+		m_analogSignalFormat = signal.analogSignalFormat();
 
 		m_location = location;
 
@@ -393,11 +394,14 @@ namespace Metrology
 
 		int type = 0;
 
+		result &= xml.readIntAttribute("InOutType", &type);
+		m_inOutType  = static_cast<E::SignalInOutType>(type);
+
 		result &= xml.readIntAttribute("SignalType", &type);
 		m_signalType = static_cast<E::SignalType>(type);
 
-		result &= xml.readIntAttribute("InOutType", &type);
-		m_inOutType  = static_cast<E::SignalInOutType>(type);
+		result &= xml.readIntAttribute("AnalogSignalFormat", &type);
+		m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(type);
 
 		result &= m_location.readFromXml(xml);
 
@@ -436,8 +440,9 @@ namespace Metrology
 			xml.writeStringAttribute("CustomAppSignalID", customAppSignalID());
 			xml.writeStringAttribute("Caption", caption());
 
-			xml.writeIntAttribute("SignalType", signalType());
 			xml.writeIntAttribute("InOutType", TO_INT(inOutType()));
+			xml.writeIntAttribute("SignalType", signalType());
+			xml.writeIntAttribute("AnalogSignalFormat", TO_INT(analogSignalFormat()));
 
 			location().writeToXml(xml);
 
@@ -621,6 +626,28 @@ namespace Metrology
 		}
 
 		return stateStr;
+	}
+
+	TuningValueType	SignalParam::tuningValueType()
+	{
+		TuningValueType type = TuningValueType::Float;
+
+		switch (m_signalType)
+		{
+			case E::SignalType::Analog:
+
+				switch (m_analogSignalFormat)
+				{
+					case E::AnalogAppSignalFormat::SignedInt32:	type = TuningValueType::SignedInt32;	break;
+					case E::AnalogAppSignalFormat::Float32:		type = TuningValueType::Float;			break;
+				}
+
+				break;
+
+			case E::SignalType::Discrete:						type = TuningValueType::Discrete;		break;
+		}
+
+		return type;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

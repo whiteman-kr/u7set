@@ -577,7 +577,7 @@ void MeasureThread::measureLinearity()
 			{
 				case OUTPUT_SIGNAL_TYPE_UNUSED:
 				case OUTPUT_SIGNAL_TYPE_FROM_INPUT:		pCalibratorManager->setValue(m_activeSignalParam[c].isNegativeRange() ? -electricVal : electricVal);	break;
-				case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	theSignalBase.tuning().appendCmdFowWrite(param.hash(), engeneeringVal);									break;
+				case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	theSignalBase.tuning().appendCmdFowWrite(param.hash(), param.tuningValueType(), engeneeringVal);		break;
 				default:								assert(0);
 			}
 		}
@@ -725,7 +725,7 @@ void MeasureThread::restoreStateTunSignals()
 //		val_str.sprintf("Tun restore - %.3f", m_tunSignalState[c]);
 //		emit msgBox(QMessageBox::Information, val_str);
 
-		theSignalBase.tuning().appendCmdFowWrite(tunParam.hash(), m_tunSignalState[c]);
+		theSignalBase.tuning().appendCmdFowWrite(tunParam.hash(), tunParam.tuningValueType(), m_tunSignalState[c]);
 	}
 }
 

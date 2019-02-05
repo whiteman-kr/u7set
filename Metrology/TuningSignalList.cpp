@@ -1301,7 +1301,7 @@ void TuningSignalStateDialog::onOk()
 		return;
 	}
 
-	theSignalBase.tuning().appendCmdFowWrite(m_param.hash(), state);
+	theSignalBase.tuning().appendCmdFowWrite(m_param.hash(), m_param.tuningValueType(), state);
 
 	accept();
 }
@@ -1310,7 +1310,7 @@ void TuningSignalStateDialog::onOk()
 
 void TuningSignalStateDialog::onYes()
 {
-	theSignalBase.tuning().appendCmdFowWrite(m_param.hash(), 1);
+	theSignalBase.tuning().appendCmdFowWrite(m_param.hash(), m_param.tuningValueType(), 1);
 
 	accept();
 }
@@ -1319,7 +1319,7 @@ void TuningSignalStateDialog::onYes()
 
 void TuningSignalStateDialog::onNo()
 {
-	theSignalBase.tuning().appendCmdFowWrite(m_param.hash(), 0);
+	theSignalBase.tuning().appendCmdFowWrite(m_param.hash(), m_param.tuningValueType(), 0);
 
 	accept();
 }
