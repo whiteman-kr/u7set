@@ -12,6 +12,7 @@
 #include "../lib/Queue.h"
 #include "../lib/AppSignal.h"
 #include "ArchRequest.h"
+#include "ArchMaintenance.h"
 
 class ArchWriterThread;
 
@@ -21,6 +22,10 @@ public:
 	static const int TIME_1S = 1000;								// 1000 millisecond
 	static const int TIME_TO_EXPAND_REQUEST = 31 * TIME_1S;			// 31 seconds
 
+	//static const qint64 PARTITTION_DIVIDER = 24 * 60 * 60 * 1000;		// day
+	//static const qint64 PARTITTION_DIVIDER = 60 * 60 * 1000;			// hour
+	static const qint64 PARTITION_LENGHT_MS = 60 * 1000;				// minute
+
 	static QString formatTime(qint64 time);
 
 public:
@@ -28,6 +33,8 @@ public:
 			const QString& equipmentID,
 			const QString& archDir,
 			const Proto::ArchSignals& protoArchSignals,
+			int shortTermPeriod,
+			int longTermPeriod,
 			CircularLoggerShared logger);
 	~Archive();
 
@@ -84,9 +91,13 @@ public:
 
 	//
 
-	ArchFindResult findData(const ArchRequestParam& param);
-
 	ArchFile* getArchFile(Hash signalHash) { return m_archFiles.value(signalHash, nullptr); }
+
+	bool startMaintenance();
+	bool continueMaintenance(int* deletedCount, int* packedCount);
+	bool isMaintenanceRequired() { return m_isMaintenanceRequired.load(); }
+
+	qint64 getCurrentPartition();
 
 private:
 	quint32 getNewRequestID();
@@ -113,6 +124,9 @@ private:
 
 	CircularLoggerShared m_log;
 
+	qint64 m_shortTermPeriod = 0;
+	qint64 m_longTermPeriod = 0;
+
 	//
 
 	static std::atomic<quint32> m_nextRequestID;
@@ -121,7 +135,13 @@ private:
 
 	//
 
+	std::atomic<qint64> m_currentPartition = { -1 };
+
 	ArchWriterThread* m_archWriterThread = nullptr;
+
+	std::atomic<bool> m_isMaintenanceRequired = { true };
+	int m_maintenanceFileIndex = -1;
+	ArchMaintenanceThread* m_archMaintenanceThread = nullptr;
 
 	//
 
@@ -151,8 +171,5 @@ private:
 	QMutex m_requestsMutex;
 	QHash<quint32, std::shared_ptr<ArchRequest>> m_requests;
 
-	//
-
-//	friend class ArchFile;
 	friend class ArchRequest;
 };

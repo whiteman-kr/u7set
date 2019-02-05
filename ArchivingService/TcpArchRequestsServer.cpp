@@ -190,18 +190,24 @@ void TcpArchRequestsServer::onGetSignalStatesFromArchiveNext(const char* request
 		reply.set_dataready(false);
 		sendReply(reply);
 
-		//qDebug() << "Data not ready";
+		qDebug() << "Data not ready";
 		return;
 	}
 
 	Network::GetAppSignalStatesFromArchiveNextReply& nextReply = *m_getNextReply.get();
 
+	int sss = nextReply.appsignalstates_size();
+	if (sss >= 20000)
+	{
+		DEBUG_STOP;
+	}
 	sendReply(nextReply);
 
-	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: send next reply, states = %2 (elapsed %3)").
+
+	/*DEBUG_LOG_MSG(m_logger, QString("RequestID %1: send next reply, states = %2 (elapsed %3)").
 				  arg(requestID).
 				  arg(nextReply.statesinpartcount()).
-				  arg(m_archRequest->timeElapsed()));
+				  arg(m_archRequest->timeElapsed()));*/
 
 	if (nextReply.islastpart() == false)
 	{

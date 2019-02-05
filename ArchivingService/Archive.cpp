@@ -61,12 +61,36 @@ Archive::Archive(const QString& projectID,
 				 const QString& equipmentID,
 				 const QString& archDir,
 				 const Proto::ArchSignals& protoArchSignals,
+				 int shortTermPeriod,
+				 int longTermPeriod,
 				 CircularLoggerShared logger) :
 	m_projectID(projectID),
 	m_equipmentID(equipmentID),
+	m_shortTermPeriod(shortTermPeriod),
+	m_longTermPeriod(longTermPeriod),
 	m_archDir(archDir),
 	m_log(logger)
 {
+	if (m_shortTermPeriod < 2)
+	{
+		m_shortTermPeriod = 2;
+	}
+
+	if (m_longTermPeriod < 5)
+	{
+		m_longTermPeriod = 5;
+	}
+
+	if (m_longTermPeriod < m_shortTermPeriod)
+	{
+		m_longTermPeriod = m_shortTermPeriod;
+	}
+
+	// period to milliseconds conversation
+	//
+	m_shortTermPeriod *= PARTITION_LENGHT_MS * m_shortTermPeriod;
+	m_longTermPeriod *= PARTITION_LENGHT_MS * m_longTermPeriod;
+
 	int signalsCount = protoArchSignals.archsignals_size();
 
 	m_archFiles.reserve(static_cast<int>(signalsCount * 1.2));
@@ -119,6 +143,11 @@ void Archive::start()
 
 	m_archWriterThread = new ArchWriterThread(this, m_log);
 	m_archWriterThread->start();
+
+	assert(m_archMaintenanceThread == nullptr);
+
+	m_archMaintenanceThread = new ArchMaintenanceThread(*this, m_log);
+	m_archMaintenanceThread->start();
 
 	m_isWorkable = true;
 }
@@ -613,6 +642,54 @@ ArchFile* Archive::getNextFileForFlushing(bool* flushAnyway)
 	archFile = getNextRegularFile();
 
 	return archFile;
+}
+
+bool Archive::startMaintenance()
+{
+	assert(isMaintenanceRequired() == true);
+
+	m_isMaintenanceRequired.store(false);
+
+	if (m_archFilesArray.count() > 0)
+	{
+		m_maintenanceFileIndex = 0;
+		return true;
+	}
+
+	return false;
+}
+
+bool Archive::continueMaintenance(int* deletedCount, int* packedCount)
+{
+	if (m_maintenanceFileIndex < 0 || m_maintenanceFileIndex >= m_archFilesArray.count())
+	{
+		m_maintenanceFileIndex = -1;
+		return false;
+	}
+
+	ArchFile* archFile = m_archFilesArray[m_maintenanceFileIndex];
+
+	archFile->maintenance(getCurrentPartition(), m_shortTermPeriod, m_longTermPeriod, deletedCount, packedCount);
+
+	m_maintenanceFileIndex++;
+
+	return true;
+}
+
+qint64 Archive::getCurrentPartition()
+{
+	qint64 prevPartition = m_currentPartition.load();
+
+	qint64 newPartition = (QDateTime::currentMSecsSinceEpoch() / PARTITION_LENGHT_MS) * PARTITION_LENGHT_MS;
+
+	if (prevPartition != newPartition)
+	{
+		m_currentPartition.store(newPartition);
+
+		m_isMaintenanceRequired.store(true);
+	}
+
+	return newPartition;
 }
 
 quint32 Archive::getNewRequestID()

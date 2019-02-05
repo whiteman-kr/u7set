@@ -36,7 +36,7 @@ void ArchFileToRead::findData()
 		return;
 	}
 
-	findStartPosition();
+	m_findResult = openPartitionToStartReading();
 
 	if (m_findResult == ArchFindResult::Found)
 	{
@@ -95,7 +95,8 @@ bool ArchFileToRead::fillBuffer()
 				break;
 			}
 
-			bool res = m_partitionToRead.openForReading(m_partitionsInfo[m_partitionToReadIndex].startTime);
+			bool res = m_partitionToRead.openForReading(m_partitionsInfo[m_partitionToReadIndex].startTime,
+														m_partitionsInfo[m_partitionToReadIndex].shortTerm);
 
 			if (res == false)
 			{
@@ -140,23 +141,6 @@ bool ArchFileToRead::gotoNextRecord()
 	return true;
 }
 
-void ArchFileToRead::findStartPosition()
-{
-	m_findResult = openPartitionToStartReading();
-
-	if (m_findResult == ArchFindResult::Found)
-	{
-		m_hasDataToRead = true;
-	}
-	else
-	{
-		m_hasDataToRead = false;
-
-		m_partitionToRead.close();
-		m_partitionToReadIndex = -1;
-	}
-}
-
 ArchFindResult ArchFileToRead::openPartitionToStartReading()
 {
 	int partitionsCount = m_partitionsInfo.count();
@@ -164,15 +148,6 @@ ArchFindResult ArchFileToRead::openPartitionToStartReading()
 	if (partitionsCount == 0)
 	{
 		return ArchFindResult::NotFound;
-	}
-
-	// Sort m_archPartitionsInfo by systemTime ascending
-	//
-	qSort(m_partitionsInfo);
-
-	for(int i = 0; i < partitionsCount; i++)
-	{
-		m_partitionsInfo[i].index = i;
 	}
 
 	qint64 sysTimeToFindPartition = 0;
@@ -215,19 +190,27 @@ ArchFindResult ArchFileToRead::openPartitionToStartReading()
 	}
 
 	int prevMoveDirection = 0;
-	int prevPartitionToReadIndex = m_partitionToReadIndex;
+	int lastPartitionWithData = -1;
+
+	m_hasDataToRead = false;
 
 	do
 	{
-		ArchFilePartition::Info pi = m_partitionsInfo[m_partitionToReadIndex];
+		const ArchFilePartition::Info& pi = m_partitionsInfo[m_partitionToReadIndex];
 
 		int moveDirection = 1;
+		bool hasData = false;
 
-		bool res = m_partitionToRead.openForReading(pi.startTime);
+		bool res = m_partitionToRead.openForReading(pi.startTime, pi.shortTerm);
 
 		if (res == true)
 		{
-			m_partitionToRead.checkTimesAndGetMoveDirection( m_timeType, m_startTime, &moveDirection);
+			res = m_partitionToRead.checkTimesAndGetMoveDirection( m_timeType, m_startTime, m_endTime, &hasData, &moveDirection);
+
+			if (res == true && hasData == true)
+			{
+				lastPartitionWithData = m_partitionToReadIndex;
+			}
 		}
 
 		if (moveDirection == 0)
@@ -235,6 +218,15 @@ ArchFindResult ArchFileToRead::openPartitionToStartReading()
 			// partition to read is found
 			//
 			ArchFindResult result = m_partitionToRead.binarySearch(m_timeType, m_startTime, &m_startReadFromRecord);
+
+			if (result == ArchFindResult::Found)
+			{
+				m_hasDataToRead = true;
+			}
+			else
+			{
+				m_hasDataToRead = false;
+			}
 			return result;
 		}
 
@@ -243,7 +235,6 @@ ArchFindResult ArchFileToRead::openPartitionToStartReading()
 		if (prevMoveDirection == 0 || prevMoveDirection == moveDirection)
 		{
 			prevMoveDirection = moveDirection;
-			prevPartitionToReadIndex = m_partitionToReadIndex;
 
 			m_partitionToReadIndex += moveDirection;
 
@@ -257,24 +248,40 @@ ArchFindResult ArchFileToRead::openPartitionToStartReading()
 		//
 		// direction changed - stop moving, use prevPartition for reading from firsRecord
 		//
-		m_partitionToRead.close();
-
-		m_partitionToReadIndex = prevPartitionToReadIndex;
-
-		m_startReadFromRecord = 0;
-
-		res = m_partitionToRead.openForReading(m_partitionsInfo[m_partitionToReadIndex].startTime);
-
-		if (res == true)
+		if (lastPartitionWithData != -1)
 		{
-			return ArchFindResult::Found;
+			m_hasDataToRead = true;
+			m_startReadFromRecord = 0;
+
+			if (m_partitionToReadIndex == lastPartitionWithData)
+			{
+				m_partitionToRead.gotoFirstRecord();
+				return ArchFindResult::Found;
+			}
+			else
+			{
+				m_partitionToRead.close();
+
+				m_partitionToReadIndex = lastPartitionWithData;
+
+				res = m_partitionToRead.openForReading(m_partitionsInfo[m_partitionToReadIndex].startTime,
+													   m_partitionsInfo[m_partitionToReadIndex].shortTerm);
+
+				if (res == true)
+				{
+					return ArchFindResult::Found;
+				}
+			}
 		}
+
+		// no data found
+
+		m_partitionToRead.close();
+		m_partitionToReadIndex = -1;
 
 		break;
 	}
 	while(1);
-
-	assert(false);
 
 	return ArchFindResult::NotFound;
 }
@@ -300,17 +307,23 @@ ArchRequest::ArchRequest(Archive& archive,
 
 ArchRequest::~ArchRequest()
 {
-	DEBUG_LOG_MSG(m_logger, QString("ArchRequest is deleted: ID = %1, states sent = %2").
-							arg(m_param.requestID()).arg(m_sentStatesCount));
+	DEBUG_LOG_MSG(m_logger, QString("ArchRequest is deleted: ID = %1, states sent = %2, elapsed time %3 ms").
+							arg(m_param.requestID()).arg(m_sentStatesCount).arg(QDateTime::currentMSecsSinceEpoch() - m_startTime));
 }
 
 void ArchRequest::run()
 {
+	/*	if (m_param.print().contains("startTime=2019-02-05 08:00:00") == true)
+		{
+			DEBUG_STOP;
+		}*/
+
 	// expand request time from both sides
 	//
+
 	m_param.expandTimes(Archive::TIME_TO_EXPAND_REQUEST);
 
-	DEBUG_LOG_MSG(m_logger, QString("ArchRequest to exec: %1").arg(m_param.print()));
+//	DEBUG_LOG_MSG(m_logger, QString("ArchRequest to exec: %1").arg(m_param.print()));
 
 	bool dataFound = prepareArchFilesToRead();
 
@@ -378,6 +391,8 @@ bool ArchRequest::prepareArchFilesToRead()
 			break;
 		}
 
+		// wait for immediately flushing here ???
+
 		ArchFileToRead* archFileToRead = new ArchFileToRead(*fileToRead, m_param);
 
 		archFileToRead->findData();
@@ -407,11 +422,6 @@ void ArchRequest::prepareGetNextReply()
 	{
 		reportNoMoreData();
 		return;
-	}
-
-	if (m_sentStatesCount > 0)
-	{
-		DEBUG_STOP;
 	}
 
 	m_getNextReply->Clear();
@@ -629,7 +639,7 @@ bool ArchRequest::getMultipleFilesNextRecord(Hash* hash, ArchFileRecord* record)
 
 void ArchRequest::reportError()
 {
-	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: error occured!").arg(m_param.requestID()));
+//	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: error occured!").arg(m_param.requestID()));
 
 	m_getNextReply->set_requestid(m_param.requestID());
 
@@ -652,7 +662,7 @@ void ArchRequest::reportError()
 
 void ArchRequest::reportNoData()
 {
-	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: data not found!").arg(m_param.requestID()));
+//	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: data not found!").arg(m_param.requestID()));
 
 	m_getNextReply->set_requestid(m_param.requestID());
 
@@ -677,7 +687,7 @@ void ArchRequest::reportNoMoreData()
 {
 	assert(m_noMoreData == true);
 
-	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: has no more data!").arg(m_param.requestID()));
+//	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: has no more data!").arg(m_param.requestID()));
 
 	m_getNextReply->set_requestid(m_param.requestID());
 

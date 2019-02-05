@@ -53,6 +53,7 @@ public:
 		QString fileName;
 		QDateTime date;
 		qint64 startTime = 0;
+		bool shortTerm = true;
 		ArchFileRecord firstRecord;
 		ArchFileRecord lastRecord;
 	};
@@ -70,13 +71,17 @@ public:
 
 	//
 
-	bool openForReading(qint64 partitionSystemTime);
+	bool openForReading(qint64 partitionSystemTime, bool shortTerm);
 	bool getFirstAndLastRecords(ArchFileRecord* first, ArchFileRecord* last);
+	bool gotoFirstRecord();
+	bool gotoRecord(qint64 recordIndex);
 	bool readRecord(qint64 recordIndex, ArchFileRecord* record);
 	bool read(ArchFileRecord* recordBuffer, int maxRecordsToRead, int* readCount);
 
 	bool checkTimesAndGetMoveDirection(E::TimeType requestedTimeType,
-									   qint64 requestedTime,
+									   qint64 startTime,
+									   qint64 endTime,
+									   bool* hasData,
 									   int* moveDirection);
 
 	ArchFindResult binarySearch(E::TimeType timeType, qint64 time, qint64* startPosition);
@@ -84,7 +89,7 @@ public:
 	bool close();
 
 private:
-	QString getFileName(qint64 partitionStartTime);
+	QString getFileName(qint64 partitionStartTime, bool shortTerm);
 
 	void moveToRecord(qint64 record);
 
@@ -142,9 +147,24 @@ public:
 
 	void shutdown(qint64 curPartition, qint64* totalFlushedStatesCount);
 
-public:
-	static const QString EXTENSION;
+	void maintenance(qint64 currentPartition,
+					 qint64 msShortTermPeriod,
+					 qint64 msLongTermPeriod,
+					 int* deletedCount,
+					 int* packedCount);
 
+public:
+	static const QString LONG_TERM_ARCHIVE_EXTENSION;
+	static const QString SHORT_TERM_ARCHIVE_EXTENSION;
+
+private:
+	int deleteOldPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
+							qint64 currentPartition,
+							qint64 msLongTermPeriod);
+
+	int packPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
+							qint64 currentPartition,
+							qint64 msShortTermPeriod);
 private:
 	Hash m_hash = 0;
 	QString m_appSignalID;

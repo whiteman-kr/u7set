@@ -66,7 +66,6 @@ public:
 
 private:
 	void getArchPartitionsInfo();
-	void findStartPosition();
 	ArchFindResult openPartitionToStartReading();
 
 private:
@@ -89,7 +88,7 @@ private:
 
 	//
 
-	static const int READ_BUFFER_SIZE = 50000;
+	static const int READ_BUFFER_SIZE = 200000;
 
 	ArchFileRecord m_readBuffer[READ_BUFFER_SIZE];
 	int m_recordsInBuffer = 0;

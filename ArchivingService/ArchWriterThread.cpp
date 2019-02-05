@@ -47,11 +47,9 @@ void ArchWriterThread::run()
 	{
 		if (filesCount == 0)
 		{
-			msleep(5);
+			msleep(100);
 			continue;
 		}
-
-		updateCurrentPartition();
 
 		bool flushAnyway = false;
 
@@ -63,7 +61,9 @@ void ArchWriterThread::run()
 		}
 		else
 		{
-			bool flushingExecuted = fileToFlush->flush(m_curPartition, &m_totalFlushedStatesCount, flushAnyway);
+			qint64 currentPartition = m_archive->getCurrentPartition();
+
+			bool flushingExecuted = fileToFlush->flush(currentPartition, &m_totalFlushedStatesCount, flushAnyway);
 
 			if (flushingExecuted == false)
 			{
@@ -106,69 +106,3 @@ void ArchWriterThread::run()
 	m_archive->shutdown();
 }
 
-void ArchWriterThread::updateCurrentPartition()
-{
-	// const int PARTITTION_DIVIDER = 24 * 60 * 60 * 1000;			// each day
-	const int PARTITTION_DIVIDER = 60 * 1000;						// each minute
-
-	qint64 curPartition = (QDateTime::currentMSecsSinceEpoch() / PARTITTION_DIVIDER) * PARTITTION_DIVIDER;
-
-/*	const int MINUTE_TIME = 60 * 1000;
-
-	if (curPartition / MINUTE_TIME != m_curPartition / MINUTE_TIME)
-	{
-		writeMinuteCheckpoint((curPartition / MINUTE_TIME) * MINUTE_TIME);		// trunc system time to minutes
-	}*/
-
-	if (m_curPartition == curPartition)
-	{
-		return;
-	}
-
-	if (m_curPartition == -1)
-	{
-		m_curPartition = curPartition;
-	}
-	else
-	{
-		m_curPartition = curPartition;
-
-		// needs runArchiveMaintenance(); here !!!
-	}
-}
-
-/*
-bool FileArchWriter::writeMinuteCheckpoint(qint64 minuteSystemTime)
-{
-	QString fileName = m_archFullPath + "/mincheckpoints.dat";
-
-	QFile minuteCheckpointsFile(fileName);
-
-	if (minuteCheckpointsFile.open(QIODevice::ReadWrite) == false)
-	{
-		DEBUG_LOG_ERR(m_log, "Can't open minutes checkpoint file");
-		return false;
-	}
-
-	QFileInfo fi(minuteCheckpointsFile);
-
-	qint64 writePos = (fi.size() / sizeof(MinuteCheckpoint)) * sizeof(MinuteCheckpoint);
-
-	minuteCheckpointsFile.seek(writePos);
-
-	MinuteCheckpoint mc;
-
-	mc.checkpoint.minuteSystemTime = minuteSystemTime;
-	mc.checkpoint.archiveID = m_archID;
-
-	m_archID++;
-
-	mc.crc16 = calcCrc16(&mc.checkpoint, sizeof(mc.checkpoint));
-
-	minuteCheckpointsFile.write(reinterpret_cast<const char*>(&mc), sizeof(mc));
-
-	minuteCheckpointsFile.close();
-
-	return true;
-}
-*/
