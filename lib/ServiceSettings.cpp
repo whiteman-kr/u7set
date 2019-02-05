@@ -232,7 +232,7 @@ bool CfgServiceSettings::writeToXml(XmlWriteHelper& xml)
 	xml.writeStartElement(CLIENTS_SECTION);
 	xml.writeIntAttribute(ATTR_COUNT, clients.count());
 
-	for(const QPair<QString, E::SoftwareType> pair : clients)
+	for(const QPair<QString, E::SoftwareType>& pair : clients)
 	{
 		xml.writeStartElement(CLIENT);
 
@@ -757,6 +757,9 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 
 const char* ArchivingServiceSettings::PROP_ARCHIVE_DB_HOST_IP = "ArchiveDatabaseHostIP";
 const char* ArchivingServiceSettings::PROP_ARCHIVE_DB_HOST_PORT = "ArchiveDatabaseHostPort";
+const char* ArchivingServiceSettings::PROP_ARCHIVE_SHORT_TERM_PERIOD = "ShortTermArchivePeriod";
+const char* ArchivingServiceSettings::PROP_ARCHIVE_LONG_TERM_PERIOD = "LongTermArchivePeriod";;
+const char* ArchivingServiceSettings::PROP_ARCHIVE_LOCATION = "ArchiveLocation";
 
 bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Builder::IssueLogger* log)
 {
@@ -809,6 +812,27 @@ bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Buil
 
 	dbHost = HostAddressPort(dbHostIP, dbHostPort);
 
+	//
+
+	result &= DeviceHelper::getIntProperty(software, PROP_ARCHIVE_SHORT_TERM_PERIOD, &shortTermArchivePeriod, log);
+	result &= DeviceHelper::getIntProperty(software, PROP_ARCHIVE_LONG_TERM_PERIOD, &longTermArchivePeriod, log);
+	result &= DeviceHelper::getStrProperty(software, PROP_ARCHIVE_LOCATION, &archiveLocation, log);
+
+	if (shortTermArchivePeriod < 2)
+	{
+		shortTermArchivePeriod = 2;
+	}
+
+	if (shortTermArchivePeriod >= longTermArchivePeriod)
+	{
+		longTermArchivePeriod = shortTermArchivePeriod + 1;
+	}
+
+	if (archiveLocation.isEmpty() == true)
+	{
+		log->wrnCFG3031(software->equipmentIdTemplate(), PROP_ARCHIVE_LOCATION);
+	}
+
 	return result;
 }
 
@@ -828,6 +852,10 @@ bool ArchivingServiceSettings::writeToXml(XmlWriteHelper& xml)
 	xml.writeHostAddress(PROP_DIAG_DATA_RECEIVING_NETMASK, diagDataReceivingNetmask);
 
 	xml.writeHostAddressPort(PROP_ARCHIVE_DB_HOST_IP, PROP_ARCHIVE_DB_HOST_PORT, dbHost);
+
+	xml.writeIntElement(PROP_ARCHIVE_SHORT_TERM_PERIOD, shortTermArchivePeriod);
+	xml.writeIntElement(PROP_ARCHIVE_LONG_TERM_PERIOD, longTermArchivePeriod);
+	xml.writeStringElement(PROP_ARCHIVE_LOCATION, archiveLocation);
 
 	xml.writeEndElement();	// </Settings>
 
@@ -855,6 +883,10 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddress(PROP_DIAG_DATA_RECEIVING_NETMASK, &diagDataReceivingNetmask);
 
 	result &= xml.readHostAddressPort(PROP_ARCHIVE_DB_HOST_IP, PROP_ARCHIVE_DB_HOST_PORT, &dbHost);
+
+	result &= xml.readIntElement(PROP_ARCHIVE_SHORT_TERM_PERIOD, &shortTermArchivePeriod);
+	result &= xml.readIntElement(PROP_ARCHIVE_LONG_TERM_PERIOD, &longTermArchivePeriod);
+	result &= xml.readStringElement(PROP_ARCHIVE_LOCATION, &archiveLocation);
 
 	return result;
 }
