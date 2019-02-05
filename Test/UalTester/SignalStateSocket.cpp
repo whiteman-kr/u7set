@@ -144,10 +144,10 @@ void SignalStateSocket::replySignalState(const char* replyData, quint32 replyDat
 		AppSignalState appState;
 		appState.load(m_getSignalStateReply.appsignalstates(i));
 
-		//appState.m_flags.valid = 1;
-		//appState.m_value = 2.5;
+		// appState.m_flags.valid = 1;
+		// appState.m_value = 1;
 
-		 m_pSignalBase->setSignalState(hash, appState);
+		m_pSignalBase->setSignalState(hash, appState);
 	}
 
 	requestSignalState();

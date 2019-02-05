@@ -97,6 +97,7 @@ public:
 	//
 	void					clearHashForRequestState();
 	int						hashForRequestStateCount() const;
+	void					appendHashForRequestState(const QVector<Hash>& hashList);
 	Hash					hashForRequestState(int index);
 
 signals:

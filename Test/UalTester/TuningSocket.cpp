@@ -216,7 +216,7 @@ void TuningSocket::requestReadTuningSignals()
 	int signalForReadCount = m_pTuningBase->Signals().count();
 	if (signalForReadCount == 0)
 	{
-		requestTuningSourcesState();
+		requestWriteTuningSignals();
 		return;
 	}
 
@@ -337,7 +337,6 @@ void TuningSocket::requestWriteTuningSignals()
 		}
 
 		Network::TuningWriteCommand* wrCmd = new Network::TuningWriteCommand();
-
 		if (wrCmd == nullptr)
 		{
 			continue;
@@ -352,31 +351,11 @@ void TuningSocket::requestWriteTuningSignals()
 		switch (cmd.type())
 		{
 			case TuningValueType::Discrete:
-			case TuningValueType::SignedInt32:
-
-				tv->set_intvalue(cmd.value().toInt());
-
-				break;
-
-			case TuningValueType::SignedInt64:
-
-				tv->set_intvalue(cmd.value().toLongLong());
-
-				break;
-
+			case TuningValueType::SignedInt32:	tv->set_intvalue(cmd.value().toInt());			break;
+			case TuningValueType::SignedInt64:	tv->set_intvalue(cmd.value().toLongLong());		break;
 			case TuningValueType::Float:
-			case TuningValueType::Double:
-
-				tv->set_doublevalue(cmd.value().toDouble());
-
-				break;
-
-			default:
-
-				assert(false);
-				continue;
-
-				break;
+			case TuningValueType::Double:		tv->set_doublevalue(cmd.value().toDouble());	break;
+			default:							assert(false); continue;						break;
 		}
 
 		wrCmd->set_allocated_value(tv);
@@ -399,7 +378,7 @@ void TuningSocket::replyWriteTuningSignals(const char* replyData, quint32 replyD
 	bool result = m_writeTuningSignalsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
 	if (result == false)
 	{
-		qDebug() << "TuningSocket::replyWriteTuningSignals - error: ParseFromArray";
+		//qDebug() << "TuningSocket::replyWriteTuningSignals - error: ParseFromArray";
 		assert(result);
 		requestTuningSourcesState();
 		return;

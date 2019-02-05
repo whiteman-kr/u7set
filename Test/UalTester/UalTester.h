@@ -90,6 +90,8 @@ private:
 	QTimer m_waitSocketsConnectionTimer;
 	void runWaitSocketsConnectionTimer();
 
+	void runTestFile();
+
 public:
 
 	bool start();

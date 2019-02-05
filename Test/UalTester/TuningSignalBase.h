@@ -184,23 +184,23 @@ class TuningWriteCmd
 public:
 
 	TuningWriteCmd() {}
-	TuningWriteCmd(TuningValueType type, const Hash &signalHash, double value) : m_type (type), m_signalHash (signalHash), m_value (value) {}
+	TuningWriteCmd(const Hash &signalHash, TuningValueType type, double value) : m_signalHash (signalHash), m_type (type), m_value (value) {}
 	virtual ~TuningWriteCmd() {}
 
 private:
 
-	TuningValueType			m_type = TuningValueType::Discrete;
 	Hash					m_signalHash;
+	TuningValueType			m_type = TuningValueType::Discrete;
 	QVariant				m_value;
 
 public:
 
+	Hash					signalHash() const { return m_signalHash; }
+	void					setSignalHash(Hash hash) { m_signalHash = hash; }
+
 	TuningValueType			type() const { return m_type; }
 	int						typeInt() const { return TO_INT(m_type); }
 	void					setType(TuningValueType valueType) { m_type = valueType; }
-
-	Hash					signalHash() const { return m_signalHash; }
-	void					setSignalHash(Hash hash) { m_signalHash = hash; }
 
 	QVariant				value() const { return m_value; }
 	void					setValue(QVariant value) { m_value = value; }
@@ -239,7 +239,7 @@ public:
 	int						cmdFowWriteCount() const;
 
 	void					appendCmdFowWrite(const TuningWriteCmd& cmd);
-	void					appendCmdFowWrite(const Hash& signalHash, float value);
+	void					appendCmdFowWrite(const Hash& signalHash, TuningValueType type, QVariant value);
 
 	TuningWriteCmd			cmdFowWrite(int index);
 

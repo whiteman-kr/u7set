@@ -58,6 +58,7 @@ int TestCommand::getCmdType(const QString& line)
 bool TestCommand::parse(const QString& line)
 {
 	m_line = line;
+	m_paramList.clear();
 	m_errorList.clear();
 	m_lineIndex ++;
 

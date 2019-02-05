@@ -68,6 +68,21 @@ private:
 
 public:
 
+	bool isEmtpy()
+	{
+		if (m_name.isEmpty() == true)
+		{
+			return true;
+		}
+
+		if (m_type == TestCmdParamType::Undefined)
+		{
+			return true;
+		}
+
+		return false;
+	}
+
 	QString name() const { return m_name; }
 	void setName(const QString& name) { m_name = name; }
 

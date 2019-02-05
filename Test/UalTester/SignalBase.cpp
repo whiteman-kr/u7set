@@ -391,6 +391,15 @@ int SignalBase::hashForRequestStateCount() const
 	return count;
 }
 
+void SignalBase::appendHashForRequestState(const QVector<Hash>& hashList)
+{
+	m_stateMutex.lock();
+
+		m_requestStateList.append(hashList);
+
+	m_stateMutex.unlock();
+}
+
 Hash SignalBase::hashForRequestState(int index)
 {
 	Hash hash = UNDEFINED_HASH;

@@ -404,7 +404,7 @@ void TuningBase::appendCmdFowWrite(const TuningWriteCmd& cmd)
 	m_cmdFowWriteMutex.unlock();
 }
 
-void TuningBase::appendCmdFowWrite(const Hash& signalHash, float value)
+void TuningBase::appendCmdFowWrite(const Hash& signalHash, TuningValueType type, QVariant value)
 {
 	if (signalHash == 0)
 	{
@@ -417,6 +417,7 @@ void TuningBase::appendCmdFowWrite(const Hash& signalHash, float value)
 		TuningWriteCmd cmd;
 
 		cmd.setSignalHash(signalHash);
+		cmd.setType(type);
 		cmd.setValue(value);
 
 		m_cmdFowWriteList.append(cmd);
@@ -441,7 +442,3 @@ TuningWriteCmd TuningBase::cmdFowWrite(int index)
 
 	return cmd;
 }
-
-
-
-
