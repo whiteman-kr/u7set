@@ -728,6 +728,29 @@ void UalTester::runTestFile()
 					m_signalBase.clearHashForRequestState();
 				}
 				break;
+
+			case TF_CMD_DELAY:
+				{
+					if (cmd.paramList().count() != 1)
+					{
+						break;
+					}
+
+					TestCmdParam param = cmd.paramList().at(0);
+
+					if (param.type() != TestCmdParamType::SignedInt32)
+					{
+						break;
+					}
+
+					int ms = param.value().toInt();
+
+					qDebug() << "    Delay" << ms << "ms";
+
+					QThread::msleep(ms);
+				}
+				break;
+
 		}
 	}
 }
