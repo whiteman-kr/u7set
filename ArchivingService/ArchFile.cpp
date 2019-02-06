@@ -744,17 +744,54 @@ void ArchFile::shutdown(qint64 curPartition, qint64* totalFlushedStatesCount)
 	flush(curPartition, totalFlushedStatesCount, true);
 }
 
-void ArchFile::maintenance(qint64 currentPartition,
+void ArchFile::breakMaintenance()
+{
+	m_fileInMaintenanceMutex.lock();
+
+	if (m_fileInMaintenance == true)
+	{
+		m_breakMaintenanceRequest = true;
+
+		m_fileInMaintenanceMutex.unlock();
+
+		while(m_breakMaintenanceRequest != false)
+	}
+
+}
+
+
+bool ArchFile::maintenance(qint64 currentPartition,
 						   qint64 shortTermPeriodMs,
 						   qint64 msLongTermPeriod,
 						   int* deletedCount,
 						   int* packedCount)
 {
+	m_fileInMaintenanceMutex.lock();
+
+	m_fileInMaintenance = true;
+
+	m_fileInMaintenanceMutex.lock();
+
 	QVector<ArchFilePartition::Info> partitionsInfo = getArchPartitionsInfo(m_path);
 
-	*deletedCount += deleteOldPartitions(partitionsInfo, currentPartition, msLongTermPeriod);
 	*packedCount += packPartitions(partitionsInfo, currentPartition, shortTermPeriodMs);
+	*deletedCount += deleteOldPartitions(partitionsInfo, currentPartition, msLongTermPeriod);
 }
+
+void ArchFile::startMaintenance()
+{
+	AUTO_LOCK(m_fileInMaintenanceMutex);
+
+	m_fileInMaintenance = true;
+}
+
+void ArchFile::stopMaintenance()
+{
+	AUTO_LOCK(m_fileInMaintenanceMutex);
+
+	m_fileInMaintenance = false;
+}
+
 
 int ArchFile::deleteOldPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
 								  qint64 currentPartition,
@@ -780,20 +817,16 @@ int ArchFile::deleteOldPartitions(const QVector<ArchFilePartition::Info>& partit
 
 	return deletedCount;
 }
-
-int ArchFile::packPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
+/*
+bool ArchFile::packPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
 						qint64 currentPartition,
-						qint64 msShortTermPeriod)
+						qint64 msShortTermPeriod
+						int* packedPartitionsCount)
 {
-	if (m_isAnalog == false)
-	{
-		return 0;
-	}
-
 	int packedPartitionsCount = 0;
 
 	return packedPartitionsCount;
 }
-
+*/
 
 

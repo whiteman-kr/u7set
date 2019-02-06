@@ -147,7 +147,7 @@ public:
 
 	void shutdown(qint64 curPartition, qint64* totalFlushedStatesCount);
 
-	void maintenance(qint64 currentPartition,
+	bool maintenance(qint64 currentPartition,
 					 qint64 msShortTermPeriod,
 					 qint64 msLongTermPeriod,
 					 int* deletedCount,
@@ -158,6 +158,9 @@ public:
 	static const QString SHORT_TERM_ARCHIVE_EXTENSION;
 
 private:
+	void startMaintenance();
+	void stopMaintenance();
+
 	int deleteOldPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
 							qint64 currentPartition,
 							qint64 msLongTermPeriod);
@@ -165,6 +168,7 @@ private:
 	int packPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
 							qint64 currentPartition,
 							qint64 msShortTermPeriod);
+
 private:
 	Hash m_hash = 0;
 	QString m_appSignalID;
@@ -175,10 +179,13 @@ private:
 	bool m_isInitialized = false;
 	bool m_canReadWrite = false;
 
+	QMutex m_fileInMaintenanceMutex;
+	bool m_fileInMaintenance = false;
+	bool m_breakMaintenanceRequest = false;
+
 	//
 
 	SimpleAppSignalState m_lastState;
-
 	QString m_path;
 
 	//
