@@ -2252,8 +2252,7 @@ void EquipmentView::addInOutsToSignals()
 		if (equipmentDevice != module)
 		{
 			QByteArray bytes;
-
-			equipmentDevice->Save(bytes);	// save and restore to keep equpment version after expanding strid
+			equipmentDevice->saveToByteArray(&bytes);	// save and restore to keep equpment version after expanding strid
 
 			std::shared_ptr<Hardware::DeviceObject> newObject = Hardware::DeviceObject::Create(bytes);
 
@@ -3347,7 +3346,7 @@ void EquipmentView::updateFromPreset()
 		}
 
 		QByteArray data;
-		bool ok = device->Save(data);
+		bool ok = device->saveToByteArray(&data);
 
 		if (ok == false)
 		{
@@ -4909,7 +4908,7 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<PropertyObject>> 
 		}
 
 		QByteArray data;
-		bool ok = device->Save(data);
+		bool ok = device->saveToByteArray(&data);
 
 		if (ok == false)
 		{

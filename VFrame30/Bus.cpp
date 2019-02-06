@@ -483,7 +483,7 @@ namespace VFrame30
 	Hash Bus::calcHash() const
 	{
 		QByteArray data;
-		bool ok = Save(data);
+		bool ok = saveToByteArray(&data);
 
 		if (ok == false)
 		{

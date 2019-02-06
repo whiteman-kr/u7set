@@ -54,7 +54,7 @@ namespace Proto
 		{
 		}
 
-		bool Save(const QString& fileName) const
+		bool saveToFile(const QString& fileName) const
 		{
 			std::wstring wfnstr(fileName.toStdWString());
 			std::string fnstr(wfnstr.begin(), wfnstr.end());
@@ -66,9 +66,9 @@ namespace Proto
 				return false;
 			}
 
-			return Save(output);
+			return saveToStream(output);
 		}
-		bool Save(const wchar_t* fileName) const
+		bool saveToFile(const wchar_t* fileName) const
 		{
 			std::wstring wfnstr(fileName);
 			std::string fnstr(wfnstr.begin(), wfnstr.end());
@@ -80,9 +80,9 @@ namespace Proto
 				return false;
 			}
 
-			return Save(output);
+			return saveToStream(output);
 		}
-		bool Save(std::fstream& stream) const
+		bool saveToStream(std::fstream& stream) const
 		{
 			if (stream.is_open() == false || stream.bad() == true)
 			{
@@ -164,7 +164,7 @@ namespace Proto
 				return false;
 			}
 		}
-		bool Save(QByteArray& data) const
+		bool saveToByteArray(QByteArray* data) const
 		{
 			Proto::Envelope message;
 			this->SaveData(&message);
@@ -198,7 +198,7 @@ namespace Proto
 						//
 						if (static_cast<size_t>(compressedData.size()) >= serializedString.size())
 						{
-							data = QByteArray(serializedString.data(), static_cast<int>(serializedString.size()));
+							*data = QByteArray(serializedString.data(), static_cast<int>(serializedString.size()));
 							return true;
 						}
 
@@ -210,7 +210,7 @@ namespace Proto
 						compressMessage.set_compressedobject(compressedData.constData(), compressedData.size());
 
 						std::string str = compressMessage.SerializeAsString();
-						data = QByteArray(str.data(), static_cast<int>(str.size()));
+						*data = QByteArray(str.data(), static_cast<int>(str.size()));
 
 						return true;
 					}
@@ -218,7 +218,7 @@ namespace Proto
 					{
 						// Do not compress
 						//
-						data = QByteArray(serializedString.data(), static_cast<int>(serializedString.size()));
+						*data = QByteArray(serializedString.data(), static_cast<int>(serializedString.size()));
 						return true;
 					}
 				}
@@ -227,7 +227,7 @@ namespace Proto
 			case ProtoCompress::Never:
 				{
 					std::string str = message.SerializeAsString();
-					data = QByteArray(str.data(), static_cast<int>(str.size()));
+					*data = QByteArray(str.data(), static_cast<int>(str.size()));
 					return true;
 				}
 

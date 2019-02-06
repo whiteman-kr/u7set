@@ -673,7 +673,7 @@ double MV_TYPE_E[][2]=
 	{90 , 5.648}, {91 , 5.714}, {92 , 5.781}, {93 , 5.848}, {94 , 5.915}, {95 , 5.982}, {96 , 6.049}, {97 , 6.117}, {98 , 6.184}, {99 , 6.251	},
 	{100 , 6.319}, {101 , 6.386}, {102 , 6.454}, {103 , 6.522}, {104 , 6.59}, {105 , 6.658}, {106 , 6.725}, {107 , 6.794}, {108 , 6.862}, {109 , 6.93	},
 	{110 , 6.998}, {111 , 7.066}, {112 , 7.135}, {113 , 7.203}, {114 , 7.272}, {115 , 7.341}, {116 , 7.409}, {117 , 7.478}, {118 , 7.547}, {119 , 7.616	},
-	{120 , 7.685}, {121 , 7.754}, {122 , 7.8-23}, {123 , 7.892}, {124 , 7.962}, {125 , 8.031}, {126 , 8.101}, {127 , 8.17}, {128 , 8.24}, {129 , 8.309	},
+	{120 , 7.685}, {121 , 7.754}, {122 , 7.823}, {123 , 7.892}, {124 , 7.962}, {125 , 8.031}, {126 , 8.101}, {127 , 8.17}, {128 , 8.24}, {129 , 8.309	},
 	{130 , 8.379}, {131 , 8.449}, {132 , 8.519}, {133 , 8.589}, {134 , 8.659}, {135 , 8.729}, {136 , 8.799}, {137 , 8.869}, {138 , 8.94}, {139 , 9.01	},
 	{140 , 9.081}, {141 , 9.151}, {142 , 9.222}, {143 , 9.292}, {144 , 9.363}, {145 , 9.434}, {146 , 9.505}, {147 , 9.576}, {148 , 9.647}, {149 , 9.718	},
 	{150 , 9.789}, {151 , 9.86}, {152 , 9.931}, {153 , 10.003}, {154 , 10.074}, {155 , 10.145}, {156 , 10.217}, {157 , 10.288}, {158 , 10.36}, {159 , 10.432	},
@@ -685,7 +685,7 @@ double MV_TYPE_E[][2]=
 	{210 , 14.164}, {211 , 14.239}, {212 , 14.313}, {213 , 14.388}, {214 , 14.463}, {215 , 14.537}, {216 , 14.612}, {217 , 14.687}, {218 , 14.762}, {219 , 14.837	},
 	{220 , 14.912}, {221 , 14.987}, {222 , 15.062}, {223 , 15.137}, {224 , 15.212}, {225 , 15.287}, {226 , 15.362}, {227 , 15.438}, {228 , 15.513}, {229 , 15.588	},
 	{230 , 15.664}, {231 , 15.739}, {232 , 15.815}, {233 , 15.89}, {234 , 15.966}, {235 , 16.041}, {236 , 16.117}, {237 , 16.193}, {238 , 16.269}, {239 , 16.344	},
-	{240 , 16.42}, {241 , 16.496}, {242 , 16.572}, {243 , 16.648}, {244 , 16.724}, {245 , 16.8}, {246 , 16.876}, {247 , 16.952}, {248 , 17.028}, {249 , 37.104	},
+	{240 , 16.42}, {241 , 16.496}, {242 , 16.572}, {243 , 16.648}, {244 , 16.724}, {245 , 16.8}, {246 , 16.876}, {247 , 16.952}, {248 , 17.028}, {249 , 17.104	},
 	{250 , 17.181}, {251 , 17.257}, {252 , 17.333}, {253 , 17.409}, {254 , 17.486}, {255 , 17.562}, {256 , 17.639}, {257 , 17.715}, {258 , 17.792}, {259 , 17.868	},
 	{260 , 17.945}, {261 , 18.021}, {262 , 18.098}, {263 , 18.175}, {264 , 18.252}, {265 , 18.328}, {266 , 18.405}, {267 , 18.482}, {268 , 18.559}, {269 , 18.636	},
 	{270 , 18.713}, {271 , 18.79}, {272 , 18.867}, {273 , 18.944}, {274 , 19.021}, {275 , 19.098}, {276 , 19.175}, {277 , 19.252}, {278 , 19.33}, {279 , 19.407	},
@@ -8513,11 +8513,13 @@ double findConversionVal(double val, double* pArray, int size, bool isDegree)
 			if (val == pArray[i])
 			{
 				retVal = pArray[i+1];
+				break;
 			}
 
 			if ((val > pArray[i]) && (val < pArray[i+2]))
 			{
 				retVal = ((pArray[i+3] - pArray[i+1])*(val-pArray[i]))/(pArray[i+2]-pArray[i])+pArray[i+1];
+				break;
 			}
 		}
 		else
@@ -8525,11 +8527,13 @@ double findConversionVal(double val, double* pArray, int size, bool isDegree)
 			if (val == pArray[i+1])
 			{
 				retVal = pArray[i];
+				break;
 			}
 
 			if ((val > pArray[i+1]) && (val < pArray[i+3]))
 			{
 				retVal = ((pArray[i+2] - pArray[i])*(val-pArray[i+1]))/(pArray[i+3]-pArray[i+1])+pArray[i];
+				break;
 			}
 
 		}
@@ -8601,6 +8605,14 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 						case E::SensorType::mV_Type_S:			retVal = findConversionVal(val, &MV_TYPE_S[0][0], MV_TYPE_S_COUNT, true);			break;
 						case E::SensorType::mV_Type_T:			retVal = findConversionVal(val, &MV_TYPE_T[0][0], MV_TYPE_T_COUNT, true);			break;
 
+						case E::SensorType::mV_Raw_Mul_8:
+						case E::SensorType::mV_Raw_Mul_32:
+
+							retVal = (val - param.physicalLowLimit())*(param.electricHighLimit() - param.electricLowLimit())/(param.physicalHighLimit() - param.physicalLowLimit()) + param.electricLowLimit();
+
+							break;
+
+
 						default:								assert(0);
 					}
 
@@ -8628,7 +8640,6 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 
 					switch(param.electricSensorType())
 					{
-
 						case E::SensorType::NoSensor:			retVal = (val - param.electricLowLimit())*(param.physicalHighLimit() - param.physicalLowLimit())/(param.electricHighLimit() - param.electricLowLimit()) + param.physicalLowLimit();	break;
 
 						case E::SensorType::Ohm_Pt50_W1391:		retVal = findConversionVal(val, &PT_50_W_1391[0][0], PT_50_W_1391_COUNT, false);	break;
@@ -8670,6 +8681,13 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 						case E::SensorType::mV_Type_R:			retVal = findConversionVal(val, &MV_TYPE_R[0][0], MV_TYPE_R_COUNT, false);			break;
 						case E::SensorType::mV_Type_S:			retVal = findConversionVal(val, &MV_TYPE_S[0][0], MV_TYPE_S_COUNT, false);			break;
 						case E::SensorType::mV_Type_T:			retVal = findConversionVal(val, &MV_TYPE_T[0][0], MV_TYPE_T_COUNT, false);			break;
+
+						case E::SensorType::mV_Raw_Mul_8:
+						case E::SensorType::mV_Raw_Mul_32:
+
+							retVal = (val - param.electricLowLimit())*(param.physicalHighLimit() - param.physicalLowLimit())/(param.electricHighLimit() - param.electricLowLimit()) + param.physicalLowLimit();
+
+							break;
 
 						default:								assert(0);
 					}

@@ -137,8 +137,7 @@ bool BusStorage::save(const QUuid& uuid, QString* errorMessage)
 	}
 
 	QByteArray data;
-
-	bool ok = bus->Save(data);
+	bool ok = bus->saveToByteArray(&data);
 
 	if (ok == false)
 	{

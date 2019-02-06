@@ -15,7 +15,7 @@ signals:
 	void sendRequest(quint32 requestID);
 
 public:
-	TestAppDataService();
+	TestAppDataService(int& argc, char** argv);
 
 private:
 	bool readByteArray(QString fileName, QByteArray& result, QString& error);
@@ -37,7 +37,10 @@ private Q_SLOTS:
 	void cleanupTestCase();
 
 private:
-	AppDataServiceSettings m_cfgSettings;
+	QString m_equipmentID;
+	HostAddressPort m_cfgIp1;
+	HostAddressPort m_cfgIp2;
+	TestClientSettings m_cfgSettings;
 	QVector<DataSource> m_dataSources;
 	QVector<QVector<Rup::Frame>> m_sourcePackets;
 

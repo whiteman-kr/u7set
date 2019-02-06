@@ -809,6 +809,7 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 	proto->set_errorframesize(errorFrameSize());
 	proto->set_errorduplicateplanttime(errorDuplicatePlantTime());
 	proto->set_errornonmonotonicplanttime(errorDuplicatePlantTime());
+	proto->set_lmequipmentid(lmEquipmentID().toStdString());
 
 	return true;
 }

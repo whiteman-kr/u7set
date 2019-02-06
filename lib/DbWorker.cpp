@@ -263,6 +263,10 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0243.sql", "Upgrade to version 243, AIM-4PH Preset corrections"},
 	{":/DatabaseUpgrade/Upgrade0244.sql", "Upgrade to version 244, Blink signal was added to LM1-SR04, LM1-SF00-4PH Presets"},
 	{":/DatabaseUpgrade/Upgrade0245.sql", "Upgrade to version 245, Unit have been made editable for output analog signals"},
+	{":/DatabaseUpgrade/Upgrade0246.sql", "Upgrade to version 246, Add attributes to file system"},
+	{":/DatabaseUpgrade/Upgrade0247.sql", "Upgrade to version 247, AIM-4PH default range is 5..0, TIM valid range checking is made in physical units, added V to ElectricUnits in AOM-4PH"},
+	{":/DatabaseUpgrade/Upgrade0248.sql", "Upgrade to version 248, TIM valid range checking calculations fix"},
+	{":/DatabaseUpgrade/Upgrade0249.sql", "Upgrade to version 249, Add archive period and location properties to Archive Service preset"},
 };
 
 
@@ -2721,27 +2725,45 @@ void DbWorker::slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int pa
 
 		if (ensureUniquesInParentTree == false)
 		{
-			q.prepare("SELECT * FROM api.add_file(:sessionkey, :filename, :parentid, :filedata, :details);");
+			q.prepare("SELECT * FROM api.add_file(:sessionkey, :filename, :parentid, :filedata, :details, :attributes);");
 
 			q.bindValue(":sessionkey", sessionKey());
 			q.bindValue(":filename", file->fileName());
 			q.bindValue(":parentid", parentId);
-			q.bindValue(":filedata", file->data());
+			if (file->data().isEmpty() == false)
+			{
+				q.bindValue(":filedata", file->data());
+			}
+			else
+			{
+				q.bindValue(":filedata", "");
+			}
 			q.bindValue(":details", file->details());
+			q.bindValue(":attributes", file->attributes());
+
+			qDebug() << q.lastQuery();
 		}
 		else
 		{
 			// api.add_unique_file scans parent tree and finds any files with the same name.
 			// Comparsion done without extension, case insensetive
 			//
-			q.prepare("SELECT * FROM api.add_unique_file(:sessionkey, :filename, :parentid, :uniquefromfileid,  :filedata, :details);");
+			q.prepare("SELECT * FROM api.add_unique_file(:sessionkey, :filename, :parentid, :uniquefromfileid,  :filedata, :details, :attributes);");
 
 			q.bindValue(":sessionkey", sessionKey());
 			q.bindValue(":filename", file->fileName());
 			q.bindValue(":parentid", parentId);
 			q.bindValue(":uniquefromfileid", uniqueFromFileId);
-			q.bindValue(":filedata", file->data());
+			if (file->data().isEmpty() == false)
+			{
+				q.bindValue(":filedata", file->data());
+			}
+			else
+			{
+				q.bindValue(":filedata", "");
+			}
 			q.bindValue(":details", file->details());
+			q.bindValue(":attributes", file->attributes());
 		}
 
 		bool result = q.exec();
@@ -4169,7 +4191,7 @@ void DbWorker::slot_addDeviceObject(Hardware::DeviceObject* device, int parentId
 		// FUNCTION add_device(user_id integer, file_data bytea, parent_id integer, file_extension text, details text)
 		//
 		QByteArray data;
-		bool result = current->Save(data);
+		bool result = current->saveToByteArray(&data);
 		if (result == false)
 		{
 			assert(result);
@@ -4595,16 +4617,6 @@ QString DbWorker::getSignalDataStr(const Signal& s)
 	return str;
 }
 
-void DbWorker::getObjectState(QSqlQuery& q, ObjectState& os)
-{
-	os.id = q.value("id").toInt();
-	os.deleted = q.value("deleted").toBool();
-	os.checkedOut = q.value("checkedout").toBool();
-	os.action = q.value("action").toInt();
-	os.userId = q.value("userid").toInt();
-	os.errCode = q.value("errCode").toInt();
-}
-
 void DbWorker::slot_addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 {
 	AUTO_COMPLETE
@@ -4663,7 +4675,7 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 	{
 		ObjectState os;
 
-		getObjectState(q, os);
+		db_objectState(q, &os);
 
 		int signalID =  os.id;
 
@@ -4754,7 +4766,7 @@ bool DbWorker::setSignalWorkcopy(QSqlDatabase& db, const Signal& s, ObjectState&
 		return false;
 	}
 
-	getObjectState(q, objectState);
+	db_objectState(q, &objectState);
 
 	return true;
 }
@@ -4837,7 +4849,7 @@ void DbWorker::slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState
 	{
 		ObjectState os;
 
-		getObjectState(q, os);
+		db_objectState(q, &os);
 
 		objectStates->append(os);
 	}
@@ -4952,7 +4964,7 @@ void DbWorker::slot_deleteSignal(int signalID, ObjectState* objectState)
 
 	if (q.next() != false)
 	{
-		getObjectState(q, *objectState);
+		db_objectState(q, objectState);
 	}
 	else
 	{
@@ -5004,7 +5016,7 @@ void DbWorker::slot_undoSignalChanges(int signalID, ObjectState* objectState)
 
 	if (q.next() != false)
 	{
-		getObjectState(q, *objectState);
+		db_objectState(q, objectState);
 	}
 	else
 	{
@@ -5089,7 +5101,7 @@ void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVe
 	{
 		ObjectState os;
 
-		getObjectState(q, os);
+		db_objectState(q, &os);
 
 		objectState->append(os);
 	}
@@ -5188,7 +5200,7 @@ void DbWorker::slot_autoDeleteSignals(const std::vector<Hardware::DeviceSignal*>
 
 		if (q.next() != false)
 		{
-			getObjectState(q, os);
+			db_objectState(q, &os);
 		}
 		else
 		{
@@ -6088,7 +6100,7 @@ int DbWorker::db_getProjectVersion(QSqlDatabase db)
 	}
 }
 
-bool DbWorker::db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo, bool checkFileId) const
+bool DbWorker::db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo, bool checkFileId)
 {
 	//qDebug() << Q_FUNC_INFO << " FileId = " << q.value(0).toInt();
 	//qDebug() << Q_FUNC_INFO << " Deleted = " << q.value(1).toBool();
@@ -6119,7 +6131,7 @@ bool DbWorker::db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo, bool
 	return true;
 }
 
-bool DbWorker::db_updateFile(const QSqlQuery& q, DbFile* file) const
+bool DbWorker::db_updateFile(const QSqlQuery& q, DbFile* file)
 {
 static thread_local bool columnIndexesInitialized = false;
 static thread_local int fileIdNo = -1;
@@ -6134,6 +6146,7 @@ static thread_local int actionNo = -1;
 static thread_local int userIdNo = -1;
 static thread_local int detailsNo = -1;
 static thread_local int dataNo = -1;
+static thread_local int attributesNo = -1;
 
 	QSqlRecord record = q.record();
 
@@ -6153,6 +6166,7 @@ static thread_local int dataNo = -1;
 		userIdNo = record.indexOf("UserID");
 		detailsNo = record.indexOf("Details");
 		dataNo = record.indexOf("Data");
+		attributesNo = record.indexOf("Attributes");
 
 		if (fileIdNo == -1 ||
 		    deletedNo == -1 ||
@@ -6165,7 +6179,8 @@ static thread_local int dataNo = -1;
 		    actionNo == -1 ||
 		    userIdNo == -1 ||
 		    detailsNo == -1 ||
-		    dataNo == -1)
+			dataNo == -1 ||
+			attributesNo == -1)
 		{
 			assert(false);
 			return false;
@@ -6191,6 +6206,8 @@ static thread_local int dataNo = -1;
 	QByteArray data = record.value(dataNo).toByteArray();
 	file->swapData(data);
 
+	file->setAttributes(record.value(attributesNo).toInt());
+
 	return true;
 }
 
@@ -6210,7 +6227,8 @@ bool DbWorker::db_dbFileInfo(const QSqlQuery& q, DbFileInfo* fileInfo)
 	//	    checkouttime timestamp with time zone,
 	//	    userid integer,
 	//	    action integer,
-	//	    details text);
+	//	    details text,
+	//		attributes integer);
 	//	ALTER TYPE dbfileinfo
 	//	  OWNER TO postgres;
 
@@ -6228,6 +6246,21 @@ bool DbWorker::db_dbFileInfo(const QSqlQuery& q, DbFileInfo* fileInfo)
 	fileInfo->setUserId(q.value(9).toInt());
 	fileInfo->setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(10).toInt()));
 	fileInfo->setDetails(q.value(11).toString());
+	fileInfo->setAttributes(q.value(12).toInt());
+
+	return true;
+}
+
+bool DbWorker::db_objectState(QSqlQuery& q, ObjectState* os)
+{
+	assert(os);
+
+	os->id = q.value(0).toInt();
+	os->deleted = q.value(1).toBool();
+	os->checkedOut = q.value(2).toBool();
+	os->action = q.value(3).toInt();
+	os->userId = q.value(4).toInt();
+	os->errCode = q.value(5).toInt();
 
 	return true;
 }

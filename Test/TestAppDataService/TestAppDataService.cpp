@@ -1,26 +1,33 @@
 #include <QString>
 #include <QtTest>
 #include <QUdpSocket>
-#include "tst_testappdataservice.h"
+#include "TestAppDataService.h"
 #include "../../lib/XmlHelper.h"
 #include "AppDataServiceClient.h"
 #include "../../lib/SoftwareInfo.h"
-
-const QString pathToBuild = QStringLiteral("/mnt/Data/fedora/service_tests-debug");
-const QString appDataServiceID = QStringLiteral("SYSTEMID_RACKID_WS00_ADS");
+#include "../../lib/CommandLineParser.h"
+#include "../../lib/CfgServerLoader.h"
 
 const QString configFile = QStringLiteral("Configuration.xml");
 const QString dataSourceFile = QStringLiteral("AppDataSources.xml");
 
-const QString appDataServiceBuildPath = pathToBuild + (pathToBuild.endsWith("/") ? "" : "/") +
-		"build/" +
-		appDataServiceID + "/";
+const QString SETTING_EQUIPMENT_ID = QStringLiteral("EquipmentID");
+const QString SETTING_CFG_SERVICE_IP1 = QStringLiteral("CfgServiceIP1");
+const QString SETTING_CFG_SERVICE_IP2 = QStringLiteral("CfgServiceIP2");
 
-const QString appDataServiceConfigPath = appDataServiceBuildPath + configFile;
-const QString appDataServiceDataSourcePath = appDataServiceBuildPath + dataSourceFile;
-
-TestAppDataService::TestAppDataService()
+TestAppDataService::TestAppDataService(int &argc, char **argv)
 {
+	CommandLineParser parser(argc, argv);
+
+	parser.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "TestClient EquipmentID.", "EQUIPMENT_ID");
+	parser.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "IPv4");
+	parser.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "IPv4");
+
+	parser.parse();
+
+	m_equipmentID = parser.settingValue(SETTING_EQUIPMENT_ID);
+	m_cfgIp1.setAddressPortStr(parser.settingValue(SETTING_CFG_SERVICE_IP1), PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
+	m_cfgIp2.setAddressPortStr(parser.settingValue(SETTING_CFG_SERVICE_IP2), PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
 }
 
 bool TestAppDataService::readByteArray(QString fileName, QByteArray& result, QString& error)
@@ -125,9 +132,9 @@ bool TestAppDataService::initTcpClient(QString &/*error*/)
 
 	SoftwareInfo si;
 
-	si.init(E::SoftwareType::ServiceControlManager, "TEST_APP_DATA_SERVICE", 1, 0);
+	si.init(E::SoftwareType::TestClient, m_equipmentID, 1, 0);
 
-	m_tcpClientSocket = new AppDataServiceClient(m_nextDataSourceStateMessage, si, m_cfgSettings.clientRequestIP);
+	m_tcpClientSocket = new AppDataServiceClient(m_nextDataSourceStateMessage, si, m_cfgSettings.appDataService_clientRequestIP);
 
 	return true;
 }
@@ -209,7 +216,7 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 
 			//static int attemptQuantity = 0;
 
-			const HostAddressPort& dest = m_cfgSettings.appDataReceivingIP;
+			const HostAddressPort& dest = m_cfgSettings.appDataService_appDataReceivingIP;
 			m_udpSockets[i]->writeDatagram(reinterpret_cast<char*>(&frame), sizeof(frame), dest.address(), dest.port());
 
 			/*attemptQuantity++;
@@ -241,17 +248,17 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 
 		if (previusSourceMessage == nullptr || nextSourceMessage == nullptr)
 		{
-			error = "AppDataSource state reply doesn't contain state of " + m_dataSources[i].lmCaption();
+			error = "AppDataSource state reply doesn't contain state of " + m_dataSources[i].lmEquipmentID();
 			return false;
 		}
 
 		// AppDataSourceState::receivedDataID
 		//
 		Rup::Header& header = m_sourcePackets[i][0].header;
-		quint32 dataId = reverseUint16(header.dataId);
+		quint32 dataId = reverseUint32(header.dataId);
 		if (dataId != nextSourceMessage->receiveddataid())
 		{
-			error = "Source " + m_dataSources[i].lmCaption() +
+			error = "Source " + m_dataSources[i].lmEquipmentID() +
 					" received Data ID " + QString::number(nextSourceMessage->receiveddataid(), 16) + " instead of " + QString::number(dataId, 16);
 			return false;
 		}
@@ -262,7 +269,7 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 
 		if (receivedPacketsQuantity != 1)
 		{
-			error = "Source " + m_dataSources[i].lmCaption() +
+			error = "Source " + m_dataSources[i].lmEquipmentID() +
 					" received " + QString::number(receivedPacketsQuantity) + " packets instead of 1";
 			return false;
 		}
@@ -273,7 +280,7 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 
 		if (receivedFramesQuantity != m_dataSources[i].lmRupFramesQuantity())
 		{
-			error = "Source " + m_dataSources[i].lmCaption() +
+			error = "Source " + m_dataSources[i].lmEquipmentID() +
 					" received " + QString::number(receivedFramesQuantity) + " frames"
 					" instead of " + QString::number(m_dataSources[i].lmRupFramesQuantity());
 			return false;
@@ -286,7 +293,7 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 
 		if (receivedDataQuantity != expectedDataQuantity)
 		{
-			error = "Source " + m_dataSources[i].lmCaption() +
+			error = "Source " + m_dataSources[i].lmEquipmentID() +
 					" received " + QString::number(receivedFramesQuantity) + "bytes"
 					" instead of " + QString::number(expectedDataQuantity);
 			return false;
@@ -298,7 +305,7 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 
 		if (lostPacketCount != 0)
 		{
-			error = "Source " + m_dataSources[i].lmCaption() +
+			error = "Source " + m_dataSources[i].lmEquipmentID() +
 					" lost " + QString::number(lostPacketCount) + " packets instead of 0";
 			return false;
 		}
@@ -319,7 +326,7 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 
 		if (receivedPlantTime != expectedPlantTime)
 		{
-			error = "Source " + m_dataSources[i].lmCaption() +
+			error = "Source " + m_dataSources[i].lmEquipmentID() +
 					" received plant time " + receivedPlantTime.toString() +
 					" instead of " + expectedPlantTime.toString();
 			return false;
@@ -330,7 +337,7 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 		quint16 numerator = reverseUint16(header.numerator);
 		if (numerator != nextSourceMessage->rupframenumerator())
 		{
-			error = "Source " + m_dataSources[i].lmCaption() +
+			error = "Source " + m_dataSources[i].lmEquipmentID() +
 					" received numerator " + QString::number(nextSourceMessage->rupframenumerator()) +
 					" instead of " + QString::number(numerator);
 			return false;
@@ -346,7 +353,7 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 		int errorProtocolVersion = nextSourceMessage->errorprotocolversion() - previusSourceMessage->errorprotocolversion();
 		if (errorProtocolVersion != 0)
 		{
-			error = "Source " + m_dataSources[i].lmCaption() +
+			error = "Source " + m_dataSources[i].lmEquipmentID() +
 					" incrimented errorProtocolVersion by " + errorProtocolVersion;
 			return false;
 		}
@@ -356,7 +363,7 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 		int errorFramesQuantity = nextSourceMessage->errorframesquantity() - previusSourceMessage->errorframesquantity();
 		if (errorFramesQuantity != 0)
 		{
-			error = "Source " + m_dataSources[i].lmCaption() +
+			error = "Source " + m_dataSources[i].lmEquipmentID() +
 					" incrimented errorFramesQuantity by " + errorFramesQuantity;
 			return false;
 		}
@@ -366,7 +373,7 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 		int errorFrameNo = nextSourceMessage->errorframeno() - previusSourceMessage->errorframeno();
 		if (errorFrameNo != 0)
 		{
-			error = "Source " + m_dataSources[i].lmCaption() +
+			error = "Source " + m_dataSources[i].lmEquipmentID() +
 					" incrimented errorFrameNo by " + errorFrameNo;
 			return false;
 		}
@@ -376,7 +383,7 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 		int errorDataID = nextSourceMessage->errordataid() - previusSourceMessage->errordataid();
 		if (errorDataID != 0)
 		{
-			error = "Source " + m_dataSources[i].lmCaption() +
+			error = "Source " + m_dataSources[i].lmEquipmentID() +
 					" incrimented errorDataID by " + errorDataID;
 			return false;
 		}
@@ -386,7 +393,7 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 		int errorFrameSize = nextSourceMessage->errorframesize() - previusSourceMessage->errorframesize();
 		if (errorFrameSize != 0)
 		{
-			error = "Source " + m_dataSources[i].lmCaption() +
+			error = "Source " + m_dataSources[i].lmEquipmentID() +
 					" incrimented errorFrameSize by " + errorFrameSize;
 			return false;
 		}
@@ -396,7 +403,7 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 		int errorDuplicatePlantTime = nextSourceMessage->errorduplicateplanttime() - previusSourceMessage->errorduplicateplanttime();
 		if (errorDuplicatePlantTime != 0)
 		{
-			error = "Source " + m_dataSources[i].lmCaption() +
+			error = "Source " + m_dataSources[i].lmEquipmentID() +
 					" incrimented errorDuplicatePlantTime by " + errorDuplicatePlantTime;
 			return false;
 		}
@@ -406,7 +413,7 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 		int errorNonmonotonicPlantTime = nextSourceMessage->errornonmonotonicplanttime() - previusSourceMessage->errornonmonotonicplanttime();
 		if (errorNonmonotonicPlantTime != 0)
 		{
-			error = "Source " + m_dataSources[i].lmCaption() +
+			error = "Source " + m_dataSources[i].lmEquipmentID() +
 					" incrimented errorNonmonotonicPlantTime by " + errorNonmonotonicPlantTime;
 			return false;
 		}
@@ -432,34 +439,58 @@ void TestAppDataService::initTestCase()
 {
 	// reading Configuration.xml
 	//
+	SoftwareInfo si;
+
+	si.init(E::SoftwareType::TestClient, m_equipmentID, 1, 0);
+
+	CfgLoaderThread cfgLoader(si, 1, m_cfgIp1, m_cfgIp2, false, nullptr);
+
+	cfgLoader.start();
+	cfgLoader.enableDownloadConfiguration();
+
+	QTimer timeoutChecker;
+	QEventLoop waiter;
+
 	QByteArray data;
 	QString error;
-	bool result = readByteArray(appDataServiceConfigPath, data, error);
-	if (result == false)
+
+	timeoutChecker.setSingleShot(true);
+	connect(&cfgLoader, &CfgLoaderThread::signal_configurationReady,
+			[&](const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
 	{
-		QVERIFY2(false, qPrintable(error));
+		data = configurationXmlData;
+		waiter.quit();
+	});
+	connect(&timeoutChecker, &QTimer::timeout, &waiter, &QEventLoop::quit);
+	timeoutChecker.start(10 * 1000);
+	waiter.exec();
+
+	if (timeoutChecker.isActive() == false)
+	{
+		QVERIFY2(false, qPrintable("Timeout of reading Configuration.xml"));
 	}
+
 	XmlReadHelper configXml(data);
 
-	result = m_cfgSettings.readFromXml(configXml);
+	bool result = m_cfgSettings.readFromXml(configXml);
 	if (result == false)
 	{
-		QVERIFY2(false, qPrintable("Could not read config file " + appDataServiceConfigPath));
+		QVERIFY2(false, qPrintable("Could not understand config file Configuration.xml"));
 	}
 
-	// reading AppDataSources.xml
-	//
-	result = readByteArray(appDataServiceDataSourcePath, data, error);
+	result = initTcpClient(error);
 	if (result == false)
 	{
 		QVERIFY2(false, qPrintable(error));
 	}
 
-	result = DataSourcesXML<DataSource>::readFromXml(data, &m_dataSources);
+	result = m_tcpClientSocket->sendRequestAndWaitForResponse(ADS_GET_DATA_SOURCES_INFO, error);
 	if (result == false)
 	{
-		QVERIFY2(false, qPrintable("Error reading AppDataSources from XML-file " + appDataServiceConfigPath));
+		QVERIFY2(false, qPrintable(error));
 	}
+
+	m_tcpClientSocket->initDataSourceArray(m_dataSources);
 
 	result = initSourcePackets(error);
 	if (result == false)
@@ -468,12 +499,6 @@ void TestAppDataService::initTestCase()
 	}
 
 	result = initSenders(error);
-	if (result == false)
-	{
-		QVERIFY2(false, qPrintable(error));
-	}
-
-	result = initTcpClient(error);
 	if (result == false)
 	{
 		QVERIFY2(false, qPrintable(error));
@@ -503,9 +528,3 @@ void TestAppDataService::cleanupTestCase()
 	removeSenders();
 	removeTcpClient();
 }
-
-//QTEST_APPLESS_MAIN(TestAppDataService)
-//QTEST_GUILESS_MAIN(TestAppDataService)
-QTEST_MAIN(TestAppDataService)
-
-//#include "tst_testappdataservice.moc"

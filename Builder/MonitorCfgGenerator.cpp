@@ -82,7 +82,7 @@ namespace Builder
 
 		QByteArray schemaSetFileData;
 
-		bool saveOk = detailsSet.Save(schemaSetFileData);
+		bool saveOk = detailsSet.saveToByteArray(&schemaSetFileData);
 		assert(saveOk);
 
 		if (saveOk == true)

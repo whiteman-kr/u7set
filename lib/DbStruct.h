@@ -275,6 +275,7 @@ public:
 
 	const std::map<int, std::shared_ptr<DbFileInfo>>& files() const;
 	std::vector<DbFileInfo> toVector(bool excludeRoot) const;
+	std::vector<DbFileInfo> toVectorIf(std::function<bool(const DbFileInfo&)> pred) const;
 	std::vector<std::shared_ptr<DbFileInfo>> toVectorOfSharedPointers(bool excludeRoot) const;
 
 	bool hasChildren(int fileId) const;
@@ -308,6 +309,7 @@ public:
 	bool removeFile(std::shared_ptr<DbFileInfo> fileInfo);
 
 	bool removeFilesWithExtension(QString ext);
+	bool removeIf(std::function<bool(const DbFileInfo&)> pred);
 
 private:
 	struct FileChildren
@@ -393,6 +395,15 @@ public:
 	const QString& details() const noexcept;
 	void setDetails(const QString& value);		// Value must be valid JSON, Example: "{}"
 
+	// File Attributes
+	//
+	qint32 attributes() const;
+	void setAttributes(qint32 value);
+
+	bool isFolder() const;
+	bool directoryAttribute() const;
+	void setDirectoryAttribute(bool value);
+
 	// Data
 	//
 protected:
@@ -412,8 +423,18 @@ protected:
 
 	QString m_details;
 
+	union
+	{
+		struct
+		{
+			qint32 m_attrDirectory: 1;
+		};
+		qint32 m_attributes = 0;
+	};
+
 public:
 	static const int Null = -1;
+	static const int ATTRIBUTE_DIRECTORY = 0x00000001;
 
 	static QString fullPathToFileName(const QString& fullPathName);		// $root$/Schemas/Monitor -> Monitor
 
@@ -447,7 +468,8 @@ public:
 	//
 public:
 	const QByteArray& data() const;
-	QByteArray& data();
+	//QByteArray& data();				// Commented, as this function cannot set size after changing data
+	void setData(const QByteArray& data);
 	void swapData(QByteArray& data);
 	void clearData();
 

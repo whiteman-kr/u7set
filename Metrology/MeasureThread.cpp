@@ -571,6 +571,8 @@ void MeasureThread::measureLinearity()
 				emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the positive (+) part of the electrical range.").arg(m_activeSignalParam[c].calibratorManager()->calibratorChannel() + 1));
 			}
 
+			// set electric value
+			//
 			switch (m_activeSignalParam[c].outputSignalType())
 			{
 				case OUTPUT_SIGNAL_TYPE_UNUSED:

@@ -352,6 +352,20 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 		}
 	}
 
+	if (role == Qt::DecorationRole)
+	{
+		if (index.column() == 0 &&
+			file->isFolder() == true)
+		{
+			static QIcon staticFolderIcon(":/Images/Images/SchemaFolder.svg");
+			return staticFolderIcon;
+		}
+		else
+		{
+			return {};
+		}
+	}
+
 	if (role == Qt::UserRole)
 	{
 		return fileId;
@@ -469,12 +483,15 @@ std::pair<QModelIndex, bool> SchemaListModelEx::addFile(QModelIndex parentIndex,
 		return {{}, false};
 	}
 
-	VFrame30::SchemaDetails details;
-
-	bool ok = details.parseDetails(file->details());
-	if (ok == true)
+	if (file->directoryAttribute() == false)
 	{
-		m_details[file->fileId()] = details;
+		VFrame30::SchemaDetails details;
+
+		bool ok = details.parseDetails(file->details());
+		if (ok == true)
+		{
+			m_details[file->fileId()] = details;
+		}
 	}
 
 	endInsertRows();
@@ -582,6 +599,19 @@ bool SchemaListModelEx::updateFiles(const QModelIndexList& selectedIndexes, cons
 	return true;
 }
 
+DbFileInfo SchemaListModelEx::file(int fileId) const
+{
+	auto foundFile = m_files.file(fileId);
+	if (foundFile != nullptr)
+	{
+		return *foundFile.get();
+	}
+	else
+	{
+		return {};
+	}
+}
+
 DbFileInfo SchemaListModelEx::file(const QModelIndex& modelIndex) const
 {
 	if (modelIndex.isValid() == false)
@@ -592,15 +622,7 @@ DbFileInfo SchemaListModelEx::file(const QModelIndex& modelIndex) const
 	int fileId = modelIndex.internalId();
 	assert(fileId != -1);
 
-	auto foundFile = m_files.file(fileId);
-	if (foundFile != nullptr)
-	{
-		return *foundFile.get();
-	}
-	else
-	{
-		return {};
-	}
+	return file(fileId);
 }
 
 std::shared_ptr<DbFileInfo> SchemaListModelEx::fileSharedPtr(const QModelIndex& modelIndex) const
@@ -1004,11 +1026,16 @@ SchemaFileViewEx::~SchemaFileViewEx()
 
 void SchemaFileViewEx::createActions()
 {
-	m_newFileAction = new QAction(tr("New Schema.."), parent());
+	m_newFileAction = new QAction(tr("New Schema..."), parent());
 	m_newFileAction->setIcon(QIcon(":/Images/Images/SchemaAddFile.svg"));
 	m_newFileAction->setStatusTip(tr("Add new schema to version control..."));
 	m_newFileAction->setEnabled(false);
 	m_newFileAction->setShortcut(QKeySequence::StandardKey::New);
+
+	m_newFolderAction = new QAction(tr("New Folder..."), parent());
+	m_newFolderAction->setIcon(QIcon(":/Images/Images/SchemaAddFolder2.svg"));
+	m_newFolderAction->setStatusTip(tr("Add new folder to version control..."));
+	m_newFolderAction->setEnabled(false);
 
 	m_cloneFileAction = new QAction(tr("Clone Schema"), parent());
 	m_cloneFileAction->setIcon(QIcon(":/Images/Images/SchemaClone.svg"));
@@ -1107,6 +1134,7 @@ void SchemaFileViewEx::createContextMenu()
 	addAction(separator);
 
 	addAction(m_newFileAction);
+	addAction(m_newFolderAction);
 	addAction(m_cloneFileAction);
 	addAction(m_deleteAction);
 
@@ -1345,6 +1373,7 @@ void SchemaFileViewEx::projectOpened()
 void SchemaFileViewEx::projectClosed()
 {
 	m_newFileAction->setEnabled(false);
+	m_newFolderAction->setEnabled(false);
 	m_cloneFileAction->setEnabled(false);
 	m_refreshFileAction->setEnabled(false);
 
@@ -1370,28 +1399,25 @@ void SchemaFileViewEx::slot_doubleClicked(const QModelIndex& index)
 		return;
 	}
 
-	// Open on double click confuses!!!
-	// So, for now default action - expand
+	// If folder then expand/collapse it
+	// If file is schema then open or view it
 	//
-	QModelIndex column0Index = index.siblingAtColumn(0);
-	setExpanded(column0Index, !isExpanded(column0Index));
-
-//	if (dbc()->isSystemFile(file.fileId()) == true)
-//	{
-//		this->blockSignals(true);			// To prevent call of this function again
-//		QTreeView::doubleClicked(index);	// Default action for system files
-//		this->blockSignals(false);
-//		return;
-//	}
-
-//	if (file.state() == VcsState::CheckedOut)
-//	{
-//		emit openFileSignal(file);
-//	}
-//	else
-//	{
-//		emit viewFileSignal(file);
-//	}
+	if (file.directoryAttribute() == true)
+	{
+		QModelIndex column0Index = index.siblingAtColumn(0);
+		setExpanded(column0Index, !isExpanded(column0Index));
+	}
+	else
+	{
+		if (file.state() == VcsState::CheckedOut)
+		{
+			emit openFileSignal(file);
+		}
+		else
+		{
+			emit viewFileSignal(file);
+		}
+	}
 
 	return;
 }
@@ -1401,9 +1427,12 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 	QTreeView::selectionChanged(selected, deselected);
 
 	std::vector<std::shared_ptr<DbFileInfo>> selectedFiles = this->selectedFiles();
-	bool selectedOneNonSystemFile = selectedFiles.size() == 1 && db()->systemFileInfo(selectedFiles.front()->fileId()).isNull() == true;
+	bool selectedOneNonSystemFile = selectedFiles.size() == 1 &&
+									db()->systemFileInfo(selectedFiles.front()->fileId()).isNull() == true &&
+									selectedFiles.front()->directoryAttribute() == false;
 
 	m_newFileAction->setEnabled(selectedFiles.size() == 1);
+	m_newFolderAction->setEnabled(selectedFiles.size() == 1);
 	m_cloneFileAction->setEnabled(selectedOneNonSystemFile);
 
 	// --
@@ -1427,6 +1456,7 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 	//
 	if (selectedFiles.size() == 1 &&
 		selectedFiles.front()->state() == VcsState::CheckedOut &&
+		selectedFiles.front()->directoryAttribute() == false &&
 		(selectedFiles.front()->userId() == currentUserId  || currentUserIsAdmin == true))
 	{
 		hasAbilityToOpen = true;
@@ -1434,7 +1464,8 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 
 	// hasViewPossibility
 	//
-	if (selectedFiles.size() == 1)
+	if (selectedFiles.size() == 1 &&
+		selectedFiles.front()->directoryAttribute() == false)
 	{
 		hasViewPossibility = true;
 	}
@@ -1480,7 +1511,9 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 
 		// canGetWorkcopy, canSetWorkcopy
 		//
-		if (file->state() == VcsState::CheckedOut && file->userId() == currentUserId)
+		if (file->state() == VcsState::CheckedOut &&
+			file->directoryAttribute() == false &&
+			file->userId() == currentUserId)
 		{
 			canGetWorkcopy = true;
 			canSetWorkcopy ++;
@@ -1660,6 +1693,7 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 	connect(m_filesView->m_viewAction, &QAction::triggered, this, &SchemaControlTabPageEx::viewSelectedFile);
 
 	connect(m_filesView->m_newFileAction, &QAction::triggered, this, &SchemaControlTabPageEx::addFile);
+	connect(m_filesView->m_newFolderAction, &QAction::triggered, this, &SchemaControlTabPageEx::addFolder);
 	connect(m_filesView->m_cloneFileAction, &QAction::triggered, this, &SchemaControlTabPageEx::cloneFile);
 	connect(m_filesView->m_deleteAction, &QAction::triggered, this, &SchemaControlTabPageEx::deleteFiles);
 
@@ -1802,6 +1836,7 @@ void SchemaControlTabPageEx::createToolBar()
 
 	m_toolBar->addSeparator();
 	m_toolBar->addAction(m_filesView->m_newFileAction);
+	m_toolBar->addAction(m_filesView->m_newFolderAction);
 	m_toolBar->addAction(m_filesView->m_cloneFileAction);
 	m_toolBar->addAction(m_filesView->m_deleteAction);
 
@@ -1826,57 +1861,41 @@ void SchemaControlTabPageEx::createToolBar()
 
 std::shared_ptr<VFrame30::Schema> SchemaControlTabPageEx::createSchema(const DbFileInfo& parentFile) const
 {
-	if (parentFile.fileId() == -1)
+	if (parentFile.isNull() == true)
 	{
-		assert(parentFile.fileId() != -1);
+		assert(parentFile.isNull() == false);
 		return {};
 	}
 
-	// Create schema depends on parent file extension, or if it is root file (like $root$/Schemas/ApplicatinLogic)
-	// then on file name
+	// If parent  or it's parent... is $root$/Schemas/ApplicatinLogic
+	// the create als
 	//
 	auto createAppLogicSchema =	[]{	return std::make_shared<VFrame30::LogicSchema>();	};
 	auto createMonitorSchema =	[]{	return std::make_shared<VFrame30::MonitorSchema>();	};
 	auto createUfbSchema =		[]{	return std::make_shared<VFrame30::UfbSchema>();		};
 	//auto createTuningSchema =	[]{	return std::make_shared<VFrame30::TuningSchema>();	};
 
-	// Depend on parent
-	//
-	if (parentFile.fileId() == dbc()->alFileId())
+	DbFileInfo lookForSystemParent = parentFile;
+	do
 	{
-		return createAppLogicSchema();
-	}
+		if (lookForSystemParent.fileId() == db()->alFileId())
+		{
+			return createAppLogicSchema();
+		}
 
-	if (parentFile.fileId() == dbc()->mvsFileId() ||
-		parentFile.fileId() == dbc()->tvsFileId())
-	{
-		return createMonitorSchema();
-	}
+		if (lookForSystemParent.fileId() == db()->mvsFileId() ||
+			lookForSystemParent.fileId() == db()->tvsFileId())
+		{
+			return createMonitorSchema();
+		}
 
-	if (parentFile.fileId() == dbc()->ufblFileId())
-	{
-		return createUfbSchema();
-	}
+		if (lookForSystemParent.fileId() == db()->ufblFileId())
+		{
+			return createUfbSchema();
+		}
 
-	// Depend on parent file extension
-	//
-	QString parentFileExt = parentFile.extension();
-
-	if (parentFileExt.compare(::AlFileExtension, Qt::CaseInsensitive) == 0)
-	{
-		return createAppLogicSchema();
-	}
-
-	if (parentFileExt.compare(::MvsFileExtension, Qt::CaseInsensitive) == 0 ||
-		parentFileExt.compare(::TvsFileName, Qt::CaseInsensitive) == 0)
-	{
-		return createMonitorSchema();
-	}
-
-	if (parentFileExt.compare(::UfbFileExtension, Qt::CaseInsensitive) == 0)
-	{
-		return createUfbSchema();
-	}
+		lookForSystemParent = m_filesView->filesModel().file(lookForSystemParent.parentId());
+	} while (lookForSystemParent.isNull() == false);
 
 	// What kind of schema suppose to be created?
 	//
@@ -1978,7 +1997,7 @@ void SchemaControlTabPageEx::projectClosed()
 	setEnabled(false);
 }
 
-int SchemaControlTabPageEx::showSelectFileDialog(int parentFileId, int currentSelectionFileId, bool showRootFile)
+int SchemaControlTabPageEx::showSelectFolderDialog(int parentFileId, int currentSelectionFileId, bool showRootFile)
 {
 	// Show dialog with file tree to select file, can be used as parent.
 	// function returns selected file id or -1 if operation canceled
@@ -2005,17 +2024,20 @@ int SchemaControlTabPageEx::showSelectFileDialog(int parentFileId, int currentSe
 		return -1;
 	}
 
-	files.removeFilesWithExtension(::AlTemplExtension);
-	files.removeFilesWithExtension(::MvsTemplExtension);
-	files.removeFilesWithExtension(::UfbTemplExtension);
-	files.removeFilesWithExtension(::DvsTemplExtension);
+	files.removeIf([](const DbFileInfo& fi)
+		{
+			return fi.directoryAttribute() == false;
+		});
 
 	std::shared_ptr<DbFileInfo> schemaFile = files.rootFile();		// SchemaFile
+	assert(schemaFile->directoryAttribute() == true);
 
+	static QIcon staticFolderIcon(":/Images/Images/SchemaFolder.svg");
+	const QIcon* const ptrToIcon = &staticFolderIcon;
 	QTreeWidgetItem* treeItemToSelect = nullptr;
 
 	std::function<void(std::shared_ptr<DbFileInfo>, QTreeWidgetItem*)> addChilderenFilesFunc =
-		[&addChilderenFilesFunc, &files, treeWidget, currentSelectionFileId, &treeItemToSelect](std::shared_ptr<DbFileInfo> parent, QTreeWidgetItem* parentTreeItem)
+		[&addChilderenFilesFunc, &files, treeWidget, currentSelectionFileId, &treeItemToSelect, ptrToIcon](std::shared_ptr<DbFileInfo> parent, QTreeWidgetItem* parentTreeItem)
 		{
 			assert(parent->isNull() == false);
 
@@ -2023,9 +2045,11 @@ int SchemaControlTabPageEx::showSelectFileDialog(int parentFileId, int currentSe
 
 			for (auto file : childeren)
 			{
-				if (file->isNull() == true)
+				if (file->isNull() == true ||
+					file->directoryAttribute() == false)
 				{
 					assert(file->isNull() == false);
+					assert(file->directoryAttribute() == true);
 					return;
 				}
 
@@ -2040,6 +2064,7 @@ int SchemaControlTabPageEx::showSelectFileDialog(int parentFileId, int currentSe
 				{
 					treeItem = new QTreeWidgetItem(parentTreeItem, {file->fileName()}, file->fileId()) ;
 				}
+				treeItem->setIcon(0, *ptrToIcon);
 
 				addChilderenFilesFunc(file, treeItem);
 
@@ -2055,6 +2080,7 @@ int SchemaControlTabPageEx::showSelectFileDialog(int parentFileId, int currentSe
 	if (showRootFile == true)
 	{
 		rootTreeItem = new QTreeWidgetItem(treeWidget, {schemaFile->fileName()}, schemaFile->fileId()) ;
+		rootTreeItem->setIcon(0, staticFolderIcon);
 		treeWidget->addTopLevelItem(rootTreeItem);
 
 		if (schemaFile->fileId() == currentSelectionFileId)
@@ -2172,8 +2198,7 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 		// File already opened, check if it is opened for edit then activate this tab
 		//
 		if (editTabPage->readOnly() == false &&
-			editTabPage->fileInfo().fileId() == file.fileId() &&
-			editTabPage->fileInfo().changeset() == file.changeset())
+			editTabPage->fileInfo().fileId() == file.fileId())
 		{
 			if (tabWidget->indexOf(editTabPage) != -1)
 			{
@@ -2340,11 +2365,13 @@ void SchemaControlTabPageEx::viewFile(const DbFileInfo& file)
 
 void SchemaControlTabPageEx::addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile)
 {
-	int parentFileId = showSelectFileDialog(dbc()->alFileId(), m_lastSelectedNewSchemaForLmFileId, true);
+	int parentFileId = showSelectFolderDialog(dbc()->alFileId(), m_lastSelectedNewSchemaForLmFileId, true);
 	if (parentFileId == -1)
 	{
 		return;
 	}
+
+	m_lastSelectedNewSchemaForLmFileId = parentFileId;
 
 	// Create new Schema and add it to the vcs
 	//
@@ -2403,18 +2430,35 @@ void SchemaControlTabPageEx::addFile()
         return;
     }
 
-	// Creating new schema depends on parent, if it is ApplicationLogic, then ALS file is created,
-	// if Monitor, then MVS, so on
-	//
-	QModelIndex parentModelIndex =  m_filesView->proxyModel().mapToSource(selectedRows.front());
-	DbFileInfo parentFile = m_filesView->filesModel().file(parentModelIndex);
+	QModelIndex selectedModelIndex =  m_filesView->proxyModel().mapToSource(selectedRows.front());
+	DbFileInfo selectedFile = m_filesView->filesModel().file(selectedModelIndex);
 
-	if (parentFile.fileId() == -1)
+	DbFileInfo parentFile;
+
+	// If folder selected, then create new file in this bolder
+	//
+	if (selectedFile.directoryAttribute() == true)
 	{
-		assert(parentFile.fileId() != -1);
+		parentFile = selectedFile;
+	}
+	else
+	{
+		// If File selected, the create new file in the same folder as selected one
+		//
+		parentFile = m_filesView->filesModel().file(selectedFile.parentId());
+	}
+
+	if (parentFile.isNull() == true ||
+		parentFile.directoryAttribute() == false)
+	{
+		assert(parentFile.isNull() == false);
+		assert(parentFile.directoryAttribute());
 		return;
 	}
 
+	// Creating new schema depends on parent, if it is ApplicationLogic, then ALS file is created,
+	// if Monitor, then MVS, so on
+	//
 	std::shared_ptr<VFrame30::Schema> schema = createSchema(parentFile);
 	if (schema == nullptr)
 	{
@@ -2498,40 +2542,21 @@ void SchemaControlTabPageEx::addFile()
         }
     }
 
-	addSchemaFile(schema, extension, false);
+
+	CreateSchemaDialog propertiesDialog(schema, db(), this);
+
+	if (propertiesDialog.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	addSchemaFile(schema, extension, parentFile.fileId());
 
     return;
 }
 
-void SchemaControlTabPageEx::addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, QString fileExtension, bool dontShowPropDialog)
-{
-    QModelIndexList selectedRows = m_filesView->selectionModel()->selectedRows();
-	if (selectedRows.size() != 1)
-    {
-		assert(selectedRows.size() == 1);
-        return;
-    }
-
-	QModelIndex parentModelIndex = selectedRows.front();
-	parentModelIndex = m_filesView->proxyModel().mapToSource(parentModelIndex);
-
-    // Show dialog to edit schema properties
-    //
-    if (dontShowPropDialog == false)
-    {
-		CreateSchemaDialog propertiesDialog(schema, db(), this);
-
-        if (propertiesDialog.exec() != QDialog::Accepted)
-        {
-            return;
-        }
-    }
-
-	addSchemaFile(schema, fileExtension, parentModelIndex);
-
-	return;
-}
-
+// Find the QModelIndex for FileID, and call addSchemaFileToDb
+//
 void SchemaControlTabPageEx::addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, QString fileExtension, int parentFileId)
 {
 	QModelIndex parentIndex;
@@ -2543,18 +2568,20 @@ void SchemaControlTabPageEx::addSchemaFile(std::shared_ptr<VFrame30::Schema> sch
 
 	if (matched.size() != 1)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Cannot find parent item for new clonned file."));
+		QMessageBox::critical(this, qAppName(), tr("Cannot find parent item for new file."));
 		return;
 	}
 
 	parentIndex = matched.front();
 
-	addSchemaFile(schema, fileExtension, parentIndex);
+	addSchemaFileToDb(schema, fileExtension, parentIndex);
 
 	return;
 }
 
-void SchemaControlTabPageEx::addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, QString fileExtension, QModelIndex parentIndex)
+// Add file to DB
+//
+void SchemaControlTabPageEx::addSchemaFileToDb(std::shared_ptr<VFrame30::Schema> schema, QString fileExtension, QModelIndex parentIndex)
 {
 	if (schema == nullptr)
 	{
@@ -2571,7 +2598,7 @@ void SchemaControlTabPageEx::addSchemaFile(std::shared_ptr<VFrame30::Schema> sch
 	}
 
 	QByteArray data;
-	schema->Save(data);
+	schema->saveToByteArray(&data);
 
 	std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 
@@ -2604,6 +2631,117 @@ void SchemaControlTabPageEx::addSchemaFile(std::shared_ptr<VFrame30::Schema> sch
 		//
 		file->clearData();
 
+		m_filesView->selectionModel()->clear();
+		auto [addedModelIndex, addResult] = m_filesView->filesModel().addFile(parentIndex, file);
+
+		if (addResult == true)
+		{
+			QModelIndex addedProxyIndex = m_filesView->proxyModel().mapFromSource(addedModelIndex);
+			QModelIndex parentProxyIndex = addedProxyIndex.parent();
+
+			if (m_filesView->isExpanded(parentProxyIndex) == false)
+			{
+				m_filesView->expand(parentProxyIndex);
+			}
+
+			m_filesView->scrollTo(addedProxyIndex);
+			m_filesView->selectionModel()->setCurrentIndex(addedProxyIndex, QItemSelectionModel::Select | QItemSelectionModel::Rows);	//
+		}
+	}
+
+	return;
+}
+
+void SchemaControlTabPageEx::addFolder()
+{
+	// Folder can be created only for another folder
+	//
+	QModelIndexList selectedRows = m_filesView->selectionModel()->selectedRows();
+	if (selectedRows.size() != 1)
+	{
+		assert(selectedRows.size() == 1);
+		return;
+	}
+
+	QModelIndex selectedModelIndex =  m_filesView->proxyModel().mapToSource(selectedRows.front());
+	DbFileInfo selectedFile = m_filesView->filesModel().file(selectedModelIndex);
+
+	DbFileInfo parentFile;
+
+	// If folder selected, then create new folder in the selected one
+	//
+	if (selectedFile.directoryAttribute() == true)
+	{
+		parentFile = selectedFile;
+	}
+	else
+	{
+		// If file is selected, the create new folder in the same folder as selected file
+		//
+		parentFile = m_filesView->filesModel().file(selectedFile.parentId());
+	}
+
+	if (parentFile.isNull() == true ||
+		parentFile.directoryAttribute() == false)
+	{
+		assert(parentFile.isNull() == false);
+		assert(parentFile.directoryAttribute());
+		return;
+	}
+
+	// Get folder name
+	//
+	int sequenceNo = db()->nextCounterValue();
+	QString folderName = "FOLDER" + QString::number(sequenceNo).rightJustified(6, '0');
+
+	do
+	{
+		bool ok = false;
+		folderName = QInputDialog::getText(this, tr("Add Folder"), tr("Folder name:"), QLineEdit::Normal, folderName, &ok);
+
+		if (ok == false)
+		{
+			return;
+		}
+
+	} while (folderName.isEmpty() == true);
+
+	// Get ParentModelIndex
+	//
+	QModelIndex parentIndex;
+	QModelIndexList matched = m_filesView->filesModel().match(m_filesView->filesModel().index(0, 0),
+															  Qt::UserRole,
+															  QVariant::fromValue(parentFile.fileId()),
+															  1,
+															  Qt::MatchExactly | Qt::MatchRecursive);
+
+	if (matched.size() != 1)
+	{
+		QMessageBox::critical(this, qAppName(), tr("Cannot find parent item for new file."));
+		return;
+	}
+
+	parentIndex = matched.front();
+
+	// Add folder file to DB and to model
+	//
+	std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
+
+	file->setFileName(folderName);
+	file->setDetails("{}");
+	file->setDirectoryAttribute(true);
+	file->clearData();
+
+	if (bool ok = db()->addFile(file, parentFile.fileId(), this);		// File may not be unique
+		ok == false)
+	{
+		return;
+	}
+
+	// Add file to the FileModel and select it
+	//
+	if (file->isNull() == false)
+	{
 		m_filesView->selectionModel()->clear();
 		auto [addedModelIndex, addResult] = m_filesView->filesModel().addFile(parentIndex, file);
 
@@ -2714,7 +2852,7 @@ void SchemaControlTabPageEx::cloneFile()
 
 	}
 
-	int parentFileId = showSelectFileDialog(dbc()->schemaFileId(), fileToClone.parentId(), false);
+	int parentFileId = showSelectFolderDialog(dbc()->schemaFileId(), fileToClone.parentId(), false);
 	if (parentFileId == -1)
 	{
 		return;
@@ -2869,6 +3007,8 @@ void SchemaControlTabPageEx::checkOutFiles()
 		return;
 	}
 
+	m_filesView->selectionChanged({}, {});		// To update actions
+
 	return;
 }
 
@@ -2897,6 +3037,11 @@ void SchemaControlTabPageEx::checkInFiles()
 	for(const std::shared_ptr<DbFileInfo>& file : selectedFiles)
 	{
 		if (dbc()->isSystemFile(file->fileId()) == true)
+		{
+			continue;
+		}
+
+		if (file->state() == VcsState::CheckedIn)
 		{
 			continue;
 		}
@@ -2988,6 +3133,8 @@ void SchemaControlTabPageEx::checkInFiles()
 			}
 		}
 	}
+
+	// To update actions
 
 	return;
 }
@@ -3632,7 +3779,7 @@ void SchemaControlTabPageEx::showFileProperties()
 			}
 
 			QByteArray data;
-			schema->Save(data);
+			schema->saveToByteArray(&data);
 
 			if (data.isEmpty() == true)
 			{
@@ -4370,7 +4517,7 @@ bool EditSchemaTabPageEx::saveWorkcopy()
 	}
 
 	QByteArray data;
-	m_schemaWidget->schema()->Save(data);
+	m_schemaWidget->schema()->saveToByteArray(&data);
 
 	if (data.isEmpty() == true)
 	{
@@ -4414,7 +4561,7 @@ void EditSchemaTabPageEx::getCurrentWorkcopy()
 	//
 	QString fileName = dir + fileInfo().fileName();
 
-	bool writeResult = m_schemaWidget->schema()->Save(fileName);
+	bool writeResult = m_schemaWidget->schema()->saveToFile(fileName);
 
 	if (writeResult == false)
 	{
@@ -4537,3 +4684,4 @@ void EditSchemaTabPageEx::setCompareItemActions(const std::map<QUuid, CompareAct
 {
 	m_schemaWidget->setCompareItemActions(itemsActions);
 }
+
