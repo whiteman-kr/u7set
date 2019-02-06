@@ -121,7 +121,13 @@ void ArchivingService::startArchive()
 
 	if (m_archive == nullptr)
 	{
-		m_archive = new Archive(m_buildInfo.project, equipmentID(), "d:/Temp", *m_archSignalsProto, logger());
+		m_archive = new Archive(m_buildInfo.project,
+								equipmentID(),
+								m_serviceSettings.archiveLocation,
+								*m_archSignalsProto,
+								m_serviceSettings.shortTermArchivePeriod,
+								m_serviceSettings.longTermArchivePeriod,
+								logger());
 
 		deleteArchSignalsProto();				// no more required
 

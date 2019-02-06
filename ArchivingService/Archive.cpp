@@ -66,9 +66,9 @@ Archive::Archive(const QString& projectID,
 				 CircularLoggerShared logger) :
 	m_projectID(projectID),
 	m_equipmentID(equipmentID),
+	m_archDir(archDir),
 	m_shortTermPeriod(shortTermPeriod),
 	m_longTermPeriod(longTermPeriod),
-	m_archDir(archDir),
 	m_log(logger)
 {
 	if (m_shortTermPeriod < 2)
@@ -76,20 +76,15 @@ Archive::Archive(const QString& projectID,
 		m_shortTermPeriod = 2;
 	}
 
-	if (m_longTermPeriod < 5)
+	if (m_shortTermPeriod >= m_longTermPeriod)
 	{
-		m_longTermPeriod = 5;
-	}
-
-	if (m_longTermPeriod < m_shortTermPeriod)
-	{
-		m_longTermPeriod = m_shortTermPeriod;
+		m_longTermPeriod = m_shortTermPeriod + 1;
 	}
 
 	// period to milliseconds conversation
 	//
-	m_shortTermPeriod *= PARTITION_LENGHT_MS * m_shortTermPeriod;
-	m_longTermPeriod *= PARTITION_LENGHT_MS * m_longTermPeriod;
+	m_shortTermPeriod *= PARTITION_PERIOD_MS;
+	m_longTermPeriod *= PARTITION_PERIOD_MS;
 
 	int signalsCount = protoArchSignals.archsignals_size();
 
@@ -680,7 +675,7 @@ qint64 Archive::getCurrentPartition()
 {
 	qint64 prevPartition = m_currentPartition.load();
 
-	qint64 newPartition = (QDateTime::currentMSecsSinceEpoch() / PARTITION_LENGHT_MS) * PARTITION_LENGHT_MS;
+	qint64 newPartition = (QDateTime::currentMSecsSinceEpoch() / PARTITION_PERIOD_MS) * PARTITION_PERIOD_MS;
 
 	if (prevPartition != newPartition)
 	{

@@ -24,7 +24,7 @@ public:
 
 	//static const qint64 PARTITTION_DIVIDER = 24 * 60 * 60 * 1000;		// day
 	//static const qint64 PARTITTION_DIVIDER = 60 * 60 * 1000;			// hour
-	static const qint64 PARTITION_LENGHT_MS = 60 * 1000;				// minute
+	static const qint64 PARTITION_PERIOD_MS = 60 * 1000;				// minute
 
 	static QString formatTime(qint64 time);
 
@@ -121,11 +121,10 @@ private:
 private:
 	QString m_projectID;
 	QString m_equipmentID;
-
-	CircularLoggerShared m_log;
-
+	QString m_archDir;
 	qint64 m_shortTermPeriod = 0;
 	qint64 m_longTermPeriod = 0;
+	CircularLoggerShared m_log;
 
 	//
 
@@ -151,7 +150,6 @@ private:
 
 	// File Archive members
 
-	QString m_archDir;
 	QString m_archFullPath;
 
 	QVector<ArchFile*> m_archFilesArray;
