@@ -73,7 +73,7 @@ BEGIN
 
     -- Move file:
     --      1. There is no special action for move
-    --      2. FileInstance has three new columns MovedFromParentId, BeforeMoveFileId, MoveText
+    --      2. FileInstance has new columns beforemovefileid, movedfromparentid, movedtoparentid, movetext
     --      3. Moved file or not is determined by FileInstance.MovedFromParentId
     --      4. If file was just created, then move operation just moves it and DOES NOT fill FileInstance, so it will count as created in the new location
     --      5. Destination file has new FileID -- it is important that children always has file id bigger then their parent (the same for 4.)
@@ -166,11 +166,6 @@ BEGIN
 
     -- That's it
     --
-    --SELECT F.FileID, F.Deleted, true, FI.Action, CO.UserID, 0 
-    --    INTO return_value
-    --    FROM File F, FileInstance FI, CheckOut CO 
-    --    WHERE F.FileId = new_file_id AND FI.FileInstanceID = F.CheckedOutInstanceID AND CO.FileID = new_file_id;
-
     RETURN api.get_file_info(session_key, new_file_id);
 END
 $BODY$

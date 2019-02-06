@@ -33,7 +33,9 @@ private slots:
 	void api_set_file_attributes();
 	void api_add_file();
 	void api_move_file();
-	void api_undo_cahnges_after_move_file();
+	void api_undo_changes_after_move_file();
+	void api_rename_file();
+	void api_undo_changes_after_rename_file();
 
 	void fileExistsTest();
 	void filesExistTest_data();

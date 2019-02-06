@@ -266,6 +266,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0246.sql", "Upgrade to version 246, Add attributes to file system"},	
 
 	{":/DatabaseUpgrade/Upgrade0247.sql", "Upgrade to version 247, Add functions api.get_file_full_path, api.move_file"},
+	{":/DatabaseUpgrade/Upgrade0248.sql", "Upgrade to version 248, Add functions api.rename_file"},
 };
 
 
