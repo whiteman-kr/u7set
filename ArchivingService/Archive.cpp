@@ -167,6 +167,15 @@ void Archive::stop()
 
 	//
 
+	if (m_archMaintenanceThread != nullptr)
+	{
+		m_archMaintenanceThread->quitAndWait();
+		delete m_archMaintenanceThread;
+		m_archMaintenanceThread = nullptr;
+	}
+
+	//
+
 	if (m_archWriterThread != nullptr)
 	{
 		m_archWriterThread->quitAndWait();
@@ -338,6 +347,8 @@ qint64 Archive::localTimeOffsetFromUtc()
 
 void Archive::saveState(const SimpleAppSignalState& state)
 {
+	qDebug() << "save";
+
 	ArchFile* archFile = m_archFiles.value(state.hash, nullptr);
 
 	if (archFile == nullptr)

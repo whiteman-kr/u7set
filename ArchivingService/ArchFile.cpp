@@ -228,6 +228,8 @@ bool ArchFilePartition::write(qint64 partition, ArchFileRecord* buffer, int stat
 
 	qint64 written = m_file.write(reinterpret_cast<const char*>(buffer), sizeToWrite);
 
+	qDebug() << written;
+
 	if (written == -1)
 	{
 		return false;

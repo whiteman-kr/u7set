@@ -51,6 +51,8 @@ void ArchWriterThread::run()
 			continue;
 		}
 
+		qint64 currentPartition = m_archive->getCurrentPartition();
+
 		bool flushAnyway = false;
 
 		ArchFile* fileToFlush = m_archive->getNextFileForFlushing(&flushAnyway);
@@ -61,8 +63,6 @@ void ArchWriterThread::run()
 		}
 		else
 		{
-			qint64 currentPartition = m_archive->getCurrentPartition();
-
 			bool flushingExecuted = fileToFlush->flush(currentPartition, &m_totalFlushedStatesCount, flushAnyway);
 
 			if (flushingExecuted == false)
