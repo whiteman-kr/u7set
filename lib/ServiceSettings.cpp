@@ -884,9 +884,9 @@ bool ArchivingServiceSettings::readFromXml(XmlReadHelper& xml)
 
 	result &= xml.readHostAddressPort(PROP_ARCHIVE_DB_HOST_IP, PROP_ARCHIVE_DB_HOST_PORT, &dbHost);
 
-	result &= xml.readIntElement(PROP_ARCHIVE_SHORT_TERM_PERIOD, &shortTermArchivePeriod);
-	result &= xml.readIntElement(PROP_ARCHIVE_LONG_TERM_PERIOD, &longTermArchivePeriod);
-	result &= xml.readStringElement(PROP_ARCHIVE_LOCATION, &archiveLocation);
+	result &= xml.readIntElement(PROP_ARCHIVE_SHORT_TERM_PERIOD, &shortTermArchivePeriod, true);
+	result &= xml.readIntElement(PROP_ARCHIVE_LONG_TERM_PERIOD, &longTermArchivePeriod, true);
+	result &= xml.readStringElement(PROP_ARCHIVE_LOCATION, &archiveLocation, true);
 
 	return result;
 }
