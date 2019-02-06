@@ -347,8 +347,6 @@ qint64 Archive::localTimeOffsetFromUtc()
 
 void Archive::saveState(const SimpleAppSignalState& state)
 {
-	qDebug() << "save";
-
 	ArchFile* archFile = m_archFiles.value(state.hash, nullptr);
 
 	if (archFile == nullptr)

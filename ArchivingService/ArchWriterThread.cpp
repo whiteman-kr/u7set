@@ -43,6 +43,8 @@ void ArchWriterThread::run()
 
 	int sleepTime = 0;
 
+	const qint64
+
 	do
 	{
 		if (filesCount == 0)
