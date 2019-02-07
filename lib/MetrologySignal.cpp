@@ -335,20 +335,20 @@ namespace Metrology
 
 		// physicalUnits
 		//
-		QVariant qv;
-		bool isEnum;
+		UnitsConvertor uc;
 
-		m_physicalLowLimit = 0;
-		m_physicalHighLimit = 0;
+		QVariant qpl = uc.electricToPhysical(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+		QVariant qph = uc.electricToPhysical(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
 
-		if (signal.getSpecPropValue("LowPhysicalUnits", &qv, &isEnum) == true)
+		if (qpl.isNull() == false && qph.isNull() == false)
 		{
-			m_physicalLowLimit = qv.toDouble();
+			m_physicalLowLimit = qpl.toDouble();
+			m_physicalHighLimit = qph.toDouble();
 		}
-
-		if (signal.getSpecPropValue("HighPhysicalUnits", &qv, &isEnum) == true)
+		else
 		{
-			m_physicalHighLimit = qv.toDouble();
+			m_physicalLowLimit = 0;
+			m_physicalHighLimit = 0;
 		}
 
 		// engeneeringUnits

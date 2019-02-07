@@ -31,13 +31,11 @@ QVariant UnitsConvertor::physicalToElectric(double val, double electricLowLimit,
 					break;
 
 				default:
-					assert(0);
 					break;
 			}
 			break;
 
 		default:
-			assert(0);
 			break;
 	}
 
@@ -66,13 +64,11 @@ QVariant UnitsConvertor::electricToPhysical(double val, double electricLowLimit,
 					break;
 
 				default:
-					assert(0);
 					break;
 			}
 			break;
 
 		default:
-			assert(0);
 			break;
 	}
 

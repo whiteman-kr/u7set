@@ -4,6 +4,7 @@
 #include "../lib/AppSignal.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/XmlHelper.h"
+#include "../lib/UnitsConvertor.h"
 #include "../Builder/CfgFiles.h"
 
 // Attention !!!
