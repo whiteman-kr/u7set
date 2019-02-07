@@ -802,6 +802,12 @@ namespace Hardware
 
 	}
 
+	UnitsConvertor* ModuleFirmwareWriter::jsGetUnitsConvertor()
+	{
+		QQmlEngine::setObjectOwnership(&m_unitsConvertor, QQmlEngine::ObjectOwnership::CppOwnership);
+		return &m_unitsConvertor;
+	}
+
 
 	void ModuleFirmwareWriter::writeLog(QString logString)
 	{

@@ -4,6 +4,7 @@
 #include <qglobal.h>
 #include "../../Proto/network.pb.h"
 #include "../../lib/Tcp.h"
+#include "../../lib/DataSource.h"
 
 class AppDataServiceClient
 {
@@ -18,6 +19,8 @@ public:
 	bool sendRequestAndWaitForResponse(quint32 requestID, google::protobuf::Message& protobufMessage, QString& error);
 	bool sendRequestAndWaitForResponse(quint32 requestID, const char* requestData, quint32 requestDataSize, QString& error);
 
+	void initDataSourceArray(QVector<DataSource>& dataSourceArray);
+
 private:
 	bool ensureConnectedToService(QString& error);
 	bool socketWrite(const char* data, quint32 dataSize, QString& error);
@@ -26,6 +29,7 @@ private:
 	bool parseMessageLoggingErrors(google::protobuf::Message& protobufMessage, QString& error);
 
 	Network::GetAppDataSourcesStatesReply& m_dataSourceStateMessage;
+	Network::GetDataSourcesInfoReply m_dataSourceInfoMessage;
 	SoftwareInfo m_softwareInfo;
 	SoftwareInfo m_serviceSoftwareInfo;
 	const HostAddressPort& m_serverAddressPort;
@@ -34,7 +38,7 @@ private:
 	Tcp::SocketWorker::Header m_sendRequestHeader;
 	Tcp::SocketWorker::Header m_receiveReplyHeader;
 	quint32 m_requestNumerator = 1;
-	QEventLoop signalWaiter;
+	QEventLoop m_signalWaiter;
 };
 
 #endif // APPDATASERVICECLIENT_H

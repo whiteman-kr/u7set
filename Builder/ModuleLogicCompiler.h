@@ -363,6 +363,7 @@ namespace Builder
 		bool generateAlpPhaseCode();
 		bool makeAppLogicCode();
 
+		bool generateAfbsVersionCheckingCode(CodeSnippet* code);
 		bool generateInitAfbsCode(CodeSnippet* code);
 		bool generateInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb);
 		bool displayAfbParams(CodeSnippet* code, const UalAfb& appFb);

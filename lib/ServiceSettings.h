@@ -184,6 +184,9 @@ class ArchivingServiceSettings : public ServiceSettings
 public:
 	static const char* PROP_ARCHIVE_DB_HOST_IP;
 	static const char* PROP_ARCHIVE_DB_HOST_PORT;
+	static const char* PROP_ARCHIVE_SHORT_TERM_PERIOD;
+	static const char* PROP_ARCHIVE_LONG_TERM_PERIOD;
+	static const char* PROP_ARCHIVE_LOCATION;
 
 public:
 	HostAddressPort clientRequestIP;
@@ -194,6 +197,11 @@ public:
 
 	HostAddressPort diagDataReceivingIP;
 	QHostAddress diagDataReceivingNetmask;
+
+	int shortTermArchivePeriod = 10;
+	int longTermArchivePeriod = 365;
+
+	QString archiveLocation;
 
 	HostAddressPort dbHost = HostAddressPort("127.0.0.1", 5432);
 

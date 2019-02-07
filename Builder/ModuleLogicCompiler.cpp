@@ -5554,6 +5554,7 @@ namespace Builder
 
 		CodeGenProcsToCallArray procs =
 		{
+//			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateAfbsVersionCheckingCode),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateInitAfbsCode),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateLoopbacksRefreshingCode),
 		};
@@ -5631,6 +5632,41 @@ namespace Builder
 		stopCmd.setComment("end of ALP phase code");
 
 		m_code.append(stopCmd);
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::generateAfbsVersionCheckingCode(CodeSnippet* code)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+
+		code->comment_nl("AFBs implementation versions checking");
+
+		const std::map<int, std::shared_ptr<Afb::AfbComponent>>& components = m_lmDescription->afbComponents();
+
+		QVector<int> opCodes;
+
+		for(auto const& component : components)
+		{
+			opCodes.append(component.second->opCode());
+		}
+
+		qSort(opCodes);
+
+		for(int opCode : opCodes)
+		{
+			auto component = components.at(opCode);
+
+			CodeItem cmd;
+
+			cmd.readFuncBlockTestInt32(opCode, 0,
+									   component->versionOpIndex(),
+									   component->impVersion(),
+									   component->caption());
+			code->append(cmd);
+		}
+
+		code->newLine();
 
 		return true;
 	}

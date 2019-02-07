@@ -474,11 +474,11 @@ void TuningBase::appendCmdFowWrite(const TuningWriteCmd& cmd)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningBase::appendCmdFowWrite(const Hash& signalHash, float value)
+void TuningBase::appendCmdFowWrite(const Hash& signalHash, TuningValueType type, QVariant value)
 {
-	if (signalHash == 0)
+	if (signalHash == UNDEFINED_HASH)
 	{
-		assert(signalHash != 0);
+		assert(signalHash != UNDEFINED_HASH);
 		return;
 	}
 
@@ -487,6 +487,7 @@ void TuningBase::appendCmdFowWrite(const Hash& signalHash, float value)
 		TuningWriteCmd cmd;
 
 		cmd.setSignalHash(signalHash);
+		cmd.setType(type);
 		cmd.setValue(value);
 
 		m_cmdFowWriteList.append(cmd);

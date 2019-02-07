@@ -10,9 +10,13 @@
 // ==============================================================================================
 
 const int	CT_PHYSICAL_TO_ELECTRIC	= 0,
-			CT_ELECTRIC_TO_PHYSICAL	= 1;
+			CT_ELECTRIC_TO_PHYSICAL	= 1,
 
-const int	CT_COUNT                = 2;
+			CT_ENGENEER_TO_ELECTRIC	= 2,
+			CT_ELECTRIC_TO_ENGENEER	= 3;
+
+
+const int	CT_COUNT                = 4;
 
 // ==============================================================================================
 

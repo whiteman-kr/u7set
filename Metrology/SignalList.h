@@ -27,9 +27,10 @@ const char* const			SignalListColumn[] =
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Module"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Place"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "ADC range"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Physical range"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Electric range"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Electric sensor"),
+							QT_TRANSLATE_NOOP("SignalListDialog.h", "Physical range"),
+							QT_TRANSLATE_NOOP("SignalListDialog.h", "Engeneering range"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Tuning"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Default value"),
 };
@@ -44,12 +45,13 @@ const int					SIGNAL_LIST_COLUMN_RACK				= 0,
 							SIGNAL_LIST_COLUMN_CHASSIS			= 5,
 							SIGNAL_LIST_COLUMN_MODULE			= 6,
 							SIGNAL_LIST_COLUMN_PLACE			= 7,
-							SIGNAL_LIST_COLUMN_ADC				= 8,
-							SIGNAL_LIST_COLUMN_PH_RANGE			= 9,
-							SIGNAL_LIST_COLUMN_EL_RANGE			= 10,
-							SIGNAL_LIST_COLUMN_EL_SENSOR		= 11,
-							SIGNAL_LIST_COLUMN_TUN_SIGNAL		= 12,
-							SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL	= 13;
+							SIGNAL_LIST_COLUMN_ADC_RANGE		= 8,
+							SIGNAL_LIST_COLUMN_EL_RANGE			= 9,
+							SIGNAL_LIST_COLUMN_EL_SENSOR		= 10,
+							SIGNAL_LIST_COLUMN_PH_RANGE			= 11,
+							SIGNAL_LIST_COLUMN_EN_RANGE			= 12,
+							SIGNAL_LIST_COLUMN_TUN_SIGNAL		= 13,
+							SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL	= 14;
 
 const int					SignalListColumnWidth[SIGNAL_LIST_COLUMN_COUNT] =
 {
@@ -62,9 +64,10 @@ const int					SignalListColumnWidth[SIGNAL_LIST_COLUMN_COUNT] =
 							 60,	// SIGNAL_LIST_COLUMN_MODULE
 							 60,	// SIGNAL_LIST_COLUMN_PLACE
 							120,	// SIGNAL_LIST_COLUMN_ADC
-							150,	// SIGNAL_LIST_COLUMN_IN_PH_RANGE
 							150,	// SIGNAL_LIST_COLUMN_IN_EL_RANGE
 							100,	// SIGNAL_LIST_COLUMN_IN_EL_SENSOR
+							150,	// SIGNAL_LIST_COLUMN_IN_PH_RANGE
+							150,	// SIGNAL_LIST_COLUMN_IN_EN_RANGE
 							 50,	// SIGNAL_LIST_COLUMN_TUN_SIGNAL
 							100,	// SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL
 };
