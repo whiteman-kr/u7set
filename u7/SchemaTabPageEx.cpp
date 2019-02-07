@@ -4860,7 +4860,7 @@ bool EditSchemaTabPageEx::saveWorkcopy()
 	}
 
 	QByteArray data;
-	m_schemaWidget->schema()->saveToByteArray(&data);
+	schema()->saveToByteArray(&data);
 
 	if (data.isEmpty() == true)
 	{
@@ -4872,17 +4872,45 @@ bool EditSchemaTabPageEx::saveWorkcopy()
 	static_cast<DbFileInfo*>(file.get())->operator=(fileInfo());
 	file->swapData(data);
 
-	QString detailsString = m_schemaWidget->schema()->details();
-	file->setDetails(detailsString);
+	// Check if schemaId was changed, rename file if so
+	//
+	bool fileWasRenamed = false;
 
-	bool result = db()->setWorkcopy(file, this);
-	if (result == true)
+	if (schema()->schemaId() != m_schemaWidget->m_initialSchemaId)
 	{
-		resetModified();
-		return true;
+		QString newFileName = schema()->schemaId() + "." + file->extension();
+
+		if (bool ok = db()->renameFile(*file, newFileName, file.get(), this);
+			ok == false)
+		{
+			// Don't save file if it was not renamed, as it will lead that filename differs from SchemaID
+			// Just return
+			//
+			return false;
+		}
+
+		fileWasRenamed = true;
 	}
 
-	return false;
+	file->setDetails(schema()->details());	// Details must be set here, as file rename will spoils them
+
+	// Save workcopy
+	//
+	if (bool result = db()->setWorkcopy(file, this);
+		result == false)
+	{
+		return false;
+	}
+
+	resetModified();
+
+	if (fileWasRenamed == true)
+	{
+		setPageTitle();
+		emit vcsFileStateChanged();
+	}
+
+	return true;
 }
 
 void EditSchemaTabPageEx::getCurrentWorkcopy()
