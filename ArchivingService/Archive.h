@@ -22,8 +22,8 @@ public:
 	static const int TIME_1S = 1000;								// 1000 millisecond
 	static const int TIME_TO_EXPAND_REQUEST = 31 * TIME_1S;			// 31 seconds
 
-	//static const qint64 PARTITTION_DIVIDER = 24 * 60 * 60 * 1000;		// day
-	//static const qint64 PARTITTION_DIVIDER = 60 * 60 * 1000;			// hour
+	//static const qint64 PARTITION_PERIOD_MS = 24 * 60 * 60 * 1000;	// day
+	//static const qint64 PARTITION_PERIOD_MS = 60 * 60 * 1000;			// hour
 	static const qint64 PARTITION_PERIOD_MS = 60 * 1000;				// minute
 
 	static QString formatTime(qint64 time);
@@ -40,6 +40,8 @@ public:
 
 	void start();
 	void stop();
+
+	void writeArchFilesInfoFile(const QVector<QVector<ArchFile*>>& archFilesGroups);
 
 	std::shared_ptr<ArchRequest> startNewRequest(E::TimeType timeType,
 												 qint64 sartTime,

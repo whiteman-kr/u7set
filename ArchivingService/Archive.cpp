@@ -123,6 +123,10 @@ void Archive::start()
 		return;
 	}
 
+	QVector<QVector<ArchFile*>> archFilesGroups;
+
+	archFilesGroups.resize(256);
+
 	for(ArchFile* archFile : m_archFilesArray)
 	{
 		if (archFile == nullptr)
@@ -132,7 +136,13 @@ void Archive::start()
 		}
 
 		archFile->setArchFullPath(m_archFullPath);
+
+		quint32 group = archFile->hash() & 0xFF;
+
+		archFilesGroups[group].append(archFile);
 	}
+
+	writeArchFilesInfoFile(archFilesGroups);
 
 	assert(m_archWriterThread == nullptr);
 
@@ -184,6 +194,51 @@ void Archive::stop()
 	}
 
 	m_isWorkable = false;
+}
+
+void Archive::writeArchFilesInfoFile(const QVector<QVector<ArchFile*>>& archFilesGroups)
+{
+	QFile infoFile(QString("%1/archive.info").arg(m_archFullPath));
+
+	if (infoFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate) == false)
+	{
+		return;
+	}
+
+	QTextStream info(&infoFile);
+
+	for(int g = 0; g < 256; g++)
+	{
+		info << QString("Group %1\n\n").arg(QString("%1").arg(g, 2, 16, QChar('0')).toUpper());
+
+		int filesCount = archFilesGroups[g].size();
+
+		if (filesCount == 0)
+		{
+			info << "No files in group\n\n";
+			continue;
+		}
+
+		for(int i = 0; i < filesCount; i++)
+		{
+			ArchFile* archFile = archFilesGroups[g][i];
+
+			if (archFile == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			info << QString("%1 %2 %3\n").
+						arg(archFile->isAnalog() ? "A" : "D").
+						arg(QString("%1").arg(archFile->hash(), 16, 16, QChar('0')).toUpper()).
+						arg(archFile->appSignalID());
+		}
+
+		info << "\n";
+	}
+
+	infoFile.close();
 }
 
 std::shared_ptr<ArchRequest> Archive::startNewRequest(E::TimeType timeType,

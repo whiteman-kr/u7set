@@ -744,6 +744,7 @@ void ArchFile::shutdown(qint64 curPartition, qint64* totalFlushedStatesCount)
 	flush(curPartition, totalFlushedStatesCount, true);
 }
 
+/*
 void ArchFile::breakMaintenance()
 {
 	m_fileInMaintenanceMutex.lock();
@@ -756,9 +757,9 @@ void ArchFile::breakMaintenance()
 
 		while(m_breakMaintenanceRequest != false)
 	}
-
 }
 
+*/
 
 bool ArchFile::maintenance(qint64 currentPartition,
 						   qint64 shortTermPeriodMs,
@@ -766,16 +767,23 @@ bool ArchFile::maintenance(qint64 currentPartition,
 						   int* deletedCount,
 						   int* packedCount)
 {
-	m_fileInMaintenanceMutex.lock();
-
-	m_fileInMaintenance = true;
-
-	m_fileInMaintenanceMutex.lock();
-
 	QVector<ArchFilePartition::Info> partitionsInfo = getArchPartitionsInfo(m_path);
 
-	*packedCount += packPartitions(partitionsInfo, currentPartition, shortTermPeriodMs);
-	*deletedCount += deleteOldPartitions(partitionsInfo, currentPartition, msLongTermPeriod);
+/*	if (partitionsInfo.count() > 0 && m_isAnalog == false)
+	{
+		DEBUG_STOP;
+	}*/
+
+	bool result = packPartitions(partitionsInfo, currentPartition, shortTermPeriodMs, packedCount);
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	result = deleteOldPartitions(partitionsInfo, currentPartition, msLongTermPeriod, deletedCount);
+
+	return result;
 }
 
 void ArchFile::startMaintenance()
@@ -792,41 +800,292 @@ void ArchFile::stopMaintenance()
 	m_fileInMaintenance = false;
 }
 
-
-int ArchFile::deleteOldPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
-								  qint64 currentPartition,
-								  qint64 msLongTermPeriod)
+bool ArchFile::packPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
+								qint64 currentPartition,
+								qint64 msShortTermPeriod,
+								int* packedCount)
 {
-	int deletedCount = 0;
+	TEST_PTR_RETURN_FALSE(packedCount);
+
+	// returns false if maintenance has been breaked!
+
+	*packedCount = 0;
 
 	for(int i = 0; i < partitionsInfo.count(); i++)
 	{
+		if (isRwAccessRequested() == true)
+		{
+			return false;			// break maintenance
+		}
+
+		const ArchFilePartition::Info& pi = partitionsInfo[i];
+
+		if (pi.shortTerm == false)
+		{
+			continue;				// partition already packed
+		}
+
+		if (currentPartition - pi.startTime > msShortTermPeriod)
+		{
+			bool result = true;
+
+			if (m_isAnalog == true)
+			{
+				result = packAnalogSignalPartition(pi);
+			}
+			else
+			{
+				result = packDiscreteSignalPartition(pi);
+			}
+
+			if (result == false)
+			{
+				return false;
+			}
+
+			(*packedCount)++;
+		}
+		else
+		{
+			break;		// partitions info sorted by pi.startTime ascending
+						// so no more partitions to packing
+		}
+	}
+
+	return true;
+}
+
+bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
+{
+	assert(pi.shortTerm == true);
+
+	const int ARCH_FILE_RECORD_SIZE = sizeof(ArchFileRecord);
+
+	// opening short term archive partition *.sta
+	//
+	QString staFileName = getPartitionFileName(pi);
+
+	QFile staFile(staFileName);
+
+	if (staFile.open(QIODevice::ReadOnly) == false)
+	{
+		return false;
+	}
+
+	QFileInfo fi(staFile);
+
+	qint64 staFileSize = fi.size();
+
+	staFileSize = (staFileSize / ARCH_FILE_RECORD_SIZE) * ARCH_FILE_RECORD_SIZE;
+
+	if (staFileSize < ARCH_FILE_RECORD_SIZE)
+	{
+		staFile.close();
+		QDir().remove(staFileName);
+		return true;
+	}
+
+	// creating long term archive partition *.lta
+	//
+	QString ltaFileName = staFileName;
+
+	ltaFileName.replace(SHORT_TERM_ARCHIVE_EXTENSION, LONG_TERM_ARCHIVE_EXTENSION);
+
+	QFile ltaFile(ltaFileName);
+
+	if (ltaFile.open(QIODevice::WriteOnly | QIODevice::Truncate) == false)
+	{
+		return false;
+	}
+
+	// reading buffer allocation
+	//
+	qint64 bufSize = staFileSize;
+
+	const int MAX_BUF_SIZE = ((10 * 1024 * 1024) / ARCH_FILE_RECORD_SIZE) * ARCH_FILE_RECORD_SIZE;		// ~10 Mb
+
+	if (bufSize > MAX_BUF_SIZE)
+	{
+		bufSize = MAX_BUF_SIZE;
+	}
+
+	char* readBuf = new char[bufSize];
+	char* writeBuf = new char[bufSize];
+
+	// sta to lta processing
+	//
+	int inReadBufSize = 0;
+	int inWriteBufSize = 0;
+
+	bool result = true;
+
+	while(true)
+	{
+		if (isRwAccessRequested() == true)
+		{
+			result = false;
+			break;
+		}
+
+		qint64 reads = staFile.read(readBuf + inReadBufSize, bufSize - inReadBufSize);
+
+		if (reads <= 0)
+		{
+			break;
+		}
+
+		inReadBufSize += reads;
+
+		if (inReadBufSize < ARCH_FILE_RECORD_SIZE)
+		{
+			break;
+		}
+
+		int recordStartPos = 0;
+
+		while(inReadBufSize - recordStartPos >= ARCH_FILE_RECORD_SIZE)
+		{
+			const ArchFileRecord* record = reinterpret_cast<const ArchFileRecord*>(readBuf + recordStartPos);
+
+			if (record->isValid() == true)
+			{
+				if (record->state.flags.hasShortTermArchivingReasonOnly() == true)
+				{
+					// skip record
+					//
+				}
+				else
+				{
+					// copy record in writeBuffer
+					//
+					memcpy(writeBuf + inWriteBufSize, reinterpret_cast<const char*>(record), ARCH_FILE_RECORD_SIZE);
+
+					inWriteBufSize += ARCH_FILE_RECORD_SIZE;
+
+					if (inWriteBufSize >= bufSize)
+					{
+						qint64 written = ltaFile.write(writeBuf, inWriteBufSize);
+
+						if (written != inWriteBufSize)
+						{
+							result = false;
+							break;
+						}
+
+						inWriteBufSize = 0;
+					}
+				}
+
+				recordStartPos += ARCH_FILE_RECORD_SIZE;
+			}
+			else
+			{
+				// record is not valid, shift on one byte
+				//
+				recordStartPos++;
+			}
+		}
+
+		inReadBufSize -= recordStartPos;
+
+		if (inReadBufSize > 0)
+		{
+			// copy remaining bytes in beginning of buffer
+			//
+			memcpy(readBuf + 0, readBuf + recordStartPos, inReadBufSize);
+		}
+	}
+
+	if (result == true && inWriteBufSize > 0)
+	{
+		qint64 written = ltaFile.write(writeBuf, inWriteBufSize);
+
+		if (written != inWriteBufSize)
+		{
+			result = false;
+		}
+	}
+
+	ltaFile.close();
+	staFile.close();
+
+	if (result == true)
+	{
+		QDir().remove(staFileName);
+	}
+	else
+	{
+		QDir().remove(ltaFileName);
+	}
+
+	delete [] readBuf;
+	delete [] writeBuf;
+
+	return result;
+}
+
+bool ArchFile::packDiscreteSignalPartition(const ArchFilePartition::Info& pi)
+{
+	assert(pi.shortTerm == true);
+
+	QString fileName = getPartitionFileName(pi);
+
+	QString newFileName = fileName;
+
+	newFileName.replace(SHORT_TERM_ARCHIVE_EXTENSION, LONG_TERM_ARCHIVE_EXTENSION);
+
+	QDir dir;
+
+	dir.rename(fileName, newFileName);
+
+	return true;
+}
+
+bool ArchFile::deleteOldPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
+								  qint64 currentPartition,
+								  qint64 msLongTermPeriod,
+								  int* deletedCount)
+{
+	TEST_PTR_RETURN_FALSE(deletedCount);
+
+	// returns false if maintenance has been breaked!
+
+	*deletedCount = 0;
+
+	for(int i = 0; i < partitionsInfo.count(); i++)
+	{
+		if (isRwAccessRequested() == true)
+		{
+			return false;		// break maintenance
+		}
+
 		const ArchFilePartition::Info& pi = partitionsInfo[i];
 
 		if (currentPartition - pi.startTime > msLongTermPeriod)
 		{
-			QString fileToDelete = QString("%1//%2").arg(m_path, pi.fileName);
 			QDir dir;
 
-			if (dir.remove(fileToDelete) == true)
+			QString fileName = getPartitionFileName(pi);
+
+			if (dir.remove(fileName) == true)
 			{
-				deletedCount++;
+				(*deletedCount)++;
 			}
+		}
+		else
+		{
+			break;				// partitions info sorted by pi.startTime ascending
+								// so no more partitions to delete
 		}
 	}
 
-	return deletedCount;
+	return true;
 }
-/*
-bool ArchFile::packPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
-						qint64 currentPartition,
-						qint64 msShortTermPeriod
-						int* packedPartitionsCount)
-{
-	int packedPartitionsCount = 0;
 
-	return packedPartitionsCount;
+QString ArchFile::getPartitionFileName(const ArchFilePartition::Info& pi)
+{
+	return QString("%1/%2").arg(m_path, pi.fileName);
 }
-*/
+
 
 

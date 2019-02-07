@@ -93,7 +93,6 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 		{
 			// prevState is valid and not stored, archive it
 			//
-
 			if (m_prevStateIsStored == false)
 			{
 				statesQueue.pushAutoPoint(prevState);
@@ -198,9 +197,12 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 	{
 		// update stored state
 		//
-		m_stored = curState;
+		statesQueue.push(&curState);
 
-		statesQueue.push(&m_stored);
+		if (curState.flags.hasShortTermArchivingReasonOnly() == false)
+		{
+			m_stored = curState;
+		}
 
 		m_prevStateIsStored = true;
 

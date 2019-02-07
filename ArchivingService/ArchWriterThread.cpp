@@ -35,19 +35,17 @@ void ArchWriterThread::run()
 
 	int noFlushingExecuted = 0;
 
-	m_statisticsTimer.start();
+	m_timer.start();
 
 	while(isQuitRequested() == false)
 	{
 		if (filesCount == 0)
 		{
-			sleepMs(200);
+			msleep(200);
 			continue;
 		}
 
-		qint64 currentPartition = m_archive->getCurrentPartition();
-
-		printStatistics(currentPartition);
+		printStatistics();
 
 		bool flushAnyway = false;
 
@@ -55,11 +53,17 @@ void ArchWriterThread::run()
 
 		if (fileToFlush == nullptr)
 		{
-			sleepMs(1);
+			msleep(1);
 		}
 		else
 		{
+			qint64 currentPartition = m_archive->getCurrentPartition();
+
+			qint64 startTime = m_timer.elapsed();
+
 			bool flushingExecuted = fileToFlush->flush(currentPartition, &m_totalFlushedStatesCount, flushAnyway);
+
+			m_flushTime += m_timer.elapsed() - startTime;
 
 			if (flushingExecuted == false)
 			{
@@ -67,7 +71,7 @@ void ArchWriterThread::run()
 
 				if (noFlushingExecuted >= filesCount)
 				{
-					sleepMs(5);
+					msleep(5);
 					noFlushingExecuted = 0;
 				}
 			}
@@ -81,41 +85,33 @@ void ArchWriterThread::run()
 	m_archive->shutdown();
 }
 
-void ArchWriterThread::printStatistics(qint64 currentPartition)
+void ArchWriterThread::printStatistics()
 {
-	if (m_prevPartition == -1)
+	const qint64 TEN_SECONDS = 10 * 1000;
+
+	qint64 elapsedTime = m_timer.elapsed();
+
+	if (elapsedTime < TEN_SECONDS)
 	{
-		m_prevPartition = currentPartition;
-		m_prevFlushedStatesCount = m_totalFlushedStatesCount;
 		return;
 	}
 
-	const qint64 TEN_SECONDS = 10 * 1000;
-
-	if (currentPartition - m_prevPartition > TEN_SECONDS)
+	if (m_totalFlushedStatesCount == m_prevFlushedStatesCount)
 	{
-		qint64 dn = m_totalFlushedStatesCount - m_prevFlushedStatesCount;
-
-		m_prevFlushedStatesCount = m_totalFlushedStatesCount;
-
-		qint64 elapsedTime = m_statisticsTimer.elapsed();
-
-		qint64 dt_clear = elapsedTime - m_sleepTime;
-
-		qint64 sleepPercent = m_sleepTime * 100 / elapsedTime;
-
-		qDebug() << C_STR(QString("Flush states %1 time %2 (sleep %3%) (per state %4 mcs)").
-						  arg(dn).arg(elapsedTime).arg(sleepPercent).arg((dt_clear * 1000) / dn));
-
-		m_statisticsTimer.start();
-		m_sleepTime = 0;
+		qDebug() << "No flushing";
+		return;
 	}
-}
 
-void ArchWriterThread::sleepMs(int ms)
-{
-	msleep(ms);
-	m_sleepTime += ms;
-}
+	qint64 flushedCount = m_totalFlushedStatesCount - m_prevFlushedStatesCount;
 
+	m_prevFlushedStatesCount = m_totalFlushedStatesCount;
+
+	qint64 sleepPercent = 100 - (m_flushTime * 100) / elapsedTime;
+
+	qDebug() << C_STR(QString("Flush states %1 time %2 (sleep %3%) (per state %4 mcs)").
+						  arg(flushedCount).arg(elapsedTime).arg(sleepPercent).arg((m_flushTime * 1000) / flushedCount));
+
+	m_timer.start();
+	m_flushTime = 0;
+}
 

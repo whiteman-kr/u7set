@@ -13,8 +13,7 @@ public:
 private:
 	void run() override;
 
-	void printStatistics(qint64 currentPartition);
-	void sleepMs(int ms);
+	void printStatistics();
 
 private:
 	Archive* m_archive = nullptr;
@@ -28,7 +27,7 @@ private:
 
 	qint64 m_totalFlushedStatesCount = 0;
 	qint64 m_prevFlushedStatesCount = 0;
-	qint64 m_prevPartition = -1;
-	qint64 m_sleepTime = 0;
-	QElapsedTimer m_statisticsTimer;
+	qint64 m_flushTime = 0;
+	QElapsedTimer m_timer;
+
 };

@@ -161,13 +161,21 @@ private:
 	void startMaintenance();
 	void stopMaintenance();
 
-	int deleteOldPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
+	bool packPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
 							qint64 currentPartition,
-							qint64 msLongTermPeriod);
+							qint64 msShortTermPeriod,
+							int* packedCount);
+	bool packAnalogSignalPartition(const ArchFilePartition::Info& pi);
+	bool packDiscreteSignalPartition(const ArchFilePartition::Info& pi);
 
-	int packPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
-							qint64 currentPartition,
-							qint64 msShortTermPeriod);
+	bool deleteOldPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
+								qint64 currentPartition,
+								qint64 msLongTermPeriod,
+								int* deletedCount);
+
+	bool isRwAccessRequested() { return m_rwAccessRequested.load(); }
+
+	QString getPartitionFileName(const ArchFilePartition::Info& pi);
 
 private:
 	Hash m_hash = 0;
@@ -181,7 +189,7 @@ private:
 
 	QMutex m_fileInMaintenanceMutex;
 	bool m_fileInMaintenance = false;
-	bool m_breakMaintenanceRequest = false;
+	std::atomic<bool> m_rwAccessRequested = { false };
 
 	//
 
