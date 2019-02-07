@@ -265,8 +265,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0245.sql", "Upgrade to version 245, Unit have been made editable for output analog signals"},
 	{":/DatabaseUpgrade/Upgrade0246.sql", "Upgrade to version 246, Add attributes to file system"},	
 
-	{":/DatabaseUpgrade/Upgrade0247.sql", "Upgrade to version 247, Add functions api.get_file_full_path, api.move_file"},
-	{":/DatabaseUpgrade/Upgrade0248.sql", "Upgrade to version 248, Add functions api.rename_file"},
+	{":/DatabaseUpgrade/Upgrade0251.sql", "Upgrade to version 251, Add functions api.get_file_full_path, api.move_file"},
+	{":/DatabaseUpgrade/Upgrade0252.sql", "Upgrade to version 252, Add functions api.rename_file"},
 };
 
 
