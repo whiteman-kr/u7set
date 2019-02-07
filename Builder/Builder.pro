@@ -129,7 +129,8 @@ SOURCES += \
     ../lib/DbProgressDialog.cpp \
     ../lib/MetrologySignal.cpp \
     RunOrder.cpp \
-    TestClientCfgGenerator.cpp
+    TestClientCfgGenerator.cpp \
+    ../lib/UnitsConvertor.cpp
 
 HEADERS += \
     ../lib/OutputLog.h \
@@ -212,7 +213,8 @@ HEADERS += \
     ../lib/DbProgressDialog.h \
     ../lib/MetrologySignal.h \
     RunOrder.h \
-    TestClientCfgGenerator.h
+    TestClientCfgGenerator.h \
+    ../lib/UnitsConvertor.h
 
 
 unix {

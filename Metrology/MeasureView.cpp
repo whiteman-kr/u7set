@@ -293,7 +293,7 @@ QString MeasureTable::textLinearity(int row, int column) const
 
 	if (theOptions.linearity().viewType() == LO_VIEW_TYPE_DETAIL_PHYSICAL)
 	{
-		detailLimitType = MEASURE_LIMIT_TYPE_PHYSICAL;
+		detailLimitType = MEASURE_LIMIT_TYPE_ENGENEER;
 	}
 
 	QString result;
@@ -313,15 +313,15 @@ QString MeasureTable::textLinearity(int row, int column) const
 		case MVC_CMN_L_PLACE:					result = m->location().placeStr(); break;
 
 		case MVC_CMN_L_EL_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
-		case MVC_CMN_L_PH_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_PHYSICAL); break;
+		case MVC_CMN_L_EN_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_ENGENEER); break;
 
 		case MVC_CMN_L_PERCENT:					result = QString::number(m->percent(), 10, 2); break;
 
 		case MVC_CMN_L_EL_MEASURE:				result = m->measureStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
-		case MVC_CMN_L_PH_MEASURE:				result = m->measureStr(MEASURE_LIMIT_TYPE_PHYSICAL); break;
+		case MVC_CMN_L_EN_MEASURE:				result = m->measureStr(MEASURE_LIMIT_TYPE_ENGENEER); break;
 
 		case MVC_CMN_L_EL_RANGE:				result = m->limitStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
-		case MVC_CMN_L_PH_RANGE:				result = m->limitStr(MEASURE_LIMIT_TYPE_PHYSICAL); break;
+		case MVC_CMN_L_EN_RANGE:				result = m->limitStr(MEASURE_LIMIT_TYPE_ENGENEER); break;
 
 		case MVC_CMN_L_VALUE_COUNT:				result = QString::number(m->measureCount()); break;
 		case MVC_CMN_L_VALUE_0:					result = m->measureItemStr(detailLimitType, 0); break;

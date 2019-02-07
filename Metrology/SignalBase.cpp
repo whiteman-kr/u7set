@@ -592,49 +592,6 @@ QString MeasureMultiParam::caption() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString MeasureMultiParam::physicalRangeStr() const
-{
-	QString result;
-
-	m_mutex.lock();
-
-		if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
-		{
-			const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
-			if (param.isValid() == true)
-			{
-				result = param.physicalRangeStr();
-			}
-		}
-		else
-		{
-			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
-			if (inParam.isValid() == true)
-			{
-				result = inParam.physicalRangeStr() + MultiTextDivider;
-			}
-
-			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
-			if (outParam.isValid() == true)
-			{
-				if (inParam.physicalRangeStr() != outParam.physicalRangeStr())
-				{
-					result += outParam.physicalRangeStr();
-				}
-				else
-				{
-					result = outParam.physicalRangeStr();
-				}
-			}
-		}
-
-	m_mutex.unlock();
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 QString MeasureMultiParam::electricRangeStr() const
 {
 	QString result;
@@ -754,6 +711,92 @@ QString MeasureMultiParam::electricSensorStr() const
 				break;
 
 			default: assert(0);
+		}
+
+	m_mutex.unlock();
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasureMultiParam::physicalRangeStr() const
+{
+	QString result;
+
+	m_mutex.lock();
+
+		if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
+		{
+			const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+			if (param.isValid() == true)
+			{
+				result = param.physicalRangeStr();
+			}
+		}
+		else
+		{
+			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+			if (inParam.isValid() == true)
+			{
+				result = inParam.physicalRangeStr() + MultiTextDivider;
+			}
+
+			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+			if (outParam.isValid() == true)
+			{
+				if (inParam.physicalRangeStr() != outParam.physicalRangeStr())
+				{
+					result += outParam.physicalRangeStr();
+				}
+				else
+				{
+					result = outParam.physicalRangeStr();
+				}
+			}
+		}
+
+	m_mutex.unlock();
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString MeasureMultiParam::engeneeringRangeStr() const
+{
+	QString result;
+
+	m_mutex.lock();
+
+		if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
+		{
+			const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+			if (param.isValid() == true)
+			{
+				result = param.engeneeringRangeStr();
+			}
+		}
+		else
+		{
+			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+			if (inParam.isValid() == true)
+			{
+				result = inParam.engeneeringRangeStr() + MultiTextDivider;
+			}
+
+			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+			if (outParam.isValid() == true)
+			{
+				if (inParam.engeneeringRangeStr() != outParam.engeneeringRangeStr())
+				{
+					result += outParam.engeneeringRangeStr();
+				}
+				else
+				{
+					result = outParam.engeneeringRangeStr();
+				}
+			}
 		}
 
 	m_mutex.unlock();
@@ -1744,6 +1787,11 @@ void SignalBase::updateRackParam()
 		{
 			Metrology::SignalParam& param = m_signalList[i].param();
 			if (param.isValid() == false)
+			{
+				continue;
+			}
+
+			if (param.location().rack().hash() == 0)
 			{
 				continue;
 			}

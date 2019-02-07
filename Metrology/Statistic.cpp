@@ -115,8 +115,9 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 			case STATISTIC_COLUMN_MODULE:			result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_PLACE:			result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_ADC:				result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_PH_RANGE:			result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_EL_RANGE:			result = Qt::AlignCenter;	break;
+			case STATISTIC_COLUMN_PH_RANGE:			result = Qt::AlignCenter;	break;
+			case STATISTIC_COLUMN_EN_RANGE:			result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_MEASURE_COUNT:	result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_STATE:			result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_OUTPUT_TYPE:		result = Qt::AlignCenter;	break;
@@ -205,8 +206,9 @@ QString StatisticTable::text(int row, int column, Metrology::Signal* pSignal) co
 		case STATISTIC_COLUMN_MODULE:			result = param.location().moduleStr();				break;
 		case STATISTIC_COLUMN_PLACE:			result = param.location().placeStr();				break;
 		case STATISTIC_COLUMN_ADC:				result = param.adcRangeStr(m_showADCInHex);			break;
-		case STATISTIC_COLUMN_PH_RANGE:			result = param.physicalRangeStr();					break;
 		case STATISTIC_COLUMN_EL_RANGE:			result = param.electricRangeStr();					break;
+		case STATISTIC_COLUMN_PH_RANGE:			result = param.physicalRangeStr();					break;
+		case STATISTIC_COLUMN_EN_RANGE:			result = param.engeneeringRangeStr();				break;
 		case STATISTIC_COLUMN_MEASURE_COUNT:	result = pSignal->statistic().measureCountStr();	break;
 		case STATISTIC_COLUMN_STATE:			result = pSignal->statistic().stateStr();			break;
 		case STATISTIC_COLUMN_OUTPUT_TYPE:		result.clear();										break;

@@ -13,6 +13,7 @@
 #include "DialogSubsystemListEditor.h"
 #include "DialogConnections.h"
 #include "DialogBusEditor.h"
+#include "DialogAfbLibraryCheck.h"
 #include "BuildTabPage.h"
 #include "UploadTabPage.h"
 #include "SimulatorTabPage.h"
@@ -238,7 +239,12 @@ void MainWindow::createActions()
 	m_updateUfbsAfbs->setEnabled(false);
 	connect(m_updateUfbsAfbs, &QAction::triggered, this, &MainWindow::updateUfbsAfbsBusses);
 
-    m_aboutAction = new QAction(tr("About..."), this);
+	m_AfbLibraryCheck = new QAction(tr("AFB Library Check..."), this);
+	m_AfbLibraryCheck->setStatusTip(tr("AFB Library Check"));
+	m_AfbLibraryCheck->setEnabled(false);
+	connect(m_AfbLibraryCheck, &QAction::triggered, this, &MainWindow::afbLibraryCheck);
+
+	m_aboutAction = new QAction(tr("About..."), this);
 	m_aboutAction->setStatusTip(tr("Show application information"));
 	//m_pAboutAction->setEnabled(true);
 	connect(m_aboutAction, &QAction::triggered, this, &MainWindow::showAbout);
@@ -307,6 +313,11 @@ void MainWindow::createMenus()
 
 	pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_updateUfbsAfbs);
+
+	if (theSettings.isExpertMode() == true)
+	{
+		pToolsMenu->addAction(m_AfbLibraryCheck);
+	}
 
 	pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_settingsAction);
@@ -773,6 +784,19 @@ void MainWindow::updateUfbsAfbsBusses()
 	return;
 }
 
+void MainWindow::afbLibraryCheck()
+{
+	if (theDialogAfbLibraryCheck == nullptr)
+	{
+		theDialogAfbLibraryCheck = new DialogAfbLibraryCheck(dbController(), this);
+		theDialogAfbLibraryCheck->show();
+	}
+	else
+	{
+		theDialogAfbLibraryCheck->activateWindow();
+	}
+}
+
 void MainWindow::showAbout()
 {
 	QString text = "Supported project database version: " + QString::number(DbController::databaseVersion()) + "<br><br>";
@@ -853,6 +877,7 @@ void MainWindow::projectOpened(DbProject project)
     m_connectionsEditorAction->setEnabled(true);
 	m_busEditorAction->setEnabled(true);
 	m_updateUfbsAfbs->setEnabled(true);
+	m_AfbLibraryCheck->setEnabled(true);
 
 	// Status bar
 	//
@@ -883,6 +908,7 @@ void MainWindow::projectClosed()
     m_connectionsEditorAction->setEnabled(false);
 	m_busEditorAction->setEnabled(false);
 	m_updateUfbsAfbs->setEnabled(false);
+	m_AfbLibraryCheck->setEnabled(false);
 
 	// Status bar
 	//

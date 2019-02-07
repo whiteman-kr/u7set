@@ -10,12 +10,13 @@
 // If you want to change any function writeToXml you must change CFG_FILE_VER_METROLOGY_SIGNALS
 // and write log history about changing
 
-const int			CFG_FILE_VER_METROLOGY_SIGNALS	= 2;
+const int			CFG_FILE_VER_METROLOGY_SIGNALS	= 3;
 
 // Historty of version
 //
 // version 1 - it is base version
 // version 2 - deleted a few fields SignalParam::writeToXml (story about removing redundant ranges)
+// version 3 - append fields: EngeneeringUnits
 //
 
 namespace Metrology
@@ -159,18 +160,14 @@ namespace Metrology
 		QString					m_customAppSignalID;
 		QString					m_caption;
 
-		E::SignalType			m_signalType = E::SignalType::Analog;
 		E::SignalInOutType		m_inOutType = E::SignalInOutType::Internal;
+		E::SignalType			m_signalType = E::SignalType::Analog;
+		E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;		// discrete signals is always treat as UnsignedInt and dataSize == 1
 
 		SignalLocation			m_location;
 
 		int						m_lowADC = 0;
 		int						m_highADC = 0;
-
-		double					m_physicalLowLimit = 0;
-		double					m_physicalHighLimit = 0;
-		QString					m_physicalUnit;
-		int						m_physicalPrecision = 2;
 
 		double					m_electricLowLimit = 0;
 		double					m_electricHighLimit = 0;
@@ -179,6 +176,14 @@ namespace Metrology
 		E::SensorType			m_electricSensorType = E::SensorType::NoSensor;
 		QString					m_electricSensor;
 		int						m_electricPrecision = 3;
+
+		double					m_physicalLowLimit = 0;
+		double					m_physicalHighLimit = 0;
+
+		double					m_engeneeringLowLimit = 0;
+		double					m_engeneeringHighLimit = 0;
+		QString					m_engeneeringUnit;
+		int						m_engeneeringPrecision = 2;
 
 		bool					m_enableTuning = false;
 		double					m_tuningDefaultValue = 0;
@@ -200,11 +205,15 @@ namespace Metrology
 		QString					caption() const { return m_caption; }
 		void					setCaption(const QString& caption) { m_caption = caption; }
 
+		E::SignalInOutType		inOutType() const { return m_inOutType; }
+		void					setInOutType(E::SignalInOutType inOutType) { m_inOutType = inOutType; }
+
 		E::SignalType			signalType() const { return m_signalType; }
 		void					setSignalType(E::SignalType type) { m_signalType = type; }
 
-		E::SignalInOutType		inOutType() const { return m_inOutType; }
-		void					setInOutType(E::SignalInOutType inOutType) { m_inOutType = inOutType; }
+		E::AnalogAppSignalFormat analogSignalFormat() const { return m_analogSignalFormat; }
+		int						analogSignalFormatInt() const { return TO_INT(m_analogSignalFormat); }
+		void					setAnalogSignalFormat(E::AnalogAppSignalFormat dataFormat) { m_analogSignalFormat = dataFormat; }
 
 		bool					isAnalog() const { return m_signalType == E::SignalType::Analog; }
 		bool					isDiscrete() const { return m_signalType == E::SignalType::Discrete; }
@@ -227,21 +236,6 @@ namespace Metrology
 		void					setHighADC(int highADC) { m_highADC = highADC;}
 
 		QString					adcRangeStr(bool showHex) const;
-
-		double					physicalLowLimit() const { return m_physicalLowLimit; }
-		void					setPhysicalLowLimit(double lowLimit) { m_physicalLowLimit = lowLimit; }
-
-		double					physicalHighLimit() const { return m_physicalHighLimit; }
-		void					setPhysicalHighLimit(double highLimit) { m_physicalHighLimit = highLimit; }
-
-		QString					physicalUnit() const { return m_physicalUnit; }
-		void					setPhysicalUnit(const QString& unit) { m_physicalUnit = unit; }
-
-		int						physicalPrecision() const { return m_physicalPrecision; }
-		void					setPhysicalPrecision(int precision) { m_physicalPrecision = precision; }
-
-		bool					physicalRangeIsValid() const;
-		QString					physicalRangeStr() const;
 
 		double					electricLowLimit() const { return m_electricLowLimit; }
 		void					setElectricLowLimit(double lowLimit) { m_electricLowLimit = lowLimit; }
@@ -267,6 +261,30 @@ namespace Metrology
 		bool					electricRangeIsValid() const;
 		QString					electricRangeStr() const;
 
+		double					physicalLowLimit() const { return m_physicalLowLimit; }
+		void					setPhysicalLowLimit(double lowLimit) { m_physicalLowLimit = lowLimit; }
+
+		double					physicalHighLimit() const { return m_physicalHighLimit; }
+		void					setPhysicalHighLimit(double highLimit) { m_physicalHighLimit = highLimit; }
+
+		bool					physicalRangeIsValid() const;
+		QString					physicalRangeStr() const;
+
+		double					engeneeringLowLimit() const { return m_engeneeringLowLimit; }
+		void					setEngeneeringLowLimit(double lowLimit) { m_engeneeringLowLimit = lowLimit; }
+
+		double					engeneeringHighLimit() const { return m_engeneeringHighLimit; }
+		void					setEngeneeringHighLimit(double highLimit) { m_engeneeringHighLimit = highLimit; }
+
+		QString					engeneeringUnit() const { return m_engeneeringUnit; }
+		void					setEngeneeringUnit(const QString& unit) { m_engeneeringUnit = unit; }
+
+		int						engeneeringPrecision() const { return m_engeneeringPrecision; }
+		void					setEngeneeringPrecision(int precision) { m_engeneeringPrecision = precision; }
+
+		bool					engeneeringRangeIsValid() const;
+		QString					engeneeringRangeStr() const;
+
 		bool					enableTuning() const { return m_enableTuning; }
 		QString					enableTuningStr() const;
 		void					setEnableTuning(bool enableTuning) { m_enableTuning = enableTuning; }
@@ -274,6 +292,8 @@ namespace Metrology
 		double					tuningDefaultValue() const { return m_tuningDefaultValue; }
 		QString					tuningDefaultValueStr() const;
 		void					setTuningDefaultValue(double value) { m_tuningDefaultValue = value; }
+
+		TuningValueType			tuningValueType();
 
 		bool					readFromXml(XmlReadHelper& xml);
 		void					writeToXml(XmlWriteHelper& xml);
