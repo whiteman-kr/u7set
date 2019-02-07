@@ -49,6 +49,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_addFiles, m_worker, &DbWorker::slot_addFiles);
 	connect(this, &DbController::signal_deleteFiles, m_worker, &DbWorker::slot_deleteFiles);
 	connect(this, &DbController::signal_moveFiles, m_worker, &DbWorker::slot_moveFiles);
+	connect(this, &DbController::signal_renameFile, m_worker, &DbWorker::slot_renameFile);
 
 	connect(this, &DbController::signal_getLatestVersion, m_worker, &DbWorker::slot_getLatestVersion);
 	connect(this, &DbController::signal_getLatestTreeVersion, m_worker, &DbWorker::slot_getLatestTreeVersion);
@@ -811,6 +812,36 @@ bool DbController::moveFiles(const std::vector<DbFileInfo>& files, int moveToPar
 	emit signal_moveFiles(&files, moveToParentId, movedFiles);
 
 	bool result = waitForComplete(parentWidget, tr("Moving files"));
+	return result;
+}
+
+bool DbController::renameFile(const DbFileInfo& file, QString newFileName, DbFileInfo* updatedFileInfo, QWidget* parentWidget)
+{
+	// Check parameters
+	//
+	if (updatedFileInfo == nullptr ||
+		file.isNull() == true ||
+		newFileName.isEmpty() == true)
+	{
+		assert(updatedFileInfo != nullptr);
+		assert(file.isNull() == false);
+		assert(newFileName.isEmpty() == false);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+	if (ok == false)
+	{
+		return false;
+	}
+
+	// Emit signal end wait for complete
+	//
+	emit signal_renameFile(file, newFileName, updatedFileInfo);
+
+	bool result = waitForComplete(parentWidget, tr("Renaming file"));
 	return result;
 }
 

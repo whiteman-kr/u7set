@@ -171,7 +171,6 @@ public slots:
 
 	void slot_refreshFiles();
 	void slot_doubleClicked(const QModelIndex& index);
-	//	void slot_properties();
 
 public slots:
 	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
@@ -299,8 +298,6 @@ protected slots:
 	void importWorkcopy();
 
 	void showFileProperties();
-
-	//	void editSchemasProperties(std::vector<DbFileInfo> selectedFiles);
 
 private slots:
 	void ctrlF();

@@ -2979,6 +2979,74 @@ void DbWorker::slot_moveFiles(const std::vector<DbFileInfo>* files, int moveToPa
 	return;
 }
 
+void DbWorker::slot_renameFile(const DbFileInfo& file, QString newFileName, DbFileInfo* updatedFileInfo)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Database connection is not openned."));
+		return;
+	}
+
+	// Check parameters
+	//
+	if (updatedFileInfo == nullptr ||
+		file.isNull() == true ||
+		newFileName.isEmpty() == true)
+	{
+		assert(updatedFileInfo != nullptr);
+		assert(file.isNull() == false);
+		assert(newFileName.isEmpty() == false);
+		emitError(db, tr("slot_renameFile: input parameters error."));
+		return;
+	}
+
+	*updatedFileInfo = DbFileInfo{};
+
+	// Log action
+	//
+	QString logMessage = QString("slot_renameFile: fileId %1, newFileName %2")
+							 .arg(file.fileId())
+							 .arg(newFileName);
+	addLogRecord(db, logMessage);
+
+	// Request
+	//
+	QString request = QString("SELECT * FROM api.rename_file('%1', %2, '%3');")
+									.arg(sessionKey())
+									.arg(file.fileId())
+									.arg(newFileName);
+
+	QSqlQuery q(db);
+	if (bool result = q.exec(request);
+		result == false)
+	{
+		emitError(db, tr("Can't rename file. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	if (q.next() == true)
+	{
+		db_dbFileInfo(q, updatedFileInfo);
+	}
+	else
+	{
+		assert(false);
+		emitError(db, tr("Can't get return result on renaming file"));
+	}
+
+	return;
+}
+
 void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out)
 {
 	// Init automitic varaiables

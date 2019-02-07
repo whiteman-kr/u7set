@@ -1426,6 +1426,7 @@ void SchemaFileViewEx::refreshFiles()
 
 	selectionModel()->blockSignals(false);
 
+	selectionChanged({}, {});					// To update actions
 	return;
 }
 
@@ -3401,7 +3402,7 @@ void SchemaControlTabPageEx::checkInFiles()
 		}
 	}
 
-	// To update actions
+	m_filesView->selectionChanged({}, {});		// To update actions
 
 	return;
 }
@@ -3970,8 +3971,9 @@ void SchemaControlTabPageEx::showFileProperties()
 	// Read schemas
 	//
 	std::vector<std::pair<std::shared_ptr<DbFile>, std::shared_ptr<VFrame30::Schema>>> schemas;
-
 	schemas.reserve(out.size());
+
+	QString initialSchemasId;
 
 	for (std::shared_ptr<DbFile> file : out)
 	{
@@ -3983,6 +3985,8 @@ void SchemaControlTabPageEx::showFileProperties()
 		}
 
 		schemas.push_back({file, schema});
+
+		initialSchemasId = schema->schemaId();		// Has sense if only one schema is selected
 	}
 
 	// Show schema properties dialog
@@ -4005,10 +4009,26 @@ void SchemaControlTabPageEx::showFileProperties()
 	std::vector<std::shared_ptr<PropertyObject>> propertyObjects;
 	propertyObjects.reserve(schemas.size());
 
-	for (std::pair<std::shared_ptr<DbFile>, std::shared_ptr<VFrame30::Schema>> s : schemas)
+	for (auto[schemaFile, schema] : schemas)
 	{
-		propertyObjects.push_back(s.second);
-		assert(propertyObjects.back() != nullptr);
+		assert(schema != nullptr);
+
+		propertyObjects.push_back(schema);
+
+		// Now allow to edit SchemaID, only if one file is selected
+		//
+		if (schemas.size() == 1)
+		{
+			std::shared_ptr<Property> schemaIdProp = schema->propertyByCaption("SchemaID");
+			if (schemaIdProp == nullptr)
+			{
+				assert(schemaIdProp != nullptr);
+			}
+			else
+			{
+				schemaIdProp->setReadOnly(false);
+			}
+		}
 	}
 
 	propertyEditor->setObjects(propertyObjects);
@@ -4027,18 +4047,17 @@ void SchemaControlTabPageEx::showFileProperties()
 
 	d.resize(d.sizeHint() * 1.5);
 
-	int result = d.exec();
-
-	if (result == QDialog::Accepted)
+	// Show proprties dialog
+	// and save result on accept
+	//
+	if (int result = d.exec();
+		result == QDialog::Accepted)
 	{
 		std::vector<std::shared_ptr<DbFile>> filesToSave;
 		filesToSave.reserve(schemas.size());
 
-		for (std::pair<std::shared_ptr<DbFile>, std::shared_ptr<VFrame30::Schema>> s : schemas)
+		for (auto [file, schema]: schemas)
 		{
-			std::shared_ptr<DbFile> file = s.first;
-			std::shared_ptr<VFrame30::Schema> schema = s.second;
-
 			if (file->state() != VcsState::CheckedOut ||
 				(file->userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
 			{
@@ -4054,18 +4073,47 @@ void SchemaControlTabPageEx::showFileProperties()
 				return;
 			}
 
+			// --
+			//
 			file->swapData(data);
-
-			QString detailsString = schema->details();
-			file->setDetails(detailsString);
+			file->setDetails(schema->details());
 
 			filesToSave.push_back(file);
+		}
+
+		// Check if SchemaID was changed and we need to rename file
+		//
+		if (schemas.size() == 1)
+		{
+			auto file = schemas.front().first;
+			auto schema = schemas.front().second;
+
+			if (schema->schemaId() != initialSchemasId)
+			{
+				// File must be renamed to new name
+				//
+				QString newFileName = schema->schemaId() + "." + file->extension();
+
+				if (bool ok = db()->renameFile(*file, newFileName, file.get(), this);
+					ok == false)
+				{
+					// Don't save file if it was not renamed, as it will lead that filename differs from SchemaID
+					// Just return
+					//
+					return;
+				}
+
+				// variable file has spoiled 'details' while db()->renameFile (it returns new DbFileInfo into file)
+				// so we need to update details again!!!
+				// and it will be written to DB later (db()->setWorkcopy(filesToSave, this);)
+				//
+				file->setDetails(schema->details());
+			}
 		}
 
 		if (filesToSave.empty() == false)
 		{
 			db()->setWorkcopy(filesToSave, this);
-
 			m_filesView->refreshFiles();
 		}
 	}
