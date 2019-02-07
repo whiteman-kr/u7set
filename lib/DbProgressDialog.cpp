@@ -28,7 +28,8 @@ ProgressDialog::ProgressDialog(QWidget* parent, const QString& description, DbPr
 	//
     QVBoxLayout* vLayout = new QVBoxLayout;
 
-    m_label = new QLabel();
+	m_label = new QLabel;
+	m_currentOperation = new QLabel;
 
     m_progressBar = new QProgressBar();
     m_progressBar->setTextVisible(false);
@@ -37,6 +38,7 @@ ProgressDialog::ProgressDialog(QWidget* parent, const QString& description, DbPr
     m_cancelButton = new QPushButton(tr("Cancel"));
 
     vLayout->addWidget(m_label);
+	vLayout->addWidget(m_currentOperation);
     vLayout->addWidget(m_progressBar);
 
     QHBoxLayout* hLayout = new QHBoxLayout;
@@ -102,6 +104,13 @@ void ProgressDialog::timerEvent(QTimerEvent*)
 	else
 	{
 		m_label->setText(m_description + QString(" - %1%").arg(m_progress->value()));
+
+		QString curOp = m_progress->currentOperation();
+		if (curOp != m_currentOperation->text())
+		{
+			m_currentOperation->setText(curOp);
+		}
+
 		m_progressBar->setValue(m_progress->value());
 	}
 

@@ -66,6 +66,10 @@ namespace Builder
 		//
 		bool loadLogicModuleDescription(DbController* db, Hardware::DeviceModule* logicModule, LmDescriptionSet* lmDescriptions);
 
+		// Check that all files (and from that theirs SchemaIds) in $root$/Schema are unique
+		//
+		bool checkRootSchemasUniquesIds(DbController* db);
+
 		// Build Application Logic
 		//
 		bool parseApplicationLogic(DbController* db,

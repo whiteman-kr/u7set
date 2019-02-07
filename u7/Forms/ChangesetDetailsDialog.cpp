@@ -66,21 +66,43 @@ ChangesetDetailsDialog::ChangesetDetailsDialog(DbController* db, const DbChanges
 		switch (co.type())
 		{
 		case DbChangesetObject::Type::File:
-			fileCount ++;
-			itemTextList << "F";
+			{
+				fileCount ++;
+
+				itemTextList << "F";
+				itemTextList << co.name();
+				itemTextList << co.caption();
+
+				QString action = co.action().text();
+				if (co.fileMoveText().isEmpty() == false)
+				{
+					action += ", " + co.fileMoveText();
+				}
+
+				if (co.fileRenameText().isEmpty() == false)
+				{
+					action += ", " + co.fileRenameText();
+				}
+
+				itemTextList <<	action;
+				itemTextList << co.parent();
+			}
 			break;
+
 		case DbChangesetObject::Type::Signal:
 			signalCount ++;
 			itemTextList << "S";
+			itemTextList << co.name();
+			itemTextList << co.caption();
+			itemTextList << co.action().text();
+			itemTextList << co.parent();
 			break;
+
 		default:
 			assert(false);
 		}
 
-		itemTextList << co.name();
-		itemTextList << co.caption();
-		itemTextList << co.action().text();
-		itemTextList << co.parent();
+
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(itemTextList);
 		item->setData(0, Qt::UserRole, static_cast<int>(i));

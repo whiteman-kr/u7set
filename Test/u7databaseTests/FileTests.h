@@ -29,13 +29,18 @@ private slots:
 	void initTestCase();
 	void cleanupTestCase();
 
-	void apiFileExistsTest();
+	void api_is_file_exists();
 	void api_set_file_attributes();
 	void api_add_file();
+	void api_move_file();
+	void api_undo_changes_after_move_file();
+	void api_rename_file();
+	void api_undo_changes_after_rename_file();
+
 	void fileExistsTest();
 	void filesExistTest_data();
 	void filesExistTest();
-	void is_any_checked_outTest();
+	void api_is_any_checked_out();
 	void filesAddTest_data();
 	void filesAddTest();
 	void is_file_checkedout();

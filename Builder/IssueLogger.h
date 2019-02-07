@@ -186,6 +186,8 @@ namespace Builder
 		void errALP4021(QString logicModule, QString schema1, QString schema2, QString schemaItem1, QString schemaItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids);
 		void errALP4022(QString schema);
 		void errALP4023(QString schema, QString pinCaption, QUuid itemUuid);
+		void errALP4024(QString fileName, QString details);
+		void errALP4025(QString schema);
 
 		void errALP4040(QString schema, QString schemaItem, QString busTypeId, QUuid itemUuid);		// Bus Related
 		void errALP4041(QString schema, QString schemaItem, QUuid itemUuid);						// Bus Related
@@ -193,7 +195,7 @@ namespace Builder
 		void errALP4060(QString schema, QString schemaItem, QUuid itemUuid);						// Loopback detected
 		void errALP4061(QString schema, QString loopbackId, const std::vector<QUuid>& itemUuids);	// Duplicate source of LoopbackID
 
-		void wrnALP4070(QString schema, const std::vector<QUuid>& itemsUuids);	// Schema %1 has %2 commented functional item(s).
+		void wrnALP4070(QString schema, const std::vector<QUuid>& itemsUuids);						// Schema %1 has %2 commented functional item(s).
 
 		// Multichannel pasing errors
 		//

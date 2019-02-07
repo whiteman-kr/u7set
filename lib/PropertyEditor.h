@@ -126,12 +126,12 @@ namespace ExtWidgets
 
 	};
 
-	class QtMultiFilePathEdit : public QWidget
+	class MultiFilePathEdit : public QWidget
 	{
 		Q_OBJECT
 
 	public:
-		explicit QtMultiFilePathEdit(QWidget* parent);
+		explicit MultiFilePathEdit(QWidget* parent, bool readOnly);
 		void setValue(std::shared_ptr<Property> property, bool readOnly);
 
 	public slots:
@@ -155,12 +155,12 @@ namespace ExtWidgets
 
 	};
 
-	class QtMultiEnumEdit : public QWidget
+	class MultiEnumEdit : public QWidget
 	{
 		Q_OBJECT
 
 	public:
-		explicit QtMultiEnumEdit(QWidget* parent);
+		explicit MultiEnumEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly);
 		void setValue(std::shared_ptr<Property> property, bool readOnly);
 
 	public slots:
@@ -180,12 +180,12 @@ namespace ExtWidgets
         int m_oldValue;
 
 	};
-	class QtMultiColorEdit : public QWidget
+	class MultiColorEdit : public QWidget
 	{
 		Q_OBJECT
 
 	public:
-		explicit QtMultiColorEdit(QWidget* parent);
+		explicit MultiColorEdit(QWidget* parent, bool readOnly);
 		void setValue(std::shared_ptr<Property> property, bool readOnly);
 
 	public slots:
@@ -211,12 +211,12 @@ namespace ExtWidgets
 	};
 
 
-    class MultiLineEdit : public QDialog
+	class MultiTextEditorDialog : public QDialog
 	{
 		Q_OBJECT
 
 	public:
-		MultiLineEdit(QWidget* parent, PropertyEditor* propertyEditor, const QString& text, std::shared_ptr<Property> p);
+		MultiTextEditorDialog(QWidget* parent, PropertyEditor* propertyEditor, const QString& text, std::shared_ptr<Property> p);
 		QString text();
 
 	private slots:
@@ -240,12 +240,12 @@ namespace ExtWidgets
 	};
 
 
-	class QtMultiCheckBox : public QWidget
+	class MultiCheckBox : public QWidget
 	{
 		Q_OBJECT
 
 	public:
-		explicit QtMultiCheckBox(QWidget* parent);
+		explicit MultiCheckBox(QWidget* parent);
 		void setValue(bool value, bool readOnly);
 
 	public slots:
@@ -263,12 +263,12 @@ namespace ExtWidgets
 	};
 
 
-	class QtMultiTextEdit : public QWidget
+	class MultiTextEdit : public QWidget
 	{
 		Q_OBJECT
 
 	public:
-		explicit QtMultiTextEdit(QWidget* parent, PropertyEditor* propertyEditor, std::shared_ptr<Property> p);
+		explicit MultiTextEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly, PropertyEditor* propertyEditor);
 		void setValue(std::shared_ptr<Property> property, bool readOnly);
 
 	public slots:
@@ -301,12 +301,12 @@ namespace ExtWidgets
 
 
 
-	class QtMultiVariantPropertyManager : public QtAbstractPropertyManager
+	class MultiVariantPropertyManager : public QtAbstractPropertyManager
 	{
 		Q_OBJECT
 
 	public:
-		explicit QtMultiVariantPropertyManager(QObject* parent);
+		explicit MultiVariantPropertyManager(QObject* parent);
 
 		QVariant attribute(const QtProperty* property, const QString& attribute) const;
 		bool hasAttribute(const QtProperty* property, const QString& attribute) const;
@@ -349,16 +349,16 @@ namespace ExtWidgets
 
 	};
 
-	class QtMultiVariantFactory : public QtAbstractEditorFactory<QtMultiVariantPropertyManager>
+	class MultiVariantFactory : public QtAbstractEditorFactory<MultiVariantPropertyManager>
 	{
 		Q_OBJECT
 
 	public:
-		explicit QtMultiVariantFactory(PropertyEditor* propertyEditor);
+		explicit MultiVariantFactory(PropertyEditor* propertyEditor);
 
-		void connectPropertyManager (QtMultiVariantPropertyManager* manager);
-		QWidget* createEditor(QtMultiVariantPropertyManager* manager, QtProperty* property, QWidget* parent);
-		void disconnectPropertyManager(QtMultiVariantPropertyManager* manager);
+		void connectPropertyManager (MultiVariantPropertyManager* manager);
+		QWidget* createEditor(MultiVariantPropertyManager* manager, QtProperty* property, QWidget* parent);
+		void disconnectPropertyManager(MultiVariantPropertyManager* manager);
 
 	public slots:
 		//void slotPropertyChanged(QtProperty* property, QVariant value);
@@ -369,7 +369,7 @@ namespace ExtWidgets
 		void slotEditorDestroyed(QObject* object);
 
 	private:
-		QtMultiVariantPropertyManager* m_manager = nullptr;
+		MultiVariantPropertyManager* m_manager = nullptr;
 		QtProperty* m_property = nullptr;
 
 		PropertyEditor* m_propertyEditor = nullptr;
@@ -386,12 +386,13 @@ namespace ExtWidgets
 		QString description;
 		QString category;
 		bool sameValue = false;
+		bool readOnly = false;
 
 	};
 
 	class PropertyEditor : public QtTreePropertyBrowser
 	{
-		friend class MultiLineEdit;
+		friend class MultiTextEditorDialog;
 
 		Q_OBJECT
 
@@ -449,7 +450,7 @@ namespace ExtWidgets
 		void clearProperties();
 
 		void createValuesMap(const QSet<QtProperty*>& props, QMap<QtProperty*, std::pair<QVariant, bool> > &values);
-		QtProperty* createProperty(QtProperty* parentProperty, const QString& caption, const QString& category, const QString &description, const std::shared_ptr<Property> value, bool sameValue);
+		QtProperty* createProperty(QtProperty* parentProperty, const QString& caption, const QString& category, const QString &description, const std::shared_ptr<Property> value, bool sameValue, bool readOnly);
 
 		static bool createPropertyStructsSortFunc(const CreatePropertyStruct& cs1, const CreatePropertyStruct& cs2);
 
@@ -458,7 +459,7 @@ namespace ExtWidgets
 		//
 		QtGroupPropertyManager* m_propertyGroupManager = nullptr;
 
-		QtMultiVariantPropertyManager* m_propertyVariantManager = nullptr;
+		MultiVariantPropertyManager* m_propertyVariantManager = nullptr;
 
 		QList<std::shared_ptr<PropertyObject>> m_objects;
 

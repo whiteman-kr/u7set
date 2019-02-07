@@ -35,7 +35,8 @@ public:
 
 public:
 	std::pair<QModelIndex, bool> addFile(QModelIndex parentIndex, std::shared_ptr<DbFileInfo> file);
-	bool deleteFiles(const QModelIndexList& selectedIndexes, const std::vector<std::shared_ptr<DbFileInfo>>& files);
+	bool deleteFilesUpdate(const QModelIndexList& selectedIndexes, const std::vector<std::shared_ptr<DbFileInfo>>& files);
+	bool moveFilesUpdate(const QModelIndexList& selectedIndexes, int movedToParnetId, const std::vector<DbFileInfo>& movedFiles, std::vector<QModelIndex>* addedFilesIndexes);
 
 	bool updateFiles(const QModelIndexList& selectedIndexes, const std::vector<DbFileInfo>& files);
 
@@ -68,6 +69,8 @@ public:
 	bool excludedFromBuild(int fileId) const;
 
 	const DbFileInfo& parentFile() const;
+
+	int schemaFilterCount() const;
 
 	// Data
 	//
@@ -104,6 +107,8 @@ private:
 	std::map<int, VFrame30::SchemaDetails> m_details; 		// Key is FileID
 
 	std::set<int> m_systemFiles;	// Key is fileid
+
+	int m_schemaFilterCount = 0;
 };
 
 
@@ -166,7 +171,6 @@ public slots:
 
 	void slot_refreshFiles();
 	void slot_doubleClicked(const QModelIndex& index);
-	//	void slot_properties();
 
 public slots:
 	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
@@ -204,6 +208,7 @@ public:
 	QAction* m_viewAction = nullptr;
 	QAction* m_cloneFileAction = nullptr;
 	QAction* m_deleteAction = nullptr;
+	QAction* m_moveFileAction = nullptr;
 
 	// --
 	QAction* m_checkOutAction = nullptr;
@@ -278,6 +283,7 @@ protected slots:
 
 	void cloneFile();
 	void deleteFiles();
+	void moveFiles();
 
 	void checkOutFiles();
 	void checkInFiles();
@@ -292,8 +298,6 @@ protected slots:
 	void importWorkcopy();
 
 	void showFileProperties();
-
-	//	void editSchemasProperties(std::vector<DbFileInfo> selectedFiles);
 
 private slots:
 	void ctrlF();
