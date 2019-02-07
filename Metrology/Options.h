@@ -422,8 +422,6 @@ private:
 	QFont				m_font;
 
 	bool				m_showElectricState = false;
-	bool				m_showAdcState = false;
-	bool				m_showAdcHexState = false;
 
 	QColor				m_colorFlagValid = COLOR_FLAG_VALID;
 	QColor				m_colorFlagOverflow = COLOR_FLAG_OVERFLOW;
@@ -436,12 +434,6 @@ public:
 
 	bool				showElectricState() const { return m_showElectricState; }
 	void				setShowElectricState(bool show) { m_showElectricState = show; }
-
-	bool				showAdcState() const { return m_showAdcState; }
-	void				setShowAdcState(bool show) { m_showAdcState = show; }
-
-	bool				showAdcHexState() const { return m_showAdcHexState; }
-	void				setShowAdcHexState(bool show) { m_showAdcHexState = show; }
 
 	QColor				colorFlagValid() const { return m_colorFlagValid; }
 	void				setColorFlagValid(QColor color) { m_colorFlagValid = color; }
@@ -694,7 +686,7 @@ private:
 	double				m_highLimitRange = 100;										// high limit of the range for automatic division
 
 	int					m_viewType = LO_VIEW_TYPE_SIMPLE;							// type of measurements list extended or simple
-	bool				m_showPhyscalValueColumn = true;							// show columns of physcal values
+	bool				m_showEngeneeringValueColumn = true;						// show columns of engeneering values
 
 	bool				m_warningIfMeasured = true;									// show warning if signal is already measured
 	bool				m_measureEntireModule = false;								// measure all inputs of module in series
@@ -730,8 +722,8 @@ public:
 	int					viewType() const { return m_viewType; }
 	void				setViewType(int type) { m_viewType = type; }
 
-	bool				showPhyscalValueColumn() const { return m_showPhyscalValueColumn; }
-	void				setShowPhyscalValueColumn(bool show) { m_showPhyscalValueColumn = show; }
+	bool				showEngeneeringValueColumn() const { return m_showEngeneeringValueColumn; }
+	void				setShowPhyscalValueColumn(bool show) { m_showEngeneeringValueColumn = show; }
 
 	bool				warningIfMeasured() const { return m_warningIfMeasured; }
 	void				setWarningIfMeasured(bool enable) { m_warningIfMeasured = enable; }

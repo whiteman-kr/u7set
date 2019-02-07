@@ -8708,6 +8708,20 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 
 			break;
 
+		case CT_ENGENEER_TO_ELECTRIC:
+			{
+				double phVal = (val - param.engeneeringLowLimit())*(param.physicalHighLimit() - param.physicalLowLimit())/(param.engeneeringHighLimit() - param.engeneeringLowLimit()) + param.physicalLowLimit();
+				retVal = conversion(phVal, CT_PHYSICAL_TO_ELECTRIC, param);
+			}
+			break;
+
+		case CT_ELECTRIC_TO_ENGENEER:
+			{
+				double phVal = conversion(val, CT_ELECTRIC_TO_PHYSICAL, param);
+				retVal = (phVal - param.physicalLowLimit())*(param.engeneeringHighLimit() - param.engeneeringLowLimit())/(param.physicalHighLimit() - param.physicalLowLimit()) + param.engeneeringLowLimit();
+			}
+			break;
+
 		default:
 			assert(0);
 	}
