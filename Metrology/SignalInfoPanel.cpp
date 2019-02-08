@@ -112,7 +112,6 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 			case SIGNAL_INFO_COLUMN_CAPTION:		result = Qt::AlignLeft;		break;
 			case SIGNAL_INFO_COLUMN_EL_RANGE:		result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_EL_SENSOR:		result = Qt::AlignCenter;	break;
-			case SIGNAL_INFO_COLUMN_PH_RANGE:		result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_EN_RANGE:		result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_CALIBRATOR:		result = Qt::AlignCenter;	break;
 			default:								assert(0);
@@ -237,7 +236,6 @@ QString SignalInfoTable::text(int row, int column, const MeasureMultiParam& meas
 		case SIGNAL_INFO_COLUMN_CAPTION:		result = measureParam.caption();				break;
 		case SIGNAL_INFO_COLUMN_EL_RANGE:		result = measureParam.electricRangeStr();		break;
 		case SIGNAL_INFO_COLUMN_EL_SENSOR:		result = measureParam.electricSensorStr();		break;
-		case SIGNAL_INFO_COLUMN_PH_RANGE:		result = measureParam.physicalRangeStr();		break;
 		case SIGNAL_INFO_COLUMN_EN_RANGE:		result = measureParam.engeneeringRangeStr();	break;
 		case SIGNAL_INFO_COLUMN_CALIBRATOR:		result = measureParam.calibratorStr();			break;
 		default:								assert(0);
@@ -447,7 +445,6 @@ SignalInfoPanel::SignalInfoPanel(QWidget* parent) :
 	hideColumn(SIGNAL_INFO_COLUMN_MODULE, true);
 	hideColumn(SIGNAL_INFO_COLUMN_PLACE, true);
 	hideColumn(SIGNAL_INFO_COLUMN_EL_SENSOR, true);
-	hideColumn(SIGNAL_INFO_COLUMN_PH_RANGE, true);
 
 	startSignalStateTimer();
 }

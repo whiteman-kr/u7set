@@ -474,7 +474,7 @@ QString TuningSignalTable::text(int row, int column, Metrology::Signal* pSignal)
 		case TUN_SIGNAL_LIST_COLUMN_CAPTION:		result = param.caption();					break;
 		case TUN_SIGNAL_LIST_COLUMN_STATE:			result = signalStateStr(pSignal);			break;
 		case TUN_SIGNAL_LIST_COLUMN_DEFAULT:		result = param.tuningDefaultValueStr();		break;
-		case TUN_SIGNAL_LIST_COLUMN_RANGE:			result = param.engeneeringRangeStr();		break;
+		case TUN_SIGNAL_LIST_COLUMN_RANGE:			result = param.tuningRangeStr();			break;
 		default:									assert(0);
 	}
 

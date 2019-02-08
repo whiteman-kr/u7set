@@ -11,7 +11,6 @@ bool SignalPropertyDialog::m_showGroupHeader[SIGNAL_PROPERTY_GROUP_COUNT] =
 	true,	//	SIGNAL_PROPERTY_GROUP_ID
 	false,	//	SIGNAL_PROPERTY_GROUP_POSITION
 	false,	//	SIGNAL_PROPERTY_GROUP_EL_RANGE
-	false,	//	SIGNAL_PROPERTY_GROUP_PH_RANGE
 	false,	//	SIGNAL_PROPERTY_GROUP_EN_RANGE
 };
 
@@ -192,31 +191,6 @@ void SignalPropertyDialog::createPropertyList()
 
 		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
 
-		// physical range group
-
-		QtProperty *physicalRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_PH_RANGE] + m_param.physicalRangeStr());
-
-			item = m_pManager->addProperty(QVariant::String, tr("ADC Limits"));
-			item->setValue(m_param.adcRangeStr(false) + " (" + m_param.adcRangeStr(true) + ")");
-			item->setAttribute(QLatin1String("readOnly"), true);
-			physicalRangeGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
-			item->setValue(m_param.physicalLowLimit());
-			item->setAttribute(QLatin1String("singleStep"), 0.001);
-			item->setAttribute(QLatin1String("decimals"), m_param.engeneeringPrecision());
-			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_PH_RANGE_LOW);
-			physicalRangeGroup->addSubProperty(item);
-
-			item = m_pManager->addProperty(QVariant::Double, tr("High limit"));
-			item->setValue(m_param.physicalHighLimit());
-			item->setAttribute(QLatin1String("singleStep"), 0.001);
-			item->setAttribute(QLatin1String("decimals"), m_param.engeneeringPrecision());
-			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_PH_RANGE_HIGH);
-			physicalRangeGroup->addSubProperty(item);
-
-		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
-
 		// engeneering range group
 
 		QtProperty *engeneeringRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EN_RANGE] + m_param.engeneeringRangeStr());
@@ -265,14 +239,12 @@ void SignalPropertyDialog::createPropertyList()
 
 
 				m_browserItemList[SIGNAL_PROPERTY_GROUP_EL_RANGE] = m_pEditor->addProperty(electricRangeGroup);
-				m_browserItemList[SIGNAL_PROPERTY_GROUP_PH_RANGE] = m_pEditor->addProperty(physicalRangeGroup);
 				m_browserItemList[SIGNAL_PROPERTY_GROUP_EN_RANGE] = m_pEditor->addProperty(engeneeringRangeGroup);
 
 				break;
 
 			case E::SignalInOutType::Internal:
 
-				m_browserItemList[SIGNAL_PROPERTY_GROUP_PH_RANGE] = m_pEditor->addProperty(physicalRangeGroup);
 				m_browserItemList[SIGNAL_PROPERTY_GROUP_EN_RANGE] = m_pEditor->addProperty(engeneeringRangeGroup);
 
 				break;
@@ -355,11 +327,6 @@ void SignalPropertyDialog::onPropertyValueChanged(QtProperty *property, const QV
 														m_param.setElectricSensor(mst.key(value.toInt()));									groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION:	m_param.setElectricPrecision(value.toInt());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 
-		// physical limit
-		//
-		case SIGNAL_PROPERTY_ITEM_PH_RANGE_LOW:			m_param.setPhysicalLowLimit(value.toDouble());										groupIndex = SIGNAL_PROPERTY_GROUP_PH_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_PH_RANGE_HIGH:		m_param.setPhysicalHighLimit(value.toDouble());										groupIndex = SIGNAL_PROPERTY_GROUP_PH_RANGE;	break;
-
 		// engeneering limit
 		//
 		case SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW:			m_param.setEngeneeringLowLimit(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
@@ -399,7 +366,6 @@ void SignalPropertyDialog::updateGroupHeader(int index)
 	{
 		case SIGNAL_PROPERTY_GROUP_ID:			header = tr("Signal ID");												break;
 		case SIGNAL_PROPERTY_GROUP_EL_RANGE:	header = SignalPropertyGroup[index] + m_param.electricRangeStr();		break;
-		case SIGNAL_PROPERTY_GROUP_PH_RANGE:	header = SignalPropertyGroup[index] + m_param.physicalRangeStr();		break;
 		case SIGNAL_PROPERTY_GROUP_EN_RANGE:	header = SignalPropertyGroup[index] + m_param.engeneeringRangeStr();	break;
 		default:								assert(0);
 	}

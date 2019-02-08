@@ -335,20 +335,37 @@ namespace Metrology
 
 		// physicalUnits
 		//
-		UnitsConvertor uc;
 
-		QVariant qpl = uc.electricToPhysical(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
-		QVariant qph = uc.electricToPhysical(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+		m_physicalLowLimit = 0;
+		m_physicalHighLimit = 0;
 
-		if (qpl.isNull() == false && qph.isNull() == false)
+		if (signal.sensorType() == E::SensorType::V_0_5)
 		{
-			m_physicalLowLimit = qpl.toDouble();
-			m_physicalHighLimit = qph.toDouble();
+			UnitsConvertor uc;
+
+			QVariant qpl = uc.electricToPhysical(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+			QVariant qph = uc.electricToPhysical(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+
+			if (qpl.isNull() == false && qph.isNull() == false)
+			{
+				m_physicalLowLimit = qpl.toDouble();
+				m_physicalHighLimit = qph.toDouble();
+			}
 		}
 		else
 		{
-			m_physicalLowLimit = 0;
-			m_physicalHighLimit = 0;
+			QVariant qv;
+			bool isEnum;
+
+			if (signal.getSpecPropValue("LowPhysicalUnits", &qv, &isEnum) == true)
+			{
+				m_physicalLowLimit = qv.toDouble();
+			}
+
+			if (signal.getSpecPropValue("HighPhysicalUnits", &qv, &isEnum) == true)
+			{
+				m_physicalHighLimit = qv.toDouble();
+			}
 		}
 
 		// engeneeringUnits
@@ -364,6 +381,8 @@ namespace Metrology
 
 		m_enableTuning = signal.enableTuning();
 		m_tuningDefaultValue = signal.tuningDefaultValue().toDouble();
+		m_tuningLowBound = signal.tuningLowBound().toDouble();
+		m_tuningHighBound = signal.tuningHighBound().toDouble();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -426,6 +445,8 @@ namespace Metrology
 
 		result &= xml.readBoolAttribute("EnableTuning", &m_enableTuning);
 		result &= xml.readDoubleAttribute("TuningDefaultValue", &m_tuningDefaultValue);
+		result &= xml.readDoubleAttribute("TuningLowBound", &m_tuningLowBound);
+		result &= xml.readDoubleAttribute("TuningHighBound", &m_tuningHighBound);
 
 		return result;
 	}
@@ -465,6 +486,8 @@ namespace Metrology
 
 			xml.writeBoolAttribute("EnableTuning", enableTuning());
 			xml.writeDoubleAttribute("TuningDefaultValue", tuningDefaultValue());
+			xml.writeDoubleAttribute("TuningLowBound", tuningLowBound());
+			xml.writeDoubleAttribute("TuningHighBound", tuningHighBound());
 		}
 		xml.writeEndElement();
 	}
@@ -491,7 +514,7 @@ namespace Metrology
 
 	bool SignalParam::electricRangeIsValid() const
 	{
-		if (m_electricLowLimit == 0 && m_electricHighLimit == 0)
+		if (m_electricLowLimit == 0.0 && m_electricHighLimit == 0.0)
 		{
 			return false;
 		}
@@ -526,7 +549,7 @@ namespace Metrology
 
 	bool SignalParam::physicalRangeIsValid() const
 	{
-		if (m_physicalLowLimit == 0 && m_physicalHighLimit == 0)
+		if (m_physicalLowLimit == 0.0 && m_physicalHighLimit == 0.0)
 		{
 			return false;
 		}
@@ -551,7 +574,7 @@ namespace Metrology
 
 	bool SignalParam::engeneeringRangeIsValid() const
 	{
-		if (m_engeneeringLowLimit == 0 && m_engeneeringHighLimit == 0)
+		if (m_engeneeringLowLimit == 0.0 && m_engeneeringHighLimit == 0.0)
 		{
 			return false;
 		}
@@ -608,16 +631,11 @@ namespace Metrology
 
 				stateStr.sprintf(formatStr.toLocal8Bit(), m_tuningDefaultValue);
 
-				if (m_engeneeringUnit.isEmpty() == false)
-				{
-					stateStr.append(" " + m_engeneeringUnit);
-				}
-
 				break;
 
 			case E::SignalType::Discrete:
 
-				stateStr = m_tuningDefaultValue == 0 ? QString("No") : QString("Yes");
+				stateStr = m_tuningDefaultValue == 0.0 ? QString("No") : QString("Yes");
 
 				break;
 
@@ -627,6 +645,43 @@ namespace Metrology
 
 		return stateStr;
 	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	bool SignalParam::tuningRangeIsValid() const
+	{
+		if (m_enableTuning == false)
+		{
+			return true;
+		}
+
+		if (m_tuningLowBound == 0.0 && m_tuningHighBound == 0.0)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalParam::tuningRangeStr() const
+	{
+		if (m_enableTuning == false)
+		{
+			return QString();
+		}
+
+		QString range, formatStr;
+
+		formatStr.sprintf("%%.%df", m_engeneeringPrecision);
+
+		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_tuningLowBound, m_tuningHighBound);
+
+		return range;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
 
 	TuningValueType	SignalParam::tuningValueType()
 	{

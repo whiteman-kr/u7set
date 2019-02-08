@@ -769,35 +769,64 @@ QString MeasureMultiParam::engeneeringRangeStr() const
 
 	m_mutex.lock();
 
-		if (m_outputSignalType == OUTPUT_SIGNAL_TYPE_UNUSED)
+		switch (m_outputSignalType)
 		{
-			const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
-			if (param.isValid() == true)
-			{
-				result = param.engeneeringRangeStr();
-			}
-		}
-		else
-		{
-			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
-			if (inParam.isValid() == true)
-			{
-				result = inParam.engeneeringRangeStr() + MultiTextDivider;
-			}
+			case OUTPUT_SIGNAL_TYPE_UNUSED:
+				{
+					const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+					if (param.isValid() == true)
+					{
+						result = param.engeneeringRangeStr();
+					}
+				}
+				break;
 
-			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
-			if (outParam.isValid() == true)
-			{
-				if (inParam.engeneeringRangeStr() != outParam.engeneeringRangeStr())
+			case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
 				{
-					result += outParam.engeneeringRangeStr();
+					const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+					if (inParam.isValid() == true)
+					{
+						result = inParam.engeneeringRangeStr() + MultiTextDivider;
+					}
+
+					const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+					if (outParam.isValid() == true)
+					{
+						if (inParam.engeneeringRangeStr() != outParam.engeneeringRangeStr())
+						{
+							result += outParam.engeneeringRangeStr();
+						}
+						else
+						{
+							result = outParam.engeneeringRangeStr();
+						}
+					}
 				}
-				else
+				break;
+
+			case OUTPUT_SIGNAL_TYPE_FROM_TUNING:
 				{
-					result = outParam.engeneeringRangeStr();
+					const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
+					if (inParam.isValid() == true)
+					{
+						result = inParam.tuningRangeStr() + MultiTextDivider;
+					}
+
+					const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
+					if (outParam.isValid() == true)
+					{
+						if (inParam.tuningLowBound() != outParam.engeneeringLowLimit() || inParam.tuningHighBound() != outParam.engeneeringHighLimit())
+						{
+							result += outParam.engeneeringRangeStr();
+						}
+						else
+						{
+							result = outParam.engeneeringRangeStr();
+						}
+					}
 				}
-			}
 		}
+
 
 	m_mutex.unlock();
 
