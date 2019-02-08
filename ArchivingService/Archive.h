@@ -41,6 +41,9 @@ public:
 	void start();
 	void stop();
 
+	qint64 msShortTermPeriod() const { return m_msShortTermPeriod; }
+	qint64 msLongTermPeriod() const { return m_msLongTermPeriod; }
+
 	void writeArchFilesInfoFile(const QVector<QVector<ArchFile*>>& archFilesGroups);
 
 	std::shared_ptr<ArchRequest> startNewRequest(E::TimeType timeType,
@@ -95,9 +98,8 @@ public:
 
 	ArchFile* getArchFile(Hash signalHash) { return m_archFiles.value(signalHash, nullptr); }
 
-	bool startMaintenance();
-	bool continueMaintenance(int* deletedCount, int* packedCount);
 	bool isMaintenanceRequired() { return m_isMaintenanceRequired.load(); }
+	void maintenanceIsStarted();
 
 	qint64 getCurrentPartition();
 
@@ -124,8 +126,8 @@ private:
 	QString m_projectID;
 	QString m_equipmentID;
 	QString m_archDir;
-	qint64 m_shortTermPeriod = 0;
-	qint64 m_longTermPeriod = 0;
+	qint64 m_msShortTermPeriod = 0;
+	qint64 m_msLongTermPeriod = 0;
 	CircularLoggerShared m_log;
 
 	//

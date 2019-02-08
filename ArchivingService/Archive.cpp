@@ -67,24 +67,27 @@ Archive::Archive(const QString& projectID,
 	m_projectID(projectID),
 	m_equipmentID(equipmentID),
 	m_archDir(archDir),
-	m_shortTermPeriod(shortTermPeriod),
-	m_longTermPeriod(longTermPeriod),
 	m_log(logger)
 {
-	if (m_shortTermPeriod < 2)
+	// +++++++++++++++ DEBUG +++++++++++++++++
+	shortTermPeriod = 2;
+	longTermPeriod = 100;
+	// +++++++++++++++ DEBUG +++++++++++++++++
+
+	if (shortTermPeriod < 2)
 	{
-		m_shortTermPeriod = 2;
+		shortTermPeriod = 2;
 	}
 
-	if (m_shortTermPeriod >= m_longTermPeriod)
+	if (shortTermPeriod >= longTermPeriod)
 	{
-		m_longTermPeriod = m_shortTermPeriod + 1;
+		longTermPeriod = shortTermPeriod + 1;
 	}
 
-	// period to milliseconds conversation
+	// period from days to milliseconds conversation
 	//
-	m_shortTermPeriod *= PARTITION_PERIOD_MS;
-	m_longTermPeriod *= PARTITION_PERIOD_MS;
+	m_msShortTermPeriod = shortTermPeriod * PARTITION_PERIOD_MS;
+	m_msLongTermPeriod = longTermPeriod * PARTITION_PERIOD_MS;
 
 	int signalsCount = protoArchSignals.archsignals_size();
 
@@ -96,7 +99,7 @@ Archive::Archive(const QString& projectID,
 	{
 		const Proto::ArchSignal& protoArchSignal = protoArchSignals.archsignals(i);
 
-		ArchFile* archFile = new ArchFile(protoArchSignal);
+		ArchFile* archFile = new ArchFile(protoArchSignal, m_log);
 
 		m_archFiles.insert(archFile->hash(), archFile);
 
@@ -703,36 +706,11 @@ ArchFile* Archive::getNextFileForFlushing(bool* flushAnyway)
 	return archFile;
 }
 
-bool Archive::startMaintenance()
+void Archive::maintenanceIsStarted()
 {
 	assert(isMaintenanceRequired() == true);
 
 	m_isMaintenanceRequired.store(false);
-
-	if (m_archFilesArray.count() > 0)
-	{
-		m_maintenanceFileIndex = 0;
-		return true;
-	}
-
-	return false;
-}
-
-bool Archive::continueMaintenance(int* deletedCount, int* packedCount)
-{
-	if (m_maintenanceFileIndex < 0 || m_maintenanceFileIndex >= m_archFilesArray.count())
-	{
-		m_maintenanceFileIndex = -1;
-		return false;
-	}
-
-	ArchFile* archFile = m_archFilesArray[m_maintenanceFileIndex];
-
-	archFile->maintenance(getCurrentPartition(), m_shortTermPeriod, m_longTermPeriod, deletedCount, packedCount);
-
-	m_maintenanceFileIndex++;
-
-	return true;
 }
 
 qint64 Archive::getCurrentPartition()

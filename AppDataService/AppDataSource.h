@@ -33,7 +33,7 @@ public:
 	void setSignalParams(int index, Signal* signal);
 
 	bool setState(const Times& time, quint32 validity, double value, int autoArchivingGroup, SimpleAppSignalStatesQueue& statesQueue);
-	void invalidate() { m_current[0].flags.all = m_current[1].flags.all = m_stored.flags.all = 0; }
+	void invalidate() { m_current[0].flags.all = m_current[1].flags.all = 0; }
 
 	Hash hash() const;
 
@@ -44,7 +44,7 @@ public:
 	friend class AppSignalStates;
 
 	const SimpleAppSignalState& current() const { return m_current[m_curStateIndex.load()]; }
-	const SimpleAppSignalState& stored() const { return m_stored; }
+//	const SimpleAppSignalState& stored() const { return m_stored; }
 
 	int autoArchiningGroup() const { return m_autoArchivingGroup; }
 	void setAutoArchivingGroup(int archivingGroup);
@@ -90,7 +90,8 @@ private:
 
 private:
 	SimpleAppSignalState m_current[2];
-	SimpleAppSignalState m_stored;
+	double m_coarseStoredValue;
+	double m_fineStoredValue;
 
 	std::atomic<int> m_curStateIndex = {0};
 
@@ -150,7 +151,7 @@ public:
 	void buidlHash2State();
 
 	bool getCurrentState(Hash hash, AppSignalState& state) const;
-	bool getStoredState(Hash hash, AppSignalState& state) const;
+//	bool getStoredState(Hash hash, AppSignalState& state) const;
 
 	void setAutoArchivingGroups(int autoArchivingGroupsCount);
 

@@ -93,6 +93,7 @@ void ArchWriterThread::printStatistics()
 
 	if (elapsedTime < TEN_SECONDS)
 	{
+		m_timer.start();
 		return;
 	}
 

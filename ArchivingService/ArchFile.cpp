@@ -562,7 +562,8 @@ ArchFileRecord ArchFile::m_buffer[ArchFile::QUEUE_MAX_SIZE];
 const QString ArchFile::LONG_TERM_ARCHIVE_EXTENSION = "lta";		// Signal Archive File
 const QString ArchFile::SHORT_TERM_ARCHIVE_EXTENSION = "sta";		// Signal Archive File
 
-ArchFile::ArchFile(const Proto::ArchSignal& protoArchSignal)
+ArchFile::ArchFile(const Proto::ArchSignal& protoArchSignal, CircularLoggerShared log) :
+	m_log(log)
 {
 	m_hash = protoArchSignal.hash();
 	m_appSignalID = QString::fromStdString(protoArchSignal.appsignalid());
@@ -809,8 +810,6 @@ bool ArchFile::packPartitions(const QVector<ArchFilePartition::Info>& partitions
 
 	// returns false if maintenance has been breaked!
 
-	*packedCount = 0;
-
 	for(int i = 0; i < partitionsInfo.count(); i++)
 	{
 		if (isRwAccessRequested() == true)
@@ -840,6 +839,7 @@ bool ArchFile::packPartitions(const QVector<ArchFilePartition::Info>& partitions
 
 			if (result == false)
 			{
+				qDebug() << C_STR(QString("Pack error %1").arg(getPartitionFileName(pi)));
 				return false;
 			}
 
@@ -869,6 +869,7 @@ bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
 
 	if (staFile.open(QIODevice::ReadOnly) == false)
 	{
+		DEBUG_LOG_ERR(m_log, QString("Maintenance: file open error %1").arg(staFileName));
 		return false;
 	}
 
@@ -881,8 +882,17 @@ bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
 	if (staFileSize < ARCH_FILE_RECORD_SIZE)
 	{
 		staFile.close();
-		QDir().remove(staFileName);
-		return true;
+
+		DEBUG_LOG_WRN(m_log, QString("Maintenance: file size less then ARCH_FILE_RECORD_SIZE, %1").arg(staFileName));
+
+		bool res = QDir().remove(staFileName);
+
+		if (res == false)
+		{
+			DEBUG_LOG_ERR(m_log, QString("Maintenance: file deleting error %1").arg(staFileName));
+		}
+
+		return res;
 	}
 
 	// creating long term archive partition *.lta
@@ -895,6 +905,7 @@ bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
 
 	if (ltaFile.open(QIODevice::WriteOnly | QIODevice::Truncate) == false)
 	{
+		DEBUG_LOG_ERR(m_log, QString("Maintenance: file creation error %1").arg(ltaFileName));
 		return false;
 	}
 
@@ -928,6 +939,11 @@ bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
 		}
 
 		qint64 reads = staFile.read(readBuf + inReadBufSize, bufSize - inReadBufSize);
+
+		if (reads == -1)
+		{
+			DEBUG_LOG_ERR(m_log, QString("Maintenance: sta-file reding error %1").arg(staFileName));
+		}
 
 		if (reads <= 0)
 		{
@@ -964,11 +980,10 @@ bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
 
 					if (inWriteBufSize >= bufSize)
 					{
-						qint64 written = ltaFile.write(writeBuf, inWriteBufSize);
+						result = writeLtaFile(ltaFile, writeBuf, inWriteBufSize);
 
-						if (written != inWriteBufSize)
+						if (result == false)
 						{
-							result = false;
 							break;
 						}
 
@@ -998,12 +1013,7 @@ bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
 
 	if (result == true && inWriteBufSize > 0)
 	{
-		qint64 written = ltaFile.write(writeBuf, inWriteBufSize);
-
-		if (written != inWriteBufSize)
-		{
-			result = false;
-		}
+		result = writeLtaFile(ltaFile, writeBuf, inWriteBufSize);
 	}
 
 	ltaFile.close();
@@ -1024,19 +1034,39 @@ bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
 	return result;
 }
 
+bool ArchFile::writeLtaFile(QFile& ltaFile, const char* buffer, int size)
+{
+	bool result = true;
+
+	qint64 written = ltaFile.write(buffer, size);
+
+	if (written != size)
+	{
+		DEBUG_LOG_ERR(m_log, QString("Maintenance: lta-file writing error %1").arg(ltaFile.fileName()));
+		result = false;
+	}
+
+	return result;
+}
+
 bool ArchFile::packDiscreteSignalPartition(const ArchFilePartition::Info& pi)
 {
 	assert(pi.shortTerm == true);
 
-	QString fileName = getPartitionFileName(pi);
+	QString staFileName = getPartitionFileName(pi);
 
-	QString newFileName = fileName;
+	QString ltaFileName = staFileName;
 
-	newFileName.replace(SHORT_TERM_ARCHIVE_EXTENSION, LONG_TERM_ARCHIVE_EXTENSION);
+	ltaFileName.replace(SHORT_TERM_ARCHIVE_EXTENSION, LONG_TERM_ARCHIVE_EXTENSION);
 
 	QDir dir;
 
-	dir.rename(fileName, newFileName);
+	bool result = dir.rename(staFileName, ltaFileName);
+
+	if (result == false)
+	{
+		DEBUG_LOG_ERR(m_log, QString("Maintenance: file renaming error %1 to %2").arg(staFileName).arg(ltaFileName));
+	}
 
 	return true;
 }
@@ -1050,7 +1080,7 @@ bool ArchFile::deleteOldPartitions(const QVector<ArchFilePartition::Info>& parti
 
 	// returns false if maintenance has been breaked!
 
-	*deletedCount = 0;
+	bool result = true;
 
 	for(int i = 0; i < partitionsInfo.count(); i++)
 	{
@@ -1071,6 +1101,11 @@ bool ArchFile::deleteOldPartitions(const QVector<ArchFilePartition::Info>& parti
 			{
 				(*deletedCount)++;
 			}
+			else
+			{
+				DEBUG_LOG_ERR(m_log, QString("Maintenance: file deleting error %1").arg(fileName));
+				result = false;
+			}
 		}
 		else
 		{
@@ -1079,7 +1114,7 @@ bool ArchFile::deleteOldPartitions(const QVector<ArchFilePartition::Info>& parti
 		}
 	}
 
-	return true;
+	return result;
 }
 
 QString ArchFile::getPartitionFileName(const ArchFilePartition::Info& pi)

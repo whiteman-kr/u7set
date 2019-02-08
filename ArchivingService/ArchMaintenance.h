@@ -2,6 +2,8 @@
 
 #include "..\lib\SimpleThread.h"
 #include "..\lib\CircularLogger.h"
+#include "..\lib\Hash.h"
+#include <QVector>
 
 class Archive;
 
@@ -18,4 +20,6 @@ private:
 private:
 	Archive& m_archive;
 	CircularLoggerShared m_log;
+
+	QVector<Hash> m_signalsHashes;
 };

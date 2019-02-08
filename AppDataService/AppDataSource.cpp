@@ -33,7 +33,7 @@ AppSignalStateEx::AppSignalStateEx()
 {
 	m_current[0].flags.all = 0;
 	m_current[1].flags.all = 0;
-	m_stored.flags.all = 0;
+//	m_stored.flags.all = 0;
 }
 
 
@@ -66,7 +66,7 @@ void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 		m_absFineAperture = fabs(m_highLimit - m_lowLimit) * (m_fineAperture / 100.0);
 	}
 
-	m_current[0].hash = m_current[1].hash = m_stored.hash = calcHash(signal->appSignalID());
+	m_current[0].hash = m_current[1].hash = /*m_stored.hash =*/ calcHash(signal->appSignalID());
 }
 
 
@@ -153,28 +153,34 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 				//
 				if (m_adaptiveAperture == true)
 				{
-					double absAperture = fabs((fabs(curState.value - m_stored.value) * 100) / m_stored.value);
-
-					if (absAperture > m_fineAperture)
+					if (m_fineStoredValue != 0)
 					{
-						curState.flags.fineAperture = 1;
+						double fineAbsAperture = fabs((fabs(value - m_fineStoredValue) * 100) / m_fineStoredValue);
+
+						if (fineAbsAperture > m_fineAperture)
+						{
+							curState.flags.fineAperture = 1;
+						}
 					}
 
-					if (absAperture > m_coarseAperture)
+					if (m_coarseStoredValue != 0)
 					{
-						curState.flags.coarseAperture = 1;
+						double coarseAbsAperture = fabs((fabs(value - m_coarseStoredValue) * 100) / m_coarseStoredValue);
+
+						if (coarseAbsAperture > m_coarseAperture)
+						{
+							curState.flags.coarseAperture = 1;
+						}
 					}
 				}
 				else
 				{
-					double absValueChange = fabs(m_stored.value - curState.value);
-
-					if (absValueChange > m_absFineAperture)
+					if (fabs(m_fineStoredValue - value) > m_absFineAperture)
 					{
 						curState.flags.fineAperture = 1;
 					}
 
-					if (absValueChange > m_absCoarseAperture)
+					if (fabs(m_coarseStoredValue - value) > m_absCoarseAperture)
 					{
 						curState.flags.coarseAperture = 1;
 					}
@@ -195,13 +201,17 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 
 	if (hasArchivingReason == true)
 	{
-		// update stored state
-		//
 		statesQueue.push(&curState);
 
-		if (curState.flags.hasShortTermArchivingReasonOnly() == false)
+		// update stored states
+		//
+		if (curState.flags.hasShortTermArchivingReasonOnly() == true)
 		{
-			m_stored = curState;
+			m_fineStoredValue = curState.value;
+		}
+		else
+		{
+			m_fineStoredValue = m_coarseStoredValue = curState.value;
 		}
 
 		m_prevStateIsStored = true;
@@ -229,8 +239,8 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 Hash AppSignalStateEx::hash() const
 {
 	assert(m_current[0].hash != 0);
-	assert(m_current[0].hash == m_stored.hash);
-	assert(m_current[1].hash == m_stored.hash);
+/*	assert(m_current[0].hash == m_stored.hash);
+	assert(m_current[1].hash == m_stored.hash);*/
 
 	return m_current[0].hash;
 }
@@ -507,7 +517,7 @@ bool AppSignalStates::getCurrentState(Hash hash, AppSignalState& state) const
 	return false;
 }
 
-
+/*
 bool AppSignalStates::getStoredState(Hash hash, AppSignalState& state) const
 {
 	if (m_hash2State.contains(hash))
@@ -523,7 +533,7 @@ bool AppSignalStates::getStoredState(Hash hash, AppSignalState& state) const
 
 	return false;
 }
-
+*/
 
 void AppSignalStates::setAutoArchivingGroups(int autoArchivingGroupsCount)
 {

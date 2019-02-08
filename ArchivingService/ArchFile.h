@@ -4,6 +4,7 @@
 #include "../lib/WUtils.h"
 #include "../lib/Crc16.h"
 #include "../lib/SimpleThread.h"
+#include "../lib/CircularLogger.h"
 
 #pragma pack(push, 1)
 
@@ -117,7 +118,7 @@ inline bool operator < (const ArchFilePartition::Info& p1, const ArchFilePartiti
 class ArchFile
 {
 public:
-	ArchFile(const Proto::ArchSignal& protoArchSignal);
+	ArchFile(const Proto::ArchSignal& protoArchSignal, CircularLoggerShared log);
 	~ArchFile();
 
 	void setArchFullPath(const QString& archFullPath);
@@ -166,6 +167,8 @@ private:
 							qint64 msShortTermPeriod,
 							int* packedCount);
 	bool packAnalogSignalPartition(const ArchFilePartition::Info& pi);
+	bool writeLtaFile(QFile& ltaFile, const char* buffer, int size);
+
 	bool packDiscreteSignalPartition(const ArchFilePartition::Info& pi);
 
 	bool deleteOldPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
@@ -178,6 +181,7 @@ private:
 	QString getPartitionFileName(const ArchFilePartition::Info& pi);
 
 private:
+	CircularLoggerShared m_log;
 	Hash m_hash = 0;
 	QString m_appSignalID;
 	bool m_isAnalog = false;
