@@ -562,7 +562,7 @@ void UalTester::runTestFile()
 						testName.append(param.value().toString());
 					}
 
-					qDebug() << "Test #"<< testCount+1 << testName;
+					qDebug() << "#" << testCount + 1 << "Test" << testName;
 					testCount++;
 
 					errorCount = 0;
@@ -573,7 +573,7 @@ void UalTester::runTestFile()
 				{
 					if (errorCount == 0)
 					{
-						qDebug() << "Endtest - Ok" << errorCount;
+						qDebug() << "Endtest - Ok";
 					}
 					else
 					{
@@ -629,7 +629,7 @@ void UalTester::runTestFile()
 					//
 					//
 					m_signalBase.appendHashForRequestState(signalHashList);
-					QThread::msleep(100);
+					QThread::msleep(1000);
 
 					//
 					//
@@ -652,12 +652,12 @@ void UalTester::runTestFile()
 						{
 							if (signal.state().value() == param.value())
 							{
-								qDebug() << "    Set set" << param.name() << "- Ok";
+								qDebug() << "    Set" << param.name() << "- Ok";
 							}
 							else
 							{
 								errorCount ++;
-								qDebug() << "    Set set" << param.name() << "- Fail";
+								qDebug() << "    Set" << param.name() << "- Fail";
 							}
 						}
 						else
@@ -710,12 +710,12 @@ void UalTester::runTestFile()
 						{
 							if (signal.state().value() == param.value())
 							{
-								qDebug() << "    Check sheck" << param.name() << "- Ok";
+								qDebug() << "    Check" << param.name() << "- Ok";
 							}
 							else
 							{
 								errorCount ++;
-								qDebug() << "    Check sheck" << param.name() << "- Fail";
+								qDebug() << "    Check" << param.name() << "- Fail";
 							}
 						}
 						else

@@ -328,7 +328,7 @@ void TuningSocket::requestWriteTuningSignals()
 
 	for (int i = 0; i < cmdCount && i < TUNING_SOCKET_MAX_WRITE_CMD; i++)
 	{
-		TuningWriteCmd cmd = m_pTuningBase->cmdFowWrite(i);
+		TuningWriteCmd cmd = m_pTuningBase->cmdFowWrite();
 
 		if (cmd.signalHash() == 0)
 		{
