@@ -339,7 +339,7 @@ namespace Metrology
 		m_physicalLowLimit = 0;
 		m_physicalHighLimit = 0;
 
-		if (signal.sensorType() == E::SensorType::V_0_5)
+		if (signal.sensorType() == E::SensorType::V_0_5 || signal.sensorType() == E::SensorType::V_m10_p10)
 		{
 			UnitsConvertor uc;
 

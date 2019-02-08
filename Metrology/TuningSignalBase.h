@@ -260,7 +260,7 @@ public:
 	void					appendCmdFowWrite(const TuningWriteCmd& cmd);
 	void					appendCmdFowWrite(const Hash& signalHash, TuningValueType type, QVariant value);
 
-	TuningWriteCmd			cmdFowWrite(int index);
+	TuningWriteCmd			cmdFowWrite();
 
 signals:
 
