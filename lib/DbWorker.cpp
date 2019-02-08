@@ -271,6 +271,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0251.sql", "Upgrade to version 251, Add functions api.get_file_full_path, api.move_file"},
 	{":/DatabaseUpgrade/Upgrade0252.sql", "Upgrade to version 252, Add functions api.rename_file"},	
 	{":/DatabaseUpgrade/Upgrade0253.sql", "Upgrade to version 253, ImpVersion and MaxInstCount made up to date in AFB elements descriptions"},
+	{":/DatabaseUpgrade/Upgrade0254.sql", "Upgrade to version 254, PhysicalLimits were removed WAIM-4PH, they are calculated from ElectricUnits"},
 };
 
 
