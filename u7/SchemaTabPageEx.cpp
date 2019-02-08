@@ -4017,17 +4017,20 @@ void SchemaControlTabPageEx::showFileProperties()
 
 		// Now allow to edit SchemaID, only if one file is selected
 		//
+		std::shared_ptr<Property> schemaIdProp = schema->propertyByCaption("SchemaID");
+		if (schemaIdProp == nullptr)
+		{
+			assert(schemaIdProp != nullptr);
+			continue;
+		}
+
 		if (schemas.size() == 1)
 		{
-			std::shared_ptr<Property> schemaIdProp = schema->propertyByCaption("SchemaID");
-			if (schemaIdProp == nullptr)
-			{
-				assert(schemaIdProp != nullptr);
-			}
-			else
-			{
-				schemaIdProp->setReadOnly(false);
-			}
+			schemaIdProp->setReadOnly(false);
+		}
+		else
+		{
+			schemaIdProp->setReadOnly(true);
 		}
 	}
 
