@@ -31,7 +31,9 @@ namespace VFrame30
 
 	void Schema::Init(void)
 	{
-		ADD_PROPERTY_GETTER_SETTER(QString, "SchemaID", true, Schema::schemaId, Schema::setSchemaId);
+		auto schemaIdProp = ADD_PROPERTY_GETTER_SETTER(QString, "SchemaID", true, Schema::schemaId, Schema::setSchemaId);
+		schemaIdProp->setValidator("^[A-Za-z\\d_]{1,64}$");
+
 		ADD_PROPERTY_GETTER(int, "Changeset", true, Schema::changeset);
 		ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, Schema::caption, Schema::setCaption);
 		ADD_PROPERTY_GETTER_SETTER(bool, "ExcludeFromBuild", true, Schema::excludeFromBuild, Schema::setExcludeFromBuild);
