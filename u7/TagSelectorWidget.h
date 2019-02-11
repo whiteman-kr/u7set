@@ -28,6 +28,9 @@ public:
 signals:
 	void changed();
 
+private slots:
+	void resetAllTags();
+
 private:
 	TagSelector::FlowLayout* m_flowLayout;
 };

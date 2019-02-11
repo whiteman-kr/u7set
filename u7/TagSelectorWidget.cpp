@@ -16,6 +16,15 @@ TagSelectorWidget::TagSelectorWidget(QWidget* parent)
 
 	setLayout(m_flowLayout);
 
+	// Context menu
+	//
+	setContextMenuPolicy(Qt::ActionsContextMenu);
+
+	QAction* resetAllTags = new QAction(tr("Reset All"));
+	connect(resetAllTags, &QAction::triggered, this, &TagSelectorWidget::resetAllTags);
+
+	addAction(resetAllTags);
+
 	return;
 }
 
@@ -155,6 +164,36 @@ QStringList TagSelectorWidget::selectedTags() const
 	}
 
 	return result;
+}
+
+void TagSelectorWidget::resetAllTags()
+{
+	bool wasReset = false;
+
+	for (int i = 0; i < m_flowLayout->count(); i++)
+	{
+		QLayoutItem* li = m_flowLayout->itemAt(i);
+
+		if (li->widget() != nullptr)
+		{
+			TagSelector::TagSelectorButton* b = dynamic_cast<TagSelector::TagSelectorButton*>(li->widget());
+			assert(b);
+
+			if (b != nullptr && b->selected() == true)
+			{
+				wasReset = true;
+
+				b->blockSignals(true);
+				b->setChecked(false);
+				b->blockSignals(false);
+			}
+		}
+	}
+
+	if (wasReset == true)
+	{
+		emit changed();
+	}
 }
 
 namespace TagSelector
