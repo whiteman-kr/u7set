@@ -8,6 +8,7 @@
 #include <QHBoxLayout>
 #include <QSplitter>
 #include "../lib/WidgetUtils.h"
+#include <QSettings>
 
 struct staticPropertyFieldDefinition
 {

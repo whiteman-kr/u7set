@@ -283,7 +283,6 @@ public slots:
 	void showPendingChanges();
 	void checkIn();
 
-	void editColumnsVisibilityAndOrder();
 	void changeSignalActionsVisibility();
 
 	void setSelection(const QVector<int> &selectedRowsSignalID, int focusedCellSignalID = -1);
@@ -318,12 +317,6 @@ private:
 	QVector<int> m_selectedRowsSignalID;
 	int m_focusedCellSignalID = -1;
 	int m_focusedCellColumn = -1;
-
-	void saveColumnVisibility(int index, bool visible);
-	void saveColumnPosition(int index, int position);
-
-private slots:
-	void saveColumnWidth(int index);
 };
 
 

@@ -170,7 +170,8 @@ SOURCES +=\
     ../lib/LogicModuleSet.cpp \
     SchemaTabPageEx.cpp \
     DialogInputEx.cpp \
-    DialogAfbLibraryCheck.cpp
+    DialogAfbLibraryCheck.cpp \
+    ../lib/WidgetUtils.cpp
 
 
 HEADERS  += \
