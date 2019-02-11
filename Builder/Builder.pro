@@ -130,7 +130,6 @@ SOURCES += \
     ../lib/MetrologySignal.cpp \
     RunOrder.cpp \
     TestClientCfgGenerator.cpp \
-    ../lib/UnitsConvertor.cpp \
     ../lib/UnitsConvertor.cpp
 
 HEADERS += \
@@ -215,7 +214,6 @@ HEADERS += \
     ../lib/MetrologySignal.h \
     RunOrder.h \
     TestClientCfgGenerator.h \
-    ../lib/UnitsConvertor.h \
     ../lib/UnitsConvertor.h
 
 

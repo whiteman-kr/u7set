@@ -343,10 +343,10 @@ namespace Metrology
 		{
 			UnitsConvertor uc;
 
-			QVariant qpl = uc.electricToPhysical(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
-			QVariant qph = uc.electricToPhysical(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+			UnitsConvertResult qpl = uc.electricToPhysical(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+			UnitsConvertResult qph = uc.electricToPhysical(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
 
-			if (qpl.isNull() == false && qph.isNull() == false)
+			if (qpl.ok() == true && qph.ok() == true)
 			{
 				m_physicalLowLimit = qpl.toDouble();
 				m_physicalHighLimit = qph.toDouble();
