@@ -99,7 +99,8 @@ SOURCES += \
     ../lib/PropertyObject.cpp \
     ../lib/SignalProperties.cpp \
     ../lib/Ui/DialogAbout.cpp \
-	../lib/UnitsConvertor.cpp
+	../lib/UnitsConvertor.cpp \
+    ../lib/UnitsConvertorTable.cpp
 
 #../lib/ExcelHelper.cpp
 
@@ -176,7 +177,8 @@ HEADERS  += \
     ../lib/PropertyObject.h \
     ../lib/SignalProperties.h \
     ../lib/Ui/DialogAbout.h \
-	../lib/UnitsConvertor.h
+	../lib/UnitsConvertor.h \
+    ../lib/UnitsConvertorTable.h
 #../lib/ExcelHelper.h
 
 FORMS    +=

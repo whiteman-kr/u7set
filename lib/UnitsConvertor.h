@@ -4,19 +4,30 @@
 #include <assert.h>
 
 #include "Types.h"
+#include "UnitsConvertorTable.h"
 
+// ==============================================================================================
+
+// limits for input signals
+//
 
 const double RESISTOR_V_0_5 = 0.25;	 // 250 Ohm
 
-//
-//
 const double V_0_5_LOW_LIMIT = 0;
 const double V_0_5_HIGH_LIMIT = 5.1;
 
-//
-//
 const double V_m10_p10_LOW_LIMIT = -11.5;
 const double V_m10_p10_HIGH_LIMIT = 11.5;
+
+// limits for otput signals
+//
+
+const double OUT_PH_LOW_LIMIT = 0;
+const double OUT_PH_HIGH_LIMIT = 65535;
+
+// ==============================================================================================
+// class UnitsConvertResult
+//
 
 enum class UnitsConvertResultError
 {
@@ -33,8 +44,8 @@ class UnitsConvertResult
 public:
 	UnitsConvertResult();
 
-	explicit UnitsConvertResult(double result);						// Good result constructor
-	explicit UnitsConvertResult(UnitsConvertResultError errorCode, const QString& errorMessage);		// Generic Error constructor
+	explicit UnitsConvertResult(double result);																						// Good result constructor
+	explicit UnitsConvertResult(UnitsConvertResultError errorCode, const QString& errorMessage);									// Generic Error constructor
 	explicit UnitsConvertResult(UnitsConvertResultError errorCode, double expectedLowValidRange, double expectedHighValidRange);	// Range Error constructor
 
 	bool ok() const;
@@ -79,8 +90,10 @@ private:
 
 Q_DECLARE_METATYPE(UnitsConvertResult)
 
+// ==============================================================================================
+// class UnitsConvert
 //
-//
+
 class UnitsConvertor : public QObject
 {
 	Q_OBJECT
@@ -92,10 +105,12 @@ public:
 
 public:
 
-	Q_INVOKABLE QVariant physicalToElectric(double val, double electricLowLimit, double electricHighLimit, int unitID, int sensorType);
-	Q_INVOKABLE UnitsConvertResult electricToPhysical(double val, double electricLowLimit, double electricHighLimit, int unitID, int sensorType);
-
+	Q_INVOKABLE UnitsConvertResult electricToPhysical_Input(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType);						// for blocks of input signals - AIM, WAIM
+	Q_INVOKABLE UnitsConvertResult electricToPhysical_Output(double elVal, double electricLowLimit, double electricHighLimit, int outputMode);									// for blocks of output signals - AOM
+	Q_INVOKABLE UnitsConvertResult electricToPhysical_ThermoCouple(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType);				// for blocks of thermocouple signals - TIM
+	Q_INVOKABLE UnitsConvertResult electricToPhysical_ThermoResistor(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double r0);	// for blocks of thermoresistor signals - RIM
 };
 
+// ==============================================================================================
 
 #endif // UNITSCONVERTOR_H

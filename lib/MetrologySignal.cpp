@@ -288,7 +288,7 @@ namespace Metrology
 		// electricUnits
 		//
 
-		switch(m_inOutType)
+		switch(signal.inOutType())
 		{
 			case E::SignalInOutType::Input:
 
@@ -339,32 +339,65 @@ namespace Metrology
 		m_physicalLowLimit = 0;
 		m_physicalHighLimit = 0;
 
-		if (signal.sensorType() == E::SensorType::V_0_5 || signal.sensorType() == E::SensorType::V_m10_p10)
+		if (signal.isAnalog() == true)
 		{
 			UnitsConvertor uc;
 
-			UnitsConvertResult qpl = uc.electricToPhysical(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
-			UnitsConvertResult qph = uc.electricToPhysical(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+			UnitsConvertResult qpl;
+			UnitsConvertResult qph;
+
+			switch (signal.inOutType())
+			{
+				case E::SignalInOutType::Input:
+
+					switch (signal.electricUnit())
+					{
+						case E::ElectricUnit::V:
+						case E::ElectricUnit::mA:
+							{
+								qpl = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+								qph = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+							}
+							break;
+
+						case E::ElectricUnit::mV:
+							{
+								qpl = uc.electricToPhysical_ThermoCouple(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+								qph = uc.electricToPhysical_ThermoCouple(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+							}
+							break;
+
+						case E::ElectricUnit::Ohm:
+							{
+								QVariant qv;
+								bool isEnum;
+								double r0 = 100;
+
+								if (signal.getSpecPropValue("R0_Ohm", &qv, &isEnum) == true)
+								{
+									r0 = qv.toDouble();
+								}
+
+								qpl = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), r0);
+								qph = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), r0);
+							}
+							break;
+					}
+
+					break;
+
+				case E::SignalInOutType::Output:
+
+					qpl = uc.electricToPhysical_Output(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.outputMode());
+					qph = uc.electricToPhysical_Output(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.outputMode());
+
+					break;
+			}
 
 			if (qpl.ok() == true && qph.ok() == true)
 			{
 				m_physicalLowLimit = qpl.toDouble();
 				m_physicalHighLimit = qph.toDouble();
-			}
-		}
-		else
-		{
-			QVariant qv;
-			bool isEnum;
-
-			if (signal.getSpecPropValue("LowPhysicalUnits", &qv, &isEnum) == true)
-			{
-				m_physicalLowLimit = qv.toDouble();
-			}
-
-			if (signal.getSpecPropValue("HighPhysicalUnits", &qv, &isEnum) == true)
-			{
-				m_physicalHighLimit = qv.toDouble();
 			}
 		}
 
