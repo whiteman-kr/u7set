@@ -274,6 +274,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0254.sql", "Upgrade to version 254, PhysicalLimits were removed WAIM-4PH, they are calculated from ElectricUnits"},
 	{":/DatabaseUpgrade/Upgrade0255.sql", "Upgrade to version 255, PhysicalLimits calculation error messages are processed in WAIM and AIM"},
 	{":/DatabaseUpgrade/Upgrade0256.sql", "Upgrade to version 256, SchemaTags property was added to Monitor and TuningClient presets"},
+	{":/DatabaseUpgrade/Upgrade0257.sql", "Upgrade to version 257, MaxInstCount changed to 1024 for TCT in LM1-SR03"},
 };
 
 
