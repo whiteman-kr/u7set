@@ -446,7 +446,7 @@
 			<Pin OpName="o_tconv_edi"	OpIndex ="10"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="11"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="INDICATION" OpCode="29" ImpVersion="1" VersionOpIndex="13" MaxInstCount="1023" SimulationFunc="afb_indication">
+		<AFBComponent Caption="INDICATION" OpCode="29" ImpVersion="1" VersionOpIndex="13" MaxInstCount="1024" SimulationFunc="afb_indication">
 		    <Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_input"		OpIndex ="4"	PinType = "Input"/>
 			<Pin OpName="i_ack"			OpIndex ="5"	PinType = "Input"/>
