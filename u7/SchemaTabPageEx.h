@@ -10,6 +10,7 @@
 #include "../VFrame30/LogicSchema.h"
 
 class EditSchemaTabPageEx;
+class TagSelectorWidget;
 
 //
 //
@@ -320,10 +321,13 @@ private:
 
 	QAction* m_searchAction = nullptr;
 	QLineEdit* m_searchEdit = nullptr;
+	QLineEdit* m_filterEdit = nullptr;
 	QCompleter* m_searchCompleter = nullptr;
 	QPushButton* m_searchButton = nullptr;
 	QPushButton* m_filterButton = nullptr;
 	QPushButton* m_resetFilterButton = nullptr;
+
+	TagSelectorWidget* m_tagSelector = nullptr;
 
 	std::list<EditSchemaTabPageEx*> m_openedFiles;		// Opened files (for edit and view)
 

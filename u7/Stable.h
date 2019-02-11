@@ -18,6 +18,7 @@
 #include <type_traits>
 #include <limits>
 #include <iterator>
+#include <optional>
 
 
 // Qt includes

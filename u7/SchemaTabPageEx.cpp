@@ -2,6 +2,7 @@
 #include "CreateSchemaDialog.h"
 #include "CheckInDialog.h"
 #include "Settings.h"
+#include "TagSelectorWidget.h"
 #include "Forms/SelectChangesetDialog.h"
 #include "Forms/FileHistoryDialog.h"
 #include "Forms/CompareDialog.h"
@@ -1760,31 +1761,6 @@ void SchemasTabPageEx::refreshControlTabPage()
 	return;
 }
 
-//std::vector<EditSchemaTabPage*> SchemasTabPage::openSchemas()
-//{
-//	std::vector<EditSchemaTabPage*> result;
-//	result.reserve(32);
-
-//	for (int i = 0; i < m_tabWidget->count(); i++)
-//	{
-//		QWidget* tab = m_tabWidget->widget(i);
-
-//		if (tab == nullptr)
-//		{
-//			assert(tab);
-//			continue;
-//		}
-
-//		EditSchemaTabPage* schemaTabPage = dynamic_cast<EditSchemaTabPage*>(tab);
-//		if (schemaTabPage != nullptr)
-//		{
-//			result.push_back(schemaTabPage);
-//		}
-//	}
-
-//	return result;
-//}
-
 void SchemasTabPageEx::projectOpened()
 {
 	this->setEnabled(true);
@@ -1849,16 +1825,19 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 	addAction(m_searchAction);
 
 	m_searchEdit = new QLineEdit(this);
-	m_searchEdit->setPlaceholderText(tr("Search or Filter Text"));
+	m_searchEdit->setPlaceholderText(tr("Search Text"));
 	m_searchEdit->setClearButtonEnabled(true);
-	m_searchEdit->setMinimumWidth(400);
 
+	m_filterEdit = new QLineEdit(this);
+	m_filterEdit->setPlaceholderText(tr("Filter Text"));
+	m_filterEdit->setClearButtonEnabled(true);
 
 	QStringList completerStringList = QSettings{}.value("SchemaControlTabPageEx/SearchCompleter").toStringList();
 	m_searchCompleter = new QCompleter(completerStringList, this);
 	m_searchCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 
 	m_searchEdit->setCompleter(m_searchCompleter);
+	m_filterEdit->setCompleter(m_searchCompleter);
 
 	m_searchButton = new QPushButton(tr("Search"));
 	m_filterButton = new QPushButton(tr("Filter"));
@@ -1866,16 +1845,40 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 	m_resetFilterButton = new QPushButton(tr("Reset Filter"));
 	m_resetFilterButton->setDisabled(true);
 
+	m_tagSelector = new TagSelectorWidget(this);
+	//m_tagSelector->setSizePolicy(QSizePolicy::Expanding, m_tagSelector->sizePolicy().verticalPolicy());
+	m_tagSelector->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	int remove_it_set_tags_for_tag_selecter;
+
+	std::vector<QString> tags = {"All", "Serfaus", "Ski", "Austria", "Serfaus-Fiss-Ladis", "Tirol", "Skiing", "GoPro", "GoPro4Silver", "OneHorseTown", "Andrew", "FreeStyle", "Backfilp", "Airbag"};
+
+	m_tagSelector->setTags(tags);
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
 	// --
 	//
 	QGridLayout* layout = new QGridLayout(this);
 	layout->setMenuBar(m_toolBar);						// Set ToolBar here as menu, so no gaps and margins
 	layout->addWidget(m_filesView, 0, 0, 1, 6);
+
 	layout->addWidget(m_searchEdit, 1, 0, 1, 2);
 	layout->addWidget(m_searchButton, 1, 2, 1, 1);
-	layout->addWidget(m_filterButton, 1, 3, 1, 1);
-	layout->addWidget(m_resetFilterButton, 1, 4, 1, 1);
-	layout->setColumnStretch(5, 100);
+
+	layout->addWidget(m_filterEdit, 2, 0, 1, 2);
+	layout->addWidget(m_filterButton, 2, 2, 1, 1);
+	layout->addWidget(m_resetFilterButton, 2, 3, 1, 1);
+	layout->addWidget(m_tagSelector, 1, 4, 2, 2);
+
+	layout->setColumnStretch(0, 2);
+	layout->setColumnStretch(4, 2);
+	layout->setColumnStretch(5, 2);
+
+	layout->setRowStretch(0, 2);
+	layout->setRowStretch(1, 0);
 
 	setLayout(layout);
 
@@ -1890,6 +1893,7 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 
 	connect(m_searchAction, &QAction::triggered, this, &SchemaControlTabPageEx::ctrlF);
 	connect(m_searchEdit, &QLineEdit::returnPressed, this, &SchemaControlTabPageEx::search);
+	connect(m_filterEdit, &QLineEdit::returnPressed, this, &SchemaControlTabPageEx::filter);
 	connect(m_searchButton, &QPushButton::clicked, this, &SchemaControlTabPageEx::search);
 	connect(m_filterButton, &QPushButton::clicked, this, &SchemaControlTabPageEx::filter);
 	connect(m_resetFilterButton, &QPushButton::clicked, this, &SchemaControlTabPageEx::resetFilter);
@@ -4127,6 +4131,7 @@ void SchemaControlTabPageEx::showFileProperties()
 void SchemaControlTabPageEx::ctrlF()
 {
 	assert(m_searchEdit);
+
 	m_searchEdit->setFocus();
 	m_searchEdit->selectAll();
 
@@ -4206,9 +4211,9 @@ void SchemaControlTabPageEx::filter()
 	// Search for text in schemas
 	//
 	assert(m_filesView);
-	assert(m_searchEdit);
+	assert(m_filterEdit);
 
-	QString filterText = m_searchEdit->text().trimmed();
+	QString filterText = m_filterEdit->text().trimmed();
 
 	// Save completer
 	//
@@ -4260,6 +4265,8 @@ void SchemaControlTabPageEx::filter()
 void SchemaControlTabPageEx::resetFilter()
 {
 	assert(m_filesView);
+
+	m_filterEdit->clear();
 
 	m_filesView->setFilter("");
 	m_filesView->setFocus();
