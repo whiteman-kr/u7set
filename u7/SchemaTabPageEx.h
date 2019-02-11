@@ -47,11 +47,20 @@ public:
 
 	QModelIndexList searchFor(const QString searchText);
 	void setFilter(QString filter);
+	void setTagFilter(const QStringList& tags);
+	const QStringList& tagFilter() const;
 
 protected:
 private:
-	void applyFilter(QString filterText, DbFileTree* filesTree);
+	void applyFilter(DbFileTree* filesTree, const std::map<int, VFrame30::SchemaDetails>& detailsMap);
+	void applyTagFilter(DbFileTree* filesTree, const std::map<int, VFrame30::SchemaDetails>& detailsMap);
+
 	bool isSystemFile(int fileId) const;
+
+	void updateTagsFromDetails();
+
+signals:
+	void tagsChanged();
 
 public slots:
 	void refresh();
@@ -64,7 +73,7 @@ private slots:
 	//
 public:
 	QString usernameById(int userId) const noexcept;
-
+	QString tagsColumnText(int fileId) const;
 	QString detailsColumnText(int fileId) const;
 	QString fileCaption(int fileId) const;
 	bool excludedFromBuild(int fileId) const;
@@ -72,6 +81,8 @@ public:
 	const DbFileInfo& parentFile() const;
 
 	int schemaFilterCount() const;
+
+	const std::set<QString>& tags() const;
 
 	// Data
 	//
@@ -85,6 +96,7 @@ public:
 		ChangesetColumn,
 		FileUserColumn,
 		IssuesColumn,
+		TagsColumn,
 		DetailsColumn,
 
 		// Add other column befor this line
@@ -106,6 +118,8 @@ private:
 
 	std::map<int, QString> m_users;							// Key is UserID
 	std::map<int, VFrame30::SchemaDetails> m_details; 		// Key is FileID
+	std::set<QString> m_tags;
+	QStringList m_tagFilter;						// If vector is empty, then all schemas must be shown
 
 	std::set<int> m_systemFiles;	// Key is fileid
 
@@ -156,9 +170,14 @@ protected:
 	//
 public:
 	std::vector<std::shared_ptr<DbFileInfo>> selectedFiles() const;
+
 	void refreshFiles();
+
 	void searchAndSelect(QString searchText);
+
 	void setFilter(QString filter);
+	void setTagFilter(const QStringList& tags);
+
 
 signals:
 	void openFileSignal(DbFileInfo files);
@@ -307,6 +326,9 @@ private slots:
 
 	void filter();
 	void resetFilter();
+
+	void schemaTagsChanged();
+	void tagSelectorHasChanges();
 
 	// Properties
 	//

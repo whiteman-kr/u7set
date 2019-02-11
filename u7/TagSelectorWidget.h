@@ -17,8 +17,16 @@ public:
 	explicit TagSelectorWidget(QWidget* parent = nullptr);
 
 public:
+	void clear();
+
 	void setTags(const std::vector<QString>& tags);
+	void setTags(const std::set<QString>& tags);
+
 	std::map<QString, bool> tags() const;
+	QStringList selectedTags() const;
+
+signals:
+	void changed();
 
 private:
 	TagSelector::FlowLayout* m_flowLayout;

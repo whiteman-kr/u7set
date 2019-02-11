@@ -19,8 +19,25 @@ TagSelectorWidget::TagSelectorWidget(QWidget* parent)
 	return;
 }
 
+void TagSelectorWidget::clear()
+{
+	setTags(std::set<QString>{});
+	return;
+}
 
 void TagSelectorWidget::setTags(const std::vector<QString>& tags)
+{
+	std::set<QString> tagSet;
+
+	for (const QString& tag : tags)
+	{
+		tagSet.insert(tag);
+	}
+
+	return setTags(tagSet);
+}
+
+void TagSelectorWidget::setTags(const std::set<QString>& tags)
 {
 	// Get all tags, remove them from layout
 	//
@@ -50,13 +67,9 @@ void TagSelectorWidget::setTags(const std::vector<QString>& tags)
 		}
 	}
 
-	// Sort tags
-	//
-	std::vector<QString> sortedTags{tags};
-	std::sort(sortedTags.begin(), sortedTags.end());
-
 	// Add tags to
-	for (const QString& tag : sortedTags)
+	//
+	for (const QString& tag : tags)
 	{
 		if (auto it = layoutItems.find(tag);
 			it != layoutItems.end())
@@ -73,6 +86,9 @@ void TagSelectorWidget::setTags(const std::vector<QString>& tags)
 			// The new tag, cretae tag button and insert it into the layout
 			//
 			TagSelector::TagSelectorButton* tagButton = new TagSelector::TagSelectorButton(tag);
+			//tagButton->setChecked(true);	// selected by default
+
+			connect(tagButton, &TagSelector::TagSelectorButton::toggled, this, &TagSelectorWidget::changed);
 
 			m_flowLayout->addWidget(tagButton);
 		}
@@ -82,11 +98,17 @@ void TagSelectorWidget::setTags(const std::vector<QString>& tags)
 	//
 	for (auto [t, li] : layoutItems)
 	{
+		if (li->widget() != nullptr)
+		{
+			li->widget()->deleteLater();
+		}
+
 		delete li;
 	}
 
 	return;
 }
+
 
 std::map<QString, bool> TagSelectorWidget::tags() const
 {
@@ -104,6 +126,30 @@ std::map<QString, bool> TagSelectorWidget::tags() const
 			if (b != nullptr)
 			{
 				result[b->tag()] = b->selected();
+			}
+		}
+	}
+
+	return result;
+}
+
+QStringList TagSelectorWidget::selectedTags() const
+{
+	QStringList result;
+	result.reserve(m_flowLayout->count());
+
+	for (int i = 0; i < m_flowLayout->count(); i++)
+	{
+		QLayoutItem* li = m_flowLayout->itemAt(i);
+
+		if (li->widget() != nullptr)
+		{
+			TagSelector::TagSelectorButton* b = dynamic_cast<TagSelector::TagSelectorButton*>(li->widget());
+			assert(b);
+
+			if (b != nullptr && b->selected() == true)
+			{
+				result.push_back(b->tag());
 			}
 		}
 	}
@@ -143,6 +189,7 @@ namespace TagSelector
 
 	TagSelectorButton::~TagSelectorButton()
 	{
+		//qDebug() << "TagSelectorButton::~TagSelectorButton(): " << text();
 	}
 
 	QString TagSelectorButton::tag() const
