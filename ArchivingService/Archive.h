@@ -57,16 +57,9 @@ public:
 
 	QString getSignalID(Hash signalHash);
 
-	bool canReadWriteSignal(Hash signalHash);
-	void setCanReadWriteSignal(Hash signalHash, bool canWrite);
-
-	void setSignalInitialized(Hash signalHash, bool initilaized);
-
 	bool isSignalExists(Hash signalHash) const { return m_archFiles.contains(signalHash); }
 
 	int getFilesCount() const { return m_archFiles.count(); }
-
-	void getArchSignalStatus(Hash signalHash, bool* canReadWrite, bool* isInitialized, bool* isAnalog);
 
 	void getSignalsHashes(QVector<Hash>* hashes);
 
@@ -119,6 +112,10 @@ private:
 	void pushBackInRegularFilesQueue(ArchFile* file);
 
 	//
+
+	void stopAllRequests();
+	void stopMaintenanceThread();
+	void stopWriteThread();
 
 	void clear();
 

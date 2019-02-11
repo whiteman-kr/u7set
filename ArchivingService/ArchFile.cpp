@@ -15,94 +15,6 @@ bool ArchFileRecord::isValid() const
 	return calcCrc16(this, sizeof(ArchFileRecord)) == 0;
 }
 
-bool ArchFileRecord::timeLessThen(E::TimeType timeType, qint64 time)
-{
-	assert(isValid());
-
-	switch(timeType)
-	{
-/*	case E::TimeType::Local:
-		return state.localTime < time; */
-
-	case E::TimeType::System:
-		return state.systemTime < time;
-
-	case E::TimeType::Plant:
-		return state.plantTime < time;
-
-	default:
-		assert(false);
-	}
-
-	return false;
-}
-
-bool ArchFileRecord::timeLessOrEqualThen(E::TimeType timeType, qint64 time)
-{
-	assert(isValid());
-
-	switch(timeType)
-	{
-/*	case E::TimeType::Local:
-		return state.localTime <= time;*/
-
-	case E::TimeType::System:
-		return state.systemTime <= time;
-
-	case E::TimeType::Plant:
-		return state.plantTime <= time;
-
-	default:
-		assert(false);
-	}
-
-	return false;
-}
-
-bool ArchFileRecord::timeGreateThen(E::TimeType timeType, qint64 time)
-{
-	assert(isValid());
-
-	switch(timeType)
-	{
-/*	case E::TimeType::Local:
-		return state.localTime > time;*/
-
-	case E::TimeType::System:
-		return state.systemTime > time;
-
-	case E::TimeType::Plant:
-		return state.plantTime > time;
-
-	default:
-		assert(false);
-	}
-
-	return false;
-}
-
-bool ArchFileRecord::timeGreateOrEqualThen(E::TimeType timeType, qint64 time)
-{
-	assert(isValid());
-
-	switch(timeType)
-	{
-/*	case E::TimeType::Local:
-		return state.localTime >= time;*/
-
-	case E::TimeType::System:
-		return state.systemTime >= time;
-
-	case E::TimeType::Plant:
-		return state.plantTime >= time;
-
-	default:
-		assert(false);
-	}
-
-	return false;
-}
-
 qint64 ArchFileRecord::getTime(E::TimeType timeType)
 {
 	switch(timeType)
@@ -123,6 +35,13 @@ qint64 ArchFileRecord::getTime(E::TimeType timeType)
 
 	assert(false);					// unknown time type
 	return 0;
+}
+
+void ArchFileRecord::offsetTimes(qint64 dt)
+{
+	state.localTime += dt;
+	state.systemTime += dt;
+	state.plantTime += dt;
 }
 
 // -----------------------------------------------------------------------------------------------------------------------
@@ -551,6 +470,16 @@ void ArchFilePartition::closeFile()
 }
 
 
+inline bool operator < (const ArchFilePartition::Info& p1, const ArchFilePartition::Info& p2)
+{
+	if (p1.startTime == p2.startTime)
+	{
+		return p1.shortTerm;			// if start times is equal short term partitions consider less then long term
+	}
+
+	return p1.startTime < p2.startTime;
+}
+
 // ----------------------------------------------------------------------------------------------------------------------
 //
 // ArchFile class implementation
@@ -569,7 +498,7 @@ ArchFile::ArchFile(const Proto::ArchSignal& protoArchSignal, CircularLoggerShare
 	m_appSignalID = QString::fromStdString(protoArchSignal.appsignalid());
 	m_isAnalog = protoArchSignal.isanalog();
 
-	m_lastState.flags.valid = 0;
+	m_lastRecord.state.flags.valid = 0;
 
 	int queueSize = QUEUE_MIN_SIZE;
 
@@ -601,8 +530,6 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 
 	Q_UNUSED(archID)
 
-	m_lastState = state;
-
 	ArchFileRecord s;
 
 	s.state.localTime = state.time.local.timeStamp;
@@ -617,7 +544,28 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 
 	Q_UNUSED(locker);
 
+	if (m_lastRecordInitialized == false && s.state.flags.valid)
+	{
+		// write non-valid auto point before first valid point
+		//
+		if (m_path.contains("000266") == true)
+		{
+			DEBUG_STOP;
+		}
+
+		ArchFileRecord nvp = s;
+
+		nvp.state.flags.valid = 0;
+		nvp.state.flags.autoPoint = 1;
+		nvp.offsetTimes(-1);
+
+		m_queue->push(nvp);
+	}
+
 	m_queue->push(s);
+
+	m_lastRecord = s;
+	m_lastRecordInitialized = true;
 
 	return true;
 }
@@ -732,6 +680,38 @@ QVector<ArchFilePartition::Info> ArchFile::getArchPartitionsInfo(const QString& 
 	//
 	qSort(partitionsInfo);
 
+	//
+	for(int i = 0; i < partitionsInfo.count() - 1; /* it is Ok*/)
+	{
+		const ArchFilePartition::Info& p1 = partitionsInfo[i];
+		const ArchFilePartition::Info& p2 = partitionsInfo[i + 1];
+
+		if (p1.startTime == p2.startTime)
+		{
+			// Two partitions with same startTime is the ANOMALY.
+			// Short term partition will taken as more precise.
+			//
+
+			assert(p1.shortTerm == true);
+
+			// After sorting partitionsInfo short term partition is first.
+			// Remove long term partition (that is second).
+			// On next archive maintenance long term partition will be recreated from short term partition.
+			//
+
+			QDir().remove(getPartitionFileName(path, p2));
+
+			partitionsInfo.removeAt(i + 1);
+
+			continue;
+		}
+
+		i++;
+	}
+
+	// remove partitions with same startTime.
+	// leave shortTerm partitions
+
 	for(int i = 0; i < partitionsInfo.count(); i++)
 	{
 		partitionsInfo[i].index = i;
@@ -740,8 +720,35 @@ QVector<ArchFilePartition::Info> ArchFile::getArchPartitionsInfo(const QString& 
 	return partitionsInfo;
 }
 
+QString ArchFile::getPartitionFileName(const QString& archFilePath, const ArchFilePartition::Info& pi)
+{
+	return QString("%1/%2").arg(archFilePath, pi.fileName);
+}
+
 void ArchFile::shutdown(qint64 curPartition, qint64* totalFlushedStatesCount)
 {
+	if (m_lastRecordInitialized == true && m_lastRecord.state.flags.valid == 1)
+	{
+		qint64 curSysTime = QDateTime::currentMSecsSinceEpoch();
+
+		qint64 dT = curSysTime - m_lastRecord.state.systemTime;
+
+		if (dT <= 0)
+		{
+			dT = 1;
+		}
+
+		m_lastRecord.state.flags.valid = 0;
+		m_lastRecord.state.flags.autoPoint = 1;
+		m_lastRecord.offsetTimes(dT);
+
+		m_flushMutex.lock();
+
+		m_queue->push(m_lastRecord);
+
+		m_flushMutex.unlock();
+	}
+
 	flush(curPartition, totalFlushedStatesCount, true);
 }
 
@@ -1068,7 +1075,7 @@ bool ArchFile::packDiscreteSignalPartition(const ArchFilePartition::Info& pi)
 		DEBUG_LOG_ERR(m_log, QString("Maintenance: file renaming error %1 to %2").arg(staFileName).arg(ltaFileName));
 	}
 
-	return true;
+	return result;
 }
 
 bool ArchFile::deleteOldPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
@@ -1121,6 +1128,7 @@ QString ArchFile::getPartitionFileName(const ArchFilePartition::Info& pi)
 {
 	return QString("%1/%2").arg(m_path, pi.fileName);
 }
+
 
 
 

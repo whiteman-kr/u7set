@@ -26,13 +26,9 @@ struct ArchFileRecord
 	void calcCRC16() { crc16 = calcCrc16(&state, sizeof(state)); }
 	bool isValid() const;
 
-	bool timeLessThen(E::TimeType timeType, qint64 time);
-	bool timeLessOrEqualThen(E::TimeType timeType, qint64 time);
-
-	bool timeGreateThen(E::TimeType timeType, qint64 time);
-	bool timeGreateOrEqualThen(E::TimeType timeType, qint64 time);
-
 	qint64 getTime(E::TimeType timeType);
+
+	void offsetTimes(qint64 dt);
 };
 
 #pragma pack(pop)
@@ -113,7 +109,7 @@ private:
 	static const qint64 LAST_RECORD = -1;
 };
 
-inline bool operator < (const ArchFilePartition::Info& p1, const ArchFilePartition::Info& p2) { return p1.startTime < p2.startTime; }
+inline bool operator < (const ArchFilePartition::Info& p1, const ArchFilePartition::Info& p2);
 
 class ArchFile
 {
@@ -132,12 +128,6 @@ public:
 	Hash hash() const { return m_hash; }
 	QString appSignalID() const { return m_appSignalID; }
 
-	bool canReadWrite() const { return m_canReadWrite; }
-	void setCanReadWrite(bool canReadWrite) { m_canReadWrite = canReadWrite; }
-
-	bool isInitialized() const { return m_isInitialized; }
-	void setInitialized(bool initialized) { m_isInitialized = initialized; }
-
 	bool isAnalog() const { return m_isAnalog; }
 
 	bool queueIsEmpty() const { return m_queue->isEmpty(); }
@@ -145,6 +135,7 @@ public:
 	QString path() const { return m_path; }
 
 	static QVector<ArchFilePartition::Info> getArchPartitionsInfo(const QString& path);
+	static QString getPartitionFileName(const QString& archFilePath, const ArchFilePartition::Info& pi);
 
 	void shutdown(qint64 curPartition, qint64* totalFlushedStatesCount);
 
@@ -188,8 +179,8 @@ private:
 
 	//
 
-	bool m_isInitialized = false;
-	bool m_canReadWrite = false;
+	bool m_lastRecordInitialized = false;
+	ArchFileRecord m_lastRecord;
 
 	QMutex m_fileInMaintenanceMutex;
 	bool m_fileInMaintenance = false;
@@ -197,7 +188,6 @@ private:
 
 	//
 
-	SimpleAppSignalState m_lastState;
 	QString m_path;
 
 	//

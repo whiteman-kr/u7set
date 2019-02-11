@@ -313,10 +313,10 @@ ArchRequest::~ArchRequest()
 
 void ArchRequest::run()
 {
-	/*	if (m_param.print().contains("startTime=2019-02-05 08:00:00") == true)
-		{
-			DEBUG_STOP;
-		}*/
+	if (m_param.print().contains("startTime=2019-02-11 17:00:00, endTime=2019-02-11 18:00:00") == true)
+	{
+		DEBUG_STOP;
+	}
 
 	// expand request time from both sides
 	//
@@ -516,6 +516,12 @@ void ArchRequest::getSignalStates()
 		state->set_hash(signalHash);
 		state->set_value(record.state.value);
 		state->set_flags(record.state.flags.all);
+
+		if (record.state.flags.valid == 0)
+		{
+			qDebug() << "Not valid point";
+		}
+
 		state->set_planttime(record.state.plantTime);
 		state->set_systemtime(record.state.systemTime);
 		state->set_localtime(record.state.localTime);

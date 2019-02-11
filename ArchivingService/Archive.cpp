@@ -71,7 +71,7 @@ Archive::Archive(const QString& projectID,
 {
 	// +++++++++++++++ DEBUG +++++++++++++++++
 	shortTermPeriod = 2;
-	longTermPeriod = 100;
+	longTermPeriod = 1000000;
 	// +++++++++++++++ DEBUG +++++++++++++++++
 
 	if (shortTermPeriod < 2)
@@ -162,39 +162,11 @@ void Archive::start()
 
 void Archive::stop()
 {
-	m_requestsMutex.lock();
+	DEBUG_LOG_MSG(m_log, QString("Archive is shutting down..."));
 
-	assert(m_requests.count() == 0);
-
-	for(ArchRequestShared archRequest : m_requests)
-	{
-		if (archRequest != nullptr)
-		{
-			archRequest->quitAndWait();
-		}
-	}
-
-	m_requests.clear();
-
-	m_requestsMutex.unlock();
-
-	//
-
-	if (m_archMaintenanceThread != nullptr)
-	{
-		m_archMaintenanceThread->quitAndWait();
-		delete m_archMaintenanceThread;
-		m_archMaintenanceThread = nullptr;
-	}
-
-	//
-
-	if (m_archWriterThread != nullptr)
-	{
-		m_archWriterThread->quitAndWait();
-		delete m_archWriterThread;
-		m_archWriterThread = nullptr;
-	}
+	stopAllRequests();
+	stopMaintenanceThread();
+	stopWriteThread();
 
 	m_isWorkable = false;
 }
@@ -281,7 +253,6 @@ void Archive::finalizeRequest(quint32 requestID)
 	m_requestsMutex.unlock();
 }
 
-
 QString Archive::getSignalID(Hash signalHash)
 {
 	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
@@ -294,67 +265,6 @@ QString Archive::getSignalID(Hash signalHash)
 
 	return archFile->appSignalID();
 }
-
-bool Archive::canReadWriteSignal(Hash signalHash)
-{
-	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
-
-	if (archFile == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
-	return archFile->canReadWrite();
-}
-
-void Archive::setCanReadWriteSignal(Hash signalHash, bool canReadWrite)
-{
-	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
-
-	if (archFile == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	archFile->setCanReadWrite(canReadWrite);
-}
-
-void Archive::setSignalInitialized(Hash signalHash, bool initilaized)
-{
-	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
-
-	if (archFile == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	archFile->setInitialized(initilaized);
-}
-
-void Archive::getArchSignalStatus(Hash signalHash, bool* canReadWrite, bool* isInitialized, bool* isAnalog)
-{
-	TEST_PTR_RETURN(canReadWrite);
-	TEST_PTR_RETURN(isInitialized);
-	TEST_PTR_RETURN(isAnalog);
-
-	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
-
-	if (archFile == nullptr)
-	{
-		*canReadWrite = false;
-		*isInitialized = false;
-		*isAnalog = false;
-		return;
-	}
-
-	*canReadWrite = archFile->canReadWrite();
-	*isInitialized = archFile->isInitialized();
-	*isAnalog = archFile->isAnalog();
-}
-
 
 void Archive::getSignalsHashes(QVector<Hash>* hashes)
 {
@@ -559,54 +469,25 @@ bool Archive::createGroupDirs()
 	return result;
 }
 
-
-
-
 bool Archive::shutdown()
 {
-/*	if (m_lastState.flags.valid == 1)
-	{
-		qint64 dTime = system - m_lastState.time.system;
-
-		if (dTime > 0)
-		{
-			m_lastState.time.system = systemTime;
-			m_lastState.time.local += dTime;
-			m_lastState.time.plant += dTime;
-
-			pushState()
-
-		}
-	}
-
-	ArchFile* firstArchFile = nullptr;
-
 	// shutting down all archive files
 	//
-	do
-	{
-		ArchFile* archFile = m_archive->getNextRegularFile();
+	qint64 totalFlushed = 0;
 
+	for(ArchFile* archFile : m_archFilesArray)
+	{
 		if (archFile == nullptr)
 		{
-			break;
+			assert(false);
+			continue;
 		}
 
-		if (firstArchFile == nullptr)
-		{
-			firstArchFile = archFile;
-		}
-		else
-		{
-			if (firstArchFile == archFile)
-			{
-				break;
-			}
-		}
-
-		archFile->shutdown(m_curPartition, &m_totalFlushedStatesCount);
+		qint64 curPartition = getCurrentPartition();
+		archFile->shutdown(curPartition, &totalFlushed);
 	}
-	while(1);*/
+
+	DEBUG_LOG_MSG(m_log, QString("Archive is shutdowned."));
 
 	return true;
 }
@@ -838,10 +719,50 @@ void Archive::pushBackInRegularFilesQueue(ArchFile* file)
 	}
 }
 
+void Archive::stopAllRequests()
+{
+	m_requestsMutex.lock();
+
+	for(ArchRequestShared archRequest : m_requests)
+	{
+		if (archRequest != nullptr)
+		{
+			archRequest->quitAndWait(3 * 1000);
+		}
+	}
+
+	m_requests.clear();
+
+	DEBUG_LOG_MSG(m_log, QString("All requests is closed."));
+
+	m_requestsMutex.unlock();
+}
+
+void Archive::stopMaintenanceThread()
+{
+	if (m_archMaintenanceThread != nullptr)
+	{
+		m_archMaintenanceThread->quitAndWait(5 * 1000);
+		delete m_archMaintenanceThread;
+		m_archMaintenanceThread = nullptr;
+
+		DEBUG_LOG_MSG(m_log, QString("Maintenance thread is stoped."));
+	}
+}
+
+void Archive::stopWriteThread()
+{
+	if (m_archWriterThread != nullptr)
+	{
+		m_archWriterThread->quitAndWait();			// undefined time to all files flushing
+		delete m_archWriterThread;
+		m_archWriterThread = nullptr;
+	}
+}
+
 void Archive::clear()
 {
 	m_projectID.clear();
-	m_archFiles.clear();
 
 	for(ArchFile* archFile : m_archFiles)
 	{
@@ -850,11 +771,4 @@ void Archive::clear()
 
 	m_archFiles.clear();
 	m_archFilesArray.clear();
-/*
-	for(RequestContext* reqContext : m_requestContexts)
-	{
-		delete reqContext;
-	}
-
-	m_requestContexts.clear();*/
 }

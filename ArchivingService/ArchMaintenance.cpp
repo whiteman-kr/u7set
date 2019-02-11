@@ -40,9 +40,11 @@ void ArchMaintenanceThread::maintenance()
 
 	int retryCount = 0;
 
-	while(retryCount < 3)
+	while(retryCount < 2)
 	{
 		retryHashes.clear();
+
+		errorCount = 0;
 
 		for(Hash signalHash : hashes)
 		{

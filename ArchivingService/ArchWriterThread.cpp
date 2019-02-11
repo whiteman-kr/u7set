@@ -93,13 +93,13 @@ void ArchWriterThread::printStatistics()
 
 	if (elapsedTime < TEN_SECONDS)
 	{
-		m_timer.start();
 		return;
 	}
 
 	if (m_totalFlushedStatesCount == m_prevFlushedStatesCount)
 	{
 		qDebug() << "No flushing";
+		m_timer.start();
 		return;
 	}
 
