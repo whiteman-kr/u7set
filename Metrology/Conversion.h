@@ -2,8 +2,11 @@
 #define CONVERSION_H
 
 #include <QtGlobal>
+#include <assert.h>
 
 #include "../lib/Types.h"
+#include "../lib/UnitsConvertorTable.h"
+
 
 #include "SignalBase.h"
 
@@ -24,14 +27,5 @@ double		conversion(double val, int conversionType, const Metrology::SignalParam&
 double		conversion(double val, int conversionType, const E::ElectricUnit unitID, const E::SensorType sensorType);
 
 // ==============================================================================================
-
-const int	CT_PROPABILITY_95    = 0;
-
-const int	CT_PROPABILITY_COUNT = 1;
-
-double		studentK(int measureCount, int p);
-
-// ==============================================================================================
-
 
 #endif // CONVERSION_H
