@@ -23,7 +23,6 @@ const char* const			SignalInfoColumn[] =
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Caption"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Electric range"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Electric sensor"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Physical range"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Engeneering range"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Calibrator"),
 };
@@ -41,9 +40,8 @@ const int					SIGNAL_INFO_COLUMN_RACK			= 0,
 							SIGNAL_INFO_COLUMN_CAPTION		= 8,
 							SIGNAL_INFO_COLUMN_EL_RANGE		= 9,
 							SIGNAL_INFO_COLUMN_EL_SENSOR	= 10,
-							SIGNAL_INFO_COLUMN_PH_RANGE		= 11,
-							SIGNAL_INFO_COLUMN_EN_RANGE		= 12,
-							SIGNAL_INFO_COLUMN_CALIBRATOR	= 13;
+							SIGNAL_INFO_COLUMN_EN_RANGE		= 11,
+							SIGNAL_INFO_COLUMN_CALIBRATOR	= 12;
 
 const int					SignalInfoColumnWidth[SIGNAL_INFO_COLUMN_COUNT] =
 {
@@ -58,7 +56,6 @@ const int					SignalInfoColumnWidth[SIGNAL_INFO_COLUMN_COUNT] =
 							150,	// SIGNAL_INFO_COLUMN_CAPTION
 							150,	// SIGNAL_INFO_COLUMN_EL_RANGE
 							100,	// SIGNAL_INFO_COLUMN_EL_SENSOR
-							150,	// SIGNAL_INFO_COLUMN_PH_RANGE
 							150,	// SIGNAL_INFO_COLUMN_EN_RANGE
 							150,	// SIGNAL_INFO_COLUMN_CALIBRATOR
 };

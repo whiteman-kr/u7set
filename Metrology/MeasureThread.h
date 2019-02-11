@@ -40,6 +40,7 @@ private:
 	//
 	bool					calibratorIsValid(CalibratorManager* pCalibratorManager);
 	bool					hasConnectedCalibrators();
+	bool					polarityTest(double electricVal, const MeasureMultiParam& param);
 	bool					setCalibratorUnit();
 	bool					prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit);
 

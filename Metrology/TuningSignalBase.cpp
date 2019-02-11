@@ -497,17 +497,17 @@ void TuningBase::appendCmdFowWrite(const Hash& signalHash, TuningValueType type,
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningWriteCmd TuningBase::cmdFowWrite(int index)
+TuningWriteCmd TuningBase::cmdFowWrite()
 {
 	TuningWriteCmd cmd;
 
 	m_cmdFowWriteMutex.lock();
 
-		if (index >= 0 && index < m_cmdFowWriteList.count())
+		if (m_cmdFowWriteList.isEmpty() == false)
 		{
-			cmd = m_cmdFowWriteList[index];
+			cmd = m_cmdFowWriteList[0];
 
-			m_cmdFowWriteList.remove(index);
+			m_cmdFowWriteList.remove(0);
 		}
 
 	m_cmdFowWriteMutex.unlock();

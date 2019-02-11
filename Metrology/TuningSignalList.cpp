@@ -474,7 +474,7 @@ QString TuningSignalTable::text(int row, int column, Metrology::Signal* pSignal)
 		case TUN_SIGNAL_LIST_COLUMN_CAPTION:		result = param.caption();					break;
 		case TUN_SIGNAL_LIST_COLUMN_STATE:			result = signalStateStr(pSignal);			break;
 		case TUN_SIGNAL_LIST_COLUMN_DEFAULT:		result = param.tuningDefaultValueStr();		break;
-		case TUN_SIGNAL_LIST_COLUMN_RANGE:			result = param.engeneeringRangeStr();		break;
+		case TUN_SIGNAL_LIST_COLUMN_RANGE:			result = param.tuningRangeStr();			break;
 		default:									assert(0);
 	}
 
@@ -510,11 +510,6 @@ QString TuningSignalTable::signalStateStr(Metrology::Signal* pSignal) const
 			formatStr.sprintf("%%.%df", param.engeneeringPrecision());
 
 			stateStr.sprintf(formatStr.toAscii(), pSignal->state().value());
-
-			if (param.engeneeringUnit().isEmpty() == false)
-			{
-				stateStr.append(" " + param.engeneeringUnit());
-			}
 
 			break;
 
@@ -1224,7 +1219,7 @@ void TuningSignalStateDialog::createInterface()
 				m_stateEdit->setAlignment(Qt::AlignHCenter);
 				m_stateEdit->setValidator(validator);
 
-				QLabel* rangeLabel = new QLabel(m_param.engeneeringRangeStr());
+				QLabel* rangeLabel = new QLabel(m_param.tuningRangeStr());
 				rangeLabel->setAlignment(Qt::AlignHCenter);
 
 				// buttons
@@ -1287,15 +1282,14 @@ void TuningSignalStateDialog::onOk()
 {
 	double state = m_stateEdit->text().toDouble();
 
-	if (state < m_param.engeneeringLowLimit() || state > m_param.engeneeringHighLimit())
+	if (state < m_param.tuningLowBound()|| state > m_param.tuningHighBound())
 	{
 		QString str, formatStr;
 
 		formatStr.sprintf("%%.%df", m_param.engeneeringPrecision());
 
 		str.sprintf("Failed input value: " + formatStr.toAscii(), state);
-		str += tr(" %1").arg(m_param.engeneeringUnit());
-		str += tr("\nRange of signal: %1").arg(m_param.engeneeringRangeStr());
+		str += tr("\nRange of signal: %1").arg(m_param.tuningRangeStr());
 
 		QMessageBox::critical(this, windowTitle(), str);
 		return;

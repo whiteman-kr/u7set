@@ -10,6 +10,7 @@
 #include <QDebug>
 #include <QJsonDocument>
 #include <QtEndian>
+#include <QQmlEngine>
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
