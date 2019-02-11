@@ -22,12 +22,14 @@
 #include <vector>
 #include <map>
 #include <unordered_map>
+#include <unordered_set>
 #include <set>
 #include <cmath>
 #include <cassert>
 #include <memory>
 #include <utility>
 #include <string>
+#include <optional>
 #include <algorithm>
 #include <functional>
 #include <iterator>

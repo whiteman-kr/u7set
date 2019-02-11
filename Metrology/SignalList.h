@@ -33,6 +33,7 @@ const char* const			SignalListColumn[] =
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Engeneering range"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Tuning"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Default value"),
+							QT_TRANSLATE_NOOP("SignalListDialog.h", "Tuning range"),
 };
 
 const int					SIGNAL_LIST_COLUMN_COUNT			= sizeof(SignalListColumn)/sizeof(SignalListColumn[0]);
@@ -51,7 +52,8 @@ const int					SIGNAL_LIST_COLUMN_RACK				= 0,
 							SIGNAL_LIST_COLUMN_PH_RANGE			= 11,
 							SIGNAL_LIST_COLUMN_EN_RANGE			= 12,
 							SIGNAL_LIST_COLUMN_TUN_SIGNAL		= 13,
-							SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL	= 14;
+							SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL	= 14,
+							SIGNAL_LIST_COLUMN_TUN_RANGE		= 15;
 
 const int					SignalListColumnWidth[SIGNAL_LIST_COLUMN_COUNT] =
 {
@@ -70,6 +72,7 @@ const int					SignalListColumnWidth[SIGNAL_LIST_COLUMN_COUNT] =
 							150,	// SIGNAL_LIST_COLUMN_IN_EN_RANGE
 							 50,	// SIGNAL_LIST_COLUMN_TUN_SIGNAL
 							100,	// SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL
+							100,	// SIGNAL_LIST_COLUMN_TTUN_RANGE
 };
 
 // ==============================================================================================

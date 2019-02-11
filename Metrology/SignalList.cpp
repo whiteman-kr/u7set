@@ -120,6 +120,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 			case SIGNAL_LIST_COLUMN_EN_RANGE:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_TUN_SIGNAL:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:	result = Qt::AlignCenter;	break;
+			case SIGNAL_LIST_COLUMN_TUN_RANGE:			result = Qt::AlignCenter;	break;
 			default:									assert(0);
 		}
 
@@ -162,6 +163,14 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 			case SIGNAL_LIST_COLUMN_EN_RANGE:
 
 				if (pSignal->param().engeneeringRangeIsValid() == false)
+				{
+					return QColor(0xFF, 0xA0, 0xA0);
+				}
+				break;
+
+			case SIGNAL_LIST_COLUMN_TUN_RANGE:
+
+				if (pSignal->param().tuningRangeIsValid() == false)
 				{
 					return QColor(0xFF, 0xA0, 0xA0);
 				}
@@ -221,6 +230,7 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 		case SIGNAL_LIST_COLUMN_EN_RANGE:			result = param.engeneeringRangeStr();		break;
 		case SIGNAL_LIST_COLUMN_TUN_SIGNAL:			result = param.enableTuningStr();			break;
 		case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:	result = param.tuningDefaultValueStr();		break;
+		case SIGNAL_LIST_COLUMN_TUN_RANGE:			result = param.tuningRangeStr();			break;
 		default:									assert(0);
 	}
 
@@ -567,7 +577,10 @@ void SignalListDialog::updateVisibleColunm()
 			{
 				case E::SignalInOutType::Input:
 				case E::SignalInOutType::Output:
+					hideColumn(SIGNAL_LIST_COLUMN_ADC_RANGE, true);
 					hideColumn(SIGNAL_LIST_COLUMN_EL_SENSOR, true);
+					hideColumn(SIGNAL_LIST_COLUMN_PH_RANGE, true);
+					hideColumn(SIGNAL_LIST_COLUMN_TUN_RANGE, true);
 					break;
 
 				case E::SignalInOutType::Internal:
@@ -590,6 +603,8 @@ void SignalListDialog::updateVisibleColunm()
 			hideColumn(SIGNAL_LIST_COLUMN_EL_SENSOR, true);
 			hideColumn(SIGNAL_LIST_COLUMN_PH_RANGE, true);
 			hideColumn(SIGNAL_LIST_COLUMN_EN_RANGE, true);
+			hideColumn(SIGNAL_LIST_COLUMN_TUN_RANGE, true);
+			hideColumn(SIGNAL_LIST_COLUMN_TUN_RANGE, true);
 
 			break;
 
@@ -602,6 +617,7 @@ void SignalListDialog::updateVisibleColunm()
 			hideColumn(SIGNAL_LIST_COLUMN_EN_RANGE, true);
 			hideColumn(SIGNAL_LIST_COLUMN_TUN_SIGNAL, true);
 			hideColumn(SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL, true);
+			hideColumn(SIGNAL_LIST_COLUMN_TUN_RANGE, true);
 
 			break;
 

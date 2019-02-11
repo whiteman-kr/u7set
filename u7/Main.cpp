@@ -14,7 +14,6 @@
 #	include "../gitlabci_version.h"
 #endif
 
-
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
 
 _CRT_REPORT_HOOK prevHook = nullptr;

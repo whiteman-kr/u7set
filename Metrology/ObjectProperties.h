@@ -37,8 +37,7 @@ const int						SIGNAL_PROPERTY_GROUP_COUNT				= sizeof(SignalPropertyGroup)/size
 const int						SIGNAL_PROPERTY_GROUP_ID				= 0,
 								SIGNAL_PROPERTY_GROUP_POSITION			= 1,
 								SIGNAL_PROPERTY_GROUP_EL_RANGE			= 2,
-								SIGNAL_PROPERTY_GROUP_PH_RANGE			= 3,
-								SIGNAL_PROPERTY_GROUP_EN_RANGE			= 4;
+								SIGNAL_PROPERTY_GROUP_EN_RANGE			= 3;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -51,15 +50,12 @@ const int						SIGNAL_PROPERTY_ITEM_CUSTOM_ID			= 0,
 								SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR	= 5,
 								SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION	= 6,
 
-								SIGNAL_PROPERTY_ITEM_PH_RANGE_LOW		= 7,
-								SIGNAL_PROPERTY_ITEM_PH_RANGE_HIGH		= 8,
+								SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW		= 7,
+								SIGNAL_PROPERTY_ITEM_EN_RANGE_HIGH		= 8,
+								SIGNAL_PROPERTY_ITEM_EN_RANGE_UNIT		= 9,
+								SIGNAL_PROPERTY_ITEM_EN_RANGE_PRECISION	= 10;
 
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW		= 9,
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_HIGH		= 10,
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_UNIT		= 11,
-								SIGNAL_PROPERTY_ITEM_EN_RANGE_PRECISION	= 12;
-
-const int						SIGNAL_PROPERTY_ITEM_COUNT				= 13;
+const int						SIGNAL_PROPERTY_ITEM_COUNT				= 11;
 
 // ----------------------------------------------------------------------------------------------
 

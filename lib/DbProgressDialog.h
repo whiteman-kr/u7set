@@ -29,6 +29,7 @@ private:
 	int m_timerId = 0;
     QString m_description;
 	QLabel* m_label = nullptr;
+	QLabel* m_currentOperation = nullptr;
 	QProgressBar* m_progressBar = nullptr;
 	QPushButton* m_cancelButton = nullptr;
 	DbProgress* m_progress = nullptr;

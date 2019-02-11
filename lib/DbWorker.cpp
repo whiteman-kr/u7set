@@ -263,11 +263,16 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0243.sql", "Upgrade to version 243, AIM-4PH Preset corrections"},
 	{":/DatabaseUpgrade/Upgrade0244.sql", "Upgrade to version 244, Blink signal was added to LM1-SR04, LM1-SF00-4PH Presets"},
 	{":/DatabaseUpgrade/Upgrade0245.sql", "Upgrade to version 245, Unit have been made editable for output analog signals"},
-	{":/DatabaseUpgrade/Upgrade0246.sql", "Upgrade to version 246, Add attributes to file system"},
+	{":/DatabaseUpgrade/Upgrade0246.sql", "Upgrade to version 246, Add attributes to file system"},	
 	{":/DatabaseUpgrade/Upgrade0247.sql", "Upgrade to version 247, AIM-4PH default range is 5..0, TIM valid range checking is made in physical units, added V to ElectricUnits in AOM-4PH"},
 	{":/DatabaseUpgrade/Upgrade0248.sql", "Upgrade to version 248, TIM valid range checking calculations fix"},
 	{":/DatabaseUpgrade/Upgrade0249.sql", "Upgrade to version 249, Add archive period and location properties to Archive Service preset"},
 	{":/DatabaseUpgrade/Upgrade0250.sql", "Upgrade to version 250, PhysicalLimits were removed AIM-4PH, they are calculated from ElectricUnits"},
+	{":/DatabaseUpgrade/Upgrade0251.sql", "Upgrade to version 251, Add functions api.get_file_full_path, api.move_file"},
+	{":/DatabaseUpgrade/Upgrade0252.sql", "Upgrade to version 252, Add functions api.rename_file"},	
+	{":/DatabaseUpgrade/Upgrade0253.sql", "Upgrade to version 253, ImpVersion and MaxInstCount made up to date in AFB elements descriptions"},
+	{":/DatabaseUpgrade/Upgrade0254.sql", "Upgrade to version 254, PhysicalLimits were removed WAIM-4PH, they are calculated from ElectricUnits"},
+	{":/DatabaseUpgrade/Upgrade0255.sql", "Upgrade to version 255, PhysicalLimits calculation error messages are processed in WAIM and AIM"},
 };
 
 
@@ -1748,7 +1753,8 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 				//
 				QFile upgradeFile(ui.upgradeFileName);
 
-				//qDebug() << "Begin upgrade: item " << i << " completed, file: " << ui.upgradeFileName;
+				//qDebug() << "Upgrade Project Database, file " << ui.upgradeFileName;
+				m_progress->setCurrentOperation(tr("Upgrading... %1").arg(ui.upgradeFileName));
 
 				result = upgradeFile.open(QIODevice::ReadOnly | QIODevice::Text);
 
@@ -2884,6 +2890,165 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 	// set back DbFilInfo states
 	//
 	files->swap(filesToDetele);
+
+	return;
+}
+
+void DbWorker::slot_moveFiles(const std::vector<DbFileInfo>* files, int moveToParentId, std::vector<DbFileInfo>* movedFiles)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (movedFiles == nullptr)
+	{
+		assert(movedFiles != nullptr);
+		return;
+	}
+
+	if (files == nullptr ||
+		files->empty() == true ||
+		moveToParentId == DbFileInfo::Null)
+	{
+		assert(files != nullptr);
+		assert(files->empty() != true);
+		assert(moveToParentId != DbFileInfo::Null);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Database connection is not openned."));
+		return;
+	}
+
+	// Log action
+	//
+	QString logMessage = QString("slot_moveFiles: moveToParentId %1, FileCount %2, FileNames: ")
+							 .arg(moveToParentId)
+							 .arg(files->size());
+	for (auto& f : *files)
+	{
+		logMessage += f.fileName() + QLatin1String(" ");
+	}
+
+	addLogRecord(db, logMessage);
+
+	// Form request string
+	//
+	QString request = QString("SELECT * FROM api.move_files('%1', ARRAY[")
+									.arg(sessionKey());
+
+	for (auto it = files->begin(); it != files->end(); ++it)
+	{
+		if (it == files->begin())
+		{
+			request += QString("%1").arg(it->fileId());
+		}
+		else
+		{
+			request += QString(", %1").arg(it->fileId());
+		}
+	}
+
+	request += QString("], %1);").arg(moveToParentId);
+
+	// --
+	//
+	QSqlQuery q(db);
+	q.setForwardOnly(true);
+
+	if (bool result = q.exec(request);
+		result == false)
+	{
+		emitError(db, tr("Can't move file. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	movedFiles->clear();
+	movedFiles->reserve(files->size());
+
+	while (q.next())
+	{
+		DbFileInfo& fileInfo = movedFiles->emplace_back();
+		db_dbFileInfo(q, &fileInfo);	// FileID will be changed here
+	}
+
+	return;
+}
+
+void DbWorker::slot_renameFile(const DbFileInfo& file, QString newFileName, DbFileInfo* updatedFileInfo)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Database connection is not openned."));
+		return;
+	}
+
+	// Check parameters
+	//
+	if (updatedFileInfo == nullptr ||
+		file.isNull() == true ||
+		newFileName.isEmpty() == true)
+	{
+		assert(updatedFileInfo != nullptr);
+		assert(file.isNull() == false);
+		assert(newFileName.isEmpty() == false);
+		emitError(db, tr("slot_renameFile: input parameters error."));
+		return;
+	}
+
+	*updatedFileInfo = DbFileInfo{};
+
+	// Log action
+	//
+	QString logMessage = QString("slot_renameFile: fileId %1, newFileName %2")
+							 .arg(file.fileId())
+							 .arg(newFileName);
+	addLogRecord(db, logMessage);
+
+	// Request
+	//
+	QString request = QString("SELECT * FROM api.rename_file('%1', %2, '%3');")
+									.arg(sessionKey())
+									.arg(file.fileId())
+									.arg(newFileName);
+
+	QSqlQuery q(db);
+	if (bool result = q.exec(request);
+		result == false)
+	{
+		emitError(db, tr("Can't rename file. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	if (q.next() == true)
+	{
+		db_dbFileInfo(q, updatedFileInfo);
+	}
+	else
+	{
+		assert(false);
+		emitError(db, tr("Can't get return result on renaming file"));
+	}
 
 	return;
 }
@@ -4116,14 +4281,6 @@ void DbWorker::slot_getChangesetDetails(int changeset, DbChangesetDetails* out)
 
 	// --
 	//
-
-//	QMapIterator<QString, QVariant> i(q.boundValues());
-//	while (i.hasNext())
-//	{
-//		i.next();
-//		qDebug() << i.key().toUtf8().data() << ": " << i.value().toString().toUtf8().data() << endl;
-//	}
-
 	while (q.next())
 	{
 		db_dbChangesetObject(q, out);
@@ -6307,6 +6464,8 @@ bool DbWorker::db_dbChangesetObject(const QSqlQuery& q, DbChangesetDetails* dest
 	csObject.setCaption(q.value(6 + 3).toString());
 	csObject.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(6 + 4).toInt()));
 	csObject.setParent(q.value(6 + 5).toString());
+	csObject.setFileMoveText(q.value(6 + 6).toString());
+	csObject.setFileRenameText(q.value(6 + 7).toString());
 
 	destination->addObject(csObject);
 

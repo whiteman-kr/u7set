@@ -288,7 +288,7 @@ namespace Metrology
 		// electricUnits
 		//
 
-		switch(m_inOutType)
+		switch(signal.inOutType())
 		{
 			case E::SignalInOutType::Input:
 
@@ -335,20 +335,70 @@ namespace Metrology
 
 		// physicalUnits
 		//
-		QVariant qv;
-		bool isEnum;
 
 		m_physicalLowLimit = 0;
 		m_physicalHighLimit = 0;
 
-		if (signal.getSpecPropValue("LowPhysicalUnits", &qv, &isEnum) == true)
+		if (signal.isAnalog() == true)
 		{
-			m_physicalLowLimit = qv.toDouble();
-		}
+			UnitsConvertor uc;
 
-		if (signal.getSpecPropValue("HighPhysicalUnits", &qv, &isEnum) == true)
-		{
-			m_physicalHighLimit = qv.toDouble();
+			UnitsConvertResult qpl;
+			UnitsConvertResult qph;
+
+			switch (signal.inOutType())
+			{
+				case E::SignalInOutType::Input:
+
+					switch (signal.electricUnit())
+					{
+						case E::ElectricUnit::V:
+						case E::ElectricUnit::mA:
+							{
+								qpl = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+								qph = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+							}
+							break;
+
+						case E::ElectricUnit::mV:
+							{
+								qpl = uc.electricToPhysical_ThermoCouple(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+								qph = uc.electricToPhysical_ThermoCouple(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+							}
+							break;
+
+						case E::ElectricUnit::Ohm:
+							{
+								QVariant qv;
+								bool isEnum;
+								double r0 = 100;
+
+								if (signal.getSpecPropValue("R0_Ohm", &qv, &isEnum) == true)
+								{
+									r0 = qv.toDouble();
+								}
+
+								qpl = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), r0);
+								qph = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), r0);
+							}
+							break;
+					}
+
+					break;
+
+				case E::SignalInOutType::Output:
+
+					qpl = uc.electricToPhysical_Output(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.outputMode());
+					qph = uc.electricToPhysical_Output(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.outputMode());
+
+					break;
+			}
+
+			if (qpl.ok() == true && qph.ok() == true)
+			{
+				m_physicalLowLimit = qpl.toDouble();
+				m_physicalHighLimit = qph.toDouble();
+			}
 		}
 
 		// engeneeringUnits
@@ -364,6 +414,8 @@ namespace Metrology
 
 		m_enableTuning = signal.enableTuning();
 		m_tuningDefaultValue = signal.tuningDefaultValue().toDouble();
+		m_tuningLowBound = signal.tuningLowBound().toDouble();
+		m_tuningHighBound = signal.tuningHighBound().toDouble();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -426,6 +478,8 @@ namespace Metrology
 
 		result &= xml.readBoolAttribute("EnableTuning", &m_enableTuning);
 		result &= xml.readDoubleAttribute("TuningDefaultValue", &m_tuningDefaultValue);
+		result &= xml.readDoubleAttribute("TuningLowBound", &m_tuningLowBound);
+		result &= xml.readDoubleAttribute("TuningHighBound", &m_tuningHighBound);
 
 		return result;
 	}
@@ -465,6 +519,8 @@ namespace Metrology
 
 			xml.writeBoolAttribute("EnableTuning", enableTuning());
 			xml.writeDoubleAttribute("TuningDefaultValue", tuningDefaultValue());
+			xml.writeDoubleAttribute("TuningLowBound", tuningLowBound());
+			xml.writeDoubleAttribute("TuningHighBound", tuningHighBound());
 		}
 		xml.writeEndElement();
 	}
@@ -491,7 +547,7 @@ namespace Metrology
 
 	bool SignalParam::electricRangeIsValid() const
 	{
-		if (m_electricLowLimit == 0 && m_electricHighLimit == 0)
+		if (m_electricLowLimit == 0.0 && m_electricHighLimit == 0.0)
 		{
 			return false;
 		}
@@ -526,7 +582,7 @@ namespace Metrology
 
 	bool SignalParam::physicalRangeIsValid() const
 	{
-		if (m_physicalLowLimit == 0 && m_physicalHighLimit == 0)
+		if (m_physicalLowLimit == 0.0 && m_physicalHighLimit == 0.0)
 		{
 			return false;
 		}
@@ -551,7 +607,7 @@ namespace Metrology
 
 	bool SignalParam::engeneeringRangeIsValid() const
 	{
-		if (m_engeneeringLowLimit == 0 && m_engeneeringHighLimit == 0)
+		if (m_engeneeringLowLimit == 0.0 && m_engeneeringHighLimit == 0.0)
 		{
 			return false;
 		}
@@ -608,16 +664,11 @@ namespace Metrology
 
 				stateStr.sprintf(formatStr.toLocal8Bit(), m_tuningDefaultValue);
 
-				if (m_engeneeringUnit.isEmpty() == false)
-				{
-					stateStr.append(" " + m_engeneeringUnit);
-				}
-
 				break;
 
 			case E::SignalType::Discrete:
 
-				stateStr = m_tuningDefaultValue == 0 ? QString("No") : QString("Yes");
+				stateStr = m_tuningDefaultValue == 0.0 ? QString("No") : QString("Yes");
 
 				break;
 
@@ -627,6 +678,43 @@ namespace Metrology
 
 		return stateStr;
 	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	bool SignalParam::tuningRangeIsValid() const
+	{
+		if (m_enableTuning == false)
+		{
+			return true;
+		}
+
+		if (m_tuningLowBound == 0.0 && m_tuningHighBound == 0.0)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalParam::tuningRangeStr() const
+	{
+		if (m_enableTuning == false)
+		{
+			return QString();
+		}
+
+		QString range, formatStr;
+
+		formatStr.sprintf("%%.%df", m_engeneeringPrecision);
+
+		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_tuningLowBound, m_tuningHighBound);
+
+		return range;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
 
 	TuningValueType	SignalParam::tuningValueType()
 	{

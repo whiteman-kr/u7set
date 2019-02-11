@@ -129,7 +129,7 @@ void CalibratorBase::createInitDialog(QWidget* parent)
 {
 	m_pInitDialog = new QDialog(parent);
 	m_pInitDialog->setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
-	m_pInitDialog->setFixedSize(500, 200);
+	m_pInitDialog->setFixedSize(500, 220);
 	m_pInitDialog->setWindowIcon(QIcon(":/icons/Calibrators.png"));
 	m_pInitDialog->setWindowTitle(tr("Calibrators initialization"));
 	m_pInitDialog->installEventFilter(this);

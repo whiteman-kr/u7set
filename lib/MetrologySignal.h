@@ -4,19 +4,21 @@
 #include "../lib/AppSignal.h"
 #include "../lib/DeviceObject.h"
 #include "../lib/XmlHelper.h"
+#include "../lib/UnitsConvertor.h"
 #include "../Builder/CfgFiles.h"
 
 // Attention !!!
 // If you want to change any function writeToXml you must change CFG_FILE_VER_METROLOGY_SIGNALS
 // and write log history about changing
 
-const int			CFG_FILE_VER_METROLOGY_SIGNALS	= 3;
+const int			CFG_FILE_VER_METROLOGY_SIGNALS	= 4;
 
 // Historty of version
 //
 // version 1 - it is base version
 // version 2 - deleted a few fields SignalParam::writeToXml (story about removing redundant ranges)
 // version 3 - append fields: EngeneeringUnits
+// version 4 - append fields: TuningBounds
 //
 
 namespace Metrology
@@ -187,6 +189,8 @@ namespace Metrology
 
 		bool					m_enableTuning = false;
 		double					m_tuningDefaultValue = 0;
+		double					m_tuningLowBound = 0;
+		double					m_tuningHighBound = 0;
 
 	public:
 
@@ -292,6 +296,15 @@ namespace Metrology
 		double					tuningDefaultValue() const { return m_tuningDefaultValue; }
 		QString					tuningDefaultValueStr() const;
 		void					setTuningDefaultValue(double value) { m_tuningDefaultValue = value; }
+
+		double					tuningLowBound() const { return m_tuningLowBound; }
+		void					setTuningLowBound(double value) { m_tuningLowBound = value; }
+
+		double					tuningHighBound() const { return m_tuningHighBound; }
+		void					setTuningHighBound(double value) { m_tuningHighBound = value; }
+
+		bool					tuningRangeIsValid() const;
+		QString					tuningRangeStr() const;
 
 		TuningValueType			tuningValueType();
 
