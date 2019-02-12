@@ -66,7 +66,7 @@ void setWindowPosition(QWidget* window, QString widgetKey)
 	window->setGeometry(windowRect);
 }
 
-TableDataVisibilityController::TableDataVisibilityController(QTableView* parent, QString settingsBranchName) :
+TableDataVisibilityController::TableDataVisibilityController(QTableView* parent, const QString& settingsBranchName, const QVector<int>& defaultVisibleColumnSet) :
 	QObject(parent->horizontalHeader()),
 	m_signalsView(parent),
 	m_settingBranchName(settingsBranchName)
@@ -83,11 +83,24 @@ TableDataVisibilityController::TableDataVisibilityController(QTableView* parent,
 	QSettings settings;
 	QHeaderView* horizontalHeader = m_signalsView->horizontalHeader();
 
+	horizontalHeader->setContextMenuPolicy(Qt::ActionsContextMenu);
+	horizontalHeader->setSectionsMovable(true);
+
 	for (int i = 0; i < columnCount; i++)
 	{
 		QString columnName = QString("%1").arg(m_columnNameList[i].replace("/", "|")).replace("\n", " ");
-		m_signalsView->setColumnWidth(i, settings.value(m_settingBranchName + "/ColumnWidth/" + columnName, m_signalsView->columnWidth(i)).toInt());
-		horizontalHeader->setSectionHidden(i, !settings.value(m_settingBranchName + "/ColumnVisibility/" + columnName, true).toBool());
+		int columnWidth = settings.value(m_settingBranchName + "/ColumnWidth/" + columnName, -1).toInt();
+		if (columnWidth == -1)
+		{
+			m_signalsView->resizeColumnToContents(i);
+		}
+		else
+		{
+			m_signalsView->setColumnWidth(i, columnWidth);
+		}
+
+		horizontalHeader->setSectionHidden(i, !settings.value(m_settingBranchName + "/ColumnVisibility/" + columnName, defaultVisibleColumnSet.contains(i)).toBool());
+
 		int position = settings.value(m_settingBranchName + "/ColumnPosition/" + columnName, i).toInt();
 		positionMap.insert(position, i);
 	}
@@ -173,6 +186,7 @@ void TableDataVisibilityController::editColumnsVisibilityAndOrder()
 	//
 	QListView* listView = new QListView(&dlg);
 	listView->setModel(model);
+	listView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	listView->setCurrentIndex(model->index(0,0));
 	QHBoxLayout* hl = new QHBoxLayout;
 	hl->addWidget(listView);
@@ -191,12 +205,48 @@ void TableDataVisibilityController::editColumnsVisibilityAndOrder()
 
 	// Show/Hide column
 	//
-	connect(model, &QStandardItemModel::itemChanged, [=](QStandardItem* item){
+	bool isReselectingItems = false;
+	connect(model, &QStandardItemModel::itemChanged, this, [&](QStandardItem* item){
+		if (isReselectingItems == true)
+		{
+			return;
+		}
+
 		int visualIndex = item->row();
 		int logicalIndex = header->logicalIndex(visualIndex);
 		setHidden(logicalIndex, item->checkState() != Qt::Checked);
 
 		saveColumnVisibility(logicalIndex, item->checkState() == Qt::Checked);
+
+		isReselectingItems = true;
+		QModelIndexList&& list = listView->selectionModel()->selectedIndexes();
+		foreach(const QModelIndex& index, list)
+		{
+			if (index.row() == visualIndex)
+			{
+				continue;
+			}
+
+			logicalIndex = header->logicalIndex(index.row());
+
+			QStandardItem* selectedItem = model->item(index.row());
+			if (selectedItem->checkState() == Qt::Checked)
+			{
+				selectedItem->setCheckState(Qt::Unchecked);
+
+				setHidden(logicalIndex, true);
+				saveColumnVisibility(logicalIndex, false);
+			}
+			else
+			{
+				selectedItem->setCheckState(Qt::Checked);
+
+				setHidden(logicalIndex, false);
+				saveColumnVisibility(logicalIndex, true);
+			}
+
+		}
+		isReselectingItems = false;
 
 		//Check if no visible column left
 		//
@@ -210,7 +260,7 @@ void TableDataVisibilityController::editColumnsVisibilityAndOrder()
 		setHidden(0, false);
 		saveColumnVisibility(0, true);
 		updateHidden(header->visualIndex(0), false);
-	});
+	}, Qt::DirectConnection);
 
 	// Move column left (move item up)
 	//

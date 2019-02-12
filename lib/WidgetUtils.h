@@ -12,7 +12,7 @@ class TableDataVisibilityController : public QObject
 {
 	Q_OBJECT
 public:
-	TableDataVisibilityController(QTableView* parent, QString settingsBranchName);
+	TableDataVisibilityController(QTableView* parent, const QString& settingsBranchName, const QVector<int>& defaultVisibleColumnSet);
 	virtual ~TableDataVisibilityController();
 
 	void editColumnsVisibilityAndOrder();

@@ -3,6 +3,9 @@
 #include "MainTabPage.h"
 #include "GlobalMessanger.h"
 #include "../lib/Signal.h"
+#include <QStyledItemDelegate>
+#include <QSortFilterProxyModel>
+#include <QDialog>
 
 class DbController;
 class QTableView;
@@ -50,7 +53,7 @@ class SignalsDelegate : public QStyledItemDelegate
 {
     Q_OBJECT
 public:
-	explicit SignalsDelegate(SignalSet& signalSet, SignalsModel* model, SignalsProxyModel* signalsProxyModel, QObject *parent = 0);
+	explicit SignalsDelegate(SignalSet& signalSet, SignalsModel* model, SignalsProxyModel* signalsProxyModel, QObject *parent = nullptr);
 
     QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
 
@@ -80,7 +83,7 @@ class SignalsModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	SignalsModel(DbController* dbController, SignalsTabPage* parent = 0);
+	SignalsModel(DbController* dbController, SignalsTabPage* parent = nullptr);
 	virtual ~SignalsModel();
 
 	virtual int rowCount(const QModelIndex& parentIndex = QModelIndex()) const override;
@@ -162,7 +165,7 @@ class SignalsProxyModel : public QSortFilterProxyModel
 {
 	Q_OBJECT
 public:
-	SignalsProxyModel(SignalsModel* sourceModel, QObject* parent = 0);
+	SignalsProxyModel(SignalsModel* sourceModel, QObject* parent = nullptr);
 
 	bool filterAcceptsRow(int source_row, const QModelIndex&) const override;
 	bool lessThan(const QModelIndex &source_left, const QModelIndex &source_right) const override;

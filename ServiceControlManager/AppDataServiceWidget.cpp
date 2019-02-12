@@ -5,6 +5,7 @@
 #include <QAction>
 #include <QHeaderView>
 #include <QStandardItemModel>
+#include "../lib/WidgetUtils.h"
 
 const int DSC_EQUIPMENT_ID = 0,
 DSC_DATA_ID = 1,
@@ -16,20 +17,40 @@ DSC_RECEIVED = 6,
 DSC_SPEED = 7,
 DSC_CAPTION = 8,
 DSC_PORT = 9,
-DSC_PART_COUNT = 10,
+DSC_RUP_FRAMES_QUANTITY = 10,
 DSC_DATA_TYPE = 11,
 DSC_MODULE_NUMBER = 12,
 DSC_MODULE_TYPE = 13,
 DSC_SUBSYSTEM_ID = 14,
 DSC_SUBSYSTEM_CAPTION = 15,
-DSC_ADAPTER_ID = 16,
-DSC_ERROR_PROTOCOL_VERSION = 17,
-DSC_ERROR_FRAMES_QUANTITY = 18,
-DSC_ERROR_FRAME_NOMBER = 19,
-DSC_LOSTED_FRAMES_COUNT = 20,
-DSC_ERROR_DATA_ID = 21,
-DSC_ERROR_BAD_FRAME_SIZE = 22,
-DSC_COUNT = 23;
+DSC_SUBSYSTEM_CHANNEL = 16,
+DSC_ADAPTER_ID = 17,
+DSC_UNIQUE_ID = 18,
+
+DSC_RECEIVES_DATA = 19,
+DSC_RECEIVED_DATA_ID = 20,
+DSC_RUP_FRAMES_QUEUE_SIZE = 21,
+DSC_RUP_FRAMES_QUEUE_MAX_SIZE = 22,
+DSC_RECEIVED_FRAMES_COUNT = 23,
+DSC_RECEIVED_PACKET_COUNT = 24,
+DSC_DATA_PROCESSING_ENABLED = 25,
+DSC_PROCESSED_PACKET_COUNT = 26,
+DSC_LAST_PACKET_SYSTEM_TIME = 27,
+DSC_RUP_FRAME_PLANT_TIME = 28,
+DSC_RUP_FRAME_NUMERATOR = 29,
+DSC_SIGNAL_STATES_QUEUE_SIZE = 30,
+DSC_SIGNAL_STATES_QUEUE_MAX_SIZE = 31,
+DSC_ACQUIRED_SIGNALS_COUNT = 32,
+
+DSC_ERROR_PROTOCOL_VERSION = 33,
+DSC_ERROR_FRAMES_QUANTITY = 34,
+DSC_ERROR_FRAME_NOMBER = 35,
+DSC_LOSTED_FRAMES_COUNT = 36,
+DSC_ERROR_DATA_ID = 37,
+DSC_ERROR_BAD_FRAME_SIZE = 38,
+DSC_ERROR_DUPLICATE_PLANT_TIME = 39,
+DSC_ERROR_NONMONOTONIC_PLANT_TIME = 40,
+DSC_COUNT = 41;
 
 const int dataSourceStateColumn[] =
 {
@@ -57,19 +78,39 @@ const char* const dataSourceColumnStr[] =
 	"Speed",
 	"Caption",
 	"Port",
-	"Part count",
+	"Frames count",
 	"Data type",
 	"Module number",
 	"Module type",
 	"Subsystem ID",
 	"Subsystem caption",
+	"Subsystem channel",
 	"Adapter ID",
+	"Unique ID",
+
+	"Receives data",
+	"Received data ID",
+	"RUP frames queue size",
+	"RUP frames queue max size",
+	"Received frames count",
+	"Received packet count",
+	"Data processing enabled",
+	"Processed packet count",
+	"Last packet system time",
+	"RUP frame plant time",
+	"RUP frame numerator",
+	"Signal states queue size",
+	"Signal states queue max size",
+	"Acquired signals count",
+
 	"Error Protocol version",
 	"Error Frames quantity",
 	"Error Frame nomber",
 	"Losted frames count",
 	"Error Data ID",
 	"Error Bad frame size",
+	"Error Duplicate plant time",
+	"Error nonmonotonic plant time",
 };
 
 const int DATA_SOURCE_COLUMN_COUNT = sizeof(dataSourceColumnStr) / sizeof(dataSourceColumnStr[0]);
@@ -79,7 +120,7 @@ const QVector<int> defaultSourceColumnVisibility =
 	DSC_CAPTION,
 	DSC_IP,
 	DSC_PORT,
-	DSC_PART_COUNT,
+	DSC_RUP_FRAMES_QUANTITY,
 	DSC_STATE,
 	DSC_UPTIME,
 	DSC_RECEIVED,
@@ -109,6 +150,19 @@ const char* const signalColumnStr[] =
 };
 
 const int SIGNAL_COLUMN_COUNT = sizeof(signalColumnStr) / sizeof(signalColumnStr[0]);
+
+const QVector<int> defaultSignalColumnVisibility =
+{
+	SC_ID,
+	SC_CAPTION,
+	SC_FIRST_STATE_COLUMN,
+	SC_VALUE,
+	SC_VALID,
+	SC_UNIT,
+	SC_LOW_VALID_RANGE,
+	SC_HIGH_VALID_RANGE,
+	SC_COUNT
+};
 
 
 
@@ -142,43 +196,67 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 		return QVariant();
 	}
 
-	const DataSourceOnline& d = *m_dataSource[row];
+	const AppDataSource& source = *m_dataSource[row];
 
 	switch (role)
 	{
 		case Qt::DisplayRole:
 			switch (index.column())
 			{
-				case DSC_CAPTION: return d.lmCaption();
-				case DSC_IP: return d.lmAddressStr();
-				case DSC_PORT: return d.lmPort();
-				case DSC_PART_COUNT: return d.lmRupFramesQuantity();
-				case DSC_DATA_TYPE: return d.lmDataTypeStr();
-				case DSC_EQUIPMENT_ID: return d.lmEquipmentID();
-				case DSC_MODULE_NUMBER: return d.lmNumber();
-				case DSC_MODULE_TYPE: return d.lmModuleType();
-				case DSC_SUBSYSTEM_ID: return d.lmSubsystemKey();
-				case DSC_SUBSYSTEM_CAPTION: return d.lmSubsystem();
-				case DSC_ADAPTER_ID: return d.lmAdapterID();
-				case DSC_ENABLE_DATA: return d.lmDataEnable();
-				case DSC_DATA_ID: return "0x" + QString("%1").arg(d.lmDataID(), sizeof(d.lmDataID()) * 2, 16, QChar('0')).toUpper();
-				case DSC_STATE: return E::valueToString<E::DataSourceState>(TO_INT(d.state()));
+				// DataSourceInfo
+				//
+				case DSC_CAPTION: return source.lmCaption();
+				case DSC_IP: return source.lmAddressStr();
+				case DSC_PORT: return source.lmPort();
+				case DSC_RUP_FRAMES_QUANTITY: return source.lmRupFramesQuantity();
+				case DSC_DATA_TYPE: return source.lmDataTypeStr();
+				case DSC_EQUIPMENT_ID: return source.lmEquipmentID();
+				case DSC_MODULE_NUMBER: return source.lmNumber();
+				case DSC_MODULE_TYPE: return source.lmModuleType();
+				case DSC_SUBSYSTEM_ID: return source.lmSubsystemKey();
+				case DSC_SUBSYSTEM_CAPTION: return source.lmSubsystem();
+				case DSC_SUBSYSTEM_CHANNEL: return source.lmSubsystemChannel();
+				case DSC_ADAPTER_ID: return source.lmAdapterID();
+				case DSC_ENABLE_DATA: return source.lmDataEnable();
+				case DSC_DATA_ID: return "0x" + QString("%1").arg(source.lmDataID(), sizeof(source.lmDataID()) * 2, 16, QChar('0')).toUpper();
+				case DSC_UNIQUE_ID: return "0x" + QString("%1").arg(source.lmUniqueID(), sizeof(source.lmUniqueID()) * 2, 16, QChar('0')).toUpper();
+				case DSC_STATE: return E::valueToString<E::DataSourceState>(TO_INT(source.state()));
+
+				// DataSourceState
+				//
 				case DSC_UPTIME:
 				{
-					auto time = d.uptime();
+					auto time = source.uptime();
 					int s = time % 60; time /= 60;
 					int m = time % 60; time /= 60;
 					int h = time % 24; time /= 24;
 					return QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
 				}
-				case DSC_RECEIVED: return d.receivedDataSize();
-				case DSC_SPEED: return d.dataReceivingRate();
-				case DSC_ERROR_PROTOCOL_VERSION: return d.errorProtocolVersion();
-				case DSC_ERROR_FRAMES_QUANTITY: return d.errorFramesQuantity();
-				case DSC_ERROR_FRAME_NOMBER: return d.errorFrameNo();
-				case DSC_LOSTED_FRAMES_COUNT: return d.lostedPacketCount();
-				case DSC_ERROR_DATA_ID: return d.errorDataID();
-				case DSC_ERROR_BAD_FRAME_SIZE: return d.errorFrameSize();
+				case DSC_RECEIVED: return source.receivedDataSize();
+				case DSC_SPEED: return source.dataReceivingRate();
+				case DSC_RECEIVES_DATA: return source.dataReceives();
+				case DSC_RECEIVED_DATA_ID: return "0x" + QString("%1").arg(source.receivedDataID(), sizeof(source.receivedDataID()) * 2, 16, QChar('0')).toUpper();
+				case DSC_RUP_FRAMES_QUEUE_SIZE: return source.rupFramesQueueSize();
+				case DSC_RUP_FRAMES_QUEUE_MAX_SIZE: return source.rupFramesQueueMaxSize();
+				case DSC_RECEIVED_FRAMES_COUNT: return source.receivedFramesCount();
+				case DSC_RECEIVED_PACKET_COUNT: return source.receivedPacketCount();
+				case DSC_DATA_PROCESSING_ENABLED: return source.dataProcessingEnabled();
+				case DSC_PROCESSED_PACKET_COUNT: return source.processedPacketCount();
+				case DSC_LAST_PACKET_SYSTEM_TIME: return QDateTime::fromMSecsSinceEpoch(source.lastPacketSystemTime());
+				case DSC_RUP_FRAME_PLANT_TIME: return QDateTime::fromMSecsSinceEpoch(source.rupFramePlantTime());
+				case DSC_RUP_FRAME_NUMERATOR: return source.rupFrameNumerator();
+				case DSC_SIGNAL_STATES_QUEUE_SIZE: return source.signalStatesQueueSize();
+				case DSC_SIGNAL_STATES_QUEUE_MAX_SIZE: return source.signalStatesQueueMaxSize();
+				case DSC_ACQUIRED_SIGNALS_COUNT: return source.acquiredSignalsCount();
+
+				case DSC_ERROR_PROTOCOL_VERSION: return source.errorProtocolVersion();
+				case DSC_ERROR_FRAMES_QUANTITY: return source.errorFramesQuantity();
+				case DSC_ERROR_FRAME_NOMBER: return source.errorFrameNo();
+				case DSC_LOSTED_FRAMES_COUNT: return source.lostedPacketCount();
+				case DSC_ERROR_DATA_ID: return source.errorDataID();
+				case DSC_ERROR_BAD_FRAME_SIZE: return source.errorFrameSize();
+				case DSC_ERROR_DUPLICATE_PLANT_TIME: return source.errorDuplicatePlantTime();
+				case DSC_ERROR_NONMONOTONIC_PLANT_TIME: return source.errorNonmonotonicPlantTime();
 				default:
 					assert(false);
 				return QVariant();
@@ -260,37 +338,9 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, qui
 	m_dataSourcesView = addTabWithTableView(100, tr("AppData Sources"));;
 	m_dataSourcesView->setModel(m_dataSourcesStateModel);
 
-	QSettings settings;
-	QHeaderView* horizontalHeader = m_dataSourcesView->horizontalHeader();
-	for (int i = 0; i < DSC_COUNT; i++)
-	{
-		m_dataSourcesView->setColumnWidth(i, settings.value(QString("DataAquisitionServiceWidget/SourceColumnWidth/%1").arg(QString(dataSourceColumnStr[i]).replace("/", "|")).replace("\n", " "),
-															m_dataSourcesView->columnWidth(i)).toInt());
-	}
-
 	connect(m_dataSourcesView, &QTableView::doubleClicked, this, &AppDataServiceWidget::onAppDataSourceDoubleClicked);
 
-	// Data Source columns actions
-	m_sourceTableHeadersContextMenuActions = new QActionGroup(this);
-	m_sourceTableHeadersContextMenuActions->setExclusive(false);
-	QAction* columnAction = m_sourceTableHeadersContextMenuActions->addAction("All columns");
-	columnAction->setCheckable(true);
-	columnAction->setChecked(settings.value("DataAquisitionServiceWidget/SourceColumnVisibility/All columns", true).toBool());
-
-	for (int i = 0; i < DSC_COUNT; i++)
-	{
-		columnAction = m_sourceTableHeadersContextMenuActions->addAction(QString(dataSourceColumnStr[i]).replace("\n", " "));
-		columnAction->setCheckable(true);
-		bool checked = settings.value(QString("DataAquisitionServiceWidget/SourceColumnVisibility/%1").arg(QString(dataSourceColumnStr[i]).replace("/", "|")).replace("\n", " "),
-									  defaultSourceColumnVisibility.contains(i)).toBool();
-		columnAction->setChecked(checked);
-		m_dataSourcesView->setColumnHidden(i, !checked);
-	}
-
-	horizontalHeader->setContextMenuPolicy(Qt::ActionsContextMenu);
-	horizontalHeader->addActions(m_sourceTableHeadersContextMenuActions->actions());
-	connect(m_sourceTableHeadersContextMenuActions, &QActionGroup::triggered, this, &AppDataServiceWidget::changeSourceColumnVisibility);
-	connect(horizontalHeader, &QHeaderView::sectionResized, this, &AppDataServiceWidget::saveSourceColumnWidth);
+	new TableDataVisibilityController(m_dataSourcesView, "AppDataServiceWidget/DataSources", defaultSourceColumnVisibility);
 
 	// Signals
 	m_signalStateModel = new SignalStateModel(this);
@@ -301,6 +351,8 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, qui
 	m_signalsView = addTabWithTableView(250, tr("Signals"));;
 	m_signalsView->setModel(sortModel);
 	m_signalsView->setSortingEnabled(true);
+
+	new TableDataVisibilityController(m_signalsView, "AppDataServiceWidget/Signals", defaultSignalColumnVisibility);
 
 	// Clients
 	addClientsTab(false);
@@ -486,51 +538,6 @@ void AppDataServiceWidget::clearServiceData()
 	m_settingsTabModel->setData(m_settingsTabModel->index(0, 1), "???");
 	m_settingsTabModel->setData(m_settingsTabModel->index(1, 1), "???");
 	m_settingsTabModel->setData(m_settingsTabModel->index(2, 1), "???");
-}
-
-void AppDataServiceWidget::saveSourceColumnWidth(int index)
-{
-	QSettings settings;
-	settings.setValue(QString("DataAquisitionServiceWidget/SourceColumnWidth/%1").arg(QString(dataSourceColumnStr[index]).replace("/", "|")).replace("\n", " "), m_dataSourcesView->columnWidth(index));
-}
-
-void AppDataServiceWidget::saveSourceColumnVisibility(int index, bool visible)
-{
-	QSettings settings;
-	settings.setValue(QString("DataAquisitionServiceWidget/SourceColumnVisibility/%1").arg(QString(dataSourceColumnStr[index]).replace("/", "|")).replace("\n", " "), visible);
-}
-
-void AppDataServiceWidget::changeSourceColumnVisibility(QAction* action)
-{
-	int actionIndex = m_sourceTableHeadersContextMenuActions->actions().indexOf(action);
-	if (actionIndex == 0)
-	{
-		for (int i = 0; i < DSC_COUNT; i++)
-		{
-			if (!action->isChecked())
-			{
-				saveSourceColumnWidth(i);
-			}
-			saveSourceColumnVisibility(i, action->isChecked());
-			m_dataSourcesView->setColumnHidden(i, !action->isChecked());
-			m_sourceTableHeadersContextMenuActions->actions()[i + 1]->setChecked(action->isChecked());
-		}
-	}
-	else
-	{
-		if (!action->isChecked())
-		{
-			saveSourceColumnWidth(actionIndex - 1);
-		}
-		saveSourceColumnVisibility(actionIndex - 1, action->isChecked());
-		m_dataSourcesView->setColumnHidden(actionIndex - 1, !action->isChecked());
-	}
-	if (m_dataSourcesView->horizontalHeader()->hiddenSectionCount() == DSC_COUNT)
-	{
-		m_dataSourcesView->showColumn(DSC_CAPTION);
-		m_sourceTableHeadersContextMenuActions->actions()[DSC_CAPTION + 1]->setChecked(true);
-		saveSourceColumnVisibility(DSC_CAPTION, true);
-	}
 }
 
 void AppDataServiceWidget::onAppDataSourceDoubleClicked(const QModelIndex &index)

@@ -7,6 +7,18 @@
 #include "../lib/WidgetUtils.h"
 #include "../lib/WUtils.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
+#include <QMessageBox>
+#include <QFormLayout>
+#include <QDialogButtonBox>
+#include <QToolBar>
+#include <QLabel>
+#include <QCompleter>
+#include <QPushButton>
+#include <QTableView>
+#include <QHeaderView>
+#include <QClipboard>
+#include <QSplitter>
+#include <QScrollBar>
 
 
 const int SC_STR_ID = 0,
@@ -1640,17 +1652,16 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView->verticalHeader()->setFixedWidth(DEFAULT_COLUMN_WIDTH);
 	SignalsDelegate* delegate = m_signalsModel->createDelegate(m_signalsProxyModel);
 	m_signalsView->setItemDelegate(delegate);
-	m_signalsView->horizontalHeader()->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	QHeaderView* horizontalHeader = m_signalsView->horizontalHeader();
 	m_signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	horizontalHeader->setHighlightSections(false);
-	horizontalHeader->setSectionsMovable(true);
+
+	new TableDataVisibilityController(m_signalsView, "SignalsTabPage", defaultColumnVisibility);
 
 	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
 	m_signalsView->verticalHeader()->setResizeMode(QHeaderView::Fixed);
 	horizontalHeader->setDefaultSectionSize(150);
-	horizontalHeader->setContextMenuPolicy(Qt::ActionsContextMenu);
 	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	m_signalsView->setColumnWidth(SC_STR_ID, 400);
@@ -1658,8 +1669,6 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView->setColumnWidth(SC_BUS_TYPE_ID, 400);
 	m_signalsView->setColumnWidth(SC_NAME, 400);
 	m_signalsView->setColumnWidth(SC_DEVICE_STR_ID, 400);
-
-	TableDataVisibilityController* columnVisibilityController = new TableDataVisibilityController(m_signalsView, "SignalsTabPage");
 
 	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 
