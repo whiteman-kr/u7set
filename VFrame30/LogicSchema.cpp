@@ -24,6 +24,8 @@ namespace VFrame30
 		Layers.push_back(std::make_shared<SchemaLayer>("Logic", true));
 		Layers.push_back(std::make_shared<SchemaLayer>("Notes", false));
 
+		setTagsList(QStringList{"ApplicationLogic"});
+
 		return;
 	}
 

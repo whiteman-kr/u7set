@@ -296,6 +296,7 @@ message Schema
 	required SchemaUnit unit = 6;
 	optional bool excludeFromBuild = 7 [default = false];
 	optional uint32 backgroundColor = 8;
+	optional string tags = 9;
 
 	repeated Envelope layers = 100;				// Layer list
 	required AfbElementCollection afbs = 101;	// Not used anymore, keep for compability
@@ -1191,6 +1192,7 @@ message SchemaDetails
 	repeated string labels = 21;
 	repeated string connections = 22;
 	repeated Uuid guids = 23;
+	repeated string tags = 24;
 }
 
 

@@ -273,20 +273,22 @@ namespace Metrology
 		m_customAppSignalID = signal.customAppSignalID();
 		m_caption = signal.caption();
 
-		m_signalType = signal.signalType();
 		m_inOutType = signal.inOutType();
+		m_signalType = signal.signalType();
+		m_analogSignalFormat = signal.analogSignalFormat();
 
 		m_location = location;
+
+		// adc
+		//
 
 		m_lowADC = signal.lowADC();
 		m_highADC = signal.highADC();
 
-		m_physicalLowLimit = signal.lowEngeneeringUnits();
-		m_physicalHighLimit = signal.highEngeneeringUnits();
-		m_physicalUnit = signal.unit();
-		m_physicalPrecision = signal.decimalPlaces();
+		// electricUnits
+		//
 
-		switch(m_inOutType)
+		switch(signal.inOutType())
 		{
 			case E::SignalInOutType::Input:
 
@@ -331,8 +333,89 @@ namespace Metrology
 			default: assert(0);
 		}
 
+		// physicalUnits
+		//
+
+		m_physicalLowLimit = 0;
+		m_physicalHighLimit = 0;
+
+		if (signal.isAnalog() == true)
+		{
+			UnitsConvertor uc;
+
+			UnitsConvertResult qpl;
+			UnitsConvertResult qph;
+
+			switch (signal.inOutType())
+			{
+				case E::SignalInOutType::Input:
+
+					switch (signal.electricUnit())
+					{
+						case E::ElectricUnit::V:
+						case E::ElectricUnit::mA:
+							{
+								qpl = uc.electricToPhysical_Input(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+								qph = uc.electricToPhysical_Input(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+							}
+							break;
+
+						case E::ElectricUnit::mV:
+							{
+								qpl = uc.electricToPhysical_ThermoCouple(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+								qph = uc.electricToPhysical_ThermoCouple(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+							}
+							break;
+
+						case E::ElectricUnit::Ohm:
+							{
+								QVariant qv;
+								bool isEnum;
+								double r0 = 100;
+
+								if (signal.getSpecPropValue("R0_Ohm", &qv, &isEnum) == true)
+								{
+									r0 = qv.toDouble();
+								}
+
+								qpl = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), r0);
+								qph = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), r0);
+							}
+							break;
+					}
+
+					break;
+
+				case E::SignalInOutType::Output:
+
+					qpl = uc.electricToPhysical_Output(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.outputMode());
+					qph = uc.electricToPhysical_Output(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.outputMode());
+
+					break;
+			}
+
+			if (qpl.ok() == true && qph.ok() == true)
+			{
+				m_physicalLowLimit = qpl.toDouble();
+				m_physicalHighLimit = qph.toDouble();
+			}
+		}
+
+		// engeneeringUnits
+		//
+
+		m_engeneeringLowLimit = signal.lowEngeneeringUnits();
+		m_engeneeringHighLimit = signal.highEngeneeringUnits();
+		m_engeneeringUnit = signal.unit();
+		m_engeneeringPrecision = signal.decimalPlaces();
+
+		// tuning
+		//
+
 		m_enableTuning = signal.enableTuning();
 		m_tuningDefaultValue = signal.tuningDefaultValue().toDouble();
+		m_tuningLowBound = signal.tuningLowBound().toDouble();
+		m_tuningHighBound = signal.tuningHighBound().toDouble();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -363,21 +446,19 @@ namespace Metrology
 
 		int type = 0;
 
+		result &= xml.readIntAttribute("InOutType", &type);
+		m_inOutType  = static_cast<E::SignalInOutType>(type);
+
 		result &= xml.readIntAttribute("SignalType", &type);
 		m_signalType = static_cast<E::SignalType>(type);
 
-		result &= xml.readIntAttribute("InOutType", &type);
-		m_inOutType  = static_cast<E::SignalInOutType>(type);
+		result &= xml.readIntAttribute("AnalogSignalFormat", &type);
+		m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(type);
 
 		result &= m_location.readFromXml(xml);
 
 		result &= xml.readIntAttribute("LowADC", &m_lowADC);
 		result &= xml.readIntAttribute("HighADC", &m_highADC);
-
-		result &= xml.readDoubleAttribute("PhysicalLowLimit", &m_physicalLowLimit);
-		result &= xml.readDoubleAttribute("PhysicalHighLimit", &m_physicalHighLimit);
-		result &= xml.readStringAttribute("PhysicalUnit", &m_physicalUnit);
-		result &= xml.readIntAttribute("PhysicalPrecision", &m_physicalPrecision);
 
 		result &= xml.readDoubleAttribute("ElectricLowLimit", &m_electricLowLimit);
 		result &= xml.readDoubleAttribute("ElectricHighLimit", &m_electricHighLimit);
@@ -387,8 +468,18 @@ namespace Metrology
 		m_electricSensorType = static_cast<E::SensorType>(type);
 		result &= xml.readIntAttribute("ElectricPrecision", &m_electricPrecision);
 
+		result &= xml.readDoubleAttribute("PhysicalLowLimit", &m_physicalLowLimit);
+		result &= xml.readDoubleAttribute("PhysicalHighLimit", &m_physicalHighLimit);
+
+		result &= xml.readDoubleAttribute("EngeneeringLowLimit", &m_engeneeringLowLimit);
+		result &= xml.readDoubleAttribute("EngeneeringHighLimit", &m_engeneeringHighLimit);
+		result &= xml.readStringAttribute("EngeneeringUnit", &m_engeneeringUnit);
+		result &= xml.readIntAttribute("EngeneeringPrecision", &m_engeneeringPrecision);
+
 		result &= xml.readBoolAttribute("EnableTuning", &m_enableTuning);
 		result &= xml.readDoubleAttribute("TuningDefaultValue", &m_tuningDefaultValue);
+		result &= xml.readDoubleAttribute("TuningLowBound", &m_tuningLowBound);
+		result &= xml.readDoubleAttribute("TuningHighBound", &m_tuningHighBound);
 
 		return result;
 	}
@@ -403,18 +494,14 @@ namespace Metrology
 			xml.writeStringAttribute("CustomAppSignalID", customAppSignalID());
 			xml.writeStringAttribute("Caption", caption());
 
-			xml.writeIntAttribute("SignalType", signalType());
 			xml.writeIntAttribute("InOutType", TO_INT(inOutType()));
+			xml.writeIntAttribute("SignalType", signalType());
+			xml.writeIntAttribute("AnalogSignalFormat", TO_INT(analogSignalFormat()));
 
 			location().writeToXml(xml);
 
 			xml.writeIntAttribute("LowADC", lowADC());
 			xml.writeIntAttribute("HighADC", highADC());
-
-			xml.writeDoubleAttribute("PhysicalLowLimit", physicalLowLimit());
-			xml.writeDoubleAttribute("PhysicalHighLimit", physicalHighLimit());
-			xml.writeStringAttribute("PhysicalUnit", physicalUnit());
-			xml.writeIntAttribute("PhysicalPrecision", physicalPrecision());
 
 			xml.writeDoubleAttribute("ElectricLowLimit", electricLowLimit());
 			xml.writeDoubleAttribute("ElectricHighLimit", electricHighLimit());
@@ -422,8 +509,18 @@ namespace Metrology
 			xml.writeIntAttribute("ElectricSensorType", electricSensorType());
 			xml.writeIntAttribute("ElectricPrecision", electricPrecision());
 
+			xml.writeDoubleAttribute("PhysicalLowLimit", physicalLowLimit());
+			xml.writeDoubleAttribute("PhysicalHighLimit", physicalHighLimit());
+
+			xml.writeDoubleAttribute("EngeneeringLowLimit", engeneeringLowLimit());
+			xml.writeDoubleAttribute("EngeneeringHighLimit", engeneeringHighLimit());
+			xml.writeStringAttribute("EngeneeringUnit", engeneeringUnit());
+			xml.writeIntAttribute("EngeneeringPrecision", engeneeringPrecision());
+
 			xml.writeBoolAttribute("EnableTuning", enableTuning());
 			xml.writeDoubleAttribute("TuningDefaultValue", tuningDefaultValue());
+			xml.writeDoubleAttribute("TuningLowBound", tuningLowBound());
+			xml.writeDoubleAttribute("TuningHighBound", tuningHighBound());
 		}
 		xml.writeEndElement();
 	}
@@ -448,39 +545,9 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	bool SignalParam::physicalRangeIsValid() const
-	{
-		if (m_physicalLowLimit == 0 && m_physicalHighLimit == 0)
-		{
-			return false;
-		}
-
-		return true;
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
-	QString SignalParam::physicalRangeStr() const
-	{
-		QString range, formatStr;
-
-		formatStr.sprintf("%%.%df", m_physicalPrecision);
-
-		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_physicalLowLimit, m_physicalHighLimit);
-
-		if (m_physicalUnit.isEmpty() == false)
-		{
-			range.append(" " + m_physicalUnit);
-		}
-
-		return range;
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
 	bool SignalParam::electricRangeIsValid() const
 	{
-		if (m_electricLowLimit == 0 && m_electricHighLimit == 0)
+		if (m_electricLowLimit == 0.0 && m_electricHighLimit == 0.0)
 		{
 			return false;
 		}
@@ -513,6 +580,61 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
+	bool SignalParam::physicalRangeIsValid() const
+	{
+		if (m_physicalLowLimit == 0.0 && m_physicalHighLimit == 0.0)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalParam::physicalRangeStr() const
+	{
+		QString range, formatStr;
+
+		formatStr.sprintf("%%.%df", m_engeneeringPrecision);
+
+		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_physicalLowLimit, m_physicalHighLimit);
+
+		return range;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	bool SignalParam::engeneeringRangeIsValid() const
+	{
+		if (m_engeneeringLowLimit == 0.0 && m_engeneeringHighLimit == 0.0)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalParam::engeneeringRangeStr() const
+	{
+		QString range, formatStr;
+
+		formatStr.sprintf("%%.%df", m_engeneeringPrecision);
+
+		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_engeneeringLowLimit, m_engeneeringHighLimit);
+
+		if (m_engeneeringUnit.isEmpty() == false)
+		{
+			range.append(" " + m_engeneeringUnit);
+		}
+
+		return range;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
 	QString SignalParam::enableTuningStr() const
 	{
 		if (m_enableTuning == false)
@@ -538,20 +660,15 @@ namespace Metrology
 		{
 			case E::SignalType::Analog:
 
-				formatStr.sprintf("%%.%df", m_physicalPrecision);
+				formatStr.sprintf("%%.%df", m_engeneeringPrecision);
 
 				stateStr.sprintf(formatStr.toLocal8Bit(), m_tuningDefaultValue);
-
-				if (m_physicalUnit.isEmpty() == false)
-				{
-					stateStr.append(" " + m_physicalUnit);
-				}
 
 				break;
 
 			case E::SignalType::Discrete:
 
-				stateStr = m_tuningDefaultValue == 0 ? QString("No") : QString("Yes");
+				stateStr = m_tuningDefaultValue == 0.0 ? QString("No") : QString("Yes");
 
 				break;
 
@@ -560,6 +677,65 @@ namespace Metrology
 		}
 
 		return stateStr;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	bool SignalParam::tuningRangeIsValid() const
+	{
+		if (m_enableTuning == false)
+		{
+			return true;
+		}
+
+		if (m_tuningLowBound == 0.0 && m_tuningHighBound == 0.0)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString SignalParam::tuningRangeStr() const
+	{
+		if (m_enableTuning == false)
+		{
+			return QString();
+		}
+
+		QString range, formatStr;
+
+		formatStr.sprintf("%%.%df", m_engeneeringPrecision);
+
+		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_tuningLowBound, m_tuningHighBound);
+
+		return range;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	TuningValueType	SignalParam::tuningValueType()
+	{
+		TuningValueType type = TuningValueType::Float;
+
+		switch (m_signalType)
+		{
+			case E::SignalType::Analog:
+
+				switch (m_analogSignalFormat)
+				{
+					case E::AnalogAppSignalFormat::SignedInt32:	type = TuningValueType::SignedInt32;	break;
+					case E::AnalogAppSignalFormat::Float32:		type = TuningValueType::Float;			break;
+				}
+
+				break;
+
+			case E::SignalType::Discrete:						type = TuningValueType::Discrete;		break;
+		}
+
+		return type;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

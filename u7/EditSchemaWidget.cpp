@@ -1678,7 +1678,8 @@ bool EditSchemaView::isItemSelected(const std::shared_ptr<VFrame30::SchemaItem>&
 EditSchemaWidget::EditSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, const DbFileInfo& fileInfo, DbController* dbController) :
 	VFrame30::BaseSchemaWidget(schema, new EditSchemaView(schema)),
 	m_fileInfo(fileInfo),
-	m_dbcontroller(dbController)
+	m_dbcontroller(dbController),
+	m_initialSchemaId(schema->schemaId())
 {
 	assert(schema != nullptr);
 	assert(m_dbcontroller);
@@ -9543,6 +9544,8 @@ void EditSchemaWidget::setModified()
 
 void EditSchemaWidget::resetModified()
 {
+	m_initialSchemaId = schema()->schemaId();
+
 	assert(m_editEngine);
 	m_editEngine->resetModified();
 }

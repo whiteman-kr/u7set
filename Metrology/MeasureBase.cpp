@@ -205,18 +205,18 @@ void LinearityMeasurement::fill_measure_aim(const MeasureMultiParam &measurePara
 	//
 
 	double electric = isNegativeRange ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();
-	double physical = conversion(electric, CT_ELECTRIC_TO_PHYSICAL, inParam);
+	double engeneering = conversion(electric, CT_ELECTRIC_TO_ENGENEER, inParam);
 
-	setPercent(((physical - inParam.physicalLowLimit()) * 100)/(inParam.physicalHighLimit() - inParam.physicalLowLimit()));
+	setPercent(((engeneering - inParam.engeneeringLowLimit()) * 100)/(inParam.engeneeringHighLimit() - inParam.engeneeringLowLimit()));
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
-	setNominal(MEASURE_LIMIT_TYPE_PHYSICAL, physical);
+	setNominal(MEASURE_LIMIT_TYPE_ENGENEER, engeneering);
 
 	// measure
 	//
 
 	double averageElVal = 0;
-	double averagePhVal = 0;
+	double averageEnVal = 0;
 
 	int measureCount = theOptions.linearity().measureCountInPoint();
 
@@ -226,23 +226,23 @@ void LinearityMeasurement::fill_measure_aim(const MeasureMultiParam &measurePara
 	{
 		Metrology::SignalState signalState = theSignalBase.signalState(inParam.hash());
 
-		double elVal = conversion(signalState.value(), CT_PHYSICAL_TO_ELECTRIC, inParam);
-		double phVal = signalState.value();
+		double elVal = conversion(signalState.value(), CT_ENGENEER_TO_ELECTRIC, inParam);
+		double enVal = signalState.value();
 
 		setMeasureItemArray(MEASURE_LIMIT_TYPE_ELECTRIC, index, elVal);
-		setMeasureItemArray(MEASURE_LIMIT_TYPE_PHYSICAL, index, phVal);
+		setMeasureItemArray(MEASURE_LIMIT_TYPE_ENGENEER, index, enVal);
 
 		averageElVal += elVal;
-		averagePhVal += phVal;
+		averageEnVal += enVal;
 
 		QThread::msleep((theOptions.linearity().measureTimeInPoint() * 1000) / measureCount);
 	}
 
 	averageElVal /= measureCount;
-	averagePhVal /= measureCount;
+	averageEnVal /= measureCount;
 
 	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, averageElVal);
-	setMeasure(MEASURE_LIMIT_TYPE_PHYSICAL, averagePhVal);
+	setMeasure(MEASURE_LIMIT_TYPE_ENGENEER, averageEnVal);
 
 	// limits
 	//
@@ -254,7 +254,7 @@ void LinearityMeasurement::fill_measure_aim(const MeasureMultiParam &measurePara
 
 	// calc additional parameters
 	//
-	calcAdditionalParam(MEASURE_LIMIT_TYPE_PHYSICAL);
+	calcAdditionalParam(MEASURE_LIMIT_TYPE_ENGENEER);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -311,14 +311,14 @@ void LinearityMeasurement::fill_measure_aom(const MeasureMultiParam &measurePara
 	// nominal
 	//
 
-	//double physical = theSignalBase.signalState(outParam.hash()).value();
-	double physical = (measureParam.percent() * (outParam.physicalHighLimit() - outParam.physicalLowLimit()) / 100) + outParam.physicalLowLimit();
-	double electric = conversion(physical, CT_PHYSICAL_TO_ELECTRIC, outParam);
+	//double engeneering = theSignalBase.signalState(outParam.hash()).value();
+	double engeneering = (measureParam.percent() * (outParam.engeneeringHighLimit() - outParam.engeneeringLowLimit()) / 100) + outParam.engeneeringLowLimit();
+	double electric = conversion(engeneering, CT_ENGENEER_TO_ELECTRIC, outParam);
 
 	setPercent(measureParam.percent());
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
-	setNominal(MEASURE_LIMIT_TYPE_PHYSICAL, physical);
+	setNominal(MEASURE_LIMIT_TYPE_ENGENEER, engeneering);
 
 	// measure
 	//
@@ -333,7 +333,7 @@ void LinearityMeasurement::fill_measure_aom(const MeasureMultiParam &measurePara
 	for(int index = 0; index < measureCount; index++)
 	{
 		double elVal = 0;
-		double phVal = theSignalBase.signalState(outParam.hash()).value();
+		double enVal = theSignalBase.signalState(outParam.hash()).value();
 
 		if (outParam.isOutput() == true)
 		{
@@ -344,10 +344,10 @@ void LinearityMeasurement::fill_measure_aom(const MeasureMultiParam &measurePara
 		}
 
 		setMeasureItemArray(MEASURE_LIMIT_TYPE_ELECTRIC, index, elVal);
-		setMeasureItemArray(MEASURE_LIMIT_TYPE_PHYSICAL, index, phVal);
+		setMeasureItemArray(MEASURE_LIMIT_TYPE_ENGENEER, index, enVal);
 
 		averageElVal += elVal;
-		averagePhVal += phVal;
+		averagePhVal += enVal;
 
 		QThread::msleep((theOptions.linearity().measureTimeInPoint() * 1000) / measureCount);
 	}
@@ -356,7 +356,7 @@ void LinearityMeasurement::fill_measure_aom(const MeasureMultiParam &measurePara
 	averagePhVal /= measureCount;
 
 	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, averageElVal);
-	setMeasure(MEASURE_LIMIT_TYPE_PHYSICAL, averagePhVal);
+	setMeasure(MEASURE_LIMIT_TYPE_ENGENEER, averagePhVal);
 
 	// limits
 	//
@@ -381,10 +381,10 @@ void LinearityMeasurement::setLimits(const Metrology::SignalParam& param)
 	setUnit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricUnit());
 	setLimitPrecision(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricPrecision());
 
-	setLowLimit(MEASURE_LIMIT_TYPE_PHYSICAL, param.physicalLowLimit());
-	setHighLimit(MEASURE_LIMIT_TYPE_PHYSICAL, param.physicalHighLimit());
-	setUnit(MEASURE_LIMIT_TYPE_PHYSICAL, param.physicalUnit());
-	setLimitPrecision(MEASURE_LIMIT_TYPE_PHYSICAL, param.physicalPrecision());
+	setLowLimit(MEASURE_LIMIT_TYPE_ENGENEER, param.engeneeringLowLimit());
+	setHighLimit(MEASURE_LIMIT_TYPE_ENGENEER, param.engeneeringHighLimit());
+	setUnit(MEASURE_LIMIT_TYPE_ENGENEER, param.engeneeringUnit());
+	setLimitPrecision(MEASURE_LIMIT_TYPE_ENGENEER, param.engeneeringPrecision());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1231,7 +1231,7 @@ int MeasureBase::load(int measureType)
 					switch(subTable.tableType)
 					{
 						case SQL_TABLE_LINEARITY_20_EL:			static_cast<LinearityMeasurement*>(pMainMeasure)->updateMeasureArray(MEASURE_LIMIT_TYPE_ELECTRIC, pSubMeasure);	break;
-						case SQL_TABLE_LINEARITY_20_PH:			static_cast<LinearityMeasurement*>(pMainMeasure)->updateMeasureArray(MEASURE_LIMIT_TYPE_PHYSICAL, pSubMeasure);	break;
+						case SQL_TABLE_LINEARITY_20_PH:			static_cast<LinearityMeasurement*>(pMainMeasure)->updateMeasureArray(MEASURE_LIMIT_TYPE_ENGENEER, pSubMeasure);	break;
 						case SQL_TABLE_LINEARITY_ADD_VAL:		static_cast<LinearityMeasurement*>(pMainMeasure)->updateAdditionalParam(pSubMeasure);							break;
 						case SQL_TABLE_COMPARATOR_HYSTERESIS:	static_cast<ComparatorMeasurement*>(pMainMeasure)->updateHysteresis(pSubMeasure);								break;
 					}
@@ -1457,7 +1457,7 @@ Metrology::SignalStatistic MeasureBase::statistic(const Hash& signalHash)
 
 						si.measureCount()++;
 
-						if (pLinearityMeasurement->error(MEASURE_LIMIT_TYPE_PHYSICAL, errorType) > pLinearityMeasurement->errorLimit(MEASURE_LIMIT_TYPE_PHYSICAL, errorType))
+						if (pLinearityMeasurement->error(MEASURE_LIMIT_TYPE_ENGENEER, errorType) > pLinearityMeasurement->errorLimit(MEASURE_LIMIT_TYPE_ENGENEER, errorType))
 						{
 							si.setState(Metrology::StatisticStateInvalid);
 						}

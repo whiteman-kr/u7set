@@ -24,18 +24,6 @@ FileHistoryDialog::FileHistoryDialog(QString title, DbController* db, const std:
 
 	// Set changesetList
 	//
-
-//	auto p = qApp->palette("QTreeView");
-
-//	QColor highlight = p.highlight().color();
-//	QColor highlightText = p.highlightedText().color();
-
-//	QString selectionColor = QString("QTreeWidget {selection-background-color: red; selection-color: %2; }")
-//							 .arg(highlight.name())
-//							 .arg(highlightText.name());
-
-//	ui->changesetList->setStyleSheet(selectionColor);
-
 	ui->changesetList->setColumnCount(4);
 
 

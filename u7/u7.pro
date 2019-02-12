@@ -169,7 +169,9 @@ SOURCES +=\
     ../lib/Connection.cpp \
     ../lib/LogicModuleSet.cpp \
     SchemaTabPageEx.cpp \
-    DialogInputEx.cpp
+    DialogInputEx.cpp \
+    DialogAfbLibraryCheck.cpp \
+    TagSelectorWidget.cpp
 
 
 HEADERS  += \
@@ -302,7 +304,9 @@ HEADERS  += \
     ../lib/Connection.h \
     ../lib/LogicModuleSet.h \
     SchemaTabPageEx.h \
-    DialogInputEx.h
+    DialogInputEx.h \
+    DialogAfbLibraryCheck.h \
+    TagSelectorWidget.h
 
 
 FORMS    += \

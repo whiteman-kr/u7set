@@ -2116,6 +2116,18 @@ class Schema : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 backgroundcolor() const;
   inline void set_backgroundcolor(::google::protobuf::uint32 value);
 
+  // optional string tags = 9;
+  inline bool has_tags() const;
+  inline void clear_tags();
+  static const int kTagsFieldNumber = 9;
+  inline const ::std::string& tags() const;
+  inline void set_tags(const ::std::string& value);
+  inline void set_tags(const char* value);
+  inline void set_tags(const char* value, size_t size);
+  inline ::std::string* mutable_tags();
+  inline ::std::string* release_tags();
+  inline void set_allocated_tags(::std::string* tags);
+
   // repeated .Proto.Envelope layers = 100;
   inline int layers_size() const;
   inline void clear_layers();
@@ -2173,6 +2185,8 @@ class Schema : public ::google::protobuf::Message {
   inline void clear_has_excludefrombuild();
   inline void set_has_backgroundcolor();
   inline void clear_has_backgroundcolor();
+  inline void set_has_tags();
+  inline void clear_has_tags();
   inline void set_has_afbs();
   inline void clear_has_afbs();
   inline void set_has_logic_schema();
@@ -2189,6 +2203,7 @@ class Schema : public ::google::protobuf::Message {
   double height_;
   int unit_;
   bool excludefrombuild_;
+  ::std::string* tags_;
   ::google::protobuf::RepeatedPtrField< ::Proto::Envelope > layers_;
   ::Proto::AfbElementCollection* afbs_;
   ::Proto::LogicSchema* logic_schema_;
@@ -2196,7 +2211,7 @@ class Schema : public ::google::protobuf::Message {
   ::google::protobuf::uint32 backgroundcolor_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -11069,6 +11084,22 @@ class SchemaDetails : public ::google::protobuf::Message {
   inline ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >*
       mutable_guids();
 
+  // repeated string tags = 24;
+  inline int tags_size() const;
+  inline void clear_tags();
+  static const int kTagsFieldNumber = 24;
+  inline const ::std::string& tags(int index) const;
+  inline ::std::string* mutable_tags(int index);
+  inline void set_tags(int index, const ::std::string& value);
+  inline void set_tags(int index, const char* value);
+  inline void set_tags(int index, const char* value, size_t size);
+  inline ::std::string* add_tags();
+  inline void add_tags(const ::std::string& value);
+  inline void add_tags(const char* value);
+  inline void add_tags(const char* value, size_t size);
+  inline const ::google::protobuf::RepeatedPtrField< ::std::string>& tags() const;
+  inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_tags();
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaDetails)
  private:
   inline void set_has_version();
@@ -11096,9 +11127,10 @@ class SchemaDetails : public ::google::protobuf::Message {
   ::google::protobuf::RepeatedPtrField< ::std::string> labels_;
   ::google::protobuf::RepeatedPtrField< ::std::string> connections_;
   ::google::protobuf::RepeatedPtrField< ::Proto::Uuid > guids_;
+  ::google::protobuf::RepeatedPtrField< ::std::string> tags_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -14219,6 +14251,76 @@ inline void Schema::set_backgroundcolor(::google::protobuf::uint32 value) {
   backgroundcolor_ = value;
 }
 
+// optional string tags = 9;
+inline bool Schema::has_tags() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void Schema::set_has_tags() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void Schema::clear_has_tags() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void Schema::clear_tags() {
+  if (tags_ != &::google::protobuf::internal::kEmptyString) {
+    tags_->clear();
+  }
+  clear_has_tags();
+}
+inline const ::std::string& Schema::tags() const {
+  return *tags_;
+}
+inline void Schema::set_tags(const ::std::string& value) {
+  set_has_tags();
+  if (tags_ == &::google::protobuf::internal::kEmptyString) {
+    tags_ = new ::std::string;
+  }
+  tags_->assign(value);
+}
+inline void Schema::set_tags(const char* value) {
+  set_has_tags();
+  if (tags_ == &::google::protobuf::internal::kEmptyString) {
+    tags_ = new ::std::string;
+  }
+  tags_->assign(value);
+}
+inline void Schema::set_tags(const char* value, size_t size) {
+  set_has_tags();
+  if (tags_ == &::google::protobuf::internal::kEmptyString) {
+    tags_ = new ::std::string;
+  }
+  tags_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Schema::mutable_tags() {
+  set_has_tags();
+  if (tags_ == &::google::protobuf::internal::kEmptyString) {
+    tags_ = new ::std::string;
+  }
+  return tags_;
+}
+inline ::std::string* Schema::release_tags() {
+  clear_has_tags();
+  if (tags_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = tags_;
+    tags_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Schema::set_allocated_tags(::std::string* tags) {
+  if (tags_ != &::google::protobuf::internal::kEmptyString) {
+    delete tags_;
+  }
+  if (tags) {
+    set_has_tags();
+    tags_ = tags;
+  } else {
+    clear_has_tags();
+    tags_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
 // repeated .Proto.Envelope layers = 100;
 inline int Schema::layers_size() const {
   return layers_.size();
@@ -14246,13 +14348,13 @@ Schema::mutable_layers() {
 
 // required .Proto.AfbElementCollection afbs = 101;
 inline bool Schema::has_afbs() const {
-  return (_has_bits_[0] & 0x00000200u) != 0;
+  return (_has_bits_[0] & 0x00000400u) != 0;
 }
 inline void Schema::set_has_afbs() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000400u;
 }
 inline void Schema::clear_has_afbs() {
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline void Schema::clear_afbs() {
   if (afbs_ != NULL) afbs_->::Proto::AfbElementCollection::Clear();
@@ -14284,13 +14386,13 @@ inline void Schema::set_allocated_afbs(::Proto::AfbElementCollection* afbs) {
 
 // optional .Proto.LogicSchema logic_schema = 200;
 inline bool Schema::has_logic_schema() const {
-  return (_has_bits_[0] & 0x00000400u) != 0;
+  return (_has_bits_[0] & 0x00000800u) != 0;
 }
 inline void Schema::set_has_logic_schema() {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00000800u;
 }
 inline void Schema::clear_has_logic_schema() {
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline void Schema::clear_logic_schema() {
   if (logic_schema_ != NULL) logic_schema_->::Proto::LogicSchema::Clear();
@@ -14322,13 +14424,13 @@ inline void Schema::set_allocated_logic_schema(::Proto::LogicSchema* logic_schem
 
 // optional .Proto.UfbSchema ufb_schema = 201;
 inline bool Schema::has_ufb_schema() const {
-  return (_has_bits_[0] & 0x00000800u) != 0;
+  return (_has_bits_[0] & 0x00001000u) != 0;
 }
 inline void Schema::set_has_ufb_schema() {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00001000u;
 }
 inline void Schema::clear_has_ufb_schema() {
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline void Schema::clear_ufb_schema() {
   if (ufb_schema_ != NULL) ufb_schema_->::Proto::UfbSchema::Clear();
@@ -27309,6 +27411,50 @@ SchemaDetails::guids() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::Uuid >*
 SchemaDetails::mutable_guids() {
   return &guids_;
+}
+
+// repeated string tags = 24;
+inline int SchemaDetails::tags_size() const {
+  return tags_.size();
+}
+inline void SchemaDetails::clear_tags() {
+  tags_.Clear();
+}
+inline const ::std::string& SchemaDetails::tags(int index) const {
+  return tags_.Get(index);
+}
+inline ::std::string* SchemaDetails::mutable_tags(int index) {
+  return tags_.Mutable(index);
+}
+inline void SchemaDetails::set_tags(int index, const ::std::string& value) {
+  tags_.Mutable(index)->assign(value);
+}
+inline void SchemaDetails::set_tags(int index, const char* value) {
+  tags_.Mutable(index)->assign(value);
+}
+inline void SchemaDetails::set_tags(int index, const char* value, size_t size) {
+  tags_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaDetails::add_tags() {
+  return tags_.Add();
+}
+inline void SchemaDetails::add_tags(const ::std::string& value) {
+  tags_.Add()->assign(value);
+}
+inline void SchemaDetails::add_tags(const char* value) {
+  tags_.Add()->assign(value);
+}
+inline void SchemaDetails::add_tags(const char* value, size_t size) {
+  tags_.Add()->assign(reinterpret_cast<const char*>(value), size);
+}
+inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
+SchemaDetails::tags() const {
+  return tags_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::std::string>*
+SchemaDetails::mutable_tags() {
+  return &tags_;
 }
 
 // -------------------------------------------------------------------

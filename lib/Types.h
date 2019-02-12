@@ -253,6 +253,15 @@ public:
 
 		Ohm_Ni50_W1617 = 24,
 		Ohm_Ni100_W1617 = 25,
+
+		V_0_5 = 26,
+		V_m10_p10 = 27,
+
+		Ohm_Pt_a_391 = 28,
+		Ohm_Pt_a_385 = 29,
+		Ohm_Cu_a_428 = 30,
+		Ohm_Cu_a_426 = 31,
+		Ohm_Ni_a_617 = 32,
 	};
 	Q_ENUM(SensorType)
 

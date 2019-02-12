@@ -539,6 +539,8 @@ private:
 
 	static QString m_lastUsedLoopbackId;
 
+	QString m_initialSchemaId;
+
 	// Actions
 	//
 private:

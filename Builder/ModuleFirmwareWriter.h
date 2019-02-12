@@ -4,6 +4,8 @@
 #include "../lib/ModuleFirmware.h"
 #include "IssueLogger.h"
 
+#include "../lib/UnitsConvertor.h"
+
 //
 // JsVariantList
 //
@@ -92,6 +94,8 @@ namespace Hardware
 
 		Q_INVOKABLE void jsSetUniqueID(int lmNumber, quint64 uniqueID);
 
+		Q_INVOKABLE UnitsConvertor* jsGetUnitsConvertor();
+
 		// Script execution log
 		//
 		Q_INVOKABLE void writeLog(QString logString);
@@ -120,6 +124,8 @@ namespace Hardware
 		ModuleFirmware* scriptFirmware = nullptr;
 		ModuleFirmwareData* scriptFirmwareData = nullptr;
 		UartChannelData* scriptUartChannelData = nullptr;
+
+		UnitsConvertor m_unitsConvertor;
 
 	};
 

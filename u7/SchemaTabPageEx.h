@@ -10,6 +10,7 @@
 #include "../VFrame30/LogicSchema.h"
 
 class EditSchemaTabPageEx;
+class TagSelectorWidget;
 
 //
 //
@@ -35,7 +36,8 @@ public:
 
 public:
 	std::pair<QModelIndex, bool> addFile(QModelIndex parentIndex, std::shared_ptr<DbFileInfo> file);
-	bool deleteFiles(const QModelIndexList& selectedIndexes, const std::vector<std::shared_ptr<DbFileInfo>>& files);
+	bool deleteFilesUpdate(const QModelIndexList& selectedIndexes, const std::vector<std::shared_ptr<DbFileInfo>>& files);
+	bool moveFilesUpdate(const QModelIndexList& selectedIndexes, int movedToParnetId, const std::vector<DbFileInfo>& movedFiles, std::vector<QModelIndex>* addedFilesIndexes);
 
 	bool updateFiles(const QModelIndexList& selectedIndexes, const std::vector<DbFileInfo>& files);
 
@@ -45,11 +47,20 @@ public:
 
 	QModelIndexList searchFor(const QString searchText);
 	void setFilter(QString filter);
+	void setTagFilter(const QStringList& tags);
+	const QStringList& tagFilter() const;
 
 protected:
 private:
-	void applyFilter(QString filterText, DbFileTree* filesTree);
+	void applyFilter(DbFileTree* filesTree, const std::map<int, VFrame30::SchemaDetails>& detailsMap);
+	void applyTagFilter(DbFileTree* filesTree, const std::map<int, VFrame30::SchemaDetails>& detailsMap);
+
 	bool isSystemFile(int fileId) const;
+
+	void updateTagsFromDetails();
+
+signals:
+	void tagsChanged();
 
 public slots:
 	void refresh();
@@ -62,12 +73,16 @@ private slots:
 	//
 public:
 	QString usernameById(int userId) const noexcept;
-
+	QString tagsColumnText(int fileId) const;
 	QString detailsColumnText(int fileId) const;
 	QString fileCaption(int fileId) const;
 	bool excludedFromBuild(int fileId) const;
 
 	const DbFileInfo& parentFile() const;
+
+	int schemaFilterCount() const;
+
+	const std::set<QString>& tags() const;
 
 	// Data
 	//
@@ -81,6 +96,7 @@ public:
 		ChangesetColumn,
 		FileUserColumn,
 		IssuesColumn,
+		TagsColumn,
 		DetailsColumn,
 
 		// Add other column befor this line
@@ -102,8 +118,12 @@ private:
 
 	std::map<int, QString> m_users;							// Key is UserID
 	std::map<int, VFrame30::SchemaDetails> m_details; 		// Key is FileID
+	std::set<QString> m_tags;
+	QStringList m_tagFilter;						// If vector is empty, then all schemas must be shown
 
 	std::set<int> m_systemFiles;	// Key is fileid
+
+	int m_schemaFilterCount = 0;
 };
 
 
@@ -150,9 +170,14 @@ protected:
 	//
 public:
 	std::vector<std::shared_ptr<DbFileInfo>> selectedFiles() const;
+
 	void refreshFiles();
+
 	void searchAndSelect(QString searchText);
+
 	void setFilter(QString filter);
+	void setTagFilter(const QStringList& tags);
+
 
 signals:
 	void openFileSignal(DbFileInfo files);
@@ -166,7 +191,6 @@ public slots:
 
 	void slot_refreshFiles();
 	void slot_doubleClicked(const QModelIndex& index);
-	//	void slot_properties();
 
 public slots:
 	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
@@ -204,6 +228,7 @@ public:
 	QAction* m_viewAction = nullptr;
 	QAction* m_cloneFileAction = nullptr;
 	QAction* m_deleteAction = nullptr;
+	QAction* m_moveFileAction = nullptr;
 
 	// --
 	QAction* m_checkOutAction = nullptr;
@@ -278,6 +303,7 @@ protected slots:
 
 	void cloneFile();
 	void deleteFiles();
+	void moveFiles();
 
 	void checkOutFiles();
 	void checkInFiles();
@@ -293,8 +319,6 @@ protected slots:
 
 	void showFileProperties();
 
-	//	void editSchemasProperties(std::vector<DbFileInfo> selectedFiles);
-
 private slots:
 	void ctrlF();
 	void search();
@@ -302,6 +326,9 @@ private slots:
 
 	void filter();
 	void resetFilter();
+
+	void schemaTagsChanged();
+	void tagSelectorHasChanges();
 
 	// Properties
 	//
@@ -316,10 +343,13 @@ private:
 
 	QAction* m_searchAction = nullptr;
 	QLineEdit* m_searchEdit = nullptr;
+	QLineEdit* m_filterEdit = nullptr;
 	QCompleter* m_searchCompleter = nullptr;
 	QPushButton* m_searchButton = nullptr;
 	QPushButton* m_filterButton = nullptr;
 	QPushButton* m_resetFilterButton = nullptr;
+
+	TagSelectorWidget* m_tagSelector = nullptr;
 
 	std::list<EditSchemaTabPageEx*> m_openedFiles;		// Opened files (for edit and view)
 

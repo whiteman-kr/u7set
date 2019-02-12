@@ -707,6 +707,7 @@ int DbFileTree::calcIf(int startFromFileId, std::function<int(const DbFileInfo&)
 	auto it = m_files.find(startFromFileId);
 	if (it == m_files.end())
 	{
+		qDebug() << "DbFileTree::calcIf: Cant find file" << startFromFileId;
 		assert(it != m_files.end());
 		return 0;
 	}
@@ -1518,3 +1519,22 @@ void DbChangesetObject::setParent(const QString& value)
 	m_parent = value;
 }
 
+QString DbChangesetObject::fileMoveText() const
+{
+	return m_fileMoveText;
+}
+
+void DbChangesetObject::setFileMoveText(const QString& value)
+{
+	m_fileMoveText = value;
+}
+
+QString DbChangesetObject::fileRenameText() const
+{
+	return m_fileRenameText;
+}
+
+void DbChangesetObject::setFileRenameText(const QString& value)
+{
+	m_fileRenameText = value;
+}
