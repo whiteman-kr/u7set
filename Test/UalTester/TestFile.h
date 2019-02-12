@@ -197,7 +197,7 @@ class TestItem
 public:
 
 	TestItem();
-	TestItem(const TestItem& from) { *this = from; }
+	TestItem(const TestItem& from);
 	virtual ~TestItem();
 
 private:

@@ -53,7 +53,7 @@ private:
 	HostAddressPort m_cfgSocketAddress2;
 
 	bool m_errorIngnore = true;
-	bool m_trace = false;
+	bool m_enableTrace = false;
 
 	bool printToReportFile(const QString& msg);
 

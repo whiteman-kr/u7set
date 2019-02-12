@@ -177,13 +177,13 @@ bool UalTester::cmdLineParamsIsValid()
 		if (m_traceStr.compare("yes", Qt::CaseInsensitive) == 0)
 		{
 			paramOk = true;
-			m_trace = true;
+			m_enableTrace = true;
 		}
 
 		if (m_traceStr.compare("no", Qt::CaseInsensitive) == 0)
 		{
 			paramOk = true;
-			m_trace = false;
+			m_enableTrace = false;
 		}
 
 		if (paramOk == false)
@@ -585,7 +585,7 @@ void UalTester::slot_socketsReady()
 
 void UalTester::runTestFile()
 {
-	qDebug() << "Run test file\n";
+	qDebug() << "Test file is running, wait for the end ...\n";
 
 	int startTestIndex = 0;				// for cmd line param -from
 	bool enableContinueTest = true;		// for cmd line param -errignore
@@ -657,48 +657,46 @@ void UalTester::runTestFile()
 			{
 				case TF_CMD_TEST:
 					{
-						if (m_trace == true)
+						if (m_enableTrace == true)
 						{
 							qDebug() << test.index() + 1 << "Test" << test.name();
 							printToReportFile(QString("%1. Test - %2").arg(test.index() + 1).arg(test.name()));
 						}
-
-						//errorCount = 0;
 					}
 					break;
 
 				case TF_CMD_ENDTEST:
 					{
-						if (m_trace == true)
+						if (test.errorCount() == 0)
 						{
-							if (test.errorCount() == 0)
+							if (m_enableTrace == true)
 							{
 								qDebug() << "Endtest - Ok" << "\n";
 								printToReportFile("Endtest - Ok\r\n");
 							}
 							else
 							{
-								qDebug() << "Endtest - error(s):" << test.errorCount() << "\n";
-								printToReportFile(QString("Endtest - error(s): %1\r\n").arg(test.errorCount()));
+								qDebug() << test.index() + 1 << "Test" << test.name() << "- Ok";
+								printToReportFile(QString("%1. Test - %2 - Ok").arg(test.index() + 1).arg(test.name()));
 							}
 						}
 						else
 						{
-							if (test.errorCount() == 0)
+							if (m_enableTrace == true)
 							{
-								qDebug() << test.index() + 1 << "Test" << test.name() << "- Ok";
-								printToReportFile(QString("%1. Test - %2 - Ok").arg(test.index() + 1).arg(test.name()));
+								qDebug() << "Endtest - error(s):" << test.errorCount() << "\n";
+								printToReportFile(QString("Endtest - error(s): %1\r\n").arg(test.errorCount()));
 							}
 							else
 							{
 								qDebug() << test.index() + 1 << "Test" << test.name() << "- error(s):" << test.errorCount();
 								printToReportFile(QString("%1. Test - %2 - error(s): %3").arg(test.index() + 1).arg(test.name()).arg(test.errorCount()));
 							}
-						}
 
-						if (m_errorIngnore == false && test.errorCount() != 0)
-						{
-							enableContinueTest = false;
+							if (m_errorIngnore == false)
+							{
+								enableContinueTest = false;
+							}
 						}
 					}
 					break;
@@ -772,7 +770,7 @@ void UalTester::runTestFile()
 							{
 								if (signal.state().value() == param.value())
 								{
-									if (m_trace == true)
+									if (m_enableTrace == true)
 									{
 										qDebug() << "\tSet" << param.valueStr() << "- Ok";
 										printToReportFile(QString("    Set %1 - Ok").arg(param.valueStr()));
@@ -782,7 +780,7 @@ void UalTester::runTestFile()
 								{
 									test.incErrorCount();
 
-									if (m_trace == true)
+									if (m_enableTrace == true)
 									{
 										qDebug() << "\tSet" << param.valueStr() << "- Fail";
 										printToReportFile(QString("    Set %1 - Fail").arg(param.valueStr()));
@@ -793,7 +791,7 @@ void UalTester::runTestFile()
 							{
 								test.incErrorCount();
 
-								if (m_trace == true)
+								if (m_enableTrace == true)
 								{
 									qDebug() << "\tSet signal" << param.name() << "- No valid";
 									printToReportFile(QString("    Set signal %1 - No valid").arg(param.name()));
@@ -844,7 +842,7 @@ void UalTester::runTestFile()
 							{
 								if (signal.state().value() == param.value())
 								{
-									if (m_trace == true)
+									if (m_enableTrace == true)
 									{
 										qDebug() << "\tCheck" << param.valueStr() << "- Ok";
 										printToReportFile(QString("    Check %1 - Ok").arg(param.valueStr()));
@@ -854,7 +852,7 @@ void UalTester::runTestFile()
 								{
 									test.incErrorCount();
 
-									if (m_trace == true)
+									if (m_enableTrace == true)
 									{
 										qDebug() << "\tCheck" << param.valueStr() << "- Fail";
 										printToReportFile(QString("    Check %1 - Fail").arg(param.valueStr()));
@@ -865,7 +863,7 @@ void UalTester::runTestFile()
 							{
 								test.incErrorCount();
 
-								if (m_trace == true)
+								if (m_enableTrace == true)
 								{
 									qDebug() << "\tCheck signal" << param.name() << "- No valid";
 									printToReportFile(QString("    Check signal %1 - No valid").arg(param.name()));
@@ -893,7 +891,7 @@ void UalTester::runTestFile()
 
 						int ms = param.value().toInt();
 
-						if (m_trace == true)
+						if (m_enableTrace == true)
 						{
 							qDebug() << "\tDelay" << ms << "ms";
 							printToReportFile(QString("    Delay %1 ms").arg(ms));

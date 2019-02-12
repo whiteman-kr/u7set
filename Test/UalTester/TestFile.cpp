@@ -640,6 +640,11 @@ TestItem::TestItem()
 {
 }
 
+TestItem::TestItem(const TestItem& from)
+{
+	*this = from;
+}
+
 TestItem::~TestItem()
 {
 }
@@ -817,7 +822,7 @@ void TestFile::createTestList()
 		{
 			test.setIndex(testIndex++);
 			test.setTestID(cmd.paramList().at(0).value().toString());
-			test.setName(cmd.paramList().at(0).value().toString() + cmd.paramList().at(1).value().toString());
+			test.setName(cmd.paramList().at(0).value().toString() + ", " + cmd.paramList().at(1).value().toString());
 
 			while (cmdIndex < cmdCount)
 			{
