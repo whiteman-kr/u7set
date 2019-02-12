@@ -313,9 +313,13 @@ ArchRequest::~ArchRequest()
 
 void ArchRequest::run()
 {
-	if (m_param.print().contains("startTime=2019-02-11 17:00:00, endTime=2019-02-11 18:00:00") == true)
+	if (m_param.print().contains("startTime=2019-02-11 17:00:00, endTime=2019-02-11 18:00:00") != true)
 	{
 		DEBUG_STOP;
+
+		reportNoData();
+		waitForQuit();
+		return;
 	}
 
 	// expand request time from both sides

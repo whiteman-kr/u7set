@@ -5,33 +5,7 @@
 #include "../lib/Crc16.h"
 #include "../lib/SimpleThread.h"
 #include "../lib/CircularLogger.h"
-
-#pragma pack(push, 1)
-
-struct ArchFileRecord
-{
-	struct
-	{
-//			qint64 archID;
-		qint64 localTime;
-		qint64 systemTime;
-		qint64 plantTime;
-
-		AppSignalStateFlags flags;
-		double value;
-	} state;
-
-	quint16 crc16;
-
-	void calcCRC16() { crc16 = calcCrc16(&state, sizeof(state)); }
-	bool isValid() const;
-
-	qint64 getTime(E::TimeType timeType);
-
-	void offsetTimes(qint64 dt);
-};
-
-#pragma pack(pop)
+#include "ArchFileRecord.h"
 
 enum class ArchFindResult
 {
@@ -144,11 +118,6 @@ public:
 					 qint64 msLongTermPeriod,
 					 int* deletedCount,
 					 int* packedCount);
-
-public:
-	static const QString LONG_TERM_ARCHIVE_EXTENSION;
-	static const QString SHORT_TERM_ARCHIVE_EXTENSION;
-
 private:
 	void startMaintenance();
 	void stopMaintenance();

@@ -56,6 +56,7 @@ SOURCES += \
     TcpAppDataServer.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
+    ../lib/AppSignalStateFlags.cpp \
     ../lib/AppSignal.cpp \
     ../Builder/IssueLogger.cpp \
     TcpAppDataClient.cpp \
@@ -108,6 +109,7 @@ HEADERS += \
     ../Proto/network.pb.h \
     ../lib/Hash.h \
     ../Proto/serialization.pb.h \
+    ../lib/AppSignalStateFlags.h \
     ../lib/AppSignal.h \
     ../Builder/IssueLogger.h \
     TcpAppDataClient.h \

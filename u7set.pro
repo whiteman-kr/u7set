@@ -28,3 +28,4 @@ SUBDIRS += qtservice \
     mconf \
     ./Tools/PacketSource \
     ./Test/u7databaseTests
+

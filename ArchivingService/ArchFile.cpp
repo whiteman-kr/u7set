@@ -6,46 +6,6 @@
 
 // -----------------------------------------------------------------------------------------------------------------------
 //
-// ArchFileRecord struct implementation
-//
-// -----------------------------------------------------------------------------------------------------------------------
-
-bool ArchFileRecord::isValid() const
-{
-	return calcCrc16(this, sizeof(ArchFileRecord)) == 0;
-}
-
-qint64 ArchFileRecord::getTime(E::TimeType timeType)
-{
-	switch(timeType)
-	{
-	case E::TimeType::Local:
-		return state.localTime;
-
-	case E::TimeType::System:
-		return state.systemTime;
-
-	case E::TimeType::Plant:
-		return state.plantTime;
-
-	case E::TimeType::ArchiveId:
-		assert(false);				// not implemented now
-		return 0;
-	}
-
-	assert(false);					// unknown time type
-	return 0;
-}
-
-void ArchFileRecord::offsetTimes(qint64 dt)
-{
-	state.localTime += dt;
-	state.systemTime += dt;
-	state.plantTime += dt;
-}
-
-// -----------------------------------------------------------------------------------------------------------------------
-//
 // ArchFilePartition class implementation
 //
 // -----------------------------------------------------------------------------------------------------------------------
@@ -488,9 +448,6 @@ inline bool operator < (const ArchFilePartition::Info& p1, const ArchFilePartiti
 
 ArchFileRecord ArchFile::m_buffer[ArchFile::QUEUE_MAX_SIZE];
 
-const QString ArchFile::LONG_TERM_ARCHIVE_EXTENSION = "lta";		// Signal Archive File
-const QString ArchFile::SHORT_TERM_ARCHIVE_EXTENSION = "sta";		// Signal Archive File
-
 ArchFile::ArchFile(const Proto::ArchSignal& protoArchSignal, CircularLoggerShared log) :
 	m_log(log)
 {
@@ -621,7 +578,7 @@ QVector<ArchFilePartition::Info> ArchFile::getArchPartitionsInfo(const QString& 
 
 	// Arch file name format: 2018_12_31_23_59.sta (or lta))
 
-	QRegExp archFileNameTemplate(QString("2[0-9][0-9][0-9]_[0-1][0-9]_[0-3][0-9]_[0-2][0-9]_[0-5][0-9]."));
+	QRegExp archFileNameTemplate(ARCH_FILE_NAME_TEMPLATE);
 
 	QDirIterator di(path, QDir::Files);
 
