@@ -92,6 +92,35 @@ public:
 	QVariant value() const { return m_value; }
 	void setValue(const QVariant& value) { m_value = value; }
 
+	QString valueStr()
+	{
+		QString str;
+
+		switch (m_type)
+		{
+			case TestCmdParamType::Undefined:
+				str.clear();
+				break;
+			case TestCmdParamType::Discrete:
+			case TestCmdParamType::SignedInt32:
+			case TestCmdParamType::SignedInt64:
+				str = m_name + QString("=%2").arg(m_value.toInt());
+				break;
+			case TestCmdParamType::Float:
+			case TestCmdParamType::Double:
+				str = m_name + str.sprintf("=%0.4f", m_value.toDouble());
+				break;
+			case TestCmdParamType::String:
+				str = m_name + "=" + m_value.toString();
+				break;
+			default:
+				assert(false);
+				break;
+		}
+
+		return str;
+	}
+
 	void clear()
 	{
 		m_name.clear();
@@ -162,6 +191,49 @@ public:
 
 // ==============================================================================================
 
+class TestItem
+{
+
+public:
+
+	TestItem();
+	TestItem(const TestItem& from) { *this = from; }
+	virtual ~TestItem();
+
+private:
+
+	mutable QMutex m_mutex;
+
+	int m_index = -1;
+	QString m_testID;
+	QString m_name;
+	int m_errorCount = 0;
+
+	QVector<TestCommand> m_commandList;
+
+public:
+
+	int index() const { return m_index; }
+	void setIndex(int index) { m_index = index; }
+
+	QString testID() const { return m_testID; }
+	void setTestID(const QString& testID) { m_testID = testID; }
+
+	QString name() const { return m_name; }
+	void setName(const QString& name) { m_name = name; }
+
+	int errorCount() const { return m_errorCount; }
+	void incErrorCount() { m_errorCount ++; }
+
+	int cmdCount();
+	TestCommand cmd(int index);
+	void appendCmd(const TestCommand& cmd);
+
+	TestItem& operator=(const TestItem& from);
+};
+
+// ==============================================================================================
+
 class TestFile : public QObject
 {
 	Q_OBJECT
@@ -183,6 +255,8 @@ private:
 	QVector<TestCommand> m_commandList;
 	QStringList m_errorList;
 
+	QVector<TestItem> m_testList;
+
 	void printErrorlist();
 
 public:
@@ -195,6 +269,9 @@ public:
 	SignalBase* signalBase() const { return m_pSignalBase; }
 	void setSignalBase(SignalBase* pSignalBase) { m_pSignalBase = pSignalBase; }
 
+	const QStringList& errorList() const { return m_errorList; }
+	const  QVector<TestItem> testList() const { return m_testList; }
+
 	//
 	//
 	bool open();
@@ -203,8 +280,7 @@ public:
 
 	//
 	//
-	int cmdCount();
-	TestCommand cmd(int index);
+	void createTestList();
 
 signals:
 

@@ -34,8 +34,32 @@ UalTester::UalTester(int& argc, char** argv) :
 
 UalTester::~UalTester()
 {
-	stopCfgLoaderThread();
 }
+
+bool UalTester::printToReportFile(const QString& msg)
+{
+	if (m_reportFileName.isEmpty() == true)
+	{
+		return false;
+	}
+
+	QFile reportFile(m_reportFileName);
+	if (reportFile.open(QIODevice::Append) == false)
+	{
+		return false;
+	}
+
+	qint64 written = reportFile.write(msg.toUtf8() + "\r\n");
+	if (written != msg.length())
+	{
+		return false;
+	}
+
+	reportFile.close();
+
+	return true;
+}
+
 
 void UalTester::getCmdLineParams(int& argc, char** argv)
 {
@@ -171,11 +195,16 @@ bool UalTester::cmdLineParamsIsValid()
 
 	if (m_reportFileName.isEmpty() == false)
 	{
-		if (QFileInfo::exists(m_reportFileName) == false)
+		QFile reportFile(m_reportFileName);
+		if (reportFile.open(QIODevice::WriteOnly) == false)
 		{
-			qDebug() << "Error: Report file" << m_reportFileName << "is not exist";
+			qDebug() << "Error: Report file" << m_reportFileName << "has not been created";
 			return false;
 		}
+
+		reportFile.write(QString("Report from: %1\r\n\r\n").arg(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm:ss")).toUtf8());
+
+		reportFile.close();
 	}
 
 	return true;
@@ -234,6 +263,14 @@ bool UalTester::start()
 	}
 
 	return true;
+}
+
+void UalTester::stop()
+{
+	stopCfgLoaderThread();
+	m_waitSocketsConnectionTimer.stop();
+	stopSignalStateThread();
+	stopTuningThread();
 }
 
 void UalTester::slot_configurationReceived(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
@@ -350,9 +387,12 @@ bool UalTester::parseTestFile()
 {
 	qDebug() << "Parse test file:" << m_testFileName;
 
+	printToReportFile("Open test file: " + m_testFileName + "\r\n");
+
 	m_testfile.setFileName(m_testFileName);
 	if (m_testfile.open() == false)
 	{
+		printToReportFile("Can not open test file for read");
 		return false;
 	}
 
@@ -377,6 +417,15 @@ void UalTester::slot_parseTestFile()
 	//
 	if (parseTestFile() == false)
 	{
+		// print error list to file
+		//
+		int errorCount = m_testfile.errorList().count();
+		for(int i = 0; i < errorCount; i++)
+		{
+			printToReportFile(m_testfile.errorList().at(i));
+		}
+
+		printToReportFile(QString("Found error(s): %1").arg(errorCount));
 		return;
 	}
 
@@ -529,230 +578,335 @@ void UalTester::slot_waitSocketsConnection()
 void UalTester::slot_socketsReady()
 {
 	 runTestFile();
+
+	 stopSignalStateThread();
+	 stopTuningThread();
 }
 
 void UalTester::runTestFile()
 {
 	qDebug() << "Run test file\n";
 
-	int testCount = 0;
-	int errorCount = 0;
+	int startTestIndex = 0;				// for cmd line param -from
+	bool enableContinueTest = true;		// for cmd line param -errignore
 
-	int cmdCount = m_testfile.cmdCount();
-	for(int i = 0; i < cmdCount; i++)
+	int testCount = m_testfile.testList().count();
+	if (testCount == 0)
 	{
-		TestCommand cmd = m_testfile.cmd(i);
+		qDebug() << "Error: Test file don't have any test";
+		return;
+	}
 
-		switch (cmd.type())
+	// check cmd line param -from
+	//
+	if (m_fromTestID.isEmpty() == false)
+	{
+		startTestIndex = -1;
+
+		for(int testIndex = 0; testIndex < testCount; testIndex++)
 		{
-			case TF_CMD_TEST:
-				{
-					QString testName;
+			TestItem test = m_testfile.testList().at(testIndex);
+			if (m_fromTestID != test.testID())
+			{
+				continue;
+			}
 
-					int paramCount = cmd.paramList().count();
-					for(int i = 0; i < paramCount; i++)
-					{
-						TestCmdParam param = cmd.paramList().at(i);
-						if (param.isEmtpy() == true)
-						{
-							continue;
-						}
-
-						testName.append(" ");
-						testName.append(param.value().toString());
-					}
-
-					qDebug() << "#" << testCount + 1 << "Test" << testName;
-					testCount++;
-
-					errorCount = 0;
-				}
-				break;
-
-			case TF_CMD_ENDTEST:
-				{
-					if (errorCount == 0)
-					{
-						qDebug() << "Endtest - Ok";
-					}
-					else
-					{
-						qDebug() << "Endtest, error(s):" << errorCount;
-					}
-					qDebug() << "";
-				}
-				break;
-
-			case TF_CMD_SET:
-				{
-					QVector<Hash> signalHashList;
-					TuningWriteCmd tuningCmd;
-
-					//
-					//
-					int paramCount = cmd.paramList().count();
-					for(int i = 0; i < paramCount; i++)
-					{
-						TestCmdParam param = cmd.paramList().at(i);
-						if (param.isEmtpy() == true)
-						{
-							continue;
-						}
-
-						TuningValueType tuningCmdType;
-
-						switch (param.type())
-						{
-							case TestCmdParamType::Discrete:	tuningCmdType = TuningValueType::Discrete;		break;
-							case TestCmdParamType::SignedInt32:	tuningCmdType = TuningValueType::SignedInt32;	break;
-							case TestCmdParamType::SignedInt64:	tuningCmdType = TuningValueType::SignedInt64;	break;
-							case TestCmdParamType::Float:		tuningCmdType = TuningValueType::Float;			break;
-							case TestCmdParamType::Double:		tuningCmdType = TuningValueType::Double;		break;
-							default:							continue;										break;
-						}
-
-						Hash signalHash = calcHash(param.name());
-						if (signalHash == UNDEFINED_HASH)
-						{
-							continue;
-						}
-
-						signalHashList.append(signalHash);
-
-						tuningCmd.setSignalHash(signalHash);
-						tuningCmd.setType(tuningCmdType);
-						tuningCmd.setValue(param.value());
-
-						m_tuningBase.appendCmdFowWrite(tuningCmd);
-					}
-
-					//
-					//
-					m_signalBase.appendHashForRequestState(signalHashList);
-					QThread::msleep(1000);
-
-					//
-					//
-					for(int i = 0; i < paramCount; i++)
-					{
-						TestCmdParam param = cmd.paramList().at(i);
-						if (param.isEmtpy() == true)
-						{
-							continue;
-						}
-
-						TestSignal signal = m_signalBase.signal(param.name());
-						if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
-						{
-							qDebug() << "Signal" << param.name() << "not found in SignalBase";
-							continue;
-						}
-
-						if (signal.state().isValid() == true)
-						{
-							if (signal.state().value() == param.value())
-							{
-								qDebug() << "    Set" << param.name() << "- Ok";
-							}
-							else
-							{
-								errorCount ++;
-								qDebug() << "    Set" << param.name() << "- Fail";
-							}
-						}
-						else
-						{
-							errorCount ++;
-							qDebug() << "    Set signal" << param.name() << "- No valid";
-						}
-					}
-
-					m_signalBase.clearHashForRequestState();
-				}
-				break;
-
-
-			case TF_CMD_CHECK:
-				{
-					QVector<Hash> signalHashList;
-
-					int paramCount = cmd.paramList().count();
-					for(int i = 0; i < paramCount; i++)
-					{
-						TestCmdParam param = cmd.paramList().at(i);
-						if (param.isEmtpy() == true)
-						{
-							continue;
-						}
-
-						signalHashList.append(calcHash(param.name()));
-					}
-
-					m_signalBase.appendHashForRequestState(signalHashList);
-					QThread::msleep(100);
-
-					for(int i = 0; i < paramCount; i++)
-					{
-						TestCmdParam param = cmd.paramList().at(i);
-						if (param.isEmtpy() == true)
-						{
-							continue;
-						}
-
-						TestSignal signal = m_signalBase.signal(param.name());
-						if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
-						{
-							qDebug() << "Signal" << param.name() << "not found in SignalBase";
-							continue;
-						}
-
-						if (signal.state().isValid() == true)
-						{
-							if (signal.state().value() == param.value())
-							{
-								qDebug() << "    Check" << param.name() << "- Ok";
-							}
-							else
-							{
-								errorCount ++;
-								qDebug() << "    Check" << param.name() << "- Fail";
-							}
-						}
-						else
-						{
-							errorCount ++;
-							qDebug() << "    Check signal" << param.name() << "- No valid";
-						}
-					}
-
-					m_signalBase.clearHashForRequestState();
-				}
-				break;
-
-			case TF_CMD_DELAY:
-				{
-					if (cmd.paramList().count() != 1)
-					{
-						break;
-					}
-
-					TestCmdParam param = cmd.paramList().at(0);
-
-					if (param.type() != TestCmdParamType::SignedInt32)
-					{
-						break;
-					}
-
-					int ms = param.value().toInt();
-
-					qDebug() << "    Delay" << ms << "ms";
-
-					QThread::msleep(ms);
-				}
-				break;
-
+			startTestIndex = testIndex;
+			break;
 		}
 	}
+
+	if (startTestIndex == -1)
+	{
+		qDebug() << "Error: TestID" << m_fromTestID << "not found in the test file";
+		return;
+	}
+
+	for(int testIndex = startTestIndex; testIndex < testCount; testIndex++)
+	{
+		if (enableContinueTest == false)
+		{
+			break;
+		}
+
+		TestItem test = m_testfile.testList().at(testIndex);
+
+		// check cmd line param -test
+		//
+		if (m_testID.isEmpty() == false)
+		{
+			if (m_testID != test.testID())
+			{
+				continue;
+			}
+		}
+
+		// execute commands
+		//
+		int cmdCount = test.cmdCount();
+		for(int cmdIndex = 0; cmdIndex < cmdCount; cmdIndex++)
+		{
+			if (enableContinueTest == false)
+			{
+				break;
+			}
+
+			TestCommand cmd = test.cmd(cmdIndex);
+
+			switch (cmd.type())
+			{
+				case TF_CMD_TEST:
+					{
+						if (m_trace == true)
+						{
+							qDebug() << test.index() + 1 << "Test" << test.name();
+							printToReportFile(QString("%1. Test - %2").arg(test.index() + 1).arg(test.name()));
+						}
+
+						//errorCount = 0;
+					}
+					break;
+
+				case TF_CMD_ENDTEST:
+					{
+						if (m_trace == true)
+						{
+							if (test.errorCount() == 0)
+							{
+								qDebug() << "Endtest - Ok" << "\n";
+								printToReportFile("Endtest - Ok\r\n");
+							}
+							else
+							{
+								qDebug() << "Endtest - error(s):" << test.errorCount() << "\n";
+								printToReportFile(QString("Endtest - error(s): %1\r\n").arg(test.errorCount()));
+							}
+						}
+						else
+						{
+							if (test.errorCount() == 0)
+							{
+								qDebug() << test.index() + 1 << "Test" << test.name() << "- Ok";
+								printToReportFile(QString("%1. Test - %2 - Ok").arg(test.index() + 1).arg(test.name()));
+							}
+							else
+							{
+								qDebug() << test.index() + 1 << "Test" << test.name() << "- error(s):" << test.errorCount();
+								printToReportFile(QString("%1. Test - %2 - error(s): %3").arg(test.index() + 1).arg(test.name()).arg(test.errorCount()));
+							}
+						}
+
+						if (m_errorIngnore == false && test.errorCount() != 0)
+						{
+							enableContinueTest = false;
+						}
+					}
+					break;
+
+				case TF_CMD_SET:
+					{
+						QVector<Hash> signalHashList;
+						TuningWriteCmd tuningCmd;
+
+						//
+						//
+						int paramCount = cmd.paramList().count();
+						for(int i = 0; i < paramCount; i++)
+						{
+							TestCmdParam param = cmd.paramList().at(i);
+							if (param.isEmtpy() == true)
+							{
+								continue;
+							}
+
+							TuningValueType tuningCmdType;
+
+							switch (param.type())
+							{
+								case TestCmdParamType::Discrete:	tuningCmdType = TuningValueType::Discrete;		break;
+								case TestCmdParamType::SignedInt32:	tuningCmdType = TuningValueType::SignedInt32;	break;
+								case TestCmdParamType::SignedInt64:	tuningCmdType = TuningValueType::SignedInt64;	break;
+								case TestCmdParamType::Float:		tuningCmdType = TuningValueType::Float;			break;
+								case TestCmdParamType::Double:		tuningCmdType = TuningValueType::Double;		break;
+								default:							continue;										break;
+							}
+
+							Hash signalHash = calcHash(param.name());
+							if (signalHash == UNDEFINED_HASH)
+							{
+								continue;
+							}
+
+							signalHashList.append(signalHash);
+
+							tuningCmd.setSignalHash(signalHash);
+							tuningCmd.setType(tuningCmdType);
+							tuningCmd.setValue(param.value());
+
+							m_tuningBase.appendCmdFowWrite(tuningCmd);
+						}
+
+						//
+						//
+						m_signalBase.appendHashForRequestState(signalHashList);
+						QThread::msleep(1000);
+
+						//
+						//
+						for(int i = 0; i < paramCount; i++)
+						{
+							TestCmdParam param = cmd.paramList().at(i);
+							if (param.isEmtpy() == true)
+							{
+								continue;
+							}
+
+							TestSignal signal = m_signalBase.signal(param.name());
+							if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
+							{
+								qDebug() << "Signal" << param.name() << "not found in SignalBase";
+								continue;
+							}
+
+							if (signal.state().isValid() == true)
+							{
+								if (signal.state().value() == param.value())
+								{
+									if (m_trace == true)
+									{
+										qDebug() << "\tSet" << param.valueStr() << "- Ok";
+										printToReportFile(QString("    Set %1 - Ok").arg(param.valueStr()));
+									}
+								}
+								else
+								{
+									test.incErrorCount();
+
+									if (m_trace == true)
+									{
+										qDebug() << "\tSet" << param.valueStr() << "- Fail";
+										printToReportFile(QString("    Set %1 - Fail").arg(param.valueStr()));
+									}
+								}
+							}
+							else
+							{
+								test.incErrorCount();
+
+								if (m_trace == true)
+								{
+									qDebug() << "\tSet signal" << param.name() << "- No valid";
+									printToReportFile(QString("    Set signal %1 - No valid").arg(param.name()));
+								}
+							}
+						}
+
+						m_signalBase.clearHashForRequestState();
+					}
+					break;
+
+
+				case TF_CMD_CHECK:
+					{
+						QVector<Hash> signalHashList;
+
+						int paramCount = cmd.paramList().count();
+						for(int i = 0; i < paramCount; i++)
+						{
+							TestCmdParam param = cmd.paramList().at(i);
+							if (param.isEmtpy() == true)
+							{
+								continue;
+							}
+
+							signalHashList.append(calcHash(param.name()));
+						}
+
+						m_signalBase.appendHashForRequestState(signalHashList);
+						QThread::msleep(100);
+
+						for(int i = 0; i < paramCount; i++)
+						{
+							TestCmdParam param = cmd.paramList().at(i);
+							if (param.isEmtpy() == true)
+							{
+								continue;
+							}
+
+							TestSignal signal = m_signalBase.signal(param.name());
+							if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
+							{
+								qDebug() << "Signal" << param.name() << "not found in SignalBase";
+								continue;
+							}
+
+							if (signal.state().isValid() == true)
+							{
+								if (signal.state().value() == param.value())
+								{
+									if (m_trace == true)
+									{
+										qDebug() << "\tCheck" << param.valueStr() << "- Ok";
+										printToReportFile(QString("    Check %1 - Ok").arg(param.valueStr()));
+									}
+								}
+								else
+								{
+									test.incErrorCount();
+
+									if (m_trace == true)
+									{
+										qDebug() << "\tCheck" << param.valueStr() << "- Fail";
+										printToReportFile(QString("    Check %1 - Fail").arg(param.valueStr()));
+									}
+								}
+							}
+							else
+							{
+								test.incErrorCount();
+
+								if (m_trace == true)
+								{
+									qDebug() << "\tCheck signal" << param.name() << "- No valid";
+									printToReportFile(QString("    Check signal %1 - No valid").arg(param.name()));
+								}
+							}
+						}
+
+						m_signalBase.clearHashForRequestState();
+					}
+					break;
+
+				case TF_CMD_DELAY:
+					{
+						if (cmd.paramList().count() != 1)
+						{
+							break;
+						}
+
+						TestCmdParam param = cmd.paramList().at(0);
+
+						if (param.type() != TestCmdParamType::SignedInt32)
+						{
+							break;
+						}
+
+						int ms = param.value().toInt();
+
+						if (m_trace == true)
+						{
+							qDebug() << "\tDelay" << ms << "ms";
+							printToReportFile(QString("    Delay %1 ms").arg(ms));
+						}
+
+						QThread::msleep(ms);
+					}
+					break;
+			}
+		}
+	}
+
+	qDebug() << "End of test file";
 }
 
 

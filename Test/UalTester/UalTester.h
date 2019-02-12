@@ -55,6 +55,8 @@ private:
 	bool m_errorIngnore = true;
 	bool m_trace = false;
 
+	bool printToReportFile(const QString& msg);
+
 	void getCmdLineParams(int& argc, char** argv);
 	bool cmdLineParamsIsValid();
 
@@ -95,6 +97,7 @@ private:
 public:
 
 	bool start();
+	void stop();
 
 signals:
 

@@ -632,6 +632,70 @@ bool TestCommand::parseCmdDelay()
 
 // -------------------------------------------------------------------------------------------------------------------
 //
+// TestItem class implementation
+//
+// -------------------------------------------------------------------------------------------------------------------
+
+TestItem::TestItem()
+{
+}
+
+TestItem::~TestItem()
+{
+}
+
+int TestItem::cmdCount()
+{
+	int count = 0;
+
+	m_mutex.lock();
+
+		count = m_commandList.count();
+
+	m_mutex.unlock();
+
+	return count;
+}
+
+TestCommand TestItem::cmd(int index)
+{
+	TestCommand cmd;
+
+	m_mutex.lock();
+
+		if (index >= 0 && index < m_commandList.count())
+		{
+			cmd = m_commandList[index];
+		}
+
+	m_mutex.unlock();
+
+	return cmd;
+}
+
+void TestItem::appendCmd(const TestCommand& cmd)
+{
+	m_mutex.lock();
+
+		m_commandList.append(cmd);
+
+	m_mutex.unlock();
+}
+
+TestItem& TestItem::operator=(const TestItem& from)
+{
+	m_index = from.m_index;
+	m_testID = from.m_testID;
+	m_name = from.m_name;
+	m_errorCount = from.m_errorCount;
+
+	m_commandList = from.m_commandList;
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+//
 // TestFile class implementation
 //
 // -------------------------------------------------------------------------------------------------------------------
@@ -723,6 +787,8 @@ bool TestFile::parse()
 		return false;
 	}
 
+	createTestList();
+
 	return true;
 }
 
@@ -736,32 +802,37 @@ void TestFile::close()
 	m_file.close();
 }
 
-int TestFile::cmdCount()
+void TestFile::createTestList()
 {
-	int count = 0;
+	int testIndex = 0;
+	int cmdIndex = 0;
+	int cmdCount = m_commandList.count();
 
-	m_mutex.lock();
+	while(cmdIndex < cmdCount)
+	{
+		TestItem test;
 
-		count = m_commandList.count();
-
-	m_mutex.unlock();
-
-	return count;
-}
-
-TestCommand TestFile::cmd(int index)
-{
-	TestCommand cmd;
-
-	m_mutex.lock();
-
-		if (index >= 0 && index < m_commandList.count())
+		TestCommand cmd = m_commandList[cmdIndex];
+		if (cmd.type() == TF_CMD_TEST)
 		{
-			cmd = m_commandList[index];
+			test.setIndex(testIndex++);
+			test.setTestID(cmd.paramList().at(0).value().toString());
+			test.setName(cmd.paramList().at(0).value().toString() + cmd.paramList().at(1).value().toString());
+
+			while (cmdIndex < cmdCount)
+			{
+				cmd = m_commandList[cmdIndex];
+				test.appendCmd(cmd);
+
+				if (cmd.type() == TF_CMD_ENDTEST)
+				{
+					m_testList.append(test);
+					break;
+				}
+
+				cmdIndex++;
+			}
 		}
-
-	m_mutex.unlock();
-
-	return cmd;
-
+		cmdIndex++;
+	}
 }
