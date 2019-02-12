@@ -313,21 +313,19 @@ ArchRequest::~ArchRequest()
 
 void ArchRequest::run()
 {
-	if (m_param.print().contains("startTime=2019-02-11 17:00:00, endTime=2019-02-11 18:00:00") != true)
+/*	if (m_param.print().contains("startTime=2019-02-11 17:00:00, endTime=2019-02-11 18:00:00") != true)
 	{
 		DEBUG_STOP;
 
 		reportNoData();
 		waitForQuit();
 		return;
-	}
+	} */
 
 	// expand request time from both sides
 	//
 
 	m_param.expandTimes(Archive::TIME_TO_EXPAND_REQUEST);
-
-//	DEBUG_LOG_MSG(m_logger, QString("ArchRequest to exec: %1").arg(m_param.print()));
 
 	bool dataFound = prepareArchFilesToRead();
 
@@ -489,7 +487,7 @@ void ArchRequest::getSignalStates()
 			break;
 		}
 
-		if (record.isValid() == false)
+		if (record.isNotCorrupted(m_param.timeType()) == false)
 		{
 			continue;
 		}

@@ -76,7 +76,8 @@ SOURCES += \
     ArchWriterThread.cpp \
     ArchRequest.cpp \
     ArchMaintenance.cpp \
-    ArchFileRecord.cpp
+    ArchFileRecord.cpp \
+    ../lib/AppSignalStateFlags.cpp
 
 HEADERS += \
     ../lib/HostAddressPort.h \
@@ -126,7 +127,8 @@ HEADERS += \
     ArchWriterThread.h \
     ArchRequest.h \
     ArchMaintenance.h \
-    ArchFileRecord.h
+    ArchFileRecord.h \
+    ../lib/AppSignalStateFlags.h
 
 include(../qtservice/src/qtservice.pri)
 

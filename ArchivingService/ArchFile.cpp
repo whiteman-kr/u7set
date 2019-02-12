@@ -221,7 +221,7 @@ bool ArchFilePartition::readRecord(qint64 recordIndex, ArchFileRecord* record)
 		return false;
 	}
 
-	if (record->isValid() == false)
+	if (record->isNotCorrupted() == false)
 	{
 		return false;
 	}
@@ -314,11 +314,11 @@ QString ArchFilePartition::getFileName(qint64 partitionStartTime, bool shortTerm
 
 	if (shortTerm == true)
 	{
-		extension = ArchFile::SHORT_TERM_ARCHIVE_EXTENSION;
+		extension = SHORT_TERM_ARCHIVE_EXTENSION;
 	}
 	else
 	{
-		extension = ArchFile::LONG_TERM_ARCHIVE_EXTENSION;
+		extension = LONG_TERM_ARCHIVE_EXTENSION;
 	}
 
 	QString fileName = QString("%1/%2_%3_%4_%5_%6.%7").
@@ -512,9 +512,11 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 
 		ArchFileRecord nvp = s;
 
+		nvp.state.value = 0;
 		nvp.state.flags.valid = 0;
 		nvp.state.flags.autoPoint = 1;
 		nvp.offsetTimes(-1);
+		nvp.calcCRC16();
 
 		m_queue->push(nvp);
 	}
@@ -603,13 +605,13 @@ QVector<ArchFilePartition::Info> ArchFile::getArchPartitionsInfo(const QString& 
 
 		ArchFilePartition::Info pi;
 
-		if (fileName.endsWith(ArchFile::LONG_TERM_ARCHIVE_EXTENSION) == true)
+		if (fileName.endsWith(LONG_TERM_ARCHIVE_EXTENSION) == true)
 		{
 			pi.shortTerm = false;
 		}
 		else
 		{
-			if (fileName.endsWith(ArchFile::SHORT_TERM_ARCHIVE_EXTENSION) == true)
+			if (fileName.endsWith(SHORT_TERM_ARCHIVE_EXTENSION) == true)
 			{
 				pi.shortTerm = true;
 			}
@@ -695,9 +697,11 @@ void ArchFile::shutdown(qint64 curPartition, qint64* totalFlushedStatesCount)
 			dT = 1;
 		}
 
+		m_lastRecord.state.value = 0;
 		m_lastRecord.state.flags.valid = 0;
 		m_lastRecord.state.flags.autoPoint = 1;
 		m_lastRecord.offsetTimes(dT);
+		m_lastRecord.calcCRC16();
 
 		m_flushMutex.lock();
 
@@ -927,7 +931,7 @@ bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
 		{
 			const ArchFileRecord* record = reinterpret_cast<const ArchFileRecord*>(readBuf + recordStartPos);
 
-			if (record->isValid() == true)
+			if (record->isNotCorrupted() == true)
 			{
 				if (record->state.flags.hasShortTermArchivingReasonOnly() == true)
 				{

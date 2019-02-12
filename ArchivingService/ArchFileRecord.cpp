@@ -6,12 +6,23 @@
 //
 // -----------------------------------------------------------------------------------------------------------------------
 
-bool ArchFileRecord::isValid() const
+const qint64 ArchFileRecord::TIME_MAX_VALUE = (static_cast<qint64>(2200 - 1970) * 365 * 24 * 60 * 60 * 1000);		// Year 2200 in milliseconds
+const qint64 ArchFileRecord::TIME_MIN_VALUE = (static_cast<qint64>(2000 - 1970) * 365 * 24 * 60 * 60 * 1000);		// Year 2000 in milliseconds
+
+bool ArchFileRecord::isNotCorrupted() const
 {
-	return calcCrc16(this, sizeof(ArchFileRecord)) == 0;
+	return	calcCrc16(this, sizeof(ArchFileRecord)) == 0;
 }
 
-qint64 ArchFileRecord::getTime(E::TimeType timeType)
+bool ArchFileRecord::isNotCorrupted(E::TimeType timeType) const
+{
+	qint64 time = getTime(timeType);
+
+	return	calcCrc16(this, sizeof(ArchFileRecord)) == 0 &&
+			(time >= TIME_MIN_VALUE && time < TIME_MAX_VALUE);
+}
+
+qint64 ArchFileRecord::getTime(E::TimeType timeType) const
 {
 	switch(timeType)
 	{
