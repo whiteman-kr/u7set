@@ -6,6 +6,7 @@
 #include <QtCore/QUuid>
 #include <QVariant>
 
+#include "PropertyObject.h"
 
 #ifdef Q_OS_WIN
 #pragma warning (push)
@@ -23,8 +24,6 @@
 #pragma warning (pop)
 #endif // Q_OS_WIN
 
-
-class Property;
 
 namespace Proto
 {
@@ -310,6 +309,24 @@ namespace Proto
 		{
 			try
 			{
+				// This code disables emitting propertyListChanged if object is propertyObject
+				//
+				PropertyObject* propertyObject = dynamic_cast<PropertyObject*>(this);
+				if (propertyObject != nullptr)
+				{
+					propertyObject->blockSignals(true);
+				}
+
+				std::shared_ptr<int> emitPropertyListChanged(nullptr, [propertyObject](void*)
+					{
+						if (propertyObject != nullptr)
+						{
+							propertyObject->blockSignals(false);
+						}
+					});
+
+				//--
+				//
 				if (message.has_compressedobject() == true)
 				{
 					// it is compressed Envelope, uncompress it and after it it will be possible to use it

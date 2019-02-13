@@ -11,6 +11,7 @@ ConfigurationServiceWidget::ConfigurationServiceWidget(const SoftwareInfo& softw
 	connect(this, &BaseServiceStateWidget::connectionStatisticChanged, this, &ConfigurationServiceWidget::updateStateInfo);
 
 	setStateTabMaxRowQuantity(9);
+	setClientQuantityRowIndexOnStateTab(8);
 
 	//----------------------------------------------------------------------------------------------------
 	addClientsTab();

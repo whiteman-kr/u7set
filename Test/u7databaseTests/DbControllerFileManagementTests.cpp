@@ -686,7 +686,7 @@ void DbControllerFileTests::checkInTest()
 
 	int changesetIdFirstFile = query.value(0).toInt();
 
-	ok = query.exec(QString("UPDATE fileInstance SET Data='1235234523636' WHERE fileId = %1 AND changesetId = %2").arg(firstFileId).arg(changesetIdFirstFile));
+	ok = query.exec(QString("UPDATE fileInstance SET Data='1235234523636', md5=md5('1235234523636') WHERE fileId = %1 AND changesetId = %2").arg(firstFileId).arg(changesetIdFirstFile));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	DbFileInfo file2;
