@@ -1,5 +1,5 @@
 #include <QString>
-#include <QtTest>
+#include "TestUtils.h"
 #include <QUdpSocket>
 #include "TestAppDataService.h"
 #include "../../lib/XmlHelper.h"
@@ -30,26 +30,18 @@ TestAppDataService::TestAppDataService(int &argc, char **argv)
 	m_cfgIp2.setAddressPortStr(parser.settingValue(SETTING_CFG_SERVICE_IP2), PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
 }
 
-bool TestAppDataService::readByteArray(QString fileName, QByteArray& result, QString& error)
+void TestAppDataService::readByteArray(QString fileName, QByteArray& resultBuffer, bool& result)
 {
-	if (QFile::exists(fileName) == false)
-	{
-		error = "File " + fileName + "doesn't exist";
-		return false;
-	}
+	VERIFY_STATEMENT_STR(QFile::exists(fileName), "File " + fileName + "doesn't exist");
 
 	QFile file(fileName);
-	if (file.open(QIODevice::ReadOnly | QIODevice::Text) == false)
-	{
-		error = "Could not open " + fileName;
-		return false;
-	}
 
-	result = file.readAll();
-	return true;
+	VERIFY_STATEMENT_STR(file.open(QIODevice::ReadOnly | QIODevice::Text), "Could not open " + fileName);
+
+	resultBuffer = file.readAll();
 }
 
-bool TestAppDataService::initSourcePackets(QString& error)
+void TestAppDataService::initSourcePackets(bool& result)
 {
 	m_sourcePackets.clear();
 
@@ -57,11 +49,7 @@ bool TestAppDataService::initSourcePackets(QString& error)
 	{
 		QVector<Rup::Frame> sourceFrames;
 
-		if (source.lmRupFramesQuantity() == 0)
-		{
-			error = "Source with " + source.lmAddressPort().addressPortStr() + " has zero frames";
-			return false;
-		}
+		VERIFY_STATEMENT_STR(source.lmRupFramesQuantity() > 0, "Source with " + source.lmAddressPort().addressPortStr() + " has zero frames");
 
 		for (int i = 0; i < source.lmRupFramesQuantity(); i++)
 		{
@@ -102,11 +90,9 @@ bool TestAppDataService::initSourcePackets(QString& error)
 
 		m_sourcePackets.push_back(sourceFrames);
 	}
-
-	return true;
 }
 
-bool TestAppDataService::initSenders(QString &error)
+void TestAppDataService::initSenders(bool& result)
 {
 	removeSenders();
 
@@ -115,18 +101,11 @@ bool TestAppDataService::initSenders(QString &error)
 		QUdpSocket* udpSocket = new QUdpSocket(this);
 		m_udpSockets.push_back(udpSocket);
 
-		bool result = udpSocket->bind(source.lmAddress(), source.lmPort());
-		if (result == false)
-		{
-			error = "Unnable to bind to " + source.lmAddressPort().addressPortStr();
-			return false;
-		}
+		VERIFY_STATEMENT_STR(udpSocket->bind(source.lmAddress(), source.lmPort()), "Unnable to bind to " + source.lmAddressPort().addressPortStr());
 	}
-
-	return true;
 }
 
-bool TestAppDataService::initTcpClient(QString &/*error*/)
+void TestAppDataService::initTcpClient()
 {
 	removeTcpClient();
 
@@ -135,8 +114,6 @@ bool TestAppDataService::initTcpClient(QString &/*error*/)
 	si.init(E::SoftwareType::TestClient, m_equipmentID, 1, 0);
 
 	m_tcpClientSocket = new AppDataServiceClient(m_nextDataSourceStateMessage, si, m_cfgSettings.appDataService_clientRequestIP);
-
-	return true;
 }
 
 void TestAppDataService::removeSenders()
@@ -154,25 +131,8 @@ void TestAppDataService::removeTcpClient()
 	m_tcpClientSocket = nullptr;
 }
 
-bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
+void TestAppDataService::sendBuffers(bool& result)
 {
-	// Getting all counters before sending any udp
-	//
-	if (m_tcpClientSocket->sendRequestAndWaitForResponse(ADS_GET_DATA_SOURCES_STATES, error) == false)
-	{
-		error = "Got error while getting AppDataSource state: " + error;
-		return false;
-	}
-
-	// Checking correctness of initialization
-	//
-	if (m_dataSources.size() != m_sourcePackets.size())
-	{
-		assert(false);
-		error = "Data source quantity not equal packet quantity";
-		return false;
-	}
-
 	// Sending buffers (frames)
 	//
 	for (int i = 0; i < m_dataSources.size(); i++)
@@ -180,12 +140,7 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 		const DataSource& source = m_dataSources[i];
 		QVector<Rup::Frame>& sourceFrames = m_sourcePackets[i];
 
-		if (source.lmRupFramesQuantity() != sourceFrames.size())
-		{
-			assert(false);
-			error = "Wrong frame quantity";
-			return false;
-		}
+		VERIFY_STATEMENT(source.lmRupFramesQuantity() == sourceFrames.size(), "Wrong frame quantity");
 
 		// Increment numerator
 		quint16 numerator = reverseUint16(sourceFrames[source.lmRupFramesQuantity() - 1].header.numerator);
@@ -227,199 +182,6 @@ bool TestAppDataService::sendBuffers(QString& error, bool checkHeaderErrors)
 			}*/
 		}
 	}
-
-	// Getting all counters after sending udp
-	//
-	m_previousDataSourceStateMessage = m_nextDataSourceStateMessage;
-	if (m_tcpClientSocket->sendRequestAndWaitForResponse(ADS_GET_DATA_SOURCES_STATES, error) == false)
-	{
-		error = "Got error while getting AppDataSource state: " + error;
-		return false;
-	}
-
-	// Checking correctness of all data quantity counters
-	//
-	for (int i = 0; i < m_dataSources.size(); i++)
-	{
-		// Get AppDataSource state messages to compare
-		//
-		auto* previusSourceMessage = getSourceMessageById(m_previousDataSourceStateMessage, m_dataSources[i].ID());
-		auto* nextSourceMessage = getSourceMessageById(m_nextDataSourceStateMessage, m_dataSources[i].ID());
-
-		if (previusSourceMessage == nullptr || nextSourceMessage == nullptr)
-		{
-			error = "AppDataSource state reply doesn't contain state of " + m_dataSources[i].lmEquipmentID();
-			return false;
-		}
-
-		// AppDataSourceState::receivedDataID
-		//
-		Rup::Header& header = m_sourcePackets[i][0].header;
-		quint32 dataId = reverseUint32(header.dataId);
-		if (dataId != nextSourceMessage->receiveddataid())
-		{
-			error = "Source " + m_dataSources[i].lmEquipmentID() +
-					" received Data ID " + QString::number(nextSourceMessage->receiveddataid(), 16) + " instead of " + QString::number(dataId, 16);
-			return false;
-		}
-
-		// AppDataSourceState::receivedPacketCount
-		//
-		int receivedPacketsQuantity = nextSourceMessage->receivedpacketcount() - previusSourceMessage->receivedpacketcount();
-
-		if (receivedPacketsQuantity != 1)
-		{
-			error = "Source " + m_dataSources[i].lmEquipmentID() +
-					" received " + QString::number(receivedPacketsQuantity) + " packets instead of 1";
-			return false;
-		}
-
-		// AppDataSourceState::receivedFramesCount
-		//
-		int receivedFramesQuantity = nextSourceMessage->receivedframescount() - previusSourceMessage->receivedframescount();
-
-		if (receivedFramesQuantity != m_dataSources[i].lmRupFramesQuantity())
-		{
-			error = "Source " + m_dataSources[i].lmEquipmentID() +
-					" received " + QString::number(receivedFramesQuantity) + " frames"
-					" instead of " + QString::number(m_dataSources[i].lmRupFramesQuantity());
-			return false;
-		}
-
-		// AppDataSourceState::receivedDataSize
-		//
-		int receivedDataQuantity = nextSourceMessage->receiveddatasize() - previusSourceMessage->receiveddatasize();
-		int expectedDataQuantity = m_dataSources[i].lmRupFramesQuantity() * Socket::ENTIRE_UDP_SIZE;
-
-		if (receivedDataQuantity != expectedDataQuantity)
-		{
-			error = "Source " + m_dataSources[i].lmEquipmentID() +
-					" received " + QString::number(receivedFramesQuantity) + "bytes"
-					" instead of " + QString::number(expectedDataQuantity);
-			return false;
-		}
-
-		// AppDataSourceState::lostedPacketCount
-		//
-		int lostPacketCount = nextSourceMessage->lostedpacketcount() - previusSourceMessage->lostedpacketcount();
-
-		if (lostPacketCount != 0)
-		{
-			error = "Source " + m_dataSources[i].lmEquipmentID() +
-					" lost " + QString::number(lostPacketCount) + " packets instead of 0";
-			return false;
-		}
-
-		// AppDataSourceState::rupFramePlantTime
-		//
-		Rup::TimeStamp timeStamp = header.timeStamp;
-		timeStamp.reverseBytes();
-
-		QDateTime expectedPlantTime;
-
-		expectedPlantTime.setTimeSpec(Qt::UTC);	// don't delete this to prevent plantTime conversion from Local to UTC time!!!
-
-		expectedPlantTime.setDate(QDate(timeStamp.year, timeStamp.month, timeStamp.day));
-		expectedPlantTime.setTime(QTime(timeStamp.hour, timeStamp.minute, timeStamp.second, timeStamp.millisecond));
-
-		QDateTime receivedPlantTime = QDateTime::fromMSecsSinceEpoch(nextSourceMessage->rupframeplanttime());
-
-		if (receivedPlantTime != expectedPlantTime)
-		{
-			error = "Source " + m_dataSources[i].lmEquipmentID() +
-					" received plant time " + receivedPlantTime.toString() +
-					" instead of " + expectedPlantTime.toString();
-			return false;
-		}
-
-		// AppDataSourceState::rupFrameNumerator
-		//
-		quint16 numerator = reverseUint16(header.numerator);
-		if (numerator != nextSourceMessage->rupframenumerator())
-		{
-			error = "Source " + m_dataSources[i].lmEquipmentID() +
-					" received numerator " + QString::number(nextSourceMessage->rupframenumerator()) +
-					" instead of " + QString::number(numerator);
-			return false;
-		}
-
-		if (checkHeaderErrors == false)
-		{
-			continue;
-		}
-
-		// AppDataSourceState::errorProtocolVersion
-		//
-		int errorProtocolVersion = nextSourceMessage->errorprotocolversion() - previusSourceMessage->errorprotocolversion();
-		if (errorProtocolVersion != 0)
-		{
-			error = "Source " + m_dataSources[i].lmEquipmentID() +
-					" incrimented errorProtocolVersion by " + errorProtocolVersion;
-			return false;
-		}
-
-		// AppDataSourceState::errorFramesQuantity
-		//
-		int errorFramesQuantity = nextSourceMessage->errorframesquantity() - previusSourceMessage->errorframesquantity();
-		if (errorFramesQuantity != 0)
-		{
-			error = "Source " + m_dataSources[i].lmEquipmentID() +
-					" incrimented errorFramesQuantity by " + errorFramesQuantity;
-			return false;
-		}
-
-		// AppDataSourceState::errorFrameNo
-		//
-		int errorFrameNo = nextSourceMessage->errorframeno() - previusSourceMessage->errorframeno();
-		if (errorFrameNo != 0)
-		{
-			error = "Source " + m_dataSources[i].lmEquipmentID() +
-					" incrimented errorFrameNo by " + errorFrameNo;
-			return false;
-		}
-
-		// AppDataSourceState::errorDataID
-		//
-		int errorDataID = nextSourceMessage->errordataid() - previusSourceMessage->errordataid();
-		if (errorDataID != 0)
-		{
-			error = "Source " + m_dataSources[i].lmEquipmentID() +
-					" incrimented errorDataID by " + errorDataID;
-			return false;
-		}
-
-		// AppDataSourceState::errorFrameSize
-		//
-		int errorFrameSize = nextSourceMessage->errorframesize() - previusSourceMessage->errorframesize();
-		if (errorFrameSize != 0)
-		{
-			error = "Source " + m_dataSources[i].lmEquipmentID() +
-					" incrimented errorFrameSize by " + errorFrameSize;
-			return false;
-		}
-
-		// AppDataSourceState::errorDuplicatePlantTime
-		//
-		int errorDuplicatePlantTime = nextSourceMessage->errorduplicateplanttime() - previusSourceMessage->errorduplicateplanttime();
-		if (errorDuplicatePlantTime != 0)
-		{
-			error = "Source " + m_dataSources[i].lmEquipmentID() +
-					" incrimented errorDuplicatePlantTime by " + errorDuplicatePlantTime;
-			return false;
-		}
-
-		// AppDataSourceState::errorNonmonotonicPlantTime
-		//
-		int errorNonmonotonicPlantTime = nextSourceMessage->errornonmonotonicplanttime() - previusSourceMessage->errornonmonotonicplanttime();
-		if (errorNonmonotonicPlantTime != 0)
-		{
-			error = "Source " + m_dataSources[i].lmEquipmentID() +
-					" incrimented errorNonmonotonicPlantTime by " + errorNonmonotonicPlantTime;
-			return false;
-		}
-	}
-
-	return true;
 }
 
 const Network::AppDataSourceState* TestAppDataService::getSourceMessageById(Network::GetAppDataSourcesStatesReply &reply, quint64 id)
@@ -437,6 +199,8 @@ const Network::AppDataSourceState* TestAppDataService::getSourceMessageById(Netw
 
 void TestAppDataService::initTestCase()
 {
+	bool result = true;
+
 	// reading Configuration.xml
 	//
 	SoftwareInfo si;
@@ -456,7 +220,7 @@ void TestAppDataService::initTestCase()
 
 	timeoutChecker.setSingleShot(true);
 	connect(&cfgLoader, &CfgLoaderThread::signal_configurationReady,
-			[&](const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+			[&](const QByteArray configurationXmlData, const BuildFileInfoArray /*buildFileInfoArray*/)
 	{
 		data = configurationXmlData;
 		waiter.quit();
@@ -465,56 +229,190 @@ void TestAppDataService::initTestCase()
 	timeoutChecker.start(10 * 1000);
 	waiter.exec();
 
-	if (timeoutChecker.isActive() == false)
-	{
-		QVERIFY2(false, qPrintable("Timeout of reading Configuration.xml"));
-	}
+	QVERIFY2(timeoutChecker.isActive(), "Timeout of reading Configuration.xml");
 
 	XmlReadHelper configXml(data);
 
-	bool result = m_cfgSettings.readFromXml(configXml);
-	if (result == false)
-	{
-		QVERIFY2(false, qPrintable("Could not understand config file Configuration.xml"));
-	}
+	QVERIFY2(m_cfgSettings.readFromXml(configXml), "Could not understand config file Configuration.xml");
 
-	result = initTcpClient(error);
-	if (result == false)
-	{
-		QVERIFY2(false, qPrintable(error));
-	}
+	initTcpClient();
 
-	result = m_tcpClientSocket->sendRequestAndWaitForResponse(ADS_GET_DATA_SOURCES_INFO, error);
-	if (result == false)
-	{
-		QVERIFY2(false, qPrintable(error));
-	}
+	m_tcpClientSocket->sendRequestAndWaitForResponse(ADS_GET_APP_DATA_SOURCES_INFO, result);
+	VERIFY_RESULT("Got error while requesting ADS_GET_APP_DATA_SOURCES_INFO");
 
 	m_tcpClientSocket->initDataSourceArray(m_dataSources);
 
-	result = initSourcePackets(error);
-	if (result == false)
-	{
-		QVERIFY2(false, qPrintable(error));
-	}
+	initSourcePackets(result);
+	VERIFY_RESULT("Got error while initializing fake AppDataSources");
 
-	result = initSenders(error);
-	if (result == false)
-	{
-		QVERIFY2(false, qPrintable(error));
-	}
+	initSenders(result);
+	VERIFY_RESULT("Got error while initializing udp senders");
 }
 
 void TestAppDataService::TADS_001_001()
 {
-	QString error;
+	bool result = true;
+
+	// Checking correctness of initialization
+	//
+	QVERIFY2(m_dataSources.size() == m_sourcePackets.size(), "Data source quantity not equal packet quantity");
+
+	// Getting all counters before sending any udp
+	//
+	m_tcpClientSocket->sendRequestAndWaitForResponse(ADS_GET_APP_DATA_SOURCES_STATES, result);
+	VERIFY_RESULT("Got error while getting AppDataSource state");
 
 	// Sending udp and checking transmission counters
 	//
-	bool result = sendBuffers(error);
-	if (result == false)
+	sendBuffers(result);
+	VERIFY_RESULT("Could not send registration data");
+
+	// Getting all counters after sending udp
+	//
+	m_previousDataSourceStateMessage = m_nextDataSourceStateMessage;
+
+	m_tcpClientSocket->sendRequestAndWaitForResponse(ADS_GET_APP_DATA_SOURCES_STATES, result);
+	VERIFY_RESULT("Got error while getting AppDataSource state");
+
+	// Checking correctness of all data quantity counters
+	//
+	for (int i = 0; i < m_dataSources.size(); i++)
 	{
-		QVERIFY2(false, qPrintable(error));
+		result = false;
+		// Get AppDataSource state messages to compare
+		//
+		auto* previusSourceMessage = getSourceMessageById(m_previousDataSourceStateMessage, m_dataSources[i].ID());
+		auto* nextSourceMessage = getSourceMessageById(m_nextDataSourceStateMessage, m_dataSources[i].ID());
+
+		VERIFY_STR(previusSourceMessage != nullptr && nextSourceMessage != nullptr,
+				   "AppDataSource state reply doesn't contain state of " + m_dataSources[i].lmEquipmentID());
+
+		// AppDataSourceState::receivedDataID
+		//
+		Rup::Header& header = m_sourcePackets[i][0].header;
+		quint32 dataId = reverseUint32(header.dataId);
+
+		VERIFY_STR(dataId == nextSourceMessage->receiveddataid(),
+				   "Source " + m_dataSources[i].lmEquipmentID() +
+				   " received Data ID " + QString::number(nextSourceMessage->receiveddataid(), 16) +
+				   " instead of " + QString::number(dataId, 16));
+
+		// AppDataSourceState::receivedPacketCount
+		//
+		qint64 receivedPacketsQuantity = nextSourceMessage->receivedpacketcount() - previusSourceMessage->receivedpacketcount();
+
+		VERIFY_STR(receivedPacketsQuantity == 1,
+				   "Source " + m_dataSources[i].lmEquipmentID() +
+				   " received " + QString::number(receivedPacketsQuantity) +
+				   " packets instead of 1");
+
+		// AppDataSourceState::receivedFramesCount
+		//
+		qint64 receivedFramesQuantity = nextSourceMessage->receivedframescount() - previusSourceMessage->receivedframescount();
+
+		VERIFY_STR(receivedFramesQuantity == m_dataSources[i].lmRupFramesQuantity(),
+				   "Source " + m_dataSources[i].lmEquipmentID() +
+				   " received " + QString::number(receivedFramesQuantity) +
+				   " frames instead of " + QString::number(m_dataSources[i].lmRupFramesQuantity()));
+
+		// AppDataSourceState::receivedDataSize
+		//
+		qint64 receivedDataQuantity = nextSourceMessage->receiveddatasize() - previusSourceMessage->receiveddatasize();
+		int expectedDataQuantity = m_dataSources[i].lmRupFramesQuantity() * Socket::ENTIRE_UDP_SIZE;
+
+		VERIFY_STR(receivedDataQuantity == expectedDataQuantity,
+				   "Source " + m_dataSources[i].lmEquipmentID() +
+				   " received " + QString::number(receivedFramesQuantity) +
+				   " bytes instead of " + QString::number(expectedDataQuantity));
+
+		// AppDataSourceState::lostedPacketCount
+		//
+		qint64 lostPacketCount = nextSourceMessage->lostedpacketcount() - previusSourceMessage->lostedpacketcount();
+
+		VERIFY_STR(lostPacketCount == 0,
+				   "Source " + m_dataSources[i].lmEquipmentID() +
+				   " lost " + QString::number(lostPacketCount) +
+				   " packets instead of 0");
+
+		// AppDataSourceState::rupFramePlantTime
+		//
+		Rup::TimeStamp timeStamp = header.timeStamp;
+		timeStamp.reverseBytes();
+
+		QDateTime expectedPlantTime;
+
+		expectedPlantTime.setTimeSpec(Qt::UTC);	// don't delete this to prevent plantTime conversion from Local to UTC time!!!
+
+		expectedPlantTime.setDate(QDate(timeStamp.year, timeStamp.month, timeStamp.day));
+		expectedPlantTime.setTime(QTime(timeStamp.hour, timeStamp.minute, timeStamp.second, timeStamp.millisecond));
+
+		QDateTime receivedPlantTime = QDateTime::fromMSecsSinceEpoch(nextSourceMessage->rupframeplanttime());
+
+		VERIFY_STR(receivedPlantTime == expectedPlantTime,
+				   "Source " + m_dataSources[i].lmEquipmentID() +
+				   " received plant time " + receivedPlantTime.toString() +
+				   " instead of " + expectedPlantTime.toString());
+
+		// AppDataSourceState::rupFrameNumerator
+		//
+		quint16 numerator = reverseUint16(header.numerator);
+		VERIFY_STR(numerator != nextSourceMessage->rupframenumerator(),
+				   "Source " + m_dataSources[i].lmEquipmentID() +
+				   " received numerator " + QString::number(nextSourceMessage->rupframenumerator()) +
+				   " instead of " + QString::number(numerator));
+
+		/*
+		 *  Verify error counters
+		 */
+
+		// AppDataSourceState::errorProtocolVersion
+		//
+		qint64 errorProtocolVersion = nextSourceMessage->errorprotocolversion() - previusSourceMessage->errorprotocolversion();
+		VERIFY_STR(errorProtocolVersion == 0,
+				   "Source " + m_dataSources[i].lmEquipmentID() +
+				   " incrimented errorProtocolVersion by " + QString::number(errorProtocolVersion));
+
+		// AppDataSourceState::errorFramesQuantity
+		//
+		qint64 errorFramesQuantity = nextSourceMessage->errorframesquantity() - previusSourceMessage->errorframesquantity();
+		VERIFY_STR(errorFramesQuantity == 0,
+				   "Source " + m_dataSources[i].lmEquipmentID() +
+				   " incrimented errorFramesQuantity by " + QString::number(errorFramesQuantity));
+
+		// AppDataSourceState::errorFrameNo
+		//
+		qint64 errorFrameNo = nextSourceMessage->errorframeno() - previusSourceMessage->errorframeno();
+		VERIFY_STR(errorFrameNo == 0,
+				   "Source " + m_dataSources[i].lmEquipmentID() +
+				   " incrimented errorFrameNo by " + QString::number(errorFrameNo));
+
+		// AppDataSourceState::errorDataID
+		//
+		qint64 errorDataID = nextSourceMessage->errordataid() - previusSourceMessage->errordataid();
+		VERIFY_STR(errorDataID == 0,
+				   "Source " + m_dataSources[i].lmEquipmentID() +
+				   " incrimented errorDataID by " + QString::number(errorDataID));
+
+		// AppDataSourceState::errorFrameSize
+		//
+		qint64 errorFrameSize = nextSourceMessage->errorframesize() - previusSourceMessage->errorframesize();
+		VERIFY_STR(errorFrameSize == 0,
+				   "Source " + m_dataSources[i].lmEquipmentID() +
+				   " incrimented errorFrameSize by " + QString::number(errorFrameSize));
+
+		// AppDataSourceState::errorDuplicatePlantTime
+		//
+		qint64 errorDuplicatePlantTime = nextSourceMessage->errorduplicateplanttime() - previusSourceMessage->errorduplicateplanttime();
+		VERIFY_STR(errorDuplicatePlantTime == 0,
+				   "Source " + m_dataSources[i].lmEquipmentID() +
+				   " incrimented errorDuplicatePlantTime by " + QString::number(errorDuplicatePlantTime));
+
+		// AppDataSourceState::errorNonmonotonicPlantTime
+		//
+		qint64 errorNonmonotonicPlantTime = nextSourceMessage->errornonmonotonicplanttime() - previusSourceMessage->errornonmonotonicplanttime();
+		VERIFY_STR(errorNonmonotonicPlantTime == 0,
+				   "Source " + m_dataSources[i].lmEquipmentID() +
+				   " incrimented errorNonmonotonicPlantTime by " + QString::number(errorNonmonotonicPlantTime));
 	}
 }
 

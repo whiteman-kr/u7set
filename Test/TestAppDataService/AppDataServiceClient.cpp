@@ -3,6 +3,7 @@
 #include <QTcpSocket>
 #include "../../lib/HostAddressPort.h"
 #include "../../lib/Tcp.h"
+#include "TestUtils.h"
 
 
 AppDataServiceClient::AppDataServiceClient(Network::GetAppDataSourcesStatesReply& dataSourceStateMessage,
@@ -29,20 +30,20 @@ AppDataServiceClient::~AppDataServiceClient()
 	}
 }
 
-bool AppDataServiceClient::sendRequestAndWaitForResponse(quint32 requestID, QString& error)
+void AppDataServiceClient::sendRequestAndWaitForResponse(quint32 requestID, bool& result)
 {
-	return sendRequestAndWaitForResponse(requestID, nullptr, 0, error);
+	sendRequestAndWaitForResponse(requestID, nullptr, 0, result);
 }
 
-bool AppDataServiceClient::sendRequestAndWaitForResponse(quint32 requestID, google::protobuf::Message& protobufMessage, QString& error)
+void AppDataServiceClient::sendRequestAndWaitForResponse(quint32 requestID, google::protobuf::Message& protobufMessage, bool& result)
 {
 	int messageSize = protobufMessage.ByteSize();
 
-	if (messageSize > Tcp::TCP_MAX_DATA_SIZE)
-	{
-		error = QString("Request %1 has message size %2 while limit is %3").arg(requestID).arg(messageSize).arg(Tcp::TCP_MAX_DATA_SIZE);
-		return false;
-	}
+	VERIFY_STATEMENT_STR(messageSize <= Tcp::TCP_MAX_DATA_SIZE,
+						 QString("Request %1 has message size %2 while limit is %3")
+						 .arg(requestID)
+						 .arg(messageSize)
+						 .arg(Tcp::TCP_MAX_DATA_SIZE));
 
 	if (m_buffer == nullptr)
 	{
@@ -51,15 +52,14 @@ bool AppDataServiceClient::sendRequestAndWaitForResponse(quint32 requestID, goog
 
 	protobufMessage.SerializeWithCachedSizesToArray(reinterpret_cast<google::protobuf::uint8*>(m_buffer));
 
-	return sendRequestAndWaitForResponse(requestID, m_buffer, messageSize, error);
+	sendRequestAndWaitForResponse(requestID, m_buffer, messageSize, result);
 }
 
-bool AppDataServiceClient::sendRequestAndWaitForResponse(quint32 requestID, const char* requestData, quint32 requestDataSize, QString& error)
+void AppDataServiceClient::sendRequestAndWaitForResponse(quint32 requestID, const char* requestData, quint32 requestDataSize, bool& result)
 {
-	if (ensureConnectedToService(error) == false)
-	{
-		return false;
-	}
+	ensureConnectedToService(result);
+	VERIFY_RESULT("Trying to send request while not connected to service");
+
 	// Sending header
 	//
 	m_sendRequestHeader.type = Tcp::SocketWorker::Header::Type::Request;
@@ -70,76 +70,47 @@ bool AppDataServiceClient::sendRequestAndWaitForResponse(quint32 requestID, cons
 
 	m_requestNumerator++;
 
-	if (socketWrite(reinterpret_cast<char*>(&m_sendRequestHeader), sizeof(m_sendRequestHeader), error) == false)
-	{
-		return false;
-	}
+	socketWrite(reinterpret_cast<char*>(&m_sendRequestHeader), sizeof(m_sendRequestHeader), result);
+	VERIFY_RESULT("Got error while sending request header");
 
 	// Sending data
 	//
 	if (requestDataSize > 0)
 	{
-		if (requestData == nullptr)
-		{
-			error = "Null data passed to request while data size is more than zero";
-			return false;
-		}
+		VERIFY_STATEMENT(requestData != nullptr, "Null data passed to request while data size is more than zero");
 
-		if (socketWrite(requestData, requestDataSize, error) == false)
-		{
-			return false;
-		}
+		socketWrite(requestData, requestDataSize, result);
+		VERIFY_RESULT("Got error while sending request data");
 	}
 
 	// Reading header
-	if (socketRead(reinterpret_cast<char*>(&m_receiveReplyHeader), sizeof(m_receiveReplyHeader), error) == false)
-	{
-		return false;
-	}
+	//
+	socketRead(reinterpret_cast<char*>(&m_receiveReplyHeader), sizeof(m_receiveReplyHeader), result);
+	VERIFY_RESULT("Got error while reading answer header");
 
-	if (m_receiveReplyHeader.checkCRC() == false)
-	{
-		error = "Received header with CRC error";
-		return false;
-	}
+	VERIFY_STATEMENT(m_receiveReplyHeader.checkCRC(), "Received header with CRC error");
 
-	if (m_receiveReplyHeader.id != m_sendRequestHeader.id)
-	{
-		error = "Reply id mismatch";
-		return false;
-	}
+	VERIFY_STATEMENT(m_receiveReplyHeader.id == m_sendRequestHeader.id, "Reply id mismatch");
 
-	if (m_receiveReplyHeader.numerator != m_sendRequestHeader.numerator)
-	{
-		error = "Reply numerator mismatch";
-		return false;
-	}
-	if (m_receiveReplyHeader.type != Tcp::SocketWorker::Header::Type::Reply)
-	{
-		error = "Reply type is not reply";
-		return false;
-	}
+	VERIFY_STATEMENT(m_receiveReplyHeader.numerator == m_sendRequestHeader.numerator, "Reply numerator mismatch");
+
+	VERIFY_STATEMENT(m_receiveReplyHeader.type == Tcp::SocketWorker::Header::Type::Reply, "Reply type is not reply");
 
 	// Reading data
+	//
 	if (m_receiveReplyHeader.dataSize > 0)
 	{
-		if (m_receiveReplyHeader.dataSize > Tcp::TCP_MAX_DATA_SIZE)
-		{
-			error = QString("Datasize in received header is %1 while it must be less than %2").arg(m_receiveReplyHeader.dataSize).arg(Tcp::TCP_MAX_DATA_SIZE);
-			return false;
-		}
-		if (socketRead(m_buffer, m_receiveReplyHeader.dataSize, error) == false)
-		{
-			return false;
-		}
+		VERIFY_STATEMENT_STR(m_receiveReplyHeader.dataSize <= Tcp::TCP_MAX_DATA_SIZE,
+							 QString("Datasize in received header is %1 while it must be less than %2")
+							 .arg(m_receiveReplyHeader.dataSize)
+							 .arg(Tcp::TCP_MAX_DATA_SIZE));
+
+		socketRead(m_buffer, m_receiveReplyHeader.dataSize, result);
+		VERIFY_RESULT("Got error while reading answer data");
 	}
 
-	if (processData(error) == false)
-	{
-		return false;
-	}
-
-	return true;
+	processData(result);
+	VERIFY_RESULT("Processing data error");
 }
 
 void AppDataServiceClient::initDataSourceArray(QVector<DataSource>& dataSourceArray)
@@ -173,60 +144,44 @@ void AppDataServiceClient::initDataSourceArray(QVector<DataSource>& dataSourceAr
 	dataSourceArray.squeeze();
 }
 
-bool AppDataServiceClient::ensureConnectedToService(QString& error)
+void AppDataServiceClient::ensureConnectedToService(bool& result)
 {
 	if (m_tcpSocket->state() == QAbstractSocket::ConnectedState)
 	{
-		return true;
+		result = true;
+		return;
 	}
 
 	m_tcpSocket->connectToHost(m_serverAddressPort.address(), m_serverAddressPort.port());
-	if (m_tcpSocket->waitForConnected(Tcp::TCP_ON_CLIENT_REQUEST_REPLY_TIMEOUT) == false)
-	{
-		error = "Could not make tcp connection to " + m_serverAddressPort.addressPortStr();
-		return false;
-	}
+	VERIFY_STATEMENT_STR(m_tcpSocket->waitForConnected(Tcp::TCP_ON_CLIENT_REQUEST_REPLY_TIMEOUT),
+						 "Could not make tcp connection to " + m_serverAddressPort.addressPortStr());
 
 	Network::SoftwareInfo message;
 
 	m_softwareInfo.serializeTo(&message);
 
-	if (sendRequestAndWaitForResponse(RQID_INTRODUCE_MYSELF, message, error) == false)
-	{
-		return false;
-	}
-	return true;
+	sendRequestAndWaitForResponse(RQID_INTRODUCE_MYSELF, message, result);
+	VERIFY_RESULT("Failed to request RQID_INTRODUCE_MYSELF");
 }
 
-bool AppDataServiceClient::socketWrite(const char* data, quint32 dataSize, QString& error)
+void AppDataServiceClient::socketWrite(const char* data, quint32 dataSize, bool& result)
 {
 	qint64 writtenQuantity = m_tcpSocket->write(data, dataSize);
 
-	if (writtenQuantity == -1)
-	{
-		error = QString("Socket write error: %1").arg(m_tcpSocket->errorString());
-		return false;
-	}
+	VERIFY_STATEMENT_STR(writtenQuantity != -1, "Socket write error: " + m_tcpSocket->errorString());
 
-	if (writtenQuantity != static_cast<int>(dataSize))
-	{
-		error = QString("Socket sent %1 bytes instead of %2").arg(writtenQuantity).arg(dataSize);
-		return false;
-	}
+	VERIFY_STATEMENT_STR(writtenQuantity == static_cast<int>(dataSize),
+						 QString("Socket sent %1 bytes instead of %2")
+						 .arg(writtenQuantity)
+						 .arg(dataSize));
 
 	QTimer::singleShot(Tcp::TCP_BYTES_WRITTEN_TIMEOUT, &m_signalWaiter, SLOT(quit()));
 	m_signalWaiter.exec();
 
-	if (m_tcpSocket->bytesToWrite() > 0)
-	{
-		error = "Socket write timeout";
-		return false;
-	}
-
-	return true;
+	VERIFY_STATEMENT(m_tcpSocket->bytesToWrite() == 0, "Socket write timeout");
 }
 
-bool AppDataServiceClient::socketRead(char* data, quint32 dataSize, QString& error)
+void AppDataServiceClient::socketRead(char* data, quint32 dataSize, bool& result)
 {
 	quint32 totalBytesRead = 0;
 
@@ -236,29 +191,20 @@ bool AppDataServiceClient::socketRead(char* data, quint32 dataSize, QString& err
 		m_signalWaiter.exec();
 
 		qint64 bytesAvailable = m_tcpSocket->bytesAvailable();
-		if (bytesAvailable <= 0)
-		{
-			error = QString("Socket read error: %1").arg(m_tcpSocket->errorString());
-			return false;
-		}
 
-		int bytesToRead = std::min(dataSize - totalBytesRead, static_cast<quint32>(bytesAvailable));
+		VERIFY_STATEMENT_STR(totalBytesRead < dataSize && bytesAvailable > 0, "Socket read error:" + m_tcpSocket->errorString());
+
+		quint32 bytesToRead = std::min(dataSize - totalBytesRead, static_cast<quint32>(bytesAvailable));
 
 		qint64 bytesRead = m_tcpSocket->read(data, bytesToRead);
 
-		if (bytesRead < bytesToRead)
-		{
-			error = QString("Socket read error: %1").arg(m_tcpSocket->errorString());
-			return false;
-		}
+		VERIFY_STATEMENT_STR(bytesRead == bytesToRead, "Socket read error: %1" + m_tcpSocket->errorString());
 
 		totalBytesRead += bytesRead;
 	}
-
-	return true;
 }
 
-bool AppDataServiceClient::processData(QString& error)
+void AppDataServiceClient::processData(bool& result)
 {
 	switch (m_receiveReplyHeader.id)
 	{
@@ -266,54 +212,39 @@ bool AppDataServiceClient::processData(QString& error)
 	{
 		Network::SoftwareInfo message;
 
-		if (parseMessageLoggingErrors(message, error) == false)
-		{
-			error = "Reply RQID_INTRODUCE_MYSELF protobuf error: " + error;
-			return false;
-		}
+		parseMessageLoggingErrors(message, result);
+		VERIFY_RESULT("Got error while parsing RQID_INTRODUCE_MYSELF message");
+
 		m_serviceSoftwareInfo.serializeFrom(message);
-		if (m_serviceSoftwareInfo.softwareType() != E::SoftwareType::AppDataService)
-		{
-			error = "TCP Connection established to wrong software: " + E::valueToString<E::SoftwareType>(m_serviceSoftwareInfo.softwareType());
-			return false;
-		}
+
+		VERIFY_STATEMENT_STR(m_serviceSoftwareInfo.softwareType() == E::SoftwareType::AppDataService,
+							 "TCP Connection established to wrong software: " +
+							 E::valueToString<E::SoftwareType>(m_serviceSoftwareInfo.softwareType()));
+
 		break;
 	}
-	case ADS_GET_DATA_SOURCES_STATES:
-		if (parseMessageLoggingErrors(m_dataSourceStateMessage, error) == false)
-		{
-			error = "Reply ADS_GET_DATA_SOURCES_STATES protobuf error: " + error;
-			return false;
-		}
+	case ADS_GET_APP_DATA_SOURCES_STATES:
+		parseMessageLoggingErrors(m_dataSourceStateMessage, result);
+		VERIFY_RESULT("Got error while parsing ADS_GET_APP_DATA_SOURCES_STATES message");
+
 		break;
-	case ADS_GET_DATA_SOURCES_INFO:
-		if (parseMessageLoggingErrors(m_dataSourceInfoMessage, error) == false)
-		{
-			error = "Reply ADS_GET_DATA_SOURCES_INFO protobuf error: " + error;
-			return false;
-		}
+	case ADS_GET_APP_DATA_SOURCES_INFO:
+		parseMessageLoggingErrors(m_dataSourceInfoMessage, result);
+		VERIFY_RESULT("Got error while parsing ADS_GET_APP_DATA_SOURCES_INFO message");
+
 		break;
 	default:
-		error = QString("Unknown Reply header ID: %1").arg(m_receiveReplyHeader.id);
-		return false;
+		result = false;
+		FAIL_STR(QString("Unknown Reply header ID: %1").arg(m_receiveReplyHeader.id));
 	}
-	return true;
 }
 
-bool AppDataServiceClient::parseMessageLoggingErrors(google::protobuf::Message& protobufMessage, QString& error)
+void AppDataServiceClient::parseMessageLoggingErrors(google::protobuf::Message& protobufMessage, bool& result)
 {
-	if (protobufMessage.ParsePartialFromArray(m_buffer, m_receiveReplyHeader.dataSize) == false)
-	{
-		error = "has invalid format";
-		return false;
-	}
+	VERIFY_STATEMENT(protobufMessage.ParsePartialFromArray(m_buffer, m_receiveReplyHeader.dataSize), "Message has invalid format");
 
-	if (protobufMessage.IsInitialized() == false)
-	{
-		error = "has missing required fields: " + QString::fromStdString(protobufMessage.InitializationErrorString());
-		return false;
-	}
-
-	return true;
+	VERIFY_STATEMENT_STR(protobufMessage.IsInitialized(),
+			   "Message has missing required fields: " +
+			   QString::fromStdString(protobufMessage.InitializationErrorString()));
 }
 

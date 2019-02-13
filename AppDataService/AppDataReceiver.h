@@ -19,6 +19,8 @@ public:
 
 	virtual ~AppDataReceiverThread() override;
 
+	void fillAppDataReceiveState(Network::AppDataReceiveState* adrs);
+
 private:
 	virtual void run() override;
 

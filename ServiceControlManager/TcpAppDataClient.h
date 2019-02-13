@@ -50,6 +50,8 @@ public:
 	QString configServiceConnectionState();
 	QString archiveServiceConnectionState();
 
+	Network::AppDataServiceState& serviceState();
+
 signals:
 	void clientsLoaded();
 
