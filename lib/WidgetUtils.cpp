@@ -1,5 +1,4 @@
 #include "WidgetUtils.h"
-#include <QDialog>
 #include <QStandardItemModel>
 #include <QSettings>
 #include <QApplication>
@@ -9,6 +8,7 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QAction>
+#include <QDesktopWidget>
 
 void saveWindowPosition(QWidget* window, QString widgetKey)
 {
@@ -68,10 +68,10 @@ void setWindowPosition(QWidget* window, QString widgetKey)
 
 TableDataVisibilityController::TableDataVisibilityController(QTableView* parent, const QString& settingsBranchName, const QVector<int>& defaultVisibleColumnSet) :
 	QObject(parent->horizontalHeader()),
-	m_signalsView(parent),
+	m_tableView(parent),
 	m_settingBranchName(settingsBranchName)
 {
-	auto* model = m_signalsView->model();
+	auto* model = m_tableView->model();
 	int columnCount = model->columnCount();
 	m_columnNameList.reserve(columnCount);
 	for (int i = 0; i < columnCount; i++)
@@ -81,10 +81,14 @@ TableDataVisibilityController::TableDataVisibilityController(QTableView* parent,
 
 	QMap<int, int> positionMap;
 	QSettings settings;
-	QHeaderView* horizontalHeader = m_signalsView->horizontalHeader();
+	QHeaderView* horizontalHeader = m_tableView->horizontalHeader();
 
 	horizontalHeader->setContextMenuPolicy(Qt::ActionsContextMenu);
 	horizontalHeader->setSectionsMovable(true);
+
+	// Use only on first time
+	//
+	int positionForUnknownColumns = defaultVisibleColumnSet.count();
 
 	for (int i = 0; i < columnCount; i++)
 	{
@@ -92,16 +96,24 @@ TableDataVisibilityController::TableDataVisibilityController(QTableView* parent,
 		int columnWidth = settings.value(m_settingBranchName + "/ColumnWidth/" + columnName, -1).toInt();
 		if (columnWidth == -1)
 		{
-			m_signalsView->resizeColumnToContents(i);
+			m_tableView->resizeColumnToContents(i);
 		}
 		else
 		{
-			m_signalsView->setColumnWidth(i, columnWidth);
+			m_tableView->setColumnWidth(i, columnWidth);
 		}
 
 		horizontalHeader->setSectionHidden(i, !settings.value(m_settingBranchName + "/ColumnVisibility/" + columnName, defaultVisibleColumnSet.contains(i)).toBool());
 
-		int position = settings.value(m_settingBranchName + "/ColumnPosition/" + columnName, i).toInt();
+		int position = settings.value(m_settingBranchName + "/ColumnPosition/" + columnName, -1).toInt();
+		if (position == -1)
+		{
+			position = defaultVisibleColumnSet.indexOf(i);
+		}
+		if (position == -1)
+		{
+			position = positionForUnknownColumns++;
+		}
 		positionMap.insert(position, i);
 	}
 
@@ -112,7 +124,7 @@ TableDataVisibilityController::TableDataVisibilityController(QTableView* parent,
 		horizontalHeader->moveSection(oldVisualIndex, i);
 	}
 
-	QAction* columnsAction = new QAction("Columns", m_signalsView);
+	QAction* columnsAction = new QAction("Columns", m_tableView);
 	connect(columnsAction, &QAction::triggered, this, &TableDataVisibilityController::editColumnsVisibilityAndOrder);
 	horizontalHeader->addAction(columnsAction);
 	connect(horizontalHeader, &QHeaderView::sectionResized, this, &TableDataVisibilityController::saveColumnWidth);
@@ -120,7 +132,7 @@ TableDataVisibilityController::TableDataVisibilityController(QTableView* parent,
 
 TableDataVisibilityController::~TableDataVisibilityController()
 {
-	auto header = m_signalsView->horizontalHeader();
+	auto header = m_tableView->horizontalHeader();
 	int columnCount = m_columnNameList.count();
 	for (int i = 0; i < columnCount; i++)
 	{
@@ -136,174 +148,20 @@ TableDataVisibilityController::~TableDataVisibilityController()
 
 void TableDataVisibilityController::editColumnsVisibilityAndOrder()
 {
-	QDialog dlg(nullptr, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
-	QStandardItemModel *model = new QStandardItemModel(&dlg);
-	auto header = m_signalsView->horizontalHeader();
-	for (int i = 0; i < header->count(); i++)
-	{
-		auto item = new QStandardItem;
-		item->setCheckable(true);
-		item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-		model->setItem(i, item);
-	}
-
-	// Helper functions
-	//
-	auto isHidden = [header](int logicalIndex){
-		return header->isSectionHidden(logicalIndex) || header->sectionSize(logicalIndex) == 0;
-	};
-	auto updateHidden = [model](int visualIndex, bool hidden) {
-		model->setData(model->index(visualIndex, 0), hidden ? Qt::Unchecked : Qt::Checked, Qt::CheckStateRole);
-	};
-	auto setHidden = [header](int logicalIndex, bool hidden) {
-		header->setSectionHidden(logicalIndex, hidden);
-		if (!hidden && header->sectionSize(logicalIndex) == 0)
-		{
-			header->resizeSection(logicalIndex, header->defaultSectionSize());
-		}
-	};
-
-	QAbstractItemModel* tableModel = m_signalsView->model();
-	if (tableModel == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	// Update state of items from signal table header
-	//
-	auto updateItems = [=](){
-		for (int i = 0; i < header->count(); i++)
-		{
-			int logicalIndex = header->logicalIndex(i);
-			updateHidden(i, isHidden(logicalIndex));
-			model->setData(model->index(i, 0), tableModel->headerData(logicalIndex, Qt::Horizontal, Qt::DisplayRole).toString().replace('\n', ' '), Qt::DisplayRole);
-		}
-	};
-	updateItems();
-
-	// Child widgets layout
-	//
-	QListView* listView = new QListView(&dlg);
-	listView->setModel(model);
-	listView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-	listView->setCurrentIndex(model->index(0,0));
-	QHBoxLayout* hl = new QHBoxLayout;
-	hl->addWidget(listView);
-	QVBoxLayout* vl = new QVBoxLayout;
-	hl->addLayout(vl);
-	QPushButton* upButton = new QPushButton("Up", &dlg);
-	vl->addWidget(upButton);
-	QPushButton* downButton = new QPushButton("Down", &dlg);
-	vl->addWidget(downButton);
-	vl->addStretch();
-	dlg.setLayout(hl);
+	EditColumnsVisibilityDialog dlg(m_tableView, this);
 
 	//Window geometry
 	//
-	setWindowPosition(&dlg, "ColumnsVisibilityDialog");
-
-	// Show/Hide column
-	//
-	bool isReselectingItems = false;
-	connect(model, &QStandardItemModel::itemChanged, this, [&](QStandardItem* item){
-		if (isReselectingItems == true)
-		{
-			return;
-		}
-
-		int visualIndex = item->row();
-		int logicalIndex = header->logicalIndex(visualIndex);
-		setHidden(logicalIndex, item->checkState() != Qt::Checked);
-
-		saveColumnVisibility(logicalIndex, item->checkState() == Qt::Checked);
-
-		isReselectingItems = true;
-		QModelIndexList&& list = listView->selectionModel()->selectedIndexes();
-		foreach(const QModelIndex& index, list)
-		{
-			if (index.row() == visualIndex)
-			{
-				continue;
-			}
-
-			logicalIndex = header->logicalIndex(index.row());
-
-			QStandardItem* selectedItem = model->item(index.row());
-			if (selectedItem->checkState() == Qt::Checked)
-			{
-				selectedItem->setCheckState(Qt::Unchecked);
-
-				setHidden(logicalIndex, true);
-				saveColumnVisibility(logicalIndex, false);
-			}
-			else
-			{
-				selectedItem->setCheckState(Qt::Checked);
-
-				setHidden(logicalIndex, false);
-				saveColumnVisibility(logicalIndex, true);
-			}
-
-		}
-		isReselectingItems = false;
-
-		//Check if no visible column left
-		//
-		for (int i = 0; i < model->rowCount(); i++)
-		{
-			if (!isHidden(i))
-			{
-				return;
-			}
-		}
-		setHidden(0, false);
-		saveColumnVisibility(0, true);
-		updateHidden(header->visualIndex(0), false);
-	}, Qt::DirectConnection);
-
-	// Move column left (move item up)
-	//
-	connect(upButton, &QPushButton::pressed, [=](){
-		int visualIndex = listView->currentIndex().row();
-		if (visualIndex == 0)
-		{
-			return;
-		}
-
-		header->moveSection(visualIndex, visualIndex - 1);
-
-		listView->setCurrentIndex(model->index(visualIndex - 1, 0));
-		updateItems();
-		saveColumnPosition(header->logicalIndex(visualIndex), visualIndex);
-		saveColumnPosition(header->logicalIndex(visualIndex - 1), visualIndex - 1);
-	});
-
-	// Move column right (move item down)
-	//
-	connect(downButton, &QPushButton::pressed, [=](){
-		int visualIndex = listView->currentIndex().row();
-		if (visualIndex == model->rowCount() - 1)
-		{
-			return;
-		}
-
-		header->moveSection(visualIndex, visualIndex + 1);
-
-		listView->setCurrentIndex(model->index(visualIndex + 1, 0));
-		updateItems();
-		saveColumnPosition(header->logicalIndex(visualIndex), visualIndex);
-		saveColumnPosition(header->logicalIndex(visualIndex + 1), visualIndex + 1);
-	});
+	setWindowPosition(&dlg, m_settingBranchName + "ColumnsVisibilityDialog");
 
 	dlg.exec();
 
-	saveWindowPosition(&dlg, "ColumnsVisibilityDialog");
+	saveWindowPosition(&dlg, m_settingBranchName + "/ColumnsVisibilityDialog");
 }
 
 void TableDataVisibilityController::saveColumnWidth(int index)
 {
-	int width = m_signalsView->columnWidth(index);
+	int width = m_tableView->columnWidth(index);
 	if (width == 0)
 	{
 		return;
@@ -323,4 +181,253 @@ void TableDataVisibilityController::saveColumnPosition(int index, int position)
 {
 	QSettings settings;
 	settings.setValue((m_settingBranchName + "/ColumnPosition/%1").arg(m_columnNameList[index].replace("/", "|")).replace("\n", " "), position);
+}
+
+EditColumnsVisibilityDialog::EditColumnsVisibilityDialog(QTableView* tableView, TableDataVisibilityController* controller) :
+	QDialog(nullptr, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint),
+	m_controller(controller)
+{
+	m_columnModel = new QStandardItemModel(this);
+	m_header = tableView->horizontalHeader();
+	for (int i = 0; i < m_header->count(); i++)
+	{
+		auto item = new QStandardItem;
+		item->setCheckable(true);
+		item->setFlags(item->flags() & ~Qt::ItemIsEditable);
+		m_columnModel->setItem(i, item);
+	}
+
+	m_tableModel = tableView->model();
+	if (m_tableModel == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	// Child widgets layout
+	//
+	m_columnList = new QListView(this);
+	m_columnList->setModel(m_columnModel);
+	m_columnList->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	m_columnList->setCurrentIndex(m_columnModel->index(0,0));
+	QHBoxLayout* hl = new QHBoxLayout;
+	hl->addWidget(m_columnList);
+	QVBoxLayout* vl = new QVBoxLayout;
+	hl->addLayout(vl);
+	QPushButton* upButton = new QPushButton("Up", this);
+	vl->addWidget(upButton);
+	QPushButton* downButton = new QPushButton("Down", this);
+	vl->addWidget(downButton);
+	vl->addStretch();
+	setLayout(hl);
+
+	// Show/Hide column
+	//
+	connect(m_columnModel, &QStandardItemModel::itemChanged, this, &EditColumnsVisibilityDialog::changeVisibility, Qt::DirectConnection);
+
+	// Move column left (move item up)
+	//
+	connect(upButton, &QPushButton::pressed, this, &EditColumnsVisibilityDialog::moveUp);
+
+	// Move column right (move item down)
+	//
+	connect(downButton, &QPushButton::pressed, this, &EditColumnsVisibilityDialog::moveDown);
+
+	// Update state of items from signal table header
+	//
+	updateItems();
+}
+
+void EditColumnsVisibilityDialog::updateItems(QList<int> selectedLogicalIndexes, int currentLogicalIndex)
+{
+	QItemSelectionModel* selectionModel = m_columnList->selectionModel();
+	selectionModel->clearSelection();
+
+	for (int i = 0; i < m_header->count(); i++)
+	{
+		int logicalIndex = m_header->logicalIndex(i);
+		updateHidden(i, isHidden(logicalIndex));
+		QModelIndex index = m_columnModel->index(i, 0);
+		m_columnModel->setData(index, m_tableModel->headerData(logicalIndex, Qt::Horizontal, Qt::DisplayRole).toString().replace('\n', ' '), Qt::DisplayRole);
+
+		if (logicalIndex == currentLogicalIndex)
+		{
+			selectionModel->select(index, QItemSelectionModel::Current);
+		}
+
+		if (selectedLogicalIndexes.contains(logicalIndex))
+		{
+			selectionModel->select(index, QItemSelectionModel::Select);
+		}
+	}
+}
+
+bool EditColumnsVisibilityDialog::isHidden(int logicalIndex)
+{
+	return m_header->isSectionHidden(logicalIndex) || m_header->sectionSize(logicalIndex) == 0;
+}
+
+void EditColumnsVisibilityDialog::updateHidden(int visualIndex, bool hidden)
+{
+	m_columnModel->setData(m_columnModel->index(visualIndex, 0), hidden ? Qt::Unchecked : Qt::Checked, Qt::CheckStateRole);
+}
+
+void EditColumnsVisibilityDialog::setHidden(int logicalIndex, bool hidden)
+{
+	m_header->setSectionHidden(logicalIndex, hidden);
+	if (!hidden && m_header->sectionSize(logicalIndex) == 0)
+	{
+		m_header->resizeSection(logicalIndex, m_header->defaultSectionSize());
+	}
+}
+
+void EditColumnsVisibilityDialog::moveUp()
+{
+	m_changingItems = true;
+	QList<int> selectedIndexes;
+	QList<int> selectedLogicalIndexes;
+	int currentLogicalIndex = -1;
+
+	QModelIndexList&& list = m_columnList->selectionModel()->selectedIndexes();
+
+	selectedIndexes.reserve(list.size());
+	selectedLogicalIndexes.reserve(list.size());
+
+	foreach (const QModelIndex& index, list)
+	{
+		selectedIndexes.push_back(index.row());
+		selectedLogicalIndexes.push_back(m_header->logicalIndex(index.row()));
+	}
+
+	QModelIndex currentIndex = m_columnList->currentIndex();
+	if (currentIndex.isValid())
+	{
+		currentLogicalIndex = m_header->logicalIndex(currentIndex.row());
+	}
+
+	std::sort(selectedIndexes.begin(), selectedIndexes.end());
+
+	for (int i = 0; i < selectedIndexes.count(); i++)
+	{
+		if (selectedIndexes[i] == 0)
+		{
+			continue;
+		}
+
+		if (i == 0 || selectedIndexes[i - 1] != selectedIndexes[i] - 1)
+		{
+			m_header->moveSection(selectedIndexes[i], selectedIndexes[i] - 1);
+			selectedIndexes[i]--;
+		}
+	}
+
+	updateItems(selectedLogicalIndexes, currentLogicalIndex);
+	m_changingItems = false;
+}
+
+void EditColumnsVisibilityDialog::moveDown()
+{
+	m_changingItems = true;
+	QList<int> selectedIndexes;
+	QList<int> selectedLogicalIndexes;
+	int currentLogicalIndex = -1;
+
+	QModelIndexList&& list = m_columnList->selectionModel()->selectedIndexes();
+
+	selectedIndexes.reserve(list.size());
+	selectedLogicalIndexes.reserve(list.size());
+
+	foreach (const QModelIndex& index, list)
+	{
+		selectedIndexes.push_back(index.row());
+		selectedLogicalIndexes.push_back(m_header->logicalIndex(index.row()));
+	}
+
+	QModelIndex currentIndex = m_columnList->currentIndex();
+	if (currentIndex.isValid())
+	{
+		currentLogicalIndex = m_header->logicalIndex(currentIndex.row());
+	}
+
+	std::sort(selectedIndexes.begin(), selectedIndexes.end(), std::greater<int>());
+
+	for (int i = 0; i < selectedIndexes.count(); i++)
+	{
+		if (selectedIndexes[i] == m_columnModel->rowCount() - 1)
+		{
+			continue;
+		}
+
+		if (i == 0 || selectedIndexes[i - 1] != selectedIndexes[i] + 1)
+		{
+			m_header->moveSection(selectedIndexes[i], selectedIndexes[i] + 1);
+			selectedIndexes[i]++;
+		}
+	}
+
+	updateItems(selectedLogicalIndexes, currentLogicalIndex);
+	m_changingItems = false;
+}
+
+void EditColumnsVisibilityDialog::changeVisibility(QStandardItem* item)
+{
+	if (m_changingItems == true)
+	{
+		return;
+	}
+
+	// Apply visibility for current item
+	//
+	int visualIndex = item->row();
+	int logicalIndex = m_header->logicalIndex(visualIndex);
+	setHidden(logicalIndex, item->checkState() != Qt::Checked);
+
+	m_controller->saveColumnVisibility(logicalIndex, item->checkState() == Qt::Checked);
+
+	// In case if user selected multiple items
+	//
+	m_changingItems = true;
+	QModelIndexList&& list = m_columnList->selectionModel()->selectedIndexes();
+	foreach(const QModelIndex& index, list)
+	{
+		if (index.row() == visualIndex)
+		{
+			continue;
+		}
+
+		logicalIndex = m_header->logicalIndex(index.row());
+
+		QStandardItem* selectedItem = m_columnModel->item(index.row());
+		if (selectedItem->checkState() == Qt::Checked)
+		{
+			selectedItem->setCheckState(Qt::Unchecked);
+
+			setHidden(logicalIndex, true);
+			m_controller->saveColumnVisibility(logicalIndex, false);
+		}
+		else
+		{
+			selectedItem->setCheckState(Qt::Checked);
+
+			setHidden(logicalIndex, false);
+			m_controller->saveColumnVisibility(logicalIndex, true);
+		}
+	}
+	m_changingItems = false;
+
+	//Check if no visible column left
+	//
+	for (int i = 0; i < m_columnModel->rowCount(); i++)
+	{
+		if (isHidden(i) == false)
+		{
+			return;
+		}
+	}
+
+	m_changingItems = true;
+	setHidden(0, false);
+	m_controller->saveColumnVisibility(0, true);
+	updateHidden(m_header->visualIndex(0), false);
+	m_changingItems = false;
 }

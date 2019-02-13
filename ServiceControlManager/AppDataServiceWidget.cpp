@@ -128,36 +128,108 @@ const QVector<int> defaultSourceColumnVisibility =
 };
 
 
-const int SC_ID = 0,
-SC_CAPTION = 1,
-SC_FIRST_STATE_COLUMN = 2,
-SC_VALUE = 2,
-SC_VALID = 3,
-SC_UNIT = 4,
-SC_LOW_VALID_RANGE = 5,
-SC_HIGH_VALID_RANGE = 6,
-SC_COUNT = 7;
+const int SC_APP_SIGNAL_ID = 0,
+SC_CUSTOM_APP_SIGNAL_ID = 1,
+SC_CAPTION = 2,
+SC_EQUIPMENT_ID = 3,
+SC_LM_EQUIPMENT_ID = 4,
+SC_BUS_TYPE_ID = 5,
+SC_CHANNEL = 6,
+SC_SIGNAL_TYPE = 7,
+SC_IN_OUT_TYPE = 8,
+SC_DATA_SIZE = 9,
+SC_BYTE_ORDER = 10,
+SC_ANALOG_SIGNAL_FORMAT = 11,
+SC_UNIT = 12,
+SC_ENABLE_TUNING = 13,
+SC_TUNING_DEFAULT_VALUE = 14,
+SC_TUNING_LOW_BOUND = 15,
+SC_TUNING_HIGH_BOUND = 16,
+SC_ACQUIRE = 17,
+SC_ARCHIVE = 18,
+SC_DECIMAL_PLACES = 19,
+SC_COARSE_APERTURE = 20,
+SC_FINE_APERTURE = 21,
+SC_ADAPTIVE_APERTURE = 22,
+SC_IO_BUF_ADDR = 23,
+SC_TUNING_ADDR = 24,
+SC_UAL_ADDR = 25,
+SC_REG_BUF_ADDR = 26,
+SC_REG_VALUE_ADDR = 27,
+SC_REG_VALIDITY_ADDR = 28,
+
+// Spec prop struct
+//
+SC_LOW_VALID_RANGE = 29,
+SC_HIGH_VALID_RANGE = 30,
+
+SC_FIRST_STATE_COLUMN = 31,
+SC_VALUE = 31,
+SC_IS_VALID = 32,
+SC_IS_FINE_APERTURE = 33,
+SC_IS_COARSE_APERTURE = 34,
+SC_IS_AUTO_POINT = 35,
+SC_IS_VALIDITY_CHANGE = 36,
+SC_SYSTEM_TIME = 37,
+SC_LOCAL_TIME = 38,
+SC_PLANT_TIME = 39,
+SC_COUNT = 40;
 
 const char* const signalColumnStr[] =
 {
 	"ID",
+	"CustomID",
 	"Caption",
-	"Value",
-	"Valid",
+	"EquipmentID",
+	"LmEquipmentID",
+	"BusTypeID",
+	"Channel",
+	"SignalType",
+	"InOutType",
+	"DataSize",
+	"ByteOrder",
+	"AnalogSignalFormat",
 	"Unit",
+	"EnableTuning",
+	"TuningDefaultValue",
+	"TuningLowBound",
+	"TuningHighBound",
+	"Acquire",
+	"Archive",
+	"DecimalPlaces",
+	"CoarseAperture",
+	"FineAperture",
+	"AdaptiveAperture",
+	"IoBufAddr",
+	"TuningAddr",
+	"UalAddr",
+	"RegBufAddr",
+	"RegValueAddr",
+	"RegValidityAddr",
+
 	"LowValidRange",
-	"HighValidRange"
+	"HighValidRange",
+
+	"Value",
+	"IsValid",
+	"IsFineAperture",
+	"IsCoarseAperture",
+	"IsAutoPoint",
+	"IsValidityChange",
+	"SystemTime",
+	"LocalTime",
+	"PlantTime",
 };
 
 const int SIGNAL_COLUMN_COUNT = sizeof(signalColumnStr) / sizeof(signalColumnStr[0]);
 
 const QVector<int> defaultSignalColumnVisibility =
 {
-	SC_ID,
+	SC_APP_SIGNAL_ID,
 	SC_CAPTION,
 	SC_FIRST_STATE_COLUMN,
 	SC_VALUE,
-	SC_VALID,
+	SC_IS_VALID,
 	SC_UNIT,
 	SC_LOW_VALID_RANGE,
 	SC_HIGH_VALID_RANGE,
@@ -632,6 +704,7 @@ SignalStateModel::SignalStateModel(QObject* parent) :
 	QAbstractTableModel(parent),
 	m_clientSocket(nullptr)
 {
+	static_assert(SC_COUNT == SIGNAL_COLUMN_COUNT, "Signal column count error");
 }
 
 SignalStateModel::~SignalStateModel()
@@ -654,6 +727,9 @@ int SignalStateModel::columnCount(const QModelIndex&) const
 
 QVariant SignalStateModel::data(const QModelIndex& index, int role) const
 {
+	static QString yes = tr("Yes");
+	static QString no = tr("No");
+
 	if (m_clientSocket == nullptr)
 	{
 		return QVariant();
@@ -666,33 +742,53 @@ QVariant SignalStateModel::data(const QModelIndex& index, int role) const
 	if (role == Qt::DisplayRole)
 	{
 		const Signal& s = m_clientSocket->signalParams()[row];
+		const AppSignalState& ass = m_clientSocket->signalStates()[row];
+
 		switch (index.column())
 		{
-			case SC_ID: return s.appSignalID();
-			case SC_CAPTION: return s.caption();
-			case SC_VALUE:
-			{
-				if (row < 0 || row >= m_clientSocket->signalStates().count())
-				{
-					return QVariant();
-				}
-				const AppSignalState& ass = m_clientSocket->signalStates()[row];
-				return ass.m_value;
-			}
-			case SC_VALID:
-			{
-				if (row < 0 || row >= m_clientSocket->signalStates().count())
-				{
-					return QVariant();
-				}
-				const AppSignalState& ass = m_clientSocket->signalStates()[row];
-				return ass.m_flags.valid ? tr("Yes") : tr("No");
-			}
-			case SC_UNIT: return s.unit();
-			case SC_LOW_VALID_RANGE: return s.lowValidRange();
-			case SC_HIGH_VALID_RANGE: return s.highValidRange();
-			default:
-				assert(false);
+		case SC_APP_SIGNAL_ID: return s.appSignalID();
+		case SC_CUSTOM_APP_SIGNAL_ID: return s.customAppSignalID();
+		case SC_CAPTION: return s.caption();
+		case SC_EQUIPMENT_ID: return s.equipmentID();
+		case SC_LM_EQUIPMENT_ID: return s.lmEquipmentID();
+		case SC_BUS_TYPE_ID: return s.busTypeID();
+		case SC_CHANNEL: return E::valueToString<E::Channel>(s.channel());
+		case SC_SIGNAL_TYPE: return E::valueToString<E::SignalType>(s.signalType());
+		case SC_IN_OUT_TYPE: return E::valueToString<E::SignalInOutType>(s.inOutType());
+		case SC_DATA_SIZE: return s.dataSize();
+		case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(s.byteOrder());
+		case SC_ANALOG_SIGNAL_FORMAT: return E::valueToString<E::AnalogAppSignalFormat>(s.analogSignalFormat());
+		case SC_ENABLE_TUNING: return s.enableTuning() ? yes : no;
+		case SC_TUNING_DEFAULT_VALUE: return s.tuningDefaultValue().toString(s.decimalPlaces());
+		case SC_TUNING_LOW_BOUND: return s.tuningLowBound().toString(s.decimalPlaces());
+		case SC_TUNING_HIGH_BOUND: return s.tuningHighBound().toString(s.decimalPlaces());
+		case SC_ACQUIRE: return s.acquire() ? yes : no;
+		case SC_ARCHIVE: return s.archive() ? yes : no;
+		case SC_DECIMAL_PLACES: return s.decimalPlaces();
+		case SC_COARSE_APERTURE: return s.coarseAperture();
+		case SC_FINE_APERTURE: return s.fineAperture();
+		case SC_ADAPTIVE_APERTURE: return s.adaptiveAperture() ? yes : no;
+		case SC_IO_BUF_ADDR: return s.ioBufAddr().toString();
+		case SC_TUNING_ADDR: return s.tuningAddr().toString();
+		case SC_UAL_ADDR: return s.ualAddr().toString();
+		case SC_REG_BUF_ADDR: return s.regBufAddr().toString();
+		case SC_REG_VALUE_ADDR: return s.regValueAddr().toString();
+		case SC_REG_VALIDITY_ADDR: return s.regValidityAddr().toString();
+
+		case SC_VALUE: return ass.m_value;
+		case SC_IS_VALID: return ass.m_flags.valid ? yes : no;
+		case SC_IS_FINE_APERTURE: return ass.m_flags.valid ? yes : no;;
+		case SC_IS_COARSE_APERTURE: return ass.m_flags.coarseAperture ? yes : no;
+		case SC_IS_AUTO_POINT: return ass.m_flags.autoPoint ? yes : no;
+		case SC_IS_VALIDITY_CHANGE: return ass.m_flags.validityChange ? yes : no;
+		case SC_SYSTEM_TIME: return ass.m_time.systemToDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz");
+		case SC_LOCAL_TIME: return ass.m_time.localToDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz");
+		case SC_PLANT_TIME: return ass.m_time.plantToDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz");
+		case SC_UNIT: return s.unit();
+		case SC_LOW_VALID_RANGE: return s.lowValidRange();
+		case SC_HIGH_VALID_RANGE: return s.highValidRange();
+		default:
+			assert(false);
 		}
 	}
 	return QVariant();
