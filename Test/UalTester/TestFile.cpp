@@ -255,11 +255,295 @@ bool TestCommand::parseCmdCompatible()
 
 bool TestCommand::parseCmdConst()
 {
+	int space1Pos = m_line.indexOf(' ');
+	if (space1Pos == -1)
+	{
+		QString errorStr = QString("(%1) Error : Failed command - %2").arg(m_lineIndex).arg(m_line);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+
+	int space2Pos = m_line.indexOf(' ', space1Pos + 1);
+	if (space2Pos == -1)
+	{
+		QString errorStr = QString("(%1) Error : Failed const type").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	QString constTypeStr = m_line;
+	constTypeStr.remove(space2Pos, m_line.length() - space2Pos);
+	constTypeStr = constTypeStr.right(constTypeStr.length() - space1Pos).simplified();
+
+	TestCmdParamType constType = TestCmdParamType::Undefined;
+
+	if (constTypeStr == "int")
+	{
+		constType = TestCmdParamType::SignedInt32;
+	}
+
+	if (constTypeStr == "float")
+	{
+		constType = TestCmdParamType::Float;
+	}
+
+	if (constType == TestCmdParamType::Undefined)
+	{
+		QString errorStr = QString("(%1) Error : Failed const type").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	QString args = m_line.right(m_line.length() - space2Pos).simplified();
+	QStringList argList = args.split(',');
+
+	if (argList.count() == 0)
+	{
+		QString errorStr = QString("(%1) Error : Failed argument list").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	TestCmdParam param;
+
+	int argCount = argList.count();
+	for(int i = 0; i < argCount; i++)
+	{
+		QString arg = argList[i].simplified();
+		if(arg.isEmpty() == true)
+		{
+			QString errorStr = QString("(%1) Error : Failed argument list").arg(m_lineIndex);
+			m_errorList.append(errorStr);
+			continue;
+		}
+
+		QStringList sv = arg.split('=');
+		if (sv.count() != 2)
+		{
+			QString errorStr = QString("(%1) Error : Failed argument list").arg(m_lineIndex);
+			m_errorList.append(errorStr);
+			continue;
+		}
+
+		// const name
+		//
+		QString constName = sv[0].simplified();
+		if (constName.isEmpty() == true)
+		{
+			QString errorStr = QString("(%1) Error : Failed argument list").arg(m_lineIndex);
+			m_errorList.append(errorStr);
+			continue;
+		}
+
+		param.setName(constName);
+
+		// const Value
+		//
+		QString constValue =  sv[1].simplified();
+		if (constValue.isEmpty() == true)
+		{
+			QString errorStr = QString("(%1) Error : Failed argument list").arg(m_lineIndex);
+			m_errorList.append(errorStr);
+			continue;
+		}
+
+		param.setType(constType);
+
+		switch (constType)
+		{
+			case TestCmdParamType::Float:
+				{
+					bool isTypefloat = false;
+
+					param.setValue(constValue.toFloat(&isTypefloat));
+
+					if(isTypefloat == false)
+					{
+						QString errorStr = QString("(%1) Error : Const %2 failed value").arg(m_lineIndex).arg(constName);
+						m_errorList.append(errorStr);
+						continue;
+					}
+				}
+				break;
+
+			case TestCmdParamType::SignedInt32:
+				{
+					bool isTypeInt = false;
+
+					param.setValue(constValue.toInt(&isTypeInt));
+
+					if(isTypeInt == false)
+					{
+						QString errorStr = QString("(%1) Error : Const %2 failed value").arg(m_lineIndex).arg(constName);
+						m_errorList.append(errorStr);
+						continue;
+					}
+				}
+				break;
+
+			default:
+
+				QString errorStr = QString("(%1) Error : Const %2 failed type (int or float)").arg(m_lineIndex).arg(constName);
+				m_errorList.append(errorStr);
+				continue;
+		}
+
+		m_paramList.append(param);
+	}
+
+	if (m_errorList.count() != 0)
+	{
+		return false;
+	}
+
 	return true;
 }
 
 bool TestCommand::parseCmdVar()
 {
+	int space1Pos = m_line.indexOf(' ');
+	if (space1Pos == -1)
+	{
+		QString errorStr = QString("(%1) Error : Failed command - %2").arg(m_lineIndex).arg(m_line);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+
+	int space2Pos = m_line.indexOf(' ', space1Pos + 1);
+	if (space2Pos == -1)
+	{
+		QString errorStr = QString("(%1) Error : Failed const type").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	QString varTypeStr = m_line;
+	varTypeStr.remove(space2Pos, m_line.length() - space2Pos);
+	varTypeStr = varTypeStr.right(varTypeStr.length() - space1Pos).simplified();
+
+	TestCmdParamType varType = TestCmdParamType::Undefined;
+
+	if (varTypeStr == "int")
+	{
+		varType = TestCmdParamType::SignedInt32;
+	}
+
+	if (varTypeStr == "float")
+	{
+		varType = TestCmdParamType::Float;
+	}
+
+	if (varType == TestCmdParamType::Undefined)
+	{
+		QString errorStr = QString("(%1) Error : Failed var type").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	QString args = m_line.right(m_line.length() - space2Pos).simplified();
+	QStringList argList = args.split(',');
+
+	if (argList.count() == 0)
+	{
+		QString errorStr = QString("(%1) Error : Failed argument list").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	TestCmdParam param;
+
+	int argCount = argList.count();
+	for(int i = 0; i < argCount; i++)
+	{
+		QString arg = argList[i].simplified();
+		if(arg.isEmpty() == true)
+		{
+			QString errorStr = QString("(%1) Error : Failed argument list").arg(m_lineIndex);
+			m_errorList.append(errorStr);
+			continue;
+		}
+
+		QStringList sv = arg.split('=');
+		if (sv.count() != 2)
+		{
+			QString errorStr = QString("(%1) Error : Failed argument list").arg(m_lineIndex);
+			m_errorList.append(errorStr);
+			continue;
+		}
+
+		// var name
+		//
+		QString varName = sv[0].simplified();
+		if (varName.isEmpty() == true)
+		{
+			QString errorStr = QString("(%1) Error : Failed argument list").arg(m_lineIndex);
+			m_errorList.append(errorStr);
+			continue;
+		}
+
+		param.setName(varName);
+
+		// var Value
+		//
+		QString varValue =  sv[1].simplified();
+		if (varValue.isEmpty() == true)
+		{
+			QString errorStr = QString("(%1) Error : Failed argument list").arg(m_lineIndex);
+			m_errorList.append(errorStr);
+			continue;
+		}
+
+		param.setType(varType);
+
+		switch (varType)
+		{
+			case TestCmdParamType::Float:
+				{
+					bool isTypefloat = false;
+
+					param.setValue(varValue.toFloat(&isTypefloat));
+
+					if(isTypefloat == false)
+					{
+						QString errorStr = QString("(%1) Error : Var %2 failed value").arg(m_lineIndex).arg(varName);
+						m_errorList.append(errorStr);
+						continue;
+					}
+				}
+				break;
+
+			case TestCmdParamType::SignedInt32:
+				{
+					bool isTypeInt = false;
+
+					param.setValue(varValue.toInt(&isTypeInt));
+
+					if(isTypeInt == false)
+					{
+						QString errorStr = QString("(%1) Error : Var %2 failed value").arg(m_lineIndex).arg(varName);
+						m_errorList.append(errorStr);
+						continue;
+					}
+				}
+				break;
+
+			default:
+
+				QString errorStr = QString("(%1) Error : Var %2 failed type (int or float)").arg(m_lineIndex).arg(varName);
+				m_errorList.append(errorStr);
+				continue;
+		}
+
+		m_paramList.append(param);
+	}
+
+	if (m_errorList.count() != 0)
+	{
+		return false;
+	}
+
 	return true;
 }
 
