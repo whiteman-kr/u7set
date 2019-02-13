@@ -63,7 +63,28 @@ var SensorType;
     SensorType[SensorType["Ohm_Ni100_W1617"] = 25] = "Ohm_Ni100_W1617";
     SensorType[SensorType["V_0_5"] = 26] = "V_0_5";
     SensorType[SensorType["V_m10_p10"] = 27] = "V_m10_p10";
+    SensorType[SensorType["Ohm_Pt_a_391"] = 28] = "Ohm_Pt_a_391";
+    SensorType[SensorType["Ohm_Pt_a_385"] = 29] = "Ohm_Pt_a_385";
+    SensorType[SensorType["Ohm_Cu_a_428"] = 30] = "Ohm_Cu_a_428";
+    SensorType[SensorType["Ohm_Cu_a_426"] = 31] = "Ohm_Cu_a_426";
+    SensorType[SensorType["Ohm_Ni_a_617"] = 32] = "Ohm_Ni_a_617";
 })(SensorType || (SensorType = {}));
+var OutputMode;
+(function (OutputMode) {
+    OutputMode[OutputMode["Plus0_Plus5_V"] = 0] = "Plus0_Plus5_V";
+    OutputMode[OutputMode["Plus4_Plus20_mA"] = 1] = "Plus4_Plus20_mA";
+    OutputMode[OutputMode["Minus10_Plus10_V"] = 2] = "Minus10_Plus10_V";
+    OutputMode[OutputMode["Plus0_Plus5_mA"] = 3] = "Plus0_Plus5_mA";
+    OutputMode[OutputMode["Plus0_Plus20_mA"] = 4] = "Plus0_Plus20_mA";
+    OutputMode[OutputMode["Plus0_Plus24_mA"] = 5] = "Plus0_Plus24_mA";
+})(OutputMode || (OutputMode = {}));
+;
+var UnitsConvertorErrorCode;
+(function (UnitsConvertorErrorCode) {
+    UnitsConvertorErrorCode[UnitsConvertorErrorCode["ErrorGeneric"] = 1] = "ErrorGeneric";
+    UnitsConvertorErrorCode[UnitsConvertorErrorCode["LowLimitOutOfRange"] = 2] = "LowLimitOutOfRange";
+    UnitsConvertorErrorCode[UnitsConvertorErrorCode["HighLimitOutOfRange"] = 3] = "HighLimitOutOfRange";
+})(UnitsConvertorErrorCode || (UnitsConvertorErrorCode = {}));
 function runConfigScript(configScript, confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage) {
     //var funcStr = "(function (confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage){log.writeMessage(\"Hello\"); return true; })";
     //

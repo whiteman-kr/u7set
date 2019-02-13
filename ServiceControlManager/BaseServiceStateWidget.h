@@ -15,7 +15,7 @@ class BaseServiceStateWidget : public QMainWindow
 {
 	Q_OBJECT
 public:
-	explicit BaseServiceStateWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, qint32 udpPort, QWidget *parent = 0);
+	explicit BaseServiceStateWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, qint32 udpPort, QWidget *parent = nullptr);
 	virtual ~BaseServiceStateWidget();
 
 	int addTab(QWidget* page, const QString& label);
@@ -24,7 +24,10 @@ public:
 	void addClientsTab(bool showStateColumn = true);
 	QStandardItemModel* stateTabModel() { return m_stateTabModel; }
 	QStandardItemModel* clientsTabModel() { return m_clientsTabModel; }
+
 	void setStateTabMaxRowQuantity(int rowQuantity) { m_stateTabMaxRowQuantity = rowQuantity; }
+	void setClientQuantityRowIndexOnStateTab(int index) { m_clientQuantityRowIndex = index; }
+
 	quint32 getWorkingClientRequestIp();
 
 	const SoftwareInfo& softwareInfo() { return m_softwareInfo; }
@@ -76,6 +79,7 @@ private:
 	QTabWidget* m_tabWidget = nullptr;
 
 	int m_stateTabMaxRowQuantity = 5;
+	int m_clientQuantityRowIndex = -1;
 	QStandardItemModel* m_stateTabModel = nullptr;
 	QStandardItemModel* m_clientsTabModel = nullptr;
 };

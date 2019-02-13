@@ -70,7 +70,8 @@ HEADERS += \
     ../../lib/CfgServerLoader.h \
     ../../lib/BuildInfo.h \
     ../../lib/TcpFileTransfer.h \
-    ../../lib/CommandLineParser.h
+    ../../lib/CommandLineParser.h \
+    TestUtils.h
 
 
 SOURCES += \

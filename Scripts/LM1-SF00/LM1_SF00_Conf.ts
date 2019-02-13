@@ -73,8 +73,29 @@ enum SensorType {
 
 	V_0_5 = 26,
 	V_m10_p10 = 27,
+
+	Ohm_Pt_a_391 = 28,
+	Ohm_Pt_a_385 = 29,
+	Ohm_Cu_a_428 = 30,
+	Ohm_Cu_a_426 = 31,
+	Ohm_Ni_a_617 = 32,
+
 }
 
+enum OutputMode {
+	Plus0_Plus5_V = 0,
+	Plus4_Plus20_mA = 1,
+	Minus10_Plus10_V = 2,
+	Plus0_Plus5_mA = 3,
+	Plus0_Plus20_mA = 4,
+	Plus0_Plus24_mA = 5,
+};
+
+enum UnitsConvertorErrorCode{
+	ErrorGeneric = 1,
+	LowLimitOutOfRange = 2,
+	HighLimitOutOfRange = 3,
+}
 
 interface Builder {
 	jsIsInterruptRequested(): boolean;
