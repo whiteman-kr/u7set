@@ -10,6 +10,7 @@
 const char* const TestCommand::PARAM_TEST_ID = "TestID";
 const char* const TestCommand::PARAM_TEST_DESCRIPTION = "TestDescription";
 const char* const TestCommand::PARAM_SCHEMA_ID = "SchemaID";
+const char* const TestCommand::PARAM_COMPATIBLE = "Compatible";
 
 TestCommand::TestCommand()
 {
@@ -238,7 +239,7 @@ bool TestCommand::parseCmdCompatible()
 			continue;
 		}
 
-		param.setName(QString("Preset%1").arg(i));
+		param.setName(PARAM_COMPATIBLE);
 		param.setType(TestCmdParamType::String);
 		param.setValue(preset);
 		m_paramList.append(param);
@@ -692,6 +693,7 @@ TestItem& TestItem::operator=(const TestItem& from)
 	m_index = from.m_index;
 	m_testID = from.m_testID;
 	m_name = from.m_name;
+	m_compatibleList = from.m_compatibleList;
 	m_errorCount = from.m_errorCount;
 
 	m_commandList = from.m_commandList;
@@ -828,6 +830,15 @@ void TestFile::createTestList()
 			{
 				cmd = m_commandList[cmdIndex];
 				test.appendCmd(cmd);
+
+				if (cmd.type() == TF_CMD_COMPATIBLE)
+				{
+					int paramCount = cmd.paramList().count();
+					for(int i = 0; i < paramCount; i++)
+					{
+						test.compatibleList().append(cmd.paramList().at(i).value().toString());
+					}
+				}
 
 				if (cmd.type() == TF_CMD_ENDTEST)
 				{

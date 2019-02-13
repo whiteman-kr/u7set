@@ -24,7 +24,7 @@ const char* const UalTester::SETTING_TEST_ID = "TestID";
 const char* const UalTester::SETTING_FROM_TEST_ID = "FromTestID";
 const char* const UalTester::SETTING_TRACE = "Trace";
 const char* const UalTester::SETTING_REPORT = "ReportFileName";
-const char* const UalTester::SETTING_PRESET_LM = "TestFileName";
+const char* const UalTester::SETTING_PRESET_LM = "PresetLM";
 
 UalTester::UalTester(int& argc, char** argv) :
 	m_waitSocketsConnectionTimer(this)
@@ -641,7 +641,29 @@ void UalTester::runTestFile()
 			}
 		}
 
-		// execute commands
+		// check cmd line param -lm
+		//
+		if (m_presetLM.isEmpty() == false)
+		{
+			bool foundPreset = false;
+
+			int presetCount = test.compatibleList().count();
+			for (int i = 0; i < presetCount; i++)
+			{
+				if (m_presetLM == test.compatibleList().at(i))
+				{
+					foundPreset = true;
+					break;
+				}
+			}
+
+			if (foundPreset == false)
+			{
+				continue;
+			}
+		}
+
+		// execute all commands of test
 		//
 		int cmdCount = test.cmdCount();
 		for(int cmdIndex = 0; cmdIndex < cmdCount; cmdIndex++)
@@ -665,46 +687,9 @@ void UalTester::runTestFile()
 					}
 					break;
 
-				case TF_CMD_ENDTEST:
-					{
-						if (test.errorCount() == 0)
-						{
-							if (m_enableTrace == true)
-							{
-								qDebug() << "Endtest - Ok" << "\n";
-								printToReportFile("Endtest - Ok\r\n");
-							}
-							else
-							{
-								qDebug() << test.index() + 1 << "Test" << test.name() << "- Ok";
-								printToReportFile(QString("%1. Test - %2 - Ok").arg(test.index() + 1).arg(test.name()));
-							}
-						}
-						else
-						{
-							if (m_enableTrace == true)
-							{
-								qDebug() << "Endtest - error(s):" << test.errorCount() << "\n";
-								printToReportFile(QString("Endtest - error(s): %1\r\n").arg(test.errorCount()));
-							}
-							else
-							{
-								qDebug() << test.index() + 1 << "Test" << test.name() << "- error(s):" << test.errorCount();
-								printToReportFile(QString("%1. Test - %2 - error(s): %3").arg(test.index() + 1).arg(test.name()).arg(test.errorCount()));
-							}
-
-							if (m_errorIngnore == false)
-							{
-								enableContinueTest = false;
-							}
-						}
-					}
-					break;
-
 				case TF_CMD_SET:
 					{
 						QVector<Hash> signalHashList;
-						TuningWriteCmd tuningCmd;
 
 						//
 						//
@@ -736,6 +721,8 @@ void UalTester::runTestFile()
 							}
 
 							signalHashList.append(signalHash);
+
+							TuningWriteCmd tuningCmd;
 
 							tuningCmd.setSignalHash(signalHash);
 							tuningCmd.setType(tuningCmdType);
@@ -802,7 +789,6 @@ void UalTester::runTestFile()
 						m_signalBase.clearHashForRequestState();
 					}
 					break;
-
 
 				case TF_CMD_CHECK:
 					{
@@ -898,6 +884,42 @@ void UalTester::runTestFile()
 						}
 
 						QThread::msleep(ms);
+					}
+					break;
+
+				case TF_CMD_ENDTEST:
+					{
+						if (test.errorCount() == 0)
+						{
+							if (m_enableTrace == true)
+							{
+								qDebug() << "Endtest - Ok" << "\n";
+								printToReportFile("Endtest - Ok\r\n");
+							}
+							else
+							{
+								qDebug() << test.index() + 1 << "Test" << test.name() << "- Ok";
+								printToReportFile(QString("%1. Test - %2 - Ok").arg(test.index() + 1).arg(test.name()));
+							}
+						}
+						else
+						{
+							if (m_enableTrace == true)
+							{
+								qDebug() << "Endtest - error(s):" << test.errorCount() << "\n";
+								printToReportFile(QString("Endtest - error(s): %1\r\n").arg(test.errorCount()));
+							}
+							else
+							{
+								qDebug() << test.index() + 1 << "Test" << test.name() << "- error(s):" << test.errorCount();
+								printToReportFile(QString("%1. Test - %2 - error(s): %3").arg(test.index() + 1).arg(test.name()).arg(test.errorCount()));
+							}
+
+							if (m_errorIngnore == false)
+							{
+								enableContinueTest = false;
+							}
+						}
 					}
 					break;
 			}

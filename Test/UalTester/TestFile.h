@@ -154,6 +154,7 @@ private:
 	static const char* const PARAM_TEST_ID;
 	static const char* const PARAM_TEST_DESCRIPTION;
 	static const char* const PARAM_SCHEMA_ID;
+	static const char* const PARAM_COMPATIBLE;
 
 	SignalBase* m_pSignalBase = nullptr;
 
@@ -207,6 +208,7 @@ private:
 	int m_index = -1;
 	QString m_testID;
 	QString m_name;
+	QStringList m_compatibleList;
 	int m_errorCount = 0;
 
 	QVector<TestCommand> m_commandList;
@@ -221,6 +223,8 @@ public:
 
 	QString name() const { return m_name; }
 	void setName(const QString& name) { m_name = name; }
+
+	QStringList& compatibleList() { return m_compatibleList; }
 
 	int errorCount() const { return m_errorCount; }
 	void incErrorCount() { m_errorCount ++; }
