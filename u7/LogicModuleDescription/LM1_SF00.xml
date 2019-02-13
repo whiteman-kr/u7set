@@ -312,7 +312,7 @@
 			<Pin OpName="o_nan"				OpIndex ="15"	PinType = "Output"/>
 			<Pin OpName="o_version"			OpIndex ="16"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="FUNC"		OpCode="16"	ImpVersion="2"		VersionOpIndex="13"	MaxInstCount="256" SimulationFunc="afb_func">
+		<AFBComponent Caption="FUNC"		OpCode="16"	ImpVersion="3"		VersionOpIndex="13"	MaxInstCount="256" SimulationFunc="afb_func">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_data"		OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="5"	PinType = "Output"/>
@@ -367,7 +367,7 @@
 			<Pin OpName="o_result"		OpIndex ="6"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="8"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="LATCH"		OpCode="22"	ImpVersion="3"		VersionOpIndex="15"	MaxInstCount="256" SimulationFunc="afb_latch">
+		<AFBComponent Caption="LATCH"		OpCode="22"	ImpVersion="4"		VersionOpIndex="15"	MaxInstCount="256" SimulationFunc="afb_latch">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_set_prev"	OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="i_y_prev"		OpIndex ="2"	PinType = "Input"/>

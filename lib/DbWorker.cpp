@@ -272,6 +272,10 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0252.sql", "Upgrade to version 252, Add functions api.rename_file"},	
 	{":/DatabaseUpgrade/Upgrade0253.sql", "Upgrade to version 253, ImpVersion and MaxInstCount made up to date in AFB elements descriptions"},
 	{":/DatabaseUpgrade/Upgrade0254.sql", "Upgrade to version 254, PhysicalLimits were removed WAIM-4PH, they are calculated from ElectricUnits"},
+	{":/DatabaseUpgrade/Upgrade0255.sql", "Upgrade to version 255, PhysicalLimits calculation error messages are processed in WAIM and AIM"},
+	{":/DatabaseUpgrade/Upgrade0256.sql", "Upgrade to version 256, SchemaTags property was added to Monitor and TuningClient presets"},
+	{":/DatabaseUpgrade/Upgrade0257.sql", "Upgrade to version 257, MaxInstCount corrections in  LM1-SR03, LM1-SR02"},
+	{":/DatabaseUpgrade/Upgrade0258.sql", "Upgrade to version 258, AIM-4PH, AOM-4PH, WAIM, TIM, RIM migrated to dynamic physical units calculation"},
 };
 
 

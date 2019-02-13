@@ -131,7 +131,7 @@ SOURCES += \
     RunOrder.cpp \
     TestClientCfgGenerator.cpp \
     ../lib/UnitsConvertor.cpp \
-    ../lib/UnitsConvertor.cpp
+    ../lib/UnitsConvertorTable.cpp
 
 HEADERS += \
     ../lib/OutputLog.h \
@@ -216,7 +216,7 @@ HEADERS += \
     RunOrder.h \
     TestClientCfgGenerator.h \
     ../lib/UnitsConvertor.h \
-    ../lib/UnitsConvertor.h
+    ../lib/UnitsConvertorTable.h
 
 
 unix {

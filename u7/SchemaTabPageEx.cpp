@@ -2,6 +2,7 @@
 #include "CreateSchemaDialog.h"
 #include "CheckInDialog.h"
 #include "Settings.h"
+#include "TagSelectorWidget.h"
 #include "Forms/SelectChangesetDialog.h"
 #include "Forms/FileHistoryDialog.h"
 #include "Forms/CompareDialog.h"
@@ -285,6 +286,9 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 				return result;
 			}
 
+		case Columns::TagsColumn:
+			return tagsColumnText(file->fileId());
+
 		case Columns::DetailsColumn:
 			return detailsColumnText(file->fileId());
 
@@ -428,6 +432,7 @@ QVariant SchemaListModelEx::headerData(int section, Qt::Orientation orientation,
 			case Columns::ChangesetColumn:	return QStringLiteral("Changeset");
 			case Columns::FileUserColumn:	return QStringLiteral("User");
 			case Columns::IssuesColumn:	return QStringLiteral("Issues");
+			case Columns::TagsColumn:	return QStringLiteral("Tags");
 			case Columns::DetailsColumn:	return QStringLiteral("Details");
 			default:
 				assert(false);
@@ -502,6 +507,8 @@ std::pair<QModelIndex, bool> SchemaListModelEx::addFile(QModelIndex parentIndex,
 	}
 
 	endInsertRows();
+
+	updateTagsFromDetails();
 
 	//
 	QModelIndex addedModelIndex = index(insertIndex, 0, parentIndex);
@@ -747,11 +754,28 @@ void SchemaListModelEx::setFilter(QString filter)
 {
 	m_filterText = filter;
 	refresh();
+	return;
 }
 
-void SchemaListModelEx::applyFilter(QString filterText, DbFileTree* filesTree)
+void SchemaListModelEx::setTagFilter(const QStringList& tags)
 {
-	if (filterText.isEmpty() == true)
+	m_tagFilter = tags;
+	refresh();
+	return;
+}
+
+const QStringList& SchemaListModelEx::tagFilter() const
+{
+	return m_tagFilter;
+}
+
+void SchemaListModelEx::applyFilter(DbFileTree* filesTree, const std::map<int, VFrame30::SchemaDetails>& detailsMap)
+{
+	assert(filesTree);
+
+	// Filetr by filter text
+	//
+	if (m_filterText.isEmpty() == true)
 	{
 		return;
 	}
@@ -778,7 +802,9 @@ void SchemaListModelEx::applyFilter(QString filterText, DbFileTree* filesTree)
 			continue;
 		}
 
-		if (file->fileName().contains(filterText, Qt::CaseInsensitive) == true)
+		// Filter by text
+		//
+		if (file->fileName().contains(m_filterText, Qt::CaseInsensitive) == true)
 		{
 			filteredFiles[fileId] = file;
 
@@ -786,15 +812,24 @@ void SchemaListModelEx::applyFilter(QString filterText, DbFileTree* filesTree)
 			continue;
 		}
 
-		VFrame30::SchemaDetails details{file->details()};
-
-		if (bool searchResult = details.searchForString(filterText);
-			searchResult == true)
+		if (auto dit = detailsMap.find(fileId);
+			dit != detailsMap.end())
 		{
-			filteredFiles[fileId] = file;
+			const VFrame30::SchemaDetails& details = dit->second;
 
-			schemaFilterCount++;
-			continue;
+			if (bool searchResult = details.searchForString(m_filterText);
+				searchResult == true)
+			{
+				filteredFiles[fileId] = file;
+
+				schemaFilterCount++;
+				continue;
+			}
+
+		}
+		else
+		{
+			assert(dit != detailsMap.end());
 		}
 	}
 
@@ -852,9 +887,127 @@ void SchemaListModelEx::applyFilter(QString filterText, DbFileTree* filesTree)
 	return;
 }
 
+void SchemaListModelEx::applyTagFilter(DbFileTree* filesTree, const std::map<int, VFrame30::SchemaDetails>& detailsMap)
+{
+	assert(filesTree);
+
+	if (m_tagFilter.isEmpty() == true)
+	{
+		return;
+	}
+
+	// Apply filter, if parent has any file with filterText, then this parent must be left in tree.
+	// So, in tree are files with filterText and they parents
+	// System files like Application Logic, Monitor, Tuning.... must be left
+	//
+	const std::map<int, std::shared_ptr<DbFileInfo>>& files = filesTree->files();
+	int rootFileId = filesTree->rootFileId();
+
+	// Filter files
+	//
+	std::map<int, std::shared_ptr<DbFileInfo>> filteredFiles;
+
+	for (const auto&[fileId, file] : files)
+	{
+		if (isSystemFile(fileId) ||
+			fileId == rootFileId)
+		{
+			filteredFiles[fileId] = file;
+			continue;
+		}
+
+		if (auto dit = detailsMap.find(fileId);
+			dit != detailsMap.end())
+		{
+			const VFrame30::SchemaDetails& details = dit->second;
+
+			if (bool searchResult = details.hasTag(m_tagFilter);
+				searchResult == true)
+			{
+				filteredFiles[fileId] = file;
+				continue;
+			}
+
+		}
+		else
+		{
+			assert(dit != detailsMap.end());
+		}
+	}
+
+	// Add parents
+	//
+	std::map<int, std::shared_ptr<DbFileInfo>> parentFiles;
+
+	for (auto&[fileId, file] : filteredFiles)
+	{
+		if (isSystemFile(fileId) ||
+			fileId == rootFileId)
+		{
+			continue;
+		}
+
+		auto parentIt = files.find(file->parentId());
+		if (parentIt == files.end())
+		{
+			assert(false);
+			continue;
+		}
+
+		std::shared_ptr<DbFileInfo> parentFile = parentIt->second;
+
+		while (parentFile != nullptr &&
+			   parentFile->isNull() == false &&
+			   isSystemFile(parentFile->fileId()) == false)
+		{
+			parentFiles[parentFile->fileId()] = parentFile;
+
+			auto parentIt = files.find(parentFile->parentId());
+			if (parentIt == files.end())
+			{
+				assert(false);
+				parentFile.reset();
+			}
+			else
+			{
+				parentFile = parentIt->second;
+			}
+		}
+	}
+
+	for (auto&[fileId, file] : parentFiles)
+	{
+		filteredFiles[fileId] = file;
+	}
+
+	// --
+	//
+	*filesTree = std::move(DbFileTree{filteredFiles, rootFileId});
+
+	return;
+}
+
+
 bool SchemaListModelEx::isSystemFile(int fileId) const
 {
 	return m_systemFiles.find(fileId) != m_systemFiles.end();
+}
+
+void SchemaListModelEx::updateTagsFromDetails()
+{
+	m_tags.clear();
+
+	for (auto&[fileId, details] : m_details)
+	{
+		for (const QString& tag : details.tags())
+		{
+			m_tags.insert(tag);
+		}
+	}
+
+	emit tagsChanged();
+
+	return;
 }
 
 void SchemaListModelEx::refresh()
@@ -880,7 +1033,25 @@ void SchemaListModelEx::refresh()
 	files.removeFilesWithExtension(::UfbTemplExtension);
 	files.removeFilesWithExtension(::DvsTemplExtension);
 
-	applyFilter(m_filterText, &files);
+	// Parse file details, befor eapplying filter, as we want to keep tags for all schemas
+	//
+	std::map<int, VFrame30::SchemaDetails> detailsMap;
+
+	for (auto& [fileId, fileInfo] : files.files())
+	{
+		VFrame30::SchemaDetails details;
+		bool parsed = details.parseDetails(fileInfo->details());
+
+		if (parsed == true)
+		{
+			detailsMap[fileId] = std::move(details);
+		}
+	}
+
+	// Apply filters
+	//
+	applyTagFilter(&files, detailsMap);
+	applyFilter(&files, detailsMap);
 
 	// Get users
 	//
@@ -901,21 +1072,6 @@ void SchemaListModelEx::refresh()
 		usersMap[u.userId()] = u.username();
 	}
 
-	// Parse file details
-	//
-	std::map<int, VFrame30::SchemaDetails> detailsMap;
-
-	for (auto& [fileId, fileInfo] : files.files())
-	{
-		VFrame30::SchemaDetails details;
-		bool parsed = details.parseDetails(fileInfo->details());
-
-		if (parsed == true)
-		{
-			detailsMap[fileId] = std::move(details);
-		}
-	}
-
 	// Set all data
 	//
 	beginResetModel();
@@ -923,6 +1079,8 @@ void SchemaListModelEx::refresh()
 	m_users = std::move(usersMap);
 	m_details = std::move(detailsMap);
 	endResetModel();
+
+	updateTagsFromDetails();
 
 	return;
 }
@@ -954,6 +1112,9 @@ void SchemaListModelEx::projectClosed()
 	m_parentFile = DbFileInfo();
 	m_systemFiles.clear();
 	m_schemaFilterCount = 0;
+	m_tagFilter.clear();
+
+	updateTagsFromDetails();
 
 	return;
 }
@@ -970,6 +1131,33 @@ QString SchemaListModelEx::usernameById(int userId) const noexcept
 	{
 		return it->second;
 	}
+}
+
+QString SchemaListModelEx::tagsColumnText(int fileId) const
+{
+	auto it = m_details.find(fileId);
+	if (it == m_details.end())
+	{
+		return {};
+	}
+
+	QString result;
+	result.reserve(256);
+
+	const VFrame30::SchemaDetails& d = it->second;
+	for (QString tag : d.m_tags)
+	{
+		if (result.isEmpty() == true)
+		{
+			result = tag;
+		}
+		else
+		{
+			result += QString(", %1").arg(tag);
+		}
+	}
+
+	return result;
 }
 
 QString SchemaListModelEx::detailsColumnText(int fileId) const
@@ -1017,6 +1205,12 @@ int SchemaListModelEx::schemaFilterCount() const
 {
 	return m_schemaFilterCount;
 }
+
+const std::set<QString>& SchemaListModelEx::tags() const
+{
+	return m_tags;
+}
+
 
 //
 // class SchemaProxyListModel
@@ -1483,6 +1677,15 @@ void SchemaFileViewEx::setFilter(QString filter)
 	return;
 }
 
+void SchemaFileViewEx::setTagFilter(const QStringList& tags)
+{
+	m_filesModel.setTagFilter(tags);
+
+	expandAll();
+
+	return;
+}
+
 void SchemaFileViewEx::projectOpened()
 {
 	m_refreshFileAction->setEnabled(true);
@@ -1760,31 +1963,6 @@ void SchemasTabPageEx::refreshControlTabPage()
 	return;
 }
 
-//std::vector<EditSchemaTabPage*> SchemasTabPage::openSchemas()
-//{
-//	std::vector<EditSchemaTabPage*> result;
-//	result.reserve(32);
-
-//	for (int i = 0; i < m_tabWidget->count(); i++)
-//	{
-//		QWidget* tab = m_tabWidget->widget(i);
-
-//		if (tab == nullptr)
-//		{
-//			assert(tab);
-//			continue;
-//		}
-
-//		EditSchemaTabPage* schemaTabPage = dynamic_cast<EditSchemaTabPage*>(tab);
-//		if (schemaTabPage != nullptr)
-//		{
-//			result.push_back(schemaTabPage);
-//		}
-//	}
-
-//	return result;
-//}
-
 void SchemasTabPageEx::projectOpened()
 {
 	this->setEnabled(true);
@@ -1842,6 +2020,8 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 
 	connect(m_filesView->m_propertiesAction, &QAction::triggered, this, &SchemaControlTabPageEx::showFileProperties);
 
+	connect(&m_filesView->filesModel(), &SchemaListModelEx::tagsChanged, this, &SchemaControlTabPageEx::schemaTagsChanged);
+
 	// --
 	//
 	m_searchAction = new QAction(tr("Edit Search"), this);
@@ -1849,16 +2029,19 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 	addAction(m_searchAction);
 
 	m_searchEdit = new QLineEdit(this);
-	m_searchEdit->setPlaceholderText(tr("Search or Filter Text"));
+	m_searchEdit->setPlaceholderText(tr("Search Text"));
 	m_searchEdit->setClearButtonEnabled(true);
-	m_searchEdit->setMinimumWidth(400);
 
+	m_filterEdit = new QLineEdit(this);
+	m_filterEdit->setPlaceholderText(tr("Filter Text"));
+	m_filterEdit->setClearButtonEnabled(true);
 
 	QStringList completerStringList = QSettings{}.value("SchemaControlTabPageEx/SearchCompleter").toStringList();
 	m_searchCompleter = new QCompleter(completerStringList, this);
 	m_searchCompleter->setCaseSensitivity(Qt::CaseInsensitive);
 
 	m_searchEdit->setCompleter(m_searchCompleter);
+	m_filterEdit->setCompleter(m_searchCompleter);
 
 	m_searchButton = new QPushButton(tr("Search"));
 	m_filterButton = new QPushButton(tr("Filter"));
@@ -1866,16 +2049,30 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 	m_resetFilterButton = new QPushButton(tr("Reset Filter"));
 	m_resetFilterButton->setDisabled(true);
 
+	m_tagSelector = new TagSelectorWidget(this);
+	m_tagSelector->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+	connect(m_tagSelector, &TagSelectorWidget::changed, this, &SchemaControlTabPageEx::tagSelectorHasChanges);
+
 	// --
 	//
 	QGridLayout* layout = new QGridLayout(this);
 	layout->setMenuBar(m_toolBar);						// Set ToolBar here as menu, so no gaps and margins
 	layout->addWidget(m_filesView, 0, 0, 1, 6);
+
 	layout->addWidget(m_searchEdit, 1, 0, 1, 2);
 	layout->addWidget(m_searchButton, 1, 2, 1, 1);
-	layout->addWidget(m_filterButton, 1, 3, 1, 1);
-	layout->addWidget(m_resetFilterButton, 1, 4, 1, 1);
-	layout->setColumnStretch(5, 100);
+
+	layout->addWidget(m_filterEdit, 2, 0, 1, 2);
+	layout->addWidget(m_filterButton, 2, 2, 1, 1);
+	layout->addWidget(m_resetFilterButton, 2, 3, 1, 1);
+	layout->addWidget(m_tagSelector, 1, 4, 2, 2);
+
+	layout->setColumnStretch(0, 2);
+	layout->setColumnStretch(4, 2);
+	layout->setColumnStretch(5, 2);
+
+	layout->setRowStretch(0, 2);
+	layout->setRowStretch(1, 0);
 
 	setLayout(layout);
 
@@ -1886,10 +2083,10 @@ SchemaControlTabPageEx::SchemaControlTabPageEx(DbController* db) :
 
 	connect(m_filesView, &SchemaFileViewEx::openFileSignal, this, &SchemaControlTabPageEx::openFile);
 	connect(m_filesView, &SchemaFileViewEx::viewFileSignal, this, &SchemaControlTabPageEx::viewFile);
-//	connect(m_filesView, &SchemaFileView::editSchemasProperties, this, &SchemaControlTabPage::editSchemasProperties);
 
 	connect(m_searchAction, &QAction::triggered, this, &SchemaControlTabPageEx::ctrlF);
 	connect(m_searchEdit, &QLineEdit::returnPressed, this, &SchemaControlTabPageEx::search);
+	connect(m_filterEdit, &QLineEdit::returnPressed, this, &SchemaControlTabPageEx::filter);
 	connect(m_searchButton, &QPushButton::clicked, this, &SchemaControlTabPageEx::search);
 	connect(m_filterButton, &QPushButton::clicked, this, &SchemaControlTabPageEx::filter);
 	connect(m_resetFilterButton, &QPushButton::clicked, this, &SchemaControlTabPageEx::resetFilter);
@@ -2131,6 +2328,7 @@ void SchemaControlTabPageEx::projectOpened()
 void SchemaControlTabPageEx::projectClosed()
 {
 	m_lastSelectedNewSchemaForLmFileId = -1;
+	m_tagSelector->clear();
 	setEnabled(false);
 }
 
@@ -2396,7 +2594,15 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::buildStarted, editTabPage, &EditSchemaTabPageEx::saveWorkcopy);
 
-	// --
+	// Update AFBs/UFBs after creating tab page, so it will be possible to set new (modified) caption
+	// to the tab page title
+	//
+	editTabPage->updateAfbSchemaItems();
+	editTabPage->updateUfbSchemaItems();
+	editTabPage->updateBussesSchemaItems();
+
+	// Do this ONLY after update, because during updateAfbSchemaItems/updateUfbSchemaItems/updateBussesSchemaItems
+	// window can be closed by Ctrl+w, and programm crashes then
 	//
 	editTabPage->setReadOnly(false);
 
@@ -2404,13 +2610,6 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 	tabWidget->setCurrentWidget(editTabPage);
 
 	m_openedFiles.push_back(editTabPage);
-
-	// Update AFBs/UFBs after creating tab page, so it will be possible to set new (modified) caption
-	// to the tab page title
-	//
-	editTabPage->updateAfbSchemaItems();
-	editTabPage->updateUfbSchemaItems();
-	editTabPage->updateBussesSchemaItems();
 
 	return;
 }
@@ -4127,6 +4326,7 @@ void SchemaControlTabPageEx::showFileProperties()
 void SchemaControlTabPageEx::ctrlF()
 {
 	assert(m_searchEdit);
+
 	m_searchEdit->setFocus();
 	m_searchEdit->selectAll();
 
@@ -4206,9 +4406,9 @@ void SchemaControlTabPageEx::filter()
 	// Search for text in schemas
 	//
 	assert(m_filesView);
-	assert(m_searchEdit);
+	assert(m_filterEdit);
 
-	QString filterText = m_searchEdit->text().trimmed();
+	QString filterText = m_filterEdit->text().trimmed();
 
 	// Save completer
 	//
@@ -4261,6 +4461,8 @@ void SchemaControlTabPageEx::resetFilter()
 {
 	assert(m_filesView);
 
+	m_filterEdit->clear();
+
 	m_filesView->setFilter("");
 	m_filesView->setFocus();
 
@@ -4270,6 +4472,33 @@ void SchemaControlTabPageEx::resetFilter()
 	m_filterButton->setFont(font);
 
 	m_resetFilterButton->setDisabled(true);
+
+	return;
+}
+
+void SchemaControlTabPageEx::schemaTagsChanged()
+{
+	const std::set<QString>& tags = m_filesView->filesModel().tags();
+	m_tagSelector->setTags(tags);
+
+	// Selected tags could be removed so tag filter could be changed
+	//
+	if (m_tagSelector->selectedTags() != m_filesView->filesModel().tagFilter())
+	{
+		tagSelectorHasChanges();
+	}
+
+	return;
+}
+
+void SchemaControlTabPageEx::tagSelectorHasChanges()
+{
+	// Filter schemas by tags
+	//
+	QStringList selectedTags = m_tagSelector->selectedTags();
+
+	m_filesView->setTagFilter(selectedTags);
+	m_filesView->setFocus();
 
 	return;
 }
