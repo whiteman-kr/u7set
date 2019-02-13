@@ -39,6 +39,12 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 						case E::SensorType::Ohm_Pt21:			retVal = findConversionVal(val, &PT_21[0][0], PT_21_COUNT, true);					break;
 						case E::SensorType::Ohm_Cu23:			retVal = findConversionVal(val, &CU_23[0][0], CU_23_COUNT, true);					break;
 
+						case E::SensorType::Ohm_Pt_a_391:		retVal = findConversionVal(val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, true);	retVal = retVal * param.electricR0() / 100; break;
+						case E::SensorType::Ohm_Pt_a_385:		retVal = findConversionVal(val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, true);	retVal = retVal * param.electricR0() / 100; break;
+						case E::SensorType::Ohm_Cu_a_428:		retVal = findConversionVal(val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, true);	retVal = retVal * param.electricR0() / 100; break;
+						case E::SensorType::Ohm_Cu_a_426:		retVal = findConversionVal(val, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, true);	retVal = retVal * param.electricR0() / 100; break;
+						case E::SensorType::Ohm_Ni_a_617:		retVal = findConversionVal(val, &NI_100_W_1617[0][0], NI_100_W_1617_COUNT, true);	retVal = retVal * param.electricR0() / 100; break;
+
 						default:								assert(0);
 					}
 
@@ -116,6 +122,12 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 						case E::SensorType::Ohm_Pt21:			retVal = findConversionVal(val, &PT_21[0][0], PT_21_COUNT, false);					break;
 						case E::SensorType::Ohm_Cu23:			retVal = findConversionVal(val, &CU_23[0][0], CU_23_COUNT, false);					break;
 
+						case E::SensorType::Ohm_Pt_a_391:		if (param.electricR0() == 0.0) break; val = val / param.electricR0() * 100; retVal = findConversionVal(val, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, false);	break;
+						case E::SensorType::Ohm_Pt_a_385:		if (param.electricR0() == 0.0) break; val = val / param.electricR0() * 100; retVal = findConversionVal(val, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, false);	break;
+						case E::SensorType::Ohm_Cu_a_428:		if (param.electricR0() == 0.0) break; val = val / param.electricR0() * 100; retVal = findConversionVal(val, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, false);	break;
+						case E::SensorType::Ohm_Cu_a_426:		if (param.electricR0() == 0.0) break; val = val / param.electricR0() * 100; retVal = findConversionVal(val, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, false);	break;
+						case E::SensorType::Ohm_Ni_a_617:		if (param.electricR0() == 0.0) break; val = val / param.electricR0() * 100; retVal = findConversionVal(val, &NI_100_W_1617[0][0], NI_100_W_1617_COUNT, false);	break;
+
 						default:								assert(0);
 					}
 
@@ -189,7 +201,7 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 
 // -------------------------------------------------------------------------------------------------------------------------------------------------
 
-double conversion(double val, int conversionType, const E::ElectricUnit unitID, const E::SensorType sensorType)
+double conversion(double val, int conversionType, const E::ElectricUnit unitID, const E::SensorType sensorType, double r0)
 {
 	if (conversionType < 0 || conversionType > CT_COUNT)
 	{
@@ -200,6 +212,7 @@ double conversion(double val, int conversionType, const E::ElectricUnit unitID, 
 
 	param.setElectricUnitID(unitID);
 	param.setElectricSensorType(sensorType);
+	param.setElectricR0(r0);
 
 	return conversion(val, conversionType, param);
 }

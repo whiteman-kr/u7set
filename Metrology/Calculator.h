@@ -39,6 +39,12 @@ const UnitSensorTypePair SensorTypeByUnit[] =
 	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt21 },
 	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu23 },
 
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt_a_391 },
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt_a_385 },
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_a_428 },
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_a_426 },
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Ni_a_617 },
+
 	// types of thermocouple
 	//
 	{ E::ElectricUnit::mV,		E::SensorType::mV_K_TXA },
@@ -77,7 +83,6 @@ private:
 	QLineEdit*		m_pTrDegreeEdit = nullptr;
 	QRadioButton*	m_pTrElectricRadio = nullptr;
 	QLineEdit*		m_pTrElectricEdit = nullptr;
-
 
 	QComboBox*		m_pTcList = nullptr;
 	QRadioButton*	m_pTcDegreeRadio = nullptr;

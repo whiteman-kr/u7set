@@ -11,7 +11,7 @@
 // If you want to change any function writeToXml you must change CFG_FILE_VER_METROLOGY_SIGNALS
 // and write log history about changing
 
-const int			CFG_FILE_VER_METROLOGY_SIGNALS	= 4;
+const int			CFG_FILE_VER_METROLOGY_SIGNALS	= 5;
 
 // Historty of version
 //
@@ -19,6 +19,7 @@ const int			CFG_FILE_VER_METROLOGY_SIGNALS	= 4;
 // version 2 - deleted a few fields SignalParam::writeToXml (story about removing redundant ranges)
 // version 3 - append fields: EngeneeringUnits
 // version 4 - append fields: TuningBounds
+// version 5 - append fields: electricR0
 //
 
 namespace Metrology
@@ -177,6 +178,7 @@ namespace Metrology
 		QString					m_electricUnit;
 		E::SensorType			m_electricSensorType = E::SensorType::NoSensor;
 		QString					m_electricSensor;
+		double					m_electricR0 = 0;
 		int						m_electricPrecision = 3;
 
 		double					m_physicalLowLimit = 0;
@@ -257,7 +259,10 @@ namespace Metrology
 		void					setElectricSensorType(E::SensorType sensorType) { m_electricSensorType = sensorType; }
 
 		QString					electricSensor() const { return m_electricSensor; }
-		void					setElectricSensor(const QString& sensor) { m_electricSensor = sensor; }
+		void					setElectricSensor(const QString& sensor);
+
+		double					electricR0() const { return m_electricR0; }
+		void					setElectricR0(double r0) { m_electricR0 = r0; }
 
 		int						electricPrecision() const { return m_electricPrecision; }
 		void					setElectricPrecision(int precision) { m_electricPrecision = precision; }

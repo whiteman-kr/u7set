@@ -6515,6 +6515,27 @@ namespace Builder
 				  );
 	}
 
+	/// IssueCode: EQP6103
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong (ThermoResistor) R0 = 0.
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Wrong R0. It is required to set R0 of ThermoResistor.
+	///
+	void IssueLogger::errEQP6110(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6110,
+				  tr("Signal %1 has wrong (ThermoResistor) R0 = 0.")
+				  .arg(appSignalID)
+				  );
+	}
+
 	// --
 	//
 	void IssueLogger::addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids)
