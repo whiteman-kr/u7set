@@ -3,6 +3,7 @@
 
 #include <assert.h>
 
+
 #include "Types.h"
 #include "UnitsConvertorTable.h"
 
@@ -91,6 +92,16 @@ private:
 Q_DECLARE_METATYPE(UnitsConvertResult)
 
 // ==============================================================================================
+
+enum class UnitsConvertType
+{
+	ElectricToPhysical = 0,
+	PhysicalToElectric = 1,
+	ElectricToEngeneering = 2,
+	EngeneeringToElectric = 3,
+};
+
+// ==============================================================================================
 // class UnitsConvert
 //
 
@@ -109,6 +120,9 @@ public:
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_Output(double elVal, double electricLowLimit, double electricHighLimit, int outputMode);									// for blocks of output signals - AOM
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_ThermoCouple(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType);				// for blocks of thermocouple signals - TIM
 	Q_INVOKABLE UnitsConvertResult electricToPhysical_ThermoResistor(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int sensorType, double r0);	// for blocks of thermoresistor signals - RIM
+
+	double conversion(double val, const UnitsConvertType& conversionType, const E::ElectricUnit& unitID, const E::SensorType& sensorType, double r0 = 0);						// Only ThermoCouple and ThermoResistor.
+
 };
 
 // ==============================================================================================

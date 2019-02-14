@@ -171,7 +171,7 @@ void AppDataServiceWorker::runTcpAppDataServer()
 {
 	assert(m_tcpAppDataServerThread == nullptr);
 
-	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer(softwareInfo());
+	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer(softwareInfo(), m_appDataReceiverThread);
 
 	m_tcpAppDataServerThread = new TcpAppDataServerThread(	m_cfgSettings.clientRequestIP,
 															tcpAppDataSever,
@@ -534,8 +534,8 @@ void AppDataServiceWorker::applyNewConfiguration()
 
 	runSignalStatesProcessingThread();
 	runTcpArchiveClientThread();
-	runTcpAppDataServer();
 	runAppDataReceiverThread();
+	runTcpAppDataServer();
 	runAppDataProcessingThreads();
 	runRtTrendsServerThread();
 }
@@ -546,8 +546,8 @@ void AppDataServiceWorker::clearConfiguration()
 	//
 	stopRtTrendsServerThread();
 	stopAppDataProcessingThreads();
-	stopAppDataReceiverlThread();
 	stopTcpAppDataServer();
+	stopAppDataReceiverlThread();
 	stopTcpArchiveClientThread();
 	stopSignalStatesProcessingThread();
 

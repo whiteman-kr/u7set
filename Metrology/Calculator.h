@@ -3,6 +3,9 @@
 
 #include <QObject>
 #include <QDialog>
+#include <QGroupBox>
+#include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QRadioButton>
 #include <QLabel>
 #include <QLineEdit>
@@ -11,7 +14,6 @@
 #include "../lib/Types.h"
 
 // ==============================================================================================
-
 
 struct UnitSensorTypePair
 {
@@ -23,18 +25,11 @@ const UnitSensorTypePair SensorTypeByUnit[] =
 {
 	// types of thermistors
 	//
-	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt50_W1391 },
-	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt100_W1391 },
-	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt50_W1385 },
-	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt100_W1385 },
-
-	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_50_W1428 },
-	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_100_W1428 },
-	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_50_W1426 },
-	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_100_W1426 },
-
-	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Ni50_W1617 },
-	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Ni100_W1617 },
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt_a_391 },
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt_a_385 },
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_a_428 },
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu_a_426 },
+	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Ni_a_617 },
 
 	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Pt21 },
 	{ E::ElectricUnit::Ohm, 	E::SensorType::Ohm_Cu23 },
@@ -57,6 +52,7 @@ const UnitSensorTypePair SensorTypeByUnit[] =
 
 const int	SENSOR_TYPE_BY_UNIT_COUNT = sizeof(SensorTypeByUnit) / sizeof(SensorTypeByUnit[0]);
 
+// ==============================================================================================
 
 class Calculator : public QDialog
 {
@@ -64,7 +60,7 @@ class Calculator : public QDialog
 
 public:
 
-	explicit Calculator(QWidget* parent = 0);
+	explicit Calculator(QWidget* parent = nullptr);
 	virtual ~Calculator();
 
 private:
@@ -77,7 +73,8 @@ private:
 	QLineEdit*		m_pTrDegreeEdit = nullptr;
 	QRadioButton*	m_pTrElectricRadio = nullptr;
 	QLineEdit*		m_pTrElectricEdit = nullptr;
-
+	QHBoxLayout*	m_tr_R0_Layout = nullptr;
+	QLineEdit*		m_pTrR0Edit = nullptr;
 
 	QComboBox*		m_pTcList = nullptr;
 	QRadioButton*	m_pTcDegreeRadio = nullptr;

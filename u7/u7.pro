@@ -171,6 +171,7 @@ SOURCES +=\
     SchemaTabPageEx.cpp \
     DialogInputEx.cpp \
     DialogAfbLibraryCheck.cpp \
+    ../lib/WidgetUtils.cpp \
     TagSelectorWidget.cpp
 
 

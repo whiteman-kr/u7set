@@ -1493,7 +1493,7 @@ void FileTests::check_inTest()
 	ok = query.exec(QString("UPDATE fileInstance SET Action=2 WHERE fileId = %1 AND changesetId = %2").arg(fifthFile).arg(fifthFileLastChangeset));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("UPDATE fileInstance SET Data='12314124125343gdfjtjfgx bvavt23y45' WHERE fileId = %1 AND changesetId = %2").arg(fifthFile).arg(fifthFileLastChangeset));
+	ok = query.exec(QString("UPDATE fileInstance SET Data='12314124125343gdfjtjfgx bvavt23y45', md5 = md5('12314124125343gdfjtjfgx bvavt23y45') WHERE fileId = %1 AND changesetId = %2").arg(fifthFile).arg(fifthFileLastChangeset));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = query.exec(QString("SELECT * FROM check_in(%1, '{%2}', 'checkInFileWithoutChanges')").arg(m_user1.userId).arg(fifthFile));
