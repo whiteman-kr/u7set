@@ -295,6 +295,8 @@ namespace Builder
 
 				// Creating signal list
 				//
+				UnitsConvertor uc;
+
 				QVector<Metrology::SignalParam> signalsToWrite;
 
 				QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
@@ -313,6 +315,134 @@ namespace Builder
 						//
 						m_log->errEQP6102(signal.appSignalID(), signal.sensorType());
 						hasWrongField = true;
+					}
+
+					if (signal.isInput() == true)
+					{
+						if (signal.electricUnit() == E::ElectricUnit::mV)
+						{
+							switch (signal.sensorType())
+							{
+								case E::SensorType::mV_K_TXA:
+								case E::SensorType::mV_L_TXK:
+								case E::SensorType::mV_N_THH:
+
+								case E::SensorType::mV_Type_B:
+								case E::SensorType::mV_Type_E:
+								case E::SensorType::mV_Type_J:
+								case E::SensorType::mV_Type_K:
+								case E::SensorType::mV_Type_N:
+								case E::SensorType::mV_Type_R:
+								case E::SensorType::mV_Type_S:
+								case E::SensorType::mV_Type_T:
+									{
+										UnitsConvertResult physicalLowLimit = uc.electricToPhysical_ThermoCouple(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+										UnitsConvertResult physicalHighLimit = uc.electricToPhysical_ThermoCouple(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType());
+
+										if (physicalLowLimit.ok() == false)
+										{
+											// Signal %1 has wrong physical low Limit
+											//
+											m_log->errEQP6110(signal.appSignalID());
+											hasWrongField = true;
+										}
+
+										if (physicalHighLimit.ok() == false)
+										{
+											// Signal %1 has wrong physical high Limit
+											//
+											m_log->errEQP6111(signal.appSignalID());
+											hasWrongField = true;
+										}
+
+
+										if (physicalLowLimit.toDouble() != signal.lowEngeneeringUnits())
+										{
+											// Signal %1 has wrong engeneering low Limit
+											//
+											m_log->errEQP6112(signal.appSignalID());
+											hasWrongField = true;
+										}
+
+										if (physicalHighLimit.toDouble() != signal.highEngeneeringUnits())
+										{
+											// Signal %1 has wrong engeneering high Limit
+											//
+											m_log->errEQP6113(signal.appSignalID());
+											hasWrongField = true;
+										}
+									}
+									break;
+							}
+						}
+
+						if (signal.electricUnit() == E::ElectricUnit::Ohm)
+						{
+							QVariant qv;
+							bool isEnum;
+							double r0 = 0;
+
+							switch (signal.sensorType())
+							{
+								case E::SensorType::Ohm_Pt_a_391:
+								case E::SensorType::Ohm_Pt_a_385:
+								case E::SensorType::Ohm_Cu_a_428:
+								case E::SensorType::Ohm_Cu_a_426:
+								case E::SensorType::Ohm_Ni_a_617:
+									{
+										if (signal.getSpecPropValue("R0_Ohm", &qv, &isEnum) == true)
+										{
+											r0 = qv.toDouble();
+										}
+
+										if (r0 == 0)
+										{
+											// Signal %1 has wrong R0 (ThermoResistor)
+											//
+											m_log->errEQP6114(signal.appSignalID());
+											hasWrongField = true;
+										}
+										else
+										{
+											UnitsConvertResult physicalLowLimit = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), r0);
+											UnitsConvertResult physicalHighLimit = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), r0);
+
+											if (physicalLowLimit.ok() == false)
+											{
+												// Signal %1 has wrong physical low Limit
+												//
+												m_log->errEQP6110(signal.appSignalID());
+												hasWrongField = true;
+											}
+
+											if (physicalHighLimit.ok() == false)
+											{
+												// Signal %1 has wrong physical high Limit
+												//
+												m_log->errEQP6111(signal.appSignalID());
+												hasWrongField = true;
+											}
+
+											if (physicalLowLimit.toDouble() != signal.lowEngeneeringUnits())
+											{
+												// Signal %1 has wrong engeneering low Limit
+												//
+												m_log->errEQP6112(signal.appSignalID());
+												hasWrongField = true;
+											}
+
+											if (physicalHighLimit.toDouble() != signal.highEngeneeringUnits())
+											{
+												// Signal %1 has wrong engeneering high Limit
+												//
+												m_log->errEQP6113(signal.appSignalID());
+												hasWrongField = true;
+											}
+										}
+									}
+									break;
+							}
+						}
 					}
 
 					if (E::contains<E::OutputMode>(signal.outputMode()) == false)

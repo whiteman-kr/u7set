@@ -18,13 +18,13 @@ public:
 	TestAppDataService(int& argc, char** argv);
 
 private:
-	bool readByteArray(QString fileName, QByteArray& result, QString& error);
-	bool initSourcePackets(QString& error);
-	bool initSenders(QString& error);
-	bool initTcpClient(QString& error);
+	void readByteArray(QString fileName, QByteArray& resultBuffer, bool& result);
+	void initSourcePackets(bool& result);
+	void initSenders(bool& result);
+	void initTcpClient();
 	void removeSenders();
 	void removeTcpClient();
-	bool sendBuffers(QString& error, bool checkHeaderErrors = true);
+	void sendBuffers(bool& result);
 
 	const Network::AppDataSourceState *getSourceMessageById(Network::GetAppDataSourcesStatesReply& reply, quint64 id);
 

@@ -6515,6 +6515,111 @@ namespace Builder
 				  );
 	}
 
+	/// IssueCode: EQP6110
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong physical low Limit
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Wrong R0. It is required to set R0 of ThermoResistor.
+	///
+	void IssueLogger::errEQP6110(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6110,
+				  tr("Signal %1 has wrong physical low Limit.")
+				  .arg(appSignalID)
+				  );
+	}
+
+	/// IssueCode: EQP6111
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong physical high Limit
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Wrong R0. It is required to set R0 of ThermoResistor.
+	///
+	void IssueLogger::errEQP6111(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6111,
+				  tr("Signal %1 has wrong physical high Limit.")
+				  .arg(appSignalID)
+				  );
+	}
+
+	/// IssueCode: EQP6112
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong engeneering low Limit
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Wrong R0. It is required to set R0 of ThermoResistor.
+	///
+	void IssueLogger::errEQP6112(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6112,
+				  tr("Signal %1 has wrong engeneering low Limit, calculated from electrical low Limit.")
+				  .arg(appSignalID)
+				  );
+	}
+
+	/// IssueCode: EQP6113
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong engeneering high Limit
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Wrong R0. It is required to set R0 of ThermoResistor.
+	///
+	void IssueLogger::errEQP6113(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6113,
+				  tr("Signal %1 has wrong engeneering high Limit, calculated from the electrical high Limit")
+				  .arg(appSignalID)
+				  );
+	}
+
+	/// IssueCode: EQP6114
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong R0 (ThermoResistor).
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Wrong R0. It is required to set R0 of ThermoResistor.
+	///
+	void IssueLogger::errEQP6114(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6114,
+				  tr("Signal %1 has wrong R0 (ThermoResistor).")
+				  .arg(appSignalID)
+				  );
+	}
+
 	// --
 	//
 	void IssueLogger::addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids)

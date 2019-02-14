@@ -197,6 +197,11 @@ QString TcpAppDataClient::archiveServiceConnectionState()
 	return "No";
 }
 
+Network::AppDataServiceState& TcpAppDataClient::serviceState()
+{
+	return m_getAppDataServiceState;
+}
+
 
 void TcpAppDataClient::onGetAppDataSourcesInfoReply(const char* replyData, quint32 replyDataSize)
 {

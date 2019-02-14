@@ -403,7 +403,8 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, qui
 {
 	connect(this, &BaseServiceStateWidget::connectionStatisticChanged, this, &AppDataServiceWidget::updateStateInfo);
 
-	setStateTabMaxRowQuantity(8);
+	setStateTabMaxRowQuantity(13);
+	setClientQuantityRowIndexOnStateTab(5);
 
 	// Data Sources
 	m_dataSourcesStateModel = new DataSourcesStateModel(this);
@@ -465,6 +466,14 @@ void AppDataServiceWidget::updateServiceState()
 	}
 	stateTabModel()->setData(stateTabModel()->index(6, 1), m_tcpClientSocket->configServiceConnectionState());
 	stateTabModel()->setData(stateTabModel()->index(7, 1), m_tcpClientSocket->archiveServiceConnectionState());
+
+	auto state = m_tcpClientSocket->serviceState().appdatareceivestate();
+
+	stateTabModel()->setData(stateTabModel()->index(8, 1), state.receivedframescount());
+	stateTabModel()->setData(stateTabModel()->index(9, 1), state.simframescount());
+	stateTabModel()->setData(stateTabModel()->index(10, 1), state.errdatagramsize());
+	stateTabModel()->setData(stateTabModel()->index(11, 1), state.errsimversion());
+	stateTabModel()->setData(stateTabModel()->index(12, 1), state.errunknownappdatasourceip());
 }
 
 void AppDataServiceWidget::updateStateInfo()
@@ -475,7 +484,12 @@ void AppDataServiceWidget::updateStateInfo()
 		stateTabModel()->setData(stateTabModel()->index(6, 0), "Connected to CfgService");
 		stateTabModel()->setData(stateTabModel()->index(7, 0), "Connected to ArchiveService");
 
-		stateTabModel()->setData(stateTabModel()->index(5, 1), clientsTabModel()->rowCount());
+		stateTabModel()->setData(stateTabModel()->index(8, 0), "Received frames count");
+		stateTabModel()->setData(stateTabModel()->index(9, 0), "Simulated frames count");
+		stateTabModel()->setData(stateTabModel()->index(10, 0), "Datagram size errors");
+		stateTabModel()->setData(stateTabModel()->index(11, 0), "Simulation version errors");
+		stateTabModel()->setData(stateTabModel()->index(12, 0), "Unknown AppDataSource IP errors");
+
 		if (m_tcpClientSocket == nullptr || m_tcpClientSocket->stateIsReady() == false)
 		{
 			stateTabModel()->setData(stateTabModel()->index(6, 1), "???");

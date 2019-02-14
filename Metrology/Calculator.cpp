@@ -1,9 +1,5 @@
 #include "Calculator.h"
 
-#include <QGroupBox>
-#include <QVBoxLayout>
-#include <QHBoxLayout>
-
 #include "Conversion.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -40,7 +36,7 @@ void Calculator::createInterface()
 	QHBoxLayout *tr_C_Layout = new QHBoxLayout;
 
 	m_pTrDegreeRadio = new QRadioButton(this);
-	m_pTrDegreeEdit = new QLineEdit(tr("0"), this);
+	m_pTrDegreeEdit = new QLineEdit(tr("100"), this);
 	QLabel* pTrDegreeLabel = new QLabel(tr("°C"), this);
 	pTrDegreeLabel->setFixedWidth(30);
 	m_pTrDegreeEdit->setFont(*font);
@@ -63,9 +59,24 @@ void Calculator::createInterface()
 	tr_Ohm_Layout->addWidget(pTrElectricLabel);
 	tr_Ohm_Layout->addStretch();
 
+
+	m_tr_R0_Layout = new QHBoxLayout;
+
+	m_pTrR0Edit = new QLineEdit(tr("100"), this);
+	QLabel* pTrR0Label = new QLabel(tr(""), this);
+	pTrR0Label->setFixedWidth(30);
+	m_pTrR0Edit->setFont(*font);
+
+	m_tr_R0_Layout->addWidget(new QLabel(tr("R0"), this));
+	m_tr_R0_Layout->addWidget(m_pTrR0Edit);
+	m_tr_R0_Layout->addWidget(pTrR0Label);
+	m_tr_R0_Layout->addStretch();
+
+
 	trLayout->addWidget(m_pTrList);
 	trLayout->addLayout(tr_C_Layout);
 	trLayout->addLayout(tr_Ohm_Layout);
+	trLayout->addLayout(m_tr_R0_Layout);
 
 	trGroup->setLayout(trLayout);
 
@@ -225,9 +236,11 @@ void Calculator::initDialog()
 	connect(m_pTrDegreeEdit, &QLineEdit::textChanged, this, &Calculator::onTrValue);
 	connect(m_pTrElectricRadio, &QRadioButton::clicked, this, &Calculator::onTrRadio);
 	connect(m_pTrElectricEdit, &QLineEdit::textChanged, this, &Calculator::onTrValue);
+	connect(m_pTrR0Edit, &QLineEdit::textChanged, this, &Calculator::onTrValue);
 
 	m_pTrDegreeEdit->setValidator(validator);
 	m_pTrElectricEdit->setValidator(validator);
+	m_pTrR0Edit->setValidator(validator);
 
 	conversionTr();
 
@@ -306,24 +319,22 @@ void Calculator::conversionTr()
 		return;
 	}
 
-	QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
 	E::SensorType sensorType = static_cast<E::SensorType>(m_pTrList->itemData(index).toInt());
 
-	if (sensorType < 0 || sensorType >= mst.keyCount())
+	switch (sensorType)
 	{
-		return;
-	}
-
-	if (sensorType == E::SensorType::NoSensor)
-	{
-		return;
+		case E::SensorType::Ohm_Pt_a_391:
+		case E::SensorType::Ohm_Pt_a_385:
+		case E::SensorType::Ohm_Cu_a_428:
+		case E::SensorType::Ohm_Cu_a_426:
+		case E::SensorType::Ohm_Ni_a_617:	m_pTrR0Edit->setEnabled(true);		break;
+		default:							m_pTrR0Edit->setEnabled(false);		break;
 	}
 
 	if (m_pTrDegreeRadio->isChecked() == true)
 	{
-		double val = conversion(m_pTrDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, E::ElectricUnit::Ohm, sensorType);
+		double val = conversion(m_pTrDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, E::ElectricUnit::Ohm, sensorType, m_pTrR0Edit->text().toDouble());
 
-		m_pTrDegreeEdit->setFocus();
 		m_pTrDegreeEdit->setReadOnly(false);
 		m_pTrElectricEdit->setText(QString::number(val, 10, 4));
 		m_pTrElectricEdit->setReadOnly(true);
@@ -331,9 +342,8 @@ void Calculator::conversionTr()
 
 	if (m_pTrElectricRadio->isChecked() == true)
 	{
-		double val = conversion(m_pTrElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, E::ElectricUnit::Ohm, sensorType);
+		double val = conversion(m_pTrElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, E::ElectricUnit::Ohm, sensorType, m_pTrR0Edit->text().toDouble());
 
-		m_pTrElectricEdit->setFocus();
 		m_pTrElectricEdit->setReadOnly(false);
 		m_pTrDegreeEdit->setText(QString::number(val, 10, 4));
 		m_pTrDegreeEdit->setReadOnly(true);
@@ -350,18 +360,7 @@ void Calculator::conversionTc()
 		return;
 	}
 
-	QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
 	E::SensorType sensorType = static_cast<E::SensorType>(m_pTcList->itemData(index).toInt());
-
-	if (sensorType < 0 || sensorType >= mst.keyCount())
-	{
-		return;
-	}
-
-	if (sensorType == E::SensorType::NoSensor)
-	{
-		return;
-	}
 
 	if (m_pTcDegreeRadio->isChecked() == true)
 	{
