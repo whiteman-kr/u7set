@@ -2,6 +2,9 @@
 
 #include "../lib/Types.h"
 
+#include <QUuid>
+#include <memory>
+
 namespace Builder
 {
 

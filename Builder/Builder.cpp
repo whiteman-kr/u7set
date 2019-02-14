@@ -1,5 +1,6 @@
 #include "Builder.h"
 #include "BuildWorkerThread.h"
+#include <qqml.h>
 
 namespace Builder
 {
@@ -7,6 +8,7 @@ namespace Builder
 	{
 		qmlRegisterType<Hardware::OptoPort>();
 		qmlRegisterType<JsVariantList>();
+		qmlRegisterType<UnitsConvertor>();
 
 		qRegisterMetaType<RunOrder>("RunOrder");
 

@@ -151,6 +151,8 @@ namespace Builder
 		void errCFG3028(QString signalID1, QString signalID2, QString module, QString propertyName);
 		void errCFG3029(QString softwareID);												// Software %1 is not linked to ConfigurationService.
 		void errCFG3030(QString lmID, QString appDataServiceID);							// Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.		
+		void wrnCFG3031(QString objectID, QString propertyName);							// Property %1.%2 is empty. Default writeble catalog of workstation  will be used.
+
 
 		void errCFG3040(QString monitorId, QString tuningServiceId);				// Mode SingleLmControl is not supported by Monitor. Set TuningServiceID.SingleLmControl to false. Monitor EquipmentID %1, TuningServiceID %2.
 
@@ -184,6 +186,8 @@ namespace Builder
 		void errALP4021(QString logicModule, QString schema1, QString schema2, QString schemaItem1, QString schemaItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids);
 		void errALP4022(QString schema);
 		void errALP4023(QString schema, QString pinCaption, QUuid itemUuid);
+		void errALP4024(QString fileName, QString details);
+		void errALP4025(QString schema);
 
 		void errALP4040(QString schema, QString schemaItem, QString busTypeId, QUuid itemUuid);		// Bus Related
 		void errALP4041(QString schema, QString schemaItem, QUuid itemUuid);						// Bus Related
@@ -191,7 +195,7 @@ namespace Builder
 		void errALP4060(QString schema, QString schemaItem, QUuid itemUuid);						// Loopback detected
 		void errALP4061(QString schema, QString loopbackId, const std::vector<QUuid>& itemUuids);	// Duplicate source of LoopbackID
 
-		void wrnALP4070(QString schema, const std::vector<QUuid>& itemsUuids);	// Schema %1 has %2 commented functional item(s).
+		void wrnALP4070(QString schema, const std::vector<QUuid>& itemsUuids);						// Schema %1 has %2 commented functional item(s).
 
 		// Multichannel pasing errors
 		//
@@ -362,6 +366,7 @@ namespace Builder
 		void errALC5155(QString validitySignalEquipmentID, QString inputSignalID);		// Linked validity signal with EquipmentID %1 is not found (input signal %2).
 		void errALC5156(QString validitySignalID, QString inputSignalID);				// Linked validity signal %1 shoud have Discrete Input type (input signal %2).
 		void errALC5157(QString appSignalID);											// Analog signal %1 aperture should be less then 100.
+		void errALC5158(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel);			// Value of parameter %1.%2 must be greater or equal then the value of %1.%3.
 
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.
@@ -407,6 +412,11 @@ namespace Builder
 		void errEQP6108(QString appSignalId, QString filter, QString tuningClientEquipmentId);		//Signal %1 specified in filter %2 in Tuning Client %3 does not exist.
 		void errEQP6109(QString equipmentId, QString tuningClientEquipmentId);	//Tuning Source %1 specified in Tuning Client %2 does not exist.
 
+		void errEQP6110(QString appSignalID);								//  Signal %1 has wrong physical low Limit
+		void errEQP6111(QString appSignalID);								//  Signal %1 has wrong physical high Limit
+		void errEQP6112(QString appSignalID, QString value);				//  Signal %1 - engeneering low Limit mismatch electrical low Limit
+		void errEQP6113(QString appSignalID, QString value);				//  Signal %1 - engeneering high Limit mismatch electrical high Limit
+		void errEQP6114(QString appSignalID);								//  Signal %1 has wrong R0 (ThermoResistor)
 
 	public:
 		void addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids);

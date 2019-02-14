@@ -11,6 +11,7 @@
 #include "TuningBuilder.h"
 #include "OptoModule.h"
 #include "ComparatorStorage.h"
+#include <QJSEngine>
 
 namespace Builder
 {
@@ -64,6 +65,10 @@ namespace Builder
 		// Load Application Functional Block Library
 		//
 		bool loadLogicModuleDescription(DbController* db, Hardware::DeviceModule* logicModule, LmDescriptionSet* lmDescriptions);
+
+		// Check that all files (and from that theirs SchemaIds) in $root$/Schema are unique
+		//
+		bool checkRootSchemasUniquesIds(DbController* db);
 
 		// Build Application Logic
 		//

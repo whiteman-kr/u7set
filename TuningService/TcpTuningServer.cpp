@@ -693,9 +693,8 @@ namespace Tuning
 
 			quint32 ip = tuningSource.lmAddress32();
 
-			if (signalList.isEmpty())
+			if (signalList.isEmpty() == true)
 			{
-				assert(false);
 				continue;
 			}
 

@@ -1678,7 +1678,8 @@ bool EditSchemaView::isItemSelected(const std::shared_ptr<VFrame30::SchemaItem>&
 EditSchemaWidget::EditSchemaWidget(std::shared_ptr<VFrame30::Schema> schema, const DbFileInfo& fileInfo, DbController* dbController) :
 	VFrame30::BaseSchemaWidget(schema, new EditSchemaView(schema)),
 	m_fileInfo(fileInfo),
-	m_dbcontroller(dbController)
+	m_dbcontroller(dbController),
+	m_initialSchemaId(schema->schemaId())
 {
 	assert(schema != nullptr);
 	assert(m_dbcontroller);
@@ -3428,8 +3429,7 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 			[xdif, ydif, &newItems, dbc, s](const std::shared_ptr<VFrame30::SchemaItem>& si)
 			{
 				QByteArray data;
-
-				bool result = si->Save(data);
+				bool result = si->saveToByteArray(&data);
 
 				if (result == false || data.isEmpty() == true)
 				{
@@ -5297,13 +5297,19 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 	//
 	DbFileTree filesTree;
 
-	bool ok = db()->getFileListTree(&filesTree, db()->ufblFileId(), QString(".") + UfbFileExtension, true, this);
+	bool ok = db()->getFileListTree(&filesTree, db()->ufblFileId(), "%", true, this);
 	if (ok == false)
 	{
 		return false;
 	}
 
-	std::vector<DbFileInfo> fileList = filesTree.toVector(true);
+	std::vector<DbFileInfo> fileList = filesTree.toVectorIf(
+		[](const DbFileInfo& file)
+		{
+			return file.fileName().endsWith(QString(".") + ::UfbFileExtension, Qt::CaseInsensitive) == true &&
+				file.isFolder() == false;
+		});
+
 
 	// Get UFBs where LmDescriptionFile same with this chema
 	//
@@ -6763,12 +6769,12 @@ void EditSchemaWidget::f2KeyForBus(std::shared_ptr<VFrame30::SchemaItem> item)
 		const VFrame30::Bus& newBus = busses[selectedBusIndex];
 
 		QByteArray oldState;
-		busItem->Save(oldState);
+		busItem->saveToByteArray(&oldState);
 
 		busItem->setBusType(newBus);
 
 		QByteArray newState;
-		busItem->Save(newState);
+		busItem->saveToByteArray(&newState);
 
 		// Return object to prev state, it is not neccessary indeed, as it will be loaded into the new state in edit engine
 		//
@@ -9247,12 +9253,12 @@ int EditSchemaWidget::replace(std::shared_ptr<VFrame30::SchemaItem> item, QStrin
 	}
 
 	QByteArray oldState;
-	item->Save(oldState);
+	item->saveToByteArray(&oldState);
 
 	int replaceCount = item->replace(findText, replaceWith, cs);
 
 	QByteArray newState;
-	item->Save(newState);
+	item->saveToByteArray(&newState);
 
 	item->Load(oldState);
 
@@ -9538,6 +9544,8 @@ void EditSchemaWidget::setModified()
 
 void EditSchemaWidget::resetModified()
 {
+	m_initialSchemaId = schema()->schemaId();
+
 	assert(m_editEngine);
 	m_editEngine->resetModified();
 }

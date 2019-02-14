@@ -13,6 +13,7 @@
 #include "DialogSubsystemListEditor.h"
 #include "DialogConnections.h"
 #include "DialogBusEditor.h"
+#include "DialogAfbLibraryCheck.h"
 #include "BuildTabPage.h"
 #include "UploadTabPage.h"
 #include "SimulatorTabPage.h"
@@ -238,7 +239,12 @@ void MainWindow::createActions()
 	m_updateUfbsAfbs->setEnabled(false);
 	connect(m_updateUfbsAfbs, &QAction::triggered, this, &MainWindow::updateUfbsAfbsBusses);
 
-    m_aboutAction = new QAction(tr("About..."), this);
+	m_AfbLibraryCheck = new QAction(tr("AFB Library Check..."), this);
+	m_AfbLibraryCheck->setStatusTip(tr("AFB Library Check"));
+	m_AfbLibraryCheck->setEnabled(false);
+	connect(m_AfbLibraryCheck, &QAction::triggered, this, &MainWindow::afbLibraryCheck);
+
+	m_aboutAction = new QAction(tr("About..."), this);
 	m_aboutAction->setStatusTip(tr("Show application information"));
 	//m_pAboutAction->setEnabled(true);
 	connect(m_aboutAction, &QAction::triggered, this, &MainWindow::showAbout);
@@ -307,6 +313,11 @@ void MainWindow::createMenus()
 
 	pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_updateUfbsAfbs);
+
+	if (theSettings.isExpertMode() == true)
+	{
+		pToolsMenu->addAction(m_AfbLibraryCheck);
+	}
 
 	pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_settingsAction);
@@ -462,8 +473,8 @@ void MainWindow::updateUfbsAfbsBusses()
 	}
 
 	QMessageBox mb(this);
-	mb.setText(tr("Update schemas AFBs/UFBs/Bussus."));
-	mb.setInformativeText(tr("To perform operation all Application Logic and UFB schemas must be checked in."));
+	mb.setText(tr("Update schemas AFBs/UFBs/Busses."));
+	mb.setInformativeText(tr("To prevent data loss all ApplicationLogic and UFB schemas must be checked in."));
 	mb.setIcon(QMessageBox::NoIcon);
 	QPushButton* updateButton = mb.addButton(tr("Update"), QMessageBox::ActionRole);
 	mb.addButton(QMessageBox::Cancel);
@@ -492,9 +503,14 @@ void MainWindow::updateUfbsAfbsBusses()
 	QStringList checkedOutFiles;
 
 	DbFileTree filesTree;
-	db()->getFileListTree(&filesTree, db()->ufblFileId(), QLatin1String(".") + ::UfbFileExtension, true, this);
+	db()->getFileListTree(&filesTree, db()->ufblFileId(), "%", true, this);
 
-	std::vector<DbFileInfo>	ufbSchemaFileInfos = filesTree.toVector(true);
+	std::vector<DbFileInfo>	ufbSchemaFileInfos = filesTree.toVectorIf(
+		[](const DbFileInfo& file)
+		{
+			return file.fileName().endsWith(QLatin1String(".") + ::UfbFileExtension, Qt::CaseInsensitive) == true &&
+				file.isFolder() == false;
+		});
 
 	for (const DbFileInfo& f : ufbSchemaFileInfos)
 	{
@@ -507,9 +523,14 @@ void MainWindow::updateUfbsAfbsBusses()
 	// Get ApplicationLogic schema list
 	//
 	filesTree.clear();
-	db()->getFileListTree(&filesTree, db()->alFileId(), QLatin1String(".") + ::AlFileExtension, true, this);
+	db()->getFileListTree(&filesTree, db()->alFileId(), "%", true, this);
 
-	std::vector<DbFileInfo>	alSchemaFileInfos = filesTree.toVector(true);
+	std::vector<DbFileInfo>	alSchemaFileInfos = filesTree.toVectorIf(
+		[](const DbFileInfo& file)
+		{
+			return file.fileName().endsWith(QLatin1String(".") + ::AlFileExtension, Qt::CaseInsensitive) == true &&
+				file.isFolder() == false;
+		});
 
 	for (const DbFileInfo& f : alSchemaFileInfos)
 	{
@@ -703,7 +724,10 @@ void MainWindow::updateUfbsAfbsBusses()
 
 				// Set workcopy
 				//
-				ok = schema->Save(file->data());
+				QByteArray savedData;
+				ok = schema->saveToByteArray(&savedData);
+
+				file->swapData(savedData);
 
 				if (ok == false)
 				{
@@ -758,6 +782,19 @@ void MainWindow::updateUfbsAfbsBusses()
 	}
 
 	return;
+}
+
+void MainWindow::afbLibraryCheck()
+{
+	if (theDialogAfbLibraryCheck == nullptr)
+	{
+		theDialogAfbLibraryCheck = new DialogAfbLibraryCheck(dbController(), this);
+		theDialogAfbLibraryCheck->show();
+	}
+	else
+	{
+		theDialogAfbLibraryCheck->activateWindow();
+	}
 }
 
 void MainWindow::showAbout()
@@ -840,6 +877,7 @@ void MainWindow::projectOpened(DbProject project)
     m_connectionsEditorAction->setEnabled(true);
 	m_busEditorAction->setEnabled(true);
 	m_updateUfbsAfbs->setEnabled(true);
+	m_AfbLibraryCheck->setEnabled(true);
 
 	// Status bar
 	//
@@ -870,6 +908,7 @@ void MainWindow::projectClosed()
     m_connectionsEditorAction->setEnabled(false);
 	m_busEditorAction->setEnabled(false);
 	m_updateUfbsAfbs->setEnabled(false);
+	m_AfbLibraryCheck->setEnabled(false);
 
 	// Status bar
 	//

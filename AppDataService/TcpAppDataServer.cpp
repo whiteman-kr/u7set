@@ -8,8 +8,9 @@
 //
 // -------------------------------------------------------------------------------
 
-TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo) :
-	Tcp::Server(softwareInfo)
+TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo, AppDataReceiverThread *appDataReceiverThread) :
+	Tcp::Server(softwareInfo),
+	m_appDataReceiverThread(appDataReceiverThread)
 {
 
 }
@@ -22,7 +23,7 @@ TcpAppDataServer::~TcpAppDataServer()
 
 Tcp::Server* TcpAppDataServer::getNewInstance()
 {
-	TcpAppDataServer* newServer =  new TcpAppDataServer(localSoftwareInfo());
+	TcpAppDataServer* newServer =  new TcpAppDataServer(localSoftwareInfo(), m_appDataReceiverThread);
 
 	newServer->setThread(m_thread);
 
@@ -56,6 +57,12 @@ void TcpAppDataServer::onGetState()
 		m_getAppDataServiceState.set_archiveserviceip(ip);
 		m_getAppDataServiceState.set_archiveserviceport(port);
 	}
+
+	Network::AppDataReceiveState* adrs = new Network::AppDataReceiveState();
+
+	m_appDataReceiverThread->fillAppDataReceiveState(adrs);
+
+	m_getAppDataServiceState.set_allocated_appdatareceivestate(adrs);
 
 	sendReply(m_getAppDataServiceState);
 }
@@ -120,16 +127,12 @@ void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData
 		onGetAppSignalStateRequest(requestData, requestDataSize);
 		break;
 
-	case ADS_GET_DATA_SOURCES_INFO:
-		onGetDataSourcesInfoRequest();
+	case ADS_GET_APP_DATA_SOURCES_INFO:
+		onGetAppDataSourcesInfoRequest();
 		break;
 
-	case ADS_GET_DATA_SOURCES_STATES:
-		onGetDataSourcesStatesRequest();
-		break;
-
-	case ADS_GET_UNITS:
-		onGetUnitsRequest();
+	case ADS_GET_APP_DATA_SOURCES_STATES:
+		onGetAppDataSourcesStatesRequest();
 		break;
 
 	case ADS_GET_SETTINGS:
@@ -371,7 +374,7 @@ bool TcpAppDataServer::getAppSignalStateState(Hash hash, AppSignalState& state)
 }
 
 
-void TcpAppDataServer::onGetDataSourcesInfoRequest()
+void TcpAppDataServer::onGetAppDataSourcesInfoRequest()
 {
 	m_getDataSourcesInfoReply.Clear();
 
@@ -389,13 +392,13 @@ void TcpAppDataServer::onGetDataSourcesInfoRequest()
 }
 
 
-void TcpAppDataServer::onGetDataSourcesStatesRequest()
+void TcpAppDataServer::onGetAppDataSourcesStatesRequest()
 {
 	m_getAppDataSourcesStatesReply.Clear();
 
 	const AppDataSourcesIP& dataSources = appDataSources();
 
-	for (const AppDataSourceShared source : dataSources)
+	for (const AppDataSourceShared& source : dataSources)
 	{
 		Network::AppDataSourceState* state = m_getAppDataSourcesStatesReply.add_appdatasourcesstates();
 		source->getState(state);
@@ -405,15 +408,6 @@ void TcpAppDataServer::onGetDataSourcesStatesRequest()
 
 	sendReply(m_getAppDataSourcesStatesReply);
 }
-
-
-void TcpAppDataServer::onGetUnitsRequest()
-{
-	m_getUnitsReply.Clear();
-
-	sendReply(m_getUnitsReply);
-}
-
 
 void TcpAppDataServer::onGetSettings()
 {

@@ -40,8 +40,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-HEADERS += tst_testappdataservice.h \
-    tst_testappdataservice.h \
+HEADERS += \
     ../../lib/ServiceSettings.h \
     ../../lib/XmlHelper.h \
     ../../lib/HostAddressPort.h \
@@ -66,11 +65,16 @@ HEADERS += tst_testappdataservice.h \
     ../../lib/Tcp.h \
     ../../Proto/network.pb.h \
     ../../lib/SocketIO.h \
-    ../../lib/CircularLogger.h
+    ../../lib/CircularLogger.h \
+    TestAppDataService.h \
+    ../../lib/CfgServerLoader.h \
+    ../../lib/BuildInfo.h \
+    ../../lib/TcpFileTransfer.h \
+    ../../lib/CommandLineParser.h \
+    TestUtils.h
 
 
 SOURCES += \
-        tst_testappdataservice.cpp \ 
     ../../lib/XmlHelper.cpp \
     ../../lib/ServiceSettings.cpp \
     ../../lib/HostAddressPort.cpp \
@@ -95,7 +99,13 @@ SOURCES += \
     ../../lib/Tcp.cpp \
     ../../Proto/network.pb.cc \
     ../../lib/SocketIO.cpp \
-    ../../lib/CircularLogger.cpp
+    ../../lib/CircularLogger.cpp \
+    TestAppDataService.cpp \
+    main.cpp \
+    ../../lib/CfgServerLoader.cpp \
+    ../../lib/BuildInfo.cpp \
+    ../../lib/TcpFileTransfer.cpp \
+    ../../lib/CommandLineParser.cpp
 
 #protobuf
 #

@@ -10,6 +10,7 @@
 #include "../VFrame30/LogicSchema.h"
 
 class EditSchemaTabPageEx;
+class TagSelectorWidget;
 
 //
 //
@@ -27,7 +28,6 @@ public:
 	virtual QModelIndex index(int row, int column, const QModelIndex& parent = QModelIndex()) const override;
 	virtual QModelIndex parent(const QModelIndex& index) const override;
 
-	//virtual bool hasChildren(const QModelIndex &parent = QModelIndex()) const override;
 	virtual int rowCount(const QModelIndex& parentIndex = QModelIndex()) const override;
 	virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
 
@@ -36,20 +36,31 @@ public:
 
 public:
 	std::pair<QModelIndex, bool> addFile(QModelIndex parentIndex, std::shared_ptr<DbFileInfo> file);
-	bool deleteFiles(const QModelIndexList& selectedIndexes, const std::vector<std::shared_ptr<DbFileInfo>>& files);
+	bool deleteFilesUpdate(const QModelIndexList& selectedIndexes, const std::vector<std::shared_ptr<DbFileInfo>>& files);
+	bool moveFilesUpdate(const QModelIndexList& selectedIndexes, int movedToParnetId, const std::vector<DbFileInfo>& movedFiles, std::vector<QModelIndex>* addedFilesIndexes);
 
 	bool updateFiles(const QModelIndexList& selectedIndexes, const std::vector<DbFileInfo>& files);
 
+	DbFileInfo file(int fileId) const;
 	DbFileInfo file(const QModelIndex& modelIndex) const;
 	std::shared_ptr<DbFileInfo> fileSharedPtr(const QModelIndex& modelIndex) const;
 
 	QModelIndexList searchFor(const QString searchText);
 	void setFilter(QString filter);
+	void setTagFilter(const QStringList& tags);
+	const QStringList& tagFilter() const;
 
 protected:
 private:
-	void applyFilter(QString filterText, DbFileTree* filesTree);
+	void applyFilter(DbFileTree* filesTree, const std::map<int, VFrame30::SchemaDetails>& detailsMap);
+	void applyTagFilter(DbFileTree* filesTree, const std::map<int, VFrame30::SchemaDetails>& detailsMap);
+
 	bool isSystemFile(int fileId) const;
+
+	void updateTagsFromDetails();
+
+signals:
+	void tagsChanged();
 
 public slots:
 	void refresh();
@@ -62,12 +73,16 @@ private slots:
 	//
 public:
 	QString usernameById(int userId) const noexcept;
-
+	QString tagsColumnText(int fileId) const;
 	QString detailsColumnText(int fileId) const;
 	QString fileCaption(int fileId) const;
 	bool excludedFromBuild(int fileId) const;
 
 	const DbFileInfo& parentFile() const;
+
+	int schemaFilterCount() const;
+
+	const std::set<QString>& tags() const;
 
 	// Data
 	//
@@ -81,6 +96,7 @@ public:
 		ChangesetColumn,
 		FileUserColumn,
 		IssuesColumn,
+		TagsColumn,
 		DetailsColumn,
 
 		// Add other column befor this line
@@ -102,15 +118,13 @@ private:
 
 	std::map<int, QString> m_users;							// Key is UserID
 	std::map<int, VFrame30::SchemaDetails> m_details; 		// Key is FileID
+	std::set<QString> m_tags;
+	QStringList m_tagFilter;						// If vector is empty, then all schemas must be shown
 
-	// Cache for creating index
-	//
-private:
-	//mutable std::unordered_map<SchemaModelCacheKey, SchemaModelCacheVale, SchemaModelCacheKey> m_cache;	// Cache for fast creaing indexes, value is FileId
 	std::set<int> m_systemFiles;	// Key is fileid
+
+	int m_schemaFilterCount = 0;
 };
-
-
 
 
 class SchemaProxyListModel : public QSortFilterProxyModel
@@ -155,13 +169,15 @@ protected:
 	// Methods
 	//
 public:
-	//	void setFiles(const std::vector<DbFileInfo>& files);
-	//	void clear();
+	std::vector<std::shared_ptr<DbFileInfo>> selectedFiles() const;
 
-	std::vector<std::shared_ptr<DbFileInfo> > selectedFiles() const;
 	void refreshFiles();
+
 	void searchAndSelect(QString searchText);
+
 	void setFilter(QString filter);
+	void setTagFilter(const QStringList& tags);
+
 
 signals:
 	void openFileSignal(DbFileInfo files);
@@ -175,11 +191,9 @@ public slots:
 
 	void slot_refreshFiles();
 	void slot_doubleClicked(const QModelIndex& index);
-	//	void slot_properties();
 
 public slots:
 	void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
-	//	void filesViewSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
 	// Public properties
 	//
@@ -209,10 +223,12 @@ private:
 public:
 	// --
 	QAction* m_newFileAction = nullptr;
+	QAction* m_newFolderAction = nullptr;
 	QAction* m_openAction = nullptr;
 	QAction* m_viewAction = nullptr;
 	QAction* m_cloneFileAction = nullptr;
 	QAction* m_deleteAction = nullptr;
+	QAction* m_moveFileAction = nullptr;
 
 	// --
 	QAction* m_checkOutAction = nullptr;
@@ -269,7 +285,7 @@ protected slots:
 	void projectOpened();
 	void projectClosed();
 
-	int showSelectFileDialog(int parentFileId, int currentSelectionFileId, bool showRootFile);
+	int showSelectFolderDialog(int parentFileId, int currentSelectionFileId, bool showRootFile);
 
 	void openSelectedFile();
 	void viewSelectedFile();
@@ -280,12 +296,14 @@ protected slots:
 	void addLogicSchema(QStringList deviceStrIds, QString lmDescriptionFile);
 	void addFile();
 
-	void addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, QString fileExtension, bool dontShowPropDialog);
 	void addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, QString fileExtension, int parentFileId);
-	void addSchemaFile(std::shared_ptr<VFrame30::Schema> schema, QString fileExtension, QModelIndex parentIndex);
+	void addSchemaFileToDb(std::shared_ptr<VFrame30::Schema> schema, QString fileExtension, QModelIndex parentIndex);
+
+	void addFolder();
 
 	void cloneFile();
 	void deleteFiles();
+	void moveFiles();
 
 	void checkOutFiles();
 	void checkInFiles();
@@ -301,8 +319,6 @@ protected slots:
 
 	void showFileProperties();
 
-	//	void editSchemasProperties(std::vector<DbFileInfo> selectedFiles);
-
 private slots:
 	void ctrlF();
 	void search();
@@ -310,6 +326,9 @@ private slots:
 
 	void filter();
 	void resetFilter();
+
+	void schemaTagsChanged();
+	void tagSelectorHasChanges();
 
 	// Properties
 	//
@@ -324,10 +343,13 @@ private:
 
 	QAction* m_searchAction = nullptr;
 	QLineEdit* m_searchEdit = nullptr;
+	QLineEdit* m_filterEdit = nullptr;
 	QCompleter* m_searchCompleter = nullptr;
 	QPushButton* m_searchButton = nullptr;
 	QPushButton* m_filterButton = nullptr;
 	QPushButton* m_resetFilterButton = nullptr;
+
+	TagSelectorWidget* m_tagSelector = nullptr;
 
 	std::list<EditSchemaTabPageEx*> m_openedFiles;		// Opened files (for edit and view)
 

@@ -10,6 +10,7 @@
 
 class TcpAppDataServerThread;
 class AppDataServiceWorker;
+class AppDataReceiverThread;
 
 // -------------------------------------------------------------------------------
 //
@@ -22,12 +23,14 @@ class TcpAppDataServer : public Tcp::Server
 private:
 	TcpAppDataServerThread* m_thread = nullptr;
 
+	AppDataReceiverThread* m_appDataReceiverThread = nullptr;
+
 	// precalculated variables
 	//
 	int m_signalCount = 0;
 	int m_signalListPartCount = 0;
 
-	virtual Server* getNewInstance();
+	virtual Server* getNewInstance() override;
 
 	// Request processing functions
 	//
@@ -41,10 +44,8 @@ private:
 
 	void onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize);
 
-	void onGetDataSourcesInfoRequest();
-	void onGetDataSourcesStatesRequest();
-
-	void onGetUnitsRequest();
+	void onGetAppDataSourcesInfoRequest();
+	void onGetAppDataSourcesStatesRequest();
 
 	void onGetSettings();
 
@@ -66,8 +67,6 @@ private:
 	Network::GetAppSignalStateRequest m_getAppSignalStateRequest;
 	Network::GetAppSignalStateReply m_getAppSignalStateReply;
 
-	Network::GetUnitsReply m_getUnitsReply;
-
 	//
 
 	Network::GetDataSourcesInfoReply m_getDataSourcesInfoReply;
@@ -87,8 +86,8 @@ private:
 	bool getDataSourceState(Hash hash, AppSignalState& state);
 
 public:
-	TcpAppDataServer(const SoftwareInfo& softwareInfo);
-	virtual ~TcpAppDataServer();
+	TcpAppDataServer(const SoftwareInfo& softwareInfo, AppDataReceiverThread* appDataReceiverThread);
+	virtual ~TcpAppDataServer() override;
 
 	virtual void onServerThreadStarted() override;
 	virtual void onServerThreadFinished() override;

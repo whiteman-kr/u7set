@@ -1288,6 +1288,28 @@ namespace Builder
 						arg(lmID).arg(appDataServiceID));
 	}
 
+	/// IssueCode: CFG3022
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Property %1.%2 is empty. Default writeble catalog of workstation  will be used.
+	///
+	/// Parameters:
+	///         %1 Object ID
+	///         %2 Property name
+	///
+	/// Description:
+	///			Archive location is not assigned.
+	///
+	void IssueLogger::wrnCFG3031(QString objectID, QString propertyName)
+	{
+		LOG_WARNING0(IssueType::FscConfiguration,
+				  3031,
+				  tr("Property %1.%2 is empty. Default writeble catalog of workstation  will be used.")
+				  .arg(objectID)
+				  .arg(propertyName));
+	}
+
 	/// IssueCode: CFG3040
 	///
 	/// IssueType: Error
@@ -1940,6 +1962,45 @@ namespace Builder
 		LOG_ERROR(IssueType::AlParsing,
 				  4023,
 				  tr("UFB schema has duplicate pins %1 (UFB schema %2).").arg(pinCaption).arg(schema));
+	}
+
+	/// IssueCode: ALP4024
+	///
+	/// IssueType: Error
+	///
+	/// Title: Schema details parsing error, filename %1, details string %2.
+	///
+	/// Parameters:
+	///		%1 Schema file name
+	///		%2 Detaisl string
+	///
+	/// Description:
+	///		Schema details parsing error.
+	///
+	void IssueLogger::errALP4024(QString fileName, QString details)
+	{
+		LOG_ERROR(IssueType::AlParsing,
+				  4024,
+				  tr("Schema details parsing error, filename %1, details string %2.").arg(fileName).arg(details));
+	}
+
+	/// IssueCode: ALP4025
+	///
+	/// IssueType: Error
+	///
+	/// Title: Duplicate SchemaIDs %1, all schemas (including Monitor, Tuning, etc) must have unique SchemaIDs.
+	///
+	/// Parameters:
+	///		%1 SchemaID
+	///
+	/// Description:
+	///		$root$/Schema/ Has duplicate SchemaIDs.
+	///
+	void IssueLogger::errALP4025(QString schema)
+	{
+		LOG_ERROR(IssueType::AlParsing,
+				  4025,
+				  tr("Duplicate SchemaIDs %1, all schemas (including Monitor, Tuning, etc) must have unique SchemaIDs.").arg(schema));
 	}
 
 
@@ -3457,7 +3518,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Value of parameter %1.%2 must be greate then the value of %1.%3.
+	/// Title: Value of parameter %1.%2 must be greater then the value of %1.%3.
 	///
 	/// Parameters:
 	///		%1 functional block caption
@@ -3466,7 +3527,7 @@ namespace Builder
 	///		%4 application logic item Uuid
 	///
 	/// Description:
-	///		Value of first specified parameter must be greate then the value of second parameneter. Correct prameter's values.
+	///		Value of first specified parameter must be greater then the value of second parameneter. Correct prameter's values.
 	///
 	void IssueLogger::errALC5052(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel)
 	{
@@ -3474,7 +3535,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5052,
-				  QString(tr("Value of parameter %1.%2 must be greate then the value of %1.%3 (Logic schema %4, item %5).")).
+				  QString(tr("Value of parameter %1.%2 must be greater then the value of %1.%3 (Logic schema %4, item %5).")).
 					arg(fbCaption).arg(param1).arg(param2).arg(schemaID).arg(itemLabel));
 	}
 
@@ -5707,6 +5768,32 @@ namespace Builder
 					arg(appSignalID));
 	}
 
+	/// IssueCode: ALC5158
+	///
+	/// IssueType: Error
+	///
+	/// Title: Value of parameter %1.%2 must be greater or equal then the value of %1.%3.
+	///
+	/// Parameters:
+	///		%1 functional block caption
+	///		%2 parameter 1 caption
+	///		%3 parameter 2 caption
+	///		%4 application logic item Uuid
+	///
+	/// Description:
+	///		Value of first specified parameter must be greater or equal then the value of second parameneter. Correct prameter's values.
+	///
+	void IssueLogger::errALC5158(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel)
+	{
+		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5158,
+				  QString(tr("Value of parameter %1.%2 must be greater or equal then the value of %1.%3 (Logic schema %4, item %5).")).
+					arg(fbCaption).arg(param1).arg(param2).arg(schemaID).arg(itemLabel));
+	}
+
+
 	//
 
 	/// IssueCode: ALC5186
@@ -6425,6 +6512,115 @@ namespace Builder
 				  tr("Equipment ID %1 specified in TuningSourceEquipmentID property of Tuning Client %2 does not exist.")
 				  .arg(equipmentId)
 				  .arg(tuningClientEquipmentId)
+				  );
+	}
+
+	/// IssueCode: EQP6110
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong physical low Limit
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Wrong physical low Limit.
+	///
+	void IssueLogger::errEQP6110(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6110,
+				  tr("Signal %1 has wrong physical low Limit.")
+				  .arg(appSignalID)
+				  );
+	}
+
+	/// IssueCode: EQP6111
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong physical high Limit
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Wrong physical high Limit.
+	///
+	void IssueLogger::errEQP6111(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6111,
+				  tr("Signal %1 has wrong physical high Limit.")
+				  .arg(appSignalID)
+				  );
+	}
+
+	/// IssueCode: EQP6112
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 - engeneering low Limit mismatch electrical low Limit, set electrical low Limit: %2
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Electrical low Limit
+	///
+	/// Description:
+	///		Only ThermoCouple and ThermoResistor. Engeneering low Limit mismatch electrical low Limit.
+	///
+	void IssueLogger::errEQP6112(QString appSignalID, QString value)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6112,
+				  tr("Signal %1 - engeneering low Limit mismatch electrical low Limit, set electrical low Limit: %2.")
+				  .arg(appSignalID)
+				  .arg(value)
+				  );
+	}
+
+	/// IssueCode: EQP6113
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 - engeneering high Limit mismatch electrical high Limit
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Electrical high Limit
+	///
+	/// Description:
+	///		 Only ThermoCouple and ThermoResistor. Engeneering high Limit mismatch electrical high Limit. Only ThermoCouple and ThermoResistor.
+	///
+	void IssueLogger::errEQP6113(QString appSignalID, QString value)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6113,
+				  tr("Signal %1 - engeneering high Limit mismatch electrical high Limit, set electrical high Limit: %2.")
+				  .arg(appSignalID)
+				  .arg(value)
+				  );
+	}
+
+	/// IssueCode: EQP6114
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong R0 (ThermoResistor).
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Wrong R0. It is required to set R0 of ThermoResistor.
+	///
+	void IssueLogger::errEQP6114(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6114,
+				  tr("Signal %1 has wrong R0 (ThermoResistor).")
+				  .arg(appSignalID)
 				  );
 	}
 

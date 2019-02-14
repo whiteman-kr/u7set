@@ -22,6 +22,16 @@ AppDataReceiverThread::~AppDataReceiverThread()
 {
 }
 
+void AppDataReceiverThread::fillAppDataReceiveState(Network::AppDataReceiveState *adrs)
+{
+	adrs->set_receivedframescount(m_receivedFramesCount);
+
+	adrs->set_simframescount(m_simFramesCount);
+	adrs->set_errdatagramsize(m_errDatagramSize);
+	adrs->set_errsimversion(m_errSimVersion);
+	adrs->set_errunknownappdatasourceip(m_errUnknownAppDataSourceIP);
+}
+
 void AppDataReceiverThread::run()
 {
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread is started (receiving IP %1)").arg(m_dataReceivingIP.addressPortStr()));
@@ -183,14 +193,25 @@ void AppDataReceiverThread::receivePackets()
 			}
 		}
 
-		//
+		AppDataSourceShared dataSource = m_appDataSourcesIP.value(ip, nullptr);
 
-		Rup::Header h = simFrame.rupFrame.header;
+		if (dataSource == nullptr)
+		{
+			m_errUnknownAppDataSourceIP++;
 
-		h.reverseBytes();
+			if (m_unknownAppDataSourcesIP.contains(ip) == false && m_unknownAppDataSourcesIP.count() < 500)
+			{
+				m_unknownAppDataSourcesIP.insert(ip, ip);
+			}
 
-		//
+			continue;
+		}
+
 		m_receivedFramesCount++;
+
+		dataSource->pushRupFrame(serverTime, simFrame.rupFrame);
+
+		//
 
 		if (serverTime - prevServerTime > 1000)
 		{
@@ -200,20 +221,5 @@ void AppDataReceiverThread::receivePackets()
 
 			prevReceivedFramesCount = m_receivedFramesCount;
 		}
-
-		AppDataSourceShared dataSource = m_appDataSourcesIP.value(ip, nullptr);
-
-		if (dataSource == nullptr)
-		{
-			if (m_unknownAppDataSourcesIP.contains(ip) == false && m_unknownAppDataSourcesIP.count() < 500)
-			{
-				m_unknownAppDataSourcesIP.insert(ip, ip);
-				m_unknownAppDataSourcesCount++;
-			}
-
-			continue;
-		}
-
-		dataSource->pushRupFrame(serverTime, simFrame.rupFrame);
 	}
 }

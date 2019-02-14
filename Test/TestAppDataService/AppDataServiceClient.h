@@ -4,6 +4,7 @@
 #include <qglobal.h>
 #include "../../Proto/network.pb.h"
 #include "../../lib/Tcp.h"
+#include "../../lib/DataSource.h"
 
 class AppDataServiceClient
 {
@@ -14,18 +15,21 @@ public:
 
 	virtual ~AppDataServiceClient();
 
-	bool sendRequestAndWaitForResponse(quint32 requestID, QString& error);
-	bool sendRequestAndWaitForResponse(quint32 requestID, google::protobuf::Message& protobufMessage, QString& error);
-	bool sendRequestAndWaitForResponse(quint32 requestID, const char* requestData, quint32 requestDataSize, QString& error);
+	void sendRequestAndWaitForResponse(quint32 requestID, bool& result);
+	void sendRequestAndWaitForResponse(quint32 requestID, google::protobuf::Message& protobufMessage, bool& result);
+	void sendRequestAndWaitForResponse(quint32 requestID, const char* requestData, quint32 requestDataSize, bool& result);
+
+	void initDataSourceArray(QVector<DataSource>& dataSourceArray);
 
 private:
-	bool ensureConnectedToService(QString& error);
-	bool socketWrite(const char* data, quint32 dataSize, QString& error);
-	bool socketRead(char* data, quint32 dataSize, QString& error);
-	bool processData(QString& error);
-	bool parseMessageLoggingErrors(google::protobuf::Message& protobufMessage, QString& error);
+	void ensureConnectedToService(bool& result);
+	void socketWrite(const char* data, quint32 dataSize, bool& result);
+	void socketRead(char* data, quint32 dataSize, bool& result);
+	void processData(bool& result);
+	void parseMessageLoggingErrors(google::protobuf::Message& protobufMessage, bool& result);
 
 	Network::GetAppDataSourcesStatesReply& m_dataSourceStateMessage;
+	Network::GetDataSourcesInfoReply m_dataSourceInfoMessage;
 	SoftwareInfo m_softwareInfo;
 	SoftwareInfo m_serviceSoftwareInfo;
 	const HostAddressPort& m_serverAddressPort;
@@ -34,7 +38,7 @@ private:
 	Tcp::SocketWorker::Header m_sendRequestHeader;
 	Tcp::SocketWorker::Header m_receiveReplyHeader;
 	quint32 m_requestNumerator = 1;
-	QEventLoop signalWaiter;
+	QEventLoop m_signalWaiter;
 };
 
 #endif // APPDATASERVICECLIENT_H

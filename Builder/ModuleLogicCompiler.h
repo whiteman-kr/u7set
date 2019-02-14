@@ -178,6 +178,8 @@ namespace Builder
 		bool expertMode() const;
 		void setExpertMode(bool value);
 
+		int lmDescriptionNumber() const;
+
 	private:
 		// pass #1 compilation functions
 		//
@@ -361,6 +363,7 @@ namespace Builder
 		bool generateAlpPhaseCode();
 		bool makeAppLogicCode();
 
+		bool generateAfbsVersionCheckingCode(CodeSnippet* code);
 		bool generateInitAfbsCode(CodeSnippet* code);
 		bool generateInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb);
 		bool displayAfbParams(CodeSnippet* code, const UalAfb& appFb);

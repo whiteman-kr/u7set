@@ -22,6 +22,8 @@
 #include "IssueLogger.h"
 #include "SignalSet.h"
 
+#include <QtConcurrentRun>
+
 
 namespace Builder
 {
@@ -822,7 +824,7 @@ namespace Builder
 			QByteArray buffer;
 			buffer.reserve(2048);
 
-			ali.m_fblItem->Save(buffer);
+			ali.m_fblItem->saveToByteArray(&buffer);
 
 			AppLogicItem aliCopy = ali;
 			aliCopy.m_fblItem = std::dynamic_pointer_cast<VFrame30::FblItemRect>(VFrame30::SchemaItem::Create(buffer));
@@ -2721,7 +2723,7 @@ namespace Builder
 
 	bool Parser::loadUfbFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::UfbSchema>>* out)
 	{
-		bool ok = loadSchemaFiles<VFrame30::UfbSchema>(db, out, db->ufblFileId(), QLatin1String("%.") + ::UfbFileExtension);
+		bool ok = loadSchemaFiles<VFrame30::UfbSchema>(db, out, db->ufblFileId(), QLatin1String(".") + ::UfbFileExtension);
 		m_log->writeMessage(tr("Loaded %1 UFB logic file(s).").arg(out->size()));
 		m_log->writeMessage("");
 		return ok;
@@ -2729,14 +2731,14 @@ namespace Builder
 
 	bool Parser::loadAppLogicFiles(DbController* db, std::vector<std::shared_ptr<VFrame30::LogicSchema>>* out)
 	{
-		bool ok = loadSchemaFiles<VFrame30::LogicSchema>(db, out, db->alFileId(), QLatin1String("%.") + ::AlFileExtension);
+		bool ok = loadSchemaFiles<VFrame30::LogicSchema>(db, out, db->alFileId(), QLatin1String(".") + ::AlFileExtension);
 		m_log->writeMessage(tr("Loaded %1 Application Logic file(s).").arg(out->size()));
 		m_log->writeMessage("");
 		return ok;
 	}
 
 	template<typename SchemaType>
-	bool Parser::loadSchemaFiles(DbController* db, std::vector<std::shared_ptr<SchemaType>>* out, int parentFileId, QString filter)
+	bool Parser::loadSchemaFiles(DbController* db, std::vector<std::shared_ptr<SchemaType>>* out, int parentFileId, QString endsWithFilter)
 	{
 		if (out == nullptr)
 		{
@@ -2752,13 +2754,18 @@ namespace Builder
 		bool ok = false;
 		DbFileTree filesTree;
 
-		ok = db->getFileListTree(&filesTree, parentFileId, filter, true, nullptr);
+		ok = db->getFileListTree(&filesTree, parentFileId, "%", true, nullptr);
 		if (ok == false)
 		{
 			return false;
 		}
 
-		std::vector<DbFileInfo> fileList = filesTree.toVector(true);
+		std::vector<DbFileInfo> fileList = filesTree.toVectorIf(
+			[&endsWithFilter](const DbFileInfo& file)
+			{
+			   return file.fileName().endsWith(endsWithFilter, Qt::CaseInsensitive) == true &&
+				   file.isFolder() == false;
+			});
 
 		// --
 		//
@@ -2782,7 +2789,7 @@ namespace Builder
 		{
 			// Error of getting file list from the database, parent file ID %1, filter '%2', database message %3.
 			//
-			m_log->errPDB2001(db->alFileId(), filter, db->lastError());
+			m_log->errPDB2001(db->alFileId(), endsWithFilter, db->lastError());
 			return false;
 		}
 
@@ -2852,53 +2859,6 @@ namespace Builder
 				});
 
 			loadSchemaTasks.push_back(task);
-
-//			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file.get()->data());
-
-//			std::shared_ptr<SchemaType> ls = std::dynamic_pointer_cast<SchemaType>(schema);
-
-//			if (ls == nullptr)
-//			{
-//				assert(ls != nullptr);
-
-//				// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
-//				//
-//				m_log->errCMN0010(file->fileName());
-
-//				result = false;
-//				continue;
-//			}
-
-//			if (ls->excludeFromBuild() == true)
-//			{
-//				// Schema is excluded from build (Schema '%1').
-//				//
-//				m_log->wrnALP4004(ls->schemaId());
-//				continue;
-//			}
-
-//			// Remove all commented items from the schema
-//			//
-//			for (std::shared_ptr<VFrame30::SchemaLayer> layer :  schema->Layers)
-//			{
-//				std::list<std::shared_ptr<VFrame30::SchemaItem>> newItemList;
-
-//				for (std::shared_ptr<VFrame30::SchemaItem> item :  layer->Items)
-//				{
-//					assert(item);
-
-//					if (item->isCommented() == false)
-//					{
-//						newItemList.push_back(item);
-//					}
-//				}
-
-//				layer->Items.swap(newItemList);
-//			}
-
-//			// Add to schema list
-//			//
-//			out->push_back(ls);
 		}
 
 		// Wait for finish and process interrupt request
@@ -2936,7 +2896,6 @@ namespace Builder
 		for (auto& task : loadSchemaTasks)
 		{
 			std::shared_ptr<VFrame30::Schema> schema = task.result();
-
 			std::shared_ptr<SchemaType> ls = std::dynamic_pointer_cast<SchemaType>(schema);
 
 			if (ls == nullptr)
@@ -3862,7 +3821,7 @@ namespace Builder
 		QByteArray layerData;
 		if (equipmentIds.size() > 1)
 		{
-			layer->Save(layerData);		// If there is only one equipmentId, dont serialize it, just use the existing layer
+			layer->saveToByteArray(&layerData);		// If there is only one equipmentId, dont serialize it, just use the existing layer
 		}
 
 		// Parse layer for each LM

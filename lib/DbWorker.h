@@ -23,8 +23,6 @@ class DbWorker : public QObject
 private:
 	DbWorker();
 
-	void getObjectState(QSqlQuery& q, ObjectState& os);
-
 public:
     DbWorker(DbProgress* progress);
 
@@ -114,6 +112,9 @@ public slots:
 	void slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId);
     void slot_deleteFiles(std::vector<DbFileInfo>* files);
 
+	void slot_moveFiles(const std::vector<DbFileInfo>* files, int moveToParentId, std::vector<DbFileInfo>* movedFiles);
+	void slot_renameFile(const DbFileInfo& file, QString newFileName, DbFileInfo* updatedFileInfo);
+
     void slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
     void slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::vector<std::shared_ptr<DbFile> >* out);
     void slot_getCheckedOutFiles(const std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* out);
@@ -179,12 +180,6 @@ public slots:
 
 	void hasCheckedOutSignals(QSqlDatabase& db, bool* hasCheckedOut);
 
-	// Units management
-	//
-/*	void slot_getUnits(UnitList* units);
-	void slot_addUnit(QString unitEn, QString unitRu, int* newUnitID);
-	void slot_updateUnit(int unitID, QString unitEn, QString unitRu, int* result);*/
-
     // Build management
     //
     void slot_buildStart(QString workstation, bool release, int changeset, int* buildID);
@@ -211,9 +206,10 @@ public slots:
     bool db_checkUserPassword(QSqlDatabase db, QString username, QString password);
     int db_getProjectVersion(QSqlDatabase db);
 
-    bool db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo, bool checkFileId) const;
-    bool db_updateFile(const QSqlQuery& q, DbFile* file) const;
-    bool db_dbFileInfo(const QSqlQuery& q, DbFileInfo* fileInfo);
+	static bool db_updateFileState(const QSqlQuery& q, DbFileInfo* fileInfo, bool checkFileId);
+	static bool db_updateFile(const QSqlQuery& q, DbFile* file);
+	static bool db_dbFileInfo(const QSqlQuery& q, DbFileInfo* fileInfo);
+	static bool db_objectState(QSqlQuery& q, ObjectState* os);
 
 	bool db_dbChangeset(const QSqlQuery& q, DbChangeset* out);
 	bool db_dbChangesetObject(const QSqlQuery& q, DbChangesetDetails* destination);

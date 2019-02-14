@@ -251,7 +251,7 @@ namespace Builder
 		UalAfb(const UalItem &appItem, bool isBusProcessingAfb);
 
 		quint16 instance() const { return m_instance; }
-		quint16 opcode() const { return afb().opCode(); }		// return FB type
+		quint16 opcode() const { return static_cast<quint16>(afb().opCode()); }		// return FB type
 		QString caption() const { return afb().caption(); }
 		QString typeCaption() const { return afb().componentCaption(); }
 		int number() const { return m_number; }
@@ -303,6 +303,7 @@ namespace Builder
 		bool calculate_LATCH_paramValues();
 		bool calculate_LIM_paramValues();
 		bool calculate_DEAD_ZONE_paramValues();
+		bool calculate_DEAD_ZONE_paramValues_ldn4();
 		bool calculate_POL_paramValues();
 		bool calculate_DER_paramValues();
 		bool calculate_MISMATCH_paramValues();
@@ -321,6 +322,8 @@ namespace Builder
 		bool checkUnsignedInt32(const AppFbParamValue& paramValue);
 		bool checkSignedInt32(const AppFbParamValue& paramValue);
 		bool checkFloat32(const AppFbParamValue& paramValue);
+
+		int lmDescriptionNumber() const;
 
 	private:
 		quint16 m_instance = -1;

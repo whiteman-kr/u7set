@@ -22,7 +22,7 @@ public:
 	TcpAppDataClient(const SoftwareInfo& softwareInfo,
 					 const HostAddressPort& serverAddressPort1,
 					 const HostAddressPort& serverAddressPort2);
-	virtual ~TcpAppDataClient();
+	virtual ~TcpAppDataClient() override;
 
 	virtual void onClientThreadStarted() override;
 	virtual void onClientThreadFinished() override;
@@ -50,6 +50,8 @@ public:
 	QString configServiceConnectionState();
 	QString archiveServiceConnectionState();
 
+	Network::AppDataServiceState& serviceState();
+
 signals:
 	void clientsLoaded();
 
@@ -73,18 +75,15 @@ private:
 
 	void onGetClientList(const char* replyData, quint32 replyDataSize);
 
-	void onGetDataSourcesInfoReply(const char* replyData, quint32 replyDataSize);
-	void onGetDataSourcesStatesReply(const char* replyData, quint32 replyDataSize);
+	void onGetAppDataSourcesInfoReply(const char* replyData, quint32 replyDataSize);
+	void onGetAppDataSourcesStatesReply(const char* replyData, quint32 replyDataSize);
 
 	void onGetAppSignalListStartReply(const char* replyData, quint32 replyDataSize);
 	void onGetAppSignalListNextReply(const char* replyData, quint32 replyDataSize);
 	void onGetAppSignalReply(const char* replyData, quint32 replyDataSize);
 	void onGetAppSignalStateReply(const char* replyData, quint32 replyDataSize);
 
-	void onGetUnitsReply(const char* replyData, quint32 replyDataSize);
-
 	void onGetServiceState(const char* replyData, quint32 replyDataSize);
-
 	void onGetServiceSettings(const char* replyData, quint32 replyDataSize);
 
 	//
@@ -125,8 +124,6 @@ private:
 
 	Network::GetAppSignalStateRequest m_getSignalStateRequest;
 	Network::GetAppSignalStateReply m_getSignalStateReply;
-
-	Network::GetUnitsReply m_getUnitsReply;
 
 	Network::AppDataServiceState m_getAppDataServiceState;
 

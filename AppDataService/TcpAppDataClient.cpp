@@ -1,6 +1,6 @@
 #include "TcpAppDataClient.h"
 #include "../lib/DataSource.h"
-
+/*
 TcpAppDataClient::TcpAppDataClient(const SoftwareInfo& softwareInfo,
 								   const HostAddressPort& serverAddressPort1,
 								   const HostAddressPort& serverAddressPort2) :
@@ -44,7 +44,7 @@ void TcpAppDataClient::onConnection()
 
 	//sendRequest(ADS_GET_APP_SIGNAL_LIST_START);
 
-	sendRequest(ADS_GET_DATA_SOURCES_INFO);
+	sendRequest(ADS_GET_APP_DATA_SOURCES_INFO);
 }
 
 
@@ -78,12 +78,12 @@ void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, qu
 {
 	switch(requestID)
 	{
-	case ADS_GET_DATA_SOURCES_INFO:
-		onGetDataSourcesInfoReply(replyData, replyDataSize);
+	case ADS_GET_APP_DATA_SOURCES_INFO:
+		onGetAppDataSourcesInfoReply(replyData, replyDataSize);
 		break;
 
-	case ADS_GET_DATA_SOURCES_STATES:
-		onGetDataSourcesStatesReply(replyData, replyDataSize);
+	case ADS_GET_APP_DATA_SOURCES_STATES:
+		onGetAppDataSourcesStatesReply(replyData, replyDataSize);
 		break;
 
 	case ADS_GET_APP_SIGNAL_LIST_START:
@@ -108,7 +108,7 @@ void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, qu
 }
 
 
-void TcpAppDataClient::onGetDataSourcesInfoReply(const char* replyData, quint32 replyDataSize)
+void TcpAppDataClient::onGetAppDataSourcesInfoReply(const char* replyData, quint32 replyDataSize)
 {
 	bool result = m_getDataSourcesInfoReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
 
@@ -146,7 +146,7 @@ void TcpAppDataClient::onGetDataSourcesInfoReply(const char* replyData, quint32 
 }
 
 
-void TcpAppDataClient::onGetDataSourcesStatesReply(const char* replyData, quint32 replyDataSize)
+void TcpAppDataClient::onGetAppDataSourcesStatesReply(const char* replyData, quint32 replyDataSize)
 {
 	Q_UNUSED(replyData)
 	Q_UNUSED(replyDataSize)
@@ -362,3 +362,4 @@ void TcpAppDataClient::onGetAppSignalStateReply(const char* replyData, quint32 r
 
 	getNextParamPart();
 }
+*/

@@ -72,9 +72,9 @@ namespace Log
 
 		bool writeLogFileInfo(QFile& file, const QDateTime& startTime, const QDateTime& endTime, int recordsCount);
 
-		bool flush();
+		bool flush(QString* errorString);
 
-		bool switchToNextLogFile();
+		bool switchToNextLogFile(QString* errorString);
 
 		bool readFileRecords(const QString& fileName, bool currentSessionOnly, std::vector<LogFileRecord>* result);
 
@@ -85,7 +85,7 @@ namespace Log
 		void slot_load(bool currentSessionOnly);
 
 	signals:
-		void flushFailure();
+		void writeFailure(QString errorString);
 
 		void readStart(bool currentSessionOnly);
 
@@ -248,11 +248,11 @@ namespace Log
 
 	signals:
 
-		void writeFailure();
+		void writeFailure(QString errorString);
 		void alertArrived(QString text);
 
 	private slots:
-		void onFlushFailure();
+		void onFlushFailure(QString errorString);
 
 		void onDialogFinished(int result);
 

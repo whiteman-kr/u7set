@@ -51,6 +51,7 @@ extern const char* const BusFileExtension;		// Bus types
 extern const char* const AppSignalFileExtension;	// Application signal file extention (::Proto::AppSignal message)
 extern const char* const AppSignalSetFileExtension;	// Application signals set file extention (::Proto::AppSignalSet message)
 
+
 //
 //
 // VcsState
@@ -82,6 +83,7 @@ private:
 bool operator== (const VcsState& s1, const VcsState& s2) noexcept;
 bool operator!= (const VcsState& s1, const VcsState& s2) noexcept;
 bool operator<  (const VcsState& s1, const VcsState& s2) noexcept;
+
 
 //
 //
@@ -136,6 +138,7 @@ struct ObjectState
 	int errCode;
 };
 
+
 //
 //
 // DbProject
@@ -167,11 +170,13 @@ protected:
 	int m_version;
 };
 
+
 struct UpgradeItem
 {
     QString upgradeFileName;
 	QString text;
 };
+
 
 //
 //
@@ -236,6 +241,7 @@ private:
 	bool m_disabled = false;
 };
 
+
 //
 // DbFileTree
 //
@@ -275,6 +281,7 @@ public:
 
 	const std::map<int, std::shared_ptr<DbFileInfo>>& files() const;
 	std::vector<DbFileInfo> toVector(bool excludeRoot) const;
+	std::vector<DbFileInfo> toVectorIf(std::function<bool(const DbFileInfo&)> pred) const;
 	std::vector<std::shared_ptr<DbFileInfo>> toVectorOfSharedPointers(bool excludeRoot) const;
 
 	bool hasChildren(int fileId) const;
@@ -308,6 +315,7 @@ public:
 	bool removeFile(std::shared_ptr<DbFileInfo> fileInfo);
 
 	bool removeFilesWithExtension(QString ext);
+	bool removeIf(std::function<bool(const DbFileInfo&)> pred);
 
 private:
 	struct FileChildren
@@ -325,6 +333,7 @@ private:
 	// WARNING, assigment move is present, adding new member, modify operator=(DbFileTree&&)!!!
 	//
 };
+
 
 //
 //
@@ -393,6 +402,15 @@ public:
 	const QString& details() const noexcept;
 	void setDetails(const QString& value);		// Value must be valid JSON, Example: "{}"
 
+	// File Attributes
+	//
+	qint32 attributes() const;
+	void setAttributes(qint32 value);
+
+	bool isFolder() const;
+	bool directoryAttribute() const;
+	void setDirectoryAttribute(bool value);
+
 	// Data
 	//
 protected:
@@ -412,13 +430,24 @@ protected:
 
 	QString m_details;
 
+	union
+	{
+		struct
+		{
+			qint32 m_attrDirectory: 1;
+		};
+		qint32 m_attributes = 0;
+	};
+
 public:
 	static const int Null = -1;
+	static const int ATTRIBUTE_DIRECTORY = 0x00000001;
 
 	static QString fullPathToFileName(const QString& fullPathName);		// $root$/Schemas/Monitor -> Monitor
 
 	friend bool operator< (const DbFileInfo& a, const DbFileInfo& b);
 };
+
 
 //
 //
@@ -447,7 +476,8 @@ public:
 	//
 public:
 	const QByteArray& data() const;
-	QByteArray& data();
+	//QByteArray& data();				// Commented, as this function cannot set size after changing data
+	void setData(const QByteArray& data);
 	void swapData(QByteArray& data);
 	void clearData();
 
@@ -458,6 +488,7 @@ public:
 private:
 	QByteArray m_data;
 };
+
 
 //
 //
@@ -562,6 +593,12 @@ public:
 	QString parent() const;
 	void setParent(const QString& value);
 
+	QString fileMoveText() const;
+	void setFileMoveText(const QString& value);
+
+	QString fileRenameText() const;
+	void setFileRenameText(const QString& value);
+
 private:
 	Type m_type = Type::File;
 	int m_id = -1;				// File.FileID or Signal.SignalsID
@@ -569,18 +606,10 @@ private:
 	QString m_caption;
 	VcsItemAction m_action = VcsItemAction::Added;
 	QString m_parent;
+	QString m_fileMoveText;
+	QString m_fileRenameText;
 };
 
-
-
-// WIN_64 PLATFORM C4267 WARNING ISSUE, IT IS NOT ENOUGH TO DISBALE THIS WARNING
-// To remove annoing warning c4267 under windows x64, go to qmetatype.h, line 897 (Qt 5.3.1) and set static_cast to int for the
-// returning value.
-// Was:
-// { static int size(const std::vector<T> *t) { return t->size(); } };
-// Now:
-// { static int size(const std::vector<T> *t) { return static_cast<int>(t->size()); } };
-//
 
 Q_DECLARE_METATYPE(DbUser)
 Q_DECLARE_METATYPE(DbFileTree)

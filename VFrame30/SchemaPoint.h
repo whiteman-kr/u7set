@@ -1,5 +1,6 @@
 #pragma once
 #include "VFrame30Lib_global.h"
+#include <QPointF>
 
 namespace Proto
 {

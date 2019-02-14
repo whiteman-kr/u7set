@@ -182,14 +182,6 @@ namespace Log
 	{
 		assert(messageTypeCount == static_cast<int>(MessageType::Count));
 		assert(messageTypeLongCount == static_cast<int>(MessageType::Count));
-
-		if (m_path.isEmpty() == true)
-		{
-			QString localAppDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-			m_path = QDir::toNativeSeparators(localAppDataPath);
-		}
-
-		qDebug() << "Log path : " << m_path;
 	}
 
 	LogFileWorker::~LogFileWorker()
@@ -250,6 +242,23 @@ namespace Log
 
 	void LogFileWorker::onThreadStarted()
 	{
+		// Initialize path
+
+		if (m_path.isEmpty() == true)
+		{
+			QString localAppDataPath = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+			m_path = QDir::toNativeSeparators(localAppDataPath);
+		}
+
+		if (QDir().exists(m_path) == false)
+		{
+			if (QDir().mkpath(m_path) == false)
+			{
+				QString errorString = tr("LogFileWorker: can't create path %1").arg(m_path);
+				emit writeFailure(errorString);
+			}
+		}
+
 		// Start timer
 
 		m_timer = new QTimer(this);
@@ -295,9 +304,11 @@ namespace Log
 	{
 		m_timer->stop();
 
-		if (flush() == false)
+		QString errorString;
+
+		if (flush(&errorString) == false)
 		{
-			emit flushFailure();
+			emit writeFailure(errorString);
 		}
 	}
 
@@ -479,8 +490,16 @@ namespace Log
 		return true;
 	}
 
-	bool LogFileWorker::flush()
+	bool LogFileWorker::flush(QString* errorString)
 	{
+		if (errorString == nullptr)
+		{
+			assert(errorString);
+			return false;
+		}
+
+		errorString->clear();
+
 		QMutexLocker l(&m_queueMutex);
 
 		if (m_queue.size() == 0)
@@ -496,10 +515,14 @@ namespace Log
 
 			if (file.size() > m_maxFileSize)
 			{
-				if (switchToNextLogFile() == true)
+				if (switchToNextLogFile(errorString) == false)
 				{
-					fileName = getLogFileName(m_currentFileNumber);
+					m_queue.clear();
+
+					return false;
 				}
+
+				fileName = getLogFileName(m_currentFileNumber);
 			}
 		}
 
@@ -524,6 +547,10 @@ namespace Log
 
 		if (file.open(QIODevice::Append | QIODevice::Text ) == false)
 		{
+			*errorString = tr("Log file %1 open error: %2").arg(fileName).arg(file.errorString());
+
+			m_queue.clear();
+
 			return false;
 		}
 
@@ -541,7 +568,16 @@ namespace Log
 
 		for (LogFileRecord& record : m_queue)
 		{
-			file.write(record.toString(m_sessionHashString).toLocal8Bit());
+			if (file.write(record.toString(m_sessionHashString).toLocal8Bit()) == -1)
+			{
+				*errorString = tr("Log file %1 write error: %2").arg(fileName).arg(file.errorString());
+
+				file.close();
+
+				m_queue.clear();
+
+				return false;
+			}
 		}
 
 		file.close();
@@ -551,8 +587,14 @@ namespace Log
 		return true;
 	}
 
-	bool LogFileWorker::switchToNextLogFile()
+	bool LogFileWorker::switchToNextLogFile(QString* errorString)
 	{
+		if (errorString == nullptr)
+		{
+			assert(errorString);
+			return false;
+		}
+
 		// If current file is less than max count, switch to the next file
 
 		if (m_currentFileNumber < m_maxFilesCount - 1)
@@ -570,13 +612,13 @@ namespace Log
 
 			if (f.exists() == false)
 			{
-				assert(false);
+				*errorString = tr("LogFileWorker::switchToNextLogFile, file %1 does not exist.").arg(fileName);
 				return false;
 			}
 
 			if (f.remove() == false)
 			{
-				assert(false);
+				*errorString = tr("LogFileWorker::switchToNextLogFile, can't remove file %1.").arg(fileName);
 				return false;
 			}
 		}
@@ -592,7 +634,7 @@ namespace Log
 
 			if (f.rename(fileNameNew) == false)
 			{
-				assert(false);
+				*errorString = tr("LogFileWorker::switchToNextLogFile, can't rename file %1 -> %2.").arg(fileNameOld).arg(fileNameNew);
 				return false;
 			}
 		}
@@ -602,8 +644,6 @@ namespace Log
 
 	bool LogFileWorker::readFileRecords(const QString& fileName, bool currentSessionOnly, std::vector<LogFileRecord>* result)
 	{
-		qDebug() << fileName;
-
 		if (result == nullptr)
 		{
 			assert(false);
@@ -681,9 +721,11 @@ namespace Log
 
 	void LogFileWorker::slot_onTimer()
 	{
-		if (flush() == false)
+		QString errorString;
+
+		if (flush(&errorString) == false)
 		{
-			emit flushFailure();
+			emit writeFailure(errorString);
 		}
 	}
 
@@ -1220,8 +1262,6 @@ namespace Log
 
 	void LogFileDialog::onReadComplete()
 	{
-		qDebug() << "onLoadComplete";
-
 		std::vector<LogFileRecord> loadResult;
 
 		m_worker->getLoadedData(&loadResult);
@@ -1317,7 +1357,7 @@ namespace Log
 
 		m_logFileWorker = new LogFileWorker(logName, path, maxFileSize, maxFilesCount, m_sessionHash);
 
-		connect(m_logFileWorker, &LogFileWorker::flushFailure, this, &LogFile::onFlushFailure);
+		connect(m_logFileWorker, &LogFileWorker::writeFailure, this, &LogFile::onFlushFailure);
 
 		m_logThread.addWorker(m_logFileWorker);
 		m_logThread.start();
@@ -1419,11 +1459,9 @@ namespace Log
 		return m_warningAckCounter;
 	}
 
-	void LogFile::onFlushFailure()
+	void LogFile::onFlushFailure(QString errorString)
 	{
-		qDebug() << "Log write failure!";
-		assert(false);
-		emit writeFailure();
+		emit writeFailure(errorString);
 	}
 
 	void LogFile::onDialogFinished(int result)

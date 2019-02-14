@@ -256,7 +256,7 @@ void TuningSocket::requestReadTuningSignals()
 	int signalForReadCount = theSignalBase.tuning().Signals().count();
 	if (signalForReadCount == 0)
 	{
-		requestTuningSourcesState();
+		requestWriteTuningSignals();
 		return;
 	}
 
@@ -368,7 +368,7 @@ void TuningSocket::requestWriteTuningSignals()
 
 	for (int i = 0; i < cmdCount && i < TUNING_SOCKET_MAX_WRITE_CMD; i++)
 	{
-		TuningWriteCmd cmd = theSignalBase.tuning().cmdFowWrite(i);
+		TuningWriteCmd cmd = theSignalBase.tuning().cmdFowWrite();
 
 		if (cmd.signalHash() == 0)
 		{
@@ -387,12 +387,17 @@ void TuningSocket::requestWriteTuningSignals()
 
 		Proto::TuningValue* tv = new Proto::TuningValue();
 
-		assert(false);		// WM: code below is needs checking
+		tv->set_type(cmd.typeInt());
 
-		tv->set_type(0/* need set value of enum TuningValueType */);
-
-		tv->set_doublevalue(cmd.value());
-		// or need tv.set_intvalue(); dependent from TuningValueType
+		switch (cmd.type())
+		{
+			case TuningValueType::Discrete:
+			case TuningValueType::SignedInt32:	tv->set_intvalue(cmd.value().toInt());			break;
+			case TuningValueType::SignedInt64:	tv->set_intvalue(cmd.value().toLongLong());		break;
+			case TuningValueType::Float:
+			case TuningValueType::Double:		tv->set_doublevalue(cmd.value().toDouble());	break;
+			default:							assert(false); continue;						break;
+		}
 
 		wrCmd->set_allocated_value(tv);
 

@@ -9,7 +9,7 @@
 #include "../Proto/network.pb.h"
 
 class DataSource;
-
+/*
 class TcpAppDataClient : public Tcp::Client
 {
 private:
@@ -53,8 +53,8 @@ private:
 	void getNextParamPart();
 	void getNextStatePart();
 
-	void onGetDataSourcesInfoReply(const char* replyData, quint32 replyDataSize);
-	void onGetDataSourcesStatesReply(const char* replyData, quint32 replyDataSize);
+	void onGetAppDataSourcesInfoReply(const char* replyData, quint32 replyDataSize);
+	void onGetAppDataSourcesStatesReply(const char* replyData, quint32 replyDataSize);
 
 	void onGetAppSignalListStartReply(const char* replyData, quint32 replyDataSize);
 	void onGetAppSignalListNextReply(const char* replyData, quint32 replyDataSize);
@@ -82,4 +82,4 @@ public:
 
 	virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) override;
 
-};
+};*/

@@ -47,11 +47,9 @@ class GetAppSignalStateReply;
 class DataSourceInfo;
 class GetDataSourcesInfoRequest;
 class GetDataSourcesInfoReply;
+class AppDataReceiveState;
 class AppDataSourceState;
 class GetAppDataSourcesStatesReply;
-class GetUnitsRequest;
-class Unit;
-class GetUnitsReply;
 class AppDataServiceState;
 class SoftwareInfo;
 class GetServiceInfoRequest;
@@ -1440,6 +1438,138 @@ class GetDataSourcesInfoReply : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class AppDataReceiveState : public ::google::protobuf::Message {
+ public:
+  AppDataReceiveState();
+  virtual ~AppDataReceiveState();
+
+  AppDataReceiveState(const AppDataReceiveState& from);
+
+  inline AppDataReceiveState& operator=(const AppDataReceiveState& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const AppDataReceiveState& default_instance();
+
+  void Swap(AppDataReceiveState* other);
+
+  // implements Message ----------------------------------------------
+
+  AppDataReceiveState* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const AppDataReceiveState& from);
+  void MergeFrom(const AppDataReceiveState& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int64 receivedFramesCount = 1 [default = 0];
+  inline bool has_receivedframescount() const;
+  inline void clear_receivedframescount();
+  static const int kReceivedFramesCountFieldNumber = 1;
+  inline ::google::protobuf::int64 receivedframescount() const;
+  inline void set_receivedframescount(::google::protobuf::int64 value);
+
+  // optional int64 framesReceivedPerSecond = 2 [default = 0];
+  inline bool has_framesreceivedpersecond() const;
+  inline void clear_framesreceivedpersecond();
+  static const int kFramesReceivedPerSecondFieldNumber = 2;
+  inline ::google::protobuf::int64 framesreceivedpersecond() const;
+  inline void set_framesreceivedpersecond(::google::protobuf::int64 value);
+
+  // optional int64 simFramesCount = 3 [default = 0];
+  inline bool has_simframescount() const;
+  inline void clear_simframescount();
+  static const int kSimFramesCountFieldNumber = 3;
+  inline ::google::protobuf::int64 simframescount() const;
+  inline void set_simframescount(::google::protobuf::int64 value);
+
+  // optional int64 errDatagramSize = 4 [default = 0];
+  inline bool has_errdatagramsize() const;
+  inline void clear_errdatagramsize();
+  static const int kErrDatagramSizeFieldNumber = 4;
+  inline ::google::protobuf::int64 errdatagramsize() const;
+  inline void set_errdatagramsize(::google::protobuf::int64 value);
+
+  // optional int64 errSimVersion = 5 [default = 0];
+  inline bool has_errsimversion() const;
+  inline void clear_errsimversion();
+  static const int kErrSimVersionFieldNumber = 5;
+  inline ::google::protobuf::int64 errsimversion() const;
+  inline void set_errsimversion(::google::protobuf::int64 value);
+
+  // optional int64 errUnknownAppDataSourceIP = 6 [default = 0];
+  inline bool has_errunknownappdatasourceip() const;
+  inline void clear_errunknownappdatasourceip();
+  static const int kErrUnknownAppDataSourceIPFieldNumber = 6;
+  inline ::google::protobuf::int64 errunknownappdatasourceip() const;
+  inline void set_errunknownappdatasourceip(::google::protobuf::int64 value);
+
+  // @@protoc_insertion_point(class_scope:Network.AppDataReceiveState)
+ private:
+  inline void set_has_receivedframescount();
+  inline void clear_has_receivedframescount();
+  inline void set_has_framesreceivedpersecond();
+  inline void clear_has_framesreceivedpersecond();
+  inline void set_has_simframescount();
+  inline void clear_has_simframescount();
+  inline void set_has_errdatagramsize();
+  inline void clear_has_errdatagramsize();
+  inline void set_has_errsimversion();
+  inline void clear_has_errsimversion();
+  inline void set_has_errunknownappdatasourceip();
+  inline void clear_has_errunknownappdatasourceip();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int64 receivedframescount_;
+  ::google::protobuf::int64 framesreceivedpersecond_;
+  ::google::protobuf::int64 simframescount_;
+  ::google::protobuf::int64 errdatagramsize_;
+  ::google::protobuf::int64 errsimversion_;
+  ::google::protobuf::int64 errunknownappdatasourceip_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static AppDataReceiveState* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class AppDataSourceState : public ::google::protobuf::Message {
  public:
   AppDataSourceState();
@@ -1676,6 +1806,18 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 errornonmonotonicplanttime() const;
   inline void set_errornonmonotonicplanttime(::google::protobuf::int64 value);
 
+  // optional string lmEquipmentID = 27;
+  inline bool has_lmequipmentid() const;
+  inline void clear_lmequipmentid();
+  static const int kLmEquipmentIDFieldNumber = 27;
+  inline const ::std::string& lmequipmentid() const;
+  inline void set_lmequipmentid(const ::std::string& value);
+  inline void set_lmequipmentid(const char* value);
+  inline void set_lmequipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_lmequipmentid();
+  inline ::std::string* release_lmequipmentid();
+  inline void set_allocated_lmequipmentid(::std::string* lmequipmentid);
+
   // @@protoc_insertion_point(class_scope:Network.AppDataSourceState)
  private:
   inline void set_has_id();
@@ -1730,6 +1872,8 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline void clear_has_errorduplicateplanttime();
   inline void set_has_errornonmonotonicplanttime();
   inline void clear_has_errornonmonotonicplanttime();
+  inline void set_has_lmequipmentid();
+  inline void clear_has_lmequipmentid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1758,10 +1902,11 @@ class AppDataSourceState : public ::google::protobuf::Message {
   ::google::protobuf::int64 errorframesize_;
   ::google::protobuf::int64 errorduplicateplanttime_;
   ::google::protobuf::int64 errornonmonotonicplanttime_;
+  ::std::string* lmequipmentid_;
   ::google::protobuf::int32 acquiredsignalscount_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(26 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(27 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -1867,270 +2012,6 @@ class GetAppDataSourcesStatesReply : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
-class GetUnitsRequest : public ::google::protobuf::Message {
- public:
-  GetUnitsRequest();
-  virtual ~GetUnitsRequest();
-
-  GetUnitsRequest(const GetUnitsRequest& from);
-
-  inline GetUnitsRequest& operator=(const GetUnitsRequest& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const GetUnitsRequest& default_instance();
-
-  void Swap(GetUnitsRequest* other);
-
-  // implements Message ----------------------------------------------
-
-  GetUnitsRequest* New() const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const GetUnitsRequest& from);
-  void MergeFrom(const GetUnitsRequest& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // @@protoc_insertion_point(class_scope:Network.GetUnitsRequest)
- private:
-
-  ::google::protobuf::UnknownFieldSet _unknown_fields_;
-
-
-  mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[1];
-
-  friend void  protobuf_AddDesc_network_2eproto();
-  friend void protobuf_AssignDesc_network_2eproto();
-  friend void protobuf_ShutdownFile_network_2eproto();
-
-  void InitAsDefaultInstance();
-  static GetUnitsRequest* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class Unit : public ::google::protobuf::Message {
- public:
-  Unit();
-  virtual ~Unit();
-
-  Unit(const Unit& from);
-
-  inline Unit& operator=(const Unit& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const Unit& default_instance();
-
-  void Swap(Unit* other);
-
-  // implements Message ----------------------------------------------
-
-  Unit* New() const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const Unit& from);
-  void MergeFrom(const Unit& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // optional int32 id = 1;
-  inline bool has_id() const;
-  inline void clear_id();
-  static const int kIdFieldNumber = 1;
-  inline ::google::protobuf::int32 id() const;
-  inline void set_id(::google::protobuf::int32 value);
-
-  // optional string unit = 2;
-  inline bool has_unit() const;
-  inline void clear_unit();
-  static const int kUnitFieldNumber = 2;
-  inline const ::std::string& unit() const;
-  inline void set_unit(const ::std::string& value);
-  inline void set_unit(const char* value);
-  inline void set_unit(const char* value, size_t size);
-  inline ::std::string* mutable_unit();
-  inline ::std::string* release_unit();
-  inline void set_allocated_unit(::std::string* unit);
-
-  // @@protoc_insertion_point(class_scope:Network.Unit)
- private:
-  inline void set_has_id();
-  inline void clear_has_id();
-  inline void set_has_unit();
-  inline void clear_has_unit();
-
-  ::google::protobuf::UnknownFieldSet _unknown_fields_;
-
-  ::std::string* unit_;
-  ::google::protobuf::int32 id_;
-
-  mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
-
-  friend void  protobuf_AddDesc_network_2eproto();
-  friend void protobuf_AssignDesc_network_2eproto();
-  friend void protobuf_ShutdownFile_network_2eproto();
-
-  void InitAsDefaultInstance();
-  static Unit* default_instance_;
-};
-// -------------------------------------------------------------------
-
-class GetUnitsReply : public ::google::protobuf::Message {
- public:
-  GetUnitsReply();
-  virtual ~GetUnitsReply();
-
-  GetUnitsReply(const GetUnitsReply& from);
-
-  inline GetUnitsReply& operator=(const GetUnitsReply& from) {
-    CopyFrom(from);
-    return *this;
-  }
-
-  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
-    return _unknown_fields_;
-  }
-
-  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
-    return &_unknown_fields_;
-  }
-
-  static const ::google::protobuf::Descriptor* descriptor();
-  static const GetUnitsReply& default_instance();
-
-  void Swap(GetUnitsReply* other);
-
-  // implements Message ----------------------------------------------
-
-  GetUnitsReply* New() const;
-  void CopyFrom(const ::google::protobuf::Message& from);
-  void MergeFrom(const ::google::protobuf::Message& from);
-  void CopyFrom(const GetUnitsReply& from);
-  void MergeFrom(const GetUnitsReply& from);
-  void Clear();
-  bool IsInitialized() const;
-
-  int ByteSize() const;
-  bool MergePartialFromCodedStream(
-      ::google::protobuf::io::CodedInputStream* input);
-  void SerializeWithCachedSizes(
-      ::google::protobuf::io::CodedOutputStream* output) const;
-  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
-  int GetCachedSize() const { return _cached_size_; }
-  private:
-  void SharedCtor();
-  void SharedDtor();
-  void SetCachedSize(int size) const;
-  public:
-
-  ::google::protobuf::Metadata GetMetadata() const;
-
-  // nested types ----------------------------------------------------
-
-  // accessors -------------------------------------------------------
-
-  // optional int32 error = 1 [default = 0];
-  inline bool has_error() const;
-  inline void clear_error();
-  static const int kErrorFieldNumber = 1;
-  inline ::google::protobuf::int32 error() const;
-  inline void set_error(::google::protobuf::int32 value);
-
-  // repeated .Network.Unit units = 2;
-  inline int units_size() const;
-  inline void clear_units();
-  static const int kUnitsFieldNumber = 2;
-  inline const ::Network::Unit& units(int index) const;
-  inline ::Network::Unit* mutable_units(int index);
-  inline ::Network::Unit* add_units();
-  inline const ::google::protobuf::RepeatedPtrField< ::Network::Unit >&
-      units() const;
-  inline ::google::protobuf::RepeatedPtrField< ::Network::Unit >*
-      mutable_units();
-
-  // @@protoc_insertion_point(class_scope:Network.GetUnitsReply)
- private:
-  inline void set_has_error();
-  inline void clear_has_error();
-
-  ::google::protobuf::UnknownFieldSet _unknown_fields_;
-
-  ::google::protobuf::RepeatedPtrField< ::Network::Unit > units_;
-  ::google::protobuf::int32 error_;
-
-  mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
-
-  friend void  protobuf_AddDesc_network_2eproto();
-  friend void protobuf_AssignDesc_network_2eproto();
-  friend void protobuf_ShutdownFile_network_2eproto();
-
-  void InitAsDefaultInstance();
-  static GetUnitsReply* default_instance_;
-};
-// -------------------------------------------------------------------
-
 class AppDataServiceState : public ::google::protobuf::Message {
  public:
   AppDataServiceState();
@@ -2227,6 +2108,15 @@ class AppDataServiceState : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 archiveserviceport() const;
   inline void set_archiveserviceport(::google::protobuf::int32 value);
 
+  // optional .Network.AppDataReceiveState appDataReceiveState = 7;
+  inline bool has_appdatareceivestate() const;
+  inline void clear_appdatareceivestate();
+  static const int kAppDataReceiveStateFieldNumber = 7;
+  inline const ::Network::AppDataReceiveState& appdatareceivestate() const;
+  inline ::Network::AppDataReceiveState* mutable_appdatareceivestate();
+  inline ::Network::AppDataReceiveState* release_appdatareceivestate();
+  inline void set_allocated_appdatareceivestate(::Network::AppDataReceiveState* appdatareceivestate);
+
   // @@protoc_insertion_point(class_scope:Network.AppDataServiceState)
  private:
   inline void set_has_cfgserviceisconnected();
@@ -2241,6 +2131,8 @@ class AppDataServiceState : public ::google::protobuf::Message {
   inline void clear_has_archiveserviceip();
   inline void set_has_archiveserviceport();
   inline void clear_has_archiveserviceport();
+  inline void set_has_appdatareceivestate();
+  inline void clear_has_appdatareceivestate();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2249,10 +2141,11 @@ class AppDataServiceState : public ::google::protobuf::Message {
   bool archiveserviceisconnected_;
   ::google::protobuf::int32 cfgserviceport_;
   ::google::protobuf::uint32 archiveserviceip_;
+  ::Network::AppDataReceiveState* appdatareceivestate_;
   ::google::protobuf::int32 archiveserviceport_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -8191,6 +8084,142 @@ GetDataSourcesInfoReply::mutable_datasourceinfo() {
 
 // -------------------------------------------------------------------
 
+// AppDataReceiveState
+
+// optional int64 receivedFramesCount = 1 [default = 0];
+inline bool AppDataReceiveState::has_receivedframescount() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void AppDataReceiveState::set_has_receivedframescount() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void AppDataReceiveState::clear_has_receivedframescount() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void AppDataReceiveState::clear_receivedframescount() {
+  receivedframescount_ = GOOGLE_LONGLONG(0);
+  clear_has_receivedframescount();
+}
+inline ::google::protobuf::int64 AppDataReceiveState::receivedframescount() const {
+  return receivedframescount_;
+}
+inline void AppDataReceiveState::set_receivedframescount(::google::protobuf::int64 value) {
+  set_has_receivedframescount();
+  receivedframescount_ = value;
+}
+
+// optional int64 framesReceivedPerSecond = 2 [default = 0];
+inline bool AppDataReceiveState::has_framesreceivedpersecond() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void AppDataReceiveState::set_has_framesreceivedpersecond() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void AppDataReceiveState::clear_has_framesreceivedpersecond() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void AppDataReceiveState::clear_framesreceivedpersecond() {
+  framesreceivedpersecond_ = GOOGLE_LONGLONG(0);
+  clear_has_framesreceivedpersecond();
+}
+inline ::google::protobuf::int64 AppDataReceiveState::framesreceivedpersecond() const {
+  return framesreceivedpersecond_;
+}
+inline void AppDataReceiveState::set_framesreceivedpersecond(::google::protobuf::int64 value) {
+  set_has_framesreceivedpersecond();
+  framesreceivedpersecond_ = value;
+}
+
+// optional int64 simFramesCount = 3 [default = 0];
+inline bool AppDataReceiveState::has_simframescount() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void AppDataReceiveState::set_has_simframescount() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void AppDataReceiveState::clear_has_simframescount() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void AppDataReceiveState::clear_simframescount() {
+  simframescount_ = GOOGLE_LONGLONG(0);
+  clear_has_simframescount();
+}
+inline ::google::protobuf::int64 AppDataReceiveState::simframescount() const {
+  return simframescount_;
+}
+inline void AppDataReceiveState::set_simframescount(::google::protobuf::int64 value) {
+  set_has_simframescount();
+  simframescount_ = value;
+}
+
+// optional int64 errDatagramSize = 4 [default = 0];
+inline bool AppDataReceiveState::has_errdatagramsize() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void AppDataReceiveState::set_has_errdatagramsize() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void AppDataReceiveState::clear_has_errdatagramsize() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void AppDataReceiveState::clear_errdatagramsize() {
+  errdatagramsize_ = GOOGLE_LONGLONG(0);
+  clear_has_errdatagramsize();
+}
+inline ::google::protobuf::int64 AppDataReceiveState::errdatagramsize() const {
+  return errdatagramsize_;
+}
+inline void AppDataReceiveState::set_errdatagramsize(::google::protobuf::int64 value) {
+  set_has_errdatagramsize();
+  errdatagramsize_ = value;
+}
+
+// optional int64 errSimVersion = 5 [default = 0];
+inline bool AppDataReceiveState::has_errsimversion() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void AppDataReceiveState::set_has_errsimversion() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void AppDataReceiveState::clear_has_errsimversion() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void AppDataReceiveState::clear_errsimversion() {
+  errsimversion_ = GOOGLE_LONGLONG(0);
+  clear_has_errsimversion();
+}
+inline ::google::protobuf::int64 AppDataReceiveState::errsimversion() const {
+  return errsimversion_;
+}
+inline void AppDataReceiveState::set_errsimversion(::google::protobuf::int64 value) {
+  set_has_errsimversion();
+  errsimversion_ = value;
+}
+
+// optional int64 errUnknownAppDataSourceIP = 6 [default = 0];
+inline bool AppDataReceiveState::has_errunknownappdatasourceip() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void AppDataReceiveState::set_has_errunknownappdatasourceip() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void AppDataReceiveState::clear_has_errunknownappdatasourceip() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void AppDataReceiveState::clear_errunknownappdatasourceip() {
+  errunknownappdatasourceip_ = GOOGLE_LONGLONG(0);
+  clear_has_errunknownappdatasourceip();
+}
+inline ::google::protobuf::int64 AppDataReceiveState::errunknownappdatasourceip() const {
+  return errunknownappdatasourceip_;
+}
+inline void AppDataReceiveState::set_errunknownappdatasourceip(::google::protobuf::int64 value) {
+  set_has_errunknownappdatasourceip();
+  errunknownappdatasourceip_ = value;
+}
+
+// -------------------------------------------------------------------
+
 // AppDataSourceState
 
 // optional uint64 id = 1 [default = 0];
@@ -8765,6 +8794,76 @@ inline void AppDataSourceState::set_errornonmonotonicplanttime(::google::protobu
   errornonmonotonicplanttime_ = value;
 }
 
+// optional string lmEquipmentID = 27;
+inline bool AppDataSourceState::has_lmequipmentid() const {
+  return (_has_bits_[0] & 0x04000000u) != 0;
+}
+inline void AppDataSourceState::set_has_lmequipmentid() {
+  _has_bits_[0] |= 0x04000000u;
+}
+inline void AppDataSourceState::clear_has_lmequipmentid() {
+  _has_bits_[0] &= ~0x04000000u;
+}
+inline void AppDataSourceState::clear_lmequipmentid() {
+  if (lmequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_->clear();
+  }
+  clear_has_lmequipmentid();
+}
+inline const ::std::string& AppDataSourceState::lmequipmentid() const {
+  return *lmequipmentid_;
+}
+inline void AppDataSourceState::set_lmequipmentid(const ::std::string& value) {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
+  }
+  lmequipmentid_->assign(value);
+}
+inline void AppDataSourceState::set_lmequipmentid(const char* value) {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
+  }
+  lmequipmentid_->assign(value);
+}
+inline void AppDataSourceState::set_lmequipmentid(const char* value, size_t size) {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
+  }
+  lmequipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* AppDataSourceState::mutable_lmequipmentid() {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
+  }
+  return lmequipmentid_;
+}
+inline ::std::string* AppDataSourceState::release_lmequipmentid() {
+  clear_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = lmequipmentid_;
+    lmequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void AppDataSourceState::set_allocated_lmequipmentid(::std::string* lmequipmentid) {
+  if (lmequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete lmequipmentid_;
+  }
+  if (lmequipmentid) {
+    set_has_lmequipmentid();
+    lmequipmentid_ = lmequipmentid;
+  } else {
+    clear_has_lmequipmentid();
+    lmequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
 // -------------------------------------------------------------------
 
 // GetAppDataSourcesStatesReply
@@ -8814,157 +8913,6 @@ GetAppDataSourcesStatesReply::appdatasourcesstates() const {
 inline ::google::protobuf::RepeatedPtrField< ::Network::AppDataSourceState >*
 GetAppDataSourcesStatesReply::mutable_appdatasourcesstates() {
   return &appdatasourcesstates_;
-}
-
-// -------------------------------------------------------------------
-
-// GetUnitsRequest
-
-// -------------------------------------------------------------------
-
-// Unit
-
-// optional int32 id = 1;
-inline bool Unit::has_id() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void Unit::set_has_id() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void Unit::clear_has_id() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void Unit::clear_id() {
-  id_ = 0;
-  clear_has_id();
-}
-inline ::google::protobuf::int32 Unit::id() const {
-  return id_;
-}
-inline void Unit::set_id(::google::protobuf::int32 value) {
-  set_has_id();
-  id_ = value;
-}
-
-// optional string unit = 2;
-inline bool Unit::has_unit() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
-}
-inline void Unit::set_has_unit() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void Unit::clear_has_unit() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void Unit::clear_unit() {
-  if (unit_ != &::google::protobuf::internal::kEmptyString) {
-    unit_->clear();
-  }
-  clear_has_unit();
-}
-inline const ::std::string& Unit::unit() const {
-  return *unit_;
-}
-inline void Unit::set_unit(const ::std::string& value) {
-  set_has_unit();
-  if (unit_ == &::google::protobuf::internal::kEmptyString) {
-    unit_ = new ::std::string;
-  }
-  unit_->assign(value);
-}
-inline void Unit::set_unit(const char* value) {
-  set_has_unit();
-  if (unit_ == &::google::protobuf::internal::kEmptyString) {
-    unit_ = new ::std::string;
-  }
-  unit_->assign(value);
-}
-inline void Unit::set_unit(const char* value, size_t size) {
-  set_has_unit();
-  if (unit_ == &::google::protobuf::internal::kEmptyString) {
-    unit_ = new ::std::string;
-  }
-  unit_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* Unit::mutable_unit() {
-  set_has_unit();
-  if (unit_ == &::google::protobuf::internal::kEmptyString) {
-    unit_ = new ::std::string;
-  }
-  return unit_;
-}
-inline ::std::string* Unit::release_unit() {
-  clear_has_unit();
-  if (unit_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = unit_;
-    unit_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void Unit::set_allocated_unit(::std::string* unit) {
-  if (unit_ != &::google::protobuf::internal::kEmptyString) {
-    delete unit_;
-  }
-  if (unit) {
-    set_has_unit();
-    unit_ = unit;
-  } else {
-    clear_has_unit();
-    unit_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
-
-// -------------------------------------------------------------------
-
-// GetUnitsReply
-
-// optional int32 error = 1 [default = 0];
-inline bool GetUnitsReply::has_error() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void GetUnitsReply::set_has_error() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void GetUnitsReply::clear_has_error() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void GetUnitsReply::clear_error() {
-  error_ = 0;
-  clear_has_error();
-}
-inline ::google::protobuf::int32 GetUnitsReply::error() const {
-  return error_;
-}
-inline void GetUnitsReply::set_error(::google::protobuf::int32 value) {
-  set_has_error();
-  error_ = value;
-}
-
-// repeated .Network.Unit units = 2;
-inline int GetUnitsReply::units_size() const {
-  return units_.size();
-}
-inline void GetUnitsReply::clear_units() {
-  units_.Clear();
-}
-inline const ::Network::Unit& GetUnitsReply::units(int index) const {
-  return units_.Get(index);
-}
-inline ::Network::Unit* GetUnitsReply::mutable_units(int index) {
-  return units_.Mutable(index);
-}
-inline ::Network::Unit* GetUnitsReply::add_units() {
-  return units_.Add();
-}
-inline const ::google::protobuf::RepeatedPtrField< ::Network::Unit >&
-GetUnitsReply::units() const {
-  return units_;
-}
-inline ::google::protobuf::RepeatedPtrField< ::Network::Unit >*
-GetUnitsReply::mutable_units() {
-  return &units_;
 }
 
 // -------------------------------------------------------------------
@@ -9101,6 +9049,44 @@ inline ::google::protobuf::int32 AppDataServiceState::archiveserviceport() const
 inline void AppDataServiceState::set_archiveserviceport(::google::protobuf::int32 value) {
   set_has_archiveserviceport();
   archiveserviceport_ = value;
+}
+
+// optional .Network.AppDataReceiveState appDataReceiveState = 7;
+inline bool AppDataServiceState::has_appdatareceivestate() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void AppDataServiceState::set_has_appdatareceivestate() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void AppDataServiceState::clear_has_appdatareceivestate() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void AppDataServiceState::clear_appdatareceivestate() {
+  if (appdatareceivestate_ != NULL) appdatareceivestate_->::Network::AppDataReceiveState::Clear();
+  clear_has_appdatareceivestate();
+}
+inline const ::Network::AppDataReceiveState& AppDataServiceState::appdatareceivestate() const {
+  return appdatareceivestate_ != NULL ? *appdatareceivestate_ : *default_instance_->appdatareceivestate_;
+}
+inline ::Network::AppDataReceiveState* AppDataServiceState::mutable_appdatareceivestate() {
+  set_has_appdatareceivestate();
+  if (appdatareceivestate_ == NULL) appdatareceivestate_ = new ::Network::AppDataReceiveState;
+  return appdatareceivestate_;
+}
+inline ::Network::AppDataReceiveState* AppDataServiceState::release_appdatareceivestate() {
+  clear_has_appdatareceivestate();
+  ::Network::AppDataReceiveState* temp = appdatareceivestate_;
+  appdatareceivestate_ = NULL;
+  return temp;
+}
+inline void AppDataServiceState::set_allocated_appdatareceivestate(::Network::AppDataReceiveState* appdatareceivestate) {
+  delete appdatareceivestate_;
+  appdatareceivestate_ = appdatareceivestate;
+  if (appdatareceivestate) {
+    set_has_appdatareceivestate();
+  } else {
+    clear_has_appdatareceivestate();
+  }
 }
 
 // -------------------------------------------------------------------

@@ -1,5 +1,8 @@
 #pragma once
 
+#include <QPair>
+#include <QHash>
+
 
 class MemWriteMap
 {

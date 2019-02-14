@@ -186,11 +186,13 @@ const int ADS_GET_APP_SIGNAL_STATE_MAX = 2000;
 
 // Data Sources info/state communication, Port PORT_APP_DATA_SERVICE_CLIENT_REQUEST
 //
-const quint32 ADS_GET_DATA_SOURCES_INFO = 0x1401;
-const quint32 ADS_GET_DATA_SOURCES_STATES = 0x1402;
+const quint32 ADS_GET_APP_DATA_SOURCES_INFO = 0x1401;
+const quint32 ADS_GET_APP_DATA_SOURCES_STATES = 0x1402;
 
 const int ADS_GET_DATA_SOURCES_STATES_MAX = 1000;
 
+const quint32 ADS_GET_STATE = 0x1600;
+const quint32 ADS_GET_SETTINGS = 0x1800;
 
 // Tuning Sources info/state communication, Port PORT_TUNING_SERVICE_CLIENT_REQUEST
 //
@@ -227,14 +229,6 @@ const int ARCH_REQUEST_MAX_STATES = 20000; //65000;
 const int RT_TRENDS_MANAGEMENT = 0x1801;
 const int RT_TRENDS_GET_STATE_CHANGES = 1802;
 
-// Getting application signals Units
-//
-const quint32 ADS_GET_UNITS = 0x1500;
-
-const int ADS_GET_DATA_UNITS_MAX = 1000;
-
-const quint32 ADS_GET_STATE = 0x1600;
-const quint32 ADS_GET_SETTINGS = 0x1800;
 
 enum class NetworkError
 {

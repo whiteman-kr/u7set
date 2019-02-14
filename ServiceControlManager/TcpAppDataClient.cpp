@@ -69,7 +69,7 @@ void TcpAppDataClient::onConnection()
 {
 	init();
 
-	sendRequest(ADS_GET_DATA_SOURCES_INFO);
+	sendRequest(ADS_GET_APP_DATA_SOURCES_INFO);
 }
 
 
@@ -124,14 +124,9 @@ void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, qu
 	{
 	// Static data
 	//
-	case ADS_GET_DATA_SOURCES_INFO:
-		onGetDataSourcesInfoReply(replyData, replyDataSize);
-		sendNextRequest(ADS_GET_DATA_SOURCES_INFO);
-		break;
-
-	case ADS_GET_UNITS:
-		onGetUnitsReply(replyData, replyDataSize);
-		sendNextRequest(ADS_GET_UNITS);
+	case ADS_GET_APP_DATA_SOURCES_INFO:
+		onGetAppDataSourcesInfoReply(replyData, replyDataSize);
+		sendNextRequest(ADS_GET_APP_DATA_SOURCES_INFO);
 		break;
 
 	case ADS_GET_APP_SIGNAL_LIST_START:
@@ -167,9 +162,9 @@ void TcpAppDataClient::processReply(quint32 requestID, const char* replyData, qu
 		sendNextRequest(ADS_GET_APP_SIGNAL_STATE);
 		break;
 
-	case ADS_GET_DATA_SOURCES_STATES:
-		onGetDataSourcesStatesReply(replyData, replyDataSize);
-		sendNextRequest(ADS_GET_DATA_SOURCES_STATES);
+	case ADS_GET_APP_DATA_SOURCES_STATES:
+		onGetAppDataSourcesStatesReply(replyData, replyDataSize);
+		sendNextRequest(ADS_GET_APP_DATA_SOURCES_STATES);
 		break;
 
 	case RQID_GET_CLIENT_LIST:
@@ -202,8 +197,13 @@ QString TcpAppDataClient::archiveServiceConnectionState()
 	return "No";
 }
 
+Network::AppDataServiceState& TcpAppDataClient::serviceState()
+{
+	return m_getAppDataServiceState;
+}
 
-void TcpAppDataClient::onGetDataSourcesInfoReply(const char* replyData, quint32 replyDataSize)
+
+void TcpAppDataClient::onGetAppDataSourcesInfoReply(const char* replyData, quint32 replyDataSize)
 {
 	bool result = m_getDataSourcesInfoReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
 
@@ -243,7 +243,7 @@ void TcpAppDataClient::onGetDataSourcesInfoReply(const char* replyData, quint32 
 }
 
 
-void TcpAppDataClient::onGetDataSourcesStatesReply(const char* replyData, quint32 replyDataSize)
+void TcpAppDataClient::onGetAppDataSourcesStatesReply(const char* replyData, quint32 replyDataSize)
 {
 	bool result = m_getAppDataSourcesStatesReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
 
@@ -273,6 +273,8 @@ void TcpAppDataClient::onGetDataSourcesStatesReply(const char* replyData, quint3
 		AppDataSource* source = m_appDataSources.value(id);
 
 		source->setState(m_getAppDataSourcesStatesReply.appdatasourcesstates(i));
+
+		assert(source->lmEquipmentID().toStdString() == m_getAppDataSourcesStatesReply.appdatasourcesstates(i).lmequipmentid());
 	}
 
 	emit dataSoursesStateUpdated();
@@ -464,17 +466,6 @@ void TcpAppDataClient::onGetAppSignalStateReply(const char* replyData, quint32 r
 	m_getStatesCurrentPart++;
 }
 
-void TcpAppDataClient::onGetUnitsReply(const char* replyData, quint32 replyDataSize)
-{
-	bool result = m_getUnitsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
-
-	if (result == false)
-	{
-		assert(false);
-		return;
-	}
-}
-
 void TcpAppDataClient::onGetServiceState(const char* replyData, quint32 replyDataSize)
 {
 	bool result = m_getAppDataServiceState.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
@@ -513,11 +504,7 @@ void TcpAppDataClient::sendNextRequest(quint32 processedRequestID)
 	{
 	// Static data requests
 	//
-	case ADS_GET_DATA_SOURCES_INFO:
-		sendRequest(ADS_GET_UNITS);
-		break;
-
-	case ADS_GET_UNITS:
+	case ADS_GET_APP_DATA_SOURCES_INFO:
 		sendRequest(ADS_GET_APP_SIGNAL_LIST_START);
 		break;
 
@@ -525,7 +512,7 @@ void TcpAppDataClient::sendNextRequest(quint32 processedRequestID)
 		if (m_partCount > 0)
 		{
 			m_hash2Index.clear();
-			m_hash2Index.reserve(m_signalHashes.count() * 1.3);
+			m_hash2Index.reserve(static_cast<int>(m_signalHashes.count() * 1.3));
 
 			m_currentPart = 0;
 			getNextItemsPart();
@@ -594,7 +581,7 @@ void TcpAppDataClient::sendNextRequest(quint32 processedRequestID)
 				emit appSignalsStateUpdated();
 
 				m_getStatesCurrentPart = 0;
-				sendRequest(ADS_GET_DATA_SOURCES_STATES);
+				sendRequest(ADS_GET_APP_DATA_SOURCES_STATES);
 			}
 			else
 			{
@@ -603,7 +590,7 @@ void TcpAppDataClient::sendNextRequest(quint32 processedRequestID)
 		}
 		break;
 
-	case ADS_GET_DATA_SOURCES_STATES:
+	case ADS_GET_APP_DATA_SOURCES_STATES:
 		sendRequest(RQID_GET_CLIENT_LIST);
 		break;
 

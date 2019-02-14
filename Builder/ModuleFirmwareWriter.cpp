@@ -4,6 +4,14 @@
 #include "../lib/WUtils.h"
 #include "../lib/CUtils.h"
 
+#include <qqml.h>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QDebug>
+#include <QJsonDocument>
+#include <QtEndian>
+#include <QQmlEngine>
+
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
 #endif
@@ -793,6 +801,12 @@ namespace Hardware
 
 		scriptUartChannelData->uniqueIdMap[lmNumber] = uniqueID;
 
+	}
+
+	UnitsConvertor* ModuleFirmwareWriter::jsGetUnitsConvertor()
+	{
+		QQmlEngine::setObjectOwnership(&m_unitsConvertor, QQmlEngine::ObjectOwnership::CppOwnership);
+		return &m_unitsConvertor;
 	}
 
 

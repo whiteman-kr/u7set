@@ -4,6 +4,7 @@
 #include "../lib/PropertyObject.h"
 #include "../lib/Hash.h"
 #include "../VFrame30/Schema.h"
+#include <QColor>
 
 const int MAX_VALUES_COLUMN_COUNT = 6;
 
