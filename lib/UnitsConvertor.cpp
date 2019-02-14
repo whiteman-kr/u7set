@@ -187,7 +187,6 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Output(double elVal, doubl
 		case E::OutputMode::Plus0_Plus24_mA:	minElectricLowLimit = 0;		maxElectricHighLimit = 24;	break;
 
 		default:
-			assert(false);
 			return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown OutputMode"));
 	}
 
@@ -238,8 +237,8 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoCouple(double elVal,
 		case E::SensorType::mV_Raw_Mul_8:
 		case E::SensorType::mV_Raw_Mul_32:		phVal = elVal;																		break;
 
+		case E::SensorType::NoSensor:
 		default:
-			assert(false);
 			return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for mV"));
 	}
 
@@ -275,8 +274,8 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoResistor(double elVa
 		case E::SensorType::Ohm_Cu_a_426:	phVal = findConversionVal(elVal, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, false);		break;
 		case E::SensorType::Ohm_Ni_a_617:	phVal = findConversionVal(elVal, &NI_100_W_1617[0][0], NI_100_W_1617_COUNT, false);		break;
 
+		case E::SensorType::NoSensor:
 		default:
-			assert(false);
 			return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for Ohm"));
 	}
 

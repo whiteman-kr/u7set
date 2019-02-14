@@ -412,7 +412,11 @@ namespace Builder
 		void errEQP6108(QString appSignalId, QString filter, QString tuningClientEquipmentId);		//Signal %1 specified in filter %2 in Tuning Client %3 does not exist.
 		void errEQP6109(QString equipmentId, QString tuningClientEquipmentId);	//Tuning Source %1 specified in Tuning Client %2 does not exist.
 
-		void errEQP6110(QString appSignalID);						//  Signal %1 has wrong (ThermoResistor) R0 = 0
+		void errEQP6110(QString appSignalID);						//  Signal %1 has wrong physical low Limit
+		void errEQP6111(QString appSignalID);						//  Signal %1 has wrong physical high Limit
+		void errEQP6112(QString appSignalID);						//  Signal %1 has wrong engeneering low Limit
+		void errEQP6113(QString appSignalID);						//  Signal %1 has wrong engeneering high Limit
+		void errEQP6114(QString appSignalID);						//  Signal %1 has wrong R0 (ThermoResistor)
 
 	public:
 		void addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids);
