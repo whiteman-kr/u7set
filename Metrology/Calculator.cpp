@@ -319,13 +319,7 @@ void Calculator::conversionTr()
 		return;
 	}
 
-	QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
 	E::SensorType sensorType = static_cast<E::SensorType>(m_pTrList->itemData(index).toInt());
-
-	if (sensorType < 0 || sensorType >= mst.keyCount())
-	{
-		return;
-	}
 
 	switch (sensorType)
 	{
@@ -337,16 +331,10 @@ void Calculator::conversionTr()
 		default:							m_pTrR0Edit->setEnabled(false);		break;
 	}
 
-	if (sensorType == E::SensorType::NoSensor)
-	{
-		return;
-	}
-
 	if (m_pTrDegreeRadio->isChecked() == true)
 	{
 		double val = conversion(m_pTrDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, E::ElectricUnit::Ohm, sensorType, m_pTrR0Edit->text().toDouble());
 
-		//m_pTrDegreeEdit->setFocus();
 		m_pTrDegreeEdit->setReadOnly(false);
 		m_pTrElectricEdit->setText(QString::number(val, 10, 4));
 		m_pTrElectricEdit->setReadOnly(true);
@@ -356,7 +344,6 @@ void Calculator::conversionTr()
 	{
 		double val = conversion(m_pTrElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, E::ElectricUnit::Ohm, sensorType, m_pTrR0Edit->text().toDouble());
 
-		//m_pTrElectricEdit->setFocus();
 		m_pTrElectricEdit->setReadOnly(false);
 		m_pTrDegreeEdit->setText(QString::number(val, 10, 4));
 		m_pTrDegreeEdit->setReadOnly(true);
@@ -373,22 +360,11 @@ void Calculator::conversionTc()
 		return;
 	}
 
-	QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
 	E::SensorType sensorType = static_cast<E::SensorType>(m_pTcList->itemData(index).toInt());
-
-	if (sensorType < 0 || sensorType >= mst.keyCount())
-	{
-		return;
-	}
-
-	if (sensorType == E::SensorType::NoSensor)
-	{
-		return;
-	}
 
 	if (m_pTcDegreeRadio->isChecked() == true)
 	{
-		double val = conversion(m_pTcDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, E::ElectricUnit::mV, sensorType, 0);
+		double val = conversion(m_pTcDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, E::ElectricUnit::mV, sensorType);
 
 		m_pTcDegreeEdit->setFocus();
 		m_pTcDegreeEdit->setReadOnly(false);
@@ -398,7 +374,7 @@ void Calculator::conversionTc()
 
 	if (m_pTcElectricRadio->isChecked() == true)
 	{
-		double val = conversion(m_pTcElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, E::ElectricUnit::mV, sensorType, 0);
+		double val = conversion(m_pTcElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, E::ElectricUnit::mV, sensorType);
 
 		m_pTcElectricEdit->setFocus();
 		m_pTcElectricEdit->setReadOnly(false);

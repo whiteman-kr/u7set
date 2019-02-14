@@ -24,7 +24,7 @@ const int	CT_COUNT                = 4;
 // ==============================================================================================
 
 double		conversion(double val, int conversionType, const Metrology::SignalParam& param);
-double		conversion(double val, int conversionType, const E::ElectricUnit unitID, const E::SensorType sensorType, double r0);
+double		conversion(double val, int conversionType, const E::ElectricUnit unitID, const E::SensorType sensorType, double r0 = 0);
 
 // ==============================================================================================
 
