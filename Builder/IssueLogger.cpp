@@ -6525,7 +6525,7 @@ namespace Builder
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		Wrong R0. It is required to set R0 of ThermoResistor.
+	///		Wrong physical low Limit.
 	///
 	void IssueLogger::errEQP6110(QString appSignalID)
 	{
@@ -6546,7 +6546,7 @@ namespace Builder
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		Wrong R0. It is required to set R0 of ThermoResistor.
+	///		Wrong physical high Limit.
 	///
 	void IssueLogger::errEQP6111(QString appSignalID)
 	{
@@ -6561,20 +6561,22 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 has wrong engeneering low Limit
+	/// Title: Signal %1 - engeneering low Limit mismatch electrical low Limit, set electrical low Limit: %2
 	///
 	/// Parameters:
 	///		%1 Application signal ID
+	///		%2 Electrical low Limit
 	///
 	/// Description:
-	///		Wrong R0. It is required to set R0 of ThermoResistor.
+	///		Only ThermoCouple and ThermoResistor. Engeneering low Limit mismatch electrical low Limit.
 	///
-	void IssueLogger::errEQP6112(QString appSignalID)
+	void IssueLogger::errEQP6112(QString appSignalID, QString value)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6112,
-				  tr("Signal %1 has wrong engeneering low Limit, calculated from electrical low Limit.")
+				  tr("Signal %1 - engeneering low Limit mismatch electrical low Limit, set electrical low Limit: %2.")
 				  .arg(appSignalID)
+				  .arg(value)
 				  );
 	}
 
@@ -6582,20 +6584,22 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 has wrong engeneering high Limit
+	/// Title: Signal %1 - engeneering high Limit mismatch electrical high Limit
 	///
 	/// Parameters:
 	///		%1 Application signal ID
+	///		%2 Electrical high Limit
 	///
 	/// Description:
-	///		Wrong R0. It is required to set R0 of ThermoResistor.
+	///		 Only ThermoCouple and ThermoResistor. Engeneering high Limit mismatch electrical high Limit. Only ThermoCouple and ThermoResistor.
 	///
-	void IssueLogger::errEQP6113(QString appSignalID)
+	void IssueLogger::errEQP6113(QString appSignalID, QString value)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6113,
-				  tr("Signal %1 has wrong engeneering high Limit, calculated from the electrical high Limit")
+				  tr("Signal %1 - engeneering high Limit mismatch electrical high Limit, set electrical high Limit: %2.")
 				  .arg(appSignalID)
+				  .arg(value)
 				  );
 	}
 
