@@ -220,15 +220,7 @@ bool UalTester::parseTestFile()
 {
 	qDebug() << "Parse test file:" << m_cmdLineParam.testFileName();
 
-	m_testfile.setFileName(m_cmdLineParam.testFileName());
-	if (m_testfile.open() == false)
-	{
-		return false;
-	}
-
-	m_testfile.setSignalBase(&m_signalBase);
-
-	if (m_testfile.parse() == false)
+	if (m_testfile.parse(m_cmdLineParam.testFileName(), &m_signalBase) == false)
 	{
 		m_testfile.close();
 		return false;

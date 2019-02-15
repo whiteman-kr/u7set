@@ -230,8 +230,7 @@ public:
 
 	//
 	//
-	bool open();
-	bool parse();
+	bool parse(const QString& fileName, SignalBase* pSignalBase);
 	void close();
 
 	//

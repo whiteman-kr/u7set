@@ -1122,37 +1122,30 @@ void TestFile::printErrorlist()
 	}
 }
 
-bool TestFile::open()
+bool TestFile::parse(const QString& fileName, SignalBase* pSignalBase)
 {
-	if (m_fileName.isEmpty() == true)
+	if (fileName.isEmpty() == true)
 	{
 		qDebug() << "Error: Test file name is empty";
 		return false;
 	}
 
-	m_file.setFileName(m_fileName);
-	if (m_file.open(QIODevice::ReadOnly) == false)
-	{
-		qDebug() << "Error: Test file" << m_fileName << "is not open";
-		return false;
-	}
-
-	return true;
-}
-
-bool TestFile::parse()
-{
-	if (m_file.isOpen() == false)
-	{
-		qDebug() << "Error: Test file is not open";
-		return false;
-	}
-
-	if (m_pSignalBase == nullptr)
+	if (pSignalBase == nullptr)
 	{
 		qDebug() << "Error: Failed SignalBase";
 		return false;
 	}
+
+	m_file.setFileName(fileName);
+	if (m_file.open(QIODevice::ReadOnly) == false)
+	{
+		qDebug() << "Error: Test file" << m_fileName << "is not open";
+		m_errorList.append("Error: Test file" + m_fileName + "is not open");
+		return false;
+	}
+
+	m_fileName = fileName;
+	m_pSignalBase = pSignalBase;
 
 	//
 	//
