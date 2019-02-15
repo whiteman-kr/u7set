@@ -213,19 +213,20 @@ public:
 
 	bool getSignalState(SimpleAppSignalState* state);
 
+	int acquiredSignalsCount() const { return m_acquiredSignalsCount; }
+
+	int signalStatesQueueSize() const { return m_signalStatesQueueSize; }
+	int signalStatesQueueMaxSize() const { return m_signalStatesQueueMaxSize; }
+
 private:
 	int getAutoArchivingGroup(qint64 currentSysTime);
 
 	bool getDoubleValue(const char* rupData, int rupDataSize, const SignalParseInfo& parseInfo, double& value);
 	bool getValidity(const char* rupData, int rupDataSize, const SignalParseInfo& parseInfo, quint32& validity);
 
-	int acquiredSignalsCount() const { return m_acquiredSignalsCount; }
 	void setAcquiredSignalsCount(int count) { m_acquiredSignalsCount = count; }
 
-	int signalStatesQueueSize() const { return m_signalStatesQueueSize; }
 	void setSignalStatesQueueSize(int size) { m_signalStatesQueueSize = size; }
-
-	int signalStatesQueueMaxSize() const { return m_signalStatesQueueMaxSize; }
 	void setSignalStatesQueueMaxSize(int size) { m_signalStatesQueueMaxSize = size; }
 
 private:

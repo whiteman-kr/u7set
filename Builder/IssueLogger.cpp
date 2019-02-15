@@ -6515,6 +6515,115 @@ namespace Builder
 				  );
 	}
 
+	/// IssueCode: EQP6110
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong physical low Limit
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Wrong physical low Limit.
+	///
+	void IssueLogger::errEQP6110(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6110,
+				  tr("Signal %1 has wrong physical low Limit.")
+				  .arg(appSignalID)
+				  );
+	}
+
+	/// IssueCode: EQP6111
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong physical high Limit
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Wrong physical high Limit.
+	///
+	void IssueLogger::errEQP6111(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6111,
+				  tr("Signal %1 has wrong physical high Limit.")
+				  .arg(appSignalID)
+				  );
+	}
+
+	/// IssueCode: EQP6112
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 - engeneering low Limit mismatch electrical low Limit, set electrical low Limit: %2
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Electrical low Limit
+	///
+	/// Description:
+	///		Only ThermoCouple and ThermoResistor. Engeneering low Limit mismatch electrical low Limit.
+	///
+	void IssueLogger::errEQP6112(QString appSignalID, QString value)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6112,
+				  tr("Signal %1 - engeneering low Limit mismatch electrical low Limit, set electrical low Limit: %2.")
+				  .arg(appSignalID)
+				  .arg(value)
+				  );
+	}
+
+	/// IssueCode: EQP6113
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 - engeneering high Limit mismatch electrical high Limit
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///		%2 Electrical high Limit
+	///
+	/// Description:
+	///		 Only ThermoCouple and ThermoResistor. Engeneering high Limit mismatch electrical high Limit. Only ThermoCouple and ThermoResistor.
+	///
+	void IssueLogger::errEQP6113(QString appSignalID, QString value)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6113,
+				  tr("Signal %1 - engeneering high Limit mismatch electrical high Limit, set electrical high Limit: %2.")
+				  .arg(appSignalID)
+				  .arg(value)
+				  );
+	}
+
+	/// IssueCode: EQP6114
+	///
+	/// IssueType: Error
+	///
+	/// Title: Signal %1 has wrong R0 (ThermoResistor).
+	///
+	/// Parameters:
+	///		%1 Application signal ID
+	///
+	/// Description:
+	///		Wrong R0. It is required to set R0 of ThermoResistor.
+	///
+	void IssueLogger::errEQP6114(QString appSignalID)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6114,
+				  tr("Signal %1 has wrong R0 (ThermoResistor).")
+				  .arg(appSignalID)
+				  );
+	}
+
 	// --
 	//
 	void IssueLogger::addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids)
