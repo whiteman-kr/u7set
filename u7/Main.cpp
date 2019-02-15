@@ -9,6 +9,8 @@
 #include "../lib/LmDescription.h"
 #include "../lib/Configurator.h"
 #include "../Builder/Builder.h"
+#include "../lib/Signal.h"
+#include <QList>
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"

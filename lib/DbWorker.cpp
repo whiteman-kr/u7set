@@ -5082,7 +5082,7 @@ void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
 	}
 }
 
-void DbWorker::slot_setSignalsWorkcopies(const QList<Signal>& signalsList)
+void DbWorker::slot_setSignalsWorkcopies(const QVector<Signal>* signalsList)
 {
 	AUTO_COMPLETE
 
@@ -5098,23 +5098,20 @@ void DbWorker::slot_setSignalsWorkcopies(const QList<Signal>& signalsList)
 
 	QString errMsg;
 
-	int count = 0;
-	int interval = signalsList.count() / 50;
+	double sum = 0;
+	double prevSum = 0;
+	double interval = signalsList->count() / 50.0;
 
-	if (interval == 0)
-	{
-		interval = 1;
-	}
-
-	for(Signal signal : signalsList)
+	for(Signal signal : *signalsList)
 	{
 		//
 
-		count++;
+		sum += 1;
 
-		if (count > 0 && (count % interval) == 0)
+		if (sum >= prevSum + interval)
 		{
-			m_progress->setValue((count * 100) / signalsList.count());
+			m_progress->setValue(static_cast<int>((sum * 100.0) / (*signalsList).count()));
+			prevSum = sum;
 		}
 
 		//
@@ -5599,23 +5596,20 @@ void DbWorker::slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equi
 		return;
 	}
 
-	int count = 0;
-	int interval = equipmentIDs.count() / 50;
-
-	if (interval == 0)
-	{
-		interval = 1;
-	}
+	double sum = 0;
+	double prevSum = 0;
+	double interval = equipmentIDs.count() / 50.0;
 
 	for(const QString& equipmentID : equipmentIDs)
 	{
 		//
 
-		count++;
+		sum += 1;
 
-		if (count > 0 && (count % interval) == 0)
+		if (sum >= prevSum + interval)
 		{
-			m_progress->setValue((count * 100) / equipmentIDs.count());
+			m_progress->setValue(static_cast<int>((sum * 100.0) / equipmentIDs.count()));
+			prevSum = sum;
 		}
 
 		//

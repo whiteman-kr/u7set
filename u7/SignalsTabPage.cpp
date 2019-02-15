@@ -1736,7 +1736,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 	}
 
 	QVector<int> checkoutSignalIDs;
-	QList<Signal> newSignalWorkcopies;
+	QVector<Signal> newSignalWorkcopies;
 
 	for(const Hardware::DeviceSignal* deviceSignal: deviceSignalsToUpdate)
 	{
@@ -1862,7 +1862,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 		return false;
 	}
 
-	result = dbc->setSignalsWorkcopies(newSignalWorkcopies, nullptr);
+	result = dbc->setSignalsWorkcopies(&newSignalWorkcopies, nullptr);
 
 	if (result == false)
 	{

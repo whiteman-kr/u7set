@@ -135,8 +135,6 @@ void DbController::init()
 	qRegisterMetaType<std::vector<DbProject>>();
 	qRegisterMetaType<std::vector<DbFileInfo>>();
 	qRegisterMetaType<std::vector<std::shared_ptr<DbFile>>>();
-	qRegisterMetaType<Signal>();
-	qRegisterMetaType<QList<Signal>>();
 
 	return;
 }
@@ -1833,7 +1831,7 @@ bool DbController::setSignalWorkcopy(Signal *signal, ObjectState *objectState, Q
 	return ok;
 }
 
-bool DbController::setSignalsWorkcopies(const QList<Signal>& signalsList, QWidget* parentWidget)
+bool DbController::setSignalsWorkcopies(const QVector<Signal>* signalsList, QWidget* parentWidget)
 {
 	// Init progress and check availability
 	//

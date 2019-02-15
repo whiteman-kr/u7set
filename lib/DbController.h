@@ -127,7 +127,7 @@ public:
 
 	bool checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
 	bool setSignalWorkcopy(Signal* signal, ObjectState* objectState, QWidget* parentWidget);
-	bool setSignalsWorkcopies(const QList<Signal>& signalsList, QWidget* parentWidget);
+	bool setSignalsWorkcopies(const QVector<Signal>* signalsList, QWidget* parentWidget);
 
 	bool deleteSignal(int signalID, ObjectState* objectState, QWidget* parentWidget);
 	bool undoSignalChanges(int signalID, ObjectState* objectState, QWidget* parentWidget);
@@ -228,7 +228,7 @@ signals:
 
 	void signal_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
 	void signal_setSignalWorkcopy(Signal* signal, ObjectState* objectState);
-	void signal_setSignalsWorkcopies(const QList<Signal>& signalsList);
+	void signal_setSignalsWorkcopies(const QVector<Signal>* signalsList);
 	void signal_deleteSignal(int signalID, ObjectState* objectState);
 	void signal_undoSignalChanges(int signalID, ObjectState* objectState);
 	void signal_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);

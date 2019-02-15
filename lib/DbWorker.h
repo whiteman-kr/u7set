@@ -158,7 +158,7 @@ public slots:
 
     void slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
 	void slot_setSignalWorkcopy(Signal *signal, ObjectState *objectState);
-	void slot_setSignalsWorkcopies(const QList<Signal>& signalsList);
+	void slot_setSignalsWorkcopies(const QVector<Signal>* signalsList);
 
     void slot_deleteSignal(int signalID, ObjectState* objectState);
     void slot_undoSignalChanges(int signalID, ObjectState* objectState);
