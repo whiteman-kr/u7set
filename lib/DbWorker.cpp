@@ -5082,6 +5082,54 @@ void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
 	}
 }
 
+void DbWorker::slot_setSignalsWorkcopies(const QList<Signal>& signalsList)
+{
+	AUTO_COMPLETE
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot set signal workcopy. Database connection is not opened."));
+		return;
+	}
+
+	QString errMsg;
+
+	int count = 0;
+	int interval = signalsList.count() / 50;
+
+	if (interval == 0)
+	{
+		interval = 1;
+	}
+
+	for(Signal signal : signalsList)
+	{
+		//
+
+		count++;
+
+		if (count > 0 && (count % interval) == 0)
+		{
+			m_progress->setValue((count * 100) / signalsList.count());
+		}
+
+		//
+
+		ObjectState objectState;
+
+		bool result = setSignalWorkcopy(db, signal, objectState, errMsg);
+
+		if (result == false)
+		{
+			emitError(db, errMsg);
+			return;
+		}
+	}
+}
 
 void DbWorker::slot_deleteSignal(int signalID, ObjectState* objectState)
 {
@@ -5528,6 +5576,70 @@ void DbWorker::slot_getSignalsIDsWithEquipmentID(QString equipmentID, QVector<in
 	while(q.next() == true)
 	{
 		signalIDs->append(q.value(0).toInt());
+	}
+}
+
+void DbWorker::slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QHash<QString, int>* signalIDs)
+{
+	AUTO_COMPLETE
+
+	if (signalIDs == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	signalIDs->clear();
+
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get signal IDs with EquipmentID. Database connection is not opened."));
+		return;
+	}
+
+	int count = 0;
+	int interval = equipmentIDs.count() / 50;
+
+	if (interval == 0)
+	{
+		interval = 1;
+	}
+
+	for(const QString& equipmentID : equipmentIDs)
+	{
+		//
+
+		count++;
+
+		if (count > 0 && (count % interval) == 0)
+		{
+			m_progress->setValue((count * 100) / equipmentIDs.count());
+		}
+
+		//
+
+		QString request = QString("SELECT * FROM get_signal_ids_with_equipmentid(%1, '%2')")
+						  .arg(currentUser().userId())
+						  .arg(toSqlStr(equipmentID));
+
+		QSqlQuery q(db);
+
+		bool result = q.exec(request);
+
+		if (result == false)
+		{
+			emitError(db, q.lastError().text());
+			return;
+		}
+
+		while(q.next() == true)
+		{
+			int signalID = q.value(0).toInt();
+
+			signalIDs->insertMulti(equipmentID, signalID);
+		}
 	}
 }
 

@@ -52,7 +52,7 @@ SC_TUNING_HIGH_BOUND = 27,
 SC_LAST_CHANGE_USER = 28;
 
 
-const char* Columns[] =
+static const char* Columns[] =
 {
 	"AppSignalID",
 	"CustomAppSignalID",
@@ -1718,9 +1718,22 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 
 	TEST_PTR_RETURN_FALSE(dbc);
 
-	bool result = true;
+	QStringList equipmentIDs;
 
-	bool res = true;
+	for(const Hardware::DeviceSignal* deviceSignal: deviceSignalsToUpdate)
+	{
+		TEST_PTR_CONTINUE(deviceSignal);
+		equipmentIDs.append(deviceSignal->equipmentId());
+	}
+
+	QHash<QString, int> signalIDsMap;
+
+	bool result = dbc->getMultipleSignalsIDsWithEquipmentID(equipmentIDs, &signalIDsMap, nullptr);
+
+	if (result == false)
+	{
+		return false;
+	}
 
 	QVector<int> checkoutSignalIDs;
 	QList<Signal> newSignalWorkcopies;
@@ -1729,20 +1742,9 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 	{
 		TEST_PTR_CONTINUE(deviceSignal);
 
-		QString signalEquipmentID = deviceSignal->equipmentId();
+		QList<int> signalIDs = signalIDsMap.values(deviceSignal->equipmentId());
 
-		QVector<int> signalIDs;
-
-		res = dbc->getSignalsIDsWithEquipmentID(signalEquipmentID, &signalIDs, nullptr);
-
-		if (res == false)
-		{
-			assert(false);
-			result = false;
-			continue;
-		}
-
-		if (signalIDs.isEmpty() == true)
+		if (signalIDs.count() == 0)
 		{
 			continue;
 		}
@@ -1772,9 +1774,9 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 
 			SignalSpecPropValues specPropValues;
 
-			res = specPropValues.parseValuesFromArray(s.protoSpecPropValues());
+			result = specPropValues.parseValuesFromArray(s.protoSpecPropValues());
 
-			if (res == false)
+			if (result == false)
 			{
 				QMessageBox::critical(m_instance,
 							  QApplication::applicationName(),
@@ -1782,9 +1784,9 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 				return false;
 			}
 
-			res = specPropValues.updateFromSpecPropStruct(deviceSignalSpecPropStruct);
+			result = specPropValues.updateFromSpecPropStruct(deviceSignalSpecPropStruct);
 
-			if (res == false)
+			if (result == false)
 			{
 				QMessageBox::critical(m_instance,
 							  QApplication::applicationName(),
@@ -1794,7 +1796,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 
 			QByteArray newValues;
 
-			res = specPropValues.serializeValuesToArray(&newValues);
+			result = specPropValues.serializeValuesToArray(&newValues);
 
 			if (newValues != s.protoSpecPropValues())		// compare proto-data arrays
 			{
@@ -1816,11 +1818,16 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 		}
 	}
 
+	if (checkoutSignalIDs.count() == 0)
+	{
+		return true;
+	}
+
 	QVector<ObjectState> objStates;
 
-	res = dbc->checkoutSignals(&checkoutSignalIDs, &objStates, nullptr);
+	result = dbc->checkoutSignals(&checkoutSignalIDs, &objStates, nullptr);
 
-	if (res == false)
+	if (result == false)
 	{
 		QMessageBox::critical(m_instance,
 							  QApplication::applicationName(),
@@ -1855,22 +1862,34 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 		return false;
 	}
 
+	result = dbc->setSignalsWorkcopies(newSignalWorkcopies, nullptr);
+
+	if (result == false)
+	{
+		QMessageBox::critical(m_instance,
+					  QApplication::applicationName(),
+					  QString(tr("Error setting signals new workcopies, update from preset is aborted.")));
+		return false;
+	}
+
+
+/*
 	for(Signal& s : newSignalWorkcopies)
 	{
 		ObjectState objState;
 
-		res = dbc->setSignalWorkcopy(&s, &objState, nullptr);
+		result = dbc->setSignalWorkcopy(&s, &objState, nullptr);
 
-		if (res == false)
+		if (result == false)
 		{
 			QMessageBox::critical(m_instance,
 						  QApplication::applicationName(),
 						  QString(tr("Cannot set workcopy of signal %1, update from preset is aborted.")).arg(s.appSignalID()));
 			return false;
 		}
-	}
+	}*/
 
-	return true;
+	return result;
 }
 
 void SignalsTabPage::CreateActions(QToolBar *toolBar)
