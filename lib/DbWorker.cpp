@@ -3655,7 +3655,7 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 	// Log action
 	//
 	QString logMessage = QString("slot_checkIn: Comment '%1', FileCount %2, FileNames: ").arg(comment).arg(files->size());
-	for (auto& f : *files)
+	for (const DbFileInfo& f : *files)
 	{
 		logMessage += QString("%1 %2, ").arg(f.fileName()).arg(f.fileId());
 	}
@@ -3671,7 +3671,7 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 	//
 	for (unsigned int i = 0; i < files->size(); i++)
 	{
-		auto file = files->at(i);
+		const DbFileInfo& file = files->at(i);
 
 		if (i == 0)
 		{
@@ -3685,6 +3685,9 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 
 	request += QString("], '%1');")
 			.arg(DbWorker::toSqlStr(comment));
+
+	//qDebug() << files->size();
+	//qDebug() << request;
 
 	// request
 	//
