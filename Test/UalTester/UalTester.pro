@@ -63,7 +63,8 @@ SOURCES += \
     SignalBase.cpp \
     TestFile.cpp \
     TuningSocket.cpp \
-    TuningSignalBase.cpp
+    TuningSignalBase.cpp \
+    CmdLineParam.cpp
 
 
 HEADERS += \
@@ -103,7 +104,8 @@ HEADERS += \
     SignalBase.h \
     TestFile.h \
     TuningSocket.h \
-    TuningSignalBase.h
+    TuningSignalBase.h \
+    CmdLineParam.h
 
 
 

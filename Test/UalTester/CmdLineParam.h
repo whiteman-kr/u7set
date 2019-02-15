@@ -1,241 +1,81 @@
-#ifndef TESTFILE_H
-#define TESTFILE_H
+#ifndef CMDLINEPARAM_H
+#define CMDLINEPARAM_H
 
 #include <QObject>
-#include <QFile>
 
-#include "SignalBase.h"
+#include "../../lib/HostAddressPort.h"
 
-// ==============================================================================================
-
-const char* const TestFileCmd[] =
-{
-				"",
-				"test",
-				"endtest",
-				"schema",
-				"compatible",
-				"const",
-				"var",
-				"set",
-				"check",
-				"apply",
-				"delay",
-};
-
-const int		TF_CMD_COUNT = sizeof(TestFileCmd)/sizeof(TestFileCmd[0]);
-
-const int		TF_CMD_UNKNOWN = -1,
-				TF_CMD_EMPTY = 0,
-				TF_CMD_TEST = 1,
-				TF_CMD_ENDTEST = 2,
-				TF_CMD_SCHEMA = 3,
-				TF_CMD_COMPATIBLE = 4,
-				TF_CMD_CONST = 5,
-				TF_CMD_VAR = 6,
-				TF_CMD_SET = 7,
-				TF_CMD_CHECK = 8,
-				TF_CMD_APPLY = 9,
-				TF_CMD_DELAY = 10;
+#include "TestFile.h"
 
 // ==============================================================================================
 
-enum class TestCmdParamType
-{
-	Undefined,
-	Discrete,
-	SignedInt32,
-	SignedInt64,
-	Float,
-	Double,
-	String
-};
-
-class TestCmdParam
+class CmdLineParam
 {
 
 public:
 
-	TestCmdParam();
-	TestCmdParam(const TestCmdParam& from);
-	virtual ~TestCmdParam();
+	explicit CmdLineParam();
+	virtual ~CmdLineParam();
+
+protected:
+
+	static const char* const SETTING_CFG_SERVICE_IP1;
+	static const char* const SETTING_CFG_SERVICE_IP2;
+	static const char* const SETTING_EQUIPMENT_ID;
+	static const char* const SETTING_TEST_FILE_NAME;
+
+	static const char* const SETTING_ERROR_IGNORE;
+	static const char* const SETTING_TEST_ID;
+	static const char* const SETTING_FROM_TEST_ID;
+	static const char* const SETTING_TRACE;
+	static const char* const SETTING_REPORT;
+	static const char* const SETTING_PRESET_LM;
 
 private:
 
-	QString m_name;
-	TestCmdParamType m_type = TestCmdParamType::Undefined;
-	QVariant m_value;
+	HostAddressPort m_cfgSocketAddress1;
+	HostAddressPort m_cfgSocketAddress2;
 
-public:
+	QString m_cfgServiceIP1;
+	QString m_cfgServiceIP2;
+	QString m_equipmentID;
+	QString m_testFileName;
 
-	bool isEmtpy();
-	void clear();
-
-	QString name() const { return m_name; }
-	void setName(const QString& name) { m_name = name; }
-
-	TestCmdParamType type() const { return m_type; }
-	void setType(TestCmdParamType type) { m_type = type; }
-
-	QVariant value() const { return m_value; }
-	void setValue(const QVariant& value) { m_value = value; }
-
-	QString getNameValueStr();
-	QString getValueStr();
-
-	TestCmdParam& operator=(const TestCmdParam& from);
-};
-
-// ==============================================================================================
-
-class TestCommand
-{
-
-public:
-
-	TestCommand();
-	explicit TestCommand(SignalBase* pSignalBase);
-	virtual ~TestCommand();
-
-private:
-
-	static const char* const PARAM_TEST_ID;
-	static const char* const PARAM_TEST_DESCRIPTION;
-	static const char* const PARAM_SCHEMA_ID;
-	static const char* const PARAM_COMPATIBLE;
-
-	SignalBase* m_pSignalBase = nullptr;
-
-	int m_lineIndex;
-	bool m_foundEndOfTest;
-
-	int m_type = TF_CMD_UNKNOWN;
-	QVector<TestCmdParam> m_paramList;
-
-	QString m_line;
-	QStringList m_errorList;
-
-public:
-
-	int lineIndex() { return m_lineIndex; }
-	bool foundEndOfTest() { return m_foundEndOfTest; }
-
-	int type() const { return m_type; }
-	int getCmdType(const QString& line);
-
-	bool parse(const QString& line);
-	bool parseCmdTest();
-	bool parseCmdEndtest();
-	bool parseCmdSchema();
-	bool parseCmdCompatible();
-	bool parseCmdConst();
-	bool parseCmdVar();
-	bool parseCmdSet();
-	bool parseCmdCheck();
-	bool parseCmdDelay();
-
-	const QVector<TestCmdParam>& paramList() const { return m_paramList; }
-	const QStringList& errorList() const { return m_errorList; }
-};
-
-// ==============================================================================================
-
-class TestItem
-{
-
-public:
-
-	TestItem();
-	TestItem(const TestItem& from);
-	virtual ~TestItem();
-
-private:
-
-	mutable QMutex m_mutex;
-
-	int m_index = -1;
+	QString m_errorIngnoreStr;
 	QString m_testID;
-	QString m_name;
-	QStringList m_compatibleList;
-	int m_errorCount = 0;
+	QString m_fromTestID;
+	QString m_traceStr;
+	QString m_reportFileName;
+	QString m_presetLM;
 
-	QVector<TestCommand> m_commandList;
-	QStringList m_reultsList;
+	bool m_errorIngnore = true;
+	bool m_enableTrace = false;
+
+	bool m_enableContinueTest = true;
 
 public:
 
-	int index() const { return m_index; }
-	void setIndex(int index) { m_index = index; }
+	HostAddressPort cfgSocketAddress1() const { return m_cfgSocketAddress1; }
+	HostAddressPort cfgSocketAddress2() const { return m_cfgSocketAddress2; }
+	QString equipmentID() const { return m_equipmentID; }
+	QString testFileName() const { return m_testFileName; }
 
+	bool errorIngnore() const { return m_errorIngnore; }
 	QString testID() const { return m_testID; }
-	void setTestID(const QString& testID) { m_testID = testID; }
+	QString fromTestID() const { return m_fromTestID; }
+	bool enableTrace() const { return m_enableTrace; }
+	QString reportFileName() const { return m_reportFileName; }
+	QString presetLM() const { return m_presetLM; }
 
-	QString name() const { return m_name; }
-	void setName(const QString& name) { m_name = name; }
+	void getParams(int& argc, char** argv);
+	bool paramIsValid();
 
-	QStringList& compatibleList() { return m_compatibleList; }
+	bool enableContinueTest() const { return m_enableContinueTest; }			// for cmd line param -errignore
+	void setEnableContinueTest(bool enable) { m_enableContinueTest = enable; }
 
-	int errorCount() const { return m_errorCount; }
-	void incErrorCount() { m_errorCount ++; }
-
-	int cmdCount();
-	TestCommand cmd(int index);
-	void appendCmd(const TestCommand& cmd);
-
-	QStringList& reultsList() { return m_reultsList; }
-
-	TestItem& operator=(const TestItem& from);
-};
-
-// ==============================================================================================
-
-class TestFile : public QObject
-{
-	Q_OBJECT
-
-public:
-
-	explicit TestFile(QObject *parent = nullptr);
-	virtual ~TestFile();
-
-private:
-
-	mutable QMutex m_mutex;
-
-	QString m_fileName;
-	QFile m_file;
-
-	SignalBase* m_pSignalBase = nullptr;
-
-	QVector<TestCommand> m_commandList;
-	QStringList m_errorList;
-
-	QVector<TestItem> m_testList;
-
-	void printErrorlist();
-
-public:
-
-	//
-	//
-	QString fileName() const { return m_fileName; }
-	void setFileName(const QString& fileName) { m_fileName = fileName; }
-
-	SignalBase* signalBase() const { return m_pSignalBase; }
-	void setSignalBase(SignalBase* pSignalBase) { m_pSignalBase = pSignalBase; }
-
-	const QStringList& errorList() const { return m_errorList; }
-	const  QVector<TestItem> testList() const { return m_testList; }
-
-	//
-	//
-	bool open();
-	bool parse();
-	void close();
-
-	//
-	//
-	void createTestList();
+	int getStartTestIndex(const QVector<TestItem>& testList);					// check cmd line param -from
+	bool enableExecuteTest(const QString& testID);								// check cmd line param -test
+	bool enableExecuteTestForLM(TestItem test);									// check cmd line param -lm
 
 signals:
 
@@ -245,4 +85,4 @@ public slots:
 
 // ==============================================================================================
 
-#endif // TESTFILE_H
+#endif // CMDLINEPARAM_H

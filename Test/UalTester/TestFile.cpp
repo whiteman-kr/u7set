@@ -1065,6 +1065,16 @@ void TestItem::appendCmd(const TestCommand& cmd)
 	m_mutex.unlock();
 }
 
+void TestItem::appendCmdresult(const QString& str, bool printDebug)
+{
+	m_reultsList.append(str);
+
+	if (printDebug == true)
+	{
+		qDebug() << str;
+	}
+}
+
 TestItem& TestItem::operator=(const TestItem& from)
 {
 	m_index = from.m_index;

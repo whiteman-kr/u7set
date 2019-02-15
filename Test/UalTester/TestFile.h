@@ -183,6 +183,7 @@ public:
 	void appendCmd(const TestCommand& cmd);
 
 	QStringList& reultsList() { return m_reultsList; }
+	void appendCmdresult(const QString& str, bool printDebug);
 
 	TestItem& operator=(const TestItem& from);
 };
@@ -225,7 +226,7 @@ public:
 	void setSignalBase(SignalBase* pSignalBase) { m_pSignalBase = pSignalBase; }
 
 	const QStringList& errorList() const { return m_errorList; }
-	const  QVector<TestItem> testList() const { return m_testList; }
+	const QVector<TestItem> testList() const { return m_testList; }
 
 	//
 	//
