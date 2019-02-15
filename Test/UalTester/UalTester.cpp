@@ -36,31 +36,6 @@ UalTester::~UalTester()
 {
 }
 
-bool UalTester::printToReportFile(const QString& msg)
-{
-	if (m_reportFileName.isEmpty() == true)
-	{
-		return false;
-	}
-
-	QFile reportFile(m_reportFileName);
-	if (reportFile.open(QIODevice::Append) == false)
-	{
-		return false;
-	}
-
-	qint64 written = reportFile.write(msg.toUtf8() + "\r\n");
-	if (written != msg.length())
-	{
-		return false;
-	}
-
-	reportFile.close();
-
-	return true;
-}
-
-
 void UalTester::getCmdLineParams(int& argc, char** argv)
 {
 	CommandLineParser cmdLineParser(argc, argv);
@@ -203,11 +178,34 @@ bool UalTester::cmdLineParamsIsValid()
 		}
 
 		reportFile.write(QString("Report from: %1\r\n\r\n").arg(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm:ss")).toUtf8());
+		reportFile.write(QString("Test File: %1\r\n\r\n").arg(m_testFileName).toUtf8());
 
 		reportFile.close();
 	}
 
 	return true;
+}
+
+void UalTester::printToReportFile(const QStringList& msgList)
+{
+	if (m_reportFileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	QFile reportFile(m_reportFileName);
+	if (reportFile.open(QIODevice::Append) == false)
+	{
+		return;
+	}
+
+	int msgCount = msgList.count();
+	for(int i = 0; i < msgCount; i++)
+	{
+		reportFile.write(msgList[i].toUtf8() + "\r\n");
+	}
+
+	reportFile.close();
 }
 
 bool UalTester::runCfgLoaderThread()
@@ -387,12 +385,9 @@ bool UalTester::parseTestFile()
 {
 	qDebug() << "Parse test file:" << m_testFileName;
 
-	printToReportFile("Open test file: " + m_testFileName + "\r\n");
-
 	m_testfile.setFileName(m_testFileName);
 	if (m_testfile.open() == false)
 	{
-		printToReportFile("Can not open test file for read");
 		return false;
 	}
 
@@ -417,15 +412,7 @@ void UalTester::slot_parseTestFile()
 	//
 	if (parseTestFile() == false)
 	{
-		// print error list to file
-		//
-		int errorCount = m_testfile.errorList().count();
-		for(int i = 0; i < errorCount; i++)
-		{
-			printToReportFile(m_testfile.errorList().at(i));
-		}
-
-		printToReportFile(QString("Found error(s): %1").arg(errorCount));
+		printToReportFile(m_testfile.errorList());	// print errors to report file
 		return;
 	}
 
@@ -585,7 +572,7 @@ void UalTester::slot_socketsReady()
 
 void UalTester::runTestFile()
 {
-	qDebug() << "Test file is running, wait for the end ...\n";
+	qDebug() << "Test file is running, wait for the end ...";
 
 	int startTestIndex = 0;				// for cmd line param -from
 	bool enableContinueTest = true;		// for cmd line param -errignore
@@ -679,10 +666,14 @@ void UalTester::runTestFile()
 			{
 				case TF_CMD_TEST:
 					{
+						qDebug() << "";
+
+						QString str = "Test " + test.name();
+						test.reultsList().append(str);
+
 						if (m_enableTrace == true)
 						{
-							qDebug() << test.index() + 1 << "Test" << test.name();
-							printToReportFile(QString("%1. Test - %2").arg(test.index() + 1).arg(test.name()));
+							qDebug() << str;
 						}
 					}
 					break;
@@ -749,7 +740,9 @@ void UalTester::runTestFile()
 							TestSignal signal = m_signalBase.signal(param.name());
 							if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
 							{
-								qDebug() << "Signal" << param.name() << "not found in SignalBase";
+								QString str = "    Signal " + param.name() + " not found in SignalBase";
+								qDebug() << str;
+								test.reultsList().append(str);
 								continue;
 							}
 
@@ -757,20 +750,27 @@ void UalTester::runTestFile()
 							{
 								if (signal.state().value() == param.value())
 								{
+									QString str = "    Set " + param.getNameValueStr() + " - Ok";
+									test.reultsList().append(str);
+
 									if (m_enableTrace == true)
 									{
-										qDebug() << "\tSet" << param.valueStr() << "- Ok";
-										printToReportFile(QString("    Set %1 - Ok").arg(param.valueStr()));
+										qDebug() << str;
 									}
 								}
 								else
 								{
 									test.incErrorCount();
 
+									TestCmdParam realState = param;
+									realState.setValue(signal.state().value());
+
+									QString str = "    Set " + param.getNameValueStr() + " - Fail    [received: " + realState.getValueStr() + " ]";
+									test.reultsList().append(str);
+
 									if (m_enableTrace == true)
 									{
-										qDebug() << "\tSet" << param.valueStr() << "- Fail";
-										printToReportFile(QString("    Set %1 - Fail").arg(param.valueStr()));
+										qDebug() << str;
 									}
 								}
 							}
@@ -778,10 +778,12 @@ void UalTester::runTestFile()
 							{
 								test.incErrorCount();
 
+								QString str = "    Set signal " + param.name() + " - No valid";
+								test.reultsList().append(str);
+
 								if (m_enableTrace == true)
 								{
-									qDebug() << "\tSet signal" << param.name() << "- No valid";
-									printToReportFile(QString("    Set signal %1 - No valid").arg(param.name()));
+									qDebug() << str;
 								}
 							}
 						}
@@ -820,7 +822,9 @@ void UalTester::runTestFile()
 							TestSignal signal = m_signalBase.signal(param.name());
 							if (signal.param().appSignalID().isEmpty() == true || signal.param().hash() == 0)
 							{
-								qDebug() << "Signal" << param.name() << "not found in SignalBase";
+								QString str = "    Signal " + param.name() + " not found in SignalBase";
+								qDebug() << str;
+								test.reultsList().append(str);
 								continue;
 							}
 
@@ -828,20 +832,27 @@ void UalTester::runTestFile()
 							{
 								if (signal.state().value() == param.value())
 								{
+									QString str = "    Check " + param.getNameValueStr() + " - Ok";
+									test.reultsList().append(str);
+
 									if (m_enableTrace == true)
 									{
-										qDebug() << "\tCheck" << param.valueStr() << "- Ok";
-										printToReportFile(QString("    Check %1 - Ok").arg(param.valueStr()));
+										qDebug() << str;
 									}
 								}
 								else
 								{
 									test.incErrorCount();
 
+									TestCmdParam realState = param;
+									realState.setValue(signal.state().value());
+
+									QString str = "    Check " + param.getNameValueStr() + " - Fail    [received: " + realState.getValueStr() + " ]";
+									test.reultsList().append(str);
+
 									if (m_enableTrace == true)
 									{
-										qDebug() << "\tCheck" << param.valueStr() << "- Fail";
-										printToReportFile(QString("    Check %1 - Fail").arg(param.valueStr()));
+										qDebug() << str;
 									}
 								}
 							}
@@ -849,10 +860,12 @@ void UalTester::runTestFile()
 							{
 								test.incErrorCount();
 
+								QString str = "    Check signal " + param.name() + " - No valid";
+								test.reultsList().append(str);
+
 								if (m_enableTrace == true)
 								{
-									qDebug() << "\tCheck signal" << param.name() << "- No valid";
-									printToReportFile(QString("    Check signal %1 - No valid").arg(param.name()));
+									qDebug() << str;
 								}
 							}
 						}
@@ -877,10 +890,12 @@ void UalTester::runTestFile()
 
 						int ms = param.value().toInt();
 
+						QString str = "    Delay " + QString("%1").arg(ms) + " ms";
+						test.reultsList().append(str);
+
 						if (m_enableTrace == true)
 						{
-							qDebug() << "\tDelay" << ms << "ms";
-							printToReportFile(QString("    Delay %1 ms").arg(ms));
+							qDebug() << str;
 						}
 
 						QThread::msleep(ms);
@@ -893,26 +908,29 @@ void UalTester::runTestFile()
 						{
 							if (m_enableTrace == true)
 							{
-								qDebug() << "Endtest - Ok" << "\n";
-								printToReportFile("Endtest - Ok\r\n");
+								QString str = "Endtest - Ok";
+
+								qDebug() << str;
+								test.reultsList().append(str);
 							}
 							else
 							{
-								qDebug() << test.index() + 1 << "Test" << test.name() << "- Ok";
-								printToReportFile(QString("%1. Test - %2 - Ok").arg(test.index() + 1).arg(test.name()));
+								QString str = "Test " + test.name()  + " - Ok";
+
+								qDebug() << str;
+								test.reultsList().clear();
+								test.reultsList().append(str);
 							}
 						}
 						else
 						{
-							if (m_enableTrace == true)
+							QString str = QString("Endtest - error(s): %1").arg(test.errorCount());
+							test.reultsList().append(str);
+
+							int resCount = test.reultsList().count();
+							for (int i = 0; i < resCount; i++)
 							{
-								qDebug() << "Endtest - error(s):" << test.errorCount() << "\n";
-								printToReportFile(QString("Endtest - error(s): %1\r\n").arg(test.errorCount()));
-							}
-							else
-							{
-								qDebug() << test.index() + 1 << "Test" << test.name() << "- error(s):" << test.errorCount();
-								printToReportFile(QString("%1. Test - %2 - error(s): %3").arg(test.index() + 1).arg(test.name()).arg(test.errorCount()));
+								qDebug() << test.reultsList().at(i);
 							}
 
 							if (m_errorIngnore == false)
@@ -920,12 +938,16 @@ void UalTester::runTestFile()
 								enableContinueTest = false;
 							}
 						}
+
+						test.reultsList().append(QString());
+						printToReportFile(test.reultsList());		// print results to report file
 					}
 					break;
 			}
 		}
 	}
 
+	qDebug() << "";
 	qDebug() << "End of test file";
 }
 

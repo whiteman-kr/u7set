@@ -56,9 +56,9 @@ class TestCmdParam
 
 public:
 
-	TestCmdParam() { clear(); }
-	TestCmdParam(const TestCmdParam& from) { *this = from; }
-	virtual ~TestCmdParam() {}
+	TestCmdParam();
+	TestCmdParam(const TestCmdParam& from);
+	virtual ~TestCmdParam();
 
 private:
 
@@ -68,20 +68,8 @@ private:
 
 public:
 
-	bool isEmtpy()
-	{
-		if (m_name.isEmpty() == true)
-		{
-			return true;
-		}
-
-		if (m_type == TestCmdParamType::Undefined)
-		{
-			return true;
-		}
-
-		return false;
-	}
+	bool isEmtpy();
+	void clear();
 
 	QString name() const { return m_name; }
 	void setName(const QString& name) { m_name = name; }
@@ -92,50 +80,10 @@ public:
 	QVariant value() const { return m_value; }
 	void setValue(const QVariant& value) { m_value = value; }
 
-	QString valueStr()
-	{
-		QString str;
+	QString getNameValueStr();
+	QString getValueStr();
 
-		switch (m_type)
-		{
-			case TestCmdParamType::Undefined:
-				str.clear();
-				break;
-			case TestCmdParamType::Discrete:
-			case TestCmdParamType::SignedInt32:
-			case TestCmdParamType::SignedInt64:
-				str = m_name + QString("=%2").arg(m_value.toInt());
-				break;
-			case TestCmdParamType::Float:
-			case TestCmdParamType::Double:
-				str = m_name + str.sprintf("=%0.4f", m_value.toDouble());
-				break;
-			case TestCmdParamType::String:
-				str = m_name + "=" + m_value.toString();
-				break;
-			default:
-				assert(false);
-				break;
-		}
-
-		return str;
-	}
-
-	void clear()
-	{
-		m_name.clear();
-		m_type = TestCmdParamType::Undefined;
-		m_value.clear();
-	}
-
-	TestCmdParam& operator=(const TestCmdParam& from)
-	{
-		m_name = from.m_name;
-		m_type = from.m_type;
-		m_value = from.m_value;
-
-		return *this;
-	}
+	TestCmdParam& operator=(const TestCmdParam& from);
 };
 
 // ==============================================================================================
@@ -212,6 +160,7 @@ private:
 	int m_errorCount = 0;
 
 	QVector<TestCommand> m_commandList;
+	QStringList m_reultsList;
 
 public:
 
@@ -232,6 +181,8 @@ public:
 	int cmdCount();
 	TestCommand cmd(int index);
 	void appendCmd(const TestCommand& cmd);
+
+	QStringList& reultsList() { return m_reultsList; }
 
 	TestItem& operator=(const TestItem& from);
 };

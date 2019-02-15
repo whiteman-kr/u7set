@@ -55,8 +55,6 @@ private:
 	bool m_errorIngnore = true;
 	bool m_enableTrace = false;
 
-	bool printToReportFile(const QString& msg);
-
 	void getCmdLineParams(int& argc, char** argv);
 	bool cmdLineParamsIsValid();
 
@@ -68,6 +66,8 @@ private:
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 	bool runCfgLoaderThread();
 	void stopCfgLoaderThread();
+
+	void printToReportFile(const QStringList& msgList);
 
 	TestClientSettings m_cfgSettings;
 	bool readConfiguration(const QByteArray& cfgFileData);
