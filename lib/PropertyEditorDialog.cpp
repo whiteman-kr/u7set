@@ -5,8 +5,8 @@
 #include "../lib/PropertyEditor.h"
 #include "../lib/PropertyEditorDialog.h"
 
-PropertyEditorDialog::PropertyEditorDialog(QWidget* parent)
-	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
+PropertyEditorDialog::PropertyEditorDialog(QWidget* parent) :
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
 	m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 
@@ -19,18 +19,20 @@ PropertyEditorDialog::PropertyEditorDialog(QWidget* parent)
     mainLayout->addWidget(pe);
 	mainLayout->addWidget(m_buttonBox);
     setLayout(mainLayout);
+
+	return;
 }
 
 PropertyEditorDialog::~PropertyEditorDialog()
 {
-
 }
 
 void PropertyEditorDialog::setObjects(QList<std::shared_ptr<PropertyObject>> objects)
 {
 	m_objects = objects;
-
 	pe->setObjects(m_objects);
+
+	return;
 }
 
 void PropertyEditorDialog::setObject(std::shared_ptr<PropertyObject> object)
@@ -39,6 +41,8 @@ void PropertyEditorDialog::setObject(std::shared_ptr<PropertyObject> object)
 	m_objects.push_back(object);
 
 	pe->setObjects(m_objects);
+
+	return;
 }
 
 void PropertyEditorDialog::setReadOnly(bool readOnly)
@@ -56,6 +60,7 @@ int PropertyEditorDialog::splitterPosition()
     {
         return pe->splitterPosition();
     }
+
     return 0;
 }
 
@@ -65,6 +70,8 @@ void PropertyEditorDialog::setSplitterPosition(int value)
     {
         pe->setSplitterPosition(value);
     }
+
+	return;
 }
 
 bool PropertyEditorDialog::onPropertiesChanged(std::shared_ptr<PropertyObject> object)
@@ -94,4 +101,6 @@ void PropertyEditorDialog::onOk()
 	{
 		accept();
 	}
+
+	return;
 }
