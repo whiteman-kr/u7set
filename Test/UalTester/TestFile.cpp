@@ -108,8 +108,9 @@ TestCommand::TestCommand()
 {
 }
 
-TestCommand::TestCommand(SignalBase* pSignalBase)
-	: m_pSignalBase(pSignalBase)
+TestCommand::TestCommand(TestFile* pTestFile, SignalBase* pSignalBase)
+	: m_pTestFile(pTestFile)
+	, m_pSignalBase(pSignalBase)
 	, m_lineIndex(0)
 	, m_foundEndOfTest(true)
 {
@@ -254,6 +255,43 @@ bool TestCommand::parseCmdTest()
 	}
 
 	m_foundEndOfTest = false;
+
+	// check unique TestID
+	//
+
+	if (m_pTestFile == nullptr)
+	{
+		QString errorStr = QString("(line %1) Error : Failed test file").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	int cmdCount = m_pTestFile->commandList().count();
+	for(int c = 0; c < cmdCount; c++)
+	{
+		TestCommand cmd = m_pTestFile->commandList().at(c);
+		if (cmd.type() != TF_CMD_TEST)
+		{
+			continue;
+		}
+
+		int paramCount = cmd.paramList().count();
+		for(int p = 0; p < paramCount; p++)
+		{
+			param = cmd.paramList().at(p);
+			if (param.name() != PARAM_TEST_ID)
+			{
+				continue;
+			}
+
+			if (param.value() == testID)
+			{
+				QString errorStr = QString("(line %1) Error : TestID %2 is not unique in the test file").arg(m_lineIndex).arg(testID);
+				m_errorList.append(errorStr);
+				return false;
+			}
+		}
+	}
 
 	return true;
 }
@@ -1149,7 +1187,7 @@ bool TestFile::parse(const QString& fileName, SignalBase* pSignalBase)
 
 	//
 	//
-	TestCommand testCmd(m_pSignalBase);
+	TestCommand testCmd(this, m_pSignalBase);
 
 	// parse file
 	//

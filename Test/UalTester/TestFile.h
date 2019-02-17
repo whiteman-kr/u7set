@@ -6,6 +6,8 @@
 
 #include "SignalBase.h"
 
+class TestFile;
+
 // ==============================================================================================
 
 const char* const TestFileCmd[] =
@@ -94,7 +96,7 @@ class TestCommand
 public:
 
 	TestCommand();
-	explicit TestCommand(SignalBase* pSignalBase);
+	explicit TestCommand(TestFile* pTestFile, SignalBase* pSignalBase);
 	virtual ~TestCommand();
 
 private:
@@ -104,6 +106,7 @@ private:
 	static const char* const PARAM_SCHEMA_ID;
 	static const char* const PARAM_COMPATIBLE;
 
+	TestFile* m_pTestFile = nullptr;
 	SignalBase* m_pSignalBase = nullptr;
 
 	int m_lineIndex;
@@ -210,7 +213,6 @@ private:
 
 	QVector<TestCommand> m_commandList;
 	QStringList m_errorList;
-
 	QVector<TestItem> m_testList;
 
 	void printErrorlist();
@@ -225,6 +227,7 @@ public:
 	SignalBase* signalBase() const { return m_pSignalBase; }
 	void setSignalBase(SignalBase* pSignalBase) { m_pSignalBase = pSignalBase; }
 
+	const QVector<TestCommand> commandList() const  { return m_commandList; }
 	const QStringList& errorList() const { return m_errorList; }
 	const QVector<TestItem> testList() const { return m_testList; }
 
