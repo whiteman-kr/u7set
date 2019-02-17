@@ -137,6 +137,12 @@ public:
 	bool parseCmdCheck();
 	bool parseCmdDelay();
 
+	bool isUniqueTestID(const QString& testID);
+	bool isUniqueConstOrVarName(const QString& name, const QVector<TestCmdParam>& paramList);
+
+	TestCmdParam paramFromConstOrVar(const QString& name, const QString& value, const Signal& signal);
+	TestCmdParam paramFromSignal(const QString& name, const QString& value, const Signal& signal);
+
 	const QVector<TestCmdParam>& paramList() const { return m_paramList; }
 	const QStringList& errorList() const { return m_errorList; }
 };

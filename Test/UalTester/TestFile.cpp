@@ -139,7 +139,7 @@ int TestCommand::getCmdType(const QString& line)
 
 	for(int type = 1; type < TF_CMD_COUNT; type++)
 	{
-		if (cmd.compare(TestFileCmd[type]) == 0)
+		if (cmd == TestFileCmd[type])
 		{
 			cmdType = type;
 			break;
@@ -258,39 +258,9 @@ bool TestCommand::parseCmdTest()
 
 	// check unique TestID
 	//
-
-	if (m_pTestFile == nullptr)
+	if (isUniqueTestID(testID) == false)
 	{
-		QString errorStr = QString("(line %1) Error : Failed test file").arg(m_lineIndex);
-		m_errorList.append(errorStr);
 		return false;
-	}
-
-	int cmdCount = m_pTestFile->commandList().count();
-	for(int c = 0; c < cmdCount; c++)
-	{
-		TestCommand cmd = m_pTestFile->commandList().at(c);
-		if (cmd.type() != TF_CMD_TEST)
-		{
-			continue;
-		}
-
-		int paramCount = cmd.paramList().count();
-		for(int p = 0; p < paramCount; p++)
-		{
-			param = cmd.paramList().at(p);
-			if (param.name() != PARAM_TEST_ID)
-			{
-				continue;
-			}
-
-			if (param.value() == testID)
-			{
-				QString errorStr = QString("(line %1) Error : TestID %2 is not unique in the test file").arg(m_lineIndex).arg(testID);
-				m_errorList.append(errorStr);
-				return false;
-			}
-		}
 	}
 
 	return true;
@@ -394,7 +364,6 @@ bool TestCommand::parseCmdConst()
 		return false;
 	}
 
-
 	int space2Pos = m_line.indexOf(' ', space1Pos + 1);
 	if (space2Pos == -1)
 	{
@@ -464,6 +433,11 @@ bool TestCommand::parseCmdConst()
 		{
 			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
 			m_errorList.append(errorStr);
+			continue;
+		}
+
+		if (isUniqueConstOrVarName(constName, m_paramList) == false)
+		{
 			continue;
 		}
 
@@ -541,11 +515,10 @@ bool TestCommand::parseCmdVar()
 		return false;
 	}
 
-
 	int space2Pos = m_line.indexOf(' ', space1Pos + 1);
 	if (space2Pos == -1)
 	{
-		QString errorStr = QString("(line %1) Error : Failed const type").arg(m_lineIndex);
+		QString errorStr = QString("(line %1) Error : Failed variable type").arg(m_lineIndex);
 		m_errorList.append(errorStr);
 		return false;
 	}
@@ -568,7 +541,7 @@ bool TestCommand::parseCmdVar()
 
 	if (varType == TestCmdParamType::Undefined)
 	{
-		QString errorStr = QString("(line %1) Error : Failed var type").arg(m_lineIndex);
+		QString errorStr = QString("(line %1) Error : Failed variable type").arg(m_lineIndex);
 		m_errorList.append(errorStr);
 		return false;
 	}
@@ -604,7 +577,7 @@ bool TestCommand::parseCmdVar()
 			continue;
 		}
 
-		// var name
+		// variable name
 		//
 		QString varName = sv[0].simplified();
 		if (varName.isEmpty() == true)
@@ -614,9 +587,14 @@ bool TestCommand::parseCmdVar()
 			continue;
 		}
 
+		if (isUniqueConstOrVarName(varName, m_paramList) == false)
+		{
+			continue;
+		}
+
 		param.setName(varName);
 
-		// var Value
+		// variable Value
 		//
 		QString varValue =  sv[1].simplified();
 		if (varValue.isEmpty() == true)
@@ -638,7 +616,7 @@ bool TestCommand::parseCmdVar()
 
 					if(isTypefloat == false)
 					{
-						QString errorStr = QString("(line %1) Error : Var %2 failed value").arg(m_lineIndex).arg(varName);
+						QString errorStr = QString("(line %1) Error : Variable %2 failed value").arg(m_lineIndex).arg(varName);
 						m_errorList.append(errorStr);
 						continue;
 					}
@@ -653,7 +631,7 @@ bool TestCommand::parseCmdVar()
 
 					if(isTypeInt == false)
 					{
-						QString errorStr = QString("(line %1) Error : Var %2 failed value").arg(m_lineIndex).arg(varName);
+						QString errorStr = QString("(line %1) Error : Variable %2 failed value").arg(m_lineIndex).arg(varName);
 						m_errorList.append(errorStr);
 						continue;
 					}
@@ -662,7 +640,7 @@ bool TestCommand::parseCmdVar()
 
 			default:
 
-				QString errorStr = QString("(line %1) Error : Var %2 failed type (int or float)").arg(m_lineIndex).arg(varName);
+				QString errorStr = QString("(line %1) Error : Variable %2 failed type (int or float)").arg(m_lineIndex).arg(varName);
 				m_errorList.append(errorStr);
 				continue;
 		}
@@ -758,8 +736,6 @@ bool TestCommand::parseCmdSet()
 			continue;
 		}
 
-		param.setName(signalID);
-
 		// signal Value
 		//
 		QString signalValue =  sv[1].simplified();
@@ -770,74 +746,23 @@ bool TestCommand::parseCmdSet()
 			continue;
 		}
 
-		switch (signal.param().signalType())
+		//
+		//
+		bool signalValueIsDigit = false;
+		signalValue.toFloat(&signalValueIsDigit);
+
+		if (signalValueIsDigit == true)
 		{
-			case E::SignalType::Analog:
-				{
-					E::AnalogAppSignalFormat type = signal.param().analogSignalFormat();
+			param = paramFromSignal(signalID, signalValue, signal.param());
+		}
+		else
+		{
+			param = paramFromConstOrVar(signalID, signalValue, signal.param());
+		}
 
-					switch(type)
-					{
-						case E::AnalogAppSignalFormat::Float32:
-							{
-								bool isTypefloat = false;
-
-								param.setType(TestCmdParamType::Float);
-								param.setValue(signalValue.toFloat(&isTypefloat));
-
-								if(isTypefloat == false)
-								{
-									QString errorStr = QString("(line %1) Error : Signal %2 failed value of signal").arg(m_lineIndex).arg(signalID);
-									m_errorList.append(errorStr);
-									continue;
-								}
-							}
-							break;
-
-						case E::AnalogAppSignalFormat::SignedInt32:
-							{
-								bool isTypeInt = false;
-
-								param.setType(TestCmdParamType::SignedInt32);
-								param.setValue(signalValue.toInt(&isTypeInt));
-
-								if(isTypeInt == false)
-								{
-									QString errorStr = QString("(line %1) Error : Signal %2 failed value of signal (type float instead int)").arg(m_lineIndex).arg(signalID);
-									m_errorList.append(errorStr);
-									continue;
-								}
-							}
-							break;
-
-						default:
-
-							QString errorStr = QString("(line %1) Error : Signal %2 failed type of signal (int or float)").arg(m_lineIndex).arg(signalID);
-							m_errorList.append(errorStr);
-							continue;
-					}
-				}
-				break;
-
-			case E::SignalType::Discrete:
-				{
-					if (signalValue != "0" &&  signalValue != "1")
-					{
-						QString errorStr = QString("(line %1) Error : Signal %2 failed value (0 or 1)").arg(m_lineIndex).arg(signalID);
-						m_errorList.append(errorStr);
-						continue;
-					}
-
-					param.setType(TestCmdParamType::Discrete);
-					param.setValue(signalValue.toInt());
-				}
-				break;
-
-			default:
-
-				QString errorStr = QString("(line %1) Error : Signal %2 failed type of signal (analog or discrete)").arg(m_lineIndex).arg(signalID);
-				m_errorList.append(errorStr);
-				continue;
+		if (param.isEmtpy() == true)
+		{
+			continue;
 		}
 
 		m_paramList.append(param);
@@ -924,11 +849,9 @@ bool TestCommand::parseCmdCheck()
 			continue;
 		}
 
-		param.setName(signalID);
-
 		// signal Value
 		//
-		QString signalValue =  sv[1].simplified();
+		QString signalValue = sv[1].simplified();
 		if (signalValue.isEmpty() == true)
 		{
 			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
@@ -936,74 +859,23 @@ bool TestCommand::parseCmdCheck()
 			continue;
 		}
 
-		switch (signal.param().signalType())
+		//
+		//
+		bool signalValueIsDigit = false;
+		signalValue.toFloat(&signalValueIsDigit);
+
+		if (signalValueIsDigit == true)
 		{
-			case E::SignalType::Analog:
-				{
-					E::AnalogAppSignalFormat type = signal.param().analogSignalFormat();
+			param = paramFromSignal(signalID, signalValue, signal.param());
+		}
+		else
+		{
+			param = paramFromConstOrVar(signalID, signalValue, signal.param());
+		}
 
-					switch(type)
-					{
-						case E::AnalogAppSignalFormat::Float32:
-							{
-								bool isTypefloat = false;
-
-								param.setType(TestCmdParamType::Float);
-								param.setValue(signalValue.toFloat(&isTypefloat));
-
-								if(isTypefloat == false)
-								{
-									QString errorStr = QString("(line %1) Error : Signal %2 failed value of signal").arg(m_lineIndex).arg(signalID);
-									m_errorList.append(errorStr);
-									continue;
-								}
-							}
-							break;
-
-						case E::AnalogAppSignalFormat::SignedInt32:
-							{
-								bool isTypeInt = false;
-
-								param.setType(TestCmdParamType::SignedInt32);
-								param.setValue(signalValue.toInt(&isTypeInt));
-
-								if(isTypeInt == false)
-								{
-									QString errorStr = QString("(line %1) Error : Signal %2 failed value of signal (type float instead int)").arg(m_lineIndex).arg(signalID);
-									m_errorList.append(errorStr);
-									continue;
-								}
-							}
-							break;
-
-						default:
-
-							QString errorStr = QString("(line %1) Error : Signal %2 failed type of signal (int or float) ").arg(m_lineIndex).arg(signalID);
-							m_errorList.append(errorStr);
-							continue;
-					}
-				}
-				break;
-
-			case E::SignalType::Discrete:
-				{
-					if (signalValue != "0" &&  signalValue != "1")
-					{
-						QString errorStr = QString("(line %1) Error : Signal %2 failed value (0 or 1)").arg(m_lineIndex).arg(signalID);
-						m_errorList.append(errorStr);
-						continue;
-					}
-
-					param.setType(TestCmdParamType::Discrete);
-					param.setValue(signalValue.toInt());
-				}
-				break;
-
-			default:
-
-				QString errorStr = QString("(line %1) Error : Signal %2 failed type of signal (analog or discrete)").arg(m_lineIndex).arg(signalID);
-				m_errorList.append(errorStr);
-				continue;
+		if (param.isEmtpy() == true)
+		{
+			continue;
 		}
 
 		m_paramList.append(param);
@@ -1044,6 +916,310 @@ bool TestCommand::parseCmdDelay()
 	m_paramList.append(param);
 
 	return true;
+}
+
+bool TestCommand::isUniqueTestID(const QString& testID)
+{
+	if (testID.isEmpty() == true)
+	{
+		QString errorStr = QString("(line %1) Error : TestID is empty").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	if (m_pTestFile == nullptr)
+	{
+		QString errorStr = QString("(line %1) Error : Failed test file").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	int cmdCount = m_pTestFile->commandList().count();
+	for(int c = 0; c < cmdCount; c++)
+	{
+		TestCommand cmd = m_pTestFile->commandList().at(c);
+		if (cmd.type() != TF_CMD_TEST)
+		{
+			continue;
+		}
+
+		int paramCount = cmd.paramList().count();
+		for(int p = 0; p < paramCount; p++)
+		{
+			TestCmdParam param = cmd.paramList().at(p);
+			if (param.name() != PARAM_TEST_ID)
+			{
+				continue;
+			}
+
+			if (param.value() == testID)
+			{
+				QString errorStr = QString("(line %1) Error : TestID %2 is not unique in the test file").arg(m_lineIndex).arg(testID);
+				m_errorList.append(errorStr);
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+bool TestCommand::isUniqueConstOrVarName(const QString& name, const QVector<TestCmdParam>& paramList)
+{
+	if (m_pTestFile == nullptr)
+	{
+		QString errorStr = QString("(line %1) Error : Failed test file").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	if (name.isEmpty() == true)
+	{
+		QString errorStr = QString("(line %1) Error : Const or variable name is empty").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return false;
+	}
+
+	int paramCount = paramList.count();
+	for(int i = 0; i < paramCount; i++)
+	{
+		if (paramList[i].name() == name)
+		{
+			QString errorStr = QString("(line %1) Error : Const or variable %2 is not unique in the test file").arg(m_lineIndex).arg(name);
+			m_errorList.append(errorStr);
+			return false;
+		}
+	}
+
+	int cmdCount = m_pTestFile->commandList().count();
+	for(int c = 0; c < cmdCount; c++)
+	{
+		TestCommand cmd = m_pTestFile->commandList().at(c);
+		if (cmd.type() != TF_CMD_CONST && cmd.type() != TF_CMD_VAR)
+		{
+			continue;
+		}
+
+		int paramCount = cmd.paramList().count();
+		for(int p = 0; p < paramCount; p++)
+		{
+			if (cmd.paramList().at(p).name() == name)
+			{
+				QString errorStr = QString("(line %1) Error : Const or variable %2 is not unique in the test file").arg(m_lineIndex).arg(name);
+				m_errorList.append(errorStr);
+				return false;
+			}
+		}
+	}
+
+	return true;
+}
+
+TestCmdParam TestCommand::paramFromConstOrVar(const QString& name, const QString& value, const Signal& signal)
+{
+	if (m_pTestFile == nullptr)
+	{
+		QString errorStr = QString("(line %1) Error : Failed test file").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return TestCmdParam();
+	}
+
+	if (name.isEmpty() == true)
+	{
+		QString errorStr = QString("(line %1) Error : Name is empty").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return TestCmdParam();
+	}
+
+	if (value.isEmpty() == true)
+	{
+		QString errorStr = QString("(line %1) Error : Value is empty").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return TestCmdParam();
+	}
+
+	TestCmdParam varParam;
+
+	int cmdCount = m_pTestFile->commandList().count();
+	for(int c = 0; c < cmdCount; c++)
+	{
+		TestCommand cmd = m_pTestFile->commandList().at(c);
+		if (cmd.type() != TF_CMD_CONST && cmd.type() != TF_CMD_VAR)
+		{
+			continue;
+		}
+
+		int paramCount = cmd.paramList().count();
+		for(int p = 0; p < paramCount; p++)
+		{
+			if (cmd.paramList().at(p).name() == value)
+			{
+				varParam = cmd.paramList().at(p);
+				break;
+			}
+		}
+	}
+
+	if (varParam.isEmtpy() == true)
+	{
+		QString errorStr = QString("(line %1) Error : Unknown name of const or var: %2").arg(m_lineIndex).arg(value);
+		m_errorList.append(errorStr);
+		return TestCmdParam();
+	}
+
+	//
+	//
+	bool typeOk = false;
+
+	switch (signal.signalType())
+	{
+		case E::SignalType::Analog:
+			{
+				switch(signal.analogSignalFormat())
+				{
+					case E::AnalogAppSignalFormat::SignedInt32:
+
+						if (varParam.type() != TestCmdParamType::SignedInt32)
+						{
+							break;
+						}
+
+						typeOk = true;
+
+						break;
+
+					case E::AnalogAppSignalFormat::Float32:
+
+						if (varParam.type() != TestCmdParamType::Float)
+						{
+							break;
+						}
+
+						typeOk = true;
+
+						break;
+				}
+			}
+			break;
+
+		case E::SignalType::Discrete:
+
+			if (varParam.type() != TestCmdParamType::SignedInt32)
+			{
+				break;
+			}
+
+			if (varParam.value() != 0 && varParam.value() != 1)
+			{
+				break;
+			}
+
+			typeOk = true;
+
+			break;
+	}
+
+	if (typeOk == false)
+	{
+		QString errorStr = QString("(line %1) Error : Non-combination of types for const or variable: %2").arg(m_lineIndex).arg(varParam.name());
+		m_errorList.append(errorStr);
+		return TestCmdParam();
+	}
+
+	varParam.setName(name);
+
+	return varParam;
+}
+
+TestCmdParam TestCommand::paramFromSignal(const QString& name, const QString& value, const Signal& signal)
+{
+	if (name.isEmpty() == true)
+	{
+		QString errorStr = QString("(line %1) Error : Name is empty").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return TestCmdParam();
+	}
+
+	if (value.isEmpty() == true)
+	{
+		QString errorStr = QString("(line %1) Error : Value is empty").arg(m_lineIndex);
+		m_errorList.append(errorStr);
+		return TestCmdParam();
+	}
+
+	TestCmdParam varParam;
+
+	switch (signal.signalType())
+	{
+		case E::SignalType::Analog:
+			{
+				switch(signal.analogSignalFormat())
+				{
+					case E::AnalogAppSignalFormat::SignedInt32:
+						{
+							bool isTypeInt = false;
+
+							varParam.setType(TestCmdParamType::SignedInt32);
+							varParam.setValue(value.toInt(&isTypeInt));
+
+							if(isTypeInt == false)
+							{
+								QString errorStr = QString("(line %1) Error : Signal %2 failed value of signal (type Float32 instead SignedInt32)").arg(m_lineIndex).arg(signal.appSignalID());
+								m_errorList.append(errorStr);
+								return TestCmdParam();
+							}
+						}
+						break;
+
+					case E::AnalogAppSignalFormat::Float32:
+						{
+							bool isTypefloat = false;
+
+							varParam.setType(TestCmdParamType::Float);
+							varParam.setValue(value.toFloat(&isTypefloat));
+
+							if(isTypefloat == false)
+							{
+								QString errorStr = QString("(line %1) Error : Signal %2 failed value of signal").arg(m_lineIndex).arg(signal.appSignalID());
+								m_errorList.append(errorStr);
+								return TestCmdParam();
+							}
+						}
+						break;
+
+					default:
+
+						QString errorStr = QString("(line %1) Error : Signal %2 failed type of signal (SignedInt32 or Float32)").arg(m_lineIndex).arg(signal.appSignalID());
+						m_errorList.append(errorStr);
+						return TestCmdParam();
+				}
+			}
+			break;
+
+		case E::SignalType::Discrete:
+			{
+				if (value != "0" &&  value != "1")
+				{
+					QString errorStr = QString("(line %1) Error : Signal %2 failed value (0 or 1)").arg(m_lineIndex).arg(signal.appSignalID());
+					m_errorList.append(errorStr);
+					return TestCmdParam();
+				}
+
+				varParam.setType(TestCmdParamType::Discrete);
+				varParam.setValue(value.toInt());
+			}
+			break;
+
+		default:
+
+			QString errorStr = QString("(line %1) Error : Signal %2 failed type of signal (analog or discrete)").arg(m_lineIndex).arg(signal.appSignalID());
+			m_errorList.append(errorStr);
+			return TestCmdParam();
+	}
+
+	varParam.setName(name);
+
+	return varParam;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

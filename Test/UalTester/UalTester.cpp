@@ -672,7 +672,10 @@ void UalTester::runTestFile()
 									qDebug() << test.reultsList().at(i);
 								}
 							}
+						}
 
+						if (m_cmdLineParam.errorIngnore() == false)
+						{
 							m_cmdLineParam.setEnableContinueTest(false);
 						}
 
