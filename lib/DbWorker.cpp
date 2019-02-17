@@ -3204,9 +3204,9 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 		out->push_back(file);
 	}
 
-	qDebug() << "Request time is " << timerObject.elapsed() << " ms, request: " << request;
+	//qDebug() << "Request time is " << timerObject.elapsed() << " ms, request: " << request;
 	//qDebug() << "\tmemoryAllocationEllpased " << memoryAllocationEllpased / 1000000;
-	qDebug() << "\tupdateFileEllpased " << updateFileEllpased / 1000000;
+	//qDebug() << "\tupdateFileEllpased " << updateFileEllpased / 1000000;
 	//qDebug() << "\tpushBackEllpased " << pushBackEllpased / 1000000;
 
 	return;
