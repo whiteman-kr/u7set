@@ -277,8 +277,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0257.sql", "Upgrade to version 257, MaxInstCount corrections in  LM1-SR03, LM1-SR02"},
 	{":/DatabaseUpgrade/Upgrade0258.sql", "Upgrade to version 258, AIM-4PH, AOM-4PH, WAIM, TIM, RIM migrated to dynamic physical units calculation"},
 	{":/DatabaseUpgrade/Upgrade0259.sql", "Upgrade to version 259, Optimize undo_changes and Equipment Editor"},
+	{":/DatabaseUpgrade/Upgrade0260.sql", "Upgrade to version 260, Creating some indexes on signalinstance table"},
 };
-
 
 int DbWorker::counter = 0;
 
@@ -5085,6 +5085,51 @@ void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
 	}
 }
 
+void DbWorker::slot_setSignalsWorkcopies(const QVector<Signal>* signalsList)
+{
+	AUTO_COMPLETE
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot set signal workcopy. Database connection is not opened."));
+		return;
+	}
+
+	QString errMsg;
+
+	double sum = 0;
+	double prevSum = 0;
+	double interval = signalsList->count() / 50.0;
+
+	for(Signal signal : *signalsList)
+	{
+		//
+
+		sum += 1;
+
+		if (sum >= prevSum + interval)
+		{
+			m_progress->setValue(static_cast<int>((sum * 100.0) / (*signalsList).count()));
+			prevSum = sum;
+		}
+
+		//
+
+		ObjectState objectState;
+
+		bool result = setSignalWorkcopy(db, signal, objectState, errMsg);
+
+		if (result == false)
+		{
+			emitError(db, errMsg);
+			return;
+		}
+	}
+}
 
 void DbWorker::slot_deleteSignal(int signalID, ObjectState* objectState)
 {
@@ -5531,6 +5576,67 @@ void DbWorker::slot_getSignalsIDsWithEquipmentID(QString equipmentID, QVector<in
 	while(q.next() == true)
 	{
 		signalIDs->append(q.value(0).toInt());
+	}
+}
+
+void DbWorker::slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QHash<QString, int>* signalIDs)
+{
+	AUTO_COMPLETE
+
+	if (signalIDs == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	signalIDs->clear();
+
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get signal IDs with EquipmentID. Database connection is not opened."));
+		return;
+	}
+
+	double sum = 0;
+	double prevSum = 0;
+	double interval = equipmentIDs.count() / 50.0;
+
+	for(const QString& equipmentID : equipmentIDs)
+	{
+		//
+
+		sum += 1;
+
+		if (sum >= prevSum + interval)
+		{
+			m_progress->setValue(static_cast<int>((sum * 100.0) / equipmentIDs.count()));
+			prevSum = sum;
+		}
+
+		//
+
+		QString request = QString("SELECT * FROM get_signal_ids_with_equipmentid(%1, '%2')")
+						  .arg(currentUser().userId())
+						  .arg(toSqlStr(equipmentID));
+
+		QSqlQuery q(db);
+
+		bool result = q.exec(request);
+
+		if (result == false)
+		{
+			emitError(db, q.lastError().text());
+			return;
+		}
+
+		while(q.next() == true)
+		{
+			int signalID = q.value(0).toInt();
+
+			signalIDs->insertMulti(equipmentID, signalID);
+		}
 	}
 }
 
