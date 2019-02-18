@@ -345,9 +345,9 @@ QString MeasureTable::textLinearity(int row, int column) const
 		case MVC_CMN_L_VALUE_18:				result = m->measureItemStr(detailLimitType, 18); break;
 		case MVC_CMN_L_VALUE_19:				result = m->measureItemStr(detailLimitType, 19); break;
 
-		case MVC_CMN_L_SYSTEM_ERROR:			result = QString::number(m->additionalParam(MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR), 10, 2); break;
-		case MVC_CMN_L_SD:						result = QString::number(m->additionalParam(MEASURE_ADDITIONAL_PARAM_SD), 10, 2); break;
-		case MVC_CMN_L_BORDER:					result = tr("± ") + QString::number(m->additionalParam(MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER), 10, 2); break;
+		case MVC_CMN_L_SYSTEM_ERROR:			result = m->additionalParamStr(MEASURE_ADDITIONAL_PARAM_SYSTEM_ERROR); break;
+		case MVC_CMN_L_SD:						result = m->additionalParamStr(MEASURE_ADDITIONAL_PARAM_SD); break;
+		case MVC_CMN_L_BORDER:					result = tr("± ") + m->additionalParamStr(MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER); break;
 
 		case MVC_CMN_L_ERROR:					result = m->errorStr(theOptions.linearity().showErrorFromLimit()); break;
 		case MVC_CMN_L_ERROR_LIMIT:				result = m->errorLimitStr(theOptions.linearity().showErrorFromLimit()); break;
