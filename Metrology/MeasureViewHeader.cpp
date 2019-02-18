@@ -313,11 +313,10 @@ void MeasureViewHeader::updateColumnState()
 	{
 		case MEASURE_TYPE_LINEARITY:
 			{
-				// show columns of physical value
+				// show columns of engeneering value
 				//
 				bool visibleEngeneering = theOptions.linearity().showEngeneeringValueColumn();
 
-				//setColumnVisible(MVC_CMN_L_PH_RANGE, visibleEngeneering);
 				setColumnVisible(MVC_CMN_L_EN_NOMINAL, visibleEngeneering);
 				setColumnVisible(MVC_CMN_L_EN_MEASURE, visibleEngeneering);
 
@@ -362,7 +361,7 @@ void MeasureViewHeader::updateColumnState()
 						break;
 
 					case LO_VIEW_TYPE_DETAIL_ELRCTRIC:
-					case LO_VIEW_TYPE_DETAIL_PHYSICAL:
+					case LO_VIEW_TYPE_DETAIL_ENGENEERING:
 
 						setColumnVisible(MVC_CMN_L_PERCENT, false);
 						setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, false);

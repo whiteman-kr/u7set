@@ -291,7 +291,7 @@ QString MeasureTable::textLinearity(int row, int column) const
 
 	int detailLimitType = MEASURE_LIMIT_TYPE_ELECTRIC;
 
-	if (theOptions.linearity().viewType() == LO_VIEW_TYPE_DETAIL_PHYSICAL)
+	if (theOptions.linearity().viewType() == LO_VIEW_TYPE_DETAIL_ENGENEERING)
 	{
 		detailLimitType = MEASURE_LIMIT_TYPE_ENGENEER;
 	}

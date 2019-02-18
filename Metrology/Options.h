@@ -605,7 +605,7 @@ const char* const		LinearityParamName[] =
 						QT_TRANSLATE_NOOP("Options.h", "High limit of the measure range, (%)"),
 						QT_TRANSLATE_NOOP("Options.h", "Points of range"),
 						QT_TRANSLATE_NOOP("Options.h", "Type of measurements list"),
-						QT_TRANSLATE_NOOP("Options.h", "Show columns of physcal values"),
+						QT_TRANSLATE_NOOP("Options.h", "Show columns of engeneering values"),
 						QT_TRANSLATE_NOOP("Options.h", "Show warning if signal is already measured"),
 						QT_TRANSLATE_NOOP("Options.h", "Measure all signals of module in series"),
 };
@@ -623,7 +623,7 @@ const int				LO_PARAM_ERROR_LIMIT			= 0,
 						LO_PARAM_HIGH_RANGE				= 8,
 						LO_PARAM_VALUE_POINTS			= 9,
 						LO_PARAM_LIST_TYPE				= 10,
-						LO_PARAM_SHOW_PHYSICAL_VALUE	= 11,
+						LO_PARAM_SHOW_ENGENEERING_VALUE	= 11,
 						LO_PARAM_WARN_IF_MEASURED		= 12,
 						LO_PARAM_MEASURE_ENTIRE_MODULE	= 13;
 
@@ -647,7 +647,7 @@ const char* const		LinearityViewTypeStr[] =
 						QT_TRANSLATE_NOOP("Options.h", "Simple"),
 						QT_TRANSLATE_NOOP("Options.h", "Extended (show columns for metrological certification)"),
 						QT_TRANSLATE_NOOP("Options.h", "Detail electric (show all measurements at one point)"),
-						QT_TRANSLATE_NOOP("Options.h", "Detail physical (show all measurements at one point)"),
+						QT_TRANSLATE_NOOP("Options.h", "Detail engeneering (show all measurements at one point)"),
 };
 
 const int				LO_VIEW_TYPE_COUNT				= sizeof(LinearityViewTypeStr)/sizeof(LinearityViewTypeStr[0]);
@@ -656,7 +656,7 @@ const int				LO_VIEW_TYPE_UNKNOWN			= -1,
 						LO_VIEW_TYPE_SIMPLE				= 0,
 						LO_VIEW_TYPE_EXTENDED			= 1,
 						LO_VIEW_TYPE_DETAIL_ELRCTRIC	= 2,
-						LO_VIEW_TYPE_DETAIL_PHYSICAL	= 3;
+						LO_VIEW_TYPE_DETAIL_ENGENEERING	= 3;
 
 // ----------------------------------------------------------------------------------------------
 

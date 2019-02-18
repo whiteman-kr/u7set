@@ -490,9 +490,9 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					appendProperty(item, page, LO_PARAM_LIST_TYPE);
 					showcolumnGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_SHOW_PHYSICAL_VALUE]);
+					item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_SHOW_ENGENEERING_VALUE]);
 					item->setValue(m_options.linearity().showEngeneeringValueColumn());
-					appendProperty(item, page, LO_PARAM_SHOW_PHYSICAL_VALUE);
+					appendProperty(item, page, LO_PARAM_SHOW_ENGENEERING_VALUE);
 					showcolumnGroup->addSubProperty(item);
 
 				QtProperty *measuremoduleGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measuring of module"));
@@ -1039,7 +1039,7 @@ void OptionsDialog::applyProperty()
 					case LO_PARAM_VALUE_POINTS:				setActivePage(OPTION_PAGE_LINEARITY_POINT);						break;
 					case LO_PARAM_LIST_TYPE:				m_options.linearity().setViewType(value.toInt());
 															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;	break;
-					case LO_PARAM_SHOW_PHYSICAL_VALUE:		m_options.linearity().setShowPhyscalValueColumn(value.toBool());
+					case LO_PARAM_SHOW_ENGENEERING_VALUE:		m_options.linearity().setShowPhyscalValueColumn(value.toBool());
 															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;	break;
 					case LO_PARAM_WARN_IF_MEASURED:			m_options.linearity().setWarningIfMeasured(value.toBool());		break;
 					case LO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.linearity().setMeasureEntireModule(value.toBool());	break;
