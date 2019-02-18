@@ -1026,19 +1026,19 @@ TestCmdParam TestCommand::paramFromConstOrVar(const QString& name, const QString
 
 	if (name.isEmpty() == true)
 	{
-		QString errorStr = QString("(line %1) Error : Name is empty").arg(m_lineIndex);
+		QString errorStr = QString("(line %1) Error : Param name is empty").arg(m_lineIndex);
 		m_errorList.append(errorStr);
 		return TestCmdParam();
 	}
 
 	if (value.isEmpty() == true)
 	{
-		QString errorStr = QString("(line %1) Error : Value is empty").arg(m_lineIndex);
+		QString errorStr = QString("(line %1) Error : Param value is empty").arg(m_lineIndex);
 		m_errorList.append(errorStr);
 		return TestCmdParam();
 	}
 
-	TestCmdParam varParam;
+	TestCmdParam param;
 
 	int cmdCount = m_pTestFile->commandList().count();
 	for(int c = 0; c < cmdCount; c++)
@@ -1054,13 +1054,13 @@ TestCmdParam TestCommand::paramFromConstOrVar(const QString& name, const QString
 		{
 			if (cmd.paramList().at(p).name() == value)
 			{
-				varParam = cmd.paramList().at(p);
+				param = cmd.paramList().at(p);
 				break;
 			}
 		}
 	}
 
-	if (varParam.isEmtpy() == true)
+	if (param.isEmtpy() == true)
 	{
 		QString errorStr = QString("(line %1) Error : Unknown name of const or var: %2").arg(m_lineIndex).arg(value);
 		m_errorList.append(errorStr);
@@ -1079,7 +1079,7 @@ TestCmdParam TestCommand::paramFromConstOrVar(const QString& name, const QString
 				{
 					case E::AnalogAppSignalFormat::SignedInt32:
 
-						if (varParam.type() != TestCmdParamType::SignedInt32)
+						if (param.type() != TestCmdParamType::SignedInt32)
 						{
 							break;
 						}
@@ -1090,7 +1090,7 @@ TestCmdParam TestCommand::paramFromConstOrVar(const QString& name, const QString
 
 					case E::AnalogAppSignalFormat::Float32:
 
-						if (varParam.type() != TestCmdParamType::Float)
+						if (param.type() != TestCmdParamType::Float)
 						{
 							break;
 						}
@@ -1104,12 +1104,12 @@ TestCmdParam TestCommand::paramFromConstOrVar(const QString& name, const QString
 
 		case E::SignalType::Discrete:
 
-			if (varParam.type() != TestCmdParamType::SignedInt32)
+			if (param.type() != TestCmdParamType::SignedInt32)
 			{
 				break;
 			}
 
-			if (varParam.value() != 0 && varParam.value() != 1)
+			if (param.value() != 0 && param.value() != 1)
 			{
 				break;
 			}
@@ -1121,33 +1121,33 @@ TestCmdParam TestCommand::paramFromConstOrVar(const QString& name, const QString
 
 	if (typeOk == false)
 	{
-		QString errorStr = QString("(line %1) Error : Non-combination of types for const or variable: %2").arg(m_lineIndex).arg(varParam.name());
+		QString errorStr = QString("(line %1) Error : Non-combination of types for const or variable: %2").arg(m_lineIndex).arg(param.name());
 		m_errorList.append(errorStr);
 		return TestCmdParam();
 	}
 
-	varParam.setName(name);
+	param.setName(name);
 
-	return varParam;
+	return param;
 }
 
 TestCmdParam TestCommand::paramFromSignal(const QString& name, const QString& value, const Signal& signal)
 {
 	if (name.isEmpty() == true)
 	{
-		QString errorStr = QString("(line %1) Error : Name is empty").arg(m_lineIndex);
+		QString errorStr = QString("(line %1) Error : Param name is empty").arg(m_lineIndex);
 		m_errorList.append(errorStr);
 		return TestCmdParam();
 	}
 
 	if (value.isEmpty() == true)
 	{
-		QString errorStr = QString("(line %1) Error : Value is empty").arg(m_lineIndex);
+		QString errorStr = QString("(line %1) Error : Param value is empty").arg(m_lineIndex);
 		m_errorList.append(errorStr);
 		return TestCmdParam();
 	}
 
-	TestCmdParam varParam;
+	TestCmdParam param;
 
 	switch (signal.signalType())
 	{
@@ -1159,8 +1159,8 @@ TestCmdParam TestCommand::paramFromSignal(const QString& name, const QString& va
 						{
 							bool isTypeInt = false;
 
-							varParam.setType(TestCmdParamType::SignedInt32);
-							varParam.setValue(value.toInt(&isTypeInt));
+							param.setType(TestCmdParamType::SignedInt32);
+							param.setValue(value.toInt(&isTypeInt));
 
 							if(isTypeInt == false)
 							{
@@ -1175,8 +1175,8 @@ TestCmdParam TestCommand::paramFromSignal(const QString& name, const QString& va
 						{
 							bool isTypefloat = false;
 
-							varParam.setType(TestCmdParamType::Float);
-							varParam.setValue(value.toFloat(&isTypefloat));
+							param.setType(TestCmdParamType::Float);
+							param.setValue(value.toFloat(&isTypefloat));
 
 							if(isTypefloat == false)
 							{
@@ -1205,8 +1205,8 @@ TestCmdParam TestCommand::paramFromSignal(const QString& name, const QString& va
 					return TestCmdParam();
 				}
 
-				varParam.setType(TestCmdParamType::Discrete);
-				varParam.setValue(value.toInt());
+				param.setType(TestCmdParamType::Discrete);
+				param.setValue(value.toInt());
 			}
 			break;
 
@@ -1217,9 +1217,9 @@ TestCmdParam TestCommand::paramFromSignal(const QString& name, const QString& va
 			return TestCmdParam();
 	}
 
-	varParam.setName(name);
+	param.setName(name);
 
-	return varParam;
+	return param;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1291,7 +1291,6 @@ void TestItem::appendCmdresult(const QString& str, bool printDebug)
 
 TestItem& TestItem::operator=(const TestItem& from)
 {
-	m_index = from.m_index;
 	m_testID = from.m_testID;
 	m_name = from.m_name;
 	m_compatibleList = from.m_compatibleList;
@@ -1410,7 +1409,6 @@ void TestFile::close()
 
 void TestFile::createTestList()
 {
-	int testIndex = 0;
 	int cmdIndex = 0;
 	int cmdCount = m_commandList.count();
 
@@ -1421,10 +1419,32 @@ void TestFile::createTestList()
 		TestCommand cmd = m_commandList[cmdIndex];
 		if (cmd.type() == TF_CMD_TEST)
 		{
-			test.setIndex(testIndex++);
-			test.setTestID(cmd.paramList().at(0).value().toString());
-			test.setName(cmd.paramList().at(0).value().toString() + ", " + cmd.paramList().at(1).value().toString());
+			//
+			//
+			QString testName;
 
+			int paramCount = cmd.paramList().count();
+			for(int i = 0; i < paramCount; i++)
+			{
+				TestCmdParam param = cmd.paramList().at(i);
+				if (param.type() != TestCmdParamType::String)
+				{
+					continue;
+				}
+
+				testName.append(cmd.paramList().at(i).value().toString());
+
+				if (i == 0)
+				{
+					test.setTestID(cmd.paramList().at(i).value().toString());
+					testName.append(", ");
+				}
+			}
+
+			test.setName(testName);
+
+			//
+			//
 			while (cmdIndex < cmdCount)
 			{
 				cmd = m_commandList[cmdIndex];

@@ -162,7 +162,6 @@ private:
 
 	mutable QMutex m_mutex;
 
-	int m_index = -1;
 	QString m_testID;
 	QString m_name;
 	QStringList m_compatibleList;
@@ -173,8 +172,6 @@ private:
 
 public:
 
-	int index() const { return m_index; }
-	void setIndex(int index) { m_index = index; }
 
 	QString testID() const { return m_testID; }
 	void setTestID(const QString& testID) { m_testID = testID; }
