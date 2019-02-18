@@ -2155,7 +2155,7 @@ namespace Builder
 
 		if (result == false)
 		{
-			m_log->addItemsIssues(OutputMessageLevel::Error, ualItem->guid(), ualItem->schemaID());
+			m_log->addItemsIssues(OutputMessageLevel::Error, 0 /*What issue code?*/, ualItem->guid(), ualItem->schemaID());
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::AlCompiler,
 							   QString(tr("Invalid AFB's output format %1.%2 (Logic schema %3)")).
 							   arg(ualItem->caption()).arg(outAfbSignal.caption()).arg(ualItem->schemaID()));

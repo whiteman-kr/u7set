@@ -298,18 +298,39 @@ void OutputLog::writeWarning2(const QString& str)
 	return write(str, OutputMessageLevel::Warning2, QString(""), 0, QString(""));
 }
 
-void OutputLog::writeWarning0(QString issue, const QString& str)
+void OutputLog::writeWarning0(QString issueCategory, int issueCode, const QString& str)
 {
+	if (isIssueSuppressed(issueCode) == true)
+	{
+		return;
+	}
+
+	QString issue = issueCategory + QString::number(issueCode).rightJustified(4, '0');
+
 	return write(issue + ": " + str, OutputMessageLevel::Warning0, QString(""), 0, QString(""));
 }
 
-void OutputLog::writeWarning1(QString issue, const QString& str)
+void OutputLog::writeWarning1(QString issueCategory, int issueCode, const QString& str)
 {
+	if (isIssueSuppressed(issueCode) == true)
+	{
+		return;
+	}
+
+	QString issue = issueCategory + QString::number(issueCode).rightJustified(4, '0');
+
 	return write(issue + ": " + str, OutputMessageLevel::Warning1, QString(""), 0, QString(""));
 }
 
-void OutputLog::writeWarning2(QString issue, const QString& str)
+void OutputLog::writeWarning2(QString issueCategory, int issueCode, const QString& str)
 {
+	if (isIssueSuppressed(issueCode) == true)
+	{
+		return;
+	}
+
+	QString issue = issueCategory + QString::number(issueCode).rightJustified(4, '0');
+
 	return write(issue + ": " + str, OutputMessageLevel::Warning2, QString(""), 0, QString(""));
 }
 
@@ -318,8 +339,9 @@ void OutputLog::writeError(const QString& str)
 	return write(str, OutputMessageLevel::Error, QString(""), 0, QString(""));
 }
 
-void OutputLog::writeError(QString issue, const QString& str)
+void OutputLog::writeError(QString issueCategory, int issueCode, const QString& str)
 {
+	QString issue = issueCategory + QString::number(issueCode).rightJustified(4, '0');
 	return write(issue + ": " + str, OutputMessageLevel::Error, QString(""), 0, QString(""));
 }
 
@@ -348,18 +370,39 @@ void OutputLog::writeWarning2(const QString& str, QString file, int fileLine, QS
 	return write(str, OutputMessageLevel::Warning2, file, fileLine, func);
 }
 
-void OutputLog::writeWarning0(QString issue, const QString& str, QString file, int fileLine, QString func)
+void OutputLog::writeWarning0(QString issueCategory, int issueCode, const QString& str, QString file, int fileLine, QString func)
 {
+	if (isIssueSuppressed(issueCode) == true)
+	{
+		return;
+	}
+
+	QString issue = issueCategory + QString::number(issueCode).rightJustified(4, '0');
+
 	return write(issue + ": " + str, OutputMessageLevel::Warning0, file, fileLine, func);
 }
 
-void OutputLog::writeWarning1(QString issue, const QString& str, QString file, int fileLine, QString func)
+void OutputLog::writeWarning1(QString issueCategory, int issueCode, const QString& str, QString file, int fileLine, QString func)
 {
+	if (isIssueSuppressed(issueCode) == true)
+	{
+		return;
+	}
+
+	QString issue = issueCategory + QString::number(issueCode).rightJustified(4, '0');
+
 	return write(issue + ": " + str, OutputMessageLevel::Warning1, file, fileLine, func);
 }
 
-void OutputLog::writeWarning2(QString issue, const QString& str, QString file, int fileLine, QString func)
+void OutputLog::writeWarning2(QString issueCategory, int issueCode, const QString& str, QString file, int fileLine, QString func)
 {
+	if (isIssueSuppressed(issueCode) == true)
+	{
+		return;
+	}
+
+	QString issue = issueCategory + QString::number(issueCode).rightJustified(4, '0');
+
 	return write(issue + ": " + str, OutputMessageLevel::Warning2, file, fileLine, func);
 }
 
@@ -368,8 +411,9 @@ void OutputLog::writeError(const QString& str, QString file, int fileLine, QStri
 	return write(str, OutputMessageLevel::Error, file, fileLine, func);
 }
 
-void OutputLog::writeError(QString issue, const QString& str, QString file, int fileLine, QString func)
+void OutputLog::writeError(QString issueCategory, int issueCode, const QString& str, QString file, int fileLine, QString func)
 {
+	QString issue = issueCategory + QString::number(issueCode).rightJustified(4, '0');
 	return write(issue + ": " + str, OutputMessageLevel::Error, file, fileLine, func);
 }
 
@@ -398,6 +442,23 @@ void OutputLog::writeDump(const std::vector<quint8>& data)
 void OutputLog::writeEmptyLine()
 {
 	return writeMessage("");
+}
+
+void OutputLog::setSupressIssues(std::vector<int> warnings)
+{
+	m_suppressedIssues.clear();
+
+	for (int w : warnings)
+	{
+		m_suppressedIssues.insert(w);
+	}
+
+	return;
+}
+
+bool OutputLog::isIssueSuppressed(int issueCode) const
+{
+	return m_suppressedIssues.find(issueCode) != m_suppressedIssues.end();
 }
 
 bool OutputLog::isEmpty() const

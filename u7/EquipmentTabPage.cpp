@@ -4907,7 +4907,7 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<PropertyObject>> 
 		files.push_back(file);
 	}
 
-	qDebug() << "Update Properties in the Database";
+	//qDebug() << "Update Properties in the Database";
 
 	bool ok = dbController()->setWorkcopy(files, this);
 
