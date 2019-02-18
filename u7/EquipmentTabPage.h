@@ -71,6 +71,8 @@ public slots:
 
 	void switchMode();
 
+	void updateUserList();
+
 signals:
 	void objectVcsStateChanged();
 
