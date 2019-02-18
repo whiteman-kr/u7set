@@ -158,6 +158,7 @@ public slots:
 
     void slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
 	void slot_setSignalWorkcopy(Signal *signal, ObjectState *objectState);
+	void slot_setSignalsWorkcopies(const QVector<Signal>* signalsList);
 
     void slot_deleteSignal(int signalID, ObjectState* objectState);
     void slot_undoSignalChanges(int signalID, ObjectState* objectState);
@@ -172,6 +173,7 @@ public slots:
 	void slot_getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs);
 	void slot_getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs);
 	void slot_getSignalsIDsWithEquipmentID(QString equipmentID, QVector<int>* signalIDs);
+	void slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QHash<QString, int>* signalIDs);
 
 	void slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out);
 	void slot_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out);

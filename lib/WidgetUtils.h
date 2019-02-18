@@ -1,64 +1,66 @@
 #ifndef WIDGETUTILS_H
 #define WIDGETUTILS_H
 
-#include <QApplication>
-#include <QDesktopWidget>
-#include <QSettings>
+class QTableView;
+class QStandardItem;
+class QListView;
+class QHeaderView;
+class QStandardItemModel;
+class QAbstractItemModel;
 
-static void saveWindowPosition(QWidget* window, QString widgetKey)
+#include <QDialog>
+
+void saveWindowPosition(QWidget* window, QString widgetKey);
+void setWindowPosition(QWidget* window, QString widgetKey);
+
+class TableDataVisibilityController : public QObject
 {
-	QSettings settings;
-	int screenNumber = QApplication::desktop()->screenNumber(window);
-	settings.setValue(widgetKey + "/screenNumber", screenNumber);
-	settings.setValue(widgetKey + "/geometry", window->geometry());
-}
+	Q_OBJECT
+public:
+	TableDataVisibilityController(QTableView* parent, const QString& settingsBranchName, const QVector<int>& defaultVisibleColumnSet);
+	virtual ~TableDataVisibilityController();
 
-static void setWindowPosition(QWidget* window, QString widgetKey)
+	void editColumnsVisibilityAndOrder();
+
+	void saveColumnVisibility(int index, bool visible);
+	void saveColumnPosition(int index, int position);
+
+public slots:
+	void saveColumnWidth(int index);
+
+private:
+	QTableView* m_tableView = nullptr;
+	QStringList m_columnNameList;
+	QString m_settingBranchName;
+};
+
+class EditColumnsVisibilityDialog : public QDialog
 {
-	if (window == nullptr)
-	{
-		return;
-	}
-	QSettings settings;
-	int screenNumber = settings.value(widgetKey + "/screenNumber", QApplication::desktop()->screenNumber(window)).toInt();
+	Q_OBJECT
+public:
+	EditColumnsVisibilityDialog(QTableView* tableView, TableDataVisibilityController* controller);
+	virtual ~EditColumnsVisibilityDialog() {}
 
-	QRect screenRect = QApplication::desktop()->screenGeometry(screenNumber);
-	QPoint center = screenRect.center();
+private:
+	void updateItems(QList<int> selectedLogicalIndexes = QList<int>(), int currentLogicalIndex = -1);
 
-	QRect baseWindowRect = screenRect;
-	baseWindowRect.setSize(QSize(screenRect.width() * 2 / 3, screenRect.height() * 2 / 3));
-	baseWindowRect.moveCenter(center);
+	bool isHidden(int logicalIndex);
+	void updateHidden(int visualIndex, bool hidden);
+	void setHidden(int logicalIndex, bool hidden);
 
-	QRect windowRect = settings.value(widgetKey + "/geometry", baseWindowRect).toRect();
+private slots:
+	void moveUp();
+	void moveDown();
+	void changeVisibility(QStandardItem* item);
 
-	if (windowRect.height() > screenRect.height())
-	{
-		windowRect.setHeight(screenRect.height());
-	}
-	if (windowRect.width() > screenRect.width())
-	{
-		windowRect.setWidth(screenRect.width());
-	}
+private:
+	TableDataVisibilityController* m_controller = nullptr;
+	QHeaderView* m_header = nullptr;
+	QListView* m_columnList = nullptr;
+	QStandardItemModel* m_columnModel = nullptr;
+	QAbstractItemModel* m_tableModel = nullptr;
 
-	if (windowRect.left() < 0)
-	{
-		windowRect.moveLeft(0);
-	}
-	if (windowRect.left() + windowRect.width() > screenRect.right())
-	{
-		windowRect.moveLeft(screenRect.right() - windowRect.width());
-	}
-
-	if (windowRect.top() < 0)
-	{
-		windowRect.moveTop(0);
-	}
-	if (windowRect.top() + windowRect.height() > screenRect.bottom())
-	{
-		windowRect.moveTop(screenRect.bottom() - windowRect.height());
-	}
-
-	window->setGeometry(windowRect);
-}
+	bool m_changingItems = false;
+};
 
 #endif // WIDGETUTILS_H

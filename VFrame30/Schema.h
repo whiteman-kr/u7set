@@ -138,6 +138,7 @@ namespace VFrame30
 		bool isLogicSchema() const;
 		bool isUfbSchema() const;
 		bool isMonitorSchema() const;
+		bool isTuningSchema() const;
 		bool isDiagSchema() const;
 
 		LogicSchema* toLogicSchema();

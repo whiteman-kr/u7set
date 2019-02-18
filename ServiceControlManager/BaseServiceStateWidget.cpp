@@ -272,7 +272,10 @@ void BaseServiceStateWidget::updateServiceState()
 void BaseServiceStateWidget::updateClientsModel(const Network::ServiceClients& serviceClients)
 {
 	m_clientsTabModel->setRowCount(serviceClients.clients_size());
-	stateTabModel()->setData(stateTabModel()->index(8, 1), serviceClients.clients_size());
+	if (m_clientQuantityRowIndex != -1)
+	{
+		stateTabModel()->setData(stateTabModel()->index(m_clientQuantityRowIndex, 1), serviceClients.clients_size());
+	}
 
 	for (int i = 0; i < serviceClients.clients_size(); i++)
 	{

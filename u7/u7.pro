@@ -171,7 +171,9 @@ SOURCES +=\
     SchemaTabPageEx.cpp \
     DialogInputEx.cpp \
     DialogAfbLibraryCheck.cpp \
-    TagSelectorWidget.cpp
+    ../lib/WidgetUtils.cpp \
+    TagSelectorWidget.cpp \
+    Forms/ProjectPropertiesForm.cpp
 
 
 HEADERS  += \
@@ -306,7 +308,8 @@ HEADERS  += \
     SchemaTabPageEx.h \
     DialogInputEx.h \
     DialogAfbLibraryCheck.h \
-    TagSelectorWidget.h
+    TagSelectorWidget.h \
+    Forms/ProjectPropertiesForm.h
 
 
 FORMS    += \

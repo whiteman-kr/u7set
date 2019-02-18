@@ -101,7 +101,7 @@ namespace Builder
 		qDebug() << "Cancel build";
 
 		m_thread->requestInterruption();
-		bool result = m_thread->wait(60000);		// Wait for a minute.
+		bool result = m_thread->wait(120000);		// Wait for a couple minutes.
 
 		if (result == false)
 		{

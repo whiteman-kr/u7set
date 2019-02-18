@@ -181,6 +181,16 @@ void SignalPropertyDialog::createPropertyList()
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR);
 			electricRangeGroup->addSubProperty(item);
 
+			if (m_param.electricUnitID() == E::ElectricUnit::Ohm)
+			{
+				item = m_pManager->addProperty(QVariant::Double, tr("R0"));
+				item->setValue(m_param.electricR0());
+				item->setAttribute(QLatin1String("singleStep"), 1);
+				item->setAttribute(QLatin1String("decimals"), 2);
+				m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EL_RANGE_R0);
+				electricRangeGroup->addSubProperty(item);
+			}
+
 			item = m_pManager->addProperty(QVariant::Int, tr("Precision"));
 			item->setValue(m_param.electricPrecision());
 			item->setAttribute(QLatin1String("minimum"), 0);
@@ -325,6 +335,8 @@ void SignalPropertyDialog::onPropertyValueChanged(QtProperty *property, const QV
 														m_param.setElectricUnit(meu.key(value.toInt()));									groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR:		m_param.setElectricSensorType(static_cast<E::SensorType>(value.toInt()));
 														m_param.setElectricSensor(mst.key(value.toInt()));									groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_EL_RANGE_R0:			m_param.setElectricR0(value.toDouble());
+														m_param.setElectricSensor(mst.key( m_param.electricSensorType() ));					groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION:	m_param.setElectricPrecision(value.toInt());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 
 		// engeneering limit

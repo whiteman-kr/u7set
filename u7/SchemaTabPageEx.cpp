@@ -13,6 +13,7 @@
 #include "../VFrame30/WiringSchema.h"
 #include "../VFrame30/DiagSchema.h"
 #include "../VFrame30/UfbSchema.h"
+#include "../VFrame30/TuningSchema.h"
 #include "../VFrame30/FblItemRect.h"
 
 //
@@ -431,8 +432,8 @@ QVariant SchemaListModelEx::headerData(int section, Qt::Orientation orientation,
 			case Columns::FileActionColumn:	return QStringLiteral("Action");
 			case Columns::ChangesetColumn:	return QStringLiteral("Changeset");
 			case Columns::FileUserColumn:	return QStringLiteral("User");
-			case Columns::IssuesColumn:	return QStringLiteral("Issues");
-			case Columns::TagsColumn:	return QStringLiteral("Tags");
+			case Columns::IssuesColumn:		return QStringLiteral("Issues");
+			case Columns::TagsColumn:		return QStringLiteral("Tags");
 			case Columns::DetailsColumn:	return QStringLiteral("Details");
 			default:
 				assert(false);
@@ -2206,8 +2207,8 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPageEx::createSchema(const DbF
 	//
 	auto createAppLogicSchema =	[]{	return std::make_shared<VFrame30::LogicSchema>();	};
 	auto createMonitorSchema =	[]{	return std::make_shared<VFrame30::MonitorSchema>();	};
+	auto createTuningSchema =	[]{	return std::make_shared<VFrame30::TuningSchema>();	};
 	auto createUfbSchema =		[]{	return std::make_shared<VFrame30::UfbSchema>();		};
-	//auto createTuningSchema =	[]{	return std::make_shared<VFrame30::TuningSchema>();	};
 
 	DbFileInfo lookForSystemParent = parentFile;
 	do
@@ -2217,10 +2218,14 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPageEx::createSchema(const DbF
 			return createAppLogicSchema();
 		}
 
-		if (lookForSystemParent.fileId() == db()->mvsFileId() ||
-			lookForSystemParent.fileId() == db()->tvsFileId())
+		if (lookForSystemParent.fileId() == db()->mvsFileId())
 		{
 			return createMonitorSchema();
+		}
+
+		if (lookForSystemParent.fileId() == db()->tvsFileId())
+		{
+			return createTuningSchema();
 		}
 
 		if (lookForSystemParent.fileId() == db()->ufblFileId())
@@ -2832,6 +2837,12 @@ void SchemaControlTabPageEx::addFile()
         defaultId = "MONITORSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
 		extension = ::MvsFileExtension;
     }
+
+	if (schema->isTuningSchema() == true)
+	{
+		defaultId = "TUNINGSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
+		extension = ::TvsFileExtension;
+	}
 
     if (schema->isDiagSchema() == true)
     {
@@ -4609,6 +4620,14 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 	}
 
 	if (schema->isMonitorSchema())
+	{
+		m_toolBar->addSeparator();
+		m_toolBar->addAction(m_schemaWidget->m_addValueAction);
+		m_toolBar->addAction(m_schemaWidget->m_addPushButtonAction);
+		m_toolBar->addAction(m_schemaWidget->m_addLineEditAction);
+	}
+
+	if (schema->isTuningSchema())
 	{
 		m_toolBar->addSeparator();
 		m_toolBar->addAction(m_schemaWidget->m_addValueAction);

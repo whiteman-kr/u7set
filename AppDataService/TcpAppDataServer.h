@@ -10,6 +10,7 @@
 
 class TcpAppDataServerThread;
 class AppDataServiceWorker;
+class AppDataReceiverThread;
 
 // -------------------------------------------------------------------------------
 //
@@ -21,6 +22,8 @@ class TcpAppDataServer : public Tcp::Server
 {
 private:
 	TcpAppDataServerThread* m_thread = nullptr;
+
+	AppDataReceiverThread* m_appDataReceiverThread = nullptr;
 
 	// precalculated variables
 	//
@@ -83,7 +86,7 @@ private:
 	bool getDataSourceState(Hash hash, AppSignalState& state);
 
 public:
-	TcpAppDataServer(const SoftwareInfo& softwareInfo);
+	TcpAppDataServer(const SoftwareInfo& softwareInfo, AppDataReceiverThread* appDataReceiverThread);
 	virtual ~TcpAppDataServer() override;
 
 	virtual void onServerThreadStarted() override;

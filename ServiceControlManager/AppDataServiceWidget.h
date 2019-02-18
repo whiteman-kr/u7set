@@ -18,7 +18,7 @@ class DataSourcesStateModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	explicit DataSourcesStateModel(QObject *parent = 0);
+	explicit DataSourcesStateModel(QObject *parent = nullptr);
 	~DataSourcesStateModel();
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -44,7 +44,7 @@ class SignalStateModel : public QAbstractTableModel
 {
 	Q_OBJECT
 public:
-	explicit SignalStateModel(QObject *parent = 0);
+	explicit SignalStateModel(QObject *parent = nullptr);
 	~SignalStateModel();
 
 	int rowCount(const QModelIndex &parent = QModelIndex()) const;
@@ -69,7 +69,7 @@ class AppDataServiceWidget : public BaseServiceStateWidget
 {
 	Q_OBJECT
 public:
-	AppDataServiceWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget *parent = 0);
+	AppDataServiceWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget *parent = nullptr);
 	~AppDataServiceWidget();
 
 signals:
@@ -93,8 +93,6 @@ public slots:
 
 	void clearServiceData();
 
-	void changeSourceColumnVisibility(QAction* action);
-
 	void onAppDataSourceDoubleClicked(const QModelIndex &index);
 
 	void forgetWidget();
@@ -111,17 +109,10 @@ private:
 	QTableView* m_dataSourcesView = nullptr;
 	QTableView* m_signalsView = nullptr;
 
-	QActionGroup* m_sourceTableHeadersContextMenuActions = nullptr;
-
 	TcpAppDataClient* m_tcpClientSocket;
-	SimpleThread *m_tcpClientThread;
+	SimpleThread* m_tcpClientThread;
 
 	QList<AppDataSourceWidget*> m_appDataSourceWidgetList;
-
-	void saveSourceColumnVisibility(int index, bool visible);
-
-private slots:
-	void saveSourceColumnWidth(int index);
 };
 
 #endif // DATAAQUISITIONSERVICEWIDGET_H

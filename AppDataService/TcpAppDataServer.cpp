@@ -8,8 +8,9 @@
 //
 // -------------------------------------------------------------------------------
 
-TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo) :
-	Tcp::Server(softwareInfo)
+TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo, AppDataReceiverThread *appDataReceiverThread) :
+	Tcp::Server(softwareInfo),
+	m_appDataReceiverThread(appDataReceiverThread)
 {
 
 }
@@ -22,7 +23,7 @@ TcpAppDataServer::~TcpAppDataServer()
 
 Tcp::Server* TcpAppDataServer::getNewInstance()
 {
-	TcpAppDataServer* newServer =  new TcpAppDataServer(localSoftwareInfo());
+	TcpAppDataServer* newServer =  new TcpAppDataServer(localSoftwareInfo(), m_appDataReceiverThread);
 
 	newServer->setThread(m_thread);
 
@@ -56,6 +57,12 @@ void TcpAppDataServer::onGetState()
 		m_getAppDataServiceState.set_archiveserviceip(ip);
 		m_getAppDataServiceState.set_archiveserviceport(port);
 	}
+
+	Network::AppDataReceiveState* adrs = new Network::AppDataReceiveState();
+
+	m_appDataReceiverThread->fillAppDataReceiveState(adrs);
+
+	m_getAppDataServiceState.set_allocated_appdatareceivestate(adrs);
 
 	sendReply(m_getAppDataServiceState);
 }

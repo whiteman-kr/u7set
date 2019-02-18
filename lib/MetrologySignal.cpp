@@ -297,7 +297,7 @@ namespace Metrology
 				m_electricUnitID = signal.electricUnit();
 
 				m_electricSensorType = signal.sensorType();
-				m_electricPrecision = 3;
+				m_electricPrecision = 4;
 
 				break;
 
@@ -326,7 +326,7 @@ namespace Metrology
 				}
 
 				m_electricSensorType = signal.sensorType();
-				m_electricPrecision = 3;
+				m_electricPrecision = 4;
 
 				break;
 
@@ -369,17 +369,17 @@ namespace Metrology
 
 						case E::ElectricUnit::Ohm:
 							{
+								m_electricR0 = 0;
+
 								QVariant qv;
 								bool isEnum;
-								double r0 = 100;
-
 								if (signal.getSpecPropValue("R0_Ohm", &qv, &isEnum) == true)
 								{
-									r0 = qv.toDouble();
+									m_electricR0 = qv.toDouble();
 								}
 
-								qpl = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), r0);
-								qph = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), r0);
+								qpl = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), m_electricR0);
+								qph = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), m_electricR0);
 							}
 							break;
 					}
@@ -466,6 +466,7 @@ namespace Metrology
 		m_electricUnitID = static_cast<E::ElectricUnit>(type);
 		result &= xml.readIntAttribute("ElectricSensorType", &type);
 		m_electricSensorType = static_cast<E::SensorType>(type);
+		result &= xml.readDoubleAttribute("ElectricR0", &m_electricR0);
 		result &= xml.readIntAttribute("ElectricPrecision", &m_electricPrecision);
 
 		result &= xml.readDoubleAttribute("PhysicalLowLimit", &m_physicalLowLimit);
@@ -507,6 +508,7 @@ namespace Metrology
 			xml.writeDoubleAttribute("ElectricHighLimit", electricHighLimit());
 			xml.writeIntAttribute("ElectricUnitID", electricUnitID());
 			xml.writeIntAttribute("ElectricSensorType", electricSensorType());
+			xml.writeDoubleAttribute("ElectricR0", electricR0());
 			xml.writeIntAttribute("ElectricPrecision", electricPrecision());
 
 			xml.writeDoubleAttribute("PhysicalLowLimit", physicalLowLimit());
@@ -541,6 +543,24 @@ namespace Metrology
 		}
 
 		return range;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void SignalParam::setElectricSensor(const QString& sensor)
+	{
+		QString sensorTypeStr = sensor;
+
+		if (	m_electricSensorType == E::SensorType::Ohm_Pt_a_391 ||
+				m_electricSensorType == E::SensorType::Ohm_Pt_a_385 ||
+				m_electricSensorType == E::SensorType::Ohm_Cu_a_428 ||
+				m_electricSensorType == E::SensorType::Ohm_Cu_a_426 ||
+				m_electricSensorType == E::SensorType::Ohm_Ni_a_617)
+		{
+			sensorTypeStr = sensor + sensorTypeStr.sprintf(" R0=%0.2f", m_electricR0);
+		}
+
+		m_electricSensor = sensorTypeStr;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
