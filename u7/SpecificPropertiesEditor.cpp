@@ -829,6 +829,9 @@ void SpecificPropertiesEditor::setText(const QString& text)
 		for (QString& col : columns)
 		{
 			col = col.trimmed();
+
+			col = col.replace(QString("\\r"), QString(QChar::CarriageReturn));
+			col = col.replace(QString("\\n"), QString(QChar::LineFeed));
 		}
 
 		QString strVersion(columns[0]);

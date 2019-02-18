@@ -2019,6 +2019,9 @@ public:
 		result += E::valueToString<E::PropertySpecificEditor>(editor) + ";";
 		result += QString("%1").arg(viewOrder);
 
+		result = result.replace(QChar::CarriageReturn, "\\r");
+		result = result.replace(QChar::LineFeed, "\\n");
+
 		return result;
 
 	}
@@ -2105,6 +2108,9 @@ public:
 			for (QString& col : columns)
 			{
 				col = col.trimmed();
+
+				col = col.replace(QString("\\r"), QString(QChar::CarriageReturn));
+				col = col.replace(QString("\\n"), QString(QChar::LineFeed));
 			}
 
 			QString strVersion(columns[0]);
