@@ -80,6 +80,8 @@ public:
 	bool getLatestVersion(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
 	bool getLatestVersion(const DbFileInfo& file, std::shared_ptr<DbFile>* out, QWidget* parentWidget);
 	bool getLatestTreeVersion(const DbFileInfo& file, std::vector<std::shared_ptr<DbFile> >* out, QWidget* parentWidget);
+
+	bool getCheckedOutFiles(const DbFileInfo& parentFile, std::vector<DbFileInfo>* out, QWidget* parentWidget);
 	bool getCheckedOutFiles(const std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* out, QWidget* parentWidget);
 
 	bool getWorkcopy(const std::vector<DbFileInfo>& files, std::vector<std::shared_ptr<DbFile>>* out, QWidget* parentWidget);
@@ -127,6 +129,7 @@ public:
 
 	bool checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
 	bool setSignalWorkcopy(Signal* signal, ObjectState* objectState, QWidget* parentWidget);
+	bool setSignalsWorkcopies(const QVector<Signal>* signalsList, QWidget* parentWidget);
 
 	bool deleteSignal(int signalID, ObjectState* objectState, QWidget* parentWidget);
 	bool undoSignalChanges(int signalID, ObjectState* objectState, QWidget* parentWidget);
@@ -138,7 +141,8 @@ public:
 
 	bool getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs, QWidget* parentWidget);
 	bool getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs, QWidget* parentWidget);
-	bool getSignalsIDsWithEquipmentID(QString equipmentID, QVector<int>* signalIDs, QWidget* parentWidget);
+	bool getSignalsIDsWithEquipmentID(const QString& equipmentID, QVector<int>* signalIDs, QWidget* parentWidget);
+	bool getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QHash<QString, int>* signalIDs, QWidget* parentWidget);
 
 	bool getSignalHistory(int signalID, std::vector<DbChangeset>* out, QWidget* parentWidget);
 	bool getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out, QWidget* parentWidget);
@@ -226,6 +230,7 @@ signals:
 
 	void signal_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
 	void signal_setSignalWorkcopy(Signal* signal, ObjectState* objectState);
+	void signal_setSignalsWorkcopies(const QVector<Signal>* signalsList);
 	void signal_deleteSignal(int signalID, ObjectState* objectState);
 	void signal_undoSignalChanges(int signalID, ObjectState* objectState);
 	void signal_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
@@ -236,6 +241,7 @@ signals:
 	void signal_getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs);
 	void signal_getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs);
 	void signal_getSignalsIDsWithEquipmentID(QString equipID, QVector<int>* signalIDs);
+	void signal_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QHash<QString, int>* signalIDs);
 
 	void signal_getSignalHistory(int signalID, std::vector<DbChangeset>* out);
 	void signal_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out);

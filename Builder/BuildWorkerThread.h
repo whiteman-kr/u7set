@@ -29,6 +29,10 @@ namespace Builder
 	private:
 		virtual void run() override;
 
+		// Get SuppressWarning list
+		//
+		bool getSuppressWarningList(DbController* db);
+
 		// Get Equipment from the project database
 		//
 		bool getEquipment(DbController* db, Hardware::DeviceObject* parent);

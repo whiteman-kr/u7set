@@ -48,9 +48,18 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		templateFileExtension = ::MvsTemplExtension;
 	}
 
+	if (isTuningSchema() == true)
+	{
+		idLabel = "TuningSchemaID";
+
+		tempateParentFileId = db->tvsFileId();
+		templateFileExtension = ::TvsTemplExtension;
+	}
+
 	if (isDiagSchema() == true)
 	{
 		idLabel = "DiagSchemaID";
+		assert(false);	// to do
 	}
 
 	assert(tempateParentFileId != -1);
@@ -492,22 +501,27 @@ void CreateSchemaDialog::setWidthHeight(VFrame30::Schema* schema)
 
 bool CreateSchemaDialog::isLogicSchema() const
 {
-	return (dynamic_cast<VFrame30::LogicSchema*>(m_schema.get()) != nullptr);
+	return m_schema->isLogicSchema();
 }
 
 bool CreateSchemaDialog::isUfbSchema() const
 {
-	return (dynamic_cast<VFrame30::UfbSchema*>(m_schema.get()) != nullptr);
+	return m_schema->isUfbSchema();
 }
 
 bool CreateSchemaDialog::isMonitorSchema() const
 {
-	return (dynamic_cast<VFrame30::MonitorSchema*>(m_schema.get()) != nullptr);
+	return m_schema->isMonitorSchema();
+}
+
+bool CreateSchemaDialog::isTuningSchema() const
+{
+	return m_schema->isTuningSchema();
 }
 
 bool CreateSchemaDialog::isDiagSchema() const
 {
-	return (dynamic_cast<VFrame30::DiagSchema*>(m_schema.get()) != nullptr);
+	return m_schema->isDiagSchema();
 }
 
 std::shared_ptr<VFrame30::LogicSchema> CreateSchemaDialog::logicSchema()

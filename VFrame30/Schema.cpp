@@ -2,6 +2,7 @@
 #include "LogicSchema.h"
 #include "UfbSchema.h"
 #include "MonitorSchema.h"
+#include "TuningSchema.h"
 #include "DiagSchema.h"
 #include "ClientSchemaView.h"
 #include "FblItem.h"
@@ -1152,6 +1153,11 @@ namespace VFrame30
 	bool Schema::isMonitorSchema() const
 	{
 		return dynamic_cast<const VFrame30::MonitorSchema*>(this) != nullptr;
+	}
+
+	bool Schema::isTuningSchema() const
+	{
+		return dynamic_cast<const VFrame30::TuningSchema*>(this) != nullptr;
 	}
 
 	bool Schema::isDiagSchema() const

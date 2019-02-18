@@ -1135,18 +1135,7 @@ void EquipmentModel::projectOpened()
 
 	// Fill user list
 	//
-	m_users.clear();
-
-	std::vector<DbUser> users;
-	bool ok = dbController()->getUserList(&users, nullptr);
-
-	if (ok == true)
-	{
-		for (const DbUser& u : users)
-		{
-			m_users[u.userId()] = u.username();
-		}
-	}
+	updateUserList();
 
 	endResetModel();
 
@@ -1181,6 +1170,23 @@ void EquipmentModel::switchMode()
 	}
 
 	endResetModel();
+}
+
+void EquipmentModel::updateUserList()
+{
+	m_users.clear();
+
+	std::vector<DbUser> users;
+	bool ok = dbController()->getUserList(&users, nullptr);
+
+	if (ok == true)
+	{
+		for (const DbUser& u : users)
+		{
+			m_users[u.userId()] = u.username();
+		}
+	}
+
 }
 
 DbController* EquipmentModel::dbController()
@@ -3103,6 +3109,26 @@ void EquipmentView::updateFromPreset()
 		return;
 	}
 
+	// Check if some files are checked out
+	//
+	DbFileInfo hcFileInfo = db()->systemFileInfo(db()->hcFileId());
+	assert(hcFileInfo.isNull() == false);
+
+//	std::vector<DbFileInfo> checkedOutHcFiles;
+
+//	bool ok = db()->getCheckedOutFiles(hcFileInfo, &checkedOutHcFiles, this);
+//	if (ok == false)
+//	{
+//		return;
+//	}
+
+//	qDebug() << "===== Checked out files =====";
+//	for (const DbFileInfo& fi : checkedOutHcFiles)
+//	{
+//		fi.trace();
+//		qDebug() << "-----------------------------";
+//	}
+
 	// Get all presets
 	//
 	DbFileInfo hpFileInfo = db()->systemFileInfo(db()->hpFileId());		//	hp -- stands for Hardware Presets
@@ -3174,9 +3200,6 @@ void EquipmentView::updateFromPreset()
 
 	// Get all equipment from the database
 	//
-	DbFileInfo hcFileInfo = db()->systemFileInfo(db()->hcFileId());
-	assert(hcFileInfo.isNull() == false);
-
 	std::shared_ptr<Hardware::DeviceObject> root;
 
 	ok = db()->getDeviceTreeLatestVersion(hcFileInfo, &root, this);
@@ -3425,6 +3448,7 @@ void EquipmentView::updateFromPreset()
 	// Reset model
 	//
 	equipmentModel()->reset();
+	equipmentModel()->updateUserList();
 
 	return;
 }
@@ -4907,7 +4931,7 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<PropertyObject>> 
 		files.push_back(file);
 	}
 
-	qDebug() << "Update Properties in the Database";
+	//qDebug() << "Update Properties in the Database";
 
 	bool ok = dbController()->setWorkcopy(files, this);
 

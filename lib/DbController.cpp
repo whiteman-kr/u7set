@@ -1,4 +1,5 @@
 #include "../lib/DbController.h"
+#include "../lib/WUtils.h"
 
 #include <QDebug>
 #include <QtConcurrent/QtConcurrent>
@@ -87,6 +88,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_addSignal, m_worker, &DbWorker::slot_addSignal);
 	connect(this, &DbController::signal_checkoutSignals, m_worker, &DbWorker::slot_checkoutSignals);
 	connect(this, &DbController::signal_setSignalWorkcopy, m_worker, &DbWorker::slot_setSignalWorkcopy);
+	connect(this, &DbController::signal_setSignalsWorkcopies, m_worker, &DbWorker::slot_setSignalsWorkcopies);
 	connect(this, &DbController::signal_deleteSignal, m_worker, &DbWorker::slot_deleteSignal);
 	connect(this, &DbController::signal_undoSignalChanges, m_worker, &DbWorker::slot_undoSignalChanges);
 	connect(this, &DbController::signal_checkinSignals, m_worker, &DbWorker::slot_checkinSignals);
@@ -95,6 +97,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getSignalsIDsWithAppSignalID, m_worker, &DbWorker::slot_getSignalsIDsWithAppSignalID);
 	connect(this, &DbController::signal_getSignalsIDsWithCustomAppSignalID, m_worker, &DbWorker::slot_getSignalsIDsWithCustomAppSignalID);
 	connect(this, &DbController::signal_getSignalsIDsWithEquipmentID, m_worker, &DbWorker::slot_getSignalsIDsWithEquipmentID);
+	connect(this, &DbController::signal_getMultipleSignalsIDsWithEquipmentID, m_worker, &DbWorker::slot_getMultipleSignalsIDsWithEquipmentID);
 	connect(this, &DbController::signal_getSignalHistory, m_worker, &DbWorker::slot_getSignalHistory);
 	connect(this, &DbController::signal_getSpecificSignals, m_worker, &DbWorker::slot_getSpecificSignals);
 	connect(this, &DbController::signal_hasCheckedOutSignals, m_worker, &DbWorker::slot_hasCheckedOutSignals);
@@ -922,6 +925,12 @@ bool DbController::getLatestTreeVersion(const DbFileInfo& file, std::vector<std:
 
 	ok = waitForComplete(parentWidget, tr("Getting files"));
 	return out;
+}
+
+bool DbController::getCheckedOutFiles(const DbFileInfo& parentFile, std::vector<DbFileInfo>* out, QWidget* parentWidget)
+{
+	std::vector<DbFileInfo> fv = {parentFile};
+	return getCheckedOutFiles(&fv, out, parentWidget);
 }
 
 bool DbController::getCheckedOutFiles(const std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* out, QWidget* parentWidget)
@@ -1809,17 +1818,8 @@ bool DbController::checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>
 
 bool DbController::setSignalWorkcopy(Signal *signal, ObjectState *objectState, QWidget* parentWidget)
 {
-	if (signal == nullptr)
-	{
-		assert(signal != nullptr);
-		return false;
-	}
-
-	if (objectState == nullptr)
-	{
-		assert(objectState != nullptr);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(signal);
+	TEST_PTR_RETURN_FALSE(objectState);
 
 	// Init progress and check availability
 	//
@@ -1837,6 +1837,24 @@ bool DbController::setSignalWorkcopy(Signal *signal, ObjectState *objectState, Q
 	return ok;
 }
 
+bool DbController::setSignalsWorkcopies(const QVector<Signal>* signalsList, QWidget* parentWidget)
+{
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_setSignalsWorkcopies(signalsList);
+
+	ok = waitForComplete(parentWidget, tr("Set signals workcopies"));
+
+	return ok;
+
+}
 
 bool DbController::deleteSignal(int signalID, ObjectState* objectState, QWidget* parentWidget)
 {
@@ -1991,7 +2009,7 @@ bool DbController::getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int
 
 	emit signal_getSignalsIDsWithAppSignalID(appSignalID, signalIDs);
 
-	ok = waitForComplete(parentWidget, tr("Gget signals IDs with AppSignalID"));
+	ok = waitForComplete(parentWidget, tr("Get signals IDs with AppSignalID"));
 
 	return ok;
 }
@@ -2016,13 +2034,12 @@ bool DbController::getSignalsIDsWithCustomAppSignalID(QString customAppSignalID,
 
 	emit signal_getSignalsIDsWithCustomAppSignalID(customAppSignalID, signalIDs);
 
-	ok = waitForComplete(parentWidget, tr("Gget signals IDs with CustomAppSignalID"));
+	ok = waitForComplete(parentWidget, tr("Get signals IDs with CustomAppSignalID"));
 
 	return ok;
 }
 
-
-bool DbController::getSignalsIDsWithEquipmentID(QString equipmentID, QVector<int>* signalIDs, QWidget* parentWidget)
+bool DbController::getSignalsIDsWithEquipmentID(const QString& equipmentID, QVector<int>* signalIDs, QWidget* parentWidget)
 {
 	if (signalIDs == nullptr)
 	{
@@ -2041,11 +2058,34 @@ bool DbController::getSignalsIDsWithEquipmentID(QString equipmentID, QVector<int
 
 	emit signal_getSignalsIDsWithEquipmentID(equipmentID, signalIDs);
 
-	ok = waitForComplete(parentWidget, tr("Gget signals IDs with EquipmentID"));
+	ok = waitForComplete(parentWidget, tr("Get signals IDs with EquipmentID"));
 
 	return ok;
 }
 
+bool DbController::getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QHash<QString, int>* signalIDs, QWidget* parentWidget)
+{
+	if (signalIDs == nullptr)
+	{
+		assert(signalIDs != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getMultipleSignalsIDsWithEquipmentID(equipmentIDs, signalIDs);
+
+	ok = waitForComplete(parentWidget, tr("Get signals IDs with EquipmentID"));
+
+	return ok;
+}
 
 bool DbController::getSignalHistory(int signalID, std::vector<DbChangeset>* out, QWidget* parentWidget)
 {

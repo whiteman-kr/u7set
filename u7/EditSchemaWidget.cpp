@@ -1028,14 +1028,14 @@ void EditSchemaView::drawGrid(QPainter* p)
 {
 	assert(p);
 
-	if (m_mouseSelectionStartPoint.isNull() == false &&
-		m_mouseSelectionEndPoint.isNull() == false)
-	{
-		// Don't draw grid if selection now,
-		// just speed optimization
-		//
-		return;
-	}
+//	if (m_mouseSelectionStartPoint.isNull() == false &&
+//		m_mouseSelectionEndPoint.isNull() == false)
+//	{
+//		// Don't draw grid if selection now,
+//		// just speed optimization
+//		//
+//		return;
+//	}
 
 	auto unit = schema()->unit();
 
@@ -2526,6 +2526,13 @@ void EditSchemaWidget::createActions()
 		}
 
 		if (isMonitorSchema() == true)
+		{
+			m_addMenu->addAction(m_addValueAction);
+			m_addMenu->addAction(m_addPushButtonAction);
+			m_addMenu->addAction(m_addLineEditAction);
+		}
+
+		if (isTuningSchema() == true)
 		{
 			m_addMenu->addAction(m_addValueAction);
 			m_addMenu->addAction(m_addPushButtonAction);
@@ -4472,6 +4479,11 @@ bool EditSchemaWidget::isUfbSchema() const
 bool EditSchemaWidget::isMonitorSchema() const
 {
 	return schema()->isMonitorSchema();
+}
+
+bool EditSchemaWidget::isTuningSchema() const
+{
+	return schema()->isTuningSchema();
 }
 
 std::shared_ptr<VFrame30::LogicSchema> EditSchemaWidget::logicSchema()

@@ -3335,7 +3335,6 @@ void FileTests::undo_changesTest()
 
 	// Create file for call errors
 	//
-
 	ok = query.exec("SElECT * FROM add_file(1, 'undoChangesErrTest', 1, 'Windows', '{}');");
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -4078,7 +4077,6 @@ void FileTests::check_in_treeTest()
 
 	// Create children file of first file for test
 	//
-
 	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestSecondFile', %1, 'OpenBSD', '{}');").arg(fileIds[0]));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -4088,7 +4086,6 @@ void FileTests::check_in_treeTest()
 
 	// Create children file of second file for test
 	//
-
 	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestThirdFile', %1, 'NetBSD', '{}');").arg(fileIds[1]));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -4098,7 +4095,6 @@ void FileTests::check_in_treeTest()
 
 	// Create children file from first file
 	//
-
 	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestFourthFile', %1, 'PC-BSD', '{}');").arg(fileIds[0]));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -4108,7 +4104,6 @@ void FileTests::check_in_treeTest()
 
 	// Create file with random parent
 	//
-
 	ok = query.exec("SElECT * FROM add_file(1, 'checkInTreeTestRandomFile', 0, 'Yosemite', '{}');");
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -4118,7 +4113,6 @@ void FileTests::check_in_treeTest()
 
 	// Create child of the file with random parent, which will be deleted
 	//
-
 	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestRandomFileChild', %1, 'El Capitano', '{}');").arg(fileIds[4]));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -4128,7 +4122,6 @@ void FileTests::check_in_treeTest()
 
 	// Create file from first file, and check it in
 	//
-
 	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestFifthFile', %1, 'Solaris', '{}');").arg(fileIds[0]));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -4138,7 +4131,6 @@ void FileTests::check_in_treeTest()
 
 	// Create file. Check it in, check out, and do checkInTree without changes
 	//
-
 	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestUnchangedFile', %1, 'GNU/Hurd', '{}');").arg(fileIds[0]));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -4181,7 +4173,7 @@ void FileTests::check_in_treeTest()
 	ok = query.exec(QString("UPDATE fileInstance SET Action=2 WHERE fileId = %1 AND changesetId = %2").arg(fileIds[8]).arg(changesetIdChangedFile));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("UPDATE fileInstance SET Data='12314124125343gdfjtjfgx bvavt23y45' WHERE fileId = %1 AND changesetId = %2").arg(fileIds[8]).arg(changesetIdChangedFile));
+	ok = query.exec(QString("UPDATE fileInstance SET Data='12314124125343gdfjtjfgx bvavt23y45', md5=md5('12314124125343gdfjtjfgx bvavt23y45') WHERE fileId = %1 AND changesetId = %2").arg(fileIds[8]).arg(changesetIdChangedFile));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = query.exec(QString("SELECT * FROM delete_file (1, %1);").arg(fileIds[5]));
@@ -4199,7 +4191,6 @@ void FileTests::check_in_treeTest()
 		// 6th file in array - file, which already checked in. Function must not return 6th file id, and
 		// need to skip it
 		//
-
 		QVERIFY2(query.value("id").toInt() != fileIds[6], qPrintable("Error: checked in file has been checked_in twice"));
 
 		if (fileNumber == 6)
@@ -4213,7 +4204,6 @@ void FileTests::check_in_treeTest()
 		{
 			// Check deleted file
 			//
-
 			ok = tempQuery.exec(QString("SELECT deleted FROM file WHERE fileId = %1").arg(currentFileId));
 
 			QVERIFY2 (ok == true, qPrintable(tempQuery.lastError().databaseText()));
@@ -4234,7 +4224,6 @@ void FileTests::check_in_treeTest()
 		{
 			// Check all data of the checkedIn file
 			//
-
 			ok = tempQuery.exec(QString("SELECT * FROM checkOut WHERE fileId = %1").arg(query.value("id").toInt()));
 			QVERIFY2 (ok == true, qPrintable(tempQuery.lastError().databaseText()));
 			QVERIFY2 (tempQuery.next() == false, qPrintable("Error: file was not checked in"));

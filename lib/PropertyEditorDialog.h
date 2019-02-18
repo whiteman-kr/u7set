@@ -9,10 +9,10 @@
 class PropertyEditorDialog : public QDialog
 {
 public:
-	PropertyEditorDialog(QWidget *parent);
+	PropertyEditorDialog(QWidget* parent);
 	~PropertyEditorDialog();
 
-	void setObjects(QList<std::shared_ptr<PropertyObject> > objects);
+	void setObjects(QList<std::shared_ptr<PropertyObject>> objects);
 
 	void setObject(std::shared_ptr<PropertyObject> object);
 
@@ -34,7 +34,6 @@ private:
 	bool m_readOnly = false;
 
 	QDialogButtonBox* m_buttonBox = nullptr;
-
     ExtWidgets::PropertyEditor* pe = nullptr;
 
 };
