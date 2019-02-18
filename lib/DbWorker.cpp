@@ -2016,7 +2016,7 @@ void DbWorker::slot_setProjectProperty(QString propertyName, QString propertyVal
 
 	query.prepare("SELECT * FROM set_project_property(:propertyName, :propertyValue);");
 	query.bindValue(":propertyName", propertyName);
-	query.bindValue(":propertyValue", propertyValue);
+	query.bindValue(":propertyValue", propertyValue.isEmpty() ? "" : propertyValue);
 
 	bool result = query.exec();
 

@@ -10,8 +10,8 @@ ProjectProperties::ProjectProperties()
 	auto p = ADD_PROPERTY_GETTER_SETTER(QString, "Description", true, ProjectProperties::description, ProjectProperties::setDescription);
 	p->setDescription("Project description");
 
-	//p = ADD_PROPERTY_GETTER_SETTER(QString, "SupressWarnings", true, ProjectProperties::suppressWarningsAsString, ProjectProperties::setSuppressWarnings);
-	//p->setDescription("Comma separated suppress warning list. Example: 4004, 4005, 2000");
+	p = ADD_PROPERTY_GETTER_SETTER(QString, "SuppressWarnings", true, ProjectProperties::suppressWarningsAsString, ProjectProperties::setSuppressWarnings);
+	p->setDescription("Comma separated suppress warning list. Example: 4004, 4005, 2000");
 
 	return;
 }
@@ -24,10 +24,21 @@ bool ProjectProperties::load(QWidget* parent, DbController* db)
 		return false;
 	}
 
-	bool ok = db->getProjectProperty("Description", &m_description, parent);
-	if (ok == false)
+	if (bool ok = db->getProjectProperty("Description", &m_description, parent);
+		ok == false)
 	{
 		return false;
+	}
+
+	QString suppressWarningsStr;
+	if (bool ok = db->getProjectProperty("SuppressWarnings", &suppressWarningsStr, parent);
+		ok == false)
+	{
+		return false;
+	}
+	else
+	{
+		setSuppressWarnings(suppressWarningsStr);
 	}
 
 	return true;
@@ -41,8 +52,14 @@ bool ProjectProperties::save(QWidget* parent, DbController* db)
 		return false;
 	}
 
-	bool ok = db->setProjectProperty("Description", m_description, parent);
-	if (ok == false)
+	if (bool ok = db->setProjectProperty("Description", m_description, parent);
+		ok == false)
+	{
+		return false;
+	}
+
+	if (bool ok = db->setProjectProperty("SuppressWarnings", suppressWarningsAsString(), parent);
+		ok == false)
 	{
 		return false;
 	}
@@ -128,17 +145,30 @@ bool ProjectPropertiesForm::show(QWidget* parent, DbController* db)
 		return false;
 	}
 
-	// Only Administrator can edit Description
+	// Only Administrator can edit @Description@
 	//
-	if (auto descriptionProp = propertyObject->propertyByCaption("Description");
-		descriptionProp != nullptr)
+	if (auto prop = propertyObject->propertyByCaption("Description");
+		prop != nullptr)
 	{
-		descriptionProp->setReadOnly(!db->currentUser().isAdminstrator());
+		prop->setReadOnly(!db->currentUser().isAdminstrator());
 	}
 	else
 	{
-		assert(descriptionProp);
+		assert(prop);
 	}
+
+	// Only Administrator can edit @SuppressWarnings@
+	//
+	if (auto prop = propertyObject->propertyByCaption("SuppressWarnings");
+		prop != nullptr)
+	{
+		prop->setReadOnly(!db->currentUser().isAdminstrator());
+	}
+	else
+	{
+		assert(prop);
+	}
+
 
 	//--
 	//
