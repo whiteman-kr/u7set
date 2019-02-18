@@ -200,6 +200,7 @@ protected:
 	// Variables for changing ConnectionLine
 	//
 	std::list<EditConnectionLine> m_editConnectionLines;	// Add new or edit PosConnectionImpl items
+	bool m_doNotMoveConnectionLines = false;
 
 	// For updating schema in timerEvent during build
 	//
@@ -536,7 +537,6 @@ private:
 	// --
 	//
 	bool m_ctrlWasPressed = false;
-	bool m_altWasPressed = false;
 
 	static QString m_lastUsedLoopbackId;
 
