@@ -256,9 +256,7 @@ bool TestCommand::parseCmdTest()
 
 	m_foundEndOfTest = false;
 
-	// check unique TestID
-	//
-	if (isUniqueTestID(testID) == false)
+	if (isUniqueTestID(testID) == false) // check unique TestID
 	{
 		return false;
 	}
@@ -270,7 +268,7 @@ bool TestCommand::parseCmdEndtest()
 {
 	if (m_foundEndOfTest == true)
 	{
-		QString errorStr = QString("(line %1) Error : Found command endtest bun not found command test").arg(m_lineIndex);
+		QString errorStr = QString("(line %1) Error : Found command \"endtest\", bun not found command \"test\"").arg(m_lineIndex);
 		m_errorList.append(errorStr);
 		return false;
 	}
@@ -322,7 +320,7 @@ bool TestCommand::parseCmdCompatible()
 
 	if (argList.count() == 0)
 	{
-		QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+		QString errorStr = QString("(line %1) Error : Argument list is empty").arg(m_lineIndex);
 		m_errorList.append(errorStr);
 		return false;
 	}
@@ -335,7 +333,7 @@ bool TestCommand::parseCmdCompatible()
 		QString preset = argList[i].simplified();
 		if(preset.isEmpty() == true)
 		{
-			QString errorStr = QString("(line %1) Error : Failed compatible preset").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Failed argument: %2").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
@@ -400,7 +398,7 @@ bool TestCommand::parseCmdConst()
 
 	if (argList.count() == 0)
 	{
-		QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+		QString errorStr = QString("(line %1) Error : Argument list is empty").arg(m_lineIndex);
 		m_errorList.append(errorStr);
 		return false;
 	}
@@ -413,7 +411,7 @@ bool TestCommand::parseCmdConst()
 		QString arg = argList[i].simplified();
 		if(arg.isEmpty() == true)
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Argument %2 is empty").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
@@ -421,7 +419,7 @@ bool TestCommand::parseCmdConst()
 		QStringList sv = arg.split('=');
 		if (sv.count() != 2)
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Failed argument: %2").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
@@ -431,7 +429,7 @@ bool TestCommand::parseCmdConst()
 		QString constName = sv[0].simplified();
 		if (constName.isEmpty() == true)
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Failed argument: %2").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
@@ -445,10 +443,10 @@ bool TestCommand::parseCmdConst()
 
 		// const Value
 		//
-		QString constValue =  sv[1].simplified();
+		QString constValue = sv[1].simplified();
 		if (constValue.isEmpty() == true)
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Failed argument: %2").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
@@ -551,7 +549,7 @@ bool TestCommand::parseCmdVar()
 
 	if (argList.count() == 0)
 	{
-		QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+		QString errorStr = QString("(line %1) Error : Argument list is empty").arg(m_lineIndex);
 		m_errorList.append(errorStr);
 		return false;
 	}
@@ -564,7 +562,7 @@ bool TestCommand::parseCmdVar()
 		QString arg = argList[i].simplified();
 		if(arg.isEmpty() == true)
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Argument %2 is empty").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
@@ -572,7 +570,7 @@ bool TestCommand::parseCmdVar()
 		QStringList sv = arg.split('=');
 		if (sv.count() != 2)
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Failed argument: %2").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
@@ -582,7 +580,7 @@ bool TestCommand::parseCmdVar()
 		QString varName = sv[0].simplified();
 		if (varName.isEmpty() == true)
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Failed argument: %2").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
@@ -599,7 +597,7 @@ bool TestCommand::parseCmdVar()
 		QString varValue =  sv[1].simplified();
 		if (varValue.isEmpty() == true)
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Failed argument: %2").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
@@ -678,7 +676,7 @@ bool TestCommand::parseCmdSet()
 
 	if (argList.count() == 0)
 	{
-		QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+		QString errorStr = QString("(line %1) Error : Argument list is empty").arg(m_lineIndex);
 		m_errorList.append(errorStr);
 		return false;
 	}
@@ -691,7 +689,7 @@ bool TestCommand::parseCmdSet()
 		QString arg = argList[i].simplified();
 		if(arg.isEmpty() == true)
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Argument %2 is empty").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
@@ -699,7 +697,7 @@ bool TestCommand::parseCmdSet()
 		QStringList sv = arg.split('=');
 		if (sv.count() != 2)
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Failed argument: %2").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
@@ -709,14 +707,14 @@ bool TestCommand::parseCmdSet()
 		QString signalID = sv[0].simplified();
 		if (signalID.isEmpty() == true)
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Failed argument: %2").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
 
 		if (signalID[0] != '#')
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Failed argument: %2").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
@@ -741,7 +739,7 @@ bool TestCommand::parseCmdSet()
 		QString signalValue =  sv[1].simplified();
 		if (signalValue.isEmpty() == true)
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Failed argument: %2").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
@@ -798,7 +796,7 @@ bool TestCommand::parseCmdCheck()
 
 	if (argList.count() == 0)
 	{
-		QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+		QString errorStr = QString("(line %1) Error : Argument list is empty").arg(m_lineIndex);
 		m_errorList.append(errorStr);
 		return false;
 	}
@@ -811,7 +809,7 @@ bool TestCommand::parseCmdCheck()
 		QString arg = argList[i].simplified();
 		if(arg.isEmpty() == true)
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Argument %2 is empty").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
@@ -819,7 +817,7 @@ bool TestCommand::parseCmdCheck()
 		QStringList sv = arg.split("==");
 		if (sv.count() != 2)
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Failed argument: %2").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
@@ -829,14 +827,14 @@ bool TestCommand::parseCmdCheck()
 		QString signalID = sv[0].simplified();
 		if (signalID.isEmpty() == true)
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Failed argument: %2").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
 
 		if (signalID[0] != '#')
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Failed argument: %2").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}
@@ -854,7 +852,7 @@ bool TestCommand::parseCmdCheck()
 		QString signalValue = sv[1].simplified();
 		if (signalValue.isEmpty() == true)
 		{
-			QString errorStr = QString("(line %1) Error : Failed argument list").arg(m_lineIndex);
+			QString errorStr = QString("(line %1) Error : Failed argument: %2").arg(m_lineIndex).arg(i+1);
 			m_errorList.append(errorStr);
 			continue;
 		}

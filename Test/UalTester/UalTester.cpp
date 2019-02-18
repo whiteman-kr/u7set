@@ -674,13 +674,13 @@ void UalTester::runTestFile()
 							}
 						}
 
-						if (m_cmdLineParam.errorIngnore() == false)
+						if (m_cmdLineParam.errorIngnore() == false)				// check cmd line param -errignore
 						{
 							m_cmdLineParam.setEnableContinueTest(false);
 						}
 
 						test.reultsList().append(QString());
-						printToReportFile(test.reultsList());		// print results to report file
+						printToReportFile(test.reultsList());					// print results to report file
 					}
 					break;
 			}
