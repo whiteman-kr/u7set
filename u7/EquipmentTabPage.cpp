@@ -3136,7 +3136,7 @@ void EquipmentView::updateFromPreset()
 
 	std::shared_ptr<Hardware::DeviceObject> presetRoot;
 
-	ok = db()->getDeviceTreeLatestVersion(hpFileInfo, &presetRoot, this);
+	bool ok = db()->getDeviceTreeLatestVersion(hpFileInfo, &presetRoot, this);
 
 	if (ok == false)
 	{
