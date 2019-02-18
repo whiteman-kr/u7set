@@ -53,6 +53,7 @@ int SqlFieldBase::init(int objectType, int)
 			append("MeasureID",						QVariant::Int);
 
 			append("Filter",						QVariant::Bool);
+			append("Valid",							QVariant::Bool);
 
 			append("AppSignalID",					QVariant::String, 64);
 			append("CustomAppSignalID",				QVariant::String, 64);
@@ -71,35 +72,35 @@ int SqlFieldBase::init(int objectType, int)
 			append("ElectricNominal",				QVariant::Double);
 			append("ElectricMeasure",				QVariant::Double);
 
-			append("PhysicalNominal",				QVariant::Double);
-			append("PhysicalMeasure",				QVariant::Double);
+			append("EngeneeringNominal",			QVariant::Double);
+			append("EngeneeringMeasure",			QVariant::Double);
 
 			append("ElectricLowLimit",				QVariant::Double);
 			append("ElectricHighLimit",				QVariant::Double);
 			append("ElectricUnit",					QVariant::String, 32);
 			append("ElectricPrecision",				QVariant::Int);
 
-			append("PhysicalLowLimit",				QVariant::Double);
-			append("PhysicalHighLimit",				QVariant::Double);
-			append("PhysicalUnit",					QVariant::String, 32);
-			append("PhysicalPrecision",				QVariant::Int);
+			append("EngeneeringLowLimit",			QVariant::Double);
+			append("EngeneeringHighLimit",			QVariant::Double);
+			append("EngeneeringUnit",				QVariant::String, 32);
+			append("EngeneeringPrecision",			QVariant::Int);
 
 			append("ElectricErrorAbsolute",			QVariant::Double);
 			append("ElectricErrorReduce",			QVariant::Double);
 			append("ElectricLimitErrorAbsolute",	QVariant::Double);
 			append("ElectricLimitErrorReduce",		QVariant::Double);
 
-			append("PhysicalErrorAbsolute",			QVariant::Double);
-			append("PhysicalErrorReduce",			QVariant::Double);
-			append("PhysicalLimitErrorAbsolute",	QVariant::Double);
-			append("PhysicalLimitErrorReduce",		QVariant::Double);
+			append("EngeneeringErrorAbsolute",		QVariant::Double);
+			append("EngeneeringErrorReduce",		QVariant::Double);
+			append("EngeneeringLimitErrorAbsolute",	QVariant::Double);
+			append("EngeneeringLimitErrorReduce",	QVariant::Double);
 
 			append("MeasureTime",					QVariant::String, 64);
 
 			break;
 
 		case SQL_TABLE_LINEARITY_20_EL:
-		case SQL_TABLE_LINEARITY_20_PH:
+		case SQL_TABLE_LINEARITY_20_EN:
 
 			append("ObjectID",						QVariant::Int);
 			append("MeasureID",						QVariant::Int);
@@ -581,7 +582,7 @@ bool SqlTable::create()
 			switch(m_info.objectType())
 			{
 				case SQL_TABLE_LINEARITY_20_EL:
-				case SQL_TABLE_LINEARITY_20_PH:
+				case SQL_TABLE_LINEARITY_20_EN:
 				case SQL_TABLE_LINEARITY_ADD_VAL:
 					request.append(QString(" REFERENCES %1(MeasureID) ON DELETE CASCADE").arg(SqlTabletName[SQL_TABLE_LINEARITY]));
 					break;
@@ -735,6 +736,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setMeasureID(query.value(field++).toInt());
 
 					measure->setFilter(query.value(field++).toBool());
+					measure->setValid(query.value(field++).toBool());
 
 					measure->setAppSignalID(query.value(field++).toString());
 					measure->setCustomAppSignalID(query.value(field++).toString());
@@ -781,14 +783,14 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 				break;
 
 			case SQL_TABLE_LINEARITY_20_EL:
-			case SQL_TABLE_LINEARITY_20_PH:
+			case SQL_TABLE_LINEARITY_20_EN:
 				{
 					int limitType = MEASURE_LIMIT_TYPE_UNDEFINED;
 
 					switch(m_info.objectType())
 					{
 						case SQL_TABLE_LINEARITY_20_EL:	limitType = MEASURE_LIMIT_TYPE_ELECTRIC;	break;
-						case SQL_TABLE_LINEARITY_20_PH:	limitType = MEASURE_LIMIT_TYPE_ENGENEER;	break;
+						case SQL_TABLE_LINEARITY_20_EN:	limitType = MEASURE_LIMIT_TYPE_ENGENEER;	break;
 						default:						limitType = MEASURE_LIMIT_TYPE_UNDEFINED;	break;
 					}
 
@@ -1049,6 +1051,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->measureID());
 
 					query.bindValue(field++, measure->filter());
+					query.bindValue(field++, measure->isValid());
 
 					query.bindValue(field++, measure->appSignalID());
 					query.bindValue(field++, measure->customAppSignalID());
@@ -1098,14 +1101,14 @@ int SqlTable::write(void* pRecord, int count, int* key)
 				break;
 
 			case SQL_TABLE_LINEARITY_20_EL:
-			case SQL_TABLE_LINEARITY_20_PH:
+			case SQL_TABLE_LINEARITY_20_EN:
 				{
 					int limitType = MEASURE_LIMIT_TYPE_UNDEFINED;
 
 					switch(m_info.objectType())
 					{
 						case SQL_TABLE_LINEARITY_20_EL:	limitType = MEASURE_LIMIT_TYPE_ELECTRIC;	break;
-						case SQL_TABLE_LINEARITY_20_PH:	limitType = MEASURE_LIMIT_TYPE_ENGENEER;	break;
+						case SQL_TABLE_LINEARITY_20_EN:	limitType = MEASURE_LIMIT_TYPE_ENGENEER;	break;
 						default:						limitType = MEASURE_LIMIT_TYPE_UNDEFINED;	break;
 					}
 
