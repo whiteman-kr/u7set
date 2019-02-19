@@ -1,6 +1,24 @@
 #ifndef UALTESTER_H
 #define UALTESTER_H
 
+// ==============================================================================================
+
+// Algorithm:
+//
+//   runCfgLoaderThread
+//        readConfiguration
+//        readAppSignals
+//
+//   parseTestFile
+//
+//   runSignalStateThread - connect to AppDataSrv
+//   runTuningThread - connect to TuningSrv
+//   Waiting connection to AppDataSrv and TuningSrv
+//
+//   runTestFile
+
+// ==============================================================================================
+
 #include <QObject>
 
 #include "../../lib/CfgServerLoader.h"
@@ -23,6 +41,9 @@ public:
 	~UalTester();
 
 private:
+
+	static UalTester* m_pUalTester;
+	static void exitApp(int sig);
 
 	CmdLineParam m_cmdLineParam;
 

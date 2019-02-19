@@ -6,20 +6,43 @@
 #include "../../lib/XmlHelper.h"
 #include "../../lib/Signal.h"
 
+
+#include <QtCore/QCoreApplication>
+#include <csignal>
+
 // -------------------------------------------------------------------------------------------------------------------
 //
 // UalTester class implementation
 //
 // -------------------------------------------------------------------------------------------------------------------
 
+UalTester* UalTester::m_pUalTester = nullptr;
+
 UalTester::UalTester(int& argc, char** argv) :
 	m_waitSocketsConnectionTimer(this)
 {
+	m_pUalTester = this;
+
+	signal(SIGTERM, &UalTester::exitApp);
+	signal(SIGBREAK, &UalTester::exitApp) ;
+
 	m_cmdLineParam.getParams(argc, argv);
 }
 
 UalTester::~UalTester()
 {
+}
+
+void UalTester::exitApp(int sig)
+{
+	Q_UNUSED(sig);
+
+	if (m_pUalTester != nullptr)
+	{
+		m_pUalTester->stop();
+	}
+
+	QCoreApplication::exit(0);
 }
 
 void UalTester::printToReportFile(const QStringList& msgList)
