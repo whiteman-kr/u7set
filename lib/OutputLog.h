@@ -1,4 +1,5 @@
 #pragma once
+#include <set>
 #include <QObject>
 #include <QDateTime>
 #include <QMutex>
@@ -95,12 +96,12 @@ public:
 	Q_INVOKABLE void writeWarning1(const QString& str);
 	Q_INVOKABLE void writeWarning2(const QString& str);
 
-	Q_INVOKABLE void writeWarning0(QString issue, const QString& str);
-	Q_INVOKABLE void writeWarning1(QString issue, const QString& str);
-	Q_INVOKABLE void writeWarning2(QString issue, const QString& str);
+	Q_INVOKABLE void writeWarning0(QString issueCategory, int issueCode, const QString& str);
+	Q_INVOKABLE void writeWarning1(QString issueCategory, int issueCode, const QString& str);
+	Q_INVOKABLE void writeWarning2(QString issueCategory, int issueCode, const QString& str);
 
 	Q_INVOKABLE void writeError(const QString& str);
-	Q_INVOKABLE void writeError(QString issue, const QString& str);
+	Q_INVOKABLE void writeError(QString issueCategory, int issueCode, const QString& str);
 
 	Q_INVOKABLE void writeMessage(const QString& str, QString file, int fileLine, QString func);
 	Q_INVOKABLE void writeSuccess(const QString& str, QString file, int fileLine, QString func);
@@ -109,15 +110,18 @@ public:
 	Q_INVOKABLE void writeWarning1(const QString& str, QString file, int fileLine, QString func);
 	Q_INVOKABLE void writeWarning2(const QString& str, QString file, int fileLine, QString func);
 
-	Q_INVOKABLE void writeWarning0(QString issue, const QString& str, QString file, int fileLine, QString func);
-	Q_INVOKABLE void writeWarning1(QString issue, const QString& str, QString file, int fileLine, QString func);
-	Q_INVOKABLE void writeWarning2(QString issue, const QString& str, QString file, int fileLine, QString func);
+	Q_INVOKABLE void writeWarning0(QString issueCategory, int issueCode, const QString& str, QString file, int fileLine, QString func);
+	Q_INVOKABLE void writeWarning1(QString issueCategory, int issueCode, const QString& str, QString file, int fileLine, QString func);
+	Q_INVOKABLE void writeWarning2(QString issueCategory, int issueCode, const QString& str, QString file, int fileLine, QString func);
 
 	Q_INVOKABLE void writeError(const QString& str, QString file, int fileLine, QString func);
-	Q_INVOKABLE void writeError(QString issue, const QString& str, QString file, int fileLine, QString func);
+	Q_INVOKABLE void writeError(QString issueCategory, int issueCode, const QString& str, QString file, int fileLine, QString func);
 
     Q_INVOKABLE void writeDump(const std::vector<quint8> &data);
 	Q_INVOKABLE void writeEmptyLine();
+
+	void setSupressIssues(std::vector<int> warnings);
+	bool isIssueSuppressed(int issueCode) const;
 
 	bool isEmpty() const;
 	OutputLogItem popMessages();
@@ -153,6 +157,8 @@ public:
 
 private:
 	std::list<OutputLogItem> m_messages;			// List buffer for writing messages to main window Log Widget
+
+	std::set<int> m_suppressedIssues;
 
 	bool m_strLogging = false;
 	QString m_strFullLog;

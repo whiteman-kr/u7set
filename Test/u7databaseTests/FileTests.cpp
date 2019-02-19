@@ -20,41 +20,6 @@ FileTests::FileTests() :
 {
 }
 
-QString FileTests::logIn(User user)
-{
-	return logIn(user.username, user.password);
-}
-
-QString FileTests::logIn(QString username, QString password)
-{
-	QSqlQuery query;
-
-	bool ok = query.exec(QString("SELECT * FROM user_api.log_in('%1', '%2')")
-							.arg(username)
-							.arg(password));
-
-	if (ok == false)
-	{
-		return QString("");
-	}
-
-	ok = query.next();
-	if (ok == false)
-	{
-		return QString("");
-	}
-
-	QString session_key = query.value(0).toString();
-	return session_key;
-}
-
-bool FileTests::logOut()
-{
-	QSqlQuery query;
-	bool ok = query.exec("SELECT * FROM user_api.log_out()");
-	return ok;
-}
-
 void FileTests::initTestCase()
 {
 	bool ok = createProjectDb();
@@ -153,14 +118,14 @@ void FileTests::api_set_file_attributes()
 		QSqlQuery query;
 		bool ok = query.exec(QString("SELECT api.set_file_attributes('%1', '%2', 123);")
 								.arg(session_key)
-								.arg(::AlFileName)	// "$root$/Schemas/ApplicationLogic"
+								.arg(Db::File::AlFileName)	// "$root$/Schemas/ApplicationLogic"
 							 );
 
 		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 		ok = query.exec(QString("SELECT F.Attributes FROM File F WHERE FileID = (SELECT api.get_file_id('%1', '%2'));")
 								.arg(session_key)
-								.arg(::AlFileName)	// "$root$/Schemas/ApplicationLogic"
+								.arg(Db::File::AlFileName)	// "$root$/Schemas/ApplicationLogic"
 							 );
 
 		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -174,14 +139,14 @@ void FileTests::api_set_file_attributes()
 		QSqlQuery query;
 		bool ok = query.exec(QString("SELECT api.set_file_attributes('%1', (SELECT api.get_file_id('%1', '%2')), 225);")
 								.arg(session_key)
-								.arg(::AlFileName)	// "$root$/Schemas/ApplicationLogic"
+								.arg(Db::File::AlFileName)	// "$root$/Schemas/ApplicationLogic"
 							 );
 
 		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 		ok = query.exec(QString("SELECT F.Attributes FROM File F WHERE FileID = (SELECT api.get_file_id('%1', '%2'));")
 								.arg(session_key)
-								.arg(::AlFileName)	// "$root$/Schemas/ApplicationLogic"
+								.arg(Db::File::AlFileName)	// "$root$/Schemas/ApplicationLogic"
 							 );
 
 		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -223,7 +188,7 @@ void FileTests::api_add_file()
 		bool ok = query.exec(QString("SELECT * FROM api.add_file('%1', '%2', (SELECT api.get_file_id('%1', '%3')), '1234567890', '{}', %4);")
 								.arg(session_key)
 								.arg(fileName)
-								.arg(::AlFileName)	// "$root$/Schemas/ApplicationLogic"
+								.arg(Db::File::AlFileName)	// "$root$/Schemas/ApplicationLogic"
 								.arg(attributes)
 							 );
 
@@ -244,7 +209,7 @@ void FileTests::api_add_file()
 		//
 		ok = query.exec(QString("SELECT * FROM api.get_file_info('%1', '%2');")
 								.arg(session_key)
-								.arg(QString(::AlFileName) + "/" + fileName)	// "$root$/Schemas/ApplicationLogic/AddFileTest.txt"
+								.arg(QString(Db::File::AlFileName) + "/" + fileName)	// "$root$/Schemas/ApplicationLogic/AddFileTest.txt"
 							 );
 
 		QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -306,8 +271,8 @@ void FileTests::api_move_file()
 		QString fileNameParent = "MoveFileTestParent.txt";
 		QString fileNameParentChild = "MoveFileTestParentChild.txt";
 
-		QString moveFileFrom = ::AlFileName;	// "$root$/Schemas/ApplicationLogic"
-		QString moveFileTo = ::MvsFileName;		// "$root$/Schemas/Monitor"
+		QString moveFileFrom = Db::File::AlFileName;	// "$root$/Schemas/ApplicationLogic"
+		QString moveFileTo = Db::File::MvsFileName;		// "$root$/Schemas/Monitor"
 
 		int moveFileFromId = -1;
 		int moveFileToId = -1;
@@ -535,9 +500,9 @@ void FileTests::api_undo_changes_after_move_file()
 
 	// --
 	//
-	QString moveFileFrom = ::AlFileName;	// "$root$/Schemas/ApplicationLogic"
-	QString moveFileTo = ::MvsFileName;		// "$root$/Schemas/Monitor"
-	QString moveFileTo2 = ::UfblFileName;	// "$root$/Schemas/UFBL"
+	QString moveFileFrom = Db::File::AlFileName;	// "$root$/Schemas/ApplicationLogic"
+	QString moveFileTo = Db::File::MvsFileName;		// "$root$/Schemas/Monitor"
+	QString moveFileTo2 = Db::File::UfblFileName;	// "$root$/Schemas/UFBL"
 	int moveFileFromId = -1;
 	int moveFileToId = -1;
 	int moveFileTo2Id = -1;
@@ -798,7 +763,7 @@ void FileTests::api_rename_file()
 		QString fileName1 = "RenameTest1.txt";
 		QString fileName2 = "RenameTest2.txt";
 
-		QString parentFileName = ::AlFileName;
+		QString parentFileName = Db::File::AlFileName;
 		int parentFileId = -1;
 
 		QSqlQuery query;
@@ -944,7 +909,7 @@ void FileTests::api_undo_changes_after_rename_file()
 		QString fileName1 = "RenameTest1_undoTest.txt";
 		QString fileName2 = "RenameTest2_undoTest.txt";
 
-		QString parentFileName = ::AlFileName;
+		QString parentFileName = Db::File::AlFileName;
 		int parentFileId = -1;
 
 		QSqlQuery query;
@@ -3335,7 +3300,6 @@ void FileTests::undo_changesTest()
 
 	// Create file for call errors
 	//
-
 	ok = query.exec("SElECT * FROM add_file(1, 'undoChangesErrTest', 1, 'Windows', '{}');");
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -4078,7 +4042,6 @@ void FileTests::check_in_treeTest()
 
 	// Create children file of first file for test
 	//
-
 	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestSecondFile', %1, 'OpenBSD', '{}');").arg(fileIds[0]));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -4088,7 +4051,6 @@ void FileTests::check_in_treeTest()
 
 	// Create children file of second file for test
 	//
-
 	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestThirdFile', %1, 'NetBSD', '{}');").arg(fileIds[1]));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -4098,7 +4060,6 @@ void FileTests::check_in_treeTest()
 
 	// Create children file from first file
 	//
-
 	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestFourthFile', %1, 'PC-BSD', '{}');").arg(fileIds[0]));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -4108,7 +4069,6 @@ void FileTests::check_in_treeTest()
 
 	// Create file with random parent
 	//
-
 	ok = query.exec("SElECT * FROM add_file(1, 'checkInTreeTestRandomFile', 0, 'Yosemite', '{}');");
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -4118,7 +4078,6 @@ void FileTests::check_in_treeTest()
 
 	// Create child of the file with random parent, which will be deleted
 	//
-
 	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestRandomFileChild', %1, 'El Capitano', '{}');").arg(fileIds[4]));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -4128,7 +4087,6 @@ void FileTests::check_in_treeTest()
 
 	// Create file from first file, and check it in
 	//
-
 	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestFifthFile', %1, 'Solaris', '{}');").arg(fileIds[0]));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -4138,7 +4096,6 @@ void FileTests::check_in_treeTest()
 
 	// Create file. Check it in, check out, and do checkInTree without changes
 	//
-
 	ok = query.exec(QString("SElECT * FROM add_file(1, 'checkInTreeTestUnchangedFile', %1, 'GNU/Hurd', '{}');").arg(fileIds[0]));
 
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
@@ -4181,7 +4138,7 @@ void FileTests::check_in_treeTest()
 	ok = query.exec(QString("UPDATE fileInstance SET Action=2 WHERE fileId = %1 AND changesetId = %2").arg(fileIds[8]).arg(changesetIdChangedFile));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
-	ok = query.exec(QString("UPDATE fileInstance SET Data='12314124125343gdfjtjfgx bvavt23y45' WHERE fileId = %1 AND changesetId = %2").arg(fileIds[8]).arg(changesetIdChangedFile));
+	ok = query.exec(QString("UPDATE fileInstance SET Data='12314124125343gdfjtjfgx bvavt23y45', md5=md5('12314124125343gdfjtjfgx bvavt23y45') WHERE fileId = %1 AND changesetId = %2").arg(fileIds[8]).arg(changesetIdChangedFile));
 	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
 
 	ok = query.exec(QString("SELECT * FROM delete_file (1, %1);").arg(fileIds[5]));
@@ -4199,7 +4156,6 @@ void FileTests::check_in_treeTest()
 		// 6th file in array - file, which already checked in. Function must not return 6th file id, and
 		// need to skip it
 		//
-
 		QVERIFY2(query.value("id").toInt() != fileIds[6], qPrintable("Error: checked in file has been checked_in twice"));
 
 		if (fileNumber == 6)
@@ -4213,7 +4169,6 @@ void FileTests::check_in_treeTest()
 		{
 			// Check deleted file
 			//
-
 			ok = tempQuery.exec(QString("SELECT deleted FROM file WHERE fileId = %1").arg(currentFileId));
 
 			QVERIFY2 (ok == true, qPrintable(tempQuery.lastError().databaseText()));
@@ -4234,7 +4189,6 @@ void FileTests::check_in_treeTest()
 		{
 			// Check all data of the checkedIn file
 			//
-
 			ok = tempQuery.exec(QString("SELECT * FROM checkOut WHERE fileId = %1").arg(query.value("id").toInt()));
 			QVERIFY2 (ok == true, qPrintable(tempQuery.lastError().databaseText()));
 			QVERIFY2 (tempQuery.next() == false, qPrintable("Error: file was not checked in"));

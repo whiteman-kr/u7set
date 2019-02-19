@@ -154,7 +154,7 @@ namespace Builder
 		m_schemaFileList.clear();	// m_schemaFileList is filled in next two calls of SoftwareCfgGenerator::writeSchemasList
 
 		bool result = true;
-		result &= writeSchemasList(db, buildResultWriter, db->alFileId(), QLatin1String(".") + ::AlFileExtension, "LogicSchemas", "LogicSchema", log);
+		result &= writeSchemasList(db, buildResultWriter, db->alFileId(), QLatin1String(".") + Db::File::AlFileExtension, "LogicSchemas", "LogicSchema", log);
 
 		// Write LogicSchemas/SchemaDetais.pbuf
 		//
@@ -162,7 +162,7 @@ namespace Builder
 
 		// Get all Monitor schemas
 		//
-		result &= writeSchemasList(db, buildResultWriter, db->mvsFileId(), QLatin1String(".") + ::MvsFileExtension, "MonitorSchemas", "MonitorSchema", log);
+		result &= writeSchemasList(db, buildResultWriter, db->mvsFileId(), QLatin1String(".") + Db::File::MvsFileExtension, "MonitorSchemas", "MonitorSchema", log);
 
 		return result;
 	}

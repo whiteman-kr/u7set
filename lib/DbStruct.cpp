@@ -6,48 +6,12 @@
 #include <QDebug>
 #include "Signal.h"
 
-const char* const RootFileName = "$root$";							// root file name
-const char* const AfblFileName = "$root$/AFBL";						// Application Functional Block Library
 
-const char* const SchemasFileName = "$root$/Schemas";				// Schemas root fie
-const char* const UfblFileName = "$root$/Schemas/UFBL";				// User Functional Block Library
-const char* const AlFileName = "$root$/Schemas/ApplicationLogic";	// Application Logic Schemas
-const char* const MvsFileName = "$root$/Schemas/Monitor";			// Monitor Video Schemas
-const char* const TvsFileName = "$root$/Schemas/Tuning";			// Tuning Video Schemas
-const char* const DvsFileName = "$root$/Diagnostics";				// Diagnostics Video Schemas -> will be moved to $root$/Schemas,  see update 235
-
-const char* const HcFileName = "$root$/HC";							// Hardware Configuratiun
-const char* const HpFileName = "$root$/HP";							// Hardware Presets
-const char* const McFileName = "$root$/MC";							// Module Configuration
-const char* const ConnectionsFileName = "$root$/CONNECTIONS";		// Connections
-const char* const BusTypesFileName = "$root$/BUSTYPES";				// BustTypes
-const char* const EtcFileName = "$root$/ETC";						//
-
-const char* const SignalPropertyBehaviorFileName = "SignalPropertyBehavior.csv";
-
-const char* const AlFileExtension = "als";				// Application Logic schema file extension
-const char* const AlTemplExtension = "templ_als";		// Application Logic schema template file extnesion
-
-const char* const UfbFileExtension = "ufb";				// User Functional Block schema file extnesion
-const char* const UfbTemplExtension = "templ_ufb";		// User Functional Block template file extnesion
-
-const char* const MvsFileExtension = "mvs";				// Monitor schema file extnesion
-const char* const MvsTemplExtension = "templ_mvs";		// Monitor schema template file extnesion
-
-const char* const DvsFileExtension = "dvs";				// Diagnostics schema file extnesion
-const char* const DvsTemplExtension = "templ_dvs";		// Diagnostics schema template file extnesion
-
-const char* const OclFileExtension = "ocl";				// (Optical) Connection Link
-const char* const BusFileExtension = "bus_type";		// Bus type
-
-const char* const AppSignalFileExtension = "asg";		// Application signal file extention (::Proto::AppSignal message)
-const char* const AppSignalSetFileExtension = "asgs";	// Application signals set file extention (::Proto::AppSignalSet message)
 //
 //
 //	VcsState
 //
 //
-
 VcsState::VcsState()  noexcept:
 	m_state(CheckedIn)
 {
@@ -194,6 +158,16 @@ int DbProject::version() const
 void DbProject::setVersion(int value)
 {
 	m_version = value;
+}
+
+bool DbProject::uppercaseAppSignalId() const
+{
+	return m_uppercaseAppSignalId;
+}
+
+void DbProject::setUppercaseAppSignalId(bool value)
+{
+	m_uppercaseAppSignalId = value;
 }
 
 //

@@ -5554,7 +5554,7 @@ namespace Builder
 
 		CodeGenProcsToCallArray procs =
 		{
-//			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateAfbsVersionCheckingCode),
+			//CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateAfbsVersionCheckingCode),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateInitAfbsCode),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateLoopbacksRefreshingCode),
 		};
@@ -5659,10 +5659,10 @@ namespace Builder
 
 			CodeItem cmd;
 
-			cmd.readFuncBlockTestInt32(opCode, 0,
-									   component->versionOpIndex(),
-									   component->impVersion(),
-									   component->caption());
+			cmd.readFuncBlockTest(	opCode, 0,
+									component->versionOpIndex(),
+									component->impVersion(),
+									component->caption());
 			code->append(cmd);
 		}
 

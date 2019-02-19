@@ -405,10 +405,9 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 void EditSchemaView::drawEditConnectionLineOutline(VFrame30::CDrawParam* drawParam)
 {
 	bool ctrlIsPressed = QApplication::queryKeyboardModifiers().testFlag(Qt::ControlModifier);
-	bool altIsPressed = QApplication::queryKeyboardModifiers().testFlag(Qt::AltModifier);
 
 	if (ctrlIsPressed == true ||
-		altIsPressed == true)
+		m_doNotMoveConnectionLines == true)
 	{
 		return;
 	}
@@ -1028,14 +1027,14 @@ void EditSchemaView::drawGrid(QPainter* p)
 {
 	assert(p);
 
-	if (m_mouseSelectionStartPoint.isNull() == false &&
-		m_mouseSelectionEndPoint.isNull() == false)
-	{
-		// Don't draw grid if selection now,
-		// just speed optimization
-		//
-		return;
-	}
+//	if (m_mouseSelectionStartPoint.isNull() == false &&
+//		m_mouseSelectionEndPoint.isNull() == false)
+//	{
+//		// Don't draw grid if selection now,
+//		// just speed optimization
+//		//
+//		return;
+//	}
 
 	auto unit = schema()->unit();
 
@@ -2532,6 +2531,13 @@ void EditSchemaWidget::createActions()
 			m_addMenu->addAction(m_addLineEditAction);
 		}
 
+		if (isTuningSchema() == true)
+		{
+			m_addMenu->addAction(m_addValueAction);
+			m_addMenu->addAction(m_addPushButtonAction);
+			m_addMenu->addAction(m_addLineEditAction);
+		}
+
 	m_editMenu = new QMenu(this);
 	m_editAction->setMenu(m_editMenu);
 		m_editMenu->addAction(m_undoAction);
@@ -2656,14 +2662,17 @@ void EditSchemaWidget::keyPressEvent(QKeyEvent* e)
 	//
 	if (editSchemaView()->m_editConnectionLines.empty() == false)
 	{
+		if (e->key() == Qt::Key_Space)
+		{
+			editSchemaView()->m_doNotMoveConnectionLines = !editSchemaView()->m_doNotMoveConnectionLines;
+		}
+
 		bool ctrlIsPressed = e->modifiers() & Qt::ControlModifier;
-		bool altIsPressed = e->modifiers() & Qt::AltModifier;
 
 		if (ctrlIsPressed != m_ctrlWasPressed ||
-			altIsPressed != m_altWasPressed)
+			e->key() == Qt::Key_Space)
 		{
 			m_ctrlWasPressed = ctrlIsPressed;
-			m_altWasPressed = altIsPressed;
 
 			editSchemaView()->update();
 		}
@@ -2685,14 +2694,10 @@ void EditSchemaWidget::keyReleaseEvent(QKeyEvent* event)
 	if (editSchemaView()->m_editConnectionLines.empty() == false)
 	{
 		bool ctrlIsPressed = event->modifiers() & Qt::ControlModifier;
-		bool altIsPressed = event->modifiers() & Qt::AltModifier;
 
-		if (ctrlIsPressed != m_ctrlWasPressed ||
-			altIsPressed != m_altWasPressed)
+		if (ctrlIsPressed != m_ctrlWasPressed)
 		{
 			m_ctrlWasPressed = ctrlIsPressed;
-			m_altWasPressed = altIsPressed;
-
 			editSchemaView()->update();
 		}
 
@@ -3376,6 +3381,25 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 
 	editSchemaView()->m_editEndDocPt = mouseMovingEndPointIn;
 
+	// If Alt is pressed then moving in one dirrection horz or vert
+	//
+	if (bool altIsPressed = QApplication::queryKeyboardModifiers().testFlag(Qt::AltModifier);
+		altIsPressed)
+	{
+		QPointF offset = mouseMovingEndPointIn - editSchemaView()->m_editStartDocPt;
+
+		if (std::abs(offset.rx()) > std::abs(offset.ry()))
+		{
+			mouseMovingEndPointIn.setY(editSchemaView()->m_editStartDocPt.ry());
+		}
+		else
+		{
+			mouseMovingEndPointIn.setX(editSchemaView()->m_editStartDocPt.rx());
+		}
+	}
+
+	// --
+	//
 	float xdif = mouseMovingEndPointIn.x() - mouseMovingStartPointIn.x();
 	float ydif = mouseMovingEndPointIn.y() - mouseMovingStartPointIn.y();
 
@@ -3387,9 +3411,8 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 		return;
 	}
 
-	bool ctrlIsPressed = event->modifiers().testFlag(Qt::ControlModifier);
-
-	if (ctrlIsPressed == false)
+	if (bool ctrlIsPressed = event->modifiers().testFlag(Qt::ControlModifier);
+		ctrlIsPressed == false)
 	{
 		// Move items
 		//
@@ -4026,6 +4049,23 @@ void EditSchemaWidget::mouseMove_Moving(QMouseEvent* me)
 
 	editSchemaView()->m_editEndDocPt = widgetPointToDocument(me->pos(), snapToGrid());
 
+	// If Alt is pressed then moving in one dirrection horz or vert
+	//
+	if (bool altIsPressed = QApplication::queryKeyboardModifiers().testFlag(Qt::AltModifier);
+		altIsPressed)
+	{
+		QPointF offset = editSchemaView()->m_editEndDocPt - editSchemaView()->m_editStartDocPt;
+
+		if (std::abs(offset.rx()) > std::abs(offset.ry()))
+		{
+			editSchemaView()->m_editEndDocPt.setY(editSchemaView()->m_editStartDocPt.ry());
+		}
+		else
+		{
+			editSchemaView()->m_editEndDocPt.setX(editSchemaView()->m_editStartDocPt.rx());
+		}
+	}
+
 	// Move links along item
 	//
 	QPointF offset = editSchemaView()->m_editEndDocPt - editSchemaView()->m_editStartDocPt;
@@ -4474,6 +4514,11 @@ bool EditSchemaWidget::isMonitorSchema() const
 	return schema()->isMonitorSchema();
 }
 
+bool EditSchemaWidget::isTuningSchema() const
+{
+	return schema()->isTuningSchema();
+}
+
 std::shared_ptr<VFrame30::LogicSchema> EditSchemaWidget::logicSchema()
 {
 	std::shared_ptr<VFrame30::LogicSchema> logicSchema = std::dynamic_pointer_cast<VFrame30::LogicSchema>(schema());
@@ -4920,6 +4965,7 @@ void EditSchemaWidget::movePosConnectionEndPoint(std::shared_ptr<VFrame30::Schem
 void EditSchemaWidget::initMoveAfbsConnectionLinks(MouseState mouseState)
 {
 	editSchemaView()->m_editConnectionLines.clear();
+	editSchemaView()->m_doNotMoveConnectionLines = false;
 
 	// Go over all selected itmes pins, and add data to m_editConnectionLines
 	//
@@ -5161,10 +5207,9 @@ void EditSchemaWidget::finishMoveAfbsConnectionLinks()
 	setFocus();	// As alt could be pressed and MainMeu activated
 
 	bool ctrlIsPressed = QApplication::queryKeyboardModifiers().testFlag(Qt::ControlModifier);
-	bool altIsPressed = QApplication::queryKeyboardModifiers().testFlag(Qt::AltModifier);
 
 	if (ctrlIsPressed == true ||
-		altIsPressed == true)
+		editSchemaView()->m_doNotMoveConnectionLines == true)
 	{
 		editSchemaView()->m_editConnectionLines.clear();
 		return;
@@ -5306,7 +5351,7 @@ bool EditSchemaWidget::loadUfbSchemas(std::vector<std::shared_ptr<VFrame30::UfbS
 	std::vector<DbFileInfo> fileList = filesTree.toVectorIf(
 		[](const DbFileInfo& file)
 		{
-			return file.fileName().endsWith(QString(".") + ::UfbFileExtension, Qt::CaseInsensitive) == true &&
+			return file.fileName().endsWith(QString(".") + Db::File::UfbFileExtension, Qt::CaseInsensitive) == true &&
 				file.isFolder() == false;
 		});
 
@@ -5404,7 +5449,7 @@ bool EditSchemaWidget::loadBusses(DbController* db, std::vector<VFrame30::Bus>* 
 	//
 	DbFileTree filesTree;
 
-	bool ok = db->getFileListTree(&filesTree, db->busTypesFileId(), QString(".") + ::BusFileExtension, true, parentWidget);
+	bool ok = db->getFileListTree(&filesTree, db->busTypesFileId(), QString(".") + Db::File::BusFileExtension, true, parentWidget);
 	if (ok == false)
 	{
 		return false;

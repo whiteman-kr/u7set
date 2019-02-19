@@ -4,6 +4,7 @@
 #include "LogicSchema.h"
 #include "UfbSchema.h"
 #include "MonitorSchema.h"
+#include "TuningSchema.h"
 #include "WiringSchema.h"
 #include "SchemaLayer.h"
 #include "SchemaItemLine.h"
@@ -42,6 +43,7 @@ namespace VFrame30
 		SchemaFactory.Register<LogicSchema>();
 		SchemaFactory.Register<UfbSchema>();
 		SchemaFactory.Register<MonitorSchema>();
+		SchemaFactory.Register<TuningSchema>();
 		SchemaFactory.Register<WiringSchema>();
 
 		// Registering VideoLayers

@@ -68,12 +68,20 @@ namespace Builder
 			LOG_MESSAGE(m_log, tr("Opening project %1: ok").arg(projectName()));
 		}
 
+		// Get SuppressWarning list
+		//
+		ok = getSuppressWarningList(&db);
+
+		// --
+		//
 		BuildResultWriter buildWriter(buildOutputPath());
 
 		buildWriter.start(&db, m_log, release(), 0 /* Load correct ChangesetID */);
 
 		do
 		{
+			// --
+			//
 			int lastChangesetId = 0;
 			ok = db.lastChangesetId(&lastChangesetId);
 
@@ -440,6 +448,59 @@ namespace Builder
 		//
 
 		return;
+	}
+
+	bool BuildWorkerThread::getSuppressWarningList(DbController* db)
+	{
+		assert(db != nullptr);
+		assert(db->isProjectOpened() == true);
+
+		QString suppressedWarningsStr;
+
+		if (bool ok = db->getProjectProperty(Db::ProjectProperty::SuppressWarnings, &suppressedWarningsStr, nullptr);
+			ok == false)
+		{
+			m_log->errPDB2020(Db::ProjectProperty::SuppressWarnings);
+			return false;
+		}
+
+		// --
+		//
+		QStringList sl = suppressedWarningsStr.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+
+		std::vector<int> suppressWarnings;
+		suppressWarnings.reserve(sl.size());
+
+		for (QString& sw : sl)
+		{
+			bool ok = false;
+			int warning = sw.toInt(&ok);
+
+			if (ok == true)
+			{
+				suppressWarnings.push_back(warning);
+			}
+		}
+
+		if (suppressWarnings.empty() == false)
+		{
+			QString suppressWarningsMessage;
+			for (int w : suppressWarnings)
+			{
+				if (suppressWarningsMessage.isEmpty() == false)
+				{
+					suppressWarningsMessage += QStringLiteral(", ");
+				}
+
+				suppressWarningsMessage += QString::number(w);
+			}
+
+			LOG_MESSAGE(m_log, tr("Suppressed warnings: %1").arg(suppressWarningsMessage));
+		}
+
+		m_log->setSupressIssues(suppressWarnings);
+
+		return true;
 	}
 
 	bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* parent)
@@ -945,7 +1006,7 @@ namespace Builder
 		//
 		std::vector<DbFileInfo> fileList;
 
-		bool ok = db->getFileList(&fileList, db->busTypesFileId(), ::BusFileExtension, true, nullptr);
+		bool ok = db->getFileList(&fileList, db->busTypesFileId(), Db::File::BusFileExtension, true, nullptr);
 		if (ok == false)
 		{
 			return false;
@@ -1065,10 +1126,10 @@ namespace Builder
 		//
 		const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
 
-		QString strAlFileExtension{::AlFileExtension};
-		QString strUfbFileExtension{::UfbFileExtension};
-		QString strMvsFileExtension{::MvsFileExtension};
-		QString strDvsFileExtension{::DvsFileExtension};
+		QString strAlFileExtension{Db::File::AlFileExtension};
+		QString strUfbFileExtension{Db::File::UfbFileExtension};
+		QString strMvsFileExtension{Db::File::MvsFileExtension};
+		QString strDvsFileExtension{Db::File::DvsFileExtension};
 
 		bool success = true;
 

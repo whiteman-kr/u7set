@@ -29,7 +29,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		idLabel = "AppSchemaID";
 
 		tempateParentFileId = db->alFileId();
-		templateFileExtension = ::AlTemplExtension;
+		templateFileExtension = Db::File::AlTemplExtension;
 	}
 
 	if (dynamic_cast<VFrame30::UfbSchema*>(m_schema.get()) != nullptr)
@@ -37,7 +37,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		idLabel = "UserFunctionalBlock ID";
 
 		tempateParentFileId = db->ufblFileId();
-		templateFileExtension = ::UfbTemplExtension;
+		templateFileExtension = Db::File::UfbTemplExtension;
 	}
 
 	if (isMonitorSchema() == true)
@@ -45,12 +45,21 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		idLabel = "MonitorSchemaID";
 
 		tempateParentFileId = db->mvsFileId();
-		templateFileExtension = ::MvsTemplExtension;
+		templateFileExtension = Db::File::MvsTemplExtension;
+	}
+
+	if (isTuningSchema() == true)
+	{
+		idLabel = "TuningSchemaID";
+
+		tempateParentFileId = db->tvsFileId();
+		templateFileExtension = Db::File::TvsTemplExtension;
 	}
 
 	if (isDiagSchema() == true)
 	{
 		idLabel = "DiagSchemaID";
+		assert(false);	// to do
 	}
 
 	assert(tempateParentFileId != -1);
@@ -492,22 +501,27 @@ void CreateSchemaDialog::setWidthHeight(VFrame30::Schema* schema)
 
 bool CreateSchemaDialog::isLogicSchema() const
 {
-	return (dynamic_cast<VFrame30::LogicSchema*>(m_schema.get()) != nullptr);
+	return m_schema->isLogicSchema();
 }
 
 bool CreateSchemaDialog::isUfbSchema() const
 {
-	return (dynamic_cast<VFrame30::UfbSchema*>(m_schema.get()) != nullptr);
+	return m_schema->isUfbSchema();
 }
 
 bool CreateSchemaDialog::isMonitorSchema() const
 {
-	return (dynamic_cast<VFrame30::MonitorSchema*>(m_schema.get()) != nullptr);
+	return m_schema->isMonitorSchema();
+}
+
+bool CreateSchemaDialog::isTuningSchema() const
+{
+	return m_schema->isTuningSchema();
 }
 
 bool CreateSchemaDialog::isDiagSchema() const
 {
-	return (dynamic_cast<VFrame30::DiagSchema*>(m_schema.get()) != nullptr);
+	return m_schema->isDiagSchema();
 }
 
 std::shared_ptr<VFrame30::LogicSchema> CreateSchemaDialog::logicSchema()

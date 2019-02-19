@@ -125,6 +125,8 @@ private:
 	int				m_measureID = -1;								// primary key of record in SQL table
 	bool			m_filter = false;								// filter for record, if "true" - hide record
 
+	bool			m_valid = true;									// signal is valid during the measurement
+
 	QDateTime		m_measureTime;									// measure time
 	int				m_reportType = -1;								// report type
 
@@ -144,6 +146,9 @@ public:
 
 	bool			filter() const { return m_filter; }
 	void			setFilter(bool filter) { m_filter = filter; }
+
+	bool			isValid() const { return m_valid; }
+	void			setValid(bool valid) { m_valid = valid; }
 
 	QDateTime		measureTime() const { return m_measureTime; }
 	void			setMeasureTime(const QDateTime& time) { m_measureTime = time; }
@@ -265,6 +270,7 @@ public:
 	void			setAdditionalParamCount(int count) { m_additionalParamCount = count; }
 
 	double			additionalParam(int paramType) const;
+	QString			additionalParamStr(int paramType) const;
 	void			setAdditionalParam(int paramType, double value);
 
 	void			updateMeasureArray(int limitType, Measurement* pMeasurement);

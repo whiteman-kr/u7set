@@ -200,6 +200,7 @@ protected:
 	// Variables for changing ConnectionLine
 	//
 	std::list<EditConnectionLine> m_editConnectionLines;	// Add new or edit PosConnectionImpl items
+	bool m_doNotMoveConnectionLines = false;
 
 	// For updating schema in timerEvent during build
 	//
@@ -451,6 +452,7 @@ public:
 	bool isLogicSchema() const;
 	bool isUfbSchema() const;
 	bool isMonitorSchema() const;
+	bool isTuningSchema() const;
 
 	std::shared_ptr<VFrame30::LogicSchema> logicSchema();
 	const std::shared_ptr<VFrame30::LogicSchema> logicSchema() const;
@@ -535,7 +537,6 @@ private:
 	// --
 	//
 	bool m_ctrlWasPressed = false;
-	bool m_altWasPressed = false;
 
 	static QString m_lastUsedLoopbackId;
 

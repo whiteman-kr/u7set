@@ -54,8 +54,8 @@ namespace Builder
 
 		// add link to configuration files (previously written) via m_cfgXml->addLinkToFile(...)
 		//
-		QString alsExt = QLatin1String(".") + ::AlFileExtension;
-		QString mvsExt = QLatin1String(".") + ::MvsFileExtension;
+		QString alsExt = QLatin1String(".") + Db::File::AlFileExtension;
+		QString mvsExt = QLatin1String(".") + Db::File::MvsFileExtension;
 
 		for (const SchemaFile& schemaFile : SoftwareCfgGenerator::m_schemaFileList)
 		{
@@ -203,7 +203,22 @@ namespace Builder
 
 				ok1 = false;
 			}
+
+			if (appDataService1->type() != E::SoftwareType::AppDataService)
+			{
+				m_log->errCFG3017(m_software->equipmentId(), "AppDataServiceID1", appDataServiceId1);
+
+				QString errorStr = tr("Property %1.%2 is linked to not compatible software %3.")
+										.arg(m_software->equipmentId())
+										.arg("AppDataServiceID1")
+										.arg(appDataServiceId1);
+
+				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+
+				ok1 = false;
+			}
 		}
+
 
 		if (appDataServiceId2.isEmpty() == false)
 		{
@@ -217,6 +232,20 @@ namespace Builder
 				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
 
 				ok2 = false;
+			}
+
+			if (appDataService2->type() != E::SoftwareType::AppDataService)
+			{
+				m_log->errCFG3017(m_software->equipmentId(), "AppDataServiceID2", appDataServiceId2);
+
+				QString errorStr = tr("Property %1.%2 is linked to not compatible software %3.")
+										.arg(m_software->equipmentId())
+										.arg("AppDataServiceID2")
+										.arg(appDataServiceId2);
+
+				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+
+				ok1 = false;
 			}
 		}
 
