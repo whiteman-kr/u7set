@@ -545,7 +545,7 @@ void UalTester::runTestFile()
 							{
 								if (signal.state().value() == param.value())
 								{
-									QString str = "    Set " + param.getNameValueStr() + " - Ok";
+									QString str = "    Set " + param.getNameValueStr();
 									test.appendResult(str, m_cmdLineParam.enableTrace());
 								}
 								else
@@ -555,7 +555,7 @@ void UalTester::runTestFile()
 									TestCmdParam realState = param;
 									realState.setValue(signal.state().value());
 
-									QString str = "    Set " + param.getNameValueStr() + " - Fail    [received: " + realState.getValueStr() + " ]";
+									QString str = "    Set " + param.getNameValueStr() + " - Fail    [ received: " + realState.getValueStr() + " ]";
 									test.appendResult(str, m_cmdLineParam.enableTrace());
 								}
 							}
@@ -621,7 +621,7 @@ void UalTester::runTestFile()
 									TestCmdParam realState = param;
 									realState.setValue(signal.state().value());
 
-									QString str = "    Check " + param.getNameValueStr() + " - Fail    [received: " + realState.getValueStr() + " ]";
+									QString str = "    Check " + param.getNameValueStr() + " - Fail    [ received: " + realState.getValueStr() + " ]";
 									test.appendResult(str, m_cmdLineParam.enableTrace());
 								}
 							}
@@ -667,7 +667,7 @@ void UalTester::runTestFile()
 						{
 							if (m_cmdLineParam.enableTrace() == true)
 							{
-								QString str = "Endtest - Ok";
+								QString str = "Endtest " + test.testID()  + " - Ok";
 								test.appendResult(str, true);
 							}
 							else
@@ -680,7 +680,7 @@ void UalTester::runTestFile()
 						}
 						else
 						{
-							QString str = QString("Endtest - error(s): %1").arg(test.errorCount());
+							QString str = QString("Endtest %1 - error(s): %2").arg(test.testID()).arg(test.errorCount());
 							test.resultList().append(str);
 
 							if (m_cmdLineParam.enableTrace() == true)
