@@ -7,6 +7,18 @@
 #include "../lib/WidgetUtils.h"
 #include "../lib/WUtils.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
+#include <QMessageBox>
+#include <QFormLayout>
+#include <QDialogButtonBox>
+#include <QToolBar>
+#include <QLabel>
+#include <QCompleter>
+#include <QPushButton>
+#include <QTableView>
+#include <QHeaderView>
+#include <QClipboard>
+#include <QSplitter>
+#include <QScrollBar>
 
 
 const int SC_STR_ID = 0,
@@ -40,7 +52,7 @@ SC_TUNING_HIGH_BOUND = 27,
 SC_LAST_CHANGE_USER = 28;
 
 
-const char* Columns[] =
+static const char* Columns[] =
 {
 	"AppSignalID",
 	"CustomAppSignalID",
@@ -1640,17 +1652,16 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView->verticalHeader()->setFixedWidth(DEFAULT_COLUMN_WIDTH);
 	SignalsDelegate* delegate = m_signalsModel->createDelegate(m_signalsProxyModel);
 	m_signalsView->setItemDelegate(delegate);
-	m_signalsView->horizontalHeader()->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	QHeaderView* horizontalHeader = m_signalsView->horizontalHeader();
 	m_signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	horizontalHeader->setHighlightSections(false);
-	horizontalHeader->setSectionsMovable(true);
+
+	new TableDataVisibilityController(m_signalsView, "SignalsTabPage", defaultColumnVisibility);
 
 	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
 	m_signalsView->verticalHeader()->setResizeMode(QHeaderView::Fixed);
 	horizontalHeader->setDefaultSectionSize(150);
-	horizontalHeader->setContextMenuPolicy(Qt::ActionsContextMenu);
 	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	m_signalsView->setColumnWidth(SC_STR_ID, 400);
@@ -1658,29 +1669,6 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView->setColumnWidth(SC_BUS_TYPE_ID, 400);
 	m_signalsView->setColumnWidth(SC_NAME, 400);
 	m_signalsView->setColumnWidth(SC_DEVICE_STR_ID, 400);
-
-	QMap<int, int> positionMap;
-
-	for (int i = 0; i < COLUMNS_COUNT; i++)
-	{
-		QString columnName = QString("%1").arg(QString(Columns[i]).replace("/", "|")).replace("\n", " ");
-		m_signalsView->setColumnWidth(i, settings.value(QString("SignalsTabPage/ColumnWidth/") + columnName, m_signalsView->columnWidth(i)).toInt());
-		horizontalHeader->setSectionHidden(i, !settings.value(QString("SignalsTabPage/ColumnVisibility/") + columnName, true).toBool());
-		int position = settings.value(QString("SignalsTabPage/ColumnPosition/") + columnName, i).toInt();
-		positionMap.insert(position, i);
-	}
-
-	for (int i = 0; i < COLUMNS_COUNT; i++)
-	{
-		int logicalIndex = positionMap[i];
-		int oldVisualIndex = horizontalHeader->visualIndex(logicalIndex);
-		horizontalHeader->moveSection(oldVisualIndex, i);
-	}
-
-	QAction* columnsAction = new QAction("Columns", m_signalsView);
-	connect(columnsAction, &QAction::triggered, this, &SignalsTabPage::editColumnsVisibilityAndOrder);
-	horizontalHeader->addAction(columnsAction);
-	connect(horizontalHeader, &QHeaderView::sectionResized, this, &SignalsTabPage::saveColumnWidth);
 
 	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 
@@ -1722,17 +1710,6 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 SignalsTabPage::~SignalsTabPage()
 {
-	auto header = m_signalsView->horizontalHeader();
-	for (int i = 0; i < COLUMNS_COUNT; i++)
-	{
-		bool visible = !header->isSectionHidden(i);
-		if (visible)
-		{
-			saveColumnWidth(i);
-		}
-		saveColumnVisibility(i, visible);
-		saveColumnPosition(i, header->visualIndex(i));
-	}
 }
 
 bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties)
@@ -1741,31 +1718,33 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 
 	TEST_PTR_RETURN_FALSE(dbc);
 
-	bool result = true;
+	QStringList equipmentIDs;
 
-	bool res = true;
+	for(const Hardware::DeviceSignal* deviceSignal: deviceSignalsToUpdate)
+	{
+		TEST_PTR_CONTINUE(deviceSignal);
+		equipmentIDs.append(deviceSignal->equipmentId());
+	}
+
+	QHash<QString, int> signalIDsMap;
+
+	bool result = dbc->getMultipleSignalsIDsWithEquipmentID(equipmentIDs, &signalIDsMap, nullptr);
+
+	if (result == false)
+	{
+		return false;
+	}
 
 	QVector<int> checkoutSignalIDs;
-	QList<Signal> newSignalWorkcopies;
+	QVector<Signal> newSignalWorkcopies;
 
 	for(const Hardware::DeviceSignal* deviceSignal: deviceSignalsToUpdate)
 	{
 		TEST_PTR_CONTINUE(deviceSignal);
 
-		QString signalEquipmentID = deviceSignal->equipmentId();
+		QList<int> signalIDs = signalIDsMap.values(deviceSignal->equipmentId());
 
-		QVector<int> signalIDs;
-
-		res = dbc->getSignalsIDsWithEquipmentID(signalEquipmentID, &signalIDs, nullptr);
-
-		if (res == false)
-		{
-			assert(false);
-			result = false;
-			continue;
-		}
-
-		if (signalIDs.isEmpty() == true)
+		if (signalIDs.count() == 0)
 		{
 			continue;
 		}
@@ -1795,9 +1774,9 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 
 			SignalSpecPropValues specPropValues;
 
-			res = specPropValues.parseValuesFromArray(s.protoSpecPropValues());
+			result = specPropValues.parseValuesFromArray(s.protoSpecPropValues());
 
-			if (res == false)
+			if (result == false)
 			{
 				QMessageBox::critical(m_instance,
 							  QApplication::applicationName(),
@@ -1805,9 +1784,9 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 				return false;
 			}
 
-			res = specPropValues.updateFromSpecPropStruct(deviceSignalSpecPropStruct);
+			result = specPropValues.updateFromSpecPropStruct(deviceSignalSpecPropStruct);
 
-			if (res == false)
+			if (result == false)
 			{
 				QMessageBox::critical(m_instance,
 							  QApplication::applicationName(),
@@ -1817,7 +1796,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 
 			QByteArray newValues;
 
-			res = specPropValues.serializeValuesToArray(&newValues);
+			result = specPropValues.serializeValuesToArray(&newValues);
 
 			if (newValues != s.protoSpecPropValues())		// compare proto-data arrays
 			{
@@ -1839,11 +1818,16 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 		}
 	}
 
+	if (checkoutSignalIDs.count() == 0)
+	{
+		return true;
+	}
+
 	QVector<ObjectState> objStates;
 
-	res = dbc->checkoutSignals(&checkoutSignalIDs, &objStates, nullptr);
+	result = dbc->checkoutSignals(&checkoutSignalIDs, &objStates, nullptr);
 
-	if (res == false)
+	if (result == false)
 	{
 		QMessageBox::critical(m_instance,
 							  QApplication::applicationName(),
@@ -1878,22 +1862,34 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 		return false;
 	}
 
+	result = dbc->setSignalsWorkcopies(&newSignalWorkcopies, nullptr);
+
+	if (result == false)
+	{
+		QMessageBox::critical(m_instance,
+					  QApplication::applicationName(),
+					  QString(tr("Error setting signals new workcopies, update from preset is aborted.")));
+		return false;
+	}
+
+
+/*
 	for(Signal& s : newSignalWorkcopies)
 	{
 		ObjectState objState;
 
-		res = dbc->setSignalWorkcopy(&s, &objState, nullptr);
+		result = dbc->setSignalWorkcopy(&s, &objState, nullptr);
 
-		if (res == false)
+		if (result == false)
 		{
 			QMessageBox::critical(m_instance,
 						  QApplication::applicationName(),
 						  QString(tr("Cannot set workcopy of signal %1, update from preset is aborted.")).arg(s.appSignalID()));
 			return false;
 		}
-	}
+	}*/
 
-	return true;
+	return result;
 }
 
 void SignalsTabPage::CreateActions(QToolBar *toolBar)
@@ -2106,129 +2102,6 @@ void SignalsTabPage::checkIn()
 	}
 
 	m_signalsModel->loadSignals();
-}
-
-void SignalsTabPage::editColumnsVisibilityAndOrder()
-{
-	QDialog dlg(nullptr, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
-	QStandardItemModel *model = new QStandardItemModel(&dlg);
-	auto header = m_signalsView->horizontalHeader();
-	for (int i = 0; i < header->count(); i++)
-	{
-		auto item = new QStandardItem;
-		item->setCheckable(true);
-		item->setFlags(item->flags() & ~Qt::ItemIsEditable);
-		model->setItem(i, item);
-	}
-
-	// Helper functions
-	//
-	auto isHidden = [header](int logicalIndex){
-		return header->isSectionHidden(logicalIndex) || header->sectionSize(logicalIndex) == 0;
-	};
-	auto updateHidden = [model](int visualIndex, bool hidden) {
-		model->setData(model->index(visualIndex, 0), hidden ? Qt::Unchecked : Qt::Checked, Qt::CheckStateRole);
-	};
-	auto setHidden = [header](int logicalIndex, bool hidden) {
-		header->setSectionHidden(logicalIndex, hidden);
-		if (!hidden && header->sectionSize(logicalIndex) == 0)
-		{
-			header->resizeSection(logicalIndex, header->defaultSectionSize());
-		}
-	};
-
-	// Update state of items from signal table header
-	//
-	auto updateItems = [=](){
-		for (int i = 0; i < header->count(); i++)
-		{
-			int logicalIndex = header->logicalIndex(i);
-			updateHidden(i, isHidden(logicalIndex));
-			model->setData(model->index(i, 0), m_signalsModel->headerData(logicalIndex, Qt::Horizontal, Qt::DisplayRole).toString().replace('\n', ' '), Qt::DisplayRole);
-		}
-	};
-	updateItems();
-
-	// Child widgets layout
-	//
-	QListView* listView = new QListView(&dlg);
-	listView->setModel(model);
-	listView->setCurrentIndex(model->index(0,0));
-	QHBoxLayout* hl = new QHBoxLayout;
-	hl->addWidget(listView);
-	QVBoxLayout* vl = new QVBoxLayout;
-	hl->addLayout(vl);
-	QPushButton* upButton = new QPushButton("Up", &dlg);
-	vl->addWidget(upButton);
-	QPushButton* downButton = new QPushButton("Down", &dlg);
-	vl->addWidget(downButton);
-	vl->addStretch();
-	dlg.setLayout(hl);
-
-	//Window geometry
-	//
-	setWindowPosition(&dlg, "ColumnsVisibilityDialog");
-
-	// Show/Hide column
-	//
-	connect(model, &QStandardItemModel::itemChanged, [=](QStandardItem* item){
-		int visualIndex = item->row();
-		int logicalIndex = header->logicalIndex(visualIndex);
-		setHidden(logicalIndex, item->checkState() != Qt::Checked);
-
-		saveColumnVisibility(logicalIndex, item->checkState() == Qt::Checked);
-
-		//Check if no visible column left
-		//
-		for (int i = 0; i < model->rowCount(); i++)
-		{
-			if (!isHidden(i))
-			{
-				return;
-			}
-		}
-		setHidden(0, false);
-		saveColumnVisibility(0, true);
-		updateHidden(header->visualIndex(0), false);
-	});
-
-	// Move column left (move item up)
-	//
-	connect(upButton, &QPushButton::pressed, [=](){
-		int visualIndex = listView->currentIndex().row();
-		if (visualIndex == 0)
-		{
-			return;
-		}
-
-		header->moveSection(visualIndex, visualIndex - 1);
-
-		listView->setCurrentIndex(model->index(visualIndex - 1, 0));
-		updateItems();
-		saveColumnPosition(header->logicalIndex(visualIndex), visualIndex);
-		saveColumnPosition(header->logicalIndex(visualIndex - 1), visualIndex - 1);
-	});
-
-	// Move column right (move item down)
-	//
-	connect(downButton, &QPushButton::pressed, [=](){
-		int visualIndex = listView->currentIndex().row();
-		if (visualIndex == model->rowCount() - 1)
-		{
-			return;
-		}
-
-		header->moveSection(visualIndex, visualIndex + 1);
-
-		listView->setCurrentIndex(model->index(visualIndex + 1, 0));
-		updateItems();
-		saveColumnPosition(header->logicalIndex(visualIndex), visualIndex);
-		saveColumnPosition(header->logicalIndex(visualIndex + 1), visualIndex + 1);
-	});
-
-	dlg.exec();
-
-	saveWindowPosition(&dlg, "ColumnsVisibilityDialog");
 }
 
 void SignalsTabPage::changeSignalActionsVisibility()
@@ -2563,29 +2436,6 @@ void SignalsTabPage::compareObject(DbChangesetObject object, CompareData compare
 	ComparePropertyObjectDialog::showDialog(object, compareData, source, target, this);
 
 	return;
-}
-
-void SignalsTabPage::saveColumnWidth(int index)
-{
-	int width = m_signalsView->columnWidth(index);
-	if (width == 0)
-	{
-		return;
-	}
-	QSettings settings;
-	settings.setValue(QString("SignalsTabPage/ColumnWidth/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), width);
-}
-
-void SignalsTabPage::saveColumnVisibility(int index, bool visible)
-{
-	QSettings settings;
-	settings.setValue(QString("SignalsTabPage/ColumnVisibility/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), visible);
-}
-
-void SignalsTabPage::saveColumnPosition(int index, int position)
-{
-	QSettings settings;
-	settings.setValue(QString("SignalsTabPage/ColumnPosition/%1").arg(QString(Columns[index]).replace("/", "|")).replace("\n", " "), position);
 }
 
 

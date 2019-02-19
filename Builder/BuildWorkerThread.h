@@ -29,6 +29,10 @@ namespace Builder
 	private:
 		virtual void run() override;
 
+		// Get SuppressWarning list
+		//
+		bool getSuppressWarningList(DbController* db);
+
 		// Get Equipment from the project database
 		//
 		bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
@@ -65,6 +69,10 @@ namespace Builder
 		// Load Application Functional Block Library
 		//
 		bool loadLogicModuleDescription(DbController* db, Hardware::DeviceModule* logicModule, LmDescriptionSet* lmDescriptions);
+
+		// Check that all files (and from that theirs SchemaIds) in $root$/Schema are unique
+		//
+		bool checkRootSchemasUniquesIds(DbController* db);
 
 		// Build Application Logic
 		//

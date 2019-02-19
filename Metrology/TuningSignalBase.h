@@ -185,22 +185,44 @@ class TuningWriteCmd
 {
 public:
 
-	TuningWriteCmd() {}
-	TuningWriteCmd(const Hash &signalHash, float value) : m_signalHash (signalHash), m_value (value) {}
+	TuningWriteCmd() { clear(); }
+	TuningWriteCmd(const Hash &signalHash, TuningValueType type, double value) : m_signalHash (signalHash), m_type (type), m_value (value) {}
 	virtual ~TuningWriteCmd() {}
 
 private:
 
-	Hash					m_signalHash;
-	float					m_value;
+	Hash					m_signalHash = UNDEFINED_HASH;
+	TuningValueType			m_type = TuningValueType::Discrete;
+	QVariant				m_value;
 
 public:
+
+	void					clear()
+	{
+		m_signalHash = UNDEFINED_HASH;
+		m_type = TuningValueType::Discrete;
+		m_value.clear();
+	}
+
+	bool					isEmpty()
+	{
+		if (m_signalHash == UNDEFINED_HASH)
+		{
+			return true;
+		}
+
+		return false;
+	}
 
 	Hash					signalHash() const { return m_signalHash; }
 	void					setSignalHash(Hash hash) { m_signalHash = hash; }
 
-	float					value() const { return m_value; }
-	void					setValue(float value) { m_value = value; }
+	TuningValueType			type() const { return m_type; }
+	int						typeInt() const { return TO_INT(m_type); }
+	void					setType(TuningValueType valueType) { m_type = valueType; }
+
+	QVariant				value() const { return m_value; }
+	void					setValue(QVariant value) { m_value = value; }
 };
 
 // ==============================================================================================
@@ -236,9 +258,9 @@ public:
 	int						cmdFowWriteCount() const;
 
 	void					appendCmdFowWrite(const TuningWriteCmd& cmd);
-	void					appendCmdFowWrite(const Hash& signalHash, float value);
+	void					appendCmdFowWrite(const Hash& signalHash, TuningValueType type, QVariant value);
 
-	TuningWriteCmd			cmdFowWrite(int index);
+	TuningWriteCmd			cmdFowWrite();
 
 signals:
 

@@ -55,14 +55,14 @@ const int	MEASURE_KIND_UNKNOWN	= -1,
 const char* const MeasureLimitType[] =
 {
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Electric"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Physical"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Engeneering"),
 };
 
 const int	MEASURE_LIMIT_TYPE_COUNT		= sizeof(MeasureLimitType)/sizeof(MeasureLimitType[0]);
 
 const int	MEASURE_LIMIT_TYPE_UNDEFINED	= -1,
 			MEASURE_LIMIT_TYPE_ELECTRIC		= 0,
-			MEASURE_LIMIT_TYPE_PHYSICAL		= 1;
+			MEASURE_LIMIT_TYPE_ENGENEER		= 1;
 
 // ==============================================================================================
 
@@ -125,6 +125,8 @@ private:
 	int				m_measureID = -1;								// primary key of record in SQL table
 	bool			m_filter = false;								// filter for record, if "true" - hide record
 
+	bool			m_valid = true;									// signal is valid during the measurement
+
 	QDateTime		m_measureTime;									// measure time
 	int				m_reportType = -1;								// report type
 
@@ -144,6 +146,9 @@ public:
 
 	bool			filter() const { return m_filter; }
 	void			setFilter(bool filter) { m_filter = filter; }
+
+	bool			isValid() const { return m_valid; }
+	void			setValid(bool valid) { m_valid = valid; }
 
 	QDateTime		measureTime() const { return m_measureTime; }
 	void			setMeasureTime(const QDateTime& time) { m_measureTime = time; }
@@ -200,8 +205,8 @@ public:
 
 	void			virtual clear();
 
-	void			fill_measure_aim(const MeasureMultiParam& measureParam, bool isNegativeRange);
-	void			fill_measure_aom(const MeasureMultiParam& measureParam);
+	void			fill_measure_input(const MeasureMultiParam& measureParam, bool isNegativeRange);
+	void			fill_measure_output(const MeasureMultiParam& measureParam);
 
 	void			setLimits(const Metrology::SignalParam& param);
 	void			calcError();
@@ -265,6 +270,7 @@ public:
 	void			setAdditionalParamCount(int count) { m_additionalParamCount = count; }
 
 	double			additionalParam(int paramType) const;
+	QString			additionalParamStr(int paramType) const;
 	void			setAdditionalParam(int paramType, double value);
 
 	void			updateMeasureArray(int limitType, Measurement* pMeasurement);

@@ -42,6 +42,9 @@ extern const char* const UfbTemplExtension;		// User Functional Block template f
 extern const char* const MvsFileExtension;		// Monitor schema file extnesion
 extern const char* const MvsTemplExtension;		// Monitor schema template file extnesion
 
+extern const char* const TvsFileExtension;		// TuningClient schema file extnesion
+extern const char* const TvsTemplExtension;		// TuningClient schema template file extnesion
+
 extern const char* const DvsFileExtension;		// Diagnostics schema file extnesion
 extern const char* const DvsTemplExtension;		// Diagnostics schema template file extnesion
 
@@ -50,6 +53,7 @@ extern const char* const BusFileExtension;		// Bus types
 
 extern const char* const AppSignalFileExtension;	// Application signal file extention (::Proto::AppSignal message)
 extern const char* const AppSignalSetFileExtension;	// Application signals set file extention (::Proto::AppSignalSet message)
+
 
 //
 //
@@ -82,6 +86,7 @@ private:
 bool operator== (const VcsState& s1, const VcsState& s2) noexcept;
 bool operator!= (const VcsState& s1, const VcsState& s2) noexcept;
 bool operator<  (const VcsState& s1, const VcsState& s2) noexcept;
+
 
 //
 //
@@ -136,6 +141,7 @@ struct ObjectState
 	int errCode;
 };
 
+
 //
 //
 // DbProject
@@ -167,11 +173,13 @@ protected:
 	int m_version;
 };
 
+
 struct UpgradeItem
 {
     QString upgradeFileName;
 	QString text;
 };
+
 
 //
 //
@@ -235,6 +243,7 @@ private:
 	bool m_readonly = false;
 	bool m_disabled = false;
 };
+
 
 //
 // DbFileTree
@@ -327,6 +336,7 @@ private:
 	// WARNING, assigment move is present, adding new member, modify operator=(DbFileTree&&)!!!
 	//
 };
+
 
 //
 //
@@ -441,6 +451,7 @@ public:
 	friend bool operator< (const DbFileInfo& a, const DbFileInfo& b);
 };
 
+
 //
 //
 // DbFile
@@ -480,6 +491,7 @@ public:
 private:
 	QByteArray m_data;
 };
+
 
 //
 //
@@ -584,6 +596,12 @@ public:
 	QString parent() const;
 	void setParent(const QString& value);
 
+	QString fileMoveText() const;
+	void setFileMoveText(const QString& value);
+
+	QString fileRenameText() const;
+	void setFileRenameText(const QString& value);
+
 private:
 	Type m_type = Type::File;
 	int m_id = -1;				// File.FileID or Signal.SignalsID
@@ -591,18 +609,10 @@ private:
 	QString m_caption;
 	VcsItemAction m_action = VcsItemAction::Added;
 	QString m_parent;
+	QString m_fileMoveText;
+	QString m_fileRenameText;
 };
 
-
-
-// WIN_64 PLATFORM C4267 WARNING ISSUE, IT IS NOT ENOUGH TO DISBALE THIS WARNING
-// To remove annoing warning c4267 under windows x64, go to qmetatype.h, line 897 (Qt 5.3.1) and set static_cast to int for the
-// returning value.
-// Was:
-// { static int size(const std::vector<T> *t) { return t->size(); } };
-// Now:
-// { static int size(const std::vector<T> *t) { return static_cast<int>(t->size()); } };
-//
 
 Q_DECLARE_METATYPE(DbUser)
 Q_DECLARE_METATYPE(DbFileTree)

@@ -68,13 +68,20 @@ namespace Builder
 			LOG_MESSAGE(m_log, tr("Opening project %1: ok").arg(projectName()));
 		}
 
+		// Get SuppressWarning list
+		//
+		ok = getSuppressWarningList(&db);
+
+		// --
+		//
 		BuildResultWriter buildWriter(buildOutputPath());
 
-#pragma message("################################ Load correct ChangesetID")
 		buildWriter.start(&db, m_log, release(), 0 /* Load correct ChangesetID */);
 
 		do
 		{
+			// --
+			//
 			int lastChangesetId = 0;
 			ok = db.lastChangesetId(&lastChangesetId);
 
@@ -284,6 +291,16 @@ namespace Builder
 			Hardware::OptoModuleStorage opticModuleStorage(&equipmentSet, &fscDescriptions, m_log);
 
 			//
+			// Check that all files (and from that theirs SchemaIds) in $root$/Schema are unique
+			//
+			ok = checkRootSchemasUniquesIds(&db);
+
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
+
+			//
 			// Parse application logic
 			//
 			AppLogicData appLogicData;
@@ -431,6 +448,59 @@ namespace Builder
 		//
 
 		return;
+	}
+
+	bool BuildWorkerThread::getSuppressWarningList(DbController* db)
+	{
+		assert(db != nullptr);
+		assert(db->isProjectOpened() == true);
+
+		QString suppressedWarningsStr;
+
+		if (bool ok = db->getProjectProperty("SuppressWarnings", &suppressedWarningsStr, nullptr);
+			ok == false)
+		{
+			m_log->errPDB2020("SuppressWarnings");
+			return false;
+		}
+
+		// --
+		//
+		QStringList sl = suppressedWarningsStr.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+
+		std::vector<int> suppressWarnings;
+		suppressWarnings.reserve(sl.size());
+
+		for (QString& sw : sl)
+		{
+			bool ok = false;
+			int warning = sw.toInt(&ok);
+
+			if (ok == true)
+			{
+				suppressWarnings.push_back(warning);
+			}
+		}
+
+		if (suppressWarnings.empty() == false)
+		{
+			QString suppressWarningsMessage;
+			for (int w : suppressWarnings)
+			{
+				if (suppressWarningsMessage.isEmpty() == false)
+				{
+					suppressWarningsMessage += QStringLiteral(", ");
+				}
+
+				suppressWarningsMessage += QString::number(w);
+			}
+
+			LOG_MESSAGE(m_log, tr("Suppressed warnings: %1").arg(suppressWarningsMessage));
+		}
+
+		m_log->setSupressIssues(suppressWarnings);
+
+		return true;
 	}
 
 	bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* parent)
@@ -1030,6 +1100,86 @@ namespace Builder
 		return ok;
 	}
 
+	// Check that all files (and from that theirs SchemaIds) in $root$/Schema are unique
+	//
+	bool BuildWorkerThread::checkRootSchemasUniquesIds(DbController* db)
+	{
+		if (db == nullptr)
+		{
+			assert(db);
+			return false;
+		}
+
+		LOG_EMPTY_LINE(m_log);
+		LOG_MESSAGE(m_log, tr("Checking uniqueness SchemaIDs..."));
+
+		DbFileTree fileTree;
+
+		if (bool ok = db->getFileListTree(&fileTree, db->schemaFileId(), true, nullptr);
+			ok == false)
+		{
+			m_log->errPDB2001(db->schemaFileId(), "", db->lastError());
+			return false;
+		}
+
+		// --
+		//
+		const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
+
+		QString strAlFileExtension{::AlFileExtension};
+		QString strUfbFileExtension{::UfbFileExtension};
+		QString strMvsFileExtension{::MvsFileExtension};
+		QString strDvsFileExtension{::DvsFileExtension};
+
+		bool success = true;
+
+		std::set<QString> schemaIds;
+		for (auto& [fileId, file] : files)
+		{
+			if (file->isFolder() == true)
+			{
+				continue;
+			}
+
+			QString fileExt = file->extension();
+
+			if (fileExt.compare(strAlFileExtension, Qt::CaseInsensitive) != 0 &&
+				fileExt.compare(strUfbFileExtension, Qt::CaseInsensitive) != 0 &&
+				fileExt.compare(strMvsFileExtension, Qt::CaseInsensitive) != 0 &&
+				fileExt.compare(strDvsFileExtension, Qt::CaseInsensitive) != 0)
+			{
+				continue;
+			}
+
+			//--
+			//
+			VFrame30::SchemaDetails details;
+
+			if (bool ok = details.parseDetails(file->details());
+				ok == false)
+			{
+				m_log->errALP4024(file->fileName(), file->details());
+				continue;
+			}
+
+			if (schemaIds.count(details.m_schemaId) != 0)
+			{
+				m_log->errALP4025(details.m_schemaId);
+				success = false;
+			}
+			else
+			{
+				schemaIds.insert(details.m_schemaId);
+			}
+		}
+
+		if (success == true)
+		{
+			LOG_SUCCESS(m_log, tr("Ok"));
+		}
+
+		return success;
+	}
 
 	bool BuildWorkerThread::parseApplicationLogic(DbController* db,
 												  AppLogicData* appLogicData,

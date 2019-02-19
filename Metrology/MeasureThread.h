@@ -42,6 +42,7 @@ private:
 	bool					hasConnectedCalibrators();
 	bool					setCalibratorUnit();
 	bool					prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit);
+	void					polarityTest(double electricVal, MeasureMultiParam& param);
 
 	// function of measure
 	//

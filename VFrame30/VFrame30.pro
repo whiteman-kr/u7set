@@ -120,7 +120,8 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/Signal.h \
     ../lib/DeviceObject.h \
     ../lib/SignalProperties.h \
-    ../lib/XmlHelper.h
+    ../lib/XmlHelper.h \
+    TuningSchema.h
 
 SOURCES += \
     Settings.cpp \
@@ -185,7 +186,8 @@ SOURCES += \
     ../lib/Signal.cpp \
     ../lib/DeviceObject.cpp \
     ../lib/SignalProperties.cpp \
-    ../lib/XmlHelper.cpp
+    ../lib/XmlHelper.cpp \
+    TuningSchema.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

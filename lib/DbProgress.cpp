@@ -31,6 +31,7 @@ bool DbProgress::init()
 	{
 		QMutexLocker l(&m_mutex);
 
+		m_currentOperation.clear();
 		m_errorMessage.clear();
 		m_completeMessage.clear();
 	}

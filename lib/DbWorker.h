@@ -112,6 +112,9 @@ public slots:
 	void slot_addFiles(std::vector<std::shared_ptr<DbFile>>* files, int parentId, bool ensureUniquesInParentTree, int uniqueFromFileId);
     void slot_deleteFiles(std::vector<DbFileInfo>* files);
 
+	void slot_moveFiles(const std::vector<DbFileInfo>* files, int moveToParentId, std::vector<DbFileInfo>* movedFiles);
+	void slot_renameFile(const DbFileInfo& file, QString newFileName, DbFileInfo* updatedFileInfo);
+
     void slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out);
     void slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::vector<std::shared_ptr<DbFile> >* out);
     void slot_getCheckedOutFiles(const std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* out);
@@ -155,6 +158,7 @@ public slots:
 
     void slot_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
 	void slot_setSignalWorkcopy(Signal *signal, ObjectState *objectState);
+	void slot_setSignalsWorkcopies(const QVector<Signal>* signalsList);
 
     void slot_deleteSignal(int signalID, ObjectState* objectState);
     void slot_undoSignalChanges(int signalID, ObjectState* objectState);
@@ -169,6 +173,7 @@ public slots:
 	void slot_getSignalsIDsWithAppSignalID(QString appSignalID, QVector<int>* signalIDs);
 	void slot_getSignalsIDsWithCustomAppSignalID(QString customAppSignalID, QVector<int>* signalIDs);
 	void slot_getSignalsIDsWithEquipmentID(QString equipmentID, QVector<int>* signalIDs);
+	void slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QHash<QString, int>* signalIDs);
 
 	void slot_getSignalHistory(int signalID, std::vector<DbChangeset>* out);
 	void slot_getSpecificSignals(const std::vector<int>* signalIDs, int changesetId, std::vector<Signal>* out);

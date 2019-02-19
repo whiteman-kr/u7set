@@ -13,11 +13,13 @@
 #include "DialogSubsystemListEditor.h"
 #include "DialogConnections.h"
 #include "DialogBusEditor.h"
+#include "DialogAfbLibraryCheck.h"
 #include "BuildTabPage.h"
 #include "UploadTabPage.h"
 #include "SimulatorTabPage.h"
 #include "GlobalMessanger.h"
 #include "Forms/FileHistoryDialog.h"
+#include "Forms/ProjectPropertiesForm.h"
 #include "../lib/Ui/DialogAbout.h"
 #include "../VFrame30/VFrame30.h"
 #include "../lib/LogicModuleSet.h"
@@ -238,7 +240,12 @@ void MainWindow::createActions()
 	m_updateUfbsAfbs->setEnabled(false);
 	connect(m_updateUfbsAfbs, &QAction::triggered, this, &MainWindow::updateUfbsAfbsBusses);
 
-    m_aboutAction = new QAction(tr("About..."), this);
+	m_AfbLibraryCheck = new QAction(tr("AFB Library Check..."), this);
+	m_AfbLibraryCheck->setStatusTip(tr("AFB Library Check"));
+	m_AfbLibraryCheck->setEnabled(false);
+	connect(m_AfbLibraryCheck, &QAction::triggered, this, &MainWindow::afbLibraryCheck);
+
+	m_aboutAction = new QAction(tr("About..."), this);
 	m_aboutAction->setStatusTip(tr("Show application information"));
 	//m_pAboutAction->setEnabled(true);
 	connect(m_aboutAction, &QAction::triggered, this, &MainWindow::showAbout);
@@ -273,6 +280,12 @@ void MainWindow::createActions()
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectHistoryAction->setEnabled(false);});
 	addAction(m_projectHistoryAction);
 
+	m_projectPropertiesAction = new QAction(tr("Project Properties..."), this);
+	m_projectPropertiesAction->setEnabled(false);
+	connect(m_projectPropertiesAction, &QAction::triggered, this, &MainWindow::projectProperties);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_projectPropertiesAction->setEnabled(true);});
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectPropertiesAction->setEnabled(false);});
+
 	return;
 }
 
@@ -295,6 +308,7 @@ void MainWindow::createMenus()
 	//
 	QMenu* pProjectMenu = menuBar()->addMenu(tr("Project"));		// Alt+P now switching to the Projects tab page, don't use &
 	pProjectMenu->addAction(m_projectHistoryAction);
+	pProjectMenu->addAction(m_projectPropertiesAction);
 	pProjectMenu->addAction(m_startBuildAction);
 
 	// Tools
@@ -307,6 +321,11 @@ void MainWindow::createMenus()
 
 	pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_updateUfbsAfbs);
+
+	if (theSettings.isExpertMode() == true)
+	{
+		pToolsMenu->addAction(m_AfbLibraryCheck);
+	}
 
 	pToolsMenu->addSeparator();
 	pToolsMenu->addAction(m_settingsAction);
@@ -773,6 +792,19 @@ void MainWindow::updateUfbsAfbsBusses()
 	return;
 }
 
+void MainWindow::afbLibraryCheck()
+{
+	if (theDialogAfbLibraryCheck == nullptr)
+	{
+		theDialogAfbLibraryCheck = new DialogAfbLibraryCheck(dbController(), this);
+		theDialogAfbLibraryCheck->show();
+	}
+	else
+	{
+		theDialogAfbLibraryCheck->activateWindow();
+	}
+}
+
 void MainWindow::showAbout()
 {
 	QString text = "Supported project database version: " + QString::number(DbController::databaseVersion()) + "<br><br>";
@@ -840,6 +872,24 @@ void MainWindow::projectHistory()
 	return;
 }
 
+void MainWindow::projectProperties()
+{
+	if (m_dbController == nullptr)
+	{
+		assert(m_dbController);
+		return;
+	}
+
+	if (m_dbController->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	ProjectPropertiesForm::show(this, m_dbController);
+
+	return;
+}
+
 void MainWindow::projectOpened(DbProject project)
 {
 	setWindowTitle(qApp->applicationName() + QString(" - ") + project.projectName() + QString(" - ") + dbController()->currentUser().username());
@@ -853,6 +903,7 @@ void MainWindow::projectOpened(DbProject project)
     m_connectionsEditorAction->setEnabled(true);
 	m_busEditorAction->setEnabled(true);
 	m_updateUfbsAfbs->setEnabled(true);
+	m_AfbLibraryCheck->setEnabled(true);
 
 	// Status bar
 	//
@@ -883,6 +934,7 @@ void MainWindow::projectClosed()
     m_connectionsEditorAction->setEnabled(false);
 	m_busEditorAction->setEnabled(false);
 	m_updateUfbsAfbs->setEnabled(false);
+	m_AfbLibraryCheck->setEnabled(false);
 
 	// Status bar
 	//

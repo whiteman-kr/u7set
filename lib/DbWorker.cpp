@@ -263,12 +263,23 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0243.sql", "Upgrade to version 243, AIM-4PH Preset corrections"},
 	{":/DatabaseUpgrade/Upgrade0244.sql", "Upgrade to version 244, Blink signal was added to LM1-SR04, LM1-SF00-4PH Presets"},
 	{":/DatabaseUpgrade/Upgrade0245.sql", "Upgrade to version 245, Unit have been made editable for output analog signals"},
-	{":/DatabaseUpgrade/Upgrade0246.sql", "Upgrade to version 246, Add attributes to file system"},
+	{":/DatabaseUpgrade/Upgrade0246.sql", "Upgrade to version 246, Add attributes to file system"},	
 	{":/DatabaseUpgrade/Upgrade0247.sql", "Upgrade to version 247, AIM-4PH default range is 5..0, TIM valid range checking is made in physical units, added V to ElectricUnits in AOM-4PH"},
 	{":/DatabaseUpgrade/Upgrade0248.sql", "Upgrade to version 248, TIM valid range checking calculations fix"},
 	{":/DatabaseUpgrade/Upgrade0249.sql", "Upgrade to version 249, Add archive period and location properties to Archive Service preset"},
+	{":/DatabaseUpgrade/Upgrade0250.sql", "Upgrade to version 250, PhysicalLimits were removed AIM-4PH, they are calculated from ElectricUnits"},
+	{":/DatabaseUpgrade/Upgrade0251.sql", "Upgrade to version 251, Add functions api.get_file_full_path, api.move_file"},
+	{":/DatabaseUpgrade/Upgrade0252.sql", "Upgrade to version 252, Add functions api.rename_file"},	
+	{":/DatabaseUpgrade/Upgrade0253.sql", "Upgrade to version 253, ImpVersion and MaxInstCount made up to date in AFB elements descriptions"},
+	{":/DatabaseUpgrade/Upgrade0254.sql", "Upgrade to version 254, PhysicalLimits were removed WAIM-4PH, they are calculated from ElectricUnits"},
+	{":/DatabaseUpgrade/Upgrade0255.sql", "Upgrade to version 255, PhysicalLimits calculation error messages are processed in WAIM and AIM"},
+	{":/DatabaseUpgrade/Upgrade0256.sql", "Upgrade to version 256, SchemaTags property was added to Monitor and TuningClient presets"},
+	{":/DatabaseUpgrade/Upgrade0257.sql", "Upgrade to version 257, MaxInstCount corrections in  LM1-SR03, LM1-SR02"},
+	{":/DatabaseUpgrade/Upgrade0258.sql", "Upgrade to version 258, AIM-4PH, AOM-4PH, WAIM, TIM, RIM migrated to dynamic physical units calculation"},
+	{":/DatabaseUpgrade/Upgrade0259.sql", "Upgrade to version 259, Optimize undo_changes and Equipment Editor"},
+	{":/DatabaseUpgrade/Upgrade0260.sql", "Upgrade to version 260, Creating some indexes on signalinstance table"},
+	{":/DatabaseUpgrade/Upgrade0261.sql", "Upgrade to version 261, SchemaTags in Monitor and TuningClient has default values"},
 };
-
 
 int DbWorker::counter = 0;
 
@@ -1747,7 +1758,8 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 				//
 				QFile upgradeFile(ui.upgradeFileName);
 
-				//qDebug() << "Begin upgrade: item " << i << " completed, file: " << ui.upgradeFileName;
+				//qDebug() << "Upgrade Project Database, file " << ui.upgradeFileName;
+				m_progress->setCurrentOperation(tr("Upgrading... %1").arg(ui.upgradeFileName));
 
 				result = upgradeFile.open(QIODevice::ReadOnly | QIODevice::Text);
 
@@ -2005,7 +2017,7 @@ void DbWorker::slot_setProjectProperty(QString propertyName, QString propertyVal
 
 	query.prepare("SELECT * FROM set_project_property(:propertyName, :propertyValue);");
 	query.bindValue(":propertyName", propertyName);
-	query.bindValue(":propertyValue", propertyValue);
+	query.bindValue(":propertyValue", propertyValue.isEmpty() ? "" : propertyValue);
 
 	bool result = query.exec();
 
@@ -2887,6 +2899,165 @@ void DbWorker::slot_deleteFiles(std::vector<DbFileInfo>* files)
 	return;
 }
 
+void DbWorker::slot_moveFiles(const std::vector<DbFileInfo>* files, int moveToParentId, std::vector<DbFileInfo>* movedFiles)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Check parameters
+	//
+	if (movedFiles == nullptr)
+	{
+		assert(movedFiles != nullptr);
+		return;
+	}
+
+	if (files == nullptr ||
+		files->empty() == true ||
+		moveToParentId == DbFileInfo::Null)
+	{
+		assert(files != nullptr);
+		assert(files->empty() != true);
+		assert(moveToParentId != DbFileInfo::Null);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Database connection is not openned."));
+		return;
+	}
+
+	// Log action
+	//
+	QString logMessage = QString("slot_moveFiles: moveToParentId %1, FileCount %2, FileNames: ")
+							 .arg(moveToParentId)
+							 .arg(files->size());
+	for (auto& f : *files)
+	{
+		logMessage += f.fileName() + QLatin1String(" ");
+	}
+
+	addLogRecord(db, logMessage);
+
+	// Form request string
+	//
+	QString request = QString("SELECT * FROM api.move_files('%1', ARRAY[")
+									.arg(sessionKey());
+
+	for (auto it = files->begin(); it != files->end(); ++it)
+	{
+		if (it == files->begin())
+		{
+			request += QString("%1").arg(it->fileId());
+		}
+		else
+		{
+			request += QString(", %1").arg(it->fileId());
+		}
+	}
+
+	request += QString("], %1);").arg(moveToParentId);
+
+	// --
+	//
+	QSqlQuery q(db);
+	q.setForwardOnly(true);
+
+	if (bool result = q.exec(request);
+		result == false)
+	{
+		emitError(db, tr("Can't move file. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	movedFiles->clear();
+	movedFiles->reserve(files->size());
+
+	while (q.next())
+	{
+		DbFileInfo& fileInfo = movedFiles->emplace_back();
+		db_dbFileInfo(q, &fileInfo);	// FileID will be changed here
+	}
+
+	return;
+}
+
+void DbWorker::slot_renameFile(const DbFileInfo& file, QString newFileName, DbFileInfo* updatedFileInfo)
+{
+	// Init automitic varaiables
+	//
+	std::shared_ptr<int*> progressCompleted(nullptr, [this](void*)
+		{
+			this->m_progress->setCompleted(true);			// set complete flag on return
+		});
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Database connection is not openned."));
+		return;
+	}
+
+	// Check parameters
+	//
+	if (updatedFileInfo == nullptr ||
+		file.isNull() == true ||
+		newFileName.isEmpty() == true)
+	{
+		assert(updatedFileInfo != nullptr);
+		assert(file.isNull() == false);
+		assert(newFileName.isEmpty() == false);
+		emitError(db, tr("slot_renameFile: input parameters error."));
+		return;
+	}
+
+	*updatedFileInfo = DbFileInfo{};
+
+	// Log action
+	//
+	QString logMessage = QString("slot_renameFile: fileId %1, newFileName %2")
+							 .arg(file.fileId())
+							 .arg(newFileName);
+	addLogRecord(db, logMessage);
+
+	// Request
+	//
+	QString request = QString("SELECT * FROM api.rename_file('%1', %2, '%3');")
+									.arg(sessionKey())
+									.arg(file.fileId())
+									.arg(newFileName);
+
+	QSqlQuery q(db);
+	if (bool result = q.exec(request);
+		result == false)
+	{
+		emitError(db, tr("Can't rename file. Error: ") +  q.lastError().text());
+		return;
+	}
+
+	if (q.next() == true)
+	{
+		db_dbFileInfo(q, updatedFileInfo);
+	}
+	else
+	{
+		assert(false);
+		emitError(db, tr("Can't get return result on renaming file"));
+	}
+
+	return;
+}
+
 void DbWorker::slot_getLatestVersion(const std::vector<DbFileInfo>* files, std::vector<std::shared_ptr<DbFile>>* out)
 {
 	// Init automitic varaiables
@@ -3034,9 +3205,9 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 		out->push_back(file);
 	}
 
-	qDebug() << "Request time is " << timerObject.elapsed() << " ms, request: " << request;
+	//qDebug() << "Request time is " << timerObject.elapsed() << " ms, request: " << request;
 	//qDebug() << "\tmemoryAllocationEllpased " << memoryAllocationEllpased / 1000000;
-	qDebug() << "\tupdateFileEllpased " << updateFileEllpased / 1000000;
+	//qDebug() << "\tupdateFileEllpased " << updateFileEllpased / 1000000;
 	//qDebug() << "\tpushBackEllpased " << pushBackEllpased / 1000000;
 
 	return;
@@ -3485,7 +3656,7 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 	// Log action
 	//
 	QString logMessage = QString("slot_checkIn: Comment '%1', FileCount %2, FileNames: ").arg(comment).arg(files->size());
-	for (auto& f : *files)
+	for (const DbFileInfo& f : *files)
 	{
 		logMessage += QString("%1 %2, ").arg(f.fileName()).arg(f.fileId());
 	}
@@ -3501,7 +3672,7 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 	//
 	for (unsigned int i = 0; i < files->size(); i++)
 	{
-		auto file = files->at(i);
+		const DbFileInfo& file = files->at(i);
 
 		if (i == 0)
 		{
@@ -3515,6 +3686,9 @@ void DbWorker::slot_checkIn(std::vector<DbFileInfo>* files, QString comment)
 
 	request += QString("], '%1');")
 			.arg(DbWorker::toSqlStr(comment));
+
+	//qDebug() << files->size();
+	//qDebug() << request;
 
 	// request
 	//
@@ -4115,14 +4289,6 @@ void DbWorker::slot_getChangesetDetails(int changeset, DbChangesetDetails* out)
 
 	// --
 	//
-
-//	QMapIterator<QString, QVariant> i(q.boundValues());
-//	while (i.hasNext())
-//	{
-//		i.next();
-//		qDebug() << i.key().toUtf8().data() << ": " << i.value().toString().toUtf8().data() << endl;
-//	}
-
 	while (q.next())
 	{
 		db_dbChangesetObject(q, out);
@@ -4920,6 +5086,51 @@ void DbWorker::slot_setSignalWorkcopy(Signal* signal, ObjectState *objectState)
 	}
 }
 
+void DbWorker::slot_setSignalsWorkcopies(const QVector<Signal>* signalsList)
+{
+	AUTO_COMPLETE
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot set signal workcopy. Database connection is not opened."));
+		return;
+	}
+
+	QString errMsg;
+
+	double sum = 0;
+	double prevSum = 0;
+	double interval = signalsList->count() / 50.0;
+
+	for(Signal signal : *signalsList)
+	{
+		//
+
+		sum += 1;
+
+		if (sum >= prevSum + interval)
+		{
+			m_progress->setValue(static_cast<int>((sum * 100.0) / (*signalsList).count()));
+			prevSum = sum;
+		}
+
+		//
+
+		ObjectState objectState;
+
+		bool result = setSignalWorkcopy(db, signal, objectState, errMsg);
+
+		if (result == false)
+		{
+			emitError(db, errMsg);
+			return;
+		}
+	}
+}
 
 void DbWorker::slot_deleteSignal(int signalID, ObjectState* objectState)
 {
@@ -5366,6 +5577,67 @@ void DbWorker::slot_getSignalsIDsWithEquipmentID(QString equipmentID, QVector<in
 	while(q.next() == true)
 	{
 		signalIDs->append(q.value(0).toInt());
+	}
+}
+
+void DbWorker::slot_getMultipleSignalsIDsWithEquipmentID(const QStringList& equipmentIDs, QHash<QString, int>* signalIDs)
+{
+	AUTO_COMPLETE
+
+	if (signalIDs == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	signalIDs->clear();
+
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get signal IDs with EquipmentID. Database connection is not opened."));
+		return;
+	}
+
+	double sum = 0;
+	double prevSum = 0;
+	double interval = equipmentIDs.count() / 50.0;
+
+	for(const QString& equipmentID : equipmentIDs)
+	{
+		//
+
+		sum += 1;
+
+		if (sum >= prevSum + interval)
+		{
+			m_progress->setValue(static_cast<int>((sum * 100.0) / equipmentIDs.count()));
+			prevSum = sum;
+		}
+
+		//
+
+		QString request = QString("SELECT * FROM get_signal_ids_with_equipmentid(%1, '%2')")
+						  .arg(currentUser().userId())
+						  .arg(toSqlStr(equipmentID));
+
+		QSqlQuery q(db);
+
+		bool result = q.exec(request);
+
+		if (result == false)
+		{
+			emitError(db, q.lastError().text());
+			return;
+		}
+
+		while(q.next() == true)
+		{
+			int signalID = q.value(0).toInt();
+
+			signalIDs->insertMulti(equipmentID, signalID);
+		}
 	}
 }
 
@@ -6306,6 +6578,8 @@ bool DbWorker::db_dbChangesetObject(const QSqlQuery& q, DbChangesetDetails* dest
 	csObject.setCaption(q.value(6 + 3).toString());
 	csObject.setAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(6 + 4).toInt()));
 	csObject.setParent(q.value(6 + 5).toString());
+	csObject.setFileMoveText(q.value(6 + 6).toString());
+	csObject.setFileRenameText(q.value(6 + 7).toString());
 
 	destination->addObject(csObject);
 

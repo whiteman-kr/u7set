@@ -20,7 +20,7 @@ namespace Afb
 		Output
 	};
 
-	class AfbComponentPin
+	class VFRAME30LIBSHARED_EXPORT AfbComponentPin
 	{
 	public:
 		AfbComponentPin() = default;

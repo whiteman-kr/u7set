@@ -1135,18 +1135,7 @@ void EquipmentModel::projectOpened()
 
 	// Fill user list
 	//
-	m_users.clear();
-
-	std::vector<DbUser> users;
-	bool ok = dbController()->getUserList(&users, nullptr);
-
-	if (ok == true)
-	{
-		for (const DbUser& u : users)
-		{
-			m_users[u.userId()] = u.username();
-		}
-	}
+	updateUserList();
 
 	endResetModel();
 
@@ -1181,6 +1170,23 @@ void EquipmentModel::switchMode()
 	}
 
 	endResetModel();
+}
+
+void EquipmentModel::updateUserList()
+{
+	m_users.clear();
+
+	std::vector<DbUser> users;
+	bool ok = dbController()->getUserList(&users, nullptr);
+
+	if (ok == true)
+	{
+		for (const DbUser& u : users)
+		{
+			m_users[u.userId()] = u.username();
+		}
+	}
+
 }
 
 DbController* EquipmentModel::dbController()
@@ -1223,25 +1229,6 @@ EquipmentView::EquipmentView(DbController* dbcontroller) :
 	setIndentation(10);
 
 	sortByColumn(EquipmentModel::Columns::ObjectPlaceColumn, Qt::SortOrder::AscendingOrder);
-
-
-	// RPCT-633, somehow in this widow selectiop background was white, set it to something default
-	// And the same situation was seen in QtCreator, I think it's some kind of bug, so, just set come colors
-	// for selection
-	//
-//	auto p = qApp->palette("QListView");
-
-//	QColor highlight = p.highlight().color();
-//	QColor highlightText = p.highlightedText().color();
-
-//	QString selectionColor = QString("QTreeView::item:selected { background-color: %1; color: %2; }")
-//							 .arg(highlight.name())
-//							 .arg(highlightText.name());
-
-//	setStyleSheet(selectionColor);
-
-	// end of RPCT-633
-	//
 
 	return;
 }
@@ -3122,6 +3109,26 @@ void EquipmentView::updateFromPreset()
 		return;
 	}
 
+	// Check if some files are checked out
+	//
+	DbFileInfo hcFileInfo = db()->systemFileInfo(db()->hcFileId());
+	assert(hcFileInfo.isNull() == false);
+
+//	std::vector<DbFileInfo> checkedOutHcFiles;
+
+//	bool ok = db()->getCheckedOutFiles(hcFileInfo, &checkedOutHcFiles, this);
+//	if (ok == false)
+//	{
+//		return;
+//	}
+
+//	qDebug() << "===== Checked out files =====";
+//	for (const DbFileInfo& fi : checkedOutHcFiles)
+//	{
+//		fi.trace();
+//		qDebug() << "-----------------------------";
+//	}
+
 	// Get all presets
 	//
 	DbFileInfo hpFileInfo = db()->systemFileInfo(db()->hpFileId());		//	hp -- stands for Hardware Presets
@@ -3193,9 +3200,6 @@ void EquipmentView::updateFromPreset()
 
 	// Get all equipment from the database
 	//
-	DbFileInfo hcFileInfo = db()->systemFileInfo(db()->hcFileId());
-	assert(hcFileInfo.isNull() == false);
-
 	std::shared_ptr<Hardware::DeviceObject> root;
 
 	ok = db()->getDeviceTreeLatestVersion(hcFileInfo, &root, this);
@@ -3444,6 +3448,7 @@ void EquipmentView::updateFromPreset()
 	// Reset model
 	//
 	equipmentModel()->reset();
+	equipmentModel()->updateUserList();
 
 	return;
 }
@@ -4926,7 +4931,7 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<PropertyObject>> 
 		files.push_back(file);
 	}
 
-	qDebug() << "Update Properties in the Database";
+	//qDebug() << "Update Properties in the Database";
 
 	bool ok = dbController()->setWorkcopy(files, this);
 

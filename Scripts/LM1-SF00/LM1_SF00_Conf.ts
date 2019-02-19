@@ -26,6 +26,76 @@ enum SoftwareType {
 }
 
 
+enum ElectricUnit {
+	NoUnit = 0,
+	mA = 1,
+	mV = 2,
+	Ohm = 3,
+	V = 4,
+}
+
+enum SensorType {
+	NoSensor = 0,
+
+	Ohm_Pt50_W1391 = 1,
+	Ohm_Pt100_W1391 = 2,
+	Ohm_Pt50_W1385 = 3,
+	Ohm_Pt100_W1385 = 4,
+
+	Ohm_Cu_50_W1428 = 5,
+	Ohm_Cu_100_W1428 = 6,
+	Ohm_Cu_50_W1426 = 7,
+	Ohm_Cu_100_W1426 = 8,
+
+	Ohm_Pt21 = 9,
+	Ohm_Cu23 = 10,
+
+	mV_K_TXA = 11,
+	mV_L_TXK = 12,
+	mV_N_THH = 13,
+
+	//
+
+	mV_Type_B = 14,
+	mV_Type_E = 15,
+	mV_Type_J = 16,
+	mV_Type_K = 17,
+	mV_Type_N = 18,
+	mV_Type_R = 19,
+	mV_Type_S = 20,
+	mV_Type_T = 21,
+
+	mV_Raw_Mul_8 = 22,
+	mV_Raw_Mul_32 = 23,
+
+	Ohm_Ni50_W1617 = 24,
+	Ohm_Ni100_W1617 = 25,
+
+	V_0_5 = 26,
+	V_m10_p10 = 27,
+
+	Ohm_Pt_a_391 = 28,
+	Ohm_Pt_a_385 = 29,
+	Ohm_Cu_a_428 = 30,
+	Ohm_Cu_a_426 = 31,
+	Ohm_Ni_a_617 = 32,
+
+}
+
+enum OutputMode {
+	Plus0_Plus5_V = 0,
+	Plus4_Plus20_mA = 1,
+	Minus10_Plus10_V = 2,
+	Plus0_Plus5_mA = 3,
+	Plus0_Plus20_mA = 4,
+	Plus0_Plus24_mA = 5,
+};
+
+enum UnitsConvertorErrorCode{
+	ErrorGeneric = 1,
+	LowLimitOutOfRange = 2,
+	HighLimitOutOfRange = 3,
+}
 
 interface Builder {
 	jsIsInterruptRequested(): boolean;
@@ -136,7 +206,19 @@ interface LogicModule {
 	OptoInterface_OptoPortCount: number;
 }
 
-function runConfigScript(configScript: string, confFirmware: ModuleFirmware, ioModule: DeviceObject, LMNumber: number, frame: number, log: IssueLogger, signalSet: SignalSet, opticModuleStorage: OptoModuleStorage): boolean {
+interface UnitsConvertor {
+	physicalToElectric(value: number, electricLowLimit: number, electricHighLimit: number, unitID: number, sensorType: number): number;
+	electricToPhysical(value: number, electricLowLimit: number, electricHighLimit: number, unitID: number, sensorType: number): number;
+}
+
+function runConfigScript(configScript: string,
+	confFirmware: ModuleFirmware,
+	ioModule: DeviceObject,
+	LMNumber: number,
+	frame: number,
+	log: IssueLogger,
+	signalSet: SignalSet,
+	opticModuleStorage: OptoModuleStorage): boolean {
 	//var funcStr = "(function (confFirmware, ioModule, LMNumber, frame, log, signalSet, opticModuleStorage){log.writeMessage(\"Hello\"); return true; })";
 	//
 	var funcStr = "(" + configScript + ")";
@@ -225,7 +307,7 @@ function main(builder: Builder, root: DeviceObject, logicModules: DeviceObject[]
 
 	// LMNumberCount
 	//
-	var frameStorageConfig:number = 1;
+	var frameStorageConfig: number = 1;
 	var ptr: number = 14;
 
 	if (setData16(confFirmware, log, -1, "", frameStorageConfig, ptr, "LMNumberCount", LMNumberCount) == false) {
@@ -662,7 +744,7 @@ function generate_lm_1_rev3(builder: Builder, module: DeviceObject, root: Device
 			}
 
 			var softwareType: number = service.jsPropertyInt("Type");
-			if (softwareType != SoftwareType.TuningService){
+			if (softwareType != SoftwareType.TuningService) {
 				log.errCFG3017(ethernetController.jsPropertyString("EquipmentID"), "Type", service.jsPropertyString("EquipmentID"));
 				return false;
 			}
@@ -789,7 +871,7 @@ function generate_lm_1_rev3(builder: Builder, module: DeviceObject, root: Device
 
 					var softwareType: number = service.jsPropertyInt("Type");
 					if ((s == 0 && softwareType != SoftwareType.AppDataService) ||
-						(s == 1 && softwareType != SoftwareType.DiagDataService)){
+						(s == 1 && softwareType != SoftwareType.DiagDataService)) {
 						log.errCFG3017(ethernetController.jsPropertyString("EquipmentID"), "Type", service.jsPropertyString("EquipmentID"));
 						return false;
 					}

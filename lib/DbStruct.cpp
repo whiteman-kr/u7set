@@ -13,7 +13,7 @@ const char* const SchemasFileName = "$root$/Schemas";				// Schemas root fie
 const char* const UfblFileName = "$root$/Schemas/UFBL";				// User Functional Block Library
 const char* const AlFileName = "$root$/Schemas/ApplicationLogic";	// Application Logic Schemas
 const char* const MvsFileName = "$root$/Schemas/Monitor";			// Monitor Video Schemas
-const char* const TvsFileName = "$root$/Schemas/Tuning";			// Tuning Video Schemas
+const char* const TvsFileName = "$root$/Schemas/Tuning";			// TuningClient Video Schemas
 const char* const DvsFileName = "$root$/Diagnostics";				// Diagnostics Video Schemas -> will be moved to $root$/Schemas,  see update 235
 
 const char* const HcFileName = "$root$/HC";							// Hardware Configuratiun
@@ -33,6 +33,9 @@ const char* const UfbTemplExtension = "templ_ufb";		// User Functional Block tem
 
 const char* const MvsFileExtension = "mvs";				// Monitor schema file extnesion
 const char* const MvsTemplExtension = "templ_mvs";		// Monitor schema template file extnesion
+
+const char* const TvsFileExtension = "tvs";				// TuningClient schema file extnesion
+const char* const TvsTemplExtension = "templ_tvs";		// TuningClient schema template file extnesion
 
 const char* const DvsFileExtension = "dvs";				// Diagnostics schema file extnesion
 const char* const DvsTemplExtension = "templ_dvs";		// Diagnostics schema template file extnesion
@@ -707,6 +710,7 @@ int DbFileTree::calcIf(int startFromFileId, std::function<int(const DbFileInfo&)
 	auto it = m_files.find(startFromFileId);
 	if (it == m_files.end())
 	{
+		qDebug() << "DbFileTree::calcIf: Cant find file" << startFromFileId;
 		assert(it != m_files.end());
 		return 0;
 	}
@@ -1518,3 +1522,22 @@ void DbChangesetObject::setParent(const QString& value)
 	m_parent = value;
 }
 
+QString DbChangesetObject::fileMoveText() const
+{
+	return m_fileMoveText;
+}
+
+void DbChangesetObject::setFileMoveText(const QString& value)
+{
+	m_fileMoveText = value;
+}
+
+QString DbChangesetObject::fileRenameText() const
+{
+	return m_fileRenameText;
+}
+
+void DbChangesetObject::setFileRenameText(const QString& value)
+{
+	m_fileRenameText = value;
+}

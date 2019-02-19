@@ -76,7 +76,8 @@ SOURCES += MainWindow.cpp \
     ../lib/PropertyObject.cpp \
     ../lib/SignalProperties.cpp \
     ../AppDataService/RtTrendsServer.cpp \
-    ../lib/AppSignalStateFlags.cpp
+	../lib/AppSignalStateFlags.cpp \
+    ../lib/WidgetUtils.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \

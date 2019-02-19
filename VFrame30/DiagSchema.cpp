@@ -3,7 +3,6 @@
 
 namespace VFrame30
 {
-
 	DiagSchema::DiagSchema(void)
 	{
 		setUnit(SchemaUnit::Display);
@@ -17,11 +16,12 @@ namespace VFrame30
 		Layers.push_back(std::make_shared<SchemaLayer>("Drawing", true));
 		Layers.push_back(std::make_shared<SchemaLayer>("Notes", false));
 
+		setTagsList(QStringList{"Diagnostics"});
+
 		return;
 	}
 
 	DiagSchema::~DiagSchema(void)
 	{
 	}
-
 }

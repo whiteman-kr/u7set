@@ -65,10 +65,12 @@ protected slots:
     void runConnectionsEditor();
 	void runBusEditor();
 	void updateUfbsAfbsBusses();
+	void afbLibraryCheck();
     void showAbout();
 	void debug();
 	void startBuild();
 	void projectHistory();
+	void projectProperties();
 
 private slots:
 	void projectOpened(DbProject project);
@@ -93,10 +95,12 @@ private:
     QAction* m_connectionsEditorAction = nullptr;
 	QAction* m_busEditorAction = nullptr;
 	QAction* m_updateUfbsAfbs = nullptr;
+	QAction* m_AfbLibraryCheck = nullptr;
 	QAction* m_aboutAction = nullptr;
 	QAction* m_debugAction = nullptr;
 	QAction* m_startBuildAction = nullptr;
 	QAction* m_projectHistoryAction = nullptr;
+	QAction* m_projectPropertiesAction = nullptr;
 
 	QLabel* m_statusBarInfo = nullptr;
 	QLabel* m_statusBarConnectionStatistics = nullptr;

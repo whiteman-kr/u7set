@@ -12,6 +12,7 @@ namespace Afb
 	class AfbElement;
 }
 
+
 namespace VFrame30
 {
 	class SchemaLayer;
@@ -98,6 +99,12 @@ namespace VFrame30
 		QString caption() const;
 		void setCaption(const QString& caption);
 
+		QString tagsAsString() const;
+		QStringList tagsAsList() const;
+
+		void setTags(QString tags);
+		void setTagsList(const QStringList& tags);
+
 		double docWidth() const;
 		void setDocWidth(double width);
 		double docWidthRegional() const;
@@ -131,6 +138,7 @@ namespace VFrame30
 		bool isLogicSchema() const;
 		bool isUfbSchema() const;
 		bool isMonitorSchema() const;
+		bool isTuningSchema() const;
 		bool isDiagSchema() const;
 
 		LogicSchema* toLogicSchema();
@@ -149,6 +157,8 @@ namespace VFrame30
 		QUuid m_guid;
 		QString m_schemaID;
 		QString m_caption;
+
+		QStringList m_tags;
 
 		double m_width = 0.0;					// pixels or inches, depends on m_unit
 		double m_height = 0.0;					// pixels or inches, depends on m_unit
@@ -198,6 +208,10 @@ namespace VFrame30
 
 		bool searchForString(const QString& searchText) const;
 
+		bool hasTag(const QString& tag) const;
+		bool hasTag(const QStringList& tags) const;
+		const std::set<QString>& tags() const;
+
 		bool hasEquipmentId(const QString& equipmentId) const;
 
 	public:
@@ -210,6 +224,7 @@ namespace VFrame30
 		std::set<QString> m_signals;
 		std::set<QString> m_labels;
 		std::set<QString> m_connections;
+		std::set<QString> m_tags;		// All tags are kept in lowercase
 		std::set<QUuid> m_guids;
 	};
 
