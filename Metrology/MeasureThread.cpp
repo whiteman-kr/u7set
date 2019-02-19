@@ -446,34 +446,23 @@ void MeasureThread::polarityTest(double electricVal, MeasureMultiParam& param)
 		return;
 	}
 
+	double negativeLimit = 0;
+
 	if (pCalibrator->mode() == CALIBRATOR_MODE_SOURCE && pCalibrator->sourceUnit() == CALIBRATOR_UNIT_MV)
 	{
-
-		if (electricVal < -10 && param.isNegativeRange() == false)
-		{
-			param.setNegativeRange(true);
-			emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the negative (-) part of the electrical range.").arg(param.calibratorManager()->calibratorChannel() + 1));
-		}
-
-		if (electricVal >= -10 && param.isNegativeRange() == true)
-		{
-			param.setNegativeRange(false);
-			emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the positive (+) part of the electrical range.").arg(param.calibratorManager()->calibratorChannel() + 1));
-		}
+		negativeLimit = -10;
 	}
-	else
-	{
-		if (electricVal < 0 && param.isNegativeRange() == false)
-		{
-			param.setNegativeRange(true);
-			emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the negative (-) part of the electrical range.").arg(param.calibratorManager()->calibratorChannel() + 1));
-		}
 
-		if (electricVal >= 0 && param.isNegativeRange() == true)
-		{
-			param.setNegativeRange(false);
-			emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the positive (+) part of the electrical range.").arg(param.calibratorManager()->calibratorChannel() + 1));
-		}
+	if (electricVal < negativeLimit && param.isNegativeRange() == false)
+	{
+		param.setNegativeRange(true);
+		emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the negative (-) part of the electrical range.").arg(param.calibratorManager()->calibratorChannel() + 1));
+	}
+
+	if (electricVal >= negativeLimit && param.isNegativeRange() == true)
+	{
+		param.setNegativeRange(false);
+		emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the positive (+) part of the electrical range.").arg(param.calibratorManager()->calibratorChannel() + 1));
 	}
 }
 
