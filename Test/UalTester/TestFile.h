@@ -53,6 +53,8 @@ enum class TestCmdParamType
 	String
 };
 
+// ==============================================================================================
+
 class TestCmdParam
 {
 
@@ -90,14 +92,14 @@ public:
 
 // ==============================================================================================
 
-class TestCommand
+class TestCmd
 {
 
 public:
 
-	TestCommand();
-	explicit TestCommand(TestFile* pTestFile, SignalBase* pSignalBase);
-	virtual ~TestCommand();
+	TestCmd();
+	explicit TestCmd(TestFile* pTestFile, SignalBase* pSignalBase);
+	virtual ~TestCmd();
 
 private:
 
@@ -167,8 +169,8 @@ private:
 	QStringList m_compatibleList;
 	int m_errorCount = 0;
 
-	QVector<TestCommand> m_commandList;
-	QStringList m_reultsList;
+	QVector<TestCmd> m_commandList;
+	QStringList m_resultList;
 
 public:
 
@@ -185,11 +187,11 @@ public:
 	void incErrorCount() { m_errorCount ++; }
 
 	int cmdCount();
-	TestCommand cmd(int index);
-	void appendCmd(const TestCommand& cmd);
+	TestCmd cmd(int index);
+	void appendCmd(const TestCmd& cmd);
 
-	QStringList& reultsList() { return m_reultsList; }
-	void appendCmdresult(const QString& str, bool printDebug);
+	QStringList& resultList() { return m_resultList; }
+	void appendResult(const QString& str, bool printDebugMsg);
 
 	TestItem& operator=(const TestItem& from);
 };
@@ -207,16 +209,14 @@ public:
 
 private:
 
-	mutable QMutex m_mutex;
-
 	QString m_fileName;
 	QFile m_file;
 
 	SignalBase* m_pSignalBase = nullptr;
 
-	QVector<TestCommand> m_commandList;
-	QStringList m_errorList;
-	QVector<TestItem> m_testList;
+	QVector<TestItem> m_testList;			// all tests of file
+	QVector<TestCmd> m_commandList;			// all commands of file
+	QStringList m_errorList;				// errors of parsing
 
 	void printErrorlist();
 
@@ -230,9 +230,9 @@ public:
 	SignalBase* signalBase() const { return m_pSignalBase; }
 	void setSignalBase(SignalBase* pSignalBase) { m_pSignalBase = pSignalBase; }
 
-	const QVector<TestCommand> commandList() const  { return m_commandList; }
-	const QStringList& errorList() const { return m_errorList; }
 	const QVector<TestItem> testList() const { return m_testList; }
+	const QVector<TestCmd> commandList() const  { return m_commandList; }
+	const QStringList& errorList() const { return m_errorList; }
 
 	//
 	//

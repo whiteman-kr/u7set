@@ -99,16 +99,16 @@ TestCmdParam& TestCmdParam::operator=(const TestCmdParam& from)
 //
 // -------------------------------------------------------------------------------------------------------------------
 
-const char* const TestCommand::PARAM_TEST_ID = "TestID";
-const char* const TestCommand::PARAM_TEST_DESCRIPTION = "TestDescription";
-const char* const TestCommand::PARAM_SCHEMA_ID = "SchemaID";
-const char* const TestCommand::PARAM_COMPATIBLE = "Compatible";
+const char* const TestCmd::PARAM_TEST_ID = "TestID";
+const char* const TestCmd::PARAM_TEST_DESCRIPTION = "TestDescription";
+const char* const TestCmd::PARAM_SCHEMA_ID = "SchemaID";
+const char* const TestCmd::PARAM_COMPATIBLE = "Compatible";
 
-TestCommand::TestCommand()
+TestCmd::TestCmd()
 {
 }
 
-TestCommand::TestCommand(TestFile* pTestFile, SignalBase* pSignalBase)
+TestCmd::TestCmd(TestFile* pTestFile, SignalBase* pSignalBase)
 	: m_pTestFile(pTestFile)
 	, m_pSignalBase(pSignalBase)
 	, m_lineIndex(0)
@@ -116,11 +116,11 @@ TestCommand::TestCommand(TestFile* pTestFile, SignalBase* pSignalBase)
 {
 }
 
-TestCommand::~TestCommand()
+TestCmd::~TestCmd()
 {
 }
 
-int TestCommand::getCmdType(const QString& line)
+int TestCmd::getCmdType(const QString& line)
 {
 	int cmdType = TF_CMD_UNKNOWN;
 
@@ -149,7 +149,7 @@ int TestCommand::getCmdType(const QString& line)
 	return cmdType;
 }
 
-bool TestCommand::parse(const QString& line)
+bool TestCmd::parse(const QString& line)
 {
 	m_line = line;
 	m_paramList.clear();
@@ -199,7 +199,7 @@ bool TestCommand::parse(const QString& line)
 	return resultCmd;
 }
 
-bool TestCommand::parseCmdTest()
+bool TestCmd::parseCmdTest()
 {
 	int spacePos = m_line.indexOf(' ');
 	if (spacePos == -1)
@@ -264,7 +264,7 @@ bool TestCommand::parseCmdTest()
 	return true;
 }
 
-bool TestCommand::parseCmdEndtest()
+bool TestCmd::parseCmdEndtest()
 {
 	if (m_foundEndOfTest == true)
 	{
@@ -278,7 +278,7 @@ bool TestCommand::parseCmdEndtest()
 	return true;
 }
 
-bool TestCommand::parseCmdSchema()
+bool TestCmd::parseCmdSchema()
 {
 	int spacePos = m_line.indexOf(' ');
 	if (spacePos == -1)
@@ -305,7 +305,7 @@ bool TestCommand::parseCmdSchema()
 	return true;
 }
 
-bool TestCommand::parseCmdCompatible()
+bool TestCmd::parseCmdCompatible()
 {
 	int spacePos = m_line.indexOf(' ');
 	if (spacePos == -1)
@@ -352,7 +352,7 @@ bool TestCommand::parseCmdCompatible()
 	return true;
 }
 
-bool TestCommand::parseCmdConst()
+bool TestCmd::parseCmdConst()
 {
 	int space1Pos = m_line.indexOf(' ');
 	if (space1Pos == -1)
@@ -503,7 +503,7 @@ bool TestCommand::parseCmdConst()
 	return true;
 }
 
-bool TestCommand::parseCmdVar()
+bool TestCmd::parseCmdVar()
 {
 	int space1Pos = m_line.indexOf(' ');
 	if (space1Pos == -1)
@@ -654,7 +654,7 @@ bool TestCommand::parseCmdVar()
 	return true;
 }
 
-bool TestCommand::parseCmdSet()
+bool TestCmd::parseCmdSet()
 {
 	if (m_pSignalBase == nullptr)
 	{
@@ -774,7 +774,7 @@ bool TestCommand::parseCmdSet()
 	return true;
 }
 
-bool TestCommand::parseCmdCheck()
+bool TestCmd::parseCmdCheck()
 {
 	if (m_pSignalBase == nullptr)
 	{
@@ -887,7 +887,7 @@ bool TestCommand::parseCmdCheck()
 	return true;
 }
 
-bool TestCommand::parseCmdDelay()
+bool TestCmd::parseCmdDelay()
 {
 	int spacePos = m_line.indexOf(' ');
 	if (spacePos == -1)
@@ -916,7 +916,7 @@ bool TestCommand::parseCmdDelay()
 	return true;
 }
 
-bool TestCommand::isUniqueTestID(const QString& testID)
+bool TestCmd::isUniqueTestID(const QString& testID)
 {
 	if (testID.isEmpty() == true)
 	{
@@ -935,7 +935,7 @@ bool TestCommand::isUniqueTestID(const QString& testID)
 	int cmdCount = m_pTestFile->commandList().count();
 	for(int c = 0; c < cmdCount; c++)
 	{
-		TestCommand cmd = m_pTestFile->commandList().at(c);
+		TestCmd cmd = m_pTestFile->commandList().at(c);
 		if (cmd.type() != TF_CMD_TEST)
 		{
 			continue;
@@ -962,7 +962,7 @@ bool TestCommand::isUniqueTestID(const QString& testID)
 	return true;
 }
 
-bool TestCommand::isUniqueConstOrVarName(const QString& name, const QVector<TestCmdParam>& paramList)
+bool TestCmd::isUniqueConstOrVarName(const QString& name, const QVector<TestCmdParam>& paramList)
 {
 	if (m_pTestFile == nullptr)
 	{
@@ -992,7 +992,7 @@ bool TestCommand::isUniqueConstOrVarName(const QString& name, const QVector<Test
 	int cmdCount = m_pTestFile->commandList().count();
 	for(int c = 0; c < cmdCount; c++)
 	{
-		TestCommand cmd = m_pTestFile->commandList().at(c);
+		TestCmd cmd = m_pTestFile->commandList().at(c);
 		if (cmd.type() != TF_CMD_CONST && cmd.type() != TF_CMD_VAR)
 		{
 			continue;
@@ -1013,7 +1013,7 @@ bool TestCommand::isUniqueConstOrVarName(const QString& name, const QVector<Test
 	return true;
 }
 
-TestCmdParam TestCommand::paramFromConstOrVar(const QString& name, const QString& value, const Signal& signal)
+TestCmdParam TestCmd::paramFromConstOrVar(const QString& name, const QString& value, const Signal& signal)
 {
 	if (m_pTestFile == nullptr)
 	{
@@ -1041,7 +1041,7 @@ TestCmdParam TestCommand::paramFromConstOrVar(const QString& name, const QString
 	int cmdCount = m_pTestFile->commandList().count();
 	for(int c = 0; c < cmdCount; c++)
 	{
-		TestCommand cmd = m_pTestFile->commandList().at(c);
+		TestCmd cmd = m_pTestFile->commandList().at(c);
 		if (cmd.type() != TF_CMD_CONST && cmd.type() != TF_CMD_VAR)
 		{
 			continue;
@@ -1129,7 +1129,7 @@ TestCmdParam TestCommand::paramFromConstOrVar(const QString& name, const QString
 	return param;
 }
 
-TestCmdParam TestCommand::paramFromSignal(const QString& name, const QString& value, const Signal& signal)
+TestCmdParam TestCmd::paramFromSignal(const QString& name, const QString& value, const Signal& signal)
 {
 	if (name.isEmpty() == true)
 	{
@@ -1252,9 +1252,9 @@ int TestItem::cmdCount()
 	return count;
 }
 
-TestCommand TestItem::cmd(int index)
+TestCmd TestItem::cmd(int index)
 {
-	TestCommand cmd;
+	TestCmd cmd;
 
 	m_mutex.lock();
 
@@ -1268,7 +1268,7 @@ TestCommand TestItem::cmd(int index)
 	return cmd;
 }
 
-void TestItem::appendCmd(const TestCommand& cmd)
+void TestItem::appendCmd(const TestCmd& cmd)
 {
 	m_mutex.lock();
 
@@ -1277,11 +1277,11 @@ void TestItem::appendCmd(const TestCommand& cmd)
 	m_mutex.unlock();
 }
 
-void TestItem::appendCmdresult(const QString& str, bool printDebug)
+void TestItem::appendResult(const QString& str, bool printDebugMsg)
 {
-	m_reultsList.append(str);
+	m_resultList.append(str);
 
-	if (printDebug == true)
+	if (printDebugMsg == true)
 	{
 		qDebug() << str;
 	}
@@ -1295,6 +1295,7 @@ TestItem& TestItem::operator=(const TestItem& from)
 	m_errorCount = from.m_errorCount;
 
 	m_commandList = from.m_commandList;
+	m_resultList = from.m_resultList;
 
 	return *this;
 }
@@ -1360,7 +1361,7 @@ bool TestFile::parse(const QString& fileName, SignalBase* pSignalBase)
 
 	//
 	//
-	TestCommand testCmd(this, m_pSignalBase);
+	TestCmd testCmd(this, m_pSignalBase);
 
 	// parse file
 	//
@@ -1414,7 +1415,7 @@ void TestFile::createTestList()
 	{
 		TestItem test;
 
-		TestCommand cmd = m_commandList[cmdIndex];
+		TestCmd cmd = m_commandList[cmdIndex];
 		if (cmd.type() == TF_CMD_TEST)
 		{
 			//
