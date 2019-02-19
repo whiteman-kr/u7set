@@ -32,24 +32,28 @@ SC_ACQUIRE = 7,
 SC_IN_OUT_TYPE = 8,
 SC_DATA_SIZE = 9,
 SC_ANALOG_SIGNAL_FORMAT = 10,
-SC_LOW_ADC = 11,
-SC_HIGH_ADC = 12,
-SC_LOW_LIMIT = 13,
-SC_HIGH_LIMIT = 14,
-SC_UNIT = 15,
-SC_DROP_LIMIT = 16,
-SC_EXCESS_LIMIT = 17,
-SC_OUTPUT_MODE = 18,
-SC_DECIMAL_PLACES = 19,
-SC_APERTURE = 20,
-SC_FILTERING_TIME = 21,
-SC_SPREAD_TOLERANCE = 22,
-SC_BYTE_ORDER = 23,
-SC_ENABLE_TUNING = 24,
-SC_TUNING_DEFAULT_VALUE = 25,
-SC_TUNING_LOW_BOUND = 26,
-SC_TUNING_HIGH_BOUND = 27,
-SC_LAST_CHANGE_USER = 28;
+SC_ELECTRIC_LOW_LIMIT = 11,
+SC_ELECTRIC_HIGH_LIMIT = 12,
+SC_LOW_ADC = 13,
+SC_HIGH_ADC = 14,
+SC_LOW_LIMIT = 15,
+SC_HIGH_LIMIT = 16,
+SC_UNIT = 17,
+SC_ELECTRIC_UNIT = 18,
+SC_DROP_LIMIT = 19,
+SC_EXCESS_LIMIT = 20,
+SC_OUTPUT_MODE = 21,
+SC_SENSOR_TYPE = 22,
+SC_DECIMAL_PLACES = 23,
+SC_APERTURE = 24,
+SC_FILTERING_TIME = 25,
+SC_SPREAD_TOLERANCE = 26,
+SC_BYTE_ORDER = 27,
+SC_ENABLE_TUNING = 28,
+SC_TUNING_DEFAULT_VALUE = 29,
+SC_TUNING_LOW_BOUND = 30,
+SC_TUNING_HIGH_BOUND = 31,
+SC_LAST_CHANGE_USER = 32;
 
 
 const char* Columns[] =
@@ -65,14 +69,18 @@ const char* Columns[] =
 	"Input-output\ntype",
 	"Data\nsize",
 	"Analog\nSignal format",
+	"Electric\nLow limit",
+	"Electric\nHigh limit",
 	"Low ADC",
 	"High ADC",
 	"Low\nEngeneering Units",
 	"High\nEngeneering Units",
 	"Unit",
+	"Electric\nUnit",
 	"Low\nValid Range",
 	"High\nValid Range",
 	"Output\nmode",
+	"Sensor\ntype",
 	"Decimal\nplaces",
 	"Aperture",
 	"Filtering time",
@@ -180,6 +188,8 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		}
 		case SC_LOW_LIMIT:
 		case SC_HIGH_LIMIT:
+		case SC_ELECTRIC_LOW_LIMIT:
+		case SC_ELECTRIC_HIGH_LIMIT:
 		case SC_DROP_LIMIT:
 		case SC_EXCESS_LIMIT:
 		case SC_APERTURE:
@@ -219,6 +229,26 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		{
 			QComboBox* cb = new QComboBox(parent);
 			auto values = E::enumValues<E::OutputMode>();
+			for (auto& valuePair : values)
+			{
+				cb->addItem(valuePair.second, valuePair.first);
+			}
+			return cb;
+		}
+		case SC_ELECTRIC_UNIT:
+		{
+			QComboBox* cb = new QComboBox(parent);
+			auto values = E::enumValues<E::ElectricUnit>();
+			for (auto& valuePair : values)
+			{
+				cb->addItem(valuePair.second, valuePair.first);
+			}
+			return cb;
+		}
+		case SC_SENSOR_TYPE:
+		{
+			QComboBox* cb = new QComboBox(parent);
+			auto values = E::enumValues<E::SensorType>();
 			for (auto& valuePair : values)
 			{
 				cb->addItem(valuePair.second, valuePair.first);
@@ -292,6 +322,8 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 
 		case SC_LOW_LIMIT: if (le) le->setText(QString("%1").arg(s.lowEngeneeringUnits())); break;
 		case SC_HIGH_LIMIT: if (le) le->setText(QString("%1").arg(s.highEngeneeringUnits())); break;
+		case SC_ELECTRIC_LOW_LIMIT: if (le) le->setText(QString("%1").arg(s.electricLowLimit())); break;
+		case SC_ELECTRIC_HIGH_LIMIT: if (le) le->setText(QString("%1").arg(s.electricHighLimit())); break;
 		case SC_DROP_LIMIT: if (le) le->setText(QString("%1").arg(s.lowValidRange())); break;
 		case SC_EXCESS_LIMIT: if (le) le->setText(QString("%1").arg(s.highValidRange())); break;
 		case SC_APERTURE: if (le) le->setText(QString("%1").arg(s.coarseAperture())); break;
@@ -309,6 +341,8 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		case SC_ENABLE_TUNING: if (cb) cb->setCurrentIndex(s.enableTuning()); break;
 		case SC_IN_OUT_TYPE: if (cb) cb->setCurrentIndex(TO_INT(s.inOutType())); break;
 		case SC_BYTE_ORDER: if (cb) cb->setCurrentIndex(s.byteOrderInt()); break;
+		case SC_ELECTRIC_UNIT: if (cb) cb->setCurrentIndex(TO_INT(s.electricUnit())); break;
+		case SC_SENSOR_TYPE: if (cb) cb->setCurrentIndex(TO_INT(s.sensorType())); break;
 		case SC_LAST_CHANGE_USER:
 		case SC_CHANNEL:
 		case SC_TYPE:
@@ -382,6 +416,8 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 
 		case SC_LOW_LIMIT: if (le) s.setLowEngeneeringUnits(le->text().toDouble()); break;
 		case SC_HIGH_LIMIT: if (le) s.setHighEngeneeringUnits(le->text().toDouble()); break;
+		case SC_ELECTRIC_LOW_LIMIT: if (le) s.setElectricLowLimit(le->text().toDouble()); break;
+		case SC_ELECTRIC_HIGH_LIMIT: if (le) s.setElectricHighLimit(le->text().toDouble()); break;
 		case SC_DROP_LIMIT: if (le) s.setLowValidRange(le->text().toDouble()); break;
 		case SC_EXCESS_LIMIT: if (le) s.setHighValidRange(le->text().toDouble()); break;
 		case SC_APERTURE: if (le) s.setCoarseAperture(le->text().toDouble()); break;
@@ -438,6 +474,22 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 			if (cb && cb->currentData().isValid())
 			{
 				s.setOutputMode(static_cast<E::OutputMode>(cb->currentData().toInt()));
+			}
+			break;
+		}
+		case SC_ELECTRIC_UNIT:
+		{
+			if (cb && cb->currentData().isValid())
+			{
+				s.setElectricUnit(static_cast<E::ElectricUnit>(cb->currentData().toInt()));
+			}
+			break;
+		}
+		case SC_SENSOR_TYPE:
+		{
+			if (cb && cb->currentData().isValid())
+			{
+				s.setSensorType(static_cast<E::SensorType>(cb->currentData().toInt()));
 			}
 			break;
 		}
@@ -779,16 +831,20 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 					case SC_TYPE: return QChar('A');
 					case SC_ANALOG_SIGNAL_FORMAT: return E::valueToString<E::AnalogAppSignalFormat>(signal.analogSignalFormat());
 					case SC_DATA_SIZE: return signal.dataSize();
+					case SC_ELECTRIC_LOW_LIMIT: return signal.electricLowLimit();
+					case SC_ELECTRIC_HIGH_LIMIT: return signal.electricHighLimit();
 					case SC_LOW_ADC: return QString("0x%1").arg(signal.lowADC(), 4, 16, QChar('0'));
 					case SC_HIGH_ADC: return QString("0x%1").arg(signal.highADC(), 4, 16, QChar('0'));
 					case SC_LOW_LIMIT: return signal.lowEngeneeringUnits();
 					case SC_HIGH_LIMIT: return signal.highEngeneeringUnits();
 					case SC_UNIT: return signal.unit();
+					case SC_ELECTRIC_UNIT: return E::valueToString<E::ElectricUnit>(signal.electricUnit());
 
 					case SC_DROP_LIMIT: return signal.lowValidRange();
 					case SC_EXCESS_LIMIT: return signal.highValidRange();
 
 					case SC_OUTPUT_MODE: return getOutputModeStr(signal.outputMode());
+					case SC_SENSOR_TYPE: return E::valueToString<E::SensorType>(signal.sensorType());
 
 					case SC_ACQUIRE: return signal.acquire() ? tr("True") : tr("False");
 
@@ -894,16 +950,20 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 					case SC_BYTE_ORDER: return E::valueToString<E::ByteOrder>(signal.byteOrderInt());
 					case SC_DEVICE_STR_ID: return signal.equipmentID();
 
+					case SC_ELECTRIC_LOW_LIMIT:
+					case SC_ELECTRIC_HIGH_LIMIT:
 					case SC_LOW_ADC:
 					case SC_HIGH_ADC:
 					case SC_LOW_LIMIT:
 					case SC_HIGH_LIMIT:
 					case SC_UNIT:
+					case SC_ELECTRIC_UNIT:
 
 					case SC_DROP_LIMIT:
 					case SC_EXCESS_LIMIT:
 
 					case SC_OUTPUT_MODE:
+					case SC_SENSOR_TYPE:
 
 					case SC_DECIMAL_PLACES:
 					case SC_APERTURE:
