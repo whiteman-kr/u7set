@@ -918,7 +918,7 @@ namespace Hardware
 			//
 			std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 
-			QString fileName = QString("connection-%1.%2").arg(connection->uuid().toString()).arg(OclFileExtension);
+			QString fileName = QString("connection-%1.%2").arg(connection->uuid().toString()).arg(Db::File::OclFileExtension);
 			fileName = fileName.remove('{');
 			fileName = fileName.remove('}');
 
@@ -979,7 +979,7 @@ namespace Hardware
         // Load the file from the database
         //
 		std::vector<DbFileInfo> fileList;
-		bool ok = m_db->getFileList(&fileList, m_db->connectionsFileId(), ::OclFileExtension, true, nullptr);
+		bool ok = m_db->getFileList(&fileList, m_db->connectionsFileId(), Db::File::OclFileExtension, true, nullptr);
         if (ok == false)
         {
 			*errorMessage = m_db->lastError();

@@ -6,6 +6,15 @@
 #include <QtSql>
 #include "../../lib/DbController.h"
 
+
+struct User
+{
+	QString username;
+	QString password;
+	int userId;
+};
+
+
 class TestDbBase : public QObject
 {
 	Q_OBJECT
@@ -20,6 +29,10 @@ protected slots:
 protected:
 	bool createProjectDb();
 	bool dropProjectDb(QString projectName = QString());
+
+	QString logIn(User user);								// returns session_key
+	QString logIn(QString username, QString password);		// returns session_key
+	bool logOut();
 
 public:
 	QString databaseHost() const;
@@ -54,7 +67,6 @@ protected:
 	QString m_projectName = "testproject";
 	QString m_projectAdministratorName = "Administrator";
 	QString m_projectAdministratorPassword = "P2ssw0rd";
-
 };
 
 #endif // TESTDBBASE_H

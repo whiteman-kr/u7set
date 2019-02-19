@@ -12,47 +12,64 @@
 
 class Signal;
 
-// System files names
-//
-extern const char* const RootFileName;			// root file name
-extern const char* const AfblFileName;			// Application Functional Block Library
+namespace Db
+{
+	class ProjectProperty
+	{
+		ProjectProperty() = delete;
 
-extern const char* const SchemasFileName;		// Schemas root fie
-extern const char* const UfblFileName;			// User Functional Block Library
-extern const char* const AlFileName;			// Application Logic Schemas
-extern const char* const MvsFileName;			// Monitor Video Schemas
-extern const char* const TvsFileName;			// Tuning Video Schemas
-extern const char* const DvsFileName;			// Diagnostics Video Schemas
+	public:
+		inline static const QString Description = "Description";
+		inline static const QString SuppressWarnings = "SuppressWarnings";
+		inline static const QString UppercaseAppSignalId = "UppercaseAppSignalID";
+	};
 
-extern const char* const HcFileName;			// Hardware Configuratiun
-extern const char* const HpFileName;			// Hardware Presets
-extern const char* const McFileName;			// Modules Configurations
-extern const char* const ConnectionsFileName;	// Connections
-extern const char* const BusTypesFileName;		// Bus types
-extern const char* const EtcFileName;			// Etc file name
+	class File
+	{
+		File() = delete;
 
-extern const char* const SignalPropertyBehaviorFileName;			// SignalPropertyBehavior.csv file name
+	public:
+		inline static const QString RootFileName = "$root$";						// root file name
+		inline static const QString AfblFileName = "$root$/AFBL";					// Application Functional Block Library
 
-extern const char* const AlFileExtension;		// Application Logic schema file extnesion
-extern const char* const AlTemplExtension;		// Application Logic schema template file extnesion
+		inline static const QString SchemasFileName = "$root$/Schemas";				// Schemas root fie
+		inline static const QString UfblFileName = "$root$/Schemas/UFBL";			// User Functional Block Library
+		inline static const QString AlFileName = "$root$/Schemas/ApplicationLogic";	// Application Logic Schemas
+		inline static const QString MvsFileName = "$root$/Schemas/Monitor";			// Monitor Video Schemas
+		inline static const QString TvsFileName = "$root$/Schemas/Tuning";			// TuningClient Video Schemas;			// Tuning Video Schemas
+		inline static const QString DvsFileName = "$root$/Diagnostics";				// Diagnostics Video Schemas -> will be moved to $root$/Schemas,  see update 235
 
-extern const char* const UfbFileExtension;		// User Functional Block schema file extnesion
-extern const char* const UfbTemplExtension;		// User Functional Block template file extnesion
+		inline static const QString HcFileName = "$root$/HC";						// Hardware Configuratiun
+		inline static const QString HpFileName = "$root$/HP";						// Hardware Presets
+		inline static const QString McFileName = "$root$/MC";						// Module Configuration
+		inline static const QString ConnectionsFileName = "$root$/CONNECTIONS";		// Connections
+		inline static const QString BusTypesFileName = "$root$/BUSTYPES";			// BustTypes
+		inline static const QString EtcFileName = "$root$/ETC";						// Etc file name
 
-extern const char* const MvsFileExtension;		// Monitor schema file extnesion
-extern const char* const MvsTemplExtension;		// Monitor schema template file extnesion
+		inline static const QString SignalPropertyBehaviorFileName = "SignalPropertyBehavior.csv";
 
-extern const char* const TvsFileExtension;		// TuningClient schema file extnesion
-extern const char* const TvsTemplExtension;		// TuningClient schema template file extnesion
+		inline static const QString AlFileExtension = "als";						// Application Logic schema file extension
+		inline static const QString AlTemplExtension = "templ_als";					// Application Logic schema template file extnesion
 
-extern const char* const DvsFileExtension;		// Diagnostics schema file extnesion
-extern const char* const DvsTemplExtension;		// Diagnostics schema template file extnesion
+		inline static const QString UfbFileExtension = "ufb";						// User Functional Block schema file extnesion;		// User Functional Block schema file extnesion
+		inline static const QString UfbTemplExtension = "templ_ufb";				// User Functional Block template file extnesion
 
-extern const char* const OclFileExtension;		// (Optical) Connection Link
-extern const char* const BusFileExtension;		// Bus types
+		inline static const QString MvsFileExtension = "mvs";						// Monitor schema file extnesion
+		inline static const QString MvsTemplExtension = "templ_mvs";				// Monitor schema template file extnesion
 
-extern const char* const AppSignalFileExtension;	// Application signal file extention (::Proto::AppSignal message)
-extern const char* const AppSignalSetFileExtension;	// Application signals set file extention (::Proto::AppSignalSet message)
+		inline static const QString TvsFileExtension = "tvs";						// TuningClient schema file extnesion
+		inline static const QString TvsTemplExtension = "templ_tvs";				// TuningClient schema template file extnesion
+
+		inline static const QString DvsFileExtension = "dvs";						// Diagnostics schema file extnesion
+		inline static const QString DvsTemplExtension = "templ_dvs";				// Diagnostics schema template file extnesion
+
+		inline static const QString OclFileExtension = "ocl";						// (Optical) Connection Link
+		inline static const QString BusFileExtension = "bus_type";					// Bus type
+
+		inline static const QString AppSignalFileExtension = "asg";					// Application signal file extention (::Proto::AppSignal message)
+		inline static const QString AppSignalSetFileExtension = "asgs";				// Application signals set file extention (::Proto::AppSignalSet message)
+	};
+}
 
 
 //
@@ -166,11 +183,15 @@ public:
 	int version() const;
 	void setVersion(int value);
 
+	bool uppercaseAppSignalId() const;
+	void setUppercaseAppSignalId(bool value);
+
 protected:
 	QString m_databaseName;
 	QString m_projectName;
 	QString m_description;
-	int m_version;
+	int m_version = 0;
+	bool m_uppercaseAppSignalId = true;
 };
 
 

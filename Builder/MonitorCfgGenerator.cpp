@@ -54,8 +54,8 @@ namespace Builder
 
 		// add link to configuration files (previously written) via m_cfgXml->addLinkToFile(...)
 		//
-		QString alsExt = QLatin1String(".") + ::AlFileExtension;
-		QString mvsExt = QLatin1String(".") + ::MvsFileExtension;
+		QString alsExt = QLatin1String(".") + Db::File::AlFileExtension;
+		QString mvsExt = QLatin1String(".") + Db::File::MvsFileExtension;
 
 		for (const SchemaFile& schemaFile : SoftwareCfgGenerator::m_schemaFileList)
 		{

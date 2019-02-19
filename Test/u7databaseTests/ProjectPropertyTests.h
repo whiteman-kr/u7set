@@ -15,4 +15,6 @@ private slots:
 
 	void set_project_property();
 	void get_project_property();
+
+public:
 };

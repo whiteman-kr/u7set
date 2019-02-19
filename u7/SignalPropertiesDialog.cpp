@@ -172,16 +172,16 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 
 	if (mcInfo.isNull() == true)
 	{
-		QMessageBox::critical(parent, "Error", QString("File \"%1\" is not found!").arg(EtcFileName));
+		QMessageBox::critical(parent, "Error", QString("File \"%1\" is not found!").arg(Db::File::EtcFileName));
 		return;
 	}
 
 	DbFileInfo propertyBehaviorFile;
-	dbController->getFileInfo(mcInfo.fileId(), QString(SignalPropertyBehaviorFileName), &propertyBehaviorFile, parent);
+	dbController->getFileInfo(mcInfo.fileId(), QString(Db::File::SignalPropertyBehaviorFileName), &propertyBehaviorFile, parent);
 
 	if (propertyBehaviorFile.isNull() == true)
 	{
-		QMessageBox::critical(parent, "Error", QString("File \"%1\" is not found!").arg(SignalPropertyBehaviorFileName));
+		QMessageBox::critical(parent, "Error", QString("File \"%1\" is not found!").arg(Db::File::SignalPropertyBehaviorFileName));
 		return;
 	}
 
