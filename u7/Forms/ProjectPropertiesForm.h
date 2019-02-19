@@ -21,9 +21,13 @@ public:
 	QString suppressWarningsAsString() const;
 	void setSuppressWarnings(const QString& value);
 
+	bool uppercaseAppSignalId() const;
+	void setUppercaseAppSignalId(bool value);
+
 private:
 	QString m_description;
 	std::vector<int> m_suppressWarnings;
+	bool m_uppercaseAppSignalId = true;
 };
 
 

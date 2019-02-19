@@ -29,7 +29,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		idLabel = "AppSchemaID";
 
 		tempateParentFileId = db->alFileId();
-		templateFileExtension = ::AlTemplExtension;
+		templateFileExtension = Db::File::AlTemplExtension;
 	}
 
 	if (dynamic_cast<VFrame30::UfbSchema*>(m_schema.get()) != nullptr)
@@ -37,7 +37,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		idLabel = "UserFunctionalBlock ID";
 
 		tempateParentFileId = db->ufblFileId();
-		templateFileExtension = ::UfbTemplExtension;
+		templateFileExtension = Db::File::UfbTemplExtension;
 	}
 
 	if (isMonitorSchema() == true)
@@ -45,7 +45,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		idLabel = "MonitorSchemaID";
 
 		tempateParentFileId = db->mvsFileId();
-		templateFileExtension = ::MvsTemplExtension;
+		templateFileExtension = Db::File::MvsTemplExtension;
 	}
 
 	if (isTuningSchema() == true)
@@ -53,7 +53,7 @@ CreateSchemaDialog::CreateSchemaDialog(std::shared_ptr<VFrame30::Schema> schema,
 		idLabel = "TuningSchemaID";
 
 		tempateParentFileId = db->tvsFileId();
-		templateFileExtension = ::TvsTemplExtension;
+		templateFileExtension = Db::File::TvsTemplExtension;
 	}
 
 	if (isDiagSchema() == true)

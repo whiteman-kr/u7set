@@ -364,6 +364,11 @@ bool DbController::upgradeProject(QString projectName, QString password, bool do
 	return result;
 }
 
+bool DbController::setProjectProperty(QString propertyName, bool propertyValue, QWidget* parentWidget)
+{
+	return setProjectProperty(propertyName, propertyValue ? QString("true") : QString("false") , parentWidget);
+}
+
 bool DbController::setProjectProperty(QString propertyName, QString propertyValue, QWidget* parentWidget)
 {
 	// Check parameters
@@ -388,6 +393,26 @@ bool DbController::setProjectProperty(QString propertyName, QString propertyValu
 
 	bool result = waitForComplete(parentWidget, tr("Setting project property"));
 	return result;
+}
+
+bool DbController::getProjectProperty(QString propertyName, bool* out, QWidget* parentWidget)
+{
+	if (out == nullptr)
+	{
+		assert(out);
+	}
+
+	QString propValueStr;
+
+	bool ok = getProjectProperty(propertyName, &propValueStr, parentWidget);
+	if (ok == false)
+	{
+		return false;
+	}
+
+	*out = propValueStr.compare("true", Qt::CaseInsensitive) == 0 ? true : false;
+
+	return true;
 }
 
 bool DbController::getProjectProperty(QString propertyName, QString* out, QWidget* parentWidget)

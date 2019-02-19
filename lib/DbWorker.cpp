@@ -279,6 +279,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0259.sql", "Upgrade to version 259, Optimize undo_changes and Equipment Editor"},
 	{":/DatabaseUpgrade/Upgrade0260.sql", "Upgrade to version 260, Creating some indexes on signalinstance table"},
 	{":/DatabaseUpgrade/Upgrade0261.sql", "Upgrade to version 261, SchemaTags in Monitor and TuningClient has default values"},
+	{":/DatabaseUpgrade/Upgrade0262.sql", "Upgrade to version 262, Add project property UppercaseAppSignalID"},
 };
 
 int DbWorker::counter = 0;
@@ -612,7 +613,6 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 
 	// Open each project and get it's version
 	//
-
 	for (auto pi = out->begin(); pi != out->end(); ++pi)
 	{
 		QString projectDatabaseConnectionName = QString("%1_%2 connection").arg(m_instanceNo).arg(pi->projectName());
@@ -666,7 +666,7 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 			//
 			if (pi->version() >= 41)
 			{
-				QString getProjectDescriptionSql = QString("SELECT * FROM get_project_property('Description');");
+				QString getProjectDescriptionSql = QString("SELECT Value FROM ProjectProperties WHERE Name = 'Description';");
 
 				QSqlQuery q(projectDb);
 				result = q.exec(getProjectDescriptionSql);
@@ -1019,18 +1019,22 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	project.setProjectName(projectName);
 
 	QString projectDescription;
-	getProjectProperty_worker("Description", &projectDescription);
+	QString projectUppercaseAppSignalId;
+
+	getProjectProperty_worker(Db::ProjectProperty::Description, &projectDescription);
+	getProjectProperty_worker(Db::ProjectProperty::UppercaseAppSignalId, &projectUppercaseAppSignalId);
 
 	project.setDescription(projectDescription);
+	project.setUppercaseAppSignalId(projectUppercaseAppSignalId.compare("true", Qt::CaseInsensitive) == 0 ? true : false);
 
 	setCurrentProject(project);
 
 	// Set System Folders File ID
 	//
 	std::vector<DbFileInfo> systemFiles;
-	std::vector<QString> systemFileNames = {::AfblFileName, ::SchemasFileName, ::UfblFileName, ::AlFileName, ::HcFileName,
-											::HpFileName, ::MvsFileName,::TvsFileName, ::DvsFileName, ::McFileName,
-											::ConnectionsFileName, ::BusTypesFileName, ::EtcFileName};
+	std::vector<QString> systemFileNames = {Db::File::AfblFileName, Db::File::SchemasFileName, Db::File::UfblFileName, Db::File::AlFileName, Db::File::HcFileName,
+											Db::File::HpFileName, Db::File::MvsFileName, Db::File::TvsFileName, Db::File::DvsFileName, Db::File::McFileName,
+											Db::File::ConnectionsFileName, Db::File::BusTypesFileName, Db::File::EtcFileName};
 
 	bool ok = worker_getFilesInfo(systemFileNames, &systemFiles);
 	if (ok == false)
@@ -1067,13 +1071,13 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 		DbFileInfo rfi;
 		rfi.setFileId(rootFileId());
-		rfi.setFileName(RootFileName);
+		rfi.setFileName(Db::File::RootFileName);
 		m_systemFiles.push_back(rfi);
 	}
 
 	for (const DbFileInfo& fi : systemFiles)
 	{
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(::AfblFileName))
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::AfblFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_afblFileId = fi.fileId();
@@ -1081,7 +1085,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(::SchemasFileName))
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::SchemasFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_schemasFileId = fi.fileId();
@@ -1089,7 +1093,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(::UfblFileName))
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::UfblFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_ufblFileId = fi.fileId();
@@ -1097,7 +1101,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(::AlFileName))
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::AlFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_alFileId = fi.fileId();
@@ -1105,7 +1109,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(::HcFileName))
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::HcFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_hcFileId = fi.fileId();
@@ -1113,7 +1117,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(::HpFileName))
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::HpFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_hpFileId = fi.fileId();
@@ -1121,7 +1125,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(::MvsFileName))
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::MvsFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_mvsFileId = fi.fileId();
@@ -1129,7 +1133,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(::TvsFileName))
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::TvsFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_tvsFileId = fi.fileId();
@@ -1137,7 +1141,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(::DvsFileName))
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::DvsFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_dvsFileId = fi.fileId();
@@ -1145,7 +1149,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(::McFileName))
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::McFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_mcFileId = fi.fileId();
@@ -1153,7 +1157,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(::ConnectionsFileName))
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::ConnectionsFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_connectionsFileId = fi.fileId();
@@ -1161,7 +1165,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(::BusTypesFileName))
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::BusTypesFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_busTypesFileId = fi.fileId();
@@ -1169,7 +1173,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 			continue;
 		}
 
-		if (fi.fileName() == DbFileInfo::fullPathToFileName(::EtcFileName))
+		if (fi.fileName() == DbFileInfo::fullPathToFileName(Db::File::EtcFileName))
 		{
 			QMutexLocker locker(&m_mutex);
 			m_etcFileId = fi.fileId();
@@ -1537,7 +1541,6 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 
 	// Open database, removeDatabase will be called in slot_closeProject()
 	//
-
 	int projectVersion = 0;
 
 	{
@@ -2015,7 +2018,8 @@ void DbWorker::slot_setProjectProperty(QString propertyName, QString propertyVal
 	//
 	QSqlQuery query(db);
 
-	query.prepare("SELECT * FROM set_project_property(:propertyName, :propertyValue);");
+	query.prepare("SELECT * FROM api.set_project_property(:sessionkey, :propertyName, :propertyValue);");
+	query.bindValue(":sessionkey", sessionKey());
 	query.bindValue(":propertyName", propertyName);
 	query.bindValue(":propertyValue", propertyValue.isEmpty() ? "" : propertyValue);
 
@@ -2073,7 +2077,8 @@ void DbWorker::getProjectProperty_worker(QString propertyName, QString* out)
 	//
 	QSqlQuery query(db);
 
-	query.prepare("SELECT * FROM get_project_property(:propertyName);");
+	query.prepare("SELECT * FROM api.get_project_property(:sessionkey, :propertyName);");
+	query.bindValue(":sessionkey", sessionKey());
 	query.bindValue(":propertyName", propertyName);
 
 	bool result = query.exec();

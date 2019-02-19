@@ -531,7 +531,7 @@ void SimWidget::openLogicSchemaTabPage(QString schemaId)
 
 	// Load schema
 	//
-	QString fileName = buildPath + QLatin1String("LogicSchemas/") + schemaId + "." + ::AlFileExtension;
+	QString fileName = buildPath + QLatin1String("LogicSchemas/") + schemaId + "." + Db::File::AlFileExtension;
 
 	openSchemaTabPage(fileName);
 	return;
