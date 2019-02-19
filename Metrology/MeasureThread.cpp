@@ -272,27 +272,6 @@ bool MeasureThread::hasConnectedCalibrators()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureThread::polarityTest(double electricVal, const MeasureMultiParam& param)
-{
-	bool isNegativeRange = false;
-
-	if (electricVal < 0 && param.isNegativeRange() == false)
-	{
-		isNegativeRange = true;
-		emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the negative (-) part of the electrical range.").arg(param.calibratorManager()->calibratorChannel() + 1));
-	}
-
-	if (electricVal >= 0 && param.isNegativeRange() == true)
-	{
-		isNegativeRange = false;
-		emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the positive (+) part of the electrical range.").arg(param.calibratorManager()->calibratorChannel() + 1));
-	}
-
-	return isNegativeRange;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 bool MeasureThread::setCalibratorUnit()
 {
 	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
@@ -454,6 +433,41 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MeasureThread::polarityTest(double electricVal, MeasureMultiParam& param)
+{
+	if (calibratorIsValid(param.calibratorManager()) == false)
+	{
+		return;
+	}
+
+	Calibrator* pCalibrator = param.calibratorManager()->calibrator();
+	if (pCalibrator == nullptr)
+	{
+		return;
+	}
+
+	double negativeLimit = 0;
+
+	if (pCalibrator->mode() == CALIBRATOR_MODE_SOURCE && pCalibrator->sourceUnit() == CALIBRATOR_UNIT_MV)
+	{
+		negativeLimit = -10;
+	}
+
+	if (electricVal < negativeLimit && param.isNegativeRange() == false)
+	{
+		param.setNegativeRange(true);
+		emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the negative (-) part of the electrical range.").arg(param.calibratorManager()->calibratorChannel() + 1));
+	}
+
+	if (electricVal >= negativeLimit && param.isNegativeRange() == true)
+	{
+		param.setNegativeRange(false);
+		emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the positive (+) part of the electrical range.").arg(param.calibratorManager()->calibratorChannel() + 1));
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MeasureThread::run()
 {
 	if (m_measureType < 0 || m_measureType >= MEASURE_TYPE_COUNT)
@@ -587,17 +601,19 @@ void MeasureThread::measureLinearity()
 
 						// polarity test
 						//
-						if (electricVal < 0 && m_activeSignalParam[c].isNegativeRange() == false)
-						{
-							m_activeSignalParam[c].setNegativeRange(true);
-							emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the negative (-) part of the electrical range.").arg(m_activeSignalParam[c].calibratorManager()->calibratorChannel() + 1));
-						}
+//						if (electricVal < 0 && m_activeSignalParam[c].isNegativeRange() == false)
+//						{
+//							m_activeSignalParam[c].setNegativeRange(true);
+//							emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the negative (-) part of the electrical range.").arg(m_activeSignalParam[c].calibratorManager()->calibratorChannel() + 1));
+//						}
 
-						if (electricVal >= 0 && m_activeSignalParam[c].isNegativeRange() == true)
-						{
-							m_activeSignalParam[c].setNegativeRange(false);
-							emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the positive (+) part of the electrical range.").arg(m_activeSignalParam[c].calibratorManager()->calibratorChannel() + 1));
-						}
+//						if (electricVal >= 0 && m_activeSignalParam[c].isNegativeRange() == true)
+//						{
+//							m_activeSignalParam[c].setNegativeRange(false);
+//							emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the positive (+) part of the electrical range.").arg(m_activeSignalParam[c].calibratorManager()->calibratorChannel() + 1));
+//						}
+						polarityTest(electricVal, m_activeSignalParam[c]);
+
 
 						pCalibratorManager->setValue(m_activeSignalParam[c].isNegativeRange() ? -electricVal : electricVal);
 					}

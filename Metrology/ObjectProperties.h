@@ -28,7 +28,6 @@ const char* const				SignalPropertyGroup[] =
 								QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Signal ID"),
 								QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Position"),
 								QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Electric range: "),
-								QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Physical range: "),
 								QT_TRANSLATE_NOOP("SignalPropertyDialog.h", "Engeneering range: "),
 };
 

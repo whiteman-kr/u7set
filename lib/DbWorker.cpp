@@ -278,6 +278,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0258.sql", "Upgrade to version 258, AIM-4PH, AOM-4PH, WAIM, TIM, RIM migrated to dynamic physical units calculation"},
 	{":/DatabaseUpgrade/Upgrade0259.sql", "Upgrade to version 259, Optimize undo_changes and Equipment Editor"},
 	{":/DatabaseUpgrade/Upgrade0260.sql", "Upgrade to version 260, Creating some indexes on signalinstance table"},
+	{":/DatabaseUpgrade/Upgrade0261.sql", "Upgrade to version 261, SchemaTags in Monitor and TuningClient has default values"},
 };
 
 int DbWorker::counter = 0;
@@ -2016,7 +2017,7 @@ void DbWorker::slot_setProjectProperty(QString propertyName, QString propertyVal
 
 	query.prepare("SELECT * FROM set_project_property(:propertyName, :propertyValue);");
 	query.bindValue(":propertyName", propertyName);
-	query.bindValue(":propertyValue", propertyValue);
+	query.bindValue(":propertyValue", propertyValue.isEmpty() ? "" : propertyValue);
 
 	bool result = query.exec();
 
@@ -3204,9 +3205,9 @@ void DbWorker::slot_getLatestTreeVersion(const DbFileInfo& parentFileInfo, std::
 		out->push_back(file);
 	}
 
-	qDebug() << "Request time is " << timerObject.elapsed() << " ms, request: " << request;
+	//qDebug() << "Request time is " << timerObject.elapsed() << " ms, request: " << request;
 	//qDebug() << "\tmemoryAllocationEllpased " << memoryAllocationEllpased / 1000000;
-	qDebug() << "\tupdateFileEllpased " << updateFileEllpased / 1000000;
+	//qDebug() << "\tupdateFileEllpased " << updateFileEllpased / 1000000;
 	//qDebug() << "\tpushBackEllpased " << pushBackEllpased / 1000000;
 
 	return;

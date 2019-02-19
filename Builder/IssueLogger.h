@@ -3,15 +3,15 @@
 #include "../lib/OutputLog.h"
 #include <QUuid>
 
-#define LOG_ERROR(type, code, message)		writeError(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+#define LOG_ERROR(type, code, message)		writeError(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 
 // Warning2 - the least important warning
 // Warning1 - just warning
 // Warning0 - the most important warning
-
-#define LOG_WARNING0(type, code, message)	writeWarning0(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, SHORT_FUNC_INFO);
-#define LOG_WARNING1(type, code, message)	writeWarning1(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, SHORT_FUNC_INFO);
-#define LOG_WARNING2(type, code, message)	writeWarning2(issuePTypeToString(type) + QString::number(code).rightJustified(4, '0'), message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+//
+#define LOG_WARNING0(type, code, message)	writeWarning0(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+#define LOG_WARNING1(type, code, message)	writeWarning1(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
+#define LOG_WARNING2(type, code, message)	writeWarning2(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 
 
 namespace Builder
@@ -108,10 +108,12 @@ namespace Builder
 		void wrnPDB2000();
 		void errPDB2001(int parentFileId, QString filter, QString databaseMessage);
 		void errPDB2002(int fileId, QString fileName, QString databaseMessage);
-		void errPDB2003();										// Load signals from the project database error
-		void errPDB2004();										// Load units from the project database error
-		void errPDB2005();										// Load UFB schemas from the project database error
-		void errPDB2006(QString projectName, QString dbLastError);										// Opening project %1 error (%2).
+		void errPDB2003();												// Load signals from the project database error
+		void errPDB2004();												// Load units from the project database error
+		void errPDB2005();												// Load UFB schemas from the project database error
+		void errPDB2006(QString projectName, QString dbLastError);		// Opening project %1 error (%2).
+
+		void errPDB2020(QString projectPropertyName);					// Getting project property %1 error.
 
 		// CFG			FSC configuration						3000-3999
 		//
@@ -419,13 +421,13 @@ namespace Builder
 		void errEQP6114(QString appSignalID);								//  Signal %1 has wrong R0 (ThermoResistor)
 
 	public:
-		void addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids);
-		void addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids, const QString& schemaID);
+		void addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids);
+		void addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids, const QString& schemaID);
 
-		void addItemsIssues(OutputMessageLevel level, QUuid itemsUuid);
-		void addItemsIssues(OutputMessageLevel level, QUuid itemsUuid, const QString& schemaID);
+		void addItemsIssues(OutputMessageLevel level, int issueCode, QUuid itemsUuid);
+		void addItemsIssues(OutputMessageLevel level, int issueCode, QUuid itemsUuid, const QString& schemaID);
 
-		void addSchemaIssue(OutputMessageLevel level, const QString& schemaID);
+		void addSchemaIssue(OutputMessageLevel level, int issueCode, const QString& schemaID);
 
 		void clearItemsIssues();
 

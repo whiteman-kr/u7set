@@ -396,7 +396,7 @@ namespace Builder
 
 	void IssueLogger::errINT1001(QString debugMessage, QString schema)
 	{
-		addSchemaIssue(OutputMessageLevel::Error, schema);
+		addSchemaIssue(OutputMessageLevel::Error, 1001, schema);
 
 		LOG_ERROR(IssueType::Internal,
 				  1001,
@@ -407,7 +407,7 @@ namespace Builder
 
 	void IssueLogger::errINT1001(QString debugMessage, QString schema, QUuid itemsUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemsUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 1001, itemsUuid, schema);
 
 		LOG_ERROR(IssueType::Internal,
 				  1001,
@@ -418,7 +418,7 @@ namespace Builder
 
 	void IssueLogger::errINT1001(QString debugMessage, QString schema, const std::vector<QUuid>& itemsUuids)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemsUuids, schema);
+		addItemsIssues(OutputMessageLevel::Error, 100, itemsUuids, schema);
 
 		LOG_ERROR(IssueType::Internal,
 				  1001,
@@ -570,6 +570,25 @@ namespace Builder
 		LOG_ERROR(IssueType::ProjectDatabase,
 				  2006,
 				  QString(tr("Opening project %1 error (%2).")).arg(projectName).arg(dbLastError));
+	}
+
+	/// IssueCode: PDB2020B
+	///
+	/// IssueType: Error
+	///
+	/// Title: Getting project property %1 error.
+	///
+	/// Parameters:
+	///			%1 Project property name
+	///
+	/// Description:
+	///		RPCT project property getting errror.
+	///
+	void IssueLogger::errPDB2020(QString projectPropertyName)
+	{
+		LOG_ERROR(IssueType::ProjectDatabase,
+				  2020,
+				  QString(tr("Getting project property %1 error.")).arg(projectPropertyName));
 	}
 
 	// CFG			FSC configuration						3000-3999
@@ -1350,7 +1369,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4000(QString schema, const std::vector<QUuid>& itemsUuids)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemsUuids, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4000, itemsUuids, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4000,
@@ -1373,7 +1392,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4001(QString schema, QString propertyName)
 	{
-		addSchemaIssue(OutputMessageLevel::Error, schema);
+		addSchemaIssue(OutputMessageLevel::Error, 4001, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4001,
@@ -1397,7 +1416,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4002(QString schema, QString equipmentId)
 	{
-		addSchemaIssue(OutputMessageLevel::Error, schema);
+		addSchemaIssue(OutputMessageLevel::Error, 4002, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4002,
@@ -1421,7 +1440,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4003(QString schema, QString equipmentId)
 	{
-		addSchemaIssue(OutputMessageLevel::Error, schema);
+		addSchemaIssue(OutputMessageLevel::Error, 4003, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4003,
@@ -1445,7 +1464,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnALP4004(QString schema)
 	{
-		addSchemaIssue(OutputMessageLevel::Warning1, schema);
+		addSchemaIssue(OutputMessageLevel::Warning1, 4004, schema);
 
 		LOG_WARNING1(IssueType::AlParsing,
 					4004,
@@ -1467,7 +1486,9 @@ namespace Builder
 	///
 	void IssueLogger::wrnALP4005(QString schema)
 	{
-		addSchemaIssue(OutputMessageLevel::Warning2, schema);
+		addSchemaIssue(OutputMessageLevel::Warning2,
+					   4005,
+					   schema);
 
 		LOG_WARNING2(IssueType::AlParsing,
 					4005,
@@ -1499,7 +1520,10 @@ namespace Builder
 
 	void IssueLogger::errALP4006(QString schema, QString schemaItem, QString pin, const std::vector<QUuid>& itemsUuids)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemsUuids, schema);
+		addItemsIssues(OutputMessageLevel::Error,
+					   4006,
+					   itemsUuids,
+					   schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4006,
@@ -1525,7 +1549,10 @@ namespace Builder
 	///
 	void IssueLogger::errALP4007(QString schema, QString schemaItem, QString afbElement, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error,
+					   4007,
+					   itemUuid,
+					   schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4007,
@@ -1551,7 +1578,10 @@ namespace Builder
 	///
 	void IssueLogger::errALP4008(QString schema, QString schemaItem, QString schemaItemAfbVersion, QString latesAfbVersion, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error,
+					   4008,
+					   itemUuid,
+					   schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4008,
@@ -1578,7 +1608,10 @@ namespace Builder
 	///
 	void IssueLogger::errALP4009(QString schema, QString schemaItem, QString ufbElement, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error,
+					   4009,
+					   itemUuid,
+					   schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4009,
@@ -1604,7 +1637,10 @@ namespace Builder
 	///
 	void IssueLogger::errALP4010(QString schema, QString schemaItem, int schemaItemUfbVersion, int latesUfbVersion, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error,
+					   4010,
+					   itemUuid,
+					   schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4010,
@@ -1630,7 +1666,10 @@ namespace Builder
 	///
 	void IssueLogger::errALP4011(QString schema, QString schemaItem, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error,
+					   4011,
+					   itemUuid,
+					   schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4011,
@@ -1654,7 +1693,10 @@ namespace Builder
 	///
 	void IssueLogger::errALP4012(QString schema, QString schemaItem, QString pinCaption, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error,
+					   4012,
+					   itemUuid,
+					   schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4012,
@@ -1681,7 +1723,10 @@ namespace Builder
 	///
 	void IssueLogger::errALP4013(QString schema, QString schemaItem, QString inPin, QString outPin, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error,
+					   4013,
+					   itemUuid,
+					   schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4013,
@@ -1708,7 +1753,10 @@ namespace Builder
 	///
 	void IssueLogger::errALP4014(QString schema, QString schemaItem, QString itemType, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error,
+					   4014,
+					   itemUuid,
+					   schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4014,
@@ -1733,7 +1781,10 @@ namespace Builder
 	///
 	void IssueLogger::errALP4015(QString schema, QString schemaItem, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error,
+					   4015,
+					   itemUuid,
+					   schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4015,
@@ -1756,7 +1807,8 @@ namespace Builder
 	///
 	void IssueLogger::errALP4016(QString schema, QString lmDecriptionFile)
 	{
-		addSchemaIssue(OutputMessageLevel::Error, schema);
+		addSchemaIssue(OutputMessageLevel::Error, 4016, schema);
+
 		LOG_ERROR(IssueType::AlParsing,
 				  4016,
 				  tr("File LmDescriptionFile %1 is not found (Schema %2).")
@@ -1780,7 +1832,8 @@ namespace Builder
 	///
 	void IssueLogger::errALP4017(QString schema, QString lmDecriptionFile, int opCode)
 	{
-		addSchemaIssue(OutputMessageLevel::Error, schema);
+		addSchemaIssue(OutputMessageLevel::Error, 4017, schema);
+
 		LOG_ERROR(IssueType::AlParsing,
 				  4017,
 				  tr("AfbComponent with OpCode %1 is not found in file %2 (Schema %3).")
@@ -1805,7 +1858,8 @@ namespace Builder
 	///
 	void IssueLogger::errALP4017(QString schema, QString lmDecriptionFile, int opCode, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4017, itemUuid, schema);
+
 		LOG_ERROR(IssueType::AlParsing,
 				  4017,
 				  tr("AfbComponent with OpCode %1 is not found in file %2 (Schema %3).")
@@ -1831,7 +1885,8 @@ namespace Builder
 	///
 	void IssueLogger::errALP4018(QString schema, QString equipmentId, QString schemaLmDecriptionFile1, QString moduleLmDecriptionFile2)
 	{
-		addSchemaIssue(OutputMessageLevel::Error, schema);
+		addSchemaIssue(OutputMessageLevel::Error, 4018, schema);
+
 		LOG_ERROR(IssueType::AlParsing,
 				  4018,
 				  tr("LogicSchema (%1) and LogicModule (%2) have different LmDescriptionFile (%3 and %4).")
@@ -1860,7 +1915,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4019(QString schema, QString schemaItem, QString ufbElement, QUuid itemUuid, QString UfbLmDecriptionFile, QString schemaLmDecriptionFile)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4019, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4019,
@@ -1908,9 +1963,9 @@ namespace Builder
 	///
 	void IssueLogger::errALP4021(QString logicModule, QString schema1, QString schema2, QString schemaItem1, QString schemaItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids)
 	{
-		addSchemaIssue(OutputMessageLevel::Error, schema1);
-		addSchemaIssue(OutputMessageLevel::Error, schema2);
-		addItemsIssues(OutputMessageLevel::Error, itemsUuids);
+		addSchemaIssue(OutputMessageLevel::Error, 4021, schema1);
+		addSchemaIssue(OutputMessageLevel::Error, 4021, schema2);
+		addItemsIssues(OutputMessageLevel::Error, 4021, itemsUuids);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4021,
@@ -1938,7 +1993,8 @@ namespace Builder
 	///
 	void IssueLogger::errALP4022(QString schema)
 	{
-		addSchemaIssue(OutputMessageLevel::Error, schema);
+		addSchemaIssue(OutputMessageLevel::Error, 4022, schema);
+
 		LOG_ERROR(IssueType::AlParsing,
 				  4022,
 				  tr("Schema does not have logic layer (Schema %1).").arg(schema));
@@ -1958,7 +2014,8 @@ namespace Builder
 	///
 	void IssueLogger::errALP4023(QString schema, QString pinCaption, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4023, itemUuid, schema);
+
 		LOG_ERROR(IssueType::AlParsing,
 				  4023,
 				  tr("UFB schema has duplicate pins %1 (UFB schema %2).").arg(pinCaption).arg(schema));
@@ -2020,7 +2077,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4040(QString schema, QString schemaItem, QString busTypeId, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4040, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4040,
@@ -2046,7 +2103,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4041(QString schema, QString schemaItem, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4041, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4041,
@@ -2070,7 +2127,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4060(QString schema, QString schemaItem, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4060, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4060,
@@ -2094,7 +2151,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4061(QString schema, QString loopbackId, const std::vector<QUuid>& itemUuids)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuids, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4061, itemUuids, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4061,
@@ -2118,7 +2175,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnALP4070(QString schema, const std::vector<QUuid>& itemsUuids)
 	{
-		addItemsIssues(OutputMessageLevel::Warning2, itemsUuids, schema);
+		addItemsIssues(OutputMessageLevel::Warning2, 4070, itemsUuids, schema);
 
 		LOG_WARNING2(IssueType::AlParsing,
 					4070,
@@ -2143,7 +2200,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4130(QString schema, QString schemaItem, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4130, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4130,
@@ -2169,7 +2226,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4131(QString schema, QString schemaItem, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4131, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4131,
@@ -2194,7 +2251,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4132(QString schema, const std::vector<QUuid>& itemsUuids)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemsUuids, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4132, itemsUuids, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4132,
@@ -2218,7 +2275,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4133(QString schema, QString appSignalId, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4133, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4133,
@@ -2243,7 +2300,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4134(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4134, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4134,
@@ -2269,7 +2326,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4135(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4135, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4135,
@@ -2295,7 +2352,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4136(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4136, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4136,
@@ -2322,7 +2379,7 @@ namespace Builder
 	///
 	void IssueLogger::errALP4137(QString schema, QString schemaItem, QString appSignalId, QString equipmentId, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4137, itemUuid, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4137,
@@ -2354,11 +2411,11 @@ namespace Builder
 	{
 		if (schemaID.isEmpty() == true)
 		{
-			addItemsIssues(OutputMessageLevel::Error, itemUuid);
+			addItemsIssues(OutputMessageLevel::Error, 5000, itemUuid);
 		}
 		else
 		{
-			addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+			addItemsIssues(OutputMessageLevel::Error, 5000, itemUuid, schemaID);
 		}
 
 		LOG_ERROR(IssueType::AlCompiler,
@@ -2401,7 +2458,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5002(QString schemaID, QString appSignalID, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5002, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5002,
@@ -2425,7 +2482,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5003(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5003, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5003,
@@ -2448,7 +2505,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5004(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5004, signalUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5004,
@@ -2472,7 +2529,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5005(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5005, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5005,
@@ -2495,7 +2552,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5006(QString afbCaption, QString output, QString appSignalID, QUuid signalUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5006, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5006,
@@ -2519,7 +2576,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5007(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5007, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5007,
@@ -2543,7 +2600,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5008(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid, const QString& schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5008, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5008,
@@ -2568,7 +2625,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5009(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5009, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5009,
@@ -2592,7 +2649,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5010(QString appSignalID, QString afbCaption, QString input, QUuid signalUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5010, signalUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5010,
@@ -2615,7 +2672,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5011(QString itemLabel, QString schemaId, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaId);
+		addItemsIssues(OutputMessageLevel::Error, 5011, itemUuid, schemaId);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5011,
@@ -2886,7 +2943,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5024(QString connection, QUuid transmitterUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, transmitterUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5024, transmitterUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5024,
@@ -2909,7 +2966,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5025(QString connection, QUuid receiverUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, receiverUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5025, receiverUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5025,
@@ -2932,11 +2989,11 @@ namespace Builder
 	///
 	void IssueLogger::errALC5026(QUuid transmitterUuid, const QList<QUuid>& signalIDs)
 	{
-		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5026, transmitterUuid);
 
 		for(QUuid signalID : signalIDs)
 		{
-			addItemsIssues(OutputMessageLevel::Error, signalID);
+			addItemsIssues(OutputMessageLevel::Error, 5026, signalID);
 		}
 
 		LOG_ERROR(IssueType::AlCompiler,
@@ -2958,7 +3015,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5027(QUuid transmitterUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, transmitterUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5027, transmitterUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5027,
@@ -2979,7 +3036,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5028(QUuid constUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, constUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5028, constUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5028,
@@ -3002,7 +3059,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5030(QString appSignalID, QString lmEquipmentID, QUuid signalUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5030, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5030,
@@ -3091,8 +3148,8 @@ namespace Builder
 	///
 	void IssueLogger::errALC5034(QUuid transmitterUuid, QUuid connectedItemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
-		addItemsIssues(OutputMessageLevel::Error, connectedItemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5034, transmitterUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5034, connectedItemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5034,
@@ -3140,8 +3197,8 @@ namespace Builder
 	///
 	void IssueLogger::errALC5036(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, srcUuid);
-		addItemsIssues(OutputMessageLevel::Error, destUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5036, srcUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5036, destUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5036,
@@ -3167,8 +3224,8 @@ namespace Builder
 	///
 	void IssueLogger::errALC5037(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, srcUuid);
-		addItemsIssues(OutputMessageLevel::Error, destUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5037, srcUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5037, destUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5037,
@@ -3193,8 +3250,8 @@ namespace Builder
 	///
 	void IssueLogger::errALC5038(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, srcUuid);
-		addItemsIssues(OutputMessageLevel::Error, destUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5038, srcUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5038, destUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5038,
@@ -3219,8 +3276,8 @@ namespace Builder
 	///
 	void IssueLogger::errALC5039(QString srcSignalID, QUuid srcUuid, QString destSignalID, QUuid destUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, srcUuid);
-		addItemsIssues(OutputMessageLevel::Error, destUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5039, srcUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5039, destUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5039,
@@ -3242,7 +3299,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5040(QString connectionID, QUuid item)
 	{
-		addItemsIssues(OutputMessageLevel::Error, item);
+		addItemsIssues(OutputMessageLevel::Error, 5040, item);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5040,
@@ -3264,7 +3321,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5041(QString appSignalID, QString lmID, QUuid receiverUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, receiverUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5041, receiverUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5041,
@@ -3287,7 +3344,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5042(QString appSignalID, QString connectionID, QUuid receiverUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, receiverUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5042, receiverUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5042,
@@ -3313,7 +3370,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5043(QString fbCaption, QString paramCaption, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5043, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5043,
@@ -3337,7 +3394,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5044(QString fbCaption, int opcode, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5044, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5044,
@@ -3361,7 +3418,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5045(QString paramCaption, QString fbCaption, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5045, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5045,
@@ -3385,7 +3442,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5046(QString paramCaption, QString fbCaption, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5046, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5046,
@@ -3409,7 +3466,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5047(QString paramCaption, QString fbCaption, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5047, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5047,
@@ -3433,7 +3490,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5048(QString paramCaption, QString fbCaption, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5048, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5048,
@@ -3457,7 +3514,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5049(QString paramCaption, QString fbCaption, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5049, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5049,
@@ -3481,7 +3538,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5050(QString paramCaption, QString fbCaption, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5050, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5050,
@@ -3506,7 +3563,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5051(int paramValue, QString paramCaption, QString fbCaption, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5051, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5051,
@@ -3531,7 +3588,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5052(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5052, itemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5052,
@@ -3554,7 +3611,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnALC5053(QString fbCaption, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5053, itemUuid);
 
 		LOG_WARNING0(IssueType::AlCompiler,
 				  5053,
@@ -3578,7 +3635,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5054(QString fbCaption, QString param1, QString param2, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5054, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5054,
@@ -3643,7 +3700,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5057(QString afbCaption, QString afbSignal, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5057, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5057,
@@ -3667,7 +3724,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5058(QString paramCaption, QString afbCaption, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5058, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5058,
@@ -3691,7 +3748,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5059(QString schemaID, QString connectionID, QString lmID, QUuid transmitterUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5059, transmitterUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5059,
@@ -3713,7 +3770,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5060(QString schemaID, QUuid constantUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, constantUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5060, constantUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5060,
@@ -3734,7 +3791,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5061(QString schemaID, QUuid constantUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, constantUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5061, constantUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5061,
@@ -3755,7 +3812,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5062(QString schemaID, QUuid constantUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, constantUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5062, constantUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5062,
@@ -3776,7 +3833,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5063(QString schemaID, QUuid constantUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, constantUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5063, constantUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5063,
@@ -3944,7 +4001,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5071(QString schemaID, QString appSignalID, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5071, itemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5071,
@@ -3970,7 +4027,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnALC5072(int coefCount, QString coefCaption, QUuid itemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Warning0, itemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Warning0, 5072, itemUuid, schemaID);
 
 		LOG_WARNING1(IssueType::AlCompiler,
 				  5072,
@@ -4176,7 +4233,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5083(QString receiverPortID, QString connectionID, QString lmID, QUuid receiverUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, receiverUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5083, receiverUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5083,
@@ -4220,7 +4277,7 @@ namespace Builder
 
 	void IssueLogger::errALC5086(QUuid constItemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, constItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5086, constItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5086,
@@ -4243,7 +4300,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5087(QString schemaID, QString appSignalID, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5087, itemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5087,
@@ -4267,7 +4324,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5088(QString fbCaption, QString paramCaption, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5088, itemUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5088,
@@ -4516,7 +4573,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5100(QString busTypeID, QUuid item, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, item, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5100, item, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5100,
@@ -4537,8 +4594,8 @@ namespace Builder
 	///
 	void IssueLogger::errALC5102(QUuid composer1Guid, QUuid composer2Guid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, composer1Guid, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, composer2Guid);
+		addItemsIssues(OutputMessageLevel::Error, 5102, composer1Guid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5102, composer2Guid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5102,
@@ -4560,8 +4617,8 @@ namespace Builder
 	///
 	void IssueLogger::errALC5103(QString signalID, QUuid signalUuid, QUuid composerUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalUuid, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, composerUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5103, signalUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5103, composerUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5103,
@@ -4584,8 +4641,8 @@ namespace Builder
 	///
 	void IssueLogger::errALC5104(QUuid composerUuid, QString signalID, QUuid signalUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, composerUuid, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, signalUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5104, composerUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5104, signalUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5104,
@@ -4608,7 +4665,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5105(QString signalID, QUuid signalUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5105, signalUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5105,
@@ -4631,7 +4688,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5106(QString pinCaption, QUuid schemaItemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, schemaItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5106, schemaItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5106,
@@ -4653,8 +4710,8 @@ namespace Builder
 	///
 	void IssueLogger::errALC5107(QUuid afbUuid, QUuid transmitterUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, afbUuid, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, transmitterUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5107, afbUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5107, transmitterUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5107,
@@ -4676,7 +4733,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5108(QUuid afbUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, afbUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5108, afbUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5108,
@@ -4697,7 +4754,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5109(QUuid afbUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, afbUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5109, afbUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5109,
@@ -4718,8 +4775,8 @@ namespace Builder
 	///
 	void IssueLogger::errALC5110(QUuid item1, QUuid item2, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, item1, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, item2);
+		addItemsIssues(OutputMessageLevel::Error, 5110, item1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5110, item2);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5110,
@@ -4741,7 +4798,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5111(QUuid afbUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, afbUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5111, afbUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5111,
@@ -4763,8 +4820,8 @@ namespace Builder
 	///
 	void IssueLogger::errALC5112(QUuid uuid1, QUuid uuid2, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, uuid1, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, uuid2);
+		addItemsIssues(OutputMessageLevel::Error, 5112, uuid1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5112, uuid2);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5112,
@@ -4786,8 +4843,8 @@ namespace Builder
 	///
 	void IssueLogger::errALC5113(QUuid item1, QUuid item2, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, item1, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, item2);
+		addItemsIssues(OutputMessageLevel::Error, 5113, item1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5113, item2);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5113,
@@ -4811,7 +4868,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5114(QString itemCaption, QString inputCaption, QUuid itemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5114, itemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5114,
@@ -4833,8 +4890,8 @@ namespace Builder
 	///
 	void IssueLogger::errALC5115(QUuid uuid1, QUuid uuid2, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, uuid1, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, uuid2);
+		addItemsIssues(OutputMessageLevel::Error, 5115, uuid1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5115, uuid2);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5115,
@@ -4856,8 +4913,8 @@ namespace Builder
 	///
 	void IssueLogger::errALC5116(QUuid uuid1, QUuid uuid2, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, uuid1, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, uuid2);
+		addItemsIssues(OutputMessageLevel::Error, 5116, uuid1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5116, uuid2);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5116,
@@ -4879,8 +4936,8 @@ namespace Builder
 	///
 	void IssueLogger::errALC5117(QUuid uuid1, QString label1, QUuid uuid2, QString label2, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, uuid1, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, uuid2);
+		addItemsIssues(OutputMessageLevel::Error, 5117, uuid1, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5117, uuid2);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5117,
@@ -4903,7 +4960,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5118(QString appSignalID, QUuid itemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5118, itemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5118,
@@ -4925,7 +4982,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5119(QUuid constItemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, constItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5119, constItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5119,
@@ -4947,7 +5004,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5120(QUuid ualItemUuid, QString ualItemLabel, QString pin, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5120, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5120,
@@ -4970,7 +5027,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5121, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5121,
@@ -4992,7 +5049,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5122(QUuid ualItemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5122, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5122,
@@ -5013,7 +5070,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5123(QUuid ualItemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5123, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5123,
@@ -5035,8 +5092,8 @@ namespace Builder
 	///
 	void IssueLogger::errALC5124(QString appSignalID, QUuid signalUuid, QUuid ualItemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, signalUuid);
+		addItemsIssues(OutputMessageLevel::Error, 5124, ualItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5124, signalUuid);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5124,
@@ -5059,7 +5116,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5125(QString pinCaption, QUuid transmitterUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, transmitterUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5125, transmitterUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5125,
@@ -5081,7 +5138,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5126(QUuid ualItemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5126, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5126,
@@ -5103,7 +5160,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5127(QUuid ualItemUuid, QString itemLabel, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5127, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5127,
@@ -5126,7 +5183,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5128(QUuid ualItemUuid, QString itemLabel, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5128, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5128,
@@ -5149,7 +5206,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5129(QUuid ualItemUuid, QString itemLabel, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5129, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5129,
@@ -5174,7 +5231,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5130(int maxInstances, QString afbComponentCaption, QUuid ualItemUuid, QString itemLabel, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5130, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5130,
@@ -5239,7 +5296,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5133(QString signalEquipmentID, QUuid ualItemUuid, QString itemLabel, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5133, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5133,
@@ -5262,7 +5319,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5134(QUuid ualItemUuid, QString itemLabel, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5134, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5134,
@@ -5287,7 +5344,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5135(QUuid ualItemUuid, QString itemLabel, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, ualItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5135, ualItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5135,
@@ -5376,7 +5433,7 @@ namespace Builder
 	///
 	void IssueLogger::wrnALC5139(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel)
 	{
-		addItemsIssues(OutputMessageLevel::Warning0, itemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Warning0, 5139, itemUuid, schemaID);
 
 		LOG_WARNING0(IssueType::AlCompiler,
 				  5139,
@@ -5419,7 +5476,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5141(QString fbCaption, QString paramCaption, QString rangeStr, QUuid itemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5141, itemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5141,
@@ -5442,7 +5499,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5142(QString loopbackSourceID, QUuid loopbackSourceItemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, loopbackSourceItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5142, loopbackSourceItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5142,
@@ -5465,7 +5522,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5143(QString loopbackID, QUuid loopbackTargetItemUuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, loopbackTargetItemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5143, loopbackTargetItemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5143,
@@ -5490,9 +5547,9 @@ namespace Builder
 	///
 	void IssueLogger::errALC5144(QString s1ID, QUuid s1Guid, QString s2ID, QUuid s2Guid, QString lbId, QUuid lbGuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, s1Guid, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, s2Guid, schemaID);
-		addItemsIssues(OutputMessageLevel::Error, lbGuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5144, s1Guid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5144, s2Guid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5144, lbGuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5144,
@@ -5515,7 +5572,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5145(QString signalID, QUuid signalGuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalGuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5145, signalGuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5145,
@@ -5537,7 +5594,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5146(QString signalID, QUuid signalGuid, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, signalGuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5146, signalGuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5146,
@@ -5785,7 +5842,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5158(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemUuid, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5158, itemUuid, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5158,
@@ -5919,7 +5976,7 @@ namespace Builder
 	///
 	void IssueLogger::errALC5191(QString appSignalID, QString lmID, QUuid itemID, QString schemaID)
 	{
-		addItemsIssues(OutputMessageLevel::Error, itemID, schemaID);
+		addItemsIssues(OutputMessageLevel::Error, 5191, itemID, schemaID);
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5191,
@@ -6030,7 +6087,7 @@ namespace Builder
 	///
 	void IssueLogger::errEQP6000(QString equipmemtId, QUuid equpmentUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, equpmentUuid);
+		addItemsIssues(OutputMessageLevel::Error, 6000, equpmentUuid);
 
 		LOG_ERROR(IssueType::Equipment,
 				  6000,
@@ -6054,8 +6111,8 @@ namespace Builder
 	///
 	void IssueLogger::errEQP6001(QString equipmemtId, QUuid equipmentUuid1, QUuid equipmentUuid2)
 	{
-		addItemsIssues(OutputMessageLevel::Error, equipmentUuid1);
-		addItemsIssues(OutputMessageLevel::Error, equipmentUuid2);
+		addItemsIssues(OutputMessageLevel::Error, 6001, equipmentUuid1);
+		addItemsIssues(OutputMessageLevel::Error, 6001, equipmentUuid2);
 
 		LOG_ERROR(IssueType::Equipment,
 				  6001,
@@ -6082,7 +6139,7 @@ namespace Builder
 	///
 	void IssueLogger::errEQP6002(QUuid equipmentUuid, QString equipmentId1, QString equipmentId2)
 	{
-		addItemsIssues(OutputMessageLevel::Error, equipmentUuid);
+		addItemsIssues(OutputMessageLevel::Error, 6002, equipmentUuid);
 
 		LOG_ERROR(IssueType::Equipment,
 				  6002,
@@ -6111,8 +6168,8 @@ namespace Builder
 	///
 	void IssueLogger::errEQP6003(QString lm1, QString lm2, QString ipAddress, QUuid lm1Uuid, QUuid lm2Uuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, lm1Uuid);
-		addItemsIssues(OutputMessageLevel::Error, lm2Uuid);
+		addItemsIssues(OutputMessageLevel::Error, 6003, lm1Uuid);
+		addItemsIssues(OutputMessageLevel::Error, 6003, lm2Uuid);
 
 		LOG_ERROR(IssueType::Equipment,
 				  6003,
@@ -6138,7 +6195,7 @@ namespace Builder
 	///
 	void IssueLogger::errEQP6004(QString lm, QString lmDescriptionFile, QUuid lmUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, lmUuid);
+		addItemsIssues(OutputMessageLevel::Error, 6004, lmUuid);
 
 		LOG_ERROR(IssueType::Equipment,
 				  6004,
@@ -6247,7 +6304,7 @@ namespace Builder
 	///
 	void IssueLogger::errEQP6009(QString equipmemtId, QUuid equpmentUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, equpmentUuid);
+		addItemsIssues(OutputMessageLevel::Error, 6009, equpmentUuid);
 
 		LOG_ERROR(IssueType::Equipment,
 				  6009,
@@ -6270,7 +6327,7 @@ namespace Builder
 	///
 	void IssueLogger::errEQP6020(QString lm, QUuid lmUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, lmUuid);
+		addItemsIssues(OutputMessageLevel::Error, 6020, lmUuid);
 
 		LOG_ERROR(IssueType::Equipment,
 				  6020,
@@ -6293,7 +6350,7 @@ namespace Builder
 	///
 	void IssueLogger::errEQP6100(QString softwareObjectStrId, QUuid uuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, uuid);
+		addItemsIssues(OutputMessageLevel::Error, 6100, uuid);
 
 		LOG_ERROR(IssueType::Equipment,
 				  6100,
@@ -6626,40 +6683,80 @@ namespace Builder
 
 	// --
 	//
-	void IssueLogger::addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids)
+	void IssueLogger::addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids)
 	{
+		if ((level == OutputMessageLevel::Warning0 ||
+			level == OutputMessageLevel::Warning1 ||
+			level == OutputMessageLevel::Warning2) &&
+			isIssueSuppressed(issueCode) == true)
+		{
+			return;
+		}
+
 		if (m_buildIssues != nullptr)
 		{
 			m_buildIssues->addItemsIssues(level, itemsUuids);
 		}
 	}
 
-	void IssueLogger::addItemsIssues(OutputMessageLevel level, const std::vector<QUuid>& itemsUuids, const QString& schemaID)
+	void IssueLogger::addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids, const QString& schemaID)
 	{
+		if ((level == OutputMessageLevel::Warning0 ||
+			level == OutputMessageLevel::Warning1 ||
+			level == OutputMessageLevel::Warning2) &&
+			isIssueSuppressed(issueCode) == true)
+		{
+			return;
+		}
+
 		if (m_buildIssues != nullptr)
 		{
 			m_buildIssues->addItemsIssues(level, itemsUuids, schemaID);
 		}
 	}
 
-	void IssueLogger::addItemsIssues(OutputMessageLevel level, QUuid itemsUuid)
+	void IssueLogger::addItemsIssues(OutputMessageLevel level, int issueCode, QUuid itemsUuid)
 	{
+		if ((level == OutputMessageLevel::Warning0 ||
+			level == OutputMessageLevel::Warning1 ||
+			level == OutputMessageLevel::Warning2) &&
+			isIssueSuppressed(issueCode) == true)
+		{
+			return;
+		}
+
 		if (m_buildIssues != nullptr)
 		{
 			m_buildIssues->addItemsIssues(level, itemsUuid);
 		}
 	}
 
-	void IssueLogger::addItemsIssues(OutputMessageLevel level, QUuid itemsUuid, const QString& schemaID)
+	void IssueLogger::addItemsIssues(OutputMessageLevel level, int issueCode, QUuid itemsUuid, const QString& schemaID)
 	{
+		if ((level == OutputMessageLevel::Warning0 ||
+			level == OutputMessageLevel::Warning1 ||
+			level == OutputMessageLevel::Warning2) &&
+			isIssueSuppressed(issueCode) == true)
+		{
+			return;
+		}
+
 		if (m_buildIssues != nullptr)
 		{
 			m_buildIssues->addItemsIssues(level, itemsUuid, schemaID);
 		}
 	}
 
-	void IssueLogger::addSchemaIssue(OutputMessageLevel level, const QString& schemaID)
+	void IssueLogger::addSchemaIssue(OutputMessageLevel level, int issueCode, const QString& schemaID)
 	{
+		if ((level == OutputMessageLevel::Warning0 ||
+			level == OutputMessageLevel::Warning1 ||
+			level == OutputMessageLevel::Warning2) &&
+			isIssueSuppressed(issueCode) == true)
+		{
+			return;
+		}
+
 		if (m_buildIssues != nullptr)
 		{
 			m_buildIssues->addSchemaIssue(level, schemaID);

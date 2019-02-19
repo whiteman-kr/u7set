@@ -927,6 +927,12 @@ bool DbController::getLatestTreeVersion(const DbFileInfo& file, std::vector<std:
 	return out;
 }
 
+bool DbController::getCheckedOutFiles(const DbFileInfo& parentFile, std::vector<DbFileInfo>* out, QWidget* parentWidget)
+{
+	std::vector<DbFileInfo> fv = {parentFile};
+	return getCheckedOutFiles(&fv, out, parentWidget);
+}
+
 bool DbController::getCheckedOutFiles(const std::vector<DbFileInfo>* parentFiles, std::vector<DbFileInfo>* out, QWidget* parentWidget)
 {
 	// Check parameters

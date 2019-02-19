@@ -42,6 +42,9 @@ extern const char* const UfbTemplExtension;		// User Functional Block template f
 extern const char* const MvsFileExtension;		// Monitor schema file extnesion
 extern const char* const MvsTemplExtension;		// Monitor schema template file extnesion
 
+extern const char* const TvsFileExtension;		// TuningClient schema file extnesion
+extern const char* const TvsTemplExtension;		// TuningClient schema template file extnesion
+
 extern const char* const DvsFileExtension;		// Diagnostics schema file extnesion
 extern const char* const DvsTemplExtension;		// Diagnostics schema template file extnesion
 

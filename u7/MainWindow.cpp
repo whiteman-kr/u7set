@@ -19,6 +19,7 @@
 #include "SimulatorTabPage.h"
 #include "GlobalMessanger.h"
 #include "Forms/FileHistoryDialog.h"
+#include "Forms/ProjectPropertiesForm.h"
 #include "../lib/Ui/DialogAbout.h"
 #include "../VFrame30/VFrame30.h"
 #include "../lib/LogicModuleSet.h"
@@ -279,6 +280,12 @@ void MainWindow::createActions()
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectHistoryAction->setEnabled(false);});
 	addAction(m_projectHistoryAction);
 
+	m_projectPropertiesAction = new QAction(tr("Project Properties..."), this);
+	m_projectPropertiesAction->setEnabled(false);
+	connect(m_projectPropertiesAction, &QAction::triggered, this, &MainWindow::projectProperties);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_projectPropertiesAction->setEnabled(true);});
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectPropertiesAction->setEnabled(false);});
+
 	return;
 }
 
@@ -301,6 +308,7 @@ void MainWindow::createMenus()
 	//
 	QMenu* pProjectMenu = menuBar()->addMenu(tr("Project"));		// Alt+P now switching to the Projects tab page, don't use &
 	pProjectMenu->addAction(m_projectHistoryAction);
+	pProjectMenu->addAction(m_projectPropertiesAction);
 	pProjectMenu->addAction(m_startBuildAction);
 
 	// Tools
@@ -860,6 +868,24 @@ void MainWindow::projectHistory()
 	}
 
 	FileHistoryDialog::showHistory(m_dbController, db()->currentProject().projectName(), history, this);
+
+	return;
+}
+
+void MainWindow::projectProperties()
+{
+	if (m_dbController == nullptr)
+	{
+		assert(m_dbController);
+		return;
+	}
+
+	if (m_dbController->isProjectOpened() == false)
+	{
+		return;
+	}
+
+	ProjectPropertiesForm::show(this, m_dbController);
 
 	return;
 }

@@ -980,13 +980,13 @@ namespace ExtWidgets
 		case QMetaType::Float:
 		{
 			m_oldValue = property->value().toFloat();
-			m_lineEdit->setText(QString::number(m_oldValue.toFloat(), 'f', property->precision()));
+			m_lineEdit->setText(QString::number(m_oldValue.toFloat(), 'g', property->precision()));
 		}
 			break;
 		case QVariant::Double:
 		{
 			m_oldValue = property->value().toDouble();
-			m_lineEdit->setText(QString::number(m_oldValue.toDouble(), 'f', property->precision()));
+			m_lineEdit->setText(QString::number(m_oldValue.toDouble(), 'g', property->precision()));
 		}
 			break;
 		default:
@@ -1815,13 +1815,13 @@ namespace ExtWidgets
 				case QMetaType::Float:
 					{
 						float val = value.toFloat();
-						return QString::number(val, 'f', p->precision());
+						return QString::number(val, 'g', p->precision());
 					}
 					break;
 				case QVariant::Double:
 					{
                         double val = value.toDouble();
-						return QString::number(val, 'f', p->precision());
+						return QString::number(val, 'g', p->precision());
 					}
 					break;
 				case QVariant::Bool:
