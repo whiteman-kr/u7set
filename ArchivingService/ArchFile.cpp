@@ -442,6 +442,96 @@ inline bool operator < (const ArchFilePartition::Info& p1, const ArchFilePartiti
 
 // ----------------------------------------------------------------------------------------------------------------------
 //
+// ArchFileReadBuffer class implementation
+//
+// ----------------------------------------------------------------------------------------------------------------------
+
+
+
+ArchFileReadBuffer::ArchFileReadBuffer(int bufSizeBytes) :
+	m_bufSize(bufSizeBytes)
+{
+	const int MIN_BUF_SIZE = 1000 * ArchFileRecord::SIZE;
+	const int MAX_BUF_SIZE = ((10 * 1024 * 1024) / ArchFileRecord::SIZE) * ArchFileRecord::SIZE;		// ~10 Mb
+
+	if (m_bufSize < MIN_BUF_SIZE)
+	{
+		m_bufSize = MIN_BUF_SIZE;
+	}
+	else
+	{
+		if (m_bufSize > MAX_BUF_SIZE)
+		{
+			m_bufSize = MAX_BUF_SIZE;
+		}
+	}
+
+	m_buffer = new char[m_bufSize];
+}
+
+ArchFileReadBuffer::~ArchFileReadBuffer()
+{
+	delete [] m_buffer;
+}
+
+qint64 ArchFileReadBuffer::readDataFromFile(QFile& file)
+{
+	qint64 read = file.read(m_buffer + m_inBufSize, m_bufSize - m_inBufSize);
+
+	if (read == -1)
+	{
+		// error
+		return 0;
+	}
+
+	m_inBufSize += read;
+
+	return m_inBufSize;
+}
+
+bool ArchFileReadBuffer::hasRecordsInBuffer() const
+{
+	return m_inBufSize > ArchFileRecord::SIZE;
+}
+
+bool ArchFileReadBuffer::getNextRecord(ArchFileRecord* record)
+{
+	TEST_PTR_RETURN_FALSE(record);
+
+	while(m_inBufSize - m_recordStartPos < ArchFileRecord::SIZE)
+	{
+		ArchFileRecord* recordPtr = reinterpret_cast<ArchFileRecord*>(m_buffer + m_recordStartPos);
+
+		if (recordPtr->isNotCorrupted() == true)
+		{
+			memcpy(record, recordPtr, ArchFileRecord::SIZE);
+			m_recordStartPos += ArchFileRecord::SIZE;
+			return true;
+		}
+
+		// record is corrupted
+		// shift m_recordStartPos on 1 byte
+
+		m_recordStartPos++;
+	}
+
+	m_inBufSize -= m_recordStartPos;
+
+	if (m_inBufSize > 0)
+	{
+		// copy remaining bytes in beginning of buffer
+		//
+		memcpy(m_buffer + 0, m_buffer + m_recordStartPos, m_inBufSize);
+	}
+
+	m_recordStartPos = 0;
+
+	return false;
+}
+
+
+// ----------------------------------------------------------------------------------------------------------------------
+//
 // ArchFile class implementation
 //
 // ----------------------------------------------------------------------------------------------------------------------
@@ -827,8 +917,6 @@ bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
 {
 	assert(pi.shortTerm == true);
 
-	const int ARCH_FILE_RECORD_SIZE = sizeof(ArchFileRecord);
-
 	// opening short term archive partition *.sta
 	//
 	QString staFileName = getPartitionFileName(pi);
@@ -845,9 +933,9 @@ bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
 
 	qint64 staFileSize = fi.size();
 
-	staFileSize = (staFileSize / ARCH_FILE_RECORD_SIZE) * ARCH_FILE_RECORD_SIZE;
+	staFileSize = (staFileSize / ArchFileRecord::SIZE) * ArchFileRecord::SIZE;
 
-	if (staFileSize < ARCH_FILE_RECORD_SIZE)
+	if (staFileSize < ArchFileRecord::SIZE)
 	{
 		staFile.close();
 
@@ -877,26 +965,18 @@ bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
 		return false;
 	}
 
-	// reading buffer allocation
-	//
-	qint64 bufSize = staFileSize;
+	const int BUF_SIZE = 2 * 1024 * 1024;
 
-	const int MAX_BUF_SIZE = ((10 * 1024 * 1024) / ARCH_FILE_RECORD_SIZE) * ARCH_FILE_RECORD_SIZE;		// ~10 Mb
+	ArchFileReadBuffer readBuf(BUF_SIZE);		// buf size ~2Mb
 
-	if (bufSize > MAX_BUF_SIZE)
-	{
-		bufSize = MAX_BUF_SIZE;
-	}
-
-	char* readBuf = new char[bufSize];
-	char* writeBuf = new char[bufSize];
+	char* writeBuf = new char[BUF_SIZE];
 
 	// sta to lta processing
 	//
-	int inReadBufSize = 0;
 	int inWriteBufSize = 0;
 
 	bool result = true;
+	ArchFileRecord record;
 
 	while(true)
 	{
@@ -906,77 +986,49 @@ bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
 			break;
 		}
 
-		qint64 reads = staFile.read(readBuf + inReadBufSize, bufSize - inReadBufSize);
+		readBuf.readDataFromFile(staFile);
 
-		if (reads == -1)
-		{
-			DEBUG_LOG_ERR(m_log, QString("Maintenance: sta-file reding error %1").arg(staFileName));
-		}
-
-		if (reads <= 0)
+		if (readBuf.hasRecordsInBuffer() == false)
 		{
 			break;
 		}
 
-		inReadBufSize += reads;
-
-		if (inReadBufSize < ARCH_FILE_RECORD_SIZE)
+		do
 		{
-			break;
-		}
+			bool okRecord = readBuf.getNextRecord(&record);
 
-		int recordStartPos = 0;
-
-		while(inReadBufSize - recordStartPos >= ARCH_FILE_RECORD_SIZE)
-		{
-			const ArchFileRecord* record = reinterpret_cast<const ArchFileRecord*>(readBuf + recordStartPos);
-
-			if (record->isNotCorrupted() == true)
+			if (okRecord == false)
 			{
-				if (record->state.flags.hasShortTermArchivingReasonOnly() == true)
-				{
-					// skip record
-					//
-				}
-				else
-				{
-					// copy record in writeBuffer
-					//
-					memcpy(writeBuf + inWriteBufSize, reinterpret_cast<const char*>(record), ARCH_FILE_RECORD_SIZE);
+				break;
+			}
 
-					inWriteBufSize += ARCH_FILE_RECORD_SIZE;
-
-					if (inWriteBufSize >= bufSize)
-					{
-						result = writeLtaFile(ltaFile, writeBuf, inWriteBufSize);
-
-						if (result == false)
-						{
-							break;
-						}
-
-						inWriteBufSize = 0;
-					}
-				}
-
-				recordStartPos += ARCH_FILE_RECORD_SIZE;
+			if (record.hasShortTermArchivingReasonOnly() == true)
+			{
+				// skip record
+				//
 			}
 			else
 			{
-				// record is not valid, shift on one byte
+				// copy record in writeBuffer
 				//
-				recordStartPos++;
+				memcpy(writeBuf + inWriteBufSize, &record, ArchFileRecord::SIZE);
+
+				inWriteBufSize += ArchFileRecord::SIZE;
+
+				if (inWriteBufSize + ArchFileRecord::SIZE >= BUF_SIZE)
+				{
+					result = writeLtaFile(ltaFile, writeBuf, inWriteBufSize);
+
+					if (result == false)
+					{
+						break;
+					}
+
+					inWriteBufSize = 0;
+				}
 			}
 		}
-
-		inReadBufSize -= recordStartPos;
-
-		if (inReadBufSize > 0)
-		{
-			// copy remaining bytes in beginning of buffer
-			//
-			memcpy(readBuf + 0, readBuf + recordStartPos, inReadBufSize);
-		}
+		while(true);
 	}
 
 	if (result == true && inWriteBufSize > 0)
@@ -996,7 +1048,6 @@ bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
 		QDir().remove(ltaFileName);
 	}
 
-	delete [] readBuf;
 	delete [] writeBuf;
 
 	return result;

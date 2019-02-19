@@ -37,10 +37,14 @@ struct ArchFileRecord
 
 	void offsetTimes(qint64 dt);
 
+	bool hasShortTermArchivingReasonOnly() const { return state.flags.hasShortTermArchivingReasonOnly(); }
+
 	//
 
 	static const qint64 TIME_MAX_VALUE;
 	static const qint64 TIME_MIN_VALUE;
+
+	static const int SIZE;
 };
 
 #pragma pack(pop)
