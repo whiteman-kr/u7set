@@ -60,9 +60,9 @@ class TestCmdParam
 
 public:
 
-	TestCmdParam();
-	TestCmdParam(const TestCmdParam& from);
-	virtual ~TestCmdParam();
+	TestCmdParam() { clear(); }
+	TestCmdParam(const TestCmdParam& from) { *this = from; }
+	virtual ~TestCmdParam() {}
 
 private:
 
@@ -84,8 +84,43 @@ public:
 	QVariant value() const { return m_value; }
 	void setValue(const QVariant& value) { m_value = value; }
 
-	QString getNameValueStr();
-	QString getValueStr();
+	QString getNameValueStr()
+	{
+		QString str;
+
+		switch (m_type)
+		{
+			case TestCmdParamType::Undefined:	str.clear();												break;
+			case TestCmdParamType::Discrete:
+			case TestCmdParamType::SignedInt32:
+			case TestCmdParamType::SignedInt64:	str = m_name + QString("=%2").arg(m_value.toInt());			break;
+			case TestCmdParamType::Float:
+			case TestCmdParamType::Double:		str = m_name + str.sprintf("=%0.4f", m_value.toDouble());	break;
+			case TestCmdParamType::String:		str = m_name + "=" + m_value.toString();					break;
+			default:							assert(false);												break;
+		}
+
+		return str;
+	}
+
+	QString getValueStr()
+	{
+		QString str;
+
+		switch (m_type)
+		{
+			case TestCmdParamType::Undefined:	str.clear();								break;
+			case TestCmdParamType::Discrete:
+			case TestCmdParamType::SignedInt32:
+			case TestCmdParamType::SignedInt64:	str = QString("%1").arg(m_value.toInt());	break;
+			case TestCmdParamType::Float:
+			case TestCmdParamType::Double:		str.sprintf("%0.4f", m_value.toDouble());	break;
+			case TestCmdParamType::String:		str = m_value.toString();					break;
+			default:							assert(false);								break;
+		}
+
+		return str;
+	}
 
 	TestCmdParam& operator=(const TestCmdParam& from);
 };
@@ -118,15 +153,21 @@ private:
 	QVector<TestCmdParam> m_paramList;
 
 	QString m_line;
+	QString m_comment;
 	QStringList m_errorList;
 
 public:
+
+	bool isEmpty() { return m_line.isEmpty() == true; }
 
 	int lineIndex() { return m_lineIndex; }
 	bool foundEndOfTest() { return m_foundEndOfTest; }
 
 	int type() const { return m_type; }
 	int getCmdType(const QString& line);
+
+	QString comment() const { return m_comment; }
+	void setComment(const QString& comment) { m_comment = comment; }
 
 	bool parse(const QString& line);
 	bool parseCmdTest();

@@ -26,6 +26,8 @@ UalTester::UalTester(int& argc, char** argv) :
 	signal(SIGTERM, &UalTester::exitApp);
 	signal(SIGBREAK, &UalTester::exitApp) ;
 
+	setlocale(LC_ALL,"Russian");
+
 	m_cmdLineParam.getParams(argc, argv);
 }
 
@@ -462,6 +464,11 @@ void UalTester::runTestFile()
 			}
 
 			TestCmd cmd = test.cmd(cmdIndex);
+
+			if (cmd.comment().isEmpty() == false)
+			{
+				test.appendResult("    " + cmd.comment(), m_cmdLineParam.enableTrace());
+			}
 
 			switch (cmd.type())
 			{

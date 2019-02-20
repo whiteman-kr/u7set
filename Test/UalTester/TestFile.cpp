@@ -7,20 +7,6 @@
 //
 // -------------------------------------------------------------------------------------------------------------------
 
-TestCmdParam::TestCmdParam()
-{
-	clear();
-}
-
-TestCmdParam::TestCmdParam(const TestCmdParam& from)
-{
-	*this = from;
-}
-
-TestCmdParam::~TestCmdParam()
-{
-}
-
 bool TestCmdParam::isEmtpy()
 {
 	if (m_name.isEmpty() == true)
@@ -42,47 +28,6 @@ void TestCmdParam::clear()
 	m_type = TestCmdParamType::Undefined;
 	m_value.clear();
 }
-
-QString TestCmdParam::getNameValueStr()
-{
-	QString str;
-
-	switch (m_type)
-	{
-		case TestCmdParamType::Undefined:	str.clear();												break;
-		case TestCmdParamType::Discrete:
-		case TestCmdParamType::SignedInt32:
-		case TestCmdParamType::SignedInt64:	str = m_name + QString("=%2").arg(m_value.toInt());			break;
-		case TestCmdParamType::Float:
-		case TestCmdParamType::Double:		str = m_name + str.sprintf("=%0.4f", m_value.toDouble());	break;
-		case TestCmdParamType::String:		str = m_name + "=" + m_value.toString();					break;
-		default:							assert(false);												break;
-	}
-
-	return str;
-}
-
-QString TestCmdParam::getValueStr()
-{
-	QString str;
-
-	switch (m_type)
-	{
-		case TestCmdParamType::Undefined:	str.clear();								break;
-		case TestCmdParamType::Discrete:
-		case TestCmdParamType::SignedInt32:
-		case TestCmdParamType::SignedInt64:	str = QString("%1").arg(m_value.toInt());	break;
-		case TestCmdParamType::Float:
-		case TestCmdParamType::Double:		str.sprintf("%0.4f", m_value.toDouble());	break;
-		case TestCmdParamType::String:		str = m_value.toString();					break;
-		default:							assert(false);								break;
-	}
-
-	return str;
-}
-
-
-
 
 TestCmdParam& TestCmdParam::operator=(const TestCmdParam& from)
 {
@@ -152,6 +97,7 @@ int TestCmd::getCmdType(const QString& line)
 bool TestCmd::parse(const QString& line)
 {
 	m_line = line;
+	m_comment.clear();
 	m_paramList.clear();
 	m_errorList.clear();
 	m_lineIndex ++;
@@ -168,6 +114,7 @@ bool TestCmd::parse(const QString& line)
 	int pos = m_line.indexOf("//");
 	if (pos != -1)
 	{
+		m_comment = m_line.right(m_line.length() - pos);
 		m_line.remove(pos, m_line.length() - pos);
 	}
 
@@ -1415,7 +1362,7 @@ void TestFile::createTestList()
 	{
 		TestItem test;
 
-		TestCmd cmd = m_commandList[cmdIndex];
+		TestCmd& cmd = m_commandList[cmdIndex];
 		if (cmd.type() == TF_CMD_TEST)
 		{
 			//
@@ -1441,6 +1388,8 @@ void TestFile::createTestList()
 			}
 
 			test.setName(testName);
+
+			cmd.setComment(QString());
 
 			//
 			//
