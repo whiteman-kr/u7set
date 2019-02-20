@@ -24,7 +24,7 @@ bool BusStorage::load(QString* errorMessage)
 	//
 	std::vector<DbFileInfo> fileList;
 
-	bool ok = m_db->getFileList(&fileList, m_db->busTypesFileId(), BusFileExtension, true, nullptr);
+	bool ok = m_db->getFileList(&fileList, m_db->busTypesFileId(), Db::File::BusFileExtension, true, nullptr);
 	if (ok == false)
 	{
 		*errorMessage = m_db->lastError();
@@ -155,7 +155,7 @@ bool BusStorage::save(const QUuid& uuid, QString* errorMessage)
 		//
 		std::shared_ptr<DbFile> file = std::make_shared<DbFile>();
 
-		QString fileName = QString("bustype-%1.%2").arg(bus->uuid().toString()).arg(BusFileExtension);
+		QString fileName = QString("bustype-%1.%2").arg(bus->uuid().toString()).arg(Db::File::BusFileExtension);
 		fileName = fileName.remove('{');
 		fileName = fileName.remove('}');
 

@@ -173,6 +173,8 @@ void CfgLoader::FileDownloadRequest::setErrorCode(Tcp::FileTransferResult result
 //
 // -------------------------------------------------------------------------------------
 
+bool CfgLoader::m_registerTypes = true;
+
 CfgLoader::CfgLoader(const SoftwareInfo& softwareInfo,
 						int appInstance,
 						const HostAddressPort& serverAddressPort1,
@@ -180,10 +182,16 @@ CfgLoader::CfgLoader(const SoftwareInfo& softwareInfo,
 						bool enableDownloadCfg,
 						std::shared_ptr<CircularLogger> logger) :
 	Tcp::FileClient(softwareInfo, "", serverAddressPort1, serverAddressPort2),
+	m_enableDownloadConfiguration(enableDownloadCfg),
 	m_logger(logger),
-	m_timer(this),
-	m_enableDownloadConfiguration(enableDownloadCfg)
+	m_timer(this)
 {
+	if (m_registerTypes == true)
+	{
+		qRegisterMetaType<Tcp::FileTransferResult>("Tcp::FileTransferResult");
+		m_registerTypes = false;
+	}
+
 	changeApp(softwareInfo.equipmentID(), appInstance);
 
 	// DELETE after periodic CFG requests to be added
@@ -363,13 +371,13 @@ void CfgLoader::onStartDownload(const QString& fileName)
 
 void CfgLoader::onEndDownload(const QString& fileName, Tcp::FileTransferResult errorCode)
 {
-	if (errorCode != Tcp::FileTransferResult::Ok)
+	if (errorCode == Tcp::FileTransferResult::Ok)
 	{
-		DEBUG_LOG_ERR(m_logger, QString("File %1 download error - %2").arg(fileName).arg(getErrorStr(errorCode)));
+		DEBUG_LOG_MSG(m_logger, QString("File %1 download Ok").arg(fileName));
 	}
 	else
 	{
-		DEBUG_LOG_MSG(m_logger, QString("File %1 download Ok").arg(fileName));
+		DEBUG_LOG_ERR(m_logger, QString("File %1 download error - %2").arg(fileName).arg(getErrorStr(errorCode)));
 	}
 }
 
@@ -512,10 +520,28 @@ void CfgLoader::resetStatuses()
 	m_configurationXmlReady = false;
 	m_autoDownloadIndex = 1;		// index 0 - Configuration.xml
 	m_allFilesLoaded = false;
+
+	m_enableSignalUnknownClient = true;
 }
 
 void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResult errorCode, const QString md5)
 {
+	//
+
+	emit signal_onEndFileDownload(fileName, errorCode);
+
+	if (errorCode != Tcp::FileTransferResult::Ok)
+	{
+		emit signal_onEndFileDownloadError(fileName, errorCode);
+
+		if (errorCode == Tcp::FileTransferResult::UnknownClient)
+		{
+			emitSignalUnknownClient();
+		}
+	}
+
+	//
+
 	onEndDownload(fileName, errorCode);
 
 	if (errorCode != Tcp::FileTransferResult::Ok)
@@ -536,7 +562,7 @@ void CfgLoader::onEndFileDownload(const QString fileName, Tcp::FileTransferResul
 		{
 			assert(false);
 
-			m_currentDownloadRequest.setErrorCode(Tcp::FileDataCorrupted);
+			m_currentDownloadRequest.setErrorCode(Tcp::FileTransferResult::FileDataCorrupted);
 			setFileReady(true);
 			return;
 		}
@@ -857,6 +883,16 @@ QString CfgLoader::getFilePathNameByID(QString fileID)
 	return pathFileName;
 }
 
+void CfgLoader::emitSignalUnknownClient()
+{
+	if (m_enableSignalUnknownClient == true)
+	{
+		m_enableSignalUnknownClient = false;
+		emit signal_unknownClient();
+	}
+}
+
+
 // -------------------------------------------------------------------------------------
 //
 // CfgLoaderThread class implementation
@@ -1051,6 +1087,10 @@ void CfgLoaderThread::initThread()
 	m_thread->addWorker(m_cfgLoader); // this instance of CfgLoader will be deleted during SimpleThread destruction
 
 	connect(m_cfgLoader, &CfgLoader::signal_configurationReady, this, &CfgLoaderThread::signal_configurationReady);
+
+	connect(m_cfgLoader, &CfgLoader::signal_unknownClient, this, &CfgLoaderThread::signal_unknownClient);
+	connect(m_cfgLoader, &CfgLoader::signal_onEndFileDownload, this, &CfgLoaderThread::signal_onEndFileDownload);
+	connect(m_cfgLoader, &CfgLoader::signal_onEndFileDownloadError, this, &CfgLoaderThread::signal_onEndFileDownloadError);
 }
 
 void CfgLoaderThread::shutdownThread(bool* restartThread)

@@ -122,7 +122,17 @@ void TcpSignalClient::resetToGetState()
 {
 	QThread::msleep(theSettings.requestTimeInterval());
 
-	requestSignalState(0);
+	if (m_signalList.empty() == false)
+	{
+		requestSignalState(0);
+	}
+	else
+	{
+		// There is no signals stae to request list again
+		//
+		resetToGetSignalList();
+	}
+
 	return;
 }
 

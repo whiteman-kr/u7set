@@ -1029,10 +1029,10 @@ void SchemaListModelEx::refresh()
 		return;		// do not reset model, just leave it as is
 	}
 
-	files.removeFilesWithExtension(::AlTemplExtension);
-	files.removeFilesWithExtension(::MvsTemplExtension);
-	files.removeFilesWithExtension(::UfbTemplExtension);
-	files.removeFilesWithExtension(::DvsTemplExtension);
+	files.removeFilesWithExtension(Db::File::AlTemplExtension);
+	files.removeFilesWithExtension(Db::File::MvsTemplExtension);
+	files.removeFilesWithExtension(Db::File::UfbTemplExtension);
+	files.removeFilesWithExtension(Db::File::DvsTemplExtension);
 
 	// Parse file details, befor eapplying filter, as we want to keep tags for all schemas
 	//
@@ -1088,7 +1088,7 @@ void SchemaListModelEx::refresh()
 
 void SchemaListModelEx::projectOpened(DbProject /*project*/)
 {
-	m_parentFile = db()->systemFileInfo(::SchemasFileName);
+	m_parentFile = db()->systemFileInfo(Db::File::SchemasFileName);
 	assert(m_parentFile.fileId() != -1);
 
 	std::vector<DbFileInfo> systemFiles = db()->systemFiles();
@@ -2727,7 +2727,7 @@ void SchemaControlTabPageEx::addLogicSchema(QStringList deviceStrIds, QString lm
 	std::shared_ptr<VFrame30::Schema> schema = createSchema(parentFile);
 	if (schema->isLogicSchema() == false)
 	{
-		QMessageBox::critical(this, qAppName(), tr("Can add Logic Schema only to '%1' or it's descendands.").arg(::AlFileName));
+		QMessageBox::critical(this, qAppName(), tr("Can add Logic Schema only to '%1' or it's descendands.").arg(Db::File::AlFileName));
 		return;
 	}
 
@@ -2753,7 +2753,7 @@ void SchemaControlTabPageEx::addLogicSchema(QStringList deviceStrIds, QString lm
 
 	// --
 	//
-	addSchemaFile(schema, ::AlFileExtension, parentFile.fileId());
+	addSchemaFile(schema, Db::File::AlFileExtension, parentFile.fileId());
 
 	GlobalMessanger::instance().fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
 
@@ -2823,31 +2823,31 @@ void SchemaControlTabPageEx::addFile()
     if (schema->isLogicSchema() == true)
     {
         defaultId = "APPSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
-		extension = ::AlFileExtension;
+		extension = Db::File::AlFileExtension;
     }
 
     if (schema->isUfbSchema() == true)
     {
         defaultId = "UFBID" + QString::number(sequenceNo).rightJustified(6, '0');
-		extension = ::UfbFileExtension;
+		extension = Db::File::UfbFileExtension;
     }
 
 	if (schema->isMonitorSchema() == true)
     {
         defaultId = "MONITORSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
-		extension = ::MvsFileExtension;
+		extension = Db::File::MvsFileExtension;
     }
 
 	if (schema->isTuningSchema() == true)
 	{
 		defaultId = "TUNINGSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
-		extension = ::TvsFileExtension;
+		extension = Db::File::TvsFileExtension;
 	}
 
     if (schema->isDiagSchema() == true)
     {
         defaultId = "DIAGSCHEMAID" + QString::number(sequenceNo).rightJustified(6, '0');
-		extension = ::DvsFileExtension;
+		extension = Db::File::DvsFileExtension;
     }
 
 	assert(extension.isEmpty() == false);
@@ -3760,14 +3760,14 @@ void SchemaControlTabPageEx::compareObject(DbChangesetObject object, CompareData
 	// Check file extension,
 	// can compare next files
 	//
-	if (object.name().endsWith("." + QString(::AlFileExtension)) == false &&
-		object.name().endsWith("." + QString(::AlTemplExtension)) == false &&
-		object.name().endsWith("." + QString(::UfbFileExtension)) == false &&
-		object.name().endsWith("." + QString(::UfbTemplExtension)) == false &&
-		object.name().endsWith("." + QString(::MvsFileExtension)) == false &&
-		object.name().endsWith("." + QString(::MvsTemplExtension)) == false &&
-		object.name().endsWith("." + QString(::DvsFileExtension)) == false &&
-		object.name().endsWith("." + QString(::DvsTemplExtension)) == false)
+	if (object.name().endsWith("." + QString(Db::File::AlFileExtension)) == false &&
+		object.name().endsWith("." + QString(Db::File::AlTemplExtension)) == false &&
+		object.name().endsWith("." + QString(Db::File::UfbFileExtension)) == false &&
+		object.name().endsWith("." + QString(Db::File::UfbTemplExtension)) == false &&
+		object.name().endsWith("." + QString(Db::File::MvsFileExtension)) == false &&
+		object.name().endsWith("." + QString(Db::File::MvsTemplExtension)) == false &&
+		object.name().endsWith("." + QString(Db::File::DvsFileExtension)) == false &&
+		object.name().endsWith("." + QString(Db::File::DvsTemplExtension)) == false)
 	{
 		return;
 	}

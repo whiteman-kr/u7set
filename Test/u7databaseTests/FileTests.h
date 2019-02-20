@@ -6,24 +6,12 @@
 
 struct ObjectState;
 
-struct User
-{
-	QString username;
-	QString password;
-	int userId;
-};
-
 class FileTests : public TestDbBase
 {
 	Q_OBJECT
 
 public:
 	FileTests();
-
-protected:
-	QString logIn(User user);								// returns session_key
-	QString logIn(QString username, QString password);		// returns session_key
-	bool logOut();
 
 private slots:
 	void initTestCase();

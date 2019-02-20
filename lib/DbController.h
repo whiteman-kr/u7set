@@ -41,7 +41,10 @@ public:
 	bool deleteProject(QString projectName, QString password, bool doNotBackup, QWidget* parentWidget);
 	bool upgradeProject(QString projectName, QString password, bool doNotBackup, QWidget* parentWidget);
 
+	bool setProjectProperty(QString propertyName, bool propertyValue, QWidget* parentWidget);
 	bool setProjectProperty(QString propertyName, QString propertyValue, QWidget* parentWidget);
+
+	bool getProjectProperty(QString propertyName, bool* out, QWidget* parentWidget);
 	bool getProjectProperty(QString propertyName, QString* out, QWidget* parentWidget);
 
 	// User management

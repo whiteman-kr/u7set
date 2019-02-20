@@ -469,11 +469,11 @@ void AppDataServiceWidget::updateServiceState()
 
 	auto state = m_tcpClientSocket->serviceState().appdatareceivestate();
 
-	stateTabModel()->setData(stateTabModel()->index(8, 1), state.receivedframescount());
-	stateTabModel()->setData(stateTabModel()->index(9, 1), state.simframescount());
-	stateTabModel()->setData(stateTabModel()->index(10, 1), state.errdatagramsize());
-	stateTabModel()->setData(stateTabModel()->index(11, 1), state.errsimversion());
-	stateTabModel()->setData(stateTabModel()->index(12, 1), state.errunknownappdatasourceip());
+	stateTabModel()->setData(stateTabModel()->index(8, 1), static_cast<qint64>(state.receivedframescount()));
+	stateTabModel()->setData(stateTabModel()->index(9, 1), static_cast<qint64>(state.simframescount()));
+	stateTabModel()->setData(stateTabModel()->index(10, 1), static_cast<qint64>(state.errdatagramsize()));
+	stateTabModel()->setData(stateTabModel()->index(11, 1), static_cast<qint64>(state.errsimversion()));
+	stateTabModel()->setData(stateTabModel()->index(12, 1), static_cast<qint64>(state.errunknownappdatasourceip()));
 }
 
 void AppDataServiceWidget::updateStateInfo()

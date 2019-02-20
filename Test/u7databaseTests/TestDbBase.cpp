@@ -117,6 +117,41 @@ bool TestDbBase::createProjectDb()
 	return true;
 }
 
+QString TestDbBase::logIn(User user)
+{
+	return logIn(user.username, user.password);
+}
+
+QString TestDbBase::logIn(QString username, QString password)
+{
+	QSqlQuery query;
+
+	bool ok = query.exec(QString("SELECT * FROM user_api.log_in('%1', '%2')")
+							.arg(username)
+							.arg(password));
+
+	if (ok == false)
+	{
+		return QString("");
+	}
+
+	ok = query.next();
+	if (ok == false)
+	{
+		return QString("");
+	}
+
+	QString session_key = query.value(0).toString();
+	return session_key;
+}
+
+bool TestDbBase::logOut()
+{
+	QSqlQuery query;
+	bool ok = query.exec("SELECT * FROM user_api.log_out()");
+	return ok;
+}
+
 bool TestDbBase::dropProjectDb(QString projectName/*= QString()*/)
 {
 	if (QSqlDatabase::contains() == true)
