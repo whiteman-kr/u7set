@@ -177,19 +177,21 @@ void ProjectsTabPage::createProject()
 		{
 			// Add project
 			//
-			bool result = dbController()->createProject(projectName, administratorPassword, this);
-			if (result == true)
+			if (bool result = dbController()->createProject(projectName, administratorPassword, this);
+				result == true)
 			{
 				bool upgradeOk = dbController()->upgradeProject(projectName, administratorPassword, true, this);
 
 				if (upgradeOk == true)
 				{
-					// Open project to write Description property
+					// Open project to write Description and UppercaseAppSignalID properties
 					//
 					result = dbController()->openProject(projectName, "Administrator", administratorPassword, this);
+
 					if (result == true)
 					{
-						dbController()->setProjectProperty("Description", dialog.projectDescription, this);
+						dbController()->setProjectProperty(Db::ProjectProperty::Description, dialog.projectDescription, this);
+						dbController()->setProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, true, this);
 						dbController()->closeProject(this);
 					}
 				}

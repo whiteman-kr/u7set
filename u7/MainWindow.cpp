@@ -516,7 +516,7 @@ void MainWindow::updateUfbsAfbsBusses()
 	std::vector<DbFileInfo>	ufbSchemaFileInfos = filesTree.toVectorIf(
 		[](const DbFileInfo& file)
 		{
-			return file.fileName().endsWith(QLatin1String(".") + ::UfbFileExtension, Qt::CaseInsensitive) == true &&
+			return file.fileName().endsWith(QLatin1String(".") + Db::File::UfbFileExtension, Qt::CaseInsensitive) == true &&
 				file.isFolder() == false;
 		});
 
@@ -536,7 +536,7 @@ void MainWindow::updateUfbsAfbsBusses()
 	std::vector<DbFileInfo>	alSchemaFileInfos = filesTree.toVectorIf(
 		[](const DbFileInfo& file)
 		{
-			return file.fileName().endsWith(QLatin1String(".") + ::AlFileExtension, Qt::CaseInsensitive) == true &&
+			return file.fileName().endsWith(QLatin1String(".") + Db::File::AlFileExtension, Qt::CaseInsensitive) == true &&
 				file.isFolder() == false;
 		});
 

@@ -457,10 +457,10 @@ namespace Builder
 
 		QString suppressedWarningsStr;
 
-		if (bool ok = db->getProjectProperty("SuppressWarnings", &suppressedWarningsStr, nullptr);
+		if (bool ok = db->getProjectProperty(Db::ProjectProperty::SuppressWarnings, &suppressedWarningsStr, nullptr);
 			ok == false)
 		{
-			m_log->errPDB2020("SuppressWarnings");
+			m_log->errPDB2020(Db::ProjectProperty::SuppressWarnings);
 			return false;
 		}
 
@@ -1006,7 +1006,7 @@ namespace Builder
 		//
 		std::vector<DbFileInfo> fileList;
 
-		bool ok = db->getFileList(&fileList, db->busTypesFileId(), ::BusFileExtension, true, nullptr);
+		bool ok = db->getFileList(&fileList, db->busTypesFileId(), Db::File::BusFileExtension, true, nullptr);
 		if (ok == false)
 		{
 			return false;
@@ -1126,10 +1126,10 @@ namespace Builder
 		//
 		const std::map<int, std::shared_ptr<DbFileInfo>>& files = fileTree.files();
 
-		QString strAlFileExtension{::AlFileExtension};
-		QString strUfbFileExtension{::UfbFileExtension};
-		QString strMvsFileExtension{::MvsFileExtension};
-		QString strDvsFileExtension{::DvsFileExtension};
+		QString strAlFileExtension{Db::File::AlFileExtension};
+		QString strUfbFileExtension{Db::File::UfbFileExtension};
+		QString strMvsFileExtension{Db::File::MvsFileExtension};
+		QString strDvsFileExtension{Db::File::DvsFileExtension};
 
 		bool success = true;
 

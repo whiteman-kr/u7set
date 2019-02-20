@@ -98,7 +98,7 @@ windows build job:
     - "echo               Run BuilderConsole tests"
     - "echo ----------------------------------------------"
     - "rmdir /Q /S c:\\temp\\build\\test_simulator-debug"    
-    - "%CI_PROJECT_DIR%\\bin\\release\\BuilderConsole.exe 127.0.0.1 5432 u7 P2ssw0rd test_simulator_v249 Administrator P2ssw0rd c:\\temp\\build\\ debug"    
+    - "%CI_PROJECT_DIR%\\bin\\release\\BuilderConsole.exe 127.0.0.1 5432 u7 P2ssw0rd test_simulator_v262 Administrator P2ssw0rd c:\\temp\\build\\ debug"    
   artifacts:
     name: "u7set_0.8.%CI_PIPELINE_ID%_%CI_BUILD_REF_SLUG%_%CI_COMMIT_SHA%"
     paths:

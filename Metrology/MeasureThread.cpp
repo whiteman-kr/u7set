@@ -598,22 +598,7 @@ void MeasureThread::measureLinearity()
 						double engeneeringVal = (point.percent() * (param.engeneeringHighLimit() - param.engeneeringLowLimit()) / 100) + param.engeneeringLowLimit();
 						double electricVal = conversion(engeneeringVal, CT_ENGENEER_TO_ELECTRIC, param);
 
-
-						// polarity test
-						//
-//						if (electricVal < 0 && m_activeSignalParam[c].isNegativeRange() == false)
-//						{
-//							m_activeSignalParam[c].setNegativeRange(true);
-//							emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the negative (-) part of the electrical range.").arg(m_activeSignalParam[c].calibratorManager()->calibratorChannel() + 1));
-//						}
-
-//						if (electricVal >= 0 && m_activeSignalParam[c].isNegativeRange() == true)
-//						{
-//							m_activeSignalParam[c].setNegativeRange(false);
-//							emit msgBox(QMessageBox::Information, tr("Please, switch polarity for calibrator %1\nYou have used the positive (+) part of the electrical range.").arg(m_activeSignalParam[c].calibratorManager()->calibratorChannel() + 1));
-//						}
-						polarityTest(electricVal, m_activeSignalParam[c]);
-
+						polarityTest(electricVal, m_activeSignalParam[c]);	// polarity test
 
 						pCalibratorManager->setValue(m_activeSignalParam[c].isNegativeRange() ? -electricVal : electricVal);
 					}
