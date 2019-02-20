@@ -5,7 +5,8 @@
 #include "../lib/Crc16.h"
 #include "../lib/SimpleThread.h"
 #include "../lib/CircularLogger.h"
-#include "ArchFileRecord.h"
+
+#include "ArchFileBuffer.h"
 
 enum class ArchFindResult
 {
@@ -84,28 +85,6 @@ private:
 };
 
 inline bool operator < (const ArchFilePartition::Info& p1, const ArchFilePartition::Info& p2);
-
-class ArchFileReadBuffer
-{
-public:
-	ArchFileReadBuffer(int bufSizeBytes);
-	~ArchFileReadBuffer();
-
-	qint64 readDataFromFile(QFile& file);
-
-	bool hasRecordsInBuffer() const;
-
-	bool getNextRecord(ArchFileRecord* record);
-
-private:
-	qint64 m_bufSize = 0;
-	char* m_buffer = nullptr;
-
-	//
-
-	qint64 m_inBufSize = 0;
-	qint64 m_recordStartPos = 0;
-};
 
 class ArchFile
 {

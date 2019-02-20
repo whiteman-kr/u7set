@@ -24,7 +24,7 @@ public:
 
 	//static const qint64 PARTITION_PERIOD_MS = 24 * 60 * 60 * 1000;	// day
 	//static const qint64 PARTITION_PERIOD_MS = 60 * 60 * 1000;			// hour
-	static const qint64 PARTITION_PERIOD_MS = 60 * 1000;				// minute
+	static const qint64 PARTITION_PERIOD_MS = 5 * 60 * 1000;			// minute
 
 	static QString formatTime(qint64 time);
 
