@@ -66,8 +66,4 @@ BEGIN
 	END LOOP;
 END
 $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100
-  ROWS 1000;
-ALTER FUNCTION public.add_signal(integer, integer, integer)
-  OWNER TO u7;
+LANGUAGE plpgsql;
