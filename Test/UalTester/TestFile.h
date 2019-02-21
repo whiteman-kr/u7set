@@ -88,6 +88,8 @@ public:
 	{
 		QString str;
 
+
+
 		switch (m_type)
 		{
 			case TestCmdParamType::Undefined:	str.clear();												break;
@@ -95,7 +97,7 @@ public:
 			case TestCmdParamType::SignedInt32:
 			case TestCmdParamType::SignedInt64:	str = m_name + QString("=%2").arg(m_value.toInt());			break;
 			case TestCmdParamType::Float:
-			case TestCmdParamType::Double:		str = m_name + str.sprintf("=%0.4f", m_value.toDouble());	break;
+			case TestCmdParamType::Double:		str = m_name + "=" + fromDouble(m_value.toDouble());		break;
 			case TestCmdParamType::String:		str = m_name + "=" + m_value.toString();					break;
 			default:							assert(false);												break;
 		}
@@ -114,9 +116,33 @@ public:
 			case TestCmdParamType::SignedInt32:
 			case TestCmdParamType::SignedInt64:	str = QString("%1").arg(m_value.toInt());	break;
 			case TestCmdParamType::Float:
-			case TestCmdParamType::Double:		str.sprintf("%0.4f", m_value.toDouble());	break;
+			case TestCmdParamType::Double:		str = fromDouble(m_value.toDouble());		break;
 			case TestCmdParamType::String:		str = m_value.toString();					break;
 			default:							assert(false);								break;
+		}
+
+		return str;
+	}
+
+	QString fromDouble(double value)
+	{
+		QString str;
+		str.sprintf("%0.4f", value);
+
+		int pos = str.indexOf('.');
+		if (pos == -1)
+		{
+			return QString();
+		}
+
+		while(str[str.length() - 1] == '0')
+		{
+			if (str.length() - 2 == pos)
+			{
+				break;
+			}
+
+			str.remove(str.length() - 1, 1);
 		}
 
 		return str;
