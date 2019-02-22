@@ -10,17 +10,17 @@
 // -------------------------------------------------------------------------------------------------
 
 SimpleAppSignalStatesQueue::SimpleAppSignalStatesQueue(int queueSize) :
-	LockFreeQueue<SimpleAppSignalState>(queueSize)
+	FastThreadSafeQueue<SimpleAppSignalState>(queueSize)
 {
 }
 
-bool SimpleAppSignalStatesQueue::pushAutoPoint(SimpleAppSignalState state)
+void SimpleAppSignalStatesQueue::pushAutoPoint(SimpleAppSignalState state, const QThread* thread)
 {
 	// state is a copy!
 	//
 	state.flags.autoPoint = 1;
 
-	return push(&state);
+	push(state, thread);
 }
 
 // -------------------------------------------------------------------------------
@@ -35,7 +35,6 @@ AppSignalStateEx::AppSignalStateEx()
 	m_current[1].flags.all = 0;
 //	m_stored.flags.all = 0;
 }
-
 
 void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 {
@@ -69,8 +68,12 @@ void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 	m_current[0].hash = m_current[1].hash = /*m_stored.hash =*/ calcHash(signal->appSignalID());
 }
 
-
-bool AppSignalStateEx::setState(const Times& time, quint32 validity, double value, int autoArchivingGroup, SimpleAppSignalStatesQueue& statesQueue)
+bool AppSignalStateEx::setState(const Times& time,
+								quint32 validity,
+								double value,
+								int autoArchivingGroup,
+								SimpleAppSignalStatesQueue& statesQueue,
+								const QThread* thread)
 {
 	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
 	SimpleAppSignalState curState = prevState;
@@ -95,7 +98,7 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 			//
 			if (m_prevStateIsStored == false)
 			{
-				statesQueue.pushAutoPoint(prevState);
+				statesQueue.pushAutoPoint(prevState, thread);
 
 				rtSessionsProcessing(prevState, true);
 
@@ -126,7 +129,7 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 			tmpState.flags.valid = 0;
 			tmpState.value = 0;
 
-			statesQueue.pushAutoPoint(tmpState);
+			statesQueue.pushAutoPoint(tmpState, thread);
 
 			rtSessionsProcessing(tmpState, true);
 
@@ -201,7 +204,7 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 
 	if (hasArchivingReason == true)
 	{
-		statesQueue.push(&curState);
+		statesQueue.push(curState, thread);
 
 		// update stored states
 		//
@@ -235,7 +238,6 @@ bool AppSignalStateEx::setState(const Times& time, quint32 validity, double valu
 	return hasArchivingReason;
 }
 
-
 Hash AppSignalStateEx::hash() const
 {
 	assert(m_current[0].hash != 0);
@@ -244,7 +246,6 @@ Hash AppSignalStateEx::hash() const
 
 	return m_current[0].hash;
 }
-
 
 QString AppSignalStateEx::appSignalID() const
 {
@@ -421,7 +422,6 @@ AppSignalStates::~AppSignalStates()
 	clear();
 }
 
-
 void AppSignalStates::clear()
 {
 	m_hash2State.clear();
@@ -434,7 +434,6 @@ void AppSignalStates::clear()
 
 	m_size = 0;
 }
-
 
 void AppSignalStates::setSize(int size)
 {
@@ -454,7 +453,6 @@ void AppSignalStates::setSize(int size)
 		m_appSignalState[i].invalidate();
 	}
 }
-
 
 AppSignalStateEx* AppSignalStates::operator [] (int index)
 {
@@ -500,7 +498,6 @@ void AppSignalStates::buidlHash2State()
 	}
 }
 
-
 bool AppSignalStates::getCurrentState(Hash hash, AppSignalState& state) const
 {
 	if (m_hash2State.contains(hash))
@@ -516,24 +513,6 @@ bool AppSignalStates::getCurrentState(Hash hash, AppSignalState& state) const
 
 	return false;
 }
-
-/*
-bool AppSignalStates::getStoredState(Hash hash, AppSignalState& state) const
-{
-	if (m_hash2State.contains(hash))
-	{
-		const AppSignalStateEx* stateEx = m_hash2State[hash];
-
-		state = stateEx->stored();
-
-		assert(state.m_hash == hash);
-
-		return true;
-	}
-
-	return false;
-}
-*/
 
 void AppSignalStates::setAutoArchivingGroups(int autoArchivingGroupsCount)
 {
@@ -564,7 +543,6 @@ AppSignals::~AppSignals()
 	clear();
 }
 
-
 void AppSignals::clear()
 {
 	m_hash2Signal.clear();
@@ -577,12 +555,11 @@ void AppSignals::clear()
 	HashedVector<QString, Signal*>::clear();
 }
 
-
 void AppSignals::buildHash2Signal()
 {
 	m_hash2Signal.clear();
 
-	m_hash2Signal.reserve(count() * 1.3);
+	m_hash2Signal.reserve(static_cast<int>(count() * 1.3));
 
 	for(Signal* signal : *this)
 	{
@@ -602,7 +579,6 @@ void AppSignals::buildHash2Signal()
 	}
 }
 
-
 const Signal* AppSignals::getSignal(Hash hash) const
 {
 	if (m_hash2Signal.contains(hash))
@@ -612,7 +588,6 @@ const Signal* AppSignals::getSignal(Hash hash) const
 
 	return nullptr;
 }
-
 
 // -------------------------------------------------------------------------------
 //
@@ -651,7 +626,6 @@ AppDataSource::AppDataSource(const DataSource& dataSource) :
 {
 	*(reinterpret_cast<DataSource*>(this)) = dataSource;
 }
-
 
 void AppDataSource::prepare(const AppSignals& appSignals, AppSignalStates* signalStates, int autoArchivingGroupsCount)
 {
@@ -743,6 +717,8 @@ bool AppDataSource::parsePacket()
 	quint32 validity = 0;
 	double value = 0;
 
+	const QThread* thread = QThread::currentThread();
+
 	for(const SignalParseInfo& parseInfo : m_signalsParseInfo)
 	{
 /*		if (parseInfo.appSignalID != "#LB0222_SI")
@@ -782,7 +758,7 @@ bool AppDataSource::parsePacket()
 			}
 		}
 
-		signalState->setState(times, validity, value, autoArchivingGroup, m_signalStatesQueue);
+		signalState->setState(times, validity, value, autoArchivingGroup, m_signalStatesQueue, thread);
 	}
 
 	m_signalStatesQueueSize = m_signalStatesQueue.size();
@@ -856,11 +832,11 @@ void AppDataSource::setState(const Network::AppDataSourceState& proto)
 	setErrorNonmonotonicPlantTime(proto.errornonmonotonicplanttime());
 }
 
-bool AppDataSource::getSignalState(SimpleAppSignalState* state)
+bool AppDataSource::getSignalState(SimpleAppSignalState* state, const QThread* thread)
 {
 	TEST_PTR_RETURN_FALSE(state);
 
-	bool result = m_signalStatesQueue.pop(state);
+	bool result = m_signalStatesQueue.pop(state, thread);
 
 	m_signalStatesQueueSize = m_signalStatesQueue.size();
 
@@ -895,7 +871,6 @@ int AppDataSource::getAutoArchivingGroup(qint64 currentSysTime)
 
 	return retGroup;
 }
-
 
 bool AppDataSource::getDoubleValue(const char* rupData, int rupDataSize, const SignalParseInfo& parseInfo, double& value)
 {
@@ -972,7 +947,6 @@ bool AppDataSource::getDoubleValue(const char* rupData, int rupDataSize, const S
 	return true;
 }
 
-
 bool AppDataSource::getValidity(const char* rupData, int rupDataSize, const SignalParseInfo& parseInfo, quint32& validity)
 {
 	// get signal validity from m_rupData.data buffer using parseInfo
@@ -1005,14 +979,3 @@ bool AppDataSource::getValidity(const char* rupData, int rupDataSize, const Sign
 
 	return true;
 }
-
-
-
-
-// -------------------------------------------------------------------------------
-//
-// SourceSignalsParseInfo class implementation
-//
-// -------------------------------------------------------------------------------
-
-

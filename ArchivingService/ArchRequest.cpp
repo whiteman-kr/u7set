@@ -17,7 +17,8 @@ ArchFileToRead::ArchFileToRead(const ArchFile& archFile, const ArchRequestParam&
 	m_requestID(param.requestID()),
 	m_timeType(param.timeType()),
 	m_startTime(param.startTime()),
-	m_endTime(param.endTime())
+	m_endTime(param.endTime()),
+	m_readBuffer(2 * 1024 * 1024)
 {
 	m_partitionToRead.init(m_archFilePath, false);
 }
@@ -73,19 +74,15 @@ bool ArchFileToRead::fillBuffer()
 		return false;
 	}
 
-	m_recordsInBuffer = 0;
-	m_nextRecordIndex = 0;
+	int readPartitionsCount = 0;
 
 	do
 	{
-		int maxRecordsToRead = READ_BUFFER_SIZE - m_recordsInBuffer;
-		int readCount = 0;
+		m_readBuffer.fillBuffer(m_partitionToRead.file());
 
-		m_partitionToRead.read(m_readBuffer + m_recordsInBuffer, maxRecordsToRead, &readCount);
+		readPartitionsCount++;
 
-		m_recordsInBuffer += readCount;
-
-		if (m_recordsInBuffer < READ_BUFFER_SIZE)
+		if (m_readBuffer.hasRecordsInBuffer() == false)
 		{
 			m_partitionToReadIndex++;
 
@@ -105,40 +102,37 @@ bool ArchFileToRead::fillBuffer()
 			}
 		}
 	}
-	while(m_recordsInBuffer < READ_BUFFER_SIZE);
+	while(readPartitionsCount < 2);
 
-	return m_recordsInBuffer != 0;
+	return m_readBuffer.hasRecordsInBuffer();
 }
 
 bool ArchFileToRead::getRecord(Hash* signalHash, ArchFileRecord* record)
 {
-	if (m_nextRecordIndex >= m_recordsInBuffer)
-	{
-		bool hasRecordsInBuffer = fillBuffer();
+	bool res = false;
 
-		if (hasRecordsInBuffer == false)
+	if (m_readBuffer.hasRecordsInBuffer() == false)
+	{
+		res = fillBuffer();
+
+		if (res == false)
 		{
 			return false;
 		}
 	}
 
 	*signalHash = m_hash;
-	*record = m_readBuffer[m_nextRecordIndex];
 
-	return true;			// record is valid
+	res = m_readBuffer.getRecord(record);
+
+	return res;			// true - record is valid
 }
 
 bool ArchFileToRead::gotoNextRecord()
 {
-	m_nextRecordIndex++;
+	bool res = m_readBuffer.moveToNextRecord();
 
-	if (m_nextRecordIndex > m_recordsInBuffer)
-	{
-		m_nextRecordIndex = m_recordsInBuffer;
-		return false;
-	}
-
-	return true;
+	return res;
 }
 
 ArchFindResult ArchFileToRead::openPartitionToStartReading()

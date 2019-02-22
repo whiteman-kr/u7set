@@ -4,12 +4,12 @@
 #include "../lib/DataSource.h"
 
 
-class SimpleAppSignalStatesQueue : public LockFreeQueue<SimpleAppSignalState>
+class SimpleAppSignalStatesQueue : public FastThreadSafeQueue<SimpleAppSignalState>
 {
 public:
 	SimpleAppSignalStatesQueue(int queueSize);
 
-	bool pushAutoPoint(SimpleAppSignalState state);
+	void pushAutoPoint(SimpleAppSignalState state, const QThread* thread);
 };
 
 typedef std::shared_ptr<SimpleAppSignalStatesQueue> SimpleAppSignalStatesQueueShared;
@@ -32,7 +32,13 @@ public:
 
 	void setSignalParams(int index, Signal* signal);
 
-	bool setState(const Times& time, quint32 validity, double value, int autoArchivingGroup, SimpleAppSignalStatesQueue& statesQueue);
+	bool setState(const Times& time,
+				  quint32 validity,
+				  double value,
+				  int autoArchivingGroup,
+				  SimpleAppSignalStatesQueue& statesQueue,
+				  const QThread* thread);
+
 	void invalidate() { m_current[0].flags.all = m_current[1].flags.all = 0; }
 
 	Hash hash() const;
@@ -212,7 +218,7 @@ public:
 	bool getState(Network::AppDataSourceState* proto) const;
 	void setState(const Network::AppDataSourceState& proto);
 
-	bool getSignalState(SimpleAppSignalState* state);
+	bool getSignalState(SimpleAppSignalState* state, const QThread* thread);
 
 	int acquiredSignalsCount() const { return m_acquiredSignalsCount; }
 

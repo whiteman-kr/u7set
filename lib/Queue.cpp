@@ -222,6 +222,11 @@ LockFreeQueueBase::LockFreeQueueBase(int itemSize, int queueSize) :
 	m_buffer = new char [itemSize * queueSize];
 }
 
+LockFreeQueueBase::~LockFreeQueueBase()
+{
+	delete [] m_buffer;
+}
+
 bool LockFreeQueueBase::push(const char* item)
 {
 	if (item == nullptr)

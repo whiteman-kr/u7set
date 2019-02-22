@@ -60,6 +60,8 @@ public:
 
 	bool close();
 
+	QFile& file() { return m_file; }
+
 private:
 	QString getFileName(qint64 partitionStartTime, bool shortTerm);
 

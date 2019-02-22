@@ -86,13 +86,15 @@ private:
 
 	ArchFindResult m_findResult = ArchFindResult::NotFound;
 
+	ArchFileReadBuffer m_readBuffer;
+
 	//
 
-	static const int READ_BUFFER_SIZE = 200000;
+/*	static const int READ_BUFFER_SIZE = 200000;
 
 	ArchFileRecord m_readBuffer[READ_BUFFER_SIZE];
 	int m_recordsInBuffer = 0;
-	int m_nextRecordIndex = 0;
+	int m_nextRecordIndex = 0;*/
 	bool m_hasDataToRead = true;
 };
 

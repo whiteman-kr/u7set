@@ -504,12 +504,12 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 
 	if (m_lastRecordInitialized == false && s.state.flags.valid)
 	{
-		// write non-valid auto point before first valid point
-		//
-		if (m_path.contains("000266") == true)
-		{
-			DEBUG_STOP;
-		}
+//		// write non-valid auto point before first valid point
+//		//
+//		if (m_path.contains("000266") == true)
+//		{
+//			DEBUG_STOP;
+//		}
 
 		ArchFileRecord nvp = s;
 
@@ -687,6 +687,11 @@ QString ArchFile::getPartitionFileName(const QString& archFilePath, const ArchFi
 
 void ArchFile::shutdown(qint64 curPartition, qint64* totalFlushedStatesCount)
 {
+	if (m_appSignalID.contains("PILA2"))
+	{
+		DEBUG_STOP;
+	}
+
 	if (m_lastRecordInitialized == true && m_lastRecord.state.flags.valid == 1)
 	{
 		qint64 curSysTime = QDateTime::currentMSecsSinceEpoch();
@@ -828,10 +833,10 @@ bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
 {
 	assert(pi.shortTerm == true);
 
-	if (m_appSignalID.contains("OUT_STRID2"))
+/*	if (m_appSignalID.contains("OUT_STRID2"))
 	{
 		DEBUG_STOP;
-	}
+	}*/
 
 	// opening short term archive partition *.sta
 	//
@@ -914,7 +919,7 @@ bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
 
 		do
 		{
-			bool okRecord = readBuf.getNextRecord(&record);
+			bool okRecord = readBuf.getRecordAndMoveToNext(&record);
 
 			if (okRecord == false)
 			{

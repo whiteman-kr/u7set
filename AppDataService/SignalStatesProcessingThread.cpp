@@ -70,7 +70,7 @@ void SignalStatesProcessingThread::run()
 			{
 				SimpleAppSignalState state;
 
-				bool result = appDataSource->getSignalState(&state);
+				bool result = appDataSource->getSignalState(&state, this);
 
 				if (result == false)
 				{
@@ -85,7 +85,7 @@ void SignalStatesProcessingThread::run()
 
 				for(SimpleAppSignalStatesQueueShared destQueue : m_queueMap)
 				{
-					destQueue->push(&state);
+					destQueue->push(state, this);
 				}
 
 				m_queueMapMutex.unlock();
@@ -111,7 +111,6 @@ void SignalStatesProcessingThread::run()
 		}
     }
     while(isQuitRequested() == false);
-
 
     DEBUG_LOG_MSG(m_log, QString("SignalStatesProcessingThread is finished"));
 }

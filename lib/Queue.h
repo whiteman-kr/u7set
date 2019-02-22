@@ -4,6 +4,8 @@
 #include <cassert>
 #include <atomic>
 
+#include "SimpleMutex.h"
+
 class QueueIndex
 {
 private:
@@ -12,7 +14,10 @@ private:
 
 public:
 	QueueIndex(int maxValue) :
-		m_maxValue(maxValue) {}
+		m_maxValue(maxValue)
+	{
+		assert(maxValue > 0);
+	}
 
 	int operator ++ (int)
 	{
@@ -113,6 +118,7 @@ public:
 
 public:
 	LockFreeQueueBase(int itemSize, int queueSize);
+	virtual ~LockFreeQueueBase();
 
 	bool push(const char* item);
 	bool pop(char* item);
@@ -400,4 +406,197 @@ public:
 		return result;
 	}
 };
+
+template <typename T>
+class FastThreadSafeQueue
+{
+	//
+	// One Writer - One Reader using only!!!
+	//
+public:
+	static const int MAX_QUEUE_MEMORY_SIZE = 100 * 1024 * 1024;			// 100 MBytes
+
+public:
+	FastThreadSafeQueue(int queueSize);
+	virtual ~FastThreadSafeQueue();
+
+	void resize(int newSize);
+
+	void push(const T& item, const QThread* thread);
+	void push(const T& item) { push(item, QThread::currentThread()); }
+
+	bool pop(T* item, const QThread* thread);
+	bool pop(T* item) { return pop(item, QThread::currentThread()); }
+
+	bool isFull(const QThread* thread) const;
+	bool isFull() const { return isFull(QThread::currentThread()); }
+
+	bool isEmpty(const QThread* thread) const;
+	bool isEmpty() const { return isEmpty(QThread::currentThread()); }
+
+	int size(const QThread* thread) const;
+	int size() const { return size(QThread::currentThread()); }
+
+	int maxSize(const QThread* thread) const;
+	int maxSize() const{ return maxSize(QThread::currentThread()); }
+
+private:
+	T* m_buffer = nullptr;
+
+	mutable SimpleMutex m_mutex;
+
+	int m_queueSize = 0;
+
+	// var modified by Writer only
+
+	QueueIndex m_writeIndex;
+	qint64 m_lostedCount = 0;
+	int m_maxSize = 0;
+
+	// var modified by Reader only
+
+	QueueIndex m_readIndex;
+
+	// var modified both by Writer and Reader
+
+	int m_size = 0;								// current queue size
+};
+
+template <typename T>
+FastThreadSafeQueue<T>::FastThreadSafeQueue(int queueSize) :
+	m_queueSize(1),
+	m_readIndex(1),
+	m_writeIndex(1)
+{
+	assert(std::is_trivially_copyable<T>::value == true);
+	resize(queueSize);
+}
+
+template <typename T>
+FastThreadSafeQueue<T>::~FastThreadSafeQueue()
+{
+	AUTO_LOCK_BY_CURRENT_THREAD(m_mutex);
+
+	delete [] m_buffer;
+}
+
+template <typename T>
+void FastThreadSafeQueue<T>::resize(int newSize)
+{
+	assert(newSize > 0);
+
+	AUTO_LOCK_BY_CURRENT_THREAD(m_mutex);
+
+	if (m_buffer != nullptr)
+	{
+		delete [] m_buffer;
+		m_buffer = nullptr;
+	}
+
+	m_queueSize = newSize;
+
+	if (m_queueSize * sizeof(T) > MAX_QUEUE_MEMORY_SIZE)
+	{
+		assert(false);
+
+		m_queueSize = MAX_QUEUE_MEMORY_SIZE / sizeof(T);
+	}
+
+	m_readIndex.setMaxValue(m_queueSize);
+	m_readIndex.reset();
+
+	m_writeIndex.setMaxValue(m_queueSize);
+	m_writeIndex.reset();
+
+	m_buffer = new T[m_queueSize];
+
+	m_size = 0;
+	m_maxSize = 0;
+}
+
+template <typename T>
+void FastThreadSafeQueue<T>::push(const T& item, const QThread* thread)
+{
+	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+
+	if (m_size == m_queueSize)
+	{
+		// first queued item will be lost here
+		//
+		m_lostedCount++;
+
+		m_readIndex++;
+		m_size--;
+	}
+
+	memcpy(m_buffer + m_writeIndex(), &item, sizeof(T));
+
+	m_writeIndex++;
+	m_size++;
+
+	if (m_size > m_maxSize)
+	{
+		m_maxSize = m_size;
+	}
+}
+
+template <typename T>
+bool FastThreadSafeQueue<T>::pop(T* item, const QThread* thread)
+{
+	if (item == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+
+	if (m_size == 0)
+	{
+		return false;
+	}
+
+	memcpy(item, m_buffer + m_readIndex(), sizeof(T));
+
+	m_readIndex++;
+	m_size--;
+
+	return true;
+}
+
+template <typename T>
+bool FastThreadSafeQueue<T>::isFull(const QThread* thread) const
+{
+	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+
+	return m_size == m_queueSize;
+}
+
+template <typename T>
+bool FastThreadSafeQueue<T>::isEmpty(const QThread* thread) const
+{
+	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+
+	return m_size == 0;
+}
+
+template <typename T>
+int FastThreadSafeQueue<T>::size(const QThread* thread) const
+{
+	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+
+	return 	m_size;
+}
+
+template <typename T>
+int FastThreadSafeQueue<T>::maxSize(const QThread* thread) const
+{
+	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+
+	return 	m_maxSize;
+}
+
+
+
+
 

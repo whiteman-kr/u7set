@@ -25,7 +25,14 @@ public:
 
 	bool fillBuffer(QFile& file);
 	bool hasRecordsInBuffer() const;
-	bool getNextRecord(ArchFileRecord* record);
+
+	bool getRecord(ArchFileRecord* record);
+	bool moveToNextRecord();
+
+	bool getRecordAndMoveToNext(ArchFileRecord* record);
+
+private:
+	void moveRemainingDataInBeginningOfBuffer();
 
 private:
 	qint64 m_recordStartPos = 0;

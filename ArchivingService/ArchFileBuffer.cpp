@@ -67,21 +67,25 @@ bool ArchFileReadBuffer::fillBuffer(QFile& file)
 
 bool ArchFileReadBuffer::hasRecordsInBuffer() const
 {
-	return m_inBufSize > ArchFileRecord::SIZE;
+	return (m_inBufSize - m_recordStartPos) >= ArchFileRecord::SIZE;
 }
 
-bool ArchFileReadBuffer::getNextRecord(ArchFileRecord* record)
+bool ArchFileReadBuffer::getRecord(ArchFileRecord* record)
 {
 	TEST_PTR_RETURN_FALSE(record);
 
-	while(m_inBufSize - m_recordStartPos >= ArchFileRecord::SIZE)
+	if (m_recordStartPos + ArchFileRecord::SIZE > m_inBufSize)
+	{
+		return false;
+	}
+
+	while(m_recordStartPos + ArchFileRecord::SIZE <= m_inBufSize)
 	{
 		ArchFileRecord* recordPtr = reinterpret_cast<ArchFileRecord*>(m_buffer + m_recordStartPos);
 
 		if (recordPtr->isNotCorrupted() == true)
 		{
 			memcpy(record, recordPtr, ArchFileRecord::SIZE);
-			m_recordStartPos += ArchFileRecord::SIZE;
 			return true;
 		}
 
@@ -91,18 +95,53 @@ bool ArchFileReadBuffer::getNextRecord(ArchFileRecord* record)
 		m_recordStartPos++;
 	}
 
-	m_inBufSize -= m_recordStartPos;
-
-	if (m_inBufSize > 0)
-	{
-		// copy remaining bytes in beginning of buffer
-		//
-		memcpy(m_buffer + 0, m_buffer + m_recordStartPos, m_inBufSize);
-	}
-
-	m_recordStartPos = 0;
+	moveRemainingDataInBeginningOfBuffer();
 
 	return false;
+}
+
+bool ArchFileReadBuffer::moveToNextRecord()
+{
+	if (m_recordStartPos + ArchFileRecord::SIZE > m_inBufSize)
+	{
+		return false;
+	}
+
+	m_recordStartPos += ArchFileRecord::SIZE;
+
+	if (m_recordStartPos + ArchFileRecord::SIZE <= m_inBufSize)
+	{
+		return true;
+	}
+
+	moveRemainingDataInBeginningOfBuffer();
+
+	return false;
+}
+
+bool ArchFileReadBuffer::getRecordAndMoveToNext(ArchFileRecord* record)
+{
+	bool result = getRecord(record);
+
+	moveToNextRecord();
+
+	return result;
+}
+
+void ArchFileReadBuffer::moveRemainingDataInBeginningOfBuffer()
+{
+	qint64 remainigDataSize = m_inBufSize - m_recordStartPos;
+
+	assert(remainigDataSize >= 0);
+	assert(remainigDataSize < ArchFileRecord::SIZE);
+
+	if (remainigDataSize > 0)
+	{
+		memcpy(m_buffer + 0, m_buffer + m_recordStartPos, remainigDataSize);
+	}
+
+	m_inBufSize = remainigDataSize;
+	m_recordStartPos = 0;
 }
 
 // ----------------------------------------------------------------------------------------------------------------------

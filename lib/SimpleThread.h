@@ -96,36 +96,3 @@ public:
 	bool waitForever() { return wait(0); }
 };
 
-
-class SimpleMutex
-{
-public:
-	SimpleMutex();
-
-	void lock();
-	void lock(const QThread* currentThread);
-
-	bool tryLock();
-	bool tryLock(const QThread* currentThread);
-
-	void unlock();
-	void unlock(const QThread* currentThread);
-
-private:
-	std::atomic<const QThread*> m_currentOwner = { nullptr };
-};
-
-class SimpleMutexLocker
-{
-public:
-	SimpleMutexLocker(SimpleMutex* mutex);
-	SimpleMutexLocker(SimpleMutex* mutex, const QThread* currentThread);
-
-	~SimpleMutexLocker();
-
-private:
-
-private:
-	SimpleMutex* m_simpleMutex;
-	const QThread* m_currentThread = nullptr;
-};

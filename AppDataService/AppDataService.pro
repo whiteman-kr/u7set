@@ -74,7 +74,8 @@ SOURCES += \
     ../lib/SignalProperties.cpp \
     RtTrendsServer.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    ../lib/SimpleMutex.cpp
 
 HEADERS += \
 	Stable.h \
@@ -128,7 +129,8 @@ HEADERS += \
     ../lib/SignalProperties.h \
     RtTrendsServer.h \
     ../lib/ProtoSerialization.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    ../lib/SimpleMutex.h
 
 include(../qtservice/src/qtservice.pri)
 
