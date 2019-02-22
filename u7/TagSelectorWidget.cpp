@@ -20,7 +20,7 @@ TagSelectorWidget::TagSelectorWidget(QWidget* parent)
 	//
 	setContextMenuPolicy(Qt::ActionsContextMenu);
 
-	QAction* resetAllTags = new QAction(tr("Reset All"));
+	QAction* resetAllTags = new QAction(tr("Reset All"), this);
 	connect(resetAllTags, &QAction::triggered, this, &TagSelectorWidget::resetAllTags);
 
 	addAction(resetAllTags);
