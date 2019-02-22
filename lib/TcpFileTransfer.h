@@ -14,7 +14,7 @@ namespace Tcp
 					RQID_GET_FILE_NEXT = 401;
 
 
-	enum FileTransferResult
+	enum class FileTransferResult
 	{
 		Ok,
 
