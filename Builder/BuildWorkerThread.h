@@ -31,7 +31,7 @@ namespace Builder
 
 		// Get SuppressWarning list
 		//
-		bool getSuppressWarningList(DbController* db);
+		bool getProjectProperties(DbController* db);
 
 		// Get Equipment from the project database
 		//
@@ -143,6 +143,8 @@ namespace Builder
 		QString serverPassword() const;
 		void setServerPassword(QString value);
 
+		const DbProjectProperties& projectProperties() const;
+
 		void setIssueLog(IssueLogger* value);
 
 		QString projectUserName() const;
@@ -178,6 +180,8 @@ namespace Builder
 
 		QString m_projectUserName;
 		QString m_projectUserPassword;
+
+		DbProjectProperties m_projectProperties;
 
 		QString m_buildOutputPath;
 

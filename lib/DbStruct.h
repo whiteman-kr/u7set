@@ -9,6 +9,7 @@
 #include <QDateTime>
 #include <QMetaType>
 #include <QtSql/QSqlRecord>
+#include "PropertyObject.h"
 
 class Signal;
 
@@ -20,8 +21,10 @@ namespace Db
 
 	public:
 		constexpr static const char* Description = "Description";
-		constexpr static const char* SuppressWarnings = "SuppressWarnings";
+		constexpr static const char* SuppressWarnings = "SuppressWarnings";					// A list of suppressed warnings on build
 		constexpr static const char* UppercaseAppSignalId = "UppercaseAppSignalID";
+		constexpr static const char* GenerateAppSignalsXml = "Generate AppSignals.xml";		// Generate file AppSignals.xml on build
+		constexpr static const char* GenerateExtraDebugInfo = "Generate Extra Debug Info";	// Generate extra debug information on build
 	};
 
 	class File
@@ -199,6 +202,38 @@ struct UpgradeItem
 {
     QString upgradeFileName;
 	QString text;
+};
+
+// DbProjectProperties
+//
+class DbProjectProperties : public PropertyObject
+{
+public:
+	DbProjectProperties();
+
+public:
+	QString description() const;
+	void setDescription(const QString& value);
+
+	std::vector<int> suppressWarnings() const;
+	QString suppressWarningsAsString() const;
+	void setSuppressWarnings(const QString& value);
+
+	bool uppercaseAppSignalId() const;
+	void setUppercaseAppSignalId(bool value);
+
+	bool generateAppSignalsXml() const;
+	void setGenerateAppSignalsXml(bool value);
+
+	bool generateExtraDebugInfo() const;
+	void setGenerateExtraDebugInfo(bool value);
+
+private:
+	QString m_description;
+	std::vector<int> m_suppressWarnings;
+	bool m_uppercaseAppSignalId = true;
+	bool m_generateAppSignalsXml = false;
+	bool m_generateExtraDebugInfo = false;
 };
 
 
