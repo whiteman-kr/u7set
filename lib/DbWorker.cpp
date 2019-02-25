@@ -280,7 +280,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0260.sql", "Upgrade to version 260, Creating some indexes on signalinstance table"},
 	{":/DatabaseUpgrade/Upgrade0261.sql", "Upgrade to version 261, SchemaTags in Monitor and TuningClient has default values"},
 	{":/DatabaseUpgrade/Upgrade0262.sql", "Upgrade to version 262, Add project property UppercaseAppSignalID"},
-	{":/DatabaseUpgrade/Upgrade0263.sql", "Upgrade to version 263, Added function for getting checked out signals"},
+	{":/DatabaseUpgrade/Upgrade0263.sql", "Upgrade to version 263, Added functions for getting checked out signals and undo multiple signals"},
 };
 
 int DbWorker::counter = 0;
@@ -4641,18 +4641,18 @@ void DbWorker::slot_getLatestSignals(QVector<int> signalIDs, QVector<Signal>* si
 		return;
 	}
 
-	signalsArray->clear();
-	signalsArray->reserve(signalIDs.count());
-
 	// Operation
 	//
 	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
 
 	if (db.isOpen() == false)
 	{
-		emitError(db, tr("Cannot get latest signal. Database connection is not opened."));
+		emitError(db, tr("Cannot get latest signals. Database connection is not opened."));
 		return;
 	}
+
+	signalsArray->clear();
+	signalsArray->reserve(signalIDs.count());
 
 	// request
 	//
@@ -4683,7 +4683,7 @@ void DbWorker::slot_getLatestSignals(QVector<int> signalIDs, QVector<Signal>* si
 
 	if (result == false)
 	{
-		emitError(db, tr("Can't get signal workcopy! Error: ") +  q.lastError().text());
+		emitError(db, tr("Can't get signals workcopy! Error: ") +  q.lastError().text());
 		return;
 	}
 
@@ -4805,7 +4805,7 @@ void DbWorker::slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs)
 	}
 
 	signalsIDs->clear();
-	signalsIDs->resize(q.size());
+	signalsIDs->reserve(q.size());
 
 	while(q.next() != false)
 	{
@@ -5304,7 +5304,6 @@ void DbWorker::slot_deleteSignal(int signalID, ObjectState* objectState)
 	}
 }
 
-
 void DbWorker::slot_undoSignalChanges(int signalID, ObjectState* objectState)
 {
 	AUTO_COMPLETE
@@ -5356,6 +5355,77 @@ void DbWorker::slot_undoSignalChanges(int signalID, ObjectState* objectState)
 	}
 }
 
+void DbWorker::slot_undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectState>* objectStates)
+{
+	AUTO_COMPLETE
+
+	if (objectStates == nullptr)
+	{
+		assert(objectStates != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot undo signal changes. Database connection is not opened."));
+		return;
+	}
+
+	objectStates->clear();
+	objectStates->reserve(signalIDs.count());
+
+	//
+
+	QString idsStr("ARRAY[");
+	bool first = true;
+
+	for(int id : signalIDs)
+	{
+		if (first == true)
+		{
+			idsStr += QString("%1").arg(id);
+			first = false;
+		}
+		else
+		{
+			idsStr += QString(",%1").arg(id);
+		}
+	}
+
+	idsStr += "]";
+
+	// Log action
+	//
+	QString logMessage = QString("slot_undoSignalsChanges: SignalIDs %1").arg(idsStr);
+
+	addLogRecord(db, logMessage);
+
+	// --
+	//
+	QString request = QString("SELECT * FROM undo_signals_changes(%1, %2)")
+		.arg(currentUser().userId()).arg(idsStr);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(db, tr("Can't undo signals changes! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while(q.next() != false)
+	{
+		ObjectState os;
+		db_objectState(q, &os);
+		objectStates->append(os);
+	}
+}
 
 void DbWorker::slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState> *objectState)
 {

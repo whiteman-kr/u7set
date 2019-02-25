@@ -140,6 +140,7 @@ public:
 
 	bool deleteSignal(int signalID, ObjectState* objectState, QWidget* parentWidget);
 	bool undoSignalChanges(int signalID, ObjectState* objectState, QWidget* parentWidget);
+	bool undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
 
 	bool checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState, QWidget* parentWidget);
 
@@ -242,6 +243,7 @@ signals:
 	void signal_setSignalsWorkcopies(const QVector<Signal>* signalsList);
 	void signal_deleteSignal(int signalID, ObjectState* objectState);
 	void signal_undoSignalChanges(int signalID, ObjectState* objectState);
+	bool signal_undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectState>* objectStates);
 	void signal_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
 
 	void signal_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, std::vector<Signal>* addedSignals);
