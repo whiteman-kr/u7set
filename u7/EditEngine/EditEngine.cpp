@@ -193,6 +193,13 @@ namespace EditEngine
 	void EditEngine::setReadOnly(bool value)
 	{
 		m_readOnly = value;
+
+		if (m_readOnly == true)
+		{
+			resetModified();
+		}
+
+		return;
 	}
 
 	bool EditEngine::modified() const

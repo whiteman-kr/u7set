@@ -151,6 +151,7 @@ public slots:
     void slot_getLatestSignal(int signalID, Signal* signal);
 	void slot_getLatestSignals(QVector<int> signalIDs, QVector<Signal>* signalsArray);
 	void slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVector<Signal>* signalArray);
+	void slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs);
 
 	void slot_addSignal(E::SignalType signalType, QVector<Signal>* newSignal);
 
@@ -163,6 +164,7 @@ public slots:
 
     void slot_deleteSignal(int signalID, ObjectState* objectState);
     void slot_undoSignalChanges(int signalID, ObjectState* objectState);
+	void slot_undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectState>* objectStates);
 
     void slot_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
 

@@ -86,12 +86,14 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getLatestSignal, m_worker, &DbWorker::slot_getLatestSignal);
 	connect(this, &DbController::signal_getLatestSignals, m_worker, &DbWorker::slot_getLatestSignals);
 	connect(this, &DbController::signal_getLatestSignalsByAppSignalIDs, m_worker, &DbWorker::slot_getLatestSignalsByAppSignalIDs);
+	connect(this, &DbController::signal_getCheckedOutSignalsIDs, m_worker, &DbWorker::slot_getCheckedOutSignalsIDs);
 	connect(this, &DbController::signal_addSignal, m_worker, &DbWorker::slot_addSignal);
 	connect(this, &DbController::signal_checkoutSignals, m_worker, &DbWorker::slot_checkoutSignals);
 	connect(this, &DbController::signal_setSignalWorkcopy, m_worker, &DbWorker::slot_setSignalWorkcopy);
 	connect(this, &DbController::signal_setSignalsWorkcopies, m_worker, &DbWorker::slot_setSignalsWorkcopies);
 	connect(this, &DbController::signal_deleteSignal, m_worker, &DbWorker::slot_deleteSignal);
 	connect(this, &DbController::signal_undoSignalChanges, m_worker, &DbWorker::slot_undoSignalChanges);
+	connect(this, &DbController::signal_undoSignalsChanges, m_worker, &DbWorker::slot_undoSignalsChanges);
 	connect(this, &DbController::signal_checkinSignals, m_worker, &DbWorker::slot_checkinSignals);
 	connect(this, &DbController::signal_autoAddSignals, m_worker, &DbWorker::slot_autoAddSignals);
 	connect(this, &DbController::signal_autoDeleteSignals, m_worker, &DbWorker::slot_autoDeleteSignals);
@@ -1778,7 +1780,7 @@ bool DbController::getLatestSignals(QVector<int> signalIDs, QVector<Signal>* sig
 
 	emit signal_getLatestSignals(signalIDs, signalsArray);
 
-	ok = waitForComplete(parentWidget, tr("Reading latest signal"));
+	ok = waitForComplete(parentWidget, tr("Reading latest signals"));
 
 	return ok;
 }
@@ -1808,6 +1810,31 @@ bool DbController::getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVec
 	return ok;
 
 }
+
+bool DbController::getCheckedOutSignalsIDs(QVector<int> *signalIDs, QWidget* parentWidget)
+{
+	if (signalIDs == nullptr)
+	{
+		assert(signalIDs != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getCheckedOutSignalsIDs(signalIDs);
+
+	ok = waitForComplete(parentWidget, tr("Getting checked out signals' IDs"));
+
+	return ok;
+}
+
 
 
 bool DbController::addSignal(E::SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget)
@@ -1930,7 +1957,6 @@ bool DbController::deleteSignal(int signalID, ObjectState* objectState, QWidget*
 	return ok;
 }
 
-
 bool DbController::undoSignalChanges(int signalID, ObjectState* objectState, QWidget* parentWidget)
 {
 	if (objectState == nullptr)
@@ -1955,6 +1981,30 @@ bool DbController::undoSignalChanges(int signalID, ObjectState* objectState, QWi
 	return ok;
 }
 
+bool DbController::undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget)
+{
+	if (objectStates == nullptr)
+	{
+		assert(objectStates != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_undoSignalsChanges(signalIDs, objectStates);
+
+	ok = waitForComplete(parentWidget, tr("Undo signals changes"));
+
+	return ok;
+
+}
 
 bool DbController::checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState> *objectState, QWidget* parentWidget)
 {

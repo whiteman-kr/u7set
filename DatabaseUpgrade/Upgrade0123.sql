@@ -98,8 +98,4 @@ BEGIN
 	ORDER BY S.SignalID;
 END
 $BODY$
-  LANGUAGE plpgsql VOLATILE
-  COST 100
-  ROWS 1000;
-ALTER FUNCTION public.get_latest_signals_by_appsignalids(integer, text[])
-  OWNER TO u7;
+  LANGUAGE plpgsql;

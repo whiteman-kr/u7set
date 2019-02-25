@@ -129,6 +129,7 @@ public:
 	bool getLatestSignal(int signalID, Signal* signal, QWidget* parentWidget);
 	bool getLatestSignals(QVector<int> signalIDs, QVector<Signal>* signalsArray, QWidget* parentWidget);
 	bool getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray, QWidget* parentWidget);
+	bool getCheckedOutSignalsIDs(QVector<int>* signalIDs, QWidget* parentWidget);
 	bool addSignal(E::SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget);
 
 	bool checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
@@ -137,6 +138,7 @@ public:
 
 	bool deleteSignal(int signalID, ObjectState* objectState, QWidget* parentWidget);
 	bool undoSignalChanges(int signalID, ObjectState* objectState, QWidget* parentWidget);
+	bool undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
 
 	bool checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState, QWidget* parentWidget);
 
@@ -231,6 +233,7 @@ signals:
 	void signal_getLatestSignal(int signalID, Signal* signal);
 	void signal_getLatestSignals(QVector<int> signalIDs, QVector<Signal>* signalsArray);
 	void signal_getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray);
+	void signal_getCheckedOutSignalsIDs(QVector<int>* signalIDs);
 	void signal_addSignal(E::SignalType signalType, QVector<Signal>* newSignal);
 
 	void signal_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
@@ -238,6 +241,7 @@ signals:
 	void signal_setSignalsWorkcopies(const QVector<Signal>* signalsList);
 	void signal_deleteSignal(int signalID, ObjectState* objectState);
 	void signal_undoSignalChanges(int signalID, ObjectState* objectState);
+	bool signal_undoSignalsChanges(QVector<int> signalIDs, QVector<ObjectState>* objectStates);
 	void signal_checkinSignals(QVector<int>* signalIDs, QString comment, QVector<ObjectState>* objectState);
 
 	void signal_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* deviceSignals, std::vector<Signal>* addedSignals);

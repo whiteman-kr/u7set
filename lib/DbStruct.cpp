@@ -880,6 +880,13 @@ DbFileInfo::DbFileInfo(const DbFile& file) noexcept
 	m_size = file.size();
 }
 
+DbFileInfo::DbFileInfo(int fileId) noexcept :
+	DbFileInfo{}
+{
+	m_fileId = fileId;
+}
+
+
 DbFileInfo::~DbFileInfo()
 {
 }

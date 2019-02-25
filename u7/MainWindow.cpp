@@ -20,6 +20,7 @@
 #include "GlobalMessanger.h"
 #include "Forms/FileHistoryDialog.h"
 #include "Forms/ProjectPropertiesForm.h"
+#include "Forms/PendingChangesDialog.h"
 #include "../lib/Ui/DialogAbout.h"
 #include "../VFrame30/VFrame30.h"
 #include "../lib/LogicModuleSet.h"
@@ -286,6 +287,12 @@ void MainWindow::createActions()
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_projectPropertiesAction->setEnabled(true);});
 	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_projectPropertiesAction->setEnabled(false);});
 
+	m_pendingChangesAction = new QAction(tr("Pending Changes..."), this);
+	m_pendingChangesAction->setEnabled(false);
+	connect(m_pendingChangesAction, &QAction::triggered, this, &MainWindow::pendingChanges);
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectOpened, this, [this](){m_pendingChangesAction->setEnabled(true);});
+	connect(&GlobalMessanger::instance(), &GlobalMessanger::projectClosed, this, [this](){m_pendingChangesAction->setEnabled(false);});
+
 	return;
 }
 
@@ -310,6 +317,7 @@ void MainWindow::createMenus()
 	pProjectMenu->addAction(m_projectHistoryAction);
 	pProjectMenu->addAction(m_projectPropertiesAction);
 	pProjectMenu->addAction(m_startBuildAction);
+	pProjectMenu->addAction(m_pendingChangesAction);
 
 	// Tools
 	//
@@ -887,6 +895,12 @@ void MainWindow::projectProperties()
 
 	ProjectPropertiesForm::show(this, m_dbController);
 
+	return;
+}
+
+void MainWindow::pendingChanges()
+{
+	PendingChangesDialog::show(db(), this);
 	return;
 }
 
