@@ -371,7 +371,8 @@ class DbFileInfo
 public:
 	DbFileInfo() noexcept;
 	DbFileInfo(const DbFileInfo& fileInfo) noexcept = default;
-	DbFileInfo(const DbFile& file) noexcept;
+	explicit DbFileInfo(const DbFile& file) noexcept;
+	explicit DbFileInfo(int fileId) noexcept;
 	virtual ~DbFileInfo();
 
 	// Methods

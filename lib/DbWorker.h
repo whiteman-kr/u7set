@@ -150,6 +150,7 @@ public slots:
 	void getSignals(SignalSet* signalSet, bool excludeDeleted, bool tuningableOnly);
     void slot_getLatestSignal(int signalID, Signal* signal);
 	void slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVector<Signal>* signalArray);
+	void slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs);
 
 	void slot_addSignal(E::SignalType signalType, QVector<Signal>* newSignal);
 

@@ -280,6 +280,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0260.sql", "Upgrade to version 260, Creating some indexes on signalinstance table"},
 	{":/DatabaseUpgrade/Upgrade0261.sql", "Upgrade to version 261, SchemaTags in Monitor and TuningClient has default values"},
 	{":/DatabaseUpgrade/Upgrade0262.sql", "Upgrade to version 262, Add project property UppercaseAppSignalID"},
+	{":/DatabaseUpgrade/Upgrade0263.sql", "Upgrade to version 263, Added function for getting checked out signals"},
 };
 
 int DbWorker::counter = 0;
@@ -4699,6 +4700,55 @@ void DbWorker::slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVe
 
 	return;
 
+}
+
+void DbWorker::slot_getCheckedOutSignalsIDs(QVector<int>* signalsIDs)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	if (signalsIDs == nullptr)
+	{
+		assert(signalsIDs != nullptr);
+		return;
+	}
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get checked out signals' IDs. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM get_checked_out_signals_ids(%1)")
+		.arg(currentUser().userId());
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(db, tr("Can't get checked out signals' IDs! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	signalsIDs->clear();
+	signalsIDs->resize(q.size());
+
+	while(q.next() != false)
+	{
+		int signalID = q.value(0).toInt();
+
+		signalsIDs->append(signalID);
+	}
+
+	return;
 }
 
 

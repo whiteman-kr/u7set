@@ -85,6 +85,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getTuningableSignals, m_worker, &DbWorker::slot_getTuningableSignals);
 	connect(this, &DbController::signal_getLatestSignal, m_worker, &DbWorker::slot_getLatestSignal);
 	connect(this, &DbController::signal_getLatestSignalsByAppSignalIDs, m_worker, &DbWorker::slot_getLatestSignalsByAppSignalIDs);
+	connect(this, &DbController::signal_getCheckedOutSignalsIDs, m_worker, &DbWorker::slot_getCheckedOutSignalsIDs);
 	connect(this, &DbController::signal_addSignal, m_worker, &DbWorker::slot_addSignal);
 	connect(this, &DbController::signal_checkoutSignals, m_worker, &DbWorker::slot_checkoutSignals);
 	connect(this, &DbController::signal_setSignalWorkcopy, m_worker, &DbWorker::slot_setSignalWorkcopy);
@@ -1783,6 +1784,31 @@ bool DbController::getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVec
 	return ok;
 
 }
+
+bool DbController::getCheckedOutSignalsIDs(QVector<int> *signalIDs, QWidget* parentWidget)
+{
+	if (signalIDs == nullptr)
+	{
+		assert(signalIDs != nullptr);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getCheckedOutSignalsIDs(signalIDs);
+
+	ok = waitForComplete(parentWidget, tr("Getting checked out signals' IDs"));
+
+	return ok;
+}
+
 
 
 bool DbController::addSignal(E::SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget)

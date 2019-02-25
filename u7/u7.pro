@@ -173,7 +173,8 @@ SOURCES +=\
     DialogAfbLibraryCheck.cpp \
     ../lib/WidgetUtils.cpp \
     TagSelectorWidget.cpp \
-    Forms/ProjectPropertiesForm.cpp
+    Forms/ProjectPropertiesForm.cpp \
+    Forms/PendingChangesDialog.cpp
 
 
 HEADERS  += \
@@ -309,7 +310,8 @@ HEADERS  += \
     DialogInputEx.h \
     DialogAfbLibraryCheck.h \
     TagSelectorWidget.h \
-    Forms/ProjectPropertiesForm.h
+    Forms/ProjectPropertiesForm.h \
+    Forms/PendingChangesDialog.h
 
 
 FORMS    += \

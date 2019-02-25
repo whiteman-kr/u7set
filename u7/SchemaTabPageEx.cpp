@@ -5272,6 +5272,7 @@ void EditSchemaTabPageEx::setReadOnly(bool value)
 {
 	assert(m_schemaWidget);
 	m_schemaWidget->setReadOnly(value);
+
 	setPageTitle();
 }
 

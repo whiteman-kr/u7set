@@ -128,6 +128,7 @@ public:
 	bool getTuningableSignals(SignalSet* signalSet, QWidget* parentWidget);
 	bool getLatestSignal(int signalID, Signal* signal, QWidget* parentWidget);
 	bool getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray, QWidget* parentWidget);
+	bool getCheckedOutSignalsIDs(QVector<int>* signalIDs, QWidget* parentWidget);
 	bool addSignal(E::SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget);
 
 	bool checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
@@ -229,6 +230,7 @@ signals:
 	void signal_getTuningableSignals(SignalSet* signalSet);
 	void signal_getLatestSignal(int signalID, Signal* signal);
 	void signal_getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray);
+	void signal_getCheckedOutSignalsIDs(QVector<int>* signalIDs);
 	void signal_addSignal(E::SignalType signalType, QVector<Signal>* newSignal);
 
 	void signal_checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates);
