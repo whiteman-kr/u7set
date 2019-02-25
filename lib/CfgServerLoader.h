@@ -125,6 +125,10 @@ signals:
 	void signal_fileReady();					// emit only for manual requests
 	void signal_configurationChanged();
 
+	void signal_unknownClient();
+	void signal_onEndFileDownload(const QString& fileName, Tcp::FileTransferResult errorCode);
+	void signal_onEndFileDownloadError(const QString& fileName, Tcp::FileTransferResult errorCode);
+
 private slots:
 	void slot_enableDownloadConfiguration();
 	void slot_getFile(QString fileName, QByteArray *fileData);
@@ -153,6 +157,8 @@ private:
 	void setFileReady(bool value);
 
 	QString getFilePathNameByID(QString fileID);
+
+	void emitSignalUnknownClient();
 
 private:
 	struct CfgFileInfo : public Builder::BuildFileInfo
@@ -219,6 +225,9 @@ private:
 
 	QMap<QString, QString> m_fileIDPathMap;
 
+	bool m_enableSignalUnknownClient = true;
+
+	static bool m_registerTypes;
 };
 
 
@@ -270,6 +279,10 @@ public:
 signals:
 	void signal_configurationChanged();
 	void signal_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
+
+	void signal_unknownClient();
+	void signal_onEndFileDownload(const QString& fileName, Tcp::FileTransferResult errorCode);
+	void signal_onEndFileDownloadError(const QString& fileName, Tcp::FileTransferResult errorCode);
 
 private:
 	void initThread();

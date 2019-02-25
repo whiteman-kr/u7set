@@ -75,6 +75,13 @@ QVariant PendingChangesModel::data(const QModelIndex& index, int role /*= Qt::Di
 
 	const PendingChangesObject& object = m_objects[objectIndex];
 
+	if (std::holds_alternative<DbFileInfo>(object) == false &&
+		std::holds_alternative<Signal>(object) == false)
+	{
+		assert(false);
+		return {};
+	}
+
 	if (std::holds_alternative<DbFileInfo>(object) == true)
 	{
 		const DbFileInfo& file = std::get<DbFileInfo>(object);
@@ -140,6 +147,54 @@ QVariant PendingChangesModel::data(const QModelIndex& index, int role /*= Qt::Di
 				else
 				{
 					return file.userId();
+				}
+
+			default:
+				assert(false);
+				return {};
+			}
+		}
+	}	// Is file
+
+	if (std::holds_alternative<Signal>(object) == true)
+	{
+		const Signal& signal = std::get<Signal>(object);
+
+		if (role == Qt::DisplayRole)
+		{
+			switch (column)
+			{
+			case Columns::Index:
+				return {row + 1};
+
+			case Columns::Type:
+				return {"S"};
+
+			case Columns::Id:
+				return {signal.ID()};
+
+			case Columns::NameOrAppSignalId:
+				return {signal.appSignalID()};
+
+			case Columns::Caption:
+				return {signal.customAppSignalID() + ": " + signal.caption()};
+
+			case Columns::State:
+				assert(signal.checkedOut() == true);
+				return {"Checked Out"};
+
+			case Columns::Action:
+				return {signal.instanceAction().text()};
+
+			case Columns::User:
+				if (auto it = m_users.find(signal.userID());
+					it != m_users.end())
+				{
+					return it->second.username();
+				}
+				else
+				{
+					return signal.userID();
 				}
 
 			default:
@@ -419,6 +474,64 @@ void PendingChangesDialog::checkIn()
 void PendingChangesDialog::undoChanges()
 {
 	QModelIndexList selectedIndexes = m_treeView->selectionModel()->selectedIndexes();
+	if (selectedIndexes.isEmpty() == true)
+	{
+		assert(selectedIndexes.isEmpty() == false);
+	}
+
+	// Separate files and signals
+	//
+	std::vector<PendingChangesObject> objects = m_model.objectsByModelIndex(selectedIndexes);
+
+	std::vector<DbFileInfo> undoFilesFiles;
+	undoFilesFiles.reserve(objects.size());
+
+	QVector<int> undoSignals;
+	undoSignals.reserve(static_cast<int>(objects.size()));
+
+	for (const PendingChangesObject& o : objects)
+	{
+		if (std::holds_alternative<DbFileInfo>(o) == true)
+		{
+			const DbFileInfo& file = std::get<DbFileInfo>(o);
+			undoFilesFiles.push_back(file);
+
+			continue;
+		}
+
+		if (std::holds_alternative<Signal>(o) == true)
+		{
+			const Signal& signal = std::get<Signal>(o);
+			undoSignals.push_back(signal.ID());
+			continue;
+		}
+
+		// What kind of object is it?
+		//
+		assert(std::holds_alternative<DbFileInfo>(o) == true ||
+			   std::holds_alternative<Signal>(o) == true);
+	}
+
+	// CheckIn files
+	//
+	if (undoFilesFiles.empty() == false)
+	{
+		db()->undoChanges(undoFilesFiles, this);
+	}
+
+	// CheckIn signals
+	//
+	if (undoSignals.empty() == false)
+	{
+		QVector<ObjectState> signalObjectState;
+		db()->undoSignalsChanges(undoSignals, &signalObjectState, this);
+	}
+
+	// --
+	//
+	updateData();
+
+	return;
 }
 
 
@@ -457,13 +570,16 @@ void PendingChangesDialog::updateData()
 
 	if (checkedOutSignalsIds.empty() == false)
 	{
-		where to get signals????
+		QVector<Signal> checkedOutSignals;
+		checkedOutSignals.reserve(checkedOutSignalsIds.size());
 
-		db()->getLatestSignals(&checkedOutSignalsIds, this);
-
-		for (const Signal& s : checkedOutSignals)
+		if (bool ok = db()->getLatestSignals(checkedOutSignalsIds, &checkedOutSignals, this);
+			ok == true)
 		{
-			objects.push_back(s);
+			for (const Signal& s : checkedOutSignals)
+			{
+				objects.push_back(s);
+			}
 		}
 	}
 
@@ -480,6 +596,8 @@ void PendingChangesDialog::updateData()
 	// Update data in model
 	//
 	m_model.setData(std::move(objects), users);
+
+	selectionChanged({}, {});
 
 	return;
 }

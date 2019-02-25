@@ -1717,18 +1717,19 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	horizontalHeader->setHighlightSections(false);
 
-	new TableDataVisibilityController(m_signalsView, "SignalsTabPage", defaultColumnVisibility);
-
-	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
-	m_signalsView->verticalHeader()->setResizeMode(QHeaderView::Fixed);
 	horizontalHeader->setDefaultSectionSize(150);
-	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	m_signalsView->setColumnWidth(SC_STR_ID, 400);
 	m_signalsView->setColumnWidth(SC_EXT_STR_ID, 400);
 	m_signalsView->setColumnWidth(SC_BUS_TYPE_ID, 400);
 	m_signalsView->setColumnWidth(SC_NAME, 400);
 	m_signalsView->setColumnWidth(SC_DEVICE_STR_ID, 400);
+
+	new TableDataVisibilityController(m_signalsView, "SignalsTabPage", defaultColumnVisibility);
+
+	m_signalsView->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_signalsView->fontMetrics().height() * 1.4));
+	m_signalsView->verticalHeader()->setResizeMode(QHeaderView::Fixed);
+	m_signalsView->setContextMenuPolicy(Qt::ActionsContextMenu);
 
 	m_signalsView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
 

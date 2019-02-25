@@ -48,7 +48,7 @@ windows build job:
     - "echo ----------------------------------------------"
     - "echo               Copy Qt DLL's"
     - "echo ----------------------------------------------"
-    - "copy \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Redist\\MSVC\\14.15.26706\\vcredist_x64.exe\" \"%CI_PROJECT_DIR%/bin/release/\""
+    - "copy \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Redist\\MSVC\\14.16.27012\\vcredist_x64.exe\" \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy C:\\libpq_my_build\\libpq.dll \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy C:\\Qt\\5.12.0\\msvc2017_64\\bin\\libEGL.dll \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy C:\\Qt\\5.12.0\\msvc2017_64\\bin\\libGLESv2.dll \"%CI_PROJECT_DIR%/bin/release/\""
