@@ -71,6 +71,8 @@ TableDataVisibilityController::TableDataVisibilityController(QTableView* parent,
 	m_tableView(parent),
 	m_settingBranchName(settingsBranchName)
 {
+	connect(parent, &QObject::destroyed, this, &TableDataVisibilityController::saveAllHeaderGeomery, Qt::DirectConnection);
+
 	auto* model = m_tableView->model();
 	int columnCount = model->columnCount();
 	m_columnNameList.reserve(columnCount);
@@ -132,18 +134,6 @@ TableDataVisibilityController::TableDataVisibilityController(QTableView* parent,
 
 TableDataVisibilityController::~TableDataVisibilityController()
 {
-	auto header = m_tableView->horizontalHeader();
-	int columnCount = m_columnNameList.count();
-	for (int i = 0; i < columnCount; i++)
-	{
-		bool visible = !header->isSectionHidden(i);
-		if (visible)
-		{
-			saveColumnWidth(i);
-		}
-		saveColumnVisibility(i, visible);
-		saveColumnPosition(i, header->visualIndex(i));
-	}
 }
 
 void TableDataVisibilityController::editColumnsVisibilityAndOrder()
@@ -169,6 +159,22 @@ void TableDataVisibilityController::saveColumnWidth(int index)
 
 	QSettings settings;
 	settings.setValue((m_settingBranchName + "/ColumnWidth/%1").arg(m_columnNameList[index].replace("/", "|")).replace("\n", " "), width);
+}
+
+void TableDataVisibilityController::saveAllHeaderGeomery()
+{
+	auto header = m_tableView->horizontalHeader();
+	int columnCount = m_columnNameList.count();
+	for (int i = 0; i < columnCount; i++)
+	{
+		bool visible = !header->isSectionHidden(i);
+		if (visible)
+		{
+			saveColumnWidth(i);
+		}
+		saveColumnVisibility(i, visible);
+		saveColumnPosition(i, header->visualIndex(i));
+	}
 }
 
 void TableDataVisibilityController::saveColumnVisibility(int index, bool visible)

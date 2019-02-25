@@ -4582,8 +4582,6 @@ void DbWorker::getSignals(SignalSet* signalSet, bool excludeDeleted, bool tuning
 	return;
 }
 
-
-
 void DbWorker::slot_getLatestSignal(int signalID, Signal* signal)
 {
 	AUTO_COMPLETE
@@ -4630,6 +4628,74 @@ void DbWorker::slot_getLatestSignal(int signalID, Signal* signal)
 	return;
 }
 
+void DbWorker::slot_getLatestSignals(QVector<int> signalIDs, QVector<Signal>* signalsArray)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	if (signalsArray == nullptr)
+	{
+		assert(signalsArray != nullptr);
+		return;
+	}
+
+	signalsArray->clear();
+	signalsArray->reserve(signalIDs.count());
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get latest signal. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+
+	QString idsStr("ARRAY[");
+	bool first = true;
+
+	for(int id : signalIDs)
+	{
+		if (first == true)
+		{
+			idsStr += QString("%1").arg(id);
+			first = false;
+		}
+		else
+		{
+			idsStr += QString(",%1").arg(id);
+		}
+	}
+
+	idsStr += "]";
+
+	QString request = QString("SELECT * FROM get_latest_signals(%1, %2)")
+		.arg(currentUser().userId()).arg(idsStr);
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(db, tr("Can't get signal workcopy! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	while(q.next() != false)
+	{
+		Signal s;
+		getSignalData(q, s);
+
+		signalsArray->append(s);
+	}
+
+	return;
+}
 
 void DbWorker::slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVector<Signal>* signalArray)
 {

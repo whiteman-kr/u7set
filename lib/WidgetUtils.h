@@ -27,6 +27,7 @@ public:
 
 public slots:
 	void saveColumnWidth(int index);
+	void saveAllHeaderGeomery();
 
 private:
 	QTableView* m_tableView = nullptr;
