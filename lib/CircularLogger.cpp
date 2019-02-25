@@ -388,7 +388,23 @@ QString CircularLogger::getRecordTypeStr(RecordType type)
 
 QString CircularLogger::getCurrentDateTimeStr()
 {
-	return QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz");
+	QDateTime&& currentTime = QDateTime::currentDateTime();
+	if (currentTime.isValid() == false)
+	{
+		return "Current time is not valid";
+	}
+	assert(currentTime.isValid());
+	QDate&& date = currentTime.date();
+	QTime&& time = currentTime.time();
+	QChar&& zero = QChar('0');
+	return QString("%1.%2.%3 %4:%5:%6.%7")
+			.arg(date.year(), 4, 10, zero)
+			.arg(date.month(), 2, 10, zero)
+			.arg(date.day(), 2, 10, zero)
+			.arg(time.hour(), 2, 10, zero)
+			.arg(time.minute(), 2, 10, zero)
+			.arg(time.msec(), 3, 10, zero);
+	//return QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz");
 }
 
 
