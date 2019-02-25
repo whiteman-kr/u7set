@@ -113,7 +113,7 @@ namespace Builder
 		void errPDB2005();												// Load UFB schemas from the project database error
 		void errPDB2006(QString projectName, QString dbLastError);		// Opening project %1 error (%2).
 
-		void errPDB2020(QString projectPropertyName);					// Getting project property %1 error.
+		void errPDB2020();												// Getting project properties error.
 
 		// CFG			FSC configuration						3000-3999
 		//

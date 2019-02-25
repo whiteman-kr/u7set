@@ -403,6 +403,7 @@ QString CircularLogger::getCurrentDateTimeStr()
 			.arg(date.day(), 2, 10, zero)
 			.arg(time.hour(), 2, 10, zero)
 			.arg(time.minute(), 2, 10, zero)
+			.arg(time.second(), 2, 10, zero)
 			.arg(time.msec(), 3, 10, zero);
 	//return QDateTime::currentDateTime().toString("yyyy.MM.dd hh:mm:ss.zzz");
 }

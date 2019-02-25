@@ -68,9 +68,9 @@ namespace Builder
 			LOG_MESSAGE(m_log, tr("Opening project %1: ok").arg(projectName()));
 		}
 
-		// Get SuppressWarning list
+		// Get project properties
 		//
-		ok = getSuppressWarningList(&db);
+		ok = getProjectProperties(&db);
 
 		// --
 		//
@@ -450,37 +450,21 @@ namespace Builder
 		return;
 	}
 
-	bool BuildWorkerThread::getSuppressWarningList(DbController* db)
+	bool BuildWorkerThread::getProjectProperties(DbController* db)
 	{
 		assert(db != nullptr);
 		assert(db->isProjectOpened() == true);
 
-		QString suppressedWarningsStr;
+		bool ok = db->getProjectProperties(&m_projectProperties, nullptr);
 
-		if (bool ok = db->getProjectProperty(Db::ProjectProperty::SuppressWarnings, &suppressedWarningsStr, nullptr);
-			ok == false)
+		if (ok == false)
 		{
-			m_log->errPDB2020(Db::ProjectProperty::SuppressWarnings);
-			return false;
+			m_log->errPDB2020();
 		}
 
 		// --
 		//
-		QStringList sl = suppressedWarningsStr.split(QRegExp("\\W+"), QString::SkipEmptyParts);
-
-		std::vector<int> suppressWarnings;
-		suppressWarnings.reserve(sl.size());
-
-		for (QString& sw : sl)
-		{
-			bool ok = false;
-			int warning = sw.toInt(&ok);
-
-			if (ok == true)
-			{
-				suppressWarnings.push_back(warning);
-			}
-		}
+		std::vector<int> suppressWarnings = m_projectProperties.suppressWarnings();
 
 		if (suppressWarnings.empty() == false)
 		{
@@ -500,7 +484,7 @@ namespace Builder
 
 		m_log->setSupressIssues(suppressWarnings);
 
-		return true;
+		return ok;
 	}
 
 	bool BuildWorkerThread::getEquipment(DbController* db, Hardware::DeviceObject* parent)
@@ -1588,6 +1572,11 @@ namespace Builder
 	{
 		QMutexLocker m(&m_mutex);
 		m_serverPassword = value;
+	}
+
+	const DbProjectProperties& BuildWorkerThread::projectProperties() const
+	{
+		return m_projectProperties;
 	}
 
 	void BuildWorkerThread::setIssueLog(IssueLogger* value)

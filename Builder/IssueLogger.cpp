@@ -576,19 +576,18 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Getting project property %1 error.
+	/// Title: Getting project properties error.
 	///
 	/// Parameters:
-	///			%1 Project property name
 	///
 	/// Description:
 	///		RPCT project property getting errror.
 	///
-	void IssueLogger::errPDB2020(QString projectPropertyName)
+	void IssueLogger::errPDB2020()
 	{
 		LOG_ERROR(IssueType::ProjectDatabase,
 				  2020,
-				  QString(tr("Getting project property %1 error.")).arg(projectPropertyName));
+				  QString(tr("Getting project properties error.")));
 	}
 
 	// CFG			FSC configuration						3000-3999

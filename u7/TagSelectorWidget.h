@@ -15,6 +15,7 @@ class TagSelectorWidget : public QWidget
 
 public:
 	explicit TagSelectorWidget(QWidget* parent = nullptr);
+	virtual ~TagSelectorWidget();
 
 public:
 	void clear();
@@ -33,6 +34,7 @@ private slots:
 
 private:
 	TagSelector::FlowLayout* m_flowLayout;
+	QAction* m_resetAllTags = nullptr;
 };
 
 
