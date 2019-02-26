@@ -84,47 +84,7 @@ public:
 	QVariant value() const { return m_value; }
 	void setValue(const QVariant& value) { m_value = value; }
 
-	QString getNameValueStr()
-	{
-		QString str;
-
-
-
-		switch (m_type)
-		{
-			case TestCmdParamType::Undefined:	str.clear();												break;
-			case TestCmdParamType::Discrete:
-			case TestCmdParamType::SignedInt32:
-			case TestCmdParamType::SignedInt64:	str = m_name + QString("=%2").arg(m_value.toInt());			break;
-			case TestCmdParamType::Float:
-			case TestCmdParamType::Double:		str = m_name + "=" + fromDouble(m_value.toDouble());		break;
-			case TestCmdParamType::String:		str = m_name + "=" + m_value.toString();					break;
-			default:							assert(false);												break;
-		}
-
-		return str;
-	}
-
-	QString getValueStr()
-	{
-		QString str;
-
-		switch (m_type)
-		{
-			case TestCmdParamType::Undefined:	str.clear();								break;
-			case TestCmdParamType::Discrete:
-			case TestCmdParamType::SignedInt32:
-			case TestCmdParamType::SignedInt64:	str = QString("%1").arg(m_value.toInt());	break;
-			case TestCmdParamType::Float:
-			case TestCmdParamType::Double:		str = fromDouble(m_value.toDouble());		break;
-			case TestCmdParamType::String:		str = m_value.toString();					break;
-			default:							assert(false);								break;
-		}
-
-		return str;
-	}
-
-	QString fromDouble(double value)
+	QString strFromDouble(double value)
 	{
 		QString str;
 		str.sprintf("%0.4f", value);
@@ -146,6 +106,81 @@ public:
 		}
 
 		return str;
+	}
+
+	QString getNameValueStr()
+	{
+		QString str;
+
+		switch (m_type)
+		{
+			case TestCmdParamType::Undefined:	str.clear();												break;
+			case TestCmdParamType::Discrete:
+			case TestCmdParamType::SignedInt32:
+			case TestCmdParamType::SignedInt64:	str = m_name + QString("=%2").arg(m_value.toInt());			break;
+			case TestCmdParamType::Float:
+			case TestCmdParamType::Double:		str = m_name + "=" + strFromDouble(m_value.toDouble());		break;
+			case TestCmdParamType::String:		str = m_name + "=" + m_value.toString();					break;
+			default:							assert(false);												break;
+		}
+
+		return str;
+	}
+
+	QString getValueStr()
+	{
+		QString str;
+
+		switch (m_type)
+		{
+			case TestCmdParamType::Undefined:	str.clear();												break;
+			case TestCmdParamType::Discrete:
+			case TestCmdParamType::SignedInt32:
+			case TestCmdParamType::SignedInt64:	str = QString("%1").arg(m_value.toInt());					break;
+			case TestCmdParamType::Float:
+			case TestCmdParamType::Double:		str = strFromDouble(m_value.toDouble());					break;
+			case TestCmdParamType::String:		str = m_value.toString();									break;
+			default:							assert(false);												break;
+		}
+
+		return str;
+	}
+
+	bool compare(QVariant cmpValue)
+	{
+		bool result = false;
+
+		switch (m_type)
+		{
+			case TestCmdParamType::Undefined:
+				result = false;
+				break;
+
+			case TestCmdParamType::Discrete:
+			case TestCmdParamType::SignedInt32:
+			case TestCmdParamType::SignedInt64:
+
+				result = m_value.toInt() == cmpValue.toInt();
+				break;
+
+			case TestCmdParamType::Float:
+			case TestCmdParamType::Double:
+				{
+					double lDouble = m_value.toDouble();
+					double rDouble = cmpValue.toDouble();
+
+					result = std::nextafter(lDouble, std::numeric_limits<double>::lowest()) <= rDouble && std::nextafter(lDouble, std::numeric_limits<double>::max()) >= rDouble;
+				}
+				break;
+
+			case TestCmdParamType::String:
+				result = m_value.toString() == cmpValue.toString();
+				break;
+
+			default:							assert(false);												break;
+		}
+
+		return result;
 	}
 
 	TestCmdParam& operator=(const TestCmdParam& from);

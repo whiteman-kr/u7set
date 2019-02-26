@@ -550,7 +550,7 @@ void UalTester::runTestFile()
 
 							if (signal.state().isValid() == true)
 							{
-								if (signal.state().value() == param.value())
+								if (param.compare(signal.state().value()) == true)
 								{
 									QString str = "    Set " + param.getNameValueStr();
 									test.appendResult(str, m_cmdLineParam.enableTrace());
@@ -616,7 +616,7 @@ void UalTester::runTestFile()
 
 							if (signal.state().isValid() == true)
 							{
-								if (signal.state().value() == param.value())
+								if (param.compare(signal.state().value()) == true)
 								{
 									QString str = "    Check " + param.getNameValueStr() + " - Ok";
 									test.appendResult(str, m_cmdLineParam.enableTrace());
