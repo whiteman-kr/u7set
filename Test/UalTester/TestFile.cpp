@@ -29,6 +29,117 @@ void TestCmdParam::clear()
 	m_value.clear();
 }
 
+QString TestCmdParam::valueStr(bool addParamName)
+{
+	QString str;
+
+	switch (m_type)
+	{
+		case TestCmdParamType::Undefined:
+
+			str = "???";
+			break;
+
+		case TestCmdParamType::Discrete:
+		case TestCmdParamType::SignedInt32:
+		case TestCmdParamType::SignedInt64:
+
+			str = QString("%1").arg(m_value.toInt());
+			break;
+
+		case TestCmdParamType::Float:
+		case TestCmdParamType::Double:
+			{
+				str.sprintf("%0.4f", m_value.toDouble());
+
+				// remove unnecessary 0
+				//
+				int pos = str.indexOf('.');
+				if (pos == -1)
+				{
+					return QString();
+				}
+
+				while(str[str.length() - 1] == '0')
+				{
+					if (str.length() - 2 == pos)
+					{
+						break;
+					}
+
+					str.remove(str.length() - 1, 1);
+				}
+			}
+			break;
+		case TestCmdParamType::String:
+
+			str = m_value.toString();
+			break;
+
+		default:
+
+			assert(false);
+			break;
+	}
+
+	if (addParamName == true)
+	{
+		str = m_name + "=" + str;
+	}
+
+	return str;
+}
+
+bool TestCmdParam::compare(QVariant cmpValue)
+{
+	bool result = false;
+
+	switch (m_type)
+	{
+		case TestCmdParamType::Undefined:
+
+			result = false;
+			break;
+
+		case TestCmdParamType::Discrete:
+		case TestCmdParamType::SignedInt32:
+		case TestCmdParamType::SignedInt64:
+
+			result = m_value.toInt() == cmpValue.toInt();
+			break;
+
+		case TestCmdParamType::Float:
+			{
+				float lFloat = m_value.toFloat();
+				float rFloat = cmpValue.toFloat();
+
+				result = std::nextafter(lFloat, std::numeric_limits<float>::lowest()) <= rFloat && std::nextafter(lFloat, std::numeric_limits<float>::max()) >= rFloat;
+			}
+			break;
+
+		case TestCmdParamType::Double:
+			{
+				double lDouble = m_value.toDouble();
+				double rDouble = cmpValue.toDouble();
+
+				result = std::nextafter(lDouble, std::numeric_limits<double>::lowest()) <= rDouble && std::nextafter(lDouble, std::numeric_limits<double>::max()) >= rDouble;
+			}
+			break;
+
+		case TestCmdParamType::String:
+
+			result = m_value.toString() == cmpValue.toString();
+			break;
+
+		default:
+
+			assert(false);
+			break;
+	}
+
+	return result;
+}
+
 TestCmdParam& TestCmdParam::operator=(const TestCmdParam& from)
 {
 	m_name = from.m_name;
@@ -852,12 +963,14 @@ bool TestCmd::parseCmdDelay()
 		return false;
 	}
 
-	int delay_ms = ms.sprintf("%0.0f", ms.toDouble()).toInt();
+	quint32 delay_ms = ms.sprintf("%0.0f", ms.toDouble()).toUInt(); // float is rounded to int
 
 	TestCmdParam param;
-	param.setName("Delay(ms)");
+
+	param.setName("Delay");
 	param.setType(TestCmdParamType::SignedInt32);
 	param.setValue(delay_ms);
+
 	m_paramList.append(param);
 
 	return true;

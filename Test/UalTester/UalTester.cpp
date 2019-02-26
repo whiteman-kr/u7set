@@ -552,7 +552,7 @@ void UalTester::runTestFile()
 							{
 								if (param.compare(signal.state().value()) == true)
 								{
-									QString str = "    Set " + param.getNameValueStr();
+									QString str = "    Set " + param.valueStr(true);
 									test.appendResult(str, m_cmdLineParam.enableTrace());
 								}
 								else
@@ -562,7 +562,7 @@ void UalTester::runTestFile()
 									TestCmdParam realState = param;
 									realState.setValue(signal.state().value());
 
-									QString str = "    Set " + param.getNameValueStr() + " - Fail    [ received: " + realState.getValueStr() + " ]";
+									QString str = "    Set " + param.valueStr(true) + " - Fail    [ received: " + realState.valueStr(false) + " ]";
 									test.appendResult(str, m_cmdLineParam.enableTrace());
 								}
 							}
@@ -618,7 +618,7 @@ void UalTester::runTestFile()
 							{
 								if (param.compare(signal.state().value()) == true)
 								{
-									QString str = "    Check " + param.getNameValueStr() + " - Ok";
+									QString str = "    Check " + param.valueStr(true) + " - Ok";
 									test.appendResult(str, m_cmdLineParam.enableTrace());
 								}
 								else
@@ -628,7 +628,7 @@ void UalTester::runTestFile()
 									TestCmdParam realState = param;
 									realState.setValue(signal.state().value());
 
-									QString str = "    Check " + param.getNameValueStr() + " - Fail    [ received: " + realState.getValueStr() + " ]";
+									QString str = "    Check " + param.valueStr(true) + " - Fail    [ received: " + realState.valueStr(false) + " ]";
 									test.appendResult(str, m_cmdLineParam.enableTrace());
 								}
 							}
@@ -659,7 +659,7 @@ void UalTester::runTestFile()
 							break;
 						}
 
-						int ms = param.value().toInt();
+						quint32 ms = param.value().toUInt();
 
 						QString str = "    Delay " + QString("%1").arg(ms) + " ms";
 						test.appendResult(str, m_cmdLineParam.enableTrace());

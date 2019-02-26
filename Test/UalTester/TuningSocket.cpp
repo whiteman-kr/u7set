@@ -386,7 +386,7 @@ void TuningSocket::replyWriteTuningSignals(const char* replyData, quint32 replyD
 
 	if (m_writeTuningSignalsReply.error() != 0)
 	{
-		qDebug() << "TuningSocket::replyWriteTuningSignals - error: " << m_writeTuningSignalsReply.error();
+		//qDebug() << "TuningSocket::replyWriteTuningSignals - error: " << m_writeTuningSignalsReply.error();
 		requestTuningSourcesState();
 		return;
 	}
