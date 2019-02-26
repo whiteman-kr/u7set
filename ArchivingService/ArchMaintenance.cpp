@@ -10,16 +10,33 @@ ArchMaintenanceThread::ArchMaintenanceThread(Archive& archive, CircularLoggerSha
 
 void ArchMaintenanceThread::run()
 {
-	while(isQuitRequested() == false)
+	m_timerStarted = false;
+
+	for (;;)
 	{
-		if (m_archive.isMaintenanceRequired() == true)
+		if (m_timerStarted == true)
 		{
-			maintenance();
+			if (m_timerToStartMaintenance.hasExpired(m_archive.maintenanceDelayMinutes() * 60 * 1000) == true)
+			{
+				maintenance();
+				m_timerStarted = false;
+			}
 		}
 		else
 		{
-			msleep(500);
+			if (m_archive.isMaintenanceRequired() == true)
+			{
+				m_timerToStartMaintenance.start();
+				m_timerStarted = true;
+			}
 		}
+
+		if (isQuitRequested() == true)
+		{
+			break;
+		}
+
+		msleep(500);
 	}
 }
 

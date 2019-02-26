@@ -63,10 +63,12 @@ Archive::Archive(const QString& projectID,
 				 const Proto::ArchSignals& protoArchSignals,
 				 int shortTermPeriod,
 				 int longTermPeriod,
+				 int maintenanceDelayMinutes,
 				 CircularLoggerShared logger) :
 	m_projectID(projectID),
 	m_equipmentID(equipmentID),
 	m_archDir(archDir),
+	m_maintenanceDelayMinutes(maintenanceDelayMinutes),
 	m_log(logger)
 {
 	// +++++++++++++++ DEBUG +++++++++++++++++
@@ -88,6 +90,11 @@ Archive::Archive(const QString& projectID,
 	//
 	m_msShortTermPeriod = shortTermPeriod * PARTITION_PERIOD_MS;
 	m_msLongTermPeriod = longTermPeriod * PARTITION_PERIOD_MS;
+
+	if (m_maintenanceDelayMinutes < 0)
+	{
+		m_maintenanceDelayMinutes = 0;
+	}
 
 	int signalsCount = protoArchSignals.archsignals_size();
 

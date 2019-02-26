@@ -102,7 +102,7 @@ bool ArchFileToRead::fillBuffer()
 			}
 		}
 	}
-	while(readPartitionsCount < 2);
+	while(readPartitionsCount < 1);
 
 	return m_readBuffer.hasRecordsInBuffer();
 }

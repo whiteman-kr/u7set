@@ -4,6 +4,7 @@
 #include "..\lib\CircularLogger.h"
 #include "..\lib\Hash.h"
 #include <QVector>
+#include <QElapsedTimer>
 
 class Archive;
 
@@ -20,6 +21,9 @@ private:
 private:
 	Archive& m_archive;
 	CircularLoggerShared m_log;
+
+	QElapsedTimer m_timerToStartMaintenance;
+	bool m_timerStarted = true;
 
 	QVector<Hash> m_signalsHashes;
 };

@@ -127,6 +127,7 @@ void ArchivingService::startArchive()
 								*m_archSignalsProto,
 								m_serviceSettings.shortTermArchivePeriod,
 								m_serviceSettings.longTermArchivePeriod,
+								1,
 								logger());
 
 		deleteArchSignalsProto();				// no more required

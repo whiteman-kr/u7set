@@ -35,6 +35,7 @@ public:
 			const Proto::ArchSignals& protoArchSignals,
 			int shortTermPeriod,
 			int longTermPeriod,
+			int maintenanceDelayMinutes,
 			CircularLoggerShared logger);
 	~Archive();
 
@@ -43,6 +44,8 @@ public:
 
 	qint64 msShortTermPeriod() const { return m_msShortTermPeriod; }
 	qint64 msLongTermPeriod() const { return m_msLongTermPeriod; }
+
+	int maintenanceDelayMinutes() const { return m_maintenanceDelayMinutes; }
 
 	void writeArchFilesInfoFile(const QVector<QVector<ArchFile*>>& archFilesGroups);
 
@@ -125,6 +128,7 @@ private:
 	QString m_archDir;
 	qint64 m_msShortTermPeriod = 0;
 	qint64 m_msLongTermPeriod = 0;
+	int m_maintenanceDelayMinutes = 0;
 	CircularLoggerShared m_log;
 
 	//
