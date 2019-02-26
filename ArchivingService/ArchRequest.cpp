@@ -102,7 +102,7 @@ bool ArchFileToRead::fillBuffer()
 			}
 		}
 	}
-	while(readPartitionsCount < 1);
+	while(readPartitionsCount < 2);
 
 	return m_readBuffer.hasRecordsInBuffer();
 }
@@ -301,25 +301,23 @@ ArchRequest::ArchRequest(Archive& archive,
 
 ArchRequest::~ArchRequest()
 {
-	DEBUG_LOG_MSG(m_logger, QString("ArchRequest is deleted: ID = %1, states sent = %2, elapsed time %3 ms").
+	DEBUG_LOG_MSG(m_logger, QString("ArchRequest deleted: ID=%1, states sent = %2, elapsed time %3 ms").
 							arg(m_param.requestID()).arg(m_sentStatesCount).arg(QDateTime::currentMSecsSinceEpoch() - m_startTime));
 }
 
 void ArchRequest::run()
 {
-/*	if (m_param.print().contains("startTime=2019-02-11 17:00:00, endTime=2019-02-11 18:00:00") != true)
+/*	if (m_param.print().contains(" startTime=2019-02-26 14:00:00, endTime=2019-02-26") != true)
 	{
 		DEBUG_STOP;
-
 		reportNoData();
 		waitForQuit();
 		return;
-	} */
+	}*/
 
 	// expand request time from both sides
 	//
-
-	m_param.expandTimes(Archive::TIME_TO_EXPAND_REQUEST);
+//	m_param.expandTimes(Archive::TIME_TO_EXPAND_REQUEST);
 
 	bool dataFound = prepareArchFilesToRead();
 
@@ -332,7 +330,7 @@ void ArchRequest::run()
 
 	// revert m_execParam times to initial values!
 	//
-	m_param.expandTimes(-Archive::TIME_TO_EXPAND_REQUEST);		// minus is OK!
+//	m_param.expandTimes(-Archive::TIME_TO_EXPAND_REQUEST);		// minus is OK!
 
 	prepareGetNextReply();
 
@@ -513,24 +511,9 @@ void ArchRequest::getSignalStates()
 		state->set_value(record.state.value);
 		state->set_flags(record.state.flags.all);
 
-		if (record.state.flags.valid == 0)
-		{
-			qDebug() << "Not valid point";
-		}
-
 		state->set_planttime(record.state.plantTime);
 		state->set_systemtime(record.state.systemTime);
 		state->set_localtime(record.state.localTime);
-
-		// conversion from UTC to localtime
-		//
-/*		QDateTime localDateTime = QDateTime::fromMSecsSinceEpoch(record.state.systemTime);
-
-		localDateTime.setTimeSpec(Qt::UTC);		// to prevent time shifting in next convertion toMSecsSinceEpoch
-
-		qint64 localTime = localDateTime.toMSecsSinceEpoch();
-
-		state->set_localtime(localTime);*/
 
 		state->set_archiveid(0);
 
@@ -688,8 +671,6 @@ void ArchRequest::reportNoData()
 void ArchRequest::reportNoMoreData()
 {
 	assert(m_noMoreData == true);
-
-//	DEBUG_LOG_MSG(m_logger, QString("RequestID %1: has no more data!").arg(m_param.requestID()));
 
 	m_getNextReply->set_requestid(m_param.requestID());
 

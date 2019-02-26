@@ -87,11 +87,11 @@ void ArchWriterThread::run()
 
 void ArchWriterThread::printStatistics()
 {
-	const qint64 TEN_SECONDS = 10 * 1000;
+	const qint64 MINUTE = 60 * 1000;
 
 	qint64 elapsedTime = m_timer.elapsed();
 
-	if (elapsedTime < TEN_SECONDS)
+	if (elapsedTime < MINUTE)
 	{
 		return;
 	}

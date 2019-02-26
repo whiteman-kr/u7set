@@ -132,7 +132,8 @@ HEADERS += \
     ArchFileRecord.h \
     ../lib/AppSignalStateFlags.h \
     ArchFileBuffer.h \
-    ../lib/SimpleMutex.h
+    ../lib/SimpleMutex.h \
+    ../lib/WUtils.h
 
 include(../qtservice/src/qtservice.pri)
 

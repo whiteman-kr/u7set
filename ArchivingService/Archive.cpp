@@ -71,11 +71,6 @@ Archive::Archive(const QString& projectID,
 	m_maintenanceDelayMinutes(maintenanceDelayMinutes),
 	m_log(logger)
 {
-	// +++++++++++++++ DEBUG +++++++++++++++++
-	shortTermPeriod = 2;
-	longTermPeriod = 1000000;
-	// +++++++++++++++ DEBUG +++++++++++++++++
-
 	if (shortTermPeriod < 2)
 	{
 		shortTermPeriod = 2;

@@ -90,14 +90,8 @@ private:
 
 	//
 
-/*	static const int READ_BUFFER_SIZE = 200000;
-
-	ArchFileRecord m_readBuffer[READ_BUFFER_SIZE];
-	int m_recordsInBuffer = 0;
-	int m_nextRecordIndex = 0;*/
 	bool m_hasDataToRead = true;
 };
-
 
 //
 
@@ -120,24 +114,9 @@ public:
 
 	bool isDataReady() const { return m_dataReady.load(); }
 
-//	Network::GetAppSignalStatesFromArchiveNextReply& getNextReply() { return m_reply; }
-
-	int timeElapsed() const { return QDateTime::currentMSecsSinceEpoch() - m_startTime; }
+	qint64 timeElapsed() const { return QDateTime::currentMSecsSinceEpoch() - m_startTime; }
 
 	void setErrorMessage(const QString& errMsg) { m_errMsg = errMsg; }
-
-//	int signalCount() const { return m_param.signalHashes.count(); }
-
-//	Hash signalHash(int index);
-
-//	E::TimeType requestTimeType() const { return m_requestTimeType; }
-
-//	qint64 requestStartTime() const { return m_requestStartTime; }
-//	qint64 requestEndTime() const { return m_requestEndTime; }
-
-//	qint64 expandedRequestStartTime() const { return m_expandedRequestStartTime; }
-//	qint64 expandedRequestEndTime() const { return m_expandedRequestEndTime; }
-
 
 private:
 	bool isNextDataRequired() { return m_nextDataRequired.load(); }
@@ -175,11 +154,8 @@ private:
 
 	QVector<ArchFileToRead*> m_archFilesToRead;
 
-	// getNextRecord function variables
+	// getMultipleFilesNextRecord function variables
 	//
-	qint64 m_minTime = std::numeric_limits<qint64>::max();
-	qint64 m_minTimeIndex = -1;
-
 	int m_lastFileIndex = -1;
 	qint64 m_lastRecordTime = 0;
 
@@ -190,7 +166,6 @@ private:
 	bool m_noMoreData = false;
 	int m_sentStatesCount = 0;
 
-	//Network::GetAppSignalStatesFromArchiveNextReply m_reply;
 	QString m_errMsg;
 };
 
