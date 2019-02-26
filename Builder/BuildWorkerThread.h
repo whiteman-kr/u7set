@@ -143,7 +143,7 @@ namespace Builder
 		QString serverPassword() const;
 		void setServerPassword(QString value);
 
-		const DbProjectProperties& projectProperties() const;
+		DbProjectProperties projectProperties() const;
 
 		void setIssueLog(IssueLogger* value);
 

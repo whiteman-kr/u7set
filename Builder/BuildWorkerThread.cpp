@@ -1574,8 +1574,9 @@ namespace Builder
 		m_serverPassword = value;
 	}
 
-	const DbProjectProperties& BuildWorkerThread::projectProperties() const
+	DbProjectProperties BuildWorkerThread::projectProperties() const
 	{
+		QMutexLocker m(&m_mutex);
 		return m_projectProperties;
 	}
 
