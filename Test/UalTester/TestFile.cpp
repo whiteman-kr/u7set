@@ -57,7 +57,7 @@ QString TestCmdParam::valueStr(bool addParamName)
 				int pos = str.indexOf('.');
 				if (pos == -1)
 				{
-					return QString();
+					break;
 				}
 
 				while(str[str.length() - 1] == '0')
@@ -113,6 +113,24 @@ bool TestCmdParam::compare(QVariant cmpValue)
 				float lFloat = m_value.toFloat();
 				float rFloat = cmpValue.toFloat();
 
+				// nan
+				//
+				if (std::isnan(lFloat) == true && std::isnan(rFloat) == true)
+				{
+					result = true;
+					break;
+				}
+
+				// inf
+				//
+				if (std::isinf(lFloat) == true && std::isinf(rFloat) == true)
+				{
+					result = true;
+					break;
+				}
+
+				// simple float digit
+				//
 				result = std::nextafter(lFloat, std::numeric_limits<float>::lowest()) <= rFloat && std::nextafter(lFloat, std::numeric_limits<float>::max()) >= rFloat;
 			}
 			break;
@@ -122,6 +140,24 @@ bool TestCmdParam::compare(QVariant cmpValue)
 				double lDouble = m_value.toDouble();
 				double rDouble = cmpValue.toDouble();
 
+				// nan
+				//
+				if (std::isnan(lDouble) == true && std::isnan(rDouble) == true)
+				{
+					result = true;
+					break;
+				}
+
+				// inf
+				//
+				if (std::isinf(lDouble) == true && std::isinf(rDouble) == true)
+				{
+					result = true;
+					break;
+				}
+
+				// simple double digit
+				//
 				result = std::nextafter(lDouble, std::numeric_limits<double>::lowest()) <= rDouble && std::nextafter(lDouble, std::numeric_limits<double>::max()) >= rDouble;
 			}
 			break;
