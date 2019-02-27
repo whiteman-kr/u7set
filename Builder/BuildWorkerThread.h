@@ -161,7 +161,26 @@ namespace Builder
 		// Data
 		//
 	private:
-		Context m_context;
+		QString m_projectName;
+
+		QString m_serverIpAddress;
+		int m_serverPort = 0;
+		QString m_serverUsername;
+		QString m_serverPassword;
+
+		QString m_projectUserName;
+		QString m_projectUserPassword;
+
+		DbProjectProperties m_projectProperties;
+
+		QString m_buildOutputPath;
+
+		bool m_debug = false;							// if true then don't get workcopy of checked out files, use unly checked in copy
+		bool m_expertMode = false;
+
+		IssueLogger* m_log = nullptr;					// Probably it's better to make it as shared_ptr
+
+		std::unique_ptr<Context> m_context;
 	};
 
 }

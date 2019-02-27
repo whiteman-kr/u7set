@@ -22,10 +22,7 @@ namespace Builder
 	class Context
 	{
 	public:
-		Context()
-		{
-		}
-
+		Context(IssueLogger* log, QString buildOutputPath, bool debug, bool expertMode);
 		Context(const Context&) = delete;
 		Context(Context&&) = delete;
 		Context& operator=(const Context&) = delete;
@@ -36,15 +33,15 @@ namespace Builder
 
 		DbController m_db;
 
-		QString m_projectName;
+		//QString m_projectName;
 
-		QString m_serverIpAddress;
-		int m_serverPort = 0;
-		QString m_serverUsername;
-		QString m_serverPassword;
+		//QString m_serverIpAddress;
+		//int m_serverPort = 0;
+		//QString m_serverUsername;
+		//QString m_serverPassword;
 
-		QString m_projectUserName;
-		QString m_projectUserPassword;
+		//QString m_projectUserName;
+		//QString m_projectUserPassword;
 
 		DbProjectProperties m_projectProperties;
 
