@@ -30,7 +30,7 @@ namespace Builder
 													   Tuning::TuningDataStorage* tuningDataStorage,
 													   ComparatorStorage* comparatorStorage,
 													   VFrame30::BusSet* busSet,
-													   BuildResultWriter* buildResultWriter,
+													   std::shared_ptr<BuildResultWriter> buildResultWriter,
 													   IssueLogger *log,
 													   bool expertMode) :
 		m_subsystems(subsystems),
@@ -638,7 +638,7 @@ namespace Builder
 
 	bool ApplicationLogicCompiler::writeSerialDataXml()
 	{
-		return m_optoModuleStorage->writeSerialDataXml(m_resultWriter);
+		return m_optoModuleStorage->writeSerialDataXml(m_resultWriter.get());
 	}
 
 	bool ApplicationLogicCompiler::writeOptoConnectionsReport()

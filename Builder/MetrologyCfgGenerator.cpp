@@ -5,14 +5,9 @@
 
 namespace Builder
 {
-	MetrologyCfgGenerator::MetrologyCfgGenerator(	DbController* db,
-													Hardware::SubsystemStorage *subsystems,
-													Hardware::Software* software,
-													SignalSet* signalSet,
-													Hardware::EquipmentSet* equipment,
-													BuildResultWriter* buildResultWriter) :
-		SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter),
-		m_subsystems(subsystems)
+	MetrologyCfgGenerator::MetrologyCfgGenerator(Context* context, Hardware::Software* software) :
+		SoftwareCfgGenerator(context, software),
+		m_subsystems(context->m_subsystems.get())
 	{
 	}
 

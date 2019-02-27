@@ -12,12 +12,7 @@ namespace Builder
 	class TuningClientCfgGenerator : public SoftwareCfgGenerator
 	{
 	public:
-		TuningClientCfgGenerator(	DbController* db,
-									Hardware::SubsystemStorage* subsystems,
-									Hardware::Software* software,
-									SignalSet* signalSet,
-									Hardware::EquipmentSet* equipment,
-									BuildResultWriter* buildResultWriter);
+		TuningClientCfgGenerator(Context* context, Hardware::Software* software);
 
 		virtual bool generateConfiguration() override;
 

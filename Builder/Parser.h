@@ -20,6 +20,7 @@ namespace VFrame30
 
 namespace Builder
 {
+	class Context;
 	class IssueLogger;
 	class SignalSet;
 	class LmDescriptionSet;
@@ -262,17 +263,7 @@ namespace Builder
 
 	public:
 		Parser() = delete;
-		Parser(DbController* db,
-			   IssueLogger* log,
-			   AppLogicData* appLogicData,
-			   LmDescriptionSet* lmDescriptions,
-			   Hardware::EquipmentSet* equipmentSet,
-			   SignalSet* signalSet,
-			   VFrame30::BusSet* busSet,
-			   int changesetId,
-			   bool debug);
-
-		virtual ~Parser();
+		Parser(Builder::Context* context);
 
 		bool parse();
 
@@ -347,7 +338,7 @@ namespace Builder
 		int m_changesetId = 0;
 		int m_debug = false;
 
-		AppLogicData* m_applicationData = nullptr;
+		std::shared_ptr<AppLogicData> m_applicationData;
 		LmDescriptionSet* m_lmDescriptions = nullptr;
 		Hardware::EquipmentSet* m_equipmentSet = nullptr;
 		SignalSet* m_signalSet = nullptr;

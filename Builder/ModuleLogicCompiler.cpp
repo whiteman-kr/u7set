@@ -61,7 +61,7 @@ namespace Builder
 		assert(m_lmDescription != nullptr);
 
 		m_appLogicData = appLogicCompiler.m_appLogicData;
-		m_resultWriter = appLogicCompiler.m_resultWriter;
+		m_resultWriter = appLogicCompiler.m_resultWriter.get();
 		m_log = appLogicCompiler.m_log;
 		m_lm = lm;
 		m_connections = appLogicCompiler.m_connections;

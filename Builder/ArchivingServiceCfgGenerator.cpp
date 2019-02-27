@@ -5,12 +5,8 @@
 namespace Builder
 {
 
-	ArchivingServiceCfgGenerator::ArchivingServiceCfgGenerator(DbController* db,
-															   Hardware::Software* software,
-															   SignalSet* signalSet,
-															   Hardware::EquipmentSet* equipment,
-															   BuildResultWriter* buildResultWriter) :
-		SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter)
+	ArchivingServiceCfgGenerator::ArchivingServiceCfgGenerator(Context* context, Hardware::Software* software) :
+		SoftwareCfgGenerator(context, software)
 	{
 	}
 

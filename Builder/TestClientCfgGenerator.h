@@ -7,11 +7,7 @@ namespace Builder
 	class TestClientCfgGenerator : public SoftwareCfgGenerator
 	{
 	public:
-		TestClientCfgGenerator(DbController* db,
-							   Hardware::Software* software,
-							   SignalSet* signalSet,
-							   Hardware::EquipmentSet* equipment,
-							   BuildResultWriter* buildResultWriter);
+		TestClientCfgGenerator(Context* context, Hardware::Software* software);
 
 		bool generateConfiguration() override;
 

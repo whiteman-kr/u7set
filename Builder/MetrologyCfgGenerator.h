@@ -15,12 +15,7 @@ namespace Builder
 		bool writeMetrologySignalsXml();
 
 	public:
-		MetrologyCfgGenerator(		DbController* db,
-									Hardware::SubsystemStorage* subsystems,
-									Hardware::Software* software,
-									SignalSet* signalSet,
-									Hardware::EquipmentSet* equipment,
-									BuildResultWriter* buildResultWriter);
+		MetrologyCfgGenerator(Context* context, Hardware::Software* software);
 		virtual ~MetrologyCfgGenerator();
 
 		virtual bool generateConfiguration() override;

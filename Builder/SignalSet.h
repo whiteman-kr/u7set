@@ -15,7 +15,7 @@ namespace Builder
 		Q_OBJECT
 
 	public:
-		SignalSet(VFrame30::BusSet* busSet, BuildResultWriter* resultWriter, IssueLogger* log);
+		SignalSet(VFrame30::BusSet* busSet, std::shared_ptr<BuildResultWriter> resultWriter, IssueLogger* log);
 		virtual ~SignalSet();
 
 		bool prepareBusses();
@@ -43,7 +43,7 @@ namespace Builder
 
 	private:
 		VFrame30::BusSet* m_busSet = nullptr;
-		BuildResultWriter* m_resultWriter = nullptr;
+		std::shared_ptr<BuildResultWriter> m_resultWriter = nullptr;
 		IssueLogger* m_log = nullptr;
 
 		//

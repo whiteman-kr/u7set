@@ -2,23 +2,19 @@
 #include "../lib/Subsystem.h"
 #include "../TuningService/TuningSource.h"
 #include "TuningServiceCfgGenerator.h"
+#include "Context.h"
 
 
 namespace Builder
 {
-	TuningServiceCfgGenerator::TuningServiceCfgGenerator(DbController* db,
-															const Hardware::SubsystemStorage* subsystems,
-															Hardware::Software* software,
-															SignalSet* signalSet,
-															Hardware::EquipmentSet* equipment,
-															Tuning::TuningDataStorage *tuningDataStorage,
-															const LmsUniqueIdMap& lmsUniqueIdMap,
-															BuildResultWriter* buildResultWriter) :
-		SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter),
-		m_tuningDataStorage(tuningDataStorage),
+	TuningServiceCfgGenerator::TuningServiceCfgGenerator(Context* context,
+														 Hardware::Software* software,
+														 const LmsUniqueIdMap& lmsUniqueIdMap) :
+		SoftwareCfgGenerator(context, software),
+		m_tuningDataStorage(context->m_tuningDataStorage.get()),
 		m_lmsUniqueIdMap(lmsUniqueIdMap)
 	{
-		initSubsystemKeyMap(&m_subsystemKeyMap, subsystems);
+		initSubsystemKeyMap(&m_subsystemKeyMap, context->m_subsystems.get());
 	}
 
 

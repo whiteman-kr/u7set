@@ -9,6 +9,7 @@
 #include "BuildResultWriter.h"
 #include "IssueLogger.h"
 #include "SignalSet.h"
+#include "Context.h"
 
 namespace Builder
 {
@@ -28,16 +29,12 @@ namespace Builder
 		};
 
 	public:
-		SoftwareCfgGenerator(	DbController* db,
-								Hardware::Software* software,
-								SignalSet* signalSet,
-								Hardware::EquipmentSet* equipment,
-								BuildResultWriter* buildResultWriter);
+		SoftwareCfgGenerator(Context* context, Hardware::Software* software);
 		virtual ~SoftwareCfgGenerator();
 
 		bool run();
 
-		static bool generalSoftwareCfgGeneration(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter);
+		static bool generalSoftwareCfgGeneration(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet* equipment, std::shared_ptr<BuildResultWriter> buildResultWriter);
 		static bool writeSchemas(DbController* db, BuildResultWriter* buildResultWriter, IssueLogger* log);
 		static bool writeSchemasList(DbController* db,
 									 BuildResultWriter* buildResultWriter,

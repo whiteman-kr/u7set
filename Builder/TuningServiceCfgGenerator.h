@@ -7,17 +7,14 @@
 
 namespace Builder
 {
+	class Context;
+
 	class TuningServiceCfgGenerator : public SoftwareCfgGenerator
 	{
 	public:
-		TuningServiceCfgGenerator(DbController* db,
-									const Hardware::SubsystemStorage* subsystems,
-									Hardware::Software* software,
-									SignalSet* signalSet,
-									Hardware::EquipmentSet* equipment,
-									Tuning::TuningDataStorage* tuningDataStorage,
-									const LmsUniqueIdMap& lmsUniqueIdMap,
-									BuildResultWriter* buildResultWriter);
+		TuningServiceCfgGenerator(Context* context,
+								  Hardware::Software* software,
+								  const LmsUniqueIdMap& lmsUniqueIdMap);
 
 		~TuningServiceCfgGenerator();
 

@@ -4,12 +4,8 @@
 namespace Builder
 {
 
-	ConfigurationServiceCfgGenerator::ConfigurationServiceCfgGenerator(DbController* db,
-															   Hardware::Software* software,
-															   SignalSet* signalSet,
-															   Hardware::EquipmentSet* equipment,
-															   BuildResultWriter* buildResultWriter) :
-		SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter)
+	ConfigurationServiceCfgGenerator::ConfigurationServiceCfgGenerator(Context* context, Hardware::Software* software) :
+		SoftwareCfgGenerator(context, software)
 	{
 	}
 
