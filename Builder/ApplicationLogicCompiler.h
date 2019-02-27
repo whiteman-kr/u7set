@@ -29,7 +29,7 @@ namespace Builder
 								 Tuning::TuningDataStorage* tuningDataStorage,
 								 ComparatorStorage* comparatorStorage,
 								 VFrame30::BusSet* busSet,
-								 BuildResultWriter* buildResultWriter,
+								 std::shared_ptr<BuildResultWriter> buildResultWriter,
 								 IssueLogger* log,
 								 bool expertMode);
 
@@ -86,7 +86,7 @@ namespace Builder
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
 		ComparatorStorage* m_cmpStorage = nullptr;
 		const VFrame30::BusSet* m_busSet = nullptr;
-		BuildResultWriter* m_resultWriter = nullptr;
+		std::shared_ptr<BuildResultWriter> m_resultWriter = nullptr;
 		Hardware::ConnectionStorage* m_connections = nullptr;
 
 		static IssueLogger* m_log;

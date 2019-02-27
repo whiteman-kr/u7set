@@ -446,6 +446,67 @@ bool DbController::getProjectProperty(QString propertyName, QString* out, QWidge
 	return result;
 }
 
+bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* parentWidget)
+{
+	if (out == nullptr)
+	{
+		assert(out);
+		return false;
+	}
+
+	if (isProjectOpened() == false)
+	{
+		return false;
+	}
+
+	bool ok = true;
+
+	QString description;
+	QString suppressWarningsStr;
+	bool uppercaseAppSignalId = true;
+	bool generateAppSignalXml = false;
+	bool generateExtarDebugInfo = false;
+
+	ok &= getProjectProperty(Db::ProjectProperty::Description, &description, parentWidget);
+	ok &= getProjectProperty(Db::ProjectProperty::SuppressWarnings, &suppressWarningsStr, parentWidget);
+	ok &= getProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, &uppercaseAppSignalId, parentWidget);
+	ok &= getProjectProperty(Db::ProjectProperty::GenerateAppSignalsXml, &generateAppSignalXml, parentWidget);
+	ok &= getProjectProperty(Db::ProjectProperty::GenerateExtraDebugInfo, &generateExtarDebugInfo, parentWidget);
+
+	// --
+	//
+	if (ok == false)
+	{
+		return false;
+	}
+
+	out->setDescription(description);
+	out->setSuppressWarnings(suppressWarningsStr);
+	out->setUppercaseAppSignalId(uppercaseAppSignalId);
+	out->setGenerateAppSignalsXml(generateAppSignalXml);
+	out->setGenerateExtraDebugInfo(generateExtarDebugInfo);
+
+	return true;
+}
+
+bool DbController::setProjectProperties(const DbProjectProperties& in, QWidget* parentWidget)
+{
+	if (isProjectOpened() == false)
+	{
+		return false;
+	}
+
+	bool ok = true;
+
+	ok &= setProjectProperty(Db::ProjectProperty::Description, in.description(), parentWidget);
+	ok &= setProjectProperty(Db::ProjectProperty::SuppressWarnings, in.suppressWarningsAsString(), parentWidget);
+	ok &= setProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, in.uppercaseAppSignalId(), parentWidget);
+	ok &= setProjectProperty(Db::ProjectProperty::GenerateAppSignalsXml, in.generateAppSignalsXml(), parentWidget);
+	ok &= setProjectProperty(Db::ProjectProperty::GenerateExtraDebugInfo, in.generateExtraDebugInfo(), parentWidget);
+
+	return ok;
+}
+
 bool DbController::createUser(const DbUser& user, QWidget* parentWidget)
 {
 	// Check parameters

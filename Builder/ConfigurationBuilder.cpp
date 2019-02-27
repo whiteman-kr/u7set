@@ -88,7 +88,7 @@ namespace Builder
 	{
 	}
 
-	bool ConfigurationBuilder::build(BuildResultWriter &buildResultWriter)
+	bool ConfigurationBuilder::build(BuildResultWriter& buildResultWriter)
 	{
 		if (db() == nullptr || log() == nullptr)
 		{

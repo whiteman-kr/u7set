@@ -5,10 +5,12 @@
 
 namespace Builder
 {
+	class Context;
+
 	class MonitorCfgGenerator : public SoftwareCfgGenerator
 	{
 	public:
-		MonitorCfgGenerator(DbController* db, Hardware::Software* software, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter);
+		MonitorCfgGenerator(Context* context, Hardware::Software* software);
 		~MonitorCfgGenerator();
 
 		virtual bool generateConfiguration() override;
@@ -32,6 +34,7 @@ namespace Builder
 		bool writeTuningSignals();
 
 	private:
+		Context* m_context = nullptr;
 		bool m_tuningEnabled = false;
 		QStringList m_tuningSources;
 	};

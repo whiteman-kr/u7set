@@ -9,11 +9,7 @@ namespace Builder
 	class ArchivingServiceCfgGenerator : public SoftwareCfgGenerator
 	{
 	public:
-		ArchivingServiceCfgGenerator(DbController* db,
-									Hardware::Software* software,
-									SignalSet* signalSet,
-									Hardware::EquipmentSet* equipment,
-									BuildResultWriter* buildResultWriter);
+		ArchivingServiceCfgGenerator(Context* context, Hardware::Software* software);
 
 		~ArchivingServiceCfgGenerator();
 

@@ -10,13 +10,9 @@ namespace Builder
 	class AppDataServiceCfgGenerator : public SoftwareCfgGenerator
 	{
 	public:
-		AppDataServiceCfgGenerator(	DbController* db,
-									const Hardware::SubsystemStorage* subsystems,
-									Hardware::Software* software,
-									SignalSet* signalSet,
-									Hardware::EquipmentSet* equipment,
-									const QHash<QString, quint64>& lmUniqueIdMap,
-									BuildResultWriter* buildResultWriter);
+		AppDataServiceCfgGenerator(Context* context,
+								   Hardware::Software* software,
+								   const QHash<QString, quint64>& lmUniqueIdMap);
 		~AppDataServiceCfgGenerator();
 
 		virtual bool generateConfiguration() override;

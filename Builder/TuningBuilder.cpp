@@ -7,25 +7,17 @@ namespace Builder
 	//		TuningBuilder
 	//
 	// ------------------------------------------------------------------------
-	TuningBuilder::TuningBuilder(DbController* db,
-								 Hardware::DeviceRoot* deviceRoot,
-								 SignalSet* signalSet,
-								 Hardware::SubsystemStorage* subsystems,
-								 Tuning::TuningDataStorage* tuningDataStorage,
-								 const std::vector<Hardware::DeviceModule*> lmModules,
-								 const LmDescriptionSet* lmDescriptionSet,
-								 Hardware::ModuleFirmwareWriter* firmwareWriter,
-								 IssueLogger* log) :
+	TuningBuilder::TuningBuilder(Context* context) :
 		QObject(nullptr),
-		m_firmwareWriter(firmwareWriter),
-		m_db(db),
-		m_deviceRoot(deviceRoot),
-		m_signalSet(signalSet),
-		m_subsystems(subsystems),
-		m_tuningDataStorage(tuningDataStorage),
-		m_log(log),
-        m_lmModules(lmModules),
-		m_lmDescriptionSet(lmDescriptionSet)
+		m_firmwareWriter(context->m_buildResultWriter->firmwareWriter()),
+		m_db(&context->m_db),
+		m_deviceRoot(context->m_equipmentSet->root()),
+		m_signalSet(context->m_signalSet.get()),
+		m_subsystems(context->m_subsystems.get()),
+		m_tuningDataStorage(context->m_tuningDataStorage.get()),
+		m_log(context->m_log),
+		m_lmModules(context->m_lmModules),
+		m_lmDescriptionSet(context->m_lmDescriptions.get())
 	{
 		assert(m_db);
 		assert(m_deviceRoot);

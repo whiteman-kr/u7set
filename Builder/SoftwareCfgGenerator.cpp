@@ -18,17 +18,14 @@ namespace Builder
 	HashedVector<QString, Hardware::Software*> SoftwareCfgGenerator::m_softwareList;
 	QList<SoftwareCfgGenerator::SchemaFile> SoftwareCfgGenerator::m_schemaFileList;
 
-	SoftwareCfgGenerator::SoftwareCfgGenerator(DbController* db,
-												Hardware::Software* software,
-												SignalSet* signalSet,
-												Hardware::EquipmentSet* equipment,
-												BuildResultWriter* buildResultWriter) :
-		m_dbController(db),
+	SoftwareCfgGenerator::SoftwareCfgGenerator(Context* context, Hardware::Software* software) :
+		m_dbController(&context->m_db),
 		m_software(software),
-		m_signalSet(signalSet),
-		m_equipment(equipment),
-		m_buildResultWriter(buildResultWriter)
+		m_signalSet(context->m_signalSet.get()),
+		m_equipment(context->m_equipmentSet.get()),
+		m_buildResultWriter(context->m_buildResultWriter.get())
 	{
+		assert(context);
 	}
 
 	SoftwareCfgGenerator::~SoftwareCfgGenerator()
@@ -94,7 +91,7 @@ namespace Builder
 	}
 
 
-	bool SoftwareCfgGenerator::generalSoftwareCfgGeneration(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter)
+	bool SoftwareCfgGenerator::generalSoftwareCfgGeneration(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet* equipment, std::shared_ptr<BuildResultWriter> buildResultWriter)
 	{
 		if (buildResultWriter == nullptr)
 		{
@@ -132,7 +129,7 @@ namespace Builder
 
 		// Add Schemas to Build result
 		//
-		result &= writeSchemas(db, buildResultWriter, log);
+		result &= writeSchemas(db, buildResultWriter.get(), log);
 
 		return result;
 	}

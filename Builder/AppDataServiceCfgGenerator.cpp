@@ -2,22 +2,21 @@
 #include "../lib/ServiceSettings.h"
 #include "../lib/WUtils.h"
 #include "Builder.h"
+#
 
 class DataSource;
 
 namespace Builder
 {
-	AppDataServiceCfgGenerator::AppDataServiceCfgGenerator(	DbController* db,
-															const Hardware::SubsystemStorage* subsystems,
-															Hardware::Software* software,
-															SignalSet* signalSet,
-															Hardware::EquipmentSet* equipment,
-															const QHash<QString, quint64>& lmUniqueIdMap,
-															BuildResultWriter* buildResultWriter) :
-		SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter),
+	AppDataServiceCfgGenerator::AppDataServiceCfgGenerator(Context* context,
+														   Hardware::Software* software,
+														   const QHash<QString, quint64>& lmUniqueIdMap) :
+		SoftwareCfgGenerator(context, software),
 		m_lmUniqueIdMap(lmUniqueIdMap)
 	{
-		initSubsystemKeyMap(&m_subsystemKeyMap, subsystems);
+		assert(context);
+
+		initSubsystemKeyMap(&m_subsystemKeyMap, context->m_subsystems.get());
 	}
 
 	AppDataServiceCfgGenerator::~AppDataServiceCfgGenerator()

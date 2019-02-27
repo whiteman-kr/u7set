@@ -5,7 +5,7 @@
 namespace Builder
 {
 
-	SignalSet::SignalSet(VFrame30::BusSet* busSet, BuildResultWriter* resultWriter, IssueLogger* log) :
+	SignalSet::SignalSet(VFrame30::BusSet* busSet, std::shared_ptr<BuildResultWriter> resultWriter, IssueLogger* log) :
 		m_busSet(busSet),
 		m_resultWriter(resultWriter),
 		m_log(log),
@@ -34,7 +34,7 @@ namespace Builder
 			return true;
 		}
 
-		return m_busses.writeReport(m_resultWriter);
+		return m_busses.writeReport(m_resultWriter.get());
 	}
 
 	bool SignalSet::checkSignals()

@@ -2,14 +2,15 @@
 #include "TuningClientCfgGenerator.h"
 #include "../lib/ServiceSettings.h"
 #include "../VFrame30/Schema.h"
+#include "Context.h"
 
 namespace Builder
 {
-	MonitorCfgGenerator::MonitorCfgGenerator(DbController* db, Hardware::Software* software, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter) :
-		SoftwareCfgGenerator(db, software, signalSet, equipment, buildResultWriter)
+	MonitorCfgGenerator::MonitorCfgGenerator(Context* context, Hardware::Software* software) :
+		SoftwareCfgGenerator(context, software),
+		m_context(context)
 	{
 	}
-
 
 	MonitorCfgGenerator::~MonitorCfgGenerator()
 	{

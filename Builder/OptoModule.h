@@ -6,7 +6,6 @@
 #include "../lib/Signal.h"
 
 #include "RawDataDescription.h"
-#include "UalItems.h"
 #include "../lib/Connection.h"
 
 class LmDescription;
@@ -17,6 +16,7 @@ namespace Builder
 	class IssueLogger;
 	class LmDescriptionSet;
 	class BuildResultWriter;
+	class UalSignal;
 }
 
 namespace Hardware

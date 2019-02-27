@@ -6,7 +6,6 @@
 #include <QDebug>
 #include "Signal.h"
 
-
 //
 //
 //	VcsState
@@ -168,6 +167,116 @@ bool DbProject::uppercaseAppSignalId() const
 void DbProject::setUppercaseAppSignalId(bool value)
 {
 	m_uppercaseAppSignalId = value;
+}
+
+//
+// DbProjectProperties
+//
+DbProjectProperties::DbProjectProperties()
+{
+	auto p1 = ADD_PROPERTY_GETTER_SETTER(QString, Db::ProjectProperty::Description, true, DbProjectProperties::description, DbProjectProperties::setDescription);
+	p1->setCategory("Project");
+	p1->setDescription("Project description");
+
+	auto p2 = ADD_PROPERTY_GETTER_SETTER(QString, Db::ProjectProperty::SuppressWarnings, true, DbProjectProperties::suppressWarningsAsString, DbProjectProperties::setSuppressWarnings);
+	p2->setCategory("Build");
+	p2->setDescription("Comma separated suppress warning list. Example: 4004, 4005, 2000");
+
+	auto p3 = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::UppercaseAppSignalId, true, DbProjectProperties::uppercaseAppSignalId, DbProjectProperties::setUppercaseAppSignalId);
+	p3->setCategory("Editor");
+	p3->setDescription("Uppercase AppSignalIDs, to apply option reopen project is required");
+
+	auto p4 = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateAppSignalsXml, true, DbProjectProperties::generateAppSignalsXml, DbProjectProperties::setGenerateAppSignalsXml);
+	p4->setCategory("Build");
+	p4->setDescription("Generate file AppSignals.xml on build");
+
+	auto p5 = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateExtraDebugInfo, true, DbProjectProperties::generateExtraDebugInfo, DbProjectProperties::setGenerateExtraDebugInfo);
+	p5->setCategory("Build");
+	p5->setDescription("Generate extra debug information on build");
+
+	return;
+}
+
+QString DbProjectProperties::description() const
+{
+	return m_description;
+}
+
+void DbProjectProperties::setDescription(const QString& value)
+{
+	m_description = value;
+}
+
+std::vector<int> DbProjectProperties::suppressWarnings() const
+{
+	return m_suppressWarnings;
+}
+
+QString DbProjectProperties::suppressWarningsAsString() const
+{
+	QString result;
+	for (int w : m_suppressWarnings)
+	{
+		if (result.isEmpty() == false)
+		{
+			result += QStringLiteral(", ");
+		}
+
+		result += QString::number(w);
+	}
+
+	return result;
+}
+
+void DbProjectProperties::setSuppressWarnings(const QString& value)
+{
+	QStringList sl = value.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+
+	m_suppressWarnings.clear();
+	m_suppressWarnings.reserve(sl.size());
+
+	for (QString& sw : sl)
+	{
+		bool ok = false;
+		int warning = sw.toInt(&ok);
+
+		if (ok == true)
+		{
+			m_suppressWarnings.push_back(warning);
+		}
+	}
+
+	return;
+}
+
+bool DbProjectProperties::uppercaseAppSignalId() const
+{
+	return m_uppercaseAppSignalId;
+}
+
+void DbProjectProperties::setUppercaseAppSignalId(bool value)
+{
+	m_uppercaseAppSignalId = value;
+}
+
+bool DbProjectProperties::generateAppSignalsXml() const
+{
+	return m_generateAppSignalsXml;
+}
+
+void DbProjectProperties::setGenerateAppSignalsXml(bool value)
+{
+	m_generateAppSignalsXml = value;
+}
+
+bool DbProjectProperties::generateExtraDebugInfo() const
+{
+	return m_generateExtraDebugInfo;
+}
+
+void DbProjectProperties::setGenerateExtraDebugInfo(bool value)
+{
+	m_generateExtraDebugInfo = value;
 }
 
 //

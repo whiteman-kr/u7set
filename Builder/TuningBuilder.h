@@ -8,6 +8,7 @@
 #include "IssueLogger.h"
 #include "LmDescriptionSet.h"
 #include "ModuleFirmwareWriter.h"
+#include "Context.h"
 
 namespace Builder
 {
@@ -17,15 +18,7 @@ namespace Builder
 
 	public:
 		TuningBuilder() = delete;
-		TuningBuilder(DbController* db,
-					  Hardware::DeviceRoot* deviceRoot,
-					  SignalSet* signalSet,
-					  Hardware::SubsystemStorage* subsystems,
-					  Tuning::TuningDataStorage* tuningDataStorage,
-					  const std::vector<Hardware::DeviceModule*> lmModules,
-					  const LmDescriptionSet* lmDescriptionSet,
-					  Hardware::ModuleFirmwareWriter* firmwareWriter,
-					  IssueLogger* log);
+		TuningBuilder(Context* context);
 		virtual ~TuningBuilder();
 
 		bool build();

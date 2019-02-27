@@ -1,4 +1,5 @@
 #include "Parser.h"
+#include <QtConcurrentRun>
 
 #include "../lib/DbController.h"
 #include "../lib/LmDescription.h"
@@ -18,11 +19,7 @@
 #include "../VFrame30/HorzVertLinks.h"
 #include "../VFrame30/PropertyNames.h"
 
-#include "LmDescriptionSet.h"
-#include "IssueLogger.h"
-#include "SignalSet.h"
-
-#include <QtConcurrentRun>
+#include "Context.h"
 
 
 namespace Builder
@@ -2358,26 +2355,16 @@ namespace Builder
 	//		ApplicationLogicBuilder
 	//
 	// ------------------------------------------------------------------------
-
-
-	Parser::Parser(DbController* db,
-				   IssueLogger* log,
-				   AppLogicData* appLogicData,
-				   LmDescriptionSet* lmDescriptions,
-				   Hardware::EquipmentSet* equipmentSet,
-				   SignalSet* signalSet,
-				   VFrame30::BusSet* busSet,
-				   int changesetId,
-				   bool debug) :
-		m_db(db),
-		m_log(log),
-		m_changesetId(changesetId),
-		m_debug(debug),
-		m_applicationData(appLogicData),
-		m_lmDescriptions(lmDescriptions),
-		m_equipmentSet(equipmentSet),
-		m_signalSet(signalSet),
-		m_busSet(busSet)
+	Parser::Parser(Builder::Context* context) :
+		m_db(&context->m_db),
+		m_log(context->m_log),
+		m_changesetId(context->m_lastChangesetId),
+		m_debug(context->m_debug),
+		m_applicationData(context->m_appLogicData),
+		m_lmDescriptions(context->m_lmDescriptions.get()),
+		m_equipmentSet(context->m_equipmentSet.get()),
+		m_signalSet(context->m_signalSet.get()),
+		m_busSet(context->m_busSet.get())
 	{
 		assert(m_db);
 		assert(m_log);
@@ -2387,10 +2374,6 @@ namespace Builder
 		assert(m_signalSet);
 
 		return;
-	}
-
-	Parser::~Parser()
-	{
 	}
 
 	bool Parser::parse()
@@ -4810,11 +4793,11 @@ namespace Builder
 
 	const AppLogicData* Parser::applicationData() const
 	{
-		return m_applicationData;
+		return m_applicationData.get();
 	}
 
 	AppLogicData* Parser::applicationData()
 	{
-		return m_applicationData;
+		return m_applicationData.get();
 	}
 }

@@ -1,17 +1,15 @@
 #ifndef BUILDWORKERTHREAD_H
 #define BUILDWORKERTHREAD_H
 
-#include "../lib/DbController.h"
+#include <QJSEngine>
 #include "../lib/Subsystem.h"
 #include "../lib/CommonTypes.h"
-#include "../VFrame30/Bus.h"
 #include "../TuningService/TuningDataStorage.h"
-#include "IssueLogger.h"
-#include "BuildResultWriter.h"
+#include "Context.h"
 #include "TuningBuilder.h"
 #include "OptoModule.h"
-#include "ComparatorStorage.h"
-#include <QJSEngine>
+#include "RunOrder.h"
+
 
 namespace Builder
 {
@@ -31,11 +29,12 @@ namespace Builder
 
 		// Get SuppressWarning list
 		//
-		bool getSuppressWarningList(DbController* db);
+		bool getProjectProperties();
 
 		// Get Equipment from the project database
 		//
-		bool getEquipment(DbController* db, Hardware::DeviceObject* parent);
+		bool getEquipment();
+		bool getEquipment(Hardware::DeviceObject* parent);
 
 		void findFSCConfigurationModules(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out) const;
 		void findModulesByFamily(Hardware::DeviceObject* object, std::vector<Hardware::DeviceModule*>* out, Hardware::DeviceModule::FamilyType family) const;
@@ -46,7 +45,7 @@ namespace Builder
 
 		// Load subsystems
 		//
-		bool loadSubsystems(DbController& db, const std::vector<Hardware::DeviceModule*>& logicModules, Hardware::SubsystemStorage* subsystems);
+		bool loadSubsystems();
 
 		// Check same Uuids and same StrIds
 		//
@@ -60,15 +59,20 @@ namespace Builder
 
 		// Load Application Logic signals
 		//
-		bool loadSignals(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet* equipment);
+		bool loadSignals(SignalSet* signalSet, Hardware::EquipmentSet* equipment);
 
 		// Load BusTypes (VFrame30::BusSet)
 		//
-		bool loadBusses(DbController* db, VFrame30::BusSet* out);
+		bool loadBusses();
 
 		// Load Application Functional Block Library
 		//
-		bool loadLogicModuleDescription(DbController* db, Hardware::DeviceModule* logicModule, LmDescriptionSet* lmDescriptions);
+		bool loadLmDescriptions();
+		bool loadLogicModuleDescription(Hardware::DeviceModule* logicModule, LmDescriptionSet* lmDescriptions);
+
+		// Load Connections
+		//
+		bool loadConnections();
 
 		// Check that all files (and from that theirs SchemaIds) in $root$/Schema are unique
 		//
@@ -76,22 +80,16 @@ namespace Builder
 
 		// Build Application Logic
 		//
-		bool parseApplicationLogic(DbController* db,
-								   AppLogicData* appLogicData,
-								   LmDescriptionSet& lmDescriptions,
-								   Hardware::EquipmentSet* equipment,
-								   SignalSet* signalSet,
-								   VFrame30::BusSet* busSet,
-								   int changesetId);
+		bool parseApplicationLogic();
 
 		// Save Logic Modules Descriptions
 		//
 		bool saveLogicModuleDescriptions(const LmDescriptionSet& lmDescriptions,
-										 BuildResultWriter* buildResultWriter);
+										 std::shared_ptr<BuildResultWriter> buildResultWriter);
 
 		// Compile Application Logic
 		//
-		bool compileApplicationLogic(	Hardware::SubsystemStorage* subsystems,
+		bool compileApplicationLogic(Hardware::SubsystemStorage* subsystems,
 										const std::vector<Hardware::DeviceModule*>& lmModules,
 										Hardware::EquipmentSet*equipmentSet,
 										Hardware::OptoModuleStorage* optoModuleStorage,
@@ -101,17 +99,11 @@ namespace Builder
 										AppLogicData* appLogicData,
 										Tuning::TuningDataStorage* tuningDataStorage,
 										ComparatorStorage* comparatorStorage, VFrame30::BusSet *busSet,
-										BuildResultWriter* buildResultWriter);
+										std::shared_ptr<BuildResultWriter> buildResultWriter);
 
 		// Generate MATS software configurations
 		//
-		bool generateSoftwareConfiguration(DbController* db,
-											Hardware::SubsystemStorage* subsystems,
-											Hardware::EquipmentSet* equipment,
-											SignalSet* signalSet,
-											Tuning::TuningDataStorage* tuningDataStorage,
-											const LmsUniqueIdMap& lmsUniqueIdMap,
-											BuildResultWriter* buildResultWriter);
+		bool generateSoftwareConfiguration(const LmsUniqueIdMap& lmsUniqueIdMap);
 
 		bool writeBinaryFiles(BuildResultWriter& buildResultWriter);
 
@@ -143,6 +135,8 @@ namespace Builder
 		QString serverPassword() const;
 		void setServerPassword(QString value);
 
+		DbProjectProperties projectProperties() const;
+
 		void setIssueLog(IssueLogger* value);
 
 		QString projectUserName() const;
@@ -167,8 +161,6 @@ namespace Builder
 		// Data
 		//
 	private:
-		mutable QMutex m_mutex;
-
 		QString m_projectName;
 
 		QString m_serverIpAddress;
@@ -179,6 +171,8 @@ namespace Builder
 		QString m_projectUserName;
 		QString m_projectUserPassword;
 
+		DbProjectProperties m_projectProperties;
+
 		QString m_buildOutputPath;
 
 		bool m_debug = false;							// if true then don't get workcopy of checked out files, use unly checked in copy
@@ -186,7 +180,7 @@ namespace Builder
 
 		IssueLogger* m_log = nullptr;					// Probably it's better to make it as shared_ptr
 
-		QJSEngine m_jsEngine;
+		std::unique_ptr<Context> m_context;
 	};
 
 }

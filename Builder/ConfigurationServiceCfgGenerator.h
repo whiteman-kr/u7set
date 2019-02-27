@@ -9,11 +9,7 @@ namespace Builder
 	class ConfigurationServiceCfgGenerator : public SoftwareCfgGenerator
 	{
 	public:
-		ConfigurationServiceCfgGenerator(DbController* db,
-									Hardware::Software* software,
-									SignalSet* signalSet,
-									Hardware::EquipmentSet* equipment,
-									BuildResultWriter* buildResultWriter);
+		ConfigurationServiceCfgGenerator(Context* context, Hardware::Software* software);
 
 		~ConfigurationServiceCfgGenerator();
 

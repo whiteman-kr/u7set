@@ -11,7 +11,7 @@ namespace Builder
 	private:
 
 	public:
-		DiagDataServiceCfgGenerator(DbController* db, Hardware::Software* software, SignalSet* signalSet, Hardware::EquipmentSet* equipment, BuildResultWriter* buildResultWriter);
+		DiagDataServiceCfgGenerator(Context* context, Hardware::Software* software);
 		~DiagDataServiceCfgGenerator();
 
 		virtual bool generateConfiguration() override;
