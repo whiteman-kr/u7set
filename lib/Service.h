@@ -128,7 +128,6 @@ protected:
 	static const char* const SETTING_EQUIPMENT_ID;
 	static const char* const SETTING_CFG_SERVICE_IP1;
 	static const char* const SETTING_CFG_SERVICE_IP2;
-	static const char* const SETTING_PROCESSING_THREADS_COUNT;
 
 private:
 	QString m_equipmentID;

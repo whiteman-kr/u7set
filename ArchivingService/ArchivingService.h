@@ -59,6 +59,7 @@ private slots:
 	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 private:
+	QString m_overwriteArchiveLocation;
 	QSettings m_settings;
 
 	ArchivingServiceSettings m_serviceSettings;
@@ -71,4 +72,6 @@ private:
 	Tcp::ServerThread* m_tcpArchRequestsServerThread = nullptr;
 
 	Archive* m_archive = nullptr;
+
+	static const char* const SETTING_ARCHIVE_LOCATION;
 };

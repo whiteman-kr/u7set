@@ -133,6 +133,8 @@ private:
 
 	static const int APP_SIGNAL_EVENTS_QUEUE_MAX_SIZE = 1024 * 1024;
 
+	static const char* const SETTING_PROCESSING_THREADS_COUNT;
+
 	QTimer m_timer;
 };
 

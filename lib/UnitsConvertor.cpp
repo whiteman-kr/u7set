@@ -141,7 +141,7 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double
 					return UnitsConvertResult(elVal);
 
 				default:
-					assert(false);
+					// assert(false); commented by WhiteMan
 					return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for V"));
 			}
 
@@ -156,12 +156,15 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double
 					return  UnitsConvertResult(elVal * RESISTOR_V_0_5);
 
 				default:
-					assert(false);
+					// assert(false); commented by WhiteMan
 					return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for mA"));
 			}
 
-		default:
-			assert(false);
+			break;
+
+		default: ;
+			//	assert(false); commented by WhiteMan
+			//
 	}
 
 	return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown unitID"));

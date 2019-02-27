@@ -49,8 +49,6 @@ HashedVector<E::SoftwareType, ServiceInfo> initServiceInfo()
 const char* const ServiceWorker::SETTING_EQUIPMENT_ID = "EquipmentID";
 const char* const ServiceWorker::SETTING_CFG_SERVICE_IP1 = "CfgServiceIP1";
 const char* const ServiceWorker::SETTING_CFG_SERVICE_IP2 = "CfgServiceIP2";
-const char* const ServiceWorker::SETTING_PROCESSING_THREADS_COUNT = "ProcessingThreadsCount";
-
 
 int ServiceWorker::m_instanceNo = 0;
 

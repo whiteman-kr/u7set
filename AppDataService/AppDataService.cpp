@@ -15,6 +15,8 @@
 //
 // -------------------------------------------------------------------------------
 
+const char* const AppDataServiceWorker::SETTING_PROCESSING_THREADS_COUNT = "ProcessingThreadsCount";
+
 AppDataServiceWorker::AppDataServiceWorker(const SoftwareInfo& softwareInfo,
 										   const QString& serviceName,
 										   int& argc,

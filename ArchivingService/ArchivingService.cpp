@@ -9,6 +9,8 @@
 //
 // -------------------------------------------------------------------------------
 
+const char* const ArchivingService::SETTING_ARCHIVE_LOCATION = "ArchiveLocation";
+
 ArchivingService::ArchivingService(const SoftwareInfo& softwareInfo,
 											   const QString& serviceName,
 											   int& argc,
@@ -46,14 +48,18 @@ void ArchivingService::initCmdLineParser()
 	cp.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
 	cp.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
 	cp.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
+	cp.addSingleValueOption("location", SETTING_ARCHIVE_LOCATION, "Archive location (overwrite ArchiveLocation from project settings)", "");
 }
 
 void ArchivingService::loadSettings()
 {
+	m_overwriteArchiveLocation = QString(getStrSetting(SETTING_ARCHIVE_LOCATION));
+
 	DEBUG_LOG_MSG(logger(), QString(tr("Load settings:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStr()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStr()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_ARCHIVE_LOCATION).arg(m_overwriteArchiveLocation));
 }
 
 void ArchivingService::initialize()
@@ -259,6 +265,11 @@ void ArchivingService::onConfigurationReady(const QByteArray configurationXmlDat
 	ArchivingServiceSettings newServiceSettings;
 
 	bool fileResult = loadConfigurationXml(configurationXmlData, &newServiceSettings);
+
+	if (m_overwriteArchiveLocation.isEmpty() == false)
+	{
+		newServiceSettings.archiveLocation = m_overwriteArchiveLocation;
+	}
 
 	logFileLoadResult(fileResult, "Configuration.xml");
 

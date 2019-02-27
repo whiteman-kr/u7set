@@ -281,6 +281,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0261.sql", "Upgrade to version 261, SchemaTags in Monitor and TuningClient has default values"},
 	{":/DatabaseUpgrade/Upgrade0262.sql", "Upgrade to version 262, Add project property UppercaseAppSignalID"},
 	{":/DatabaseUpgrade/Upgrade0263.sql", "Upgrade to version 263, Added functions for getting checked out signals and undo multiple signals"},
+	{":/DatabaseUpgrade/Upgrade0264.sql", "Upgrade to version 264, Changes in ArchiveService preset"},
 };
 
 int DbWorker::counter = 0;

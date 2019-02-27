@@ -1307,11 +1307,11 @@ namespace Builder
 						arg(lmID).arg(appDataServiceID));
 	}
 
-	/// IssueCode: CFG3022
+	/// IssueCode: CFG3031
 	///
-	/// IssueType: Warning
+	/// IssueType: Error
 	///
-	/// Title: Property %1.%2 is empty. Default writeble catalog of workstation  will be used.
+	/// Title: Property %1.%2 should be set to the valid writable catalog of workstation.
 	///
 	/// Parameters:
 	///         %1 Object ID
@@ -1320,11 +1320,11 @@ namespace Builder
 	/// Description:
 	///			Archive location is not assigned.
 	///
-	void IssueLogger::wrnCFG3031(QString objectID, QString propertyName)
+	void IssueLogger::errCFG3031(QString objectID, QString propertyName)
 	{
-		LOG_WARNING0(IssueType::FscConfiguration,
+		LOG_ERROR(IssueType::FscConfiguration,
 				  3031,
-				  tr("Property %1.%2 is empty. Default writeble catalog of workstation  will be used.")
+				  tr("Property %1.%2 should be set to the valid writable catalog of workstation.")
 				  .arg(objectID)
 				  .arg(propertyName));
 	}
