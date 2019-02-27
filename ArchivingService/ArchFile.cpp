@@ -539,7 +539,7 @@ bool ArchFile::flush(qint64 curPartition, qint64* totalFushedStatesCount, bool f
 		return false;
 	}
 
-	if (m_requiredImmediatelyFlushing.load() == false && flushAnyway == false && m_queue->size() < 3 /* may be 4 or more? */)
+	if (m_requiredImmediatelyFlushing.load() == false && flushAnyway == false && m_queue->size() < MIN_QUEUE_SIZE_TO_FLUSH)
 	{
 		return false;
 	}

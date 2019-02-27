@@ -178,6 +178,8 @@ private:
 	static const int QUEUE_MIN_SIZE = 20;
 	static const int QUEUE_MAX_SIZE = 1280;			// 20 * 2^6
 
+	static const int MIN_QUEUE_SIZE_TO_FLUSH = 3;	// may be 4 or more?
+
 	static ArchFileRecord m_buffer[QUEUE_MAX_SIZE];
 };
 

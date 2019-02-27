@@ -278,7 +278,7 @@ void ArchivingService::onConfigurationReady(const QByteArray configurationXmlDat
 		return;
 	}
 
-	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
+	for(const Builder::BuildFileInfo& bfi : buildFileInfoArray)
 	{
 		QByteArray fileData;
 		QString errStr;
