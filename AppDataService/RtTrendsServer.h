@@ -11,28 +11,19 @@
 namespace RtTrends
 {
 
-	struct SignalState
-	{
-		SimpleAppSignalState state;
-
-		qint64 archiveID = 0;
-		//quint32 samplePeriodFlags = 0;
-	};
-
 	class SignalStatesQueue
 	{
 	public:
 		SignalStatesQueue(Hash signalHash, int queueSize);
 
 		Hash signalHash() const { return m_signalHash; }
-		void push(qint64 archiveID, const SimpleAppSignalState& state);
+		void push(qint64 archiveID, const SimpleAppSignalState& state, const QThread* thread);
 
-		LockFreeQueue<SignalState>& clientQueue() { return m_clientQueue; }
+		FastThreadSafeQueue<SimpleAppSignalState>& clientQueue() { return m_clientQueue; }
 
 	private:
 		Hash m_signalHash = 0;
-		LockFreeQueue<SignalState> m_clientQueue;
-		//LockFreeQueue<SignalState> m_dbQueue;
+		FastThreadSafeQueue<SimpleAppSignalState> m_clientQueue;
 	};
 
 	class Session
@@ -50,7 +41,7 @@ namespace RtTrends
 		bool appendSignal(Hash signalHash);
 		bool deleteSignal(Hash signalHash);
 
-		void pushSignalState(Hash signalHash, const SimpleAppSignalState& state);
+		void pushSignalState(Hash signalHash, const SimpleAppSignalState& state, const QThread* thread);
 
 		void getTrackedSignalHashes(QVector<Hash>* hashes);
 

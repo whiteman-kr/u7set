@@ -370,7 +370,7 @@ void AppSignalStateEx::rtSessionsProcessing(const SimpleAppSignalState& state, b
 	{
 		if (pushAnyway == true)
 		{
-			session.session->pushSignalState(m_signalHash, state);
+			session.session->pushSignalState(m_signalHash, state, thread);
 			session.sampleCounter = 0;
 			continue;
 		}
@@ -379,7 +379,7 @@ void AppSignalStateEx::rtSessionsProcessing(const SimpleAppSignalState& state, b
 
 		if (session.sampleCounter >= session.samplePeriodCounter)
 		{
-			session.session->pushSignalState(m_signalHash, state);
+			session.session->pushSignalState(m_signalHash, state, thread);
 			session.sampleCounter = 0;
 		}
 	}
@@ -617,7 +617,7 @@ void AppDataSource::SignalParseInfo::setSignalParams(int i, const Signal& s)
 // -------------------------------------------------------------------------------
 
 AppDataSource::AppDataSource() :
-	m_signalStatesQueue(10)
+	m_signalStatesQueue(10 * 1000)
 {
 }
 
@@ -838,7 +838,7 @@ bool AppDataSource::getSignalState(SimpleAppSignalState* state, const QThread* t
 
 	bool result = m_signalStatesQueue.pop(state, thread);
 
-	m_signalStatesQueueSize = m_signalStatesQueue.size();
+	m_signalStatesQueueSize = m_signalStatesQueue.size(thread);
 
 	return result;
 }
