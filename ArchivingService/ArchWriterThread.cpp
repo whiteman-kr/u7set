@@ -29,6 +29,8 @@ void ArchWriterThread::run()
 		return;
 	}
 
+	m_buffer = new ArchFileRecord[ArchFile::QUEUE_MAX_SIZE];
+
 	m_thisThread = QThread::currentThread();
 
 	int filesCount = m_archive->getFilesCount();
@@ -41,7 +43,7 @@ void ArchWriterThread::run()
 	{
 		if (filesCount == 0)
 		{
-			msleep(200);
+			msleep(300);
 			continue;
 		}
 
@@ -61,7 +63,11 @@ void ArchWriterThread::run()
 
 			qint64 startTime = m_timer.elapsed();
 
-			bool flushingExecuted = fileToFlush->flush(currentPartition, &m_totalFlushedStatesCount, flushAnyway);
+			bool flushingExecuted = fileToFlush->flush(currentPartition,
+													   &m_totalFlushedStatesCount,
+													   flushAnyway,
+													   m_buffer,
+													   ArchFile::QUEUE_MAX_SIZE);
 
 			m_flushTime += m_timer.elapsed() - startTime;
 
@@ -82,7 +88,10 @@ void ArchWriterThread::run()
 		}
 	}
 
-	m_archive->shutdown();
+	m_archive->shutdown(m_buffer, ArchFile::QUEUE_MAX_SIZE);
+
+	delete [] m_buffer;
+	m_buffer = nullptr;
 }
 
 void ArchWriterThread::printStatistics()

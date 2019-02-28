@@ -471,7 +471,7 @@ bool Archive::createGroupDirs()
 	return result;
 }
 
-bool Archive::shutdown()
+bool Archive::shutdown(ArchFileRecord* buffer, int bufferSize)
 {
 	// shutting down all archive files
 	//
@@ -486,7 +486,7 @@ bool Archive::shutdown()
 		}
 
 		qint64 curPartition = getCurrentPartition();
-		archFile->shutdown(curPartition, &totalFlushed);
+		archFile->shutdown(curPartition, &totalFlushed, buffer, bufferSize);
 	}
 
 	DEBUG_LOG_MSG(m_log, QString("Archive is shutdowned."));

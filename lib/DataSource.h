@@ -344,7 +344,7 @@ public:
 
 	// Functions used by receiver thread
 	//
-	void pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame);
+	void pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame, const QThread* thread);
 	void incFrameSizeError() { m_errorFrameSize++; }
 
 	// Functions used by data processing thread
@@ -352,7 +352,7 @@ public:
 	bool takeProcessingOwnership(const QThread* processingThread);
 	bool releaseProcessingOwnership(const QThread* processingThread);
 
-	bool processRupFrameTimeQueue();
+	bool processRupFrameTimeQueue(const QThread* thread);
 	bool getDataToParsing(Times* times, const char** rupData, quint32* rupDataSize, bool* dataReceivingTimeout);
 
 	bool rupFramesQueueIsEmpty() const { return m_rupFrameTimeQueue.isEmpty(); }
@@ -411,7 +411,7 @@ private:
 
 	//
 
-	LockFreeQueue<RupFrameTime> m_rupFrameTimeQueue;				// fast non-blocking queue filled by AppDataReceiver
+	FastThreadSafeQueue<RupFrameTime> m_rupFrameTimeQueue;				// filled by AppDataReceiver
 
 	//
 

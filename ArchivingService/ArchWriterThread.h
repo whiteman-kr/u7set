@@ -30,4 +30,5 @@ private:
 	qint64 m_flushTime = 0;
 	QElapsedTimer m_timer;
 
+	ArchFileRecord* m_buffer = nullptr;
 };

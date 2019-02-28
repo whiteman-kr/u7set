@@ -91,13 +91,28 @@ inline bool operator < (const ArchFilePartition::Info& p1, const ArchFilePartiti
 class ArchFile
 {
 public:
+	static const int QUEUE_MAX_SIZE;
+
+private:
+	static const int QUEUE_MIN_SIZE;
+	static const int MIN_QUEUE_SIZE_TO_FLUSH;
+
+	static const double QUEUE_EMERGENCY_LIMIT;
+	static const double QUEUE_EXPAND_LIMIT;
+
+public:
 	ArchFile(const Proto::ArchSignal& protoArchSignal, CircularLoggerShared log);
 	~ArchFile();
 
 	void setArchFullPath(const QString& archFullPath);
 
 	bool pushState(qint64 archID, const SimpleAppSignalState& state);
-	bool flush(qint64 curPartition, qint64* totalFushedStatesCount, bool flushAnyway);
+
+	bool flush(qint64 curPartition,
+			   qint64* totalFushedStatesCount,
+			   bool flushAnyway,
+			   ArchFileRecord* buffer,
+			   int bufferSize);
 
 	void setRequiredImmediatelyFlushing(bool b) { m_requiredImmediatelyFlushing.store(b); }
 	bool isRequiredImmediatelyFlushing() const { return m_requiredImmediatelyFlushing.load(); }
@@ -114,7 +129,10 @@ public:
 	static QVector<ArchFilePartition::Info> getArchPartitionsInfo(const QString& path);
 	static QString getPartitionFileName(const QString& archFilePath, const ArchFilePartition::Info& pi);
 
-	void shutdown(qint64 curPartition, qint64* totalFlushedStatesCount);
+	void shutdown(qint64 curPartition,
+				  qint64* totalFlushedStatesCount,
+				  ArchFileRecord* buffer,
+				  int bufferSize);
 
 	bool maintenance(qint64 currentPartition,
 					 qint64 msShortTermPeriod,
@@ -171,16 +189,6 @@ private:
 	std::atomic<bool> m_requiredImmediatelyFlushing = { false };
 
 	SimpleMutex m_flushMutex;
-
-	const double QUEUE_EMERGENCY_LIMIT = 0.7;		// 70%
-	const double QUEUE_EXPAND_LIMIT = 0.9;			// 90%
-
-	static const int QUEUE_MIN_SIZE = 20;
-	static const int QUEUE_MAX_SIZE = 1280;			// 20 * 2^6
-
-	static const int MIN_QUEUE_SIZE_TO_FLUSH = 3;	// may be 4 or more?
-
-	static ArchFileRecord m_buffer[QUEUE_MAX_SIZE];
 };
 
 

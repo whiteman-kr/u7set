@@ -4,7 +4,6 @@
 
 #include "ArchFileRecord.h"
 
-
 class ArchFileBuffer
 {
 public:

@@ -447,7 +447,12 @@ inline bool operator < (const ArchFilePartition::Info& p1, const ArchFilePartiti
 //
 // ----------------------------------------------------------------------------------------------------------------------
 
-ArchFileRecord ArchFile::m_buffer[ArchFile::QUEUE_MAX_SIZE];
+const int ArchFile::QUEUE_MAX_SIZE = 1280;
+const int ArchFile::QUEUE_MIN_SIZE = 20;
+const int ArchFile::MIN_QUEUE_SIZE_TO_FLUSH = 3;		// may be 4 or more?
+
+const double ArchFile::QUEUE_EMERGENCY_LIMIT = 0.7;		// 70%
+const double ArchFile::QUEUE_EXPAND_LIMIT = 0.9;		// 90%
 
 ArchFile::ArchFile(const Proto::ArchSignal& protoArchSignal, CircularLoggerShared log) :
 	m_log(log)
@@ -523,9 +528,14 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 	return true;
 }
 
-bool ArchFile::flush(qint64 curPartition, qint64* totalFushedStatesCount, bool flushAnyway)
+bool ArchFile::flush(qint64 curPartition,
+					 qint64* totalFushedStatesCount,
+					 bool flushAnyway,
+					 ArchFileRecord* buffer,
+					 int bufferSize)
 {
 	TEST_PTR_RETURN_FALSE(totalFushedStatesCount);
+	TEST_PTR_RETURN_FALSE(buffer);
 
 	SimpleMutexLocker locker(&m_flushMutex);
 
@@ -546,7 +556,7 @@ bool ArchFile::flush(qint64 curPartition, qint64* totalFushedStatesCount, bool f
 
 	int copiedItemsCount = 0;
 
-	bool result = m_queue->copyToBuffer(m_buffer, QUEUE_MAX_SIZE, &copiedItemsCount);
+	bool result = m_queue->copyToBuffer(buffer, bufferSize, &copiedItemsCount);
 
 	if (result == false || copiedItemsCount == 0)
 	{
@@ -554,7 +564,7 @@ bool ArchFile::flush(qint64 curPartition, qint64* totalFushedStatesCount, bool f
 		return false;
 	}
 
-	m_writablePartition.write(curPartition, m_buffer, copiedItemsCount, totalFushedStatesCount);
+	m_writablePartition.write(curPartition, buffer, copiedItemsCount, totalFushedStatesCount);
 
 	setRequiredImmediatelyFlushing(false);
 
@@ -678,8 +688,14 @@ QString ArchFile::getPartitionFileName(const QString& archFilePath, const ArchFi
 	return QString("%1/%2").arg(archFilePath, pi.fileName);
 }
 
-void ArchFile::shutdown(qint64 curPartition, qint64* totalFlushedStatesCount)
+void ArchFile::shutdown(qint64 curPartition,
+						qint64* totalFlushedStatesCount,
+						ArchFileRecord* buffer,
+						int bufferSize)
 {
+	TEST_PTR_RETURN(totalFlushedStatesCount);
+	TEST_PTR_RETURN(buffer);
+
 	if (m_lastRecordInitialized == true && m_lastRecord.state.flags.valid == 1)
 	{
 		qint64 curSysTime = QDateTime::currentMSecsSinceEpoch();
@@ -704,7 +720,7 @@ void ArchFile::shutdown(qint64 curPartition, qint64* totalFlushedStatesCount)
 		m_flushMutex.unlock();
 	}
 
-	flush(curPartition, totalFlushedStatesCount, true);
+	flush(curPartition, totalFlushedStatesCount, true, buffer, bufferSize);
 }
 
 /*

@@ -36,6 +36,8 @@ void AppDataReceiverThread::run()
 {
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread is started (receiving IP %1)").arg(m_dataReceivingIP.addressPortStr()));
 
+	m_thisThread = QThread::currentThread();
+
 	while(isQuitRequested() == false)
 	{
 		bool result = tryCreateAndBindSocket();
@@ -126,6 +128,18 @@ void AppDataReceiverThread::receivePackets()
 	{
 		qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
 
+/*		if (m_socket->waitForReadyRead(500) == false)
+		{
+			if (serverTime - lastPacketTime > 3000)
+			{
+				qDebug() << "No RUP packets received in 3 seconds";
+				closeSocket();
+				return;
+			}
+
+			continue;
+		}*/
+
 		qint64 size = m_socket->pendingDatagramSize();
 
 		if (size == -1)
@@ -137,9 +151,7 @@ void AppDataReceiverThread::receivePackets()
 				return;
 			}
 
-			// is no datagram available, short sleep on 200mcs
-			//
-			usleep(200);
+			usleep(500);
 			continue;
 		}
 
@@ -209,7 +221,7 @@ void AppDataReceiverThread::receivePackets()
 
 		m_receivedFramesCount++;
 
-		dataSource->pushRupFrame(serverTime, simFrame.rupFrame);
+		dataSource->pushRupFrame(serverTime, simFrame.rupFrame, m_thisThread);
 
 		//
 

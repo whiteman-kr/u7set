@@ -440,26 +440,33 @@ public:
 	int maxSize(const QThread* thread) const;
 	int maxSize() const{ return maxSize(QThread::currentThread()); }
 
+	T* beginPush(const QThread* thread);
+	T* beginPush() { return beginPush(QThread::currentThread()); }
+
+	void completePush(const QThread* thread);
+	void completePush() { completePush(QThread::currentThread()); }
+
+	T* beginPop(const QThread* thread);
+	T* beginPop() { return beginPop(QThread::currentThread()); }
+
+	void completePop(const QThread* thread);
+	void completePop() { completePop(QThread::currentThread()); }
+
 private:
 	T* m_buffer = nullptr;
+	int m_queueSize = 0;
 
 	mutable SimpleMutex m_mutex;
 
-	int m_queueSize = 0;
-
-	// var modified by Writer only
-
 	QueueIndex m_writeIndex;
+	QueueIndex m_readIndex;
+	int m_size = 0;								// current queue size
+
 	qint64 m_lostedCount = 0;
 	int m_maxSize = 0;
 
-	// var modified by Reader only
-
-	QueueIndex m_readIndex;
-
-	// var modified both by Writer and Reader
-
-	int m_size = 0;								// current queue size
+	bool m_pushIsBegan = false;
+	bool m_popIsBegan = false;
 };
 
 template <typename T>
@@ -594,6 +601,77 @@ int FastThreadSafeQueue<T>::maxSize(const QThread* thread) const
 	AUTO_LOCK_BY_THREAD(m_mutex, thread);
 
 	return 	m_maxSize;
+}
+
+template <typename T>
+T* FastThreadSafeQueue<T>::beginPush(const QThread* thread)
+{
+	m_mutex.lock(thread);
+
+	assert(m_pushIsBegan == false);
+
+	m_pushIsBegan = true;
+
+	if (m_size == m_queueSize)
+	{
+		// first queued item will be lost here
+		//
+		m_lostedCount++;
+
+		m_readIndex++;
+		m_size--;
+	}
+
+	return m_buffer + m_writeIndex();
+}
+
+template <typename T>
+void FastThreadSafeQueue<T>::completePush(const QThread* thread)
+{
+	assert(m_pushIsBegan == true);
+
+	m_writeIndex++;
+	m_size++;
+
+	if (m_size > m_maxSize)
+	{
+		m_maxSize = m_size;
+	}
+
+	m_pushIsBegan = false;
+
+	m_mutex.unlock(thread);
+}
+
+template <typename T>
+T* FastThreadSafeQueue<T>::beginPop(const QThread* thread)
+{
+	m_mutex.lock(thread);
+
+	assert(m_popIsBegan == false);
+
+	if (m_size == 0)
+	{
+		m_mutex.unlock(thread);
+		return nullptr;
+	}
+
+	m_popIsBegan = true;
+
+	return m_buffer + m_readIndex();
+}
+
+template <typename T>
+void FastThreadSafeQueue<T>::completePop(const QThread* thread)
+{
+	assert(m_popIsBegan == true);
+
+	m_readIndex++;
+	m_size--;
+
+	m_popIsBegan = false;
+
+	m_mutex.unlock(thread);
 }
 
 

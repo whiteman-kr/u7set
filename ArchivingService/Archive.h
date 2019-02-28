@@ -81,7 +81,7 @@ public:
 	bool archDirIsWritableChecking();
 	bool createGroupDirs();
 
-	bool shutdown();
+	bool shutdown(ArchFileRecord* buffer, int bufferSize);
 
 	// flushing controlling functions (public)
 

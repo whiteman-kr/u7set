@@ -680,9 +680,9 @@ void DataSourceOnline::resume()
 }*/
 
 
-void DataSourceOnline::pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame)
+void DataSourceOnline::pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame, const QThread* thread)
 {
-	RupFrameTime* rupFrameTime = m_rupFrameTimeQueue.beginPush();
+	RupFrameTime* rupFrameTime = m_rupFrameTimeQueue.beginPush(thread);
 
 	if (rupFrameTime != nullptr)
 	{
@@ -694,7 +694,7 @@ void DataSourceOnline::pushRupFrame(qint64 serverTime, const Rup::Frame& rupFram
 		// is not an error - queue is full
 	}
 
-	m_rupFrameTimeQueue.completePush();
+	m_rupFrameTimeQueue.completePush(thread);
 
 	m_rupFramesQueueSize = m_rupFrameTimeQueue.size();
 	m_rupFramesQueueMaxSize = m_rupFrameTimeQueue.maxSize();
@@ -722,13 +722,13 @@ bool DataSourceOnline::releaseProcessingOwnership(const QThread* processingThrea
 	return result;
 }
 
-bool DataSourceOnline::processRupFrameTimeQueue()
+bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 {
 	int count = 0;
 
 	do
 	{
-		RupFrameTime* rupFrameTime = m_rupFrameTimeQueue.beginPop();
+		RupFrameTime* rupFrameTime = m_rupFrameTimeQueue.beginPop(thread);
 
 		if (rupFrameTime == nullptr)
 		{
