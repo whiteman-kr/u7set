@@ -29,7 +29,7 @@ void TestCmdParam::clear()
 	m_value.clear();
 }
 
-QString TestCmdParam::valueStr(bool addParamName)
+QString TestCmdParam::valueStr(bool addParamName, int precise)
 {
 	QString str;
 
@@ -50,7 +50,10 @@ QString TestCmdParam::valueStr(bool addParamName)
 		case TestCmdParamType::Float:
 		case TestCmdParamType::Double:
 			{
-				str.sprintf("%0.4f", m_value.toDouble());
+				QString formatStr;
+				formatStr.sprintf(("%%.%df"), precise);
+
+				str.sprintf(formatStr.toUtf8(), m_value.toDouble());
 
 				// remove unnecessary 0
 				//

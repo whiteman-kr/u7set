@@ -82,7 +82,7 @@ public:
 	void setType(TestCmdParamType type) { m_type = type; }
 
 	QVariant value() const { return m_value; }
-	QString valueStr(bool addParamName);
+	QString valueStr(bool addParamName, int precise);
 	void setValue(const QVariant& value) { m_value = value; }
 
 	bool compare(QVariant cmpValue);
