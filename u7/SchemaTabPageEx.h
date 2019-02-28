@@ -45,6 +45,8 @@ public:
 	DbFileInfo file(const QModelIndex& modelIndex) const;
 	std::shared_ptr<DbFileInfo> fileSharedPtr(const QModelIndex& modelIndex) const;
 
+	bool isFolder(const QModelIndex& modelIndex) const;
+
 	QModelIndexList searchFor(const QString searchText);
 	void setFilter(QString filter);
 	void setTagFilter(const QStringList& tags);
@@ -136,6 +138,9 @@ public:
 	virtual ~SchemaProxyListModel();
 
 	virtual void setSourceModel(QAbstractItemModel* sourceModel) override;
+
+protected:
+	virtual bool lessThan(const QModelIndex& sourceLeft, const QModelIndex& sourceRight) const override;
 
 public:
 	DbFileInfo file(const QModelIndex& mi) const;
