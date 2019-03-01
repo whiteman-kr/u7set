@@ -126,6 +126,7 @@ MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInf
 	m_cfgLoaderThread = new CfgLoaderThread(m_softwareInfo, m_appInstanceNo, address1,  address2, false, nullptr);
 
 	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &MonitorConfigController::slot_configurationReady);
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_unknownClient, this, &MonitorConfigController::unknownClient);
 
 	return;
 }
