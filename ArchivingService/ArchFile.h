@@ -121,9 +121,8 @@ public:
 	QString appSignalID() const { return m_appSignalID; }
 
 	bool isAnalog() const { return m_isAnalog; }
-
-	bool queueIsEmpty() const { return m_queue->isEmpty(); }
 	bool isEmergency() const;
+
 	QString path() const { return m_path; }
 
 	static QVector<ArchFilePartition::Info> getArchPartitionsInfo(const QString& path);
@@ -184,11 +183,9 @@ private:
 
 	ArchFilePartition m_writablePartition;
 
-	FastQueue<ArchFileRecord>* m_queue = nullptr;
+	FastThreadSafeQueue<ArchFileRecord> m_queue;
 
 	std::atomic<bool> m_requiredImmediatelyFlushing = { false };
-
-	SimpleMutex m_flushMutex;
 };
 
 

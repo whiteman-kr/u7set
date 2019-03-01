@@ -19,6 +19,7 @@ void SimpleAppSignalStatesQueue::pushAutoPoint(SimpleAppSignalState state, const
 	// state is a copy!
 	//
 	state.flags.autoPoint = 1;
+	state.packetNo = 0;			// auto state
 
 	push(state, thread);
 }
@@ -69,6 +70,7 @@ void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 }
 
 bool AppSignalStateEx::setState(const Times& time,
+								quint16 packetNo,
 								quint32 validity,
 								double value,
 								int autoArchivingGroup,
@@ -85,6 +87,7 @@ bool AppSignalStateEx::setState(const Times& time,
 	//
 	curState.time = time;
 	curState.value = value;
+	curState.packetNo = packetNo;
 
 	curState.flags.clearReasonsFlags();
 
@@ -703,8 +706,23 @@ bool AppDataSource::parsePacket()
 	const char* rupData = nullptr;
 	quint32 rupDataSize = 0;
 	bool dataReceivingTimeout = false;
+	quint16 packetNo = 0;
 
-	bool result = getDataToParsing(&times, &rupData, &rupDataSize, &dataReceivingTimeout);
+	bool result = getDataToParsing(&times, &packetNo, &rupData, &rupDataSize, &dataReceivingTimeout);
+
+	{// START_DEBUG_CODE
+		static quint16 prevPacketNo = 55555;
+
+		if (prevPacketNo != 55555)
+		{
+			if (prevPacketNo + 1 != packetNo)
+			{
+				qDebug() << "packet losted 2";
+			}
+		}
+
+		prevPacketNo = packetNo;
+	}
 
 	if (result == false)
 	{
@@ -721,10 +739,12 @@ bool AppDataSource::parsePacket()
 
 	for(const SignalParseInfo& parseInfo : m_signalsParseInfo)
 	{
-/*		if (parseInfo.appSignalID != "#LB0222_SI")
+		// START_DEBUG_CODE
+
+		if (parseInfo.appSignalID != "#MEANDR")
 		{
 			continue;
-		}*/
+		}
 
 		AppSignalStateEx* signalState = (*m_signalStates)[parseInfo.index];
 
@@ -758,7 +778,7 @@ bool AppDataSource::parsePacket()
 			}
 		}
 
-		signalState->setState(times, validity, value, autoArchivingGroup, m_signalStatesQueue, thread);
+		signalState->setState(times, packetNo, validity, value, autoArchivingGroup, m_signalStatesQueue, thread);
 	}
 
 	m_signalStatesQueueSize = m_signalStatesQueue.size();
@@ -839,6 +859,23 @@ bool AppDataSource::getSignalState(SimpleAppSignalState* state, const QThread* t
 	bool result = m_signalStatesQueue.pop(state, thread);
 
 	m_signalStatesQueueSize = m_signalStatesQueue.size(thread);
+
+	{// START_DEBUG_CODE
+		if (result == true)
+		{
+			static quint16 prevPacketNo = 55555;
+
+			if (prevPacketNo != 55555)
+			{
+				if (prevPacketNo + 1 != state->packetNo)
+				{
+					qDebug() << "packet losted 3 prev " << prevPacketNo << " now " << state->packetNo;
+				}
+			}
+
+			prevPacketNo = state->packetNo;
+		}
+	}
 
 	return result;
 }

@@ -355,7 +355,7 @@ void LockFreeQueueBase::resize(int newQueueSize)		// not thread-safe operation!!
 	m_maxSize.store(0);
 }
 
-
+/*
 FastQueueBase::FastQueueBase(int itemSize, int queueSize) :
 	m_itemSize(itemSize),
 	m_queueSize(queueSize),
@@ -550,4 +550,4 @@ char* FastQueueBase::allocateBuffer(int sizeBytes)
 
 	return new char [sizeBytes];
 }
-
+*/

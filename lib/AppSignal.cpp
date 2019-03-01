@@ -112,6 +112,7 @@ void SimpleAppSignalState::save(Proto::AppSignalState* protoState)
 	protoState->set_systemtime(time.system.timeStamp);
 	protoState->set_localtime(time.local.timeStamp);
 	protoState->set_planttime(time.plant.timeStamp);
+	protoState->set_packetno(packetNo);
 }
 
 Hash SimpleAppSignalState::load(const Proto::AppSignalState& protoState)
@@ -126,6 +127,7 @@ Hash SimpleAppSignalState::load(const Proto::AppSignalState& protoState)
 	time.system.timeStamp = protoState.systemtime();
 	time.local.timeStamp = protoState.localtime();
 	time.plant.timeStamp = protoState.planttime();
+	packetNo = static_cast<quint16>(protoState.packetno());
 
 	return hash;
 }

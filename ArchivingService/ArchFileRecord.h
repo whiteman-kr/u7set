@@ -22,6 +22,8 @@ struct ArchFileRecord
 		qint64 systemTime;
 		qint64 plantTime;
 
+		quint16 packetNo;
+
 		AppSignalStateFlags flags;
 		double value;
 	} state;

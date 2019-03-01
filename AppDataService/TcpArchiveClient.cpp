@@ -94,6 +94,20 @@ bool TcpArchiveClient::sendSignalStatesToArchiveRequest(bool sendNow)
 			break;
 		}
 
+		{// START_DEBUG_CODE
+				static quint16 prevPacketNo = 55555;
+
+				if (prevPacketNo != 55555)
+				{
+					if (prevPacketNo + 1 != state.packetNo)
+					{
+						qDebug() << "packet losted 4 prev " << prevPacketNo << " now " << state.packetNo;
+					}
+				}
+
+				prevPacketNo = state.packetNo;
+		}
+
 		Proto::AppSignalState* appSignalState = request.add_appsignalstates();
 
 		if (appSignalState == nullptr)
@@ -106,7 +120,7 @@ bool TcpArchiveClient::sendSignalStatesToArchiveRequest(bool sendNow)
 
 		count++;
 	}
-	while(count < 1000);
+	while(count < 3000);
 
 	if (count == 0)
 	{

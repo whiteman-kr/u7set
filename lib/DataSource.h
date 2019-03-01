@@ -353,7 +353,7 @@ public:
 	bool releaseProcessingOwnership(const QThread* processingThread);
 
 	bool processRupFrameTimeQueue(const QThread* thread);
-	bool getDataToParsing(Times* times, const char** rupData, quint32* rupDataSize, bool* dataReceivingTimeout);
+	bool getDataToParsing(Times* times, quint16* packetNo, const char** rupData, quint32* rupDataSize, bool* dataReceivingTimeout);
 
 	bool rupFramesQueueIsEmpty() const { return m_rupFrameTimeQueue.isEmpty(); }
 
@@ -431,6 +431,7 @@ private:
 
 	Times m_rupDataTimes;
 	Times m_lastRupDataTimes;
+	quint16 m_packetNo = 0;
 	quint32 m_rupDataSize = 0;
 };
 

@@ -574,6 +574,8 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 		return false;
 	}
 
+	m_packetNo = numerator0;
+
 	m_receivedPacketCount++;
 
 	const Rup::TimeStamp& timeStamp = m_rupFramesHeaders[0].timeStamp;
@@ -605,7 +607,7 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 	return true;
 }
 
-bool DataSourceOnline::getDataToParsing(Times* times, const char** rupData, quint32* rupDataSize, bool* dataReceivingTimeout)
+bool DataSourceOnline::getDataToParsing(Times* times, quint16* packetNo, const char** rupData, quint32* rupDataSize, bool* dataReceivingTimeout)
 {
 	if (m_dataReadyToParsing == false)
 	{
@@ -615,7 +617,7 @@ bool DataSourceOnline::getDataToParsing(Times* times, const char** rupData, quin
 
 #ifdef QT_DEBUG
 
-	if (times == nullptr || rupData == nullptr || rupDataSize == nullptr || dataReceivingTimeout == nullptr)
+	if (times == nullptr || packetNo == nullptr || rupData == nullptr || rupDataSize == nullptr || dataReceivingTimeout == nullptr)
 	{
 		assert(false);
 		return false;
@@ -624,6 +626,7 @@ bool DataSourceOnline::getDataToParsing(Times* times, const char** rupData, quin
 #endif
 
 	*times = m_rupDataTimes;
+	*packetNo = m_packetNo;
 	*rupData = reinterpret_cast<const char*>(m_rupFramesData);
 	*rupDataSize = m_rupDataSize;
 	*dataReceivingTimeout = m_dataRecevingTimeout;

@@ -33,6 +33,7 @@ public:
 	void setSignalParams(int index, Signal* signal);
 
 	bool setState(const Times& time,
+				  quint16 packetNo,
 				  quint32 validity,
 				  double value,
 				  int autoArchivingGroup,

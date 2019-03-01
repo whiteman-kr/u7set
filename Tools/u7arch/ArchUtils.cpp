@@ -9,7 +9,7 @@ ArchUtils::ArchUtils(const QString& workDir) :
 
 void ArchUtils::dump(const QString& archFile, bool lt, bool st, bool pt)
 {
-	QRegExp archFileNameTemplate(ACRH_FILE_NAME_TEMPLATE);
+	QRegExp archFileNameTemplate(ARCH_FILE_NAME_TEMPLATE);
 
 	if (archFile.contains(archFileNameTemplate) == false)
 	{
@@ -60,7 +60,7 @@ void ArchUtils::dump(const QString& archFile, bool lt, bool st, bool pt)
 			break;
 		}
 
-		if (record.isValid() == false)
+		if (record.isNotCorrupted() == false)
 		{
 			dump << QString("Corrupted record (index %1)\n").arg(recordNo);
 			recordNo++;
@@ -68,6 +68,8 @@ void ArchUtils::dump(const QString& archFile, bool lt, bool st, bool pt)
 		}
 
 		recordNo++;
+
+		dump << QString("%1    ").arg(record.state.packetNo, 5, 10, QChar('0'));
 
 		QDateTime dt;
 

@@ -20,7 +20,8 @@ SOURCES += \
     ../../lib/AppSignalStateFlags.cpp \
     ../../ArchivingService/ArchFileRecord.cpp \
     ../../lib/Types.cpp \
-    ../../lib/Crc16.cpp
+    ../../lib/Crc16.cpp \
+    ../../ArchivingService/ArchFileRecord.cpp
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
@@ -32,4 +33,5 @@ HEADERS += \
     ../../lib/AppSignalStateFlags.h \
     ../../ArchivingService/ArchFileRecord.h \
     ../../lib/Types.h \
-    ../../lib/Crc16.h
+    ../../lib/Crc16.h \
+    ../../ArchivingService/ArchFileRecord.h

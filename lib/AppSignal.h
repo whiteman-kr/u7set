@@ -33,6 +33,7 @@ struct SimpleAppSignalState
 	Times time;
 	AppSignalStateFlags flags;
 	double value = 0;
+	quint16 packetNo = 0;
 
 	bool isValid() const { return flags.valid == 1; }
 

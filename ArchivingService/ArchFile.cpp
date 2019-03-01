@@ -455,22 +455,14 @@ const double ArchFile::QUEUE_EMERGENCY_LIMIT = 0.7;		// 70%
 const double ArchFile::QUEUE_EXPAND_LIMIT = 0.9;		// 90%
 
 ArchFile::ArchFile(const Proto::ArchSignal& protoArchSignal, CircularLoggerShared log) :
-	m_log(log)
+	m_log(log),
+	m_queue(protoArchSignal.isanalog() == true ? QUEUE_MIN_SIZE * 16 : QUEUE_MIN_SIZE)
 {
 	m_hash = protoArchSignal.hash();
 	m_appSignalID = QString::fromStdString(protoArchSignal.appsignalid());
 	m_isAnalog = protoArchSignal.isanalog();
 
 	m_lastRecord.state.flags.valid = 0;
-
-	int queueSize = QUEUE_MIN_SIZE;
-
-	if (m_isAnalog == true)
-	{
-		queueSize = QUEUE_MIN_SIZE * 16;
-	}
-
-	m_queue = new FastQueue<ArchFileRecord>(queueSize);
 }
 
 ArchFile::~ArchFile()
@@ -489,23 +481,24 @@ void ArchFile::setArchFullPath(const QString& archFullPath)
 
 bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 {
-	TEST_PTR_RETURN_FALSE(m_queue);
-
 	Q_UNUSED(archID)
+
+	if (m_queue.size() >= static_cast<int>(m_queue.queueSize() * QUEUE_EXPAND_LIMIT) && m_queue.queueSize() < QUEUE_MAX_SIZE)
+	{
+		int k = m_queue.queueSize() / QUEUE_MIN_SIZE;
+
+		m_queue.resizeAndCopy(QUEUE_MIN_SIZE * k * 2);
+	}
 
 	ArchFileRecord s;
 
 	s.state.localTime = state.time.local.timeStamp;
 	s.state.systemTime = state.time.system.timeStamp;
 	s.state.plantTime = state.time.plant.timeStamp;
-	//	s.state.archID = archID;
+	s.state.packetNo = state.packetNo;
 	s.state.flags = state.flags;
 	s.state.value = state.value;
 	s.calcCRC16();
-
-	SimpleMutexLocker locker(&m_flushMutex);
-
-	Q_UNUSED(locker);
 
 	if (m_lastRecordInitialized == false && s.state.flags.valid)
 	{
@@ -514,13 +507,14 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 		nvp.state.value = 0;
 		nvp.state.flags.valid = 0;
 		nvp.state.flags.autoPoint = 1;
+		nvp.state.packetNo = 0;
 		nvp.offsetTimes(-1);
 		nvp.calcCRC16();
 
-		m_queue->push(nvp);
+		m_queue.push(nvp);
 	}
 
-	m_queue->push(s);
+	m_queue.push(s);
 
 	m_lastRecord = s;
 	m_lastRecordInitialized = true;
@@ -537,31 +531,45 @@ bool ArchFile::flush(qint64 curPartition,
 	TEST_PTR_RETURN_FALSE(totalFushedStatesCount);
 	TEST_PTR_RETURN_FALSE(buffer);
 
-	SimpleMutexLocker locker(&m_flushMutex);
+	int queueSize = m_queue.size();
 
-	Q_UNUSED(locker);
-
-	TEST_PTR_RETURN_FALSE(m_queue);
-
-	if (m_queue->isEmpty() == true)
+	if (queueSize == 0)
 	{
 		setRequiredImmediatelyFlushing(false);
 		return false;
 	}
 
-	if (m_requiredImmediatelyFlushing.load() == false && flushAnyway == false && m_queue->size() < MIN_QUEUE_SIZE_TO_FLUSH)
+	if (m_requiredImmediatelyFlushing.load() == false && flushAnyway == false &&  queueSize < MIN_QUEUE_SIZE_TO_FLUSH)
 	{
 		return false;
 	}
 
 	int copiedItemsCount = 0;
 
-	bool result = m_queue->copyToBuffer(buffer, bufferSize, &copiedItemsCount);
+	bool result = m_queue.copyToBuffer(buffer, bufferSize, &copiedItemsCount, QThread::currentThread());
 
 	if (result == false || copiedItemsCount == 0)
 	{
 		setRequiredImmediatelyFlushing(false);
 		return false;
+	}
+
+	{// START_DEBUG_CODE
+			static quint16 prevPacketNo = 55555;
+
+			for(int i = 0; i < copiedItemsCount; i++)
+			{
+				const ArchFileRecord& r = buffer[i];
+				if (prevPacketNo != 55555)
+				{
+					if (prevPacketNo + 1 != r.state.packetNo)
+					{
+						qDebug() << "arch packet losted 2 prev " << prevPacketNo << " now " << r.state.packetNo;
+					}
+				}
+
+				prevPacketNo = r.state.packetNo;
+			}
 	}
 
 	m_writablePartition.write(curPartition, buffer, copiedItemsCount, totalFushedStatesCount);
@@ -573,9 +581,7 @@ bool ArchFile::flush(qint64 curPartition,
 
 bool ArchFile::isEmergency() const
 {
-	TEST_PTR_RETURN_FALSE(m_queue);
-
-	return m_queue->size() >= static_cast<int>(m_queue->queueSize() * QUEUE_EMERGENCY_LIMIT);
+	return m_queue.size() >= static_cast<int>(m_queue.queueSize() * QUEUE_EMERGENCY_LIMIT);
 }
 
 QVector<ArchFilePartition::Info> ArchFile::getArchPartitionsInfo(const QString& path)
@@ -710,14 +716,11 @@ void ArchFile::shutdown(qint64 curPartition,
 		m_lastRecord.state.value = 0;
 		m_lastRecord.state.flags.valid = 0;
 		m_lastRecord.state.flags.autoPoint = 1;
+		m_lastRecord.state.packetNo = 0;
 		m_lastRecord.offsetTimes(dT);
 		m_lastRecord.calcCRC16();
 
-		m_flushMutex.lock();
-
-		m_queue->push(m_lastRecord);
-
-		m_flushMutex.unlock();
+		m_queue.push(m_lastRecord);
 	}
 
 	flush(curPartition, totalFlushedStatesCount, true, buffer, bufferSize);
