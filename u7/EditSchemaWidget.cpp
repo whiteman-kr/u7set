@@ -7356,6 +7356,7 @@ void EditSchemaWidget::properties()
 	}
 
 	m_itemsPropertiesDialog->setObjects(editSchemaView()->selectedItems());
+	m_itemsPropertiesDialog->setReadOnly(m_editEngine->readOnly());
 	m_itemsPropertiesDialog->show();
 	return;
 }
@@ -7436,6 +7437,7 @@ void EditSchemaWidget::selectionChanged()
 	}
 
 	m_itemsPropertiesDialog->setObjects(editSchemaView()->selectedItems());
+	m_itemsPropertiesDialog->setReadOnly(m_editEngine->readOnly());
 
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
 	auto selectectNotLocked = selectedNonLockedItems();

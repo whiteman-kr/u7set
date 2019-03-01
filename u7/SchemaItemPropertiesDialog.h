@@ -27,6 +27,7 @@ public:
 
 public:
 	void setObjects(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items);
+	void setReadOnly(bool value);
 
 private:
     virtual void closeEvent(QCloseEvent * e);
