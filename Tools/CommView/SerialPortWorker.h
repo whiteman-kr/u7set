@@ -31,7 +31,7 @@ private:
 
 	bool				m_finishThread = false;
 
-	bool				disconnectSerialPort = false;
+	bool				m_disconnectSerialPort = false;
 
     int                 m_timeout = 0;
 
@@ -39,6 +39,9 @@ public:
 
 	bool				openSerialPort();
 	bool				closeSerialPort();
+
+	bool				runTest();
+	bool				testIsRunning() const;
 
 signals:
 
@@ -52,7 +55,7 @@ public slots:
 
 	void				process();
 	void				finish() { m_finishThread = true; }
-	void				reopenSerialPort() { disconnectSerialPort = true; }
+	void				reopenSerialPort() { m_disconnectSerialPort = true; }
 };
 
 // ==============================================================================================

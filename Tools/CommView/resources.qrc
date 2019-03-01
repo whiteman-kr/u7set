@@ -7,5 +7,6 @@
         <file>icons/CommView.png</file>
         <file>icons/About.png</file>
         <file>icons/toFloat.png</file>
+        <file>icons/Start.png</file>
     </qresource>
 </RCC>

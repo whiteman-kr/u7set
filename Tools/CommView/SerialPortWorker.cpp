@@ -4,7 +4,6 @@
 #include <QDebug>
 #include <QThread>
 
-
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -13,6 +12,7 @@ SerialPortWorker::SerialPortWorker(SerialPortOption *option) :
 	m_option(option),
 	m_port(nullptr),
     m_finishThread(false),
+	m_disconnectSerialPort(false),
     m_timeout(0)
 {
 	m_port = new QSerialPort(this);
@@ -94,7 +94,7 @@ bool SerialPortWorker::openSerialPort()
 
 	connect(m_port, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(serialPortError(QSerialPort::SerialPortError)));
 
-	disconnectSerialPort = false;
+	m_disconnectSerialPort = false;
 
 	return true;
 }
@@ -126,7 +126,7 @@ void SerialPortWorker::serialPortError(QSerialPort::SerialPortError error)
 {
 	if (error == QSerialPort::ResourceError)	// on serial port disconnected
 	{
-		disconnectSerialPort = true;
+		m_disconnectSerialPort = true;
 	}
 }
 
@@ -157,7 +157,7 @@ void SerialPortWorker::process()
 
 		// close port if we have command about disconnected
 		//
-		if (disconnectSerialPort == true)
+		if (m_disconnectSerialPort == true)
 		{
 			closeSerialPort();
 			QThread::msleep(REQUEST_SERIAL_PORT_TIMEOUT);
@@ -172,6 +172,11 @@ void SerialPortWorker::process()
         {
             m_timeout = 0;
             m_option->setNoReply(true);
+
+			if (m_option->testResult().isRunning() == true)
+			{
+				m_option->endTest();
+			}
 
             m_option->setReceivedBytes(0);
             m_option->setSkippedBytes(0);
@@ -202,6 +207,11 @@ void SerialPortWorker::process()
 				requestData.clear();
 
                 m_option->incPacketCount(1);
+
+				if (m_option->testResult().isRunning() == true && m_option->packetCount() == theOptions.testResult().maxPacketCount())
+				{
+					m_option->endTest();
+				}
 			}
 			else
 			{
@@ -212,6 +222,42 @@ void SerialPortWorker::process()
 	}
 
 	emit finished();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SerialPortWorker::runTest()
+{
+	if (m_port == nullptr || m_option == nullptr)
+	{
+		return false;
+	}
+
+	if (m_port->isOpen() == false)
+	{
+		return false;
+	}
+
+	if (m_option->isNoReply() == true)
+	{
+		return false;
+	}
+
+	m_option->beginTest();
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SerialPortWorker::testIsRunning() const
+{
+	if ( m_option == nullptr)
+	{
+		return false;
+	}
+
+	return m_option->testResult().isRunning();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

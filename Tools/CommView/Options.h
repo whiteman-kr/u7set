@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QMutex>
 #include <QtSerialPort/QSerialPort>
+#include <QDateTime>
 
 #include "SerialPortPacket.h"
 
@@ -19,6 +20,122 @@ typedef unsigned long	DWORD;
 
 #define MAKEWORD(a, b)	((WORD)(((BYTE)(((DWORD)(a)) & 0xff)) | ((WORD)((BYTE)(((DWORD)(b)) & 0xff))) << 8))
 #define MAKEDWORD(a, b)	((DWORD)(((WORD)(((DWORD)(a)) & 0xffff)) | ((DWORD)((WORD)(((DWORD)(b)) & 0xffff))) << 16))
+
+
+// ==============================================================================================
+
+#define					RESULT_FILE_NAME				"Results.csv"
+const int				MAX_SKIPPED_BYTES				= 10;		// in % (in percents) from recieved bytes
+const int				MAX_PACKET_COUNT_FOR_TEST		= 100;
+
+// ----------------------------------------------------------------------------------------------
+
+class TestResult
+{
+public:
+
+	explicit TestResult() { clear(); }
+	virtual ~TestResult() {}
+
+private:
+
+	bool m_isRunning = false;
+
+	QString m_startTime;
+	QString m_stopTime;
+
+	int m_receivedBytes = 0;
+	int m_skippedBytes = 0;
+	int m_packetCount = 0;
+
+public:
+
+	void clear()
+	{
+		m_isRunning = false;
+
+		m_startTime.clear();
+		m_stopTime.clear();
+
+		m_receivedBytes = 0;
+		m_skippedBytes = 0;
+		m_packetCount = 0;
+	}
+
+	bool				isRunning() const { return m_isRunning; }
+	void				setIsRunning(bool isRunning) { m_isRunning = isRunning; }
+
+	QString				startTime() const { return m_startTime; }
+	void				setStartTime() { m_startTime = QDateTime::currentDateTime().toString(" dd-MM-yyyy hh:mm:ss.zzz");  }
+
+	QString				stopTime() const { return m_stopTime; }
+	void				setStopTime() { m_stopTime = QDateTime::currentDateTime().toString(" dd-MM-yyyy hh:mm:ss.zzz");  }
+
+	int					receivedBytes() const { return m_receivedBytes; }
+	QString             receivedBytesStr() { return QString::number(m_receivedBytes); }
+	void				setReceivedBytes(int receivedBytes) { m_receivedBytes = receivedBytes; }
+
+	int					skippedBytes() const { return m_skippedBytes; }
+	QString             skippedBytesStr() { return QString::number(m_skippedBytes); }
+	void				setSkippedBytes(int skippedBytes) { m_skippedBytes = skippedBytes; }
+
+	int					packetCount() const { return m_packetCount; }
+	QString             packetCountStr() {  return QString::number(m_packetCount); }
+	void				setPacketCount(int count) { m_packetCount = count; }
+
+	bool				isOk() { return (m_skippedBytes * 100.0 / m_receivedBytes < m_skippedBytes); }
+	QString             isOkStr() { return isOk() == true ? "Passed" : "Fail"; }
+};
+
+// ==============================================================================================
+
+#define					TESTRESULT_OPTIONS_REG_KEY			"Options/TestResult/"
+
+// ----------------------------------------------------------------------------------------------
+
+class TestResultOption : public QObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit	TestResultOption(QObject *parent = 0);
+				TestResultOption(const TestResultOption& from, QObject *parent = 0);
+	virtual		~TestResultOption();
+
+private:
+
+	QString				m_fileName;
+	int					m_percentLimit = MAX_SKIPPED_BYTES;
+	int					m_maxPacketCount = MAX_PACKET_COUNT_FOR_TEST;
+
+	QString				m_moduleID;
+	QString				m_operatorName;
+
+public:
+
+	void				clear();
+
+	QString				fileName() const { return m_fileName; }
+	void				setFileName(const QString& portName) { m_fileName = portName; }
+
+	int					percentLimit() const { return m_percentLimit; }
+	void				setPercentLimit(int percent) { m_percentLimit = percent; }
+
+	int					maxPacketCount() const { return m_maxPacketCount; }
+	void				setMaxPacketCount(int count) { m_maxPacketCount = count; }
+
+	QString				moduleID() const { return m_moduleID; }
+	void				setModuleID(const QString& moduleID) { m_moduleID = moduleID; }
+
+	QString				operatorName() const { return m_operatorName; }
+	void				setOperatorName(const QString& operatorName) { m_operatorName = operatorName; }
+
+	void				load();
+	void				save();
+
+	TestResultOption&	operator=(const TestResultOption& from);
+};
 
 // ==============================================================================================
 
@@ -79,10 +196,12 @@ private:
 	int					m_dataSize = SERIAL_PORT_HEADER_SIZE+MIN_DATA_SIZE;
 	QByteArray			m_data;
 
-	uint				m_receivedBytes = 0;
-	uint				m_skippedBytes = 0;
-	uint				m_queueBytes = 0;
-	uint                m_packetCount = 0;
+	int					m_receivedBytes = 0;
+	int					m_skippedBytes = 0;
+	int					m_queueBytes = 0;
+	int					m_packetCount = 0;
+
+	TestResult			m_testResult;
 
 public:
 
@@ -136,6 +255,11 @@ public:
 	bool                isHeaderCrcOk();
 	bool                isDataCrcOk();
 
+	TestResult&			testResult() { return m_testResult; }
+	void				beginTest();
+	void				endTest();
+
+
 	void				load(int index);
 	void				save(int index);
 
@@ -144,6 +268,7 @@ public:
 signals:
 
 	void				connectChanged();
+	void				testFinished();
 };
 
 // ==============================================================================================
@@ -248,10 +373,14 @@ private:
 
 	QMutex				m_mutex;
 
+	TestResultOption	m_testResult;
 	SerialPortsOption	m_serialPorts;
 	ViewOption			m_view;
 
 public:
+
+	TestResultOption&	testResult() { return m_testResult; }
+	void				setTestResult(const TestResultOption& testResult) { m_testResult = testResult; }
 
 	SerialPortsOption&	serialPorts() { return m_serialPorts; }
 	void				setSerialPorts(const SerialPortsOption& serialPorts) { m_serialPorts = serialPorts; }

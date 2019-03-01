@@ -5,8 +5,11 @@
 #include <QThread>
 #include <QTimer>
 #include <QDebug>
+#include <QFile>
 
 #include "SerialPortDialog.h"
+#include "TestResultDialog.h"
+#include "OptionDialog.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -60,6 +63,12 @@ void MainWindow::createActions()
 {
 	// Ports
 	//
+	m_portStartAction = new QAction(tr("&Start test ..."), this);
+	m_portStartAction->setShortcut(Qt::Key_F5);
+	m_portStartAction->setIcon(QIcon(":/icons/Start.png"));
+	m_portStartAction->setToolTip(tr("Start test for receive data from serial port"));
+	connect(m_portStartAction, &QAction::triggered, this, &MainWindow::startTest);
+
 	m_portReconnectAction = new QAction(tr("Reconnect"), this);
 	m_portReconnectAction->setIcon(QIcon(":/icons/Reconnect.png"));
 	m_portReconnectAction->setToolTip(tr("Reconnect selected serial port"));
@@ -69,9 +78,7 @@ void MainWindow::createActions()
 	m_portReconnectAllAction->setToolTip(tr("Reconnect all serial ports"));
 	connect(m_portReconnectAllAction, &QAction::triggered, this, &MainWindow::reconnectAllSerialPort);
 
-	m_portOptionAction = new QAction(tr("&Options ..."), this);
-	m_portOptionAction->setShortcut(Qt::CTRL + Qt::Key_O);
-	m_portOptionAction->setIcon(QIcon(":/icons/Options.png"));
+	m_portOptionAction = new QAction(tr("&Port options ..."), this);
 	m_portOptionAction->setToolTip(tr("Options of selected serial port"));
 	connect(m_portOptionAction, &QAction::triggered, this, &MainWindow::optionSerialPort);
 
@@ -102,10 +109,15 @@ void MainWindow::createActions()
 
 	// ?
 	//
-	m_pAboutAppAction = new QAction(tr("About ..."), this);
-	m_pAboutAppAction->setIcon(QIcon(":/icons/About.png"));
-	m_pAboutAppAction->setToolTip("");
-	connect(m_pAboutAppAction, &QAction::triggered, this, &MainWindow::aboutApp);
+	m_optionAppAction = new QAction(tr("&Options ..."), this);
+	m_optionAppAction->setIcon(QIcon(":/icons/Options.png"));
+	m_optionAppAction->setToolTip(tr("Options of application"));
+	connect(m_optionAppAction, &QAction::triggered, this, &MainWindow::optionApp);
+
+	m_aboutAppAction = new QAction(tr("About ..."), this);
+	m_aboutAppAction->setIcon(QIcon(":/icons/About.png"));
+	m_aboutAppAction->setToolTip("");
+	connect(m_aboutAppAction, &QAction::triggered, this, &MainWindow::aboutApp);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -122,6 +134,8 @@ void MainWindow::createMenu()
 	//
 	m_portsMenu = pMenuBar->addMenu(tr("&Ports"));
 
+	m_portsMenu->addAction(m_portStartAction);
+	m_portsMenu->addSeparator();
 	m_portsMenu->addAction(m_portReconnectAction);
 	m_portsMenu->addAction(m_portReconnectAllAction);
 	m_portsMenu->addSeparator();
@@ -141,7 +155,8 @@ void MainWindow::createMenu()
 	//
 	m_pInfoMenu = pMenuBar->addMenu(tr("&?"));
 
-	m_pInfoMenu->addAction(m_pAboutAppAction);
+	m_pInfoMenu->addAction(m_optionAppAction);
+	m_pInfoMenu->addAction(m_aboutAppAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -162,13 +177,13 @@ bool MainWindow::createToolBars()
 	addToolBarBreak(Qt::TopToolBarArea);
 	addToolBar(m_mainToolBar);
 
-	m_mainToolBar->addAction(m_portReconnectAction);
+	m_mainToolBar->addAction(m_portStartAction);
 	m_mainToolBar->addSeparator();
 	m_mainToolBar->addAction(m_showInWordAction);
 	m_mainToolBar->addAction(m_showInHexAction);
 	m_mainToolBar->addAction(m_showInFloatAction);
 	m_mainToolBar->addSeparator();
-	m_mainToolBar->addAction(m_portOptionAction);
+	m_mainToolBar->addAction(m_optionAppAction);
 	m_mainToolBar->addSeparator();
 
 	return true;
@@ -332,7 +347,8 @@ bool MainWindow::runSerialPortThread(int index)
 		return false;
 	}
 
-	connect(portOption, SIGNAL(connectChanged()), this, SLOT(portConnectedChanged()), Qt::QueuedConnection);
+	connect(portOption, &SerialPortOption::connectChanged , this, &MainWindow::portConnectedChanged, Qt::QueuedConnection);
+	connect(portOption, &SerialPortOption::testFinished, this, &MainWindow::testFinished, Qt::QueuedConnection);
 
 	SerialPortWorker* pWorker = new SerialPortWorker(portOption);
 	if (pWorker == nullptr)
@@ -354,6 +370,8 @@ bool MainWindow::runSerialPortThread(int index)
 
 	connect(pWorker, SIGNAL(finished()), pWorker, SLOT(deleteLater()));
 	connect(pThread, SIGNAL(finished()), pThread, SLOT(deleteLater()));
+
+
 
 	pThread->start();												// run thread that runs process()
 
@@ -378,6 +396,11 @@ void MainWindow::stopSerialPortThreads()
 {
 	for(int i = 0; i < SERIAL_PORT_COUNT; i++)
 	{
+		if (m_pWorker[i] == nullptr)
+		{
+			continue;
+		}
+
 		m_pWorker[i]->finish();
 	}
 }
@@ -510,6 +533,35 @@ void MainWindow::stopCommDataTimer()
 		m_updateCommDataTimer->stop();
 		delete m_updateCommDataTimer;
 		m_updateCommDataTimer = nullptr;
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::startTest()
+{
+	int portReady = 0;
+
+	for(int i = 0; i < SERIAL_PORT_COUNT; i++ )
+	{
+		if (m_pWorker[i] == nullptr)
+		{
+			continue;
+		}
+
+		bool result = m_pWorker[i]->runTest();
+		if (result == false)
+		{
+			continue;
+		}
+
+		portReady ++;
+	}
+
+	if (portReady != SERIAL_PORT_COUNT)
+	{
+		QMessageBox::information(this, windowTitle(), tr("Not all ports receive data"));
+		return;
 	}
 }
 
@@ -679,6 +731,13 @@ void MainWindow::onColumnAction(QAction* action)
 		}
 	}
 }
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::optionApp()
+{
+	OptionDialog dialog;
+	dialog.exec();
+}
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -692,7 +751,7 @@ void MainWindow::aboutApp()
 
 		QVBoxLayout *mainLayout = new QVBoxLayout;
 
-		QLabel* versionLabel = new QLabel(tr("Version 1.2"), &aboutDialog);
+		QLabel* versionLabel = new QLabel(tr("Version 1.3"), &aboutDialog);
 		versionLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
 		mainLayout->addWidget(versionLabel);
@@ -730,6 +789,100 @@ void MainWindow::updateCommData()
 void MainWindow::portConnectedChanged()
 {
 	m_commStateTable.updateColumn(COMM_STATE_LIST_COLUMN_PORT);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::testFinished()
+{
+	int portReady = 0;
+
+	for(int i = 0; i < SERIAL_PORT_COUNT; i++ )
+	{
+		if (m_pWorker[i] == nullptr)
+		{
+			continue;
+		}
+
+		if (m_pWorker[i]->testIsRunning() == true)
+		{
+			continue;
+		}
+
+		portReady ++;
+	}
+
+	if (portReady != SERIAL_PORT_COUNT)
+	{
+		return;
+	}
+
+	writeTestResultToFile();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::writeTestResultToFile()
+{
+	TestResultDialog dialog(this);
+	if (dialog.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	QFile file(theOptions.testResult().fileName());
+	if (file.open(QIODevice::Append) == false)
+	{
+		QMessageBox::information(this, windowTitle(), tr("Error: result file is not open!"));
+		return;
+	}
+
+	QString str;
+
+	// header
+	//
+	str.append("Operator name;");
+	str.append("Block type;");
+	str.append("Module ID;");
+	str.append("Port;");
+	str.append("Type;");
+	str.append("Received packets;");
+	str.append("Received bytes;");
+	str.append("Skipped bytes;");
+	str.append("Start time;");
+	str.append("Stop time;");
+	str.append("Result;");
+	str.append("\r\n");
+
+	// data
+	//
+	for(int i = 0; i < SERIAL_PORT_COUNT; i++ )
+	{
+		SerialPortOption* portOption = theOptions.serialPorts().port(i);
+		if (portOption == nullptr)
+		{
+			continue;
+		}
+
+		str.append(dialog.operatorName()+ ";");
+		str.append("OCM;");
+		str.append(dialog.moduleID()+ ";");
+		str.append(portOption->portName() + ";");
+		str.append(portOption->typeStr() + ";");
+		str.append(portOption->testResult().packetCountStr() + ";");
+		str.append(portOption->testResult().receivedBytesStr() + ";");
+		str.append(portOption->testResult().skippedBytesStr() + ";");
+		str.append(portOption->testResult().startTime() + ";");
+		str.append(portOption->testResult().stopTime() + ";");
+		str.append(portOption->testResult().isOkStr() + ";");
+		str.append("\r\n");
+	}
+
+	str.append("\r\n");
+
+	file.write(str.toUtf8());
+
+	file.close();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

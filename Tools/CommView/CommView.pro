@@ -18,7 +18,10 @@ SOURCES += main.cpp\
     SerialPortDialog.cpp \
     SerialPortList.cpp \
     SerialPortWorker.cpp \
-    Crc.cpp
+    Crc.cpp \
+    WorkerBase.cpp \
+    TestResultDialog.cpp \
+    OptionDialog.cpp
 
 HEADERS  += MainWindow.h \
     Options.h \
@@ -26,10 +29,12 @@ HEADERS  += MainWindow.h \
     SerialPortList.h \
     SerialPortWorker.h \
     SerialPortPacket.h \
-    Crc.h
+    Crc.h \
+    WorkerBase.h \
+    TestResultDialog.h \
+    OptionDialog.h
 
 RESOURCES += \
-    resources.qrc \
-    resources.qrc
+	resources.qrc
 
 DISTFILES +=
