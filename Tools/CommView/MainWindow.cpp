@@ -541,8 +541,6 @@ void MainWindow::stopCommDataTimer()
 
 void MainWindow::startTest()
 {
-	theOptions.serialPorts().port(0)->saveTestResult();
-
 	int portReady = 0;
 
 	for(int i = 0; i < SERIAL_PORT_COUNT; i++ )
@@ -568,6 +566,7 @@ void MainWindow::startTest()
 	}
 
 	theOptions.testOption().setTestFinisedCount(0);
+	m_portStartAction->setEnabled(false);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -800,6 +799,7 @@ void MainWindow::portConnectedChanged()
 
 void MainWindow::testFinished()
 {
+	m_portStartAction->setEnabled(true);
 	writeTestResultToFile();
 }
 
