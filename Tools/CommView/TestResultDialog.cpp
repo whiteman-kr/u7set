@@ -272,7 +272,7 @@ bool TestResultDialog::createInterface()
 	//
 	QHBoxLayout *moduleIDLayout = new QHBoxLayout;
 
-	m_pModuleIDLabel = new QLabel(tr("Module ID"), this);
+	m_pModuleIDLabel = new QLabel(tr("Module number"), this);
 	m_pModuleIDEdit = new QLineEdit(theOptions.testOption().moduleID(), this);
 
 	moduleIDLayout->addWidget(m_pModuleIDLabel);

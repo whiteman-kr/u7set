@@ -826,7 +826,7 @@ void MainWindow::writeTestResultToFile()
 	//
 	str.append("Operator name;");
 	str.append("Block type;");
-	str.append("Module ID;");
+	str.append("Module number;");
 	str.append("Port;");
 	str.append("Type;");
 	str.append("Received packets;");
