@@ -54,6 +54,11 @@ void SchemaItemPropertiesDialog::setObjects(const std::vector<std::shared_ptr<VF
 	return;
 }
 
+void SchemaItemPropertiesDialog::setReadOnly(bool value)
+{
+	m_propertyEditor->setReadOnly(value);
+}
+
 void SchemaItemPropertiesDialog::closeEvent(QCloseEvent * e)
 {
     Q_UNUSED(e);

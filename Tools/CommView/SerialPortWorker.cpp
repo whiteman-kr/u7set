@@ -4,7 +4,6 @@
 #include <QDebug>
 #include <QThread>
 
-
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -13,6 +12,7 @@ SerialPortWorker::SerialPortWorker(SerialPortOption *option) :
 	m_option(option),
 	m_port(nullptr),
     m_finishThread(false),
+	m_disconnectSerialPort(false),
     m_timeout(0)
 {
 	m_port = new QSerialPort(this);
@@ -94,7 +94,7 @@ bool SerialPortWorker::openSerialPort()
 
 	connect(m_port, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(serialPortError(QSerialPort::SerialPortError)));
 
-	disconnectSerialPort = false;
+	m_disconnectSerialPort = false;
 
 	return true;
 }
@@ -126,7 +126,7 @@ void SerialPortWorker::serialPortError(QSerialPort::SerialPortError error)
 {
 	if (error == QSerialPort::ResourceError)	// on serial port disconnected
 	{
-		disconnectSerialPort = true;
+		m_disconnectSerialPort = true;
 	}
 }
 
@@ -157,14 +157,14 @@ void SerialPortWorker::process()
 
 		// close port if we have command about disconnected
 		//
-		if (disconnectSerialPort == true)
+		if (m_disconnectSerialPort == true)
 		{
 			closeSerialPort();
 			QThread::msleep(REQUEST_SERIAL_PORT_TIMEOUT);
 			continue;
 		}
 
-		// read data
+		//
 		//
 		qApp->processEvents();
 
@@ -173,7 +173,7 @@ void SerialPortWorker::process()
             m_timeout = 0;
             m_option->setNoReply(true);
 
-            m_option->setReceivedBytes(0);
+			m_option->setReceivedBytes(0);
             m_option->setSkippedBytes(0);
             m_option->setPacketCount(0);
         }
@@ -187,31 +187,71 @@ void SerialPortWorker::process()
 			continue;
 		}
 
+		// we have some data
+		//
         m_timeout = 0;
         m_option->setNoReply(false);
 
+		// read data
+		//
 		requestData += m_port->read(1);
 		m_option->incReceivedBytes(1);
 
+		// if amount of received data == size of packet
+		//
 		if (requestData.count() == m_option->dataSize())
 		{
-			SerialPortDataHeader* pHeader = (SerialPortDataHeader*) requestData.data();
-			if (pHeader->Signature == SERIAL_PORT_DATA_SIGN)
+			SerialPortDataHeader* pHeader = (SerialPortDataHeader*) requestData.data();			// take header of packet
+			if (pHeader->Signature == SERIAL_PORT_DATA_SIGN)									// if header is correct
 			{
-				m_option->setData(requestData);
-				requestData.clear();
+				m_option->setData(requestData);													// update data in packet
+				requestData.clear();															// clear received data
 
-                m_option->incPacketCount(1);
+				m_option->incPacketCount(1);													// inc packet count
 			}
 			else
 			{
-				requestData.remove(0, 1);
-				m_option->incSkippedBytes(1);
+				requestData.remove(0, 1);														//
+				m_option->incSkippedBytes(1);													// inc skipped bytes
+			}
+		}
+
+		// for test
+		//
+		if (m_option->testResult().isRunning() == true)
+		{
+			if (m_option->receivedBytes() >= (m_option->dataSize() * theOptions.testOption().maxPacketCount()))
+			{
+				m_option->saveTestResult();
 			}
 		}
 	}
 
 	emit finished();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SerialPortWorker::runTest()
+{
+	if (m_port == nullptr || m_option == nullptr)
+	{
+		return false;
+	}
+
+	if (m_port->isOpen() == false)
+	{
+		return false;
+	}
+
+	if (m_option->isNoReply() == true)
+	{
+		return false;
+	}
+
+	m_option->runTest();
+
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

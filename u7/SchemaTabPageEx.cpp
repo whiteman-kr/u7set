@@ -745,6 +745,29 @@ std::shared_ptr<DbFileInfo> SchemaListModelEx::fileSharedPtr(const QModelIndex& 
 	return m_files.file(fileId);
 }
 
+bool SchemaListModelEx::isFolder(const QModelIndex& modelIndex) const
+{
+	if (modelIndex.isValid() == false)
+	{
+		return false;
+	}
+
+	int fileId = modelIndex.internalId();
+	assert(fileId != -1);
+
+	// --
+	//
+	auto foundFile = m_files.file(fileId);
+	if (foundFile != nullptr)
+	{
+		return foundFile->isFolder();
+	}
+	else
+	{
+		return false;
+	}
+}
+
 QModelIndexList SchemaListModelEx::searchFor(const QString searchText)
 {
 	m_searchText = searchText;
@@ -1234,6 +1257,37 @@ void SchemaProxyListModel::setSourceModel(QAbstractItemModel* sourceModel)
 	assert(m_sourceModel != nullptr);
 
 	return;
+}
+
+bool SchemaProxyListModel::lessThan(const QModelIndex& sourceLeft, const QModelIndex& sourceRight) const
+{
+	// All folders alway at top
+	//
+	bool leftIsFolder = m_sourceModel->isFolder(sourceLeft);
+	bool rightIsFolder = m_sourceModel->isFolder(sourceRight);
+
+	bool result = false;
+
+	if ((leftIsFolder == true && rightIsFolder == true) ||
+		(leftIsFolder == false && rightIsFolder == false))
+	{
+		result = QSortFilterProxyModel::lessThan(sourceLeft, sourceRight);
+	}
+	else
+	{
+		// Relying on sort order helps to kepp folders always at the top
+		//
+		if (sortOrder() == Qt::AscendingOrder)
+		{
+			result = (leftIsFolder == true && rightIsFolder == false);
+		}
+		else
+		{
+			result = (leftIsFolder == false && rightIsFolder == true);
+		}
+	}
+
+	return result;
 }
 
 DbFileInfo SchemaProxyListModel::file(const QModelIndex& mi) const

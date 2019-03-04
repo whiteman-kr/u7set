@@ -84,6 +84,7 @@ public:
 	//
 signals:
 	void configurationArrived(ConfigSettings configuration);
+	void unknownClient();										// Error f CfgService cannot find SoftwareID
 
 	// slots
 	//
