@@ -24,39 +24,25 @@ bool OptionDialog::createInterface()
 	setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Options.png"));
 	setWindowTitle(tr("Application options"));
-	setFixedSize(300, 150);
+	setFixedSize(300, 120);
 
 	// Result File Name
 	//
 	QHBoxLayout *fileNameLayout = new QHBoxLayout;
 
 	m_pFileNameLabel = new QLabel(tr("Result file name"), this);
-	m_pFileNameEdit = new QLineEdit(theOptions.testResult().fileName(), this);
+	m_pFileNameEdit = new QLineEdit(theOptions.testOption().fileName(), this);
 
 	fileNameLayout->addWidget(m_pFileNameLabel);
 	fileNameLayout->addStretch();
 	fileNameLayout->addWidget(m_pFileNameEdit);
-
-
-	// Persent limit
-	//
-	QHBoxLayout *percentLayout = new QHBoxLayout;
-
-	m_pPercentLabel = new QLabel(tr("Max skipped data (%)"), this);
-	m_pPercentEdit = new QLineEdit(QString::number(theOptions.testResult().percentLimit()), this);
-	m_pPercentEdit->setValidator(new QIntValidator(1, 100, this));
-
-	percentLayout->addWidget(m_pPercentLabel);
-	percentLayout->addStretch();
-	percentLayout->addWidget(m_pPercentEdit);
-
 
 	// Max packet count
 	//
 	QHBoxLayout *packetCountLayout = new QHBoxLayout;
 
 	m_pPacketCountLabel = new QLabel(tr("Max packet amount for test"), this);
-	m_pPacketCountEdit = new QLineEdit(QString::number(theOptions.testResult().maxPacketCount()), this);
+	m_pPacketCountEdit = new QLineEdit(QString::number(theOptions.testOption().maxPacketCount()), this);
 	m_pPacketCountEdit->setValidator(new QIntValidator(this));
 
 	packetCountLayout->addWidget(m_pPacketCountLabel);
@@ -75,7 +61,6 @@ bool OptionDialog::createInterface()
 	QVBoxLayout *optionLayout = new QVBoxLayout;
 
 	optionLayout->addLayout(fileNameLayout);
-	optionLayout->addLayout(percentLayout);
 	optionLayout->addLayout(packetCountLayout);
 
 	QGroupBox* group = new QGroupBox();
@@ -102,14 +87,6 @@ void OptionDialog::onOk()
 		return;
 	}
 
-
-	int pecentLimit = m_pPercentEdit->text().toInt();
-	if (pecentLimit <= 0 || pecentLimit > 100)
-	{
-		QMessageBox::information(this, windowTitle(), tr("Please, input max skipped data in percentages!"));
-		return;
-	}
-
 	int packetCount = m_pPacketCountEdit->text().toInt();
 	if (packetCount == 0)
 	{
@@ -117,10 +94,9 @@ void OptionDialog::onOk()
 		return;
 	}
 
-	theOptions.testResult().setFileName(fileName);
-	theOptions.testResult().setPercentLimit(pecentLimit);
-	theOptions.testResult().setMaxPacketCount(packetCount);
-	theOptions.testResult().save();
+	theOptions.testOption().setFileName(fileName);
+	theOptions.testOption().setMaxPacketCount(packetCount);
+	theOptions.testOption().save();
 
 	accept();
 }

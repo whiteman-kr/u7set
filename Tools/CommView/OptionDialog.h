@@ -28,9 +28,6 @@ private:
 	QLabel*					m_pFileNameLabel = nullptr;
 	QLineEdit*				m_pFileNameEdit = nullptr;
 
-	QLabel*					m_pPercentLabel = nullptr;
-	QLineEdit*				m_pPercentEdit = nullptr;
-
 	QLabel*					m_pPacketCountLabel = nullptr;
 	QLineEdit*				m_pPacketCountEdit = nullptr;
 

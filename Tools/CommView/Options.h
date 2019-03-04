@@ -11,6 +11,8 @@
 // ==============================================================================================
 
 const int				SERIAL_PORT_COUNT			= 5;
+const int				APP_VER						= 3;
+
 
 // ==============================================================================================
 
@@ -24,9 +26,9 @@ typedef unsigned long	DWORD;
 
 // ==============================================================================================
 
-#define					RESULT_FILE_NAME				"Results.csv"
-const int				MAX_SKIPPED_BYTES				= 10;		// in % (in percents) from recieved bytes
-const int				MAX_PACKET_COUNT_FOR_TEST		= 100;
+#define					RESULT_FILE_NAME					"Results.csv"
+const int				MAX_SKIPPED_BYTES_IN_PERCENTAGES	= 10;		// in % (in percents) from recieved bytes
+const int				MAX_PACKET_COUNT_FOR_TEST			= 100;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -40,6 +42,7 @@ public:
 private:
 
 	bool m_isRunning = false;
+	bool m_resultIsClear = false;
 
 	QString m_startTime;
 	QString m_stopTime;
@@ -48,22 +51,27 @@ private:
 	int m_skippedBytes = 0;
 	int m_packetCount = 0;
 
+	bool m_result = false;
+
 public:
 
 	void clear()
 	{
-		m_isRunning = false;
-
 		m_startTime.clear();
 		m_stopTime.clear();
 
 		m_receivedBytes = 0;
 		m_skippedBytes = 0;
 		m_packetCount = 0;
+
+		m_result = false;
 	}
 
 	bool				isRunning() const { return m_isRunning; }
-	void				setIsRunning(bool isRunning) { m_isRunning = isRunning; }
+    void				setIsRunning(bool running) { m_isRunning = running; }
+
+	bool				resultIsClear() const { return m_resultIsClear; }
+    void				setResultIsClear(bool resultIsClear) { m_resultIsClear = resultIsClear; }
 
 	QString				startTime() const { return m_startTime; }
 	void				setStartTime() { m_startTime = QDateTime::currentDateTime().toString(" dd-MM-yyyy hh:mm:ss.zzz");  }
@@ -83,8 +91,10 @@ public:
 	QString             packetCountStr() {  return QString::number(m_packetCount); }
 	void				setPacketCount(int count) { m_packetCount = count; }
 
-	bool				isOk() { return (m_skippedBytes * 100.0 / m_receivedBytes < m_skippedBytes); }
-	QString             isOkStr() { return isOk() == true ? "Passed" : "Fail"; }
+	bool				isOk() { return m_result; }
+	QString             isOkStr() { return m_result == true ? "Passed" : "Fail"; }
+	void				setIsOk(bool result) { m_result = result;  }
+
 };
 
 // ==============================================================================================
@@ -99,18 +109,19 @@ class TestResultOption : public QObject
 
 public:
 
-	explicit	TestResultOption(QObject *parent = 0);
-				TestResultOption(const TestResultOption& from, QObject *parent = 0);
+	explicit	TestResultOption(QObject *parent = nullptr);
+				TestResultOption(const TestResultOption& from, QObject *parent = nullptr);
 	virtual		~TestResultOption();
 
 private:
 
 	QString				m_fileName;
-	int					m_percentLimit = MAX_SKIPPED_BYTES;
 	int					m_maxPacketCount = MAX_PACKET_COUNT_FOR_TEST;
 
 	QString				m_moduleID;
 	QString				m_operatorName;
+
+	int					m_testFinisedCount = 0;
 
 public:
 
@@ -118,9 +129,6 @@ public:
 
 	QString				fileName() const { return m_fileName; }
 	void				setFileName(const QString& portName) { m_fileName = portName; }
-
-	int					percentLimit() const { return m_percentLimit; }
-	void				setPercentLimit(int percent) { m_percentLimit = percent; }
 
 	int					maxPacketCount() const { return m_maxPacketCount; }
 	void				setMaxPacketCount(int count) { m_maxPacketCount = count; }
@@ -131,10 +139,18 @@ public:
 	QString				operatorName() const { return m_operatorName; }
 	void				setOperatorName(const QString& operatorName) { m_operatorName = operatorName; }
 
+	int					testFinisedCount() const { return m_testFinisedCount; }
+	void				setTestFinisedCount(int count) { m_testFinisedCount = count; }
+	void				updateTestFinisedCount();
+
 	void				load();
 	void				save();
 
 	TestResultOption&	operator=(const TestResultOption& from);
+
+signals:
+
+	void				testFinished();
 };
 
 // ==============================================================================================
@@ -178,8 +194,8 @@ class SerialPortOption : public QObject
 
 public:
 
-	explicit	SerialPortOption(QObject *parent = 0);
-				SerialPortOption(const SerialPortOption& from, QObject *parent = 0);
+	explicit	SerialPortOption(QObject *parent = nullptr);
+				SerialPortOption(const SerialPortOption& from, QObject *parent = nullptr);
 	virtual		~SerialPortOption();
 
 private:
@@ -211,7 +227,7 @@ public:
 	void				setConnected(bool connected);
 
 	bool				isNoReply() const { return m_noReply; }
-	void				setNoReply(bool noReply) { m_noReply = noReply; }
+	void				setNoReply(bool noReply);
 
 	QString				portName() const { return m_portName; }
 	void				setPortName(const QString& portName) { m_portName = portName; }
@@ -256,8 +272,9 @@ public:
 	bool                isDataCrcOk();
 
 	TestResult&			testResult() { return m_testResult; }
-	void				beginTest();
-	void				endTest();
+	void				runTest();
+	void				clearTestResult();
+	void				saveTestResult();
 
 
 	void				load(int index);
@@ -268,7 +285,6 @@ public:
 signals:
 
 	void				connectChanged();
-	void				testFinished();
 };
 
 // ==============================================================================================
@@ -283,8 +299,8 @@ class SerialPortsOption : public QObject
 
 public:
 
-	explicit	SerialPortsOption(QObject *parent = 0);
-				SerialPortsOption(const SerialPortsOption& from, QObject *parent = 0);
+	explicit	SerialPortsOption(QObject *parent = nullptr);
+				SerialPortsOption(const SerialPortsOption& from, QObject *parent = nullptr);
 	virtual		~SerialPortsOption();
 
 private:
@@ -324,8 +340,8 @@ class ViewOption : public QObject
 
 public:
 
-	explicit	ViewOption(QObject *parent = 0);
-				ViewOption(const ViewOption& from, QObject *parent = 0);
+	explicit	ViewOption(QObject *parent = nullptr);
+				ViewOption(const ViewOption& from, QObject *parent = nullptr);
 	virtual		~ViewOption();
 
 private:
@@ -365,8 +381,8 @@ class Options : public QObject
 
 public:
 
-	explicit	Options(QObject *parent = 0);
-				Options(const Options& from, QObject *parent = 0);
+	explicit	Options(QObject *parent = nullptr);
+				Options(const Options& from, QObject *parent = nullptr);
 	virtual		~Options();
 
 private:
@@ -379,7 +395,7 @@ private:
 
 public:
 
-	TestResultOption&	testResult() { return m_testResult; }
+	TestResultOption&	testOption() { return m_testResult; }
 	void				setTestResult(const TestResultOption& testResult) { m_testResult = testResult; }
 
 	SerialPortsOption&	serialPorts() { return m_serialPorts; }

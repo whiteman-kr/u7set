@@ -9,7 +9,7 @@
 
 // ==============================================================================================
 
-const int REQUEST_SERIAL_PORT_TIMEOUT = 10; // 10 ms
+const int REQUEST_SERIAL_PORT_TIMEOUT = 50; // 50 ms
 
 const int TIMEOUT_COUNT = 10;
 
@@ -41,7 +41,6 @@ public:
 	bool				closeSerialPort();
 
 	bool				runTest();
-	bool				testIsRunning() const;
 
 signals:
 

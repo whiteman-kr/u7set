@@ -164,7 +164,7 @@ void SerialPortWorker::process()
 			continue;
 		}
 
-		// read data
+		//
 		//
 		qApp->processEvents();
 
@@ -173,12 +173,7 @@ void SerialPortWorker::process()
             m_timeout = 0;
             m_option->setNoReply(true);
 
-			if (m_option->testResult().isRunning() == true)
-			{
-				m_option->endTest();
-			}
-
-            m_option->setReceivedBytes(0);
+			m_option->setReceivedBytes(0);
             m_option->setSkippedBytes(0);
             m_option->setPacketCount(0);
         }
@@ -192,31 +187,42 @@ void SerialPortWorker::process()
 			continue;
 		}
 
+		// we have some data
+		//
         m_timeout = 0;
         m_option->setNoReply(false);
 
+		// read data
+		//
 		requestData += m_port->read(1);
 		m_option->incReceivedBytes(1);
 
+		// if amount of received data == size of packet
+		//
 		if (requestData.count() == m_option->dataSize())
 		{
-			SerialPortDataHeader* pHeader = (SerialPortDataHeader*) requestData.data();
-			if (pHeader->Signature == SERIAL_PORT_DATA_SIGN)
+			SerialPortDataHeader* pHeader = (SerialPortDataHeader*) requestData.data();			// take header of packet
+			if (pHeader->Signature == SERIAL_PORT_DATA_SIGN)									// if header is correct
 			{
-				m_option->setData(requestData);
-				requestData.clear();
+				m_option->setData(requestData);													// update data in packet
+				requestData.clear();															// clear received data
 
-                m_option->incPacketCount(1);
-
-				if (m_option->testResult().isRunning() == true && m_option->packetCount() == theOptions.testResult().maxPacketCount())
-				{
-					m_option->endTest();
-				}
+				m_option->incPacketCount(1);													// inc packet count
 			}
 			else
 			{
-				requestData.remove(0, 1);
-				m_option->incSkippedBytes(1);
+				requestData.remove(0, 1);														//
+				m_option->incSkippedBytes(1);													// inc skipped bytes
+			}
+		}
+
+		// for test
+		//
+		if (m_option->testResult().isRunning() == true)
+		{
+			if (m_option->receivedBytes() >= (m_option->dataSize() * theOptions.testOption().maxPacketCount()))
+			{
+				m_option->saveTestResult();
 			}
 		}
 	}
@@ -243,21 +249,9 @@ bool SerialPortWorker::runTest()
 		return false;
 	}
 
-	m_option->beginTest();
+	m_option->runTest();
 
 	return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool SerialPortWorker::testIsRunning() const
-{
-	if ( m_option == nullptr)
-	{
-		return false;
-	}
-
-	return m_option->testResult().isRunning();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

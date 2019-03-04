@@ -11,8 +11,8 @@ TEMPLATE = app
 
 #c++17 support
 #
-gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+#gcc:CONFIG += c++1z
+#win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # DESTDIR
 #

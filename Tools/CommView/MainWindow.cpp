@@ -348,7 +348,6 @@ bool MainWindow::runSerialPortThread(int index)
 	}
 
 	connect(portOption, &SerialPortOption::connectChanged , this, &MainWindow::portConnectedChanged, Qt::QueuedConnection);
-	connect(portOption, &SerialPortOption::testFinished, this, &MainWindow::testFinished, Qt::QueuedConnection);
 
 	SerialPortWorker* pWorker = new SerialPortWorker(portOption);
 	if (pWorker == nullptr)
@@ -388,6 +387,8 @@ void MainWindow::runSerialPortThreads()
 	{
 		runSerialPortThread(i);
 	}
+
+	connect(&theOptions.testOption(), &TestResultOption::testFinished, this, &MainWindow::testFinished, Qt::QueuedConnection);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -540,6 +541,8 @@ void MainWindow::stopCommDataTimer()
 
 void MainWindow::startTest()
 {
+	theOptions.serialPorts().port(0)->saveTestResult();
+
 	int portReady = 0;
 
 	for(int i = 0; i < SERIAL_PORT_COUNT; i++ )
@@ -563,6 +566,8 @@ void MainWindow::startTest()
 		QMessageBox::information(this, windowTitle(), tr("Not all ports receive data"));
 		return;
 	}
+
+	theOptions.testOption().setTestFinisedCount(0);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -751,7 +756,7 @@ void MainWindow::aboutApp()
 
 		QVBoxLayout *mainLayout = new QVBoxLayout;
 
-		QLabel* versionLabel = new QLabel(tr("Version 1.3"), &aboutDialog);
+		QLabel* versionLabel = new QLabel(tr("Version 1.%1").arg(APP_VER), &aboutDialog);
 		versionLabel->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
 
 		mainLayout->addWidget(versionLabel);
@@ -795,28 +800,6 @@ void MainWindow::portConnectedChanged()
 
 void MainWindow::testFinished()
 {
-	int portReady = 0;
-
-	for(int i = 0; i < SERIAL_PORT_COUNT; i++ )
-	{
-		if (m_pWorker[i] == nullptr)
-		{
-			continue;
-		}
-
-		if (m_pWorker[i]->testIsRunning() == true)
-		{
-			continue;
-		}
-
-		portReady ++;
-	}
-
-	if (portReady != SERIAL_PORT_COUNT)
-	{
-		return;
-	}
-
 	writeTestResultToFile();
 }
 
@@ -830,7 +813,7 @@ void MainWindow::writeTestResultToFile()
 		return;
 	}
 
-	QFile file(theOptions.testResult().fileName());
+	QFile file(theOptions.testOption().fileName());
 	if (file.open(QIODevice::Append) == false)
 	{
 		QMessageBox::information(this, windowTitle(), tr("Error: result file is not open!"));
@@ -851,7 +834,7 @@ void MainWindow::writeTestResultToFile()
 	str.append("Skipped bytes;");
 	str.append("Start time;");
 	str.append("Stop time;");
-	str.append("Result;");
+	str.append(QString("Result (ver 1.%1);").arg(APP_VER));
 	str.append("\r\n");
 
 	// data

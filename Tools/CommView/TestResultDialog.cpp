@@ -100,7 +100,7 @@ QVariant TestResultTable::data(const QModelIndex &index, int role) const
 			case TEST_RESULT_COLUMN_RECEIVED:			result = Qt::AlignCenter;	break;
 			case TEST_RESULT_COLUMN_SKIPPED:			result = Qt::AlignCenter;	break;
 			case TEST_RESULT_COLUMN_RESULT:				result = Qt::AlignCenter;	break;
-			default:									assert(0);
+			default:									assert(false);
 		}
 
 		return result;
@@ -159,7 +159,7 @@ QString TestResultTable::text(int row, int column, SerialPortOption* pOption) co
 		case TEST_RESULT_COLUMN_RECEIVED:	result = pOption->testResult().receivedBytesStr();	break;
 		case TEST_RESULT_COLUMN_SKIPPED:	result = pOption->testResult().skippedBytesStr();	break;
 		case TEST_RESULT_COLUMN_RESULT:		result = pOption->testResult().isOkStr();			break;
-		default:							assert(0);
+		default:							assert(0); break;
 	}
 
 
@@ -273,7 +273,7 @@ bool TestResultDialog::createInterface()
 	QHBoxLayout *moduleIDLayout = new QHBoxLayout;
 
 	m_pModuleIDLabel = new QLabel(tr("Module ID"), this);
-	m_pModuleIDEdit = new QLineEdit(theOptions.testResult().moduleID(), this);
+	m_pModuleIDEdit = new QLineEdit(theOptions.testOption().moduleID(), this);
 
 	moduleIDLayout->addWidget(m_pModuleIDLabel);
 	moduleIDLayout->addWidget(m_pModuleIDEdit);
@@ -284,7 +284,7 @@ bool TestResultDialog::createInterface()
 	QHBoxLayout *operatorNameLayout = new QHBoxLayout;
 
 	m_pOperatorNameLabel = new QLabel(tr("Operator name"), this);
-	m_pOperatorNameEdit = new QLineEdit(theOptions.testResult().operatorName(), this);
+	m_pOperatorNameEdit = new QLineEdit(theOptions.testOption().operatorName(), this);
 
 	operatorNameLayout->addWidget(m_pOperatorNameLabel);
 	operatorNameLayout->addWidget(m_pOperatorNameEdit);
@@ -371,9 +371,9 @@ void TestResultDialog::onOk()
 		return;
 	}
 
-	theOptions.testResult().setModuleID(m_moduleID);
-	theOptions.testResult().setOperatorName(m_operatorName);
-	theOptions.testResult().save();
+	theOptions.testOption().setModuleID(m_moduleID);
+	theOptions.testOption().setOperatorName(m_operatorName);
+	theOptions.testOption().save();
 
 	accept();
 }
