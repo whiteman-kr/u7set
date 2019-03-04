@@ -355,7 +355,7 @@ public:
 	bool processRupFrameTimeQueue(const QThread* thread);
 	bool getDataToParsing(Times* times, quint16* packetNo, const char** rupData, quint32* rupDataSize, bool* dataReceivingTimeout);
 
-	bool rupFramesQueueIsEmpty() const { return m_rupFrameTimeQueue.isEmpty(); }
+	bool rupFramesQueueIsEmpty() const { return m_rupFrameTimeQueue.isEmpty(QThread::currentThread()); }
 
 	// Used by PacketViewer
 	//

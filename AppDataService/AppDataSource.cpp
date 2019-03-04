@@ -710,20 +710,6 @@ bool AppDataSource::parsePacket()
 
 	bool result = getDataToParsing(&times, &packetNo, &rupData, &rupDataSize, &dataReceivingTimeout);
 
-	{// START_DEBUG_CODE
-		static quint16 prevPacketNo = 55555;
-
-		if (prevPacketNo != 55555)
-		{
-			if (prevPacketNo + 1 != packetNo)
-			{
-				qDebug() << "packet losted 2";
-			}
-		}
-
-		prevPacketNo = packetNo;
-	}
-
 	if (result == false)
 	{
 		assert(false);
@@ -739,13 +725,6 @@ bool AppDataSource::parsePacket()
 
 	for(const SignalParseInfo& parseInfo : m_signalsParseInfo)
 	{
-		// START_DEBUG_CODE
-
-		if (parseInfo.appSignalID != "#MEANDR")
-		{
-			continue;
-		}
-
 		AppSignalStateEx* signalState = (*m_signalStates)[parseInfo.index];
 
 		if (signalState == nullptr)
@@ -781,8 +760,7 @@ bool AppDataSource::parsePacket()
 		signalState->setState(times, packetNo, validity, value, autoArchivingGroup, m_signalStatesQueue, thread);
 	}
 
-	m_signalStatesQueueSize = m_signalStatesQueue.size();
-	m_signalStatesQueueMaxSize = m_signalStatesQueue.maxSize();
+	m_signalStatesQueue.getSizes(&m_signalStatesQueueSize, &m_signalStatesQueueMaxSize, nullptr, thread);
 
 	return true;
 }
@@ -859,23 +837,6 @@ bool AppDataSource::getSignalState(SimpleAppSignalState* state, const QThread* t
 	bool result = m_signalStatesQueue.pop(state, thread);
 
 	m_signalStatesQueueSize = m_signalStatesQueue.size(thread);
-
-	{// START_DEBUG_CODE
-		if (result == true)
-		{
-			static quint16 prevPacketNo = 55555;
-
-			if (prevPacketNo != 55555)
-			{
-				if (prevPacketNo + 1 != state->packetNo)
-				{
-					qDebug() << "packet losted 3 prev " << prevPacketNo << " now " << state->packetNo;
-				}
-			}
-
-			prevPacketNo = state->packetNo;
-		}
-	}
 
 	return result;
 }

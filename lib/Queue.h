@@ -8,10 +8,6 @@
 
 class QueueIndex
 {
-private:
-	int m_index = 0;
-	int m_maxValue = 0;
-
 public:
 	QueueIndex(int maxValue) :
 		m_maxValue(maxValue)
@@ -48,6 +44,10 @@ public:
 	void reset() { m_index = 0; }
 	void setMaxValue(int maxValue) { m_maxValue = maxValue; }
 	void setValue(int value) { m_index = value; }
+
+private:
+	int m_index = 0;
+	int m_maxValue = 0;
 };
 
 class QueueBase : public QObject
@@ -336,78 +336,6 @@ public:
 	TYPE* beginPop() { return reinterpret_cast<TYPE*>(LockFreeQueueBase::beginPop()); }
 };
 
-
-// ----------------------------------------------------------------------------------------------------
-//
-//	FastQueueBase - fast, non thread-safe queue!
-//
-// ----------------------------------------------------------------------------------------------------
-
-/*class FastQueueBase
-{
-public:
-	FastQueueBase(int itemSize, int queueSize);
-	virtual ~FastQueueBase();
-
-	int size() const { return m_size; }
-
-	bool isEmpty() const { return m_size == 0; }
-	bool isNotEmpty() const { return m_size > 0; }
-	bool isFull() const { return m_size == m_queueSize; }
-	int queueSize() const { return m_queueSize; }
-
-	bool push(const char* item);
-	bool pop(char* item);
-
-	void resizeAndCopy(int newQueueSize);
-
-	bool copyToBuffer(char* buffer, int bufferSize, int* copiedDataSize);
-
-private:
-	char* allocateBuffer(int sizeBytes);
-
-protected:
-	char* m_buffer = nullptr;
-
-	int m_itemSize = 0;
-	int m_queueSize = 0;
-
-	int m_size = 0;								// current queue size
-
-	QueueIndex m_writeIndex;
-	QueueIndex m_readIndex;
-
-private:
-	static const int MAX_QUEUE_MEMORY_SIZE = 50 * 1024 * 1024;			// 50 MBytes
-};
-
-
-template <typename TYPE>
-class FastQueue : public FastQueueBase
-{
-public:
-	FastQueue(int queueSize) :
-		FastQueueBase(sizeof(TYPE), queueSize)
-	{
-		// checking, that memcpy can be used to copy queue items of type TYPE
-		//
-		assert(std::is_trivially_copyable<TYPE>::value == true);
-	}
-
-	bool push(const TYPE& ref) { return FastQueueBase::push(reinterpret_cast<const char*>(&ref)); }
-	bool pop(TYPE* ptr) { return FastQueueBase::pop(reinterpret_cast<char*>(ptr)); }
-
-	bool copyToBuffer(TYPE* buffer, int bufferSizeInItems, int* copiedItemsCount)
-	{
-		bool result = FastQueueBase::copyToBuffer(reinterpret_cast<char*>(buffer), bufferSizeInItems * sizeof(TYPE), copiedItemsCount);
-
-		*copiedItemsCount /= sizeof(TYPE);
-
-		return result;
-	}
-};
-*/
-
 template <typename T>
 class FastThreadSafeQueue
 {
@@ -415,7 +343,8 @@ class FastThreadSafeQueue
 	// One Writer - One Reader using only!!!
 	//
 public:
-	static const int MAX_QUEUE_MEMORY_SIZE = 100 * 1024 * 1024;			// 100 MBytes
+	static const int MAX_QUEUE_MEMORY_SIZE = 50 * 1024 * 1024;			// 50 MBytes
+	static const int MIN_QUEUE_SIZE = 3;
 
 public:
 	FastThreadSafeQueue(int queueSize);
@@ -423,8 +352,9 @@ public:
 
 	void resize(int newSize);
 
-	void push(const T& item, const QThread* thread);
+	void push(const T& item, const QThread* thread, int* curSize = nullptr, int* curMaxSize = nullptr);
 	bool pop(T* item, const QThread* thread);
+	bool peekAt(int index, T* item, const QThread* thread);
 
 	bool isFull(const QThread* thread) const;
 	bool isEmpty(const QThread* thread) const;
@@ -434,7 +364,7 @@ public:
 	int maxSize(const QThread* thread) const;
 
 	T* beginPush(const QThread* thread);
-	void completePush(const QThread* thread);
+	void completePush(const QThread* thread, int* curSize = nullptr, int* curMaxSize = nullptr);
 
 	T* beginPop(const QThread* thread);
 	void completePop(const QThread* thread);
@@ -442,8 +372,15 @@ public:
 	bool copyToBuffer(T* buffer, int bufferSizeInItems, int* copiedItemsCount, const QThread* thread);
 	void nonDestructiveResize(int newQueueSize, const QThread* thread);
 
+	void getSizes(int* curSize, int* curMaxSize, int* queueSize, const QThread* thread);
+
+	void resetMaxSize(const QThread* thread);
+
+	void clear(const QThread* thread);
+
 private:
-	int checkSize(int newSize);
+	int checkQueueSize(int newSize) const;
+	void nonLockResizing(int newSize);
 
 private:
 	T* m_buffer = nullptr;
@@ -483,41 +420,21 @@ FastThreadSafeQueue<T>::~FastThreadSafeQueue()
 template <typename T>
 void FastThreadSafeQueue<T>::resize(int newSize)
 {
-	assert(newSize > 0);
-
 	AUTO_LOCK_BY_CURRENT_THREAD(m_mutex);
 
-	if (m_buffer != nullptr)
-	{
-		delete [] m_buffer;
-		m_buffer = nullptr;
-	}
+	assert(m_pushIsBegan == false);
+	assert(m_popIsBegan == false);
 
-	m_queueSize = newSize;
-
-	if (m_queueSize * sizeof(T) > MAX_QUEUE_MEMORY_SIZE)
-	{
-		assert(false);
-
-		m_queueSize = MAX_QUEUE_MEMORY_SIZE / sizeof(T);
-	}
-
-	m_readIndex.setMaxValue(m_queueSize);
-	m_readIndex.reset();
-
-	m_writeIndex.setMaxValue(m_queueSize);
-	m_writeIndex.reset();
-
-	m_buffer = new T[m_queueSize];
-
-	m_size = 0;
-	m_maxSize = 0;
+	nonLockResizing(newSize);
 }
 
 template <typename T>
-void FastThreadSafeQueue<T>::push(const T& item, const QThread* thread)
+void FastThreadSafeQueue<T>::push(const T& item, const QThread* thread, int* curSize, int* curMaxSize)
 {
 	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+
+	assert(m_pushIsBegan == false);
+	assert(m_popIsBegan == false);
 
 	if (m_size == m_queueSize)
 	{
@@ -534,9 +451,19 @@ void FastThreadSafeQueue<T>::push(const T& item, const QThread* thread)
 	m_writeIndex++;
 	m_size++;
 
+	if (curSize != nullptr)
+	{
+		*curSize = m_size;
+	}
+
 	if (m_size > m_maxSize)
 	{
 		m_maxSize = m_size;
+	}
+
+	if (curMaxSize != nullptr)
+	{
+		*curMaxSize = m_maxSize;
 	}
 }
 
@@ -551,6 +478,9 @@ bool FastThreadSafeQueue<T>::pop(T* item, const QThread* thread)
 
 	AUTO_LOCK_BY_THREAD(m_mutex, thread);
 
+	assert(m_pushIsBegan == false);
+	assert(m_popIsBegan == false);
+
 	if (m_size == 0)
 	{
 		return false;
@@ -560,6 +490,32 @@ bool FastThreadSafeQueue<T>::pop(T* item, const QThread* thread)
 
 	m_readIndex++;
 	m_size--;
+
+	return true;
+}
+
+template <typename T>
+bool FastThreadSafeQueue<T>::peekAt(int index, T* item, const QThread* thread)
+{
+	if (item == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+
+	if (index < 0 || index >= m_size)
+	{
+		assert(false);
+		return false;
+	}
+
+	QueueIndex readIndex = m_readIndex;
+
+	readIndex += index;
+
+	memcpy(item, m_buffer + readIndex(), sizeof(T));
 
 	return true;
 }
@@ -611,6 +567,7 @@ T* FastThreadSafeQueue<T>::beginPush(const QThread* thread)
 	m_mutex.lock(thread);
 
 	assert(m_pushIsBegan == false);
+	assert(m_popIsBegan == false);
 
 	m_pushIsBegan = true;
 
@@ -628,16 +585,27 @@ T* FastThreadSafeQueue<T>::beginPush(const QThread* thread)
 }
 
 template <typename T>
-void FastThreadSafeQueue<T>::completePush(const QThread* thread)
+void FastThreadSafeQueue<T>::completePush(const QThread* thread, int* curSize, int* curMaxSize)
 {
 	assert(m_pushIsBegan == true);
+	assert(m_popIsBegan == false);
 
 	m_writeIndex++;
 	m_size++;
 
+	if (curSize != nullptr)
+	{
+		*curSize = m_size;
+	}
+
 	if (m_size > m_maxSize)
 	{
 		m_maxSize = m_size;
+	}
+
+	if (curMaxSize != nullptr)
+	{
+		*curMaxSize = m_maxSize;
 	}
 
 	m_pushIsBegan = false;
@@ -650,6 +618,7 @@ T* FastThreadSafeQueue<T>::beginPop(const QThread* thread)
 {
 	m_mutex.lock(thread);
 
+	assert(m_pushIsBegan == false);
 	assert(m_popIsBegan == false);
 
 	if (m_size == 0)
@@ -667,6 +636,7 @@ template <typename T>
 void FastThreadSafeQueue<T>::completePop(const QThread* thread)
 {
 	assert(m_popIsBegan == true);
+	assert(m_pushIsBegan == false);
 
 	m_readIndex++;
 	m_size--;
@@ -693,6 +663,9 @@ bool FastThreadSafeQueue<T>::copyToBuffer(T* buffer, int bufferSizeInItems, int*
 
 	SimpleMutexLocker locker(&m_mutex, thread);
 
+	assert(m_pushIsBegan == false);
+	assert(m_popIsBegan == false);
+
 	*copiedItemsCount = 0;
 
 	if (m_size == 0)
@@ -709,26 +682,19 @@ bool FastThreadSafeQueue<T>::copyToBuffer(T* buffer, int bufferSizeInItems, int*
 
 	if (m_readIndex() < m_writeIndex())
 	{
-		memcpy(buffer, m_buffer + m_readIndex(), itemsToCopy);
+		memcpy(buffer, m_buffer + m_readIndex(), itemsToCopy * sizeof(T));
 	}
 	else
 	{
 		int firstPartSize = m_queueSize - m_readIndex();
 
-		if(itemsToCopy <= firstPartSize)
-		{
-			memcpy(buffer, m_buffer + m_readIndex(), itemsToCopy);
-		}
-		else
-		{
-			memcpy(buffer, m_buffer + m_readIndex(), firstPartSize);
+		memcpy(buffer, m_buffer + m_readIndex(), firstPartSize * sizeof(T));
 
-			int secondPartSize = itemsToCopy - firstPartSize;
+		int secondPartSize = itemsToCopy - firstPartSize;
 
-			if (secondPartSize > 0)
-			{
-				memcpy(buffer + firstPartSize, m_buffer, secondPartSize);
-			}
+		if (secondPartSize > 0)
+		{
+			memcpy(buffer + firstPartSize, m_buffer, secondPartSize * sizeof(T));
 		}
 	}
 
@@ -749,85 +715,152 @@ bool FastThreadSafeQueue<T>::copyToBuffer(T* buffer, int bufferSizeInItems, int*
 template <typename T>
 void FastThreadSafeQueue<T>::nonDestructiveResize(int newQueueSize, const QThread* thread)
 {
-	if (newQueueSize <= 0)
-	{
-		assert(false);
-		newQueueSize = 10;
-	}
+	SimpleMutexLocker locker(&m_mutex, thread);
+
+	assert(m_pushIsBegan == false);
+	assert(m_popIsBegan == false);
 
 	if (newQueueSize == m_queueSize)
 	{
 		return;
 	}
 
-	SimpleMutexLocker locker(&m_mutex, thread);
-
-	if (m_size > 0)
+	if (m_size == 0)
 	{
-		// data copying required
+		nonLockResizing(newQueueSize);
+		return;
+	}
+
+	newQueueSize = checkQueueSize(newQueueSize);
+
+	// data copying required
+	//
+
+	int dSize = newQueueSize - m_size;
+
+	if (dSize < 0)
+	{
+		// queue compression
+		// if newQueueSize < m_size (dSize < 0), remove items from beginng of queue
 		//
+		m_readIndex += abs(dSize);
+		m_size -= abs(dSize);
+	}
 
-		if (newQueueSize < m_size)
-		{
-			// queue compression
-			// if newQueueSize < m_size, remove items from beginng of queue
-			//
-			m_readIndex += m_size - newQueueSize;
-			m_size = newQueueSize;
-		}
+	T* newBuffer = new T[newQueueSize];
 
-		char* newBuffer = allocateBuffer(newQueueSize * m_itemSize);
-
-		if (m_readIndex() < m_writeIndex())
-		{
-			memcpy(newBuffer, m_buffer + m_readIndex() * m_itemSize, m_size * m_itemSize);
-		}
-		else
-		{
-			int firstPartSize = m_queueSize - m_readIndex();
-			int secondPartSize = m_size - firstPartSize;
-
-			memcpy(newBuffer, m_buffer + m_readIndex() * m_itemSize, firstPartSize * m_itemSize);
-			memcpy(newBuffer + firstPartSize * m_itemSize, m_buffer, secondPartSize * m_itemSize);
-		}
-
-		delete [] m_buffer;
-		m_buffer = newBuffer;
-
-		m_readIndex.reset();
-		m_readIndex.setMaxValue(newQueueSize);
-
-		m_writeIndex.setValue(m_size);
-		m_writeIndex.setMaxValue(newQueueSize);
-
-		m_queueSize = newQueueSize;
+	if (m_readIndex() < m_writeIndex())
+	{
+		memcpy(newBuffer, m_buffer + m_readIndex(), m_size * sizeof(T));
 	}
 	else
 	{
-		// no data copying required
-		//
-		delete [] m_buffer;
-		m_buffer = nullptr;
+		int firstPartSize = m_queueSize - m_readIndex();
 
-		m_buffer = allocateBuffer(newQueueSize * m_itemSize);
+		assert(firstPartSize > 0);
 
-		m_readIndex.reset();
-		m_readIndex.setMaxValue(newQueueSize);
+		memcpy(newBuffer, m_buffer + m_readIndex(), firstPartSize * sizeof(T));
 
-		m_writeIndex.reset();
-		m_writeIndex.setMaxValue(newQueueSize);
+		int secondPartSize = m_size - firstPartSize;
 
-		m_queueSize = newQueueSize;
+		if (secondPartSize > 0)
+		{
+			memcpy(newBuffer + firstPartSize, m_buffer + 0, secondPartSize * sizeof(T));
+		}
+	}
+
+	delete [] m_buffer;
+	m_buffer = newBuffer;
+
+	m_readIndex.reset();
+	m_readIndex.setMaxValue(newQueueSize);
+
+	m_writeIndex.setValue(m_size);
+	m_writeIndex.setMaxValue(newQueueSize);
+
+	m_queueSize = newQueueSize;
+	m_maxSize = m_size;
+	m_lostedCount = 0;
+}
+
+template <typename T>
+void FastThreadSafeQueue<T>::getSizes(int* curSize, int* curMaxSize, int* queueSize, const QThread* thread)
+{
+	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+
+	if (curSize != nullptr)
+	{
+		*curSize = m_size;
+	}
+
+	if (curMaxSize != nullptr)
+	{
+		*curMaxSize = m_maxSize;
+	}
+
+	if (queueSize != nullptr)
+	{
+		*queueSize = m_queueSize;
 	}
 }
 
 template <typename T>
-int FastThreadSafeQueue<T>::checkSize(int newSize)
+void FastThreadSafeQueue<T>::resetMaxSize(const QThread* thread)
 {
-
+	AUTO_LOCK_BY_THREAD(m_mutex, thread);
+	m_maxSize = 0;
 }
 
+template <typename T>
+int FastThreadSafeQueue<T>::checkQueueSize(int newSize) const
+{
+	if (newSize * sizeof(T) > MAX_QUEUE_MEMORY_SIZE)
+	{
+		assert(false);
+		newSize = MAX_QUEUE_MEMORY_SIZE / sizeof(T);
+	}
 
+	if (newSize < MIN_QUEUE_SIZE)
+	{
+		assert(false);
+		newSize = MIN_QUEUE_SIZE;
+	}
 
+	return newSize;
+}
 
+template <typename T>
+void FastThreadSafeQueue<T>::clear(const QThread* thread)
+{
+	AUTO_LOCK_BY_THREAD(m_mutex, thread);
 
+	m_readIndex.reset();
+	m_writeIndex.reset();
+	m_size = 0;
+	m_maxSize = 0;
+	m_lostedCount = 0;
+}
+
+template <typename T>
+void FastThreadSafeQueue<T>::nonLockResizing(int newSize)
+{
+	m_queueSize = checkQueueSize(newSize);
+
+	if (m_buffer != nullptr)
+	{
+		delete [] m_buffer;
+		m_buffer = nullptr;
+	}
+
+	m_readIndex.setMaxValue(m_queueSize);
+	m_readIndex.reset();
+
+	m_writeIndex.setMaxValue(m_queueSize);
+	m_writeIndex.reset();
+
+	m_buffer = new T[m_queueSize];
+
+	m_size = 0;
+	m_maxSize = 0;
+	m_lostedCount = 0;
+}

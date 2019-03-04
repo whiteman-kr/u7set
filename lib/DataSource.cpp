@@ -697,10 +697,7 @@ void DataSourceOnline::pushRupFrame(qint64 serverTime, const Rup::Frame& rupFram
 		// is not an error - queue is full
 	}
 
-	m_rupFrameTimeQueue.completePush(thread);
-
-	m_rupFramesQueueSize = m_rupFrameTimeQueue.size();
-	m_rupFramesQueueMaxSize = m_rupFrameTimeQueue.maxSize();
+	m_rupFrameTimeQueue.completePush(thread, &m_rupFramesQueueSize, &m_rupFramesQueueMaxSize);
 }
 
 bool DataSourceOnline::takeProcessingOwnership(const QThread* processingThread)
@@ -856,7 +853,7 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 		}
 		while(1);
 
-		m_rupFrameTimeQueue.completePop();
+		m_rupFrameTimeQueue.completePop(thread);
 
 		count++;
 	}

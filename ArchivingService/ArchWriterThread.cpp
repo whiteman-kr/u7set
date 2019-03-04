@@ -67,7 +67,8 @@ void ArchWriterThread::run()
 													   &m_totalFlushedStatesCount,
 													   flushAnyway,
 													   m_buffer,
-													   ArchFile::QUEUE_MAX_SIZE);
+													   ArchFile::QUEUE_MAX_SIZE,
+													   m_thisThread);
 
 			m_flushTime += m_timer.elapsed() - startTime;
 
@@ -88,7 +89,7 @@ void ArchWriterThread::run()
 		}
 	}
 
-	m_archive->shutdown(m_buffer, ArchFile::QUEUE_MAX_SIZE);
+	m_archive->shutdown(m_buffer, ArchFile::QUEUE_MAX_SIZE, m_thisThread);
 
 	delete [] m_buffer;
 	m_buffer = nullptr;

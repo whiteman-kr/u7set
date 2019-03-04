@@ -48,7 +48,9 @@ void ArchivingService::initCmdLineParser()
 	cp.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
 	cp.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
 	cp.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
-	cp.addSingleValueOption("location", SETTING_ARCHIVE_LOCATION, "Archive location (overwrite ArchiveLocation from project settings)", "");
+	cp.addSingleValueOption("location",
+							SETTING_ARCHIVE_LOCATION,
+							"Path to archive location (overwrite ArchiveLocation from project settings)", "D:\Archives");
 }
 
 void ArchivingService::loadSettings()

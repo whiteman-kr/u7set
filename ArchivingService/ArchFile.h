@@ -99,6 +99,7 @@ private:
 
 	static const double QUEUE_EMERGENCY_LIMIT;
 	static const double QUEUE_EXPAND_LIMIT;
+	static const double QUEUE_REDUCTION_LIMIT;
 
 public:
 	ArchFile(const Proto::ArchSignal& protoArchSignal, CircularLoggerShared log);
@@ -112,7 +113,8 @@ public:
 			   qint64* totalFushedStatesCount,
 			   bool flushAnyway,
 			   ArchFileRecord* buffer,
-			   int bufferSize);
+			   int bufferSize,
+			   const QThread* thread);
 
 	void setRequiredImmediatelyFlushing(bool b) { m_requiredImmediatelyFlushing.store(b); }
 	bool isRequiredImmediatelyFlushing() const { return m_requiredImmediatelyFlushing.load(); }
@@ -131,7 +133,8 @@ public:
 	void shutdown(qint64 curPartition,
 				  qint64* totalFlushedStatesCount,
 				  ArchFileRecord* buffer,
-				  int bufferSize);
+				  int bufferSize,
+				  const QThread* thread);
 
 	bool maintenance(qint64 currentPartition,
 					 qint64 msShortTermPeriod,
@@ -160,6 +163,8 @@ private:
 
 	QString getPartitionFileName(const ArchFilePartition::Info& pi);
 
+	void controlQueueSize(const QThread* thread);
+
 private:
 	CircularLoggerShared m_log;
 	Hash m_hash = 0;
@@ -174,6 +179,8 @@ private:
 	QMutex m_fileInMaintenanceMutex;
 	bool m_fileInMaintenance = false;
 	std::atomic<bool> m_rwAccessRequested = { false };
+
+	int m_statesCountAfterExpand = -1;
 
 	//
 

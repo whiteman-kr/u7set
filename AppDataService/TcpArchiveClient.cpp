@@ -74,7 +74,9 @@ bool TcpArchiveClient::sendSignalStatesToArchiveRequest(bool sendNow)
 		return false;
 	}
 
-	if (sendNow == false && m_signalStatesQueue->size() < 100)
+	const QThread* thread = QThread::currentThread();
+
+	if (sendNow == false && m_signalStatesQueue->size(thread) < 100)
 	{
 		return false;
 	}
@@ -87,25 +89,11 @@ bool TcpArchiveClient::sendSignalStatesToArchiveRequest(bool sendNow)
 	{
 		SimpleAppSignalState state;
 
-		bool res = m_signalStatesQueue->pop(&state);
+		bool res = m_signalStatesQueue->pop(&state, thread);
 
 		if (res == false)
 		{
 			break;
-		}
-
-		{// START_DEBUG_CODE
-				static quint16 prevPacketNo = 55555;
-
-				if (prevPacketNo != 55555)
-				{
-					if (prevPacketNo + 1 != state.packetNo)
-					{
-						qDebug() << "packet losted 4 prev " << prevPacketNo << " now " << state.packetNo;
-					}
-				}
-
-				prevPacketNo = state.packetNo;
 		}
 
 		Proto::AppSignalState* appSignalState = request.add_appsignalstates();

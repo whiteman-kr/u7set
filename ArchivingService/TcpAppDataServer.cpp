@@ -60,24 +60,7 @@ void TcpAppDataServer::onSaveAppSignalsStatesToArchive(const char* requestData, 
 		state.load(m_saveStatesRequest.appsignalstates(i));
 
 		m_archive->saveState(state);
-
-		{// START_DEBUG_CODE
-				static quint16 prevPacketNo = 55555;
-
-				if (prevPacketNo != 55555)
-				{
-					if (prevPacketNo + 1 != state.packetNo)
-					{
-						qDebug() << "arch packet losted 1 prev " << prevPacketNo << " now " << state.packetNo;
-					}
-				}
-
-				prevPacketNo = state.packetNo;
-		}
-
 	}
-
-	//qDebug() << "Receive " << statesCount << " states to save";
 
 	m_saveStatesReply.set_error(TO_INT(NetworkError::Success));
 

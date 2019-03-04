@@ -81,7 +81,7 @@ public:
 	bool archDirIsWritableChecking();
 	bool createGroupDirs();
 
-	bool shutdown(ArchFileRecord* buffer, int bufferSize);
+	bool shutdown(ArchFileRecord* buffer, int bufferSize, const QThread* thread);
 
 	// flushing controlling functions (public)
 

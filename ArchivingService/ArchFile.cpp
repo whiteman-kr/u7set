@@ -447,12 +447,15 @@ inline bool operator < (const ArchFilePartition::Info& p1, const ArchFilePartiti
 //
 // ----------------------------------------------------------------------------------------------------------------------
 
-const int ArchFile::QUEUE_MAX_SIZE = 1280;
-const int ArchFile::QUEUE_MIN_SIZE = 20;
+const int ArchFile::QUEUE_MIN_SIZE = 10;
+const int ArchFile::QUEUE_MAX_SIZE = 1280;	// == QUEUE_MIN_SIZE * 128 (2^7)
+
 const int ArchFile::MIN_QUEUE_SIZE_TO_FLUSH = 3;		// may be 4 or more?
 
 const double ArchFile::QUEUE_EMERGENCY_LIMIT = 0.7;		// 70%
-const double ArchFile::QUEUE_EXPAND_LIMIT = 0.9;		// 90%
+const double ArchFile::QUEUE_EXPAND_LIMIT = 0.8;		// 80%
+const double ArchFile::QUEUE_REDUCTION_LIMIT = 0.2;		// 20%
+
 
 ArchFile::ArchFile(const Proto::ArchSignal& protoArchSignal, CircularLoggerShared log) :
 	m_log(log),
@@ -483,12 +486,9 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 {
 	Q_UNUSED(archID)
 
-	if (m_queue.size() >= static_cast<int>(m_queue.queueSize() * QUEUE_EXPAND_LIMIT) && m_queue.queueSize() < QUEUE_MAX_SIZE)
-	{
-		int k = m_queue.queueSize() / QUEUE_MIN_SIZE;
+	const QThread* thread = QThread::currentThread();
 
-		m_queue.resizeAndCopy(QUEUE_MIN_SIZE * k * 2);
-	}
+	controlQueueSize(thread);
 
 	ArchFileRecord s;
 
@@ -511,10 +511,10 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 		nvp.offsetTimes(-1);
 		nvp.calcCRC16();
 
-		m_queue.push(nvp);
+		m_queue.push(nvp, thread);
 	}
 
-	m_queue.push(s);
+	m_queue.push(s, thread);
 
 	m_lastRecord = s;
 	m_lastRecordInitialized = true;
@@ -526,12 +526,13 @@ bool ArchFile::flush(qint64 curPartition,
 					 qint64* totalFushedStatesCount,
 					 bool flushAnyway,
 					 ArchFileRecord* buffer,
-					 int bufferSize)
+					 int bufferSize,
+					 const QThread* thread)
 {
 	TEST_PTR_RETURN_FALSE(totalFushedStatesCount);
 	TEST_PTR_RETURN_FALSE(buffer);
 
-	int queueSize = m_queue.size();
+	int queueSize = m_queue.size(thread);
 
 	if (queueSize == 0)
 	{
@@ -546,30 +547,12 @@ bool ArchFile::flush(qint64 curPartition,
 
 	int copiedItemsCount = 0;
 
-	bool result = m_queue.copyToBuffer(buffer, bufferSize, &copiedItemsCount, QThread::currentThread());
+	bool result = m_queue.copyToBuffer(buffer, bufferSize, &copiedItemsCount, thread);
 
 	if (result == false || copiedItemsCount == 0)
 	{
 		setRequiredImmediatelyFlushing(false);
 		return false;
-	}
-
-	{// START_DEBUG_CODE
-			static quint16 prevPacketNo = 55555;
-
-			for(int i = 0; i < copiedItemsCount; i++)
-			{
-				const ArchFileRecord& r = buffer[i];
-				if (prevPacketNo != 55555)
-				{
-					if (prevPacketNo + 1 != r.state.packetNo)
-					{
-						qDebug() << "arch packet losted 2 prev " << prevPacketNo << " now " << r.state.packetNo;
-					}
-				}
-
-				prevPacketNo = r.state.packetNo;
-			}
 	}
 
 	m_writablePartition.write(curPartition, buffer, copiedItemsCount, totalFushedStatesCount);
@@ -581,7 +564,9 @@ bool ArchFile::flush(qint64 curPartition,
 
 bool ArchFile::isEmergency() const
 {
-	return m_queue.size() >= static_cast<int>(m_queue.queueSize() * QUEUE_EMERGENCY_LIMIT);
+	const QThread* thread = QThread::currentThread();
+
+	return m_queue.size(thread) >= static_cast<int>(m_queue.queueSize(thread) * QUEUE_EMERGENCY_LIMIT);
 }
 
 QVector<ArchFilePartition::Info> ArchFile::getArchPartitionsInfo(const QString& path)
@@ -697,7 +682,8 @@ QString ArchFile::getPartitionFileName(const QString& archFilePath, const ArchFi
 void ArchFile::shutdown(qint64 curPartition,
 						qint64* totalFlushedStatesCount,
 						ArchFileRecord* buffer,
-						int bufferSize)
+						int bufferSize,
+						const QThread* thread)
 {
 	TEST_PTR_RETURN(totalFlushedStatesCount);
 	TEST_PTR_RETURN(buffer);
@@ -720,10 +706,10 @@ void ArchFile::shutdown(qint64 curPartition,
 		m_lastRecord.offsetTimes(dT);
 		m_lastRecord.calcCRC16();
 
-		m_queue.push(m_lastRecord);
+		m_queue.push(m_lastRecord, thread);
 	}
 
-	flush(curPartition, totalFlushedStatesCount, true, buffer, bufferSize);
+	flush(curPartition, totalFlushedStatesCount, true, buffer, bufferSize, thread);
 }
 
 /*
@@ -1056,6 +1042,61 @@ QString ArchFile::getPartitionFileName(const ArchFilePartition::Info& pi)
 	return QString("%1/%2").arg(m_path, pi.fileName);
 }
 
+void ArchFile::controlQueueSize(const QThread* thread)
+{
+	int curSize = 0;
+	int curMaxSize = 0;
+	int queueSize = 0;
 
+	m_queue.getSizes(&curSize, &curMaxSize, &queueSize, thread);
+
+	if (curSize >= static_cast<int>(queueSize * QUEUE_EXPAND_LIMIT) && queueSize < QUEUE_MAX_SIZE)
+	{
+		int k = (queueSize / QUEUE_MIN_SIZE) * 2;
+
+		if (k == 0)
+		{
+			k = 1;
+		}
+
+		m_queue.nonDestructiveResize(QUEUE_MIN_SIZE * k, thread);
+
+		m_statesCountAfterExpand = 0;
+
+		DEBUG_LOG_MSG(m_log, QString("%1 queue expand to %2").arg(m_appSignalID).arg(QUEUE_MIN_SIZE * k));
+	}
+	else
+	{
+		if (m_statesCountAfterExpand >= 0)
+		{
+			m_statesCountAfterExpand++;
+
+			if (m_statesCountAfterExpand >= queueSize)
+			{
+				if (curMaxSize <= static_cast<int>(queueSize * QUEUE_REDUCTION_LIMIT))
+				{
+					int k = (queueSize / QUEUE_MIN_SIZE) / 2;
+
+					if (k == 0)
+					{
+						k = 1;
+					}
+
+					m_queue.nonDestructiveResize(QUEUE_MIN_SIZE * k, thread);
+
+					m_statesCountAfterExpand = 0;
+
+					DEBUG_LOG_MSG(m_log, QString("%1 queue reduce to %2").arg(m_appSignalID).arg(QUEUE_MIN_SIZE * k));
+				}
+				else
+				{
+					m_queue.resetMaxSize(thread);
+
+					m_statesCountAfterExpand = 0;
+				}
+			}
+		}
+	}
+}
 
 

@@ -18,7 +18,7 @@ namespace RtTrends
 	{
 	}
 
-	void SignalStatesQueue::push(qint64 archiveID, const SimpleAppSignalState& state, const QThread* thread)
+	void SignalStatesQueue::push(const SimpleAppSignalState& state, const QThread* thread)
 	{
 		m_clientQueue.push(state, thread);
 	}
@@ -90,9 +90,7 @@ namespace RtTrends
 
 		TEST_PTR_RETURN(queue);
 
-		qint64 archiveID = m_archiveID.fetch_add(1);
-
-		queue->push(archiveID, state, thread);
+		queue->push(state, thread);
 	}
 
 	void Session::getTrackedSignalHashes(QVector<Hash>* hashes)
@@ -336,6 +334,8 @@ namespace RtTrends
 
 		int states = 0;
 
+		const QThread* thread = QThread::currentThread();
+
 		for(SignalStatesQueue* queue : trackedSignals)
 		{
 			TEST_PTR_CONTINUE(queue);
@@ -350,7 +350,7 @@ namespace RtTrends
 
 			do
 			{
-				bool result = clientQueue.pop(&ss);
+				bool result = clientQueue.pop(&ss, thread);
 
 				if (result == false)
 				{

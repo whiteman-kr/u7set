@@ -17,7 +17,7 @@ namespace RtTrends
 		SignalStatesQueue(Hash signalHash, int queueSize);
 
 		Hash signalHash() const { return m_signalHash; }
-		void push(qint64 archiveID, const SimpleAppSignalState& state, const QThread* thread);
+		void push(const SimpleAppSignalState& state, const QThread* thread);
 
 		FastThreadSafeQueue<SimpleAppSignalState>& clientQueue() { return m_clientQueue; }
 
@@ -63,8 +63,6 @@ namespace RtTrends
 		int m_samplePeriodCounter = 0;
 
 		QHash<Hash, SignalStatesQueue*> m_trackedSignals;
-
-		std::atomic<qint64> m_archiveID = 1;
 	};
 
 	typedef std::shared_ptr<Session> SessionShared;
