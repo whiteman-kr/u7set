@@ -152,11 +152,6 @@ private:
 	QString getOutputModeStr(int outputMode) const;
 	QString getUserStr(int userID) const;
 
-	const QPixmap lock = QPixmap(":/Images/Images/lock.png");
-	const QPixmap plus = QPixmap(":/Images/Images/plus.png");
-	const QPixmap pencil = QPixmap(":/Images/Images/pencil.png");
-	const QPixmap cross = QPixmap(":/Images/Images/cross.png");
-
 	void changeCheckedoutSignalActionsVisibility();
 };
 

@@ -95,7 +95,7 @@ static const char* Columns[] =
 
 const int COLUMNS_COUNT = sizeof(Columns) / sizeof(char*);
 
-const int DEFAULT_COLUMN_WIDTH = 75;
+const int DEFAULT_COLUMN_WIDTH = 50;
 
 const QVector<int> defaultColumnVisibility =
 {
@@ -815,6 +815,31 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 	const Signal& signal = m_signalSet[row];
 
+	if (role == Qt::BackgroundRole)
+	{
+		if (signal.checkedOut())
+		{
+			QBrush b(QColor(0xFF, 0xFF, 0xFF));
+
+			switch (signal.instanceAction().value())
+			{
+			case VcsItemAction::Added:
+				b.setColor(QColor(0xF9, 0xFF, 0xF9));
+				break;
+			case VcsItemAction::Modified:
+				b.setColor(QColor(0xEA, 0xF0, 0xFF));
+				break;
+			case VcsItemAction::Deleted:
+				b.setColor(QColor(0xFF, 0xF4, 0xF4));
+				break;
+			default:
+				assert(false);
+			}
+
+			return {b};
+		}
+	}
+
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
 		switch (signal.signalType())
@@ -986,29 +1011,6 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-	if(orientation == Qt::Vertical && role == Qt::DecorationRole)
-	{
-		const Signal& signal = m_signalSet[section];
-		if (signal.checkedOut())
-		{
-			if (signal.userID() == dbController()->currentUser().userId() || dbController()->currentUser().isAdminstrator())
-			{
-				switch (signal.instanceAction().value())
-				{
-					case VcsItemAction::Added: return plus;
-					case VcsItemAction::Modified: return pencil;
-					case VcsItemAction::Deleted: return cross;
-					default:
-						assert(false);
-						return QVariant();
-				}
-			}
-			else
-			{
-				return lock;
-			}
-		}
-	}
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
 		if (orientation == Qt::Horizontal)
