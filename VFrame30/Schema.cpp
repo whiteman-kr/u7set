@@ -79,7 +79,7 @@ namespace VFrame30
 		quint32 classnamehash = CUtils::GetClassHashCode(className);
 
 		message->set_classnamehash(classnamehash);	// Required field, class name hash code, by it instance is created
-		
+
 		Proto::Schema* mutableSchema = message->mutable_schema();
 
 		Proto::Write(mutableSchema->mutable_uuid(), m_guid);
@@ -141,20 +141,20 @@ namespace VFrame30
 			m_backgroundColor = schema.backgroundcolor();
 		}
 
-		// ѕрочитать Layers
+		// ????????? Layers
 		//
 		Layers.clear();
 
 		for (int i = 0; i < schema.layers().size(); i++)
 		{
 			std::shared_ptr<SchemaLayer> layer = SchemaLayer::Create(schema.layers(i));
-			
+
 			if (layer == nullptr)
 			{
 				assert(layer);
 				continue;
 			}
-			
+
 			Layers.push_back(layer);
 
 			if (layer->compile() == true)
@@ -195,7 +195,7 @@ namespace VFrame30
 			assert(schema);
 			return nullptr;
 		}
-		
+
 		schema->LoadData(message);
 
 		return schema;
@@ -212,9 +212,9 @@ namespace VFrame30
 		// Cleare client area by "grey" color
 		//
 		QPainter* p = drawParam->painter();
-		//p->fill(0xB0, 0xB0, 0xB0);	-- ќчистка происходит в CDrawParam::BeginPaint
+		//p->fill(0xB0, 0xB0, 0xB0);	-- ??????? ?????????? ? CDrawParam::BeginPaint
 
-		// Ќарисовать лист
+		// ?????????? ????
 		//
 		QRectF pageRect(0.0, 0.0, static_cast<qreal>(docWidth()), static_cast<qreal>(docHeight()));
 		p->fillRect(pageRect, backgroundColor());
@@ -350,7 +350,7 @@ namespace VFrame30
 
 		// Run script
 		//
-		QScriptValue result = scriptEngine.evaluate(script);	
+		QScriptValue result = scriptEngine.evaluate(script);
 
 		// Process script running result
 		//
@@ -395,7 +395,7 @@ namespace VFrame30
 		//
 		CHorzVertLinks horzVertLinks;
 
-		// ѕройти по всем соединени€м, заполнить horzlinks и vertlinks
+		// ?????? ?? ???? ???????????, ????????? horzlinks ? vertlinks
 		//
 		for (auto layer = Layers.begin(); layer != Layers.end(); ++layer)
 		{
@@ -419,14 +419,14 @@ namespace VFrame30
 				if (schemaItemLink != nullptr)
 				{
 					const std::list<SchemaPoint>& pointList = schemaItemLink->GetPointList();
-					
+
 					if (pointList.size() < 2)
 					{
 						assert(pointList.size() >= 2);
 						continue;
 					}
-					
-					// разложить кривую на отдельные отрезки и занести их в horzlinks и vertlinks
+
+					// ????????? ?????? ?? ????????? ??????? ? ??????? ?? ? horzlinks ? vertlinks
 					//
 					horzVertLinks.AddLinks(pointList, schemaItemLink->guid());
 				}
@@ -449,32 +449,32 @@ namespace VFrame30
 				}
 
 				FblItem* pFblItem = dynamic_cast<FblItem*>(item->get());
-				
+
 				if (pFblItem == nullptr)
 				{
 					assert(pFblItem);
 					continue;
 				}
 
-			
-				// ≈сли элемент SchemaItemLink, то в качестве координат пинов будут крайние точки
+
+				// ???? ??????? SchemaItemLink, ?? ? ???????? ????????? ????? ????? ??????? ?????
 				//
 				SchemaItemLink* schemaItemLink = dynamic_cast<SchemaItemLink*>(item->get());
 
 				if (schemaItemLink != nullptr)
 				{
 					const std::list<SchemaPoint>& pointList = schemaItemLink->GetPointList();
-					
+
 					if (pointList.size() < 2)
 					{
 						assert(pointList.size() >= 2);
 						continue;
 					}
-					
+
 					pLayer->ConnectionMapPosInc(pointList.front());
 					pLayer->ConnectionMapPosInc(pointList.back());
 
-					// проверить, не лежит ли пин на соединительной линии
+					// ?????????, ?? ????? ?? ??? ?? ?????????????? ?????
 					//
 					if (horzVertLinks.IsPointOnLink(pointList.front(), schemaItemLink->guid()) == true)
 					{
@@ -489,21 +489,21 @@ namespace VFrame30
 					continue;
 				}
 
-				// ¬ычисление и сохранение координат пинов дл€ обычного Fbl элементы
+				// ?????????? ? ?????????? ????????? ????? ??? ???????? Fbl ????????
 				//
 				pFblItem->SetConnectionsPos(gridSize(), pinGridStep());
 
-				// Ќайти в connectionMap такую координату и если она есть до увеличить счетчик пинов,
-				// если нет, то создать запись в списке
+				// ????? ? connectionMap ????? ?????????? ? ???? ??? ???? ?? ????????? ??????? ?????,
+				// ???? ???, ?? ??????? ?????? ? ??????
 				//
 				const std::vector<AfbPin>& inputs = pFblItem->inputs();
 				for (auto pin = inputs.begin(); pin != inputs.end(); ++pin)
 				{
 					SchemaPoint pinPos = pin->point();
-					
+
 					pLayer->ConnectionMapPosInc(pinPos);
 
-					// проверить, не лежит ли пин на соединительной линии
+					// ?????????, ?? ????? ?? ??? ?? ?????????????? ?????
 					//
 					if (horzVertLinks.IsPinOnLink(pinPos, item->get()->guid()) == true)
 					{
@@ -518,7 +518,7 @@ namespace VFrame30
 
 					pLayer->ConnectionMapPosInc(pinPos);
 
-					// проверить, не лежит ли пин на соединительной линии
+					// ?????????, ?? ????? ?? ??? ?? ?????????????? ?????
 					//
 					if (horzVertLinks.IsPinOnLink(pinPos, item->get()->guid()) == true)
 					{
