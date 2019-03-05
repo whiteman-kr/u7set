@@ -264,22 +264,29 @@ void CreateSignalDialog::initBusTypes()
 
 QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDialogOptions* options, QWidget* parent)
 {
+	qDebug() << "RPCT-2286 log: QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDialogOptions* options, QWidget* parent)";
+
 	if (dbc == nullptr ||
 		options == nullptr)
 	{
 		assert(dbc);
 		assert(options);
+		qDebug() << "RPCT-2286 showDialog: check point 1";
 		return QStringList();
 	}
 
+	qDebug() << "RPCT-2286 showDialog: check point 2";
 	CreateSignalDialog d(dbc, options, parent);
 
+	qDebug() << "RPCT-2286 showDialog: check point 3";
 	int dialogResult = d.exec();
 
+	qDebug() << "RPCT-2286 showDialog: check point 4";
 	*options = d.options();
 
 	if (dialogResult == QDialog::Rejected)
 	{
+		qDebug() << "RPCT-2286 showDialog: check point 5";
 		return QStringList();
 	}
 
@@ -291,12 +298,21 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 	assert(resultData.equipmentIds.size() == resultData.appSignalIds.size());
 	assert(resultData.equipmentIds.size() == resultData.customSignalIds.size());
 
+	qDebug() << "RPCT-2286 showDialog: check point 6";
+
 	for (int index = 0; index < resultData.equipmentIds.size(); index ++)
 	{
+		qDebug() << "RPCT-2286 showDialog: check point 7";
 		QString equipmentId = resultData.equipmentIds[index];
 		QString appSignalId = resultData.appSignalIds[index];
 		QString customSignalId = resultData.customSignalIds[index];
 		QString caption = QString("App signal %1 in schema %2").arg(appSignalId).arg(options->m_schemaId);
+
+		qDebug() << "RPCT-2286 showDialog: check point 8";
+		qDebug() << "RPCT-2286 showDialog: equipmentId " << equipmentId;
+		qDebug() << "RPCT-2286 showDialog: appSignalId " << appSignalId;
+		qDebug() << "RPCT-2286 showDialog: customSignalId " << customSignalId;
+		qDebug() << "RPCT-2286 showDialog: caption " << caption;
 
 		Signal signal;
 
@@ -305,26 +321,31 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		case CreatingSignalDialogOptions::SignalTypeAndFormat::Discrete:
 			signal.setSignalType(E::Discrete);
 			signal.setDataSize(DISCRETE_SIZE);
+			qDebug() << "RPCT-2286 showDialog: check point 9";
 			break;
 
 		case CreatingSignalDialogOptions::SignalTypeAndFormat::AnalogFloat32:
 			signal.setSignalType(E::Analog);
 			signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 			signal.setDataSize(FLOAT32_SIZE);
+			qDebug() << "RPCT-2286 showDialog: check point 10";
 			break;
 
 		case CreatingSignalDialogOptions::SignalTypeAndFormat::AnalogSignedInt32:
 			signal.setSignalType(E::Analog);
 			signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);
 			signal.setDataSize(SIGNED_INT32_SIZE);
+			qDebug() << "RPCT-2286 showDialog: check point 11";
 			break;
 
 		case CreatingSignalDialogOptions::SignalTypeAndFormat::Bus:
 			signal.setSignalType(E::Bus);
 			signal.setBusTypeID(resultData.busTypeId);
+			qDebug() << "RPCT-2286 showDialog: check point 12";
 			break;
 
 		default:
+			qDebug() << "RPCT-2286 showDialog: check point 13";
 			assert(false);
 		}
 
@@ -335,10 +356,13 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		signal.initSpecificProperties();
 
 		newSignals.push_back(signal);
+
+		qDebug() << "RPCT-2286 showDialog: check point 14";
 	}
 
 	if (newSignals.empty() == true)
 	{
+		qDebug() << "RPCT-2286 showDialog: check point 15";
 		return QStringList();
 	}
 
@@ -351,27 +375,38 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		signalPtrVector.push_back(&signal);
 	}
 
+	qDebug() << "RPCT-2286 showDialog: check point 16";
 	SignalPropertiesDialog signalPropDialog(dbc, signalPtrVector, false, false, parent);
 
 	dialogResult = signalPropDialog.exec();
 	if (dialogResult != QDialog::Accepted)
 	{
+		qDebug() << "RPCT-2286 showDialog: check point 17";
 		return QStringList();
 	}
+
+	qDebug() << "RPCT-2286 showDialog: check point 18";
 
 	for (Signal& signal : newSignals)
 	{
+		qDebug() << "RPCT-2286 showDialog: check point 19" << signal.appSignalID();
+		qDebug() << "RPCT-2286 showDialog: check point 20" << signal.caption();
 		SignalsModel::trimSignalTextFields(signal);
 	}
 
+	qDebug() << "RPCT-2286 showDialog: check point 21; << " << newSignals.size();
 	bool ok = dbc->addSignal(newSignals.front().signalType(), &newSignals, parent);
 	if (ok == false)
 	{
+		qDebug() << "RPCT-2286 showDialog: check point 22; << ";
 		return QStringList();
 	}
 
+	qDebug() << "RPCT-2286 showDialog: check point 23";
 	SignalsModel* model = SignalsModel::instance();
+	qDebug() << "RPCT-2286 showDialog: check point 24";
 	model->loadSignals();
+	qDebug() << "RPCT-2286 showDialog: check point 25";
 
 	QVector<int> selectIdList(newSignals.size());
 	int currentIdIndex = 0;
@@ -383,7 +418,9 @@ QStringList CreateSignalDialog::showDialog(DbController* dbc, CreatingSignalDial
 		selectIdList[currentIdIndex++] = signal.ID();
 	}
 
+	qDebug() << "RPCT-2286 showDialog: check point 26";
 	model->parentWindow()->setSelection(selectIdList);
+	qDebug() << "RPCT-2286 showDialog: check point 27";
 
 	return resultAppSignalIds;
 }
