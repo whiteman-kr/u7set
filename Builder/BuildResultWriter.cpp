@@ -310,7 +310,16 @@ namespace Builder
 			return false;
 		}
 
-		m_linkedFiles.append(buildFile);
+		if (m_linkedFiles.contains(buildFile) == false)
+		{
+			m_linkedFiles.append(buildFile);
+		}
+		else
+		{
+			// File %1 already linked to %2.
+			//
+			m_log->errCMN0021(buildFile->pathFileName(), fileName());
+		}
 
 		return true;
 	}
