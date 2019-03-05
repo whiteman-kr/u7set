@@ -943,6 +943,8 @@ namespace ExtWidgets
 
 		m_lineEdit->setReadOnly(readOnly == true);
 
+		char numberFormat = property->precision() > 5 ? 'g' : 'f';
+
 		switch (m_userType)
 		{
 		case QVariant::String:
@@ -980,13 +982,14 @@ namespace ExtWidgets
 		case QMetaType::Float:
 		{
 			m_oldValue = property->value().toFloat();
-			m_lineEdit->setText(QString::number(m_oldValue.toFloat(), 'g', property->precision()));
+			m_lineEdit->setText(QString::number(m_oldValue.toFloat(), numberFormat, property->precision()));
+
 		}
 			break;
 		case QVariant::Double:
 		{
 			m_oldValue = property->value().toDouble();
-			m_lineEdit->setText(QString::number(m_oldValue.toDouble(), 'g', property->precision()));
+			m_lineEdit->setText(QString::number(m_oldValue.toDouble(), numberFormat, property->precision()));
 		}
 			break;
 		default:
@@ -1796,6 +1799,8 @@ namespace ExtWidgets
 				return t.toString(p->precision());
 			}
 
+			char numberFormat = p->precision() > 5 ? 'g' : 'f';
+
 			switch (type)
 			{
 				case QVariant::Int:
@@ -1815,13 +1820,13 @@ namespace ExtWidgets
 				case QMetaType::Float:
 					{
 						float val = value.toFloat();
-						return QString::number(val, 'g', p->precision());
+						return QString::number(val, numberFormat, p->precision());
 					}
 					break;
 				case QVariant::Double:
 					{
                         double val = value.toDouble();
-						return QString::number(val, 'g', p->precision());
+						return QString::number(val, numberFormat, p->precision());
 					}
 					break;
 				case QVariant::Bool:
