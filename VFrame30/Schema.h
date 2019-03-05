@@ -248,6 +248,9 @@ namespace VFrame30
 		//
 	public:
 		void clear();
+
+		void add(const SchemaDetails& details);
+		void add(SchemaDetails&& details);
 		void add(std::shared_ptr<SchemaDetails> details);
 
 		std::vector<SchemaDetails> schemasDetails() const;
