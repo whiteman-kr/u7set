@@ -61,7 +61,9 @@ SOURCES +=\
     AppSignalStateEx.cpp \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp \
-    ../lib/WidgetUtils.cpp
+	../lib/AppSignalStateFlags.cpp \
+    ../lib/WidgetUtils.cpp \
+    ../lib/SimpleMutex.cpp
 
 HEADERS  += TuningMainWindow.h \
 	../lib/ServiceSettings.h \
@@ -105,7 +107,9 @@ HEADERS  += TuningMainWindow.h \
     AppSignalStateEx.h \
     ../lib/Times.h \
     ../lib/SignalProperties.h \
-    ../lib/WidgetUtils.h
+	../lib/AppSignalStateFlags.h \
+    ../lib/WidgetUtils.h \
+    ../lib/SimpleMutex.h
 
 include(../qtservice/src/qtservice.pri)
 

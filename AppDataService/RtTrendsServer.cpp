@@ -18,15 +18,9 @@ namespace RtTrends
 	{
 	}
 
-	void SignalStatesQueue::push(qint64 archiveID, const SimpleAppSignalState& state)
+	void SignalStatesQueue::push(const SimpleAppSignalState& state, const QThread* thread)
 	{
-		SignalState ss;
-
-		ss.state = state;
-		ss.archiveID = archiveID;
-
-		m_clientQueue.push(ss);
-		//m_dbQueue.push(&ss);
+		m_clientQueue.push(state, thread);
 	}
 
 	// -----------------------------------------------------------------------------------------------
@@ -90,15 +84,13 @@ namespace RtTrends
 		return true;
 	}
 
-	void Session::pushSignalState(Hash signalHash, const SimpleAppSignalState& state)
+	void Session::pushSignalState(Hash signalHash, const SimpleAppSignalState& state, const QThread* thread)
 	{
 		SignalStatesQueue* queue = m_trackedSignals.value(signalHash, nullptr);
 
 		TEST_PTR_RETURN(queue);
 
-		qint64 archiveID = m_archiveID.fetch_add(1);
-
-		queue->push(archiveID, state);
+		queue->push(state, thread);
 	}
 
 	void Session::getTrackedSignalHashes(QVector<Hash>* hashes)
@@ -342,21 +334,23 @@ namespace RtTrends
 
 		int states = 0;
 
+		const QThread* thread = QThread::currentThread();
+
 		for(SignalStatesQueue* queue : trackedSignals)
 		{
 			TEST_PTR_CONTINUE(queue);
 
 			Hash signalHash = queue->signalHash();
 
-			LockFreeQueue<SignalState>& clientQueue = queue->clientQueue();
+			FastThreadSafeQueue<SimpleAppSignalState>& clientQueue = queue->clientQueue();
 
 			int count = 0;
 
-			SignalState ss;
+			SimpleAppSignalState ss;
 
 			do
 			{
-				bool result = clientQueue.pop(&ss);
+				bool result = clientQueue.pop(&ss, thread);
 
 				if (result == false)
 				{
@@ -372,13 +366,13 @@ namespace RtTrends
 				}
 
 				appSignalState->set_hash(signalHash);
-				appSignalState->set_value(ss.state.value);
-				appSignalState->set_flags(ss.state.flags.all);
+				appSignalState->set_value(ss.value);
+				appSignalState->set_flags(ss.flags.all);
 
-				appSignalState->set_systemtime(ss.state.time.system.timeStamp);
-				appSignalState->set_localtime(ss.state.time.local.timeStamp);
-				appSignalState->set_planttime(ss.state.time.plant.timeStamp);
-				appSignalState->set_archiveid(ss.archiveID);
+				appSignalState->set_systemtime(ss.time.system.timeStamp);
+				appSignalState->set_localtime(ss.time.local.timeStamp);
+				appSignalState->set_planttime(ss.time.plant.timeStamp);
+				appSignalState->set_archiveid(0);
 
 				count++;
 

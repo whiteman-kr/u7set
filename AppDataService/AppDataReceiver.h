@@ -34,6 +34,8 @@ private:
 	const AppDataSourcesIP& m_appDataSourcesIP;
 	CircularLoggerShared m_log;
 
+	const QThread* m_thisThread = nullptr;
+
 	//
 
 	QUdpSocket* m_socket = nullptr;

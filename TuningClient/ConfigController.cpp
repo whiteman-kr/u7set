@@ -236,14 +236,6 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		{
 			result &= xmlReadSettingsNode(settingsNodes.item(0), &readSettings);
 		}
-
-		// Schemas node
-		//
-		QDomNodeList schemasNodes = configElement.elementsByTagName("Schemas");
-		if (schemasNodes.size()  > 0)
-		{
-			result &= xmlReadSchemasNode(schemasNodes.item(0), buildFileInfoArray, &readSettings);
-		}
 	}
 
 	// Error handling
@@ -267,6 +259,33 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	QByteArray data;
 	QString errorStr;
+
+	// Get all schema details
+	//
+	{
+		// Get SchemaDetails.pbuf file
+		//
+		QString parsingError;
+
+		QByteArray ba;
+		QString fileName = "/" + theSettings.instanceStrId() + "/SchemaDetails.pbuf";
+		bool ok = m_cfgLoaderThread->getFileBlocked(fileName, &ba, &parsingError);
+
+		if (ok == false)
+		{
+			qDebug() << "ERROR: Cannot get " << fileName << ", " << parsingError;
+
+			m_schemaDetailsSet.clear();
+		}
+		else
+		{
+			m_schemaDetailsSet.clear();
+
+			m_schemaDetailsSet.Load(ba);
+		}
+	}
+
+	std::vector<VFrame30::SchemaDetails> schemasDetails = m_schemaDetailsSet.schemasDetails();
 
 	for (const Builder::BuildFileInfo& f: buildFileInfoArray)
 	{
@@ -337,6 +356,15 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
 					theLogFile->writeError(completeErrorMessage);
 					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
+				}
+			}
+
+			for (auto si : schemasDetails)
+			{
+				if (f.ID == si.m_schemaId)
+				{
+					SchemaSettings s(si.m_schemaId, si.m_caption);
+					readSettings.schemas.push_back(s);
 				}
 			}
 		}
@@ -570,63 +598,6 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			usersAccounts.replace('\n', ';');
 			usersAccounts.remove('\r');
 			outSetting->usersAccounts = usersAccounts.split(';', QString::SkipEmptyParts);
-		}
-	}
-
-	return outSetting->errorMessage.isEmpty();
-}
-
-bool ConfigController::xmlReadSchemasNode(const QDomNode& schemasNode, const BuildFileInfoArray& buildFileInfoArray, ConfigSettings* outSetting)
-{
-	if (outSetting == nullptr ||
-			schemasNode.nodeName() != "Schemas")
-	{
-		assert(outSetting);
-		assert(schemasNode.nodeName() == "Schemas");
-		return false;
-	}
-
-	QDomElement schemasElement = schemasNode.toElement();
-
-	// Check if XML contains Error tag
-	//
-	QDomNodeList errorNodes = schemasElement.elementsByTagName("Error");
-
-	if (errorNodes.isEmpty() == false)
-	{
-		for (int i = 0; i < errorNodes.count();  i++)
-		{
-			outSetting->errorMessage += QString("%1\n").arg(errorNodes.at(i).toElement().text());
-		}
-		return false;
-	}
-
-	// Get Schemas
-	//
-	{
-		QDomNodeList dasNodes = schemasElement.elementsByTagName("Schema");
-
-		for (int i = 0; i <dasNodes.size(); i++)
-		{
-			QDomElement dasXmlElement = dasNodes.at(i).toElement();
-
-			QString schemaId = dasXmlElement.attribute("Id");
-			QString schemaCaption = dasXmlElement.attribute("Caption");
-
-			if (schemaId.isEmpty() == true)
-			{
-				assert(false);
-				continue;
-			}
-
-			for (const Builder::BuildFileInfo& f: buildFileInfoArray)
-			{
-				if (f.ID == schemaId)
-				{
-					SchemaSettings s(schemaId, schemaCaption);
-					outSetting->schemas.push_back(s);
-				}
-			}
 		}
 	}
 

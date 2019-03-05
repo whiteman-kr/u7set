@@ -203,8 +203,6 @@ public:
 
 	QString archiveLocation;
 
-	HostAddressPort dbHost = HostAddressPort("127.0.0.1", 5432);
-
 	bool readFromDevice(Hardware::Software *software, Builder::IssueLogger* log);
 	bool writeToXml(XmlWriteHelper& xml);
 	bool readFromXml(XmlReadHelper& xml);

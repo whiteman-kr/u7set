@@ -661,7 +661,7 @@ namespace Builder
 
 		parameters += " -cfgip1=" + cfgIP1 + " -cfgip2=" + cfgIP2;
 
-		parameters += " -id=" + m_software->equipmentIdTemplate() + "\n";
+		parameters += " -id=" + m_software->equipmentIdTemplate();
 
 		return true;
 	}

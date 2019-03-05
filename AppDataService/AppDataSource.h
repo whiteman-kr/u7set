@@ -4,12 +4,12 @@
 #include "../lib/DataSource.h"
 
 
-class SimpleAppSignalStatesQueue : public LockFreeQueue<SimpleAppSignalState>
+class SimpleAppSignalStatesQueue : public FastThreadSafeQueue<SimpleAppSignalState>
 {
 public:
 	SimpleAppSignalStatesQueue(int queueSize);
 
-	bool pushAutoPoint(SimpleAppSignalState state);
+	void pushAutoPoint(SimpleAppSignalState state, const QThread* thread);
 };
 
 typedef std::shared_ptr<SimpleAppSignalStatesQueue> SimpleAppSignalStatesQueueShared;
@@ -32,8 +32,15 @@ public:
 
 	void setSignalParams(int index, Signal* signal);
 
-	bool setState(const Times& time, quint32 validity, double value, int autoArchivingGroup, SimpleAppSignalStatesQueue& statesQueue);
-	void invalidate() { m_current[0].flags.all = m_current[1].flags.all = m_stored.flags.all = 0; }
+	bool setState(const Times& time,
+				  quint16 packetNo,
+				  quint32 validity,
+				  double value,
+				  int autoArchivingGroup,
+				  SimpleAppSignalStatesQueue& statesQueue,
+				  const QThread* thread);
+
+	void invalidate() { m_current[0].flags.all = m_current[1].flags.all = 0; }
 
 	Hash hash() const;
 
@@ -44,7 +51,7 @@ public:
 	friend class AppSignalStates;
 
 	const SimpleAppSignalState& current() const { return m_current[m_curStateIndex.load()]; }
-	const SimpleAppSignalState& stored() const { return m_stored; }
+//	const SimpleAppSignalState& stored() const { return m_stored; }
 
 	int autoArchiningGroup() const { return m_autoArchivingGroup; }
 	void setAutoArchivingGroup(int archivingGroup);
@@ -90,7 +97,8 @@ private:
 
 private:
 	SimpleAppSignalState m_current[2];
-	SimpleAppSignalState m_stored;
+	double m_coarseStoredValue;
+	double m_fineStoredValue;
 
 	std::atomic<int> m_curStateIndex = {0};
 
@@ -150,7 +158,7 @@ public:
 	void buidlHash2State();
 
 	bool getCurrentState(Hash hash, AppSignalState& state) const;
-	bool getStoredState(Hash hash, AppSignalState& state) const;
+//	bool getStoredState(Hash hash, AppSignalState& state) const;
 
 	void setAutoArchivingGroups(int autoArchivingGroupsCount);
 
@@ -211,7 +219,7 @@ public:
 	bool getState(Network::AppDataSourceState* proto) const;
 	void setState(const Network::AppDataSourceState& proto);
 
-	bool getSignalState(SimpleAppSignalState* state);
+	bool getSignalState(SimpleAppSignalState* state, const QThread* thread);
 
 	int acquiredSignalsCount() const { return m_acquiredSignalsCount; }
 

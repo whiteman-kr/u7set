@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QtGlobal>
+#include <QElapsedTimer>
+#include <QDebug>
 
 #define ASSERT_RESULT_FALSE_BREAK	assert(false); \
 									result = false; \
@@ -84,3 +86,24 @@ inline qint32 reverseInt32(qint32 val)	  { return reverseBytes<qint32>(val);  }
 inline float reverseFloat(float val)	  { return reverseBytes<float>(val);   }
 
 const char* const RADIY_ORG = "Radiy";
+
+class PrintElapsedTime
+{
+public:
+	PrintElapsedTime(const QString& msg) :
+		m_msg(msg)
+	{
+		m_timer.start();
+	}
+
+	~PrintElapsedTime()
+	{
+		qDebug() << C_STR(m_msg) << m_timer.elapsed();
+	}
+
+private:
+	QString m_msg;
+	QElapsedTimer m_timer;
+};
+
+

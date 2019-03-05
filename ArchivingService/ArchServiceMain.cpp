@@ -1,6 +1,11 @@
 #include "ArchivingService.h"
 #include "../lib/WUtils.h"
 
+// To increase time that system waiting to the service shutting down, change value:
+//
+// HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\WaitToKillServiceTimeout.
+//
+
 int main(int argc, char *argv[])
 {
 #if defined (Q_OS_WIN) && defined (Q_DEBUG)
@@ -19,7 +24,7 @@ int main(int argc, char *argv[])
 
 	si.init(E::SoftwareType::ArchiveService, "", 1, 0);
 
-	ArchivingServiceWorker archServiceWorker(si, "RPCT Archiving Service", argc, argv, logger);
+	ArchivingService archServiceWorker(si, "RPCT Archiving Service", argc, argv, logger);
 
 	ServiceStarter serviceStarter(app, archServiceWorker, logger);
 

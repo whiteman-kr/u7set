@@ -47,10 +47,12 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
         main.cpp \
-    BuildTask.cpp
+    BuildTask.cpp \
+    ../lib/SimpleMutex.cpp
 
 HEADERS += \
-    BuildTask.h
+    BuildTask.h \
+    ../lib/SimpleMutex.h
 
 # VFrame30 library
 #

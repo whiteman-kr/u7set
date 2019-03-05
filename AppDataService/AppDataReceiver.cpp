@@ -16,6 +16,7 @@ AppDataReceiverThread::AppDataReceiverThread(const HostAddressPort& dataReceivin
 	m_appDataSourcesIP(appDataSourcesIP),
 	m_log(log)
 {
+	setPriority(QThread::Priority::HighPriority);
 }
 
 AppDataReceiverThread::~AppDataReceiverThread()
@@ -35,6 +36,8 @@ void AppDataReceiverThread::fillAppDataReceiveState(Network::AppDataReceiveState
 void AppDataReceiverThread::run()
 {
 	DEBUG_LOG_MSG(m_log, QString("AppDataReceiver thread is started (receiving IP %1)").arg(m_dataReceivingIP.addressPortStr()));
+
+	m_thisThread = QThread::currentThread();
 
 	while(isQuitRequested() == false)
 	{
@@ -85,7 +88,7 @@ bool AppDataReceiverThread::tryCreateAndBindSocket()
 			break;
 		}
 
-		qDebug() << C_STR(QString("AppDataReceiverThread listening socket binding error").arg(m_dataReceivingIP.addressPortStr()));
+		qDebug() << C_STR(QString("AppDataReceiverThread listening socket binding error to %1").arg(m_dataReceivingIP.addressPortStr()));
 
 		closeSocket();
 
@@ -122,9 +125,23 @@ void AppDataReceiverThread::receivePackets()
 
 	qint64 prevReceivedFramesCount = 0;
 
+	quint16 packetNo = 55555;
+
 	while(isQuitRequested() == false)
 	{
 		qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
+
+/*		if (m_socket->waitForReadyRead(500) == false)
+		{
+			if (serverTime - lastPacketTime > 3000)
+			{
+				qDebug() << "No RUP packets received in 3 seconds";
+				closeSocket();
+				return;
+			}
+
+			continue;
+		}*/
 
 		qint64 size = m_socket->pendingDatagramSize();
 
@@ -137,9 +154,7 @@ void AppDataReceiverThread::receivePackets()
 				return;
 			}
 
-			// is no datagram available, short sleep on 200mcs
-			//
-			usleep(200);
+			usleep(500);
 			continue;
 		}
 
@@ -209,7 +224,23 @@ void AppDataReceiverThread::receivePackets()
 
 		m_receivedFramesCount++;
 
-		dataSource->pushRupFrame(serverTime, simFrame.rupFrame);
+		{
+			Rup::Header header = simFrame.rupFrame.header;
+
+			header.reverseBytes();
+
+			if (packetNo != 55555)
+			{
+				if (header.numerator != packetNo + 1)
+				{
+					qDebug() << "packet losted";
+				}
+			}
+
+			packetNo = header.numerator;
+		}
+
+		dataSource->pushRupFrame(serverTime, simFrame.rupFrame, m_thisThread);
 
 		//
 

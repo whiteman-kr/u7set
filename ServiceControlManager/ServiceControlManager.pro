@@ -76,7 +76,9 @@ SOURCES += MainWindow.cpp \
     ../lib/PropertyObject.cpp \
     ../lib/SignalProperties.cpp \
     ../AppDataService/RtTrendsServer.cpp \
-    ../lib/WidgetUtils.cpp
+	../lib/AppSignalStateFlags.cpp \
+    ../lib/WidgetUtils.cpp \
+    ../lib/SimpleMutex.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -127,7 +129,9 @@ HEADERS  += MainWindow.h \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/PropertyObject.h \
     ../lib/SignalProperties.h \
-    ../AppDataService/RtTrendsServer.h
+    ../AppDataService/RtTrendsServer.h \
+    ../lib/AppSignalStateFlags.h \
+    ../lib/SimpleMutex.h
 
 include(../qtservice/src/qtservice.pri)
 

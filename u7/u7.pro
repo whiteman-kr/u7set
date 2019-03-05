@@ -174,7 +174,8 @@ SOURCES +=\
     ../lib/WidgetUtils.cpp \
     TagSelectorWidget.cpp \
     Forms/ProjectPropertiesForm.cpp \
-    Forms/PendingChangesDialog.cpp
+    Forms/PendingChangesDialog.cpp \
+    ../lib/SimpleMutex.cpp
 
 
 HEADERS  += \
@@ -311,7 +312,8 @@ HEADERS  += \
     DialogAfbLibraryCheck.h \
     TagSelectorWidget.h \
     Forms/ProjectPropertiesForm.h \
-    Forms/PendingChangesDialog.h
+    Forms/PendingChangesDialog.h \
+    ../lib/SimpleMutex.h
 
 
 FORMS    += \

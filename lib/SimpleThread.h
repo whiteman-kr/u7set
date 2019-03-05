@@ -1,11 +1,10 @@
 #pragma once
 
-
 #include <QThread>
 #include <QEventLoop>
+#include <QMutex>
 #include <memory>
 #include <atomic>
-
 
 class SimpleThreadWorker : public QObject
 {
@@ -94,3 +93,4 @@ public:
 
 	bool waitForever() { return wait(0); }
 };
+

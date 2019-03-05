@@ -7,6 +7,8 @@
 
 #include "../lib/AppSignal.h"
 
+#include "Archive.h"
+
 
 // -------------------------------------------------------------------------------
 //
@@ -17,7 +19,7 @@
 class TcpAppDataServer : public Tcp::Server
 {
 public:
-	TcpAppDataServer(const SoftwareInfo& softwareInfo, Queue<SimpleAppSignalState>& saveStatesQueue);
+	TcpAppDataServer(const SoftwareInfo& softwareInfo, Archive* archive);
 
 	virtual Tcp::Server* getNewInstance() override;
 	virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
@@ -29,23 +31,9 @@ private:
 	void onDisconnection() override;
 
 private:
+	Archive* m_archive = nullptr;
+
 	Network::SaveAppSignalsStatesToArchiveRequest m_saveStatesRequest;
 	Network::SaveAppSignalsStatesToArchiveReply m_saveStatesReply;
-
-	Queue<SimpleAppSignalState>& m_saveStatesQueue;
 };
 
-
-// -------------------------------------------------------------------------------
-//
-// TcpAppDataServerThread class declaration
-//
-// -------------------------------------------------------------------------------
-
-class TcpAppDataServerThread : public Tcp::ServerThread
-{
-public:
-	TcpAppDataServerThread(const HostAddressPort& listenAddressPort,
-				 Tcp::Server* server,
-				 std::shared_ptr<CircularLogger> logger);
-};

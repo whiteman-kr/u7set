@@ -2,60 +2,86 @@
 #include <QMetaProperty>
 #include "ArchivingService.h"
 
+
 // -------------------------------------------------------------------------------
 //
-// AppDataServiceWorker class implementation
+// AppDataService class implementation
 //
 // -------------------------------------------------------------------------------
 
-ArchivingServiceWorker::ArchivingServiceWorker(const SoftwareInfo& softwareInfo,
+const char* const ArchivingService::SETTING_ARCHIVE_LOCATION = "ArchiveLocation";
+const char* const ArchivingService::SETTING_MIN_QUEUE_SIZE_FOR_FLUSHING = "MinQueueSizeForFlushing";
+
+ArchivingService::ArchivingService(const SoftwareInfo& softwareInfo,
 											   const QString& serviceName,
 											   int& argc,
 											   char** argv,
 											   CircularLoggerShared logger) :
-	ServiceWorker(softwareInfo, serviceName, argc, argv, logger),
-	m_saveStatesQueue(1024 * 1024)
+	ServiceWorker(softwareInfo, serviceName, argc, argv, logger)
 {
 }
 
 
-ArchivingServiceWorker::~ArchivingServiceWorker()
+ArchivingService::~ArchivingService()
 {
+	deleteArchSignalsProto();
 }
 
-ServiceWorker* ArchivingServiceWorker::createInstance() const
+ServiceWorker* ArchivingService::createInstance() const
 {
-	ArchivingServiceWorker* archServiceWorker = new ArchivingServiceWorker(softwareInfo(), serviceName(), argc(), argv(), logger());
+	ArchivingService* archServiceWorker = new ArchivingService(softwareInfo(), serviceName(), argc(), argv(), logger());
 
 	archServiceWorker->init();
 
 	return archServiceWorker;
 }
 
-void ArchivingServiceWorker::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
+void ArchivingService::getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const
 {
-	serviceInfo.set_clientrequestip(m_cfgSettings.clientRequestIP.address32());
-	serviceInfo.set_clientrequestport(m_cfgSettings.clientRequestIP.port());
+	serviceInfo.set_clientrequestip(m_serviceSettings.clientRequestIP.address32());
+	serviceInfo.set_clientrequestport(m_serviceSettings.clientRequestIP.port());
 }
 
-void ArchivingServiceWorker::initCmdLineParser()
+void ArchivingService::initCmdLineParser()
 {
 	CommandLineParser& cp = cmdLineParser();
 
 	cp.addSingleValueOption("id", SETTING_EQUIPMENT_ID, "Service EquipmentID.", "EQUIPMENT_ID");
 	cp.addSingleValueOption("cfgip1", SETTING_CFG_SERVICE_IP1, "IP-addres of first Configuration Service.", "");
 	cp.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
+	cp.addSingleValueOption("location",
+							SETTING_ARCHIVE_LOCATION,
+							"Path to archive location (overwrite ArchiveLocation from project settings)", "D:\\Archives");
+	cp.addSingleValueOption("mq",
+							SETTING_MIN_QUEUE_SIZE_FOR_FLUSHING,
+							"Minimum size of signal states queue for flushing to disk.", "");
+
 }
 
-void ArchivingServiceWorker::loadSettings()
+void ArchivingService::loadSettings()
 {
+	m_overwriteArchiveLocation = QString(getStrSetting(SETTING_ARCHIVE_LOCATION));
+
+	QString sizeStr = getStrSetting(SETTING_MIN_QUEUE_SIZE_FOR_FLUSHING);
+
+	bool ok = false;
+
+	m_minQueueSizeForFlushing = sizeStr.toInt(&ok);
+
+	if (sizeStr.isEmpty() == true || ok == false)
+	{
+		m_minQueueSizeForFlushing = Archive::DEFAULT_QUEUE_SIZE_FOR_FLUSHING;
+	}
+
 	DEBUG_LOG_MSG(logger(), QString(tr("Load settings:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStr()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStr()));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_ARCHIVE_LOCATION).arg(m_overwriteArchiveLocation));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_MIN_QUEUE_SIZE_FOR_FLUSHING).arg(m_minQueueSizeForFlushing));
 }
 
-void ArchivingServiceWorker::initialize()
+void ArchivingService::initialize()
 {
 	// Service Main Function initialization
 	//
@@ -64,28 +90,28 @@ void ArchivingServiceWorker::initialize()
 	DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker initialized")));
 }
 
-void ArchivingServiceWorker::shutdown()
+void ArchivingService::shutdown()
 {
 	// Service Main Function deinitialization
 	//
-	stopAllThread();
+	stopAllThreads();
 
 	stopCfgLoaderThread();
 
 	DEBUG_LOG_MSG(logger(), QString(tr("ArchivingServiceWorker stoped")));
 }
 
-void ArchivingServiceWorker::runCfgLoaderThread()
+void ArchivingService::runCfgLoaderThread()
 {
 	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo(), 1, cfgServiceIP1(), cfgServiceIP2(), false, logger());
 
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ArchivingServiceWorker::onConfigurationReady);
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ArchivingService::onConfigurationReady);
 
 	m_cfgLoaderThread->start();
 	m_cfgLoaderThread->enableDownloadConfiguration();
 }
 
-void ArchivingServiceWorker::stopCfgLoaderThread()
+void ArchivingService::stopCfgLoaderThread()
 {
 	if (m_cfgLoaderThread != nullptr)
 	{
@@ -95,68 +121,82 @@ void ArchivingServiceWorker::stopCfgLoaderThread()
 	}
 }
 
-void ArchivingServiceWorker::runAllThreads()
+void ArchivingService::startAllThreads()
 {
-	runArchWriteThread();
-	runArchRequestThread();
-	runTcpAppDataServerThread();
-	runTcpArchRequestsServerThread();
-}
+	startArchive();
 
-void ArchivingServiceWorker::stopAllThread()
-{
-	stopTcpArchiveRequestsServerThread();
-	stopTcpAppDataServerThread();
-	stopArchRequestThread();
-	stopArchWriteThread();
-}
-
-void ArchivingServiceWorker::createArchive()
-{
-	assert(m_archive == nullptr);
-
-	m_archive = std::make_shared<Archive>(m_projectID, m_cfgSettings.dbHost, logger());
-}
-
-void ArchivingServiceWorker::deleteArchive()
-{
-	m_archive.reset();
-}
-
-void ArchivingServiceWorker::runArchWriteThread()
-{
-	assert(m_archWriteThread == nullptr);
-
-	m_archWriteThread = new ArchWriteThread(m_cfgSettings.dbHost,
-											m_archive,
-											m_saveStatesQueue,
-											logger());
-
-	m_archWriteThread->start();
-}
-
-void ArchivingServiceWorker::stopArchWriteThread()
-{
-	if (m_archWriteThread != nullptr)
+	if (m_archive->isWorkable() == true)
 	{
-		m_archWriteThread->quitAndWait();
-		delete m_archWriteThread;
-		m_archWriteThread = nullptr;
+		startTcpAppDataServerThread();
+		startTcpArchRequestsServerThread();
 	}
 }
 
-void ArchivingServiceWorker::runTcpAppDataServerThread()
+void ArchivingService::stopAllThreads()
+{
+	stopTcpAppDataServerThread();
+	stopTcpArchiveRequestsServerThread();
+
+	stopArchive();
+}
+
+void ArchivingService::startArchive()
+{
+	TEST_PTR_RETURN(m_archSignalsProto);
+
+	if (m_archive == nullptr)
+	{
+		m_archive = new Archive(m_buildInfo.project,
+								equipmentID(),
+								m_serviceSettings.archiveLocation,
+								*m_archSignalsProto,
+								m_serviceSettings.shortTermArchivePeriod,
+								m_serviceSettings.longTermArchivePeriod,
+								Archive::DEFAULT_MAINTENANCE_DELAY_MINUTES,
+								m_minQueueSizeForFlushing,
+								logger());
+
+		deleteArchSignalsProto();				// no more required
+
+		m_archive->start();
+
+		if (m_archive->isWorkable() == true)
+		{
+			DEBUG_LOG_MSG(logger(), QString("Archive is workable. Directory: %1").arg(m_archive->archFullPath()));
+		}
+		else
+		{
+			DEBUG_LOG_ERR(logger(), QString("Archive is NOT WORKABLE!"));
+		}
+	}
+	else
+	{
+		assert(false);
+	}
+}
+
+void ArchivingService::stopArchive()
+{
+	if (m_archive != nullptr)
+	{
+		m_archive->stop();
+		delete m_archive;
+		m_archive = nullptr;
+	}
+}
+
+void ArchivingService::startTcpAppDataServerThread()
 {
 	assert(m_tcpAppDataServerThread == nullptr);
+	assert(m_archive != nullptr);
 
-	TcpAppDataServer* server = new TcpAppDataServer(softwareInfo(), m_saveStatesQueue);
+	TcpAppDataServer* server = new TcpAppDataServer(softwareInfo(), m_archive);
 
-	m_tcpAppDataServerThread = new TcpAppDataServerThread(m_cfgSettings.appDataRecevingIP, server, logger());
-
+	m_tcpAppDataServerThread = new Tcp::ServerThread(m_serviceSettings.appDataRecevingIP, server, logger());
 	m_tcpAppDataServerThread->start();
 }
 
-void ArchivingServiceWorker::stopTcpAppDataServerThread()
+void ArchivingService::stopTcpAppDataServerThread()
 {
 	if (m_tcpAppDataServerThread != nullptr)
 	{
@@ -166,164 +206,99 @@ void ArchivingServiceWorker::stopTcpAppDataServerThread()
 	}
 }
 
-void ArchivingServiceWorker::runTcpArchRequestsServerThread()
+void ArchivingService::startTcpArchRequestsServerThread()
 {
-	assert(m_tcpArchiveRequestsServerThread == nullptr);
+	assert(m_tcpArchRequestsServerThread == nullptr);
+	assert(m_archive != nullptr);
 
-	if (m_archRequestThread == nullptr)
+	if (m_archive == nullptr)
 	{
 		assert(false);
 		return;
 	}
 
-	TcpArchRequestsServer* server = new TcpArchRequestsServer(softwareInfo(), *m_archRequestThread, logger());
+	TcpArchRequestsServer* server = new TcpArchRequestsServer(softwareInfo(), m_archive, logger());
 
-	m_tcpArchiveRequestsServerThread = new TcpArchiveRequestsServerThread(m_cfgSettings.clientRequestIP,
-																		  server,
-																		  logger());
-	m_tcpArchiveRequestsServerThread->start();
+	m_tcpArchRequestsServerThread = new Tcp::ServerThread(m_serviceSettings.clientRequestIP, server, logger());
+	m_tcpArchRequestsServerThread->start();
 }
 
-void ArchivingServiceWorker::stopTcpArchiveRequestsServerThread()
+void ArchivingService::stopTcpArchiveRequestsServerThread()
 {
-	if (m_tcpArchiveRequestsServerThread != nullptr)
+	if (m_tcpArchRequestsServerThread != nullptr)
 	{
-		m_tcpArchiveRequestsServerThread->quitAndWait();
-		delete m_tcpArchiveRequestsServerThread;
-		m_tcpArchiveRequestsServerThread = nullptr;
+		m_tcpArchRequestsServerThread->quitAndWait();
+		delete m_tcpArchRequestsServerThread;
+		m_tcpArchRequestsServerThread = nullptr;
 	}
 }
 
-void ArchivingServiceWorker::runArchRequestThread()
+bool ArchivingService::loadConfigurationXml(const QByteArray& fileData, ArchivingServiceSettings* settings)
 {
-	assert(m_archRequestThread == nullptr);
+	TEST_PTR_RETURN_FALSE(settings);
 
-	m_archRequestThread = new ArchRequestThread(m_archive, logger());
-
-	m_archRequestThread->start();
-}
-
-void ArchivingServiceWorker::stopArchRequestThread()
-{
-	if (m_archRequestThread != nullptr)
-	{
-		m_archRequestThread->quitAndWait();
-		delete m_archRequestThread;
-		m_archRequestThread = nullptr;
-	}
-}
-
-bool ArchivingServiceWorker::readConfiguration(const QByteArray& fileData)
-{
 	XmlReadHelper xml(fileData);
 
-	bool result = m_cfgSettings.readFromXml(xml);
-
-	if (result == true)
-	{
-		qDebug() << "Reading settings - OK";
-	}
-	else
-	{
-		qDebug() << "Settings read ERROR!";
-	}
+	bool result = settings->readFromXml(xml);
 
 	return result;
 }
 
-bool ArchivingServiceWorker::loadConfigurationFromFile(const QString& fileName)
+bool ArchivingService::loadArchSignalsProto(const QByteArray& fileData)
 {
-	QString str;
+	deleteArchSignalsProto();
 
-	QByteArray cfgXmlData;
+	m_archSignalsProto = new Proto::ArchSignals;
 
-	QFile file(fileName);
-
-	if (file.open(QIODevice::ReadOnly) == false)
-	{
-		str = QString("Error open configuration file: %1").arg(fileName);
-
-		qDebug() << C_STR(str);
-
-		return false;
-	}
-
-	bool result = true;
-
-	cfgXmlData = file.readAll();
-
-	result = readConfiguration(cfgXmlData);
-
-	if  (result == true)
-	{
-		str = QString("Configuration is loaded from file: %1").arg(fileName);
-	}
-	else
-	{
-		str = QString("Loading configuration error from file: %1").arg(fileName);
-	}
-
-	qDebug() << C_STR(str);
+	bool result = m_archSignalsProto->ParseFromArray(reinterpret_cast<const void*>(fileData.constData()), fileData.size());
 
 	return result;
 }
 
-bool ArchivingServiceWorker::initArchSignalsMap(const QByteArray& fileData)
+void ArchivingService::deleteArchSignalsProto()
 {
-	Proto::ArchSignals msg;
-
-	bool result = msg.ParseFromArray(reinterpret_cast<const void*>(fileData.constData()), fileData.size());
-
-	if (result == false)
+	if (m_archSignalsProto != nullptr)
 	{
-		assert(false);
-		return false;
+		delete m_archSignalsProto;
+		m_archSignalsProto = nullptr;
 	}
-
-	int count = msg.archsignals_size();
-
-	m_archive->initArchSignals(count);
-
-	for(int i = 0; i < count; i++)
-	{
-		const Proto::ArchSignal& protoArchSignal = msg.archsignals(i);
-
-		ArchSignal archSignal;
-
-		archSignal.hash = protoArchSignal.hash();
-		archSignal.isAnalog = protoArchSignal.isanalog();
-
-		m_archive->appendArchSignal(QString::fromStdString(protoArchSignal.appsignalid()), archSignal);
-	}
-
-	return true;
 }
 
-void ArchivingServiceWorker::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+void ArchivingService::logFileLoadResult(bool loadOk, const QString& fileName)
 {
-	qDebug() << "Configuration Ready!";
+	if (loadOk == true)
+	{
+		DEBUG_LOG_MSG(logger(), QString("Load file %1 OK").arg(fileName));
+	}
+	else
+	{
+		DEBUG_LOG_ERR(logger(), QString("Load file %1 ERROR").arg(fileName));
+	}
+}
 
-	if (m_cfgLoaderThread == nullptr)
+void ArchivingService::onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+{
+	TEST_PTR_RETURN(m_cfgLoaderThread);
+
+	DEBUG_LOG_MSG(logger(), "Trying new configuration loading.");
+
+	ArchivingServiceSettings newServiceSettings;
+
+	bool fileResult = loadConfigurationXml(configurationXmlData, &newServiceSettings);
+
+	if (m_overwriteArchiveLocation.isEmpty() == false)
+	{
+		newServiceSettings.archiveLocation = m_overwriteArchiveLocation;
+	}
+
+	logFileLoadResult(fileResult, "Configuration.xml");
+
+	if (fileResult == false)
 	{
 		return;
 	}
 
-	stopAllThread();
-
-	deleteArchive();
-
-	bool result = readConfiguration(configurationXmlData);
-
-	if (result == false)
-	{
-		return;
-	}
-
-	m_projectID = m_cfgLoaderThread->buildInfo().project;
-
-	createArchive();
-
-	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
+	for(const Builder::BuildFileInfo& bfi : buildFileInfoArray)
 	{
 		QByteArray fileData;
 		QString errStr;
@@ -336,25 +311,38 @@ void ArchivingServiceWorker::onConfigurationReady(const QByteArray configuration
 			continue;
 		}
 
+		bool fileResult = true;
+
 		if (bfi.pathFileName.endsWith("ArchSignals.proto"))
 		{
-			initArchSignalsMap(fileData);
+			fileResult = loadArchSignalsProto(fileData);
+
+			logFileLoadResult(fileResult, bfi.pathFileName);
 		}
 
-		if (result == true)
+		if (fileResult == false)
 		{
-			qDebug() << "Read file " << bfi.pathFileName << " OK";
-		}
-		else
-		{
-			qDebug() << "Read file " << bfi.pathFileName << " ERROR";
 			break;
 		}
 	}
 
-	if (result == true)
+	if (fileResult == false)
 	{
-		runAllThreads();
+		DEBUG_LOG_ERR(logger(), "New configuration loading ERROR.");
+		return;
 	}
+
+	DEBUG_LOG_MSG(logger(), "New configuration loading OK.");
+
+	//
+
+	DEBUG_LOG_MSG(logger(), "Applying new configuration.");
+
+	stopAllThreads();
+
+	m_buildInfo = m_cfgLoaderThread->buildInfo();
+	m_serviceSettings = newServiceSettings;
+
+	startAllThreads();
 }
 

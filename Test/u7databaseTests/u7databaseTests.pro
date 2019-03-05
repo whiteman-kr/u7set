@@ -82,7 +82,8 @@ SOURCES += main.cpp \
     ../../lib/SignalProperties.cpp \
     TestDbBase.cpp \
     DbControllerUserTests.cpp \
-    DbControllerProjectTests.cpp
+    DbControllerProjectTests.cpp \
+    ../../lib/SimpleMutex.cpp
 
 HEADERS += \
     UserTests.h \
@@ -125,7 +126,8 @@ HEADERS += \
     ../../lib/SignalProperties.h \
     TestDbBase.h \
     DbControllerUserTests.h \
-    DbControllerProjectTests.h
+    DbControllerProjectTests.h \
+    ../../lib/SimpleMutex.h
 
 # Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
 #
