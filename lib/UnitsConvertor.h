@@ -29,38 +29,38 @@ const double OUT_PH_HIGH_LIMIT = 65535;
 // limits for thermo couple
 //
 
-const double mV_K_TXA_LOW_LIMIT = -5.891;
-const double mV_K_TXA_HIGH_LIMIT = 52.410;
+const double mV_K_TXA_LOW_LIMIT = -5.891;		// -200
+const double mV_K_TXA_HIGH_LIMIT = 52.410;		// 1300
 
-const double mV_L_TXK_LOW_LIMIT = -9.488;
-const double mV_L_TXK_HIGH_LIMIT = 66.466;
+const double mV_L_TXK_LOW_LIMIT = -9.488;		// -200
+const double mV_L_TXK_HIGH_LIMIT = 66.466;		// 800
 
-const double mV_N_THH_LOW_LIMIT = -4.345;
-const double mV_N_THH_HIGH_LIMIT = 47.513;
+const double mV_N_THH_LOW_LIMIT = -4.345;		// -270
+const double mV_N_THH_HIGH_LIMIT = 47.513;		// 1300
 
-const double mV_Type_B_LOW_LIMIT = -0.291;
-const double mV_Type_B_HIGH_LIMIT = 13.820;
+const double mV_Type_B_LOW_LIMIT = 0.291;		// 250
+const double mV_Type_B_HIGH_LIMIT = 13.820;		// 1820
 
-const double mV_Type_E_LOW_LIMIT = -8.825;
-const double mV_Type_E_HIGH_LIMIT = 76.373;
+const double mV_Type_E_LOW_LIMIT = -8.825;		// -200
+const double mV_Type_E_HIGH_LIMIT = 76.373;		// 1000
 
-const double mV_Type_J_LOW_LIMIT = -8.095;
-const double mV_Type_J_HIGH_LIMIT = 69.553;
+const double mV_Type_J_LOW_LIMIT = -8.095;		// -210
+const double mV_Type_J_HIGH_LIMIT = 69.553;		// 1200
 
-const double mV_Type_K_LOW_LIMIT = -5.891;
-const double mV_Type_K_HIGH_LIMIT = 54.886;
+const double mV_Type_K_LOW_LIMIT = -5.891;		// -200
+const double mV_Type_K_HIGH_LIMIT = 54.886;		// 1372
 
-const double mV_Type_N_LOW_LIMIT = -3.990;
-const double mV_Type_N_HIGH_LIMIT = 47.513;
+const double mV_Type_N_LOW_LIMIT = -3.990;		// -200
+const double mV_Type_N_HIGH_LIMIT = 47.513;		// 1300
 
-const double mV_Type_R_LOW_LIMIT = -0.226;
-const double mV_Type_R_HIGH_LIMIT = 21.101;
+const double mV_Type_R_LOW_LIMIT = -0.226;		// -50
+const double mV_Type_R_HIGH_LIMIT = 21.101;		// 1768
 
-const double mV_Type_S_LOW_LIMIT = -0.236;
-const double mV_Type_S_HIGH_LIMIT = 18.693;
+const double mV_Type_S_LOW_LIMIT = -0.236;		// -50
+const double mV_Type_S_HIGH_LIMIT = 18.693;		// 1768
 
-const double mV_Type_T_LOW_LIMIT = -5.603;
-const double mV_Type_T_HIGH_LIMIT = 20.872;
+const double mV_Type_T_LOW_LIMIT = -5.603;		// -200
+const double mV_Type_T_HIGH_LIMIT = 20.872;		// 400
 
 const double mV_Raw_Mul_8_LOW_LIMIT = -35.000;
 const double mV_Raw_Mul_8_HIGH_LIMIT = 100.000;
