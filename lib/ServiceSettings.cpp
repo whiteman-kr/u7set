@@ -806,16 +806,6 @@ bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Buil
 	result &= DeviceHelper::getIntProperty(software, PROP_ARCHIVE_LONG_TERM_PERIOD, &longTermArchivePeriod, log);
 	result &= DeviceHelper::getStrProperty(software, PROP_ARCHIVE_LOCATION, &archiveLocation, log);
 
-	if (shortTermArchivePeriod < 2)
-	{
-		shortTermArchivePeriod = 2;
-	}
-
-	if (shortTermArchivePeriod >= longTermArchivePeriod)
-	{
-		longTermArchivePeriod = shortTermArchivePeriod + 1;
-	}
-
 	if (archiveLocation.isEmpty() == true)
 	{
 		log->errCFG3031(software->equipmentIdTemplate(), PROP_ARCHIVE_LOCATION);
