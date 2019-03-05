@@ -14,6 +14,7 @@
 
 #include "SerialPortWorker.h"
 #include "SerialPortList.h"
+#include "WorkerBase.h"
 
 // ==============================================================================================
 
@@ -22,7 +23,7 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	explicit MainWindow(QWidget *parent = 0);
+	explicit MainWindow(QWidget *parent = nullptr);
 	virtual ~MainWindow();
 
 private:
@@ -39,6 +40,7 @@ private:
 	//
 							// menu - Ports
 							//
+	QAction*				m_portStartAction = nullptr;
 	QAction*				m_portReconnectAction = nullptr;
 	QAction*				m_portReconnectAllAction = nullptr;
 	QAction*				m_portOptionAction = nullptr;
@@ -52,7 +54,8 @@ private:
 
 							// menu - ?
 							//
-	QAction*				m_pAboutAppAction = nullptr;
+	QAction*				m_optionAppAction = nullptr;
+	QAction*				m_aboutAppAction = nullptr;
 
 	// Elements of interface - ToolBar
 	//
@@ -118,6 +121,8 @@ private:
 	void					startCommDataTimer();
 	void					stopCommDataTimer();
 
+	void					writeTestResultToFile();
+
 protected:
 
 	void					closeEvent(QCloseEvent* e);
@@ -130,6 +135,7 @@ private slots:
 	//
 							// Ports
 							//
+	void					startTest();
 	void					reconnectSerialPort();
 	void					reconnectAllSerialPort();
 	void					optionSerialPort();
@@ -150,6 +156,7 @@ private slots:
 
 							// menu - ?
 							//
+	void					optionApp();
 	void					aboutApp();
 
 	// slot for update lists
@@ -161,6 +168,7 @@ private slots:
 	// Slots of SerialPortThread
 	//
 	void					portConnectedChanged();
+	void					testFinished();
 };
 
 // ==============================================================================================
