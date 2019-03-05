@@ -5,6 +5,7 @@
 #include "../lib/DeviceObject.h"
 #include "../lib/DataSource.h"
 #include "../lib/Subsystem.h"
+#include "../VFrame30/Schema.h"
 
 #include "BuildResultWriter.h"
 #include "IssueLogger.h"
@@ -21,11 +22,20 @@ namespace Builder
 	public:
 		struct SchemaFile
 		{
-			QString id;
-			QString subDir;
+			SchemaFile(const QString& _schemaId, const QString& _fileName, const QString& _subDir, const QString& _group, const QString& _details) :
+				schemaId(_schemaId),
+				fileName(_fileName),
+				subDir(_subDir),
+				group(_group),
+				details(_details)
+			{
+			}
+
+			QString schemaId;
 			QString fileName;
+			QString subDir;
 			QString group;
-			QString details;
+			VFrame30::SchemaDetails details;
 		};
 
 	public:
@@ -35,16 +45,8 @@ namespace Builder
 		bool run();
 
 		static bool generalSoftwareCfgGeneration(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet* equipment, std::shared_ptr<BuildResultWriter> buildResultWriter);
-		static bool writeSchemas(DbController* db, BuildResultWriter* buildResultWriter, IssueLogger* log);
-		static bool writeSchemasList(DbController* db,
-									 BuildResultWriter* buildResultWriter,
-									 int parentFileId,
-									 QString fileExtension,
-									 QString subDir,
-									 QString group,
-									 IssueLogger* log);
-
-		static bool writeAppLogicSchemasDetails(const QList<SchemaFile>& schemaFiles, BuildResultWriter* buildResultWriter, QString dir, IssueLogger* log);
+		static bool loadAllSchemas(DbController* db, BuildResultWriter* buildResultWriter, IssueLogger* log);
+		static void clearStaticData();
 
 		virtual bool generateConfiguration() = 0;
 
@@ -68,13 +70,11 @@ namespace Builder
 		QString m_subDir;
 
 		static HashedVector<QString, Hardware::DeviceModule*> m_lmList;
-
 		static HashedVector<QString, Hardware::Software*> m_softwareList;
 
+		static std::multimap<QString, std::shared_ptr<SchemaFile>> m_schemaTagToFile;
+
 		Hardware::DeviceRoot* m_deviceRoot = nullptr;
-
-		static QList<SchemaFile> m_schemaFileList;
-
 
 		QString getBuildInfoCommentsForBat();
 		QString getBuildInfoCommentsForSh();

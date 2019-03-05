@@ -46,6 +46,8 @@ namespace Builder
 		::Proto::AppSignalSet m_tuningSet;
 
 		TuningFilterStorage m_tuningFilterStorage;
+		QStringList m_schemaTagList;					// Generated in writeSettings
+		std::set<std::shared_ptr<SchemaFile>> m_tuningSchemas;
 	};
 
 	template <typename TYPE>

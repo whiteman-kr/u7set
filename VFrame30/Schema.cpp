@@ -1343,7 +1343,7 @@ namespace VFrame30
 	{
 		if (details.trimmed().isEmpty() == true)
 		{
-			*this = SchemaDetails{};
+			*this = {};
 			return true;
 		}
 
@@ -1715,6 +1715,18 @@ namespace VFrame30
 	void SchemaDetailsSet::clear()
 	{
 		m_details.clear();
+	}
+
+	void SchemaDetailsSet::add(const SchemaDetails& details)
+	{
+		std::shared_ptr<SchemaDetails> d = std::make_shared<SchemaDetails>(details);
+		return add(d);
+	}
+
+	void SchemaDetailsSet::add(SchemaDetails&& details)
+	{
+		std::shared_ptr<SchemaDetails> d = std::make_shared<SchemaDetails>(std::move(details));
+		return add(d);
 	}
 
 	void SchemaDetailsSet::add(std::shared_ptr<SchemaDetails> details)

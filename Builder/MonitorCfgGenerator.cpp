@@ -10,6 +10,7 @@ namespace Builder
 		SoftwareCfgGenerator(context, software),
 		m_context(context)
 	{
+		assert(m_context);
 	}
 
 	MonitorCfgGenerator::~MonitorCfgGenerator()
@@ -46,51 +47,23 @@ namespace Builder
 			QString globalScript = m_software->propertyValue("GlobalScript").toString();
 			BuildFile* globalScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "GlobalScript.js", globalScript);
 
-			m_cfgXml->addLinkToFile(globalScriptBuildFile);
+			if (globalScriptBuildFile != nullptr)
+			{
+				m_cfgXml->addLinkToFile(globalScriptBuildFile);
+			}
+			else
+			{
+				result = false;
+			}
 		}
 
 		// write XML via m_cfgXml->xmlWriter()
 		//
 		result &= writeMonitorSettings();
 
-		// add link to configuration files (previously written) via m_cfgXml->addLinkToFile(...)
+		// Add links to schema files (previously written) via m_cfgXml->addLinkToFile(...)
 		//
-		QString alsExt = QLatin1String(".") + Db::File::AlFileExtension;
-		QString mvsExt = QLatin1String(".") + Db::File::MvsFileExtension;
-
-		for (const SchemaFile& schemaFile : SoftwareCfgGenerator::m_schemaFileList)
-		{
-			// Add Application Logic and Monitor schemas only
-			//
-			if (schemaFile.fileName.endsWith(alsExt, Qt::CaseInsensitive) == true ||
-				schemaFile.fileName.endsWith(mvsExt, Qt::CaseInsensitive) == true)
-			{
-				m_cfgXml->addLinkToFile(schemaFile.subDir, schemaFile.fileName);
-			}
-		}
-
-		// Generate description file for all schemas
-		//
-		VFrame30::SchemaDetailsSet detailsSet;
-
-		for (const SchemaFile& schemaFile : SoftwareCfgGenerator::m_schemaFileList)
-		{
-			auto details = std::make_shared<VFrame30::SchemaDetails>(schemaFile.details);
-			details->m_guids.clear();		// Do we really need SchemaItemGuids in Monitor? If yes, delete this line
-
-			detailsSet.add(details);
-		}
-
-		QByteArray schemaSetFileData;
-
-		bool saveOk = detailsSet.saveToByteArray(&schemaSetFileData);
-		assert(saveOk);
-
-		if (saveOk == true)
-		{
-			BuildFile* schemaDetailsBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "SchemaDetails.pbuf", schemaSetFileData);
-			m_cfgXml->addLinkToFile(schemaDetailsBuildFile);
-		}
+		result &= writeSchemasByTags();
 
 		// Generate tuning signals file
 		//
@@ -117,56 +90,157 @@ namespace Builder
 
 			// --
 			//
-			bool ok = true;
 
 			// StartSchemaID
 			//
-			QString startSchemaId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "StartSchemaID", &ok).trimmed();
-			if (ok == false)
 			{
-				return false;
+				bool ok = true;
+				QString startSchemaId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "StartSchemaID", &ok).trimmed();
+				if (ok == false)
+				{
+					return false;
+				}
+
+				if (startSchemaId.isEmpty() == true)
+				{
+					QString errorStr = tr("Monitor configuration error %1, property startSchemaId is invalid")
+									   .arg(m_software->equipmentIdTemplate());
+
+					m_log->writeError(errorStr);
+					writeErrorSection(xmlWriter, errorStr);
+					return false;
+				}
+
+				xmlWriter.writeTextElement("StartSchemaID", startSchemaId);
 			}
 
-			if (startSchemaId.isEmpty() == true)
+			// SchemaTags
+			//
 			{
-				QString errorStr = tr("Monitor configuration error %1, property startSchemaId is invalid")
-								   .arg(m_software->equipmentIdTemplate());
+				bool ok = true;
+				QString schemaTags = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "SchemaTags", &ok);
+				if (ok == false)
+				{
+					return false;
+				}
 
-				m_log->writeError(errorStr);
-				writeErrorSection(xmlWriter, errorStr);
-				return false;
+				m_schemaTagList = schemaTags.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+				schemaTags = m_schemaTagList.join("; ");
+
+				xmlWriter.writeTextElement("SchemaTags", schemaTags);
 			}
-
-			xmlWriter.writeTextElement("StartSchemaID", startSchemaId);
 
 			// AppDataService
 			//
-			ok = writeAppDataServiceSection(xmlWriter);
-			if (ok == false)
+			if (bool ok = writeAppDataServiceSection(xmlWriter);
+				ok == false)
 			{
 				return false;
 			}
 
 			// ArchiveService
 			//
-			ok = writeArchiveServiceSection(xmlWriter);
-			if (ok == false)
+			if (bool ok = writeArchiveServiceSection(xmlWriter);
+				ok == false)
 			{
 				return false;
 			}
 
 			// TuningService
 			//
-			ok = writeTuningServiceSection(xmlWriter);
-			if (ok == false)
+			if (bool ok = writeTuningServiceSection(xmlWriter);
+				ok == false)
 			{
 				return false;
 			}
 
 		} // Settings
 
-
 		return true;
+	}
+
+	bool MonitorCfgGenerator::writeSchemasByTags()
+	{
+		// class SoftwareCfgGenerator
+		//		static std::multimap<QString, std::shared_ptr<SchemaFile>> m_schemaTagToFile;
+		//
+
+		bool result = true;
+		std::set<std::shared_ptr<SchemaFile>> monitorSchemas;
+
+		// If tag list is empty, then link all Monitor and ApplicationLogic schemas
+		//
+		if (m_schemaTagList.isEmpty() == true)
+		{
+			for (auto&[tag, schemaFile] : SoftwareCfgGenerator::m_schemaTagToFile)
+			{
+				if (schemaFile->fileName.endsWith(QStringLiteral(".") + Db::File::AlFileExtension, Qt::CaseInsensitive) == true ||
+					schemaFile->fileName.endsWith(QStringLiteral(".") + Db::File::MvsFileExtension, Qt::CaseInsensitive) == true)
+				{
+					monitorSchemas.insert(schemaFile);
+				}
+			}
+		}
+		else
+		{
+			for (QString tag : m_schemaTagList)
+			{
+				auto tagRange = m_schemaTagToFile.equal_range(tag);
+
+				for (auto it = tagRange.first; it != tagRange.second; ++it)
+				{
+					const QString& mapTag = it->first;
+					std::shared_ptr<SchemaFile> schemaFile = it->second;
+
+					if (mapTag != tag ||
+						schemaFile == nullptr)
+					{
+						assert(mapTag == tag);
+						assert(schemaFile);
+						continue;
+					}
+
+					monitorSchemas.insert(schemaFile);
+				}
+			}
+		}
+
+		// --
+		//
+		VFrame30::SchemaDetailsSet detaisSet;
+
+		for (auto schemaFile : monitorSchemas)
+		{
+			result &= m_cfgXml->addLinkToFile(schemaFile->subDir, schemaFile->fileName);
+			detaisSet.add(schemaFile->details);
+		}
+
+		// Save details
+		//
+		{
+			QByteArray fileData;
+
+			if (bool ok = detaisSet.saveToByteArray(&fileData);
+				ok == true)
+			{
+				BuildFile* schemaDetailsBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "SchemaDetails.pbuf", fileData);
+
+				if (schemaDetailsBuildFile != nullptr)
+				{
+					result &= m_cfgXml->addLinkToFile(schemaDetailsBuildFile);
+				}
+				else
+				{
+					result = false;
+				}
+			}
+			else
+			{
+				return false;
+			}
+		}
+
+		return result;
 	}
 
 	bool MonitorCfgGenerator::writeAppDataServiceSection(QXmlStreamWriter& xmlWriter)
@@ -611,7 +685,7 @@ namespace Builder
 	{
 		if (m_tuningSources.empty() == true)
 		{
-			assert(m_tuningSources.empty() == false);
+			//assert(m_tuningSources.empty() == false);
 			return false;
 		}
 
