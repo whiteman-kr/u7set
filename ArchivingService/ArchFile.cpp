@@ -450,8 +450,6 @@ inline bool operator < (const ArchFilePartition::Info& p1, const ArchFilePartiti
 const int ArchFile::QUEUE_MIN_SIZE = 10;
 const int ArchFile::QUEUE_MAX_SIZE = 1280;	// == QUEUE_MIN_SIZE * 128 (2^7)
 
-const int ArchFile::MIN_QUEUE_SIZE_TO_FLUSH = 3;		// may be 4 or more?
-
 const double ArchFile::QUEUE_EMERGENCY_LIMIT = 0.7;		// 70%
 const double ArchFile::QUEUE_EXPAND_LIMIT = 0.8;		// 80%
 const double ArchFile::QUEUE_REDUCTION_LIMIT = 0.2;		// 20%
@@ -482,13 +480,11 @@ void ArchFile::setArchFullPath(const QString& archFullPath)
 	m_writablePartition.init(m_path, true);
 }
 
-bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
+bool ArchFile::pushState(const SimpleAppSignalState& state)
 {
-	Q_UNUSED(archID)
-
 	const QThread* thread = QThread::currentThread();
 
-	controlQueueSize(thread);
+	controlQueueSizeBeforePush(thread);
 
 	ArchFileRecord s;
 
@@ -525,6 +521,7 @@ bool ArchFile::pushState(qint64 archID, const SimpleAppSignalState& state)
 bool ArchFile::flush(qint64 curPartition,
 					 qint64* totalFushedStatesCount,
 					 bool flushAnyway,
+					 int minQueueSizeForFlushing,
 					 ArchFileRecord* buffer,
 					 int bufferSize,
 					 const QThread* thread)
@@ -540,7 +537,7 @@ bool ArchFile::flush(qint64 curPartition,
 		return false;
 	}
 
-	if (m_requiredImmediatelyFlushing.load() == false && flushAnyway == false &&  queueSize < MIN_QUEUE_SIZE_TO_FLUSH)
+	if (m_requiredImmediatelyFlushing.load() == false && flushAnyway == false &&  queueSize < minQueueSizeForFlushing)
 	{
 		return false;
 	}
@@ -709,42 +706,36 @@ void ArchFile::shutdown(qint64 curPartition,
 		m_queue.push(m_lastRecord, thread);
 	}
 
-	flush(curPartition, totalFlushedStatesCount, true, buffer, bufferSize, thread);
+	flush(curPartition,
+		  totalFlushedStatesCount,
+		  true,
+		  Archive::DEFAULT_QUEUE_SIZE_FOR_FLUSHING /* value doesn't matter, because prev param says FlushAnyway */,
+		  buffer,
+		  bufferSize,
+		  thread);
 }
-
-/*
-void ArchFile::breakMaintenance()
-{
-	m_fileInMaintenanceMutex.lock();
-
-	if (m_fileInMaintenance == true)
-	{
-		m_breakMaintenanceRequest = true;
-
-		m_fileInMaintenanceMutex.unlock();
-
-		while(m_breakMaintenanceRequest != false)
-	}
-}
-
-*/
 
 bool ArchFile::maintenance(qint64 currentPartition,
 						   qint64 shortTermPeriodMs,
 						   qint64 msLongTermPeriod,
 						   int* deletedCount,
-						   int* packedCount)
+						   int* packedCount,
+						   const RunOverrideThread* thread)
 {
+	TEST_PTR_RETURN_FALSE(deletedCount);
+	TEST_PTR_RETURN_FALSE(packedCount);
+	TEST_PTR_RETURN_FALSE(thread);
+
 	QVector<ArchFilePartition::Info> partitionsInfo = getArchPartitionsInfo(m_path);
 
-	bool result = packPartitions(partitionsInfo, currentPartition, shortTermPeriodMs, packedCount);
+	bool result = packPartitions(partitionsInfo, currentPartition, shortTermPeriodMs, packedCount, thread);
 
 	if (result == false)
 	{
 		return false;
 	}
 
-	result = deleteOldPartitions(partitionsInfo, currentPartition, msLongTermPeriod, deletedCount);
+	result = deleteOldPartitions(partitionsInfo, currentPartition, msLongTermPeriod, deletedCount, thread);
 
 	return result;
 }
@@ -766,7 +757,8 @@ void ArchFile::stopMaintenance()
 bool ArchFile::packPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
 								qint64 currentPartition,
 								qint64 msShortTermPeriod,
-								int* packedCount)
+								int* packedCount,
+								const RunOverrideThread* thread)
 {
 	TEST_PTR_RETURN_FALSE(packedCount);
 
@@ -774,9 +766,9 @@ bool ArchFile::packPartitions(const QVector<ArchFilePartition::Info>& partitions
 
 	for(int i = 0; i < partitionsInfo.count(); i++)
 	{
-		if (isRwAccessRequested() == true)
+		if (thread->isQuitRequested() == true)
 		{
-			return false;			// break maintenance
+			return false;
 		}
 
 		const ArchFilePartition::Info& pi = partitionsInfo[i];
@@ -792,7 +784,7 @@ bool ArchFile::packPartitions(const QVector<ArchFilePartition::Info>& partitions
 
 			if (m_isAnalog == true)
 			{
-				result = packAnalogSignalPartition(pi);
+				result = packAnalogSignalPartition(pi, thread);
 			}
 			else
 			{
@@ -817,7 +809,7 @@ bool ArchFile::packPartitions(const QVector<ArchFilePartition::Info>& partitions
 	return true;
 }
 
-bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
+bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi, const RunOverrideThread* thread)
 {
 	assert(pi.shortTerm == true);
 
@@ -882,7 +874,7 @@ bool ArchFile::packAnalogSignalPartition(const ArchFilePartition::Info& pi)
 
 	while(true)
 	{
-		if (isRwAccessRequested() == true)
+		if (thread->isQuitRequested() == true)
 		{
 			result = false;
 			break;
@@ -994,7 +986,8 @@ bool ArchFile::packDiscreteSignalPartition(const ArchFilePartition::Info& pi)
 bool ArchFile::deleteOldPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
 								  qint64 currentPartition,
 								  qint64 msLongTermPeriod,
-								  int* deletedCount)
+								  int* deletedCount,
+								  const RunOverrideThread* thread)
 {
 	TEST_PTR_RETURN_FALSE(deletedCount);
 
@@ -1004,7 +997,7 @@ bool ArchFile::deleteOldPartitions(const QVector<ArchFilePartition::Info>& parti
 
 	for(int i = 0; i < partitionsInfo.count(); i++)
 	{
-		if (isRwAccessRequested() == true)
+		if (thread->isQuitRequested() == true)
 		{
 			return false;		// break maintenance
 		}
@@ -1042,7 +1035,7 @@ QString ArchFile::getPartitionFileName(const ArchFilePartition::Info& pi)
 	return QString("%1/%2").arg(m_path, pi.fileName);
 }
 
-void ArchFile::controlQueueSize(const QThread* thread)
+void ArchFile::controlQueueSizeBeforePush(const QThread* thread)
 {
 	int curSize = 0;
 	int curMaxSize = 0;

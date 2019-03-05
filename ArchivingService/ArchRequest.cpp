@@ -307,18 +307,6 @@ ArchRequest::~ArchRequest()
 
 void ArchRequest::run()
 {
-/*	if (m_param.print().contains(" startTime=2019-02-26 14:00:00, endTime=2019-02-26") != true)
-	{
-		DEBUG_STOP;
-		reportNoData();
-		waitForQuit();
-		return;
-	}*/
-
-	// expand request time from both sides
-	//
-//	m_param.expandTimes(Archive::TIME_TO_EXPAND_REQUEST);
-
 	bool dataFound = prepareArchFilesToRead();
 
 	if (dataFound == false)
@@ -327,10 +315,6 @@ void ArchRequest::run()
 		waitForQuit();
 		return;
 	}
-
-	// revert m_execParam times to initial values!
-	//
-//	m_param.expandTimes(-Archive::TIME_TO_EXPAND_REQUEST);		// minus is OK!
 
 	prepareGetNextReply();
 

@@ -83,7 +83,8 @@ void ArchMaintenanceThread::maintenance()
 								  m_archive.msShortTermPeriod(),
 								  m_archive.msLongTermPeriod(),
 								  &deletedCount,
-								  &packedCount);
+								  &packedCount,
+								  this);
 			if (res == false)
 			{
 				errorCount++;

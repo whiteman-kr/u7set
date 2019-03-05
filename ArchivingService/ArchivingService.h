@@ -60,6 +60,7 @@ private slots:
 
 private:
 	QString m_overwriteArchiveLocation;
+	int m_minQueueSizeForFlushing = 0;
 	QSettings m_settings;
 
 	ArchivingServiceSettings m_serviceSettings;
@@ -74,4 +75,5 @@ private:
 	Archive* m_archive = nullptr;
 
 	static const char* const SETTING_ARCHIVE_LOCATION;
+	static const char* const SETTING_MIN_QUEUE_SIZE_FOR_FLUSHING;
 };

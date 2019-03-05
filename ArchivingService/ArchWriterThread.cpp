@@ -66,6 +66,7 @@ void ArchWriterThread::run()
 			bool flushingExecuted = fileToFlush->flush(currentPartition,
 													   &m_totalFlushedStatesCount,
 													   flushAnyway,
+													   m_archive->minQueueSizeForFlushing(),
 													   m_buffer,
 													   ArchFile::QUEUE_MAX_SIZE,
 													   m_thisThread);

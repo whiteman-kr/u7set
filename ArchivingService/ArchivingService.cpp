@@ -10,6 +10,7 @@
 // -------------------------------------------------------------------------------
 
 const char* const ArchivingService::SETTING_ARCHIVE_LOCATION = "ArchiveLocation";
+const char* const ArchivingService::SETTING_MIN_QUEUE_SIZE_FOR_FLUSHING = "MinQueueSizeForFlushing";
 
 ArchivingService::ArchivingService(const SoftwareInfo& softwareInfo,
 											   const QString& serviceName,
@@ -50,18 +51,34 @@ void ArchivingService::initCmdLineParser()
 	cp.addSingleValueOption("cfgip2", SETTING_CFG_SERVICE_IP2, "IP-addres of second Configuration Service.", "");
 	cp.addSingleValueOption("location",
 							SETTING_ARCHIVE_LOCATION,
-							"Path to archive location (overwrite ArchiveLocation from project settings)", "D:\Archives");
+							"Path to archive location (overwrite ArchiveLocation from project settings)", "D:\\Archives");
+	cp.addSingleValueOption("mq",
+							SETTING_MIN_QUEUE_SIZE_FOR_FLUSHING,
+							"Minimum size of signal states queue for flushing to disk.", "");
+
 }
 
 void ArchivingService::loadSettings()
 {
 	m_overwriteArchiveLocation = QString(getStrSetting(SETTING_ARCHIVE_LOCATION));
 
+	QString sizeStr = getStrSetting(SETTING_MIN_QUEUE_SIZE_FOR_FLUSHING);
+
+	bool ok = false;
+
+	m_minQueueSizeForFlushing = sizeStr.toInt(&ok);
+
+	if (sizeStr.isEmpty() == true || ok == false)
+	{
+		m_minQueueSizeForFlushing = Archive::DEFAULT_QUEUE_SIZE_FOR_FLUSHING;
+	}
+
 	DEBUG_LOG_MSG(logger(), QString(tr("Load settings:")));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_EQUIPMENT_ID).arg(equipmentID()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP1).arg(cfgServiceIP1().addressPortStr()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_CFG_SERVICE_IP2).arg(cfgServiceIP2().addressPortStr()));
 	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_ARCHIVE_LOCATION).arg(m_overwriteArchiveLocation));
+	DEBUG_LOG_MSG(logger(), QString(tr("%1 = %2")).arg(SETTING_MIN_QUEUE_SIZE_FOR_FLUSHING).arg(m_minQueueSizeForFlushing));
 }
 
 void ArchivingService::initialize()
@@ -135,7 +152,8 @@ void ArchivingService::startArchive()
 								*m_archSignalsProto,
 								m_serviceSettings.shortTermArchivePeriod,
 								m_serviceSettings.longTermArchivePeriod,
-								5,		// archive maintenance running delay (minutes)
+								Archive::DEFAULT_MAINTENANCE_DELAY_MINUTES,
+								m_minQueueSizeForFlushing,
 								logger());
 
 		deleteArchSignalsProto();				// no more required

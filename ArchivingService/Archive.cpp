@@ -64,32 +64,35 @@ Archive::Archive(const QString& projectID,
 				 int shortTermPeriod,
 				 int longTermPeriod,
 				 int maintenanceDelayMinutes,
+				 int minQueueSizeForFlushing,
 				 CircularLoggerShared logger) :
 	m_projectID(projectID),
 	m_equipmentID(equipmentID),
 	m_archDir(archDir),
 	m_maintenanceDelayMinutes(maintenanceDelayMinutes),
+	m_minQueueSizeForFlushing(minQueueSizeForFlushing),
 	m_log(logger)
 {
-	if (shortTermPeriod < 2)
-	{
-		shortTermPeriod = 2;
-	}
 
-	if (shortTermPeriod >= longTermPeriod)
-	{
-		longTermPeriod = shortTermPeriod + 1;
-	}
+	// shortTermPeriod and longTermPeriod limitation
+	//
+	shortTermPeriod = std::max(shortTermPeriod, MIN_SHORT_TERM_PERIOD_DAYS);
+	longTermPeriod = std::max(shortTermPeriod + 1, longTermPeriod);
+
+	// m_maintenanceDelayMinutes limitation
+	//
+	m_maintenanceDelayMinutes = std::max(m_maintenanceDelayMinutes, MIN_MAINTENANCE_DELAY_MINUTES);
+	m_maintenanceDelayMinutes = std::min(m_maintenanceDelayMinutes, MAX_MAINTENANCE_DELAY_MINUTES);
+
+	// m_minQueueSizeForFlushing limitation
+	//
+	m_minQueueSizeForFlushing = std::max(m_minQueueSizeForFlushing, MIN_QUEUE_SIZE_FOR_FLUSHING);
+	m_minQueueSizeForFlushing = std::min(m_minQueueSizeForFlushing, MAX_QUEUE_SIZE_FOR_FLUSHING);
 
 	// period from days to milliseconds conversation
 	//
 	m_msShortTermPeriod = shortTermPeriod * PARTITION_PERIOD_MS;
 	m_msLongTermPeriod = longTermPeriod * PARTITION_PERIOD_MS;
-
-	if (m_maintenanceDelayMinutes < 0)
-	{
-		m_maintenanceDelayMinutes = 0;
-	}
 
 	int signalsCount = protoArchSignals.archsignals_size();
 
@@ -171,168 +174,6 @@ void Archive::stop()
 	stopWriteThread();
 
 	m_isWorkable = false;
-}
-
-void Archive::writeArchFilesInfoFile(const QVector<QVector<ArchFile*>>& archFilesGroups)
-{
-	QFile infoFile(QString("%1/archive.info").arg(m_archFullPath));
-
-	if (infoFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate) == false)
-	{
-		return;
-	}
-
-	QTextStream info(&infoFile);
-
-	for(int g = 0; g < 256; g++)
-	{
-		info << QString("Group %1\n\n").arg(QString("%1").arg(g, 2, 16, QChar('0')).toUpper());
-
-		int filesCount = archFilesGroups[g].size();
-
-		if (filesCount == 0)
-		{
-			info << "No files in group\n\n";
-			continue;
-		}
-
-		for(int i = 0; i < filesCount; i++)
-		{
-			ArchFile* archFile = archFilesGroups[g][i];
-
-			if (archFile == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			info << QString("%1 %2 %3\n").
-						arg(archFile->isAnalog() ? "A" : "D").
-						arg(QString("%1").arg(archFile->hash(), 16, 16, QChar('0')).toUpper()).
-						arg(archFile->appSignalID());
-		}
-
-		info << "\n";
-	}
-
-	infoFile.close();
-}
-
-std::shared_ptr<ArchRequest> Archive::startNewRequest(E::TimeType timeType,
-													  qint64 startTime,
-													  qint64 endTime,
-													  const QVector<Hash>& signalHashes,
-													  std::shared_ptr<Network::GetAppSignalStatesFromArchiveNextReply> getNextReply)
-{
-	m_requestsMutex.lock();
-
-	ArchRequestParam param(getNewRequestID(), timeType, startTime, endTime, signalHashes);
-
-	ArchRequestShared archRequest = std::make_shared<ArchRequest>(*this, param, getNextReply, m_log);
-
-	m_requests.insert(param.requestID(), archRequest);
-
-	m_requestsMutex.unlock();
-
-	archRequest->start();
-
-	return archRequest;
-}
-
-void Archive::finalizeRequest(quint32 requestID)
-{
-	m_requestsMutex.lock();
-
-	ArchRequestShared archRequest = m_requests.value(requestID, nullptr);
-
-	if (archRequest != nullptr)
-	{
-		archRequest->quitAndWait();
-
-		m_requests.remove(requestID);
-	}
-
-	m_requestsMutex.unlock();
-}
-
-QString Archive::getSignalID(Hash signalHash)
-{
-	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
-
-	if (archFile == nullptr)
-	{
-		assert(false);
-		return QString();
-	}
-
-	return archFile->appSignalID();
-}
-
-void Archive::getSignalsHashes(QVector<Hash>* hashes)
-{
-	TEST_PTR_RETURN(hashes);
-
-	hashes->resize(m_archFiles.count());
-
-	int i = 0;
-
-	for(ArchFile* archFile : m_archFiles)
-	{
-		(*hashes)[i] = archFile->hash();
-		i++;
-	}
-}
-
-QString Archive::timeTypeStr(E::TimeType timeType)
-{
-	switch(timeType)
-	{
-	case E::TimeType::Plant:
-		return QString("Plant");
-
-	case E::TimeType::System:
-		return QString("System");
-
-	case E::TimeType::Local:
-		return QString("Local");
-
-	case E::TimeType::ArchiveId:
-		return QString("ArchiveId");
-
-	default:
-		assert(false);
-	}
-
-	return QString("???");
-}
-
-qint64 Archive::localTimeOffsetFromUtc()
-{
-	QDateTime local(QDateTime::currentDateTime());
-
-	qint64 offset = local.offsetFromUtc() * 1000;
-
-	return offset;
-}
-
-void Archive::saveState(const SimpleAppSignalState& state)
-{
-	ArchFile* archFile = m_archFiles.value(state.hash, nullptr);
-
-	if (archFile == nullptr)
-	{
-		assert(false);
-		return;
-	}
-
-	m_archID++;
-
-	archFile->pushState(m_archID, state);
-
-	if (archFile->isEmergency() == true)
-	{
-		appendEmergencyFile(archFile);
-	}
 }
 
 bool Archive::checkAndCreateArchiveDirs()
@@ -469,6 +310,134 @@ bool Archive::createGroupDirs()
 	}
 
 	return result;
+}
+
+void Archive::writeArchFilesInfoFile(const QVector<QVector<ArchFile*>>& archFilesGroups)
+{
+	QFile infoFile(QString("%1/archive.info").arg(m_archFullPath));
+
+	if (infoFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate) == false)
+	{
+		return;
+	}
+
+	QTextStream info(&infoFile);
+
+	for(int g = 0; g < 256; g++)
+	{
+		info << QString("Group %1\n\n").arg(QString("%1").arg(g, 2, 16, QChar('0')).toUpper());
+
+		int filesCount = archFilesGroups[g].size();
+
+		if (filesCount == 0)
+		{
+			info << "No files in group\n\n";
+			continue;
+		}
+
+		for(int i = 0; i < filesCount; i++)
+		{
+			ArchFile* archFile = archFilesGroups[g][i];
+
+			if (archFile == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			info << QString("%1 %2 %3\n").
+						arg(archFile->isAnalog() ? "A" : "D").
+						arg(QString("%1").arg(archFile->hash(), 16, 16, QChar('0')).toUpper()).
+						arg(archFile->appSignalID());
+		}
+
+		info << "\n";
+	}
+
+	infoFile.close();
+}
+
+std::shared_ptr<ArchRequest> Archive::startNewRequest(E::TimeType timeType,
+													  qint64 startTime,
+													  qint64 endTime,
+													  const QVector<Hash>& signalHashes,
+													  std::shared_ptr<Network::GetAppSignalStatesFromArchiveNextReply> getNextReply)
+{
+	m_requestsMutex.lock();
+
+	ArchRequestParam param(getNewRequestID(), timeType, startTime, endTime, signalHashes);
+
+	ArchRequestShared archRequest = std::make_shared<ArchRequest>(*this, param, getNextReply, m_log);
+
+	m_requests.insert(param.requestID(), archRequest);
+
+	m_requestsMutex.unlock();
+
+	archRequest->start();
+
+	return archRequest;
+}
+
+void Archive::finalizeRequest(quint32 requestID)
+{
+	m_requestsMutex.lock();
+
+	ArchRequestShared archRequest = m_requests.value(requestID, nullptr);
+
+	if (archRequest != nullptr)
+	{
+		archRequest->quitAndWait();
+
+		m_requests.remove(requestID);
+	}
+
+	m_requestsMutex.unlock();
+}
+
+QString Archive::getSignalID(Hash signalHash)
+{
+	ArchFile* archFile = m_archFiles.value(signalHash, nullptr);
+
+	if (archFile == nullptr)
+	{
+		assert(false);
+		return QString();
+	}
+
+	return archFile->appSignalID();
+}
+
+void Archive::getSignalsHashes(QVector<Hash>* hashes)
+{
+	TEST_PTR_RETURN(hashes);
+
+	hashes->resize(m_archFiles.count());
+
+	int i = 0;
+
+	for(ArchFile* archFile : m_archFiles)
+	{
+		(*hashes)[i] = archFile->hash();
+		i++;
+	}
+}
+
+void Archive::saveState(const SimpleAppSignalState& state)
+{
+	ArchFile* archFile = m_archFiles.value(state.hash, nullptr);
+
+	if (archFile == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	archFile->pushState(state);
+
+	if (archFile->isEmergency() == true)
+	{
+		appendEmergencyFile(archFile);
+	}
 }
 
 bool Archive::shutdown(ArchFileRecord* buffer, int bufferSize, const QThread* thread)
@@ -610,6 +579,29 @@ qint64 Archive::getCurrentPartition()
 	}
 
 	return newPartition;
+}
+
+QString Archive::timeTypeStr(E::TimeType timeType)
+{
+	switch(timeType)
+	{
+	case E::TimeType::Plant:
+		return QString("Plant");
+
+	case E::TimeType::System:
+		return QString("System");
+
+	case E::TimeType::Local:
+		return QString("Local");
+
+	case E::TimeType::ArchiveId:
+		return QString("ArchiveId");
+
+	default:
+		assert(false);
+	}
+
+	return QString("???");
 }
 
 quint32 Archive::getNewRequestID()

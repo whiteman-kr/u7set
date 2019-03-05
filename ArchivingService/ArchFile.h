@@ -95,7 +95,6 @@ public:
 
 private:
 	static const int QUEUE_MIN_SIZE;
-	static const int MIN_QUEUE_SIZE_TO_FLUSH;
 
 	static const double QUEUE_EMERGENCY_LIMIT;
 	static const double QUEUE_EXPAND_LIMIT;
@@ -107,11 +106,12 @@ public:
 
 	void setArchFullPath(const QString& archFullPath);
 
-	bool pushState(qint64 archID, const SimpleAppSignalState& state);
+	bool pushState(const SimpleAppSignalState& state);
 
 	bool flush(qint64 curPartition,
 			   qint64* totalFushedStatesCount,
 			   bool flushAnyway,
+			   int minQueueSizeForFlushing,
 			   ArchFileRecord* buffer,
 			   int bufferSize,
 			   const QThread* thread);
@@ -140,7 +140,8 @@ public:
 					 qint64 msShortTermPeriod,
 					 qint64 msLongTermPeriod,
 					 int* deletedCount,
-					 int* packedCount);
+					 int* packedCount,
+					 const RunOverrideThread* thread);
 private:
 	void startMaintenance();
 	void stopMaintenance();
@@ -148,8 +149,10 @@ private:
 	bool packPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
 							qint64 currentPartition,
 							qint64 msShortTermPeriod,
-							int* packedCount);
-	bool packAnalogSignalPartition(const ArchFilePartition::Info& pi);
+							int* packedCount,
+							const RunOverrideThread* thread);
+
+	bool packAnalogSignalPartition(const ArchFilePartition::Info& pi, const RunOverrideThread* thread);
 	bool writeLtaFile(QFile& ltaFile, const char* buffer, int size);
 
 	bool packDiscreteSignalPartition(const ArchFilePartition::Info& pi);
@@ -157,13 +160,12 @@ private:
 	bool deleteOldPartitions(const QVector<ArchFilePartition::Info>& partitionsInfo,
 								qint64 currentPartition,
 								qint64 msLongTermPeriod,
-								int* deletedCount);
-
-	bool isRwAccessRequested() { return m_rwAccessRequested.load(); }
+								int* deletedCount,
+								const RunOverrideThread *thread);
 
 	QString getPartitionFileName(const ArchFilePartition::Info& pi);
 
-	void controlQueueSize(const QThread* thread);
+	void controlQueueSizeBeforePush(const QThread* thread);
 
 private:
 	CircularLoggerShared m_log;
@@ -178,7 +180,6 @@ private:
 
 	QMutex m_fileInMaintenanceMutex;
 	bool m_fileInMaintenance = false;
-	std::atomic<bool> m_rwAccessRequested = { false };
 
 	int m_statesCountAfterExpand = -1;
 
