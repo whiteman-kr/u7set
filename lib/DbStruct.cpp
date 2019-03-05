@@ -863,6 +863,25 @@ bool DbFileTree::removeFile(int fileId)
 	std::shared_ptr<DbFileInfo>& fileInfo = fit->second;
 	assert(fileId == fileInfo->fileId());
 
+	// Recursively delete children
+	//
+	if (auto it = m_fileIdToChildren.find(fileInfo->fileId());
+		it == m_fileIdToChildren.end())
+	{
+		// It is possible that file has not any children
+		//
+	}
+	else
+	{
+		FileChildren& ch = it->second;
+		assert(ch.m_fileId == fileInfo->fileId());
+
+		for (std::shared_ptr<DbFileInfo>& fc : ch.m_children)
+		{
+			removeFile(fc->fileId());
+		}
+	}
+
 	// Remove from children record
 	//
 	if (auto it = m_fileIdToChildren.find(fileInfo->parentId());
@@ -872,9 +891,11 @@ bool DbFileTree::removeFile(int fileId)
 	}
 	else
 	{
-		auto& ch = it->second;
+		FileChildren& ch = it->second;
 		assert(ch.m_fileId == fileInfo->parentId());
 
+		// Delete file itself from its' parent
+		//
 		ch.m_children.erase(std::remove_if(ch.m_children.begin(),
 										   ch.m_children.end(),
 										   [fileId](const auto& f)

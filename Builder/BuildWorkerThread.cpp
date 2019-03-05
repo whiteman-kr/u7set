@@ -1307,6 +1307,11 @@ namespace Builder
 		equipmentWalker(m_context->m_equipmentSet->root(),
 			[this, lmsUniqueIdMap, &result](Hardware::DeviceObject* currentDevice)
 			{
+				if (QThread::currentThread()->isInterruptionRequested() == true)
+				{
+					return;
+				}
+
 				if (currentDevice->isSoftware() == false)
 				{
 					return;
@@ -1386,6 +1391,8 @@ namespace Builder
 		{
 			LOG_SUCCESS(m_context->m_log, tr("Sofware configuration generation was succesfully finished"));
 		}
+
+		SoftwareCfgGenerator::clearStaticData();
 
 		return result;
 	}

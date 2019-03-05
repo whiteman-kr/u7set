@@ -3,7 +3,7 @@
 #include "IssueLogger.h"
 #include "../lib/DeviceHelper.h"
 #include "../lib/ServiceSettings.h"
-#include "../VFrame30/LogicSchema.h"
+#include "../VFrame30/Schema.h"
 
 
 namespace Builder
@@ -16,7 +16,8 @@ namespace Builder
 
 	HashedVector<QString, Hardware::DeviceModule*> SoftwareCfgGenerator::m_lmList;
 	HashedVector<QString, Hardware::Software*> SoftwareCfgGenerator::m_softwareList;
-	QList<SoftwareCfgGenerator::SchemaFile> SoftwareCfgGenerator::m_schemaFileList;
+	std::multimap<QString, std::shared_ptr<SoftwareCfgGenerator::SchemaFile>> SoftwareCfgGenerator::m_schemaTagToFile;
+
 
 	SoftwareCfgGenerator::SoftwareCfgGenerator(Context* context, Hardware::Software* software) :
 		m_dbController(&context->m_db),
@@ -120,7 +121,6 @@ namespace Builder
 
 		// add general software cfg generation here:
 		//
-
 		result &= buildLmList(equipment, log);
 
 		result &= buildSoftwareList(equipment, log);
@@ -129,100 +129,59 @@ namespace Builder
 
 		// Add Schemas to Build result
 		//
-		result &= writeSchemas(db, buildResultWriter.get(), log);
+		result &= loadAllSchemas(db, buildResultWriter.get(), log);
 
 		return result;
 	}
 
-	bool SoftwareCfgGenerator::writeSchemas(DbController* db, BuildResultWriter* buildResultWriter, IssueLogger* log)
+	bool SoftwareCfgGenerator::loadAllSchemas(DbController* db, BuildResultWriter* buildResultWriter, IssueLogger* log)
 	{
-		if (db == nullptr ||
-			buildResultWriter == nullptr ||
-			log == nullptr)
+		if (db == nullptr || log == nullptr)
 		{
 			assert(db);
-			assert(buildResultWriter);
 			assert(log);
 			return false;
 		}
 
-		// Get all Application Logic schemas
-		//
-		m_schemaFileList.clear();	// m_schemaFileList is filled in next two calls of SoftwareCfgGenerator::writeSchemasList
+		DbFileTree filesTree;									// Filed in loadAllSchemas
 
-		bool result = true;
-		result &= writeSchemasList(db, buildResultWriter, db->alFileId(), QLatin1String(".") + Db::File::AlFileExtension, "LogicSchemas", "LogicSchema", log);
-
-		// Write LogicSchemas/SchemaDetais.pbuf
-		//
-		result &= writeAppLogicSchemasDetails(m_schemaFileList, buildResultWriter, "LogicSchemas", log);
-
-		// Get all Monitor schemas
-		//
-		result &= writeSchemasList(db, buildResultWriter, db->mvsFileId(), QLatin1String(".") + Db::File::MvsFileExtension, "MonitorSchemas", "MonitorSchema", log);
-
-		return result;
-	}
-
-	bool SoftwareCfgGenerator::writeSchemasList(DbController* db, BuildResultWriter* buildResultWriter, int parentFileId, QString fileExtension, QString subDir, QString group, IssueLogger* log)
-	{
-		if (db == nullptr ||
-			buildResultWriter == nullptr ||
-			log == nullptr)
+		if (bool ok = db->getFileListTree(&filesTree, db->schemaFileId(), "%", true, nullptr);
+			ok == false)
 		{
-			assert(db);
-			assert(buildResultWriter);
-			assert(log);
+			log->errPDB2001(db->schemaFileId(), "%", db->lastError());
 			return false;
 		}
 
-		// Get File list
+		filesTree.removeIf([](const DbFileInfo& f)
+			{
+				return f.action() == VcsItemAction::Deleted;
+			});
+
+		// Remove all unsuported fileas and marked for deleting
 		//
-		std::vector<DbFileInfo> fileList;
+		std::vector<DbFileInfo> files = filesTree.toVectorIf([](const DbFileInfo& f)
+						{
+							return  (f.action() != VcsItemAction::Deleted) &&
+									(f.isFolder() == false) &&
+									(f.fileName().endsWith(QLatin1String(".") + Db::File::AlFileExtension, Qt::CaseInsensitive) ||
+									 f.fileName().endsWith(QLatin1String(".") + Db::File::MvsFileExtension, Qt::CaseInsensitive) ||
+									 f.fileName().endsWith(QLatin1String(".") + Db::File::DvsFileExtension, Qt::CaseInsensitive) ||
+									 f.fileName().endsWith(QLatin1String(".") + Db::File::UfbFileExtension, Qt::CaseInsensitive) ||
+									 f.fileName().endsWith(QLatin1String(".") + Db::File::TvsFileExtension, Qt::CaseInsensitive));
+						});
 
 		bool returnResult = true;
-		bool result = false;
 
-		if (buildResultWriter->isRelease() == true)
+		QString group = "Schema";
+
+		for (const DbFileInfo& f : files)
 		{
-			// To Do getting files for release
-			//
-			assert(false);
-			returnResult = false;
-		}
-		else
-		{
-			DbFileTree filesTree;
-
-			result = db->getFileListTree(&filesTree, parentFileId, "%", true, nullptr);
-			if (result == false)
-			{
-				log->errPDB2001(parentFileId, "%", db->lastError());
-				return false;
-			}
-
-			fileList = filesTree.toVectorIf(
-				[&fileExtension](const DbFileInfo& file)
-				{
-				   return file.fileName().endsWith(fileExtension, Qt::CaseInsensitive) == true &&
-					   file.isFolder() == false;
-				});
-		}
-
-		// Get file instance and parse it
-		//
-		for (const DbFileInfo& f : fileList)
-		{
-			if (f.action() == VcsItemAction::Deleted)		// File is deleted, it can be in Debug build
-			{
-				qDebug() << "Skip file " << f.fileId() << ", " << f.fileName() << ", it was marked as deleted";
-				continue;
-			}
+			QString subDir = "Schemas." + f.extension();
 
 			std::shared_ptr<DbFile> file;
 
-			result = db->getLatestVersion(f, &file, nullptr);
-			if (result == false || file.get() == nullptr)
+			if (bool ok  = db->getLatestVersion(f, &file, nullptr);
+				ok == false || file.get() == nullptr)
 			{
 				log->errPDB2002(f.fileId(), f.fileName(), db->lastError());
 				returnResult = false;
@@ -242,63 +201,77 @@ namespace Builder
 
 			//qDebug() << "Build: schema " << schema->schemaId() << " is loaded";
 
+			// --
+			//
+			std::shared_ptr<SchemaFile> schemaFile = std::make_shared<SchemaFile>(schema->schemaId(), file->fileName(), subDir, group, "");
+			if (bool parseOk = schemaFile->details.parseDetails(schema->details());
+				parseOk == false)
+			{
+				log->errINT1001(tr("Parse schema detais error."), schema->schemaId());
+				returnResult = false;
+				continue;
+			}
+
+			if (schema->excludeFromBuild() == true)
+			{
+				continue;
+			}
+
 			// Add file to build result
 			//
-			result = buildResultWriter->addFile(subDir, schema->schemaId() + fileExtension, schema->schemaId(), group, file->data());
-			if (result == false)
+			if (bool ok = buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schema->tagsAsList().join(";"), file->data(), false);
+				ok == false)
 			{
 				returnResult = false;
 				continue;
 			}
 
-			SchemaFile schemaFile;
-
-			schemaFile.id = schema->schemaId();
-			schemaFile.subDir = subDir;
-			schemaFile.fileName = schema->schemaId() + fileExtension;		// File is stored under this name
-			schemaFile.group = group;
-			schemaFile.details = schema->details();
-
-			m_schemaFileList.push_back(schemaFile);
+			// --
+			//
+			QStringList schemaTags = schema->tagsAsList();
+			for (const QString& t : schemaTags)
+			{
+				m_schemaTagToFile.insert({t, schemaFile});
+			}
 		}
 
 		return returnResult;
 	}
 
-	bool SoftwareCfgGenerator::writeAppLogicSchemasDetails(const QList<SchemaFile>& schemaFiles, BuildResultWriter* buildResultWriter, QString dir, IssueLogger* log)
+
+//	bool SoftwareCfgGenerator::writeAppLogicSchemasDetails(const QList<SchemaFile>& schemaFiles, BuildResultWriter* buildResultWriter, QString dir, IssueLogger* log)
+//	{
+//		if (buildResultWriter == nullptr ||
+//			log == nullptr)
+//		{
+//			assert(false);
+//			return false;
+//		}
+
+//		bool result = true;
+
+//		VFrame30::SchemaDetailsSet sds;
+//		for (const SchemaFile& sf : schemaFiles)
+//		{
+//			std::shared_ptr<VFrame30::SchemaDetails> details = std::make_shared<VFrame30::SchemaDetails>(sf.details);
+//			sds.add(details);
+//		}
+
+//		QByteArray fileData;
+//		sds.saveToByteArray(&fileData);
+
+//		buildResultWriter->addFile(dir, "SchemaDetails.pbuf", fileData, false);
+
+//		return result;
+//	}
+
+	void SoftwareCfgGenerator::clearStaticData()
 	{
-		if (buildResultWriter == nullptr ||
-			log == nullptr)
-		{
-			assert(false);
-			return false;
-		}
+		m_lmList.clear();
+		m_softwareList.clear();
+		m_schemaTagToFile.clear();
 
-		bool ok = true;
-		bool result = true;
-
-		VFrame30::SchemaDetailsSet sds;
-		for (const SchemaFile& sf : schemaFiles)
-		{
-			std::shared_ptr<VFrame30::SchemaDetails> details = std::make_shared<VFrame30::SchemaDetails>();
-
-			ok = details->parseDetails(sf.details);
-			result &= ok;
-
-			if (ok == false)
-			{
-				log->errINT1001(tr("Parse schema detais error."), sf.id);
-			}
-
-			sds.add(details);
-		}
-
-		QByteArray fileData;
-		sds.saveToByteArray(&fileData);
-
-		buildResultWriter->addFile(dir, "SchemaDetails.pbuf", fileData, false);
-
-		return result;
+		return;
 	}
 
 	void SoftwareCfgGenerator::initSubsystemKeyMap(SubsystemKeyMap* subsystemKeyMap, const Hardware::SubsystemStorage* subsystems)

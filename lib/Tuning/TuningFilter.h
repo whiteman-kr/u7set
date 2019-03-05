@@ -157,7 +157,6 @@ public:
 
 	// Values
 	//
-
 	std::vector <TuningFilterValue> getValues() const;
 	void setValues(const std::vector <TuningFilterValue>& getValues);
 
@@ -174,7 +173,7 @@ public:
 	void setCounters(TuningCounters value);
 
 	// Tab appearance
-
+	//
 	int valuesColumnCount() const;
 	void setValuesColumnCount(int value);
 
@@ -214,7 +213,6 @@ public:
 public:
 	// Operations
 	//
-
 	TuningFilter* parentFilter() const;
 
 	bool isEmpty() const;
@@ -254,7 +252,6 @@ private:
 	//
 	// Properties
 	//
-
 	QString m_ID = "ID";
 	QString m_customID;
 	QString m_caption;
@@ -274,13 +271,13 @@ private:
 	bool m_hasDiscreteCounter = false;
 
 	// Filters
-
+	//
 	QStringList m_customAppSignalIDMasks;
 	QStringList m_equipmentIDMasks;
 	QStringList m_appSignalIDMasks;
 
 	// Tab appearance
-
+	//
 	int m_valueColumnsCount = 0;
 	std::vector<QString> m_valueColumnsAppSignalIdSuffixes;
 
@@ -302,27 +299,23 @@ private:
 	//
 
 	// Values
-
+	//
 	std::vector<Hash> m_signalValuesVec;
 	std::map <Hash, TuningFilterValue> m_signalValuesMap;
 
 	// Parent and child
-
+	//
 	TuningFilter* m_parentFilter = nullptr;
 	std::vector<std::shared_ptr<TuningFilter>> m_childFilters;
 
 	// Hashes of equipment and filtered signals, used in client applicaton
-
+	//
 	std::vector<Hash> m_equipmentHashes;
 	std::vector<Hash> m_signalsHashes;
 
 	// Counters
-
+	//
 	TuningCounters m_counters;
-
-
-
-
 };
 
 class TuningFilterStorage : public QObject
@@ -344,7 +337,7 @@ public:
 	std::shared_ptr<TuningFilter> root();
 
 	// Serialization
-
+	//
 	bool load(const QByteArray& data, QString* errorCode);
 	bool load(const QString& fileName, QString* errorCode);
 
@@ -356,7 +349,7 @@ public:
 	std::shared_ptr<TuningFilter> pasteFromClipboard();
 
 	// Operation
-
+	//
 	void add(std::shared_ptr<TuningFilter> filter, bool moveToTop);
 
 	void checkFilterSignals(const std::vector<Hash>& signalHashes, std::vector<std::pair<QString, QString> >& notFoundSignalsAndFilters);

@@ -10,6 +10,7 @@ namespace Builder
 		SoftwareCfgGenerator(context, software),
 		m_subsystems(context->m_subsystems.get())
 	{
+		assert(context);
 	}
 
 	bool TuningClientCfgGenerator::generateConfiguration()
@@ -71,6 +72,12 @@ namespace Builder
 			return result;
 		}
 
+		result &= writeTuningSchemas();
+		if (result == false)
+		{
+			return result;
+		}
+
 		// --
 		//
 		result &= createObjectFilters(equipmentList, filterByEquipment, filterBySchema, showDiscreteCounters);
@@ -92,12 +99,6 @@ namespace Builder
 		}
 
 		result &= writeObjectFilters();
-		if (result == false)
-		{
-			return result;
-		}
-
-		result &= writeTuningSchemas();
 		if (result == false)
 		{
 			return result;
@@ -329,7 +330,6 @@ namespace Builder
 			//
 			// TuningServiceID
 			//
-
 			QString tunsProperty = "TuningServiceID";
 
 			QString tuningServiceId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), tunsProperty, &ok).trimmed();
@@ -485,73 +485,21 @@ namespace Builder
 				xmlWriter.writeAttribute("loginSessionLength", QString::number(loginSessionLength));
 				xmlWriter.writeAttribute("usersAccounts", usersAccounts);
 			}
-		}
 
-		{
-			xmlWriter.writeStartElement("Schemas");
-			std::shared_ptr<int*> writeEndSettings(nullptr, [&xmlWriter](void*)
-			{
-				xmlWriter.writeEndElement();
-			});
-
-			// --
+			// SchemaTags
 			//
-			bool ok = true;
-
-			//
-			// Schemas
-			//
-			QString schemas = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "Schemas", &ok);
-			if (ok == false)
 			{
-				return false;
-			}
-
-			QStringList schemasList;
-			if (schemas.isEmpty() == false)
-			{
-				schemas.replace('\n', ';');
-				schemasList = schemas.split(';', QString::SkipEmptyParts);
-			}
-
-
-			for (QString s : schemasList)
-			{
-				s = s.trimmed();
-
-				// Check if schema with specified ID exists
-				//
-
-				QString caption;
-
-				bool found = false;
-
-				for (const SchemaFile& schemaFile : SoftwareCfgGenerator::m_schemaFileList)
+				bool ok = true;
+				QString schemaTags = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "SchemaTags", &ok);
+				if (ok == false)
 				{
-					if (schemaFile.id == s)
-					{
-
-						VFrame30::SchemaDetails details;
-						bool parsed = details.parseDetails(schemaFile.details);
-						if (parsed)
-						{
-							caption = details.m_caption;
-						}
-						found = true;
-						break;
-					}
-				}
-
-				if (found == false)
-				{
-					m_log->errEQP6106(s, m_software->equipmentId());
 					return false;
 				}
 
-				xmlWriter.writeStartElement("Schema");
-				xmlWriter.writeAttribute("Id", s);
-				xmlWriter.writeAttribute("Caption", caption);
-				xmlWriter.writeEndElement();
+				m_schemaTagList = schemaTags.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+				schemaTags = m_schemaTagList.join("; ");
+
+				xmlWriter.writeTextElement("SchemaTags", schemaTags);
 			}
 		}
 
@@ -674,51 +622,83 @@ namespace Builder
 
 	bool TuningClientCfgGenerator::writeTuningSchemas()
 	{
-		bool ok = true;
+		// class SoftwareCfgGenerator
+		//		static std::multimap<QString, std::shared_ptr<SchemaFile>> m_schemaTagToFile;
 		//
-		// Schemas
+		bool result = true;
+
+		// If tag list is empty, then link all Tuning schemas
 		//
-		QString schemas = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "Schemas", &ok);
-		if (ok == false)
+		if (m_schemaTagList.isEmpty() == true)
 		{
-			return false;
-		}
-
-		QStringList schemasList;
-		if (schemas.isEmpty() == false)
-		{
-			schemas.replace('\n', ';');
-			schemasList = schemas.split(';', QString::SkipEmptyParts);
-		}
-
-
-		for (QString s : schemasList)
-		{
-			s = s.trimmed();
-
-			bool found = false;
-
-			// Check if schema with specified ID exists
-			//
-			for (const SchemaFile& schemaFile : SoftwareCfgGenerator::m_schemaFileList)
+			for (auto&[tag, schemaFile] : SoftwareCfgGenerator::m_schemaTagToFile)
 			{
-				if (schemaFile.id == s)
+				if (schemaFile->fileName.endsWith(QStringLiteral(".") + Db::File::TvsFileExtension, Qt::CaseInsensitive) == true)
 				{
-					m_cfgXml->addLinkToFile(schemaFile.subDir, schemaFile.fileName);
-
-					found = true;
-					break;
+					m_tuningSchemas.insert(schemaFile);
 				}
 			}
-
-			if (found == false)
+		}
+		else
+		{
+			for (QString tag : m_schemaTagList)
 			{
-				m_log->errEQP6106(s, m_software->equipmentId());
+				auto tagRange = m_schemaTagToFile.equal_range(tag);
+
+				for (auto it = tagRange.first; it != tagRange.second; ++it)
+				{
+					const QString& mapTag = it->first;
+					std::shared_ptr<SchemaFile> schemaFile = it->second;
+
+					if (mapTag != tag ||
+						schemaFile == nullptr)
+					{
+						assert(mapTag == tag);
+						assert(schemaFile);
+						continue;
+					}
+
+					m_tuningSchemas.insert(schemaFile);
+				}
+			}
+		}
+
+		// --
+		//
+		VFrame30::SchemaDetailsSet detaisSet;
+
+		for (auto schemaFile : m_tuningSchemas)
+		{
+			result &= m_cfgXml->addLinkToFile(schemaFile->subDir, schemaFile->fileName);
+			detaisSet.add(schemaFile->details);
+		}
+
+		// Save details
+		//
+		{
+			QByteArray fileData;
+
+			if (bool ok = detaisSet.saveToByteArray(&fileData);
+				ok == true)
+			{
+				BuildFile* schemaDetailsBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "SchemaDetails.pbuf", fileData);
+
+				if (schemaDetailsBuildFile != nullptr)
+				{
+					result &= m_cfgXml->addLinkToFile(schemaDetailsBuildFile);
+				}
+				else
+				{
+					result = false;
+				}
+			}
+			else
+			{
 				return false;
 			}
 		}
 
-		return true;
+		return result;
 	}
 
 	bool TuningClientCfgGenerator::writeGlobalScript()
@@ -763,12 +743,12 @@ namespace Builder
 			ofSchema->setCaption(QObject::tr("Schemas"));
 			ofSchema->setSource(TuningFilter::Source::Schema);
 
-			for (const SchemaFile& schemaFile : SoftwareCfgGenerator::m_schemaFileList)
+			for (std::shared_ptr<SchemaFile> schemaFile : m_tuningSchemas)
 			{
-				std::shared_ptr<VFrame30::SchemaDetails> details = std::make_shared<VFrame30::SchemaDetails>(schemaFile.details);
+				const VFrame30::SchemaDetails& details = schemaFile->details;
 
 				std::shared_ptr<TuningFilter> ofTs = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
-				for (const QString& appSignalID : details->m_signals)
+				for (const QString& appSignalID : details.m_signals)
 				{
 					// find if this signal is a tuning signal
 					//
@@ -791,10 +771,10 @@ namespace Builder
 					continue;
 				}
 
-				ofTs->setID("%AUFOFILTER%_SCHEMA_" + details->m_schemaId);
+				ofTs->setID("%AUFOFILTER%_SCHEMA_" + details.m_schemaId);
 
 				//QString s = QString("%1 - %2").arg(schemasDetails.m_Id).arg(schemasDetails.m_caption);
-				ofTs->setCaption(details->m_caption);
+				ofTs->setCaption(details.m_caption);
 				ofTs->setSource(TuningFilter::Source::Schema);
 				ofTs->setHasDiscreteCounter(showDiscreteCounters);
 
