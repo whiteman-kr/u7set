@@ -176,187 +176,6 @@ void Archive::stop()
 	m_isWorkable = false;
 }
 
-bool Archive::checkAndCreateArchiveDirs()
-{
-	bool result = archDirIsWritableChecking();
-
-	if (result == false)
-	{
-		return false;
-	}
-
-	result = createGroupDirs();
-
-	return result;
-}
-
-bool Archive::archDirIsWritableChecking()
-{
-	int pass = 1;
-
-	bool result = false;
-
-	QString archDir;
-	do
-	{
-		if (pass == 1)
-		{
-			archDir = m_archDir;
-		}
-		else
-		{
-			archDir = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::AppDataLocation);
-		}
-
-		m_archFullPath = QDir(QString("%1/%2-archive/%3").arg(archDir).arg(m_projectID).arg(m_equipmentID)).absolutePath();
-
-		QDir d(m_archFullPath);
-
-		DEBUG_LOG_MSG(m_log, QString("Archive directory %1 checking...").arg(m_archFullPath));
-
-		if (d.exists() == false)
-		{
-			if (d.mkpath(m_archFullPath) == false)
-			{
-				DEBUG_LOG_ERR(m_log, QString("Archive directory %1 creation error").arg(m_archFullPath));
-				pass++;
-				continue;
-			}
-			else
-			{
-				DEBUG_LOG_MSG(m_log, QString("Archive directory %1 is created successfully").arg(m_archFullPath));
-			}
-		}
-		else
-		{
-			DEBUG_LOG_MSG(m_log, QString("Archive directory %1 allready exists").arg(m_archFullPath));
-		}
-
-		QFileInfo fi(m_archFullPath);
-
-		if (fi.isDir() == false)
-		{
-			DEBUG_LOG_ERR(m_log, QString("Path %1 is not a directory!").arg(m_archFullPath));
-			pass++;
-			continue;
-		}
-
-		if (fi.isWritable() == false)
-		{
-			DEBUG_LOG_ERR(m_log, QString("Directory %1 is not writable!").arg(m_archFullPath));
-			pass++;
-			continue;
-		}
-
-		qint64 time = QDateTime::currentMSecsSinceEpoch();
-
-		QString testDir = QString("%1/test_dir_%2").arg(m_archFullPath).arg(time);
-
-		if (d.mkpath(testDir) == false)
-		{
-			DEBUG_LOG_ERR(m_log, QString("Test directory %1 creation error!").arg(testDir));
-			pass++;
-			continue;
-		}
-
-		DEBUG_LOG_MSG(m_log, QString("Test directory %1 is created successfully").arg(testDir));
-
-		d.rmdir(testDir);
-
-		QString testFile = QString("%1/test_file_%2.dat").arg(m_archFullPath).arg(time);
-
-		QFile f(testFile);
-
-		if (f.open(QIODevice::ReadWrite) == false)
-		{
-			DEBUG_LOG_ERR(m_log, QString("Test file %1 creation error!").arg(testFile));
-			pass++;
-			continue;
-		}
-
-		DEBUG_LOG_MSG(m_log, QString("Test file %1 is created successfully").arg(testFile));
-
-		f.remove();
-
-		DEBUG_LOG_MSG(m_log, QString("Archive directory %1 checking succesfully completed").arg(m_archFullPath));
-
-		result = true;
-
-		break;
-	}
-	while(pass <= 2);
-
-	return result;
-}
-
-bool Archive::createGroupDirs()
-{
-	bool result = true;
-
-	for(int i = 0; i < 256; i++)
-	{
-		QString dir = QString("%1/%2").arg(m_archFullPath).arg(QString().sprintf("%02X", i));
-
-		QDir d;
-
-		bool res = d.mkpath(dir);
-
-		if (res == false)
-		{
-			DEBUG_LOG_ERR(m_log, QString("Directory %1 creation error!").arg(dir));
-
-			result = false;
-		}
-	}
-
-	return result;
-}
-
-void Archive::writeArchFilesInfoFile(const QVector<QVector<ArchFile*>>& archFilesGroups)
-{
-	QFile infoFile(QString("%1/archive.info").arg(m_archFullPath));
-
-	if (infoFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate) == false)
-	{
-		return;
-	}
-
-	QTextStream info(&infoFile);
-
-	for(int g = 0; g < 256; g++)
-	{
-		info << QString("Group %1\n\n").arg(QString("%1").arg(g, 2, 16, QChar('0')).toUpper());
-
-		int filesCount = archFilesGroups[g].size();
-
-		if (filesCount == 0)
-		{
-			info << "No files in group\n\n";
-			continue;
-		}
-
-		for(int i = 0; i < filesCount; i++)
-		{
-			ArchFile* archFile = archFilesGroups[g][i];
-
-			if (archFile == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			info << QString("%1 %2 %3\n").
-						arg(archFile->isAnalog() ? "A" : "D").
-						arg(QString("%1").arg(archFile->hash(), 16, 16, QChar('0')).toUpper()).
-						arg(archFile->appSignalID());
-		}
-
-		info << "\n";
-	}
-
-	infoFile.close();
-}
-
 std::shared_ptr<ArchRequest> Archive::startNewRequest(E::TimeType timeType,
 													  qint64 startTime,
 													  qint64 endTime,
@@ -602,6 +421,187 @@ QString Archive::timeTypeStr(E::TimeType timeType)
 	}
 
 	return QString("???");
+}
+
+bool Archive::checkAndCreateArchiveDirs()
+{
+	bool result = archDirIsWritableChecking();
+
+	if (result == false)
+	{
+		return false;
+	}
+
+	result = createGroupDirs();
+
+	return result;
+}
+
+bool Archive::archDirIsWritableChecking()
+{
+	int pass = 1;
+
+	bool result = false;
+
+	QString archDir;
+	do
+	{
+		if (pass == 1)
+		{
+			archDir = m_archDir;
+		}
+		else
+		{
+			archDir = QStandardPaths::writableLocation(QStandardPaths::StandardLocation::AppDataLocation);
+		}
+
+		m_archFullPath = QDir(QString("%1/%2-archive/%3").arg(archDir).arg(m_projectID).arg(m_equipmentID)).absolutePath();
+
+		QDir d(m_archFullPath);
+
+		DEBUG_LOG_MSG(m_log, QString("Archive directory %1 checking...").arg(m_archFullPath));
+
+		if (d.exists() == false)
+		{
+			if (d.mkpath(m_archFullPath) == false)
+			{
+				DEBUG_LOG_ERR(m_log, QString("Archive directory %1 creation error").arg(m_archFullPath));
+				pass++;
+				continue;
+			}
+			else
+			{
+				DEBUG_LOG_MSG(m_log, QString("Archive directory %1 is created successfully").arg(m_archFullPath));
+			}
+		}
+		else
+		{
+			DEBUG_LOG_MSG(m_log, QString("Archive directory %1 allready exists").arg(m_archFullPath));
+		}
+
+		QFileInfo fi(m_archFullPath);
+
+		if (fi.isDir() == false)
+		{
+			DEBUG_LOG_ERR(m_log, QString("Path %1 is not a directory!").arg(m_archFullPath));
+			pass++;
+			continue;
+		}
+
+		if (fi.isWritable() == false)
+		{
+			DEBUG_LOG_ERR(m_log, QString("Directory %1 is not writable!").arg(m_archFullPath));
+			pass++;
+			continue;
+		}
+
+		qint64 time = QDateTime::currentMSecsSinceEpoch();
+
+		QString testDir = QString("%1/test_dir_%2").arg(m_archFullPath).arg(time);
+
+		if (d.mkpath(testDir) == false)
+		{
+			DEBUG_LOG_ERR(m_log, QString("Test directory %1 creation error!").arg(testDir));
+			pass++;
+			continue;
+		}
+
+		DEBUG_LOG_MSG(m_log, QString("Test directory %1 is created successfully").arg(testDir));
+
+		d.rmdir(testDir);
+
+		QString testFile = QString("%1/test_file_%2.dat").arg(m_archFullPath).arg(time);
+
+		QFile f(testFile);
+
+		if (f.open(QIODevice::ReadWrite) == false)
+		{
+			DEBUG_LOG_ERR(m_log, QString("Test file %1 creation error!").arg(testFile));
+			pass++;
+			continue;
+		}
+
+		DEBUG_LOG_MSG(m_log, QString("Test file %1 is created successfully").arg(testFile));
+
+		f.remove();
+
+		DEBUG_LOG_MSG(m_log, QString("Archive directory %1 checking succesfully completed").arg(m_archFullPath));
+
+		result = true;
+
+		break;
+	}
+	while(pass <= 2);
+
+	return result;
+}
+
+bool Archive::createGroupDirs()
+{
+	bool result = true;
+
+	for(int i = 0; i < 256; i++)
+	{
+		QString dir = QString("%1/%2").arg(m_archFullPath).arg(QString().sprintf("%02X", i));
+
+		QDir d;
+
+		bool res = d.mkpath(dir);
+
+		if (res == false)
+		{
+			DEBUG_LOG_ERR(m_log, QString("Directory %1 creation error!").arg(dir));
+
+			result = false;
+		}
+	}
+
+	return result;
+}
+
+void Archive::writeArchFilesInfoFile(const QVector<QVector<ArchFile*>>& archFilesGroups)
+{
+	QFile infoFile(QString("%1/archive.info").arg(m_archFullPath));
+
+	if (infoFile.open(QIODevice::WriteOnly | QIODevice::Text | QIODevice::Truncate) == false)
+	{
+		return;
+	}
+
+	QTextStream info(&infoFile);
+
+	for(int g = 0; g < 256; g++)
+	{
+		info << QString("Group %1\n\n").arg(QString("%1").arg(g, 2, 16, QChar('0')).toUpper());
+
+		int filesCount = archFilesGroups[g].size();
+
+		if (filesCount == 0)
+		{
+			info << "No files in group\n\n";
+			continue;
+		}
+
+		for(int i = 0; i < filesCount; i++)
+		{
+			ArchFile* archFile = archFilesGroups[g][i];
+
+			if (archFile == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			info << QString("%1 %2 %3\n").
+						arg(archFile->isAnalog() ? "A" : "D").
+						arg(QString("%1").arg(archFile->hash(), 16, 16, QChar('0')).toUpper()).
+						arg(archFile->appSignalID());
+		}
+
+		info << "\n";
+	}
+
+	infoFile.close();
 }
 
 quint32 Archive::getNewRequestID()

@@ -351,8 +351,6 @@ namespace Builder
 		buildFile->addMetadata(metadataName, metadataValue);
 
 		return addLinkToFile(buildFile);
-
-		return true;
 	}
 
 	void ConfigurationXmlFile::finalize()

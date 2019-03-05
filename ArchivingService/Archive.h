@@ -53,10 +53,6 @@ public:
 	void start();
 	void stop();
 
-	bool checkAndCreateArchiveDirs();
-	bool archDirIsWritableChecking();
-	bool createGroupDirs();
-
 	qint64 msShortTermPeriod() const { return m_msShortTermPeriod; }
 	qint64 msLongTermPeriod() const { return m_msLongTermPeriod; }
 	int minQueueSizeForFlushing() const { return m_minQueueSizeForFlushing; }
@@ -68,8 +64,6 @@ public:
 	QString archFullPath() const { return m_archFullPath; }
 
 	bool isWorkable() const { return m_isWorkable; }
-
-	void writeArchFilesInfoFile(const QVector<QVector<ArchFile*>>& archFilesGroups);
 
 	std::shared_ptr<ArchRequest> startNewRequest(E::TimeType timeType,
 												 qint64 sartTime,
@@ -104,6 +98,12 @@ public:
 	static QString timeTypeStr(E::TimeType timeType);
 
 private:
+	bool checkAndCreateArchiveDirs();
+	bool archDirIsWritableChecking();
+	bool createGroupDirs();
+
+	void writeArchFilesInfoFile(const QVector<QVector<ArchFile*>>& archFilesGroups);
+
 	quint32 getNewRequestID();
 
 	// flushing controlling functions (private)
