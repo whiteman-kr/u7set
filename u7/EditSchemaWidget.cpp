@@ -6192,7 +6192,7 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 		return false;
 	}
 
-	QString connectionId = receiver->connectionId();
+	QString connectionId = receiver->connectionIds();
 	QString appSignalId = receiver->appSignalId();
 
 	// Get all connections
@@ -6302,7 +6302,7 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 			}
 			else
 			{
-				receiver->setConnectionId(newConnectionId);
+				receiver->setConnectionIds(newConnectionId);
 				receiver->setAppSignalId(newAppSignalId);
 			}
 		}
@@ -6330,7 +6330,7 @@ bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem>
 		return false;
 	}
 
-	QString connectionId = transmitter->connectionId();
+	QString connectionId = transmitter->connectionIds();
 
 	// Get all connections
 	//
@@ -6423,7 +6423,7 @@ bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem>
 			}
 			else
 			{
-				transmitter->setConnectionId(newConnectionId);
+				transmitter->setConnectionIds(newConnectionId);
 			}
 		}
 

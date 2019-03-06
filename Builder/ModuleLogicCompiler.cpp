@@ -1353,7 +1353,7 @@ namespace Builder
 			return false;
 		}
 
-		QString connectionID = ualReceiver->connectionId();
+		QString connectionID = ualReceiver->connectionIds();
 
 		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(connectionID);
 
@@ -5191,7 +5191,7 @@ namespace Builder
 
 		for(const QPair<QString, UalSignal*>& connectedSignal : connectedSignals)
 		{
-			result &= m_optoModuleStorage->appendTxSignal(ualItem->schemaID(), transmitter.connectionId(), transmitter.guid(),
+			result &= m_optoModuleStorage->appendTxSignal(ualItem->schemaID(), transmitter.connectionIds(), transmitter.guid(),
 													   m_lm->equipmentIdTemplate(),
 													   connectedSignal.first,
 													   connectedSignal.second,
@@ -5373,7 +5373,7 @@ namespace Builder
 
 		const UalReceiver& receiver = item->logicReceiver();
 
-		QString connectionID = receiver.connectionId();
+		QString connectionID = receiver.connectionIds();
 
 		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(connectionID);
 
@@ -5531,7 +5531,7 @@ namespace Builder
 			SignalAddress16 rxAddress;
 
 			bool res = m_optoModuleStorage->getRxSignalAbsAddress(ualItem->schemaID(),
-													   ualReceiver->connectionId(),
+													   ualReceiver->connectionIds(),
 													   ualReceiver->appSignalId(),
 													   m_lm->equipmentIdTemplate(),
 													   ualReceiver->guid(),
