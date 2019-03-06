@@ -5191,11 +5191,16 @@ namespace Builder
 
 		for(const QPair<QString, UalSignal*>& connectedSignal : connectedSignals)
 		{
-			result &= m_optoModuleStorage->appendTxSignal(ualItem->schemaID(), transmitter.connectionIds(), transmitter.guid(),
-													   m_lm->equipmentIdTemplate(),
-													   connectedSignal.first,
-													   connectedSignal.second,
-													   &signalAlreadyInTxList);
+			const QStringList& connectionIDs = transmitter.connectionIdsAsList();
+
+			for(const QString& connectionID : connectionIDs)
+			{
+				result &= m_optoModuleStorage->appendTxSignal(ualItem->schemaID(), connectionID, transmitter.guid(),
+														   m_lm->equipmentIdTemplate(),
+														   connectedSignal.first,
+														   connectedSignal.second,
+														   &signalAlreadyInTxList);
+			}
 		}
 
 		return result;
@@ -11391,6 +11396,16 @@ namespace Builder
 		}
 
 		return cmd;
+	}
+
+	bool ModuleLogicCompiler::getReceiverConnectionID(const UalReceiver* receiver, QString* connectionID)
+	{
+		TEST_PTR_RETURN_FALSE(receiver);
+		TEST_PTR_RETURN_FALSE(connectionID);
+
+		assert(false);
+
+		return false;
 	}
 
 	// ---------------------------------------------------------------------------------------

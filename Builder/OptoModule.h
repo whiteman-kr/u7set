@@ -456,7 +456,6 @@ namespace Hardware
 
 		bool appendOptoModules();
 		bool appendAndCheckConnections(const Hardware::ConnectionStorage& connectionStorage);
-		bool processConnection(ConnectionShared connection);
 
 		bool sortTxSignals(const QString& lmID);
 		bool sortSerialRxSignals(const QString& lmID);
@@ -520,7 +519,12 @@ namespace Hardware
 
 		bool processBvbModules();
 
+		bool isConnectionAccessible(const QString& lmEquipmentID, const QString& connectionID);
+
 	private:
+		bool processConnection(ConnectionShared connection);
+		void prepareLmsAccessibleConnections();
+
 		bool addModule(DeviceModule* module);
 
 		bool forEachPortOfLmAssociatedOptoModules(const QString& lmID, OptoPortFunc funcPtr);
@@ -541,5 +545,7 @@ namespace Hardware
 		static QHash<QString, OptoModuleShared> m_lmAssociatedModules;
 
 		static QHash<QString, ConnectionShared> m_connections;		// connectionID -> connection
+
+		static QHash<QString, QHash<QString, bool>> m_lmsAccessibleConnections;
 	};
 }

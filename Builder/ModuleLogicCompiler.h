@@ -506,6 +506,8 @@ namespace Builder
 
 		CodeItem codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment);
 
+		bool getReceiverConnectionID(const UalReceiver* receiver, QString* connectionID);
+
 	private:
 		static const int ERR_VALUE = -1;
 

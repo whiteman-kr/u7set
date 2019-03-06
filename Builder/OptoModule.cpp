@@ -2637,6 +2637,7 @@ namespace Hardware
 	HashedVector<QString, OptoPortShared> OptoModuleStorage::m_ports;
 	QHash<QString, OptoModuleShared> OptoModuleStorage::m_lmAssociatedModules;
 	QHash<QString, std::shared_ptr<Connection>> OptoModuleStorage::m_connections;
+	QHash<QString, QHash<QString, bool>> OptoModuleStorage::m_lmsAccessibleConnections;
 
 	OptoModuleStorage::OptoModuleStorage(EquipmentSet* equipmentSet, Builder::LmDescriptionSet* lmDescriptionSet, Builder::IssueLogger *log)
 	{
@@ -2731,6 +2732,8 @@ namespace Hardware
 			}
 		}
 
+		prepareLmsAccessibleConnections();
+
 		for(OptoPortShared& port : m_ports)
 		{
 			TEST_PTR_CONTINUE(port);
@@ -2739,162 +2742,6 @@ namespace Hardware
 		}
 
 		return result;
-	}
-
-	bool OptoModuleStorage::processConnection(ConnectionShared connection)
-	{
-		if (connection == nullptr)
-		{
-			ASSERT_RETURN_FALSE;
-		}
-
-		if (connection->manualSettings() == true)
-		{
-			m_log->wrnALC5055(connection->connectionID());
-		}
-
-		quint16 linkID = connection->linkID();
-
-		QString connectionID = connection->connectionID();
-
-		Hardware::OptoPortShared optoPort1 = getOptoPort(connection->port1EquipmentID());
-
-		// check port 1
-		//
-		if (optoPort1 == nullptr)
-		{
-			// Undefined opto port '%1' in the connection '%2'.
-			//
-			m_log->errALC5021(connection->port1EquipmentID(), connection->connectionID());
-			return false;
-		}
-
-		if (optoPort1->connectionID().isEmpty() == true)
-		{
-			optoPort1->setConnectionID(connectionID);
-		}
-		else
-		{
-			// Opto port '%1' of connection '%2' is already used in connection '%3'.
-			//
-			m_log->errALC5019(optoPort1->equipmentID(), connectionID, optoPort1->connectionID());
-			return false;
-		}
-
-		Hardware::OptoModuleShared optoModule = getOptoModule(optoPort1);
-
-		if (optoModule == nullptr)
-		{
-			assert(false);
-			return false;
-		}
-
-		if (connection->isSinglePort() == true)
-		{
-			bool res = optoPort1->initSettings(connection);
-
-			if (res == false)
-			{
-				return false;
-			}
-
-			LOG_MESSAGE(m_log, QString(tr("Single port connection '%1' ID = %2... Ok")).
-							arg(connectionID).arg(linkID));
-		}
-		else
-		{
-			assert(connection->isPortToPort() == true);
-
-			// check port 2
-			//
-			Hardware::OptoPortShared optoPort2 = getOptoPort(connection->port2EquipmentID());
-
-			if (optoPort2 == nullptr)
-			{
-				// Undefined opto port '%1' in the connection '%2'.
-				//
-				m_log->errALC5021(connection->port2EquipmentID(), connectionID);
-				return false;
-			}
-
-			if (optoPort1->lmID() == optoPort2->lmID())
-			{
-				//  Opto ports of the same chassis is linked via connection '%1'.
-				//
-				m_log->errALC5022(connectionID);
-				return false;
-			}
-
-			if (optoPort2->connectionID().isEmpty() == true)
-			{
-				optoPort2->setConnectionID(connectionID);
-			}
-			else
-			{
-				// Opto port '%1' of connection '%2' is already used in connection '%3'.
-				//
-				m_log->errALC5019(optoPort2->equipmentID(), connectionID, optoPort2->connectionID());
-				return false;
-			}
-
-			bool res = true;
-
-			res &= optoPort1->initSettings(connection);
-			res &= optoPort2->initSettings(connection);
-
-			if (res == false)
-			{
-				return false;
-			}
-
-			if (connection->manualSettings() == true)
-			{
-				if (optoPort1->manualRxSizeW() != optoPort2->manualTxSizeW())
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-									   QString(tr("Manual rxDataSizeW of port '%1' is not equal to manual txDataSizeW of linked port '%2' (connection %3)")).
-									   arg(optoPort1->equipmentID()).
-									   arg(optoPort2->equipmentID()).
-									   arg(optoPort1->connectionID()));
-					return false;
-				}
-
-				if (optoPort2->manualRxSizeW() != optoPort1->manualTxSizeW())
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-									   QString(tr("Manual rxDataSizeW of port '%1' is not equal to manual txDataSizeW of linked port '%2' (connection %3)")).
-									   arg(optoPort2->equipmentID()).
-									   arg(optoPort1->equipmentID()).
-									   arg(optoPort1->connectionID()));
-					return false;
-				}
-
-				if (optoPort1->manualTxSizeW() < OptoPort::TX_DATA_ID_SIZE_W)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-									   QString(tr("Manual txDataSizeW of port '%1' should be greate or equal %2 (connection %3)")).
-									   arg(optoPort1->equipmentID()).
-									   arg(OptoPort::TX_DATA_ID_SIZE_W).
-									   arg(optoPort1->connectionID()));
-					return false;
-				}
-
-				if (optoPort2->manualTxSizeW() < OptoPort::TX_DATA_ID_SIZE_W)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-									   QString(tr("Manual txDataSizeW of port '%1' should be greate or equal %2 (connection %3)")).
-									   arg(optoPort2->equipmentID()).
-									   arg(OptoPort::TX_DATA_ID_SIZE_W).
-									   arg(optoPort2->connectionID()));
-					return false;
-				}
-			}
-
-			LOG_MESSAGE(m_log, QString(tr("Optical connection '%1' ID = %2... Ok")).
-						arg(connectionID).arg(linkID));
-		}
-
-		return true;
 	}
 
 	bool OptoModuleStorage::sortTxSignals(const QString& lmID)
@@ -3460,6 +3307,220 @@ namespace Hardware
 		return result;
 	}
 
+	bool OptoModuleStorage::isConnectionAccessible(const QString& lmEquipmentID, const QString& connectionID)
+	{
+		if (m_lmsAccessibleConnections.contains(lmEquipmentID) == false)
+		{
+			return false;
+		}
+
+		return m_lmsAccessibleConnections[lmEquipmentID].contains(connectionID);
+	}
+
+	bool OptoModuleStorage::processConnection(ConnectionShared connection)
+	{
+		if (connection == nullptr)
+		{
+			ASSERT_RETURN_FALSE;
+		}
+
+		if (connection->manualSettings() == true)
+		{
+			m_log->wrnALC5055(connection->connectionID());
+		}
+
+		quint16 linkID = connection->linkID();
+
+		QString connectionID = connection->connectionID();
+
+		Hardware::OptoPortShared optoPort1 = getOptoPort(connection->port1EquipmentID());
+
+		// check port 1
+		//
+		if (optoPort1 == nullptr)
+		{
+			// Undefined opto port '%1' in the connection '%2'.
+			//
+			m_log->errALC5021(connection->port1EquipmentID(), connection->connectionID());
+			return false;
+		}
+
+		if (optoPort1->connectionID().isEmpty() == true)
+		{
+			optoPort1->setConnectionID(connectionID);
+		}
+		else
+		{
+			// Opto port '%1' of connection '%2' is already used in connection '%3'.
+			//
+			m_log->errALC5019(optoPort1->equipmentID(), connectionID, optoPort1->connectionID());
+			return false;
+		}
+
+		Hardware::OptoModuleShared optoModule = getOptoModule(optoPort1);
+
+		if (optoModule == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (connection->isSinglePort() == true)
+		{
+			bool res = optoPort1->initSettings(connection);
+
+			if (res == false)
+			{
+				return false;
+			}
+
+			LOG_MESSAGE(m_log, QString(tr("Single port connection '%1' ID = %2... Ok")).
+							arg(connectionID).arg(linkID));
+		}
+		else
+		{
+			assert(connection->isPortToPort() == true);
+
+			// check port 2
+			//
+			Hardware::OptoPortShared optoPort2 = getOptoPort(connection->port2EquipmentID());
+
+			if (optoPort2 == nullptr)
+			{
+				// Undefined opto port '%1' in the connection '%2'.
+				//
+				m_log->errALC5021(connection->port2EquipmentID(), connectionID);
+				return false;
+			}
+
+			if (optoPort1->lmID() == optoPort2->lmID())
+			{
+				//  Opto ports of the same chassis is linked via connection '%1'.
+				//
+				m_log->errALC5022(connectionID);
+				return false;
+			}
+
+			if (optoPort2->connectionID().isEmpty() == true)
+			{
+				optoPort2->setConnectionID(connectionID);
+			}
+			else
+			{
+				// Opto port '%1' of connection '%2' is already used in connection '%3'.
+				//
+				m_log->errALC5019(optoPort2->equipmentID(), connectionID, optoPort2->connectionID());
+				return false;
+			}
+
+			bool res = true;
+
+			res &= optoPort1->initSettings(connection);
+			res &= optoPort2->initSettings(connection);
+
+			if (res == false)
+			{
+				return false;
+			}
+
+			if (connection->manualSettings() == true)
+			{
+				if (optoPort1->manualRxSizeW() != optoPort2->manualTxSizeW())
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+									   QString(tr("Manual rxDataSizeW of port '%1' is not equal to manual txDataSizeW of linked port '%2' (connection %3)")).
+									   arg(optoPort1->equipmentID()).
+									   arg(optoPort2->equipmentID()).
+									   arg(optoPort1->connectionID()));
+					return false;
+				}
+
+				if (optoPort2->manualRxSizeW() != optoPort1->manualTxSizeW())
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+									   QString(tr("Manual rxDataSizeW of port '%1' is not equal to manual txDataSizeW of linked port '%2' (connection %3)")).
+									   arg(optoPort2->equipmentID()).
+									   arg(optoPort1->equipmentID()).
+									   arg(optoPort1->connectionID()));
+					return false;
+				}
+
+				if (optoPort1->manualTxSizeW() < OptoPort::TX_DATA_ID_SIZE_W)
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+									   QString(tr("Manual txDataSizeW of port '%1' should be greate or equal %2 (connection %3)")).
+									   arg(optoPort1->equipmentID()).
+									   arg(OptoPort::TX_DATA_ID_SIZE_W).
+									   arg(optoPort1->connectionID()));
+					return false;
+				}
+
+				if (optoPort2->manualTxSizeW() < OptoPort::TX_DATA_ID_SIZE_W)
+				{
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+									   QString(tr("Manual txDataSizeW of port '%1' should be greate or equal %2 (connection %3)")).
+									   arg(optoPort2->equipmentID()).
+									   arg(OptoPort::TX_DATA_ID_SIZE_W).
+									   arg(optoPort2->connectionID()));
+					return false;
+				}
+			}
+
+			LOG_MESSAGE(m_log, QString(tr("Optical connection '%1' ID = %2... Ok")).
+						arg(connectionID).arg(linkID));
+		}
+
+		return true;
+	}
+
+	void OptoModuleStorage::prepareLmsAccessibleConnections()
+	{
+		m_lmsAccessibleConnections.clear();
+
+		QList<QPair<OptoPortShared, QString>> portConnection;
+
+		for(ConnectionShared& connection : m_connections)
+		{
+			QString portID = connection->port1EquipmentID();
+
+			OptoPortShared optoPort = getOptoPort(portID);
+
+			if (optoPort != nullptr)
+			{
+				portConnection.append(QPair<OptoPortShared, QString>(optoPort, connection->connectionID()));
+			}
+
+			portID = connection->port2EquipmentID();
+
+			optoPort = getOptoPort(portID);
+
+			if (optoPort != nullptr)
+			{
+				portConnection.append(QPair<OptoPortShared, QString>(optoPort, connection->connectionID()));
+			}
+		}
+
+		for(QPair<OptoPortShared, QString>& pair : portConnection)
+		{
+			OptoPortShared& optoPort = pair.first;
+			QString& connectionID = pair.second;
+
+			QString lmID = getOptoPortAssociatedLmID(optoPort);
+
+			if (lmID.isEmpty() == true)
+			{
+				continue;
+			}
+
+			if (m_lmsAccessibleConnections.contains(lmID) == false)
+			{
+				m_lmsAccessibleConnections.insert(lmID, QHash<QString, bool>());
+			}
+
+			m_lmsAccessibleConnections[lmID].insert(connectionID, true);
+		}
+	}
+
 	bool OptoModuleStorage::addModule(DeviceModule* module)
 	{
 		if (module == nullptr)
@@ -3579,6 +3640,7 @@ namespace Hardware
 		m_ports.clear();
 		m_lmAssociatedModules.clear();
 		m_connections.clear();
+		m_lmsAccessibleConnections.clear();
 	}
 
 }
