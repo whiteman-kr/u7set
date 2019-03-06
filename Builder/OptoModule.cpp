@@ -2630,6 +2630,7 @@ namespace Hardware
 
 	EquipmentSet* OptoModuleStorage::m_equipmentSet = nullptr;
 	Builder::LmDescriptionSet* OptoModuleStorage::m_lmDescriptionSet = nullptr;
+	ConnectionStorage* OptoModuleStorage::m_connectionStorage = nullptr;
 	Builder::IssueLogger* OptoModuleStorage::m_log = nullptr;
 
 	int OptoModuleStorage::m_instanceCount = 0;
@@ -2639,15 +2640,20 @@ namespace Hardware
 	QHash<QString, std::shared_ptr<Connection>> OptoModuleStorage::m_connections;
 	QHash<QString, QHash<QString, bool>> OptoModuleStorage::m_lmsAccessibleConnections;
 
-	OptoModuleStorage::OptoModuleStorage(EquipmentSet* equipmentSet, Builder::LmDescriptionSet* lmDescriptionSet, Builder::IssueLogger *log)
+	OptoModuleStorage::OptoModuleStorage(EquipmentSet* equipmentSet,
+										 Builder::LmDescriptionSet* lmDescriptionSet,
+										 Hardware::ConnectionStorage* connectionStorage,
+										 Builder::IssueLogger *log)
 	{
 		assert(m_instanceCount == 0);			// OptoModuleStorage is singleton!
 
 		m_instanceCount++;
 
+		m_log = log;
+
 		m_equipmentSet = equipmentSet;
 		m_lmDescriptionSet = lmDescriptionSet;
-		m_log = log;
+		m_connectionStorage = connectionStorage;
 	}
 
 	OptoModuleStorage::~OptoModuleStorage()
@@ -2655,6 +2661,34 @@ namespace Hardware
 		clear();
 
 		m_instanceCount--;
+	}
+
+	bool OptoModuleStorage::init()
+	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_equipmentSet, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_lmDescriptionSet, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_connectionStorage, m_log);
+
+		if (m_connectionStorage->count() == 0)
+		{
+			LOG_MESSAGE(m_log, QString(tr("No opto connections found")));
+			LOG_SUCCESS(m_log, QString(tr("Ok")));
+		}
+
+		bool res = appendOptoModules();
+
+		if (res == false)
+		{
+			return false;
+		}
+
+		LOG_EMPTY_LINE(m_log);
+		LOG_MESSAGE(m_log, QString(tr("Checking opto connections")));
+
+		res = appendAndCheckConnections();
+
+		return res;
 	}
 
 	bool OptoModuleStorage::appendOptoModules()
@@ -2696,15 +2730,15 @@ namespace Hardware
 		return result;
 	}
 
-	bool OptoModuleStorage::appendAndCheckConnections(const Hardware::ConnectionStorage& connectionStorage)
+	bool OptoModuleStorage::appendAndCheckConnections()
 	{
 		bool result = true;
 
-		int count = connectionStorage.count();
+		int count = m_connectionStorage->count();
 
 		for(int i = 0; i < count; i++)
 		{
-			ConnectionShared connection = connectionStorage.get(i);
+			ConnectionShared connection = m_connectionStorage->get(i);
 
 			if (connection == nullptr)
 			{

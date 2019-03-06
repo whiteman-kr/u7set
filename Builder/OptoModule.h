@@ -451,11 +451,17 @@ namespace Hardware
 		};
 
 	public:
-		OptoModuleStorage(EquipmentSet* equipmentSet, Builder::LmDescriptionSet* lmDescriptionSet, Builder::IssueLogger* log);
+		OptoModuleStorage(EquipmentSet* equipmentSet,
+						  Builder::LmDescriptionSet* lmDescriptionSet,
+						  Hardware::ConnectionStorage* connections,
+						  Builder::IssueLogger* log);
+
 		~OptoModuleStorage();
 
+		bool init();
+
 		bool appendOptoModules();
-		bool appendAndCheckConnections(const Hardware::ConnectionStorage& connectionStorage);
+		bool appendAndCheckConnections();
 
 		bool sortTxSignals(const QString& lmID);
 		bool sortSerialRxSignals(const QString& lmID);
@@ -535,6 +541,7 @@ namespace Hardware
 	private:
 		static EquipmentSet* m_equipmentSet;
 		static Builder::LmDescriptionSet* m_lmDescriptionSet;
+		static ConnectionStorage* m_connectionStorage;
 		static Builder::IssueLogger* m_log;
 
 		static int m_instanceCount;

@@ -98,7 +98,7 @@ namespace Builder
 
 		ApplicationLogicCompilerProc appLogicCompilerProcs[] =
 		{
-			&ApplicationLogicCompiler::prepareOptoConnectionsProcessing,
+//			&ApplicationLogicCompiler::prepareOptoConnectionsProcessing,
 			&ApplicationLogicCompiler::checkLmIpAddresses,
 			&ApplicationLogicCompiler::compileModulesLogicsPass1,
 //			&ApplicationLogicCompiler::processBvbModules,
@@ -151,7 +151,11 @@ namespace Builder
 
 	bool ApplicationLogicCompiler::prepareOptoConnectionsProcessing()
 	{
-		if (m_optoModuleStorage == nullptr ||
+		// function is obsolete
+
+		assert(false);
+
+		/*if (m_optoModuleStorage == nullptr ||
 			m_connections == nullptr)
 		{
 			LOG_INTERNAL_ERROR(m_log);
@@ -176,7 +180,7 @@ namespace Builder
 		if (m_optoModuleStorage->appendAndCheckConnections(*m_connections) == false)
 		{
 			return false;
-		}
+		}*/
 
 		return true;
 	}
