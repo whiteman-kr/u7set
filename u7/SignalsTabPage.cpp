@@ -1957,49 +1957,55 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 
 void SignalsTabPage::CreateActions(QToolBar *toolBar)
 {
-	QAction* action = new QAction(QIcon(":/Images/Images/update.png"), tr("Refresh signal list"), this);
-	connect(action, &QAction::triggered, m_signalsModel, &SignalsModel::loadSignals);
-	toolBar->addAction(action);
+	QAction* action = nullptr;
 
-	action = new QAction(QIcon(":/Images/Images/undo.png"), tr("Undo signal changes"), this);
-	connect(action, &QAction::triggered, this, &SignalsTabPage::undoSignalChanges);
-	connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setVisible);
+	action = new QAction(QIcon(":/Images/Images/SchemaOpen.svg"), tr("Edit properties"), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::editSignal);
+	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setEnabled);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
-	action = new QAction(QIcon(":/Images/Images/checkin.png"), tr("CheckIn"), this);
-	connect(action, &QAction::triggered, this, &SignalsTabPage::checkIn);
-	connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setVisible);
-	m_signalsView->addAction(action);
-	toolBar->addAction(action);
-
-	action = new QAction(QIcon(":/Images/Images/changes.png"), tr("Show pending changes..."), this);
-	connect(action, &QAction::triggered, this, &SignalsTabPage::showPendingChanges);
-	connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setVisible);
-	m_signalsView->addAction(action);
-	toolBar->addAction(action);
-
-	action = new QAction(QIcon(":/Images/Images/plus.png"), tr("Create signal"), this);
+	action = new QAction(QIcon(":/Images/Images/SchemaAddFile.svg"), tr("New signal"), this);
 	connect(action, &QAction::triggered, m_signalsModel, &SignalsModel::addSignal);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
-	action = new QAction(QIcon(":/Images/Images/copy.png"), tr("Clone signal"), this);
+	action = new QAction(QIcon(":/Images/Images/SchemaClone.svg"), tr("Clone signal"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::cloneSignal);
-	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setVisible);
+	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setEnabled);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
-	action = new QAction(QIcon(":/Images/Images/cross.png"), tr("Delete signal"), this);
+	action = new QAction(QIcon(":/Images/Images/SchemaDelete.svg"), tr("Delete signal"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::deleteSignal);
-	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setVisible);
+	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setEnabled);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
-	action = new QAction(QIcon(":/Images/Images/pencil.png"), tr("Properties"), this);
-	connect(action, &QAction::triggered, this, &SignalsTabPage::editSignal);
-	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setVisible);
+	m_signalsView->addAction(toolBar->addSeparator());
+
+	action = new QAction(QIcon(":/Images/Images/SchemaCheckIn.svg"), tr("Check in signals"), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::checkIn);
+	connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setEnabled);
 	m_signalsView->addAction(action);
+	toolBar->addAction(action);
+
+	action = new QAction(QIcon(":/Images/Images/SchemaUndo.svg"), tr("Undo changes"), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::undoSignalChanges);
+	connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setEnabled);
+	m_signalsView->addAction(action);
+	toolBar->addAction(action);
+
+	action = new QAction(QIcon(":/Images/Images/SchemaHistory.svg"), tr("History"), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::viewSignalHistory);
+	connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setEnabled);
+	m_signalsView->addAction(action);
+	toolBar->addAction(action);
+
+	m_signalsView->addAction(toolBar->addSeparator());
+
+	action = new QAction(QIcon(":/Images/Images/SchemaRefresh.svg"), tr("Refresh"), this);
+	connect(action, &QAction::triggered, m_signalsModel, &SignalsModel::loadSignals);
 	toolBar->addAction(action);
 
 	changeSignalActionsVisibility();
@@ -2137,21 +2143,6 @@ void SignalsTabPage::undoSignalChanges()
 	m_signalsModel->loadSignals();
 }
 
-void SignalsTabPage::showPendingChanges()
-{
-	const QItemSelection& proxySelection = m_signalsView->selectionModel()->selection();
-	const QItemSelection& sourceSelection = m_signalsProxyModel->mapSelectionToSource(proxySelection);
-
-	CheckinSignalsDialog dlg(tr("Pending changes"), m_signalsModel, sourceSelection.indexes(), true, this);
-
-	if (dlg.exec() == QDialog::Rejected)
-	{
-		return;
-	}
-
-	m_signalsModel->loadSignals();
-}
-
 void SignalsTabPage::checkIn()
 {
 	const QItemSelection& proxySelection = m_signalsView->selectionModel()->selection();
@@ -2165,6 +2156,11 @@ void SignalsTabPage::checkIn()
 	}
 
 	m_signalsModel->loadSignals();
+}
+
+void SignalsTabPage::viewSignalHistory()
+{
+
 }
 
 void SignalsTabPage::changeSignalActionsVisibility()

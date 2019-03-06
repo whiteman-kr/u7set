@@ -278,8 +278,8 @@ public slots:
 	void deleteSignal();
 
 	void undoSignalChanges();
-	void showPendingChanges();
 	void checkIn();
+	void viewSignalHistory();
 
 	void changeSignalActionsVisibility();
 
