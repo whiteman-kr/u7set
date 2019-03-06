@@ -64,6 +64,12 @@ namespace Tuning
 		return result;
 	}
 
+	bool TuningSource::hasTuningSignals() const
+	{
+		TEST_PTR_RETURN_FALSE(m_tuningData);
+
+		return m_tuningData->getSignalsCount() != 0;
+	}
 
 	// -------------------------------------------------------------------------------
 	//
