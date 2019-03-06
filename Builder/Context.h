@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <QJSEngine>
 #include "../lib/DbController.h"
 #include "../lib/Subsystem.h"
 #include "../lib/Connection.h"

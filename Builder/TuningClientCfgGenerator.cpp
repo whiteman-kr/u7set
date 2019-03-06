@@ -72,6 +72,12 @@ namespace Builder
 			return result;
 		}
 
+		result &= writeSettings(filterByEquipment, filterBySchema, showDiscreteCounters);
+		if (result == false)
+		{
+			return result;
+		}
+
 		result &= writeTuningSchemas();
 		if (result == false)
 		{
@@ -81,12 +87,6 @@ namespace Builder
 		// --
 		//
 		result &= createObjectFilters(equipmentList, filterByEquipment, filterBySchema, showDiscreteCounters);
-		if (result == false)
-		{
-			return result;
-		}
-
-		result &= writeSettings(filterByEquipment, filterBySchema, showDiscreteCounters);
 		if (result == false)
 		{
 			return result;

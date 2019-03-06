@@ -228,21 +228,201 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoCouple(double elVal,
 		case E::SensorType::NoSensor:
 			return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for mv"));
 
-		case E::SensorType::mV_K_TXA: 			phVal = findConversionVal(elVal, &K_TXA[0][0], K_TXA_COUNT, false);					break;
-		case E::SensorType::mV_L_TXK:			phVal = findConversionVal(elVal, &L_TXK[0][0], L_TXK_COUNT, false);					break;
-		case E::SensorType::mV_N_THH:			phVal = findConversionVal(elVal, &N_THH[0][0], N_THH_COUNT, false);					break;
+		case E::SensorType::mV_K_TXA:
 
-		case E::SensorType::mV_Type_B:			phVal = findConversionVal(elVal, &MV_TYPE_B[0][0], MV_TYPE_B_COUNT, false);			break;
-		case E::SensorType::mV_Type_E:			phVal = findConversionVal(elVal, &MV_TYPE_E[0][0], MV_TYPE_E_COUNT, false);			break;
-		case E::SensorType::mV_Type_J:			phVal = findConversionVal(elVal, &MV_TYPE_J[0][0], MV_TYPE_J_COUNT, false);			break;
-		case E::SensorType::mV_Type_K:			phVal = findConversionVal(elVal, &MV_TYPE_K[0][0], MV_TYPE_K_COUNT, false);			break;
-		case E::SensorType::mV_Type_N:			phVal = findConversionVal(elVal, &MV_TYPE_N[0][0], MV_TYPE_N_COUNT, false);			break;
-		case E::SensorType::mV_Type_R:			phVal = findConversionVal(elVal, &MV_TYPE_R[0][0], MV_TYPE_R_COUNT, false);			break;
-		case E::SensorType::mV_Type_S:			phVal = findConversionVal(elVal, &MV_TYPE_S[0][0], MV_TYPE_S_COUNT, false);			break;
-		case E::SensorType::mV_Type_T:			phVal = findConversionVal(elVal, &MV_TYPE_T[0][0], MV_TYPE_T_COUNT, false);			break;
+			if (electricLowLimit < mV_K_TXA_LOW_LIMIT || electricLowLimit > mV_K_TXA_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_K_TXA_LOW_LIMIT, mV_K_TXA_HIGH_LIMIT);
+			}
+			if (electricHighLimit < mV_K_TXA_LOW_LIMIT || electricHighLimit > mV_K_TXA_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_K_TXA_LOW_LIMIT, mV_K_TXA_HIGH_LIMIT);
+			}
+
+			phVal = findConversionVal(elVal, &K_TXA[0][0], K_TXA_COUNT, false);
+
+			break;
+
+		case E::SensorType::mV_L_TXK:
+
+			if (electricLowLimit < mV_L_TXK_LOW_LIMIT || electricLowLimit > mV_L_TXK_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_L_TXK_LOW_LIMIT, mV_L_TXK_HIGH_LIMIT);
+			}
+			if (electricHighLimit < mV_L_TXK_LOW_LIMIT || electricHighLimit > mV_L_TXK_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_L_TXK_LOW_LIMIT, mV_L_TXK_HIGH_LIMIT);
+			}
+
+			phVal = findConversionVal(elVal, &L_TXK[0][0], L_TXK_COUNT, false);
+
+			break;
+
+		case E::SensorType::mV_N_THH:
+
+			if (electricLowLimit < mV_N_THH_LOW_LIMIT || electricLowLimit > mV_N_THH_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_N_THH_LOW_LIMIT, mV_N_THH_HIGH_LIMIT);
+			}
+			if (electricHighLimit < mV_N_THH_LOW_LIMIT || electricHighLimit > mV_N_THH_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_N_THH_LOW_LIMIT, mV_N_THH_HIGH_LIMIT);
+			}
+
+			phVal = findConversionVal(elVal, &N_THH[0][0], N_THH_COUNT, false);
+
+			break;
+
+		case E::SensorType::mV_Type_B:
+
+			if (electricLowLimit < mV_Type_B_LOW_LIMIT || electricLowLimit > mV_Type_B_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Type_B_LOW_LIMIT, mV_Type_B_HIGH_LIMIT);
+			}
+			if (electricHighLimit < mV_Type_B_LOW_LIMIT || electricHighLimit > mV_Type_B_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Type_B_LOW_LIMIT, mV_Type_B_HIGH_LIMIT);
+			}
+
+			phVal = findConversionVal(elVal, &MV_TYPE_B[0][0], MV_TYPE_B_COUNT, false);
+
+			break;
+
+		case E::SensorType::mV_Type_E:
+
+			if (electricLowLimit < mV_Type_E_LOW_LIMIT || electricLowLimit > mV_Type_E_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Type_E_LOW_LIMIT, mV_Type_E_HIGH_LIMIT);
+			}
+			if (electricHighLimit < mV_Type_E_LOW_LIMIT || electricHighLimit > mV_Type_E_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Type_E_LOW_LIMIT, mV_Type_E_HIGH_LIMIT);
+			}
+
+			phVal = findConversionVal(elVal, &MV_TYPE_E[0][0], MV_TYPE_E_COUNT, false);
+
+			break;
+
+		case E::SensorType::mV_Type_J:
+
+			if (electricLowLimit < mV_Type_J_LOW_LIMIT || electricLowLimit > mV_Type_J_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Type_J_LOW_LIMIT, mV_Type_J_HIGH_LIMIT);
+			}
+			if (electricHighLimit < mV_Type_J_LOW_LIMIT || electricHighLimit > mV_Type_J_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Type_J_LOW_LIMIT, mV_Type_J_HIGH_LIMIT);
+			}
+
+			phVal = findConversionVal(elVal, &MV_TYPE_J[0][0], MV_TYPE_J_COUNT, false);
+
+			break;
+
+		case E::SensorType::mV_Type_K:
+
+			if (electricLowLimit < mV_Type_K_LOW_LIMIT || electricLowLimit > mV_Type_K_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Type_K_LOW_LIMIT, mV_Type_K_HIGH_LIMIT);
+			}
+			if (electricHighLimit < mV_Type_K_LOW_LIMIT || electricHighLimit > mV_Type_K_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Type_K_LOW_LIMIT, mV_Type_K_HIGH_LIMIT);
+			}
+
+			phVal = findConversionVal(elVal, &MV_TYPE_K[0][0], MV_TYPE_K_COUNT, false);
+
+			break;
+
+		case E::SensorType::mV_Type_N:
+
+			if (electricLowLimit < mV_Type_N_LOW_LIMIT || electricLowLimit > mV_Type_N_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Type_N_LOW_LIMIT, mV_Type_N_HIGH_LIMIT);
+			}
+			if (electricHighLimit < mV_Type_N_LOW_LIMIT || electricHighLimit > mV_Type_N_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Type_N_LOW_LIMIT, mV_Type_N_HIGH_LIMIT);
+			}
+
+			phVal = findConversionVal(elVal, &MV_TYPE_N[0][0], MV_TYPE_N_COUNT, false);
+
+			break;
+
+		case E::SensorType::mV_Type_R:
+
+			if (electricLowLimit < mV_Type_R_LOW_LIMIT || electricLowLimit > mV_Type_R_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Type_R_LOW_LIMIT, mV_Type_R_HIGH_LIMIT);
+			}
+			if (electricHighLimit < mV_Type_R_LOW_LIMIT || electricHighLimit > mV_Type_R_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Type_R_LOW_LIMIT, mV_Type_R_HIGH_LIMIT);
+			}
+
+			phVal = findConversionVal(elVal, &MV_TYPE_R[0][0], MV_TYPE_R_COUNT, false);
+
+			break;
+
+		case E::SensorType::mV_Type_S:
+
+			if (electricLowLimit < mV_Type_S_LOW_LIMIT || electricLowLimit > mV_Type_S_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Type_S_LOW_LIMIT, mV_Type_S_HIGH_LIMIT);
+			}
+			if (electricHighLimit < mV_Type_S_LOW_LIMIT || electricHighLimit > mV_Type_S_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Type_S_LOW_LIMIT, mV_Type_S_HIGH_LIMIT);
+			}
+
+			phVal = findConversionVal(elVal, &MV_TYPE_S[0][0], MV_TYPE_S_COUNT, false);
+
+			break;
+
+		case E::SensorType::mV_Type_T:
+
+			if (electricLowLimit < mV_Type_T_LOW_LIMIT || electricLowLimit > mV_Type_T_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Type_T_LOW_LIMIT, mV_Type_T_HIGH_LIMIT);
+			}
+			if (electricHighLimit < mV_Type_T_LOW_LIMIT || electricHighLimit > mV_Type_T_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Type_T_LOW_LIMIT, mV_Type_T_HIGH_LIMIT);
+			}
+
+			phVal = findConversionVal(elVal, &MV_TYPE_T[0][0], MV_TYPE_T_COUNT, false);
+
+			break;
 
 		case E::SensorType::mV_Raw_Mul_8:
-		case E::SensorType::mV_Raw_Mul_32:		phVal = elVal;																		break;
+
+			if (electricLowLimit < mV_Raw_Mul_8_LOW_LIMIT || electricLowLimit > mV_Raw_Mul_8_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Raw_Mul_8_LOW_LIMIT, mV_Raw_Mul_8_HIGH_LIMIT);
+			}
+
+			if (electricHighLimit < mV_Raw_Mul_8_LOW_LIMIT || electricHighLimit > mV_Raw_Mul_8_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Raw_Mul_8_LOW_LIMIT, mV_Raw_Mul_8_HIGH_LIMIT);
+			}
+
+			phVal = elVal;
+
+			break;
+
+		case E::SensorType::mV_Raw_Mul_32:
+
+			if (electricLowLimit < mV_Raw_Mul_32_LOW_LIMIT || electricLowLimit > mV_Raw_Mul_32_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, mV_Raw_Mul_32_LOW_LIMIT, mV_Raw_Mul_32_HIGH_LIMIT);
+			}
+			if (electricHighLimit < mV_Raw_Mul_32_LOW_LIMIT || electricHighLimit > mV_Raw_Mul_32_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, mV_Raw_Mul_32_LOW_LIMIT, mV_Raw_Mul_32_HIGH_LIMIT);
+			}
+
+			phVal = elVal;
+
+			break;
 
 		default:
 			assert(false);
@@ -270,6 +450,8 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoResistor(double elVa
 	}
 
 	elVal = elVal / r0 * 100;
+	electricLowLimit = electricLowLimit / r0 * 100;
+	electricHighLimit = electricHighLimit / r0 * 100;
 
 	double phVal = 0;
 
@@ -278,11 +460,80 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoResistor(double elVa
 		case E::SensorType::NoSensor:
 			return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown SensorType for Ohm"));
 
-		case E::SensorType::Ohm_Pt_a_391:	phVal = findConversionVal(elVal, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, false);		break;
-		case E::SensorType::Ohm_Pt_a_385:	phVal = findConversionVal(elVal, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, false);		break;
-		case E::SensorType::Ohm_Cu_a_428:	phVal = findConversionVal(elVal, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, false);		break;
-		case E::SensorType::Ohm_Cu_a_426:	phVal = findConversionVal(elVal, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, false);		break;
-		case E::SensorType::Ohm_Ni_a_617:	phVal = findConversionVal(elVal, &NI_100_W_1617[0][0], NI_100_W_1617_COUNT, false);		break;
+		case E::SensorType::Ohm_Pt_a_391:
+
+			if (electricLowLimit < Ohm_Pt_a_391_LOW_LIMIT || electricLowLimit > Ohm_Pt_a_391_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, Ohm_Pt_a_391_LOW_LIMIT * r0 / 100, Ohm_Pt_a_391_HIGH_LIMIT * r0 / 100);
+			}
+			if (electricHighLimit < Ohm_Pt_a_391_LOW_LIMIT || electricHighLimit > Ohm_Pt_a_391_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, Ohm_Pt_a_391_LOW_LIMIT * r0 / 100, Ohm_Pt_a_391_HIGH_LIMIT * r0 / 100);
+			}
+
+			phVal = findConversionVal(elVal, &PT_100_W_1391[0][0], PT_100_W_1391_COUNT, false);
+
+			break;
+
+		case E::SensorType::Ohm_Pt_a_385:
+
+			if (electricLowLimit < Ohm_Pt_a_385_LOW_LIMIT || electricLowLimit > Ohm_Pt_a_385_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, Ohm_Pt_a_385_LOW_LIMIT * r0 / 100, Ohm_Pt_a_385_HIGH_LIMIT * r0 / 100);
+			}
+			if (electricHighLimit < Ohm_Pt_a_385_LOW_LIMIT || electricHighLimit > Ohm_Pt_a_385_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, Ohm_Pt_a_385_LOW_LIMIT * r0 / 100, Ohm_Pt_a_385_HIGH_LIMIT * r0 / 100);
+			}
+
+			phVal = findConversionVal(elVal, &PT_100_W_1385[0][0], PT_100_W_1385_COUNT, false);
+
+			break;
+
+		case E::SensorType::Ohm_Cu_a_428:
+
+			if (electricLowLimit < Ohm_Cu_a_428_LOW_LIMIT || electricLowLimit > Ohm_Cu_a_428_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, Ohm_Cu_a_428_LOW_LIMIT * r0 / 100, Ohm_Cu_a_428_HIGH_LIMIT * r0 / 100);
+			}
+			if (electricHighLimit < Ohm_Cu_a_428_LOW_LIMIT || electricHighLimit > Ohm_Cu_a_428_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, Ohm_Cu_a_428_LOW_LIMIT * r0 / 100, Ohm_Cu_a_428_HIGH_LIMIT * r0 / 100);
+			}
+
+			phVal = findConversionVal(elVal, &CU_100_W_1428[0][0], CU_100_W_1428_COUNT, false);
+
+			break;
+
+		case E::SensorType::Ohm_Cu_a_426:
+
+			if (electricLowLimit < Ohm_Cu_a_426_LOW_LIMIT || electricLowLimit > Ohm_Cu_a_426_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, Ohm_Cu_a_426_LOW_LIMIT * r0 / 100, Ohm_Cu_a_426_HIGH_LIMIT * r0 / 100);
+			}
+			if (electricHighLimit < Ohm_Cu_a_426_LOW_LIMIT || electricHighLimit > Ohm_Cu_a_426_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, Ohm_Cu_a_426_LOW_LIMIT * r0 / 100, Ohm_Cu_a_426_HIGH_LIMIT * r0 / 100);
+			}
+
+			phVal = findConversionVal(elVal, &CU_100_W_1426[0][0], CU_100_W_1426_COUNT, false);
+
+			break;
+
+		case E::SensorType::Ohm_Ni_a_617:
+
+			if (electricLowLimit < Ohm_Ni_a_617_LOW_LIMIT || electricLowLimit > Ohm_Ni_a_617_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, Ohm_Ni_a_617_LOW_LIMIT * r0 / 100, Ohm_Ni_a_617_HIGH_LIMIT * r0 / 100);
+			}
+			if (electricHighLimit < Ohm_Ni_a_617_LOW_LIMIT || electricHighLimit > Ohm_Ni_a_617_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, Ohm_Ni_a_617_LOW_LIMIT * r0 / 100, Ohm_Ni_a_617_HIGH_LIMIT * r0 / 100);
+			}
+
+			phVal = findConversionVal(elVal, &NI_100_W_1617[0][0], NI_100_W_1617_COUNT, false);
+
+			break;
 
 		default:
 			assert(false);

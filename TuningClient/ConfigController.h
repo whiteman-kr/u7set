@@ -7,6 +7,7 @@
 #include <QSharedMemory>
 #include "../lib/CfgServerLoader.h"
 #include "../lib/SocketIO.h"
+#include "../VFrame30/Schema.h"
 
 #include "Settings.h"
 
@@ -55,7 +56,6 @@ private:
 	bool xmlReadBuildInfoNode(const QDomNode& node, ConfigSettings* outSetting);
 	bool xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting);
 	bool xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting);
-	bool xmlReadSchemasNode(const QDomNode& schemasNode, const BuildFileInfoArray& buildFileInfoArray, ConfigSettings* outSetting);
 
 	// Public properties
 public:
@@ -75,6 +75,9 @@ private:
 	HostAddressPort m_address2;
 
 	QByteArray m_globalScriptData;
+
+
+	VFrame30::SchemaDetailsSet m_schemaDetailsSet;
 };
 
 

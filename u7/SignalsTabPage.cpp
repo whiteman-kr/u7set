@@ -815,6 +815,30 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 	const Signal& signal = m_signalSet[row];
 
+	auto getStringValue = [&signal](const QString& name)
+	{
+		PropertyObject propObject;
+
+		std::pair<bool, QString> result = propObject.parseSpecificPropertiesStruct(signal.specPropStruct());
+
+		if (result.first == false)
+		{
+			assert(false);
+			return QString();
+		}
+
+		std::vector<std::shared_ptr<Property>> specificProperties = propObject.properties();
+
+		for(std::shared_ptr<Property> specificProperty : specificProperties)
+		{
+			if (specificProperty->caption() == name)
+			{
+				return QString::number(signal.getSpecPropDouble(name), 'f', specificProperty->precision());
+			}
+		}
+		return QString();
+	};
+
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
 		switch (signal.signalType())
@@ -831,8 +855,8 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 					case SC_TYPE: return QChar('A');
 					case SC_ANALOG_SIGNAL_FORMAT: return E::valueToString<E::AnalogAppSignalFormat>(signal.analogSignalFormat());
 					case SC_DATA_SIZE: return signal.dataSize();
-					case SC_ELECTRIC_LOW_LIMIT: return signal.electricLowLimit();
-					case SC_ELECTRIC_HIGH_LIMIT: return signal.electricHighLimit();
+					case SC_ELECTRIC_LOW_LIMIT: return getStringValue(SignalProperties::electricLowLimitCaption);
+					case SC_ELECTRIC_HIGH_LIMIT: return getStringValue(SignalProperties::electricHighLimitCaption);
 					case SC_LOW_ADC: return QString("0x%1").arg(signal.lowADC(), 4, 16, QChar('0'));
 					case SC_HIGH_ADC: return QString("0x%1").arg(signal.highADC(), 4, 16, QChar('0'));
 					case SC_LOW_LIMIT: return signal.lowEngeneeringUnits();
@@ -850,8 +874,8 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 
 					case SC_DECIMAL_PLACES: return signal.decimalPlaces();
 					case SC_APERTURE: return signal.coarseAperture();
-					case SC_FILTERING_TIME: return signal.filteringTime();
-					case SC_SPREAD_TOLERANCE: return signal.spreadTolerance();
+					case SC_FILTERING_TIME: return getStringValue(SignalProperties::filteringTimeCaption);
+					case SC_SPREAD_TOLERANCE: return getStringValue(SignalProperties::spreadToleranceCaption);
 
 					case SC_ENABLE_TUNING:
 					{

@@ -2811,8 +2811,17 @@ void SchemaControlTabPageEx::addLogicSchema(QStringList deviceStrIds, QString lm
 
 	GlobalMessanger::instance().fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
 
-	m_filesView->setFocus();
+	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(this->parentWidget()->parentWidget());
+	assert(tabWidget);
 
+	if (tabWidget != nullptr)
+	{
+		// Activate ControlTabPage (this)
+		//
+		tabWidget->setCurrentWidget(this);
+	}
+
+	m_filesView->setFocus();
 	return;
 }
 
