@@ -1015,7 +1015,7 @@ QVariant SignalsModel::headerData(int section, Qt::Orientation orientation, int 
 	{
 		if (orientation == Qt::Horizontal)
 		{
-			return QString(Columns[section]);
+			return QString(Columns[section]).replace('\n', ' ');
 		}
 		if (orientation == Qt::Vertical)
 		{
