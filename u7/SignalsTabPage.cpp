@@ -1771,6 +1771,9 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	//
 	CreateActions(toolBar);
 
+	toolBar->setStyleSheet("QToolButton { padding: 6px; }");
+	toolBar->setIconSize(toolBar->iconSize() * 0.9);
+
 	//
 	// Layouts
 	//
@@ -2030,6 +2033,7 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 
 	action = new QAction(QIcon(":/Images/Images/SchemaRefresh.svg"), tr("Refresh"), this);
 	connect(action, &QAction::triggered, m_signalsModel, &SignalsModel::loadSignals);
+	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
 	changeSignalActionsVisibility();
