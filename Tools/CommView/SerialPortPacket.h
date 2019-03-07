@@ -60,8 +60,6 @@ const int				COMM_PACKET_FIELD_SIGN			= 0,
 const int				MIN_DATA_SIZE					= 12;		// min size in bytes (4 + 8 ==> DataUniqueID + CRC64)
 const int				MAX_DATA_SIZE					= 2560*2;	// max size in bytes
 
-const int				MAX_SKIPPED_BYTES				= 10;		// in % (in percents) from recieved bytes
-
 // ==============================================================================================
 // big-little endian convertor
 

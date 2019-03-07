@@ -56,6 +56,7 @@ SOURCES += \
     TcpAppDataServer.cpp \
     ../Proto/network.pb.cc \
     ../Proto/serialization.pb.cc \
+    ../lib/AppSignalStateFlags.cpp \
     ../lib/AppSignal.cpp \
     ../Builder/IssueLogger.cpp \
     TcpAppDataClient.cpp \
@@ -71,10 +72,10 @@ SOURCES += \
     SignalStatesProcessingThread.cpp \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp \
-    RtTrendsDatabase.cpp \
     RtTrendsServer.cpp \
     ../lib/ProtoSerialization.cpp \
-    ../lib/TuningValue.cpp
+    ../lib/TuningValue.cpp \
+    ../lib/SimpleMutex.cpp
 
 HEADERS += \
 	Stable.h \
@@ -109,6 +110,7 @@ HEADERS += \
     ../Proto/network.pb.h \
     ../lib/Hash.h \
     ../Proto/serialization.pb.h \
+    ../lib/AppSignalStateFlags.h \
     ../lib/AppSignal.h \
     ../Builder/IssueLogger.h \
     TcpAppDataClient.h \
@@ -125,10 +127,10 @@ HEADERS += \
     SignalStatesProcessingThread.h \
     ../lib/Times.h \
     ../lib/SignalProperties.h \
-    RtTrendsDatabase.h \
     RtTrendsServer.h \
     ../lib/ProtoSerialization.h \
-    ../lib/TuningValue.h
+    ../lib/TuningValue.h \
+    ../lib/SimpleMutex.h
 
 include(../qtservice/src/qtservice.pri)
 

@@ -9,7 +9,7 @@
 
 // ==============================================================================================
 
-const int REQUEST_SERIAL_PORT_TIMEOUT = 10; // 10 ms
+const int REQUEST_SERIAL_PORT_TIMEOUT = 50; // 50 ms
 
 const int TIMEOUT_COUNT = 10;
 
@@ -31,7 +31,7 @@ private:
 
 	bool				m_finishThread = false;
 
-	bool				disconnectSerialPort = false;
+	bool				m_disconnectSerialPort = false;
 
     int                 m_timeout = 0;
 
@@ -39,6 +39,8 @@ public:
 
 	bool				openSerialPort();
 	bool				closeSerialPort();
+
+	bool				runTest();
 
 signals:
 
@@ -52,7 +54,7 @@ public slots:
 
 	void				process();
 	void				finish() { m_finishThread = true; }
-	void				reopenSerialPort() { disconnectSerialPort = true; }
+	void				reopenSerialPort() { m_disconnectSerialPort = true; }
 };
 
 // ==============================================================================================

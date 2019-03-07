@@ -73,7 +73,8 @@ SOURCES += \
     ../lib/Times.cpp \
     ../lib/SignalProperties.cpp \
     TuningSourceThread.cpp \
-    TuningDataStorage.cpp
+    TuningDataStorage.cpp \
+    ../lib/SimpleMutex.cpp
 
 HEADERS += \
     ../lib/BuildInfo.h \
@@ -120,7 +121,8 @@ HEADERS += \
     ../lib/Times.h \
     ../lib/SignalProperties.h \
     TuningSourceThread.h \
-    TuningDataStorage.h
+    TuningDataStorage.h \
+    ../lib/SimpleMutex.h
 
 include(../qtservice/src/qtservice.pri)
 

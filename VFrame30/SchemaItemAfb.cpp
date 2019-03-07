@@ -114,6 +114,8 @@ namespace VFrame30
 					{
 						QVariant a = propertyValue(param.caption());
 
+						char paramFormat = precision() > 5 ? 'g' : 'f';
+
 						switch (param.dataFormat())
 						{
 							case E::DataFormat::UnsignedInt:
@@ -125,7 +127,7 @@ namespace VFrame30
 								break;
 
 							case E::DataFormat::Float:
-								paramValue.setNum(a.toDouble(), 'g', precision());
+								paramValue.setNum(a.toDouble(), paramFormat, precision());
 
 								if (paramValue.contains(QChar('.')) == true &&
 									paramValue.contains(QChar('e')) == false &&

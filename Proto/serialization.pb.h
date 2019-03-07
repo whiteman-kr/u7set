@@ -10435,6 +10435,13 @@ class AppSignalState : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 archiveid() const;
   inline void set_archiveid(::google::protobuf::int64 value);
 
+  // optional uint32 packetNo = 8 [default = 0];
+  inline bool has_packetno() const;
+  inline void clear_packetno();
+  static const int kPacketNoFieldNumber = 8;
+  inline ::google::protobuf::uint32 packetno() const;
+  inline void set_packetno(::google::protobuf::uint32 value);
+
   // @@protoc_insertion_point(class_scope:Proto.AppSignalState)
  private:
   inline void set_has_hash();
@@ -10451,6 +10458,8 @@ class AppSignalState : public ::google::protobuf::Message {
   inline void clear_has_planttime();
   inline void set_has_archiveid();
   inline void clear_has_archiveid();
+  inline void set_has_packetno();
+  inline void clear_has_packetno();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -10458,12 +10467,13 @@ class AppSignalState : public ::google::protobuf::Message {
   double value_;
   ::google::protobuf::int64 systemtime_;
   ::google::protobuf::int64 localtime_;
+  ::google::protobuf::uint32 flags_;
+  ::google::protobuf::uint32 packetno_;
   ::google::protobuf::int64 planttime_;
   ::google::protobuf::int64 archiveid_;
-  ::google::protobuf::uint32 flags_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(8 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -26087,6 +26097,28 @@ inline ::google::protobuf::int64 AppSignalState::archiveid() const {
 inline void AppSignalState::set_archiveid(::google::protobuf::int64 value) {
   set_has_archiveid();
   archiveid_ = value;
+}
+
+// optional uint32 packetNo = 8 [default = 0];
+inline bool AppSignalState::has_packetno() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void AppSignalState::set_has_packetno() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void AppSignalState::clear_has_packetno() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void AppSignalState::clear_packetno() {
+  packetno_ = 0u;
+  clear_has_packetno();
+}
+inline ::google::protobuf::uint32 AppSignalState::packetno() const {
+  return packetno_;
+}
+inline void AppSignalState::set_packetno(::google::protobuf::uint32 value) {
+  set_has_packetno();
+  packetno_ = value;
 }
 
 // -------------------------------------------------------------------

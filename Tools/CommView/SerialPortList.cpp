@@ -114,7 +114,7 @@ QVariant CommStateTable::data(const QModelIndex &index, int role) const
 
 		if (column == COMM_STATE_LIST_COLUMN_SKIPPED)
 		{
-			if ( (double) option->skippedBytes() * 100.0 / (double) option->receivedBytes() > MAX_SKIPPED_BYTES)
+			if ( (double) option->skippedBytes() * 100.0 / (double) option->receivedBytes() > MAX_SKIPPED_BYTES_IN_PERCENTAGES)
 			{
 				return QColor(0xFF, 0xA0, 0xA0);
 			}

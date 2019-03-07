@@ -443,6 +443,14 @@ namespace Tuning
 				continue;
 			}
 
+			if (tuningSource.hasTuningSignals() == false)
+			{
+				DEBUG_LOG_MSG(m_logger,
+							  QString("Tuning source %1 has no signals. Controlling thread wouldn't be run.").
+							  arg(tuningSource.lmEquipmentID()));
+				continue;
+			}
+
 			// create TuningSourceWorkerThreads and fill m_sourceWorkerThreadMap
 			//
 			TuningSourceThread* sourceThread = new TuningSourceThread(m_cfgSettings, tuningSource, m_logger, m_tuningLog);

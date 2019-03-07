@@ -7,21 +7,21 @@
 
 #include "TcpAppDataServer.h"
 #include "Archive.h"
-#include "ArchWriteThread.h"
 #include "TcpArchRequestsServer.h"
-#include "ArchRequestThread.h"
+#include "ArchRequest.h"
+#include "ArchWriterThread.h"
 
-class ArchivingServiceWorker : public ServiceWorker
+class ArchivingService : public ServiceWorker
 {
 	Q_OBJECT
 
 public:
-	ArchivingServiceWorker(const SoftwareInfo& softwareInfo,
+	ArchivingService(const SoftwareInfo& softwareInfo,
 						   const QString &serviceName,
 						   int &argc,
 						   char **argv,
 						   std::shared_ptr<CircularLogger> logger);
-	~ArchivingServiceWorker();
+	~ArchivingService();
 
 	virtual ServiceWorker* createInstance() const override;
 	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const override;
@@ -36,49 +36,44 @@ private:
 	void runCfgLoaderThread();
 	void stopCfgLoaderThread();
 
-	void runAllThreads();
-	void stopAllThread();
+	void startAllThreads();
+	void stopAllThreads();
 
-	void createArchive();
-	void deleteArchive();
+	void startArchive();
+	void stopArchive();
 
-	void runArchWriteThread();
-	void stopArchWriteThread();
-
-	void runTcpAppDataServerThread();
+	void startTcpAppDataServerThread();
 	void stopTcpAppDataServerThread();
 
-	void runTcpArchRequestsServerThread();
+	void startTcpArchRequestsServerThread();
 	void stopTcpArchiveRequestsServerThread();
 
-	void runArchRequestThread();
-	void stopArchRequestThread();
+	bool loadConfigurationXml(const QByteArray& fileData, ArchivingServiceSettings* settings);
 
-	bool readConfiguration(const QByteArray& fileData);
-	bool loadConfigurationFromFile(const QString& fileName);
+	bool loadArchSignalsProto(const QByteArray& fileData);
+	void deleteArchSignalsProto();
 
-	bool initArchSignalsMap(const QByteArray& fileData);
+	void logFileLoadResult(bool loadOk, const QString& fileName);
 
 private slots:
 	void onConfigurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 private:
+	QString m_overwriteArchiveLocation;
+	int m_minQueueSizeForFlushing = 0;
 	QSettings m_settings;
 
-	ArchivingServiceSettings m_cfgSettings;
-	QString m_projectID;
+	ArchivingServiceSettings m_serviceSettings;
+	Builder:: BuildInfo m_buildInfo;
+	Proto::ArchSignals* m_archSignalsProto = nullptr;
 
 	CfgLoaderThread* m_cfgLoaderThread = nullptr;
 
-	//
+	Tcp::ServerThread* m_tcpAppDataServerThread = nullptr;
+	Tcp::ServerThread* m_tcpArchRequestsServerThread = nullptr;
 
-	TcpAppDataServerThread* m_tcpAppDataServerThread = nullptr;
-	TcpArchiveRequestsServerThread* m_tcpArchiveRequestsServerThread = nullptr;
+	Archive* m_archive = nullptr;
 
-	ArchWriteThread* m_archWriteThread = nullptr;
-	ArchRequestThread* m_archRequestThread = nullptr;
-
-	Queue<SimpleAppSignalState> m_saveStatesQueue;
-
-	ArchiveShared m_archive;
+	static const char* const SETTING_ARCHIVE_LOCATION;
+	static const char* const SETTING_MIN_QUEUE_SIZE_FOR_FLUSHING;
 };

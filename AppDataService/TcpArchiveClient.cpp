@@ -74,7 +74,9 @@ bool TcpArchiveClient::sendSignalStatesToArchiveRequest(bool sendNow)
 		return false;
 	}
 
-	if (sendNow == false && m_signalStatesQueue->size() < 100)
+	const QThread* thread = QThread::currentThread();
+
+	if (sendNow == false && m_signalStatesQueue->size(thread) < 100)
 	{
 		return false;
 	}
@@ -87,7 +89,7 @@ bool TcpArchiveClient::sendSignalStatesToArchiveRequest(bool sendNow)
 	{
 		SimpleAppSignalState state;
 
-		bool res = m_signalStatesQueue->pop(&state);
+		bool res = m_signalStatesQueue->pop(&state, thread);
 
 		if (res == false)
 		{
@@ -106,7 +108,7 @@ bool TcpArchiveClient::sendSignalStatesToArchiveRequest(bool sendNow)
 
 		count++;
 	}
-	while(count < 1000);
+	while(count < 3000);
 
 	if (count == 0)
 	{

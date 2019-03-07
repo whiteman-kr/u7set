@@ -574,6 +574,8 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 		return false;
 	}
 
+	m_packetNo = numerator0;
+
 	m_receivedPacketCount++;
 
 	const Rup::TimeStamp& timeStamp = m_rupFramesHeaders[0].timeStamp;
@@ -605,7 +607,7 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 	return true;
 }
 
-bool DataSourceOnline::getDataToParsing(Times* times, const char** rupData, quint32* rupDataSize, bool* dataReceivingTimeout)
+bool DataSourceOnline::getDataToParsing(Times* times, quint16* packetNo, const char** rupData, quint32* rupDataSize, bool* dataReceivingTimeout)
 {
 	if (m_dataReadyToParsing == false)
 	{
@@ -615,7 +617,7 @@ bool DataSourceOnline::getDataToParsing(Times* times, const char** rupData, quin
 
 #ifdef QT_DEBUG
 
-	if (times == nullptr || rupData == nullptr || rupDataSize == nullptr || dataReceivingTimeout == nullptr)
+	if (times == nullptr || packetNo == nullptr || rupData == nullptr || rupDataSize == nullptr || dataReceivingTimeout == nullptr)
 	{
 		assert(false);
 		return false;
@@ -624,6 +626,7 @@ bool DataSourceOnline::getDataToParsing(Times* times, const char** rupData, quin
 #endif
 
 	*times = m_rupDataTimes;
+	*packetNo = m_packetNo;
 	*rupData = reinterpret_cast<const char*>(m_rupFramesData);
 	*rupDataSize = m_rupDataSize;
 	*dataReceivingTimeout = m_dataRecevingTimeout;
@@ -680,9 +683,9 @@ void DataSourceOnline::resume()
 }*/
 
 
-void DataSourceOnline::pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame)
+void DataSourceOnline::pushRupFrame(qint64 serverTime, const Rup::Frame& rupFrame, const QThread* thread)
 {
-	RupFrameTime* rupFrameTime = m_rupFrameTimeQueue.beginPush();
+	RupFrameTime* rupFrameTime = m_rupFrameTimeQueue.beginPush(thread);
 
 	if (rupFrameTime != nullptr)
 	{
@@ -694,10 +697,7 @@ void DataSourceOnline::pushRupFrame(qint64 serverTime, const Rup::Frame& rupFram
 		// is not an error - queue is full
 	}
 
-	m_rupFrameTimeQueue.completePush();
-
-	m_rupFramesQueueSize = m_rupFrameTimeQueue.size();
-	m_rupFramesQueueMaxSize = m_rupFrameTimeQueue.maxSize();
+	m_rupFrameTimeQueue.completePush(thread, &m_rupFramesQueueSize, &m_rupFramesQueueMaxSize);
 }
 
 bool DataSourceOnline::takeProcessingOwnership(const QThread* processingThread)
@@ -722,13 +722,13 @@ bool DataSourceOnline::releaseProcessingOwnership(const QThread* processingThrea
 	return result;
 }
 
-bool DataSourceOnline::processRupFrameTimeQueue()
+bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 {
 	int count = 0;
 
 	do
 	{
-		RupFrameTime* rupFrameTime = m_rupFrameTimeQueue.beginPop();
+		RupFrameTime* rupFrameTime = m_rupFrameTimeQueue.beginPop(thread);
 
 		if (rupFrameTime == nullptr)
 		{
@@ -789,10 +789,10 @@ bool DataSourceOnline::processRupFrameTimeQueue()
 
 				if (m_errorDataID > 0 && (m_errorDataID % 500) == 0)
 				{
-					QString msg = QString("Wrong DataID from %1 (%2, waiting %3), packet processing skiped").
+					QString msg = QString("Wrong DataID from %1 (0x%2, waiting 0x%3), packet processing skiped").
 							arg(lmAddressPort().addressStr()).
-							arg(rupFrameHeader.dataId).
-							arg(lmDataID());
+							arg(QString::number(rupFrameHeader.dataId, 16)).
+							arg(QString::number(lmDataID(), 16));
 
 					qDebug() << C_STR(msg);
 				}
@@ -853,7 +853,7 @@ bool DataSourceOnline::processRupFrameTimeQueue()
 		}
 		while(1);
 
-		m_rupFrameTimeQueue.completePop();
+		m_rupFrameTimeQueue.completePop(thread);
 
 		count++;
 	}

@@ -24,6 +24,7 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 	qDebug() << Q_FUNC_INFO;
 
 	connect(&m_configController, &MonitorConfigController::configurationArrived, this, &MonitorMainWindow::slot_configurationArrived);
+	connect(&m_configController, &MonitorConfigController::unknownClient, this, &MonitorMainWindow::slot_unknownClient);
 
 	// TcpSignalClient
 	//
@@ -998,6 +999,18 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 	}
 
 	m_pTuningSourcesAction->setVisible(configuration.tuningEnabled);
+
+	return;
+}
+
+void MonitorMainWindow::slot_unknownClient()
+{
+	// CfgService did not find SoftwareID
+	//
+	QMessageBox::critical(this,
+						  qAppName(),
+						  tr("Configuration Service does not recognize Monitor EquipmentID %1")
+								.arg(m_configController.softwareInfo().equipmentID()));
 
 	return;
 }

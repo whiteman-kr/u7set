@@ -18,6 +18,8 @@ namespace Tuning
 		virtual void writeAdditionalSectionsToXml(XmlWriteHelper& xml) const override;
 		virtual bool readAdditionalSectionsFromXml(XmlReadHelper& xml) override;
 
+		bool hasTuningSignals() const;
+
 	private:
 		TuningData* m_tuningData = nullptr;
 

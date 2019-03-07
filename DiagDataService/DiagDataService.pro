@@ -63,7 +63,8 @@ SOURCES += \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Times.cpp \
-    ../lib/SignalProperties.cpp
+    ../lib/SignalProperties.cpp \
+    ../lib/SimpleMutex.cpp
 
 HEADERS += \
 	Stable.h \
@@ -102,7 +103,8 @@ HEADERS += \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     ../lib/Times.h \
-    ../lib/SignalProperties.h
+    ../lib/SignalProperties.h \
+    ../lib/SimpleMutex.h
 
 include(../qtservice/src/qtservice.pri)
 

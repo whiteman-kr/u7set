@@ -63,15 +63,23 @@ SOURCES += \
     ArchServiceMain.cpp \
     TcpAppDataServer.cpp \
     ../lib/AppSignal.cpp \
-    ArchWriteThread.cpp \
-    ArchRequestThread.cpp \
     TcpArchRequestsServer.cpp \
     Archive.cpp \
     TimeFilter.cpp \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Signal.cpp \
-    ../lib/SignalProperties.cpp
+    ../lib/SignalProperties.cpp \
+    ../lib/Crc16.cpp \
+    FileArchReader.cpp \
+    ArchFile.cpp \
+    ArchWriterThread.cpp \
+    ArchRequest.cpp \
+    ArchMaintenance.cpp \
+    ArchFileRecord.cpp \
+    ../lib/AppSignalStateFlags.cpp \
+    ArchFileBuffer.cpp \
+    ../lib/SimpleMutex.cpp
 
 HEADERS += \
     ../lib/HostAddressPort.h \
@@ -105,8 +113,6 @@ HEADERS += \
     ../lib/CommandLineParser.h \
     TcpAppDataServer.h \
     ../lib/AppSignal.h \
-    ArchWriteThread.h \
-    ArchRequestThread.h \
     TcpArchRequestsServer.h \
     Archive.h \
     ../lib/TimeStamp.h \
@@ -115,7 +121,19 @@ HEADERS += \
     ../lib/TuningValue.h \
     ../lib/Signal.h \
     ../lib/Signal.h \
-    ../lib/SignalProperties.h
+    ../lib/SignalProperties.h \
+    ../lib/Crc16.h \
+    FileArchReader.h \
+    ArchFile.h \
+    BinSearch.h \
+    ArchWriterThread.h \
+    ArchRequest.h \
+    ArchMaintenance.h \
+    ArchFileRecord.h \
+    ../lib/AppSignalStateFlags.h \
+    ArchFileBuffer.h \
+    ../lib/SimpleMutex.h \
+    ../lib/WUtils.h
 
 include(../qtservice/src/qtservice.pri)
 

@@ -93,6 +93,7 @@ namespace Builder
 		void errCMN0018(QString fileName, QString cfgXmlSubdir);		// Can't link build file %1 into /%2/configuration.xml.
 		void errCMN0019(QString fileID, QString subDir);		// Can't find file with ID = %1 in build subdirectory %2.
 		void errCMN0020(QString fileName);						// Can't find build file %1.
+		void errCMN0021(QString fileName, QString cfgXmlFileName);	// File %1 already linked to %2.
 
 		// INT			Internal issues							1000-1999
 		//
@@ -153,8 +154,7 @@ namespace Builder
 		void errCFG3028(QString signalID1, QString signalID2, QString module, QString propertyName);
 		void errCFG3029(QString softwareID);												// Software %1 is not linked to ConfigurationService.
 		void errCFG3030(QString lmID, QString appDataServiceID);							// Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.		
-		void wrnCFG3031(QString objectID, QString propertyName);							// Property %1.%2 is empty. Default writeble catalog of workstation  will be used.
-
+		void errCFG3031(QString objectID, QString propertyName);							// Property %1.%2 should be set to the valid writable catalog of workstation.
 
 		void errCFG3040(QString monitorId, QString tuningServiceId);				// Mode SingleLmControl is not supported by Monitor. Set TuningServiceID.SingleLmControl to false. Monitor EquipmentID %1, TuningServiceID %2.
 

@@ -1596,7 +1596,7 @@ namespace Tuning
 	{
 		while(m_handlerIsInitialized.load() != true)
 		{
-			msleep(1);
+			QThread::yieldCurrentThread();
 		}
 	}
 

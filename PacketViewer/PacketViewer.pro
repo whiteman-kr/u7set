@@ -53,7 +53,8 @@ SOURCES += main.cpp\
     ../lib/OutputLog.cpp \
     ../Builder/ModulesRawData.cpp \
     ../lib/Times.cpp \
-    ../lib/SignalProperties.cpp
+    ../lib/SignalProperties.cpp \
+    ../lib/SimpleMutex.cpp
 
 HEADERS  += SourceListWidget.h \
     PacketSourceModel.h \
@@ -82,7 +83,8 @@ HEADERS  += SourceListWidget.h \
     ../lib/OutputLog.h \
     ../Builder/ModulesRawData.h \
     ../lib/Times.h \
-    ../lib/SignalProperties.h
+    ../lib/SignalProperties.h \
+    ../lib/SimpleMutex.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

@@ -5934,6 +5934,8 @@ void EditSchemaWidget::addNewAppSignalSelected()
 
 void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> schemaItem)
 {
+	qDebug() << "RPCT-2286 log: " << "void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> schemaItem)";
+
 	if (isLogicSchema() == false ||
 		schemaItem == nullptr ||
 		dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get()) == nullptr)
@@ -5941,6 +5943,7 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 		assert(isLogicSchema() == false);
 		assert(schemaItem);
 		assert(dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get()) != nullptr);
+		qDebug() << "RPCT-2286 log: return condition 1";
 		return;
 	}
 
@@ -5948,6 +5951,7 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 	if (equipmentIdList.isEmpty() == true)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Cannot create Application Signal as schema property EquipmentIDs is empty."));
+		qDebug() << "RPCT-2286 log: return condition 2";
 		return;
 	}
 
@@ -5963,9 +5967,11 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 		// This is just created signal item
 		//
 		itemsAppSignals.clear();				// clear - means generate new AppSignalIds
+		qDebug() << "RPCT-2286 log: Check point 1";
 	}
 	else
 	{
+		qDebug() << "RPCT-2286 log: Check point 2";
 	}
 
 	m_createSignalDialoOptions.init(schema()->schemaId(),
@@ -5973,10 +5979,16 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 									equipmentIdList,
 									itemsAppSignals);
 
+	qDebug() << "RPCT-2286 log: Check point 3";
+
 	QStringList signalsIds = CreateSignalDialog::showDialog(db(), &m_createSignalDialoOptions, this);
+
+	qDebug() << "RPCT-2286 log: Check point 4";
 
 	if (signalsIds.isEmpty() == false)
 	{
+		qDebug() << "RPCT-2286 log: Check point 5 signalsIds: " << signalsIds.join(", ");
+
 		// Set value
 		//
 		QString oneStringIds;
@@ -5985,8 +5997,12 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 			oneStringIds += s + QChar::LineFeed;
 		}
 
+		qDebug() << "RPCT-2286 log: Check point 6";
 		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(oneStringIds), schemaItem);
+		qDebug() << "RPCT-2286 log: Check point 7";
 	}
+
+	qDebug() << "RPCT-2286 log: Check point 8";
 
 	//--------------------------------------------------
 //	QStringList equipmentIdList = logicSchema()->equipmentIdList();
@@ -7356,6 +7372,7 @@ void EditSchemaWidget::properties()
 	}
 
 	m_itemsPropertiesDialog->setObjects(editSchemaView()->selectedItems());
+	m_itemsPropertiesDialog->setReadOnly(m_editEngine->readOnly());
 	m_itemsPropertiesDialog->show();
 	return;
 }
@@ -7436,6 +7453,7 @@ void EditSchemaWidget::selectionChanged()
 	}
 
 	m_itemsPropertiesDialog->setObjects(editSchemaView()->selectedItems());
+	m_itemsPropertiesDialog->setReadOnly(m_editEngine->readOnly());
 
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
 	auto selectectNotLocked = selectedNonLockedItems();

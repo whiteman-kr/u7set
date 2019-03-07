@@ -141,26 +141,22 @@ void SimpleThread::beforeQuit()
 {
 }
 
-
 // -------------------------------------------------------------------------------------
 //
 // WaitForSignalHelper class implementation
 //
 // -------------------------------------------------------------------------------------
 
-
 WaitForSignalHelper::WaitForSignalHelper(const QObject* sender, const char* signal)
 {
 	connect(sender, signal, &m_eventLoop, SLOT(quit()));
 }
-
 
 void WaitForSignalHelper::slot_timeout()
 {
 	m_timeout = true;
 	m_eventLoop.quit();
 }
-
 
 bool WaitForSignalHelper::wait(int milliseconds)
 {

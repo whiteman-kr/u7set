@@ -1,5 +1,4 @@
 #include "ArchivingServiceCfgGenerator.h"
-#include "../lib/ServiceSettings.h"
 #include "../lib/WUtils.h"
 
 namespace Builder
@@ -36,15 +35,13 @@ namespace Builder
 
 	bool ArchivingServiceCfgGenerator::writeSettings()
 	{
-		ArchivingServiceSettings settings;
-
 		bool result = true;
 
-		result &= settings.readFromDevice(m_software, m_log);
+		result &= m_settings.readFromDevice(m_software, m_log);
 
 		XmlWriteHelper xml(m_cfgXml->xmlWriter());
 
-		result &= settings.writeToXml(xml);
+		result &= m_settings.writeToXml(xml);
 
 		result &= writeArchSignalsFile();
 
@@ -104,6 +101,9 @@ namespace Builder
 		{
 			return false;
 		}
+
+		parameters += QString(" -location=%1").arg(m_settings.archiveLocation);
+
 		content += parameters;
 
 		BuildFile* buildFile = m_buildResultWriter->addFile(Builder::DIR_RUN_SERVICE_SCRIPTS, m_software->equipmentIdTemplate().toLower() + ".bat", content);
@@ -127,6 +127,8 @@ namespace Builder
 		{
 			return false;
 		}
+
+		parameters += QString(" -location=%1").arg(m_settings.archiveLocation);
 
 		content += parameters;
 

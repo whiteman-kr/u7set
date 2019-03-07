@@ -10,7 +10,7 @@
 #include "Tuning/TuningSignalState.h"
 #include "Times.h"
 #include "Types.h"
-
+#include "AppSignalStateFlags.h"
 
 struct AppSignalParamMimeType
 {
@@ -25,34 +25,6 @@ namespace Proto
 	class AppSignalSet;
 }
 
-union AppSignalStateFlags
-{
-	struct
-	{
-		quint32	valid : 1;
-
-		// reasons to archiving
-		//
-		quint32 fineAperture : 1;
-		quint32 coarseAperture : 1;
-		quint32 autoPoint : 1;
-		quint32 validityChange : 1;
-
-		// The last flag (the 32nd bit) is RESERVED for use in trends
-		//
-	};
-
-	quint32 all = 0;
-
-	void clear();
-
-	void clearReasonsFlags();
-
-	bool hasArchivingReason() const;
-	bool hasShortTermArchivingReasonOnly() const;
-};
-
-
 struct SimpleAppSignalState
 {
 	// light version of AppSignalState to use in queues and other AppDataService data structs
@@ -61,6 +33,7 @@ struct SimpleAppSignalState
 	Times time;
 	AppSignalStateFlags flags;
 	double value = 0;
+	quint16 packetNo = 0;
 
 	bool isValid() const { return flags.valid == 1; }
 

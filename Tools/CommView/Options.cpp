@@ -12,6 +12,101 @@ Options theOptions;
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+TestResultOption::TestResultOption(QObject *parent) :
+	QObject(parent),
+	m_maxPacketCount(MAX_PACKET_COUNT_FOR_TEST),
+	m_testFinisedCount(0)
+{
+	m_fileName.clear();
+
+	m_moduleID.clear();
+	m_operatorName.clear();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+TestResultOption::TestResultOption(const TestResultOption& from, QObject *parent) :
+	QObject(parent)
+{
+	*this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+TestResultOption::~TestResultOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void TestResultOption::clear()
+{
+	m_fileName.clear();
+	m_maxPacketCount = MAX_PACKET_COUNT_FOR_TEST;
+
+	m_moduleID.clear();
+	m_operatorName.clear();
+
+	m_testFinisedCount = 0;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void TestResultOption::updateTestFinisedCount()
+{
+	m_testFinisedCount++;
+
+	if (m_testFinisedCount == SERIAL_PORT_COUNT)
+	{
+		emit testFinished();
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void TestResultOption::load()
+{
+	QSettings s;
+
+	m_fileName = s.value(QString("%1FileName").arg(TESTRESULT_OPTIONS_REG_KEY), RESULT_FILE_NAME).toString();
+	m_maxPacketCount = s.value(QString("%1PacketCount").arg(TESTRESULT_OPTIONS_REG_KEY), MAX_PACKET_COUNT_FOR_TEST).toInt();
+
+	m_moduleID = s.value(QString("%1ModuleID").arg(TESTRESULT_OPTIONS_REG_KEY), "0001").toString();
+	m_operatorName = s.value(QString("%1OperatorName").arg(TESTRESULT_OPTIONS_REG_KEY), "Operator name").toString();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void TestResultOption::save()
+{
+	QSettings s;
+
+	s.setValue(QString("%1FileName").arg(TESTRESULT_OPTIONS_REG_KEY), m_fileName);
+	s.setValue(QString("%1PacketCount").arg(TESTRESULT_OPTIONS_REG_KEY), m_maxPacketCount);
+
+	s.setValue(QString("%1ModuleID").arg(TESTRESULT_OPTIONS_REG_KEY), m_moduleID);
+	s.setValue(QString("%1OperatorName").arg(TESTRESULT_OPTIONS_REG_KEY), m_operatorName);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+TestResultOption& TestResultOption::operator=(const TestResultOption& from)
+{
+	m_fileName = from.m_fileName;
+	m_maxPacketCount = from.m_maxPacketCount;
+
+	m_moduleID = from.m_moduleID;
+	m_operatorName = from.m_operatorName;
+
+	m_testFinisedCount = from.m_testFinisedCount;
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 SerialPortOption::SerialPortOption(QObject *parent) :
 	QObject(parent),
 	m_connected(false),
@@ -58,6 +153,30 @@ void SerialPortOption::clear()
 	m_skippedBytes = 0;
 	m_queueBytes = 0;
     m_packetCount = 0;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SerialPortOption::setNoReply(bool noReply)
+{
+	m_noReply = noReply;
+
+	// for test
+	//
+	if (m_testResult.isRunning() == true)
+	{
+		if (m_noReply == true)
+		{
+            saveTestResult();
+		}
+		else
+		{
+            if (m_testResult.resultIsClear() == false)
+            {
+                clearTestResult();
+            }
+		}
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -213,10 +332,10 @@ QString SerialPortOption::receivedBytesStr()
     {
         str = QString::number((double) m_receivedBytes/1024, 10, 2) + tr(" Kb");
     }
-    else
-    {
-        str = tr("No data");
-    }
+	else
+	{
+		str = tr("No data");
+	}
 
     return str;
 }
@@ -229,7 +348,7 @@ QString SerialPortOption::skippedBytesStr()
 
 	if (m_noReply == false)
     {
-        str = QString::number((double) m_skippedBytes/1024, 10, 2) + tr(" Kb");
+		str = QString::number((double) m_skippedBytes/1024, 10, 2) + tr(" Kb");
     }
 
     return str;
@@ -327,6 +446,49 @@ bool SerialPortOption::isDataCrcOk()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void SerialPortOption::runTest()
+{
+	m_testResult.setIsRunning(true);
+	m_testResult.setResultIsClear(false);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SerialPortOption::clearTestResult()
+{
+	m_receivedBytes = 0;
+	m_skippedBytes = 0;
+	m_packetCount = 0;
+
+	m_testResult.clear();
+	m_testResult.setStartTime();
+
+    m_testResult.setResultIsClear(true);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SerialPortOption::saveTestResult()
+{
+	m_testResult.setReceivedBytes(m_receivedBytes);
+	m_testResult.setSkippedBytes(m_skippedBytes);
+	m_testResult.setPacketCount(m_packetCount);
+
+	m_testResult.setStopTime();
+
+	m_testResult.setIsRunning(false);
+	m_testResult.setResultIsClear(false);
+
+	bool result = m_skippedBytes * 100.0 / m_receivedBytes < MAX_SKIPPED_BYTES_IN_PERCENTAGES &&
+				  100 - (m_packetCount * 100 / theOptions.testOption().maxPacketCount()) < MAX_SKIPPED_BYTES_IN_PERCENTAGES;
+
+	m_testResult.setIsOk(result);
+
+	theOptions.testOption().updateTestFinisedCount();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void SerialPortOption::load(int index)
 {
 	if (index < 0 || index >= SERIAL_PORT_COUNT)
@@ -382,6 +544,8 @@ SerialPortOption& SerialPortOption::operator=(const SerialPortOption& from)
 	m_skippedBytes = from.m_skippedBytes;
 	m_queueBytes = from.m_queueBytes;
     m_packetCount = from.m_packetCount;
+
+	m_testResult = from.m_testResult;
 
 	return *this;
 }
@@ -601,6 +765,7 @@ Options::~Options()
 
 void Options::load()
 {
+	m_testResult.load();
 	m_serialPorts.load();
 	m_view.load();
 }
@@ -609,6 +774,7 @@ void Options::load()
 
 void Options::save()
 {
+	m_testResult.save();
 	m_serialPorts.save();
 	m_view.save();
 }
@@ -634,6 +800,7 @@ Options& Options::operator=(const Options& from)
 {
 	m_mutex.lock();
 
+		m_testResult = from.m_testResult;
 		m_serialPorts = from.m_serialPorts;
 		m_view = from.m_view;
 

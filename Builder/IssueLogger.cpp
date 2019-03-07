@@ -349,6 +349,27 @@ namespace Builder
 				  QString(tr("Can't find build file %1.")).arg(fileName));
 	}
 
+	/// IssueCode: CMN0021
+	///
+	/// IssueType: Error
+	///
+	/// Title: File %1 already linked to %2.
+	///
+	/// Parameters:
+	///		%1 File name to link
+	///		%2 Configuration.xml file name
+	///
+	/// Description:
+	///		Build file already linked to specified configuration.xml file.
+	///		In most cases it is an internal software error and it shoud be reported to developers.
+	///
+	void IssueLogger::errCMN0021(QString fileName, QString cfgXmlFileName)
+	{
+		LOG_ERROR(IssueType::Common,
+				  21,
+				  QString(tr("File %1 already linked to %2.")).arg(fileName).arg(cfgXmlFileName));
+	}
+
 	// INT			Internal issues							1000-1999
 	//
 
@@ -363,7 +384,7 @@ namespace Builder
 	///
 	/// Description:
 	///		Error may occur if function gets wrong input parameters.
-	/// In most cases it is an internal software error and it shoud be reported to developers.
+	///		In most cases it is an internal software error and it shoud be reported to developers.
 	///
 	void IssueLogger::errINT1000(QString debugMessage)
 	{
@@ -1306,11 +1327,11 @@ namespace Builder
 						arg(lmID).arg(appDataServiceID));
 	}
 
-	/// IssueCode: CFG3022
+	/// IssueCode: CFG3031
 	///
-	/// IssueType: Warning
+	/// IssueType: Error
 	///
-	/// Title: Property %1.%2 is empty. Default writeble catalog of workstation  will be used.
+	/// Title: Property %1.%2 should be set to the valid writable catalog of workstation.
 	///
 	/// Parameters:
 	///         %1 Object ID
@@ -1319,11 +1340,11 @@ namespace Builder
 	/// Description:
 	///			Archive location is not assigned.
 	///
-	void IssueLogger::wrnCFG3031(QString objectID, QString propertyName)
+	void IssueLogger::errCFG3031(QString objectID, QString propertyName)
 	{
-		LOG_WARNING0(IssueType::FscConfiguration,
+		LOG_ERROR(IssueType::FscConfiguration,
 				  3031,
-				  tr("Property %1.%2 is empty. Default writeble catalog of workstation  will be used.")
+				  tr("Property %1.%2 should be set to the valid writable catalog of workstation.")
 				  .arg(objectID)
 				  .arg(propertyName));
 	}

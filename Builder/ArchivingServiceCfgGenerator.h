@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SoftwareCfgGenerator.h"
+#include "../lib/ServiceSettings.h"
 
 namespace Builder
 {
@@ -20,6 +21,9 @@ namespace Builder
 
 		bool writeBatFile();
 		bool writeShFile();
+
+	private:
+		ArchivingServiceSettings m_settings;
 	};
 
 }

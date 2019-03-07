@@ -50,7 +50,7 @@ void AppDataProcessingThread::run()
 
 			do
 			{
-				result = appDataSource->processRupFrameTimeQueue();
+				result = appDataSource->processRupFrameTimeQueue(thisThread);
 
 				if (result == false)
 				{

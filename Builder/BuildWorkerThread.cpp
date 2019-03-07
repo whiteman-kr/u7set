@@ -310,12 +310,15 @@ namespace Builder
 			//
 			// Write logic, configuration and tuning binary files
 			//
-			ok = writeBinaryFiles(*m_context->m_buildResultWriter);
-
-			if (ok == false ||
-				QThread::currentThread()->isInterruptionRequested() == true)
+			if (m_log->errorCount() == 0)
 			{
-				break;
+				ok = writeBinaryFiles(*m_context->m_buildResultWriter);
+
+				if (ok == false ||
+						QThread::currentThread()->isInterruptionRequested() == true)
+				{
+					break;
+				}
 			}
 
 			ok = cfgBuilder.writeDataFiles(*m_context->m_buildResultWriter);
@@ -1307,6 +1310,11 @@ namespace Builder
 		equipmentWalker(m_context->m_equipmentSet->root(),
 			[this, lmsUniqueIdMap, &result](Hardware::DeviceObject* currentDevice)
 			{
+				if (QThread::currentThread()->isInterruptionRequested() == true)
+				{
+					return;
+				}
+
 				if (currentDevice->isSoftware() == false)
 				{
 					return;
@@ -1386,6 +1394,8 @@ namespace Builder
 		{
 			LOG_SUCCESS(m_context->m_log, tr("Sofware configuration generation was succesfully finished"));
 		}
+
+		SoftwareCfgGenerator::clearStaticData();
 
 		return result;
 	}

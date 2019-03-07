@@ -2743,6 +2743,11 @@ namespace Builder
 			return false;
 		}
 
+		filesTree.removeIf([](const DbFileInfo& f)
+			{
+				return f.action() == VcsItemAction::Deleted;
+			});
+
 		std::vector<DbFileInfo> fileList = filesTree.toVectorIf(
 			[&endsWithFilter](const DbFileInfo& file)
 			{

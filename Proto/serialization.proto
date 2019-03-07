@@ -1124,6 +1124,7 @@ message AppSignalState
     optional sfixed64 localTime = 5 [default = 0];
     optional sfixed64 plantTime = 6 [default = 0];
     optional sfixed64 archiveId = 7 [default = -1];
+	optional uint32 packetNo = 8 [default = 0];
 }
 
 message Connection

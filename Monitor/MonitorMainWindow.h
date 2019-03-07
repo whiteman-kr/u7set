@@ -83,6 +83,7 @@ protected:
 	void slot_historyChanged(bool enableBack, bool enableForward);
 
 	void slot_configurationArrived(ConfigSettings configuration);
+	void slot_unknownClient();
 
 	void checkMonitorSingleInstance();
 

@@ -18,6 +18,8 @@ namespace Builder
 	protected:
 		bool writeMonitorSettings();
 
+		bool writeSchemasByTags();
+
 		bool writeAppDataServiceSection(QXmlStreamWriter& xmlWriter);
 		bool writeArchiveServiceSection(QXmlStreamWriter& xmlWriter);
 		bool writeTuningServiceSection(QXmlStreamWriter& xmlWriter);
@@ -35,8 +37,11 @@ namespace Builder
 
 	private:
 		Context* m_context = nullptr;
+
 		bool m_tuningEnabled = false;
 		QStringList m_tuningSources;
+
+		QStringList m_schemaTagList;		// Generated in writeMonitorSettings
 	};
 
 

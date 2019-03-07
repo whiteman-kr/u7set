@@ -6,16 +6,17 @@
 #include "../Proto/serialization.pb.h"
 #include "../lib/TimeStamp.h"
 
-#include "ArchRequestThread.h"
+#include "Archive.h"
 
+class ArchRequest;
 
 class TcpArchRequestsServer : public Tcp::Server
 {
 public:
-	TcpArchRequestsServer(const SoftwareInfo& softwareInfo, ArchRequestThread& archRequestThread, CircularLoggerShared logger);
+	TcpArchRequestsServer(const SoftwareInfo& softwareInfo, Archive* archive, CircularLoggerShared logger);
 
-    virtual Tcp::Server* getNewInstance() override;
-    virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
+	virtual Tcp::Server* getNewInstance() override;
+	virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
 
 private:
 	virtual void onServerThreadStarted() override;
@@ -25,26 +26,14 @@ private:
 	void onGetSignalStatesFromArchiveNext(const char* requestData, quint32 requestDataSize);
 	void onGetSignalStatesFromArchiveCancel(const char* requestData, quint32 requestDataSize);
 
-	void finalizeCurrentRequest();
-
-	quint32 getNewRequestID();
+	void finalizeArchRequest();
 
 private:
-	ArchRequestThread& m_archRequestThread;
+	Archive* m_archive = nullptr;
 	CircularLoggerShared m_logger;
 
-	static QMutex m_requestNoMutex;
-	static quint32 m_nextRequestNo;
+	//
 
-	ArchRequestContextShared m_currentRequest;
-};
-
-
-
-class TcpArchiveRequestsServerThread : public Tcp::ServerThread
-{
-public:
-	TcpArchiveRequestsServerThread(const HostAddressPort& listenAddressPort,
-				 Tcp::Server* server,
-				 std::shared_ptr<CircularLogger> logger);
+	std::shared_ptr<ArchRequest> m_archRequest;
+	std::shared_ptr<Network::GetAppSignalStatesFromArchiveNextReply> m_getNextReply;
 };

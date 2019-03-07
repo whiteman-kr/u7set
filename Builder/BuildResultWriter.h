@@ -79,6 +79,7 @@ namespace Builder
 
 		const QByteArray& getFileData() { return m_fileData; }
 		QString subDir() const { return m_subDir; }
+		QString fileName() const { return m_subDir + "/" + QString(FILE_CONFIGURATION_XML); }
 
 	private:
 		BuildResultWriter& m_buildResultWriter;
