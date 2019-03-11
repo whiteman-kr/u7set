@@ -2418,7 +2418,7 @@ namespace Builder
 	///
 	/// Parameters:
 	///		%1 SchemaItem description
-	///		%2 Ñonnection ID
+	///		%2 Connection ID
 	///		%3 Logic schema ID
 	///		%4 Logic module EquipmentID(s)
 	///
@@ -5976,7 +5976,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Receiver has more then one connections ID (Schema %1, module %2)
+	/// Title: Receiver has more than one connections ID (Schema %1, module %2)
 	///
 	/// Parameters:
 	///		%1 schema ID
@@ -5991,8 +5991,69 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5161,
-				  QString(tr("Receiver has more then one connections ID (Schema %1, module %2)")).
+				  QString(tr("Receiver has more than one connections ID (Schema %1, module %2)")).
 					arg(schemaID).arg(moduleID));
+	}
+
+	/// IssueCode: ALC5162
+	///
+	/// IssueType: Error
+	///
+	/// Title: In single-port connection %1 Port2EquipmentID property is not empty.
+	///
+	/// Parameters:
+	///		%1 connection ID
+	///
+	/// Description:
+	///		In single-port connections only Port1EquipmentID property should be assigned.
+	///		Clear Port2EquipmentID property or change connection type to port-to-port.
+	///
+	void IssueLogger::errALC5162(QString connectionID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5162,
+				  QString(tr("In single-port connection %1 Port2EquipmentID property is not empty.")).
+					arg(connectionID));
+	}
+
+	/// IssueCode: ALC5163
+	///
+	/// IssueType: Error
+	///
+	/// Title: Port1EquipmentID property is empty in connection %1.
+	///
+	/// Parameters:
+	///		%1 connection ID
+	///
+	/// Description:
+	///		Port1EquipmentID property should be assigned.
+	///
+	void IssueLogger::errALC5163(QString connectionID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5163,
+				  QString(tr("Port1EquipmentID property is empty in connection %1.")).
+					arg(connectionID));
+	}
+
+	/// IssueCode: ALC5164
+	///
+	/// IssueType: Error
+	///
+	/// Title: Port2EquipmentID property is empty in connection %1.
+	///
+	/// Parameters:
+	///		%1 connection ID
+	///
+	/// Description:
+	///		Port2EquipmentID property should be assigned.
+	///
+	void IssueLogger::errALC5164(QString connectionID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5164,
+				  QString(tr("Port2EquipmentID property is empty in connection %1.")).
+					arg(connectionID));
 	}
 
 	//
@@ -6108,7 +6169,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Serial Rx signal %1 is not associated with LM %2 (Logic schema %3).
+	/// Title: Single-port Rx signal %1 is not associated with LM %2 (Logic schema %3).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -6124,7 +6185,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5191,
-				  QString(tr("Serial Rx signal %1 is not associated with LM %2 (Logic schema %3).")).
+				  QString(tr("Single-port Rx signal %1 is not associated with LM %2 (Logic schema %3).")).
 						arg(appSignalID).arg(lmID).arg(schemaID));
 	}
 

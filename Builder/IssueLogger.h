@@ -374,14 +374,17 @@ namespace Builder
 		void errALC5158(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel);			// Value of parameter %1.%2 must be greater or equal then the value of %1.%3.
 		void errALC5159(QUuid itemUuid, QString schemaID, QString moduleID);			// Receiver has no connection ID (Schema %1, module %2)
 		void errALC5160(QUuid itemUuid, QString schemaID, QString moduleID);			// Transmitter has no connection ID (Schema %1, module %2)
-		void errALC5161(QUuid itemUuid, QString schemaID, QString moduleID);			// Receiver has more then one connections ID (Schema %1, module %2)
+		void errALC5161(QUuid itemUuid, QString schemaID, QString moduleID);			// Receiver has more than one connections ID (Schema %1, module %2)
+		void errALC5162(QString connectionID);											// In single-port connection %1 Port2EquipmentID property is not empty.
+		void errALC5163(QString connectionID);											// Port1EquipmentID property is empty in connection %1.
+		void errALC5164(QString connectionID);											// Port2EquipmentID property is empty in connection %1.
 
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.
 		void errALC5188(QString appSignalID, QString portID);							// Duplicate signal ID %1 in opto port %2.
 		void errALC5189(QString appSignalID, QString portID, QString lmID);				// Tx signal %1 specified in opto port %2 raw data description is not exists in LM %3.
 		void errALC5190(QString appSignalID, QString portID, QString lmID);				// Rx signal %1 specified in opto port %2 raw data description is not exists in LM %3.
-		void errALC5191(QString appSignalID, QString lmID, QUuid itemID, QString schemaID);		// Serial Rx signal %1 is not associated with LM %2 .
+		void errALC5191(QString appSignalID, QString lmID, QUuid itemID, QString schemaID);		// Single-port Rx signal %1 is not associated with LM %2 .
 		void wrnALC5192(QString appSignalID, QString portID, QString connectionID);		// Tx signal %1 is defined in port %2 raw data description isn't connected to transmitter (Connection %3).
 		void wrnALC5193(QString appSignalID, QString portID, QString connectionID);		// Rx signal %1 specified in port %2 raw data description isn't assigned to receiver (Connection %3).
 		void wrnALC5194(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 with manual settings are overlapped.

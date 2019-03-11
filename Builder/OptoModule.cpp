@@ -3367,13 +3367,21 @@ namespace Hardware
 
 		QString connectionID = connection->connectionID();
 
+		if (connection->port1EquipmentID().isEmpty() == true)
+		{
+			// Port1EquipmentID property is empty in connection %1.
+			//
+			m_log->errALC5163(connectionID);
+			return false;
+		}
+
 		Hardware::OptoPortShared optoPort1 = getOptoPort(connection->port1EquipmentID());
 
 		// check port 1
 		//
 		if (optoPort1 == nullptr)
 		{
-			// Undefined opto port '%1' in the connection '%2'.
+			// Undefined opto port %1 in the connection %2.
 			//
 			m_log->errALC5021(connection->port1EquipmentID(), connection->connectionID());
 			return false;
@@ -3401,6 +3409,14 @@ namespace Hardware
 
 		if (connection->isSinglePort() == true)
 		{
+			if (connection->port2EquipmentID().isEmpty() == false)
+			{
+				// In single-port connection %1 Port2EquipmentID property is not empty.
+				//
+				m_log->errALC5162(connectionID);
+				return false;
+			}
+
 			bool res = optoPort1->initSettings(connection);
 
 			if (res == false)
@@ -3417,6 +3433,15 @@ namespace Hardware
 
 			// check port 2
 			//
+
+			if (connection->port2EquipmentID().isEmpty() == true)
+			{
+				// Port2EquipmentID property is empty in connection %1.
+				//
+				m_log->errALC5164(connectionID);
+				return false;
+			}
+
 			Hardware::OptoPortShared optoPort2 = getOptoPort(connection->port2EquipmentID());
 
 			if (optoPort2 == nullptr)

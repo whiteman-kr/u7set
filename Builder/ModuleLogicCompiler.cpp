@@ -5446,7 +5446,7 @@ namespace Builder
 
 		if (m_chassisSignals.contains(rxSignalID) == false)
 		{
-			// Serial Rx signal '%1' is not associated with LM '%2' (Logic schema '%3').
+			// Single-port Rx signal '%1' is not associated with LM '%2' (Logic schema '%3').
 			//
 			m_log->errALC5191(rxSignalID, lmEquipmentID(), item->guid(), item->schemaID());
 			return false;
