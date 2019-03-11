@@ -5870,6 +5870,74 @@ namespace Builder
 					arg(fbCaption).arg(param1).arg(param2).arg(schemaID).arg(itemLabel));
 	}
 
+	/// IssueCode: ALC5159
+	///
+	/// IssueType: Error
+	///
+	/// Title: Receiver has no connection ID (Schema %1, module %2)
+	///
+	/// Parameters:
+	///		%1 schema ID
+	///		%2 module ID
+	///
+	/// Description:
+	///		Connection ID should be assigned to Receiver.
+	///
+	void IssueLogger::errALC5159(QUuid itemUuid, QString schemaID, QString moduleID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5159, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5159,
+				  QString(tr("Receiver has no connection ID (Schema %1, module %2)")).
+					arg(schemaID).arg(moduleID));
+	}
+
+	/// IssueCode: ALC5160
+	///
+	/// IssueType: Error
+	///
+	/// Title: Transmitter has no connection ID (Schema %1, module %2)
+	///
+	/// Parameters:
+	///		%1 schema ID
+	///		%2 module ID
+	///
+	/// Description:
+	///		At least one connection ID should be assigned to Transmitter.
+	///
+	void IssueLogger::errALC5160(QUuid itemUuid, QString schemaID, QString moduleID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5160, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5160,
+				  QString(tr("Transmitter has no connection ID (Schema %1, module %2)")).
+					arg(schemaID).arg(moduleID));
+	}
+
+	/// IssueCode: ALC5161
+	///
+	/// IssueType: Error
+	///
+	/// Title: Receiver has more then one connections ID (Schema %1, module %2)
+	///
+	/// Parameters:
+	///		%1 schema ID
+	///		%2 module ID
+	///
+	/// Description:
+	///		Only one connection ID should be assigned to Receiver.
+	///
+	void IssueLogger::errALC5161(QUuid itemUuid, QString schemaID, QString moduleID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5161, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5161,
+				  QString(tr("Receiver has more then one connections ID (Schema %1, module %2)")).
+					arg(schemaID).arg(moduleID));
+	}
 
 	//
 

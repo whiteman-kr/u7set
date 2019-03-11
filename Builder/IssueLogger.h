@@ -231,7 +231,7 @@ namespace Builder
 		void errALC5015(QString appSignalID);									// Analog signal %1 must have DataSize equal to 32.
 		void errALC5016(QString appSignalID);									// Application signal identifier %1 is not unique.
 		void errALC5017(QString appSignalID);									// Custom application signal identifier %1 is not unique.
-		void errALC5018(QString port1, QString port2, QString connection);			// Opto ports %1 and %2 are not compatible (connection %3).
+		void errALC5018(QString port1, QString port2, QString );			// Opto ports %1 and %2 are not compatible (connection %3).
 		void errALC5019(QString port, QString connection1, QString connection2);	// Opto port %1 of connection %2 is already used in connection %3.
 		void errALC5020(QString port, QString connection);							// LM's port %1 can't work in RS232/485 mode (connection %2).
 		void errALC5021(QString port, QString connection);							// Undefined opto port %1 in the connection %2.
@@ -369,6 +369,9 @@ namespace Builder
 		void errALC5156(QString validitySignalID, QString inputSignalID);				// Linked validity signal %1 shoud have Discrete Input type (input signal %2).
 		void errALC5157(QString appSignalID);											// Analog signal %1 aperture should be less then 100.
 		void errALC5158(QString fbCaption, QString param1, QString param2, QUuid itemUuid, QString schemaID, QString itemLabel);			// Value of parameter %1.%2 must be greater or equal then the value of %1.%3.
+		void errALC5159(QUuid itemUuid, QString schemaID, QString moduleID);			// Receiver has no connection ID (Schema %1, module %2)
+		void errALC5160(QUuid itemUuid, QString schemaID, QString moduleID);			// Transmitter has no connection ID (Schema %1, module %2)
+		void errALC5161(QUuid itemUuid, QString schemaID, QString moduleID);			// Receiver has more then one connections ID (Schema %1, module %2)
 
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.
