@@ -1252,7 +1252,7 @@ namespace VFrame30
 							const SchemaItemConnection* connItem = item->toType<SchemaItemConnection>();
 							assert(connItem);
 
-							connections.insert(connItem->connectionId());
+							connections.insert(connItem->connectionIds());
 						}
 
 						if (item->isType<SchemaItemReceiver>() == true)

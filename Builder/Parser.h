@@ -8,6 +8,7 @@ class DbController;
 namespace Hardware
 {
 	class EquipmentSet;
+	class OptoModuleStorage;
 }
 
 namespace VFrame30
@@ -305,7 +306,7 @@ namespace Builder
 									std::shared_ptr<VFrame30::SchemaLayer> layer,
 									QString equipmentId);
 
-		bool filterSingleChannelBranchesInMulischema(std::shared_ptr<VFrame30::LogicSchema> schema, QString equipmnetId, BushContainer* bushContainer);
+		bool filterSingleChannelBranchesInMultiSchema(std::shared_ptr<VFrame30::LogicSchema> schema, QString equipmnetId, BushContainer* bushContainer);
 
 		bool findBushes(std::shared_ptr<VFrame30::Schema> schema,
 						std::shared_ptr<VFrame30::SchemaLayer> layer,
@@ -343,6 +344,7 @@ namespace Builder
 		Hardware::EquipmentSet* m_equipmentSet = nullptr;
 		SignalSet* m_signalSet = nullptr;
 		VFrame30::BusSet* m_busSet = nullptr;
+		Hardware::OptoModuleStorage* m_opticModuleStorage = nullptr;
 
 		RunOrder m_runOrder;
 	};

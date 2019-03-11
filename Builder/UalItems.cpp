@@ -1920,7 +1920,7 @@ namespace Builder
 			return QString();
 		}
 
-		return ualReceiver->connectionId();
+		return ualReceiver->connectionIds();
 	}
 
 	void UalSignal::setUalItem(const UalItem* ualItem)

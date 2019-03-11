@@ -172,7 +172,7 @@ namespace Builder
 		bool pass1();
 		bool pass2();
 
-		QString lmEquipmentID();
+		QString lmEquipmentID() const;
 		ResourcesUsageInfo resourcesUsageInfo() { return m_resourcesUsageInfo; }
 
 		bool expertMode() const;
@@ -224,6 +224,7 @@ namespace Builder
 		bool createUalSignalsFromReceiver(UalItem* ualItem);
 		bool createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& appSignalID);
 		bool createUalSignalFromReceiverValidity(UalItem* ualItem, const LogicPin& validityPin, const QString& validitySignalEquipmentID);
+		bool getReceiverConnectionID(const UalReceiver* receiver, QString* connectionID, const QString& schemaID);
 
 		bool createUalSignalFromSignal(UalItem* ualItem, int passNo);
 		bool createUalSignalFromConst(UalItem* ualItem);
@@ -524,7 +525,7 @@ namespace Builder
 		AppLogicData* m_appLogicData = nullptr;
 		AppLogicModule* m_moduleLogic = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
-		IssueLogger* m_log = nullptr;
+		mutable IssueLogger* m_log = nullptr;
 
 		const Hardware::DeviceModule* m_lm = nullptr;
 		const Hardware::DeviceChassis* m_chassis = nullptr;

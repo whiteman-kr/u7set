@@ -1109,9 +1109,13 @@ namespace Builder
 			}
 		}
 
-		m_context->m_opticModuleStorage = std::make_shared<Hardware::OptoModuleStorage>(m_context->m_equipmentSet.get(), m_context->m_fscDescriptions.get(), m_context->m_log);
+		m_context->m_opticModuleStorage = std::make_shared<Hardware::OptoModuleStorage>(m_context->m_equipmentSet.get(),
+																						m_context->m_fscDescriptions.get(),
+																						m_context->m_connections.get(),
+																						m_context->m_log);
+		bool res = m_context->m_opticModuleStorage->init();
 
-		return true;
+		return res;
 	}
 
 	// Check that all files (and from that theirs SchemaIds) in $root$/Schema are unique
