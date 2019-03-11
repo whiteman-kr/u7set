@@ -13,6 +13,8 @@
 #define LOG_WARNING1(type, code, message)	writeWarning1(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 #define LOG_WARNING2(type, code, message)	writeWarning2(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 
+#define LOG_INTERNAL_ERROR(logObject)	logObject->errALC5998(__FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_NULLPTR_ERROR(logObject)	logObject->errALC5997(__FILE__, __LINE__, Q_FUNC_INFO);
 
 namespace Builder
 {
@@ -389,7 +391,9 @@ namespace Builder
 		void wrnALC5193(QString appSignalID, QString portID, QString connectionID);		// Rx signal %1 specified in port %2 raw data description isn't assigned to receiver (Connection %3).
 		void wrnALC5194(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 with manual settings are overlapped.
 
-		void errALC5999(QString compilationProcedureName);			// %1 has been finished with errors.
+		void errALC5997(QString fileName, int lineNo, QString functionName);			// Null pointer occurred! File: %1 Line: %2 Function: %3
+		void errALC5998(QString fileName, int lineNo, QString functionName);			// Internal error! File: %1 Line: %2 Function: %3
+		void errALC5999(QString compilationProcedureName);								// %1 has been finished with errors.
 
 		// EQP			Equipment issues						6000-6999
 		//

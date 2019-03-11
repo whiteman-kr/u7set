@@ -6254,6 +6254,50 @@ namespace Builder
 						arg(port1ID).arg(port2ID));
 	}
 
+	/// IssueCode: ALC5997
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Null pointer occurred! File: %1 Line: %2 Function: %3
+	///
+	/// Parameters:
+	///		%1 source file name
+	///		%2 source line number
+	///		%3 function name
+	///
+	/// Description:
+	///		Null pointer occurred in specified function. Contact to th RPCT developers.
+	///
+	void IssueLogger::errALC5997(QString fileName, int lineNo, QString functionName)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5997,
+				  QString(tr(" Null pointer occurred! File: %1 Line: %2 Function: %3")).
+								arg(fileName).arg(lineNo).arg(functionName));
+	}
+
+	/// IssueCode: ALC5998
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Internal error! File: %1 Line: %2 Function: %3
+	///
+	/// Parameters:
+	///		%1 source file name
+	///		%2 source line number
+	///		%3 function name
+	///
+	/// Description:
+	///		Internal error in specified function. Contact to th RPCT developers.
+	///
+	void IssueLogger::errALC5998(QString fileName, int lineNo, QString functionName)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5998,
+				  QString(tr("Internal error! File: %1 Line: %2 Function: %3")).
+								arg(fileName).arg(lineNo).arg(functionName));
+	}
+
 	/// IssueCode: ALC5999
 	///
 	/// IssueType: Error
