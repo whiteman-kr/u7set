@@ -31,7 +31,6 @@ void QTextEditCompleter::setCompleter(QCompleter* completer)
 
 	m_completer->setWidget(this);
 	m_completer->setCompletionMode(QCompleter::PopupCompletion);
-	//m_completer->setCaseSensitivity(Qt::CaseInsensitive);
 	QObject::connect(m_completer, SIGNAL(activated(QString)),
                      this, SLOT(insertCompletion(QString)));
 }
