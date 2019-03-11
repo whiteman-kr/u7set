@@ -736,7 +736,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setMeasureID(query.value(field++).toInt());
 
 					measure->setFilter(query.value(field++).toBool());
-					measure->setValid(query.value(field++).toBool());
+					measure->setSignalValid(query.value(field++).toBool());
 
 					measure->setAppSignalID(query.value(field++).toString());
 					measure->setCustomAppSignalID(query.value(field++).toString());
@@ -1051,7 +1051,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->measureID());
 
 					query.bindValue(field++, measure->filter());
-					query.bindValue(field++, measure->isValid());
+					query.bindValue(field++, measure->isSignalValid());
 
 					query.bindValue(field++, measure->appSignalID());
 					query.bindValue(field++, measure->customAppSignalID());
