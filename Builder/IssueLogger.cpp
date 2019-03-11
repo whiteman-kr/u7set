@@ -2410,6 +2410,62 @@ namespace Builder
 				  .arg(schemaItem));
 	}
 
+	/// IssueCode: ALP4150
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Schema item (%1) has connection(s) (%2) which is not accessible in logic schema's (%3) associated LM(s): %4.
+	///
+	/// Parameters:
+	///		%1 SchemaItem description
+	///		%2 Ñonnection ID
+	///		%3 Logic schema ID
+	///		%4 Logic module EquipmentID(s)
+	///
+	/// Description:
+	///		Connection item (Transmitter or Receiver) has connection(s) which is not accessible in logic schema's associated LM(s).
+	///
+	void IssueLogger::errALP4150(QString schema, QString schemaItem, QString connectionId, QString equipmentsIds, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4150, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4150,
+				  QString(tr("Schema item (%1) has connection(s) (%2) which is not accessible in logic schema's (%3) associated LM(s): %4."))
+						.arg(schemaItem)
+						.arg(connectionId)
+						.arg(schema)
+						.arg(equipmentsIds));
+	}
+
+	/// IssueCode: ALP4151
+	///
+	/// IssueType: Error
+	///
+	/// Title:		Receiver must have the only ConnectionID per channel, LogicSchemaID: %1, Receiver Item: %2, ConnectionIDs: %3, EquipmentID %4.
+	///
+	/// Parameters:
+	///		%1 Logic Schema ID
+	///		%2 Receiver item description
+	///		%3 ConnectionIDs
+	///		%4 Channel EquipmentID(s)
+	///
+	/// Description:
+	///		Receiver must have the only ConnectionID per channel.
+	///
+	void IssueLogger::errALP4151(QString schema, QString receiverItem, QString connectionIds, QString equipmentsId, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4151, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4151,
+				  QString(tr("Receiver must have the only ConnectionID per channel, LogicSchemaID: %1, Receiver Item: %2, ConnectionIDs: %3, EquipmentID %4."))
+						.arg(schema)
+						.arg(receiverItem)
+						.arg(connectionIds)
+						.arg(equipmentsId));
+	}
+
 
 	// ALC			Application logic compiler				5000-5999
 	//
@@ -2912,7 +2968,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Opto ports of the same chassis is linked via connection %1.
+	/// Title: Opto ports of the same chassis are linked via connection %1.
 	///
 	/// Parameters:
 	///		%1 Connection ID

@@ -16,6 +16,7 @@
 #include "../VFrame30/SchemaItemBus.h"
 #include "../VFrame30/SchemaItemTerminator.h"
 #include "../VFrame30/SchemaItemLoopback.h"
+#include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/HorzVertLinks.h"
 #include "../VFrame30/PropertyNames.h"
 
@@ -2364,7 +2365,8 @@ namespace Builder
 		m_lmDescriptions(context->m_lmDescriptions.get()),
 		m_equipmentSet(context->m_equipmentSet.get()),
 		m_signalSet(context->m_signalSet.get()),
-		m_busSet(context->m_busSet.get())
+		m_busSet(context->m_busSet.get()),
+		m_opticModuleStorage(context->m_opticModuleStorage.get())
 	{
 		assert(m_db);
 		assert(m_log);
@@ -2372,6 +2374,8 @@ namespace Builder
 		assert(m_lmDescriptions);
 		assert(m_equipmentSet);
 		assert(m_signalSet);
+		assert(m_busSet);
+		assert(m_opticModuleStorage);
 
 		return;
 	}
@@ -2390,14 +2394,16 @@ namespace Builder
 		//
 		std::vector<std::shared_ptr<VFrame30::UfbSchema>> ufbs;
 
-		bool ok = loadUfbFiles(db(), &ufbs);
-		if (ok == false)
+		if (bool ok = loadUfbFiles(db(), &ufbs);
+			ok == false)
 		{
 			return ok;
 		}
 
 		// Check if some LmDescripnFiles were not loaded
 		//
+		bool ok = true;
+
 		for (std::shared_ptr<VFrame30::UfbSchema> schema : ufbs)
 		{
 			if (m_lmDescriptions->has(schema->lmDescriptionFile()) == false)
@@ -2415,16 +2421,16 @@ namespace Builder
 
 		// Check for the same lables in ufbs
 		//
-		ok = checkSameLabelsAndGuids(ufbs);
-		if (ok == false)
+		if (ok = checkSameLabelsAndGuids(ufbs);
+			ok == false)
 		{
 			result = false;
 		}
 
 		// Check for the same inputs and outputs in ufbs
 		//
-		ok = checkSameInputsAndOutputs(ufbs);
-		if (ok == false)
+		if (ok = checkSameInputsAndOutputs(ufbs);
+			ok == false)
 		{
 			// Continuing with this error will lead us to the error like
 			// ERR INT1001: Internal exception: Please, report to developers: Checking items relations consistency error: .....
@@ -3743,59 +3749,86 @@ namespace Builder
 	{
 		if (logicSchema == nullptr ||
 			layer == nullptr ||
-			m_signalSet == nullptr)
+			m_signalSet == nullptr ||
+			m_opticModuleStorage == nullptr)
 		{
 			assert(logicSchema);
 			assert(layer);
 			assert(m_signalSet);
+			assert(m_opticModuleStorage);
 			return false;
 		}
 
 		QStringList equipmentIds = logicSchema->equipmentIdList();
 
 		// Check if all signal elements are from related Logic Module
+		// Check if all connection elements are from related Logic Module
 		//
 		bool alienLmIds = false;
 		for (std::shared_ptr<VFrame30::SchemaItem>& item : layer->Items)
 		{
-			if (item->isType<VFrame30::SchemaItemSignal>() == false)
+			// Checking signals
+			//
+			if (VFrame30::SchemaItemSignal* signalItem = item->toType<VFrame30::SchemaItemSignal>();
+				signalItem != nullptr)
 			{
-				// Checking only signals
-				//
+				const QStringList& itemSignals = signalItem->appSignalIdList();
+
+				for (const QString& appSignalId : itemSignals)
+				{
+					Signal* appSignal = m_signalSet->getSignal(appSignalId);
+
+					if (appSignal == nullptr)
+					{
+						alienLmIds = true;
+						m_log->errALP4134(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
+						continue;
+					}
+
+					if (appSignal->lm() == nullptr)
+					{
+						alienLmIds = true;
+						m_log->errALP4135(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
+						continue;
+					}
+
+					if (equipmentIds.contains(appSignal->lm()->equipmentId()) == false)
+					{
+						alienLmIds = true;
+						m_log->errALP4136(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
+						continue;
+					}
+				}
+
 				continue;
 			}
 
-			VFrame30::SchemaItemSignal* signalItem = item->toType<VFrame30::SchemaItemSignal>();
-			assert(signalItem);
-
-			const QStringList& itemSignals = signalItem->appSignalIdList();
-
-			for (const QString& appSignalId : itemSignals)
+			// Checking connections, if connection does not belong to one of LM's the emit error
+			//
+			if (VFrame30::SchemaItemConnection* connectionItem = item->toType<VFrame30::SchemaItemConnection>();
+				connectionItem != nullptr)
 			{
-				Signal* appSignal = m_signalSet->getSignal(appSignalId);
+				const QStringList& connectionIds = connectionItem->connectionIdsAsList();
 
-				if (appSignal == nullptr)
+				for (const QString& connectionId : connectionIds)
 				{
-					alienLmIds = true;
-					m_log->errALP4134(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
-					continue;
+					bool found = false;
+					for (const QString& equipmentId : equipmentIds)
+					{
+						found |= m_opticModuleStorage->isConnectionAccessible(equipmentId, connectionId);
+					}
+
+					if (found == false)
+					{
+						// Connection id is not accessible from any of the LMs
+						//
+						m_log->errALP4150(logicSchema->schemaId(), connectionItem->buildName(), connectionId, equipmentIds.join(", "), connectionItem->guid());
+					}
 				}
 
-				if (appSignal->lm() == nullptr)
-				{
-					alienLmIds = true;
-					m_log->errALP4135(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
-					continue;
-				}
-
-				if (equipmentIds.contains(appSignal->lm()->equipmentId()) == false)
-				{
-					alienLmIds = true;
-					m_log->errALP4136(logicSchema->schemaId(), signalItem->buildName(), appSignalId, signalItem->guid());
-					continue;
-				}
+				continue;
 			}
-		}
+		} // for fro checking Signals and Connenctions -> LM(s)
 
 		if (alienLmIds == true)
 		{
@@ -3807,9 +3840,9 @@ namespace Builder
 		// Serializae layer, so it can be restored for each equipmentId
 		//
 		QByteArray layerData;
-		if (equipmentIds.size() > 1)
+		if (equipmentIds.size() > 1)			// If there is only one equipmentId, dont serialize it, just use the existing layer
 		{
-			layer->saveToByteArray(&layerData);		// If there is only one equipmentId, dont serialize it, just use the existing layer
+			layer->saveToByteArray(&layerData);
 		}
 
 		// Parse layer for each LM
@@ -3836,8 +3869,6 @@ namespace Builder
 			// Find all branches - connected links
 			//
 			bool result = true;
-
-			//BushContainer bushContainer;
 			std::shared_ptr<BushContainer> bushContainer = std::make_shared<BushContainer>();
 
 			if (logicSchema->isMultichannelSchema() == true)
@@ -3885,13 +3916,12 @@ namespace Builder
 			//
 			if (logicSchema->isMultichannelSchema() == true)
 			{
-				filterSingleChannelBranchesInMulischema(logicSchema, equipmentId, bushContainer.get());
+				filterSingleChannelBranchesInMultiSchema(logicSchema, equipmentId, bushContainer.get());
 			}
 
 			// Generate afb list, and set it to some container
 			//
 			readyParseDataContainer->add(equipmentId, bushContainer, logicSchema);
-			//applicationData()->addLogicModuleData(equipmentId, bushContainer, logicSchema, m_log);
 		}
 
 		return true;
@@ -3903,11 +3933,13 @@ namespace Builder
 	{
 		if (schema == nullptr ||
 			layer == nullptr ||
-			m_signalSet == nullptr)
+			m_signalSet == nullptr ||
+			m_opticModuleStorage == nullptr)
 		{
 			assert(schema);
 			assert(layer);
 			assert(m_signalSet);
+			assert(m_opticModuleStorage);
 
 			m_log->errINT1000(QString(__FUNCTION__) + QString(", schema %1, layer %2, m_signalSet %3.")
 							  .arg(reinterpret_cast<size_t>(schema.get()))
@@ -3945,74 +3977,117 @@ namespace Builder
 
 		for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
 		{
-			VFrame30::SchemaItemSignal* signalItem = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
-
-			if (signalItem == nullptr)
+			// Filter signals
+			//
+			if (VFrame30::SchemaItemSignal* signalItem = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
+				signalItem != nullptr)
 			{
-				continue;
-			}
+				QStringList appSignalIds = signalItem->appSignalIdList();
 
-			QStringList appSignalIds = signalItem->appSignalIdList();
-
-			if (appSignalIds.size() == 1)
-			{
-				continue;
-			}
-
-			if (appSignalIds.size() == schema->channelCount())
-			{
-				// Get correct SignalID
-				//
-				const QStringList& signalIds = signalItem->appSignalIdList();
-
-				QString signalId = signalIds[signalIndexInBlocks];
-
-				signalItem->setAppSignalIds(signalId);
-
-				// Check that all signals belongs to appropriate LM
-				//
-				Signal* appSignal = m_signalSet->getSignal(signalId);
-
-				if (appSignal == nullptr)
+				if (appSignalIds.size() == 1)
 				{
-					result = false;
-					m_log->errALP4134(schema->schemaId(), signalItem->buildName(), signalId, signalItem->guid());
 					continue;
 				}
 
-				if (appSignal->lm() == nullptr)
+				if (appSignalIds.size() == schema->channelCount())
 				{
-					result = false;
-					m_log->errALP4135(schema->schemaId(), signalItem->buildName(), signalId, signalItem->guid());
+					// Get correct SignalID
+					//
+					const QStringList& signalIds = signalItem->appSignalIdList();
+
+					QString signalId = signalIds[signalIndexInBlocks];
+
+					signalItem->setAppSignalIds(signalId);
+
+					// Check that all signals belongs to appropriate LM
+					//
+					Signal* appSignal = m_signalSet->getSignal(signalId);
+
+					if (appSignal == nullptr)
+					{
+						result = false;
+						m_log->errALP4134(schema->schemaId(), signalItem->buildName(), signalId, signalItem->guid());
+						continue;
+					}
+
+					if (appSignal->lm() == nullptr)
+					{
+						result = false;
+						m_log->errALP4135(schema->schemaId(), signalItem->buildName(), signalId, signalItem->guid());
+						continue;
+					}
+
+					if (appSignal->lm()->equipmentId() != equipmentId)
+					{
+						result = false;
+						m_log->errALP4137(schema->schemaId(), signalItem->buildName(), signalId, equipmentId, signalItem->guid());
+						continue;
+					}
+
 					continue;
 				}
-
-				if (appSignal->lm()->equipmentId() != equipmentId)
+				else
 				{
+					// Multichannel signal block must have the same number of AppSignalIDs as schema's channel number (number of schema's EquipmentIDs), Logic Schema %1, item %2.
+					//
 					result = false;
-					m_log->errALP4137(schema->schemaId(), signalItem->buildName(), signalId, equipmentId, signalItem->guid());
+					m_log->errALP4131(schema->schemaId(), signalItem->buildName(), signalItem->guid());
 					continue;
 				}
-
-				continue;
 			}
-			else
+
+			// Filter connections
+			//
+			if (VFrame30::SchemaItemConnection* connectionItem = dynamic_cast<VFrame30::SchemaItemConnection*>(item.get());
+				connectionItem != nullptr)
 			{
-				// Multichannel signal block must have the same number of AppSignalIDs as schema's channel number (number of schema's EquipmentIDs), Logic Schema %1, item %2.
+				QStringList connectionIds = connectionItem->connectionIdsAsList();
+
+				if (connectionIds.size() == 1)
+				{
+					continue;
+				}
+
+				// Get correct ConnectionID
 				//
-				result = false;
-				m_log->errALP4131(schema->schemaId(), signalItem->buildName(), signalItem->guid());
+				QStringList accessibleConnectionIds;
+
+				for (const QString& connectionId : connectionIds)
+				{
+					bool accessible = m_opticModuleStorage->isConnectionAccessible(equipmentId, connectionId);
+
+					if (accessible == true)
+					{
+						accessibleConnectionIds.push_back(connectionId);
+					}
+				}
+
+				connectionItem->setConnectionIdsAsList(accessibleConnectionIds);
+
+				if (accessibleConnectionIds.isEmpty() == true)
+				{
+					// Connection id is not accessible from any of the LMs
+					//
+					m_log->errALP4150(schema->schemaId(), connectionItem->buildName(), connectionIds.join(", "), equipmentId, connectionItem->guid());
+					continue;
+				}
+
+				// Receiver can have the only connection id per channel
+				//
+				if (VFrame30::SchemaItemReceiver* receiverItem = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+					receiverItem != nullptr && accessibleConnectionIds.size() != 1)
+				{
+					m_log->errALP4151(schema->schemaId(), receiverItem->buildName(), accessibleConnectionIds.join(", "), equipmentId, receiverItem->guid());
+				}
+
 				continue;
 			}
-
-			assert(false);
-			result = false;
 		}
 
 		return result;
 	}
 
-	bool Parser::filterSingleChannelBranchesInMulischema(std::shared_ptr<VFrame30::LogicSchema> schema,
+	bool Parser::filterSingleChannelBranchesInMultiSchema(std::shared_ptr<VFrame30::LogicSchema> schema,
 														 QString equipmentId,
 														 BushContainer* bushContainer)
 	{
@@ -4132,11 +4207,11 @@ namespace Builder
 
 			if (allSignalsFromThisChannel == true)
 			{
-				// Add this bushAcc ti result bush container
+				// Add this bushAcc to result bush container
 				//
-				for (const Bush& ac : bushAcc)
+				for (Bush& ac : bushAcc)
 				{
-					bushContainer->bushes.push_back(ac);
+					bushContainer->bushes.push_back(std::move(ac));
 				}
 			}
 		}
