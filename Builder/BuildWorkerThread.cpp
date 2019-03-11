@@ -310,12 +310,15 @@ namespace Builder
 			//
 			// Write logic, configuration and tuning binary files
 			//
-			ok = writeBinaryFiles(*m_context->m_buildResultWriter);
-
-			if (ok == false ||
-				QThread::currentThread()->isInterruptionRequested() == true)
+			if (m_log->errorCount() == 0)
 			{
-				break;
+				ok = writeBinaryFiles(*m_context->m_buildResultWriter);
+
+				if (ok == false ||
+						QThread::currentThread()->isInterruptionRequested() == true)
+				{
+					break;
+				}
 			}
 
 			ok = cfgBuilder.writeDataFiles(*m_context->m_buildResultWriter);

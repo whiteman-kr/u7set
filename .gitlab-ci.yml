@@ -87,6 +87,8 @@ windows build job:
     - "mkdir \"%CI_PROJECT_DIR%/bin/release/sqldrivers\""
     - "copy C:\\Qt\\5.12.0\\msvc2017_64\\plugins\\sqldrivers\\qsqlpsql.dll \"%CI_PROJECT_DIR%/bin/release/sqldrivers/\""
     - "copy C:\\Qt\\5.12.0\\msvc2017_64\\plugins\\sqldrivers\\qsqlpsql.dll \"%CI_PROJECT_DIR%/bin/release/\""
+    - "mkdir \"%CI_PROJECT_DIR%/bin/release/printsupport\""
+    - "copy C:\\Qt\\5.12.0\\msvc2017_64\\plugins\\printsupport\\windowsprintersupport.dll \"%CI_PROJECT_DIR%/bin/release/printsupport/\""
 
 #Run unit tests
     - "echo ----------------------------------------------"

@@ -52,6 +52,14 @@ QString ArchRequestParam::print()
 
 std::atomic<quint32> Archive::m_nextRequestID = { 1 };
 
+const int Archive::MIN_SHORT_TERM_PERIOD_DAYS;
+
+const int Archive::MIN_MAINTENANCE_DELAY_MINUTES;
+const int Archive::MAX_MAINTENANCE_DELAY_MINUTES;
+
+const int Archive::MIN_QUEUE_SIZE_FOR_FLUSHING;
+const int Archive::MAX_QUEUE_SIZE_FOR_FLUSHING;
+
 QString Archive::formatTime(qint64 time)
 {
 	return QDateTime::fromMSecsSinceEpoch(time, Qt::TimeSpec::UTC).toString("yyyy-MM-dd HH:mm:ss");
