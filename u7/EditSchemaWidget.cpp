@@ -6781,19 +6781,24 @@ void EditSchemaWidget::f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item)
 
 	QString preDrawScriptTemplateString = R"((function(schemaItemValue)
 {
-  // var appSignalId = schemaItemValue.SignalIDs[0];
-  // var signalParamFromAppDataService = signals.signalParam(appSignalId);
-  // var signalParamFromTuningService = tuning.signalParam(appSignalId);
-  // var signalStateFromAppDataService = signals.signalState(appSignalId);
-  // var signalStateFromTuningService = tuning.signalState(appSignalId);
+	// var appSignalId = schemaItemValue.SignalIDs[0];
 
-  // if (SchemaItemValue.SignalIDs[0].Valid == true)
-  // {
-  //		SchemaItemValue.Text = "Text";
-  //		SchemaItemValue.TextColor = "white";
-  //		SchemaItemValue.FillColor = "blue";
-  //		SchemaItemValue.LineColor = "black";
-  // }
+	// Get data from AppDataService
+	// var signalParam = signals.signalParam(appSignalId);
+	// var signalState = signals.signalState(appSignalId);
+
+	// Get data from TuningService
+	// var signalParam = tuning.signalParam(appSignalId);
+	// var signalState = tuning.signalState(appSignalId);
+
+	// Get signal state
+	// if (signalState.Valid == true)
+	// {
+	//		schemaItemValue.Text = signalState.Value;
+	//		schemaItemValue.TextColor = "white";
+	//		schemaItemValue.FillColor = "blue";
+	//		schemaItemValue.LineColor = "#000000";
+	// }
 }))";
 
 	connect(preDrawScriptTemplate, &QPushButton::clicked, &d, [preDrawScriptEdit, preDrawScriptTemplateString](){preDrawScriptEdit->setText(preDrawScriptTemplateString);});
@@ -6803,6 +6808,10 @@ void EditSchemaWidget::f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item)
 
 	// --
 	//
+	int width = QSettings().value("f2KeyForValue\\width").toInt();
+	int height = QSettings().value("f2KeyForValue\\height").toInt();
+	d.resize(width, height);
+
 	int result = d.exec();
 
 	if (result == QDialog::Accepted)
@@ -6826,6 +6835,9 @@ void EditSchemaWidget::f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item)
 			}
 		}
 	}
+
+	QSettings().setValue("f2KeyForValue\\width", d.width());
+	QSettings().setValue("f2KeyForValue\\height", d.height());
 
 	return;
 }
