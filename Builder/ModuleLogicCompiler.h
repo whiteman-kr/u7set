@@ -142,6 +142,7 @@ namespace Builder
 			//
 			QString ID;
 			const UalItem* source = nullptr;
+			bool isAutoLoopback = false;
 
 			// params will be filled during loopbackPreprocessing
 			//
@@ -156,6 +157,8 @@ namespace Builder
 
 			bool isConnected(const LogicPin& pin) const;
 			bool isConnected(const QString& signalID) const;
+			
+			static QString getAutoLoopbackID(const UalItem* ualItem, const LogicPin& outputPin);
 		};
 
 	public:
@@ -199,6 +202,10 @@ namespace Builder
 		bool writeUalItemsFile();
 
 		bool loopbacksPreprocessing();
+		bool findAutoLoopbacks();
+		void getInputsDirectlyConnectedToOutput(const UalItem* ualItem,
+										const LogicPin& output,
+										QVector<QUuid>* connectedInputsGuids);
 		bool findLoopbackSources();
 		bool findLoopbackTargets();
 		bool findSignalsAndPinsLinkedToLoopbackTargets();

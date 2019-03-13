@@ -31,6 +31,17 @@ namespace Builder
 		return linkedSignals.contains(signalID);
 	}
 
+	QString ModuleLogicCompiler::Loopback::getAutoLoopbackID(const UalItem* ualItem, const LogicPin& outputPin)
+	{
+		if (ualItem == nullptr)
+		{
+			assert(false);
+			return QString();
+		}
+
+		return QString("AUTO_LOOPBACK_%1_%2").arg(ualItem->label()).arg(outputPin.caption().toUpper());
+	}
+
 	// ---------------------------------------------------------------------------------
 	//
 	//	ModuleLogicCompiler class implementation
@@ -101,7 +112,7 @@ namespace Builder
 
 		if (m_chassis == nullptr)
 		{
-			msg = QString(tr("LM %1 must be installed in the chassis!")).arg(lmEquipmentID());
+			msg = QString(tr("LM %1 must be placed in the chassis!")).arg(lmEquipmentID());
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
 			return false;
 		}
@@ -829,6 +840,10 @@ namespace Builder
 	{
 		bool result = true;
 
+		result = findAutoLoopbacks();
+
+		RETURN_IF_FALSE(result);
+
 		result = findLoopbackSources();
 
 		RETURN_IF_FALSE(result);
@@ -840,6 +855,112 @@ namespace Builder
 		result = findSignalsAndPinsLinkedToLoopbackTargets();
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::findAutoLoopbacks()
+	{
+		bool result = true;
+
+		QVector<UalItem*> createdItems;
+
+		for(UalItem* ualItem : m_ualItems)
+		{
+			TEST_PTR_CONTINUE(ualItem);
+
+			if (ualItem->isAfb() == false)
+			{
+				continue;
+			}
+
+			std::vector<LogicPin>& outputs = ualItem->outputs();
+
+			for(LogicPin& output : outputs)
+			{
+				QVector<QUuid> connectedInputsGuids;
+
+				getInputsDirectlyConnectedToOutput(ualItem, output, &connectedInputsGuids);
+
+				if (connectedInputsGuids.isEmpty() == true)
+				{
+					continue;
+				}
+
+				QString loopbackID = Loopback::getAutoLoopbackID(ualItem, output);
+
+				// LoopbackSource creation
+				//
+				std::shared_ptr<UalLoopbackSource> loopbackSource = std::make_shared<UalLoopbackSource>();
+				loopbackSource->setLoopbackId(loopbackID);
+
+				UalItem* newUalItem = new UalItem(AppLogicItem(loopbackSource, ualItem->schema()));
+				createdItems.append(newUalItem);
+				m_pinParent.insert(loopbackSource->inputs()[0].guid(), newUalItem);
+
+				// link ualItem output and loopback source input to each other
+				//
+				output.AddAssociattedIOs(loopbackSource->inputs()[0].guid());
+				loopbackSource->inputs()[0].AddAssociattedIOs(output.guid());
+
+				// LoopbackTargets creation
+				//
+				for(const QUuid& inputGuid : connectedInputsGuids)
+				{
+					LogicPin& input = ualItem->input(inputGuid);
+
+					// break output to input link
+					//
+					output.removeFromAssociatedIo(input.guid());
+					input.removeFromAssociatedIo(output.guid());
+
+					// LoopbackTarget creation
+					//
+					std::shared_ptr<UalLoopbackTarget> loopbackTarget = std::make_shared<UalLoopbackTarget>();
+					loopbackTarget->setLoopbackId(loopbackID);
+
+					UalItem* newUalItem = new UalItem(AppLogicItem(loopbackTarget, ualItem->schema()));
+					createdItems.append(newUalItem);
+					m_pinParent.insert(loopbackTarget->outputs()[0].guid(), newUalItem);
+
+					// link loopback target output and ualItem input to each other
+					//
+					loopbackTarget->outputs()[0].AddAssociattedIOs(input.guid());
+					input.AddAssociattedIOs(loopbackTarget->outputs()[0].guid());
+				}
+			}
+		}
+
+		for(UalItem* createItem : createdItems)
+		{
+			m_ualItems.insert(createItem->guid(), createItem);
+		}
+
+		return result;
+	}
+
+	void ModuleLogicCompiler::getInputsDirectlyConnectedToOutput(const UalItem* ualItem,
+														 const LogicPin& output,
+														 QVector<QUuid>* connectedInputsGuids)
+	{
+		TEST_PTR_RETURN(ualItem);
+		TEST_PTR_RETURN(connectedInputsGuids);
+
+		const std::vector<QUuid>& associatedIOsGuids = output.associatedIOs();
+
+		for(const QUuid& pinGuid : associatedIOsGuids)
+		{
+			UalItem* pinParent = m_pinParent.value(pinGuid, nullptr);
+
+			if (pinParent == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (pinParent == ualItem)
+			{
+				connectedInputsGuids->append(pinGuid);
+			}
+		}
 	}
 
 	bool ModuleLogicCompiler::findLoopbackSources()
@@ -5963,6 +6084,11 @@ namespace Builder
 				LOG_INTERNAL_ERROR(m_log);
 				result = false;
 				continue;
+			}
+
+			if (lbSignal->isConst() == true)
+			{
+				continue;			// for const signals refreshing code is not required
 			}
 
 			if (lbSignal->ualAddr().isValid() == false)
