@@ -840,7 +840,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		result = findAutoLoopbacks();
+		result = findAndProcessSingleItemLoopbacks();
 
 		RETURN_IF_FALSE(result);
 
@@ -857,7 +857,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::findAutoLoopbacks()
+	bool ModuleLogicCompiler::findAndProcessSingleItemLoopbacks()
 	{
 		bool result = true;
 

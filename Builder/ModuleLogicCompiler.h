@@ -202,7 +202,7 @@ namespace Builder
 		bool writeUalItemsFile();
 
 		bool loopbacksPreprocessing();
-		bool findAutoLoopbacks();
+		bool findAndProcessSingleItemLoopbacks();
 		void getInputsDirectlyConnectedToOutput(const UalItem* ualItem,
 										const LogicPin& output,
 										QVector<QUuid>* connectedInputsGuids);
@@ -590,12 +590,6 @@ namespace Builder
 		QHash<QString, Loopback*> m_loopbacks;
 		QHash<QString, Loopback*> m_signalsToLoopbacks;
 		QHash<QUuid, Loopback*> m_pinsToLoopbacks;
-
-		//
-//		QHash<QString, UalItem*> m_loopbackSources;
-//		QHash<QString, QVector<UalItem*>> m_loopbackConnectedSignals;
-//		QHash<QString, UalSignal*> m_loopbackSignals;					// loopbackID => loopback ualSignal
-//		QHash<QString, QString> m_signalsToLoopbacks;					// appSignalID => loopbackID
 
 		QVector<UalSignal*> m_acquiredDiscreteInputSignals;				// acquired discrete input signals, no matter used in UAL or not
 		QVector<UalSignal*> m_acquiredDiscreteStrictOutputSignals;		// acquired discrete strict output signals, used in UAL
