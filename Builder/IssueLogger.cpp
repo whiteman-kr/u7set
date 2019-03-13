@@ -1329,7 +1329,7 @@ namespace Builder
 
 	/// IssueCode: CFG3031
 	///
-	/// IssueType: Error
+	/// IssueType: Warning
 	///
 	/// Title: Property %1.%2 should be set to the valid writable catalog of workstation.
 	///
@@ -1340,9 +1340,9 @@ namespace Builder
 	/// Description:
 	///			Archive location is not assigned.
 	///
-	void IssueLogger::errCFG3031(QString objectID, QString propertyName)
+	void IssueLogger::wrnCFG3031(QString objectID, QString propertyName)
 	{
-		LOG_ERROR(IssueType::FscConfiguration,
+		LOG_WARNING0(IssueType::FscConfiguration,
 				  3031,
 				  tr("Property %1.%2 should be set to the valid writable catalog of workstation.")
 				  .arg(objectID)
@@ -5391,7 +5391,7 @@ namespace Builder
 	///		%2 Schema item label
 	///
 	/// Description:
-	///		Application signal with specified equipmentID is not found.
+	///		Integer constant value out of range. Check constant value.
 	///
 	void IssueLogger::errALC5134(QUuid ualItemUuid, QString itemLabel, QString schemaID)
 	{
@@ -5416,7 +5416,7 @@ namespace Builder
 	///		%2 Schema item label
 	///
 	/// Description:
-	///		Application signal with specified equipmentID is not found.
+	///		Float constant value out of range. Check constant value.
 	///
 	void IssueLogger::errALC5135(QUuid ualItemUuid, QString itemLabel, QString schemaID)
 	{
@@ -5429,7 +5429,6 @@ namespace Builder
 						arg(std::numeric_limits<float>::max()).
 						arg(schemaID).arg(itemLabel));
 	}
-
 
 	/// IssueCode: ALC5136
 	///

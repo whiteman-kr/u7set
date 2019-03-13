@@ -156,7 +156,7 @@ namespace Builder
 		void errCFG3028(QString signalID1, QString signalID2, QString module, QString propertyName);
 		void errCFG3029(QString softwareID);												// Software %1 is not linked to ConfigurationService.
 		void errCFG3030(QString lmID, QString appDataServiceID);							// Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.		
-		void errCFG3031(QString objectID, QString propertyName);							// Property %1.%2 should be set to the valid writable catalog of workstation.
+		void wrnCFG3031(QString objectID, QString propertyName);							// Property %1.%2 should be set to the valid writable catalog of workstation.
 
 		void errCFG3040(QString monitorId, QString tuningServiceId);				// Mode SingleLmControl is not supported by Monitor. Set TuningServiceID.SingleLmControl to false. Monitor EquipmentID %1, TuningServiceID %2.
 
