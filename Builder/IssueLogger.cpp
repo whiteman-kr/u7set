@@ -6055,6 +6055,46 @@ namespace Builder
 					arg(connectionID));
 	}
 
+	/// IssueCode: ALC5165
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Tuning is enabled for module %1 but tuningable signals is not found.
+	///
+	/// Parameters:
+	///		%1 LM's equipmentID
+	///
+	/// Description:
+	///		Tuning is enabled for specified module but tuningable signals is not found.
+	///
+	void IssueLogger::wrnALC5165(QString lmEquipmentID)
+	{
+		LOG_WARNING1(IssueType::AlCompiler,
+				  5165,
+				  QString(tr("Tuning is enabled for module %1 but tuningable signals is not found.")).
+					arg(lmEquipmentID));
+	}
+
+	/// IssueCode: ALC5166
+	///
+	/// IssueType: Error
+	///
+	/// Title: Tuningable signals is found in module %1 but tuning is not enabled.
+	///
+	/// Parameters:
+	///		%1 LM's equipmentID
+	///
+	/// Description:
+	///		Tuningable signals is found in specified module but tuning is not enabled.
+	///
+	void IssueLogger::errALC5166(QString lmEquipmentID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5166,
+				  QString(tr("Tuningable signals is found in module %1 but tuning is not enabled.")).
+					arg(lmEquipmentID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186

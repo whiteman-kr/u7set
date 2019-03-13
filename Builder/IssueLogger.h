@@ -380,6 +380,8 @@ namespace Builder
 		void errALC5162(QString connectionID);											// In single-port connection %1 Port2EquipmentID property is not empty.
 		void errALC5163(QString connectionID);											// Port1EquipmentID property is empty in connection %1.
 		void errALC5164(QString connectionID);											// Port2EquipmentID property is empty in connection %1.
+		void wrnALC5165(QString lmEquipmentID);											// Tuning is enabled for module %1 but tuningable signals is not found.
+		void errALC5166(QString lmEquipmentID);											// Tuningable signals is found in module %1 but tuning is not enabled.
 
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.

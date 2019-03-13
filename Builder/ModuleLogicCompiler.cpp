@@ -3224,6 +3224,36 @@ namespace Builder
 		bool result = true;
 
 		result &= tuningData->buildTuningSignalsLists(m_chassisSignals, m_log);
+
+		bool tuningEnabled = false;
+
+		bool res = isTuningEnabled(&tuningEnabled);
+
+		if (res == false)
+		{
+			return false;
+		}
+
+		if (tuningData->getSignalsCount() == 0)
+		{
+			if (tuningEnabled == true)
+			{
+				// Tuning is enabled for module %1 but tuningable signals is not found.
+				//
+				m_log->wrnALC5165(lmEquipmentID());
+			}
+		}
+		else
+		{
+			if (tuningEnabled == false)
+			{
+				// Tuningable signals is found in module %1 but tuning is not enabled.
+				//
+				m_log->errALC5166(lmEquipmentID());
+				result = false;
+			}
+		}
+
 		result &= tuningData->buildTuningData();
 
 		if (result == true)
@@ -3253,6 +3283,26 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::isTuningEnabled(bool* tuningEnabled)
+	{
+		QString suffix = QString(DataSource::LmEthernetAdapterProperties::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR).
+							arg(DataSource::LM_ETHERNET_ADAPTER1);
+
+		Hardware::DeviceController* adapter = DeviceHelper::getChildControllerBySuffix(m_lm, suffix, m_log);
+
+		if (adapter == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		bool res = DeviceHelper::getBoolProperty(adapter,
+												 DataSource::LmEthernetAdapterProperties::PROP_TUNING_ENABLE,
+												 tuningEnabled,
+												 m_log);
+		return res;
 	}
 
 	bool ModuleLogicCompiler::createSignalLists()
