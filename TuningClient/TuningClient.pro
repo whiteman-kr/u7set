@@ -106,7 +106,7 @@ SOURCES +=\
     ../lib/OutputLog.cpp \
     UserManager.cpp \
     DialogProperties.cpp \
-    ../lib/Ui/DialogTuningSourceInfo.cpp \
+    ../lib/Ui/DialogSourceInfo.cpp \
     DialogPassword.cpp \
     Main.cpp \
     ../lib/Tuning/TuningFilter.cpp \
@@ -167,7 +167,7 @@ HEADERS  += MainWindow.h \
     ../lib/OutputLog.h \
     UserManager.h \
     DialogProperties.h \
-    ../lib/Ui/DialogTuningSourceInfo.h \
+    ../lib/Ui/DialogSourceInfo.h \
     DialogPassword.h \
     Main.h \
     ../lib/Tuning/TuningFilter.h \
