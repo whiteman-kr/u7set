@@ -14,8 +14,7 @@ namespace VFrame30
 	SchemaItemValue::SchemaItemValue(void) :
 		SchemaItemValue(SchemaUnit::Inch)
 	{
-		// Вызов этого конструктора возможен при сериализации объектов такого типа.
-		// После этого вызова надо проинциализировать все, что и делается самой сериализацией.
+		// This constructor can called while serialization
 		//
 	}
 
@@ -23,49 +22,25 @@ namespace VFrame30
 	{
 		Property* p = nullptr;
 
+		// Functional
+		//
+		auto strIdProperty = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true, SchemaItemValue::signalIdsString, SchemaItemValue::setSignalIdsString);
+		strIdProperty->setValidator(PropertyNames::appSignalIDsValidator);
+
+		ADD_PROPERTY_GET_SET_CAT(E::SignalSource, PropertyNames::signalSource, PropertyNames::functionalCategory, true, SchemaItemValue::signalSource, SchemaItemValue::setSignalSource);
+
+		// Appearance
+		//
 		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemValue::lineWeight, SchemaItemValue::setLineWeight);
 
 		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemValue::lineColor, SchemaItemValue::setLineColor);
 		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColor, PropertyNames::appearanceCategory, true, SchemaItemValue::fillColor, SchemaItemValue::setFillColor)
+		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColor, PropertyNames::appearanceCategory, true, SchemaItemValue::textColor, SchemaItemValue::setTextColor);
 
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::drawRect, PropertyNames::appearanceCategory, true, SchemaItemValue::drawRect, SchemaItemValue::setDrawRect);
 
-		// Color Category
-		//
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorNonValid0, PropertyNames::colorCategory, true, SchemaItemValue::fillColorNonValid0, SchemaItemValue::setFillColorNonValid0);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorNonValid1, PropertyNames::colorCategory, true, SchemaItemValue::fillColorNonValid1, SchemaItemValue::setFillColorNonValid1);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorNonValid0, PropertyNames::colorCategory, true, SchemaItemValue::textColorNonValid0, SchemaItemValue::setTextColorNonValid0);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorNonValid1, PropertyNames::colorCategory, true, SchemaItemValue::textColorNonValid1, SchemaItemValue::setTextColorNonValid1);
-
-//		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorOverflow0, PropertyNames::colorCategory, true, SchemaItemValue::fillColorOverflow0, SchemaItemValue::setFillColorOverflow0);
-//		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorOverflow1, PropertyNames::colorCategory, true, SchemaItemValue::fillColorOverflow1, SchemaItemValue::setFillColorOverflow1);
-//		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorOverflow0, PropertyNames::colorCategory, true, SchemaItemValue::textColorOverflow0, SchemaItemValue::setTextColorOverflow0);
-//		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorOverflow1, PropertyNames::colorCategory, true, SchemaItemValue::textColorOverflow1, SchemaItemValue::setTextColorOverflow1);
-
-//		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorUnderflow0, PropertyNames::colorCategory, true, SchemaItemValue::fillColorUnderflow0, SchemaItemValue::setFillColorUnderflow0);
-//		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorUnderflow1, PropertyNames::colorCategory, true, SchemaItemValue::fillColorUnderflow1, SchemaItemValue::setFillColorUnderflow1);
-//		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorUnderflow0, PropertyNames::colorCategory, true, SchemaItemValue::textColorUnderflow0, SchemaItemValue::setTextColorUnderflow0);
-//		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorUnderflow1, PropertyNames::colorCategory, true, SchemaItemValue::textColorUnderflow1, SchemaItemValue::setTextColorUnderflow1);
-
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorAnalog0, PropertyNames::colorCategory, true, SchemaItemValue::fillColorAnalog0, SchemaItemValue::setFillColorAnalog0);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorAnalog1, PropertyNames::colorCategory, true, SchemaItemValue::fillColorAnalog1, SchemaItemValue::setFillColorAnalog1);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorAnalog0, PropertyNames::colorCategory, true, SchemaItemValue::textColorAnalog0, SchemaItemValue::setTextColorAnalog0);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorAnalog1, PropertyNames::colorCategory, true, SchemaItemValue::textColorAnalog1, SchemaItemValue::setTextColorAnalog1);
-
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorDiscrYes0, PropertyNames::colorCategory, true, SchemaItemValue::fillColorDiscrYes0, SchemaItemValue::setFillColorDiscrYes0);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorDiscrYes1, PropertyNames::colorCategory, true, SchemaItemValue::fillColorDiscrYes1, SchemaItemValue::setFillColorDiscrYes1);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorDiscrYes0, PropertyNames::colorCategory, true, SchemaItemValue::textColorDiscrYes0, SchemaItemValue::setTextColorDiscrYes0);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorDiscrYes1, PropertyNames::colorCategory, true, SchemaItemValue::textColorDiscrYes1, SchemaItemValue::setTextColorDiscrYes1);
-
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorDiscrNo0, PropertyNames::colorCategory, true, SchemaItemValue::fillColorDiscrNo0, SchemaItemValue::setFillColorDiscrNo0);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColorDiscrNo1, PropertyNames::colorCategory, true, SchemaItemValue::fillColorDiscrNo1, SchemaItemValue::setFillColorDiscrNo1);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorDiscrNo0, PropertyNames::colorCategory, true, SchemaItemValue::textColorDiscrNo0, SchemaItemValue::setTextColorDiscrNo0);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColorDiscrNo1, PropertyNames::colorCategory, true, SchemaItemValue::textColorDiscrNo1, SchemaItemValue::setTextColorDiscrNo1);
-
 		// Text Category Properties
 		//
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::textColor, PropertyNames::textCategory, true, SchemaItemValue::textColor, SchemaItemValue::setTextColor);
-
 		ADD_PROPERTY_GET_SET_CAT(E::HorzAlign, PropertyNames::alignHorz, PropertyNames::textCategory, true, SchemaItemValue::horzAlign, SchemaItemValue::setHorzAlign);
 		ADD_PROPERTY_GET_SET_CAT(E::VertAlign, PropertyNames::alignVert, PropertyNames::textCategory, true, SchemaItemValue::vertAlign, SchemaItemValue::setVertAlign);
 
@@ -74,23 +49,7 @@ namespace VFrame30
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontBold, PropertyNames::textCategory, true, SchemaItemValue::getFontBold, SchemaItemValue::setFontBold);
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fontItalic, PropertyNames::textCategory, true,  SchemaItemValue::getFontItalic, SchemaItemValue::setFontItalic);
 
-		// Funtional
-		//
-		auto strIdProperty = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalId, PropertyNames::functionalCategory, true, SchemaItemValue::signalId, SchemaItemValue::setSignalId);
-		strIdProperty->setValidator(PropertyNames::appSignalIdValidator);
-
-		ADD_PROPERTY_GET_SET_CAT(E::SignalSource, PropertyNames::signalSource, PropertyNames::functionalCategory, true, SchemaItemValue::signalSource, SchemaItemValue::setSignalSource);
-
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::textAnalog, PropertyNames::functionalCategory, true, SchemaItemValue::textAnalog, SchemaItemValue::setTextAnalog);
-		p->setDescription(PropertyNames::textValuePropDescription);
-
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::textDiscrete0, PropertyNames::functionalCategory, true, SchemaItemValue::textDiscreteNo, SchemaItemValue::setTextDiscreteNo);
-		p->setDescription(PropertyNames::textValuePropDescription);
-
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::textDiscrete1, PropertyNames::functionalCategory, true, SchemaItemValue::textDiscreteYes, SchemaItemValue::setTextDiscreteYes);
-		p->setDescription(PropertyNames::textValuePropDescription);
-
-		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::textNonValid, PropertyNames::functionalCategory, true, SchemaItemValue::textNonValid, SchemaItemValue::setTextNonValid);
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::text, PropertyNames::functionalCategory, true, SchemaItemValue::text, SchemaItemValue::setText);
 		p->setDescription(PropertyNames::textValuePropDescription);
 
 		p = ADD_PROPERTY_GET_SET_CAT(int, PropertyNames::precision, PropertyNames::functionalCategory, true, SchemaItemValue::precision, SchemaItemValue::setPrecision);
@@ -140,54 +99,26 @@ namespace VFrame30
 		//
 		Proto::SchemaItemValue* valueMessage = message->mutable_schemaitem()->mutable_value();
 
-		valueMessage->set_weight(m_lineWeight);
+		valueMessage->set_signalids(signalIdsString().toStdString());
+		valueMessage->set_signalsource(static_cast<int32_t>(m_signalSource));
+
+		valueMessage->set_lineweight(m_lineWeight);
+
 		valueMessage->set_linecolor(m_lineColor.rgba());
 		valueMessage->set_fillcolor(m_fillColor.rgba());
-		valueMessage->set_drawrect(m_drawRect);
 		valueMessage->set_textcolor(m_textColor.rgba());
+
+		valueMessage->set_text(m_text.toStdString());
+
 		m_font.SaveData(valueMessage->mutable_font());
+
+		valueMessage->set_drawrect(m_drawRect);
 
 		valueMessage->set_horzalign(static_cast<int32_t>(m_horzAlign));
 		valueMessage->set_vertalign(static_cast<int32_t>(m_vertAlign));
 
-		valueMessage->set_textanalog(m_textAnalog.toStdString());
-		valueMessage->set_textdiscrete0(m_textDiscreteNo.toStdString());
-		valueMessage->set_textdiscrete1(m_textDiscreteYes.toStdString());
-		valueMessage->set_textnonvalid(m_textNonValid.toStdString());
-
-		valueMessage->set_signalid(m_signalId.toStdString());
-		valueMessage->set_signalsource(static_cast<int32_t>(m_signalSource));
 		valueMessage->set_precision(m_precision);
-
-		valueMessage->set_fillcolornonvalid0(m_fillColorNonValid0.rgba());
-		valueMessage->set_fillcolornonvalid1(m_fillColorNonValid1.rgba());
-		valueMessage->set_textcolornonvalid0(m_textColorNonValid0.rgba());
-		valueMessage->set_textcolornonvalid1(m_textColorNonValid1.rgba());
-
-//		valueMessage->set_fillcoloroverflow0(m_fillColorOverflow0.rgba());
-//		valueMessage->set_fillcoloroverflow1(m_fillColorOverflow1.rgba());
-//		valueMessage->set_textcoloroverflow0(m_textColorOverflow0.rgba());
-//		valueMessage->set_textcoloroverflow1(m_textColorOverflow1.rgba());
-
-//		valueMessage->set_fillcolorunderflow0(m_fillColorUnderflow0.rgba());
-//		valueMessage->set_fillcolorunderflow1(m_fillColorUnderflow1.rgba());
-//		valueMessage->set_textcolorunderflow0(m_textColorUnderflow0.rgba());
-//		valueMessage->set_textcolorunderflow1(m_textColorUnderflow1.rgba());
-
-		valueMessage->set_fillcoloranalog0(m_fillColorAnalog0.rgba());
-		valueMessage->set_fillcoloranalog1(m_fillColorAnalog1.rgba());
-		valueMessage->set_textcoloranalog0(m_textColorAnalog0.rgba());
-		valueMessage->set_textcoloranalog1(m_textColorAnalog1.rgba());
-
-		valueMessage->set_fillcolordiscryes0(m_fillColorDiscrYes0.rgba());
-		valueMessage->set_fillcolordiscryes1(m_fillColorDiscrYes1.rgba());
-		valueMessage->set_textcolordiscryes0(m_textColorDiscrYes0.rgba());
-		valueMessage->set_textcolordiscryes1(m_textColorDiscrYes1.rgba());
-
-		valueMessage->set_fillcolordiscrno0(m_fillColorDiscrNo0.rgba());
-		valueMessage->set_fillcolordiscrno1(m_fillColorDiscrNo1.rgba());
-		valueMessage->set_textcolordiscrno0(m_textColorDiscrNo0.rgba());
-		valueMessage->set_textcolordiscrno1(m_textColorDiscrNo1.rgba());
+		valueMessage->set_analogformat(static_cast<int32_t>(m_analogFormat));
 
 		return true;
 	}
@@ -218,64 +149,31 @@ namespace VFrame30
 
 		const Proto::SchemaItemValue& valueMessage = message.schemaitem().value();
 
-		m_lineWeight = valueMessage.weight();
+		setSignalIdsString(valueMessage.signalids().data());
+		m_signalSource = static_cast<E::SignalSource>(valueMessage.signalsource());
+
+		m_lineWeight = valueMessage.lineweight();
+
 		m_lineColor = QColor::fromRgba(valueMessage.linecolor());
 		m_fillColor = QColor::fromRgba(valueMessage.fillcolor());
 		m_textColor = QColor::fromRgba(valueMessage.textcolor());
-		m_drawRect = valueMessage.drawrect();
 
-		m_textAnalog = QString::fromStdString(valueMessage.textanalog());
-		m_textDiscreteNo = QString::fromStdString(valueMessage.textdiscrete0());
-		m_textDiscreteYes = QString::fromStdString(valueMessage.textdiscrete1());
-		m_textNonValid = QString::fromStdString(valueMessage.textnonvalid());
+		m_text = QString::fromStdString(valueMessage.text());
+
+		m_font.LoadData(valueMessage.font());
+
+		m_drawRect = valueMessage.drawrect();
 
 		m_horzAlign = static_cast<E::HorzAlign>(valueMessage.horzalign());
 		m_vertAlign = static_cast<E::VertAlign>(valueMessage.vertalign());
 
-		m_font.LoadData(valueMessage.font());
-
-		m_signalId = QString::fromStdString(valueMessage.signalid());
-		m_signalSource = static_cast<E::SignalSource>(valueMessage.signalsource());
 		m_precision = valueMessage.precision();
-
-		m_fillColorNonValid0 = valueMessage.fillcolornonvalid0();
-		m_fillColorNonValid1 = valueMessage.fillcolornonvalid1();
-		m_textColorNonValid0 = valueMessage.textcolornonvalid0();
-		m_textColorNonValid1 = valueMessage.textcolornonvalid1();
-
-//		m_fillColorOverflow0 = valueMessage.fillcoloroverflow0();
-//		m_fillColorOverflow1 = valueMessage.fillcoloroverflow1();
-//		m_textColorOverflow0 = valueMessage.textcoloroverflow0();
-//		m_textColorOverflow1 = valueMessage.textcoloroverflow1();
-
-//		m_fillColorUnderflow0 = valueMessage.fillcolorunderflow0();
-//		m_fillColorUnderflow1 =	valueMessage.fillcolorunderflow1();
-//		m_textColorUnderflow0 =	valueMessage.textcolorunderflow0();
-//		m_textColorUnderflow1 =	valueMessage.textcolorunderflow1();
-
-		m_fillColorAnalog0 = valueMessage.fillcoloranalog0();
-		m_fillColorAnalog1 = valueMessage.fillcoloranalog1();
-		m_textColorAnalog0 = valueMessage.textcoloranalog0();
-		m_textColorAnalog1 = valueMessage.textcoloranalog1();
-
-		m_fillColorDiscrYes0 = valueMessage.fillcolordiscryes0();
-		m_fillColorDiscrYes1 = valueMessage.fillcolordiscryes1();
-		m_textColorDiscrYes0 = valueMessage.textcolordiscryes0();
-		m_textColorDiscrYes1 = valueMessage.textcolordiscryes1();
-
-		m_fillColorDiscrNo0 = valueMessage.fillcolordiscrno0();
-		m_fillColorDiscrNo1 = valueMessage.fillcolordiscrno1();
-		m_textColorDiscrNo0 = valueMessage.textcolordiscrno0();
-		m_textColorDiscrNo1 = valueMessage.textcolordiscrno1();
+		m_analogFormat = static_cast<E::AnalogFormat>(valueMessage.analogformat());
 
 		return true;
 	}
 
 	// Drawing Functions
-	//
-
-	// Рисование элемента, выполняется в 100% масштабе.
-	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
 	void SchemaItemValue::Draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
 	{
@@ -289,56 +187,14 @@ namespace VFrame30
 		//
 		QRectF r = boundingRectInDocPt();
 
-		// Get signal description and state
+		// Drawing background
 		//
-		AppSignalState signalState;
-		AppSignalParam signalParam;
-		TuningSignalState tuningSignalState;
+		m_fillBrush->setColor(m_fillColor);
+		drawParam->painter()->fillRect(r, *m_fillBrush);
 
-		signalParam.setAppSignalId(signalId());
-		signalParam.setCustomSignalId(signalId());
-
-		bool ok = false;
-
-		if (drawParam->isMonitorMode() == true)
-		{
-			switch (signalSource())
-			{
-			case E::SignalSource::AppDataService:
-				if (drawParam->appSignalController() == nullptr)
-				{
-				}
-				else
-				{
-					signalParam = drawParam->appSignalController()->signalParam(signalId(), &ok);
-					signalState = drawParam->appSignalController()->signalState(signalId(), nullptr);
-				}
-				break;
-
-			case E::SignalSource::TuningService:
-				if (drawParam->tuningController() == nullptr)
-				{
-
-				}
-				else
-				{
-					signalParam = drawParam->tuningController()->signalParam(signalId(), &ok);
-					tuningSignalState = drawParam->tuningController()->signalState(signalId(), nullptr);
-
-					signalState.m_hash = signalParam.hash();
-					signalState.m_flags.valid = tuningSignalState.valid();
-					signalState.m_value = tuningSignalState.value().toDouble();
-				}
-				break;
-
-			default:
-				assert(false);
-			}
-		}
-
-		// Drawing background and text
+		// Drawing text
 		//
-		drawLogic(drawParam, r, signalParam, signalState);
+		drawText(drawParam, r);
 
 		// Drawing frame rect
 		//
@@ -357,97 +213,67 @@ namespace VFrame30
 	{
 		if (m_rectPen.get() == nullptr)
 		{
-			m_rectPen = std::make_shared<QPen>();
+			m_rectPen = std::make_unique<QPen>();
 		}
 
-		QColor qlinecolor(lineColor());
-		if (m_rectPen->color() !=qlinecolor )
+		if (m_rectPen->color() != lineColor())
 		{
-			m_rectPen->setColor(qlinecolor);
+			m_rectPen->setColor(lineColor());
 		}
 
+		// --
+		//
 		if (m_fillBrush.get() == nullptr)
 		{
-			m_fillBrush = std::make_shared<QBrush>(Qt::SolidPattern);
+			m_fillBrush = std::make_unique<QBrush>(Qt::SolidPattern);
 		}
 
 		return;
 	}
 
-	void SchemaItemValue::drawLogic(CDrawParam* drawParam, const QRectF& rect, const AppSignalParam& signal, const AppSignalState& signalState) const
+	void SchemaItemValue::drawText(CDrawParam* drawParam, const QRectF& rect) const
 	{
 		QPainter* painter = drawParam->painter();
-		QColor text_color = textColor();
-		QColor back_color = fillColor();
 		QString text;
-		bool blinkPhase = drawParam->blinkPhase();
 
 		if (drawParam->isEditMode() == true)
 		{
-			text = signalId();
-			back_color = fillColor();
-			text_color = textColor();
+			text = m_text;
 		}
 		else
 		{
-			if (signalState.isValid() == false)
+			if (m_text.contains(QLatin1Literal("$(")) == true)
 			{
-				text = parseText(m_textNonValid, signal, signalState);
-				back_color = blinkPhase ? fillColorNonValid0() : fillColorNonValid1();
-				text_color = blinkPhase ? textColorNonValid0() : textColorNonValid1();
+				// m_text contains some variables, which need to be parsed
+				//
+
+				// Get signal description and state
+				//
+				AppSignalParam signalParam;
+				AppSignalState signalState;
+				TuningSignalState tuningSignalState;
+
+				if (signalIds().empty() == false)
+				{
+					signalParam.setAppSignalId(signalIds().front());
+					signalParam.setCustomSignalId(signalIds().front());
+				}
+
+				getSignalState(drawParam, &signalParam, &signalState, &tuningSignalState);
+
+				text = parseText(m_text, signalParam, signalState);
 			}
 			else
 			{
-				if (signal.isAnalog() == true)
-				{
-					text = parseText(m_textAnalog, signal, signalState);
-
-					back_color = blinkPhase ? fillColorAnalog0() : fillColorAnalog1();
-					text_color = blinkPhase ? textColorAnalog0() : textColorAnalog1();
-
-//					if (signalState.isOverflow() == true)
-//					{
-//						back_color = blinkPhase ? fillColorOverflow0() : fillColorOverflow1();
-//						text_color = blinkPhase ? textColorOverflow0() : textColorOverflow1();
-//					}
-//					else
-//					{
-//						if (signalState.isUnderflow() == true)
-//						{
-//							back_color = blinkPhase ? fillColorUnderflow0() : fillColorUnderflow1();
-//							text_color = blinkPhase ? textColorUnderflow0() : textColorUnderflow1();
-//						}
-//						else
-//						{
-//							back_color = blinkPhase ? fillColorAnalog0() : fillColorAnalog1();
-//							text_color = blinkPhase ? textColorAnalog0() : textColorAnalog1();
-//						}
-//					}
-				}
-				else
-				{
-					if (signalState.m_value == 0)
-					{
-						text = parseText(m_textDiscreteNo, signal, signalState);
-						back_color = blinkPhase ? fillColorDiscrNo0() : fillColorDiscrNo1();
-						text_color = blinkPhase ? textColorDiscrNo0() : textColorDiscrNo1();
-					}
-					else
-					{
-						text = parseText(m_textDiscreteYes, signal, signalState);
-						back_color = blinkPhase ? fillColorDiscrYes0() : fillColorDiscrYes1();
-						text_color = blinkPhase ? textColorDiscrYes0() : textColorDiscrYes1();
-					}
-				}
+				// Most likely text was set in PreDrawScript, or it is just text
+				//
+				text = m_text;
 			}
 		}
 
-		m_fillBrush->setColor(back_color);
-		drawParam->painter()->fillRect(rect, *m_fillBrush);
-
 		if (text.isEmpty() == false)
 		{
-			painter->setPen(text_color);
+			painter->setPen(textColor());
 			DrawHelper::drawText(painter, m_font, itemUnit(), text, rect, horzAlign() | vertAlign());
 		}
 
@@ -488,7 +314,14 @@ namespace VFrame30
 			{
 				if (macro.compare(QLatin1String("value"), Qt::CaseInsensitive) == 0)
 				{
-					replaceText = formatNumber(signalState.m_value, signal);
+					if (signalState.isValid() == true)
+					{
+						replaceText = formatNumber(signalState.m_value, signal);
+					}
+					else
+					{
+						replaceText = QStringLiteral("?");
+					}
 					break;
 				}
 
@@ -553,13 +386,73 @@ namespace VFrame30
 			return QString::number(value, 'f', 0);
 		}
 
+		assert(signal.isAnalog());
+
 		int p = m_precision;
 		if (m_precision == -1)
 		{
 			p = signal.precision();
 		}
 
-		return QString::number(value, 'f', p);
+		return QString::number(value, static_cast<char>(analogFormat()), p);
+	}
+
+	bool SchemaItemValue::getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const
+	{
+		if (drawParam == nullptr ||
+			signalParam == nullptr ||
+			appSignalState == nullptr ||
+			tuningSignalState == nullptr)
+		{
+			assert(drawParam);
+			assert(signalParam);
+			assert(appSignalState);
+			assert(tuningSignalState);
+			return false;
+		}
+
+		if (drawParam->isMonitorMode() == false)
+		{
+			assert(drawParam->isMonitorMode());
+			return false;
+		}
+
+		bool ok = false;
+
+		switch (signalSource())
+		{
+		case E::SignalSource::AppDataService:
+			if (drawParam->appSignalController() == nullptr)
+			{
+			}
+			else
+			{
+				*signalParam = drawParam->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
+				*appSignalState = drawParam->appSignalController()->signalState(signalParam->appSignalId(), nullptr);
+			}
+			break;
+
+		case E::SignalSource::TuningService:
+			if (drawParam->tuningController() == nullptr)
+			{
+			}
+			else
+			{
+				*signalParam = drawParam->tuningController()->signalParam(signalParam->appSignalId(), &ok);
+				*tuningSignalState = drawParam->tuningController()->signalState(signalParam->appSignalId(), nullptr);
+
+				appSignalState->m_hash = signalParam->hash();
+				appSignalState->m_flags.valid = tuningSignalState->valid();
+				appSignalState->m_value = tuningSignalState->value().toDouble();
+			}
+			break;
+
+		default:
+			assert(false);
+			ok = false;
+		}
+
+		return ok;
 	}
 
 	double SchemaItemValue::minimumPossibleHeightDocPt(double gridSize, int /*pinGridStep*/) const
@@ -575,6 +468,36 @@ namespace VFrame30
 	// Properties and Data
 	//
 	IMPLEMENT_FONT_PROPERTIES(SchemaItemValue, Font, m_font);
+
+	QString SchemaItemValue::signalIdsString() const
+	{
+		return m_signalIds.join(QChar::LineFeed);
+	}
+
+	void SchemaItemValue::setSignalIdsString(const QString& value)
+	{
+		m_signalIds = value.split(QRegExp(PropertyNames::appSignalId), QString::SkipEmptyParts);
+	}
+
+	const QStringList& SchemaItemValue::signalIds() const
+	{
+		return m_signalIds;
+	}
+
+	void SchemaItemValue::setSignalIds(const QStringList& value)
+	{
+		m_signalIds = value;
+	}
+
+	E::SignalSource SchemaItemValue::signalSource() const
+	{
+		return m_signalSource;
+	}
+
+	void SchemaItemValue::setSignalSource(E::SignalSource value)
+	{
+		m_signalSource = value;
+	}
 
 	// Weight property
 	//
@@ -607,33 +530,33 @@ namespace VFrame30
 
 	// LineColor property
 	//
-	QColor SchemaItemValue::lineColor() const
+	const QColor& SchemaItemValue::lineColor() const
 	{
 		return m_lineColor;
 	}
-	void SchemaItemValue::setLineColor(QColor color)
+	void SchemaItemValue::setLineColor(const QColor& color)
 	{
 		m_lineColor = color;
 	}
 
 	// FillColor property
 	//
-	QColor SchemaItemValue::fillColor() const
+	const QColor& SchemaItemValue::fillColor() const
 	{
 		return m_fillColor;
 	}
-	void SchemaItemValue::setFillColor(QColor color)
+	void SchemaItemValue::setFillColor(const QColor& color)
 	{
 		m_fillColor = color;
 	}
 
 	// TextColor property
 	//
-	QColor SchemaItemValue::textColor() const
+	const QColor& SchemaItemValue::textColor() const
 	{
 		return m_textColor;
 	}
-	void SchemaItemValue::setTextColor(QColor color)
+	void SchemaItemValue::setTextColor(const QColor& color)
 	{
 		m_textColor = color;
 	}
@@ -669,63 +592,13 @@ namespace VFrame30
 		m_drawRect = value;
 	}
 
-	QString SchemaItemValue::signalId() const
+	const QString& SchemaItemValue::text() const
 	{
-		return m_signalId;
+		return m_text;
 	}
-
-	void SchemaItemValue::setSignalId(const QString& value)
+	void SchemaItemValue::setText(QString value)
 	{
-		m_signalId = value.trimmed();
-	}
-
-	E::SignalSource SchemaItemValue::signalSource() const
-	{
-		return m_signalSource;
-	}
-
-	void SchemaItemValue::setSignalSource(E::SignalSource value)
-	{
-		m_signalSource = value;
-	}
-
-	const QString& SchemaItemValue::textAnalog() const
-	{
-		return m_textAnalog;
-	}
-	void SchemaItemValue::setTextAnalog(QString value)
-	{
-		m_textAnalog = value;
-	}
-
-	const QString& SchemaItemValue::textDiscreteNo() const
-	{
-		return m_textDiscreteNo;
-	}
-
-	void SchemaItemValue::setTextDiscreteNo(QString value)
-	{
-		m_textDiscreteNo = value;
-	}
-
-	const QString& SchemaItemValue::textDiscreteYes() const
-	{
-		return m_textDiscreteYes;
-	}
-
-	void SchemaItemValue::setTextDiscreteYes(QString value)
-	{
-		m_textDiscreteYes = value;
-	}
-
-	const QString& SchemaItemValue::textNonValid() const
-	{
-		return m_textNonValid;
-	}
-
-	void SchemaItemValue::setTextNonValid(QString value)
-	{
-		m_textNonValid = value;
+		m_text = value;
 	}
 
 	int SchemaItemValue::precision() const
@@ -735,17 +608,17 @@ namespace VFrame30
 
 	void SchemaItemValue::setPrecision(int value)
 	{
-		if (value < -1)
-		{
-			value = -1;
-		}
+		m_precision = qBound(-1, value, 64);
+	}
 
-		if (value > 64)
-		{
-			value = 64;
-		}
+	E::AnalogFormat SchemaItemValue::analogFormat() const
+	{
+		return m_analogFormat;
+	}
 
-		m_precision = value;
+	void SchemaItemValue::setAnalogFormat(E::AnalogFormat value)
+	{
+		m_analogFormat = value;
 	}
 }
 
