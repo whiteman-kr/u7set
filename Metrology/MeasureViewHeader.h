@@ -149,7 +149,8 @@ const int				MVC_CMN_L_VALUE_18			= 38;
 const int				MVC_CMN_L_VALUE_19			= 39;
 const int				MVC_CMN_L_ERROR				= 40;
 const int				MVC_CMN_L_ERROR_LIMIT		= 41;
-const int				MVC_CMN_L_MEASUREMENT_TIME	= 42;
+const int				MVC_CMN_L_ERROR_RESULT		= 42;
+const int				MVC_CMN_L_MEASUREMENT_TIME	= 43;
 
 // ==============================================================================================
 

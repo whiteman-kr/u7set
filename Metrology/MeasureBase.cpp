@@ -48,7 +48,7 @@ Measurement& Measurement::operator=(Measurement& from)
 	m_measureID = from.m_measureID;
 	m_filter = from.m_filter;
 
-	m_valid = from.m_valid;
+	m_signalValid = from.m_signalValid;
 
 	m_measureTime = from.m_measureTime;
 	m_reportType = from.m_reportType;
@@ -217,7 +217,7 @@ void LinearityMeasurement::fill_measure_input(const MeasureMultiParam &measurePa
 	// measure
 	//
 
-	setValid(theSignalBase.signalState(inParam.hash()).valid());
+	setSignalValid(theSignalBase.signalState(inParam.hash()).valid());
 
 	double averageElVal = 0;
 	double averageEnVal = 0;
@@ -326,7 +326,7 @@ void LinearityMeasurement::fill_measure_output(const MeasureMultiParam &measureP
 	// measure
 	//
 
-	setValid(theSignalBase.signalState(outParam.hash()).valid());
+	setSignalValid(theSignalBase.signalState(outParam.hash()).valid());
 
 	double averageElVal = 0;
 	double averagePhVal = 0;
@@ -542,9 +542,9 @@ double LinearityMeasurement::measure(int limitType) const
 
 QString LinearityMeasurement::measureStr(int limitType) const
 {
-	if (isValid() == false)
+	if (isSignalValid() == false)
 	{
-		return QT_TRANSLATE_NOOP("MeasureBase.cpp", "No valid");
+		return SignalNoValidStr;
 	}
 
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
@@ -710,13 +710,14 @@ double LinearityMeasurement::error(int limitType, int errotType) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString LinearityMeasurement::errorStr(int limitType) const
+QString LinearityMeasurement::errorStr() const
 {
-	if (isValid() == false)
+	if (isSignalValid() == false)
 	{
-		return QT_TRANSLATE_NOOP("MeasureBase.cpp", "No valid");
+		return SignalNoValidStr;
 	}
 
+	int limitType = theOptions.linearity().showErrorFromLimit();
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
 	{
 		assert(0);
@@ -730,19 +731,12 @@ QString LinearityMeasurement::errorStr(int limitType) const
 		return QString();
 	}
 
-	int showErrorFromLimit = theOptions.linearity().showErrorFromLimit();
-	if (showErrorFromLimit < 0 || showErrorFromLimit >= MEASURE_LIMIT_TYPE_COUNT)
-	{
-		assert(0);
-		return QString();
-	}
-
 	QString str;
 
 	switch(errorType)
 	{
-		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_error[limitType][errorType], 10, m_limitPrecision[showErrorFromLimit]) + " " + m_unit[showErrorFromLimit];	break;
-		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_error[limitType][errorType], 10, 3) + " %" ;																break;
+		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_error[limitType][errorType], 10, m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
+		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_error[limitType][errorType], 10, 3) + " %" ;												break;
 		default:							assert(0);
 	}
 
@@ -789,8 +783,9 @@ double LinearityMeasurement::errorLimit(int limitType, int errotType) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString LinearityMeasurement::errorLimitStr(int limitType) const
+QString LinearityMeasurement::errorLimitStr() const
 {
+	int limitType = theOptions.linearity().showErrorFromLimit();
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
 	{
 		assert(0);
@@ -804,19 +799,12 @@ QString LinearityMeasurement::errorLimitStr(int limitType) const
 		return QString();
 	}
 
-	int showErrorFromLimit = theOptions.linearity().showErrorFromLimit();
-	if (showErrorFromLimit < 0 || showErrorFromLimit >= MEASURE_LIMIT_TYPE_COUNT)
-	{
-		assert(0);
-		return QString();
-	}
-
 	QString str;
 
 	switch(errorType)
 	{
-		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_errorLimit[limitType][errorType], 10, m_limitPrecision[showErrorFromLimit]) + " " + m_unit[showErrorFromLimit];	break;
-		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_errorLimit[limitType][errorType], 10, 3) + " %";																break;
+		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_errorLimit[limitType][errorType], 10, m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
+		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_errorLimit[limitType][errorType], 10, 3) + " %";												break;
 		default:							assert(0);
 	}
 
@@ -844,6 +832,50 @@ void LinearityMeasurement::setErrorLimit(int limitType, int errotType, double va
 
 // -------------------------------------------------------------------------------------------------------------------
 
+int LinearityMeasurement::errorResult() const
+{
+	int limitType = theOptions.linearity().showErrorFromLimit();
+	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	{
+		assert(0);
+		return MEASURE_ERROR_RESULT_UNKNOWN;
+	}
+
+	int errorType = theOptions.linearity().errorType();
+	if (errorType < 0 || errorType >= MEASURE_ERROR_TYPE_COUNT)
+	{
+		assert(0);
+		return MEASURE_ERROR_RESULT_UNKNOWN;
+	}
+
+	if (m_error[limitType][errorType] > m_errorLimit[limitType][errorType])
+	{
+		return MEASURE_ERROR_RESULT_FAILED;
+	}
+
+	return MEASURE_ERROR_RESULT_OK;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString LinearityMeasurement::errorResultStr() const
+{
+	if (isSignalValid() == false)
+	{
+		return SignalNoValidStr;
+	}
+
+	int errResult = errorResult();
+	if (errResult < 0 || errResult > MEASURE_ERROR_RESULT_COUNT)
+	{
+		return QString();
+	}
+
+	return ErrorResult[errResult];
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 double LinearityMeasurement::measureItemArray(int limitType, int index) const
 {
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
@@ -865,9 +897,9 @@ double LinearityMeasurement::measureItemArray(int limitType, int index) const
 
 QString LinearityMeasurement::measureItemStr(int limitType, int index) const
 {
-	if (isValid() == false)
+	if (isSignalValid() == false)
 	{
-		return QT_TRANSLATE_NOOP("MeasureBase.cpp", "No valid");
+		return SignalNoValidStr;
 	}
 
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
@@ -922,9 +954,9 @@ double LinearityMeasurement::additionalParam(int paramType) const
 
 QString LinearityMeasurement::additionalParamStr(int paramType) const
 {
-	if (isValid() == false)
+	if (isSignalValid() == false)
 	{
-		return QT_TRANSLATE_NOOP("MeasureBase.cpp", "No valid");
+		return SignalNoValidStr;
 	}
 
 	if (paramType < 0 || paramType >= MEASURE_ADDITIONAL_PARAM_COUNT)
@@ -1497,7 +1529,7 @@ Metrology::SignalStatistic MeasureBase::statistic(const Hash& signalHash)
 
 						if (pLinearityMeasurement->error(MEASURE_LIMIT_TYPE_ENGENEER, errorType) > pLinearityMeasurement->errorLimit(MEASURE_LIMIT_TYPE_ENGENEER, errorType))
 						{
-							si.setState(Metrology::StatisticStateInvalid);
+							si.setState(Metrology::StatisticStateFailed);
 						}
 					}
 					break;

@@ -175,7 +175,8 @@ SOURCES +=\
     TagSelectorWidget.cpp \
     Forms/ProjectPropertiesForm.cpp \
     Forms/PendingChangesDialog.cpp \
-    ../lib/SimpleMutex.cpp
+    ../lib/SimpleMutex.cpp \
+    ../lib/Ui/TextEditCompleter.cpp
 
 
 HEADERS  += \
@@ -313,7 +314,8 @@ HEADERS  += \
     TagSelectorWidget.h \
     Forms/ProjectPropertiesForm.h \
     Forms/PendingChangesDialog.h \
-    ../lib/SimpleMutex.h
+    ../lib/SimpleMutex.h \
+    ../lib/Ui/TextEditCompleter.h
 
 
 FORMS    += \

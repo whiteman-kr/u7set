@@ -451,12 +451,17 @@ namespace Hardware
 		};
 
 	public:
-		OptoModuleStorage(EquipmentSet* equipmentSet, Builder::LmDescriptionSet* lmDescriptionSet, Builder::IssueLogger* log);
+		OptoModuleStorage(EquipmentSet* equipmentSet,
+						  Builder::LmDescriptionSet* lmDescriptionSet,
+						  Hardware::ConnectionStorage* connections,
+						  Builder::IssueLogger* log);
+
 		~OptoModuleStorage();
 
+		bool init();
+
 		bool appendOptoModules();
-		bool appendAndCheckConnections(const Hardware::ConnectionStorage& connectionStorage);
-		bool processConnection(ConnectionShared connection);
+		bool appendAndCheckConnections();
 
 		bool sortTxSignals(const QString& lmID);
 		bool sortSerialRxSignals(const QString& lmID);
@@ -520,7 +525,12 @@ namespace Hardware
 
 		bool processBvbModules();
 
+		bool isConnectionAccessible(const QString& lmEquipmentID, const QString& connectionID);
+
 	private:
+		bool processConnection(ConnectionShared connection);
+		void prepareLmsAccessibleConnections();
+
 		bool addModule(DeviceModule* module);
 
 		bool forEachPortOfLmAssociatedOptoModules(const QString& lmID, OptoPortFunc funcPtr);
@@ -531,6 +541,7 @@ namespace Hardware
 	private:
 		static EquipmentSet* m_equipmentSet;
 		static Builder::LmDescriptionSet* m_lmDescriptionSet;
+		static ConnectionStorage* m_connectionStorage;
 		static Builder::IssueLogger* m_log;
 
 		static int m_instanceCount;
@@ -541,5 +552,7 @@ namespace Hardware
 		static QHash<QString, OptoModuleShared> m_lmAssociatedModules;
 
 		static QHash<QString, ConnectionShared> m_connections;		// connectionID -> connection
+
+		static QHash<QString, QHash<QString, bool>> m_lmsAccessibleConnections;
 	};
 }

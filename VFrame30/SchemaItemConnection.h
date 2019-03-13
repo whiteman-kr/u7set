@@ -42,13 +42,16 @@ namespace VFrame30
 		// Properties
 		//
 	public:
-		QString connectionId() const;
-		void setConnectionId(const QString& value);
+		QString connectionIds() const;
+		void setConnectionIds(const QString& value);
+
+		const QStringList& connectionIdsAsList() const;
+		void setConnectionIdsAsList(const QStringList& value);
 
 		// Data
 		//
 	private:
-		QString m_connectionId = {"CONNECTIONID"};
+		QStringList m_connectionIds = {"CONNECTIONID"};
 	};
 
 
@@ -84,6 +87,7 @@ namespace VFrame30
 		// Public Methods
 		//
 	public:
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual QString buildName() const override;
 		virtual QString toolTipText(int dpiX, int dpiY) const override;
 

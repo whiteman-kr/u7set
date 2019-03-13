@@ -78,6 +78,21 @@ const int	MEASURE_ERROR_TYPE_UNKNOWN	= -1,
 			MEASURE_ERROR_TYPE_ABSOLUTE	= 0,
 			MEASURE_ERROR_TYPE_REDUCE	= 1;
 
+
+// ==============================================================================================
+
+const char* const ErrorResult[] =
+{
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Ok"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Failed"),
+};
+
+const int	MEASURE_ERROR_RESULT_COUNT	= sizeof(ErrorResult)/sizeof(ErrorResult[0]);
+
+const int	MEASURE_ERROR_RESULT_UNKNOWN		= -1,
+			MEASURE_ERROR_RESULT_OK				= 0,
+			MEASURE_ERROR_RESULT_FAILED			= 1;
+
 // ==============================================================================================
 
 const char* const MeasureAdditionalParam[] =
@@ -109,6 +124,10 @@ const int	MAX_MEASUREMENT_IN_POINT	= 20;
 
 // ==============================================================================================
 
+const char* const SignalNoValidStr		= QT_TRANSLATE_NOOP("MeasureBase.h", "No valid");
+
+// ==============================================================================================
+
 class Measurement
 {
 
@@ -125,7 +144,7 @@ private:
 	int				m_measureID = -1;								// primary key of record in SQL table
 	bool			m_filter = false;								// filter for record, if "true" - hide record
 
-	bool			m_valid = true;									// signal is valid during the measurement
+	bool			m_signalValid = true;							// signal is valid during the measurement
 
 	QDateTime		m_measureTime;									// measure time
 	int				m_reportType = -1;								// report type
@@ -147,8 +166,8 @@ public:
 	bool			filter() const { return m_filter; }
 	void			setFilter(bool filter) { m_filter = filter; }
 
-	bool			isValid() const { return m_valid; }
-	void			setValid(bool valid) { m_valid = valid; }
+	bool			isSignalValid() const { return m_signalValid; }
+	void			setSignalValid(bool valid) { m_signalValid = valid; }
 
 	QDateTime		measureTime() const { return m_measureTime; }
 	void			setMeasureTime(const QDateTime& time) { m_measureTime = time; }
@@ -252,12 +271,15 @@ public:
 	QString			limitStr(int limitType) const;
 
 	double			error(int limitType, int errotType) const;
-	QString			errorStr(int limitType) const;
+	QString			errorStr() const;
 	void			setError(int limitType, int errotType, double value);
 
 	double			errorLimit(int limitType, int errotType) const;
-	QString			errorLimitStr(int limitType) const;
+	QString			errorLimitStr() const;
 	void			setErrorLimit(int limitType, int errotType, double value);
+
+	int				errorResult() const;
+	QString			errorResultStr() const;
 
 	int				measureCount() const { return m_measureCount; }
 	void			setMeasureCount(int count) { m_measureCount = count; }

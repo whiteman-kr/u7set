@@ -32,6 +32,7 @@
 #include "../lib/SignalProperties.h"
 #include "DialogInputEx.h"
 #include "../QScintilla/Qt4Qt5/Qsci/QsciLexerJavaScript.h"
+#include "../lib/Ui/TextEditCompleter.h"
 
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
@@ -6193,7 +6194,7 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 		return false;
 	}
 
-	QString connectionId = receiver->connectionId();
+	QString recConnectionIds = receiver->connectionIds();
 	QString appSignalId = receiver->appSignalId();
 
 	// Get all connections
@@ -6229,26 +6230,16 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
 	QLabel* connectionIdLabel = new QLabel("ConnectionID:");
-	QComboBox* connectionIdControl = new QComboBox;
-	connectionIdControl->setEditable(true);
-	connectionIdControl->addItems(connectionIds);
-	connectionIdControl->setMaxVisibleItems(20);
+
+	QTextEditCompleter* connectionIdControl = new QTextEditCompleter(&d);
+	connectionIdControl->setPlaceholderText("Enter ConnectionID(s)");
+	connectionIdControl->setPlainText(recConnectionIds);
 
 	QCompleter* completer = new QCompleter(connectionIds);
 	completer->setFilterMode(Qt::MatchContains);
-	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	completer->setCaseSensitivity(Qt::CaseSensitive);
 	completer->setMaxVisibleItems(20);
 	connectionIdControl->setCompleter(completer);
-
-	// Set current value, to selecte value in the list, controll must be non editable ((
-	//
-	connectionIdControl->setEditable(false);
-	connectionIdControl->setCurrentText(connectionId);
-	connectionIdControl->setEditable(true);
-	if (connectionIdControl->currentText() != connectionId)
-	{
-		connectionIdControl->setCurrentText(connectionId);
-	}
 
 	QLabel* appSignalIdLabel = new QLabel("AppSignalID:");
 	QLineEdit* appSignalIdEdit = new QLineEdit(appSignalId);
@@ -6284,10 +6275,10 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 
 	if (result == QDialog::Accepted)
 	{
-		QString newConnectionId = connectionIdControl->currentText().trimmed();
+		QString newConnectionId = connectionIdControl->toPlainText();
 		QString newAppSignalId = appSignalIdEdit->text().trimmed();
 
-		if (newConnectionId != connectionId ||
+		if (newConnectionId != recConnectionIds ||
 			newAppSignalId != appSignalId)
 		{
 			if (setViaEditEngine == true)
@@ -6303,13 +6294,12 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 			}
 			else
 			{
-				receiver->setConnectionId(newConnectionId);
+				receiver->setConnectionIds(newConnectionId);
 				receiver->setAppSignalId(newAppSignalId);
 			}
 		}
 
 		editSchemaView()->update();
-
 		return true;
 	}
 
@@ -6331,7 +6321,7 @@ bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem>
 		return false;
 	}
 
-	QString connectionId = transmitter->connectionId();
+	QString transmitterConnectionIds = transmitter->connectionIds();
 
 	// Get all connections
 	//
@@ -6365,27 +6355,17 @@ bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem>
 					~Qt::WindowMaximizeButtonHint &
 					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
-	QLabel* connectionIdLabel = new QLabel("ConnectionID:");
-	QComboBox* connectionIdControl = new QComboBox;
+	QLabel* connectionIdLabel = new QLabel("ConnectionID(s):");
 
-	connectionIdControl->addItems(connectionIds);
-	connectionIdControl->setMaxVisibleItems(20);
+	QTextEditCompleter* connectionIdControl = new QTextEditCompleter(&d);
+	connectionIdControl->setPlaceholderText("Enter ConnectionID(s)");
+	connectionIdControl->setPlainText(transmitterConnectionIds);
 
-	QCompleter* completer = new QCompleter(connectionIds);
+	QCompleter* completer = new QCompleter(connectionIds, &d);
 	completer->setFilterMode(Qt::MatchContains);
-	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	completer->setCaseSensitivity(Qt::CaseSensitive);
 	completer->setMaxVisibleItems(20);
 	connectionIdControl->setCompleter(completer);
-
-	// Set current value, to selecte value in the list, controll must be non editable ((
-	//
-	connectionIdControl->setEditable(false);
-	connectionIdControl->setCurrentText(connectionId);
-	connectionIdControl->setEditable(true);
-	if (connectionIdControl->currentText() != connectionId)
-	{
-		connectionIdControl->setCurrentText(connectionId);
-	}
 
 	QWidget* spacer = new QWidget;
 	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -6414,9 +6394,9 @@ bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem>
 
 	if (result == QDialog::Accepted)
 	{
-		QString newConnectionId = connectionIdControl->currentText().trimmed();
+		QString newConnectionId = connectionIdControl->toPlainText();  //connectionIdControl->currentText().trimmed();
 
-		if (newConnectionId != connectionId)
+		if (newConnectionId != transmitterConnectionIds)
 		{
 			if (setViaEditEngine == true)
 			{
@@ -6424,12 +6404,11 @@ bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem>
 			}
 			else
 			{
-				transmitter->setConnectionId(newConnectionId);
+				transmitter->setConnectionIds(newConnectionId);
 			}
 		}
 
 		editSchemaView()->update();
-
 		return true;
 	}
 

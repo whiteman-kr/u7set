@@ -141,9 +141,7 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::FontRole)
 	{
-//		if (	indexColumn == MVC_CMN_L_APP_ID || indexColumn == MVC_CMN_L_CUSTOM_ID || indexColumn == MVC_CMN_L_EQUIPMENT_ID ||
-//				indexColumn == MVC_CMN_L_IN_ERROR || indexColumn == MVC_CMN_L_OUT_ERROR)
-		if (	indexColumn == MVC_CMN_L_APP_ID || indexColumn == MVC_CMN_L_ERROR)
+		if (	indexColumn == MVC_CMN_L_APP_ID || indexColumn == MVC_CMN_L_ERROR_RESULT)
 		{
 			return theOptions.measureView().fontBold();
 		}
@@ -158,7 +156,7 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::BackgroundColorRole)
 	{
-		if (indexColumn == MVC_CMN_L_ERROR)
+		if (indexColumn == MVC_CMN_L_ERROR_RESULT)
 		{
 			return backgroundColor(indexRow, indexColumn);
 		}
@@ -175,57 +173,49 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 
 QColor MeasureTable::backgroundColor(int row, int column) const
 {
-	QColor result = MVC_CMN_COLOR_LIGHT_BLUE;
+	QColor result = theOptions.measureView().colorNotError();
 
 	if (row < 0 || row >= m_measureBase.count())
 	{
 		return result;
 	}
 
-	if (column < 0 || column > m_header.count())
+	if (column != MVC_CMN_L_ERROR_RESULT)
 	{
 		return result;
 	}
 
-	if (column == MVC_CMN_L_ERROR)
+	switch(m_measureType)
 	{
-		switch(m_measureType)
-		{
-			case MEASURE_TYPE_LINEARITY:
+		case MEASURE_TYPE_LINEARITY:
+			{
+				LinearityMeasurement* pLinearityMeasurement = static_cast<LinearityMeasurement*> (m_measureBase.measurement(row));
+				if (pLinearityMeasurement == nullptr)
 				{
-					LinearityMeasurement* pLinearityMeasurement = static_cast<LinearityMeasurement*> (m_measureBase.measurement(row));
-					if (pLinearityMeasurement == nullptr)
-					{
-						break;
-					}
-
-					int errorType = theOptions.linearity().errorType();
-					if (errorType < 0 || errorType >= MEASURE_ERROR_TYPE_COUNT)
-					{
-						break;
-					}
-
-					int showErrorFromLimit = theOptions.linearity().showErrorFromLimit();
-					if (showErrorFromLimit < 0 || showErrorFromLimit >= MEASURE_LIMIT_TYPE_COUNT)
-					{
-						break;
-					}
-
-					if (pLinearityMeasurement->error(showErrorFromLimit, errorType) > pLinearityMeasurement->errorLimit(showErrorFromLimit, errorType))
-					{
-						result = theOptions.measureView().colorErrorLimit();
-					}
-
+					break;
 				}
-				break;
 
-			case MEASURE_TYPE_COMPARATOR:
+				if (pLinearityMeasurement->isSignalValid() == false)
+				{
+					result = theOptions.measureView().colorErrorLimit();
+					break;
+				}
 
-				break;
+				if (pLinearityMeasurement->errorResult() != MEASURE_ERROR_RESULT_OK)
+				{
+					result = theOptions.measureView().colorErrorLimit();
+					break;
+				}
 
-			default:
-				assert(0);
-		}
+			}
+			break;
+
+		case MEASURE_TYPE_COMPARATOR:
+
+			break;
+
+		default:
+			assert(0);
 	}
 
 	return result;
@@ -349,10 +339,11 @@ QString MeasureTable::textLinearity(int row, int column) const
 		case MVC_CMN_L_SD:						result = m->additionalParamStr(MEASURE_ADDITIONAL_PARAM_SD); break;
 		case MVC_CMN_L_BORDER:					result = tr("± ") + m->additionalParamStr(MEASURE_ADDITIONAL_PARAM_LOW_HIGH_BORDER); break;
 
-		case MVC_CMN_L_ERROR:					result = m->errorStr(theOptions.linearity().showErrorFromLimit()); break;
-		case MVC_CMN_L_ERROR_LIMIT:				result = m->errorLimitStr(theOptions.linearity().showErrorFromLimit()); break;
+		case MVC_CMN_L_ERROR:					result = m->errorStr(); break;
+		case MVC_CMN_L_ERROR_LIMIT:				result = m->errorLimitStr(); break;
+		case MVC_CMN_L_ERROR_RESULT:			result = m->errorResultStr(); break;
 
-		case MVC_CMN_L_MEASUREMENT_TIME:		result = m->measureTime().toString("dd-MM-yyyy hh:mm:ss"); break;
+		case MVC_CMN_L_MEASUREMENT_TIME:		result = m->measureTime().toString(MEASURE_TIME_FORMAT); break;
 
 		default:								result.clear(); break;
 	}
