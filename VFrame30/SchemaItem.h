@@ -69,6 +69,7 @@ namespace VFrame30
 		Q_OBJECT
 
 		Q_PROPERTY(QString ObjectName READ objectName)
+		Q_PROPERTY(bool BlinkPhase READ blinkPhase)
 
 	protected:
 		SchemaItem();
@@ -258,6 +259,9 @@ namespace VFrame30
 		QString preDrawScript() const;
 		void setPreDrawScript(const QString& value);
 
+		bool blinkPhase() const;
+		void setBlinkPhase(bool value);
+
 		// Get SchemaItem bounding rectangle in itemUnit()
 		//
 		virtual QRectF boundingRectInDocPt() const;
@@ -278,6 +282,8 @@ namespace VFrame30
 		bool m_acceptClick = false;	// The SchemaItem accept mouse Left button click and runs script
 		QString m_clickScript;		// Qt script on mouse left button click
 		QString m_preDrawScript;
+
+		bool m_blinkPhase = false;	// Filled becore coalling preDrawScript for access to BlinkPahse from JS via property SchemaItem.BlinkPhase
 
 		QJSValue m_jsClickScript;		// Evaluated m_clickScript
 		QJSValue m_jsPreDrawScript;		// Evaluated m_preDrawScript

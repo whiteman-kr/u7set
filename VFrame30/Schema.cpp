@@ -212,9 +212,9 @@ namespace VFrame30
 		// Cleare client area by "grey" color
 		//
 		QPainter* p = drawParam->painter();
-		//p->fill(0xB0, 0xB0, 0xB0);	-- ??????? ?????????? ? CDrawParam::BeginPaint
+		//p->fill(0xB0, 0xB0, 0xB0);	-- Done in? CDrawParam::BeginPaint
 
-		// ?????????? ????
+		// ---
 		//
 		QRectF pageRect(0.0, 0.0, static_cast<qreal>(docWidth()), static_cast<qreal>(docHeight()));
 		p->fillRect(pageRect, backgroundColor());
@@ -226,24 +226,27 @@ namespace VFrame30
 		double clipWidth = static_cast<double>(clipRect.width());
 		double clipHeight = static_cast<double>(clipRect.height());
 
-		for (auto layer = Layers.cbegin(); layer != Layers.cend(); ++layer)
+		for (auto layer : Layers)
 		{
-			const SchemaLayer* pLayer = layer->get();
+			assert(layer);
 
-			if (pLayer->show() == false)
+			if (layer->show() == false)
 			{
 				continue;
 			}
 
 			if (drawParam->drawNotesLayer() == false &&
-				pLayer->name().compare(QLatin1String("Notes"), Qt::CaseInsensitive) == 0)
+				layer->name().compare(QLatin1String("Notes"), Qt::CaseInsensitive) == 0)
 			{
 				continue;
 			}
 
-			for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
+			for (auto vi = layer->Items.cbegin(); vi != layer->Items.cend(); ++vi)
 			{
 				const std::shared_ptr<SchemaItem>& item = *vi;
+				assert(item);
+
+				item->setBlinkPhase(drawParam->blinkPhase());
 
 				if (item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
@@ -255,7 +258,7 @@ namespace VFrame30
 						item->preDrawEvent(view->globalScript(), view->jsEngine());
 					}
 
-					item->Draw(drawParam, this, pLayer);
+					item->Draw(drawParam, this, layer.get());
 
 					if (item->isCommented() == true)
 					{

@@ -31,6 +31,7 @@
 #include "Settings.h"
 #include "../lib/SignalProperties.h"
 #include "DialogInputEx.h"
+#include "../QScintilla/Qt4Qt5/Qsci/QsciLexerJavaScript.h"
 #include "../lib/Ui/TextEditCompleter.h"
 
 
@@ -6705,25 +6706,125 @@ void EditSchemaWidget::f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item)
 		return;
 	}
 
-	QString text = valueItem->signalId();
+	QString appSignalIds = valueItem->signalIdsString();
+	QString text = valueItem->text();
+	QString preDrawScript = valueItem->preDrawScript();
 
 	// Show input dialog
 	//
-	bool ok = false;
-	QString newValue = DialogInputEx::getSingleLineText(this,
-														tr("Set AppSignalID"),
-														tr("AppSignalID:"),
-														text,
-														&ok,
-														VFrame30::PropertyNames::appSignalIdValidator,
-														400).trimmed();
+	QDialog d(this);
 
-	if (ok == true &&
-			newValue.isEmpty() == false &&
-			newValue != text)
+	d.setWindowTitle(tr("SchemaItemValue"));
+	d.setWindowFlags((d.windowFlags() & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowContextHelpButtonHint)
+					 | Qt::CustomizeWindowHint | Qt::WindowMaximizeButtonHint);
+
+	// AppSchemaIDs
+	//
+	QLabel* appSignalIdsLabel = new QLabel("AppSchemaIDs:", &d);
+
+	QTextEdit* appSignalIdsEdit = new QTextEdit(&d);
+	appSignalIdsEdit->setPlaceholderText("Enter AppSchemaIDs separated by lines");
+	appSignalIdsEdit->setPlainText(appSignalIds);
+
+	// Text
+	//
+	QLabel* textLabel = new QLabel("Text:", &d);
+
+	QLineEdit* textEdit = new QLineEdit(&d);
+	textEdit->setPlaceholderText(VFrame30::PropertyNames::textValuePropDescription);
+	textEdit->setToolTip(VFrame30::PropertyNames::textValuePropDescription);
+	textEdit->setText(text);
+
+	// PreDrawScript
+	//
+	QLabel* preDrawScriptLabel = new QLabel("PreDrawScript:", &d);
+
+	QsciScintilla* preDrawScriptEdit = new QsciScintilla(&d);
+	QsciLexerJavaScript lexer;
+	preDrawScriptEdit->setLexer(&lexer);
+	preDrawScriptEdit->setText(preDrawScript);
+	preDrawScriptEdit->setMarginType(0, QsciScintilla::NumberMargin);
+	preDrawScriptEdit->setMarginWidth(0, 40);
+
+#if defined(Q_OS_WIN)
+	preDrawScriptEdit->setFont(QFont("Consolas"));
+#else
+	preDrawScriptEdit->setFont(QFont("Courier"));
+#endif
+
+	preDrawScriptEdit->setTabWidth(4);
+	preDrawScriptEdit->setAutoIndent(true);
+
+	QPushButton* preDrawScriptTemplate = new QPushButton(tr("Paste PreDrawScript Template"), &d);
+
+	// --
+	//
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &d);
+
+	QGridLayout* layout = new QGridLayout(&d);
+
+	layout->addWidget(appSignalIdsLabel, 0, 0, 1, 3);
+	layout->addWidget(appSignalIdsEdit, 1, 0, 1, 3);
+
+	layout->addWidget(textLabel, 2, 0, 1, 3);
+	layout->addWidget(textEdit, 3, 0, 1, 3);
+
+	layout->addWidget(preDrawScriptLabel, 4, 0, 1, 3);
+	layout->addWidget(preDrawScriptEdit, 5, 0, 1, 3);
+	layout->addWidget(preDrawScriptTemplate, 6, 0, 1, 1);
+
+	layout->addWidget(buttonBox, 7, 0, 1, 3);
+
+	layout->setRowStretch(5, 1);	// preDrawScriptEdit
+
+	d.setLayout(layout);
+
+	QString preDrawScriptTemplateString = R"((function(schemaItemValue)
+{
+  // var appSignalId = schemaItemValue.SignalIDs[0];
+  // var signalParamFromAppDataService = signals.signalParam(appSignalId);
+  // var signalParamFromTuningService = tuning.signalParam(appSignalId);
+  // var signalStateFromAppDataService = signals.signalState(appSignalId);
+  // var signalStateFromTuningService = tuning.signalState(appSignalId);
+
+  // if (SchemaItemValue.SignalIDs[0].Valid == true)
+  // {
+  //		SchemaItemValue.Text = "Text";
+  //		SchemaItemValue.TextColor = "white";
+  //		SchemaItemValue.FillColor = "blue";
+  //		SchemaItemValue.LineColor = "black";
+  // }
+}))";
+
+	connect(preDrawScriptTemplate, &QPushButton::clicked, &d, [preDrawScriptEdit, preDrawScriptTemplateString](){preDrawScriptEdit->setText(preDrawScriptTemplateString);});
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	// --
+	//
+	int result = d.exec();
+
+	if (result == QDialog::Accepted)
 	{
-		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newValue), item);
-		editSchemaView()->update();
+		QString newAppSignaIds = appSignalIdsEdit->toPlainText();
+		QString newText = textEdit->text();
+		QString newPreDrawScript = preDrawScriptEdit->text();
+
+		if (newAppSignaIds != appSignalIds ||
+			newText != text ||
+			newPreDrawScript != preDrawScript)
+		{
+			if (bool ok = m_editEngine->startBatch();
+				ok == true)
+			{
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newAppSignaIds), item);
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::text, QVariant(newText), item);
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::preDrawScript, QVariant(newPreDrawScript), item);
+
+				m_editEngine->endBatch();
+			}
+		}
 	}
 
 	return;
