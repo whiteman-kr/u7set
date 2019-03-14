@@ -66,7 +66,7 @@ std::vector<AppSignalParam> DialogChooseTrendSignals::acceptedSignals() const
 void DialogChooseTrendSignals::fillSignalList()
 {
 	FilteredTrendSignalsModel* model = dynamic_cast<FilteredTrendSignalsModel*>(ui->filteredSignals->model());
-	assert(model);
+	Q_ASSERT(model);
 
 	model->filterSignals(ui->filterEdit->text());
 
@@ -95,7 +95,7 @@ void DialogChooseTrendSignals::addSignal(const AppSignalParam& signal)
 	case E::SignalType::Discrete:	signalType = "D";	break;
 	case E::SignalType::Bus:		signalType = "B";	break;
 	default:
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	QStringList itemData;
@@ -125,7 +125,7 @@ void DialogChooseTrendSignals::addSignal(const AppSignalParam& signal)
 
 void DialogChooseTrendSignals::removeSelectedSignal()
 {
-	assert(ui->trendSignals);
+	Q_ASSERT(ui->trendSignals);
 
 	QModelIndex currentIndex = ui->trendSignals->currentIndex();
 
@@ -145,7 +145,7 @@ bool DialogChooseTrendSignals::trendSignalsHasSignalId(QString signalId)
 	for (int i = 0; i < itemCount; i++)
 	{
 		QTreeWidgetItem* item = ui->trendSignals->topLevelItem(i);
-		assert(item);
+		Q_ASSERT(item);
 
 		if (item->text(0) == signalId)
 		{
@@ -158,13 +158,13 @@ bool DialogChooseTrendSignals::trendSignalsHasSignalId(QString signalId)
 
 void DialogChooseTrendSignals::disableControls()
 {
-	assert(ui->filteredSignals);
-	assert(ui->trendSignals);
+	Q_ASSERT(ui->filteredSignals);
+	Q_ASSERT(ui->trendSignals);
 
 	const FilteredTrendSignalsModel* fileterModel = dynamic_cast<const FilteredTrendSignalsModel*>(ui->filteredSignals->model());
 	if (fileterModel == nullptr)
 	{
-		assert(fileterModel != nullptr);
+		Q_ASSERT(fileterModel != nullptr);
 		return;
 	}
 
@@ -234,7 +234,7 @@ void DialogChooseTrendSignals::on_addSignalButton_clicked()
 
 	if (model == nullptr)
 	{
-		assert(dynamic_cast<const FilteredTrendSignalsModel*>(index.model()) != nullptr);
+		Q_ASSERT(dynamic_cast<const FilteredTrendSignalsModel*>(index.model()) != nullptr);
 		return;
 	}
 
@@ -278,7 +278,7 @@ void DialogChooseTrendSignals::on_filterEdit_editingFinished()
 		}
 
 		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_filterCompleter->model());
-		assert(completerModel);
+		Q_ASSERT(completerModel);
 
 		if (completerModel != nullptr)
 		{
@@ -300,7 +300,7 @@ void DialogChooseTrendSignals::on_filteredSignals_doubleClicked(const QModelInde
 
 	if (model == nullptr)
 	{
-		assert(dynamic_cast<const FilteredTrendSignalsModel*>(index.model()) != nullptr);
+		Q_ASSERT(dynamic_cast<const FilteredTrendSignalsModel*>(index.model()) != nullptr);
 		return;
 	}
 
@@ -332,16 +332,16 @@ void DialogChooseTrendSignals::on_buttonBox_accepted()
 	for (int i = 0; i < ui->trendSignals->topLevelItemCount(); i++)
 	{
 		QTreeWidgetItem* treeItem = ui->trendSignals->topLevelItem(i);
-		assert(treeItem);
+		Q_ASSERT(treeItem);
 
 		QVariant signalVariant = treeItem->data(0, Qt::UserRole);
 
-		assert(signalVariant.isNull() == false);
-		assert(signalVariant.isValid() == true);
+		Q_ASSERT(signalVariant.isNull() == false);
+		Q_ASSERT(signalVariant.isValid() == true);
 
 		AppSignalParam signalParam = signalVariant.value<AppSignalParam>();
 
-		assert(signalParam.customSignalId() == treeItem->text(0));
+		Q_ASSERT(signalParam.customSignalId() == treeItem->text(0));
 
 		m_acceptedSignals.push_back(signalParam);
 	}
@@ -376,7 +376,7 @@ FilteredTrendSignalsModel::FilteredTrendSignalsModel(const std::vector<AppSignal
 
 		if (customSignalId.isEmpty() == true)
 		{
-			assert(customSignalId.isEmpty() == false);
+			Q_ASSERT(customSignalId.isEmpty() == false);
 			continue;
 		}
 
@@ -443,7 +443,7 @@ QVariant FilteredTrendSignalsModel::data(const QModelIndex& index, int role) con
 		{
 			if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
 			{
-				assert(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
+				Q_ASSERT(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
 				return QVariant();
 			}
 
@@ -452,7 +452,7 @@ QVariant FilteredTrendSignalsModel::data(const QModelIndex& index, int role) con
 			if (signalIndex < 0 ||
 				signalIndex >= static_cast<int>(m_signals.size()))
 			{
-				assert(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
+				Q_ASSERT(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
 				return QVariant();
 			}
 
@@ -469,13 +469,13 @@ QVariant FilteredTrendSignalsModel::data(const QModelIndex& index, int role) con
 				case E::SignalType::Discrete:	return QString("D");
 				case E::SignalType::Bus:		return QString("B");
 				default:
-					assert(false);
+					Q_ASSERT(false);
 					return QVariant();
 				}
 			case 2:
 				return signalParam.caption();
 			default:
-				assert(false);
+				Q_ASSERT(false);
 				return QVariant();
 			}
 		}
@@ -484,7 +484,7 @@ QVariant FilteredTrendSignalsModel::data(const QModelIndex& index, int role) con
 		{
 			if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
 			{
-				assert(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
+				Q_ASSERT(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
 				return QVariant();
 			}
 
@@ -493,7 +493,7 @@ QVariant FilteredTrendSignalsModel::data(const QModelIndex& index, int role) con
 			if (signalIndex < 0 ||
 				signalIndex >= static_cast<int>(m_signals.size()))
 			{
-				assert(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
+				Q_ASSERT(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
 				return QVariant();
 			}
 
@@ -551,7 +551,7 @@ void FilteredTrendSignalsModel::filterSignals(QString filter)
 		{
 			if (index < 0 || index >= static_cast<int>(m_signals.size()))
 			{
-				assert(index >= 0 && index < static_cast<int>(m_signals.size()));
+				Q_ASSERT(index >= 0 && index < static_cast<int>(m_signals.size()));
 				continue;
 			}
 
@@ -577,7 +577,7 @@ AppSignalParam FilteredTrendSignalsModel::signalByRow(int row) const
 {
 	if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
 	{
-		assert(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
+		Q_ASSERT(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
 		return AppSignalParam();
 	}
 
@@ -585,7 +585,7 @@ AppSignalParam FilteredTrendSignalsModel::signalByRow(int row) const
 
 	if (signalIndex < 0 || signalIndex >= static_cast<int>(m_signals.size()))
 	{
-		assert(signalIndex >= 0 && signalIndex < static_cast<int>(m_signals.size()));
+		Q_ASSERT(signalIndex >= 0 && signalIndex < static_cast<int>(m_signals.size()));
 		return AppSignalParam();
 	}
 

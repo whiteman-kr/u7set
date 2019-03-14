@@ -4,7 +4,7 @@ MonitorSchemaManager::MonitorSchemaManager(MonitorConfigController* configContro
 	VFrame30::SchemaManager(parent),
 	m_configController(configController)
 {
-	assert(m_configController);
+	Q_ASSERT(m_configController);
 
 	connect(m_configController, &MonitorConfigController::configurationArrived, this, &MonitorSchemaManager::slot_configurationArrived);
 

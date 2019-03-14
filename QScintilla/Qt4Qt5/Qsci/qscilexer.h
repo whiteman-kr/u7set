@@ -1,6 +1,6 @@
 // This defines the interface to the QsciLexer class.
 //
-// Copyright (c) 2017 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2019 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla.
 // 
@@ -153,8 +153,8 @@ public:
     virtual int indentationGuideView() const;
 
     //! Returns the set of keywords for the keyword set \a set recognised
-    //! by the lexer as a space separated string.  0 is returned if there
-    //! is no such set.
+    //! by the lexer as a space separated string.  Keyword sets are numbered
+    //! from 1.  0 is returned if there is no such set.
     virtual const char *keywords(int set) const;
 
     //! Returns the number of the style used for whitespace.  The default
@@ -243,7 +243,8 @@ public:
     virtual void refreshProperties();
 
     //! Returns the number of style bits needed by the lexer.  Normally this
-    //! should only be re-implemented by custom lexers.
+    //! should only be re-implemented by custom lexers.  This is deprecated and
+    //! no longer has any effect.
     virtual int styleBitsNeeded() const;
 
     //! Returns the string of characters that comprise a word.  The default is

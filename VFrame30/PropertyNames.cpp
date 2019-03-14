@@ -41,6 +41,9 @@ namespace VFrame30
 	const QString PropertyNames::maxLength("MaxLength");
 	const QString PropertyNames::multiLine("MultiLine");
 
+	const QString PropertyNames::allowScale("AllowScale");
+	const QString PropertyNames::keepAspectRatio("KeepAspectRatio");
+
 	// SchemaItemValue Colors
 	//
 	const QString PropertyNames::textAnalog("TextAnalog");

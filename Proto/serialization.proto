@@ -389,6 +389,7 @@ message SchemaItem
 	optional SchemaItemRect Rect = 116;						// +PosRectImpl
 	optional SchemaItemLine Line = 117;						// +PosLineImpl
 	optional SchemaItemPath Path = 118;						// +PosConnectionImpl
+	optional SchemaItemImage Image = 119;					// +PosRectImpl
 
     optional SchemaItemSignal Signal = 124;					// +FblItemRect
 	optional SchemaItemInput InputSignal = 125;				// +Signal
@@ -485,6 +486,14 @@ message SchemaItemPath
 	required uint32 lineColor = 2;
 }
 
+//
+// SchemaItemImage
+//
+message SchemaItemImage
+{
+    optional bool allowScale = 1 [default = true];
+	optional bool keepAspectRatio = 2 [default = true];
+}
 
 //
 // FblConnectionPoint

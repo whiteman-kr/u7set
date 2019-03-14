@@ -5,7 +5,7 @@ TcpSignalClient::TcpSignalClient(MonitorConfigController* configController, cons
 	Tcp::Client(configController->softwareInfo(), serverAddressPort1, serverAddressPort2),
 	m_cfgController(configController)
 {
-	assert(m_cfgController);
+	Q_ASSERT(m_cfgController);
 
 	setObjectName("TcpSignalClient");
 
@@ -22,7 +22,7 @@ TcpSignalClient::~TcpSignalClient()
 
 void TcpSignalClient::timerEvent(QTimerEvent* event)
 {
-	assert(event);
+	Q_ASSERT(event);
 	return;
 }
 
@@ -48,7 +48,7 @@ void TcpSignalClient::onConnection()
 {
 	qDebug() << "TcpSignalClient::onConnection()";
 
-	assert(isClearToSendRequest() == true);
+	Q_ASSERT(isClearToSendRequest() == true);
 
 	resetToGetSignalList();
 
@@ -73,7 +73,7 @@ void TcpSignalClient::processReply(quint32 requestID, const char* replyData, qui
 {
 	if (replyData == nullptr)
 	{
-		assert(replyData);
+		Q_ASSERT(replyData);
 		return;
 	}
 
@@ -98,7 +98,7 @@ void TcpSignalClient::processReply(quint32 requestID, const char* replyData, qui
 		break;
 
 	default:
-		assert(false);
+		Q_ASSERT(false);
 		qDebug() << "Wrong requestID in TcpSignalClient::processReply()";
 
 		resetToGetState();
@@ -138,7 +138,7 @@ void TcpSignalClient::resetToGetState()
 
 void TcpSignalClient::requestSignalListStart()
 {
-	assert(isClearToSendRequest());
+	Q_ASSERT(isClearToSendRequest());
 	sendRequest(ADS_GET_APP_SIGNAL_LIST_START);
 }
 
@@ -148,7 +148,7 @@ void TcpSignalClient::processSignalListStart(const QByteArray& data)
 
 	if (ok == false)
 	{
-		assert(ok);
+		Q_ASSERT(ok);
 		resetToGetSignalList();
 		return;
 	}
@@ -156,7 +156,7 @@ void TcpSignalClient::processSignalListStart(const QByteArray& data)
 	if (m_getSignalListStartReply.error() != 0)
 	{
 		qDebug() << "TcpSignalClient::processSignalListNext, error received: " << m_getSignalListStartReply.error();
-		assert(m_getSignalListStartReply.error() != 0);
+		Q_ASSERT(m_getSignalListStartReply.error() != 0);
 
 		resetToGetSignalList();
 		return;
@@ -173,8 +173,8 @@ void TcpSignalClient::processSignalListStart(const QByteArray& data)
 	{
 		// There is no signals, useless but can be
 		//
-		assert(m_getSignalListStartReply.totalitemcount() == 0);
-		assert(m_getSignalListStartReply.partcount() == 0);
+		Q_ASSERT(m_getSignalListStartReply.totalitemcount() == 0);
+		Q_ASSERT(m_getSignalListStartReply.partcount() == 0);
 
 		m_signalList.clear();
 
@@ -194,7 +194,7 @@ void TcpSignalClient::processSignalListStart(const QByteArray& data)
 
 void TcpSignalClient::requestSignalListNext(int part)
 {
-	assert(isClearToSendRequest());
+	Q_ASSERT(isClearToSendRequest());
 
 	// if all parts were requested then sitch to next reply
 	//
@@ -202,7 +202,7 @@ void TcpSignalClient::requestSignalListNext(int part)
 	{
 		if (m_signalList.size() != m_getSignalListStartReply.totalitemcount())
 		{
-			assert(m_signalList.size() != m_getSignalListStartReply.totalitemcount());
+			Q_ASSERT(m_signalList.size() != m_getSignalListStartReply.totalitemcount());
 		}
 
 		// Request params
@@ -225,7 +225,7 @@ void TcpSignalClient::processSignalListNext(const QByteArray& data)
 
 	if (ok == false)
 	{
-		assert(ok);
+		Q_ASSERT(ok);
 		resetToGetSignalList();
 		return;
 	}
@@ -233,7 +233,7 @@ void TcpSignalClient::processSignalListNext(const QByteArray& data)
 	if (m_getSignalListNextReply.error() != 0)
 	{
 		qDebug() << "TcpSignalClient::processSignalListNext, error received: " << m_getSignalListNextReply.error();
-		assert(m_getSignalListNextReply.error() != 0);
+		Q_ASSERT(m_getSignalListNextReply.error() != 0);
 
 		resetToGetSignalList();
 		return;
@@ -243,7 +243,7 @@ void TcpSignalClient::processSignalListNext(const QByteArray& data)
 	{
 		// Asked for one part but got different
 		//
-		assert(m_getSignalListNextReply.part() == m_getSignalListNextRequest.part());
+		Q_ASSERT(m_getSignalListNextReply.part() == m_getSignalListNextRequest.part());
 		resetToGetSignalList();
 		return;
 	}
@@ -268,7 +268,7 @@ void TcpSignalClient::processSignalListNext(const QByteArray& data)
 //
 void TcpSignalClient::requestSignalParam(int startIndex)
 {
-	assert(isClearToSendRequest());
+	Q_ASSERT(isClearToSendRequest());
 	m_lastSignalParamStartIndex = startIndex;
 
 	if (startIndex == 0)
@@ -305,7 +305,7 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 
 	if (ok == false)
 	{
-		assert(ok);
+		Q_ASSERT(ok);
 		resetToGetSignalList();
 		return;
 	}
@@ -313,7 +313,7 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 	if (m_getSignalParamReply.error() != 0)
 	{
 		qDebug() << "TcpSignalClient::processSignalParam, error received: " << m_getSignalParamReply.error();
-		assert(m_getSignalParamReply.error() != 0);
+		Q_ASSERT(m_getSignalParamReply.error() != 0);
 
 		resetToGetState();
 		return;
@@ -335,8 +335,8 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 			qDebug() << s.caption();
 		}
 
-		assert(s.hash() != 0);
-		assert(s.appSignalId().isEmpty() == false);
+		Q_ASSERT(s.hash() != 0);
+		Q_ASSERT(s.appSignalId().isEmpty() == false);
 
 		if (s.hash() != 0 && s.appSignalId().isEmpty() == false)
 		{
@@ -356,7 +356,7 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 //
 void TcpSignalClient::requestSignalState(int startIndex)
 {
-	assert(isClearToSendRequest());
+	Q_ASSERT(isClearToSendRequest());
 	m_lastSignalStateStartIndex = startIndex;
 
 	if (startIndex >= m_signalList.size())
@@ -387,7 +387,7 @@ void TcpSignalClient::processSignalState(const QByteArray& data)
 
 	if (ok == false)
 	{
-		assert(ok);
+		Q_ASSERT(ok);
 		resetToGetState();
 		return;
 	}
@@ -395,7 +395,7 @@ void TcpSignalClient::processSignalState(const QByteArray& data)
 	if (m_getSignalStateReply.error() != 0)
 	{
 		qDebug() << "TcpSignalClient::processSignalState, error received: " << m_getSignalStateReply.error();
-		assert(m_getSignalStateReply.error() != 0);
+		Q_ASSERT(m_getSignalStateReply.error() != 0);
 
 		resetToGetState();
 		return;
@@ -409,7 +409,7 @@ void TcpSignalClient::processSignalState(const QByteArray& data)
 	for (int i = 0; i < signalStateCount; i++)
 	{
 		const ::Proto::AppSignalState& protoState = m_getSignalStateReply.appsignalstates(i);
-		assert(protoState.hash() != 0);
+		Q_ASSERT(protoState.hash() != 0);
 
 		states.emplace_back(protoState);
 	}

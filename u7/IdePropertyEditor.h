@@ -2,8 +2,8 @@
 #define IDEPROPERTYEDITOR_H
 
 #include "../QScintilla/Qt4Qt5/Qsci/qsciscintilla.h"
-#include "../QScintilla/Qt4Qt5/Qsci/qscilexercpp.h"
-#include "../QScintilla/Qt4Qt5/Qsci/qscilexerxml.h"
+#include "../lib/QScintillaLexers/LexerXML.h"
+#include "../lib/QScintillaLexers/LexerJavaScript.h"
 
 #include "../lib/PropertyEditor.h"
 #include "../lib/DbController.h"
@@ -65,7 +65,7 @@ private:
 
 enum class CodeType
 {
-    Cpp,
+	JavaScript,
     Xml,
     Unknown
 };
@@ -94,8 +94,9 @@ protected:
 
 private:
     QsciScintilla* m_textEdit = nullptr;
-    QsciLexerCPP m_lexerCpp;
-    QsciLexerXML m_lexerXml;
+
+	LexerJavaScript m_lexerJavaScript;
+	LexerXML m_lexerXml;
 
     QWidget* m_parent = nullptr;
 

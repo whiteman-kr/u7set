@@ -150,7 +150,7 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 {
 	if (theMonitorMainWindow == nullptr)
 	{
-		assert(theMonitorMainWindow);
+		Q_ASSERT(theMonitorMainWindow);
 		return;
 	}
 
@@ -161,6 +161,8 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 	{
 		DialogSignalInfo* dsi = new DialogSignalInfo(signal, theMonitorMainWindow);
 		dsi->show();
+		dsi->raise();
+		dsi->activateWindow();
 	}
 	else
 	{
@@ -174,7 +176,7 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 //{
 //	if (schemaManager() == nullptr)
 //	{
-//		assert(schemaManager());
+//		Q_ASSERT(schemaManager());
 //		return;
 //	}
 
@@ -185,7 +187,7 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 //	if (canBackHistory() == false)
 //	{
 //		VFrame30::SchemaHistoryItem& currentHistoryItem = m_backHistory.back();
-//		assert(currentHistoryItem.m_schemaId == this->schemaId());
+//		Q_ASSERT(currentHistoryItem.m_schemaId == this->schemaId());
 
 //		currentHistoryItem = currentHistoryState();
 //	}
@@ -224,13 +226,13 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 MonitorView* MonitorSchemaWidget::monitorSchemaView()
 {
 	MonitorView* result = dynamic_cast<MonitorView*>(schemaView());
-	assert(result);
+	Q_ASSERT(result);
 	return result;
 }
 
 const MonitorView* MonitorSchemaWidget::monitorSchemaView() const
 {
 	const MonitorView* result = dynamic_cast<const MonitorView*>(schemaView());
-	assert(result);
+	Q_ASSERT(result);
 	return result;
 }

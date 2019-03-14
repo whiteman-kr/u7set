@@ -48,6 +48,9 @@ namespace VFrame30
 		static const QString maxLength;
 		static const QString multiLine;
 
+		static const QString allowScale;
+		static const QString keepAspectRatio;
+
 		// --
 		//
 		static const QString textAnalog;

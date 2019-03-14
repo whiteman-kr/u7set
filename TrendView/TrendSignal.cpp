@@ -9,7 +9,7 @@ namespace TrendLib
 	{
 		if (message == nullptr)
 		{
-			assert(message);
+			Q_ASSERT(message);
 			return false;
 		}
 
@@ -29,7 +29,7 @@ namespace TrendLib
 
 		// Loading TrendStateItem_v1
 		//
-		assert(message.states_raw_buffer_v1().size() % sizeof(TrendStateItem_v1) == 0);
+		Q_ASSERT(message.states_raw_buffer_v1().size() % sizeof(TrendStateItem_v1) == 0);
 		size_t stateCount = message.states_raw_buffer_v1().size() / sizeof(TrendStateItem_v1);
 
 		states.clear();
@@ -44,7 +44,7 @@ namespace TrendLib
 	{
 		if (message == nullptr)
 		{
-			assert(message);
+			Q_ASSERT(message);
 			return false;
 		}
 
@@ -85,7 +85,7 @@ namespace TrendLib
 	{
 		if (message == nullptr)
 		{
-			assert(message);
+			Q_ASSERT(message);
 			return false;
 		}
 
@@ -162,7 +162,7 @@ namespace TrendLib
 	{
 		if (message == nullptr)
 		{
-			assert(message);
+			Q_ASSERT(message);
 			return false;
 		}
 
@@ -363,7 +363,7 @@ namespace TrendLib
 	{
 		if (message == nullptr)
 		{
-			assert(message);
+			Q_ASSERT(message);
 			return false;
 		}
 
@@ -654,8 +654,8 @@ namespace TrendLib
 		if (outData == nullptr ||
 			from > to)
 		{
-			assert(outData);
-			assert(from <= to);
+			Q_ASSERT(outData);
+			Q_ASSERT(from <= to);
 			return false;
 		}
 
@@ -670,7 +670,7 @@ namespace TrendLib
 		case E::TimeType::System:	m_archive = &m_archiveSystemTime;	break;
 		case E::TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
 		default:
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -699,9 +699,9 @@ namespace TrendLib
 				archHour.toDateTime().time().second() != 0 ||
 				archHour.toDateTime().time().msec() != 0)
 			{
-				assert(archHour.toDateTime().time().minute() == 0);
-				assert(archHour.toDateTime().time().second() == 0);
-				assert(archHour.toDateTime().time().msec() == 0);
+				Q_ASSERT(archHour.toDateTime().time().minute() == 0);
+				Q_ASSERT(archHour.toDateTime().time().second() == 0);
+				Q_ASSERT(archHour.toDateTime().time().msec() == 0);
 				return false;
 			}
 
@@ -715,7 +715,7 @@ namespace TrendLib
 			std::shared_ptr<OneHourData> hourData = archHourIt->second;
 			if (hourData == nullptr)
 			{
-				assert(hourData);
+				Q_ASSERT(hourData);
 				continue;
 			}
 
@@ -734,8 +734,8 @@ namespace TrendLib
 		if (outData == nullptr ||
 			from > to)
 		{
-			assert(outData);
-			assert(from <= to);
+			Q_ASSERT(outData);
+			Q_ASSERT(from <= to);
 			return false;
 		}
 
@@ -751,7 +751,7 @@ namespace TrendLib
 			case E::TimeType::System:	m_archive = &m_archiveSystemTime;	break;
 			case E::TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
 			default:
-				assert(false);
+				Q_ASSERT(false);
 				return false;
 			}
 
@@ -781,9 +781,9 @@ namespace TrendLib
 					archHour.toDateTime().time().second() != 0 ||
 					archHour.toDateTime().time().msec() != 0)
 				{
-					assert(archHour.toDateTime().time().minute() == 0);
-					assert(archHour.toDateTime().time().second() == 0);
-					assert(archHour.toDateTime().time().msec() == 0);
+					Q_ASSERT(archHour.toDateTime().time().minute() == 0);
+					Q_ASSERT(archHour.toDateTime().time().second() == 0);
+					Q_ASSERT(archHour.toDateTime().time().msec() == 0);
 					return false;
 				}
 
@@ -820,7 +820,7 @@ namespace TrendLib
 					}
 					break;
 				default:
-					assert(false);
+					Q_ASSERT(false);
 					return false;
 				}
 			}
@@ -846,7 +846,7 @@ namespace TrendLib
 			m_archivePlantTime.clear();
 			break;
 		default:
-			assert(false);
+			Q_ASSERT(false);
 			break;
 		}
 
@@ -877,7 +877,7 @@ namespace TrendLib
 		case E::TimeType::System:	archive = &m_archiveSystemTime;	break;
 		case E::TimeType::Plant:	archive = &m_archivePlantTime;	break;
 		default:
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -922,7 +922,7 @@ namespace TrendLib
 						}
 						else
 						{
-							assert(record.states.empty() == false);
+							Q_ASSERT(record.states.empty() == false);
 						}
 
 						break;
@@ -965,7 +965,7 @@ namespace TrendLib
 		case E::TimeType::System:	m_archive = &m_archiveSystemTime;	break;
 		case E::TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
 		default:
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -984,9 +984,9 @@ namespace TrendLib
 			requestedHour.toDateTime().time().second() != 0 ||
 			requestedHour.toDateTime().time().msec() != 0)
 		{
-			assert(requestedHour.toDateTime().time().minute() == 0);
-			assert(requestedHour.toDateTime().time().second() == 0);
-			assert(requestedHour.toDateTime().time().msec() == 0);
+			Q_ASSERT(requestedHour.toDateTime().time().minute() == 0);
+			Q_ASSERT(requestedHour.toDateTime().time().second() == 0);
+			Q_ASSERT(requestedHour.toDateTime().time().msec() == 0);
 			return;
 		}
 
@@ -1025,7 +1025,7 @@ namespace TrendLib
 		case E::TimeType::System:	m_archive = &m_archiveSystemTime;	break;
 		case E::TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
 		default:
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -1043,9 +1043,9 @@ namespace TrendLib
 			requestedHour.toDateTime().time().second() != 0 ||
 			requestedHour.toDateTime().time().msec() != 0)
 		{
-			assert(requestedHour.toDateTime().time().minute() == 0);
-			assert(requestedHour.toDateTime().time().second() == 0);
-			assert(requestedHour.toDateTime().time().msec() == 0);
+			Q_ASSERT(requestedHour.toDateTime().time().minute() == 0);
+			Q_ASSERT(requestedHour.toDateTime().time().second() == 0);
+			Q_ASSERT(requestedHour.toDateTime().time().msec() == 0);
 			return;
 		}
 
@@ -1088,7 +1088,7 @@ namespace TrendLib
 		case E::TimeType::System:	m_archive = &m_archiveSystemTime;	break;
 		case E::TimeType::Plant:	m_archive = &m_archivePlantTime;	break;
 		default:
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -1109,7 +1109,7 @@ namespace TrendLib
 
 			if (lastHourTime == ts)
 			{
-				assert(hourData);
+				Q_ASSERT(hourData);
 			}
 			else
 			{
