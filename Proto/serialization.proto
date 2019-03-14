@@ -999,6 +999,7 @@ message AppSignal
     optional string lmEquipmentID = 5;
     optional string busTypeID = 6;
     optional int32 channel = 7 [default = 0];
+	optional bool excludeFromBuild = 8 [default = false];
 
     // Signal type
 
@@ -1079,6 +1080,7 @@ message ProtoAppSignalData
 	optional double coarseAperture = 15 [default = 1.0];
 	optional double fineAperture = 16 [default = 0.5];
 	optional bool adaptiveAperture = 17 [default = false];
+	optional bool excludefromBuild = 18 [default = false];
 }
 
 

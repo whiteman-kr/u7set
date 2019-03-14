@@ -925,12 +925,16 @@ namespace Builder
 			return false;
 		}
 
+		signalSet->findAndRemoveExcludedFromBuildSignals();
+
 		result = signalSet->checkSignals();
 
 		if (result == false)
 		{
 			return false;
 		}
+
+		//QStringList
 
 		signalSet->buildID2IndexMap();
 
