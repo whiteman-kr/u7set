@@ -21,12 +21,12 @@ bool MonitorArchive::activateWindow(QString archiveName)
 {
 	if (m_archiveList.count(archiveName) != 1)
 	{
-		assert(m_archiveList.count(archiveName) != 1);
+		Q_ASSERT(m_archiveList.count(archiveName) != 1);
 		return false;
 	}
 
 	MonitorArchiveWidget* widget = m_archiveList[archiveName];
-	assert(widget);
+	Q_ASSERT(widget);
 
 	widget->activateWindow();
 	widget->ensureVisible();
@@ -47,7 +47,7 @@ bool MonitorArchive::startNewWidget(MonitorConfigController* configController, c
 
 void MonitorArchive::registerWindow(QString name, MonitorArchiveWidget* window)
 {
-	assert(m_archiveList.count(name) == 0);
+	Q_ASSERT(m_archiveList.count(name) == 0);
 	m_archiveList[name] = window;
 
 	return;
@@ -55,7 +55,7 @@ void MonitorArchive::registerWindow(QString name, MonitorArchiveWidget* window)
 
 void MonitorArchive::unregisterWindow(QString name)
 {
-	assert(m_archiveList.count(name) == 1);
+	Q_ASSERT(m_archiveList.count(name) == 1);
 	m_archiveList.erase(name);
 
 	return;
@@ -129,7 +129,7 @@ static int no = 1;
 	m_timeType->addItem(tr("Plant Time"), QVariant::fromValue(E::TimeType::Plant));
 
 	int currentTimeType = m_timeType->findData(QVariant::fromValue(m_source.timeType));
-	assert(currentTimeType != -1);
+	Q_ASSERT(currentTimeType != -1);
 
 	if (currentTimeType != -1)
 	{
@@ -230,7 +230,7 @@ MonitorArchiveWidget::~MonitorArchiveWidget()
 {
 	MonitorArchive::unregisterWindow(this->windowTitle());
 
-	assert(m_tcpClientThread);
+	Q_ASSERT(m_tcpClientThread);
 	m_tcpClientThread->quitAndWait(10000);
 
 	return;
@@ -275,20 +275,20 @@ void MonitorArchiveWidget::requestData()
 	if (m_tcpClient == nullptr ||
 		m_tcpClientThread == nullptr)
 	{
-		assert(m_tcpClient);
-		assert(m_tcpClientThread);
+		Q_ASSERT(m_tcpClient);
+		Q_ASSERT(m_tcpClientThread);
 		return;
 	}
 
 	if (m_tcpClientThread->isRunning() == false)
 	{
-		assert(m_tcpClientThread->isRunning() == true);
+		Q_ASSERT(m_tcpClientThread->isRunning() == true);
 		return;
 	}
 
 	if (m_tcpClient->isRequestInProgress() == true)
 	{
-		assert(m_tcpClient->isRequestInProgress());
+		Q_ASSERT(m_tcpClient->isRequestInProgress());
 		return;
 	}
 
@@ -318,14 +318,14 @@ void MonitorArchiveWidget::cancelRequest()
 	if (m_tcpClient == nullptr ||
 		m_tcpClientThread == nullptr)
 	{
-		assert(m_tcpClient);
-		assert(m_tcpClientThread);
+		Q_ASSERT(m_tcpClient);
+		Q_ASSERT(m_tcpClientThread);
 		return;
 	}
 
 	if (m_tcpClientThread->isRunning() == false)
 	{
-		assert(m_tcpClientThread->isRunning() == true);
+		Q_ASSERT(m_tcpClientThread->isRunning() == true);
 		return;
 	}
 
@@ -336,7 +336,7 @@ void MonitorArchiveWidget::cancelRequest()
 
 	m_tcpClient->cancelRequest();
 
-	assert(m_tcpClient->isRequestInProgress() == false);
+	Q_ASSERT(m_tcpClient->isRequestInProgress() == false);
 
 	return;
 }
@@ -345,7 +345,7 @@ bool MonitorArchiveWidget::exportToTextDocument(QTextDocument* doc, bool onlySel
 {
 	if (doc == nullptr)
 	{
-		assert(doc);
+		Q_ASSERT(doc);
 		return false;
 	}
 
@@ -522,9 +522,9 @@ bool MonitorArchiveWidget::saveArchiveWithDocWriter(QString fileName, QString fo
 		m_view == nullptr ||
 		fileName.isEmpty() == true)
 	{
-		assert(m_model);
-		assert(m_view);
-		assert(fileName.isEmpty() == false);
+		Q_ASSERT(m_model);
+		Q_ASSERT(m_view);
+		Q_ASSERT(fileName.isEmpty() == false);
 		return false;
 	}
 
@@ -636,9 +636,9 @@ bool MonitorArchiveWidget::saveArchiveToCsv(QString fileName)
 		m_view == nullptr ||
 		fileName.isEmpty() == true)
 	{
-		assert(m_model);
-		assert(m_view);
-		assert(fileName.isEmpty() == false);
+		Q_ASSERT(m_model);
+		Q_ASSERT(m_view);
+		Q_ASSERT(fileName.isEmpty() == false);
 		return false;
 	}
 
@@ -762,7 +762,7 @@ void MonitorArchiveWidget::dropEvent(QDropEvent* event)
 {
 	if (event->mimeData()->hasFormat(AppSignalParamMimeType::value) == false)
 	{
-		assert(event->mimeData()->hasFormat(AppSignalParamMimeType::value) == true);
+		Q_ASSERT(event->mimeData()->hasFormat(AppSignalParamMimeType::value) == true);
 		event->setDropAction(Qt::DropAction::IgnoreAction);
 		event->accept();
 		return;
@@ -830,7 +830,7 @@ void MonitorArchiveWidget::restoreWindowState()
 
 void MonitorArchiveWidget::timeTypeCurrentIndexChanged(int /*index*/)
 {
-	assert(m_timeType);
+	Q_ASSERT(m_timeType);
 
 	m_source.timeType = m_timeType->currentData().value<E::TimeType>();
 	theSettings.m_archiveTimeType = static_cast<int>(m_source.timeType);
@@ -840,7 +840,7 @@ void MonitorArchiveWidget::timeTypeCurrentIndexChanged(int /*index*/)
 
 void MonitorArchiveWidget::exportButton()
 {
-	assert(m_model);
+	Q_ASSERT(m_model);
 	if (m_model->rowCount() == 0)
 	{
 		QMessageBox::warning(this, qAppName(), tr("Nothing to export."));
@@ -885,8 +885,8 @@ void MonitorArchiveWidget::printButton()
 	if (m_model == nullptr ||
 		m_view == nullptr)
 	{
-		assert(m_model);
-		assert(m_view);
+		Q_ASSERT(m_model);
+		Q_ASSERT(m_view);
 		return;
 	}
 
@@ -970,7 +970,7 @@ void MonitorArchiveWidget::signalsButton()
 	m_endDateTimeEdit->setDateTime(tsEnd.toDateTime());
 
 	int currentTimeType = m_timeType->findData(QVariant::fromValue(m_source.timeType));
-	assert(currentTimeType != -1);
+	Q_ASSERT(currentTimeType != -1);
 
 	if (currentTimeType != -1)
 	{
@@ -1015,7 +1015,7 @@ void MonitorArchiveWidget::printRequested(QPrinter* printer)
 {
 	if (printer == nullptr)
 	{
-		assert(printer);
+		Q_ASSERT(printer);
 	}
 
 	QTextDocument doc;
@@ -1039,7 +1039,7 @@ void MonitorArchiveWidget::dataReceived(std::shared_ptr<ArchiveChunk> chunk)
 {
 	if (chunk == nullptr)
 	{
-		assert(chunk);
+		Q_ASSERT(chunk);
 		return;
 	}
 
@@ -1056,7 +1056,7 @@ void MonitorArchiveWidget::tcpClientError(QString errorMessage)
 
 void MonitorArchiveWidget::tcpStatus(QString status, int statesReceived, int requestCount, int repliesCount)
 {
-	assert(m_statusBar);
+	Q_ASSERT(m_statusBar);
 
 	m_statusBarTextLabel->setText(status);
 	m_statusBarStatesReceivedLabel->setText(QString("States received: %1").arg(statesReceived));

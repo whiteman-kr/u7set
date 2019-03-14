@@ -17,7 +17,7 @@ namespace TrendLib
 	{
 		if (message == nullptr)
 		{
-			assert(message);
+			Q_ASSERT(message);
 			return false;
 		}
 
@@ -33,7 +33,7 @@ namespace TrendLib
 	{
 		if (message.IsInitialized() == false)
 		{
-			assert(message.IsInitialized());
+			Q_ASSERT(message.IsInitialized());
 			return false;
 		}
 
@@ -49,7 +49,7 @@ namespace TrendLib
 	{
 		if (image == nullptr)
 		{
-			assert(image);
+			Q_ASSERT(image);
 			return;
 		}
 
@@ -70,7 +70,7 @@ namespace TrendLib
 
 	void Trend::draw(QPainter* painter, const TrendParam& drawParam, bool needAdjustPainter) const
 	{
-		assert(painter);
+		Q_ASSERT(painter);
 
 		if (needAdjustPainter == true)
 		{
@@ -164,7 +164,7 @@ namespace TrendLib
 							   const std::vector<TrendSignalParam>& discretes,
 							   const std::vector<TrendSignalParam>& analogs) const
 	{
-		assert(painter);
+		Q_ASSERT(painter);
 		painter->setClipping(false);
 
 		QRectF lastDiscreteRect;
@@ -188,7 +188,7 @@ namespace TrendLib
 
 		// Specific drawing for analog signals
 		//
-		assert(drawParam.viewMode() == TrendViewMode::Separated ||
+		Q_ASSERT(drawParam.viewMode() == TrendViewMode::Separated ||
 			   drawParam.viewMode() == TrendViewMode::Overlapped);
 
 		if (analogs.empty() == true &&
@@ -397,7 +397,7 @@ namespace TrendLib
 								 const std::vector<TrendSignalParam>& discretes,
 								 const std::vector<TrendSignalParam>& analogs) const
 	{
-		assert(painter);
+		Q_ASSERT(painter);
 		painter->setClipRect(laneRect);
 
 		// Draw DISCRETE signal id, caption and scale ("0", "1")
@@ -430,7 +430,7 @@ namespace TrendLib
 
 		// Draw ANALOG signal id, caption and scale for TrendView::Separated mode
 		//
-		assert(drawParam.viewMode() == TrendViewMode::Separated ||
+		Q_ASSERT(drawParam.viewMode() == TrendViewMode::Separated ||
 			   drawParam.viewMode() == TrendViewMode::Overlapped);
 
 		if (drawParam.viewMode() == TrendViewMode::Separated  &&
@@ -517,7 +517,7 @@ namespace TrendLib
 												  const TrendParam& drawParam,
 												  const TrendSignalParam& signal) const
 	{
-		assert(painter);
+		Q_ASSERT(painter);
 		painter->setClipping(false);
 
 		QRectF signalRect = signal.tempDrawRect();
@@ -574,7 +574,7 @@ namespace TrendLib
 
 		if (gridCount < 0)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			gridCount = 0;
 		}
 
@@ -649,7 +649,7 @@ namespace TrendLib
 													const TrendParam& drawParam,
 													const std::vector<TrendSignalParam>& analogs) const
 	{
-		assert(painter);
+		Q_ASSERT(painter);
 		painter->setClipping(false);
 
 		if (analogs.empty() == true)
@@ -719,7 +719,7 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 		{
 			// Something wrong
 			//
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -795,7 +795,7 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 		for (size_t i = 1; i < analogs.size(); i++)
 		{
 			const TrendSignalParam& signal = analogs[i];
-			assert(signal.isAnalog() == true);
+			Q_ASSERT(signal.isAnalog() == true);
 
 			double highLimit = qMax(signal.viewHighLimit(), signal.viewLowLimit());
 			double lowLimit = qMin(signal.viewHighLimit(), signal.viewLowLimit());
@@ -869,7 +869,7 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 
 	void Trend::drawSignalTrend(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam) const
 	{
-		assert(painter);
+		Q_ASSERT(painter);
 
 		QRectF signalRect = signal.tempDrawRect();
 		if (signalRect.isEmpty() == true)
@@ -912,8 +912,8 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 
 	void Trend::drawSignalTrendDiscrete(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const
 	{
-		assert(painter);
-		assert(signal.isDiscrete() == true);
+		Q_ASSERT(painter);
+		Q_ASSERT(signal.isDiscrete() == true);
 
 		QRectF signalRect = signal.tempDrawRect();
 
@@ -1049,8 +1049,8 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 
 	void Trend::drawSignalTrendAnalog(QPainter* painter, const TrendSignalParam& signal, const TrendParam& drawParam, const std::list<std::shared_ptr<OneHourData>>& signalData) const
 	{
-		assert(painter);
-		assert(signal.isAnalog() == true);
+		Q_ASSERT(painter);
+		Q_ASSERT(signal.isAnalog() == true);
 
 		QRectF signalRect = signal.tempDrawRect();
 
@@ -1207,7 +1207,7 @@ static const int recomendedSize = 8192;
 	{
 		if (painter == nullptr)
 		{
-			assert(painter);
+			Q_ASSERT(painter);
 			return;
 		}
 
@@ -1622,10 +1622,10 @@ static const TrendStateItem fakeState = TrendStateItem();
 				{
 					// value is beyond the last item
 					//
-					assert(false);	// we have checked it before
+					Q_ASSERT(false);	// we have checked it before
 				}
 
-				assert(false);
+				Q_ASSERT(false);
 			}
 		}
 
@@ -1636,7 +1636,7 @@ static const TrendStateItem fakeState = TrendStateItem();
 
 	void Trend::adjustPainter(QPainter* painter, int dpiX, int dpiY)
 	{
-		assert(painter);
+		Q_ASSERT(painter);
 
 		painter->setRenderHint(QPainter::Antialiasing, true);
 		painter->setRenderHint(QPainter::TextAntialiasing, true);
@@ -1651,7 +1651,7 @@ static const TrendStateItem fakeState = TrendStateItem();
 
 	void Trend::drawPolyline(QPainter* painter, const QVector<QPointF>& lines, const QRectF& rect) const
 	{
-		assert(painter);
+		Q_ASSERT(painter);
 
 		if (lines.size() < 2)
 		{
@@ -1712,8 +1712,8 @@ static const TrendStateItem fakeState = TrendStateItem();
 								std::vector<TrendSignalParam>* discretes,
 								std::vector<TrendSignalParam>* analogs)
 	{
-		assert(discretes);
-		assert(analogs);
+		Q_ASSERT(discretes);
+		Q_ASSERT(analogs);
 
 		double y = insideRect.top();
 
@@ -1787,7 +1787,7 @@ static const TrendStateItem fakeState = TrendStateItem();
 			}
 		}
 
-		assert(drawParam.viewMode() == TrendViewMode::Separated ||
+		Q_ASSERT(drawParam.viewMode() == TrendViewMode::Separated ||
 			   drawParam.viewMode() == TrendViewMode::Overlapped);
 
 		return;
@@ -1930,10 +1930,10 @@ static const TrendStateItem fakeState = TrendStateItem();
 			rulerIndex == nullptr ||
 			outSignal == nullptr)
 		{
-			assert(outLaneIndex);
-			assert(outTime);
-			assert(rulerIndex);
-			assert(outSignal);
+			Q_ASSERT(outLaneIndex);
+			Q_ASSERT(outTime);
+			Q_ASSERT(rulerIndex);
+			Q_ASSERT(outSignal);
 			return Trend::MouseOn::Outside;
 		}
 
@@ -2067,7 +2067,7 @@ static const TrendStateItem fakeState = TrendStateItem();
 	{
 		if (duration == 0)
 		{
-			assert(duration != 0);
+			Q_ASSERT(duration != 0);
 			duration = 1;
 		}
 
@@ -2080,7 +2080,7 @@ static const TrendStateItem fakeState = TrendStateItem();
 
 		if (delta <= DBL_MIN)
 		{
-			assert(fabs(highLimit - lowLimit) > DBL_MIN);
+			Q_ASSERT(fabs(highLimit - lowLimit) > DBL_MIN);
 			return 0;
 		}
 
@@ -2092,7 +2092,7 @@ static const TrendStateItem fakeState = TrendStateItem();
 	{
 		if (painter == nullptr)
 		{
-			assert(painter);
+			Q_ASSERT(painter);
 			return;
 		}
 

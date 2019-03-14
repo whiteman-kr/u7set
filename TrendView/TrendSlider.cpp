@@ -8,7 +8,7 @@
 TrendSlider::TrendSlider(TrendLib::TrendRulerSet* rulerSet) :
 	m_rulerSet(rulerSet)
 {
-	assert(m_rulerSet);
+	Q_ASSERT(m_rulerSet);
 
 	m_setTimeButton = new QPushButton(QChar(0x25B2), this);
 	m_lineLeftButton = new QPushButton(QChar(0x25C4), this);
@@ -241,8 +241,8 @@ TrendSliderRailSubcontrol::TrendSliderRailSubcontrol(TrendSlider* threndSlider, 
 	m_trendSlider(threndSlider),
 	m_rulerSet(rulerSet)
 {
-	assert(m_trendSlider);
-	assert(m_rulerSet);
+	Q_ASSERT(m_trendSlider);
+	Q_ASSERT(m_rulerSet);
 
 	connect(m_trendSlider, &TrendSlider::paramsChanged, this, &TrendSliderRailSubcontrol::paramsChanged);
 

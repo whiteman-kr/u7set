@@ -64,7 +64,7 @@ void RtTrendTcpClient::onClientThreadFinished()
 void RtTrendTcpClient::onConnection()
 {
 	qDebug() << "RtTrendTcpClient::onConnection()";
-	assert(isClearToSendRequest() == true);
+	Q_ASSERT(isClearToSendRequest() == true);
 
 	startRequestCycle();
 
@@ -90,7 +90,7 @@ void RtTrendTcpClient::processReply(quint32 requestID, const char* replyData, qu
 
 	if (replyData == nullptr)
 	{
-		assert(replyData);
+		Q_ASSERT(replyData);
 		return;
 	}
 
@@ -107,7 +107,7 @@ void RtTrendTcpClient::processReply(quint32 requestID, const char* replyData, qu
 		break;
 
 	default:
-		assert(false);
+		Q_ASSERT(false);
 		qDebug() << "Wrong requestID in RtTrendTcpClient::processReply() " << requestID;
 
 		closeConnection();
@@ -122,7 +122,7 @@ void RtTrendTcpClient::startRequestCycle()
 
 	if (isClearToSendRequest() == false)
 	{
-		assert(isClearToSendRequest() == true);
+		Q_ASSERT(isClearToSendRequest() == true);
 		closeConnection();
 		return;
 	}
@@ -134,7 +134,7 @@ void RtTrendTcpClient::startRequestCycle()
 
 void RtTrendTcpClient::requestTrendManagement()
 {
-	assert(isClearToSendRequest());
+	Q_ASSERT(isClearToSendRequest());
 	incStatRequestCount();
 
 	m_managementRequest.Clear();
@@ -183,7 +183,7 @@ void RtTrendTcpClient::processTrendManagement(const QByteArray& data)
 	{
 		emit requestError(tr("Cannot parse reply to RT_TRENDS_MANAGEMENT"));
 
-		assert(ok);
+		Q_ASSERT(ok);
 		closeConnection();
 		return;
 	}
@@ -213,7 +213,7 @@ void RtTrendTcpClient::processTrendManagement(const QByteArray& data)
 
 void RtTrendTcpClient::requestTrendStateChanges()
 {
-	assert(isClearToSendRequest());
+	Q_ASSERT(isClearToSendRequest());
 	incStatRequestCount();
 
 	m_stateChangesRequest.Clear();
@@ -231,7 +231,7 @@ void RtTrendTcpClient::processTrendStateChanges(const QByteArray& data)
 
 	if (ok == false)
 	{
-		assert(ok);
+		Q_ASSERT(ok);
 
 		emit requestError(tr("Cannot parse reply to RT_TRENDS_GET_STATE_CHANGES"));
 		closeConnection();

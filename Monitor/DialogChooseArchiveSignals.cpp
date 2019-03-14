@@ -21,13 +21,13 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(
 
 	// Fill SignalType Combo
 	//
-	assert(ui->signalTypeCombo);
+	Q_ASSERT(ui->signalTypeCombo);
 	ui->signalTypeCombo->addItem(tr("All Signals"), QVariant::fromValue<ArchiveSignalType>(ArchiveSignalType::AllSignals));
 	ui->signalTypeCombo->addItem(tr("Analog Signals"), QVariant::fromValue<ArchiveSignalType>(ArchiveSignalType::AnalogSignals));
 	ui->signalTypeCombo->addItem(tr("Discrete Signals"), QVariant::fromValue<ArchiveSignalType>(ArchiveSignalType::DiscreteSignals));
 
 	int currentSignalTypeIndex = ui->signalTypeCombo->findData(QVariant::fromValue<ArchiveSignalType>(m_lastSignalType));
-	assert(currentSignalTypeIndex != -1);
+	Q_ASSERT(currentSignalTypeIndex != -1);
 
 	if (currentSignalTypeIndex != -1)
 	{
@@ -38,7 +38,7 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(
 
 	// Fill Schema Combo
 	//
-	assert(ui->schemaCombo);
+	Q_ASSERT(ui->schemaCombo);
 	ui->schemaCombo->addItem(tr("All Schemas"), QVariant::fromValue<QString>(QString()));
 	for (const VFrame30::SchemaDetails& schema : m_schemasDetails)
 	{
@@ -66,13 +66,13 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(
 
 	// TimeType Combo
 	//
-	assert(ui->timeTypeCombo);
+	Q_ASSERT(ui->timeTypeCombo);
 	ui->timeTypeCombo->addItem(tr("Server Time"), QVariant::fromValue(E::TimeType::Local));
 	ui->timeTypeCombo->addItem(tr("Server Time UTC%100").arg(QChar(0x00B1)), QVariant::fromValue(E::TimeType::System));
 	ui->timeTypeCombo->addItem(tr("Plant Time"), QVariant::fromValue(E::TimeType::Plant));
 
 	int currentTimeType = ui->timeTypeCombo->findData(QVariant::fromValue(init.timeType));
-	assert(currentTimeType != -1);
+	Q_ASSERT(currentTimeType != -1);
 
 	if (currentTimeType != -1)
 	{
@@ -81,7 +81,7 @@ DialogChooseArchiveSignals::DialogChooseArchiveSignals(
 
 	// Remove periodic records checkbox
 	//
-	assert(ui->removePeriodicCheckbox);
+	Q_ASSERT(ui->removePeriodicCheckbox);
 	ui->removePeriodicCheckbox->setChecked(init.removePeriodicRecords);
 
 	// Set filter completer
@@ -152,7 +152,7 @@ void DialogChooseArchiveSignals::filterSignals()
 	// Get SignalType
 	//
 	ArchiveSignalType signaType = ui->signalTypeCombo->currentData().value<ArchiveSignalType>();
-	assert(signaType == ArchiveSignalType::AllSignals ||
+	Q_ASSERT(signaType == ArchiveSignalType::AllSignals ||
 		   signaType == ArchiveSignalType::AnalogSignals ||
 		   signaType == ArchiveSignalType::DiscreteSignals);
 
@@ -163,7 +163,7 @@ void DialogChooseArchiveSignals::filterSignals()
 	// Apply filter to model
 	//
 	FilteredArchiveSignalsModel* model = dynamic_cast<FilteredArchiveSignalsModel*>(ui->filteredSignals->model());
-	assert(model);
+	Q_ASSERT(model);
 
 	model->filterSignals(signaType, ui->filterEdit->text(), schemaId);
 
@@ -192,7 +192,7 @@ void DialogChooseArchiveSignals::addSignal(const AppSignalParam& signal)
 	case E::SignalType::Discrete:	signalType = "D";	break;
 	case E::SignalType::Bus:		signalType = "B";	break;
 	default:
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	QStringList itemData;
@@ -223,7 +223,7 @@ void DialogChooseArchiveSignals::addSignal(const AppSignalParam& signal)
 
 void DialogChooseArchiveSignals::removeSelectedSignal()
 {
-	assert(ui->archiveSignals);
+	Q_ASSERT(ui->archiveSignals);
 
 	QModelIndex currentIndex = ui->archiveSignals->currentIndex();
 
@@ -243,7 +243,7 @@ bool DialogChooseArchiveSignals::archiveSignalsHasSignalId(QString signalId)
 	for (int i = 0; i < itemCount; i++)
 	{
 		QTreeWidgetItem* item = ui->archiveSignals->topLevelItem(i);
-		assert(item);
+		Q_ASSERT(item);
 
 		if (item->text(0) == signalId)
 		{
@@ -256,13 +256,13 @@ bool DialogChooseArchiveSignals::archiveSignalsHasSignalId(QString signalId)
 
 void DialogChooseArchiveSignals::disableControls()
 {
-	assert(ui->filteredSignals);
-	assert(ui->archiveSignals);
+	Q_ASSERT(ui->filteredSignals);
+	Q_ASSERT(ui->archiveSignals);
 
 	const FilteredArchiveSignalsModel* fileterModel = dynamic_cast<const FilteredArchiveSignalsModel*>(ui->filteredSignals->model());
 	if (fileterModel == nullptr)
 	{
-		assert(fileterModel != nullptr);
+		Q_ASSERT(fileterModel != nullptr);
 		return;
 	}
 
@@ -341,7 +341,7 @@ void DialogChooseArchiveSignals::on_addSignalButton_clicked()
 
 	if (model == nullptr)
 	{
-		assert(dynamic_cast<const FilteredArchiveSignalsModel*>(index.model()) != nullptr);
+		Q_ASSERT(dynamic_cast<const FilteredArchiveSignalsModel*>(index.model()) != nullptr);
 		return;
 	}
 
@@ -385,7 +385,7 @@ void DialogChooseArchiveSignals::on_filterEdit_editingFinished()
 		}
 
 		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_filterCompleter->model());
-		assert(completerModel);
+		Q_ASSERT(completerModel);
 
 		if (completerModel != nullptr)
 		{
@@ -407,7 +407,7 @@ void DialogChooseArchiveSignals::on_filteredSignals_doubleClicked(const QModelIn
 
 	if (model == nullptr)
 	{
-		assert(dynamic_cast<const FilteredArchiveSignalsModel*>(index.model()) != nullptr);
+		Q_ASSERT(dynamic_cast<const FilteredArchiveSignalsModel*>(index.model()) != nullptr);
 		return;
 	}
 
@@ -462,7 +462,7 @@ FilteredArchiveSignalsModel::FilteredArchiveSignalsModel(const std::vector<AppSi
 
 		if (customSignalId.isEmpty() == true)
 		{
-			assert(customSignalId.isEmpty() == false);
+			Q_ASSERT(customSignalId.isEmpty() == false);
 			continue;
 		}
 
@@ -513,16 +513,16 @@ void DialogChooseArchiveSignals::on_buttonBox_accepted()
 	for (int i = 0; i < ui->archiveSignals->topLevelItemCount(); i++)
 	{
 		QTreeWidgetItem* treeItem = ui->archiveSignals->topLevelItem(i);
-		assert(treeItem);
+		Q_ASSERT(treeItem);
 
 		QVariant signalVariant = treeItem->data(0, Qt::UserRole);
 
-		assert(signalVariant.isNull() == false);
-		assert(signalVariant.isValid() == true);
+		Q_ASSERT(signalVariant.isNull() == false);
+		Q_ASSERT(signalVariant.isValid() == true);
 
 		AppSignalParam signalParam = signalVariant.value<AppSignalParam>();
 
-		assert(signalParam.customSignalId() == treeItem->text(0));
+		Q_ASSERT(signalParam.customSignalId() == treeItem->text(0));
 
 		m_result.acceptedSignals.push_back(signalParam);
 	}
@@ -572,7 +572,7 @@ QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) c
 		{
 			if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
 			{
-				assert(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
+				Q_ASSERT(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
 				return QVariant();
 			}
 
@@ -581,7 +581,7 @@ QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) c
 			if (signalIndex < 0 ||
 				signalIndex >= static_cast<int>(m_signals.size()))
 			{
-				assert(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
+				Q_ASSERT(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
 				return QVariant();
 			}
 
@@ -598,13 +598,13 @@ QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) c
 				case E::SignalType::Discrete:	return QString("D");
 				case E::SignalType::Bus:		return QString("B");
 				default:
-					assert(false);
+					Q_ASSERT(false);
 					return QVariant();
 				}
 			case 2:
 				return signalParam.caption();
 			default:
-				assert(false);
+				Q_ASSERT(false);
 				return QVariant();
 			}
 		}
@@ -613,7 +613,7 @@ QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) c
 		{
 			if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
 			{
-				assert(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
+				Q_ASSERT(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
 				return QVariant();
 			}
 
@@ -622,7 +622,7 @@ QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) c
 			if (signalIndex < 0 ||
 				signalIndex >= static_cast<int>(m_signals.size()))
 			{
-				assert(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
+				Q_ASSERT(signalIndex >= 0 &&  signalIndex < static_cast<int>(m_signals.size()));
 				return QVariant();
 			}
 
@@ -659,7 +659,7 @@ void FilteredArchiveSignalsModel::filterSignals(DialogChooseArchiveSignals::Arch
 	if (sit != m_schemasDetails.end())
 	{
 		schemaIndex = std::distance(m_schemasDetails.begin(), sit);
-		assert(schemaIndex < m_schemasDetails.size());
+		Q_ASSERT(schemaIndex < m_schemasDetails.size());
 	}
 
 	if (filterText.isEmpty() == true)
@@ -712,7 +712,7 @@ void FilteredArchiveSignalsModel::filterSignals(DialogChooseArchiveSignals::Arch
 		{
 			if (index < 0 || index >= static_cast<int>(m_signals.size()))
 			{
-				assert(index >= 0 && index < static_cast<int>(m_signals.size()));
+				Q_ASSERT(index >= 0 && index < static_cast<int>(m_signals.size()));
 				continue;
 			}
 
@@ -761,7 +761,7 @@ AppSignalParam FilteredArchiveSignalsModel::signalByRow(int row) const
 {
 	if (row < 0 || row >= static_cast<int>(m_signalIndexes.size()))
 	{
-		assert(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
+		Q_ASSERT(row >= 0 && row < static_cast<int>(m_signalIndexes.size()));
 		return AppSignalParam();
 	}
 
@@ -769,7 +769,7 @@ AppSignalParam FilteredArchiveSignalsModel::signalByRow(int row) const
 
 	if (signalIndex < 0 || signalIndex >= static_cast<int>(m_signals.size()))
 	{
-		assert(signalIndex >= 0 && signalIndex < static_cast<int>(m_signals.size()));
+		Q_ASSERT(signalIndex >= 0 && signalIndex < static_cast<int>(m_signals.size()));
 		return AppSignalParam();
 	}
 

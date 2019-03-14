@@ -17,7 +17,7 @@ namespace TrendLib
 	{
 		if (message == nullptr)
 		{
-			assert(message);
+			Q_ASSERT(message);
 			return false;
 		}
 
@@ -80,7 +80,7 @@ namespace TrendLib
 	{
 		if (message == nullptr)
 		{
-			assert(message);
+			Q_ASSERT(message);
 			return false;
 		}
 
@@ -98,7 +98,7 @@ namespace TrendLib
 	{
 		if (message.IsInitialized() == false)
 		{
-			assert(message.IsInitialized());
+			Q_ASSERT(message.IsInitialized());
 			return false;
 		}
 

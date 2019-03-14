@@ -8,7 +8,7 @@ MonitorTuningTcpClient::MonitorTuningTcpClient(const SoftwareInfo& softwareInfo,
 
 	if (m_logFile == nullptr)
 	{
-		assert(m_logFile);
+		Q_ASSERT(m_logFile);
 	}
 }
 

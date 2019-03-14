@@ -84,7 +84,7 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 	connect(monitorCentralWidget, &MonitorCentralWidget::signal_actionCloseTabUpdated, this,
 		[this](bool allowed)
 		{
-			assert(m_closeTabAction);
+			Q_ASSERT(m_closeTabAction);
 			m_closeTabAction->setEnabled(allowed);
 		});
 
@@ -140,7 +140,7 @@ void MonitorMainWindow::closeEvent(QCloseEvent* e)
 
 void MonitorMainWindow::timerEvent(QTimerEvent* event)
 {
-	assert(event);
+	Q_ASSERT(event);
 
 	// Update status bar
 	//
@@ -166,8 +166,8 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 	if  (event->timerId() == m_updateStatusBarTimerId &&
 		 m_tcpSignalClient != nullptr)
 	{
-		assert(m_statusBarConnectionState);
-		assert(m_statusBarConnectionStatistics);
+		Q_ASSERT(m_statusBarConnectionState);
+		Q_ASSERT(m_statusBarConnectionStatistics);
 
 		Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
 		Tcp::ConnectionState signalClientState =  m_tcpSignalClient->getConnectionState();
@@ -214,7 +214,7 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 		m_logErrorsCounter = m_LogFile.errorAckCounter();
 		m_logWarningsCounter = m_LogFile.warningAckCounter();
 
-		assert(m_statusBarLogAlerts);
+		Q_ASSERT(m_statusBarLogAlerts);
 
 		m_statusBarLogAlerts->setText(QString(" Log E: %1 W: %2").arg(m_logErrorsCounter).arg(m_logWarningsCounter));
 
@@ -299,7 +299,7 @@ void MonitorMainWindow::restoreWindowState()
 
 void MonitorMainWindow::showLogo()
 {
-	assert(m_logoLabel);
+	Q_ASSERT(m_logoLabel);
 
 	QImage logo = QImage(":/Images/Images/Logo.png");
 
@@ -588,7 +588,7 @@ void MonitorMainWindow::createStatusBar()
 MonitorCentralWidget* MonitorMainWindow::monitorCentralWidget()
 {
 	MonitorCentralWidget* centralWidget = dynamic_cast<MonitorCentralWidget*>(QMainWindow::centralWidget());
-	assert(centralWidget != nullptr);
+	Q_ASSERT(centralWidget != nullptr);
 
 	return centralWidget;
 }
@@ -609,7 +609,7 @@ void MonitorMainWindow::showTuningSources()
 	{
 		if (m_tuningTcpClient == nullptr)
 		{
-			assert(m_tuningTcpClient);
+			Q_ASSERT(m_tuningTcpClient);
 			return;
 		}
 
@@ -806,7 +806,7 @@ void MonitorMainWindow::slot_archive()
 		for (size_t i = 0; i < archives.size(); i++)
 		{
 			QAction* a = menu.addAction(archives[i]);
-			assert(a);
+			Q_ASSERT(a);
 
 			a->setData(QVariant::fromValue<int>(static_cast<int>(i)));		// Data is index in archives vector
 		}
@@ -830,8 +830,8 @@ void MonitorMainWindow::slot_archive()
 		{
 			if (ok == false || archiveIndex < 0 || archiveIndex >= archives.size())
 			{
-				assert(ok == true);
-				assert(archiveIndex >= 0 && archiveIndex < archives.size());
+				Q_ASSERT(ok == true);
+				Q_ASSERT(archiveIndex >= 0 && archiveIndex < archives.size());
 				return;
 			}
 
@@ -883,7 +883,7 @@ void MonitorMainWindow::slot_trends()
 		for (size_t i = 0; i < trends.size(); i++)
 		{
 			QAction* a = menu.addAction(trends[i]);
-			assert(a);
+			Q_ASSERT(a);
 
 			a->setData(QVariant::fromValue<int>(static_cast<int>(i)));		// Data is index in trend vector
 		}
@@ -907,8 +907,8 @@ void MonitorMainWindow::slot_trends()
 		{
 			if (ok == false || trendIndex < 0 || trendIndex >= trends.size())
 			{
-				assert(ok == true);
-				assert(trendIndex >= 0 && trendIndex < trends.size());
+				Q_ASSERT(ok == true);
+				Q_ASSERT(trendIndex >= 0 && trendIndex < trends.size());
 				return;
 			}
 
@@ -951,8 +951,8 @@ void MonitorMainWindow::slot_historyChanged(bool enableBack, bool enableForward)
 	if (m_historyBack == nullptr ||
 		m_historyForward == nullptr)
 	{
-		assert(m_historyBack);
-		assert(m_historyForward);
+		Q_ASSERT(m_historyBack);
+		Q_ASSERT(m_historyForward);
 
 		return;
 	}
@@ -1036,7 +1036,7 @@ MonitorToolBar::MonitorToolBar(const QString& tittle, QWidget* parent) :
 
 void MonitorToolBar::addAction(QAction* action)
 {
-	assert(action);
+	Q_ASSERT(action);
 
 	QWidget::addAction(action);
 	widgetForAction(action)->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
@@ -1132,7 +1132,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 		MonitorMainWindow* m = dynamic_cast<MonitorMainWindow*>(this->parent());
 		if (m == nullptr)
 		{
-			assert(m);
+			Q_ASSERT(m);
 			return;
 		}
 
@@ -1183,7 +1183,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 		MonitorMainWindow* mainWindow = dynamic_cast<MonitorMainWindow*>(this->parent());
 		if (mainWindow == nullptr)
 		{
-			assert(mainWindow);
+			Q_ASSERT(mainWindow);
 			return;
 		}
 

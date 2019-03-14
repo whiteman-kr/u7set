@@ -10,7 +10,7 @@ MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 	m_appSignalController(appSignalController),
 	m_tuningController(tuningController)
 {
-	assert(m_schemaManager);
+	Q_ASSERT(m_schemaManager);
 
 	// --
 	//
@@ -82,7 +82,7 @@ void MonitorCentralWidget::slot_newTab()
 
 	if (curTabWidget == nullptr)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
@@ -96,7 +96,7 @@ void MonitorCentralWidget::slot_closeCurrentTab()
 
 	if (curTabWidget == nullptr)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
@@ -113,7 +113,7 @@ void MonitorCentralWidget::slot_zoomIn()
 
 	if (curTabWidget == nullptr)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
@@ -127,7 +127,7 @@ void MonitorCentralWidget::slot_zoomOut()
 
 	if (curTabWidget == nullptr)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
@@ -141,7 +141,7 @@ void MonitorCentralWidget::slot_zoom100()
 
 	if (curTabWidget == nullptr)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
@@ -155,11 +155,11 @@ void MonitorCentralWidget::slot_historyBack()
 
 	if (curTabWidget == nullptr)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
-	assert(curTabWidget->canBackHistory() == true);
+	Q_ASSERT(curTabWidget->canBackHistory() == true);
 
 	curTabWidget->historyBack();
 
@@ -172,11 +172,11 @@ void MonitorCentralWidget::slot_historyForward()
 
 	if (curTabWidget == nullptr)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
-	assert(curTabWidget->canForwardHistory() == true);
+	Q_ASSERT(curTabWidget->canForwardHistory() == true);
 
 	curTabWidget->historyForward();
 
@@ -189,7 +189,7 @@ void MonitorCentralWidget::slot_selectSchemaForCurrentTab(QString schemaId)
 
 	if (tab == nullptr)
 	{
-		assert(tab);
+		Q_ASSERT(tab);
 		return;
 	}
 
@@ -214,7 +214,7 @@ void MonitorCentralWidget::slot_tabCloseRequested(int index)
 
 	if (tabWidget == nullptr)
 	{
-		assert(tabWidget);
+		Q_ASSERT(tabWidget);
 		return;
 	}
 
@@ -243,7 +243,7 @@ void MonitorCentralWidget::slot_resetSchema()
 
 		if (tabPage == nullptr)
 		{
-			assert(tabPage);
+			Q_ASSERT(tabPage);
 			continue;
 		}
 
@@ -264,7 +264,7 @@ void MonitorCentralWidget::slot_newSameTab(MonitorSchemaWidget* tabWidget)
 {
 	if (tabWidget == nullptr)
 	{
-		assert(tabWidget);
+		Q_ASSERT(tabWidget);
 		return;
 	}
 
@@ -279,7 +279,7 @@ void MonitorCentralWidget::slot_newSameTab(MonitorSchemaWidget* tabWidget)
 		emit signal_schemaChanged(schemaId);
 
 		MonitorSchemaWidget* newTab = currentTab();
-		assert(newTab);
+		Q_ASSERT(newTab);
 
 		newTab->emitHistoryChanged();
 	}
@@ -291,7 +291,7 @@ void MonitorCentralWidget::slot_closeTab(MonitorSchemaWidget* tabWidget)
 {
 	if (tabWidget == nullptr)
 	{
-		assert(tabWidget);
+		Q_ASSERT(tabWidget);
 		return;
 	}
 
@@ -299,7 +299,7 @@ void MonitorCentralWidget::slot_closeTab(MonitorSchemaWidget* tabWidget)
 
 	if (tabIndex == -1)
 	{
-		assert(tabIndex != -1);
+		Q_ASSERT(tabIndex != -1);
 		return;
 	}
 
@@ -313,8 +313,8 @@ void MonitorCentralWidget::slot_schemaChanged(VFrame30::ClientSchemaWidget* tabW
 	if (tabWidget == nullptr ||
 		schema == nullptr)
 	{
-		assert(tabWidget);
-		assert(schema);
+		Q_ASSERT(tabWidget);
+		Q_ASSERT(schema);
 		return;
 	}
 

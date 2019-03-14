@@ -82,7 +82,7 @@ MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInf
 		{
 			// Get empty slot from shared memory
 			//
-			assert(m_appInstanceSharedMemory.isAttached() == true);
+			Q_ASSERT(m_appInstanceSharedMemory.isAttached() == true);
 
 			m_appInstanceSharedMemory.lock();
 
@@ -104,7 +104,7 @@ MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInf
 
 			if (m_appInstanceNo == -1)
 			{
-				assert(m_appInstanceNo > 0);
+				Q_ASSERT(m_appInstanceNo > 0);
 
 				QMessageBox::critical(nullptr,
 									  qApp->applicationName(),
@@ -137,7 +137,7 @@ MonitorConfigController::~MonitorConfigController()
 	//
 	if (m_appInstanceNo != -1)
 	{
-		assert(m_appInstanceSharedMemory.isAttached() == true);
+		Q_ASSERT(m_appInstanceSharedMemory.isAttached() == true);
 
 		m_appInstanceSharedMemory.lock();
 
@@ -157,7 +157,7 @@ void MonitorConfigController::setConnectionParams(QString equipmentId, HostAddre
 {
 	if (m_cfgLoaderThread == nullptr)
 	{
-		assert(m_cfgLoaderThread);
+		Q_ASSERT(m_cfgLoaderThread);
 		return;
 	}
 
@@ -172,7 +172,7 @@ bool MonitorConfigController::getFileBlocked(const QString& pathFileName, QByteA
 {
 	if (m_cfgLoaderThread == nullptr)
 	{
-		assert(m_cfgLoaderThread != nullptr);
+		Q_ASSERT(m_cfgLoaderThread != nullptr);
 		return false;
 	}
 
@@ -193,7 +193,7 @@ bool MonitorConfigController::getFile(const QString& pathFileName, QByteArray* f
 
 	// To do
 	//
-	assert(false);
+	Q_ASSERT(false);
 	return false;
 }
 
@@ -201,7 +201,7 @@ bool MonitorConfigController::getFileBlockedById(const QString& id, QByteArray* 
 {
 	if (m_cfgLoaderThread == nullptr)
 	{
-		assert(m_cfgLoaderThread != nullptr);
+		Q_ASSERT(m_cfgLoaderThread != nullptr);
 		return false;
 	}
 
@@ -222,7 +222,7 @@ bool MonitorConfigController::getFileById(const QString& id, QByteArray* fileDat
 
 	// To do
 	//
-	assert(false);
+	Q_ASSERT(false);
 	return false;
 }
 
@@ -232,7 +232,7 @@ Tcp::ConnectionState MonitorConfigController::getConnectionState() const
 
 	if (m_cfgLoaderThread == nullptr)
 	{
-		assert(m_cfgLoaderThread);
+		Q_ASSERT(m_cfgLoaderThread);
 
 		result.isConnected = false;
 		return result;
@@ -252,7 +252,7 @@ void MonitorConfigController::start()
 {
 	if (m_cfgLoaderThread == nullptr)
 	{
-		assert(m_cfgLoaderThread);
+		Q_ASSERT(m_cfgLoaderThread);
 		return;
 	}
 
@@ -433,8 +433,8 @@ bool MonitorConfigController::xmlReadBuildInfoNode(const QDomNode& buildInfoNode
 	if (outSetting == nullptr ||
 		buildInfoNode.nodeName() != "BuildInfo")
 	{
-		assert(outSetting);
-		assert(buildInfoNode.nodeName() == "BuildInfo");
+		Q_ASSERT(outSetting);
+		Q_ASSERT(buildInfoNode.nodeName() == "BuildInfo");
 		return false;
 	}
 
@@ -451,8 +451,8 @@ bool MonitorConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, 
 	if (outSetting == nullptr ||
 		softwareNode.nodeName() != "Software")
 	{
-		assert(outSetting);
-		assert(softwareNode.nodeName() == "Software");
+		Q_ASSERT(outSetting);
+		Q_ASSERT(softwareNode.nodeName() == "Software");
 		return false;
 	}
 
@@ -492,8 +492,8 @@ bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, 
 	if (outSetting == nullptr ||
 		settingsNode.nodeName() != "Settings")
 	{
-		assert(outSetting);
-		assert(settingsNode.nodeName() == "Settings");
+		Q_ASSERT(outSetting);
+		Q_ASSERT(settingsNode.nodeName() == "Settings");
 		return false;
 	}
 

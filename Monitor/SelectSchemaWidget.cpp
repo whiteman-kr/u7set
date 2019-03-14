@@ -4,8 +4,8 @@ SelectSchemaWidget::SelectSchemaWidget(MonitorConfigController* configController
 	m_configController(configController),
 	m_centraWidget(centralWidget)
 {
-	assert(m_configController);
-	assert(m_centraWidget);
+	Q_ASSERT(m_configController);
+	Q_ASSERT(m_centraWidget);
 
 	m_schemas.reserve(32);
 
@@ -71,9 +71,9 @@ QString SelectSchemaWidget::currentSchemaId() const
 
 void SelectSchemaWidget::slot_configurationArrived(ConfigSettings)
 {
-	assert(m_button);
-	assert(m_configController);
-	assert(m_centraWidget);
+	Q_ASSERT(m_button);
+	Q_ASSERT(m_configController);
+	Q_ASSERT(m_centraWidget);
 
 	// Save state
 	//
@@ -304,10 +304,10 @@ QVariant SelectSchemaModel::data(const QModelIndex& index, int role) const
 
 	if (role == Qt::DisplayRole)
 	{
-		assert(static_cast<size_t>(row) < m_filteredItems.size());
+		Q_ASSERT(static_cast<size_t>(row) < m_filteredItems.size());
 
 		int index = m_filteredItems[row];
-		assert(static_cast<size_t>(index) < m_schemas.size());
+		Q_ASSERT(static_cast<size_t>(index) < m_schemas.size());
 
 		const auto& schema = m_schemas[index];
 		QString str = QString("%1\n%2").arg(schema.schemaId).arg(schema.caption);
@@ -317,10 +317,10 @@ QVariant SelectSchemaModel::data(const QModelIndex& index, int role) const
 
 	if (role == Qt::UserRole)
 	{
-		assert(static_cast<size_t>(row) < m_filteredItems.size());
+		Q_ASSERT(static_cast<size_t>(row) < m_filteredItems.size());
 
 		int index = m_filteredItems[row];
-		assert(static_cast<size_t>(index) < m_schemas.size());
+		Q_ASSERT(static_cast<size_t>(index) < m_schemas.size());
 
 		const auto& schema = m_schemas[index];
 
