@@ -11,6 +11,7 @@
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/SchemaItemLine.h"
 #include "../VFrame30/SchemaItemRect.h"
+#include "../VFrame30/SchemaItemImage.h"
 #include "../VFrame30/SchemaItemPath.h"
 #include "../VFrame30/SchemaItemSignal.h"
 #include "../VFrame30/SchemaItemAfb.h"
@@ -1940,6 +1941,16 @@ void EditSchemaWidget::createActions()
 				addItem(text);
 			});
 
+	m_addImageAction = new QAction(tr("Image"), this);
+	m_addImageAction->setEnabled(true);
+	m_addImageAction->setIcon(QIcon(":/Images/Images/SchemaItemImage.svg"));
+	connect(m_addImageAction, &QAction::triggered,
+			[this](bool)
+			{
+				auto image = std::make_shared<VFrame30::SchemaItemImage>(schema()->unit());
+				addItem(image);
+			});
+
 	// ----------------------------------------
 	m_addSeparatorAction0 = new QAction(this);
 	m_addSeparatorAction0->setSeparator(true);
@@ -2477,6 +2488,7 @@ void EditSchemaWidget::createActions()
 		m_addMenu->addAction(m_addRectAction);
 		m_addMenu->addAction(m_addPathAction);
 		m_addMenu->addAction(m_addTextAction);
+		m_addMenu->addAction(m_addImageAction);
 
 		m_addMenu->addAction(m_addSeparatorAction0);
 
