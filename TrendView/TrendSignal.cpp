@@ -1108,7 +1108,7 @@ namespace TrendLib
 			TimeStamp ts = state.getTime(timeType).roundedToHour();
 			if (ts == 0)
 			{
-				qDebug() << "TrendSignalSet: Received wront timestamp: " << ts.timeStamp << ", " << timeType;
+				qDebug() << "TrendSignalSet::appendRealtimeDataToArchive: Received wrong timestamp: " << ts.timeStamp << ", " << timeType;
 				continue;
 			}
 
