@@ -103,6 +103,7 @@ public:
 	static const QString checkedOutCaption;
 	static const QString userIdCaption;
 	static const QString channelCaption;
+	static const QString excludeFromBuildCaption;
 	static const QString createdCaption;
 	static const QString deletedCaption;
 	static const QString instanceCreatedCaption;

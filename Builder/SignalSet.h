@@ -34,6 +34,8 @@ namespace Builder
 		Signal* appendBusChildSignal(const Signal& s, BusShared bus, const BusSignal& busSignal);
 		Signal* createBusChildSignal(const Signal& s, BusShared bus, const BusSignal& busSignal);
 
+		void findAndRemoveExcludedFromBuildSignals();
+
 	private:
 		QString buildBusSignalCaption(const Signal& s, BusShared bus, const BusSignal& busSignal);
 

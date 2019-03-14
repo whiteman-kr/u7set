@@ -6095,6 +6095,26 @@ namespace Builder
 					arg(lmEquipmentID));
 	}
 
+	/// IssueCode: ALC5167
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Signal %1 is excluded from build.
+	///
+	/// Parameters:
+	///		%1 app signal ID
+	///
+	/// Description:
+	///		Signal is excluded from build.
+	///
+	void IssueLogger::wrnALC5167(QString appSignalID)
+	{
+		LOG_WARNING1(IssueType::AlCompiler,
+				  5167,
+				  QString(tr("Signal %1 is excluded from build.")).
+					arg(appSignalID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186

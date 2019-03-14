@@ -16,6 +16,7 @@ const QString SignalProperties::changesetIDCaption("ChangesetID");
 const QString SignalProperties::checkedOutCaption("CheckedOut");
 const QString SignalProperties::userIdCaption("UserID");
 const QString SignalProperties::channelCaption("Channel");
+const QString SignalProperties::excludeFromBuildCaption("ExcludeFromBuild");
 const QString SignalProperties::createdCaption("Created");
 const QString SignalProperties::deletedCaption("Deleted");
 const QString SignalProperties::instanceCreatedCaption("InstanceCreated");
@@ -192,6 +193,11 @@ void SignalProperties::initProperties()
 	ADD_PROPERTY_GETTER_INDIRECT(QDateTime, createdCaption, false, Signal::created, m_signal);
 	ADD_PROPERTY_GETTER_INDIRECT(bool, deletedCaption, false, Signal::deleted, m_signal);
 	ADD_PROPERTY_GETTER_INDIRECT(QDateTime, instanceCreatedCaption, false, Signal::instanceCreated, m_signal);
+
+	auto excludeFromBuildProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, excludeFromBuildCaption, true,
+																		Signal::excludeFromBuild,
+																		Signal::setExcludeFromBuild, m_signal);
+	excludeFromBuildProperty->setCategory(categorySignalProcessing);
 
 	auto signalTypeProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::SignalType, typeCaption, true, Signal::signalType, Signal::setSignalType, m_signal);
 	signalTypeProperty->setCategory(categorySignalType);
