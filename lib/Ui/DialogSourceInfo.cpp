@@ -128,6 +128,47 @@ void DialogSourceInfo::timerEvent(QTimerEvent* event)
 	}
 }
 
+void DialogSourceInfo::prepareContextMenu(const QPoint& pos)
+{
+	Q_UNUSED(pos);
+
+	if (m_treeWidget == nullptr)
+	{
+		assert(m_treeWidget);
+		return;
+	}
+
+	QMenu menu(this);
+
+	QTreeWidgetItem* item = m_treeWidget->currentItem();
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	// Copy
+	QAction* actionCopy = new QAction(tr("Copy"), &menu);
+
+	auto f = [this]() -> void
+			 {
+				QClipboard *clipboard = QApplication::clipboard();
+				QTreeWidgetItem* item = m_treeWidget->currentItem();
+				if (item == nullptr)
+				{
+					return;
+				}
+				clipboard->setText(item->text(1));
+
+			};
+
+	connect(actionCopy, &QAction::triggered, this, f);
+
+	menu.addAction(actionCopy);
+
+	//
+	menu.exec(QCursor::pos());
+}
+
 void DialogSourceInfo::accept()
 {
 	emit dialogClosed(m_sourceHash);

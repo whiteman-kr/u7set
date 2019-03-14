@@ -1,4 +1,4 @@
-#include "TcpAppDataSourcesStateClient.h"
+#include "TcpAppSourcesState.h"
 #include "Settings.h"
 
 #include "../lib/Tuning/TuningSourceState.h"
@@ -105,7 +105,7 @@ const ::Network::AppDataSourceState& AppDataSourceState::previousState() const
 //
 //
 
-TcpAppDataSourcesStateClient::TcpAppDataSourcesStateClient(MonitorConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
+TcpAppSourcesState::TcpAppSourcesState(MonitorConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
 	Tcp::Client(configController->softwareInfo(), serverAddressPort1, serverAddressPort2),
 	m_cfgController(configController)
 {
@@ -116,12 +116,12 @@ TcpAppDataSourcesStateClient::TcpAppDataSourcesStateClient(MonitorConfigControll
 	qDebug() << "TcpSourcesStateClient::TcpSourcesStateClient(...)";
 }
 
-TcpAppDataSourcesStateClient::~TcpAppDataSourcesStateClient()
+TcpAppSourcesState::~TcpAppSourcesState()
 {
 	qDebug() << "TcpSourcesStateClient::~TcpSourcesStateClient()";
 }
 
-std::vector<Hash> TcpAppDataSourcesStateClient::appDataSourceHashes()
+std::vector<Hash> TcpAppSourcesState::appDataSourceHashes()
 {
 	std::vector<Hash> result;
 
@@ -135,7 +135,7 @@ std::vector<Hash> TcpAppDataSourcesStateClient::appDataSourceHashes()
 	return result;
 }
 
-AppDataSourceState TcpAppDataSourcesStateClient::appDataSourceState(Hash id, bool* ok)
+AppDataSourceState TcpAppSourcesState::appDataSourceState(Hash id, bool* ok)
 {
 	QMutexLocker l(&m_appDataSourceStatesMutex);
 
@@ -157,7 +157,7 @@ AppDataSourceState TcpAppDataSourcesStateClient::appDataSourceState(Hash id, boo
 	return it->second;
 }
 
-int TcpAppDataSourcesStateClient::sourceErrorCount()
+int TcpAppSourcesState::sourceErrorCount()
 {
 	QMutexLocker l(&m_appDataSourceStatesMutex);
 
@@ -179,23 +179,23 @@ int TcpAppDataSourcesStateClient::sourceErrorCount()
 	return result;
 }
 
-void TcpAppDataSourcesStateClient::onClientThreadStarted()
+void TcpAppSourcesState::onClientThreadStarted()
 {
 	qDebug() << "TcpSourcesStateClient::onClientThreadStarted()";
 
 	connect(m_cfgController, &MonitorConfigController::configurationArrived,
-			this, &TcpAppDataSourcesStateClient::slot_configurationArrived,
+			this, &TcpAppSourcesState::slot_configurationArrived,
 			Qt::QueuedConnection);
 
 	return;
 }
 
-void TcpAppDataSourcesStateClient::onClientThreadFinished()
+void TcpAppSourcesState::onClientThreadFinished()
 {
 	qDebug() << "TcpSourcesStateClient::onClientThreadFinished()";
 }
 
-void TcpAppDataSourcesStateClient::onConnection()
+void TcpAppSourcesState::onConnection()
 {
 	qDebug() << "TcpSourcesStateClient::onConnection()";
 
@@ -210,7 +210,7 @@ void TcpAppDataSourcesStateClient::onConnection()
 	return;
 }
 
-void TcpAppDataSourcesStateClient::onDisconnection()
+void TcpAppSourcesState::onDisconnection()
 {
 	qDebug() << "TcpSourcesStateClient::onDisconnection";
 
@@ -227,12 +227,12 @@ void TcpAppDataSourcesStateClient::onDisconnection()
 	emit connectionReset();
 }
 
-void TcpAppDataSourcesStateClient::onReplyTimeout()
+void TcpAppSourcesState::onReplyTimeout()
 {
 	qDebug() << "TcpSourcesStateClient::onReplyTimeout()";
 }
 
-void TcpAppDataSourcesStateClient::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
+void TcpAppSourcesState::processReply(quint32 requestID, const char* replyData, quint32 replyDataSize)
 {
 	if (replyData == nullptr)
 	{
@@ -262,18 +262,18 @@ void TcpAppDataSourcesStateClient::processReply(quint32 requestID, const char* r
 	return;
 }
 
-void TcpAppDataSourcesStateClient::resetToGetAppDataSourcesInfo()
+void TcpAppSourcesState::resetToGetAppDataSourcesInfo()
 {
-	QThread::msleep(theSettings.requestTimeInterval());
+	QThread::msleep(m_requestPeriod);
 
 	requestAppDataSourcesInfo();
 
 	return;
 }
 
-void TcpAppDataSourcesStateClient::resetToGetAppDataSourcesState()
+void TcpAppSourcesState::resetToGetAppDataSourcesState()
 {
-	QThread::msleep(theSettings.requestTimeInterval());
+	QThread::msleep(m_requestPeriod);
 
 	requestAppDataSourcesState();
 
@@ -281,7 +281,7 @@ void TcpAppDataSourcesStateClient::resetToGetAppDataSourcesState()
 }
 
 
-void TcpAppDataSourcesStateClient::requestAppDataSourcesInfo()
+void TcpAppSourcesState::requestAppDataSourcesInfo()
 {
 	if (isClearToSendRequest() == false)
 	{
@@ -297,7 +297,7 @@ void TcpAppDataSourcesStateClient::requestAppDataSourcesInfo()
 
 }
 
-void TcpAppDataSourcesStateClient::processAppDataSourcesInfo(const QByteArray& data)
+void TcpAppSourcesState::processAppDataSourcesInfo(const QByteArray& data)
 {
 	bool ok = m_getDataSourcesInfoReply.ParseFromArray(data.constData(), data.size());
 
@@ -338,13 +338,13 @@ void TcpAppDataSourcesStateClient::processAppDataSourcesInfo(const QByteArray& d
 }
 
 
-void TcpAppDataSourcesStateClient::requestAppDataSourcesState()
+void TcpAppSourcesState::requestAppDataSourcesState()
 {
 	assert(isClearToSendRequest());
 	sendRequest(ADS_GET_APP_DATA_SOURCES_STATES);
 }
 
-void TcpAppDataSourcesStateClient::processAppDataSourcesState(const QByteArray& data)
+void TcpAppSourcesState::processAppDataSourcesState(const QByteArray& data)
 {
 	QMutexLocker l(&m_appDataSourceStatesMutex);
 
@@ -401,7 +401,7 @@ void TcpAppDataSourcesStateClient::processAppDataSourcesState(const QByteArray& 
 
 	return;
 }
-void TcpAppDataSourcesStateClient::slot_configurationArrived(ConfigSettings configuration)
+void TcpAppSourcesState::slot_configurationArrived(ConfigSettings configuration)
 {
 	HostAddressPort s1 = configuration.appDataService1.address();
 	HostAddressPort s2 = configuration.appDataService2.address();

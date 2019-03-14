@@ -1089,7 +1089,9 @@ void DialogSignalSnapshot::on_tableView_doubleClicked(const QModelIndex &index)
 		return;
 	}
 
-	cw->currentTab()->signalInfo(s.appSignalId());
+	QTimer::singleShot(10, [cw, s] {
+		  cw->currentTab()->signalInfo(s.appSignalId());
+	  });
 }
 
 void DialogSignalSnapshot::sortIndicatorChanged(int column, Qt::SortOrder order)

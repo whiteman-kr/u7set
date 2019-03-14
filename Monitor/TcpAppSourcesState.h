@@ -39,21 +39,22 @@ private:
 };
 
 //
+//		ADS_GET_APP_DATA_SOURCES_INFO
+//				|
 //		ADS_GET_APP_DATA_SOURCES_STATES <------+
 //				|						|			Repeat it
 //				+------------------------
 //
 
-class TcpAppDataSourcesStateClient : public Tcp::Client
+class TcpAppSourcesState : public Tcp::Client
 {
 	Q_OBJECT
 
 public:
-	TcpAppDataSourcesStateClient(MonitorConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
-	virtual ~TcpAppDataSourcesStateClient();
+	TcpAppSourcesState(MonitorConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2);
+	virtual ~TcpAppSourcesState();
 
 	std::vector<Hash> appDataSourceHashes();
-
 	AppDataSourceState appDataSourceState(Hash id, bool* ok);
 
 	int sourceErrorCount();
@@ -88,13 +89,16 @@ private:
 	MonitorConfigController* m_cfgController = nullptr;
 
 private:
-	// Cache protobug messages
-	//
+	int m_requestPeriod = 100;
+
 	QMutex m_appDataSourceStatesMutex;
 	std::map<Hash, AppDataSourceState> m_appDataSourceStates;
 
+	// Cache protobuf messages
+	//
 	::Network::GetDataSourcesInfoReply m_getDataSourcesInfoReply;
 	::Network::GetAppDataSourcesStatesReply m_getAppDataSourcesStateReply;
+
 
 };
 

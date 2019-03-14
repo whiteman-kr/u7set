@@ -5,7 +5,7 @@
 #include "MonitorSchemaManager.h"
 #include "TcpSignalClient.h"
 #include "TcpSignalRecents.h"
-#include "TcpAppDataSourcesStateClient.h"
+#include "TcpAppSourcesState.h"
 #include "SelectSchemaWidget.h"
 #include "MonitorTuningTcpClient.h"
 #include "../VFrame30/AppSignalController.h"
@@ -18,8 +18,7 @@ class MonitorToolBar;
 class SchemaListWidget;
 class QLabel;
 class QComboBox;
-class DialogAppDataSources;
-class DialogTuningSources;
+class DialogDataSources;
 
 class MonitorMainWindow : public QMainWindow
 {
@@ -73,8 +72,7 @@ protected slots:
 	void exit();
 
 	void showLog();
-	void showAppDataSources();
-	void showTuningSources();
+	void showDataSources();
 	void showSettings();
 
 	void showAbout();
@@ -130,7 +128,7 @@ private:
 	MonitorTuningTcpClient* m_tuningTcpClient = nullptr;
 	SimpleThread* m_tuningTcpClientThread = nullptr;
 
-	TcpAppDataSourcesStateClient* m_tcpSourcesStateClient = nullptr;
+	TcpAppSourcesState* m_tcpSourcesStateClient = nullptr;
 	SimpleThread* m_sourcesStateClientThread = nullptr;
 
 	Log::LogFile m_LogFile;
@@ -144,8 +142,7 @@ private:
 	// Tools menu
 	//
 
-	QAction* m_pAppDataSourcesAction = nullptr;
-	QAction* m_pTuningSourcesAction = nullptr;
+	QAction* m_pDataSourcesAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 
 	// ? menu
@@ -195,8 +192,7 @@ private:
 	int m_logErrorsCounter = -1;
 	int m_logWarningsCounter = -1;
 
-	DialogAppDataSources* m_dialogAppDataSources = nullptr;
-	DialogTuningSources* m_dialogTuningSources = nullptr;
+	DialogDataSources* m_dialogDataSources = nullptr;
 };
 
 

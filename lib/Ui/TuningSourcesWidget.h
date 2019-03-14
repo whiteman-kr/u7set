@@ -1,5 +1,5 @@
-#ifndef DIALOGTUNINGSOURCES_H
-#define DIALOGTUNINGSOURCES_H
+#ifndef TUNINGSOURCESWIDGET_H
+#define TUNINGSOURCESWIDGET_H
 
 #include <QDialog>
 
@@ -24,29 +24,22 @@ private:
 
 private:
 	TuningTcpClient* m_tcpClient = nullptr;
-	QTreeWidget* m_treeWidget = nullptr;
 
 };
 
-//
-// DialogTuningSources
-//
-
-class DialogTuningSources : public QDialog
+class TuningSourcesWidget : public QWidget
 {
 	Q_OBJECT
-
 public:
-	explicit DialogTuningSources(TuningTcpClient* tcpClient, bool hasActivationControls, QWidget* parent);
-	~DialogTuningSources();
+
+	explicit TuningSourcesWidget(TuningTcpClient* tcpClient, bool hasActivationControls, bool hasCloseButton, QWidget* parent);
+	virtual ~TuningSourcesWidget();
 
 signals:
-	void dialogClosed();
+	void closeButtonPressed();
 
 protected:
 	void timerEvent(QTimerEvent* event);
-
-	virtual bool passwordOk();
 
 private slots:
 	void slot_tuningSourcesArrived();
@@ -114,5 +107,7 @@ private:
 
 	std::map<Hash, DialogTuningSourceInfo*> m_sourceInfoDialogsMap;
 };
+
+
 
 #endif // DIALOGTUNINGSOURCES_H

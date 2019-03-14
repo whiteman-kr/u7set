@@ -1,4 +1,4 @@
-#include "DialogTuningSources.h"
+#include "TuningSourcesWidget.h"
 #include "../lib/Tuning/TuningTcpClient.h"
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "UiTools.h"
@@ -31,6 +31,9 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningTcpClient* tcpClient, QWidg
 	QHBoxLayout* l = new QHBoxLayout();
 
 	m_treeWidget = new QTreeWidget();
+
+	m_treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_treeWidget, &QTreeWidget::customContextMenuRequested,this, &DialogSourceInfo::prepareContextMenu);
 
 	l->addWidget(m_treeWidget);
 
@@ -178,11 +181,9 @@ void DialogTuningSourceInfo::updateData()
 		return;
 	}
 
-	int c = 0;
-
 	item->setData(0, Qt::UserRole, 0);
 
-	setDataItemText("ID", QString::number(ts.info.id(), 16));
+	setDataItemText("ID", tr("%1 (%2h)").arg(QString::number(ts.info.id())).arg(QString::number(ts.info.id(), 16)));
 	setDataItemText("EquipmentID", ts.info.lmequipmentid().c_str());
 	setDataItemText("Caption", ts.info.lmcaption().c_str());
 	setDataItemNumber("DataType", ts.info.lmdatatype());
@@ -193,10 +194,10 @@ void DialogTuningSourceInfo::updateData()
 	setDataItemText("Subsystem", ts.info.lmsubsystem().c_str());
 
 	setDataItemNumber("LmNumber", ts.info.lmnumber());
-	setDataItemNumber("LmModuleType", ts.info.lmmoduletype());
+	setDataItemText("LmModuleType", tr("%1 (%2h)").arg(QString::number(ts.info.lmmoduletype())).arg(QString::number(ts.info.lmmoduletype(), 16)));
 	setDataItemText("LmAdapterID", ts.info.lmadapterid().c_str());
 	setDataItemNumber("LmDataEnable", ts.info.lmdataenable());
-	setDataItemNumber("LmDataID", ts.info.lmdataid());
+	setDataItemText("LmDataID", tr("%1 (%2h)").arg(QString::number(ts.info.lmdataid())).arg(QString::number(ts.info.lmdataid(), 16)));
 
 	// state
 
@@ -207,7 +208,6 @@ void DialogTuningSourceInfo::updateData()
 		return;
 	}
 
-	c = 0;
 
 	item->setData(0, Qt::UserRole, 0);
 
@@ -256,8 +256,6 @@ void DialogTuningSourceInfo::updateData()
 		return;
 	}
 
-	c = 0;
-
 	item->setData(0, Qt::UserRole, 0);
 
 	setDataItemNumberCompare(item, "ErrRupProtocolVersion", ts.state.errrupprotocolversion(), ts.previousState().errrupprotocolversion());
@@ -278,8 +276,6 @@ void DialogTuningSourceInfo::updateData()
 		assert(item);
 		return;
 	}
-
-	c = 0;
 
 	item->setData(0, Qt::UserRole, 0);
 
@@ -303,8 +299,6 @@ void DialogTuningSourceInfo::updateData()
 		assert(item);
 		return;
 	}
-
-	c = 0;
 
 	item->setData(0, Qt::UserRole, 0);
 
@@ -337,11 +331,11 @@ void DialogTuningSourceInfo::updateData()
 // ---
 //
 
-const QString DialogTuningSources::m_singleLmControlEnabledString("Single LM control mode is enabled");
-const QString DialogTuningSources::m_singleLmControlDisabledString("Single LM control mode is disabled");
+const QString TuningSourcesWidget::m_singleLmControlEnabledString("Single LM control mode is enabled");
+const QString TuningSourcesWidget::m_singleLmControlDisabledString("Single LM control mode is disabled");
 
-DialogTuningSources::DialogTuningSources(TuningTcpClient* tcpClient, bool hasActivationControls, QWidget* parent) :
-	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+TuningSourcesWidget::TuningSourcesWidget(TuningTcpClient* tcpClient, bool hasActivationControls, bool hasCloseButton, QWidget* parent) :
+	QWidget(parent),
 	m_tuningTcpClient(tcpClient),
 	m_hasActivationControls(hasActivationControls),
 	m_parent(parent)
@@ -359,31 +353,32 @@ DialogTuningSources::DialogTuningSources(TuningTcpClient* tcpClient, bool hasAct
 	//
 
 	QVBoxLayout* mainLayout = new QVBoxLayout();
+	mainLayout->setContentsMargins(0, 0, 0, 0);
 
 	m_treeWidget = new QTreeWidget();
 	mainLayout->addWidget(m_treeWidget);
 
-	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &DialogTuningSources::on_treeWidget_itemDoubleClicked);
-	connect(m_treeWidget, &QTreeWidget::itemSelectionChanged, this, &DialogTuningSources::on_treeWidget_itemSelectionChanged);
+	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &TuningSourcesWidget::on_treeWidget_itemDoubleClicked);
+	connect(m_treeWidget, &QTreeWidget::itemSelectionChanged, this, &TuningSourcesWidget::on_treeWidget_itemSelectionChanged);
 
 	QHBoxLayout* bottomLayout = new QHBoxLayout();
 	mainLayout->addLayout(bottomLayout);
 
 	m_btnDetails = new QPushButton(tr("Details..."));
 	m_btnDetails->setEnabled(false);
-	connect(m_btnDetails, &QPushButton::clicked, this, &DialogTuningSources::on_btnDetails_clicked);
+	connect(m_btnDetails, &QPushButton::clicked, this, &TuningSourcesWidget::on_btnDetails_clicked);
 	bottomLayout->addWidget(m_btnDetails);
 
 	if (m_hasActivationControls == true)
 	{
 		m_btnEnableControl = new QPushButton(tr("Activate Control..."));
 		m_btnEnableControl->setEnabled(false);
-		connect(m_btnEnableControl, &QPushButton::clicked, this, &DialogTuningSources::on_btnEnableControl_clicked);
+		connect(m_btnEnableControl, &QPushButton::clicked, this, &TuningSourcesWidget::on_btnEnableControl_clicked);
 		bottomLayout->addWidget(m_btnEnableControl);
 
 		m_btnDisableControl = new QPushButton(tr("Deactivate Control..."));
 		m_btnDisableControl->setEnabled(false);
-		connect(m_btnDisableControl, &QPushButton::clicked, this, &DialogTuningSources::on_btnDisableControl_clicked);
+		connect(m_btnDisableControl, &QPushButton::clicked, this, &TuningSourcesWidget::on_btnDisableControl_clicked);
 		bottomLayout->addWidget(m_btnDisableControl);
 
 		m_labelSingleControlMode = new QLabel(m_singleLmControlEnabledString);
@@ -392,19 +387,21 @@ DialogTuningSources::DialogTuningSources(TuningTcpClient* tcpClient, bool hasAct
 
 	bottomLayout->addStretch();
 
-	QPushButton* b = new QPushButton(tr("Close"));
-	connect(b, &QPushButton::clicked, this, &DialogTuningSources::on_btnClose_clicked);
-	bottomLayout->addWidget(b);
+	if (hasCloseButton == true)
+	{
+		QPushButton* b = new QPushButton(tr("Close"));
+		connect(b, &QPushButton::clicked, this, &TuningSourcesWidget::on_btnClose_clicked);
+		bottomLayout->addWidget(b);
+	}
 
 	setLayout(mainLayout);
 
-	setMinimumSize(1024, 300);
 	//
 
 
 	QStringList headerLabels;
 	headerLabels << tr("EquipmentId");
-	headerLabels << tr("Ip");
+	headerLabels << tr("IP");
 	headerLabels << tr("Port");
 	headerLabels << tr("Channel");
 	headerLabels << tr("SubsystemID");
@@ -438,17 +435,16 @@ DialogTuningSources::DialogTuningSources(TuningTcpClient* tcpClient, bool hasAct
 		m_btnDisableControl->setEnabled(false);
 	}
 
-	connect(m_tuningTcpClient, &TuningTcpClient::tuningSourcesArrived, this, &DialogTuningSources::slot_tuningSourcesArrived);
+	connect(m_tuningTcpClient, &TuningTcpClient::tuningSourcesArrived, this, &TuningSourcesWidget::slot_tuningSourcesArrived);
 
 	m_updateStateTimerId = startTimer(250);
 }
 
-DialogTuningSources::~DialogTuningSources()
+TuningSourcesWidget::~TuningSourcesWidget()
 {
-	emit dialogClosed();
 }
 
-void DialogTuningSources::timerEvent(QTimerEvent* event)
+void TuningSourcesWidget::timerEvent(QTimerEvent* event)
 {
 	assert(event);
 
@@ -458,17 +454,12 @@ void DialogTuningSources::timerEvent(QTimerEvent* event)
 	}
 }
 
-bool DialogTuningSources::passwordOk()
-{
-	return true;
-}
-
-void DialogTuningSources::slot_tuningSourcesArrived()
+void TuningSourcesWidget::slot_tuningSourcesArrived()
 {
 	update(false);
 }
 
-void DialogTuningSources::update(bool refreshOnly)
+void TuningSourcesWidget::update(bool refreshOnly)
 {
 	if (m_tuningTcpClient == nullptr)
 	{
@@ -597,14 +588,12 @@ void DialogTuningSources::update(bool refreshOnly)
 	}
 }
 
-DialogTuningSources* theDialogTuningSources = nullptr;
-
-void DialogTuningSources::on_btnClose_clicked()
+void TuningSourcesWidget::on_btnClose_clicked()
 {
-	reject();
+	emit closeButtonPressed();
 }
 
-void DialogTuningSources::on_btnDetails_clicked()
+void TuningSourcesWidget::on_btnDetails_clicked()
 {
 	if (m_tuningTcpClient == nullptr)
 	{
@@ -625,7 +614,7 @@ void DialogTuningSources::on_btnDetails_clicked()
 	if (it == m_sourceInfoDialogsMap.end())
 	{
 		DialogTuningSourceInfo* dlg = new DialogTuningSourceInfo(m_tuningTcpClient, this, hash);
-		connect(dlg, &DialogTuningSourceInfo::dialogClosed, this, &DialogTuningSources::onDetailsDialogClosed);
+		connect(dlg, &DialogTuningSourceInfo::dialogClosed, this, &TuningSourcesWidget::onDetailsDialogClosed);
 		dlg->show();
 		dlg->activateWindow();
 
@@ -640,7 +629,7 @@ void DialogTuningSources::on_btnDetails_clicked()
 	}
 }
 
-void DialogTuningSources::on_treeWidget_itemSelectionChanged()
+void TuningSourcesWidget::on_treeWidget_itemSelectionChanged()
 {
 	QTreeWidgetItem* item = m_treeWidget->currentItem();
 
@@ -670,25 +659,25 @@ void DialogTuningSources::on_treeWidget_itemSelectionChanged()
 	}
 }
 
-void DialogTuningSources::on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column)
+void TuningSourcesWidget::on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column)
 {
 	Q_UNUSED(item);
 	Q_UNUSED(column);
 
-	QTimer::singleShot(10, this, &DialogTuningSources::on_btnDetails_clicked);
+	QTimer::singleShot(10, this, &TuningSourcesWidget::on_btnDetails_clicked);
 }
 
-void DialogTuningSources::on_btnEnableControl_clicked()
+void TuningSourcesWidget::on_btnEnableControl_clicked()
 {
 	activateControl(true);
 }
 
-void DialogTuningSources::on_btnDisableControl_clicked()
+void TuningSourcesWidget::on_btnDisableControl_clicked()
 {
 	activateControl(false);
 }
 
-void DialogTuningSources::onDetailsDialogClosed(Hash hash)
+void TuningSourcesWidget::onDetailsDialogClosed(Hash hash)
 {
 	auto it = m_sourceInfoDialogsMap.find(hash);
 	if (it == m_sourceInfoDialogsMap.end())
@@ -701,7 +690,7 @@ void DialogTuningSources::onDetailsDialogClosed(Hash hash)
 
 }
 
-void DialogTuningSources::activateControl(bool enable)
+void TuningSourcesWidget::activateControl(bool enable)
 {
 	if (m_tuningTcpClient == nullptr)
 	{
@@ -713,11 +702,6 @@ void DialogTuningSources::activateControl(bool enable)
 	if (items.size() != 1)
 	{
 		QMessageBox::warning(this, qAppName(), tr("Please select a tuning source!"));
-		return;
-	}
-
-	if (passwordOk() == false)
-	{
 		return;
 	}
 
@@ -762,5 +746,4 @@ void DialogTuningSources::activateControl(bool enable)
 		QMessageBox::critical(this, qAppName(), tr("An error has been occured!"));
 	}
 }
-
 

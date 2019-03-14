@@ -5,7 +5,7 @@
 
 #include "DialogSourceInfo.h"
 
-class TcpAppDataSourcesStateClient;
+class TcpAppSourcesState;
 
 //
 // DialogAppDataSourceInfo
@@ -16,15 +16,14 @@ class DialogAppDataSourceInfo : public DialogSourceInfo
 	Q_OBJECT
 
 public:
-	explicit DialogAppDataSourceInfo(TcpAppDataSourcesStateClient* tcpClient, QWidget* parent, Hash sourceHash);
+	explicit DialogAppDataSourceInfo(TcpAppSourcesState* tcpClient, QWidget* parent, Hash sourceHash);
 	virtual ~DialogAppDataSourceInfo();
 
 private:
 	void updateData() override;
 
 private:
-	TcpAppDataSourcesStateClient* m_tcpClient = nullptr;
-	QTreeWidget* m_treeWidget = nullptr;
+	TcpAppSourcesState* m_tcpClient = nullptr;
 
 };
 
@@ -32,16 +31,16 @@ private:
 // DialogAppDataSources
 //
 
-class DialogAppDataSources : public QDialog
+class AppDataSourcesWidget : public QWidget
 {
 	Q_OBJECT
 
 public:
-	explicit DialogAppDataSources(TcpAppDataSourcesStateClient* tcpClient, QWidget* parent);
-	~DialogAppDataSources();
+	explicit AppDataSourcesWidget(TcpAppSourcesState* tcpClient,  bool hasCloseButton, QWidget* parent);
+	virtual ~AppDataSourcesWidget();
 
 signals:
-	void dialogClosed();
+	void closeButtonPressed();
 
 protected:
 	void timerEvent(QTimerEvent* event);
@@ -92,7 +91,7 @@ private:
 
 	bool m_singleControlMode = true;
 
-	TcpAppDataSourcesStateClient* m_stateTcpClient = nullptr;
+	TcpAppSourcesState* m_stateTcpClient = nullptr;
 
 	QWidget* m_parent = nullptr;
 

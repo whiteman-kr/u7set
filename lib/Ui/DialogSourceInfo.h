@@ -26,6 +26,9 @@ protected:
 	void timerEvent(QTimerEvent* event);
 	virtual void updateData() = 0;
 
+public slots:
+	void prepareContextMenu(const QPoint& pos);
+
 signals:
 	void dialogClosed(Hash sourceHash);
 
@@ -34,6 +37,7 @@ public:
 
 protected:
 	Hash m_sourceHash;
+	QTreeWidget* m_treeWidget = nullptr;
 
 private:
 	virtual void accept() override;

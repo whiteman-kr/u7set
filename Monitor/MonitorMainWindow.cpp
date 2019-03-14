@@ -8,8 +8,7 @@
 #include "MonitorArchive.h"
 #include "./Trend/MonitorTrends.h"
 #include "../VFrame30/Schema.h"
-#include "../lib/Ui/DialogAppDataSources.h"
-#include "../lib/Ui/DialogTuningSources.h"
+#include "DialogDataSources.h"
 #include "../lib/Ui/UiTools.h"
 #include "../lib/Ui/DialogAbout.h"
 
@@ -47,7 +46,7 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 
 	// TcpSourcesStateClient
 	//
-	m_tcpSourcesStateClient = new TcpAppDataSourcesStateClient(&m_configController, fakeAddress, fakeAddress);
+	m_tcpSourcesStateClient = new TcpAppSourcesState(&m_configController, fakeAddress, fakeAddress);
 
 	m_sourcesStateClientThread = new SimpleThread(m_tcpSourcesStateClient);
 	m_sourcesStateClientThread->start();
@@ -263,18 +262,11 @@ void MonitorMainWindow::createActions()
 	m_pExitAction->setEnabled(true);
 	connect(m_pExitAction, &QAction::triggered, this, &MonitorMainWindow::exit);
 
-	m_pAppDataSourcesAction = new QAction(tr("Application Data Sources..."), this);
-	m_pAppDataSourcesAction->setStatusTip(tr("View Application Data Sources"));
-	m_pAppDataSourcesAction->setIcon(QIcon(":/Images/Images/AppDataSources.svg"));
-	m_pAppDataSourcesAction->setEnabled(true);
-	connect(m_pAppDataSourcesAction, &QAction::triggered, this, &MonitorMainWindow::showAppDataSources);
-
-	m_pTuningSourcesAction = new QAction(tr("Tuning Sources..."), this);
-	m_pTuningSourcesAction->setStatusTip(tr("View Tuning Sources"));
-	m_pTuningSourcesAction->setIcon(QIcon(":/Images/Images/TuningSources.svg"));
-	m_pTuningSourcesAction->setEnabled(true);
-	m_pTuningSourcesAction->setVisible(false);
-	connect(m_pTuningSourcesAction, &QAction::triggered, this, &MonitorMainWindow::showTuningSources);
+	m_pDataSourcesAction = new QAction(tr("Data Sources..."), this);
+	m_pDataSourcesAction->setStatusTip(tr("View Data Sources"));
+	m_pDataSourcesAction->setIcon(QIcon(":/Images/Images/AppDataSources.svg"));
+	m_pDataSourcesAction->setEnabled(true);
+	connect(m_pDataSourcesAction, &QAction::triggered, this, &MonitorMainWindow::showDataSources);
 
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
@@ -417,8 +409,7 @@ void MonitorMainWindow::createMenus()
 	//
 	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
 
-	pToolsMenu->addAction(m_pAppDataSourcesAction);
-	pToolsMenu->addAction(m_pTuningSourcesAction);
+	pToolsMenu->addAction(m_pDataSourcesAction);
 	pToolsMenu->addAction(m_pSettingsAction);
 
 	// Help
@@ -638,12 +629,12 @@ void MonitorMainWindow::showSoftwareConnection(const QString& caption, const QSt
 
 	if (connectionState.isConnected == true)
 	{
-		statusText = tr(" %1: connected, replies: %2").arg(shortCaption).arg(connectionState.replyCount);
+		statusText = tr(" %1: %2 ").arg(shortCaption).arg(connectionState.replyCount);
 		tooltipText.append(tr("Connection: established"));
 	}
 	else
 	{
-		statusText = tr(" %1: no connection").arg(shortCaption);
+		statusText = tr(" %1: no connection ").arg(shortCaption);
 		tooltipText.append(tr("Connection: no connection"));
 	}
 
@@ -667,55 +658,32 @@ void MonitorMainWindow::showLog()
 	m_LogFile.view(this);
 }
 
-void MonitorMainWindow::showAppDataSources()
+void MonitorMainWindow::showDataSources()
 {
-	if (m_dialogAppDataSources == nullptr)
+	if (m_dialogDataSources == nullptr)
 	{
-		m_dialogAppDataSources = new DialogAppDataSources(m_tcpSourcesStateClient, this);
-		m_dialogAppDataSources->show();
+		m_dialogDataSources = new DialogDataSources(m_tcpSourcesStateClient,
+													m_configController.configuration().tuningEnabled,
+													m_tuningTcpClient,
+													false,
+													this);
+		m_dialogDataSources->show();
 
 		auto f = [this]() -> void
 		{
-				m_dialogAppDataSources = nullptr;
+				m_dialogDataSources = nullptr;
 		};
 
-		connect(m_dialogAppDataSources, &DialogAppDataSources::dialogClosed, this, f);
+		connect(m_dialogDataSources, &DialogDataSources::dialogClosed, this, f);
 	}
 	else
 	{
-		m_dialogAppDataSources->activateWindow();
+		m_dialogDataSources->activateWindow();
 	}
 
-	UiTools::adjustDialogPlacement(m_dialogAppDataSources);
+	UiTools::adjustDialogPlacement(m_dialogDataSources);
 }
 
-void MonitorMainWindow::showTuningSources()
-{
-	if (m_dialogTuningSources == nullptr)
-	{
-		if (m_tuningTcpClient == nullptr)
-		{
-			assert(m_tuningTcpClient);
-			return;
-		}
-
-		m_dialogTuningSources = new DialogTuningSources(m_tuningTcpClient, false, this);
-		m_dialogTuningSources->show();
-
-		auto f = [this]() -> void
-		{
-				m_dialogTuningSources = nullptr;
-		};
-
-		connect(m_dialogTuningSources, &DialogTuningSources::dialogClosed, this, f);
-	}
-	else
-	{
-		m_dialogTuningSources->activateWindow();
-	}
-
-	UiTools::adjustDialogPlacement(m_dialogTuningSources);
-}
 
 void MonitorMainWindow::showSettings()
 {
@@ -1051,6 +1019,12 @@ void MonitorMainWindow::slot_historyChanged(bool enableBack, bool enableForward)
 
 void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 {
+	if (m_dialogDataSources != nullptr)
+	{
+		delete m_dialogDataSources;
+		m_dialogDataSources = nullptr;
+	}
+
 	if (m_tuningTcpClientThread != nullptr)
 	{
 		m_tuningController->resetTcpClient();
@@ -1060,12 +1034,6 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 
 		m_tuningTcpClientThread = nullptr;
 		m_tuningTcpClient = nullptr;
-	}
-
-	if (m_dialogTuningSources != nullptr)
-	{
-		delete m_dialogTuningSources;
-		m_dialogTuningSources = nullptr;
 	}
 
 	// TuningTcpClient
@@ -1084,7 +1052,7 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 		m_tuningController->setTcpClient(m_tuningTcpClient);
 	}
 
-	m_pTuningSourcesAction->setVisible(configuration.tuningEnabled);
+	m_statusBarTuningConnection->setVisible(configuration.tuningEnabled == true);
 
 	return;
 }

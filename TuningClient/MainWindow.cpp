@@ -19,22 +19,6 @@
 #include "TuningClientFilterStorage.h"
 #include "TuningSchemaManager.h"
 
-ClientDialogTuningSources::ClientDialogTuningSources(TuningTcpClient* tcpClient, bool hasActivationControls, QWidget* parent):
-	DialogTuningSources(tcpClient, hasActivationControls, parent)
-{
-
-}
-
-bool ClientDialogTuningSources::passwordOk()
-{
-	if (theMainWindow->userManager()->login(this) == false)
-	{
-		return false;
-	}
-
-	return true;
-}
-
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
 	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), this)
@@ -821,7 +805,7 @@ void MainWindow::showTuningSources()
 {
 	if (m_dialogTuningSources == nullptr)
 	{
-		m_dialogTuningSources = new ClientDialogTuningSources(m_tcpClient, true, this);
+		m_dialogTuningSources = new DialogTuningSources(m_tcpClient, true, this);
 		m_dialogTuningSources->show();
 
 		auto f = [this]() -> void

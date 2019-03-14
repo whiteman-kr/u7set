@@ -1,5 +1,5 @@
-#include "DialogAppDataSources.h"
-#include "TcpAppDataSourcesStateClient.h"
+#include "AppDataSourcesWidget.h"
+#include "TcpAppSourcesState.h"
 #include "UiTools.h"
 
 #include <QTreeWidget>
@@ -8,7 +8,7 @@
 // DialogAppDataSourceInfo
 //
 
-DialogAppDataSourceInfo::DialogAppDataSourceInfo(TcpAppDataSourcesStateClient* tcpClient, QWidget* parent,  Hash sourceHash) :
+DialogAppDataSourceInfo::DialogAppDataSourceInfo(TcpAppSourcesState* tcpClient, QWidget* parent,  Hash sourceHash) :
 	DialogSourceInfo(parent, sourceHash),
 	m_tcpClient(tcpClient)
 {
@@ -36,6 +36,9 @@ DialogAppDataSourceInfo::DialogAppDataSourceInfo(TcpAppDataSourcesStateClient* t
 	QHBoxLayout* l = new QHBoxLayout();
 
 	m_treeWidget = new QTreeWidget();
+
+	m_treeWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_treeWidget, &QTreeWidget::customContextMenuRequested,this, &DialogSourceInfo::prepareContextMenu);
 
 	l->addWidget(m_treeWidget);
 
@@ -155,11 +158,9 @@ void DialogAppDataSourceInfo::updateData()
 		return;
 	}
 
-	int c = 0;
-
 	item->setData(0, Qt::UserRole, 0);
 
-	setDataItemText("ID", QString::number(ds.info.id(), 16));
+	setDataItemText("ID", tr("%1 (%2h)").arg(QString::number(ds.info.id())).arg(QString::number(ds.info.id(), 16)));
 	setDataItemText("EquipmentID", ds.info.lmequipmentid().c_str());
 	setDataItemText("Caption", ds.info.lmcaption().c_str());
 	setDataItemNumber("DataType", ds.info.lmdatatype());
@@ -170,10 +171,10 @@ void DialogAppDataSourceInfo::updateData()
 	setDataItemText("Subsystem", ds.info.lmsubsystem().c_str());
 
 	setDataItemNumber("LmNumber", ds.info.lmnumber());
-	setDataItemNumber("LmModuleType", ds.info.lmmoduletype());
+	setDataItemText("LmModuleType", tr("%1 (%2h)").arg(QString::number(ds.info.lmmoduletype())).arg(QString::number(ds.info.lmmoduletype(), 16)));
 	setDataItemText("LmAdapterID", ds.info.lmadapterid().c_str());
 	setDataItemNumber("LmDataEnable", ds.info.lmdataenable());
-	setDataItemNumber("LmDataID", ds.info.lmdataid());
+	setDataItemText("LmDataID", tr("%1 (%2h)").arg(QString::number(ds.info.lmdataid())).arg(QString::number(ds.info.lmdataid(), 16)));
 
 	setDataItemText("DataReceives", ds.state.datareceives() ? "Yes" : "No");
 
@@ -233,8 +234,6 @@ void DialogAppDataSourceInfo::updateData()
 		return;
 	}
 
-	c = 0;
-
 	item->setData(0, Qt::UserRole, 0);
 
 	setDataItemNumberCompare(item, "ErrorProtocolVersion", ds.state.errorprotocolversion(), ds.previousState().errorprotocolversion());
@@ -250,8 +249,8 @@ void DialogAppDataSourceInfo::updateData()
 // DialogAppDataSources
 //
 
-DialogAppDataSources::DialogAppDataSources(TcpAppDataSourcesStateClient* tcpClient, QWidget* parent) :
-	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+AppDataSourcesWidget::AppDataSourcesWidget(TcpAppSourcesState* tcpClient,  bool hasCloseButton, QWidget* parent) :
+	QWidget(parent),
 	m_stateTcpClient(tcpClient),
 	m_parent(parent)
 {
@@ -261,44 +260,43 @@ DialogAppDataSources::DialogAppDataSources(TcpAppDataSourcesStateClient* tcpClie
 		return;
 	}
 
-	setWindowTitle(tr("Application Data Sources"));
-
-	setAttribute(Qt::WA_DeleteOnClose);
-
 	//
 
 	QVBoxLayout* mainLayout = new QVBoxLayout();
+	mainLayout->setContentsMargins(0, 0, 0, 0);
 
 	m_treeWidget = new QTreeWidget();
 	mainLayout->addWidget(m_treeWidget);
 
-	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &DialogAppDataSources::on_treeWidget_itemDoubleClicked);
-	connect(m_treeWidget, &QTreeWidget::itemSelectionChanged, this, &DialogAppDataSources::on_treeWidget_itemSelectionChanged);
+	connect(m_treeWidget, &QTreeWidget::itemDoubleClicked, this, &AppDataSourcesWidget::on_treeWidget_itemDoubleClicked);
+	connect(m_treeWidget, &QTreeWidget::itemSelectionChanged, this, &AppDataSourcesWidget::on_treeWidget_itemSelectionChanged);
 
 	QHBoxLayout* bottomLayout = new QHBoxLayout();
 	mainLayout->addLayout(bottomLayout);
 
 	m_btnDetails = new QPushButton(tr("Details..."));
 	m_btnDetails->setEnabled(false);
-	connect(m_btnDetails, &QPushButton::clicked, this, &DialogAppDataSources::on_btnDetails_clicked);
+	connect(m_btnDetails, &QPushButton::clicked, this, &AppDataSourcesWidget::on_btnDetails_clicked);
 	bottomLayout->addWidget(m_btnDetails);
 
 	bottomLayout->addStretch();
 
-	QPushButton* b = new QPushButton(tr("Close"));
-	connect(b, &QPushButton::clicked, this, &DialogAppDataSources::on_btnClose_clicked);
-	bottomLayout->addWidget(b);
+	if (hasCloseButton == true)
+	{
+		QPushButton* b = new QPushButton(tr("Close"));
+		connect(b, &QPushButton::clicked, this, &AppDataSourcesWidget::on_btnClose_clicked);
+		bottomLayout->addWidget(b);
+	}
 
 	setLayout(mainLayout);
 
-	setMinimumSize(1024, 300);
 	//
 
 
 	QStringList headerLabels;
 	headerLabels << tr("EquipmentID");
 
-	headerLabels << tr("Ip");
+	headerLabels << tr("IP");
 	headerLabels << tr("Port");
 	headerLabels << tr("Channel");
 	headerLabels << tr("SubsystemID");
@@ -320,12 +318,11 @@ DialogAppDataSources::DialogAppDataSources(TcpAppDataSourcesStateClient* tcpClie
 	m_updateStateTimerId = startTimer(250);
 }
 
-DialogAppDataSources::~DialogAppDataSources()
+AppDataSourcesWidget::~AppDataSourcesWidget()
 {
-	emit dialogClosed();
 }
 
-void DialogAppDataSources::timerEvent(QTimerEvent* event)
+void AppDataSourcesWidget::timerEvent(QTimerEvent* event)
 {
 	assert(event);
 
@@ -335,17 +332,17 @@ void DialogAppDataSources::timerEvent(QTimerEvent* event)
 	}
 }
 
-bool DialogAppDataSources::passwordOk()
+bool AppDataSourcesWidget::passwordOk()
 {
 	return true;
 }
 
-void DialogAppDataSources::slot_tuningSourcesArrived()
+void AppDataSourcesWidget::slot_tuningSourcesArrived()
 {
 	update(false);
 }
 
-void DialogAppDataSources::update(bool refreshOnly)
+void AppDataSourcesWidget::update(bool refreshOnly)
 {
 	if (m_stateTcpClient == nullptr)
 	{
@@ -474,14 +471,12 @@ void DialogAppDataSources::update(bool refreshOnly)
 	}
 }
 
-DialogAppDataSources* theDialogAppDataSources = nullptr;
-
-void DialogAppDataSources::on_btnClose_clicked()
+void AppDataSourcesWidget::on_btnClose_clicked()
 {
-	reject();
+	emit closeButtonPressed();
 }
 
-void DialogAppDataSources::on_btnDetails_clicked()
+void AppDataSourcesWidget::on_btnDetails_clicked()
 {
 	if (m_stateTcpClient == nullptr)
 	{
@@ -502,7 +497,7 @@ void DialogAppDataSources::on_btnDetails_clicked()
 	if (it == m_sourceInfoDialogsMap.end())
 	{
 		DialogAppDataSourceInfo* dlg = new DialogAppDataSourceInfo(m_stateTcpClient, this, hash);
-		connect(dlg, &DialogAppDataSourceInfo::dialogClosed, this, &DialogAppDataSources::onDetailsDialogClosed);
+		connect(dlg, &DialogAppDataSourceInfo::dialogClosed, this, &AppDataSourcesWidget::onDetailsDialogClosed);
 		dlg->show();
 		dlg->activateWindow();
 
@@ -523,22 +518,22 @@ void DialogAppDataSources::on_btnDetails_clicked()
 	}
 }
 
-void DialogAppDataSources::on_treeWidget_itemSelectionChanged()
+void AppDataSourcesWidget::on_treeWidget_itemSelectionChanged()
 {
 	QTreeWidgetItem* item = m_treeWidget->currentItem();
 
 	m_btnDetails->setEnabled(item != nullptr);
 }
 
-void DialogAppDataSources::on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column)
+void AppDataSourcesWidget::on_treeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column)
 {
 	Q_UNUSED(item);
 	Q_UNUSED(column);
 
-	QTimer::singleShot(10, this, &DialogAppDataSources::on_btnDetails_clicked);
+	QTimer::singleShot(10, this, &AppDataSourcesWidget::on_btnDetails_clicked);
 }
 
-void DialogAppDataSources::onDetailsDialogClosed(Hash hash)
+void AppDataSourcesWidget::onDetailsDialogClosed(Hash hash)
 {
 	auto it = m_sourceInfoDialogsMap.find(hash);
 	if (it == m_sourceInfoDialogsMap.end())
