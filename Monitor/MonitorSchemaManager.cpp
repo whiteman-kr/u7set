@@ -11,6 +11,18 @@ MonitorSchemaManager::MonitorSchemaManager(MonitorConfigController* configContro
 	return;
 }
 
+bool MonitorSchemaManager::hasSchema(QString schemaId) const
+{
+	if (m_configController == nullptr)
+	{
+		Q_ASSERT(m_configController);
+		return false;
+	}
+
+	return m_configController->hasFileId(schemaId);
+}
+
+
 std::shared_ptr<VFrame30::Schema> MonitorSchemaManager::loadSchema(QString schemaId)
 {
 	QByteArray data;
@@ -32,5 +44,27 @@ void MonitorSchemaManager::slot_configurationArrived(ConfigSettings configuratio
 	clear();
 	setGlobalScript(configuration.globalScript);
 	return;
+}
+
+MonitorConfigController* MonitorSchemaManager::monitorConfigController()
+{
+	if (m_configController == nullptr)
+	{
+		Q_ASSERT(m_configController);
+		return nullptr;
+	}
+
+	return m_configController;
+}
+
+const MonitorConfigController* MonitorSchemaManager::monitorConfigController() const
+{
+	if (m_configController == nullptr)
+	{
+		Q_ASSERT(m_configController);
+		return nullptr;
+	}
+
+	return m_configController;
 }
 
