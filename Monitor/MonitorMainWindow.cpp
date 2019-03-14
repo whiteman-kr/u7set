@@ -154,72 +154,6 @@ void MonitorMainWindow::timerEvent(QTimerEvent* event)
 		updateStatusBar();
 	}
 
-	if  (event->timerId() == m_updateStatusBarTimerId &&
-		 m_tcpSignalClient != nullptr)
-	{
-		Q_ASSERT(m_statusBarConnectionState);
-		Q_ASSERT(m_statusBarConnectionStatistics);
-
-		Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
-		Tcp::ConnectionState signalClientState =  m_tcpSignalClient->getConnectionState();
-
-		// State
-		//
-		QString text = QString(" ConfigSrv: %1   AppDataSrv: %2 ")
-					   .arg(confiConnState.isConnected ? confiConnState.peerAddr.addressPortStr() : "NoConnection")
-					   .arg(signalClientState.isConnected ? signalClientState.peerAddr.addressPortStr() : "NoConnection");
-
-		if (m_configController.configuration().tuningEnabled == true)
-		{
-			text.append(QString("  TuningSrv: %1 ").arg(tuningServiceState));
-		}
-
-		m_statusBarConnectionState->setText(text);
-
-		// Statistics
-		//
-		text = QString(" ConfigSrv: %1   AppDataSrv: %2 ")
-			   .arg(QString::number(confiConnState.replyCount))
-			   .arg(QString::number(signalClientState.replyCount));
-
-		if (m_configController.configuration().tuningEnabled == true)
-		{
-			text.append(QString("  TuningSrv: %1 ").arg(tuningServiceReplyCount));
-		}
-
-		m_statusBarConnectionStatistics->setText(text);
-
-		// BuildNo
-		//
-		text = QString(" Project: %1   Build: %2  ")
-				   .arg(m_configController.configuration().project)
-				   .arg(m_configController.configuration().buildNo);
-
-		m_statusBarProjectInfo->setText(text);
-
-	}
-
-	if (event->timerId() == m_updateStatusBarTimerId &&
-			(m_logErrorsCounter != m_LogFile.errorAckCounter() || m_logWarningsCounter != m_LogFile.warningAckCounter()))
-	{
-		m_logErrorsCounter = m_LogFile.errorAckCounter();
-		m_logWarningsCounter = m_LogFile.warningAckCounter();
-
-		Q_ASSERT(m_statusBarLogAlerts);
-
-		m_statusBarLogAlerts->setText(QString(" Log E: %1 W: %2").arg(m_logErrorsCounter).arg(m_logWarningsCounter));
-
-		if (m_logErrorsCounter == 0 && m_logWarningsCounter == 0)
-		{
-			m_statusBarLogAlerts->setStyleSheet(m_statusBarInfo->styleSheet());
-		}
-		else
-		{
-			m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: red}");
-		}
-	}
-
-
 	return;
 }
 
@@ -591,28 +525,9 @@ void MonitorMainWindow::updateStatusBar()
 {
 	// Update status bar
 	//
-	QString tuningServiceState;
-	int tuningServiceReplyCount = 0;
-
-	if (m_configController.configuration().tuningEnabled == true)
-	{
-		if (m_tuningTcpClientThread == nullptr ||
-			m_tuningTcpClient == nullptr)
-		{
-			tuningServiceState = tr("TCP Thread Error");
-		}
-		else
-		{
-			auto connState = m_tuningTcpClient->getConnectionState();
-			tuningServiceReplyCount = connState.replyCount;
-
-			tuningServiceState = connState.isConnected ? connState.peerAddr.addressPortStr() : "NoConnection";
-		}
-	}
-
-	assert(m_statusBarConfigConnection);
-	assert(m_statusBarAppDataConnection);
-	assert(m_statusBarTuningConnection);
+	Q_ASSERT(m_statusBarConfigConnection);
+	Q_ASSERT(m_statusBarAppDataConnection);
+	Q_ASSERT(m_statusBarTuningConnection);
 
 	// ConfigService connection
 	//
@@ -632,7 +547,6 @@ void MonitorMainWindow::updateStatusBar()
 	{
 		Tcp::ConnectionState signalClientState =  m_tcpSignalClient->getConnectionState();
 
-
 		showSoftwareConnection(tr("Application Data Service"), tr("AppDataService"),
 							   signalClientState,
 							   m_tcpSignalClient->serverAddressPort1(),
@@ -642,10 +556,9 @@ void MonitorMainWindow::updateStatusBar()
 
 	// TuningService connection
 	//
-	if  (m_configController.configuration().tuningEnabled == true && m_tcpSignalClient != nullptr)
+	if  (m_configController.configuration().tuningEnabled == true && m_tuningTcpClient != nullptr)
 	{
-		Tcp::ConnectionState tuningClientState =  m_tuningTcpClient->getConnectionState();
-
+		Tcp::ConnectionState tuningClientState = m_tuningTcpClient->getConnectionState();
 
 		showSoftwareConnection(tr("Tuning Service"), tr("TuningService"),
 							   tuningClientState,
@@ -682,6 +595,8 @@ void MonitorMainWindow::updateStatusBar()
 			m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: red}");
 		}
 	}
+
+	return;
 }
 
 void MonitorMainWindow::showSoftwareConnection(const QString& caption, const QString& shortCaption, Tcp::ConnectionState connectionState, HostAddressPort portPrimary, HostAddressPort portSecondary, QLabel* label)
