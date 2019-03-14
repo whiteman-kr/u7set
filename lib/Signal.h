@@ -66,6 +66,9 @@ public:
 	E::Channel channel() const { return m_channel; }
 	int channelInt() const { return TO_INT(m_channel); }
 
+	bool excludeFromBuild() const { return m_excludeFromBuild; }
+	void setExcludeFromBuild(bool excludeFromBuild) { m_excludeFromBuild = excludeFromBuild; }
+
 	// Signal type
 
 	E::SignalType signalType() const { return m_signalType; }
@@ -328,6 +331,7 @@ private:
 	QString m_lmEquipmentID;										// now fills in compile time only
 	QString m_busTypeID;											// only for: m_signalType == E::SignalType::Bus
 	E::Channel m_channel = E::Channel::A;
+	bool m_excludeFromBuild;
 
 	// Signal type
 	//
