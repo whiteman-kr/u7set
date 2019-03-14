@@ -8,7 +8,7 @@
 #include "SchemasWorkspace.h"
 #include "ConfigController.h"
 #include "UserManager.h"
-#include "../lib/Ui/DialogTuningSources.h"
+#include "DialogTuningSources.h"
 
 class TuningTcpClient;
 class DialogAlert;
@@ -16,15 +16,6 @@ class DialogAlert;
 namespace Ui {
 	class MainWindow;
 }
-
-class ClientDialogTuningSources : public DialogTuningSources
-{
-public:
-	explicit ClientDialogTuningSources(TuningTcpClient* tcpClient, bool hasActivationControls, QWidget* parent);
-
-protected:
-	virtual bool passwordOk() override;
-};
 
 class MainWindow : public QMainWindow
 {
@@ -139,7 +130,7 @@ private:
 	QString m_singleLmControlModeText;
 	QString m_multipleLmControlModeText;
 
-	ClientDialogTuningSources* m_dialogTuningSources = nullptr;
+	DialogTuningSources* m_dialogTuningSources = nullptr;
 };
 
 // Global definitions

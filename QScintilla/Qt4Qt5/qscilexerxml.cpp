@@ -1,6 +1,6 @@
 // This module implements the QsciLexerXML class.
 //
-// Copyright (c) 2017 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2019 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla.
 // 
@@ -130,7 +130,7 @@ bool QsciLexerXML::defaultEolFill(int style) const
 // Returns the font of the text for a style.
 QFont QsciLexerXML::defaultFont(int style) const
 {
-	/*QFont f;
+    QFont f;
 
     switch (style)
     {
@@ -157,10 +157,7 @@ QFont QsciLexerXML::defaultFont(int style) const
         f = QsciLexerHTML::defaultFont(style);
     }
 
-
-	return f;*/
-
-	return QsciLexer::defaultFont(style);
+    return f;
 }
 
 
@@ -213,7 +210,7 @@ void QsciLexerXML::refreshProperties()
 // Read properties from the settings.
 bool QsciLexerXML::readProperties(QSettings &qs, const QString &prefix)
 {
-    int rc = QsciLexerHTML::readProperties(qs, prefix), num;
+    int rc = QsciLexerHTML::readProperties(qs, prefix);
 
     scripts = qs.value(prefix + "scriptsstyled", true).toBool();
 

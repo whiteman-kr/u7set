@@ -1,6 +1,6 @@
 // This module implements the QsciLexerCPP class.
 //
-// Copyright (c) 2017 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2019 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla.
 // 
@@ -120,7 +120,7 @@ QColor QsciLexerCPP::defaultColor(int style) const
     switch (style)
     {
     case Default:
-		return QColor(0x80, 0x80, 0x80);
+        return QColor(0x80, 0x80, 0x80);
 
     case Comment:
     case CommentLine:
@@ -132,25 +132,21 @@ QColor QsciLexerCPP::defaultColor(int style) const
         return QColor(0x3f, 0x70, 0x3f);
 
     case Number:
-		return QColor(0x00, 0x00, 0x7f);
+        return QColor(0x00, 0x7f, 0x7f);
 
     case Keyword:
-		return QColor(0x7f, 0x7f, 0x00);
+        return QColor(0x00, 0x00, 0x7f);
 
     case DoubleQuotedString:
     case SingleQuotedString:
     case RawString:
-		//return QColor(0x7f, 0x00, 0x7f);
-		return QColor(0x00, 0x7f, 0x00);
+        return QColor(0x7f, 0x00, 0x7f);
 
     case PreProcessor:
-		return QColor(0x00, 0x00, 0x7f);
+        return QColor(0x7f, 0x7f, 0x00);
 
     case Operator:
-		//return QColor(0x7f, 0x7f, 0x00);
-		return QColor(0x00, 0x00, 0x00);
-
-	case UnclosedString:
+    case UnclosedString:
         return QColor(0x00, 0x00, 0x00);
 
     case VerbatimString:
@@ -191,7 +187,7 @@ QColor QsciLexerCPP::defaultColor(int style) const
         return QColor(0xd0, 0xd0, 0xd0);
 
     case InactiveKeyword:
-		return QColor(0x7f, 0x7f, 0x00);
+        return QColor(0x90, 0x90, 0xb0);
 
     case InactiveDoubleQuotedString:
     case InactiveSingleQuotedString:
@@ -202,9 +198,6 @@ QColor QsciLexerCPP::defaultColor(int style) const
         return QColor(0xb0, 0xb0, 0x90);
 
     case InactiveOperator:
-		//return QColor(0x7f, 0x7f, 0x00);
-		return QColor(0x80, 0x80, 0x80);
-
     case InactiveIdentifier:
     case InactiveGlobalClass:
         return QColor(0xb0, 0xb0, 0xb0);
@@ -260,7 +253,7 @@ bool QsciLexerCPP::defaultEolFill(int style) const
 // Returns the font of the text for a style.
 QFont QsciLexerCPP::defaultFont(int style) const
 {
-	/*QFont f;
+    QFont f;
 
     switch (style)
     {
@@ -279,7 +272,7 @@ QFont QsciLexerCPP::defaultFont(int style) const
     case TaskMarker:
     case InactiveTaskMarker:
 #if defined(Q_OS_WIN)
-		f = QFont("Comic Sans MS",10);
+        f = QFont("Comic Sans MS",9);
 #elif defined(Q_OS_MAC)
         f = QFont("Comic Sans MS", 12);
 #else
@@ -287,13 +280,13 @@ QFont QsciLexerCPP::defaultFont(int style) const
 #endif
         break;
 
-	case Keyword:
+    case Keyword:
     case InactiveKeyword:
     case Operator:
     case InactiveOperator:
-		f = QsciLexer::defaultFont(style);
-		f.setBold(true);
-		break;
+        f = QsciLexer::defaultFont(style);
+        f.setBold(true);
+        break;
 
     case DoubleQuotedString:
     case InactiveDoubleQuotedString:
@@ -322,9 +315,7 @@ QFont QsciLexerCPP::defaultFont(int style) const
         f = QsciLexer::defaultFont(style);
     }
 
-	return f;*/
-
-	return QsciLexer::defaultFont(style);
+    return f;
 }
 
 
@@ -336,13 +327,13 @@ const char *QsciLexerCPP::keywords(int set) const
             "and and_eq asm auto bitand bitor bool break case "
             "catch char class compl const const_cast continue "
             "default delete do double dynamic_cast else enum "
-			"explicit export extern false float for friend function goto if "
+            "explicit export extern false float for friend goto if "
             "inline int long mutable namespace new not not_eq "
             "operator or or_eq private protected public register "
             "reinterpret_cast return short signed sizeof static "
             "static_cast struct switch template this throw true "
             "try typedef typeid typename union unsigned using "
-			"var virtual void volatile wchar_t while xor xor_eq";
+            "virtual void volatile wchar_t while xor xor_eq";
 
     if (set == 3)
         return

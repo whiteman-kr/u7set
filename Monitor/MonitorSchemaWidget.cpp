@@ -161,6 +161,8 @@ void MonitorSchemaWidget::signalInfo(QString appSignalId)
 	{
 		DialogSignalInfo* dsi = new DialogSignalInfo(signal, theMonitorMainWindow);
 		dsi->show();
+		dsi->raise();
+		dsi->activateWindow();
 	}
 	else
 	{

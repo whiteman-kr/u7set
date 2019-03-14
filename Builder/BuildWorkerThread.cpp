@@ -902,7 +902,6 @@ namespace Builder
 		return true;
 	}
 
-
 	bool BuildWorkerThread::loadSignals(SignalSet* signalSet, Hardware::EquipmentSet* equipment)
 	{
 		if (signalSet == nullptr ||

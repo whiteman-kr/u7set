@@ -1329,7 +1329,7 @@ namespace Builder
 
 	/// IssueCode: CFG3031
 	///
-	/// IssueType: Error
+	/// IssueType: Warning
 	///
 	/// Title: Property %1.%2 should be set to the valid writable catalog of workstation.
 	///
@@ -1340,9 +1340,9 @@ namespace Builder
 	/// Description:
 	///			Archive location is not assigned.
 	///
-	void IssueLogger::errCFG3031(QString objectID, QString propertyName)
+	void IssueLogger::wrnCFG3031(QString objectID, QString propertyName)
 	{
-		LOG_ERROR(IssueType::FscConfiguration,
+		LOG_WARNING0(IssueType::FscConfiguration,
 				  3031,
 				  tr("Property %1.%2 should be set to the valid writable catalog of workstation.")
 				  .arg(objectID)
@@ -5391,7 +5391,7 @@ namespace Builder
 	///		%2 Schema item label
 	///
 	/// Description:
-	///		Application signal with specified equipmentID is not found.
+	///		Integer constant value out of range. Check constant value.
 	///
 	void IssueLogger::errALC5134(QUuid ualItemUuid, QString itemLabel, QString schemaID)
 	{
@@ -5416,7 +5416,7 @@ namespace Builder
 	///		%2 Schema item label
 	///
 	/// Description:
-	///		Application signal with specified equipmentID is not found.
+	///		Float constant value out of range. Check constant value.
 	///
 	void IssueLogger::errALC5135(QUuid ualItemUuid, QString itemLabel, QString schemaID)
 	{
@@ -5429,7 +5429,6 @@ namespace Builder
 						arg(std::numeric_limits<float>::max()).
 						arg(schemaID).arg(itemLabel));
 	}
-
 
 	/// IssueCode: ALC5136
 	///
@@ -6054,6 +6053,46 @@ namespace Builder
 				  5164,
 				  QString(tr("Port2EquipmentID property is empty in connection %1.")).
 					arg(connectionID));
+	}
+
+	/// IssueCode: ALC5165
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Tuning is enabled for module %1 but tuningable signals is not found.
+	///
+	/// Parameters:
+	///		%1 LM's equipmentID
+	///
+	/// Description:
+	///		Tuning is enabled for specified module but tuningable signals is not found.
+	///
+	void IssueLogger::wrnALC5165(QString lmEquipmentID)
+	{
+		LOG_WARNING1(IssueType::AlCompiler,
+				  5165,
+				  QString(tr("Tuning is enabled for module %1 but tuningable signals is not found.")).
+					arg(lmEquipmentID));
+	}
+
+	/// IssueCode: ALC5166
+	///
+	/// IssueType: Error
+	///
+	/// Title: Tuningable signals is found in module %1 but tuning is not enabled.
+	///
+	/// Parameters:
+	///		%1 LM's equipmentID
+	///
+	/// Description:
+	///		Tuningable signals is found in specified module but tuning is not enabled.
+	///
+	void IssueLogger::errALC5166(QString lmEquipmentID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5166,
+				  QString(tr("Tuningable signals is found in module %1 but tuning is not enabled.")).
+					arg(lmEquipmentID));
 	}
 
 	//

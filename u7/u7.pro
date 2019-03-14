@@ -176,7 +176,9 @@ SOURCES +=\
     Forms/ProjectPropertiesForm.cpp \
     Forms/PendingChangesDialog.cpp \
     ../lib/SimpleMutex.cpp \
-    ../lib/Ui/TextEditCompleter.cpp
+    ../lib/Ui/TextEditCompleter.cpp \
+    ../lib/QScintillaLexers/LexerJavaScript.cpp \
+    ../lib/QScintillaLexers/LexerXML.cpp
 
 
 HEADERS  += \
@@ -315,7 +317,9 @@ HEADERS  += \
     Forms/ProjectPropertiesForm.h \
     Forms/PendingChangesDialog.h \
     ../lib/SimpleMutex.h \
-    ../lib/Ui/TextEditCompleter.h
+    ../lib/Ui/TextEditCompleter.h \
+    ../lib/QScintillaLexers/LexerJavaScript.h \
+    ../lib/QScintillaLexers/LexerXML.h
 
 
 FORMS    += \
