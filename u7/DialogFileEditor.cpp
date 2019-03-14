@@ -20,7 +20,7 @@ DialogFileEditor::DialogFileEditor(const QString& fileName, QByteArray *pData, D
 
 	if (ext == tr("js"))
 	{
-		codeType = CodeType::Cpp;
+		codeType = CodeType::JavaScript;
 	}
 	else
 	{

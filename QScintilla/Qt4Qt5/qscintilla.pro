@@ -1,6 +1,6 @@
 # The project file for the QScintilla library.
 #
-# Copyright (c) 2017 Riverbank Computing Limited <info@riverbankcomputing.com>
+# Copyright (c) 2019 Riverbank Computing Limited <info@riverbankcomputing.com>
 # 
 # This file is part of QScintilla.
 # 
@@ -20,17 +20,31 @@
 
 # This must be kept in sync with Python/configure.py, Python/configure-old.py,
 # example-Qt4Qt5/application.pro and designer-Qt4Qt5/designer.pro.
-!win32:VERSION = 13.0.0
+!win32:VERSION = 15.0.0
 
 TEMPLATE = lib
-TARGET = qscintilla2_qt$${QT_MAJOR_VERSION}
 CONFIG += qt warn_off thread exceptions hide_symbols
+
+CONFIG(debug, debug|release) {
+    mac: {
+        TARGET = qscintilla2_qt$${QT_MAJOR_VERSION}_debug
+    } else {
+        win32: {
+            TARGET = qscintilla2_qt$${QT_MAJOR_VERSION}d
+        } else {
+            TARGET = qscintilla2_qt$${QT_MAJOR_VERSION}
+        }
+    }
+} else {
+    TARGET = qscintilla2_qt$${QT_MAJOR_VERSION}
+}
+
 INCLUDEPATH += . ../include ../lexlib ../src
 
 !CONFIG(staticlib) {
     DEFINES += QSCINTILLA_MAKE_DLL
 }
-DEFINES += SCINTILLA_QT SCI_LEXER
+DEFINES += SCINTILLA_QT SCI_LEXER INCLUDE_DEPRECATED_FEATURES
 
 greaterThan(QT_MAJOR_VERSION, 4) {
 	QT += widgets printsupport
@@ -41,6 +55,13 @@ greaterThan(QT_MAJOR_VERSION, 4) {
 
     # Work around QTBUG-39300.
     CONFIG -= android_install
+} else {
+    DEFINES += QT_NO_ACCESSIBILITY
+}
+
+# For old versions of GCC.
+unix:!macx {
+    CONFIG += c++11
 }
 
 # Comment this in if you want the internal Scintilla classes to be placed in a
@@ -95,6 +116,7 @@ HEADERS = \
 	./Qsci/qscilexercustom.h \
 	./Qsci/qscilexerd.h \
 	./Qsci/qscilexerdiff.h \
+	./Qsci/qscilexeredifact.h \
 	./Qsci/qscilexerfortran.h \
 	./Qsci/qscilexerfortran77.h \
 	./Qsci/qscilexerhtml.h \
@@ -128,8 +150,8 @@ HEADERS = \
 	./Qsci/qscistyle.h \
 	./Qsci/qscistyledtext.h \
 	ListBoxQt.h \
+	SciAccessibility.h \
 	SciClasses.h \
-	SciNamespace.h \
 	ScintillaQt.h \
 	../include/ILexer.h \
 	../include/Platform.h \
@@ -140,6 +162,7 @@ HEADERS = \
 	../lexlib/Accessor.h \
 	../lexlib/CharacterCategory.h \
 	../lexlib/CharacterSet.h \
+	../lexlib/DefaultLexer.h \
 	../lexlib/LexAccessor.h \
 	../lexlib/LexerBase.h \
 	../lexlib/LexerModule.h \
@@ -159,14 +182,17 @@ HEADERS = \
 	../src/CellBuffer.h \
 	../src/CharClassify.h \
 	../src/ContractionState.h \
+	../src/DBCS.h \
 	../src/Decoration.h \
 	../src/Document.h \
 	../src/EditModel.h \
 	../src/Editor.h \
 	../src/EditView.h \
+	../src/ElapsedPeriod.h \
 	../src/ExternalLexer.h \
 	../src/FontQuality.h \
 	../src/Indicator.h \
+	../src/IntegerRectangle.h \
 	../src/KeyMap.h \
 	../src/LineMarker.h \
 	../src/MarginView.h \
@@ -179,8 +205,8 @@ HEADERS = \
 	../src/Selection.h \
 	../src/SplitVector.h \
 	../src/Style.h \
-	../src/UnicodeFromUTF8.h \
 	../src/UniConversion.h \
+	../src/UniqueString.h \
 	../src/ViewStyle.h \
 	../src/XPM.h
 
@@ -204,6 +230,7 @@ SOURCES = \
 	qscilexercustom.cpp \
 	qscilexerd.cpp \
 	qscilexerdiff.cpp \
+	qscilexeredifact.cpp \
 	qscilexerfortran.cpp \
 	qscilexerfortran77.cpp \
 	qscilexerhtml.cpp \
@@ -238,6 +265,7 @@ SOURCES = \
 	qscistyledtext.cpp \
     MacPasteboardMime.cpp \
     InputMethod.cpp \
+	SciAccessibility.cpp \
 	SciClasses.cpp \
 	ListBoxQt.cpp \
 	PlatQt.cpp \
@@ -256,7 +284,7 @@ SOURCES = \
 	../lexers/LexBash.cpp \
 	../lexers/LexBasic.cpp \
 	../lexers/LexBatch.cpp \
-	../lexers/LexBibTex.cpp \
+	../lexers/LexBibTeX.cpp \
 	../lexers/LexBullant.cpp \
 	../lexers/LexCaml.cpp \
 	../lexers/LexCLW.cpp \
@@ -286,11 +314,12 @@ SOURCES = \
 	../lexers/LexHaskell.cpp \
 	../lexers/LexHex.cpp \
 	../lexers/LexHTML.cpp \
+	../lexers/LexIndent.cpp \
 	../lexers/LexInno.cpp \
 	../lexers/LexJSON.cpp \
 	../lexers/LexKix.cpp \
 	../lexers/LexKVIrc.cpp \
-	../lexers/LexLaTex.cpp \
+	../lexers/LexLaTeX.cpp \
 	../lexers/LexLisp.cpp \
 	../lexers/LexLout.cpp \
 	../lexers/LexLua.cpp \
@@ -298,6 +327,7 @@ SOURCES = \
 	../lexers/LexMake.cpp \
 	../lexers/LexMarkdown.cpp \
 	../lexers/LexMatlab.cpp \
+	../lexers/LexMaxima.cpp \
 	../lexers/LexMetapost.cpp \
 	../lexers/LexMMIXAL.cpp \
 	../lexers/LexModula.cpp \
@@ -326,6 +356,7 @@ SOURCES = \
 	../lexers/LexRegistry.cpp \
 	../lexers/LexRuby.cpp \
 	../lexers/LexRust.cpp \
+	../lexers/LexSAS.cpp \
 	../lexers/LexScriptol.cpp \
 	../lexers/LexSmalltalk.cpp \
 	../lexers/LexSML.cpp \
@@ -333,6 +364,7 @@ SOURCES = \
 	../lexers/LexSpecman.cpp \
 	../lexers/LexSpice.cpp \
 	../lexers/LexSQL.cpp \
+	../lexers/LexStata.cpp \
 	../lexers/LexSTTXT.cpp \
 	../lexers/LexTACL.cpp \
 	../lexers/LexTADS3.cpp \
@@ -349,6 +381,7 @@ SOURCES = \
 	../lexlib/Accessor.cpp \
 	../lexlib/CharacterCategory.cpp \
 	../lexlib/CharacterSet.cpp \
+	../lexlib/DefaultLexer.cpp \
 	../lexlib/LexerBase.cpp \
 	../lexlib/LexerModule.cpp \
 	../lexlib/LexerNoExceptions.cpp \
@@ -364,6 +397,7 @@ SOURCES = \
 	../src/CellBuffer.cpp \
 	../src/CharClassify.cpp \
 	../src/ContractionState.cpp \
+	../src/DBCS.cpp \
 	../src/Decoration.cpp \
 	../src/Document.cpp \
 	../src/EditModel.cpp \

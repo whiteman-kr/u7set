@@ -31,7 +31,7 @@
 #include "Settings.h"
 #include "../lib/SignalProperties.h"
 #include "DialogInputEx.h"
-#include "../QScintilla/Qt4Qt5/Qsci/QsciLexerJavaScript.h"
+#include "../lib/QScintillaLexers/LexerJavaScript.h"
 #include "../lib/Ui/TextEditCompleter.h"
 
 
@@ -6740,7 +6740,7 @@ void EditSchemaWidget::f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item)
 	QLabel* preDrawScriptLabel = new QLabel("PreDrawScript:", &d);
 
 	QsciScintilla* preDrawScriptEdit = new QsciScintilla(&d);
-	QsciLexerJavaScript lexer;
+	LexerJavaScript lexer;
 	preDrawScriptEdit->setLexer(&lexer);
 	preDrawScriptEdit->setText(preDrawScript);
 	preDrawScriptEdit->setMarginType(0, QsciScintilla::NumberMargin);

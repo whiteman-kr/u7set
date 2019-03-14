@@ -1,7 +1,6 @@
-// Support for building the Scintilla code in the Scintilla namespace using the
-// -DSCI_NAMESPACE compiler flag.
+// This is the SIP interface definition for QsciLexerEDIFACT.
 //
-// Copyright (c) 2017 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2019 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla.
 // 
@@ -19,17 +18,33 @@
 // WARRANTY OF DESIGN, MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
 
 
-#ifndef _SCINAMESPACE_H
-#define _SCINAMESPACE_H
+class QsciLexerEDIFACT : QsciLexer
+{
+%TypeHeaderCode
+#include <Qsci/qscilexeredifact.h>
+%End
 
-#ifdef SCI_NAMESPACE
-#define QSCI_SCI_NAMESPACE(name)    Scintilla::name
-#define QSCI_BEGIN_SCI_NAMESPACE    namespace Scintilla {
-#define QSCI_END_SCI_NAMESPACE      };
-#else
-#define QSCI_SCI_NAMESPACE(name)    name
-#define QSCI_BEGIN_SCI_NAMESPACE
-#define QSCI_END_SCI_NAMESPACE
-#endif
+public:
+    enum {
+        Default,
+        SegmentStart,
+        SegmentEnd,
+        ElementSeparator,
+        CompositeSeparator,
+        ReleaseSeparator,
+        UNASegmentHeader,
+        UNHSegmentHeader,
+        BadSegment
+    };
 
-#endif
+    QsciLexerEDIFACT(QObject *parent /TransferThis/ = 0);
+    virtual ~QsciLexerEDIFACT();
+
+    const char *language() const;
+    const char *lexer() const;
+    QColor defaultColor(int style) const;
+    QString description(int style) const;
+
+private:
+    QsciLexerEDIFACT(const QsciLexerEDIFACT &);
+};
