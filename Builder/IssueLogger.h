@@ -13,6 +13,8 @@
 #define LOG_WARNING1(type, code, message)	writeWarning1(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 #define LOG_WARNING2(type, code, message)	writeWarning2(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 
+#define LOG_INTERNAL_ERROR(logObject)	logObject->errALC5998(__FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_NULLPTR_ERROR(logObject)	logObject->errALC5997(__FILE__, __LINE__, Q_FUNC_INFO);
 
 namespace Builder
 {
@@ -154,7 +156,7 @@ namespace Builder
 		void errCFG3028(QString signalID1, QString signalID2, QString module, QString propertyName);
 		void errCFG3029(QString softwareID);												// Software %1 is not linked to ConfigurationService.
 		void errCFG3030(QString lmID, QString appDataServiceID);							// Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.		
-		void errCFG3031(QString objectID, QString propertyName);							// Property %1.%2 should be set to the valid writable catalog of workstation.
+		void wrnCFG3031(QString objectID, QString propertyName);							// Property %1.%2 should be set to the valid writable catalog of workstation.
 
 		void errCFG3040(QString monitorId, QString tuningServiceId);				// Mode SingleLmControl is not supported by Monitor. Set TuningServiceID.SingleLmControl to false. Monitor EquipmentID %1, TuningServiceID %2.
 
@@ -378,6 +380,8 @@ namespace Builder
 		void errALC5162(QString connectionID);											// In single-port connection %1 Port2EquipmentID property is not empty.
 		void errALC5163(QString connectionID);											// Port1EquipmentID property is empty in connection %1.
 		void errALC5164(QString connectionID);											// Port2EquipmentID property is empty in connection %1.
+		void wrnALC5165(QString lmEquipmentID);											// Tuning is enabled for module %1 but tuningable signals is not found.
+		void errALC5166(QString lmEquipmentID);											// Tuningable signals is found in module %1 but tuning is not enabled.
 
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.
@@ -389,7 +393,9 @@ namespace Builder
 		void wrnALC5193(QString appSignalID, QString portID, QString connectionID);		// Rx signal %1 specified in port %2 raw data description isn't assigned to receiver (Connection %3).
 		void wrnALC5194(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 with manual settings are overlapped.
 
-		void errALC5999(QString compilationProcedureName);			// %1 has been finished with errors.
+		void errALC5997(QString fileName, int lineNo, QString functionName);			// Null pointer occurred! File: %1 Line: %2 Function: %3
+		void errALC5998(QString fileName, int lineNo, QString functionName);			// Internal error! File: %1 Line: %2 Function: %3
+		void errALC5999(QString compilationProcedureName);								// %1 has been finished with errors.
 
 		// EQP			Equipment issues						6000-6999
 		//

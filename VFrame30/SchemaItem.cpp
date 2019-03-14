@@ -839,6 +839,16 @@ namespace VFrame30
 		m_preDrawScript = value;
 	}
 
+	bool SchemaItem::blinkPhase() const
+	{
+		return m_blinkPhase;
+	}
+
+	void SchemaItem::setBlinkPhase(bool value)
+	{
+		m_blinkPhase = value;
+	}
+
 	QRectF SchemaItem::boundingRectInDocPt() const
 	{
 		assert(false);		// Must be implemented in child classes

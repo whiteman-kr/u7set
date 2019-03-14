@@ -47,9 +47,7 @@ namespace VFrame30
 					const VFrame30::SchemaItemValue* itemValue = item->toType<VFrame30::SchemaItemValue>();
 					assert(itemValue);
 
-					QStringList appSignals;
-					appSignals << itemValue->signalId();
-
+					const QStringList& appSignals = itemValue->signalIds();
 					for (const QString& id : appSignals)
 					{
 						signalMap.insert(id);
