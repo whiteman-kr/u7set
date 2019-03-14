@@ -125,8 +125,6 @@ void AppDataReceiverThread::receivePackets()
 
 	qint64 prevReceivedFramesCount = 0;
 
-	quint16 packetNo = 55555;
-
 	while(isQuitRequested() == false)
 	{
 		qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
@@ -223,22 +221,6 @@ void AppDataReceiverThread::receivePackets()
 		}
 
 		m_receivedFramesCount++;
-
-		{
-			Rup::Header header = simFrame.rupFrame.header;
-
-			header.reverseBytes();
-
-			if (packetNo != 55555)
-			{
-				if (header.numerator != packetNo + 1)
-				{
-					qDebug() << "packet losted";
-				}
-			}
-
-			packetNo = header.numerator;
-		}
 
 		dataSource->pushRupFrame(serverTime, simFrame.rupFrame, m_thisThread);
 
