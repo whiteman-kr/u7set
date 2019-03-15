@@ -1,7 +1,6 @@
 #include "TuningModel.h"
 #include <QKeyEvent>
 
-using namespace std;
 
 Hash TuningModelHashSet::firstHash() const
 {

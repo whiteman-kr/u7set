@@ -988,7 +988,6 @@ void MonitorMainWindow::slot_historyChanged(bool enableBack, bool enableForward)
 	{
 		Q_ASSERT(m_historyBack);
 		Q_ASSERT(m_historyForward);
-
 		return;
 	}
 

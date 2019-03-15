@@ -54,7 +54,8 @@ HEADERS += \
     DialogTrendSignalProperties.h \
     ../Proto/trends.pb.h \
     TrendRuler.h \
-    TrendParam.h
+    TrendParam.h \
+    ../lib/CUtils.h
 
 unix {
     target.path = /usr/lib

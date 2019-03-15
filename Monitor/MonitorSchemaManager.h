@@ -12,6 +12,9 @@ class MonitorSchemaManager : public VFrame30::SchemaManager
 public:
 	explicit MonitorSchemaManager(MonitorConfigController* configController, QObject* parent = nullptr);
 
+public:
+	bool hasSchema(QString schemaId) const;
+
 protected:
 	virtual std::shared_ptr<VFrame30::Schema> loadSchema(QString schemaId) override;
 
@@ -19,6 +22,10 @@ protected:
 	//
 protected slots:
 	void slot_configurationArrived(ConfigSettings configuration);
+
+public:
+	[[nodiscard]] MonitorConfigController* monitorConfigController();
+	[[nodiscard]] const MonitorConfigController* monitorConfigController() const;
 
 	// Data
 	//

@@ -1106,6 +1106,11 @@ namespace TrendLib
 		for (const TrendStateItem& state : states)
 		{
 			TimeStamp ts = state.getTime(timeType).roundedToHour();
+			if (ts == 0)
+			{
+				qDebug() << "TrendSignalSet::appendRealtimeDataToArchive: Received wrong timestamp: " << ts.timeStamp << ", " << timeType;
+				continue;
+			}
 
 			if (lastHourTime == ts)
 			{

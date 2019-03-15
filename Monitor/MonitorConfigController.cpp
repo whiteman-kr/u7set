@@ -226,6 +226,17 @@ bool MonitorConfigController::getFileById(const QString& id, QByteArray* fileDat
 	return false;
 }
 
+bool MonitorConfigController::hasFileId(QString fileId) const
+{
+	if (m_cfgLoaderThread == nullptr)
+	{
+		Q_ASSERT(m_cfgLoaderThread != nullptr);
+		return false;
+	}
+
+	return m_cfgLoaderThread->hasFileID(fileId);
+}
+
 Tcp::ConnectionState MonitorConfigController::getConnectionState() const
 {
 	Tcp::ConnectionState result;
@@ -678,4 +689,10 @@ ConfigSettings MonitorConfigController::configuration() const
 {
 	QMutexLocker locker(&m_confugurationMutex);
 	return m_configuration;
+}
+
+QString MonitorConfigController::configurationStartSchemaId() const
+{
+	QMutexLocker locker(&m_confugurationMutex);
+	return m_configuration.startSchemaId;
 }

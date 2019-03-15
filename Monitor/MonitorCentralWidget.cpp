@@ -82,7 +82,7 @@ void MonitorCentralWidget::slot_newTab()
 
 	if (curTabWidget == nullptr)
 	{
-		Q_ASSERT(false);
+		Q_ASSERT(curTabWidget);
 		return;
 	}
 
@@ -96,7 +96,7 @@ void MonitorCentralWidget::slot_closeCurrentTab()
 
 	if (curTabWidget == nullptr)
 	{
-		Q_ASSERT(false);
+		Q_ASSERT(curTabWidget);
 		return;
 	}
 
@@ -113,7 +113,7 @@ void MonitorCentralWidget::slot_zoomIn()
 
 	if (curTabWidget == nullptr)
 	{
-		Q_ASSERT(false);
+		Q_ASSERT(curTabWidget);
 		return;
 	}
 
@@ -127,7 +127,7 @@ void MonitorCentralWidget::slot_zoomOut()
 
 	if (curTabWidget == nullptr)
 	{
-		Q_ASSERT(false);
+		Q_ASSERT(curTabWidget);
 		return;
 	}
 
@@ -141,7 +141,7 @@ void MonitorCentralWidget::slot_zoom100()
 
 	if (curTabWidget == nullptr)
 	{
-		Q_ASSERT(false);
+		Q_ASSERT(curTabWidget);
 		return;
 	}
 
@@ -153,13 +153,12 @@ void MonitorCentralWidget::slot_historyBack()
 {
 	MonitorSchemaWidget* curTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
 
-	if (curTabWidget == nullptr)
+	if (curTabWidget == nullptr || curTabWidget->canBackHistory() == false)
 	{
-		Q_ASSERT(false);
+		Q_ASSERT(curTabWidget);
+		Q_ASSERT(curTabWidget->canBackHistory() == true);
 		return;
 	}
-
-	Q_ASSERT(curTabWidget->canBackHistory() == true);
 
 	curTabWidget->historyBack();
 
@@ -170,13 +169,12 @@ void MonitorCentralWidget::slot_historyForward()
 {
 	MonitorSchemaWidget* curTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
 
-	if (curTabWidget == nullptr)
+	if (curTabWidget == nullptr || curTabWidget->canForwardHistory() == false)
 	{
 		Q_ASSERT(false);
+		Q_ASSERT(curTabWidget->canForwardHistory());
 		return;
 	}
-
-	Q_ASSERT(curTabWidget->canForwardHistory() == true);
 
 	curTabWidget->historyForward();
 
@@ -228,7 +226,6 @@ void MonitorCentralWidget::slot_tabCloseRequested(int index)
 	}
 
 	emit signal_actionCloseTabUpdated(count() > 1);
-
 	return;
 }
 
@@ -240,19 +237,37 @@ void MonitorCentralWidget::slot_resetSchema()
 	for (int i = 0; i < count(); i++)
 	{
 		MonitorSchemaWidget* tabPage = dynamic_cast<MonitorSchemaWidget*>(widget(i));
-
 		if (tabPage == nullptr)
 		{
 			Q_ASSERT(tabPage);
 			continue;
 		}
 
-		tabPage->setSchema(tabPage->schemaId());
+		QString schemaToLoad = tabPage->schemaId();
+		if (m_schemaManager->hasSchema(tabPage->schemaId()) == true)
+		{
+			schemaToLoad = tabPage->schemaId();
+		}
+		else
+		{
+			QString startSchemaId = m_schemaManager->monitorConfigController()->configurationStartSchemaId();
+			if (m_schemaManager->hasSchema(startSchemaId) == true)
+			{
+				schemaToLoad = startSchemaId;
+			}
+			else
+			{
+				// schemaToLoad will stay tabPage->schemaId(); as during initialization,
+				// in that case empty schema will be loaded
+				//
+			}
+		}
+
+		tabPage->setSchema(schemaToLoad);
 		tabPage->resetHistory();
 
 		if (i == currentIndex())
 		{
-			//emit signal_schemaChanged(newSchema->schemaID());
 			emit signal_schemaChanged(tabPage->schema()->schemaId());
 		}
 	}
@@ -304,7 +319,6 @@ void MonitorCentralWidget::slot_closeTab(MonitorSchemaWidget* tabWidget)
 	}
 
 	slot_tabCloseRequested(tabIndex);
-
 	return;
 }
 

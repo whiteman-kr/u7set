@@ -201,7 +201,7 @@ class MonitorToolBar : public QToolBar
 	Q_OBJECT
 
 public:
-	explicit MonitorToolBar(const QString &tittle, QWidget* parent = Q_NULLPTR);
+	explicit MonitorToolBar(const QString& tittle, QWidget* parent = Q_NULLPTR);
 
 public:
 	void addAction(QAction* action);
