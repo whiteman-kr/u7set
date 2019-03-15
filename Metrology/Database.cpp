@@ -1095,7 +1095,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
 					measure->setMeasureTime(QDateTime::currentDateTime());
 
-					query.bindValue(field++, measure->measureTime().toString(MEASURE_TIME_FORMAT));
+					query.bindValue(field++, measure->measureTimeStr());
 
 				}
 				break;

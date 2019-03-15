@@ -24,6 +24,24 @@ Measurement::~Measurement()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+QString Measurement::measureTimeStr() const
+{
+	QString timeStr;
+
+	timeStr.sprintf("%02d-%02d-%04d %02d:%02d:%02d",
+					m_measureTime.date().day(),
+					m_measureTime.date().month(),
+					m_measureTime.date().year(),
+
+					m_measureTime.time().hour(),
+					m_measureTime.time().minute(),
+					m_measureTime.time().second());
+
+	return timeStr;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 Measurement* Measurement::at(int index)
 {
 	Measurement* pMeasurement = nullptr;
