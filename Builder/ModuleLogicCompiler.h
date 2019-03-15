@@ -226,6 +226,7 @@ namespace Builder
 		bool createUalSignalsFromBusComposers();
 		bool createUalSignalsFromBusComposer(UalItem* ualItem);
 		UalSignal* createBusParentSignal(UalItem* ualItem, const LogicPin& outPin, Signal* s, const QString& busTypeID);
+		UalSignal* createBusParentSignalFromBusExtractorConnectedToDiscreteSignal(UalItem* ualItem);
 
 		bool createUalSignalsFromReceivers();
 		bool createUalSignalsFromReceiver(UalItem* ualItem);
@@ -413,6 +414,8 @@ namespace Builder
 		bool get_SignedInt32_To_Unsigned16_BE_NoScale_inbusSignalCoversionCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal);
 		bool generateDiscreteSignalToBusCode(CodeSnippet* code, const UalSignal* inputSignal, const UalSignal* busChildSignal, const BusSignal& busSignal);
 		bool generateBusSignalToBusCode(CodeSnippet* code, UalSignal* inputSignal, UalSignal* busChildSignal, const BusSignal& busSignal);
+
+		bool generateDiscreteSignalToBusExtractorCode(CodeSnippet* code, const UalItem* ualItem);
 
 		UalItem* getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const;
 		UalItem* getAssociatedOutputPinParent(const LogicPin& inputPin, QUuid* connectedOutPinUuid = nullptr) const;

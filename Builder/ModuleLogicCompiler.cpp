@@ -1438,6 +1438,41 @@ namespace Builder
 		return busParentSignal;
 	}
 
+	UalSignal* ModuleLogicCompiler::createBusParentSignalFromBusExtractorConnectedToDiscreteSignal(UalItem* ualItem)
+	{
+		if (ualItem == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return nullptr;
+		}
+
+		const UalBusExtractor* busExtractor = ualItem->ualBusExtractor();
+
+		if (busExtractor == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return nullptr;
+		}
+
+		const std::vector<LogicPin>& inputs = busExtractor->inputs();
+
+		if (inputs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return nullptr;
+		}
+
+		const LogicPin& inPin = inputs[0];
+
+		QString busTypeID = busExtractor->busTypeId();
+
+		// connectedBusSignal can be nullptr here, it is Ok! AUTO bus signal will be created
+
+		UalSignal* busParentSignal = createBusParentSignal(ualItem, inPin, nullptr, busTypeID);
+
+		return busParentSignal;
+	}
+
 	bool ModuleLogicCompiler::createUalSignalsFromReceivers()
 	{
 		bool result = true;
@@ -2084,6 +2119,8 @@ namespace Builder
 			// link connected signals to UalSignal
 			//
 			result &= linkConnectedItems(ualItem, outPin, busChildSignal);
+
+			m_ualSignals.appendRefPin(ualItem, outPin.guid(), busChildSignal);
 		}
 
 		return result;
@@ -2383,6 +2420,25 @@ namespace Builder
 			//
 			m_log->errALC5100(busTypeID, busExtractorItem->guid(), busExtractorItem->schemaID());
 			return false;
+		}
+
+		// Discrete signal is connected to bus with discrete in/outs only
+		//
+		if (ualSignal->isDiscrete() &&
+			bus->busDataFormat() == E::BusDataFormat::Discrete)
+		{
+			UalSignal* busParentSignal = createBusParentSignalFromBusExtractorConnectedToDiscreteSignal(busExtractorItem);
+
+			if (busParentSignal == nullptr)
+			{
+				return false;
+			}
+
+			bool result = linkUalSignalsFromBusExtractor(busExtractorItem);
+
+			result &= m_ualSignals.appendRefPin(busExtractorItem, inPinUuid, busParentSignal);
+
+			return result;
 		}
 
 		if (ualSignal->isBus() != true || ualSignal->busTypeID() != busTypeID)
@@ -6443,6 +6499,12 @@ namespace Builder
 				result &= generateBusComposerCode(code, ualItem);
 				break;
 
+			case E::UalItemType::BusExtractor:
+				// specific code generation ONLY for discrete signals connected to bus extractor
+				//
+				result &= generateDiscreteSignalToBusExtractorCode(code, ualItem);
+				break;
+
 			// UalItems that is not required code generation
 			//
 			case E::UalItemType::Signal:
@@ -6450,7 +6512,7 @@ namespace Builder
 			case E::UalItemType::Transmitter:
 			case E::UalItemType::Receiver:
 			case E::UalItemType::Terminator:
-			case E::UalItemType::BusExtractor:
+//			case E::UalItemType::BusExtractor:
 			case E::UalItemType::LoopbackSource:
 			case E::UalItemType::LoopbackTarget:
 				break;
@@ -7636,6 +7698,140 @@ namespace Builder
 		code->append(cmd);
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::generateDiscreteSignalToBusExtractorCode(CodeSnippet* code, const UalItem* ualItem)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
+
+		const UalBusExtractor* busExtractor = ualItem->ualBusExtractor();
+
+		if (busExtractor == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const std::vector<LogicPin>& inputs = busExtractor->inputs();
+
+		if (inputs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const LogicPin& inPin = inputs[0];
+
+		const std::vector<QUuid>& associatedOutPins = inPin.associatedIOs();
+
+		if (associatedOutPins.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		UalSignal* inputSignal = m_ualSignals.get(associatedOutPins[0]);
+
+		TEST_PTR_LOG_RETURN_FALSE(inputSignal, m_log);
+
+		if (inputSignal->isDiscrete() == false)
+		{
+			return true;			// it is OK, bus extractor is connected to non-discrete signal
+									// specific code generation is not required
+		}
+
+		UalSignal* ualBusSignal = m_ualSignals.get(inPin.guid());
+
+		TEST_PTR_LOG_RETURN_FALSE(ualBusSignal, m_log);
+
+		BusShared bus = m_signals->getBus(ualBusSignal->busTypeID());
+
+		TEST_PTR_LOG_RETURN_FALSE(bus, m_log);
+
+		if (bus->busDataFormat() != E::BusDataFormat::Discrete)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		code->comment_nl(QString("Discrete signal to BusExtractor %1 processing").arg(ualItem->label()));
+
+		bool result = true;
+		int count = 0;
+
+		code->append(codeSetMemory(ualBusSignal->ualAddr().offset(), 0, bus->sizeW(), QString("init %1").arg(ualBusSignal->appSignalID())));
+
+		for(const BusSignal& busSignal : bus->busSignals())
+		{
+			UalSignal* busChildSignal = ualBusSignal->getBusChildSignal(busSignal.signalID);
+
+			if (inputSignal == nullptr || busChildSignal == nullptr)
+			{
+				result = false;
+				continue;
+			}
+
+			if (busChildSignal->isCompatible(inputSignal) == false)
+			{
+				assert(false);						// this error should be detected early
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (inputSignal->isConst() == false && inputSignal->ualAddr().isValid() == false)
+			{
+				// Undefined UAL address of signal '%1' (Logic schema '%2').
+				//
+				m_log->errALC5105(inputSignal->appSignalID(), inputSignal->ualItemGuid(), inputSignal->ualItemSchemaID());
+				return false;
+			}
+
+			if (busChildSignal->ualAddr().isValid() == false)
+			{
+				// Undefined UAL address of signal '%1' (Logic schema '%2').
+				//
+				m_log->errALC5105(busChildSignal->appSignalID(), busChildSignal->ualItemGuid(), busChildSignal->ualItemSchemaID());
+				return false;
+			}
+
+			bool res = true;
+
+			switch(busChildSignal->signalType())
+			{
+			case E::SignalType::Analog:
+			case E::SignalType::Bus:
+				LOG_INTERNAL_ERROR(m_log);
+				res = false;
+				break;
+
+			case E::SignalType::Discrete:
+				res = generateDiscreteSignalToBusCode(code, inputSignal, busChildSignal, busSignal);
+				break;
+
+			default:
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+			}
+
+			if (res == true)
+			{
+				count++;
+			}
+			else
+			{
+				result = false;
+			}
+		}
+
+		if (count > 0)
+		{
+			code->newLine();
+		}
+
+		return result;
 	}
 
 	UalItem* ModuleLogicCompiler::getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const
