@@ -6791,6 +6791,8 @@ void EditSchemaWidget::f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item)
 
 	d.setLayout(layout);
 
+	// RAW STRINg TEMPLATE FOR PreDrawScript
+	//
 	QString preDrawScriptTemplateString = R"((function(schemaItemValue)
 {
 	// var appSignalId = schemaItemValue.SignalIDs[0];
@@ -6808,7 +6810,7 @@ void EditSchemaWidget::f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item)
 	// {
 	//		schemaItemValue.Text = signalState.Value;
 	//		schemaItemValue.TextColor = "white";
-	//		schemaItemValue.FillColor = "blue";
+	//		schemaItemValue.FillColor = schemaItemValue.BlinkPhase ? "black" : "#A00000";
 	//		schemaItemValue.LineColor = "#000000";
 	// }
 }))";
