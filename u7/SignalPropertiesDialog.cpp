@@ -1,3 +1,6 @@
+#include <QMessageBox>
+#include <QDialogButtonBox>
+#include <QVBoxLayout>
 #include "SignalPropertiesDialog.h"
 #include "SignalsTabPage.h"
 #include "Settings.h"
@@ -226,7 +229,24 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 	{
 		Signal& appSignal = *signalVector[i];
 
-		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(appSignal);
+		bool uppercaseAppSignalID = true;
+		if (m_dbController->getProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, &uppercaseAppSignalID, this) == false)
+		{
+			assert(false);
+		}
+		if (uppercaseAppSignalID)
+		{
+			QString upperAppSignalId = appSignal.appSignalID().toUpper();
+			if (appSignal.appSignalID() != upperAppSignalId)
+			{
+				appSignal.setAppSignalID(upperAppSignalId);
+				if (m_editedSignalsId.contains(appSignal.ID()) == false)
+				{
+					m_editedSignalsId.push_back(appSignal.ID());
+				}
+			}
+		}
+		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(appSignal, uppercaseAppSignalID);
 
 		if (readOnly == true)
 		{
@@ -370,6 +390,19 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		if (signal.appSignalID().isEmpty() || signal.appSignalID()[0] != '#')
 		{
 			signal.setAppSignalID("#" + signal.appSignalID());
+		}
+
+		bool uppercaseAppSignalId = true;
+		if (m_dbController->getProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, &uppercaseAppSignalId, this) == false)
+		{
+			assert(false);
+		}
+		else
+		{
+			if (uppercaseAppSignalId)
+			{
+				signal.setAppSignalID(signal.appSignalID().toUpper());
+			}
 		}
 
 		signal.setCustomAppSignalID(signal.customAppSignalID().trimmed());

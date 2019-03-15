@@ -109,6 +109,7 @@ public:
 	static const QString typeCaption;
 	static const QString inOutTypeCaption;
 	static const QString cacheValidator;
+	static const QString upperCacheValidator;
 	static const QString appSignalIDCaption;
 	static const QString customSignalIDCaption;
 	static const QString busTypeIDCaption;
@@ -162,7 +163,7 @@ public:
 	static const QString lastEditedSignalFieldValuePlace;
 
 public:
-	explicit SignalProperties(Signal& signal);
+	explicit SignalProperties(Signal& signal, bool uppercaseAppSignalId = true);
 
 	Signal& signal() { return m_signal; }
 	void updateSpecPropValues();
@@ -204,7 +205,7 @@ public:
 
 
 private:
-	void initProperties();
+	void initProperties(bool uppercaseAppSignalId);
 
 	void createSpecificProperties();
 	void deleteSpecificProperties();

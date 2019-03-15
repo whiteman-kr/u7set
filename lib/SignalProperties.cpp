@@ -22,6 +22,7 @@ const QString SignalProperties::instanceCreatedCaption("InstanceCreated");
 const QString SignalProperties::typeCaption("Type");
 const QString SignalProperties::inOutTypeCaption("InOutType");
 const QString SignalProperties::cacheValidator("^[#]?[A-Za-z\\d_]*$");
+const QString SignalProperties::upperCacheValidator("^[#]?[A-Z\\d_]*$");
 const QString SignalProperties::appSignalIDCaption("AppSignalID");
 const QString SignalProperties::customSignalIDCaption("CustomAppSignalID");
 const QString SignalProperties::busTypeIDCaption("BusTypeID");
@@ -109,10 +110,10 @@ const QString SignalProperties::defaultBusChildAnalogSpecPropStruct(
 const QString SignalProperties::lastEditedSignalFieldValuePlace("SignalsTabPage/LastEditedSignal/");
 
 
-SignalProperties::SignalProperties(Signal& signal) :
+SignalProperties::SignalProperties(Signal& signal, bool uppercaseAppSignalId) :
 	m_signal(signal)
 {
-	initProperties();
+	initProperties(uppercaseAppSignalId);
 }
 
 void SignalProperties::updateSpecPropValues()
@@ -180,7 +181,7 @@ int SignalProperties::getPrecision()
 	return precision;
 }
 
-void SignalProperties::initProperties()
+void SignalProperties::initProperties(bool uppercaseAppSignalId)
 {
 	ADD_PROPERTY_GETTER_INDIRECT(int, idCaption, false, Signal::ID, m_signal);
 	ADD_PROPERTY_GETTER_INDIRECT(int, signalGroupIDCaption, false, Signal::signalGroupID, m_signal);
@@ -200,7 +201,14 @@ void SignalProperties::initProperties()
 	signalInOutTypeProperty->setCategory(categorySignalType);
 
 	auto strIdProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, appSignalIDCaption, true, Signal::appSignalID, Signal::setAppSignalID, m_signal);
-	strIdProperty->setValidator(cacheValidator);
+	if (uppercaseAppSignalId == true)
+	{
+		strIdProperty->setValidator(upperCacheValidator);
+	}
+	else
+	{
+		strIdProperty->setValidator(cacheValidator);
+	}
 	strIdProperty->setCategory(categoryIdentification);
 
 	auto extStrIdProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, customSignalIDCaption, true, Signal::customAppSignalID, Signal::setCustomAppSignalID, m_signal);
