@@ -170,6 +170,7 @@ public:
 	void			setSignalValid(bool valid) { m_signalValid = valid; }
 
 	QDateTime		measureTime() const { return m_measureTime; }
+	QString			measureTimeStr() const;
 	void			setMeasureTime(const QDateTime& time) { m_measureTime = time; }
 
 	int				reportType() const { return m_reportType; }

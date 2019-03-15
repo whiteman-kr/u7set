@@ -343,7 +343,7 @@ QString MeasureTable::textLinearity(int row, int column) const
 		case MVC_CMN_L_ERROR_LIMIT:				result = m->errorLimitStr(); break;
 		case MVC_CMN_L_ERROR_RESULT:			result = m->errorResultStr(); break;
 
-		case MVC_CMN_L_MEASUREMENT_TIME:		result = m->measureTime().toString(MEASURE_TIME_FORMAT); break;
+		case MVC_CMN_L_MEASUREMENT_TIME:		result = m->measureTimeStr(); break;
 
 		default:								result.clear(); break;
 	}
