@@ -172,7 +172,7 @@ bool CmdLineParam::paramIsValid()
 			return false;
 		}
 
-		reportFile.write(QString("Report from: %1\r\n\r\n").arg(QDateTime::currentDateTime().toString("dd-MM-yyyy hh:mm:ss")).toUtf8());
+		reportFile.write(QString("Report from: %1\r\n\r\n").arg(currentTimeStr()).toUtf8());
 		reportFile.write(QString("Test File: %1\r\n\r\n").arg(m_testFileName).toUtf8());
 
 		reportFile.close();
@@ -248,3 +248,20 @@ bool CmdLineParam::enableExecuteTestForLM(TestItem test)
 	return false;
 }
 
+QString CmdLineParam::currentTimeStr()
+{
+	QString timeStr;
+
+	QDateTime ct = QDateTime::currentDateTime();
+
+	timeStr.sprintf("%02d-%02d-%04d %02d:%02d:%02d",
+					ct.date().day(),
+					ct.date().month(),
+					ct.date().year(),
+
+					ct.time().hour(),
+					ct.time().minute(),
+					ct.time().second());
+
+	return timeStr;
+}

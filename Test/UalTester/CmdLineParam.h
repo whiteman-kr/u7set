@@ -53,6 +53,8 @@ private:
 
 	bool m_enableContinueTest = true;
 
+	QString currentTimeStr();
+
 public:
 
 	HostAddressPort cfgSocketAddress1() const { return m_cfgSocketAddress1; }
