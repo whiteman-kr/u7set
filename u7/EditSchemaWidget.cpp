@@ -11,6 +11,7 @@
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/SchemaItemLine.h"
 #include "../VFrame30/SchemaItemRect.h"
+#include "../VFrame30/SchemaItemImage.h"
 #include "../VFrame30/SchemaItemPath.h"
 #include "../VFrame30/SchemaItemSignal.h"
 #include "../VFrame30/SchemaItemAfb.h"
@@ -31,6 +32,8 @@
 #include "Settings.h"
 #include "../lib/SignalProperties.h"
 #include "DialogInputEx.h"
+#include "../lib/QScintillaLexers/LexerJavaScript.h"
+#include "../lib/Ui/TextEditCompleter.h"
 
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
@@ -1938,6 +1941,16 @@ void EditSchemaWidget::createActions()
 				addItem(text);
 			});
 
+	m_addImageAction = new QAction(tr("Image"), this);
+	m_addImageAction->setEnabled(true);
+	m_addImageAction->setIcon(QIcon(":/Images/Images/SchemaItemImage.svg"));
+	connect(m_addImageAction, &QAction::triggered,
+			[this](bool)
+			{
+				auto image = std::make_shared<VFrame30::SchemaItemImage>(schema()->unit());
+				addItem(image);
+			});
+
 	// ----------------------------------------
 	m_addSeparatorAction0 = new QAction(this);
 	m_addSeparatorAction0->setSeparator(true);
@@ -2475,6 +2488,7 @@ void EditSchemaWidget::createActions()
 		m_addMenu->addAction(m_addRectAction);
 		m_addMenu->addAction(m_addPathAction);
 		m_addMenu->addAction(m_addTextAction);
+		m_addMenu->addAction(m_addImageAction);
 
 		m_addMenu->addAction(m_addSeparatorAction0);
 
@@ -6192,7 +6206,7 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 		return false;
 	}
 
-	QString connectionId = receiver->connectionId();
+	QString recConnectionIds = receiver->connectionIds();
 	QString appSignalId = receiver->appSignalId();
 
 	// Get all connections
@@ -6228,26 +6242,16 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
 	QLabel* connectionIdLabel = new QLabel("ConnectionID:");
-	QComboBox* connectionIdControl = new QComboBox;
-	connectionIdControl->setEditable(true);
-	connectionIdControl->addItems(connectionIds);
-	connectionIdControl->setMaxVisibleItems(20);
+
+	QTextEditCompleter* connectionIdControl = new QTextEditCompleter(&d);
+	connectionIdControl->setPlaceholderText("Enter ConnectionID(s)");
+	connectionIdControl->setPlainText(recConnectionIds);
 
 	QCompleter* completer = new QCompleter(connectionIds);
 	completer->setFilterMode(Qt::MatchContains);
-	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	completer->setCaseSensitivity(Qt::CaseSensitive);
 	completer->setMaxVisibleItems(20);
 	connectionIdControl->setCompleter(completer);
-
-	// Set current value, to selecte value in the list, controll must be non editable ((
-	//
-	connectionIdControl->setEditable(false);
-	connectionIdControl->setCurrentText(connectionId);
-	connectionIdControl->setEditable(true);
-	if (connectionIdControl->currentText() != connectionId)
-	{
-		connectionIdControl->setCurrentText(connectionId);
-	}
 
 	QLabel* appSignalIdLabel = new QLabel("AppSignalID:");
 	QLineEdit* appSignalIdEdit = new QLineEdit(appSignalId);
@@ -6283,10 +6287,10 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 
 	if (result == QDialog::Accepted)
 	{
-		QString newConnectionId = connectionIdControl->currentText().trimmed();
+		QString newConnectionId = connectionIdControl->toPlainText();
 		QString newAppSignalId = appSignalIdEdit->text().trimmed();
 
-		if (newConnectionId != connectionId ||
+		if (newConnectionId != recConnectionIds ||
 			newAppSignalId != appSignalId)
 		{
 			if (setViaEditEngine == true)
@@ -6302,13 +6306,12 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 			}
 			else
 			{
-				receiver->setConnectionId(newConnectionId);
+				receiver->setConnectionIds(newConnectionId);
 				receiver->setAppSignalId(newAppSignalId);
 			}
 		}
 
 		editSchemaView()->update();
-
 		return true;
 	}
 
@@ -6330,7 +6333,7 @@ bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem>
 		return false;
 	}
 
-	QString connectionId = transmitter->connectionId();
+	QString transmitterConnectionIds = transmitter->connectionIds();
 
 	// Get all connections
 	//
@@ -6364,27 +6367,17 @@ bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem>
 					~Qt::WindowMaximizeButtonHint &
 					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
-	QLabel* connectionIdLabel = new QLabel("ConnectionID:");
-	QComboBox* connectionIdControl = new QComboBox;
+	QLabel* connectionIdLabel = new QLabel("ConnectionID(s):");
 
-	connectionIdControl->addItems(connectionIds);
-	connectionIdControl->setMaxVisibleItems(20);
+	QTextEditCompleter* connectionIdControl = new QTextEditCompleter(&d);
+	connectionIdControl->setPlaceholderText("Enter ConnectionID(s)");
+	connectionIdControl->setPlainText(transmitterConnectionIds);
 
-	QCompleter* completer = new QCompleter(connectionIds);
+	QCompleter* completer = new QCompleter(connectionIds, &d);
 	completer->setFilterMode(Qt::MatchContains);
-	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	completer->setCaseSensitivity(Qt::CaseSensitive);
 	completer->setMaxVisibleItems(20);
 	connectionIdControl->setCompleter(completer);
-
-	// Set current value, to selecte value in the list, controll must be non editable ((
-	//
-	connectionIdControl->setEditable(false);
-	connectionIdControl->setCurrentText(connectionId);
-	connectionIdControl->setEditable(true);
-	if (connectionIdControl->currentText() != connectionId)
-	{
-		connectionIdControl->setCurrentText(connectionId);
-	}
 
 	QWidget* spacer = new QWidget;
 	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -6413,9 +6406,9 @@ bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem>
 
 	if (result == QDialog::Accepted)
 	{
-		QString newConnectionId = connectionIdControl->currentText().trimmed();
+		QString newConnectionId = connectionIdControl->toPlainText();  //connectionIdControl->currentText().trimmed();
 
-		if (newConnectionId != connectionId)
+		if (newConnectionId != transmitterConnectionIds)
 		{
 			if (setViaEditEngine == true)
 			{
@@ -6423,12 +6416,11 @@ bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem>
 			}
 			else
 			{
-				transmitter->setConnectionId(newConnectionId);
+				transmitter->setConnectionIds(newConnectionId);
 			}
 		}
 
 		editSchemaView()->update();
-
 		return true;
 	}
 
@@ -6726,26 +6718,138 @@ void EditSchemaWidget::f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item)
 		return;
 	}
 
-	QString text = valueItem->signalId();
+	QString appSignalIds = valueItem->signalIdsString();
+	QString text = valueItem->text();
+	QString preDrawScript = valueItem->preDrawScript();
 
 	// Show input dialog
 	//
-	bool ok = false;
-	QString newValue = DialogInputEx::getSingleLineText(this,
-														tr("Set AppSignalID"),
-														tr("AppSignalID:"),
-														text,
-														&ok,
-														VFrame30::PropertyNames::appSignalIdValidator,
-														400).trimmed();
+	QDialog d(this);
 
-	if (ok == true &&
-			newValue.isEmpty() == false &&
-			newValue != text)
+	d.setWindowTitle(tr("SchemaItemValue"));
+	d.setWindowFlags((d.windowFlags() & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowContextHelpButtonHint)
+					 | Qt::CustomizeWindowHint | Qt::WindowMaximizeButtonHint);
+
+	// AppSchemaIDs
+	//
+	QLabel* appSignalIdsLabel = new QLabel("AppSchemaIDs:", &d);
+
+	QTextEdit* appSignalIdsEdit = new QTextEdit(&d);
+	appSignalIdsEdit->setPlaceholderText("Enter AppSchemaIDs separated by lines");
+	appSignalIdsEdit->setPlainText(appSignalIds);
+
+	// Text
+	//
+	QLabel* textLabel = new QLabel("Text:", &d);
+
+	QLineEdit* textEdit = new QLineEdit(&d);
+	textEdit->setPlaceholderText(VFrame30::PropertyNames::textValuePropDescription);
+	textEdit->setToolTip(VFrame30::PropertyNames::textValuePropDescription);
+	textEdit->setText(text);
+
+	// PreDrawScript
+	//
+	QLabel* preDrawScriptLabel = new QLabel("PreDrawScript:", &d);
+
+	QsciScintilla* preDrawScriptEdit = new QsciScintilla(&d);
+	LexerJavaScript lexer;
+	preDrawScriptEdit->setLexer(&lexer);
+	preDrawScriptEdit->setText(preDrawScript);
+	preDrawScriptEdit->setMarginType(0, QsciScintilla::NumberMargin);
+	preDrawScriptEdit->setMarginWidth(0, 40);
+
+#if defined(Q_OS_WIN)
+	preDrawScriptEdit->setFont(QFont("Consolas"));
+#else
+	preDrawScriptEdit->setFont(QFont("Courier"));
+#endif
+
+	preDrawScriptEdit->setTabWidth(4);
+	preDrawScriptEdit->setAutoIndent(true);
+
+	QPushButton* preDrawScriptTemplate = new QPushButton(tr("Paste PreDrawScript Template"), &d);
+
+	// --
+	//
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &d);
+
+	QGridLayout* layout = new QGridLayout(&d);
+
+	layout->addWidget(appSignalIdsLabel, 0, 0, 1, 3);
+	layout->addWidget(appSignalIdsEdit, 1, 0, 1, 3);
+
+	layout->addWidget(textLabel, 2, 0, 1, 3);
+	layout->addWidget(textEdit, 3, 0, 1, 3);
+
+	layout->addWidget(preDrawScriptLabel, 4, 0, 1, 3);
+	layout->addWidget(preDrawScriptEdit, 5, 0, 1, 3);
+	layout->addWidget(preDrawScriptTemplate, 6, 0, 1, 1);
+
+	layout->addWidget(buttonBox, 7, 0, 1, 3);
+
+	layout->setRowStretch(5, 1);	// preDrawScriptEdit
+
+	d.setLayout(layout);
+
+	QString preDrawScriptTemplateString = R"((function(schemaItemValue)
+{
+	// var appSignalId = schemaItemValue.SignalIDs[0];
+
+	// Get data from AppDataService
+	// var signalParam = signals.signalParam(appSignalId);
+	// var signalState = signals.signalState(appSignalId);
+
+	// Get data from TuningService
+	// var signalParam = tuning.signalParam(appSignalId);
+	// var signalState = tuning.signalState(appSignalId);
+
+	// Get signal state
+	// if (signalState.Valid == true)
+	// {
+	//		schemaItemValue.Text = signalState.Value;
+	//		schemaItemValue.TextColor = "white";
+	//		schemaItemValue.FillColor = "blue";
+	//		schemaItemValue.LineColor = "#000000";
+	// }
+}))";
+
+	connect(preDrawScriptTemplate, &QPushButton::clicked, &d, [preDrawScriptEdit, preDrawScriptTemplateString](){preDrawScriptEdit->setText(preDrawScriptTemplateString);});
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	// --
+	//
+	int width = QSettings().value("f2KeyForValue\\width").toInt();
+	int height = QSettings().value("f2KeyForValue\\height").toInt();
+	d.resize(width, height);
+
+	int result = d.exec();
+
+	if (result == QDialog::Accepted)
 	{
-		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newValue), item);
-		editSchemaView()->update();
+		QString newAppSignaIds = appSignalIdsEdit->toPlainText();
+		QString newText = textEdit->text();
+		QString newPreDrawScript = preDrawScriptEdit->text();
+
+		if (newAppSignaIds != appSignalIds ||
+			newText != text ||
+			newPreDrawScript != preDrawScript)
+		{
+			if (bool ok = m_editEngine->startBatch();
+				ok == true)
+			{
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newAppSignaIds), item);
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::text, QVariant(newText), item);
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::preDrawScript, QVariant(newPreDrawScript), item);
+
+				m_editEngine->endBatch();
+			}
+		}
 	}
+
+	QSettings().setValue("f2KeyForValue\\width", d.width());
+	QSettings().setValue("f2KeyForValue\\height", d.height());
 
 	return;
 }

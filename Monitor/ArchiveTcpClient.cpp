@@ -38,13 +38,13 @@ bool ArchiveTcpClient::requestData(TimeStamp startTime,
 {
 	if (appSignals.size() > ARCH_REQUEST_MAX_SIGNALS)
 	{
-		assert(appSignals.size() <= ARCH_REQUEST_MAX_SIGNALS);
+		Q_ASSERT(appSignals.size() <= ARCH_REQUEST_MAX_SIGNALS);
 		return false;
 	}
 
 	if (m_requestInProgress == true)
 	{
-		assert(m_requestInProgress == false);
+		Q_ASSERT(m_requestInProgress == false);
 		return false;
 	}
 
@@ -83,7 +83,7 @@ bool ArchiveTcpClient::cancelRequest()
 		QThread::yieldCurrentThread();
 	}
 
-	assert(m_requestInProgress == false);	// Request was not cancelled
+	Q_ASSERT(m_requestInProgress == false);	// Request was not cancelled
 	return !m_requestInProgress;
 }
 
@@ -153,7 +153,7 @@ void ArchiveTcpClient::onConnection()
 {
 	qDebug() << "ArchiveTcpClient::onConnection()";
 
-	assert(isClearToSendRequest() == true);
+	Q_ASSERT(isClearToSendRequest() == true);
 
 	resetState();
 
@@ -185,7 +185,7 @@ void ArchiveTcpClient::processReply(quint32 requestID, const char* replyData, qu
 
 	if (replyData == nullptr)
 	{
-		assert(replyData);
+		Q_ASSERT(replyData);
 		return;
 	}
 
@@ -206,7 +206,7 @@ void ArchiveTcpClient::processReply(quint32 requestID, const char* replyData, qu
 		break;
 
 	default:
-		assert(false);
+		Q_ASSERT(false);
 		qDebug() << "Wrong requestID in ArchiveTcpClient::processReply() " << requestID;
 		emitErrorResetState("Wrong requestID in ArchiveTcpClient::processReply().");
 	}
@@ -224,7 +224,7 @@ void ArchiveTcpClient::requestStart()
 
 	if (isClearToSendRequest() == false)
 	{
-		assert(isClearToSendRequest());
+		Q_ASSERT(isClearToSendRequest());
 		emitErrorResetState("No connection to Archive Service.");
 		return;
 	}
@@ -310,7 +310,7 @@ void ArchiveTcpClient::requestNext()
 
 	if (isClearToSendRequest() == false)
 	{
-		assert(isClearToSendRequest());
+		Q_ASSERT(isClearToSendRequest());
 		emitErrorResetState("No connection to Archive Service.");
 		return;
 	}
@@ -321,8 +321,8 @@ void ArchiveTcpClient::requestNext()
 		return;
 	}
 
-	assert(m_currentRequestId != 0);
-	assert(m_requestInProgress == true);
+	Q_ASSERT(m_currentRequestId != 0);
+	Q_ASSERT(m_requestInProgress == true);
 
 	m_nextRequest.Clear();
 	m_nextRequest.set_requestid(m_currentRequestId);
@@ -366,7 +366,7 @@ void ArchiveTcpClient::processNext(const QByteArray& data)
 
 	if (m_currentRequestId != m_nextReply.requestid())
 	{
-		assert(m_currentRequestId == m_nextReply.requestid());
+		Q_ASSERT(m_currentRequestId == m_nextReply.requestid());
 		emitErrorResetState(tr("Received wrong RequestID, received %1, expected %2").arg(m_nextReply.requestid()).arg(m_currentRequestId));
 		return;
 	}
@@ -432,13 +432,13 @@ void ArchiveTcpClient::requestCancel()
 
 	if (isClearToSendRequest() == false)
 	{
-		assert(isClearToSendRequest());
+		Q_ASSERT(isClearToSendRequest());
 		emitErrorResetState("No connection to Archive Service.");
 		return;
 	}
 
-	assert(m_requestInProgress == true);
-	assert(m_currentRequestId != 0);
+	Q_ASSERT(m_requestInProgress == true);
+	Q_ASSERT(m_currentRequestId != 0);
 
 	m_statTcpRequestCount ++;
 
@@ -482,14 +482,14 @@ void ArchiveTcpClient::processCancel(const QByteArray& data)
 
 void ArchiveTcpClient::slot_startRequest()
 {
-	assert(m_requestInProgress == false);
+	Q_ASSERT(m_requestInProgress == false);
 	requestStart();
 	return;
 }
 
 void ArchiveTcpClient::slot_cancelRequest()
 {
-	assert(m_requestInProgress == true);
+	Q_ASSERT(m_requestInProgress == true);
 
 	if (m_requestInProgress == false)
 	{

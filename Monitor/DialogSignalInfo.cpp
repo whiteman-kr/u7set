@@ -341,7 +341,7 @@ void DialogSignalInfo::prepareContextMenu(const QPoint& pos)
 
 void DialogSignalInfo::timerEvent(QTimerEvent* event)
 {
-	assert(event);
+	Q_ASSERT(event);
 
 	if  (event->timerId() == m_updateStateTimerId)
 	{

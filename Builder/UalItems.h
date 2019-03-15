@@ -145,7 +145,17 @@ namespace Builder
 		bool hasRam() const { return afb().hasRam(); }
 
 		const std::vector<LogicPin>& inputs() const { return m_appLogicItem.m_fblItem->inputs(); }
+		std::vector<LogicPin>& inputs() { return m_appLogicItem.m_fblItem->inputs(); }
+
+		const LogicPin& input(const QUuid& guid) const { return m_appLogicItem.m_fblItem->input(guid); }
+		LogicPin& input(const QUuid& guid) { return m_appLogicItem.m_fblItem->input(guid); }
+
 		const std::vector<LogicPin>& outputs() const { return m_appLogicItem.m_fblItem->outputs(); }
+		std::vector<LogicPin>& outputs() { return m_appLogicItem.m_fblItem->outputs(); }
+
+		const LogicPin& output(const QUuid& guid) const { return m_appLogicItem.m_fblItem->output(guid); }
+		VFrame30::AfbPin& output(const QUuid& guid) { return m_appLogicItem.m_fblItem->output(guid); }
+
 		const std::vector<Afb::AfbParam>& params() const { return m_appLogicItem.afbElement().params(); }
 
 		const LogicFb& logicFb() const { return *m_appLogicItem.m_fblItem->toAfbElement(); }
@@ -164,6 +174,7 @@ namespace Builder
 		std::shared_ptr<VFrame30::FblItemRect> itemRect() const { return m_appLogicItem.m_fblItem; }
 
 		QString schemaID() const { return m_appLogicItem.m_schema->schemaId(); }
+		std::shared_ptr<VFrame30::Schema> schema() { return m_appLogicItem.m_schema; }
 
 		QString label() const { return m_appLogicItem.m_fblItem->label(); }
 

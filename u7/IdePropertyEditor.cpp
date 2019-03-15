@@ -1,8 +1,6 @@
-
 #include "Settings.h"
 #include "IdePropertyEditor.h"
 #include "SpecificPropertiesEditor.h"
-
 
 //
 // IdePropertyEditor
@@ -70,7 +68,7 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditor::createPropertyTextEditor(Prop
 	}
 	else
 	{
-		return new IdeCodeEditor(CodeType::Cpp, parent);
+		return new IdeCodeEditor(CodeType::JavaScript, parent);
 	}
 }
 
@@ -196,12 +194,12 @@ IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
 
     // Set up lexer
     //
-    m_lexerCpp.setDefaultFont(f);
+	m_lexerJavaScript.setDefaultFont(f);
     m_lexerXml.setDefaultFont(f);
 
-    if (codeType == CodeType::Cpp)
+	if (codeType == CodeType::JavaScript)
     {
-        m_textEdit->setLexer(&m_lexerCpp);
+		m_textEdit->setLexer(&m_lexerJavaScript);
     }
 
     if (codeType == CodeType::Xml)
@@ -211,7 +209,7 @@ IdeCodeEditor::IdeCodeEditor(CodeType codeType, QWidget* parent) :
 
     // Set up margins
 
-    if (codeType == CodeType::Cpp || codeType == CodeType::Xml)
+	if (codeType == CodeType::JavaScript || codeType == CodeType::Xml)
     {
         m_textEdit->setMarginType(0, QsciScintilla::NumberMargin);
         m_textEdit->setMarginWidth(0, 40);

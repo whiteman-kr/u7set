@@ -53,7 +53,7 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation /*orientation*/, 
 		return tr("Time");
 	}
 
-	assert(false);
+	Q_ASSERT(false);
 	return QVariant();
 }
 
@@ -90,7 +90,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 				{
 					// State from differtent signal!!! ArchiveService has returned something wrong?
 					//
-					assert(false);
+					Q_ASSERT(false);
 				}
 				else
 				{
@@ -106,7 +106,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 				{
 					// State from differtent signal!!! ArchiveService has returned something wrong?
 					//
-					assert(false);
+					Q_ASSERT(false);
 				}
 				else
 				{
@@ -121,7 +121,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 				{
 					// State from differtent signal!!! ArchiveService has returned something wrong?
 					//
-					assert(false);
+					Q_ASSERT(false);
 				}
 				else
 				{
@@ -136,7 +136,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 				{
 					// State from differtent signal!!! ArchiveService has returned something wrong?
 					//
-					assert(false);
+					Q_ASSERT(false);
 				}
 				else
 				{
@@ -156,7 +156,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 			}
 			break;
 		default:
-			assert(false);
+			Q_ASSERT(false);
 		}
 
 		return result;
@@ -181,7 +181,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 		{
 			// State from differtent signal!!! ArchiveService has returned something wrong?
 			//
-			assert(false);
+			Q_ASSERT(false);
 		}
 		else
 		{
@@ -201,7 +201,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 			typeStr = tr("Bus");
 			break;
 		default:
-			assert(false);
+			Q_ASSERT(false);
 		}
 
 		QString toolTip = QString("StateIndex: %1\n"
@@ -303,7 +303,7 @@ void ArchiveModel::addData(std::shared_ptr<ArchiveChunk> chunk)
 {
 	if (chunk == nullptr)
 	{
-		assert(chunk);
+		Q_ASSERT(chunk);
 		return;
 	}
 
@@ -389,7 +389,7 @@ ArchiveView::~ArchiveView()
 void ArchiveView::contextMenuEvent(QContextMenuEvent* event)
 {
 	ArchiveModel* archiveModel = qobject_cast<ArchiveModel*>(model());
-	assert(archiveModel);
+	Q_ASSERT(archiveModel);
 
 	QMenu menu(this);
 
@@ -498,7 +498,7 @@ void ArchiveView::headerColumnToggled(bool checked)
 
 	if (action == nullptr)
 	{
-		assert(action);
+		Q_ASSERT(action);
 		return ;
 	}
 
@@ -506,7 +506,7 @@ void ArchiveView::headerColumnToggled(bool checked)
 
 	if (column >= static_cast<int>(ArchiveColumns::ColumnCount))
 	{
-		assert(column < static_cast<int>(ArchiveColumns::ColumnCount));
+		Q_ASSERT(column < static_cast<int>(ArchiveColumns::ColumnCount));
 		return;
 	}
 
@@ -525,7 +525,7 @@ void ArchiveView::headerColumnToggled(bool checked)
 void ArchiveView::copySelection()
 {
 	ArchiveModel* archiveModel = qobject_cast<ArchiveModel*>(model());
-	assert(archiveModel);
+	Q_ASSERT(archiveModel);
 
 	QModelIndexList selectedIndexes = selectionModel()->selectedIndexes();
 	if (selectedIndexes.isEmpty() == true)

@@ -10,13 +10,10 @@
 #include <QTableView>
 #include <QInputDialog>
 
-using namespace std;
 
 //
 // TuningItemModelMain
 //
-
-
 TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent):
 	TuningModel(tuningSignalManager, valueColumnsAppSignalIdSuffixes, parent)
 {

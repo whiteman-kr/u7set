@@ -12,7 +12,7 @@ SignalSearchSorter::SignalSearchSorter(std::vector<AppSignalParam>* appSignalPar
 {
 	if (appSignalParamVec == nullptr)
 	{
-		assert(appSignalParamVec);
+		Q_ASSERT(appSignalParamVec);
 	}
 }
 
@@ -20,14 +20,14 @@ bool SignalSearchSorter::sortFunction(int index1, int index2, const SignalSearch
 {
 	if (m_appSignalParamVec == nullptr)
 	{
-		assert(m_appSignalParamVec);
+		Q_ASSERT(m_appSignalParamVec);
 		return index1 < index2;
 	}
 
 	if (index1 < 0 || index1 >= pThis->m_appSignalParamVec->size() ||
 			index2 < 0 || index2 >= pThis->m_appSignalParamVec->size())
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return index1 < index2;
 	}
 
@@ -149,7 +149,7 @@ bool SignalSearchSorter::sortFunction(int index1, int index2, const SignalSearch
 
 	default:
 		{
-			assert(false);
+			Q_ASSERT(false);
 			v1 = index1;
 			v2 = index2;
 		}
@@ -193,7 +193,7 @@ QModelIndex SignalSearchItemModel::index(int row, int column, const QModelIndex 
 		return createIndex(row, column);
 	}
 
-	assert(false);
+	Q_ASSERT(false);
 	return QModelIndex();
 }
 
@@ -224,14 +224,14 @@ QVariant SignalSearchItemModel::data(const QModelIndex &index, int role) const
 		int col = index.column();
 		if (col < 0 || col >= m_columnsNames.size())
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return QVariant();
 		}
 
 		int row = index.row();
 		if (row >= m_signals.size())
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return QVariant();
 		}
 
@@ -256,7 +256,7 @@ QVariant SignalSearchItemModel::data(const QModelIndex &index, int role) const
 		}
 
 		default:
-			assert(false);
+			Q_ASSERT(false);
 		}
 
 		return QVariant();
@@ -271,7 +271,7 @@ QVariant SignalSearchItemModel::headerData(int section, Qt::Orientation orientat
 	{
 		if (section < 0 || section >= m_columnsNames.size())
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return QVariant();
 		}
 
@@ -286,7 +286,7 @@ AppSignalParam SignalSearchItemModel::getSignal(const QModelIndex& index) const
 	int row = index.row();
 	if (row >= m_signals.size())
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return AppSignalParam();
 	}
 
@@ -297,7 +297,7 @@ void SignalSearchItemModel::setSignals(std::vector<AppSignalParam>* signalsVecto
 {
 	if (signalsVector == nullptr)
 	{
-		assert(signalsVector);
+		Q_ASSERT(signalsVector);
 		return;
 	}
 
@@ -475,14 +475,14 @@ void DialogSignalSearch::prepareContextMenu(const QPoint& pos)
 
 	if (theMonitorMainWindow == nullptr)
 	{
-		assert(theMonitorMainWindow);
+		Q_ASSERT(theMonitorMainWindow);
 		return;
 	}
 
 	MonitorCentralWidget* cw = dynamic_cast<MonitorCentralWidget*>(theMonitorMainWindow->centralWidget());
 	if (cw == nullptr)
 	{
-		assert(cw);
+		Q_ASSERT(cw);
 		return;
 	}
 
@@ -507,14 +507,14 @@ void DialogSignalSearch::on_tableView_doubleClicked(const QModelIndex &index)
 
 	if (theMonitorMainWindow == nullptr)
 	{
-		assert(theMonitorMainWindow);
+		Q_ASSERT(theMonitorMainWindow);
 		return;
 	}
 
 	MonitorCentralWidget* cw = dynamic_cast<MonitorCentralWidget*>(theMonitorMainWindow->centralWidget());
 	if (cw == nullptr)
 	{
-		assert(cw);
+		Q_ASSERT(cw);
 		return;
 	}
 

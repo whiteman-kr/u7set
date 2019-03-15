@@ -44,7 +44,7 @@ namespace EditEngine
 	public:
 		bool addCommand(std::shared_ptr<EditCommand> command, bool runCommand);
 
-		bool startBatch();		// For performing several commands in a time
+		[[nodiscard]] bool startBatch();			// For performing several commands in a time
 		bool endBatch(bool runCommands = true);
 
 		void redo();

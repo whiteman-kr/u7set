@@ -207,11 +207,9 @@ namespace VFrame30
 		return result;
 	}
 
-
-
 	bool ClientSchemaWidget::canBackHistory() const
 	{
-		bool enableBack = m_backHistory.empty() == false;
+		bool enableBack = m_backHistory.size() > 1;		// m_backHistory has at leas
 		return enableBack;
 	}
 
@@ -258,7 +256,13 @@ namespace VFrame30
 		// Save current state
 		//
 		SchemaHistoryItem& currentView = m_backHistory.back();
-		assert(currentView.m_schemaId == schemaId());
+		if (currentView.m_schemaId != schemaId())
+		{
+			Q_ASSERT(currentView.m_schemaId == schemaId());
+			resetHistory();
+			return;
+		}
+
 		currentView = currentHistoryState();
 
 		// Switch history
@@ -328,7 +332,7 @@ namespace VFrame30
 
 	SchemaHistoryItem ClientSchemaWidget::currentHistoryState() const
 	{
-		SchemaHistoryItem hi = {schemaId(), zoom(), horizontalScrollBar()->value(), verticalScrollBar()->value()};
+		SchemaHistoryItem hi{schemaId(), zoom(), horizontalScrollBar()->value(), verticalScrollBar()->value()};
 		return hi;
 	}
 

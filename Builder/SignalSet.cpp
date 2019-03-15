@@ -401,6 +401,32 @@ namespace Builder
 		return newSignal;
 	}
 
+	void SignalSet::findAndRemoveExcludedFromBuildSignals()
+	{
+		QVector<int> excludedFromBuidSignalsIDs;
+
+		int signalCount = count();
+
+		for(int i = 0; i < signalCount; i++)
+		{
+			const Signal& s = (*this)[i];
+
+			if (s.excludeFromBuild() == true)
+			{
+				excludedFromBuidSignalsIDs.append(s.ID());
+
+				// Signal %1 is excluded from build.
+				//
+				m_log->wrnALC5167(s.appSignalID());											// Signal %1 is excluded from build.
+			}
+		}
+
+		for(int id : excludedFromBuidSignalsIDs)
+		{
+			remove(id);
+		}
+	}
+
 	QString SignalSet::buildBusSignalCaption(const Signal& s, BusShared bus, const BusSignal& busSignal)
 	{
 		QString caption = s.caption();

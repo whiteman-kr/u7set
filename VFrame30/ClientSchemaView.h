@@ -104,6 +104,7 @@ namespace VFrame30
 
 		TuningController* m_tuningController = nullptr;
 		AppSignalController* m_appSignalController = nullptr;
+		std::unique_ptr<ScriptAppSignalController> m_scriptAppSignalController;
 
 		bool m_periodicUpdate = true;		// Update widget every 250 ms
 		bool m_infoMode = false;			// Show some aditional info like labels

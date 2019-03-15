@@ -142,6 +142,7 @@ namespace Builder
 			//
 			QString ID;
 			const UalItem* source = nullptr;
+			bool isAutoLoopback = false;
 
 			// params will be filled during loopbackPreprocessing
 			//
@@ -156,6 +157,8 @@ namespace Builder
 
 			bool isConnected(const LogicPin& pin) const;
 			bool isConnected(const QString& signalID) const;
+			
+			static QString getAutoLoopbackID(const UalItem* ualItem, const LogicPin& outputPin);
 		};
 
 	public:
@@ -172,7 +175,7 @@ namespace Builder
 		bool pass1();
 		bool pass2();
 
-		QString lmEquipmentID();
+		QString lmEquipmentID() const;
 		ResourcesUsageInfo resourcesUsageInfo() { return m_resourcesUsageInfo; }
 
 		bool expertMode() const;
@@ -199,6 +202,10 @@ namespace Builder
 		bool writeUalItemsFile();
 
 		bool loopbacksPreprocessing();
+		bool findAndProcessSingleItemLoopbacks();
+		void getInputsDirectlyConnectedToOutput(const UalItem* ualItem,
+										const LogicPin& output,
+										QVector<QUuid>* connectedInputsGuids);
 		bool findLoopbackSources();
 		bool findLoopbackTargets();
 		bool findSignalsAndPinsLinkedToLoopbackTargets();
@@ -224,6 +231,7 @@ namespace Builder
 		bool createUalSignalsFromReceiver(UalItem* ualItem);
 		bool createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& appSignalID);
 		bool createUalSignalFromReceiverValidity(UalItem* ualItem, const LogicPin& validityPin, const QString& validitySignalEquipmentID);
+		bool getReceiverConnectionID(const UalReceiver* receiver, QString* connectionID, const QString& schemaID);
 
 		bool createUalSignalFromSignal(UalItem* ualItem, int passNo);
 		bool createUalSignalFromConst(UalItem* ualItem);
@@ -266,6 +274,7 @@ namespace Builder
 		bool checkBusAndBusExtractorCompatibility(UalItem* srcAppItem, BusShared bus, UalItem* destAppItem);
 
 		bool buildTuningData();
+		bool isTuningEnabled(bool* tuningEnabled);
 
 		bool createSignalLists();
 
@@ -524,7 +533,7 @@ namespace Builder
 		AppLogicData* m_appLogicData = nullptr;
 		AppLogicModule* m_moduleLogic = nullptr;
 		BuildResultWriter* m_resultWriter = nullptr;
-		IssueLogger* m_log = nullptr;
+		mutable IssueLogger* m_log = nullptr;
 
 		const Hardware::DeviceModule* m_lm = nullptr;
 		const Hardware::DeviceChassis* m_chassis = nullptr;
@@ -582,12 +591,6 @@ namespace Builder
 		QHash<QString, Loopback*> m_loopbacks;
 		QHash<QString, Loopback*> m_signalsToLoopbacks;
 		QHash<QUuid, Loopback*> m_pinsToLoopbacks;
-
-		//
-//		QHash<QString, UalItem*> m_loopbackSources;
-//		QHash<QString, QVector<UalItem*>> m_loopbackConnectedSignals;
-//		QHash<QString, UalSignal*> m_loopbackSignals;					// loopbackID => loopback ualSignal
-//		QHash<QString, QString> m_signalsToLoopbacks;					// appSignalID => loopbackID
 
 		QVector<UalSignal*> m_acquiredDiscreteInputSignals;				// acquired discrete input signals, no matter used in UAL or not
 		QVector<UalSignal*> m_acquiredDiscreteStrictOutputSignals;		// acquired discrete strict output signals, used in UAL

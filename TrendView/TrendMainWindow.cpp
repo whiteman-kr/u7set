@@ -373,7 +373,7 @@ static int stdColorIndex = 0;
 		restoreGeometry(theSettings.m_mainWindowGeometry);
 		restoreState(theSettings.m_mainWindowState);
 
-		assert(m_viewCombo);
+		Q_ASSERT(m_viewCombo);
 		m_viewCombo->setCurrentIndex(theSettings.m_viewType);
 
 		m_timeTypeCombo->setCurrentIndex(theSettings.m_timeTypeIndex);
@@ -387,8 +387,8 @@ static int stdColorIndex = 0;
 
 	void TrendMainWindow::setRealtimeAutoShift(const TimeStamp& ts)
 	{
-		assert(trendMode() == E::TrendMode::Realtime);
-		assert(isRealtimeAutoShift() == true);
+		Q_ASSERT(trendMode() == E::TrendMode::Realtime);
+		Q_ASSERT(isRealtimeAutoShift() == true);
 
 		m_lastRealtimeMaxValue = ts;
 
@@ -436,7 +436,7 @@ static int stdColorIndex = 0;
 	{
 		if (event->mimeData()->hasFormat(AppSignalParamMimeType::value) == false)
 		{
-			assert(event->mimeData()->hasFormat(AppSignalParamMimeType::value) == true);
+			Q_ASSERT(event->mimeData()->hasFormat(AppSignalParamMimeType::value) == true);
 			event->setDropAction(Qt::DropAction::IgnoreAction);
 			event->accept();
 			return;
@@ -484,7 +484,7 @@ static int stdColorIndex = 0;
 	{
 		if (m_trendWidget == nullptr)
 		{
-			assert(m_trendWidget);
+			Q_ASSERT(m_trendWidget);
 			return;
 		}
 
@@ -501,7 +501,7 @@ static int stdColorIndex = 0;
 
 		if (ok == false)
 		{
-			assert(ok);		// Signal must be in signal set
+			Q_ASSERT(ok);		// Signal must be in signal set
 			return;
 		}
 
@@ -511,7 +511,7 @@ static int stdColorIndex = 0;
 		if (result == QDialog::Accepted)
 		{
 			ok = signalSet().setSignalParam(d.trendSignal());
-			assert(ok);
+			Q_ASSERT(ok);
 			updateWidget();
 		}
 
@@ -529,7 +529,7 @@ static int stdColorIndex = 0;
 			return;
 		}
 
-		assert(m_trendWidget);
+		Q_ASSERT(m_trendWidget);
 
 		QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 		QApplication::processEvents();
@@ -599,7 +599,7 @@ static int stdColorIndex = 0;
 
 		if (extension.compare(QLatin1String("u7trend"), Qt::CaseInsensitive) == 0)
 		{
-			assert(m_trendWidget);
+			Q_ASSERT(m_trendWidget);
 
 			QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 			QApplication::processEvents();
@@ -917,14 +917,14 @@ static int lastCopyCount = false;
 	{
 		if (rulerIndex == -1)
 		{
-			assert(rulerIndex);
+			Q_ASSERT(rulerIndex);
 			return;
 		}
 
 		if (rulerIndex < 0 ||
 			rulerIndex >= static_cast<int>(trend().rulerSet().rulers().size()))
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -940,14 +940,14 @@ static int lastCopyCount = false;
 	{
 		if (rulerIndex == -1)
 		{
-			assert(rulerIndex);
+			Q_ASSERT(rulerIndex);
 			return;
 		}
 
 		if (rulerIndex < 0 ||
 			rulerIndex >= static_cast<int>(trend().rulerSet().rulers().size()))
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -1177,7 +1177,7 @@ static int lastCopyCount = false;
 		chooseView->setEnabled(analogsCount + discretesCount > 0);
 		connect(chooseView, &QAction::triggered, m_trendWidget, &TrendLib::TrendWidget::startSelectionViewArea);
 
-		assert(m_refreshAction);
+		Q_ASSERT(m_refreshAction);
 		menu.addAction(m_refreshAction->text(), this, &TrendMainWindow::actionRefreshTriggered, QKeySequence::Refresh);
 
 		menu.addSeparator();
@@ -1248,8 +1248,8 @@ static int lastCopyCount = false;
 
 	bool TrendMainWindow::isRealtimeAutoShift() const
 	{
-		assert(trendMode() == E::TrendMode::Realtime);
-		assert(m_realtimeAutoShiftButton);
+		Q_ASSERT(trendMode() == E::TrendMode::Realtime);
+		Q_ASSERT(m_realtimeAutoShiftButton);
 
 		return m_realtimeAutoShiftButton->isChecked();
 	}

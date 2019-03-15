@@ -1,6 +1,6 @@
 // This is the SIP interface definition for QsciStyle.
 //
-// Copyright (c) 2017 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2019 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla.
 // 
@@ -35,6 +35,7 @@ public:
     QsciStyle(int style, const QString &description, const QColor &color,
             const QColor &paper, const QFont &font, bool eolFill = false);
 
+    void setStyle(int style);
     int style() const;
 
     void setDescription(const QString &description);

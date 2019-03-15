@@ -15,7 +15,7 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 {
 	if (m_model == nullptr)
 	{
-		assert(m_model);
+		Q_ASSERT(m_model);
 		return false;
 	}
 
@@ -26,7 +26,7 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 			|| index2 >= static_cast<int>(m_model->m_allStates.size())
 			)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return index1 < index2;
 	}
 
@@ -140,7 +140,7 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 		}
 		break;
 	default:
-		assert(false);
+		Q_ASSERT(false);
 		return index1 < index2;
 	}
 
@@ -395,7 +395,7 @@ int SignalSnapshotModel::columnIndex(int index) const
 {
 	if (index <0 || index >= m_columnsIndexes.size())
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return -1;
 	}
 
@@ -430,7 +430,7 @@ void SignalSnapshotModel::updateStates(int from, int to)
 	}
 	if (from >= m_filteredSignals.size() || to >= m_filteredSignals.size())
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
@@ -446,7 +446,7 @@ void SignalSnapshotModel::updateStates(int from, int to)
 
 		if (index < 0 || index >= static_cast<int>(m_allSignals.size()))
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -459,7 +459,7 @@ void SignalSnapshotModel::updateStates(int from, int to)
 
 	if (requestHashes.size() != requestStates.size())
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
@@ -470,7 +470,7 @@ void SignalSnapshotModel::updateStates(int from, int to)
 
 		if (index < 0 || index >= static_cast<int>(m_allSignals.size()))
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -513,13 +513,13 @@ AppSignalParam SignalSnapshotModel::signalParam(int rowIndex, bool* found)
 {
 	if (found == nullptr)
 	{
-		assert(found);
+		Q_ASSERT(found);
 		return AppSignalParam();
 	}
 
 	if (rowIndex < 0 || rowIndex >= static_cast<int>(m_filteredSignals.size()))
 	{
-		assert(false);
+		Q_ASSERT(false);
 		*found = false;
 		return AppSignalParam();
 	}
@@ -535,13 +535,13 @@ AppSignalState SignalSnapshotModel::signalState(int rowIndex, bool* found)
 {
 	if (found == nullptr)
 	{
-		assert(found);
+		Q_ASSERT(found);
 		return AppSignalState();
 	}
 
 	if (rowIndex < 0 || rowIndex >= static_cast<int>(m_filteredSignals.size()))
 	{
-		assert(false);
+		Q_ASSERT(false);
 		*found = false;
 		return AppSignalState();
 	}
@@ -562,7 +562,7 @@ void SignalSnapshotModel::sort(int column, Qt::SortOrder sortOrder)
 
 	if (column < 0 || column >= m_columnsIndexes.size())
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
@@ -587,14 +587,14 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 		int col = index.column();
 		if (col < 0 || col >= m_columnsIndexes.size())
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return QVariant();
 		}
 
 		int row = index.row();
 		if (row >= m_filteredSignals.size())
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return QVariant();
 		}
 
@@ -604,7 +604,7 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 
 		if (signalIndex >= m_allSignals.size() || signalIndex >= m_allStates.size())
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return QVariant();
 		}
 
@@ -663,7 +663,7 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 						return str;
 					}
 
-					assert(false);
+					Q_ASSERT(false);
 				}
 
 				return tr("?");
@@ -724,7 +724,7 @@ QVariant SignalSnapshotModel::headerData(int section, Qt::Orientation orientatio
 	{
 		if (section < 0 || section >= m_columnsIndexes.size())
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return QVariant();
 		}
 
@@ -755,8 +755,8 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 
 	if (m_configController == nullptr || m_tcpSignalClient == nullptr)
 	{
-		assert(m_configController);
-		assert(m_tcpSignalClient);
+		Q_ASSERT(m_configController);
+		Q_ASSERT(m_tcpSignalClient);
 		return;
 	}
 
@@ -946,14 +946,14 @@ void DialogSignalSnapshot::prepareContextMenu(const QPoint& pos)
 
 	if (theMonitorMainWindow == nullptr)
 	{
-		assert(theMonitorMainWindow);
+		Q_ASSERT(theMonitorMainWindow);
 		return;
 	}
 
 	MonitorCentralWidget* cw = dynamic_cast<MonitorCentralWidget*>(theMonitorMainWindow->centralWidget());
 	if (cw == nullptr)
 	{
-		assert(cw);
+		Q_ASSERT(cw);
 		return;
 	}
 
@@ -979,7 +979,7 @@ void DialogSignalSnapshot::prepareContextMenu(const QPoint& pos)
 
 void DialogSignalSnapshot::timerEvent(QTimerEvent* event)
 {
-	assert(event);
+	Q_ASSERT(event);
 
 	if  (event->timerId() == m_updateStateTimerId)
 	{
@@ -1044,7 +1044,7 @@ void DialogSignalSnapshot::maskChanged()
 				QStringListModel* model = dynamic_cast<QStringListModel*>(m_completer->model());
 				if (model == nullptr)
 				{
-					assert(model);
+					Q_ASSERT(model);
 					return;
 				}
 				model->setStringList(theSettings.m_signalSnapshotMaskList);
@@ -1061,14 +1061,14 @@ void DialogSignalSnapshot::on_tableView_doubleClicked(const QModelIndex &index)
 
 	if (theMonitorMainWindow == nullptr)
 	{
-		assert(theMonitorMainWindow);
+		Q_ASSERT(theMonitorMainWindow);
 		return;
 	}
 
 	MonitorCentralWidget* cw = dynamic_cast<MonitorCentralWidget*>(theMonitorMainWindow->centralWidget());
 	if (cw == nullptr)
 	{
-		assert(cw);
+		Q_ASSERT(cw);
 		return;
 	}
 
@@ -1089,7 +1089,9 @@ void DialogSignalSnapshot::on_tableView_doubleClicked(const QModelIndex &index)
 		return;
 	}
 
-	cw->currentTab()->signalInfo(s.appSignalId());
+	QTimer::singleShot(10, [cw, s] {
+		  cw->currentTab()->signalInfo(s.appSignalId());
+	  });
 }
 
 void DialogSignalSnapshot::sortIndicatorChanged(int column, Qt::SortOrder order)

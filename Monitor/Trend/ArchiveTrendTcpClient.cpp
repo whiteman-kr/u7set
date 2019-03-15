@@ -70,7 +70,7 @@ void ArchiveTrendTcpClient::onClientThreadFinished()
 void ArchiveTrendTcpClient::onConnection()
 {
 	qDebug() << "ArchiveTrendTcpClient::onConnection()";
-	assert(isClearToSendRequest() == true);
+	Q_ASSERT(isClearToSendRequest() == true);
 
 	return;
 }
@@ -93,7 +93,7 @@ void ArchiveTrendTcpClient::processReply(quint32 requestID, const char* replyDat
 
 	if (replyData == nullptr)
 	{
-		assert(replyData);
+		Q_ASSERT(replyData);
 		return;
 	}
 
@@ -110,7 +110,7 @@ void ArchiveTrendTcpClient::processReply(quint32 requestID, const char* replyDat
 		break;
 
 	default:
-		assert(false);
+		Q_ASSERT(false);
 		qDebug() << "Wrong requestID in TrendTcpClient::processReply() " << requestID;
 
 		resetRequestCycle();
@@ -138,7 +138,7 @@ void ArchiveTrendTcpClient::resetRequestCycle()
 
 void ArchiveTrendTcpClient::requestStart()
 {
-	assert(isClearToSendRequest());
+	Q_ASSERT(isClearToSendRequest());
 
 	if (m_queue.empty() == true)
 	{
@@ -182,7 +182,7 @@ void ArchiveTrendTcpClient::processStart(const QByteArray& data)
 		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
 
 		requestInProgress = false;
-		assert(ok);
+		Q_ASSERT(ok);
 		resetRequestCycle();
 		return;
 	}
@@ -210,8 +210,8 @@ void ArchiveTrendTcpClient::processStart(const QByteArray& data)
 
 void ArchiveTrendTcpClient::requestNext()
 {
-	assert(isClearToSendRequest());
-	assert(m_currentRequestId != 0);
+	Q_ASSERT(isClearToSendRequest());
+	Q_ASSERT(m_currentRequestId != 0);
 
 	m_nextRequest.Clear();
 	m_nextRequest.set_requestid(m_currentRequestId);
@@ -229,7 +229,7 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 
 	if (ok == false)
 	{
-		assert(ok);
+		Q_ASSERT(ok);
 
 		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
 		requestInProgress = false;
@@ -243,7 +243,7 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 
 	if (m_currentRequestId != m_nextReply.requestid())
 	{
-		assert(m_currentRequestId == m_nextReply.requestid());
+		Q_ASSERT(m_currentRequestId == m_nextReply.requestid());
 
 		emit requestError(m_currentRequest.appSignalId, m_currentRequest.hourToRequest, m_currentRequest.timeType);
 		requestInProgress = false;
@@ -281,7 +281,7 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 
 	// Parse data
 	//
-	assert(m_receivedData);
+	Q_ASSERT(m_receivedData);
 
 	int stateCount = m_nextReply.appsignalstates_size();
 
@@ -312,11 +312,11 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 
 			if (hash != m_currentSignalHash)
 			{
-				assert(hash == m_currentSignalHash);
+				Q_ASSERT(hash == m_currentSignalHash);
 			}
 			else
 			{
-				assert(record);
+				Q_ASSERT(record);
 
 				if (record->states.size() >= record->states.max_size())
 				{
@@ -324,7 +324,7 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 					m_receivedData->data.back().states.reserve(TrendLib::TrendStateRecord::RecomendedSize);
 
 					record = &m_receivedData->data.back();
-					assert(record);
+					Q_ASSERT(record);
 				}
 
 				record->states.emplace_back(s);
@@ -337,7 +337,7 @@ void ArchiveTrendTcpClient::processNext(const QByteArray& data)
 	if (m_nextReply.islastpart() == true)
 	{
 		qDebug() << "ARCHS_GET_APP_SIGNALS_STATES_NEXT Reqest->Reply time: " << m_startRequestTime.elapsed();
-		assert(m_receivedData);
+		Q_ASSERT(m_receivedData);
 
 		m_receivedData->state = TrendLib::OneHourData::State::Received;
 

@@ -497,7 +497,6 @@ void Signal::cacheSpecPropValues()
 	m_cachedSpecPropValues->parseValuesFromArray(m_protoSpecPropValues);
 }
 
-
 void Signal::saveProtoData(QByteArray* protoDataArray) const
 {
 	TEST_PTR_RETURN(protoDataArray);
@@ -522,6 +521,7 @@ void Signal::saveProtoData(Proto::ProtoAppSignalData* protoData) const
 	protoData->set_bustypeid(m_busTypeID.toStdString());
 	protoData->set_caption(m_caption.toStdString());
 	protoData->set_channel(static_cast<int>(m_channel));
+	protoData->set_excludefrombuild(m_excludeFromBuild);
 
 	protoData->set_datasize(m_dataSize);
 	protoData->set_byteorder(static_cast<int>(m_byteOrder));
@@ -541,7 +541,6 @@ void Signal::saveProtoData(Proto::ProtoAppSignalData* protoData) const
 	protoData->set_adaptiveaperture(m_adaptiveAperture);
 }
 
-
 void Signal::loadProtoData(const QByteArray& protoDataArray)
 {
 	Proto::ProtoAppSignalData protoData;
@@ -559,6 +558,7 @@ void Signal::loadProtoData(const Proto::ProtoAppSignalData& protoData)
 	m_busTypeID = QString::fromStdString(protoData.bustypeid());
 	m_caption = QString::fromStdString(protoData.caption());
 	m_channel = static_cast<E::Channel>(protoData.channel());
+	m_excludeFromBuild = protoData.excludefrombuild();
 
 	m_dataSize = protoData.datasize();
 	m_byteOrder = static_cast<E::ByteOrder>(protoData.byteorder());
@@ -842,6 +842,7 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 	s->set_lmequipmentid(m_lmEquipmentID.toStdString());
 	s->set_bustypeid(m_busTypeID.toStdString());
 	s->set_channel(TO_INT(m_channel));
+	s->set_excludefrombuild(m_excludeFromBuild);
 
 	// Signal type
 
@@ -1023,6 +1024,7 @@ void Signal::serializeFrom(const Proto::AppSignal& s)
 	m_lmEquipmentID = QString::fromStdString(s.lmequipmentid());
 	m_busTypeID = QString::fromStdString(s.bustypeid());
 	m_channel = static_cast<E::Channel>(s.channel());
+	m_excludeFromBuild = s.excludefrombuild();
 
 	// Signal type
 

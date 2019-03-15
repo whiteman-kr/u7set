@@ -28,6 +28,8 @@ public:
 		auto it = factories.find(classHash);
 		if (it == factories.end())
 		{
+			// Crash? Forger to register class? VFrame30Library.cpp?
+			//
 			assert(false);
 			return nullptr;
 		}

@@ -1329,7 +1329,7 @@ namespace Builder
 
 	/// IssueCode: CFG3031
 	///
-	/// IssueType: Error
+	/// IssueType: Warning
 	///
 	/// Title: Property %1.%2 should be set to the valid writable catalog of workstation.
 	///
@@ -1340,9 +1340,9 @@ namespace Builder
 	/// Description:
 	///			Archive location is not assigned.
 	///
-	void IssueLogger::errCFG3031(QString objectID, QString propertyName)
+	void IssueLogger::wrnCFG3031(QString objectID, QString propertyName)
 	{
-		LOG_ERROR(IssueType::FscConfiguration,
+		LOG_WARNING0(IssueType::FscConfiguration,
 				  3031,
 				  tr("Property %1.%2 should be set to the valid writable catalog of workstation.")
 				  .arg(objectID)
@@ -2410,6 +2410,62 @@ namespace Builder
 				  .arg(schemaItem));
 	}
 
+	/// IssueCode: ALP4150
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Schema item (%1) has connection(s) (%2) which is not accessible in logic schema's (%3) associated LM(s): %4.
+	///
+	/// Parameters:
+	///		%1 SchemaItem description
+	///		%2 Connection ID
+	///		%3 Logic schema ID
+	///		%4 Logic module EquipmentID(s)
+	///
+	/// Description:
+	///		Connection item (Transmitter or Receiver) has connection(s) which is not accessible in logic schema's associated LM(s).
+	///
+	void IssueLogger::errALP4150(QString schema, QString schemaItem, QString connectionId, QString equipmentsIds, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4150, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4150,
+				  QString(tr("Schema item (%1) has connection(s) (%2) which is not accessible in logic schema's (%3) associated LM(s): %4."))
+						.arg(schemaItem)
+						.arg(connectionId)
+						.arg(schema)
+						.arg(equipmentsIds));
+	}
+
+	/// IssueCode: ALP4151
+	///
+	/// IssueType: Error
+	///
+	/// Title:		Receiver must have the only ConnectionID per channel, LogicSchemaID: %1, Receiver Item: %2, ConnectionIDs: %3, EquipmentID %4.
+	///
+	/// Parameters:
+	///		%1 Logic Schema ID
+	///		%2 Receiver item description
+	///		%3 ConnectionIDs
+	///		%4 Channel EquipmentID(s)
+	///
+	/// Description:
+	///		Receiver must have the only ConnectionID per channel.
+	///
+	void IssueLogger::errALP4151(QString schema, QString receiverItem, QString connectionIds, QString equipmentsId, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4151, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4151,
+				  QString(tr("Receiver must have the only ConnectionID per channel, LogicSchemaID: %1, Receiver Item: %2, ConnectionIDs: %3, EquipmentID %4."))
+						.arg(schema)
+						.arg(receiverItem)
+						.arg(connectionIds)
+						.arg(equipmentsId));
+	}
+
 
 	// ALC			Application logic compiler				5000-5999
 	//
@@ -2912,7 +2968,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Opto ports of the same chassis is linked via connection %1.
+	/// Title: Opto ports of the same chassis are linked via connection %1.
 	///
 	/// Parameters:
 	///		%1 Connection ID
@@ -5335,7 +5391,7 @@ namespace Builder
 	///		%2 Schema item label
 	///
 	/// Description:
-	///		Application signal with specified equipmentID is not found.
+	///		Integer constant value out of range. Check constant value.
 	///
 	void IssueLogger::errALC5134(QUuid ualItemUuid, QString itemLabel, QString schemaID)
 	{
@@ -5360,7 +5416,7 @@ namespace Builder
 	///		%2 Schema item label
 	///
 	/// Description:
-	///		Application signal with specified equipmentID is not found.
+	///		Float constant value out of range. Check constant value.
 	///
 	void IssueLogger::errALC5135(QUuid ualItemUuid, QString itemLabel, QString schemaID)
 	{
@@ -5373,7 +5429,6 @@ namespace Builder
 						arg(std::numeric_limits<float>::max()).
 						arg(schemaID).arg(itemLabel));
 	}
-
 
 	/// IssueCode: ALC5136
 	///
@@ -5870,6 +5925,195 @@ namespace Builder
 					arg(fbCaption).arg(param1).arg(param2).arg(schemaID).arg(itemLabel));
 	}
 
+	/// IssueCode: ALC5159
+	///
+	/// IssueType: Error
+	///
+	/// Title: Receiver has no connection ID (Schema %1, module %2)
+	///
+	/// Parameters:
+	///		%1 schema ID
+	///		%2 module ID
+	///
+	/// Description:
+	///		Connection ID should be assigned to Receiver.
+	///
+	void IssueLogger::errALC5159(QUuid itemUuid, QString schemaID, QString moduleID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5159, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5159,
+				  QString(tr("Receiver has no connection ID (Schema %1, module %2)")).
+					arg(schemaID).arg(moduleID));
+	}
+
+	/// IssueCode: ALC5160
+	///
+	/// IssueType: Error
+	///
+	/// Title: Transmitter has no connection ID (Schema %1, module %2)
+	///
+	/// Parameters:
+	///		%1 schema ID
+	///		%2 module ID
+	///
+	/// Description:
+	///		At least one connection ID should be assigned to Transmitter.
+	///
+	void IssueLogger::errALC5160(QUuid itemUuid, QString schemaID, QString moduleID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5160, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5160,
+				  QString(tr("Transmitter has no connection ID (Schema %1, module %2)")).
+					arg(schemaID).arg(moduleID));
+	}
+
+	/// IssueCode: ALC5161
+	///
+	/// IssueType: Error
+	///
+	/// Title: Receiver has more than one connections ID (Schema %1, module %2)
+	///
+	/// Parameters:
+	///		%1 schema ID
+	///		%2 module ID
+	///
+	/// Description:
+	///		Only one connection ID should be assigned to Receiver.
+	///
+	void IssueLogger::errALC5161(QUuid itemUuid, QString schemaID, QString moduleID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5161, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5161,
+				  QString(tr("Receiver has more than one connections ID (Schema %1, module %2)")).
+					arg(schemaID).arg(moduleID));
+	}
+
+	/// IssueCode: ALC5162
+	///
+	/// IssueType: Error
+	///
+	/// Title: In single-port connection %1 Port2EquipmentID property is not empty.
+	///
+	/// Parameters:
+	///		%1 connection ID
+	///
+	/// Description:
+	///		In single-port connections only Port1EquipmentID property should be assigned.
+	///		Clear Port2EquipmentID property or change connection type to port-to-port.
+	///
+	void IssueLogger::errALC5162(QString connectionID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5162,
+				  QString(tr("In single-port connection %1 Port2EquipmentID property is not empty.")).
+					arg(connectionID));
+	}
+
+	/// IssueCode: ALC5163
+	///
+	/// IssueType: Error
+	///
+	/// Title: Port1EquipmentID property is empty in connection %1.
+	///
+	/// Parameters:
+	///		%1 connection ID
+	///
+	/// Description:
+	///		Port1EquipmentID property should be assigned.
+	///
+	void IssueLogger::errALC5163(QString connectionID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5163,
+				  QString(tr("Port1EquipmentID property is empty in connection %1.")).
+					arg(connectionID));
+	}
+
+	/// IssueCode: ALC5164
+	///
+	/// IssueType: Error
+	///
+	/// Title: Port2EquipmentID property is empty in connection %1.
+	///
+	/// Parameters:
+	///		%1 connection ID
+	///
+	/// Description:
+	///		Port2EquipmentID property should be assigned.
+	///
+	void IssueLogger::errALC5164(QString connectionID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5164,
+				  QString(tr("Port2EquipmentID property is empty in connection %1.")).
+					arg(connectionID));
+	}
+
+	/// IssueCode: ALC5165
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Tuning is enabled for module %1 but tuningable signals is not found.
+	///
+	/// Parameters:
+	///		%1 LM's equipmentID
+	///
+	/// Description:
+	///		Tuning is enabled for specified module but tuningable signals is not found.
+	///
+	void IssueLogger::wrnALC5165(QString lmEquipmentID)
+	{
+		LOG_WARNING1(IssueType::AlCompiler,
+				  5165,
+				  QString(tr("Tuning is enabled for module %1 but tuningable signals is not found.")).
+					arg(lmEquipmentID));
+	}
+
+	/// IssueCode: ALC5166
+	///
+	/// IssueType: Error
+	///
+	/// Title: Tuningable signals is found in module %1 but tuning is not enabled.
+	///
+	/// Parameters:
+	///		%1 LM's equipmentID
+	///
+	/// Description:
+	///		Tuningable signals is found in specified module but tuning is not enabled.
+	///
+	void IssueLogger::errALC5166(QString lmEquipmentID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5166,
+				  QString(tr("Tuningable signals is found in module %1 but tuning is not enabled.")).
+					arg(lmEquipmentID));
+	}
+
+	/// IssueCode: ALC5167
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Signal %1 is excluded from build.
+	///
+	/// Parameters:
+	///		%1 app signal ID
+	///
+	/// Description:
+	///		Signal is excluded from build.
+	///
+	void IssueLogger::wrnALC5167(QString appSignalID)
+	{
+		LOG_WARNING1(IssueType::AlCompiler,
+				  5167,
+				  QString(tr("Signal %1 is excluded from build.")).
+					arg(appSignalID));
+	}
 
 	//
 
@@ -5984,7 +6228,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Serial Rx signal %1 is not associated with LM %2 (Logic schema %3).
+	/// Title: Single-port Rx signal %1 is not associated with LM %2 (Logic schema %3).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -6000,7 +6244,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5191,
-				  QString(tr("Serial Rx signal %1 is not associated with LM %2 (Logic schema %3).")).
+				  QString(tr("Single-port Rx signal %1 is not associated with LM %2 (Logic schema %3).")).
 						arg(appSignalID).arg(lmID).arg(schemaID));
 	}
 
@@ -6067,6 +6311,50 @@ namespace Builder
 				  5194,
 				  QString(tr("Tx data memory areas of ports %1 and %2 with manual settings are overlapped.")).
 						arg(port1ID).arg(port2ID));
+	}
+
+	/// IssueCode: ALC5997
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Null pointer occurred! File: %1 Line: %2 Function: %3
+	///
+	/// Parameters:
+	///		%1 source file name
+	///		%2 source line number
+	///		%3 function name
+	///
+	/// Description:
+	///		Null pointer occurred in specified function. Contact to th RPCT developers.
+	///
+	void IssueLogger::errALC5997(QString fileName, int lineNo, QString functionName)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5997,
+				  QString(tr(" Null pointer occurred! File: %1 Line: %2 Function: %3")).
+								arg(fileName).arg(lineNo).arg(functionName));
+	}
+
+	/// IssueCode: ALC5998
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Internal error! File: %1 Line: %2 Function: %3
+	///
+	/// Parameters:
+	///		%1 source file name
+	///		%2 source line number
+	///		%3 function name
+	///
+	/// Description:
+	///		Internal error in specified function. Contact to th RPCT developers.
+	///
+	void IssueLogger::errALC5998(QString fileName, int lineNo, QString functionName)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5998,
+				  QString(tr("Internal error! File: %1 Line: %2 Function: %3")).
+								arg(fileName).arg(lineNo).arg(functionName));
 	}
 
 	/// IssueCode: ALC5999

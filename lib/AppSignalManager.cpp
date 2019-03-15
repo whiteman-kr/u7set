@@ -225,7 +225,6 @@ AppSignalState AppSignalManager::signalState(Hash signalHash, bool* found) const
 {
 	if (signalHash == 0)
 	{
-		assert(signalHash != 0);
 		return AppSignalState();
 	}
 

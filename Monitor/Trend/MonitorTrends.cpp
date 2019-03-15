@@ -21,12 +21,12 @@ bool MonitorTrends::activateTrendWindow(QString trendName)
 {
 	if (m_trendsList.count(trendName) != 1)
 	{
-		assert(m_trendsList.count(trendName) != 1);
+		Q_ASSERT(m_trendsList.count(trendName) != 1);
 		return false;
 	}
 
 	MonitorTrendsWidget* widget = m_trendsList[trendName];
-	assert(widget);
+	Q_ASSERT(widget);
 
 	widget->activateWindow();
 	widget->ensureVisible();
@@ -56,13 +56,13 @@ bool MonitorTrends::startTrendApp(MonitorConfigController* configController, con
 
 void MonitorTrends::registerTrendWindow(QString name, MonitorTrendsWidget* window)
 {
-	assert(m_trendsList.count(name) == 0);
+	Q_ASSERT(m_trendsList.count(name) == 0);
 	m_trendsList[name] = window;
 }
 
 void MonitorTrends::unregisterTrendWindow(QString name)
 {
-	assert(m_trendsList.count(name) == 1);
+	Q_ASSERT(m_trendsList.count(name) == 1);
 	m_trendsList.erase(name);
 }
 
@@ -82,7 +82,7 @@ static int no = 1;
 	// Status bar
 	//
 	QStatusBar* sb = statusBar();
-	assert(sb);
+	Q_ASSERT(sb);
 
 	m_statusBarTextLabel = new QLabel(sb);
 	m_statusBarQueueSizeLabel = new QLabel(sb);
@@ -133,11 +133,11 @@ MonitorTrendsWidget::~MonitorTrendsWidget()
 void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 {
 	QStatusBar* sb = statusBar();
-	assert(sb);
+	Q_ASSERT(sb);
 
 	if (trendMode() == E::TrendMode::Archive)
 	{
-		assert(m_archiveTcpClient);
+		Q_ASSERT(m_archiveTcpClient);
 
 		ArchiveTrendTcpClient::Stat stat = m_archiveTcpClient->stat();
 
@@ -161,7 +161,7 @@ void MonitorTrendsWidget::timerEvent(QTimerEvent*)
 	}
 	else
 	{
-		assert(m_rtTcpClient);
+		Q_ASSERT(m_rtTcpClient);
 
 		// --
 		//
@@ -258,9 +258,9 @@ void MonitorTrendsWidget::signalsButton()
 
 void MonitorTrendsWidget::createArchiveConnection()
 {
-	assert(m_configController);
-	assert(m_archiveTcpClient == nullptr);
-	assert(m_archiveTcpClientThread == nullptr);
+	Q_ASSERT(m_configController);
+	Q_ASSERT(m_archiveTcpClient == nullptr);
+	Q_ASSERT(m_archiveTcpClientThread == nullptr);
 
 	m_archiveTcpClient = new ArchiveTrendTcpClient(m_configController);
 
@@ -279,9 +279,9 @@ void MonitorTrendsWidget::createArchiveConnection()
 
 void MonitorTrendsWidget::createRealtimeConnection()
 {
-	assert(m_configController);
-	assert(m_rtTcpClient == nullptr);
-	assert(m_rtTcpClientThread == nullptr);
+	Q_ASSERT(m_configController);
+	Q_ASSERT(m_rtTcpClient == nullptr);
+	Q_ASSERT(m_rtTcpClientThread == nullptr);
 
 	m_rtTcpClient = new RtTrendTcpClient(m_configController);
 
@@ -303,8 +303,8 @@ void MonitorTrendsWidget::setRealtimeParams()
 	if (m_rtTcpClient == nullptr ||
 		m_rtTcpClientThread == nullptr)
 	{
-		assert(m_rtTcpClient);
-		assert(m_rtTcpClientThread);
+		Q_ASSERT(m_rtTcpClient);
+		Q_ASSERT(m_rtTcpClientThread);
 		return;
 	}
 
@@ -401,8 +401,8 @@ void MonitorTrendsWidget::setRealtimeParams()
 
 void MonitorTrendsWidget::slot_archiveDataReceived(QString /*appSignalId*/, TimeStamp requestedHour, E::TimeType timeType, std::shared_ptr<TrendLib::OneHourData> /*data*/)
 {
-	assert(m_trendWidget);
-	assert(m_trendSlider);
+	Q_ASSERT(m_trendWidget);
+	Q_ASSERT(m_trendSlider);
 
 	TimeStamp plus1hour(requestedHour.timeStamp + 1_hour);
 	TimeStamp minus1hour(requestedHour.timeStamp - 1_hour);
@@ -421,9 +421,9 @@ void MonitorTrendsWidget::slot_archiveDataReceived(QString /*appSignalId*/, Time
 
 void MonitorTrendsWidget::slot_realtimeDataReceived(std::shared_ptr<TrendLib::RealtimeData> data, TrendLib::TrendStateItem minState, TrendLib::TrendStateItem maxState)
 {
-	assert(m_trendWidget);
-	assert(m_trendSlider);
-	assert(data);
+	Q_ASSERT(m_trendWidget);
+	Q_ASSERT(m_trendSlider);
+	Q_ASSERT(data);
 
 	if (data->signalData.empty() == true)
 	{

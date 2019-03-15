@@ -8,7 +8,7 @@
 #include "MonitorArchive.h"
 #include "./Trend/MonitorTrends.h"
 #include "../VFrame30/Schema.h"
-#include "../lib/Ui/DialogTuningSources.h"
+#include "DialogDataSources.h"
 #include "../lib/Ui/UiTools.h"
 #include "../lib/Ui/DialogAbout.h"
 
@@ -43,6 +43,13 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 
 	connect(&theSignals, &AppSignalManager::addSignalToPriorityList, m_tcpSignalRecents, &TcpSignalRecents::addSignal, Qt::QueuedConnection);
 	connect(&theSignals, &AppSignalManager::addSignalsToPriorityList, m_tcpSignalRecents, &TcpSignalRecents::addSignals, Qt::QueuedConnection);
+
+	// TcpSourcesStateClient
+	//
+	m_tcpSourcesStateClient = new TcpAppSourcesState(&m_configController, fakeAddress, fakeAddress);
+
+	m_sourcesStateClientThread = new SimpleThread(m_tcpSourcesStateClient);
+	m_sourcesStateClientThread->start();
 
 	// Log file
 	//
@@ -84,7 +91,7 @@ MonitorMainWindow::MonitorMainWindow(const SoftwareInfo& softwareInfo, QWidget* 
 	connect(monitorCentralWidget, &MonitorCentralWidget::signal_actionCloseTabUpdated, this,
 		[this](bool allowed)
 		{
-			assert(m_closeTabAction);
+			Q_ASSERT(m_closeTabAction);
 			m_closeTabAction->setEnabled(allowed);
 		});
 
@@ -140,94 +147,12 @@ void MonitorMainWindow::closeEvent(QCloseEvent* e)
 
 void MonitorMainWindow::timerEvent(QTimerEvent* event)
 {
-	assert(event);
+	Q_ASSERT(event);
 
-	// Update status bar
-	//
-	QString tuningServiceState;
-	int tuningServiceReplyCount = 0;
-
-	if (m_configController.configuration().tuningEnabled == true)
+	if (event->timerId() == m_updateStatusBarTimerId)
 	{
-		if (m_tuningTcpClientThread == nullptr ||
-			m_tuningTcpClient == nullptr)
-		{
-			tuningServiceState = tr("TCP Thread Error");
-		}
-		else
-		{
-			auto connState = m_tuningTcpClient->getConnectionState();
-			tuningServiceReplyCount = connState.replyCount;
-
-			tuningServiceState = connState.isConnected ? connState.peerAddr.addressPortStr() : "NoConnection";
-		}
+		updateStatusBar();
 	}
-
-	if  (event->timerId() == m_updateStatusBarTimerId &&
-		 m_tcpSignalClient != nullptr)
-	{
-		assert(m_statusBarConnectionState);
-		assert(m_statusBarConnectionStatistics);
-
-		Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
-		Tcp::ConnectionState signalClientState =  m_tcpSignalClient->getConnectionState();
-
-		// State
-		//
-		QString text = QString(" ConfigSrv: %1   AppDataSrv: %2 ")
-					   .arg(confiConnState.isConnected ? confiConnState.peerAddr.addressPortStr() : "NoConnection")
-					   .arg(signalClientState.isConnected ? signalClientState.peerAddr.addressPortStr() : "NoConnection");
-
-		if (m_configController.configuration().tuningEnabled == true)
-		{
-			text.append(QString("  TuningSrv: %1 ").arg(tuningServiceState));
-		}
-
-		m_statusBarConnectionState->setText(text);
-
-		// Statistics
-		//
-		text = QString(" ConfigSrv: %1   AppDataSrv: %2 ")
-			   .arg(QString::number(confiConnState.replyCount))
-			   .arg(QString::number(signalClientState.replyCount));
-
-		if (m_configController.configuration().tuningEnabled == true)
-		{
-			text.append(QString("  TuningSrv: %1 ").arg(tuningServiceReplyCount));
-		}
-
-		m_statusBarConnectionStatistics->setText(text);
-
-		// BuildNo
-		//
-		text = QString(" Project: %1   Build: %2  ")
-				   .arg(m_configController.configuration().project)
-				   .arg(m_configController.configuration().buildNo);
-
-		m_statusBarProjectInfo->setText(text);
-
-	}
-
-	if (event->timerId() == m_updateStatusBarTimerId &&
-			(m_logErrorsCounter != m_LogFile.errorAckCounter() || m_logWarningsCounter != m_LogFile.warningAckCounter()))
-	{
-		m_logErrorsCounter = m_LogFile.errorAckCounter();
-		m_logWarningsCounter = m_LogFile.warningAckCounter();
-
-		assert(m_statusBarLogAlerts);
-
-		m_statusBarLogAlerts->setText(QString(" Log E: %1 W: %2").arg(m_logErrorsCounter).arg(m_logWarningsCounter));
-
-		if (m_logErrorsCounter == 0 && m_logWarningsCounter == 0)
-		{
-			m_statusBarLogAlerts->setStyleSheet(m_statusBarInfo->styleSheet());
-		}
-		else
-		{
-			m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: red}");
-		}
-	}
-
 
 	return;
 }
@@ -299,7 +224,7 @@ void MonitorMainWindow::restoreWindowState()
 
 void MonitorMainWindow::showLogo()
 {
-	assert(m_logoLabel);
+	Q_ASSERT(m_logoLabel);
 
 	QImage logo = QImage(":/Images/Images/Logo.png");
 
@@ -337,12 +262,11 @@ void MonitorMainWindow::createActions()
 	m_pExitAction->setEnabled(true);
 	connect(m_pExitAction, &QAction::triggered, this, &MonitorMainWindow::exit);
 
-	m_pTuningSourcesAction = new QAction(tr("Tuning Sources..."), this);
-	m_pTuningSourcesAction->setStatusTip(tr("View Tuning Sources"));
-	m_pTuningSourcesAction->setIcon(QIcon(":/Images/Images/TuningSources.svg"));
-	m_pTuningSourcesAction->setEnabled(true);
-	m_pTuningSourcesAction->setVisible(false);
-	connect(m_pTuningSourcesAction, &QAction::triggered, this, &MonitorMainWindow::showTuningSources);
+	m_pDataSourcesAction = new QAction(tr("Data Sources..."), this);
+	m_pDataSourcesAction->setStatusTip(tr("View Data Sources"));
+	m_pDataSourcesAction->setIcon(QIcon(":/Images/Images/AppDataSources.svg"));
+	m_pDataSourcesAction->setEnabled(true);
+	connect(m_pDataSourcesAction, &QAction::triggered, this, &MonitorMainWindow::showDataSources);
 
 	m_pSettingsAction = new QAction(tr("Settings..."), this);
 	m_pSettingsAction->setStatusTip(tr("Change application settings"));
@@ -357,7 +281,6 @@ void MonitorMainWindow::createActions()
 
 	m_pLogAction = new QAction(tr("Log..."), this);
 	m_pLogAction->setStatusTip(tr("Show application log"));
-	m_pLogAction->setIcon(QIcon(":/Images/Images/Log.svg"));
 	connect(m_pLogAction, &QAction::triggered, this, &MonitorMainWindow::showLog);
 
 	m_pAboutAction = new QAction(tr("About..."), this);
@@ -486,7 +409,7 @@ void MonitorMainWindow::createMenus()
 	//
 	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
 
-	pToolsMenu->addAction(m_pTuningSourcesAction);
+	pToolsMenu->addAction(m_pDataSourcesAction);
 	pToolsMenu->addAction(m_pSettingsAction);
 
 	// Help
@@ -556,13 +479,17 @@ void MonitorMainWindow::createStatusBar()
 	m_statusBarInfo->setAlignment(Qt::AlignLeft);
 	m_statusBarInfo->setIndent(3);
 
-	m_statusBarConnectionStatistics = new QLabel();
-	m_statusBarConnectionStatistics->setAlignment(Qt::AlignHCenter);
-	m_statusBarConnectionStatistics->setMinimumWidth(100);
+	m_statusBarConfigConnection = new QLabel();
+	m_statusBarConfigConnection->setAlignment(Qt::AlignHCenter);
+	m_statusBarConfigConnection->setMinimumWidth(100);
 
-	m_statusBarConnectionState = new QLabel();
-	m_statusBarConnectionState->setAlignment(Qt::AlignHCenter);
-	m_statusBarConnectionState->setMinimumWidth(100);
+	m_statusBarAppDataConnection = new QLabel();
+	m_statusBarAppDataConnection->setAlignment(Qt::AlignHCenter);
+	m_statusBarAppDataConnection->setMinimumWidth(100);
+
+	m_statusBarTuningConnection = new QLabel();
+	m_statusBarTuningConnection->setAlignment(Qt::AlignHCenter);
+	m_statusBarTuningConnection->setMinimumWidth(100);
 
 	m_statusBarProjectInfo = new QLabel;
 	m_statusBarProjectInfo->setAlignment(Qt::AlignHCenter);
@@ -577,8 +504,9 @@ void MonitorMainWindow::createStatusBar()
 	// --
 	//
 	statusBar()->addWidget(m_statusBarInfo, 1);
-	statusBar()->addPermanentWidget(m_statusBarConnectionStatistics, 0);
-	statusBar()->addPermanentWidget(m_statusBarConnectionState, 0);
+	statusBar()->addPermanentWidget(m_statusBarConfigConnection, 0);
+	statusBar()->addPermanentWidget(m_statusBarAppDataConnection, 0);
+	statusBar()->addPermanentWidget(m_statusBarTuningConnection, 0);
 	statusBar()->addPermanentWidget(m_statusBarProjectInfo, 0);
 	statusBar()->addPermanentWidget(m_statusBarLogAlerts, 0);
 
@@ -588,9 +516,117 @@ void MonitorMainWindow::createStatusBar()
 MonitorCentralWidget* MonitorMainWindow::monitorCentralWidget()
 {
 	MonitorCentralWidget* centralWidget = dynamic_cast<MonitorCentralWidget*>(QMainWindow::centralWidget());
-	assert(centralWidget != nullptr);
+	Q_ASSERT(centralWidget != nullptr);
 
 	return centralWidget;
+}
+
+void MonitorMainWindow::updateStatusBar()
+{
+	// Update status bar
+	//
+	Q_ASSERT(m_statusBarConfigConnection);
+	Q_ASSERT(m_statusBarAppDataConnection);
+	Q_ASSERT(m_statusBarTuningConnection);
+
+	// ConfigService connection
+	//
+	{
+		Tcp::ConnectionState confiConnState =  m_configController.getConnectionState();
+
+		showSoftwareConnection(tr("Configuration Service"), tr("ConfigService"),
+							   confiConnState,
+							   theSettings.configuratorAddress1(),
+							   theSettings.configuratorAddress2(),
+							   m_statusBarConfigConnection);
+	}
+
+	// AppDataService connection
+	//
+	if  (m_tcpSignalClient != nullptr)
+	{
+		Tcp::ConnectionState signalClientState =  m_tcpSignalClient->getConnectionState();
+
+		showSoftwareConnection(tr("Application Data Service"), tr("AppDataService"),
+							   signalClientState,
+							   m_tcpSignalClient->serverAddressPort1(),
+							   m_tcpSignalClient->serverAddressPort2(),
+							   m_statusBarAppDataConnection);
+	}
+
+	// TuningService connection
+	//
+	if  (m_configController.configuration().tuningEnabled == true && m_tuningTcpClient != nullptr)
+	{
+		Tcp::ConnectionState tuningClientState = m_tuningTcpClient->getConnectionState();
+
+		showSoftwareConnection(tr("Tuning Service"), tr("TuningService"),
+							   tuningClientState,
+							   m_tuningTcpClient->serverAddressPort1(),
+							   m_tuningTcpClient->serverAddressPort2(),
+							   m_statusBarTuningConnection);
+	}
+
+	// BuildNo
+	//
+	{
+		QString text = QString(" Project: %1   Build: %2  ")
+				.arg(m_configController.configuration().project)
+				.arg(m_configController.configuration().buildNo);
+
+		m_statusBarProjectInfo->setText(text);
+	}
+
+	if ((m_logErrorsCounter != m_LogFile.errorAckCounter() || m_logWarningsCounter != m_LogFile.warningAckCounter()))
+	{
+		m_logErrorsCounter = m_LogFile.errorAckCounter();
+		m_logWarningsCounter = m_LogFile.warningAckCounter();
+
+		assert(m_statusBarLogAlerts);
+
+		m_statusBarLogAlerts->setText(QString(" Log E: %1 W: %2").arg(m_logErrorsCounter).arg(m_logWarningsCounter));
+
+		if (m_logErrorsCounter == 0 && m_logWarningsCounter == 0)
+		{
+			m_statusBarLogAlerts->setStyleSheet(m_statusBarInfo->styleSheet());
+		}
+		else
+		{
+			m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: red}");
+		}
+	}
+
+	return;
+}
+
+void MonitorMainWindow::showSoftwareConnection(const QString& caption, const QString& shortCaption, Tcp::ConnectionState connectionState, HostAddressPort portPrimary, HostAddressPort portSecondary, QLabel* label)
+{
+	QString tooltipText = tr("%1\r\n\r\n").arg(caption);
+	tooltipText.append(tr("Address (primary): %1\r\n").arg(portPrimary.addressPortStr()));
+	tooltipText.append(tr("Address (secondary): %1\r\n\r\n").arg(portSecondary.addressPortStr()));
+	tooltipText.append(tr("Address (current): %1\r\n").arg(connectionState.peerAddr.addressPortStr()));
+
+	QString statusText;
+
+	if (connectionState.isConnected == true)
+	{
+		statusText = tr(" %1: %2 ").arg(shortCaption).arg(connectionState.replyCount);
+		tooltipText.append(tr("Connection: established"));
+	}
+	else
+	{
+		statusText = tr(" %1: no connection ").arg(shortCaption);
+		tooltipText.append(tr("Connection: no connection"));
+	}
+
+	if (label->text() != statusText)
+	{
+		label->setText(statusText);
+	}
+	if (label->toolTip() != tooltipText)
+	{
+		label->setToolTip(tooltipText);
+	}
 }
 
 void MonitorMainWindow::exit()
@@ -603,33 +639,32 @@ void MonitorMainWindow::showLog()
 	m_LogFile.view(this);
 }
 
-void MonitorMainWindow::showTuningSources()
+void MonitorMainWindow::showDataSources()
 {
-	if (m_dialogTuningSources == nullptr)
+	if (m_dialogDataSources == nullptr)
 	{
-		if (m_tuningTcpClient == nullptr)
-		{
-			assert(m_tuningTcpClient);
-			return;
-		}
-
-		m_dialogTuningSources = new DialogTuningSources(m_tuningTcpClient, false, this);
-		m_dialogTuningSources->show();
+		m_dialogDataSources = new DialogDataSources(m_tcpSourcesStateClient,
+													m_configController.configuration().tuningEnabled,
+													m_tuningTcpClient,
+													false,
+													this);
+		m_dialogDataSources->show();
 
 		auto f = [this]() -> void
-		{
-				m_dialogTuningSources = nullptr;
-		};
+			{
+				m_dialogDataSources = nullptr;
+			};
 
-		connect(m_dialogTuningSources, &DialogTuningSources::dialogClosed, this, f);
+		connect(m_dialogDataSources, &DialogDataSources::dialogClosed, this, f);
 	}
 	else
 	{
-		m_dialogTuningSources->activateWindow();
+		m_dialogDataSources->activateWindow();
 	}
 
-	UiTools::adjustDialogPlacement(m_dialogTuningSources);
+	UiTools::adjustDialogPlacement(m_dialogDataSources);
 }
+
 
 void MonitorMainWindow::showSettings()
 {
@@ -806,7 +841,7 @@ void MonitorMainWindow::slot_archive()
 		for (size_t i = 0; i < archives.size(); i++)
 		{
 			QAction* a = menu.addAction(archives[i]);
-			assert(a);
+			Q_ASSERT(a);
 
 			a->setData(QVariant::fromValue<int>(static_cast<int>(i)));		// Data is index in archives vector
 		}
@@ -830,8 +865,8 @@ void MonitorMainWindow::slot_archive()
 		{
 			if (ok == false || archiveIndex < 0 || archiveIndex >= archives.size())
 			{
-				assert(ok == true);
-				assert(archiveIndex >= 0 && archiveIndex < archives.size());
+				Q_ASSERT(ok == true);
+				Q_ASSERT(archiveIndex >= 0 && archiveIndex < archives.size());
 				return;
 			}
 
@@ -883,7 +918,7 @@ void MonitorMainWindow::slot_trends()
 		for (size_t i = 0; i < trends.size(); i++)
 		{
 			QAction* a = menu.addAction(trends[i]);
-			assert(a);
+			Q_ASSERT(a);
 
 			a->setData(QVariant::fromValue<int>(static_cast<int>(i)));		// Data is index in trend vector
 		}
@@ -907,8 +942,8 @@ void MonitorMainWindow::slot_trends()
 		{
 			if (ok == false || trendIndex < 0 || trendIndex >= trends.size())
 			{
-				assert(ok == true);
-				assert(trendIndex >= 0 && trendIndex < trends.size());
+				Q_ASSERT(ok == true);
+				Q_ASSERT(trendIndex >= 0 && trendIndex < trends.size());
 				return;
 			}
 
@@ -951,9 +986,8 @@ void MonitorMainWindow::slot_historyChanged(bool enableBack, bool enableForward)
 	if (m_historyBack == nullptr ||
 		m_historyForward == nullptr)
 	{
-		assert(m_historyBack);
-		assert(m_historyForward);
-
+		Q_ASSERT(m_historyBack);
+		Q_ASSERT(m_historyForward);
 		return;
 	}
 
@@ -965,6 +999,12 @@ void MonitorMainWindow::slot_historyChanged(bool enableBack, bool enableForward)
 
 void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 {
+	if (m_dialogDataSources != nullptr)
+	{
+		delete m_dialogDataSources;
+		m_dialogDataSources = nullptr;
+	}
+
 	if (m_tuningTcpClientThread != nullptr)
 	{
 		m_tuningController->resetTcpClient();
@@ -974,12 +1014,6 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 
 		m_tuningTcpClientThread = nullptr;
 		m_tuningTcpClient = nullptr;
-	}
-
-	if (m_dialogTuningSources != nullptr)
-	{
-		delete m_dialogTuningSources;
-		m_dialogTuningSources = nullptr;
 	}
 
 	// TuningTcpClient
@@ -998,7 +1032,7 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 		m_tuningController->setTcpClient(m_tuningTcpClient);
 	}
 
-	m_pTuningSourcesAction->setVisible(configuration.tuningEnabled);
+	m_statusBarTuningConnection->setVisible(configuration.tuningEnabled == true);
 
 	return;
 }
@@ -1036,7 +1070,7 @@ MonitorToolBar::MonitorToolBar(const QString& tittle, QWidget* parent) :
 
 void MonitorToolBar::addAction(QAction* action)
 {
-	assert(action);
+	Q_ASSERT(action);
 
 	QWidget::addAction(action);
 	widgetForAction(action)->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Expanding);
@@ -1132,7 +1166,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 		MonitorMainWindow* m = dynamic_cast<MonitorMainWindow*>(this->parent());
 		if (m == nullptr)
 		{
-			assert(m);
+			Q_ASSERT(m);
 			return;
 		}
 
@@ -1183,7 +1217,7 @@ void MonitorToolBar::dropEvent(QDropEvent* event)
 		MonitorMainWindow* mainWindow = dynamic_cast<MonitorMainWindow*>(this->parent());
 		if (mainWindow == nullptr)
 		{
-			assert(mainWindow);
+			Q_ASSERT(mainWindow);
 			return;
 		}
 

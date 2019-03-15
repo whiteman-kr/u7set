@@ -32,7 +32,7 @@ namespace TrendLib
 	{
 		if (message.IsInitialized() == false)
 		{
-			assert(message.IsInitialized());
+			Q_ASSERT(message.IsInitialized());
 			return false;
 		}
 

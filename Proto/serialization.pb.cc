@@ -106,6 +106,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* SchemaItemPath_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   SchemaItemPath_reflection_ = NULL;
+const ::google::protobuf::Descriptor* SchemaItemImage_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  SchemaItemImage_reflection_ = NULL;
 const ::google::protobuf::Descriptor* FblConnectionPoint_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   FblConnectionPoint_reflection_ = NULL;
@@ -644,7 +647,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaLayer));
   SchemaItem_descriptor_ = file->message_type(18);
-  static const int SchemaItem_offsets_[40] = {
+  static const int SchemaItem_offsets_[41] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, uuid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, isstatic_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, islocked_),
@@ -663,6 +666,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, rect_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, line_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, path_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, image_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, signal_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, inputsignal_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItem, outputsignal_),
@@ -804,7 +808,23 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemPath));
-  FblConnectionPoint_descriptor_ = file->message_type(25);
+  SchemaItemImage_descriptor_ = file->message_type(25);
+  static const int SchemaItemImage_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemImage, allowscale_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemImage, keepaspectratio_),
+  };
+  SchemaItemImage_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      SchemaItemImage_descriptor_,
+      SchemaItemImage::default_instance_,
+      SchemaItemImage_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemImage, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemImage, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(SchemaItemImage));
+  FblConnectionPoint_descriptor_ = file->message_type(26);
   static const int FblConnectionPoint_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblConnectionPoint, point_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblConnectionPoint, dirrection_),
@@ -825,7 +845,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblConnectionPoint));
-  FblItem_descriptor_ = file->message_type(26);
+  FblItem_descriptor_ = file->message_type(27);
   static const int FblItem_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblItem, points_),
   };
@@ -840,7 +860,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblItem));
-  FblItemRect_descriptor_ = file->message_type(27);
+  FblItemRect_descriptor_ = file->message_type(28);
   static const int FblItemRect_offsets_[9] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblItemRect, weight_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblItemRect, linecolor_),
@@ -863,7 +883,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblItemRect));
-  FblItemLine_descriptor_ = file->message_type(28);
+  FblItemLine_descriptor_ = file->message_type(29);
   static const int FblItemLine_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblItemLine, weight_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblItemLine, linecolor_),
@@ -879,7 +899,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblItemLine));
-  SchemaItemSignalColumn_descriptor_ = file->message_type(29);
+  SchemaItemSignalColumn_descriptor_ = file->message_type(30);
   static const int SchemaItemSignalColumn_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemSignalColumn, width_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemSignalColumn, data_),
@@ -896,7 +916,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemSignalColumn));
-  SchemaItemSignal_descriptor_ = file->message_type(30);
+  SchemaItemSignal_descriptor_ = file->message_type(31);
   static const int SchemaItemSignal_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemSignal, appsignalids_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemSignal, precision_),
@@ -915,7 +935,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemSignal));
-  SchemaItemInput_descriptor_ = file->message_type(31);
+  SchemaItemInput_descriptor_ = file->message_type(32);
   static const int SchemaItemInput_offsets_[1] = {
   };
   SchemaItemInput_reflection_ =
@@ -929,7 +949,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemInput));
-  SchemaItemOutput_descriptor_ = file->message_type(32);
+  SchemaItemOutput_descriptor_ = file->message_type(33);
   static const int SchemaItemOutput_offsets_[1] = {
   };
   SchemaItemOutput_reflection_ =
@@ -943,7 +963,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemOutput));
-  SchemaItemInOut_descriptor_ = file->message_type(33);
+  SchemaItemInOut_descriptor_ = file->message_type(34);
   static const int SchemaItemInOut_offsets_[1] = {
   };
   SchemaItemInOut_reflection_ =
@@ -957,7 +977,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemInOut));
-  SchemaItemLink_descriptor_ = file->message_type(34);
+  SchemaItemLink_descriptor_ = file->message_type(35);
   static const int SchemaItemLink_offsets_[1] = {
   };
   SchemaItemLink_reflection_ =
@@ -971,7 +991,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemLink));
-  SchemaItemAfb_descriptor_ = file->message_type(35);
+  SchemaItemAfb_descriptor_ = file->message_type(36);
   static const int SchemaItemAfb_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemAfb, params_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemAfb, afbstrid_),
@@ -991,7 +1011,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemAfb));
-  SchemaItemConst_descriptor_ = file->message_type(36);
+  SchemaItemConst_descriptor_ = file->message_type(37);
   static const int SchemaItemConst_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemConst, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemConst, intvalue_),
@@ -1012,7 +1032,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemConst));
-  SchemaItemConnection_descriptor_ = file->message_type(37);
+  SchemaItemConnection_descriptor_ = file->message_type(38);
   static const int SchemaItemConnection_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemConnection, connectionid_),
   };
@@ -1027,7 +1047,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemConnection));
-  SchemaItemTransmitter_descriptor_ = file->message_type(38);
+  SchemaItemTransmitter_descriptor_ = file->message_type(39);
   static const int SchemaItemTransmitter_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemTransmitter, pincount_),
   };
@@ -1042,7 +1062,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemTransmitter));
-  SchemaItemReceiver_descriptor_ = file->message_type(39);
+  SchemaItemReceiver_descriptor_ = file->message_type(40);
   static const int SchemaItemReceiver_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemReceiver, showvalidity_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemReceiver, appsignalid_),
@@ -1061,7 +1081,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemReceiver));
-  SchemaItemUfb_descriptor_ = file->message_type(40);
+  SchemaItemUfb_descriptor_ = file->message_type(41);
   static const int SchemaItemUfb_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemUfb, ufbschemaid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemUfb, ufbcaption_),
@@ -1078,7 +1098,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemUfb));
-  SchemaItemTerminator_descriptor_ = file->message_type(41);
+  SchemaItemTerminator_descriptor_ = file->message_type(42);
   static const int SchemaItemTerminator_offsets_[1] = {
   };
   SchemaItemTerminator_reflection_ =
@@ -1092,40 +1112,21 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemTerminator));
-  SchemaItemValue_descriptor_ = file->message_type(42);
-  static const int SchemaItemValue_offsets_[32] = {
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, weight_),
+  SchemaItemValue_descriptor_ = file->message_type(43);
+  static const int SchemaItemValue_offsets_[13] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, signalids_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, signalsource_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, lineweight_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, linecolor_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, fillcolor_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, textanalog_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, textcolor_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, text_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, font_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, fill_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, drawrect_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, horzalign_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, vertalign_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, signalid_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, signalsource_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, precision_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, textdiscrete0_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, textdiscrete1_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, textnonvalid_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, fillcolornonvalid0_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, fillcolornonvalid1_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, textcolornonvalid0_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, textcolornonvalid1_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, fillcoloranalog0_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, fillcoloranalog1_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, textcoloranalog0_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, textcoloranalog1_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, fillcolordiscryes0_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, fillcolordiscryes1_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, textcolordiscryes0_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, textcolordiscryes1_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, fillcolordiscrno0_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, fillcolordiscrno1_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, textcolordiscrno0_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, textcolordiscrno1_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, analogformat_),
   };
   SchemaItemValue_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1138,7 +1139,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemValue));
-  SchemaItemBus_descriptor_ = file->message_type(43);
+  SchemaItemBus_descriptor_ = file->message_type(44);
   static const int SchemaItemBus_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemBus, bustypeid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemBus, bustypehash_),
@@ -1155,7 +1156,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemBus));
-  SchemaItemBusComposer_descriptor_ = file->message_type(44);
+  SchemaItemBusComposer_descriptor_ = file->message_type(45);
   static const int SchemaItemBusComposer_offsets_[1] = {
   };
   SchemaItemBusComposer_reflection_ =
@@ -1169,7 +1170,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemBusComposer));
-  SchemaItemBusExtractor_descriptor_ = file->message_type(45);
+  SchemaItemBusExtractor_descriptor_ = file->message_type(46);
   static const int SchemaItemBusExtractor_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemBusExtractor, properties_),
   };
@@ -1184,7 +1185,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemBusExtractor));
-  SchemaItemLoopback_descriptor_ = file->message_type(46);
+  SchemaItemLoopback_descriptor_ = file->message_type(47);
   static const int SchemaItemLoopback_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemLoopback, loopbackid_),
   };
@@ -1199,7 +1200,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemLoopback));
-  SchemaItemLoopbackSource_descriptor_ = file->message_type(47);
+  SchemaItemLoopbackSource_descriptor_ = file->message_type(48);
   static const int SchemaItemLoopbackSource_offsets_[1] = {
   };
   SchemaItemLoopbackSource_reflection_ =
@@ -1213,7 +1214,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemLoopbackSource));
-  SchemaItemLoopbackTarget_descriptor_ = file->message_type(48);
+  SchemaItemLoopbackTarget_descriptor_ = file->message_type(49);
   static const int SchemaItemLoopbackTarget_offsets_[1] = {
   };
   SchemaItemLoopbackTarget_reflection_ =
@@ -1227,7 +1228,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemLoopbackTarget));
-  SchemaItemControl_descriptor_ = file->message_type(49);
+  SchemaItemControl_descriptor_ = file->message_type(50);
   static const int SchemaItemControl_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemControl, stylesheet_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemControl, tooltip_),
@@ -1243,7 +1244,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemControl));
-  SchemaItemPushButton_descriptor_ = file->message_type(50);
+  SchemaItemPushButton_descriptor_ = file->message_type(51);
   static const int SchemaItemPushButton_offsets_[11] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemPushButton, text_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemPushButton, checkable_),
@@ -1268,7 +1269,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemPushButton));
-  SchemaItemLineEdit_descriptor_ = file->message_type(51);
+  SchemaItemLineEdit_descriptor_ = file->message_type(52);
   static const int SchemaItemLineEdit_offsets_[10] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemLineEdit, text_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemLineEdit, horzalign_),
@@ -1292,7 +1293,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemLineEdit));
-  DeviceObject_descriptor_ = file->message_type(52);
+  DeviceObject_descriptor_ = file->message_type(53);
   static const int DeviceObject_offsets_[22] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, uuid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, equipmentid_),
@@ -1328,7 +1329,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceObject));
-  DeviceRoot_descriptor_ = file->message_type(53);
+  DeviceRoot_descriptor_ = file->message_type(54);
   static const int DeviceRoot_offsets_[1] = {
   };
   DeviceRoot_reflection_ =
@@ -1342,7 +1343,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceRoot));
-  DeviceSystem_descriptor_ = file->message_type(54);
+  DeviceSystem_descriptor_ = file->message_type(55);
   static const int DeviceSystem_offsets_[1] = {
   };
   DeviceSystem_reflection_ =
@@ -1356,7 +1357,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceSystem));
-  DeviceRack_descriptor_ = file->message_type(55);
+  DeviceRack_descriptor_ = file->message_type(56);
   static const int DeviceRack_offsets_[1] = {
   };
   DeviceRack_reflection_ =
@@ -1370,7 +1371,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceRack));
-  DeviceChassis_descriptor_ = file->message_type(56);
+  DeviceChassis_descriptor_ = file->message_type(57);
   static const int DeviceChassis_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceChassis, type_),
   };
@@ -1385,7 +1386,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceChassis));
-  DeviceModule_descriptor_ = file->message_type(57);
+  DeviceModule_descriptor_ = file->message_type(58);
   static const int DeviceModule_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, typeobsolete_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, configurationscript_),
@@ -1404,7 +1405,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceModule));
-  DeviceController_descriptor_ = file->message_type(58);
+  DeviceController_descriptor_ = file->message_type(59);
   static const int DeviceController_offsets_[1] = {
   };
   DeviceController_reflection_ =
@@ -1418,7 +1419,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceController));
-  DeviceSignal_descriptor_ = file->message_type(59);
+  DeviceSignal_descriptor_ = file->message_type(60);
   static const int DeviceSignal_offsets_[16] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceSignal, obsoletetype_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceSignal, byteorder_),
@@ -1448,7 +1449,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceSignal));
-  Workstation_descriptor_ = file->message_type(60);
+  Workstation_descriptor_ = file->message_type(61);
   static const int Workstation_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Workstation, type_),
   };
@@ -1463,7 +1464,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Workstation));
-  Software_descriptor_ = file->message_type(61);
+  Software_descriptor_ = file->message_type(62);
   static const int Software_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Software, type_),
   };
@@ -1478,7 +1479,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Software));
-  ModuleConfiguration_descriptor_ = file->message_type(62);
+  ModuleConfiguration_descriptor_ = file->message_type(63);
   static const int ModuleConfiguration_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfiguration, struct_description_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfiguration, values_),
@@ -1495,7 +1496,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ModuleConfiguration));
-  ModuleConfigurationValue_descriptor_ = file->message_type(63);
+  ModuleConfigurationValue_descriptor_ = file->message_type(64);
   static const int ModuleConfigurationValue_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfigurationValue, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfigurationValue, value_),
@@ -1511,7 +1512,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ModuleConfigurationValue));
-  Property_descriptor_ = file->message_type(64);
+  Property_descriptor_ = file->message_type(65);
   static const int Property_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Property, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Property, value_),
@@ -1527,7 +1528,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Property));
-  SignalSpecPropValue_descriptor_ = file->message_type(65);
+  SignalSpecPropValue_descriptor_ = file->message_type(66);
   static const int SignalSpecPropValue_offsets_[10] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SignalSpecPropValue, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SignalSpecPropValue, type_),
@@ -1551,7 +1552,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SignalSpecPropValue));
-  SignalSpecPropValues_descriptor_ = file->message_type(66);
+  SignalSpecPropValues_descriptor_ = file->message_type(67);
   static const int SignalSpecPropValues_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SignalSpecPropValues, value_),
   };
@@ -1566,7 +1567,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SignalSpecPropValues));
-  Address16_descriptor_ = file->message_type(67);
+  Address16_descriptor_ = file->message_type(68);
   static const int Address16_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Address16, offset_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Address16, bit_),
@@ -1582,7 +1583,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Address16));
-  Unit_descriptor_ = file->message_type(68);
+  Unit_descriptor_ = file->message_type(69);
   static const int Unit_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Unit, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Unit, caption_),
@@ -1598,7 +1599,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Unit));
-  UnitSet_descriptor_ = file->message_type(69);
+  UnitSet_descriptor_ = file->message_type(70);
   static const int UnitSet_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UnitSet, unit_),
   };
@@ -1613,7 +1614,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(UnitSet));
-  TuningValue_descriptor_ = file->message_type(70);
+  TuningValue_descriptor_ = file->message_type(71);
   static const int TuningValue_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningValue, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningValue, intvalue_),
@@ -1630,7 +1631,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningValue));
-  AppSignalDbField_descriptor_ = file->message_type(71);
+  AppSignalDbField_descriptor_ = file->message_type(72);
   static const int AppSignalDbField_offsets_[10] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalDbField, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalDbField, signalgroupid_),
@@ -1654,7 +1655,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalDbField));
-  AppSignalCalculatedParam_descriptor_ = file->message_type(72);
+  AppSignalCalculatedParam_descriptor_ = file->message_type(73);
   static const int AppSignalCalculatedParam_offsets_[10] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalCalculatedParam, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalCalculatedParam, iobufaddr_),
@@ -1678,8 +1679,8 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalCalculatedParam));
-  AppSignal_descriptor_ = file->message_type(73);
-  static const int AppSignal_offsets_[27] = {
+  AppSignal_descriptor_ = file->message_type(74);
+  static const int AppSignal_offsets_[28] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, appsignalid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, customappsignalid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, caption_),
@@ -1687,6 +1688,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, lmequipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, bustypeid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, channel_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, excludefrombuild_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, signaltype_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, inouttype_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, datasize_),
@@ -1719,7 +1721,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignal));
-  AppSignalSet_descriptor_ = file->message_type(74);
+  AppSignalSet_descriptor_ = file->message_type(75);
   static const int AppSignalSet_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalSet, appsignal_),
   };
@@ -1734,8 +1736,8 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalSet));
-  ProtoAppSignalData_descriptor_ = file->message_type(75);
-  static const int ProtoAppSignalData_offsets_[17] = {
+  ProtoAppSignalData_descriptor_ = file->message_type(76);
+  static const int ProtoAppSignalData_offsets_[18] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ProtoAppSignalData, bustypeid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ProtoAppSignalData, caption_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ProtoAppSignalData, channel_),
@@ -1753,6 +1755,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ProtoAppSignalData, coarseaperture_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ProtoAppSignalData, fineaperture_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ProtoAppSignalData, adaptiveaperture_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ProtoAppSignalData, excludefrombuild_),
   };
   ProtoAppSignalData_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1765,7 +1768,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ProtoAppSignalData));
-  AppSignalState_descriptor_ = file->message_type(76);
+  AppSignalState_descriptor_ = file->message_type(77);
   static const int AppSignalState_offsets_[8] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, value_),
@@ -1787,7 +1790,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalState));
-  Connection_descriptor_ = file->message_type(77);
+  Connection_descriptor_ = file->message_type(78);
   static const int Connection_offsets_[25] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, connectionid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port1equipmentid_),
@@ -1826,7 +1829,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Connection));
-  SchemaDetailsSet_descriptor_ = file->message_type(78);
+  SchemaDetailsSet_descriptor_ = file->message_type(79);
   static const int SchemaDetailsSet_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetailsSet, schemasdetails_),
   };
@@ -1841,7 +1844,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaDetailsSet));
-  SchemaDetails_descriptor_ = file->message_type(79);
+  SchemaDetails_descriptor_ = file->message_type(80);
   static const int SchemaDetails_offsets_[11] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, version_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, schemaid_),
@@ -1866,7 +1869,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaDetails));
-  ArchSignal_descriptor_ = file->message_type(80);
+  ArchSignal_descriptor_ = file->message_type(81);
   static const int ArchSignal_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignal, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignal, isanalog_),
@@ -1883,7 +1886,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ArchSignal));
-  ArchSignals_descriptor_ = file->message_type(81);
+  ArchSignals_descriptor_ = file->message_type(82);
   static const int ArchSignals_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignals, archsignals_),
   };
@@ -1898,7 +1901,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ArchSignals));
-  BusSignal_descriptor_ = file->message_type(82);
+  BusSignal_descriptor_ = file->message_type(83);
   static const int BusSignal_offsets_[19] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, signalid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, caption_),
@@ -1931,7 +1934,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(BusSignal));
-  Bus_descriptor_ = file->message_type(83);
+  Bus_descriptor_ = file->message_type(84);
   static const int Bus_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Bus, uuid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Bus, bustypeid_),
@@ -2016,6 +2019,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
     SchemaItemLine_descriptor_, &SchemaItemLine::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     SchemaItemPath_descriptor_, &SchemaItemPath::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    SchemaItemImage_descriptor_, &SchemaItemImage::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     FblConnectionPoint_descriptor_, &FblConnectionPoint::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -2191,6 +2196,8 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete SchemaItemLine_reflection_;
   delete SchemaItemPath::default_instance_;
   delete SchemaItemPath_reflection_;
+  delete SchemaItemImage::default_instance_;
+  delete SchemaItemImage_reflection_;
   delete FblConnectionPoint::default_instance_;
   delete FblConnectionPoint_reflection_;
   delete FblItem::default_instance_;
@@ -2392,7 +2399,7 @@ void protobuf_AddDesc_serialization_2eproto() {
     ".xml\"\224\001\n\013SchemaLayer\022\031\n\004uuid\030\001 \002(\0132\013.Pro"
     "to.Uuid\022\034\n\004name\030\002 \002(\0132\016.Proto.wstring\022\017\n"
     "\007compile\030\003 \002(\010\022\014\n\004show\030\004 \002(\010\022\r\n\005print\030\005 "
-    "\002(\010\022\036\n\005items\030\017 \003(\0132\017.Proto.Envelope\"\333\014\n\n"
+    "\002(\010\022\036\n\005items\030\017 \003(\0132\017.Proto.Envelope\"\202\r\n\n"
     "SchemaItem\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022\020\n"
     "\010isStatic\030\002 \002(\010\022\020\n\010isLocked\030\003 \002(\010\022#\n\010ite"
     "mUnit\030\004 \002(\0162\021.Proto.SchemaUnit\022\032\n\013accept"
@@ -2407,289 +2414,281 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\'\n\013FblItemLine\030l \001(\0132\022.Proto.FblItemLine"
     "\022#\n\004Rect\030t \001(\0132\025.Proto.SchemaItemRect\022#\n"
     "\004Line\030u \001(\0132\025.Proto.SchemaItemLine\022#\n\004Pa"
-    "th\030v \001(\0132\025.Proto.SchemaItemPath\022\'\n\006Signa"
-    "l\030| \001(\0132\027.Proto.SchemaItemSignal\022+\n\013Inpu"
-    "tSignal\030} \001(\0132\026.Proto.SchemaItemInput\022-\n"
-    "\014OutputSignal\030~ \001(\0132\027.Proto.SchemaItemOu"
-    "tput\022#\n\004Link\030\177 \001(\0132\025.Proto.SchemaItemLin"
-    "k\022\"\n\003Afb\030\200\001 \001(\0132\024.Proto.SchemaItemAfb\022*\n"
-    "\tConstItem\030\201\001 \001(\0132\026.Proto.SchemaItemCons"
-    "t\0224\n\016ConnectionItem\030\202\001 \001(\0132\033.Proto.Schem"
-    "aItemConnection\0226\n\017TransmitterItem\030\203\001 \001("
-    "\0132\034.Proto.SchemaItemTransmitter\0220\n\014Recei"
-    "verItem\030\204\001 \001(\0132\031.Proto.SchemaItemReceive"
-    "r\022,\n\013InOutSignal\030\205\001 \001(\0132\026.Proto.SchemaIt"
-    "emInOut\022\"\n\003ufb\030\206\001 \001(\0132\024.Proto.SchemaItem"
-    "Ufb\0220\n\nterminator\030\207\001 \001(\0132\033.Proto.SchemaI"
-    "temTerminator\022&\n\005Value\030\210\001 \001(\0132\026.Proto.Sc"
-    "hemaItemValue\022&\n\007BusItem\030\226\001 \001(\0132\024.Proto."
-    "SchemaItemBus\0222\n\013BusComposer\030\227\001 \001(\0132\034.Pr"
-    "oto.SchemaItemBusComposer\0224\n\014BusExtracto"
-    "r\030\230\001 \001(\0132\035.Proto.SchemaItemBusExtractor\022"
-    "0\n\014LoopbackItem\030\233\001 \001(\0132\031.Proto.SchemaIte"
-    "mLoopback\0228\n\016loopbackSource\030\234\001 \001(\0132\037.Pro"
-    "to.SchemaItemLoopbackSource\0228\n\016loopbackT"
-    "arget\030\235\001 \001(\0132\037.Proto.SchemaItemLoopbackT"
-    "arget\022*\n\007control\030\310\001 \001(\0132\030.Proto.SchemaIt"
-    "emControl\0220\n\npushButton\030\322\001 \001(\0132\033.Proto.S"
-    "chemaItemPushButton\022,\n\010lineEdit\030\323\001 \001(\0132\031"
-    ".Proto.SchemaItemLineEdit\"[\n\013PosRectImpl"
-    "\022\021\n\tleftDocPt\030\001 \002(\001\022\020\n\010topDocPt\030\002 \002(\001\022\022\n"
-    "\nwidthDocPt\030\003 \002(\001\022\023\n\013heightDocPt\030\004 \002(\001\"]"
-    "\n\013PosLineImpl\022\023\n\013startXDocPt\030\001 \002(\001\022\023\n\013st"
-    "artYDocPt\030\002 \002(\001\022\021\n\tendXDocPt\030\003 \002(\001\022\021\n\ten"
-    "dYDocPt\030\004 \002(\001\"7\n\021PosConnectionImpl\022\"\n\006po"
-    "ints\030\001 \003(\0132\022.Proto.SchemaPoint\"\353\001\n\016Schem"
-    "aItemRect\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002"
-    " \002(\r\022\021\n\tfillColor\030\003 \002(\r\022\034\n\004text\030\004 \002(\0132\016."
-    "Proto.wstring\022\021\n\ttextColor\030\005 \002(\r\022\036\n\004font"
-    "\030\006 \002(\0132\020.Proto.FontParam\022\014\n\004fill\030\007 \002(\010\022\026"
-    "\n\010drawrect\030\010 \001(\010:\004true\022\024\n\thorzAlign\030\t \001("
-    "\005:\0014\022\026\n\tvertAlign\030\n \001(\005:\003128\"3\n\016SchemaIt"
-    "emLine\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002("
-    "\r\"3\n\016SchemaItemPath\022\016\n\006weight\030\001 \002(\001\022\021\n\tl"
-    "ineColor\030\002 \002(\r\"\353\001\n\022FblConnectionPoint\022!\n"
-    "\005point\030\001 \001(\0132\022.Proto.SchemaPoint\022/\n\ndirr"
-    "ection\030\002 \001(\0162\033.Proto.ConnectionDirrectio"
-    "n\022\031\n\004uuid\030\003 \001(\0132\013.Proto.Uuid\022\030\n\014operandI"
-    "ndex\030\004 \001(\005:\002-1\022\021\n\007caption\030\005 \001(\t:\000\022\"\n\rass"
-    "ociatedIos\030\006 \003(\0132\013.Proto.Uuid\022\025\n\nsignalT"
-    "ype\030\007 \001(\005:\0010\"4\n\007FblItem\022)\n\006points\030\001 \003(\0132"
-    "\031.Proto.FblConnectionPoint\"\304\001\n\013FblItemRe"
-    "ct\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\021\n"
-    "\tfillColor\030\003 \002(\r\022\021\n\ttextColor\030\004 \002(\r\022\036\n\004f"
-    "ont\030\005 \002(\0132\020.Proto.FontParam\022\r\n\005label\030\006 \001"
-    "(\t\022\020\n\010userText\030\007 \001(\t\022\026\n\013userTextPos\030\010 \001("
-    "\005:\0011\022\023\n\010labelPos\030\t \001(\005:\0012\"0\n\013FblItemLine"
-    "\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"R\n\026S"
-    "chemaItemSignalColumn\022\021\n\005width\030\001 \001(\001:\00220"
-    "\022\017\n\004data\030\002 \001(\005:\0010\022\024\n\thorzAlign\030\003 \001(\005:\0011\""
-    "\262\001\n\020SchemaItemSignal\022$\n\014appSignalIDs\030\001 \003"
-    "(\0132\016.Proto.wstring\022\024\n\tprecision\030\002 \001(\005:\0012"
-    "\022\031\n\014analogFormat\030\003 \001(\005:\003102\022.\n\007columns\030\004"
-    " \003(\0132\035.Proto.SchemaItemSignalColumn\022\027\n\tm"
-    "ultiLine\030\005 \001(\010:\004true\"\021\n\017SchemaItemInput\""
-    "\022\n\020SchemaItemOutput\"\021\n\017SchemaItemInOut\"\020"
-    "\n\016SchemaItemLink\"\341\001\n\rSchemaItemAfb\022\037\n\006pa"
-    "rams\030\002 \003(\0132\017.Proto.AfbParam\022 \n\010afbStrid\030"
-    "\003 \001(\0132\016.Proto.wstring\022\024\n\tprecision\030\004 \001(\005"
-    ":\0012\0223\n\025deprecated_afbelement\030\005 \001(\0132\024.Pro"
-    "to.AfbElementXml\022\030\n\020deprecated_label\030\006 \001"
-    "(\t\022(\n\nafbelement\030\007 \001(\0132\024.Proto.AfbElemen"
-    "tXml\"\254\001\n\017SchemaItemConst\022\017\n\004type\030\001 \001(\005:\001"
-    "0\022\023\n\010intValue\030\002 \001(\005:\0010\022\025\n\nfloatValue\030\003 \001"
-    "(\001:\0010\022\030\n\rdiscreteValue\030\007 \001(\005:\0010\022\024\n\tpreci"
-    "sion\030\004 \001(\005:\0012\022\024\n\thorzAlign\030\005 \001(\005:\0014\022\026\n\tv"
-    "ertAlign\030\006 \001(\005:\003128\",\n\024SchemaItemConnect"
-    "ion\022\024\n\014connectionid\030\001 \001(\t\",\n\025SchemaItemT"
-    "ransmitter\022\023\n\010pinCount\030\001 \001(\005:\0011\"\213\001\n\022Sche"
-    "maItemReceiver\022\032\n\014showValidity\030\001 \001(\010:\004tr"
-    "ue\022\023\n\013appSignalId\030\002 \001(\t\022\023\n\010dataType\030\003 \001("
-    "\005:\0010\022\024\n\tprecision\030\004 \001(\005:\0012\022\031\n\014analogForm"
-    "at\030\005 \001(\005:\003102\"P\n\rSchemaItemUfb\022\023\n\013ufbSch"
-    "emaId\030\001 \001(\t\022\022\n\nufbCaption\030\002 \001(\t\022\026\n\nufbVe"
-    "rsion\030\003 \001(\005:\002-1\"\026\n\024SchemaItemTerminator\""
-    "\234\006\n\017SchemaItemValue\022\016\n\006weight\030\001 \001(\001\022\021\n\tl"
-    "ineColor\030\002 \001(\r\022\021\n\tfillColor\030\003 \001(\r\022\022\n\ntex"
-    "tAnalog\030\004 \001(\t\022\021\n\ttextColor\030\005 \001(\r\022\036\n\004font"
-    "\030\006 \001(\0132\020.Proto.FontParam\022\014\n\004fill\030\007 \001(\010\022\026"
-    "\n\010drawrect\030\010 \001(\010:\004true\022\024\n\thorzAlign\030\t \001("
-    "\005:\0014\022\026\n\tvertAlign\030\n \001(\005:\003128\022\020\n\010signalId"
-    "\030\013 \001(\t\022\027\n\014signalSource\030\014 \001(\005:\0010\022\025\n\tpreci"
-    "sion\030\r \001(\005:\002-1\022\025\n\rtextDiscrete0\030\016 \001(\t\022\025\n"
-    "\rtextDiscrete1\030\017 \001(\t\022\024\n\014textNonValid\030\020 \001"
-    "(\t\022\032\n\022fillColorNonValid0\030\036 \001(\r\022\032\n\022fillCo"
-    "lorNonValid1\030\037 \001(\r\022\032\n\022textColorNonValid0"
-    "\030  \001(\r\022\032\n\022textColorNonValid1\030! \001(\r\022\030\n\020fi"
-    "llColorAnalog0\030* \001(\r\022\030\n\020fillColorAnalog1"
-    "\030+ \001(\r\022\030\n\020textColorAnalog0\030, \001(\r\022\030\n\020text"
-    "ColorAnalog1\030- \001(\r\022\032\n\022fillColorDiscrYes0"
-    "\030. \001(\r\022\032\n\022fillColorDiscrYes1\030/ \001(\r\022\032\n\022te"
-    "xtColorDiscrYes0\0300 \001(\r\022\032\n\022textColorDiscr"
-    "Yes1\0301 \001(\r\022\031\n\021fillColorDiscrNo0\0302 \001(\r\022\031\n"
-    "\021fillColorDiscrNo1\0303 \001(\r\022\031\n\021textColorDis"
-    "crNo0\0304 \001(\r\022\031\n\021textColorDiscrNo1\0305 \001(\r\"P"
-    "\n\rSchemaItemBus\022\021\n\tbusTypeId\030\002 \001(\t\022\023\n\013bu"
-    "sTypeHash\030\003 \001(\006\022\027\n\003bus\030\005 \001(\0132\n.Proto.Bus"
-    "\"\027\n\025SchemaItemBusComposer\"=\n\026SchemaItemB"
-    "usExtractor\022#\n\nproperties\030\002 \003(\0132\017.Proto."
-    "Property\"(\n\022SchemaItemLoopback\022\022\n\nloopba"
-    "ckId\030\002 \001(\t\"\032\n\030SchemaItemLoopbackSource\"\032"
-    "\n\030SchemaItemLoopbackTarget\"8\n\021SchemaItem"
-    "Control\022\022\n\nstyleSheet\030\001 \001(\t\022\017\n\007toolTip\030\002"
-    " \001(\t\"\220\002\n\024SchemaItemPushButton\022\014\n\004text\030\001 "
-    "\001(\t\022\021\n\tcheckable\030\002 \001(\010\022\026\n\016checkedDefault"
-    "\030\003 \001(\010\022\022\n\nautoRepeat\030\004 \001(\010\022\027\n\017autoRepeat"
-    "Delay\030\005 \001(\005\022\032\n\022autoRepeatInterval\030\006 \001(\005\022"
-    "\031\n\021scriptAfterCreate\030\025 \001(\t\022\025\n\rscriptClic"
-    "ked\030\026 \001(\t\022\025\n\rscriptPressed\030\027 \001(\t\022\026\n\016scri"
-    "ptReleased\030\030 \001(\t\022\025\n\rscriptToggled\030\031 \001(\t\""
-    "\370\001\n\022SchemaItemLineEdit\022\014\n\004text\030\001 \001(\t\022\021\n\t"
-    "horzAlign\030\002 \001(\005\022\021\n\tvertAlign\030\003 \001(\005\022\021\n\tma"
-    "xLength\030\004 \001(\005\022\027\n\017placeholderText\030\005 \001(\t\022\020"
-    "\n\010readOnly\030\006 \001(\010\022\031\n\021scriptAfterCreate\030\025 "
-    "\001(\t\022\035\n\025scriptEditingFinished\030\026 \001(\t\022\033\n\023sc"
-    "riptReturnPressed\030\027 \001(\t\022\031\n\021scriptTextCha"
-    "nged\030\030 \001(\t\"\201\006\n\014DeviceObject\022\031\n\004uuid\030\001 \002("
-    "\0132\013.Proto.Uuid\022#\n\013equipmentId\030\002 \002(\0132\016.Pr"
-    "oto.wstring\022\037\n\007caption\030\003 \002(\0132\016.Proto.wst"
-    "ring\022(\n\020childRestriction\030\004 \001(\0132\016.Proto.w"
-    "string\022\020\n\005place\030\005 \001(\005:\0010\022\"\n\032specific_pro"
-    "perties_struct\030\006 \001(\t\022#\n\nproperties\030\007 \003(\013"
-    "2\017.Proto.Property\022\025\n\006preset\030  \001(\010:\005false"
-    "\022\031\n\npresetRoot\030! \001(\010:\005false\022\"\n\npresetNam"
-    "e\030\" \001(\0132\016.Proto.wstring\022%\n\020presetObjectU"
-    "uid\030# \001(\0132\013.Proto.Uuid\022\031\n\016childCountHint"
-    "\030$ \001(\005:\0010\022\037\n\004Root\030d \001(\0132\021.Proto.DeviceRo"
-    "ot\022#\n\006System\030e \001(\0132\023.Proto.DeviceSystem\022"
-    "\037\n\004Rack\030f \001(\0132\021.Proto.DeviceRack\022%\n\007Chas"
-    "sis\030g \001(\0132\024.Proto.DeviceChassis\022#\n\006Modul"
-    "e\030h \001(\0132\023.Proto.DeviceModule\022+\n\nControll"
-    "er\030i \001(\0132\027.Proto.DeviceController\022#\n\006Sig"
-    "nal\030j \001(\0132\023.Proto.DeviceSignal\022\'\n\013Workst"
-    "ation\030k \001(\0132\022.Proto.Workstation\022!\n\010Softw"
-    "are\030l \001(\0132\017.Proto.Software\022\"\n\010children\030\310"
-    "\001 \003(\0132\017.Proto.Envelope\"\014\n\nDeviceRoot\"\016\n\014"
-    "DeviceSystem\"\014\n\nDeviceRack\" \n\rDeviceChas"
-    "sis\022\017\n\004type\030\001 \001(\005:\0010\"\223\001\n\014DeviceModule\022\027\n"
-    "\014typeObsolete\030\001 \001(\005:\0010\022\033\n\023configurationS"
-    "cript\030\002 \001(\t\022\022\n\nmoduleType\030\003 \001(\005\022\032\n\022rawDa"
-    "taDescription\030\004 \001(\t\022\035\n\022customModuleFamil"
-    "y\030\005 \001(\005:\0010\"\022\n\020DeviceController\"\245\003\n\014Devic"
-    "eSignal\022\027\n\014obsoletetype\030\001 \001(\005:\0010\022\024\n\tbyte"
-    "Order\030\002 \001(\005:\0010\022\021\n\006format\030\003 \001(\005:\0010\022\017\n\004siz"
-    "e\030\004 \001(\005:\0010\022\026\n\013valueOffset\030\007 \001(\005:\0010\022\023\n\010va"
-    "lueBit\030\010 \001(\005:\0010\022\017\n\004type\030\t \001(\005:\0010\022\023\n\010func"
-    "tion\030\n \001(\005:\0010\022\025\n\nmemoryArea\030\013 \001(\005:\0010\022\032\n\017"
-    "appSignalLowAdc\030\014 \001(\005:\0010\022\037\n\020appSignalHig"
-    "hAdc\030\r \001(\005:\00565535\022\037\n\024appSignalLowEngUnit"
-    "s\030\016 \001(\001:\0010\022\"\n\025appSignalHighEngUnits\030\017 \001("
-    "\001:\003100\022\036\n\023appSignalDataFormat\030\020 \001(\005:\0012\022\030"
-    "\n\020validitySignalId\030\024 \001(\t\022\034\n\024signalSpecPr"
-    "opsStruc\030( \001(\t\"\036\n\013Workstation\022\017\n\004type\030\001 "
-    "\001(\005:\0010\"\033\n\010Software\022\017\n\004type\030\001 \001(\005:\0010\"r\n\023M"
-    "oduleConfiguration\022\032\n\022struct_description"
-    "\030\001 \001(\t\022/\n\006values\030\002 \003(\0132\037.Proto.ModuleCon"
-    "figurationValue\022\016\n\004name\030\003 \001(\t:\000\"7\n\030Modul"
-    "eConfigurationValue\022\014\n\004name\030\001 \002(\t\022\r\n\005val"
-    "ue\030\002 \002(\t\"\'\n\010Property\022\014\n\004name\030\001 \002(\t\022\r\n\005va"
-    "lue\030\002 \002(\t\"\314\001\n\023SignalSpecPropValue\022\014\n\004nam"
-    "e\030\001 \002(\t\022\017\n\004type\030\002 \002(\005:\0010\022\025\n\006isEnum\030\003 \002(\010"
-    ":\005false\022\020\n\010int32Val\030\n \001(\005\022\021\n\tuint32Val\030\013"
-    " \001(\r\022\020\n\010int64Val\030\014 \001(\003\022\021\n\tuint64Val\030\r \001("
-    "\004\022\021\n\tdoubleVal\030\016 \001(\001\022\017\n\007boolVal\030\017 \001(\010\022\021\n"
-    "\tstringVal\030\020 \001(\t\"A\n\024SignalSpecPropValues"
-    "\022)\n\005value\030\001 \003(\0132\032.Proto.SignalSpecPropVa"
-    "lue\"0\n\tAddress16\022\022\n\006offset\030\001 \002(\005:\002-1\022\017\n\003"
-    "bit\030\002 \002(\005:\002-1\"&\n\004Unit\022\r\n\002id\030\001 \002(\005:\0010\022\017\n\007"
-    "caption\030\002 \002(\t\"$\n\007UnitSet\022\031\n\004unit\030\001 \003(\0132\013"
-    ".Proto.Unit\"H\n\013TuningValue\022\014\n\004type\030\001 \001(\005"
-    "\022\023\n\010intValue\030\002 \001(\003:\0010\022\026\n\013doubleValue\030\003 \001"
-    "(\001:\0010\"\206\002\n\020AppSignalDbField\022\016\n\002ID\030\001 \001(\005:\002"
-    "-1\022\031\n\rsignalGroupID\030\002 \001(\005:\002-1\022\034\n\020signalI"
-    "nstanceID\030\003 \001(\005:\002-1\022\027\n\013changesetID\030\004 \001(\005"
-    ":\002-1\022\031\n\ncheckedOut\030\005 \001(\010:\005false\022\022\n\006userI"
-    "D\030\006 \001(\005:\002-1\022\022\n\007created\030\007 \001(\003:\0010\022\026\n\007delet"
-    "ed\030\010 \001(\010:\005false\022\032\n\017instanceCreated\030\t \001(\003"
-    ":\0010\022\031\n\016instanceAction\030\n \001(\005:\0010\"\331\002\n\030AppSi"
-    "gnalCalculatedParam\022\017\n\004hash\030\001 \001(\004:\0010\022#\n\t"
-    "ioBufAddr\030\002 \001(\0132\020.Proto.Address16\022$\n\ntun"
-    "ingAddr\030\003 \001(\0132\020.Proto.Address16\022!\n\007ualAd"
-    "dr\030\004 \001(\0132\020.Proto.Address16\022$\n\nregBufAddr"
-    "\030\005 \001(\0132\020.Proto.Address16\022&\n\014regValueAddr"
-    "\030\006 \001(\0132\020.Proto.Address16\022)\n\017regValidityA"
-    "ddr\030\007 \001(\0132\020.Proto.Address16\022\026\n\013lmRamAcce"
-    "ss\030\010 \001(\005:\0010\022\026\n\007isConst\030\t \001(\010:\005false\022\025\n\nc"
-    "onstValue\030\n \001(\001:\0010\"\371\005\n\tAppSignal\022\023\n\013appS"
-    "ignalID\030\001 \001(\t\022\031\n\021customAppSignalID\030\002 \001(\t"
-    "\022\017\n\007caption\030\003 \001(\t\022\023\n\013equipmentID\030\004 \001(\t\022\025"
-    "\n\rlmEquipmentID\030\005 \001(\t\022\021\n\tbusTypeID\030\006 \001(\t"
-    "\022\022\n\007channel\030\007 \001(\005:\0010\022\025\n\nsignalType\030\020 \001(\005"
-    ":\0011\022\024\n\tinOutType\030\021 \001(\005:\0012\022\023\n\010dataSize\030\025 "
-    "\001(\005:\0010\022\024\n\tbyteOrder\030\026 \001(\005:\0011\022\035\n\022analogSi"
-    "gnalFormat\030\032 \001(\005:\0011\022\014\n\004unit\030\033 \001(\t\022\033\n\014ena"
-    "bleTuning\030G \001(\010:\005false\022.\n\022tuningDefaultV"
-    "alue\030H \001(\0132\022.Proto.TuningValue\022*\n\016tuning"
-    "LowBound\030I \001(\0132\022.Proto.TuningValue\022+\n\017tu"
-    "ningHighBound\030J \001(\0132\022.Proto.TuningValue\022"
-    "\026\n\007acquire\030Q \001(\010:\005false\022\026\n\007archive\030R \001(\010"
-    ":\005false\022\030\n\rdecimalPlaces\030S \001(\005:\0012\022\031\n\016coa"
-    "rseAperture\030T \001(\001:\0011\022\031\n\014fineAperture\030U \001"
-    "(\001:\0030.5\022\037\n\020adaptiveAperture\030V \001(\010:\005false"
-    "\022\026\n\016specPropStruct\030Z \001(\t\022\026\n\016specPropValu"
-    "es\030[ \001(\014\022(\n\007dbField\030x \001(\0132\027.Proto.AppSig"
-    "nalDbField\0222\n\tcalcParam\030y \001(\0132\037.Proto.Ap"
-    "pSignalCalculatedParam\"3\n\014AppSignalSet\022#"
-    "\n\tappSignal\030\001 \003(\0132\020.Proto.AppSignal\"\352\003\n\022"
-    "ProtoAppSignalData\022\021\n\tbusTypeID\030\001 \001(\t\022\017\n"
-    "\007caption\030\002 \001(\t\022\022\n\007channel\030\003 \001(\005:\0010\022\024\n\010da"
-    "taSize\030\004 \001(\005:\00232\022\024\n\tbyteOrder\030\005 \001(\005:\0011\022\035"
-    "\n\022analogSignalFormat\030\006 \001(\005:\0012\022\014\n\004unit\030\007 "
-    "\001(\t\022\033\n\014enableTuning\030\010 \001(\010:\005false\022.\n\022tuni"
-    "ngDefaultValue\030\t \001(\0132\022.Proto.TuningValue"
-    "\022*\n\016tuningLowBound\030\n \001(\0132\022.Proto.TuningV"
-    "alue\022+\n\017tuningHighBound\030\013 \001(\0132\022.Proto.Tu"
-    "ningValue\022\025\n\007acquire\030\014 \001(\010:\004true\022\025\n\007arch"
-    "ive\030\r \001(\010:\004true\022\030\n\rdecimalPlaces\030\016 \001(\005:\001"
-    "2\022\031\n\016coarseAperture\030\017 \001(\001:\0011\022\031\n\014fineAper"
-    "ture\030\020 \001(\001:\0030.5\022\037\n\020adaptiveAperture\030\021 \001("
-    "\010:\005false\"\264\001\n\016AppSignalState\022\017\n\004hash\030\001 \001("
-    "\004:\0010\022\020\n\005value\030\002 \001(\001:\0010\022\020\n\005flags\030\003 \001(\r:\0010"
-    "\022\025\n\nsystemTime\030\004 \001(\020:\0010\022\024\n\tlocalTime\030\005 \001"
-    "(\020:\0010\022\024\n\tplantTime\030\006 \001(\020:\0010\022\025\n\tarchiveId"
-    "\030\007 \001(\020:\002-1\022\023\n\010packetNo\030\010 \001(\r:\0010\"\224\006\n\nConn"
-    "ection\022\026\n\014ConnectionID\030\002 \001(\t:\000\022\032\n\020Port1E"
-    "quipmentID\030\003 \001(\t:\000\022\032\n\020Port2EquipmentID\030\004"
-    " \001(\t:\000\022!\n\027Port1RawDataDescription\030\005 \001(\t:"
-    "\000\022!\n\027Port2RawDataDescription\030\006 \001(\t:\000\022\035\n\016"
-    "ManualSettings\030\013 \001(\010:\005false\022\034\n\rDisableDa"
-    "taID\030\014 \001(\010:\005false\022\036\n\017GenerateVHDFile\030\r \001"
-    "(\010:\005false\022\036\n\023Port1TxStartAddress\030\016 \001(\005:\001"
-    "0\022!\n\024Port1TxWordsQuantity\030\017 \001(\005:\003479\022!\n\024"
-    "Port1RxWordsQuantity\030\020 \001(\005:\003479\022\036\n\023Port2"
-    "TxStartAddress\030\021 \001(\005:\0010\022!\n\024Port2TxWordsQ"
-    "uantity\030\022 \001(\005:\003479\022!\n\024Port2RxWordsQuanti"
-    "ty\030\023 \001(\005:\003479\022\031\n\004uuid\030\024 \001(\0132\013.Proto.Uuid"
-    "\022 \n\021Port1EnableSerial\030\025 \001(\010:\005false\022\032\n\017Po"
-    "rt1SerialMode\030\026 \001(\005:\0010\022 \n\021Port1EnableDup"
-    "lex\030\027 \001(\010:\005false\022 \n\021Port2EnableSerial\030\030 "
-    "\001(\010:\005false\022\032\n\017Port2SerialMode\030\031 \001(\005:\0010\022 "
-    "\n\021Port2EnableDuplex\030\032 \001(\010:\005false\022\017\n\004Type"
-    "\030\033 \001(\005:\0010\022\027\n\014ObsoleteMode\030\010 \001(\005:\0010\022\035\n\022Ob"
-    "soleteSerialMode\030\007 \001(\005:\0010\022#\n\024ObsoleteEna"
-    "bleDuplex\030\n \001(\010:\005false\"@\n\020SchemaDetailsS"
-    "et\022,\n\016schemasDetails\030\002 \003(\0132\024.Proto.Schem"
-    "aDetails\"\360\001\n\rSchemaDetails\022\017\n\007version\030\002 "
-    "\001(\005\022\020\n\010schemaId\030\004 \001(\t\022\017\n\007caption\030\005 \001(\t\022\031"
-    "\n\021excludedfromBuild\030\006 \001(\010\022\023\n\013equipmentId"
-    "\030\007 \001(\t\022\031\n\021lmDescriptionFile\030\010 \001(\t\022\021\n\tsig"
-    "nalIds\030\024 \003(\t\022\016\n\006labels\030\025 \003(\t\022\023\n\013connecti"
-    "ons\030\026 \003(\t\022\032\n\005guids\030\027 \003(\0132\013.Proto.Uuid\022\014\n"
-    "\004tags\030\030 \003(\t\"A\n\nArchSignal\022\014\n\004hash\030\001 \002(\004\022"
-    "\020\n\010isAnalog\030\002 \002(\010\022\023\n\013appSignalID\030\003 \002(\t\"5"
-    "\n\013ArchSignals\022&\n\013archSignals\030\001 \003(\0132\021.Pro"
-    "to.ArchSignal\"\326\003\n\tBusSignal\022\020\n\010signalId\030"
-    "\001 \001(\t\022\017\n\007caption\030\002 \001(\t\022\014\n\004type\030\003 \001(\005\022\r\n\005"
-    "units\030\004 \001(\t\022\024\n\014analogFormat\030\n \001(\005\022\024\n\tpre"
-    "cision\030\013 \001(\005:\0012\022\031\n\016coarseAperture\030\014 \001(\001:"
-    "\0011\022\031\n\014fineAperture\030\r \001(\001:\0030.5\022\037\n\020adaptiv"
-    "eAperture\030\016 \001(\010:\005false\022\021\n\tbusTypeId\030\017 \001("
-    "\t\022\023\n\013inbusOffset\030  \001(\005\022\032\n\022inbusDiscreteB"
-    "itNo\030( \001(\005\022\027\n\017inbusAnalogSize\0302 \001(\005\022\031\n\021i"
-    "nbusAnalogFormat\0303 \001(\005\022\034\n\024inbusAnalogByt"
-    "eOrder\0304 \001(\005\022\031\n\021busAnalogLowLimit\0305 \001(\001\022"
-    "\032\n\022busAnalogHighLimit\0306 \001(\001\022\033\n\023inbusAnal"
-    "ogLowLimit\0307 \001(\001\022\034\n\024inbusAnalogHighLimit"
-    "\0308 \001(\001\"\226\001\n\003Bus\022\031\n\004uuid\030\001 \001(\0132\013.Proto.Uui"
-    "d\022\021\n\tbusTypeId\030\002 \001(\t\022$\n\nbusSignals\030\003 \003(\013"
-    "2\020.Proto.BusSignal\022!\n\023autoSignalPlacemen"
-    "t\030\n \001(\010:\004true\022\030\n\rmanualBusSize\030\013 \001(\005:\0010*"
-    "3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter"
-    "\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirrection\022\t\n\005"
-    "Input\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006"
-    "Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022"
-    "\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float"
-    "\020\002", 14842);
+    "th\030v \001(\0132\025.Proto.SchemaItemPath\022%\n\005Image"
+    "\030w \001(\0132\026.Proto.SchemaItemImage\022\'\n\006Signal"
+    "\030| \001(\0132\027.Proto.SchemaItemSignal\022+\n\013Input"
+    "Signal\030} \001(\0132\026.Proto.SchemaItemInput\022-\n\014"
+    "OutputSignal\030~ \001(\0132\027.Proto.SchemaItemOut"
+    "put\022#\n\004Link\030\177 \001(\0132\025.Proto.SchemaItemLink"
+    "\022\"\n\003Afb\030\200\001 \001(\0132\024.Proto.SchemaItemAfb\022*\n\t"
+    "ConstItem\030\201\001 \001(\0132\026.Proto.SchemaItemConst"
+    "\0224\n\016ConnectionItem\030\202\001 \001(\0132\033.Proto.Schema"
+    "ItemConnection\0226\n\017TransmitterItem\030\203\001 \001(\013"
+    "2\034.Proto.SchemaItemTransmitter\0220\n\014Receiv"
+    "erItem\030\204\001 \001(\0132\031.Proto.SchemaItemReceiver"
+    "\022,\n\013InOutSignal\030\205\001 \001(\0132\026.Proto.SchemaIte"
+    "mInOut\022\"\n\003ufb\030\206\001 \001(\0132\024.Proto.SchemaItemU"
+    "fb\0220\n\nterminator\030\207\001 \001(\0132\033.Proto.SchemaIt"
+    "emTerminator\022&\n\005Value\030\210\001 \001(\0132\026.Proto.Sch"
+    "emaItemValue\022&\n\007BusItem\030\226\001 \001(\0132\024.Proto.S"
+    "chemaItemBus\0222\n\013BusComposer\030\227\001 \001(\0132\034.Pro"
+    "to.SchemaItemBusComposer\0224\n\014BusExtractor"
+    "\030\230\001 \001(\0132\035.Proto.SchemaItemBusExtractor\0220"
+    "\n\014LoopbackItem\030\233\001 \001(\0132\031.Proto.SchemaItem"
+    "Loopback\0228\n\016loopbackSource\030\234\001 \001(\0132\037.Prot"
+    "o.SchemaItemLoopbackSource\0228\n\016loopbackTa"
+    "rget\030\235\001 \001(\0132\037.Proto.SchemaItemLoopbackTa"
+    "rget\022*\n\007control\030\310\001 \001(\0132\030.Proto.SchemaIte"
+    "mControl\0220\n\npushButton\030\322\001 \001(\0132\033.Proto.Sc"
+    "hemaItemPushButton\022,\n\010lineEdit\030\323\001 \001(\0132\031."
+    "Proto.SchemaItemLineEdit\"[\n\013PosRectImpl\022"
+    "\021\n\tleftDocPt\030\001 \002(\001\022\020\n\010topDocPt\030\002 \002(\001\022\022\n\n"
+    "widthDocPt\030\003 \002(\001\022\023\n\013heightDocPt\030\004 \002(\001\"]\n"
+    "\013PosLineImpl\022\023\n\013startXDocPt\030\001 \002(\001\022\023\n\013sta"
+    "rtYDocPt\030\002 \002(\001\022\021\n\tendXDocPt\030\003 \002(\001\022\021\n\tend"
+    "YDocPt\030\004 \002(\001\"7\n\021PosConnectionImpl\022\"\n\006poi"
+    "nts\030\001 \003(\0132\022.Proto.SchemaPoint\"\353\001\n\016Schema"
+    "ItemRect\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 "
+    "\002(\r\022\021\n\tfillColor\030\003 \002(\r\022\034\n\004text\030\004 \002(\0132\016.P"
+    "roto.wstring\022\021\n\ttextColor\030\005 \002(\r\022\036\n\004font\030"
+    "\006 \002(\0132\020.Proto.FontParam\022\014\n\004fill\030\007 \002(\010\022\026\n"
+    "\010drawrect\030\010 \001(\010:\004true\022\024\n\thorzAlign\030\t \001(\005"
+    ":\0014\022\026\n\tvertAlign\030\n \001(\005:\003128\"3\n\016SchemaIte"
+    "mLine\022\016\n\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r"
+    "\"3\n\016SchemaItemPath\022\016\n\006weight\030\001 \002(\001\022\021\n\tli"
+    "neColor\030\002 \002(\r\"J\n\017SchemaItemImage\022\030\n\nallo"
+    "wScale\030\001 \001(\010:\004true\022\035\n\017keepAspectRatio\030\002 "
+    "\001(\010:\004true\"\353\001\n\022FblConnectionPoint\022!\n\005poin"
+    "t\030\001 \001(\0132\022.Proto.SchemaPoint\022/\n\ndirrectio"
+    "n\030\002 \001(\0162\033.Proto.ConnectionDirrection\022\031\n\004"
+    "uuid\030\003 \001(\0132\013.Proto.Uuid\022\030\n\014operandIndex\030"
+    "\004 \001(\005:\002-1\022\021\n\007caption\030\005 \001(\t:\000\022\"\n\rassociat"
+    "edIos\030\006 \003(\0132\013.Proto.Uuid\022\025\n\nsignalType\030\007"
+    " \001(\005:\0010\"4\n\007FblItem\022)\n\006points\030\001 \003(\0132\031.Pro"
+    "to.FblConnectionPoint\"\304\001\n\013FblItemRect\022\016\n"
+    "\006weight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\022\021\n\tfill"
+    "Color\030\003 \002(\r\022\021\n\ttextColor\030\004 \002(\r\022\036\n\004font\030\005"
+    " \002(\0132\020.Proto.FontParam\022\r\n\005label\030\006 \001(\t\022\020\n"
+    "\010userText\030\007 \001(\t\022\026\n\013userTextPos\030\010 \001(\005:\0011\022"
+    "\023\n\010labelPos\030\t \001(\005:\0012\"0\n\013FblItemLine\022\016\n\006w"
+    "eight\030\001 \002(\001\022\021\n\tlineColor\030\002 \002(\r\"R\n\026Schema"
+    "ItemSignalColumn\022\021\n\005width\030\001 \001(\001:\00220\022\017\n\004d"
+    "ata\030\002 \001(\005:\0010\022\024\n\thorzAlign\030\003 \001(\005:\0011\"\262\001\n\020S"
+    "chemaItemSignal\022$\n\014appSignalIDs\030\001 \003(\0132\016."
+    "Proto.wstring\022\024\n\tprecision\030\002 \001(\005:\0012\022\031\n\014a"
+    "nalogFormat\030\003 \001(\005:\003102\022.\n\007columns\030\004 \003(\0132"
+    "\035.Proto.SchemaItemSignalColumn\022\027\n\tmultiL"
+    "ine\030\005 \001(\010:\004true\"\021\n\017SchemaItemInput\"\022\n\020Sc"
+    "hemaItemOutput\"\021\n\017SchemaItemInOut\"\020\n\016Sch"
+    "emaItemLink\"\341\001\n\rSchemaItemAfb\022\037\n\006params\030"
+    "\002 \003(\0132\017.Proto.AfbParam\022 \n\010afbStrid\030\003 \001(\013"
+    "2\016.Proto.wstring\022\024\n\tprecision\030\004 \001(\005:\0012\0223"
+    "\n\025deprecated_afbelement\030\005 \001(\0132\024.Proto.Af"
+    "bElementXml\022\030\n\020deprecated_label\030\006 \001(\t\022(\n"
+    "\nafbelement\030\007 \001(\0132\024.Proto.AfbElementXml\""
+    "\254\001\n\017SchemaItemConst\022\017\n\004type\030\001 \001(\005:\0010\022\023\n\010"
+    "intValue\030\002 \001(\005:\0010\022\025\n\nfloatValue\030\003 \001(\001:\0010"
+    "\022\030\n\rdiscreteValue\030\007 \001(\005:\0010\022\024\n\tprecision\030"
+    "\004 \001(\005:\0012\022\024\n\thorzAlign\030\005 \001(\005:\0014\022\026\n\tvertAl"
+    "ign\030\006 \001(\005:\003128\",\n\024SchemaItemConnection\022\024"
+    "\n\014connectionid\030\001 \001(\t\",\n\025SchemaItemTransm"
+    "itter\022\023\n\010pinCount\030\001 \001(\005:\0011\"\213\001\n\022SchemaIte"
+    "mReceiver\022\032\n\014showValidity\030\001 \001(\010:\004true\022\023\n"
+    "\013appSignalId\030\002 \001(\t\022\023\n\010dataType\030\003 \001(\005:\0010\022"
+    "\024\n\tprecision\030\004 \001(\005:\0012\022\031\n\014analogFormat\030\005 "
+    "\001(\005:\003102\"P\n\rSchemaItemUfb\022\023\n\013ufbSchemaId"
+    "\030\001 \001(\t\022\022\n\nufbCaption\030\002 \001(\t\022\026\n\nufbVersion"
+    "\030\003 \001(\005:\002-1\"\026\n\024SchemaItemTerminator\"\260\002\n\017S"
+    "chemaItemValue\022\021\n\tsignalIds\030\001 \001(\t\022\027\n\014sig"
+    "nalSource\030\002 \001(\005:\0010\022\022\n\nlineWeight\030\004 \001(\001\022\021"
+    "\n\tlineColor\030\005 \001(\r\022\021\n\tfillColor\030\006 \001(\r\022\021\n\t"
+    "textColor\030\007 \001(\r\022\014\n\004text\030\010 \001(\t\022\036\n\004font\030\t "
+    "\001(\0132\020.Proto.FontParam\022\026\n\010drawRect\030\n \001(\010:"
+    "\004true\022\024\n\thorzAlign\030\013 \001(\005:\0014\022\026\n\tvertAlign"
+    "\030\014 \001(\005:\003128\022\025\n\tprecision\030\r \001(\005:\002-1\022\031\n\014an"
+    "alogFormat\030\016 \001(\005:\003102\"P\n\rSchemaItemBus\022\021"
+    "\n\tbusTypeId\030\002 \001(\t\022\023\n\013busTypeHash\030\003 \001(\006\022\027"
+    "\n\003bus\030\005 \001(\0132\n.Proto.Bus\"\027\n\025SchemaItemBus"
+    "Composer\"=\n\026SchemaItemBusExtractor\022#\n\npr"
+    "operties\030\002 \003(\0132\017.Proto.Property\"(\n\022Schem"
+    "aItemLoopback\022\022\n\nloopbackId\030\002 \001(\t\"\032\n\030Sch"
+    "emaItemLoopbackSource\"\032\n\030SchemaItemLoopb"
+    "ackTarget\"8\n\021SchemaItemControl\022\022\n\nstyleS"
+    "heet\030\001 \001(\t\022\017\n\007toolTip\030\002 \001(\t\"\220\002\n\024SchemaIt"
+    "emPushButton\022\014\n\004text\030\001 \001(\t\022\021\n\tcheckable\030"
+    "\002 \001(\010\022\026\n\016checkedDefault\030\003 \001(\010\022\022\n\nautoRep"
+    "eat\030\004 \001(\010\022\027\n\017autoRepeatDelay\030\005 \001(\005\022\032\n\022au"
+    "toRepeatInterval\030\006 \001(\005\022\031\n\021scriptAfterCre"
+    "ate\030\025 \001(\t\022\025\n\rscriptClicked\030\026 \001(\t\022\025\n\rscri"
+    "ptPressed\030\027 \001(\t\022\026\n\016scriptReleased\030\030 \001(\t\022"
+    "\025\n\rscriptToggled\030\031 \001(\t\"\370\001\n\022SchemaItemLin"
+    "eEdit\022\014\n\004text\030\001 \001(\t\022\021\n\thorzAlign\030\002 \001(\005\022\021"
+    "\n\tvertAlign\030\003 \001(\005\022\021\n\tmaxLength\030\004 \001(\005\022\027\n\017"
+    "placeholderText\030\005 \001(\t\022\020\n\010readOnly\030\006 \001(\010\022"
+    "\031\n\021scriptAfterCreate\030\025 \001(\t\022\035\n\025scriptEdit"
+    "ingFinished\030\026 \001(\t\022\033\n\023scriptReturnPressed"
+    "\030\027 \001(\t\022\031\n\021scriptTextChanged\030\030 \001(\t\"\201\006\n\014De"
+    "viceObject\022\031\n\004uuid\030\001 \002(\0132\013.Proto.Uuid\022#\n"
+    "\013equipmentId\030\002 \002(\0132\016.Proto.wstring\022\037\n\007ca"
+    "ption\030\003 \002(\0132\016.Proto.wstring\022(\n\020childRest"
+    "riction\030\004 \001(\0132\016.Proto.wstring\022\020\n\005place\030\005"
+    " \001(\005:\0010\022\"\n\032specific_properties_struct\030\006 "
+    "\001(\t\022#\n\nproperties\030\007 \003(\0132\017.Proto.Property"
+    "\022\025\n\006preset\030  \001(\010:\005false\022\031\n\npresetRoot\030! "
+    "\001(\010:\005false\022\"\n\npresetName\030\" \001(\0132\016.Proto.w"
+    "string\022%\n\020presetObjectUuid\030# \001(\0132\013.Proto"
+    ".Uuid\022\031\n\016childCountHint\030$ \001(\005:\0010\022\037\n\004Root"
+    "\030d \001(\0132\021.Proto.DeviceRoot\022#\n\006System\030e \001("
+    "\0132\023.Proto.DeviceSystem\022\037\n\004Rack\030f \001(\0132\021.P"
+    "roto.DeviceRack\022%\n\007Chassis\030g \001(\0132\024.Proto"
+    ".DeviceChassis\022#\n\006Module\030h \001(\0132\023.Proto.D"
+    "eviceModule\022+\n\nController\030i \001(\0132\027.Proto."
+    "DeviceController\022#\n\006Signal\030j \001(\0132\023.Proto"
+    ".DeviceSignal\022\'\n\013Workstation\030k \001(\0132\022.Pro"
+    "to.Workstation\022!\n\010Software\030l \001(\0132\017.Proto"
+    ".Software\022\"\n\010children\030\310\001 \003(\0132\017.Proto.Env"
+    "elope\"\014\n\nDeviceRoot\"\016\n\014DeviceSystem\"\014\n\nD"
+    "eviceRack\" \n\rDeviceChassis\022\017\n\004type\030\001 \001(\005"
+    ":\0010\"\223\001\n\014DeviceModule\022\027\n\014typeObsolete\030\001 \001"
+    "(\005:\0010\022\033\n\023configurationScript\030\002 \001(\t\022\022\n\nmo"
+    "duleType\030\003 \001(\005\022\032\n\022rawDataDescription\030\004 \001"
+    "(\t\022\035\n\022customModuleFamily\030\005 \001(\005:\0010\"\022\n\020Dev"
+    "iceController\"\245\003\n\014DeviceSignal\022\027\n\014obsole"
+    "tetype\030\001 \001(\005:\0010\022\024\n\tbyteOrder\030\002 \001(\005:\0010\022\021\n"
+    "\006format\030\003 \001(\005:\0010\022\017\n\004size\030\004 \001(\005:\0010\022\026\n\013val"
+    "ueOffset\030\007 \001(\005:\0010\022\023\n\010valueBit\030\010 \001(\005:\0010\022\017"
+    "\n\004type\030\t \001(\005:\0010\022\023\n\010function\030\n \001(\005:\0010\022\025\n\n"
+    "memoryArea\030\013 \001(\005:\0010\022\032\n\017appSignalLowAdc\030\014"
+    " \001(\005:\0010\022\037\n\020appSignalHighAdc\030\r \001(\005:\00565535"
+    "\022\037\n\024appSignalLowEngUnits\030\016 \001(\001:\0010\022\"\n\025app"
+    "SignalHighEngUnits\030\017 \001(\001:\003100\022\036\n\023appSign"
+    "alDataFormat\030\020 \001(\005:\0012\022\030\n\020validitySignalI"
+    "d\030\024 \001(\t\022\034\n\024signalSpecPropsStruc\030( \001(\t\"\036\n"
+    "\013Workstation\022\017\n\004type\030\001 \001(\005:\0010\"\033\n\010Softwar"
+    "e\022\017\n\004type\030\001 \001(\005:\0010\"r\n\023ModuleConfiguratio"
+    "n\022\032\n\022struct_description\030\001 \001(\t\022/\n\006values\030"
+    "\002 \003(\0132\037.Proto.ModuleConfigurationValue\022\016"
+    "\n\004name\030\003 \001(\t:\000\"7\n\030ModuleConfigurationVal"
+    "ue\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\'\n\010Prope"
+    "rty\022\014\n\004name\030\001 \002(\t\022\r\n\005value\030\002 \002(\t\"\314\001\n\023Sig"
+    "nalSpecPropValue\022\014\n\004name\030\001 \002(\t\022\017\n\004type\030\002"
+    " \002(\005:\0010\022\025\n\006isEnum\030\003 \002(\010:\005false\022\020\n\010int32V"
+    "al\030\n \001(\005\022\021\n\tuint32Val\030\013 \001(\r\022\020\n\010int64Val\030"
+    "\014 \001(\003\022\021\n\tuint64Val\030\r \001(\004\022\021\n\tdoubleVal\030\016 "
+    "\001(\001\022\017\n\007boolVal\030\017 \001(\010\022\021\n\tstringVal\030\020 \001(\t\""
+    "A\n\024SignalSpecPropValues\022)\n\005value\030\001 \003(\0132\032"
+    ".Proto.SignalSpecPropValue\"0\n\tAddress16\022"
+    "\022\n\006offset\030\001 \002(\005:\002-1\022\017\n\003bit\030\002 \002(\005:\002-1\"&\n\004"
+    "Unit\022\r\n\002id\030\001 \002(\005:\0010\022\017\n\007caption\030\002 \002(\t\"$\n\007"
+    "UnitSet\022\031\n\004unit\030\001 \003(\0132\013.Proto.Unit\"H\n\013Tu"
+    "ningValue\022\014\n\004type\030\001 \001(\005\022\023\n\010intValue\030\002 \001("
+    "\003:\0010\022\026\n\013doubleValue\030\003 \001(\001:\0010\"\206\002\n\020AppSign"
+    "alDbField\022\016\n\002ID\030\001 \001(\005:\002-1\022\031\n\rsignalGroup"
+    "ID\030\002 \001(\005:\002-1\022\034\n\020signalInstanceID\030\003 \001(\005:\002"
+    "-1\022\027\n\013changesetID\030\004 \001(\005:\002-1\022\031\n\ncheckedOu"
+    "t\030\005 \001(\010:\005false\022\022\n\006userID\030\006 \001(\005:\002-1\022\022\n\007cr"
+    "eated\030\007 \001(\003:\0010\022\026\n\007deleted\030\010 \001(\010:\005false\022\032"
+    "\n\017instanceCreated\030\t \001(\003:\0010\022\031\n\016instanceAc"
+    "tion\030\n \001(\005:\0010\"\331\002\n\030AppSignalCalculatedPar"
+    "am\022\017\n\004hash\030\001 \001(\004:\0010\022#\n\tioBufAddr\030\002 \001(\0132\020"
+    ".Proto.Address16\022$\n\ntuningAddr\030\003 \001(\0132\020.P"
+    "roto.Address16\022!\n\007ualAddr\030\004 \001(\0132\020.Proto."
+    "Address16\022$\n\nregBufAddr\030\005 \001(\0132\020.Proto.Ad"
+    "dress16\022&\n\014regValueAddr\030\006 \001(\0132\020.Proto.Ad"
+    "dress16\022)\n\017regValidityAddr\030\007 \001(\0132\020.Proto"
+    ".Address16\022\026\n\013lmRamAccess\030\010 \001(\005:\0010\022\026\n\007is"
+    "Const\030\t \001(\010:\005false\022\025\n\nconstValue\030\n \001(\001:\001"
+    "0\"\232\006\n\tAppSignal\022\023\n\013appSignalID\030\001 \001(\t\022\031\n\021"
+    "customAppSignalID\030\002 \001(\t\022\017\n\007caption\030\003 \001(\t"
+    "\022\023\n\013equipmentID\030\004 \001(\t\022\025\n\rlmEquipmentID\030\005"
+    " \001(\t\022\021\n\tbusTypeID\030\006 \001(\t\022\022\n\007channel\030\007 \001(\005"
+    ":\0010\022\037\n\020excludeFromBuild\030\010 \001(\010:\005false\022\025\n\n"
+    "signalType\030\020 \001(\005:\0011\022\024\n\tinOutType\030\021 \001(\005:\001"
+    "2\022\023\n\010dataSize\030\025 \001(\005:\0010\022\024\n\tbyteOrder\030\026 \001("
+    "\005:\0011\022\035\n\022analogSignalFormat\030\032 \001(\005:\0011\022\014\n\004u"
+    "nit\030\033 \001(\t\022\033\n\014enableTuning\030G \001(\010:\005false\022."
+    "\n\022tuningDefaultValue\030H \001(\0132\022.Proto.Tunin"
+    "gValue\022*\n\016tuningLowBound\030I \001(\0132\022.Proto.T"
+    "uningValue\022+\n\017tuningHighBound\030J \001(\0132\022.Pr"
+    "oto.TuningValue\022\026\n\007acquire\030Q \001(\010:\005false\022"
+    "\026\n\007archive\030R \001(\010:\005false\022\030\n\rdecimalPlaces"
+    "\030S \001(\005:\0012\022\031\n\016coarseAperture\030T \001(\001:\0011\022\031\n\014"
+    "fineAperture\030U \001(\001:\0030.5\022\037\n\020adaptiveApert"
+    "ure\030V \001(\010:\005false\022\026\n\016specPropStruct\030Z \001(\t"
+    "\022\026\n\016specPropValues\030[ \001(\014\022(\n\007dbField\030x \001("
+    "\0132\027.Proto.AppSignalDbField\0222\n\tcalcParam\030"
+    "y \001(\0132\037.Proto.AppSignalCalculatedParam\"3"
+    "\n\014AppSignalSet\022#\n\tappSignal\030\001 \003(\0132\020.Prot"
+    "o.AppSignal\"\213\004\n\022ProtoAppSignalData\022\021\n\tbu"
+    "sTypeID\030\001 \001(\t\022\017\n\007caption\030\002 \001(\t\022\022\n\007channe"
+    "l\030\003 \001(\005:\0010\022\024\n\010dataSize\030\004 \001(\005:\00232\022\024\n\tbyte"
+    "Order\030\005 \001(\005:\0011\022\035\n\022analogSignalFormat\030\006 \001"
+    "(\005:\0012\022\014\n\004unit\030\007 \001(\t\022\033\n\014enableTuning\030\010 \001("
+    "\010:\005false\022.\n\022tuningDefaultValue\030\t \001(\0132\022.P"
+    "roto.TuningValue\022*\n\016tuningLowBound\030\n \001(\013"
+    "2\022.Proto.TuningValue\022+\n\017tuningHighBound\030"
+    "\013 \001(\0132\022.Proto.TuningValue\022\025\n\007acquire\030\014 \001"
+    "(\010:\004true\022\025\n\007archive\030\r \001(\010:\004true\022\030\n\rdecim"
+    "alPlaces\030\016 \001(\005:\0012\022\031\n\016coarseAperture\030\017 \001("
+    "\001:\0011\022\031\n\014fineAperture\030\020 \001(\001:\0030.5\022\037\n\020adapt"
+    "iveAperture\030\021 \001(\010:\005false\022\037\n\020excludefromB"
+    "uild\030\022 \001(\010:\005false\"\264\001\n\016AppSignalState\022\017\n\004"
+    "hash\030\001 \001(\004:\0010\022\020\n\005value\030\002 \001(\001:\0010\022\020\n\005flags"
+    "\030\003 \001(\r:\0010\022\025\n\nsystemTime\030\004 \001(\020:\0010\022\024\n\tloca"
+    "lTime\030\005 \001(\020:\0010\022\024\n\tplantTime\030\006 \001(\020:\0010\022\025\n\t"
+    "archiveId\030\007 \001(\020:\002-1\022\023\n\010packetNo\030\010 \001(\r:\0010"
+    "\"\224\006\n\nConnection\022\026\n\014ConnectionID\030\002 \001(\t:\000\022"
+    "\032\n\020Port1EquipmentID\030\003 \001(\t:\000\022\032\n\020Port2Equi"
+    "pmentID\030\004 \001(\t:\000\022!\n\027Port1RawDataDescripti"
+    "on\030\005 \001(\t:\000\022!\n\027Port2RawDataDescription\030\006 "
+    "\001(\t:\000\022\035\n\016ManualSettings\030\013 \001(\010:\005false\022\034\n\r"
+    "DisableDataID\030\014 \001(\010:\005false\022\036\n\017GenerateVH"
+    "DFile\030\r \001(\010:\005false\022\036\n\023Port1TxStartAddres"
+    "s\030\016 \001(\005:\0010\022!\n\024Port1TxWordsQuantity\030\017 \001(\005"
+    ":\003479\022!\n\024Port1RxWordsQuantity\030\020 \001(\005:\003479"
+    "\022\036\n\023Port2TxStartAddress\030\021 \001(\005:\0010\022!\n\024Port"
+    "2TxWordsQuantity\030\022 \001(\005:\003479\022!\n\024Port2RxWo"
+    "rdsQuantity\030\023 \001(\005:\003479\022\031\n\004uuid\030\024 \001(\0132\013.P"
+    "roto.Uuid\022 \n\021Port1EnableSerial\030\025 \001(\010:\005fa"
+    "lse\022\032\n\017Port1SerialMode\030\026 \001(\005:\0010\022 \n\021Port1"
+    "EnableDuplex\030\027 \001(\010:\005false\022 \n\021Port2Enable"
+    "Serial\030\030 \001(\010:\005false\022\032\n\017Port2SerialMode\030\031"
+    " \001(\005:\0010\022 \n\021Port2EnableDuplex\030\032 \001(\010:\005fals"
+    "e\022\017\n\004Type\030\033 \001(\005:\0010\022\027\n\014ObsoleteMode\030\010 \001(\005"
+    ":\0010\022\035\n\022ObsoleteSerialMode\030\007 \001(\005:\0010\022#\n\024Ob"
+    "soleteEnableDuplex\030\n \001(\010:\005false\"@\n\020Schem"
+    "aDetailsSet\022,\n\016schemasDetails\030\002 \003(\0132\024.Pr"
+    "oto.SchemaDetails\"\360\001\n\rSchemaDetails\022\017\n\007v"
+    "ersion\030\002 \001(\005\022\020\n\010schemaId\030\004 \001(\t\022\017\n\007captio"
+    "n\030\005 \001(\t\022\031\n\021excludedfromBuild\030\006 \001(\010\022\023\n\013eq"
+    "uipmentId\030\007 \001(\t\022\031\n\021lmDescriptionFile\030\010 \001"
+    "(\t\022\021\n\tsignalIds\030\024 \003(\t\022\016\n\006labels\030\025 \003(\t\022\023\n"
+    "\013connections\030\026 \003(\t\022\032\n\005guids\030\027 \003(\0132\013.Prot"
+    "o.Uuid\022\014\n\004tags\030\030 \003(\t\"A\n\nArchSignal\022\014\n\004ha"
+    "sh\030\001 \002(\004\022\020\n\010isAnalog\030\002 \002(\010\022\023\n\013appSignalI"
+    "D\030\003 \002(\t\"5\n\013ArchSignals\022&\n\013archSignals\030\001 "
+    "\003(\0132\021.Proto.ArchSignal\"\326\003\n\tBusSignal\022\020\n\010"
+    "signalId\030\001 \001(\t\022\017\n\007caption\030\002 \001(\t\022\014\n\004type\030"
+    "\003 \001(\005\022\r\n\005units\030\004 \001(\t\022\024\n\014analogFormat\030\n \001"
+    "(\005\022\024\n\tprecision\030\013 \001(\005:\0012\022\031\n\016coarseApertu"
+    "re\030\014 \001(\001:\0011\022\031\n\014fineAperture\030\r \001(\001:\0030.5\022\037"
+    "\n\020adaptiveAperture\030\016 \001(\010:\005false\022\021\n\tbusTy"
+    "peId\030\017 \001(\t\022\023\n\013inbusOffset\030  \001(\005\022\032\n\022inbus"
+    "DiscreteBitNo\030( \001(\005\022\027\n\017inbusAnalogSize\0302"
+    " \001(\005\022\031\n\021inbusAnalogFormat\0303 \001(\005\022\034\n\024inbus"
+    "AnalogByteOrder\0304 \001(\005\022\031\n\021busAnalogLowLim"
+    "it\0305 \001(\001\022\032\n\022busAnalogHighLimit\0306 \001(\001\022\033\n\023"
+    "inbusAnalogLowLimit\0307 \001(\001\022\034\n\024inbusAnalog"
+    "HighLimit\0308 \001(\001\"\226\001\n\003Bus\022\031\n\004uuid\030\001 \001(\0132\013."
+    "Proto.Uuid\022\021\n\tbusTypeId\030\002 \001(\t\022$\n\nbusSign"
+    "als\030\003 \003(\0132\020.Proto.BusSignal\022!\n\023autoSigna"
+    "lPlacement\030\n \001(\010:\004true\022\030\n\rmanualBusSize\030"
+    "\013 \001(\005:\0010*3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016\n\nM"
+    "illimeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirre"
+    "ction\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSigna"
+    "lType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFblDa"
+    "taFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt\020\001"
+    "\022\t\n\005Float\020\002", 14531);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -2721,6 +2720,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   SchemaItemRect::default_instance_ = new SchemaItemRect();
   SchemaItemLine::default_instance_ = new SchemaItemLine();
   SchemaItemPath::default_instance_ = new SchemaItemPath();
+  SchemaItemImage::default_instance_ = new SchemaItemImage();
   FblConnectionPoint::default_instance_ = new FblConnectionPoint();
   FblItem::default_instance_ = new FblItem();
   FblItemRect::default_instance_ = new FblItemRect();
@@ -2805,6 +2805,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   SchemaItemRect::default_instance_->InitAsDefaultInstance();
   SchemaItemLine::default_instance_->InitAsDefaultInstance();
   SchemaItemPath::default_instance_->InitAsDefaultInstance();
+  SchemaItemImage::default_instance_->InitAsDefaultInstance();
   FblConnectionPoint::default_instance_->InitAsDefaultInstance();
   FblItem::default_instance_->InitAsDefaultInstance();
   FblItemRect::default_instance_->InitAsDefaultInstance();
@@ -10187,6 +10188,7 @@ const int SchemaItem::kFblItemLineFieldNumber;
 const int SchemaItem::kRectFieldNumber;
 const int SchemaItem::kLineFieldNumber;
 const int SchemaItem::kPathFieldNumber;
+const int SchemaItem::kImageFieldNumber;
 const int SchemaItem::kSignalFieldNumber;
 const int SchemaItem::kInputSignalFieldNumber;
 const int SchemaItem::kOutputSignalFieldNumber;
@@ -10227,6 +10229,7 @@ void SchemaItem::InitAsDefaultInstance() {
   rect_ = const_cast< ::Proto::SchemaItemRect*>(&::Proto::SchemaItemRect::default_instance());
   line_ = const_cast< ::Proto::SchemaItemLine*>(&::Proto::SchemaItemLine::default_instance());
   path_ = const_cast< ::Proto::SchemaItemPath*>(&::Proto::SchemaItemPath::default_instance());
+  image_ = const_cast< ::Proto::SchemaItemImage*>(&::Proto::SchemaItemImage::default_instance());
   signal_ = const_cast< ::Proto::SchemaItemSignal*>(&::Proto::SchemaItemSignal::default_instance());
   inputsignal_ = const_cast< ::Proto::SchemaItemInput*>(&::Proto::SchemaItemInput::default_instance());
   outputsignal_ = const_cast< ::Proto::SchemaItemOutput*>(&::Proto::SchemaItemOutput::default_instance());
@@ -10277,6 +10280,7 @@ void SchemaItem::SharedCtor() {
   rect_ = NULL;
   line_ = NULL;
   path_ = NULL;
+  image_ = NULL;
   signal_ = NULL;
   inputsignal_ = NULL;
   outputsignal_ = NULL;
@@ -10327,6 +10331,7 @@ void SchemaItem::SharedDtor() {
     delete rect_;
     delete line_;
     delete path_;
+    delete image_;
     delete signal_;
     delete inputsignal_;
     delete outputsignal_;
@@ -10429,6 +10434,9 @@ void SchemaItem::Clear() {
     if (has_path()) {
       if (path_ != NULL) path_->::Proto::SchemaItemPath::Clear();
     }
+    if (has_image()) {
+      if (image_ != NULL) image_->::Proto::SchemaItemImage::Clear();
+    }
     if (has_signal()) {
       if (signal_ != NULL) signal_->::Proto::SchemaItemSignal::Clear();
     }
@@ -10444,11 +10452,11 @@ void SchemaItem::Clear() {
     if (has_afb()) {
       if (afb_ != NULL) afb_->::Proto::SchemaItemAfb::Clear();
     }
+  }
+  if (_has_bits_[24 / 32] & (0xffu << (24 % 32))) {
     if (has_constitem()) {
       if (constitem_ != NULL) constitem_->::Proto::SchemaItemConst::Clear();
     }
-  }
-  if (_has_bits_[24 / 32] & (0xffu << (24 % 32))) {
     if (has_connectionitem()) {
       if (connectionitem_ != NULL) connectionitem_->::Proto::SchemaItemConnection::Clear();
     }
@@ -10470,11 +10478,11 @@ void SchemaItem::Clear() {
     if (has_value()) {
       if (value_ != NULL) value_->::Proto::SchemaItemValue::Clear();
     }
+  }
+  if (_has_bits_[32 / 32] & (0xffu << (32 % 32))) {
     if (has_busitem()) {
       if (busitem_ != NULL) busitem_->::Proto::SchemaItemBus::Clear();
     }
-  }
-  if (_has_bits_[32 / 32] & (0xffu << (32 % 32))) {
     if (has_buscomposer()) {
       if (buscomposer_ != NULL) buscomposer_->::Proto::SchemaItemBusComposer::Clear();
     }
@@ -10496,6 +10504,8 @@ void SchemaItem::Clear() {
     if (has_pushbutton()) {
       if (pushbutton_ != NULL) pushbutton_->::Proto::SchemaItemPushButton::Clear();
     }
+  }
+  if (_has_bits_[40 / 32] & (0xffu << (40 % 32))) {
     if (has_lineedit()) {
       if (lineedit_ != NULL) lineedit_->::Proto::SchemaItemLineEdit::Clear();
     }
@@ -10778,6 +10788,20 @@ bool SchemaItem::MergePartialFromCodedStream(
          parse_Path:
           DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
                input, mutable_path()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(954)) goto parse_Image;
+        break;
+      }
+
+      // optional .Proto.SchemaItemImage Image = 119;
+      case 119: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_Image:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_image()));
         } else {
           goto handle_uninterpreted;
         }
@@ -11224,6 +11248,12 @@ void SchemaItem::SerializeWithCachedSizes(
       118, this->path(), output);
   }
 
+  // optional .Proto.SchemaItemImage Image = 119;
+  if (has_image()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      119, this->image(), output);
+  }
+
   // optional .Proto.SchemaItemSignal Signal = 124;
   if (has_signal()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
@@ -11488,6 +11518,13 @@ void SchemaItem::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
         118, this->path(), target);
+  }
+
+  // optional .Proto.SchemaItemImage Image = 119;
+  if (has_image()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        119, this->image(), target);
   }
 
   // optional .Proto.SchemaItemSignal Signal = 124;
@@ -11776,6 +11813,13 @@ int SchemaItem::ByteSize() const {
           this->path());
     }
 
+    // optional .Proto.SchemaItemImage Image = 119;
+    if (has_image()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->image());
+    }
+
     // optional .Proto.SchemaItemSignal Signal = 124;
     if (has_signal()) {
       total_size += 2 +
@@ -11811,6 +11855,8 @@ int SchemaItem::ByteSize() const {
           this->afb());
     }
 
+  }
+  if (_has_bits_[24 / 32] & (0xffu << (24 % 32))) {
     // optional .Proto.SchemaItemConst ConstItem = 129;
     if (has_constitem()) {
       total_size += 2 +
@@ -11818,8 +11864,6 @@ int SchemaItem::ByteSize() const {
           this->constitem());
     }
 
-  }
-  if (_has_bits_[24 / 32] & (0xffu << (24 % 32))) {
     // optional .Proto.SchemaItemConnection ConnectionItem = 130;
     if (has_connectionitem()) {
       total_size += 2 +
@@ -11869,6 +11913,8 @@ int SchemaItem::ByteSize() const {
           this->value());
     }
 
+  }
+  if (_has_bits_[32 / 32] & (0xffu << (32 % 32))) {
     // optional .Proto.SchemaItemBus BusItem = 150;
     if (has_busitem()) {
       total_size += 2 +
@@ -11876,8 +11922,6 @@ int SchemaItem::ByteSize() const {
           this->busitem());
     }
 
-  }
-  if (_has_bits_[32 / 32] & (0xffu << (32 % 32))) {
     // optional .Proto.SchemaItemBusComposer BusComposer = 151;
     if (has_buscomposer()) {
       total_size += 2 +
@@ -11927,6 +11971,8 @@ int SchemaItem::ByteSize() const {
           this->pushbutton());
     }
 
+  }
+  if (_has_bits_[40 / 32] & (0xffu << (40 % 32))) {
     // optional .Proto.SchemaItemLineEdit lineEdit = 211;
     if (has_lineedit()) {
       total_size += 2 +
@@ -12019,6 +12065,9 @@ void SchemaItem::MergeFrom(const SchemaItem& from) {
     if (from.has_path()) {
       mutable_path()->::Proto::SchemaItemPath::MergeFrom(from.path());
     }
+    if (from.has_image()) {
+      mutable_image()->::Proto::SchemaItemImage::MergeFrom(from.image());
+    }
     if (from.has_signal()) {
       mutable_signal()->::Proto::SchemaItemSignal::MergeFrom(from.signal());
     }
@@ -12034,11 +12083,11 @@ void SchemaItem::MergeFrom(const SchemaItem& from) {
     if (from.has_afb()) {
       mutable_afb()->::Proto::SchemaItemAfb::MergeFrom(from.afb());
     }
+  }
+  if (from._has_bits_[24 / 32] & (0xffu << (24 % 32))) {
     if (from.has_constitem()) {
       mutable_constitem()->::Proto::SchemaItemConst::MergeFrom(from.constitem());
     }
-  }
-  if (from._has_bits_[24 / 32] & (0xffu << (24 % 32))) {
     if (from.has_connectionitem()) {
       mutable_connectionitem()->::Proto::SchemaItemConnection::MergeFrom(from.connectionitem());
     }
@@ -12060,11 +12109,11 @@ void SchemaItem::MergeFrom(const SchemaItem& from) {
     if (from.has_value()) {
       mutable_value()->::Proto::SchemaItemValue::MergeFrom(from.value());
     }
+  }
+  if (from._has_bits_[32 / 32] & (0xffu << (32 % 32))) {
     if (from.has_busitem()) {
       mutable_busitem()->::Proto::SchemaItemBus::MergeFrom(from.busitem());
     }
-  }
-  if (from._has_bits_[32 / 32] & (0xffu << (32 % 32))) {
     if (from.has_buscomposer()) {
       mutable_buscomposer()->::Proto::SchemaItemBusComposer::MergeFrom(from.buscomposer());
     }
@@ -12086,6 +12135,8 @@ void SchemaItem::MergeFrom(const SchemaItem& from) {
     if (from.has_pushbutton()) {
       mutable_pushbutton()->::Proto::SchemaItemPushButton::MergeFrom(from.pushbutton());
     }
+  }
+  if (from._has_bits_[40 / 32] & (0xffu << (40 % 32))) {
     if (from.has_lineedit()) {
       mutable_lineedit()->::Proto::SchemaItemLineEdit::MergeFrom(from.lineedit());
     }
@@ -12176,6 +12227,7 @@ void SchemaItem::Swap(SchemaItem* other) {
     std::swap(rect_, other->rect_);
     std::swap(line_, other->line_);
     std::swap(path_, other->path_);
+    std::swap(image_, other->image_);
     std::swap(signal_, other->signal_);
     std::swap(inputsignal_, other->inputsignal_);
     std::swap(outputsignal_, other->outputsignal_);
@@ -14137,6 +14189,250 @@ void SchemaItemPath::Swap(SchemaItemPath* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = SchemaItemPath_descriptor_;
   metadata.reflection = SchemaItemPath_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int SchemaItemImage::kAllowScaleFieldNumber;
+const int SchemaItemImage::kKeepAspectRatioFieldNumber;
+#endif  // !_MSC_VER
+
+SchemaItemImage::SchemaItemImage()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void SchemaItemImage::InitAsDefaultInstance() {
+}
+
+SchemaItemImage::SchemaItemImage(const SchemaItemImage& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void SchemaItemImage::SharedCtor() {
+  _cached_size_ = 0;
+  allowscale_ = true;
+  keepaspectratio_ = true;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+SchemaItemImage::~SchemaItemImage() {
+  SharedDtor();
+}
+
+void SchemaItemImage::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void SchemaItemImage::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* SchemaItemImage::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return SchemaItemImage_descriptor_;
+}
+
+const SchemaItemImage& SchemaItemImage::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+SchemaItemImage* SchemaItemImage::default_instance_ = NULL;
+
+SchemaItemImage* SchemaItemImage::New() const {
+  return new SchemaItemImage;
+}
+
+void SchemaItemImage::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    allowscale_ = true;
+    keepaspectratio_ = true;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool SchemaItemImage::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional bool allowScale = 1 [default = true];
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &allowscale_)));
+          set_has_allowscale();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_keepAspectRatio;
+        break;
+      }
+
+      // optional bool keepAspectRatio = 2 [default = true];
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_keepAspectRatio:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &keepaspectratio_)));
+          set_has_keepaspectratio();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void SchemaItemImage::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional bool allowScale = 1 [default = true];
+  if (has_allowscale()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(1, this->allowscale(), output);
+  }
+
+  // optional bool keepAspectRatio = 2 [default = true];
+  if (has_keepaspectratio()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(2, this->keepaspectratio(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* SchemaItemImage::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional bool allowScale = 1 [default = true];
+  if (has_allowscale()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(1, this->allowscale(), target);
+  }
+
+  // optional bool keepAspectRatio = 2 [default = true];
+  if (has_keepaspectratio()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(2, this->keepaspectratio(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int SchemaItemImage::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional bool allowScale = 1 [default = true];
+    if (has_allowscale()) {
+      total_size += 1 + 1;
+    }
+
+    // optional bool keepAspectRatio = 2 [default = true];
+    if (has_keepaspectratio()) {
+      total_size += 1 + 1;
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void SchemaItemImage::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const SchemaItemImage* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const SchemaItemImage*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void SchemaItemImage::MergeFrom(const SchemaItemImage& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_allowscale()) {
+      set_allowscale(from.allowscale());
+    }
+    if (from.has_keepaspectratio()) {
+      set_keepaspectratio(from.keepaspectratio());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void SchemaItemImage::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void SchemaItemImage::CopyFrom(const SchemaItemImage& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool SchemaItemImage::IsInitialized() const {
+
+  return true;
+}
+
+void SchemaItemImage::Swap(SchemaItemImage* other) {
+  if (other != this) {
+    std::swap(allowscale_, other->allowscale_);
+    std::swap(keepaspectratio_, other->keepaspectratio_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata SchemaItemImage::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = SchemaItemImage_descriptor_;
+  metadata.reflection = SchemaItemImage_reflection_;
   return metadata;
 }
 
@@ -19135,38 +19431,19 @@ void SchemaItemTerminator::Swap(SchemaItemTerminator* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
-const int SchemaItemValue::kWeightFieldNumber;
+const int SchemaItemValue::kSignalIdsFieldNumber;
+const int SchemaItemValue::kSignalSourceFieldNumber;
+const int SchemaItemValue::kLineWeightFieldNumber;
 const int SchemaItemValue::kLineColorFieldNumber;
 const int SchemaItemValue::kFillColorFieldNumber;
-const int SchemaItemValue::kTextAnalogFieldNumber;
 const int SchemaItemValue::kTextColorFieldNumber;
+const int SchemaItemValue::kTextFieldNumber;
 const int SchemaItemValue::kFontFieldNumber;
-const int SchemaItemValue::kFillFieldNumber;
-const int SchemaItemValue::kDrawrectFieldNumber;
+const int SchemaItemValue::kDrawRectFieldNumber;
 const int SchemaItemValue::kHorzAlignFieldNumber;
 const int SchemaItemValue::kVertAlignFieldNumber;
-const int SchemaItemValue::kSignalIdFieldNumber;
-const int SchemaItemValue::kSignalSourceFieldNumber;
 const int SchemaItemValue::kPrecisionFieldNumber;
-const int SchemaItemValue::kTextDiscrete0FieldNumber;
-const int SchemaItemValue::kTextDiscrete1FieldNumber;
-const int SchemaItemValue::kTextNonValidFieldNumber;
-const int SchemaItemValue::kFillColorNonValid0FieldNumber;
-const int SchemaItemValue::kFillColorNonValid1FieldNumber;
-const int SchemaItemValue::kTextColorNonValid0FieldNumber;
-const int SchemaItemValue::kTextColorNonValid1FieldNumber;
-const int SchemaItemValue::kFillColorAnalog0FieldNumber;
-const int SchemaItemValue::kFillColorAnalog1FieldNumber;
-const int SchemaItemValue::kTextColorAnalog0FieldNumber;
-const int SchemaItemValue::kTextColorAnalog1FieldNumber;
-const int SchemaItemValue::kFillColorDiscrYes0FieldNumber;
-const int SchemaItemValue::kFillColorDiscrYes1FieldNumber;
-const int SchemaItemValue::kTextColorDiscrYes0FieldNumber;
-const int SchemaItemValue::kTextColorDiscrYes1FieldNumber;
-const int SchemaItemValue::kFillColorDiscrNo0FieldNumber;
-const int SchemaItemValue::kFillColorDiscrNo1FieldNumber;
-const int SchemaItemValue::kTextColorDiscrNo0FieldNumber;
-const int SchemaItemValue::kTextColorDiscrNo1FieldNumber;
+const int SchemaItemValue::kAnalogFormatFieldNumber;
 #endif  // !_MSC_VER
 
 SchemaItemValue::SchemaItemValue()
@@ -19186,38 +19463,19 @@ SchemaItemValue::SchemaItemValue(const SchemaItemValue& from)
 
 void SchemaItemValue::SharedCtor() {
   _cached_size_ = 0;
-  weight_ = 0;
+  signalids_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  signalsource_ = 0;
+  lineweight_ = 0;
   linecolor_ = 0u;
   fillcolor_ = 0u;
-  textanalog_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   textcolor_ = 0u;
+  text_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   font_ = NULL;
-  fill_ = false;
   drawrect_ = true;
   horzalign_ = 4;
   vertalign_ = 128;
-  signalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  signalsource_ = 0;
   precision_ = -1;
-  textdiscrete0_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  textdiscrete1_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  textnonvalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  fillcolornonvalid0_ = 0u;
-  fillcolornonvalid1_ = 0u;
-  textcolornonvalid0_ = 0u;
-  textcolornonvalid1_ = 0u;
-  fillcoloranalog0_ = 0u;
-  fillcoloranalog1_ = 0u;
-  textcoloranalog0_ = 0u;
-  textcoloranalog1_ = 0u;
-  fillcolordiscryes0_ = 0u;
-  fillcolordiscryes1_ = 0u;
-  textcolordiscryes0_ = 0u;
-  textcolordiscryes1_ = 0u;
-  fillcolordiscrno0_ = 0u;
-  fillcolordiscrno1_ = 0u;
-  textcolordiscrno0_ = 0u;
-  textcolordiscrno1_ = 0u;
+  analogformat_ = 102;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -19226,20 +19484,11 @@ SchemaItemValue::~SchemaItemValue() {
 }
 
 void SchemaItemValue::SharedDtor() {
-  if (textanalog_ != &::google::protobuf::internal::kEmptyString) {
-    delete textanalog_;
+  if (signalids_ != &::google::protobuf::internal::kEmptyString) {
+    delete signalids_;
   }
-  if (signalid_ != &::google::protobuf::internal::kEmptyString) {
-    delete signalid_;
-  }
-  if (textdiscrete0_ != &::google::protobuf::internal::kEmptyString) {
-    delete textdiscrete0_;
-  }
-  if (textdiscrete1_ != &::google::protobuf::internal::kEmptyString) {
-    delete textdiscrete1_;
-  }
-  if (textnonvalid_ != &::google::protobuf::internal::kEmptyString) {
-    delete textnonvalid_;
+  if (text_ != &::google::protobuf::internal::kEmptyString) {
+    delete text_;
   }
   if (this != default_instance_) {
     delete font_;
@@ -19269,66 +19518,31 @@ SchemaItemValue* SchemaItemValue::New() const {
 
 void SchemaItemValue::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    weight_ = 0;
-    linecolor_ = 0u;
-    fillcolor_ = 0u;
-    if (has_textanalog()) {
-      if (textanalog_ != &::google::protobuf::internal::kEmptyString) {
-        textanalog_->clear();
-      }
-    }
-    textcolor_ = 0u;
-    if (has_font()) {
-      if (font_ != NULL) font_->::Proto::FontParam::Clear();
-    }
-    fill_ = false;
-    drawrect_ = true;
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
-    horzalign_ = 4;
-    vertalign_ = 128;
-    if (has_signalid()) {
-      if (signalid_ != &::google::protobuf::internal::kEmptyString) {
-        signalid_->clear();
+    if (has_signalids()) {
+      if (signalids_ != &::google::protobuf::internal::kEmptyString) {
+        signalids_->clear();
       }
     }
     signalsource_ = 0;
+    lineweight_ = 0;
+    linecolor_ = 0u;
+    fillcolor_ = 0u;
+    textcolor_ = 0u;
+    if (has_text()) {
+      if (text_ != &::google::protobuf::internal::kEmptyString) {
+        text_->clear();
+      }
+    }
+    if (has_font()) {
+      if (font_ != NULL) font_->::Proto::FontParam::Clear();
+    }
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    drawrect_ = true;
+    horzalign_ = 4;
+    vertalign_ = 128;
     precision_ = -1;
-    if (has_textdiscrete0()) {
-      if (textdiscrete0_ != &::google::protobuf::internal::kEmptyString) {
-        textdiscrete0_->clear();
-      }
-    }
-    if (has_textdiscrete1()) {
-      if (textdiscrete1_ != &::google::protobuf::internal::kEmptyString) {
-        textdiscrete1_->clear();
-      }
-    }
-    if (has_textnonvalid()) {
-      if (textnonvalid_ != &::google::protobuf::internal::kEmptyString) {
-        textnonvalid_->clear();
-      }
-    }
-  }
-  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
-    fillcolornonvalid0_ = 0u;
-    fillcolornonvalid1_ = 0u;
-    textcolornonvalid0_ = 0u;
-    textcolornonvalid1_ = 0u;
-    fillcoloranalog0_ = 0u;
-    fillcoloranalog1_ = 0u;
-    textcoloranalog0_ = 0u;
-    textcoloranalog1_ = 0u;
-  }
-  if (_has_bits_[24 / 32] & (0xffu << (24 % 32))) {
-    fillcolordiscryes0_ = 0u;
-    fillcolordiscryes1_ = 0u;
-    textcolordiscryes0_ = 0u;
-    textcolordiscryes1_ = 0u;
-    fillcolordiscrno0_ = 0u;
-    fillcolordiscrno1_ = 0u;
-    textcolordiscrno0_ = 0u;
-    textcolordiscrno1_ = 0u;
+    analogformat_ = 102;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -19340,23 +19554,56 @@ bool SchemaItemValue::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional double weight = 1;
+      // optional string signalIds = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
-                 input, &weight_)));
-          set_has_weight();
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_signalids()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->signalids().data(), this->signalids().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(16)) goto parse_lineColor;
+        if (input->ExpectTag(16)) goto parse_signalSource;
         break;
       }
 
-      // optional uint32 lineColor = 2;
+      // optional int32 signalSource = 2 [default = 0];
       case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_signalSource:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &signalsource_)));
+          set_has_signalsource();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(33)) goto parse_lineWeight;
+        break;
+      }
+
+      // optional double lineWeight = 4;
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_lineWeight:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &lineweight_)));
+          set_has_lineweight();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(40)) goto parse_lineColor;
+        break;
+      }
+
+      // optional uint32 lineColor = 5;
+      case 5: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_lineColor:
@@ -19367,12 +19614,12 @@ bool SchemaItemValue::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(24)) goto parse_fillColor;
+        if (input->ExpectTag(48)) goto parse_fillColor;
         break;
       }
 
-      // optional uint32 fillColor = 3;
-      case 3: {
+      // optional uint32 fillColor = 6;
+      case 6: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_fillColor:
@@ -19383,29 +19630,12 @@ bool SchemaItemValue::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(34)) goto parse_textAnalog;
+        if (input->ExpectTag(56)) goto parse_textColor;
         break;
       }
 
-      // optional string textAnalog = 4;
-      case 4: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_textAnalog:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_textanalog()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->textanalog().data(), this->textanalog().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(40)) goto parse_textColor;
-        break;
-      }
-
-      // optional uint32 textColor = 5;
-      case 5: {
+      // optional uint32 textColor = 7;
+      case 7: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_textColor:
@@ -19416,12 +19646,29 @@ bool SchemaItemValue::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(50)) goto parse_font;
+        if (input->ExpectTag(66)) goto parse_text;
         break;
       }
 
-      // optional .Proto.FontParam font = 6;
-      case 6: {
+      // optional string text = 8;
+      case 8: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_text:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_text()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->text().data(), this->text().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(74)) goto parse_font;
+        break;
+      }
+
+      // optional .Proto.FontParam font = 9;
+      case 9: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
          parse_font:
@@ -19430,31 +19677,15 @@ bool SchemaItemValue::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(56)) goto parse_fill;
+        if (input->ExpectTag(80)) goto parse_drawRect;
         break;
       }
 
-      // optional bool fill = 7;
-      case 7: {
+      // optional bool drawRect = 10 [default = true];
+      case 10: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_fill:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
-                 input, &fill_)));
-          set_has_fill();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(64)) goto parse_drawrect;
-        break;
-      }
-
-      // optional bool drawrect = 8 [default = true];
-      case 8: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_drawrect:
+         parse_drawRect:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
                  input, &drawrect_)));
@@ -19462,12 +19693,12 @@ bool SchemaItemValue::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(72)) goto parse_horzAlign;
+        if (input->ExpectTag(88)) goto parse_horzAlign;
         break;
       }
 
-      // optional int32 horzAlign = 9 [default = 4];
-      case 9: {
+      // optional int32 horzAlign = 11 [default = 4];
+      case 11: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_horzAlign:
@@ -19478,12 +19709,12 @@ bool SchemaItemValue::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(80)) goto parse_vertAlign;
+        if (input->ExpectTag(96)) goto parse_vertAlign;
         break;
       }
 
-      // optional int32 vertAlign = 10 [default = 128];
-      case 10: {
+      // optional int32 vertAlign = 12 [default = 128];
+      case 12: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_vertAlign:
@@ -19491,39 +19722,6 @@ bool SchemaItemValue::MergePartialFromCodedStream(
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &vertalign_)));
           set_has_vertalign();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(90)) goto parse_signalId;
-        break;
-      }
-
-      // optional string signalId = 11;
-      case 11: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_signalId:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_signalid()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->signalid().data(), this->signalid().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(96)) goto parse_signalSource;
-        break;
-      }
-
-      // optional int32 signalSource = 12 [default = 0];
-      case 12: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_signalSource:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
-                 input, &signalsource_)));
-          set_has_signalsource();
         } else {
           goto handle_uninterpreted;
         }
@@ -19543,310 +19741,19 @@ bool SchemaItemValue::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(114)) goto parse_textDiscrete0;
+        if (input->ExpectTag(112)) goto parse_analogFormat;
         break;
       }
 
-      // optional string textDiscrete0 = 14;
+      // optional int32 analogFormat = 14 [default = 102];
       case 14: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_textDiscrete0:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_textdiscrete0()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->textdiscrete0().data(), this->textdiscrete0().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(122)) goto parse_textDiscrete1;
-        break;
-      }
-
-      // optional string textDiscrete1 = 15;
-      case 15: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_textDiscrete1:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_textdiscrete1()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->textdiscrete1().data(), this->textdiscrete1().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(130)) goto parse_textNonValid;
-        break;
-      }
-
-      // optional string textNonValid = 16;
-      case 16: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_textNonValid:
-          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_textnonvalid()));
-          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->textnonvalid().data(), this->textnonvalid().length(),
-            ::google::protobuf::internal::WireFormat::PARSE);
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(240)) goto parse_fillColorNonValid0;
-        break;
-      }
-
-      // optional uint32 fillColorNonValid0 = 30;
-      case 30: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_fillColorNonValid0:
+         parse_analogFormat:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &fillcolornonvalid0_)));
-          set_has_fillcolornonvalid0();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(248)) goto parse_fillColorNonValid1;
-        break;
-      }
-
-      // optional uint32 fillColorNonValid1 = 31;
-      case 31: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_fillColorNonValid1:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &fillcolornonvalid1_)));
-          set_has_fillcolornonvalid1();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(256)) goto parse_textColorNonValid0;
-        break;
-      }
-
-      // optional uint32 textColorNonValid0 = 32;
-      case 32: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_textColorNonValid0:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &textcolornonvalid0_)));
-          set_has_textcolornonvalid0();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(264)) goto parse_textColorNonValid1;
-        break;
-      }
-
-      // optional uint32 textColorNonValid1 = 33;
-      case 33: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_textColorNonValid1:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &textcolornonvalid1_)));
-          set_has_textcolornonvalid1();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(336)) goto parse_fillColorAnalog0;
-        break;
-      }
-
-      // optional uint32 fillColorAnalog0 = 42;
-      case 42: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_fillColorAnalog0:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &fillcoloranalog0_)));
-          set_has_fillcoloranalog0();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(344)) goto parse_fillColorAnalog1;
-        break;
-      }
-
-      // optional uint32 fillColorAnalog1 = 43;
-      case 43: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_fillColorAnalog1:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &fillcoloranalog1_)));
-          set_has_fillcoloranalog1();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(352)) goto parse_textColorAnalog0;
-        break;
-      }
-
-      // optional uint32 textColorAnalog0 = 44;
-      case 44: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_textColorAnalog0:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &textcoloranalog0_)));
-          set_has_textcoloranalog0();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(360)) goto parse_textColorAnalog1;
-        break;
-      }
-
-      // optional uint32 textColorAnalog1 = 45;
-      case 45: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_textColorAnalog1:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &textcoloranalog1_)));
-          set_has_textcoloranalog1();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(368)) goto parse_fillColorDiscrYes0;
-        break;
-      }
-
-      // optional uint32 fillColorDiscrYes0 = 46;
-      case 46: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_fillColorDiscrYes0:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &fillcolordiscryes0_)));
-          set_has_fillcolordiscryes0();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(376)) goto parse_fillColorDiscrYes1;
-        break;
-      }
-
-      // optional uint32 fillColorDiscrYes1 = 47;
-      case 47: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_fillColorDiscrYes1:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &fillcolordiscryes1_)));
-          set_has_fillcolordiscryes1();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(384)) goto parse_textColorDiscrYes0;
-        break;
-      }
-
-      // optional uint32 textColorDiscrYes0 = 48;
-      case 48: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_textColorDiscrYes0:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &textcolordiscryes0_)));
-          set_has_textcolordiscryes0();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(392)) goto parse_textColorDiscrYes1;
-        break;
-      }
-
-      // optional uint32 textColorDiscrYes1 = 49;
-      case 49: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_textColorDiscrYes1:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &textcolordiscryes1_)));
-          set_has_textcolordiscryes1();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(400)) goto parse_fillColorDiscrNo0;
-        break;
-      }
-
-      // optional uint32 fillColorDiscrNo0 = 50;
-      case 50: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_fillColorDiscrNo0:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &fillcolordiscrno0_)));
-          set_has_fillcolordiscrno0();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(408)) goto parse_fillColorDiscrNo1;
-        break;
-      }
-
-      // optional uint32 fillColorDiscrNo1 = 51;
-      case 51: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_fillColorDiscrNo1:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &fillcolordiscrno1_)));
-          set_has_fillcolordiscrno1();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(416)) goto parse_textColorDiscrNo0;
-        break;
-      }
-
-      // optional uint32 textColorDiscrNo0 = 52;
-      case 52: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_textColorDiscrNo0:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &textcolordiscrno0_)));
-          set_has_textcolordiscrno0();
-        } else {
-          goto handle_uninterpreted;
-        }
-        if (input->ExpectTag(424)) goto parse_textColorDiscrNo1;
-        break;
-      }
-
-      // optional uint32 textColorDiscrNo1 = 53;
-      case 53: {
-        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
-            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
-         parse_textColorDiscrNo1:
-          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
-                 input, &textcolordiscrno1_)));
-          set_has_textcolordiscrno1();
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &analogformat_)));
+          set_has_analogformat();
         } else {
           goto handle_uninterpreted;
         }
@@ -19872,73 +19779,68 @@ bool SchemaItemValue::MergePartialFromCodedStream(
 
 void SchemaItemValue::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional double weight = 1;
-  if (has_weight()) {
-    ::google::protobuf::internal::WireFormatLite::WriteDouble(1, this->weight(), output);
-  }
-
-  // optional uint32 lineColor = 2;
-  if (has_linecolor()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(2, this->linecolor(), output);
-  }
-
-  // optional uint32 fillColor = 3;
-  if (has_fillcolor()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(3, this->fillcolor(), output);
-  }
-
-  // optional string textAnalog = 4;
-  if (has_textanalog()) {
+  // optional string signalIds = 1;
+  if (has_signalids()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->textanalog().data(), this->textanalog().length(),
+      this->signalids().data(), this->signalids().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     ::google::protobuf::internal::WireFormatLite::WriteString(
-      4, this->textanalog(), output);
+      1, this->signalids(), output);
   }
 
-  // optional uint32 textColor = 5;
+  // optional int32 signalSource = 2 [default = 0];
+  if (has_signalsource()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->signalsource(), output);
+  }
+
+  // optional double lineWeight = 4;
+  if (has_lineweight()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(4, this->lineweight(), output);
+  }
+
+  // optional uint32 lineColor = 5;
+  if (has_linecolor()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(5, this->linecolor(), output);
+  }
+
+  // optional uint32 fillColor = 6;
+  if (has_fillcolor()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(6, this->fillcolor(), output);
+  }
+
+  // optional uint32 textColor = 7;
   if (has_textcolor()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(5, this->textcolor(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(7, this->textcolor(), output);
   }
 
-  // optional .Proto.FontParam font = 6;
+  // optional string text = 8;
+  if (has_text()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->text().data(), this->text().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      8, this->text(), output);
+  }
+
+  // optional .Proto.FontParam font = 9;
   if (has_font()) {
     ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
-      6, this->font(), output);
+      9, this->font(), output);
   }
 
-  // optional bool fill = 7;
-  if (has_fill()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(7, this->fill(), output);
-  }
-
-  // optional bool drawrect = 8 [default = true];
+  // optional bool drawRect = 10 [default = true];
   if (has_drawrect()) {
-    ::google::protobuf::internal::WireFormatLite::WriteBool(8, this->drawrect(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteBool(10, this->drawrect(), output);
   }
 
-  // optional int32 horzAlign = 9 [default = 4];
+  // optional int32 horzAlign = 11 [default = 4];
   if (has_horzalign()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(9, this->horzalign(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(11, this->horzalign(), output);
   }
 
-  // optional int32 vertAlign = 10 [default = 128];
+  // optional int32 vertAlign = 12 [default = 128];
   if (has_vertalign()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(10, this->vertalign(), output);
-  }
-
-  // optional string signalId = 11;
-  if (has_signalid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->signalid().data(), this->signalid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
-      11, this->signalid(), output);
-  }
-
-  // optional int32 signalSource = 12 [default = 0];
-  if (has_signalsource()) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt32(12, this->signalsource(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(12, this->vertalign(), output);
   }
 
   // optional int32 precision = 13 [default = -1];
@@ -19946,111 +19848,9 @@ void SchemaItemValue::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(13, this->precision(), output);
   }
 
-  // optional string textDiscrete0 = 14;
-  if (has_textdiscrete0()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->textdiscrete0().data(), this->textdiscrete0().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
-      14, this->textdiscrete0(), output);
-  }
-
-  // optional string textDiscrete1 = 15;
-  if (has_textdiscrete1()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->textdiscrete1().data(), this->textdiscrete1().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
-      15, this->textdiscrete1(), output);
-  }
-
-  // optional string textNonValid = 16;
-  if (has_textnonvalid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->textnonvalid().data(), this->textnonvalid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    ::google::protobuf::internal::WireFormatLite::WriteString(
-      16, this->textnonvalid(), output);
-  }
-
-  // optional uint32 fillColorNonValid0 = 30;
-  if (has_fillcolornonvalid0()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(30, this->fillcolornonvalid0(), output);
-  }
-
-  // optional uint32 fillColorNonValid1 = 31;
-  if (has_fillcolornonvalid1()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(31, this->fillcolornonvalid1(), output);
-  }
-
-  // optional uint32 textColorNonValid0 = 32;
-  if (has_textcolornonvalid0()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(32, this->textcolornonvalid0(), output);
-  }
-
-  // optional uint32 textColorNonValid1 = 33;
-  if (has_textcolornonvalid1()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(33, this->textcolornonvalid1(), output);
-  }
-
-  // optional uint32 fillColorAnalog0 = 42;
-  if (has_fillcoloranalog0()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(42, this->fillcoloranalog0(), output);
-  }
-
-  // optional uint32 fillColorAnalog1 = 43;
-  if (has_fillcoloranalog1()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(43, this->fillcoloranalog1(), output);
-  }
-
-  // optional uint32 textColorAnalog0 = 44;
-  if (has_textcoloranalog0()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(44, this->textcoloranalog0(), output);
-  }
-
-  // optional uint32 textColorAnalog1 = 45;
-  if (has_textcoloranalog1()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(45, this->textcoloranalog1(), output);
-  }
-
-  // optional uint32 fillColorDiscrYes0 = 46;
-  if (has_fillcolordiscryes0()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(46, this->fillcolordiscryes0(), output);
-  }
-
-  // optional uint32 fillColorDiscrYes1 = 47;
-  if (has_fillcolordiscryes1()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(47, this->fillcolordiscryes1(), output);
-  }
-
-  // optional uint32 textColorDiscrYes0 = 48;
-  if (has_textcolordiscryes0()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(48, this->textcolordiscryes0(), output);
-  }
-
-  // optional uint32 textColorDiscrYes1 = 49;
-  if (has_textcolordiscryes1()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(49, this->textcolordiscryes1(), output);
-  }
-
-  // optional uint32 fillColorDiscrNo0 = 50;
-  if (has_fillcolordiscrno0()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(50, this->fillcolordiscrno0(), output);
-  }
-
-  // optional uint32 fillColorDiscrNo1 = 51;
-  if (has_fillcolordiscrno1()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(51, this->fillcolordiscrno1(), output);
-  }
-
-  // optional uint32 textColorDiscrNo0 = 52;
-  if (has_textcolordiscrno0()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(52, this->textcolordiscrno0(), output);
-  }
-
-  // optional uint32 textColorDiscrNo1 = 53;
-  if (has_textcolordiscrno1()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(53, this->textcolordiscrno1(), output);
+  // optional int32 analogFormat = 14 [default = 102];
+  if (has_analogformat()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(14, this->analogformat(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -20061,76 +19861,71 @@ void SchemaItemValue::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* SchemaItemValue::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // optional double weight = 1;
-  if (has_weight()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(1, this->weight(), target);
-  }
-
-  // optional uint32 lineColor = 2;
-  if (has_linecolor()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(2, this->linecolor(), target);
-  }
-
-  // optional uint32 fillColor = 3;
-  if (has_fillcolor()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(3, this->fillcolor(), target);
-  }
-
-  // optional string textAnalog = 4;
-  if (has_textanalog()) {
+  // optional string signalIds = 1;
+  if (has_signalids()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->textanalog().data(), this->textanalog().length(),
+      this->signalids().data(), this->signalids().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        4, this->textanalog(), target);
+        1, this->signalids(), target);
   }
 
-  // optional uint32 textColor = 5;
+  // optional int32 signalSource = 2 [default = 0];
+  if (has_signalsource()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->signalsource(), target);
+  }
+
+  // optional double lineWeight = 4;
+  if (has_lineweight()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(4, this->lineweight(), target);
+  }
+
+  // optional uint32 lineColor = 5;
+  if (has_linecolor()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(5, this->linecolor(), target);
+  }
+
+  // optional uint32 fillColor = 6;
+  if (has_fillcolor()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(6, this->fillcolor(), target);
+  }
+
+  // optional uint32 textColor = 7;
   if (has_textcolor()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(5, this->textcolor(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(7, this->textcolor(), target);
   }
 
-  // optional .Proto.FontParam font = 6;
+  // optional string text = 8;
+  if (has_text()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->text().data(), this->text().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        8, this->text(), target);
+  }
+
+  // optional .Proto.FontParam font = 9;
   if (has_font()) {
     target = ::google::protobuf::internal::WireFormatLite::
       WriteMessageNoVirtualToArray(
-        6, this->font(), target);
+        9, this->font(), target);
   }
 
-  // optional bool fill = 7;
-  if (has_fill()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(7, this->fill(), target);
-  }
-
-  // optional bool drawrect = 8 [default = true];
+  // optional bool drawRect = 10 [default = true];
   if (has_drawrect()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(8, this->drawrect(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(10, this->drawrect(), target);
   }
 
-  // optional int32 horzAlign = 9 [default = 4];
+  // optional int32 horzAlign = 11 [default = 4];
   if (has_horzalign()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(9, this->horzalign(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(11, this->horzalign(), target);
   }
 
-  // optional int32 vertAlign = 10 [default = 128];
+  // optional int32 vertAlign = 12 [default = 128];
   if (has_vertalign()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(10, this->vertalign(), target);
-  }
-
-  // optional string signalId = 11;
-  if (has_signalid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->signalid().data(), this->signalid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        11, this->signalid(), target);
-  }
-
-  // optional int32 signalSource = 12 [default = 0];
-  if (has_signalsource()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(12, this->signalsource(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(12, this->vertalign(), target);
   }
 
   // optional int32 precision = 13 [default = -1];
@@ -20138,114 +19933,9 @@ void SchemaItemValue::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(13, this->precision(), target);
   }
 
-  // optional string textDiscrete0 = 14;
-  if (has_textdiscrete0()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->textdiscrete0().data(), this->textdiscrete0().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        14, this->textdiscrete0(), target);
-  }
-
-  // optional string textDiscrete1 = 15;
-  if (has_textdiscrete1()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->textdiscrete1().data(), this->textdiscrete1().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        15, this->textdiscrete1(), target);
-  }
-
-  // optional string textNonValid = 16;
-  if (has_textnonvalid()) {
-    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->textnonvalid().data(), this->textnonvalid().length(),
-      ::google::protobuf::internal::WireFormat::SERIALIZE);
-    target =
-      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        16, this->textnonvalid(), target);
-  }
-
-  // optional uint32 fillColorNonValid0 = 30;
-  if (has_fillcolornonvalid0()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(30, this->fillcolornonvalid0(), target);
-  }
-
-  // optional uint32 fillColorNonValid1 = 31;
-  if (has_fillcolornonvalid1()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(31, this->fillcolornonvalid1(), target);
-  }
-
-  // optional uint32 textColorNonValid0 = 32;
-  if (has_textcolornonvalid0()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(32, this->textcolornonvalid0(), target);
-  }
-
-  // optional uint32 textColorNonValid1 = 33;
-  if (has_textcolornonvalid1()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(33, this->textcolornonvalid1(), target);
-  }
-
-  // optional uint32 fillColorAnalog0 = 42;
-  if (has_fillcoloranalog0()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(42, this->fillcoloranalog0(), target);
-  }
-
-  // optional uint32 fillColorAnalog1 = 43;
-  if (has_fillcoloranalog1()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(43, this->fillcoloranalog1(), target);
-  }
-
-  // optional uint32 textColorAnalog0 = 44;
-  if (has_textcoloranalog0()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(44, this->textcoloranalog0(), target);
-  }
-
-  // optional uint32 textColorAnalog1 = 45;
-  if (has_textcoloranalog1()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(45, this->textcoloranalog1(), target);
-  }
-
-  // optional uint32 fillColorDiscrYes0 = 46;
-  if (has_fillcolordiscryes0()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(46, this->fillcolordiscryes0(), target);
-  }
-
-  // optional uint32 fillColorDiscrYes1 = 47;
-  if (has_fillcolordiscryes1()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(47, this->fillcolordiscryes1(), target);
-  }
-
-  // optional uint32 textColorDiscrYes0 = 48;
-  if (has_textcolordiscryes0()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(48, this->textcolordiscryes0(), target);
-  }
-
-  // optional uint32 textColorDiscrYes1 = 49;
-  if (has_textcolordiscryes1()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(49, this->textcolordiscryes1(), target);
-  }
-
-  // optional uint32 fillColorDiscrNo0 = 50;
-  if (has_fillcolordiscrno0()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(50, this->fillcolordiscrno0(), target);
-  }
-
-  // optional uint32 fillColorDiscrNo1 = 51;
-  if (has_fillcolordiscrno1()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(51, this->fillcolordiscrno1(), target);
-  }
-
-  // optional uint32 textColorDiscrNo0 = 52;
-  if (has_textcolordiscrno0()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(52, this->textcolordiscrno0(), target);
-  }
-
-  // optional uint32 textColorDiscrNo1 = 53;
-  if (has_textcolordiscrno1()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(53, this->textcolordiscrno1(), target);
+  // optional int32 analogFormat = 14 [default = 102];
+  if (has_analogformat()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(14, this->analogformat(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -20259,84 +19949,79 @@ int SchemaItemValue::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional double weight = 1;
-    if (has_weight()) {
+    // optional string signalIds = 1;
+    if (has_signalids()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->signalids());
+    }
+
+    // optional int32 signalSource = 2 [default = 0];
+    if (has_signalsource()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->signalsource());
+    }
+
+    // optional double lineWeight = 4;
+    if (has_lineweight()) {
       total_size += 1 + 8;
     }
 
-    // optional uint32 lineColor = 2;
+    // optional uint32 lineColor = 5;
     if (has_linecolor()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->linecolor());
     }
 
-    // optional uint32 fillColor = 3;
+    // optional uint32 fillColor = 6;
     if (has_fillcolor()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->fillcolor());
     }
 
-    // optional string textAnalog = 4;
-    if (has_textanalog()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->textanalog());
-    }
-
-    // optional uint32 textColor = 5;
+    // optional uint32 textColor = 7;
     if (has_textcolor()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->textcolor());
     }
 
-    // optional .Proto.FontParam font = 6;
+    // optional string text = 8;
+    if (has_text()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->text());
+    }
+
+    // optional .Proto.FontParam font = 9;
     if (has_font()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
           this->font());
     }
 
-    // optional bool fill = 7;
-    if (has_fill()) {
-      total_size += 1 + 1;
-    }
-
-    // optional bool drawrect = 8 [default = true];
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional bool drawRect = 10 [default = true];
     if (has_drawrect()) {
       total_size += 1 + 1;
     }
 
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
-    // optional int32 horzAlign = 9 [default = 4];
+    // optional int32 horzAlign = 11 [default = 4];
     if (has_horzalign()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->horzalign());
     }
 
-    // optional int32 vertAlign = 10 [default = 128];
+    // optional int32 vertAlign = 12 [default = 128];
     if (has_vertalign()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::Int32Size(
           this->vertalign());
-    }
-
-    // optional string signalId = 11;
-    if (has_signalid()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->signalid());
-    }
-
-    // optional int32 signalSource = 12 [default = 0];
-    if (has_signalsource()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::Int32Size(
-          this->signalsource());
     }
 
     // optional int32 precision = 13 [default = -1];
@@ -20346,141 +20031,11 @@ int SchemaItemValue::ByteSize() const {
           this->precision());
     }
 
-    // optional string textDiscrete0 = 14;
-    if (has_textdiscrete0()) {
+    // optional int32 analogFormat = 14 [default = 102];
+    if (has_analogformat()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->textdiscrete0());
-    }
-
-    // optional string textDiscrete1 = 15;
-    if (has_textdiscrete1()) {
-      total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->textdiscrete1());
-    }
-
-    // optional string textNonValid = 16;
-    if (has_textnonvalid()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->textnonvalid());
-    }
-
-  }
-  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
-    // optional uint32 fillColorNonValid0 = 30;
-    if (has_fillcolornonvalid0()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->fillcolornonvalid0());
-    }
-
-    // optional uint32 fillColorNonValid1 = 31;
-    if (has_fillcolornonvalid1()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->fillcolornonvalid1());
-    }
-
-    // optional uint32 textColorNonValid0 = 32;
-    if (has_textcolornonvalid0()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->textcolornonvalid0());
-    }
-
-    // optional uint32 textColorNonValid1 = 33;
-    if (has_textcolornonvalid1()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->textcolornonvalid1());
-    }
-
-    // optional uint32 fillColorAnalog0 = 42;
-    if (has_fillcoloranalog0()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->fillcoloranalog0());
-    }
-
-    // optional uint32 fillColorAnalog1 = 43;
-    if (has_fillcoloranalog1()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->fillcoloranalog1());
-    }
-
-    // optional uint32 textColorAnalog0 = 44;
-    if (has_textcoloranalog0()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->textcoloranalog0());
-    }
-
-    // optional uint32 textColorAnalog1 = 45;
-    if (has_textcoloranalog1()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->textcoloranalog1());
-    }
-
-  }
-  if (_has_bits_[24 / 32] & (0xffu << (24 % 32))) {
-    // optional uint32 fillColorDiscrYes0 = 46;
-    if (has_fillcolordiscryes0()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->fillcolordiscryes0());
-    }
-
-    // optional uint32 fillColorDiscrYes1 = 47;
-    if (has_fillcolordiscryes1()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->fillcolordiscryes1());
-    }
-
-    // optional uint32 textColorDiscrYes0 = 48;
-    if (has_textcolordiscryes0()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->textcolordiscryes0());
-    }
-
-    // optional uint32 textColorDiscrYes1 = 49;
-    if (has_textcolordiscryes1()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->textcolordiscryes1());
-    }
-
-    // optional uint32 fillColorDiscrNo0 = 50;
-    if (has_fillcolordiscrno0()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->fillcolordiscrno0());
-    }
-
-    // optional uint32 fillColorDiscrNo1 = 51;
-    if (has_fillcolordiscrno1()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->fillcolordiscrno1());
-    }
-
-    // optional uint32 textColorDiscrNo0 = 52;
-    if (has_textcolordiscrno0()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->textcolordiscrno0());
-    }
-
-    // optional uint32 textColorDiscrNo1 = 53;
-    if (has_textcolordiscrno1()) {
-      total_size += 2 +
-        ::google::protobuf::internal::WireFormatLite::UInt32Size(
-          this->textcolordiscrno1());
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->analogformat());
     }
 
   }
@@ -20510,8 +20065,14 @@ void SchemaItemValue::MergeFrom(const ::google::protobuf::Message& from) {
 void SchemaItemValue::MergeFrom(const SchemaItemValue& from) {
   GOOGLE_CHECK_NE(&from, this);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    if (from.has_weight()) {
-      set_weight(from.weight());
+    if (from.has_signalids()) {
+      set_signalids(from.signalids());
+    }
+    if (from.has_signalsource()) {
+      set_signalsource(from.signalsource());
+    }
+    if (from.has_lineweight()) {
+      set_lineweight(from.lineweight());
     }
     if (from.has_linecolor()) {
       set_linecolor(from.linecolor());
@@ -20519,98 +20080,31 @@ void SchemaItemValue::MergeFrom(const SchemaItemValue& from) {
     if (from.has_fillcolor()) {
       set_fillcolor(from.fillcolor());
     }
-    if (from.has_textanalog()) {
-      set_textanalog(from.textanalog());
-    }
     if (from.has_textcolor()) {
       set_textcolor(from.textcolor());
+    }
+    if (from.has_text()) {
+      set_text(from.text());
     }
     if (from.has_font()) {
       mutable_font()->::Proto::FontParam::MergeFrom(from.font());
     }
-    if (from.has_fill()) {
-      set_fill(from.fill());
-    }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_drawrect()) {
       set_drawrect(from.drawrect());
     }
-  }
-  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     if (from.has_horzalign()) {
       set_horzalign(from.horzalign());
     }
     if (from.has_vertalign()) {
       set_vertalign(from.vertalign());
     }
-    if (from.has_signalid()) {
-      set_signalid(from.signalid());
-    }
-    if (from.has_signalsource()) {
-      set_signalsource(from.signalsource());
-    }
     if (from.has_precision()) {
       set_precision(from.precision());
     }
-    if (from.has_textdiscrete0()) {
-      set_textdiscrete0(from.textdiscrete0());
-    }
-    if (from.has_textdiscrete1()) {
-      set_textdiscrete1(from.textdiscrete1());
-    }
-    if (from.has_textnonvalid()) {
-      set_textnonvalid(from.textnonvalid());
-    }
-  }
-  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
-    if (from.has_fillcolornonvalid0()) {
-      set_fillcolornonvalid0(from.fillcolornonvalid0());
-    }
-    if (from.has_fillcolornonvalid1()) {
-      set_fillcolornonvalid1(from.fillcolornonvalid1());
-    }
-    if (from.has_textcolornonvalid0()) {
-      set_textcolornonvalid0(from.textcolornonvalid0());
-    }
-    if (from.has_textcolornonvalid1()) {
-      set_textcolornonvalid1(from.textcolornonvalid1());
-    }
-    if (from.has_fillcoloranalog0()) {
-      set_fillcoloranalog0(from.fillcoloranalog0());
-    }
-    if (from.has_fillcoloranalog1()) {
-      set_fillcoloranalog1(from.fillcoloranalog1());
-    }
-    if (from.has_textcoloranalog0()) {
-      set_textcoloranalog0(from.textcoloranalog0());
-    }
-    if (from.has_textcoloranalog1()) {
-      set_textcoloranalog1(from.textcoloranalog1());
-    }
-  }
-  if (from._has_bits_[24 / 32] & (0xffu << (24 % 32))) {
-    if (from.has_fillcolordiscryes0()) {
-      set_fillcolordiscryes0(from.fillcolordiscryes0());
-    }
-    if (from.has_fillcolordiscryes1()) {
-      set_fillcolordiscryes1(from.fillcolordiscryes1());
-    }
-    if (from.has_textcolordiscryes0()) {
-      set_textcolordiscryes0(from.textcolordiscryes0());
-    }
-    if (from.has_textcolordiscryes1()) {
-      set_textcolordiscryes1(from.textcolordiscryes1());
-    }
-    if (from.has_fillcolordiscrno0()) {
-      set_fillcolordiscrno0(from.fillcolordiscrno0());
-    }
-    if (from.has_fillcolordiscrno1()) {
-      set_fillcolordiscrno1(from.fillcolordiscrno1());
-    }
-    if (from.has_textcolordiscrno0()) {
-      set_textcolordiscrno0(from.textcolordiscrno0());
-    }
-    if (from.has_textcolordiscrno1()) {
-      set_textcolordiscrno1(from.textcolordiscrno1());
+    if (from.has_analogformat()) {
+      set_analogformat(from.analogformat());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -20638,38 +20132,19 @@ bool SchemaItemValue::IsInitialized() const {
 
 void SchemaItemValue::Swap(SchemaItemValue* other) {
   if (other != this) {
-    std::swap(weight_, other->weight_);
+    std::swap(signalids_, other->signalids_);
+    std::swap(signalsource_, other->signalsource_);
+    std::swap(lineweight_, other->lineweight_);
     std::swap(linecolor_, other->linecolor_);
     std::swap(fillcolor_, other->fillcolor_);
-    std::swap(textanalog_, other->textanalog_);
     std::swap(textcolor_, other->textcolor_);
+    std::swap(text_, other->text_);
     std::swap(font_, other->font_);
-    std::swap(fill_, other->fill_);
     std::swap(drawrect_, other->drawrect_);
     std::swap(horzalign_, other->horzalign_);
     std::swap(vertalign_, other->vertalign_);
-    std::swap(signalid_, other->signalid_);
-    std::swap(signalsource_, other->signalsource_);
     std::swap(precision_, other->precision_);
-    std::swap(textdiscrete0_, other->textdiscrete0_);
-    std::swap(textdiscrete1_, other->textdiscrete1_);
-    std::swap(textnonvalid_, other->textnonvalid_);
-    std::swap(fillcolornonvalid0_, other->fillcolornonvalid0_);
-    std::swap(fillcolornonvalid1_, other->fillcolornonvalid1_);
-    std::swap(textcolornonvalid0_, other->textcolornonvalid0_);
-    std::swap(textcolornonvalid1_, other->textcolornonvalid1_);
-    std::swap(fillcoloranalog0_, other->fillcoloranalog0_);
-    std::swap(fillcoloranalog1_, other->fillcoloranalog1_);
-    std::swap(textcoloranalog0_, other->textcoloranalog0_);
-    std::swap(textcoloranalog1_, other->textcoloranalog1_);
-    std::swap(fillcolordiscryes0_, other->fillcolordiscryes0_);
-    std::swap(fillcolordiscryes1_, other->fillcolordiscryes1_);
-    std::swap(textcolordiscryes0_, other->textcolordiscryes0_);
-    std::swap(textcolordiscryes1_, other->textcolordiscryes1_);
-    std::swap(fillcolordiscrno0_, other->fillcolordiscrno0_);
-    std::swap(fillcolordiscrno1_, other->fillcolordiscrno1_);
-    std::swap(textcolordiscrno0_, other->textcolordiscrno0_);
-    std::swap(textcolordiscrno1_, other->textcolordiscrno1_);
+    std::swap(analogformat_, other->analogformat_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -31133,6 +30608,7 @@ const int AppSignal::kEquipmentIDFieldNumber;
 const int AppSignal::kLmEquipmentIDFieldNumber;
 const int AppSignal::kBusTypeIDFieldNumber;
 const int AppSignal::kChannelFieldNumber;
+const int AppSignal::kExcludeFromBuildFieldNumber;
 const int AppSignal::kSignalTypeFieldNumber;
 const int AppSignal::kInOutTypeFieldNumber;
 const int AppSignal::kDataSizeFieldNumber;
@@ -31183,6 +30659,7 @@ void AppSignal::SharedCtor() {
   lmequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   bustypeid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   channel_ = 0;
+  excludefrombuild_ = false;
   signaltype_ = 1;
   inouttype_ = 2;
   datasize_ = 0;
@@ -31301,9 +30778,10 @@ void AppSignal::Clear() {
       }
     }
     channel_ = 0;
-    signaltype_ = 1;
+    excludefrombuild_ = false;
   }
   if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    signaltype_ = 1;
     inouttype_ = 2;
     datasize_ = 0;
     byteorder_ = 1;
@@ -31317,11 +30795,11 @@ void AppSignal::Clear() {
     if (has_tuningdefaultvalue()) {
       if (tuningdefaultvalue_ != NULL) tuningdefaultvalue_->::Proto::TuningValue::Clear();
     }
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     if (has_tuninglowbound()) {
       if (tuninglowbound_ != NULL) tuninglowbound_->::Proto::TuningValue::Clear();
     }
-  }
-  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     if (has_tuninghighbound()) {
       if (tuninghighbound_ != NULL) tuninghighbound_->::Proto::TuningValue::Clear();
     }
@@ -31331,13 +30809,13 @@ void AppSignal::Clear() {
     coarseaperture_ = 1;
     fineaperture_ = 0.5;
     adaptiveaperture_ = false;
+  }
+  if (_has_bits_[24 / 32] & (0xffu << (24 % 32))) {
     if (has_specpropstruct()) {
       if (specpropstruct_ != &::google::protobuf::internal::kEmptyString) {
         specpropstruct_->clear();
       }
     }
-  }
-  if (_has_bits_[24 / 32] & (0xffu << (24 % 32))) {
     if (has_specpropvalues()) {
       if (specpropvalues_ != &::google::protobuf::internal::kEmptyString) {
         specpropvalues_->clear();
@@ -31470,6 +30948,22 @@ bool AppSignal::MergePartialFromCodedStream(
                    ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, &channel_)));
           set_has_channel();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(64)) goto parse_excludeFromBuild;
+        break;
+      }
+
+      // optional bool excludeFromBuild = 8 [default = false];
+      case 8: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_excludeFromBuild:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &excludefrombuild_)));
+          set_has_excludefrombuild();
         } else {
           goto handle_uninterpreted;
         }
@@ -31864,6 +31358,11 @@ void AppSignal::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(7, this->channel(), output);
   }
 
+  // optional bool excludeFromBuild = 8 [default = false];
+  if (has_excludefrombuild()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(8, this->excludefrombuild(), output);
+  }
+
   // optional int32 signalType = 16 [default = 1];
   if (has_signaltype()) {
     ::google::protobuf::internal::WireFormatLite::WriteInt32(16, this->signaltype(), output);
@@ -32051,6 +31550,11 @@ void AppSignal::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(7, this->channel(), target);
   }
 
+  // optional bool excludeFromBuild = 8 [default = false];
+  if (has_excludefrombuild()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(8, this->excludefrombuild(), target);
+  }
+
   // optional int32 signalType = 16 [default = 1];
   if (has_signaltype()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(16, this->signaltype(), target);
@@ -32233,6 +31737,13 @@ int AppSignal::ByteSize() const {
           this->channel());
     }
 
+    // optional bool excludeFromBuild = 8 [default = false];
+    if (has_excludefrombuild()) {
+      total_size += 1 + 1;
+    }
+
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     // optional int32 signalType = 16 [default = 1];
     if (has_signaltype()) {
       total_size += 2 +
@@ -32240,8 +31751,6 @@ int AppSignal::ByteSize() const {
           this->signaltype());
     }
 
-  }
-  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
     // optional int32 inOutType = 17 [default = 2];
     if (has_inouttype()) {
       total_size += 2 +
@@ -32289,6 +31798,8 @@ int AppSignal::ByteSize() const {
           this->tuningdefaultvalue());
     }
 
+  }
+  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     // optional .Proto.TuningValue tuningLowBound = 73;
     if (has_tuninglowbound()) {
       total_size += 2 +
@@ -32296,8 +31807,6 @@ int AppSignal::ByteSize() const {
           this->tuninglowbound());
     }
 
-  }
-  if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     // optional .Proto.TuningValue tuningHighBound = 74;
     if (has_tuninghighbound()) {
       total_size += 2 +
@@ -32337,6 +31846,8 @@ int AppSignal::ByteSize() const {
       total_size += 2 + 1;
     }
 
+  }
+  if (_has_bits_[24 / 32] & (0xffu << (24 % 32))) {
     // optional string specPropStruct = 90;
     if (has_specpropstruct()) {
       total_size += 2 +
@@ -32344,8 +31855,6 @@ int AppSignal::ByteSize() const {
           this->specpropstruct());
     }
 
-  }
-  if (_has_bits_[24 / 32] & (0xffu << (24 % 32))) {
     // optional bytes specPropValues = 91;
     if (has_specpropvalues()) {
       total_size += 2 +
@@ -32415,11 +31924,14 @@ void AppSignal::MergeFrom(const AppSignal& from) {
     if (from.has_channel()) {
       set_channel(from.channel());
     }
-    if (from.has_signaltype()) {
-      set_signaltype(from.signaltype());
+    if (from.has_excludefrombuild()) {
+      set_excludefrombuild(from.excludefrombuild());
     }
   }
   if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (from.has_signaltype()) {
+      set_signaltype(from.signaltype());
+    }
     if (from.has_inouttype()) {
       set_inouttype(from.inouttype());
     }
@@ -32441,11 +31953,11 @@ void AppSignal::MergeFrom(const AppSignal& from) {
     if (from.has_tuningdefaultvalue()) {
       mutable_tuningdefaultvalue()->::Proto::TuningValue::MergeFrom(from.tuningdefaultvalue());
     }
+  }
+  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     if (from.has_tuninglowbound()) {
       mutable_tuninglowbound()->::Proto::TuningValue::MergeFrom(from.tuninglowbound());
     }
-  }
-  if (from._has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     if (from.has_tuninghighbound()) {
       mutable_tuninghighbound()->::Proto::TuningValue::MergeFrom(from.tuninghighbound());
     }
@@ -32467,11 +31979,11 @@ void AppSignal::MergeFrom(const AppSignal& from) {
     if (from.has_adaptiveaperture()) {
       set_adaptiveaperture(from.adaptiveaperture());
     }
+  }
+  if (from._has_bits_[24 / 32] & (0xffu << (24 % 32))) {
     if (from.has_specpropstruct()) {
       set_specpropstruct(from.specpropstruct());
     }
-  }
-  if (from._has_bits_[24 / 32] & (0xffu << (24 % 32))) {
     if (from.has_specpropvalues()) {
       set_specpropvalues(from.specpropvalues());
     }
@@ -32514,6 +32026,7 @@ void AppSignal::Swap(AppSignal* other) {
     std::swap(lmequipmentid_, other->lmequipmentid_);
     std::swap(bustypeid_, other->bustypeid_);
     std::swap(channel_, other->channel_);
+    std::swap(excludefrombuild_, other->excludefrombuild_);
     std::swap(signaltype_, other->signaltype_);
     std::swap(inouttype_, other->inouttype_);
     std::swap(datasize_, other->datasize_);
@@ -32775,6 +32288,7 @@ const int ProtoAppSignalData::kDecimalPlacesFieldNumber;
 const int ProtoAppSignalData::kCoarseApertureFieldNumber;
 const int ProtoAppSignalData::kFineApertureFieldNumber;
 const int ProtoAppSignalData::kAdaptiveApertureFieldNumber;
+const int ProtoAppSignalData::kExcludefromBuildFieldNumber;
 #endif  // !_MSC_VER
 
 ProtoAppSignalData::ProtoAppSignalData()
@@ -32813,6 +32327,7 @@ void ProtoAppSignalData::SharedCtor() {
   coarseaperture_ = 1;
   fineaperture_ = 0.5;
   adaptiveaperture_ = false;
+  excludefrombuild_ = false;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -32899,6 +32414,7 @@ void ProtoAppSignalData::Clear() {
   }
   if (_has_bits_[16 / 32] & (0xffu << (16 % 32))) {
     adaptiveaperture_ = false;
+    excludefrombuild_ = false;
   }
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
@@ -33174,6 +32690,22 @@ bool ProtoAppSignalData::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(144)) goto parse_excludefromBuild;
+        break;
+      }
+
+      // optional bool excludefromBuild = 18 [default = false];
+      case 18: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_excludefromBuild:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &excludefrombuild_)));
+          set_has_excludefrombuild();
+        } else {
+          goto handle_uninterpreted;
+        }
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -33296,6 +32828,11 @@ void ProtoAppSignalData::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteBool(17, this->adaptiveaperture(), output);
   }
 
+  // optional bool excludefromBuild = 18 [default = false];
+  if (has_excludefrombuild()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(18, this->excludefrombuild(), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -33408,6 +32945,11 @@ void ProtoAppSignalData::SerializeWithCachedSizes(
   // optional bool adaptiveAperture = 17 [default = false];
   if (has_adaptiveaperture()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(17, this->adaptiveaperture(), target);
+  }
+
+  // optional bool excludefromBuild = 18 [default = false];
+  if (has_excludefrombuild()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(18, this->excludefrombuild(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -33532,6 +33074,11 @@ int ProtoAppSignalData::ByteSize() const {
       total_size += 2 + 1;
     }
 
+    // optional bool excludefromBuild = 18 [default = false];
+    if (has_excludefrombuild()) {
+      total_size += 2 + 1;
+    }
+
   }
   if (!unknown_fields().empty()) {
     total_size +=
@@ -33614,6 +33161,9 @@ void ProtoAppSignalData::MergeFrom(const ProtoAppSignalData& from) {
     if (from.has_adaptiveaperture()) {
       set_adaptiveaperture(from.adaptiveaperture());
     }
+    if (from.has_excludefrombuild()) {
+      set_excludefrombuild(from.excludefrombuild());
+    }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
 }
@@ -33654,6 +33204,7 @@ void ProtoAppSignalData::Swap(ProtoAppSignalData* other) {
     std::swap(coarseaperture_, other->coarseaperture_);
     std::swap(fineaperture_, other->fineaperture_);
     std::swap(adaptiveaperture_, other->adaptiveaperture_);
+    std::swap(excludefrombuild_, other->excludefrombuild_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
