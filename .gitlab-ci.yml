@@ -18,7 +18,7 @@ before_script:
 windows build job:
   stage: build
   only:
-#    - /^release.*$/
+    - /^release.*$/
     - master
     - develop
     - experimental
