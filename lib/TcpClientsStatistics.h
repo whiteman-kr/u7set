@@ -32,6 +32,9 @@ public:
 	DialogStatistics(QWidget* parent);
 	~DialogStatistics();
 
+public slots:
+	void prepareContextMenu(const QPoint& pos);
+
 signals:
 	void dialogClosed();
 
@@ -41,10 +44,11 @@ protected:
 	void timerEvent(QTimerEvent* event);
 
 private slots:
-	//void onReconnect();
+	void onReconnect();
 
 private:
 	void update();
+	void reconnect(std::vector<Tcp::Client*> clients);	// call this function with static mutex locked!
 
 private:
 	enum Columns
@@ -53,6 +57,7 @@ private:
 		IsConnected,
 		AddressPort,
 		StartTime,
+		UpTime,
 		SentKbytes,
 		ReceivedKbytes,
 		RequestCount,

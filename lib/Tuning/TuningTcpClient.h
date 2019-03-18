@@ -8,7 +8,6 @@
 #include "../lib/Tcp.h"
 #include "../lib/Hash.h"
 #include "../Proto/network.pb.h"
-#include "../lib/TcpClientsStatistics.h"
 
 struct TuningWriteCommand
 {
@@ -71,7 +70,7 @@ struct TuningWriteCommand
 };
 
 
-class TuningTcpClient : public Tcp::Client, public TcpClientInstance, public ITuningTcpClient
+class TuningTcpClient : public Tcp::Client, public ITuningTcpClient
 {
 	Q_OBJECT
 

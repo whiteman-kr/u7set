@@ -4,8 +4,9 @@
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/LogFile.h"
 #include "MonitorConfigController.h"
+#include "../lib/TcpClientsStatistics.h"
 
-class MonitorTuningTcpClient : public TuningTcpClient
+class MonitorTuningTcpClient : public TuningTcpClient, public TcpClientInstance
 {
 	Q_OBJECT
 

@@ -23,7 +23,6 @@ bool TuningWriteCommand::load(const Network::TuningWriteCommand& message)
 //
 TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, TuningSignalManager* signalManager) :
 	Tcp::Client(softwareInfo, HostAddressPort("0.0.0.0", 0)),
-	TcpClientInstance(this),
 	m_instanceId(softwareInfo.equipmentID()),
 	m_instanceIdHash(::calcHash(softwareInfo.equipmentID())),
 	m_signals(signalManager)
