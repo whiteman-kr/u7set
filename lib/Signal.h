@@ -331,7 +331,7 @@ private:
 	QString m_lmEquipmentID;										// now fills in compile time only
 	QString m_busTypeID;											// only for: m_signalType == E::SignalType::Bus
 	E::Channel m_channel = E::Channel::A;
-	bool m_excludeFromBuild;
+	bool m_excludeFromBuild = false;
 
 	// Signal type
 	//
