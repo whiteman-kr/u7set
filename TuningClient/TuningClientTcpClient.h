@@ -5,9 +5,11 @@
 #include "../lib/LogFile.h"
 #include "../lib/Tuning/TuningLog.h"
 #include "UserManager.h"
+#include "../lib/TcpClientsStatistics.h"
 
-class TuningClientTcpClient : public TuningTcpClient
+class TuningClientTcpClient : public TuningTcpClient, public TcpClientInstance
 {
+	Q_OBJECT
 public:
 	TuningClientTcpClient(const SoftwareInfo& softwareInfo,
 						  TuningSignalManager* signalManager,

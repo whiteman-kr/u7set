@@ -8,6 +8,7 @@
 #include "../Proto/network.pb.h"
 #include "MonitorConfigController.h"
 #include "ArchiveData.h"
+#include "../lib/TcpClientsStatistics.h"
 
 
 struct ArchiveRequest
@@ -22,7 +23,7 @@ struct ArchiveRequest
 
 // Getting data freom archive, can process only one request in a time
 //
-class ArchiveTcpClient : public Tcp::Client
+class ArchiveTcpClient : public Tcp::Client, public TcpClientInstance
 {
 	Q_OBJECT
 

@@ -159,6 +159,11 @@ void MainWindow::createActions()
 	m_pTuningSourcesAction->setEnabled(true);
 	connect(m_pTuningSourcesAction, &QAction::triggered, this, &MainWindow::showTuningSources);
 
+	m_pStatisticsAction = new QAction(tr("Connection Statistics..."), this);
+	m_pStatisticsAction->setStatusTip(tr("View Connection Statistics"));
+	m_pStatisticsAction->setEnabled(true);
+	connect(m_pStatisticsAction, &QAction::triggered, this, &MainWindow::showStatistics);
+
 	m_pAppLogAction = new QAction(tr("Application Log..."), this);
 	m_pAppLogAction->setStatusTip(tr("Show application log"));
 	connect(m_pAppLogAction, &QAction::triggered, this, &MainWindow::showAppLog);
@@ -184,13 +189,14 @@ void MainWindow::createMenu()
 
 	// Tools
 	//
-	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
-
-	pToolsMenu->addAction(m_pPresetEditorAction);
-
 	QMenu* pServiceMenu = menuBar()->addMenu(tr("&Service"));
-	pServiceMenu->addAction(m_pTuningSourcesAction);
-	pServiceMenu->addAction(m_pSettingsAction);
+	pServiceMenu->addAction(m_pPresetEditorAction);
+
+	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
+	pToolsMenu->addAction(m_pTuningSourcesAction);
+	pToolsMenu->addAction(m_pStatisticsAction);
+	pToolsMenu->addAction(m_pSettingsAction);
+
 
 	// Help
 	//
@@ -822,6 +828,28 @@ void MainWindow::showTuningSources()
 	}
 
 	UiTools::adjustDialogPlacement(m_dialogTuningSources);
+}
+
+void MainWindow::showStatistics()
+{
+	if (m_dialogStatistics == nullptr)
+	{
+		m_dialogStatistics = new DialogStatistics(this);
+		m_dialogStatistics->show();
+
+		auto f = [this]() -> void
+			{
+				m_dialogStatistics = nullptr;
+			};
+
+		connect(m_dialogStatistics, &DialogStatistics::dialogClosed, this, f);
+	}
+	else
+	{
+		m_dialogStatistics->activateWindow();
+	}
+
+	UiTools::adjustDialogPlacement(m_dialogStatistics);
 }
 
 void MainWindow::showAppLog()

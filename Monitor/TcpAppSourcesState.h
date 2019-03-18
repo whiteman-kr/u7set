@@ -6,6 +6,7 @@
 #include "../Proto/network.pb.h"
 #include "../lib/AppSignalManager.h"
 #include "MonitorConfigController.h"
+#include "../lib/TcpClientsStatistics.h"
 
 class AppDataSourceState
 {
@@ -46,7 +47,7 @@ private:
 //				+------------------------
 //
 
-class TcpAppSourcesState : public Tcp::Client
+class TcpAppSourcesState : public Tcp::Client, public TcpClientInstance
 {
 	Q_OBJECT
 

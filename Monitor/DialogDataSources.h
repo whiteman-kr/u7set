@@ -12,6 +12,8 @@ public:
 	explicit DialogDataSources(TcpAppSourcesState* tcpAppSourceState, bool showTuningWidget, TuningTcpClient* tcpTuningClient, bool hasActivationControls, QWidget* parent);
 	virtual ~DialogDataSources();
 
+	void setTuningTcpClient(bool showTuningWidget, TuningTcpClient* tcpTuningClient, bool hasActivationControls);
+
 protected:
 	virtual void reject() override;
 
@@ -20,7 +22,11 @@ signals:
 
 private:
 	AppDataSourcesWidget* m_appDataSourcesWidget = nullptr;
+
+	QLabel* m_tuningSourcesLabel = nullptr;
 	TuningSourcesWidget* m_tuningSourcesWidget = nullptr;
+
+	QVBoxLayout* m_mainLayout = nullptr;
 
 };
 

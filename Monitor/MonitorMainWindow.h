@@ -12,6 +12,7 @@
 #include "../VFrame30/TuningController.h"
 #include "../lib/LogFile.h"
 #include "../lib/Ui/DialogAlert.h"
+#include "../lib/TcpClientsStatistics.h"
 
 class MonitorCentralWidget;
 class MonitorToolBar;
@@ -74,6 +75,7 @@ protected slots:
 	void showLog();
 	void showDataSources();
 	void showSettings();
+	void showStatistics();
 
 	void showAbout();
 	void debug();
@@ -143,6 +145,7 @@ private:
 	//
 
 	QAction* m_pDataSourcesAction = nullptr;
+	QAction* m_pStatisticsAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 
 	// ? menu
@@ -193,6 +196,7 @@ private:
 	int m_logWarningsCounter = -1;
 
 	DialogDataSources* m_dialogDataSources = nullptr;
+	DialogStatistics* m_dialogStatistics = nullptr;
 };
 
 

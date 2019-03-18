@@ -283,6 +283,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0263.sql", "Upgrade to version 263, Added functions for getting checked out signals and undo multiple signals"},
 	{":/DatabaseUpgrade/Upgrade0264.sql", "Upgrade to version 264, Changes in ArchiveService preset"},
 	{":/DatabaseUpgrade/Upgrade0265.sql", "Upgrade to version 265, ElectricLimits properties have 4 decimal places in input modules"},
+	{":/DatabaseUpgrade/Upgrade0266.sql", "Upgrade to version 266, Add SerialNo signal to 4-phase input modules, 2 percents SpreadTolerance, Add validity signals to AOM-4PH and DOM"},
 };
 
 int DbWorker::counter = 0;
