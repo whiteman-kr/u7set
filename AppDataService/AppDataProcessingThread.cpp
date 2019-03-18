@@ -62,14 +62,6 @@ void AppDataProcessingThread::run()
 				appDataSource->parsePacket();
 
 				m_parsedRupPacketCount++;
-
-/*				if ((m_parsedRupPacketCount % 100) == 0)
-				{
-					qDebug() << " tread " << m_number << "parsed " << m_parsedRupPacketCount <<
-								" ----- success" << m_successOwnership << "/" << m_failOwnership <<
-								"queue max size" << appDataSource->rupFramesQueueMaxSize() <<
-								"losted" << appDataSource->lostedPacketCount();
-				}*/
 			}
 			while(isQuitRequested() == false);
 

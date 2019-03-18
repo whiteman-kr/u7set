@@ -6,6 +6,7 @@
 #include <QtWidgets/QApplication>
 #include <assert.h>
 #include <cmath>
+#include <QDateTime>
 
 #ifdef _MSC_VER
 #pragma warning(push)
@@ -657,6 +658,42 @@ public:
 
 	}
 
+	static QString dateTimeToStringTime(const QDateTime& dt, bool milliseconds)
+	{
+		QTime tm = dt.time();
+		QString result;
+
+		if (milliseconds == true)
+		{
+			result = QString("%1:%2:%3.%4")
+						.arg(tm.hour(), 2, 10, QChar('0'))
+						.arg(tm.minute(), 2, 10, QChar('0'))
+						.arg(tm.second(), 2, 10, QChar('0'))
+						.arg(tm.msec(), 3, 10, QChar('0'));
+		}
+		else
+		{
+			result = QString("%1:%2:%3")
+						.arg(tm.hour(), 2, 10, QChar('0'))
+						.arg(tm.minute(), 2, 10, QChar('0'))
+						.arg(tm.second(), 2, 10, QChar('0'));
+		}
+
+		return result;
+	}
+
+	static QString dateTimeToStringDate(const QDateTime& dt)
+	{
+		QDate date = dt.date();
+		QString result;
+
+		result = QString("%1.%2.%3")
+					.arg(date.day(), 2, 10, QChar('0'))
+					.arg(date.month(), 2, 10, QChar('0'))
+					.arg(date.year(), 4, 10, QChar('0'));
+
+		return result;
+	}
 };
 
 

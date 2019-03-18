@@ -4,6 +4,7 @@
 #include <QHBoxLayout>
 #include <QDateTimeEdit>
 #include <QDialogButtonBox>
+#include "../lib/CUtils.h"
 
 TrendSlider::TrendSlider(TrendLib::TrendRulerSet* rulerSet) :
 	m_rulerSet(rulerSet)
@@ -366,7 +367,10 @@ void TrendSliderRailSubcontrol::paintEvent(QPaintEvent*)
 	//
 	p.setPen(QPen(Qt::darkGray, 0));
 
-	QString minTimeText = TimeStamp(m_min).toDateTime().toString(" hh:mm:ss [dd.MM.yyyy] ");
+	//QString minTimeText = TimeStamp(m_min).toDateTime().toString(QStringLiteral(" hh:mm:ss [dd.MM.yyyy] "));
+	QDateTime minDt = TimeStamp(m_min).toDateTime();
+	QString minTimeText = QStringLiteral(" ") + CUtils::dateTimeToStringTime(minDt, false) +
+						  QStringLiteral(" [") +  CUtils::dateTimeToStringDate(minDt) + QStringLiteral("] ");
 
 	QRect minTextRect = sliderRc;
 	minTextRect.moveLeft(0);
@@ -375,7 +379,10 @@ void TrendSliderRailSubcontrol::paintEvent(QPaintEvent*)
 
 	// Draw max text
 	//
-	QString maxTimeText = TimeStamp(m_max).toDateTime().toString(" hh:mm:ss [dd.MM.yyyy] ");
+	//QString maxTimeText = TimeStamp(m_max).toDateTime().toString(QStringLiteral(" hh:mm:ss [dd.MM.yyyy] "));
+	QDateTime maxDt = TimeStamp(m_max).toDateTime();
+	QString maxTimeText = QStringLiteral(" ") + CUtils::dateTimeToStringTime(maxDt, false) +
+						  QStringLiteral(" [") +  CUtils::dateTimeToStringDate(maxDt) + QStringLiteral("] ");
 
 	QRect maxTextRect = sliderRc;
 	maxTextRect.moveRight(this->rect().width());
@@ -404,7 +411,10 @@ void TrendSliderRailSubcontrol::paintEvent(QPaintEvent*)
 	p.setPen(QPen(Qt::black, 0));
 
 	QDateTime dateTime = TimeStamp(m_value).toDateTime();
-	QString text = dateTime.toString("hh:mm:ss [dd.MM.yyyy]");
+	//QString text = dateTime.toString(QStringLiteral("hh:mm:ss [dd.MM.yyyy]"));
+	QString text = CUtils::dateTimeToStringTime(dateTime, false) +
+					QStringLiteral(" [") +  CUtils::dateTimeToStringDate(dateTime) + QStringLiteral("]");
+
 	p.drawText(sliderRc, Qt::AlignCenter, text, &sliderRc);
 
 	if (m_sliderWidth < static_cast<int>(sliderRc.width() * 1.2))

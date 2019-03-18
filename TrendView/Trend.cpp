@@ -2,6 +2,7 @@
 #include <QPainter>
 #include <cfloat>
 #include <type_traits>
+#include "../lib/CUtils.h"
 #include "../Proto/trends.pb.h"
 
 namespace TrendLib
@@ -368,8 +369,9 @@ namespace TrendLib
 		QString lastDateText;
 		for (const PosTimePair& p : timeGridPos)
 		{
-			QString timeText = p.timeStamp.toDateTime().toString(timeGridInterval < 1_sec ? "hh:mm:ss.zzz" : "hh:mm:ss");
-			QString dateText = p.timeStamp.toDateTime().toString("dd.MM.yyyy");
+			QDateTime dateTime = p.timeStamp.toDateTime();
+			QString timeText = CUtils::dateTimeToStringTime(dateTime, timeGridInterval < 1_sec);
+			QString dateText = CUtils::dateTimeToStringDate(dateTime);
 
 			QRectF timeTextRect(p.x - 2.0, insideRect.bottom(), 4.0, (laneRect.bottom() - insideRect.bottom()) / 2.0);
 			QRectF dateTextRect(p.x - 2.0, timeTextRect.bottom(), 4.0, (laneRect.bottom() - insideRect.bottom()) / 2.0);
