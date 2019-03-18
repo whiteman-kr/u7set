@@ -39,13 +39,13 @@ public:
 	explicit AppDataSourcesWidget(TcpAppSourcesState* tcpClient,  bool hasCloseButton, QWidget* parent);
 	virtual ~AppDataSourcesWidget();
 
+	void showCloseButton(bool show);
+
 signals:
 	void closeButtonPressed();
 
 protected:
 	void timerEvent(QTimerEvent* event);
-
-	virtual bool passwordOk();
 
 private slots:
 	void slot_tuningSourcesArrived();
@@ -86,6 +86,7 @@ private:
 	QTreeWidget* m_treeWidget = nullptr;
 	QPushButton* m_btnDetails = nullptr;
 	QLabel* m_labelSingleControlMode = nullptr;
+	QPushButton* m_closeButton = nullptr;
 
 	int m_updateStateTimerId = -1;
 

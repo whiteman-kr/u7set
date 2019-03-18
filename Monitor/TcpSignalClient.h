@@ -6,6 +6,7 @@
 #include "../Proto/network.pb.h"
 #include "../lib/AppSignalManager.h"
 #include "MonitorConfigController.h"
+#include "../lib/TcpClientsStatistics.h"
 
 //
 //		ADS_GET_APP_SIGNAL_LIST_START
@@ -19,7 +20,7 @@
 //				+------------------------
 //
 
-class TcpSignalClient : public Tcp::Client
+class TcpSignalClient : public Tcp::Client, public TcpClientInstance
 {
 	Q_OBJECT
 

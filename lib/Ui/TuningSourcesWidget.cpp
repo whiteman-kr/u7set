@@ -157,6 +157,11 @@ DialogTuningSourceInfo::~DialogTuningSourceInfo()
 
 }
 
+void DialogTuningSourceInfo::setTuningTcpClient(TuningTcpClient* tcpClient)
+{
+	m_tcpClient = tcpClient;
+}
+
 void DialogTuningSourceInfo::updateData()
 {
 	if (m_tcpClient == nullptr)
@@ -442,6 +447,23 @@ TuningSourcesWidget::TuningSourcesWidget(TuningTcpClient* tcpClient, bool hasAct
 
 TuningSourcesWidget::~TuningSourcesWidget()
 {
+}
+
+void TuningSourcesWidget::setTuningTcpClient(TuningTcpClient* tcpClient)
+{
+	m_tuningTcpClient = tcpClient;
+
+	for (auto it : m_sourceInfoDialogsMap)
+	{
+		DialogTuningSourceInfo* d = it.second;
+		if (d == nullptr)
+		{
+			Q_ASSERT(d);
+			return;
+		}
+
+		d->setTuningTcpClient(tcpClient);
+	}
 }
 
 void TuningSourcesWidget::timerEvent(QTimerEvent* event)

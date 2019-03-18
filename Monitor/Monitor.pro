@@ -108,7 +108,8 @@ SOURCES += main.cpp \
     TcpAppSourcesState.cpp \
     ../lib/Ui/TuningSourcesWidget.cpp \
     ../lib/Ui/AppDataSourcesWidget.cpp \
-    DialogDataSources.cpp
+    DialogDataSources.cpp \
+    ../lib/TcpClientsStatistics.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -177,7 +178,8 @@ HEADERS  += \
     TcpAppSourcesState.h \
     ../lib/Ui/TuningSourcesWidget.h \
     ../lib/Ui/AppDataSourcesWidget.h \
-    DialogDataSources.h
+    DialogDataSources.h \
+    ../lib/TcpClientsStatistics.h
 
 
 FORMS    += \

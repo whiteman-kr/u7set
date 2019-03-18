@@ -143,10 +143,9 @@ void DialogAppDataSourceInfo::updateData()
 	bool ok = false;
 
 	AppDataSourceState ds = m_tcpClient->appDataSourceState(m_sourceHash, &ok);
-
 	if (ok == false)
 	{
-		//return;	//Zeroes will be printed
+		return;
 	}
 
 	// info
@@ -281,12 +280,11 @@ AppDataSourcesWidget::AppDataSourcesWidget(TcpAppSourcesState* tcpClient,  bool 
 
 	bottomLayout->addStretch();
 
-	if (hasCloseButton == true)
-	{
-		QPushButton* b = new QPushButton(tr("Close"));
-		connect(b, &QPushButton::clicked, this, &AppDataSourcesWidget::on_btnClose_clicked);
-		bottomLayout->addWidget(b);
-	}
+	m_closeButton = new QPushButton(tr("Close"));
+	connect(m_closeButton, &QPushButton::clicked, this, &AppDataSourcesWidget::on_btnClose_clicked);
+	bottomLayout->addWidget(m_closeButton);
+
+	showCloseButton(hasCloseButton);
 
 	setLayout(mainLayout);
 
@@ -322,6 +320,11 @@ AppDataSourcesWidget::~AppDataSourcesWidget()
 {
 }
 
+void AppDataSourcesWidget::showCloseButton(bool show)
+{
+	m_closeButton->setVisible(show);
+}
+
 void AppDataSourcesWidget::timerEvent(QTimerEvent* event)
 {
 	assert(event);
@@ -330,11 +333,6 @@ void AppDataSourcesWidget::timerEvent(QTimerEvent* event)
 	{
 		update(true);
 	}
-}
-
-bool AppDataSourcesWidget::passwordOk()
-{
-	return true;
 }
 
 void AppDataSourcesWidget::slot_tuningSourcesArrived()

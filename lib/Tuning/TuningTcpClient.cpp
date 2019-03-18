@@ -23,6 +23,7 @@ bool TuningWriteCommand::load(const Network::TuningWriteCommand& message)
 //
 TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, TuningSignalManager* signalManager) :
 	Tcp::Client(softwareInfo, HostAddressPort("0.0.0.0", 0)),
+	TcpClientInstance(this),
 	m_instanceId(softwareInfo.equipmentID()),
 	m_instanceIdHash(::calcHash(softwareInfo.equipmentID())),
 	m_signals(signalManager)
@@ -442,6 +443,12 @@ void TuningTcpClient::resetToProcessTuningSignals()
 
 void TuningTcpClient::requestTuningSourcesInfo()
 {
+	if (isConnected() == false)
+	{
+		writeLogMessage(tr("TuningTcpClient::requestTuningSourcesInfo, isConnected() == false."));
+		return;
+	}
+
 	if (isClearToSendRequest() == false)
 	{
 		writeLogMessage(tr("TuningTcpClient::requestTuningSourcesInfo, isClearToSendRequest() == false, reconnecting."));
@@ -505,6 +512,12 @@ void TuningTcpClient::processTuningSourcesInfo(const QByteArray& data)
 
 void TuningTcpClient::requestTuningSourcesState()
 {
+	if (isConnected() == false)
+	{
+		writeLogMessage(tr("TuningTcpClient::requestTuningSourcesState, isConnected() == false."));
+		return;
+	}
+
 	if (isClearToSendRequest() == false)
 	{
 		writeLogMessage(tr("TuningTcpClient::requestTuningSourcesState, isClearToSendRequest() == false, reconnecting."));
@@ -613,6 +626,12 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 
 void TuningTcpClient::requestActivateTuningSource(const QString& equipmentId, bool enableControl, bool forceTakeControl)
 {
+	if (isConnected() == false)
+	{
+		writeLogMessage(tr("TuningTcpClient::requestActivateTuningSource, isConnected() == false."));
+		return;
+	}
+
 	if (isClearToSendRequest() == false)
 	{
 		writeLogMessage(tr("TuningTcpClient::requestActivateTuningSource, isClearToSendRequest() == false, reconnecting."));
@@ -659,6 +678,12 @@ void TuningTcpClient::processActivateTuningSource(const QByteArray& data)
 
 void TuningTcpClient::requestReadTuningSignals()
 {
+	if (isConnected() == false)
+	{
+		writeLogMessage(tr("TuningTcpClient::requestReadTuningSignals, isConnected() == false."));
+		return;
+	}
+
 	if (isClearToSendRequest() == false)
 	{
 		writeLogMessage(tr("TuningTcpClient::isClearToSendRequest, isClearToSendRequest() == false, reconnecting."));
@@ -836,6 +861,12 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 void TuningTcpClient::requestWriteTuningSignals()
 {
+	if (isConnected() == false)
+	{
+		writeLogMessage(tr("TuningTcpClient::requestWriteTuningSignals, isConnected() == false."));
+		return;
+	}
+
 	if (isClearToSendRequest() == false)
 	{
 		writeLogMessage(tr("TuningTcpClient::requestWriteTuningSignals, isClearToSendRequest() == false, reconnecting."));
@@ -927,9 +958,15 @@ void TuningTcpClient::processWriteTuningSignals(const QByteArray& data)
 
 void TuningTcpClient::requestApplyTuningSignals()
 {
+	if (isConnected() == false)
+	{
+		writeLogMessage(tr("TuningTcpClient::requestApplyTuningSignals, isConnected() == false."));
+		return;
+	}
+
 	if (isClearToSendRequest() == false)
 	{
-		writeLogMessage(tr("TuningTcpClient::requestTuningSourcesInfo, isClearToSendRequest() == false, reconnecting."));
+		writeLogMessage(tr("TuningTcpClient::requestApplyTuningSignals, isClearToSendRequest() == false, reconnecting."));
 		closeConnection();
 		return;
 	}

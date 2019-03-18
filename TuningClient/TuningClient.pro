@@ -139,7 +139,8 @@ SOURCES +=\
     ../lib/Ui/DialogAbout.cpp \
     DialogChooseFilter.cpp \
     DialogTuningSources.cpp \
-    ../lib/Ui/TuningSourcesWidget.cpp
+    ../lib/Ui/TuningSourcesWidget.cpp \
+    ../lib/TcpClientsStatistics.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -201,7 +202,8 @@ HEADERS  += MainWindow.h \
     DialogChooseFilter.h \
     DialogTuningSources.h \
     ../lib/Ui/TuningSourcesWidget.h \
-    ../lib/Ui/DialogSourceInfo.h
+    ../lib/Ui/DialogSourceInfo.h \
+    ../lib/TcpClientsStatistics.h
 
 FORMS    += \
     DialogSettings.ui \

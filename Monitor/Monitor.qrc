@@ -17,5 +17,6 @@
         <file>Images/TuningSources.svg</file>
         <file>Images/logo.png</file>
         <file>Images/AppDataSources.svg</file>
+        <file>Images/NetworkConnections.svg</file>
     </qresource>
 </RCC>

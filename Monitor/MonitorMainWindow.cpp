@@ -262,6 +262,12 @@ void MonitorMainWindow::createActions()
 	m_pExitAction->setEnabled(true);
 	connect(m_pExitAction, &QAction::triggered, this, &MonitorMainWindow::exit);
 
+	m_pStatisticsAction = new QAction(tr("Connection Statistics..."), this);
+	m_pStatisticsAction->setStatusTip(tr("View Connection Statistics"));
+	m_pStatisticsAction->setIcon(QIcon(":/Images/Images/NetworkConnections.svg"));
+	m_pStatisticsAction->setEnabled(true);
+	connect(m_pStatisticsAction, &QAction::triggered, this, &MonitorMainWindow::showStatistics);
+
 	m_pDataSourcesAction = new QAction(tr("Data Sources..."), this);
 	m_pDataSourcesAction->setStatusTip(tr("View Data Sources"));
 	m_pDataSourcesAction->setIcon(QIcon(":/Images/Images/AppDataSources.svg"));
@@ -410,6 +416,7 @@ void MonitorMainWindow::createMenus()
 	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
 
 	pToolsMenu->addAction(m_pDataSourcesAction);
+	pToolsMenu->addAction(m_pStatisticsAction);
 	pToolsMenu->addAction(m_pSettingsAction);
 
 	// Help
@@ -710,6 +717,28 @@ void MonitorMainWindow::showSettings()
 	return;
 }
 
+void MonitorMainWindow::showStatistics()
+{
+	if (m_dialogStatistics == nullptr)
+	{
+		m_dialogStatistics = new DialogStatistics(this);
+		m_dialogStatistics->show();
+
+		auto f = [this]() -> void
+			{
+				m_dialogStatistics = nullptr;
+			};
+
+		connect(m_dialogStatistics, &DialogStatistics::dialogClosed, this, f);
+	}
+	else
+	{
+		m_dialogStatistics->activateWindow();
+	}
+
+	UiTools::adjustDialogPlacement(m_dialogStatistics);
+}
+
 void MonitorMainWindow::showAbout()
 {
 	QString text = qApp->applicationName() + tr(" allows user to view schemas and trends.<br>");
@@ -999,12 +1028,6 @@ void MonitorMainWindow::slot_historyChanged(bool enableBack, bool enableForward)
 
 void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 {
-	if (m_dialogDataSources != nullptr)
-	{
-		delete m_dialogDataSources;
-		m_dialogDataSources = nullptr;
-	}
-
 	if (m_tuningTcpClientThread != nullptr)
 	{
 		m_tuningController->resetTcpClient();
@@ -1030,6 +1053,11 @@ void MonitorMainWindow::slot_configurationArrived(ConfigSettings configuration)
 		m_tuningTcpClientThread->start();
 
 		m_tuningController->setTcpClient(m_tuningTcpClient);
+	}
+
+	if (m_dialogDataSources != nullptr)
+	{
+		m_dialogDataSources->setTuningTcpClient(m_configController.configuration().tuningEnabled, m_tuningTcpClient, false);
 	}
 
 	m_statusBarTuningConnection->setVisible(configuration.tuningEnabled == true);
