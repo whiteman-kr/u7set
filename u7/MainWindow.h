@@ -12,6 +12,7 @@ class FilesTabPage;
 class BuildTabPage;
 class UploadTabPage;
 class SimulatorTabPage;
+class DialogShortcuts;
 
 namespace Ui {
 class MainWindow;
@@ -59,6 +60,7 @@ protected slots:
 	void userManagement();
 	void showLog();
 	void showSettings();
+	void showShortcuts();
 
 	void runConfigurator();
 	void runSubsystemListEditor();
@@ -91,6 +93,7 @@ private:
 	QAction* m_usersAction = nullptr;
 	QAction* m_logAction = nullptr;
 	QAction* m_settingsAction = nullptr;
+	QAction* m_shortcutsAction = nullptr;
 
 	QAction* m_subsystemListEditorAction = nullptr;
     QAction* m_connectionsEditorAction = nullptr;
@@ -117,6 +120,8 @@ private:
 	SimulatorTabPage* m_simulatorTabPage = nullptr;
 
 	DbController* m_dbController = nullptr;
+
+	DialogShortcuts* m_dialogShortcuts = nullptr;
 
 	int m_filesTabPageIndex = 0;
 	FilesTabPage* m_filesTabPage = nullptr;
