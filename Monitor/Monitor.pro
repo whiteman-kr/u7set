@@ -103,9 +103,13 @@ SOURCES += main.cpp \
     ../lib/LogFile.cpp \
     ../lib/Ui/DialogAlert.cpp \
     ../lib/Ui/UiTools.cpp \
-    ../lib/Ui/DialogTuningSourceInfo.cpp \
-    ../lib/Ui/DialogTuningSources.cpp \
-    ../lib/Ui/DialogAbout.cpp
+    ../lib/Ui/DialogAbout.cpp \
+    ../lib/Ui/DialogSourceInfo.cpp \
+    TcpAppSourcesState.cpp \
+    ../lib/Ui/TuningSourcesWidget.cpp \
+    ../lib/Ui/AppDataSourcesWidget.cpp \
+    DialogDataSources.cpp \
+    ../lib/TcpClientsStatistics.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -169,9 +173,13 @@ HEADERS  += \
     ../lib/LogFile.h \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/UiTools.h \
-    ../lib/Ui/DialogTuningSourceInfo.h \
-    ../lib/Ui/DialogTuningSources.h \
-    ../lib/Ui/DialogAbout.h
+    ../lib/Ui/DialogAbout.h \
+    ../lib/Ui/DialogSourceInfo.h \
+    TcpAppSourcesState.h \
+    ../lib/Ui/TuningSourcesWidget.h \
+    ../lib/Ui/AppDataSourcesWidget.h \
+    DialogDataSources.h \
+    ../lib/TcpClientsStatistics.h
 
 
 FORMS    += \

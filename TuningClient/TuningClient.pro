@@ -94,7 +94,6 @@ SOURCES +=\
     ../lib/Crc.cpp \
     ../lib/SocketIO.cpp \
     DialogSettings.cpp \
-    ../lib/Ui/DialogTuningSources.cpp \
     ../Proto/network.pb.cc \
     ../lib/AppSignal.cpp \
     ../Proto/serialization.pb.cc \
@@ -106,7 +105,7 @@ SOURCES +=\
     ../lib/OutputLog.cpp \
     UserManager.cpp \
     DialogProperties.cpp \
-    ../lib/Ui/DialogTuningSourceInfo.cpp \
+    ../lib/Ui/DialogSourceInfo.cpp \
     DialogPassword.cpp \
     Main.cpp \
     ../lib/Tuning/TuningFilter.cpp \
@@ -138,7 +137,10 @@ SOURCES +=\
     ../lib/Ui/DialogAlert.cpp \
     ../lib/Ui/UiTools.cpp \
     ../lib/Ui/DialogAbout.cpp \
-    DialogChooseFilter.cpp
+    DialogChooseFilter.cpp \
+    DialogTuningSources.cpp \
+    ../lib/Ui/TuningSourcesWidget.cpp \
+    ../lib/TcpClientsStatistics.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -155,7 +157,6 @@ HEADERS  += MainWindow.h \
     ../lib/Crc.h \
     ../lib/SocketIO.h \
     DialogSettings.h \
-    ../lib/Ui/DialogTuningSources.h \
     ../Proto/network.pb.h \
     ../lib/AppSignal.h \
     ../Proto/serialization.pb.h \
@@ -167,7 +168,6 @@ HEADERS  += MainWindow.h \
     ../lib/OutputLog.h \
     UserManager.h \
     DialogProperties.h \
-    ../lib/Ui/DialogTuningSourceInfo.h \
     DialogPassword.h \
     Main.h \
     ../lib/Tuning/TuningFilter.h \
@@ -199,7 +199,11 @@ HEADERS  += MainWindow.h \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/UiTools.h \
     ../lib/Ui/DialogAbout.h \
-    DialogChooseFilter.h
+    DialogChooseFilter.h \
+    DialogTuningSources.h \
+    ../lib/Ui/TuningSourcesWidget.h \
+    ../lib/Ui/DialogSourceInfo.h \
+    ../lib/TcpClientsStatistics.h
 
 FORMS    += \
     DialogSettings.ui \

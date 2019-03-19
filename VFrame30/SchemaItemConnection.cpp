@@ -22,8 +22,8 @@ namespace VFrame30
 								 PropertyNames::connectionId,
 								 PropertyNames::functionalCategory,
 								 true,
-								 SchemaItemConnection::connectionId,
-								 SchemaItemConnection::setConnectionId);
+								 SchemaItemConnection::connectionIds,
+								 SchemaItemConnection::setConnectionIds);
 	}
 
 	SchemaItemConnection::~SchemaItemConnection()
@@ -45,7 +45,7 @@ namespace VFrame30
 		//
 		Proto::SchemaItemConnection* connectionitem = message->mutable_schemaitem()->mutable_connectionitem();
 
-		connectionitem->set_connectionid(m_connectionId.toStdString());
+		connectionitem->set_connectionid(connectionIds().toStdString());
 
 		return true;
 	}
@@ -68,7 +68,7 @@ namespace VFrame30
 
 		const Proto::SchemaItemConnection& connectionitem = message.schemaitem().connectionitem();
 
-		m_connectionId = QString::fromStdString(connectionitem.connectionid());
+		setConnectionIds(QString::fromStdString(connectionitem.connectionid()));
 
 		return true;
 	}
@@ -85,15 +85,40 @@ namespace VFrame30
 		return QString();
 	}
 
-	QString SchemaItemConnection::connectionId() const
+	QString SchemaItemConnection::connectionIds() const
 	{
-		return m_connectionId;
+		return m_connectionIds.join(QChar::LineFeed);
 	}
 
-	void SchemaItemConnection::setConnectionId(const QString& value)
+	void SchemaItemConnection::setConnectionIds(const QString& value)
 	{
-		m_connectionId = value;
-		m_connectionId = m_connectionId.trimmed();
+		m_connectionIds = value.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+
+		if (double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep);
+			heightDocPt() < minHeight)
+		{
+			SetHeightInDocPt(minHeight);
+		}
+
+		return;
+	}
+
+	const QStringList& SchemaItemConnection::connectionIdsAsList() const
+	{
+		return m_connectionIds;
+	}
+
+	void SchemaItemConnection::setConnectionIdsAsList(const QStringList& value)
+	{
+		m_connectionIds = value;
+
+		if (double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep);
+			heightDocPt() < minHeight)
+		{
+			SetHeightInDocPt(minHeight);
+		}
+
+		return;
 	}
 
 	//
@@ -216,14 +241,31 @@ namespace VFrame30
 
 		p->setPen(textColor());
 
-		DrawHelper::drawText(p, m_font, itemUnit(), connectionId(), r, Qt::AlignHCenter | Qt::AlignVCenter);
+		DrawHelper::drawText(p, m_font, itemUnit(), connectionIds(), r, Qt::AlignHCenter | Qt::AlignVCenter);
 
 		return;
 	}
 
+	double SchemaItemTransmitter::minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const
+	{
+		// Cache values
+		//
+		m_cachedGridSize = gridSize;
+		m_cachedPinGridStep = pinGridStep;
+
+		// --
+		//
+		int pinCount = connectionIdsAsList().size();
+
+		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
+		double minHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
+
+		return minHeight;
+	}
+
 	QString SchemaItemTransmitter::buildName() const
 	{
-		return QString("Transmitter %1").arg(connectionId());
+		return QString("Transmitter %1").arg(connectionIds());
 	}
 
 	QString SchemaItemTransmitter::toolTipText(int dpiX, int dpiY) const
@@ -235,7 +277,7 @@ namespace VFrame30
 							  "\n\tConnectionID: %1"
 							  "\n"
 							  "\nHint: Press F2 to edit ConnectionID")
-						.arg(connectionId());
+						.arg(connectionIds());
 
 		return str;
 	}
@@ -268,9 +310,8 @@ namespace VFrame30
 				addInput(i, E::SignalType::Discrete, QString("in_%1").arg(QString::number(i + 1)));
 			}
 
-			double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep);
-
-			if (heightDocPt() < minHeight)
+			if (double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep);
+				heightDocPt() < minHeight)
 			{
 				SetHeightInDocPt(minHeight);
 			}
@@ -428,14 +469,10 @@ namespace VFrame30
 		p->setPen(textColor());
 		DrawHelper::drawText(p, m_font, itemUnit(), QLatin1String("\xBB"), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
 
-		// Draw ConnectionID
-		//
 		r.setLeft(r.left() + pinWidth + m_font.drawSize() / 4.0);
 		r.setRight(r.right() - pinWidth - m_font.drawSize() / 4.0);
 
-		p->setPen(textColor());
-
-		DrawHelper::drawText(p, m_font, itemUnit(), connectionId(), r, Qt::AlignHCenter | Qt::AlignTop);
+		double lineHeight = qMax(drawParam->gridSize() * drawParam->pinGridStep(), m_font.drawSize());
 
 		// Draw Data (AppSignalID, CustomerSignalID, Caption, etc
 		//
@@ -455,9 +492,25 @@ namespace VFrame30
 			signalState = drawParam->appSignalController()->signalState(appSignalId, nullptr);
 		}
 
+		QRectF signalRect = {r.left(), r.top(), r.width(), lineHeight};
 		QString dataText = SchemaItemSignal::getCoulumnText(drawParam, m_dataType, signal, signalState, m_analogFormat, m_precision);
 
-		DrawHelper::drawText(p, m_font, itemUnit(), dataText, r, Qt::AlignHCenter | Qt::AlignBottom);
+		DrawHelper::drawText(p, m_font, itemUnit(), dataText, signalRect, Qt::AlignHCenter | Qt::AlignBottom);
+
+		// Draw ConnectionIDs
+		//
+		const QStringList& connIds = connectionIdsAsList();
+		int connectionIndex = 1;
+
+		p->setPen(textColor());
+
+		for (const QString& connectionId : connIds)
+		{
+			QRectF connIdRect = {r.left(), r.top() + lineHeight * connectionIndex, r.width(), lineHeight};
+			DrawHelper::drawText(p, m_font, itemUnit(), connectionId, connIdRect, Qt::AlignHCenter | Qt::AlignVCenter);
+
+			connectionIndex ++;
+		}
 
 		return;
 	}
@@ -471,7 +524,7 @@ namespace VFrame30
 
 		// --
 		//
-		int pinCount = 2;
+		int pinCount = 1 + qBound(1, connectionIdsAsList().size(), 256);
 
 		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
 		double minHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
@@ -481,7 +534,7 @@ namespace VFrame30
 
 	QString SchemaItemReceiver::buildName() const
 	{
-		return QString("Receiver %1").arg(connectionId());
+		return QString("Receiver %1").arg(connectionIds());
 	}
 
 	QString SchemaItemReceiver::toolTipText(int dpiX, int dpiY) const
@@ -494,7 +547,7 @@ namespace VFrame30
 							  "\n\tAppSignalID: %2"
 							  "\n"
 							  "\nHint: Press F2 to edit AppSignalID and ConnectionID")
-						.arg(connectionId())
+						.arg(connectionIds())
 						.arg(appSignalId());
 
 		return str;

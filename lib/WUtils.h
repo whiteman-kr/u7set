@@ -37,6 +37,13 @@
 													return nullptr; \
 												}
 
+#define TEST_PTR_LOG_RETURN(ptr, log)		if (ptr == nullptr) \
+											{	\
+												assert(false);	\
+												LOG_NULLPTR_ERROR(log); \
+												return; \
+											}
+
 #define TEST_PTR_CONTINUE(ptr)		if (ptr == nullptr) \
 									{	\
 										assert(false);	\

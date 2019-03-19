@@ -175,7 +175,12 @@ SOURCES +=\
     TagSelectorWidget.cpp \
     Forms/ProjectPropertiesForm.cpp \
     Forms/PendingChangesDialog.cpp \
-    ../lib/SimpleMutex.cpp
+    ../lib/SimpleMutex.cpp \
+    ../lib/Ui/TextEditCompleter.cpp \
+    ../lib/QScintillaLexers/LexerJavaScript.cpp \
+    ../lib/QScintillaLexers/LexerXML.cpp \
+    DialogShortcuts.cpp \
+    ../lib/Ui/UiTools.cpp
 
 
 HEADERS  += \
@@ -313,7 +318,12 @@ HEADERS  += \
     TagSelectorWidget.h \
     Forms/ProjectPropertiesForm.h \
     Forms/PendingChangesDialog.h \
-    ../lib/SimpleMutex.h
+    ../lib/SimpleMutex.h \
+    ../lib/Ui/TextEditCompleter.h \
+    ../lib/QScintillaLexers/LexerJavaScript.h \
+    ../lib/QScintillaLexers/LexerXML.h \
+    DialogShortcuts.h \
+    ../lib/Ui/UiTools.h
 
 
 FORMS    += \

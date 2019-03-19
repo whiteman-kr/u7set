@@ -2,18 +2,41 @@
 
 MonitorTuningTcpClient::MonitorTuningTcpClient(const SoftwareInfo& softwareInfo, TuningSignalManager* signalManager, Log::LogFile* logFile) :
 	TuningTcpClient(softwareInfo, signalManager),
+	TcpClientInstance(this),
 	m_logFile(logFile)
 {
 	setAutoApply(true);
 
 	if (m_logFile == nullptr)
 	{
-		assert(m_logFile);
+		Q_ASSERT(m_logFile);
 	}
 }
 
 MonitorTuningTcpClient::~MonitorTuningTcpClient()
 {
+}
+
+int MonitorTuningTcpClient::sourceErrorCount() const
+{
+	QMutexLocker l(&m_tuningSourcesMutex);
+
+	int result = 0;
+
+	for (const auto& it : m_tuningSources)
+	{
+		const TuningSource& ts = it.second;
+
+		if (ts.state.isreply() == false && ts.state.controlisactive() == true)
+		{
+			result++;
+			continue;
+		}
+
+		result += ts.getErrorsCount();
+	}
+
+	return result;
 }
 
 void MonitorTuningTcpClient::writeLogAlert(const QString& message)

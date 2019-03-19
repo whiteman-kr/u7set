@@ -415,6 +415,7 @@ namespace VFrame30
 	void ClientSchemaView::setAppSignalController(AppSignalController* value)
 	{
 		m_appSignalController = value;
+		m_scriptAppSignalController = std::make_unique<ScriptAppSignalController>(m_appSignalController->appSignalManager());
 		m_jsEngineGlobalsWereCreated = false;	// it will make jsEngine() to initialize global script vars again
 
 		return;
@@ -443,8 +444,8 @@ namespace VFrame30
 			QQmlEngine::setObjectOwnership(m_tuningController, QQmlEngine::CppOwnership);
 			engine->globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
 
-			QJSValue jsSignals = engine->newQObject(m_appSignalController);
-			QQmlEngine::setObjectOwnership(m_appSignalController, QQmlEngine::CppOwnership);
+			QJSValue jsSignals = engine->newQObject(m_scriptAppSignalController.get());
+			QQmlEngine::setObjectOwnership(m_scriptAppSignalController.get(), QQmlEngine::CppOwnership);
 			engine->globalObject().setProperty(PropertyNames::scriptGlobalVariableSignals, jsSignals);
 
 			m_jsEngineGlobalsWereCreated = true;

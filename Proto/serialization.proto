@@ -389,6 +389,7 @@ message SchemaItem
 	optional SchemaItemRect Rect = 116;						// +PosRectImpl
 	optional SchemaItemLine Line = 117;						// +PosLineImpl
 	optional SchemaItemPath Path = 118;						// +PosConnectionImpl
+	optional SchemaItemImage Image = 119;					// +PosRectImpl
 
     optional SchemaItemSignal Signal = 124;					// +FblItemRect
 	optional SchemaItemInput InputSignal = 125;				// +Signal
@@ -485,6 +486,14 @@ message SchemaItemPath
 	required uint32 lineColor = 2;
 }
 
+//
+// SchemaItemImage
+//
+message SchemaItemImage
+{
+    optional bool allowScale = 1 [default = true];
+	optional bool keepAspectRatio = 2 [default = true];
+}
 
 //
 // FblConnectionPoint
@@ -660,52 +669,21 @@ message SchemaItemTerminator
 //
 message SchemaItemValue
 {
-    optional double weight = 1;
-	optional uint32 lineColor = 2;
-	optional uint32 fillColor = 3;
-	optional string textAnalog = 4;
-	optional uint32 textColor = 5;
-	optional FontParam font = 6;
-	optional bool fill = 7;
-	optional bool drawrect = 8 [default = true];
-	optional int32 horzAlign = 9  [default = 4];	// Qt::AlignHCenter 0x0004 Centers horizontally in the available space.
-	optional int32 vertAlign = 10  [default = 128];	// Qt::AlignVCenter 0x0080 Centers vertically in the available space.
-	optional string signalId = 11;
-	optional int32 signalSource = 12 [default = 0];
-	optional int32 precision = 13 [default = -1];	// -1: Take precision value from signal description
-	optional string textDiscrete0 = 14;
-	optional string textDiscrete1 = 15;
-	optional string textNonValid = 16;
+    optional string signalIds = 1;
+	optional int32 signalSource = 2 [default = 0];
 
-    optional uint32 fillColorNonValid0 = 30;
-	optional uint32 fillColorNonValid1 = 31;
-	optional uint32 textColorNonValid0 = 32;
-	optional uint32 textColorNonValid1 = 33;
+    optional double lineWeight = 4;
+	optional uint32 lineColor = 5;
+	optional uint32 fillColor = 6;
+	optional uint32 textColor = 7;
+	optional string text = 8;
+	optional FontParam font = 9;
+	optional bool drawRect = 10 [default = true];
+	optional int32 horzAlign = 11  [default = 4];		// Qt::AlignHCenter 0x0004 Centers horizontally in the available space.
+	optional int32 vertAlign = 12  [default = 128];		// Qt::AlignVCenter 0x0080 Centers vertically in the available space.
 
-//  optional uint32 fillColorOverflow0 = 34;
-//	optional uint32 fillColorOverflow1 = 35;
-//	optional uint32 textColorOverflow0 = 36;
-//	optional uint32 textColorOverflow1 = 37;
-
-//  optional uint32 fillColorUnderflow0 = 38;
-//	optional uint32 fillColorUnderflow1 = 39;
-//	optional uint32 textColorUnderflow0 = 40;
-//	optional uint32 textColorUnderflow1 = 41;
-
-    optional uint32 fillColorAnalog0 = 42;
-	optional uint32 fillColorAnalog1 = 43;
-	optional uint32 textColorAnalog0 = 44;
-	optional uint32 textColorAnalog1 = 45;
-
-    optional uint32 fillColorDiscrYes0 = 46;
-	optional uint32 fillColorDiscrYes1 = 47;
-	optional uint32 textColorDiscrYes0 = 48;
-	optional uint32 textColorDiscrYes1 = 49;
-
-    optional uint32 fillColorDiscrNo0 = 50;
-	optional uint32 fillColorDiscrNo1 = 51;
-	optional uint32 textColorDiscrNo0 = 52;
-	optional uint32 textColorDiscrNo1 = 53;
+    optional int32 precision = 13 [default = -1];		// -1: Take precision value from signal description
+	optional int32 analogFormat = 14 [default = 102];	// Default 102 (charcode for 'f') is AnalogFormat::f (format as [-]9.9)
 }
 
 //
@@ -1030,6 +1008,7 @@ message AppSignal
     optional string lmEquipmentID = 5;
     optional string busTypeID = 6;
     optional int32 channel = 7 [default = 0];
+	optional bool excludeFromBuild = 8 [default = false];
 
     // Signal type
 
@@ -1110,6 +1089,7 @@ message ProtoAppSignalData
 	optional double coarseAperture = 15 [default = 1.0];
 	optional double fineAperture = 16 [default = 0.5];
 	optional bool adaptiveAperture = 17 [default = false];
+	optional bool excludefromBuild = 18 [default = false];
 }
 
 

@@ -48,37 +48,8 @@ namespace VFrame30
 		static const QString maxLength;
 		static const QString multiLine;
 
-		// SchemaItemValue Colors
-		//
-		static const QString fillColorNonValid0;
-		static const QString fillColorNonValid1;
-		static const QString textColorNonValid0;
-		static const QString textColorNonValid1;
-
-		static const QString fillColorOverflow0;
-		static const QString fillColorOverflow1;
-		static const QString textColorOverflow0;
-		static const QString textColorOverflow1;
-
-		static const QString fillColorUnderflow0;
-		static const QString fillColorUnderflow1;
-		static const QString textColorUnderflow0;
-		static const QString textColorUnderflow1;
-
-		static const QString fillColorAnalog0;
-		static const QString fillColorAnalog1;
-		static const QString textColorAnalog0;
-		static const QString textColorAnalog1;
-
-		static const QString fillColorDiscrYes0;
-		static const QString fillColorDiscrYes1;
-		static const QString textColorDiscrYes0;
-		static const QString textColorDiscrYes1;
-
-		static const QString fillColorDiscrNo0;
-		static const QString fillColorDiscrNo1;
-		static const QString textColorDiscrNo0;
-		static const QString textColorDiscrNo1;
+		static const QString allowScale;
+		static const QString keepAspectRatio;
 
 		// --
 		//

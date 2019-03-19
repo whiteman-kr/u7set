@@ -6,6 +6,7 @@ TuningClientTcpClient::TuningClientTcpClient(const SoftwareInfo& softwareInfo,
 											 Log::LogFile* log,
 											 TuningLog::TuningLog* tuningLog, UserManager* userManager) :
 	TuningTcpClient(softwareInfo, signalManager),
+	TcpClientInstance(this),
 	m_log(log),
 	m_tuningLog(tuningLog),
 	m_userManager(userManager)

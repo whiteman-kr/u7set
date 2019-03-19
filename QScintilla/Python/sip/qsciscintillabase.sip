@@ -1,6 +1,6 @@
 // This is the SIP interface definition for QsciScintillaBase.
 //
-// Copyright (c) 2017 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2019 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla.
 // 
@@ -701,6 +701,24 @@ public:
         SCI_DISTANCETOSECONDARYSTYLES,
         SCI_GETSUBSTYLEBASES,
 
+        SCI_GETLINECHARACTERINDEX,
+        SCI_ALLOCATELINECHARACTERINDEX,
+        SCI_RELEASELINECHARACTERINDEX,
+        SCI_LINEFROMINDEXPOSITION,
+        SCI_INDEXPOSITIONFROMLINE,
+        SCI_COUNTCODEUNITS,
+        SCI_POSITIONRELATIVECODEUNITS,
+
+        SCI_GETNAMEDSTYLES,
+        SCI_NAMEOFSTYLE,
+        SCI_TAGSOFSTYLE,
+        SCI_DESCRIPTIONOFSTYLE,
+
+        SCI_GETMOVEEXTENDSSELECTION,
+        SCI_SETCOMMANDEVENTS,
+        SCI_GETCOMMANDEVENTS,
+        SCI_GETDOCUMENTOPTIONS,
+
         SCI_SETIDLESTYLING,
         SCI_GETIDLESTYLING,
         SCI_SETMARGINBACKN,
@@ -719,6 +737,12 @@ public:
         SCI_MULTIEDGECLEARALL,
         SCI_MULTIPLESELECTADDNEXT,
         SCI_MULTIPLESELECTADDEACH,
+
+        SCI_SETACCESSIBILITY,
+        SCI_GETACCESSIBILITY,
+        SCI_SETCARETLINEFRAME,
+        SCI_GETCARETLINEFRAME,
+        SCI_LINEREVERSE,
     };
 
     enum {
@@ -742,6 +766,12 @@ public:
     };
 
     enum {
+        SC_DOCUMENTOPTION_DEFAULT,
+        SC_DOCUMENTOPTION_STYLES_NONE,
+        SC_DOCUMENTOPTION_TEXT_LARGE,
+    };
+
+    enum {
         SC_EFF_QUALITY_MASK,
         SC_EFF_QUALITY_DEFAULT,
         SC_EFF_QUALITY_NON_ANTIALIASED,
@@ -759,6 +789,12 @@ public:
     enum {
         SC_IME_WINDOWED,
         SC_IME_INLINE,
+    };
+
+    enum {
+        SC_LINECHARACTERINDEX_NONE,
+        SC_LINECHARACTERINDEX_UTF32,
+        SC_LINECHARACTERINDEX_UTF16,
     };
 
     enum {
@@ -984,6 +1020,8 @@ public:
         INDIC_TEXTFORE,
         INDIC_POINT,
         INDIC_POINTCHARACTER,
+        INDIC_GRADIENT,
+        INDIC_GRADIENTCENTRE,
 
         INDIC_IME,
         INDIC_IME_MAX,
@@ -1005,7 +1043,8 @@ public:
         SC_PRINT_INVERTLIGHT,
         SC_PRINT_BLACKONWHITE,
         SC_PRINT_COLOURONWHITE,
-        SC_PRINT_COLOURONWHITEDEFAULTBG
+        SC_PRINT_COLOURONWHITEDEFAULTBG,
+        SC_PRINT_SCREENCOLOURS,
     };
 
     enum {
@@ -1059,6 +1098,7 @@ public:
         SC_WRAPINDENT_FIXED,
         SC_WRAPINDENT_SAME,
         SC_WRAPINDENT_INDENT,
+        SC_WRAPINDENT_DEEPINDENT,
     };
 
     enum {
@@ -1298,6 +1338,10 @@ public:
         SCLEX_TEHEX,
         SCLEX_JSON,
         SCLEX_EDIFACT,
+        SCLEX_INDENT,
+        SCLEX_MAXIMA,
+        SCLEX_STATA,
+        SCLEX_SAS,
     };
 
     enum {
@@ -1429,6 +1473,9 @@ while (i >= 0);
             void *lParam) const;
     long SendScintilla(unsigned int msg, unsigned long wParam,
             const char *lParam /TypeHint="Py_v3:bytes;str", Encoding="None"/) const;
+%MethodCode
+        sipRes = sipCpp->SendScintilla(a0, static_cast<uintptr_t>(a1), a2);
+%End
     long SendScintilla(unsigned int msg,
             const char *lParam /TypeHint="Py_v3:bytes;str", Encoding="None"/); const
     long SendScintilla(unsigned int msg,
@@ -1460,6 +1507,7 @@ signals:
     void SCN_AUTOCCOMPLETED(const char *selection, int position, int ch, int method);
     void SCN_AUTOCSELECTION(const char *selection, int position, int ch, int method);
     void SCN_AUTOCSELECTION(const char *selection, int position);
+    void SCN_AUTOCSELECTIONCHANGE(const char *selection, int id, int position);
     void SCN_CALLTIPCLICK(int direction);
     void SCN_CHARADDED(int charadded);
     void SCN_DOUBLECLICK(int position, int line, int modifiers);
@@ -1472,7 +1520,7 @@ signals:
     void SCN_HOTSPOTRELEASECLICK(int position, int modifiers);
     void SCN_INDICATORCLICK(int position, int modifiers);
     void SCN_INDICATORRELEASE(int position, int modifiers);
-    void SCN_MACRORECORD(unsigned int, unsigned long, void *);
+    void SCN_MACRORECORD(unsigned int, ulong, void *);
     void SCN_MARGINCLICK(int position, int modifiers, int margin);
     void SCN_MARGINRIGHTCLICK(int position, int modifiers, int margin);
     void SCN_MODIFIED(int, int, const char *, int, int, int, int, int, int, int);
@@ -1482,9 +1530,11 @@ signals:
     void SCN_SAVEPOINTLEFT();
     void SCN_SAVEPOINTREACHED();
     void SCN_STYLENEEDED(int position);
+    void SCN_URIDROPPED(const QUrl &url);
     void SCN_UPDATEUI(int updated);
-    void SCN_USERLISTSELECTION(const char *, int, int, int);
-    void SCN_USERLISTSELECTION(const char *, int);
+    void SCN_USERLISTSELECTION(const char *selection, int id, int ch, int method, int position);
+    void SCN_USERLISTSELECTION(const char *selection, int id, int ch, int method);
+    void SCN_USERLISTSELECTION(const char *selection, int id);
     void SCN_ZOOM();
 
 protected:
@@ -1492,6 +1542,7 @@ protected:
     virtual QByteArray fromMimeData(const QMimeData *source, bool &rectangular) const;
     virtual QMimeData *toMimeData(const QByteArray &text, bool rectangular) const;
 
+    virtual void changeEvent(QEvent *e);
     virtual void contextMenuEvent(QContextMenuEvent *e);
     virtual void dragEnterEvent(QDragEnterEvent *e);
     virtual void dragLeaveEvent(QDragLeaveEvent *e);

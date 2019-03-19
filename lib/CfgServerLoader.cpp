@@ -320,6 +320,13 @@ bool CfgLoader::getFileByID(QString fileID, QByteArray* fileData)
 	return getFile(pathFileName, fileData);
 }
 
+bool CfgLoader::hasFileID(QString fileID) const
+{
+	QMutexLocker l(&m_mutex);
+
+	return m_fileIDPathMap.contains(fileID);
+}
+
 bool CfgLoader::isFileReady()
 {
 	m_mutex.lock();
@@ -867,7 +874,7 @@ void CfgLoader::setFileReady(bool value)
 	emit signal_fileReady();
 }
 
-QString CfgLoader::getFilePathNameByID(QString fileID)
+QString CfgLoader::getFilePathNameByID(QString fileID) const
 {
 	QString pathFileName;
 
@@ -1008,6 +1015,13 @@ bool CfgLoaderThread::getFileByID(const QString& fileID, QByteArray* fileData)
 	AUTO_LOCK(m_mutex);
 
 	return m_cfgLoader->getFileByID(fileID, fileData);;
+}
+
+bool CfgLoaderThread::hasFileID(QString fileID) const
+{
+	AUTO_LOCK(m_mutex);
+
+	return m_cfgLoader->hasFileID(fileID);
 }
 
 bool CfgLoaderThread::isFileReady()

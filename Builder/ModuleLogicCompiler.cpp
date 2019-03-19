@@ -31,6 +31,17 @@ namespace Builder
 		return linkedSignals.contains(signalID);
 	}
 
+	QString ModuleLogicCompiler::Loopback::getAutoLoopbackID(const UalItem* ualItem, const LogicPin& outputPin)
+	{
+		if (ualItem == nullptr)
+		{
+			assert(false);
+			return QString();
+		}
+
+		return QString("AUTO_LOOPBACK_%1_%2").arg(ualItem->label()).arg(outputPin.caption().toUpper());
+	}
+
 	// ---------------------------------------------------------------------------------
 	//
 	//	ModuleLogicCompiler class implementation
@@ -93,7 +104,7 @@ namespace Builder
 	{
 		LOG_EMPTY_LINE(m_log)
 
-		msg = QString(tr("Compilation pass #1 for LM %1 was started...")).arg(m_lm->equipmentIdTemplate());
+		msg = QString(tr("Compilation pass #1 for LM %1 was started...")).arg(lmEquipmentID());
 
 		LOG_MESSAGE(m_log, msg);
 
@@ -101,12 +112,12 @@ namespace Builder
 
 		if (m_chassis == nullptr)
 		{
-			msg = QString(tr("LM %1 must be installed in the chassis!")).arg(m_lm->equipmentIdTemplate());
+			msg = QString(tr("LM %1 must be placed in the chassis!")).arg(lmEquipmentID());
 			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
 			return false;
 		}
 
-		std::shared_ptr<AppLogicModule> appLogicModule = m_appLogicData->module(m_lm->equipmentIdTemplate());
+		std::shared_ptr<AppLogicModule> appLogicModule = m_appLogicData->module(lmEquipmentID());
 
 		m_moduleLogic = appLogicModule.get();
 
@@ -114,7 +125,7 @@ namespace Builder
 		{
 			//	Application logic for module '%1' is not found.
 			//
-			m_log->wrnALC5001(m_lm->equipmentIdTemplate());
+			m_log->wrnALC5001(lmEquipmentID());
 		}
 
 		ProcsToCallArray procs =
@@ -141,13 +152,13 @@ namespace Builder
 		if (result == true)
 		{
 			msg = QString(tr("Compilation pass #1 for LM %1 was successfully finished.")).
-					arg(m_lm->equipmentIdTemplate());
+					arg(lmEquipmentID());
 
 			LOG_SUCCESS(m_log, msg);
 		}
 		else
 		{
-			msg = QString(tr("Compilation pass #1 for LM %1 was finished with errors")).arg(m_lm->equipmentIdTemplate());
+			msg = QString(tr("Compilation pass #1 for LM %1 was finished with errors")).arg(lmEquipmentID());
 			LOG_MESSAGE(m_log, msg);
 		}
 
@@ -158,7 +169,7 @@ namespace Builder
 	{
 		LOG_EMPTY_LINE(m_log)
 
-		msg = QString(tr("Compilation pass #2 for LM %1 was started...")).arg(m_lm->equipmentIdTemplate());
+		msg = QString(tr("Compilation pass #2 for LM %1 was started...")).arg(lmEquipmentID());
 
 		LOG_MESSAGE(m_log, msg);
 
@@ -194,13 +205,13 @@ namespace Builder
 		if (result == true)
 		{
 			msg = QString(tr("Compilation pass #2 for LM %1 was successfully finished.")).
-					arg(m_lm->equipmentIdTemplate());
+					arg(lmEquipmentID());
 
 			LOG_SUCCESS(m_log, msg);
 		}
 		else
 		{
-			msg = QString(tr("Compilation pass #2 for LM %1 was finished with errors")).arg(m_lm->equipmentIdTemplate());
+			msg = QString(tr("Compilation pass #2 for LM %1 was finished with errors")).arg(lmEquipmentID());
 			LOG_MESSAGE(m_log, msg);
 		}
 
@@ -211,7 +222,7 @@ namespace Builder
 		return result;
 	}
 
-	QString ModuleLogicCompiler::lmEquipmentID()
+	QString ModuleLogicCompiler::lmEquipmentID() const
 	{
 		if (m_lm == nullptr)
 		{
@@ -314,7 +325,7 @@ namespace Builder
 		m.rxAppDataOffset = m.txAppDataOffset;
 		m.rxAppDataSize = m.txAppDataSize;
 
-		m_modules.insert(m_lm->equipmentIdTemplate(), m);
+		m_modules.insert(lmEquipmentID(), m);
 
 		// chek LM subsystem ID
 		//
@@ -324,7 +335,7 @@ namespace Builder
 		{
 			// SubsystemID '%1' assigned in LM '%2' is not found in subsystem list.
 			//
-			m_log->errALC5056(m_lmSubsystemID, m_lm->equipmentIdTemplate());
+			m_log->errALC5056(m_lmSubsystemID, lmEquipmentID());
 			return false;
 		}
 
@@ -432,7 +443,7 @@ namespace Builder
 						continue;
 					}
 
-					if (deviceModule->equipmentIdTemplate() != m_lm->equipmentIdTemplate())
+					if (deviceModule->equipmentIdTemplate() != lmEquipmentID())
 					{
 						continue;
 					}
@@ -821,13 +832,17 @@ namespace Builder
 			items.append(itemStr);
 		}
 
-		return m_resultWriter->addFile(m_lmSubsystemID, m_lm->equipmentIdTemplate() + ".uil", "", "", items, false);
+		return m_resultWriter->addFile(m_lmSubsystemID, lmEquipmentID() + ".uil", "", "", items, false);
 	}
 
 
 	bool ModuleLogicCompiler::loopbacksPreprocessing()
 	{
 		bool result = true;
+
+		result = findAndProcessSingleItemLoopbacks();
+
+		RETURN_IF_FALSE(result);
 
 		result = findLoopbackSources();
 
@@ -840,6 +855,112 @@ namespace Builder
 		result = findSignalsAndPinsLinkedToLoopbackTargets();
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::findAndProcessSingleItemLoopbacks()
+	{
+		bool result = true;
+
+		QVector<UalItem*> createdItems;
+
+		for(UalItem* ualItem : m_ualItems)
+		{
+			TEST_PTR_CONTINUE(ualItem);
+
+			if (ualItem->isAfb() == false)
+			{
+				continue;
+			}
+
+			std::vector<LogicPin>& outputs = ualItem->outputs();
+
+			for(LogicPin& output : outputs)
+			{
+				QVector<QUuid> connectedInputsGuids;
+
+				getInputsDirectlyConnectedToOutput(ualItem, output, &connectedInputsGuids);
+
+				if (connectedInputsGuids.isEmpty() == true)
+				{
+					continue;
+				}
+
+				QString loopbackID = Loopback::getAutoLoopbackID(ualItem, output);
+
+				// LoopbackSource creation
+				//
+				std::shared_ptr<UalLoopbackSource> loopbackSource = std::make_shared<UalLoopbackSource>();
+				loopbackSource->setLoopbackId(loopbackID);
+
+				UalItem* newUalItem = new UalItem(AppLogicItem(loopbackSource, ualItem->schema()));
+				createdItems.append(newUalItem);
+				m_pinParent.insert(loopbackSource->inputs()[0].guid(), newUalItem);
+
+				// link ualItem output and loopback source input to each other
+				//
+				output.AddAssociattedIOs(loopbackSource->inputs()[0].guid());
+				loopbackSource->inputs()[0].AddAssociattedIOs(output.guid());
+
+				// LoopbackTargets creation
+				//
+				for(const QUuid& inputGuid : connectedInputsGuids)
+				{
+					LogicPin& input = ualItem->input(inputGuid);
+
+					// break output to input link
+					//
+					output.removeFromAssociatedIo(input.guid());
+					input.removeFromAssociatedIo(output.guid());
+
+					// LoopbackTarget creation
+					//
+					std::shared_ptr<UalLoopbackTarget> loopbackTarget = std::make_shared<UalLoopbackTarget>();
+					loopbackTarget->setLoopbackId(loopbackID);
+
+					UalItem* newUalItem = new UalItem(AppLogicItem(loopbackTarget, ualItem->schema()));
+					createdItems.append(newUalItem);
+					m_pinParent.insert(loopbackTarget->outputs()[0].guid(), newUalItem);
+
+					// link loopback target output and ualItem input to each other
+					//
+					loopbackTarget->outputs()[0].AddAssociattedIOs(input.guid());
+					input.AddAssociattedIOs(loopbackTarget->outputs()[0].guid());
+				}
+			}
+		}
+
+		for(UalItem* createItem : createdItems)
+		{
+			m_ualItems.insert(createItem->guid(), createItem);
+		}
+
+		return result;
+	}
+
+	void ModuleLogicCompiler::getInputsDirectlyConnectedToOutput(const UalItem* ualItem,
+														 const LogicPin& output,
+														 QVector<QUuid>* connectedInputsGuids)
+	{
+		TEST_PTR_RETURN(ualItem);
+		TEST_PTR_RETURN(connectedInputsGuids);
+
+		const std::vector<QUuid>& associatedIOsGuids = output.associatedIOs();
+
+		for(const QUuid& pinGuid : associatedIOsGuids)
+		{
+			UalItem* pinParent = m_pinParent.value(pinGuid, nullptr);
+
+			if (pinParent == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (pinParent == ualItem)
+			{
+				connectedInputsGuids->append(pinGuid);
+			}
+		}
 	}
 
 	bool ModuleLogicCompiler::findLoopbackSources()
@@ -1030,7 +1151,7 @@ namespace Builder
 
 			QList<QUuid> loopbackLinkedPins = loopback->linkedPins.keys();
 
-			for(const QUuid linkedPin : loopbackLinkedPins)
+			for(const QUuid& linkedPin : loopbackLinkedPins)
 			{
 				Loopback* presentLoopback = m_pinsToLoopbacks.value(linkedPin, nullptr);
 
@@ -1317,6 +1438,41 @@ namespace Builder
 		return busParentSignal;
 	}
 
+	UalSignal* ModuleLogicCompiler::createBusParentSignalFromBusExtractorConnectedToDiscreteSignal(UalItem* ualItem)
+	{
+		if (ualItem == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return nullptr;
+		}
+
+		const UalBusExtractor* busExtractor = ualItem->ualBusExtractor();
+
+		if (busExtractor == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return nullptr;
+		}
+
+		const std::vector<LogicPin>& inputs = busExtractor->inputs();
+
+		if (inputs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return nullptr;
+		}
+
+		const LogicPin& inPin = inputs[0];
+
+		QString busTypeID = busExtractor->busTypeId();
+
+		// connectedBusSignal can be nullptr here, it is Ok! AUTO bus signal will be created
+
+		UalSignal* busParentSignal = createBusParentSignal(ualItem, inPin, nullptr, busTypeID);
+
+		return busParentSignal;
+	}
+
 	bool ModuleLogicCompiler::createUalSignalsFromReceivers()
 	{
 		bool result = true;
@@ -1353,7 +1509,14 @@ namespace Builder
 			return false;
 		}
 
-		QString connectionID = ualReceiver->connectionId();
+		QString connectionID;
+
+		bool res = getReceiverConnectionID(ualReceiver, &connectionID, ualItem->schemaID());
+
+		if (res == false)
+		{
+			return false;
+		}
 
 		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(connectionID);
 
@@ -1429,7 +1592,7 @@ namespace Builder
 			return false;
 		}
 
-		if (port->lmID() != m_lm->equipmentIdTemplate())
+		if (port->lmID() != lmEquipmentID())
 		{
 			if (connection->isSinglePort() == true)
 			{
@@ -1447,7 +1610,7 @@ namespace Builder
 				return false;
 			}
 
-			if (port->lmID() != m_lm->equipmentIdTemplate())
+			if (port->lmID() != lmEquipmentID())
 			{
 				LOG_INTERNAL_ERROR(m_log);				// port associated with current LM isn't found
 				return false;
@@ -1485,7 +1648,7 @@ namespace Builder
 				return false;
 			}
 
-			ualSignal = m_ualSignals.createOptoSignal(ualItem, s, m_lm->equipmentIdTemplate(), false, outPin.guid());
+			ualSignal = m_ualSignals.createOptoSignal(ualItem, s, lmEquipmentID(), false, outPin.guid());
 
 			if (ualSignal == nullptr)
 			{
@@ -1538,6 +1701,37 @@ namespace Builder
 		bool result = linkConnectedItems(ualItem, validityPin, ualSignal);
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::getReceiverConnectionID(const UalReceiver* receiver, QString* connectionID, const QString& schemaID)
+	{
+		TEST_PTR_RETURN_FALSE(receiver);
+		TEST_PTR_RETURN_FALSE(connectionID);
+
+		const QStringList& ids = receiver->connectionIdsAsList();
+
+		if (ids.count() == 1)
+		{
+			*connectionID = ids.first();
+			return true;
+		}
+
+		if (ids.count() == 0)
+		{
+			// Receiver has no connection ID (Schema %1, module %2)
+			//
+			m_log->errALC5159(receiver->guid(), schemaID, lmEquipmentID());
+			return false;
+		}
+
+		if (ids.count() > 1)
+		{
+			// Receiver has more then one connections ID (Schema %1, module %2)
+			//
+			m_log->errALC5161(receiver->guid(), schemaID, lmEquipmentID());
+		}
+
+		return false;
 	}
 
 	bool ModuleLogicCompiler::createUalSignalFromSignal(UalItem* ualItem, int passNo)
@@ -1925,6 +2119,8 @@ namespace Builder
 			// link connected signals to UalSignal
 			//
 			result &= linkConnectedItems(ualItem, outPin, busChildSignal);
+
+			m_ualSignals.appendRefPin(ualItem, outPin.guid(), busChildSignal);
 		}
 
 		return result;
@@ -2224,6 +2420,25 @@ namespace Builder
 			//
 			m_log->errALC5100(busTypeID, busExtractorItem->guid(), busExtractorItem->schemaID());
 			return false;
+		}
+
+		// Discrete signal is connected to bus with discrete in/outs only
+		//
+		if (ualSignal->isDiscrete() &&
+			bus->busDataFormat() == E::BusDataFormat::Discrete)
+		{
+			UalSignal* busParentSignal = createBusParentSignalFromBusExtractorConnectedToDiscreteSignal(busExtractorItem);
+
+			if (busParentSignal == nullptr)
+			{
+				return false;
+			}
+
+			bool result = linkUalSignalsFromBusExtractor(busExtractorItem);
+
+			result &= m_ualSignals.appendRefPin(busExtractorItem, inPinUuid, busParentSignal);
+
+			return result;
 		}
 
 		if (ualSignal->isBus() != true || ualSignal->busTypeID() != busTypeID)
@@ -3044,13 +3259,13 @@ namespace Builder
 		// To generate tuning data for IPEN (version 1 of FOTIP protocol)
 		// uncomment next 3 lines:
 		//
-		// TuningIPEN::TuningData* tuningData = new TuningIPEN::TuningData(m_lm->equipmentIdTemplate(),
+		// TuningIPEN::TuningData* tuningData = new TuningIPEN::TuningData(lmEquipmentID(),
 		//													tuningFrameSizeBytes,
 		//													tuningFrameCount);
 		//
 		// and comment 3 lines below:
 		//
-		Tuning::TuningData* tuningData = new Tuning::TuningData(m_lm->equipmentIdTemplate(),
+		Tuning::TuningData* tuningData = new Tuning::TuningData(lmEquipmentID(),
 																m_lmDescription->flashMemory().m_tuningFrameCount,
 																m_lmDescription->flashMemory().m_tuningFramePayload,
 																m_lmDescription->flashMemory().m_tuningFrameSize,
@@ -3065,6 +3280,36 @@ namespace Builder
 		bool result = true;
 
 		result &= tuningData->buildTuningSignalsLists(m_chassisSignals, m_log);
+
+		bool tuningEnabled = false;
+
+		bool res = isTuningEnabled(&tuningEnabled);
+
+		if (res == false)
+		{
+			return false;
+		}
+
+		if (tuningData->getSignalsCount() == 0)
+		{
+			if (tuningEnabled == true)
+			{
+				// Tuning is enabled for module %1 but tuningable signals is not found.
+				//
+				m_log->wrnALC5165(lmEquipmentID());
+			}
+		}
+		else
+		{
+			if (tuningEnabled == false)
+			{
+				// Tuningable signals is found in module %1 but tuning is not enabled.
+				//
+				m_log->errALC5166(lmEquipmentID());
+				result = false;
+			}
+		}
+
 		result &= tuningData->buildTuningData();
 
 		if (result == true)
@@ -3075,16 +3320,16 @@ namespace Builder
 			{
 				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
 								   QString(tr("Tuning data of LM '%1' exceed available %2 frames")).
-								   arg(m_lm->equipmentIdTemplate()).
+								   arg(lmEquipmentID()).
 								   arg(tuningFrameCount));
 				result = false;
 			}
 			else
 			{
-				tuningData->generateUniqueID(m_lm->equipmentIdTemplate());
+				tuningData->generateUniqueID(lmEquipmentID());
 
 				m_tuningData = tuningData;
-				m_tuningDataStorage->insert(m_lm->equipmentIdTemplate(), tuningData);
+				m_tuningDataStorage->insert(lmEquipmentID(), tuningData);
 			}
 		}
 
@@ -3094,6 +3339,26 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::isTuningEnabled(bool* tuningEnabled)
+	{
+		QString suffix = QString(DataSource::LmEthernetAdapterProperties::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR).
+							arg(DataSource::LM_ETHERNET_ADAPTER1);
+
+		Hardware::DeviceController* adapter = DeviceHelper::getChildControllerBySuffix(m_lm, suffix, m_log);
+
+		if (adapter == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		bool res = DeviceHelper::getBoolProperty(adapter,
+												 DataSource::LmEthernetAdapterProperties::PROP_TUNING_ENABLE,
+												 tuningEnabled,
+												 m_log);
+		return res;
 	}
 
 	bool ModuleLogicCompiler::createSignalLists()
@@ -3504,7 +3769,7 @@ namespace Builder
 		//	+ internal
 		//  - enableTuning
 		//  - bus child
-		//	+ used in UAL || is a SerialRx signal (condition: m_optoModuleStorage->isSerialRxSignalExists(m_lm->equipmentIdTemplate(), s->appSignalID()) == true))
+		//	+ used in UAL || is a SerialRx signal (condition: m_optoModuleStorage->isSerialRxSignalExists(lmEquipmentID(), s->appSignalID()) == true))
 
 		for(UalSignal* s : m_ualSignals)
 		{
@@ -3916,7 +4181,7 @@ namespace Builder
 	{
 		QList<Hardware::OptoPortShared> associatedPorts;
 
-		m_optoModuleStorage->getLmAssociatedOptoPorts(m_lm->equipmentIdTemplate(), associatedPorts);
+		m_optoModuleStorage->getLmAssociatedOptoPorts(lmEquipmentID(), associatedPorts);
 
 		QHash<UalSignal*, UalSignal*> acquiredInternalDiscretes;
 
@@ -5068,7 +5333,7 @@ namespace Builder
 			return false;
 		}
 
-		QString lmID = m_lm->equipmentIdTemplate();
+		QString lmID = lmEquipmentID();
 
 		bool result = false;
 
@@ -5115,7 +5380,7 @@ namespace Builder
 			return false;
 		}
 
-		QString lmID = m_lm->equipmentIdTemplate();
+		QString lmID = lmEquipmentID();
 
 		bool result = false;
 
@@ -5191,11 +5456,25 @@ namespace Builder
 
 		for(const QPair<QString, UalSignal*>& connectedSignal : connectedSignals)
 		{
-			result &= m_optoModuleStorage->appendTxSignal(ualItem->schemaID(), transmitter.connectionId(), transmitter.guid(),
-													   m_lm->equipmentIdTemplate(),
-													   connectedSignal.first,
-													   connectedSignal.second,
-													   &signalAlreadyInTxList);
+			const QStringList& connectionIDs = transmitter.connectionIdsAsList();
+
+			if (connectionIDs.count() == 0)
+			{
+				// Transmitter has no connection ID (Schema %1, module %2)
+				//
+				m_log->errALC5160(ualItem->guid(), ualItem->schemaID(), lmEquipmentID());
+				result = false;
+				continue;
+			}
+
+			for(const QString& connectionID : connectionIDs)
+			{
+				result &= m_optoModuleStorage->appendTxSignal(ualItem->schemaID(), connectionID, transmitter.guid(),
+														   lmEquipmentID(),
+														   connectedSignal.first,
+														   connectedSignal.second,
+														   &signalAlreadyInTxList);
+			}
 		}
 
 		return result;
@@ -5373,7 +5652,7 @@ namespace Builder
 
 		const UalReceiver& receiver = item->logicReceiver();
 
-		QString connectionID = receiver.connectionId();
+		QString connectionID = receiver.connectionIds();
 
 		std::shared_ptr<Hardware::Connection> connection = m_optoModuleStorage->getConnection(connectionID);
 
@@ -5394,9 +5673,9 @@ namespace Builder
 
 		if (m_chassisSignals.contains(rxSignalID) == false)
 		{
-			// Serial Rx signal '%1' is not associated with LM '%2' (Logic schema '%3').
+			// Single-port Rx signal '%1' is not associated with LM '%2' (Logic schema '%3').
 			//
-			m_log->errALC5191(rxSignalID, m_lm->equipmentIdTemplate(), item->guid(), item->schemaID());
+			m_log->errALC5191(rxSignalID, lmEquipmentID(), item->guid(), item->schemaID());
 			return false;
 		}
 
@@ -5411,7 +5690,7 @@ namespace Builder
 		bool result = m_optoModuleStorage->appendSinglePortRxSignal(item->schemaID(),
 																connectionID,
 																item->guid(),
-																m_lm->equipmentIdTemplate(),
+																lmEquipmentID(),
 																rxSignal);
 		return result;
 	}
@@ -5424,7 +5703,7 @@ namespace Builder
 			return false;
 		}
 
-		QList<Hardware::OptoModuleShared> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(m_lm->equipmentIdTemplate());
+		QList<Hardware::OptoModuleShared> optoModules = m_optoModuleStorage->getLmAssociatedOptoModules(lmEquipmentID());
 
 		if (optoModules.isEmpty())
 		{
@@ -5479,7 +5758,7 @@ namespace Builder
 	{
 		bool result = true;
 
-		QString lmID = m_lm->equipmentIdTemplate();
+		QString lmID = lmEquipmentID();
 
 		// copying optical ports txSignals lists to connected ports rxSignals lists
 		//
@@ -5531,9 +5810,9 @@ namespace Builder
 			SignalAddress16 rxAddress;
 
 			bool res = m_optoModuleStorage->getRxSignalAbsAddress(ualItem->schemaID(),
-													   ualReceiver->connectionId(),
+													   ualReceiver->connectionIds(),
 													   ualReceiver->appSignalId(),
-													   m_lm->equipmentIdTemplate(),
+													   lmEquipmentID(),
 													   ualReceiver->guid(),
 													   &rxAddress);
 			if (res == false)
@@ -5913,6 +6192,11 @@ namespace Builder
 				continue;
 			}
 
+			if (lbSignal->isConst() == true)
+			{
+				continue;			// for const signals refreshing code is not required
+			}
+
 			if (lbSignal->ualAddr().isValid() == false)
 			{
 				LOG_INTERNAL_ERROR(m_log);
@@ -6215,6 +6499,12 @@ namespace Builder
 				result &= generateBusComposerCode(code, ualItem);
 				break;
 
+			case E::UalItemType::BusExtractor:
+				// specific code generation ONLY for discrete signals connected to bus extractor
+				//
+				result &= generateDiscreteSignalToBusExtractorCode(code, ualItem);
+				break;
+
 			// UalItems that is not required code generation
 			//
 			case E::UalItemType::Signal:
@@ -6222,7 +6512,6 @@ namespace Builder
 			case E::UalItemType::Transmitter:
 			case E::UalItemType::Receiver:
 			case E::UalItemType::Terminator:
-			case E::UalItemType::BusExtractor:
 			case E::UalItemType::LoopbackSource:
 			case E::UalItemType::LoopbackTarget:
 				break;
@@ -7410,6 +7699,140 @@ namespace Builder
 		return true;
 	}
 
+	bool ModuleLogicCompiler::generateDiscreteSignalToBusExtractorCode(CodeSnippet* code, const UalItem* ualItem)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
+
+		const UalBusExtractor* busExtractor = ualItem->ualBusExtractor();
+
+		if (busExtractor == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const std::vector<LogicPin>& inputs = busExtractor->inputs();
+
+		if (inputs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const LogicPin& inPin = inputs[0];
+
+		const std::vector<QUuid>& associatedOutPins = inPin.associatedIOs();
+
+		if (associatedOutPins.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		UalSignal* inputSignal = m_ualSignals.get(associatedOutPins[0]);
+
+		TEST_PTR_LOG_RETURN_FALSE(inputSignal, m_log);
+
+		if (inputSignal->isDiscrete() == false)
+		{
+			return true;			// it is OK, bus extractor is connected to non-discrete signal
+									// specific code generation is not required
+		}
+
+		UalSignal* ualBusSignal = m_ualSignals.get(inPin.guid());
+
+		TEST_PTR_LOG_RETURN_FALSE(ualBusSignal, m_log);
+
+		BusShared bus = m_signals->getBus(ualBusSignal->busTypeID());
+
+		TEST_PTR_LOG_RETURN_FALSE(bus, m_log);
+
+		if (bus->busDataFormat() != E::BusDataFormat::Discrete)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		code->comment_nl(QString("Discrete signal to BusExtractor %1 processing").arg(ualItem->label()));
+
+		bool result = true;
+		int count = 0;
+
+		code->append(codeSetMemory(ualBusSignal->ualAddr().offset(), 0, bus->sizeW(), QString("init %1").arg(ualBusSignal->appSignalID())));
+
+		for(const BusSignal& busSignal : bus->busSignals())
+		{
+			UalSignal* busChildSignal = ualBusSignal->getBusChildSignal(busSignal.signalID);
+
+			if (inputSignal == nullptr || busChildSignal == nullptr)
+			{
+				result = false;
+				continue;
+			}
+
+			if (busChildSignal->isCompatible(inputSignal) == false)
+			{
+				assert(false);						// this error should be detected early
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			if (inputSignal->isConst() == false && inputSignal->ualAddr().isValid() == false)
+			{
+				// Undefined UAL address of signal '%1' (Logic schema '%2').
+				//
+				m_log->errALC5105(inputSignal->appSignalID(), inputSignal->ualItemGuid(), inputSignal->ualItemSchemaID());
+				return false;
+			}
+
+			if (busChildSignal->ualAddr().isValid() == false)
+			{
+				// Undefined UAL address of signal '%1' (Logic schema '%2').
+				//
+				m_log->errALC5105(busChildSignal->appSignalID(), busChildSignal->ualItemGuid(), busChildSignal->ualItemSchemaID());
+				return false;
+			}
+
+			bool res = true;
+
+			switch(busChildSignal->signalType())
+			{
+			case E::SignalType::Analog:
+			case E::SignalType::Bus:
+				LOG_INTERNAL_ERROR(m_log);
+				res = false;
+				break;
+
+			case E::SignalType::Discrete:
+				res = generateDiscreteSignalToBusCode(code, inputSignal, busChildSignal, busSignal);
+				break;
+
+			default:
+				assert(false);
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+			}
+
+			if (res == true)
+			{
+				count++;
+			}
+			else
+			{
+				result = false;
+			}
+		}
+
+		if (count > 0)
+		{
+			code->newLine();
+		}
+
+		return result;
+	}
+
 	UalItem* ModuleLogicCompiler::getInputPinAssociatedOutputPinParent(QUuid appItemUuid, const QString& inPinCaption, QUuid* connectedOutPinUuid) const
 	{
 		if (connectedOutPinUuid == nullptr)
@@ -7801,7 +8224,7 @@ namespace Builder
 			return false;
 		}
 
-		for(const std::pair<QUuid, UalItem*>& pair : connectedItems)
+		for(const std::pair<QUuid, UalItem*> pair : connectedItems)
 		{
 			if (pair.second == nullptr)
 			{
@@ -7840,7 +8263,7 @@ namespace Builder
 
 		if (result == true)
 		{
-			m_cmpStorage->insert(m_lm->equipmentIdTemplate(), cmp);
+			m_cmpStorage->insert(lmEquipmentID(), cmp);
 		}
 
 		return result;
@@ -8940,7 +9363,7 @@ namespace Builder
 				continue;
 			}
 
-			if (module->lmID() != m_lm->equipmentIdTemplate())
+			if (module->lmID() != lmEquipmentID())
 			{
 				continue;
 			}
@@ -10208,7 +10631,7 @@ namespace Builder
 			result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID,
 														   m_lmSubsystemKey,
 														   m_lmDescription->flashMemory().m_appLogicUartId,
-														   m_lm->equipmentIdTemplate(),
+														   lmEquipmentID(),
 														   m_lmNumber,
 														   m_lmAppLogicFramePayload,
 														   m_lmAppLogicFrameCount,
@@ -10224,7 +10647,7 @@ namespace Builder
 
 		if (expertMode() == true)
 		{
-			BuildFile* binFile = m_resultWriter->addFile(DIR_BIN, QString("%1.bin").arg(m_lm->equipmentIdTemplate()), "", "", binCode);
+			BuildFile* binFile = m_resultWriter->addFile(DIR_BIN, QString("%1.bin").arg(lmEquipmentID()), "", "", binCode);
 
 			if (binFile == nullptr)
 			{
@@ -10380,8 +10803,8 @@ namespace Builder
 		QStringList file;
 		QString line = QString("----------------------------------------------------------------------------------------------------------");
 
-		file.append(QString("Tuning information file: %1\n").arg(m_lm->equipmentIdTemplate()));
-		file.append(QString("LM eqipmentID: %1").arg(m_lm->equipmentIdTemplate()));
+		file.append(QString("Tuning information file: %1\n").arg(lmEquipmentID()));
+		file.append(QString("LM eqipmentID: %1").arg(lmEquipmentID()));
 		file.append(QString("LM caption: %1").arg(m_lm->caption()));
 		file.append(QString("LM number: %1\n").arg(m_lmNumber));
 		file.append(QString("Frames used total: %1").arg(m_tuningData->usedFramesCount()));
@@ -10701,7 +11124,7 @@ namespace Builder
 
 		LOG_EMPTY_LINE(m_log);
 
-		LOG_MESSAGE(m_log, QString(tr("Used resources of %1:")).arg(m_lm->equipmentIdTemplate()));
+		LOG_MESSAGE(m_log, QString(tr("Used resources of %1:")).arg(lmEquipmentID()));
 
 		str.sprintf("%.2f", percentOfUsedCodeMemory);
 		LOG_MESSAGE(m_log, QString(tr("Code memory - %1%")).arg(str));
@@ -10845,7 +11268,7 @@ namespace Builder
 			}
 		}
 
-		m_resourcesUsageInfo.lmEquipmentID = m_lm->equipmentIdTemplate();
+		m_resourcesUsageInfo.lmEquipmentID = lmEquipmentID();
 		m_resourcesUsageInfo.codeMemoryUsed = percentOfUsedCodeMemory;
 		m_resourcesUsageInfo.bitMemoryUsed = percentOfUsedBitMemory;
 		m_resourcesUsageInfo.wordMemoryUsed = percentOfUsedWordMemory;
@@ -10885,7 +11308,7 @@ namespace Builder
 	{
 		QList<Hardware::OptoPortShared> associatedPorts;
 
-		m_optoModuleStorage->getLmAssociatedOptoPorts(m_lm->equipmentIdTemplate(), associatedPorts);
+		m_optoModuleStorage->getLmAssociatedOptoPorts(lmEquipmentID(), associatedPorts);
 
 		QHash<UalSignal*, int> signalsRefs;
 
@@ -11153,7 +11576,7 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_NULLPTR(m_lm, m_log);
 
-		return 	std::dynamic_pointer_cast<Hardware::DeviceModule>(getDeviceSharedPtr(m_lm->equipmentIdTemplate()));
+		return 	std::dynamic_pointer_cast<Hardware::DeviceModule>(getDeviceSharedPtr(lmEquipmentID()));
 	}
 
 	void ModuleLogicCompiler::dumpApplicationLogicItems()
@@ -11271,7 +11694,7 @@ namespace Builder
 						   arg(ualSignal->regValueAddr().offset()).arg(ualSignal->regValueAddr().bit()));
 		}
 
-		m_resultWriter->addFile(QString("%1/%2").arg(m_lmSubsystemID).arg(m_lm->equipmentIdTemplate()),
+		m_resultWriter->addFile(QString("%1/%2").arg(m_lmSubsystemID).arg(lmEquipmentID()),
 								QString("sl_%1.csv").arg(listName), "", "", strList);
 		return result;
 	}

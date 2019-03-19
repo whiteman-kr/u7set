@@ -24,6 +24,8 @@
 #include "../lib/Ui/DialogAbout.h"
 #include "../VFrame30/VFrame30.h"
 #include "../lib/LogicModuleSet.h"
+#include "DialogShortcuts.h"
+#include "../lib/Ui/UiTools.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -216,6 +218,10 @@ void MainWindow::createActions()
 	//m_pLogAction->setEnabled(false);
 	connect(m_logAction, &QAction::triggered, this, &MainWindow::showLog);
 
+	m_shortcutsAction = new QAction(tr("Shortcuts..."), this);
+	m_shortcutsAction->setStatusTip(tr("Show shortcuts"));
+	connect(m_shortcutsAction, &QAction::triggered, this, &MainWindow::showShortcuts);
+
 	m_settingsAction = new QAction(tr("Settings..."), this);
 	m_settingsAction->setStatusTip(tr("Change application settings"));
 	m_settingsAction->setEnabled(true);
@@ -343,8 +349,8 @@ void MainWindow::createMenus()
 	menuBar()->addSeparator();
 	QMenu* pHelpMenu = menuBar()->addMenu(tr("&?"));
 
+	pHelpMenu->addAction(m_shortcutsAction);
 	pHelpMenu->addAction(m_aboutAction);
-
 
 	return;
 }
@@ -425,6 +431,28 @@ void MainWindow::showSettings()
 	}
 
 	return;
+}
+
+void MainWindow::showShortcuts()
+{
+	if (m_dialogShortcuts == nullptr)
+	{
+		m_dialogShortcuts = new DialogShortcuts(this);
+		m_dialogShortcuts->show();
+
+		auto f = [this]() -> void
+			{
+				m_dialogShortcuts = nullptr;
+			};
+
+		connect(m_dialogShortcuts, &DialogShortcuts::dialogClosed, this, f);
+	}
+	else
+	{
+		m_dialogShortcuts->activateWindow();
+	}
+
+	UiTools::adjustDialogPlacement(m_dialogShortcuts);
 }
 
 void MainWindow::runConfigurator()

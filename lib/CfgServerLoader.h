@@ -99,6 +99,8 @@ public:
 	bool getFileBlockedByID(QString fileID, QByteArray* fileData, QString *errorStr);
 	bool getFileByID(QString fileID, QByteArray* fileData);
 
+	bool hasFileID(QString fileID) const;
+
 	Tcp::FileTransferResult getLastError() const { return m_lastError; }
 	QString getLastErrorStr() const { return getErrorStr(getLastError()); }
 
@@ -156,7 +158,7 @@ private:
 
 	void setFileReady(bool value);
 
-	QString getFilePathNameByID(QString fileID);
+	QString getFilePathNameByID(QString fileID) const;
 
 	void emitSignalUnknownClient();
 
@@ -193,7 +195,7 @@ private:
 
 	static const int CONFIGURATION_XML_FILE_INDEX = 0;
 
-	QMutex m_mutex;
+	mutable QMutex m_mutex;
 
 	QString m_appEquipmentID;
 
@@ -263,6 +265,8 @@ public:
 	bool getFileBlockedByID(const QString& fileID, QByteArray* fileData, QString *errorStr);
 	bool getFileByID(const QString& fileID, QByteArray* fileData);
 
+	bool hasFileID(QString fileID) const;
+
 	bool isFileReady();
 
 	Builder::BuildInfo buildInfo();
@@ -298,7 +302,7 @@ private:
 
 	//
 
-	QMutex m_mutex;
+	mutable QMutex m_mutex;
 
 	CfgLoader* m_cfgLoader = nullptr;
 	SimpleThread* m_thread = nullptr;

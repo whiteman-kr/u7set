@@ -18,7 +18,7 @@ namespace TrendLib
 	{
 		qRegisterMetaType<TrendLib::TrendParam>("TrendParam");
 
-		assert(m_trend);
+		Q_ASSERT(m_trend);
 	}
 
 	RenderThread::~RenderThread()
@@ -118,7 +118,7 @@ namespace TrendLib
 	{
 		if (errorMessage == nullptr)
 		{
-			assert(errorMessage);
+			Q_ASSERT(errorMessage);
 			return false;
 		}
 
@@ -173,7 +173,7 @@ namespace TrendLib
 	{
 		if (errorMessage == nullptr)
 		{
-			assert(errorMessage);
+			Q_ASSERT(errorMessage);
 			return false;
 		}
 
@@ -221,7 +221,7 @@ namespace TrendLib
 	{
 		if (message == nullptr)
 		{
-			assert(message);
+			Q_ASSERT(message);
 			return false;
 		}
 
@@ -242,9 +242,9 @@ namespace TrendLib
 			message.has_trend() == false ||
 			message.has_trend_param() == false)
 		{
-			assert(message.IsInitialized());
-			assert(message.has_trend());
-			assert(message.has_trend_param());
+			Q_ASSERT(message.IsInitialized());
+			Q_ASSERT(message.has_trend());
+			Q_ASSERT(message.has_trend_param());
 			return false;
 		}
 
@@ -316,7 +316,7 @@ namespace TrendLib
 		if (printer == nullptr ||
 			printer->isValid() == false)
 		{
-			assert(printer);
+			Q_ASSERT(printer);
 			return false;
 		}
 
@@ -325,7 +325,7 @@ namespace TrendLib
 		bool ok = painter.begin(printer);
 		if (ok == false)
 		{
-			assert(ok);
+			Q_ASSERT(ok);
 			return false;
 		}
 
@@ -354,7 +354,7 @@ namespace TrendLib
 		ok = painter.end();
 		if (ok == false)
 		{
-			assert(ok);
+			Q_ASSERT(ok);
 			return false;
 		}
 
@@ -478,7 +478,7 @@ namespace TrendLib
 			{
 				if (rulerIndex == -1)
 				{
-					assert(rulerIndex != -1);
+					Q_ASSERT(rulerIndex != -1);
 					return;
 				}
 
@@ -495,7 +495,7 @@ namespace TrendLib
 			{
 				if (outSignal.appSignalId().isEmpty() == true)
 				{
-					assert(outSignal.appSignalId().isEmpty() == false);
+					Q_ASSERT(outSignal.appSignalId().isEmpty() == false);
 					return;
 				}
 
@@ -598,7 +598,7 @@ namespace TrendLib
 			case Trend::MouseOn::OnSignalDescription:	newCursorShape = Qt::PointingHandCursor;	break;
 			case Trend::MouseOn::OnRuler:				newCursorShape = Qt::SplitHCursor;			break;
 			default:
-				assert(false);
+				Q_ASSERT(false);
 			}
 
 			m_pixmapDrawParam.setHightlightRulerIndex(rulerIndex);
@@ -625,7 +625,7 @@ namespace TrendLib
 			switch (m_mouseAction)
 			{
 			case MouseAction::None:
-				assert(false);
+				Q_ASSERT(false);
 				break;
 			case MouseAction::Scroll:
 				{
@@ -693,8 +693,8 @@ namespace TrendLib
 				break;
 			case MouseAction::MoveRuler:
 				{
-					assert(m_rulerMoveRulerIndex != -1);
-					assert(m_rulerMoveRulerIndex >= 0 && m_rulerMoveRulerIndex < static_cast<int>(rulerSet().rulers().size()));
+					Q_ASSERT(m_rulerMoveRulerIndex != -1);
+					Q_ASSERT(m_rulerMoveRulerIndex >= 0 && m_rulerMoveRulerIndex < static_cast<int>(rulerSet().rulers().size()));
 
 					int laneHeight = rect().height() / laneCount();
 					int laneIndex = qBound<int>(0, event->pos().y() / laneHeight, laneCount() - 1);
@@ -726,7 +726,7 @@ namespace TrendLib
 				break;
 
 			default:
-				assert(false);
+				Q_ASSERT(false);
 				break;
 			}
 		}
@@ -877,7 +877,7 @@ namespace TrendLib
 
 	void TrendWidget::initSelectViewArea(QPoint pos, int laneIndex)
 	{
-		assert(laneIndex != -1);
+		Q_ASSERT(laneIndex != -1);
 
 		m_selectViewLaneIndex = laneIndex;
 

@@ -8,7 +8,8 @@
 #include "SchemasWorkspace.h"
 #include "ConfigController.h"
 #include "UserManager.h"
-#include "../lib/Ui/DialogTuningSources.h"
+#include "DialogTuningSources.h"
+#include "../lib/TcpClientsStatistics.h"
 
 class TuningTcpClient;
 class DialogAlert;
@@ -16,15 +17,6 @@ class DialogAlert;
 namespace Ui {
 	class MainWindow;
 }
-
-class ClientDialogTuningSources : public DialogTuningSources
-{
-public:
-	explicit ClientDialogTuningSources(TuningTcpClient* tcpClient, bool hasActivationControls, QWidget* parent);
-
-protected:
-	virtual bool passwordOk() override;
-};
 
 class MainWindow : public QMainWindow
 {
@@ -84,6 +76,7 @@ public slots:
 	void runPresetEditor();
 	void showSettings();
 	void showTuningSources();
+	void showStatistics();
 	void showAppLog();
 	void showSignalsLog();
 	void showAbout();
@@ -112,6 +105,7 @@ private:
 	QAction* m_pPresetEditorAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 	QAction* m_pTuningSourcesAction = nullptr;
+	QAction* m_pStatisticsAction = nullptr;
 	QAction* m_pAppLogAction = nullptr;
 	QAction* m_pSignalLogAction = nullptr;
 	QAction* m_pAboutAction = nullptr;
@@ -139,7 +133,9 @@ private:
 	QString m_singleLmControlModeText;
 	QString m_multipleLmControlModeText;
 
-	ClientDialogTuningSources* m_dialogTuningSources = nullptr;
+	DialogTuningSources* m_dialogTuningSources = nullptr;
+	DialogStatistics* m_dialogStatistics = nullptr;
+
 };
 
 // Global definitions

@@ -4,8 +4,9 @@
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/LogFile.h"
 #include "MonitorConfigController.h"
+#include "../lib/TcpClientsStatistics.h"
 
-class MonitorTuningTcpClient : public TuningTcpClient
+class MonitorTuningTcpClient : public TuningTcpClient, public TcpClientInstance
 {
 	Q_OBJECT
 
@@ -13,6 +14,7 @@ public:
 	MonitorTuningTcpClient(const SoftwareInfo& softwareInfo, TuningSignalManager* signalManager, Log::LogFile* logFile);
 	virtual ~MonitorTuningTcpClient();
 
+	int sourceErrorCount() const;
 protected:
 	virtual void writeLogAlert(const QString& message) override;
 	virtual void writeLogError(const QString& message) override;

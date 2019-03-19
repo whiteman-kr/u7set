@@ -43,12 +43,12 @@ void RecentUsed::add(Hash hash)
 				break;
 			}
 		}
-		assert(updated == true);
+		Q_ASSERT(updated == true);
 
 		it->second = now;
 	}
 
-	assert(m_signalToTile.size() == m_timeToSignal.size());
+	Q_ASSERT(m_signalToTile.size() == m_timeToSignal.size());
 	return;
 }
 
@@ -83,11 +83,11 @@ bool RecentUsed::remove(Hash hash)
 			break;
 		}
 	}
-	assert(removedFromTimeMap == true);
+	Q_ASSERT(removedFromTimeMap == true);
 
 	m_signalToTile.erase(it);
 
-	assert(m_signalToTile.size() == m_timeToSignal.size());
+	Q_ASSERT(m_signalToTile.size() == m_timeToSignal.size());
 	return true;
 }
 
@@ -129,9 +129,10 @@ std::vector<Hash> RecentUsed::hashes() const
 
 TcpSignalRecents::TcpSignalRecents(MonitorConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
 	Tcp::Client(configController->softwareInfo(), serverAddressPort1, serverAddressPort2),
+	TcpClientInstance(this),
 	m_cfgController(configController)
 {
-	assert(m_cfgController);
+	Q_ASSERT(m_cfgController);
 	qDebug() << "TcpSignalRecents::TcpSignalRecents(...)";
 
 	setObjectName("TcpSignalRecents");
@@ -165,7 +166,7 @@ void TcpSignalRecents::onConnection()
 {
 	qDebug() << "TcpSignalRecents::onConnection()";
 
-	assert(isClearToSendRequest() == true);
+	Q_ASSERT(isClearToSendRequest() == true);
 
 	requestSignalState();
 
@@ -186,7 +187,7 @@ void TcpSignalRecents::processReply(quint32 requestID, const char* replyData, qu
 {
 	if (replyData == nullptr)
 	{
-		assert(replyData);
+		Q_ASSERT(replyData);
 		return;
 	}
 
@@ -200,7 +201,7 @@ void TcpSignalRecents::processReply(quint32 requestID, const char* replyData, qu
 		break;
 
 	default:
-		assert(false);
+		Q_ASSERT(false);
 		qDebug() << "Wrong requestID in TcpSignalRecents::processReply()";
 
 		requestSignalState();
@@ -227,7 +228,7 @@ void TcpSignalRecents::requestSignalState()
 {
 	QThread::msleep(100);
 
-	assert(isClearToSendRequest());
+	Q_ASSERT(isClearToSendRequest());
 
 	const std::map<Hash, qint64>& recentRecords = m_recents.rawHashes();
 	if (recentRecords.empty() == true)
@@ -240,7 +241,7 @@ void TcpSignalRecents::requestSignalState()
 
 	if (recentRecords.size() > ADS_GET_APP_SIGNAL_STATE_MAX)
 	{
-		assert(recentRecords.size() <= ADS_GET_APP_SIGNAL_STATE_MAX);
+		Q_ASSERT(recentRecords.size() <= ADS_GET_APP_SIGNAL_STATE_MAX);
 	}
 
 	m_getSignalStateRequest.mutable_signalhashes()->Clear();
@@ -285,7 +286,7 @@ void TcpSignalRecents::processSignalState(const QByteArray& data)
 
 	if (ok == false)
 	{
-		assert(ok);
+		Q_ASSERT(ok);
 		requestSignalState();
 		return;
 	}
@@ -293,7 +294,7 @@ void TcpSignalRecents::processSignalState(const QByteArray& data)
 	if (m_getSignalStateReply.error() != 0)
 	{
 		qDebug() << "TcpSignalRecents::processSignalState, error received: " << m_getSignalStateReply.error();
-		assert(m_getSignalStateReply.error() != 0);
+		Q_ASSERT(m_getSignalStateReply.error() != 0);
 
 		requestSignalState();
 		return;
@@ -307,7 +308,7 @@ void TcpSignalRecents::processSignalState(const QByteArray& data)
 	for (int i = 0; i < signalStateCount; i++)
 	{
 		const ::Proto::AppSignalState& protoState = m_getSignalStateReply.appsignalstates(i);
-		assert(protoState.hash() != 0);
+		Q_ASSERT(protoState.hash() != 0);
 
 		states.emplace_back(protoState);
 	}

@@ -4633,6 +4633,7 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 	m_toolBar->addAction(m_schemaWidget->m_addRectAction);
 	m_toolBar->addAction(m_schemaWidget->m_addPathAction);
 	m_toolBar->addAction(m_schemaWidget->m_addTextAction);
+	m_toolBar->addAction(m_schemaWidget->m_addImageAction);
 
 	if (schema->isLogicSchema() == true)
 	{

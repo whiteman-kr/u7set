@@ -7,8 +7,9 @@
 #include "../Proto/network.pb.h"
 #include "../TrendView/TrendSignal.h"
 #include "MonitorConfigController.h"
+#include "../lib/TcpClientsStatistics.h"
 
-class RtTrendTcpClient : public Tcp::Client
+class RtTrendTcpClient : public Tcp::Client, public TcpClientInstance
 {
 	Q_OBJECT
 

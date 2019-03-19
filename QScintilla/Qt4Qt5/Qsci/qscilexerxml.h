@@ -1,6 +1,6 @@
 // This defines the interface to the QsciLexerXML class.
 //
-// Copyright (c) 2017 Riverbank Computing Limited <info@riverbankcomputing.com>
+// Copyright (c) 2019 Riverbank Computing Limited <info@riverbankcomputing.com>
 // 
 // This file is part of QScintilla.
 // 
@@ -56,7 +56,7 @@ public:
     bool defaultEolFill(int style) const;
 
     //! Returns the font for style number \a style.
-	QFont defaultFont(int style) const;
+    QFont defaultFont(int style) const;
 
     //! Returns the background colour of the text for style number \a style.
     //!

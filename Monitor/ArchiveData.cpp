@@ -12,7 +12,7 @@ void ArchiveData::addChunk(std::shared_ptr<ArchiveChunk> chunk)
 	if (chunk == nullptr ||
 		chunk->states.empty() == true)
 	{
-		assert(chunk);
+		Q_ASSERT(chunk);
 		return;
 	}
 
@@ -45,7 +45,7 @@ AppSignalState ArchiveData::state(int index) const
 {
 	if (index < 0)
 	{
-		assert(index >= 0);
+		Q_ASSERT(index >= 0);
 		return AppSignalState();
 	}
 
@@ -68,6 +68,6 @@ AppSignalState ArchiveData::state(int index) const
 		currentIndex += chunkSize;
 	}
 
-	assert(index >= size());
+	Q_ASSERT(index >= size());
 	return AppSignalState();
 }

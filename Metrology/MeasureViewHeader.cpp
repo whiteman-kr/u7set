@@ -56,8 +56,8 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Value 20"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Error"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Limit of error"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Result"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Measurement time"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(),
 		MeasureViewColumn(),
 		MeasureViewColumn(),
 		MeasureViewColumn(),
@@ -339,6 +339,7 @@ void MeasureViewHeader::updateColumnState()
 
 						setColumnVisible(MVC_CMN_L_ERROR, true);
 						setColumnVisible(MVC_CMN_L_ERROR_LIMIT, true);
+						setColumnVisible(MVC_CMN_L_ERROR_RESULT, true);
 
 						break;
 
@@ -357,6 +358,7 @@ void MeasureViewHeader::updateColumnState()
 
 						setColumnVisible(MVC_CMN_L_ERROR, true);
 						setColumnVisible(MVC_CMN_L_ERROR_LIMIT, true);
+						setColumnVisible(MVC_CMN_L_ERROR_RESULT, true);
 
 						break;
 
@@ -375,6 +377,7 @@ void MeasureViewHeader::updateColumnState()
 
 						setColumnVisible(MVC_CMN_L_ERROR, false);
 						setColumnVisible(MVC_CMN_L_ERROR_LIMIT, false);
+						setColumnVisible(MVC_CMN_L_ERROR_RESULT, false);
 
 						break;
 

@@ -352,13 +352,13 @@ namespace Metrology
 
 	const char* const StatisticState[] =
 	{
-				QT_TRANSLATE_NOOP("MetrologySignal.h", "Invalid"),
+				QT_TRANSLATE_NOOP("MetrologySignal.h", "Failed"),
 				QT_TRANSLATE_NOOP("MetrologySignal.h", "Ok"),
 	};
 
 	const int	StatisticStateCount		= sizeof(StatisticState)/sizeof(StatisticState[0]);
 
-	const int	StatisticStateInvalid	= 0,
+	const int	StatisticStateFailed	= 0,
 				StatisticStateSuccess	= 1;
 
 	// ----------------------------------------------------------------------------------------------

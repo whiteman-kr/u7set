@@ -735,7 +735,7 @@ bool AppDataSource::parsePacket()
 
 		if (dataReceivingTimeout == true)
 		{
-			value = 0;
+			value = signalState->current().value;
 			validity = 0;
 		}
 		else

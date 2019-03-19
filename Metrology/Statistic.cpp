@@ -146,7 +146,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 	{
 		if (column == STATISTIC_COLUMN_STATE && pSignal->statistic().measureCount() != 0)
 		{
-			if (pSignal->statistic().state() == Metrology::StatisticStateInvalid)
+			if (pSignal->statistic().state() == Metrology::StatisticStateFailed)
 			{
 				return theOptions.measureView().colorErrorLimit();
 			}
@@ -557,7 +557,7 @@ void StatisticDialog::updateList()
 			m_MeasuredCount++;
 		}
 
-		if (pSignal->statistic().state() == Metrology::StatisticStateInvalid)
+		if (pSignal->statistic().state() == Metrology::StatisticStateFailed)
 		{
 			m_invalidMeasureCount ++;
 		}
@@ -904,7 +904,7 @@ void StatisticDialog::gotoNextInvalid()
 			continue;
 		}
 
-		if (pSignal->statistic().state() == Metrology::StatisticStateInvalid)
+		if (pSignal->statistic().state() == Metrology::StatisticStateFailed)
 		{
 			foundIndex = i;
 

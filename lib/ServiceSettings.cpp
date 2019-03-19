@@ -808,7 +808,7 @@ bool ArchivingServiceSettings::readFromDevice(Hardware::Software* software, Buil
 
 	if (archiveLocation.isEmpty() == true)
 	{
-		log->errCFG3031(software->equipmentIdTemplate(), PROP_ARCHIVE_LOCATION);
+		log->wrnCFG3031(software->equipmentIdTemplate(), PROP_ARCHIVE_LOCATION);
 	}
 
 	return result;

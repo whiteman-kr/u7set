@@ -67,6 +67,27 @@ public:
 		m_result = false;
 	}
 
+	QString getCurrentDateTimeStr()
+	{
+		QString timeStr;
+
+		QDateTime ct = QDateTime::currentDateTime();
+
+		timeStr.sprintf("%02d-%02d-%04d %02d:%02d:%02d.%03d",
+						ct.date().day(),
+						ct.date().month(),
+						ct.date().year(),
+
+						ct.time().hour(),
+						ct.time().minute(),
+						ct.time().second(),
+						ct.time().msec());
+
+		return timeStr;
+	}
+
+
+
 	bool				isRunning() const { return m_isRunning; }
     void				setIsRunning(bool running) { m_isRunning = running; }
 
@@ -74,10 +95,10 @@ public:
     void				setResultIsClear(bool resultIsClear) { m_resultIsClear = resultIsClear; }
 
 	QString				startTime() const { return m_startTime; }
-	void				setStartTime() { m_startTime = QDateTime::currentDateTime().toString(" dd-MM-yyyy hh:mm:ss.zzz");  }
+	void				setStartTime() { m_startTime = getCurrentDateTimeStr();  }
 
 	QString				stopTime() const { return m_stopTime; }
-	void				setStopTime() { m_stopTime = QDateTime::currentDateTime().toString(" dd-MM-yyyy hh:mm:ss.zzz");  }
+	void				setStopTime() { m_stopTime = getCurrentDateTimeStr();  }
 
 	int					receivedBytes() const { return m_receivedBytes; }
 	QString             receivedBytesStr() { return QString::number(m_receivedBytes); }

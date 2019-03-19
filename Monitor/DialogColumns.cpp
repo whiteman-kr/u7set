@@ -14,7 +14,7 @@ DialogColumns::DialogColumns(QWidget *parent, const QStringList& columnsNames, c
 	{
         if (i >= static_cast<int>(columnsNames.size()))
         {
-            assert(false);
+			Q_ASSERT(false);
             continue;
         }
 
@@ -69,7 +69,7 @@ void DialogColumns::accept()
 		QListWidgetItem* item = ui->listSelectedColumns->item(i);
 		if (item == nullptr)
 		{
-			assert(item);
+			Q_ASSERT(item);
 			return;
 		}
 
@@ -77,7 +77,7 @@ void DialogColumns::accept()
 
 		if (index < 0 || index >= m_columnsNames.size())
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return;
 		}
 
@@ -98,7 +98,7 @@ void DialogColumns::on_buttonAdd_clicked()
 	QListWidgetItem* item = ui->listExistingColumns->takeItem(row);
 	if (item == nullptr)
 	{
-		assert(item);
+		Q_ASSERT(item);
 		return;
 	}
 
@@ -113,7 +113,7 @@ void DialogColumns::on_buttonAddAll_clicked()
 		QListWidgetItem* item = ui->listExistingColumns->takeItem(0);
 		if (item == nullptr)
 		{
-			assert(item);
+			Q_ASSERT(item);
 			return;
 		}
 
@@ -132,7 +132,7 @@ void DialogColumns::on_buttonRemove_clicked()
 	QListWidgetItem* item = ui->listSelectedColumns->takeItem(row);
 	if (item == nullptr)
 	{
-		assert(item);
+		Q_ASSERT(item);
 		return;
 	}
 

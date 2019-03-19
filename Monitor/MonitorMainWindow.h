@@ -5,19 +5,21 @@
 #include "MonitorSchemaManager.h"
 #include "TcpSignalClient.h"
 #include "TcpSignalRecents.h"
+#include "TcpAppSourcesState.h"
 #include "SelectSchemaWidget.h"
 #include "MonitorTuningTcpClient.h"
 #include "../VFrame30/AppSignalController.h"
 #include "../VFrame30/TuningController.h"
 #include "../lib/LogFile.h"
 #include "../lib/Ui/DialogAlert.h"
+#include "../lib/TcpClientsStatistics.h"
 
 class MonitorCentralWidget;
 class MonitorToolBar;
 class SchemaListWidget;
 class QLabel;
 class QComboBox;
-class DialogTuningSources;
+class DialogDataSources;
 
 class MonitorMainWindow : public QMainWindow
 {
@@ -61,14 +63,19 @@ private:
 
 	MonitorCentralWidget* monitorCentralWidget();
 
+	void updateStatusBar();
+
+	void showSoftwareConnection(const QString& caption, const QString& shortCaption, Tcp::ConnectionState connectionState, HostAddressPort portPrimary, HostAddressPort portSecondary, QLabel* label);
+
 	// Commands
 	//
 protected slots:
 	void exit();
 
 	void showLog();
-	void showTuningSources();
+	void showDataSources();
 	void showSettings();
+	void showStatistics();
 
 	void showAbout();
 	void debug();
@@ -123,6 +130,9 @@ private:
 	MonitorTuningTcpClient* m_tuningTcpClient = nullptr;
 	SimpleThread* m_tuningTcpClientThread = nullptr;
 
+	TcpAppSourcesState* m_tcpSourcesStateClient = nullptr;
+	SimpleThread* m_sourcesStateClientThread = nullptr;
+
 	Log::LogFile m_LogFile;
 
 	DialogAlert m_dialogAlert;
@@ -134,7 +144,8 @@ private:
 	// Tools menu
 	//
 
-	QAction* m_pTuningSourcesAction = nullptr;
+	QAction* m_pDataSourcesAction = nullptr;
+	QAction* m_pStatisticsAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 
 	// ? menu
@@ -171,8 +182,11 @@ private:
 	SelectSchemaWidget* m_selectSchemaWidget = nullptr;
 
 	QLabel* m_statusBarInfo = nullptr;
-	QLabel* m_statusBarConnectionStatistics = nullptr;
-	QLabel* m_statusBarConnectionState = nullptr;
+
+	QLabel* m_statusBarConfigConnection	= nullptr;
+	QLabel* m_statusBarAppDataConnection = nullptr;
+	QLabel* m_statusBarTuningConnection = nullptr;
+
 	QLabel* m_statusBarProjectInfo = nullptr;
 	QLabel* m_statusBarLogAlerts = nullptr;
 
@@ -181,7 +195,8 @@ private:
 	int m_logErrorsCounter = -1;
 	int m_logWarningsCounter = -1;
 
-	DialogTuningSources* m_dialogTuningSources = nullptr;
+	DialogDataSources* m_dialogDataSources = nullptr;
+	DialogStatistics* m_dialogStatistics = nullptr;
 };
 
 
@@ -190,7 +205,7 @@ class MonitorToolBar : public QToolBar
 	Q_OBJECT
 
 public:
-	explicit MonitorToolBar(const QString &tittle, QWidget* parent = Q_NULLPTR);
+	explicit MonitorToolBar(const QString& tittle, QWidget* parent = Q_NULLPTR);
 
 public:
 	void addAction(QAction* action);

@@ -76,6 +76,8 @@ public:
 	bool getFileBlockedById(const QString& id, QByteArray* fileData, QString* errorStr);
 	bool getFileById(const QString& id, QByteArray* fileData);
 
+	bool hasFileId(QString fileId) const;
+
 	Tcp::ConnectionState getConnectionState() const;
 
 	const SoftwareInfo& softwareInfo() const;
@@ -106,6 +108,7 @@ public:
 	std::set<QString> schemaAppSignals(const QString& schemaId);
 
 	ConfigSettings configuration() const;
+	QString configurationStartSchemaId() const;
 
 	// Data section
 	//

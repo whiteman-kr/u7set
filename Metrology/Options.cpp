@@ -1127,7 +1127,21 @@ BackupOption::~BackupOption()
 bool BackupOption::createBackup()
 {
 	QString sourcePath = theOptions.database().path() + QDir::separator() + DATABASE_NAME;
-	QString destPath = m_path + QDir::separator() + QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + DATABASE_NAME;
+
+	QDateTime&& currentTime = QDateTime::currentDateTime();
+	QDate&& date = currentTime.date();
+	QTime&& time = currentTime.time();
+
+	QString destPath = QString("%1%2%3%4%5%6%7%8%9")
+				.arg(m_path)
+				.arg(QDir::separator())
+				.arg(date.year(), 4, 10, QChar('0'))
+				.arg(date.month(), 2, 10, QChar('0'))
+				.arg(date.day(), 2, 10, QChar('0'))
+				.arg(time.hour(), 2, 10, QChar('0'))
+				.arg(time.minute(), 2, 10, QChar('0'))
+				.arg(time.second(), 2, 10, QChar('0'))
+				.arg(DATABASE_NAME);
 
 	if (QFile::copy(sourcePath, destPath) == false)
 	{
