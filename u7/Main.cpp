@@ -126,6 +126,7 @@ int main(int argc, char *argv[])
 	qRegisterMetaType<TimeSpan>();
 	qRegisterMetaType<std::vector<UartPair>>();
 	qRegisterMetaType<std::map<QString, std::vector<UartPair>>>();
+	qRegisterMetaType<QVector<int>>();
 
     // Start database communication thread
 	//

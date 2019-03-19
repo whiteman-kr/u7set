@@ -1896,8 +1896,6 @@ bool DbController::getCheckedOutSignalsIDs(QVector<int> *signalIDs, QWidget* par
 	return ok;
 }
 
-
-
 bool DbController::addSignal(E::SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget)
 {
 	if (newSignal == nullptr)
@@ -1918,6 +1916,45 @@ bool DbController::addSignal(E::SignalType signalType, QVector<Signal>* newSigna
 	emit signal_addSignal(signalType, newSignal);
 
 	ok = waitForComplete(parentWidget, tr("Adding signals"));
+
+	return ok;
+}
+
+bool DbController::getLatestSignalsWithoutProgress(QVector<int> signalIDs, QVector<Signal>* signalsArray, QWidget* parentWidget)
+{
+	if (signalsArray == nullptr)
+	{
+		assert(signalsArray != nullptr);
+		return false;
+	}
+
+	if (signalIDs.size() > 250)
+	{
+		assert(false);
+		return false;
+	}
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	bool progressIsEnabled = isProgressEnabled();
+
+	disableProgress();
+
+	emit signal_getLatestSignals(signalIDs, signalsArray);
+
+	ok = waitForComplete(parentWidget, tr("Reading latest signals"));
+
+	if (progressIsEnabled == true)
+	{
+		enableProgress();
+	}
 
 	return ok;
 }
@@ -2549,6 +2586,11 @@ void DbController::enableProgress()
 void DbController::disableProgress()
 {
 	m_progress.disableProgress();
+}
+
+bool DbController::isProgressEnabled() const
+{
+	return m_progress.isProgressEnabled();
 }
 
 const QString& DbController::host() const

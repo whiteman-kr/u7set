@@ -40,7 +40,7 @@ public:
 
 	void enableProgress();
 	void disableProgress();
-	bool isProgressEnabled();
+	bool isProgressEnabled() const;
 
 private:
 	std::atomic<bool> m_completed;			// Set true if operation is completed
