@@ -13,7 +13,7 @@ class DialogChooseTuningSignals : public QDialog
 
 public:
 
-	DialogChooseTuningSignals(TuningSignalManager* signalStorage, std::shared_ptr<TuningFilter> filter, bool setCurrentEnabled, QWidget* parent);
+	DialogChooseTuningSignals(TuningSignalManager* signalStorage, std::shared_ptr<TuningFilter> filter, bool requestValuesEnabled, QWidget* parent);
 
 	enum class FilterType
 	{
@@ -21,7 +21,9 @@ public:
 		AppSignalID,
 		CustomAppSignalID,
 		EquipmentID,
-		Caption
+		Caption,
+		Zero,
+		One
 	};
 
 	enum class SignalType
@@ -59,6 +61,7 @@ private:
 
 	QComboBox* m_baseSignalTypeCombo = nullptr;
 	QComboBox* m_baseFilterTypeCombo = nullptr;
+	QComboBox* m_baseFilterValueCombo = nullptr;
 	QLineEdit* m_baseFilterText = nullptr;
 	QPushButton* m_baseApplyFilter = nullptr;
 
@@ -99,6 +102,8 @@ private slots:
 
 	void on_m_baseFilterTypeCombo_currentIndexChanged(int index);
 
+	void on_m_baseFilterValueCombo_currentIndexChanged(int index);
+
 	void on_m_baseFilterText_returnPressed();
 
 	void on_m_baseSignalTypeCombo_currentIndexChanged(int index);
@@ -128,7 +133,7 @@ public:
 
 	explicit TuningFilterEditor(TuningFilterStorage* filterStorage, TuningSignalManager* signalManager,
 								bool readOnly,
-								bool setCurrentEnabled,
+								bool requestValuesEnabled,
 								bool typeTreeEnabled,
 								bool typeButtonEnabled,
 								bool typeTabEnabled,
@@ -231,7 +236,7 @@ private:
 
     int m_propertyEditorSplitterPos = -1;
 	bool m_readOnly = false;
-	bool m_setCurrentEnabled = false;
+	bool m_requestValuesEnabled = false;
 
 	bool m_typeButtonEnabled = false;
 	bool m_typeTabEnabled = false;

@@ -168,7 +168,7 @@ namespace Tcp
 	public:
 		SocketWorker(const SoftwareInfo& softwareInfo);
 
-		virtual ~SocketWorker();
+		virtual ~SocketWorker() override;
 
 		bool isConnected() const;
 		bool isUnconnected() const;

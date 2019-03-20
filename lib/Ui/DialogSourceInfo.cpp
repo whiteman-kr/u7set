@@ -140,12 +140,6 @@ void DialogSourceInfo::prepareContextMenu(const QPoint& pos)
 
 	QMenu menu(this);
 
-	QTreeWidgetItem* item = m_treeWidget->currentItem();
-	if (item == nullptr)
-	{
-		return;
-	}
-
 	// Copy
 	QAction* actionCopy = new QAction(tr("Copy"), &menu);
 

@@ -68,8 +68,8 @@ namespace TuningLog
 		std::vector<std::pair<QString, double>> headers;
 
 		headers.push_back(std::make_pair(tr("User"), 0.1));
-		headers.push_back(std::make_pair(tr("EquipmentId/Message"), 0.3));
-		headers.push_back(std::make_pair(tr("customSignalId"), 0.2));
+		headers.push_back(std::make_pair(tr("EquipmentID/Message"), 0.3));
+		headers.push_back(std::make_pair(tr("CustomAppSignalID"), 0.2));
 		headers.push_back(std::make_pair(tr("Old Value"), 0.2));
 		headers.push_back(std::make_pair(tr("New Value"), 0.2));
 

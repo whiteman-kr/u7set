@@ -2,6 +2,7 @@
 
 MonitorTuningTcpClient::MonitorTuningTcpClient(const SoftwareInfo& softwareInfo, TuningSignalManager* signalManager, Log::LogFile* logFile) :
 	TuningTcpClient(softwareInfo, signalManager),
+	TcpClientInstance(this),
 	m_logFile(logFile)
 {
 	setAutoApply(true);

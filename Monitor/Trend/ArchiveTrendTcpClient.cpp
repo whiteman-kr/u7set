@@ -5,6 +5,7 @@ ArchiveTrendTcpClient::ArchiveTrendTcpClient(MonitorConfigController* configCont
 	Tcp::Client(configController->softwareInfo(),
 				configController->configuration().archiveService1.address(),
 				configController->configuration().archiveService2.address()),
+	TcpClientInstance(this),
 	m_cfgController(configController)
 {
 	qDebug() << "ArchiveTrendTcpClient::ArchiveTrendTcpClient(...)";

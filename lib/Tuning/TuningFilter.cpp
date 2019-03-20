@@ -1674,7 +1674,7 @@ bool TuningFilterStorage::load(const QString& fileName, QString* errorCode)
 
 	if (f.open(QFile::ReadOnly) == false)
 	{
-		*errorCode = QObject::tr("Error opening file:\r\n\r\n%1").arg(fileName);
+		*errorCode = QObject::tr("Error opening file:\n\n%1").arg(fileName);
 		return false;
 	}
 

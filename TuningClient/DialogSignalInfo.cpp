@@ -97,7 +97,7 @@ void DialogSignalInfo::updateInfo()
 
 	if (state.controlIsEnabled() == false)
 	{
-		text += tr("NewValue:\t\tDisabled\r\n");
+		text += tr("NewValue:\t\tDisabled\n");
 	}
 	else
 	{
@@ -110,22 +110,22 @@ void DialogSignalInfo::updateInfo()
 				precision = asp.precision();
 			}
 
-			text += tr("NewValue:\t\t%1\r\n").arg(m_signalManager->newValue(m_appSignalHash).toString(precision));
+			text += tr("NewValue:\t\t%1\n").arg(m_signalManager->newValue(m_appSignalHash).toString(precision));
 		}
 		else
 		{
-			text += tr("NewValue:\t\t-\r\n");
+			text += tr("NewValue:\t\t-\n");
 		}
 	}
 
-	text += "\r\n";
+	text += "\n";
 
-	text += tr("Valid:\t\t%1\r\n").arg(state.valid() == true ? tr("Yes") : tr("No"));
-	text += tr("OutOfRange:\t\t%1\r\n").arg(state.outOfRange() == true ? tr("Yes") : tr("No"));
-	text += tr("WriteInProgress:\t%1\r\n").arg(state.writeInProgress() == true ? tr("Yes") : tr("No"));
-	text += tr("ControlIsEnabled:\t%1\r\n").arg(state.controlIsEnabled() == true ? tr("Yes") : tr("No"));
+	text += tr("Valid:\t\t%1\n").arg(state.valid() == true ? tr("Yes") : tr("No"));
+	text += tr("OutOfRange:\t\t%1\n").arg(state.outOfRange() == true ? tr("Yes") : tr("No"));
+	text += tr("WriteInProgress:\t%1\n").arg(state.writeInProgress() == true ? tr("Yes") : tr("No"));
+	text += tr("ControlIsEnabled:\t%1\n").arg(state.controlIsEnabled() == true ? tr("Yes") : tr("No"));
 
-	text += "\r\n";
+	text += "\n";
 
 	QString hashString = QString("%1h").arg(QString::number(state.writeClient(), 16));
 
@@ -134,15 +134,15 @@ void DialogSignalInfo::updateInfo()
 		hashString += tr(" (this client)");
 	}
 
-	text += tr("WriteClientHash:\t%1\r\n").arg(hashString);
-	text += tr("WriteErrorCode:\t\t%1\r\n").arg(getNetworkErrorStr(static_cast<NetworkError>(state.writeErrorCode())));
+	text += tr("WriteClientHash:\t%1\n").arg(hashString);
+	text += tr("WriteErrorCode:\t\t%1\n").arg(getNetworkErrorStr(static_cast<NetworkError>(state.writeErrorCode())));
 
-	text += "\r\n";
+	text += "\n";
 
-	text += tr("SuccessfulReadTime:\t%1\r\n").arg(state.successfulReadTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-	text += tr("WriteRequestTime:\t%1\r\n").arg(state.writeRequestTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-	text += tr("SuccessfulWriteTime:\t%1\r\n").arg(state.successfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
-	text += tr("UnsuccessfulWriteTime:\t%1\r\n").arg(state.unsuccessfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));;
+	text += tr("SuccessfulReadTime:\t%1\n").arg(state.successfulReadTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+	text += tr("WriteRequestTime:\t%1\n").arg(state.writeRequestTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+	text += tr("SuccessfulWriteTime:\t%1\n").arg(state.successfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));
+	text += tr("UnsuccessfulWriteTime:\t%1\n").arg(state.unsuccessfulWriteTime().toString("dd.MM.yyyy hh:mm:ss.zzz"));;
 
 	if (m_textEditText != text)
 	{

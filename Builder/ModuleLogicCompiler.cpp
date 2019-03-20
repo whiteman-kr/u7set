@@ -6512,7 +6512,6 @@ namespace Builder
 			case E::UalItemType::Transmitter:
 			case E::UalItemType::Receiver:
 			case E::UalItemType::Terminator:
-//			case E::UalItemType::BusExtractor:
 			case E::UalItemType::LoopbackSource:
 			case E::UalItemType::LoopbackTarget:
 				break;

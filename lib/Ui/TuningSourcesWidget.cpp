@@ -157,6 +157,11 @@ DialogTuningSourceInfo::~DialogTuningSourceInfo()
 
 }
 
+void DialogTuningSourceInfo::setTuningTcpClient(TuningTcpClient* tcpClient)
+{
+	m_tcpClient = tcpClient;
+}
+
 void DialogTuningSourceInfo::updateData()
 {
 	if (m_tcpClient == nullptr)
@@ -331,8 +336,6 @@ void DialogTuningSourceInfo::updateData()
 // ---
 //
 
-const QString TuningSourcesWidget::m_singleLmControlEnabledString("Single LM control mode is enabled");
-const QString TuningSourcesWidget::m_singleLmControlDisabledString("Single LM control mode is disabled");
 
 TuningSourcesWidget::TuningSourcesWidget(TuningTcpClient* tcpClient, bool hasActivationControls, bool hasCloseButton, QWidget* parent) :
 	QWidget(parent),
@@ -340,6 +343,9 @@ TuningSourcesWidget::TuningSourcesWidget(TuningTcpClient* tcpClient, bool hasAct
 	m_hasActivationControls(hasActivationControls),
 	m_parent(parent)
 {
+	m_singleLmControlEnabledString = tr("Single LM control mode is enabled");
+	m_singleLmControlDisabledString = tr("Single LM control mode is disabled");
+
 	if (m_tuningTcpClient == nullptr)
 	{
 		assert(m_tuningTcpClient);
@@ -442,6 +448,23 @@ TuningSourcesWidget::TuningSourcesWidget(TuningTcpClient* tcpClient, bool hasAct
 
 TuningSourcesWidget::~TuningSourcesWidget()
 {
+}
+
+void TuningSourcesWidget::setTuningTcpClient(TuningTcpClient* tcpClient)
+{
+	m_tuningTcpClient = tcpClient;
+
+	for (auto it : m_sourceInfoDialogsMap)
+	{
+		DialogTuningSourceInfo* d = it.second;
+		if (d == nullptr)
+		{
+			Q_ASSERT(d);
+			return;
+		}
+
+		d->setTuningTcpClient(tcpClient);
+	}
 }
 
 void TuningSourcesWidget::timerEvent(QTimerEvent* event)
@@ -721,7 +744,7 @@ void TuningSourcesWidget::activateControl(bool enable)
 	if (m_tuningTcpClient->singleLmControlMode() == true && m_tuningTcpClient->clientIsActive() == false)
 	{
 		if (QMessageBox::warning(this, qAppName(),
-								 tr("Warning!\r\n\r\nCurrent client is not selected as active now.\r\n\r\nAre you sure you want to take control and %1 the source %2?").arg(action).arg(equipmentId),
+								 tr("Warning!\n\nCurrent client is not selected as active now.\n\nAre you sure you want to take control and %1 the source %2?").arg(action).arg(equipmentId),
 								 QMessageBox::Yes | QMessageBox::No,
 								 QMessageBox::No) != QMessageBox::Yes)
 		{

@@ -9,6 +9,7 @@
 #include "ConfigController.h"
 #include "UserManager.h"
 #include "DialogTuningSources.h"
+#include "../lib/TcpClientsStatistics.h"
 
 class TuningTcpClient;
 class DialogAlert;
@@ -75,6 +76,7 @@ public slots:
 	void runPresetEditor();
 	void showSettings();
 	void showTuningSources();
+	void showStatistics();
 	void showAppLog();
 	void showSignalsLog();
 	void showAbout();
@@ -103,6 +105,7 @@ private:
 	QAction* m_pPresetEditorAction = nullptr;
 	QAction* m_pSettingsAction = nullptr;
 	QAction* m_pTuningSourcesAction = nullptr;
+	QAction* m_pStatisticsAction = nullptr;
 	QAction* m_pAppLogAction = nullptr;
 	QAction* m_pSignalLogAction = nullptr;
 	QAction* m_pAboutAction = nullptr;
@@ -131,6 +134,8 @@ private:
 	QString m_multipleLmControlModeText;
 
 	DialogTuningSources* m_dialogTuningSources = nullptr;
+	DialogStatistics* m_dialogStatistics = nullptr;
+
 };
 
 // Global definitions

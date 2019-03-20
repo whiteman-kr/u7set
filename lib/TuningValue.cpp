@@ -1,6 +1,13 @@
 #include "TuningValue.h"
 #include <cmath>
 
+const char* TuningValue::TYPE_STR_DISCRETE = "Discrete";
+const char* TuningValue::TYPE_STR_SIGNED_INT32 = "SignedInt32";
+const char* TuningValue::TYPE_STR_SIGNED_INT64 = "SignedInt64";
+const char* TuningValue::TYPE_STR_FLOAT = "Float";
+const char* TuningValue::TYPE_STR_DOUBLE = "Double";
+const char* TuningValue::TYPE_STR_UNKNOWN = "?";
+
 TuningValue::TuningValue(TuningValueType valueType)
 {
 	m_type = valueType;
@@ -38,25 +45,24 @@ QString TuningValue::typeStr() const
 	switch(m_type)
 	{
 	case TuningValueType::Discrete:
-		return "Discrete";
+		return TYPE_STR_DISCRETE;
 
 	case TuningValueType::SignedInt32:
-		return "SignedInt32";
+		return TYPE_STR_SIGNED_INT32;
 
 	case TuningValueType::SignedInt64:
-		return "SignedInt64";
+		return TYPE_STR_SIGNED_INT64;
 
 	case TuningValueType::Float:
-		return "Float";
+		return TYPE_STR_FLOAT;
 
 	case TuningValueType::Double:
-		return "Double";
+		return TYPE_STR_DOUBLE;
 
 	default:
 		assert(false);
+		return TYPE_STR_UNKNOWN;
 	}
-
-	return "???";
 }
 
 qint32 TuningValue::discreteValue() const
@@ -375,7 +381,7 @@ void TuningValue::fromString(QString value, bool* ok)
 		break;
 
 	case TuningValueType::Float:
-		m_double = value.toFloat(ok);
+		m_double = static_cast<double>(value.toFloat(ok));
 		break;
 
 	case TuningValueType::Double:
@@ -454,6 +460,38 @@ TuningValue TuningValue::createFromDouble(E::SignalType signalType, E::AnalogApp
 	return tv;
 }
 
+TuningValueType TuningValue::typeFromStr(const QString& typeStr)
+{
+	if (typeStr == QString(TYPE_STR_DISCRETE))
+	{
+		return TuningValueType::Discrete;
+	}
+
+	if (typeStr == QString(TYPE_STR_SIGNED_INT32))
+	{
+		return TuningValueType::SignedInt32;
+	}
+
+	if (typeStr == QString(TYPE_STR_SIGNED_INT64))
+	{
+		return TuningValueType::SignedInt64;
+	}
+
+	if (typeStr == QString(TYPE_STR_FLOAT))
+	{
+		return TuningValueType::Float;
+	}
+
+	if (typeStr == QString(TYPE_STR_DOUBLE))
+	{
+		return TuningValueType::Double;
+	}
+
+	assert(false);
+
+	return TuningValueType::Discrete;
+}
+
 int TuningValue::tuningValueTypeId()
 {
 	return qMetaTypeId<TuningValue>();
@@ -463,14 +501,14 @@ QString TuningValue::tuningValueTypeString() const
 {
 	switch (m_type)
 	{
-	case TuningValueType::Discrete:		return QObject::tr("Discrete");
-	case TuningValueType::SignedInt32:	return QObject::tr("SignedInt32");
-	case TuningValueType::SignedInt64:	return QObject::tr("SignedInt64");
-	case TuningValueType::Float:		return QObject::tr("Float");
-	case TuningValueType::Double:		return QObject::tr("Double");
+	case TuningValueType::Discrete:		return QObject::tr(TYPE_STR_DISCRETE);
+	case TuningValueType::SignedInt32:	return QObject::tr(TYPE_STR_SIGNED_INT32);
+	case TuningValueType::SignedInt64:	return QObject::tr(TYPE_STR_SIGNED_INT64);
+	case TuningValueType::Float:		return QObject::tr(TYPE_STR_FLOAT);
+	case TuningValueType::Double:		return QObject::tr(TYPE_STR_DOUBLE);
 	default:
 		assert(false);
-		return "?";
+		return TYPE_STR_UNKNOWN;
 	}
 }
 

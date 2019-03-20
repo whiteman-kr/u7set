@@ -3,6 +3,7 @@
 
 TcpSignalClient::TcpSignalClient(MonitorConfigController* configController, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
 	Tcp::Client(configController->softwareInfo(), serverAddressPort1, serverAddressPort2),
+	TcpClientInstance(this),
 	m_cfgController(configController)
 {
 	Q_ASSERT(m_cfgController);

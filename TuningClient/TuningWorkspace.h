@@ -76,7 +76,7 @@ private:
 
 protected:
 
-	bool eventFilter(QObject *object, QEvent *event) override;
+	virtual bool eventFilter(QObject *object, QEvent *event) override;
 
 private:
 
@@ -103,6 +103,8 @@ private:
 	QTreeWidget* m_filterTree = nullptr;
 
 	QLineEdit* m_treeMask = nullptr;
+
+	QPushButton* m_treeMaskApply = nullptr;
 
 	QTabWidget* m_tab = nullptr;
 

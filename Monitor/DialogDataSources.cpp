@@ -7,54 +7,32 @@ DialogDataSources::DialogDataSources(TcpAppSourcesState* tcpAppSourceState, bool
 
 	setAttribute(Qt::WA_DeleteOnClose);
 
-	QVBoxLayout* layout = new QVBoxLayout();
+	m_mainLayout = new QVBoxLayout();
 
 	// AppData
 
 	if (tcpAppSourceState == nullptr)
 	{
-		assert(tcpAppSourceState);
+		Q_ASSERT(tcpAppSourceState);
 		return;
 	}
 
 	QLabel* l = new QLabel(tr("Application Data Sources"));
-	layout->addWidget(l);
+	m_mainLayout->addWidget(l);
 
 	m_appDataSourcesWidget = new AppDataSourcesWidget(tcpAppSourceState, showTuningWidget == false /*closeButton*/, this);
 
 	connect(m_appDataSourcesWidget, &AppDataSourcesWidget::closeButtonPressed, this, &DialogDataSources::reject);
 
-	layout->addWidget(m_appDataSourcesWidget);
+	m_mainLayout->addWidget(m_appDataSourcesWidget);
 
 	// Tuning
 
-	if (showTuningWidget == true)
-	{
-		if (tcpTuningClient == nullptr)
-		{
-			assert(tcpTuningClient);
-			return;
-		}
-
-		l = new QLabel(tr("Tuning Data Sources"));
-		layout->addWidget(l);
-
-		m_tuningSourcesWidget = new TuningSourcesWidget(tcpTuningClient, hasActivationControls, true, this);
-
-		connect(m_tuningSourcesWidget, &TuningSourcesWidget::closeButtonPressed, this, &DialogDataSources::reject);
-
-		layout->addWidget(m_tuningSourcesWidget);
-
-		setMinimumSize(1024, 500);
-	}
-	else
-	{
-		setMinimumSize(1024, 300);
-	}
+	setTuningTcpClient(showTuningWidget, tcpTuningClient, hasActivationControls);
 
 	//
 
-	setLayout(layout);
+	setLayout(m_mainLayout);
 
 }
 
@@ -62,11 +40,68 @@ DialogDataSources::~DialogDataSources()
 {
 }
 
+void DialogDataSources::setTuningTcpClient(bool showTuningWidget, TuningTcpClient* tcpTuningClient, bool hasActivationControls)
+{
+	if (showTuningWidget == true)
+	{
+		// Show tuning widget
+
+		if (m_tuningSourcesLabel == nullptr)
+		{
+			m_tuningSourcesLabel = new QLabel(tr("Tuning Data Sources"));
+			m_mainLayout->addWidget(m_tuningSourcesLabel);
+		}
+
+		if (m_tuningSourcesWidget == nullptr)
+		{
+			if (tcpTuningClient == nullptr)
+			{
+				Q_ASSERT(tcpTuningClient);
+				return;
+			}
+
+			m_tuningSourcesWidget = new TuningSourcesWidget(tcpTuningClient, hasActivationControls, true, this);
+
+			connect(m_tuningSourcesWidget, &TuningSourcesWidget::closeButtonPressed, this, &DialogDataSources::reject);
+
+			m_mainLayout->addWidget(m_tuningSourcesWidget);
+		}
+		else
+		{
+			m_tuningSourcesWidget->setTuningTcpClient(tcpTuningClient);
+		}
+	}
+	else
+	{
+		// Delete tuning widget
+
+		if (m_tuningSourcesLabel != nullptr)
+		{
+			delete m_tuningSourcesLabel;
+			m_tuningSourcesLabel = nullptr;
+		}
+
+		if (m_tuningSourcesWidget != nullptr)
+		{
+			delete m_tuningSourcesWidget;
+			m_tuningSourcesWidget = nullptr;
+		}
+	}
+
+	m_appDataSourcesWidget->showCloseButton(showTuningWidget == false);
+
+	if (showTuningWidget == true)
+	{
+		setMinimumSize(1024, 500);
+	}
+	else
+	{
+		setMinimumSize(1024, 300);
+	}
+}
+
 void DialogDataSources::reject()
 {
 	emit dialogClosed();
 	QDialog::reject();
 }
-
-DialogDataSources* theDialogDataSources = nullptr;
-

@@ -19,6 +19,8 @@ public:
 	explicit DialogTuningSourceInfo(TuningTcpClient* tcpClient, QWidget* parent, Hash sourceHash);
 	virtual ~DialogTuningSourceInfo();
 
+	void setTuningTcpClient(TuningTcpClient* tcpClient);
+
 private:
 	void updateData() override;
 
@@ -34,6 +36,8 @@ public:
 
 	explicit TuningSourcesWidget(TuningTcpClient* tcpClient, bool hasActivationControls, bool hasCloseButton, QWidget* parent);
 	virtual ~TuningSourcesWidget();
+
+	void setTuningTcpClient(TuningTcpClient* tcpClient);
 
 signals:
 	void closeButtonPressed();
@@ -99,8 +103,8 @@ private:
 
 	QWidget* m_parent = nullptr;
 
-	static const QString m_singleLmControlEnabledString;
-	static const QString m_singleLmControlDisabledString;
+	QString m_singleLmControlEnabledString;
+	QString m_singleLmControlDisabledString;
 
 	static const int columnIndex_Hash = 0;
 	static const int columnIndex_EquipmentId = 1;

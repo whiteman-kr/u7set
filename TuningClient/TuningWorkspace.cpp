@@ -175,6 +175,33 @@ TuningWorkspace::~TuningWorkspace()
 	m_instanceCounter--;
 	//qDebug() << "TuningWorkspace::~TuningWorkspace m_instanceCounter = " << m_instanceCounter;
 
+	if (m_filterTree != nullptr)
+	{
+		QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
+
+		if (columnNameIndex != -1)
+		{
+			int width = m_filterTree->columnWidth(columnNameIndex);
+			settings.setValue("TuningWorkspace/FilterTreeColumnIndex", width);
+
+		}
+		if (columnDiscreteCountIndex != -1)
+		{
+			int width = m_filterTree->columnWidth(columnDiscreteCountIndex);
+			settings.setValue("TuningWorkspace/FilterTreeColumnDiscreteCount", width);
+		}
+		if (columnStatusIndex != -1)
+		{
+			int width = m_filterTree->columnWidth(columnStatusIndex);
+			settings.setValue("TuningWorkspace/FilterTreeColumnStatus", width);
+		}
+		if (columnSorIndex != -1)
+		{
+			int width = m_filterTree->columnWidth(columnSorIndex);
+			settings.setValue("TuningWorkspace/FilterTreeColumnSor", width);
+		}
+	}
+
 	if (m_hSplitter != nullptr)
 	{
 		theSettings.m_tuningWorkspaceSplitterState = m_hSplitter->saveState();
@@ -327,22 +354,57 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 
 		// Set column width
 
+		const int columnMaxWidth = 500;
+
+		QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
 
 		if (columnNameIndex != -1)
 		{
-			m_filterTree->setColumnWidth(columnNameIndex, 200);
+			const int defaultWidth = 200;
+
+			int width = settings.value("TuningWorkspace/FilterTreeColumnIndex", defaultWidth).toInt();
+			if (width < defaultWidth || width > columnMaxWidth)
+			{
+				width = defaultWidth;
+			}
+
+			m_filterTree->setColumnWidth(columnNameIndex, width);
 		}
 		if (columnDiscreteCountIndex != -1)
 		{
-			m_filterTree->setColumnWidth(columnDiscreteCountIndex, 60);
+			const int defaultWidth = 80;
+
+			int width = settings.value("TuningWorkspace/FilterTreeColumnDiscreteCount", defaultWidth).toInt();
+			if (width < defaultWidth || width > columnMaxWidth)
+			{
+				width = defaultWidth;
+			}
+
+			m_filterTree->setColumnWidth(columnDiscreteCountIndex, width);
 		}
 		if (columnStatusIndex != -1)
 		{
-			m_filterTree->setColumnWidth(columnStatusIndex, 150);
+			const int defaultWidth = 150;
+
+			int width = settings.value("TuningWorkspace/FilterTreeColumnStatus", defaultWidth).toInt();
+			if (width < defaultWidth || width > columnMaxWidth)
+			{
+				width = defaultWidth;
+			}
+
+			m_filterTree->setColumnWidth(columnStatusIndex, width);
 		}
 		if (columnSorIndex != -1)
 		{
-			m_filterTree->setColumnWidth(columnSorIndex, 60);
+			const int defaultWidth = 60;
+
+			int width = settings.value("TuningWorkspace/FilterTreeColumnSor", defaultWidth).toInt();
+			if (width < defaultWidth || width > columnMaxWidth)
+			{
+				width = defaultWidth;
+			}
+
+			m_filterTree->setColumnWidth(columnSorIndex, width);
 		}
 
 		//
@@ -350,7 +412,7 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 		m_treeMask = new QLineEdit();
 		connect(m_treeMask, &QLineEdit::returnPressed, this, &TuningWorkspace::slot_maskReturnPressed);
 
-		QPushButton* m_treeMaskApply = new QPushButton(tr("Filter"));
+		m_treeMaskApply = new QPushButton(tr("Filter"));
 		connect(m_treeMaskApply, &QPushButton::clicked, this, &TuningWorkspace::slot_maskApply);
 
 		QHBoxLayout* searchLayout = new QHBoxLayout();
@@ -1147,7 +1209,7 @@ void TuningWorkspace::activateControl(const QString& equipmentId, bool enable)
 	if (m_tuningTcpClient->singleLmControlMode() == true && m_tuningTcpClient->clientIsActive() == false)
 	{
 		if (QMessageBox::warning(this, qAppName(),
-								 tr("Warning!\r\n\r\nCurrent client is not selected as active now.\r\n\r\nAre you sure you want to take control and %1 the source %2?").arg(action).arg(equipmentId),
+								 tr("Warning!\n\nCurrent client is not selected as active now.\n\nAre you sure you want to take control and %1 the source %2?").arg(action).arg(equipmentId),
 								 QMessageBox::Yes | QMessageBox::No,
 								 QMessageBox::No) != QMessageBox::Yes)
 		{
@@ -1360,6 +1422,17 @@ void TuningWorkspace::slot_maskApply()
 	{
 		assert(rootFilter);
 		return;
+	}
+
+	if (m_treeMask->text().isEmpty() == false)
+	{
+		m_treeMask->setStyleSheet("QLineEdit { color: red }");
+		m_treeMaskApply->setStyleSheet("QPushButton { color: red }");
+	}
+	else
+	{
+		m_treeMask->setStyleSheet(QString());
+		m_treeMaskApply->setStyleSheet(QString());
 	}
 
 	updateFiltersTree(rootFilter);
