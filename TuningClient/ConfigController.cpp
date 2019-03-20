@@ -153,10 +153,10 @@ QString ConfigController::getStateToolTip()
 	Tcp::ConnectionState connectionState = m_cfgLoaderThread->getConnectionState();
 	HostAddressPort currentConnection = m_cfgLoaderThread->getCurrentServerAddressPort();
 
-	QString result = tr("Configuration Service connection\r\n\r\n");
-	result += tr("Address (primary): %1\r\n").arg(m_address1.addressPortStr());
-	result += tr("Address (secondary): %1\r\n\r\n").arg(m_address2.addressPortStr());
-	result += tr("Address (current): %1\r\n").arg(currentConnection.addressPortStr());
+	QString result = tr("Configuration Service connection\n\n");
+	result += tr("Address (primary): %1\n").arg(m_address1.addressPortStr());
+	result += tr("Address (secondary): %1\n\n").arg(m_address2.addressPortStr());
+	result += tr("Address (current): %1\n").arg(currentConnection.addressPortStr());
 	result += tr("Connection: ") + (connectionState.isConnected ? tr("established") : tr("no connection"));
 
 	return result;

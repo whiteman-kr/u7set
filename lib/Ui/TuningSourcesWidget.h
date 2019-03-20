@@ -103,8 +103,8 @@ private:
 
 	QWidget* m_parent = nullptr;
 
-	static const QString m_singleLmControlEnabledString;
-	static const QString m_singleLmControlDisabledString;
+	QString m_singleLmControlEnabledString;
+	QString m_singleLmControlDisabledString;
 
 	static const int columnIndex_Hash = 0;
 	static const int columnIndex_EquipmentId = 1;

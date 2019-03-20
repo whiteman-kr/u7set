@@ -145,7 +145,7 @@ void DialogStatistics::prepareContextMenu(const QPoint& pos)
 				return;
 			}
 
-			auto mbResult = QMessageBox::warning(this, qAppName(), tr("Are you sure you want to reconnect the connection '%1'?\r\n\r\nData will not be available at the time of reconnection.").arg(item->text(0)), QMessageBox::Yes, QMessageBox::No);
+			auto mbResult = QMessageBox::warning(this, qAppName(), tr("Are you sure you want to reconnect the connection '%1'?\n\nData will not be available at the time of reconnection.").arg(item->text(0)), QMessageBox::Yes, QMessageBox::No);
 			if (mbResult == QMessageBox::No)
 			{
 				return;
@@ -193,7 +193,7 @@ void DialogStatistics::timerEvent(QTimerEvent* event)
 
 void DialogStatistics::onReconnect()
 {
-	auto mbResult = QMessageBox::warning(this, qAppName(), tr("Are you sure you want to reconnect all connections?\r\n\r\nData will not be available at the time of reconnection."), QMessageBox::Yes, QMessageBox::No);
+	auto mbResult = QMessageBox::warning(this, qAppName(), tr("Are you sure you want to reconnect all connections?\n\nData will not be available at the time of reconnection."), QMessageBox::Yes, QMessageBox::No);
 	if (mbResult == QMessageBox::No)
 	{
 		return;

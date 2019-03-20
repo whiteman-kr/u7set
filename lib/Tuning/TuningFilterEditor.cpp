@@ -328,6 +328,11 @@ void DialogChooseTuningSignals::fillFilterValuesList()
 		setFilterValueItemText(item, v);
 		m_filterValuesTree->addTopLevelItem(item);
 	}
+
+	for (int i = 0; i < m_filterValuesTree->columnCount(); i++)
+	{
+		m_filterValuesTree->resizeColumnToContents(i);
+	}
 }
 
 void DialogChooseTuningSignals::on_m_add_clicked()
@@ -378,6 +383,16 @@ void DialogChooseTuningSignals::on_m_add_clicked()
 		setFilterValueItemText(childItem, ofv);
 
 		m_filterValuesTree->addTopLevelItem(childItem);
+
+		// Adjust width if this is the first item
+
+		if (m_filterValuesTree->topLevelItemCount() == 1)
+		{
+			for (int i = 0; i < m_filterValuesTree->columnCount(); i++)
+			{
+				m_filterValuesTree->resizeColumnToContents(i);
+			}
+		}
 	}
 }
 

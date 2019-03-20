@@ -35,6 +35,10 @@ DialogSettings::DialogSettings(QWidget* parent) :
 
 void DialogSettings::createLanguagesList()
 {
+	ui->m_languageCombo->addItem("English", "en");
+	ui->m_languageCombo->setCurrentIndex(0);
+
+
 	QString m_langPath = QApplication::applicationDirPath();
 	m_langPath.append("/languages");
 
@@ -55,9 +59,10 @@ void DialogSettings::createLanguagesList()
 
 		if (theSettings.language() == locale)
 		{
-			ui->m_languageCombo->setCurrentIndex(i);
+			ui->m_languageCombo->setCurrentIndex(ui->m_languageCombo->count() - 1);
 		}
 	}
+
 }
 
 

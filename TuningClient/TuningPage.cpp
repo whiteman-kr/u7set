@@ -1110,7 +1110,7 @@ bool TuningPage::write()
 		return false;
 	}
 
-	QString str = tr("New values will be written:") + QString("\r\n\r\n");
+	QString str = tr("New values will be written:") + QString("\n\n");
 	QString strValue;
 
 	bool modifiedFound = false;
@@ -1176,12 +1176,12 @@ bool TuningPage::write()
 			strValue = m_tuningSignalManager->newValue(hash).toString();
 		}
 
-		str += tr("%1 (%2) = %3\r\n").arg(asp.appSignalId()).arg(asp.caption()).arg(strValue);
+		str += tr("%1 (%2) = %3\n").arg(asp.appSignalId()).arg(asp.caption()).arg(strValue);
 
 		listCount++;
 	}
 
-	str += QString("\r\n") + tr("Are you sure you want to continue?");
+	str += QString("\n") + tr("Are you sure you want to continue?");
 
 	if (QMessageBox::warning(this, tr("Write Changes"),
 							 str,
@@ -1247,7 +1247,7 @@ bool TuningPage::apply()
 	if (totalSorCount > 0)
 	{
 		if (QMessageBox::warning(this, qAppName(),
-								 tr("Warning!!!\r\n\r\nSOR Signal(s) are set in logic modules!\r\n\r\nIf you apply these changes, module can run into RUN SAFE STATE.\r\n\r\nAre you sure you STILL WANT TO APPLY the changes?"),
+								 tr("Warning!!!\n\nSOR Signal(s) are set in logic modules!\n\nIf you apply these changes, module can run into RUN SAFE STATE.\n\nAre you sure you STILL WANT TO APPLY the changes?"),
 								 QMessageBox::Yes | QMessageBox::No,
 								 QMessageBox::No) != QMessageBox::Yes)
 		{
@@ -1749,7 +1749,7 @@ bool TuningPage::takeClientControl()
 		QString equipmentId = m_tuningTcpClient->singleActiveTuningSource();
 
 		if (QMessageBox::warning(this, qAppName(),
-								 tr("Warning!\r\n\r\nCurrent client is not selected as active now.\r\n\r\nAre you sure you want to take control and activate the source %1?").arg(equipmentId),
+								 tr("Warning!\n\nCurrent client is not selected as active now.\n\nAre you sure you want to take control and activate the source %1?").arg(equipmentId),
 								 QMessageBox::Yes | QMessageBox::No,
 								 QMessageBox::No) != QMessageBox::Yes)
 		{
