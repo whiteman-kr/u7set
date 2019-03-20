@@ -48,9 +48,9 @@ ConfigController::ConfigController(const SoftwareInfo& softwareInfo, HostAddress
 
 		if (ok == false)
 		{
-			QMessageBox::critical(nullptr,
+			QMessageBox::critical(m_parent,
 								  qApp->applicationName(),
-								  tr("Cannot create or attach to shared memory to determine software instance no. Error: %1")
+								  tr("Cannot create or attach to shared memory to determine software instance no.\nError: %1")
 								  .arg(m_appInstanceSharedMemory.errorString()));
 
 			// Set "Some" Application Instance No
@@ -85,7 +85,7 @@ ConfigController::ConfigController(const SoftwareInfo& softwareInfo, HostAddress
 			{
 				assert(m_appInstanceNo > 0);
 
-				QMessageBox::critical(nullptr,
+				QMessageBox::critical(m_parent,
 									  qApp->applicationName(),
 									  tr("Cannot determine software instance no. It seems all slots are occupied"));
 
@@ -243,10 +243,10 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 	if (result == false ||
 			readSettings.errorMessage.isEmpty() == false)
 	{
-		QString completeErrorMessage = tr("Parsing configuration file error: %1").arg(readSettings.errorMessage);
+		QString completeErrorMessage = tr("Parsing configuration file error:\n%1").arg(readSettings.errorMessage);
 
 		qDebug() << completeErrorMessage;
-		QMessageBox::critical(nullptr, qApp->applicationName(), completeErrorMessage);
+		QMessageBox::critical(m_parent, qApp->applicationName(), completeErrorMessage);
 
 	}
 
@@ -320,7 +320,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 			{
 				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
 				{
-					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
+					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error:\n%2").arg(f.pathFileName).arg(errorStr);
 					theLogFile->writeError(completeErrorMessage);
 					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 				}
@@ -337,7 +337,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 			{
 				if (getFileBlockedById(f.ID, &data, &errorStr) == false)
 				{
-					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
+					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error:\n%2").arg(f.pathFileName).arg(errorStr);
 					theLogFile->writeError(completeErrorMessage);
 					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 				}
@@ -353,7 +353,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 				{
 					m_globalScriptData.clear();
 
-					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error: %2").arg(f.pathFileName).arg(errorStr);
+					QString completeErrorMessage = tr("ConfigController::getFileBlockedById: Get %1 file error:\n%2").arg(f.pathFileName).arg(errorStr);
 					theLogFile->writeError(completeErrorMessage);
 					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 				}

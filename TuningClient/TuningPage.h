@@ -113,6 +113,8 @@ private slots:
 
 	void slot_FilterTypeIndexChanged(int index);
 
+	void slot_FilterValueIndexChanged(int index);
+
 	void slot_listContextMenuRequested(const QPoint& pos);
 
 	void slot_saveSignalsToNewFilter();
@@ -135,7 +137,9 @@ private:
 		AppSignalID,
 		CustomAppSignalID,
 		EquipmentID,
-		Caption
+		Caption,
+		Zero,
+		One
 	};
 
 private:
@@ -191,6 +195,8 @@ private:
 	QLineEdit* m_filterEdit = nullptr;
 
 	QComboBox* m_filterTypeCombo = nullptr;
+
+	QComboBox* m_filterValueCombo = nullptr;
 
 	TuningModelClient* m_model = nullptr;
 

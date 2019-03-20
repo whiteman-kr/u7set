@@ -104,6 +104,8 @@ private:
 
 	QLineEdit* m_treeMask = nullptr;
 
+	QPushButton* m_treeMaskApply = nullptr;
+
 	QTabWidget* m_tab = nullptr;
 
 	const int columnNameIndex = 0;

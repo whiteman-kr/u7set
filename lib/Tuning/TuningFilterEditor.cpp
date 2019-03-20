@@ -9,7 +9,7 @@
 // DialogChooseTuningSignals
 //
 
-DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signalStorage, std::shared_ptr<TuningFilter> filter, bool setCurrentEnabled, QWidget* parent)
+DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signalStorage, std::shared_ptr<TuningFilter> filter, bool requestValuesEnabled, QWidget* parent)
 	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
 		m_signalManager(signalStorage),
 		m_filter(filter)
@@ -69,6 +69,27 @@ DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signal
 	connect(m_baseApplyFilter, &QPushButton::clicked, this, &DialogChooseTuningSignals::on_m_baseApplyFilter_clicked);
 	leftFilterLayout->addWidget(m_baseApplyFilter);
 
+	// Value filter controls
+	//
+
+	if (requestValuesEnabled == true)
+	{
+		leftFilterLayout->addSpacing(20);
+
+		QLabel* l = new QLabel(tr("Value:"));
+		leftFilterLayout->addWidget(l);
+
+		m_baseFilterValueCombo = new QComboBox();
+		m_baseFilterValueCombo->addItem(tr("Any Value"), static_cast<int>(FilterType::All));
+		m_baseFilterValueCombo->addItem(tr("Discrete 0"), static_cast<int>(FilterType::Zero));
+		m_baseFilterValueCombo->addItem(tr("Discrete 1"), static_cast<int>(FilterType::One));
+		leftFilterLayout->addWidget(m_baseFilterValueCombo);
+
+		connect(m_baseFilterValueCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(on_m_baseFilterValueCombo_currentIndexChanged(int)));
+
+		m_baseFilterValueCombo->setCurrentIndex(0);
+	}
+
 	leftLayout->addLayout(leftFilterLayout);
 
 	mainHorzLayout->addLayout(leftLayout);
@@ -101,15 +122,15 @@ DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signal
 	m_filterValuesTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	connect(m_filterValuesTree, &QTreeWidget::doubleClicked, this, &DialogChooseTuningSignals::on_m_filterValuesTree_doubleClicked);
 
-	QStringList l;
-	l << tr("Custom AppSignal Id");
-	l << tr("App Signal Id");
-	l << tr("Type");
-	l << tr("Caption");
-	l << tr("Value");
+	QStringList headers;
+	headers << tr("CustomAppSignalID");
+	headers << tr("AppSignalID");
+	headers << tr("Type");
+	headers << tr("Caption");
+	headers << tr("Value");
 
-	m_filterValuesTree->setColumnCount(l.size());
-	m_filterValuesTree->setHeaderLabels(l);
+	m_filterValuesTree->setColumnCount(headers.size());
+	m_filterValuesTree->setHeaderLabels(headers);
 	rightLayout->addWidget(m_filterValuesTree);
 
 	QHBoxLayout* rightGridLayout = new QHBoxLayout();
@@ -128,7 +149,7 @@ DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signal
 	connect(m_setValue, &QPushButton::clicked, this, &DialogChooseTuningSignals::on_m_setValue_clicked);
 	rightGridLayout->addWidget(m_setValue);
 
-	if (setCurrentEnabled == true)
+	if (requestValuesEnabled == true)
 	{
 		m_setCurrent = new QPushButton(tr("Set Current"));
 		connect(m_setCurrent, &QPushButton::clicked, this, &DialogChooseTuningSignals::on_m_setCurrent_clicked);
@@ -226,6 +247,16 @@ void DialogChooseTuningSignals::fillBaseSignalsList()
 		filterType = static_cast<FilterType>(data.toInt());
 	}
 
+	FilterType filterValue = FilterType::All;
+	if (m_baseFilterValueCombo != nullptr)
+	{
+		data = m_baseFilterValueCombo->currentData();
+		if (data.isValid() == true)
+		{
+			filterValue = static_cast<FilterType>(data.toInt());
+		}
+	}
+
 	QString filterText = m_baseFilterText->text().trimmed();
 
 	std::vector<Hash> hashes = m_signalManager->signalHashes();
@@ -252,6 +283,31 @@ void DialogChooseTuningSignals::fillBaseSignalsList()
 		{
 			continue;
 		}
+
+		// Value filter
+		//
+
+		if (filterValue != FilterType::All && asp.isDiscrete() == true)
+		{
+			bool ok = false;
+
+			const TuningSignalState state = m_signalManager->state(hash, &ok);
+
+			if (ok == true && state.valid() == true)
+			{
+				if (filterValue == FilterType::Zero && state.value().discreteValue() != 0)
+				{
+					continue;
+				}
+				if (filterValue == FilterType::One && state.value().discreteValue() != 1)
+				{
+					continue;
+				}
+			}
+		}
+
+		// Text filter
+		//
 
 		if (filterText.isEmpty() == false)
 		{
@@ -631,12 +687,16 @@ void DialogChooseTuningSignals::on_m_baseFilterTypeCombo_currentIndexChanged(int
 	fillBaseSignalsList();
 }
 
+void DialogChooseTuningSignals::on_m_baseFilterValueCombo_currentIndexChanged(int index)
+{
+	Q_UNUSED(index);
+	fillBaseSignalsList();
+}
+
 void DialogChooseTuningSignals::on_m_baseFilterText_returnPressed()
 {
 	fillBaseSignalsList();
 }
-
-
 
 void DialogChooseTuningSignals::on_m_moveUp_clicked()
 {
@@ -722,7 +782,7 @@ void DialogChooseTuningSignals::setFilterValueItemText(QTreeWidgetItem* item, co
 
 TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, TuningSignalManager* signalManager,
 									   bool readOnly,
-									   bool setCurrentEnabled,
+									   bool requestValuesEnabled,
 									   bool typeTreeEnabled,
 									   bool typeButtonEnabled,
 									   bool typeTabEnabled,
@@ -734,7 +794,7 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, Tunin
 	m_dialogChooseSignalGeometry(dialogChooseSignalGeometry),
 	m_propertyEditorSplitterPos(propertyEditorSplitterPos),
 	m_readOnly(readOnly),
-	m_setCurrentEnabled(setCurrentEnabled),
+	m_requestValuesEnabled(requestValuesEnabled),
 	m_typeButtonEnabled(typeButtonEnabled),
 	m_typeTabEnabled(typeTabEnabled),
 	m_typeTreeEnabled(typeTreeEnabled),
@@ -1462,7 +1522,7 @@ void TuningFilterEditor::on_m_presetsSignals_clicked()
 		return;
 	}
 
-	DialogChooseTuningSignals d(m_signalManager, selectedFilter, m_setCurrentEnabled, this);
+	DialogChooseTuningSignals d(m_signalManager, selectedFilter, m_requestValuesEnabled, this);
 
 	connect(&d, &DialogChooseTuningSignals::getCurrentSignalValue, this, &TuningFilterEditor::slot_getCurrentSignalValue, Qt::DirectConnection);
 
