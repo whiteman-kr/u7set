@@ -189,13 +189,14 @@ void MainWindow::createMenu()
 
 	// Tools
 	//
-	QMenu* pServiceMenu = menuBar()->addMenu(tr("&Service"));
-	pServiceMenu->addAction(m_pPresetEditorAction);
-
 	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
-	pToolsMenu->addAction(m_pTuningSourcesAction);
-	pToolsMenu->addAction(m_pStatisticsAction);
-	pToolsMenu->addAction(m_pSettingsAction);
+	pToolsMenu->addAction(m_pPresetEditorAction);
+
+	QMenu* pServiceMenu = menuBar()->addMenu(tr("&Service"));
+	pServiceMenu->addAction(m_pTuningSourcesAction);
+	pServiceMenu->addAction(m_pStatisticsAction);
+	pServiceMenu->addSeparator();
+	pServiceMenu->addAction(m_pSettingsAction);
 
 
 	// Help
@@ -595,7 +596,7 @@ void MainWindow::updateStatusBar()
 		{
 			m_discreteCounter = m_filterStorage.root()->counters().discreteCounter;
 
-			m_statusDiscreteCount->setText(QString("Discretes: %1").arg(m_discreteCounter));
+			m_statusDiscreteCount->setText(tr("Discretes: %1").arg(m_discreteCounter));
 
 			if (m_discreteCounter == 0)
 			{

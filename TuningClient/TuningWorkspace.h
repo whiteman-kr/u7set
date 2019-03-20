@@ -76,7 +76,7 @@ private:
 
 protected:
 
-	bool eventFilter(QObject *object, QEvent *event) override;
+	virtual bool eventFilter(QObject *object, QEvent *event) override;
 
 private:
 
