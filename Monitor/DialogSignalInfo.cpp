@@ -368,7 +368,7 @@ void DialogSignalInfo::updateData()
 		return;
 	}
 
-	if (state.m_flags.valid)
+	if (state.m_flags.valid == true)
 	{
 		QString strValue;
 
@@ -377,7 +377,7 @@ void DialogSignalInfo::updateData()
 			strValue = QString("%1").arg(state.m_value);
 		}
 
-		if (m_signal.isAnalog())
+		if (m_signal.isAnalog() == true)
 		{
 			int p = 4;
 
@@ -423,7 +423,6 @@ void DialogSignalInfo::updateData()
 				//strValue = tr("BIN64: ") + strValue;
 				break;
 			}
-
 		}
 
 		// switch font if needed
@@ -452,7 +451,7 @@ void DialogSignalInfo::updateData()
 	}
 	else
 	{
-		ui->labelValue->setText("???");
+		ui->labelValue->setText(QStringLiteral("?"));
 	}
 
 	//QDateTime systemTime = QDateTime::fromMSecsSinceEpoch(state.time.system);
@@ -467,8 +466,9 @@ void DialogSignalInfo::updateData()
 	if (m_signalFlags)
 	{
 		m_signalFlags->updateControl(state.m_flags);
-
 	}
+
+	return;
 }
 
 

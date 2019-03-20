@@ -165,8 +165,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 	if (role == Qt::TextAlignmentRole &&
 		(column ==  static_cast<int>(ArchiveColumns::Row) ||
 		 column ==  static_cast<int>(ArchiveColumns::State) ||
-		column ==  static_cast<int>(ArchiveColumns::Valid))
-		)
+		column ==  static_cast<int>(ArchiveColumns::Valid)))
 	{
 		return QVariant(Qt::AlignCenter);
 	}
@@ -247,25 +246,32 @@ QString ArchiveModel::getValueString(const AppSignalState& state, const AppSigna
 	case E::SignalType::Analog:
 		if (m_cachedSignalState.isValid() == false)
 		{
-			result = nonValidString;
+			result = QString("%1 (%2)")
+						.arg(nonValidString)
+						.arg(QString::number(state.value()));		// <<<<----- Subject to change in RPCT-2197 (MATS Archive precision mismatch)
 		}
 		else
 		{
-			result = QString::number(state.value());
+			result = QString::number(state.value());				// <<<<----- Subject to change in RPCT-2197 (MATS Archive precision mismatch)
 		}
 		break;
 	case E::SignalType::Discrete:
 		if (m_cachedSignalState.isValid() == false)
 		{
-			result = nonValidString;
+			result = QString("%1 (%2)")
+						.arg(nonValidString)
+						.arg(QString::number(state.value()));
 		}
 		else
 		{
 			result = QString::number(state.value());
 		}
 		break;
+	case E::SignalType::Bus:
+		result = QStringLiteral("Unsuported");
+		break;
 	default:
-		result = tr("Unsuported");
+		assert(false);
 	}
 
 	return result;
