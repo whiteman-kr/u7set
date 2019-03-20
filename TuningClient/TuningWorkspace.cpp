@@ -412,7 +412,7 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 		m_treeMask = new QLineEdit();
 		connect(m_treeMask, &QLineEdit::returnPressed, this, &TuningWorkspace::slot_maskReturnPressed);
 
-		QPushButton* m_treeMaskApply = new QPushButton(tr("Filter"));
+		m_treeMaskApply = new QPushButton(tr("Filter"));
 		connect(m_treeMaskApply, &QPushButton::clicked, this, &TuningWorkspace::slot_maskApply);
 
 		QHBoxLayout* searchLayout = new QHBoxLayout();
@@ -1422,6 +1422,17 @@ void TuningWorkspace::slot_maskApply()
 	{
 		assert(rootFilter);
 		return;
+	}
+
+	if (m_treeMask->text().isEmpty() == false)
+	{
+		m_treeMask->setStyleSheet("QLineEdit { color: red }");
+		m_treeMaskApply->setStyleSheet("QPushButton { color: red }");
+	}
+	else
+	{
+		m_treeMask->setStyleSheet(QString());
+		m_treeMaskApply->setStyleSheet(QString());
 	}
 
 	updateFiltersTree(rootFilter);
