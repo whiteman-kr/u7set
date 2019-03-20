@@ -656,10 +656,7 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeDoubleAttribute("SpreadTolerance", spreadTolerance());
 	xml.writeIntAttribute("ByteOrder", byteOrderInt());
 
-	xml.writeBoolAttribute("EnableTuning", enableTuning());
-	xml.writeFloatAttribute("TuningDefaultValue", tuningDefaultValue().toFloat());
-	xml.writeFloatAttribute("TuningLowBound", tuningLowBound().toFloat());
-	xml.writeFloatAttribute("TuningHighBound", tuningHighBound().toFloat());
+	writeTuningValuesToXml(xml);
 
 	xml.writeStringAttribute("BusTypeID", busTypeID());
 	xml.writeBoolAttribute("AdaptiveAperture", adaptiveAperture());
@@ -682,6 +679,19 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeEndElement();				// </Signal>
 }
 
+void Signal::writeTuningValuesToXml(XmlWriteHelper& xml)
+{
+	xml.writeBoolAttribute("EnableTuning", enableTuning());
+
+	assert(tuningDefaultValue().type() == tuningLowBound().type());
+	assert(tuningDefaultValue().type() == tuningHighBound().type());
+
+	xml.writeStringAttribute("TuningValueType", tuningDefaultValue().typeStr());
+
+	xml.writeStringAttribute("TuningDefaultValue", tuningDefaultValue().toString());
+	xml.writeStringAttribute("TuningLowBound", tuningLowBound().toString());
+	xml.writeStringAttribute("TuningHighBound", tuningHighBound().toString());
+}
 
 bool Signal::readFromXml(XmlReadHelper& xml)
 {
@@ -765,20 +775,7 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute("ByteOrder", &intValue);
 	m_byteOrder = static_cast<E::ByteOrder>(intValue);
 
-	result &= xml.readBoolAttribute("EnableTuning", &m_enableTuning);
-
-	updateTuningValuesType();
-
-	float value = 0;
-
-	result &= xml.readFloatAttribute("TuningDefaultValue", &value);
-	m_tuningDefaultValue.fromFloat(value);
-
-	result &= xml.readFloatAttribute("TuningLowBound", &value);
-	m_tuningLowBound.fromFloat(value);
-
-	result &= xml.readFloatAttribute("TuningHighBound", &value);
-	m_tuningHighBound.fromFloat(value);
+	result &= readTuningValuesFromXml(xml);
 
 	result &= xml.readStringAttribute("BusTypeID", &m_busTypeID);
 	result &= xml.readBoolAttribute("AdaptiveAperture", &m_adaptiveAperture);
@@ -821,6 +818,45 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readStringAttribute("SpecPropValues", &hexArray);
 
 	m_protoSpecPropValues = QByteArray(hexArray.toLatin1());
+
+	return result;
+}
+
+bool Signal::readTuningValuesFromXml(XmlReadHelper &xml)
+{
+	bool result = true;
+
+	result &= xml.readBoolAttribute("EnableTuning", &m_enableTuning);
+
+	QString tuningValueTypeStr;
+
+	result &= xml.readStringAttribute("TuningValueType", &tuningValueTypeStr);
+
+	TuningValueType tvType = TuningValue::typeFromStr(tuningValueTypeStr);
+
+	if (tvType != TuningValue::getTuningValueType(m_signalType, m_analogSignalFormat))
+	{
+		assert(false);
+		return false;
+	}
+
+	updateTuningValuesType();
+
+	QString valueStr;
+
+	bool conversionResult = true;
+
+	result &= xml.readStringAttribute("TuningDefaultValue", &valueStr);
+	m_tuningDefaultValue.fromString(valueStr, &conversionResult);
+	result &= conversionResult;
+
+	result &= xml.readStringAttribute("TuningLowBound", &valueStr);
+	m_tuningLowBound.fromString(valueStr, &conversionResult);
+	result &= conversionResult;
+
+	result &= xml.readStringAttribute("TuningHighBound", &valueStr);
+	m_tuningHighBound.fromString(valueStr, &conversionResult);
+	result &= conversionResult;
 
 	return result;
 }

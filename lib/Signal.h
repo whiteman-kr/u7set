@@ -292,7 +292,10 @@ public:
 	//
 
 	void writeToXml(XmlWriteHelper& xml);
+	void writeTuningValuesToXml(XmlWriteHelper& xml);
+
 	bool readFromXml(XmlReadHelper& xml);
+	bool readTuningValuesFromXml(XmlReadHelper& xml);
 
 	void serializeTo(Proto::AppSignal* s) const;
 	void serializeFrom(const Proto::AppSignal &s);
