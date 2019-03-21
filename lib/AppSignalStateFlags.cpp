@@ -7,25 +7,19 @@ void AppSignalStateFlags::clear()
 
 void AppSignalStateFlags::clearReasonsFlags()
 {
-	validityChange = 0;
-	autoPoint = 0;
-	coarseAperture = 0;
-	fineAperture = 0;
+	all &= ~MASK_ALL_ARCHIVING_REASONS;
 }
 
 bool AppSignalStateFlags::hasArchivingReason() const
 {
-	return	validityChange == 1 ||
-			autoPoint == 1 ||
-			coarseAperture == 1 ||
-			fineAperture == 1;
+	return (all & MASK_ALL_ARCHIVING_REASONS) != 0;
 }
 
 bool AppSignalStateFlags::hasShortTermArchivingReasonOnly() const
 {
-	return	validityChange == 0 &&
-			autoPoint == 0 &&
-			coarseAperture == 0 &&
-			fineAperture == 1;
+	quint32 archivingReasons = all & MASK_ALL_ARCHIVING_REASONS;
+
+	return	(archivingReasons & ~MASK_SHORT_TERM_ARCHIVING_REASONE) == 0 &&
+			(archivingReasons & MASK_SHORT_TERM_ARCHIVING_REASONE) != 0;
 }
 
