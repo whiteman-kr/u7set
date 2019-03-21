@@ -2011,7 +2011,7 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 
 	m_signalsView->addAction(toolBar->addSeparator());
 
-	action = new QAction(QIcon(":/Images/Images/SchemaCheckIn.svg"), tr("Check in signals"), this);
+	action = new QAction(QIcon(":/Images/Images/SchemaCheckIn.svg"), tr("Check in signal(s)"), this);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::checkIn);
 	connect(m_signalsModel, &SignalsModel::setCheckedoutSignalActionsVisibility, action, &QAction::setEnabled);
 	m_signalsView->addAction(action);
@@ -2176,7 +2176,7 @@ void SignalsTabPage::checkIn()
 	const QItemSelection& proxySelection = m_signalsView->selectionModel()->selection();
 	const QItemSelection& sourceSelection = m_signalsProxyModel->mapSelectionToSource(proxySelection);
 
-	CheckinSignalsDialog dlg(tr("CheckIn"), m_signalsModel, sourceSelection.indexes(), false, this);
+	CheckinSignalsDialog dlg(m_signalsModel, sourceSelection.indexes(), this);
 
 	if (dlg.exec() == QDialog::Rejected)
 	{
@@ -2612,11 +2612,11 @@ void CheckedoutSignalsModel::setCheckState(int row, Qt::CheckState state)
 }
 
 
-CheckinSignalsDialog::CheckinSignalsDialog(QString title, SignalsModel *sourceModel, QModelIndexList selection, bool showUndoButton, QWidget* parent) :
+CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel *sourceModel, QModelIndexList selection, QWidget* parent) :
 	QDialog(parent),
 	m_sourceModel(sourceModel)
 {
-	setWindowTitle(title);
+	setWindowTitle("Check In Signal(s)");
 
 	m_splitter = new QSplitter(Qt::Vertical, this);
 
@@ -2664,36 +2664,24 @@ CheckinSignalsDialog::CheckinSignalsDialog(QString title, SignalsModel *sourceMo
 		}
 	}
 
-	QAction* undoAction = new QAction(QIcon(":/Images/Images/undo.png"), tr("Undo signal changes"), this);
-	connect(undoAction, &QAction::triggered, this, &CheckinSignalsDialog::openUndoDialog);
-	m_signalsView->addAction(undoAction);
-
 	vl2->addWidget(m_signalsView);
-
-	vl2->addWidget(new QLabel(tr("Comment:"), this));
 
 	QWidget* w = new QWidget(this);
 
 	w->setLayout(vl2);
 
-	m_splitter->addWidget(w);
 	m_splitter->addWidget(m_commentEdit);
+	m_splitter->addWidget(w);
 
+	vl1->addWidget(new QLabel(tr("Check In Comment:"), this));
 	vl1->addWidget(m_splitter);
 
 	QHBoxLayout* hl = new QHBoxLayout;
 	hl->addStretch();
 
-	QPushButton* checkinSelectedButton = new QPushButton(tr("CheckIn"), this);
+	QPushButton* checkinSelectedButton = new QPushButton(tr("Check In"), this);
 	connect(checkinSelectedButton, &QPushButton::clicked, this, &CheckinSignalsDialog::checkinSelected);
 	hl->addWidget(checkinSelectedButton);
-
-	if (showUndoButton)
-	{
-		QPushButton* undoSelectedButton = new QPushButton(tr("Undo"), this);
-		connect(undoSelectedButton, &QPushButton::clicked, this, &CheckinSignalsDialog::undoSelected);
-		hl->addWidget(undoSelectedButton);
-	}
 
 	QPushButton* cancelButton = new QPushButton(tr("Cancel"), this);
 	connect(cancelButton, &QPushButton::clicked, this, &CheckinSignalsDialog::cancel);
@@ -2705,14 +2693,14 @@ CheckinSignalsDialog::CheckinSignalsDialog(QString title, SignalsModel *sourceMo
 
 	m_splitter->setChildrenCollapsible(false);
 
-	setWindowPosition(this, "PendingChangesDialog");
+	setWindowPosition(this, "CheckinSignalsDialog");
 
 	QList<int> list = m_splitter->sizes();
 	list[0] = height();
 	list[1] = m_commentEdit->height();
 	m_splitter->setSizes(list);
 
-	m_splitter->restoreState(settings.value("PendingChangesDialog/splitterPosition", m_splitter->saveState()).toByteArray());
+	m_splitter->restoreState(settings.value("CheckinSignalsDialog/splitterPosition", m_splitter->saveState()).toByteArray());
 }
 
 void CheckinSignalsDialog::checkinSelected()
@@ -2749,43 +2737,6 @@ void CheckinSignalsDialog::checkinSelected()
 	accept();
 }
 
-void CheckinSignalsDialog::undoSelected()
-{
-	saveDialogGeometry();
-
-	QVector<int> IDs;
-	for (int i = 0; i < m_proxyModel->rowCount(); i++)
-	{
-		QModelIndex proxyIndex = m_proxyModel->index(i, SC_STR_ID);
-		if (m_proxyModel->data(proxyIndex, Qt::CheckStateRole) != Qt::Checked)
-		{
-			continue;
-		}
-		int sourceRow = m_proxyModel->mapToSource(proxyIndex).row();
-		IDs << m_sourceModel->key(sourceRow);
-	}
-	if (IDs.count() == 0)
-	{
-		QMessageBox::warning(m_sourceModel->parentWindow(), tr("Warning"), tr("No one signal was selected!"));
-		return;
-	}
-	QVector<ObjectState> states;
-	foreach (int ID, IDs)
-	{
-		ObjectState state;
-		m_sourceModel->dbController()->undoSignalChanges(ID, &state, m_sourceModel->parentWindow());
-		if (state.errCode != ERR_SIGNAL_OK)
-		{
-			states << state;
-		}
-	}
-	if (!states.isEmpty())
-	{
-		m_sourceModel->showErrors(states);
-	}
-
-	accept();
-}
 
 void CheckinSignalsDialog::cancel()
 {
@@ -2794,19 +2745,6 @@ void CheckinSignalsDialog::cancel()
 	reject();
 }
 
-void CheckinSignalsDialog::openUndoDialog()
-{
-	UndoSignalsDialog dlg(m_sourceModel, this);
-
-	dlg.setCheckStates(m_signalsView->selectionModel()->selectedRows(), false);
-
-	if (dlg.exec() == QDialog::Rejected)
-	{
-		return;
-	}
-
-	m_sourceModel->loadSignals();
-}
 
 void CheckinSignalsDialog::closeEvent(QCloseEvent* event)
 {
@@ -2817,10 +2755,10 @@ void CheckinSignalsDialog::closeEvent(QCloseEvent* event)
 
 void CheckinSignalsDialog::saveDialogGeometry()
 {
-	saveWindowPosition(this, "PendingChangesDialog");
+	saveWindowPosition(this, "CheckinSignalsDialog");
 
 	QSettings settings;
-	settings.setValue("PendingChangesDialog/splitterPosition", m_splitter->saveState());
+	settings.setValue("CheckinSignalsDialog/splitterPosition", m_splitter->saveState());
 }
 
 

@@ -204,13 +204,11 @@ class CheckinSignalsDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	CheckinSignalsDialog(QString title, SignalsModel* sourceModel, QModelIndexList selection, bool showUndoButton = true, QWidget *parent = 0);
+	CheckinSignalsDialog(SignalsModel* sourceModel, QModelIndexList selection, QWidget *parent = 0);
 
 public slots:
 	void checkinSelected();
-	void undoSelected();
 	void cancel();
-	void openUndoDialog();
 
 protected:
 	void closeEvent(QCloseEvent* event);
