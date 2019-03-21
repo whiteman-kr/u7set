@@ -530,7 +530,7 @@ void TuningSourcesWidget::update(bool refreshOnly)
 			m_treeWidget->resizeColumnToContents(i);
 		}
 
-		m_treeWidget->setColumnWidth(State, 120);
+		m_treeWidget->setColumnWidth(static_cast<int>(Columns::State), 120);
 
 		if (m_hasActivationControls == true)
 		{
@@ -576,9 +576,9 @@ void TuningSourcesWidget::update(bool refreshOnly)
 			{
 				if (ts.state.isreply() == false)
 				{
-					item->setForeground(State, QBrush(DialogSourceInfo::dataItemErrorColor));
+					item->setForeground(static_cast<int>(Columns::State), QBrush(DialogSourceInfo::dataItemErrorColor));
 
-					item->setText(State, tr("No Reply"));
+					item->setText(static_cast<int>(Columns::State), tr("No Reply"));
 				}
 				else
 				{
@@ -586,27 +586,27 @@ void TuningSourcesWidget::update(bool refreshOnly)
 
 					if (errorsCount == 0)
 					{
-						item->setForeground(State, QBrush(Qt::black));
+						item->setForeground(static_cast<int>(Columns::State), QBrush(Qt::black));
 
-						item->setText(State, tr("Active"));
+						item->setText(static_cast<int>(Columns::State), tr("Active"));
 					}
 					else
 					{
-						item->setForeground(State, QBrush(DialogSourceInfo::dataItemErrorColor));
+						item->setForeground(static_cast<int>(Columns::State), QBrush(DialogSourceInfo::dataItemErrorColor));
 
-						item->setText(State, tr("E: %1").arg(errorsCount));
+						item->setText(static_cast<int>(Columns::State), tr("E: %1").arg(errorsCount));
 					}
 				}
 			}
 			else
 			{
-				item->setText(State, tr("Inactive"));
+				item->setText(static_cast<int>(Columns::State), tr("Inactive"));
 			}
 
-			item->setText(IsActive, ts.state.controlisactive() ? tr("Yes") : tr("No"));
-			item->setText(HasUnappliedParams, ts.state.hasunappliedparams() ? tr("Yes") : tr("No"));
-			item->setText(RequestCount, QString::number(ts.state.requestcount()));
-			item->setText(ReplyCount, QString::number(ts.state.replycount()));
+			item->setText(static_cast<int>(Columns::IsActive), ts.state.controlisactive() ? tr("Yes") : tr("No"));
+			item->setText(static_cast<int>(Columns::HasUnappliedParams), ts.state.hasunappliedparams() ? tr("Yes") : tr("No"));
+			item->setText(static_cast<int>(Columns::RequestCount), QString::number(ts.state.requestcount()));
+			item->setText(static_cast<int>(Columns::ReplyCount), QString::number(ts.state.replycount()));
 		}
 	}
 }

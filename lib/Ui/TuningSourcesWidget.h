@@ -67,7 +67,7 @@ private:
 
 	void activateControl(bool enable);
 
-	enum Columns
+	enum class Columns
 	{
 		EquipmentId,
 		Ip,

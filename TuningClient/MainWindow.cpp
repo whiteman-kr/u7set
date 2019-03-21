@@ -189,12 +189,8 @@ void MainWindow::createMenu()
 
 	// Tools
 	//
-	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
-	pToolsMenu->addAction(m_pPresetEditorAction);
-
 	QMenu* pServiceMenu = menuBar()->addMenu(tr("&Service"));
-	pServiceMenu->addAction(m_pTuningSourcesAction);
-	pServiceMenu->addAction(m_pStatisticsAction);
+	pServiceMenu->addAction(m_pPresetEditorAction);
 	pServiceMenu->addSeparator();
 	pServiceMenu->addAction(m_pSettingsAction);
 
@@ -203,6 +199,9 @@ void MainWindow::createMenu()
 	//
 	QMenu* pHelpMenu = menuBar()->addMenu(tr("&?"));
 
+	pHelpMenu->addAction(m_pTuningSourcesAction);
+	pHelpMenu->addAction(m_pStatisticsAction);
+	pHelpMenu->addSeparator();
 	pHelpMenu->addAction(m_pAppLogAction);
 	pHelpMenu->addAction(m_pSignalLogAction);
 	pHelpMenu->addSeparator();
@@ -596,7 +595,7 @@ void MainWindow::updateStatusBar()
 		{
 			m_discreteCounter = m_filterStorage.root()->counters().discreteCounter;
 
-			m_statusDiscreteCount->setText(tr("Discretes: %1").arg(m_discreteCounter));
+			m_statusDiscreteCount->setText(tr(" Discretes: %1 ").arg(m_discreteCounter));
 
 			if (m_discreteCounter == 0)
 			{
@@ -617,7 +616,7 @@ void MainWindow::updateStatusBar()
 
 	if (sources.empty() == true)
 	{
-		m_statusBarLmErrors->setText(tr(" No LM information"));
+		m_statusBarLmErrors->setText(tr(" No LM information "));
 		m_statusBarSor->setText(QString());
 	}
 	else
@@ -632,7 +631,7 @@ void MainWindow::updateStatusBar()
 		{
 			m_lmErrorsCounter = totalErrorCount;
 
-			m_statusBarLmErrors->setText(QString(" LM Errors: %1").arg(m_lmErrorsCounter));
+			m_statusBarLmErrors->setText(tr(" LM Errors: %1 ").arg(m_lmErrorsCounter));
 
 			if (m_lmErrorsCounter == 0)
 			{
@@ -664,23 +663,23 @@ void MainWindow::updateStatusBar()
 			{
 				if (totalSorValid == false)
 				{
-					sorStatus = tr(" SOR: ?");
+					sorStatus = tr(" SOR: ? ");
 				}
 				else
 				{
 					if (totalSorCount == 0)
 					{
-						sorStatus = tr(" SOR: No");
+						sorStatus = tr(" SOR: No ");
 					}
 					else
 					{
 						if (totalSorCount == 1)
 						{
-							sorStatus = tr(" SOR: Yes");
+							sorStatus = tr(" SOR: Yes ");
 						}
 						else
 						{
-							sorStatus = tr(" SOR: Yes [%1]").arg(totalSorCount);
+							sorStatus = tr(" SOR: Yes [%1] ").arg(totalSorCount);
 						}
 					}
 				}
@@ -720,7 +719,7 @@ void MainWindow::updateStatusBar()
 
 		assert(m_statusBarLogAlerts);
 
-		m_statusBarLogAlerts->setText(QString(" Log E: %1 W: %2").arg(m_logErrorsCounter).arg(m_logWarningsCounter));
+		m_statusBarLogAlerts->setText(QString(" Log E: %1 W: %2 ").arg(m_logErrorsCounter).arg(m_logWarningsCounter));
 
 		if (m_logErrorsCounter == 0 && m_logWarningsCounter == 0)
 		{
