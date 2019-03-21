@@ -449,6 +449,11 @@ bool Archive::archDirIsWritableChecking()
 {
 	int pass = 1;
 
+	if (m_archDir.trimmed().isEmpty() == true)
+	{
+		pass = 2;
+	}
+
 	bool result = false;
 
 	QString archDir;
