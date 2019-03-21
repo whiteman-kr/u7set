@@ -418,24 +418,24 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 		int m = time % 60; time /= 60;
 		int h = time % 24; time /= 24;
 
-		item->setText(Uptime, QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
-		item->setText(DataReceivingRate, QString::number(adsState.state.datareceivingrate() / 1024.0));
-		item->setText(ReceivedPacketCount, QString::number(adsState.state.receivedpacketcount()));
-		item->setText(ProcessedPacketCount, QString::number(adsState.state.processedpacketcount()));
+		item->setText(static_cast<int>(Columns::Uptime), QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
+		item->setText(static_cast<int>(Columns::DataReceivingRate), QString::number(adsState.state.datareceivingrate() / 1024.0));
+		item->setText(static_cast<int>(Columns::ReceivedPacketCount), QString::number(adsState.state.receivedpacketcount()));
+		item->setText(static_cast<int>(Columns::ProcessedPacketCount), QString::number(adsState.state.processedpacketcount()));
 
 		if (adsState.valid() == false)
 		{
-			item->setForeground(State, QBrush(DialogSourceInfo::dataItemErrorColor));
+			item->setForeground(static_cast<int>(Columns::State), QBrush(DialogSourceInfo::dataItemErrorColor));
 
-			item->setText(State, tr("Unknown"));
+			item->setText(static_cast<int>(Columns::State), tr("Unknown"));
 		}
 		else
 		{
 			if (adsState.state.datareceives() == false)
 			{
-				item->setForeground(State, QBrush(DialogSourceInfo::dataItemErrorColor));
+				item->setForeground(static_cast<int>(Columns::State), QBrush(DialogSourceInfo::dataItemErrorColor));
 
-				item->setText(State, tr("No Data Received"));
+				item->setText(static_cast<int>(Columns::State), tr("No Data Received"));
 			}
 			else
 			{
@@ -443,15 +443,15 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 
 				if (errorsCount == 0)
 				{
-					item->setForeground(State, QBrush(Qt::black));
+					item->setForeground(static_cast<int>(Columns::State), QBrush(Qt::black));
 
-					item->setText(State, tr("Active"));
+					item->setText(static_cast<int>(Columns::State), tr("Active"));
 				}
 				else
 				{
-					item->setForeground(State, QBrush(DialogSourceInfo::dataItemErrorColor));
+					item->setForeground(static_cast<int>(Columns::State), QBrush(DialogSourceInfo::dataItemErrorColor));
 
-					item->setText(State, tr("E: %1").arg(errorsCount));
+					item->setText(static_cast<int>(Columns::State), tr("E: %1").arg(errorsCount));
 				}
 			}
 		}
@@ -464,8 +464,8 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 			m_treeWidget->resizeColumnToContents(i);
 		}
 
-		m_treeWidget->setColumnWidth(State, 120);
-		m_treeWidget->setColumnWidth(Uptime, 120);
+		m_treeWidget->setColumnWidth(static_cast<int>(Columns::State), 120);
+		m_treeWidget->setColumnWidth(static_cast<int>(Columns::Uptime), 120);
 	}
 }
 

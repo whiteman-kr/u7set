@@ -2254,68 +2254,68 @@ Error: %1</source>
 <context>
     <name>DialogStatistics</name>
     <message>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="69"/>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="86"/>
         <source>Connections Statistics</source>
         <translation>Статистика соединений</translation>
     </message>
     <message>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="81"/>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="138"/>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="98"/>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="160"/>
         <source>Reconnect</source>
         <translation>Пересоединиться</translation>
     </message>
     <message>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="87"/>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="104"/>
         <source>Close</source>
         <translation>Закрыть</translation>
     </message>
     <message>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="97"/>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="113"/>
         <source>Caption</source>
         <translation>Наименование</translation>
     </message>
     <message>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="98"/>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="114"/>
         <source>Connected</source>
         <translation>Соединение</translation>
     </message>
     <message>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="100"/>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="116"/>
         <source>Address</source>
         <translation>Адрес</translation>
     </message>
     <message>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="101"/>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="117"/>
         <source>Start Time</source>
         <translation>Начало работы</translation>
     </message>
     <message>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="102"/>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="118"/>
         <source>UpTime</source>
         <translation>Время работы</translation>
     </message>
     <message>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="103"/>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="119"/>
         <source>Sent KBytes</source>
         <translation>Отправлено, КБ</translation>
     </message>
     <message>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="104"/>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="120"/>
         <source>Received KBytes</source>
         <translation>Принято, КБ</translation>
     </message>
     <message>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="105"/>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="121"/>
         <source>Request Count</source>
         <translation>Запросов</translation>
     </message>
     <message>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="106"/>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="122"/>
         <source>Reply Count</source>
         <translation>Ответов</translation>
     </message>
     <message>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="148"/>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="170"/>
         <source>Are you sure you want to reconnect the connection &apos;%1&apos;?
 
 Data will not be available at the time of reconnection.</source>
@@ -2324,7 +2324,7 @@ Data will not be available at the time of reconnection.</source>
 Данные будут недоступны на время пересоединения.</translation>
     </message>
     <message>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="196"/>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="213"/>
         <source>Are you sure you want to reconnect all connections?
 
 Data will not be available at the time of reconnection.</source>
@@ -2333,19 +2333,19 @@ Data will not be available at the time of reconnection.</source>
 Данные будут недоступны на время пересоединения.</translation>
     </message>
     <message>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="260"/>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="269"/>
         <source>Yes</source>
         <translation>Да</translation>
     </message>
     <message>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="260"/>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="269"/>
         <source>No</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../../lib/TcpClientsStatistics.cpp" line="264"/>
-        <source>%1 (Server %2)</source>
-        <translation>%1 (Сервер %2)</translation>
+        <location filename="../../lib/TcpClientsStatistics.cpp" line="273"/>
+        <source>%1</source>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -2653,8 +2653,8 @@ Data will not be available at the time of reconnection.</source>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="100"/>
-        <location filename="../MainWindow.cpp" line="361"/>
-        <location filename="../MainWindow.cpp" line="794"/>
+        <location filename="../MainWindow.cpp" line="360"/>
+        <location filename="../MainWindow.cpp" line="793"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
@@ -2735,11 +2735,6 @@ Data will not be available at the time of reconnection.</source>
     </message>
     <message>
         <location filename="../MainWindow.cpp" line="192"/>
-        <source>&amp;Tools</source>
-        <translation>&amp;Инструменты</translation>
-    </message>
-    <message>
-        <location filename="../MainWindow.cpp" line="195"/>
         <source>&amp;Service</source>
         <translation>&amp;Сервис</translation>
     </message>
@@ -2754,124 +2749,129 @@ Data will not be available at the time of reconnection.</source>
         <translation>Просмотрр статистики соединений</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="204"/>
+        <location filename="../MainWindow.cpp" line="200"/>
         <source>&amp;?</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="229"/>
+        <location filename="../MainWindow.cpp" line="228"/>
         <source>Alerted discretes counter</source>
         <translation>Счетчик включенных дискретов</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="235"/>
+        <location filename="../MainWindow.cpp" line="234"/>
         <source>LM Errors (click for details)</source>
         <translation>Ошибки ЛМ (кликните для информации)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="241"/>
+        <location filename="../MainWindow.cpp" line="240"/>
         <source>SOR counter (click for details)</source>
         <translation>Количество SOR (кликните для информации)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="255"/>
+        <location filename="../MainWindow.cpp" line="254"/>
         <source>Error and warning counters in the log (click to view log)</source>
         <translation>Счетчик ошибок и предупреждений лога (кликните для просмотра)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="273"/>
+        <location filename="../MainWindow.cpp" line="272"/>
         <source>Warning! Some values were modified but not written. Are you sure you want to exit?</source>
         <translation>Внимание! Некоторые значения были изменены, но не применены. Вы уверены, что хотите выйти?</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="273"/>
+        <location filename="../MainWindow.cpp" line="272"/>
         <source>Yes</source>
         <translation>Да</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="273"/>
+        <location filename="../MainWindow.cpp" line="272"/>
         <source>No</source>
         <translation>Нет</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="507"/>
+        <location filename="../MainWindow.cpp" line="506"/>
         <source>Project %1, build %2</source>
         <translation>Проект %1, сборка %2</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="527"/>
+        <location filename="../MainWindow.cpp" line="526"/>
         <source>, active client is %1, %2</source>
         <translation>, активный клиент %1, %2</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="531"/>
+        <location filename="../MainWindow.cpp" line="530"/>
         <source> (current)</source>
         <translation> (текущий)</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="543"/>
+        <location filename="../MainWindow.cpp" line="542"/>
         <source> ConfigService: </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="547"/>
-        <location filename="../MainWindow.cpp" line="572"/>
+        <location filename="../MainWindow.cpp" line="546"/>
+        <location filename="../MainWindow.cpp" line="571"/>
         <source> no connection</source>
         <translation> нет соединения</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="551"/>
-        <location filename="../MainWindow.cpp" line="576"/>
+        <location filename="../MainWindow.cpp" line="550"/>
+        <location filename="../MainWindow.cpp" line="575"/>
         <source> connected, packets: %1</source>
         <translation> соединено, пакетов: %1</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="568"/>
+        <location filename="../MainWindow.cpp" line="567"/>
         <source> TuningService: </source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="599"/>
-        <source>Discretes: %1</source>
-        <translation>Дискретных: %1</translation>
+        <location filename="../MainWindow.cpp" line="598"/>
+        <source> Discretes: %1 </source>
+        <translation> Дискретных: %1 </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="620"/>
-        <source> No LM information</source>
-        <translation> Нет информации</translation>
+        <location filename="../MainWindow.cpp" line="619"/>
+        <source> No LM information </source>
+        <translation> Нет информации </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="661"/>
+        <location filename="../MainWindow.cpp" line="634"/>
+        <source> LM Errors: %1 </source>
+        <translation> Ошибок LM: %1 </translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="666"/>
+        <source> SOR: ? </source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="672"/>
+        <source> SOR: No </source>
+        <translation> SOR: Нет </translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="678"/>
+        <source> SOR: Yes </source>
+        <translation> SOR: Да </translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="682"/>
+        <source> SOR: Yes [%1] </source>
+        <translation> SOR: Да [%1] </translation>
+    </message>
+    <message>
+        <location filename="../MainWindow.cpp" line="660"/>
         <source> SOR: </source>
         <translation> SOR: </translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="667"/>
-        <source> SOR: ?</source>
-        <translation></translation>
-    </message>
-    <message>
-        <location filename="../MainWindow.cpp" line="673"/>
-        <source> SOR: No</source>
-        <translation> SOR: Нет</translation>
-    </message>
-    <message>
-        <location filename="../MainWindow.cpp" line="679"/>
-        <source> SOR: Yes</source>
-        <translation> SOR: Да</translation>
-    </message>
-    <message>
-        <location filename="../MainWindow.cpp" line="683"/>
-        <source> SOR: Yes [%1]</source>
-        <translation> SOR: Да [%1]</translation>
-    </message>
-    <message>
-        <location filename="../MainWindow.cpp" line="874"/>
+        <location filename="../MainWindow.cpp" line="873"/>
         <source> allows user to modify tuning values.</source>
         <translation> выполняет изменение значений сигналов.</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="458"/>
+        <location filename="../MainWindow.cpp" line="457"/>
         <source>Schemas</source>
         <translation>Алгоритмы</translation>
     </message>
@@ -2891,17 +2891,17 @@ Data will not be available at the time of reconnection.</source>
         <translation>Журнал приложения...</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="459"/>
+        <location filename="../MainWindow.cpp" line="458"/>
         <source>Signals</source>
         <translation>Сигналы</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="370"/>
+        <location filename="../MainWindow.cpp" line="369"/>
         <source>Warning</source>
         <translation>Предупреждение</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="370"/>
+        <location filename="../MainWindow.cpp" line="369"/>
         <source>Program configuration has been changed and will be updated.</source>
         <translation>Конфигурация программы изменилась и будет обновлена.</translation>
     </message>
@@ -2977,12 +2977,12 @@ Data will not be available at the time of reconnection.</source>
         <translation>Режим управления несколькими ЛМ</translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="754"/>
+        <location filename="../MainWindow.cpp" line="753"/>
         <source>Object Filters file loading error: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../MainWindow.cpp" line="764"/>
+        <location filename="../MainWindow.cpp" line="763"/>
         <source>Tuning signals file loading error.</source>
         <translation></translation>
     </message>
@@ -2995,31 +2995,6 @@ Data will not be available at the time of reconnection.</source>
         <location filename="../UserManager.cpp" line="257"/>
         <source>Wrong password!</source>
         <translation>Неверный пароль!</translation>
-    </message>
-    <message>
-        <location filename="../../lib/TuningValue.cpp" line="466"/>
-        <source>Discrete</source>
-        <translation>Дискретный</translation>
-    </message>
-    <message>
-        <location filename="../../lib/TuningValue.cpp" line="467"/>
-        <source>SignedInt32</source>
-        <translation>Аналоговый, Si32</translation>
-    </message>
-    <message>
-        <location filename="../../lib/TuningValue.cpp" line="468"/>
-        <source>SignedInt64</source>
-        <translation>Аналоговый, Si64</translation>
-    </message>
-    <message>
-        <location filename="../../lib/TuningValue.cpp" line="469"/>
-        <source>Float</source>
-        <translation>Аналоговый</translation>
-    </message>
-    <message>
-        <location filename="../../lib/TuningValue.cpp" line="470"/>
-        <source>Double</source>
-        <translation>Аналоговый</translation>
     </message>
     <message>
         <location filename="../../lib/LogFile.cpp" line="149"/>
@@ -3575,7 +3550,7 @@ Data will not be available at the time of reconnection.</source>
 <context>
     <name>TuningClientTcpClient</name>
     <message>
-        <location filename="../TuningClientTcpClient.cpp" line="177"/>
+        <location filename="../TuningClientTcpClient.cpp" line="179"/>
         <source>Tuning Service connection
 
 </source>
@@ -3584,14 +3559,14 @@ Data will not be available at the time of reconnection.</source>
 </translation>
     </message>
     <message>
-        <location filename="../TuningClientTcpClient.cpp" line="178"/>
+        <location filename="../TuningClientTcpClient.cpp" line="180"/>
         <source>Address (primary): %1
 </source>
         <translation>Адрес (основной): %1
 </translation>
     </message>
     <message>
-        <location filename="../TuningClientTcpClient.cpp" line="179"/>
+        <location filename="../TuningClientTcpClient.cpp" line="181"/>
         <source>Address (secondary): %1
 
 </source>
@@ -3600,24 +3575,24 @@ Data will not be available at the time of reconnection.</source>
 </translation>
     </message>
     <message>
-        <location filename="../TuningClientTcpClient.cpp" line="180"/>
+        <location filename="../TuningClientTcpClient.cpp" line="182"/>
         <source>Address (current): %1
 </source>
         <translation>Адрес (текущий): %1
 </translation>
     </message>
     <message>
-        <location filename="../TuningClientTcpClient.cpp" line="181"/>
+        <location filename="../TuningClientTcpClient.cpp" line="183"/>
         <source>Connection: </source>
         <translation>Соедниение: </translation>
     </message>
     <message>
-        <location filename="../TuningClientTcpClient.cpp" line="181"/>
+        <location filename="../TuningClientTcpClient.cpp" line="183"/>
         <source>established</source>
         <translation>установлено</translation>
     </message>
     <message>
-        <location filename="../TuningClientTcpClient.cpp" line="181"/>
+        <location filename="../TuningClientTcpClient.cpp" line="183"/>
         <source>no connection</source>
         <translation>не установлено</translation>
     </message>
@@ -3885,7 +3860,7 @@ Data will not be available at the time of reconnection.</source>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="808"/>
-        <location filename="../TuningPage.cpp" line="2028"/>
+        <location filename="../TuningPage.cpp" line="2055"/>
         <source>Set All</source>
         <translation>Установить все</translation>
     </message>
@@ -3994,62 +3969,62 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
         <translation>Выбранные сигналы имеют разное значение по умолчанию.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1503"/>
+        <location filename="../TuningPage.cpp" line="1519"/>
         <source>%1 - %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1519"/>
+        <location filename="../TuningPage.cpp" line="1535"/>
         <source>...</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1541"/>
+        <location filename="../TuningPage.cpp" line="1557"/>
         <source>More</source>
         <translation>Дополнительно</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1543"/>
+        <location filename="../TuningPage.cpp" line="1559"/>
         <source>Add To New Filter...</source>
         <translation>Добавить к новому фильтру...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1547"/>
+        <location filename="../TuningPage.cpp" line="1563"/>
         <source>Add To Existing Filter...</source>
         <translation>Добавить к существующему фильтру...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1566"/>
+        <location filename="../TuningPage.cpp" line="1582"/>
         <source>Restore Values From Filter...</source>
         <translation>Восстановить из фильтра...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1579"/>
+        <location filename="../TuningPage.cpp" line="1595"/>
         <source>Add Signals To Filter</source>
         <translation>Добавить сигналы в фильтр</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1580"/>
+        <location filename="../TuningPage.cpp" line="1596"/>
         <source>Enter the filter name:</source>
         <translation>Введите имя фильтра:</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1581"/>
+        <location filename="../TuningPage.cpp" line="1597"/>
         <source>Name</source>
         <translation>Наименование</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1671"/>
+        <location filename="../TuningPage.cpp" line="1687"/>
         <source>No auto-created filters exist.</source>
         <translation>Нет автоматически созданных фильтров.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1796"/>
+        <location filename="../TuningPage.cpp" line="1823"/>
         <source>No tuning sources with control enabled found.</source>
         <translation>Нет источников, выбранных для управления.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1807"/>
+        <location filename="../TuningPage.cpp" line="1834"/>
         <source>Warning!
 
 Current client is not selected as active now.
@@ -4062,52 +4037,52 @@ Are you sure you want to take control and activate the source %1?</source>
 Вы уверены, что хотите активировать клиент и источник %1?</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1886"/>
+        <location filename="../TuningPage.cpp" line="1913"/>
         <source>No signals were added.</source>
         <translation>Нет добавленных сигналов.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1895"/>
+        <location filename="../TuningPage.cpp" line="1922"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1898"/>
+        <location filename="../TuningPage.cpp" line="1925"/>
         <source>Adding signals complete.</source>
         <translation>Добавление сигналов завершено.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1949"/>
+        <location filename="../TuningPage.cpp" line="1976"/>
         <source>No values restored from the filter for current signals.</source>
         <translation>Нет сигналов, восстановленных из фильтра.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1953"/>
+        <location filename="../TuningPage.cpp" line="1980"/>
         <source>%1 values were restored from the filter. Check them and apply the changes.</source>
         <translation>%1 значений было восстановлено из фильтра.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2028"/>
+        <location filename="../TuningPage.cpp" line="2055"/>
         <source>There is limits mismatch in signal &apos;%1&apos;. Operation is disabled.</source>
         <translation>Несоответствие границ сигнала %1. Невозможно выполнить действие.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2036"/>
+        <location filename="../TuningPage.cpp" line="2063"/>
         <source>Set All Discretes To On</source>
         <translation>Установить все дискреты в &quot;1&quot;</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2067"/>
+        <location filename="../TuningPage.cpp" line="2094"/>
         <source>Set All Discretes To Off</source>
         <translation>Установить все дискреты в &quot;0&quot;</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2099"/>
+        <location filename="../TuningPage.cpp" line="2126"/>
         <source>Set All To Defaults</source>
         <translation>Установить все по умолчанию</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2124"/>
+        <location filename="../TuningPage.cpp" line="2151"/>
         <source>Invalid default value &apos;%1&apos; in signal %2 [%3]</source>
         <translation>Недопустимое значение по умолчанию %1 в сигнале %2 [%3]</translation>
     </message>
