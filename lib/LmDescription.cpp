@@ -107,6 +107,11 @@ LmDescription::LmDescription(const LmDescription& that)
 
 LmDescription& LmDescription::operator=(const LmDescription& src)
 {
+	if (&src == this)
+	{
+		return *this;
+	}
+
 	m_name = src.m_name;
 	m_descriptionNumber = src.m_descriptionNumber;
 	m_configurationScriptFile = src.m_configurationScriptFile;
@@ -123,6 +128,9 @@ LmDescription& LmDescription::operator=(const LmDescription& src)
 
 	// AFBs
 	//
+	m_checkAfbVersions = src.m_checkAfbVersions;
+	m_checkAfbVersionsOffset = src.m_checkAfbVersionsOffset;
+
 	m_afbComponents.clear();
 	for (const std::pair<int, std::shared_ptr<Afb::AfbComponent>>& p : src.m_afbComponents)
 	{
@@ -143,7 +151,6 @@ LmDescription& LmDescription::operator=(const LmDescription& src)
 
 LmDescription::~LmDescription()
 {
-
 }
 
 bool LmDescription::load(const QByteArray& xml, QString* errorMessage)
@@ -331,6 +338,8 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 	// <AFBImplementation> -- Loading Application Functional Components
 	//
 	{
+		// --
+		//
 		QDomNodeList afbcElementList = logicModuleElement.elementsByTagName(QLatin1String("AFBImplementation"));
 
 		if (afbcElementList.size() != 1)
@@ -341,6 +350,13 @@ bool LmDescription::load(QDomDocument doc, QString* errorMessage)
 
 		QDomElement afbcElement = afbcElementList.at(0).toElement();
 
+		// Check Afb Versions
+		//
+		m_checkAfbVersions = afbcElement.attribute(QLatin1String("CheckAfbVersions")).compare("true", Qt::CaseInsensitive) == 0;
+		m_checkAfbVersionsOffset = afbcElement.attribute(QLatin1String("CheckAfbVersionsOffset")).toInt();
+
+		// --
+		//
 		ok = loadAfbComponents(afbcElement, errorMessage);
 		if (ok == false)
 		{
@@ -973,6 +989,16 @@ const LmDescription::LogicUnit& LmDescription::logicUnit() const
 const LmDescription::OptoInterface& LmDescription::optoInterface() const
 {
 	return m_optoInterface;
+}
+
+bool LmDescription::checkAfbVersions() const
+{
+	return m_checkAfbVersions;
+}
+
+quint32 LmDescription::checkAfbVersionsOffset(bool absoluteValue) const
+{
+	return m_checkAfbVersionsOffset + (absoluteValue ? m_memory.m_appDataOffset : 0);
 }
 
 const std::vector<std::shared_ptr<Afb::AfbElement>>& LmDescription::afbs() const
