@@ -6,7 +6,7 @@
 #include "MonitorConfigController.h"
 #include "../lib/TcpClientsStatistics.h"
 
-class MonitorTuningTcpClient : public TuningTcpClient, public TcpClientInstance
+class MonitorTuningTcpClient : public TuningTcpClient, public TcpClientStatistics
 {
 	Q_OBJECT
 

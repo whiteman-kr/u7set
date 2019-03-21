@@ -6,11 +6,13 @@ TuningClientTcpClient::TuningClientTcpClient(const SoftwareInfo& softwareInfo,
 											 Log::LogFile* log,
 											 TuningLog::TuningLog* tuningLog, UserManager* userManager) :
 	TuningTcpClient(softwareInfo, signalManager),
-	TcpClientInstance(this),
+	TcpClientStatistics(this),
 	m_log(log),
 	m_tuningLog(tuningLog),
 	m_userManager(userManager)
 {
+	setObjectName("TuningClientTcpClient");
+
 	assert(m_log);
 	assert(m_tuningLog);
 	assert(m_userManager);

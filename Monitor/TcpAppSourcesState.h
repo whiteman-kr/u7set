@@ -47,7 +47,7 @@ private:
 //				+------------------------
 //
 
-class TcpAppSourcesState : public Tcp::Client, public TcpClientInstance
+class TcpAppSourcesState : public Tcp::Client, public TcpClientStatistics
 {
 	Q_OBJECT
 

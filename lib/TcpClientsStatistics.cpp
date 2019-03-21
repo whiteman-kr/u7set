@@ -4,67 +4,84 @@
 // TcpClientInstance
 //
 
-TcpClientInstance::TcpClientInstance(Tcp::Client* client):
+QMutex TcpClientStatistics::s_mutex;
+std::set<Tcp::Client*> TcpClientStatistics::s_clients;
+
+
+TcpClientStatistics::TcpClientStatistics(Tcp::Client* client) :
 	m_client(client)
 {
-	QMutexLocker l(&TcpClientInstances::m_mutex);
+	Q_ASSERT(m_client);
 
-	TcpClientInstances::addConnection(m_client);
-}
-
-TcpClientInstance::~TcpClientInstance()
-{
-	QMutexLocker l(&TcpClientInstances::m_mutex);
-
-	TcpClientInstances::removeConnection(m_client);
-}
-
-//
-// TcpClientInstances
-//
-
-QMutex TcpClientInstances::m_mutex;
-
-std::vector<Tcp::Client*> TcpClientInstances::m_clients;
-
-void TcpClientInstances::addConnection(Tcp::Client* client)
-{
-	if (std::find(m_clients.begin(), m_clients.end(), client) != m_clients.end())
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	m_clients.push_back(client);
+	QMutexLocker l(&s_mutex);
+	s_clients.insert(m_client);
 
 	return;
 }
 
-void TcpClientInstances::removeConnection(Tcp::Client* client)
+TcpClientStatistics::~TcpClientStatistics()
 {
-	auto it = std::find(m_clients.begin(), m_clients.end(), client);
-	if (it == m_clients.end())
-	{
-		Q_ASSERT(false);
-		return;
-	}
+	QMutexLocker l(&s_mutex);
 
-	m_clients.erase(it);
+	Q_ASSERT(s_clients.count(m_client) == 1);
+	s_clients.erase(m_client);
 
 	return;
 }
 
-std::vector<Tcp::Client*> TcpClientInstances::clients()
+std::vector<TcpClientStatistics::Statisctics> TcpClientStatistics::statistics()
 {
-	return m_clients;
+	std::vector<Statisctics> result;
+
+	QMutexLocker l(&s_mutex);
+	result.reserve(s_clients.size());
+
+	for (Tcp::Client* tcpClient : s_clients)
+	{
+		if (tcpClient == nullptr)
+		{
+			Q_ASSERT(tcpClient);
+			return {};
+		}
+
+		result.emplace_back(reinterpret_cast<size_t>(tcpClient),
+							tcpClient->objectName(),
+							tcpClient->getConnectionState());
+	}
+
+	return result;
 }
+
+void TcpClientStatistics::reconnect(size_t id)
+{
+	QMutexLocker l(&s_mutex);
+
+	Tcp::Client* ptr = reinterpret_cast<Tcp::Client*>(id);
+	if (s_clients.count(ptr) == 0)
+	{
+		return;
+	}
+
+	Tcp::Client* tcpClient = dynamic_cast<Tcp::Client*>(ptr);
+	if (tcpClient == nullptr)
+	{
+		Q_ASSERT(tcpClient);
+		return;
+	}
+
+	tcpClient->setServers(tcpClient->serverAddressPort1(), tcpClient->serverAddressPort2(), true);		// this will reconnect
+
+	return;
+}
+
+
 
 //
 // DialogStatistics
 //
 
-DialogStatistics::DialogStatistics(QWidget* parent)
-	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
+DialogStatistics::DialogStatistics(QWidget* parent) :
+	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint)
 {
 	setWindowTitle(tr("Connections Statistics"));
 
@@ -79,7 +96,7 @@ DialogStatistics::DialogStatistics(QWidget* parent)
 	mainLayout->addLayout(bottomLayout);
 
 	QPushButton* reconnectButton = new QPushButton(tr("Reconnect"));
-	connect(reconnectButton, &QPushButton::clicked, this, &DialogStatistics::onReconnect);
+	connect(reconnectButton, &QPushButton::clicked, this, &DialogStatistics::reconnectAll);
 	bottomLayout->addWidget(reconnectButton);
 
 	bottomLayout->addStretch();
@@ -90,9 +107,8 @@ DialogStatistics::DialogStatistics(QWidget* parent)
 
 	setLayout(mainLayout);
 
+	//--
 	//
-
-
 	QStringList headerLabels;
 	headerLabels << tr("Caption");
 	headerLabels << tr("Connected");
@@ -115,12 +131,18 @@ DialogStatistics::DialogStatistics(QWidget* parent)
 
 	update();
 
+	for (int i = 0; i < m_treeWidget->columnCount(); i++)
+	{
+		m_treeWidget->resizeColumnToContents(i);
+	}
+
 	m_updateStateTimerId = startTimer(250);
+
+	return;
 }
 
 DialogStatistics::~DialogStatistics()
 {
-
 }
 
 void DialogStatistics::prepareContextMenu(const QPoint& pos)
@@ -138,7 +160,7 @@ void DialogStatistics::prepareContextMenu(const QPoint& pos)
 	QAction* actionReconnect = new QAction(tr("Reconnect"), &menu);
 
 	auto f = [this]() -> void
-	{
+		{
 			QTreeWidgetItem* item = m_treeWidget->currentItem();
 			if (item == nullptr)
 			{
@@ -151,27 +173,20 @@ void DialogStatistics::prepareContextMenu(const QPoint& pos)
 				return;
 			}
 
-			QMutexLocker l(&TcpClientInstances::m_mutex);	// Mutex should be locked for all processing time
+			 size_t id = item->data(0, Qt::UserRole).value<size_t>();
+			 Q_ASSERT(id);
 
-			std::vector<Tcp::Client*> clients = TcpClientInstances::clients();
-
-			int index = m_treeWidget->currentIndex().row();
-			if (index < 0 || index >= static_cast<int>(clients.size()))
-			{
-					return;
-			}
-
-			std::vector<Tcp::Client*> reconnectClients;
-			reconnectClients.push_back(clients[index]);
-
-			reconnect(reconnectClients);
-	};
+			TcpClientStatistics::reconnect(id);
+			return;
+		};
 
 	connect(actionReconnect, &QAction::triggered, this, f);
 
 	menu.addAction(actionReconnect);
 
 	menu.exec(QCursor::pos());
+
+	return;
 }
 
 
@@ -189,9 +204,11 @@ void DialogStatistics::timerEvent(QTimerEvent* event)
 	{
 		update();
 	}
+
+	return;
 }
 
-void DialogStatistics::onReconnect()
+void DialogStatistics::reconnectAll()
 {
 	auto mbResult = QMessageBox::warning(this, qAppName(), tr("Are you sure you want to reconnect all connections?\n\nData will not be available at the time of reconnection."), QMessageBox::Yes, QMessageBox::No);
 	if (mbResult == QMessageBox::No)
@@ -199,20 +216,21 @@ void DialogStatistics::onReconnect()
 		return;
 	}
 
-	QMutexLocker l(&TcpClientInstances::m_mutex);	// Mutex should be locked for all processing time
+	std::vector<TcpClientStatistics::Statisctics> stats = TcpClientStatistics::statistics();
 
-	std::vector<Tcp::Client*> clients = TcpClientInstances::clients();
+	for (const auto& stat : stats)
+	{
+		TcpClientStatistics::reconnect(stat.id);
+	}
 
-	reconnect(clients);
+	return;
 }
 
 void DialogStatistics::update()
 {
-	QMutexLocker l(&TcpClientInstances::m_mutex);	// Mutex should be locked for all processing time
+	std::vector<TcpClientStatistics::Statisctics> stats = TcpClientStatistics::statistics();
 
-	std::vector<Tcp::Client*> displayClients = TcpClientInstances::clients();
-
-	int count = static_cast<int>(displayClients.size());
+	int count = static_cast<int>(stats.size());
 
 	bool refreshOnly = true;
 
@@ -225,13 +243,9 @@ void DialogStatistics::update()
 	{
 		m_treeWidget->clear();
 
-		for (auto client : displayClients)
+		for (TcpClientStatistics::Statisctics& s : stats)
 		{
-			if (client == nullptr)
-			{
-				Q_ASSERT(client);
-				return;
-			}
+			Q_UNUSED(s);
 
 			QTreeWidgetItem* item = new QTreeWidgetItem();
 			m_treeWidget->addTopLevelItem(item);
@@ -240,78 +254,50 @@ void DialogStatistics::update()
 
 	for (int i = 0; i < count; i++)
 	{
-		Tcp::Client* client = displayClients[i];
-		if (client == nullptr)
-		{
-			Q_ASSERT(client);
-			return;
-		}
+		TcpClientStatistics::Statisctics& stat = stats[i];
 
 		QTreeWidgetItem* item = m_treeWidget->topLevelItem(i);
 		if (item == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			continue;
 		}
 
-		Tcp::ConnectionState state = client->getConnectionState();
+		item->setData(0, Qt::UserRole, QVariant::fromValue<size_t>(stat.id));
 
-		item->setText(Caption, client->metaObject()->className());
-		item->setText(IsConnected, state.isConnected ? tr("Yes") : tr("No"));
+		item->setText(static_cast<int>(Columns::Caption), stat.objectName);
+		item->setText(static_cast<int>(Columns::IsConnected), stat.state.isConnected ? tr("Yes") : tr("No"));
 
-		if (state.isConnected == true)
+		if (stat.state.isConnected == true)
 		{
-			item->setText(AddressPort, tr("%1 (Server %2)")
-						  .arg(state.peerAddr.addressPortStr())
-						  .arg(client->selectedServerIndex()));
+			item->setText(static_cast<int>(Columns::AddressPort), tr("%1").arg(stat.state.peerAddr.addressPortStr()));
 
-			QDateTime startTime = QDateTime::fromMSecsSinceEpoch(state.startTime);
-			item->setText(StartTime, startTime.toString("dd/MM/yyyy HH:mm:ss"));
+			QDateTime startTime = QDateTime::fromMSecsSinceEpoch(stat.state.startTime);
+			item->setText(static_cast<int>(Columns::StartTime), startTime.toString("dd/MM/yyyy HH:mm:ss"));
 
-			int upTime = (QDateTime::currentMSecsSinceEpoch() - state.startTime) / 1000.0;
+			int upTime = (QDateTime::currentMSecsSinceEpoch() - stat.state.startTime) / 1000.0;
 			int s = upTime % 60; upTime /= 60;
 			int m = upTime % 60; upTime /= 60;
 			int h = upTime % 24; upTime /= 24;
-			item->setText(UpTime, QString("%1d %2:%3:%4").arg(upTime).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
+			item->setText(static_cast<int>(Columns::UpTime), QString("%1d %2:%3:%4").arg(upTime).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
 
-			item->setText(SentKbytes, QString::number(state.sentBytes / 1024.0, 'f', 2));
-			item->setText(ReceivedKbytes, QString::number(state.receivedBytes / 1024.0, 'f', 2));
-			item->setText(RequestCount, QString::number(state.requestCount));
-			item->setText(ReplyCount, QString::number(state.replyCount));
+			item->setText(static_cast<int>(Columns::SentKbytes), QString::number(stat.state.sentBytes / 1024.0, 'f', 2));
+			item->setText(static_cast<int>(Columns::ReceivedKbytes), QString::number(stat.state.receivedBytes / 1024.0, 'f', 2));
+			item->setText(static_cast<int>(Columns::RequestCount), QString::number(stat.state.requestCount));
+			item->setText(static_cast<int>(Columns::ReplyCount), QString::number(stat.state.replyCount));
 		}
 		else
 		{
-			item->setText(AddressPort, "");
-			item->setText(StartTime, "");
-			item->setText(UpTime, "");
-			item->setText(SentKbytes, "");
-			item->setText(ReceivedKbytes, "");
-			item->setText(RequestCount, "");
-			item->setText(ReplyCount, "");
+			item->setText(static_cast<int>(Columns::AddressPort), "");
+			item->setText(static_cast<int>(Columns::StartTime), "");
+			item->setText(static_cast<int>(Columns::UpTime), "");
+			item->setText(static_cast<int>(Columns::SentKbytes), "");
+			item->setText(static_cast<int>(Columns::ReceivedKbytes), "");
+			item->setText(static_cast<int>(Columns::RequestCount), "");
+			item->setText(static_cast<int>(Columns::ReplyCount), "");
 		}
 	}
 
-	if (refreshOnly == false)
-	{
-		for (int i = 0; i < m_treeWidget->columnCount(); i++)
-		{
-			m_treeWidget->resizeColumnToContents(i);
-		}
-	}
+	return;
 }
 
-void DialogStatistics::reconnect(std::vector<Tcp::Client*> clients)
-{
-	/*
-	for (auto client : clients)
-	{
-		if (client->selectedServerIndex() == 1)
-		{
-			client->selectServer1(true);
-		}
-		else
-		{
-			client->selectServer2(true);
-		}
-	}*/
-}

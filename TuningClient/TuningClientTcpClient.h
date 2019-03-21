@@ -7,7 +7,7 @@
 #include "UserManager.h"
 #include "../lib/TcpClientsStatistics.h"
 
-class TuningClientTcpClient : public TuningTcpClient, public TcpClientInstance
+class TuningClientTcpClient : public TuningTcpClient, public TcpClientStatistics
 {
 	Q_OBJECT
 public:
