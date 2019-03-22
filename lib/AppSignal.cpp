@@ -96,6 +96,64 @@ Hash AppSignalState::load(const Proto::AppSignalState& protoState)
 	return m_hash;
 }
 
+QString AppSignalState::toString(double value, E::ValueViewType viewType, int precision)
+{
+	QString result;
+	result.reserve(32);
+
+	int p = 4;
+
+	switch (viewType)
+	{
+	case E::ValueViewType::Dec:
+		result = QString::number(value, 'f', precision);
+		break;
+
+	case E::ValueViewType::Hex:
+		result = /*tr("HEX:") + */QString::number((long)value, 16) + QStringLiteral("h");
+		break;
+
+	case E::ValueViewType::Exp:
+		result = /*tr("EXP:") + */QString::number(value, 'e', precision);
+		break;
+
+	case E::ValueViewType::Bin16:
+		{
+			result = QString::number((quint16)value, 2);
+			result = result.rightJustified(16, '0');
+			for (int q = 0; q < 3; q++, p += 5)
+			{
+				result.insert(p, ' ');
+			}
+		}
+		break;
+
+	case E::ValueViewType::Bin32:
+		result = QString::number((quint32)value, 2);
+		result = result.rightJustified(32, '0');
+		for (int q = 0; q < 7; q++, p += 5)
+		{
+			result.insert(p, ' ');
+		}
+		break;
+
+	case E::ValueViewType::Bin64:
+		result = QString::number((quint64)value, 2);
+		result = result.rightJustified(64, '0');
+		for (int q = 0; q < 15; q++, p += 5)
+		{
+			result.insert(p, ' ');
+		}
+		result.insert(40, '\n');
+		break;
+
+	default:
+		assert(false);
+	}
+
+	return result;
+}
+
 void SimpleAppSignalState::save(Proto::AppSignalState* protoState)
 {
 	if (protoState == nullptr)

@@ -17,6 +17,16 @@ enum class ArchiveColumns
 
 Q_DECLARE_METATYPE(ArchiveColumns);
 
+class ArchiveSignalParam : public AppSignalParam
+{
+public:
+	ArchiveSignalParam() {}
+	explicit ArchiveSignalParam(const AppSignalParam& _appSignalParam) : AppSignalParam(_appSignalParam), precision(_appSignalParam.precision()) {}
+
+	E::ValueViewType viewType = E::ValueViewType::Dec;
+	int precision = 2;
+};
+
 //
 //
 //		ArchiveModel
@@ -38,7 +48,7 @@ public:
 	QVariant data(int row, int column, int role) const;
 
 private:
-	QString getValueString(const AppSignalState& state, const AppSignalParam& signalParam) const;
+	QString getValueString(const AppSignalState& state, const ArchiveSignalParam& signalParam) const;
 	void updateCachedState(int row) const;
 
 	// Data manipultaion
@@ -48,12 +58,15 @@ public:
 	void addData(std::shared_ptr<ArchiveChunk> chunk);
 	void clear();
 
-	std::vector<AppSignalParam> appSignals();
+	std::vector<ArchiveSignalParam> appSignals();
+	ArchiveSignalParam signalParam(int row) const;
+
+	bool setShowParams(Hash signalHash, E::ValueViewType viewType, int precision);
 
 	// Data
 	//
 private:
-	std::map<Hash, AppSignalParam> m_appSignals;
+	std::map<Hash, ArchiveSignalParam> m_appSignals;
 	E::TimeType m_timeType = E::TimeType::Local;
 	ArchiveData m_archive;
 
