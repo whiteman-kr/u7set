@@ -995,14 +995,22 @@ void TuningPage::fillObjectsList()
 			// Modify the default value from selected tree filter
 			//
 
-			TuningFilterValue filterValue;
-
-			bool hasValue = m_treeFilter->value(hash, filterValue);
-
-			if (hasValue == true)
+			if (m_treeFilter->filterSignalExists(hash) == true)
 			{
-				modifyDefaultValue = true;
-				modifiedDefaultValue = filterValue.value();
+				TuningFilterSignal filterSignal;
+
+				bool ok = m_treeFilter->filterSignal(hash, filterSignal);
+				if (ok == false)
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+				if (filterSignal.useValue() == true)
+				{
+					modifyDefaultValue = true;
+					modifiedDefaultValue = filterSignal.value();
+				}
 			}
 		}
 		else
@@ -1011,15 +1019,22 @@ void TuningPage::fillObjectsList()
 			{
 				// Modify the default value from page filter
 				//
-
-				TuningFilterValue filterValue;
-
-				bool hasValue = m_pageFilter->value(hash, filterValue);
-
-				if (hasValue == true)
+				if (m_treeFilter->filterSignalExists(hash) == true)
 				{
-					modifyDefaultValue = true;
-					modifiedDefaultValue = filterValue.value();
+					TuningFilterSignal filterSignal;
+
+					bool ok = m_pageFilter->filterSignal(hash, filterSignal);
+					if (ok == false)
+					{
+						Q_ASSERT(false);
+						return;
+					}
+
+					if (filterSignal.useValue() == true)
+					{
+						modifyDefaultValue = true;
+						modifiedDefaultValue = filterSignal.value();
+					}
 				}
 			}
 		}
@@ -1892,7 +1907,7 @@ void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 				continue;
 			}
 
-			TuningFilterValue tv;
+			TuningFilterSignal tv;
 
 			tv.setAppSignalId(asp.appSignalId());
 
@@ -1902,7 +1917,7 @@ void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 				tv.setValue(state.value());
 			}
 
-			filter->addValue(tv);
+			filter->addFilterSignal(tv);
 
 			addedCount++;
 		}
@@ -1937,7 +1952,7 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 
 	int restoredCount = 0;
 
-	TuningFilterValue tv;
+	TuningFilterSignal tv;
 
 	for (int r = 0; r < m_model->rowCount(); r++)
 	{
@@ -1950,7 +1965,7 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 				continue;
 			}
 
-			bool exists = filter->value(hash, tv);
+			bool exists = filter->filterSignal(hash, tv);
 			if (exists == true)
 			{
 

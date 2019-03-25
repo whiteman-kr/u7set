@@ -9,20 +9,17 @@
 // DialogChooseTuningSignals
 //
 
-DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signalStorage, std::shared_ptr<TuningFilter> filter, bool requestValuesEnabled, QWidget* parent)
-	:QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint),
-		m_signalManager(signalStorage),
-		m_filter(filter)
+ChooseTuningSignalsWidget::ChooseTuningSignalsWidget(TuningSignalManager* signalStorage, bool requestValuesEnabled, QWidget* parent)
+	:QWidget(parent),
+		m_signalManager(signalStorage)
 {
 
 	setWindowTitle(tr("Filter Signals"));
 
-	m_filterValues = m_filter->getValues();
-
 	// Left part
 	//
 
-	QHBoxLayout* mainHorzLayout = new QHBoxLayout();
+	QHBoxLayout* mainLayout = new QHBoxLayout();
 
 	QVBoxLayout* leftLayout = new QVBoxLayout();
 
@@ -33,8 +30,8 @@ DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signal
 	m_baseSignalsTable->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	m_baseSignalsTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 	m_baseSignalsTable->setSortingEnabled(true);
-	connect(m_baseSignalsTable->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &DialogChooseTuningSignals::baseSortIndicatorChanged);
-	connect(m_baseSignalsTable, &QTableView::doubleClicked, this, &DialogChooseTuningSignals::on_m_baseSignalsTable_doubleClicked);
+	connect(m_baseSignalsTable->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &ChooseTuningSignalsWidget::baseSortIndicatorChanged);
+	connect(m_baseSignalsTable, &QTableView::doubleClicked, this, &ChooseTuningSignalsWidget::on_m_baseSignalsTable_doubleClicked);
 	leftLayout->addWidget(m_baseSignalsTable);
 
 	m_baseSignalTypeCombo = new QComboBox();
@@ -62,11 +59,11 @@ DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signal
 	leftFilterLayout->addWidget(m_baseFilterTypeCombo);
 
 	m_baseFilterText = new QLineEdit();
-	connect(m_baseFilterText, &QLineEdit::returnPressed, this, &DialogChooseTuningSignals::on_m_baseFilterText_returnPressed);
+	connect(m_baseFilterText, &QLineEdit::returnPressed, this, &ChooseTuningSignalsWidget::on_m_baseFilterText_returnPressed);
 	leftFilterLayout->addWidget(m_baseFilterText);
 
 	m_baseApplyFilter = new QPushButton(tr("Apply Filter"));
-	connect(m_baseApplyFilter, &QPushButton::clicked, this, &DialogChooseTuningSignals::on_m_baseApplyFilter_clicked);
+	connect(m_baseApplyFilter, &QPushButton::clicked, this, &ChooseTuningSignalsWidget::on_m_baseApplyFilter_clicked);
 	leftFilterLayout->addWidget(m_baseApplyFilter);
 
 	// Value filter controls
@@ -92,7 +89,7 @@ DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signal
 
 	leftLayout->addLayout(leftFilterLayout);
 
-	mainHorzLayout->addLayout(leftLayout);
+	mainLayout->addLayout(leftLayout);
 
 	// Middle part
 	//
@@ -102,16 +99,16 @@ DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signal
 	midLayout->addStretch();
 
 	m_addValue = new QPushButton(tr("Add"));
-	connect(m_addValue, &QPushButton::clicked, this, &DialogChooseTuningSignals::on_m_add_clicked);
+	connect(m_addValue, &QPushButton::clicked, this, &ChooseTuningSignalsWidget::on_m_add_clicked);
 	midLayout->addWidget(m_addValue);
 
 	m_removeValue = new QPushButton(tr("Remove"));
-	connect(m_removeValue, &QPushButton::clicked, this, &DialogChooseTuningSignals::on_m_remove_clicked);
+	connect(m_removeValue, &QPushButton::clicked, this, &ChooseTuningSignalsWidget::on_m_remove_clicked);
 	midLayout->addWidget(m_removeValue);
 
 	midLayout->addStretch();
 
-	mainHorzLayout->addLayout(midLayout);
+	mainLayout->addLayout(midLayout);
 
 	// Right part
 	//
@@ -120,7 +117,7 @@ DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signal
 
 	m_filterValuesTree = new QTreeWidget();
 	m_filterValuesTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
-	connect(m_filterValuesTree, &QTreeWidget::doubleClicked, this, &DialogChooseTuningSignals::on_m_filterValuesTree_doubleClicked);
+	connect(m_filterValuesTree, &QTreeWidget::doubleClicked, this, &ChooseTuningSignalsWidget::on_m_filterValuesTree_doubleClicked);
 
 	QStringList headers;
 	headers << tr("CustomAppSignalID");
@@ -146,51 +143,33 @@ DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signal
 	rightGridLayout->addStretch();
 
 	m_setValue = new QPushButton(tr("Set Value"));
-	connect(m_setValue, &QPushButton::clicked, this, &DialogChooseTuningSignals::on_m_setValue_clicked);
+	connect(m_setValue, &QPushButton::clicked, this, &ChooseTuningSignalsWidget::on_m_setValue_clicked);
 	rightGridLayout->addWidget(m_setValue);
 
 	if (requestValuesEnabled == true)
 	{
 		m_setCurrent = new QPushButton(tr("Set Current"));
-		connect(m_setCurrent, &QPushButton::clicked, this, &DialogChooseTuningSignals::on_m_setCurrent_clicked);
+		connect(m_setCurrent, &QPushButton::clicked, this, &ChooseTuningSignalsWidget::on_m_setCurrent_clicked);
 		rightGridLayout->addWidget(m_setCurrent);
 	}
 
 	m_moveUpAction = new QAction(tr("Move Up"), this);
-	connect(m_moveUpAction, &QAction::triggered, this, &DialogChooseTuningSignals::on_m_moveUp_clicked);
+	connect(m_moveUpAction, &QAction::triggered, this, &ChooseTuningSignalsWidget::on_m_moveUp_clicked);
 
 	m_moveDownAction = new QAction(tr("Move Down"), this);
-	connect(m_moveDownAction, &QAction::triggered, this, &DialogChooseTuningSignals::on_m_moveDown_clicked);
+	connect(m_moveDownAction, &QAction::triggered, this, &ChooseTuningSignalsWidget::on_m_moveDown_clicked);
 
 	m_setValueAction = new QAction(tr("Set Value"), this);
-	connect(m_setValueAction, &QAction::triggered, this, &DialogChooseTuningSignals::on_m_setValue_clicked);
+	connect(m_setValueAction, &QAction::triggered, this, &ChooseTuningSignalsWidget::on_m_setValue_clicked);
 
 	m_setCurrentAction = new QAction(tr("Set Current"), this);
-	connect(m_setCurrentAction, &QAction::triggered, this, &DialogChooseTuningSignals::on_m_setCurrent_clicked);
+	connect(m_setCurrentAction, &QAction::triggered, this, &ChooseTuningSignalsWidget::on_m_setCurrent_clicked);
 
 	rightLayout->addLayout(rightGridLayout);
 
-	mainHorzLayout->addLayout(rightLayout);
+	mainLayout->addLayout(rightLayout);
 
 	//
-
-	QHBoxLayout* m_okCancelLayout = new QHBoxLayout();
-
-	m_okCancelLayout->addStretch();
-
-	m_buttonOk = new QPushButton(tr("OK"));
-	connect(m_buttonOk, &QPushButton::clicked, this, &DialogChooseTuningSignals::accept);
-	m_okCancelLayout->addWidget(m_buttonOk);
-
-	m_buttonCancel = new QPushButton(tr("Cancel"));
-	connect(m_buttonCancel, &QPushButton::clicked, this, &DialogChooseTuningSignals::reject);
-	m_okCancelLayout->addWidget(m_buttonCancel);
-
-	//
-
-	QVBoxLayout* mainLayout = new QVBoxLayout();
-	mainLayout->addLayout(mainHorzLayout);
-	mainLayout->addLayout(m_okCancelLayout);
 
 	setLayout(mainLayout);
 
@@ -208,8 +187,6 @@ DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signal
 
 	fillBaseSignalsList();
 
-	fillFilterValuesList();
-
 	// Set column width
 	//
 
@@ -217,15 +194,40 @@ DialogChooseTuningSignals::DialogChooseTuningSignals(TuningSignalManager* signal
 
 }
 
-void DialogChooseTuningSignals::accept()
+void ChooseTuningSignalsWidget::setFilter(std::shared_ptr<TuningFilter> selectedFilter)
 {
-	m_filter->setValues(m_filterValues);
+	m_filter = selectedFilter;
 
-	QDialog::accept();
+	if (m_filterValuesTree == nullptr)
+	{
+		Q_ASSERT(m_filterValuesTree);
+		return;
+	}
+
+	m_filterValuesTree->clear();
+
+	if (m_filter != nullptr)
+	{
+		std::vector <TuningFilterSignal> values = m_filter->getFilterSignals();
+
+		for (const TuningFilterSignal& v: values)
+		{
+			QTreeWidgetItem* item = new QTreeWidgetItem();
+			setFilterValueItemText(item, v);
+			m_filterValuesTree->addTopLevelItem(item);
+		}
+
+		for (int i = 0; i < m_filterValuesTree->columnCount(); i++)
+		{
+			m_filterValuesTree->resizeColumnToContents(i);
+		}
+
+		m_filterValuesTree->setSortingEnabled(true);
+		m_filterValuesTree->sortByColumn(0, Qt::AscendingOrder);
+	}
 }
 
-
-void DialogChooseTuningSignals::fillBaseSignalsList()
+void ChooseTuningSignalsWidget::fillBaseSignalsList()
 {
 	if (m_signalManager == nullptr)
 	{
@@ -374,68 +376,53 @@ void DialogChooseTuningSignals::fillBaseSignalsList()
 	m_baseSignalsTable->sortByColumn(m_sortColumn, m_sortOrder);
 }
 
-void DialogChooseTuningSignals::fillFilterValuesList()
+void ChooseTuningSignalsWidget::on_m_add_clicked()
 {
-	m_filterValuesTree->clear();
-
-	for (const TuningFilterValue& v: m_filterValues)
+	if (m_filter == nullptr)
 	{
-		QTreeWidgetItem* item = new QTreeWidgetItem();
-		setFilterValueItemText(item, v);
-		m_filterValuesTree->addTopLevelItem(item);
+		return;
 	}
-
-	for (int i = 0; i < m_filterValuesTree->columnCount(); i++)
-	{
-		m_filterValuesTree->resizeColumnToContents(i);
-	}
-}
-
-void DialogChooseTuningSignals::on_m_add_clicked()
-{
-	std::vector<Hash> baseHashes  = m_baseModel->allHashes();
 
 	for (const QModelIndex& index : m_baseSignalsTable->selectionModel()->selectedRows())
 	{
-		Hash hash = baseHashes[index.row()];
+		Hash hash = m_baseModel->hashByIndex(index.row(), 0);
 
 		bool ok = false;
 
 		const AppSignalParam p = m_signalManager->signalParam(hash, &ok);
-		const TuningSignalState s = m_signalManager->state(hash, &ok);
-
-		bool alreadyExists = false;
-
-		for (const TuningFilterValue& v : m_filterValues)
+		if (ok == false)
 		{
-			if (v.appSignalHash() == p.hash())
-			{
-				alreadyExists = true;
-				break;
-			}
-
+			Q_ASSERT(false);
+			return;
 		}
 
-		if (alreadyExists == true)
+		const TuningSignalState s = m_signalManager->state(hash, &ok);
+
+		if (m_filter == nullptr)
+		{
+			Q_ASSERT(m_filter);
+			return;
+		}
+
+		if (m_filter->filterSignalExists(p.hash()) == true)
 		{
 			continue;
 		}
 
 		// Create value
 
-		TuningFilterValue ofv;
+		TuningFilterSignal ofv;
 		ofv.setAppSignalId(p.appSignalId());
 		if (s.valid() == true)
 		{
 			ofv.setValue(s.value());
 		}
 
-		m_filterValues.push_back(ofv);
+		m_filter->addFilterSignal(ofv);
 
 		// Add tree item
 
 		QTreeWidgetItem* childItem = new QTreeWidgetItem();
-
 		setFilterValueItemText(childItem, ofv);
 
 		m_filterValuesTree->addTopLevelItem(childItem);
@@ -452,24 +439,48 @@ void DialogChooseTuningSignals::on_m_add_clicked()
 	}
 }
 
-void DialogChooseTuningSignals::on_m_remove_clicked()
+void ChooseTuningSignalsWidget::on_m_remove_clicked()
 {
-
-	QModelIndexList selectedRows = m_filterValuesTree->selectionModel()->selectedRows();
-
-	for (int i = selectedRows.size() - 1; i >= 0; i--)
+	if (m_filter == nullptr)
 	{
-		int index = selectedRows[i].row();
+		return;
+	}
 
-		m_filterValues.erase(m_filterValues.begin() + index);
+	QList<QTreeWidgetItem*> selectedItems = m_filterValuesTree->selectedItems();
 
-		QTreeWidgetItem* deleteItem = m_filterValuesTree->takeTopLevelItem(index);
-		delete deleteItem;
+	for (auto selectedItem : selectedItems)
+	{
+		if (selectedItem == nullptr)
+		{
+			Q_ASSERT(selectedItem);
+			return;
+		}
+
+		Hash hash = selectedItem->data(static_cast<int>(Columns::AppSignalID), Qt::UserRole).value<Hash>();
+
+		if (m_filter == nullptr)
+		{
+			Q_ASSERT(m_filter);
+			return;
+		}
+
+		if (m_filter->removeFilterSignal(hash) == false)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		delete selectedItem;
 	}
 }
 
-void DialogChooseTuningSignals::on_m_setValue_clicked()
+void ChooseTuningSignalsWidget::on_m_setValue_clicked()
 {
+	if (m_filter == nullptr)
+	{
+		return;
+	}
+
 	bool first = true;
 	TuningValue lowLimit;
 	TuningValue highLimit;
@@ -479,21 +490,39 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 
 	bool sameValue = true;
 
-	QModelIndexList selectedRows = m_filterValuesTree->selectionModel()->selectedRows();
+	QList<QTreeWidgetItem*> selectedItems = m_filterValuesTree->selectedItems();
 
-	for (int i = 0; i < selectedRows.size(); i++)
+	for (auto selectedItem : selectedItems)
 	{
-		int index = selectedRows[i].row();
+		if (selectedItem == nullptr)
+		{
+			Q_ASSERT(selectedItem);
+			return;
+		}
 
-		const TuningFilterValue& fv = m_filterValues[index];
+		Hash hash = selectedItem->data(static_cast<int>(Columns::AppSignalID), Qt::UserRole).value<Hash>();
 
-		if (m_signalManager->signalExists(fv.appSignalHash()) == false)
+		if (m_filter == nullptr)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		TuningFilterSignal fv;
+
+		if (m_filter->filterSignalExists(hash) == true)
+		{
+			bool ok = m_filter->filterSignal(hash, fv);
+			Q_UNUSED(ok);
+		}
+
+		if (m_signalManager->signalExists(hash) == false)
 		{
 			continue;
 		}
 
 		AppSignalParam asp;
-		if (m_signalManager->signalParam(fv.appSignalHash(), &asp) == false)
+		if (m_signalManager->signalParam(hash, &asp) == false)
 		{
 			assert(false);
 			return;
@@ -505,7 +534,10 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 			highLimit = asp.tuningHighBound();
 			precision = asp.precision();
 
-			value = fv.value();
+			if (fv.useValue() == true)
+			{
+				value = fv.value();
+			}
 			value.setType(asp.toTuningType());
 
 			defaultValue = asp.tuningDefaultValue();
@@ -535,7 +567,7 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 				return;
 			}
 
-			if (fv.value() != value)
+			if (fv.useValue() == true && fv.value() != value)
 			{
 				sameValue = false;
 			}
@@ -548,132 +580,107 @@ void DialogChooseTuningSignals::on_m_setValue_clicked()
 		return;
 	}
 
-	for (int i = 0; i < selectedRows.size(); i++)
+	for (auto selectedItem : selectedItems)
 	{
-		int index = selectedRows[i].row();
+		if (selectedItem == nullptr)
+		{
+			Q_ASSERT(selectedItem);
+			return;
+		}
 
-		TuningFilterValue& fv = m_filterValues[index];
+		Hash hash = selectedItem->data(static_cast<int>(Columns::AppSignalID), Qt::UserRole).value<Hash>();
 
+		AppSignalParam asp;
+		if (m_signalManager->signalParam(hash, &asp) == false)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		TuningFilterSignal fv;
+		fv.setAppSignalId(asp.appSignalId());
 		fv.setUseValue(true);
 		fv.setValue(d.value());
 
-		QTreeWidgetItem* item = m_filterValuesTree->topLevelItem(index);
-		setFilterValueItemText(item, fv);
+		m_filter->addFilterSignal(fv);
+
+		setFilterValueItemText(selectedItem, fv);
 	}
 }
 
-void DialogChooseTuningSignals::on_m_setCurrent_clicked()
+void ChooseTuningSignalsWidget::on_m_setCurrent_clicked()
 {
-	QModelIndexList selectedRows = m_filterValuesTree->selectionModel()->selectedRows();
-
-	for (int i = 0; i < selectedRows.size(); i++)
+	if (m_filter == nullptr)
 	{
-		int index = selectedRows[i].row();
+		return;
+	}
 
-		TuningFilterValue& fv = m_filterValues[index];
+	QList<QTreeWidgetItem*> selectedItems = m_filterValuesTree->selectedItems();
+
+	for (auto selectedItem : selectedItems)
+	{
+		if (selectedItem == nullptr)
+		{
+			Q_ASSERT(selectedItem);
+			return;
+		}
+
+		Hash hash = selectedItem->data(static_cast<int>(Columns::AppSignalID), Qt::UserRole).value<Hash>();
+
+		if (m_filter == nullptr)
+		{
+			Q_ASSERT(false);
+			return;
+		}
 
 		AppSignalParam asp;
-		if (m_signalManager->signalParam(fv.appSignalHash(), &asp) == false)
+		if (m_signalManager->signalParam(hash, &asp) == false)
 		{
-			QMessageBox::warning(this, tr("Filter Editor"), tr("Can't find signal %1!").arg(fv.appSignalId()));
+			Q_ASSERT(false);
 			return;
 		}
 
 		TuningValue currentValue;
-		bool ok = false;
 
-		emit getCurrentSignalValue(fv.appSignalHash(), &currentValue, &ok);
+		bool ok = false;
+		emit getCurrentSignalValue(hash, &currentValue, &ok);
 
 		if (ok == true)
 		{
+			TuningFilterSignal fv;
+			fv.setAppSignalId(asp.appSignalId());
 			fv.setUseValue(true);
 			fv.setValue(currentValue);
+
+			m_filter->addFilterSignal(fv);
+
+			setFilterValueItemText(selectedItem, fv);
 		}
 		else
 		{
 			QMessageBox::warning(this, tr("Filter Editor"), tr("Can't get current value of signal %1!").arg(asp.customSignalId()));
 		}
-
-		QTreeWidgetItem* item = m_filterValuesTree->topLevelItem(index);
-		setFilterValueItemText(item, fv);
 	}
-
-
-
-	/*QList<QTreeWidgetItem*> selectedItems = m_presetsTree->selectedItems();
-
-	for (auto item : selectedItems)
-	{
-		if (isSignal(item) == false)
-		{
-			continue;
-		}
-
-		QTreeWidgetItem* parentItem = item->parent();
-		if (parentItem == nullptr)
-		{
-			assert(parentItem);
-			return;
-		}
-
-		if (isFilter(parentItem) == false)
-		{
-			assert(false);
-			return;
-		}
-
-		std::shared_ptr<TuningFilter> filter = parentItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
-		if (filter == nullptr)
-		{
-			assert(filter);
-			return;
-		}
-
-		TuningFilterValue ov = item->data(2, Qt::UserRole).value<TuningFilterValue>();
-
-		bool ok = false;
-		float newValue = 0;
-
-		emit getCurrentSignalValue(ov.appSignalHash(), &newValue, &ok);
-
-		if (ok == true)
-		{
-			ov.setUseValue(true);
-			ov.setValue(newValue);
-		}
-		else
-		{
-			ov.setUseValue(false);
-		}
-
-		item->setData(2, Qt::UserRole, QVariant::fromValue(ov));
-		setSignalItemText(item, ov);
-
-		filter->setValue(ov);
-	}
-
-	m_modified = true;*/
-
 }
 
-void DialogChooseTuningSignals::on_m_baseApplyFilter_clicked()
+void ChooseTuningSignalsWidget::on_m_baseApplyFilter_clicked()
 {
 	fillBaseSignalsList();
 }
 
-void DialogChooseTuningSignals::on_m_baseSignalsTable_doubleClicked(const QModelIndex& index)
+void ChooseTuningSignalsWidget::on_m_baseSignalsTable_doubleClicked(const QModelIndex& index)
 {
 	Q_UNUSED(index);
 	on_m_add_clicked();
 }
 
-void DialogChooseTuningSignals::on_m_filterValuesTree_doubleClicked(const QModelIndex& index)
+void ChooseTuningSignalsWidget::on_m_filterValuesTree_doubleClicked(const QModelIndex& index)
 {
 	Q_UNUSED(index);
 	on_m_setValue_clicked();
 }
 
-void DialogChooseTuningSignals::baseSortIndicatorChanged(int column, Qt::SortOrder order)
+void ChooseTuningSignalsWidget::baseSortIndicatorChanged(int column, Qt::SortOrder order)
 {
 	m_sortColumn = column;
 	m_sortOrder = order;
@@ -681,47 +688,49 @@ void DialogChooseTuningSignals::baseSortIndicatorChanged(int column, Qt::SortOrd
 	m_baseModel->sort(column, order);
 }
 
-void DialogChooseTuningSignals::on_m_baseFilterTypeCombo_currentIndexChanged(int index)
+void ChooseTuningSignalsWidget::on_m_baseFilterTypeCombo_currentIndexChanged(int index)
 {
 	Q_UNUSED(index);
 	fillBaseSignalsList();
 }
 
-void DialogChooseTuningSignals::on_m_baseFilterValueCombo_currentIndexChanged(int index)
+void ChooseTuningSignalsWidget::on_m_baseFilterValueCombo_currentIndexChanged(int index)
 {
 	Q_UNUSED(index);
 	fillBaseSignalsList();
 }
 
-void DialogChooseTuningSignals::on_m_baseFilterText_returnPressed()
+void ChooseTuningSignalsWidget::on_m_baseFilterText_returnPressed()
 {
 	fillBaseSignalsList();
 }
 
-void DialogChooseTuningSignals::on_m_moveUp_clicked()
+void ChooseTuningSignalsWidget::on_m_moveUp_clicked()
 {
 
 }
 
-void DialogChooseTuningSignals::on_m_moveDown_clicked()
+void ChooseTuningSignalsWidget::on_m_moveDown_clicked()
 {
 
 }
 
-void DialogChooseTuningSignals::on_m_baseSignalTypeCombo_currentIndexChanged(int index)
+void ChooseTuningSignalsWidget::on_m_baseSignalTypeCombo_currentIndexChanged(int index)
 {
 	Q_UNUSED(index);
 	fillBaseSignalsList();
 }
 
 
-void DialogChooseTuningSignals::setFilterValueItemText(QTreeWidgetItem* item, const TuningFilterValue& value)
+void ChooseTuningSignalsWidget::setFilterValueItemText(QTreeWidgetItem* item, const TuningFilterSignal& value)
 {
 	if (item == nullptr)
 	{
 		assert(item);
 		return;
 	}
+
+	item->setData(static_cast<int>(Columns::AppSignalID), Qt::UserRole, value.appSignalHash());
 
 	if (m_signalManager->signalExists(value.appSignalHash()) == false)
 	{
@@ -787,24 +796,22 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, Tunin
 									   bool typeButtonEnabled,
 									   bool typeTabEnabled,
 									   TuningFilter::Source source,
-									   int propertyEditorSplitterPos,
-									   const QByteArray& dialogChooseSignalGeometry):
+									   QByteArray mainSplitterState,
+									   int propertyEditorSplitterPos):
 	m_filterStorage(filterStorage),
 	m_signalManager(signalManager),
-	m_dialogChooseSignalGeometry(dialogChooseSignalGeometry),
-	m_propertyEditorSplitterPos(propertyEditorSplitterPos),
 	m_readOnly(readOnly),
 	m_requestValuesEnabled(requestValuesEnabled),
+	m_typeTreeEnabled(typeTreeEnabled),
 	m_typeButtonEnabled(typeButtonEnabled),
 	m_typeTabEnabled(typeTabEnabled),
-	m_typeTreeEnabled(typeTreeEnabled),
 	m_source(source)
 {
 
 	assert(filterStorage);
 	assert(m_signalManager);
 
-	initUserInterface();
+	initUserInterface(mainSplitterState, propertyEditorSplitterPos);
 
 
 	// Add presets to tree
@@ -853,13 +860,23 @@ TuningFilterEditor::~TuningFilterEditor()
 }
 
 
-void TuningFilterEditor::saveUserInterfaceSettings(int* propertyEditorSplitterPos, QByteArray* dialogChooseSignalGeometry)
+void TuningFilterEditor::saveUserInterfaceSettings(QByteArray* mainSplitterState, int* propertyEditorSplitterPos)
 {
+	if (mainSplitterState == nullptr || propertyEditorSplitterPos == nullptr)
+	{
+		Q_ASSERT(mainSplitterState);
+		Q_ASSERT(propertyEditorSplitterPos);
+		return;
+	}
+
+	if (m_hSplitter != nullptr)
+	{
+		*mainSplitterState = m_hSplitter->saveState();
+	}
 	if (m_propertyEditor != nullptr)
 	{
 		*propertyEditorSplitterPos = m_propertyEditor->splitterPosition();
 	}
-	*dialogChooseSignalGeometry = m_dialogChooseSignalGeometry;
 }
 
 void TuningFilterEditor::addPreset(TuningFilter::InterfaceType interfaceType)
@@ -906,17 +923,22 @@ void TuningFilterEditor::addPreset(TuningFilter::InterfaceType interfaceType)
 	m_modified = true;
 }
 
-void TuningFilterEditor::initUserInterface()
+void TuningFilterEditor::initUserInterface(QByteArray mainSplitterState, int propertyEditorSplitterPos)
 {
 	QVBoxLayout* mainLayout = new QVBoxLayout(this);
 
-	QHBoxLayout* mainHorzLayout = new QHBoxLayout();
+
+	// Create splitter control
+	//
+	m_hSplitter = new QSplitter();
 
 
 	// Left part
 	//
 
-	QVBoxLayout* leftLayout = new QVBoxLayout();
+	QWidget* lw = new QWidget();
+	QVBoxLayout* leftLayout = new QVBoxLayout(lw);
+	leftLayout->setContentsMargins(0, 0, 0, 0);
 
 	m_presetsTree = new QTreeWidget();
 	m_presetsTree->setExpandsOnDoubleClick(false);
@@ -980,46 +1002,60 @@ void TuningFilterEditor::initUserInterface()
 	m_presetsTreeContextMenu->addAction(m_pastePresetAction);
 	//
 
-	mainHorzLayout->addLayout(leftLayout);
+	m_hSplitter->addWidget(lw);
 
 	// Right side
 
-	QVBoxLayout* rightLayout = new QVBoxLayout();
+	QWidget* rw = new QWidget();
+	QVBoxLayout* rightLayout = new QVBoxLayout(rw);
+	rightLayout->setContentsMargins(0, 0, 0, 0);
 
-	m_propertyEditor = new ExtWidgets::PropertyEditor(this);
+	QTabWidget* tab = new QTabWidget();
+	rightLayout->addWidget(tab);
+
+	// Properties Tab
+
+	QWidget* propertyTabWidget = new QWidget();
+
+	QHBoxLayout* propertyEditorLayout = new QHBoxLayout(propertyTabWidget);
+
+	m_propertyEditor = new ExtWidgets::PropertyEditor(propertyTabWidget);
+
+	propertyEditorLayout->addWidget(m_propertyEditor);
 
 	m_propertyEditor->installEventFilter(this);
 
-	if (m_propertyEditorSplitterPos > 100)
+	if (propertyEditorSplitterPos > 100)
 	{
-		m_propertyEditor->setSplitterPosition(m_propertyEditorSplitterPos);
+		m_propertyEditor->setSplitterPosition(propertyEditorSplitterPos);
 	}
 	else
 	{
 		m_propertyEditor->setSplitterPosition(100);
 	}
 
+	m_hSplitter->restoreState(mainSplitterState);
+
 	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &TuningFilterEditor::presetPropertiesChanged);
 
-	rightLayout->addWidget(m_propertyEditor);
+	tab->addTab(propertyTabWidget, tr("Properties"));
 
-	QHBoxLayout* rightGridLayout = new QHBoxLayout();
+	// Signals Tab
 
-	rightGridLayout->addStretch();
+	m_chooseTuningSignalsWidget = new ChooseTuningSignalsWidget(m_signalManager, m_requestValuesEnabled, this);
 
-	m_presetSignals = new QPushButton(tr("Signals..."));
-	m_presetSignals->setEnabled(false);
-	connect(m_presetSignals, &QPushButton::clicked, this, &TuningFilterEditor::on_m_presetsSignals_clicked);
-	rightGridLayout->addWidget(m_presetSignals);
+	connect(m_chooseTuningSignalsWidget, &ChooseTuningSignalsWidget::getCurrentSignalValue, this, &TuningFilterEditor::slot_getCurrentSignalValue, Qt::DirectConnection);
 
-	rightLayout->addLayout(rightGridLayout);
+	tab->addTab(m_chooseTuningSignalsWidget, tr("Signals"));
 
-	mainHorzLayout->addLayout(rightLayout);
+	//
+
+	m_hSplitter->addWidget(rw);
 
 	//
 
 	mainLayout->setContentsMargins(0, 0, 0, 0);
-	mainLayout->addLayout(mainHorzLayout);
+	mainLayout->addWidget(m_hSplitter);
 
 	setLayout(mainLayout);
 }
@@ -1443,9 +1479,12 @@ void TuningFilterEditor::on_m_presetsTree_itemSelectionChanged()
 	m_copyPreset->setEnabled(m_readOnly == false && presetsCount > 0);
 	m_copyPresetAction->setEnabled(m_copyPreset->isEnabled());
 
-	m_presetSignals->setEnabled(presetsCount == 1);
+	//
 
 	QList<std::shared_ptr<PropertyObject>> selectedFilters;
+
+	std::shared_ptr<TuningFilter> firstFilter = nullptr;
+
 
 	for (QTreeWidgetItem* item : selectedItems)
 	{
@@ -1457,6 +1496,20 @@ void TuningFilterEditor::on_m_presetsTree_itemSelectionChanged()
 		}
 
 		selectedFilters.push_back(filter);
+
+		if (firstFilter == nullptr)
+		{
+			firstFilter = filter;
+		}
+	}
+
+	if (selectedItems.size() == 1)
+	{
+		m_chooseTuningSignalsWidget->setFilter(firstFilter);
+	}
+	else
+	{
+		m_chooseTuningSignalsWidget->setFilter(nullptr);
 	}
 
 	m_propertyEditor->setObjects(selectedFilters);
@@ -1501,43 +1554,6 @@ void TuningFilterEditor::presetPropertiesChanged(QList<std::shared_ptr<PropertyO
 			}
 		}
 	}
-
-	//m_propertyEditor->setObjects(selectedFilters);
-}
-
-void TuningFilterEditor::on_m_presetsSignals_clicked()
-{
-	QList<QTreeWidgetItem*> selectedItems = m_presetsTree->selectedItems();
-
-	if (selectedItems.size() != 1)
-	{
-		return;
-	}
-
-	std::shared_ptr<TuningFilter> selectedFilter = selectedItems[0]->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
-
-	if (selectedFilter == nullptr)
-	{
-		assert(selectedFilter);
-		return;
-	}
-
-	DialogChooseTuningSignals d(m_signalManager, selectedFilter, m_requestValuesEnabled, this);
-
-	connect(&d, &DialogChooseTuningSignals::getCurrentSignalValue, this, &TuningFilterEditor::slot_getCurrentSignalValue, Qt::DirectConnection);
-
-	if (m_dialogChooseSignalGeometry.isEmpty() == false)
-	{
-		d.restoreGeometry(m_dialogChooseSignalGeometry);
-	}
-
-	if (d.exec() == QDialog::Accepted)
-	{
-		m_modified = true;
-	}
-
-	m_dialogChooseSignalGeometry = d.saveGeometry();
-
 }
 
 void TuningFilterEditor::slot_getCurrentSignalValue(Hash appSignalHash, TuningValue* value, bool* ok)

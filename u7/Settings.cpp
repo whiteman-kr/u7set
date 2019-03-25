@@ -134,7 +134,7 @@ void Settings::writeUserScope() const
 	s.setValue("PropertyEditor/scriptHelpPos", m_scriptHelpWindowPos);
 	s.setValue("PropertyEditor/scriptHelpGeometry", m_scriptHelpWindowGeometry);
 
-	s.setValue("TuningFiltersEditor/DialogChooseSignalGeometry", m_tuningFiltersDialogChooseSignalGeometry);
+	s.setValue("TuningFiltersEditor/MainSplitterPosition", m_tuningFiltersSplitterPosition);
     s.setValue("TuningFiltersEditor/PropertyEditorSplitterPos", m_tuningFiltersPropertyEditorSplitterPos);
 
 	s.setValue("LoginDialog/loginCompleter", m_loginCompleter);
@@ -214,7 +214,7 @@ void Settings::loadUserScope()
 	m_scriptHelpWindowPos = s.value("PropertyEditor/scriptHelpPos", QPoint(-1, -1)).toPoint();
 	m_scriptHelpWindowGeometry = s.value("PropertyEditor/scriptHelpGeometry").toByteArray();
 
-	m_tuningFiltersDialogChooseSignalGeometry = s.value("TuningFiltersEditor/DialogChooseSignalGeometry").toByteArray();
+	m_tuningFiltersSplitterPosition = s.value("TuningFiltersEditor/MainSplitterPosition").toByteArray();
     m_tuningFiltersPropertyEditorSplitterPos = s.value("TuningFiltersEditor/PropertyEditorSplitterPos").toInt();
 
 	m_loginCompleter = s.value("LoginDialog/loginCompleter").toStringList();

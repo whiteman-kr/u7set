@@ -172,7 +172,7 @@ public:
 	QByteArray m_presetEditorGeometry;
 
 
-	QByteArray m_tuningFiltersDialogChooseSignalGeometry;
+	QByteArray m_tuningFiltersSplitterPosition;
 	int m_tuningFiltersPropertyEditorSplitterPos = -1;
 
 private:
