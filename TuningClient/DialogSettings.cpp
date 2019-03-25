@@ -38,18 +38,10 @@ void DialogSettings::createLanguagesList()
 	ui->m_languageCombo->addItem("English", "en");
 	ui->m_languageCombo->setCurrentIndex(0);
 
-
-	QString m_langPath = QApplication::applicationDirPath();
-	m_langPath.append("/languages");
-
-	QDir dir(m_langPath);
-
-	QStringList fileNames = dir.entryList(QStringList("TuningClient_*.qm"));
-
-	for (int i = 0; i < fileNames.size(); ++i)
+	QDirIterator it(":/languages", QDirIterator::Subdirectories);
+	while (it.hasNext())
 	{
-		QString locale;
-		locale = fileNames[i]; // "TuningClient_.qm"
+		QString locale = it.next();
 		locale.truncate(locale.lastIndexOf('.')); // "TuningClient_"
 		locale.remove(0, locale.indexOf('_') + 1); // "de"
 
@@ -62,7 +54,6 @@ void DialogSettings::createLanguagesList()
 			ui->m_languageCombo->setCurrentIndex(ui->m_languageCombo->count() - 1);
 		}
 	}
-
 }
 
 

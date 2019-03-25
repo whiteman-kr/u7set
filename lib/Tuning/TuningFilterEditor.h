@@ -148,7 +148,6 @@ public:
 
 	 void saveUserInterfaceSettings(QByteArray* mainSplitterState, int* propertyEditorSplitterPos);
 
-
 signals:
 
 	void getCurrentSignalValue(Hash appSignalHash, TuningValue* value, bool* ok);	// Qt::DirectConnection!
@@ -162,6 +161,10 @@ private slots:
 	void on_m_addPreset_clicked();
 
 	void on_m_removePreset_clicked();
+
+	void on_m_moveUpPreset_clicked();
+
+	void on_m_moveDownPreset_clicked();
 
 	void on_m_copyPreset_clicked();
 
@@ -177,15 +180,15 @@ private slots:
 
 private:
 
-	void addPreset(TuningFilter::InterfaceType interfaceType);
-
 	void initUserInterface(QByteArray mainSplitterState, int propertyEditorSplitterPos);
+
+	void addPreset(TuningFilter::InterfaceType interfaceType);
 
 	void addChildTreeObjects(const std::shared_ptr<TuningFilter>& filter, QTreeWidgetItem* parent);
 
 	void setFilterItemText(QTreeWidgetItem* item, TuningFilter* filter);
 
-	std::shared_ptr<TuningFilter> selectedFilter(QTreeWidgetItem** item);
+	void movePresets(int direction);
 
 
 private:
@@ -210,11 +213,17 @@ private:
 	QPushButton* m_addPreset = nullptr;
 	QPushButton* m_removePreset = nullptr;
 
+	QPushButton* m_moveUpPreset = nullptr;
+	QPushButton* m_moveDownPreset = nullptr;
+
 	QPushButton* m_copyPreset = nullptr;
 	QPushButton* m_pastePreset = nullptr;
 
 	QAction* m_addPresetAction = nullptr;
 	QAction* m_removePresetAction = nullptr;
+
+	QAction* m_moveUpPresetAction = nullptr;
+	QAction* m_moveDownPresetAction = nullptr;
 
 	QAction* m_copyPresetAction = nullptr;
 	QAction* m_pastePresetAction = nullptr;
