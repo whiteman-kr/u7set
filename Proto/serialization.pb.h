@@ -3886,20 +3886,35 @@ class SchemaItemImage : public ::google::protobuf::Message {
   inline bool keepaspectratio() const;
   inline void set_keepaspectratio(bool value);
 
+  // optional bytes imageData = 8;
+  inline bool has_imagedata() const;
+  inline void clear_imagedata();
+  static const int kImageDataFieldNumber = 8;
+  inline const ::std::string& imagedata() const;
+  inline void set_imagedata(const ::std::string& value);
+  inline void set_imagedata(const char* value);
+  inline void set_imagedata(const void* value, size_t size);
+  inline ::std::string* mutable_imagedata();
+  inline ::std::string* release_imagedata();
+  inline void set_allocated_imagedata(::std::string* imagedata);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemImage)
  private:
   inline void set_has_allowscale();
   inline void clear_has_allowscale();
   inline void set_has_keepaspectratio();
   inline void clear_has_keepaspectratio();
+  inline void set_has_imagedata();
+  inline void clear_has_imagedata();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
+  ::std::string* imagedata_;
   bool allowscale_;
   bool keepaspectratio_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -17038,6 +17053,76 @@ inline bool SchemaItemImage::keepaspectratio() const {
 inline void SchemaItemImage::set_keepaspectratio(bool value) {
   set_has_keepaspectratio();
   keepaspectratio_ = value;
+}
+
+// optional bytes imageData = 8;
+inline bool SchemaItemImage::has_imagedata() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SchemaItemImage::set_has_imagedata() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SchemaItemImage::clear_has_imagedata() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SchemaItemImage::clear_imagedata() {
+  if (imagedata_ != &::google::protobuf::internal::kEmptyString) {
+    imagedata_->clear();
+  }
+  clear_has_imagedata();
+}
+inline const ::std::string& SchemaItemImage::imagedata() const {
+  return *imagedata_;
+}
+inline void SchemaItemImage::set_imagedata(const ::std::string& value) {
+  set_has_imagedata();
+  if (imagedata_ == &::google::protobuf::internal::kEmptyString) {
+    imagedata_ = new ::std::string;
+  }
+  imagedata_->assign(value);
+}
+inline void SchemaItemImage::set_imagedata(const char* value) {
+  set_has_imagedata();
+  if (imagedata_ == &::google::protobuf::internal::kEmptyString) {
+    imagedata_ = new ::std::string;
+  }
+  imagedata_->assign(value);
+}
+inline void SchemaItemImage::set_imagedata(const void* value, size_t size) {
+  set_has_imagedata();
+  if (imagedata_ == &::google::protobuf::internal::kEmptyString) {
+    imagedata_ = new ::std::string;
+  }
+  imagedata_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemImage::mutable_imagedata() {
+  set_has_imagedata();
+  if (imagedata_ == &::google::protobuf::internal::kEmptyString) {
+    imagedata_ = new ::std::string;
+  }
+  return imagedata_;
+}
+inline ::std::string* SchemaItemImage::release_imagedata() {
+  clear_has_imagedata();
+  if (imagedata_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = imagedata_;
+    imagedata_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemImage::set_allocated_imagedata(::std::string* imagedata) {
+  if (imagedata_ != &::google::protobuf::internal::kEmptyString) {
+    delete imagedata_;
+  }
+  if (imagedata) {
+    set_has_imagedata();
+    imagedata_ = imagedata;
+  } else {
+    clear_has_imagedata();
+    imagedata_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------
