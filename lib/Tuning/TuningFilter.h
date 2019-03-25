@@ -18,10 +18,10 @@ struct TuningCounters
 	int discreteCounter = 0;
 };
 
-class TuningFilterValue
+class TuningFilterSignal
 {
 public:
-	TuningFilterValue();
+	TuningFilterSignal();
 
 	QString appSignalId() const;
 	void setAppSignalId(const QString& value);
@@ -98,22 +98,22 @@ public:
 	void removeNotExistingSignals(const std::vector<Hash>& signalHashes, int& removedCounter);
 
 	const std::vector<Hash>& equipmentHashes() const;
-	void setEquipmentHashes(std::vector<Hash> value);
+	void setEquipmentHashes(std::vector<Hash> signalValue);
 
 	const std::vector<Hash>& signalsHashes() const;
-	void setSignalsHashes(std::vector<Hash> value);
+	void setSignalsHashes(std::vector<Hash> signalValue);
 
 public:
 	// Properties
 	//
 	QString ID() const;
-	void setID(const QString& value);
+	void setID(const QString& signalValue);
 
 	QString customID() const;
-	void setCustomID(const QString& value);
+	void setCustomID(const QString& signalValue);
 
 	QString caption() const;
-	void setCaption(const QString& value);
+	void setCaption(const QString& signalValue);
 
 	bool isSourceProject() const;
 	bool isSourceEquipment() const;
@@ -121,93 +121,93 @@ public:
 	bool isSourceUser() const;
 
 	Source source() const;
-	void setSource(Source value);
+	void setSource(Source signalValue);
 
 	InterfaceType interfaceType() const;
-	void setInterfaceType(InterfaceType value);
+	void setInterfaceType(InterfaceType signalValue);
 
 	SignalType signalType() const;
-	void setSignalType(SignalType value);
+	void setSignalType(SignalType signalValue);
 
 	QColor backColor() const;
-	void setBackColor(const QColor& value);
+	void setBackColor(const QColor& signalValue);
 
 	QColor textColor() const;
-	void setTextColor(const QColor& value);
+	void setTextColor(const QColor& signalValue);
 
 	QColor backSelectedColor() const;
-	void setBackSelectedColor(const QColor& value);
+	void setBackSelectedColor(const QColor& signalValue);
 
 	QColor textSelectedColor() const;
-	void setTextSelectedColor(const QColor& value);
+	void setTextSelectedColor(const QColor& signalValue);
 
 	bool hasDiscreteCounter() const;
-	void setHasDiscreteCounter(bool value);
+	void setHasDiscreteCounter(bool signalValue);
 
 	// Filters
 	//
 	QString customAppSignalIDMask() const;
-	void setCustomAppSignalIDMask(const QString& value);
+	void setCustomAppSignalIDMask(const QString& signalValue);
 
 	QString equipmentIDMask() const;
-	void setEquipmentIDMask(const QString& value);
+	void setEquipmentIDMask(const QString& signalValue);
 
 	QString appSignalIDMask() const;
-	void setAppSignalIDMask(const QString& value);
+	void setAppSignalIDMask(const QString& signalValue);
 
-	// Values
+	// FilterSignals
 	//
-	std::vector <TuningFilterValue> getValues() const;
-	void setValues(const std::vector <TuningFilterValue>& getValues);
+	std::vector <TuningFilterSignal> getFilterSignals() const;
 
-	int valuesCount() const;
-	bool valueExists(Hash hash) const;
+	int filterSignalsCount() const;
+	bool filterSignalExists(Hash hash) const;
 
-	void addValue(const TuningFilterValue& value);
-	void removeValue(Hash hash);
+	void addFilterSignal(const TuningFilterSignal& fs);
+	bool removeFilterSignal(Hash hash);
 
-	bool value(Hash hash, TuningFilterValue& value);
-	void setValue(const TuningFilterValue& value);
+	bool filterSignal(Hash hash, TuningFilterSignal& fs);
 
+	// Counters
+	//
 	TuningCounters counters() const;
-	void setCounters(TuningCounters value);
+	void setCounters(TuningCounters signalValue);
 
 	// Tab appearance
 	//
 	int valuesColumnCount() const;
-	void setValuesColumnCount(int value);
+	void setValuesColumnCount(int signalValue);
 
 	std::vector<QString> valueColumnsAppSignalIdSuffixes() const;
 
 	bool columnCustomAppId() const;
-	void setColumnCustomAppId(bool value);
+	void setColumnCustomAppId(bool signalValue);
 
 	bool columnAppId() const;
-	void setColumnAppId(bool value);
+	void setColumnAppId(bool signalValue);
 
 	bool columnEquipmentId() const;
-	void setColumnEquipmentId(bool value);
+	void setColumnEquipmentId(bool signalValue);
 
 	bool columnCaption() const;
-	void setColumnCaption(bool value);
+	void setColumnCaption(bool signalValue);
 
 	bool columnUnits() const;
-	void setColumnUnits(bool value);
+	void setColumnUnits(bool signalValue);
 
 	bool columnType() const;
-	void setColumnType(bool value);
+	void setColumnType(bool signalValue);
 
 	bool columnLimits() const;
-	void setColumnLimits(bool value);
+	void setColumnLimits(bool signalValue);
 
 	bool columnDefault() const;
-	void setColumnDefault(bool value);
+	void setColumnDefault(bool signalValue);
 
 	bool columnValid() const;
-	void setColumnValid(bool value);
+	void setColumnValid(bool signalValue);
 
 	bool columnOutOfRange() const;
-	void setColumnOutOfRange(bool value);
+	void setColumnOutOfRange(bool signalValue);
 
 
 public:
@@ -300,8 +300,7 @@ private:
 
 	// Values
 	//
-	std::vector<Hash> m_signalValuesVec;
-	std::map <Hash, TuningFilterValue> m_signalValuesMap;
+	std::map <Hash, TuningFilterSignal> m_signalValuesMap;
 
 	// Parent and child
 	//
@@ -369,6 +368,6 @@ protected:
 
 Q_DECLARE_METATYPE(std::shared_ptr<TuningFilter>)
 
-Q_DECLARE_METATYPE(TuningFilterValue)
+Q_DECLARE_METATYPE(TuningFilterSignal)
 
 

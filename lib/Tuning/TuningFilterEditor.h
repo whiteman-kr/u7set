@@ -7,13 +7,13 @@
 #include "TuningModel.h"
 #include "../lib/PropertyEditor.h"
 
-class DialogChooseTuningSignals : public QDialog
+class ChooseTuningSignalsWidget : public QWidget
 {
 	Q_OBJECT
 
 public:
 
-	DialogChooseTuningSignals(TuningSignalManager* signalStorage, std::shared_ptr<TuningFilter> filter, bool requestValuesEnabled, QWidget* parent);
+	ChooseTuningSignalsWidget(TuningSignalManager* signalStorage, bool requestValuesEnabled, QWidget* parent);
 
 	enum class FilterType
 	{
@@ -33,6 +33,18 @@ public:
 		Discrete
 	};
 
+	enum class Columns
+	{
+		CustomAppSignalID,
+		AppSignalID,
+		Type,
+		Caption,
+		Value
+	};
+
+public:
+	void setFilter(std::shared_ptr<TuningFilter> selectedFilter);
+
 signals:
 	void getCurrentSignalValue(Hash appSignalHash, TuningValue* value, bool* ok); 	// Qt::DirectConnection!
 
@@ -40,19 +52,13 @@ private:
 
 	void fillBaseSignalsList();
 
-	void fillFilterValuesList();
-
-	void accept() override;
-
-	void setFilterValueItemText(QTreeWidgetItem* item, const TuningFilterValue& value);
+	void setFilterValueItemText(QTreeWidgetItem* item, const TuningFilterSignal& value);
 
 private:
 
 	TuningSignalManager* m_signalManager = nullptr;
 
 	std::shared_ptr<TuningFilter> m_filter;
-
-	std::vector<TuningFilterValue> m_filterValues;
 
 	// Left side
 
@@ -90,9 +96,6 @@ private:
 	QAction* m_setCurrentAction = nullptr;
 
 	//
-
-	QPushButton* m_buttonOk = nullptr;
-	QPushButton* m_buttonCancel = nullptr;
 
 private slots:
 
@@ -138,12 +141,12 @@ public:
 								bool typeButtonEnabled,
 								bool typeTabEnabled,
 								TuningFilter::Source source,
-								int propertyEditorSplitterPos,
-								const QByteArray& dialogChooseSignalGeometry);
+								QByteArray mainSplitterState,
+								int propertyEditorSplitterPos);
 
 	~TuningFilterEditor();
 
-	 void saveUserInterfaceSettings(int* propertyEditorSplitterPos, QByteArray* dialogChooseSignalGeometry);
+	 void saveUserInterfaceSettings(QByteArray* mainSplitterState, int* propertyEditorSplitterPos);
 
 
 signals:
@@ -170,15 +173,13 @@ private slots:
 
 	void presetPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
 
-	void on_m_presetsSignals_clicked();
-
 	void slot_getCurrentSignalValue(Hash appSignalHash, TuningValue* value, bool* ok);
 
 private:
 
 	void addPreset(TuningFilter::InterfaceType interfaceType);
 
-	void initUserInterface();
+	void initUserInterface(QByteArray mainSplitterState, int propertyEditorSplitterPos);
 
 	void addChildTreeObjects(const std::shared_ptr<TuningFilter>& filter, QTreeWidgetItem* parent);
 
@@ -197,9 +198,12 @@ private:
 	QPushButton* m_applyFilter = nullptr;
 
 	//
+	QSplitter* m_hSplitter = nullptr;
 
 	QTreeWidget* m_presetsTree = nullptr;
 	ExtWidgets::PropertyEditor* m_propertyEditor = nullptr;
+
+	ChooseTuningSignalsWidget* m_chooseTuningSignalsWidget = nullptr;
 
 	//
 
@@ -208,8 +212,6 @@ private:
 
 	QPushButton* m_copyPreset = nullptr;
 	QPushButton* m_pastePreset = nullptr;
-
-	QPushButton* m_presetSignals = nullptr;
 
 	QAction* m_addPresetAction = nullptr;
 	QAction* m_removePresetAction = nullptr;
@@ -234,7 +236,6 @@ private:
     //
 	QByteArray m_dialogChooseSignalGeometry;
 
-    int m_propertyEditorSplitterPos = -1;
 	bool m_readOnly = false;
 	bool m_requestValuesEnabled = false;
 

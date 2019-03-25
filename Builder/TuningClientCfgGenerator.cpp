@@ -759,12 +759,12 @@ namespace Builder
 						continue;
 					}
 
-					TuningFilterValue ofv;
+					TuningFilterSignal ofv;
 					ofv.setAppSignalId(appSignalID);
-					ofTs->addValue(ofv);
+					ofTs->addFilterSignal(ofv);
 				}
 
-				if (ofTs->valuesCount() == 0)
+				if (ofTs->filterSignalsCount() == 0)
 				{
 					// Do not add empty filters
 					//

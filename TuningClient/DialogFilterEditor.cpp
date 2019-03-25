@@ -21,8 +21,9 @@ DialogFilterEditor::DialogFilterEditor(TuningSignalManager* tuningSignalManager,
 												  false,		/*typeButtonEnabled*/
 												  false,		/*typeTabEnabled*/
 												  TuningFilter::Source::User,
-												  theSettings.m_tuningFiltersPropertyEditorSplitterPos,
-												  theSettings.m_tuningFiltersDialogChooseSignalGeometry);
+												  theSettings.m_tuningFiltersSplitterPosition,
+												  theSettings.m_tuningFiltersPropertyEditorSplitterPos
+												  );
 
 	connect(m_tuningFilterEditor, &TuningFilterEditor::getCurrentSignalValue, this, &DialogFilterEditor::onGetCurrentSignalValue, Qt::DirectConnection);
 
@@ -57,7 +58,7 @@ DialogFilterEditor::~DialogFilterEditor()
     theSettings.m_presetEditorPos = pos();
     theSettings.m_presetEditorGeometry = saveGeometry();
 
-	m_tuningFilterEditor->saveUserInterfaceSettings(&theSettings.m_tuningFiltersPropertyEditorSplitterPos, &theSettings.m_tuningFiltersDialogChooseSignalGeometry);
+	m_tuningFilterEditor->saveUserInterfaceSettings(&theSettings.m_tuningFiltersSplitterPosition, &theSettings.m_tuningFiltersPropertyEditorSplitterPos);
 
 }
 
