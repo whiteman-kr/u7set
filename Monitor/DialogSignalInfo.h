@@ -34,14 +34,6 @@ public:
 
 	static bool showDialog(QString appSignalId, QWidget* parent);
 
-public:
-	enum class ViewType
-	{
-		Dec, Hex, Bin16, Bin32, Bin64, Exp, Count
-	};
-
-	Q_ENUM(ViewType)
-
 private slots:
 	void prepareContextMenu(const QPoint& pos);
 
@@ -66,7 +58,7 @@ private:
 
 	int m_precision = 0;
 
-	ViewType m_viewType = ViewType::Dec;
+	E::ValueViewType m_viewType = E::ValueViewType::Dec;
 
 	int m_currentFontSize = 20;
 };

@@ -388,6 +388,16 @@ public:
 	};
 	Q_ENUM(UalItemType)
 
+
+	// For Monitor
+	//
+	enum class ValueViewType
+	{
+		Dec, Hex, Bin16, Bin32, Bin64, Exp, Count
+	};
+
+	Q_ENUM(ValueViewType)
+
 public:
 	// Convert enum value (not index) to QString
 	//

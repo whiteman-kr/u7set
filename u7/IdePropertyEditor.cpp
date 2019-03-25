@@ -420,7 +420,7 @@ IdeTuningFiltersEditor::~IdeTuningFiltersEditor()
 {
 	if (m_tuningFilterEditor != nullptr)
 	{
-		m_tuningFilterEditor->saveUserInterfaceSettings(&theSettings.m_tuningFiltersPropertyEditorSplitterPos, &theSettings.m_tuningFiltersDialogChooseSignalGeometry);
+		m_tuningFilterEditor->saveUserInterfaceSettings(&theSettings.m_tuningFiltersSplitterPosition, &theSettings.m_tuningFiltersPropertyEditorSplitterPos);
 	}
 }
 
@@ -455,8 +455,9 @@ void IdeTuningFiltersEditor::setText(const QString& text)
 												  true,		/*typeButtonEnabled*/
 												  true,		/*typeTabEnabled*/
 												  TuningFilter::Source::Project,
-												  theSettings.m_tuningFiltersPropertyEditorSplitterPos,
-												  theSettings.m_tuningFiltersDialogChooseSignalGeometry);
+												  theSettings.m_tuningFiltersSplitterPosition,
+												  theSettings.m_tuningFiltersPropertyEditorSplitterPos
+												  );
 
     QHBoxLayout* l = new QHBoxLayout(this);
     l->setContentsMargins(0, 0, 0, 0);

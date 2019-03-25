@@ -173,7 +173,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 	if (role == Qt::ToolTipRole)
 	{
 		updateCachedState(row);		// m_cachedSignalState -- state for row
-		AppSignalParam signalParam;
+		ArchiveSignalParam signalParam;
 
 		auto sit = m_appSignals.find(m_cachedSignalState.hash());
 		if (sit == m_appSignals.end())
@@ -236,7 +236,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 	return QVariant();
 }
 
-QString ArchiveModel::getValueString(const AppSignalState& state, const AppSignalParam& signalParam) const
+QString ArchiveModel::getValueString(const AppSignalState& state, const ArchiveSignalParam& signalParam) const
 {
 	E::SignalType signalType = signalParam.type();
 	QString result;
@@ -248,11 +248,11 @@ QString ArchiveModel::getValueString(const AppSignalState& state, const AppSigna
 		{
 			result = QString("%1 (%2)")
 						.arg(nonValidString)
-						.arg(QString::number(state.value()));		// <<<<----- Subject to change in RPCT-2197 (MATS Archive precision mismatch)
+						.arg(AppSignalState::toString(state.value(), signalParam.viewType, signalParam.precision));
 		}
 		else
 		{
-			result = QString::number(state.value());				// <<<<----- Subject to change in RPCT-2197 (MATS Archive precision mismatch)
+			result = AppSignalState::toString(state.value(), signalParam.viewType, signalParam.precision);
 		}
 		break;
 	case E::SignalType::Discrete:
@@ -292,12 +292,23 @@ void ArchiveModel::updateCachedState(int row) const
 
 void ArchiveModel::setParams(const std::vector<AppSignalParam>& appSignals, E::TimeType timeType)
 {
-	m_appSignals.clear();
+	std::map<Hash, ArchiveSignalParam> oldAppSignals;
+	oldAppSignals.swap(m_appSignals);
 
 	for (const AppSignalParam& asp : appSignals)
 	{
 		Hash h = ::calcHash(asp.appSignalId());
-		m_appSignals[h] = asp;
+
+		if (auto oldSignalIt = oldAppSignals.find(h);
+			oldSignalIt != oldAppSignals.end())
+		{
+			auto nh = oldAppSignals.extract(oldSignalIt);
+			m_appSignals.insert(std::move(nh));
+		}
+		else
+		{
+			m_appSignals.emplace(h, asp);
+		}
 	}
 
 	m_timeType = timeType;
@@ -337,17 +348,48 @@ void ArchiveModel::clear()
 	return;
 }
 
-std::vector<AppSignalParam> ArchiveModel::appSignals()
+std::vector<ArchiveSignalParam> ArchiveModel::appSignals()
 {
-	std::vector<AppSignalParam> result;
+	std::vector<ArchiveSignalParam> result;
 	result.reserve(m_appSignals.size());
 
-	for (const std::pair<Hash, AppSignalParam>& p : m_appSignals)
+	for (const std::pair<Hash, ArchiveSignalParam>& p : m_appSignals)
 	{
 		result.push_back(p.second);
 	}
 
 	return result;
+}
+
+ArchiveSignalParam ArchiveModel::signalParam(int row) const
+{
+	AppSignalState signalState = m_archive.state(row);
+
+	if (auto it = m_appSignals.find(signalState.hash());
+		 it == m_appSignals.end())
+	{
+		return {};
+	}
+	else
+	{
+		return it->second;
+	}
+}
+
+bool ArchiveModel::setShowParams(Hash signalHash, E::ValueViewType viewType, int precision)
+{
+	if (auto it = m_appSignals.find(signalHash);
+		 it == m_appSignals.end())
+	{
+		return false;
+	}
+	else
+	{
+		it->second.viewType = viewType;
+		it->second.precision = precision;
+
+		return true;
+	}
 }
 
 //
@@ -399,9 +441,102 @@ void ArchiveView::contextMenuEvent(QContextMenuEvent* event)
 
 	QMenu menu(this);
 
-	// Add action to show signal info dialog
+	// SignalViewParams
 	//
-	std::vector<AppSignalParam> apppSignals = archiveModel->appSignals();
+	if (QModelIndexList selectedIndexes = selectionModel()->selectedIndexes();
+		selectedIndexes.isEmpty() == false)
+	{
+		std::set<int> selectedRows;
+
+		for (const QModelIndex& mi : selectedIndexes)
+		{
+			selectedRows.insert(mi.row());
+		}
+
+		if (selectedRows.size() == 1)
+		{
+			// Show View sub menu only for one row
+			//
+			ArchiveSignalParam signalParam = archiveModel->signalParam(*selectedRows.begin());
+
+			if (signalParam.isAnalog() == true)
+			{
+				QMenu* viewMenu = menu.addMenu(QString("View %1").arg(signalParam.customSignalId()));
+				QList<QAction*> actions;
+
+				// Precision
+				// Copy/Paste from DialogSignalInfo::ContextMenu
+				//
+				QString strPrecision = ".";
+
+				QActionGroup *precisionGroup = new QActionGroup(this);
+				precisionGroup->setExclusive(true);
+
+				for (int i = 0; i < 10; i++)
+				{
+					QAction* a = new QAction(strPrecision, &menu);
+
+					auto f = [&signalParam, i, archiveModel]() -> void
+							 {
+								archiveModel->setShowParams(signalParam.hash(), signalParam.viewType, i);
+							 };
+
+					connect(a, &QAction::triggered, this, f);
+
+					a->setCheckable(true);
+
+					if (i == signalParam.precision)
+					{
+						a->setChecked(true);
+					}
+
+					precisionGroup->addAction(a);
+
+					strPrecision += "0";
+				}
+
+				viewMenu->addActions(precisionGroup->actions());
+
+				//
+				QAction* separator = new QAction(&menu);
+				separator->setSeparator(true);
+				viewMenu->addAction(separator);
+
+				// View type
+				//
+				QActionGroup *viewGroup = new QActionGroup(this);
+				viewGroup->setExclusive(true);
+
+				for (int i = 0; i < static_cast<int>(E::ValueViewType::Count); i++)
+				{
+					QAction* a = new QAction(E::valueToString<E::ValueViewType>(i), &menu);
+
+					auto f = [&signalParam, i, archiveModel]() -> void
+							 {
+								archiveModel->setShowParams(signalParam.hash(), static_cast<E::ValueViewType>(i), signalParam.precision);
+							 };
+
+					connect(a, &QAction::triggered, this, f);
+
+					a->setCheckable(true);
+
+					if (i == static_cast<int>(signalParam.viewType))
+					{
+						a->setChecked(true);
+					}
+
+					viewGroup->addAction(a);
+				}
+
+				viewMenu->addActions(viewGroup->actions());
+			}
+		}
+	}
+
+
+	// Add action to show "SignalInfoDialog"
+	//
+	std::vector<ArchiveSignalParam> apppSignals = archiveModel->appSignals();
 
 	if (apppSignals.empty() == false)
 	{
@@ -420,7 +555,7 @@ void ArchiveView::contextMenuEvent(QContextMenuEvent* event)
 		menu.addSeparator();
 	}
 
-	// Add actions to remove specific signal from archive model
+	// Add actions to "Remove" specific signal from archive model
 	//
 	if (apppSignals.empty() == false)
 	{
