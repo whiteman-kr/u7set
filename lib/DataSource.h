@@ -191,7 +191,7 @@ public:
 	void setServiceID(const QString& serviceID) { m_serviceID = serviceID; }
 
 	quint64 ID() const { return m_id; }
-	void setID(quint32 id) { m_id = id; }
+	void setID(quint64 id) { m_id = id; }
 
 	//
 

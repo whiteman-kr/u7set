@@ -78,7 +78,9 @@ SOURCES += MainWindow.cpp \
     ../AppDataService/RtTrendsServer.cpp \
 	../lib/AppSignalStateFlags.cpp \
     ../lib/WidgetUtils.cpp \
-    ../lib/SimpleMutex.cpp
+    ../lib/SimpleMutex.cpp \
+    ../lib/SimpleAppSignalState.cpp \
+    ../AppDataService/DynamicAppSignalState.cpp
 
 HEADERS  += MainWindow.h \
     ScanOptionsWidget.h \
@@ -131,7 +133,9 @@ HEADERS  += MainWindow.h \
     ../lib/SignalProperties.h \
     ../AppDataService/RtTrendsServer.h \
     ../lib/AppSignalStateFlags.h \
-    ../lib/SimpleMutex.h
+    ../lib/SimpleMutex.h \
+    ../lib/SimpleAppSignalState.h \
+    ../AppDataService/DynamicAppSignalState.h
 
 include(../qtservice/src/qtservice.pri)
 

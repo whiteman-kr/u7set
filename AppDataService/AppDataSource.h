@@ -2,175 +2,7 @@
 
 #include "../lib/Signal.h"
 #include "../lib/DataSource.h"
-
-
-class SimpleAppSignalStatesQueue : public FastThreadSafeQueue<SimpleAppSignalState>
-{
-public:
-	SimpleAppSignalStatesQueue(int queueSize);
-
-	void pushAutoPoint(SimpleAppSignalState state, const QThread* thread);
-};
-
-typedef std::shared_ptr<SimpleAppSignalStatesQueue> SimpleAppSignalStatesQueueShared;
-
-
-namespace RtTrends
-{
-	class Session;
-}
-
-struct AppSignalStateEx
-{
-public:
-	static const int NO_INDEX = -1;
-	static const int NO_AUTOARCHIVING_GROUP = -1;
-	static const int NOT_INITIALIZED_AUTOARCHIVING_GROUP = -2;
-
-public:
-	AppSignalStateEx();
-
-	void setSignalParams(int index, Signal* signal);
-
-	bool setState(const Times& time,
-				  quint16 packetNo,
-				  quint32 validity,
-				  double value,
-				  int autoArchivingGroup,
-				  SimpleAppSignalStatesQueue& statesQueue,
-				  const QThread* thread);
-
-	void invalidate() { m_current[0].flags.all = m_current[1].flags.all = 0; }
-
-	Hash hash() const;
-
-	bool archive() const { return m_archive; }
-
-	QString appSignalID() const;
-
-	friend class AppSignalStates;
-
-	const SimpleAppSignalState& current() const { return m_current[m_curStateIndex.load()]; }
-//	const SimpleAppSignalState& stored() const { return m_stored; }
-
-	int autoArchiningGroup() const { return m_autoArchivingGroup; }
-	void setAutoArchivingGroup(int archivingGroup);
-
-	// Real time trends support
-	//
-	void appendRtSession(Hash signalHash,
-						const QThread* rtProcessingOwner,
-						std::shared_ptr<RtTrends::Session> newSession,
-						int samplePeriodCounter);
-
-	void removeRtSession(Hash signalHash,
-						const QThread* rtProcessingOwner,
-						std::shared_ptr<RtTrends::Session> sessionToRemove);
-
-	void setRtSessionSamplePeriodCounter(Hash signalHash,
-						const QThread* rtProcessingOwner,
-						int sessionID,
-						int newSamplePeriodCounter);
-
-	void rtSessionsProcessing(const SimpleAppSignalState& state, bool pushAnyway);
-
-	const Signal* signal() const { return m_signal; }
-
-private:
-
-	struct RtSession
-	{
-		std::shared_ptr<RtTrends::Session> session;
-		int sessionID = 0;
-		int samplePeriodCounter = 0;
-		int sampleCounter = 0;
-	};
-
-private:
-	void setNewCurState(const SimpleAppSignalState& newCurState);
-	void logState(const SimpleAppSignalState& state);
-
-	// Real time trends support
-	//
-	void takeRtProcessingOwnership(const QThread* newProcessingOwner);
-	void releaseRtProcessingOwnership(const QThread* currentProcessingOwner);
-
-private:
-	SimpleAppSignalState m_current[2];
-	double m_coarseStoredValue;
-	double m_fineStoredValue;
-
-	std::atomic<int> m_curStateIndex = {0};
-
-	// paramters needed to update state
-	//
-	bool m_prevStateIsStored = false;
-	bool m_isDiscreteSignal = false;
-
-	bool m_archive = false;
-
-	bool m_adaptiveAperture = false;
-
-	double m_coarseAperture = 0;
-	double m_fineAperture = 0;
-
-	double m_lowLimit = 0;
-	double m_highLimit = 0;
-
-	//
-
-	double m_absCoarseAperture = 0;
-	double m_absFineAperture = 0;
-
-	int m_autoArchivingGroup = NOT_INITIALIZED_AUTOARCHIVING_GROUP;
-
-	Signal* m_signal = nullptr;
-	Hash m_signalHash;
-
-	int m_index = 0;
-
-	// Real time trends support
-
-	bool m_hasRtSessions = false;		// this is not thread-safe but fast-checked flag
-										// if m_hasRtQueues == true, then slow thread-safe checking will run
-
-	std::atomic<const QThread*> m_rtProcessingOwner = { nullptr };
-
-	QHash<int, RtSession> m_rtSessions;
-};
-
-
-class AppSignalStates
-{
-public:
-	~AppSignalStates();
-
-	void clear();
-
-	void setSize(int size);
-
-	int size() const { return m_size; }
-
-	AppSignalStateEx* operator [] (int index);
-
-	AppSignalStateEx* getStateByHash(Hash signalHash);
-
-	void buidlHash2State();
-
-	bool getCurrentState(Hash hash, AppSignalState& state) const;
-//	bool getStoredState(Hash hash, AppSignalState& state) const;
-
-	void setAutoArchivingGroups(int autoArchivingGroupsCount);
-
-private:
-	QMutex m_allMutex;
-
-	AppSignalStateEx* m_appSignalState = nullptr;
-	int m_size = 0;
-
-	QHash<Hash, AppSignalStateEx*> m_hash2State;
-};
-
+#include "DynamicAppSignalState.h"
 
 class AppSignals : public HashedVector<QString, Signal*>
 {
@@ -201,7 +33,7 @@ private:
 
 		int dataSize = 1;
 
-		int index = AppSignalStateEx::NO_INDEX;		// index of signal in AppSignals and AppSignalStates
+		int index = DynamicAppSignalState::NO_INDEX;		// index of signal in AppSignals and AppSignalStates
 
 		QString appSignalID;
 
@@ -212,7 +44,7 @@ public:
 	AppDataSource();
 	AppDataSource(const DataSource& dataSource);
 
-	void prepare(const AppSignals& appSignals, AppSignalStates* signalStates, int autoArchivingGroupsCount);
+	void prepare(const AppSignals& appSignals, DynamicAppSignalStates* signalStates, int autoArchivingGroupsCount);
 
 	bool parsePacket();
 
@@ -238,7 +70,7 @@ private:
 	void setSignalStatesQueueMaxSize(int size) { m_signalStatesQueueMaxSize = size; }
 
 private:
-	AppSignalStates* m_signalStates = nullptr;
+	DynamicAppSignalStates* m_signalStates = nullptr;
 
 	AppSignals* m_appSignals = nullptr;
 
@@ -261,7 +93,7 @@ private:
 
 	int m_autoArchivingGroupsCount = 0;
 	qint64 m_lastAutoArchivingTime = 0;
-	int m_lastAutoArchivingGroup = AppSignalStateEx::NOT_INITIALIZED_AUTOARCHIVING_GROUP;
+	int m_lastAutoArchivingGroup = DynamicAppSignalState::NOT_INITIALIZED_AUTOARCHIVING_GROUP;
 };
 
 typedef std::shared_ptr<AppDataSource> AppDataSourceShared;

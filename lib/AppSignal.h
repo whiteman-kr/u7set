@@ -11,6 +11,7 @@
 #include "Times.h"
 #include "Types.h"
 #include "AppSignalStateFlags.h"
+#include "SimpleAppSignalState.h"
 
 struct AppSignalParamMimeType
 {
@@ -22,29 +23,7 @@ namespace Proto
 {
 	class AppSignalState;
 	class AppSignal;
-	class AppSignalSet;
 }
-
-struct SimpleAppSignalState
-{
-	// light version of AppSignalState to use in queues and other AppDataService data structs
-	//
-	Hash hash = 0;					// == calcHash(AppSignalID)
-	Times time;
-	AppSignalStateFlags flags;
-	double value = 0;
-	quint16 packetNo = 0;
-
-	bool isValid() const { return flags.valid == 1; }
-
-	void save(Proto::AppSignalState* protoState);
-	Hash load(const Proto::AppSignalState& protoState);
-
-	void print() const;
-
-	void updateArchivingReasonFlags(const SimpleAppSignalState& prevState);
-};
-
 
 class AppSignalState
 {

@@ -486,7 +486,7 @@ void AppDataServiceWorker::createAndInitSignalStates()
 
 	for(Signal* signal : m_appSignals)
 	{
-		AppSignalStateEx* signalState = m_signalStates[index];
+		DynamicAppSignalState* signalState = m_signalStates[index];
 
 		if (signalState == nullptr)
 		{

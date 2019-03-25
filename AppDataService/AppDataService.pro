@@ -75,7 +75,9 @@ SOURCES += \
     RtTrendsServer.cpp \
     ../lib/ProtoSerialization.cpp \
     ../lib/TuningValue.cpp \
-    ../lib/SimpleMutex.cpp
+    ../lib/SimpleMutex.cpp \
+    ../lib/SimpleAppSignalState.cpp \
+    DynamicAppSignalState.cpp
 
 HEADERS += \
 	Stable.h \
@@ -130,7 +132,9 @@ HEADERS += \
     RtTrendsServer.h \
     ../lib/ProtoSerialization.h \
     ../lib/TuningValue.h \
-    ../lib/SimpleMutex.h
+    ../lib/SimpleMutex.h \
+    ../lib/SimpleAppSignalState.h \
+    DynamicAppSignalState.h
 
 include(../qtservice/src/qtservice.pri)
 

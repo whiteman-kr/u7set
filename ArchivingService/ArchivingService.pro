@@ -79,7 +79,8 @@ SOURCES += \
     ArchFileRecord.cpp \
     ../lib/AppSignalStateFlags.cpp \
     ArchFileBuffer.cpp \
-    ../lib/SimpleMutex.cpp
+    ../lib/SimpleMutex.cpp \
+    ../lib/SimpleAppSignalState.cpp
 
 HEADERS += \
     ../lib/HostAddressPort.h \
@@ -133,7 +134,8 @@ HEADERS += \
     ../lib/AppSignalStateFlags.h \
     ArchFileBuffer.h \
     ../lib/SimpleMutex.h \
-    ../lib/WUtils.h
+    ../lib/WUtils.h \
+    ../lib/SimpleAppSignalState.h
 
 include(../qtservice/src/qtservice.pri)
 

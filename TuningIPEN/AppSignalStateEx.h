@@ -5,10 +5,10 @@
 #include "../lib/AppSignal.h"
 
 
-struct AppSignalStateEx
+struct DynamicAppSignalState
 {
 public:
-	AppSignalStateEx();
+	DynamicAppSignalState();
 
 	void setSignalParams(int index, Signal* signal);
 	bool setState(Times time, quint32 validity, double value, int autoArchivingGroup);
@@ -19,7 +19,7 @@ public:
 
 	QString appSignalID() const;
 
-	friend class AppSignalStates;
+	friend class DynamicAppSignalStates;
 
 	const SimpleAppSignalState& current() const { return m_current; }
 	const SimpleAppSignalState& stored() const { return m_stored; }
@@ -55,18 +55,18 @@ private:
 };
 
 
-class AppSignalStates
+class DynamicAppSignalStates
 {
 private:
 	QMutex m_allMutex;
 
-	AppSignalStateEx* m_appSignalState = nullptr;
+	DynamicAppSignalState* m_appSignalState = nullptr;
 	int m_size = 0;
 
-	QHash<Hash, const AppSignalStateEx*> m_hash2State;
+	QHash<Hash, const DynamicAppSignalState*> m_hash2State;
 
 public:
-	~AppSignalStates();
+	~DynamicAppSignalStates();
 
 	void clear();
 
@@ -74,7 +74,7 @@ public:
 
 	int size() const { return m_size; }
 
-	AppSignalStateEx* operator [] (int index);
+	DynamicAppSignalState* operator [] (int index);
 
 	void buidlHash2State();
 
