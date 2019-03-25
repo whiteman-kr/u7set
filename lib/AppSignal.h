@@ -41,6 +41,8 @@ struct SimpleAppSignalState
 	Hash load(const Proto::AppSignalState& protoState);
 
 	void print() const;
+
+	void updateArchivingReasonFlags(const SimpleAppSignalState& prevState);
 };
 
 

@@ -80,22 +80,17 @@ bool AppSignalStateEx::setState(const Times& time,
 	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
 	SimpleAppSignalState curState = prevState;
 
-	// check time to set !!!!
-	//
-
-	// curState's time and value should be updated always
+	// curState's fields should be updated always
 	//
 	curState.time = time;
 	curState.value = value;
 	curState.packetNo = packetNo;
 
-	curState.flags.clearReasonsFlags();
+	//
 
-	if (validity == 0)
+	if (validity == AppSignalState::INVALID)
 	{
-		// new state is invalid
-		//
-		if (prevState.flags.valid == 1)
+		if (prevState.flags.valid == AppSignalState::VALID)
 		{
 			// prevState is valid and not stored, archive it
 			//
@@ -110,8 +105,7 @@ bool AppSignalStateEx::setState(const Times& time,
 
 			//			logState(prevState);
 
-			curState.flags.valid = 0;
-			curState.flags.validityChange = 1;
+			curState.flags.valid = AppSignalState::INVALID;
 		}
 		else
 		{
@@ -122,14 +116,14 @@ bool AppSignalStateEx::setState(const Times& time,
 	{
 		// new state is valid
 		//
-		if (prevState.flags.valid == 0)
+		if (prevState.flags.valid == AppSignalState::INVALID)
 		{
 			// prevState is invalid, archive invalid autopoint
 			//
 			SimpleAppSignalState tmpState = curState;
 
 			tmpState.time += -1;		// current time offset back on 1 ms
-			tmpState.flags.valid = 0;
+			tmpState.flags.valid = AppSignalState::INVALID;
 			tmpState.value = 0;
 
 			statesQueue.pushAutoPoint(tmpState, thread);
@@ -138,8 +132,7 @@ bool AppSignalStateEx::setState(const Times& time,
 
 //			logState(autoPointState);
 
-			curState.flags.valid = 1;
-			curState.flags.validityChange = 1;
+			curState.flags.valid = AppSignalState::VALID;
 		}
 		else
 		{
@@ -168,6 +161,10 @@ bool AppSignalStateEx::setState(const Times& time,
 							curState.flags.fineAperture = 1;
 						}
 					}
+					else
+					{
+						m_fineStoredValue = curState.value;
+					}
 
 					if (m_coarseStoredValue != 0)
 					{
@@ -178,19 +175,26 @@ bool AppSignalStateEx::setState(const Times& time,
 							curState.flags.coarseAperture = 1;
 						}
 					}
+					else
+					{
+						m_coarseStoredValue = curState.value;
+					}
 				}
 				else
 				{
-					if (fabs(m_fineStoredValue - value) > m_absFineAperture)
+					if (fabs(m_fineStoredValue - curState.value) > m_absFineAperture)
 					{
 						curState.flags.fineAperture = 1;
 					}
 
-					if (fabs(m_coarseStoredValue - value) > m_absCoarseAperture)
+					if (fabs(m_coarseStoredValue - curState.value) > m_absCoarseAperture)
 					{
 						curState.flags.coarseAperture = 1;
 					}
 				}
+
+				curState.flags.aboveHighLimit = (curState.value > m_signal->highEngeneeringUnits() ? 1 : 0);
+				curState.flags.belowLowLimit = (curState.valuee < m_signal->lowEngeneeringUnits() ? 1 : 0);
 			}
 		}
 
@@ -199,9 +203,9 @@ bool AppSignalStateEx::setState(const Times& time,
 	if (m_autoArchivingGroup == autoArchivingGroup)
 	{
 		curState.flags.autoPoint = 1;
-
-//		qDebug() << "Auto " << m_signal->appSignalID();
 	}
+
+	curState.updateFlags(prevState);
 
 	bool hasArchivingReason = curState.flags.hasArchivingReason();
 
@@ -221,8 +225,6 @@ bool AppSignalStateEx::setState(const Times& time,
 		}
 
 		m_prevStateIsStored = true;
-
-//		logState(m_stored);
 	}
 	else
 	{
@@ -736,7 +738,7 @@ bool AppDataSource::parsePacket()
 		if (dataReceivingTimeout == true)
 		{
 			value = signalState->current().value;
-			validity = 0;
+			validity = validity = AppSignalState::INVALID;
 		}
 		else
 		{
@@ -748,12 +750,19 @@ bool AppDataSource::parsePacket()
 				continue;
 			}
 
-			result = getValidity(rupData, rupDataSize, parseInfo, validity);
-
-			if (result == false)
+			if (parseInfo.validityAddr.offset() != BAD_ADDRESS)
 			{
-				m_validityParsingErrorCount++;
-				continue;
+				result = getValidity(rupData, rupDataSize, parseInfo, validity);
+
+				if (result == false)
+				{
+					m_validityParsingErrorCount++;
+					continue;
+				}
+			}
+			else
+			{
+				validity = AppSignalState::VALID;
 			}
 		}
 
@@ -951,11 +960,7 @@ bool AppDataSource::getValidity(const char* rupData, int rupDataSize, const Sign
 	//
 	int validityOffset = parseInfo.validityAddr.offset();
 
-	if (validityOffset == BAD_ADDRESS)
-	{
-		validity = AppSignalState::VALID;				// no validity flags in reg buffer
-		return true;
-	}
+	assert(validityOffset != BAD_ADDRESS);
 
 	validityOffset *= 2;					// offset in Words => offset in Bytes
 
