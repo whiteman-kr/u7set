@@ -1277,19 +1277,25 @@ bool TuningFilter::isButton() const
 	return interfaceType() == InterfaceType::Button;
 }
 
-void TuningFilter::addTopChild(const std::shared_ptr<TuningFilter>& child)
-{
-	child->m_parentFilter = this;
-	m_childFilters.insert(m_childFilters.begin(), child);
-}
-
 void TuningFilter::addChild(const std::shared_ptr<TuningFilter>& child)
 {
 	child->m_parentFilter = this;
 	m_childFilters.push_back(child);
 }
 
-void TuningFilter::removeChild(const std::shared_ptr<TuningFilter>& child)
+void TuningFilter::insertChild(int index, const std::shared_ptr<TuningFilter>& child)
+{
+	if (index < 0 || index > childFiltersCount())
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	child->m_parentFilter = this;
+	m_childFilters.insert(m_childFilters.begin() + index, child);
+}
+
+	void TuningFilter::removeChild(const std::shared_ptr<TuningFilter>& child)
 {
 	bool found = false;
 
@@ -1830,7 +1836,7 @@ void TuningFilterStorage::add(std::shared_ptr<TuningFilter> filter, bool moveToT
 {
 	if (moveToTop == true)
 	{
-		m_root->addTopChild(filter);
+		m_root->insertChild(0, filter);
 	}
 	else
 	{

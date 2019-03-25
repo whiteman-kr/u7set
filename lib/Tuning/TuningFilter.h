@@ -222,8 +222,8 @@ public:
 	bool isTab() const;
 	bool isButton() const;
 
-	void addTopChild(const std::shared_ptr<TuningFilter>& child);
 	void addChild(const std::shared_ptr<TuningFilter>& child);
+	void insertChild(int index, const std::shared_ptr<TuningFilter>& child);
 
 	void removeChild(const std::shared_ptr<TuningFilter>& child);
 	bool removeChild(const QString& ID);
