@@ -1884,7 +1884,8 @@ void SchemaFileViewEx::selectionChanged(const QItemSelection& selected, const QI
 
 		// hasCheckInPossibility
 		//
-		if (file->state() == VcsState::CheckedOut && file->userId() == currentUserId)
+		if (file->state() == VcsState::CheckedOut &&
+			(file->userId() == currentUserId || currentUserIsAdmin == true))
 		{
 			hasCheckInPossibility = true;
 		}
