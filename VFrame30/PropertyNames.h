@@ -140,6 +140,7 @@ namespace VFrame30
 		static const QString scriptsCategory;
 		static const QString apertureCategory;
 		static const QString constCategory;
+		static const QString imageCategory;
 
 		static const QString widgetPropStyleSheet;
 		static const QString widgetPropToolTip;

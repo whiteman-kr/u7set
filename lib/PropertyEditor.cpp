@@ -900,7 +900,7 @@ namespace ExtWidgets
 
 		if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog)
 		{
-			QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"), QString(), m_property->validator());
+			QString fileName = QFileDialog::getOpenFileName(this->parentWidget(), tr("Select File"), QString(), m_property->validator());
 			if (fileName.isEmpty() == true)
 			{
 				return;

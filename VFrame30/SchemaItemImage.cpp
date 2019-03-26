@@ -4,6 +4,7 @@
 #include "DrawParam.h"
 #include "QPainter"
 
+
 namespace VFrame30
 {
 	SchemaItemImage::SchemaItemImage(void) :
@@ -16,16 +17,24 @@ namespace VFrame30
 
 	SchemaItemImage::SchemaItemImage(SchemaUnit unit)
 	{
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::allowScale, PropertyNames::appearanceCategory, true, SchemaItemImage::allowScale, SchemaItemImage::setAllowScale);
+		Property* p;
+
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::keepAspectRatio, PropertyNames::appearanceCategory, true, SchemaItemImage::keepAspectRatio, SchemaItemImage::setKeepAspectRatio);
 
-		ADD_PROPERTY_GETTER_SETTER(QImage, PropertyNames::image, false, SchemaItemImage::image, SchemaItemImage::setImage);
-		//ADD_PROPERTY_GETTER_SETTER(QByteArray, PropertyNames::svg, false, SchemaItemImage::svgData, SchemaItemImage::setSvg);
+		p = ADD_PROPERTY_GET_SET_CAT(QImage, PropertyNames::image, PropertyNames::imageCategory, true, SchemaItemImage::image, SchemaItemImage::setImage);
+		p->setSpecificEditor(E::PropertySpecificEditor::LoadFileDialog);
+		p->setValidator(QStringLiteral("Images (*.png *.bmp *.jpg *.jpeg *.gif);; All Files (*.*)"));
+
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::svg, PropertyNames::imageCategory, true, SchemaItemImage::svgData, SchemaItemImage::setSvgData);
+		p->setSpecificEditor(E::PropertySpecificEditor::LoadFileDialog);
+		p->setValidator(QStringLiteral("Svg Files (*.svg);; All Files (*.*)"));
 
 		// --
 		//
 		m_static = true;
 		setItemUnit(unit);
+
+		return;
 	}
 
 	SchemaItemImage::~SchemaItemImage(void)
@@ -48,7 +57,6 @@ namespace VFrame30
 		//
 		Proto::SchemaItemImage* imageMessage = message->mutable_schemaitem()->mutable_image();
 
-		imageMessage->set_allowscale(m_allowScale);
 		imageMessage->set_keepaspectratio(m_keepAspectRatio);
 
 		if (m_image.isNull() == false)
@@ -66,6 +74,10 @@ namespace VFrame30
 			imageMessage->set_imagedata(ba.constData(), ba.size());
 		}
 
+		if (m_svgData.isEmpty() == false)
+		{
+			imageMessage->set_svgdata(m_svgData.toStdString());
+		}
 
 		return true;
 	}
@@ -96,7 +108,6 @@ namespace VFrame30
 
 		const Proto::SchemaItemImage& imageMessage = message.schemaitem().image();
 
-		m_allowScale = imageMessage.allowscale();
 		m_keepAspectRatio = imageMessage.keepaspectratio();
 
 		if (imageMessage.has_imagedata() == true)
@@ -116,6 +127,17 @@ namespace VFrame30
 			m_image = QImage();
 		}
 
+		if (imageMessage.has_svgdata() == true)
+		{
+			m_svgData = QString::fromStdString(imageMessage.svgdata());
+		}
+		else
+		{
+			m_svgData.clear();
+		}
+
+		m_svgRenderer.reset();
+
 		return true;
 	}
 
@@ -123,71 +145,109 @@ namespace VFrame30
 	//
 	void SchemaItemImage::Draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
 	{
-		QPainter* p = drawParam->painter();
-
-		// Initialization drawing resources
-		//
-						
-		// Calculate rectangle
-		//
-		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
-
-		r.setTopRight(drawParam->gridToDpi(r.topRight()));
-		r.setBottomLeft(drawParam->gridToDpi(r.bottomLeft()));
-
-		if (std::abs(r.left() - r.right()) < 0.000001)
-		{
-			r.setRight(r.left() + 0.000001f);
-		}
-
-		if (std::abs(r.bottom() - r.top()) < 0.000001)
-		{
-			r.setBottom(r.top() + 0.000001f);
-		}
+		QRectF rect = boundingRectInDocPt();
 
 		// --
 		//
-		if (m_image.isNull() == true)
+		if (m_image.isNull() == true && m_svgData.isEmpty() == true)
 		{
 			// Image not set, draw rect and information text
 			//
-			QPen pen(Qt::black);
-			pen.setWidthF(drawParam->cosmeticPenWidth());
-
-			p->setPen(pen);
-			p->drawRect(r);
-
-			// --
-			//
-			QFont f;		// Default application font
-			p->setFont(f);
-
-			DrawHelper::drawText(p, itemUnit(), QStringLiteral("No Image"), r, Qt::AlignCenter | Qt::AlignVCenter);
-
+			drawError(drawParam, rect, QStringLiteral("No Image"));
 			return;
 		}
 
 		// Draw Image
 		//
+		if (m_svgData.isEmpty() == false)
+		{
+			drawSvg(drawParam, rect);
+			return;
+		}
 
+		if (m_image.isNull() == false)
+		{
+			drawImage(drawParam, rect);
+		}
 
+		return;
+	}
+
+	void SchemaItemImage::drawImage(CDrawParam* drawParam, const QRectF& rect) const
+	{
 		if (m_keepAspectRatio == true)
 		{
-			QRectF imageRect = r;
+			QRectF imageRect = rect;
 
 			QSizeF imageSize = m_image.size();	// m_image.size() / m_image.devicePixelRatio();
 			imageSize.scale(imageRect.width(), imageRect.height(), Qt::KeepAspectRatio);
 
 			imageRect.setSize(imageSize);
-			imageRect.translate(std::fabs(r.width() - imageRect.width()) / 2,
-								std::fabs(r.height() - imageRect.height()) / 2);
+			imageRect.translate(std::fabs(rect.width() - imageRect.width()) / 2,
+								std::fabs(rect.height() - imageRect.height()) / 2);
 
-			p->drawImage(imageRect, m_image, QRectF(0, 0, m_image.width(), m_image.height()));
+			drawParam->painter()->drawImage(imageRect, m_image, QRectF(0, 0, m_image.width(), m_image.height()));
 		}
 		else
 		{
-			p->drawImage(r, m_image, QRectF(0, 0, m_image.width(), m_image.height()));
+			drawParam->painter()->drawImage(rect, m_image, QRectF(0, 0, m_image.width(), m_image.height()));
 		}
+
+		return;
+	}
+
+	void SchemaItemImage::drawSvg(CDrawParam* drawParam, const QRectF& rect) const
+	{
+		if (m_svgData.isEmpty() == true)
+		{
+			return;
+		}
+
+		if (m_svgRenderer.has_value() == false)
+		{
+			QByteArray data = m_svgData.toLocal8Bit();
+			m_svgRenderer.emplace(data);
+		}
+
+		if (m_svgRenderer->isValid() == false)
+		{
+			// Image not set, draw rect and information text
+			//
+			drawError(drawParam, rect, QStringLiteral("Not valid SVG file."));
+			return;
+		}
+
+		QRectF imageRect = rect;
+
+		if (m_keepAspectRatio == true)
+		{
+			QSizeF imageSize = m_svgRenderer->viewBoxF().size();
+			imageSize.scale(imageRect.width(), imageRect.height(), Qt::KeepAspectRatio);
+
+			imageRect.setSize(imageSize);
+			imageRect.translate(std::fabs(rect.width() - imageRect.width()) / 2,
+								std::fabs(rect.height() - imageRect.height()) / 2);
+		}
+
+		m_svgRenderer->render(drawParam->painter(), imageRect);
+
+		return;
+	}
+
+	void SchemaItemImage::drawError(CDrawParam* drawParam, const QRectF& rect, QString errorText) const
+	{
+		QPen pen(Qt::black);
+		pen.setWidthF(drawParam->cosmeticPenWidth());
+
+		QPainter* painter = drawParam->painter();
+
+		painter->setPen(pen);
+		painter->drawRect(rect);
+
+		QFont f;		// Default application font
+		painter->setFont(f);
+
+		DrawHelper::drawText(painter, itemUnit(), errorText, rect, Qt::AlignCenter | Qt::AlignVCenter);
 
 		return;
 	}
@@ -204,18 +264,6 @@ namespace VFrame30
 
 	// Properties and Data
 	//
-
-	// AllowScale property
-	//
-	bool SchemaItemImage::allowScale() const
-	{
-		return m_allowScale;
-	}
-
-	void SchemaItemImage::setAllowScale(bool value)
-	{
-		m_allowScale = value;
-	}
 
 	// KeepAspectRatio
 	//
@@ -238,19 +286,23 @@ namespace VFrame30
 
 	void SchemaItemImage::setImage(QImage image)
 	{
-		//m_image.load("D:\\About.png");
-		//bool ok = m_image.load("D:\\ScemaFolder.svg");
 		m_image = image;
+		m_svgData.clear();
+		m_svgRenderer.reset();
 	}
 
-	QByteArray SchemaItemImage::svgData() const
+	// Svg
+	//
+	QString SchemaItemImage::svgData() const
 	{
 		return m_svgData;
 	}
 
-	void SchemaItemImage::setSvgData(QByteArray data)
+	void SchemaItemImage::setSvgData(QString data)
 	{
 		m_svgData = data;
+		m_image = {};
+		m_svgRenderer.reset();
 	}
 }
 

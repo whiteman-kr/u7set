@@ -140,6 +140,7 @@ namespace VFrame30
 	const QString PropertyNames::scriptsCategory("Scripts");
 	const QString PropertyNames::apertureCategory("Aperture");
 	const QString PropertyNames::constCategory("Const");
+	const QString PropertyNames::imageCategory("Image");
 
 	const QString PropertyNames::widgetPropStyleSheet("Property holds the widget's style sheet.\nThe style sheet contains a textual description of customizations to the widget's style.");
 	const QString PropertyNames::widgetPropToolTip("Property holds the widget's tooltip.");

@@ -3872,13 +3872,6 @@ class SchemaItemImage : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional bool allowScale = 1 [default = true];
-  inline bool has_allowscale() const;
-  inline void clear_allowscale();
-  static const int kAllowScaleFieldNumber = 1;
-  inline bool allowscale() const;
-  inline void set_allowscale(bool value);
-
   // optional bool keepAspectRatio = 2 [default = true];
   inline bool has_keepaspectratio() const;
   inline void clear_keepaspectratio();
@@ -3898,19 +3891,31 @@ class SchemaItemImage : public ::google::protobuf::Message {
   inline ::std::string* release_imagedata();
   inline void set_allocated_imagedata(::std::string* imagedata);
 
+  // optional string svgData = 9;
+  inline bool has_svgdata() const;
+  inline void clear_svgdata();
+  static const int kSvgDataFieldNumber = 9;
+  inline const ::std::string& svgdata() const;
+  inline void set_svgdata(const ::std::string& value);
+  inline void set_svgdata(const char* value);
+  inline void set_svgdata(const char* value, size_t size);
+  inline ::std::string* mutable_svgdata();
+  inline ::std::string* release_svgdata();
+  inline void set_allocated_svgdata(::std::string* svgdata);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemImage)
  private:
-  inline void set_has_allowscale();
-  inline void clear_has_allowscale();
   inline void set_has_keepaspectratio();
   inline void clear_has_keepaspectratio();
   inline void set_has_imagedata();
   inline void clear_has_imagedata();
+  inline void set_has_svgdata();
+  inline void clear_has_svgdata();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* imagedata_;
-  bool allowscale_;
+  ::std::string* svgdata_;
   bool keepaspectratio_;
 
   mutable int _cached_size_;
@@ -17011,37 +17016,15 @@ inline void SchemaItemPath::set_linecolor(::google::protobuf::uint32 value) {
 
 // SchemaItemImage
 
-// optional bool allowScale = 1 [default = true];
-inline bool SchemaItemImage::has_allowscale() const {
-  return (_has_bits_[0] & 0x00000001u) != 0;
-}
-inline void SchemaItemImage::set_has_allowscale() {
-  _has_bits_[0] |= 0x00000001u;
-}
-inline void SchemaItemImage::clear_has_allowscale() {
-  _has_bits_[0] &= ~0x00000001u;
-}
-inline void SchemaItemImage::clear_allowscale() {
-  allowscale_ = true;
-  clear_has_allowscale();
-}
-inline bool SchemaItemImage::allowscale() const {
-  return allowscale_;
-}
-inline void SchemaItemImage::set_allowscale(bool value) {
-  set_has_allowscale();
-  allowscale_ = value;
-}
-
 // optional bool keepAspectRatio = 2 [default = true];
 inline bool SchemaItemImage::has_keepaspectratio() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
+  return (_has_bits_[0] & 0x00000001u) != 0;
 }
 inline void SchemaItemImage::set_has_keepaspectratio() {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000001u;
 }
 inline void SchemaItemImage::clear_has_keepaspectratio() {
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000001u;
 }
 inline void SchemaItemImage::clear_keepaspectratio() {
   keepaspectratio_ = true;
@@ -17057,13 +17040,13 @@ inline void SchemaItemImage::set_keepaspectratio(bool value) {
 
 // optional bytes imageData = 8;
 inline bool SchemaItemImage::has_imagedata() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000002u) != 0;
 }
 inline void SchemaItemImage::set_has_imagedata() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000002u;
 }
 inline void SchemaItemImage::clear_has_imagedata() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void SchemaItemImage::clear_imagedata() {
   if (imagedata_ != &::google::protobuf::internal::kEmptyString) {
@@ -17122,6 +17105,76 @@ inline void SchemaItemImage::set_allocated_imagedata(::std::string* imagedata) {
   } else {
     clear_has_imagedata();
     imagedata_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string svgData = 9;
+inline bool SchemaItemImage::has_svgdata() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SchemaItemImage::set_has_svgdata() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SchemaItemImage::clear_has_svgdata() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SchemaItemImage::clear_svgdata() {
+  if (svgdata_ != &::google::protobuf::internal::kEmptyString) {
+    svgdata_->clear();
+  }
+  clear_has_svgdata();
+}
+inline const ::std::string& SchemaItemImage::svgdata() const {
+  return *svgdata_;
+}
+inline void SchemaItemImage::set_svgdata(const ::std::string& value) {
+  set_has_svgdata();
+  if (svgdata_ == &::google::protobuf::internal::kEmptyString) {
+    svgdata_ = new ::std::string;
+  }
+  svgdata_->assign(value);
+}
+inline void SchemaItemImage::set_svgdata(const char* value) {
+  set_has_svgdata();
+  if (svgdata_ == &::google::protobuf::internal::kEmptyString) {
+    svgdata_ = new ::std::string;
+  }
+  svgdata_->assign(value);
+}
+inline void SchemaItemImage::set_svgdata(const char* value, size_t size) {
+  set_has_svgdata();
+  if (svgdata_ == &::google::protobuf::internal::kEmptyString) {
+    svgdata_ = new ::std::string;
+  }
+  svgdata_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemImage::mutable_svgdata() {
+  set_has_svgdata();
+  if (svgdata_ == &::google::protobuf::internal::kEmptyString) {
+    svgdata_ = new ::std::string;
+  }
+  return svgdata_;
+}
+inline ::std::string* SchemaItemImage::release_svgdata() {
+  clear_has_svgdata();
+  if (svgdata_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = svgdata_;
+    svgdata_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemImage::set_allocated_svgdata(::std::string* svgdata) {
+  if (svgdata_ != &::google::protobuf::internal::kEmptyString) {
+    delete svgdata_;
+  }
+  if (svgdata) {
+    set_has_svgdata();
+    svgdata_ = svgdata;
+  } else {
+    clear_has_svgdata();
+    svgdata_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
