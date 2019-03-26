@@ -287,6 +287,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0267.sql", "Upgrade to version 267, Changes in file SignalPropertyBehavior.csv"},
 	{":/DatabaseUpgrade/Upgrade0268.sql", "Upgrade to version 268, LmDescriptions, Expand AppDataSize to 256, add CheckAfbVersions data"},
 	{":/DatabaseUpgrade/Upgrade0269.sql", "Upgrade to version 269, Add current time signals to LM1-SR03, LM1-SR04"},
+	{":/DatabaseUpgrade/Upgrade0270.sql", "Upgrade to version 270, Added AFB set_flags to all LmDescriptions"},
 };
 
 int DbWorker::counter = 0;

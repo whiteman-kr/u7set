@@ -354,7 +354,8 @@ public:
 		Password,
 		Script,
 		TuningFilter,
-		SpecificPropertyStruct
+		SpecificPropertyStruct,
+		LoadFileDialog
 	};
 	Q_ENUM(PropertySpecificEditor)
 

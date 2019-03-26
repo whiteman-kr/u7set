@@ -4,6 +4,7 @@
 #include "MonitorSchemaManager.h"
 #include "DialogSignalInfo.h"
 #include "../VFrame30/SchemaItemSignal.h"
+#include "../VFrame30/SchemaItemValue.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/MonitorSchema.h"
 
@@ -85,24 +86,28 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 	{
 		for (const std::shared_ptr<VFrame30::SchemaItem>& item : items)
 		{
-			VFrame30::SchemaItemSignal* schemaItemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
-
-			if (schemaItemSignal != nullptr)
+			if (VFrame30::SchemaItemSignal* schemaItemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
+				schemaItemSignal != nullptr)
 			{
 				const QStringList& signalList = schemaItemSignal->appSignalIdList();
-
 				signalContextMenu(signalList);
 				break;
 			}
 
-			VFrame30::SchemaItemReceiver* schemaItemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+			if (VFrame30::SchemaItemValue* schemaItemValue = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
+				schemaItemValue != nullptr)
+			{
+				const QStringList& signalList = schemaItemValue->signalIds();
+				signalContextMenu(signalList);
+				break;
+			}
 
-			if (schemaItemReceiver != nullptr)
+			if (VFrame30::SchemaItemReceiver* schemaItemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+				schemaItemReceiver != nullptr)
 			{
 				QStringList signalList;
 				QString s = schemaItemReceiver->appSignalId();
 				signalList.push_back(s);
-
 				signalContextMenu(signalList);
 				break;
 			}
@@ -117,14 +122,24 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 	return;
 }
 
-void MonitorSchemaWidget::signalContextMenu(const QStringList signalList)
+void MonitorSchemaWidget::signalContextMenu(const QStringList& signalList)
 {
+	qDebug() << "signalContextMenu: " << signalList;
+
+	// To set, it will sort list and exclude same ids
+	//
+	std::set<QString> signalListSet;
+	for (const QString& s : signalList)
+	{
+		signalListSet.insert(s);
+	}
+
 	// Compose menu
 	//
 	QMenu menu(this);
 	QList<QAction*> actions;
 
-	for (const QString& s : signalList)
+	for (const QString& s : signalListSet)
 	{
 		bool ok = false;
 		AppSignalParam signal =	theSignals.signalParam(s, &ok);
