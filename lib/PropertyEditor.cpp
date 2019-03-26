@@ -606,7 +606,7 @@ namespace ExtWidgets
 	}
 
 	//
-	// ---------MultiLineEdit----------
+	// ---------MultiTextEditorDialog----------
 	//
 	MultiTextEditorDialog::MultiTextEditorDialog(QWidget* parent, PropertyEditor* propertyEditor, const QString &text, std::shared_ptr<Property> p):
 		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint),
@@ -792,7 +792,7 @@ namespace ExtWidgets
 	}
 
 	//
-	// ---------QtMultiTextEdit----------
+	// ---------MultiTextEdit----------
 	//
 
 	MultiTextEdit::MultiTextEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly, PropertyEditor* propertyEditor):
@@ -822,7 +822,9 @@ namespace ExtWidgets
 		connect(m_lineEdit, &QLineEdit::editingFinished, this, &MultiTextEdit::onEditingFinished);
 		connect(m_lineEdit, &QLineEdit::textEdited, this, &MultiTextEdit::onTextEdited);
 
-		if (m_userType == QVariant::String && p->password() == false)
+		if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog ||
+				m_userType == QVariant::ByteArray ||
+				(m_userType == QVariant::String && p->password() == false))
 		{
 			m_button = new QToolButton(parent);
 			m_button->setText("...");
@@ -843,19 +845,25 @@ namespace ExtWidgets
 
 		m_lineEdit->installEventFilter(this);
 
-		if (p->validator().isEmpty() == false)
+		if (m_property->specificEditor() != E::PropertySpecificEditor::LoadFileDialog &&	// for LoadFileDialog, Validator is used as mask
+				p->validator().isEmpty() == false)
         {
 			QRegExp regexp(p->validator());
 			QRegExpValidator* v = new QRegExpValidator(regexp, this);
             m_lineEdit->setValidator(v);
         }
 
-		if (p->password() == true)
+		if (m_userType == QVariant::String && p->password() == true)
         {
             m_lineEdit->setEchoMode(QLineEdit::Password);
         }
 
 		m_lineEdit->setReadOnly(readOnly == true);
+
+		if (m_userType == QVariant::ByteArray || m_userType == QVariant::Image)
+		{
+			m_lineEdit->setReadOnly(true);
+		}
 
 		if (m_button != nullptr)
 		{
@@ -888,49 +896,115 @@ namespace ExtWidgets
 	void MultiTextEdit::onButtonPressed()
 	{
 		QString editText;
-		if (m_userType == QVariant::String)
+		QByteArray editBytes;
+
+		if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog)
 		{
-			editText = m_oldValue.toString();	// Take string from m_oldValue, because m_lineEdit has length limit
+			QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"), QString(), m_property->validator());
+			if (fileName.isEmpty() == true)
+			{
+				return;
+			}
+
+			QFile f(fileName);
+			if (f.open(QFile::ReadOnly) == false)
+			{
+				QMessageBox::critical(this, qAppName(), tr("File loading error!"));
+				return;
+			}
+
+			editBytes = f.readAll();
+			editText = editBytes.toStdString().c_str();
 		}
 		else
 		{
-			editText = editText = m_lineEdit->text();
+			if (m_userType == QVariant::Image)
+			{
+				Q_ASSERT(false);	// Images should have E::PropertySpecificEditor::LoadFileDialog type
+				return;
+			}
+
+			MultiTextEditorDialog multlLineEdit(this, m_propertyEditor, m_oldValue.toString(), m_property);
+			if (multlLineEdit.exec() != QDialog::Accepted)
+			{
+				return;
+			}
+
+			editText = multlLineEdit.text();
+			editBytes = editText.toUtf8();
 		}
 
-		MultiTextEditorDialog* multlLineEdit = new MultiTextEditorDialog(this, m_propertyEditor, editText, m_property);
-		if (multlLineEdit->exec() == QDialog::Accepted)
+		// update LineEdit
+
+
+		switch (m_userType)
 		{
-			editText = multlLineEdit->text();
-
-			if (editText != m_oldValue)
+			case QVariant::ByteArray:
 			{
-				 emit valueChanged(editText);
+				if (editBytes != m_oldValue)
+				{
+					 emit valueChanged(editBytes);
+				}
+
+				m_oldValue = editBytes;
+
+				m_lineEdit->blockSignals(true);
+				m_lineEdit->setText(tr("Data <%1 bytes>").arg(editBytes.size()));
+				m_lineEdit->blockSignals(false);
 			}
+			break;
 
-			editText = m_property->value().toString();
-
-			m_oldValue = editText;
-
-			// update LineEdit
-
-			m_lineEdit->blockSignals(true);
-
-			bool longText = editText.length() > PropertyEditorTextMaxLength;
-
-			m_lineEdit->setReadOnly(longText == true);
-
-			if (longText == true)
+			case QVariant::Image:
 			{
-				m_lineEdit->setText(tr("<%1 bytes>").arg(editText.length()));
-			}
-			else
-			{
-				m_lineEdit->setText(editText);
-			}
+				QImage image;
+				if (image.loadFromData(editBytes) == false)
+				{
+					QMessageBox::critical(this, qAppName(), tr("Image loading error!"));
+				}
 
-            m_lineEdit->blockSignals(false);
-        }
-		delete multlLineEdit;
+				if (image != m_oldValue)
+				{
+					 emit valueChanged(image);
+				}
+
+				m_oldValue = image;
+
+				m_lineEdit->blockSignals(true);
+				m_lineEdit->setText(tr("Image <Width = %1 Height = %2>").arg(image.width()).arg(image.height()));
+				m_lineEdit->setReadOnly(true);
+				m_lineEdit->blockSignals(false);
+			}
+			break;
+
+			default:
+			{
+				if (editText != m_oldValue)
+				{
+					 emit valueChanged(editText);
+				}
+
+				editText = m_property->value().toString();
+
+				m_oldValue = editText;
+
+				bool longText = editText.length() > PropertyEditorTextMaxLength;
+
+				m_lineEdit->blockSignals(true);
+
+				if (longText == true)
+				{
+					m_lineEdit->setText(tr("<%1 bytes>").arg(editText.length()));
+				}
+				else
+				{
+					m_lineEdit->setText(editText);
+				}
+				m_lineEdit->setReadOnly(longText == true);
+
+				m_lineEdit->blockSignals(false);
+			}
+		}
+
 	}
 
 	void MultiTextEdit::setValue(std::shared_ptr<Property> property, bool readOnly)
@@ -947,15 +1021,30 @@ namespace ExtWidgets
 
 		switch (m_userType)
 		{
+		case QVariant::ByteArray:
+			{
+				QByteArray ba = property->value().toByteArray();
+				m_oldValue = ba;
+
+				m_lineEdit->setText(tr("Data <%1 bytes>").arg(ba.size()));
+				m_lineEdit->setReadOnly(true);
+			}
+			break;
+		case QVariant::Image:
+			{
+				QImage image = property->value().value<QImage>();
+				m_oldValue = image;
+
+				m_lineEdit->setText(tr("Image <Width = %1 Height = %2>").arg(image.width()).arg(image.height()));
+				m_lineEdit->setReadOnly(true);
+			}
+			break;
 		case QVariant::String:
 			{
-				m_oldValue = property->value().toString();
-
 				QString editText = property->value().toString();
+				m_oldValue = editText;
 
 				bool longText = editText.length() > PropertyEditorTextMaxLength;
-
-				m_lineEdit->setReadOnly(readOnly == true || longText == true);
 
 				if (longText == true)
 				{
@@ -965,6 +1054,7 @@ namespace ExtWidgets
 				{
 					m_lineEdit->setText(editText);
 				}
+				m_lineEdit->setReadOnly(readOnly == true || longText == true);
 			}
 			break;
 		case QVariant::Int:
@@ -1036,12 +1126,22 @@ namespace ExtWidgets
 		switch (m_userType)
 		{
 		case QVariant::String:
+		{
+			if (m_lineEdit->text() != m_oldValue.toString() || m_oldValue.isNull() == true)
 			{
-				if (m_lineEdit->text() != m_oldValue.toString() || m_oldValue.isNull() == true)
-				{
-					m_oldValue = m_lineEdit->text();
-					emit valueChanged(m_lineEdit->text());
-				}
+				m_oldValue = m_lineEdit->text();
+				emit valueChanged(m_oldValue);
+			}
+		}
+		break;
+		case QVariant::ByteArray:
+			{
+				Q_ASSERT(false);	// No editing allowed
+			}
+			break;
+		case QVariant::Image:
+			{
+				Q_ASSERT(false);	// No editing allowed
 			}
 			break;
 		case QVariant::Int:
@@ -1199,6 +1299,25 @@ namespace ExtWidgets
 			painter.drawRect(rect);
 		}
 		return QIcon(pixmap);
+	}
+
+	static QIcon drawImage(const QImage& image)
+	{
+		if (image.isNull() == false)
+		{
+			const QStyle* style = QApplication::style();
+			const int indicatorWidth = style->pixelMetric(QStyle::PM_IndicatorWidth);
+			const int indicatorHeight = style->pixelMetric(QStyle::PM_IndicatorHeight);
+			const int listViewIconSize = indicatorWidth;
+			const int pixmapWidth = indicatorWidth;
+			const int pixmapHeight = qMax(indicatorHeight, listViewIconSize);
+
+			QImage smallImage = image.scaled(pixmapWidth, pixmapHeight, Qt::KeepAspectRatio);
+
+			return QIcon(QPixmap::fromImage(smallImage));
+		}
+
+		return QIcon();
 	}
 
 	MultiCheckBox::MultiCheckBox(QWidget* parent):
@@ -1385,7 +1504,10 @@ namespace ExtWidgets
 						case QVariant::UInt:
 						case QMetaType::Float:
 						case QVariant::Double:
-							{
+						case QVariant::Uuid:
+						case QVariant::ByteArray:
+						case QVariant::Image:
+								{
 								MultiTextEdit* m_editor = new MultiTextEdit(parent, propertyPtr, property->isEnabled() == false, m_propertyEditor);
 
 								editor = m_editor;
@@ -1416,23 +1538,7 @@ namespace ExtWidgets
 							}
 							break;
 
-						case QVariant::Uuid:
-							{
-								MultiTextEdit* m_editor = new MultiTextEdit(parent, propertyPtr, property->isEnabled() == false, m_propertyEditor);
-
-								editor = m_editor;
-
-								if (manager->sameValue(property) == true)
-								{
-									m_editor->setValue(propertyPtr, property->isEnabled() == false);
-								}
-
-								connect(m_editor, &MultiTextEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
-								connect(m_editor, &MultiTextEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
-							}
-							break;
-
-						default:
+					default:
 							Q_ASSERT(false);
 					}
 				}
@@ -1736,6 +1842,15 @@ namespace ExtWidgets
 					}
 				}
 				break;
+		case QVariant::Image:
+			{
+				if (sameValue(property) == true)
+				{
+					QImage image = value.value<QImage>();
+					return drawImage(image);
+				}
+			}
+			break;
 		}
 		return QIcon();
 	}
@@ -1868,7 +1983,21 @@ namespace ExtWidgets
 					}
 					break;
 
-				default:
+				case QVariant::ByteArray:
+					{
+						QByteArray array = value.value<QByteArray>();
+						return tr("Data <%1 bytes>").arg(array.size());
+					}
+					break;
+
+				case QVariant::Image:
+					{
+						QImage image = value.value<QImage>();
+						return tr("Image <Width = %1 Height = %2>").arg(image.width()).arg(image.height());
+					}
+					break;
+
+			default:
 					Q_ASSERT(false);
 			}
 		}
