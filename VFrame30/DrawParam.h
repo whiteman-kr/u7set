@@ -124,6 +124,15 @@ namespace VFrame30
 							 const QRectF& rect,
 							 int flags,
 							 QRectF* boundingRect = nullptr);
+
+		// Draw using already stelectd font
+		//
+		static void drawText(QPainter* p,
+							 SchemaUnit unit,
+							 const QString& str,
+							 const QRectF& rect,
+							 int flags,
+							 QRectF* boundingRect = nullptr);
 	};
 }
 

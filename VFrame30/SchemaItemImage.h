@@ -45,13 +45,20 @@ namespace VFrame30
 		bool keepAspectRatio() const;
 		void setKeepAspectRatio(bool value);
 
+		QImage image() const;
+		void setImage(QImage image);
+
+		QByteArray svgData() const;
+		void setSvgData(QByteArray data);
+
 	private:
 		bool m_allowScale = true;
 		bool m_keepAspectRatio = true;
 
+		QImage m_image;
+		QByteArray m_svgData;
+
 		// Drawing resources
 		//
-		//mutable std::shared_ptr<QPen> m_rectPen;
-		//mutable std::shared_ptr<QBrush> m_fillBrush;
 	};
 }

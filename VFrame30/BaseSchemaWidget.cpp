@@ -227,18 +227,20 @@ namespace VFrame30
 		int startX = 0;
 		int startY = 0;
 
-		if (rect().width() >= widthInPixels)
+		QRect widgetRect = viewport()->rect();
+
+		if (widgetRect.width() >= widthInPixels)
 		{
-			startX = (rect().width() - widthInPixels) / 2;
+			startX = (widgetRect.width() - widthInPixels) / 2;
 		}
 		else
 		{
 			startX = -horizontalScrollBar()->value();
 		}
 
-		if (rect().height() >= heightInPixels)
+		if (widgetRect.height() >= heightInPixels)
 		{
-			startY = (rect().height() - heightInPixels) / 2;
+			startY = (widgetRect.height() - heightInPixels) / 2;
 		}
 		else
 		{

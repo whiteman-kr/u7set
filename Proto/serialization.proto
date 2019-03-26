@@ -493,6 +493,7 @@ message SchemaItemImage
 {
     optional bool allowScale = 1 [default = true];
 	optional bool keepAspectRatio = 2 [default = true];
+	optional bytes imageData = 8;
 }
 
 //

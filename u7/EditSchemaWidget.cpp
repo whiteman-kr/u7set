@@ -7136,6 +7136,16 @@ void EditSchemaWidget::editCopy()
 		QMimeData* mime = new QMimeData();
 		mime->setData(SchemaItemClipboardData::mimeType, ba);
 
+		// If selected one image, then copy to clipboard it also as image
+		//
+		if (selectedItems().size() == 1 && selectedItems().front()->isType<VFrame30::SchemaItemImage>() == true)
+		{
+			VFrame30::SchemaItemImage* imageItem = selectedItems().front()->toType<VFrame30::SchemaItemImage>();
+			mime->setImageData(imageItem->image());
+		}
+
+		// --
+		//
 		clipboard->clear();
 		clipboard->setMimeData(mime);
 	}
@@ -7270,8 +7280,49 @@ void EditSchemaWidget::editPaste()
 	//
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
 
-	if (selected.empty() == true ||
-		mimeData->hasText() == false)
+	// --
+	//
+	if (selected.empty() == true)
+	{
+		return;
+	}
+
+	// Paste image to selected SchemaItemImage
+	//
+	if (mimeData->hasImage() == true)
+	{
+		bool allItemsAreImages = true;
+
+		for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+		{
+			VFrame30::SchemaItemImage* imageItem = dynamic_cast<VFrame30::SchemaItemImage*>(item.get());
+
+			if (imageItem == nullptr)
+			{
+				allItemsAreImages = false;
+				break;
+			}
+		}
+
+		if (allItemsAreImages == true)
+		{
+			QImage image = qvariant_cast<QImage>(mimeData->imageData());
+
+			for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+			{
+				VFrame30::SchemaItemImage* imageItem = dynamic_cast<VFrame30::SchemaItemImage*>(item.get());
+				Q_ASSERT(imageItem);
+
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::image, QVariant(image), selected);
+			}
+		}
+
+		return;
+	}
+
+	// All other itmes receives olny text
+	//
+	if (mimeData->hasText() == false)
 	{
 		return;
 	}
@@ -7737,6 +7788,7 @@ void EditSchemaWidget::clipboardDataChanged()
 	// if same SchemaItems in the clipboard
 	//
 	QStringList hasFormats = mimeData->formats();
+
 	for (auto f : hasFormats)
 	{
 		if (f == SchemaItemClipboardData::mimeType)
@@ -7753,6 +7805,25 @@ void EditSchemaWidget::clipboardDataChanged()
 	if (selected.empty() == true)
 	{
 		m_editPasteAction->setEnabled(false);
+		return;
+	}
+
+	// if SchemaItemImage is(are) selected and Image is in the clipboard
+	//
+	bool allItemsAreImages = true;
+	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	{
+		if (dynamic_cast<VFrame30::SchemaItemImage*>(item.get()) == nullptr)
+		{
+			allItemsAreImages = false;
+			break;
+		}
+	}
+
+	if (allItemsAreImages == true &&
+		mimeData->hasImage() == true)
+	{
+		m_editPasteAction->setEnabled(true);
 		return;
 	}
 

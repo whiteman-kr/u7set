@@ -403,4 +403,52 @@ namespace VFrame30
 		return;
 	}
 
+	void DrawHelper::drawText(QPainter* painter, SchemaUnit unit, const QString& str, const QRectF& rect, int flags, QRectF* boundingRect/* = nullptr*/)
+	{
+		if (painter == nullptr || str.isEmpty() == true)
+		{
+			Q_ASSERT(painter);
+			return;
+		}
+
+		painter->save();
+
+		double dpiX = 96;
+		double dpiY = 96;
+
+		QPaintDevice* pPaintDevice = painter->device();
+		if (pPaintDevice != nullptr)
+		{
+			dpiX = pPaintDevice->physicalDpiX();
+			dpiY = pPaintDevice->physicalDpiY();
+		}
+		else
+		{
+			Q_ASSERT(pPaintDevice);
+		}
+
+		QRectF rc;
+
+		if (unit == SchemaUnit::Display)
+		{
+			rc = rect;
+		}
+		else
+		{
+			Q_ASSERT(unit == SchemaUnit::Inch);
+
+			painter->scale(1.0 / dpiX, 1.0 / dpiY);
+
+			rc.setLeft(rect.left() * dpiX);
+			rc.setTop(rect.top() * dpiY);
+			rc.setRight(rect.right() * dpiX);
+			rc.setBottom(rect.bottom() * dpiY);
+		}
+
+		painter->drawText(rc, flags, str, boundingRect);
+		painter->restore();
+
+		return;
+	}
+
 }
