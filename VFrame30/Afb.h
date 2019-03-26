@@ -171,7 +171,7 @@ namespace Afb
 
 		// Properties
 		//
-	public:
+	public slots:
 		const QString& opName() const;
 		void setOpName(const QString& value);
 

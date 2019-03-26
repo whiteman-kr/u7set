@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM1_SR03" DescriptionNumber="3" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.002">
+<LogicModule Name="LM1_SR03" DescriptionNumber="3" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.003">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -467,6 +467,8 @@
 			<Pin OpName="o_sync"		OpIndex ="14"	PinType = "Output"/>
 			<Pin OpName="o_param_err"	OpIndex ="16"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="17"	PinType = "Output"/>			
+		</AFBComponent>
+		<AFBComponent Caption="SET_FLAGS" OpCode="65535" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_set_flags">
 		</AFBComponent>
 	</AFBImplementation>
 	<AFBL>
@@ -11124,6 +11126,166 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>				
+		
+		<AFB id="#set_flags_v1"          Caption="set_flags"          Version="1.0001">
+			<Properties>
+				<Description>Set flag(s) to input signals. Flags accessible only in MATS.</Description>
+				<Category>Other</Category>
+				<OpCode>65535</OpCode>
+				<HasRam>false</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>19</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_in"  		Caption="in" 			Type="Discrete" ByteOrder="BigEndian" OpIndex="0"  Size="1"/>
+				<Pin OpName="i_validity" 	Caption="validity"  	Type="Discrete" ByteOrder="BigEndian" OpIndex="1"  Size="1"/>
+				<Pin OpName="i_simulated" 	Caption="simulated"  	Type="Discrete" ByteOrder="BigEndian" OpIndex="2"  Size="1"/>
+				<Pin OpName="i_locked" 		Caption="locked"  		Type="Discrete" ByteOrder="BigEndian" OpIndex="3"  Size="1"/>
+				<Pin OpName="i_unbalanced" 	Caption="unbalanced"  	Type="Discrete" ByteOrder="BigEndian" OpIndex="4"  Size="1"/>
+				<Pin OpName="i_highlimit" 	Caption="high_limit" 	Type="Discrete" ByteOrder="BigEndian" OpIndex="5"  Size="1"/>
+				<Pin OpName="i_lowlimit" 	Caption="low_limit"  	Type="Discrete" ByteOrder="BigEndian" OpIndex="6"  Size="1"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1"/>
+			</Outputs>
+			<Params>
+				<Param OpName="ShowValidity" Caption="ShowValidity" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+(function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+})
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="ShowSimulated" Caption="ShowSimulated" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+(function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+})
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="ShowLocked" Caption="ShowLocked" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+(function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+})
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="ShowUnbalanced" Caption="ShowUnbalanced" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+(function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+})
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="ShowHighLimit" Caption="ShowHighLimit" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+(function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+})
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="ShowLowLimit" Caption="ShowLowLimit" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+(function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+})
+						</Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+function createInputSignals(schemaItem, afbElement)
+{
+	schemaItem.removeInputSignals();
+
+	var showValidity = schemaItem.getParamBoolValue("ShowValidity");
+	var showSimulated = schemaItem.getParamBoolValue("ShowSimulated");
+	var showLocked = schemaItem.getParamBoolValue("ShowLocked");
+	var showUnbalanced = schemaItem.getParamBoolValue("ShowUnbalanced");
+	var showHighLimit = schemaItem.getParamBoolValue("ShowHighLimit");
+	var showLowLimit = schemaItem.getParamBoolValue("ShowLowLimit");
+	
+	var addSignal = function(schemaItem, signalCaption)
+		{
+			var signal = afbElement.getAfbSignalByCaption(signalCaption);
+			schemaItem.addInputSignal(signal.caption(), signal.jsType(), signal.operandIndex(), signal.size());
+		};
+	
+	addSignal(schemaItem, "in");
+	
+	if (showValidity == true)
+	{
+		addSignal(schemaItem, "validity");
+	}
+	
+	if (showSimulated == true)
+	{
+		addSignal(schemaItem, "simulated");
+	}
+	
+	if (showLocked == true)
+	{
+		addSignal(schemaItem, "locked");
+	}
+	
+	if (showUnbalanced == true)
+	{
+		addSignal(schemaItem, "unbalanced");
+	}
+	
+	if (showHighLimit == true)
+	{
+		addSignal(schemaItem, "high_limit");
+	}
+	
+	if (showLowLimit == true)
+	{
+		addSignal(schemaItem, "low_limit");
+	}	
+
+	schemaItem.adjustHeight();
+
+	return true;
+}
+				</Library>
+				<AfterCreation>
+(function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+})
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
 
 	</AFBL>
 </LogicModule>
