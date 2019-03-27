@@ -6115,6 +6115,39 @@ namespace Builder
 					arg(appSignalID));
 	}
 
+	/// IssueCode: ALC5168
+	///
+	/// IssueType: Error
+	///
+	/// Title: Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
+	///
+	/// Parameters:
+	///		%1 flag signal ID
+	///		%2 flag type
+	///		%3 signal with flag ID
+	///		%4 already assigned flag signal ID
+	///
+	/// Description:
+	///		Tuningable signals is found in specified module but tuning is not enabled.
+	///
+	void IssueLogger::errALC5168(	QString flagSignalID,
+									QString flagTypeStr,
+									QString signalWithFlagID,
+									QString alreadyAssignedFlagSignalID,
+									QUuid itemUuid,
+									QString schemaID)
+	{
+		if (schemaID.isEmpty() == false)
+		{
+			addItemsIssues(OutputMessageLevel::Error, 5168, itemUuid, schemaID);
+		}
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5168,
+				  QString(tr("Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.")).
+						arg(flagSignalID).arg(flagTypeStr).arg(signalWithFlagID).arg(alreadyAssignedFlagSignalID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186

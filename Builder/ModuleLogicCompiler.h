@@ -15,6 +15,7 @@
 #include "MemWriteMap.h"
 
 #include "../lib/Connection.h"
+#include "../lib/AppSignalStateFlags.h"
 
 class LmDescription;
 
@@ -161,6 +162,17 @@ namespace Builder
 			static QString getAutoLoopbackID(const UalItem* ualItem, const LogicPin& outputPin);
 		};
 
+		class SignalsWithFlags : public QHash<QString, QHash<AppSignalStateFlagType, QString>>
+		{
+		public:
+			SignalsWithFlags(ModuleLogicCompiler& compiler);
+
+			bool append(const QString& signalWithFlagID, AppSignalStateFlagType flagType, const QString& flagSignalID);
+
+		private:
+			ModuleLogicCompiler& m_compiler;
+		};
+
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm, bool expertMode);
 		~ModuleLogicCompiler();
@@ -251,6 +263,8 @@ namespace Builder
 
 		bool checkBusProcessingItemsConnections();
 
+		bool createUalSignalsFromFlagSignals();
+
 		//
 
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString& busTypeID);
@@ -340,7 +354,7 @@ namespace Builder
 		bool disposeNonAcquiredAnalogSignals();
 		bool disposeNonAcquiredBuses();
 
-		bool setInputSignalsValidityAddresses();
+		bool setSignalsValidityAddresses();
 
 		bool appendAfbsForAnalogInOutSignalsConversion();
 		bool findFbsForAnalogInOutSignalsConversion();
@@ -589,7 +603,7 @@ namespace Builder
 		QHash<QString, Signal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => Signal*
 		QHash<QString, Signal*> m_equipmentSignals;				// equipment signals to app signals map, signal EquipmentID => Signal*
 
-		QVector<QPair<Signal*, Signal*>> m_signalsWithValidity;		// device signals with linked validity signals
+		SignalsWithFlags m_signalsWithFlags;
 
 		QHash<QString, Loopback*> m_loopbacks;
 		QHash<QString, Loopback*> m_signalsToLoopbacks;

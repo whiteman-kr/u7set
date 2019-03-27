@@ -132,7 +132,8 @@ SOURCES += \
     TestClientCfgGenerator.cpp \
     ../lib/UnitsConvertor.cpp \
     ../lib/UnitsConvertorTable.cpp \
-    Context.cpp
+    Context.cpp \
+    ../lib/AppSignalStateFlags.cpp
 
 HEADERS += \
     ../lib/OutputLog.h \
@@ -218,7 +219,8 @@ HEADERS += \
     TestClientCfgGenerator.h \
     ../lib/UnitsConvertor.h \
     ../lib/UnitsConvertorTable.h \
-    Context.h
+    Context.h \
+    ../lib/AppSignalStateFlags.h
 
 
 unix {

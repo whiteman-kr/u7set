@@ -1993,6 +1993,11 @@ namespace Builder
 		return m_busChildSignals.value(busSignalID, nullptr);
 	}
 
+	void UalSignal::setAcquired(bool acquired)
+	{
+		m_isAcquired = acquired;
+	}
+
 	// ---------------------------------------------------------------------------------------
 	//
 	// AppSignalsMap class implementation

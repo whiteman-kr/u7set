@@ -383,6 +383,12 @@ namespace Builder
 		void wrnALC5165(QString lmEquipmentID);											// Tuning is enabled for module %1 but tuningable signals is not found.
 		void errALC5166(QString lmEquipmentID);											// Tuningable signals is found in module %1 but tuning is not enabled.
 		void wrnALC5167(QString appSignalID);											// Signal %1 is excluded from build.
+		void errALC5168(QString flagSignalID,
+						QString flagTypeStr,
+						QString signalWithFlagID,
+						QString alreadyAssignedFlagSignalID,
+						QUuid itemUuid,
+						QString schemaID);					//Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
 
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.

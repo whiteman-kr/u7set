@@ -44,6 +44,44 @@ namespace Builder
 
 	// ---------------------------------------------------------------------------------
 	//
+	//	ModuleLogicCompiler::SignalsWithFlags class implementation
+	//
+	// ---------------------------------------------------------------------------------
+
+	ModuleLogicCompiler::SignalsWithFlags::SignalsWithFlags(ModuleLogicCompiler& compiler) :
+		m_compiler(compiler)
+	{
+	}
+
+	bool ModuleLogicCompiler::SignalsWithFlags::append(const QString& signalWithFlagID, AppSignalStateFlagType flagType, const QString& flagSignalID)
+	{
+		if (contains(signalWithFlagID) == false)
+		{
+			insert(signalWithFlagID, QHash<AppSignalStateFlagType, QString>());
+		}
+
+		QHash<AppSignalStateFlagType, QString>& signalFlagsMap = (*this)[signalWithFlagID];
+
+		if (signalFlagsMap.contains(flagType) == true)
+		{
+			//Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
+			//
+			m_compiler.log()->errALC5168(	flagSignalID,
+											AppSignalStateFlags::flagTypeStr(flagType),
+											signalWithFlagID,
+											signalFlagsMap[flagType],
+											QUuid(),
+											QString());
+			return false;
+		}
+
+		signalFlagsMap.insert(flagType, flagSignalID);
+
+		return true;
+	}
+
+	// ---------------------------------------------------------------------------------
+	//
 	//	ModuleLogicCompiler class implementation
 	//
 	// ---------------------------------------------------------------------------------
@@ -61,6 +99,7 @@ namespace Builder
 		m_appLogicCompiler(appLogicCompiler),
 		m_memoryMap(appLogicCompiler.m_log),
 		m_ualSignals(*this, appLogicCompiler.m_log),
+		m_signalsWithFlags(*this),
 		m_expertMode(expertMode)
 	{
 		m_equipmentSet = appLogicCompiler.m_equipmentSet;
@@ -401,7 +440,7 @@ namespace Builder
 
 		m_chassisSignals.clear();
 		m_ioSignals.clear();
-		m_signalsWithValidity.clear();
+		m_signalsWithFlags.clear();
 
 		QVector<QPair<Signal*, QString>> acquiredInputSignalToLinkedValiditySignalID;	// Acquired input signal => linked validity signal EquipmentID
 
@@ -481,15 +520,13 @@ namespace Builder
 
 					isIoSignal = true;
 
-					QString validitySignalID = deviceSignal->validitySignalId();
+					QString validitySignalEquipmentID = deviceSignal->validitySignalId();
 
 					if (s.isInput() == true &&
 						s.isAcquired() == true &&
-						validitySignalID.isEmpty() == false)
+						validitySignalEquipmentID.isEmpty() == false)
 					{
-						// DeviceSignalEquipmentID => LinkedValiditySignalEquipmentID
-						//
-						acquiredInputSignalToLinkedValiditySignalID.append(QPair<Signal*, QString>(&s, validitySignalID));
+						acquiredInputSignalToLinkedValiditySignalID.append(QPair<Signal*, QString>(&s, validitySignalEquipmentID));
 					}
 				}
 
@@ -559,9 +596,9 @@ namespace Builder
 				continue;
 			}
 
-			linkedValiditySignal->setAcquire(true);
-
-			m_signalsWithValidity.append(QPair<Signal*, Signal*>(inputSignal, linkedValiditySignal));
+			m_signalsWithFlags.append(inputSignal->appSignalID(),
+									  AppSignalStateFlagType::Validity,
+									  linkedValiditySignal->appSignalID());
 		}
 
 		return result;
@@ -803,6 +840,8 @@ namespace Builder
 		{
 			return false;
 		}
+
+		result &= createUalSignalsFromFlagSignals();
 
 		for(UalSignal* ualSignal : m_ualSignals)
 		{
@@ -2568,6 +2607,70 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::createUalSignalsFromFlagSignals()
+	{
+		QStringList signalsWithFlagsIDs = m_signalsWithFlags.keys();
+
+		for(const QString& signalWithFlagsID : signalsWithFlagsIDs)
+		{
+			UalSignal* ualSignalWithFlags = m_ualSignals.get(signalWithFlagsID);
+
+			if (ualSignalWithFlags == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (ualSignalWithFlags->isAcquired() == false)
+			{
+				// print warning
+				continue;
+			}
+
+			const QHash<AppSignalStateFlagType, QString>& signalFlags = m_signalsWithFlags[signalWithFlagsID];
+
+			assert(signalFlags.isEmpty() == false);
+
+			QList<AppSignalStateFlagType> flags = signalFlags.keys();
+
+			for(AppSignalStateFlagType flagType : flags)
+			{
+				QString flagSignalID = signalFlags.value(flagType, QString());
+
+				if (flagSignalID.isEmpty() == true)
+				{
+					assert(false);
+					continue;
+				}
+
+				UalSignal* ualSignal = m_ualSignals.get(flagSignalID);
+
+				if (ualSignal == nullptr)
+				{
+					Signal* s = m_signals->getSignal(flagSignalID);
+
+					if (s == nullptr)
+					{
+						assert(false);
+						continue;
+					}
+
+					ualSignal = m_ualSignals.createSignal(s);
+
+					if (ualSignal == nullptr)
+					{
+						assert(false);
+						continue;
+					}
+				}
+
+				ualSignal->setAcquired(true);
+			}
+		}
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::linkLoopbackTarget(UalItem* loopbackTargetItem)
@@ -4402,7 +4505,7 @@ namespace Builder
 
 			if (disposeNonAcquiredBuses() == false) break;
 
-			if (setInputSignalsValidityAddresses() == false) break;
+			if (setSignalsValidityAddresses() == false) break;
 
 			result = true;
 		}
@@ -4695,11 +4798,11 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::setInputSignalsValidityAddresses()
+	bool ModuleLogicCompiler::setSignalsValidityAddresses()
 	{
 		bool result = true;
-
-		for(const QPair<Signal*, Signal*>& pair : m_signalsWithValidity)
+/*
+		for(const QHash<AppSignalStateFlagType, QString>& signalFlags : m_signalsWithFlags)
 		{
 			Signal* inputSignal = pair.first;
 			Signal* validitySignal = pair.second;
@@ -4712,7 +4815,8 @@ namespace Builder
 			}
 
 			inputSignal->setRegValidityAddr(validitySignal->regValueAddr());
-		}
+		}*/
+
 		return result;
 	}
 
@@ -5833,7 +5937,7 @@ namespace Builder
 
 		CodeGenProcsToCallArray procs =
 		{
-			//CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateAfbsVersionCheckingCode),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateAfbsVersionCheckingCode),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateInitAfbsCode),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateLoopbacksRefreshingCode),
 		};
@@ -5918,6 +6022,22 @@ namespace Builder
 	bool ModuleLogicCompiler::generateAfbsVersionCheckingCode(CodeSnippet* code)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
+
+		///
+
+		return true;
+
+		///
+
+		if (m_lmDescription->checkAfbVersions() == false)
+		{
+			return true;
+		}
+
+		int checkResultOffset = static_cast<int>(m_lmDescription->checkAfbVersionsOffset(true));		// absolute address
+		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
+
+		////////////////////
 
 		code->comment_nl("AFBs implementation versions checking");
 

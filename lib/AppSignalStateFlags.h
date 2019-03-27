@@ -1,6 +1,24 @@
 #pragma once
 
 #include <QtGlobal>
+#include <type_traits>
+#include <QHash>
+
+enum class AppSignalStateFlagType
+{
+	Validity,
+	Simulated,
+	Locked,
+	Unbalanced,
+	AboveHighLimit,
+	BelowLowLimit
+
+};
+
+inline uint qHash(AppSignalStateFlagType t, uint seed)
+{
+	return ::qHash(static_cast<int>(t), seed);
+}
 
 #pragma pack(push, 1)
 
@@ -69,6 +87,8 @@ union AppSignalStateFlags
 	bool hasShortTermArchivingReasonOnly() const;
 
 	void updateArchivingReasonFlags(const AppSignalStateFlags& prevFlags);
+
+	static QString flagTypeStr(AppSignalStateFlagType type);
 
 	static const quint32 MASK_VALIDITY_AND_AVAILABLE_FLAGS = 0x00000003;
 	static const quint32 MASK_SIM_LOCK_UNBL_FLAGS = 0x0000001C;

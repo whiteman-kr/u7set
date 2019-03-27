@@ -1,4 +1,5 @@
 #include "AppSignalStateFlags.h"
+#include <QString>
 
 void AppSignalStateFlags::clear()
 {
@@ -32,4 +33,32 @@ void AppSignalStateFlags::updateArchivingReasonFlags(const AppSignalStateFlags& 
 	limitFlagsChange = (changedFlags & MASK_LIMITS_FLAGS) == 0 ? 0 : 1;
 }
 
+
+QString AppSignalStateFlags::flagTypeStr(AppSignalStateFlagType type)
+{
+	switch(type)
+	{
+	case AppSignalStateFlagType::Validity:
+		return "Validity";
+
+	case AppSignalStateFlagType::Simulated:
+		return "Simulated";
+
+	case AppSignalStateFlagType::Locked:
+		return "Locked";
+
+	case AppSignalStateFlagType::Unbalanced:
+		return "Unbalanced";
+
+	case AppSignalStateFlagType::AboveHighLimit:
+		return "AboveHighLimit";
+
+	case AppSignalStateFlagType::BelowLowLimit:
+		return "BelowLowLimit";
+	}
+
+	assert(false);
+
+	return "???";
+}
 

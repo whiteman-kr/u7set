@@ -522,6 +522,8 @@ namespace Builder
 
 		UalSignal* getBusChildSignal(const QString& busSignalID);
 
+		void setAcquired(bool acquired);
+
 	private:
 		const UalItem* m_ualItem = nullptr;
 		Signal* m_autoSignalPtr = nullptr;
@@ -563,6 +565,14 @@ namespace Builder
 		Address16 m_ualAddr;
 		Address16 m_regBufAddr;
 		Address16 m_regValueAddr;
+
+		struct FlagSignal
+		{
+			AppSignalStateFlagType flagType;
+			UalSignal* flagSignal;
+		};
+
+		QHash<AppSignalStateFlagType, UalSignal*> m_flagSignals;
 	};
 
 	class UalSignalsMap: public QObject, private QHash<UalSignal*, UalSignal*>
