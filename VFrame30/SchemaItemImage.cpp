@@ -19,6 +19,7 @@ namespace VFrame30
 	{
 		Property* p;
 
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::allowScale, PropertyNames::appearanceCategory, true, SchemaItemImage::allowScale, SchemaItemImage::setAllowScale);
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::keepAspectRatio, PropertyNames::appearanceCategory, true, SchemaItemImage::keepAspectRatio, SchemaItemImage::setKeepAspectRatio);
 
 		p = ADD_PROPERTY_GET_SET_CAT(QImage, PropertyNames::image, PropertyNames::imageCategory, true, SchemaItemImage::image, SchemaItemImage::setImage);
@@ -57,6 +58,7 @@ namespace VFrame30
 		//
 		Proto::SchemaItemImage* imageMessage = message->mutable_schemaitem()->mutable_image();
 
+		imageMessage->set_allowscale(m_allowScale);
 		imageMessage->set_keepaspectratio(m_keepAspectRatio);
 
 		if (m_image.isNull() == false)
@@ -108,6 +110,7 @@ namespace VFrame30
 
 		const Proto::SchemaItemImage& imageMessage = message.schemaitem().image();
 
+		m_allowScale = imageMessage.allowscale();
 		m_keepAspectRatio = imageMessage.keepaspectratio();
 
 		if (imageMessage.has_imagedata() == true)
@@ -175,22 +178,47 @@ namespace VFrame30
 
 	void SchemaItemImage::drawImage(CDrawParam* drawParam, const QRectF& rect) const
 	{
-		if (m_keepAspectRatio == true)
+		if (allowScale() == true)
 		{
-			QRectF imageRect = rect;
+			if (m_keepAspectRatio == true)
+			{
+				QRectF imageRect = rect;
 
-			QSizeF imageSize = m_image.size();	// m_image.size() / m_image.devicePixelRatio();
-			imageSize.scale(imageRect.width(), imageRect.height(), Qt::KeepAspectRatio);
+				QSizeF imageSize = m_image.size();	// m_image.size() / m_image.devicePixelRatio();
+				imageSize.scale(imageRect.width(), imageRect.height(), Qt::KeepAspectRatio);
 
-			imageRect.setSize(imageSize);
-			imageRect.translate(std::fabs(rect.width() - imageRect.width()) / 2,
-								std::fabs(rect.height() - imageRect.height()) / 2);
+				imageRect.setSize(imageSize);
+				imageRect.translate(std::fabs(rect.width() - imageRect.width()) / 2,
+									std::fabs(rect.height() - imageRect.height()) / 2);
 
-			drawParam->painter()->drawImage(imageRect, m_image, QRectF(0, 0, m_image.width(), m_image.height()));
+				drawParam->painter()->drawImage(imageRect, m_image, QRectF(0, 0, m_image.width(), m_image.height()));
+			}
+			else
+			{
+				drawParam->painter()->drawImage(rect, m_image, QRectF(0, 0, m_image.width(), m_image.height()));
+			}
 		}
 		else
 		{
-			drawParam->painter()->drawImage(rect, m_image, QRectF(0, 0, m_image.width(), m_image.height()));
+			QRectF imageRect{rect.left(), rect.top(), static_cast<qreal>(m_image.width()), static_cast<qreal>(m_image.height())};
+
+			switch (itemUnit())
+			{
+			case SchemaUnit::Display:
+				// Do nothing
+				//
+				break;
+			case SchemaUnit::Inch:
+				// in this case - size of the image depends on monitor DPI and IT CAN LOOK DIFFERENT FOR SEVERAL MONITORS WITH DIFFERENT DPI!!!
+				//
+				imageRect.setWidth(imageRect.width() / drawParam->dpiX());
+				imageRect.setHeight(imageRect.height() / drawParam->dpiY());
+				break;
+			default:
+				assert(false);
+			}
+
+			drawParam->painter()->drawImage(imageRect, m_image, QRectF(0, 0, m_image.width(), m_image.height()));
 		}
 
 		return;
@@ -217,6 +245,8 @@ namespace VFrame30
 			return;
 		}
 
+		// Keepn in midnd, autoscale == false does not work for SVG
+		//
 		QRectF imageRect = rect;
 
 		if (m_keepAspectRatio == true)
@@ -264,6 +294,18 @@ namespace VFrame30
 
 	// Properties and Data
 	//
+
+	// AllowScale
+	//
+	bool SchemaItemImage::allowScale() const
+	{
+		return m_allowScale;
+	}
+
+	void SchemaItemImage::setAllowScale(bool value)
+	{
+		m_allowScale = value;
+	}
 
 	// KeepAspectRatio
 	//

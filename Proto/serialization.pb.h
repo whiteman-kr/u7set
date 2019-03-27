@@ -3872,6 +3872,13 @@ class SchemaItemImage : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
+  // optional bool allowScale = 1 [default = true];
+  inline bool has_allowscale() const;
+  inline void clear_allowscale();
+  static const int kAllowScaleFieldNumber = 1;
+  inline bool allowscale() const;
+  inline void set_allowscale(bool value);
+
   // optional bool keepAspectRatio = 2 [default = true];
   inline bool has_keepaspectratio() const;
   inline void clear_keepaspectratio();
@@ -3905,6 +3912,8 @@ class SchemaItemImage : public ::google::protobuf::Message {
 
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemImage)
  private:
+  inline void set_has_allowscale();
+  inline void clear_has_allowscale();
   inline void set_has_keepaspectratio();
   inline void clear_has_keepaspectratio();
   inline void set_has_imagedata();
@@ -3916,10 +3925,11 @@ class SchemaItemImage : public ::google::protobuf::Message {
 
   ::std::string* imagedata_;
   ::std::string* svgdata_;
+  bool allowscale_;
   bool keepaspectratio_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -17016,15 +17026,37 @@ inline void SchemaItemPath::set_linecolor(::google::protobuf::uint32 value) {
 
 // SchemaItemImage
 
-// optional bool keepAspectRatio = 2 [default = true];
-inline bool SchemaItemImage::has_keepaspectratio() const {
+// optional bool allowScale = 1 [default = true];
+inline bool SchemaItemImage::has_allowscale() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void SchemaItemImage::set_has_keepaspectratio() {
+inline void SchemaItemImage::set_has_allowscale() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void SchemaItemImage::clear_has_keepaspectratio() {
+inline void SchemaItemImage::clear_has_allowscale() {
   _has_bits_[0] &= ~0x00000001u;
+}
+inline void SchemaItemImage::clear_allowscale() {
+  allowscale_ = true;
+  clear_has_allowscale();
+}
+inline bool SchemaItemImage::allowscale() const {
+  return allowscale_;
+}
+inline void SchemaItemImage::set_allowscale(bool value) {
+  set_has_allowscale();
+  allowscale_ = value;
+}
+
+// optional bool keepAspectRatio = 2 [default = true];
+inline bool SchemaItemImage::has_keepaspectratio() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SchemaItemImage::set_has_keepaspectratio() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SchemaItemImage::clear_has_keepaspectratio() {
+  _has_bits_[0] &= ~0x00000002u;
 }
 inline void SchemaItemImage::clear_keepaspectratio() {
   keepaspectratio_ = true;
@@ -17040,13 +17072,13 @@ inline void SchemaItemImage::set_keepaspectratio(bool value) {
 
 // optional bytes imageData = 8;
 inline bool SchemaItemImage::has_imagedata() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
+  return (_has_bits_[0] & 0x00000004u) != 0;
 }
 inline void SchemaItemImage::set_has_imagedata() {
-  _has_bits_[0] |= 0x00000002u;
+  _has_bits_[0] |= 0x00000004u;
 }
 inline void SchemaItemImage::clear_has_imagedata() {
-  _has_bits_[0] &= ~0x00000002u;
+  _has_bits_[0] &= ~0x00000004u;
 }
 inline void SchemaItemImage::clear_imagedata() {
   if (imagedata_ != &::google::protobuf::internal::kEmptyString) {
@@ -17110,13 +17142,13 @@ inline void SchemaItemImage::set_allocated_imagedata(::std::string* imagedata) {
 
 // optional string svgData = 9;
 inline bool SchemaItemImage::has_svgdata() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+  return (_has_bits_[0] & 0x00000008u) != 0;
 }
 inline void SchemaItemImage::set_has_svgdata() {
-  _has_bits_[0] |= 0x00000004u;
+  _has_bits_[0] |= 0x00000008u;
 }
 inline void SchemaItemImage::clear_has_svgdata() {
-  _has_bits_[0] &= ~0x00000004u;
+  _has_bits_[0] &= ~0x00000008u;
 }
 inline void SchemaItemImage::clear_svgdata() {
   if (svgdata_ != &::google::protobuf::internal::kEmptyString) {
