@@ -41,7 +41,7 @@ namespace Tuning
 	public:
 		bool buildTuningSignalsLists(HashedVector<QString, Signal*> lmAssociatedSignals, Builder::IssueLogger* log);
 
-		virtual bool buildTuningData();
+		virtual void buildTuningData();
 		virtual void getTuningData(QByteArray* tuningData) const;
 
 		quint64 generateUniqueID(const QString& lmEquipmentID);

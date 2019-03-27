@@ -3277,16 +3277,21 @@ namespace Builder
 
 		// common code for IPEN (FotipV1) and FotipV2 tuning protocols and data
 		//
-		bool result = true;
-
-		result &= tuningData->buildTuningSignalsLists(m_chassisSignals, m_log);
-
 		bool tuningEnabled = false;
 
-		bool res = isTuningEnabled(&tuningEnabled);
+		bool result = isTuningEnabled(&tuningEnabled);
 
-		if (res == false)
+		if (result == false)
 		{
+			delete tuningData;
+			return false;
+		}
+
+		result = tuningData->buildTuningSignalsLists(m_chassisSignals, m_log);
+
+		if (result == false)
+		{
+			delete tuningData;
 			return false;
 		}
 
@@ -3310,10 +3315,10 @@ namespace Builder
 			}
 		}
 
-		result &= tuningData->buildTuningData();
-
-		if (result == true)
+		if (tuningEnabled == true)
 		{
+			tuningData->buildTuningData();
+
 			int tuningFrameCount = m_lmDescription->flashMemory().m_tuningFrameCount;
 
 			if (tuningData->usedFramesCount() > tuningFrameCount)
@@ -3333,7 +3338,7 @@ namespace Builder
 			}
 		}
 
-		if (result == false)
+		if (result == false || tuningEnabled == false)
 		{
 			delete tuningData;
 		}
@@ -3352,6 +3357,12 @@ namespace Builder
 		{
 			assert(false);
 			return false;
+		}
+
+		if (DeviceHelper::isPropertyExists(adapter, DataSource::LmEthernetAdapterProperties::PROP_TUNING_ENABLE) == false)
+		{
+			*tuningEnabled = false;
+			return true;
 		}
 
 		bool res = DeviceHelper::getBoolProperty(adapter,
