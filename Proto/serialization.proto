@@ -491,7 +491,7 @@ message SchemaItemPath
 //
 message SchemaItemImage
 {
-    //optional bool allowScale = 1 [default = true];		 reserve, now not used anywhere
+    optional bool allowScale = 1 [default = true];
 	optional bool keepAspectRatio = 2 [default = true];
 	optional bytes imageData = 8;
 	optional string svgData = 9;

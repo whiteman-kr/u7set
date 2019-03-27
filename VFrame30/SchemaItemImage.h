@@ -2,12 +2,9 @@
 
 #include "PosRectImpl.h"
 #include "FontParam.h"
-#include <QXmlStreamReader>
 #include <QSvgRenderer>
 #include <optional>
 
-class QPen;
-class QBrush;
 
 namespace VFrame30
 {
@@ -47,6 +44,9 @@ namespace VFrame30
 		// Properties and Data
 		//
 	public:
+		bool allowScale() const;
+		void setAllowScale(bool value);
+
 		bool keepAspectRatio() const;
 		void setKeepAspectRatio(bool value);
 
@@ -57,6 +57,7 @@ namespace VFrame30
 		void setSvgData(QString data);
 
 	private:
+		bool m_allowScale = true;
 		bool m_keepAspectRatio = true;
 
 		QImage m_image;
