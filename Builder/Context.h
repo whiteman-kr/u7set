@@ -29,6 +29,9 @@ namespace Builder
 		Context& operator=(const Context&) = delete;
 		Context& operator=(Context&&) = delete;
 
+		bool generateAppSignalsXml() const;
+		bool generateExtraDebugInfo()const;
+
 	public:
 		mutable IssueLogger* m_log = nullptr;
 

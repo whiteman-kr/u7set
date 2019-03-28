@@ -63,7 +63,7 @@ namespace Hardware
 		channelData.descriptionFields = fields;
 	}
 
-	bool ModuleFirmwareWriter::setChannelData(const QString& subsysId, int uartId, QString equipmentID, int channel, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& binaryData, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger* log)
+	bool ModuleFirmwareWriter::setChannelData(const QString& subsysId, int uartId, QString equipmentID, int lmNumber, int frameSize, int frameCount, quint64 uniqueID, const QByteArray& binaryData, const std::vector<QVariantList>& descriptionData, Builder::IssueLogger* log)
 	{
 		if (log == nullptr)
 		{
@@ -85,13 +85,13 @@ namespace Hardware
 
 		if (sf.eepromFramePayloadSize(uartId) != frameSize)
 		{
-			log->errINT1000(QString("FirmwareWriter::setChannelData error, LM number %1: wrong frameSize (%2), expected %3.").arg(channel).arg(frameSize).arg(sf.eepromFramePayloadSize(uartId)));
+			log->errINT1000(QString("FirmwareWriter::setChannelData error, LM number %1: wrong frameSize (%2), expected %3.").arg(lmNumber).arg(frameSize).arg(sf.eepromFramePayloadSize(uartId)));
 			return false;
 		}
 
 		if (sf.eepromFrameCount(uartId) != frameCount)
 		{
-			log->errINT1000(QString("FirmwareWriter::setChannelData error, LM number %1: wrong frameCount (%2), expected %3.").arg(channel).arg(frameSize).arg(sf.eepromFramePayloadSize(uartId)));
+			log->errINT1000(QString("FirmwareWriter::setChannelData error, LM number %1: wrong frameCount (%2), expected %3.").arg(lmNumber).arg(frameSize).arg(sf.eepromFramePayloadSize(uartId)));
 			return false;
 		}
 
@@ -101,17 +101,17 @@ namespace Hardware
 
 		// Check if data for this channel already exists
 
-		if (channelData.binaryDataMap.find(channel) != channelData.binaryDataMap.end())
+		if (channelData.binaryDataMap.find(lmNumber) != channelData.binaryDataMap.end())
 		{
-			log->errCFG3003(channel, equipmentID);
+			log->errCFG3003(lmNumber, equipmentID);
 			return false;
 		}
 
-		channelData.uniqueIdMap[channel] = uniqueID;
+		channelData.uniqueIdMap[lmNumber] = uniqueID;
 
-		channelData.descriptonDataMap[channel] = descriptionData;
+		channelData.descriptonDataMap[lmNumber] = descriptionData;
 
-		channelData.binaryDataMap[channel] = binaryData;
+		channelData.binaryDataMap[lmNumber] = binaryData;
 
 		return true;
 	}
