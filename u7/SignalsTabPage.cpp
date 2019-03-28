@@ -808,7 +808,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 {
 	int row = index.row();
 	int col = index.column();
-	if (row == m_signalSet.count())
+	if (row == m_signalSet.count() || m_signalSet.valuePtrByIndex(row) == nullptr)
 	{
 		return QVariant();
 	}
@@ -1653,6 +1653,121 @@ void SignalsModel::deleteSignal(int signalID)
 	changeCheckedoutSignalActionsVisibility();
 }
 
+void SignalsModel::initLazyLoadSignals()
+{
+	m_partialLoading = true;
+
+	QVector<int> signalIds;
+	dbController()->getSignalsIDs(&signalIds, m_parentWindow);
+
+	for (int id : signalIds)
+	{
+		m_signalSet.SignalPtrOrderedHash::append(id, nullptr);
+	}
+
+	QVector<Signal> signalsArray;
+	signalsArray.reserve(250);
+	dbController()->getLatestSignalsWithoutProgress(signalIds.mid(0, 250), &signalsArray, m_parentWindow);
+
+	for (const Signal& loadedSignal : signalsArray)
+	{
+		m_signalSet.append(loadedSignal.ID(), new Signal(loadedSignal));
+	}
+
+	if (m_signalSet.count() > 0)
+	{
+		beginInsertRows(QModelIndex(), 0, m_signalSet.count() - 1);
+		endInsertRows();
+	}
+}
+
+void SignalsModel::finishLoadSignals()
+{
+	if (m_partialLoading == true)
+	{
+		QVector<int> signalIds;
+		for (int i = 0; i < m_signalSet.count(); i++)
+		{
+			if (m_signalSet.valuePtrByIndex(i) == nullptr)
+			{
+				signalIds.push_back(m_signalSet.key(i));
+			}
+		}
+
+		if (signalIds.count() > 0)
+		{
+			QVector<Signal> signalsToLoad;
+			signalsToLoad.reserve(signalIds.count());
+
+			dbController()->getLatestSignals(signalIds, &signalsToLoad, m_parentWindow);
+
+			for (const Signal& loadedSignal: signalsToLoad)
+			{
+				m_signalSet.append(loadedSignal.ID(), new Signal(loadedSignal));
+			}
+		}
+	}
+
+	m_partialLoading = false;
+
+	emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, columnCount() - 1), QVector<int>() << Qt::EditRole << Qt::DisplayRole);
+	emit signalsLoadingFinished();
+}
+
+void SignalsModel::loadNextSignalsPortion()
+{
+	int middleRow = m_parentWindow->getMiddleVisibleRow();
+
+	QVector<int> signalIds;
+	signalIds.reserve(250);
+	int low = middleRow - 1;
+	int high = middleRow;
+	while ((low >= 0 || high < rowCount()) && signalIds.count() <= 248)
+	{
+		while (low >= 0 && m_signalSet.valuePtrByIndex(low) != nullptr)
+		{
+			low--;
+		}
+
+		if (low >= 0)
+		{
+			signalIds.push_back(m_signalSet.key(low));
+			low--;
+		}
+
+		while (high < rowCount() && m_signalSet.valuePtrByIndex(high) != nullptr)
+		{
+			high++;
+		}
+
+		if (high < rowCount())
+		{
+			signalIds.push_back(m_signalSet.key(high));
+			high++;
+		}
+	}
+
+	if (signalIds.count() > 0)
+	{
+		QVector<Signal> signalsToLoad;
+		signalsToLoad.reserve(signalIds.count());
+
+		dbController()->getLatestSignals(signalIds, &signalsToLoad, m_parentWindow);
+
+		for (const Signal& loadedSignal: signalsToLoad)
+		{
+			m_signalSet.append(loadedSignal.ID(), new Signal(loadedSignal));
+		}
+	}
+	else
+	{
+		m_partialLoading = false;
+
+		emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, columnCount() - 1), QVector<int>() << Qt::EditRole << Qt::DisplayRole);
+		emit signalsLoadingFinished();
+	}
+}
+
 DbController *SignalsModel::dbController()
 {
 	return m_dbController;
@@ -1733,7 +1848,6 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsProxyModel = new SignalsProxyModel(m_signalsModel, this);
 	m_signalsView = new QTableView(this);
 	m_signalsView->setModel(m_signalsProxyModel);
-	m_signalsView->setSortingEnabled(true);
 	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight | Qt::AlignVCenter);
 	m_signalsView->verticalHeader()->setFixedWidth(DEFAULT_COLUMN_WIDTH);
 	SignalsDelegate* delegate = m_signalsModel->createDelegate(m_signalsProxyModel);
@@ -1742,6 +1856,9 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	QHeaderView* horizontalHeader = m_signalsView->horizontalHeader();
 	m_signalsView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
 	horizontalHeader->setHighlightSections(false);
+
+	horizontalHeader->setSortIndicator(-1, Qt::AscendingOrder);
+	m_signalsView->setSortingEnabled(true);
 
 	horizontalHeader->setDefaultSectionSize(150);
 
@@ -1766,6 +1883,14 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	connect(m_signalsModel, &SignalsModel::aboutToClearSignals, this, &SignalsTabPage::saveSelection);
 	connect(m_signalsModel, &SignalsModel::signalsRestored, this, &SignalsTabPage::restoreSelection);
+
+	m_loadSignalsTimer = new QTimer(this);
+
+	connect(m_loadSignalsTimer, &QTimer::timeout, m_signalsModel, &SignalsModel::loadNextSignalsPortion);
+	connect(m_signalsProxyModel, &SignalsProxyModel::aboutToSort, m_signalsModel, &SignalsModel::finishLoadSignals, Qt::DirectConnection);
+	connect(m_signalsProxyModel, &SignalsProxyModel::aboutToFilter, m_signalsModel, &SignalsModel::finishLoadSignals, Qt::DirectConnection);
+	connect(m_signalsView->verticalScrollBar(), &QScrollBar::valueChanged, m_signalsModel, &SignalsModel::loadNextSignalsPortion, Qt::DirectConnection);
+	connect(m_signalsModel, &SignalsModel::signalsLoadingFinished, this, &SignalsTabPage::stopLoadingSignals);
 
 	// Create Actions
 	//
@@ -1982,6 +2107,12 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 	return result;
 }
 
+int SignalsTabPage::getMiddleVisibleRow()
+{
+	QRect rect = m_signalsView->viewport()->rect();
+	return m_signalsView->indexAt(rect.center()).row();
+}
+
 void SignalsTabPage::CreateActions(QToolBar *toolBar)
 {
 	QAction* action = nullptr;
@@ -2068,7 +2199,7 @@ void SignalsTabPage::projectOpened()
 {
 	this->setEnabled(true);
 
-	m_signalsModel->loadSignals();
+	m_signalsModel->initLazyLoadSignals();
 }
 
 void SignalsTabPage::projectClosed()
@@ -2076,6 +2207,43 @@ void SignalsTabPage::projectClosed()
 	this->setEnabled(false);
 
 	m_signalsModel->clearSignals();
+}
+
+void SignalsTabPage::onTabPageChanged()
+{
+	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(sender());
+	if (tabWidget == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	if (m_loadSignalsTimer == nullptr)
+	{
+		disconnect(tabWidget, &QTabWidget::currentChanged, this, &SignalsTabPage::onTabPageChanged);
+		return;
+	}
+
+	if (tabWidget->currentWidget() == this)
+	{
+		m_loadSignalsTimer->start(100);
+	}
+	else
+	{
+		m_loadSignalsTimer->stop();
+	}
+}
+
+void SignalsTabPage::stopLoadingSignals()
+{
+	disconnect(m_loadSignalsTimer, &QTimer::timeout, m_signalsModel, &SignalsModel::loadNextSignalsPortion);
+	disconnect(m_signalsProxyModel, &SignalsProxyModel::aboutToSort, m_signalsModel, &SignalsModel::finishLoadSignals);
+	disconnect(m_signalsProxyModel, &SignalsProxyModel::aboutToFilter, m_signalsModel, &SignalsModel::finishLoadSignals);
+	disconnect(m_signalsView->verticalScrollBar(), &QScrollBar::valueChanged, m_signalsModel, &SignalsModel::loadNextSignalsPortion);
+	disconnect(m_signalsModel, &SignalsModel::finishLoadSignals, this, &SignalsTabPage::stopLoadingSignals);
+
+	m_loadSignalsTimer->deleteLater();
+	m_loadSignalsTimer = nullptr;
 }
 
 void SignalsTabPage::editSignal()
@@ -2952,11 +3120,12 @@ bool SignalsProxyModel::lessThan(const QModelIndex &source_left, const QModelInd
 
 void SignalsProxyModel::setSignalTypeFilter(int signalType)
 {
+
 	if (m_signalType != signalType)
 	{
 		m_signalType = signalType;
 
-		invalidateFilter();
+		applyNewFilter();
 	}
 }
 
@@ -2982,7 +3151,7 @@ void SignalsProxyModel::setSignalIdFilter(QStringList strIds)
 	{
 		m_strIdMasks = strIds;
 
-		invalidateFilter();
+		applyNewFilter();
 	}
 }
 
@@ -2992,6 +3161,20 @@ void SignalsProxyModel::setIdFilterField(int field)
 	{
 		m_idFilterField = field;
 
-		invalidateFilter();
+		applyNewFilter();
 	}
+}
+
+void SignalsProxyModel::sort(int column, Qt::SortOrder order)
+{
+	emit aboutToSort();
+
+	QSortFilterProxyModel::sort(column, order);
+}
+
+void SignalsProxyModel::applyNewFilter()
+{
+	emit aboutToFilter();
+
+	invalidateFilter();
 }

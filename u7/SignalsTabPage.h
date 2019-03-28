@@ -130,8 +130,12 @@ signals:
 	void setCheckedoutSignalActionsVisibility(bool state);
 	void aboutToClearSignals();
 	void signalsRestored(int focusedSignalId = -1);
+	void signalsLoadingFinished();
 
 public slots:
+	void initLazyLoadSignals();
+	void finishLoadSignals();
+	void loadNextSignalsPortion();
 	void loadSignals();
 	void loadSignalSet(QVector<int> keys, bool updateView = true);
 	void loadSignal(int signalId, bool updateView = true);
@@ -143,6 +147,7 @@ private:
 	//
 	SignalSet m_signalSet;
 	QMap<int, QString> m_usernameMap;
+	bool m_partialLoading = true;
 
 	SignalsTabPage* m_parentWindow;
 	DbController* m_dbController;
@@ -169,7 +174,16 @@ public:
 	void setSignalIdFilter(QStringList strIds);
 	void setIdFilterField(int field);
 
+signals:
+	void aboutToSort();
+	void aboutToFilter();
+
+protected:
+	void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+
 private:
+	void applyNewFilter();
+
 	SignalsModel* m_sourceModel;
 	int m_signalType = ST_ANY;
 	int m_idFilterField = FI_EQUIPMENT_ID;
@@ -254,6 +268,7 @@ public:
 	virtual ~SignalsTabPage();
 
 	static bool updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties);
+	int getMiddleVisibleRow();
 
 protected:
 	void CreateActions(QToolBar* toolBar);
@@ -270,6 +285,9 @@ signals:
 public slots:
 	void projectOpened();
 	void projectClosed();
+
+	void onTabPageChanged();
+	void stopLoadingSignals();
 
 	void editSignal();
 	void cloneSignal();
@@ -300,6 +318,7 @@ private:
 	static SignalsTabPage* m_instance;
 	SignalsModel* m_signalsModel = nullptr;
 	SignalsProxyModel* m_signalsProxyModel = nullptr;
+	QTimer* m_loadSignalsTimer = nullptr;
 	QTableView* m_signalsView = nullptr;
 	QComboBox* m_signalTypeFilterCombo = nullptr;
 	QComboBox* m_signalIdFieldCombo = nullptr;

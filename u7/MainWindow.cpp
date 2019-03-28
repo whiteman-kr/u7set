@@ -67,6 +67,8 @@ MainWindow::MainWindow(DbController* dbcontroller, QWidget* parent) :
 	getCentralWidget()->addTabPage(m_equipmentTab, tr("Equipment"));
 	getCentralWidget()->addTabPage(m_signalsTab, tr("Application Signals"));
 
+	connect(getCentralWidget(), &QTabWidget::currentChanged, m_signalsTab, &SignalsTabPage::onTabPageChanged);
+
 	m_filesTabPageIndex = getCentralWidget()->addTabPage(m_filesTabPage, m_filesTabPage->windowTitle());
 	getCentralWidget()->removeTab(m_filesTabPageIndex);	// It will be added in projectOpened slot if required
 
