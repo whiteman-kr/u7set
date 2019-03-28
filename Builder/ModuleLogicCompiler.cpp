@@ -6023,22 +6023,6 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
-		///
-
-		return true;
-
-		///
-
-		if (m_lmDescription->checkAfbVersions() == false)
-		{
-			return true;
-		}
-
-		int checkResultOffset = static_cast<int>(m_lmDescription->checkAfbVersionsOffset(true));		// absolute address
-		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
-
-		////////////////////
-
 		code->comment_nl("AFBs implementation versions checking");
 
 		const std::map<int, std::shared_ptr<Afb::AfbComponent>>& components = m_lmDescription->afbComponents();
