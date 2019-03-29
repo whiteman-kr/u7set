@@ -404,6 +404,7 @@ message SchemaItem
 	optional SchemaItemUfb ufb = 134;						// +FblItemRect
 	optional SchemaItemTerminator terminator = 135;			// +FblItemRect
 	optional SchemaItemValue Value = 136;					// +PosRectImpl
+	optional SchemaItemImageValue ImageValue = 137;			// +PosRectImpl
 
     optional SchemaItemBus BusItem = 150;					// +FblItemRect
 	optional SchemaItemBusComposer BusComposer = 151;		// +SchemaItemBus, FblItemRect
@@ -496,6 +497,7 @@ message SchemaItemImage
 	optional bytes imageData = 8;
 	optional string svgData = 9;
 }
+
 
 //
 // FblConnectionPoint
@@ -686,6 +688,19 @@ message SchemaItemValue
 
     optional int32 precision = 13 [default = -1];		// -1: Take precision value from signal description
 	optional int32 analogFormat = 14 [default = 102];	// Default 102 (charcode for 'f') is AnalogFormat::f (format as [-]9.9)
+}
+
+//
+// SchemaItemImageValue
+//
+message SchemaItemImageValue
+{
+    optional string signalIds = 1;
+	optional int32 signalSource = 2 [default = 0];
+
+    optional bool keepAspectRatio = 6 [default = true];
+//	optional bytes imageData = 8;
+//	optional string svgData = 9;
 }
 
 //

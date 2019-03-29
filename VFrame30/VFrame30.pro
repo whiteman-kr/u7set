@@ -122,7 +122,8 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/SignalProperties.h \
     ../lib/XmlHelper.h \
     TuningSchema.h \
-    SchemaItemImage.h
+    SchemaItemImage.h \
+    SchemaItemImageValue.h
 
 SOURCES += \
     Settings.cpp \
@@ -189,7 +190,8 @@ SOURCES += \
     ../lib/SignalProperties.cpp \
     ../lib/XmlHelper.cpp \
     TuningSchema.cpp \
-    SchemaItemImage.cpp
+    SchemaItemImage.cpp \
+    SchemaItemImageValue.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

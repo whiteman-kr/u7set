@@ -78,6 +78,7 @@ class SchemaItemReceiver;
 class SchemaItemUfb;
 class SchemaItemTerminator;
 class SchemaItemValue;
+class SchemaItemImageValue;
 class SchemaItemBus;
 class SchemaItemBusComposer;
 class SchemaItemBusExtractor;
@@ -2927,6 +2928,15 @@ class SchemaItem : public ::google::protobuf::Message {
   inline ::Proto::SchemaItemValue* release_value();
   inline void set_allocated_value(::Proto::SchemaItemValue* value);
 
+  // optional .Proto.SchemaItemImageValue ImageValue = 137;
+  inline bool has_imagevalue() const;
+  inline void clear_imagevalue();
+  static const int kImageValueFieldNumber = 137;
+  inline const ::Proto::SchemaItemImageValue& imagevalue() const;
+  inline ::Proto::SchemaItemImageValue* mutable_imagevalue();
+  inline ::Proto::SchemaItemImageValue* release_imagevalue();
+  inline void set_allocated_imagevalue(::Proto::SchemaItemImageValue* imagevalue);
+
   // optional .Proto.SchemaItemBus BusItem = 150;
   inline bool has_busitem() const;
   inline void clear_busitem();
@@ -3074,6 +3084,8 @@ class SchemaItem : public ::google::protobuf::Message {
   inline void clear_has_terminator();
   inline void set_has_value();
   inline void clear_has_value();
+  inline void set_has_imagevalue();
+  inline void clear_has_imagevalue();
   inline void set_has_busitem();
   inline void clear_has_busitem();
   inline void set_has_buscomposer();
@@ -3127,6 +3139,7 @@ class SchemaItem : public ::google::protobuf::Message {
   ::Proto::SchemaItemUfb* ufb_;
   ::Proto::SchemaItemTerminator* terminator_;
   ::Proto::SchemaItemValue* value_;
+  ::Proto::SchemaItemImageValue* imagevalue_;
   ::Proto::SchemaItemBus* busitem_;
   ::Proto::SchemaItemBusComposer* buscomposer_;
   ::Proto::SchemaItemBusExtractor* busextractor_;
@@ -3138,7 +3151,7 @@ class SchemaItem : public ::google::protobuf::Message {
   ::Proto::SchemaItemLineEdit* lineedit_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(41 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(42 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -5942,6 +5955,113 @@ class SchemaItemValue : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static SchemaItemValue* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class SchemaItemImageValue : public ::google::protobuf::Message {
+ public:
+  SchemaItemImageValue();
+  virtual ~SchemaItemImageValue();
+
+  SchemaItemImageValue(const SchemaItemImageValue& from);
+
+  inline SchemaItemImageValue& operator=(const SchemaItemImageValue& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const SchemaItemImageValue& default_instance();
+
+  void Swap(SchemaItemImageValue* other);
+
+  // implements Message ----------------------------------------------
+
+  SchemaItemImageValue* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const SchemaItemImageValue& from);
+  void MergeFrom(const SchemaItemImageValue& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string signalIds = 1;
+  inline bool has_signalids() const;
+  inline void clear_signalids();
+  static const int kSignalIdsFieldNumber = 1;
+  inline const ::std::string& signalids() const;
+  inline void set_signalids(const ::std::string& value);
+  inline void set_signalids(const char* value);
+  inline void set_signalids(const char* value, size_t size);
+  inline ::std::string* mutable_signalids();
+  inline ::std::string* release_signalids();
+  inline void set_allocated_signalids(::std::string* signalids);
+
+  // optional int32 signalSource = 2 [default = 0];
+  inline bool has_signalsource() const;
+  inline void clear_signalsource();
+  static const int kSignalSourceFieldNumber = 2;
+  inline ::google::protobuf::int32 signalsource() const;
+  inline void set_signalsource(::google::protobuf::int32 value);
+
+  // optional bool keepAspectRatio = 6 [default = true];
+  inline bool has_keepaspectratio() const;
+  inline void clear_keepaspectratio();
+  static const int kKeepAspectRatioFieldNumber = 6;
+  inline bool keepaspectratio() const;
+  inline void set_keepaspectratio(bool value);
+
+  // @@protoc_insertion_point(class_scope:Proto.SchemaItemImageValue)
+ private:
+  inline void set_has_signalids();
+  inline void clear_has_signalids();
+  inline void set_has_signalsource();
+  inline void clear_has_signalsource();
+  inline void set_has_keepaspectratio();
+  inline void clear_has_keepaspectratio();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* signalids_;
+  ::google::protobuf::int32 signalsource_;
+  bool keepaspectratio_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static SchemaItemImageValue* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -16115,15 +16235,53 @@ inline void SchemaItem::set_allocated_value(::Proto::SchemaItemValue* value) {
   }
 }
 
-// optional .Proto.SchemaItemBus BusItem = 150;
-inline bool SchemaItem::has_busitem() const {
+// optional .Proto.SchemaItemImageValue ImageValue = 137;
+inline bool SchemaItem::has_imagevalue() const {
   return (_has_bits_[1] & 0x00000001u) != 0;
 }
-inline void SchemaItem::set_has_busitem() {
+inline void SchemaItem::set_has_imagevalue() {
   _has_bits_[1] |= 0x00000001u;
 }
-inline void SchemaItem::clear_has_busitem() {
+inline void SchemaItem::clear_has_imagevalue() {
   _has_bits_[1] &= ~0x00000001u;
+}
+inline void SchemaItem::clear_imagevalue() {
+  if (imagevalue_ != NULL) imagevalue_->::Proto::SchemaItemImageValue::Clear();
+  clear_has_imagevalue();
+}
+inline const ::Proto::SchemaItemImageValue& SchemaItem::imagevalue() const {
+  return imagevalue_ != NULL ? *imagevalue_ : *default_instance_->imagevalue_;
+}
+inline ::Proto::SchemaItemImageValue* SchemaItem::mutable_imagevalue() {
+  set_has_imagevalue();
+  if (imagevalue_ == NULL) imagevalue_ = new ::Proto::SchemaItemImageValue;
+  return imagevalue_;
+}
+inline ::Proto::SchemaItemImageValue* SchemaItem::release_imagevalue() {
+  clear_has_imagevalue();
+  ::Proto::SchemaItemImageValue* temp = imagevalue_;
+  imagevalue_ = NULL;
+  return temp;
+}
+inline void SchemaItem::set_allocated_imagevalue(::Proto::SchemaItemImageValue* imagevalue) {
+  delete imagevalue_;
+  imagevalue_ = imagevalue;
+  if (imagevalue) {
+    set_has_imagevalue();
+  } else {
+    clear_has_imagevalue();
+  }
+}
+
+// optional .Proto.SchemaItemBus BusItem = 150;
+inline bool SchemaItem::has_busitem() const {
+  return (_has_bits_[1] & 0x00000002u) != 0;
+}
+inline void SchemaItem::set_has_busitem() {
+  _has_bits_[1] |= 0x00000002u;
+}
+inline void SchemaItem::clear_has_busitem() {
+  _has_bits_[1] &= ~0x00000002u;
 }
 inline void SchemaItem::clear_busitem() {
   if (busitem_ != NULL) busitem_->::Proto::SchemaItemBus::Clear();
@@ -16155,13 +16313,13 @@ inline void SchemaItem::set_allocated_busitem(::Proto::SchemaItemBus* busitem) {
 
 // optional .Proto.SchemaItemBusComposer BusComposer = 151;
 inline bool SchemaItem::has_buscomposer() const {
-  return (_has_bits_[1] & 0x00000002u) != 0;
+  return (_has_bits_[1] & 0x00000004u) != 0;
 }
 inline void SchemaItem::set_has_buscomposer() {
-  _has_bits_[1] |= 0x00000002u;
+  _has_bits_[1] |= 0x00000004u;
 }
 inline void SchemaItem::clear_has_buscomposer() {
-  _has_bits_[1] &= ~0x00000002u;
+  _has_bits_[1] &= ~0x00000004u;
 }
 inline void SchemaItem::clear_buscomposer() {
   if (buscomposer_ != NULL) buscomposer_->::Proto::SchemaItemBusComposer::Clear();
@@ -16193,13 +16351,13 @@ inline void SchemaItem::set_allocated_buscomposer(::Proto::SchemaItemBusComposer
 
 // optional .Proto.SchemaItemBusExtractor BusExtractor = 152;
 inline bool SchemaItem::has_busextractor() const {
-  return (_has_bits_[1] & 0x00000004u) != 0;
+  return (_has_bits_[1] & 0x00000008u) != 0;
 }
 inline void SchemaItem::set_has_busextractor() {
-  _has_bits_[1] |= 0x00000004u;
+  _has_bits_[1] |= 0x00000008u;
 }
 inline void SchemaItem::clear_has_busextractor() {
-  _has_bits_[1] &= ~0x00000004u;
+  _has_bits_[1] &= ~0x00000008u;
 }
 inline void SchemaItem::clear_busextractor() {
   if (busextractor_ != NULL) busextractor_->::Proto::SchemaItemBusExtractor::Clear();
@@ -16231,13 +16389,13 @@ inline void SchemaItem::set_allocated_busextractor(::Proto::SchemaItemBusExtract
 
 // optional .Proto.SchemaItemLoopback LoopbackItem = 155;
 inline bool SchemaItem::has_loopbackitem() const {
-  return (_has_bits_[1] & 0x00000008u) != 0;
+  return (_has_bits_[1] & 0x00000010u) != 0;
 }
 inline void SchemaItem::set_has_loopbackitem() {
-  _has_bits_[1] |= 0x00000008u;
+  _has_bits_[1] |= 0x00000010u;
 }
 inline void SchemaItem::clear_has_loopbackitem() {
-  _has_bits_[1] &= ~0x00000008u;
+  _has_bits_[1] &= ~0x00000010u;
 }
 inline void SchemaItem::clear_loopbackitem() {
   if (loopbackitem_ != NULL) loopbackitem_->::Proto::SchemaItemLoopback::Clear();
@@ -16269,13 +16427,13 @@ inline void SchemaItem::set_allocated_loopbackitem(::Proto::SchemaItemLoopback* 
 
 // optional .Proto.SchemaItemLoopbackSource loopbackSource = 156;
 inline bool SchemaItem::has_loopbacksource() const {
-  return (_has_bits_[1] & 0x00000010u) != 0;
+  return (_has_bits_[1] & 0x00000020u) != 0;
 }
 inline void SchemaItem::set_has_loopbacksource() {
-  _has_bits_[1] |= 0x00000010u;
+  _has_bits_[1] |= 0x00000020u;
 }
 inline void SchemaItem::clear_has_loopbacksource() {
-  _has_bits_[1] &= ~0x00000010u;
+  _has_bits_[1] &= ~0x00000020u;
 }
 inline void SchemaItem::clear_loopbacksource() {
   if (loopbacksource_ != NULL) loopbacksource_->::Proto::SchemaItemLoopbackSource::Clear();
@@ -16307,13 +16465,13 @@ inline void SchemaItem::set_allocated_loopbacksource(::Proto::SchemaItemLoopback
 
 // optional .Proto.SchemaItemLoopbackTarget loopbackTarget = 157;
 inline bool SchemaItem::has_loopbacktarget() const {
-  return (_has_bits_[1] & 0x00000020u) != 0;
+  return (_has_bits_[1] & 0x00000040u) != 0;
 }
 inline void SchemaItem::set_has_loopbacktarget() {
-  _has_bits_[1] |= 0x00000020u;
+  _has_bits_[1] |= 0x00000040u;
 }
 inline void SchemaItem::clear_has_loopbacktarget() {
-  _has_bits_[1] &= ~0x00000020u;
+  _has_bits_[1] &= ~0x00000040u;
 }
 inline void SchemaItem::clear_loopbacktarget() {
   if (loopbacktarget_ != NULL) loopbacktarget_->::Proto::SchemaItemLoopbackTarget::Clear();
@@ -16345,13 +16503,13 @@ inline void SchemaItem::set_allocated_loopbacktarget(::Proto::SchemaItemLoopback
 
 // optional .Proto.SchemaItemControl control = 200;
 inline bool SchemaItem::has_control() const {
-  return (_has_bits_[1] & 0x00000040u) != 0;
+  return (_has_bits_[1] & 0x00000080u) != 0;
 }
 inline void SchemaItem::set_has_control() {
-  _has_bits_[1] |= 0x00000040u;
+  _has_bits_[1] |= 0x00000080u;
 }
 inline void SchemaItem::clear_has_control() {
-  _has_bits_[1] &= ~0x00000040u;
+  _has_bits_[1] &= ~0x00000080u;
 }
 inline void SchemaItem::clear_control() {
   if (control_ != NULL) control_->::Proto::SchemaItemControl::Clear();
@@ -16383,13 +16541,13 @@ inline void SchemaItem::set_allocated_control(::Proto::SchemaItemControl* contro
 
 // optional .Proto.SchemaItemPushButton pushButton = 210;
 inline bool SchemaItem::has_pushbutton() const {
-  return (_has_bits_[1] & 0x00000080u) != 0;
+  return (_has_bits_[1] & 0x00000100u) != 0;
 }
 inline void SchemaItem::set_has_pushbutton() {
-  _has_bits_[1] |= 0x00000080u;
+  _has_bits_[1] |= 0x00000100u;
 }
 inline void SchemaItem::clear_has_pushbutton() {
-  _has_bits_[1] &= ~0x00000080u;
+  _has_bits_[1] &= ~0x00000100u;
 }
 inline void SchemaItem::clear_pushbutton() {
   if (pushbutton_ != NULL) pushbutton_->::Proto::SchemaItemPushButton::Clear();
@@ -16421,13 +16579,13 @@ inline void SchemaItem::set_allocated_pushbutton(::Proto::SchemaItemPushButton* 
 
 // optional .Proto.SchemaItemLineEdit lineEdit = 211;
 inline bool SchemaItem::has_lineedit() const {
-  return (_has_bits_[1] & 0x00000100u) != 0;
+  return (_has_bits_[1] & 0x00000200u) != 0;
 }
 inline void SchemaItem::set_has_lineedit() {
-  _has_bits_[1] |= 0x00000100u;
+  _has_bits_[1] |= 0x00000200u;
 }
 inline void SchemaItem::clear_has_lineedit() {
-  _has_bits_[1] &= ~0x00000100u;
+  _has_bits_[1] &= ~0x00000200u;
 }
 inline void SchemaItem::clear_lineedit() {
   if (lineedit_ != NULL) lineedit_->::Proto::SchemaItemLineEdit::Clear();
@@ -19274,6 +19432,124 @@ inline ::google::protobuf::int32 SchemaItemValue::analogformat() const {
 inline void SchemaItemValue::set_analogformat(::google::protobuf::int32 value) {
   set_has_analogformat();
   analogformat_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// SchemaItemImageValue
+
+// optional string signalIds = 1;
+inline bool SchemaItemImageValue::has_signalids() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SchemaItemImageValue::set_has_signalids() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SchemaItemImageValue::clear_has_signalids() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SchemaItemImageValue::clear_signalids() {
+  if (signalids_ != &::google::protobuf::internal::kEmptyString) {
+    signalids_->clear();
+  }
+  clear_has_signalids();
+}
+inline const ::std::string& SchemaItemImageValue::signalids() const {
+  return *signalids_;
+}
+inline void SchemaItemImageValue::set_signalids(const ::std::string& value) {
+  set_has_signalids();
+  if (signalids_ == &::google::protobuf::internal::kEmptyString) {
+    signalids_ = new ::std::string;
+  }
+  signalids_->assign(value);
+}
+inline void SchemaItemImageValue::set_signalids(const char* value) {
+  set_has_signalids();
+  if (signalids_ == &::google::protobuf::internal::kEmptyString) {
+    signalids_ = new ::std::string;
+  }
+  signalids_->assign(value);
+}
+inline void SchemaItemImageValue::set_signalids(const char* value, size_t size) {
+  set_has_signalids();
+  if (signalids_ == &::google::protobuf::internal::kEmptyString) {
+    signalids_ = new ::std::string;
+  }
+  signalids_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemImageValue::mutable_signalids() {
+  set_has_signalids();
+  if (signalids_ == &::google::protobuf::internal::kEmptyString) {
+    signalids_ = new ::std::string;
+  }
+  return signalids_;
+}
+inline ::std::string* SchemaItemImageValue::release_signalids() {
+  clear_has_signalids();
+  if (signalids_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = signalids_;
+    signalids_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemImageValue::set_allocated_signalids(::std::string* signalids) {
+  if (signalids_ != &::google::protobuf::internal::kEmptyString) {
+    delete signalids_;
+  }
+  if (signalids) {
+    set_has_signalids();
+    signalids_ = signalids;
+  } else {
+    clear_has_signalids();
+    signalids_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 signalSource = 2 [default = 0];
+inline bool SchemaItemImageValue::has_signalsource() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SchemaItemImageValue::set_has_signalsource() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SchemaItemImageValue::clear_has_signalsource() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SchemaItemImageValue::clear_signalsource() {
+  signalsource_ = 0;
+  clear_has_signalsource();
+}
+inline ::google::protobuf::int32 SchemaItemImageValue::signalsource() const {
+  return signalsource_;
+}
+inline void SchemaItemImageValue::set_signalsource(::google::protobuf::int32 value) {
+  set_has_signalsource();
+  signalsource_ = value;
+}
+
+// optional bool keepAspectRatio = 6 [default = true];
+inline bool SchemaItemImageValue::has_keepaspectratio() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SchemaItemImageValue::set_has_keepaspectratio() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SchemaItemImageValue::clear_has_keepaspectratio() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SchemaItemImageValue::clear_keepaspectratio() {
+  keepaspectratio_ = true;
+  clear_has_keepaspectratio();
+}
+inline bool SchemaItemImageValue::keepaspectratio() const {
+  return keepaspectratio_;
+}
+inline void SchemaItemImageValue::set_keepaspectratio(bool value) {
+  set_has_keepaspectratio();
+  keepaspectratio_ = value;
 }
 
 // -------------------------------------------------------------------

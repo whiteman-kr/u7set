@@ -1,7 +1,6 @@
 #pragma once
 
 #include "PosRectImpl.h"
-#include "FontParam.h"
 #include <QSvgRenderer>
 #include <optional>
 
