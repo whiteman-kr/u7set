@@ -888,11 +888,6 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 		QTreeWidgetItem* item = new QTreeWidgetItem(l);
 		item->setData(0, Qt::UserRole, QVariant::fromValue(f));
 
-		if (f->isSourceEquipment() == true)
-		{
-			item->setData(1, Qt::UserRole, ::calcHash(f->caption()));
-		}
-
 		parent->addChild(item);
 
 		addChildTreeObjects(f, item, mask);
@@ -1110,11 +1105,26 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem)
 {
-	Hash hash = treeItem->data(1, Qt::UserRole).value<Hash>();
+	std::shared_ptr<TuningFilter> filter = treeItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+	if (filter == nullptr)
+	{
+		assert(filter);
+		return;
+	}
+
+	std::vector<Hash> equipmentHashes = filter->equipmentHashes();
+
+	if (equipmentHashes.size() != 1)
+	{
+		Q_ASSERT(filter);
+		return;
+	}
+
+	Hash hash = equipmentHashes[0];
 
 	assert(columnStatusIndex != -1);
 
-	int errorCounter = m_tuningTcpClient->sourceErrorCount(hash);
+	int errorCounter = filter->counters().errorCounter;
 
 	TuningSource ts;
 

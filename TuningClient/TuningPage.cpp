@@ -1303,12 +1303,9 @@ void TuningPage::apply()
 
 	// Get SOR counters
 
-	bool sorActive = false;
-	bool sorValid = false;
+	TuningCounters rootCounters = m_tuningFilterStorage->root()->counters();
 
-	int totalSorCount = m_tuningTcpClient->sourceSorCount(&sorActive, &sorValid);
-
-	if (totalSorCount > 0)
+	if (rootCounters.sorCounter > 0)
 	{
 		if (QMessageBox::warning(this, qAppName(),
 								 tr("Warning!!!\n\nSOR Signal(s) are set in logic modules!\n\nIf you apply these changes, module can run into RUN SAFE STATE.\n\nAre you sure you STILL WANT TO APPLY the changes?"),

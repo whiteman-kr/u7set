@@ -1334,25 +1334,6 @@ void TuningFilter::setColumnOutOfRange(bool value)
 	m_columnOutOfRange = value;
 }
 
-/*QByteArray TuningFilter::byteArray() const
-{
-	return m_byteArray;
-}
-
-void TuningFilter::setByteArray(QByteArray value)
-{
-	m_byteArray = value;
-}
-
-QImage TuningFilter::image() const
-{
-	return m_image;
-}
-
-void TuningFilter::setImage(QImage value)
-{
-	m_image = value;
-}*/
 
 TuningFilter* TuningFilter::parentFilter() const
 {

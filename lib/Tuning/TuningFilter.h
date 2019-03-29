@@ -224,12 +224,6 @@ public:
 	bool columnOutOfRange() const;
 	void setColumnOutOfRange(bool signalValue);
 
-	/*QByteArray byteArray() const;
-	void setByteArray(QByteArray value);
-
-	QImage image() const;
-	void setImage(QImage value);*/
-
 public:
 	// Operations
 	//
