@@ -1169,7 +1169,7 @@ bool TuningPage::write()
 		return false;
 	}
 
-	if (takeClientControl() == false)
+	if (m_tuningTcpClient->takeClientControl(this) == false)
 	{
 		return false;
 	}
@@ -1281,16 +1281,16 @@ bool TuningPage::write()
 	return true;
 }
 
-bool TuningPage::apply()
+void TuningPage::apply()
 {
 	if (theMainWindow->userManager()->login(this) == false)
 	{
-		return false;
+		return;
 	}
 
-	if (takeClientControl() == false)
+	if (m_tuningTcpClient->takeClientControl(this) == false)
 	{
-		return false;
+		return;
 	}
 
 	if (QMessageBox::warning(this, qAppName(),
@@ -1298,30 +1298,27 @@ bool TuningPage::apply()
 							 QMessageBox::Yes | QMessageBox::No,
 							 QMessageBox::No) != QMessageBox::Yes)
 	{
-		return false;
+		return;
 	}
 
 	// Get SOR counters
 
-	bool sorActive = false;
-	bool sorValid = false;
+	TuningCounters rootCounters = m_tuningFilterStorage->root()->counters();
 
-	int totalSorCount = m_tuningTcpClient->sourceSorCount(&sorActive, &sorValid);
-
-	if (totalSorCount > 0)
+	if (rootCounters.sorCounter > 0)
 	{
 		if (QMessageBox::warning(this, qAppName(),
 								 tr("Warning!!!\n\nSOR Signal(s) are set in logic modules!\n\nIf you apply these changes, module can run into RUN SAFE STATE.\n\nAre you sure you STILL WANT TO APPLY the changes?"),
 								 QMessageBox::Yes | QMessageBox::No,
 								 QMessageBox::No) != QMessageBox::Yes)
 		{
-			return false;
+			return;
 		}
 	}
 
 	m_tuningTcpClient->applyTuningSignals();
 
-	return true;
+	return;
 }
 
 void TuningPage::undo()
@@ -1825,38 +1822,6 @@ void TuningPage::invertValue()
 			}
 		}
 	}
-}
-
-bool TuningPage::takeClientControl()
-{
-#ifdef Q_DEBUG
-	if (theSettings.m_simulationMode == false)
-#endif
-	{
-		if (m_tuningTcpClient->activeTuningSourceCount() == 0)
-		{
-			QMessageBox::critical(this, qAppName(),	 tr("No tuning sources with control enabled found."));
-
-			return false;
-		}
-	}
-
-	if (m_tuningTcpClient->singleLmControlMode() == true && m_tuningTcpClient->clientIsActive() == false)
-	{
-		QString equipmentId = m_tuningTcpClient->singleActiveTuningSource();
-
-		if (QMessageBox::warning(this, qAppName(),
-								 tr("Warning!\n\nCurrent client is not selected as active now.\n\nAre you sure you want to take control and activate the source %1?").arg(equipmentId),
-								 QMessageBox::Yes | QMessageBox::No,
-								 QMessageBox::No) != QMessageBox::Yes)
-		{
-			return false;
-		}
-
-		m_tuningTcpClient->activateTuningSourceControl(equipmentId, true, true);
-	}
-
-	return true;
 }
 
 void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)

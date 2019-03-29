@@ -164,6 +164,15 @@ void Settings::StoreUser()
 	s.setValue("TuningFiltersEditor/MainSplitterPosition", m_tuningFiltersSplitterPosition);
 	s.setValue("TuningFiltersEditor/PropertyEditorSplitterPos", m_tuningFiltersPropertyEditorSplitterPos);
 
+	//	SwitchPresetsPage options
+
+	s.setValue("SwitchPresetsPage/ColCount", m_switchPresetsPageColCount);
+	s.setValue("SwitchPresetsPage/RowCount", m_switchPresetsPageRowCount);
+	s.setValue("SwitchPresetsPage/ButtonsWidth", m_switchPresetsPageButtonsWidth);
+	s.setValue("SwitchPresetsPage/ButtonsHeight", m_switchPresetsPageButtonsHeight);
+
+	s.setValue("SwitchPresetsPage/MainSplitterPosition", m_switchPresetsPageSplitterPosition);
+
 	//
 
 	s.setValue("MainWindow/language", m_language);
@@ -199,6 +208,26 @@ void Settings::RestoreUser()
 
 	m_tuningFiltersSplitterPosition = s.value("TuningFiltersEditor/MainSplitterPosition").toByteArray();
 	m_tuningFiltersPropertyEditorSplitterPos = s.value("TuningFiltersEditor/PropertyEditorSplitterPos").toInt();
+
+	//	SwitchPresetsPage options
+
+	m_switchPresetsPageColCount = s.value("SwitchPresetsPage/ColCount", m_switchPresetsPageColCount).toInt();
+	if (m_switchPresetsPageColCount < 1) m_switchPresetsPageColCount = 1;
+	if (m_switchPresetsPageColCount > 25) m_switchPresetsPageColCount = 25;
+
+	m_switchPresetsPageRowCount = s.value("SwitchPresetsPage/RowCount", m_switchPresetsPageRowCount).toInt();
+	if (m_switchPresetsPageRowCount < 1) m_switchPresetsPageRowCount = 1;
+	if (m_switchPresetsPageRowCount > 25) m_switchPresetsPageRowCount = 25;
+
+	m_switchPresetsPageButtonsWidth = s.value("SwitchPresetsPage/ButtonsWidth", m_switchPresetsPageButtonsWidth).toInt();
+	if (m_switchPresetsPageButtonsWidth < 25) m_switchPresetsPageButtonsWidth = 25;
+	if (m_switchPresetsPageButtonsWidth > 500) m_switchPresetsPageButtonsWidth = 500;
+
+	m_switchPresetsPageButtonsHeight = s.value("SwitchPresetsPage/ButtonsHeight", m_switchPresetsPageButtonsHeight).toInt();
+	if (m_switchPresetsPageButtonsHeight < 25) m_switchPresetsPageButtonsHeight = 25;
+	if (m_switchPresetsPageButtonsHeight > 500) m_switchPresetsPageButtonsHeight = 500;
+
+	m_switchPresetsPageSplitterPosition = s.value("SwitchPresetsPage/MainSplitterPosition").toByteArray();
 
 	//
 

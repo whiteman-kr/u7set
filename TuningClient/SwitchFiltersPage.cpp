@@ -1,0 +1,847 @@
+#include "SwitchFiltersPage.h"
+
+#include <QGridLayout>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QTableWidget>
+#include <QSplitter>
+#include <QPushButton>
+#include <QMessageBox>
+
+#include "SwitchFiltersPageOptions.h"
+#include "MainWindow.h"
+#include "Settings.h"
+
+FilterPushButton::FilterPushButton(const QString& caption, std::shared_ptr<TuningFilter> filter, QWidget* parent):
+	QPushButton(caption, parent),
+	m_filter(filter)
+{
+	connect(this, &QPushButton::clicked, this, &FilterPushButton::slot_clicked);
+}
+
+std::shared_ptr<TuningFilter> FilterPushButton::filter()
+{
+	return m_filter;
+}
+
+void FilterPushButton::slot_clicked()
+{
+	emit clicked(m_filter);
+}
+
+//
+//
+//
+
+QString SwitchFiltersPage::tag_FilterButton = "FilterButtons";
+QString SwitchFiltersPage::tag_FilterSwitch = "FilterSwitches";
+
+SwitchFiltersPage::SwitchFiltersPage(std::shared_ptr<TuningFilter> workspaceFilter,
+									 TuningSignalManager* tuningSignalManager,
+									 TuningClientTcpClient* tuningTcpClient, TuningFilterStorage* tuningFilterStorage,
+									 QWidget* parent) :
+	QWidget(parent),
+	m_workspaceFilter(workspaceFilter),
+	m_tuningSignalManager(tuningSignalManager),
+	m_tuningTcpClient(tuningTcpClient),
+	m_tuningFilterStorage(tuningFilterStorage)
+{
+	m_mainLayout = new QVBoxLayout(this);
+	m_mainLayout->setContentsMargins(0, 0, 0, 0);
+	setLayout(m_mainLayout);
+
+	if (m_workspaceFilter == nullptr)
+	{
+		Q_ASSERT(m_workspaceFilter);
+		return;
+	}
+
+	updateFilters(m_tuningFilterStorage->root());
+
+	connect(theMainWindow, &MainWindow::timerTick500, this, &SwitchFiltersPage::slot_timerTick500);
+}
+
+
+SwitchFiltersPage::~SwitchFiltersPage()
+{
+	qDebug() << "SwitchPresetsPage";
+}
+
+void SwitchFiltersPage::updateFilters(std::shared_ptr<TuningFilter> root)
+{
+	m_buttonFilters.clear();
+	m_listFilters.clear();
+
+	createFiltersList(root);
+
+	// Delete all controls
+	//
+
+	m_filterButtons.clear();
+
+	if (m_filterButtonsWidget != nullptr)
+	{
+		delete m_filterButtonsWidget;
+		m_filterButtonsWidget = nullptr;
+	}
+
+	if (m_filterTableWidget != nullptr)
+	{
+		delete m_filterTableWidget;
+		m_filterTableWidget = nullptr;
+	}
+
+	if (m_vSplitter != nullptr)
+	{
+		delete m_vSplitter;
+		m_vSplitter = nullptr;
+	}
+
+	if (m_promptLabel != nullptr)
+	{
+		delete m_promptLabel;
+		m_promptLabel = nullptr;
+	}
+
+	// Create new controls
+	//
+
+	// Apply Button
+	//
+	if (theConfigSettings.autoApply == false &&
+			(m_buttonFilters.empty() == false || m_listFilters.empty() == false))
+	{
+		m_applyButton = new QPushButton(tr("Apply"), this);
+		connect(m_applyButton, &QPushButton::clicked, this, &SwitchFiltersPage::onApply);
+	}
+
+	// Buttons
+	//
+	if (m_buttonFilters.empty() == false)
+	{
+		m_filterButtonsWidget = new QWidget(this);
+
+		// Control Layout
+
+		QHBoxLayout* scrollControlsLayout = new QHBoxLayout(this);
+
+		const int controlHeight = 25;
+
+		scrollControlsLayout->addSpacerItem(new QSpacerItem(controlHeight, 0));
+
+		scrollControlsLayout->addStretch();
+
+		QPushButton* m_prevButton = new QPushButton("<", this);
+		scrollControlsLayout->addWidget(m_prevButton);
+		connect(m_prevButton, &QPushButton::clicked, this, &SwitchFiltersPage::onPrev);
+		m_prevButton->setFixedHeight(controlHeight);
+
+		QPushButton* m_nextButton = new QPushButton(">", this);
+		scrollControlsLayout->addWidget(m_nextButton);
+		connect(m_nextButton, &QPushButton::clicked, this, &SwitchFiltersPage::onNext);
+		m_nextButton->setFixedHeight(controlHeight);
+
+		scrollControlsLayout->addStretch();
+
+		QPushButton* b = new QPushButton(this);
+		QPixmap pixmap(":/Images/Images/ButtonSettings.png");
+		b->setIcon(QIcon(pixmap));
+		b->setIconSize(QSize(controlHeight * 0.8, controlHeight * 0.8));
+		b->setFixedSize(controlHeight, controlHeight);
+		connect(b, &QPushButton::clicked, this, &SwitchFiltersPage::onOptions);
+		scrollControlsLayout->addWidget(b);
+
+		// Buttons layout
+
+		m_buttonsLayout = new QGridLayout(this);
+
+		m_buttonStartIndex = 0;
+
+		createButtons();
+
+		m_prevButton->setVisible(m_buttonFilters.size() > theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount);
+		m_nextButton->setVisible(m_buttonFilters.size() > theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount);
+
+		// Apply button at the bottom
+
+		if (m_applyButton != nullptr && m_listFilters.empty() == true)
+		{
+			QHBoxLayout* al = new QHBoxLayout();
+			al->addStretch();
+			al->addWidget(m_applyButton);
+			scrollControlsLayout->addLayout(al);
+		}
+
+		// Main layout
+
+		QVBoxLayout* topLayout = new QVBoxLayout(m_filterButtonsWidget);
+		topLayout->setContentsMargins(0, 0, 0, 15);
+		topLayout->addStretch();
+		topLayout->addLayout(m_buttonsLayout);
+		topLayout->addStretch();
+		topLayout->addLayout(scrollControlsLayout);
+
+	}
+
+	// Table
+	//
+	if (m_listFilters.empty() == false)
+	{
+		m_filterTableWidget = new QWidget(this);
+
+		QVBoxLayout* bottomLayout = new QVBoxLayout(m_filterTableWidget);
+		bottomLayout->setContentsMargins(0, 15, 0, 0);
+
+		m_filterTable = new FilterTableWidget(this);
+
+		bottomLayout->addWidget(m_filterTable);
+
+		// Apply button at the bottom
+
+		if (m_applyButton != nullptr)
+		{
+			QHBoxLayout* al = new QHBoxLayout();
+			al->addStretch();
+			al->addWidget(m_applyButton);
+			bottomLayout->addLayout(al);
+		}
+
+		createListItems();
+	}
+
+	// Splitter
+	//
+	if (m_filterButtonsWidget != nullptr && m_filterTableWidget != nullptr)
+	{
+		m_vSplitter	= new QSplitter(Qt::Vertical);
+		m_vSplitter->addWidget(m_filterButtonsWidget);
+		m_vSplitter->addWidget(m_filterTableWidget);
+		connect(m_vSplitter, &QSplitter::splitterMoved, [this](int pos, int index)
+		{
+			Q_UNUSED(pos);
+			Q_UNUSED(index);
+			theSettings.m_switchPresetsPageSplitterPosition = m_vSplitter->saveState();
+		});
+		if (theSettings.m_switchPresetsPageSplitterPosition.isEmpty() == false)
+		{
+			m_vSplitter->restoreState(theSettings.m_switchPresetsPageSplitterPosition);
+		}
+		m_mainLayout->addWidget(m_vSplitter);
+	}
+	else
+	{
+		if (m_filterButtonsWidget != nullptr)
+		{
+			m_mainLayout->addWidget(m_filterButtonsWidget);
+		}
+		else
+		{
+			if (m_filterTableWidget != nullptr)
+			{
+				m_mainLayout->addWidget(m_filterTableWidget);
+			}
+			else
+			{
+				// No widgets
+				m_promptLabel = new QLabel(tr("No filters to display. Create filters with %1 and %2 tags.").arg(tag_FilterButton).arg(tag_FilterSwitch));
+				m_mainLayout->addWidget(m_promptLabel);
+			}
+		}
+	}
+}
+
+void SwitchFiltersPage::createFiltersList(std::shared_ptr<TuningFilter> filter)
+{
+	if (filter == nullptr)
+	{
+		Q_ASSERT(filter);
+		return;
+	}
+
+	if (m_workspaceFilter->hasAnyTag(filter->tagsList()) == true)
+	{
+		if (filter->isEmpty() == false &&
+				filter->tagsList().contains(tag_FilterButton))
+		{
+			filter->setHasDiscreteCounter(true);
+			m_buttonFilters.push_back(filter);
+		}
+
+		if (filter->isEmpty() == false &&
+				filter->tagsList().contains(tag_FilterSwitch))
+		{
+			filter->setHasDiscreteCounter(true);
+			m_listFilters.push_back(filter);
+		}
+	}
+
+	int childCount = filter->childFiltersCount();
+	for (int i = 0; i < childCount; i++)
+	{
+		std::shared_ptr<TuningFilter> childFilter = filter->childFilter(i);
+		if (childFilter == nullptr)
+		{
+			Q_ASSERT(childFilter);
+			return;
+		}
+
+		createFiltersList(childFilter);
+	}
+}
+
+void SwitchFiltersPage::createButtons()
+{
+	if (m_buttonsLayout == nullptr)
+	{
+		Q_ASSERT(m_buttonsLayout);
+		return;
+	}
+
+	// Take all buttons
+	//
+	int count = m_buttonsLayout->count();
+	for (int i = 0; i < count; i++)
+	{
+		QLayoutItem* item = m_buttonsLayout->takeAt(0);
+		if (item == nullptr || item->widget() == nullptr)
+		{
+			Q_ASSERT(item);
+			Q_ASSERT(item->widget());
+			return;
+		}
+
+		delete item->widget();
+		delete item;
+	}
+
+	// Create new buttons
+	//
+
+	m_filterButtons.clear();
+
+	int row = 0;
+	int col = 0;
+
+	int buttonsCount = static_cast<int>(m_buttonFilters.size());
+	for (int i = m_buttonStartIndex; i < buttonsCount; i++)
+	{
+		auto f = m_buttonFilters[i];
+		if (f == nullptr)
+		{
+			Q_ASSERT(f);
+			return;
+		}
+
+		FilterPushButton* b = new FilterPushButton(f->caption(), f, this);
+
+		m_filterButtons.push_back(b);
+
+		connect(b, &FilterPushButton::clicked, this, &SwitchFiltersPage::slot_filterButtonClicked);
+
+		b->setFixedSize(theSettings.m_switchPresetsPageButtonsWidth, theSettings.m_switchPresetsPageButtonsHeight);
+
+		m_buttonsLayout->addWidget(b, row, col);
+
+		if (col++ >= theSettings.m_switchPresetsPageColCount - 1)
+		{
+			col = 0;
+
+			if (row++ >= theSettings.m_switchPresetsPageRowCount - 1)
+			{
+				break;
+			}
+		}
+	}
+
+}
+
+void SwitchFiltersPage::createListItems()
+{
+	if (m_filterTable == nullptr)
+	{
+		Q_ASSERT(m_filterTable);
+		return;
+	}
+
+	m_filterTable->setColumnCount(static_cast<int>(Columns::ColumnCount));
+
+	QStringList labels;
+	labels << tr("State");
+	labels << tr("Caption");
+	labels << tr("Counter");
+	m_filterTable->setHorizontalHeaderLabels(labels);
+
+	m_filterTable->setRowCount(static_cast<int>(m_listFilters.size()));
+
+	m_filterTable->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_filterTable->setSelectionMode(QAbstractItemView::SingleSelection);
+
+	m_filterTable->verticalHeader()->setVisible(false);
+
+	m_filterTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Fixed);
+	m_filterTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+	m_filterTable->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Fixed);
+
+	for (int i = 0; i < static_cast<int>(m_listFilters.size()); i++)
+	{
+		auto f = m_listFilters[i];
+
+		for (int c = 0; c < static_cast<int>(Columns::ColumnCount); c++)
+		{
+			QTableWidgetItem* item = new QTableWidgetItem();
+			if (item == nullptr)
+			{
+				Q_ASSERT(item);
+				return;
+			}
+
+			m_filterTable->setItem(i, c, item);
+
+			FilterCheckBox* check = new FilterCheckBox(tr("OFF"));
+			connect(check, &FilterCheckBox::pressed, this, &SwitchFiltersPage::onFilterTablePressed);
+
+			switch (c)
+			{
+			case static_cast<int>(Columns::State):
+				m_filterTable->setCellWidget(i, static_cast<int>(Columns::State), check);
+				break;
+			case static_cast<int>(Columns::Caption):
+				item->setText(f->caption());
+				break;
+			case static_cast<int>(Columns::Counter):
+				item->setText("0/0");
+				break;
+			}
+
+			item->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
+		}
+	}
+
+	connect(m_filterTable, &FilterTableWidget::spacePressed, this, &SwitchFiltersPage::onFilterTablePressed);
+}
+
+void SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter)
+{
+	if (theMainWindow->userManager()->login(this) == false)
+	{
+		return;
+	}
+
+	if (m_tuningTcpClient->takeClientControl(this) == false)
+	{
+		return;
+	}
+
+	if (filter == nullptr)
+	{
+		Q_ASSERT(filter);
+		return;
+	}
+
+	TuningCounters tc = filter->counters();
+
+	int discreteCount = countDiscretes(filter.get());
+
+	int newValue = 0;
+
+	if (tc.discreteCounter == 0)
+	{
+		if (QMessageBox::warning(this, qAppName(), tr("Are you sure you want to switch ON  signals of the filter '%1'?").arg(filter->caption()),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return;
+		}
+
+		newValue = 1;
+	}
+	else
+	{
+		if (tc.discreteCounter == discreteCount)
+		{
+			if (QMessageBox::warning(this, qAppName(), tr("Are you sure you want to switch OFF signals of the filter '%1'?").arg(filter->caption()),
+									 QMessageBox::Yes | QMessageBox::No,
+									 QMessageBox::No) != QMessageBox::Yes)
+			{
+				return;
+			}
+
+			newValue = 0;
+		}
+		else
+		{
+			int result = QMessageBox::warning(this, qAppName(), tr("Signals of the filter '%1' have different values. Please select the following action:").arg(filter->caption()),
+											  tr("Set All to 0"), tr("Set All to 1"), tr("Cancel"), 2);
+			if (result == 0)
+			{
+				newValue = 0;
+			}
+			else
+			{
+				if (result == 1)
+				{
+					newValue = 1;
+				}
+				else
+				{
+					return;
+				}
+			}
+		}
+	}
+
+	std::vector <TuningFilterSignal> filterSignals = filter->getFilterSignals();
+
+	for (auto f : filterSignals)
+	{
+		bool ok = false;
+
+		AppSignalParam asp = m_tuningSignalManager->signalParam(f.appSignalHash(), &ok);
+		if (ok == false)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		if (asp.toTuningType() != TuningValueType::Discrete)
+		{
+			continue;
+		}
+
+		TuningValue tv;
+		tv.setType(TuningValueType::Discrete);
+		tv.setDiscreteValue(newValue);
+
+		m_tuningTcpClient->writeTuningSignal(f.appSignalId(), tv);
+	}
+}
+
+void SwitchFiltersPage::apply()
+{
+	if (theMainWindow->userManager()->login(this) == false)
+	{
+		return;
+	}
+
+	if (m_tuningTcpClient->takeClientControl(this) == false)
+	{
+		return;
+	}
+
+	if (QMessageBox::warning(this, qAppName(),
+							 tr("Are you sure you want apply the changes?"),
+							 QMessageBox::Yes | QMessageBox::No,
+							 QMessageBox::No) != QMessageBox::Yes)
+	{
+		return;
+	}
+
+	// Get SOR counters
+
+	TuningCounters rootCounters = m_tuningFilterStorage->root()->counters();
+
+	if (rootCounters.sorCounter > 0)
+	{
+		if (QMessageBox::warning(this, qAppName(),
+								 tr("Warning!!!\n\nSOR Signal(s) are set in logic modules!\n\nIf you apply these changes, module can run into RUN SAFE STATE.\n\nAre you sure you STILL WANT TO APPLY the changes?"),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return;
+		}
+	}
+
+	m_tuningTcpClient->applyTuningSignals();
+
+	return;
+}
+
+int SwitchFiltersPage::countDiscretes(TuningFilter* filter)
+{
+	if (filter == nullptr)
+	{
+		Q_ASSERT(filter);
+		return 0;
+	}
+
+	int result = 0;
+
+	std::vector <TuningFilterSignal> filterSignals = filter->getFilterSignals();
+
+	for (auto tfs : filterSignals)
+	{
+		bool ok = false;
+
+		AppSignalParam asp = m_tuningSignalManager->signalParam(tfs.appSignalHash(), &ok);
+		if (ok == false)
+		{
+			Q_ASSERT(false);
+			return 0;
+		}
+
+		if (asp.toTuningType() == TuningValueType::Discrete)
+		{
+			result++;
+		}
+	}
+
+	return result;
+
+}
+
+void SwitchFiltersPage::onOptions()
+{
+	SwitchFiltersPageOptions d(this,
+							   theSettings.m_switchPresetsPageColCount,
+							   theSettings.m_switchPresetsPageRowCount,
+							   theSettings.m_switchPresetsPageButtonsWidth,
+							   theSettings.m_switchPresetsPageButtonsHeight);
+	if (d.exec() == QDialog::Accepted)
+	{
+		theSettings.m_switchPresetsPageColCount = d.buttonsColCount();
+		theSettings.m_switchPresetsPageRowCount = d.buttonsRowCount();
+		theSettings.m_switchPresetsPageButtonsWidth = d.buttonsWidth();
+		theSettings.m_switchPresetsPageButtonsHeight = d.buttonsHeight();
+
+		m_buttonStartIndex = 0;
+
+		createButtons();
+
+		slot_timerTick500();
+	}
+}
+
+void SwitchFiltersPage::onPrev()
+{
+	if (m_buttonStartIndex >= theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount)
+	{
+		m_buttonStartIndex -= theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount;
+
+		createButtons();
+
+		slot_timerTick500();
+	}
+}
+void SwitchFiltersPage::onNext()
+{
+	if (m_buttonStartIndex < m_buttonFilters.size() - theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount)
+	{
+		m_buttonStartIndex += theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount;
+
+		createButtons();
+
+		slot_timerTick500();
+	}
+}
+
+void SwitchFiltersPage::onApply()
+{
+	apply();
+}
+
+void SwitchFiltersPage::slot_timerTick500()
+{
+	if  (isVisible() == false)
+	{
+		return;
+	}
+
+	// Buttons
+
+	int count = static_cast<int>(m_filterButtons.size());
+	for (int i = 0; i < count; i++)
+	{
+		auto b = m_filterButtons[i];
+		if (b == nullptr)
+		{
+			Q_ASSERT(b);
+			return;
+		}
+
+		auto f = b->filter();
+		if (f == nullptr)
+		{
+			Q_ASSERT(f);
+			return;
+		}
+
+		int discreteCount = countDiscretes(f.get());
+
+		TuningCounters tc = f->counters();
+
+		QString text = tr("%1\n\n%2 / %3").arg(f->caption()).arg(tc.discreteCounter).arg(discreteCount);
+
+		if (b->text() != text)
+		{
+			b->setText(text);
+		}
+
+		if (tc.discreteCounter == 0)
+		{
+			b->setStyleSheet(QString());
+			b->setDown(false);
+		}
+		else
+		{
+			if (tc.discreteCounter == discreteCount)
+			{
+				QString s = tr("QPushButton { background-color: %1; color: %2 }").arg(m_alertBackColor.name()).arg(m_alertTextColor.name());
+				if (b->styleSheet() != s)
+				{
+					b->setStyleSheet(s);
+				}
+				b->setDown(true);
+			}
+			else
+			{
+				QString s = tr("QPushButton { background-color: %1; color: %2 }").arg(m_partialBackColor.name()).arg(m_partialTextColor.name());
+				if (b->styleSheet() != s)
+				{
+					b->setStyleSheet(s);
+				}
+				b->setDown(false);
+			}
+		}
+	}
+
+	// List
+
+	count = static_cast<int>(m_listFilters.size());
+	for (int i = 0; i < count; i++)
+	{
+		auto f = m_listFilters[i];
+
+		int discreteCount = countDiscretes(f.get());
+
+		TuningCounters tc = f->counters();
+
+		QTableWidgetItem* itemCheck = m_filterTable->item(i, static_cast<int>(Columns::State));
+		if (itemCheck == nullptr)
+		{
+			Q_ASSERT(itemCheck);
+			return;
+		}
+
+		QTableWidgetItem* itemCaption = m_filterTable->item(i, static_cast<int>(Columns::Caption));
+		if (itemCaption == nullptr)
+		{
+			Q_ASSERT(itemCaption);
+			return;
+		}
+
+		QTableWidgetItem* itemCounter = m_filterTable->item(i, static_cast<int>(Columns::Counter));
+		if (itemCounter == nullptr)
+		{
+			Q_ASSERT(itemCounter);
+			return;
+		}
+
+		//
+
+		QString checkText;
+		QString counterText = tr("%1 / %2").arg(tc.discreteCounter).arg(discreteCount);
+
+		QColor backColor;
+		QColor textColor;
+		Qt::CheckState checkState;
+
+		if (tc.discreteCounter == 0)
+		{
+			backColor = Qt::white;
+			textColor = Qt::black;
+			checkState = Qt::Unchecked;
+			checkText = tr("OFF");
+		}
+		else
+		{
+			if (tc.discreteCounter == discreteCount)
+			{
+				backColor = m_alertBackColor;
+				textColor = m_alertTextColor;
+				checkState = Qt::Checked;
+				checkText = tr("ON");
+			}
+			else
+			{
+				backColor = m_partialBackColor;
+				textColor = m_partialTextColor;
+				checkState = Qt::PartiallyChecked;
+				checkText = tr("PARTIAL");
+			}
+		}
+
+		if (itemCounter->text() != counterText)
+		{
+			itemCounter->setText(counterText);
+		}
+
+		if (itemCaption->backgroundColor() != backColor)
+		{
+			itemCaption->setBackgroundColor(backColor);
+		}
+
+		if (itemCaption->textColor() != textColor)
+		{
+			itemCaption->setTextColor(textColor);
+		}
+
+		if (itemCounter->backgroundColor() != backColor)
+		{
+			itemCounter->setBackgroundColor(backColor);
+		}
+
+		if (itemCounter->textColor() != textColor)
+		{
+			itemCounter->setTextColor(textColor);
+		}
+
+		FilterCheckBox* checkBox = dynamic_cast<FilterCheckBox*>(m_filterTable->cellWidget(i, static_cast<int>(Columns::State)));
+		if (checkBox == nullptr)
+		{
+			Q_ASSERT(checkBox);
+			return;
+		}
+
+		if (checkBox->checkState() != checkState)
+		{
+			checkBox->setCheckState(checkState);
+		}
+
+		if (checkBox->text() != checkText)
+		{
+			checkBox->setText(checkText);
+		}
+	}
+}
+
+void SwitchFiltersPage::slot_filterButtonClicked(std::shared_ptr<TuningFilter> filter)
+{
+	if (filter == nullptr)
+	{
+		Q_ASSERT(filter);
+		return;
+	}
+
+	changeFilterSignals(filter);
+}
+
+void SwitchFiltersPage::onFilterTablePressed()
+{
+	int row = m_filterTable->currentRow();
+	if (row < 0 || row >= m_listFilters.size())
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	std::shared_ptr<TuningFilter> filter = m_listFilters[row];
+	if (filter == nullptr)
+	{
+		Q_ASSERT(filter);
+		return;
+	}
+
+	changeFilterSignals(filter);
+}
+
+

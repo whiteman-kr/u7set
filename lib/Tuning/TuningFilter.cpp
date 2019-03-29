@@ -18,6 +18,9 @@ namespace TuningTags
 	static const QString tag_Analog = "Analog";
 	static const QString tag_Discrete = "Discrete";
 
+	static const QString tag_Generic = "Generic";
+	static const QString tag_FiltersSwitch = "FiltersSwitch";
+
 	static const QString tag_Project = "Project";
 	static const QString tag_Schema = "Schema";
 	static const QString tag_Equipment = "Equipment";
@@ -32,6 +35,7 @@ namespace TuningTags
 	static const QLatin1String prop_Source = QLatin1String("Source");
 	static const QLatin1String prop_ID = QLatin1String("ID");
 	static const QLatin1String prop_CustomID = QLatin1String("CustomID");
+	static const QLatin1String prop_Tags = QLatin1String("Tags");
 	static const QLatin1String prop_InterfaceType = QLatin1String("InterfaceType");
 	static const QLatin1String prop_CustomAppSignalMasks = QLatin1String("CustomAppSignalMasks");
 	static const QLatin1String prop_AppSignalMasks = QLatin1String("AppSignalMasks");
@@ -43,6 +47,7 @@ namespace TuningTags
 	static const QLatin1String prop_TextSelectedColor = QLatin1String("TextSelectedColor");
 	static const QLatin1String prop_HasDiscreteCounter = QLatin1String("HasDiscreteCounter");
 	static const QLatin1String prop_ValueColumnsCount = QLatin1String("ValueColumnsCount");
+	static const QLatin1String prop_TabType = QLatin1String("TabType");
 
 	static const QLatin1String prop_ColumnCustomAppId = QLatin1String("ColumnCustomAppId");
 	static const QLatin1String prop_ColumnAppId = QLatin1String("ColumnAppId");
@@ -200,6 +205,8 @@ TuningFilter::TuningFilter()
 
 	ADD_PROPERTY_GETTER(InterfaceType, TuningTags::prop_InterfaceType, true, TuningFilter::interfaceType);
 
+	ADD_PROPERTY_GETTER_SETTER(QString, TuningTags::prop_Tags, true, TuningFilter::tags, TuningFilter::setTags);
+
 	auto propMask = ADD_PROPERTY_GETTER_SETTER(QString, TuningTags::prop_CustomAppSignalMasks, true, TuningFilter::customAppSignalIDMask, TuningFilter::setCustomAppSignalIDMask);
 	propMask->setCategory("Masks");
 
@@ -226,6 +233,9 @@ TuningFilter::TuningFilter()
 
 	auto propTabValuesCount = ADD_PROPERTY_GETTER_SETTER(int, TuningTags::prop_ValueColumnsCount, true, TuningFilter::valuesColumnCount, TuningFilter::setValuesColumnCount);
 	propTabValuesCount->setCategory(TuningTags::category_ValueColumns);
+
+	auto propTabType = ADD_PROPERTY_GETTER_SETTER(TabType, TuningTags::prop_TabType, true, TuningFilter::tabType, TuningFilter::setTabType);
+	propTabType->setCategory("Appearance");
 
 	// Columns
 
@@ -271,6 +281,12 @@ TuningFilter::TuningFilter()
 	propColumn->setCategory(TuningTags::category_Columns);
 	propColumn->setViewOrder(order++);
 
+	/*auto p1 = ADD_PROPERTY_GETTER_SETTER(QByteArray, "QByteArray", true, TuningFilter::byteArray, TuningFilter::setByteArray);
+	p1->setSpecificEditor(E::PropertySpecificEditor::LoadFileDialog);
+
+	auto p1a = ADD_PROPERTY_GETTER_SETTER(QByteArray, "QByteArray2", true, TuningFilter::byteArray2, TuningFilter::setByteArray2);
+	p1a->setSpecificEditor(E::PropertySpecificEditor::LoadFileDialog);
+*/
 }
 
 TuningFilter::TuningFilter(const TuningFilter& That)
@@ -444,6 +460,11 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 			}
 		}
 
+		if (reader.attributes().hasAttribute(TuningTags::prop_Tags))
+		{
+			setTags(reader.attributes().value(TuningTags::prop_Tags).toString());
+		}
+
 		// ValueColumns
 
 		if (reader.attributes().hasAttribute(TuningTags::prop_ValueColumnsCount))
@@ -477,6 +498,27 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 		{
 			m_valueColumnsCount = 0;
 			m_valueColumnsAppSignalIdSuffixes.clear();
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_TabType))
+		{
+			QString v = reader.attributes().value(TuningTags::prop_TabType).toString();
+			if (v == TuningTags::tag_Generic)
+			{
+				setTabType(TabType::Generic);
+			}
+			else
+			{
+				if (v == TuningTags::tag_FiltersSwitch)
+				{
+					setTabType(TabType::FiltersSwitch);
+				}
+				else
+				{
+					reader.raiseError(tr("Unknown TabType value: %1").arg(v));
+					return false;
+				}
+			}
 		}
 
 		// Columns
@@ -660,6 +702,8 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 	writer.writeAttribute(TuningTags::prop_SignalType, E::valueToString<SignalType>(static_cast<int>(signalType())));
 	writer.writeAttribute(TuningTags::prop_Source, E::valueToString<Source>(static_cast<int>(source())));
 
+	writer.writeAttribute(TuningTags::prop_Tags, tags());
+
 	// ValueColumns
 
 	if (static_cast<int>(m_valueColumnsAppSignalIdSuffixes.size()) != valuesColumnCount())
@@ -675,6 +719,8 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 		QString propName = tr(TuningTags::prop_ValueColumn1AppSignalSuffixes).arg(i);
 		writer.writeAttribute(propName, m_valueColumnsAppSignalIdSuffixes[i]);
 	}
+
+	writer.writeAttribute(TuningTags::prop_TabType, E::valueToString<TabType>(static_cast<int>(tabType())));
 
 	// Columns
 
@@ -986,7 +1032,7 @@ void TuningFilter::setCustomAppSignalIDMask(const QString& value)
 	}
 	else
 	{
-		m_customAppSignalIDMasks = value.split(';');
+		m_customAppSignalIDMasks = value.split(';', QString::SkipEmptyParts);
 	}
 
 }
@@ -1011,7 +1057,7 @@ void TuningFilter::setEquipmentIDMask(const QString& value)
 	}
 	else
 	{
-		m_equipmentIDMasks = value.split(';');
+		m_equipmentIDMasks = value.split(';', QString::SkipEmptyParts);
 	}
 }
 
@@ -1035,7 +1081,7 @@ void TuningFilter::setAppSignalIDMask(const QString& value)
 	}
 	else
 	{
-		m_appSignalIDMasks = value.split(';');
+		m_appSignalIDMasks = value.split(';', QString::SkipEmptyParts);
 	}
 }
 
@@ -1136,6 +1182,58 @@ std::vector<QString> TuningFilter::valueColumnsAppSignalIdSuffixes() const
 }
 
 
+TuningFilter::TabType TuningFilter::tabType() const
+{
+	return m_tabType;
+}
+
+void TuningFilter::setTabType(TabType type)
+{
+	m_tabType = type;
+}
+
+QString TuningFilter::tags() const
+{
+	QString result;
+	for (auto s : m_tags)
+	{
+		result += s + ';';
+	}
+	result.remove(result.length() - 1, 1);
+
+	return result;
+}
+
+void TuningFilter::setTags(const QString& value)
+{
+	if (value.isEmpty() == true)
+	{
+		m_tags.clear();
+	}
+	else
+	{
+		m_tags = value.split(';', QString::SkipEmptyParts);
+	}
+}
+
+QStringList TuningFilter::tagsList() const
+{
+	return m_tags;
+}
+
+bool TuningFilter::hasAnyTag(const QStringList& tags) const
+{
+	for (auto tag : tags)
+	{
+		if (m_tags.contains(tag) == true)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool TuningFilter::columnCustomAppId() const
 {
 	return m_columnCustomAppId;
@@ -1235,6 +1333,7 @@ void TuningFilter::setColumnOutOfRange(bool value)
 {
 	m_columnOutOfRange = value;
 }
+
 
 TuningFilter* TuningFilter::parentFilter() const
 {
@@ -1430,6 +1529,8 @@ void TuningFilter::updateOptionalProperties()
 	setPropertyVisible(TuningTags::prop_ColumnValid, interfaceType() == InterfaceType::Tab);
 	setPropertyVisible(TuningTags::prop_ColumnOutOfRange, interfaceType() == InterfaceType::Tab);
 
+	setPropertyVisible(TuningTags::prop_TabType, interfaceType() == InterfaceType::Tab);
+
 	if (interfaceType() == InterfaceType::Tab)
 	{
 		if (static_cast<int>(m_valueColumnsAppSignalIdSuffixes.size()) != valuesColumnCount())
@@ -1492,6 +1593,10 @@ void TuningFilter::copy(const TuningFilter& That)
 
 	m_valueColumnsCount = That.m_valueColumnsCount;
 	m_valueColumnsAppSignalIdSuffixes = That.m_valueColumnsAppSignalIdSuffixes;
+
+	m_tabType = That.m_tabType;
+
+	m_tags = That.m_tags;
 
 	m_equipmentHashes = That.m_equipmentHashes;
 	m_signalsHashes = That.m_signalsHashes;

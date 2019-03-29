@@ -2,6 +2,7 @@
 #define TUNINGWORKSPACE_H
 
 #include "TuningPage.h"
+#include "SwitchFiltersPage.h"
 #include "TuningClientTcpClient.h"
 #include "TuningClientFilterStorage.h"
 
@@ -46,11 +47,13 @@ public:
 
 	void onTimer();
 
+	void updateFilters(std::shared_ptr<TuningFilter> rootFilter);
+
+private:
+
 	// Tree update
 
 	void updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter);
-
-private:
 
 	// Initialization
 
@@ -130,6 +133,7 @@ private:
 	TuningPage* m_singleTuningPage = nullptr;
 	std::map<QString, TuningPage*> m_tuningPagesMap;
 	std::map<QString, TuningWorkspace*> m_tuningWorkspacesMap;
+	std::vector<SwitchFiltersPage*> m_switchPresetPages;
 
 	std::map<QString, int> m_activeTabPagesMap;
 

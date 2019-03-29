@@ -277,6 +277,22 @@ void TuningWorkspace::onTimer()
 	}
 }
 
+void TuningWorkspace::updateFilters(std::shared_ptr<TuningFilter> rootFilter)
+{
+	updateFiltersTree(rootFilter);
+
+	for (auto swp : m_switchPresetPages)
+	{
+		if (swp == nullptr)
+		{
+			Q_ASSERT(swp);
+			return;
+		}
+
+		swp->updateFilters(rootFilter);
+	}
+}
+
 void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter)
 {
 	// Fill the filter tree
@@ -785,29 +801,40 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 	}
 	else
 	{
-		// We have to create tuning page
-		//
-		auto it = m_tuningPagesMap.find(childWorkspaceFilterId);
-		if (it == m_tuningPagesMap.end())
+		if (childWorkspaceFilter->isTab() && childWorkspaceFilter->tabType() == TuningFilter::TabType::FiltersSwitch )
 		{
-			TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage);
-
-			m_tuningPagesMap[childWorkspaceFilterId] = tp;
-
-			connect(this, &TuningWorkspace::treeFilterSelectionChanged, tp, &TuningPage::slot_treeFilterSelectionChanged);
-
-			if (childWorkspaceFilter->isButton() == true)
-			{
-				// Connect button filter event only if this tuning page is selected by button, not tab
-
-				connect(this, &TuningWorkspace::buttonFilterSelectionChanged, tp, &TuningPage::slot_pageFilterChanged);
-			}
-
-			return tp;
+			// We have to create Presets Switch page
+			//
+			SwitchFiltersPage* swp = new SwitchFiltersPage(childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage);
+			m_switchPresetPages.push_back(swp);
+			return swp;
 		}
 		else
 		{
-			return it->second;
+			// We have to create tuning page
+			//
+			auto it = m_tuningPagesMap.find(childWorkspaceFilterId);
+			if (it == m_tuningPagesMap.end())
+			{
+				TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage);
+
+				m_tuningPagesMap[childWorkspaceFilterId] = tp;
+
+				connect(this, &TuningWorkspace::treeFilterSelectionChanged, tp, &TuningPage::slot_treeFilterSelectionChanged);
+
+				if (childWorkspaceFilter->isButton() == true)
+				{
+					// Connect button filter event only if this tuning page is selected by button, not tab
+
+					connect(this, &TuningWorkspace::buttonFilterSelectionChanged, tp, &TuningPage::slot_pageFilterChanged);
+				}
+
+				return tp;
+			}
+			else
+			{
+				return it->second;
+			}
 		}
 	}
 }
@@ -860,11 +887,6 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(l);
 		item->setData(0, Qt::UserRole, QVariant::fromValue(f));
-
-		if (f->isSourceEquipment() == true)
-		{
-			item->setData(1, Qt::UserRole, ::calcHash(f->caption()));
-		}
 
 		parent->addChild(item);
 
@@ -1083,11 +1105,26 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem)
 {
-	Hash hash = treeItem->data(1, Qt::UserRole).value<Hash>();
+	std::shared_ptr<TuningFilter> filter = treeItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+	if (filter == nullptr)
+	{
+		assert(filter);
+		return;
+	}
+
+	std::vector<Hash> equipmentHashes = filter->equipmentHashes();
+
+	if (equipmentHashes.size() != 1)
+	{
+		Q_ASSERT(filter);
+		return;
+	}
+
+	Hash hash = equipmentHashes[0];
 
 	assert(columnStatusIndex != -1);
 
-	int errorCounter = m_tuningTcpClient->sourceErrorCount(hash);
+	int errorCounter = filter->counters().errorCounter;
 
 	TuningSource ts;
 
