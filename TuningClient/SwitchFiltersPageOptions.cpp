@@ -1,5 +1,5 @@
 #include "SwitchFiltersPageOptions.h"
-#include "ui_SwitchPresetsPageOptions.h"
+#include "ui_SwitchFiltersPageOptions.h"
 
 SwitchFiltersPageOptions::SwitchFiltersPageOptions(QWidget *parent,
 												   int defaultColCount,
