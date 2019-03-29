@@ -2844,10 +2844,8 @@ private:
 template <typename OBJECT_TYPE>
 class PropertyVector : public std::vector<std::shared_ptr<OBJECT_TYPE>>
 {
-	using vector = std::vector<std::shared_ptr<OBJECT_TYPE>>;
-
 public:
-	PropertyVector() : vector()
+	PropertyVector()
 	{
 		static_assert(std::is_base_of<PropertyObject, OBJECT_TYPE>::value);
 	}
@@ -2890,10 +2888,8 @@ public:
 template <typename OBJECT_TYPE>
 class PropertyList : public std::list<std::shared_ptr<OBJECT_TYPE>>
 {
-	using list = std::list<std::shared_ptr<OBJECT_TYPE>>;
-
 public:
-	PropertyList() : list()
+	PropertyList()
 	{
 		static_assert(std::is_base_of<PropertyObject, OBJECT_TYPE>::value);
 	}
