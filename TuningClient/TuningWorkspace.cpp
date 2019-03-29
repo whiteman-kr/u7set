@@ -277,6 +277,22 @@ void TuningWorkspace::onTimer()
 	}
 }
 
+void TuningWorkspace::updateFilters(std::shared_ptr<TuningFilter> rootFilter)
+{
+	updateFiltersTree(rootFilter);
+
+	for (auto swp : m_switchPresetPages)
+	{
+		if (swp == nullptr)
+		{
+			Q_ASSERT(swp);
+			return;
+		}
+
+		swp->updateFilters(rootFilter);
+	}
+}
+
 void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter)
 {
 	// Fill the filter tree
@@ -785,29 +801,40 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 	}
 	else
 	{
-		// We have to create tuning page
-		//
-		auto it = m_tuningPagesMap.find(childWorkspaceFilterId);
-		if (it == m_tuningPagesMap.end())
+		if (childWorkspaceFilter->isTab() && childWorkspaceFilter->tabType() == TuningFilter::TabType::FiltersSwitch )
 		{
-			TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage);
-
-			m_tuningPagesMap[childWorkspaceFilterId] = tp;
-
-			connect(this, &TuningWorkspace::treeFilterSelectionChanged, tp, &TuningPage::slot_treeFilterSelectionChanged);
-
-			if (childWorkspaceFilter->isButton() == true)
-			{
-				// Connect button filter event only if this tuning page is selected by button, not tab
-
-				connect(this, &TuningWorkspace::buttonFilterSelectionChanged, tp, &TuningPage::slot_pageFilterChanged);
-			}
-
-			return tp;
+			// We have to create Presets Switch page
+			//
+			SwitchFiltersPage* swp = new SwitchFiltersPage(childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage);
+			m_switchPresetPages.push_back(swp);
+			return swp;
 		}
 		else
 		{
-			return it->second;
+			// We have to create tuning page
+			//
+			auto it = m_tuningPagesMap.find(childWorkspaceFilterId);
+			if (it == m_tuningPagesMap.end())
+			{
+				TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage);
+
+				m_tuningPagesMap[childWorkspaceFilterId] = tp;
+
+				connect(this, &TuningWorkspace::treeFilterSelectionChanged, tp, &TuningPage::slot_treeFilterSelectionChanged);
+
+				if (childWorkspaceFilter->isButton() == true)
+				{
+					// Connect button filter event only if this tuning page is selected by button, not tab
+
+					connect(this, &TuningWorkspace::buttonFilterSelectionChanged, tp, &TuningPage::slot_pageFilterChanged);
+				}
+
+				return tp;
+			}
+			else
+			{
+				return it->second;
+			}
 		}
 	}
 }

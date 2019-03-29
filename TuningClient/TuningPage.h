@@ -97,7 +97,7 @@ public:
 
 	bool write();
 
-	bool apply();
+	void apply();
 
 	void undo();
 
@@ -151,8 +151,6 @@ private:
 	void setValue();
 
 	void invertValue();
-
-	bool takeClientControl();
 
 	void addSelectedSignalsToFilter(TuningFilter* filter);
 

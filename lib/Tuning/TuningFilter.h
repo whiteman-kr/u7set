@@ -14,7 +14,6 @@ struct TuningCounters
 	int sorCounter = 0;
 	bool sorActive = false;
 	bool sorValid = false;
-	int controlEnabledCounter = 0;
 	int discreteCounter = 0;
 };
 
@@ -79,6 +78,13 @@ public:
 		Discrete,
 	};
 	Q_ENUM(SignalType)
+
+	enum class TabType
+	{
+		Generic,
+		FiltersSwitch,
+	};
+	Q_ENUM(TabType)
 
 public:
 	TuningFilter();
@@ -179,6 +185,15 @@ public:
 
 	std::vector<QString> valueColumnsAppSignalIdSuffixes() const;
 
+	TabType tabType() const;
+	void setTabType(TabType type);
+
+	QString tags() const;
+	void setTags(const QString& value);
+
+	QStringList tagsList() const;
+	bool hasAnyTag(const QStringList& tags) const;
+
 	bool columnCustomAppId() const;
 	void setColumnCustomAppId(bool signalValue);
 
@@ -209,6 +224,11 @@ public:
 	bool columnOutOfRange() const;
 	void setColumnOutOfRange(bool signalValue);
 
+	/*QByteArray byteArray() const;
+	void setByteArray(QByteArray value);
+
+	QImage image() const;
+	void setImage(QImage value);*/
 
 public:
 	// Operations
@@ -281,6 +301,10 @@ private:
 	int m_valueColumnsCount = 0;
 	std::vector<QString> m_valueColumnsAppSignalIdSuffixes;
 
+	TabType m_tabType = TabType::Generic;
+
+	QStringList m_tags;
+
 	bool m_columnCustomAppId = true;
 	bool m_columnAppId = false;
 	bool m_columnEquipmentId = true;
@@ -291,6 +315,9 @@ private:
 	bool m_columnDefault = true;
 	bool m_columnValid = false;
 	bool m_columnOutOfRange = false;
+
+	/*QByteArray m_byteArray;
+	QImage m_image;*/
 
 private:
 

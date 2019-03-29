@@ -33,6 +33,8 @@ public:
 
 	QString getStateToolTip() const;
 
+	bool takeClientControl(QWidget* parentWidget);
+
 private:
 
 	Log::LogFile* m_log = nullptr;

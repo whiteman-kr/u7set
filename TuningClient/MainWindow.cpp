@@ -882,7 +882,7 @@ void MainWindow::slot_userFiltersChanged()
 
 	if (m_tuningWorkspace != nullptr)
 	{
-		m_tuningWorkspace->updateFiltersTree(m_filterStorage.root());
+		m_tuningWorkspace->updateFilters(m_filterStorage.root());
 	}
 
 }

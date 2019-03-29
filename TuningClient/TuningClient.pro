@@ -140,7 +140,9 @@ SOURCES +=\
     DialogChooseFilter.cpp \
     DialogTuningSources.cpp \
     ../lib/Ui/TuningSourcesWidget.cpp \
-    ../lib/TcpClientsStatistics.cpp
+    ../lib/TcpClientsStatistics.cpp \
+    SwitchFiltersPage.cpp \
+    SwitchFiltersPageOptions.cpp
 
 HEADERS  += MainWindow.h \
     Stable.h \
@@ -203,12 +205,15 @@ HEADERS  += MainWindow.h \
     DialogTuningSources.h \
     ../lib/Ui/TuningSourcesWidget.h \
     ../lib/Ui/DialogSourceInfo.h \
-    ../lib/TcpClientsStatistics.h
+    ../lib/TcpClientsStatistics.h \
+    SwitchFiltersPage.h \
+    SwitchFiltersPageOptions.h
 
 FORMS    += \
     DialogSettings.ui \
     DialogPassword.ui \
-    DialogSignalInfo.ui
+    DialogSignalInfo.ui \
+    SwitchFiltersPageOptions.ui
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
