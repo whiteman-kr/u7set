@@ -57,29 +57,27 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------
 
-	ConfigurationBuilder::ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, QJSEngine* jsEngine, DbController* db, Hardware::DeviceRoot* deviceRoot,
-											   const std::vector<Hardware::DeviceModule*>& fscModules, LmDescriptionSet *lmDescriptions, SignalSet* signalSet,
-											   Hardware::SubsystemStorage* subsystems, Hardware::OptoModuleStorage *opticModuleStorage,
-											   Hardware::ModuleFirmwareWriter* firmwareWriter, IssueLogger *log):
-		m_firmwareWriter(firmwareWriter),
+	ConfigurationBuilder::ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, Context* context):
 		m_buildWorkerThread(buildWorkerThread),
-		m_jsEngine(jsEngine),
-		m_db(db),
-		m_deviceRoot(deviceRoot),
-		m_fscModules(fscModules),
-		m_lmDescriptions(lmDescriptions),
-		m_signalSet(signalSet),
-		m_subsystems(subsystems),
-		m_opticModuleStorage(opticModuleStorage),
-		m_log(log)
+		m_buildResultWriter(context->m_buildResultWriter.get()),
+		m_jsEngine(&context->m_jsEngine),
+		m_db(&context->m_db),
+		m_deviceRoot(context->m_equipmentSet->root()),
+		m_fscModules(context->m_fscModules),
+		m_lmDescriptions(context->m_fscDescriptions.get()),
+		m_signalSet(context->m_signalSet.get()),
+		m_subsystems(context->m_subsystems.get()),
+		m_opticModuleStorage(context->m_opticModuleStorage.get()),
+		m_log(context->m_log)
 	{
+
 		assert(m_db);
 		assert(m_deviceRoot);
 		assert(m_signalSet);
 		assert(m_subsystems);
 		assert(m_opticModuleStorage);
 		assert(m_log);
-		assert(m_firmwareWriter);
+		assert(m_buildResultWriter);
 
 		return;
 	}
@@ -88,7 +86,7 @@ namespace Builder
 	{
 	}
 
-	bool ConfigurationBuilder::build(BuildResultWriter& buildResultWriter)
+	bool ConfigurationBuilder::build()
 	{
 		if (db() == nullptr || log() == nullptr)
 		{
@@ -293,7 +291,7 @@ namespace Builder
 			lmReportData.append(s + "\r\n");
 		}
 
-		if (buildResultWriter.addFile("Reports", "lmJumpers.txt", lmReportData) == nullptr)
+		if (m_buildResultWriter->addFile("Reports", "lmJumpers.txt", lmReportData) == nullptr)
 		{
 			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save lmJumpers.txt file!"));
 			return false;
@@ -372,7 +370,7 @@ namespace Builder
 
 		int configUartId = lmDescription->flashMemory().m_configUartId;
 
-		m_firmwareWriter->createFirmware(subsysStrID,
+		m_buildResultWriter->firmwareWriter()->createFirmware(subsysStrID,
 										 subsysID,
 										 configUartId,
 										 "Configuration",
@@ -381,10 +379,10 @@ namespace Builder
 										 lmDescription->lmDescriptionFile(subsystemModules[0]),
 										lmDescription->descriptionNumber());
 
-		m_firmwareWriter->setScriptFirmware(subsysStrID, configUartId);
+		m_buildResultWriter->firmwareWriter()->setScriptFirmware(subsysStrID, configUartId);
 
-		QJSValue jsFirmware = m_jsEngine->newQObject(m_firmwareWriter);
-		QQmlEngine::setObjectOwnership(m_firmwareWriter, QQmlEngine::CppOwnership);
+		QJSValue jsFirmware = m_jsEngine->newQObject(m_buildResultWriter->firmwareWriter());
+		QQmlEngine::setObjectOwnership(m_buildResultWriter->firmwareWriter(), QQmlEngine::CppOwnership);
 
 		QJSValue jsLog = m_jsEngine->newQObject(m_log);
 		QQmlEngine::setObjectOwnership(m_log, QQmlEngine::CppOwnership);
@@ -452,19 +450,19 @@ namespace Builder
 	}
 
 
-	bool ConfigurationBuilder::writeDataFiles(BuildResultWriter &buildResultWriter)
+	bool ConfigurationBuilder::writeDataFiles()
 	{
-		QStringList subsystemsList = m_firmwareWriter->subsystems();
+		QStringList subsystemsList = m_buildResultWriter->firmwareWriter()->subsystems();
 
 		// Save confCollection items to binary files
 		//
 		for (auto ss : subsystemsList)
 		{
-			const QByteArray& log = m_firmwareWriter->scriptLog(ss);
+			const QByteArray& log = m_buildResultWriter->firmwareWriter()->scriptLog(ss);
 
 			if (log.isEmpty() == false)
 			{
-				if (buildResultWriter.addFile(ss, ss.toLower() + ".mct", log) == nullptr)
+				if (m_buildResultWriter->addFile(ss, ss.toLower() + ".mct", log) == nullptr)
 				{
 					return false;
 				}

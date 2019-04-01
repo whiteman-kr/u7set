@@ -45,13 +45,11 @@ namespace Builder
 		Q_OBJECT
 	public:
 		ConfigurationBuilder() = delete;
-		ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, QJSEngine* jsEngine, DbController* db, Hardware::DeviceRoot* deviceRoot, const std::vector<Hardware::DeviceModule *> &fscModules, LmDescriptionSet* lmDescriptions, SignalSet* signalSet, Hardware::SubsystemStorage* subsystems,
-							 Hardware::OptoModuleStorage *opticModuleStorage, Hardware::ModuleFirmwareWriter* firmwareWriter, IssueLogger* log);
+		ConfigurationBuilder(BuildWorkerThread* buildWorkerThread, Context* context);
 		virtual ~ConfigurationBuilder();
 
-		bool build(BuildResultWriter &buildResultWriter);
-
-		bool writeDataFiles(BuildResultWriter &buildResultWriter);
+		bool build();
+		bool writeDataFiles();
 
 		Q_INVOKABLE bool jsIsInterruptRequested();
 
@@ -66,7 +64,7 @@ namespace Builder
 
 
 	private:
-		Hardware::ModuleFirmwareWriter* m_firmwareWriter = nullptr;
+		Builder::BuildResultWriter* m_buildResultWriter = nullptr;
 
 		BuildWorkerThread* m_buildWorkerThread = nullptr;
 		QJSEngine* m_jsEngine = nullptr;
