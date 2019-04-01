@@ -47,7 +47,6 @@ SwitchFiltersPage::SwitchFiltersPage(std::shared_ptr<TuningFilter> workspaceFilt
 	m_tuningFilterStorage(tuningFilterStorage)
 {
 	m_mainLayout = new QVBoxLayout(this);
-	m_mainLayout->setContentsMargins(0, 0, 0, 0);
 	setLayout(m_mainLayout);
 
 	if (m_workspaceFilter == nullptr)
@@ -59,6 +58,62 @@ SwitchFiltersPage::SwitchFiltersPage(std::shared_ptr<TuningFilter> workspaceFilt
 	updateFilters(m_tuningFilterStorage->root());
 
 	connect(theMainWindow, &MainWindow::timerTick500, this, &SwitchFiltersPage::slot_timerTick500);
+
+	// Determine button and list colors from tags
+	// Tags format: ...;AlertBackColor=#f00000;AlertTextColor=#c00000;GrayedBackColor=#d0d000;GrayedTextColor=#000000;...
+
+	QStringList tags = workspaceFilter->tagsList();
+	for (const QString& tag : tags)
+	{
+		QStringList pair = tag.split('=');
+		if (pair.size() != 2)
+		{
+			continue;
+		}
+
+		QColor color = QColor(pair[1]);
+		if (color.isValid() == false)
+		{
+			continue;
+		}
+
+		if (pair[0].startsWith("AlertBackColor"))
+		{
+			m_alertBackColor = color;
+			continue;
+		}
+		if (pair[0].startsWith("AlertTextColor"))
+		{
+			m_alertTextColor = color;
+			continue;
+		}
+		if (pair[0].startsWith("GrayedBackColor"))
+		{
+			m_partialBackColor = color;
+			continue;
+		}
+		if (pair[0].startsWith("GrayedTextColor"))
+		{
+			m_partialTextColor = color;
+			continue;
+		}
+	}
+
+	// Background Color
+
+	if (workspaceFilter->isTab() == true && workspaceFilter->useColors() == true)
+	{
+		QPalette Pal(palette());
+
+		Pal.setColor(QPalette::Background, workspaceFilter->backColor());
+		setAutoFillBackground(true);
+		setPalette(Pal);
+	}
+	else
+	{
+		m_mainLayout->setContentsMargins(0, 0, 0, 0);
+	}
+
 }
 
 
@@ -400,6 +455,8 @@ void SwitchFiltersPage::createListItems()
 			FilterCheckBox* check = new FilterCheckBox(tr("OFF"));
 			connect(check, &FilterCheckBox::pressed, this, &SwitchFiltersPage::onFilterTablePressed);
 
+			check->setStyleSheet("FilterCheckBox::indicator{width:25px;height:25px;}");
+
 			switch (c)
 			{
 			case static_cast<int>(Columns::State):
@@ -587,6 +644,13 @@ int SwitchFiltersPage::countDiscretes(TuningFilter* filter)
 
 	return result;
 
+}
+
+void SwitchFiltersPage::showEvent(QShowEvent *ev)
+{
+	Q_UNUSED(ev);
+
+	slot_timerTick500();
 }
 
 void SwitchFiltersPage::onOptions()
@@ -842,6 +906,8 @@ void SwitchFiltersPage::onFilterTablePressed()
 	}
 
 	changeFilterSignals(filter);
+
+	m_filterTable->clearSelection();
 }
 
 

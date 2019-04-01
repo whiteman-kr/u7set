@@ -122,6 +122,9 @@ private:
 
 	int countDiscretes(TuningFilter* filter);
 
+protected:
+	  void showEvent(QShowEvent *ev) override;
+
 private slots:
 	void onOptions();
 	void onPrev();
@@ -189,7 +192,8 @@ private:
 	static QString tag_FilterButton;
 	static QString tag_FilterSwitch;
 
-	QColor m_alertBackColor = QColor(255, 140, 0);
+	//QColor m_alertBackColor = QColor(255, 140, 0);
+	QColor m_alertBackColor = QColor(Qt::darkRed);
 	QColor m_alertTextColor = QColor(255, 255, 255);
 
 	QColor m_partialBackColor = QColor(Qt::yellow);

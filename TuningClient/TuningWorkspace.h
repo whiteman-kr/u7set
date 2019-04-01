@@ -10,15 +10,17 @@ class FilterButton : public QPushButton
 {
 	Q_OBJECT
 public:
-	FilterButton(std::shared_ptr<TuningFilter> filter, const QString& caption, bool check, QWidget* parent = nullptr);
+	FilterButton(std::shared_ptr<TuningFilter> filter, bool check, QWidget* parent = nullptr);
 
 	std::shared_ptr<TuningFilter> filter();
 
-	QString caption() const;
+	int counter() const;
+
+	void update(int discreteCounter);
 
 private:
 	std::shared_ptr<TuningFilter> m_filter;
-	QString m_caption;
+	int m_discreteCounter = 0;
 
 private slots:
 	void slot_toggled(bool checked);
