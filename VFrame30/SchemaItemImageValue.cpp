@@ -11,6 +11,9 @@
 
 namespace VFrame30
 {
+	//
+	//	SchemaItemImageValue
+	//
 	SchemaItemImageValue::SchemaItemImageValue(void) :
 		SchemaItemImageValue(SchemaUnit::Inch)
 	{
@@ -20,7 +23,7 @@ namespace VFrame30
 
 	SchemaItemImageValue::SchemaItemImageValue(SchemaUnit unit)
 	{
-		Property* p = nullptr;
+		//VProperty* p = nullptr;
 
 		// Functional
 		//
@@ -29,9 +32,7 @@ namespace VFrame30
 
 		ADD_PROPERTY_GET_SET_CAT(E::SignalSource, PropertyNames::signalSource, PropertyNames::functionalCategory, true, SchemaItemImageValue::signalSource, SchemaItemImageValue::setSignalSource);
 
-		// Appearance
-		//
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::keepAspectRatio, PropertyNames::appearanceCategory, true, SchemaItemImageValue::keepAspectRatio, SchemaItemImageValue::setKeepAspectRatio);
+		ADD_PROPERTY_GET_SET_CAT(PropertyVector<ImageItem>, PropertyNames::images, PropertyNames::functionalCategory, true, SchemaItemImageValue::images, SchemaItemImageValue::setImages);
 
 		// --
 		//
@@ -62,7 +63,11 @@ namespace VFrame30
 
 		valueMessage->set_signalids(signalIdsString().toStdString());
 		valueMessage->set_signalsource(static_cast<int32_t>(m_signalSource));
-		valueMessage->set_keepaspectratio(m_keepAspectRatio);
+
+		for (auto image : m_images)
+		{
+			image->save(valueMessage->add_images());
+		}
 
 		return true;
 	}
@@ -95,16 +100,23 @@ namespace VFrame30
 
 		setSignalIdsString(valueMessage.signalids().data());
 		m_signalSource = static_cast<E::SignalSource>(valueMessage.signalsource());
-		m_keepAspectRatio = valueMessage.keepaspectratio();
 
-		return true;
+		m_images.clear();
+		bool loadOk = true;
+		for (int i = 0; i < valueMessage.images_size(); i++)
+		{
+			auto image = m_images.emplace_back();
+			loadOk &= image->load(valueMessage.images(i));
+		}
+
+		return loadOk;
 	}
 
 	// Drawing Functions
 	//
 	void SchemaItemImageValue::Draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
 	{
-		QPainter* p = drawParam->painter();
+		//QPainter* p = drawParam->painter();
 
 		// Initialization drawing resources
 		//
@@ -112,7 +124,7 @@ namespace VFrame30
 						
 		// Calculate rectangle
 		//
-		QRectF r = boundingRectInDocPt();
+		QRectF r = boundingRectInDocPt(drawParam);
 
 		// Drawing frame rect
 		//
@@ -223,16 +235,16 @@ namespace VFrame30
 		m_signalSource = value;
 	}
 
-	// KeepAspectRatio
+	// Images
 	//
-	bool SchemaItemImageValue::keepAspectRatio() const
+	const PropertyVector<ImageItem>& SchemaItemImageValue::images() const
 	{
-		return m_keepAspectRatio;
+		return m_images;
 	}
 
-	void SchemaItemImageValue::setKeepAspectRatio(bool value)
+	void SchemaItemImageValue::setImages(const PropertyVector<ImageItem>& value)
 	{
-		m_keepAspectRatio = value;
+		m_images = value;
 	}
 
 }

@@ -1,8 +1,7 @@
 #pragma once
 
 #include "PosRectImpl.h"
-#include <QSvgRenderer>
-#include <optional>
+#include "ImageItem.h"
 
 class AppSignalState;
 class AppSignalParam;
@@ -10,6 +9,7 @@ class TuningSignalState;
 
 namespace VFrame30
 {
+
 	class VFRAME30LIBSHARED_EXPORT SchemaItemImageValue : public PosRectImpl
 	{
 		Q_OBJECT
@@ -34,11 +34,7 @@ namespace VFrame30
 
 	protected:
 		void initDrawingResources() const;
-
 		bool getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
-
-		//QString parseText(QString text, const AppSignalParam& signal, const AppSignalState& signalState) const;
-		//QString formatNumber(double value, const AppSignalParam& signal) const;
 
 	protected:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
@@ -60,26 +56,15 @@ namespace VFrame30
 		E::SignalSource signalSource() const;
 		void setSignalSource(E::SignalSource value);
 
-		bool keepAspectRatio() const;
-		void setKeepAspectRatio(bool value);
-
-//		QImage image() const;
-//		void setImage(QImage image);
-
-//		QString svgData() const;
-//		void setSvgData(QString data);
+		const PropertyVector<ImageItem>& images() const;
+		void setImages(const PropertyVector<ImageItem>& value);
 
 	private:
 		QStringList m_signalIds = {"#APPSIGNALID"};
 		E::SignalSource m_signalSource = E::SignalSource::AppDataService;
 
-		bool m_keepAspectRatio = true;
-
-//		QImage m_image;
-//		QString m_svgData;
-
-		// Drawing resources
-		//
-//		mutable std::optional<QSvgRenderer> m_svgRenderer;
+		PropertyVector<ImageItem> m_images;	// Each image is a std::shared_ptr
 	};
 }
+
+

@@ -307,7 +307,7 @@ namespace VFrame30
 		return false;
 	}
 
-	QRectF PosLineImpl::boundingRectInDocPt() const
+	QRectF PosLineImpl::boundingRectInDocPt(CDrawParam* /*drawParam*/) const
 	{
 		QRectF result(
 			std::min(m_startXDocPt, m_endXDocPt), 

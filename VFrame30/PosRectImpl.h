@@ -106,7 +106,7 @@ namespace VFrame30
 
 		// Get SchemaItem bounding rectangle in itemUnit()
 		//
-		virtual QRectF boundingRectInDocPt() const override;
+		virtual QRectF boundingRectInDocPt(CDrawParam* drawParam) const override;
 
 		// IPosRect
 		//

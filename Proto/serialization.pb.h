@@ -39,6 +39,7 @@ class qvariant;
 class wstring;
 class FontParam;
 class SchemaPoint;
+class ImageItem;
 class Envelope;
 class EnvelopeSet;
 class EnvelopeSetShortDescription;
@@ -715,6 +716,128 @@ class SchemaPoint : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static SchemaPoint* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ImageItem : public ::google::protobuf::Message {
+ public:
+  ImageItem();
+  virtual ~ImageItem();
+
+  ImageItem(const ImageItem& from);
+
+  inline ImageItem& operator=(const ImageItem& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ImageItem& default_instance();
+
+  void Swap(ImageItem* other);
+
+  // implements Message ----------------------------------------------
+
+  ImageItem* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ImageItem& from);
+  void MergeFrom(const ImageItem& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional bool allowScale = 1 [default = true];
+  inline bool has_allowscale() const;
+  inline void clear_allowscale();
+  static const int kAllowScaleFieldNumber = 1;
+  inline bool allowscale() const;
+  inline void set_allowscale(bool value);
+
+  // optional bool keepAspectRatio = 2 [default = true];
+  inline bool has_keepaspectratio() const;
+  inline void clear_keepaspectratio();
+  static const int kKeepAspectRatioFieldNumber = 2;
+  inline bool keepaspectratio() const;
+  inline void set_keepaspectratio(bool value);
+
+  // optional bytes imageData = 8;
+  inline bool has_imagedata() const;
+  inline void clear_imagedata();
+  static const int kImageDataFieldNumber = 8;
+  inline const ::std::string& imagedata() const;
+  inline void set_imagedata(const ::std::string& value);
+  inline void set_imagedata(const char* value);
+  inline void set_imagedata(const void* value, size_t size);
+  inline ::std::string* mutable_imagedata();
+  inline ::std::string* release_imagedata();
+  inline void set_allocated_imagedata(::std::string* imagedata);
+
+  // optional string svgData = 9;
+  inline bool has_svgdata() const;
+  inline void clear_svgdata();
+  static const int kSvgDataFieldNumber = 9;
+  inline const ::std::string& svgdata() const;
+  inline void set_svgdata(const ::std::string& value);
+  inline void set_svgdata(const char* value);
+  inline void set_svgdata(const char* value, size_t size);
+  inline ::std::string* mutable_svgdata();
+  inline ::std::string* release_svgdata();
+  inline void set_allocated_svgdata(::std::string* svgdata);
+
+  // @@protoc_insertion_point(class_scope:Proto.ImageItem)
+ private:
+  inline void set_has_allowscale();
+  inline void clear_has_allowscale();
+  inline void set_has_keepaspectratio();
+  inline void clear_has_keepaspectratio();
+  inline void set_has_imagedata();
+  inline void clear_has_imagedata();
+  inline void set_has_svgdata();
+  inline void clear_has_svgdata();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* imagedata_;
+  ::std::string* svgdata_;
+  bool allowscale_;
+  bool keepaspectratio_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static ImageItem* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -3885,64 +4008,26 @@ class SchemaItemImage : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional bool allowScale = 1 [default = true];
-  inline bool has_allowscale() const;
-  inline void clear_allowscale();
-  static const int kAllowScaleFieldNumber = 1;
-  inline bool allowscale() const;
-  inline void set_allowscale(bool value);
-
-  // optional bool keepAspectRatio = 2 [default = true];
-  inline bool has_keepaspectratio() const;
-  inline void clear_keepaspectratio();
-  static const int kKeepAspectRatioFieldNumber = 2;
-  inline bool keepaspectratio() const;
-  inline void set_keepaspectratio(bool value);
-
-  // optional bytes imageData = 8;
-  inline bool has_imagedata() const;
-  inline void clear_imagedata();
-  static const int kImageDataFieldNumber = 8;
-  inline const ::std::string& imagedata() const;
-  inline void set_imagedata(const ::std::string& value);
-  inline void set_imagedata(const char* value);
-  inline void set_imagedata(const void* value, size_t size);
-  inline ::std::string* mutable_imagedata();
-  inline ::std::string* release_imagedata();
-  inline void set_allocated_imagedata(::std::string* imagedata);
-
-  // optional string svgData = 9;
-  inline bool has_svgdata() const;
-  inline void clear_svgdata();
-  static const int kSvgDataFieldNumber = 9;
-  inline const ::std::string& svgdata() const;
-  inline void set_svgdata(const ::std::string& value);
-  inline void set_svgdata(const char* value);
-  inline void set_svgdata(const char* value, size_t size);
-  inline ::std::string* mutable_svgdata();
-  inline ::std::string* release_svgdata();
-  inline void set_allocated_svgdata(::std::string* svgdata);
+  // optional .Proto.ImageItem image = 1;
+  inline bool has_image() const;
+  inline void clear_image();
+  static const int kImageFieldNumber = 1;
+  inline const ::Proto::ImageItem& image() const;
+  inline ::Proto::ImageItem* mutable_image();
+  inline ::Proto::ImageItem* release_image();
+  inline void set_allocated_image(::Proto::ImageItem* image);
 
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemImage)
  private:
-  inline void set_has_allowscale();
-  inline void clear_has_allowscale();
-  inline void set_has_keepaspectratio();
-  inline void clear_has_keepaspectratio();
-  inline void set_has_imagedata();
-  inline void clear_has_imagedata();
-  inline void set_has_svgdata();
-  inline void clear_has_svgdata();
+  inline void set_has_image();
+  inline void clear_has_image();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::std::string* imagedata_;
-  ::std::string* svgdata_;
-  bool allowscale_;
-  bool keepaspectratio_;
+  ::Proto::ImageItem* image_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -6031,12 +6116,17 @@ class SchemaItemImageValue : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 signalsource() const;
   inline void set_signalsource(::google::protobuf::int32 value);
 
-  // optional bool keepAspectRatio = 6 [default = true];
-  inline bool has_keepaspectratio() const;
-  inline void clear_keepaspectratio();
-  static const int kKeepAspectRatioFieldNumber = 6;
-  inline bool keepaspectratio() const;
-  inline void set_keepaspectratio(bool value);
+  // repeated .Proto.ImageItem images = 14;
+  inline int images_size() const;
+  inline void clear_images();
+  static const int kImagesFieldNumber = 14;
+  inline const ::Proto::ImageItem& images(int index) const;
+  inline ::Proto::ImageItem* mutable_images(int index);
+  inline ::Proto::ImageItem* add_images();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::ImageItem >&
+      images() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::ImageItem >*
+      mutable_images();
 
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemImageValue)
  private:
@@ -6044,14 +6134,12 @@ class SchemaItemImageValue : public ::google::protobuf::Message {
   inline void clear_has_signalids();
   inline void set_has_signalsource();
   inline void clear_has_signalsource();
-  inline void set_has_keepaspectratio();
-  inline void clear_has_keepaspectratio();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* signalids_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::ImageItem > images_;
   ::google::protobuf::int32 signalsource_;
-  bool keepaspectratio_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(3 + 31) / 32];
@@ -12318,6 +12406,194 @@ inline void SchemaPoint::set_y(double value) {
 
 // -------------------------------------------------------------------
 
+// ImageItem
+
+// optional bool allowScale = 1 [default = true];
+inline bool ImageItem::has_allowscale() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ImageItem::set_has_allowscale() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ImageItem::clear_has_allowscale() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ImageItem::clear_allowscale() {
+  allowscale_ = true;
+  clear_has_allowscale();
+}
+inline bool ImageItem::allowscale() const {
+  return allowscale_;
+}
+inline void ImageItem::set_allowscale(bool value) {
+  set_has_allowscale();
+  allowscale_ = value;
+}
+
+// optional bool keepAspectRatio = 2 [default = true];
+inline bool ImageItem::has_keepaspectratio() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ImageItem::set_has_keepaspectratio() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ImageItem::clear_has_keepaspectratio() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ImageItem::clear_keepaspectratio() {
+  keepaspectratio_ = true;
+  clear_has_keepaspectratio();
+}
+inline bool ImageItem::keepaspectratio() const {
+  return keepaspectratio_;
+}
+inline void ImageItem::set_keepaspectratio(bool value) {
+  set_has_keepaspectratio();
+  keepaspectratio_ = value;
+}
+
+// optional bytes imageData = 8;
+inline bool ImageItem::has_imagedata() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ImageItem::set_has_imagedata() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ImageItem::clear_has_imagedata() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ImageItem::clear_imagedata() {
+  if (imagedata_ != &::google::protobuf::internal::kEmptyString) {
+    imagedata_->clear();
+  }
+  clear_has_imagedata();
+}
+inline const ::std::string& ImageItem::imagedata() const {
+  return *imagedata_;
+}
+inline void ImageItem::set_imagedata(const ::std::string& value) {
+  set_has_imagedata();
+  if (imagedata_ == &::google::protobuf::internal::kEmptyString) {
+    imagedata_ = new ::std::string;
+  }
+  imagedata_->assign(value);
+}
+inline void ImageItem::set_imagedata(const char* value) {
+  set_has_imagedata();
+  if (imagedata_ == &::google::protobuf::internal::kEmptyString) {
+    imagedata_ = new ::std::string;
+  }
+  imagedata_->assign(value);
+}
+inline void ImageItem::set_imagedata(const void* value, size_t size) {
+  set_has_imagedata();
+  if (imagedata_ == &::google::protobuf::internal::kEmptyString) {
+    imagedata_ = new ::std::string;
+  }
+  imagedata_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ImageItem::mutable_imagedata() {
+  set_has_imagedata();
+  if (imagedata_ == &::google::protobuf::internal::kEmptyString) {
+    imagedata_ = new ::std::string;
+  }
+  return imagedata_;
+}
+inline ::std::string* ImageItem::release_imagedata() {
+  clear_has_imagedata();
+  if (imagedata_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = imagedata_;
+    imagedata_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ImageItem::set_allocated_imagedata(::std::string* imagedata) {
+  if (imagedata_ != &::google::protobuf::internal::kEmptyString) {
+    delete imagedata_;
+  }
+  if (imagedata) {
+    set_has_imagedata();
+    imagedata_ = imagedata;
+  } else {
+    clear_has_imagedata();
+    imagedata_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string svgData = 9;
+inline bool ImageItem::has_svgdata() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void ImageItem::set_has_svgdata() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void ImageItem::clear_has_svgdata() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void ImageItem::clear_svgdata() {
+  if (svgdata_ != &::google::protobuf::internal::kEmptyString) {
+    svgdata_->clear();
+  }
+  clear_has_svgdata();
+}
+inline const ::std::string& ImageItem::svgdata() const {
+  return *svgdata_;
+}
+inline void ImageItem::set_svgdata(const ::std::string& value) {
+  set_has_svgdata();
+  if (svgdata_ == &::google::protobuf::internal::kEmptyString) {
+    svgdata_ = new ::std::string;
+  }
+  svgdata_->assign(value);
+}
+inline void ImageItem::set_svgdata(const char* value) {
+  set_has_svgdata();
+  if (svgdata_ == &::google::protobuf::internal::kEmptyString) {
+    svgdata_ = new ::std::string;
+  }
+  svgdata_->assign(value);
+}
+inline void ImageItem::set_svgdata(const char* value, size_t size) {
+  set_has_svgdata();
+  if (svgdata_ == &::google::protobuf::internal::kEmptyString) {
+    svgdata_ = new ::std::string;
+  }
+  svgdata_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ImageItem::mutable_svgdata() {
+  set_has_svgdata();
+  if (svgdata_ == &::google::protobuf::internal::kEmptyString) {
+    svgdata_ = new ::std::string;
+  }
+  return svgdata_;
+}
+inline ::std::string* ImageItem::release_svgdata() {
+  clear_has_svgdata();
+  if (svgdata_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = svgdata_;
+    svgdata_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ImageItem::set_allocated_svgdata(::std::string* svgdata) {
+  if (svgdata_ != &::google::protobuf::internal::kEmptyString) {
+    delete svgdata_;
+  }
+  if (svgdata) {
+    set_has_svgdata();
+    svgdata_ = svgdata;
+  } else {
+    clear_has_svgdata();
+    svgdata_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
 // Envelope
 
 // required uint32 classnamehash = 1;
@@ -17184,187 +17460,41 @@ inline void SchemaItemPath::set_linecolor(::google::protobuf::uint32 value) {
 
 // SchemaItemImage
 
-// optional bool allowScale = 1 [default = true];
-inline bool SchemaItemImage::has_allowscale() const {
+// optional .Proto.ImageItem image = 1;
+inline bool SchemaItemImage::has_image() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void SchemaItemImage::set_has_allowscale() {
+inline void SchemaItemImage::set_has_image() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void SchemaItemImage::clear_has_allowscale() {
+inline void SchemaItemImage::clear_has_image() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void SchemaItemImage::clear_allowscale() {
-  allowscale_ = true;
-  clear_has_allowscale();
+inline void SchemaItemImage::clear_image() {
+  if (image_ != NULL) image_->::Proto::ImageItem::Clear();
+  clear_has_image();
 }
-inline bool SchemaItemImage::allowscale() const {
-  return allowscale_;
+inline const ::Proto::ImageItem& SchemaItemImage::image() const {
+  return image_ != NULL ? *image_ : *default_instance_->image_;
 }
-inline void SchemaItemImage::set_allowscale(bool value) {
-  set_has_allowscale();
-  allowscale_ = value;
+inline ::Proto::ImageItem* SchemaItemImage::mutable_image() {
+  set_has_image();
+  if (image_ == NULL) image_ = new ::Proto::ImageItem;
+  return image_;
 }
-
-// optional bool keepAspectRatio = 2 [default = true];
-inline bool SchemaItemImage::has_keepaspectratio() const {
-  return (_has_bits_[0] & 0x00000002u) != 0;
+inline ::Proto::ImageItem* SchemaItemImage::release_image() {
+  clear_has_image();
+  ::Proto::ImageItem* temp = image_;
+  image_ = NULL;
+  return temp;
 }
-inline void SchemaItemImage::set_has_keepaspectratio() {
-  _has_bits_[0] |= 0x00000002u;
-}
-inline void SchemaItemImage::clear_has_keepaspectratio() {
-  _has_bits_[0] &= ~0x00000002u;
-}
-inline void SchemaItemImage::clear_keepaspectratio() {
-  keepaspectratio_ = true;
-  clear_has_keepaspectratio();
-}
-inline bool SchemaItemImage::keepaspectratio() const {
-  return keepaspectratio_;
-}
-inline void SchemaItemImage::set_keepaspectratio(bool value) {
-  set_has_keepaspectratio();
-  keepaspectratio_ = value;
-}
-
-// optional bytes imageData = 8;
-inline bool SchemaItemImage::has_imagedata() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
-}
-inline void SchemaItemImage::set_has_imagedata() {
-  _has_bits_[0] |= 0x00000004u;
-}
-inline void SchemaItemImage::clear_has_imagedata() {
-  _has_bits_[0] &= ~0x00000004u;
-}
-inline void SchemaItemImage::clear_imagedata() {
-  if (imagedata_ != &::google::protobuf::internal::kEmptyString) {
-    imagedata_->clear();
-  }
-  clear_has_imagedata();
-}
-inline const ::std::string& SchemaItemImage::imagedata() const {
-  return *imagedata_;
-}
-inline void SchemaItemImage::set_imagedata(const ::std::string& value) {
-  set_has_imagedata();
-  if (imagedata_ == &::google::protobuf::internal::kEmptyString) {
-    imagedata_ = new ::std::string;
-  }
-  imagedata_->assign(value);
-}
-inline void SchemaItemImage::set_imagedata(const char* value) {
-  set_has_imagedata();
-  if (imagedata_ == &::google::protobuf::internal::kEmptyString) {
-    imagedata_ = new ::std::string;
-  }
-  imagedata_->assign(value);
-}
-inline void SchemaItemImage::set_imagedata(const void* value, size_t size) {
-  set_has_imagedata();
-  if (imagedata_ == &::google::protobuf::internal::kEmptyString) {
-    imagedata_ = new ::std::string;
-  }
-  imagedata_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* SchemaItemImage::mutable_imagedata() {
-  set_has_imagedata();
-  if (imagedata_ == &::google::protobuf::internal::kEmptyString) {
-    imagedata_ = new ::std::string;
-  }
-  return imagedata_;
-}
-inline ::std::string* SchemaItemImage::release_imagedata() {
-  clear_has_imagedata();
-  if (imagedata_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
+inline void SchemaItemImage::set_allocated_image(::Proto::ImageItem* image) {
+  delete image_;
+  image_ = image;
+  if (image) {
+    set_has_image();
   } else {
-    ::std::string* temp = imagedata_;
-    imagedata_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void SchemaItemImage::set_allocated_imagedata(::std::string* imagedata) {
-  if (imagedata_ != &::google::protobuf::internal::kEmptyString) {
-    delete imagedata_;
-  }
-  if (imagedata) {
-    set_has_imagedata();
-    imagedata_ = imagedata;
-  } else {
-    clear_has_imagedata();
-    imagedata_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-  }
-}
-
-// optional string svgData = 9;
-inline bool SchemaItemImage::has_svgdata() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
-}
-inline void SchemaItemImage::set_has_svgdata() {
-  _has_bits_[0] |= 0x00000008u;
-}
-inline void SchemaItemImage::clear_has_svgdata() {
-  _has_bits_[0] &= ~0x00000008u;
-}
-inline void SchemaItemImage::clear_svgdata() {
-  if (svgdata_ != &::google::protobuf::internal::kEmptyString) {
-    svgdata_->clear();
-  }
-  clear_has_svgdata();
-}
-inline const ::std::string& SchemaItemImage::svgdata() const {
-  return *svgdata_;
-}
-inline void SchemaItemImage::set_svgdata(const ::std::string& value) {
-  set_has_svgdata();
-  if (svgdata_ == &::google::protobuf::internal::kEmptyString) {
-    svgdata_ = new ::std::string;
-  }
-  svgdata_->assign(value);
-}
-inline void SchemaItemImage::set_svgdata(const char* value) {
-  set_has_svgdata();
-  if (svgdata_ == &::google::protobuf::internal::kEmptyString) {
-    svgdata_ = new ::std::string;
-  }
-  svgdata_->assign(value);
-}
-inline void SchemaItemImage::set_svgdata(const char* value, size_t size) {
-  set_has_svgdata();
-  if (svgdata_ == &::google::protobuf::internal::kEmptyString) {
-    svgdata_ = new ::std::string;
-  }
-  svgdata_->assign(reinterpret_cast<const char*>(value), size);
-}
-inline ::std::string* SchemaItemImage::mutable_svgdata() {
-  set_has_svgdata();
-  if (svgdata_ == &::google::protobuf::internal::kEmptyString) {
-    svgdata_ = new ::std::string;
-  }
-  return svgdata_;
-}
-inline ::std::string* SchemaItemImage::release_svgdata() {
-  clear_has_svgdata();
-  if (svgdata_ == &::google::protobuf::internal::kEmptyString) {
-    return NULL;
-  } else {
-    ::std::string* temp = svgdata_;
-    svgdata_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
-    return temp;
-  }
-}
-inline void SchemaItemImage::set_allocated_svgdata(::std::string* svgdata) {
-  if (svgdata_ != &::google::protobuf::internal::kEmptyString) {
-    delete svgdata_;
-  }
-  if (svgdata) {
-    set_has_svgdata();
-    svgdata_ = svgdata;
-  } else {
-    clear_has_svgdata();
-    svgdata_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_image();
   }
 }
 
@@ -19530,26 +19660,29 @@ inline void SchemaItemImageValue::set_signalsource(::google::protobuf::int32 val
   signalsource_ = value;
 }
 
-// optional bool keepAspectRatio = 6 [default = true];
-inline bool SchemaItemImageValue::has_keepaspectratio() const {
-  return (_has_bits_[0] & 0x00000004u) != 0;
+// repeated .Proto.ImageItem images = 14;
+inline int SchemaItemImageValue::images_size() const {
+  return images_.size();
 }
-inline void SchemaItemImageValue::set_has_keepaspectratio() {
-  _has_bits_[0] |= 0x00000004u;
+inline void SchemaItemImageValue::clear_images() {
+  images_.Clear();
 }
-inline void SchemaItemImageValue::clear_has_keepaspectratio() {
-  _has_bits_[0] &= ~0x00000004u;
+inline const ::Proto::ImageItem& SchemaItemImageValue::images(int index) const {
+  return images_.Get(index);
 }
-inline void SchemaItemImageValue::clear_keepaspectratio() {
-  keepaspectratio_ = true;
-  clear_has_keepaspectratio();
+inline ::Proto::ImageItem* SchemaItemImageValue::mutable_images(int index) {
+  return images_.Mutable(index);
 }
-inline bool SchemaItemImageValue::keepaspectratio() const {
-  return keepaspectratio_;
+inline ::Proto::ImageItem* SchemaItemImageValue::add_images() {
+  return images_.Add();
 }
-inline void SchemaItemImageValue::set_keepaspectratio(bool value) {
-  set_has_keepaspectratio();
-  keepaspectratio_ = value;
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::ImageItem >&
+SchemaItemImageValue::images() const {
+  return images_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::ImageItem >*
+SchemaItemImageValue::mutable_images() {
+  return &images_;
 }
 
 // -------------------------------------------------------------------
