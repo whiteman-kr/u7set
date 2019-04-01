@@ -368,91 +368,50 @@ void DialogSignalInfo::updateData()
 		return;
 	}
 
-	if (state.m_flags.valid)
+	// Generate value string even if signal is not valid
+	//
+	QString strValue;
+
+	if (m_signal.isDiscrete())
 	{
-		QString strValue;
+		strValue = QString("%1").arg(state.m_value);
+	}
 
-		if (m_signal.isDiscrete())
-		{
-			strValue = QString("%1").arg(state.m_value);
-		}
+	if (m_signal.isAnalog() == true)
+	{
+		strValue = AppSignalState::toString(state.m_value, m_viewType, m_precision);
+	}
 
-		if (m_signal.isAnalog())
-		{
-			int p = 4;
-
-			switch (m_viewType)
-			{
-			case ViewType::Dec:
-				strValue = QString::number(state.m_value, 'f', m_precision);
-				break;
-			case ViewType::Hex:
-				strValue = /*tr("HEX:") + */QString::number((long)state.m_value, 16) + tr("h");
-				break;
-			case ViewType::Exp:
-				strValue = /*tr("EXP:") + */QString::number(state.m_value, 'e', m_precision);
-				break;
-			case ViewType::Bin16:
-				{
-					strValue = QString::number((quint16)state.m_value, 2);
-					strValue = strValue.rightJustified(16, '0');
-					for (int q = 0; q < 3; q++, p += 5)
-					{
-						strValue.insert(p, ' ');
-					}
-				}
-				//strValue = tr("BIN16: ") + strValue;
-				break;
-			case ViewType::Bin32:
-				strValue = QString::number((quint32)state.m_value, 2);
-				strValue = strValue.rightJustified(32, '0');
-				for (int q = 0; q < 7; q++, p += 5)
-				{
-					strValue.insert(p, ' ');
-				}
-				//strValue = tr("BIN32: ") + strValue;
-				break;
-			case ViewType::Bin64:
-				strValue = QString::number((quint64)state.m_value, 2);
-				strValue = strValue.rightJustified(64, '0');
-				for (int q = 0; q < 15; q++, p += 5)
-				{
-					strValue.insert(p, ' ');
-				}
-				strValue.insert(40, '\n');
-				//strValue = tr("BIN64: ") + strValue;
-				break;
-			}
-
-		}
-
-		// switch font if needed
-		//
-		int oldFontSize = m_currentFontSize;
-		if (m_signal.isAnalog() && m_viewType == ViewType::Bin64)
-		{
-			m_currentFontSize = 12;
-		}
-		else
-		{
-			m_currentFontSize = 20;
-		}
-		if (oldFontSize != m_currentFontSize)
-		{
-			QFont font = ui->labelValue->font();
-			font.setPixelSize(m_currentFontSize);
-			ui->labelValue->setFont(font);
-		}
-
-
-		if (strValue != ui->labelValue->text())
-		{
-			ui->labelValue->setText(strValue);
-		}
+	// switch font if needed
+	//
+	int oldFontSize = m_currentFontSize;
+	if (m_signal.isAnalog() && m_viewType == E::ValueViewType::Bin64)
+	{
+		m_currentFontSize = 12;
 	}
 	else
 	{
-		ui->labelValue->setText("???");
+		m_currentFontSize = 20;
+	}
+	if (oldFontSize != m_currentFontSize)
+	{
+		QFont font = ui->labelValue->font();
+		font.setPixelSize(m_currentFontSize);
+		ui->labelValue->setFont(font);
+	}
+
+	// Generate non valid string
+	//
+	if (state.m_flags.valid == false)
+	{
+		strValue = QStringLiteral("?");
+	}
+
+	// --
+	//
+	if (strValue != ui->labelValue->text())
+	{
+		ui->labelValue->setText(strValue);
 	}
 
 	//QDateTime systemTime = QDateTime::fromMSecsSinceEpoch(state.time.system);
@@ -467,8 +426,9 @@ void DialogSignalInfo::updateData()
 	if (m_signalFlags)
 	{
 		m_signalFlags->updateControl(state.m_flags);
-
 	}
+
+	return;
 }
 
 
@@ -520,13 +480,13 @@ void DialogSignalInfo::contextMenu(QPoint pos)
 	QActionGroup *viewGroup = new QActionGroup(this);
 	viewGroup->setExclusive(true);
 
-	for (int i = 0; i < static_cast<int>(ViewType::Count); i++)
+	for (int i = 0; i < static_cast<int>(E::ValueViewType::Count); i++)
 	{
-		QAction* a = new QAction(E::valueToString<DialogSignalInfo::ViewType>(i), &menu);
+		QAction* a = new QAction(E::valueToString<E::ValueViewType>(i), &menu);
 
 		auto f = [this, i]() -> void
 				 {
-					m_viewType = static_cast<ViewType>(i);
+					m_viewType = static_cast<E::ValueViewType>(i);
 				 };
 
 		connect(a, &QAction::triggered, this, f);

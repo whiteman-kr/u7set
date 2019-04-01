@@ -18,6 +18,9 @@ namespace TuningTags
 	static const QString tag_Analog = "Analog";
 	static const QString tag_Discrete = "Discrete";
 
+	static const QString tag_Generic = "Generic";
+	static const QString tag_FiltersSwitch = "FiltersSwitch";
+
 	static const QString tag_Project = "Project";
 	static const QString tag_Schema = "Schema";
 	static const QString tag_Equipment = "Equipment";
@@ -32,17 +35,23 @@ namespace TuningTags
 	static const QLatin1String prop_Source = QLatin1String("Source");
 	static const QLatin1String prop_ID = QLatin1String("ID");
 	static const QLatin1String prop_CustomID = QLatin1String("CustomID");
+	static const QLatin1String prop_Tags = QLatin1String("Tags");
 	static const QLatin1String prop_InterfaceType = QLatin1String("InterfaceType");
 	static const QLatin1String prop_CustomAppSignalMasks = QLatin1String("CustomAppSignalMasks");
 	static const QLatin1String prop_AppSignalMasks = QLatin1String("AppSignalMasks");
 	static const QLatin1String prop_EquipmentIDMasks = QLatin1String("EquipmentIDMasks");
 
+	static const QLatin1String prop_UseColors = QLatin1String("UseColors");
+
 	static const QLatin1String prop_BackColor = QLatin1String("BackColor");
 	static const QLatin1String prop_TextColor = QLatin1String("TextColor");
 	static const QLatin1String prop_BackSelectedColor = QLatin1String("BackSelectedColor");
 	static const QLatin1String prop_TextSelectedColor = QLatin1String("TextSelectedColor");
+	static const QLatin1String prop_BackAlertedColor = QLatin1String("BackAlertedColor");
+	static const QLatin1String prop_TextAlertedColor = QLatin1String("TextAlertedColor");
 	static const QLatin1String prop_HasDiscreteCounter = QLatin1String("HasDiscreteCounter");
 	static const QLatin1String prop_ValueColumnsCount = QLatin1String("ValueColumnsCount");
+	static const QLatin1String prop_TabType = QLatin1String("TabType");
 
 	static const QLatin1String prop_ColumnCustomAppId = QLatin1String("ColumnCustomAppId");
 	static const QLatin1String prop_ColumnAppId = QLatin1String("ColumnAppId");
@@ -59,48 +68,48 @@ namespace TuningTags
 	static const QLatin1String category_ValueColumns = QLatin1String("ValueColumns");
 }
 
-TuningFilterValue::TuningFilterValue()
+TuningFilterSignal::TuningFilterSignal()
 {
 
 }
 
-QString TuningFilterValue::appSignalId() const
+QString TuningFilterSignal::appSignalId() const
 {
 	return m_appSignalId;
 }
 
-void TuningFilterValue::setAppSignalId(const QString& value)
+void TuningFilterSignal::setAppSignalId(const QString& value)
 {
 	m_appSignalId = value;
 	m_appSignalHash = ::calcHash(m_appSignalId);
 }
 
-bool TuningFilterValue::useValue() const
+bool TuningFilterSignal::useValue() const
 {
 	return m_useValue;
 }
 
-void TuningFilterValue::setUseValue(bool value)
+void TuningFilterSignal::setUseValue(bool value)
 {
 	m_useValue = value;
 }
 
-TuningValue TuningFilterValue::value() const
+TuningValue TuningFilterSignal::value() const
 {
 	return m_value;
 }
 
-void TuningFilterValue::setValue(TuningValue value)
+void TuningFilterSignal::setValue(TuningValue value)
 {
 	m_value = value;
 }
 
-Hash TuningFilterValue::appSignalHash() const
+Hash TuningFilterSignal::appSignalHash() const
 {
 	return m_appSignalHash;
 }
 
-bool TuningFilterValue::load(QXmlStreamReader& reader)
+bool TuningFilterSignal::load(QXmlStreamReader& reader)
 {
 	if (reader.attributes().hasAttribute("AppSignalId"))
 	{
@@ -137,7 +146,7 @@ bool TuningFilterValue::load(QXmlStreamReader& reader)
 			break;
 
 		default:
-			assert(false);
+			Q_ASSERT(false);
 			return false;
 		}
 
@@ -147,7 +156,7 @@ bool TuningFilterValue::load(QXmlStreamReader& reader)
 	return true;
 }
 
-bool TuningFilterValue::save(QXmlStreamWriter& writer) const
+bool TuningFilterSignal::save(QXmlStreamWriter& writer) const
 {
 	writer.writeStartElement("Value");
 	writer.writeAttribute("AppSignalId", m_appSignalId);
@@ -174,7 +183,7 @@ bool TuningFilterValue::save(QXmlStreamWriter& writer) const
 		break;
 
 	default:
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
@@ -200,6 +209,8 @@ TuningFilter::TuningFilter()
 
 	ADD_PROPERTY_GETTER(InterfaceType, TuningTags::prop_InterfaceType, true, TuningFilter::interfaceType);
 
+	ADD_PROPERTY_GETTER_SETTER(QString, TuningTags::prop_Tags, true, TuningFilter::tags, TuningFilter::setTags);
+
 	auto propMask = ADD_PROPERTY_GETTER_SETTER(QString, TuningTags::prop_CustomAppSignalMasks, true, TuningFilter::customAppSignalIDMask, TuningFilter::setCustomAppSignalIDMask);
 	propMask->setCategory("Masks");
 
@@ -208,6 +219,9 @@ TuningFilter::TuningFilter()
 
 	propMask = ADD_PROPERTY_GETTER_SETTER(QString, TuningTags::prop_EquipmentIDMasks, true, TuningFilter::equipmentIDMask, TuningFilter::setEquipmentIDMask);
 	propMask->setCategory("Masks");
+
+	auto propUseColors = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_UseColors, true, TuningFilter::useColors, TuningFilter::setUseColors);
+	propUseColors->setCategory("Appearance");
 
 	auto propBackColor = ADD_PROPERTY_GETTER_SETTER(QColor, TuningTags::prop_BackColor, true, TuningFilter::backColor, TuningFilter::setBackColor);
 	propBackColor->setCategory("Appearance");
@@ -221,11 +235,20 @@ TuningFilter::TuningFilter()
 	auto propTextSelectedColor = ADD_PROPERTY_GETTER_SETTER(QColor, TuningTags::prop_TextSelectedColor, true, TuningFilter::textSelectedColor, TuningFilter::setTextSelectedColor);
 	propTextSelectedColor->setCategory("Appearance");
 
+	auto propBackAlertedColor = ADD_PROPERTY_GETTER_SETTER(QColor, TuningTags::prop_BackAlertedColor, true, TuningFilter::backAlertedColor, TuningFilter::setBackAlertedColor);
+	propBackAlertedColor->setCategory("Appearance");
+
+	auto propTextAlertedColor = ADD_PROPERTY_GETTER_SETTER(QColor, TuningTags::prop_TextAlertedColor, true, TuningFilter::textAlertedColor, TuningFilter::setTextAlertedColor);
+	propTextAlertedColor->setCategory("Appearance");
+
 	auto propHasCounter = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_HasDiscreteCounter, true, TuningFilter::hasDiscreteCounter, TuningFilter::setHasDiscreteCounter);
 	propHasCounter->setCategory("Functions");
 
 	auto propTabValuesCount = ADD_PROPERTY_GETTER_SETTER(int, TuningTags::prop_ValueColumnsCount, true, TuningFilter::valuesColumnCount, TuningFilter::setValuesColumnCount);
 	propTabValuesCount->setCategory(TuningTags::category_ValueColumns);
+
+	auto propTabType = ADD_PROPERTY_GETTER_SETTER(TabType, TuningTags::prop_TabType, true, TuningFilter::tabType, TuningFilter::setTabType);
+	propTabType->setCategory("Appearance");
 
 	// Columns
 
@@ -271,6 +294,12 @@ TuningFilter::TuningFilter()
 	propColumn->setCategory(TuningTags::category_Columns);
 	propColumn->setViewOrder(order++);
 
+	/*auto p1 = ADD_PROPERTY_GETTER_SETTER(QByteArray, "QByteArray", true, TuningFilter::byteArray, TuningFilter::setByteArray);
+	p1->setSpecificEditor(E::PropertySpecificEditor::LoadFileDialog);
+
+	auto p1a = ADD_PROPERTY_GETTER_SETTER(QByteArray, "QByteArray2", true, TuningFilter::byteArray2, TuningFilter::setByteArray2);
+	p1a->setSpecificEditor(E::PropertySpecificEditor::LoadFileDialog);
+*/
 }
 
 TuningFilter::TuningFilter(const TuningFilter& That)
@@ -341,6 +370,11 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 			setCaption(reader.attributes().value(TuningTags::prop_Caption).toString());
 		}
 
+		if (reader.attributes().hasAttribute(TuningTags::prop_UseColors))
+		{
+			setUseColors(reader.attributes().value(TuningTags::prop_UseColors).toString() == TuningTags::tag_True);
+		}
+
 		if (reader.attributes().hasAttribute(TuningTags::prop_BackColor))
 		{
 			setBackColor(QColor(reader.attributes().value(TuningTags::prop_BackColor).toString()));
@@ -359,6 +393,16 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 		if (reader.attributes().hasAttribute(TuningTags::prop_TextSelectedColor))
 		{
 			setTextSelectedColor(QColor(reader.attributes().value(TuningTags::prop_TextSelectedColor).toString()));
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_BackAlertedColor))
+		{
+			setBackAlertedColor(QColor(reader.attributes().value(TuningTags::prop_BackAlertedColor).toString()));
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_TextAlertedColor))
+		{
+			setTextAlertedColor(QColor(reader.attributes().value(TuningTags::prop_TextAlertedColor).toString()));
 		}
 
 		if (reader.attributes().hasAttribute(TuningTags::prop_HasDiscreteCounter))
@@ -444,6 +488,11 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 			}
 		}
 
+		if (reader.attributes().hasAttribute(TuningTags::prop_Tags))
+		{
+			setTags(reader.attributes().value(TuningTags::prop_Tags).toString());
+		}
+
 		// ValueColumns
 
 		if (reader.attributes().hasAttribute(TuningTags::prop_ValueColumnsCount))
@@ -477,6 +526,27 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 		{
 			m_valueColumnsCount = 0;
 			m_valueColumnsAppSignalIdSuffixes.clear();
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_TabType))
+		{
+			QString v = reader.attributes().value(TuningTags::prop_TabType).toString();
+			if (v == TuningTags::tag_Generic)
+			{
+				setTabType(TabType::Generic);
+			}
+			else
+			{
+				if (v == TuningTags::tag_FiltersSwitch)
+				{
+					setTabType(TabType::FiltersSwitch);
+				}
+				else
+				{
+					reader.raiseError(tr("Unknown TabType value: %1").arg(v));
+					return false;
+				}
+			}
 		}
 
 		// Columns
@@ -555,11 +625,11 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 			{
 				recurseLevel++;
 
-				TuningFilterValue ofv;
+				TuningFilterSignal ofv;
 
 				ofv.load(reader);
 
-				addValue(ofv);
+				addFilterSignal(ofv);
 
 				continue;
 			}
@@ -634,7 +704,7 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 				}
 				else
 				{
-					assert(false);
+					Q_ASSERT(false);
 					return false;
 				}
 			}
@@ -645,11 +715,16 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 	writer.writeAttribute(TuningTags::prop_CustomID, customID());
 	writer.writeAttribute(TuningTags::prop_Caption, caption());
 
+	writer.writeAttribute(TuningTags::prop_UseColors, useColors() ? TuningTags::tag_True : TuningTags::tag_False);
+
 	writer.writeAttribute(TuningTags::prop_BackColor, backColor().name());
 	writer.writeAttribute(TuningTags::prop_TextColor, textColor().name());
 
 	writer.writeAttribute(TuningTags::prop_BackSelectedColor, backSelectedColor().name());
 	writer.writeAttribute(TuningTags::prop_TextSelectedColor, textSelectedColor().name());
+
+	writer.writeAttribute(TuningTags::prop_BackAlertedColor, backAlertedColor().name());
+	writer.writeAttribute(TuningTags::prop_TextAlertedColor, textAlertedColor().name());
 
 	writer.writeAttribute(TuningTags::prop_HasDiscreteCounter, hasDiscreteCounter() ? TuningTags::tag_True : TuningTags::tag_False);
 
@@ -660,11 +735,13 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 	writer.writeAttribute(TuningTags::prop_SignalType, E::valueToString<SignalType>(static_cast<int>(signalType())));
 	writer.writeAttribute(TuningTags::prop_Source, E::valueToString<Source>(static_cast<int>(source())));
 
+	writer.writeAttribute(TuningTags::prop_Tags, tags());
+
 	// ValueColumns
 
 	if (static_cast<int>(m_valueColumnsAppSignalIdSuffixes.size()) != valuesColumnCount())
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return false;
 	}
 
@@ -675,6 +752,8 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 		QString propName = tr(TuningTags::prop_ValueColumn1AppSignalSuffixes).arg(i);
 		writer.writeAttribute(propName, m_valueColumnsAppSignalIdSuffixes[i]);
 	}
+
+	writer.writeAttribute(TuningTags::prop_TabType, E::valueToString<TabType>(static_cast<int>(tabType())));
 
 	// Columns
 
@@ -691,8 +770,8 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 
 	writer.writeStartElement(TuningTags::tag_Values);
 
-	std::vector <TuningFilterValue> valuesList = getValues();
-	for (const TuningFilterValue& v : valuesList)
+	std::vector <TuningFilterSignal> valuesList = getFilterSignals();
+	for (const TuningFilterSignal& v : valuesList)
 	{
 		v.save(writer);
 	}
@@ -726,9 +805,9 @@ bool TuningFilter::match(const AppSignalParam& object) const
 
 	// List of appSignalId
 	//
-	if (m_signalValuesVec.empty() == false)
+	if (filterSignalsCount() != 0)
 	{
-		if (valueExists(object.hash()) == false)
+		if (filterSignalExists(object.hash()) == false)
 		{
 			return false;
 		}
@@ -766,7 +845,7 @@ void TuningFilter::checkSignals(const std::vector<Hash>& signalHashes, std::vect
 	for (auto it = m_signalValuesMap.begin(); it != m_signalValuesMap.end(); it++)
 	{
 		const Hash& hash = it->first;
-		const TuningFilterValue& value = it->second;
+		const TuningFilterSignal& value = it->second;
 
 		if (find(signalHashes.begin(), signalHashes.end(), hash) == signalHashes.end())
 		{
@@ -805,19 +884,8 @@ void TuningFilter::removeNotExistingSignals(const std::vector<Hash>& signalHashe
 		}
 		else
 		{
-			assert(false);
+			Q_ASSERT(false);
 		}
-
-		auto itv = std::find (m_signalValuesVec.begin(), m_signalValuesVec.end(), hash);
-		if (itv != m_signalValuesVec.end())
-		{
-			m_signalValuesVec.erase(itv);
-		}
-		else
-		{
-			assert(false);
-		}
-
 	}
 
 	int childCount = static_cast<int>(m_childFilters.size());
@@ -927,6 +995,16 @@ void TuningFilter::setSignalType(SignalType value)
 	m_signalType = value;
 }
 
+bool TuningFilter::useColors() const
+{
+	return m_useColors;
+}
+
+void TuningFilter::setUseColors(bool value)
+{
+	m_useColors = value;
+}
+
 QColor TuningFilter::backColor() const
 {
 	return m_backColor;
@@ -967,6 +1045,26 @@ void TuningFilter::setTextSelectedColor(const QColor& value)
 	m_textSelectedColor = value;
 }
 
+QColor TuningFilter::backAlertedColor() const
+{
+	return m_backAlertedColor;
+}
+
+void TuningFilter::setBackAlertedColor(const QColor& value)
+{
+	m_backAlertedColor = value;
+}
+
+QColor TuningFilter::textAlertedColor() const
+{
+	return m_textAlertedColor;
+}
+
+void TuningFilter::setTextAlertedColor(const QColor& value)
+{
+	m_textAlertedColor = value;
+}
+
 bool TuningFilter::hasDiscreteCounter() const
 {
 	return m_hasDiscreteCounter;
@@ -997,7 +1095,7 @@ void TuningFilter::setCustomAppSignalIDMask(const QString& value)
 	}
 	else
 	{
-		m_customAppSignalIDMasks = value.split(';');
+		m_customAppSignalIDMasks = value.split(';', QString::SkipEmptyParts);
 	}
 
 }
@@ -1022,7 +1120,7 @@ void TuningFilter::setEquipmentIDMask(const QString& value)
 	}
 	else
 	{
-		m_equipmentIDMasks = value.split(';');
+		m_equipmentIDMasks = value.split(';', QString::SkipEmptyParts);
 	}
 }
 
@@ -1046,121 +1144,68 @@ void TuningFilter::setAppSignalIDMask(const QString& value)
 	}
 	else
 	{
-		m_appSignalIDMasks = value.split(';');
+		m_appSignalIDMasks = value.split(';', QString::SkipEmptyParts);
 	}
 }
 
 
-std::vector <TuningFilterValue> TuningFilter::getValues() const
+std::vector <TuningFilterSignal> TuningFilter::getFilterSignals() const
 {
-	std::vector <TuningFilterValue> result;
+	std::vector <TuningFilterSignal> result;
 
-	for (Hash hash : m_signalValuesVec)
+	for (auto it = m_signalValuesMap.begin(); it != m_signalValuesMap.end(); it++)
 	{
-		result.push_back(m_signalValuesMap.at(hash));
+		result.push_back(it->second);
 	}
 
 	return result;
 }
 
-void TuningFilter::setValues(const std::vector <TuningFilterValue>& values)
+int TuningFilter::filterSignalsCount() const
 {
-	m_signalValuesVec.clear();
-	m_signalValuesMap.clear();
-
-	for (const TuningFilterValue&  v : values)
-	{
-		addValue(v);
-	}
+	return static_cast<int>(m_signalValuesMap.size());
 }
 
-int TuningFilter::valuesCount() const
-{
-	return static_cast<int>(m_signalValuesVec.size());
-}
-
-bool TuningFilter::valueExists(Hash hash) const
+bool TuningFilter::filterSignalExists(Hash hash) const
 {
 	return m_signalValuesMap.find(hash) != m_signalValuesMap.end();
 }
 
-void TuningFilter::addValue(const TuningFilterValue& value)
+void TuningFilter::addFilterSignal(const TuningFilterSignal& fs)
 {
-	Hash hash = value.appSignalHash();
+	Hash hash = fs.appSignalHash();
 
-	if (valueExists(hash) == false)
-	{
-		m_signalValuesVec.push_back(hash);
-	}
-
-	m_signalValuesMap[hash] = value;
+	m_signalValuesMap[hash] = fs;
 }
 
-void TuningFilter::removeValue(Hash hash)
+bool TuningFilter::removeFilterSignal(Hash hash)
 {
 	// remove from map
 	//
 	auto it = m_signalValuesMap.find(hash);
-
 	if (it == m_signalValuesMap.end())
 	{
-		assert(false);
-		return;
+		Q_ASSERT(false);
+		return false;
 	}
 
 	m_signalValuesMap.erase(it);
 
-	// remove from vector
-	//
-	bool found = false;
-	for (auto itv = m_signalValuesVec.begin(); itv != m_signalValuesVec.end(); itv++)
-	{
-		if (*itv == hash)
-		{
-			m_signalValuesVec.erase(itv);
-			found = true;
-			break;
-		}
-	}
-
-	if (found == false)
-	{
-		assert(false);
-		return;
-	}
+	return true;
 }
 
-bool TuningFilter::value(Hash hash, TuningFilterValue& value)
+bool TuningFilter::filterSignal(Hash hash, TuningFilterSignal& fs)
 {
 	auto it = m_signalValuesMap.find(hash);
 	if (it == m_signalValuesMap.end())
 	{
+		Q_ASSERT(false);
 		return false;
 	}
 
-	value = it->second;
-
-	if (value.useValue() == false)
-	{
-		return false;
-	}
+	fs = it->second;
 
 	return true;
-}
-
-void TuningFilter::setValue(const TuningFilterValue& value)
-{
-	auto it = m_signalValuesMap.find(value.appSignalHash());
-
-	if (it == m_signalValuesMap.end())
-	{
-		assert(false);
-		return;
-	}
-
-	TuningFilterValue& ofv = it->second;
-	ofv.setUseValue(value.useValue());
-	ofv.setValue(value.value());
 }
 
 TuningCounters TuningFilter::counters() const
@@ -1199,6 +1244,58 @@ std::vector<QString> TuningFilter::valueColumnsAppSignalIdSuffixes() const
 	return m_valueColumnsAppSignalIdSuffixes;
 }
 
+
+TuningFilter::TabType TuningFilter::tabType() const
+{
+	return m_tabType;
+}
+
+void TuningFilter::setTabType(TabType type)
+{
+	m_tabType = type;
+}
+
+QString TuningFilter::tags() const
+{
+	QString result;
+	for (auto s : m_tags)
+	{
+		result += s + ';';
+	}
+	result.remove(result.length() - 1, 1);
+
+	return result;
+}
+
+void TuningFilter::setTags(const QString& value)
+{
+	if (value.isEmpty() == true)
+	{
+		m_tags.clear();
+	}
+	else
+	{
+		m_tags = value.split(';', QString::SkipEmptyParts);
+	}
+}
+
+QStringList TuningFilter::tagsList() const
+{
+	return m_tags;
+}
+
+bool TuningFilter::hasAnyTag(const QStringList& tags) const
+{
+	for (auto tag : tags)
+	{
+		if (m_tags.contains(tag) == true)
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
 
 bool TuningFilter::columnCustomAppId() const
 {
@@ -1300,6 +1397,7 @@ void TuningFilter::setColumnOutOfRange(bool value)
 	m_columnOutOfRange = value;
 }
 
+
 TuningFilter* TuningFilter::parentFilter() const
 {
 	return m_parentFilter;
@@ -1309,7 +1407,7 @@ TuningFilter* TuningFilter::parentFilter() const
 bool TuningFilter::isEmpty() const
 {
 	if (m_signalType == SignalType::All &&
-			m_signalValuesVec.empty() == true &&
+			filterSignalsCount() == 0 &&
 			m_appSignalIDMasks.empty() == true &&
 			m_customAppSignalIDMasks.empty() == true &&
 			m_equipmentIDMasks.empty() == true
@@ -1341,19 +1439,25 @@ bool TuningFilter::isButton() const
 	return interfaceType() == InterfaceType::Button;
 }
 
-void TuningFilter::addTopChild(const std::shared_ptr<TuningFilter>& child)
-{
-	child->m_parentFilter = this;
-	m_childFilters.insert(m_childFilters.begin(), child);
-}
-
 void TuningFilter::addChild(const std::shared_ptr<TuningFilter>& child)
 {
 	child->m_parentFilter = this;
 	m_childFilters.push_back(child);
 }
 
-void TuningFilter::removeChild(const std::shared_ptr<TuningFilter>& child)
+void TuningFilter::insertChild(int index, const std::shared_ptr<TuningFilter>& child)
+{
+	if (index < 0 || index > childFiltersCount())
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	child->m_parentFilter = this;
+	m_childFilters.insert(m_childFilters.begin() + index, child);
+}
+
+	void TuningFilter::removeChild(const std::shared_ptr<TuningFilter>& child)
 {
 	bool found = false;
 
@@ -1369,7 +1473,7 @@ void TuningFilter::removeChild(const std::shared_ptr<TuningFilter>& child)
 
 	if (found == false)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 }
@@ -1426,7 +1530,7 @@ std::shared_ptr<TuningFilter> TuningFilter::childFilter(int index) const
 {
 	if (index <0 || index >= m_childFilters.size())
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return nullptr;
 	}
 
@@ -1467,11 +1571,17 @@ std::shared_ptr<TuningFilter> TuningFilter::findFilterById(const QString& id) co
 
 void TuningFilter::updateOptionalProperties()
 {
-	setPropertyVisible(TuningTags::prop_BackColor, interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
+	// Colors
+	setPropertyVisible(TuningTags::prop_UseColors, interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
 
-	setPropertyVisible(TuningTags::prop_TextColor, interfaceType() == InterfaceType::Button);
+	setPropertyVisible(TuningTags::prop_BackColor, interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
+	setPropertyVisible(TuningTags::prop_TextColor, interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
+
 	setPropertyVisible(TuningTags::prop_BackSelectedColor, interfaceType() == InterfaceType::Button);
 	setPropertyVisible(TuningTags::prop_TextSelectedColor, interfaceType() == InterfaceType::Button);
+
+	setPropertyVisible(TuningTags::prop_BackAlertedColor, interfaceType() == InterfaceType::Button);
+	setPropertyVisible(TuningTags::prop_TextAlertedColor, interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
 
 	// Value columns, add or remove unnecessary properties
 
@@ -1487,6 +1597,8 @@ void TuningFilter::updateOptionalProperties()
 	setPropertyVisible(TuningTags::prop_ColumnDefault, interfaceType() == InterfaceType::Tab);
 	setPropertyVisible(TuningTags::prop_ColumnValid, interfaceType() == InterfaceType::Tab);
 	setPropertyVisible(TuningTags::prop_ColumnOutOfRange, interfaceType() == InterfaceType::Tab);
+
+	setPropertyVisible(TuningTags::prop_TabType, interfaceType() == InterfaceType::Tab);
 
 	if (interfaceType() == InterfaceType::Tab)
 	{
@@ -1536,7 +1648,6 @@ void TuningFilter::copy(const TuningFilter& That)
 	m_appSignalIDMasks = That.m_appSignalIDMasks;
 
 	m_signalValuesMap = That.m_signalValuesMap;
-	m_signalValuesVec = That.m_signalValuesVec;
 
 	m_interfaceType = That.m_interfaceType;
 	m_signalType = That.m_signalType;
@@ -1546,11 +1657,20 @@ void TuningFilter::copy(const TuningFilter& That)
 	m_backColor = That.m_backColor;
 	m_textColor = That.m_textColor;
 
+	m_useColors = That.useColors();
+
 	m_backSelectedColor = That.m_backSelectedColor;
 	m_textSelectedColor = That.m_textSelectedColor;
 
+	m_backAlertedColor = That.m_backAlertedColor;
+	m_textAlertedColor = That.m_textAlertedColor;
+
 	m_valueColumnsCount = That.m_valueColumnsCount;
 	m_valueColumnsAppSignalIdSuffixes = That.m_valueColumnsAppSignalIdSuffixes;
+
+	m_tabType = That.m_tabType;
+
+	m_tags = That.m_tags;
 
 	m_equipmentHashes = That.m_equipmentHashes;
 	m_signalsHashes = That.m_signalsHashes;
@@ -1632,7 +1752,7 @@ void TuningFilter::setPropertyVisible(const QLatin1String& name, bool visible)
 {
 	if (propertyExists(name) == false)
 	{
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 	std::shared_ptr<Property> prop = propertyByCaption(name);
@@ -1661,7 +1781,7 @@ bool TuningFilterStorage::load(const QString& fileName, QString* errorCode)
 {
 	if (errorCode == nullptr)
 	{
-		assert(errorCode);
+		Q_ASSERT(errorCode);
 		return false;
 	}
 
@@ -1674,7 +1794,7 @@ bool TuningFilterStorage::load(const QString& fileName, QString* errorCode)
 
 	if (f.open(QFile::ReadOnly) == false)
 	{
-		*errorCode = QObject::tr("Error opening file:\r\n\r\n%1").arg(fileName);
+		*errorCode = QObject::tr("Error opening file:\n\n%1").arg(fileName);
 		return false;
 	}
 
@@ -1693,7 +1813,7 @@ bool TuningFilterStorage::load(const QByteArray &data, QString* errorCode)
 {
 	if (errorCode == nullptr)
 	{
-		assert(errorCode);
+		Q_ASSERT(errorCode);
 		return false;
 	}
 
@@ -1895,7 +2015,7 @@ void TuningFilterStorage::add(std::shared_ptr<TuningFilter> filter, bool moveToT
 {
 	if (moveToTop == true)
 	{
-		m_root->addTopChild(filter);
+		m_root->insertChild(0, filter);
 	}
 	else
 	{

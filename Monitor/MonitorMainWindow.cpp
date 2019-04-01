@@ -402,33 +402,38 @@ void MonitorMainWindow::createMenus()
 	viewMenu->addAction(m_historyForward);
 	viewMenu->addAction(m_historyBack );
 
-	viewMenu->addSeparator();
-	viewMenu->addAction(m_archiveAction);
-	viewMenu->addAction(m_trendsAction);
-
-	viewMenu->addSeparator();
-	viewMenu->addAction(m_signalSnapshotAction);
-	viewMenu->addAction(m_findSignalAction);
-
 
 	// Tools
 	//
-	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
+	QMenu* toolsMenu = menuBar()->addMenu(tr("&Tools"));
 
-	pToolsMenu->addAction(m_pDataSourcesAction);
-	pToolsMenu->addAction(m_pStatisticsAction);
-	pToolsMenu->addAction(m_pSettingsAction);
+	toolsMenu->addAction(m_archiveAction);
+	toolsMenu->addAction(m_trendsAction);
+
+	toolsMenu->addSeparator();
+	toolsMenu->addAction(m_signalSnapshotAction);
+	toolsMenu->addAction(m_findSignalAction);
+
+	toolsMenu->addSeparator();
+	toolsMenu->addAction(m_pSettingsAction);
 
 	// Help
 	//
 	menuBar()->addSeparator();
-	QMenu* pHelpMenu = menuBar()->addMenu(tr("&?"));
+	QMenu* helpMenu = menuBar()->addMenu(tr("&?"));
 
 #ifdef Q_DEBUG
-	pHelpMenu->addAction(m_pDebugAction);
+	//helpMenu->addAction(m_pDebugAction);
 #endif	// Q_DEBUG
-	pHelpMenu->addAction(m_pLogAction);
-	pHelpMenu->addAction(m_pAboutAction);
+
+	helpMenu->addAction(m_pDataSourcesAction);
+	helpMenu->addAction(m_pStatisticsAction);
+
+	helpMenu->addSeparator();
+	helpMenu->addAction(m_pLogAction);
+
+	helpMenu->addSeparator();
+	helpMenu->addAction(m_pAboutAction);
 
 	return;
 }

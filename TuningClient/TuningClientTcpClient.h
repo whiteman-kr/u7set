@@ -7,7 +7,7 @@
 #include "UserManager.h"
 #include "../lib/TcpClientsStatistics.h"
 
-class TuningClientTcpClient : public TuningTcpClient, public TcpClientInstance
+class TuningClientTcpClient : public TuningTcpClient, public TcpClientStatistics
 {
 	Q_OBJECT
 public:
@@ -32,6 +32,8 @@ public:
 	int sourceSorCount(Hash equipmentHash, bool* sorActive, bool* sorValid) const;
 
 	QString getStateToolTip() const;
+
+	bool takeClientControl(QWidget* parentWidget);
 
 private:
 

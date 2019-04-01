@@ -129,27 +129,27 @@ namespace Sim
 		return getData<quint16>(eepromOffset);
 	}
 
-	qint32 Eeprom::getSint32(int frameIndex, int wordOffset)
+	qint32 Eeprom::getSint32(int /*frameIndex*/, int /*wordOffset*/)
 	{
-		int to_to;
+		assert(false);	// To Do
 		return 0;
 	}
 
-	quint32 Eeprom::getUint32(int frameIndex, int wordOffset)
+	quint32 Eeprom::getUint32(int /*frameIndex*/, int /*wordOffset*/)
 	{
-		int to_to;
+		assert(false);	// To Do
 		return 0;
 	}
 
-	float Eeprom::getFloat(int frameIndex, int wordOffset)
+	float Eeprom::getFloat(int /*frameIndex*/, int /*wordOffset*/)
 	{
-		int to_to;
+		assert(false);	// To Do
 		return 0;
 	}
 
-	double Eeprom::getDouble(int frameIndex, int wordOffset)
+	double Eeprom::getDouble(int /*frameIndex*/, int /*wordOffset*/)
 	{
-		int to_to;
+		assert(false);	// To Do
 		return 0;
 	}
 

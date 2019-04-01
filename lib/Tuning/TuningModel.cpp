@@ -276,9 +276,9 @@ TuningModel::TuningModel(TuningSignalManager* tuningSignalManager, const std::ve
 {
 	// Fill column names
 
-	m_columnsNamesMap[TuningModelColumns::CustomAppSignalID] = tr("Custom AppSignal ID");
-	m_columnsNamesMap[TuningModelColumns::EquipmentID] = tr("Equipment ID");
-	m_columnsNamesMap[TuningModelColumns::AppSignalID] = tr("App Signal ID");
+	m_columnsNamesMap[TuningModelColumns::CustomAppSignalID] = tr("CustomAppSignalID");
+	m_columnsNamesMap[TuningModelColumns::EquipmentID] = tr("EquipmentID");
+	m_columnsNamesMap[TuningModelColumns::AppSignalID] = tr("AppSignalID");
 	m_columnsNamesMap[TuningModelColumns::Caption] = tr("Caption");
 	m_columnsNamesMap[TuningModelColumns::Units] = tr("Units");
 	m_columnsNamesMap[TuningModelColumns::Type] = tr("Type");

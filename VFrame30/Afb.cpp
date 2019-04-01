@@ -2194,6 +2194,7 @@ namespace Afb
 				return &s;
 			}
 		}
+
 		for (AfbSignal& s : m_outputSignals)
 		{
 			if (s.caption() == caption)
@@ -2202,6 +2203,7 @@ namespace Afb
 			}
 		}
 		return nullptr;
+
 	}
 
 	void AfbElement::updateParams(const std::vector<AfbParam>& params)

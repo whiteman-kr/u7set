@@ -10,11 +10,12 @@
 // FilterButton
 //
 
-FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, const QString& caption, bool check, QWidget* parent)
-	:QPushButton(caption, parent)
+FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, bool check, QWidget* parent)
+	:QPushButton(filter->caption(), parent)
 {
+	Q_ASSERT(filter);
+
 	m_filter = filter;
-	m_caption = caption;
 
 	setCheckable(true);
 
@@ -25,41 +26,7 @@ FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, const QString& 
 
 	setMinimumSize(100, 25);
 
-	QColor backColor = Qt::lightGray;
-	QColor textColor = Qt::white;
-
-	QColor backSelectedColor = Qt::darkGray;
-	QColor textSelectedColor = Qt::white;
-
-	if (filter->backColor().isValid() && filter->textColor().isValid() && filter->backColor() != filter->textColor())
-	{
-		backColor = filter->backColor();
-		textColor = filter->textColor();
-	}
-
-	if (filter->backSelectedColor().isValid() && filter->textSelectedColor().isValid() && filter->backSelectedColor() != filter->textSelectedColor())
-	{
-		backSelectedColor = filter->backSelectedColor();
-		textSelectedColor = filter->textSelectedColor();
-	}
-
-	setStyleSheet(tr("\
-					QPushButton {   \
-						background-color: %1;\
-						color: %2;    \
-					}   \
-					QPushButton:checked{\
-						background-color: %3;\
-						color: %4;    \
-						border: none;\
-					}\
-					").arg(backColor.name())
-					 .arg(textColor.name())
-					 .arg(backSelectedColor.name())
-					 .arg(textSelectedColor.name()));
-
-	update();
-
+	update(0);
 
 	connect(this, &QPushButton::toggled, this, &FilterButton::slot_toggled);
 }
@@ -69,9 +36,89 @@ std::shared_ptr<TuningFilter> FilterButton::filter()
 	return m_filter;
 }
 
-QString FilterButton::caption() const
+int FilterButton::counter() const
 {
-	return m_caption;
+	return m_discreteCounter;
+}
+
+void FilterButton::update(int discreteCounter)
+{
+	// Text
+
+	QString newCaption;
+
+	if (discreteCounter == 0)
+	{
+		newCaption = m_filter->caption();
+	}
+	else
+	{
+		newCaption = QString(" %1 [%2] ").arg(m_filter->caption()).arg(discreteCounter);
+	}
+
+	m_discreteCounter = discreteCounter;
+
+	if (text() != newCaption)
+	{
+		setText(newCaption);
+	}
+
+	// Color
+
+	QColor backColor = Qt::lightGray;
+	QColor textColor = Qt::white;
+
+	QColor backSelectedColor = Qt::darkGray;
+	QColor textSelectedColor = Qt::white;
+
+	if (m_filter->useColors() == true)
+	{
+		if (counter() != 0 && m_filter->backAlertedColor() != m_filter->textAlertedColor())
+		{
+			// Alerted state
+
+			backColor = m_filter->backAlertedColor();
+			textColor = m_filter->textAlertedColor();
+
+			backSelectedColor = backColor;
+			textSelectedColor = textColor;
+		}
+		else
+		{
+			if (m_filter->backColor() != m_filter->textColor())
+			{
+				backColor = m_filter->backColor();
+				textColor = m_filter->textColor();
+			}
+
+			if (m_filter->backSelectedColor() != m_filter->textSelectedColor())
+			{
+				backSelectedColor = m_filter->backSelectedColor();
+				textSelectedColor = m_filter->textSelectedColor();
+			}
+		}
+	}
+
+	QString style = tr("\
+					   QPushButton {   \
+						   background-color: %1;\
+						   color: %2;    \
+					   }   \
+					   QPushButton:checked{\
+						   background-color: %3;\
+						   color: %4;    \
+						   border: none;\
+					   }\
+					   ").arg(backColor.name())
+					   .arg(textColor.name())
+					   .arg(backSelectedColor.name())
+					   .arg(textSelectedColor.name());
+
+
+	if (styleSheet() != style)
+	{
+		setStyleSheet(style);
+	}
 }
 
 void FilterButton::slot_toggled(bool checked)
@@ -158,7 +205,7 @@ TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::
 
 	// Color
 
-	if (workspaceFilter->backColor().isValid() && workspaceFilter->textColor().isValid() && workspaceFilter->backColor() != workspaceFilter->textColor())
+	if (workspaceFilter->useColors() == true)
 	{
 		QPalette Pal(palette());
 
@@ -167,13 +214,39 @@ TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::
 		setPalette(Pal);
 		show();
 	}
-
 }
 
 TuningWorkspace::~TuningWorkspace()
 {
 	m_instanceCounter--;
 	//qDebug() << "TuningWorkspace::~TuningWorkspace m_instanceCounter = " << m_instanceCounter;
+
+	if (m_filterTree != nullptr)
+	{
+		QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
+
+		if (columnNameIndex != -1)
+		{
+			int width = m_filterTree->columnWidth(columnNameIndex);
+			settings.setValue("TuningWorkspace/FilterTreeColumnIndex", width);
+
+		}
+		if (columnDiscreteCountIndex != -1)
+		{
+			int width = m_filterTree->columnWidth(columnDiscreteCountIndex);
+			settings.setValue("TuningWorkspace/FilterTreeColumnDiscreteCount", width);
+		}
+		if (columnStatusIndex != -1)
+		{
+			int width = m_filterTree->columnWidth(columnStatusIndex);
+			settings.setValue("TuningWorkspace/FilterTreeColumnStatus", width);
+		}
+		if (columnSorIndex != -1)
+		{
+			int width = m_filterTree->columnWidth(columnSorIndex);
+			settings.setValue("TuningWorkspace/FilterTreeColumnSor", width);
+		}
+	}
 
 	if (m_hSplitter != nullptr)
 	{
@@ -247,6 +320,22 @@ void TuningWorkspace::onTimer()
 		tw->onTimer();
 
 		dp--;
+	}
+}
+
+void TuningWorkspace::updateFilters(std::shared_ptr<TuningFilter> rootFilter)
+{
+	updateFiltersTree(rootFilter);
+
+	for (auto swp : m_switchPresetPages)
+	{
+		if (swp == nullptr)
+		{
+			Q_ASSERT(swp);
+			return;
+		}
+
+		swp->updateFilters(rootFilter);
 	}
 }
 
@@ -327,22 +416,57 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 
 		// Set column width
 
+		const int columnMaxWidth = 500;
+
+		QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
 
 		if (columnNameIndex != -1)
 		{
-			m_filterTree->setColumnWidth(columnNameIndex, 200);
+			const int defaultWidth = 200;
+
+			int width = settings.value("TuningWorkspace/FilterTreeColumnIndex", defaultWidth).toInt();
+			if (width < defaultWidth || width > columnMaxWidth)
+			{
+				width = defaultWidth;
+			}
+
+			m_filterTree->setColumnWidth(columnNameIndex, width);
 		}
 		if (columnDiscreteCountIndex != -1)
 		{
-			m_filterTree->setColumnWidth(columnDiscreteCountIndex, 60);
+			const int defaultWidth = 80;
+
+			int width = settings.value("TuningWorkspace/FilterTreeColumnDiscreteCount", defaultWidth).toInt();
+			if (width < defaultWidth || width > columnMaxWidth)
+			{
+				width = defaultWidth;
+			}
+
+			m_filterTree->setColumnWidth(columnDiscreteCountIndex, width);
 		}
 		if (columnStatusIndex != -1)
 		{
-			m_filterTree->setColumnWidth(columnStatusIndex, 150);
+			const int defaultWidth = 80;
+
+			int width = settings.value("TuningWorkspace/FilterTreeColumnStatus", defaultWidth).toInt();
+			if (width < defaultWidth || width > columnMaxWidth)
+			{
+				width = defaultWidth;
+			}
+
+			m_filterTree->setColumnWidth(columnStatusIndex, width);
 		}
 		if (columnSorIndex != -1)
 		{
-			m_filterTree->setColumnWidth(columnSorIndex, 60);
+			const int defaultWidth = 80;
+
+			int width = settings.value("TuningWorkspace/FilterTreeColumnSor", defaultWidth).toInt();
+			if (width < defaultWidth || width > columnMaxWidth)
+			{
+				width = defaultWidth;
+			}
+
+			m_filterTree->setColumnWidth(columnSorIndex, width);
 		}
 
 		//
@@ -350,7 +474,7 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 		m_treeMask = new QLineEdit();
 		connect(m_treeMask, &QLineEdit::returnPressed, this, &TuningWorkspace::slot_maskReturnPressed);
 
-		QPushButton* m_treeMaskApply = new QPushButton(tr("Filter"));
+		m_treeMaskApply = new QPushButton(tr("Filter"));
 		connect(m_treeMaskApply, &QPushButton::clicked, this, &TuningWorkspace::slot_maskApply);
 
 		QHBoxLayout* searchLayout = new QHBoxLayout();
@@ -479,7 +603,7 @@ void TuningWorkspace::createButtons()
 			continue;
 		}
 
-		FilterButton* button = new FilterButton(f, f->caption(), firstButton);
+		FilterButton* button = new FilterButton(f, firstButton);
 		m_filterButtons.push_back(button);
 
 		button->installEventFilter(this);
@@ -723,29 +847,40 @@ QWidget* TuningWorkspace::createTuningPageOrWorkspace(std::shared_ptr<TuningFilt
 	}
 	else
 	{
-		// We have to create tuning page
-		//
-		auto it = m_tuningPagesMap.find(childWorkspaceFilterId);
-		if (it == m_tuningPagesMap.end())
+		if (childWorkspaceFilter->isTab() && childWorkspaceFilter->tabType() == TuningFilter::TabType::FiltersSwitch )
 		{
-			TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage);
-
-			m_tuningPagesMap[childWorkspaceFilterId] = tp;
-
-			connect(this, &TuningWorkspace::treeFilterSelectionChanged, tp, &TuningPage::slot_treeFilterSelectionChanged);
-
-			if (childWorkspaceFilter->isButton() == true)
-			{
-				// Connect button filter event only if this tuning page is selected by button, not tab
-
-				connect(this, &TuningWorkspace::buttonFilterSelectionChanged, tp, &TuningPage::slot_pageFilterChanged);
-			}
-
-			return tp;
+			// We have to create Presets Switch page
+			//
+			SwitchFiltersPage* swp = new SwitchFiltersPage(childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage);
+			m_switchPresetPages.push_back(swp);
+			return swp;
 		}
 		else
 		{
-			return it->second;
+			// We have to create tuning page
+			//
+			auto it = m_tuningPagesMap.find(childWorkspaceFilterId);
+			if (it == m_tuningPagesMap.end())
+			{
+				TuningPage* tp = new TuningPage(m_treeFilter, childWorkspaceFilter, m_tuningSignalManager, m_tuningTcpClient, m_tuningFilterStorage);
+
+				m_tuningPagesMap[childWorkspaceFilterId] = tp;
+
+				connect(this, &TuningWorkspace::treeFilterSelectionChanged, tp, &TuningPage::slot_treeFilterSelectionChanged);
+
+				if (childWorkspaceFilter->isButton() == true)
+				{
+					// Connect button filter event only if this tuning page is selected by button, not tab
+
+					connect(this, &TuningWorkspace::buttonFilterSelectionChanged, tp, &TuningPage::slot_pageFilterChanged);
+				}
+
+				return tp;
+			}
+			else
+			{
+				return it->second;
+			}
 		}
 	}
 }
@@ -798,11 +933,6 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(l);
 		item->setData(0, Qt::UserRole, QVariant::fromValue(f));
-
-		if (f->isSourceEquipment() == true)
-		{
-			item->setData(1, Qt::UserRole, ::calcHash(f->caption()));
-		}
 
 		parent->addChild(item);
 
@@ -863,6 +993,26 @@ void TuningWorkspace::updateCounters()
 				m_tab->setTabText(ti, newCaption);
 			}
 
+			// Tab text color
+
+			if (f->useColors() == true)
+			{
+				QColor tabTextColor;
+
+				if (discreteCount > 0)
+				{
+					tabTextColor = f->textAlertedColor();
+				}
+				else
+				{
+					tabTextColor = f->textColor();
+				}
+
+				if (m_tab->tabBar()->tabTextColor(ti) != tabTextColor)
+				{
+					m_tab->tabBar()->setTabTextColor(ti, tabTextColor);
+				}
+			}
 		}
 	}
 
@@ -891,19 +1041,9 @@ void TuningWorkspace::updateCounters()
 
 		int discreteCount = f->counters().discreteCounter;
 
-		QString newCaption;
-		if (discreteCount == 0)
+		if (discreteCount != button->counter())
 		{
-			newCaption = button->caption();
-		}
-		else
-		{
-			newCaption = QString(" %1 [%2] ").arg(button->caption()).arg(discreteCount);
-		}
-
-		if (button->text() != newCaption)
-		{
-			button->setText(newCaption);
+			button->update(discreteCount);
 		}
 	}
 }
@@ -1021,11 +1161,26 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem)
 {
-	Hash hash = treeItem->data(1, Qt::UserRole).value<Hash>();
+	std::shared_ptr<TuningFilter> filter = treeItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+	if (filter == nullptr)
+	{
+		assert(filter);
+		return;
+	}
+
+	std::vector<Hash> equipmentHashes = filter->equipmentHashes();
+
+	if (equipmentHashes.size() != 1)
+	{
+		Q_ASSERT(filter);
+		return;
+	}
+
+	Hash hash = equipmentHashes[0];
 
 	assert(columnStatusIndex != -1);
 
-	int errorCounter = m_tuningTcpClient->sourceErrorCount(hash);
+	int errorCounter = filter->counters().errorCounter;
 
 	TuningSource ts;
 
@@ -1147,7 +1302,7 @@ void TuningWorkspace::activateControl(const QString& equipmentId, bool enable)
 	if (m_tuningTcpClient->singleLmControlMode() == true && m_tuningTcpClient->clientIsActive() == false)
 	{
 		if (QMessageBox::warning(this, qAppName(),
-								 tr("Warning!\r\n\r\nCurrent client is not selected as active now.\r\n\r\nAre you sure you want to take control and %1 the source %2?").arg(action).arg(equipmentId),
+								 tr("Warning!\n\nCurrent client is not selected as active now.\n\nAre you sure you want to take control and %1 the source %2?").arg(action).arg(equipmentId),
 								 QMessageBox::Yes | QMessageBox::No,
 								 QMessageBox::No) != QMessageBox::Yes)
 		{
@@ -1360,6 +1515,17 @@ void TuningWorkspace::slot_maskApply()
 	{
 		assert(rootFilter);
 		return;
+	}
+
+	if (m_treeMask->text().isEmpty() == false)
+	{
+		m_treeMask->setStyleSheet("QLineEdit { color: red }");
+		m_treeMaskApply->setStyleSheet("QPushButton { color: red }");
+	}
+	else
+	{
+		m_treeMask->setStyleSheet(QString());
+		m_treeMaskApply->setStyleSheet(QString());
 	}
 
 	updateFiltersTree(rootFilter);

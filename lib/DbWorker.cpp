@@ -284,6 +284,10 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0264.sql", "Upgrade to version 264, Changes in ArchiveService preset"},
 	{":/DatabaseUpgrade/Upgrade0265.sql", "Upgrade to version 265, ElectricLimits properties have 4 decimal places in input modules"},
 	{":/DatabaseUpgrade/Upgrade0266.sql", "Upgrade to version 266, Add SerialNo signal to 4-phase input modules, 2 percents SpreadTolerance, Add validity signals to AOM-4PH and DOM"},
+	{":/DatabaseUpgrade/Upgrade0267.sql", "Upgrade to version 267, Changes in file SignalPropertyBehavior.csv"},
+	{":/DatabaseUpgrade/Upgrade0268.sql", "Upgrade to version 268, LmDescriptions, Expand AppDataSize to 256, add CheckAfbVersions data"},
+	{":/DatabaseUpgrade/Upgrade0269.sql", "Upgrade to version 269, Add current time signals to LM1-SR03, LM1-SR04"},
+	{":/DatabaseUpgrade/Upgrade0270.sql", "Upgrade to version 270, Added AFB set_flags to all LmDescriptions"},
 };
 
 int DbWorker::counter = 0;

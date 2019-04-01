@@ -1,36 +1,49 @@
-#ifndef TCPCLINENTSSTATISTICS_H
-#define TCPCLINENTSSTATISTICS_H
-
+#pragma once
+#include <set>
+#include <vector>
 #include "../lib/Tcp.h"
 
-class TcpClientInstance
+
+class TcpClientStatistics
 {
 protected:
-	TcpClientInstance(Tcp::Client* client);
-	virtual ~TcpClientInstance();
+	TcpClientStatistics() = delete;
+	TcpClientStatistics(Tcp::Client* client);
+	virtual ~TcpClientStatistics();
+
+public:
+	struct Statisctics
+	{
+		Statisctics(size_t _id, QString _objectName, Tcp::ConnectionState _state) :
+			id(_id),
+			objectName(_objectName),
+			state(_state)
+		{
+		}
+
+		size_t id;		// is a pointer to TcpClientInstance
+		QString objectName;
+		Tcp::ConnectionState state;
+	};
+
+	static std::vector<Statisctics> statistics();
+	static void reconnect(uintptr_t id);
 
 private:
 	Tcp::Client* m_client = nullptr;
+
+	static QMutex s_mutex;
+	static std::set<Tcp::Client*> s_clients;
 };
 
-class TcpClientInstances
-{
-public:
-	static QMutex m_mutex;
-	static void addConnection(Tcp::Client* client);
-	static void removeConnection(Tcp::Client* client);
-	static std::vector<Tcp::Client*> clients();
-
-private:
-	static std::vector<Tcp::Client*> m_clients;
-};
 
 class DialogStatistics : public QDialog
 {
 	Q_OBJECT
+
 public:
-	DialogStatistics(QWidget* parent);
-	~DialogStatistics();
+	explicit DialogStatistics(QWidget* parent);
+	virtual ~DialogStatistics();
 
 public slots:
 	void prepareContextMenu(const QPoint& pos);
@@ -44,14 +57,13 @@ protected:
 	void timerEvent(QTimerEvent* event);
 
 private slots:
-	void onReconnect();
+	void reconnectAll();
 
 private:
 	void update();
-	void reconnect(std::vector<Tcp::Client*> clients);	// call this function with static mutex locked!
 
 private:
-	enum Columns
+	enum class Columns
 	{
 		Caption,
 		IsConnected,
@@ -69,5 +81,3 @@ private:
 	QTreeWidget* m_treeWidget = nullptr;
 	int m_updateStateTimerId = -1;
 };
-
-#endif // DIALOGSTATISTICS_H

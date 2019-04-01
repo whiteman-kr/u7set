@@ -980,10 +980,10 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 					double x = timeToScaledPixel(ct, signalRect, startTimeStamp, duration);
 					double y = (state.value == 0) ? yPos0 : yPos1;
 
-//					painter->fillRect(QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), signal.color());
-//					drawText(painter, QString("%1").arg(pointIndex), QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextDontClip);
-//					qDebug() << "DEBUG: Discrete draw pointIndex: " << pointIndex;
-//					pointIndex ++;
+					//painter->fillRect(QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), signal.color());
+					//drawText(painter, QString("%1").arg(pointIndex), QRectF(x - 1.0/64.0, y - 1.0/64.0, 1.0/32.0, 1.0/32.0), drawParam, Qt::AlignLeft | Qt::AlignTop | Qt::TextDontClip);
+					//qDebug() << "pointIndex: " << pointIndex;
+					//pointIndex ++;
 
 					if (lines.isEmpty() == true)
 					{
@@ -1021,7 +1021,10 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 				if (lines.size() >= recomendedSize)
 				{
 					drawPolyline(painter, lines, signalRect);
+
+					QPointF lastPoint = lines.back();
 					lines.clear();
+					lines.push_back(lastPoint);
 				}
 
 				if (lastX >= rectRight)

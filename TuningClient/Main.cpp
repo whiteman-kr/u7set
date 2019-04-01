@@ -105,10 +105,13 @@ void loadLanguage(const QString& rLanguage)
 	QLocale locale = QLocale(rLanguage);
 	QLocale::setDefault(locale);
 
-	QString langPath = QApplication::applicationDirPath();
+
+	/*QString langPath = QApplication::applicationDirPath();
 	langPath.append("/languages");
 
-	switchTranslator(m_translator, QString("%1/TuningClient_%2.qm").arg(langPath).arg(rLanguage));
+	switchTranslator(m_translator, QString("%1/TuningClient_%2.qm").arg(langPath).arg(rLanguage));*/
+
+	switchTranslator(m_translator, QString(":/languages/TuningClient_%1.qm").arg(rLanguage));
 }
 
 

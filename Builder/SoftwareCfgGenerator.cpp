@@ -20,6 +20,7 @@ namespace Builder
 
 
 	SoftwareCfgGenerator::SoftwareCfgGenerator(Context* context, Hardware::Software* software) :
+		m_context(context),
 		m_dbController(&context->m_db),
 		m_software(software),
 		m_signalSet(context->m_signalSet.get()),
@@ -92,15 +93,21 @@ namespace Builder
 	}
 
 
-	bool SoftwareCfgGenerator::generalSoftwareCfgGeneration(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet* equipment, std::shared_ptr<BuildResultWriter> buildResultWriter)
+	bool SoftwareCfgGenerator::generalSoftwareCfgGeneration(Context* context)
 	{
-		if (buildResultWriter == nullptr)
+		if (context == nullptr)
 		{
 			assert(false);
 			return false;
 		}
 
-		IssueLogger* log = buildResultWriter->log();
+		if (context->m_buildResultWriter == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		IssueLogger* log = context->m_log;
 
 		if (log == nullptr)
 		{
@@ -108,9 +115,8 @@ namespace Builder
 			return false;
 		}
 
-		if (db == nullptr ||
-			signalSet == nullptr ||
-			equipment == nullptr)
+		if (context->m_signalSet == nullptr ||
+			context->m_equipmentSet == nullptr)
 		{
 			LOG_INTERNAL_ERROR(log);
 			assert(false);
@@ -121,34 +127,30 @@ namespace Builder
 
 		// add general software cfg generation here:
 		//
-		result &= buildLmList(equipment, log);
+		result &= buildLmList(context->m_equipmentSet.get(), log);
 
-		result &= buildSoftwareList(equipment, log);
+		result &= buildSoftwareList(context->m_equipmentSet.get(), log);
 
 		result &= checkLmToSoftwareLinks(log);
 
 		// Add Schemas to Build result
 		//
-		result &= loadAllSchemas(db, buildResultWriter.get(), log);
+		result &= loadAllSchemas(context);
 
 		return result;
 	}
 
-	bool SoftwareCfgGenerator::loadAllSchemas(DbController* db, BuildResultWriter* buildResultWriter, IssueLogger* log)
+	bool SoftwareCfgGenerator::loadAllSchemas(Context* context)
 	{
-		if (db == nullptr || log == nullptr)
-		{
-			assert(db);
-			assert(log);
-			return false;
-		}
+		DbController& db = context->m_db;
+		IssueLogger* log = context->m_log;
 
 		DbFileTree filesTree;									// Filed in loadAllSchemas
 
-		if (bool ok = db->getFileListTree(&filesTree, db->schemaFileId(), "%", true, nullptr);
+		if (bool ok = db.getFileListTree(&filesTree, db.schemaFileId(), "%", true, nullptr);
 			ok == false)
 		{
-			log->errPDB2001(db->schemaFileId(), "%", db->lastError());
+			log->errPDB2001(db.schemaFileId(), "%", db.lastError());
 			return false;
 		}
 
@@ -180,10 +182,10 @@ namespace Builder
 
 			std::shared_ptr<DbFile> file;
 
-			if (bool ok  = db->getLatestVersion(f, &file, nullptr);
+			if (bool ok  = db.getLatestVersion(f, &file, nullptr);
 				ok == false || file.get() == nullptr)
 			{
-				log->errPDB2002(f.fileId(), f.fileName(), db->lastError());
+				log->errPDB2002(f.fileId(), f.fileName(), db.lastError());
 				returnResult = false;
 				continue;
 			}
@@ -219,7 +221,7 @@ namespace Builder
 
 			// Add file to build result
 			//
-			if (bool ok = buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schema->tagsAsList().join(";"), file->data(), false);
+			if (bool ok = context->m_buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schema->tagsAsList().join(";"), file->data(), false);
 				ok == false)
 			{
 				returnResult = false;

@@ -169,6 +169,9 @@ public:
 	const LogicUnit& logicUnit() const;
 	const OptoInterface& optoInterface() const;
 
+	bool checkAfbVersions() const;
+	quint32 checkAfbVersionsOffset(bool absoluteValue) const;
+
 	const std::vector<std::shared_ptr<Afb::AfbElement>>& afbs() const;
 
 	std::shared_ptr<Afb::AfbComponent> component(int opCode) const;
@@ -199,6 +202,9 @@ private:
 
 	// AFBs
 	//
+	bool m_checkAfbVersions = false;			// Generate code for checking AFB versions
+	quint32 m_checkAfbVersionsOffset = 0;		// Result offset to genarate checking AFB versions
+
 	std::map<int, std::shared_ptr<Afb::AfbComponent>> m_afbComponents;		// Key is OpCode of AFBComponent
 	std::vector<std::shared_ptr<Afb::AfbElement>> m_afbs;
 

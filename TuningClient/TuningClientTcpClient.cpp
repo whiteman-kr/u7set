@@ -6,11 +6,13 @@ TuningClientTcpClient::TuningClientTcpClient(const SoftwareInfo& softwareInfo,
 											 Log::LogFile* log,
 											 TuningLog::TuningLog* tuningLog, UserManager* userManager) :
 	TuningTcpClient(softwareInfo, signalManager),
-	TcpClientInstance(this),
+	TcpClientStatistics(this),
 	m_log(log),
 	m_tuningLog(tuningLog),
 	m_userManager(userManager)
 {
+	setObjectName("TuningClientTcpClient");
+
 	assert(m_log);
 	assert(m_tuningLog);
 	assert(m_userManager);
@@ -174,11 +176,43 @@ QString TuningClientTcpClient::getStateToolTip() const
 	Tcp::ConnectionState connectionState = getConnectionState();
 	HostAddressPort currentConnection = currentServerAddressPort();
 
-	QString result = tr("Tuning Service connection\r\n\r\n");
-	result += tr("Address (primary): %1\r\n").arg(serverAddressPort(0).addressPortStr());
-	result += tr("Address (secondary): %1\r\n\r\n").arg(serverAddressPort(1).addressPortStr());
-	result += tr("Address (current): %1\r\n").arg(currentConnection.addressPortStr());
+	QString result = tr("Tuning Service connection\n\n");
+	result += tr("Address (primary): %1\n").arg(serverAddressPort(0).addressPortStr());
+	result += tr("Address (secondary): %1\n\n").arg(serverAddressPort(1).addressPortStr());
+	result += tr("Address (current): %1\n").arg(currentConnection.addressPortStr());
 	result += tr("Connection: ") + (connectionState.isConnected ? tr("established") : tr("no connection"));
 
 	return result;
+}
+
+bool TuningClientTcpClient::takeClientControl(QWidget* parentWidget)
+{
+#ifdef Q_DEBUG
+	if (theSettings.m_simulationMode == false)
+#endif
+	{
+		if (activeTuningSourceCount() == 0)
+		{
+			QMessageBox::critical(parentWidget, qAppName(),	 tr("No tuning sources with control enabled found."));
+
+			return false;
+		}
+	}
+
+	if (singleLmControlMode() == true && clientIsActive() == false)
+	{
+		QString equipmentId = singleActiveTuningSource();
+
+		if (QMessageBox::warning(parentWidget, qAppName(),
+								 tr("Warning!\n\nCurrent client is not selected as active now.\n\nAre you sure you want to take control and activate the source %1?").arg(equipmentId),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return false;
+		}
+
+		activateTuningSourceControl(equipmentId, true, true);
+	}
+
+	return true;
 }

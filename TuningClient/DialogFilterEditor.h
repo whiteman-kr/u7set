@@ -7,6 +7,7 @@
 
 class DialogFilterEditor : public QDialog
 {
+	Q_OBJECT
 public:
 
 	explicit DialogFilterEditor(TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, TuningFilterStorage* filterStorage,

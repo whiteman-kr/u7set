@@ -216,7 +216,7 @@ namespace Builder
 			//
 			// Save LogicModule Descriptions
 			//
-			ok = saveLogicModuleDescriptions(*m_context->m_lmDescriptions, m_context->m_buildResultWriter);
+			ok = saveLogicModuleDescriptions();
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -230,18 +230,7 @@ namespace Builder
 			m_context->m_tuningDataStorage = std::make_shared<Tuning::TuningDataStorage>();
 			m_context->m_comparatorStorage = std::make_shared<ComparatorStorage>();
 
-			ok = compileApplicationLogic(m_context->m_subsystems.get(),
-										 m_context->m_lmAndBvbModules,
-										 m_context->m_equipmentSet.get(),
-										 m_context->m_opticModuleStorage.get(),
-										 m_context->m_connections.get(),
-										 m_context->m_signalSet.get(),
-										 m_context->m_lmDescriptions.get(),
-										 m_context->m_appLogicData.get(),
-										 m_context->m_tuningDataStorage.get(),
-										 m_context->m_comparatorStorage.get(),
-										 m_context->m_busSet.get(),
-										 m_context->m_buildResultWriter);
+			ok = compileApplicationLogic();
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -271,19 +260,9 @@ namespace Builder
 			LOG_EMPTY_LINE(m_context->m_log);
 			LOG_MESSAGE(m_context->m_log, tr("Module configurations compilation"));
 
-			ConfigurationBuilder cfgBuilder(this,
-											&m_context->m_jsEngine,
-											&m_context->m_db,
-											m_context->m_equipmentSet->root(),
-											m_context->m_fscModules,
-											m_context->m_fscDescriptions.get(),
-											m_context->m_signalSet.get(),
-											m_context->m_subsystems.get(),
-											m_context->m_opticModuleStorage.get(),
-											m_context->m_buildResultWriter->firmwareWriter(),
-											m_context->m_log);
+			ConfigurationBuilder cfgBuilder(this, m_context.get());
 
-			ok = cfgBuilder.build(*m_context->m_buildResultWriter);
+			ok = cfgBuilder.build();
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -321,7 +300,7 @@ namespace Builder
 				}
 			}
 
-			ok = cfgBuilder.writeDataFiles(*m_context->m_buildResultWriter);
+			ok = cfgBuilder.writeDataFiles();
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -1226,17 +1205,17 @@ namespace Builder
 		return result;
 	}
 
-	bool BuildWorkerThread::saveLogicModuleDescriptions(const LmDescriptionSet& lmDescriptions,
-														std::shared_ptr<BuildResultWriter> buildResultWriter)
+	bool BuildWorkerThread::saveLogicModuleDescriptions()
 	{
-		assert(buildResultWriter);
+		assert(m_context->m_buildResultWriter);
 
 		LOG_MESSAGE(m_context->m_log, "Saving LogicModule's descriptions");
 
-		QStringList lmFiles = lmDescriptions.fileList();
+		QStringList lmFiles = m_context->m_lmDescriptions->fileList();
+
 		for (QString fileName : lmFiles)
 		{
-			auto file = lmDescriptions.rowFile(fileName);
+			auto file = m_context->m_lmDescriptions->rowFile(fileName);
 
 			if (file.second == false)
 			{
@@ -1244,7 +1223,7 @@ namespace Builder
 				return false;
 			}
 
-			BuildFile* buildFile = buildResultWriter->addFile(QLatin1String("LmDescriptions"), fileName, file.first, false);
+			BuildFile* buildFile = m_context->m_buildResultWriter->addFile(QLatin1String("LmDescriptions"), fileName, file.first, false);
 			assert(buildFile);
 			Q_UNUSED(buildFile);
 		}
@@ -1252,37 +1231,12 @@ namespace Builder
 		return true;
 	}
 
-
-	bool BuildWorkerThread::compileApplicationLogic(Hardware::SubsystemStorage* subsystems,
-													const std::vector<Hardware::DeviceModule*>& lmModules,
-													Hardware::EquipmentSet* equipmentSet,
-													Hardware::OptoModuleStorage* optoModuleStorage,
-													Hardware::ConnectionStorage* connections,
-													SignalSet* signalSet,
-													LmDescriptionSet* lmDescriptions,
-													AppLogicData* appLogicData,
-													Tuning::TuningDataStorage* tuningDataStorage,
-													ComparatorStorage* comparatorStorage,
-													VFrame30::BusSet* busSet,
-													std::shared_ptr<BuildResultWriter> buildResultWriter)
+	bool BuildWorkerThread::compileApplicationLogic()
 	{
 		LOG_EMPTY_LINE(m_context->m_log);
 		LOG_MESSAGE(m_context->m_log, tr("Application Logic compilation"));
 
-		ApplicationLogicCompiler appLogicCompiler(subsystems,
-												  lmModules,
-												  equipmentSet,
-												  optoModuleStorage,
-												  connections,
-												  signalSet,
-												  lmDescriptions,
-												  appLogicData,
-												  tuningDataStorage,
-												  comparatorStorage,
-												  busSet,
-												  buildResultWriter,
-												  m_context->m_log,
-												  m_context->m_expertMode);
+		ApplicationLogicCompiler appLogicCompiler(m_context.get());
 
 		bool result = appLogicCompiler.run();
 
@@ -1303,19 +1257,18 @@ namespace Builder
 
 	bool BuildWorkerThread::generateSoftwareConfiguration(const LmsUniqueIdMap& lmsUniqueIdMap)
 	{
+		Context* context = m_context.get();
+
 		bool result = true;
 
-		LOG_EMPTY_LINE(m_context->m_log);
-		LOG_MESSAGE(m_context->m_log, QString(tr("MATS configuration generation...")))
-		LOG_EMPTY_LINE(m_context->m_log);
+		LOG_EMPTY_LINE(context->m_log);
+		LOG_MESSAGE(context->m_log, QString(tr("MATS configuration generation...")))
+		LOG_EMPTY_LINE(context->m_log);
 
-		result &= SoftwareCfgGenerator::generalSoftwareCfgGeneration(&m_context->m_db,
-																	 m_context->m_signalSet.get(),
-																	 m_context->m_equipmentSet.get(),
-																	 m_context->m_buildResultWriter);
+		result &= SoftwareCfgGenerator::generalSoftwareCfgGeneration(context);
 
-		equipmentWalker(m_context->m_equipmentSet->root(),
-			[this, lmsUniqueIdMap, &result](Hardware::DeviceObject* currentDevice)
+		equipmentWalker(context->m_equipmentSet->root(),
+			[this, lmsUniqueIdMap, context, &result](Hardware::DeviceObject* currentDevice)
 			{
 				if (QThread::currentThread()->isInterruptionRequested() == true)
 				{
@@ -1340,39 +1293,39 @@ namespace Builder
 				switch(software->type())
 				{
 				case E::SoftwareType::AppDataService:
-					softwareCfgGenerator = new AppDataServiceCfgGenerator(m_context.get(), software, lmsUniqueIdMap);
+					softwareCfgGenerator = new AppDataServiceCfgGenerator(context, software, lmsUniqueIdMap);
 					break;
 
 				case E::SoftwareType::DiagDataService:
-					softwareCfgGenerator = new DiagDataServiceCfgGenerator(m_context.get(), software);
+					softwareCfgGenerator = new DiagDataServiceCfgGenerator(context, software);
 					break;
 
 				case E::SoftwareType::Monitor:
-					softwareCfgGenerator = new MonitorCfgGenerator(m_context.get(), software);
+					softwareCfgGenerator = new MonitorCfgGenerator(context, software);
 					break;
 
 				case E::SoftwareType::TuningService:
-					softwareCfgGenerator = new TuningServiceCfgGenerator(m_context.get(), software, lmsUniqueIdMap);
+					softwareCfgGenerator = new TuningServiceCfgGenerator(context, software, lmsUniqueIdMap);
 					break;
 
 				case E::SoftwareType::TuningClient:
-					softwareCfgGenerator = new TuningClientCfgGenerator(m_context.get(), software);
+					softwareCfgGenerator = new TuningClientCfgGenerator(context, software);
 					break;
 
 				case E::SoftwareType::ConfigurationService:
-					softwareCfgGenerator = new ConfigurationServiceCfgGenerator(m_context.get(), software);
+					softwareCfgGenerator = new ConfigurationServiceCfgGenerator(context, software);
 					break;
 
 				case E::SoftwareType::ArchiveService:
-					softwareCfgGenerator = new ArchivingServiceCfgGenerator(m_context.get(), software);
+					softwareCfgGenerator = new ArchivingServiceCfgGenerator(context, software);
 					break;
 
 				case E::SoftwareType::Metrology:
-					softwareCfgGenerator = new MetrologyCfgGenerator(m_context.get(), software);
+					softwareCfgGenerator = new MetrologyCfgGenerator(context, software);
 					break;
 
 				case E::SoftwareType::TestClient:
-					softwareCfgGenerator = new TestClientCfgGenerator(m_context.get(), software);
+					softwareCfgGenerator = new TestClientCfgGenerator(context, software);
 					break;
 
 				default:
@@ -1389,17 +1342,17 @@ namespace Builder
 			}
 		);
 
-		m_context->m_buildResultWriter->writeConfigurationXmlFiles();
+		context->m_buildResultWriter->writeConfigurationXmlFiles();
 
-		LOG_EMPTY_LINE(m_context->m_log);
+		LOG_EMPTY_LINE(context->m_log);
 
 		if (result == false)
 		{
-			LOG_MESSAGE(m_context->m_log, tr("Sofware configuration generation was finished with errors"));
+			LOG_MESSAGE(context->m_log, tr("Sofware configuration generation was finished with errors"));
 		}
 		else
 		{
-			LOG_SUCCESS(m_context->m_log, tr("Sofware configuration generation was succesfully finished"));
+			LOG_SUCCESS(context->m_log, tr("Sofware configuration generation was succesfully finished"));
 		}
 
 		SoftwareCfgGenerator::clearStaticData();

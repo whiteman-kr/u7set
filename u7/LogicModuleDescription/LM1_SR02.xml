@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM1_SR02" DescriptionNumber="2" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0018">
+<LogicModule Name="LM1_SR02" DescriptionNumber="2" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0021">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -22,7 +22,7 @@
 	    <CodeMemorySize>98304</CodeMemorySize>
 		<AppMemorySize>65536</AppMemorySize>
 		<AppDataOffset>57782</AppDataOffset>
-		<AppDataSize>2</AppDataSize>
+		<AppDataSize>256</AppDataSize>
 		<AppLogicBitDataOffset>46080</AppLogicBitDataOffset>
 		<AppLogicBitDataSize>256</AppLogicBitDataSize>
 		<AppLogicWordDataOffset>53956</AppLogicWordDataOffset>
@@ -66,7 +66,7 @@
 		<Command Caption="wrfbc"	Code="0280"	CodeMask="07c0"	SimulationFunc="command_wrfbc"		ParseFunc="parse_wrfbc"		Description="Write 16-bit word constant to AFB input"/>
 		<Command Caption="wrfbb"	Code="02C0"	CodeMask="07c0"	SimulationFunc="command_wrfbb"		ParseFunc="parse_wrfbb"		Description="Read 1-bit from memory and write to AFB input"/>
 		<Command Caption="rdfbb"	Code="0300"	CodeMask="07c0"	SimulationFunc="command_rdfbb"		ParseFunc="parse_rdfbb"		Description="Read 1-bit from AFB output and write to memory"/>
-		<Command Caption="rdfbts"	Code="0340"	CodeMask="07c0"	SimulationFunc="command_rdfbts"		ParseFunc="parse_rdfbts"	Description="Read 16-bit word from AFB output, compare to constant and set flag if equal"/>
+		<Command Caption="rdfbcmp"	Code="0340"	CodeMask="07c0"	SimulationFunc="command_rdfbcmp"	ParseFunc="parse_rdfbts"	Description="Read 16-bit word from AFB output, compare to constant and set flag if equal"/>
 		<Command Caption="setmem"	Code="0380"	CodeMask="07c0"	SimulationFunc="command_setmem"		ParseFunc="parse_setmem"	Description="Set memory area to 16-bit word constant"/>
 		<Command Caption="movb"		Code="03C0"	CodeMask="07c0"	SimulationFunc="command_movb"		ParseFunc="parse_movb"		Description="Copy 1-bit from memory to memory"/>
 		<Command Caption="nstart"	Code="0400"	CodeMask="07c0"	SimulationFunc="command_nstart"		ParseFunc="parse_nstart"	Description="Start AFB n-times"/>
@@ -76,14 +76,14 @@
 		<Command Caption="wrfb32"	Code="0500"	CodeMask="07c0"	SimulationFunc="command_wrfb32"		ParseFunc="parse_wrfb32"	Description="Read 32-bit data from memory and write to AFB input"/>
 		<Command Caption="rdfb32"	Code="0540"	CodeMask="07c0"	SimulationFunc="command_rdfb32"		ParseFunc="parse_rdfb32"	Description="Read 32-bit data from AFB output and write to memory"/>
 		<Command Caption="wrfbc32"	Code="0580"	CodeMask="07c0"	SimulationFunc="command_wrfbc32"	ParseFunc="parse_wrfbc32"	Description="Write 32-bit constant to AFB input"/>
-		<Command Caption="rdfbts32"	Code="05C0"	CodeMask="07c0"	SimulationFunc="command_rdfbts32"	ParseFunc="parse_rdfbts32"	Description="Read 32-bit data from AFB output, compare to constant and set flag if equal"/>
-		<Command Caption="movcf"	Code="0600"	CodeMask="07c0"	SimulationFunc="command_movcf"		ParseFunc="parse_movcf"		Description="Write 16-bit constant to memory if flag is set [rdfbts(32)]"/>
+		<Command Caption="rdfbcmp32"Code="05C0"	CodeMask="07c0"	SimulationFunc="command_rdfbts32"	ParseFunc="parse_rdfbcmp32"	Description="Read 32-bit data from AFB output, compare to constant and set flag if equal"/>
+		<Command Caption="movcmpf"	Code="0600"	CodeMask="07c0"	SimulationFunc="command_movcf"		ParseFunc="parse_movcmpf"	Description="Write compare flag to memory [flag result from rdfbcmp(32)]"/>
 		<Command Caption="pmov"		Code="0640"	CodeMask="07c0"	SimulationFunc="command_pmov"		ParseFunc="parse_pmov"		Description="Copy 16-bit word from memory to memory written in prior cycle"/>
 		<Command Caption="pmov32"	Code="0680"	CodeMask="07c0"	SimulationFunc="command_pmov32"		ParseFunc="parse_pmov32"	Description="Copy 32-bit data from memory to memory written in prior cycle"/>
 		<Command Caption="fillb"	Code="06C0"	CodeMask="07c0"	SimulationFunc="command_fillb"		ParseFunc="parse_fillb"		Description="Fill 16-bit word with 1-bit constant and write it to memory"/>
 	</LogicUnitCommnads>
 	
-	<AFBImplementation>
+    <AFBImplementation CheckAfbVersions="false" CheckAfbVersionsOffset="0">
 	    <AFBComponent Caption="LOGIC"		OpCode="1"	ImpVersion="207"	VersionOpIndex="22"	MaxInstCount="256" SimulationFunc="afb_logic">
 			<Pin OpName="i_oprd_quant"	OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_bus_width"	OpIndex ="1"	PinType = "Param"/>
@@ -535,6 +535,8 @@
 			<Pin OpName="o_sync"		OpIndex ="14"	PinType = "Output"/>
 			<Pin OpName="o_param_err"	OpIndex ="16"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="17"	PinType = "Output"/>			
+		</AFBComponent>
+		<AFBComponent Caption="SET_FLAGS" OpCode="65535" ImpVersion="1" VersionOpIndex="-1" MaxInstCount="-1" SimulationFunc="afb_set_flags">
 		</AFBComponent>
 	</AFBImplementation>
 	<AFBL>
@@ -12799,7 +12801,167 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			    <Library></Library>
 				<AfterCreation></AfterCreation>
 			</CommonScript>
-		</AFB>				
+		</AFB>
+		
+		<AFB id="#set_flags_v1"          Caption="set_flags"          Version="1.0001">
+			<Properties>
+				<Description>Set flag(s) to input signals. Flags accessible only in MATS.</Description>
+				<Category>Other</Category>
+				<OpCode>65535</OpCode>
+				<HasRam>false</HasRam>
+				<InternalUse>false</InternalUse>
+				<MinWidth>19</MinWidth>
+			</Properties>
+			<Inputs>
+				<Pin OpName="i_in"  		Caption="in" 			Type="Discrete" ByteOrder="BigEndian" OpIndex="0"  Size="1"/>
+				<Pin OpName="i_validity" 	Caption="validity"  	Type="Discrete" ByteOrder="BigEndian" OpIndex="1"  Size="1"/>
+				<Pin OpName="i_simulated" 	Caption="simulated"  	Type="Discrete" ByteOrder="BigEndian" OpIndex="2"  Size="1"/>
+				<Pin OpName="i_locked" 		Caption="locked"  		Type="Discrete" ByteOrder="BigEndian" OpIndex="3"  Size="1"/>
+				<Pin OpName="i_unbalanced" 	Caption="unbalanced"  	Type="Discrete" ByteOrder="BigEndian" OpIndex="4"  Size="1"/>
+				<Pin OpName="i_highlimit" 	Caption="high_limit" 	Type="Discrete" ByteOrder="BigEndian" OpIndex="5"  Size="1"/>
+				<Pin OpName="i_lowlimit" 	Caption="low_limit"  	Type="Discrete" ByteOrder="BigEndian" OpIndex="6"  Size="1"/>
+			</Inputs>
+			<Outputs>
+				<Pin OpName="o_result" Caption="out" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1"/>
+			</Outputs>
+			<Params>
+				<Param OpName="ShowValidity" Caption="ShowValidity" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+(function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+})
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="ShowSimulated" Caption="ShowSimulated" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+(function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+})
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="ShowLocked" Caption="ShowLocked" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+(function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+})
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="ShowUnbalanced" Caption="ShowUnbalanced" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+(function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+})
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="ShowHighLimit" Caption="ShowHighLimit" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+(function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+})
+						</Changed>
+					</Script>
+				</Param>
+				<Param OpName="ShowLowLimit" Caption="ShowLowLimit" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+					<Value>1</Value>
+					<Default>1</Default>
+					<Script>
+						<Changed>
+(function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+})
+						</Changed>
+					</Script>
+				</Param>
+			</Params>
+			<CommonScript>
+				<Library>
+function createInputSignals(schemaItem, afbElement)
+{
+	schemaItem.removeInputSignals();
+
+	var showValidity = schemaItem.getParamBoolValue("ShowValidity");
+	var showSimulated = schemaItem.getParamBoolValue("ShowSimulated");
+	var showLocked = schemaItem.getParamBoolValue("ShowLocked");
+	var showUnbalanced = schemaItem.getParamBoolValue("ShowUnbalanced");
+	var showHighLimit = schemaItem.getParamBoolValue("ShowHighLimit");
+	var showLowLimit = schemaItem.getParamBoolValue("ShowLowLimit");
+	
+	var addSignal = function(schemaItem, signalCaption)
+		{
+			var signal = afbElement.getAfbSignalByCaption(signalCaption);
+			schemaItem.addInputSignal(signal.caption(), signal.jsType(), signal.operandIndex(), signal.size());
+		};
+	
+	addSignal(schemaItem, "in");
+	
+	if (showValidity == true)
+	{
+		addSignal(schemaItem, "validity");
+	}
+	
+	if (showSimulated == true)
+	{
+		addSignal(schemaItem, "simulated");
+	}
+	
+	if (showLocked == true)
+	{
+		addSignal(schemaItem, "locked");
+	}
+	
+	if (showUnbalanced == true)
+	{
+		addSignal(schemaItem, "unbalanced");
+	}
+	
+	if (showHighLimit == true)
+	{
+		addSignal(schemaItem, "high_limit");
+	}
+	
+	if (showLowLimit == true)
+	{
+		addSignal(schemaItem, "low_limit");
+	}	
+
+	schemaItem.adjustHeight();
+
+	return true;
+}
+				</Library>
+				<AfterCreation>
+(function(videoItemFblElement, afbElement)
+{
+	return createInputSignals(videoItemFblElement, afbElement);
+})
+				</AfterCreation>
+			</CommonScript>
+		</AFB>
 
 	</AFBL>
 </LogicModule>

@@ -89,6 +89,7 @@ FORMS += moduleconfigurator.ui \
 
 RESOURCES +=	moduleconfigurator.qrc
 
+CONFIG += precompile_header
 PRECOMPILED_HEADER = stable.h
 
 OTHER_FILES +=

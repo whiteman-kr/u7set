@@ -133,7 +133,7 @@ public:
 
     // Tuning Filters editor Options
     //
-	QByteArray m_tuningFiltersDialogChooseSignalGeometry;
+	QByteArray m_tuningFiltersSplitterPosition;
     int m_tuningFiltersPropertyEditorSplitterPos = -1;
 
 	// Connection editor

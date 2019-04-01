@@ -38,7 +38,7 @@ private:
 
 
 
-class TcpSignalRecents : public Tcp::Client, public TcpClientInstance
+class TcpSignalRecents : public Tcp::Client, public TcpClientStatistics
 {
 	Q_OBJECT
 

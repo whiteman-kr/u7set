@@ -336,8 +336,6 @@ void DialogTuningSourceInfo::updateData()
 // ---
 //
 
-const QString TuningSourcesWidget::m_singleLmControlEnabledString("Single LM control mode is enabled");
-const QString TuningSourcesWidget::m_singleLmControlDisabledString("Single LM control mode is disabled");
 
 TuningSourcesWidget::TuningSourcesWidget(TuningTcpClient* tcpClient, bool hasActivationControls, bool hasCloseButton, QWidget* parent) :
 	QWidget(parent),
@@ -345,6 +343,9 @@ TuningSourcesWidget::TuningSourcesWidget(TuningTcpClient* tcpClient, bool hasAct
 	m_hasActivationControls(hasActivationControls),
 	m_parent(parent)
 {
+	m_singleLmControlEnabledString = tr("Single LM control mode is enabled");
+	m_singleLmControlDisabledString = tr("Single LM control mode is disabled");
+
 	if (m_tuningTcpClient == nullptr)
 	{
 		assert(m_tuningTcpClient);
@@ -529,7 +530,7 @@ void TuningSourcesWidget::update(bool refreshOnly)
 			m_treeWidget->resizeColumnToContents(i);
 		}
 
-		m_treeWidget->setColumnWidth(State, 120);
+		m_treeWidget->setColumnWidth(static_cast<int>(Columns::State), 120);
 
 		if (m_hasActivationControls == true)
 		{
@@ -575,9 +576,9 @@ void TuningSourcesWidget::update(bool refreshOnly)
 			{
 				if (ts.state.isreply() == false)
 				{
-					item->setForeground(State, QBrush(DialogSourceInfo::dataItemErrorColor));
+					item->setForeground(static_cast<int>(Columns::State), QBrush(DialogSourceInfo::dataItemErrorColor));
 
-					item->setText(State, tr("No Reply"));
+					item->setText(static_cast<int>(Columns::State), tr("No Reply"));
 				}
 				else
 				{
@@ -585,27 +586,27 @@ void TuningSourcesWidget::update(bool refreshOnly)
 
 					if (errorsCount == 0)
 					{
-						item->setForeground(State, QBrush(Qt::black));
+						item->setForeground(static_cast<int>(Columns::State), QBrush(Qt::black));
 
-						item->setText(State, tr("Active"));
+						item->setText(static_cast<int>(Columns::State), tr("Active"));
 					}
 					else
 					{
-						item->setForeground(State, QBrush(DialogSourceInfo::dataItemErrorColor));
+						item->setForeground(static_cast<int>(Columns::State), QBrush(DialogSourceInfo::dataItemErrorColor));
 
-						item->setText(State, tr("E: %1").arg(errorsCount));
+						item->setText(static_cast<int>(Columns::State), tr("E: %1").arg(errorsCount));
 					}
 				}
 			}
 			else
 			{
-				item->setText(State, tr("Inactive"));
+				item->setText(static_cast<int>(Columns::State), tr("Inactive"));
 			}
 
-			item->setText(IsActive, ts.state.controlisactive() ? tr("Yes") : tr("No"));
-			item->setText(HasUnappliedParams, ts.state.hasunappliedparams() ? tr("Yes") : tr("No"));
-			item->setText(RequestCount, QString::number(ts.state.requestcount()));
-			item->setText(ReplyCount, QString::number(ts.state.replycount()));
+			item->setText(static_cast<int>(Columns::IsActive), ts.state.controlisactive() ? tr("Yes") : tr("No"));
+			item->setText(static_cast<int>(Columns::HasUnappliedParams), ts.state.hasunappliedparams() ? tr("Yes") : tr("No"));
+			item->setText(static_cast<int>(Columns::RequestCount), QString::number(ts.state.requestcount()));
+			item->setText(static_cast<int>(Columns::ReplyCount), QString::number(ts.state.replycount()));
 		}
 	}
 }
@@ -743,7 +744,7 @@ void TuningSourcesWidget::activateControl(bool enable)
 	if (m_tuningTcpClient->singleLmControlMode() == true && m_tuningTcpClient->clientIsActive() == false)
 	{
 		if (QMessageBox::warning(this, qAppName(),
-								 tr("Warning!\r\n\r\nCurrent client is not selected as active now.\r\n\r\nAre you sure you want to take control and %1 the source %2?").arg(action).arg(equipmentId),
+								 tr("Warning!\n\nCurrent client is not selected as active now.\n\nAre you sure you want to take control and %1 the source %2?").arg(action).arg(equipmentId),
 								 QMessageBox::Yes | QMessageBox::No,
 								 QMessageBox::No) != QMessageBox::Yes)
 		{

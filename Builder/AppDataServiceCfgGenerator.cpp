@@ -141,6 +141,11 @@ namespace Builder
 
 	bool AppDataServiceCfgGenerator::writeAppSignalsXml()
 	{
+		if (m_context->generateAppSignalsXml() == false)
+		{
+			return true;
+		}
+
 		QByteArray data;
 		XmlWriteHelper xml(&data);
 

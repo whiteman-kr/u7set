@@ -65,6 +65,7 @@ public:
 
 	static TuningValueType getTuningValueType(E::SignalType signalType, E::AnalogAppSignalFormat analogSignalFormat);
 	static TuningValue createFromDouble(E::SignalType signalType, E::AnalogAppSignalFormat analogSignalFormat, double value);
+	static TuningValueType typeFromStr(const QString& typeStr);
 
 	friend bool operator < (const TuningValue& l, const TuningValue& r);
 	friend bool operator <= (const TuningValue& l, const TuningValue& r);
@@ -83,6 +84,13 @@ private:
 	TuningValueType m_type = TuningValueType::Discrete;		// If type is Discrete or SignedInteger, then value is kept in intValue
 	qint64 m_int64 = 0;
 	double m_double = 0.0;
+
+	static const char* TYPE_STR_DISCRETE;
+	static const char* TYPE_STR_SIGNED_INT32;
+	static const char* TYPE_STR_SIGNED_INT64;
+	static const char* TYPE_STR_FLOAT;
+	static const char* TYPE_STR_DOUBLE;
+	static const char* TYPE_STR_UNKNOWN;
 };
 
 Q_DECLARE_METATYPE(TuningValue)
