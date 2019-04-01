@@ -264,7 +264,7 @@ namespace VFrame30
 
 		// Get SchemaItem bounding rectangle in itemUnit()
 		//
-		virtual QRectF boundingRectInDocPt() const;
+		virtual QRectF boundingRectInDocPt(CDrawParam* drawParam) const;
 
 		virtual QString toolTipText(int dpiX, int dpiY) const;
 

@@ -4,7 +4,7 @@ namespace VFrame30
 {
 
 	Session::Session() :
-		Session(QString(), QString(), QString())
+		Session({}, {}, {})
 	{
 	}
 
@@ -20,6 +20,7 @@ namespace VFrame30
 		ADD_PROPERTY_GETTER(QString, "Date", true, Session::date);
 		ADD_PROPERTY_GETTER(QString, "Time", true, Session::time);
 
+		return;
 	}
 
 	Session& Session::operator= (const Session& src)

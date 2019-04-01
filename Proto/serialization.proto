@@ -9,9 +9,7 @@ package Proto;
 //------------------------------------------------------------------------------------------
 
 //
-//
 // QUuid
-//
 //
 message Uuid
 {
@@ -19,9 +17,7 @@ message Uuid
 }
 
 //
-//
 // QVariant
-//
 //
 message qvariant
 {
@@ -33,10 +29,7 @@ message qvariant
 }
 
 //
-//
 // Unicode string
-//
-//
 //
 message wstring
 {
@@ -45,9 +38,7 @@ message wstring
 
 
 //
-//
 // FontParam
-//
 //
 message FontParam
 {
@@ -59,9 +50,7 @@ message FontParam
 }
 
 //
-//
 // SchemaPoint
-//
 //
 message SchemaPoint
 {
@@ -70,9 +59,7 @@ message SchemaPoint
 }
 
 //
-//
 // SchemaUnit
-//
 //
 enum SchemaUnit
 {
@@ -83,14 +70,23 @@ enum SchemaUnit
 
 
 //
-//
 // ConnectionDirrection
-//
 //
 enum ConnectionDirrection
 {
 	Input = 0;
 	Output = 1;
+}
+
+//
+// ImageItem
+//
+message ImageItem
+{
+    optional bool allowScale = 1 [default = true];
+	optional bool keepAspectRatio = 2 [default = true];
+	optional bytes imageData = 8;
+	optional string svgData = 9;
 }
 
 
@@ -404,6 +400,7 @@ message SchemaItem
 	optional SchemaItemUfb ufb = 134;						// +FblItemRect
 	optional SchemaItemTerminator terminator = 135;			// +FblItemRect
 	optional SchemaItemValue Value = 136;					// +PosRectImpl
+	optional SchemaItemImageValue ImageValue = 137;			// +PosRectImpl
 
     optional SchemaItemBus BusItem = 150;					// +FblItemRect
 	optional SchemaItemBusComposer BusComposer = 151;		// +SchemaItemBus, FblItemRect
@@ -491,11 +488,9 @@ message SchemaItemPath
 //
 message SchemaItemImage
 {
-    optional bool allowScale = 1 [default = true];
-	optional bool keepAspectRatio = 2 [default = true];
-	optional bytes imageData = 8;
-	optional string svgData = 9;
+    optional ImageItem image = 1;
 }
+
 
 //
 // FblConnectionPoint
@@ -689,6 +684,17 @@ message SchemaItemValue
 }
 
 //
+// SchemaItemImageValue
+//
+message SchemaItemImageValue
+{
+    optional string signalIds = 1;
+	optional int32 signalSource = 2 [default = 0];
+
+    repeated ImageItem images = 14;
+}
+
+//
 // SchemaItemBus
 //
 message SchemaItemBus
@@ -779,6 +785,8 @@ message SchemaItemLineEdit
 	optional string scriptReturnPressed = 23;
 	optional string scriptTextChanged = 24;
 }
+
+
 
 
 //------------------------------------------------------------------------------------------

@@ -260,19 +260,9 @@ namespace Builder
 			LOG_EMPTY_LINE(m_context->m_log);
 			LOG_MESSAGE(m_context->m_log, tr("Module configurations compilation"));
 
-			ConfigurationBuilder cfgBuilder(this,
-											&m_context->m_jsEngine,
-											&m_context->m_db,
-											m_context->m_equipmentSet->root(),
-											m_context->m_fscModules,
-											m_context->m_fscDescriptions.get(),
-											m_context->m_signalSet.get(),
-											m_context->m_subsystems.get(),
-											m_context->m_opticModuleStorage.get(),
-											m_context->m_buildResultWriter->firmwareWriter(),
-											m_context->m_log);
+			ConfigurationBuilder cfgBuilder(this, m_context.get());
 
-			ok = cfgBuilder.build(*m_context->m_buildResultWriter);
+			ok = cfgBuilder.build();
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -310,7 +300,7 @@ namespace Builder
 				}
 			}
 
-			ok = cfgBuilder.writeDataFiles(*m_context->m_buildResultWriter);
+			ok = cfgBuilder.writeDataFiles();
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)

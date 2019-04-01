@@ -153,13 +153,56 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 		filter = m_root.get();
 	}
 
-	// Root counters
+	TuningCounters filterCounters;
 
-	if (filter->isRoot() == true && theConfigSettings.showDiscreteCounters == true)
+	if (filter->isRoot() == true)
 	{
-		TuningCounters counters;
+		// Root (total) equipment counters
 
-		// Signals counters
+		filterCounters.errorCounter += tcpClient->sourceErrorCount();
+
+		if (theConfigSettings.showSOR == true)
+		{
+			filterCounters.sorCounter += tcpClient->sourceSorCount(&filterCounters.sorActive, &filterCounters.sorValid);
+		}
+	}
+	else
+	{
+		if (filter->isEmpty() == false)
+		{
+			// Equipment counters
+
+			std::vector<Hash> equipmentHashes = filter->equipmentHashes();
+
+			for (Hash& equipmentHash : equipmentHashes)
+			{
+
+				filterCounters.errorCounter += tcpClient->sourceErrorCount(equipmentHash);
+
+				if (theConfigSettings.showSOR == true)
+				{
+					bool sorIsActive = false;
+					bool sorIsValid = false;
+
+					filterCounters.sorCounter += tcpClient->sourceSorCount(equipmentHash, &sorIsActive, &sorIsValid);
+
+					if (sorIsActive == true)
+					{
+						filterCounters.sorActive = true;
+					}
+					if (sorIsValid == true)
+					{
+						filterCounters.sorValid = true;
+					}
+				}
+			}
+		}
+	}
+
+	if ((filter->isRoot() == true || filter->isEmpty() == false) &&
+		filter->hasDiscreteCounter() == true)
+	{
+		// Discrete counters
 
 		const std::vector<Hash>& appSignalsHashes = filter->signalsHashes();
 
@@ -175,77 +218,31 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 
 			if (state.valid() == true && state.value().type() == TuningValueType::Discrete && state.value().discreteValue() != 0)
 			{
-				counters.discreteCounter++;
+				filterCounters.discreteCounter++;
 			}
 		}
-
-		filter->setCounters(counters);
 	}
 
-	// Other counters
-
-	if (filter->isEmpty() == false)
-	{
-		TuningCounters totalCounters;
-
-		// Equipment counters
-
-		std::vector<Hash> equipmentHashes = filter->equipmentHashes();
-
-		for (Hash& equipmentHash : equipmentHashes)
-		{
-			bool sorIsActive = false;
-			bool sorIsValid = false;
-
-
-			totalCounters.errorCounter += tcpClient->sourceErrorCount(equipmentHash);
-			totalCounters.sorCounter += tcpClient->sourceSorCount(equipmentHash, &sorIsActive, &sorIsValid);
-
-			if (sorIsActive == true)
-			{
-				totalCounters.sorActive = true;
-			}
-			if (sorIsValid == true)
-			{
-				totalCounters.sorValid = true;
-			}
-		}
-
-		// Signals counters
-
-		const std::vector<Hash>& appSignalsHashes = filter->signalsHashes();
-
-		bool found = false;
-
-		for (const Hash& appSignalHash : appSignalsHashes)
-		{
-			TuningSignalState state = objects->state(appSignalHash, &found);
-			if (found == false)
-			{
-				continue;
-			}
-
-			if (state.controlIsEnabled() == true)
-			{
-				totalCounters.controlEnabledCounter++;
-			}
-
-			if (filter->hasDiscreteCounter() == true)
-			{
-				if (state.valid() == true && state.value().type() == TuningValueType::Discrete && state.value().discreteValue() != 0)
-				{
-					totalCounters.discreteCounter++;
-				}
-			}
-		}
-
-		filter->setCounters(totalCounters);
-	}
+	filter->setCounters(filterCounters);
 
 	int count = filter->childFiltersCount();
 	for (int i = 0; i < count; i++)
 	{
 		updateCounters(objects, tcpClient, filter->childFilter(i).get());
+
+		// Add child filters' counters
+		//
+
+		if (filter->isRoot() == false)
+		{
+			TuningCounters childCounters = filter->childFilter(i)->counters();
+
+			filterCounters.discreteCounter += childCounters.discreteCounter;
+			filterCounters.errorCounter += childCounters.errorCounter;
+			filterCounters.sorCounter += childCounters.sorCounter;
+
+			filter->setCounters(filterCounters);
+		}
 	}
 }
 

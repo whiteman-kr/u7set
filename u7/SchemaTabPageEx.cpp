@@ -4688,6 +4688,7 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 	{
 		m_toolBar->addSeparator();
 		m_toolBar->addAction(m_schemaWidget->m_addValueAction);
+		m_toolBar->addAction(m_schemaWidget->m_addImageValueAction);
 		m_toolBar->addAction(m_schemaWidget->m_addPushButtonAction);
 		m_toolBar->addAction(m_schemaWidget->m_addLineEditAction);
 	}
@@ -4696,6 +4697,7 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 	{
 		m_toolBar->addSeparator();
 		m_toolBar->addAction(m_schemaWidget->m_addValueAction);
+		m_toolBar->addAction(m_schemaWidget->m_addImageValueAction);
 		m_toolBar->addAction(m_schemaWidget->m_addPushButtonAction);
 		m_toolBar->addAction(m_schemaWidget->m_addLineEditAction);
 	}

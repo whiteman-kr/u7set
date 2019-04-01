@@ -20,6 +20,7 @@
 #include "../VFrame30/SchemaItemUfb.h"
 #include "../VFrame30/SchemaItemTerminator.h"
 #include "../VFrame30/SchemaItemValue.h"
+#include "../VFrame30/SchemaItemImageValue.h"
 #include "../VFrame30/SchemaItemPushButton.h"
 #include "../VFrame30/SchemaItemLineEdit.h"
 #include "../VFrame30/SchemaItemLoopback.h"
@@ -2079,6 +2080,16 @@ void EditSchemaWidget::createActions()
 				addItem(item);
 			});
 
+	m_addImageValueAction = new QAction(tr("Image Value"), this);
+	m_addImageValueAction->setEnabled(true);
+	m_addImageValueAction->setIcon(QIcon(":/Images/Images/SchemaItemImageValue.svg"));
+	connect(m_addImageValueAction, &QAction::triggered,
+			[this](bool)
+	{
+		auto item = std::make_shared<VFrame30::SchemaItemImageValue>(schema()->unit());
+		addItem(item);
+	});
+
 	m_addPushButtonAction = new QAction(tr("PushButton"), this);
 	m_addPushButtonAction->setEnabled(true);
 	m_addPushButtonAction->setIcon(QIcon(":/Images/Images/SchemaItemPushButton.svg"));
@@ -2541,6 +2552,7 @@ void EditSchemaWidget::createActions()
 		if (isMonitorSchema() == true)
 		{
 			m_addMenu->addAction(m_addValueAction);
+			m_addMenu->addAction(m_addImageValueAction);
 			m_addMenu->addAction(m_addPushButtonAction);
 			m_addMenu->addAction(m_addLineEditAction);
 		}
@@ -2548,6 +2560,7 @@ void EditSchemaWidget::createActions()
 		if (isTuningSchema() == true)
 		{
 			m_addMenu->addAction(m_addValueAction);
+			m_addMenu->addAction(m_addImageValueAction);
 			m_addMenu->addAction(m_addPushButtonAction);
 			m_addMenu->addAction(m_addLineEditAction);
 		}
@@ -6149,6 +6162,12 @@ void EditSchemaWidget::f2Key()
 		return;
 	}
 
+	if (item->isType<VFrame30::SchemaItemImageValue>() == true)
+	{
+		f2KeyForImageValue(item);
+		return;
+	}
+
 	if (item->isType<VFrame30::SchemaItemBus>() == true)
 	{
 		f2KeyForBus(item);
@@ -6856,6 +6875,12 @@ void EditSchemaWidget::f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item)
 	return;
 }
 
+void EditSchemaWidget::f2KeyForImageValue(std::shared_ptr<VFrame30::SchemaItem> item)
+{
+	QMessageBox::critical(this, "Error", "To Do: void EditSchemaWidget::f2KeyForImageValue(std::shared_ptr<VFrame30::SchemaItem> item)");
+}
+
+
 void EditSchemaWidget::f2KeyForBus(std::shared_ptr<VFrame30::SchemaItem> item)
 {
 	if (item == nullptr)
@@ -7506,6 +7531,27 @@ void EditSchemaWidget::editPaste()
 		}
 	}
 
+	// Paste appSignalID to VFrame30::SchemaItemImageValue
+	//
+	{
+		bool allItemsAreImageValues = true;
+		for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+		{
+			if (dynamic_cast<VFrame30::SchemaItemImageValue*>(item.get()) == nullptr)
+			{
+				allItemsAreImageValues = false;
+				break;
+			}
+		}
+
+		if (allItemsAreImageValues == true &&
+			mimeData->text().startsWith('#') == true)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(mimeData->text()), selected);
+		}
+	}
+
+
 	return;
 }
 
@@ -7991,6 +8037,28 @@ void EditSchemaWidget::clipboardDataChanged()
 	{
 		m_editPasteAction->setEnabled(true);
 		return;
+	}
+
+	// if Any SchemaItemImageValue is selected and AppSignalID is in the clipboard
+	//
+	{
+		bool allItemsAreImageValues = true;
+		for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+		{
+			if (dynamic_cast<VFrame30::SchemaItemImageValue*>(item.get()) == nullptr)
+			{
+				allItemsAreImageValues = false;
+				break;
+			}
+		}
+
+		if (allItemsAreImageValues == true &&
+			mimeData->hasText() == true &&
+			mimeData->text().startsWith('#') == true)
+		{
+			m_editPasteAction->setEnabled(true);
+			return;
+		}
 	}
 
 	// --

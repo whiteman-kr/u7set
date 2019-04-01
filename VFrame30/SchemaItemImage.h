@@ -1,10 +1,7 @@
 #pragma once
 
 #include "PosRectImpl.h"
-#include "FontParam.h"
-#include <QSvgRenderer>
-#include <optional>
-
+#include "ImageItem.h"
 
 namespace VFrame30
 {
@@ -32,11 +29,6 @@ namespace VFrame30
 		//
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
 
-	private:
-		void drawImage(CDrawParam* drawParam, const QRectF& rect) const;
-		void drawSvg(CDrawParam* drawParam, const QRectF& rect) const;
-		void drawError(CDrawParam* drawParam, const QRectF& rect, QString errorText) const;
-
 	protected:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
 		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
@@ -44,27 +36,19 @@ namespace VFrame30
 		// Properties and Data
 		//
 	public:
-		bool allowScale() const;
+		bool allowScale() const;		// Applied only to raster images
 		void setAllowScale(bool value);
 
 		bool keepAspectRatio() const;
 		void setKeepAspectRatio(bool value);
 
-		QImage image() const;
-		void setImage(QImage image);
+		const QImage& image() const;
+		void setImage(const QImage& image);
 
-		QString svgData() const;
-		void setSvgData(QString data);
+		const QString& svgData() const;
+		void setSvgData(const QString& data);
 
 	private:
-		bool m_allowScale = true;
-		bool m_keepAspectRatio = true;
-
-		QImage m_image;
-		QString m_svgData;
-
-		// Drawing resources
-		//
-		mutable std::optional<QSvgRenderer> m_svgRenderer;
+		ImageItem m_image;
 	};
 }
