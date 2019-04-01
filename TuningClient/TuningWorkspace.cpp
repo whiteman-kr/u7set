@@ -10,11 +10,12 @@
 // FilterButton
 //
 
-FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, const QString& caption, bool check, QWidget* parent)
-	:QPushButton(caption, parent)
+FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, bool check, QWidget* parent)
+	:QPushButton(filter->caption(), parent)
 {
+	Q_ASSERT(filter);
+
 	m_filter = filter;
-	m_caption = caption;
 
 	setCheckable(true);
 
@@ -25,41 +26,7 @@ FilterButton::FilterButton(std::shared_ptr<TuningFilter> filter, const QString& 
 
 	setMinimumSize(100, 25);
 
-	QColor backColor = Qt::lightGray;
-	QColor textColor = Qt::white;
-
-	QColor backSelectedColor = Qt::darkGray;
-	QColor textSelectedColor = Qt::white;
-
-	if (filter->backColor().isValid() && filter->textColor().isValid() && filter->backColor() != filter->textColor())
-	{
-		backColor = filter->backColor();
-		textColor = filter->textColor();
-	}
-
-	if (filter->backSelectedColor().isValid() && filter->textSelectedColor().isValid() && filter->backSelectedColor() != filter->textSelectedColor())
-	{
-		backSelectedColor = filter->backSelectedColor();
-		textSelectedColor = filter->textSelectedColor();
-	}
-
-	setStyleSheet(tr("\
-					QPushButton {   \
-						background-color: %1;\
-						color: %2;    \
-					}   \
-					QPushButton:checked{\
-						background-color: %3;\
-						color: %4;    \
-						border: none;\
-					}\
-					").arg(backColor.name())
-					 .arg(textColor.name())
-					 .arg(backSelectedColor.name())
-					 .arg(textSelectedColor.name()));
-
-	update();
-
+	update(0);
 
 	connect(this, &QPushButton::toggled, this, &FilterButton::slot_toggled);
 }
@@ -69,9 +36,89 @@ std::shared_ptr<TuningFilter> FilterButton::filter()
 	return m_filter;
 }
 
-QString FilterButton::caption() const
+int FilterButton::counter() const
 {
-	return m_caption;
+	return m_discreteCounter;
+}
+
+void FilterButton::update(int discreteCounter)
+{
+	// Text
+
+	QString newCaption;
+
+	if (discreteCounter == 0)
+	{
+		newCaption = m_filter->caption();
+	}
+	else
+	{
+		newCaption = QString(" %1 [%2] ").arg(m_filter->caption()).arg(discreteCounter);
+	}
+
+	m_discreteCounter = discreteCounter;
+
+	if (text() != newCaption)
+	{
+		setText(newCaption);
+	}
+
+	// Color
+
+	QColor backColor = Qt::lightGray;
+	QColor textColor = Qt::white;
+
+	QColor backSelectedColor = Qt::darkGray;
+	QColor textSelectedColor = Qt::white;
+
+	if (m_filter->useColors() == true)
+	{
+		if (counter() != 0 && m_filter->backAlertedColor() != m_filter->textAlertedColor())
+		{
+			// Alerted state
+
+			backColor = m_filter->backAlertedColor();
+			textColor = m_filter->textAlertedColor();
+
+			backSelectedColor = backColor;
+			textSelectedColor = textColor;
+		}
+		else
+		{
+			if (m_filter->backColor() != m_filter->textColor())
+			{
+				backColor = m_filter->backColor();
+				textColor = m_filter->textColor();
+			}
+
+			if (m_filter->backSelectedColor() != m_filter->textSelectedColor())
+			{
+				backSelectedColor = m_filter->backSelectedColor();
+				textSelectedColor = m_filter->textSelectedColor();
+			}
+		}
+	}
+
+	QString style = tr("\
+					   QPushButton {   \
+						   background-color: %1;\
+						   color: %2;    \
+					   }   \
+					   QPushButton:checked{\
+						   background-color: %3;\
+						   color: %4;    \
+						   border: none;\
+					   }\
+					   ").arg(backColor.name())
+					   .arg(textColor.name())
+					   .arg(backSelectedColor.name())
+					   .arg(textSelectedColor.name());
+
+
+	if (styleSheet() != style)
+	{
+		setStyleSheet(style);
+	}
 }
 
 void FilterButton::slot_toggled(bool checked)
@@ -158,7 +205,7 @@ TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::
 
 	// Color
 
-	if (workspaceFilter->backColor().isValid() && workspaceFilter->textColor().isValid() && workspaceFilter->backColor() != workspaceFilter->textColor())
+	if (workspaceFilter->useColors() == true)
 	{
 		QPalette Pal(palette());
 
@@ -167,7 +214,6 @@ TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::
 		setPalette(Pal);
 		show();
 	}
-
 }
 
 TuningWorkspace::~TuningWorkspace()
@@ -400,7 +446,7 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 		}
 		if (columnStatusIndex != -1)
 		{
-			const int defaultWidth = 150;
+			const int defaultWidth = 80;
 
 			int width = settings.value("TuningWorkspace/FilterTreeColumnStatus", defaultWidth).toInt();
 			if (width < defaultWidth || width > columnMaxWidth)
@@ -412,7 +458,7 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 		}
 		if (columnSorIndex != -1)
 		{
-			const int defaultWidth = 60;
+			const int defaultWidth = 80;
 
 			int width = settings.value("TuningWorkspace/FilterTreeColumnSor", defaultWidth).toInt();
 			if (width < defaultWidth || width > columnMaxWidth)
@@ -557,7 +603,7 @@ void TuningWorkspace::createButtons()
 			continue;
 		}
 
-		FilterButton* button = new FilterButton(f, f->caption(), firstButton);
+		FilterButton* button = new FilterButton(f, firstButton);
 		m_filterButtons.push_back(button);
 
 		button->installEventFilter(this);
@@ -947,6 +993,26 @@ void TuningWorkspace::updateCounters()
 				m_tab->setTabText(ti, newCaption);
 			}
 
+			// Tab text color
+
+			if (f->useColors() == true)
+			{
+				QColor tabTextColor;
+
+				if (discreteCount > 0)
+				{
+					tabTextColor = f->textAlertedColor();
+				}
+				else
+				{
+					tabTextColor = f->textColor();
+				}
+
+				if (m_tab->tabBar()->tabTextColor(ti) != tabTextColor)
+				{
+					m_tab->tabBar()->setTabTextColor(ti, tabTextColor);
+				}
+			}
 		}
 	}
 
@@ -975,19 +1041,9 @@ void TuningWorkspace::updateCounters()
 
 		int discreteCount = f->counters().discreteCounter;
 
-		QString newCaption;
-		if (discreteCount == 0)
+		if (discreteCount != button->counter())
 		{
-			newCaption = button->caption();
-		}
-		else
-		{
-			newCaption = QString(" %1 [%2] ").arg(button->caption()).arg(discreteCount);
-		}
-
-		if (button->text() != newCaption)
-		{
-			button->setText(newCaption);
+			button->update(discreteCount);
 		}
 	}
 }

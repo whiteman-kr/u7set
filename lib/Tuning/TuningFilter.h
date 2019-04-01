@@ -104,22 +104,22 @@ public:
 	void removeNotExistingSignals(const std::vector<Hash>& signalHashes, int& removedCounter);
 
 	const std::vector<Hash>& equipmentHashes() const;
-	void setEquipmentHashes(std::vector<Hash> signalValue);
+	void setEquipmentHashes(std::vector<Hash> value);
 
 	const std::vector<Hash>& signalsHashes() const;
-	void setSignalsHashes(std::vector<Hash> signalValue);
+	void setSignalsHashes(std::vector<Hash> value);
 
 public:
 	// Properties
 	//
 	QString ID() const;
-	void setID(const QString& signalValue);
+	void setID(const QString& value);
 
 	QString customID() const;
-	void setCustomID(const QString& signalValue);
+	void setCustomID(const QString& value);
 
 	QString caption() const;
-	void setCaption(const QString& signalValue);
+	void setCaption(const QString& value);
 
 	bool isSourceProject() const;
 	bool isSourceEquipment() const;
@@ -127,39 +127,48 @@ public:
 	bool isSourceUser() const;
 
 	Source source() const;
-	void setSource(Source signalValue);
+	void setSource(Source value);
 
 	InterfaceType interfaceType() const;
-	void setInterfaceType(InterfaceType signalValue);
+	void setInterfaceType(InterfaceType value);
 
 	SignalType signalType() const;
-	void setSignalType(SignalType signalValue);
+	void setSignalType(SignalType value);
+
+	bool useColors() const;
+	void setUseColors(bool value);
 
 	QColor backColor() const;
-	void setBackColor(const QColor& signalValue);
+	void setBackColor(const QColor& value);
 
 	QColor textColor() const;
-	void setTextColor(const QColor& signalValue);
+	void setTextColor(const QColor& value);
 
 	QColor backSelectedColor() const;
-	void setBackSelectedColor(const QColor& signalValue);
+	void setBackSelectedColor(const QColor& value);
 
 	QColor textSelectedColor() const;
-	void setTextSelectedColor(const QColor& signalValue);
+	void setTextSelectedColor(const QColor& value);
+
+	QColor backAlertedColor() const;
+	void setBackAlertedColor(const QColor& value);
+
+	QColor textAlertedColor() const;
+	void setTextAlertedColor(const QColor& value);
 
 	bool hasDiscreteCounter() const;
-	void setHasDiscreteCounter(bool signalValue);
+	void setHasDiscreteCounter(bool value);
 
 	// Filters
 	//
 	QString customAppSignalIDMask() const;
-	void setCustomAppSignalIDMask(const QString& signalValue);
+	void setCustomAppSignalIDMask(const QString& value);
 
 	QString equipmentIDMask() const;
-	void setEquipmentIDMask(const QString& signalValue);
+	void setEquipmentIDMask(const QString& value);
 
 	QString appSignalIDMask() const;
-	void setAppSignalIDMask(const QString& signalValue);
+	void setAppSignalIDMask(const QString& value);
 
 	// FilterSignals
 	//
@@ -176,12 +185,12 @@ public:
 	// Counters
 	//
 	TuningCounters counters() const;
-	void setCounters(TuningCounters signalValue);
+	void setCounters(TuningCounters value);
 
 	// Tab appearance
 	//
 	int valuesColumnCount() const;
-	void setValuesColumnCount(int signalValue);
+	void setValuesColumnCount(int value);
 
 	std::vector<QString> valueColumnsAppSignalIdSuffixes() const;
 
@@ -195,34 +204,34 @@ public:
 	bool hasAnyTag(const QStringList& tags) const;
 
 	bool columnCustomAppId() const;
-	void setColumnCustomAppId(bool signalValue);
+	void setColumnCustomAppId(bool value);
 
 	bool columnAppId() const;
-	void setColumnAppId(bool signalValue);
+	void setColumnAppId(bool value);
 
 	bool columnEquipmentId() const;
-	void setColumnEquipmentId(bool signalValue);
+	void setColumnEquipmentId(bool value);
 
 	bool columnCaption() const;
-	void setColumnCaption(bool signalValue);
+	void setColumnCaption(bool value);
 
 	bool columnUnits() const;
-	void setColumnUnits(bool signalValue);
+	void setColumnUnits(bool value);
 
 	bool columnType() const;
-	void setColumnType(bool signalValue);
+	void setColumnType(bool value);
 
 	bool columnLimits() const;
-	void setColumnLimits(bool signalValue);
+	void setColumnLimits(bool value);
 
 	bool columnDefault() const;
-	void setColumnDefault(bool signalValue);
+	void setColumnDefault(bool value);
 
 	bool columnValid() const;
-	void setColumnValid(bool signalValue);
+	void setColumnValid(bool value);
 
 	bool columnOutOfRange() const;
-	void setColumnOutOfRange(bool signalValue);
+	void setColumnOutOfRange(bool value);
 
 public:
 	// Operations
@@ -276,11 +285,16 @@ private:
 
 	SignalType m_signalType = SignalType::All;
 
+	bool m_useColors = false;
+
 	QColor m_backColor = Qt::GlobalColor::lightGray;
-	QColor m_textColor = Qt::GlobalColor::lightGray;
+	QColor m_textColor = Qt::GlobalColor::black;
 
 	QColor m_backSelectedColor = Qt::GlobalColor::darkGray;
-	QColor m_textSelectedColor = Qt::GlobalColor::darkGray;
+	QColor m_textSelectedColor = Qt::GlobalColor::black;
+
+	QColor m_backAlertedColor = Qt::GlobalColor::red;
+	QColor m_textAlertedColor = Qt::GlobalColor::black;
 
 	bool m_hasDiscreteCounter = false;
 
@@ -309,9 +323,6 @@ private:
 	bool m_columnDefault = true;
 	bool m_columnValid = false;
 	bool m_columnOutOfRange = false;
-
-	/*QByteArray m_byteArray;
-	QImage m_image;*/
 
 private:
 

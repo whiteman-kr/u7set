@@ -863,11 +863,9 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 		m_objectList->setColumnWidth(c, width);
 	}
 
-
-
 	// Color
 
-	if (m_pageFilter->isTab() == true && m_pageFilter->backColor().isValid() && m_pageFilter->textColor().isValid() && m_pageFilter->backColor() != m_pageFilter->textColor())
+	if (m_pageFilter->isTab() == true && m_pageFilter->useColors() == true)
 	{
 		QPalette Pal(palette());
 

@@ -41,10 +41,14 @@ namespace TuningTags
 	static const QLatin1String prop_AppSignalMasks = QLatin1String("AppSignalMasks");
 	static const QLatin1String prop_EquipmentIDMasks = QLatin1String("EquipmentIDMasks");
 
+	static const QLatin1String prop_UseColors = QLatin1String("UseColors");
+
 	static const QLatin1String prop_BackColor = QLatin1String("BackColor");
 	static const QLatin1String prop_TextColor = QLatin1String("TextColor");
 	static const QLatin1String prop_BackSelectedColor = QLatin1String("BackSelectedColor");
 	static const QLatin1String prop_TextSelectedColor = QLatin1String("TextSelectedColor");
+	static const QLatin1String prop_BackAlertedColor = QLatin1String("BackAlertedColor");
+	static const QLatin1String prop_TextAlertedColor = QLatin1String("TextAlertedColor");
 	static const QLatin1String prop_HasDiscreteCounter = QLatin1String("HasDiscreteCounter");
 	static const QLatin1String prop_ValueColumnsCount = QLatin1String("ValueColumnsCount");
 	static const QLatin1String prop_TabType = QLatin1String("TabType");
@@ -216,6 +220,9 @@ TuningFilter::TuningFilter()
 	propMask = ADD_PROPERTY_GETTER_SETTER(QString, TuningTags::prop_EquipmentIDMasks, true, TuningFilter::equipmentIDMask, TuningFilter::setEquipmentIDMask);
 	propMask->setCategory("Masks");
 
+	auto propUseColors = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_UseColors, true, TuningFilter::useColors, TuningFilter::setUseColors);
+	propUseColors->setCategory("Appearance");
+
 	auto propBackColor = ADD_PROPERTY_GETTER_SETTER(QColor, TuningTags::prop_BackColor, true, TuningFilter::backColor, TuningFilter::setBackColor);
 	propBackColor->setCategory("Appearance");
 
@@ -227,6 +234,12 @@ TuningFilter::TuningFilter()
 
 	auto propTextSelectedColor = ADD_PROPERTY_GETTER_SETTER(QColor, TuningTags::prop_TextSelectedColor, true, TuningFilter::textSelectedColor, TuningFilter::setTextSelectedColor);
 	propTextSelectedColor->setCategory("Appearance");
+
+	auto propBackAlertedColor = ADD_PROPERTY_GETTER_SETTER(QColor, TuningTags::prop_BackAlertedColor, true, TuningFilter::backAlertedColor, TuningFilter::setBackAlertedColor);
+	propBackAlertedColor->setCategory("Appearance");
+
+	auto propTextAlertedColor = ADD_PROPERTY_GETTER_SETTER(QColor, TuningTags::prop_TextAlertedColor, true, TuningFilter::textAlertedColor, TuningFilter::setTextAlertedColor);
+	propTextAlertedColor->setCategory("Appearance");
 
 	auto propHasCounter = ADD_PROPERTY_GETTER_SETTER(bool, TuningTags::prop_HasDiscreteCounter, true, TuningFilter::hasDiscreteCounter, TuningFilter::setHasDiscreteCounter);
 	propHasCounter->setCategory("Functions");
@@ -357,6 +370,11 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 			setCaption(reader.attributes().value(TuningTags::prop_Caption).toString());
 		}
 
+		if (reader.attributes().hasAttribute(TuningTags::prop_UseColors))
+		{
+			setUseColors(reader.attributes().value(TuningTags::prop_UseColors).toString() == TuningTags::tag_True);
+		}
+
 		if (reader.attributes().hasAttribute(TuningTags::prop_BackColor))
 		{
 			setBackColor(QColor(reader.attributes().value(TuningTags::prop_BackColor).toString()));
@@ -375,6 +393,16 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 		if (reader.attributes().hasAttribute(TuningTags::prop_TextSelectedColor))
 		{
 			setTextSelectedColor(QColor(reader.attributes().value(TuningTags::prop_TextSelectedColor).toString()));
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_BackAlertedColor))
+		{
+			setBackAlertedColor(QColor(reader.attributes().value(TuningTags::prop_BackAlertedColor).toString()));
+		}
+
+		if (reader.attributes().hasAttribute(TuningTags::prop_TextAlertedColor))
+		{
+			setTextAlertedColor(QColor(reader.attributes().value(TuningTags::prop_TextAlertedColor).toString()));
 		}
 
 		if (reader.attributes().hasAttribute(TuningTags::prop_HasDiscreteCounter))
@@ -687,11 +715,16 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 	writer.writeAttribute(TuningTags::prop_CustomID, customID());
 	writer.writeAttribute(TuningTags::prop_Caption, caption());
 
+	writer.writeAttribute(TuningTags::prop_UseColors, useColors() ? TuningTags::tag_True : TuningTags::tag_False);
+
 	writer.writeAttribute(TuningTags::prop_BackColor, backColor().name());
 	writer.writeAttribute(TuningTags::prop_TextColor, textColor().name());
 
 	writer.writeAttribute(TuningTags::prop_BackSelectedColor, backSelectedColor().name());
 	writer.writeAttribute(TuningTags::prop_TextSelectedColor, textSelectedColor().name());
+
+	writer.writeAttribute(TuningTags::prop_BackAlertedColor, backAlertedColor().name());
+	writer.writeAttribute(TuningTags::prop_TextAlertedColor, textAlertedColor().name());
 
 	writer.writeAttribute(TuningTags::prop_HasDiscreteCounter, hasDiscreteCounter() ? TuningTags::tag_True : TuningTags::tag_False);
 
@@ -962,6 +995,16 @@ void TuningFilter::setSignalType(SignalType value)
 	m_signalType = value;
 }
 
+bool TuningFilter::useColors() const
+{
+	return m_useColors;
+}
+
+void TuningFilter::setUseColors(bool value)
+{
+	m_useColors = value;
+}
+
 QColor TuningFilter::backColor() const
 {
 	return m_backColor;
@@ -1000,6 +1043,26 @@ QColor TuningFilter::textSelectedColor() const
 void TuningFilter::setTextSelectedColor(const QColor& value)
 {
 	m_textSelectedColor = value;
+}
+
+QColor TuningFilter::backAlertedColor() const
+{
+	return m_backAlertedColor;
+}
+
+void TuningFilter::setBackAlertedColor(const QColor& value)
+{
+	m_backAlertedColor = value;
+}
+
+QColor TuningFilter::textAlertedColor() const
+{
+	return m_textAlertedColor;
+}
+
+void TuningFilter::setTextAlertedColor(const QColor& value)
+{
+	m_textAlertedColor = value;
 }
 
 bool TuningFilter::hasDiscreteCounter() const
@@ -1508,11 +1571,17 @@ std::shared_ptr<TuningFilter> TuningFilter::findFilterById(const QString& id) co
 
 void TuningFilter::updateOptionalProperties()
 {
-	setPropertyVisible(TuningTags::prop_BackColor, interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
+	// Colors
+	setPropertyVisible(TuningTags::prop_UseColors, interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
 
-	setPropertyVisible(TuningTags::prop_TextColor, interfaceType() == InterfaceType::Button);
+	setPropertyVisible(TuningTags::prop_BackColor, interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
+	setPropertyVisible(TuningTags::prop_TextColor, interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
+
 	setPropertyVisible(TuningTags::prop_BackSelectedColor, interfaceType() == InterfaceType::Button);
 	setPropertyVisible(TuningTags::prop_TextSelectedColor, interfaceType() == InterfaceType::Button);
+
+	setPropertyVisible(TuningTags::prop_BackAlertedColor, interfaceType() == InterfaceType::Button);
+	setPropertyVisible(TuningTags::prop_TextAlertedColor, interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
 
 	// Value columns, add or remove unnecessary properties
 
@@ -1588,8 +1657,13 @@ void TuningFilter::copy(const TuningFilter& That)
 	m_backColor = That.m_backColor;
 	m_textColor = That.m_textColor;
 
+	m_useColors = That.useColors();
+
 	m_backSelectedColor = That.m_backSelectedColor;
 	m_textSelectedColor = That.m_textSelectedColor;
+
+	m_backAlertedColor = That.m_backAlertedColor;
+	m_textAlertedColor = That.m_textAlertedColor;
 
 	m_valueColumnsCount = That.m_valueColumnsCount;
 	m_valueColumnsAppSignalIdSuffixes = That.m_valueColumnsAppSignalIdSuffixes;
