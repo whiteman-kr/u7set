@@ -22,7 +22,7 @@ namespace Builder
 			WRFBC = 10,
 			WRFBB = 11,
 			RDFBB = 12,
-			RDFBTS = 13,
+			RDFBCMP = 13,
 			SETMEM = 14,
 			MOVB = 15,
 			NSTART = 16,
@@ -32,8 +32,8 @@ namespace Builder
 			WRFB32 = 20,
 			RDFB32 = 21,
 			WRFBC32 = 22,
-			RDFBTS32 = 23,
-			MOVCF = 24,
+			RDFBCMP32 = 23,
+			MOVCMPF = 24,
 			PMOV = 25,
 			PMOV32 = 26,
 			FILL = 27,
@@ -60,34 +60,34 @@ namespace Builder
 
 	const LmCommand lmCommandSet[] =
 	{
-		{	LmCommand::Code::NoCommand,	0,	"NO_CMD",	false,	0,	0						},
-		{	LmCommand::Code::NOP,		1,	"NOP",		false,	5,	2						},
-		{	LmCommand::Code::START,		2,	"START",	true,	8,	6						},
-		{	LmCommand::Code::STOP,		1,	"STOP",		false,	5,	2						},
-		{	LmCommand::Code::MOV,		3,	"MOV",		false,	11,	LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::MOVMEM,	4,	"MOVMEM",	false,	14,	LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::MOVC,		3,	"MOVC",		false,	11, LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::MOVBC,		4,	"MOVBC",	false,	14, LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::WRFB,		3,	"WRFB",		false,	11,	12						},
-		{	LmCommand::Code::RDFB,		3,	"RDFB",		true,	11,	7						},
-		{	LmCommand::Code::WRFBC,		3,	"WRFBC",	false,	11,	9						},
-		{	LmCommand::Code::WRFBB,		4,	"WRFBB",	false,	14,	11						},
-		{	LmCommand::Code::RDFBB,		4,	"RDFBB",	true,	14,	LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::RDFBTS,	3,	"RDFBTS",	true,	11,	4						},
-		{	LmCommand::Code::SETMEM,	4,	"SETMEM",	false,	14, LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::MOVB,		4,	"MOVB",		false,	14,	LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::NSTART,	3,	"NSTART",	true,	11,	LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::APPSTART,	2,	"APPSTART",	false,	8,	2						},
-		{	LmCommand::Code::MOV32,		3,	"MOV32",	false,	11,	14						},
-		{	LmCommand::Code::MOVC32,	4,	"MOVC32",	false,	14, 8						},
-		{	LmCommand::Code::WRFB32,	3,	"WRFB32",	false,	11,	20						},
-		{	LmCommand::Code::RDFB32,	3,	"RDFB32",	true,	11,	14						},
-		{	LmCommand::Code::WRFBC32,	4,	"WRFBC32",	false,	14,	16						},
-		{	LmCommand::Code::RDFBTS32,	4,	"RDFBTS32",	true,	14,	6						},
-		{	LmCommand::Code::MOVCF,		3,	"MOVCF",	false,	11,	6						},
-		{	LmCommand::Code::PMOV,		3,	"PMOV",		false,	11,	LmCommand::CALC_RUNTIME	},
-		{	LmCommand::Code::PMOV32,	3,	"PMOV32",	false,	11,	14						},
-		{	LmCommand::Code::FILL,		4,	"FILL",		false,	11,	14						},
+		{	LmCommand::Code::NoCommand,	0,	"NO_CMD",		false,	0,	0						},
+		{	LmCommand::Code::NOP,		1,	"NOP",			false,	5,	2						},
+		{	LmCommand::Code::START,		2,	"START",		true,	8,	6						},
+		{	LmCommand::Code::STOP,		1,	"STOP",			false,	5,	2						},
+		{	LmCommand::Code::MOV,		3,	"MOV",			false,	11,	LmCommand::CALC_RUNTIME	},
+		{	LmCommand::Code::MOVMEM,	4,	"MOVMEM",		false,	14,	LmCommand::CALC_RUNTIME	},
+		{	LmCommand::Code::MOVC,		3,	"MOVC",			false,	11, LmCommand::CALC_RUNTIME	},
+		{	LmCommand::Code::MOVBC,		4,	"MOVBC",		false,	14, LmCommand::CALC_RUNTIME	},
+		{	LmCommand::Code::WRFB,		3,	"WRFB",			false,	11,	12						},
+		{	LmCommand::Code::RDFB,		3,	"RDFB",			true,	11,	7						},
+		{	LmCommand::Code::WRFBC,		3,	"WRFBC",		false,	11,	9						},
+		{	LmCommand::Code::WRFBB,		4,	"WRFBB",		false,	14,	11						},
+		{	LmCommand::Code::RDFBB,		4,	"RDFBB",		true,	14,	LmCommand::CALC_RUNTIME	},
+		{	LmCommand::Code::RDFBCMP,	3,	"RDFBCMP",		true,	11,	4						},
+		{	LmCommand::Code::SETMEM,	4,	"SETMEM",		false,	14, LmCommand::CALC_RUNTIME	},
+		{	LmCommand::Code::MOVB,		4,	"MOVB",			false,	14,	LmCommand::CALC_RUNTIME	},
+		{	LmCommand::Code::NSTART,	3,	"NSTART",		true,	11,	LmCommand::CALC_RUNTIME	},
+		{	LmCommand::Code::APPSTART,	2,	"APPSTART",		false,	8,	2						},
+		{	LmCommand::Code::MOV32,		3,	"MOV32",		false,	11,	14						},
+		{	LmCommand::Code::MOVC32,	4,	"MOVC32",		false,	14, 8						},
+		{	LmCommand::Code::WRFB32,	3,	"WRFB32",		false,	11,	20						},
+		{	LmCommand::Code::RDFB32,	3,	"RDFB32",		true,	11,	14						},
+		{	LmCommand::Code::WRFBC32,	4,	"WRFBC32",		false,	14,	16						},
+		{	LmCommand::Code::RDFBCMP32,	4,	"RDFBCMP32",	true,	14,	6						},
+		{	LmCommand::Code::MOVCMPF,	3,	"MOVCMPF",		false,	11,	6						},
+		{	LmCommand::Code::PMOV,		3,	"PMOV",			false,	11,	LmCommand::CALC_RUNTIME	},
+		{	LmCommand::Code::PMOV32,	3,	"PMOV32",		false,	11,	14						},
+		{	LmCommand::Code::FILL,		4,	"FILL",			false,	11,	14						},
 	};
 
 	class LmCommands : public QHash<int, LmCommand>
@@ -225,55 +225,6 @@ namespace Builder
 		void clear();
 	};
 
-
-/*	class CodeItem
-	{
-	private:
-		QString m_comment;
-
-	protected:
-		QByteArray m_binCode;
-
-	public:
-		CodeItem();
-		CodeItem(const CodeItem& codeItem);
-
-		virtual ~CodeItem() {}
-
-		virtual QString toString() = 0;
-		virtual int sizeW()= 0;
-
-		virtual bool isCommand() = 0;
-		virtual bool isComment() = 0;
-
-		virtual void generateBinCode(E::ByteOrder byteOrder) = 0;
-		virtual const QByteArray& getBinCode() { return m_binCode; }
-
-		void setComment(const QString& comment) { m_comment = comment; }
-		QString getComment() { return m_comment; }
-		void clearComment() { m_comment.clear(); }
-
-		bool commentIsEmpty() { return m_comment.isEmpty(); }
-	};*/
-
-
-/*	class Comment : public CodeItem
-	{
-	public:
-		Comment();
-		Comment(const Comment& comment);
-		Comment(const QString& comment);
-
-		QString toString() override;
-		int sizeW() override { return 0; }
-
-		void generateBinCode(E::ByteOrder) override {}
-
-		bool isCommand() override { return false; }
-		bool isComment() override { return true; }
-	};*/
-
-
 	class CodeItem
 	{
 	public:
@@ -296,7 +247,7 @@ namespace Builder
 		void writeFuncBlockBit(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, Address16 addrFrom, const QString& fbCaption);
 		void readFuncBlockBit(quint16 addrTo, quint16 bitNo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption);
 		void readFuncBlockBit(Address16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption);
-		void readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue, const QString& fbCaption);
+		void readFuncBlockCompare(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue, const QString& fbCaption);
 		void setMem(quint16 addr, quint16 constValue, quint16 sizeW);
 		void movBit(quint16 addrTo, quint16 bitTo, quint16 addrFrom, quint16 bitFrom);
 		void movBit(Address16 addrTo, Address16 addrFrom);
@@ -314,10 +265,10 @@ namespace Builder
 		void readFuncBlock32(Address16 addrTo, quint16 fbType, quint16 fbInstance, quint16 fbParamNo, const QString& fbCaption);
 		void writeFuncBlockConstInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 constInt32, const QString& fbCaption);
 		void writeFuncBlockConstFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, float constFloat, const QString& fbCaption);
-		void readFuncBlockTestInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 testInt32, const QString& fbCaption);
-		void readFuncBlockTestFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, float testFloat, const QString& fbCaption);
+		void readFuncBlockCompareInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 testInt32, const QString& fbCaption);
+		void readFuncBlockCompareFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, float testFloat, const QString& fbCaption);
 
-		void movConstIfFlag(quint16 addrTo, quint16 constVal);
+		void movCompareFlag(quint16 addrTo, quint16 bitNo);
 		void prevMov(quint16 addrTo, quint16 addrFrom);
 		void prevMov32(quint16 addrTo, quint16 addrFrom);
 		void fill(quint16 addrTo, quint16 addrFrom, quint16 addrBit);
@@ -391,10 +342,6 @@ namespace Builder
 
 		bool getTimes(const LmMemoryMap* lmMemMap, int prevCmdExecTime, int* waitTime, int* execTime) const;
 
-//		int execTime() const { return m_execTime; }
-//		int waitTime() const { return m_waitTime; }
-//		int waitAndExecTime() const { return m_waitTime + m_execTime; }
-
 	private:
 		void initCommand();
 
@@ -421,14 +368,10 @@ namespace Builder
 
 		qint32 m_numerator = 0;			// unique number of codeItems for debugging purposes
 
-//		int m_waitTime = 0;				// command wait-to-execution time
-//		int m_execTime = 0;				// command execution time
-
 		int m_fbExecTime = 0;			// != 0 for commands START and NSTART only
 
 		bool m_result = true;
 
-//		static QHash<int, const LmCommand*> m_lmCommands;
 		static QHash<quint16, int> m_executedFb;				// fbType => remaining FB exec time
 
 		static qint32 m_codeItemsNumerator;
@@ -481,8 +424,6 @@ namespace Builder
 		void newLine();
 
 		void clear();
-
-//		void generateBinCode();
 
 		void getAsmCode(QStringList* asmCode) const;
 		void getBinCode(QByteArray* binCode) const;
