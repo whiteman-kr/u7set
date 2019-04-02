@@ -50,9 +50,11 @@ namespace VFrame30
 
 		static const QString allowScale;
 		static const QString keepAspectRatio;
+		static const QString imageId;
 		static const QString image;
 		static const QString images;
 		static const QString svg;
+		static const QString initialImageId;
 
 		// --
 		//

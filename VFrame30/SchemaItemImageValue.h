@@ -15,6 +15,7 @@ namespace VFrame30
 		Q_OBJECT
 
 		Q_PROPERTY(QStringList SignalIDs READ signalIds WRITE setSignalIds)
+		Q_PROPERTY(QString CurrentImageID READ currentImageId WRITE setCurrentImageId)
 
 	public:
 		SchemaItemImageValue(void);
@@ -35,6 +36,8 @@ namespace VFrame30
 	protected:
 		void initDrawingResources() const;
 		bool getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
+
+		void drawImage(CDrawParam* drawParam, const QString& imageId, const QRectF& rect);
 
 	protected:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
@@ -59,11 +62,23 @@ namespace VFrame30
 		const PropertyVector<ImageItem>& images() const;
 		void setImages(const PropertyVector<ImageItem>& value);
 
+		QString initialImageId() const;
+		void setInitialImageId(QString value);
+
+		QString currentImageId() const;
+		void setCurrentImageId(QString value);
+
 	private:
 		QStringList m_signalIds = {"#APPSIGNALID"};
 		E::SignalSource m_signalSource = E::SignalSource::AppDataService;
 
 		PropertyVector<ImageItem> m_images;	// Each image is a std::shared_ptr
+
+		QString m_initialImageId;			// Default value on Monitor start for currentImageId
+
+		// MonitorMode variables
+		//
+		QString m_currentImageId;
 	};
 }
 

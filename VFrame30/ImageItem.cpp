@@ -11,8 +11,9 @@ namespace VFrame30
 	{
 		Property* p = nullptr;
 
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::allowScale, PropertyNames::appearanceCategory, true, ImageItem::allowScale, ImageItem::setAllowScale);
-		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::keepAspectRatio, PropertyNames::appearanceCategory, true, ImageItem::keepAspectRatio, ImageItem::setKeepAspectRatio);
+		ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::allowScale, true, ImageItem::allowScale, ImageItem::setAllowScale);
+		ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::keepAspectRatio, true, ImageItem::keepAspectRatio, ImageItem::setKeepAspectRatio);
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::imageId, true, ImageItem::imageId, ImageItem::setImageId);
 
 		p = ADD_PROPERTY_GET_SET_CAT(QImage, PropertyNames::image, PropertyNames::imageCategory, true, ImageItem::image, ImageItem::setImage);
 		p->setSpecificEditor(E::PropertySpecificEditor::LoadFileDialog);
@@ -29,6 +30,7 @@ namespace VFrame30
 		PropertyObject(src),
 		m_allowScale(src.m_allowScale),
 		m_keepAspectRatio(src.m_keepAspectRatio),
+		m_imageId(src.m_imageId),
 		m_image(src.m_image),
 		m_imageData(src.m_imageData),
 		m_svgData(src.m_svgData)
@@ -46,6 +48,7 @@ namespace VFrame30
 
 		message->set_allowscale(m_allowScale);
 		message->set_keepaspectratio(m_keepAspectRatio);
+		message->set_imageid(m_imageId.toStdString());
 
 		if (m_image.isNull() == false)
 		{
@@ -80,6 +83,7 @@ namespace VFrame30
 	{
 		m_allowScale = message.allowscale();
 		m_keepAspectRatio = message.keepaspectratio();
+		m_imageId = QString::fromStdString(message.imageid());
 
 		if (message.has_imagedata() == true)
 		{
@@ -117,7 +121,7 @@ namespace VFrame30
 		return m_image.isNull() == false || m_svgData.isEmpty() == false;
 	}
 
-	void ImageItem::drawError(CDrawParam* drawParam, const QRectF& rect, const QString& errorText) const
+	void ImageItem::drawError(CDrawParam* drawParam, const QRectF& rect, const QString& errorText)
 	{
 		if (drawParam == nullptr)
 		{
@@ -141,6 +145,22 @@ namespace VFrame30
 	}
 
 	void ImageItem::drawImage(CDrawParam* drawParam, const QRectF& rect) const
+	{
+		if (svgData().isEmpty() == false)
+		{
+			drawSvg(drawParam, rect);
+			return;
+		}
+
+		if (image().isNull() == false)
+		{
+			drawRasterImage(drawParam, rect);
+		}
+
+		return;
+	}
+
+	void ImageItem::drawRasterImage(CDrawParam* drawParam, const QRectF& rect) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -265,6 +285,18 @@ namespace VFrame30
 	void ImageItem::setKeepAspectRatio(bool value)
 	{
 		m_keepAspectRatio = value;
+	}
+
+	// ImageID
+	//
+	const QString& ImageItem::imageId() const
+	{
+		return m_imageId;
+	}
+
+	void ImageItem::setImageId(const QString& value)
+	{
+		m_imageId = value;
 	}
 
 	// Image
