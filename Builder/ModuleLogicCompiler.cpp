@@ -5825,7 +5825,7 @@ namespace Builder
 
 		CodeGenProcsToCallArray procs =
 		{
-			//CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateAfbsVersionCheckingCode),
+			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateAfbsVersionCheckingCode),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateInitAfbsCode),
 			CODE_GEN_PROC_TO_CALL(ModuleLogicCompiler::generateLoopbacksRefreshingCode),
 		};
@@ -5911,32 +5911,111 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
-		code->comment_nl("AFBs implementation versions checking");
+		if (m_lmDescription->checkAfbVersions() == false)
+		{
+			return true;
+		}
+
+		int checkResultOffset = static_cast<int>(m_lmDescription->checkAfbVersionsOffset(true));		// absolute address
+		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
+
+		code->comment("AFBs implementation versions checking");
 
 		const std::map<int, std::shared_ptr<Afb::AfbComponent>>& components = m_lmDescription->afbComponents();
 
-		QVector<int> opCodes;
+		QHash<int, bool> opCodes;
 
 		for(auto const& component : components)
 		{
-			opCodes.append(component.second->opCode());
+			opCodes.insert(component.second->opCode(), true);
 		}
 
-		qSort(opCodes);
+		const int MIN_AFB_OPCODE = 1;
+		const int MAX_AFB_OPCODE = 63;
 
-		for(int opCode : opCodes)
+		CodeItem cmd;
+		int resultBitNo = 0;
+
+		QString usedCommentStr("Used AFBs opcodes: ");
+		QString unusedCommentStr("Unused AFBs opcodes: ");
+
+		bool firstUsed = true;
+		bool firstUnused = true;
+
+		for(int afbOpcode = MIN_AFB_OPCODE; afbOpcode <= MAX_AFB_OPCODE; afbOpcode++)
 		{
-			auto component = components.at(opCode);
-
-			CodeItem cmd;
-
-			cmd.readFuncBlockTest(	opCode, 0,
-									component->versionOpIndex(),
-									component->impVersion(),
-									component->caption());
-			code->append(cmd);
+			if (opCodes.contains(afbOpcode) == true)
+			{
+				if (firstUsed == true)
+				{
+					usedCommentStr += QString::number(afbOpcode);
+					firstUsed = false;
+				}
+				else
+				{
+					usedCommentStr += QString(", %1").arg(afbOpcode);
+				}
+			}
+			else
+			{
+				if (firstUnused == true)
+				{
+					unusedCommentStr += QString::number(afbOpcode);
+					firstUnused = false;
+				}
+				else
+				{
+					unusedCommentStr += QString(", %1").arg(afbOpcode);
+				}
+			}
 		}
 
+		code->comment(usedCommentStr);
+		code->comment_nl(unusedCommentStr);
+
+		for(int afbOpcode = MIN_AFB_OPCODE; afbOpcode <= MAX_AFB_OPCODE; afbOpcode++)
+		{
+			resultBitNo = afbOpcode - 1;		// !!! last (63) bit in results is not used!
+
+			if ((resultBitNo % WORD_SIZE) == 0)
+			{
+				cmd.movConst(bitAccAddr, 0xFFFF);
+				cmd.clearComment();
+				code->append(cmd);
+			}
+
+			if (opCodes.contains(afbOpcode) == true)
+			{
+				auto component = components.at(afbOpcode);
+
+				cmd.readFuncBlockCompare(afbOpcode, 0,
+										component->versionOpIndex(),
+										component->impVersion(),
+										component->caption());
+				cmd.setComment(QString("AFB opcode %1").arg(afbOpcode));
+				code->append(cmd);
+
+				cmd.movCompareFlag(bitAccAddr, (resultBitNo % WORD_SIZE));
+				cmd.clearComment();
+				code->append(cmd);
+			}
+			else
+			{
+			//	code->comment(QString("ABF opcode %1 is not used").arg(afbOpcode));
+			}
+
+			if (((resultBitNo + 1) % WORD_SIZE) == 0)
+			{
+				cmd.mov(checkResultOffset + resultBitNo / WORD_SIZE, bitAccAddr);
+				cmd.clearComment();
+				code->append(cmd);
+				code->newLine();
+			}
+		}
+
+		cmd.mov(checkResultOffset + MAX_AFB_OPCODE / WORD_SIZE, bitAccAddr);
+		cmd.clearComment();
+		code->append(cmd);
 		code->newLine();
 
 		return true;
