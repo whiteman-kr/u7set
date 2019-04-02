@@ -2842,7 +2842,16 @@ private:
 // PropertyVector can be used in QVariant, full copy is made if assign operator called, so OBJECT_TYPE must have copy constructor
 //
 template <typename OBJECT_TYPE>
-class PropertyVector : public std::vector<std::shared_ptr<OBJECT_TYPE>>
+class PropertyVectorBase : public std::vector<std::shared_ptr<OBJECT_TYPE>>
+{
+public:
+	virtual ~PropertyVectorBase() {};
+	[[nodiscard]] virtual std::shared_ptr<OBJECT_TYPE> createItem() const = 0;
+};
+
+
+template <typename OBJECT_TYPE>
+class PropertyVector : public PropertyVectorBase<OBJECT_TYPE>
 {
 public:
 	PropertyVector()
@@ -2880,13 +2889,26 @@ public:
 		return *this;
 	}
 	PropertyVector& operator= (PropertyVector&& src) = default;
+
+	virtual std::shared_ptr<OBJECT_TYPE> createItem() const override
+	{
+		return std::make_shared<OBJECT_TYPE>();
+	}
 };
 
 //
 // PropertyList can be used in QVariant, full copy is made if assign operator called, so OBJECT_TYPE must have copy constructor
 //
 template <typename OBJECT_TYPE>
-class PropertyList : public std::list<std::shared_ptr<OBJECT_TYPE>>
+class PropertyListBase : public std::list<std::shared_ptr<OBJECT_TYPE>>
+{
+public:
+	virtual ~PropertyListBase() {};
+	[[nodiscard]] virtual std::shared_ptr<OBJECT_TYPE> createItem() const = 0;
+};
+
+template <typename OBJECT_TYPE>
+class PropertyList : public PropertyListBase<OBJECT_TYPE>
 {
 public:
 	PropertyList()
@@ -2919,6 +2941,12 @@ public:
 		return *this;
 	}
 	PropertyList& operator= (PropertyList&& src) = default;
+
+	virtual std::shared_ptr<OBJECT_TYPE> createItem() const override
+	{
+		return std::make_shared<OBJECT_TYPE>();
+	}
+
 };
 
 
@@ -2930,7 +2958,7 @@ inline bool variantIsPropertyVector(const QVariant& v)
 	return type.startsWith(QStringLiteral("PropertyVector<"), Qt::CaseSensitive);
 }
 
-inline std::vector<std::shared_ptr<PropertyObject>>* variantToPropertyVector(QVariant& v)
+inline PropertyVectorBase<PropertyObject>* variantToPropertyVector(QVariant& v)
 {
 	if (variantIsPropertyVector(v) == false)
 	{
@@ -2938,11 +2966,11 @@ inline std::vector<std::shared_ptr<PropertyObject>>* variantToPropertyVector(QVa
 		return nullptr;
 	}
 
-	return reinterpret_cast<std::vector<std::shared_ptr<PropertyObject>>*>(v.data());
+	return reinterpret_cast<PropertyVectorBase<PropertyObject>*>(v.data());
 }
 
 template<>
-inline std::vector<std::shared_ptr<PropertyObject>>* qvariant_cast<std::vector<std::shared_ptr<PropertyObject>>*>(const QVariant& v)
+inline PropertyVectorBase<PropertyObject>* qvariant_cast<PropertyVectorBase<PropertyObject>*>(const QVariant& v)
 {
 	return variantToPropertyVector(const_cast<QVariant&>(v));
 }
@@ -2955,7 +2983,7 @@ inline bool variantIsPropertyList(const QVariant& v)
 	return type.startsWith(QStringLiteral("PropertyList<"), Qt::CaseSensitive);
 }
 
-inline std::list<std::shared_ptr<PropertyObject>>* variantToPropertyList(QVariant& v)
+inline PropertyListBase<PropertyObject>* variantToPropertyList(QVariant& v)
 {
 	if (variantIsPropertyList(v) == false)
 	{
@@ -2963,11 +2991,11 @@ inline std::list<std::shared_ptr<PropertyObject>>* variantToPropertyList(QVarian
 		return nullptr;
 	}
 
-	return reinterpret_cast<std::list<std::shared_ptr<PropertyObject>>*>(v.data());
+	return reinterpret_cast<PropertyListBase<PropertyObject>*>(v.data());
 }
 
 template<>
-inline std::list<std::shared_ptr<PropertyObject>>* qvariant_cast<std::list<std::shared_ptr<PropertyObject>>*>(const QVariant& v)
+inline PropertyListBase<PropertyObject>* qvariant_cast<PropertyListBase<PropertyObject>*>(const QVariant& v)
 {
 	return variantToPropertyList(const_cast<QVariant&>(v));
 }

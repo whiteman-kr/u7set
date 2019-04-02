@@ -32,6 +32,7 @@ namespace VFrame30
 
 		ADD_PROPERTY_GET_SET_CAT(E::SignalSource, PropertyNames::signalSource, PropertyNames::functionalCategory, true, SchemaItemImageValue::signalSource, SchemaItemImageValue::setSignalSource);
 
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::initialImageId, PropertyNames::functionalCategory, true, SchemaItemImageValue::initialImageId, SchemaItemImageValue::setInitialImageId);
 		ADD_PROPERTY_GET_SET_CAT(PropertyVector<ImageItem>, PropertyNames::images, PropertyNames::functionalCategory, true, SchemaItemImageValue::images, SchemaItemImageValue::setImages);
 
 		// --
@@ -63,6 +64,7 @@ namespace VFrame30
 
 		valueMessage->set_signalids(signalIdsString().toStdString());
 		valueMessage->set_signalsource(static_cast<int32_t>(m_signalSource));
+		valueMessage->set_initialimageid(m_initialImageId.toStdString());
 
 		for (auto image : m_images)
 		{
@@ -100,6 +102,7 @@ namespace VFrame30
 
 		setSignalIdsString(valueMessage.signalids().data());
 		m_signalSource = static_cast<E::SignalSource>(valueMessage.signalsource());
+		m_initialImageId = QString::fromStdString(valueMessage.initialimageid());
 
 		m_images.clear();
 		bool loadOk = true;
@@ -128,6 +131,7 @@ namespace VFrame30
 
 		// Drawing frame rect
 		//
+
 
 		return;
 	}
@@ -195,6 +199,29 @@ namespace VFrame30
 		return ok;
 	}
 
+	void SchemaItemImageValue::drawImage(CDrawParam* drawParam, const QString& imageId, const QRectF& rect)
+	{
+		for (std::shared_ptr<ImageItem> image : m_images)
+		{
+			if (image->imageId() == imageId)
+			{
+				if (image->hasAnyImage() == false)
+				{
+					ImageItem::drawError(drawParam, rect, QString("ImageID %1 has no image.").arg(imageId));
+				}
+				else
+				{
+					image->drawImage(drawParam, rect);
+				}
+
+				return;
+			}
+		}
+
+		ImageItem::drawError(drawParam, rect, QString("ImageID %1 not found.").arg(imageId));
+		return;
+	}
+
 	double SchemaItemImageValue::minimumPossibleHeightDocPt(double gridSize, int /*pinGridStep*/) const
 	{
 		return gridSize;
@@ -245,6 +272,26 @@ namespace VFrame30
 	void SchemaItemImageValue::setImages(const PropertyVector<ImageItem>& value)
 	{
 		m_images = value;
+	}
+
+	QString SchemaItemImageValue::initialImageId() const
+	{
+		return m_initialImageId;
+	}
+
+	void SchemaItemImageValue::setInitialImageId(QString value)
+	{
+		m_initialImageId = value;
+	}
+
+	QString SchemaItemImageValue::currentImageId() const
+	{
+		return m_currentImageId;
+	}
+
+	void SchemaItemImageValue::setCurrentImageId(QString value)
+	{
+		m_currentImageId = value;
 	}
 
 }

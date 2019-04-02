@@ -20,8 +20,9 @@ namespace VFrame30
 
 		bool hasAnyImage() const;
 
-		void drawError(CDrawParam* drawParam, const QRectF& rect, const QString& errorText) const;
+		static void drawError(CDrawParam* drawParam, const QRectF& rect, const QString& errorText);
 		void drawImage(CDrawParam* drawParam, const QRectF& rect) const;
+		void drawRasterImage(CDrawParam* drawParam, const QRectF& rect) const;
 		void drawSvg(CDrawParam* drawParam, const QRectF& rect) const;
 
 	public:
@@ -30,6 +31,9 @@ namespace VFrame30
 
 		bool keepAspectRatio() const;
 		void setKeepAspectRatio(bool value);
+
+		const QString& imageId() const;
+		void setImageId(const QString& value);
 
 		const QImage& image() const;
 		void setImage(QImage image);
@@ -42,6 +46,7 @@ namespace VFrame30
 		//
 		bool m_allowScale = true;
 		bool m_keepAspectRatio = true;
+		QString m_imageId = "IMAGEID";
 
 		QImage m_image;
 		mutable QByteArray m_imageData;							// To prevent from compressing image again and again if it was not changed
