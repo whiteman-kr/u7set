@@ -4941,6 +4941,20 @@ class TuningSignalState : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 unsuccessfulwritetime() const;
   inline void set_unsuccessfulwritetime(::google::protobuf::int64 value);
 
+  // optional bool setSOR = 14 [default = false];
+  inline bool has_setsor() const;
+  inline void clear_setsor();
+  static const int kSetSORFieldNumber = 14;
+  inline bool setsor() const;
+  inline void set_setsor(bool value);
+
+  // optional bool writingDisabled = 15 [default = false];
+  inline bool has_writingdisabled() const;
+  inline void clear_writingdisabled();
+  static const int kWritingDisabledFieldNumber = 15;
+  inline bool writingdisabled() const;
+  inline void set_writingdisabled(bool value);
+
   // @@protoc_insertion_point(class_scope:Network.TuningSignalState)
  private:
   inline void set_has_signalhash();
@@ -4969,25 +4983,31 @@ class TuningSignalState : public ::google::protobuf::Message {
   inline void clear_has_successfulwritetime();
   inline void set_has_unsuccessfulwritetime();
   inline void clear_has_unsuccessfulwritetime();
+  inline void set_has_setsor();
+  inline void clear_has_setsor();
+  inline void set_has_writingdisabled();
+  inline void clear_has_writingdisabled();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::uint64 signalhash_;
   ::Proto::TuningValue* value_;
-  ::google::protobuf::int32 error_;
-  bool valid_;
-  bool writeinprogress_;
   ::Proto::TuningValue* readlowbound_;
+  ::google::protobuf::int32 error_;
+  ::google::protobuf::int32 writeerrorcode_;
   ::Proto::TuningValue* readhighbound_;
   ::google::protobuf::uint64 writeclient_;
   ::google::protobuf::int64 successfulreadtime_;
   ::google::protobuf::int64 writerequesttime_;
   ::google::protobuf::int64 successfulwritetime_;
   ::google::protobuf::int64 unsuccessfulwritetime_;
-  ::google::protobuf::int32 writeerrorcode_;
+  bool valid_;
+  bool writeinprogress_;
+  bool setsor_;
+  bool writingdisabled_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(15 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -12905,6 +12925,50 @@ inline ::google::protobuf::int64 TuningSignalState::unsuccessfulwritetime() cons
 inline void TuningSignalState::set_unsuccessfulwritetime(::google::protobuf::int64 value) {
   set_has_unsuccessfulwritetime();
   unsuccessfulwritetime_ = value;
+}
+
+// optional bool setSOR = 14 [default = false];
+inline bool TuningSignalState::has_setsor() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+inline void TuningSignalState::set_has_setsor() {
+  _has_bits_[0] |= 0x00002000u;
+}
+inline void TuningSignalState::clear_has_setsor() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline void TuningSignalState::clear_setsor() {
+  setsor_ = false;
+  clear_has_setsor();
+}
+inline bool TuningSignalState::setsor() const {
+  return setsor_;
+}
+inline void TuningSignalState::set_setsor(bool value) {
+  set_has_setsor();
+  setsor_ = value;
+}
+
+// optional bool writingDisabled = 15 [default = false];
+inline bool TuningSignalState::has_writingdisabled() const {
+  return (_has_bits_[0] & 0x00004000u) != 0;
+}
+inline void TuningSignalState::set_has_writingdisabled() {
+  _has_bits_[0] |= 0x00004000u;
+}
+inline void TuningSignalState::clear_has_writingdisabled() {
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline void TuningSignalState::clear_writingdisabled() {
+  writingdisabled_ = false;
+  clear_has_writingdisabled();
+}
+inline bool TuningSignalState::writingdisabled() const {
+  return writingdisabled_;
+}
+inline void TuningSignalState::set_writingdisabled(bool value) {
+  set_has_writingdisabled();
+  writingdisabled_ = value;
 }
 
 // -------------------------------------------------------------------
