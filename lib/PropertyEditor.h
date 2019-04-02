@@ -45,6 +45,41 @@ namespace ExtWidgets
 {
 	class PropertyEditor;
 
+
+	static QString propertyVectorText(QVariant& value);
+
+
+	class PropertyArrayEditorDialog : public QDialog
+	{
+		Q_OBJECT
+
+	public:
+		PropertyArrayEditorDialog(QWidget* parent, std::shared_ptr<Property> p);
+		QVariant value();
+
+	protected slots:
+		virtual void accept() override;
+		virtual void reject() override;
+
+	private slots:
+		void slot_MoveUp();
+		void slot_MoveDown();
+		void slot_Add();
+		void slot_Remove();
+
+	private:
+		QVariant m_value;
+
+		QTreeWidget* m_treeWidget = nullptr;
+		PropertyEditor* m_propertyEditor = nullptr;
+
+		std::shared_ptr<Property> m_property;
+
+	};
+
+
+
+
 	const int PropertyEditorTextMaxLength = 32767;
 
 	class PropertyEditorHelp : public QDialog
@@ -299,7 +334,28 @@ namespace ExtWidgets
 		PropertyEditor* m_propertyEditor = nullptr;
 	};
 
+	class MultiArrayEdit : public QWidget
+	{
+		Q_OBJECT
 
+	public:
+		explicit MultiArrayEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly);
+		void setValue(std::shared_ptr<Property> property, bool readOnly);
+
+	signals:
+		void valueChanged(QVariant value);
+
+	private slots:
+		void onButtonPressed();
+
+	private:
+
+		QLineEdit* m_lineEdit = nullptr;
+		QToolButton* m_button = nullptr;
+
+		QVariant m_oldValue;
+		std::shared_ptr<Property> m_property;
+	};
 
 	class MultiVariantPropertyManager : public QtAbstractPropertyManager
 	{

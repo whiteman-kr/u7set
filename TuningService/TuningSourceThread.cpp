@@ -68,12 +68,14 @@ namespace Tuning
 		tss->set_fotipflagoffseterr(fotipFlagOffsetErr);
 		tss->set_fotipflagapplysuccess(fotipFlagApplySuccess);
 		tss->set_fotipflagsetsor(fotipFlagSetSOR);
+		tss->set_fotipflagwritingdisabled(fotipFlagWritingDisabled);
 
 		tss->set_erranaloglowboundcheck(errAnalogLowBoundCheck);
 		tss->set_erranaloghighboundcheck(errAnalogHighBoundCheck);
 
 		tss->set_controlisactive(controlIsActive);
 		tss->set_setsor(setSOR);
+		tss->set_writingdisabled(writingDisabled);
 
 		tss->set_hasunappliedparams(hasUnappliedParams);
 	}
@@ -1390,13 +1392,19 @@ namespace Tuning
 
 		if (flags.setSOR == 1)
 		{
-			m_stat.fotipFlagSetSOR++;
+			m_stat.fotipFlagSetSOR++;					// for platform LMs
 			m_stat.setSOR = true;
+
+			m_stat.fotipFlagWritingDisabled++;			// for non-platform LMs
+			m_stat.writingDisabled = true;
 		}
 		else
 		{
-			m_stat.fotipFlagSetSOR = 0;			// added by Vintenko 22.12.2017
+			m_stat.fotipFlagSetSOR = 0;					// for platform LMs
 			m_stat.setSOR = false;
+
+			m_stat.fotipFlagWritingDisabled = 0;		// for non-platform LMs
+			m_stat.writingDisabled = false;
 		}
 
 		return result;

@@ -358,6 +358,11 @@ message TuningSourceState
     optional bool setSOR = 43 [default = false];
 
     optional bool hasUnappliedParams = 44 [default = false];
+
+	//
+
+	optional bool writingDisabled = 45 [default = false];
+	optional int64 fotipFlagWritingDisabled = 46 [default = 0];
 }
 
 message GetTuningSourcesStatesReply

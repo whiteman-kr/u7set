@@ -4186,6 +4186,20 @@ class TuningSourceState : public ::google::protobuf::Message {
   inline bool hasunappliedparams() const;
   inline void set_hasunappliedparams(bool value);
 
+  // optional bool writingDisabled = 45 [default = false];
+  inline bool has_writingdisabled() const;
+  inline void clear_writingdisabled();
+  static const int kWritingDisabledFieldNumber = 45;
+  inline bool writingdisabled() const;
+  inline void set_writingdisabled(bool value);
+
+  // optional int64 fotipFlagWritingDisabled = 46 [default = 0];
+  inline bool has_fotipflagwritingdisabled() const;
+  inline void clear_fotipflagwritingdisabled();
+  static const int kFotipFlagWritingDisabledFieldNumber = 46;
+  inline ::google::protobuf::int64 fotipflagwritingdisabled() const;
+  inline void set_fotipflagwritingdisabled(::google::protobuf::int64 value);
+
   // @@protoc_insertion_point(class_scope:Network.TuningSourceState)
  private:
   inline void set_has_sourceid();
@@ -4276,6 +4290,10 @@ class TuningSourceState : public ::google::protobuf::Message {
   inline void clear_has_setsor();
   inline void set_has_hasunappliedparams();
   inline void clear_has_hasunappliedparams();
+  inline void set_has_writingdisabled();
+  inline void clear_has_writingdisabled();
+  inline void set_has_fotipflagwritingdisabled();
+  inline void clear_has_fotipflagwritingdisabled();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -4323,9 +4341,11 @@ class TuningSourceState : public ::google::protobuf::Message {
   ::google::protobuf::int64 erranaloglowboundcheck_;
   ::google::protobuf::int64 erranaloghighboundcheck_;
   ::google::protobuf::int64 errrupcrc_;
+  ::google::protobuf::int64 fotipflagwritingdisabled_;
+  bool writingdisabled_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(44 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(46 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -12025,6 +12045,50 @@ inline bool TuningSourceState::hasunappliedparams() const {
 inline void TuningSourceState::set_hasunappliedparams(bool value) {
   set_has_hasunappliedparams();
   hasunappliedparams_ = value;
+}
+
+// optional bool writingDisabled = 45 [default = false];
+inline bool TuningSourceState::has_writingdisabled() const {
+  return (_has_bits_[1] & 0x00001000u) != 0;
+}
+inline void TuningSourceState::set_has_writingdisabled() {
+  _has_bits_[1] |= 0x00001000u;
+}
+inline void TuningSourceState::clear_has_writingdisabled() {
+  _has_bits_[1] &= ~0x00001000u;
+}
+inline void TuningSourceState::clear_writingdisabled() {
+  writingdisabled_ = false;
+  clear_has_writingdisabled();
+}
+inline bool TuningSourceState::writingdisabled() const {
+  return writingdisabled_;
+}
+inline void TuningSourceState::set_writingdisabled(bool value) {
+  set_has_writingdisabled();
+  writingdisabled_ = value;
+}
+
+// optional int64 fotipFlagWritingDisabled = 46 [default = 0];
+inline bool TuningSourceState::has_fotipflagwritingdisabled() const {
+  return (_has_bits_[1] & 0x00002000u) != 0;
+}
+inline void TuningSourceState::set_has_fotipflagwritingdisabled() {
+  _has_bits_[1] |= 0x00002000u;
+}
+inline void TuningSourceState::clear_has_fotipflagwritingdisabled() {
+  _has_bits_[1] &= ~0x00002000u;
+}
+inline void TuningSourceState::clear_fotipflagwritingdisabled() {
+  fotipflagwritingdisabled_ = GOOGLE_LONGLONG(0);
+  clear_has_fotipflagwritingdisabled();
+}
+inline ::google::protobuf::int64 TuningSourceState::fotipflagwritingdisabled() const {
+  return fotipflagwritingdisabled_;
+}
+inline void TuningSourceState::set_fotipflagwritingdisabled(::google::protobuf::int64 value) {
+  set_has_fotipflagwritingdisabled();
+  fotipflagwritingdisabled_ = value;
 }
 
 // -------------------------------------------------------------------
