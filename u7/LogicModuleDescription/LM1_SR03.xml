@@ -429,7 +429,6 @@
 			<Pin OpName="o_param_err"	OpIndex ="16"	PinType = "Output"/>
 			<Pin OpName="o_overflow"	OpIndex ="17"	PinType = "Output"/>
 			<Pin OpName="o_underflow"	OpIndex ="18"	PinType = "Output"/>
-			<Pin OpName="o_zero"		OpIndex ="19"	PinType = "Output"/>
 			<Pin OpName="o_nan"			OpIndex ="20"	PinType = "Output"/>
 			<Pin OpName="o_amismatch_edi"	OpIndex ="21"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="22"	PinType = "Output"/>
@@ -456,7 +455,7 @@
 			<Pin OpName="o_version"		OpIndex ="13"	PinType = "Output"/>
 			<Pin OpName="o_univibrator"		OpIndex ="14"	PinType = "Output"/>
 			</AFBComponent>
-		<AFBComponent Caption="PULSE_GEN" OpCode="30" ImpVersion="1" VersionOpIndex="17" MaxInstCount="256" SimulationFunc="afb_pulse_gen">
+		<AFBComponent Caption="PULSE_GEN" OpCode="30" ImpVersion="0" VersionOpIndex="17" MaxInstCount="256" SimulationFunc="afb_pulse_gen">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_t_high"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_t_low"		OpIndex ="3"	PinType = "Param"/>
@@ -6021,7 +6020,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_fp_v1"    Caption="mismatch_fp"    Version="1.0010">
+        <AFB id="#mismatch_fp_v1"    Caption="mismatch_fp"    Version="1.0011">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -6044,7 +6043,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="16" Size="1"/>
 				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="17" Size="1"/>
 				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="18" Size="1"/>
-				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="19" Size="1"/>
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1"/>     
 			</Outputs>
 			<Params>
@@ -6104,18 +6102,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					</Script>
 				</Param>
 				<Param OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-					<Value>1</Value>
-					<Default>1</Default>
-					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
-					</Script>
-				</Param>
-				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
@@ -6225,7 +6211,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
 	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
 
 	videoItemFblElement.adjustHeight();
@@ -6244,7 +6229,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_d_fp_v1"    Caption="mismatch_d_fp"    Version="1.0002">
+        <AFB id="#mismatch_d_fp_v1"    Caption="mismatch_d_fp"    Version="1.0003">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -6268,7 +6253,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="16" Size="1"/>
 				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="17" Size="1"/>
 				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="18" Size="1"/>
-				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="19" Size="1"/>
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1"/>     
 			</Outputs>
 			<Params>
@@ -6319,18 +6303,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					</Script>
 				</Param>
 				<Param OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-					<Value>1</Value>
-					<Default>1</Default>
-					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
-					</Script>
-				</Param>
-				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
@@ -6443,7 +6415,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
 	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
 
 	videoItemFblElement.adjustHeight();
@@ -6462,7 +6433,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#mismatch_r_fp_v1"  Caption="mismatch_r_fp"  Version="1.0007">
+        <AFB id="#mismatch_r_fp_v1"  Caption="mismatch_r_fp"  Version="1.0008">
 			<Properties>				
 				<Description>Analog mismatch block with limits</Description>
 				<Category>Other</Category>
@@ -6485,7 +6456,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="o_param_err" Caption="param_err" Type="Discrete" ByteOrder="BigEndian" OpIndex="16" Size="1"/>
 				<Pin OpName="o_overflow" Caption="overflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="17" Size="1"/>
 				<Pin OpName="o_underflow" Caption="underflow" Type="Discrete" ByteOrder="BigEndian" OpIndex="18" Size="1"/>
-				<Pin OpName="o_zero" Caption="zero" Type="Discrete" ByteOrder="BigEndian" OpIndex="19" Size="1"/>
 				<Pin OpName="o_nan" Caption="nan" Type="Discrete" ByteOrder="BigEndian" OpIndex="20" Size="1"/>     
 			</Outputs>
 			<Params>
@@ -6573,18 +6543,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 					</Script>
 				</Param>
 				<Param OpName="OutUnderflow" Caption="OutUnderflow" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
-					<Value>1</Value>
-					<Default>1</Default>
-					<Script>
-						<Changed>
-(function(videoItemFblElement, afbElement)
-{
-	return createOutputSignals(videoItemFblElement, afbElement);
-})
-						</Changed>
-					</Script>
-				</Param>
-				<Param OpName="OutZero" Caption="OutZero" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
@@ -6694,7 +6652,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
 	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
 
 	videoItemFblElement.adjustHeight();
