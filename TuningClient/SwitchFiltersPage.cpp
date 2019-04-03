@@ -477,27 +477,33 @@ void SwitchFiltersPage::createListItems()
 	connect(m_filterTable, &FilterTableWidget::spacePressed, this, &SwitchFiltersPage::onFilterTablePressed);
 }
 
-void SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter)
+bool SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter)
 {
 	if (theMainWindow->userManager()->login(this) == false)
 	{
-		return;
+		return false;
 	}
 
 	if (m_tuningTcpClient->takeClientControl(this) == false)
 	{
-		return;
+		return false;
 	}
 
 	if (filter == nullptr)
 	{
 		Q_ASSERT(filter);
-		return;
+		return false;
 	}
 
 	TuningCounters tc = filter->counters();
 
 	int discreteCount = countDiscretes(filter.get());
+	int writingEnabledCount = countWritingEnabled(filter.get());
+
+	if (discreteCount == 0 || discreteCount != writingEnabledCount)
+	{
+		return false;
+	}
 
 	int newValue = 0;
 
@@ -507,7 +513,7 @@ void SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 								 QMessageBox::Yes | QMessageBox::No,
 								 QMessageBox::No) != QMessageBox::Yes)
 		{
-			return;
+			return false;
 		}
 
 		newValue = 1;
@@ -520,7 +526,7 @@ void SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 									 QMessageBox::Yes | QMessageBox::No,
 									 QMessageBox::No) != QMessageBox::Yes)
 			{
-				return;
+				return false;
 			}
 
 			newValue = 0;
@@ -541,7 +547,7 @@ void SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 				}
 				else
 				{
-					return;
+					return false;
 				}
 			}
 		}
@@ -557,7 +563,7 @@ void SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 		if (ok == false)
 		{
 			Q_ASSERT(false);
-			return;
+			return false;
 		}
 
 		if (asp.toTuningType() != TuningValueType::Discrete)
@@ -571,6 +577,8 @@ void SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 
 		m_tuningTcpClient->writeTuningSignal(f.appSignalId(), tv);
 	}
+
+	return true;
 }
 
 void SwitchFiltersPage::apply()
@@ -643,7 +651,48 @@ int SwitchFiltersPage::countDiscretes(TuningFilter* filter)
 	}
 
 	return result;
+}
 
+int SwitchFiltersPage::countWritingEnabled(TuningFilter* filter)
+{
+	if (filter == nullptr)
+	{
+		Q_ASSERT(filter);
+		return 0;
+	}
+
+	int result = 0;
+
+	std::vector <TuningFilterSignal> filterSignals = filter->getFilterSignals();
+
+	for (auto tfs : filterSignals)
+	{
+		bool ok = false;
+
+		AppSignalParam asp = m_tuningSignalManager->signalParam(tfs.appSignalHash(), &ok);
+		if (ok == false)
+		{
+			Q_ASSERT(false);
+			return 0;
+		}
+
+		if (asp.toTuningType() != TuningValueType::Discrete)
+		{
+			continue;
+		}
+
+		const TuningSignalState state = m_tuningSignalManager->state(tfs.appSignalHash(), &ok);
+
+		if (ok == true)
+		{
+			if (m_tuningTcpClient->writingIsEnabled(state) == true)
+			{
+				result++;
+			}
+		}
+	}
+
+	return result;
 }
 
 void SwitchFiltersPage::showEvent(QShowEvent *ev)
@@ -730,6 +779,7 @@ void SwitchFiltersPage::slot_timerTick500()
 		}
 
 		int discreteCount = countDiscretes(f.get());
+		int writingEnabledCount = countWritingEnabled(f.get());
 
 		TuningCounters tc = f->counters();
 
@@ -740,6 +790,16 @@ void SwitchFiltersPage::slot_timerTick500()
 			b->setText(text);
 		}
 
+		// Enable/Disable
+
+		bool buttonEnabled = discreteCount != 0 && writingEnabledCount == discreteCount;
+		if (b->isEnabled() != buttonEnabled)
+		{
+			b->setEnabled(buttonEnabled);
+		}
+
+		// Color
+
 		if (tc.discreteCounter == 0)
 		{
 			b->setStyleSheet(QString());
@@ -749,7 +809,9 @@ void SwitchFiltersPage::slot_timerTick500()
 		{
 			if (tc.discreteCounter == discreteCount)
 			{
-				QString s = tr("QPushButton { background-color: %1; color: %2 }").arg(m_alertBackColor.name()).arg(m_alertTextColor.name());
+				QColor textColor = b->isEnabled() ? m_alertTextColor : QColor(Qt::lightGray);
+
+				QString s = tr("QPushButton { background-color: %1; color: %2 }").arg(m_alertBackColor.name()).arg(textColor.name());
 				if (b->styleSheet() != s)
 				{
 					b->setStyleSheet(s);
@@ -758,7 +820,9 @@ void SwitchFiltersPage::slot_timerTick500()
 			}
 			else
 			{
-				QString s = tr("QPushButton { background-color: %1; color: %2 }").arg(m_partialBackColor.name()).arg(m_partialTextColor.name());
+				QColor textColor = b->isEnabled() ? m_partialTextColor : QColor(Qt::lightGray);
+
+				QString s = tr("QPushButton { background-color: %1; color: %2 }").arg(m_partialBackColor.name()).arg(textColor.name());
 				if (b->styleSheet() != s)
 				{
 					b->setStyleSheet(s);
@@ -766,6 +830,7 @@ void SwitchFiltersPage::slot_timerTick500()
 				b->setDown(false);
 			}
 		}
+
 	}
 
 	// List
@@ -776,6 +841,7 @@ void SwitchFiltersPage::slot_timerTick500()
 		auto f = m_listFilters[i];
 
 		int discreteCount = countDiscretes(f.get());
+		int writingEnabledCount = countWritingEnabled(f.get());
 
 		TuningCounters tc = f->counters();
 
@@ -875,6 +941,12 @@ void SwitchFiltersPage::slot_timerTick500()
 		{
 			checkBox->setText(checkText);
 		}
+
+		bool buttonEnabled = discreteCount != 0 && writingEnabledCount == discreteCount;
+		if (checkBox->isEnabled() != buttonEnabled)
+		{
+			checkBox->setEnabled(buttonEnabled);
+		}
 	}
 }
 
@@ -905,9 +977,8 @@ void SwitchFiltersPage::onFilterTablePressed()
 		return;
 	}
 
-	changeFilterSignals(filter);
-
-	m_filterTable->clearSelection();
+	if (changeFilterSignals(filter) == true)
+	{
+		m_filterTable->clearSelection();
+	}
 }
-
-

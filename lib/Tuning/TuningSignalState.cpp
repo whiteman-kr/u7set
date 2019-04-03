@@ -70,6 +70,11 @@ bool TuningSignalState::controlIsEnabled() const
 	return m_flags.controlIsEnabled;
 }
 
+bool TuningSignalState::writingIsEnabled() const
+{
+	return m_flags.writingIsEnabled;
+}
+
 int TuningSignalState::writeErrorCode() const
 {
 	return m_writeErrorCode;
@@ -113,6 +118,8 @@ bool TuningSignalState::setState(const ::Network::TuningSignalState& message)
 
 	m_flags.writeInProgress = message.writeinprogress();
 	m_writeErrorCode = message.writeerrorcode();
+
+	m_flags.writingIsEnabled = message.writingdisabled() == false;
 
 	m_writeClient = message.writeclient();
 

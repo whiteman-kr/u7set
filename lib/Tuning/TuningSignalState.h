@@ -14,6 +14,7 @@ union TuningSignalStateFlags
 		quint32	outOfRange : 1;
 		quint32	writeInProgress : 1;
 		quint32 controlIsEnabled: 1;
+		quint32 writingIsEnabled: 1;
 
 	};
 
@@ -33,6 +34,7 @@ class TuningSignalState
 	Q_PROPERTY(bool OutOfRange READ outOfRange)
 	Q_PROPERTY(bool WriteInProgress READ writeInProgress)
 	Q_PROPERTY(bool ControlIsEnabled READ controlIsEnabled)
+	Q_PROPERTY(bool WritingIsEnabled READ writingIsEnabled)
 
 public:
 	TuningSignalState() = default;
@@ -55,6 +57,7 @@ public:
 	bool outOfRange() const;
 	bool writeInProgress() const;
 	bool controlIsEnabled() const;
+	bool writingIsEnabled() const;
 
 	int writeErrorCode() const;
 	Hash writeClient() const;

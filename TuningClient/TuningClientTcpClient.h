@@ -35,6 +35,8 @@ public:
 
 	bool takeClientControl(QWidget* parentWidget);
 
+	bool writingIsEnabled(const TuningSignalState& state) const;
+
 private:
 
 	Log::LogFile* m_log = nullptr;

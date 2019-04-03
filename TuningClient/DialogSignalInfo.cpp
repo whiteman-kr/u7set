@@ -5,6 +5,7 @@
 #include "../lib/Tuning/TuningSignalManager.h"
 #include "../lib/Tuning/TuningFilter.h"
 #include "TuningClientTcpClient.h"
+#include "Settings.h"
 
 DialogSignalInfo::DialogSignalInfo(Hash appSignalHash, Hash instanceIdHash, TuningSignalManager* signalManager, QWidget *parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
@@ -124,6 +125,11 @@ void DialogSignalInfo::updateInfo()
 	text += tr("OutOfRange:\t\t%1\n").arg(state.outOfRange() == true ? tr("Yes") : tr("No"));
 	text += tr("WriteInProgress:\t%1\n").arg(state.writeInProgress() == true ? tr("Yes") : tr("No"));
 	text += tr("ControlIsEnabled:\t%1\n").arg(state.controlIsEnabled() == true ? tr("Yes") : tr("No"));
+
+	if (theConfigSettings.useAccessFlag == true)
+	{
+		text += tr("WritingIsEnabled:\t%1\n").arg(state.writingIsEnabled() == true ? tr("Yes") : tr("No"));
+	}
 
 	text += "\n";
 
