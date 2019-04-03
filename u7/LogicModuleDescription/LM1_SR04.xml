@@ -381,7 +381,7 @@
 			<Pin OpName="o_nan"			OpIndex ="28"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="29"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="DPCOMP"		OpCode="20"	ImpVersion="3"		VersionOpIndex="16"	MaxInstCount="256" SimulationFunc="afb_dpcomp">
+		<AFBComponent Caption="DPCOMP"		OpCode="20"	ImpVersion="4"		VersionOpIndex="16"	MaxInstCount="256" SimulationFunc="afb_dpcomp">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_hys"			OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_result"		OpIndex ="3"	PinType = "Input"/>
