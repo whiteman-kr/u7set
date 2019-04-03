@@ -54,27 +54,30 @@ namespace ExtWidgets
 		Q_OBJECT
 
 	public:
-		PropertyArrayEditorDialog(QWidget* parent, std::shared_ptr<Property> p);
+		PropertyArrayEditorDialog(QWidget* parent, const QString& propertyName, const QVariant& value);
 		QVariant value();
 
-	protected slots:
-		virtual void accept() override;
-		virtual void reject() override;
-
 	private slots:
-		void slot_MoveUp();
-		void slot_MoveDown();
-		void slot_Add();
-		void slot_Remove();
+		void onMoveUp();
+		void onMoveDown();
+		void onAdd();
+		void onRemove();
+		void onSelectionChanged();
+		void onPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
 
 	private:
+		QString getObjectDescription(int objectIndex, PropertyObject* object);
+		void updateDescriptions();
+		void moveItems(bool forward);
+
+	private:
+
 		QVariant m_value;
 
 		QTreeWidget* m_treeWidget = nullptr;
 		PropertyEditor* m_propertyEditor = nullptr;
 
 		std::shared_ptr<Property> m_property;
-
 	};
 
 
@@ -340,7 +343,7 @@ namespace ExtWidgets
 
 	public:
 		explicit MultiArrayEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly);
-		void setValue(std::shared_ptr<Property> property, bool readOnly);
+		void setValue(QVariant value, bool readOnly);
 
 	signals:
 		void valueChanged(QVariant value);
@@ -353,7 +356,7 @@ namespace ExtWidgets
 		QLineEdit* m_lineEdit = nullptr;
 		QToolButton* m_button = nullptr;
 
-		QVariant m_oldValue;
+		QVariant m_currentValue;
 		std::shared_ptr<Property> m_property;
 	};
 

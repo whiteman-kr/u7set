@@ -33,7 +33,7 @@
 #include <QFileDialog>
 #include <QDesktopWidget>
 #include <QTextBrowser>
-
+#include <QTreeWidget>
 
 namespace ExtWidgets
 {
@@ -74,14 +74,19 @@ namespace ExtWidgets
 	}
 
 	//
-	// ------------ FilePathPropertyType ------------
+	// ------------ PropertyArrayEditorDialog ------------
 	//
-	PropertyArrayEditorDialog::PropertyArrayEditorDialog(QWidget* parent, std::shared_ptr<Property> p):
+	PropertyArrayEditorDialog::PropertyArrayEditorDialog(QWidget* parent, const QString& propertyName, const QVariant& value):
 		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
-		m_property(p),
-		m_value(p->value())
+		m_value(value)
 	{
-		setWindowTitle(p->caption());
+		if (variantIsPropertyVector(m_value) == false && variantIsPropertyList(m_value) == false)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		setWindowTitle(propertyName);
 
 		setMinimumSize(640, 480);
 
@@ -90,19 +95,29 @@ namespace ExtWidgets
 		// Create Editor
 
 		m_treeWidget = new QTreeWidget();
+		QStringList headerLabels;
+		headerLabels << tr("Property");
+
+		m_treeWidget->setColumnCount(headerLabels.size());
+		m_treeWidget->setHeaderLabels(headerLabels);
+		m_treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+		m_treeWidget->setRootIsDecorated(false);
+
+		connect(m_treeWidget, &QTreeWidget::itemSelectionChanged, this, &PropertyArrayEditorDialog::onSelectionChanged);
 
 		m_propertyEditor = new PropertyEditor(this);
+		connect(m_propertyEditor, &PropertyEditor::propertiesChanged, this, &PropertyArrayEditorDialog::onPropertiesChanged);
 
 		// Move Up/Down
 
 		QVBoxLayout* moveLayout = new QVBoxLayout();
 
 		QPushButton* b = new QPushButton(tr("Up"));
-		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::slot_MoveUp);
+		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::onMoveUp);
 		moveLayout->addWidget(b);
 
 		b = new QPushButton(tr("Down"));
-		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::slot_MoveDown);
+		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::onMoveDown);
 		moveLayout->addWidget(b);
 
 		moveLayout->addStretch();
@@ -112,11 +127,11 @@ namespace ExtWidgets
 		QHBoxLayout* addRemoveLayout = new QHBoxLayout();
 
 		b = new QPushButton(tr("Add"));
-		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::slot_Add);
+		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::onAdd);
 		addRemoveLayout->addWidget(b);
 
 		b = new QPushButton(tr("Remove"));
-		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::slot_Remove);
+		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::onRemove);
 		addRemoveLayout->addWidget(b);
 
 		addRemoveLayout->addStretch();
@@ -156,99 +171,426 @@ namespace ExtWidgets
 
 		setLayout(mainLayout);
 
-		// Fill objects
+		updateDescriptions();
 
-		QStringList headerLabels;
-		headerLabels << tr("Index");
-
-		m_treeWidget->setColumnCount(headerLabels.size());
-		m_treeWidget->setHeaderLabels(headerLabels);
-
-		if (variantIsPropertyVector(m_value) == true)
+		if (m_treeWidget->topLevelItemCount() > 0)
 		{
-			std::vector<std::shared_ptr<PropertyObject>>* pv = variantToPropertyVector(m_value);
-
-			for (int i = 0; i < static_cast<int>(pv->size()); i++)
-			{
-				//const auto& po = pv->at(i);
-				QTreeWidgetItem* twi = new QTreeWidgetItem();
-				twi->setText(0, tr("Item %1").arg(i));
-				m_treeWidget->addTopLevelItem(twi);
-			}
+			m_treeWidget->topLevelItem(0)->setSelected(true);
 		}
 	}
 
 	QVariant PropertyArrayEditorDialog::value()
 	{
 		return m_value;
-
 	}
 
-	void PropertyArrayEditorDialog::accept()
+	void PropertyArrayEditorDialog::onMoveUp()
 	{
-		/*if (m_editor == nullptr)
+		moveItems(false);
+	}
+
+	void PropertyArrayEditorDialog::onMoveDown()
+	{
+		moveItems(true);
+	}
+
+	void PropertyArrayEditorDialog::onAdd()
+	{
+		if (m_treeWidget == nullptr)
 		{
-			Q_ASSERT(m_editor);
+			Q_ASSERT(m_treeWidget);
 			return;
 		}
 
-		m_text = m_editor->text();*/
-
-		QDialog::accept();
-	}
-
-	void PropertyArrayEditorDialog::reject()
-	{
-		/*if (m_editor->modified() == true)
+		if (variantIsPropertyVector(m_value) == false && variantIsPropertyList(m_value) == false)
 		{
-			int result = QMessageBox::warning(this, qAppName(), tr("Do you want to save your changes?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+			Q_ASSERT(false);
+			return;
+		}
 
-			if (result == QMessageBox::Yes)
+		// Create new object
+
+		std::shared_ptr<PropertyObject> newObject = nullptr;
+
+		if (variantIsPropertyVector(m_value) == true)
+		{
+			auto propertyVector = variantToPropertyVector(m_value);
+			if (propertyVector == nullptr)
 			{
-				accept();
+				Q_ASSERT(propertyVector);
 				return;
 			}
 
-			if (result == QMessageBox::Cancel)
+			newObject = propertyVector->createItem();
+			propertyVector->push_back(newObject);
+		}
+
+		if (variantIsPropertyList(m_value) == true)
+		{
+			auto propertyList = variantToPropertyList(m_value);
+			if (propertyList == nullptr)
 			{
+				Q_ASSERT(propertyList);
 				return;
 			}
-		}*/
 
-		QDialog::reject();
+			newObject = propertyList->createItem();
+			propertyList->push_back(newObject);
+		}
 
+		if (newObject == nullptr)
+		{
+			Q_ASSERT(newObject);
+			return;
+		}
+
+		// Add item to the list and select it
+
+		updateDescriptions();
+
+		m_treeWidget->clearSelection();
+
+		QTreeWidgetItem* item = m_treeWidget->topLevelItem(m_treeWidget->topLevelItemCount() - 1);
+		if (item == nullptr)
+		{
+			Q_ASSERT(item);
+			return;
+		}
+
+		item->setSelected(true);
+
+		return;
 	}
 
-	void PropertyArrayEditorDialog::slot_MoveUp()
+	void PropertyArrayEditorDialog::onRemove()
 	{
+		if (m_treeWidget == nullptr)
+		{
+			Q_ASSERT(m_treeWidget);
+			return;
+		}
 
+		if (variantIsPropertyVector(m_value) == false && variantIsPropertyList(m_value) == false)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		// Find selected indexes and sort in descending order
+
+		std::vector<int> selectedRows;
+
+		auto selectedIndexes = m_treeWidget->selectionModel()->selectedIndexes();
+		for (auto si : selectedIndexes)
+		{
+			selectedRows.push_back(si.row());
+		}
+
+		std::sort(selectedRows.begin(), selectedRows.end(), std::greater<int>());
+
+		// Delete tree items and objects
+
+		for (int row : selectedRows)
+		{
+			QTreeWidgetItem* item = m_treeWidget->takeTopLevelItem(row);
+			if (item == nullptr)
+			{
+				Q_ASSERT(item);
+				return;
+			}
+			delete item;
+
+			if (variantIsPropertyVector(m_value) == true)
+			{
+				auto propertyVector = variantToPropertyVector(m_value);
+				if (propertyVector == nullptr)
+				{
+					Q_ASSERT(propertyVector);
+					return;
+				}
+
+				if (row < 0 || row >= static_cast<int>(propertyVector->size()))
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+				propertyVector->erase(propertyVector->begin() + row);
+			}
+
+			if (variantIsPropertyList(m_value) == true)
+			{
+				auto propertyList = variantToPropertyList(m_value);
+				if (propertyList == nullptr)
+				{
+					Q_ASSERT(propertyList);
+					return;
+				}
+
+				if (row < 0 || row >= static_cast<int>(propertyList->size()))
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+				auto it = propertyList->begin();
+				std::advance(it, row);
+
+				propertyList->erase(it);
+			}
+		}
+
+		updateDescriptions();
+
+		return;
 	}
 
-	void PropertyArrayEditorDialog::slot_MoveDown()
+	void PropertyArrayEditorDialog::onSelectionChanged()
 	{
+		if (m_treeWidget == nullptr || m_propertyEditor == nullptr)
+		{
+			Q_ASSERT(m_treeWidget);
+			Q_ASSERT(m_propertyEditor);
+			return;
+		}
 
+		std::vector<std::shared_ptr<PropertyObject>> propertyObjectList;
+
+		auto selectedIndexes = m_treeWidget->selectionModel()->selectedIndexes();
+
+		if (variantIsPropertyVector(m_value) == true)
+		{
+			auto propertyVector = variantToPropertyVector(m_value);
+			if (propertyVector == nullptr)
+			{
+				Q_ASSERT(propertyVector);
+				return;
+			}
+
+			for (QModelIndex& mi : selectedIndexes)
+			{
+				if (mi.row() < 0 || mi.row() >= static_cast<int>(propertyVector->size()))
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+				propertyObjectList.push_back((*propertyVector)[mi.row()]);
+			}
+		}
+
+		if (variantIsPropertyList(m_value) == true)
+		{
+			auto propertyList = variantToPropertyList(m_value);
+			if (propertyList == nullptr)
+			{
+				Q_ASSERT(propertyList);
+				return;
+			}
+
+			for (QModelIndex& mi : selectedIndexes)
+			{
+				if (mi.row() < 0 || mi.row() >= static_cast<int>(propertyList->size()))
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+				auto it = propertyList->begin();
+				std::advance(it, mi.row());
+
+				auto p = *it;
+				if (p == nullptr)
+				{
+					Q_ASSERT(p);
+					return;
+				}
+
+				propertyObjectList.push_back(p);
+			}
+		}
+
+		m_propertyEditor->setObjects(propertyObjectList);
+		m_propertyEditor->resizeColumnToContents(0);
+
+		return;
 	}
 
-	void PropertyArrayEditorDialog::slot_Add()
+	void PropertyArrayEditorDialog::onPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects)
+	{
+		updateDescriptions();
+	}
+
+	QString PropertyArrayEditorDialog::getObjectDescription(int objectIndex, PropertyObject* object)
+	{
+		std::vector<std::shared_ptr<Property>> props = object->properties();
+
+		for (auto prop : props)
+		{
+			if (prop->category().isEmpty() == true &&
+					prop->value().userType() == QVariant::String)
+			{
+				return tr("%1 - %2").arg(objectIndex).arg(prop->value().toString());
+			}
+		}
+
+		return QString("%1 - PropertyObject").arg(objectIndex);
+	}
+
+	void PropertyArrayEditorDialog::updateDescriptions()
 	{
 		if (variantIsPropertyVector(m_value) == true)
 		{
-			/*std::vector<std::shared_ptr<PropertyObject>>* pv = variantToPropertyVector(m_value);
-			pv->resize(pv->size() + 1);
+			std::vector<std::shared_ptr<PropertyObject>>* pv = variantToPropertyVector(m_value);
 
-			QTreeWidgetItem* twi = new QTreeWidgetItem();
-			twi->setText(0, tr("Item %1").arg(pv->size()));
-			twi->setSelected(true);
-			m_treeWidget->addTopLevelItem(twi);
-*/
-			//m_propertyEditor->setObjects(*pv);
+			int index = 0;
+			for (auto prop : *pv)
+			{
+				QTreeWidgetItem* twi = nullptr;
+
+				if (m_treeWidget->topLevelItemCount() > index)
+				{
+					twi = m_treeWidget->topLevelItem(index);
+				}
+				else
+				{
+					twi = new QTreeWidgetItem();
+					m_treeWidget->addTopLevelItem(twi);
+				}
+
+				twi->setText(0, getObjectDescription(index, prop.get()));
+				index++;
+			}
 		}
 
+		if (variantIsPropertyList(m_value) == true)
+		{
+			std::list<std::shared_ptr<PropertyObject>>* pl = variantToPropertyList(m_value);
+
+			int index = 0;
+			for (auto prop : *pl)
+			{
+				QTreeWidgetItem* twi = nullptr;
+
+				if (m_treeWidget->topLevelItemCount() > index)
+				{
+					twi = m_treeWidget->topLevelItem(index);
+				}
+				else
+				{
+					twi = new QTreeWidgetItem();
+					m_treeWidget->addTopLevelItem(twi);
+				}
+
+				twi->setText(0, getObjectDescription(index, prop.get()));
+				index++;
+			}
+		}
+
+		return;
 	}
 
-	void PropertyArrayEditorDialog::slot_Remove()
+	void PropertyArrayEditorDialog::moveItems(bool forward)
 	{
+		int direction = forward ? 1 : -1;
 
+		auto selectedIndexes = m_treeWidget->selectionModel()->selectedIndexes();
+		if (selectedIndexes.isEmpty() == true)
+		{
+			return;
+		}
+
+		std::vector<int> selectedRows;
+		for (auto si : selectedIndexes)
+		{
+			selectedRows.push_back(si.row());
+		}
+
+		// Sort indexes
+		//
+		if (direction < 0)
+		{
+			std::sort(selectedRows.begin(), selectedRows.end(), std::less<int>());
+		}
+		else
+		{
+			std::sort(selectedRows.begin(), selectedRows.end(), std::greater<int>());
+		}
+
+		//m_treeWidget->clearSelection();
+
+		for (int row : selectedRows)
+		{
+			int row2 = row + direction;
+			if (row2 < 0 || row2 >= m_treeWidget->topLevelItemCount())
+			{
+				break;
+			}
+
+			if (variantIsPropertyVector(m_value) == true)
+			{
+				auto pv = variantToPropertyVector(m_value);
+				if (pv == nullptr)
+				{
+					Q_ASSERT(pv);
+					return;
+				}
+
+				if (row < 0 || row >= static_cast<int>(pv->size()) ||
+					row2 < 0 || row2 >= static_cast<int>(pv->size()))
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+				auto v1 = (*pv)[row];
+				auto v2 = (*pv)[row2];
+
+				if (v1 == nullptr || v2 == nullptr)
+				{
+					Q_ASSERT(v1);
+					Q_ASSERT(v2);
+					return;
+				}
+
+				(*pv)[row] = v2;
+				(*pv)[row2] = v1;
+			}
+
+			if (variantIsPropertyList(m_value) == true)
+			{
+				auto pl = variantToPropertyList(m_value);
+				if (pl == nullptr)
+				{
+					Q_ASSERT(pl);
+					return;
+				}
+
+				if (row < 0 || row >= static_cast<int>(pl->size()) ||
+					row2 < 0 || row2 >= static_cast<int>(pl->size()))
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+				auto it1 = pl->begin();
+				auto it2 = pl->begin();
+				std::advance(it1, row);
+				std::advance(it2, row2);
+
+				std::swap(*it1, *it2);
+			}
+
+			QTreeWidgetItem* item1 = m_treeWidget->topLevelItem(row);
+			item1->setSelected(false);
+
+			QTreeWidgetItem* item2 = m_treeWidget->topLevelItem(row2);
+			item2->setSelected(true);
+		}
+
+		updateDescriptions();
+
+		return;
 	}
 
 
@@ -1439,16 +1781,30 @@ namespace ExtWidgets
 	//
 	MultiArrayEdit::MultiArrayEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly):
 		QWidget(parent),
-		m_property(p)
+		m_property(p),
+		m_currentValue(p->value())
 	{
-
-		if (p == nullptr)
-		{
-			assert(p);
-		}
 
 		m_lineEdit = new QLineEdit(parent);
 		m_lineEdit->setReadOnly(true);
+
+		// m_currentValue must have initialized type, all values must be deleted. They will be set by setValue
+
+		if (variantIsPropertyVector(m_currentValue) == true)
+		{
+			auto pv = variantToPropertyVector(m_currentValue);
+			pv->clear();
+
+			m_lineEdit->setText("<PropertyVector>");
+		}
+
+		if (variantIsPropertyList(m_currentValue) == true)
+		{
+			auto pl = variantToPropertyList(m_currentValue);
+			pl->clear();
+
+			m_lineEdit->setText("<PropertyList>");
+		}
 
 		m_button = new QToolButton(parent);
 		m_button->setText("...");
@@ -1464,40 +1820,45 @@ namespace ExtWidgets
 		setLayout(lt);
 
 		m_button->setEnabled(readOnly == false);
-
 	}
 
-	void MultiArrayEdit::setValue(std::shared_ptr<Property> property, bool readOnly)
+	void MultiArrayEdit::setValue(QVariant value, bool readOnly)
 	{
-		if (variantIsPropertyVector(property->value()) == false && variantIsPropertyList(property->value()) == false)
+		m_button->setEnabled(readOnly == false);
+
+		m_currentValue = value;
+
+		m_lineEdit->setText(propertyVectorText(m_currentValue));
+
+		if (variantIsPropertyVector(m_currentValue) == false && variantIsPropertyList(m_currentValue) == false)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+	}
+
+	void MultiArrayEdit::onButtonPressed()
+	{
+		if (variantIsPropertyVector(m_currentValue) == false && variantIsPropertyList(m_currentValue) == false)
 		{
 			Q_ASSERT(false);
 			return;
 		}
 
-		m_button->setEnabled(readOnly == false);
-
-		m_oldValue = property->value();
-
-		m_lineEdit->setText(propertyVectorText(m_oldValue));
-	}
-
-	void MultiArrayEdit::onButtonPressed()
-	{
-		PropertyArrayEditorDialog d(this, m_property);
+		PropertyArrayEditorDialog d(this, m_property->caption(), m_currentValue);
 		if (d.exec() != QDialog::Accepted)
 		{
 			return;
 		}
 
-		if (d.value() != m_oldValue)
+		if (d.value() != m_currentValue)
 		{
 			 emit valueChanged(d.value());
 		}
 
-		m_oldValue = d.value();
+		m_currentValue = d.value();
 
-		m_lineEdit->setText(propertyVectorText(m_oldValue));
+		m_lineEdit->setText(propertyVectorText(m_currentValue));
 	}
 
 	//
@@ -1707,7 +2068,7 @@ namespace ExtWidgets
 
 				if (manager->sameValue(property) == true)
 				{
-					m_editor->setValue(propertyPtr, property->isEnabled() == false);
+					m_editor->setValue(propertyPtr->value(), property->isEnabled() == false);
 				}
 
 				connect(m_editor, &MultiArrayEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
@@ -2313,7 +2674,19 @@ namespace ExtWidgets
 		}
 		else
 		{
-            switch (value.type())
+			// PropertyVector, PropertyList
+			//
+			if (variantIsPropertyVector(value) == true)
+			{
+				return tr("<PropertyVector>");
+			}
+
+			if (variantIsPropertyList(value) == true)
+			{
+				return tr("<PropertyList>");
+			}
+
+			switch (value.type())
 			{
 				case QVariant::Bool:
 					return "<Different values>";
