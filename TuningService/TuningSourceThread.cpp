@@ -421,6 +421,9 @@ namespace Tuning
 		tss->set_writeclient(ts.writeClient());
 		tss->set_writeerrorcode(TO_INT(ts.writeErrorCode()));
 
+		tss->set_setsor(m_stat.setSOR);
+		tss->set_writingdisabled(m_stat.writingDisabled);
+
 		tss->set_error(TO_INT(NetworkError::Success));
 	}
 
