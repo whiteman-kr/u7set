@@ -588,13 +588,13 @@ namespace Builder
 		readFuncBlockBit(addrTo.offset(), addrTo.bit(), fbType, fbInstance, fbParamNo, fbCaption);
 	}
 
-	void CodeItem::readFuncBlockTest(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue, const QString& fbCaption)
+	void CodeItem::readFuncBlockCompare(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, quint16 testValue, const QString& fbCaption)
 	{
 		initCommand();
 
 		m_result = true;
 
-		m_code.setOpCode(LmCommand::Code::RDFBTS);
+		m_code.setOpCode(LmCommand::Code::RDFBCMP);
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
 		m_code.setFbParamNo(fbParamNo);
@@ -807,13 +807,13 @@ namespace Builder
 		m_code.setConstFloat(constFloat);
 	}
 
-	void CodeItem::readFuncBlockTestInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 testInt32, const QString& fbCaption)
+	void CodeItem::readFuncBlockCompareInt32(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, qint32 testInt32, const QString& fbCaption)
 	{
 		initCommand();
 
 		m_result = true;
 
-		m_code.setOpCode(LmCommand::Code::RDFBTS32);
+		m_code.setOpCode(LmCommand::Code::RDFBCMP32);
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
 		m_code.setFbParamNo(fbParamNo);
@@ -823,7 +823,7 @@ namespace Builder
 		m_code.setConstInt32(testInt32);
 	}
 
-	void CodeItem::readFuncBlockTestFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, float testFloat, const QString& fbCaption)
+	void CodeItem::readFuncBlockCompareFloat(quint16 fbType, quint16 fbInstance, quint16 fbParamNo, float testFloat, const QString& fbCaption)
 	{
 		initCommand();
 
@@ -831,7 +831,7 @@ namespace Builder
 
 		qint32 testInt32 = *reinterpret_cast<qint32*>(&testFloat);		// map binary code of float to qint32
 
-		m_code.setOpCode(LmCommand::Code::RDFBTS32);
+		m_code.setOpCode(LmCommand::Code::RDFBCMP32);
 		m_code.setFbType(fbType);
 		m_code.setFbInstance(fbInstance);
 		m_code.setFbParamNo(fbParamNo);
@@ -841,15 +841,15 @@ namespace Builder
 		m_code.setConstFloat(testFloat);
 	}
 
-	void CodeItem::movConstIfFlag(quint16 addrTo, quint16 constVal)
+	void CodeItem::movCompareFlag(quint16 addrTo, quint16 bitNo)
 	{
 		initCommand();
 
 		m_result = true;
 
-		m_code.setOpCode(LmCommand::Code::MOVCF);
+		m_code.setOpCode(LmCommand::Code::MOVCMPF);
 		m_code.setWord2(addrTo);
-		m_code.setWord3(constVal);
+		m_code.setWord3(bitNo);
 	}
 
 	void CodeItem::prevMov(quint16 addrTo, quint16 addrFrom)
@@ -1299,7 +1299,6 @@ namespace Builder
 			break;
 
 		case LmCommand::Code::MOVC:
-		case LmCommand::Code::MOVCF:
 			params = QString("%1, #%2").
 						arg(m_code.getWord2()).
 						arg(m_code.getWord3());
@@ -1356,7 +1355,7 @@ namespace Builder
 						arg(m_code.getFbParamNoInt());
 			break;
 
-		case LmCommand::Code::RDFBTS:
+		case LmCommand::Code::RDFBCMP:
 			params = QString("%1.%2[%3], #%4").
 						arg(m_code.getFbCaption()).
 						arg(m_code.getFbInstanceInt()).
@@ -1405,12 +1404,18 @@ namespace Builder
 						arg(getConstValueString());
 			break;
 
-		case LmCommand::Code::RDFBTS32:
+		case LmCommand::Code::RDFBCMP32:
 			params = QString("%1.%2[%3], #%4").
 						arg(m_code.getFbCaption()).
 						arg(m_code.getFbInstanceInt()).
 						arg(m_code.getFbParamNoInt()).
 						arg(getConstValueString());
+			break;
+
+		case LmCommand::Code::MOVCMPF:
+			params = QString("%1[%2]").
+						arg(m_code.getWord2()).
+						arg(m_code.getWord3());
 			break;
 
 		case LmCommand::Code::FILL:
@@ -1505,15 +1510,15 @@ namespace Builder
 		case LmCommand::Code::RDFB:
 		case LmCommand::Code::WRFBC:
 		case LmCommand::Code::WRFBB:
-		case LmCommand::Code::RDFBTS:
+		case LmCommand::Code::RDFBCMP:
 		case LmCommand::Code::APPSTART:
 		case LmCommand::Code::MOV32:
 		case LmCommand::Code::MOVC32:
 		case LmCommand::Code::WRFB32:
 		case LmCommand::Code::RDFB32:
 		case LmCommand::Code::WRFBC32:
-		case LmCommand::Code::RDFBTS32:
-		case LmCommand::Code::MOVCF:
+		case LmCommand::Code::RDFBCMP32:
+		case LmCommand::Code::MOVCMPF:
 		case LmCommand::Code::PMOV32:
 		case LmCommand::Code::FILL:
 			assert(lmCommand.runTime != LmCommand::CALC_RUNTIME);

@@ -67,12 +67,14 @@ namespace Tuning
 		qint64 fotipFlagOffsetErr = 0;
 		qint64 fotipFlagApplySuccess = 0;
 		qint64 fotipFlagSetSOR = 0;
+		qint64 fotipFlagWritingDisabled = 0;
 
 		qint64 errAnalogLowBoundCheck = 0;
 		qint64 errAnalogHighBoundCheck = 0;
 
 		bool controlIsActive = false;
 		bool setSOR = false;
+		bool writingDisabled = false;
 		bool hasUnappliedParams = false;
 
 		void get(Network::TuningSourceState* tss);

@@ -84,22 +84,11 @@ namespace Builder
 
 		// Save Logic Modules Descriptions
 		//
-		bool saveLogicModuleDescriptions(const LmDescriptionSet& lmDescriptions,
-										 std::shared_ptr<BuildResultWriter> buildResultWriter);
+		bool saveLogicModuleDescriptions();
 
 		// Compile Application Logic
 		//
-		bool compileApplicationLogic(Hardware::SubsystemStorage* subsystems,
-										const std::vector<Hardware::DeviceModule*>& lmModules,
-										Hardware::EquipmentSet*equipmentSet,
-										Hardware::OptoModuleStorage* optoModuleStorage,
-										Hardware::ConnectionStorage* connections,
-										SignalSet* signalSet,
-										LmDescriptionSet* lmDescriptions,
-										AppLogicData* appLogicData,
-										Tuning::TuningDataStorage* tuningDataStorage,
-										ComparatorStorage* comparatorStorage, VFrame30::BusSet *busSet,
-										std::shared_ptr<BuildResultWriter> buildResultWriter);
+		bool compileApplicationLogic();
 
 		// Generate MATS software configurations
 		//

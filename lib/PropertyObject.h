@@ -1,5 +1,4 @@
-#ifndef PROPERTYOBJECT
-#define PROPERTYOBJECT
+#pragma once
 
 #include <type_traits>
 #include <functional>
@@ -1991,9 +1990,9 @@ public:
 										   const QString& category,
 										   const QString& description,
 										   const QString& strType,
-										   const QString&& strMin,
-										   const QString&& strMax,
-										   const QString&& strDefaultValue,
+										   const QString& strMin,
+										   const QString& strMax,
+										   const QString& strDefaultValue,
 										   int precision,
 										   bool updateFromPreset,
 										   bool expert,
@@ -2839,7 +2838,166 @@ private:
 };
 
 
-#endif // PROPERTYOBJECT
+//
+// PropertyVector can be used in QVariant, full copy is made if assign operator called, so OBJECT_TYPE must have copy constructor
+//
+template <typename OBJECT_TYPE>
+class PropertyVectorBase : public std::vector<std::shared_ptr<OBJECT_TYPE>>
+{
+public:
+	virtual ~PropertyVectorBase() {};
+	[[nodiscard]] virtual std::shared_ptr<OBJECT_TYPE> createItem() const = 0;
+};
 
+
+template <typename OBJECT_TYPE>
+class PropertyVector : public PropertyVectorBase<OBJECT_TYPE>
+{
+public:
+	PropertyVector()
+	{
+		static_assert(std::is_base_of<PropertyObject, OBJECT_TYPE>::value);
+	}
+	PropertyVector(const PropertyVector& src)
+	{
+		operator=(src);
+	}
+	PropertyVector(PropertyVector&& src) = default;
+
+	~PropertyVector() = default;
+
+	PropertyVector& operator= (const PropertyVector& src)
+	{
+		if (this == &src)
+		{
+			return *this;
+		}
+
+		this->clear();
+		if (this->capacity() < src.size())
+		{
+			this->reserve(src.size());
+		}
+
+		for (const std::shared_ptr<OBJECT_TYPE>& item : src)
+		{
+			// Make a copy of the object
+			//
+			this->push_back(std::make_shared<OBJECT_TYPE>(*item));
+		}
+
+		return *this;
+	}
+	PropertyVector& operator= (PropertyVector&& src) = default;
+
+	virtual std::shared_ptr<OBJECT_TYPE> createItem() const override
+	{
+		return std::make_shared<OBJECT_TYPE>();
+	}
+};
+
+//
+// PropertyList can be used in QVariant, full copy is made if assign operator called, so OBJECT_TYPE must have copy constructor
+//
+template <typename OBJECT_TYPE>
+class PropertyListBase : public std::list<std::shared_ptr<OBJECT_TYPE>>
+{
+public:
+	virtual ~PropertyListBase() {};
+	[[nodiscard]] virtual std::shared_ptr<OBJECT_TYPE> createItem() const = 0;
+};
+
+template <typename OBJECT_TYPE>
+class PropertyList : public PropertyListBase<OBJECT_TYPE>
+{
+public:
+	PropertyList()
+	{
+		static_assert(std::is_base_of<PropertyObject, OBJECT_TYPE>::value);
+	}
+	PropertyList(const PropertyList& src)
+	{
+		operator=(src);
+	}
+	PropertyList(PropertyList&& src) = default;
+
+	~PropertyList() = default;
+
+	PropertyList& operator= (const PropertyList& src)
+	{
+		if (this == &src)
+		{
+			return *this;
+		}
+
+		this->clear();
+		for (const std::shared_ptr<OBJECT_TYPE>& item : src)
+		{
+			// Make a copy of the object
+			//
+			this->push_back(std::make_shared<OBJECT_TYPE>(*item));
+		}
+
+		return *this;
+	}
+	PropertyList& operator= (PropertyList&& src) = default;
+
+	virtual std::shared_ptr<OBJECT_TYPE> createItem() const override
+	{
+		return std::make_shared<OBJECT_TYPE>();
+	}
+
+};
+
+
+// PropertyVector to QVariant functions
+//
+inline bool variantIsPropertyVector(const QVariant& v)
+{
+	QString type{v.typeName()};
+	return type.startsWith(QStringLiteral("PropertyVector<"), Qt::CaseSensitive);
+}
+
+inline PropertyVectorBase<PropertyObject>* variantToPropertyVector(QVariant& v)
+{
+	if (variantIsPropertyVector(v) == false)
+	{
+		Q_ASSERT(variantIsPropertyVector(v));
+		return nullptr;
+	}
+
+	return reinterpret_cast<PropertyVectorBase<PropertyObject>*>(v.data());
+}
+
+template<>
+inline PropertyVectorBase<PropertyObject>* qvariant_cast<PropertyVectorBase<PropertyObject>*>(const QVariant& v)
+{
+	return variantToPropertyVector(const_cast<QVariant&>(v));
+}
+
+// PropertyList to QVariant functions
+//
+inline bool variantIsPropertyList(const QVariant& v)
+{
+	QString type{v.typeName()};
+	return type.startsWith(QStringLiteral("PropertyList<"), Qt::CaseSensitive);
+}
+
+inline PropertyListBase<PropertyObject>* variantToPropertyList(QVariant& v)
+{
+	if (variantIsPropertyList(v) == false)
+	{
+		Q_ASSERT(variantIsPropertyList(v));
+		return nullptr;
+	}
+
+	return reinterpret_cast<PropertyListBase<PropertyObject>*>(v.data());
+}
+
+template<>
+inline PropertyListBase<PropertyObject>* qvariant_cast<PropertyListBase<PropertyObject>*>(const QVariant& v)
+{
+	return variantToPropertyList(const_cast<QVariant&>(v));
+}
 
 

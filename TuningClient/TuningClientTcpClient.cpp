@@ -184,3 +184,35 @@ QString TuningClientTcpClient::getStateToolTip() const
 
 	return result;
 }
+
+bool TuningClientTcpClient::takeClientControl(QWidget* parentWidget)
+{
+#ifdef Q_DEBUG
+	if (theSettings.m_simulationMode == false)
+#endif
+	{
+		if (activeTuningSourceCount() == 0)
+		{
+			QMessageBox::critical(parentWidget, qAppName(),	 tr("No tuning sources with control enabled found."));
+
+			return false;
+		}
+	}
+
+	if (singleLmControlMode() == true && clientIsActive() == false)
+	{
+		QString equipmentId = singleActiveTuningSource();
+
+		if (QMessageBox::warning(parentWidget, qAppName(),
+								 tr("Warning!\n\nCurrent client is not selected as active now.\n\nAre you sure you want to take control and activate the source %1?").arg(equipmentId),
+								 QMessageBox::Yes | QMessageBox::No,
+								 QMessageBox::No) != QMessageBox::Yes)
+		{
+			return false;
+		}
+
+		activateTuningSourceControl(equipmentId, true, true);
+	}
+
+	return true;
+}

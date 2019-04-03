@@ -95,38 +95,30 @@ namespace Builder
 
 	const char* ModuleLogicCompiler::TEST_DATA_DIR = "TestData/";
 
-	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm, bool expertMode) :
+	ModuleLogicCompiler::ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm) :
 		m_appLogicCompiler(appLogicCompiler),
-		m_memoryMap(appLogicCompiler.m_log),
-		m_ualSignals(*this, appLogicCompiler.m_log),
-		m_signalsWithFlags(*this),
-		m_expertMode(expertMode)
+		m_context(appLogicCompiler.context()),
+		m_lm(lm),
+		m_memoryMap(appLogicCompiler.log()),
+		m_ualSignals(*this, appLogicCompiler.log()),
+		m_signalsWithFlags(*this)
 	{
-		m_equipmentSet = appLogicCompiler.m_equipmentSet;
+		m_equipmentSet = appLogicCompiler.equipmentSet();
 		m_deviceRoot = m_equipmentSet->root();
-		m_signals = appLogicCompiler.m_signals;
+		m_signals = appLogicCompiler.signalSet();
 
-		m_lmDescription = appLogicCompiler.m_lmDescriptions->get(lm);
+		m_lmDescription = appLogicCompiler.lmDescriptions()->get(lm);
 
 		assert(m_lmDescription != nullptr);
 
-		m_appLogicData = appLogicCompiler.m_appLogicData;
-		m_resultWriter = appLogicCompiler.m_resultWriter.get();
-		m_log = appLogicCompiler.m_log;
-		m_lm = lm;
-		m_connections = appLogicCompiler.m_connections;
-		m_optoModuleStorage = appLogicCompiler.m_optoModuleStorage;
-		m_tuningDataStorage = appLogicCompiler.m_tuningDataStorage;
-		m_cmpStorage = appLogicCompiler.m_cmpStorage;
+		m_appLogicData = appLogicCompiler.appLogicData();
+		m_resultWriter = appLogicCompiler.buildResultWriter();
+		m_log = appLogicCompiler.log();
 
-		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::OTHER, "OTHER");
-		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::LM, "LM");
-		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::AIM, "AIM");
-		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::AOM, "AOM");
-		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::DIM, "DIM");
-		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::DOM, "DOM");
-		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::AIFM, "AIFM");
-		m_moduleFamilyTypeStr.insert(Hardware::DeviceModule::OCM, "OCM");
+		m_connections = appLogicCompiler.connectionStorage();
+		m_optoModuleStorage = appLogicCompiler.opticModuleStorage();
+		m_tuningDataStorage = appLogicCompiler.tuningDataStorage();
+		m_cmpStorage = appLogicCompiler.comparatorStorage();
 	}
 
 	ModuleLogicCompiler::~ModuleLogicCompiler()
@@ -143,16 +135,13 @@ namespace Builder
 	{
 		LOG_EMPTY_LINE(m_log)
 
-		msg = QString(tr("Compilation pass #1 for LM %1 was started...")).arg(lmEquipmentID());
-
-		LOG_MESSAGE(m_log, msg);
+		LOG_MESSAGE(m_log, QString(tr("Compilation pass #1 for LM %1 was started...")).arg(lmEquipmentID()));
 
 		m_chassis = m_lm->getParentChassis();
 
 		if (m_chassis == nullptr)
 		{
-			msg = QString(tr("LM %1 must be placed in the chassis!")).arg(lmEquipmentID());
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, QString(tr("LM %1 must be placed in the chassis!")).arg(lmEquipmentID()));
 			return false;
 		}
 
@@ -190,15 +179,11 @@ namespace Builder
 
 		if (result == true)
 		{
-			msg = QString(tr("Compilation pass #1 for LM %1 was successfully finished.")).
-					arg(lmEquipmentID());
-
-			LOG_SUCCESS(m_log, msg);
+			LOG_SUCCESS(m_log, QString(tr("Compilation pass #1 for LM %1 was successfully finished.")).arg(lmEquipmentID()));
 		}
 		else
 		{
-			msg = QString(tr("Compilation pass #1 for LM %1 was finished with errors")).arg(lmEquipmentID());
-			LOG_MESSAGE(m_log, msg);
+			LOG_MESSAGE(m_log, QString(tr("Compilation pass #1 for LM %1 was finished with errors")).arg(lmEquipmentID()));
 		}
 
 		return result;
@@ -208,9 +193,7 @@ namespace Builder
 	{
 		LOG_EMPTY_LINE(m_log)
 
-		msg = QString(tr("Compilation pass #2 for LM %1 was started...")).arg(lmEquipmentID());
-
-		LOG_MESSAGE(m_log, msg);
+		LOG_MESSAGE(m_log, QString(tr("Compilation pass #2 for LM %1 was started...")).arg(lmEquipmentID()));
 
 		m_code.setMemoryMap(&m_memoryMap, m_log);
 
@@ -243,15 +226,11 @@ namespace Builder
 
 		if (result == true)
 		{
-			msg = QString(tr("Compilation pass #2 for LM %1 was successfully finished.")).
-					arg(lmEquipmentID());
-
-			LOG_SUCCESS(m_log, msg);
+			LOG_SUCCESS(m_log, QString(tr("Compilation pass #2 for LM %1 was successfully finished.")).arg(lmEquipmentID()));
 		}
 		else
 		{
-			msg = QString(tr("Compilation pass #2 for LM %1 was finished with errors")).arg(lmEquipmentID());
-			LOG_MESSAGE(m_log, msg);
+			LOG_MESSAGE(m_log, QString(tr("Compilation pass #2 for LM %1 was finished with errors")).arg(lmEquipmentID()));
 		}
 
 		calcOptoDiscretesStatistics();
@@ -273,16 +252,6 @@ namespace Builder
 		return m_lm->equipmentIdTemplate();
 	}
 
-	bool ModuleLogicCompiler::expertMode() const
-	{
-		return m_expertMode;
-	}
-
-	void ModuleLogicCompiler::setExpertMode(bool value)
-	{
-		m_expertMode = value;
-	}
-
 	int ModuleLogicCompiler::lmDescriptionNumber() const
 	{
 		if (m_lmDescription == nullptr)
@@ -292,6 +261,11 @@ namespace Builder
 		}
 
 		return m_lmDescription->descriptionNumber();
+	}
+
+	bool ModuleLogicCompiler::expertMode() const
+	{
+		return m_context->m_expertMode;
 	}
 
 	bool ModuleLogicCompiler::loadLMSettings()
@@ -368,7 +342,7 @@ namespace Builder
 
 		// chek LM subsystem ID
 		//
-		m_lmSubsystemKey = m_appLogicCompiler.m_subsystems->ssKey(m_lmSubsystemID);
+		m_lmSubsystemKey = m_appLogicCompiler.subsystems()->ssKey(m_lmSubsystemID);
 
 		if (m_lmSubsystemKey == -1)
 		{
@@ -632,10 +606,10 @@ namespace Builder
 			{
 				UalItem* firstItem = m_ualItems[logicItem.m_fblItem->guid()];
 
-				msg = QString(tr("Duplicate GUID %1 of %2 and %3 elements")).
-						arg(logicItem.m_fblItem->guid().toString()).arg(firstItem->strID()).arg(getUalItemStrID(logicItem));
-
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+								   QString(tr("Duplicate GUID %1 of %2 and %3 elements")).
+										arg(logicItem.m_fblItem->guid().toString()).arg(firstItem->strID()).
+										arg(getUalItemStrID(logicItem)));
 
 				result = false;
 
@@ -652,16 +626,17 @@ namespace Builder
 
 			// add input pins
 			//
-			for(LogicPin input : appItem->inputs())
+			for(const LogicPin& input : appItem->inputs())
 			{
-				if (m_pinParent.contains(input.guid()))
+				UalItem* firstItem = m_pinParent.value(input.guid(), nullptr);
+
+				if (firstItem != nullptr)
 				{
-					UalItem* firstItem = m_pinParent[input.guid()];
 
-					msg = QString(tr("Duplicate input pin GUID %1 of %2 and %3 elements")).
-							arg(input.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
-
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+									   QString(tr("Duplicate input pin GUID %1 of %2 and %3 elements")).
+											arg(input.guid().toString()).
+											arg(firstItem->strID()).arg(appItem->strID()));
 
 					result = false;
 
@@ -673,16 +648,17 @@ namespace Builder
 
 			// add output pins
 			//
-			for(LogicPin output : appItem->outputs())
+			for(const LogicPin& output : appItem->outputs())
 			{
-				if (m_pinParent.contains(output.guid()))
+				UalItem* firstItem = m_pinParent.value(output.guid(), nullptr);
+
+				if (firstItem != nullptr)
 				{
-					UalItem* firstItem = m_pinParent[output.guid()];
-
-					msg = QString(tr("Duplicate output pin GUID %1 of %2 and %3 elements")).
-							arg(output.guid().toString()).arg(firstItem->strID()).arg(appItem->strID());
-
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, msg);
+					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+									   QString(tr("Duplicate output pin GUID %1 of %2 and %3 elements")).
+											arg(output.guid().toString()).
+											arg(firstItem->strID()).
+											arg(appItem->strID()));
 
 					result = false;
 
@@ -853,6 +829,11 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeUalItemsFile()
 	{
+		if (m_context->generateExtraDebugInfo() == false)
+		{
+			return true;
+		}
+
 		QStringList items;
 
 		for(const UalItem* ualItem : m_ualItems)
@@ -3380,16 +3361,21 @@ namespace Builder
 
 		// common code for IPEN (FotipV1) and FotipV2 tuning protocols and data
 		//
-		bool result = true;
-
-		result &= tuningData->buildTuningSignalsLists(m_chassisSignals, m_log);
-
 		bool tuningEnabled = false;
 
-		bool res = isTuningEnabled(&tuningEnabled);
+		bool result = isTuningEnabled(&tuningEnabled);
 
-		if (res == false)
+		if (result == false)
 		{
+			delete tuningData;
+			return false;
+		}
+
+		result = tuningData->buildTuningSignalsLists(m_chassisSignals, m_log);
+
+		if (result == false)
+		{
+			delete tuningData;
 			return false;
 		}
 
@@ -3413,10 +3399,10 @@ namespace Builder
 			}
 		}
 
-		result &= tuningData->buildTuningData();
-
-		if (result == true)
+		if (tuningEnabled == true)
 		{
+			tuningData->buildTuningData();
+
 			int tuningFrameCount = m_lmDescription->flashMemory().m_tuningFrameCount;
 
 			if (tuningData->usedFramesCount() > tuningFrameCount)
@@ -3436,7 +3422,7 @@ namespace Builder
 			}
 		}
 
-		if (result == false)
+		if (result == false || tuningEnabled == false)
 		{
 			delete tuningData;
 		}
@@ -3455,6 +3441,12 @@ namespace Builder
 		{
 			assert(false);
 			return false;
+		}
+
+		if (DeviceHelper::isPropertyExists(adapter, DataSource::LmEthernetAdapterProperties::PROP_TUNING_ENABLE) == false)
+		{
+			*tuningEnabled = false;
+			return true;
 		}
 
 		bool res = DeviceHelper::getBoolProperty(adapter,
@@ -6023,32 +6015,111 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
-		code->comment_nl("AFBs implementation versions checking");
+		if (m_lmDescription->checkAfbVersions() == false)
+		{
+			return true;
+		}
+
+		int checkResultOffset = static_cast<int>(m_lmDescription->checkAfbVersionsOffset(true));		// absolute address
+		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
+
+		code->comment("AFBs implementation versions checking");
 
 		const std::map<int, std::shared_ptr<Afb::AfbComponent>>& components = m_lmDescription->afbComponents();
 
-		QVector<int> opCodes;
+		QHash<int, bool> opCodes;
 
 		for(auto const& component : components)
 		{
-			opCodes.append(component.second->opCode());
+			opCodes.insert(component.second->opCode(), true);
 		}
 
-		qSort(opCodes);
+		const int MIN_AFB_OPCODE = 1;
+		const int MAX_AFB_OPCODE = 63;
 
-		for(int opCode : opCodes)
+		CodeItem cmd;
+		int resultBitNo = 0;
+
+		QString usedCommentStr("Used AFBs opcodes: ");
+		QString unusedCommentStr("Unused AFBs opcodes: ");
+
+		bool firstUsed = true;
+		bool firstUnused = true;
+
+		for(int afbOpcode = MIN_AFB_OPCODE; afbOpcode <= MAX_AFB_OPCODE; afbOpcode++)
 		{
-			auto component = components.at(opCode);
-
-			CodeItem cmd;
-
-			cmd.readFuncBlockTest(	opCode, 0,
-									component->versionOpIndex(),
-									component->impVersion(),
-									component->caption());
-			code->append(cmd);
+			if (opCodes.contains(afbOpcode) == true)
+			{
+				if (firstUsed == true)
+				{
+					usedCommentStr += QString::number(afbOpcode);
+					firstUsed = false;
+				}
+				else
+				{
+					usedCommentStr += QString(", %1").arg(afbOpcode);
+				}
+			}
+			else
+			{
+				if (firstUnused == true)
+				{
+					unusedCommentStr += QString::number(afbOpcode);
+					firstUnused = false;
+				}
+				else
+				{
+					unusedCommentStr += QString(", %1").arg(afbOpcode);
+				}
+			}
 		}
 
+		code->comment(usedCommentStr);
+		code->comment_nl(unusedCommentStr);
+
+		for(int afbOpcode = MIN_AFB_OPCODE; afbOpcode <= MAX_AFB_OPCODE; afbOpcode++)
+		{
+			resultBitNo = afbOpcode - 1;		// !!! last (63) bit in results is not used!
+
+			if ((resultBitNo % WORD_SIZE) == 0)
+			{
+				cmd.movConst(bitAccAddr, 0xFFFF);
+				cmd.clearComment();
+				code->append(cmd);
+			}
+
+			if (opCodes.contains(afbOpcode) == true)
+			{
+				auto component = components.at(afbOpcode);
+
+				cmd.readFuncBlockCompare(afbOpcode, 0,
+										component->versionOpIndex(),
+										component->impVersion(),
+										component->caption());
+				cmd.setComment(QString("AFB opcode %1").arg(afbOpcode));
+				code->append(cmd);
+
+				cmd.movCompareFlag(bitAccAddr, (resultBitNo % WORD_SIZE));
+				cmd.clearComment();
+				code->append(cmd);
+			}
+			else
+			{
+			//	code->comment(QString("ABF opcode %1 is not used").arg(afbOpcode));
+			}
+
+			if (((resultBitNo + 1) % WORD_SIZE) == 0)
+			{
+				cmd.mov(checkResultOffset + resultBitNo / WORD_SIZE, bitAccAddr);
+				cmd.clearComment();
+				code->append(cmd);
+				code->newLine();
+			}
+		}
+
+		cmd.mov(checkResultOffset + MAX_AFB_OPCODE / WORD_SIZE, bitAccAddr);
+		cmd.clearComment();
+		code->append(cmd);
 		code->newLine();
 
 		return true;
@@ -10721,32 +10792,15 @@ namespace Builder
 
 		m_code.getBinCode(&binCode);
 
-		quint64 uniqueID = 0;
+		result &= calcAppLogicUniqueID(binCode);
 
-		result &= setLmAppLANDataUID(binCode, uniqueID);
-
-		if (result == false)
-		{
-			return false;
-		}
+		RETURN_IF_FALSE(result);
 
 		if (m_lmDescription->flashMemory().m_appLogicWriteBitstream == true)
 		{
-			result &= m_appLogicCompiler.writeBinCodeForLm(m_lmSubsystemID,
-														   m_lmSubsystemKey,
-														   m_lmDescription->flashMemory().m_appLogicUartId,
-														   lmEquipmentID(),
-														   m_lmNumber,
-														   m_lmAppLogicFramePayload,
-														   m_lmAppLogicFrameCount,
-														   uniqueID,
-														   m_lmDescription->lmDescriptionFile(m_lm),
-														   m_lmDescription->descriptionNumber(),
-														   m_code);
-			if (result == false)
-			{
-				return false;
-			}
+			result &= writeBinCodeForLm();
+
+			RETURN_IF_FALSE(result);
 		}
 
 		if (expertMode() == true)
@@ -10822,7 +10876,61 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::setLmAppLANDataUID(const QByteArray& lmAppCode, quint64& uniqueID)
+	bool ModuleLogicCompiler::writeBinCodeForLm()
+	{
+		bool result = true;
+
+		int metadataFieldsVersion = 0;
+
+		QStringList metadataFields;
+
+		m_code.getAsmMetadataFields(&metadataFields, &metadataFieldsVersion);
+
+		Hardware::ModuleFirmwareWriter* firmwareWriter = m_resultWriter->firmwareWriter();
+
+		if (firmwareWriter == nullptr)
+		{
+			assert(firmwareWriter);
+			return false;
+		}
+
+		int appLogicUartID = m_lmDescription->flashMemory().m_appLogicUartId;
+
+		firmwareWriter->createFirmware(m_lmSubsystemID,
+									   m_lmSubsystemKey,
+									   appLogicUartID,
+									   "AppLogic",
+									   m_lmAppLogicFramePayload,
+									   m_lmAppLogicFrameCount,
+									   LmDescription::lmDescriptionFile(m_lm),
+									   lmDescriptionNumber());
+
+		firmwareWriter->setDescriptionFields(m_lmSubsystemID, appLogicUartID, metadataFieldsVersion, metadataFields);
+
+		QByteArray binCode;
+
+		m_code.getBinCode(&binCode);
+
+		std::vector<QVariantList> metadata;
+
+		m_code.getAsmMetadata(&metadata);
+
+		result &= firmwareWriter->setChannelData(m_lmSubsystemID,
+												 appLogicUartID,
+												 lmEquipmentID(),
+												 m_lmNumber,
+												 m_lmAppLogicFramePayload,
+												 m_lmAppLogicFrameCount,
+												 m_appLogicUniqueID,
+												 binCode,
+												 metadata,
+												 log());
+
+		return result;
+	}
+
+
+	bool ModuleLogicCompiler::calcAppLogicUniqueID(const QByteArray& lmAppCode)
 	{
 		QVector<UalSignal*> acquiredSignals;
 
@@ -10889,7 +10997,7 @@ namespace Builder
 			}
 		}
 
-		uniqueID = crc.result();
+		m_appLogicUniqueID = crc.result();
 
 		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
 											DataSource::LmEthernetAdapterProperties::PROP_LM_APP_DATA_UID,
@@ -11657,11 +11765,7 @@ namespace Builder
 
 	QString ModuleLogicCompiler::getModuleFamilyTypeStr(Hardware::DeviceModule::FamilyType familyType)
 	{
-		QString typeStr = m_moduleFamilyTypeStr.value(familyType, "???");
-
-		assert(typeStr != "???");
-
-		return typeStr;
+		return E::valueToString<Hardware::DeviceModule::FamilyType>(familyType);
 	}
 
 	std::shared_ptr<Hardware::DeviceObject> ModuleLogicCompiler::getDeviceSharedPtr(const Hardware::DeviceObject* device)
@@ -11738,7 +11842,7 @@ namespace Builder
 
 	bool ModuleLogicCompiler::writeSignalLists()
 	{
-		if (expertMode() == false)
+		if (m_context->generateExtraDebugInfo() == false)
 		{
 			return true;
 		}

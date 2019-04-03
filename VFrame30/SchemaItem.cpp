@@ -849,7 +849,7 @@ namespace VFrame30
 		m_blinkPhase = value;
 	}
 
-	QRectF SchemaItem::boundingRectInDocPt() const
+	QRectF SchemaItem::boundingRectInDocPt(CDrawParam* /*drawParam*/) const
 	{
 		assert(false);		// Must be implemented in child classes
 		return QRectF();

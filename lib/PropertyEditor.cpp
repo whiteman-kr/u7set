@@ -37,6 +37,221 @@
 
 namespace ExtWidgets
 {
+
+	QString propertyVectorText(QVariant& value)
+	{
+		// PropertyVector
+		//
+		if (variantIsPropertyVector(value) == true)
+		{
+			auto pv = variantToPropertyVector(value);
+			if (pv == nullptr)
+			{
+				Q_ASSERT(pv);
+				return QString();
+			}
+
+			return QObject::tr("PropertyVector [%1 items]").arg(static_cast<int>(pv->size()));
+		}
+
+		// PropertyList
+		//
+
+		if (variantIsPropertyList(value) == true)
+		{
+			auto pv = variantToPropertyList(value);
+			if (pv == nullptr)
+			{
+				Q_ASSERT(pv);
+				return QString();
+			}
+
+			return QObject::tr("PropertyList [%1 items]").arg(static_cast<int>(pv->size()));
+		}
+
+		Q_ASSERT(false);
+		return QString();
+	}
+
+	//
+	// ------------ FilePathPropertyType ------------
+	//
+	PropertyArrayEditorDialog::PropertyArrayEditorDialog(QWidget* parent, std::shared_ptr<Property> p):
+		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
+		m_property(p),
+		m_value(p->value())
+	{
+		setWindowTitle(p->caption());
+
+		setMinimumSize(640, 480);
+
+		QVBoxLayout* mainLayout = new QVBoxLayout();
+
+		// Create Editor
+
+		m_treeWidget = new QTreeWidget();
+
+		m_propertyEditor = new PropertyEditor(this);
+
+		// Move Up/Down
+
+		QVBoxLayout* moveLayout = new QVBoxLayout();
+
+		QPushButton* b = new QPushButton(tr("Up"));
+		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::slot_MoveUp);
+		moveLayout->addWidget(b);
+
+		b = new QPushButton(tr("Down"));
+		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::slot_MoveDown);
+		moveLayout->addWidget(b);
+
+		moveLayout->addStretch();
+
+		// Add/Remove
+
+		QHBoxLayout* addRemoveLayout = new QHBoxLayout();
+
+		b = new QPushButton(tr("Add"));
+		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::slot_Add);
+		addRemoveLayout->addWidget(b);
+
+		b = new QPushButton(tr("Remove"));
+		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::slot_Remove);
+		addRemoveLayout->addWidget(b);
+
+		addRemoveLayout->addStretch();
+
+		// Left Layout
+
+		QVBoxLayout* leftLayout = new QVBoxLayout();
+		leftLayout->addWidget(m_treeWidget);
+		leftLayout->addLayout(addRemoveLayout);
+
+		// Top Layout
+
+
+		QHBoxLayout* horzLayout = new QHBoxLayout();
+		horzLayout->addLayout(leftLayout);
+		horzLayout->addLayout(moveLayout);
+		horzLayout->addWidget(m_propertyEditor);
+
+		// Ok/Cancel
+
+		QHBoxLayout* buttonsLayout = new QHBoxLayout();
+		buttonsLayout->addStretch();
+
+		b = new QPushButton(tr("OK"), this);
+		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::accept);
+		buttonsLayout->addWidget(b);
+
+		b = new QPushButton(tr("Cancel"), this);
+		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::reject);
+		buttonsLayout->addWidget(b);
+
+		mainLayout->addLayout(horzLayout);
+
+		//
+
+		mainLayout->addLayout(buttonsLayout);
+
+		setLayout(mainLayout);
+
+		// Fill objects
+
+		QStringList headerLabels;
+		headerLabels << tr("Index");
+
+		m_treeWidget->setColumnCount(headerLabels.size());
+		m_treeWidget->setHeaderLabels(headerLabels);
+
+		if (variantIsPropertyVector(m_value) == true)
+		{
+			std::vector<std::shared_ptr<PropertyObject>>* pv = variantToPropertyVector(m_value);
+
+			for (int i = 0; i < static_cast<int>(pv->size()); i++)
+			{
+				//const auto& po = pv->at(i);
+				QTreeWidgetItem* twi = new QTreeWidgetItem();
+				twi->setText(0, tr("Item %1").arg(i));
+				m_treeWidget->addTopLevelItem(twi);
+			}
+		}
+	}
+
+	QVariant PropertyArrayEditorDialog::value()
+	{
+		return m_value;
+
+	}
+
+	void PropertyArrayEditorDialog::accept()
+	{
+		/*if (m_editor == nullptr)
+		{
+			Q_ASSERT(m_editor);
+			return;
+		}
+
+		m_text = m_editor->text();*/
+
+		QDialog::accept();
+	}
+
+	void PropertyArrayEditorDialog::reject()
+	{
+		/*if (m_editor->modified() == true)
+		{
+			int result = QMessageBox::warning(this, qAppName(), tr("Do you want to save your changes?"), QMessageBox::Yes | QMessageBox::No | QMessageBox::Cancel);
+
+			if (result == QMessageBox::Yes)
+			{
+				accept();
+				return;
+			}
+
+			if (result == QMessageBox::Cancel)
+			{
+				return;
+			}
+		}*/
+
+		QDialog::reject();
+
+	}
+
+	void PropertyArrayEditorDialog::slot_MoveUp()
+	{
+
+	}
+
+	void PropertyArrayEditorDialog::slot_MoveDown()
+	{
+
+	}
+
+	void PropertyArrayEditorDialog::slot_Add()
+	{
+		if (variantIsPropertyVector(m_value) == true)
+		{
+			/*std::vector<std::shared_ptr<PropertyObject>>* pv = variantToPropertyVector(m_value);
+			pv->resize(pv->size() + 1);
+
+			QTreeWidgetItem* twi = new QTreeWidgetItem();
+			twi->setText(0, tr("Item %1").arg(pv->size()));
+			twi->setSelected(true);
+			m_treeWidget->addTopLevelItem(twi);
+*/
+			//m_propertyEditor->setObjects(*pv);
+		}
+
+	}
+
+	void PropertyArrayEditorDialog::slot_Remove()
+	{
+
+	}
+
+
 	//
 	// ------------ FilePathPropertyType ------------
 	//
@@ -900,7 +1115,7 @@ namespace ExtWidgets
 
 		if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog)
 		{
-			QString fileName = QFileDialog::getOpenFileName(this, tr("Select File"), QString(), m_property->validator());
+			QString fileName = QFileDialog::getOpenFileName(this->parentWidget(), tr("Select File"), QString(), m_property->validator());
 			if (fileName.isEmpty() == true)
 			{
 				return;
@@ -1218,6 +1433,73 @@ namespace ExtWidgets
 		m_textEdited = false;
 	}
 
+
+	//
+	// ---------QtMultiCheckBox----------
+	//
+	MultiArrayEdit::MultiArrayEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly):
+		QWidget(parent),
+		m_property(p)
+	{
+
+		if (p == nullptr)
+		{
+			assert(p);
+		}
+
+		m_lineEdit = new QLineEdit(parent);
+		m_lineEdit->setReadOnly(true);
+
+		m_button = new QToolButton(parent);
+		m_button->setText("...");
+
+		connect(m_button, &QToolButton::clicked, this, &MultiArrayEdit::onButtonPressed);
+
+		QHBoxLayout* lt = new QHBoxLayout;
+		lt->setContentsMargins(0, 0, 0, 0);
+		lt->setSpacing(0);
+		lt->addWidget(m_lineEdit);
+		lt->addWidget(m_button, 0, Qt::AlignRight);
+
+		setLayout(lt);
+
+		m_button->setEnabled(readOnly == false);
+
+	}
+
+	void MultiArrayEdit::setValue(std::shared_ptr<Property> property, bool readOnly)
+	{
+		if (variantIsPropertyVector(property->value()) == false && variantIsPropertyList(property->value()) == false)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		m_button->setEnabled(readOnly == false);
+
+		m_oldValue = property->value();
+
+		m_lineEdit->setText(propertyVectorText(m_oldValue));
+	}
+
+	void MultiArrayEdit::onButtonPressed()
+	{
+		PropertyArrayEditorDialog d(this, m_property);
+		if (d.exec() != QDialog::Accepted)
+		{
+			return;
+		}
+
+		if (d.value() != m_oldValue)
+		{
+			 emit valueChanged(d.value());
+		}
+
+		m_oldValue = d.value();
+
+		m_lineEdit->setText(propertyVectorText(m_oldValue));
+	}
+
 	//
 	// ---------QtMultiCheckBox----------
 	//
@@ -1410,26 +1692,45 @@ namespace ExtWidgets
 
 		std::shared_ptr<Property> propertyPtr = manager->value(property);
 		if (propertyPtr == nullptr)
-        {
+		{
 			assert(propertyPtr);
-            return nullptr;
-        }
+			return nullptr;
+		}
 
-		if (propertyPtr->isEnum())
-        {
-			MultiEnumEdit* m_editor = new MultiEnumEdit(parent, propertyPtr, property->isEnabled() == false);
-            editor = m_editor;
+		while (true)
+		{
 
-			if (manager->sameValue(property) == true)
+			if (variantIsPropertyList(propertyPtr->value()) == true || variantIsPropertyVector(propertyPtr->value()))
 			{
-				m_editor->setValue(propertyPtr, property->isEnabled() == false);
+				MultiArrayEdit* m_editor = new MultiArrayEdit(parent, propertyPtr, property->isEnabled() == false);
+				editor = m_editor;
+
+				if (manager->sameValue(property) == true)
+				{
+					m_editor->setValue(propertyPtr, property->isEnabled() == false);
+				}
+
+				connect(m_editor, &MultiArrayEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
+				connect(m_editor, &MultiArrayEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
+
+				break;
 			}
 
-			connect(m_editor, &MultiEnumEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
-			connect(m_editor, &MultiEnumEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
-        }
-        else
-        {
+			if (propertyPtr->isEnum())
+			{
+				MultiEnumEdit* m_editor = new MultiEnumEdit(parent, propertyPtr, property->isEnabled() == false);
+				editor = m_editor;
+
+				if (manager->sameValue(property) == true)
+				{
+					m_editor->setValue(propertyPtr, property->isEnabled() == false);
+				}
+
+				connect(m_editor, &MultiEnumEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
+				connect(m_editor, &MultiEnumEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
+
+				break;
+			}
 
 			if (propertyPtr->value().userType() == FilePathPropertyType::filePathTypeId())
 			{
@@ -1443,106 +1744,108 @@ namespace ExtWidgets
 
 				connect(m_editor, &MultiFilePathEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
 				connect(m_editor, &MultiFilePathEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
+
+				break;
 			}
-			else
+
+			if (propertyPtr->value().userType() == TuningValue::tuningValueTypeId())
 			{
-				if (propertyPtr->value().userType() == TuningValue::tuningValueTypeId())
+				MultiTextEdit* m_editor = new MultiTextEdit(parent, propertyPtr, property->isEnabled() == false, m_propertyEditor);
+
+				editor = m_editor;
+
+				if (manager->sameValue(property) == true)
 				{
-					MultiTextEdit* m_editor = new MultiTextEdit(parent, propertyPtr, property->isEnabled() == false, m_propertyEditor);
+					m_editor->setValue(propertyPtr, property->isEnabled() == false);
+				}
 
-					editor = m_editor;
+				connect(m_editor, &MultiTextEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
+				connect(m_editor, &MultiTextEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
 
-					if (manager->sameValue(property) == true)
-					{
-						m_editor->setValue(propertyPtr, property->isEnabled() == false);
-					}
+				break;
+			}
 
-					connect(m_editor, &MultiTextEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
-					connect(m_editor, &MultiTextEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
+			switch(propertyPtr->value().userType())
+			{
+			case QVariant::Bool:
+			{
+				MultiCheckBox* m_editor = new MultiCheckBox(parent);
+
+				editor = m_editor;
+
+				connect(m_editor, &MultiCheckBox::valueChanged, this, &MultiVariantFactory::slotSetValue);
+				connect(m_editor, &MultiCheckBox::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
+
+				if (m_property->isEnabled() == false)
+				{
+					m_editor->setValue(propertyPtr->value().toBool(), m_property->isEnabled() == false);
 				}
 				else
 				{
-					switch(propertyPtr->value().userType())
+					// change value on first click
+					//
+					bool newValue = propertyPtr->value().toBool();
+
+					if (manager->sameValue(property) == false)
 					{
-						case QVariant::Bool:
-							{
-								MultiCheckBox* m_editor = new MultiCheckBox(parent);
-
-								editor = m_editor;
-
-								connect(m_editor, &MultiCheckBox::valueChanged, this, &MultiVariantFactory::slotSetValue);
-								connect(m_editor, &MultiCheckBox::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
-
-								if (m_property->isEnabled() == false)
-								{
-									m_editor->setValue(propertyPtr->value().toBool(), m_property->isEnabled() == false);
-								}
-								else
-								{
-									// change value on first click
-									//
-									bool newValue = propertyPtr->value().toBool();
-
-									if (manager->sameValue(property) == false)
-									{
-										newValue = true;
-									}
-									else
-									{
-										newValue = !newValue;
-									}
-
-									m_editor->setValue(newValue, m_property->isEnabled() == false);
-
-									m_valueSetOnTimer = newValue;
-									QTimer::singleShot(10, this, &MultiVariantFactory::slotSetValueTimer);
-								}
-							}
-							break;
-						case QVariant::String:
-						case QVariant::Int:
-						case QVariant::UInt:
-						case QMetaType::Float:
-						case QVariant::Double:
-						case QVariant::Uuid:
-						case QVariant::ByteArray:
-						case QVariant::Image:
-								{
-								MultiTextEdit* m_editor = new MultiTextEdit(parent, propertyPtr, property->isEnabled() == false, m_propertyEditor);
-
-								editor = m_editor;
-
-								if (manager->sameValue(property) == true)
-								{
-									m_editor->setValue(propertyPtr, property->isEnabled() == false);
-								}
-
-								connect(m_editor, &MultiTextEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
-								connect(m_editor, &MultiTextEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
-							}
-							break;
-
-						case QVariant::Color:
-							{
-								MultiColorEdit* m_editor = new MultiColorEdit(parent, property->isEnabled() == false);
-
-								editor = m_editor;
-
-								if (manager->sameValue(property) == true)
-								{
-									m_editor->setValue(propertyPtr, property->isEnabled() == false);
-								}
-
-								connect(m_editor, &MultiColorEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
-								connect(m_editor, &MultiColorEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
-							}
-							break;
-
-					default:
-							Q_ASSERT(false);
+						newValue = true;
 					}
+					else
+					{
+						newValue = !newValue;
+					}
+
+					m_editor->setValue(newValue, m_property->isEnabled() == false);
+
+					m_valueSetOnTimer = newValue;
+					QTimer::singleShot(10, this, &MultiVariantFactory::slotSetValueTimer);
 				}
 			}
+				break;
+			case QVariant::String:
+			case QVariant::Int:
+			case QVariant::UInt:
+			case QMetaType::Float:
+			case QVariant::Double:
+			case QVariant::Uuid:
+			case QVariant::ByteArray:
+			case QVariant::Image:
+			{
+				MultiTextEdit* m_editor = new MultiTextEdit(parent, propertyPtr, property->isEnabled() == false, m_propertyEditor);
+
+				editor = m_editor;
+
+				if (manager->sameValue(property) == true)
+				{
+					m_editor->setValue(propertyPtr, property->isEnabled() == false);
+				}
+
+				connect(m_editor, &MultiTextEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
+				connect(m_editor, &MultiTextEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
+			}
+				break;
+
+			case QVariant::Color:
+			{
+				MultiColorEdit* m_editor = new MultiColorEdit(parent, property->isEnabled() == false);
+
+				editor = m_editor;
+
+				if (manager->sameValue(property) == true)
+				{
+					m_editor->setValue(propertyPtr, property->isEnabled() == false);
+				}
+
+				connect(m_editor, &MultiColorEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
+				connect(m_editor, &MultiColorEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
+			}
+				break;
+
+			default:
+				Q_ASSERT(false);
+			}
+
+			break;
 		}
 
 		if (editor == nullptr)
@@ -1883,11 +2186,18 @@ namespace ExtWidgets
         //
         if (sameValue(property) == true)
 		{
+			// PropertyVector, PropertyList
+			//
+			if (variantIsPropertyVector(value) == true || variantIsPropertyList(value) == true)
+			{
+				return propertyVectorText(value);
+			}
+
             // enum is special
             //
             if (p->isEnum())
             {
-                int v = p->value().toInt();
+				int v = value.toInt();
                 for (std::pair<int, QString>& i : p->enumValues())
                 {
                     if (i.first == v)

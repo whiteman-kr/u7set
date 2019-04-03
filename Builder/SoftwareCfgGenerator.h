@@ -44,8 +44,8 @@ namespace Builder
 
 		bool run();
 
-		static bool generalSoftwareCfgGeneration(DbController* db, SignalSet* signalSet, Hardware::EquipmentSet* equipment, std::shared_ptr<BuildResultWriter> buildResultWriter);
-		static bool loadAllSchemas(DbController* db, BuildResultWriter* buildResultWriter, IssueLogger* log);
+		static bool generalSoftwareCfgGeneration(Context* context);
+		static bool loadAllSchemas(Context* context);
 		static void clearStaticData();
 
 		virtual bool generateConfiguration() = 0;
@@ -60,6 +60,7 @@ namespace Builder
 		static bool checkLmToSoftwareLinks(IssueLogger* log);
 
 	protected:
+		Context* m_context = nullptr;
 		DbController* m_dbController = nullptr;
 		Hardware::Software* m_software = nullptr;
 		SignalSet* m_signalSet = nullptr;
