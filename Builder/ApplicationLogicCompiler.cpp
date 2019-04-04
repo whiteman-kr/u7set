@@ -59,7 +59,6 @@ namespace Builder
 		{
 			&ApplicationLogicCompiler::checkLmIpAddresses,
 			&ApplicationLogicCompiler::compileModulesLogicsPass1,
-//			&ApplicationLogicCompiler::processBvbModules,
 			&ApplicationLogicCompiler::compileModulesLogicsPass2,
 			&ApplicationLogicCompiler::writeResourcesUsageReport,
 			&ApplicationLogicCompiler::writeSerialDataXml,
@@ -327,11 +326,6 @@ namespace Builder
 		}
 
 		return result;
-	}
-
-	bool ApplicationLogicCompiler::processBvbModules()
-	{
-		return m_context->m_opticModuleStorage->processBvbModules();
 	}
 
 	bool ApplicationLogicCompiler::compileModulesLogicsPass2()

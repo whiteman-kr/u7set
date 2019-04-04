@@ -50,7 +50,6 @@ namespace Builder
 		bool prepareOptoConnectionsProcessing();
 		bool checkLmIpAddresses();
 		bool compileModulesLogicsPass1();
-		bool processBvbModules();
 		bool compileModulesLogicsPass2();
 
 		bool writeResourcesUsageReport();

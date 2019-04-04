@@ -3237,6 +3237,23 @@ namespace Builder
 		assert(m_tuningData == nullptr);
 		assert(m_lmDescription);
 
+		// common code for IPEN (FotipV1) and FotipV2 tuning protocols and data
+		//
+		bool tuningPropertyExists = false;
+		bool tuningEnabled = false;
+
+		bool result = getTuningSettings(&tuningPropertyExists, &tuningEnabled);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		if (tuningPropertyExists == false)
+		{
+			return true;
+		}
+
 		// To generate tuning data for IPEN (version 1 of FOTIP protocol)
 		// uncomment next 3 lines:
 		//
@@ -3255,18 +3272,6 @@ namespace Builder
 																m_lmDescription->memory().m_tuningDataFrameCount,
 																m_lmDescription->memory().m_tuningDataFramePayload,
 																m_lmDescription->memory().m_tuningDataFrameSize);
-
-		// common code for IPEN (FotipV1) and FotipV2 tuning protocols and data
-		//
-		bool tuningEnabled = false;
-
-		bool result = isTuningEnabled(&tuningEnabled);
-
-		if (result == false)
-		{
-			delete tuningData;
-			return false;
-		}
 
 		result = tuningData->buildTuningSignalsLists(m_chassisSignals, m_log);
 
@@ -3296,30 +3301,27 @@ namespace Builder
 			}
 		}
 
-		if (tuningEnabled == true)
+		tuningData->buildTuningData();
+
+		int tuningFrameCount = m_lmDescription->flashMemory().m_tuningFrameCount;
+
+		if (tuningData->usedFramesCount() > tuningFrameCount)
 		{
-			tuningData->buildTuningData();
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							   QString(tr("Tuning data of LM '%1' exceed available %2 frames")).
+							   arg(lmEquipmentID()).
+							   arg(tuningFrameCount));
+			result = false;
+		}
+		else
+		{
+			tuningData->generateUniqueID(lmEquipmentID());
 
-			int tuningFrameCount = m_lmDescription->flashMemory().m_tuningFrameCount;
-
-			if (tuningData->usedFramesCount() > tuningFrameCount)
-			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								   QString(tr("Tuning data of LM '%1' exceed available %2 frames")).
-								   arg(lmEquipmentID()).
-								   arg(tuningFrameCount));
-				result = false;
-			}
-			else
-			{
-				tuningData->generateUniqueID(lmEquipmentID());
-
-				m_tuningData = tuningData;
-				m_tuningDataStorage->insert(lmEquipmentID(), tuningData);
-			}
+			m_tuningData = tuningData;
+			m_tuningDataStorage->insert(lmEquipmentID(), tuningData);
 		}
 
-		if (result == false || tuningEnabled == false)
+		if (result == false)
 		{
 			delete tuningData;
 		}
@@ -3327,7 +3329,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::isTuningEnabled(bool* tuningEnabled)
+	bool ModuleLogicCompiler::getTuningSettings(bool* tuningPropertyExists, bool* tuningEnabled)
 	{
 		QString suffix = QString(DataSource::LmEthernetAdapterProperties::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR).
 							arg(DataSource::LM_ETHERNET_ADAPTER1);
@@ -3342,9 +3344,11 @@ namespace Builder
 
 		if (DeviceHelper::isPropertyExists(adapter, DataSource::LmEthernetAdapterProperties::PROP_TUNING_ENABLE) == false)
 		{
-			*tuningEnabled = false;
+			*tuningPropertyExists = false;
 			return true;
 		}
+
+		*tuningPropertyExists = true;
 
 		bool res = DeviceHelper::getBoolProperty(adapter,
 												 DataSource::LmEthernetAdapterProperties::PROP_TUNING_ENABLE,
