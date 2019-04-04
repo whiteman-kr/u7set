@@ -523,8 +523,6 @@ namespace Hardware
 
 		bool isSerialRxSignalExists(const QString& lmID, const QString& appSignalID);
 
-		bool processBvbModules();
-
 		bool isConnectionAccessible(const QString& lmEquipmentID, const QString& connectionID);
 
 	private:

@@ -117,10 +117,11 @@ private:
 	void createButtons();
 	void createListItems();
 
-	void changeFilterSignals(std::shared_ptr<TuningFilter> filter);
+	bool changeFilterSignals(std::shared_ptr<TuningFilter> filter);
 	void apply();
 
 	int countDiscretes(TuningFilter* filter);
+	int countWritingEnabled(TuningFilter* filter);
 
 protected:
 	  void showEvent(QShowEvent *ev) override;

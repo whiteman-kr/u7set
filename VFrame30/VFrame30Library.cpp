@@ -23,6 +23,7 @@
 #include "SchemaItemPushButton.h"
 #include "SchemaItemLineEdit.h"
 #include "SchemaItemValue.h"
+#include "SchemaItemImageValue.h"
 #include "SchemaItemBus.h"
 #include "SchemaItemLoopback.h"
 #include "../lib/Types.h"
@@ -72,6 +73,7 @@ namespace VFrame30
 		SchemaItemFactory.Register<SchemaItemPushButton>();
 		SchemaItemFactory.Register<SchemaItemLineEdit>();
 		SchemaItemFactory.Register<SchemaItemValue>();
+		SchemaItemFactory.Register<SchemaItemImageValue>();
 		SchemaItemFactory.Register<SchemaItemBus>();
 		SchemaItemFactory.Register<SchemaItemBusComposer>();
 		SchemaItemFactory.Register<SchemaItemBusExtractor>();

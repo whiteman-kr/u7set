@@ -59,7 +59,6 @@ namespace Builder
 		{
 			&ApplicationLogicCompiler::checkLmIpAddresses,
 			&ApplicationLogicCompiler::compileModulesLogicsPass1,
-//			&ApplicationLogicCompiler::processBvbModules,
 			&ApplicationLogicCompiler::compileModulesLogicsPass2,
 			&ApplicationLogicCompiler::writeResourcesUsageReport,
 			&ApplicationLogicCompiler::writeSerialDataXml,
@@ -166,6 +165,12 @@ namespace Builder
 	{
 		return m_context->m_lmModules;
 	}
+
+	std::vector<Hardware::DeviceModule*>& ApplicationLogicCompiler::lmAndBvbModules()
+	{
+		return m_context->m_lmAndBvbModules;
+	}
+
 
 	bool ApplicationLogicCompiler::isBuildCancelled()
 	{
@@ -298,7 +303,7 @@ namespace Builder
 
 		// first compiler pass
 		//
-		for(const Hardware::DeviceModule* lm : lmModules())
+		for(const Hardware::DeviceModule* lm : lmAndBvbModules())
 		{
 			if (lm == nullptr)
 			{
@@ -321,11 +326,6 @@ namespace Builder
 		}
 
 		return result;
-	}
-
-	bool ApplicationLogicCompiler::processBvbModules()
-	{
-		return m_context->m_opticModuleStorage->processBvbModules();
 	}
 
 	bool ApplicationLogicCompiler::compileModulesLogicsPass2()

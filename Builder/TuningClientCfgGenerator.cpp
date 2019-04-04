@@ -424,6 +424,15 @@ namespace Builder
 			}
 
 			//
+			// UseAccessFlag
+			//
+			bool useAccessFlag = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "UseAccessFlag", &ok);
+			if (ok == false)
+			{
+				return false;
+			}
+
+			//
 			// loginPerOperation
 			//
 			bool loginPerOperation = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "LoginPerOperation", &ok);
@@ -480,6 +489,7 @@ namespace Builder
 				xmlWriter.writeAttribute("filterByEquipment", (filterByEquipment ? "true" : "false"));
 				xmlWriter.writeAttribute("filterBySchema", (filterBySchema ? "true" : "false"));
 				xmlWriter.writeAttribute("showSOR", (showSOR ? "true" : "false"));
+				xmlWriter.writeAttribute("useAccessFlag", (useAccessFlag ? "true" : "false"));
 				xmlWriter.writeAttribute("showDiscreteCounters", (showDiscreteCounters ? "true" : "false"));
 				xmlWriter.writeAttribute("loginPerOperation", (loginPerOperation ? "true" : "false"));
 				xmlWriter.writeAttribute("loginSessionLength", QString::number(loginSessionLength));

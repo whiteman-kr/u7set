@@ -3,4 +3,4 @@ for %%F in (*.xml) do (
 )
 
 rem del _afbl_all.sql
-rem copy *.sql _afbl_all.sql
+copy *.sql _afbl_all.sql

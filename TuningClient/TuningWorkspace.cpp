@@ -231,6 +231,11 @@ TuningWorkspace::~TuningWorkspace()
 			settings.setValue("TuningWorkspace/FilterTreeColumnIndex", width);
 
 		}
+		if (columnAccessIndex != -1)
+		{
+			int width = m_filterTree->columnWidth(columnAccessIndex);
+			settings.setValue("TuningWorkspace/FilterTreeColumnsAccess", width);
+		}
 		if (columnDiscreteCountIndex != -1)
 		{
 			int width = m_filterTree->columnWidth(columnDiscreteCountIndex);
@@ -391,6 +396,13 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 		headerLabels << tr("Caption");
 		columnIndex++;
 
+		if (theConfigSettings.useAccessFlag == true)
+		{
+			headerLabels << tr("Access");
+			columnAccessIndex = columnIndex;
+			columnIndex++;
+		}
+
 		if (theConfigSettings.showDiscreteCounters == true)
 		{
 			headerLabels << tr("Discretes");
@@ -431,6 +443,18 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 			}
 
 			m_filterTree->setColumnWidth(columnNameIndex, width);
+		}
+		if (columnAccessIndex != -1)
+		{
+			const int defaultWidth = 60;
+
+			int width = settings.value("TuningWorkspace/FilterTreeColumnsAccess", defaultWidth).toInt();
+			if (width < defaultWidth || width > columnMaxWidth)
+			{
+				width = defaultWidth;
+			}
+
+			m_filterTree->setColumnWidth(columnAccessIndex, width);
 		}
 		if (columnDiscreteCountIndex != -1)
 		{
@@ -1189,6 +1213,8 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem)
 	bool controlIsEnabled = false;
 	bool hasUnappliedParams = false;
 
+	QString access = tr("No");
+
 	if (m_tuningTcpClient->tuningSourceInfo(hash, &ts) == false)
 	{
 		valid = false;
@@ -1199,6 +1225,14 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem)
 		valid = ts.valid();
 		controlIsEnabled = ts.state.controlisactive();
 		hasUnappliedParams = ts.state.hasunappliedparams();
+
+		if (theConfigSettings.useAccessFlag == true)
+		{
+			if (ts.state.writingdisabled() == false)
+			{
+				access = tr("Yes");
+			}
+		}
 
 		if (valid == false)
 		{
@@ -1232,7 +1266,6 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem)
 						{
 							status = tr("Active [%1 replies]").arg(ts.state.replycount());
 						}
-
 					}
 				}
 			}
@@ -1242,6 +1275,11 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem)
 	if (treeItem->text(columnStatusIndex) != status)
 	{
 		treeItem->setText(columnStatusIndex, status);
+	}
+
+	if (columnAccessIndex != -1 && treeItem->text(columnAccessIndex) != access)
+	{
+		treeItem->setText(columnAccessIndex, access);
 	}
 
 	QBrush backColor;

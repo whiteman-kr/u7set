@@ -90,6 +90,8 @@ struct ConfigSettings
 
 	bool showDiscreteCounters = true;
 
+	bool useAccessFlag = false;
+
 	int loginSessionLength = 120;
 
 	QStringList usersAccounts;

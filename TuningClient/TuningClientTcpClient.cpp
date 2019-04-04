@@ -216,3 +216,14 @@ bool TuningClientTcpClient::takeClientControl(QWidget* parentWidget)
 
 	return true;
 }
+
+
+bool TuningClientTcpClient::writingIsEnabled(const TuningSignalState& state) const
+{
+	if (theConfigSettings.useAccessFlag == false)
+	{
+		return true;
+	}
+
+	return state.writingIsEnabled();
+}

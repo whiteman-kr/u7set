@@ -14,8 +14,9 @@
 //
 // TuningItemModelMain
 //
-TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent):
-	TuningModel(tuningSignalManager, valueColumnsAppSignalIdSuffixes, parent)
+TuningModelClient::TuningModelClient(TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent):
+	TuningModel(tuningSignalManager, valueColumnsAppSignalIdSuffixes, parent),
+	m_tuningTcpClient(tuningTcpClient)
 {
 }
 
@@ -327,14 +328,27 @@ Qt::ItemFlags TuningModelClient::flags(const QModelIndex& index) const
 		{
 			if (asp.isAnalog() == false)
 			{
-				f |= Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
+				if (m_tuningTcpClient->writingIsEnabled(state) == false)
+				{
+					f &= ~Qt::ItemIsEnabled;
+				}
+				else
+				{
+					f |= Qt::ItemIsUserCheckable;
+				}
 			}
 			else
 			{
-				f |= Qt::ItemIsEnabled | Qt::ItemIsEditable;
+				if (m_tuningTcpClient->writingIsEnabled(state) == false)
+				{
+					f &= ~Qt::ItemIsEnabled;
+				}
+				else
+				{
+					f |= Qt::ItemIsEditable;
+				}
 			}
 		}
-
 	}
 
 	return f;
@@ -432,7 +446,12 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 
 		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);
 
-		if (role == Qt::EditRole)
+		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+		if (role == Qt::EditRole &&
+				state.valid() == true &&
+				state.controlIsEnabled() == true &&
+				m_tuningTcpClient->writingIsEnabled(state) == true)
 		{
 			bool ok = false;
 			double v = value.toDouble(&ok);
@@ -445,7 +464,10 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 			return true;
 		}
 
-		if (role == Qt::CheckStateRole)
+		if (role == Qt::CheckStateRole &&
+				state.valid() == true &&
+				state.controlIsEnabled() == true &&
+				m_tuningTcpClient->writingIsEnabled(state) == true)
 		{
 			if ((Qt::CheckState)value.toInt() == Qt::Checked)
 			{
@@ -467,6 +489,13 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 //
 // TuningTableView
 //
+
+TuningTableView::TuningTableView(TuningClientTcpClient* tuningTcpClient):
+	QTableView(),
+	m_tuningTcpClient(tuningTcpClient)
+{
+
+}
 
 bool TuningTableView::editorActive()
 {
@@ -507,6 +536,13 @@ bool TuningTableView::edit(const QModelIndex&  index, EditTrigger trigger, QEven
 		if (row >= 0)
 		{
 			AppSignalParam asp = m_model->tuningSignalManager()->signalParam(hash, &ok);
+
+			TuningSignalState state = m_model->tuningSignalManager()->state(hash, &ok);
+
+			if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
+			{
+				return false;
+			}
 
 			if (asp.isAnalog() == true)
 			{
@@ -669,7 +705,7 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 
 	// Object List
 	//
-	m_objectList = new TuningTableView();
+	m_objectList = new TuningTableView(m_tuningTcpClient);
 
 	QFont f = m_objectList->font();
 
@@ -698,7 +734,7 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 
 	std::vector<QString> valueColumnsAppSignalIdSuffixes = tabFilter->valueColumnsAppSignalIdSuffixes();
 
-	m_model = new TuningModelClient(m_tuningSignalManager, valueColumnsAppSignalIdSuffixes, this);
+	m_model = new TuningModelClient(m_tuningSignalManager, m_tuningTcpClient, valueColumnsAppSignalIdSuffixes, this);
 	m_model->setFont(f.family(), f.pointSize(), false);
 	m_model->setImportantFont(f.family(), f.pointSize(), true);
 
@@ -1191,7 +1227,7 @@ bool TuningPage::write()
 
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-		if (state.controlIsEnabled() == false)
+		if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
 		{
 			continue;
 		}
@@ -1218,7 +1254,7 @@ bool TuningPage::write()
 			continue;
 		}
 
-		if (state.controlIsEnabled() == false)
+		if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
 		{
 			continue;
 		}
@@ -1243,6 +1279,11 @@ bool TuningPage::write()
 		listCount++;
 	}
 
+	if (listCount == 0)
+	{
+		return false;
+	}
+
 	str += QString("\n") + tr("Are you sure you want to continue?");
 
 	if (QMessageBox::warning(this, tr("Write Changes"),
@@ -1264,7 +1305,7 @@ bool TuningPage::write()
 
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-		if (state.controlIsEnabled() == false)
+		if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
 		{
 			continue;
 		}
@@ -1272,6 +1313,11 @@ bool TuningPage::write()
 		TuningWriteCommand cmd(hash, m_tuningSignalManager->newValue(hash));
 
 		commands.push_back(cmd);
+	}
+
+	if (commands.empty() == true)
+	{
+		return false;
 	}
 
 	m_tuningTcpClient->writeTuningSignal(commands);
@@ -1377,9 +1423,9 @@ void TuningPage::slot_setValue()
 
 			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-			if (state.valid() == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
 			{
-				return;
+				continue;
 			}
 
 			if (asp.isAnalog() == true)
@@ -1439,6 +1485,11 @@ void TuningPage::slot_setValue()
 			selectedHashes.push_back(hash);
 		}	// c
 	}	// row
+
+	if (selectedHashes.empty() == true)
+	{
+		return;
+	}
 
 	DialogInputTuningValue d(value, defaultValue, sameValue, lowLimit, highLimit, precision, this);
 	if (d.exec() != QDialog::Accepted)
@@ -1798,9 +1849,9 @@ void TuningPage::invertValue()
 
 			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-			if (state.valid() == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
 			{
-				return;
+				continue;
 			}
 
 			if (asp.isDiscrete() == true)
@@ -1940,7 +1991,12 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 					continue;
 				}
 
-				if (state.valid() == true && state.value() != tv.value())
+				if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
+				{
+					continue;
+				}
+
+				if (state.value() != tv.value())
 				{
 					m_tuningSignalManager->setNewValue(hash, tv.value());
 					restoredCount++;
@@ -2001,7 +2057,6 @@ void TuningPage::slot_timerTick500()
 			}
 		}
 	}
-
 }
 
 void TuningPage::slot_setAll()
@@ -2021,7 +2076,7 @@ void TuningPage::slot_setAll()
 
 			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-			if (state.valid() == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
 			{
 				continue;
 			}
@@ -2052,7 +2107,7 @@ void TuningPage::slot_setAll()
 
 			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-			if (state.valid() == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
 			{
 				continue;
 			}
@@ -2083,7 +2138,7 @@ void TuningPage::slot_setAll()
 
 			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-			if (state.valid() == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
 			{
 				continue;
 			}
@@ -2115,7 +2170,7 @@ void TuningPage::slot_setAll()
 
 			TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-			if (state.valid() == false)
+			if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
 			{
 				continue;
 			}
@@ -2160,7 +2215,7 @@ void TuningPage::slot_undo()
 	{
 		TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
-		if (state.valid() == false)
+		if (state.valid() == false || state.controlIsEnabled() == false || m_tuningTcpClient->writingIsEnabled(state) == false)
 		{
 			continue;
 		}

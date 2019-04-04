@@ -288,7 +288,7 @@ namespace Builder
 		bool checkBusAndBusExtractorCompatibility(UalItem* srcAppItem, BusShared bus, UalItem* destAppItem);
 
 		bool buildTuningData();
-		bool isTuningEnabled(bool* tuningEnabled);
+		bool getTuningSettings(bool* tuningPropertyExists, bool* tuningEnabled);
 
 		bool createSignalLists();
 
