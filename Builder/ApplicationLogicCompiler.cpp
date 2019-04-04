@@ -167,6 +167,12 @@ namespace Builder
 		return m_context->m_lmModules;
 	}
 
+	std::vector<Hardware::DeviceModule*>& ApplicationLogicCompiler::lmAndBvbModules()
+	{
+		return m_context->m_lmAndBvbModules;
+	}
+
+
 	bool ApplicationLogicCompiler::isBuildCancelled()
 	{
 		if (QThread::currentThread()->isInterruptionRequested() == true)
@@ -298,7 +304,7 @@ namespace Builder
 
 		// first compiler pass
 		//
-		for(const Hardware::DeviceModule* lm : lmModules())
+		for(const Hardware::DeviceModule* lm : lmAndBvbModules())
 		{
 			if (lm == nullptr)
 			{
