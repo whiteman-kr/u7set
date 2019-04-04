@@ -30,7 +30,7 @@ public:
 		{
 			// Crash? Forger to register class? VFrame30Library.cpp?
 			//
-			assert(false);
+			Q_ASSERT(it != factories.end());
 			return nullptr;
 		}
 		else
