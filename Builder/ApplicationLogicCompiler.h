@@ -40,6 +40,7 @@ namespace Builder
 		const VFrame30::BusSet* busSet();
 		Hardware::OptoModuleStorage* opticModuleStorage();
 		std::vector<Hardware::DeviceModule*>& lmModules();
+		std::vector<Hardware::DeviceModule*>& lmAndBvbModules();
 
 		//
 
