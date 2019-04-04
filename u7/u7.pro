@@ -395,7 +395,9 @@ DISTFILES += \
     LogicModuleDescription/LM1_SR02.xml \
     ../Etc/SignalPropertyBehavior/SignalPropertyBehavior.csv \
     LogicModuleDescription/MSO3Module0000.xml \
-    Images/u7.ico
+    Images/u7.ico \
+    LogicModuleDescription/LM1_SR04.xml \
+    LogicModuleDescription/LM1_SR03.xml
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

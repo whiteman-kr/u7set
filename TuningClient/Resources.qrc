@@ -1,6 +1,9 @@
 <RCC>
     <qresource prefix="/Images">
         <file>Images/logo.png</file>
+        <file>Images/ButtonSettings.png</file>
+    </qresource>
+    <qresource prefix="/">
+        <file>languages/TuningClient_ru.qm</file>
     </qresource>
 </RCC>
- 

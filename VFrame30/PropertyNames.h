@@ -50,6 +50,9 @@ namespace VFrame30
 
 		static const QString allowScale;
 		static const QString keepAspectRatio;
+		static const QString image;
+		static const QString images;
+		static const QString svg;
 
 		// --
 		//
@@ -138,6 +141,7 @@ namespace VFrame30
 		static const QString scriptsCategory;
 		static const QString apertureCategory;
 		static const QString constCategory;
+		static const QString imageCategory;
 
 		static const QString widgetPropStyleSheet;
 		static const QString widgetPropToolTip;

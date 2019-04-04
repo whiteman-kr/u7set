@@ -43,6 +43,9 @@ namespace VFrame30
 
 	const QString PropertyNames::allowScale("AllowScale");
 	const QString PropertyNames::keepAspectRatio("KeepAspectRatio");
+	const QString PropertyNames::image("Image");
+	const QString PropertyNames::images("Images");
+	const QString PropertyNames::svg("Svg");
 
 	// SchemaItemValue Colors
 	//
@@ -138,6 +141,7 @@ namespace VFrame30
 	const QString PropertyNames::scriptsCategory("Scripts");
 	const QString PropertyNames::apertureCategory("Aperture");
 	const QString PropertyNames::constCategory("Const");
+	const QString PropertyNames::imageCategory("Image");
 
 	const QString PropertyNames::widgetPropStyleSheet("Property holds the widget's style sheet.\nThe style sheet contains a textual description of customizations to the widget's style.");
 	const QString PropertyNames::widgetPropToolTip("Property holds the widget's tooltip.");

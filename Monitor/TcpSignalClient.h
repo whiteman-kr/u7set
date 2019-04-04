@@ -20,7 +20,7 @@
 //				+------------------------
 //
 
-class TcpSignalClient : public Tcp::Client, public TcpClientInstance
+class TcpSignalClient : public Tcp::Client, public TcpClientStatistics
 {
 	Q_OBJECT
 

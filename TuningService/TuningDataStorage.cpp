@@ -226,7 +226,7 @@ namespace  Tuning
 	}
 
 
-	bool TuningData::buildTuningData()
+	void TuningData::buildTuningData()
 	{
 		// allocate m_tuningData
 		//
@@ -412,8 +412,6 @@ namespace  Tuning
 		}
 
 		assert(sizeB <= m_tuningDataSizeB);
-
-		return true;
 	}
 
 	void TuningData::getTuningData(QByteArray* tuningData) const

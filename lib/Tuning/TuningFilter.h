@@ -14,14 +14,13 @@ struct TuningCounters
 	int sorCounter = 0;
 	bool sorActive = false;
 	bool sorValid = false;
-	int controlEnabledCounter = 0;
 	int discreteCounter = 0;
 };
 
-class TuningFilterValue
+class TuningFilterSignal
 {
 public:
-	TuningFilterValue();
+	TuningFilterSignal();
 
 	QString appSignalId() const;
 	void setAppSignalId(const QString& value);
@@ -80,6 +79,13 @@ public:
 	};
 	Q_ENUM(SignalType)
 
+	enum class TabType
+	{
+		Generic,
+		FiltersSwitch,
+	};
+	Q_ENUM(TabType)
+
 public:
 	TuningFilter();
 	TuningFilter(const TuningFilter& That);
@@ -129,6 +135,9 @@ public:
 	SignalType signalType() const;
 	void setSignalType(SignalType value);
 
+	bool useColors() const;
+	void setUseColors(bool value);
+
 	QColor backColor() const;
 	void setBackColor(const QColor& value);
 
@@ -140,6 +149,12 @@ public:
 
 	QColor textSelectedColor() const;
 	void setTextSelectedColor(const QColor& value);
+
+	QColor backAlertedColor() const;
+	void setBackAlertedColor(const QColor& value);
+
+	QColor textAlertedColor() const;
+	void setTextAlertedColor(const QColor& value);
 
 	bool hasDiscreteCounter() const;
 	void setHasDiscreteCounter(bool value);
@@ -155,20 +170,20 @@ public:
 	QString appSignalIDMask() const;
 	void setAppSignalIDMask(const QString& value);
 
-	// Values
+	// FilterSignals
 	//
-	std::vector <TuningFilterValue> getValues() const;
-	void setValues(const std::vector <TuningFilterValue>& getValues);
+	std::vector <TuningFilterSignal> getFilterSignals() const;
 
-	int valuesCount() const;
-	bool valueExists(Hash hash) const;
+	int filterSignalsCount() const;
+	bool filterSignalExists(Hash hash) const;
 
-	void addValue(const TuningFilterValue& value);
-	void removeValue(Hash hash);
+	void addFilterSignal(const TuningFilterSignal& fs);
+	bool removeFilterSignal(Hash hash);
 
-	bool value(Hash hash, TuningFilterValue& value);
-	void setValue(const TuningFilterValue& value);
+	bool filterSignal(Hash hash, TuningFilterSignal& fs);
 
+	// Counters
+	//
 	TuningCounters counters() const;
 	void setCounters(TuningCounters value);
 
@@ -178,6 +193,15 @@ public:
 	void setValuesColumnCount(int value);
 
 	std::vector<QString> valueColumnsAppSignalIdSuffixes() const;
+
+	TabType tabType() const;
+	void setTabType(TabType type);
+
+	QString tags() const;
+	void setTags(const QString& value);
+
+	QStringList tagsList() const;
+	bool hasAnyTag(const QStringList& tags) const;
 
 	bool columnCustomAppId() const;
 	void setColumnCustomAppId(bool value);
@@ -209,7 +233,6 @@ public:
 	bool columnOutOfRange() const;
 	void setColumnOutOfRange(bool value);
 
-
 public:
 	// Operations
 	//
@@ -222,8 +245,8 @@ public:
 	bool isTab() const;
 	bool isButton() const;
 
-	void addTopChild(const std::shared_ptr<TuningFilter>& child);
 	void addChild(const std::shared_ptr<TuningFilter>& child);
+	void insertChild(int index, const std::shared_ptr<TuningFilter>& child);
 
 	void removeChild(const std::shared_ptr<TuningFilter>& child);
 	bool removeChild(const QString& ID);
@@ -262,11 +285,16 @@ private:
 
 	SignalType m_signalType = SignalType::All;
 
+	bool m_useColors = false;
+
 	QColor m_backColor = Qt::GlobalColor::lightGray;
-	QColor m_textColor = Qt::GlobalColor::lightGray;
+	QColor m_textColor = Qt::GlobalColor::black;
 
 	QColor m_backSelectedColor = Qt::GlobalColor::darkGray;
-	QColor m_textSelectedColor = Qt::GlobalColor::darkGray;
+	QColor m_textSelectedColor = Qt::GlobalColor::black;
+
+	QColor m_backAlertedColor = Qt::GlobalColor::red;
+	QColor m_textAlertedColor = Qt::GlobalColor::black;
 
 	bool m_hasDiscreteCounter = false;
 
@@ -280,6 +308,10 @@ private:
 	//
 	int m_valueColumnsCount = 0;
 	std::vector<QString> m_valueColumnsAppSignalIdSuffixes;
+
+	TabType m_tabType = TabType::Generic;
+
+	QStringList m_tags;
 
 	bool m_columnCustomAppId = true;
 	bool m_columnAppId = false;
@@ -300,8 +332,7 @@ private:
 
 	// Values
 	//
-	std::vector<Hash> m_signalValuesVec;
-	std::map <Hash, TuningFilterValue> m_signalValuesMap;
+	std::map <Hash, TuningFilterSignal> m_signalValuesMap;
 
 	// Parent and child
 	//
@@ -369,6 +400,6 @@ protected:
 
 Q_DECLARE_METATYPE(std::shared_ptr<TuningFilter>)
 
-Q_DECLARE_METATYPE(TuningFilterValue)
+Q_DECLARE_METATYPE(TuningFilterSignal)
 
 

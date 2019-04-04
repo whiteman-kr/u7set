@@ -23,7 +23,7 @@ struct ArchiveRequest
 
 // Getting data freom archive, can process only one request in a time
 //
-class ArchiveTcpClient : public Tcp::Client, public TcpClientInstance
+class ArchiveTcpClient : public Tcp::Client, public TcpClientStatistics
 {
 	Q_OBJECT
 

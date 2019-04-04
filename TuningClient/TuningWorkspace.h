@@ -2,6 +2,7 @@
 #define TUNINGWORKSPACE_H
 
 #include "TuningPage.h"
+#include "SwitchFiltersPage.h"
 #include "TuningClientTcpClient.h"
 #include "TuningClientFilterStorage.h"
 
@@ -9,15 +10,17 @@ class FilterButton : public QPushButton
 {
 	Q_OBJECT
 public:
-	FilterButton(std::shared_ptr<TuningFilter> filter, const QString& caption, bool check, QWidget* parent = nullptr);
+	FilterButton(std::shared_ptr<TuningFilter> filter, bool check, QWidget* parent = nullptr);
 
 	std::shared_ptr<TuningFilter> filter();
 
-	QString caption() const;
+	int counter() const;
+
+	void update(int discreteCounter);
 
 private:
 	std::shared_ptr<TuningFilter> m_filter;
-	QString m_caption;
+	int m_discreteCounter = 0;
 
 private slots:
 	void slot_toggled(bool checked);
@@ -46,11 +49,13 @@ public:
 
 	void onTimer();
 
+	void updateFilters(std::shared_ptr<TuningFilter> rootFilter);
+
+private:
+
 	// Tree update
 
 	void updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter);
-
-private:
 
 	// Initialization
 
@@ -76,7 +81,7 @@ private:
 
 protected:
 
-	bool eventFilter(QObject *object, QEvent *event) override;
+	virtual bool eventFilter(QObject *object, QEvent *event) override;
 
 private:
 
@@ -104,6 +109,8 @@ private:
 
 	QLineEdit* m_treeMask = nullptr;
 
+	QPushButton* m_treeMaskApply = nullptr;
+
 	QTabWidget* m_tab = nullptr;
 
 	const int columnNameIndex = 0;
@@ -128,6 +135,7 @@ private:
 	TuningPage* m_singleTuningPage = nullptr;
 	std::map<QString, TuningPage*> m_tuningPagesMap;
 	std::map<QString, TuningWorkspace*> m_tuningWorkspacesMap;
+	std::vector<SwitchFiltersPage*> m_switchPresetPages;
 
 	std::map<QString, int> m_activeTabPagesMap;
 

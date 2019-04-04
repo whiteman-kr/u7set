@@ -1386,7 +1386,7 @@ namespace Builder
 
 					int switchCounter = co.incChangeCount(*dependantIsAbove);
 
-					if (switchCounter >= 10)
+					if (switchCounter >= 32)
 					{
 						if (m_signaledItems.contains(currentItem.m_fblItem->label()) == false)
 						{

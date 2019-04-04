@@ -172,8 +172,16 @@ public:
 	QByteArray m_presetEditorGeometry;
 
 
-	QByteArray m_tuningFiltersDialogChooseSignalGeometry;
+	QByteArray m_tuningFiltersSplitterPosition;
 	int m_tuningFiltersPropertyEditorSplitterPos = -1;
+
+	//	SwitchPresetsPage options
+
+	int m_switchPresetsPageColCount = 8;
+	int m_switchPresetsPageRowCount = 3;
+	int m_switchPresetsPageButtonsWidth = 150;
+	int m_switchPresetsPageButtonsHeight = 100;
+	QByteArray m_switchPresetsPageSplitterPosition;
 
 private:
 

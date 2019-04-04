@@ -6,7 +6,7 @@
 TARGET = VFrame30
 
 TEMPLATE = lib
-QT += widgets qml xml
+QT += widgets qml xml svg
 
 win32:LIBS += -lGdi32
 
@@ -122,7 +122,9 @@ HEADERS += VFrame30Lib_global.h \
     ../lib/SignalProperties.h \
     ../lib/XmlHelper.h \
     TuningSchema.h \
-    SchemaItemImage.h
+    SchemaItemImage.h \
+    SchemaItemImageValue.h \
+    ImageItem.h
 
 SOURCES += \
     Settings.cpp \
@@ -189,7 +191,9 @@ SOURCES += \
     ../lib/SignalProperties.cpp \
     ../lib/XmlHelper.cpp \
     TuningSchema.cpp \
-    SchemaItemImage.cpp
+    SchemaItemImage.cpp \
+    SchemaItemImageValue.cpp \
+    ImageItem.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

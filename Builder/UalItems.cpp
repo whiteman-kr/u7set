@@ -2208,7 +2208,7 @@ namespace Builder
 
 		if (s->isBus() == true)
 		{
-			bus = m_compiler.signalSet().getBus(s->busTypeID());
+			bus = m_compiler.signalSet()->getBus(s->busTypeID());
 
 			if (bus == nullptr)
 			{
@@ -2241,7 +2241,7 @@ namespace Builder
 
 			for(const BusSignal& busSignal : busSignals)
 			{
-				Signal* templateSignal = m_compiler.signalSet().createBusChildSignal(*ualSignal->signal(), bus, busSignal);
+				Signal* templateSignal = m_compiler.signalSet()->createBusChildSignal(*ualSignal->signal(), bus, busSignal);
 
 				UalSignal* busChildSignal = createOptoSignal(ualItem, templateSignal, lmEquipmentID, true, QUuid());
 
@@ -2288,7 +2288,7 @@ namespace Builder
 
 		for(const BusSignal& busSignal : busSignals)
 		{
-			Signal* sChild = m_compiler.signalSet().appendBusChildSignal(*busParentSignal->signal(), bus, busSignal);
+			Signal* sChild = m_compiler.signalSet()->appendBusChildSignal(*busParentSignal->signal(), bus, busSignal);
 
 			UalSignal* busChildSignal = nullptr;
 
@@ -2437,7 +2437,7 @@ namespace Builder
 
 		for(const BusSignal& busSignal : bus->busSignals())
 		{
-			Signal* newSignal = m_compiler.signalSet().appendBusChildSignal(*s, bus, busSignal);
+			Signal* newSignal = m_compiler.signalSet()->appendBusChildSignal(*s, bus, busSignal);
 
 			result &= ualSignal->appendBusChildRefSignals(busSignal.signalID, newSignal);
 		}

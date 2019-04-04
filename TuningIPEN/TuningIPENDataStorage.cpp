@@ -455,7 +455,7 @@ namespace  TuningIPEN
 	}
 
 
-	bool TuningData::buildTuningData()
+	void TuningData::buildTuningData()
 	{
 		m_tuningDataUsedFramesCount = 0;
 
@@ -475,10 +475,7 @@ namespace  TuningIPEN
 
 			m_tuningDataUsedFramesCount += framesData.usedFramesCount();
 		}
-
-		return true;
 	}
-
 
 	bool TuningData::initTuningData()
 	{

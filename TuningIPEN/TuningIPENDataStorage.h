@@ -83,7 +83,7 @@ namespace TuningIPEN
 
 		virtual ~TuningData();
 
-		virtual bool buildTuningData() override;
+		virtual void buildTuningData() override;
 		bool initTuningData();
 
 		virtual void getTuningData(QByteArray* tuningData) const override;

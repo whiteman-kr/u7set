@@ -28,6 +28,7 @@ namespace VFrame30
 		//
 	public slots:
 		void debugOutput(QString str);					// Debug output to qDebug
+
 		void setSchema(QString schemaId);				// Set schema by SchemaID
 
 		QObject* findSchemaItem(QString objectName);	// Find SchemaItem by ObjectName

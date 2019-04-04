@@ -63,7 +63,7 @@ private slots:
 private:
 	void update(bool refreshOnly);
 
-	enum Columns
+	enum class Columns
 	{
 		EquipmentId,
 		Ip,

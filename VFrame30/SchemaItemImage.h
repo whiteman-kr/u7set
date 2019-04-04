@@ -1,10 +1,7 @@
 #pragma once
 
 #include "PosRectImpl.h"
-#include "FontParam.h"
-
-class QPen;
-class QBrush;
+#include "ImageItem.h"
 
 namespace VFrame30
 {
@@ -39,19 +36,19 @@ namespace VFrame30
 		// Properties and Data
 		//
 	public:
-		bool allowScale() const;
+		bool allowScale() const;		// Applied only to raster images
 		void setAllowScale(bool value);
 
 		bool keepAspectRatio() const;
 		void setKeepAspectRatio(bool value);
 
-	private:
-		bool m_allowScale = true;
-		bool m_keepAspectRatio = true;
+		const QImage& image() const;
+		void setImage(const QImage& image);
 
-		// Drawing resources
-		//
-		//mutable std::shared_ptr<QPen> m_rectPen;
-		//mutable std::shared_ptr<QBrush> m_fillBrush;
+		const QString& svgData() const;
+		void setSvgData(const QString& data);
+
+	private:
+		ImageItem m_image;
 	};
 }

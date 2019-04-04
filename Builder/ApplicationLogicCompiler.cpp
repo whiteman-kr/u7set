@@ -16,52 +16,12 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------
 
-	IssueLogger* ApplicationLogicCompiler::m_log = nullptr;
+	//IssueLogger* ApplicationLogicCompiler::log() = nullptr;
 
 
-	ApplicationLogicCompiler::ApplicationLogicCompiler(Hardware::SubsystemStorage *subsystems,
-													   const std::vector<Hardware::DeviceModule*>& lmModules,
-													   Hardware::EquipmentSet *equipmentSet,
-													   Hardware::OptoModuleStorage *optoModuleStorage,
-													   Hardware::ConnectionStorage *connections,
-													   SignalSet* signalSet,
-													   LmDescriptionSet* lmDescriptions,
-													   AppLogicData* appLogicData,
-													   Tuning::TuningDataStorage* tuningDataStorage,
-													   ComparatorStorage* comparatorStorage,
-													   VFrame30::BusSet* busSet,
-													   std::shared_ptr<BuildResultWriter> buildResultWriter,
-													   IssueLogger *log,
-													   bool expertMode) :
-		m_subsystems(subsystems),
-		m_lmModules(lmModules),
-		m_equipmentSet(equipmentSet),
-		m_optoModuleStorage(optoModuleStorage),
-		m_signals(signalSet),
-		m_lmDescriptions(lmDescriptions),
-		m_appLogicData(appLogicData),
-		m_tuningDataStorage(tuningDataStorage),
-		m_cmpStorage(comparatorStorage),
-		m_busSet(busSet),
-		m_resultWriter(buildResultWriter),
-		m_connections(connections),
-		m_expertMode(expertMode)
+	ApplicationLogicCompiler::ApplicationLogicCompiler(Context* context) :
+		m_context(context)
 	{
-		if (m_log == nullptr)
-		{
-			m_log = log;
-		}
-		else
-		{
-			// only one instance of ApplicationLogicCompiler can be created !
-			//
-			assert(false);
-		}
-
-		if (m_equipmentSet != nullptr)
-		{
-			m_deviceRoot = m_equipmentSet->root();
-		}
 	}
 
 	ApplicationLogicCompiler::~ApplicationLogicCompiler()
@@ -71,34 +31,32 @@ namespace Builder
 
 	bool ApplicationLogicCompiler::run()
 	{
-		if (m_log == nullptr)
+		if (m_context == nullptr)
 		{
-			assert(m_log != nullptr);
 			return false;
 		}
 
-		if (m_subsystems == nullptr ||
-			m_equipmentSet == nullptr ||
-			m_signals == nullptr ||
-			m_lmDescriptions == nullptr ||
-			m_appLogicData == nullptr ||
-			m_tuningDataStorage == nullptr ||
-			m_cmpStorage == nullptr ||
-			m_resultWriter == nullptr ||
-			m_connections == nullptr ||
-			m_busSet == nullptr)
+		if (subsystems() == nullptr ||
+			equipmentSet() == nullptr ||
+			signalSet() == nullptr ||
+			lmDescriptions() == nullptr ||
+			appLogicData() == nullptr ||
+			tuningDataStorage() == nullptr ||
+			comparatorStorage() == nullptr ||
+			buildResultWriter() == nullptr ||
+			connectionStorage() == nullptr ||
+			busSet() == nullptr)
 		{
-			LOG_NULLPTR_ERROR(m_log);
+			LOG_NULLPTR_ERROR(log());
 			return false;
 		}
 
 		DeviceHelper::init();
 
-		m_signals->resetAddresses();
+		signalSet()->resetAddresses();
 
 		ApplicationLogicCompilerProc appLogicCompilerProcs[] =
 		{
-//			&ApplicationLogicCompiler::prepareOptoConnectionsProcessing,
 			&ApplicationLogicCompiler::checkLmIpAddresses,
 			&ApplicationLogicCompiler::compileModulesLogicsPass1,
 //			&ApplicationLogicCompiler::processBvbModules,
@@ -139,6 +97,76 @@ namespace Builder
 		return result;
 	}
 
+	Context* ApplicationLogicCompiler::context()
+	{
+		return m_context;
+	}
+
+	IssueLogger* ApplicationLogicCompiler::log()
+	{
+		return m_context->m_log;
+	}
+
+	Hardware::SubsystemStorage* ApplicationLogicCompiler::subsystems()
+	{
+		return m_context->m_subsystems.get();
+	}
+
+	Hardware::EquipmentSet* ApplicationLogicCompiler::equipmentSet()
+	{
+		return m_context->m_equipmentSet.get();
+	}
+
+	SignalSet* ApplicationLogicCompiler::signalSet()
+	{
+		return m_context->m_signalSet.get();
+	}
+
+	LmDescriptionSet* ApplicationLogicCompiler::lmDescriptions()
+	{
+		return m_context->m_lmDescriptions.get();
+	}
+
+	AppLogicData* ApplicationLogicCompiler::appLogicData()
+	{
+		return m_context->m_appLogicData.get();
+	}
+
+	Tuning::TuningDataStorage* ApplicationLogicCompiler::tuningDataStorage()
+	{
+		return m_context->m_tuningDataStorage.get();
+	}
+
+	ComparatorStorage* ApplicationLogicCompiler::comparatorStorage()
+	{
+		return m_context->m_comparatorStorage.get();
+	}
+
+	BuildResultWriter* ApplicationLogicCompiler::buildResultWriter()
+	{
+		return m_context->m_buildResultWriter.get();
+	}
+
+	Hardware::ConnectionStorage* ApplicationLogicCompiler::connectionStorage()
+	{
+		return m_context->m_connections.get();
+	}
+
+	const VFrame30::BusSet* ApplicationLogicCompiler::busSet()
+	{
+		return m_context->m_busSet.get();
+	}
+
+	Hardware::OptoModuleStorage* ApplicationLogicCompiler::opticModuleStorage()
+	{
+		return m_context->m_opticModuleStorage.get();
+	}
+
+	std::vector<Hardware::DeviceModule*>& ApplicationLogicCompiler::lmModules()
+	{
+		return m_context->m_lmModules;
+	}
+
 	bool ApplicationLogicCompiler::isBuildCancelled()
 	{
 		if (QThread::currentThread()->isInterruptionRequested() == true)
@@ -149,57 +177,21 @@ namespace Builder
 		return false;
 	}
 
-	bool ApplicationLogicCompiler::prepareOptoConnectionsProcessing()
-	{
-		// function is obsolete
-
-		assert(false);
-
-		/*if (m_optoModuleStorage == nullptr ||
-			m_connections == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			ASSERT_RETURN_FALSE;
-		}
-
-		if (m_connections->count() == 0)
-		{
-			LOG_MESSAGE(m_log, QString(tr("No opto connections found")));
-			LOG_SUCCESS(m_log, QString(tr("Ok")));
-			return true;
-		}
-
-		if (m_optoModuleStorage->appendOptoModules() == false)
-		{
-			return false;
-		}
-
-		LOG_EMPTY_LINE(m_log);
-		LOG_MESSAGE(m_log, QString(tr("Checking opto connections")));
-
-		if (m_optoModuleStorage->appendAndCheckConnections(*m_connections) == false)
-		{
-			return false;
-		}*/
-
-		return true;
-	}
-
 	bool ApplicationLogicCompiler::checkLmIpAddresses()
 	{
-		LOG_EMPTY_LINE(m_log);
+		LOG_EMPTY_LINE(log());
 
-		LOG_MESSAGE(m_log, QString(tr("Check LM's ethernet adapters IP addresses...")));
+		LOG_MESSAGE(log(), QString(tr("Check LM's ethernet adapters IP addresses...")));
 
 		bool result = true;
 
 		QHash<QString, const Hardware::DeviceModule*> ip2Modules;
 
-		for(const Hardware::DeviceModule* lm : m_lmModules)
+		for(const Hardware::DeviceModule* lm : lmModules())
 		{
 			if (lm == nullptr)
 			{
-				LOG_INTERNAL_ERROR(m_log);
+				LOG_INTERNAL_ERROR(log());
 				assert(false);
 				return false;
 			}
@@ -215,7 +207,7 @@ namespace Builder
 
 				int ethernetAdapterNo = DataSource::LM_ETHERNET_ADAPTER1 + i;
 
-				lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, ethernetAdapterNo, m_log);
+				lmNetProperties.getLmEthernetAdapterNetworkProperties(lm, ethernetAdapterNo, log());
 
 				switch(ethernetAdapterNo)
 				{
@@ -230,7 +222,7 @@ namespace Builder
 						{
 							const Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.tuningIP];
 
-							m_log->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.tuningIP, lm1->uuid(), lm->uuid());
+							log()->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.tuningIP, lm1->uuid(), lm->uuid());
 
 							result = false;
 						}
@@ -253,7 +245,7 @@ namespace Builder
 						{
 							const Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.appDataIP];
 
-							m_log->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.appDataIP, lm1->uuid(), lm->uuid());
+							log()->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.appDataIP, lm1->uuid(), lm->uuid());
 
 							result = false;
 						}
@@ -271,7 +263,7 @@ namespace Builder
 						{
 							const Hardware::DeviceModule* lm1 = ip2Modules[lmNetProperties.diagDataIP];
 
-							m_log->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.diagDataIP, lm1->uuid(), lm->uuid());
+							log()->errEQP6003(lm1->equipmentId(), lm->equipmentId(), lmNetProperties.diagDataIP, lm1->uuid(), lm->uuid());
 
 							result = false;
 						}
@@ -291,7 +283,7 @@ namespace Builder
 
 		if (result == true)
 		{
-			LOG_OK(m_log);
+			LOG_OK(log());
 		}
 
 		return result;
@@ -299,23 +291,23 @@ namespace Builder
 
 	bool ApplicationLogicCompiler::compileModulesLogicsPass1()
 	{
-		LOG_EMPTY_LINE(m_log);
-		LOG_MESSAGE(m_log, QString(tr("Application logic compiler pass #1...")));
+		LOG_EMPTY_LINE(log());
+		LOG_MESSAGE(log(), QString(tr("Application logic compiler pass #1...")));
 
 		bool result = true;
 
 		// first compiler pass
 		//
-		for(const Hardware::DeviceModule* lm : m_lmModules)
+		for(const Hardware::DeviceModule* lm : lmModules())
 		{
 			if (lm == nullptr)
 			{
-				LOG_NULLPTR_ERROR(m_log);
+				LOG_NULLPTR_ERROR(log());
 				result = false;
 				continue;
 			}
 
-			ModuleLogicCompiler* moduleLogicCompiler = new ModuleLogicCompiler(*this, lm, m_expertMode);
+			ModuleLogicCompiler* moduleLogicCompiler = new ModuleLogicCompiler(*this, lm);
 
 			m_moduleCompilers.append(moduleLogicCompiler);
 
@@ -333,15 +325,15 @@ namespace Builder
 
 	bool ApplicationLogicCompiler::processBvbModules()
 	{
-		return m_optoModuleStorage->processBvbModules();
+		return m_context->m_opticModuleStorage->processBvbModules();
 	}
 
 	bool ApplicationLogicCompiler::compileModulesLogicsPass2()
 	{
 		bool result = true;
 
-		LOG_EMPTY_LINE(m_log);
-		LOG_MESSAGE(m_log, QString(tr("Application logic compiler pass #2...")));
+		LOG_EMPTY_LINE(log());
+		LOG_MESSAGE(log(), QString(tr("Application logic compiler pass #2...")));
 
 		// second compiler pass
 		//
@@ -349,7 +341,7 @@ namespace Builder
 		{
 			if (moduleLogicCompiler == nullptr)
 			{
-				LOG_NULLPTR_ERROR(m_log);
+				LOG_NULLPTR_ERROR(log());
 				result = false;
 				continue;
 			}
@@ -370,8 +362,8 @@ namespace Builder
 	{
 		bool result = true;
 
-		LOG_EMPTY_LINE(m_log);
-		LOG_MESSAGE(m_log, QString(tr("Resources usage report generation...")));
+		LOG_EMPTY_LINE(log());
+		LOG_MESSAGE(log(), QString(tr("Resources usage report generation...")));
 
 		QList<std::tuple<QString, QString, double, double, double, double, double>> fileContent;
 		QStringList fileContentStringList;
@@ -578,76 +570,19 @@ namespace Builder
 		fileContentStringList.append("");
 		fileContentStringList.append(afbsUsage);
 
-		m_resultWriter->addFile(Builder::DIR_REPORTS, "Resources.txt", fileContentStringList);
-
-		return result;
-	}
-
-	bool ApplicationLogicCompiler::writeBinCodeForLm(QString subsystemID,
-													 int subsystemKey,
-													 int appLogicUartId,
-													 QString lmEquipmentID,
-													 int lmNumber,
-													 int frameSize,
-													 int frameCount,
-													 quint64 uniqueID,
-													 const QString& lmDesctriptionFile,
-													 int lmDescriptionNumber,
-													 ApplicationLogicCode& appLogicCode)
-	{
-		if (m_resultWriter == nullptr)
-		{
-			ASSERT_RETURN_FALSE
-		}
-
-		bool result = true;
-
-		int metadataFieldsVersion = 0;
-
-		QStringList metadataFields;
-
-		appLogicCode.getAsmMetadataFields(&metadataFields, &metadataFieldsVersion);
-
-		Hardware::ModuleFirmwareWriter* firmwareWriter = m_resultWriter->firmwareWriter();
-
-		if (firmwareWriter == nullptr)
-		{
-			assert(firmwareWriter);
-			return false;
-		}
-
-		firmwareWriter->createFirmware(subsystemID,
-									   subsystemKey,
-									   appLogicUartId,
-									   "AppLogic",
-									   frameSize,
-									   frameCount,
-									   lmDesctriptionFile,
-									   lmDescriptionNumber);
-
-		firmwareWriter->setDescriptionFields(subsystemID, appLogicUartId, metadataFieldsVersion, metadataFields);
-
-		QByteArray binCode;
-
-		appLogicCode.getBinCode(&binCode);
-
-		std::vector<QVariantList> metadata;
-
-		appLogicCode.getAsmMetadata(&metadata);
-
-		result &= firmwareWriter->setChannelData(subsystemID, appLogicUartId, lmEquipmentID, lmNumber, frameSize, frameCount, uniqueID, binCode, metadata, m_log);
+		buildResultWriter()->addFile(Builder::DIR_REPORTS, "Resources.txt", fileContentStringList);
 
 		return result;
 	}
 
 	bool ApplicationLogicCompiler::writeSerialDataXml()
 	{
-		return m_optoModuleStorage->writeSerialDataXml(m_resultWriter.get());
+		return m_context->m_opticModuleStorage->writeSerialDataXml(buildResultWriter());
 	}
 
 	bool ApplicationLogicCompiler::writeOptoConnectionsReport()
 	{
-		int count = m_connections->count();
+		int count = connectionStorage()->count();
 
 		if (count == 0)
 		{
@@ -661,7 +596,7 @@ namespace Builder
 
 		for(int i = 0; i < count; i++)
 		{
-			std::shared_ptr<Hardware::Connection> cn = m_connections->get(i);
+			std::shared_ptr<Hardware::Connection> cn = connectionStorage()->get(i);
 
 			if (cn == nullptr)
 			{
@@ -691,7 +626,7 @@ namespace Builder
 			{
 			case Hardware::Connection::Type::SinglePort:
 				{
-					Hardware::OptoPortShared p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
+					Hardware::OptoPortShared p1 = opticModuleStorage()->getOptoPort(cn->port1EquipmentID());
 
 					if (p1 != nullptr)
 					{
@@ -706,7 +641,7 @@ namespace Builder
 
 			case Hardware::Connection::Type::PortToPort:
 				{
-					Hardware::OptoPortShared p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
+					Hardware::OptoPortShared p1 = opticModuleStorage()->getOptoPort(cn->port1EquipmentID());
 
 					if (p1 != nullptr)
 					{
@@ -720,7 +655,7 @@ namespace Builder
 					list.append(delim2);
 					list.append("");
 
-					Hardware::OptoPortShared p2 = m_optoModuleStorage->getOptoPort(cn->port2EquipmentID());
+					Hardware::OptoPortShared p2 = opticModuleStorage()->getOptoPort(cn->port2EquipmentID());
 
 					if (p2 != nullptr)
 					{
@@ -739,14 +674,14 @@ namespace Builder
 			}
 		}
 
-		m_resultWriter->addFile(Builder::DIR_REPORTS, "Connections.txt", "", "", list);
+		buildResultWriter()->addFile(Builder::DIR_REPORTS, "Connections.txt", "", "", list);
 
 		return true;
 	}
 
 	bool ApplicationLogicCompiler::writeOptoVhdFiles()
 	{
-		int count = m_connections->count();
+		int count = connectionStorage()->count();
 
 		if (count == 0)
 		{
@@ -761,7 +696,7 @@ namespace Builder
 
 		for(int i = 0; i < count; i++)
 		{
-			std::shared_ptr<Hardware::Connection> cn = m_connections->get(i);
+			std::shared_ptr<Hardware::Connection> cn = connectionStorage()->get(i);
 
 			if (cn == nullptr)
 			{
@@ -776,15 +711,15 @@ namespace Builder
 
 			if (cn->isPortToPort() == true)
 			{
-				Hardware::OptoPortShared p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
-				Hardware::OptoPortShared p2 = m_optoModuleStorage->getOptoPort(cn->port2EquipmentID());
+				Hardware::OptoPortShared p1 = opticModuleStorage()->getOptoPort(cn->port1EquipmentID());
+				Hardware::OptoPortShared p2 = opticModuleStorage()->getOptoPort(cn->port2EquipmentID());
 
 				writeOptoPortToPortVhdFile(cn->connectionID(), p1, p2);
 				writeOptoPortToPortVhdFile(cn->connectionID(), p2, p1);
 			}
 			else
 			{
-				Hardware::OptoPortShared p1 = m_optoModuleStorage->getOptoPort(cn->port1EquipmentID());
+				Hardware::OptoPortShared p1 = opticModuleStorage()->getOptoPort(cn->port1EquipmentID());
 				writeOptoSinglePortVhdFile(cn->connectionID(), p1);
 			}
 		}
@@ -832,7 +767,7 @@ namespace Builder
 		list.append("-- This file has been generated automatically by RPCT software");
 		list.append("--");
 
-		BuildInfo bi = m_resultWriter->buildInfo();
+		BuildInfo bi = buildResultWriter()->buildInfo();
 
 		str = QString("-- Project:\t%1").arg(bi.project);
 		list.append(str);
@@ -971,9 +906,9 @@ namespace Builder
 
 		list.append("end arch;");
 
-		m_resultWriter->addFile(Builder::DIR_OPTO_VHD, vhdFileName, list);
+		buildResultWriter()->addFile(Builder::DIR_OPTO_VHD, vhdFileName, list);
 
-		m_resultWriter->addFile(Builder::DIR_OPTO_VHD, bdfFileName, bdfFile.stringList());
+		buildResultWriter()->addFile(Builder::DIR_OPTO_VHD, bdfFileName, bdfFile.stringList());
 
 		return true;
 	}
@@ -1017,7 +952,7 @@ namespace Builder
 		list.append("-- This file has been generated automatically by RPCT software");
 		list.append("--");
 
-		BuildInfo bi = m_resultWriter->buildInfo();
+		BuildInfo bi = buildResultWriter()->buildInfo();
 
 		str = QString("-- Project:\t%1").arg(bi.project);
 		list.append(str);
@@ -1153,9 +1088,9 @@ namespace Builder
 
 		list.append("end arch;");
 
-		m_resultWriter->addFile(Builder::DIR_OPTO_VHD, vhdFileName, list);
+		buildResultWriter()->addFile(Builder::DIR_OPTO_VHD, vhdFileName, list);
 
-		m_resultWriter->addFile(Builder::DIR_OPTO_VHD, bdfFileName, bdfFile.stringList());
+		buildResultWriter()->addFile(Builder::DIR_OPTO_VHD, bdfFileName, bdfFile.stringList());
 
 		return true;
 	}
@@ -1166,7 +1101,7 @@ namespace Builder
 	{
 		QVector<Hardware::OptoModuleShared> modules;
 
-		m_optoModuleStorage->getOptoModulesSorted(modules);
+		opticModuleStorage()->getOptoModulesSorted(modules);
 
 		int count = modules.count();
 
@@ -1223,14 +1158,14 @@ namespace Builder
 			}
 		}
 
-		m_resultWriter->addFile(Builder::DIR_REPORTS, "Opto-modules.txt", "", "", list);
+		buildResultWriter()->addFile(Builder::DIR_REPORTS, "Opto-modules.txt", "", "", list);
 
 		return true;
 	}
 
 	bool ApplicationLogicCompiler::writeAppSignalSetFile()
 	{
-		if (m_signals == nullptr)
+		if (signalSet() == nullptr)
 		{
 			assert(false);
 			return false;
@@ -1240,11 +1175,11 @@ namespace Builder
 
 		// fill signals
 		//
-		int signalCount = m_signals->count();
+		int signalCount = signalSet()->count();
 
 		for(int i = 0; i < signalCount; i++)
 		{
-			const Signal& s = (*m_signals)[i];
+			const Signal& s = (*signalSet())[i];
 
 			::Proto::AppSignal* protoAppSignal = protoAppSignalSet.add_appsignal();
 
@@ -1259,7 +1194,7 @@ namespace Builder
 
 		protoAppSignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
 
-		BuildFile* appSignalSetFile = m_resultWriter->addFile(Builder::DIR_COMMON, FILE_APP_SIGNALS_ASGS, CFG_FILE_ID_APP_SIGNAL_SET, "", data, true);
+		BuildFile* appSignalSetFile = buildResultWriter()->addFile(Builder::DIR_COMMON, FILE_APP_SIGNALS_ASGS, CFG_FILE_ID_APP_SIGNAL_SET, "", data, true);
 
 		return appSignalSetFile != nullptr;
 	}
@@ -1268,32 +1203,32 @@ namespace Builder
 	{
 		bool result = true;
 
-		int subsystemsCount = m_subsystems->count();
+		int subsystemsCount = subsystems()->count();
 
-		QHash<QString, std::shared_ptr<Hardware::Subsystem>> subsystems;
+		QHash<QString, std::shared_ptr<Hardware::Subsystem>> subsys;
 
 		for(int i = 0; i < subsystemsCount; i++)
 		{
-			std::shared_ptr<Hardware::Subsystem> subsystem = m_subsystems->get(i);
+			std::shared_ptr<Hardware::Subsystem> subsystem = subsystems()->get(i);
 
 			if (subsystem == nullptr)
 			{
-				LOG_NULLPTR_ERROR(m_log);
+				LOG_NULLPTR_ERROR(log());
 				result = false;
 				continue;
 			}
 
-			subsystems.insert(subsystem->subsystemId(), subsystem);
+			subsys.insert(subsystem->subsystemId(), subsystem);
 		}
 
 		QHash<QString, QString> subsystemModules;
 		QHash<QString, const Hardware::DeviceModule*> modules;
 
-		for(const Hardware::DeviceModule* module : m_lmModules)
+		for(const Hardware::DeviceModule* module : lmModules())
 		{
 			if (module == nullptr)
 			{
-				LOG_NULLPTR_ERROR(m_log);
+				LOG_NULLPTR_ERROR(log());
 				result = false;
 				continue;
 			}
@@ -1302,7 +1237,7 @@ namespace Builder
 
 			QString lmSubsystem;
 
-			bool res= DeviceHelper::getStrProperty(module, "SubsystemID", &lmSubsystem, m_log);
+			bool res= DeviceHelper::getStrProperty(module, "SubsystemID", &lmSubsystem, log());
 
 			if (res == false)
 			{
@@ -1310,10 +1245,10 @@ namespace Builder
 				continue;
 			}
 
-			if (subsystems.contains(lmSubsystem) == false)
+			if (subsys.contains(lmSubsystem) == false)
 			{
 				// Subsystem '%1' is not found in subsystem set (Logic Module '%2').
-				m_log->errCFG3001(lmSubsystem, module->equipmentIdTemplate());
+				log()->errCFG3001(lmSubsystem, module->equipmentIdTemplate());
 				result = false;
 				continue;
 			}
@@ -1327,22 +1262,22 @@ namespace Builder
 		xml.setAutoFormatting(true);
 		xml.writeStartDocument();
 
-		m_resultWriter->buildInfo().writeToXml(*xml.xmlStreamWriter());
+		buildResultWriter()->buildInfo().writeToXml(*xml.xmlStreamWriter());
 
 		xml.writeStartElement("Subsystems");
 		xml.writeIntAttribute("Count", subsystemsCount);
 
-		QStringList subsystemIDs = subsystems.uniqueKeys();
+		QStringList subsystemIDs = subsys.uniqueKeys();
 
 		subsystemIDs.sort();
 
 		for(const QString& subsystemID : subsystemIDs)
 		{
-			std::shared_ptr<Hardware::Subsystem> subsystem = subsystems.value(subsystemID, nullptr);
+			std::shared_ptr<Hardware::Subsystem> subsystem = subsys.value(subsystemID, nullptr);
 
 			if (subsystem == nullptr)
 			{
-				LOG_INTERNAL_ERROR(m_log);
+				LOG_INTERNAL_ERROR(log());
 				result = false;
 				continue;
 			}
@@ -1364,20 +1299,20 @@ namespace Builder
 
 				if (module == nullptr)
 				{
-					LOG_INTERNAL_ERROR(m_log);
+					LOG_INTERNAL_ERROR(log());
 					result = false;
 					continue;
 				}
 
 				int lmNumber = 0;
 				int lmChannel = 0;
-				QString lmSubsystem = 0;
+				QString lmSubsystem;
 
 				bool res = true;
 
-				res &= DeviceHelper::getIntProperty(module, "LMNumber", &lmNumber, m_log);
-				res &= DeviceHelper::getIntProperty(module, "SubsystemChannel", &lmChannel, m_log);
-				res &= DeviceHelper::getStrProperty(module, "SubsystemID", &lmSubsystem, m_log);
+				res &= DeviceHelper::getIntProperty(module, "LMNumber", &lmNumber, log());
+				res &= DeviceHelper::getIntProperty(module, "SubsystemChannel", &lmChannel, log());
+				res &= DeviceHelper::getStrProperty(module, "SubsystemID", &lmSubsystem, log());
 
 				if (res == false)
 				{
@@ -1405,7 +1340,7 @@ namespace Builder
 		xml.writeEndElement(); // </Subsystems>
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = m_resultWriter->addFile(Builder::DIR_COMMON, "Subsystems.xml", "", "",  data);
+		BuildFile* buildFile = buildResultWriter()->addFile(Builder::DIR_COMMON, "Subsystems.xml", "", "",  data);
 
 		if (buildFile == nullptr)
 		{
@@ -1413,12 +1348,6 @@ namespace Builder
 		}
 
 		return result;
-	}
-
-	const LmDescriptionSet& ApplicationLogicCompiler::lmDescriptionSet() const
-	{
-		assert(m_lmDescriptions);
-		return *m_lmDescriptions;
 	}
 
 	void ApplicationLogicCompiler::clear()
@@ -1429,10 +1358,7 @@ namespace Builder
 		}
 
 		m_moduleCompilers.clear();
-
-		m_log = nullptr;
 	}
-
 }
 
 

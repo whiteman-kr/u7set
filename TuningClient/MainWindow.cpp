@@ -191,17 +191,17 @@ void MainWindow::createMenu()
 	//
 	QMenu* pServiceMenu = menuBar()->addMenu(tr("&Service"));
 	pServiceMenu->addAction(m_pPresetEditorAction);
-
-	QMenu* pToolsMenu = menuBar()->addMenu(tr("&Tools"));
-	pToolsMenu->addAction(m_pTuningSourcesAction);
-	pToolsMenu->addAction(m_pStatisticsAction);
-	pToolsMenu->addAction(m_pSettingsAction);
+	pServiceMenu->addSeparator();
+	pServiceMenu->addAction(m_pSettingsAction);
 
 
 	// Help
 	//
 	QMenu* pHelpMenu = menuBar()->addMenu(tr("&?"));
 
+	pHelpMenu->addAction(m_pTuningSourcesAction);
+	pHelpMenu->addAction(m_pStatisticsAction);
+	pHelpMenu->addSeparator();
 	pHelpMenu->addAction(m_pAppLogAction);
 	pHelpMenu->addAction(m_pSignalLogAction);
 	pHelpMenu->addSeparator();
@@ -591,11 +591,13 @@ void MainWindow::updateStatusBar()
 
 	if (theConfigSettings.showDiscreteCounters == true)
 	{
-		if (m_discreteCounter != m_filterStorage.root()->counters().discreteCounter || m_statusDiscreteCount->text().isEmpty() == true)
-		{
-			m_discreteCounter = m_filterStorage.root()->counters().discreteCounter;
+		TuningCounters rootCounters = m_filterStorage.root()->counters();
 
-			m_statusDiscreteCount->setText(QString("Discretes: %1").arg(m_discreteCounter));
+		if (m_discreteCounter != rootCounters.discreteCounter || m_statusDiscreteCount->text().isEmpty() == true)
+		{
+			m_discreteCounter = rootCounters.discreteCounter;
+
+			m_statusDiscreteCount->setText(tr(" Discretes: %1 ").arg(m_discreteCounter));
 
 			if (m_discreteCounter == 0)
 			{
@@ -616,7 +618,7 @@ void MainWindow::updateStatusBar()
 
 	if (sources.empty() == true)
 	{
-		m_statusBarLmErrors->setText(tr(" No LM information"));
+		m_statusBarLmErrors->setText(tr(" No LM information "));
 		m_statusBarSor->setText(QString());
 	}
 	else
@@ -625,13 +627,13 @@ void MainWindow::updateStatusBar()
 
 		// Lm Errors tool
 
-		int totalErrorCount = m_tcpClient->sourceErrorCount();
+		TuningCounters rootCounters = m_filterStorage.root()->counters();
 
-		if (m_lmErrorsCounter != totalErrorCount)
+		if (m_lmErrorsCounter != rootCounters.errorCounter)
 		{
-			m_lmErrorsCounter = totalErrorCount;
+			m_lmErrorsCounter = rootCounters.errorCounter;
 
-			m_statusBarLmErrors->setText(QString(" LM Errors: %1").arg(m_lmErrorsCounter));
+			m_statusBarLmErrors->setText(tr(" LM Errors: %1 ").arg(m_lmErrorsCounter));
 
 			if (m_lmErrorsCounter == 0)
 			{
@@ -647,39 +649,33 @@ void MainWindow::updateStatusBar()
 
 		if (theConfigSettings.showSOR == true)
 		{
-			bool totalSorActive = false;
-
-			bool totalSorValid = false;
-
-			int totalSorCount = m_tcpClient->sourceSorCount(&totalSorActive, &totalSorValid);
-
 			QString sorStatus;
 
-			if (totalSorActive == false)
+			if (rootCounters.sorActive == false)
 			{
 				sorStatus = tr(" SOR: ");
 			}
 			else
 			{
-				if (totalSorValid == false)
+				if (rootCounters.sorValid == false)
 				{
-					sorStatus = tr(" SOR: ?");
+					sorStatus = tr(" SOR: ? ");
 				}
 				else
 				{
-					if (totalSorCount == 0)
+					if (rootCounters.sorCounter == 0)
 					{
-						sorStatus = tr(" SOR: No");
+						sorStatus = tr(" SOR: No ");
 					}
 					else
 					{
-						if (totalSorCount == 1)
+						if (rootCounters.sorCounter == 1)
 						{
-							sorStatus = tr(" SOR: Yes");
+							sorStatus = tr(" SOR: Yes ");
 						}
 						else
 						{
-							sorStatus = tr(" SOR: Yes [%1]").arg(totalSorCount);
+							sorStatus = tr(" SOR: Yes [%1] ").arg(rootCounters.sorCounter);
 						}
 					}
 				}
@@ -693,7 +689,7 @@ void MainWindow::updateStatusBar()
 
 				m_statusBarSor->setText(sorStatus);
 
-				if ((totalSorActive == true && totalSorValid == false) || totalSorCount > 0)
+				if ((rootCounters.sorActive == true && rootCounters.sorValid == false) || rootCounters.sorCounter > 0)
 				{
 					m_statusBarSor->setStyleSheet("QLabel {color : white; background-color: red}");
 
@@ -719,7 +715,7 @@ void MainWindow::updateStatusBar()
 
 		assert(m_statusBarLogAlerts);
 
-		m_statusBarLogAlerts->setText(QString(" Log E: %1 W: %2").arg(m_logErrorsCounter).arg(m_logWarningsCounter));
+		m_statusBarLogAlerts->setText(QString(" Log E: %1 W: %2 ").arg(m_logErrorsCounter).arg(m_logWarningsCounter));
 
 		if (m_logErrorsCounter == 0 && m_logWarningsCounter == 0)
 		{
@@ -734,6 +730,8 @@ void MainWindow::updateStatusBar()
 
 void MainWindow::slot_configurationArrived()
 {
+	m_filterStorage.root()->setHasDiscreteCounter(theConfigSettings.showDiscreteCounters == true);
+
 	createWorkspace();
 
 	return;
@@ -882,7 +880,7 @@ void MainWindow::slot_userFiltersChanged()
 
 	if (m_tuningWorkspace != nullptr)
 	{
-		m_tuningWorkspace->updateFiltersTree(m_filterStorage.root());
+		m_tuningWorkspace->updateFilters(m_filterStorage.root());
 	}
 
 }

@@ -9,7 +9,7 @@
 #include "MonitorConfigController.h"
 #include "../lib/TcpClientsStatistics.h"
 
-class ArchiveTrendTcpClient : public Tcp::Client, public TcpClientInstance
+class ArchiveTrendTcpClient : public Tcp::Client, public TcpClientStatistics
 {
 	Q_OBJECT
 

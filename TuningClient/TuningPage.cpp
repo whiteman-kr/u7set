@@ -497,7 +497,6 @@ bool TuningTableView::edit(const QModelIndex&  index, EditTrigger trigger, QEven
 		int valueColumn = columnType - static_cast<int>(TuningModelColumns::ValueFirst);
 		if (valueColumn < 0 || valueColumn >= MAX_VALUES_COLUMN_COUNT)
 		{
-			assert(false);
 			return false;
 		}
 
@@ -753,6 +752,9 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 		m_model->addColumn(TuningModelColumns::OutOfRange);
 	}
 
+	m_bottomLayout = new QHBoxLayout();
+
+
 	// Filter controls
 	//
 	m_filterTypeCombo = new QComboBox();
@@ -761,44 +763,61 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 	m_filterTypeCombo->addItem(tr("CustomAppSignalID"), static_cast<int>(FilterType::CustomAppSignalID));
 	m_filterTypeCombo->addItem(tr("EquipmentID"), static_cast<int>(FilterType::EquipmentID));
 	m_filterTypeCombo->addItem(tr("Caption"), static_cast<int>(FilterType::Caption));
+	m_bottomLayout->addWidget(m_filterTypeCombo);
 
 	connect(m_filterTypeCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(slot_FilterTypeIndexChanged(int)));
 
 	m_filterTypeCombo->setCurrentIndex(0);
 
 	m_filterEdit = new QLineEdit();
+	m_bottomLayout->addWidget(m_filterEdit);
 	connect(m_filterEdit, &QLineEdit::returnPressed, this, &TuningPage::slot_ApplyFilter);
 
 	m_filterButton = new QPushButton(tr("Filter"));
+	m_bottomLayout->addWidget(m_filterButton);
 	connect(m_filterButton, &QPushButton::clicked, this, &TuningPage::slot_ApplyFilter);
+
+	m_bottomLayout->addSpacing(20);
+
+	// Value filter controls
+	//
+
+	QLabel* l = new QLabel(tr("Value:"));
+	m_bottomLayout->addWidget(l);
+
+	m_filterValueCombo = new QComboBox();
+	m_filterValueCombo->addItem(tr("Any Value"), static_cast<int>(FilterType::All));
+	m_filterValueCombo->addItem(tr("Discrete 0"), static_cast<int>(FilterType::Zero));
+	m_filterValueCombo->addItem(tr("Discrete 1"), static_cast<int>(FilterType::One));
+	m_bottomLayout->addWidget(m_filterValueCombo);
+
+	connect(m_filterValueCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(slot_FilterValueIndexChanged(int)));
+
+	m_filterValueCombo->setCurrentIndex(0);
+
+	m_bottomLayout->addStretch();
+
 
 	// Button controls
 	//
 
 	m_setValueButton = new QPushButton(tr("Set Value"));
+	m_bottomLayout->addWidget(m_setValueButton);
 	connect(m_setValueButton, &QPushButton::clicked, this, &TuningPage::slot_setValue);
 
 	m_setAllButton = new QPushButton(tr("Set All"));
+	m_bottomLayout->addWidget(m_setAllButton);
 	connect(m_setAllButton, &QPushButton::clicked, this, &TuningPage::slot_setAll);
 
+	m_bottomLayout->addStretch();
+
 	m_writeButton = new QPushButton(tr("Write"));
+	m_bottomLayout->addWidget(m_writeButton);
 	connect(m_writeButton, &QPushButton::clicked, this, &TuningPage::slot_Write);
 
 	m_undoButton = new QPushButton(tr("Undo"));
-	connect(m_undoButton, &QPushButton::clicked, this, &TuningPage::slot_undo);
-
-
-	m_bottomLayout = new QHBoxLayout();
-
-	m_bottomLayout->addWidget(m_filterTypeCombo);
-	m_bottomLayout->addWidget(m_filterEdit);
-	m_bottomLayout->addWidget(m_filterButton);
-	m_bottomLayout->addStretch();
-	m_bottomLayout->addWidget(m_setValueButton);
-	m_bottomLayout->addWidget(m_setAllButton);
-	m_bottomLayout->addStretch();
-	m_bottomLayout->addWidget(m_writeButton);
 	m_bottomLayout->addWidget(m_undoButton);
+	connect(m_undoButton, &QPushButton::clicked, this, &TuningPage::slot_undo);
 
 	if (theConfigSettings.autoApply == false)
 	{
@@ -844,11 +863,9 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 		m_objectList->setColumnWidth(c, width);
 	}
 
-
-
 	// Color
 
-	if (m_pageFilter->isTab() == true && m_pageFilter->backColor().isValid() && m_pageFilter->textColor().isValid() && m_pageFilter->backColor() != m_pageFilter->textColor())
+	if (m_pageFilter->isTab() == true && m_pageFilter->useColors() == true)
 	{
 		QPalette Pal(palette());
 
@@ -949,6 +966,13 @@ void TuningPage::fillObjectsList()
 		filterType = static_cast<FilterType>(data.toInt());
 	}
 
+	FilterType filterValue = FilterType::All;
+	data = m_filterValueCombo->currentData();
+	if (data.isValid() == true)
+	{
+		filterValue = static_cast<FilterType>(data.toInt());
+	}
+
 	bool ok = false;
 
 	for (Hash hash : hashes)
@@ -969,14 +993,22 @@ void TuningPage::fillObjectsList()
 			// Modify the default value from selected tree filter
 			//
 
-			TuningFilterValue filterValue;
-
-			bool hasValue = m_treeFilter->value(hash, filterValue);
-
-			if (hasValue == true)
+			if (m_treeFilter->filterSignalExists(hash) == true)
 			{
-				modifyDefaultValue = true;
-				modifiedDefaultValue = filterValue.value();
+				TuningFilterSignal filterSignal;
+
+				bool ok = m_treeFilter->filterSignal(hash, filterSignal);
+				if (ok == false)
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+				if (filterSignal.useValue() == true)
+				{
+					modifyDefaultValue = true;
+					modifiedDefaultValue = filterSignal.value();
+				}
 			}
 		}
 		else
@@ -985,21 +1017,51 @@ void TuningPage::fillObjectsList()
 			{
 				// Modify the default value from page filter
 				//
-
-				TuningFilterValue filterValue;
-
-				bool hasValue = m_pageFilter->value(hash, filterValue);
-
-				if (hasValue == true)
+				if (m_treeFilter->filterSignalExists(hash) == true)
 				{
-					modifyDefaultValue = true;
-					modifiedDefaultValue = filterValue.value();
+					TuningFilterSignal filterSignal;
+
+					bool ok = m_pageFilter->filterSignal(hash, filterSignal);
+					if (ok == false)
+					{
+						Q_ASSERT(false);
+						return;
+					}
+
+					if (filterSignal.useValue() == true)
+					{
+						modifyDefaultValue = true;
+						modifiedDefaultValue = filterSignal.value();
+					}
+				}
+			}
+		}
+
+		// Value filter
+		//
+
+		if (filterValue != FilterType::All && asp.isDiscrete() == true)
+		{
+			bool ok = false;
+
+			const TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+			if (ok == true && state.valid() == true)
+			{
+				if (filterValue == FilterType::Zero && state.value().discreteValue() != 0)
+				{
+					continue;
+				}
+				if (filterValue == FilterType::One && state.value().discreteValue() != 1)
+				{
+					continue;
 				}
 			}
 		}
 
 		// Text filter
 		//
+
 
 		if (filter.length() != 0)
 		{
@@ -1105,12 +1167,12 @@ bool TuningPage::write()
 		return false;
 	}
 
-	if (takeClientControl() == false)
+	if (m_tuningTcpClient->takeClientControl(this) == false)
 	{
 		return false;
 	}
 
-	QString str = tr("New values will be written:") + QString("\r\n\r\n");
+	QString str = tr("New values will be written:") + QString("\n\n");
 	QString strValue;
 
 	bool modifiedFound = false;
@@ -1176,12 +1238,12 @@ bool TuningPage::write()
 			strValue = m_tuningSignalManager->newValue(hash).toString();
 		}
 
-		str += tr("%1 (%2) = %3\r\n").arg(asp.appSignalId()).arg(asp.caption()).arg(strValue);
+		str += tr("%1 (%2) = %3\n").arg(asp.appSignalId()).arg(asp.caption()).arg(strValue);
 
 		listCount++;
 	}
 
-	str += QString("\r\n") + tr("Are you sure you want to continue?");
+	str += QString("\n") + tr("Are you sure you want to continue?");
 
 	if (QMessageBox::warning(this, tr("Write Changes"),
 							 str,
@@ -1217,16 +1279,16 @@ bool TuningPage::write()
 	return true;
 }
 
-bool TuningPage::apply()
+void TuningPage::apply()
 {
 	if (theMainWindow->userManager()->login(this) == false)
 	{
-		return false;
+		return;
 	}
 
-	if (takeClientControl() == false)
+	if (m_tuningTcpClient->takeClientControl(this) == false)
 	{
-		return false;
+		return;
 	}
 
 	if (QMessageBox::warning(this, qAppName(),
@@ -1234,30 +1296,27 @@ bool TuningPage::apply()
 							 QMessageBox::Yes | QMessageBox::No,
 							 QMessageBox::No) != QMessageBox::Yes)
 	{
-		return false;
+		return;
 	}
 
 	// Get SOR counters
 
-	bool sorActive = false;
-	bool sorValid = false;
+	TuningCounters rootCounters = m_tuningFilterStorage->root()->counters();
 
-	int totalSorCount = m_tuningTcpClient->sourceSorCount(&sorActive, &sorValid);
-
-	if (totalSorCount > 0)
+	if (rootCounters.sorCounter > 0)
 	{
 		if (QMessageBox::warning(this, qAppName(),
-								 tr("Warning!!!\r\n\r\nSOR Signal(s) are set in logic modules!\r\n\r\nIf you apply these changes, module can run into RUN SAFE STATE.\r\n\r\nAre you sure you STILL WANT TO APPLY the changes?"),
+								 tr("Warning!!!\n\nSOR Signal(s) are set in logic modules!\n\nIf you apply these changes, module can run into RUN SAFE STATE.\n\nAre you sure you STILL WANT TO APPLY the changes?"),
 								 QMessageBox::Yes | QMessageBox::No,
 								 QMessageBox::No) != QMessageBox::Yes)
 		{
-			return false;
+			return;
 		}
 	}
 
 	m_tuningTcpClient->applyTuningSignals();
 
-	return true;
+	return;
 }
 
 void TuningPage::undo()
@@ -1403,6 +1462,28 @@ void TuningPage::slot_tableDoubleClicked(const QModelIndex& index)
 
 void TuningPage::slot_FilterTypeIndexChanged(int index)
 {
+	Q_UNUSED(index);
+	fillObjectsList();
+}
+
+void TuningPage::slot_FilterValueIndexChanged(int index)
+{
+	FilterType filterValue = FilterType::All;
+	QVariant data = m_filterValueCombo->currentData();
+	if (data.isValid() == true)
+	{
+		filterValue = static_cast<FilterType>(data.toInt());
+	}
+
+	if (filterValue != FilterType::All)
+	{
+		m_filterValueCombo->setStyleSheet("QComboBox { color: red }");
+	}
+	else
+	{
+		m_filterValueCombo->setStyleSheet(QString());
+	}
+
 	Q_UNUSED(index);
 	fillObjectsList();
 }
@@ -1629,6 +1710,17 @@ void TuningPage::slot_restoreValuesFromExistingFilter()
 
 void TuningPage::slot_ApplyFilter()
 {
+	if (m_filterEdit->text().isEmpty() == false)
+	{
+		m_filterEdit->setStyleSheet("QLineEdit { color: red }");
+		m_filterButton->setStyleSheet("QPushButton { color: red }");
+	}
+	else
+	{
+		m_filterEdit->setStyleSheet(QString());
+		m_filterButton->setStyleSheet(QString());
+	}
+
 	fillObjectsList();
 }
 
@@ -1730,38 +1822,6 @@ void TuningPage::invertValue()
 	}
 }
 
-bool TuningPage::takeClientControl()
-{
-#ifdef Q_DEBUG
-	if (theSettings.m_simulationMode == false)
-#endif
-	{
-		if (m_tuningTcpClient->activeTuningSourceCount() == 0)
-		{
-			QMessageBox::critical(this, qAppName(),	 tr("No tuning sources with control enabled found."));
-
-			return false;
-		}
-	}
-
-	if (m_tuningTcpClient->singleLmControlMode() == true && m_tuningTcpClient->clientIsActive() == false)
-	{
-		QString equipmentId = m_tuningTcpClient->singleActiveTuningSource();
-
-		if (QMessageBox::warning(this, qAppName(),
-								 tr("Warning!\r\n\r\nCurrent client is not selected as active now.\r\n\r\nAre you sure you want to take control and activate the source %1?").arg(equipmentId),
-								 QMessageBox::Yes | QMessageBox::No,
-								 QMessageBox::No) != QMessageBox::Yes)
-		{
-			return false;
-		}
-
-		m_tuningTcpClient->activateTuningSourceControl(equipmentId, true, true);
-	}
-
-	return true;
-}
-
 void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 {
 	if (filter == nullptr)
@@ -1810,7 +1870,7 @@ void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 				continue;
 			}
 
-			TuningFilterValue tv;
+			TuningFilterSignal tv;
 
 			tv.setAppSignalId(asp.appSignalId());
 
@@ -1820,7 +1880,7 @@ void TuningPage::addSelectedSignalsToFilter(TuningFilter* filter)
 				tv.setValue(state.value());
 			}
 
-			filter->addValue(tv);
+			filter->addFilterSignal(tv);
 
 			addedCount++;
 		}
@@ -1855,7 +1915,7 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 
 	int restoredCount = 0;
 
-	TuningFilterValue tv;
+	TuningFilterSignal tv;
 
 	for (int r = 0; r < m_model->rowCount(); r++)
 	{
@@ -1868,7 +1928,7 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 				continue;
 			}
 
-			bool exists = filter->value(hash, tv);
+			bool exists = filter->filterSignal(hash, tv);
 			if (exists == true)
 			{
 

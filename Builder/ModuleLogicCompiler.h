@@ -162,10 +162,10 @@ namespace Builder
 		};
 
 	public:
-		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm, bool expertMode);
+		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm);
 		~ModuleLogicCompiler();
 
-		SignalSet& signalSet() { return *m_signals; }
+		SignalSet* signalSet() { return m_signals; }
 		Signal* getSignal(const QString& appSignalID);
 
 		IssueLogger* log() { return m_log; }
@@ -176,12 +176,11 @@ namespace Builder
 		bool pass2();
 
 		QString lmEquipmentID() const;
-		ResourcesUsageInfo resourcesUsageInfo() { return m_resourcesUsageInfo; }
+		int lmDescriptionNumber() const;
 
 		bool expertMode() const;
-		void setExpertMode(bool value);
 
-		int lmDescriptionNumber() const;
+		const ResourcesUsageInfo& resourcesUsageInfo() { return m_resourcesUsageInfo; }
 
 	private:
 		// pass #1 compilation functions
@@ -473,7 +472,8 @@ namespace Builder
 		bool calculateCodeRunTime();
 
 		bool writeResult();
-		bool setLmAppLANDataUID(const QByteArray& lmAppCode, quint64 &uniqueID);
+		bool writeBinCodeForLm();
+		bool calcAppLogicUniqueID(const QByteArray& lmAppCode);
 		bool writeTuningInfoFile();
 		bool writeOcmRsSignalsXml();
 		void writeLMCodeTestFile();
@@ -519,11 +519,12 @@ namespace Builder
 		CodeItem codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment);
 
 	private:
-		static const int ERR_VALUE = -1;
-
 		// input parameters
 		//
 		ApplicationLogicCompiler& m_appLogicCompiler;
+		Context* m_context = nullptr;
+		const Hardware::DeviceModule* m_lm = nullptr;
+
 		Hardware::EquipmentSet* m_equipmentSet = nullptr;
 		Hardware::DeviceObject* m_deviceRoot = nullptr;
 		Hardware::ConnectionStorage* m_connections = nullptr;
@@ -538,7 +539,6 @@ namespace Builder
 		BuildResultWriter* m_resultWriter = nullptr;
 		mutable IssueLogger* m_log = nullptr;
 
-		const Hardware::DeviceModule* m_lm = nullptr;
 		const Hardware::DeviceChassis* m_chassis = nullptr;
 
 		// LM's and modules settings
@@ -558,6 +558,8 @@ namespace Builder
 		int m_lmSubsystemKey = 0;
 		int m_lmNumber = 0;
 		int m_lmChannel = 0;
+
+		quint64 m_appLogicUniqueID = 0;
 
 		// LM's calculated memory offsets and sizes
 		//
@@ -631,9 +633,7 @@ namespace Builder
 
 		QHash<QUuid, QUuid> m_outPinSignal;								// output pin GUID -> signal GUID
 
-		QHash<Hardware::DeviceModule::FamilyType, QString> m_moduleFamilyTypeStr;
-
-		QString msg;
+//		QString msg;
 
 		ResourcesUsageInfo m_resourcesUsageInfo;
 
@@ -657,8 +657,6 @@ namespace Builder
 		QHash<QString, UalAfb*> m_inOutSignalsToScalAppFbMap;
 
 		Tuning::TuningData* m_tuningData = nullptr;
-
-		bool m_expertMode = false;
 	};
 
 }

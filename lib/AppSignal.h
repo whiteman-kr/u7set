@@ -75,6 +75,8 @@ public:
 	void save(Proto::AppSignalState* protoState);
 	Hash load(const Proto::AppSignalState& protoState);
 
+	static QString toString(double value, E::ValueViewType viewType, int precision);
+
 public:
 	Hash m_hash = 0;					// == calcHash(AppSignalID)
 	Times m_time;
@@ -115,6 +117,7 @@ class AppSignalParam
 
 public:
 	AppSignalParam();
+	AppSignalParam(const AppSignalParam&) = default;
 
 	bool load(const Proto::AppSignal& message);
 	void save(::Proto::AppSignal* message) const;
@@ -237,14 +240,14 @@ private:
 
 	double m_electricLowLimit = 0;									// low electric value for input range
 	double m_electricHighLimit = 0;									// high electric value for input range
-	E::ElectricUnit m_electricUnit = E::ElectricUnit::NoUnit;			// electric unit for input range (mA, mV, Ohm, V ....)
-	E::SensorType m_sensorType = E::SensorType::NoSensor;	// electric sensor type for input range (was created for m_inputUnitID)
+	E::ElectricUnit m_electricUnit = E::ElectricUnit::NoUnit;		// electric unit for input range (mA, mV, Ohm, V ....)
+	E::SensorType m_sensorType = E::SensorType::NoSensor;			// electric sensor type for input range (was created for m_inputUnitID)
 
 	double m_outputLowLimit = 0;									// low physical value for output range
 	double m_outputHighLimit = 0;									// high physical value for output range
 	int m_outputUnitId = NO_UNIT_ID;								// physical unit for output range (kg, mm, Pa ...)
 	E::OutputMode m_outputMode = E::OutputMode::Plus0_Plus5_V;		// output electric range (or mode ref. OutputModeStr[])
-	E::SensorType m_outputSensorType = E::SensorType::NoSensor;	// electric sensor type for output range (was created for m_outputMode)
+	E::SensorType m_outputSensorType = E::SensorType::NoSensor;		// electric sensor type for output range (was created for m_outputMode)
 
 	int m_precision = 2;
 	double m_coarseAperture = 1;

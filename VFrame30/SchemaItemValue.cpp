@@ -185,7 +185,7 @@ namespace VFrame30
 						
 		// Calculate rectangle
 		//
-		QRectF r = boundingRectInDocPt();
+		QRectF r = boundingRectInDocPt(drawParam);
 
 		// Drawing background
 		//

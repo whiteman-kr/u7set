@@ -359,6 +359,7 @@ protected slots:
 	void f2KeyForSignal(std::shared_ptr<VFrame30::SchemaItem> item);
 	void f2KeyForLoopback(std::shared_ptr<VFrame30::SchemaItem> item);
 	void f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item);
+	void f2KeyForImageValue(std::shared_ptr<VFrame30::SchemaItem> item);
 	void f2KeyForBus(std::shared_ptr<VFrame30::SchemaItem> item);
 
 	void deleteKey();
@@ -616,6 +617,7 @@ private:
 		QAction* m_addBusExtractor = nullptr;
 
 		QAction* m_addValueAction = nullptr;
+		QAction* m_addImageValueAction = nullptr;
 		QAction* m_addPushButtonAction = nullptr;
 		QAction* m_addLineEditAction = nullptr;
 

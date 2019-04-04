@@ -2,6 +2,8 @@
 #include "MacrosExpander.h"
 #include "PropertyNames.h"
 #include "DrawParam.h"
+#include "QPainter"
+
 
 namespace VFrame30
 {
@@ -15,13 +17,25 @@ namespace VFrame30
 
 	SchemaItemImage::SchemaItemImage(SchemaUnit unit)
 	{
+		Property* p;
+
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::allowScale, PropertyNames::appearanceCategory, true, SchemaItemImage::allowScale, SchemaItemImage::setAllowScale);
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::keepAspectRatio, PropertyNames::appearanceCategory, true, SchemaItemImage::keepAspectRatio, SchemaItemImage::setKeepAspectRatio);
+
+		p = ADD_PROPERTY_GET_SET_CAT(QImage, PropertyNames::image, PropertyNames::imageCategory, true, SchemaItemImage::image, SchemaItemImage::setImage);
+		p->setSpecificEditor(E::PropertySpecificEditor::LoadFileDialog);
+		p->setValidator(QStringLiteral("Images (*.png *.bmp *.jpg *.jpeg *.gif);; All Files (*.*)"));
+
+		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::svg, PropertyNames::imageCategory, true, SchemaItemImage::svgData, SchemaItemImage::setSvgData);
+		p->setSpecificEditor(E::PropertySpecificEditor::LoadFileDialog);
+		p->setValidator(QStringLiteral("Svg Files (*.svg);; All Files (*.*)"));
 
 		// --
 		//
 		m_static = true;
 		setItemUnit(unit);
+
+		return;
 	}
 
 	SchemaItemImage::~SchemaItemImage(void)
@@ -42,12 +56,11 @@ namespace VFrame30
 		
 		// --
 		//
+
 		Proto::SchemaItemImage* imageMessage = message->mutable_schemaitem()->mutable_image();
 
-		imageMessage->set_allowscale(m_allowScale);
-		imageMessage->set_keepaspectratio(m_keepAspectRatio);
-
-		return true;
+		bool ok = m_image.save(imageMessage->mutable_image());
+		return ok;
 	}
 
 	bool SchemaItemImage::LoadData(const Proto::Envelope& message)
@@ -70,96 +83,47 @@ namespace VFrame30
 		//
 		if (message.schemaitem().has_image() == false)
 		{
-			assert(message.schemaitem().has_image());
+			Q_ASSERT(message.schemaitem().has_image());
 			return false;
 		}
 
 		const Proto::SchemaItemImage& imageMessage = message.schemaitem().image();
 
-		m_allowScale = imageMessage.allowscale();
-		m_keepAspectRatio = imageMessage.keepaspectratio();
+		bool ok = m_image.load(imageMessage.image());
 
-		return true;
+		return ok;
 	}
 
 	// Drawing Functions
 	//
-	void SchemaItemImage::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* /*layer*/) const
+	void SchemaItemImage::Draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
 	{
-		QPainter* p = drawParam->painter();
+		QRectF rect = boundingRectInDocPt(drawParam);
 
-		// Initialization drawing resources
-		//
-//		if (m_rectPen.get() == nullptr)
-//		{
-//			m_rectPen = std::make_shared<QPen>();
-//		}
-
-//		QColor qlinecolor(lineColor());
-//		if (m_rectPen->color() !=qlinecolor )
-//		{
-//			m_rectPen->setColor(qlinecolor);
-//		}
-
-//		if (m_fillBrush.get() == nullptr)
-//		{
-//			m_fillBrush = std::make_shared<QBrush>(Qt::SolidPattern);
-//		}
-						
-		// Calculate rectangle
-		//
-		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
-
-		r.setTopRight(drawParam->gridToDpi(r.topRight()));
-		r.setBottomLeft(drawParam->gridToDpi(r.bottomLeft()));
-
-		if (std::abs(r.left() - r.right()) < 0.000001)
+		if (m_image.hasAnyImage() == false)
 		{
-			r.setRight(r.left() + 0.000001f);
+			// Image not set, draw rect and information text
+			//
+			m_image.drawError(drawParam, rect, QStringLiteral("No Image"));
+			return;
 		}
 
-		if (std::abs(r.bottom() - r.top()) < 0.000001)
+		// Draw Image
+		//
+		if (m_image.svgData().isEmpty() == false)
 		{
-			r.setBottom(r.top() + 0.000001f);
+			m_image.drawSvg(drawParam, rect);
+			return;
 		}
 
-//		// Filling rect
-//		//
-//		if (fill() == true)
-//		{
-//			QPainter::RenderHints oldrenderhints = p->renderHints();
-//			p->setRenderHint(QPainter::Antialiasing, false);
-
-//			QColor qfillcolor(fillColor());
-
-//			m_fillBrush->setColor(qfillcolor);
-//			p->fillRect(r, *m_fillBrush);		// 22% если использовать Qcolor и намного меньше если использовать готовый Brush
-
-//			p->setRenderHints(oldrenderhints);
-//		}
-
-		// Drawing rect 
-		//
-//		if (drawRect() == true)
-//		{
-//			m_rectPen->setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
-
-//			p->setPen(*m_rectPen);
-//			p->drawRect(r);
-//		}
-
-		// Drawing Text
-		//
-//		QString text = MacrosExpander::parse(m_text, drawParam->session(), schema, this);
-
-//		if (m_text.isEmpty() == false)
-//		{
-//			p->setPen(textColor());
-//			DrawHelper::drawText(p, m_font, itemUnit(), text, r, horzAlign() | vertAlign());
-//		}
+		if (m_image.image().isNull() == false)
+		{
+			m_image.drawImage(drawParam, rect);
+		}
 
 		return;
 	}
+
 
 	double SchemaItemImage::minimumPossibleHeightDocPt(double gridSize, int /*pinGridStep*/) const
 	{
@@ -174,28 +138,52 @@ namespace VFrame30
 	// Properties and Data
 	//
 
-	// AllowScale property
+	// AllowScale
 	//
 	bool SchemaItemImage::allowScale() const
 	{
-		return m_allowScale;
+		return m_image.allowScale();
 	}
 
 	void SchemaItemImage::setAllowScale(bool value)
 	{
-		m_allowScale = value;
+		m_image.setAllowScale(value);
 	}
 
 	// KeepAspectRatio
 	//
 	bool SchemaItemImage::keepAspectRatio() const
 	{
-		return m_keepAspectRatio;
+		return m_image.keepAspectRatio();
 	}
 
 	void SchemaItemImage::setKeepAspectRatio(bool value)
 	{
-		m_keepAspectRatio = value;
+		m_image.setKeepAspectRatio(value);
+	}
+
+	// Image
+	//
+	const QImage& SchemaItemImage::image() const
+	{
+		return m_image.image();
+	}
+
+	void SchemaItemImage::setImage(const QImage& image)
+	{
+		m_image.setImage(image);
+	}
+
+	// Svg
+	//
+	const QString& SchemaItemImage::svgData() const
+	{
+		return m_image.svgData();
+	}
+
+	void SchemaItemImage::setSvgData(const QString& data)
+	{
+		m_image.setSvgData(data);
 	}
 }
 
