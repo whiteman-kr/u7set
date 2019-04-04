@@ -1752,7 +1752,7 @@ void SignalsModel::loadNextSignalsPortion()
 		QVector<Signal> signalsToLoad;
 		signalsToLoad.reserve(signalIds.count());
 
-		dbController()->getLatestSignals(signalIds, &signalsToLoad, m_parentWindow);
+		dbController()->getLatestSignalsWithoutProgress(signalIds, &signalsToLoad, m_parentWindow);
 
 		for (const Signal& loadedSignal: signalsToLoad)
 		{
@@ -1883,14 +1883,6 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 	connect(m_signalsModel, &SignalsModel::aboutToClearSignals, this, &SignalsTabPage::saveSelection);
 	connect(m_signalsModel, &SignalsModel::signalsRestored, this, &SignalsTabPage::restoreSelection);
-
-	m_loadSignalsTimer = new QTimer(this);
-
-	connect(m_loadSignalsTimer, &QTimer::timeout, m_signalsModel, &SignalsModel::loadNextSignalsPortion);
-	connect(m_signalsProxyModel, &SignalsProxyModel::aboutToSort, m_signalsModel, &SignalsModel::finishLoadSignals, Qt::DirectConnection);
-	connect(m_signalsProxyModel, &SignalsProxyModel::aboutToFilter, m_signalsModel, &SignalsModel::finishLoadSignals, Qt::DirectConnection);
-	connect(m_signalsView->verticalScrollBar(), &QScrollBar::valueChanged, m_signalsModel, &SignalsModel::loadNextSignalsPortion, Qt::DirectConnection);
-	connect(m_signalsModel, &SignalsModel::signalsLoadingFinished, this, &SignalsTabPage::stopLoadingSignals);
 
 	// Create Actions
 	//
@@ -2199,7 +2191,24 @@ void SignalsTabPage::projectOpened()
 {
 	this->setEnabled(true);
 
+	if (m_loadSignalsTimer == nullptr)
+	{
+		m_loadSignalsTimer = new QTimer(this);
+
+		connect(m_loadSignalsTimer, &QTimer::timeout, m_signalsModel, &SignalsModel::loadNextSignalsPortion);
+		connect(m_signalsProxyModel, &SignalsProxyModel::aboutToSort, m_signalsModel, &SignalsModel::finishLoadSignals, Qt::DirectConnection);
+		connect(m_signalsProxyModel, &SignalsProxyModel::aboutToFilter, m_signalsModel, &SignalsModel::finishLoadSignals, Qt::DirectConnection);
+		connect(m_signalsView->verticalScrollBar(), &QScrollBar::valueChanged, m_signalsModel, &SignalsModel::loadNextSignalsPortion, Qt::DirectConnection);
+		connect(m_signalsModel, &SignalsModel::signalsLoadingFinished, this, &SignalsTabPage::stopLoadingSignals);
+
+		if (m_tabWidget != nullptr)
+		{
+			connect(m_tabWidget, &QTabWidget::currentChanged, this, &SignalsTabPage::onTabPageChanged);
+		}
+	}
+
 	m_signalsModel->initLazyLoadSignals();
+	m_signalsModel->loadNextSignalsPortion();
 }
 
 void SignalsTabPage::projectClosed()
@@ -2218,8 +2227,14 @@ void SignalsTabPage::onTabPageChanged()
 		return;
 	}
 
+	if (isEnabled() == false)
+	{
+		return;
+	}
+
 	if (m_loadSignalsTimer == nullptr)
 	{
+		m_tabWidget = tabWidget;
 		disconnect(tabWidget, &QTabWidget::currentChanged, this, &SignalsTabPage::onTabPageChanged);
 		return;
 	}

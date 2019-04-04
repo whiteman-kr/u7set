@@ -318,6 +318,7 @@ private:
 	static SignalsTabPage* m_instance;
 	SignalsModel* m_signalsModel = nullptr;
 	SignalsProxyModel* m_signalsProxyModel = nullptr;
+	QTabWidget* m_tabWidget = nullptr;
 	QTimer* m_loadSignalsTimer = nullptr;
 	QTableView* m_signalsView = nullptr;
 	QComboBox* m_signalTypeFilterCombo = nullptr;
