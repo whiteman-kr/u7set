@@ -126,7 +126,7 @@ TableDataVisibilityController::TableDataVisibilityController(QTableView* parent,
 		horizontalHeader->moveSection(oldVisualIndex, i);
 	}
 
-	QAction* columnsAction = new QAction("Columns", m_tableView);
+	QAction* columnsAction = new QAction("Rearrange columns", m_tableView);
 	connect(columnsAction, &QAction::triggered, this, &TableDataVisibilityController::editColumnsVisibilityAndOrder);
 	horizontalHeader->addAction(columnsAction);
 	connect(horizontalHeader, &QHeaderView::sectionResized, this, &TableDataVisibilityController::saveColumnWidth);
@@ -190,9 +190,11 @@ void TableDataVisibilityController::saveColumnPosition(int index, int position)
 }
 
 EditColumnsVisibilityDialog::EditColumnsVisibilityDialog(QTableView* tableView, TableDataVisibilityController* controller) :
-	QDialog(nullptr, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint),
+	QDialog(tableView, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint),
 	m_controller(controller)
 {
+	setWindowTitle("Rearrange Columns");
+
 	m_columnModel = new QStandardItemModel(this);
 	m_header = tableView->horizontalHeader();
 	for (int i = 0; i < m_header->count(); i++)
