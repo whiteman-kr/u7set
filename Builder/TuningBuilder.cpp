@@ -107,7 +107,9 @@ namespace Builder
 
 			if (it == m_tuningDataStorage->end())
 			{
-				data.fill(0, 100);
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+								   QString(tr("Tuning data for LM '%1' is not found")).arg(m->propertyValue("EquipmentID").toString()));
+				return false;
 			}
 			else
 			{
