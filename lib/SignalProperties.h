@@ -164,7 +164,7 @@ public:
 	static const QString lastEditedSignalFieldValuePlace;
 
 public:
-	explicit SignalProperties(Signal& signal, bool uppercaseAppSignalId = true);
+	explicit SignalProperties(Signal& signal);
 
 	Signal& signal() { return m_signal; }
 	void updateSpecPropValues();
@@ -206,7 +206,7 @@ public:
 
 
 private:
-	void initProperties(bool uppercaseAppSignalId);
+	void initProperties();
 
 	void createSpecificProperties();
 	void deleteSpecificProperties();

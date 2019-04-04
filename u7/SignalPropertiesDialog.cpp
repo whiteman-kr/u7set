@@ -246,7 +246,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 				}
 			}
 		}
-		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(appSignal, uppercaseAppSignalID);
+		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(appSignal);
 
 		if (readOnly == true)
 		{
