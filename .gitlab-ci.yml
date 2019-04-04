@@ -111,6 +111,7 @@ windows build job:
       - bin/release/imageformats/*.dll
       - bin/release/platforms/*.dll
       - bin/release/sqldrivers/*.dll
+      - bin/release/printsupport/*.dll
 
 #deploy job:
 #  stage: deploy
