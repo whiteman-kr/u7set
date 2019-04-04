@@ -1138,6 +1138,8 @@ Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 
 void SignalsModel::loadSignals()
 {
+	emit signalsLoadingFinished();
+
 	bool signalsCleared = false;
 
 	if (m_signalSet.count() != 0)
@@ -2199,7 +2201,7 @@ void SignalsTabPage::projectOpened()
 		connect(m_signalsProxyModel, &SignalsProxyModel::aboutToSort, m_signalsModel, &SignalsModel::finishLoadSignals, Qt::DirectConnection);
 		connect(m_signalsProxyModel, &SignalsProxyModel::aboutToFilter, m_signalsModel, &SignalsModel::finishLoadSignals, Qt::DirectConnection);
 		connect(m_signalsView->verticalScrollBar(), &QScrollBar::valueChanged, m_signalsModel, &SignalsModel::loadNextSignalsPortion, Qt::DirectConnection);
-		connect(m_signalsModel, &SignalsModel::signalsLoadingFinished, this, &SignalsTabPage::stopLoadingSignals);
+		connect(m_signalsModel, &SignalsModel::signalsLoadingFinished, this, &SignalsTabPage::stopLoadingSignals, Qt::DirectConnection);
 
 		if (m_tabWidget != nullptr)
 		{
@@ -2251,6 +2253,13 @@ void SignalsTabPage::onTabPageChanged()
 
 void SignalsTabPage::stopLoadingSignals()
 {
+	// if loading already stopped
+	//
+	if (m_loadSignalsTimer == nullptr)
+	{
+		return;
+	}
+
 	disconnect(m_loadSignalsTimer, &QTimer::timeout, m_signalsModel, &SignalsModel::loadNextSignalsPortion);
 	disconnect(m_signalsProxyModel, &SignalsProxyModel::aboutToSort, m_signalsModel, &SignalsModel::finishLoadSignals);
 	disconnect(m_signalsProxyModel, &SignalsProxyModel::aboutToFilter, m_signalsModel, &SignalsModel::finishLoadSignals);
@@ -2340,6 +2349,8 @@ void SignalsTabPage::deleteSignal()
 
 void SignalsTabPage::undoSignalChanges()
 {
+	m_signalsModel->finishLoadSignals();
+
 	UndoSignalsDialog dlg(m_signalsModel, this);
 
 	const QItemSelection& proxySelection = m_signalsView->selectionModel()->selection();
@@ -2358,6 +2369,8 @@ void SignalsTabPage::checkIn()
 {
 	const QItemSelection& proxySelection = m_signalsView->selectionModel()->selection();
 	const QItemSelection& sourceSelection = m_signalsProxyModel->mapSelectionToSource(proxySelection);
+
+	m_signalsModel->finishLoadSignals();
 
 	CheckinSignalsDialog dlg(m_signalsModel, sourceSelection.indexes(), this);
 
@@ -2810,15 +2823,20 @@ CheckinSignalsDialog::CheckinSignalsDialog(SignalsModel *sourceModel, QModelInde
 	m_signalsView = new QTableView(this);
 	m_proxyModel = new CheckedoutSignalsModel(sourceModel, m_signalsView, this);
 
+	QCheckBox* selectAll = new QCheckBox(tr("Select all"), this);
+	connect(selectAll, &QCheckBox::toggled, m_proxyModel, &CheckedoutSignalsModel::setAllCheckStates);
+
 	if (selection.count() != 0)
 	{
 		m_proxyModel->initCheckStates(selection);
 	}
+	else
+	{
+		selectAll->setChecked(true);
+	}
 
 	m_commentEdit = new QPlainTextEdit(this);
 
-	QCheckBox* selectAll = new QCheckBox(tr("Select all"), this);
-	connect(selectAll, &QCheckBox::toggled, m_proxyModel, &CheckedoutSignalsModel::setAllCheckStates);
 	vl2->addWidget(selectAll);
 
 	m_signalsView->setModel(m_proxyModel);
