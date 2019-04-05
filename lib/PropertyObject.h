@@ -8,7 +8,6 @@
 #include <list>
 #include <vector>
 #include <utility>
-#include <cassert>
 #include <memory>
 #include <algorithm>
 
@@ -246,7 +245,7 @@ protected:
 		if (source == nullptr ||
 			source == this)
 		{
-			assert(source);
+			Q_ASSERT(source);
 			return;
 		}
 
@@ -305,7 +304,7 @@ public:
 		Property(),
 		m_object(object)
 	{
-		assert(object);
+		Q_ASSERT(object);
 	}
 
 	PropertyTypedValue(const PropertyTypedValue&) = default;
@@ -338,21 +337,21 @@ private:
 	template <typename NOT_ENUM>
 	const QMetaEnum metaEnum(non_enum_tag) const
 	{
-		assert(std::is_enum<NOT_ENUM>::value);			// Try to get QMetaEnum for not enum type
+		Q_ASSERT(std::is_enum<NOT_ENUM>::value);			// Try to get QMetaEnum for not enum type
 		return QMetaEnum();
 	}
 
 public:
 	virtual std::list<std::pair<int, QString>> enumValues() const override final
 	{
-		assert(std::is_enum<TYPE>::value);
+		Q_ASSERT(std::is_enum<TYPE>::value);
 
 		std::list<std::pair<int, QString>> result;
 
 		QMetaEnum me = metaEnum<TYPE>(enumness<std::is_enum<TYPE>::value>());
 		if (me.isValid() == false)
 		{
-			assert(me.isValid() == true);
+			Q_ASSERT(me.isValid() == true);
 			return result;
 		}
 
@@ -369,7 +368,7 @@ public:
 	{
 		if (std::is_enum<TYPE>::value == false)
 		{
-			assert(isEnum());
+			Q_ASSERT(isEnum());
 			return QVariant();
 		}
 
@@ -393,7 +392,7 @@ public:
 		}
 		else
 		{
-			assert(false);
+			Q_ASSERT(false);
 		}
 	}
 
@@ -405,7 +404,7 @@ public:
 		}
 		else
 		{
-			assert(value.canConvert<TYPE>());
+			Q_ASSERT(value.canConvert<TYPE>());
 			(m_object->*set)(value.value<TYPE>());
 		}
 	}
@@ -432,13 +431,13 @@ private:
 	void setEnumValueInternal(int value, non_enum_tag)
 	{
 		Q_UNUSED(value)
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	template <typename ENUM>
 	void setEnumValueInternal(const char* value, enum_tag)				// Overriden from class Property
 	{
-		assert(std::is_enum<TYPE>::value == true);
+		Q_ASSERT(std::is_enum<TYPE>::value == true);
 
 		QVariant v(value);
 		setValue(v);
@@ -449,7 +448,7 @@ private:
 	void setEnumValueInternal(const char* value, non_enum_tag)
 	{
 		Q_UNUSED(value)
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 public:
@@ -457,28 +456,28 @@ public:
 	{
 		// Limits must be checked in getter/setter
 		//
-		assert(false);
+		Q_ASSERT(false);
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
 	virtual void setLowLimit(const QVariant&) override final
 	{
 		// Limits must be checked in getter/setter
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	virtual const QVariant& highLimit() const override final
 	{
 		// Limits must be checked in getter/setter
 		//
-		assert(false);
+		Q_ASSERT(false);
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
 	virtual void setHighLimit(const QVariant&) override final
 	{
 		// Limits must be checked in getter/setter
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	virtual bool isTheSameType(Property* property) override final
@@ -496,8 +495,8 @@ public:
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
 		{
-			assert(presetProperty != nullptr);
-			assert(isTheSameType(presetProperty) == true);
+			Q_ASSERT(presetProperty != nullptr);
+			Q_ASSERT(isTheSameType(presetProperty) == true);
 			return;
 		}
 
@@ -506,7 +505,7 @@ public:
 		if (auto source = dynamic_cast<decltype(this)>(presetProperty);
 			source == nullptr)
 		{
-			assert(source);
+			Q_ASSERT(source);
 			return;
 		}
 
@@ -563,21 +562,21 @@ private:
 	template <typename NOT_ENUM>
 	const QMetaEnum metaEnum(non_enum_tag) const
 	{
-		assert(std::is_enum<NOT_ENUM>::value);			// Try to get QMetaEnum for not enum type
+		Q_ASSERT(std::is_enum<NOT_ENUM>::value);			// Try to get QMetaEnum for not enum type
 		return QMetaEnum();
 	}
 
 public:
 	virtual std::list<std::pair<int, QString>> enumValues() const override final
 	{
-		assert(std::is_enum<TYPE>::value);
+		Q_ASSERT(std::is_enum<TYPE>::value);
 
 		std::list<std::pair<int, QString>> result;
 
 		QMetaEnum me = metaEnum<TYPE>(enumness<std::is_enum<TYPE>::value>());
 		if (me.isValid() == false)
 		{
-			assert(me.isValid() == true);
+			Q_ASSERT(me.isValid() == true);
 			return result;
 		}
 
@@ -594,7 +593,7 @@ public:
 	{
 		if (std::is_enum<TYPE>::value == false)
 		{
-			assert(isEnum());
+			Q_ASSERT(isEnum());
 			return QVariant();
 		}
 
@@ -606,12 +605,11 @@ public:
 	{
 		if (m_getter)
 		{
-			QVariant result(QVariant::fromValue(m_getter()));
-			return result;
+			return QVariant::fromValue(m_getter());
 		}
 
-		assert(false);
-		return QVariant();
+		Q_ASSERT(m_getter);
+		return {};
 	}
 
 	void setValueDirect(const TYPE& value)				// Not virtual, is called from class ProprtyObject for direct access
@@ -622,7 +620,7 @@ public:
 		}
 		else
 		{
-			assert(false);
+			Q_ASSERT(false);
 		}
 	}
 
@@ -635,7 +633,7 @@ public:
 		}
 		else
 		{
-			assert(value.canConvert<TYPE>());
+			Q_ASSERT(value.canConvert<TYPE>());
 			m_setter(value.value<TYPE>());
 		}
 	}
@@ -653,7 +651,7 @@ private:
 	template <typename ENUM>
 	void setEnumValueInternal(int value, enum_tag)				// Overriden from class Propery
 	{
-		assert(std::is_enum<TYPE>::value == true);
+		Q_ASSERT(std::is_enum<TYPE>::value == true);
 
 		if (m_setter)
 		{
@@ -661,20 +659,20 @@ private:
 		}
 		else
 		{
-			assert(false);
+			Q_ASSERT(false);
 		}
 	}
 	template <typename NON_ENUM>
 	void setEnumValueInternal(int value, non_enum_tag)
 	{
 		Q_UNUSED(value)
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	template <typename ENUM>
 	void setEnumValueInternal(const char* value, enum_tag)				// Overriden from class Propery
 	{
-		assert(std::is_enum<TYPE>::value == true);
+		Q_ASSERT(std::is_enum<TYPE>::value == true);
 
 		QVariant v(value);
 		setValue(v);
@@ -685,7 +683,7 @@ private:
 	void setEnumValueInternal(const char* value, non_enum_tag)
 	{
 		Q_UNUSED(value)
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 public:
@@ -693,28 +691,28 @@ public:
 	{
 		// Limits must be checked in getter/setter
 		//
-		assert(false);
+		Q_ASSERT(false);
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
 	virtual void setLowLimit(const QVariant&) override final
 	{
 		// Limits must be checked in getter/setter
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	virtual const QVariant& highLimit() const override final
 	{
 		// Limits must be checked in getter/setter
 		//
-		assert(false);
+		Q_ASSERT(false);
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
 	virtual void setHighLimit(const QVariant&) override final
 	{
 		// Limits must be checked in getter/setter
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	void setGetter(const std::function<TYPE(void)>& getter)
@@ -741,8 +739,8 @@ public:
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
 		{
-			assert(presetProperty != nullptr);
-			assert(isTheSameType(presetProperty) == true);
+			Q_ASSERT(presetProperty != nullptr);
+			Q_ASSERT(isTheSameType(presetProperty) == true);
 			return;
 		}
 
@@ -752,7 +750,7 @@ public:
 
 		if (source == nullptr)
 		{
-			assert(source);
+			Q_ASSERT(source);
 			return;
 		}
 
@@ -835,7 +833,7 @@ public:
 #ifdef _DEBUG
 		if (isEnum() == false)		// Commented for perfomance reasone
 		{
-			assert(isEnum());
+			Q_ASSERT(isEnum());
 			return QVariant();
 		}
 #endif
@@ -850,7 +848,7 @@ public:
 
 		if (isEnum() == false)
 		{
-			assert(isEnum());
+			Q_ASSERT(isEnum());
 			return result;
 		}
 
@@ -861,7 +859,7 @@ public:
 			const QMetaObject* mo = QMetaType::metaObjectForType(m_value.userType());
 			if (mo == nullptr)
 			{
-				assert(mo);
+				Q_ASSERT(mo);
 				return result;
 			}
 
@@ -882,7 +880,7 @@ public:
 
 				if (me.isValid() == false)
 				{
-					assert(me.isValid() == true);
+					Q_ASSERT(me.isValid() == true);
 					return result;
 				}
 
@@ -918,7 +916,7 @@ public:
 			QVariant v(value);
 
 			bool ok = v.convert(m_value.type());
-			assert(ok);
+			Q_ASSERT(ok);
 			Q_UNUSED(ok);
 
 			m_value.setValue(v);
@@ -932,7 +930,7 @@ public:
 			QVariant v(value);
 
 			bool ok = v.convert(m_value.userType());
-			assert(ok);
+			Q_ASSERT(ok);
 			Q_UNUSED(ok);
 
 			m_value.setValue(v);
@@ -940,7 +938,7 @@ public:
 			return;
 		}
 
-		assert(m_value.type() == value.type());
+		Q_ASSERT(m_value.type() == value.type());
 
 		m_value = value;
 
@@ -977,14 +975,14 @@ public:
 			QVariant v(value);
 
 			bool ok = v.convert(m_value.userType());
-			assert(ok);
+			Q_ASSERT(ok);
 			Q_UNUSED(ok);
 
 			m_value.setValue(v);
 		}
 		else
 		{
-			assert(false);
+			Q_ASSERT(false);
 		}
 	}
 
@@ -993,7 +991,7 @@ private:
 	{
 		if (m_lowLimit.isValid() == true)
 		{
-			assert(m_lowLimit.type() == m_value.type());
+			Q_ASSERT(m_lowLimit.type() == m_value.type());
 
 			if (m_value < m_lowLimit)
 			{
@@ -1003,7 +1001,7 @@ private:
 
 		if (m_highLimit.isValid() == true)
 		{
-			assert(m_highLimit.type() == m_value.type());
+			Q_ASSERT(m_highLimit.type() == m_value.type());
 
 			if (m_value > m_highLimit)
 			{
@@ -1052,8 +1050,8 @@ public:
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
 		{
-			assert(presetProperty != nullptr);
-			assert(isTheSameType(presetProperty) == true);
+			Q_ASSERT(presetProperty != nullptr);
+			Q_ASSERT(isTheSameType(presetProperty) == true);
 			return;
 		}
 
@@ -1062,7 +1060,7 @@ public:
 		PropertyValueNoGetterSetter* source = dynamic_cast<PropertyValueNoGetterSetter*>(presetProperty);
 		if (source == nullptr)
 		{
-			assert(source);
+			Q_ASSERT(source);
 			return;
 		}
 
@@ -1097,7 +1095,7 @@ public:
 	PropertyValue(std::shared_ptr<OrderedHash<int, QString>> enumValues) :
 		m_enumValues(enumValues)
 	{
-		assert(m_enumValues);
+		Q_ASSERT(m_enumValues);
 	}
 
 	virtual ~PropertyValue()
@@ -1166,7 +1164,7 @@ public:
 			return;
 		}
 
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	virtual void setEnumValue(int value) override final	// Overriden from class Propery
@@ -1276,7 +1274,7 @@ public:
 		}
 		else
 		{
-			assert(m_enumValues.empty() == false);
+			Q_ASSERT(m_enumValues.empty() == false);
 			m_value = 0;
 		}
 
@@ -1311,7 +1309,7 @@ public:
 			}
 		}
 
-		assert(false);
+		Q_ASSERT(false);
 		return QVariant();
 	}
 
@@ -1343,7 +1341,7 @@ public:
 			return;
 		}
 
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
@@ -1374,7 +1372,7 @@ public:
 
 		// Str not found
 		//
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
@@ -1429,8 +1427,8 @@ public:
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
 		{
-			assert(presetProperty != nullptr);
-			assert(isTheSameType(presetProperty) == true);
+			Q_ASSERT(presetProperty != nullptr);
+			Q_ASSERT(isTheSameType(presetProperty) == true);
 			return;
 		}
 
@@ -1439,7 +1437,7 @@ public:
 
 		if (source == nullptr)
 		{
-			assert(source);
+			Q_ASSERT(source);
 			return;
 		}
 
@@ -1569,7 +1567,7 @@ public:
 	{
 		if (!getter)
 		{
-			assert(getter);
+			Q_ASSERT(getter);
 			return nullptr;
 		}
 
@@ -1625,7 +1623,7 @@ public:
 	{
 		if (enumValues.get() == nullptr)
 		{
-			assert(enumValues);
+			Q_ASSERT(enumValues);
 			return nullptr;
 		}
 
@@ -1902,7 +1900,7 @@ public:
 
 		if (property->isEnum() == true)
 		{
-			assert(std::is_integral<TYPE>::value == true);
+			Q_ASSERT(std::is_integral<TYPE>::value == true);
 
 			property->setEnumValue(value);
 			return true;
@@ -2169,7 +2167,7 @@ public:
 				result.first = false;
 				result.second += "SpecificProperties: Unsupported version: " + version;
 
-				assert(false);
+				Q_ASSERT(false);
 				qDebug() << "Object has spec prop with unsuported version: " << row;
 			}
 		}
@@ -2454,7 +2452,7 @@ public:
 
 		if (version < 0 || version > m_lastSpecificPropertiesVersion)
 		{
-			assert(false);
+			Q_ASSERT(false);
 
 			result.first = false;
 			result.second += "SpecificProperties: Unsupported version: " + QString::number(version);
@@ -2683,7 +2681,7 @@ public:
 				break;
 
 			default:
-				assert(false);
+				Q_ASSERT(false);
 
 				// Error, unknown type
 				//
@@ -2699,7 +2697,7 @@ public:
 		//
 		if (addedProperty == nullptr)
 		{
-			assert(addedProperty);
+			Q_ASSERT(addedProperty);
 
 			result.first = false;
 			result.second = " Property was not created: " + strType + "\n";
@@ -2772,7 +2770,7 @@ public:
 
 		if (ok == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return enumValues;
 		}
 
@@ -2966,6 +2964,11 @@ inline PropertyVectorBase<PropertyObject>* variantToPropertyVector(QVariant& v)
 		return nullptr;
 	}
 
+	// Dangerous hack! Kids, don't do it
+	// It is Undefined Behavior
+	// It' is better to create another vector and copy ther ptr's
+	// Now leave it as is
+	//
 	return reinterpret_cast<PropertyVectorBase<PropertyObject>*>(v.data());
 }
 
@@ -2991,6 +2994,11 @@ inline PropertyListBase<PropertyObject>* variantToPropertyList(QVariant& v)
 		return nullptr;
 	}
 
+	// Dangerous hack! Kids, don't do it
+	// It is Undefined Behavior
+	// It' is better to create another list and copy ther ptr's
+	// Now leave it as is
+	//
 	return reinterpret_cast<PropertyListBase<PropertyObject>*>(v.data());
 }
 

@@ -108,7 +108,7 @@ namespace VFrame30
 		bool loadOk = true;
 		for (int i = 0; i < valueMessage.images_size(); i++)
 		{
-			auto image = m_images.emplace_back();
+			auto& image = m_images.emplace_back(std::make_shared<ImageItem>());
 			loadOk &= image->load(valueMessage.images(i));
 		}
 
@@ -131,6 +131,8 @@ namespace VFrame30
 
 		// Drawing frame rect
 		//
+
+
 
 
 		return;

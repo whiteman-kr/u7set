@@ -9,6 +9,26 @@ namespace VFrame30
 	//
 	ImageItem::ImageItem(void)
 	{
+		createProperties();
+		return;
+	}
+
+	ImageItem::ImageItem(ImageItem& src) :
+		PropertyObject(src),
+		m_allowScale(src.m_allowScale),
+		m_keepAspectRatio(src.m_keepAspectRatio),
+		m_imageId(src.m_imageId),
+		m_image(src.m_image),
+		m_imageData(src.m_imageData),
+		m_svgData(src.m_svgData)
+		//m_svgRenderer(src.m_svgRenderer)		// Cannot be copied ((( that's why class has copy constructor
+	{
+		createProperties();
+		return;
+	}
+
+	void ImageItem::createProperties()
+	{
 		Property* p = nullptr;
 
 		ADD_PROPERTY_GETTER_SETTER(bool, PropertyNames::allowScale, true, ImageItem::allowScale, ImageItem::setAllowScale);
@@ -24,18 +44,6 @@ namespace VFrame30
 		p->setValidator(QStringLiteral("Svg Files (*.svg);; All Files (*.*)"));
 
 		return;
-	}
-
-	ImageItem::ImageItem(ImageItem& src) :
-		PropertyObject(src),
-		m_allowScale(src.m_allowScale),
-		m_keepAspectRatio(src.m_keepAspectRatio),
-		m_imageId(src.m_imageId),
-		m_image(src.m_image),
-		m_imageData(src.m_imageData),
-		m_svgData(src.m_svgData)
-		//m_svgRenderer(src.m_svgRenderer)		// Cannot be copied ((( that's why class has copy constructor
-	{
 	}
 
 	bool ImageItem::save(Proto::ImageItem* message) const
