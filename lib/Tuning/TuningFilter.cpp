@@ -35,7 +35,7 @@ namespace TuningTags
 	static const QLatin1String prop_Source = QLatin1String("Source");
 	static const QLatin1String prop_ID = QLatin1String("ID");
 	static const QLatin1String prop_CustomID = QLatin1String("CustomID");
-	static const QLatin1String prop_Tags = QLatin1String("Tags");
+	static const QLatin1String prop_FilterTags = QLatin1String("FilterTags");
 	static const QLatin1String prop_InterfaceType = QLatin1String("InterfaceType");
 	static const QLatin1String prop_CustomAppSignalMasks = QLatin1String("CustomAppSignalMasks");
 	static const QLatin1String prop_AppSignalMasks = QLatin1String("AppSignalMasks");
@@ -209,7 +209,7 @@ TuningFilter::TuningFilter()
 
 	ADD_PROPERTY_GETTER(InterfaceType, TuningTags::prop_InterfaceType, true, TuningFilter::interfaceType);
 
-	ADD_PROPERTY_GETTER_SETTER(QString, TuningTags::prop_Tags, true, TuningFilter::tags, TuningFilter::setTags);
+	ADD_PROPERTY_GETTER_SETTER(QString, TuningTags::prop_FilterTags, true, TuningFilter::tags, TuningFilter::setTags);
 
 	auto propMask = ADD_PROPERTY_GETTER_SETTER(QString, TuningTags::prop_CustomAppSignalMasks, true, TuningFilter::customAppSignalIDMask, TuningFilter::setCustomAppSignalIDMask);
 	propMask->setCategory("Masks");
@@ -488,9 +488,9 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 			}
 		}
 
-		if (reader.attributes().hasAttribute(TuningTags::prop_Tags))
+		if (reader.attributes().hasAttribute(TuningTags::prop_FilterTags))
 		{
-			setTags(reader.attributes().value(TuningTags::prop_Tags).toString());
+			setTags(reader.attributes().value(TuningTags::prop_FilterTags).toString());
 		}
 
 		// ValueColumns
@@ -735,7 +735,7 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 	writer.writeAttribute(TuningTags::prop_SignalType, E::valueToString<SignalType>(static_cast<int>(signalType())));
 	writer.writeAttribute(TuningTags::prop_Source, E::valueToString<Source>(static_cast<int>(source())));
 
-	writer.writeAttribute(TuningTags::prop_Tags, tags());
+	writer.writeAttribute(TuningTags::prop_FilterTags, tags());
 
 	// ValueColumns
 
