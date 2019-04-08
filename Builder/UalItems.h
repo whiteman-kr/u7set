@@ -430,6 +430,8 @@ namespace Builder
 		Address16 regValueAddr() const { return m_regValueAddr; }
 		bool setRegValueAddr(Address16 regValueAddr);
 
+		bool setFlagSignal(AppSignalStateFlagType flagType, UalSignal* flagSignal);
+
 		Address16 ioBufAddr();
 
 		Signal* signal() const;
@@ -563,14 +565,8 @@ namespace Builder
 		bool m_resultSaved = false;
 
 		Address16 m_ualAddr;
-		Address16 m_regBufAddr;
-		Address16 m_regValueAddr;
-
-		struct FlagSignal
-		{
-			AppSignalStateFlagType flagType;
-			UalSignal* flagSignal;
-		};
+		Address16 m_regBufAddr;							// address in RegBuf (absolute in LM's memory)
+		Address16 m_regValueAddr;						// relative address from beginning of RegBuf ()
 
 		QHash<AppSignalStateFlagType, UalSignal*> m_flagSignals;
 	};

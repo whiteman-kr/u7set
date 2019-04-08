@@ -1761,12 +1761,25 @@ namespace Builder
 		return true;
 	}
 
+	bool UalSignal::setFlagSignal(AppSignalStateFlagType flagType, UalSignal* flagSignal)
+	{
+		TEST_PTR_RETURN_FALSE(flagSignal);
+
+		if (m_flagSignals.value(flagType, nullptr) != nullptr)
+		{
+			assert(false);			// signal for this flag is already assigned
+			return false;
+		}
+
+		m_flagSignals.insert(flagType, flagSignal);
+
+		return true;
+	}
 
 	void UalSignal::sortRefSignals()
 	{
 		// sorting m_refSignals by appSignalID ascending
 		//
-
 		int count = m_refSignals.count();
 
 		for(int i = 0; i < count - 1; i++)

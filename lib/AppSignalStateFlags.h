@@ -12,7 +12,6 @@ enum class AppSignalStateFlagType
 	Unbalanced,
 	AboveHighLimit,
 	BelowLowLimit
-
 };
 
 inline uint qHash(AppSignalStateFlagType t, uint seed)

@@ -37,6 +37,8 @@ namespace Builder
 
 #define CODE_GEN_PROC_TO_CALL(procName)		{ &procName, #procName }
 
+	typedef QHash<AppSignalStateFlagType, QString> AppSignalStateFlagsMap;
+
 	class ModuleLogicCompiler : public QObject
 	{
 		Q_OBJECT
@@ -162,10 +164,11 @@ namespace Builder
 			static QString getAutoLoopbackID(const UalItem* ualItem, const LogicPin& outputPin);
 		};
 
-		class SignalsWithFlags : public QHash<QString, QHash<AppSignalStateFlagType, QString>>
+		class SignalsWithFlags : public QHash<QString, AppSignalStateFlagsMap*>
 		{
 		public:
 			SignalsWithFlags(ModuleLogicCompiler& compiler);
+			~SignalsWithFlags();
 
 			bool append(const QString& signalWithFlagID, AppSignalStateFlagType flagType, const QString& flagSignalID);
 
@@ -262,7 +265,15 @@ namespace Builder
 
 		bool checkBusProcessingItemsConnections();
 
+		bool processSignalsWithFlags();
+		bool processAcquiredIOSignalsValidity();
+		bool processSimlockItems();
+		bool processMismatchItems();
+		bool processSetFlagsItems();
+
 		bool createUalSignalsFromFlagSignals();
+
+		bool sortUalSignals();
 
 		//
 
@@ -353,7 +364,7 @@ namespace Builder
 		bool disposeNonAcquiredAnalogSignals();
 		bool disposeNonAcquiredBuses();
 
-		bool setSignalsValidityAddresses();
+		bool setSignalsFlagsAddresses();
 
 		bool appendAfbsForAnalogInOutSignalsConversion();
 		bool findFbsForAnalogInOutSignalsConversion();

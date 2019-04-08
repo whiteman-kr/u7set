@@ -53,29 +53,39 @@ namespace Builder
 	{
 	}
 
-	bool ModuleLogicCompiler::SignalsWithFlags::append(const QString& signalWithFlagID, AppSignalStateFlagType flagType, const QString& flagSignalID)
+	ModuleLogicCompiler::SignalsWithFlags::~SignalsWithFlags()
 	{
-		if (contains(signalWithFlagID) == false)
+		for(QHash<AppSignalStateFlagType, QString>* map : (*this))
 		{
-			insert(signalWithFlagID, QHash<AppSignalStateFlagType, QString>());
+			delete map;
 		}
 
-		QHash<AppSignalStateFlagType, QString>& signalFlagsMap = (*this)[signalWithFlagID];
+		clear();
+	}
 
-		if (signalFlagsMap.contains(flagType) == true)
+	bool ModuleLogicCompiler::SignalsWithFlags::append(const QString& signalWithFlagID, AppSignalStateFlagType flagType, const QString& flagSignalID)
+	{
+		QHash<AppSignalStateFlagType, QString>* signalFlagsMap = value(signalWithFlagID, nullptr);
+
+		if (signalFlagsMap == nullptr)
+		{
+			signalFlagsMap = new QHash<AppSignalStateFlagType, QString>;
+		}
+
+		if (signalFlagsMap->contains(flagType) == true)
 		{
 			//Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
 			//
 			m_compiler.log()->errALC5168(	flagSignalID,
 											AppSignalStateFlags::flagTypeStr(flagType),
 											signalWithFlagID,
-											signalFlagsMap[flagType],
+											signalFlagsMap->value(flagType),
 											QUuid(),
 											QString());
 			return false;
 		}
 
-		signalFlagsMap.insert(flagType, flagSignalID);
+		signalFlagsMap->insert(flagType, flagSignalID);
 
 		return true;
 	}
@@ -164,6 +174,8 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::createUalItemsMaps),
 			PROC_TO_CALL(ModuleLogicCompiler::createUalAfbsMap),
 			PROC_TO_CALL(ModuleLogicCompiler::createUalSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::processSignalsWithFlags),
+			PROC_TO_CALL(ModuleLogicCompiler::sortUalSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::processTxSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::processSinglePortRxSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::buildTuningData),
@@ -414,9 +426,6 @@ namespace Builder
 
 		m_chassisSignals.clear();
 		m_ioSignals.clear();
-		m_signalsWithFlags.clear();
-
-		QVector<QPair<Signal*, QString>> acquiredInputSignalToLinkedValiditySignalID;	// Acquired input signal => linked validity signal EquipmentID
 
 		for(int i = 0; i < signalCount; i++)
 		{
@@ -493,15 +502,6 @@ namespace Builder
 					// signal is associated with current LM
 
 					isIoSignal = true;
-
-					QString validitySignalEquipmentID = deviceSignal->validitySignalId();
-
-					if (s.isInput() == true &&
-						s.isAcquired() == true &&
-						validitySignalEquipmentID.isEmpty() == false)
-					{
-						acquiredInputSignalToLinkedValiditySignalID.append(QPair<Signal*, QString>(&s, validitySignalEquipmentID));
-					}
 				}
 
 				break;
@@ -532,47 +532,6 @@ namespace Builder
 					assert(false);
 				}
 			}
-		}
-
-		// Set Aquired property to TRUE for validity signals linked to acquired input signals
-		//
-		for(const QPair<Signal*, QString>& pair : acquiredInputSignalToLinkedValiditySignalID)
-		{
-			Signal* inputSignal = pair.first;
-			QString validitySignalEquipmentID = pair.second;
-
-			if (inputSignal == nullptr)
-			{
-				assert(false);
-				LOG_NULLPTR_ERROR(m_log);
-				result = false;
-				continue;
-			}
-
-			Signal* linkedValiditySignal = m_equipmentSignals.value(validitySignalEquipmentID, nullptr);
-
-			if (linkedValiditySignal == nullptr)
-			{
-				// Linked validity app signal with EquipmentID %1 is not found (input signal %2).
-				//
-				m_log->errALC5155(validitySignalEquipmentID, inputSignal->appSignalID());
-				result = false;
-				continue;
-			}
-
-			if (linkedValiditySignal->isInput() == false ||
-				linkedValiditySignal->isDiscrete() == false)
-			{
-				// Linked validity signal %1 shoud have Discrete Input type (input signal %2).
-				//
-				m_log->errALC5156(linkedValiditySignal->appSignalID(), inputSignal->appSignalID());
-				result = false;
-				continue;
-			}
-
-			m_signalsWithFlags.append(inputSignal->appSignalID(),
-									  AppSignalStateFlagType::Validity,
-									  linkedValiditySignal->appSignalID());
 		}
 
 		return result;
@@ -815,13 +774,6 @@ namespace Builder
 		if (result == false)
 		{
 			return false;
-		}
-
-		result &= createUalSignalsFromFlagSignals();
-
-		for(UalSignal* ualSignal : m_ualSignals)
-		{
-			ualSignal->sortRefSignals();
 		}
 
 		return result;
@@ -2590,6 +2542,114 @@ namespace Builder
 		return result;
 	}
 
+	bool ModuleLogicCompiler::processSignalsWithFlags()
+	{
+		m_signalsWithFlags.clear();
+
+		bool result = true;
+
+		result &= processAcquiredIOSignalsValidity();
+		result &= processSimlockItems();
+		result &= processMismatchItems();
+		result &= processSetFlagsItems();
+
+		RETURN_IF_FALSE(result);
+
+		result &= createUalSignalsFromFlagSignals();
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::processAcquiredIOSignalsValidity()
+	{
+		bool result = true;
+
+		QVector<QPair<Signal*, QString>> acquiredInputSignalToLinkedValiditySignalID;	// Acquired input signal => linked validity signal EquipmentID
+
+		for(const Signal* s : m_ioSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			if (s->isAcquired() == false)
+			{
+				continue;
+			}
+
+			QString signalEquipmentID = s->equipmentID();
+
+			if (s->equipmentID().isEmpty() == true)
+			{
+				assert(false);
+				continue;
+			}
+
+			assert(s->isInput() == true || s->isOutput() == true);
+
+			Hardware::DeviceObject* device = m_equipmentSet->deviceObject(signalEquipmentID);
+
+			TEST_PTR_CONTINUE(device);
+
+			Hardware::DeviceSignal* deviceSignal = device->toSignal();
+
+			TEST_PTR_CONTINUE(deviceSignal);
+
+			QString validitySignalEquipmentID = deviceSignal->validitySignalId();
+
+			if (validitySignalEquipmentID.isEmpty() == true)
+			{
+				continue;
+			}
+
+			Signal* linkedValiditySignal = m_equipmentSignals.value(validitySignalEquipmentID, nullptr);
+
+			if (linkedValiditySignal == nullptr)
+			{
+				// Linked validity app signal with EquipmentID %1 is not found (input signal %2).
+				//
+				m_log->errALC5155(validitySignalEquipmentID, s->appSignalID());
+				result = false;
+				continue;
+			}
+
+			if (linkedValiditySignal->isInput() == false ||
+				linkedValiditySignal->isDiscrete() == false)
+			{
+				// Linked validity signal %1 shoud have Discrete Input type (input signal %2).
+				//
+				m_log->errALC5156(linkedValiditySignal->appSignalID(), s->appSignalID());
+				result = false;
+				continue;
+			}
+
+			m_signalsWithFlags.append(s->appSignalID(),
+									  AppSignalStateFlagType::Validity,
+									  linkedValiditySignal->appSignalID());
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::processSimlockItems()
+	{
+		bool result = true;
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::processMismatchItems()
+	{
+		bool result = true;
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::processSetFlagsItems()
+	{
+		bool result = true;
+
+		return result;
+	}
+
 	bool ModuleLogicCompiler::createUalSignalsFromFlagSignals()
 	{
 		QStringList signalsWithFlagsIDs = m_signalsWithFlags.keys();
@@ -2598,27 +2658,26 @@ namespace Builder
 		{
 			UalSignal* ualSignalWithFlags = m_ualSignals.get(signalWithFlagsID);
 
-			if (ualSignalWithFlags == nullptr)
-			{
-				assert(false);
-				continue;
-			}
+			TEST_PTR_CONTINUE(ualSignalWithFlags);
 
 			if (ualSignalWithFlags->isAcquired() == false)
 			{
 				// print warning
+				assert(false);
 				continue;
 			}
 
-			const QHash<AppSignalStateFlagType, QString>& signalFlags = m_signalsWithFlags[signalWithFlagsID];
+			const QHash<AppSignalStateFlagType, QString>* signalFlags = m_signalsWithFlags.value(signalWithFlagsID, nullptr);
 
-			assert(signalFlags.isEmpty() == false);
+			TEST_PTR_CONTINUE(signalFlags);
 
-			QList<AppSignalStateFlagType> flags = signalFlags.keys();
+			assert(signalFlags->isEmpty() == false);
+
+			QList<AppSignalStateFlagType> flags = signalFlags->keys();
 
 			for(AppSignalStateFlagType flagType : flags)
 			{
-				QString flagSignalID = signalFlags.value(flagType, QString());
+				QString flagSignalID = signalFlags->value(flagType, QString());
 
 				if (flagSignalID.isEmpty() == true)
 				{
@@ -2649,6 +2708,16 @@ namespace Builder
 
 				ualSignal->setAcquired(true);
 			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::sortUalSignals()
+	{
+		for(UalSignal* ualSignal : m_ualSignals)
+		{
+			ualSignal->sortRefSignals();
 		}
 
 		return true;
@@ -4501,7 +4570,7 @@ namespace Builder
 
 			if (disposeNonAcquiredBuses() == false) break;
 
-			if (setSignalsValidityAddresses() == false) break;
+			if (setSignalsFlagsAddresses() == false) break;
 
 			result = true;
 		}
@@ -4794,24 +4863,56 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::setSignalsValidityAddresses()
+	bool ModuleLogicCompiler::setSignalsFlagsAddresses()
 	{
 		bool result = true;
-/*
-		for(const QHash<AppSignalStateFlagType, QString>& signalFlags : m_signalsWithFlags)
-		{
-			Signal* inputSignal = pair.first;
-			Signal* validitySignal = pair.second;
 
-			if (inputSignal == nullptr || validitySignal == nullptr)
+		QStringList signalIDs = m_signalsWithFlags.keys();
+
+		for(const QString& signalID : signalIDs)
+		{
+			UalSignal* signalWithFlags = m_ualSignals.get(signalID);
+
+			TEST_PTR_CONTINUE(signalWithFlags);
+
+			AppSignalStateFlagsMap* signalFlags = m_signalsWithFlags.value(signalID, nullptr);
+
+			TEST_PTR_CONTINUE(signalFlags);
+
+			if (signalFlags->isEmpty() == true)
 			{
-				LOG_NULLPTR_ERROR(m_log);
-				result = false;
-				continue;
+				assert(false);
 			}
 
-			inputSignal->setRegValidityAddr(validitySignal->regValueAddr());
-		}*/
+			QList<AppSignalStateFlagType> flagsTypes = signalFlags->uniqueKeys();
+
+			for( AppSignalStateFlagType flagType : flagsTypes)
+			{
+				QString flagSignalID = signalFlags->value(flagType, QString());
+
+				if (flagSignalID.isEmpty() == true)
+				{
+					assert(false);
+					continue;
+				}
+
+				UalSignal* flagSignal = m_ualSignals.get(flagSignalID);
+
+				TEST_PTR_CONTINUE(flagSignal);
+
+				assert(flagSignal->isAcquired() == true);
+
+				if (flagSignal->regValueAddr().isValid() == false)
+				{
+					assert(false);
+					continue;
+				}
+
+				signalWithFlags->setFlagSignal(flagType, flagSignal);
+			}
+
+			//signalWithFlags->setFlagsAddresses
+		}
 
 		return result;
 	}
