@@ -28,7 +28,6 @@ void TuningClientFilterStorage::createSignalsAndEqipmentHashes(const TuningSigna
 	std::vector<Hash> signalsHashes;
 	signalsHashes.reserve(allCount);
 
-
 	while (true)
 	{
 		if (userFiltersOnly == true && filter->isSourceUser() == false)

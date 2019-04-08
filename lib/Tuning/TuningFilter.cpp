@@ -791,26 +791,26 @@ bool TuningFilter::match(const AppSignalParam& object) const
 {
 	if (isEmpty() == true)
 	{
-		return true;
+        return true;
 	}
 
-	if (signalType() == TuningFilter::SignalType::Analog && object.isAnalog() == false)
+    // List of appSignalId
+    //
+    if (filterSignalsCount() != 0)
+    {
+        if (filterSignalExists(object.hash()) == false)
+        {
+            return false;
+        }
+    }
+
+    if (signalType() == TuningFilter::SignalType::Analog && object.isAnalog() == false)
 	{
 		return false;
 	}
 	if (signalType() == TuningFilter::SignalType::Discrete && object.isAnalog() == true)
 	{
 		return false;
-	}
-
-	// List of appSignalId
-	//
-	if (filterSignalsCount() != 0)
-	{
-		if (filterSignalExists(object.hash()) == false)
-		{
-			return false;
-		}
 	}
 
 	if (processMaskList(object.equipmentId(), m_equipmentIDMasks) == false)
@@ -836,7 +836,7 @@ bool TuningFilter::match(const AppSignalParam& object) const
 	}
 	else
 	{
-		return true;
+        return true;
 	}
 }
 
@@ -1503,20 +1503,30 @@ void TuningFilter::removeAllChildren()
 
 void TuningFilter::removeChildren(Source sourceType)
 {
-	std::vector<std::shared_ptr<TuningFilter>> childFiltersCopy;
+    while (true)
+    {
+        bool found = false;
 
-	childFiltersCopy = m_childFilters;
+        // Found a filter of required type and delete it
 
-	m_childFilters.clear();
+        for (auto it = m_childFilters.begin(); it != m_childFilters.end(); it++)
+        {
+            const std::shared_ptr<TuningFilter> filter =* it;
 
-	for (auto it = childFiltersCopy.begin(); it != childFiltersCopy.end(); it++)
-	{
-		std::shared_ptr<TuningFilter>& filter =* it;
+            if (filter->source() == sourceType)
+            {
+                m_childFilters.erase(it);
+                found = true;
+                break;
+            }
+        }
 
-		if (filter->source() != sourceType)
-		{
-			m_childFilters.push_back(filter);
-		}
+        // If no matching filters found, exit. Otherwise repeat again
+
+        if (found == false)
+        {
+            return;
+        }
 	}
 }
 

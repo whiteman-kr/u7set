@@ -182,7 +182,13 @@ void SwitchFiltersPage::updateFilters(std::shared_ptr<TuningFilter> root)
 
 		const int controlHeight = 25;
 
-		scrollControlsLayout->addSpacerItem(new QSpacerItem(controlHeight, 0));
+        QPushButton* b = new QPushButton(this);
+        QPixmap pixmap(":/Images/Images/ButtonSettings.png");
+        b->setIcon(QIcon(pixmap));
+        b->setIconSize(QSize(controlHeight * 0.8, controlHeight * 0.8));
+        b->setFixedSize(controlHeight, controlHeight);
+        connect(b, &QPushButton::clicked, this, &SwitchFiltersPage::onOptions);
+        scrollControlsLayout->addWidget(b);
 
 		scrollControlsLayout->addStretch();
 
@@ -198,13 +204,8 @@ void SwitchFiltersPage::updateFilters(std::shared_ptr<TuningFilter> root)
 
 		scrollControlsLayout->addStretch();
 
-		QPushButton* b = new QPushButton(this);
-		QPixmap pixmap(":/Images/Images/ButtonSettings.png");
-		b->setIcon(QIcon(pixmap));
-		b->setIconSize(QSize(controlHeight * 0.8, controlHeight * 0.8));
-		b->setFixedSize(controlHeight, controlHeight);
-		connect(b, &QPushButton::clicked, this, &SwitchFiltersPage::onOptions);
-		scrollControlsLayout->addWidget(b);
+        scrollControlsLayout->addSpacerItem(new QSpacerItem(controlHeight, 0));
+
 
 		// Buttons layout
 
@@ -217,15 +218,7 @@ void SwitchFiltersPage::updateFilters(std::shared_ptr<TuningFilter> root)
 		m_prevButton->setVisible(m_buttonFilters.size() > theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount);
 		m_nextButton->setVisible(m_buttonFilters.size() > theSettings.m_switchPresetsPageColCount * theSettings.m_switchPresetsPageRowCount);
 
-		// Apply button at the bottom
 
-		if (m_applyButton != nullptr && m_listFilters.empty() == true)
-		{
-			QHBoxLayout* al = new QHBoxLayout();
-			al->addStretch();
-			al->addWidget(m_applyButton);
-			scrollControlsLayout->addLayout(al);
-		}
 
 		// Main layout
 
@@ -236,6 +229,12 @@ void SwitchFiltersPage::updateFilters(std::shared_ptr<TuningFilter> root)
 		topLayout->addStretch();
 		topLayout->addLayout(scrollControlsLayout);
 
+        // Apply button at the bottom
+
+        if (m_applyButton != nullptr && m_listFilters.empty() == true)
+        {
+            scrollControlsLayout->addWidget(m_applyButton);
+        }
 	}
 
 	// Table
@@ -298,7 +297,20 @@ void SwitchFiltersPage::updateFilters(std::shared_ptr<TuningFilter> root)
 			else
 			{
 				// No widgets
-				m_promptLabel = new QLabel(tr("No filters to display. Create filters with %1 and %2 tags.").arg(tag_FilterButton).arg(tag_FilterSwitch));
+
+                QStringList tagsList = m_workspaceFilter->tagsList();
+
+                if (tagsList.isEmpty() == false)
+                {
+                    m_promptLabel = new QLabel(tr("No filters to display.\nCreate filters that contain '%1' tag and one of the following tags: '%2' or '%3'.").arg(tagsList.at(0)).arg(tag_FilterButton).arg(tag_FilterSwitch));
+                    m_promptLabel->setAlignment(Qt::AlignHCenter | Qt::AlignCenter);
+                }
+                else
+                {
+                    m_promptLabel = new QLabel(tr("No filters to display.\nCreate filters that contain one of the following tags: '%1' or '%2'.").arg(tag_FilterButton).arg(tag_FilterSwitch));
+                    m_promptLabel->setAlignment(Qt::AlignHCenter | Qt::AlignCenter);
+                }
+
 				m_mainLayout->addWidget(m_promptLabel);
 			}
 		}
