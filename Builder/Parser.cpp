@@ -2357,6 +2357,7 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------
 	Parser::Parser(Builder::Context* context) :
+		m_context(context),
 		m_db(&context->m_db),
 		m_log(context->m_log),
 		m_changesetId(context->m_lastChangesetId),
@@ -2579,6 +2580,12 @@ namespace Builder
 		{
 			checkUfbItemsVersion(schema.get(), ufbs);
 		}
+
+		// Save schams to context
+		// Important, these schemas are shared pointer, so they must not be spoiled in parsing
+		//
+		m_context->m_appLogicSchemas = schemas;
+
 
 		// Parse Application Logic
 		//
@@ -3840,24 +3847,14 @@ namespace Builder
 		// Serializae layer, so it can be restored for each equipmentId
 		//
 		QByteArray layerData;
-		if (equipmentIds.size() > 1)			// If there is only one equipmentId, dont serialize it, just use the existing layer
-		{
-			layer->saveToByteArray(&layerData);
-		}
+		layer->saveToByteArray(&layerData);
 
 		// Parse layer for each LM
 		//
 		for (QString equipmentId : equipmentIds)
 		{
-			std::shared_ptr<VFrame30::SchemaLayer> moduleLayer;
-			if (equipmentIds.size() > 1)
-			{
-				moduleLayer = VFrame30::SchemaLayer::Create(layerData);
-			}
-			else
-			{
-				moduleLayer = layer;		// If there is only one equipmentId, dont serialize it, just use the existing layer
-			}
+			std::shared_ptr<VFrame30::SchemaLayer> moduleLayer = VFrame30::SchemaLayer::Create(layerData);	// We don't want to spoil layer, it cab be used later
+																											// In stroring schamas, in TuningClient, et cetera.
 
 			if (moduleLayer.get() == nullptr)
 			{

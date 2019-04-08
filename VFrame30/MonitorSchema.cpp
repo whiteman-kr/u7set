@@ -1,6 +1,7 @@
 #include "MonitorSchema.h"
 #include "Settings.h"
 #include "SchemaItemValue.h"
+#include "SchemaItemImageValue.h"
 
 namespace VFrame30
 {
@@ -48,6 +49,16 @@ namespace VFrame30
 					assert(itemValue);
 
 					const QStringList& appSignals = itemValue->signalIds();
+					for (const QString& id : appSignals)
+					{
+						signalMap.insert(id);
+					}
+				}
+
+				if (const auto itemImageValue = item->toType<VFrame30::SchemaItemImageValue>();
+					itemImageValue != nullptr)
+				{
+					const QStringList& appSignals = itemImageValue->signalIds();
 					for (const QString& id : appSignals)
 					{
 						signalMap.insert(id);

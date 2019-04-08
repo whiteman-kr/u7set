@@ -15,6 +15,10 @@ namespace VFrame30
 		ImageItem(void);
 		ImageItem(ImageItem& src);
 
+	private:
+		void createProperties();
+
+	public:
 		bool save(Proto::ImageItem* message) const;
 		bool load(const Proto::ImageItem& message);
 

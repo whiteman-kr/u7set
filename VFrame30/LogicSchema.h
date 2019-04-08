@@ -23,8 +23,9 @@ namespace VFrame30
 		// Methods
 		//
 	public:
-		virtual void Draw(CDrawParam* pDrawParam, const QRectF& clipRect) const override;
+		virtual void Draw(CDrawParam* drawParam, const QRectF& clipRect) const override;
 
+		std::set<QString> getSignalMap() const;
 		virtual QStringList getSignalList() const override;
 		virtual QStringList getLabels() const override;
 

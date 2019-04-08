@@ -6131,17 +6131,17 @@ class SchemaItemImageValue : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 signalsource() const;
   inline void set_signalsource(::google::protobuf::int32 value);
 
-  // optional string initialImageId = 3;
-  inline bool has_initialimageid() const;
-  inline void clear_initialimageid();
-  static const int kInitialImageIdFieldNumber = 3;
-  inline const ::std::string& initialimageid() const;
-  inline void set_initialimageid(const ::std::string& value);
-  inline void set_initialimageid(const char* value);
-  inline void set_initialimageid(const char* value, size_t size);
-  inline ::std::string* mutable_initialimageid();
-  inline ::std::string* release_initialimageid();
-  inline void set_allocated_initialimageid(::std::string* initialimageid);
+  // optional string currentImageId = 3;
+  inline bool has_currentimageid() const;
+  inline void clear_currentimageid();
+  static const int kCurrentImageIdFieldNumber = 3;
+  inline const ::std::string& currentimageid() const;
+  inline void set_currentimageid(const ::std::string& value);
+  inline void set_currentimageid(const char* value);
+  inline void set_currentimageid(const char* value, size_t size);
+  inline ::std::string* mutable_currentimageid();
+  inline ::std::string* release_currentimageid();
+  inline void set_allocated_currentimageid(::std::string* currentimageid);
 
   // repeated .Proto.ImageItem images = 14;
   inline int images_size() const;
@@ -6161,13 +6161,13 @@ class SchemaItemImageValue : public ::google::protobuf::Message {
   inline void clear_has_signalids();
   inline void set_has_signalsource();
   inline void clear_has_signalsource();
-  inline void set_has_initialimageid();
-  inline void clear_has_initialimageid();
+  inline void set_has_currentimageid();
+  inline void clear_has_currentimageid();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* signalids_;
-  ::std::string* initialimageid_;
+  ::std::string* currentimageid_;
   ::google::protobuf::RepeatedPtrField< ::Proto::ImageItem > images_;
   ::google::protobuf::int32 signalsource_;
 
@@ -19760,73 +19760,73 @@ inline void SchemaItemImageValue::set_signalsource(::google::protobuf::int32 val
   signalsource_ = value;
 }
 
-// optional string initialImageId = 3;
-inline bool SchemaItemImageValue::has_initialimageid() const {
+// optional string currentImageId = 3;
+inline bool SchemaItemImageValue::has_currentimageid() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void SchemaItemImageValue::set_has_initialimageid() {
+inline void SchemaItemImageValue::set_has_currentimageid() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void SchemaItemImageValue::clear_has_initialimageid() {
+inline void SchemaItemImageValue::clear_has_currentimageid() {
   _has_bits_[0] &= ~0x00000004u;
 }
-inline void SchemaItemImageValue::clear_initialimageid() {
-  if (initialimageid_ != &::google::protobuf::internal::kEmptyString) {
-    initialimageid_->clear();
+inline void SchemaItemImageValue::clear_currentimageid() {
+  if (currentimageid_ != &::google::protobuf::internal::kEmptyString) {
+    currentimageid_->clear();
   }
-  clear_has_initialimageid();
+  clear_has_currentimageid();
 }
-inline const ::std::string& SchemaItemImageValue::initialimageid() const {
-  return *initialimageid_;
+inline const ::std::string& SchemaItemImageValue::currentimageid() const {
+  return *currentimageid_;
 }
-inline void SchemaItemImageValue::set_initialimageid(const ::std::string& value) {
-  set_has_initialimageid();
-  if (initialimageid_ == &::google::protobuf::internal::kEmptyString) {
-    initialimageid_ = new ::std::string;
+inline void SchemaItemImageValue::set_currentimageid(const ::std::string& value) {
+  set_has_currentimageid();
+  if (currentimageid_ == &::google::protobuf::internal::kEmptyString) {
+    currentimageid_ = new ::std::string;
   }
-  initialimageid_->assign(value);
+  currentimageid_->assign(value);
 }
-inline void SchemaItemImageValue::set_initialimageid(const char* value) {
-  set_has_initialimageid();
-  if (initialimageid_ == &::google::protobuf::internal::kEmptyString) {
-    initialimageid_ = new ::std::string;
+inline void SchemaItemImageValue::set_currentimageid(const char* value) {
+  set_has_currentimageid();
+  if (currentimageid_ == &::google::protobuf::internal::kEmptyString) {
+    currentimageid_ = new ::std::string;
   }
-  initialimageid_->assign(value);
+  currentimageid_->assign(value);
 }
-inline void SchemaItemImageValue::set_initialimageid(const char* value, size_t size) {
-  set_has_initialimageid();
-  if (initialimageid_ == &::google::protobuf::internal::kEmptyString) {
-    initialimageid_ = new ::std::string;
+inline void SchemaItemImageValue::set_currentimageid(const char* value, size_t size) {
+  set_has_currentimageid();
+  if (currentimageid_ == &::google::protobuf::internal::kEmptyString) {
+    currentimageid_ = new ::std::string;
   }
-  initialimageid_->assign(reinterpret_cast<const char*>(value), size);
+  currentimageid_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* SchemaItemImageValue::mutable_initialimageid() {
-  set_has_initialimageid();
-  if (initialimageid_ == &::google::protobuf::internal::kEmptyString) {
-    initialimageid_ = new ::std::string;
+inline ::std::string* SchemaItemImageValue::mutable_currentimageid() {
+  set_has_currentimageid();
+  if (currentimageid_ == &::google::protobuf::internal::kEmptyString) {
+    currentimageid_ = new ::std::string;
   }
-  return initialimageid_;
+  return currentimageid_;
 }
-inline ::std::string* SchemaItemImageValue::release_initialimageid() {
-  clear_has_initialimageid();
-  if (initialimageid_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* SchemaItemImageValue::release_currentimageid() {
+  clear_has_currentimageid();
+  if (currentimageid_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = initialimageid_;
-    initialimageid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = currentimageid_;
+    currentimageid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void SchemaItemImageValue::set_allocated_initialimageid(::std::string* initialimageid) {
-  if (initialimageid_ != &::google::protobuf::internal::kEmptyString) {
-    delete initialimageid_;
+inline void SchemaItemImageValue::set_allocated_currentimageid(::std::string* currentimageid) {
+  if (currentimageid_ != &::google::protobuf::internal::kEmptyString) {
+    delete currentimageid_;
   }
-  if (initialimageid) {
-    set_has_initialimageid();
-    initialimageid_ = initialimageid;
+  if (currentimageid) {
+    set_has_currentimageid();
+    currentimageid_ = currentimageid;
   } else {
-    clear_has_initialimageid();
-    initialimageid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_currentimageid();
+    currentimageid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 

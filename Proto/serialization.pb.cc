@@ -1168,7 +1168,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
   static const int SchemaItemImageValue_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemImageValue, signalids_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemImageValue, signalsource_),
-    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemImageValue, initialimageid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemImageValue, currentimageid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemImageValue, images_),
   };
   SchemaItemImageValue_reflection_ =
@@ -2563,7 +2563,7 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\022\025\n\tprecision\030\r \001(\005:\002-1\022\031\n\014analogFormat\030"
     "\016 \001(\005:\003102\"|\n\024SchemaItemImageValue\022\021\n\tsi"
     "gnalIds\030\001 \001(\t\022\027\n\014signalSource\030\002 \001(\005:\0010\022\026"
-    "\n\016initialImageId\030\003 \001(\t\022 \n\006images\030\016 \003(\0132\020"
+    "\n\016currentImageId\030\003 \001(\t\022 \n\006images\030\016 \003(\0132\020"
     ".Proto.ImageItem\"P\n\rSchemaItemBus\022\021\n\tbus"
     "TypeId\030\002 \001(\t\022\023\n\013busTypeHash\030\003 \001(\006\022\027\n\003bus"
     "\030\005 \001(\0132\n.Proto.Bus\"\027\n\025SchemaItemBusCompo"
@@ -20647,7 +20647,7 @@ void SchemaItemValue::Swap(SchemaItemValue* other) {
 #ifndef _MSC_VER
 const int SchemaItemImageValue::kSignalIdsFieldNumber;
 const int SchemaItemImageValue::kSignalSourceFieldNumber;
-const int SchemaItemImageValue::kInitialImageIdFieldNumber;
+const int SchemaItemImageValue::kCurrentImageIdFieldNumber;
 const int SchemaItemImageValue::kImagesFieldNumber;
 #endif  // !_MSC_VER
 
@@ -20669,7 +20669,7 @@ void SchemaItemImageValue::SharedCtor() {
   _cached_size_ = 0;
   signalids_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   signalsource_ = 0;
-  initialimageid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  currentimageid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -20681,8 +20681,8 @@ void SchemaItemImageValue::SharedDtor() {
   if (signalids_ != &::google::protobuf::internal::kEmptyString) {
     delete signalids_;
   }
-  if (initialimageid_ != &::google::protobuf::internal::kEmptyString) {
-    delete initialimageid_;
+  if (currentimageid_ != &::google::protobuf::internal::kEmptyString) {
+    delete currentimageid_;
   }
   if (this != default_instance_) {
   }
@@ -20717,9 +20717,9 @@ void SchemaItemImageValue::Clear() {
       }
     }
     signalsource_ = 0;
-    if (has_initialimageid()) {
-      if (initialimageid_ != &::google::protobuf::internal::kEmptyString) {
-        initialimageid_->clear();
+    if (has_currentimageid()) {
+      if (currentimageid_ != &::google::protobuf::internal::kEmptyString) {
+        currentimageid_->clear();
       }
     }
   }
@@ -20762,19 +20762,19 @@ bool SchemaItemImageValue::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
-        if (input->ExpectTag(26)) goto parse_initialImageId;
+        if (input->ExpectTag(26)) goto parse_currentImageId;
         break;
       }
 
-      // optional string initialImageId = 3;
+      // optional string currentImageId = 3;
       case 3: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
-         parse_initialImageId:
+         parse_currentImageId:
           DO_(::google::protobuf::internal::WireFormatLite::ReadString(
-                input, this->mutable_initialimageid()));
+                input, this->mutable_currentimageid()));
           ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-            this->initialimageid().data(), this->initialimageid().length(),
+            this->currentimageid().data(), this->currentimageid().length(),
             ::google::protobuf::internal::WireFormat::PARSE);
         } else {
           goto handle_uninterpreted;
@@ -20830,13 +20830,13 @@ void SchemaItemImageValue::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->signalsource(), output);
   }
 
-  // optional string initialImageId = 3;
-  if (has_initialimageid()) {
+  // optional string currentImageId = 3;
+  if (has_currentimageid()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->initialimageid().data(), this->initialimageid().length(),
+      this->currentimageid().data(), this->currentimageid().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     ::google::protobuf::internal::WireFormatLite::WriteString(
-      3, this->initialimageid(), output);
+      3, this->currentimageid(), output);
   }
 
   // repeated .Proto.ImageItem images = 14;
@@ -20868,14 +20868,14 @@ void SchemaItemImageValue::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->signalsource(), target);
   }
 
-  // optional string initialImageId = 3;
-  if (has_initialimageid()) {
+  // optional string currentImageId = 3;
+  if (has_currentimageid()) {
     ::google::protobuf::internal::WireFormat::VerifyUTF8String(
-      this->initialimageid().data(), this->initialimageid().length(),
+      this->currentimageid().data(), this->currentimageid().length(),
       ::google::protobuf::internal::WireFormat::SERIALIZE);
     target =
       ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
-        3, this->initialimageid(), target);
+        3, this->currentimageid(), target);
   }
 
   // repeated .Proto.ImageItem images = 14;
@@ -20910,11 +20910,11 @@ int SchemaItemImageValue::ByteSize() const {
           this->signalsource());
     }
 
-    // optional string initialImageId = 3;
-    if (has_initialimageid()) {
+    // optional string currentImageId = 3;
+    if (has_currentimageid()) {
       total_size += 1 +
         ::google::protobuf::internal::WireFormatLite::StringSize(
-          this->initialimageid());
+          this->currentimageid());
     }
 
   }
@@ -20959,8 +20959,8 @@ void SchemaItemImageValue::MergeFrom(const SchemaItemImageValue& from) {
     if (from.has_signalsource()) {
       set_signalsource(from.signalsource());
     }
-    if (from.has_initialimageid()) {
-      set_initialimageid(from.initialimageid());
+    if (from.has_currentimageid()) {
+      set_currentimageid(from.currentimageid());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -20987,7 +20987,7 @@ void SchemaItemImageValue::Swap(SchemaItemImageValue* other) {
   if (other != this) {
     std::swap(signalids_, other->signalids_);
     std::swap(signalsource_, other->signalsource_);
-    std::swap(initialimageid_, other->initialimageid_);
+    std::swap(currentimageid_, other->currentimageid_);
     images_.Swap(&other->images_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);

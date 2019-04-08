@@ -334,6 +334,7 @@ namespace Builder
 		AppLogicData* applicationData();
 
 	private:
+		Builder::Context* m_context = nullptr;
 		DbController* m_db = nullptr;
 		mutable IssueLogger* m_log = nullptr;
 		int m_changesetId = 0;
