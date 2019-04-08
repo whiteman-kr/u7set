@@ -6,6 +6,7 @@
 #include "../lib/Subsystem.h"
 #include "../lib/Connection.h"
 #include "../VFrame30/Bus.h"
+#include "../VFrame30/LogicSchema.h"
 #include "../TuningService/TuningDataStorage.h"
 #include "SignalSet.h"
 #include "IssueLogger.h"
@@ -64,6 +65,8 @@ namespace Builder
 		std::shared_ptr<VFrame30::BusSet> m_busSet;
 
 		std::shared_ptr<SignalSet> m_signalSet;
+
+		std::vector<std::shared_ptr<VFrame30::LogicSchema>> m_appLogicSchemas;
 
 		std::shared_ptr<LmDescriptionSet> m_lmDescriptions;
 		std::shared_ptr<LmDescriptionSet> m_fscDescriptions;

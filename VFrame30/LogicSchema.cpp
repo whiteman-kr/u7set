@@ -1,6 +1,7 @@
 #include "LogicSchema.h"
 #include "SchemaItemAfb.h"
 #include "SchemaItemSignal.h"
+#include "SchemaItemConnection.h"
 #include "PropertyNames.h"
 
 namespace VFrame30
@@ -153,15 +154,15 @@ namespace VFrame30
 		return true;
 	}
 
-	void LogicSchema::Draw(CDrawParam* pDrawParam, const QRectF& clipRect) const
+	void LogicSchema::Draw(CDrawParam* drawParam, const QRectF& clipRect) const
 	{
 		BuildFblConnectionMap();
 
-		Schema::Draw(pDrawParam, clipRect);
+		Schema::Draw(drawParam, clipRect);
 		return;
     }
 
-	QStringList LogicSchema::getSignalList() const
+	std::set<QString> LogicSchema::getSignalMap() const
 	{
 		std::set<QString> signalMap;	// signal ids can be duplicated, std::set removes dupilcates
 
@@ -185,11 +186,26 @@ namespace VFrame30
 							signalMap.insert(id);
 						}
 					}
+
+					if (const VFrame30::SchemaItemReceiver* itemReceiver = item->toType<VFrame30::SchemaItemReceiver>();
+						itemReceiver != nullptr)
+					{
+						QString appSignalId = itemReceiver->appSignalId();
+						signalMap.insert(appSignalId);
+					}
 				}
 
 				break;
 			}
 		}
+
+		return signalMap;
+	}
+
+
+	QStringList LogicSchema::getSignalList() const
+	{
+		std::set<QString> signalMap = getSignalMap();	// signal ids can be duplicated, std::set removes dupilcates
 
 		// Move set to list
 		//

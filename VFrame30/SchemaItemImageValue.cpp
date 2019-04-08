@@ -32,8 +32,8 @@ namespace VFrame30
 
 		ADD_PROPERTY_GET_SET_CAT(E::SignalSource, PropertyNames::signalSource, PropertyNames::functionalCategory, true, SchemaItemImageValue::signalSource, SchemaItemImageValue::setSignalSource);
 
-		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::initialImageId, PropertyNames::functionalCategory, true, SchemaItemImageValue::initialImageId, SchemaItemImageValue::setInitialImageId);
 		ADD_PROPERTY_GET_SET_CAT(PropertyVector<ImageItem>, PropertyNames::images, PropertyNames::functionalCategory, true, SchemaItemImageValue::images, SchemaItemImageValue::setImages);
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::currentImageId, PropertyNames::functionalCategory, true, SchemaItemImageValue::currentImageId, SchemaItemImageValue::setCurrentImageId);
 
 		// --
 		//
@@ -64,7 +64,6 @@ namespace VFrame30
 
 		valueMessage->set_signalids(signalIdsString().toStdString());
 		valueMessage->set_signalsource(static_cast<int32_t>(m_signalSource));
-		valueMessage->set_initialimageid(m_initialImageId.toStdString());
 
 		for (auto image : m_images)
 		{
@@ -102,13 +101,12 @@ namespace VFrame30
 
 		setSignalIdsString(valueMessage.signalids().data());
 		m_signalSource = static_cast<E::SignalSource>(valueMessage.signalsource());
-		m_initialImageId = QString::fromStdString(valueMessage.initialimageid());
 
 		m_images.clear();
 		bool loadOk = true;
 		for (int i = 0; i < valueMessage.images_size(); i++)
 		{
-			auto image = m_images.emplace_back();
+			auto& image = m_images.emplace_back(std::make_shared<ImageItem>());
 			loadOk &= image->load(valueMessage.images(i));
 		}
 
@@ -127,11 +125,36 @@ namespace VFrame30
 						
 		// Calculate rectangle
 		//
-		QRectF r = boundingRectInDocPt(drawParam);
+		QRectF rect = boundingRectInDocPt(drawParam);
 
-		// Drawing frame rect
+		// --
 		//
+		std::shared_ptr<ImageItem> currentImage;
 
+		for (auto i : m_images)
+		{
+			if (i->imageId() == currentImageId())
+			{
+				currentImage = i;
+				break;
+			}
+		}
+
+		if (currentImage == nullptr)
+		{
+			ImageItem::drawError(drawParam, rect, tr("Image %1 not found.").arg(currentImageId()));
+		}
+		else
+		{
+			if (currentImage->hasAnyImage() == false)
+			{
+				currentImage->drawError(drawParam, rect, QStringLiteral("No Image"));
+			}
+			else
+			{
+				currentImage->drawImage(drawParam, rect);
+			}
+		}
 
 		return;
 	}
@@ -272,16 +295,6 @@ namespace VFrame30
 	void SchemaItemImageValue::setImages(const PropertyVector<ImageItem>& value)
 	{
 		m_images = value;
-	}
-
-	QString SchemaItemImageValue::initialImageId() const
-	{
-		return m_initialImageId;
-	}
-
-	void SchemaItemImageValue::setInitialImageId(QString value)
-	{
-		m_initialImageId = value;
 	}
 
 	QString SchemaItemImageValue::currentImageId() const

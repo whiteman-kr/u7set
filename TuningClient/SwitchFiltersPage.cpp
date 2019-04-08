@@ -47,7 +47,6 @@ SwitchFiltersPage::SwitchFiltersPage(std::shared_ptr<TuningFilter> workspaceFilt
 	m_tuningFilterStorage(tuningFilterStorage)
 {
 	m_mainLayout = new QVBoxLayout(this);
-	setLayout(m_mainLayout);
 
 	if (m_workspaceFilter == nullptr)
 	{
@@ -114,6 +113,7 @@ SwitchFiltersPage::SwitchFiltersPage(std::shared_ptr<TuningFilter> workspaceFilt
 		m_mainLayout->setContentsMargins(0, 0, 0, 0);
 	}
 
+	setLayout(m_mainLayout);
 }
 
 
@@ -178,7 +178,7 @@ void SwitchFiltersPage::updateFilters(std::shared_ptr<TuningFilter> root)
 
 		// Control Layout
 
-		QHBoxLayout* scrollControlsLayout = new QHBoxLayout(this);
+		QHBoxLayout* scrollControlsLayout = new QHBoxLayout();
 
 		const int controlHeight = 25;
 
@@ -208,7 +208,7 @@ void SwitchFiltersPage::updateFilters(std::shared_ptr<TuningFilter> root)
 
 		// Buttons layout
 
-		m_buttonsLayout = new QGridLayout(this);
+		m_buttonsLayout = new QGridLayout();
 
 		m_buttonStartIndex = 0;
 
@@ -562,8 +562,7 @@ bool SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 		AppSignalParam asp = m_tuningSignalManager->signalParam(f.appSignalHash(), &ok);
 		if (ok == false)
 		{
-			Q_ASSERT(false);
-			return false;
+			continue;
 		}
 
 		if (asp.toTuningType() != TuningValueType::Discrete)
@@ -640,8 +639,7 @@ int SwitchFiltersPage::countDiscretes(TuningFilter* filter)
 		AppSignalParam asp = m_tuningSignalManager->signalParam(tfs.appSignalHash(), &ok);
 		if (ok == false)
 		{
-			Q_ASSERT(false);
-			return 0;
+			continue;
 		}
 
 		if (asp.toTuningType() == TuningValueType::Discrete)
@@ -672,8 +670,7 @@ int SwitchFiltersPage::countWritingEnabled(TuningFilter* filter)
 		AppSignalParam asp = m_tuningSignalManager->signalParam(tfs.appSignalHash(), &ok);
 		if (ok == false)
 		{
-			Q_ASSERT(false);
-			return 0;
+			continue;
 		}
 
 		if (asp.toTuningType() != TuningValueType::Discrete)

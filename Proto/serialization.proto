@@ -691,7 +691,7 @@ message SchemaItemImageValue
 {
     optional string signalIds = 1;
 	optional int32 signalSource = 2 [default = 0];
-	optional string initialImageId = 3;
+	optional string currentImageId = 3;
 
     repeated ImageItem images = 14;
 }

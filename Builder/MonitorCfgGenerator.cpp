@@ -174,6 +174,7 @@ namespace Builder
 		{
 			for (auto&[tag, schemaFile] : SoftwareCfgGenerator::m_schemaTagToFile)
 			{
+				Q_UNUSED(tag);
 				if (schemaFile->fileName.endsWith(QStringLiteral(".") + Db::File::AlFileExtension, Qt::CaseInsensitive) == true ||
 					schemaFile->fileName.endsWith(QStringLiteral(".") + Db::File::MvsFileExtension, Qt::CaseInsensitive) == true)
 				{

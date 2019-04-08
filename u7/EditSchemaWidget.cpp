@@ -6877,7 +6877,152 @@ void EditSchemaWidget::f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item)
 
 void EditSchemaWidget::f2KeyForImageValue(std::shared_ptr<VFrame30::SchemaItem> item)
 {
-	QMessageBox::critical(this, "Error", "To Do: void EditSchemaWidget::f2KeyForImageValue(std::shared_ptr<VFrame30::SchemaItem> item)");
+	if (item == nullptr)
+	{
+		assert(item);
+		return;
+	}
+
+	VFrame30::SchemaItemImageValue* valueItem = dynamic_cast<VFrame30::SchemaItemImageValue*>(item.get());
+	if (valueItem == nullptr)
+	{
+		assert(valueItem);
+		return;
+	}
+
+	QString appSignalIds = valueItem->signalIdsString();
+	QString currentImageId = valueItem->currentImageId();
+	QString preDrawScript = valueItem->preDrawScript();
+
+	// Show input dialog
+	//
+	QDialog d(this);
+
+	d.setWindowTitle(tr("SchemaItemImageValue"));
+	d.setWindowFlags((d.windowFlags() & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowContextHelpButtonHint)
+					 | Qt::CustomizeWindowHint | Qt::WindowMaximizeButtonHint);
+
+	// AppSchemaIDs
+	//
+	QLabel* appSignalIdsLabel = new QLabel("AppSchemaIDs:", &d);
+
+	QTextEdit* appSignalIdsEdit = new QTextEdit(&d);
+	appSignalIdsEdit->setPlaceholderText("Enter AppSchemaIDs separated by lines");
+	appSignalIdsEdit->setPlainText(appSignalIds);
+
+	// CurrentImageID
+	//
+	QLabel* currentImageIdLabel = new QLabel("CurrentImageID:", &d);
+
+	QLineEdit* currentImageIdEdit = new QLineEdit(&d);
+	currentImageIdEdit->setText(currentImageId);
+
+	// PreDrawScript
+	//
+	QLabel* preDrawScriptLabel = new QLabel("PreDrawScript:", &d);
+
+	QsciScintilla* preDrawScriptEdit = new QsciScintilla(&d);
+	LexerJavaScript lexer;
+	preDrawScriptEdit->setLexer(&lexer);
+	preDrawScriptEdit->setText(preDrawScript);
+	preDrawScriptEdit->setMarginType(0, QsciScintilla::NumberMargin);
+	preDrawScriptEdit->setMarginWidth(0, 40);
+
+#if defined(Q_OS_WIN)
+	preDrawScriptEdit->setFont(QFont("Consolas"));
+#else
+	preDrawScriptEdit->setFont(QFont("Courier"));
+#endif
+
+	preDrawScriptEdit->setTabWidth(4);
+	preDrawScriptEdit->setAutoIndent(true);
+
+	QPushButton* preDrawScriptTemplate = new QPushButton(tr("Paste PreDrawScript Template"), &d);
+
+	// --
+	//
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &d);
+
+	QGridLayout* layout = new QGridLayout(&d);
+
+	layout->addWidget(appSignalIdsLabel, 0, 0, 1, 3);
+	layout->addWidget(appSignalIdsEdit, 1, 0, 1, 3);
+
+	layout->addWidget(currentImageIdLabel, 2, 0, 1, 3);
+	layout->addWidget(currentImageIdEdit, 3, 0, 1, 3);
+
+	layout->addWidget(preDrawScriptLabel, 4, 0, 1, 3);
+	layout->addWidget(preDrawScriptEdit, 5, 0, 1, 3);
+	layout->addWidget(preDrawScriptTemplate, 6, 0, 1, 1);
+
+	layout->addWidget(buttonBox, 7, 0, 1, 3);
+
+	layout->setRowStretch(5, 1);	// preDrawScriptEdit
+
+	d.setLayout(layout);
+
+	// RAW STRINg TEMPLATE FOR PreDrawScript
+	//
+	QString preDrawScriptTemplateString = R"((function(schemaItemImageValue)
+{
+	// Get signal id by index from schema item
+	var appSignalId = schemaItemImageValue.SignalIDs[0];
+
+	// Get data from AppDataService or TuningService sources
+	// var signalState = tuning.signalState(appSignalId);
+	var signalState = signals.signalState(appSignalId);
+
+	if (signalState.Valid == false)
+	{
+		schemaItemImageValue.CurrentImageID = "IMAGEID_NOT_VALID";
+		return;
+	}
+
+	if (signalState.Value == 0)
+		schemaItemImageValue.CurrentImageID = "IMAGEID_OFF";
+	else
+		schemaItemImageValue.CurrentImageID = "IMAGEID_ON";
+}))";
+
+	connect(preDrawScriptTemplate, &QPushButton::clicked, &d, [preDrawScriptEdit, preDrawScriptTemplateString](){preDrawScriptEdit->setText(preDrawScriptTemplateString);});
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	// --
+	//
+	int width = QSettings().value("f2KeyForImageValue\\width").toInt();
+	int height = QSettings().value("f2KeyForImageValue\\height").toInt();
+	d.resize(width, height);
+
+	int result = d.exec();
+
+	if (result == QDialog::Accepted)
+	{
+		QString newAppSignaIds = appSignalIdsEdit->toPlainText();
+		QString newCurrentImageId = currentImageIdEdit->text();
+		QString newPreDrawScript = preDrawScriptEdit->text();
+
+		if (newAppSignaIds != appSignalIds ||
+			newCurrentImageId != currentImageId ||
+			newPreDrawScript != preDrawScript)
+		{
+			if (bool ok = m_editEngine->startBatch();
+				ok == true)
+			{
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newAppSignaIds), item);
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::currentImageId, QVariant(newCurrentImageId), item);
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::preDrawScript, QVariant(newPreDrawScript), item);
+
+				m_editEngine->endBatch();
+			}
+		}
+	}
+
+	QSettings().setValue("f2KeyForImageValue\\width", d.width());
+	QSettings().setValue("f2KeyForImageValue\\height", d.height());
+
+	return;
 }
 
 
