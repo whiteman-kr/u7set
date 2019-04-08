@@ -3254,15 +3254,6 @@ namespace Builder
 			return true;
 		}
 
-		// To generate tuning data for IPEN (version 1 of FOTIP protocol)
-		// uncomment next 3 lines:
-		//
-		// TuningIPEN::TuningData* tuningData = new TuningIPEN::TuningData(lmEquipmentID(),
-		//													tuningFrameSizeBytes,
-		//													tuningFrameCount);
-		//
-		// and comment 3 lines below:
-		//
 		Tuning::TuningData* tuningData = new Tuning::TuningData(lmEquipmentID(),
 																m_lmDescription->flashMemory().m_tuningFrameCount,
 																m_lmDescription->flashMemory().m_tuningFramePayload,
@@ -3297,7 +3288,8 @@ namespace Builder
 				// Tuningable signals is found in module %1 but tuning is not enabled.
 				//
 				m_log->errALC5166(lmEquipmentID());
-				result = false;
+				delete tuningData;
+				return false;
 			}
 		}
 
@@ -3311,22 +3303,16 @@ namespace Builder
 							   QString(tr("Tuning data of LM '%1' exceed available %2 frames")).
 							   arg(lmEquipmentID()).
 							   arg(tuningFrameCount));
-			result = false;
-		}
-		else
-		{
-			tuningData->generateUniqueID(lmEquipmentID());
-
-			m_tuningData = tuningData;
-			m_tuningDataStorage->insert(lmEquipmentID(), tuningData);
-		}
-
-		if (result == false)
-		{
 			delete tuningData;
+			return false;
 		}
 
-		return result;
+		tuningData->generateUniqueID(lmEquipmentID());
+
+		m_tuningData = tuningData;
+		m_tuningDataStorage->insert(lmEquipmentID(), tuningData);
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::getTuningSettings(bool* tuningPropertyExists, bool* tuningEnabled)
