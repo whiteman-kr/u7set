@@ -47,7 +47,7 @@ namespace VFrame30
 	const QString PropertyNames::image("Image");
 	const QString PropertyNames::images("Images");
 	const QString PropertyNames::svg("Svg");
-	const QString PropertyNames::initialImageId("InitialImageID");
+	const QString PropertyNames::currentImageId("CurrentImageID");
 
 	// SchemaItemValue Colors
 	//

@@ -5,6 +5,7 @@
 #include "DialogSignalInfo.h"
 #include "../VFrame30/SchemaItemSignal.h"
 #include "../VFrame30/SchemaItemValue.h"
+#include "../VFrame30/SchemaItemImageValue.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/MonitorSchema.h"
 
@@ -89,7 +90,7 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 			if (VFrame30::SchemaItemSignal* schemaItemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
 				schemaItemSignal != nullptr)
 			{
-				const QStringList& signalList = schemaItemSignal->appSignalIdList();
+				QStringList signalList = schemaItemSignal->appSignalIdList();
 				signalContextMenu(signalList);
 				break;
 			}
@@ -97,7 +98,15 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 			if (VFrame30::SchemaItemValue* schemaItemValue = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
 				schemaItemValue != nullptr)
 			{
-				const QStringList& signalList = schemaItemValue->signalIds();
+				QStringList signalList = schemaItemValue->signalIds();
+				signalContextMenu(signalList);
+				break;
+			}
+
+			if (VFrame30::SchemaItemImageValue* schemaItem = dynamic_cast<VFrame30::SchemaItemImageValue*>(item.get());
+				schemaItem != nullptr)
+			{
+				QStringList signalList = schemaItem->signalIds();
 				signalContextMenu(signalList);
 				break;
 			}

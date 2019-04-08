@@ -62,9 +62,6 @@ namespace VFrame30
 		const PropertyVector<ImageItem>& images() const;
 		void setImages(const PropertyVector<ImageItem>& value);
 
-		QString initialImageId() const;
-		void setInitialImageId(QString value);
-
 		QString currentImageId() const;
 		void setCurrentImageId(QString value);
 
@@ -73,8 +70,6 @@ namespace VFrame30
 		E::SignalSource m_signalSource = E::SignalSource::AppDataService;
 
 		PropertyVector<ImageItem> m_images;	// Each image is a std::shared_ptr
-
-		QString m_initialImageId;			// Default value on Monitor start for currentImageId
 
 		// MonitorMode variables
 		//

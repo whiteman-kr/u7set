@@ -54,7 +54,7 @@ namespace VFrame30
 		static const QString image;
 		static const QString images;
 		static const QString svg;
-		static const QString initialImageId;
+		static const QString currentImageId;
 
 		// --
 		//
