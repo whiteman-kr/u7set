@@ -236,7 +236,7 @@ void TuningSignalManager::validateStates()
 		s.m_flags.controlIsEnabled = true;
 
 		static bool we_debug = false;
-		s.m_flags.writingIsEnabled = we_debug;
+        s.m_flags.writingIsEnabled = true;//we_debug;
 		we_debug = !we_debug;
 
 		s.m_value = asp.tuningDefaultValue();

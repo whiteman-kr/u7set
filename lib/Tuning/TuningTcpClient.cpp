@@ -29,6 +29,8 @@ TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, TuningSignalM
 {
 	assert(m_signals);
 
+    m_signalHashes = m_signals->signalHashes();
+
 	return;
 }
 
@@ -591,7 +593,7 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 
 					// Set new source state
 
-					ts.setNewState(tss);
+                    ts.setNewState(tss);
 
 					//
 
@@ -823,7 +825,7 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 		// When updating states, we have to set some properties locally
 		//
-		arrivedState.m_flags.controlIsEnabled = (error == NetworkError::LmControlIsNotActive) ? false : true;
+        arrivedState.m_flags.controlIsEnabled = (error == NetworkError::LmControlIsNotActive) ? false : true;
 
 		// --
 		//
@@ -1029,6 +1031,8 @@ void TuningTcpClient::slot_signalsUpdated()
 			m_writeQueue.pop();
 		}
 	}
+
+    m_signalHashes = m_signals->signalHashes();
 
 	// --
 	//
