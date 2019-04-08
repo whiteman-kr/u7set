@@ -87,7 +87,13 @@ public:
     bool isEnabled() const;
     bool isModified() const;
 
-    bool hasValue() const;
+	QColor backgroundColor() const;
+	void setBackgroundColor(const QColor& color);
+
+	QColor textColor() const;
+	void setTextColor(const QColor& color) const;
+
+	bool hasValue() const;
     QIcon valueIcon() const;
     QString valueText() const;
     QString displayText() const;

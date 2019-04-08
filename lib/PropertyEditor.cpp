@@ -2854,8 +2854,17 @@ namespace ExtWidgets
             subProperty = m_propertyVariantManager->addProperty(caption);
             subProperty->setToolTip(description);
 			subProperty->setEnabled(m_readOnly == false && readOnly == false);
+
+
+			if (propertyPtr->essential() == true)
+			{
+				subProperty->setBackgroundColor(QColor(0xEA, 0xF0, 0xFF));
+			}
+
 			m_propertyVariantManager->setProperty(subProperty, propertyPtr);
             m_propertyVariantManager->setAttribute(subProperty, "@propertyEditor@sameValue", sameValue);
+
+
 
 			if (parentProperty == nullptr)
 			{
