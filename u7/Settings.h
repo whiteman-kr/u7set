@@ -158,6 +158,8 @@ public:
 	int m_busEditorSortColumn = 0;
 	Qt::SortOrder m_busEditorSortOrder = Qt::AscendingOrder;
 
+	QByteArray m_afbLibratyCheckSplitterState;
+
 
 	// CreateSchema dialog
 	//

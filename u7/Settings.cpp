@@ -157,6 +157,8 @@ void Settings::writeUserScope() const
 	s.setValue("BusEditor/sortColumn", m_busEditorSortColumn);
 	s.setValue("BusEditor/sortOrder", static_cast<int>(m_busEditorSortOrder));
 
+	s.setValue("AfbLibraryCheck/mainSplitter", m_afbLibratyCheckSplitterState);
+
 	s.setValue("CreateSchema/lastSelectedLmDescriptionFile", m_lastSelectedLmDescriptionFile);
 
 	s.setValue("SchemaItem/pos", m_schemaItemPropertiesWindowPos);
@@ -259,7 +261,11 @@ void Settings::loadUserScope()
 	m_busEditorSortColumn = s.value("BusEditor/sortColumn").toInt();
 	m_busEditorSortOrder = static_cast<Qt::SortOrder>(s.value("BusEditor/sortOrder").toInt());
 
-    //
+	//
+
+	m_afbLibratyCheckSplitterState = s.value("AfbLibraryCheck/mainSplitter").toByteArray();
+
+	//
 	m_lastSelectedLmDescriptionFile = s.value("CreateSchema/lastSelectedLmDescriptionFile", "").toString();
 
 	m_schemaItemPropertiesWindowPos = s.value("SchemaItem/pos", QPoint(-1, -1)).toPoint();
