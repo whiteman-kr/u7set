@@ -841,12 +841,24 @@ namespace VFrame30
 
 	bool SchemaItem::blinkPhase() const
 	{
-		return m_blinkPhase;
+		if (m_drawParam != nullptr && m_drawParam->isMonitorMode() == true)
+		{
+			return m_drawParam->blinkPhase();
+		}
+		else
+		{
+			return false;
+		}
 	}
 
-	void SchemaItem::setBlinkPhase(bool value)
+	const CDrawParam* SchemaItem::drawParam() const
 	{
-		m_blinkPhase = value;
+		return m_drawParam;
+	}
+
+	void SchemaItem::setDrawParam(CDrawParam* value)
+	{
+		m_drawParam = value;
 	}
 
 	QRectF SchemaItem::boundingRectInDocPt(CDrawParam* /*drawParam*/) const

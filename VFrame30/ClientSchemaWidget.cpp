@@ -5,8 +5,13 @@
 namespace VFrame30
 {
 
-	SchemaHistoryItem::SchemaHistoryItem(QString schemaId, double zoom, int horzScrollValue, int vertScrollValue) :
+	SchemaHistoryItem::SchemaHistoryItem(QString schemaId,
+										 const QVariantHash& variables,
+										 double zoom,
+										 int horzScrollValue,
+										 int vertScrollValue) :
 		m_schemaId(schemaId),
+		m_variables(variables),
 		m_zoom(zoom),
 		m_horzScrollValue(horzScrollValue),
 		m_vertScrollValue(vertScrollValue)
@@ -320,6 +325,9 @@ namespace VFrame30
 		// --
 		//
 		BaseSchemaWidget::setSchema(schema, false);
+
+		clientSchemaView()->setVariables(historyState.m_variables);
+
 		setZoom(historyState.m_zoom, false);
 
 		horizontalScrollBar()->setValue(historyState.m_horzScrollValue);
@@ -332,7 +340,7 @@ namespace VFrame30
 
 	SchemaHistoryItem ClientSchemaWidget::currentHistoryState() const
 	{
-		SchemaHistoryItem hi{schemaId(), zoom(), horizontalScrollBar()->value(), verticalScrollBar()->value()};
+		SchemaHistoryItem hi{schemaId(), clientSchemaView()->variables(), zoom(), horizontalScrollBar()->value(), verticalScrollBar()->value()};
 		return hi;
 	}
 

@@ -43,6 +43,11 @@ namespace VFrame30
 		void infoMessageBox(QString text);
 		bool questionMessageBox(QString text);
 
+		// Variables functions
+		//
+		QVariant variable(QString name);
+		void setVariable(QString name, const QVariant& value);
+
 		// Data
 		//
 	private:
@@ -100,6 +105,14 @@ namespace VFrame30
 		QJSEngine* jsEngine();
 		QString globalScript() const;
 
+		// Variables
+		//
+		QVariant variable(QString name) const;
+		void setVariable(QString name, const QVariant& value);
+
+		const QVariantHash& variables() const;
+		void setVariables(const QVariantHash& values);
+
 	private:
 		VFrame30::SchemaManager* m_schemaManager = nullptr;
 
@@ -116,6 +129,10 @@ namespace VFrame30
 
 		std::shared_ptr<SchemaItem> m_leftClickOverItem;
 		QDateTime m_lastRepaintEventFired = QDateTime::currentDateTime();
+
+		// Variables
+		//
+		QVariantHash m_variables;		// Key is variable name
 	};
 
 

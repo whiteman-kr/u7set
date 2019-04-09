@@ -15,9 +15,15 @@ namespace VFrame30
 		SchemaHistoryItem(const SchemaHistoryItem& src) = default;
 		SchemaHistoryItem& operator= (const SchemaHistoryItem& src) = default;
 
-		SchemaHistoryItem(QString schemaId, double zoom, int horzScrollValue, int vertScrollValue);
+		SchemaHistoryItem(QString schemaId,
+						  const QVariantHash& variables,
+						  double zoom,
+						  int horzScrollValue,
+						  int vertScrollValue);
 
 		QString m_schemaId;
+		QVariantHash m_variables;
+
 		double m_zoom = 100.0;
 		int m_horzScrollValue = 0;
 		int m_vertScrollValue = 0;

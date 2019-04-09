@@ -131,6 +131,16 @@ namespace VFrame30
 		return result == QMessageBox::Yes;
 	}
 
+	QVariant ScriptSchemaView::variable(QString name)
+	{
+		return m_clientSchemaView->variable(name);
+	}
+
+	void ScriptSchemaView::setVariable(QString name, const QVariant& value)
+	{
+		m_clientSchemaView->setVariable(name, value);
+	}
+
 	//
 	// ClientSchemaView
 	//
@@ -459,4 +469,23 @@ namespace VFrame30
 		return m_schemaManager->globalScript();
 	}
 
+	QVariant ClientSchemaView::variable(QString name) const
+	{
+		return m_variables.value(name);
+	}
+
+	void ClientSchemaView::setVariable(QString name, const QVariant& value)
+	{
+		m_variables[name] = value;
+	}
+
+	const QVariantHash& ClientSchemaView::variables() const
+	{
+		return m_variables;
+	}
+
+	void ClientSchemaView::setVariables(const QVariantHash& values)
+	{
+		m_variables = values;
+	}
 }
