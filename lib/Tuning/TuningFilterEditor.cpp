@@ -117,6 +117,7 @@ ChooseTuningSignalsWidget::ChooseTuningSignalsWidget(TuningSignalManager* signal
 
 	m_filterValuesTree = new QTreeWidget();
 	m_filterValuesTree->setSelectionMode(QAbstractItemView::ExtendedSelection);
+	m_filterValuesTree->setWordWrap(false);
 	connect(m_filterValuesTree, &QTreeWidget::doubleClicked, this, &ChooseTuningSignalsWidget::on_m_filterValuesTree_doubleClicked);
 
 	QStringList headers;
