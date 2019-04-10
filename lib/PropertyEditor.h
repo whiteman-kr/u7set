@@ -282,8 +282,13 @@ namespace ExtWidgets
 	public:
 		PropertyEditorCheckBox(QWidget* parent) : QCheckBox(parent)
 		{
-
 		}
+
+		bool hitOnButton(const QPoint& pos)
+		{
+			return hitButton(pos);
+		}
+
 	private:
 		virtual void paintEvent(QPaintEvent *e) override;
 	};
@@ -298,6 +303,7 @@ namespace ExtWidgets
 		void setValue(Qt::CheckState state, bool readOnly);
 
 	public slots:
+		void changeValueOnButtonClick();
 		void onStateChanged(int state);
 
 	signals:

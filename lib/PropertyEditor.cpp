@@ -2035,6 +2035,17 @@ namespace ExtWidgets
 		m_checkBox->blockSignals(false);
 	}
 
+	void MultiCheckBox::changeValueOnButtonClick()
+	{
+		QPoint pt = QCursor::pos();
+		pt = m_checkBox->mapFromGlobal(pt);
+
+		if (m_checkBox->hitOnButton(pt) == true)
+		{
+			m_checkBox->click();
+		}
+	}
+
 	void MultiCheckBox::onStateChanged(int state)
 	{
 		if (m_checkBox == nullptr)
@@ -2192,6 +2203,10 @@ namespace ExtWidgets
 				}
 
 				m_editor->setValue(state, m_property->isEnabled() == false);
+
+				QTimer::singleShot(10, m_editor, &MultiCheckBox::changeValueOnButtonClick);
+
+				//m_editor->changeValueOnButtonClick();
 			}
 				break;
 			case QVariant::String:
@@ -2739,6 +2754,8 @@ namespace ExtWidgets
 	{
 		setResizeMode(ResizeMode::Interactive);
 
+		setAlternatingRowColors(false);
+
 		m_propertyGroupManager = new QtGroupPropertyManager(this);
 		m_propertyVariantManager = new MultiVariantPropertyManager(this);
 
@@ -2876,7 +2893,8 @@ namespace ExtWidgets
 
 			if (propertyPtr->essential() == true)
 			{
-				subProperty->setBackgroundColor(QColor(0xEA, 0xF0, 0xFF));
+				//subProperty->setBackgroundColor(QColor(0xEA, 0xF0, 0xFF));
+				subProperty->setBackgroundColor(QColor(0xf0, 0xf0, 0xf0));
 			}
 
 			m_propertyVariantManager->setProperty(subProperty, propertyPtr);
