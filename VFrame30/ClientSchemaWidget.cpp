@@ -5,17 +5,18 @@
 namespace VFrame30
 {
 
-	SchemaHistoryItem::SchemaHistoryItem(QString schemaId,
+	SchemaHistoryItem::SchemaHistoryItem(std::shared_ptr<Schema> schema,
 										 const QVariantHash& variables,
 										 double zoom,
 										 int horzScrollValue,
 										 int vertScrollValue) :
-		m_schemaId(schemaId),
+		m_schema(schema),
 		m_variables(variables),
 		m_zoom(zoom),
 		m_horzScrollValue(horzScrollValue),
 		m_vertScrollValue(vertScrollValue)
 	{
+		Q_ASSERT(m_schema);
 	}
 
 
@@ -234,7 +235,7 @@ namespace VFrame30
 		SchemaHistoryItem currentView = m_backHistory.back();
 		m_backHistory.pop_back();
 
-		assert(currentView.m_schemaId == schemaId());	// Save current state
+		assert(currentView.m_schema->schemaId() == schemaId());	// Save current state
 		currentView = currentHistoryState();
 
 		m_forwardHistory.push_front(currentView);
@@ -261,9 +262,9 @@ namespace VFrame30
 		// Save current state
 		//
 		SchemaHistoryItem& currentView = m_backHistory.back();
-		if (currentView.m_schemaId != schemaId())
+		if (currentView.m_schema->schemaId() != schemaId())
 		{
-			Q_ASSERT(currentView.m_schemaId == schemaId());
+			Q_ASSERT(currentView.m_schema->schemaId() == schemaId());
 			resetHistory();
 			return;
 		}
@@ -310,16 +311,12 @@ namespace VFrame30
 			return;
 		}
 
-		std::shared_ptr<VFrame30::Schema> schema = m_schemaManager->schema(historyState.m_schemaId);
+		std::shared_ptr<VFrame30::Schema> schema = historyState.m_schema;
 
 		if (schema == nullptr)
 		{
-			// and there is no startSchemaId (((
-			// Just create an empty schema
-			//
-			schema = std::make_shared<VFrame30::LogicSchema>();
-			schema->setSchemaId(historyState.m_schemaId);
-			schema->setCaption(historyState.m_schemaId + " not found");
+			Q_ASSERT(schema);
+			return;
 		}
 
 		// --
@@ -340,7 +337,7 @@ namespace VFrame30
 
 	SchemaHistoryItem ClientSchemaWidget::currentHistoryState() const
 	{
-		SchemaHistoryItem hi{schemaId(), clientSchemaView()->variables(), zoom(), horizontalScrollBar()->value(), verticalScrollBar()->value()};
+		SchemaHistoryItem hi{schema(), clientSchemaView()->variables(), zoom(), horizontalScrollBar()->value(), verticalScrollBar()->value()};
 		return hi;
 	}
 
@@ -365,7 +362,7 @@ namespace VFrame30
 		if (canBackHistory() == false)
 		{
 			VFrame30::SchemaHistoryItem& currentHistoryItem = m_backHistory.back();		// REFERENCE!!!
-			assert(currentHistoryItem.m_schemaId == this->schemaId());
+			assert(currentHistoryItem.m_schema->schemaId() == this->schemaId());
 
 			currentHistoryItem = currentHistoryState();
 		}
@@ -393,6 +390,13 @@ namespace VFrame30
 		//
 		VFrame30::SchemaHistoryItem hi = currentHistoryState();
 		m_backHistory.push_back(hi);
+
+		// Limit size of history
+		//
+		while (m_backHistory.size() > 50)
+		{
+			m_backHistory.pop_front();
+		}
 
 		// --
 		//

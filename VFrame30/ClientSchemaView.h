@@ -127,6 +127,9 @@ namespace VFrame30
 		// --
 		//
 		bool m_jsEngineGlobalsWereCreated = false;
+		std::unique_ptr<ScriptSchemaView> m_scriptSchemaView;
+
+		QJSEngine m_jsEngine;
 
 		std::shared_ptr<SchemaItem> m_leftClickOverItem;
 		QDateTime m_lastRepaintEventFired = QDateTime::currentDateTime();
@@ -135,8 +138,6 @@ namespace VFrame30
 		//
 		QVariantHash m_variables;		// Key is variable name
 	};
-
-
 }
 
 #endif // CLIENTSCHEMAVIEW_H
