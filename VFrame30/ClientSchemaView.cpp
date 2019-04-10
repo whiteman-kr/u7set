@@ -445,7 +445,7 @@ namespace VFrame30
 			return nullptr;
 		}
 
-		QJSEngine* engine = m_schemaManager->jsEngine(); Перенести QJSEngine сюда в ClientSchemaView??? сделать по одной штуке на вью
+		QJSEngine* engine = m_schemaManager->jsEngine();
 		assert(engine);
 
 		// Set current schema view, don't do it in "if", as it will set one schema view for all widgets
