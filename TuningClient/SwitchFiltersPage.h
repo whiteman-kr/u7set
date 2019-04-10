@@ -26,8 +26,8 @@ public:
 signals:
 	void clicked(std::shared_ptr<TuningFilter> filter);
 
-private slots:
-	void slot_clicked();
+private:
+	virtual void mousePressEvent(QMouseEvent *event) override;
 
 private:
 	std::shared_ptr<TuningFilter> m_filter;
@@ -54,6 +54,17 @@ protected:
 		{
 			QTableWidget::keyPressEvent(e);
 		}
+	}
+
+	void mousePressEvent(QMouseEvent* e) override
+	{
+		QTableWidgetItem* item = itemAt(e->pos());
+		if (item == nullptr)
+		{
+			clearSelection();
+		}
+
+		QTableWidget::mousePressEvent(e);
 	}
 signals:
 	void spacePressed();
@@ -174,6 +185,10 @@ private:
 
 	QGridLayout* m_buttonsLayout = nullptr;
 
+	QPushButton* m_prevButton = nullptr;
+
+	QPushButton* m_nextButton = nullptr;
+
 	std::vector<FilterPushButton*> m_filterButtons;
 
 	// Table part
@@ -193,8 +208,7 @@ private:
 	static QString tag_FilterButton;
 	static QString tag_FilterSwitch;
 
-	//QColor m_alertBackColor = QColor(255, 140, 0);
-	QColor m_alertBackColor = QColor(Qt::darkRed);
+	QColor m_alertBackColor = QColor(192, 0, 0);
 	QColor m_alertTextColor = QColor(255, 255, 255);
 
 	QColor m_partialBackColor = QColor(Qt::yellow);

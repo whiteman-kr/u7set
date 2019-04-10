@@ -1672,6 +1672,16 @@ R"DELIM({
 		DeviceObject(preset)
 	{
 		qDebug() << "DeviceRoot::DeviceSystem";
+
+		auto p = propertyByCaption(PropertyNames::equipmentIdTemplate);
+		if (p == nullptr)
+		{
+			Q_ASSERT(p);
+		}
+		else
+		{
+			p->setEssential(true);
+		}
 	}
 
 	DeviceSystem::~DeviceSystem()
@@ -1746,6 +1756,15 @@ R"DELIM({
 	DeviceRack::DeviceRack(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
+		auto p = propertyByCaption(PropertyNames::equipmentIdTemplate);
+		if (p == nullptr)
+		{
+			Q_ASSERT(p);
+		}
+		else
+		{
+			p->setEssential(true);
+		}
 	}
 
 	DeviceRack::~DeviceRack()
@@ -1821,6 +1840,17 @@ R"DELIM({
 		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, "Type", true, DeviceChassis::type, DeviceChassis::setType)
 		typeProp->setUpdateFromPreset(true);
 		typeProp->setExpert(true);
+
+		auto p = propertyByCaption(PropertyNames::place);
+		if (p == nullptr)
+		{
+			Q_ASSERT(p);
+		}
+		else
+		{
+			p->setEssential(true);
+		}
+
 	}
 
 	DeviceChassis::~DeviceChassis()
@@ -1953,6 +1983,17 @@ R"DELIM({
 		configScriptProp->setUpdateFromPreset(true);
 		rawDataDescrProp->setUpdateFromPreset(true);
 		customFamilyTypeProp->setUpdateFromPreset(true);
+
+
+		auto p = propertyByCaption(PropertyNames::place);
+		if (p == nullptr)
+		{
+			Q_ASSERT(p);
+		}
+		else
+		{
+			p->setEssential(true);
+		}
 	}
 
 	DeviceModule::~DeviceModule()

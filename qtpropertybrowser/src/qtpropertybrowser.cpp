@@ -72,6 +72,9 @@ public:
     bool m_enabled;
     bool m_modified;
 
+	QColor m_backgroundColor;
+	QColor m_textColor;
+
     QtAbstractPropertyManager * const m_manager;
 };
 
@@ -262,6 +265,26 @@ bool QtProperty::isEnabled() const
 bool QtProperty::isModified() const
 {
     return d_ptr->m_modified;
+}
+
+QColor QtProperty::backgroundColor() const
+{
+	return d_ptr->m_backgroundColor;
+}
+
+void QtProperty::setBackgroundColor(const QColor& color)
+{
+	d_ptr->m_backgroundColor = color;
+}
+
+QColor QtProperty::textColor() const
+{
+	return d_ptr->m_textColor;
+}
+
+void QtProperty::setTextColor(const QColor& color) const
+{
+	d_ptr->m_textColor = color;
 }
 
 /*!
