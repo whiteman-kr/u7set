@@ -4309,6 +4309,7 @@ void SchemaControlTabPageEx::showFileProperties()
 	}
 
 	propertyEditor->setObjects(propertyObjects);
+	propertyEditor->resizeColumnToContents(0);
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 

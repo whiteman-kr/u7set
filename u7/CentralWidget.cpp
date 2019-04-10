@@ -9,8 +9,16 @@ CentralWidget::CentralWidget(QWidget* parent) :
 	QSize sz = fontMetrics().size(Qt::TextSingleLine, "APPLICATION LOGIC");
 	sz.setHeight(sz.height() * 1.75);
 
-	QString ss = QString("QTabBar::tab { min-width: %1px; min-height: %2px;}").arg(sz.width()).arg(sz.height());
-	setStyleSheet(ss);
+	//QString ss = QString("QTabBar::tab { min-width: %1px; min-height: %2px;}").arg(sz.width()).arg(sz.height());
+	//setStyleSheet(ss);
+
+	TabBar* tb = new TabBar();
+
+	tb->setMinimumTabSizeHint(sz);
+	tb->setShape(QTabBar::RoundedNorth);
+	tb->setDrawBase(false);
+
+	setTabBar(tb);
 
 	connect(this, &QTabWidget::currentChanged, this, &CentralWidget::currentChanged);
 }

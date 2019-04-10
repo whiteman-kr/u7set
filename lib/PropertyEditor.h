@@ -277,6 +277,17 @@ namespace ExtWidgets
 
 	};
 
+	class PropertyEditorCheckBox : public QCheckBox
+	{
+	public:
+		PropertyEditorCheckBox(QWidget* parent) : QCheckBox(parent)
+		{
+
+		}
+	private:
+		virtual void paintEvent(QPaintEvent *e) override;
+	};
+
 
 	class MultiCheckBox : public QWidget
 	{
@@ -284,7 +295,7 @@ namespace ExtWidgets
 
 	public:
 		explicit MultiCheckBox(QWidget* parent);
-		void setValue(bool value, bool readOnly);
+		void setValue(Qt::CheckState state, bool readOnly);
 
 	public slots:
 		void onStateChanged(int state);
@@ -296,7 +307,7 @@ namespace ExtWidgets
 		void updateText();
 
 	private:
-		QCheckBox* m_checkBox = nullptr;
+		PropertyEditorCheckBox* m_checkBox = nullptr;
 
 	};
 
@@ -420,10 +431,8 @@ namespace ExtWidgets
 		void disconnectPropertyManager(MultiVariantPropertyManager* manager);
 
 	public slots:
-		//void slotPropertyChanged(QtProperty* property, QVariant value);
 
 		void slotSetValue(QVariant value);		// sets value from argument
-		void slotSetValueTimer();				// sets value m_valueSetOnTimer, needed for QTimer::singleShot
 
 		void slotEditorDestroyed(QObject* object);
 
@@ -433,7 +442,6 @@ namespace ExtWidgets
 
 		PropertyEditor* m_propertyEditor = nullptr;
 
-		QVariant m_valueSetOnTimer;
 	};
 
 	// -------------------------------------------------------------------------------

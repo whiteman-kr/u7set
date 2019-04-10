@@ -36,6 +36,7 @@ void SchemaPropertiesDialog::setSchema(std::shared_ptr<VFrame30::Schema> schema)
 	ol.push_back(schema);
 
 	m_propertyEditor->setObjects(ol);
+	m_propertyEditor->resizeColumnToContents(0);
 
 	return;
 }
