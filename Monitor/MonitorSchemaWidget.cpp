@@ -8,6 +8,7 @@
 #include "../VFrame30/SchemaItemImageValue.h"
 #include "../VFrame30/SchemaItemConnection.h"
 #include "../VFrame30/MonitorSchema.h"
+#include "../VFrame30/MacrosExpander.h"
 
 //
 //
@@ -95,10 +96,10 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 				break;
 			}
 
-			if (VFrame30::SchemaItemValue* schemaItemValue = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
-				schemaItemValue != nullptr)
+			if (VFrame30::SchemaItemValue* schemaItem = dynamic_cast<VFrame30::SchemaItemValue*>(item.get());
+				schemaItem != nullptr)
 			{
-				QStringList signalList = schemaItemValue->signalIds();
+				QStringList signalList = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem);
 				signalContextMenu(signalList);
 				break;
 			}
@@ -106,7 +107,7 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 			if (VFrame30::SchemaItemImageValue* schemaItem = dynamic_cast<VFrame30::SchemaItemImageValue*>(item.get());
 				schemaItem != nullptr)
 			{
-				QStringList signalList = schemaItem->signalIds();
+				QStringList signalList = VFrame30::MacrosExpander::parse(schemaItem->signalIds(), clientSchemaView(), &clientSchemaView()->session(), schema().get(), schemaItem);
 				signalContextMenu(signalList);
 				break;
 			}

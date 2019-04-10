@@ -47,6 +47,7 @@ namespace VFrame30
 
 	public:
 		explicit ScriptAppSignalController(const IAppSignalManager* appSignalManager, QObject* parent = nullptr);
+		virtual ~ScriptAppSignalController();
 
 		// Script Interface
 		//

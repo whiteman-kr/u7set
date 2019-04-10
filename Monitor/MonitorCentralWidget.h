@@ -21,7 +21,7 @@ public:
 	MonitorSchemaWidget* currentTab();
 
 protected:
-	int addSchemaTabPage(QString schemaId);
+	int addSchemaTabPage(QString schemaId, const QVariantHash& variables);
 
 	// Signals
 signals:

@@ -5,6 +5,7 @@
 #include "DrawParam.h"
 #include "TuningController.h"
 #include "AppSignalController.h"
+#include "ClientSchemaView.h"
 #include "../lib/AppSignal.h"
 #include "../lib/Tuning/TuningSignalState.h"
 
@@ -261,7 +262,7 @@ namespace VFrame30
 
 				getSignalState(drawParam, &signalParam, &signalState, &tuningSignalState);
 
-				text = parseText(m_text, signalParam, signalState);
+				text = parseText(m_text, drawParam, signalParam, signalState);
 			}
 			else
 			{
@@ -280,8 +281,13 @@ namespace VFrame30
 		return;
 	}
 
-	QString SchemaItemValue::parseText(QString text, const AppSignalParam& signal, const AppSignalState& signalState) const
+	QString SchemaItemValue::parseText(QString text, CDrawParam* drawParam, const AppSignalParam& signal, const AppSignalState& signalState) const
 	{
+		if (drawParam == nullptr)
+		{
+			Q_ASSERT(drawParam);
+		}
+
 		QString result = text;
 
 		QRegExp reStartIndex("\\$\\([a-zA-Z0-9]+");	// Search for $([SomeText])
@@ -309,7 +315,7 @@ namespace VFrame30
 
 			// Get value string
 			//
-			QString replaceText;
+			std::optional<QString> replaceText;
 			do
 			{
 				if (macro.compare(QLatin1String("value"), Qt::CaseInsensitive) == 0)
@@ -360,21 +366,25 @@ namespace VFrame30
 //					replaceText = formatNumber(signal.lowValidRange(), signal);
 //					break;
 //				}
-
-				// Unknown macro
-				//
-				replaceText = QLatin1String("[UnknownProp]");
 			}
 			while (false);
 
 			// Replace text in result
 			//
-			result.replace(startIndexOfMacro, endIndexOfMacro - startIndexOfMacro + 1, replaceText);
-
-			// Iterate
-			//
-			index = startIndexOfMacro + replaceText.size();
+			if (replaceText.has_value() == true)
+			{
+				result.replace(startIndexOfMacro, endIndexOfMacro - startIndexOfMacro + 1, *replaceText);
+				index = startIndexOfMacro + replaceText->size();
+			}
+			else
+			{
+				index = endIndexOfMacro;
+			}
 		}
+
+		// Expand all other macroses
+		//
+		result = MacrosExpander::parse(result, drawParam, this);
 
 		return result;
 	}
@@ -471,17 +481,39 @@ namespace VFrame30
 
 	QString SchemaItemValue::signalIdsString() const
 	{
-		return m_signalIds.join(QChar::LineFeed);
+		QString result = m_signalIds.join(QChar::LineFeed);
+
+		// Expand variables in AppSignalIDs in MonitorMode, if applicable (m_drawParam is set and is monitor mode)
+		//
+		if (m_drawParam != nullptr &&
+			m_drawParam->isMonitorMode() == true &&
+			m_drawParam->clientSchemaView() != nullptr)
+		{
+			result = MacrosExpander::parse(result, m_drawParam, this);
+		}
+
+		return result;
 	}
 
 	void SchemaItemValue::setSignalIdsString(const QString& value)
 	{
-		m_signalIds = value.split(QRegExp(PropertyNames::appSignalId), QString::SkipEmptyParts);
+		m_signalIds = value.split(QRegExp("\\s+"), QString::SkipEmptyParts);
 	}
 
-	const QStringList& SchemaItemValue::signalIds() const
+	QStringList SchemaItemValue::signalIds() const
 	{
-		return m_signalIds;
+		QStringList resultList = m_signalIds;
+
+		// Expand variables in AppSignalIDs in MonitorMode, if applicable
+		//
+		if (m_drawParam != nullptr &&
+			m_drawParam->isMonitorMode() == true &&
+			m_drawParam->clientSchemaView() != nullptr)
+		{
+			resultList = MacrosExpander::parse(resultList, m_drawParam, this);
+		}
+
+		return resultList;
 	}
 
 	void SchemaItemValue::setSignalIds(const QStringList& value)
