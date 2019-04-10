@@ -364,7 +364,7 @@ namespace VFrame30
 
 		if (canBackHistory() == false)
 		{
-			VFrame30::SchemaHistoryItem& currentHistoryItem = m_backHistory.back();
+			VFrame30::SchemaHistoryItem& currentHistoryItem = m_backHistory.back();		// REFERENCE!!!
 			assert(currentHistoryItem.m_schemaId == this->schemaId());
 
 			currentHistoryItem = currentHistoryState();

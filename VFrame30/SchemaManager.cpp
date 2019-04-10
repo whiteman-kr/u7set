@@ -6,10 +6,12 @@ namespace VFrame30
 	SchemaManager::SchemaManager(QObject* parent) :
 		QObject(parent)
 	{
+		qDebug() << "SchemaManager::SchemaManager";
 	}
 
 	SchemaManager::~SchemaManager()
 	{
+		qDebug() << "SchemaManager::~SchemaManager";
 	}
 
 	void SchemaManager::clear()

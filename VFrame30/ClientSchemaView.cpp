@@ -13,7 +13,13 @@ namespace VFrame30
 		m_clientSchemaView(clientSchemaView)
 	{
 		assert(m_clientSchemaView);
+		qDebug() << "ScriptSchemaView::ScriptSchemaView";
 		return;
+	}
+
+	ScriptSchemaView::~ScriptSchemaView()
+	{
+		qDebug() << "ScriptSchemaView::~ScriptSchemaView";
 	}
 
 	void ScriptSchemaView::debugOutput(QString str)
@@ -439,7 +445,7 @@ namespace VFrame30
 			return nullptr;
 		}
 
-		QJSEngine* engine = m_schemaManager->jsEngine();
+		QJSEngine* engine = m_schemaManager->jsEngine(); Перенести QJSEngine сюда в ClientSchemaView??? сделать по одной штуке на вью
 		assert(engine);
 
 		// Set current schema view, don't do it in "if", as it will set one schema view for all widgets
@@ -450,10 +456,14 @@ namespace VFrame30
 
 		if (m_jsEngineGlobalsWereCreated == false)
 		{
+			// create global variable "tuning"
+			//
 			QJSValue jsTuning = engine->newQObject(m_tuningController);
 			QQmlEngine::setObjectOwnership(m_tuningController, QQmlEngine::CppOwnership);
 			engine->globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
 
+			// Create global variable "signals"
+			//
 			QJSValue jsSignals = engine->newQObject(m_scriptAppSignalController.get());
 			QQmlEngine::setObjectOwnership(m_scriptAppSignalController.get(), QQmlEngine::CppOwnership);
 			engine->globalObject().setProperty(PropertyNames::scriptGlobalVariableSignals, jsSignals);

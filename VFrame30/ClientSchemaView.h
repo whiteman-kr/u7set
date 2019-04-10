@@ -23,6 +23,7 @@ namespace VFrame30
 
 	public:
 		explicit ScriptSchemaView(ClientSchemaView* clientSchemaView, QObject* parent = nullptr);
+		~ScriptSchemaView();
 
 		// Public slots which are part of Script API
 		//
