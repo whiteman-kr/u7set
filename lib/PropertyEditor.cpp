@@ -1892,24 +1892,15 @@ namespace ExtWidgets
         }
 
 		const QStyle* style = QApplication::style();
-		// Figure out size of an indicator and make sure it is not scaled down in a list view item
-		// by making the pixmap as big as a list view icon and centering the indicator in it.
-		// (if it is smaller, it can't be helped)
+
 		const int indicatorWidth = style->pixelMetric(QStyle::PM_IndicatorWidth, &opt);
 		const int indicatorHeight = style->pixelMetric(QStyle::PM_IndicatorHeight, &opt);
-		const int listViewIconSize = indicatorWidth;
-		const int pixmapWidth = indicatorWidth;
-		const int pixmapHeight = qMax(indicatorHeight, listViewIconSize);
 
 		opt.rect = QRect(0, 0, indicatorWidth, indicatorHeight);
-		QPixmap pixmap = QPixmap(pixmapWidth, pixmapHeight);
+		QPixmap pixmap = QPixmap(indicatorWidth, indicatorHeight);
 		pixmap.fill(Qt::transparent);
 		{
-			// Center?
-			const int xoff = (pixmapWidth  > indicatorWidth)  ? (pixmapWidth  - indicatorWidth)  / 2 : 0;
-			const int yoff = (pixmapHeight > indicatorHeight) ? (pixmapHeight - indicatorHeight) / 2 : 0;
 			QPainter painter(&pixmap);
-			painter.translate(xoff, yoff);
 			style->drawPrimitive(QStyle::PE_IndicatorCheckBox, &opt, &painter);
 		}
 		return QIcon(pixmap);
@@ -1963,11 +1954,63 @@ namespace ExtWidgets
 		return QIcon();
 	}
 
+	void PropertyEditorCheckBox::paintEvent(QPaintEvent *e)
+	{
+		Q_UNUSED(e);
+
+		QStyleOptionButton opt;
+		switch (checkState())
+		{
+			case Qt::Checked:
+				opt.state |= QStyle::State_On;
+				break;
+			case Qt::Unchecked:
+				opt.state |= QStyle::State_Off;
+				break;
+			case Qt::PartiallyChecked:
+				opt.state |= QStyle::State_NoChange;
+				break;
+			default:
+				Q_ASSERT(false);
+		}
+
+		if (isEnabled() == false)
+		{
+			opt.state |= QStyle::State_ReadOnly;
+		}
+		else
+		{
+			opt.state |= QStyle::State_Enabled;
+		}
+
+		const QStyle* style = QApplication::style();
+
+		const int indicatorWidth = style->pixelMetric(QStyle::PM_IndicatorWidth, &opt);
+		const int indicatorHeight = style->pixelMetric(QStyle::PM_IndicatorHeight, &opt);
+
+		const int pixmapHeight = rect().height();
+
+		// Center the image vertically
+
+		const int xoff = 0;
+		const int yoff = (pixmapHeight  > indicatorHeight)  ? (pixmapHeight  - indicatorHeight)  / 2 : 0;
+
+		opt.rect = QRect(xoff, yoff, indicatorWidth, indicatorHeight);
+
+		QPainter painter(this);
+		style->drawPrimitive(QStyle::PE_IndicatorCheckBox, &opt, &painter);
+
+		const int spacing = 6;
+		QRect textRect = rect();
+		textRect.setLeft(0 + indicatorWidth + spacing);
+
+		painter.drawText(textRect, Qt::AlignVCenter,  text());
+	}
+
 	MultiCheckBox::MultiCheckBox(QWidget* parent):
 		QWidget(parent)
 	{
-		m_checkBox = new QCheckBox(parent);
-
+		m_checkBox = new PropertyEditorCheckBox(parent);
 		connect(m_checkBox, &QCheckBox::stateChanged, this, &MultiCheckBox::onStateChanged);
 
 		QHBoxLayout*lt = new QHBoxLayout;
@@ -1976,7 +2019,7 @@ namespace ExtWidgets
 		setLayout(lt);
 	}
 
-	void MultiCheckBox::setValue(bool value, bool readOnly)
+	void MultiCheckBox::setValue(Qt::CheckState state, bool readOnly)
 	{
 		if (m_checkBox == nullptr)
 		{
@@ -1985,11 +2028,22 @@ namespace ExtWidgets
 		}
 
 		m_checkBox->blockSignals(true);
-		m_checkBox->setCheckState(value ? Qt::Checked : Qt::Unchecked);
+		m_checkBox->setCheckState(state);
 
 		updateText();
 		m_checkBox->setEnabled(readOnly == false);
 		m_checkBox->blockSignals(false);
+	}
+
+	void MultiCheckBox::changeValueOnButtonClick()
+	{
+		QPoint pt = QCursor::pos();
+		pt = m_checkBox->mapFromGlobal(pt);
+
+		if (m_checkBox->hitOnButton(pt) == true)
+		{
+			m_checkBox->click();
+		}
 	}
 
 	void MultiCheckBox::onStateChanged(int state)
@@ -2137,30 +2191,22 @@ namespace ExtWidgets
 				connect(m_editor, &MultiCheckBox::valueChanged, this, &MultiVariantFactory::slotSetValue);
 				connect(m_editor, &MultiCheckBox::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
 
-				if (m_property->isEnabled() == false)
+				Qt::CheckState state;
+
+				if (manager->sameValue(property) == false)
 				{
-					m_editor->setValue(propertyPtr->value().toBool(), m_property->isEnabled() == false);
+					state = Qt::PartiallyChecked;
 				}
 				else
 				{
-					// change value on first click
-					//
-					bool newValue = propertyPtr->value().toBool();
-
-					if (manager->sameValue(property) == false)
-					{
-						newValue = true;
-					}
-					else
-					{
-						newValue = !newValue;
-					}
-
-					m_editor->setValue(newValue, m_property->isEnabled() == false);
-
-					m_valueSetOnTimer = newValue;
-					QTimer::singleShot(10, this, &MultiVariantFactory::slotSetValueTimer);
+					state = propertyPtr->value().toBool() ? Qt::Checked : Qt::Unchecked;
 				}
+
+				m_editor->setValue(state, m_property->isEnabled() == false);
+
+				QTimer::singleShot(10, m_editor, &MultiCheckBox::changeValueOnButtonClick);
+
+				//m_editor->changeValueOnButtonClick();
 			}
 				break;
 			case QVariant::String:
@@ -2221,24 +2267,11 @@ namespace ExtWidgets
 	void MultiVariantFactory::connectPropertyManager (MultiVariantPropertyManager* manager)
 	{
 		Q_UNUSED(manager);
-		//connect(manager, &QtMultiVariantPropertyManager::valueChanged, this, &QtMultiVariantFactory::slotPropertyChanged);
 	}
 
 	void MultiVariantFactory::disconnectPropertyManager(MultiVariantPropertyManager* manager)
 	{
 		Q_UNUSED(manager);
-		//disconnect(manager, &QtMultiVariantPropertyManager::valueChanged, this, &QtMultiVariantFactory::slotPropertyChanged);
-	}
-
-	/*void QtMultiVariantFactory::slotPropertyChanged(QtProperty* property, QVariant value)
-{
-	Q_UNUSED(property);
-	Q_UNUSED(value);
-}*/
-
-	void MultiVariantFactory::slotSetValueTimer()
-	{
-		emit slotSetValue(m_valueSetOnTimer);
 	}
 
 	void MultiVariantFactory::slotSetValue(QVariant value)
@@ -2719,7 +2752,9 @@ namespace ExtWidgets
 	PropertyEditor::PropertyEditor(QWidget* parent) :
 		QtTreePropertyBrowser(parent)
 	{
-        setResizeMode(ResizeMode::Interactive);
+		setResizeMode(ResizeMode::Interactive);
+
+		setAlternatingRowColors(false);
 
 		m_propertyGroupManager = new QtGroupPropertyManager(this);
 		m_propertyVariantManager = new MultiVariantPropertyManager(this);
@@ -2858,7 +2893,8 @@ namespace ExtWidgets
 
 			if (propertyPtr->essential() == true)
 			{
-				subProperty->setBackgroundColor(QColor(0xEA, 0xF0, 0xFF));
+				//subProperty->setBackgroundColor(QColor(0xEA, 0xF0, 0xFF));
+				subProperty->setBackgroundColor(QColor(0xf0, 0xf0, 0xf0));
 			}
 
 			m_propertyVariantManager->setProperty(subProperty, propertyPtr);

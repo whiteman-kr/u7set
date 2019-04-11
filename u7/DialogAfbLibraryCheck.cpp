@@ -1,5 +1,8 @@
 #include "DialogAfbLibraryCheck.h"
 #include "../lib/LmDescription.h"
+#include "Settings.h"
+
+#include <QSplitter>
 
 DialogAfbLibraryCheck* theDialogAfbLibraryCheck = nullptr;
 
@@ -27,22 +30,23 @@ DialogAfbLibraryCheck::DialogAfbLibraryCheck(DbController* db, QWidget* parent)
 	setAttribute(Qt::WA_DeleteOnClose);
 	setWindowTitle(tr("AFB Library Check"));
 
-	QVBoxLayout* mainLayout = new QVBoxLayout();
-
-	QHBoxLayout* comboLayout = new QHBoxLayout();
-	mainLayout->addLayout(comboLayout);
+	QWidget* topWidget = new QWidget();
+	QVBoxLayout* topLayout = new QVBoxLayout(topWidget);
+	topLayout->setContentsMargins(0, 0, 0, 0);
 
 	// Init combo
 
 	QComboBox* lmDescriptionsCombo = new QComboBox();
 	lmDescriptionsCombo->setMinimumWidth(250);
-	comboLayout->addWidget(lmDescriptionsCombo);
 
 	connect(lmDescriptionsCombo, static_cast<void(QComboBox::*)(const QString&)>(&QComboBox::currentIndexChanged),
 			this, &DialogAfbLibraryCheck::libraryFileChanged);
 
-
+	QHBoxLayout* comboLayout = new QHBoxLayout();
+	comboLayout->addWidget(lmDescriptionsCombo);
 	comboLayout->addStretch();
+
+	topLayout->addLayout(comboLayout);
 
 	// Init m_afbComponentTreeWidget
 
@@ -70,14 +74,18 @@ DialogAfbLibraryCheck::DialogAfbLibraryCheck(DbController* db, QWidget* parent)
 	m_afbComponentTreeWidget->setSortingEnabled(true);
 
 	QLabel* l = new QLabel(tr("Components"));
-	mainLayout->addWidget(l);
+	topLayout->addWidget(l);
 
-	mainLayout->addWidget(m_afbComponentTreeWidget, 1);
+	topLayout->addWidget(m_afbComponentTreeWidget, 1);
 
 	// Init AFB Element tree widget
 
+	QWidget* bottomWidget = new QWidget();
+	QVBoxLayout* bottomLayout = new QVBoxLayout(bottomWidget);
+	bottomLayout->setContentsMargins(0, 0, 0, 0);
+
 	l = new QLabel(tr("AFB Elements"));
-	mainLayout->addWidget(l);
+	bottomLayout->addWidget(l);
 
 	m_afbElementTreeWidget = new QTreeWidget(this);
 
@@ -104,10 +112,17 @@ DialogAfbLibraryCheck::DialogAfbLibraryCheck(DbController* db, QWidget* parent)
 
 	m_afbElementTreeWidget->setSortingEnabled(true);
 
-	mainLayout->addWidget(m_afbElementTreeWidget, 2);
+	bottomLayout->addWidget(m_afbElementTreeWidget, 2);
 
 	//
+	m_splitter = new QSplitter();
+	m_splitter->addWidget(topWidget);
+	m_splitter->addWidget(bottomWidget);
+	m_splitter->setOrientation(Qt::Vertical);
+	m_splitter->restoreState(theSettings.m_afbLibratyCheckSplitterState);
 
+	QVBoxLayout* mainLayout = new QVBoxLayout();
+	mainLayout->addWidget(m_splitter);
 	setLayout(mainLayout);
 
 	setMinimumSize(1024, 768);
@@ -134,6 +149,7 @@ DialogAfbLibraryCheck::DialogAfbLibraryCheck(DbController* db, QWidget* parent)
 
 DialogAfbLibraryCheck::~DialogAfbLibraryCheck()
 {
+	theSettings.m_afbLibratyCheckSplitterState = m_splitter->saveState();
 	theDialogAfbLibraryCheck = nullptr;
 }
 

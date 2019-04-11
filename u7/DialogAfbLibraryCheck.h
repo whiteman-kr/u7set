@@ -112,6 +112,8 @@ private:
 
 	std::map<int, std::shared_ptr<Afb::AfbComponent>> m_afbComponents;
 	std::vector<std::shared_ptr<Afb::AfbElement>> m_afbElements;
+
+	QSplitter* m_splitter = nullptr;
 };
 
 extern DialogAfbLibraryCheck* theDialogAfbLibraryCheck;
