@@ -259,6 +259,8 @@ void CreateSignalDialog::initBusTypes()
 		m_busTypeCombo->setEditText(m_options.m_lastBusTypeId);
 	}
 
+	m_busTypeCombo->model()->sort(0);
+
 	return;
 }
 
