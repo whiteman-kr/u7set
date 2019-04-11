@@ -291,6 +291,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0271.sql", "Upgrade to version 271, UseAccessFlag was added to TuningClient preset"},
 	{":/DatabaseUpgrade/Upgrade0272.sql", "Upgrade to version 272, Added LMDN 40, for the 4th cert phase. Fixed bug from upgrade 270. Fixed AFBs versions for DPCOMP, PULSEGEN. Removed Zero out in Mismatch(27), version 3 - LMDN 3, 4. "},
 	{":/DatabaseUpgrade/Upgrade0273.sql", "Upgrade to version 273, LM for 4th cert phase switched to LMDN40 -> new preset "},
+	{":/DatabaseUpgrade/Upgrade0274.sql", "Upgrade to version 274, Added Essential properties flag to software and LM presets "},
 };
 
 int DbWorker::counter = 0;

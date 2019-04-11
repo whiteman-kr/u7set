@@ -2833,6 +2833,16 @@ R"DELIM({
 	{
 		//auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, "Type", true, Workstation::type, Workstation::setType)
 		//typeProp->setUpdateFromPreset(true);
+
+		auto p = propertyByCaption(PropertyNames::equipmentIdTemplate);
+		if (p == nullptr)
+		{
+			Q_ASSERT(p);
+		}
+		else
+		{
+			p->setEssential(true);
+		}
 	}
 
 	Workstation::~Workstation()
