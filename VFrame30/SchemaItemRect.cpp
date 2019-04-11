@@ -213,12 +213,7 @@ namespace VFrame30
 
 		// Drawing Text
 		//
-		QString text = m_text;
-
-		if (drawParam->isMonitorMode() == true)
-		{
-			text = MacrosExpander::parse(text, drawParam, this);
-		}
+		QString text = MacrosExpander::parse(m_text, drawParam, this);
 
 		// --
 		//

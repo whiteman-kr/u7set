@@ -29,7 +29,11 @@ namespace VFrame30
 			return str;
 		}
 
-		return parse(str, drawParam->clientSchemaView(), &drawParam->session(), drawParam->schema(), schemaItem);
+		return parse(str,
+					 drawParam->isMonitorMode() ? drawParam->clientSchemaView() : nullptr,
+					 &drawParam->session(),
+					 drawParam->schema(),
+					 schemaItem);
 	}
 
 	QStringList MacrosExpander::parse(const QStringList& stringList,
