@@ -256,6 +256,7 @@ namespace Builder
 		bool linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal);
 		bool linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkAfbInput(UalItem* srcItem, UalItem* afbItem, QUuid inPinUuid, UalSignal* ualSignal);
+		bool linkSetFlagsItemInput(UalItem* srcItem, UalItem* setFlagsItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkBusComposerInput(UalItem* srcItem, UalItem* busComposerItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkBusExtractorInput(UalItem* srcItem, UalItem* busExtractorItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkLoopbackSource(UalItem* loopbackSourceItem, QUuid inPinUuid, UalSignal* ualSignal);
@@ -270,6 +271,7 @@ namespace Builder
 		bool processSimlockItems();
 		bool processMismatchItems();
 		bool processSetFlagsItems();
+		bool setPinFlagSignal(const UalItem* ualItem, const QString& pinCaption, AppSignalStateFlagType flagType, UalSignal* inSignal, bool* flagIsSet);
 
 		bool createUalSignalsFromFlagSignals();
 

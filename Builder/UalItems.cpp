@@ -122,6 +122,11 @@ namespace Builder
 			return false;
 		}
 
+		if (ualAfb->isSetFlagsItem() == true)
+		{
+			return true;
+		}
+
 		QString afbStrID = ualAfb->strID();
 
 		Afbl* afbl = (*this).value(afbStrID, nullptr);
@@ -322,6 +327,9 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
+	const QString UalItem::SET_FLAGS_ITEM_CAPTION = "set_flags";
+
+
 	UalItem::UalItem()
 	{
 	}
@@ -416,6 +424,16 @@ namespace Builder
 
 		assert(false);		// unknown type of item
 		return "";
+	}
+
+	bool UalItem::isSetFlagsItem() const
+	{
+		if (isAfb() == false)
+		{
+			return false;
+		}
+
+		return m_appLogicItem.afbElement().caption() == SET_FLAGS_ITEM_CAPTION;
 	}
 
 	E::UalItemType UalItem::type() const
@@ -517,6 +535,30 @@ namespace Builder
 		return nullptr;
 	}
 
+	const LogicPin* UalItem::getPin(const QString& pinCaption) const
+	{
+		const std::vector<LogicPin>& inputPins = inputs();
+
+		for(const LogicPin& inPin : inputPins)
+		{
+			if (inPin.caption() == pinCaption)
+			{
+				return &inPin;
+			}
+		}
+
+		const std::vector<LogicPin>& outputPins = outputs();
+
+		for(const LogicPin& outPin : outputPins)
+		{
+			if (outPin.caption() == pinCaption)
+			{
+				return &outPin;
+			}
+		}
+
+		return nullptr;
+	}
 
 	// ---------------------------------------------------------------------------------------
 	//
@@ -649,6 +691,15 @@ namespace Builder
 	// AppFb class implementation
 	//
 	// ---------------------------------------------------------------------------------------
+
+	const QString UalAfb::IN_PIN_CAPTION("in");
+	const QString UalAfb::VALIDITY_PIN_CAPTION("validity");
+	const QString UalAfb::SIMULATED_PIN_CAPTION("simulated");
+	const QString UalAfb::LOCKED_PIN_CAPTION("locked");
+	const QString UalAfb::UNBALANCED_PIN_CAPTION("unbalanced");
+	const QString UalAfb::HIGH_LIMIT_PIN_CAPTION("high_limit");
+	const QString UalAfb::LOW_LIMIT_PIN_CAPTION("low_limit");
+	const QString UalAfb::OUT_PIN_CAPTION("out");
 
 	UalAfb::UalAfb(const UalItem& appItem, bool isBusProcessingAfb) :
 		UalItem(appItem),
@@ -1767,6 +1818,14 @@ namespace Builder
 
 		if (m_flagSignals.value(flagType, nullptr) != nullptr)
 		{
+			void errALC5168(QString flagSignalID,
+							QString flagTypeStr,
+							QString signalWithFlagID,
+							QString alreadyAssignedFlagSignalID,
+							QUuid itemUuid,
+							QString schemaID);					//Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
+
+
 			assert(false);			// signal for this flag is already assigned
 			return false;
 		}

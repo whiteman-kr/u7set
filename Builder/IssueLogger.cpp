@@ -6148,6 +6148,29 @@ namespace Builder
 						arg(flagSignalID).arg(flagTypeStr).arg(signalWithFlagID).arg(alreadyAssignedFlagSignalID));
 	}
 
+	/// IssueCode: ALC5169
+	///
+	/// IssueType: Warning
+	///
+	/// Title: No flags assiged on set_flags item %1 (Schema %2)
+	///
+	/// Parameters:
+	///		%1 set_flags item label
+	///		%2 app logic schema ID
+	///
+	/// Description:
+	///		No flags assiged on specified set_flags item.
+	///
+	void IssueLogger::wrnALC5169(QString setFlagsItemLabel, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Warning1, 5169, itemUuid, schemaID);
+
+		LOG_WARNING1(IssueType::AlCompiler,
+				  5169,
+				  QString(tr("No flags assiged on set_flags item %1 (Schema %2)")).
+					arg(setFlagsItemLabel).arg(schemaID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186

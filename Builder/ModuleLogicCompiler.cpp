@@ -1927,6 +1927,11 @@ namespace Builder
 			return false;
 		}
 
+		if (ualAfb->isSetFlagsItem() == true)
+		{
+			return true;			// signal creation isn't required
+		}
+
 		bool result = true;
 
 		QString outBusTypeID;
@@ -2291,6 +2296,11 @@ namespace Builder
 			return false;
 		}
 
+		if (ualAfb->isSetFlagsItem() == true)
+		{
+			return linkSetFlagsItemInput(srcItem, destItem, inPinUuid, ualSignal);
+		}
+
 		LogicAfbSignal inSignal;
 
 		bool result = ualAfb->getAfbSignalByPinUuid(inPinUuid, &inSignal);
@@ -2311,6 +2321,68 @@ namespace Builder
 		}
 
 		return m_ualSignals.appendRefPin(srcItem, inPinUuid, ualSignal);
+	}
+
+	bool ModuleLogicCompiler::linkSetFlagsItemInput(UalItem* srcItem, UalItem* setFlagsItem, QUuid inPinUuid, UalSignal* ualSignal)
+	{
+		if (srcItem == nullptr || setFlagsItem == nullptr || ualSignal == nullptr)
+		{
+			LOG_NULLPTR_ERROR(m_log);
+			return false;
+		}
+
+		UalAfb* ualAfb = m_ualAfbs.value(setFlagsItem->guid(), nullptr);
+
+		if (ualAfb == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		if (ualAfb->isSetFlagsItem() == false)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const LogicPin* inPin = ualAfb->getPin(inPinUuid);
+
+		if (inPin == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		bool result = m_ualSignals.appendRefPin(setFlagsItem, inPin->guid(), ualSignal);
+
+		QString inPinCaption = inPin->caption();
+
+		if (inPinCaption != UalAfb::IN_PIN_CAPTION)
+		{
+			return true;
+		}
+
+		const std::vector<LogicPin>& outputs = ualAfb->outputs();
+
+		if (outputs.size() != 1)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		const LogicPin& outPin = outputs[0];
+
+		if (outPin.caption() != UalAfb::OUT_PIN_CAPTION)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		result &= m_ualSignals.appendRefPin(setFlagsItem, outPin.guid(), ualSignal);
+
+		result &= linkConnectedItems(srcItem, outPin, ualSignal);
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::linkBusComposerInput(UalItem* srcItem, UalItem* busComposerItem, QUuid inPinUuid, UalSignal* ualSignal)
@@ -2646,6 +2718,100 @@ namespace Builder
 	bool ModuleLogicCompiler::processSetFlagsItems()
 	{
 		bool result = true;
+
+		for(UalItem* ualItem : m_ualItems)
+		{
+			TEST_PTR_CONTINUE(ualItem);
+
+			if (ualItem->isSetFlagsItem() == false)
+			{
+				continue;
+			}
+
+			UalAfb* setFlagsItem = m_ualAfbs.value(ualItem->guid(), nullptr);
+
+			if (setFlagsItem == nullptr)
+			{
+				LOG_NULLPTR_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			Q_ASSERT(setFlagsItem->isSetFlagsItem() == true);
+
+			const LogicPin* inPin = setFlagsItem->getPin(UalAfb::IN_PIN_CAPTION);
+
+			if (inPin == nullptr)
+			{
+				// Pin with caption %1 is not found in schema item (Logic schema %2).
+				//
+				m_log->errALC5106(UalAfb::IN_PIN_CAPTION, setFlagsItem->guid(), setFlagsItem->schemaID());
+				result = false;
+				continue;
+			}
+
+			UalSignal* inSignal = m_ualSignals.get(inPin->guid());
+
+			if (inSignal == nullptr)
+			{
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
+				continue;
+			}
+
+			bool flagIsSet = false;
+
+			result &= setPinFlagSignal(ualItem, UalAfb::VALIDITY_PIN_CAPTION, AppSignalStateFlagType::Validity, inSignal, &flagIsSet);
+			result &= setPinFlagSignal(ualItem, UalAfb::SIMULATED_PIN_CAPTION, AppSignalStateFlagType::Simulated, inSignal, &flagIsSet);
+			result &= setPinFlagSignal(ualItem, UalAfb::LOCKED_PIN_CAPTION, AppSignalStateFlagType::Locked, inSignal, &flagIsSet);
+			result &= setPinFlagSignal(ualItem, UalAfb::UNBALANCED_PIN_CAPTION, AppSignalStateFlagType::Unbalanced, inSignal, &flagIsSet);
+			result &= setPinFlagSignal(ualItem, UalAfb::HIGH_LIMIT_PIN_CAPTION, AppSignalStateFlagType::AboveHighLimit, inSignal, &flagIsSet);
+			result &= setPinFlagSignal(ualItem, UalAfb::LOW_LIMIT_PIN_CAPTION, AppSignalStateFlagType::BelowLowLimit, inSignal, &flagIsSet);
+
+			if (flagIsSet == false)
+			{
+				// No flags assiged on set_flags item %1 (Schema %2)
+				//
+				m_log->wrnALC5169(ualItem->label(), ualItem->guid(), ualItem->schemaID());
+			}
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::setPinFlagSignal(	const UalItem* ualItem,
+												const QString& pinCaption,
+												AppSignalStateFlagType flagType,
+												UalSignal* inSignal,
+												bool* flagIsSet)
+	{
+		TEST_PTR_RETURN_FALSE(ualItem);
+		TEST_PTR_RETURN_FALSE(inSignal);
+		TEST_PTR_RETURN_FALSE(flagIsSet);
+
+		const LogicPin* inPin = ualItem->getPin(pinCaption);
+
+		if (inPin == nullptr)
+		{
+			return true;				// it is Ok! pin for specified flagType may be not used
+		}
+
+		UalSignal* flagSignal = m_ualSignals.get(inPin->guid());
+
+		if (flagSignal == nullptr)
+		{
+			// UalSignal is not found for pin %1 (Logic schema %2).
+			//
+			m_log->errALC5120(ualItem->guid(), ualItem->label(), pinCaption, ualItem->schemaID());
+			return false;
+		}
+
+		bool result = m_signalsWithFlags.append(inSignal->appSignalID(), flagType, flagSignal->appSignalID());
+
+		if (result == true)
+		{
+			*flagIsSet = true;
+		}
 
 		return result;
 	}
@@ -6806,6 +6972,11 @@ namespace Builder
 		}
 
 		const UalAfb* ualAfb = m_ualAfbs.value(ualItem->guid(), nullptr);
+
+		if (ualAfb->isSetFlagsItem() == true)
+		{
+			return true;		// no code generation required
+		}
 
 		TEST_PTR_RETURN_FALSE(ualAfb)
 

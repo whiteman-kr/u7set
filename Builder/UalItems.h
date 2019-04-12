@@ -139,6 +139,7 @@ namespace Builder
 		bool isBusExtractor() const { return type() == E::UalItemType::BusExtractor; }
 		bool isLoopbackSource() const { return type() == E::UalItemType::LoopbackSource; }
 		bool isLoopbackTarget() const { return type() == E::UalItemType::LoopbackTarget; }
+		bool isSetFlagsItem() const;
 
 		E::UalItemType type() const;
 
@@ -181,6 +182,7 @@ namespace Builder
 		const LogicSignal& signal() { return *(m_appLogicItem.m_fblItem->toSignalElement()); }
 
 		const LogicPin* getPin(QUuid pinUuid) const;
+		const LogicPin* getPin(const QString& pinCaption) const;
 
 	protected:
 		AppLogicItem m_appLogicItem;							// structure from parser
@@ -189,6 +191,8 @@ namespace Builder
 		mutable E::UalItemType m_type = E::UalItemType::Unknown;
 
 		QHash<QString, int> m_opNameToIndexMap;
+
+		static const QString SET_FLAGS_ITEM_CAPTION;
 	};
 
 	typedef std::map<QUuid, UalItem*> ConnectedAppItems;		// connected pin Uuid => AppItem*
@@ -257,6 +261,15 @@ namespace Builder
 		//
 	public:
 		static const int FOR_USER_ONLY_PARAM_INDEX = -1;				// index of FB's parameters used by user only
+
+		static const QString IN_PIN_CAPTION;
+		static const QString VALIDITY_PIN_CAPTION;
+		static const QString SIMULATED_PIN_CAPTION;
+		static const QString LOCKED_PIN_CAPTION;
+		static const QString UNBALANCED_PIN_CAPTION;
+		static const QString HIGH_LIMIT_PIN_CAPTION;
+		static const QString LOW_LIMIT_PIN_CAPTION;
+		static const QString OUT_PIN_CAPTION;
 
 	public:
 		UalAfb(const UalItem &appItem, bool isBusProcessingAfb);
@@ -352,7 +365,6 @@ namespace Builder
 		const quint16 CONST_COMPARATOR_OPCODE = 10;
 		const quint16 DYNAMIC_COMPARATOR_OPCODE = 20;
 	};
-
 
 	class UalAfbsMap: public HashedVector<QUuid, UalAfb*>
 	{
