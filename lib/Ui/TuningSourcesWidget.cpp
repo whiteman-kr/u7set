@@ -79,6 +79,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningTcpClient* tcpClient, QWidg
 	createDataItem(stateItem, "CommandQueueSize");
 	createDataItem(stateItem, "ControlIsActive");
 	createDataItem(stateItem, "SetSOR");
+	createDataItem(stateItem, "WritingDisabled");
 
 	createDataItem(stateItem, "ErrUntimelyReplay");
 	createDataItem(stateItem, "ErrSent");
@@ -137,6 +138,7 @@ DialogTuningSourceInfo::DialogTuningSourceInfo(TuningTcpClient* tcpClient, QWidg
 
 	createDataItem(errorsFotipFlagItem, "FotipFlagApplySuccess");
 	createDataItem(errorsFotipFlagItem, "FotipFlagSetSOR");
+	createDataItem(errorsFotipFlagItem, "FotipFlagWritingDisabled");
 
 	m_treeWidget->addTopLevelItem(errorsFotipFlagItem);
 
@@ -241,6 +243,7 @@ void DialogTuningSourceInfo::updateData()
 	setDataItemNumber("CommandQueueSize", ts.state.commandqueuesize());
 	setDataItemText("ControlIsActive", ts.state.controlisactive() ? "Yes" : "No");
 	setDataItemText("SetSOR", ts.state.setsor() ? "Yes" : "No");
+	setDataItemText("WritingDisabled", ts.state.writingdisabled() ? "Yes" : "No");
 
 	setDataItemNumber("ErrUntimelyReplay", ts.state.erruntimelyreplay());
 	setDataItemNumber("ErrSent", ts.state.errsent());
@@ -324,6 +327,7 @@ void DialogTuningSourceInfo::updateData()
 
 	setDataItemNumber("FotipFlagApplySuccess", ts.state.fotipflagapplysuccess());
 	setDataItemNumber("FotipFlagSetSOR", ts.state.fotipflagsetsor());
+	setDataItemNumber("FotipFlagWritingDisabled", ts.state.fotipflagwritingdisabled());
 
 	updateParentItemState(item);
 }

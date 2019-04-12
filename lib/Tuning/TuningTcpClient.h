@@ -161,8 +161,6 @@ signals:
 private:
 	QString networkErrorStr(NetworkError error);
 
-	void initSignalHashesAndSources();
-
 	// Properties
 	//
 public:
@@ -206,8 +204,6 @@ protected:
 	//
 	mutable QMutex m_tuningSourcesMutex;				// For access to m_tuningSources, m_equipmentToSignalMap
 	std::map<Hash, TuningSource> m_tuningSources;		// Key is hash of EquipmentID
-
-	std::multimap<Hash, Hash> m_equipmentToSignalMap;	// Key is hash of EquipmentID, values are hashes of signals
 
 private:
 	// Processing

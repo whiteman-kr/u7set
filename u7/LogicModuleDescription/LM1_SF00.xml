@@ -1,4 +1,4 @@
-Xiaomi Amazfit Bip<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <LogicModule Name="LM1_SF00" DescriptionNumber="0" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0018">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>

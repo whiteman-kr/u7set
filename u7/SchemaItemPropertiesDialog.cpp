@@ -6,7 +6,7 @@
 
 
 SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* editEngine, QWidget* parent) :
-	QDialog(parent),
+	QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::SchemaItemPropertiesDialog)
 {
 	ui->setupUi(this);

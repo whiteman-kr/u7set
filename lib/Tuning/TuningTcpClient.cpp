@@ -29,7 +29,7 @@ TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, TuningSignalM
 {
 	assert(m_signals);
 
-	initSignalHashesAndSources();
+    m_signalHashes = m_signals->signalHashes();
 
 	return;
 }
@@ -593,7 +593,7 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 
 					// Set new source state
 
-					ts.setNewState(tss);
+                    ts.setNewState(tss);
 
 					//
 
@@ -825,14 +825,19 @@ void TuningTcpClient::processReadTuningSignals(const QByteArray& data)
 
 		// When updating states, we have to set some properties locally
 		//
-		arrivedState.m_flags.controlIsEnabled = (error == NetworkError::LmControlIsNotActive) ? false : true;
+        arrivedState.m_flags.controlIsEnabled = (error == NetworkError::LmControlIsNotActive) ? false : true;
 
 		// --
 		//
 		arrivedStates.push_back(arrivedState);
 	}
 
-	m_signals->setState(arrivedStates);
+#ifdef Q_DEBUG
+	if (m_simulationMode == false)
+#endif
+	{
+		m_signals->setState(arrivedStates);
+	}
 
 	// Increase the requested signal index, wrap the request index if needed
 	//
@@ -1027,7 +1032,7 @@ void TuningTcpClient::slot_signalsUpdated()
 		}
 	}
 
-	initSignalHashesAndSources();
+    m_signalHashes = m_signals->signalHashes();
 
 	// --
 	//
@@ -1049,36 +1054,6 @@ void TuningTcpClient::slot_signalsUpdated()
 QString TuningTcpClient::networkErrorStr(NetworkError error)
 {
 	return getNetworkErrorStr(error);
-}
-
-void TuningTcpClient::initSignalHashesAndSources()
-{
-	m_signalHashes = m_signals->signalHashes();
-
-	// Build m_equipmentToSignalMap
-	//
-	{
-		QMutexLocker sl(&m_tuningSourcesMutex);
-
-		m_equipmentToSignalMap.clear();
-
-		AppSignalParam asp;
-
-		for (Hash hash : m_signalHashes)
-		{
-			bool found = m_signals->signalParam(hash, &asp);
-			if (found == false)
-			{
-				assert(false);
-				continue;
-			}
-
-			Hash equipmentHash = ::calcHash(asp.equipmentId());
-			m_equipmentToSignalMap.insert(std::pair<Hash,Hash>(equipmentHash, hash));
-		}
-	}
-
-	return;
 }
 
 void TuningTcpClient::writeLogAlert(const QString& message)

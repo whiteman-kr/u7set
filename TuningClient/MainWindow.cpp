@@ -19,6 +19,8 @@
 #include "TuningClientFilterStorage.h"
 #include "TuningSchemaManager.h"
 
+QColor redColor = QColor(192, 0, 0);
+
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
 	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), this)
@@ -641,7 +643,7 @@ void MainWindow::updateStatusBar()
 			}
 			else
 			{
-				m_statusBarLmErrors->setStyleSheet("QLabel {color : white; background-color: red}");
+                m_statusBarLmErrors->setStyleSheet(QString("QLabel {color : white; background-color: %1}").arg(redColor.name()));
 			}
 		}
 
@@ -691,7 +693,7 @@ void MainWindow::updateStatusBar()
 
 				if ((rootCounters.sorActive == true && rootCounters.sorValid == false) || rootCounters.sorCounter > 0)
 				{
-					m_statusBarSor->setStyleSheet("QLabel {color : white; background-color: red}");
+                    m_statusBarSor->setStyleSheet(QString("QLabel {color : white; background-color: %1}").arg(redColor.name()));
 
 				}
 				else
@@ -723,7 +725,7 @@ void MainWindow::updateStatusBar()
 		}
 		else
 		{
-			m_statusBarLogAlerts->setStyleSheet("QLabel {color : white; background-color: red}");
+            m_statusBarLogAlerts->setStyleSheet(QString("QLabel {color : white; background-color: %1}").arg(redColor.name()));
 		}
 	}
 }
@@ -781,7 +783,31 @@ void MainWindow::runPresetEditor()
 
 	if (d.exec() == QDialog::Accepted)
 	{
-		m_filterStorage = editFilters;
+        //m_filterStorage = editFilters;  // This is not allowed, we need to keep shared pointers to existing non-user filters
+
+        // Delete user filters from main storage
+
+        m_filterStorage.removeFilters(TuningFilter::Source::User);
+
+        // Add user filters from editing storage
+
+        for (int i = 0; i < editFilters.root()->childFiltersCount(); i++)
+        {
+            std::shared_ptr<TuningFilter> child = editFilters.root()->childFilter(i);
+
+            if (child == nullptr)
+            {
+                Q_ASSERT(child);
+                return;
+            }
+
+            if (child->source() != TuningFilter::Source::User)
+            {
+                continue;
+            }
+
+            m_filterStorage.add(child, false);
+        }
 
 		QString errorMsg;
 

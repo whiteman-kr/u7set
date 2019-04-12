@@ -294,7 +294,7 @@ private:
 	QColor m_textSelectedColor = Qt::GlobalColor::black;
 
 	QColor m_backAlertedColor = Qt::GlobalColor::red;
-	QColor m_textAlertedColor = Qt::GlobalColor::black;
+	QColor m_textAlertedColor = Qt::GlobalColor::white;
 
 	bool m_hasDiscreteCounter = false;
 

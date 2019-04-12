@@ -30,14 +30,14 @@ namespace Rup
 
 	struct TimeStamp
 	{
-		quint16 hour;			// 0..23
-		quint16 minute;			// 0..59
-		quint16 second;			// 0..59
-		quint16 millisecond;	// 0..999
+		quint16 hour;				// 0..23
+		quint16 minute;				// 0..59
+		quint16 second;				// 0..59
+		quint16 millisecond;		// 0..999
 
-		quint16 day;			// 1..31
-		quint16 month;			// 1..12
-		quint16 year;			// 1970..65535
+		quint16 day;				// 1..31
+		quint16 month;				// 1..12
+		quint16 year;				// 1970..65535
 
 		void reverseBytes();
 	};
@@ -72,7 +72,7 @@ namespace Rup
 
 		Rup::Data data;
 
-		quint64 CRC64;			// = 1 + x + x^3 + x^4 + x^64
+		quint64 CRC64;				// = 1 + x + x^3 + x^4 + x^64
 
 		void calcCRC64();
 		bool checkCRC64();
@@ -116,7 +116,7 @@ namespace FotipV2
 			quint16 idError : 1;
 			quint16 offsetError : 1;
 			quint16 succesfulApply : 1;
-			quint16 setSOR : 1;
+			quint16 setSOR : 1;				// for non-platform modules 1 in this flag means "WritingDisabled"
 		};
 
 		quint16 all;
@@ -129,7 +129,7 @@ namespace FotipV2
 			quint16 lmNumber : 6;
 			quint16 subsystemCode : 6;
 
-			quint16 crc : 4;	// CRC of previous twelve bits. CRC-4-ITU = x^4 + x + 1
+			quint16 crc : 4;				// CRC of previous twelve bits. CRC-4-ITU = x^4 + x + 1
 		};
 
 		quint16 wordVaue;

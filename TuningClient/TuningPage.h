@@ -11,7 +11,7 @@ class TuningModelClient : public TuningModel
 {
 	Q_OBJECT
 public:
-	TuningModelClient(TuningSignalManager* tuningSignalManager, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
+	TuningModelClient(TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, const std::vector<QString>& valueColumnsAppSignalIdSuffixes, QWidget* parent);
 
 	void blink();
 
@@ -28,6 +28,7 @@ protected:
 
 private:
 	bool m_blink = false;
+	TuningClientTcpClient* m_tuningTcpClient = nullptr;
 
 };
 
@@ -37,6 +38,7 @@ class TuningTableView : public QTableView
 	Q_OBJECT
 
 public:
+	TuningTableView(TuningClientTcpClient* tuningTcpClient);
 	bool editorActive();
 
 protected:
@@ -50,6 +52,7 @@ protected slots:
 private:
 
 	bool m_editorActive = false;
+	TuningClientTcpClient* m_tuningTcpClient = nullptr;
 
 };
 
@@ -147,8 +150,6 @@ private:
 	bool eventFilter(QObject* object, QEvent* event);
 
 	// Signals processing
-
-	void setValue();
 
 	void invertValue();
 

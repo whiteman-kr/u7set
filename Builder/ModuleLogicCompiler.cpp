@@ -3237,15 +3237,23 @@ namespace Builder
 		assert(m_tuningData == nullptr);
 		assert(m_lmDescription);
 
-		// To generate tuning data for IPEN (version 1 of FOTIP protocol)
-		// uncomment next 3 lines:
+		// common code for IPEN (FotipV1) and FotipV2 tuning protocols and data
 		//
-		// TuningIPEN::TuningData* tuningData = new TuningIPEN::TuningData(lmEquipmentID(),
-		//													tuningFrameSizeBytes,
-		//													tuningFrameCount);
-		//
-		// and comment 3 lines below:
-		//
+		bool tuningPropertyExists = false;
+		bool tuningEnabled = false;
+
+		bool result = getTuningSettings(&tuningPropertyExists, &tuningEnabled);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		if (tuningPropertyExists == false)
+		{
+			return true;
+		}
+
 		Tuning::TuningData* tuningData = new Tuning::TuningData(lmEquipmentID(),
 																m_lmDescription->flashMemory().m_tuningFrameCount,
 																m_lmDescription->flashMemory().m_tuningFramePayload,
@@ -3255,18 +3263,6 @@ namespace Builder
 																m_lmDescription->memory().m_tuningDataFrameCount,
 																m_lmDescription->memory().m_tuningDataFramePayload,
 																m_lmDescription->memory().m_tuningDataFrameSize);
-
-		// common code for IPEN (FotipV1) and FotipV2 tuning protocols and data
-		//
-		bool tuningEnabled = false;
-
-		bool result = isTuningEnabled(&tuningEnabled);
-
-		if (result == false)
-		{
-			delete tuningData;
-			return false;
-		}
 
 		result = tuningData->buildTuningSignalsLists(m_chassisSignals, m_log);
 
@@ -3292,42 +3288,34 @@ namespace Builder
 				// Tuningable signals is found in module %1 but tuning is not enabled.
 				//
 				m_log->errALC5166(lmEquipmentID());
-				result = false;
+				delete tuningData;
+				return false;
 			}
 		}
 
-		if (tuningEnabled == true)
+		tuningData->buildTuningData();
+
+		int tuningFrameCount = m_lmDescription->flashMemory().m_tuningFrameCount;
+
+		if (tuningData->usedFramesCount() > tuningFrameCount)
 		{
-			tuningData->buildTuningData();
-
-			int tuningFrameCount = m_lmDescription->flashMemory().m_tuningFrameCount;
-
-			if (tuningData->usedFramesCount() > tuningFrameCount)
-			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-								   QString(tr("Tuning data of LM '%1' exceed available %2 frames")).
-								   arg(lmEquipmentID()).
-								   arg(tuningFrameCount));
-				result = false;
-			}
-			else
-			{
-				tuningData->generateUniqueID(lmEquipmentID());
-
-				m_tuningData = tuningData;
-				m_tuningDataStorage->insert(lmEquipmentID(), tuningData);
-			}
-		}
-
-		if (result == false || tuningEnabled == false)
-		{
+			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+							   QString(tr("Tuning data of LM '%1' exceed available %2 frames")).
+							   arg(lmEquipmentID()).
+							   arg(tuningFrameCount));
 			delete tuningData;
+			return false;
 		}
 
-		return result;
+		tuningData->generateUniqueID(lmEquipmentID());
+
+		m_tuningData = tuningData;
+		m_tuningDataStorage->insert(lmEquipmentID(), tuningData);
+
+		return true;
 	}
 
-	bool ModuleLogicCompiler::isTuningEnabled(bool* tuningEnabled)
+	bool ModuleLogicCompiler::getTuningSettings(bool* tuningPropertyExists, bool* tuningEnabled)
 	{
 		QString suffix = QString(DataSource::LmEthernetAdapterProperties::LM_ETHERNET_CONROLLER_SUFFIX_FORMAT_STR).
 							arg(DataSource::LM_ETHERNET_ADAPTER1);
@@ -3342,9 +3330,11 @@ namespace Builder
 
 		if (DeviceHelper::isPropertyExists(adapter, DataSource::LmEthernetAdapterProperties::PROP_TUNING_ENABLE) == false)
 		{
-			*tuningEnabled = false;
+			*tuningPropertyExists = false;
 			return true;
 		}
+
+		*tuningPropertyExists = true;
 
 		bool res = DeviceHelper::getBoolProperty(adapter,
 												 DataSource::LmEthernetAdapterProperties::PROP_TUNING_ENABLE,

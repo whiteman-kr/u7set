@@ -8711,7 +8711,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 {
 	videoItemFblElement.removeOutputSignals();
 
-          var count = videoItemFblElement.getParamIntValue("InputCount");
+    var count = videoItemFblElement.getParamIntValue("InputCount");
 	if (count == -1)
 	{
 		return false;

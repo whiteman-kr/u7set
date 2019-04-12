@@ -3309,38 +3309,6 @@ namespace Hardware
 		return false;
 	}
 
-	bool OptoModuleStorage::processBvbModules()
-	{
-		bool result = true;
-
-		for(OptoModuleShared module : m_modules)
-		{
-			if (module->isBvb() == false)
-			{
-				continue;
-			}
-
-			result &= module->calculateTxSignalsAddresses();
-			result &= module->calculateTxBufAddresses();
-		}
-
-		// Not unite this cycles!!!!
-		// calculateTxSignalsAddresses() must be called for ALL bvb modules before calling copyOpticalPortsTxInRxSignals()
-
-		for(OptoModuleShared module : m_modules)
-		{
-			if (module->isBvb() == false)
-			{
-				continue;
-			}
-
-			result &= module->copyOpticalPortsTxInRxSignals();
-			result &= module->calculateRxBufAddresses();
-		}
-
-		return result;
-	}
-
 	bool OptoModuleStorage::isConnectionAccessible(const QString& lmEquipmentID, const QString& connectionID)
 	{
 		if (m_lmsAccessibleConnections.contains(lmEquipmentID) == false)

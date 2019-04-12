@@ -358,6 +358,11 @@ message TuningSourceState
     optional bool setSOR = 43 [default = false];
 
     optional bool hasUnappliedParams = 44 [default = false];
+
+	//
+
+	optional bool writingDisabled = 45 [default = false];
+	optional int64 fotipFlagWritingDisabled = 46 [default = 0];
 }
 
 message GetTuningSourcesStatesReply
@@ -421,6 +426,9 @@ message TuningSignalState
     optional sfixed64 writeRequestTime = 11 [default = 0];		// time of last write request (UTC)
 	optional sfixed64 successfulWriteTime = 12 [default = 0];	// time of last succesfull signal writing (UTC)
 	optional sfixed64 unsuccessfulWriteTime = 13 [default = 0];	// time of last unsuccesfull signal writing (UTC)
+
+	optional bool setSOR = 14 [default = false];
+	optional bool writingDisabled = 15 [default = false];
 }
 
 message TuningSignalsReadReply

@@ -8,7 +8,6 @@
 #include <list>
 #include <vector>
 #include <utility>
-#include <cassert>
 #include <memory>
 #include <algorithm>
 
@@ -178,6 +177,15 @@ public:
 		m_expert = value;
 	}
 
+	bool essential() const
+	{
+		return m_essential;
+	}
+	void setEssential(bool value)
+	{
+		m_essential = value;
+	}
+
 	E::PropertySpecificEditor specificEditor()
 	{
 		return m_specificEditor;
@@ -246,7 +254,7 @@ protected:
 		if (source == nullptr ||
 			source == this)
 		{
-			assert(source);
+			Q_ASSERT(source);
 			return;
 		}
 
@@ -279,6 +287,7 @@ private:
 			bool m_specific : 1;				// Specific property, used in DeviceObject
 			bool m_visible : 1;
 			bool m_expert : 1;
+			bool m_essential : 1;
 		};
 		uint16_t m_flags = 0;
 	};
@@ -305,7 +314,7 @@ public:
 		Property(),
 		m_object(object)
 	{
-		assert(object);
+		Q_ASSERT(object);
 	}
 
 	PropertyTypedValue(const PropertyTypedValue&) = default;
@@ -338,21 +347,21 @@ private:
 	template <typename NOT_ENUM>
 	const QMetaEnum metaEnum(non_enum_tag) const
 	{
-		assert(std::is_enum<NOT_ENUM>::value);			// Try to get QMetaEnum for not enum type
+		Q_ASSERT(std::is_enum<NOT_ENUM>::value);			// Try to get QMetaEnum for not enum type
 		return QMetaEnum();
 	}
 
 public:
 	virtual std::list<std::pair<int, QString>> enumValues() const override final
 	{
-		assert(std::is_enum<TYPE>::value);
+		Q_ASSERT(std::is_enum<TYPE>::value);
 
 		std::list<std::pair<int, QString>> result;
 
 		QMetaEnum me = metaEnum<TYPE>(enumness<std::is_enum<TYPE>::value>());
 		if (me.isValid() == false)
 		{
-			assert(me.isValid() == true);
+			Q_ASSERT(me.isValid() == true);
 			return result;
 		}
 
@@ -369,7 +378,7 @@ public:
 	{
 		if (std::is_enum<TYPE>::value == false)
 		{
-			assert(isEnum());
+			Q_ASSERT(isEnum());
 			return QVariant();
 		}
 
@@ -393,7 +402,7 @@ public:
 		}
 		else
 		{
-			assert(false);
+			Q_ASSERT(false);
 		}
 	}
 
@@ -405,7 +414,7 @@ public:
 		}
 		else
 		{
-			assert(value.canConvert<TYPE>());
+			Q_ASSERT(value.canConvert<TYPE>());
 			(m_object->*set)(value.value<TYPE>());
 		}
 	}
@@ -432,13 +441,13 @@ private:
 	void setEnumValueInternal(int value, non_enum_tag)
 	{
 		Q_UNUSED(value)
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	template <typename ENUM>
 	void setEnumValueInternal(const char* value, enum_tag)				// Overriden from class Property
 	{
-		assert(std::is_enum<TYPE>::value == true);
+		Q_ASSERT(std::is_enum<TYPE>::value == true);
 
 		QVariant v(value);
 		setValue(v);
@@ -449,7 +458,7 @@ private:
 	void setEnumValueInternal(const char* value, non_enum_tag)
 	{
 		Q_UNUSED(value)
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 public:
@@ -457,28 +466,28 @@ public:
 	{
 		// Limits must be checked in getter/setter
 		//
-		assert(false);
+		Q_ASSERT(false);
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
 	virtual void setLowLimit(const QVariant&) override final
 	{
 		// Limits must be checked in getter/setter
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	virtual const QVariant& highLimit() const override final
 	{
 		// Limits must be checked in getter/setter
 		//
-		assert(false);
+		Q_ASSERT(false);
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
 	virtual void setHighLimit(const QVariant&) override final
 	{
 		// Limits must be checked in getter/setter
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	virtual bool isTheSameType(Property* property) override final
@@ -496,8 +505,8 @@ public:
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
 		{
-			assert(presetProperty != nullptr);
-			assert(isTheSameType(presetProperty) == true);
+			Q_ASSERT(presetProperty != nullptr);
+			Q_ASSERT(isTheSameType(presetProperty) == true);
 			return;
 		}
 
@@ -506,7 +515,7 @@ public:
 		if (auto source = dynamic_cast<decltype(this)>(presetProperty);
 			source == nullptr)
 		{
-			assert(source);
+			Q_ASSERT(source);
 			return;
 		}
 
@@ -563,21 +572,21 @@ private:
 	template <typename NOT_ENUM>
 	const QMetaEnum metaEnum(non_enum_tag) const
 	{
-		assert(std::is_enum<NOT_ENUM>::value);			// Try to get QMetaEnum for not enum type
+		Q_ASSERT(std::is_enum<NOT_ENUM>::value);			// Try to get QMetaEnum for not enum type
 		return QMetaEnum();
 	}
 
 public:
 	virtual std::list<std::pair<int, QString>> enumValues() const override final
 	{
-		assert(std::is_enum<TYPE>::value);
+		Q_ASSERT(std::is_enum<TYPE>::value);
 
 		std::list<std::pair<int, QString>> result;
 
 		QMetaEnum me = metaEnum<TYPE>(enumness<std::is_enum<TYPE>::value>());
 		if (me.isValid() == false)
 		{
-			assert(me.isValid() == true);
+			Q_ASSERT(me.isValid() == true);
 			return result;
 		}
 
@@ -594,7 +603,7 @@ public:
 	{
 		if (std::is_enum<TYPE>::value == false)
 		{
-			assert(isEnum());
+			Q_ASSERT(isEnum());
 			return QVariant();
 		}
 
@@ -606,12 +615,11 @@ public:
 	{
 		if (m_getter)
 		{
-			QVariant result(QVariant::fromValue(m_getter()));
-			return result;
+			return QVariant::fromValue(m_getter());
 		}
 
-		assert(false);
-		return QVariant();
+		Q_ASSERT(m_getter);
+		return {};
 	}
 
 	void setValueDirect(const TYPE& value)				// Not virtual, is called from class ProprtyObject for direct access
@@ -622,7 +630,7 @@ public:
 		}
 		else
 		{
-			assert(false);
+			Q_ASSERT(false);
 		}
 	}
 
@@ -635,7 +643,7 @@ public:
 		}
 		else
 		{
-			assert(value.canConvert<TYPE>());
+			Q_ASSERT(value.canConvert<TYPE>());
 			m_setter(value.value<TYPE>());
 		}
 	}
@@ -653,7 +661,7 @@ private:
 	template <typename ENUM>
 	void setEnumValueInternal(int value, enum_tag)				// Overriden from class Propery
 	{
-		assert(std::is_enum<TYPE>::value == true);
+		Q_ASSERT(std::is_enum<TYPE>::value == true);
 
 		if (m_setter)
 		{
@@ -661,20 +669,20 @@ private:
 		}
 		else
 		{
-			assert(false);
+			Q_ASSERT(false);
 		}
 	}
 	template <typename NON_ENUM>
 	void setEnumValueInternal(int value, non_enum_tag)
 	{
 		Q_UNUSED(value)
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	template <typename ENUM>
 	void setEnumValueInternal(const char* value, enum_tag)				// Overriden from class Propery
 	{
-		assert(std::is_enum<TYPE>::value == true);
+		Q_ASSERT(std::is_enum<TYPE>::value == true);
 
 		QVariant v(value);
 		setValue(v);
@@ -685,7 +693,7 @@ private:
 	void setEnumValueInternal(const char* value, non_enum_tag)
 	{
 		Q_UNUSED(value)
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 public:
@@ -693,28 +701,28 @@ public:
 	{
 		// Limits must be checked in getter/setter
 		//
-		assert(false);
+		Q_ASSERT(false);
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
 	virtual void setLowLimit(const QVariant&) override final
 	{
 		// Limits must be checked in getter/setter
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	virtual const QVariant& highLimit() const override final
 	{
 		// Limits must be checked in getter/setter
 		//
-		assert(false);
+		Q_ASSERT(false);
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
 	virtual void setHighLimit(const QVariant&) override final
 	{
 		// Limits must be checked in getter/setter
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	void setGetter(const std::function<TYPE(void)>& getter)
@@ -741,8 +749,8 @@ public:
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
 		{
-			assert(presetProperty != nullptr);
-			assert(isTheSameType(presetProperty) == true);
+			Q_ASSERT(presetProperty != nullptr);
+			Q_ASSERT(isTheSameType(presetProperty) == true);
 			return;
 		}
 
@@ -752,7 +760,7 @@ public:
 
 		if (source == nullptr)
 		{
-			assert(source);
+			Q_ASSERT(source);
 			return;
 		}
 
@@ -835,7 +843,7 @@ public:
 #ifdef _DEBUG
 		if (isEnum() == false)		// Commented for perfomance reasone
 		{
-			assert(isEnum());
+			Q_ASSERT(isEnum());
 			return QVariant();
 		}
 #endif
@@ -850,7 +858,7 @@ public:
 
 		if (isEnum() == false)
 		{
-			assert(isEnum());
+			Q_ASSERT(isEnum());
 			return result;
 		}
 
@@ -861,7 +869,7 @@ public:
 			const QMetaObject* mo = QMetaType::metaObjectForType(m_value.userType());
 			if (mo == nullptr)
 			{
-				assert(mo);
+				Q_ASSERT(mo);
 				return result;
 			}
 
@@ -882,7 +890,7 @@ public:
 
 				if (me.isValid() == false)
 				{
-					assert(me.isValid() == true);
+					Q_ASSERT(me.isValid() == true);
 					return result;
 				}
 
@@ -918,7 +926,7 @@ public:
 			QVariant v(value);
 
 			bool ok = v.convert(m_value.type());
-			assert(ok);
+			Q_ASSERT(ok);
 			Q_UNUSED(ok);
 
 			m_value.setValue(v);
@@ -932,7 +940,7 @@ public:
 			QVariant v(value);
 
 			bool ok = v.convert(m_value.userType());
-			assert(ok);
+			Q_ASSERT(ok);
 			Q_UNUSED(ok);
 
 			m_value.setValue(v);
@@ -940,7 +948,7 @@ public:
 			return;
 		}
 
-		assert(m_value.type() == value.type());
+		Q_ASSERT(m_value.type() == value.type());
 
 		m_value = value;
 
@@ -977,14 +985,14 @@ public:
 			QVariant v(value);
 
 			bool ok = v.convert(m_value.userType());
-			assert(ok);
+			Q_ASSERT(ok);
 			Q_UNUSED(ok);
 
 			m_value.setValue(v);
 		}
 		else
 		{
-			assert(false);
+			Q_ASSERT(false);
 		}
 	}
 
@@ -993,7 +1001,7 @@ private:
 	{
 		if (m_lowLimit.isValid() == true)
 		{
-			assert(m_lowLimit.type() == m_value.type());
+			Q_ASSERT(m_lowLimit.type() == m_value.type());
 
 			if (m_value < m_lowLimit)
 			{
@@ -1003,7 +1011,7 @@ private:
 
 		if (m_highLimit.isValid() == true)
 		{
-			assert(m_highLimit.type() == m_value.type());
+			Q_ASSERT(m_highLimit.type() == m_value.type());
 
 			if (m_value > m_highLimit)
 			{
@@ -1052,8 +1060,8 @@ public:
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
 		{
-			assert(presetProperty != nullptr);
-			assert(isTheSameType(presetProperty) == true);
+			Q_ASSERT(presetProperty != nullptr);
+			Q_ASSERT(isTheSameType(presetProperty) == true);
 			return;
 		}
 
@@ -1062,7 +1070,7 @@ public:
 		PropertyValueNoGetterSetter* source = dynamic_cast<PropertyValueNoGetterSetter*>(presetProperty);
 		if (source == nullptr)
 		{
-			assert(source);
+			Q_ASSERT(source);
 			return;
 		}
 
@@ -1097,7 +1105,7 @@ public:
 	PropertyValue(std::shared_ptr<OrderedHash<int, QString>> enumValues) :
 		m_enumValues(enumValues)
 	{
-		assert(m_enumValues);
+		Q_ASSERT(m_enumValues);
 	}
 
 	virtual ~PropertyValue()
@@ -1166,7 +1174,7 @@ public:
 			return;
 		}
 
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	virtual void setEnumValue(int value) override final	// Overriden from class Propery
@@ -1276,7 +1284,7 @@ public:
 		}
 		else
 		{
-			assert(m_enumValues.empty() == false);
+			Q_ASSERT(m_enumValues.empty() == false);
 			m_value = 0;
 		}
 
@@ -1311,7 +1319,7 @@ public:
 			}
 		}
 
-		assert(false);
+		Q_ASSERT(false);
 		return QVariant();
 	}
 
@@ -1343,7 +1351,7 @@ public:
 			return;
 		}
 
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
@@ -1374,7 +1382,7 @@ public:
 
 		// Str not found
 		//
-		assert(false);
+		Q_ASSERT(false);
 		return;
 	}
 
@@ -1429,8 +1437,8 @@ public:
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
 		{
-			assert(presetProperty != nullptr);
-			assert(isTheSameType(presetProperty) == true);
+			Q_ASSERT(presetProperty != nullptr);
+			Q_ASSERT(isTheSameType(presetProperty) == true);
 			return;
 		}
 
@@ -1439,7 +1447,7 @@ public:
 
 		if (source == nullptr)
 		{
-			assert(source);
+			Q_ASSERT(source);
 			return;
 		}
 
@@ -1569,7 +1577,7 @@ public:
 	{
 		if (!getter)
 		{
-			assert(getter);
+			Q_ASSERT(getter);
 			return nullptr;
 		}
 
@@ -1625,7 +1633,7 @@ public:
 	{
 		if (enumValues.get() == nullptr)
 		{
-			assert(enumValues);
+			Q_ASSERT(enumValues);
 			return nullptr;
 		}
 
@@ -1902,7 +1910,7 @@ public:
 
 		if (property->isEnum() == true)
 		{
-			assert(std::is_integral<TYPE>::value == true);
+			Q_ASSERT(std::is_integral<TYPE>::value == true);
 
 			property->setEnumValue(value);
 			return true;
@@ -1984,7 +1992,7 @@ public:
 		return result;
 	}
 
-	static const int m_lastSpecificPropertiesVersion = 5;
+	static const int m_lastSpecificPropertiesVersion = 6;
 
 	static QString createSpecificPropertyStruct(const QString& name,
 										   const QString& category,
@@ -1998,9 +2006,10 @@ public:
 										   bool expert,
 										   bool visible,
 										   const E::PropertySpecificEditor editor,
-										   quint16 viewOrder)
+										   quint16 viewOrder,
+											bool essential)
 	{
-		static_assert(PropertyObject::m_lastSpecificPropertiesVersion >= 1 && PropertyObject::m_lastSpecificPropertiesVersion <= 5);	// Function must be reviewed if version is raised
+		static_assert(PropertyObject::m_lastSpecificPropertiesVersion >= 1 && PropertyObject::m_lastSpecificPropertiesVersion <= 6);	// Function must be reviewed if version is raised
 
 		QString result = QString("%1;").arg(m_lastSpecificPropertiesVersion);
 
@@ -2016,7 +2025,8 @@ public:
 		result += description + ";";
 		result += visible ? "true;" : "false;";
 		result += E::valueToString<E::PropertySpecificEditor>(editor) + ";";
-		result += QString("%1").arg(viewOrder);
+		result += QString("%1;").arg(viewOrder);
+		result += essential ? "true" : "false";
 
 		result = result.replace(QChar::CarriageReturn, "\\r");
 		result = result.replace(QChar::LineFeed, "\\n");
@@ -2061,6 +2071,9 @@ public:
 		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset	Expert		Description		Visible		Editor	ViewOrder
 		5;          Port;	Server;		uint32_t;	1;			65535;		2345;               0;          false;				false;		IP Address;		true		None	65535
 
+		version;    name; 	category;	type;		min;		max;		default             precision   updateFromPreset	Expert		Description		Visible		Editor	ViewOrder	Essential
+		6;          Port;	Server;		uint32_t;	1;			65535;		2345;               0;          false;				false;		IP Address;		true		None	65535		false
+
 		version:            record version
 		name:               property name
 		category:           category name
@@ -2089,6 +2102,7 @@ public:
 							can have values: None, Password, Script, TuningFilter, SpecificProperties
 
 		ViewOrder			[Added in version 5] View order for displaying in PropertyEditor
+		Essential			[Added in version 6] Property is highlighted by color in PropertyEditor
 		*/
 		QString m_specificPropertiesStructTrimmed = specificProperties;
 
@@ -2165,11 +2179,19 @@ public:
 					result.second += parseResult.second;
 				}
 				break;
+			case 6:
+				{
+					auto parseResult = parseSpecificPropertiesStructV6(columns);
+
+					result.first &= parseResult.first;
+					result.second += parseResult.second;
+				}
+				break;
 			default:
 				result.first = false;
 				result.second += "SpecificProperties: Unsupported version: " + version;
 
-				assert(false);
+				Q_ASSERT(false);
 				qDebug() << "Object has spec prop with unsuported version: " << row;
 			}
 		}
@@ -2248,7 +2270,8 @@ public:
 											   QLatin1String{"false"},
 											   QLatin1String{"true"},
 											   QLatin1String{"None"},
-											   QString{"65535"});
+											   QString{"65535"},
+											   QLatin1String{"false"});
 
 		return result;
 	}
@@ -2292,7 +2315,8 @@ public:
 											   strExpert,
 											   QLatin1String{"true"},
 											   QLatin1String{"None"},
-											   QString{"65535"});
+											   QString{"65535"},
+											   QLatin1String{"false"});
 
 		return result;
 	}
@@ -2337,7 +2361,8 @@ public:
 											   strExpert,
 											   strVisible,
 											   QLatin1String{"None"},
-											   QString{"65535"});
+											   QString{"65535"},
+											   QLatin1String{"false"});
 
 		return result;
 	}
@@ -2383,7 +2408,8 @@ public:
 											   strExpert,
 											   strVisible,
 											   strEditor,
-											   QString{"65535"});
+											   QString{"65535"},
+											   QLatin1String{"false"});
 
 		return result;
 	}
@@ -2430,7 +2456,57 @@ public:
 											   strExpert,
 											   strVisible,
 											   strEditor,
-											   strViewOrder);
+											   strViewOrder,
+											   QLatin1String{"false"});
+
+		return result;
+	}
+
+	std::pair<bool, QString> parseSpecificPropertiesStructV6(const QStringList& columns)
+	{
+		std::pair<bool, QString> result = std::make_pair(true, "");
+
+		if (columns.count() != 15)
+		{
+			result.first = false;
+			result.second = "Wrong proprty struct version 6!\n"
+							"Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor;viewOrder;essential\n";
+
+			qDebug() << Q_FUNC_INFO << " Wrong proprty struct version 6!";
+			qDebug() << Q_FUNC_INFO << " Expected: version;name;category;type;min;max;default;precision;updateFromPreset;expert;description;visible;editor;viewOrder;essential";
+			return result;
+		}
+
+		QString name(columns[1]);
+		QString category(columns[2]);
+		QString type(columns[3]);
+		QStringRef min(&columns[4]);
+		QStringRef max(&columns[5]);
+		QStringRef defaultValue(&columns[6]);
+		QStringRef strPrecision(&columns[7]);
+		QString strUpdateFromPreset(columns[8]);
+		QString strExpert(columns[9]);
+		QString description(columns[10]);
+		QString strVisible(columns[11]);
+		QString strEditor(columns[12]);
+		QString strViewOrder(columns[13]);
+		QString strEssential(columns[14]);
+
+		result = parseSpecificPropertiesCreate(6,
+											   name,
+											   category,
+											   description,
+											   type,
+											   min,
+											   max,
+											   defaultValue,
+											   strPrecision,
+											   strUpdateFromPreset,
+											   strExpert,
+											   strVisible,
+											   strEditor,
+											   strViewOrder,
+											   strEssential);
 
 		return result;
 	}
@@ -2448,13 +2524,14 @@ public:
 														   const QString& strExpert,
 														   const QString& strVisible,
 														   const QString& strEditor,
-														   const QString& strViewOrder)
+														   const QString& strViewOrder,
+														   const QString& strEssential)
 	{
 		std::pair<bool, QString> result = std::make_pair(true, "");
 
 		if (version < 0 || version > m_lastSpecificPropertiesVersion)
 		{
-			assert(false);
+			Q_ASSERT(false);
 
 			result.first = false;
 			result.second += "SpecificProperties: Unsupported version: " + QString::number(version);
@@ -2465,6 +2542,7 @@ public:
 		bool updateFromPreset = strUpdateFromPreset.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
 		bool expert = strExpert.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
 		bool visible = strVisible.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
+		bool essential = strEssential.compare(QLatin1String("true"), Qt::CaseInsensitive) == 0;
 
 		if (name.isEmpty() == true || name.size() > 1024)
 		{
@@ -2683,7 +2761,7 @@ public:
 				break;
 
 			default:
-				assert(false);
+				Q_ASSERT(false);
 
 				// Error, unknown type
 				//
@@ -2699,7 +2777,7 @@ public:
 		//
 		if (addedProperty == nullptr)
 		{
-			assert(addedProperty);
+			Q_ASSERT(addedProperty);
 
 			result.first = false;
 			result.second = " Property was not created: " + strType + "\n";
@@ -2717,6 +2795,7 @@ public:
 		addedProperty->setVisible(visible);
 		addedProperty->setSpecificEditor(editorType);
 		addedProperty->setViewOrder(viewOrder);
+		addedProperty->setEssential(essential);
 
 		return result;
 	}
@@ -2772,7 +2851,7 @@ public:
 
 		if (ok == nullptr)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			return enumValues;
 		}
 
@@ -2842,7 +2921,16 @@ private:
 // PropertyVector can be used in QVariant, full copy is made if assign operator called, so OBJECT_TYPE must have copy constructor
 //
 template <typename OBJECT_TYPE>
-class PropertyVector : public std::vector<std::shared_ptr<OBJECT_TYPE>>
+class PropertyVectorBase : public std::vector<std::shared_ptr<OBJECT_TYPE>>
+{
+public:
+	virtual ~PropertyVectorBase() {};
+	[[nodiscard]] virtual std::shared_ptr<OBJECT_TYPE> createItem() const = 0;
+};
+
+
+template <typename OBJECT_TYPE>
+class PropertyVector : public PropertyVectorBase<OBJECT_TYPE>
 {
 public:
 	PropertyVector()
@@ -2880,13 +2968,26 @@ public:
 		return *this;
 	}
 	PropertyVector& operator= (PropertyVector&& src) = default;
+
+	virtual std::shared_ptr<OBJECT_TYPE> createItem() const override
+	{
+		return std::make_shared<OBJECT_TYPE>();
+	}
 };
 
 //
 // PropertyList can be used in QVariant, full copy is made if assign operator called, so OBJECT_TYPE must have copy constructor
 //
 template <typename OBJECT_TYPE>
-class PropertyList : public std::list<std::shared_ptr<OBJECT_TYPE>>
+class PropertyListBase : public std::list<std::shared_ptr<OBJECT_TYPE>>
+{
+public:
+	virtual ~PropertyListBase() {};
+	[[nodiscard]] virtual std::shared_ptr<OBJECT_TYPE> createItem() const = 0;
+};
+
+template <typename OBJECT_TYPE>
+class PropertyList : public PropertyListBase<OBJECT_TYPE>
 {
 public:
 	PropertyList()
@@ -2919,6 +3020,12 @@ public:
 		return *this;
 	}
 	PropertyList& operator= (PropertyList&& src) = default;
+
+	virtual std::shared_ptr<OBJECT_TYPE> createItem() const override
+	{
+		return std::make_shared<OBJECT_TYPE>();
+	}
+
 };
 
 
@@ -2930,7 +3037,7 @@ inline bool variantIsPropertyVector(const QVariant& v)
 	return type.startsWith(QStringLiteral("PropertyVector<"), Qt::CaseSensitive);
 }
 
-inline std::vector<std::shared_ptr<PropertyObject>>* variantToPropertyVector(QVariant& v)
+inline PropertyVectorBase<PropertyObject>* variantToPropertyVector(QVariant& v)
 {
 	if (variantIsPropertyVector(v) == false)
 	{
@@ -2938,11 +3045,16 @@ inline std::vector<std::shared_ptr<PropertyObject>>* variantToPropertyVector(QVa
 		return nullptr;
 	}
 
-	return reinterpret_cast<std::vector<std::shared_ptr<PropertyObject>>*>(v.data());
+	// Dangerous hack! Kids, don't do it
+	// It is Undefined Behavior
+	// It' is better to create another vector and copy ther ptr's
+	// Now leave it as is
+	//
+	return reinterpret_cast<PropertyVectorBase<PropertyObject>*>(v.data());
 }
 
 template<>
-inline std::vector<std::shared_ptr<PropertyObject>>* qvariant_cast<std::vector<std::shared_ptr<PropertyObject>>*>(const QVariant& v)
+inline PropertyVectorBase<PropertyObject>* qvariant_cast<PropertyVectorBase<PropertyObject>*>(const QVariant& v)
 {
 	return variantToPropertyVector(const_cast<QVariant&>(v));
 }
@@ -2955,7 +3067,7 @@ inline bool variantIsPropertyList(const QVariant& v)
 	return type.startsWith(QStringLiteral("PropertyList<"), Qt::CaseSensitive);
 }
 
-inline std::list<std::shared_ptr<PropertyObject>>* variantToPropertyList(QVariant& v)
+inline PropertyListBase<PropertyObject>* variantToPropertyList(QVariant& v)
 {
 	if (variantIsPropertyList(v) == false)
 	{
@@ -2963,11 +3075,16 @@ inline std::list<std::shared_ptr<PropertyObject>>* variantToPropertyList(QVarian
 		return nullptr;
 	}
 
-	return reinterpret_cast<std::list<std::shared_ptr<PropertyObject>>*>(v.data());
+	// Dangerous hack! Kids, don't do it
+	// It is Undefined Behavior
+	// It' is better to create another list and copy ther ptr's
+	// Now leave it as is
+	//
+	return reinterpret_cast<PropertyListBase<PropertyObject>*>(v.data());
 }
 
 template<>
-inline std::list<std::shared_ptr<PropertyObject>>* qvariant_cast<std::list<std::shared_ptr<PropertyObject>>*>(const QVariant& v)
+inline PropertyListBase<PropertyObject>* qvariant_cast<PropertyListBase<PropertyObject>*>(const QVariant& v)
 {
 	return variantToPropertyList(const_cast<QVariant&>(v));
 }

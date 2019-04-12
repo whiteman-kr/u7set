@@ -255,7 +255,7 @@ namespace VFrame30
 
 		// --
 		//
-		int pinCount = connectionIdsAsList().size();
+		int pinCount = std::max(connectionIdsAsList().size(), inputsCount());
 
 		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
 		double minHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);

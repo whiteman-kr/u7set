@@ -43,9 +43,11 @@ namespace VFrame30
 
 	const QString PropertyNames::allowScale("AllowScale");
 	const QString PropertyNames::keepAspectRatio("KeepAspectRatio");
+	const QString PropertyNames::imageId("ImageID");
 	const QString PropertyNames::image("Image");
 	const QString PropertyNames::images("Images");
 	const QString PropertyNames::svg("Svg");
+	const QString PropertyNames::currentImageId("CurrentImageID");
 
 	// SchemaItemValue Colors
 	//

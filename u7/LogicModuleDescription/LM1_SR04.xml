@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM1_SR04" DescriptionNumber="4" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0021">
+<LogicModule Name="LM1_SR04" DescriptionNumber="4" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0022">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -381,7 +381,7 @@
 			<Pin OpName="o_nan"			OpIndex ="28"	PinType = "Output"/>
 			<Pin OpName="o_version"		OpIndex ="29"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="DPCOMP"		OpCode="20"	ImpVersion="3"		VersionOpIndex="16"	MaxInstCount="256" SimulationFunc="afb_dpcomp">
+		<AFBComponent Caption="DPCOMP"		OpCode="20"	ImpVersion="4"		VersionOpIndex="16"	MaxInstCount="256" SimulationFunc="afb_dpcomp">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_hys"			OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_result"		OpIndex ="3"	PinType = "Input"/>
@@ -525,7 +525,7 @@
 			<Pin OpName="o_version"		OpIndex ="13"	PinType = "Output"/>
 			<Pin OpName="o_univibrator"		OpIndex ="14"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="PULSE_GEN" OpCode="30" ImpVersion="1" VersionOpIndex="17" MaxInstCount="256" SimulationFunc="afb_pulse_gen">
+		<AFBComponent Caption="PULSE_GEN" OpCode="30" ImpVersion="0" VersionOpIndex="17" MaxInstCount="256" SimulationFunc="afb_pulse_gen">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_t_high"		OpIndex ="1"	PinType = "Param"/>
 			<Pin OpName="i_t_low"		OpIndex ="3"	PinType = "Param"/>
@@ -7738,7 +7738,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_fp_v1"    Caption="mismatch_fp"    Version="1.0011">
+        <AFB id="#mismatch_fp_v1"    Caption="mismatch_fp"    Version="1.0012">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -7901,7 +7901,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 {
 	videoItemFblElement.removeOutputSignals();
 
-          var count = videoItemFblElement.getParamIntValue("InputCount");
+    var count = videoItemFblElement.getParamIntValue("InputCount");
 	if (count == -1)
 	{
 		return false;
@@ -7929,7 +7929,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
 	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
 
 	videoItemFblElement.adjustHeight();
@@ -7948,7 +7947,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#mismatch_d_fp_v1"    Caption="mismatch_d_fp"    Version="1.0003">
+        <AFB id="#mismatch_d_fp_v1"    Caption="mismatch_d_fp"    Version="1.0004">
 			<Properties>				
 				<Description>Analog mismatch block</Description>
 				<Category>Other</Category>
@@ -8134,7 +8133,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
 	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
 
 	videoItemFblElement.adjustHeight();
@@ -8153,7 +8151,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>		
 
-		<AFB id="#mismatch_r_fp_v1"  Caption="mismatch_r_fp"  Version="1.0008">
+        <AFB id="#mismatch_r_fp_v1"  Caption="mismatch_r_fp"  Version="1.0009">
 			<Properties>				
 				<Description>Analog mismatch block with limits</Description>
 				<Category>Other</Category>
@@ -8372,7 +8370,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	createOutput(videoItemFblElement, afbElement, "OutParamErr", "param_err");
 	createOutput(videoItemFblElement, afbElement, "OutOverflow", "overflow");
 	createOutput(videoItemFblElement, afbElement, "OutUnderflow", "underflow");
-	createOutput(videoItemFblElement, afbElement, "OutZero", "zero");
 	createOutput(videoItemFblElement, afbElement, "OutNaN", "nan");
 
 	videoItemFblElement.adjustHeight();

@@ -246,7 +246,7 @@ namespace VFrame30
 				const std::shared_ptr<SchemaItem>& item = *vi;
 				assert(item);
 
-				item->setBlinkPhase(drawParam->blinkPhase());
+				item->setDrawParam(drawParam);
 
 				if (item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
@@ -272,6 +272,8 @@ namespace VFrame30
 						item->DrawScriptError(drawParam);
 					}
 				}
+
+				item->setDrawParam(nullptr);
 			}
 		}
 

@@ -380,6 +380,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 			theConfigSettings.showSchemas != readSettings.showSchemas ||
 			theConfigSettings.showSignals != readSettings.showSignals ||
 			theConfigSettings.showSOR != readSettings.showSOR ||
+			theConfigSettings.useAccessFlag != readSettings.useAccessFlag ||
 			theConfigSettings.showDiscreteCounters != readSettings.showDiscreteCounters ||
 			theConfigSettings.logonMode != readSettings.logonMode ||
 			theConfigSettings.loginSessionLength != readSettings.loginSessionLength ||
@@ -588,6 +589,7 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			outSetting->filterByEquipment = dasXmlElement.attribute("filterByEquipment") == "true" ? true : false;
 			outSetting->filterBySchema = dasXmlElement.attribute("filterBySchema") == "true" ? true : false;
 			outSetting->showSOR = dasXmlElement.attribute("showSOR") == "true" ? true : false;
+			outSetting->useAccessFlag = dasXmlElement.attribute("useAccessFlag") == "true" ? true : false;
 			outSetting->showDiscreteCounters = dasXmlElement.attribute("showDiscreteCounters") == "true" ? true : false;
 
 			outSetting->logonMode = dasXmlElement.attribute("loginPerOperation") == "true" ? LogonMode::PerOperation : LogonMode::Permanent;

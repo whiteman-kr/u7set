@@ -2,28 +2,64 @@
 #include "../lib/PropertyObject.h"
 #include "Session.h"
 #include "Schema.h"
+#include "DrawParam.h"
+#include "ClientSchemaView.h"
 
 namespace VFrame30
 {
-
-	MacrosExpander::MacrosExpander()
+	QStringList MacrosExpander::parse(const QStringList& stringList, const CDrawParam* drawParam, const PropertyObject* schemaItem)
 	{
+		QStringList resultList;
+		resultList.reserve(stringList.size());
 
+		for (const QString& str : stringList)
+		{
+			QString parsedString = parse(str, drawParam, schemaItem);
+			resultList.push_back(parsedString);
+		}
+
+		return resultList;
+	}
+
+	QString MacrosExpander::parse(const QString& str, const CDrawParam* drawParam, const PropertyObject* schemaItem)
+	{
+		if (drawParam == nullptr)
+		{
+			Q_ASSERT(drawParam);
+			return str;
+		}
+
+		return parse(str,
+					 drawParam->isMonitorMode() ? drawParam->clientSchemaView() : nullptr,
+					 &drawParam->session(),
+					 drawParam->schema(),
+					 schemaItem);
+	}
+
+	QStringList MacrosExpander::parse(const QStringList& stringList,
+									  const ClientSchemaView* clientView,
+									  const Session* session,
+									  const VFrame30::Schema* schema,
+									  const PropertyObject* thisObject)
+	{
+		QStringList resultList;
+		resultList.reserve(stringList.size());
+
+		for (const QString& str : stringList)
+		{
+			QString parsedString = parse(str, clientView, session, schema, thisObject);
+			resultList.push_back(parsedString);
+		}
+
+		return resultList;
 	}
 
 	QString MacrosExpander::parse(const QString& str,
-								  const Session& session,
-								  const Schema* schema,
+								  const ClientSchemaView* clientView,
+								  const Session* session,
+								  const VFrame30::Schema* schema,
 								  const PropertyObject* thisObject)
 	{
-		if (schema == nullptr ||
-			thisObject == nullptr)
-		{
-			assert(schema);
-			assert(thisObject);
-			return QString();
-		}
-
 		QString result = str;
 
 		QRegExp reStartIndex("\\$\\([a-zA-Z0-9]+[\\.]?[a-zA-Z0-9]*");	// Search for $(SomeText[.][SomeText])
@@ -56,6 +92,8 @@ namespace VFrame30
 
 			do
 			{
+				// Look for property assigned to object
+				//
 				if (macro.startsWith("this.", Qt::CaseInsensitive) == true ||
 					macro.startsWith("item.", Qt::CaseInsensitive) == true)
 				{
@@ -73,7 +111,7 @@ namespace VFrame30
 
 				if (macro.startsWith("session.", Qt::CaseInsensitive) == true)
 				{
-					object = &session;
+					object = session;
 					propName = macro.mid(macro.indexOf('.') + 1);
 					break;
 				}
@@ -82,24 +120,43 @@ namespace VFrame30
 
 			QString replaceText;
 
-			if (object != nullptr &&
-				propName.isEmpty() == false)
+			do
 			{
-				QVariant value = object->propertyValue(propName);
+				if (object != nullptr &&
+					propName.isEmpty() == false)
+				{
+					QVariant value = object->propertyValue(propName);
 
-				if (value.isValid() == true)
-				{
-					replaceText = value.toString();
+					if (value.isValid() == true)
+					{
+						replaceText = value.toString();
+					}
+					else
+					{
+						replaceText = QString("[unk_prop: %1]").arg(macro);
+					}
+					break;
 				}
-				else
+
+
+				// Look for variables
+				//
+				if (clientView != nullptr)
 				{
-					replaceText = QLatin1String("[UnknownProp]");
+					QVariant var = clientView->variable(macro);
+
+					if (var.isValid() == true)
+					{
+						replaceText = var.toString();
+						break;
+					}
 				}
+
+				// Total else
+				//
+				replaceText = QString("[unk_obj_or_var: %1]").arg(macro);
 			}
-			else
-			{
-				replaceText = QLatin1String("[UnknownObject]");
-			}
+			while (false);
 
 			// Replace text in result
 			//
