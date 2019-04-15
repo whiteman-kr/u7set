@@ -1150,13 +1150,7 @@ void SignalsModel::loadSignals()
 	}
 	clearSignals();
 
-	std::vector<DbUser> list;
-	m_dbController->getUserList(&list, m_parentWindow);
-	m_usernameMap.clear();
-	for (size_t i = 0; i < list.size(); i++)
-	{
-		m_usernameMap[list[i].userId()] = list[i].username();
-	}
+	loadUsers();
 
 	if (!dbController()->getSignals(&m_signalSet, false, m_parentWindow))
 	{
@@ -1660,6 +1654,8 @@ void SignalsModel::initLazyLoadSignals()
 {
 	m_partialLoading = true;
 
+	loadUsers();
+
 	QVector<int> signalIds;
 	dbController()->getSignalsIDs(&signalIds, m_parentWindow);
 
@@ -1777,6 +1773,18 @@ void SignalsModel::loadNextSignalsPortion()
 
 		emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, columnCount() - 1), QVector<int>() << Qt::EditRole << Qt::DisplayRole);
 		emit signalsLoadingFinished();
+	}
+}
+
+void SignalsModel::loadUsers()
+{
+	std::vector<DbUser> list;
+	m_dbController->getUserList(&list, m_parentWindow);
+
+	m_usernameMap.clear();
+	for (size_t i = 0; i < list.size(); i++)
+	{
+		m_usernameMap[list[i].userId()] = list[i].username();
 	}
 }
 

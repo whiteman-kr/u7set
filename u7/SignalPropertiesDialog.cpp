@@ -239,10 +239,24 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 			QString upperAppSignalId = appSignal.appSignalID().toUpper();
 			if (appSignal.appSignalID() != upperAppSignalId)
 			{
-				appSignal.setAppSignalID(upperAppSignalId);
-				if (m_editedSignalsId.contains(appSignal.ID()) == false)
+				QString message;
+				if (readOnly == false && checkoutSignal(appSignal, message) == false)
 				{
-					m_editedSignalsId.push_back(appSignal.ID());
+					if (message.isEmpty() == false)
+					{
+						showError(message);
+					}
+					setWindowTitle("Signal properties (read only)");
+					readOnly = true;
+				}
+
+				if (readOnly == false)
+				{
+					appSignal.setAppSignalID(upperAppSignalId);
+					if (m_editedSignalsId.contains(appSignal.ID()) == false)
+					{
+						m_editedSignalsId.push_back(appSignal.ID());
+					}
 				}
 			}
 		}
@@ -502,9 +516,12 @@ void SignalPropertiesDialog::checkoutSignals(QList<std::shared_ptr<PropertyObjec
 			continue;
 		}
 		QString message;
-		if (checkoutSignal(signal, message) && !message.isEmpty())
+		if (checkoutSignal(signal, message) == false)
 		{
-			showError(message);
+			if (message.isEmpty() == false)
+			{
+				showError(message);
+			}
 			setWindowTitle("Signal properties (read only)");
 			m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 			return;
@@ -541,6 +558,7 @@ bool SignalPropertiesDialog::checkoutSignal(Signal& s, QString& message)
 		}
 		else
 		{
+			message = tr("Signal %1 is checked out by other user").arg(s.appSignalID());
 			return false;
 		}
 	}
@@ -554,6 +572,9 @@ bool SignalPropertiesDialog::checkoutSignal(Signal& s, QString& message)
 	{
 		return false;
 	}
+
+	// First time collect all error output
+	//
 	foreach (const ObjectState& objectState, objectStates)
 	{
 		if (objectState.errCode != ERR_SIGNAL_OK)
@@ -561,11 +582,23 @@ bool SignalPropertiesDialog::checkoutSignal(Signal& s, QString& message)
 			message += errorMessage(objectState) + "\n";
 		}
 	}
+
+	// Then decide do we have error
+	//
 	foreach (const ObjectState& objectState, objectStates)
 	{
-		if (objectState.errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER
-				&& objectState.userId != m_dbController->currentUser().userId() && !m_dbController->currentUser().isAdminstrator())
+		switch (objectState.errCode)
 		{
+		case ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER:
+			if (objectState.userId != m_dbController->currentUser().userId() &&
+					m_dbController->currentUser().isAdminstrator() == false)
+			{
+				return false;
+			}
+			break;
+		case ERR_SIGNAL_OK:
+			break;
+		default:
 			return false;
 		}
 	}

@@ -137,6 +137,7 @@ public slots:
 	void initLazyLoadSignals();
 	void finishLoadSignals();
 	void loadNextSignalsPortion();
+	void loadUsers();
 	void loadSignals();
 	void loadSignalSet(QVector<int> keys, bool updateView = true);
 	void loadSignal(int signalId, bool updateView = true);
