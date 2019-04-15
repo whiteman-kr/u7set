@@ -19,6 +19,7 @@
 #include <QClipboard>
 #include <QSplitter>
 #include <QScrollBar>
+#include <QStandardItemModel>
 
 
 const int SC_STR_ID = 0,
@@ -2394,7 +2395,17 @@ void SignalsTabPage::checkIn()
 
 void SignalsTabPage::viewSignalHistory()
 {
+	int row = m_signalsView->currentIndex().row();
 
+	if (row < 0 || row >= m_signalsModel->rowCount())
+	{
+		return;
+	}
+
+	const Signal& signal = m_signalsModel->signal(row);
+	SignalHistoryDialog dlg(dbController(), signal.appSignalID(), signal.ID(), this);
+
+	dlg.exec();
 }
 
 void SignalsTabPage::changeSignalActionsVisibility()
@@ -3220,4 +3231,73 @@ void SignalsProxyModel::applyNewFilter()
 	emit aboutToFilter();
 
 	invalidateFilter();
+}
+
+SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QString& appSignalId, int signalId, QWidget* parent) :
+	QDialog(parent),
+	m_dbController(dbController),
+	m_signalId(signalId)
+{
+	setWindowTitle(tr("History - ") + appSignalId);
+
+	setWindowPosition(this, "SignalHistoryDialog");
+
+	setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+	setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
+
+	std::vector<DbChangeset> signalChanges;
+	dbController->getSignalHistory(signalId, &signalChanges, this);
+
+	QVBoxLayout* vl = new QVBoxLayout;
+
+	m_historyModel = new QStandardItemModel(static_cast<int>(signalChanges.size()), 4, this);
+
+	m_historyModel->setHeaderData(0, Qt::Horizontal, "Changeset");
+	m_historyModel->setHeaderData(1, Qt::Horizontal, "User");
+	m_historyModel->setHeaderData(2, Qt::Horizontal, "Date");
+	m_historyModel->setHeaderData(3, Qt::Horizontal, "Comment");
+
+	int row = 0;
+	for (DbChangeset& changeset : signalChanges)
+	{
+		m_historyModel->setData(m_historyModel->index(row, 0), changeset.changeset());
+		m_historyModel->setData(m_historyModel->index(row, 1), changeset.username());
+		m_historyModel->setData(m_historyModel->index(row, 2), changeset.date().toString("dd MMM yyyy HH:mm:ss"));
+		m_historyModel->setData(m_historyModel->index(row, 3), changeset.comment());
+
+		row++;
+	}
+
+	QTableView* historyView = new QTableView(this);
+	vl->addWidget(historyView);
+
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(this);
+	buttonBox->setOrientation(Qt::Horizontal);
+	buttonBox->setStandardButtons(QDialogButtonBox::Close);
+	connect(buttonBox, &QDialogButtonBox::clicked, this, &QDialog::accept);
+	vl->addWidget(buttonBox);
+
+	setLayout(vl);
+
+	historyView->setModel(m_historyModel);
+	historyView->verticalHeader()->setDefaultAlignment(Qt::AlignRight | Qt::AlignVCenter);
+	historyView->setAlternatingRowColors(false);
+	historyView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
+	historyView->setEditTriggers(QTableView::NoEditTriggers);
+
+	historyView->verticalHeader()->setDefaultSectionSize(static_cast<int>(historyView->fontMetrics().height() * 1.4));
+	historyView->verticalHeader()->setResizeMode(QHeaderView::Fixed);
+
+	historyView->horizontalHeader()->setHighlightSections(false);
+	historyView->horizontalHeader()->setDefaultSectionSize(150);
+	historyView->horizontalHeader()->setStretchLastSection(true);
+
+	new TableDataVisibilityController(historyView, "SignalHistoryDialog", QVector<int>() << 0 << 1 << 2 << 3);
+}
+
+void SignalHistoryDialog::closeEvent(QCloseEvent* event)
+{
+	saveWindowPosition(this, "SignalHistoryDialog");
+
+	QDialog::closeEvent(event);
 }

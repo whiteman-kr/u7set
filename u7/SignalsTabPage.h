@@ -22,6 +22,7 @@ class QCheckBox;
 class QLineEdit;
 class QCompleter;
 class QActionGroup;
+class QStandardItemModel;
 
 
 const int	ST_ANALOG = TO_INT(E::SignalType::Analog),
@@ -256,6 +257,22 @@ protected:
 private:
 	SignalsModel *m_sourceModel;
 	CheckedoutSignalsModel* m_proxyModel;
+};
+
+
+class SignalHistoryDialog : public QDialog
+{
+	Q_OBJECT
+public:
+	SignalHistoryDialog(DbController* dbController, const QString& appSignalId, int signalId, QWidget *parent = nullptr);
+
+protected:
+	void closeEvent(QCloseEvent* event);
+
+private:
+	DbController* m_dbController = nullptr;
+	int m_signalId = -1;
+	QStandardItemModel* m_historyModel = nullptr;
 };
 
 
