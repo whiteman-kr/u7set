@@ -110,16 +110,7 @@ namespace VFrame30
 
 		// Draw Image
 		//
-		if (m_image.svgData().isEmpty() == false)
-		{
-			m_image.drawSvg(drawParam, rect);
-			return;
-		}
-
-		if (m_image.image().isNull() == false)
-		{
-			m_image.drawImage(drawParam, rect);
-		}
+		m_image.drawImage(drawParam, rect);
 
 		return;
 	}

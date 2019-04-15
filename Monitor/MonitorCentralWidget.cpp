@@ -23,7 +23,7 @@ MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 
 	// On start create an empty MonitorSchema and add a tab with this schema
 	//
-	addSchemaTabPage("EMPTYSCHEMA");
+	addSchemaTabPage("EMPTYSCHEMA", {});
 
 	// --
 	//
@@ -45,7 +45,7 @@ MonitorSchemaWidget* MonitorCentralWidget::currentTab()
 	return dynamic_cast<MonitorSchemaWidget*>(currentWidget());
 }
 
-int MonitorCentralWidget::addSchemaTabPage(QString schemaId)
+int MonitorCentralWidget::addSchemaTabPage(QString schemaId, const QVariantHash& variables)
 {
 	std::shared_ptr<VFrame30::Schema> tabSchema = m_schemaManager->schema(schemaId);
 
@@ -60,6 +60,7 @@ int MonitorCentralWidget::addSchemaTabPage(QString schemaId)
 																m_schemaManager,
 																m_appSignalController,
 																m_tuningController);
+	schemaWidget->clientSchemaView()->setVariables(variables);
 
 	connect(schemaWidget, &MonitorSchemaWidget::signal_schemaChanged, this, &MonitorCentralWidget::slot_schemaChanged);
 	connect(schemaWidget, &MonitorSchemaWidget::signal_historyChanged, this, &MonitorCentralWidget::signal_historyChanged);
@@ -284,7 +285,9 @@ void MonitorCentralWidget::slot_newSameTab(MonitorSchemaWidget* tabWidget)
 	}
 
 	QString schemaId = tabWidget->schema()->schemaId();
-	int tabIndex = addSchemaTabPage(schemaId);
+	QVariantHash variables = tabWidget->clientSchemaView()->variables();
+
+	int tabIndex = addSchemaTabPage(schemaId, variables);
 
 	// Switch to the new tab
 	//

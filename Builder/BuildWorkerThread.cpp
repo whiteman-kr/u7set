@@ -998,6 +998,7 @@ namespace Builder
 		m_context->m_fscDescriptions = std::make_shared<LmDescriptionSet>();
 
 		findModulesByFamily(m_context->m_equipmentSet->root(), &m_context->m_lmModules, Hardware::DeviceModule::FamilyType::LM);
+
 		findModulesByFamily(m_context->m_equipmentSet->root(), &m_context->m_lmAndBvbModules, Hardware::DeviceModule::FamilyType::LM);
 		findModulesByFamily(m_context->m_equipmentSet->root(), &m_context->m_lmAndBvbModules, Hardware::DeviceModule::FamilyType::BVB);
 

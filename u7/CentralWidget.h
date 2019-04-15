@@ -2,6 +2,7 @@
 
 class MainTabPage;
 
+
 class CentralWidget : public QTabWidget
 {
 	Q_OBJECT

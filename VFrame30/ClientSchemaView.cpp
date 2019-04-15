@@ -13,7 +13,13 @@ namespace VFrame30
 		m_clientSchemaView(clientSchemaView)
 	{
 		assert(m_clientSchemaView);
+		qDebug() << "ScriptSchemaView::ScriptSchemaView";
 		return;
+	}
+
+	ScriptSchemaView::~ScriptSchemaView()
+	{
+		qDebug() << "ScriptSchemaView::~ScriptSchemaView";
 	}
 
 	void ScriptSchemaView::debugOutput(QString str)
@@ -129,6 +135,16 @@ namespace VFrame30
 	{
 		int result = QMessageBox::question(m_clientSchemaView, qAppName(), text);
 		return result == QMessageBox::Yes;
+	}
+
+	QVariant ScriptSchemaView::variable(QString name)
+	{
+		return m_clientSchemaView->variable(name);
+	}
+
+	void ScriptSchemaView::setVariable(QString name, const QVariant& value)
+	{
+		m_clientSchemaView->setVariable(name, value);
 	}
 
 	//
@@ -425,33 +441,40 @@ namespace VFrame30
 	{
 		if (m_schemaManager == nullptr)
 		{
-			assert(m_schemaManager);
+			Q_ASSERT(m_schemaManager);
 			return nullptr;
 		}
 
-		QJSEngine* engine = m_schemaManager->jsEngine();
-		assert(engine);
-
-		// Set current schema view, don't do it in "if", as it will set one schema view for all widgets
-		//
-		ScriptSchemaView* schemaViewObject = new ScriptSchemaView(this);	// Auto ownership, no delete
-		QJSValue jsSchemaView = engine->newQObject(schemaViewObject);
-		engine->globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
-
 		if (m_jsEngineGlobalsWereCreated == false)
 		{
-			QJSValue jsTuning = engine->newQObject(m_tuningController);
-			QQmlEngine::setObjectOwnership(m_tuningController, QQmlEngine::CppOwnership);
-			engine->globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
+			// create global variable "view"
+			//
+			m_scriptSchemaView = std::make_unique<ScriptSchemaView>(this);
 
-			QJSValue jsSignals = engine->newQObject(m_scriptAppSignalController.get());
+			QQmlEngine::setObjectOwnership(m_scriptSchemaView.get(), QQmlEngine::CppOwnership);
+			QJSValue jsSchemaView = m_jsEngine.newQObject(m_scriptSchemaView.get());
+			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableView, jsSchemaView);
+
+			// create global variable "tuning"
+			//
+			QJSValue jsTuning = m_jsEngine.newQObject(m_tuningController);
+			QQmlEngine::setObjectOwnership(m_tuningController, QQmlEngine::CppOwnership);
+			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableTuning, jsTuning);
+
+			// Create global variable "signals"
+			//
+			QJSValue jsSignals = m_jsEngine.newQObject(m_scriptAppSignalController.get());
+			qDebug() << "jsSignals";
+			qDebug() << jsSignals.isNull();
+			qDebug() << jsSignals.isUndefined();
+
 			QQmlEngine::setObjectOwnership(m_scriptAppSignalController.get(), QQmlEngine::CppOwnership);
-			engine->globalObject().setProperty(PropertyNames::scriptGlobalVariableSignals, jsSignals);
+			m_jsEngine.globalObject().setProperty(PropertyNames::scriptGlobalVariableSignals, jsSignals);
 
 			m_jsEngineGlobalsWereCreated = true;
 		}
 
-		return engine;
+		return &m_jsEngine;
 	}
 
 	QString ClientSchemaView::globalScript() const
@@ -459,4 +482,23 @@ namespace VFrame30
 		return m_schemaManager->globalScript();
 	}
 
+	QVariant ClientSchemaView::variable(QString name) const
+	{
+		return m_variables.value(name);
+	}
+
+	void ClientSchemaView::setVariable(QString name, const QVariant& value)
+	{
+		m_variables[name] = value;
+	}
+
+	const QVariantHash& ClientSchemaView::variables() const
+	{
+		return m_variables;
+	}
+
+	void ClientSchemaView::setVariables(const QVariantHash& values)
+	{
+		m_variables = values;
+	}
 }

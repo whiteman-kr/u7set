@@ -40,6 +40,7 @@ namespace Builder
 		const VFrame30::BusSet* busSet();
 		Hardware::OptoModuleStorage* opticModuleStorage();
 		std::vector<Hardware::DeviceModule*>& lmModules();
+		std::vector<Hardware::DeviceModule*>& lmAndBvbModules();
 
 		//
 
@@ -49,7 +50,6 @@ namespace Builder
 		bool prepareOptoConnectionsProcessing();
 		bool checkLmIpAddresses();
 		bool compileModulesLogicsPass1();
-		bool processBvbModules();
 		bool compileModulesLogicsPass2();
 
 		bool writeResourcesUsageReport();

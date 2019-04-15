@@ -1968,6 +1968,14 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 	m_tabWidget = new QTabWidget{};
 	m_tabWidget->setMovable(true);
 
+	QSize sz = fontMetrics().size(Qt::TextSingleLine, "APPLICATION LOGIC");
+	sz.setHeight(sz.height() * 1.75);
+
+	QString ss = QString("QTabBar::tab{ min-width: %1px; min-height: %2px;}").arg(sz.width()).arg(sz.height());
+	m_tabWidget->tabBar()->setStyleSheet(ss);
+
+	// --
+	//
 	QVBoxLayout* layout = new QVBoxLayout();
 	layout->setContentsMargins(0, 6, 0, 0);
 
@@ -4309,6 +4317,7 @@ void SchemaControlTabPageEx::showFileProperties()
 	}
 
 	propertyEditor->setObjects(propertyObjects);
+	propertyEditor->resizeColumnToContents(0);
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
 

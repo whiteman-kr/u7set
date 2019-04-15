@@ -640,8 +640,8 @@ void QtTreePropertyBrowserPrivate::updateItem(QTreeWidgetItem *item)
         expandIcon = m_expandIcon;
     }
 	item->setIcon(0, expandIcon);
-	//item->setFirstColumnSpanned(!property->hasValue());
-    if (property->toolTip().isEmpty())
+
+	if (property->toolTip().isEmpty())
     {
         item->setToolTip(0, property->propertyName());
     }
@@ -649,10 +649,22 @@ void QtTreePropertyBrowserPrivate::updateItem(QTreeWidgetItem *item)
     {
         item->setToolTip(0, property->toolTip());
     }
-	//item->setStatusTip(0, property->statusTip());
-	//item->setWhatsThis(0, property->whatsThis());
 
 	item->setText(0, property->propertyName());
+
+	QColor backgroundColor = property->backgroundColor();
+	if (backgroundColor.isValid() == true)
+	{
+		item->setBackgroundColor(0, backgroundColor);
+		item->setBackgroundColor(1, backgroundColor);
+	}
+
+	QColor textColor = property->textColor();
+	if (textColor.isValid() == true)
+	{
+		item->setTextColor(0, textColor);
+		item->setTextColor(1, textColor);
+	}
 
 	//item->setText(0, property->displayText().isEmpty() ? property->propertyName() : property->displayText());
 

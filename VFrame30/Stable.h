@@ -32,6 +32,7 @@
 #include <optional>
 #include <algorithm>
 #include <functional>
+#include <optional>
 #include <iterator>
 #include <type_traits>
 #ifdef _MSC_VER

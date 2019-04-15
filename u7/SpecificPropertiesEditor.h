@@ -63,6 +63,9 @@ public:
 	quint16 viewOrder() const;
 	void setViewOrder(quint16 value);
 
+	bool essential() const;
+	void setEssential(bool value);
+
 	void validateDynamicEnumType(QWidget* parent);
 
 	std::tuple<quint16, QString, int, QString> tuple_order() const;
@@ -87,6 +90,7 @@ private:
 	bool m_visible = true;
 	E::PropertySpecificEditor m_specificEditor = E::PropertySpecificEditor::None;
 	quint16 m_viewOrder = 65535;
+	bool m_essential = false;
 };
 
 class SpecificPropertyModel : public QAbstractTableModel

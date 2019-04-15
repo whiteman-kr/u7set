@@ -45,6 +45,44 @@ namespace ExtWidgets
 {
 	class PropertyEditor;
 
+
+	static QString propertyVectorText(QVariant& value);
+
+
+	class PropertyArrayEditorDialog : public QDialog
+	{
+		Q_OBJECT
+
+	public:
+		PropertyArrayEditorDialog(QWidget* parent, const QString& propertyName, const QVariant& value);
+		QVariant value();
+
+	private slots:
+		void onMoveUp();
+		void onMoveDown();
+		void onAdd();
+		void onRemove();
+		void onSelectionChanged();
+		void onPropertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
+
+	private:
+		QString getObjectDescription(int objectIndex, PropertyObject* object);
+		void updateDescriptions();
+		void moveItems(bool forward);
+
+	private:
+
+		QVariant m_value;
+
+		QTreeWidget* m_treeWidget = nullptr;
+		PropertyEditor* m_propertyEditor = nullptr;
+
+		std::shared_ptr<Property> m_property;
+	};
+
+
+
+
 	const int PropertyEditorTextMaxLength = 32767;
 
 	class PropertyEditorHelp : public QDialog
@@ -239,6 +277,22 @@ namespace ExtWidgets
 
 	};
 
+	class PropertyEditorCheckBox : public QCheckBox
+	{
+	public:
+		PropertyEditorCheckBox(QWidget* parent) : QCheckBox(parent)
+		{
+		}
+
+		bool hitOnButton(const QPoint& pos)
+		{
+			return hitButton(pos);
+		}
+
+	private:
+		virtual void paintEvent(QPaintEvent *e) override;
+	};
+
 
 	class MultiCheckBox : public QWidget
 	{
@@ -246,9 +300,10 @@ namespace ExtWidgets
 
 	public:
 		explicit MultiCheckBox(QWidget* parent);
-		void setValue(bool value, bool readOnly);
+		void setValue(Qt::CheckState state, bool readOnly);
 
 	public slots:
+		void changeValueOnButtonClick();
 		void onStateChanged(int state);
 
 	signals:
@@ -258,7 +313,7 @@ namespace ExtWidgets
 		void updateText();
 
 	private:
-		QCheckBox* m_checkBox = nullptr;
+		PropertyEditorCheckBox* m_checkBox = nullptr;
 
 	};
 
@@ -299,7 +354,28 @@ namespace ExtWidgets
 		PropertyEditor* m_propertyEditor = nullptr;
 	};
 
+	class MultiArrayEdit : public QWidget
+	{
+		Q_OBJECT
 
+	public:
+		explicit MultiArrayEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly);
+		void setValue(QVariant value, bool readOnly);
+
+	signals:
+		void valueChanged(QVariant value);
+
+	private slots:
+		void onButtonPressed();
+
+	private:
+
+		QLineEdit* m_lineEdit = nullptr;
+		QToolButton* m_button = nullptr;
+
+		QVariant m_currentValue;
+		std::shared_ptr<Property> m_property;
+	};
 
 	class MultiVariantPropertyManager : public QtAbstractPropertyManager
 	{
@@ -361,10 +437,8 @@ namespace ExtWidgets
 		void disconnectPropertyManager(MultiVariantPropertyManager* manager);
 
 	public slots:
-		//void slotPropertyChanged(QtProperty* property, QVariant value);
 
 		void slotSetValue(QVariant value);		// sets value from argument
-		void slotSetValueTimer();				// sets value m_valueSetOnTimer, needed for QTimer::singleShot
 
 		void slotEditorDestroyed(QObject* object);
 
@@ -374,7 +448,6 @@ namespace ExtWidgets
 
 		PropertyEditor* m_propertyEditor = nullptr;
 
-		QVariant m_valueSetOnTimer;
 	};
 
 	// -------------------------------------------------------------------------------

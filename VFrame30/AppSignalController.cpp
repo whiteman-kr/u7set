@@ -119,6 +119,12 @@ namespace VFrame30
 		m_appSignalManager(appSignalManager)
 	{
 		assert(m_appSignalManager);
+		qDebug() << "ScriptAppSignalController::ScriptAppSignalController";
+	}
+
+	ScriptAppSignalController::~ScriptAppSignalController()
+	{
+		qDebug() << "ScriptAppSignalController::~ScriptAppSignalController()";
 	}
 
 	QVariant ScriptAppSignalController::signalParam(QString signalId) const

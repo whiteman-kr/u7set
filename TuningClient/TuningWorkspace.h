@@ -114,6 +114,7 @@ private:
 	QTabWidget* m_tab = nullptr;
 
 	const int columnNameIndex = 0;
+	int columnAccessIndex = -1;
 	int columnDiscreteCountIndex = -1;
 	int columnStatusIndex = -1;
 	int columnSorIndex = -1;

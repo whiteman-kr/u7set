@@ -30,9 +30,10 @@ namespace VFrame30
 		auto strIdProperty = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true, SchemaItemImageValue::signalIdsString, SchemaItemImageValue::setSignalIdsString);
 		strIdProperty->setValidator(PropertyNames::appSignalIDsValidator);
 
-		ADD_PROPERTY_GET_SET_CAT(E::SignalSource, PropertyNames::signalSource, PropertyNames::functionalCategory, true, SchemaItemImageValue::signalSource, SchemaItemImageValue::setSignalSource);
+		//ADD_PROPERTY_GET_SET_CAT(E::SignalSource, PropertyNames::signalSource, PropertyNames::functionalCategory, true, SchemaItemImageValue::signalSource, SchemaItemImageValue::setSignalSource);
 
 		ADD_PROPERTY_GET_SET_CAT(PropertyVector<ImageItem>, PropertyNames::images, PropertyNames::functionalCategory, true, SchemaItemImageValue::images, SchemaItemImageValue::setImages);
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::currentImageId, PropertyNames::functionalCategory, true, SchemaItemImageValue::currentImageId, SchemaItemImageValue::setCurrentImageId);
 
 		// --
 		//
@@ -105,7 +106,7 @@ namespace VFrame30
 		bool loadOk = true;
 		for (int i = 0; i < valueMessage.images_size(); i++)
 		{
-			auto image = m_images.emplace_back();
+			auto& image = m_images.emplace_back(std::make_shared<ImageItem>());
 			loadOk &= image->load(valueMessage.images(i));
 		}
 
@@ -124,10 +125,36 @@ namespace VFrame30
 						
 		// Calculate rectangle
 		//
-		QRectF r = boundingRectInDocPt(drawParam);
+		QRectF rect = boundingRectInDocPt(drawParam);
 
-		// Drawing frame rect
+		// --
 		//
+		std::shared_ptr<ImageItem> currentImage;
+
+		for (auto i : m_images)
+		{
+			if (i->imageId() == currentImageId())
+			{
+				currentImage = i;
+				break;
+			}
+		}
+
+		if (currentImage == nullptr)
+		{
+			ImageItem::drawError(drawParam, rect, tr("Image %1 not found.").arg(currentImageId()));
+		}
+		else
+		{
+			if (currentImage->hasAnyImage() == false)
+			{
+				currentImage->drawError(drawParam, rect, QStringLiteral("No Image"));
+			}
+			else
+			{
+				currentImage->drawImage(drawParam, rect);
+			}
+		}
 
 		return;
 	}
@@ -137,62 +164,85 @@ namespace VFrame30
 		return;
 	}
 
-	bool SchemaItemImageValue::getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const
+//	bool SchemaItemImageValue::getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const
+//	{
+//		if (drawParam == nullptr ||
+//			signalParam == nullptr ||
+//			appSignalState == nullptr ||
+//			tuningSignalState == nullptr)
+//		{
+//			assert(drawParam);
+//			assert(signalParam);
+//			assert(appSignalState);
+//			assert(tuningSignalState);
+//			return false;
+//		}
+
+//		if (drawParam->isMonitorMode() == false)
+//		{
+//			assert(drawParam->isMonitorMode());
+//			return false;
+//		}
+
+//		bool ok = false;
+
+//		switch (signalSource())
+//		{
+//		case E::SignalSource::AppDataService:
+//			if (drawParam->appSignalController() == nullptr)
+//			{
+//			}
+//			else
+//			{
+//				*signalParam = drawParam->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
+//				*appSignalState = drawParam->appSignalController()->signalState(signalParam->appSignalId(), nullptr);
+//			}
+//			break;
+
+//		case E::SignalSource::TuningService:
+//			if (drawParam->tuningController() == nullptr)
+//			{
+//			}
+//			else
+//			{
+//				*signalParam = drawParam->tuningController()->signalParam(signalParam->appSignalId(), &ok);
+//				*tuningSignalState = drawParam->tuningController()->signalState(signalParam->appSignalId(), nullptr);
+
+//				appSignalState->m_hash = signalParam->hash();
+//				appSignalState->m_flags.valid = tuningSignalState->valid();
+//				appSignalState->m_value = tuningSignalState->value().toDouble();
+//			}
+//			break;
+
+//		default:
+//			assert(false);
+//			ok = false;
+//		}
+
+//		return ok;
+//	}
+
+	void SchemaItemImageValue::drawImage(CDrawParam* drawParam, const QString& imageId, const QRectF& rect)
 	{
-		if (drawParam == nullptr ||
-			signalParam == nullptr ||
-			appSignalState == nullptr ||
-			tuningSignalState == nullptr)
+		for (std::shared_ptr<ImageItem> image : m_images)
 		{
-			assert(drawParam);
-			assert(signalParam);
-			assert(appSignalState);
-			assert(tuningSignalState);
-			return false;
+			if (image->imageId() == imageId)
+			{
+				if (image->hasAnyImage() == false)
+				{
+					ImageItem::drawError(drawParam, rect, QString("ImageID %1 has no image.").arg(imageId));
+				}
+				else
+				{
+					image->drawImage(drawParam, rect);
+				}
+
+				return;
+			}
 		}
 
-		if (drawParam->isMonitorMode() == false)
-		{
-			assert(drawParam->isMonitorMode());
-			return false;
-		}
-
-		bool ok = false;
-
-		switch (signalSource())
-		{
-		case E::SignalSource::AppDataService:
-			if (drawParam->appSignalController() == nullptr)
-			{
-			}
-			else
-			{
-				*signalParam = drawParam->appSignalController()->signalParam(signalParam->appSignalId(), &ok);
-				*appSignalState = drawParam->appSignalController()->signalState(signalParam->appSignalId(), nullptr);
-			}
-			break;
-
-		case E::SignalSource::TuningService:
-			if (drawParam->tuningController() == nullptr)
-			{
-			}
-			else
-			{
-				*signalParam = drawParam->tuningController()->signalParam(signalParam->appSignalId(), &ok);
-				*tuningSignalState = drawParam->tuningController()->signalState(signalParam->appSignalId(), nullptr);
-
-				appSignalState->m_hash = signalParam->hash();
-				appSignalState->m_flags.valid = tuningSignalState->valid();
-				appSignalState->m_value = tuningSignalState->value().toDouble();
-			}
-			break;
-
-		default:
-			assert(false);
-			ok = false;
-		}
-
-		return ok;
+		ImageItem::drawError(drawParam, rect, QString("ImageID %1 not found.").arg(imageId));
+		return;
 	}
 
 	double SchemaItemImageValue::minimumPossibleHeightDocPt(double gridSize, int /*pinGridStep*/) const
@@ -207,17 +257,39 @@ namespace VFrame30
 
 	QString SchemaItemImageValue::signalIdsString() const
 	{
-		return m_signalIds.join(QChar::LineFeed);
+		QString result = m_signalIds.join(QChar::LineFeed);
+
+		// Expand variables in AppSignalIDs in MonitorMode, if applicable (m_drawParam is set and is monitor mode)
+		//
+		if (m_drawParam != nullptr &&
+			m_drawParam->isMonitorMode() == true &&
+			m_drawParam->clientSchemaView() != nullptr)
+		{
+			result = MacrosExpander::parse(result, m_drawParam, this);
+		}
+
+		return result;
 	}
 
 	void SchemaItemImageValue::setSignalIdsString(const QString& value)
 	{
-		m_signalIds = value.split(QRegExp(PropertyNames::appSignalId), QString::SkipEmptyParts);
+		m_signalIds = value.split(QRegExp("\\s+"), QString::SkipEmptyParts);
 	}
 
-	const QStringList& SchemaItemImageValue::signalIds() const
+	QStringList SchemaItemImageValue::signalIds() const
 	{
-		return m_signalIds;
+		QStringList resultList = m_signalIds;
+
+		// Expand variables in AppSignalIDs in MonitorMode, if applicable
+		//
+		if (m_drawParam != nullptr &&
+			m_drawParam->isMonitorMode() == true &&
+			m_drawParam->clientSchemaView() != nullptr)
+		{
+			resultList = MacrosExpander::parse(resultList, m_drawParam, this);
+		}
+
+		return resultList;
 	}
 
 	void SchemaItemImageValue::setSignalIds(const QStringList& value)
@@ -245,6 +317,16 @@ namespace VFrame30
 	void SchemaItemImageValue::setImages(const PropertyVector<ImageItem>& value)
 	{
 		m_images = value;
+	}
+
+	QString SchemaItemImageValue::currentImageId() const
+	{
+		return m_currentImageId;
+	}
+
+	void SchemaItemImageValue::setCurrentImageId(QString value)
+	{
+		m_currentImageId = value;
 	}
 
 }

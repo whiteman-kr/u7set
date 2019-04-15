@@ -424,6 +424,15 @@ namespace Builder
 			}
 
 			//
+			// UseAccessFlag
+			//
+			bool useAccessFlag = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "UseAccessFlag", &ok);
+			if (ok == false)
+			{
+				return false;
+			}
+
+			//
 			// loginPerOperation
 			//
 			bool loginPerOperation = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "LoginPerOperation", &ok);
@@ -480,6 +489,7 @@ namespace Builder
 				xmlWriter.writeAttribute("filterByEquipment", (filterByEquipment ? "true" : "false"));
 				xmlWriter.writeAttribute("filterBySchema", (filterBySchema ? "true" : "false"));
 				xmlWriter.writeAttribute("showSOR", (showSOR ? "true" : "false"));
+				xmlWriter.writeAttribute("useAccessFlag", (useAccessFlag ? "true" : "false"));
 				xmlWriter.writeAttribute("showDiscreteCounters", (showDiscreteCounters ? "true" : "false"));
 				xmlWriter.writeAttribute("loginPerOperation", (loginPerOperation ? "true" : "false"));
 				xmlWriter.writeAttribute("loginSessionLength", QString::number(loginSessionLength));
@@ -627,15 +637,18 @@ namespace Builder
 		//
 		bool result = true;
 
+		std::set<std::shared_ptr<SchemaFile>> tuningSchemas;
+
 		// If tag list is empty, then link all Tuning schemas
 		//
 		if (m_schemaTagList.isEmpty() == true)
 		{
 			for (auto&[tag, schemaFile] : SoftwareCfgGenerator::m_schemaTagToFile)
 			{
+				Q_UNUSED(tag);
 				if (schemaFile->fileName.endsWith(QStringLiteral(".") + Db::File::TvsFileExtension, Qt::CaseInsensitive) == true)
 				{
-					m_tuningSchemas.insert(schemaFile);
+					tuningSchemas.insert(schemaFile);
 				}
 			}
 		}
@@ -658,7 +671,7 @@ namespace Builder
 						continue;
 					}
 
-					m_tuningSchemas.insert(schemaFile);
+					tuningSchemas.insert(schemaFile);
 				}
 			}
 		}
@@ -667,7 +680,7 @@ namespace Builder
 		//
 		VFrame30::SchemaDetailsSet detaisSet;
 
-		for (auto schemaFile : m_tuningSchemas)
+		for (auto schemaFile : tuningSchemas)
 		{
 			result &= m_cfgXml->addLinkToFile(schemaFile->subDir, schemaFile->fileName);
 			detaisSet.add(schemaFile->details);
@@ -743,24 +756,24 @@ namespace Builder
 			ofSchema->setCaption(QObject::tr("Schemas"));
 			ofSchema->setSource(TuningFilter::Source::Schema);
 
-			for (std::shared_ptr<SchemaFile> schemaFile : m_tuningSchemas)
+			for (const std::shared_ptr<VFrame30::LogicSchema>& schema : m_context->m_appLogicSchemas)
 			{
-				const VFrame30::SchemaDetails& details = schemaFile->details;
-
 				std::shared_ptr<TuningFilter> ofTs = std::make_shared<TuningFilter>(TuningFilter::InterfaceType::Tree);
-				for (const QString& appSignalID : details.m_signals)
+
+				const std::set<QString> schemaSignals = schema->getSignalMap();
+				for (const QString& schemaSignal : schemaSignals)
 				{
+					Hash hash = ::calcHash(schemaSignal);
+
 					// find if this signal is a tuning signal
 					//
-					Hash hash = ::calcHash(appSignalID);
-
 					if (tuningSignalManager.signalExists(hash) == false)
 					{
 						continue;
 					}
 
 					TuningFilterSignal ofv;
-					ofv.setAppSignalId(appSignalID);
+					ofv.setAppSignalId(schemaSignal);
 					ofTs->addFilterSignal(ofv);
 				}
 
@@ -771,10 +784,10 @@ namespace Builder
 					continue;
 				}
 
-				ofTs->setID("%AUFOFILTER%_SCHEMA_" + details.m_schemaId);
+				ofTs->setID("%AUFOFILTER%_SCHEMA_" + schema->schemaId());
 
 				//QString s = QString("%1 - %2").arg(schemasDetails.m_Id).arg(schemasDetails.m_caption);
-				ofTs->setCaption(details.m_caption);
+				ofTs->setCaption(schema->caption());
 				ofTs->setSource(TuningFilter::Source::Schema);
 				ofTs->setHasDiscreteCounter(showDiscreteCounters);
 

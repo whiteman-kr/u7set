@@ -85,6 +85,7 @@ message ImageItem
 {
     optional bool allowScale = 1 [default = true];
 	optional bool keepAspectRatio = 2 [default = true];
+	optional string imageId = 3;
 	optional bytes imageData = 8;
 	optional string svgData = 9;
 }
@@ -690,6 +691,7 @@ message SchemaItemImageValue
 {
     optional string signalIds = 1;
 	optional int32 signalSource = 2 [default = 0];
+	optional string currentImageId = 3;
 
     repeated ImageItem images = 14;
 }
