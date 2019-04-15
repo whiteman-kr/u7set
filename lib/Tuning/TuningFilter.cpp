@@ -11,6 +11,7 @@ namespace TuningTags
 	static const QString tag_Tree = "Tree";
 	static const QString tag_Tab = "Tab";
 	static const QString tag_Button = "Button";
+	static const QString tag_Counter = "Counter";
 	static const QString tag_Value = "Value";
 	static const QString tag_Values = "Values";
 
@@ -20,6 +21,9 @@ namespace TuningTags
 
 	static const QString tag_Generic = "Generic";
 	static const QString tag_FiltersSwitch = "FiltersSwitch";
+
+	static const QString tag_StatusBar = "StatusBar";
+	static const QString tag_FilterTree = "FilterTree";
 
 	static const QString tag_Project = "Project";
 	static const QString tag_Schema = "Schema";
@@ -52,6 +56,7 @@ namespace TuningTags
 	static const QLatin1String prop_HasDiscreteCounter = QLatin1String("HasDiscreteCounter");
 	static const QLatin1String prop_ValueColumnsCount = QLatin1String("ValueColumnsCount");
 	static const QLatin1String prop_TabType = QLatin1String("TabType");
+	static const QLatin1String prop_CounterType = QLatin1String("CounterType");
 
 	static const QLatin1String prop_ColumnCustomAppId = QLatin1String("ColumnCustomAppId");
 	static const QLatin1String prop_ColumnAppId = QLatin1String("ColumnAppId");
@@ -249,6 +254,9 @@ TuningFilter::TuningFilter()
 
 	auto propTabType = ADD_PROPERTY_GETTER_SETTER(TabType, TuningTags::prop_TabType, true, TuningFilter::tabType, TuningFilter::setTabType);
 	propTabType->setCategory("Appearance");
+
+	auto propCounterType = ADD_PROPERTY_GETTER_SETTER(CounterType, TuningTags::prop_CounterType, true, TuningFilter::counterType, TuningFilter::setCounterType);
+	propCounterType->setCategory("Appearance");
 
 	// Columns
 
@@ -549,6 +557,27 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 			}
 		}
 
+		if (reader.attributes().hasAttribute(TuningTags::prop_CounterType))
+		{
+			QString v = reader.attributes().value(TuningTags::prop_CounterType).toString();
+			if (v == TuningTags::tag_StatusBar)
+			{
+				setCounterType(CounterType::StatusBar);
+			}
+			else
+			{
+				if (v == TuningTags::tag_FilterTree)
+				{
+					setCounterType(CounterType::FilterTree);
+				}
+				else
+				{
+					reader.raiseError(tr("Unknown CounterType value: %1").arg(v));
+					return false;
+				}
+			}
+		}
+
 		// Columns
 
 		if (reader.attributes().hasAttribute(TuningTags::prop_ColumnCustomAppId))
@@ -634,7 +663,7 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 				continue;
 			}
 
-			if (tagName == TuningTags::tag_Tree || tagName == TuningTags::tag_Tab || tagName == TuningTags::tag_Button)
+			if (tagName == TuningTags::tag_Tree || tagName == TuningTags::tag_Tab || tagName == TuningTags::tag_Button || tagName == TuningTags::tag_Counter)
 			{
 				TuningFilter::InterfaceType filterType = TuningFilter::InterfaceType::Tree;
 
@@ -646,6 +675,11 @@ bool TuningFilter::load(QXmlStreamReader& reader)
 				if (tagName == TuningTags::tag_Button)
 				{
 					filterType = TuningFilter::InterfaceType::Button;
+				}
+
+				if (tagName == TuningTags::tag_Counter)
+				{
+					filterType = TuningFilter::InterfaceType::Counter;
 				}
 
 				std::shared_ptr<TuningFilter> of = std::make_shared<TuningFilter>(filterType);
@@ -704,8 +738,15 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 				}
 				else
 				{
-					Q_ASSERT(false);
-					return false;
+					if (isCounter())
+					{
+						writer.writeStartElement(TuningTags::tag_Counter);
+					}
+					else
+					{
+						Q_ASSERT(false);
+						return false;
+					}
 				}
 			}
 		}
@@ -754,6 +795,7 @@ bool TuningFilter::save(QXmlStreamWriter& writer, bool filterBySourceType, Sourc
 	}
 
 	writer.writeAttribute(TuningTags::prop_TabType, E::valueToString<TabType>(static_cast<int>(tabType())));
+	writer.writeAttribute(TuningTags::prop_CounterType, E::valueToString<CounterType>(static_cast<int>(counterType())));
 
 	// Columns
 
@@ -1255,6 +1297,16 @@ void TuningFilter::setTabType(TabType type)
 	m_tabType = type;
 }
 
+TuningFilter::CounterType TuningFilter::counterType() const
+{
+	return m_counterType;
+}
+
+void TuningFilter::setCounterType(CounterType type)
+{
+	m_counterType = type;
+}
+
 QString TuningFilter::tags() const
 {
 	QString result;
@@ -1439,6 +1491,11 @@ bool TuningFilter::isButton() const
 	return interfaceType() == InterfaceType::Button;
 }
 
+bool TuningFilter::isCounter() const
+{
+	return interfaceType() == InterfaceType::Counter;
+}
+
 void TuningFilter::addChild(const std::shared_ptr<TuningFilter>& child)
 {
 	child->m_parentFilter = this;
@@ -1493,6 +1550,20 @@ bool TuningFilter::removeChild(const QString& ID)
 	}
 
 	return found;
+}
+
+bool TuningFilter::removeChild(int index)
+{
+	if (index < 0 || index >= static_cast<int>(m_childFilters.size()))
+	{
+		Q_ASSERT(false);
+		return false;
+	}
+
+	m_childFilters.erase(m_childFilters.begin() + index);
+
+	return true;
+
 }
 
 void TuningFilter::removeAllChildren()
@@ -1582,7 +1653,9 @@ std::shared_ptr<TuningFilter> TuningFilter::findFilterById(const QString& id) co
 void TuningFilter::updateOptionalProperties()
 {
 	// Colors
-	setPropertyVisible(TuningTags::prop_UseColors, interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
+	setPropertyVisible(TuningTags::prop_UseColors, interfaceType() == InterfaceType::Tab ||
+					   interfaceType() == InterfaceType::Button ||
+					   interfaceType() == InterfaceType::Counter);
 
 	setPropertyVisible(TuningTags::prop_BackColor, interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
 	setPropertyVisible(TuningTags::prop_TextColor, interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
@@ -1590,8 +1663,8 @@ void TuningFilter::updateOptionalProperties()
 	setPropertyVisible(TuningTags::prop_BackSelectedColor, interfaceType() == InterfaceType::Button);
 	setPropertyVisible(TuningTags::prop_TextSelectedColor, interfaceType() == InterfaceType::Button);
 
-	setPropertyVisible(TuningTags::prop_BackAlertedColor, interfaceType() == InterfaceType::Button);
-	setPropertyVisible(TuningTags::prop_TextAlertedColor, interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Button);
+	setPropertyVisible(TuningTags::prop_BackAlertedColor, interfaceType() == InterfaceType::Button || interfaceType() == InterfaceType::Counter);
+	setPropertyVisible(TuningTags::prop_TextAlertedColor, interfaceType() == InterfaceType::Tab || interfaceType() == InterfaceType::Counter);
 
 	// Value columns, add or remove unnecessary properties
 
@@ -1609,6 +1682,9 @@ void TuningFilter::updateOptionalProperties()
 	setPropertyVisible(TuningTags::prop_ColumnOutOfRange, interfaceType() == InterfaceType::Tab);
 
 	setPropertyVisible(TuningTags::prop_TabType, interfaceType() == InterfaceType::Tab);
+	setPropertyVisible(TuningTags::prop_CounterType, interfaceType() == InterfaceType::Counter);
+
+	setPropertyVisible(TuningTags::prop_HasDiscreteCounter, interfaceType() != InterfaceType::Counter);
 
 	if (interfaceType() == InterfaceType::Tab)
 	{
@@ -1679,6 +1755,7 @@ void TuningFilter::copy(const TuningFilter& That)
 	m_valueColumnsAppSignalIdSuffixes = That.m_valueColumnsAppSignalIdSuffixes;
 
 	m_tabType = That.m_tabType;
+	m_counterType = That.m_counterType;
 
 	m_tags = That.m_tags;
 

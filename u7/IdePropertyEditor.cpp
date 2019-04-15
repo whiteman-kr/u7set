@@ -454,6 +454,7 @@ void IdeTuningFiltersEditor::setText(const QString& text)
 												  true,		/*typeTreeEnabled*/
 												  true,		/*typeButtonEnabled*/
 												  true,		/*typeTabEnabled*/
+												  true,		/*typeCounterEnabled*/
 												  TuningFilter::Source::Project,
 												  theSettings.m_tuningFiltersSplitterPosition,
 												  theSettings.m_tuningFiltersPropertyEditorSplitterPos

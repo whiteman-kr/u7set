@@ -143,8 +143,67 @@ void TuningClientFilterStorage::checkAndRemoveFilterSignals(const std::vector<Ha
 
 		QMessageBox::warning(parentWidget, qApp->applicationName(), QObject::tr("%1 signals have been removed.").arg(removedCounter));
 	}
-
 }
+
+void TuningClientFilterStorage::createSchemaCounterFilters()
+{
+	std::vector<std::shared_ptr<TuningFilter>> templateFilters;
+
+	m_schemaCounterFiltersCount = 0;
+	m_schemaCounterFiltersNames.clear();
+
+	// Save schema counter filters locally and delete them from global storage
+
+	int count = m_root->childFiltersCount();
+	for (int i = count - 1; i >= 0; i--)
+	{
+		std::shared_ptr<TuningFilter> f = m_root->childFilter(i);
+
+		if (f->isCounter() == true && f->counterType() == TuningFilter::CounterType::FilterTree)
+		{
+			templateFilters.insert(templateFilters.begin(), f);
+
+			m_schemaCounterFiltersNames.insert(0, f->caption());
+			m_schemaCounterFiltersCount++;
+
+			m_root->removeChild(i);
+		}
+	}
+
+	// Add counter filters to every schema and equipment filter
+
+	count = m_root->childFiltersCount();
+
+	for (int i = 0; i < count; i++)
+	{
+		std::shared_ptr<TuningFilter> f = m_root->childFilter(i);
+
+		if (f->isSourceSchema() == true || f->isSourceEquipment() == true) // This is parent schemas or equipment filter
+		{
+			Q_ASSERT(f->hasDiscreteCounter() == false);
+
+			int schemaCount = f->childFiltersCount();
+
+			for (int s = 0; s < schemaCount; s++)
+			{
+				std::shared_ptr<TuningFilter> sf = f->childFilter(s);
+
+				Q_ASSERT(sf->hasDiscreteCounter() == false);
+
+				Q_ASSERT(sf->isSourceSchema() == true || sf->isSourceEquipment() == true);
+
+				for (auto tf: templateFilters)
+				{
+					std::shared_ptr<TuningFilter> cf = std::make_shared<TuningFilter>(*tf);
+					sf->addChild(cf);
+				}
+			}
+		}
+	}
+
+	return;
+}
+
 void TuningClientFilterStorage::updateCounters(const TuningSignalManager* objects, const TuningClientTcpClient* tcpClient, TuningFilter* filter)
 {
 	if (filter == nullptr)
@@ -195,29 +254,28 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 					}
 				}
 			}
-		}
-	}
 
-	if ((filter->isRoot() == true || filter->isEmpty() == false) &&
-		filter->hasDiscreteCounter() == true)
-	{
-		// Discrete counters
+			// Discrete counters
 
-		const std::vector<Hash>& appSignalsHashes = filter->signalsHashes();
-
-		bool found = false;
-
-		for (const Hash& appSignalHash : appSignalsHashes)
-		{
-			TuningSignalState state = objects->state(appSignalHash, &found);
-			if (found == false)
+			if (filter->hasDiscreteCounter() == true || filter->isCounter() == true)
 			{
-				continue;
-			}
+				const std::vector<Hash>& appSignalsHashes = filter->signalsHashes();
 
-			if (state.valid() == true && state.value().type() == TuningValueType::Discrete && state.value().discreteValue() != 0)
-			{
-				filterCounters.discreteCounter++;
+				bool found = false;
+
+				for (const Hash& appSignalHash : appSignalsHashes)
+				{
+					TuningSignalState state = objects->state(appSignalHash, &found);
+					if (found == false)
+					{
+						continue;
+					}
+
+					if (state.valid() == true && state.value().type() == TuningValueType::Discrete && state.value().discreteValue() != 0)
+					{
+						filterCounters.discreteCounter++;
+					}
+				}
 			}
 		}
 	}
@@ -263,6 +321,16 @@ void TuningClientFilterStorage::writeLogWarning(const QString& message)
 void TuningClientFilterStorage::writeLogMessage(const QString& message)
 {
 	theLogFile->writeMessage(message);
+}
+
+int TuningClientFilterStorage::schemaCounterFiltersCount() const
+{
+	return m_schemaCounterFiltersCount;
+}
+
+const QStringList& TuningClientFilterStorage::schemaCounterFiltersNames() const
+{
+	return m_schemaCounterFiltersNames;
 }
 
 //
