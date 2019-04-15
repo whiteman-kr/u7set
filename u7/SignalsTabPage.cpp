@@ -1667,19 +1667,22 @@ void SignalsModel::initLazyLoadSignals()
 		m_signalSet.SignalPtrOrderedHash::append(id, nullptr);
 	}
 
-	QVector<Signal> signalsArray;
-	signalsArray.reserve(250);
-	dbController()->getLatestSignalsWithoutProgress(signalIds.mid(0, 250), &signalsArray, m_parentWindow);
-
-	for (const Signal& loadedSignal : signalsArray)
+	if (signalIds.count() > 0)
 	{
-		m_signalSet.append(loadedSignal.ID(), new Signal(loadedSignal));
-	}
+		QVector<Signal> signalsArray;
+		signalsArray.reserve(250);
+		dbController()->getLatestSignalsWithoutProgress(signalIds.mid(0, 250), &signalsArray, m_parentWindow);
 
-	if (m_signalSet.count() > 0)
-	{
-		beginInsertRows(QModelIndex(), 0, m_signalSet.count() - 1);
-		endInsertRows();
+		for (const Signal& loadedSignal : signalsArray)
+		{
+			m_signalSet.append(loadedSignal.ID(), new Signal(loadedSignal));
+		}
+
+		if (m_signalSet.count() > 0)
+		{
+			beginInsertRows(QModelIndex(), 0, m_signalSet.count() - 1);
+			endInsertRows();
+		}
 	}
 }
 
@@ -1724,6 +1727,12 @@ void SignalsModel::loadNextSignalsPortion()
 	signalIds.reserve(250);
 	int low = middleRow - 1;
 	int high = middleRow;
+
+	if (middleRow == -1)
+	{
+		high = 0;
+	}
+
 	while ((low >= 0 || high < rowCount()) && signalIds.count() <= 248)
 	{
 		while (low >= 0 && m_signalSet.valuePtrByIndex(low) != nullptr)
@@ -2193,7 +2202,9 @@ void SignalsTabPage::projectOpened()
 {
 	this->setEnabled(true);
 
-	if (m_loadSignalsTimer == nullptr)
+	m_signalsModel->initLazyLoadSignals();
+
+	if (m_loadSignalsTimer == nullptr && m_signalsModel->rowCount() > 0)
 	{
 		m_loadSignalsTimer = new QTimer(this);
 
@@ -2207,10 +2218,9 @@ void SignalsTabPage::projectOpened()
 		{
 			connect(m_tabWidget, &QTabWidget::currentChanged, this, &SignalsTabPage::onTabPageChanged);
 		}
-	}
 
-	m_signalsModel->initLazyLoadSignals();
-	m_signalsModel->loadNextSignalsPortion();
+		m_signalsModel->loadNextSignalsPortion();
+	}
 }
 
 void SignalsTabPage::projectClosed()
