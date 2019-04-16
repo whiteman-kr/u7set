@@ -176,6 +176,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::createUalSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::processSignalsWithFlags),
 			PROC_TO_CALL(ModuleLogicCompiler::sortUalSignals),
+			PROC_TO_CALL(ModuleLogicCompiler::appendAutoUalSignalsToSignalSet),
 			PROC_TO_CALL(ModuleLogicCompiler::processTxSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::processSinglePortRxSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::buildTuningData),
@@ -2883,7 +2884,30 @@ namespace Builder
 	{
 		for(UalSignal* ualSignal : m_ualSignals)
 		{
+			TEST_PTR_CONTINUE(ualSignal);
+
 			ualSignal->sortRefSignals();
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::appendAutoUalSignalsToSignalSet()
+	{
+		int id = m_signals->getMaxID() + 1;
+
+		for(UalSignal* ualSignal : m_ualSignals)
+		{
+			TEST_PTR_CONTINUE(ualSignal);
+
+			if (ualSignal->isAutoSignal() == false)
+			{
+				continue;
+			}
+
+			m_signals->append(id, ualSignal->signal());
+
+			id++;
 		}
 
 		return true;

@@ -277,6 +277,8 @@ namespace Builder
 
 		bool sortUalSignals();
 
+		bool appendAutoUalSignalsToSignalSet();
+
 		//
 
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString& busTypeID);

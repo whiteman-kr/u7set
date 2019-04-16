@@ -452,6 +452,8 @@ public:
 
 	bool serializeFromProtoFile(const QString& filePath);
 
+	int getMaxID() const;
+
 private:
 	QMultiHash<int, int> m_groupSignals;
 	QHash<QString, int> m_strID2IndexMap;

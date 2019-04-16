@@ -1434,8 +1434,6 @@ Signal* SignalSet::getSignal(const QString& appSignalID)
 	return &(*this)[index];
 }
 
-
-
 void SignalSet::append(const int& signalID, Signal *signal)
 {
 	SignalPtrOrderedHash::append(signalID, signal);
@@ -1537,4 +1535,24 @@ bool SignalSet::serializeFromProtoFile(const QString& filePath)
 
 	return true;
 }
+
+int SignalSet::getMaxID() const
+{
+	int count = SignalPtrOrderedHash::count();
+
+	int maxID = 0;
+
+	for(int i = 0; i < count; i++)
+	{
+		int keyI = key(i);
+
+		if (keyI > maxID)
+		{
+			maxID = keyI;
+		}
+	}
+
+	return maxID;
+}
+
 

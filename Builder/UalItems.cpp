@@ -1030,10 +1030,10 @@ namespace Builder
 
 	UalSignal::~UalSignal()
 	{
-		if (m_autoSignalPtr != nullptr)
+/*		if (m_autoSignalPtr != nullptr)
 		{
 			delete m_autoSignalPtr;
-		}
+		}*/
 
 		m_refSignals.clear();
 	}
