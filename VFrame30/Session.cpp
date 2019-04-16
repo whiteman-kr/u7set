@@ -65,7 +65,7 @@ namespace VFrame30
 	QString Session::date() const
 	{
 		QDateTime t = QDateTime::currentDateTime();
-		return t.toString("d MMM yyyy");
+		return t.toString("dd MMM yyyy");
 	}
 
 	QString Session::time() const

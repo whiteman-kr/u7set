@@ -6,15 +6,16 @@ namespace VFrame30
 	SchemaManager::SchemaManager(QObject* parent) :
 		QObject(parent)
 	{
+		qDebug() << "SchemaManager::SchemaManager";
 	}
 
 	SchemaManager::~SchemaManager()
 	{
+		qDebug() << "SchemaManager::~SchemaManager";
 	}
 
 	void SchemaManager::clear()
 	{
-		m_schemas.clear();
 		m_globalScript.clear();
 		emit schemasWereReseted();
 		return;
@@ -22,36 +23,27 @@ namespace VFrame30
 
 	std::shared_ptr<VFrame30::Schema> SchemaManager::schema(QString schemaId)
 	{
-		auto found = m_schemas.find(schemaId);
+		std::shared_ptr<VFrame30::Schema> schema = loadSchema(schemaId);
 
-		if (found == m_schemas.end())
+		if (schema != nullptr)
 		{
-			// Schema was not loaded, so load it and add to loaded map
+			// Add schema to map
 			//
-			std::shared_ptr<VFrame30::Schema> schema = loadSchema(schemaId);
-
-			if (schema != nullptr)
+			if (schema->schemaId() != schemaId)
 			{
-				// Add schema to map
-				//
-				if (schema->schemaId() != schemaId)
-				{
-					qDebug() << "Requested schema is not loaded one, "
-							 << " Requsted SchemaID: " << schemaId
-							 << ", Loaded SchemaID: " << schema->schemaId();
+				qDebug() << "Requested schema is not loaded one, "
+						 << " Requsted SchemaID: " << schemaId
+						 << ", Loaded SchemaID: " << schema->schemaId();
 
-					return std::shared_ptr<VFrame30::Schema>();
-				}
-
-				m_schemas[schema->schemaId()] = schema;
+				return std::shared_ptr<VFrame30::Schema>();
 			}
-
-			return schema;
 		}
 		else
 		{
-			return found->second;
+			qDebug() << "SchemaManager::schema: Can't load schema " << schemaId;
 		}
+
+		return schema;
 	}
 
 	// Load schema, must be overriden to perform loading schema appropriate to client.
@@ -59,7 +51,7 @@ namespace VFrame30
 	std::shared_ptr<VFrame30::Schema> SchemaManager::loadSchema(QString schemaId)
 	{
 		Q_UNUSED(schemaId);
-		assert(false);
+		Q_ASSERT(false);
 		return std::shared_ptr<VFrame30::Schema>();
 	}
 
@@ -71,11 +63,6 @@ namespace VFrame30
 	void SchemaManager::setGlobalScript(const QString& value)
 	{
 		m_globalScript = value;
-	}
-
-	QJSEngine* SchemaManager::jsEngine()
-	{
-		return &m_jsEngine;
 	}
 
 }

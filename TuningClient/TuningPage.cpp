@@ -82,7 +82,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 		if (state.valid() == false)
 		{
-			QColor color = QColor(Qt::red);
+            QColor color = redColor;
 			return QBrush(color);
 		}
 
@@ -121,7 +121,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 			if (state.valid() == false)
 			{
-				color = QColor(Qt::red);
+                color = redColor;
 				break;
 			}
 		}
@@ -134,7 +134,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 			if (state.limitsUnbalance(asp) == true)
 			{
-				color = QColor(Qt::red);
+                color = redColor;
 				break;
 			}
 		}
@@ -145,7 +145,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 			if (state.outOfRange() == true)
 			{
-				color = QColor(Qt::red);
+                color = redColor;
 				break;
 			}
 		}
@@ -158,7 +158,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 			if (defaultVal < asp.tuningLowBound() || defaultVal > asp.tuningHighBound())
 			{
-				color = QColor(Qt::red);
+                color = redColor;
 				break;
 			}
 
@@ -217,6 +217,12 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 			QColor color = QColor(Qt::white);
 			return QBrush(color);
 		}
+
+        if (m_tuningTcpClient->writingIsEnabled(state) == false)
+        {
+            QColor color = QColor(Qt::darkGray);
+            return QBrush(color);
+        }
 
 		if (m_blink == true && m_tuningSignalManager->newValueIsUnapplied(hash) == true)
 		{
@@ -706,6 +712,7 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 	// Object List
 	//
 	m_objectList = new TuningTableView(m_tuningTcpClient);
+    m_objectList->setWordWrap(false);
 
 	QFont f = m_objectList->font();
 

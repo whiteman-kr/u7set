@@ -35,7 +35,7 @@ namespace VFrame30
 
 	protected:
 		void initDrawingResources() const;
-		bool getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
+		//bool getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
 
 		void drawImage(CDrawParam* drawParam, const QString& imageId, const QRectF& rect);
 
@@ -53,7 +53,7 @@ namespace VFrame30
 		QString signalIdsString() const;
 		void setSignalIdsString(const QString& value);
 
-		const QStringList& signalIds() const;
+		QStringList signalIds() const;
 		void setSignalIds(const QStringList& value);
 
 		E::SignalSource signalSource() const;

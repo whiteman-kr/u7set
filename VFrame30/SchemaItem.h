@@ -260,7 +260,9 @@ namespace VFrame30
 		void setPreDrawScript(const QString& value);
 
 		bool blinkPhase() const;
-		void setBlinkPhase(bool value);
+
+		const CDrawParam* drawParam() const;
+		void setDrawParam(CDrawParam* value);
 
 		// Get SchemaItem bounding rectangle in itemUnit()
 		//
@@ -283,7 +285,8 @@ namespace VFrame30
 		QString m_clickScript;		// Qt script on mouse left button click
 		QString m_preDrawScript;
 
-		bool m_blinkPhase = false;	// Filled becore coalling preDrawScript for access to BlinkPahse from JS via property SchemaItem.BlinkPhase
+		bool m_blinkPhase = false;			// Taken from m_drawParam
+		CDrawParam* m_drawParam = nullptr;	// Is filled before PreDrawScript (in Schema::draw) to have ability to call MacroExpander::expand in AppSiganlIDs getter from script
 
 		QJSValue m_jsClickScript;		// Evaluated m_clickScript
 		QJSValue m_jsPreDrawScript;		// Evaluated m_preDrawScript

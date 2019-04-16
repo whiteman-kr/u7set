@@ -446,7 +446,7 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 		}
 		if (columnAccessIndex != -1)
 		{
-			const int defaultWidth = 60;
+            const int defaultWidth = 50;
 
 			int width = settings.value("TuningWorkspace/FilterTreeColumnsAccess", defaultWidth).toInt();
 			if (width < defaultWidth || width > columnMaxWidth)
@@ -1127,7 +1127,7 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 			else
 			{
 				treeItem->setText(columnStatusIndex, QString("E: %1").arg(counters.errorCounter));
-				treeItem->setBackground(columnStatusIndex, QBrush(Qt::red));
+                treeItem->setBackground(columnStatusIndex, QBrush(redColor));
 				treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
 			}
 		}
@@ -1147,7 +1147,7 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 				if (counters.sorValid == false)
 				{
 					treeItem->setText(columnSorIndex, "?");
-					treeItem->setBackground(columnSorIndex, QBrush(Qt::red));
+                    treeItem->setBackground(columnSorIndex, QBrush(redColor));
 					treeItem->setForeground(columnSorIndex, QBrush(Qt::white));
 				}
 				else
@@ -1168,7 +1168,7 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 						{
 							treeItem->setText(columnSorIndex, QString("SOR [%1]").arg(counters.sorCounter));
 						}
-						treeItem->setBackground(columnSorIndex, QBrush(Qt::red));
+                        treeItem->setBackground(columnSorIndex, QBrush(redColor));
 						treeItem->setForeground(columnSorIndex, QBrush(Qt::white));
 					}
 				}
@@ -1213,11 +1213,10 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem)
 	bool controlIsEnabled = false;
 	bool hasUnappliedParams = false;
 
-	QString access = tr("No");
+    bool access = false;
 
 	if (m_tuningTcpClient->tuningSourceInfo(hash, &ts) == false)
 	{
-		valid = false;
 		status = tr("Unknown");
 	}
 	else
@@ -1226,13 +1225,13 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem)
 		controlIsEnabled = ts.state.controlisactive();
 		hasUnappliedParams = ts.state.hasunappliedparams();
 
-		if (theConfigSettings.useAccessFlag == true)
-		{
-			if (ts.state.writingdisabled() == false)
+        if (theConfigSettings.useAccessFlag == true &&
+            valid == true &&
+            controlIsEnabled == true &&
+            ts.state.isreply() == true)
 			{
-				access = tr("Yes");
+                access = ts.state.writingdisabled() == false;
 			}
-		}
 
 		if (valid == false)
 		{
@@ -1272,56 +1271,93 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem)
 		}
 	}
 
-	if (treeItem->text(columnStatusIndex) != status)
+    // Access column
+
+    if (columnAccessIndex != -1)
+    {
+        QBrush accessBackBrush = QBrush(QColor(224, 224, 224));
+        QBrush accessTextBrush = QBrush(Qt::black);
+
+        if (access == true)
+        {
+            accessBackBrush = QBrush(QColor(0, 128, 0));
+            accessTextBrush = QBrush(Qt::white);
+        }
+
+        QString accessText = access ? tr("Yes") : tr("No");
+
+        if (treeItem->text(columnAccessIndex) != accessText)
+        {
+            treeItem->setText(columnAccessIndex, accessText);
+        }
+
+        if (treeItem->background(columnAccessIndex) != accessBackBrush)
+        {
+            treeItem->setBackground(columnAccessIndex, accessBackBrush);
+        }
+
+        if (treeItem->foreground(columnAccessIndex) != accessTextBrush)
+        {
+            treeItem->setForeground(columnAccessIndex, accessTextBrush);
+        }
+
+    }
+
+    // Status column
+
+
+    if (treeItem->text(columnStatusIndex) != status)
 	{
 		treeItem->setText(columnStatusIndex, status);
 	}
 
-	if (columnAccessIndex != -1 && treeItem->text(columnAccessIndex) != access)
-	{
-		treeItem->setText(columnAccessIndex, access);
-	}
-
-	QBrush backColor;
-	QBrush textColor;
+    QBrush stateBackColor;
+    QBrush stateTextColor;
 
 	if (valid == false)
 	{
-		backColor = QBrush(Qt::white);
-		textColor = QBrush(Qt::darkGray);
+        stateBackColor = QBrush(Qt::white);
+        stateTextColor = QBrush(Qt::darkGray);
 	}
 	else
 	{
 		if (controlIsEnabled == false)
 		{
-			backColor = QBrush(Qt::gray);
-			textColor = QBrush(Qt::white);
+            stateBackColor = QBrush(Qt::gray);
+            stateTextColor = QBrush(Qt::white);
 		}
 		else
 		{
 			if (errorCounter > 0)
 			{
-				backColor = QBrush(Qt::red);
-				textColor = QBrush(Qt::white);
+                stateBackColor = QBrush(redColor);
+                stateTextColor = QBrush(Qt::white);
 			}
 			else
 			{
 				if (hasUnappliedParams == true)
 				{
-					backColor = QBrush(Qt::yellow);
-					textColor = QBrush(Qt::black);
+                    stateBackColor = QBrush(Qt::yellow);
+                    stateTextColor = QBrush(Qt::black);
 				}
 				else
 				{
-					backColor = QBrush(Qt::white);
-					textColor = QBrush(Qt::black);
+                    stateBackColor = QBrush(Qt::white);
+                    stateTextColor = QBrush(Qt::black);
 				}
 			}
 		}
 	}
 
-	treeItem->setBackground(columnStatusIndex, backColor);
-	treeItem->setForeground(columnStatusIndex, textColor);
+    if (treeItem->background(columnStatusIndex) != stateBackColor)
+    {
+         treeItem->setBackground(columnStatusIndex, stateBackColor);
+    }
+
+    if (treeItem->foreground(columnStatusIndex) != stateTextColor)
+    {
+        treeItem->setForeground(columnStatusIndex, stateTextColor);
+    }
 }
 
 void TuningWorkspace::activateControl(const QString& equipmentId, bool enable)

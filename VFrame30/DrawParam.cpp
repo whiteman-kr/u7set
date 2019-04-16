@@ -12,8 +12,8 @@ namespace VFrame30
 		m_gridSize(gridSize),
 		m_pinGridStep(pinGridStep)
 	{
-		assert(m_painter != nullptr);
-		assert(m_schema != nullptr);
+		Q_ASSERT(m_painter != nullptr);
+		Q_ASSERT(m_schema != nullptr);
 
 		if (dynamic_cast<const QPdfWriter*>(painter->device()) != nullptr)
 		{
@@ -63,12 +63,13 @@ namespace VFrame30
 
 	const ClientSchemaView* CDrawParam::clientSchemaView() const
 	{
-		assert(isMonitorMode());
+		Q_ASSERT(isMonitorMode());
 		return dynamic_cast<const ClientSchemaView*>(m_schemaView);
 	}
 
 	ClientSchemaView* CDrawParam::clientSchemaView()
 	{
+		Q_ASSERT(isMonitorMode());
 		auto ptr = dynamic_cast<const ClientSchemaView*>(m_schemaView);
 		return const_cast<ClientSchemaView*>(ptr);
 	}
@@ -120,7 +121,7 @@ namespace VFrame30
 			}
 			else
 			{
-				assert(m_painter);
+				Q_ASSERT(m_painter);
 				mutable_this->m_dpiX = 96;
 			}
 		}
@@ -140,7 +141,7 @@ namespace VFrame30
 			}
 			else
 			{
-				assert(m_painter);
+				Q_ASSERT(m_painter);
 				mutable_this->m_dpiY = 96;
 			}
 		}
@@ -152,7 +153,7 @@ namespace VFrame30
 	{
 		if (schemaView() == nullptr)
 		{
-			assert(schemaView() != nullptr);
+			Q_ASSERT(schemaView() != nullptr);
 			return pos;
 		}
 
@@ -169,7 +170,7 @@ namespace VFrame30
 			return (static_cast<double>(static_cast<int>(pos * zoom * dpix)) / dpix) / zoom;
 		}
 
-		assert(false);
+		Q_ASSERT(false);
 		return pos;
 
 	}
@@ -178,7 +179,7 @@ namespace VFrame30
 	{
 		if (schemaView() == nullptr)
 		{
-			assert(schemaView() != nullptr);
+			Q_ASSERT(schemaView() != nullptr);
 			return pos;
 		}
 
@@ -195,7 +196,7 @@ namespace VFrame30
 			return (static_cast<double>(static_cast<int>(pos * zoom * dpiy)) / dpiy) / zoom;
 		}
 
-		assert(false);
+		Q_ASSERT(false);
 		return pos;
 	}
 
@@ -203,7 +204,7 @@ namespace VFrame30
 	{
 		if (schemaView() == nullptr)
 		{
-			assert(schemaView() != nullptr);
+			Q_ASSERT(schemaView() != nullptr);
 			return QPointF(x, y);
 		}
 
@@ -224,7 +225,7 @@ namespace VFrame30
 						   (static_cast<double>(static_cast<int>(y * zoom * dpiy)) / dpiy) / zoom);
 		}
 
-		assert(false);
+		Q_ASSERT(false);
 		return QPointF(x, y);
 	}
 
@@ -232,7 +233,7 @@ namespace VFrame30
 	{
 		if (schemaView() == nullptr)
 		{
-			assert(schemaView() != nullptr);
+			Q_ASSERT(schemaView() != nullptr);
 			return pos;
 		}
 
@@ -253,7 +254,7 @@ namespace VFrame30
 						   (static_cast<double>(static_cast<int>(pos.y() * zoom * dpiy)) / dpiy) / zoom);
 		}
 
-		assert(false);
+		Q_ASSERT(false);
 		return pos;
 	}
 
@@ -341,7 +342,7 @@ namespace VFrame30
 	{
 		if (painter == nullptr)
 		{
-			assert(painter);
+			Q_ASSERT(painter);
 			return;
 		}
 
@@ -363,7 +364,7 @@ namespace VFrame30
 		}
 		else
 		{
-			assert(pPaintDevice);
+			Q_ASSERT(pPaintDevice);
 		}
 
 		QFont f(font.name());
@@ -382,7 +383,7 @@ namespace VFrame30
 		}
 		else
 		{
-			assert(unit == SchemaUnit::Inch);
+			Q_ASSERT(unit == SchemaUnit::Inch);
 								
 			painter->scale(1.0 / dpiX, 1.0 / dpiY);
 

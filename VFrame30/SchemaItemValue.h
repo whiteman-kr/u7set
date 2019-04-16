@@ -48,7 +48,7 @@ namespace VFrame30
 
 		bool getSignalState(CDrawParam* drawParam, AppSignalParam* signalParam, AppSignalState* appSignalState, TuningSignalState* tuningSignalState) const;
 
-		QString parseText(QString text, const AppSignalParam& signal, const AppSignalState& signalState) const;
+		QString parseText(QString text, CDrawParam* drawParam, const AppSignalParam& signal, const AppSignalState& signalState) const;
 		QString formatNumber(double value, const AppSignalParam& signal) const;
 
 	protected:
@@ -65,7 +65,7 @@ namespace VFrame30
 		QString signalIdsString() const;
 		void setSignalIdsString(const QString& value);
 
-		const QStringList& signalIds() const;
+		QStringList signalIds() const;
 		void setSignalIds(const QStringList& value);
 
 		E::SignalSource signalSource() const;
