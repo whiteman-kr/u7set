@@ -3588,12 +3588,36 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 				{
 					// Preset property is not found in device, this is new property, add it
 					//
-					assert(dynamic_cast<PropertyValueNoGetterSetter*>(presetProperty.get()) != nullptr);
+					std::shared_ptr<Property> newDeviceProperty;
 
-					std::shared_ptr<PropertyValueNoGetterSetter> newDeviceProperty = std::make_shared<PropertyValueNoGetterSetter>();
-					newDeviceProperty->updateFromPreset(presetProperty.get(), true);
+					if (dynamic_cast<PropertyValueNoGetterSetter*>(presetProperty.get()) != nullptr)
+					{
+						newDeviceProperty = std::make_shared<PropertyValueNoGetterSetter>();
+					}
 
-					deviceProperties.push_back(newDeviceProperty);
+					if (auto x = dynamic_cast<PropertyValue<std::vector<std::pair<QString, int>>>*>(presetProperty.get());
+						x != nullptr)
+					{
+						auto enumList = x->enumValues();
+						std::vector<std::pair<QString, int>> enumValues;
+						enumValues.reserve(enumList.size());
+
+						for (auto[k, s] : enumList)
+						{
+							enumValues.emplace_back(s, k);
+						}
+
+						newDeviceProperty = std::make_shared<PropertyValue<std::vector<std::pair<QString, int>>>>(enumValues);
+					}
+
+					Q_ASSERT(newDeviceProperty != nullptr);
+
+					if (newDeviceProperty != nullptr)
+					{
+						newDeviceProperty->updateFromPreset(presetProperty.get(), true);
+						deviceProperties.push_back(newDeviceProperty);
+					}
+
 					continue;
 				}
 
