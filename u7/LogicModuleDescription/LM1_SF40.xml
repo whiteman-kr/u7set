@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM1_SF40" DescriptionNumber="40" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0001">
+<LogicModule Name="LM1_SF40" DescriptionNumber="40" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0002">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -83,7 +83,7 @@
 		<Command Caption="fillb"	Code="06C0"	CodeMask="07c0"	SimulationFunc="command_fillb"		ParseFunc="parse_fillb"		Description="Fill 16-bit word with 1-bit constant and write it to memory"/>
 	</LogicUnitCommnads>
 	
-    <AFBImplementation CheckAfbVersions="true" CheckAfbVersionsOffset="0">
+    <AFBImplementation CheckAfbVersions="true" CheckAfbVersionsOffset="2">
 	    <AFBComponent Caption="LOGIC"		OpCode="1"	ImpVersion="207"	VersionOpIndex="22"	MaxInstCount="256" SimulationFunc="afb_logic">
 			<Pin OpName="i_oprd_quant"	OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_bus_width"	OpIndex ="1"	PinType = "Param"/>
