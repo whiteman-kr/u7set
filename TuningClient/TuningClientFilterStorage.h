@@ -15,6 +15,8 @@ public:
 
 	void checkAndRemoveFilterSignals(const std::vector<Hash>& signalHashes, bool& removedNotFound, std::vector<std::pair<QString, QString>>& notFoundSignalsAndFilters, QWidget* parentWidget);
 
+	void createSchemaCounterFilters();
+
 	void updateCounters(const TuningSignalManager* objects, const TuningClientTcpClient* tcpClient, TuningFilter* filter = nullptr);
 
 	void removeFilters(TuningFilter::Source sourceType);
@@ -22,6 +24,13 @@ public:
 	virtual void writeLogError(const QString& message);
 	virtual void writeLogWarning(const QString& message);
 	virtual void writeLogMessage(const QString& message);
+
+	int schemaCounterFiltersCount() const;
+	const QStringList& schemaCounterFiltersNames() const;
+
+private:
+	int m_schemaCounterFiltersCount = 0;		// filled by createSchemaCounterFilters
+	QStringList m_schemaCounterFiltersNames;
 
 };
 

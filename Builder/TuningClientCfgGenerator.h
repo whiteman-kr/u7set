@@ -22,10 +22,10 @@ namespace Builder
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
 
 		bool createEquipmentList(QStringList* equipmentList);
-		bool createSettings(bool* filterByEquipment, bool* filterBySchema, bool* showDiscreteCounters);
-		bool createObjectFilters(const QStringList& equipmentList, bool filterByEquipment, bool filterBySchema, bool showDiscreteCounters);
+		bool createSettings(bool* filterByEquipment, bool* filterBySchema);
+		bool createObjectFilters(const QStringList& equipmentList, bool filterByEquipment, bool filterBySchema);
 
-		bool writeSettings(bool filterByEquipment, bool filterBySchema, bool showDiscreteCounters);
+		bool writeSettings(bool filterByEquipment, bool filterBySchema);
 		bool writeTuningSignals();
 		bool writeObjectFilters();
 		bool writeTuningSchemas();
@@ -36,8 +36,7 @@ namespace Builder
 		bool createAutomaticFilters(const QStringList& equipmentList,
 									const TuningSignalManager& tuningSignalManager,
 									bool filterByEquipment,
-									bool filterBySchema,
-									bool showDiscreteCounters);
+									bool filterBySchema);
 
 		template <typename TYPE>
 		TYPE getObjectProperty(QString strId, QString property, bool* ok);

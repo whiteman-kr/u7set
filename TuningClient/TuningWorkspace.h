@@ -38,7 +38,7 @@ public:
 							 std::shared_ptr<TuningFilter> workspaceFilter,
 							 TuningSignalManager* tuningSignalManager,
 							 TuningClientTcpClient* tuningTcpClient,
-							 TuningFilterStorage* tuningFilterStorage,
+							 TuningClientFilterStorage* tuningFilterStorage,
 							 QWidget* parent);
 
 	virtual ~TuningWorkspace();
@@ -69,11 +69,13 @@ private:
 
 	void addChildTreeObjects(const std::shared_ptr<TuningFilter> filter, QTreeWidgetItem* parent, const QString& mask);
 
-	void updateCounters();
+	void updateTabsButtonsCounters();
 
 	void updateTreeItemsStatus(QTreeWidgetItem* treeItem = nullptr);
 
-	void updateTuningSourceTreeItem(QTreeWidgetItem* treeItem);
+	void updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, TuningFilter* filter);
+
+	void updateTreeItemCounters(QTreeWidgetItem* treeItem, TuningFilter* filter);
 
 	void activateControl(const QString& equipmentId, bool enable);
 
@@ -91,7 +93,7 @@ private:
 
 	TuningClientTcpClient* m_tuningTcpClient = nullptr;
 
-	TuningFilterStorage* m_tuningFilterStorage = nullptr;
+	TuningClientFilterStorage* m_tuningFilterStorage = nullptr;
 
 	std::shared_ptr<TuningFilter> m_workspaceFilter;
 
@@ -113,11 +115,11 @@ private:
 
 	QTabWidget* m_tab = nullptr;
 
-	const int columnNameIndex = 0;
-	int columnAccessIndex = -1;
-	int columnDiscreteCountIndex = -1;
-	int columnStatusIndex = -1;
-	int columnSorIndex = -1;
+	const int m_columnNameIndex = 0;
+	int m_columnAccessIndex = -1;
+	std::vector<int> m_columnDiscreteCountIndexes;
+	int m_columnStatusIndex = -1;
+	int m_columnSorIndex = -1;
 
 	// Filters containters
 

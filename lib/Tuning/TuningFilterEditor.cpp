@@ -796,6 +796,7 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, Tunin
 									   bool typeTreeEnabled,
 									   bool typeButtonEnabled,
 									   bool typeTabEnabled,
+									   bool typeCounterEnabled,
 									   TuningFilter::Source source,
 									   QByteArray mainSplitterState,
 									   int propertyEditorSplitterPos):
@@ -806,6 +807,7 @@ TuningFilterEditor::TuningFilterEditor(TuningFilterStorage* filterStorage, Tunin
 	m_typeTreeEnabled(typeTreeEnabled),
 	m_typeButtonEnabled(typeButtonEnabled),
 	m_typeTabEnabled(typeTabEnabled),
+	m_typeCounterEnabled(typeCounterEnabled),
 	m_source(source)
 {
 
@@ -921,6 +923,7 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 	bool allowTree = (selectedFilter == nullptr || selectedFilter->interfaceType() == TuningFilter::InterfaceType::Tree);
 	bool allowTabs = (selectedFilter == nullptr || selectedFilter->interfaceType() == TuningFilter::InterfaceType::Button);
 	bool allowButtons = (selectedFilter == nullptr || selectedFilter->interfaceType() == TuningFilter::InterfaceType::Tab);
+	bool allowCounters = (selectedFilter == nullptr);
 
 	if (selectedFilter == nullptr)
 	{
@@ -955,8 +958,9 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 	allowTree &= m_typeTreeEnabled;
 	allowTabs &= m_typeTabEnabled;
 	allowButtons &= m_typeButtonEnabled;
+	allowCounters &= m_typeCounterEnabled;
 
-	if (m_typeTabEnabled == false && m_typeButtonEnabled == false && allowTree == true)
+	if (m_typeTabEnabled == false && m_typeButtonEnabled == false && m_typeCounterEnabled == false && allowTree == true)
 	{
 		// This is made for TuningClient
 
@@ -1009,6 +1013,21 @@ void TuningFilterEditor::on_m_addPreset_clicked()
 		connect(action, &QAction::triggered, this, f);
 
 		action->setEnabled(allowButtons);
+
+		menu.addAction(action);
+	}
+
+	{
+		// Counter
+		QAction* action = new QAction(tr("Counter"), &menu);
+
+		auto f = [this]() -> void
+		{
+				addPreset(TuningFilter::InterfaceType::Counter);
+		};
+		connect(action, &QAction::triggered, this, f);
+
+		action->setEnabled(allowCounters);
 
 		menu.addAction(action);
 	}
