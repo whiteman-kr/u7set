@@ -159,6 +159,8 @@ void Settings::writeUserScope() const
 
 	s.setValue("AfbLibraryCheck/mainSplitter", m_afbLibratyCheckSplitterState);
 
+	s.setValue("SpecificEditor/mainSplitter", m_specificEditorSplitterState);
+
 	s.setValue("CreateSchema/lastSelectedLmDescriptionFile", m_lastSelectedLmDescriptionFile);
 
 	s.setValue("SchemaItem/pos", m_schemaItemPropertiesWindowPos);
@@ -264,6 +266,8 @@ void Settings::loadUserScope()
 	//
 
 	m_afbLibratyCheckSplitterState = s.value("AfbLibraryCheck/mainSplitter").toByteArray();
+
+	m_specificEditorSplitterState = s.value("SpecificEditor/mainSplitter").toByteArray();
 
 	//
 	m_lastSelectedLmDescriptionFile = s.value("CreateSchema/lastSelectedLmDescriptionFile", "").toString();

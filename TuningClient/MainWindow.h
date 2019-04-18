@@ -112,7 +112,7 @@ private:
 
 	QLabel* m_statusBarBuildInfo = nullptr;
 	QLabel* m_statusBarLmControlMode = nullptr;
-	QLabel* m_statusDiscreteCount = nullptr;
+	std::vector<QLabel*> m_statusDiscreteCount;
 	QLabel* m_statusBarLmErrors = nullptr;
 	QLabel* m_statusBarSor = nullptr;
 	QLabel* m_statusBarConfigConnection = nullptr;

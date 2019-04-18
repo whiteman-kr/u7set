@@ -20,6 +20,7 @@ DialogFilterEditor::DialogFilterEditor(TuningSignalManager* tuningSignalManager,
 												  true,		/*typeTreeEnabled*/
 												  false,		/*typeButtonEnabled*/
 												  false,		/*typeTabEnabled*/
+												  false,		/*typeCounterEnabled*/
 												  TuningFilter::Source::User,
 												  theSettings.m_tuningFiltersSplitterPosition,
 												  theSettings.m_tuningFiltersPropertyEditorSplitterPos

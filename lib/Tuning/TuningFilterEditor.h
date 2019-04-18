@@ -140,6 +140,7 @@ public:
 								bool typeTreeEnabled,
 								bool typeButtonEnabled,
 								bool typeTabEnabled,
+								bool typeCounterEnabled,
 								TuningFilter::Source source,
 								QByteArray mainSplitterState,
 								int propertyEditorSplitterPos);
@@ -251,6 +252,7 @@ private:
 	bool m_typeButtonEnabled = false;
 	bool m_typeTabEnabled = false;
 	bool m_typeTreeEnabled = false;
+	bool m_typeCounterEnabled = false;
 
 	TuningFilter::Source m_source = TuningFilter::Source::User;
 };

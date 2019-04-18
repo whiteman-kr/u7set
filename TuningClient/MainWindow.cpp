@@ -224,11 +224,6 @@ void MainWindow::createStatusBar()
 	//m_statusBarLmControlMode->setIndent(3);
 	m_statusBarLmControlMode->setText(m_singleLmControlMode ? m_singleLmControlModeText : m_multipleLmControlModeText);
 
-	m_statusDiscreteCount = new QLabel();
-	m_statusDiscreteCount->setAlignment(Qt::AlignLeft);
-	m_statusDiscreteCount->setMinimumWidth(80);
-	m_statusDiscreteCount->setToolTip(tr("Alerted discretes counter"));
-
 	m_statusBarLmErrors = new QLabel();
 	m_statusBarLmErrors->setAlignment(Qt::AlignLeft);
 	m_statusBarLmErrors->setMinimumWidth(80);
@@ -259,7 +254,6 @@ void MainWindow::createStatusBar()
 	//
 	statusBar()->addWidget(m_statusBarBuildInfo, 1);
 	statusBar()->addPermanentWidget(m_statusBarLmControlMode, 0);
-	statusBar()->addPermanentWidget(m_statusDiscreteCount, 0);
 	statusBar()->addPermanentWidget(m_statusBarLmErrors, 0);
 	statusBar()->addPermanentWidget(m_statusBarSor, 0);
 	statusBar()->addPermanentWidget(m_statusBarConfigConnection, 0);
@@ -590,30 +584,102 @@ void MainWindow::updateStatusBar()
 	}
 
 	// Counters
-
-	if (theConfigSettings.showDiscreteCounters == true)
 	{
-		TuningCounters rootCounters = m_filterStorage.root()->counters();
+		int labelCount = 0;
 
-		if (m_discreteCounter != rootCounters.discreteCounter || m_statusDiscreteCount->text().isEmpty() == true)
+		int filtersCount = m_filterStorage.root()->childFiltersCount();
+		for (int i = 0; i < filtersCount; i++)
 		{
-			m_discreteCounter = rootCounters.discreteCounter;
-
-			m_statusDiscreteCount->setText(tr(" Discretes: %1 ").arg(m_discreteCounter));
-
-			if (m_discreteCounter == 0)
+			TuningFilter* f = m_filterStorage.root()->childFilter(i).get();
+			if (f == nullptr)
 			{
-				m_statusDiscreteCount->setStyleSheet(m_statusBarLmControlMode->styleSheet());
+				Q_ASSERT(f);
+				return;
+			}
+			if (f->isCounter() == true && f->counterType() == TuningFilter::CounterType::StatusBar)
+			{
+				labelCount++;
+			}
+		}
+
+		if (static_cast<int>(m_statusDiscreteCount.size()) != labelCount)
+		{
+			// Counters count changed, recreate labels
+
+			for (QLabel* l : m_statusDiscreteCount)
+			{
+				delete l;
+			}
+			m_statusDiscreteCount.clear();
+
+			for (int i = 0; i < labelCount; i++)
+			{
+				QLabel* l = new QLabel();
+				l->setAlignment(Qt::AlignLeft);
+				l->setMinimumWidth(80);
+				l->setToolTip(tr("Counter %1").arg(i));
+
+				statusBar()->insertPermanentWidget(2 + i, l, 0);
+
+				m_statusDiscreteCount.push_back(l);
+			}
+		}
+
+		int labelIndex = 0;
+
+		for (int i = 0; i < filtersCount; i++)
+		{
+			TuningFilter* f = m_filterStorage.root()->childFilter(i).get();
+			if (f == nullptr)
+			{
+				Q_ASSERT(f);
+				return;
+			}
+
+			if (f->isCounter() == false || f->counterType() != TuningFilter::CounterType::StatusBar)
+			{
+				continue;
+			}
+
+			TuningCounters counters = f->counters();
+
+			if (static_cast<int>(m_statusDiscreteCount.size()) < labelIndex)
+			{
+				Q_ASSERT(false);
+				return;
+			}
+
+			QLabel* l = m_statusDiscreteCount[labelIndex++];
+			if (l == nullptr)
+			{
+				Q_ASSERT(l);
+				return;
+			}
+
+			QString text = tr(" %1 %2 ").arg(f->caption()).arg(counters.discreteCounter);
+
+			if (l->text() != text)
+			{
+				l->setText(text);
+			}
+
+			if (counters.discreteCounter == 0)
+			{
+				if (l->styleSheet() != "")
+				{
+					l->setStyleSheet("");
+				}
 			}
 			else
 			{
-				m_statusDiscreteCount->setStyleSheet("QLabel {color : white; background-color: blue}");
+				QString styleSheet = QString("QLabel {background-color : %1; color: %2}").arg(f->backAlertedColor().name()).arg(f->textAlertedColor().name());
+
+				if (l->styleSheet() != styleSheet)
+				{
+					l->setStyleSheet(styleSheet);
+				}
 			}
 		}
-	}
-	else
-	{
-		m_statusDiscreteCount->setText(QString());
 	}
 
 	std::vector<Hash> sources = m_tcpClient->tuningSourcesEquipmentHashes();
@@ -639,11 +705,19 @@ void MainWindow::updateStatusBar()
 
 			if (m_lmErrorsCounter == 0)
 			{
-				m_statusBarLmErrors->setStyleSheet(m_statusBarLmControlMode->styleSheet());
+				if (m_statusBarLmErrors->styleSheet() != "")
+				{
+					m_statusBarLmErrors->setStyleSheet("");
+				}
 			}
 			else
 			{
-                m_statusBarLmErrors->setStyleSheet(QString("QLabel {color : white; background-color: %1}").arg(redColor.name()));
+				QString styleSheet = QString("QLabel {color : white; background-color: %1}").arg(redColor.name());
+
+				if (m_statusBarLmErrors->styleSheet() != styleSheet)
+				{
+					m_statusBarLmErrors->setStyleSheet(styleSheet);
+				}
 			}
 		}
 
@@ -732,8 +806,6 @@ void MainWindow::updateStatusBar()
 
 void MainWindow::slot_configurationArrived()
 {
-	m_filterStorage.root()->setHasDiscreteCounter(theConfigSettings.showDiscreteCounters == true);
-
 	createWorkspace();
 
 	return;
@@ -753,6 +825,9 @@ void MainWindow::slot_projectFiltersUpdated(QByteArray data)
 		QString completeErrorMessage = QObject::tr("Object Filters file loading error: %1").arg(errorStr);
 		theLogFile->writeError(completeErrorMessage);
 	}
+
+	m_filterStorage.createSchemaCounterFilters();
+
 
 }
 
