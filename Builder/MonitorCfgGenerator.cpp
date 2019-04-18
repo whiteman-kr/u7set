@@ -37,25 +37,11 @@ namespace Builder
 		//
 		bool result = true;
 
-		if (m_software->propertyExists("GlobalScript") == false)
-		{
-			m_log->errCFG3000("GlobalScript", m_software->equipmentIdTemplate());
-			result = false;
-		}
-		else
-		{
-			QString globalScript = m_software->propertyValue("GlobalScript").toString();
-			BuildFile* globalScriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "GlobalScript.js", globalScript);
+		result &= saveScriptProperties("GlobalScript", "GlobalScript.js");
 
-			if (globalScriptBuildFile != nullptr)
-			{
-				m_cfgXml->addLinkToFile(globalScriptBuildFile);
-			}
-			else
-			{
-				result = false;
-			}
-		}
+		// Writing event scripts: OnConfigurationArrived
+		//
+		result &= saveScriptProperties("OnConfigurationArrived", "OnConfigurationArrived.js");
 
 		// write XML via m_cfgXml->xmlWriter()
 		//
@@ -157,6 +143,33 @@ namespace Builder
 		} // Settings
 
 		return true;
+	}
+
+	bool MonitorCfgGenerator::saveScriptProperties(QString scriptProperty, QString fileName)
+	{
+		bool result = true;
+
+		if (m_software->propertyExists(scriptProperty) == false)
+		{
+			m_log->errCFG3000(scriptProperty, m_software->equipmentIdTemplate());
+			result = false;
+		}
+		else
+		{
+			QString script = m_software->propertyValue(scriptProperty).toString();
+			BuildFile* scriptBuildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), fileName, script);
+
+			if (scriptBuildFile != nullptr)
+			{
+				m_cfgXml->addLinkToFile(scriptBuildFile);
+			}
+			else
+			{
+				result = false;
+			}
+		}
+
+		return result;
 	}
 
 	bool MonitorCfgGenerator::writeSchemasByTags()
@@ -279,19 +292,21 @@ namespace Builder
 
 				ok1 = false;
 			}
-
-			if (appDataService1->type() != E::SoftwareType::AppDataService)
+			else
 			{
-				m_log->errCFG3017(m_software->equipmentId(), "AppDataServiceID1", appDataServiceId1);
+				if (appDataService1->type() != E::SoftwareType::AppDataService)
+				{
+					m_log->errCFG3017(m_software->equipmentId(), "AppDataServiceID1", appDataServiceId1);
 
-				QString errorStr = tr("Property %1.%2 is linked to not compatible software %3.")
-										.arg(m_software->equipmentId())
-										.arg("AppDataServiceID1")
-										.arg(appDataServiceId1);
+					QString errorStr = tr("Property %1.%2 is linked to not compatible software %3.")
+											.arg(m_software->equipmentId())
+											.arg("AppDataServiceID1")
+											.arg(appDataServiceId1);
 
-				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+					writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
 
-				ok1 = false;
+					ok1 = false;
+				}
 			}
 		}
 
@@ -309,19 +324,21 @@ namespace Builder
 
 				ok2 = false;
 			}
-
-			if (appDataService2->type() != E::SoftwareType::AppDataService)
+			else
 			{
-				m_log->errCFG3017(m_software->equipmentId(), "AppDataServiceID2", appDataServiceId2);
+				if (appDataService2->type() != E::SoftwareType::AppDataService)
+				{
+					m_log->errCFG3017(m_software->equipmentId(), "AppDataServiceID2", appDataServiceId2);
 
-				QString errorStr = tr("Property %1.%2 is linked to not compatible software %3.")
-										.arg(m_software->equipmentId())
-										.arg("AppDataServiceID2")
-										.arg(appDataServiceId2);
+					QString errorStr = tr("Property %1.%2 is linked to not compatible software %3.")
+											.arg(m_software->equipmentId())
+											.arg("AppDataServiceID2")
+											.arg(appDataServiceId2);
 
-				writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+					writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
 
-				ok1 = false;
+					ok1 = false;
+				}
 			}
 		}
 

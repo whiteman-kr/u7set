@@ -42,7 +42,10 @@ std::shared_ptr<VFrame30::Schema> MonitorSchemaManager::loadSchema(QString schem
 void MonitorSchemaManager::slot_configurationArrived(ConfigSettings configuration)
 {
 	clear();
+
 	setGlobalScript(configuration.globalScript);
+	setOnConfigurationArrivedScript(configuration.onConfigurationArrivedScript);
+
 	return;
 }
 
@@ -68,3 +71,12 @@ const MonitorConfigController* MonitorSchemaManager::monitorConfigController() c
 	return m_configController;
 }
 
+QString MonitorSchemaManager::onConfigurationArrivedScript() const
+{
+	return m_onConfigurationArrivedScript;
+}
+
+void MonitorSchemaManager::setOnConfigurationArrivedScript(QString value)
+{
+	m_onConfigurationArrivedScript = value;
+}

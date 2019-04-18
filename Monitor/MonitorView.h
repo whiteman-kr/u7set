@@ -16,6 +16,9 @@ public:
 	//
 public:
 
+public slots:
+	void configurationArrived(ConfigSettings configuration);
+
 	// Data
 	//
 private:

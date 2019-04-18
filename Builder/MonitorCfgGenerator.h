@@ -18,6 +18,8 @@ namespace Builder
 	protected:
 		bool writeMonitorSettings();
 
+		bool saveScriptProperties(QString scriptProperty, QString fileName);
+
 		bool writeSchemasByTags();
 
 		bool writeAppDataServiceSection(QXmlStreamWriter& xmlWriter);

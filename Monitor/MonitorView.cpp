@@ -11,6 +11,12 @@ MonitorView::MonitorView(MonitorSchemaManager* schemaManager, QWidget *parent)
 	: VFrame30::ClientSchemaView(schemaManager, parent)
 {
 	qDebug() << Q_FUNC_INFO;
+
+	Q_ASSERT(schemaManager);
+	Q_ASSERT(schemaManager->monitorConfigController());
+
+	connect(schemaManager->monitorConfigController(), &MonitorConfigController::configurationArrived, this, &MonitorView::configurationArrived);
+
 	return;
 }
 
@@ -20,6 +26,26 @@ MonitorView::~MonitorView()
 	return;
 }
 
+void MonitorView::configurationArrived(ConfigSettings configuration)
+{
+	QJSEngine* engine = jsEngine();
 
+	if (engine == nullptr)
+	{
+		Q_ASSERT(engine);
+		return ;
+	}
+
+	QJSValue scriptValue = evaluateScript(configuration.onConfigurationArrivedScript, true);
+	if (scriptValue.isError() == true ||
+		scriptValue.isUndefined() == true)
+	{
+		return;
+	}
+
+	runScript(scriptValue, true);
+
+	return;
+}
 
 

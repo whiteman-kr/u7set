@@ -293,6 +293,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0273.sql", "Upgrade to version 273, LM for 4th cert phase switched to LMDN40 -> new preset "},
 	{":/DatabaseUpgrade/Upgrade0274.sql", "Upgrade to version 274, Added Essential properties flag to software and LM presets "},
 	{":/DatabaseUpgrade/Upgrade0275.sql", "Upgrade to version 275, LM1-SF40.xml CheckAfbVersionsOffset set to 2, bugfix, LM1-SR04.xml, tct MaxInstCount changed to 1024 "},
+	{":/DatabaseUpgrade/Upgrade0276.sql", "Upgrade to version 276, Added event scripts properties to Monitor preset"},
 };
 
 int DbWorker::counter = 0;
