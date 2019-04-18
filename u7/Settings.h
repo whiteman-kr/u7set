@@ -160,6 +160,7 @@ public:
 
 	QByteArray m_afbLibratyCheckSplitterState;
 
+	QByteArray m_specificEditorSplitterState;
 
 	// CreateSchema dialog
 	//
