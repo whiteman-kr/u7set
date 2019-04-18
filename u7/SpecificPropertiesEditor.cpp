@@ -1,4 +1,5 @@
 #include "SpecificPropertiesEditor.h"
+#include "Settings.h"
 
 //
 // SpecificPropertyDescription
@@ -742,6 +743,7 @@ SpecificPropertiesEditor::SpecificPropertiesEditor(QWidget* parent):
 	m_parent(parent),
 	m_propertiesModel(this)
 {
+
 	assert(m_parent);
 
 	setHasOkCancelButtons(false);
@@ -800,22 +802,24 @@ SpecificPropertiesEditor::SpecificPropertiesEditor(QWidget* parent):
 
 	// Top Layout
 	//
-	QHBoxLayout* topLayout = new QHBoxLayout();
-	topLayout->addWidget(m_propertiesTable);
-	topLayout->addWidget(m_propertyEditor);
-	topLayout->setContentsMargins(0, 0, 0, 0);
+	m_topSplitter = new QSplitter();
+	m_topSplitter->addWidget(m_propertiesTable);
+	m_topSplitter->addWidget(m_propertyEditor);
+	m_topSplitter->setContentsMargins(0, 0, 0, 0);
+	m_topSplitter->restoreState(theSettings.m_specificEditorSplitterState);
+
 
 	// Main Layout
 	//
 	QVBoxLayout* mainLayout = new QVBoxLayout(this);
-	mainLayout->addLayout(topLayout);
+	mainLayout->addWidget(m_topSplitter);
 	mainLayout->addLayout(buttonLayout);
 	mainLayout->setContentsMargins(0, 0, 0, 0);
 }
 
 SpecificPropertiesEditor::~SpecificPropertiesEditor()
 {
-
+	theSettings.m_specificEditorSplitterState = m_topSplitter->saveState();
 }
 
 void SpecificPropertiesEditor::setText(const QString& text)
@@ -1057,6 +1061,14 @@ void SpecificPropertiesEditor::onPropertiesChanged(QList<std::shared_ptr<Propert
 	Q_UNUSED(objects);
 
 	m_propertiesModel.update();
+
+	// Show or hide DynamicEnumType properties
+
+	for (int i = 0; i < m_propertiesModel.count(); i++)
+	{
+		std::shared_ptr<SpecificPropertyDescription> spd = m_propertiesModel.get(i);
+		spd->validateDynamicEnumType(this);
+	}
 }
 
 void SpecificPropertiesEditor::sortIndicatorChanged(int column, Qt::SortOrder order)
