@@ -1148,6 +1148,19 @@ void Signal::initCalculatedProperties()
 	m_hash = calcHash(m_appSignalID);
 }
 
+bool Signal::addStateFlagSignal(AppSignalStateFlagType flagType, const QString& appSignalID)
+{
+	if (m_stateFlagsSignals.contains(flagType) == true)
+	{
+		assert(false);
+		return false;
+	}
+
+	m_stateFlagsSignals.insert(flagType, appSignalID);
+
+	return true;
+}
+
 bool Signal::isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const
 {
 	if (m_signalType != signalType)

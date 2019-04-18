@@ -11,6 +11,7 @@
 #include "../VFrame30/Afb.h"
 #include "Hash.h"
 #include "TuningValue.h"
+#include "AppSignalStateFlags.h"
 
 class QXmlStreamAttributes;
 class XmlWriteHelper;
@@ -302,6 +303,9 @@ public:
 
 	void initCalculatedProperties();
 
+	bool addStateFlagSignal(AppSignalStateFlagType flagType, const QString& appSignalID);
+	QString stateFlagSignal(AppSignalStateFlagType flagType) const { return  m_stateFlagsSignals.value(flagType, QString("???")); }
+
 private:
 	// Private setters for fields, witch can't be changed outside DB engine
 	// Should be used only by friends
@@ -412,6 +416,8 @@ private:
 
 	bool m_isConst = false;
 	double m_constValue = 0;
+
+	AppSignalStateFlagsMap m_stateFlagsSignals;
 
 	//
 

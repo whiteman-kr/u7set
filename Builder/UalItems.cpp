@@ -2070,6 +2070,36 @@ namespace Builder
 		m_isAcquired = acquired;
 	}
 
+	bool UalSignal::addStateFlagSignal(AppSignalStateFlagType flagType, UalSignal* flagSignal, IssueLogger* log)
+	{
+		bool result = true;
+
+		for(Signal* s : m_refSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			bool res = s->addStateFlagSignal(flagType, flagSignal->appSignalID());
+
+			if (res == false)
+			{
+				//Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
+				//
+				log->errALC5168(flagSignal->appSignalID(),
+								AppSignalStateFlags::flagTypeStr(flagType),
+								s->appSignalID(),
+								s->stateFlagSignal(flagType),
+								QUuid(),
+								QString());
+
+
+			}
+
+			result &= res;
+		}
+
+		return result;
+	}
+
 	// ---------------------------------------------------------------------------------------
 	//
 	// AppSignalsMap class implementation

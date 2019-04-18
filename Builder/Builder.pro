@@ -11,6 +11,8 @@ win32:QMAKE_CXXFLAGS += /std:c++17
 
 CONFIG += warn_on				# The compiler should output as many warnings as possible. If warn_off is also specified, the last one takes effect.
 
+CONFIG(debug, debug|release): DEFINES += Q_DEBUG
+
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
@@ -222,7 +224,6 @@ HEADERS += \
     ../lib/UnitsConvertorTable.h \
     Context.h \
     ../lib/AppSignalStateFlags.h
-
 
 unix {
     target.path = /usr/lib

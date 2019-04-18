@@ -37,8 +37,6 @@ namespace Builder
 
 #define CODE_GEN_PROC_TO_CALL(procName)		{ &procName, #procName }
 
-	typedef QHash<AppSignalStateFlagType, QString> AppSignalStateFlagsMap;
-
 	class ModuleLogicCompiler : public QObject
 	{
 		Q_OBJECT
@@ -235,7 +233,7 @@ namespace Builder
 
 		bool isLoopbackSignal(const QString& appSignalID);
 
-		bool createUalSignalsFromInputAndTuningAcquiredSignals();
+		bool createUalSignalsFromInOutAndTuningAcquiredSignals();
 
 		bool createUalSignalsFromBusComposers();
 		bool createUalSignalsFromBusComposer(UalItem* ualItem);
@@ -547,6 +545,8 @@ namespace Builder
 
 		CodeItem codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment);
 
+		UalSignalsMap& ualSignals() { return m_ualSignals; }
+
 	private:
 		// input parameters
 		//
@@ -657,12 +657,7 @@ namespace Builder
 		QVector<UalSignal*> m_acquiredBuses;							// acquired bus signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredBuses;							// non acquired bus signals, used in UAL
 
-		//QHash<Signal*, Signal*> m_acquiredDiscreteInputSignalsMap;		// is used in conjunction with m_acquiredDiscreteInputSignals
-																		// for grant unique records
-
 		QHash<QUuid, QUuid> m_outPinSignal;								// output pin GUID -> signal GUID
-
-//		QString msg;
 
 		ResourcesUsageInfo m_resourcesUsageInfo;
 

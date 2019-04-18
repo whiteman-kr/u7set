@@ -65,11 +65,30 @@ namespace Builder
 
 	bool ModuleLogicCompiler::SignalsWithFlags::append(const QString& signalWithFlagID, AppSignalStateFlagType flagType, const QString& flagSignalID)
 	{
+		UalSignal* ualSignalWithFlag = m_compiler.ualSignals().get(signalWithFlagID);
+
+		if (ualSignalWithFlag == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_compiler.log());
+			return false;
+		}
+
+		UalSignal* ualFlagSignal = m_compiler.ualSignals().get(flagSignalID);
+
+		if (ualFlagSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_compiler.log());
+			return false;
+		}
+
+		ualSignalWithFlag->addStateFlagSignal(ualFlagSignal);
+
 		QHash<AppSignalStateFlagType, QString>* signalFlagsMap = value(signalWithFlagID, nullptr);
 
 		if (signalFlagsMap == nullptr)
 		{
 			signalFlagsMap = new QHash<AppSignalStateFlagType, QString>;
+			insert(signalWithFlagID, signalFlagsMap);
 		}
 
 		if (signalFlagsMap->contains(flagType) == true)
@@ -672,7 +691,7 @@ namespace Builder
 
 		// primarily created signals
 		//
-		result &= createUalSignalsFromInputAndTuningAcquiredSignals();
+		result &= createUalSignalsFromInOutAndTuningAcquiredSignals();
 		result &= createUalSignalsFromBusComposers();
 		result &= createUalSignalsFromReceivers();
 
@@ -1279,7 +1298,7 @@ namespace Builder
 		return m_signalsToLoopbacks.contains(appSignalID);
 	}
 
-	bool ModuleLogicCompiler::createUalSignalsFromInputAndTuningAcquiredSignals()
+	bool ModuleLogicCompiler::createUalSignalsFromInOutAndTuningAcquiredSignals()
 	{
 		bool result = true;
 
@@ -1299,7 +1318,7 @@ namespace Builder
 				continue;
 			}
 
-			if (s->isInput() == true)
+			if (s->isInput() == true || s->isOutput() == true)
 			{
 				m_ualSignals.createSignal(s);
 				continue;
@@ -2905,10 +2924,21 @@ namespace Builder
 				continue;
 			}
 
-			m_signals->append(id, ualSignal->signal());
+			Signal* s = ualSignal->signal();
+
+			s->setLm(getLmSharedPtr());
+
+			if (s->equipmentID().isEmpty() == true)
+			{
+				s->setEquipmentID(lmEquipmentID());
+			}
+
+			m_signals->append(id, s);
 
 			id++;
 		}
+
+		m_signals->buildID2IndexMap();
 
 		return true;
 	}

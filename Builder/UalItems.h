@@ -538,6 +538,8 @@ namespace Builder
 
 		void setAcquired(bool acquired);
 
+		bool addStateFlagSignal(AppSignalStateFlagType flagType, UalSignal* flagSignal, IssueLogger* log);
+
 	private:
 		const UalItem* m_ualItem = nullptr;
 		Signal* m_autoSignalPtr = nullptr;

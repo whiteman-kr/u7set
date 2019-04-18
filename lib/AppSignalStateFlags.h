@@ -98,3 +98,6 @@ union AppSignalStateFlags
 
 #pragma pack(pop)
 
+typedef QHash<AppSignalStateFlagType, QString> AppSignalStateFlagsMap;
+
+
