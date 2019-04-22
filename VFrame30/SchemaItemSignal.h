@@ -37,7 +37,14 @@ namespace VFrame30
 	public:
 		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
 
-		static QString getCoulumnText(CDrawParam* drawParam, const E::ColumnData& data, const AppSignalParam& signal, const AppSignalState& signalState, E::AnalogFormat analogFormat, int precision);
+		static QString getCoulumnText(CDrawParam* drawParam,
+									  const E::ColumnData& data,
+									  const AppSignalParam& signal,
+									  const AppSignalState& signalState,
+									  const AppSignalParam& impactSignal,
+									  const AppSignalState& impactSignalState,
+									  E::AnalogFormat analogFormat,
+									  int precision);
 
 	protected:
 		void drawMultichannelSlashLines(QPainter* painter, QPen& linePen) const;
@@ -67,12 +74,24 @@ namespace VFrame30
 		// Properties
 		//
 	public:
+		// AppSignalIDs
+		//
 		QString appSignalIds() const;
 		QStringList appSignalIdList() const;
 
 		void setAppSignalIds(const QString& s);
 		QStringList* mutable_appSignalIds();
 
+		// ImpactAppSignalIds
+		//
+		QString impactAppSignalIds() const;
+		QStringList impactAppSignalIdList() const;
+
+		void setImpactAppSignalIds(const QString& s);
+		QStringList* mutable_impactAppSignalIds();
+
+		// --
+		//
 		bool multiLine() const;
 		void setMultiLine(const bool& value);
 
@@ -100,6 +119,7 @@ namespace VFrame30
 		//
 	protected:
 		QStringList m_appSignalIds;
+		QStringList m_impactAppSignalIds;
 
 		bool m_multiLine = true;		// Show multichannel signlas in multi/single line
 

@@ -180,7 +180,12 @@ namespace VFrame30
 						assert(itemSignal);
 
 						QStringList appSignals = itemSignal->appSignalIdList();
+						for (const QString& id : appSignals)
+						{
+							signalMap.insert(id);
+						}
 
+						appSignals = itemSignal->impactAppSignalIdList();
 						for (const QString& id : appSignals)
 						{
 							signalMap.insert(id);

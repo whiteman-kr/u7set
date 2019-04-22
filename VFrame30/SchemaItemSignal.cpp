@@ -32,8 +32,13 @@ namespace VFrame30
 		c1.data = E::ColumnData::State;
 		c1.horzAlign = E::HorzAlign::AlignHCenter;
 
-		auto strIdProperty = addProperty<QString, SchemaItemSignal, &SchemaItemSignal::appSignalIds, &SchemaItemSignal::setAppSignalIds>(PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true);
-		strIdProperty->setValidator(PropertyNames::appSignalIDsValidator);
+		Property* prop = nullptr;
+
+		prop = addProperty<QString, SchemaItemSignal, &SchemaItemSignal::appSignalIds, &SchemaItemSignal::setAppSignalIds>(PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true);
+		prop->setValidator(PropertyNames::appSignalIDsValidator);
+
+		prop = addProperty<QString, SchemaItemSignal, &SchemaItemSignal::impactAppSignalIds, &SchemaItemSignal::setImpactAppSignalIds>(PropertyNames::impactAppSignalIDs, PropertyNames::functionalCategory, true);
+		prop->setValidator(PropertyNames::appSignalIDsValidator);
 
 		addProperty<bool, SchemaItemSignal, &SchemaItemSignal::multiLine, &SchemaItemSignal::setMultiLine>(PropertyNames::multiLine, PropertyNames::appearanceCategory, true);
 		addProperty<int, SchemaItemSignal, &SchemaItemSignal::precision, &SchemaItemSignal::setPrecision>(PropertyNames::precision, PropertyNames::monitorCategory, true);
@@ -68,6 +73,11 @@ namespace VFrame30
 		{
 			::Proto::wstring* ps = signal->add_appsignalids();
 			Proto::Write(ps, strId);
+		}
+
+		for (const QString& strId : m_impactAppSignalIds)
+		{
+			signal->add_impactappsignalids(strId.toStdString());
 		}
 
 		signal->set_multiline(m_multiLine);
@@ -112,6 +122,8 @@ namespace VFrame30
 
 		const Proto::SchemaItemSignal& signal = message.schemaitem().signal();
 
+		// --
+		//
 		m_appSignalIds.clear();
 		m_appSignalIds.reserve(signal.appsignalids_size());
 
@@ -122,6 +134,18 @@ namespace VFrame30
 			m_appSignalIds.push_back(s);
 		}
 
+		// --
+		//
+		m_impactAppSignalIds.clear();
+		m_impactAppSignalIds.reserve(signal.impactappsignalids_size());
+
+		for (const auto& is : signal.impactappsignalids())
+		{
+			m_impactAppSignalIds.push_back(QString::fromStdString(is));
+		}
+
+		// --
+		//
 		m_multiLine = signal.multiline();
 		m_precision = signal.precision();
 		m_analogFormat = static_cast<E::AnalogFormat>(signal.analogformat());
@@ -214,6 +238,8 @@ namespace VFrame30
 											 const E::ColumnData& data,
 											 const AppSignalParam& signal,
 											 const AppSignalState& signalState,
+											 const AppSignalParam& impactSignal,
+											 const AppSignalState& impactSignalState,
 											 E::AnalogFormat analogFormat,
 											 int precision)
 	{
@@ -225,11 +251,14 @@ namespace VFrame30
 			text = signal.appSignalId();
 			break;
 
+		case E::ColumnData::ImpactAppSignalID:
+			text = impactSignal.appSignalId();
+			break;
+
 		case E::ColumnData::CustomSignalID:
 			if (drawParam->isMonitorMode() == true)
 			{
 				text = signal.customSignalId();
-
 				if (text.isEmpty() == true)
 				{
 					text = QLatin1String("?");
@@ -238,6 +267,21 @@ namespace VFrame30
 			else
 			{
 				text = signal.appSignalId();
+			}
+			break;
+
+		case E::ColumnData::ImpactCustomSignalID:
+			if (drawParam->isMonitorMode() == true)
+			{
+				text = impactSignal.customSignalId();
+				if (text.isEmpty() == true)
+				{
+					text = QLatin1String("?");
+				}
+			}
+			else
+			{
+				text = impactSignal.appSignalId();
 			}
 			break;
 
@@ -253,11 +297,24 @@ namespace VFrame30
 			}
 			else
 			{
-				//text = QLatin1String("Caption");
 				text = signal.appSignalId();			// Good to see AppSignalID while editing
 			}
 			break;
 
+		case E::ColumnData::ImpactCaption:
+			if (drawParam->isMonitorMode() == true)
+			{
+				text = impactSignal.caption();
+				if (text.isEmpty() == true)
+				{
+					text = QLatin1String("?");
+				}
+			}
+			else
+			{
+				text = impactSignal.appSignalId();			// Good to see AppSignalID while editing
+			}
+			break;
 
 		case E::ColumnData::State:
 			{
@@ -287,8 +344,36 @@ namespace VFrame30
 			}
 			break;
 
+		case E::ColumnData::ImpactState:
+			{
+				if (drawParam->isMonitorMode() == true)
+				{
+					if (impactSignalState.m_flags.valid == false)
+					{
+						const static QString nonValidStr = "?";
+						text = nonValidStr;
+					}
+					else
+					{
+						if (impactSignal.isAnalog())
+						{
+							text = QString::number(impactSignalState.m_value, static_cast<char>(analogFormat), precision);
+						}
+						else
+						{
+							text = QString::number(impactSignalState.m_value);
+						}
+					}
+				}
+				else
+				{
+					text = QLatin1String("0");
+				}
+			}
+			break;
+
 		default:
-			assert(false);
+			Q_ASSERT(false);
 		}
 
 		return text;
@@ -393,6 +478,8 @@ namespace VFrame30
 		//
 		//const VFrame30::LogicSchema* logicSchema = dynamic_cast<const VFrame30::LogicSchema*>(drawParam->schema());
 
+		// Get AppSignals
+		//
 		const QStringList& signalIds = appSignalIdList();
 		if (signalIds.size() == 0)
 		{
@@ -413,21 +500,56 @@ namespace VFrame30
 			appSignals[signalIndex].setAppSignalId(id);
 			appSignalStates[signalIndex].m_flags.valid = false;
 
-			bool signalFound = false;
-
 			if (isMonitorMode == true)
 			{
-				// Get signal description
+				// Get signal description/state
 				//
-				appSignals[signalIndex] = drawParam->appSignalController()->signalParam(id, &signalFound);
-
-				// Get signal state
-				//
+				appSignals[signalIndex] = drawParam->appSignalController()->signalParam(id, nullptr);
 				appSignalStates[signalIndex] = drawParam->appSignalController()->signalState(id, nullptr);
 			}
 
 			signalIndex ++;
 		}
+
+		// Get ImpactAppSignals
+		//
+		const QStringList& impactSignalIds = impactAppSignalIdList();
+		if (signalIds.size() == 0)
+		{
+			return;
+		}
+
+		std::vector<AppSignalParam> impactAppSignals;
+		impactAppSignals.resize(std::max(impactSignalIds.size(), signalIds.size()));
+
+		std::vector<AppSignalState> impactAppSignalStates;
+		impactAppSignalStates.resize(std::max(impactSignalIds.size(), signalIds.size()));
+
+		signalIndex = 0;
+		for (const QString& id : impactSignalIds)
+		{
+			impactAppSignals[signalIndex].setAppSignalId(id);
+			impactAppSignalStates[signalIndex].m_flags.valid = false;
+
+			signalIndex ++;
+		}
+
+		signalIndex = 0;
+		for (const QString& id : impactSignalIds)
+		{
+			if (isMonitorMode == true)
+			{
+				// Get signal description/state
+				//
+				impactAppSignals[signalIndex] = drawParam->appSignalController()->signalParam(id, nullptr);
+				impactAppSignalStates[signalIndex] = drawParam->appSignalController()->signalState(id, nullptr);
+			}
+
+			signalIndex ++;
+		}
+
+		Q_ASSERT(impactAppSignals.size() >= appSignals.size());
+		Q_ASSERT(impactAppSignalStates.size() >= appSignalStates.size());
 
 		// Draw column text
 		//
@@ -472,30 +594,76 @@ namespace VFrame30
 
 				double left = rect.left() + startOffset;
 
-				if (multiLine() == false && column.data == E::ColumnData::State)
+				if (multiLine() == false &&
+					(column.data == E::ColumnData::State || column.data == E::ColumnData::ImpactState))
 				{
 					// Divide column state on signal count and draw all them
 					//
-					double subColumnWidth = columnWidth / signalIds.size();
-
-					for (int f = 0; f < signalIds.size(); f++)
+					if (column.data == E::ColumnData::State)
 					{
-						QString text = getCoulumnText(drawParam, column.data, appSignals[f], appSignalStates[f], m_analogFormat, m_precision);
+						double subColumnWidth = columnWidth / signalIds.size();
 
-						QRectF textRect(left + subColumnWidth * f, top, subColumnWidth, columntHeight);
-						textRect.setLeft(textRect.left() + m_font.drawSize() / 8.0);
-						textRect.setRight(textRect.right() - m_font.drawSize() / 8.0);
+						for (int f = 0; f < signalIds.size(); f++)
+						{
+							QString text = getCoulumnText(drawParam,
+														  column.data,
+														  appSignals[f],
+														  appSignalStates[f],
+														  AppSignalParam{},
+														  AppSignalState{},
+														  m_analogFormat,
+														  m_precision);
 
-						painter->setPen(textColor());
+							QRectF textRect(left + subColumnWidth * f, top, subColumnWidth, columntHeight);
+							textRect.setLeft(textRect.left() + m_font.drawSize() / 8.0);
+							textRect.setRight(textRect.right() - m_font.drawSize() / 8.0);
 
-						QRectF boundingRect = rect.intersected(textRect);
+							painter->setPen(textColor());
 
-						DrawHelper::drawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
+							QRectF boundingRect = rect.intersected(textRect);
+
+							DrawHelper::drawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
+						}
+					}
+					else
+					{
+						Q_ASSERT(column.data == E::ColumnData::ImpactState);
+
+						double subColumnWidth = columnWidth / impactSignalIds.size();
+
+						for (int f = 0; f < impactSignalIds.size(); f++)
+						{
+							QString text = getCoulumnText(drawParam,
+														  column.data,
+														  AppSignalParam{},
+														  AppSignalState{},
+														  impactAppSignals[f],
+														  impactAppSignalStates[f],
+														  m_analogFormat,
+														  m_precision);
+
+							QRectF textRect(left + subColumnWidth * f, top, subColumnWidth, columntHeight);
+							textRect.setLeft(textRect.left() + m_font.drawSize() / 8.0);
+							textRect.setRight(textRect.right() - m_font.drawSize() / 8.0);
+
+							painter->setPen(textColor());
+
+							QRectF boundingRect = rect.intersected(textRect);
+
+							DrawHelper::drawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
+						}
 					}
 				}
 				else
 				{
-					QString text = getCoulumnText(drawParam, column.data, appSignals[i], appSignalStates[i], m_analogFormat, m_precision);
+					QString text = getCoulumnText(drawParam,
+												  column.data,
+												  appSignals[i],
+												  appSignalStates[i],
+												  impactAppSignals[i],
+												  impactAppSignalStates[i],
+												  m_analogFormat,
+												  m_precision);
 
 					QRectF textRect(left, top, columnWidth, columntHeight);
 					textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
@@ -574,6 +742,20 @@ namespace VFrame30
 				continue;
 			}
 
+			if (multiLine() == false && c.data == E::ColumnData::ImpactState)
+			{
+				double subColumnWidth = width / impactSignalIds.size();
+
+				for (int f = 0; f < impactSignalIds.size(); f++)
+				{
+					double x = rect.left() + startOffset + subColumnWidth * (f + 1);
+					xpos.push_back(x);
+				}
+
+				startOffset += width;
+				continue;
+			}
+
 			startOffset += width;
 
 			if (i < m_columns.size() - 1)	// don't draw last vert line
@@ -617,6 +799,8 @@ namespace VFrame30
 
 		double startOffset = 0;
 
+		// Get AppSignal
+		//
 		QString appSignalId = appSignalIds();
 
 		AppSignalParam signal;
@@ -625,31 +809,50 @@ namespace VFrame30
 		AppSignalState signalState;
 		signalState.m_flags.valid = false;
 
-		bool signalFound = false;
-
-		if (drawParam->isMonitorMode() == true &&
-			this->isCommented() == false)
+		if (drawParam->isMonitorMode() == true && isCommented() == false)
 		{
-			signal = drawParam->appSignalController()->signalParam(appSignalId, &signalFound);
+			signal = drawParam->appSignalController()->signalParam(appSignalId, nullptr);
 			signalState = drawParam->appSignalController()->signalState(appSignalId, nullptr);
 		}
 
+		// Get ImpactSignal
+		//
+		QString impactAppSignalId = impactAppSignalIds();
+
+		AppSignalParam impactSignal;
+		impactSignal.setAppSignalId(impactAppSignalId);
+
+		AppSignalState impactSignalState;
+		impactSignalState.m_flags.valid = false;
+
+		if (drawParam->isMonitorMode() == true && isCommented() == false)
+		{
+			impactSignal = drawParam->appSignalController()->signalParam(impactAppSignalId, nullptr);
+			impactSignalState = drawParam->appSignalController()->signalState(impactAppSignalId, nullptr);
+		}
+
+		// --
+		//
 		for (size_t i = 0; i < m_columns.size(); i++)
 		{
 			const Column& c = m_columns[i];
 
 			double width = rect.width() * (c.width / 100.0);
-
-			// if this is the last column, give all rest width to it
-			//
 			if (i == m_columns.size() - 1)
 			{
-				width = rect.width() - startOffset;
+				width = rect.width() - startOffset; // if this is the last column, give all rest width to it
 			}
 
 			// Draw data
 			//
-			QString text = getCoulumnText(drawParam, c.data, signal, signalState, m_analogFormat, m_precision);
+			QString text = getCoulumnText(drawParam,
+										  c.data,
+										  signal,
+										  signalState,
+										  impactSignal,
+										  impactSignalState,
+										  m_analogFormat,
+										  m_precision);
 
 			QRectF textRect(rect.left() + startOffset, rect.top(), width, rect.height());
 			textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
@@ -845,6 +1048,8 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return item;
 	}
 
+	// AppSignalIDs
+	//
 	QString SchemaItemSignal::appSignalIds() const
 	{
 		QString result;
@@ -906,6 +1111,70 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return &m_appSignalIds;
 	}
 
+	// ImpactAppSignalIds
+	//
+	QString SchemaItemSignal::impactAppSignalIds() const
+	{
+		QString result;
+
+		for (QString s : m_impactAppSignalIds)
+		{
+			s = s.trimmed();
+
+			if (result.isEmpty() == false)
+			{
+				result.append(QChar::LineFeed);
+			}
+
+			result.append(s);
+		}
+
+		return result;
+	}
+
+	QStringList SchemaItemSignal::impactAppSignalIdList() const
+	{
+		QStringList result;
+		result.reserve(m_impactAppSignalIds.size());
+
+		for (const QString& s : m_impactAppSignalIds)
+		{
+			result.push_back(s.trimmed());
+		}
+
+		return result;
+	}
+
+	void SchemaItemSignal::setImpactAppSignalIds(const QString& s)
+	{
+		if (s.contains(';') == true)
+		{
+			QString sLineFeed(s);
+			sLineFeed.replace(';', QChar::LineFeed);
+
+			m_impactAppSignalIds = sLineFeed.split(QChar::LineFeed, QString::SkipEmptyParts);
+		}
+		else
+		{
+			m_impactAppSignalIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
+		}
+
+		for (QString& s : m_impactAppSignalIds)
+		{
+			s = s.trimmed();
+		}
+
+		adjustHeight();
+		return;
+	}
+
+	QStringList* SchemaItemSignal::mutable_impactAppSignalIds()
+	{
+		return &m_impactAppSignalIds;
+	}
+
+	// Multiline
+	//
 	bool SchemaItemSignal::multiLine() const
 	{
 		return m_multiLine;

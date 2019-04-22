@@ -493,7 +493,14 @@ namespace VFrame30
 		}
 
 		QRectF signalRect = {r.left(), r.top(), r.width(), lineHeight};
-		QString dataText = SchemaItemSignal::getCoulumnText(drawParam, m_dataType, signal, signalState, m_analogFormat, m_precision);
+		QString dataText = SchemaItemSignal::getCoulumnText(drawParam,
+															m_dataType,
+															signal,
+															signalState,
+															signal,				// There is no impact signalfor connection
+															signalState,		// There is no impact signalfor connection
+															m_analogFormat,
+															m_precision);
 
 		DrawHelper::drawText(p, m_font, itemUnit(), dataText, signalRect, Qt::AlignHCenter | Qt::AlignBottom);
 
