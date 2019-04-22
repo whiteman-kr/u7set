@@ -815,7 +815,7 @@ QString MeasureMultiParam::engeneeringRangeStr() const
 					const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
 					if (outParam.isValid() == true)
 					{
-						if (inParam.tuningLowBound() != outParam.engeneeringLowLimit() || inParam.tuningHighBound() != outParam.engeneeringHighLimit())
+						if (inParam.tuningLowBound().toDouble() != outParam.lowEngeneeringUnits() || inParam.tuningHighBound().toDouble() != outParam.highEngeneeringUnits())
 						{
 							result += outParam.engeneeringRangeStr();
 						}

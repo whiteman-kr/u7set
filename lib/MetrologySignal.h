@@ -99,11 +99,12 @@ namespace Metrology
 	{
 		public:
 			SignalLocation() {}
-			SignalLocation(Hardware::DeviceObject* pDeviceObject);
+			SignalLocation(const QString& appSignalID, Hardware::DeviceObject* pDeviceObject);
 			virtual ~SignalLocation() {}
 
 		private:
 
+			QString				m_appSignalID;
 			QString				m_equipmentID;
 
 			RackParam			m_rack;
@@ -118,6 +119,9 @@ namespace Metrology
 		public:
 
 			void				clear();
+
+			QString				appSignalID() const { return m_appSignalID; }
+			void				setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; }
 
 			QString				equipmentID() const { return m_equipmentID; }
 			void				setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
@@ -147,7 +151,7 @@ namespace Metrology
 
 	// ==============================================================================================
 
-	class SignalParam
+	class SignalParam : public Signal
 	{
 	public:
 
@@ -157,20 +161,7 @@ namespace Metrology
 
 	private:
 
-		Hash					m_hash = 0;							// hash calcHash from AppSignalID
-
-		QString					m_appSignalID;
-		QString					m_customAppSignalID;
-		QString					m_caption;
-
-		E::SignalInOutType		m_inOutType = E::SignalInOutType::Internal;
-		E::SignalType			m_signalType = E::SignalType::Analog;
-		E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;		// discrete signals is always treat as UnsignedInt and dataSize == 1
-
 		SignalLocation			m_location;
-
-		int						m_lowADC = 0;
-		int						m_highADC = 0;
 
 		double					m_electricLowLimit = 0;
 		double					m_electricHighLimit = 0;
@@ -184,62 +175,20 @@ namespace Metrology
 		double					m_physicalLowLimit = 0;
 		double					m_physicalHighLimit = 0;
 
-		double					m_engeneeringLowLimit = 0;
-		double					m_engeneeringHighLimit = 0;
-		QString					m_engeneeringUnit;
-		int						m_engeneeringPrecision = 2;
-
-		bool					m_enableTuning = false;
-		double					m_tuningDefaultValue = 0;
-		double					m_tuningLowBound = 0;
-		double					m_tuningHighBound = 0;
-
 	public:
 
 		bool					isValid() const;
 
 		void					setParam(const ::Signal& signal, const SignalLocation& location);
+		void					updateParam(const SignalParam& param);
 
-		Hash					hash() const { return m_hash; }
-
-		QString					appSignalID() const { return m_appSignalID; }
 		void					setAppSignalID(const QString& appSignalID);
-
-		QString					customAppSignalID() const { return m_customAppSignalID; }
-		void					setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
-
-		QString					caption() const { return m_caption; }
-		void					setCaption(const QString& caption) { m_caption = caption; }
-
-		E::SignalInOutType		inOutType() const { return m_inOutType; }
-		void					setInOutType(E::SignalInOutType inOutType) { m_inOutType = inOutType; }
-
-		E::SignalType			signalType() const { return m_signalType; }
-		void					setSignalType(E::SignalType type) { m_signalType = type; }
-
-		E::AnalogAppSignalFormat analogSignalFormat() const { return m_analogSignalFormat; }
-		int						analogSignalFormatInt() const { return TO_INT(m_analogSignalFormat); }
-		void					setAnalogSignalFormat(E::AnalogAppSignalFormat dataFormat) { m_analogSignalFormat = dataFormat; }
-
-		bool					isAnalog() const { return m_signalType == E::SignalType::Analog; }
-		bool					isDiscrete() const { return m_signalType == E::SignalType::Discrete; }
-		bool					isBus() const { return m_signalType == E::SignalType::Bus; }
-
-		bool					isInput() const { return m_inOutType == E::SignalInOutType::Input; }
-		bool					isOutput() const { return m_inOutType == E::SignalInOutType::Output; }
-		bool					isInternal() const { return m_inOutType == E::SignalInOutType::Internal; }
 
 		SignalLocation			location() const { return m_location; }
 		void					setLocation(const SignalLocation& location) { m_location = location; }
 
 		void					setRack(const Metrology::RackParam& rack) { m_location.setRack(rack); }
 		void					setPlace(int place) { m_location.setPlace(place); }
-
-		int						lowADC() const { return m_lowADC; }
-		void					setLowADC(int lowADC) { m_lowADC = lowADC; }
-
-		int						highADC() const { return m_highADC; }
-		void					setHighADC(int highADC) { m_highADC = highADC;}
 
 		QString					adcRangeStr(bool showHex) const;
 
@@ -279,38 +228,13 @@ namespace Metrology
 		bool					physicalRangeIsValid() const;
 		QString					physicalRangeStr() const;
 
-		double					engeneeringLowLimit() const { return m_engeneeringLowLimit; }
-		void					setEngeneeringLowLimit(double lowLimit) { m_engeneeringLowLimit = lowLimit; }
-
-		double					engeneeringHighLimit() const { return m_engeneeringHighLimit; }
-		void					setEngeneeringHighLimit(double highLimit) { m_engeneeringHighLimit = highLimit; }
-
-		QString					engeneeringUnit() const { return m_engeneeringUnit; }
-		void					setEngeneeringUnit(const QString& unit) { m_engeneeringUnit = unit; }
-
-		int						engeneeringPrecision() const { return m_engeneeringPrecision; }
-		void					setEngeneeringPrecision(int precision) { m_engeneeringPrecision = precision; }
-
 		bool					engeneeringRangeIsValid() const;
 		QString					engeneeringRangeStr() const;
 
-		bool					enableTuning() const { return m_enableTuning; }
 		QString					enableTuningStr() const;
-		void					setEnableTuning(bool enableTuning) { m_enableTuning = enableTuning; }
-
-		double					tuningDefaultValue() const { return m_tuningDefaultValue; }
 		QString					tuningDefaultValueStr() const;
-		void					setTuningDefaultValue(double value) { m_tuningDefaultValue = value; }
-
-		double					tuningLowBound() const { return m_tuningLowBound; }
-		void					setTuningLowBound(double value) { m_tuningLowBound = value; }
-
-		double					tuningHighBound() const { return m_tuningHighBound; }
-		void					setTuningHighBound(double value) { m_tuningHighBound = value; }
-
 		bool					tuningRangeIsValid() const;
 		QString					tuningRangeStr() const;
-
 		TuningValueType			tuningValueType();
 
 		bool					readFromXml(XmlReadHelper& xml);

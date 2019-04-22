@@ -100,7 +100,7 @@ namespace Metrology
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 
-	SignalLocation::SignalLocation(Hardware::DeviceObject* pDeviceObject)
+	SignalLocation::SignalLocation(const QString& appSignalID, Hardware::DeviceObject* pDeviceObject)
 	{
 		if (pDeviceObject == nullptr)
 		{
@@ -108,6 +108,7 @@ namespace Metrology
 			return;
 		}
 
+		setAppSignalID(appSignalID);
 		setEquipmentID(pDeviceObject->equipmentId());
 
 		getParentObject(pDeviceObject);
@@ -117,7 +118,7 @@ namespace Metrology
 
 	void SignalLocation::clear()
 	{
-
+		m_appSignalID.clear();
 		m_equipmentID.clear();
 
 		m_rack.clear();
@@ -208,6 +209,7 @@ namespace Metrology
 
 		QString rackID;
 
+		result &= xml.readStringAttribute("AppSignalID", &m_appSignalID);
 		result &= xml.readStringAttribute("EquipmentID", &m_equipmentID);
 
 		result &= xml.readStringAttribute("RackID", &rackID);
@@ -226,6 +228,7 @@ namespace Metrology
 
 	void SignalLocation::writeToXml(XmlWriteHelper& xml)
 	{
+		xml.writeStringAttribute("AppSignalID", appSignalID());			// signal appSignalID
 		xml.writeStringAttribute("EquipmentID", equipmentID());			// signal equipmentID
 
 		xml.writeStringAttribute("RackID", rack().equipmentID());		// signal rack		(other info about rack ref. in RackParam by rack hash)
@@ -242,7 +245,7 @@ namespace Metrology
 
 	bool SignalParam::isValid() const
 	{
-		if (m_appSignalID.isEmpty() == true || m_hash == 0)
+		if (appSignalID().isEmpty() == true || hash() == 0)
 		{
 			return false;
 		}
@@ -254,36 +257,22 @@ namespace Metrology
 
 	void SignalParam::setAppSignalID(const QString& appSignalID)
 	{
-		m_appSignalID = appSignalID;
+		Signal::setAppSignalID(appSignalID);
 
 		if (appSignalID.isEmpty() == true)
 		{
-			m_hash = 0;
+			setHash(0);
 			return;
 		}
 
-		m_hash = calcHash(appSignalID);
+		setHash(calcHash(appSignalID));
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
 
 	void SignalParam::setParam(const ::Signal& signal, const SignalLocation& location)
 	{
-		m_appSignalID = signal.appSignalID();
-		m_customAppSignalID = signal.customAppSignalID();
-		m_caption = signal.caption();
-
-		m_inOutType = signal.inOutType();
-		m_signalType = signal.signalType();
-		m_analogSignalFormat = signal.analogSignalFormat();
-
 		m_location = location;
-
-		// adc
-		//
-
-		m_lowADC = signal.lowADC();
-		m_highADC = signal.highADC();
 
 		// electricUnits
 		//
@@ -400,22 +389,29 @@ namespace Metrology
 				m_physicalHighLimit = qph.toDouble();
 			}
 		}
+	}
 
-		// engeneeringUnits
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void SignalParam::updateParam(const SignalParam& param)
+	{
+		m_location = param.location();
+
+		// electricUnits
 		//
 
-		m_engeneeringLowLimit = signal.lowEngeneeringUnits();
-		m_engeneeringHighLimit = signal.highEngeneeringUnits();
-		m_engeneeringUnit = signal.unit();
-		m_engeneeringPrecision = signal.decimalPlaces();
+		m_electricLowLimit = param.electricLowLimit();
+		m_electricHighLimit = param.electricHighLimit();
+		m_electricUnitID = param.electricUnitID();
 
-		// tuning
+		m_electricSensorType = param.sensorType();
+		m_electricPrecision = param.electricPrecision();
+
+		// physicalUnits
 		//
 
-		m_enableTuning = signal.enableTuning();
-		m_tuningDefaultValue = signal.tuningDefaultValue().toDouble();
-		m_tuningLowBound = signal.tuningLowBound().toDouble();
-		m_tuningHighBound = signal.tuningHighBound().toDouble();
+		m_physicalLowLimit = param.physicalLowLimit();
+		m_physicalHighLimit = param.physicalHighLimit();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -429,36 +425,9 @@ namespace Metrology
 			return false;
 		}
 
-		result &= xml.readStringAttribute("AppSignalID", &m_appSignalID);
-		if (m_appSignalID.isEmpty() == true)
-		{
-			return false;
-		}
-
-		m_hash = calcHash(m_appSignalID);
-		if (m_hash == 0)
-		{
-			return false;
-		}
-
-		result &= xml.readStringAttribute("CustomAppSignalID", &m_customAppSignalID);
-		result &= xml.readStringAttribute("Caption", &m_caption);
-
 		int type = 0;
 
-		result &= xml.readIntAttribute("InOutType", &type);
-		m_inOutType  = static_cast<E::SignalInOutType>(type);
-
-		result &= xml.readIntAttribute("SignalType", &type);
-		m_signalType = static_cast<E::SignalType>(type);
-
-		result &= xml.readIntAttribute("AnalogSignalFormat", &type);
-		m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(type);
-
 		result &= m_location.readFromXml(xml);
-
-		result &= xml.readIntAttribute("LowADC", &m_lowADC);
-		result &= xml.readIntAttribute("HighADC", &m_highADC);
 
 		result &= xml.readDoubleAttribute("ElectricLowLimit", &m_electricLowLimit);
 		result &= xml.readDoubleAttribute("ElectricHighLimit", &m_electricHighLimit);
@@ -472,16 +441,6 @@ namespace Metrology
 		result &= xml.readDoubleAttribute("PhysicalLowLimit", &m_physicalLowLimit);
 		result &= xml.readDoubleAttribute("PhysicalHighLimit", &m_physicalHighLimit);
 
-		result &= xml.readDoubleAttribute("EngeneeringLowLimit", &m_engeneeringLowLimit);
-		result &= xml.readDoubleAttribute("EngeneeringHighLimit", &m_engeneeringHighLimit);
-		result &= xml.readStringAttribute("EngeneeringUnit", &m_engeneeringUnit);
-		result &= xml.readIntAttribute("EngeneeringPrecision", &m_engeneeringPrecision);
-
-		result &= xml.readBoolAttribute("EnableTuning", &m_enableTuning);
-		result &= xml.readDoubleAttribute("TuningDefaultValue", &m_tuningDefaultValue);
-		result &= xml.readDoubleAttribute("TuningLowBound", &m_tuningLowBound);
-		result &= xml.readDoubleAttribute("TuningHighBound", &m_tuningHighBound);
-
 		return result;
 	}
 
@@ -491,18 +450,7 @@ namespace Metrology
 	{
 		xml.writeStartElement("Signal");
 		{
-			xml.writeStringAttribute("AppSignalID", appSignalID());
-			xml.writeStringAttribute("CustomAppSignalID", customAppSignalID());
-			xml.writeStringAttribute("Caption", caption());
-
-			xml.writeIntAttribute("InOutType", TO_INT(inOutType()));
-			xml.writeIntAttribute("SignalType", signalType());
-			xml.writeIntAttribute("AnalogSignalFormat", TO_INT(analogSignalFormat()));
-
 			location().writeToXml(xml);
-
-			xml.writeIntAttribute("LowADC", lowADC());
-			xml.writeIntAttribute("HighADC", highADC());
 
 			xml.writeDoubleAttribute("ElectricLowLimit", electricLowLimit());
 			xml.writeDoubleAttribute("ElectricHighLimit", electricHighLimit());
@@ -513,16 +461,6 @@ namespace Metrology
 
 			xml.writeDoubleAttribute("PhysicalLowLimit", physicalLowLimit());
 			xml.writeDoubleAttribute("PhysicalHighLimit", physicalHighLimit());
-
-			xml.writeDoubleAttribute("EngeneeringLowLimit", engeneeringLowLimit());
-			xml.writeDoubleAttribute("EngeneeringHighLimit", engeneeringHighLimit());
-			xml.writeStringAttribute("EngeneeringUnit", engeneeringUnit());
-			xml.writeIntAttribute("EngeneeringPrecision", engeneeringPrecision());
-
-			xml.writeBoolAttribute("EnableTuning", enableTuning());
-			xml.writeDoubleAttribute("TuningDefaultValue", tuningDefaultValue());
-			xml.writeDoubleAttribute("TuningLowBound", tuningLowBound());
-			xml.writeDoubleAttribute("TuningHighBound", tuningHighBound());
 		}
 		xml.writeEndElement();
 	}
@@ -535,11 +473,11 @@ namespace Metrology
 
 		if (showHex == false)
 		{
-			range.sprintf("%d .. %d", m_lowADC, m_highADC);
+			range.sprintf("%d .. %d", lowADC(), highADC());
 		}
 		else
 		{
-			range.sprintf("0x%04X .. 0x%04X", m_lowADC, m_highADC);
+			range.sprintf("0x%04X .. 0x%04X", lowADC(), highADC());
 		}
 
 		return range;
@@ -616,7 +554,7 @@ namespace Metrology
 	{
 		QString range, formatStr;
 
-		formatStr.sprintf("%%.%df", m_engeneeringPrecision);
+		formatStr.sprintf("%%.%df", decimalPlaces());
 
 		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_physicalLowLimit, m_physicalHighLimit);
 
@@ -627,7 +565,7 @@ namespace Metrology
 
 	bool SignalParam::engeneeringRangeIsValid() const
 	{
-		if (m_engeneeringLowLimit == 0.0 && m_engeneeringHighLimit == 0.0)
+		if (lowEngeneeringUnits() == 0.0 && highEngeneeringUnits() == 0.0)
 		{
 			return false;
 		}
@@ -641,13 +579,13 @@ namespace Metrology
 	{
 		QString range, formatStr;
 
-		formatStr.sprintf("%%.%df", m_engeneeringPrecision);
+		formatStr.sprintf("%%.%df", decimalPlaces());
 
-		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_engeneeringLowLimit, m_engeneeringHighLimit);
+		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), lowEngeneeringUnits(), highEngeneeringUnits());
 
-		if (m_engeneeringUnit.isEmpty() == false)
+		if (unit().isEmpty() == false)
 		{
-			range.append(" " + m_engeneeringUnit);
+			range.append(" " + unit());
 		}
 
 		return range;
@@ -657,7 +595,7 @@ namespace Metrology
 
 	QString SignalParam::enableTuningStr() const
 	{
-		if (m_enableTuning == false)
+		if (enableTuning() == false)
 		{
 			return QString();
 		}
@@ -669,26 +607,26 @@ namespace Metrology
 
 	QString SignalParam::tuningDefaultValueStr() const
 	{
-		if (m_enableTuning == false)
+		if (enableTuning() == false)
 		{
 			return QString();
 		}
 
 		QString stateStr, formatStr;
 
-		switch (m_signalType)
+		switch (signalType())
 		{
 			case E::SignalType::Analog:
 
-				formatStr.sprintf("%%.%df", m_engeneeringPrecision);
+				formatStr.sprintf("%%.%df", decimalPlaces());
 
-				stateStr.sprintf(formatStr.toLocal8Bit(), m_tuningDefaultValue);
+				stateStr.sprintf(formatStr.toLocal8Bit(), tuningDefaultValue().toDouble());
 
 				break;
 
 			case E::SignalType::Discrete:
 
-				stateStr = m_tuningDefaultValue == 0.0 ? QString("No") : QString("Yes");
+				stateStr = tuningDefaultValue().toDouble() == 0.0 ? QString("No") : QString("Yes");
 
 				break;
 
@@ -703,12 +641,12 @@ namespace Metrology
 
 	bool SignalParam::tuningRangeIsValid() const
 	{
-		if (m_enableTuning == false)
+		if (enableTuning() == false)
 		{
 			return true;
 		}
 
-		if (m_tuningLowBound == 0.0 && m_tuningHighBound == 0.0)
+		if (tuningLowBound().toDouble() == 0.0 && tuningHighBound().toDouble() == 0.0)
 		{
 			return false;
 		}
@@ -720,16 +658,16 @@ namespace Metrology
 
 	QString SignalParam::tuningRangeStr() const
 	{
-		if (m_enableTuning == false)
+		if (enableTuning() == false)
 		{
 			return QString();
 		}
 
 		QString range, formatStr;
 
-		formatStr.sprintf("%%.%df", m_engeneeringPrecision);
+		formatStr.sprintf("%%.%df", decimalPlaces());
 
-		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), m_tuningLowBound, m_tuningHighBound);
+		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), tuningLowBound().toDouble(), tuningHighBound().toDouble());
 
 		return range;
 	}
@@ -740,11 +678,11 @@ namespace Metrology
 	{
 		TuningValueType type = TuningValueType::Float;
 
-		switch (m_signalType)
+		switch (signalType())
 		{
 			case E::SignalType::Analog:
 
-				switch (m_analogSignalFormat)
+				switch (analogSignalFormat())
 				{
 					case E::AnalogAppSignalFormat::SignedInt32:	type = TuningValueType::SignedInt32;	break;
 					case E::AnalogAppSignalFormat::Float32:		type = TuningValueType::Float;			break;

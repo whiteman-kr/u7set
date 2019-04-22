@@ -507,7 +507,7 @@ QString TuningSignalTable::signalStateStr(Metrology::Signal* pSignal) const
 	{
 		case E::SignalType::Analog:
 
-			formatStr.sprintf("%%.%df", param.engeneeringPrecision());
+			formatStr.sprintf("%%.%df", param.decimalPlaces());
 
 			stateStr.sprintf(formatStr.toAscii(), pSignal->state().value());
 
@@ -1282,11 +1282,11 @@ void TuningSignalStateDialog::onOk()
 {
 	double state = m_stateEdit->text().toDouble();
 
-	if (state < m_param.tuningLowBound()|| state > m_param.tuningHighBound())
+	if (state < m_param.tuningLowBound().toDouble()|| state > m_param.tuningHighBound().toDouble())
 	{
 		QString str, formatStr;
 
-		formatStr.sprintf("%%.%df", m_param.engeneeringPrecision());
+		formatStr.sprintf("%%.%df", m_param.decimalPlaces());
 
 		str.sprintf("Failed input value: " + formatStr.toAscii(), state);
 		str += tr("\nRange of signal: %1").arg(m_param.tuningRangeStr());

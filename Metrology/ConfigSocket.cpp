@@ -148,6 +148,11 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 
 		result = true;
 
+		if (bfi.ID == CFG_FILE_ID_APP_SIGNAL_SET)
+		{
+			result &= readAppSignalSet(fileData);						// fill AppSignalSets
+		}
+
 		if (bfi.ID == CFG_FILE_ID_METROLOGY_SIGNALS)
 		{
 			result &= readMetrologySignals(fileData);				// fill MetrologySignals
@@ -170,6 +175,39 @@ bool ConfigSocket::readConfiguration(const QByteArray& fileData)
 	qDebug() << "ConfigSocket::readConfiguration - " << (result == true ? "OK" : "ERROR!");
 
 	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool ConfigSocket::readAppSignalSet(const QByteArray& fileData)
+{
+	::Proto::AppSignalSet protoAppSignalSet;
+
+	bool result = protoAppSignalSet.ParseFromArray(fileData.constData(), fileData.size());
+	if (result == false)
+	{
+		return false;
+	}
+
+	int signalCount = protoAppSignalSet.appsignal_size();
+	for(int i = 0; i < signalCount; i++)
+	{
+		const ::Proto::AppSignal& protoAppSignal = protoAppSignalSet.appsignal(i);
+
+		Metrology::SignalParam param;
+		param.serializeFrom(protoAppSignal);
+
+		theSignalBase.appendSignal(param);
+	}
+
+	if (theSignalBase.signalCount() == 0)
+	{
+		qDebug() << "ConfigSocket::readAppSignalSet - Signals have not loaded";
+		assert(false);
+		return false;
+	}
+
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -208,6 +246,7 @@ bool ConfigSocket::readMetrologySignals(const QByteArray& fileData)
 
 	return result;
 }
+
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -323,6 +362,11 @@ bool ConfigSocket::readSignals(const QByteArray& fileData, int fileVersion)
 		return false;
 	}
 
+	QTime responseTime;
+	responseTime.start();
+
+
+
 	Metrology::SignalParam param;
 
 	int signalCount = 0;
@@ -339,21 +383,19 @@ bool ConfigSocket::readSignals(const QByteArray& fileData, int fileVersion)
 		bool res = param.readFromXml(xml);
 		if (res == true)
 		{
-			if (theSignalBase.appendSignal(param) == -1)
+			Metrology::Signal* pSignal = theSignalBase.signalPtr(param.location().appSignalID());
+			if (pSignal == nullptr)
 			{
-				res = false;
+				continue;
 			}
+
+			pSignal->param().updateParam(param);
 		}
 
 		result &= res;
 	}
 
-	if (theSignalBase.signalCount() != signalCount)
-	{
-		qDebug() << "ConfigSocket::readSignals- Signals loading error, loaded: " << theSignalBase.signalCount() << " from " << signalCount;
-		assert(false);
-		return false;
-	}
+	qDebug() << __FUNCTION__ << ", Time for load: " << responseTime.elapsed() << " ms";
 
 	theSignalBase.initSignals();
 

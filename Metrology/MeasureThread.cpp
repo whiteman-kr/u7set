@@ -595,7 +595,7 @@ void MeasureThread::measureLinearity()
 						// at the beginning we need get engeneering value because if range is not Linear (for instance Ohm or mV)
 						// then by engeneering value we may get electric value
 						//
-						double engeneeringVal = (point.percent() * (param.engeneeringHighLimit() - param.engeneeringLowLimit()) / 100) + param.engeneeringLowLimit();
+						double engeneeringVal = (point.percent() * (param.highEngeneeringUnits() - param.lowEngeneeringUnits()) / 100) + param.lowEngeneeringUnits();
 						double electricVal = conversion(engeneeringVal, CT_ENGENEER_TO_ELECTRIC, param);
 
 						polarityTest(electricVal, m_activeSignalParam[c]);	// polarity test
@@ -605,7 +605,7 @@ void MeasureThread::measureLinearity()
 					break;
 				case OUTPUT_SIGNAL_TYPE_FROM_TUNING:
 					{
-						double tuningVal = (point.percent() * (param.tuningHighBound() - param.tuningLowBound()) / 100) + param.tuningLowBound();
+						double tuningVal = (point.percent() * (param.tuningHighBound().toDouble() - param.tuningLowBound().toDouble()) / 100) + param.tuningLowBound().toDouble();
 
 						theSignalBase.tuning().appendCmdFowWrite(param.hash(), param.tuningValueType(), tuningVal);
 					}

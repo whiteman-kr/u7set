@@ -227,7 +227,7 @@ void LinearityMeasurement::fill_measure_input(const MeasureMultiParam &measurePa
 	double electric = isNegativeRange ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();
 	double engeneering = conversion(electric, CT_ELECTRIC_TO_ENGENEER, inParam);
 
-	setPercent(((engeneering - inParam.engeneeringLowLimit()) * 100)/(inParam.engeneeringHighLimit() - inParam.engeneeringLowLimit()));
+	setPercent(((engeneering - inParam.lowEngeneeringUnits()) * 100)/(inParam.highEngeneeringUnits() - inParam.lowEngeneeringUnits()));
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
 	setNominal(MEASURE_LIMIT_TYPE_ENGENEER, engeneering);
@@ -333,7 +333,7 @@ void LinearityMeasurement::fill_measure_output(const MeasureMultiParam &measureP
 	// nominal
 	//
 
-	double engeneering = (measureParam.percent() * (outParam.engeneeringHighLimit() - outParam.engeneeringLowLimit()) / 100) + outParam.engeneeringLowLimit();
+	double engeneering = (measureParam.percent() * (outParam.highEngeneeringUnits() - outParam.lowEngeneeringUnits()) / 100) + outParam.lowEngeneeringUnits();
 	double electric = conversion(engeneering, CT_ENGENEER_TO_ELECTRIC, outParam);
 
 	setPercent(measureParam.percent());
@@ -404,10 +404,10 @@ void LinearityMeasurement::setLimits(const Metrology::SignalParam& param)
 	setUnit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricUnit());
 	setLimitPrecision(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricPrecision());
 
-	setLowLimit(MEASURE_LIMIT_TYPE_ENGENEER, param.engeneeringLowLimit());
-	setHighLimit(MEASURE_LIMIT_TYPE_ENGENEER, param.engeneeringHighLimit());
-	setUnit(MEASURE_LIMIT_TYPE_ENGENEER, param.engeneeringUnit());
-	setLimitPrecision(MEASURE_LIMIT_TYPE_ENGENEER, param.engeneeringPrecision());
+	setLowLimit(MEASURE_LIMIT_TYPE_ENGENEER, param.lowEngeneeringUnits());
+	setHighLimit(MEASURE_LIMIT_TYPE_ENGENEER, param.highEngeneeringUnits());
+	setUnit(MEASURE_LIMIT_TYPE_ENGENEER, param.unit());
+	setLimitPrecision(MEASURE_LIMIT_TYPE_ENGENEER, param.decimalPlaces());
 }
 
 // -------------------------------------------------------------------------------------------------------------------

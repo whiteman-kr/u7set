@@ -260,13 +260,13 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 
 	QString stateStr, formatStr;
 
-	formatStr.sprintf(("%%.%df"), param.engeneeringPrecision());
+	formatStr.sprintf(("%%.%df"), param.decimalPlaces());
 
 	stateStr.sprintf(formatStr.toAscii(), state.value());
 
-	if (param.engeneeringUnit().isEmpty() == false)
+	if (param.unit().isEmpty() == false)
 	{
-		stateStr.append(" " + param.engeneeringUnit());
+		stateStr.append(" " + param.unit());
 	}
 
 	// append electrical equivalent
