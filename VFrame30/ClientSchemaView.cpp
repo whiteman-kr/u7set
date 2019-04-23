@@ -137,6 +137,11 @@ namespace VFrame30
 		return result == QMessageBox::Yes;
 	}
 
+	bool ScriptSchemaView::variableExists(QString name) const
+	{
+		return m_clientSchemaView->variableExists(name);
+	}
+
 	QVariant ScriptSchemaView::variable(QString name)
 	{
 		return m_clientSchemaView->variable(name);
@@ -480,6 +485,85 @@ namespace VFrame30
 	QString ClientSchemaView::globalScript() const
 	{
 		return m_schemaManager->globalScript();
+	}
+
+	bool ClientSchemaView::runScript(QJSValue& evaluatedJs, bool reportError)
+	{
+		if (evaluatedJs.isUndefined() == true ||
+			evaluatedJs.isError() == true)
+		{
+			return false;
+		}
+
+		// Run script
+		//
+		QJSValue jsResult = evaluatedJs.call();
+		if (jsResult.isError() == true)
+		{
+			if (reportError == true)
+			{
+				reportSqriptError(jsResult);
+			}
+
+			return false;
+		}
+
+		return true;
+	}
+
+	QJSValue ClientSchemaView::evaluateScript(QString script, bool reportError)
+	{
+		QJSValue result = jsEngine()->evaluate(globalScript() + script);
+
+		if (result.isError() == true)
+		{
+			if (reportError == true)
+			{
+				reportSqriptError(result);
+			}
+		}
+
+		return result;
+	}
+
+	QString ClientSchemaView::formatSqriptError(const QJSValue& scriptValue) const
+	{
+		qDebug() << "Script running uncaught exception at line " << scriptValue.property("lineNumber").toInt();
+		qDebug() << "\tClass: " << metaObject()->className();
+		qDebug() << "\tStack: " << scriptValue.property("stack").toString();
+		qDebug() << "\tMessage: " << scriptValue.toString();
+
+		QString str = QString("Script running uncaught exception at line %1\n"
+							  "\tClass: %2 %3\n"
+							  "\tStack: %4\n"
+							  "\tMessage: %5")
+					  .arg(scriptValue.property("lineNumber").toInt())
+					  .arg(metaObject()->className())
+					  .arg(scriptValue.property("stack").toString())
+					  .arg(scriptValue.toString());
+
+		return str;
+	}
+
+	void ClientSchemaView::reportSqriptError(const QJSValue& scriptValue)
+	{
+		qDebug() << "Script running uncaught exception at line " << scriptValue.property("lineNumber").toInt();
+		qDebug() << "\tClass: " << metaObject()->className();
+		qDebug() << "\tStack: " << scriptValue.property("stack").toString();
+		qDebug() << "\tMessage: " << scriptValue.toString();
+
+		QMessageBox::critical(this,
+							  QApplication::applicationDisplayName(),
+							  tr("Script uncaught exception at line %1:\n%2")
+								  .arg(scriptValue.property("lineNumber").toInt())
+								  .arg(scriptValue.toString()));
+
+		return;
+	}
+
+	bool ClientSchemaView::variableExists(QString name) const
+	{
+		return m_variables.contains(name);
 	}
 
 	QVariant ClientSchemaView::variable(QString name) const

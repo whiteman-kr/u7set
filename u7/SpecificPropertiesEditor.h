@@ -188,6 +188,7 @@ private:
 	QTableView* m_propertiesTable = nullptr;
 	ExtWidgets::PropertyEditor* m_propertyEditor = nullptr;
 
+	QSplitter* m_topSplitter = nullptr;
 
 	QPushButton* m_addButton = nullptr;
 	QPushButton* m_cloneButton = nullptr;

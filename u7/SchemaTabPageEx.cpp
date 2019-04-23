@@ -940,6 +940,11 @@ void SchemaListModelEx::applyTagFilter(DbFileTree* filesTree, const std::map<int
 			continue;
 		}
 
+		if (file->isFolder() == true)
+		{
+			continue;	// If this folder contains any child it will be added later in "Add parent" part
+		}
+
 		if (auto dit = detailsMap.find(fileId);
 			dit != detailsMap.end())
 		{
@@ -951,11 +956,10 @@ void SchemaListModelEx::applyTagFilter(DbFileTree* filesTree, const std::map<int
 				filteredFiles[fileId] = file;
 				continue;
 			}
-
 		}
 		else
 		{
-			assert(dit != detailsMap.end());
+			Q_ASSERT(dit != detailsMap.end());
 		}
 	}
 
@@ -1069,6 +1073,10 @@ void SchemaListModelEx::refresh()
 		if (parsed == true)
 		{
 			detailsMap[fileId] = std::move(details);
+		}
+		else
+		{
+			//qDebug() << "void SchemaListModelEx::refresh(): File not parsed " << fileId << ", " << fileInfo->fileName();
 		}
 	}
 

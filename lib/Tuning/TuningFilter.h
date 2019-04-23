@@ -58,7 +58,8 @@ public:
 		Root,
 		Tree,
 		Tab,
-		Button
+		Button,
+		Counter
 	};
 	Q_ENUM(InterfaceType)
 
@@ -85,6 +86,13 @@ public:
 		FiltersSwitch,
 	};
 	Q_ENUM(TabType)
+
+	enum class CounterType
+	{
+		StatusBar,
+		FilterTree,
+	};
+	Q_ENUM(CounterType)
 
 public:
 	TuningFilter();
@@ -197,6 +205,9 @@ public:
 	TabType tabType() const;
 	void setTabType(TabType type);
 
+	CounterType counterType() const;
+	void setCounterType(CounterType type);
+
 	QString tags() const;
 	void setTags(const QString& value);
 
@@ -244,12 +255,14 @@ public:
 	bool isTree() const;
 	bool isTab() const;
 	bool isButton() const;
+	bool isCounter() const;
 
 	void addChild(const std::shared_ptr<TuningFilter>& child);
 	void insertChild(int index, const std::shared_ptr<TuningFilter>& child);
 
 	void removeChild(const std::shared_ptr<TuningFilter>& child);
 	bool removeChild(const QString& ID);
+	bool removeChild(int index);
 
 	void removeAllChildren();
 	void removeChildren(Source source);
@@ -310,6 +323,7 @@ private:
 	std::vector<QString> m_valueColumnsAppSignalIdSuffixes;
 
 	TabType m_tabType = TabType::Generic;
+	CounterType m_counterType = CounterType::StatusBar;
 
 	QStringList m_tags;
 

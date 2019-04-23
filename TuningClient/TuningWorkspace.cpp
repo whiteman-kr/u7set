@@ -136,7 +136,7 @@ void FilterButton::slot_toggled(bool checked)
 
 int TuningWorkspace::m_instanceCounter = 0;
 
-TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, TuningFilterStorage* tuningFilterStorage, QWidget* parent) :
+TuningWorkspace::TuningWorkspace(std::shared_ptr<TuningFilter> treeFilter, std::shared_ptr<TuningFilter> workspaceFilter, TuningSignalManager* tuningSignalManager, TuningClientTcpClient* tuningTcpClient, TuningClientFilterStorage* tuningFilterStorage, QWidget* parent) :
 	QWidget(parent),
 	m_tuningSignalManager(tuningSignalManager),
 	m_tuningTcpClient(tuningTcpClient),
@@ -225,30 +225,32 @@ TuningWorkspace::~TuningWorkspace()
 	{
 		QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
 
-		if (columnNameIndex != -1)
+		if (m_columnNameIndex != -1)
 		{
-			int width = m_filterTree->columnWidth(columnNameIndex);
+			int width = m_filterTree->columnWidth(m_columnNameIndex);
 			settings.setValue("TuningWorkspace/FilterTreeColumnIndex", width);
 
 		}
-		if (columnAccessIndex != -1)
+		if (m_columnAccessIndex != -1)
 		{
-			int width = m_filterTree->columnWidth(columnAccessIndex);
+			int width = m_filterTree->columnWidth(m_columnAccessIndex);
 			settings.setValue("TuningWorkspace/FilterTreeColumnsAccess", width);
 		}
-		if (columnDiscreteCountIndex != -1)
+
+		for (int i = 0; i < static_cast<int>(m_columnDiscreteCountIndexes.size()); i++)
 		{
-			int width = m_filterTree->columnWidth(columnDiscreteCountIndex);
-			settings.setValue("TuningWorkspace/FilterTreeColumnDiscreteCount", width);
+			int width = m_filterTree->columnWidth(m_columnDiscreteCountIndexes[i]);
+			settings.setValue(tr("TuningWorkspace/FilterTreeColumnCounter%1").arg(i), width);
 		}
-		if (columnStatusIndex != -1)
+
+		if (m_columnStatusIndex != -1)
 		{
-			int width = m_filterTree->columnWidth(columnStatusIndex);
+			int width = m_filterTree->columnWidth(m_columnStatusIndex);
 			settings.setValue("TuningWorkspace/FilterTreeColumnStatus", width);
 		}
-		if (columnSorIndex != -1)
+		if (m_columnSorIndex != -1)
 		{
-			int width = m_filterTree->columnWidth(columnSorIndex);
+			int width = m_filterTree->columnWidth(m_columnSorIndex);
 			settings.setValue("TuningWorkspace/FilterTreeColumnSor", width);
 		}
 	}
@@ -311,7 +313,8 @@ bool TuningWorkspace::askForSavePendingChanges()
 
 void TuningWorkspace::onTimer()
 {
-	updateCounters();
+	updateTabsButtonsCounters();
+
 	updateTreeItemsStatus();
 
 	for (auto it : m_tuningWorkspacesMap)
@@ -389,37 +392,55 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 		connect(m_filterTree, &QTreeWidget::itemSelectionChanged, this, &TuningWorkspace::slot_treeSelectionChanged);
 		connect(m_filterTree, &QWidget::customContextMenuRequested, this, &TuningWorkspace::slot_treeContextMenuRequested);
 
-		int columnIndex = columnNameIndex;
+		int columnIndex = m_columnNameIndex;
 
 		QStringList headerLabels;
 
 		headerLabels << tr("Caption");
 		columnIndex++;
 
+		// Access (?)
+
 		if (theConfigSettings.useAccessFlag == true)
 		{
 			headerLabels << tr("Access");
-			columnAccessIndex = columnIndex;
+			m_columnAccessIndex = columnIndex;
 			columnIndex++;
 		}
 
-		if (theConfigSettings.showDiscreteCounters == true)
-		{
-			headerLabels << tr("Discretes");
-			columnDiscreteCountIndex = columnIndex;
-			columnIndex++;
-		}
-
-		headerLabels << tr("Status");
-		columnStatusIndex = columnIndex;
-		columnIndex++;
+		// SOR (?)
 
 		if (theConfigSettings.showSOR == true)
 		{
 			headerLabels << tr("SOR");
-			columnSorIndex = columnIndex;
+			m_columnSorIndex = columnIndex;
 			columnIndex++;
 		}
+
+		// Counters ()
+
+		int counerColumnsCount = m_tuningFilterStorage->schemaCounterFiltersCount();
+		const QStringList& schemaCounterFiltersNames = m_tuningFilterStorage->schemaCounterFiltersNames();
+
+		if (static_cast<int>(schemaCounterFiltersNames.size()) != counerColumnsCount)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		for (int i = 0; i < counerColumnsCount; i++)
+		{
+			headerLabels << schemaCounterFiltersNames.at(i);
+			m_columnDiscreteCountIndexes.push_back(columnIndex++);
+		}
+
+		// Status
+
+		headerLabels << tr("Status");
+		m_columnStatusIndex = columnIndex;
+		columnIndex++;
+
+		//
 
 		headerLabels << tr("");
 
@@ -432,7 +453,7 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 
 		QSettings settings(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
 
-		if (columnNameIndex != -1)
+		if (m_columnNameIndex != -1)
 		{
 			const int defaultWidth = 200;
 
@@ -442,9 +463,10 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 				width = defaultWidth;
 			}
 
-			m_filterTree->setColumnWidth(columnNameIndex, width);
+			m_filterTree->setColumnWidth(m_columnNameIndex, width);
 		}
-		if (columnAccessIndex != -1)
+
+		if (m_columnAccessIndex != -1)
 		{
             const int defaultWidth = 50;
 
@@ -454,33 +476,11 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 				width = defaultWidth;
 			}
 
-			m_filterTree->setColumnWidth(columnAccessIndex, width);
+			m_filterTree->setColumnWidth(m_columnAccessIndex, width);
+
 		}
-		if (columnDiscreteCountIndex != -1)
-		{
-			const int defaultWidth = 80;
 
-			int width = settings.value("TuningWorkspace/FilterTreeColumnDiscreteCount", defaultWidth).toInt();
-			if (width < defaultWidth || width > columnMaxWidth)
-			{
-				width = defaultWidth;
-			}
-
-			m_filterTree->setColumnWidth(columnDiscreteCountIndex, width);
-		}
-		if (columnStatusIndex != -1)
-		{
-			const int defaultWidth = 80;
-
-			int width = settings.value("TuningWorkspace/FilterTreeColumnStatus", defaultWidth).toInt();
-			if (width < defaultWidth || width > columnMaxWidth)
-			{
-				width = defaultWidth;
-			}
-
-			m_filterTree->setColumnWidth(columnStatusIndex, width);
-		}
-		if (columnSorIndex != -1)
+		if (m_columnSorIndex != -1)
 		{
 			const int defaultWidth = 80;
 
@@ -490,7 +490,33 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 				width = defaultWidth;
 			}
 
-			m_filterTree->setColumnWidth(columnSorIndex, width);
+			m_filterTree->setColumnWidth(m_columnSorIndex, width);
+		}
+
+		for (int i = 0; i < counerColumnsCount; i++)
+		{
+			const int defaultWidth = 40;
+
+			int width = settings.value(QString("TuningWorkspace/FilterTreeColumnCounter%1").arg(i), defaultWidth).toInt();
+			if (width < defaultWidth || width > columnMaxWidth)
+			{
+				width = defaultWidth;
+			}
+
+			m_filterTree->setColumnWidth(m_columnDiscreteCountIndexes[i], width);
+		}
+
+		if (m_columnStatusIndex != -1)
+		{
+			const int defaultWidth = 80;
+
+			int width = settings.value("TuningWorkspace/FilterTreeColumnStatus", defaultWidth).toInt();
+			if (width < defaultWidth || width > columnMaxWidth)
+			{
+				width = defaultWidth;
+			}
+
+			m_filterTree->setColumnWidth(m_columnStatusIndex, width);
 		}
 
 		//
@@ -947,6 +973,12 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 			}
 		}
 
+
+		//if (f->isSourceSchema() == true || f->isSourceEquipment() == true)
+		//{
+			//caption += QString(" [+%1 DEBUG counters]").arg(f->childFiltersCount());
+		//}
+
 		static QString equipmentString = tr("Equipment");
 		static QString schemasString = tr("Schemas");
 		Q_UNUSED(equipmentString);
@@ -964,7 +996,7 @@ void TuningWorkspace::addChildTreeObjects(const std::shared_ptr<TuningFilter> fi
 	}
 }
 
-void TuningWorkspace::updateCounters()
+void TuningWorkspace::updateTabsButtonsCounters()
 {
 	// Tab counters
 
@@ -1099,79 +1131,113 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 
 	if (filter->isEmpty() == false)
 	{
-		TuningCounters counters = filter->counters();
+		updateTreeItemCounters(treeItem, filter.get());
 
 		// Counters column
 
-		if (columnDiscreteCountIndex != -1 && filter->hasDiscreteCounter() == true)
-		{
-			treeItem->setText(columnDiscreteCountIndex, QString("%1").arg(counters.discreteCounter));
-		}
+		TuningCounters counters = filter->counters();
 
 		// Status column
 
 		if (filter->isSourceEquipment() == true)
 		{
-			updateTuningSourceTreeItem(treeItem);
+			updateTuningSourceTreeItem(treeItem, filter.get());
 		}
 		else
 		{
-			assert(columnStatusIndex != -1);
+			assert(m_columnStatusIndex != -1);
+
+			QColor backColor;
+			QColor textColor;
+			QString text;
 
 			if (counters.errorCounter == 0)
 			{
-				treeItem->setText(columnStatusIndex, QString());
-				treeItem->setBackground(columnStatusIndex, QBrush(Qt::white));
-				treeItem->setForeground(columnStatusIndex, QBrush(Qt::black));
+				backColor = Qt::white;
+				textColor = Qt::black;
 			}
 			else
 			{
-				treeItem->setText(columnStatusIndex, QString("E: %1").arg(counters.errorCounter));
-                treeItem->setBackground(columnStatusIndex, QBrush(redColor));
-				treeItem->setForeground(columnStatusIndex, QBrush(Qt::white));
+				text = QString("E: %1").arg(counters.errorCounter);
+				backColor = redColor;
+				textColor = Qt::white;
+			}
+
+			if (treeItem->text(m_columnStatusIndex) != text)
+			{
+				treeItem->setText(m_columnStatusIndex, text);
+			}
+
+			if (treeItem->backgroundColor(m_columnStatusIndex) != backColor)
+			{
+				treeItem->setBackgroundColor(m_columnStatusIndex, backColor);
+			}
+
+			if (treeItem->textColor(m_columnStatusIndex) != textColor)
+			{
+				treeItem->setTextColor(m_columnStatusIndex, textColor);
 			}
 		}
 
 		// SOR Column
 
-		if (columnSorIndex != -1 && theConfigSettings.showSOR == true)
+		if (m_columnSorIndex != -1 && theConfigSettings.showSOR == true)
 		{
+			QColor backColor;
+			QColor textColor;
+			QString text;
+
 			if (counters.sorActive == false)
 			{
-				treeItem->setText(columnSorIndex, QString());	// Inactive
-				treeItem->setBackground(columnSorIndex, QBrush(Qt::white));
-				treeItem->setForeground(columnSorIndex, QBrush(Qt::black));
+				// Inactive
+				backColor = Qt::white;
+				textColor = Qt::black;
 			}
 			else
 			{
 				if (counters.sorValid == false)
 				{
-					treeItem->setText(columnSorIndex, "?");
-                    treeItem->setBackground(columnSorIndex, QBrush(redColor));
-					treeItem->setForeground(columnSorIndex, QBrush(Qt::white));
+					text = "?";
+					backColor = redColor;
+					textColor = Qt::white;
 				}
 				else
 				{
 					if (counters.sorCounter == 0)
 					{
-						treeItem->setText(columnSorIndex, QString());	// Sor NO
-						treeItem->setBackground(columnSorIndex, QBrush(Qt::white));
-						treeItem->setForeground(columnSorIndex, QBrush(Qt::black));
+						// Sor NO
+						backColor = Qt::white;
+						textColor = Qt::black;
 					}
 					else
 					{
 						if (counters.sorCounter == 1)
 						{
-							treeItem->setText(columnSorIndex, tr("SOR"));
+							text = QString("SOR");
 						}
 						else
 						{
-							treeItem->setText(columnSorIndex, QString("SOR [%1]").arg(counters.sorCounter));
+							text = QString("SOR [%1]").arg(counters.sorCounter);
 						}
-                        treeItem->setBackground(columnSorIndex, QBrush(redColor));
-						treeItem->setForeground(columnSorIndex, QBrush(Qt::white));
+						backColor = redColor;
+						textColor = Qt::white;
 					}
 				}
+			}
+
+			if (treeItem->text(m_columnSorIndex) != text)
+			{
+				treeItem->setText(m_columnSorIndex, text);
+			}
+
+			if (treeItem->backgroundColor(m_columnSorIndex) != backColor)
+			{
+				treeItem->setBackgroundColor(m_columnSorIndex, backColor);
+			}
+
+			if (treeItem->textColor(m_columnSorIndex) != textColor)
+			{
+				treeItem->setTextColor(m_columnSorIndex, textColor);
 			}
 		}
 	}
@@ -1183,9 +1249,8 @@ void TuningWorkspace::updateTreeItemsStatus(QTreeWidgetItem* treeItem)
 	}
 }
 
-void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem)
+void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem, TuningFilter* filter)
 {
-	std::shared_ptr<TuningFilter> filter = treeItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
 	if (filter == nullptr)
 	{
 		assert(filter);
@@ -1202,7 +1267,7 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem)
 
 	Hash hash = equipmentHashes[0];
 
-	assert(columnStatusIndex != -1);
+	assert(m_columnStatusIndex != -1);
 
 	int errorCounter = filter->counters().errorCounter;
 
@@ -1273,91 +1338,156 @@ void TuningWorkspace::updateTuningSourceTreeItem(QTreeWidgetItem* treeItem)
 
     // Access column
 
-    if (columnAccessIndex != -1)
-    {
-        QBrush accessBackBrush = QBrush(QColor(224, 224, 224));
-        QBrush accessTextBrush = QBrush(Qt::black);
+	if (m_columnAccessIndex != -1)
+	{
+		QColor accessBackColor = Qt::white;
+		QColor accessTextColor = Qt::black;
 
         if (access == true)
         {
-            accessBackBrush = QBrush(QColor(0, 128, 0));
-            accessTextBrush = QBrush(Qt::white);
+			accessBackColor = QColor(0, 128, 0);
+			accessTextColor = Qt::white;
         }
 
         QString accessText = access ? tr("Yes") : tr("No");
 
-        if (treeItem->text(columnAccessIndex) != accessText)
+		if (treeItem->text(m_columnAccessIndex) != accessText)
         {
-            treeItem->setText(columnAccessIndex, accessText);
+			treeItem->setText(m_columnAccessIndex, accessText);
         }
 
-        if (treeItem->background(columnAccessIndex) != accessBackBrush)
+		if (treeItem->backgroundColor(m_columnAccessIndex) != accessBackColor)
         {
-            treeItem->setBackground(columnAccessIndex, accessBackBrush);
+			treeItem->setBackgroundColor(m_columnAccessIndex, accessBackColor);
         }
 
-        if (treeItem->foreground(columnAccessIndex) != accessTextBrush)
+		if (treeItem->textColor(m_columnAccessIndex) != accessTextColor)
         {
-            treeItem->setForeground(columnAccessIndex, accessTextBrush);
-        }
+			treeItem->setTextColor(m_columnAccessIndex, accessTextColor);
+		}
 
     }
 
     // Status column
 
 
-    if (treeItem->text(columnStatusIndex) != status)
+	if (treeItem->text(m_columnStatusIndex) != status)
 	{
-		treeItem->setText(columnStatusIndex, status);
+		treeItem->setText(m_columnStatusIndex, status);
 	}
 
-    QBrush stateBackColor;
-    QBrush stateTextColor;
+	QColor stateBackColor;
+	QColor stateTextColor;
 
 	if (valid == false)
 	{
-        stateBackColor = QBrush(Qt::white);
-        stateTextColor = QBrush(Qt::darkGray);
+		stateBackColor = Qt::white;
+		stateTextColor = Qt::darkGray;
 	}
 	else
 	{
 		if (controlIsEnabled == false)
 		{
-            stateBackColor = QBrush(Qt::gray);
-            stateTextColor = QBrush(Qt::white);
+			stateBackColor = Qt::gray;
+			stateTextColor = Qt::white;
 		}
 		else
 		{
 			if (errorCounter > 0)
 			{
-                stateBackColor = QBrush(redColor);
-                stateTextColor = QBrush(Qt::white);
+				stateBackColor = redColor;
+				stateTextColor = Qt::white;
 			}
 			else
 			{
 				if (hasUnappliedParams == true)
 				{
-                    stateBackColor = QBrush(Qt::yellow);
-                    stateTextColor = QBrush(Qt::black);
+					stateBackColor = Qt::yellow;
+					stateTextColor = Qt::black;
 				}
 				else
 				{
-                    stateBackColor = QBrush(Qt::white);
-                    stateTextColor = QBrush(Qt::black);
+					stateBackColor = Qt::white;
+					stateTextColor = Qt::black;
 				}
 			}
 		}
 	}
 
-    if (treeItem->background(columnStatusIndex) != stateBackColor)
+	if (treeItem->backgroundColor(m_columnStatusIndex) != stateBackColor)
     {
-         treeItem->setBackground(columnStatusIndex, stateBackColor);
+		 treeItem->setBackgroundColor(m_columnStatusIndex, stateBackColor);
     }
 
-    if (treeItem->foreground(columnStatusIndex) != stateTextColor)
+	if (treeItem->textColor(m_columnStatusIndex) != stateTextColor)
     {
-        treeItem->setForeground(columnStatusIndex, stateTextColor);
+		treeItem->setTextColor(m_columnStatusIndex, stateTextColor);
     }
+}
+
+void TuningWorkspace::updateTreeItemCounters(QTreeWidgetItem* treeItem, TuningFilter* filter)
+{
+	if (filter == nullptr)
+	{
+		Q_ASSERT(filter);
+		return;
+	}
+
+	int childCount = filter->childFiltersCount();
+
+	int counterIndex = 0;
+
+	for (int i = 0; i < childCount; i++)
+	{
+		TuningFilter* childFilter = filter->childFilter(i).get();
+		if (childFilter == nullptr)
+		{
+			Q_ASSERT(childFilter);
+			return;
+		}
+
+		if (childFilter->isCounter() == false || childFilter->counterType() != TuningFilter::CounterType::FilterTree)
+		{
+			continue;
+		}
+
+		// Set column text and color
+
+		if (counterIndex >= static_cast<int>(m_columnDiscreteCountIndexes.size()))
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		int columnIndex = m_columnDiscreteCountIndexes[counterIndex];
+
+		TuningCounters tc = childFilter->counters();
+
+		QColor backColor = tc.discreteCounter == 0 ? Qt::white : childFilter->backAlertedColor();
+		QColor textColor = tc.discreteCounter == 0 ? Qt::black : childFilter->textAlertedColor();
+
+		//QString text = QString("%1 %2").arg(childFilter->caption()) .arg(tc.discreteCounter);
+		QString text = QString("%1").arg(tc.discreteCounter);
+
+		if (treeItem->text(columnIndex) != text)
+		{
+			treeItem->setText(columnIndex, text);
+		}
+
+		if (treeItem->backgroundColor(columnIndex) != backColor)
+		{
+			treeItem->setBackgroundColor(columnIndex, backColor);
+		}
+
+		if (treeItem->textColor(columnIndex) != textColor)
+		{
+			treeItem->setTextColor(columnIndex, textColor);
+		}
+
+		//
+
+		counterIndex++;
+	}
 }
 
 void TuningWorkspace::activateControl(const QString& equipmentId, bool enable)

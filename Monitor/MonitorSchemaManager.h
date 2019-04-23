@@ -27,10 +27,16 @@ public:
 	[[nodiscard]] MonitorConfigController* monitorConfigController();
 	[[nodiscard]] const MonitorConfigController* monitorConfigController() const;
 
+
+	QString onConfigurationArrivedScript() const;
+	void setOnConfigurationArrivedScript(QString value);
+
 	// Data
 	//
 private:
 	MonitorConfigController* const m_configController = nullptr;
+
+	QString m_onConfigurationArrivedScript;
 };
 
 #endif // MONITORSCHEMAMANAGER_H

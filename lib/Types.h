@@ -77,7 +77,11 @@ public:
 		AppSignalID,
 		CustomSignalID,
 		Caption,
-		State
+		State,
+		ImpactAppSignalID,
+		ImpactCustomSignalID,
+		ImpactCaption,
+		ImpactState,
 	};
 	Q_ENUM(ColumnData)
 

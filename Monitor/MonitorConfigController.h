@@ -50,6 +50,7 @@ struct ConfigSettings
 	ConfigConnection tuningService;
 
 	QString globalScript;
+	QString onConfigurationArrivedScript;
 
 	QString errorMessage;				// Parsing error message, empty if no errors
 };

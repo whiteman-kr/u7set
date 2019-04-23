@@ -85,8 +85,8 @@ windows build job:
     - "copy C:\\Qt\\5.12.2\\msvc2017_64\\plugins\\platforms\\qoffscreen.dll \"%CI_PROJECT_DIR%/bin/release/platforms/\""
     - "copy C:\\Qt\\5.12.2\\msvc2017_64\\plugins\\platforms\\qwindows.dll \"%CI_PROJECT_DIR%/bin/release/platforms/\""
     - "mkdir \"%CI_PROJECT_DIR%/bin/release/sqldrivers\""
+    - "copy C:\\Qt\\5.12.2\\msvc2017_64\\plugins\\sqldrivers\\qsqlite.dll \"%CI_PROJECT_DIR%/bin/release/sqldrivers/\""
     - "copy C:\\Qt\\5.12.2\\msvc2017_64\\plugins\\sqldrivers\\qsqlpsql.dll \"%CI_PROJECT_DIR%/bin/release/sqldrivers/\""
-    - "copy C:\\Qt\\5.12.2\\msvc2017_64\\plugins\\sqldrivers\\qsqlpsql.dll \"%CI_PROJECT_DIR%/bin/release/\""
     - "mkdir \"%CI_PROJECT_DIR%/bin/release/printsupport\""
     - "copy C:\\Qt\\5.12.2\\msvc2017_64\\plugins\\printsupport\\windowsprintersupport.dll \"%CI_PROJECT_DIR%/bin/release/printsupport/\""
 
@@ -100,7 +100,7 @@ windows build job:
     - "echo               Run BuilderConsole tests"
     - "echo ----------------------------------------------"
     - "rmdir /Q /S c:\\temp\\build\\test_simulator-debug"    
-    - "%CI_PROJECT_DIR%\\bin\\release\\BuilderConsole.exe 127.0.0.1 5432 u7 P2ssw0rd test_simulator_v273 Administrator P2ssw0rd c:\\temp\\build\\ debug"    
+    - "%CI_PROJECT_DIR%\\bin\\release\\BuilderConsole.exe 127.0.0.1 5432 u7 P2ssw0rd test_simulator_v277 Administrator P2ssw0rd c:\\temp\\build\\ debug"    
   artifacts:
     name: "u7set_0.8.%CI_PIPELINE_ID%_%CI_BUILD_REF_SLUG%_%CI_COMMIT_SHA%"
     paths:

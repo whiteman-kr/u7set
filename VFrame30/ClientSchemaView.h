@@ -46,6 +46,8 @@ namespace VFrame30
 
 		// Variables functions
 		//
+		bool variableExists(QString name) const;
+
 		QVariant variable(QString name);
 		void setVariable(QString name, const QVariant& value);
 
@@ -106,8 +108,15 @@ namespace VFrame30
 		QJSEngine* jsEngine();
 		QString globalScript() const;
 
+		bool runScript(QJSValue& evaluatedJs, bool reportError);
+		QJSValue evaluateScript(QString script, bool reportError);
+		QString formatSqriptError(const QJSValue& scriptValue) const;
+		void reportSqriptError(const QJSValue& scriptValue);
+
 		// Variables
 		//
+		bool variableExists(QString name) const;
+
 		QVariant variable(QString name) const;
 		void setVariable(QString name, const QVariant& value);
 

@@ -105,6 +105,7 @@ namespace VFrame30
 		static const QString appSignalIDsValidator;
 		static const QString appSignalId;
 		static const QString appSignalIdValidator;
+		static const QString impactAppSignalIDs;
 		static const QString connectionId;
 		static const QString signalSource;
 

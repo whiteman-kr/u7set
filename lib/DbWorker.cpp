@@ -292,6 +292,9 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0272.sql", "Upgrade to version 272, Added LMDN 40, for the 4th cert phase. Fixed bug from upgrade 270. Fixed AFBs versions for DPCOMP, PULSEGEN. Removed Zero out in Mismatch(27), version 3 - LMDN 3, 4. "},
 	{":/DatabaseUpgrade/Upgrade0273.sql", "Upgrade to version 273, LM for 4th cert phase switched to LMDN40 -> new preset "},
 	{":/DatabaseUpgrade/Upgrade0274.sql", "Upgrade to version 274, Added Essential properties flag to software and LM presets "},
+	{":/DatabaseUpgrade/Upgrade0275.sql", "Upgrade to version 275, LM1-SF40.xml CheckAfbVersionsOffset set to 2, bugfix, LM1-SR04.xml, tct MaxInstCount changed to 1024 "},
+	{":/DatabaseUpgrade/Upgrade0276.sql", "Upgrade to version 276, TuningClient, added StatusFlagFunction property"},	
+	{":/DatabaseUpgrade/Upgrade0277.sql", "Upgrade to version 277, Added event scripts properties to Monitor preset"},
 };
 
 int DbWorker::counter = 0;

@@ -24,6 +24,7 @@ namespace VFrame30
 	class Bus;
 	class SchemaDetails;
 	
+
 	class VFRAME30LIBSHARED_EXPORT Schema :
 		public PropertyObject,
 		public Proto::ObjectSerialization<Schema>,
@@ -213,6 +214,7 @@ namespace VFrame30
 		const std::set<QString>& tags() const;
 
 		bool hasEquipmentId(const QString& equipmentId) const;
+		bool hasSignal(const QString& signalId) const;
 
 	public:
 		int m_version = 0;
@@ -255,8 +257,9 @@ namespace VFrame30
 
 		std::vector<SchemaDetails> schemasDetails() const;
 		std::vector<SchemaDetails> schemasDetails(QString equipmentId) const;
-
 		std::shared_ptr<SchemaDetails> schemaDetails(QString schemaId) const;
+
+		QStringList schemasByAppSignalId(const QString& appSignalId) const;
 
 	private:
 		std::map<QString, std::shared_ptr<SchemaDetails>> m_details;		// Key is schemaId

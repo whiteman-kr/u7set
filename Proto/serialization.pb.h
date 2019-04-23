@@ -4759,6 +4759,22 @@ class SchemaItemSignal : public ::google::protobuf::Message {
   inline bool multiline() const;
   inline void set_multiline(bool value);
 
+  // repeated string impactAppSignalIDs = 6;
+  inline int impactappsignalids_size() const;
+  inline void clear_impactappsignalids();
+  static const int kImpactAppSignalIDsFieldNumber = 6;
+  inline const ::std::string& impactappsignalids(int index) const;
+  inline ::std::string* mutable_impactappsignalids(int index);
+  inline void set_impactappsignalids(int index, const ::std::string& value);
+  inline void set_impactappsignalids(int index, const char* value);
+  inline void set_impactappsignalids(int index, const char* value, size_t size);
+  inline ::std::string* add_impactappsignalids();
+  inline void add_impactappsignalids(const ::std::string& value);
+  inline void add_impactappsignalids(const char* value);
+  inline void add_impactappsignalids(const char* value, size_t size);
+  inline const ::google::protobuf::RepeatedPtrField< ::std::string>& impactappsignalids() const;
+  inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_impactappsignalids();
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemSignal)
  private:
   inline void set_has_precision();
@@ -4774,10 +4790,11 @@ class SchemaItemSignal : public ::google::protobuf::Message {
   ::google::protobuf::int32 precision_;
   ::google::protobuf::int32 analogformat_;
   ::google::protobuf::RepeatedPtrField< ::Proto::SchemaItemSignalColumn > columns_;
+  ::google::protobuf::RepeatedPtrField< ::std::string> impactappsignalids_;
   bool multiline_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -18419,6 +18436,50 @@ inline bool SchemaItemSignal::multiline() const {
 inline void SchemaItemSignal::set_multiline(bool value) {
   set_has_multiline();
   multiline_ = value;
+}
+
+// repeated string impactAppSignalIDs = 6;
+inline int SchemaItemSignal::impactappsignalids_size() const {
+  return impactappsignalids_.size();
+}
+inline void SchemaItemSignal::clear_impactappsignalids() {
+  impactappsignalids_.Clear();
+}
+inline const ::std::string& SchemaItemSignal::impactappsignalids(int index) const {
+  return impactappsignalids_.Get(index);
+}
+inline ::std::string* SchemaItemSignal::mutable_impactappsignalids(int index) {
+  return impactappsignalids_.Mutable(index);
+}
+inline void SchemaItemSignal::set_impactappsignalids(int index, const ::std::string& value) {
+  impactappsignalids_.Mutable(index)->assign(value);
+}
+inline void SchemaItemSignal::set_impactappsignalids(int index, const char* value) {
+  impactappsignalids_.Mutable(index)->assign(value);
+}
+inline void SchemaItemSignal::set_impactappsignalids(int index, const char* value, size_t size) {
+  impactappsignalids_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemSignal::add_impactappsignalids() {
+  return impactappsignalids_.Add();
+}
+inline void SchemaItemSignal::add_impactappsignalids(const ::std::string& value) {
+  impactappsignalids_.Add()->assign(value);
+}
+inline void SchemaItemSignal::add_impactappsignalids(const char* value) {
+  impactappsignalids_.Add()->assign(value);
+}
+inline void SchemaItemSignal::add_impactappsignalids(const char* value, size_t size) {
+  impactappsignalids_.Add()->assign(reinterpret_cast<const char*>(value), size);
+}
+inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
+SchemaItemSignal::impactappsignalids() const {
+  return impactappsignalids_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::std::string>*
+SchemaItemSignal::mutable_impactappsignalids() {
+  return &impactappsignalids_;
 }
 
 // -------------------------------------------------------------------

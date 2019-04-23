@@ -104,6 +104,7 @@ namespace VFrame30
 	const QString PropertyNames::appSignalIDsValidator("^[#]?([A-Za-z\\d_]+((;[#]?)?\\r?(\\n[#]?)?))+$");
 	const QString PropertyNames::appSignalId("AppSignalID");
 	const QString PropertyNames::appSignalIdValidator("^[#]?[A-Za-z\\d_]+$");
+	const QString PropertyNames::impactAppSignalIDs("ImpactAppSignalIDs");
 	const QString PropertyNames::connectionId("ConnectionID");
 	const QString PropertyNames::signalSource("SignalSource");
 

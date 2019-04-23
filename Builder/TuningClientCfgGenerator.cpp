@@ -44,7 +44,6 @@ namespace Builder
 
 		bool filterByEquipment = false;
 		bool filterBySchema = false;
-		bool showDiscreteCounters = false;
 
 		result &= createEquipmentList(&equipmentList);
 		if (result == false)
@@ -52,7 +51,7 @@ namespace Builder
 			return result;
 		}
 
-		result &= createSettings(&filterByEquipment, &filterBySchema, &showDiscreteCounters);
+		result &= createSettings(&filterByEquipment, &filterBySchema);
 		if (result == false)
 		{
 			return result;
@@ -72,7 +71,7 @@ namespace Builder
 			return result;
 		}
 
-		result &= writeSettings(filterByEquipment, filterBySchema, showDiscreteCounters);
+		result &= writeSettings(filterByEquipment, filterBySchema);
 		if (result == false)
 		{
 			return result;
@@ -86,7 +85,7 @@ namespace Builder
 
 		// --
 		//
-		result &= createObjectFilters(equipmentList, filterByEquipment, filterBySchema, showDiscreteCounters);
+		result &= createObjectFilters(equipmentList, filterByEquipment, filterBySchema);
 		if (result == false)
 		{
 			return result;
@@ -215,13 +214,12 @@ namespace Builder
 		return true;
 	}
 
-	bool TuningClientCfgGenerator::createSettings(bool* filterByEquipment, bool* filterBySchema, bool* showDiscreteCounters)
+	bool TuningClientCfgGenerator::createSettings(bool* filterByEquipment, bool* filterBySchema)
 	{
-		if (filterByEquipment == nullptr || filterBySchema == nullptr || showDiscreteCounters == nullptr)
+		if (filterByEquipment == nullptr || filterBySchema == nullptr)
 		{
 			assert(filterByEquipment);
 			assert(filterBySchema);
-			assert(showDiscreteCounters);
 			return false;
 		}
 
@@ -245,19 +243,10 @@ namespace Builder
 			return false;
 		}
 
-		//
-		// showDiscreteCounters
-		//
-		*showDiscreteCounters = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "ShowDiscreteCounters", &ok);
-		if (ok == false)
-		{
-			return false;
-		}
-
 		return true;
 	}
 
-	bool TuningClientCfgGenerator::writeSettings(bool filterByEquipment, bool filterBySchema, bool showDiscreteCounters)
+	bool TuningClientCfgGenerator::writeSettings(bool filterByEquipment, bool filterBySchema)
 	{
 
 		QXmlStreamWriter& xmlWriter = m_cfgXml->xmlWriter();
@@ -415,21 +404,29 @@ namespace Builder
 			}
 
 			//
-			// showSOR
+			// statusFlagFunction
 			//
-			bool showSOR = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "ShowSOR", &ok);
+			int statusFlagFunction = getObjectProperty<int>(m_software->equipmentIdTemplate(), "StatusFlagFunction", &ok);
 			if (ok == false)
 			{
 				return false;
 			}
 
-			//
-			// UseAccessFlag
-			//
-			bool useAccessFlag = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "UseAccessFlag", &ok);
-			if (ok == false)
+			bool showSOR = false;
+			bool useAccessFlag = false;
+
+			switch (statusFlagFunction)
 			{
-				return false;
+			case 0:
+				break;
+			case 1:
+				showSOR = true;
+				break;
+			case 2:
+				useAccessFlag = true;
+				break;
+			default:
+				Q_ASSERT(false);
 			}
 
 			//
@@ -490,7 +487,6 @@ namespace Builder
 				xmlWriter.writeAttribute("filterBySchema", (filterBySchema ? "true" : "false"));
 				xmlWriter.writeAttribute("showSOR", (showSOR ? "true" : "false"));
 				xmlWriter.writeAttribute("useAccessFlag", (useAccessFlag ? "true" : "false"));
-				xmlWriter.writeAttribute("showDiscreteCounters", (showDiscreteCounters ? "true" : "false"));
 				xmlWriter.writeAttribute("loginPerOperation", (loginPerOperation ? "true" : "false"));
 				xmlWriter.writeAttribute("loginSessionLength", QString::number(loginSessionLength));
 				xmlWriter.writeAttribute("usersAccounts", usersAccounts);
@@ -516,7 +512,7 @@ namespace Builder
 		return true;
 	}
 
-	bool TuningClientCfgGenerator::createObjectFilters(const QStringList& equipmentList, bool filterByEquipment, bool filterBySchema, bool showDiscreteCounters)
+	bool TuningClientCfgGenerator::createObjectFilters(const QStringList& equipmentList, bool filterByEquipment, bool filterBySchema)
 	{
 		bool ok = true;
 
@@ -567,7 +563,7 @@ namespace Builder
 
 		// Create schemas and equipment filters
 
-		ok = createAutomaticFilters(equipmentList, tuningSignalManager, filterByEquipment, filterBySchema, showDiscreteCounters);
+		ok = createAutomaticFilters(equipmentList, tuningSignalManager, filterByEquipment, filterBySchema);
 		if (ok == false)
 		{
 			assert(false);
@@ -744,8 +740,7 @@ namespace Builder
 	bool TuningClientCfgGenerator::createAutomaticFilters(const QStringList& equipmentList,
 														  const TuningSignalManager& tuningSignalManager,
 														  bool filterByEquipment,
-														  bool filterBySchema,
-														  bool showDiscreteCounters)
+														  bool filterBySchema)
 	{
 		if (filterBySchema == true)
 		{
@@ -789,7 +784,6 @@ namespace Builder
 				//QString s = QString("%1 - %2").arg(schemasDetails.m_Id).arg(schemasDetails.m_caption);
 				ofTs->setCaption(schema->caption());
 				ofTs->setSource(TuningFilter::Source::Schema);
-				ofTs->setHasDiscreteCounter(showDiscreteCounters);
 
 				ofSchema->addChild(ofTs);
 			}
@@ -815,7 +809,6 @@ namespace Builder
 				ofTs->setID("%AUFOFILTER%_EQUIPMENT_" + ts);
 				ofTs->setCaption(ts);
 				ofTs->setSource(TuningFilter::Source::Equipment);
-				ofTs->setHasDiscreteCounter(showDiscreteCounters);
 
 				ofEquipment->addChild(ofTs);
 			}

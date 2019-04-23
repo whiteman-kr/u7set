@@ -6266,7 +6266,7 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 	connectionIdControl->setPlaceholderText("Enter ConnectionID(s)");
 	connectionIdControl->setPlainText(recConnectionIds);
 
-	QCompleter* completer = new QCompleter(connectionIds);
+	QCompleter* completer = new QCompleter(connectionIds, &d);
 	completer->setFilterMode(Qt::MatchContains);
 	completer->setCaseSensitivity(Qt::CaseSensitive);
 	completer->setMaxVisibleItems(20);
@@ -6659,24 +6659,105 @@ void EditSchemaWidget::f2KeyForSignal(std::shared_ptr<VFrame30::SchemaItem> item
 		return;
 	}
 
-	QString appSignalId = signalItem->appSignalIds();
+	QString appSignalIds = signalItem->appSignalIds();
+	QString impactAppSignalIds = signalItem->impactAppSignalIds();
 
 	// Show input dialog
 	//
-	bool ok = false;
-	QString newValue = DialogInputEx::getMultiLineText(this,
-													   tr("Set AppSignalID(s)"),
-													   tr("AppSignalID(s):"),
-													   appSignalId,
-													   &ok,
-													   VFrame30::PropertyNames::appSignalIDsValidator).trimmed();
-	if (ok == true &&
-		newValue.isEmpty() == false &&
-		newValue != appSignalId)
+	QDialog d(this);
+
+	d.setWindowTitle(tr("SchemaItemSignal"));
+	d.setWindowFlags((d.windowFlags() & ~Qt::WindowMinimizeButtonHint & ~Qt::WindowContextHelpButtonHint)
+					 | Qt::CustomizeWindowHint | Qt::WindowMaximizeButtonHint);
+
+	// QCompleter for signals
+	//
+	SignalsModel* signalModel = SignalsModel::instance();
+	Q_ASSERT(signalModel);
+
+	const SignalSet& signalSet = signalModel->signalSet();
+
+	QStringList appSignalIdsCompleterList;
+	appSignalIdsCompleterList.reserve(signalSet.count());
+
+	for (int i = 0; i < signalSet.count(); i++)
 	{
-		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newValue), item);
-		editSchemaView()->update();
+		const Signal& signal = signalSet[i];
+		appSignalIdsCompleterList.push_back(signal.appSignalID());
 	}
+
+	QCompleter* completer = new QCompleter(appSignalIdsCompleterList, &d);
+	completer->setFilterMode(Qt::MatchContains);
+	completer->setCaseSensitivity(Qt::CaseSensitive);
+	completer->setMaxVisibleItems(20);
+
+
+	// AppSchemaIDs
+	//
+	QLabel* appSignalIdsLabel = new QLabel("AppSchemaIDs:", &d);
+
+	QTextEditCompleter* appSignalIdsEdit = new QTextEditCompleter(&d);
+	appSignalIdsEdit->setPlaceholderText("Enter AppSchemaIDs separated by lines");
+	appSignalIdsEdit->setPlainText(appSignalIds);
+	appSignalIdsEdit->setCompleter(completer);
+
+	// Text
+	//
+	QLabel* impactAppSignalIdsLabel = new QLabel("ImpactAppSignalIDs:", &d);
+
+	QTextEditCompleter* impactAppSignalIdsEdit = new QTextEditCompleter(&d);
+	impactAppSignalIdsEdit->setPlaceholderText("Enter Impact AppSchemaIDs separated by lines");
+	impactAppSignalIdsEdit->setPlainText(impactAppSignalIds);
+	impactAppSignalIdsEdit->setCompleter(completer);
+
+	// --
+	//
+	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, &d);
+
+	QGridLayout* layout = new QGridLayout(&d);
+
+	layout->addWidget(appSignalIdsLabel, 0, 0, 1, 3);
+	layout->addWidget(appSignalIdsEdit, 1, 0, 1, 3);
+
+	layout->addWidget(impactAppSignalIdsLabel, 2, 0, 1, 3);
+	layout->addWidget(impactAppSignalIdsEdit, 3, 0, 1, 3);
+
+	layout->addWidget(buttonBox, 4, 0, 1, 3);
+
+	d.setLayout(layout);
+
+	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	// --
+	//
+	int width = QSettings().value("f2KeyForSignal\\width").toInt();
+	int height = QSettings().value("f2KeyForSignal\\height").toInt();
+	d.resize(width, height);
+
+	int result = d.exec();
+
+	if (result == QDialog::Accepted)
+	{
+		QString newAppSignaIds = appSignalIdsEdit->toPlainText();
+		QString newImpactAppSignaIds = impactAppSignalIdsEdit->toPlainText();
+
+		if (newAppSignaIds != appSignalIds ||
+			newImpactAppSignaIds != impactAppSignalIds)
+		{
+			if (bool ok = m_editEngine->startBatch();
+				ok == true)
+			{
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(newAppSignaIds), item);
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::impactAppSignalIDs, QVariant(newImpactAppSignaIds), item);
+
+				m_editEngine->endBatch();
+			}
+		}
+	}
+
+	QSettings().setValue("f2KeyForSignal\\width", d.width());
+	QSettings().setValue("f2KeyForSignal\\height", d.height());
 
 	return;
 }

@@ -88,8 +88,6 @@ struct ConfigSettings
 
 	bool showSOR = true;
 
-	bool showDiscreteCounters = true;
-
 	bool useAccessFlag = false;
 
 	int loginSessionLength = 120;
