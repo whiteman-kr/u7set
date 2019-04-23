@@ -18,19 +18,22 @@ TagSelectorWidget::TagSelectorWidget(QWidget* parent)
 
 	// Context menu
 	//
-	setContextMenuPolicy(Qt::ActionsContextMenu);
+	setContextMenuPolicy(Qt::DefaultContextMenu);
 
-	m_resetAllTags = new QAction{tr("Reset All"), this};
-	connect(m_resetAllTags, &QAction::triggered, this, &TagSelectorWidget::resetAllTags);
+	m_resetAllTagsAction = new QAction{tr("Reset All"), this};
+	m_copyTagAction = new QAction{tr("Copy"), this};
 
-	addAction(m_resetAllTags);
+	connect(m_resetAllTagsAction, &QAction::triggered, this, &TagSelectorWidget::resetAllTags);
+	connect(m_copyTagAction, &QAction::triggered, this, &TagSelectorWidget::copyTag);
+
+	addAction(m_resetAllTagsAction);
 
 	return;
 }
 
 TagSelectorWidget::~TagSelectorWidget()
 {
-	delete m_resetAllTags;
+	delete m_resetAllTagsAction;
 }
 
 void TagSelectorWidget::clear()
@@ -123,7 +126,6 @@ void TagSelectorWidget::setTags(const std::set<QString>& tags)
 	return;
 }
 
-
 std::map<QString, bool> TagSelectorWidget::tags() const
 {
 	std::map<QString, bool> result;
@@ -171,6 +173,27 @@ QStringList TagSelectorWidget::selectedTags() const
 	return result;
 }
 
+void TagSelectorWidget::contextMenuEvent(QContextMenuEvent* event)
+{
+	QMenu menu(this);
+
+	m_resetAllTagsAction->setEnabled(m_flowLayout->selectedCount() > 0);
+
+	m_copyTag = m_flowLayout->tagAtPos(event->pos());
+	m_copyTagAction->setEnabled(m_copyTag.isEmpty() == false);
+
+	menu.addAction(m_resetAllTagsAction);
+	menu.addAction(m_copyTagAction);
+
+	// Show menu
+	//
+	menu.exec(event->globalPos());
+
+	m_copyTag.clear();
+
+	return;
+}
+
 void TagSelectorWidget::resetAllTags()
 {
 	bool wasReset = false;
@@ -199,6 +222,14 @@ void TagSelectorWidget::resetAllTags()
 	{
 		emit changed();
 	}
+}
+
+void TagSelectorWidget::copyTag()
+{
+	QClipboard* clipboard = QGuiApplication::clipboard();
+	clipboard->setText(m_copyTag);
+
+	return;
 }
 
 namespace TagSelector
@@ -347,6 +378,39 @@ namespace TagSelector
 
 		size += QSize(2*margin(), 2*margin());
 		return size;
+	}
+
+	int FlowLayout::selectedCount() const
+	{
+		int result = 0;
+
+		for (QLayoutItem* li : itemList)
+		{
+			TagSelectorButton* tsb = dynamic_cast<TagSelectorButton*>(li->widget());
+
+			if (tsb != nullptr && tsb->isChecked() == true)
+			{
+				result ++;
+			}
+		}
+
+		return result;
+	}
+
+	QString FlowLayout::tagAtPos(QPoint pos) const
+	{
+		for (QLayoutItem* li : itemList)
+		{
+			TagSelectorButton* tsb = dynamic_cast<TagSelectorButton*>(li->widget());
+
+			if (tsb != nullptr &&
+				tsb->geometry().contains(pos) == true)
+			{
+				return tsb->tag();
+			}
+		}
+
+		return {};
 	}
 
 	int FlowLayout::doLayout(const QRect &rect, bool testOnly) const

@@ -810,7 +810,7 @@ int DbFileTree::calcIf(int startFromFileId, std::function<int(const DbFileInfo&)
 
 void DbFileTree::setRoot(int rootFileId)
 {
-	assert(m_files.count(rootFileId) == 1);
+	Q_ASSERT(m_files.count(rootFileId) == 1);
 	m_rootFileId = rootFileId;
 }
 
