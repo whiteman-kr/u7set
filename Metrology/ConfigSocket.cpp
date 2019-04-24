@@ -362,11 +362,6 @@ bool ConfigSocket::readSignals(const QByteArray& fileData, int fileVersion)
 		return false;
 	}
 
-	QTime responseTime;
-	responseTime.start();
-
-
-
 	Metrology::SignalParam param;
 
 	int signalCount = 0;
@@ -394,8 +389,6 @@ bool ConfigSocket::readSignals(const QByteArray& fileData, int fileVersion)
 
 		result &= res;
 	}
-
-	qDebug() << __FUNCTION__ << ", Time for load: " << responseTime.elapsed() << " ms";
 
 	theSignalBase.initSignals();
 

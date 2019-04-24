@@ -669,7 +669,7 @@ QString MeasureMultiParam::electricSensorStr() const
 					const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 					if (param.isValid() == true)
 					{
-						result = param.electricSensor();
+						result = param.electricSensorTypeStr();
 					}
 				}
 
@@ -680,19 +680,19 @@ QString MeasureMultiParam::electricSensorStr() const
 					const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 					if (inParam.isValid() == true)
 					{
-						result = inParam.electricSensor() + MultiTextDivider;
+						result = inParam.electricSensorTypeStr() + MultiTextDivider;
 					}
 
 					const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
 					if (outParam.isValid() == true)
 					{
-						if (inParam.electricSensor() != outParam.electricSensor())
+						if (inParam.electricSensorTypeStr() != outParam.electricSensorTypeStr())
 						{
-							result += outParam.electricSensor();
+							result += outParam.electricSensorTypeStr();
 						}
 						else
 						{
-							result = outParam.electricSensor();
+							result = outParam.electricSensorTypeStr();
 						}
 					}
 				}
@@ -704,7 +704,7 @@ QString MeasureMultiParam::electricSensorStr() const
 					const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
 					if (param.isValid() == true)
 					{
-						result = param.electricSensor();
+						result = param.electricSensorTypeStr();
 					}
 				}
 
@@ -1421,7 +1421,7 @@ void SignalBase::setSignalParam(const Hash& hash, const Metrology::SignalParam& 
 			{
 				m_signalList[index].setParam(param);
 
-				emit updatedSignalParam(param.hash());
+				emit updatedSignalParam(param.appSignalID());
 			}
 		}
 
@@ -1438,7 +1438,7 @@ void SignalBase::setSignalParam(int index, const Metrology::SignalParam& param)
 		{
 			m_signalList[index].setParam(param);
 
-			emit updatedSignalParam(param.hash());
+			emit updatedSignalParam(param.appSignalID());
 		}
 
 	m_signalMutex.unlock();
@@ -1753,9 +1753,6 @@ void SignalBase::initSignals()
 
 	m_signalMutex.lock();
 
-		QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
-		QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
-
 		int count = m_signalList.count();
 
 		for(int i = 0; i < count; i ++)
@@ -1764,21 +1761,6 @@ void SignalBase::initSignals()
 			if (param.isValid() == false)
 			{
 				continue;
-			}
-
-			// units
-			//
-			if (param.electricUnitID() >= 0 && param.electricUnitID() < meu.keyCount())
-			{
-				param.setElectricUnit(meu.key(param.electricUnitID()));
-			}
-
-			// sensors
-			//
-			int sensorType = param.electricSensorType();
-			if (sensorType >= 0 && sensorType < mst.keyCount())
-			{
-				param.setElectricSensor(mst.key(sensorType));
 			}
 
 			// places for tuning signals

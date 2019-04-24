@@ -764,11 +764,11 @@ void MeasureThread::restoreStateTunSignals()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MeasureThread::updateSignalParam(const Hash& signalHash)
+void MeasureThread::updateSignalParam(const QString& appSignalID)
 {
-	if (signalHash == 0)
+	if (appSignalID.isEmpty() == true)
 	{
-		assert(signalHash != 0);
+		assert(0);
 		return;
 	}
 
@@ -776,9 +776,9 @@ void MeasureThread::updateSignalParam(const Hash& signalHash)
 	{
 		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
 		{
-			if (m_activeSignalParam[c].param(type).hash() == signalHash)
+			if (m_activeSignalParam[c].param(type).appSignalID() == appSignalID)
 			{
-				m_activeSignalParam[c].setParam(type, theSignalBase.signalParam(signalHash));
+				m_activeSignalParam[c].setParam(type, theSignalBase.signalParam(appSignalID));
 			}
 		}
 	}

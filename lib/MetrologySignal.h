@@ -166,11 +166,9 @@ namespace Metrology
 		double					m_electricLowLimit = 0;
 		double					m_electricHighLimit = 0;
 		E::ElectricUnit			m_electricUnitID = E::ElectricUnit::NoUnit;
-		QString					m_electricUnit;
 		E::SensorType			m_electricSensorType = E::SensorType::NoSensor;
-		QString					m_electricSensor;
 		double					m_electricR0 = 0;
-		int						m_electricPrecision = 3;
+		int						m_electricPrecision = 4;
 
 		double					m_physicalLowLimit = 0;
 		double					m_physicalHighLimit = 0;
@@ -200,18 +198,15 @@ namespace Metrology
 
 		E::ElectricUnit			electricUnitID() const { return m_electricUnitID; }
 		void					setElectricUnitID(E::ElectricUnit unitID) { m_electricUnitID = unitID; }
-
-		QString					electricUnit() const { return m_electricUnit; }
-		void					setElectricUnit(const QString& unit) { m_electricUnit = unit; }
+		QString					electricUnitStr() const;
 
 		E::SensorType			electricSensorType() const { return m_electricSensorType; }
 		void					setElectricSensorType(E::SensorType sensorType) { m_electricSensorType = sensorType; }
-
-		QString					electricSensor() const { return m_electricSensor; }
-		void					setElectricSensor(const QString& sensor);
+		QString					electricSensorTypeStr() const;
 
 		double					electricR0() const { return m_electricR0; }
 		void					setElectricR0(double r0) { m_electricR0 = r0; }
+		QString					electricR0Str() const;
 
 		int						electricPrecision() const { return m_electricPrecision; }
 		void					setElectricPrecision(int precision) { m_electricPrecision = precision; }
@@ -325,22 +320,6 @@ namespace Metrology
 		explicit Signal(const SignalParam& param)
 		{
 			setParam(param);
-
-			// temporary solution
-			// because u7 can not set electric range
-			//
-			//			if (param.electricLowLimit() == 0 && param.electricHighLimit() == 0)
-			//			{
-			//				m_param.setElectricLowLimit(0);
-			//				m_param.setElectricHighLimit(5);
-			//			}
-
-			//			if (param.electricUnitID() == E::ElectricUnit::NoUnit)
-			//			{
-			//				m_param.setElectricUnitID(E::ElectricUnit::V);
-			//			}
-			//
-			//
 		}
 
 		virtual ~Signal() {}

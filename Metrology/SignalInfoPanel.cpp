@@ -278,9 +278,9 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 			double electric = conversion(state.value(), CT_ENGENEER_TO_ELECTRIC, param);
 			stateStr.append(" = " + QString::number(electric, 10, param.electricPrecision()));
 
-			if (param.electricUnit().isEmpty() == false)
+			if (param.electricUnitStr().isEmpty() == false)
 			{
-				stateStr.append(" " + param.electricUnit());
+				stateStr.append(" " + param.electricUnitStr());
 			}
 		}
 	}
@@ -399,11 +399,11 @@ void SignalInfoTable::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoTable::updateSignalParam(const Hash& signalHash)
+void SignalInfoTable::updateSignalParam(const QString& appSignalID)
 {
-	if (signalHash == 0)
+	if (appSignalID.isEmpty() == true)
 	{
-		assert(signalHash != 0);
+		assert(0);
 		return;
 	}
 
@@ -413,9 +413,9 @@ void SignalInfoTable::updateSignalParam(const Hash& signalHash)
 		{
 			for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
 			{
-				if (m_activeSignalParam[c].param(type).hash() == signalHash)
+				if (m_activeSignalParam[c].param(type).appSignalID() == appSignalID)
 				{
-					m_activeSignalParam[c].setParam(type, theSignalBase.signalParam(signalHash));
+					m_activeSignalParam[c].setParam(type, theSignalBase.signalParam(appSignalID));
 				}
 			}
 		}

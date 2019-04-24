@@ -401,7 +401,7 @@ void LinearityMeasurement::setLimits(const Metrology::SignalParam& param)
 {
 	setLowLimit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricLowLimit());
 	setHighLimit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricHighLimit());
-	setUnit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricUnit());
+	setUnit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricUnitStr());
 	setLimitPrecision(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricPrecision());
 
 	setLowLimit(MEASURE_LIMIT_TYPE_ENGENEER, param.lowEngeneeringUnits());

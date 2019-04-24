@@ -317,9 +317,6 @@ void SignalPropertyDialog::onPropertyValueChanged(QtProperty *property, const QV
 		return;
 	}
 
-	QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
-	QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
-
 	int groupIndex = -1;
 
 	switch(index)
@@ -331,12 +328,9 @@ void SignalPropertyDialog::onPropertyValueChanged(QtProperty *property, const QV
 		//
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_LOW:			m_param.setElectricLowLimit(value.toDouble());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_HIGH:		m_param.setElectricHighLimit(value.toDouble());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EL_RANGE_UNIT:		m_param.setElectricUnitID(static_cast<E::ElectricUnit>(meu.value(value.toInt())));
-														m_param.setElectricUnit(meu.key(value.toInt()));									groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR:		m_param.setElectricSensorType(static_cast<E::SensorType>(value.toInt()));
-														m_param.setElectricSensor(mst.key(value.toInt()));									groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EL_RANGE_R0:			m_param.setElectricR0(value.toDouble());
-														m_param.setElectricSensor(mst.key( m_param.electricSensorType() ));					groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_EL_RANGE_UNIT:		m_param.setElectricUnitID(static_cast<E::ElectricUnit>(value.toInt()));				groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR:		m_param.setElectricSensorType(static_cast<E::SensorType>(value.toInt()));			groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_EL_RANGE_R0:			m_param.setElectricR0(value.toDouble());											groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION:	m_param.setElectricPrecision(value.toInt());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 
 		// engeneering limit

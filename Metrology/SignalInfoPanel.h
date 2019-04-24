@@ -96,7 +96,7 @@ public:
 
 private slots:
 
-	void					updateSignalParam(const Hash& signalHash);
+	void					updateSignalParam(const QString& appSignalID);
 };
 
 // ==============================================================================================
