@@ -688,6 +688,11 @@ std::set<QString> MonitorConfigController::schemaAppSignals(const QString& schem
 	return details->m_signals;
 }
 
+QStringList MonitorConfigController::schemasByAppSignalId(const QString& appSignalId) const
+{
+	return m_schemaDetailsSet.schemasByAppSignalId(appSignalId);
+}
+
 
 ConfigSettings MonitorConfigController::configuration() const
 {

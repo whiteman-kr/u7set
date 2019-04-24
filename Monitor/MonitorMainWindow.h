@@ -61,7 +61,10 @@ private:
 	void createToolBars();
 	void createStatusBar();
 
+public:
 	MonitorCentralWidget* monitorCentralWidget();
+
+private:
 
 	void updateStatusBar();
 
