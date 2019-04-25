@@ -754,10 +754,7 @@ namespace VFrame30
 
 	SchemaDetails Schema::parseDetails(const QString& details)
 	{
-		SchemaDetails d;
-		d.parseDetails(details);
-
-		return d;
+		return SchemaDetails{details};
 	}
 
 	std::shared_ptr<SchemaItem> Schema::getItemById(const QUuid& id) const
@@ -1660,6 +1657,11 @@ namespace VFrame30
 		return result;
 	}
 
+	bool SchemaDetails::hasSignal(const QString& signalId) const
+	{
+		return m_signals.find(signalId) != std::cend(m_signals);
+	}
+
 	SchemaDetailsSet::SchemaDetailsSet() :
 		Proto::ObjectSerialization<SchemaDetailsSet>(Proto::ProtoCompress::Never)
 	{
@@ -1782,5 +1784,24 @@ namespace VFrame30
 
 		return it->second;
 	}
+
+	QStringList SchemaDetailsSet::schemasByAppSignalId(const QString& appSignalId) const
+	{
+		QStringList result;
+		result.reserve(16);
+
+		for (const auto&[schemaId, schemaDetails] : m_details)
+		{
+			Q_ASSERT(schemaDetails);
+
+			if (schemaDetails->hasSignal(appSignalId) == true)
+			{
+				result.push_back(schemaId);
+			}
+		}
+
+		return result;
+	}
+
 }
 

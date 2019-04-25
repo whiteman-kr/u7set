@@ -1,3 +1,4 @@
+#include "MonitorMainWindow.h"
 #include "MonitorArchive.h"
 #include "Settings.h"
 #include "DialogSignalInfo.h"
@@ -987,7 +988,7 @@ void MonitorArchiveWidget::signalsButton()
 
 void MonitorArchiveWidget::showSignalInfo(QString appSignalId)
 {
-	DialogSignalInfo::showDialog(appSignalId, this->parentWidget());
+	DialogSignalInfo::showDialog(appSignalId, theMonitorMainWindow->configController(), theMonitorMainWindow->monitorCentralWidget());
 }
 
 void MonitorArchiveWidget::removeSignal(QString appSignalId)

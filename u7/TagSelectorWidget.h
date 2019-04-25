@@ -26,15 +26,23 @@ public:
 	std::map<QString, bool> tags() const;
 	QStringList selectedTags() const;
 
+protected:
+	virtual void contextMenuEvent(QContextMenuEvent* event) override;
+
 signals:
 	void changed();
 
 private slots:
 	void resetAllTags();
+	void copyTag();
 
 private:
 	TagSelector::FlowLayout* m_flowLayout;
-	QAction* m_resetAllTags = nullptr;
+
+	QAction* m_resetAllTagsAction = nullptr;
+	QAction* m_copyTagAction = nullptr;
+
+	QString m_copyTag;
 };
 
 
@@ -53,7 +61,6 @@ namespace TagSelector
 		QString tag() const;
 		bool selected() const;
 	};
-
 
 	// Flow layout is copied form examples of Qt
 	// https://doc.qt.io/qt-5/qtwidgets-layouts-flowlayout-example.html
@@ -79,6 +86,10 @@ namespace TagSelector
 		void setGeometry(const QRect &rect) override;
 		QSize sizeHint() const override;
 		QLayoutItem *takeAt(int index) override;
+
+	public:
+		int selectedCount() const;
+		QString tagAtPos(QPoint pos) const;
 
 	private:
 		int doLayout(const QRect &rect, bool testOnly) const;

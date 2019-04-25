@@ -108,6 +108,8 @@ public:
 	std::vector<VFrame30::SchemaDetails> schemasDetails() const;
 	std::set<QString> schemaAppSignals(const QString& schemaId);
 
+	QStringList schemasByAppSignalId(const QString& appSignalId) const;
+
 	ConfigSettings configuration() const;
 	QString configurationStartSchemaId() const;
 
