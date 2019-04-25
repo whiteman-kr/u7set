@@ -139,6 +139,7 @@ void LinearityMeasurement::clear()
 	m_customAppSignalID.clear();
 	m_caption.clear();
 
+	m_moduleSerialNo = 0;
 	m_location.clear();
 
 	m_percent = 0;
@@ -214,6 +215,16 @@ void LinearityMeasurement::fill_measure_input(const MeasureMultiParam &measurePa
 
 	// features
 	//
+
+	if (inParam.moduleSerialNoID().isEmpty() == false)
+	{
+		Hash serialNumberModuleHash = calcHash(inParam.moduleSerialNoID());
+		Metrology::SignalState signalState = theSignalBase.signalState(serialNumberModuleHash);
+		if (signalState.valid() == true)
+		{
+			setModuleSerialNo(static_cast<int>(signalState.value()));
+		}
+	}
 
 	setAppSignalID(inParam.appSignalID());
 	setCustomAppSignalID(inParam.customAppSignalID());
@@ -323,6 +334,16 @@ void LinearityMeasurement::fill_measure_output(const MeasureMultiParam &measureP
 
 	// features
 	//
+
+	if (outParam.moduleSerialNoID().isEmpty() == false)
+	{
+		Hash serialNumberModuleHash = calcHash(outParam.moduleSerialNoID());
+		Metrology::SignalState signalState = theSignalBase.signalState(serialNumberModuleHash);
+		if (signalState.valid() == true)
+		{
+			setModuleSerialNo(static_cast<int>(signalState.value()));
+		}
+	}
 
 	setAppSignalID(outParam.appSignalID());
 	setCustomAppSignalID(outParam.customAppSignalID());
@@ -502,6 +523,18 @@ QString LinearityMeasurement::signalID(int type) const
 	}
 
 	return strID;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString	LinearityMeasurement::moduleSerialNoStr() const
+{
+	if (m_moduleSerialNo == 0)
+	{
+		return QString("N/A");
+	}
+
+	return QString::number(m_moduleSerialNo);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1063,7 +1096,9 @@ LinearityMeasurement& LinearityMeasurement::operator=(const LinearityMeasurement
 	m_customAppSignalID = from.m_customAppSignalID;
 	m_caption = from.m_caption;
 
+	m_moduleSerialNo = from.m_moduleSerialNo;
 	m_location = from.m_location;
+
 	m_percent = from.m_percent;
 
 	for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)

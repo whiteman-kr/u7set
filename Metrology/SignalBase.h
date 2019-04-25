@@ -245,6 +245,10 @@ public:
 	int						rackCountForMeasure() const;
 	Metrology::RackParam	rackForMeasure(int index);
 
+	// module
+	//
+	QString					getSerialNoSignalID(const QString& moduleID);
+
 	// signals for measure
 	//
 	void					initSignals();

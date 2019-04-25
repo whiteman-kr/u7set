@@ -123,6 +123,7 @@ namespace Metrology
 
 		m_rack.clear();
 		m_chassis = -1;
+		m_moduleID.clear();
 		m_module = -1;
 		m_place = -1;
 
@@ -149,6 +150,7 @@ namespace Metrology
 				break;
 
 			case Hardware::DeviceType::Module:
+				setModuleID(pDeviceObject->equipmentId());
 				setModule(pDeviceObject->place());
 				break;
 
@@ -214,9 +216,9 @@ namespace Metrology
 
 		result &= xml.readStringAttribute("RackID", &rackID);
 		result &= xml.readIntAttribute("Chassis", &m_chassis);
+		result &= xml.readStringAttribute("ModuleID", &m_moduleID);
 		result &= xml.readIntAttribute("Module", &m_module);
 		result &= xml.readIntAttribute("Place", &m_place);
-
 		result &= xml.readStringAttribute("Contact", &m_contact);
 
 		rack().setEquipmentID(rackID);
@@ -228,15 +230,15 @@ namespace Metrology
 
 	void SignalLocation::writeToXml(XmlWriteHelper& xml)
 	{
-		xml.writeStringAttribute("AppSignalID", appSignalID());			// signal appSignalID
-		xml.writeStringAttribute("EquipmentID", equipmentID());			// signal equipmentID
+		xml.writeStringAttribute("AppSignalID", appSignalID());				// signal appSignalID
+		xml.writeStringAttribute("EquipmentID", equipmentID());				// signal equipmentID
 
-		xml.writeStringAttribute("RackID", rack().equipmentID());		// signal rack		(other info about rack ref. in RackParam by rack hash)
-		xml.writeIntAttribute("Chassis", chassis());					// signal chassis
-		xml.writeIntAttribute("Module", module());						// signal module
-		xml.writeIntAttribute("Place", place());						// signal place
-
-		xml.writeStringAttribute("Contact", contact());					// signal contact for input: _IN00A or _IN00B, for output: only _OUT00
+		xml.writeStringAttribute("RackID", rack().equipmentID());			// signal rack		(other info about rack ref. in RackParam by rack hash)
+		xml.writeIntAttribute("Chassis", chassis());						// signal chassis
+		xml.writeStringAttribute("ModuleID", moduleID());					// signal module EquipmentID
+		xml.writeIntAttribute("Module", module());							// signal module
+		xml.writeIntAttribute("Place", place());							// signal place
+		xml.writeStringAttribute("Contact", contact());						// signal contact for input: _IN00A or _IN00B, for output: only _OUT00
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -261,7 +263,7 @@ namespace Metrology
 
 		if (appSignalID.isEmpty() == true)
 		{
-			setHash(0);
+			setHash(UNDEFINED_HASH);
 			return;
 		}
 
@@ -277,51 +279,12 @@ namespace Metrology
 		// electricUnits
 		//
 
-		switch(signal.inOutType())
-		{
-			case E::SignalInOutType::Input:
-
-				m_electricLowLimit = signal.electricLowLimit();
-				m_electricHighLimit = signal.electricHighLimit();
-				m_electricUnitID = signal.electricUnit();
-				m_electricSensorType = signal.sensorType();
-				m_electricR0 = 0;
-				m_electricPrecision = 4;
-
-				break;
-
-			case E::SignalInOutType::Internal:
-
-				m_electricLowLimit = 0;
-				m_electricHighLimit = 0;
-				m_electricUnitID = E::ElectricUnit::NoUnit;
-				m_electricSensorType = E::SensorType::NoSensor;
-				m_electricR0 = 0;
-				m_electricPrecision = 0;
-
-				break;
-
-			case E::SignalInOutType::Output:
-
-				switch(signal.outputMode())
-				{
-					case E::OutputMode::Plus0_Plus5_V:		m_electricLowLimit = 0;		m_electricHighLimit = 5;	m_electricUnitID = E::ElectricUnit::V;	break;
-					case E::OutputMode::Plus4_Plus20_mA:	m_electricLowLimit = 4;		m_electricHighLimit = 20;	m_electricUnitID = E::ElectricUnit::mA;	break;
-					case E::OutputMode::Minus10_Plus10_V:	m_electricLowLimit = -10;	m_electricHighLimit = 10;	m_electricUnitID = E::ElectricUnit::V;	break;
-					case E::OutputMode::Plus0_Plus5_mA:		m_electricLowLimit = 0;		m_electricHighLimit = 5;	m_electricUnitID = E::ElectricUnit::mA;	break;
-					case E::OutputMode::Plus0_Plus20_mA:	m_electricLowLimit = 0;		m_electricHighLimit = 20;	m_electricUnitID = E::ElectricUnit::mA;	break;
-					case E::OutputMode::Plus0_Plus24_mA:	m_electricLowLimit = 0;		m_electricHighLimit = 24;	m_electricUnitID = E::ElectricUnit::mA;	break;
-					default:								assert(0);
-				}
-
-				m_electricSensorType = E::SensorType::NoSensor;
-				m_electricR0 = 0;
-				m_electricPrecision = 4;
-
-				break;
-
-			default: assert(0);
-		}
+		m_electricLowLimit = signal.electricLowLimit();
+		m_electricHighLimit = signal.electricHighLimit();
+		m_electricUnitID = signal.electricUnit();
+		m_electricSensorType = signal.sensorType();
+		m_electricR0 = 0;
+		m_electricPrecision = 4;
 
 		// physicalUnits
 		//
@@ -359,18 +322,11 @@ namespace Metrology
 
 						case E::ElectricUnit::Ohm:
 							{
-								m_electricR0 = 0;
-
 								QVariant qv;
 								bool isEnum;
 								if (signal.getSpecPropValue("R0_Ohm", &qv, &isEnum) == true)
 								{
 									m_electricR0 = qv.toDouble();
-								}
-
-								if (m_electricR0 == 0.0)
-								{
-									break;
 								}
 
 								qpl = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricR0);

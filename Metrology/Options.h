@@ -174,7 +174,7 @@ const char* const		SocketDefaultID[SOCKET_TYPE_COUNT] =
 
 const int				SocketDefaultPort[SOCKET_TYPE_COUNT] =
 {
-						PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST,				// ConfigSocket
+						PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST,		// ConfigSocket
 						PORT_APP_DATA_SERVICE_CLIENT_REQUEST,			// SignalSocket
 						PORT_TUNING_SERVICE_CLIENT_REQUEST,				// TuningSocket
 };
@@ -517,6 +517,62 @@ public:
 
 // ==============================================================================================
 
+#define					MODULE_OPTIONS_KEY			"Options/Module/"
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const		ModuleParamName[] =
+{
+						QT_TRANSLATE_NOOP("Options.h", "Measure all signals of module in series"),
+						QT_TRANSLATE_NOOP("Options.h", "Show warning if signal is already measured"),
+						QT_TRANSLATE_NOOP("Options.h", "Suffix to identify signal of module serial number"),
+};
+
+const int				MO_PARAM_COUNT					= sizeof(ModuleParamName)/sizeof(ModuleParamName[0]);
+
+const int				MO_PARAM_MEASURE_ENTIRE_MODULE	= 0,
+						MO_PARAM_WARN_IF_MEASURED		= 1,
+						MO_PARAM_SUFFIX_SN				= 2;
+
+// ----------------------------------------------------------------------------------------------
+
+class ModuleOption : public QObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit ModuleOption(QObject *parent = 0);
+	explicit ModuleOption(const ModuleOption& from, QObject *parent = 0);
+	virtual ~ModuleOption();
+
+private:
+
+	bool				m_measureEntireModule = false;								// measure all inputs of module in series
+	bool				m_warningIfMeasured = true;									// show warning if signal is already measured
+	QString				m_suffixSN;													// suffix to identify the signal of module serial number
+
+public:
+
+	bool				measureEntireModule() const { return m_measureEntireModule; }
+	void				setMeasureEntireModule(bool measure) { m_measureEntireModule = measure; }
+
+	bool				warningIfMeasured() const { return m_warningIfMeasured; }
+	void				setWarningIfMeasured(bool enable) { m_warningIfMeasured = enable; }
+
+	QString				suffixSN() const { return m_suffixSN; }
+	void				setSuffixSN(const QString& suffixSN) { m_suffixSN = suffixSN; }
+
+public:
+
+	void				load();
+	void				save();
+
+	ModuleOption&		operator=(const ModuleOption& from);
+};
+
+// ==============================================================================================
+
 const char* const		LinearityPointSensor[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "%"),
@@ -605,9 +661,7 @@ const char* const		LinearityParamName[] =
 						QT_TRANSLATE_NOOP("Options.h", "High limit of the measure range, (%)"),
 						QT_TRANSLATE_NOOP("Options.h", "Points of range"),
 						QT_TRANSLATE_NOOP("Options.h", "Type of measurements list"),
-						QT_TRANSLATE_NOOP("Options.h", "Show columns of engeneering values"),
-						QT_TRANSLATE_NOOP("Options.h", "Show warning if signal is already measured"),
-						QT_TRANSLATE_NOOP("Options.h", "Measure all signals of module in series"),
+						QT_TRANSLATE_NOOP("Options.h", "Show columns of engineering values"),
 };
 
 const int				LO_PARAM_COUNT					= sizeof(LinearityParamName)/sizeof(LinearityParamName[0]);
@@ -623,9 +677,7 @@ const int				LO_PARAM_ERROR_LIMIT			= 0,
 						LO_PARAM_HIGH_RANGE				= 8,
 						LO_PARAM_VALUE_POINTS			= 9,
 						LO_PARAM_LIST_TYPE				= 10,
-						LO_PARAM_SHOW_ENGENEERING_VALUE	= 11,
-						LO_PARAM_WARN_IF_MEASURED		= 12,
-						LO_PARAM_MEASURE_ENTIRE_MODULE	= 13;
+						LO_PARAM_SHOW_ENGINEERING_VALUE	= 11;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -647,7 +699,7 @@ const char* const		LinearityViewTypeStr[] =
 						QT_TRANSLATE_NOOP("Options.h", "Simple"),
 						QT_TRANSLATE_NOOP("Options.h", "Extended (show columns for metrological certification)"),
 						QT_TRANSLATE_NOOP("Options.h", "Detail electric (show all measurements at one point)"),
-						QT_TRANSLATE_NOOP("Options.h", "Detail engeneering (show all measurements at one point)"),
+						QT_TRANSLATE_NOOP("Options.h", "Detail engineering (show all measurements at one point)"),
 };
 
 const int				LO_VIEW_TYPE_COUNT				= sizeof(LinearityViewTypeStr)/sizeof(LinearityViewTypeStr[0]);
@@ -656,7 +708,7 @@ const int				LO_VIEW_TYPE_UNKNOWN			= -1,
 						LO_VIEW_TYPE_SIMPLE				= 0,
 						LO_VIEW_TYPE_EXTENDED			= 1,
 						LO_VIEW_TYPE_DETAIL_ELRCTRIC	= 2,
-						LO_VIEW_TYPE_DETAIL_ENGENEERING	= 3;
+						LO_VIEW_TYPE_DETAIL_ENGINEERING	= 3;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -687,9 +739,6 @@ private:
 
 	int					m_viewType = LO_VIEW_TYPE_SIMPLE;							// type of measurements list extended or simple
 	bool				m_showEngeneeringValueColumn = true;						// show columns of engeneering values
-
-	bool				m_warningIfMeasured = true;									// show warning if signal is already measured
-	bool				m_measureEntireModule = false;								// measure all inputs of module in series
 
 public:
 
@@ -724,12 +773,6 @@ public:
 
 	bool				showEngeneeringValueColumn() const { return m_showEngeneeringValueColumn; }
 	void				setShowPhyscalValueColumn(bool show) { m_showEngeneeringValueColumn = show; }
-
-	bool				warningIfMeasured() const { return m_warningIfMeasured; }
-	void				setWarningIfMeasured(bool enable) { m_warningIfMeasured = enable; }
-
-	bool				measureEntireModule() const { return m_measureEntireModule; }
-	void				setMeasureEntireModule(bool measure) { m_measureEntireModule = measure; }
 
 public:
 
@@ -884,6 +927,7 @@ private:
 	MeasureViewOption	m_measureView;
 	SignalInfoOption	m_signalInfo;
 	DatabaseOption		m_database;
+	ModuleOption		m_module;
 	LinearityOption		m_linearity;
 	ComparatorOption	m_comparator;
 	BackupOption		m_backup;
@@ -907,6 +951,9 @@ public:
 
 	DatabaseOption&		database() { return m_database; }
 	void				setDatabase(const DatabaseOption& database) { m_database = database; }
+
+	ModuleOption&		module() { return m_module; }
+	void				setModule(const ModuleOption& module) { m_module = module; }
 
 	LinearityOption&	linearity() { return m_linearity; }
 	void				setLinearity(const LinearityOption& linearity) { m_linearity = linearity; }

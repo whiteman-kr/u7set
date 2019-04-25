@@ -55,7 +55,7 @@ const int	MEASURE_KIND_UNKNOWN	= -1,
 const char* const MeasureLimitType[] =
 {
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Electric"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", "Engeneering"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", "Engineering"),
 };
 
 const int	MEASURE_LIMIT_TYPE_COUNT		= sizeof(MeasureLimitType)/sizeof(MeasureLimitType[0]);
@@ -198,6 +198,7 @@ private:
 	QString			m_customAppSignalID;
 	QString			m_caption;
 
+	int				m_moduleSerialNo = 0;
 	Metrology::SignalLocation m_location;
 
 	double			m_percent = 0;
@@ -242,6 +243,10 @@ public:
 
 	QString			caption() const { return m_caption; }
 	void			setCaption(const QString& caption) { m_caption = caption; }
+
+	int				moduleSerialNo() const { return m_moduleSerialNo; }
+	QString			moduleSerialNoStr() const;
+	void			setModuleSerialNo(int serialNo) { m_moduleSerialNo = serialNo; }
 
 	Metrology::SignalLocation& location() { return m_location; }
 	void			setLocation(const Metrology::SignalLocation& location) { m_location = location; }

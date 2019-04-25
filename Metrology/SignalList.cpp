@@ -152,6 +152,14 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 				}
 				break;
 
+			case SIGNAL_LIST_COLUMN_EL_SENSOR:
+
+				if (pSignal->param().electricSensorType() == E::SensorType::NoSensor)
+				{
+					return QColor(0xFF, 0xA0, 0xA0);
+				}
+				break;
+
 			case SIGNAL_LIST_COLUMN_PH_RANGE:
 
 				if (pSignal->param().physicalRangeIsValid() == false)

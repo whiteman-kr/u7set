@@ -256,6 +256,7 @@ PropertyPage* OptionsDialog::createPage(int page)
 		case OPTION_PAGE_CONFIG_SOCKET:
 		case OPTION_PAGE_SIGNAL_SOCKET:
 		case OPTION_PAGE_TUNING_SOCKET:
+		case OPTION_PAGE_MODULE_MEASURE:
 		case OPTION_PAGE_LINEARITY_MEASURE:
 		case OPTION_PAGE_COMPARATOR_MEASURE:
 		case OPTION_PAGE_MEASURE_VIEW_TEXT:
@@ -367,6 +368,31 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					editor->addProperty(serverGroup2);
 				}
 
+			}
+			break;
+
+		case OPTION_PAGE_MODULE_MEASURE:
+			{
+				QtProperty *measuremoduleGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measuring of module"));
+
+					item = manager->addProperty(QVariant::Bool, ModuleParamName[MO_PARAM_MEASURE_ENTIRE_MODULE]);
+					item->setValue(m_options.module().measureEntireModule());
+					appendProperty(item, page, MO_PARAM_MEASURE_ENTIRE_MODULE);
+					measuremoduleGroup->addSubProperty(item);
+
+					item = manager->addProperty(QVariant::Bool, ModuleParamName[MO_PARAM_WARN_IF_MEASURED]);
+					item->setValue(m_options.module().warningIfMeasured());
+					appendProperty(item, page, MO_PARAM_WARN_IF_MEASURED);
+					measuremoduleGroup->addSubProperty(item);
+
+					item = manager->addProperty(VariantManager::folerPathTypeId(), ModuleParamName[MO_PARAM_SUFFIX_SN]);
+					item->setValue(m_options.module().suffixSN());
+					appendProperty(item, page, MO_PARAM_SUFFIX_SN);
+					measuremoduleGroup->addSubProperty(item);
+
+				editor->setFactoryForManager(manager, factory);
+
+				editor->addProperty(measuremoduleGroup);
 			}
 			break;
 
@@ -490,22 +516,10 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					appendProperty(item, page, LO_PARAM_LIST_TYPE);
 					showcolumnGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_SHOW_ENGENEERING_VALUE]);
+					item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_SHOW_ENGINEERING_VALUE]);
 					item->setValue(m_options.linearity().showEngeneeringValueColumn());
-					appendProperty(item, page, LO_PARAM_SHOW_ENGENEERING_VALUE);
+					appendProperty(item, page, LO_PARAM_SHOW_ENGINEERING_VALUE);
 					showcolumnGroup->addSubProperty(item);
-
-				QtProperty *measuremoduleGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measuring of module"));
-
-					item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_WARN_IF_MEASURED]);
-					item->setValue(m_options.linearity().warningIfMeasured());
-					appendProperty(item, page, LO_PARAM_WARN_IF_MEASURED);
-					measuremoduleGroup->addSubProperty(item);
-
-					item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_MEASURE_ENTIRE_MODULE]);
-					item->setValue(m_options.linearity().measureEntireModule());
-					appendProperty(item, page, LO_PARAM_MEASURE_ENTIRE_MODULE);
-					measuremoduleGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
 
@@ -513,7 +527,6 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 				editor->addProperty(measureGroup);
 				editor->addProperty(pointGroup);
 				editor->addProperty(showcolumnGroup);
-				editor->addProperty(measuremoduleGroup);
 			}
 			break;
 
@@ -1014,6 +1027,18 @@ void OptionsDialog::applyProperty()
 			}
 			break;
 
+		case OPTION_PAGE_MODULE_MEASURE:
+			{
+				switch(param)
+				{
+					case MO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.module().setMeasureEntireModule(value.toBool());		break;
+					case MO_PARAM_WARN_IF_MEASURED:			m_options.module().setWarningIfMeasured(value.toBool());		break;
+					case MO_PARAM_SUFFIX_SN:				m_options.module().setSuffixSN(value.toString());				break;
+					default:								assert(0);
+				}
+			}
+			break;
+
 		case OPTION_PAGE_LINEARITY_MEASURE:
 			{
 				switch(param)
@@ -1039,10 +1064,8 @@ void OptionsDialog::applyProperty()
 					case LO_PARAM_VALUE_POINTS:				setActivePage(OPTION_PAGE_LINEARITY_POINT);						break;
 					case LO_PARAM_LIST_TYPE:				m_options.linearity().setViewType(value.toInt());
 															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;	break;
-					case LO_PARAM_SHOW_ENGENEERING_VALUE:		m_options.linearity().setShowPhyscalValueColumn(value.toBool());
+					case LO_PARAM_SHOW_ENGINEERING_VALUE:	m_options.linearity().setShowPhyscalValueColumn(value.toBool());
 															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;	break;
-					case LO_PARAM_WARN_IF_MEASURED:			m_options.linearity().setWarningIfMeasured(value.toBool());		break;
-					case LO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.linearity().setMeasureEntireModule(value.toBool());	break;
 					default:								assert(0);
 				}
 			}

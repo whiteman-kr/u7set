@@ -3,6 +3,7 @@
 #include "CalibratorBase.h"
 #include "MeasureBase.h"
 #include "Database.h"
+#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -1627,6 +1628,45 @@ Metrology::RackParam SignalBase::rackForMeasure(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+QString SignalBase::getSerialNoSignalID(const QString& moduleID)
+{
+	QString appSignalID;
+
+	int signalCount = m_signalList.count();
+	for(int i = 0; i < signalCount; i++)
+	{
+		Metrology::Signal& signal = m_signalList[i];
+
+		if (signal.param().isAnalog() == false)
+		{
+			continue;
+		}
+
+		if (signal.param().electricSensorType() != E::SensorType::NoSensor)
+		{
+			continue;
+		}
+
+		if (signal.param().location().moduleID() != moduleID)
+		{
+			continue;
+		}
+
+		if (signal.param().location().contact() != theOptions.module().suffixSN())
+		{
+			continue;
+		}
+
+		appSignalID = signal.param().location().appSignalID();
+
+		break;
+	}
+
+	return appSignalID;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 int SignalBase::createRackListForMeasure(int outputSignalType)
 {
 	if (outputSignalType < 0 || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
@@ -1921,8 +1961,12 @@ int SignalBase::createSignalListForMeasure(int measureKind, int outputSignalType
 						continue;
 					}
 
-					break;
+					if (param.electricSensorType() == E::SensorType::NoSensor)
+					{
+						continue;
+					}
 
+					break;
 
 				case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
 
@@ -1932,6 +1976,11 @@ int SignalBase::createSignalListForMeasure(int measureKind, int outputSignalType
 					}
 
 					if (param.location().place() == -1)
+					{
+						continue;
+					}
+
+					if (param.electricSensorType() == E::SensorType::NoSensor)
 					{
 						continue;
 					}
@@ -2096,6 +2145,12 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 
 				m_requestStateList.append(pSignal->param().hash());
 
+				pSignal->param().setModuleSerialNoID(getSerialNoSignalID(pSignal->param().location().moduleID()));
+				if (pSignal->param().moduleSerialNoID().isEmpty() == false)
+				{
+					m_requestStateList.append(calcHash(pSignal->param().moduleSerialNoID()));
+				}
+
 				if (m_activeSignal.outputSignalType() == OUTPUT_SIGNAL_TYPE_UNUSED)
 				{
 					continue;
@@ -2108,6 +2163,12 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 				}
 
 				m_requestStateList.append(pSignal->param().hash());
+
+				pSignal->param().setModuleSerialNoID(getSerialNoSignalID(pSignal->param().location().moduleID()));
+				if (pSignal->param().moduleSerialNoID().isEmpty() == false)
+				{
+					m_requestStateList.append(calcHash(pSignal->param().moduleSerialNoID()));
+				}
 			}
 
 		m_stateMutex.unlock();

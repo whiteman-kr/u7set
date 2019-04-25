@@ -179,14 +179,14 @@ bool ConfigSocket::readConfiguration(const QByteArray& fileData)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool ConfigSocket::readAppSignalSet(const QByteArray& fileData)
+int ConfigSocket::readAppSignalSet(const QByteArray& fileData)
 {
 	::Proto::AppSignalSet protoAppSignalSet;
 
 	bool result = protoAppSignalSet.ParseFromArray(fileData.constData(), fileData.size());
 	if (result == false)
 	{
-		return false;
+		return 0;
 	}
 
 	int signalCount = protoAppSignalSet.appsignal_size();
@@ -200,14 +200,9 @@ bool ConfigSocket::readAppSignalSet(const QByteArray& fileData)
 		theSignalBase.appendSignal(param);
 	}
 
-	if (theSignalBase.signalCount() == 0)
-	{
-		qDebug() << "ConfigSocket::readAppSignalSet - Signals have not loaded";
-		assert(false);
-		return false;
-	}
+	qDebug() << "ConfigSocket::readAppSignalSet - Signals were loaded" << theSignalBase.signalCount();
 
-	return true;
+	return theSignalBase.signalCount();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -391,8 +386,6 @@ bool ConfigSocket::readSignals(const QByteArray& fileData, int fileVersion)
 	}
 
 	theSignalBase.initSignals();
-
-	qDebug() << "ConfigSocket::readSignals - Signals were loaded: " << theSignalBase.signalCount();
 
 	return result;
 }

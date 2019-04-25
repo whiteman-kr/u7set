@@ -37,7 +37,7 @@ void MeasureThread::init(QWidget* parent)
 
 bool MeasureThread::enableMesureIsSignal()
 {
-	if (theOptions.linearity().warningIfMeasured() == true)
+	if (theOptions.module().warningIfMeasured() == true)
 	{
 		QString measuredSignals;
 
@@ -529,7 +529,7 @@ void MeasureThread::run()
 			}
 		}
 
-		if (theOptions.linearity().measureEntireModule() == true)
+		if (theOptions.module().measureEntireModule() == true)
 		{
 			// if we want to measure all signals of module
 			// suspend MeasureThread

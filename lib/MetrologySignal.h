@@ -107,11 +107,12 @@ namespace Metrology
 			QString				m_appSignalID;
 			QString				m_equipmentID;
 
+
 			RackParam			m_rack;
 			int					m_chassis = -1;
+			QString				m_moduleID;
 			int					m_module = -1;
 			int					m_place = -1;
-
 			QString				m_contact;				// for input: _IN00A or _IN00B, for output: only _OUT00
 
 			void				getParentObject(Hardware::DeviceObject* pDeviceObject);
@@ -133,6 +134,9 @@ namespace Metrology
 			int					chassis() const { return m_chassis; }
 			QString				chassisStr() const;
 			void				setChassis(int chassis) { m_chassis = chassis; }
+
+			QString				moduleID() const { return m_moduleID; }
+			void				setModuleID(const QString& moduleID) { m_moduleID = moduleID; }
 
 			int					module() const { return m_module; }
 			QString				moduleStr() const;
@@ -161,6 +165,7 @@ namespace Metrology
 
 	private:
 
+		QString					m_moduleSerialNoID;
 		SignalLocation			m_location;
 
 		double					m_electricLowLimit = 0;
@@ -181,6 +186,9 @@ namespace Metrology
 		void					updateParam(const SignalParam& param);
 
 		void					setAppSignalID(const QString& appSignalID);
+
+		QString					moduleSerialNoID() const { return m_moduleSerialNoID; }
+		void					setModuleSerialNoID(const QString& appSignalID) { m_moduleSerialNoID = appSignalID; }
 
 		SignalLocation			location() const { return m_location; }
 		void					setLocation(const SignalLocation& location) { m_location = location; }
@@ -317,11 +325,7 @@ namespace Metrology
 	public:
 
 		Signal() {}
-		explicit Signal(const SignalParam& param)
-		{
-			setParam(param);
-		}
-
+		explicit Signal(const SignalParam& param) { setParam(param); }
 		virtual ~Signal() {}
 
 	private:
