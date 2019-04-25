@@ -45,6 +45,11 @@ MonitorSchemaWidget* MonitorCentralWidget::currentTab()
 	return dynamic_cast<MonitorSchemaWidget*>(currentWidget());
 }
 
+VFrame30::TuningController* MonitorCentralWidget::tuningController()
+{
+	return m_tuningController;
+}
+
 int MonitorCentralWidget::addSchemaTabPage(QString schemaId, const QVariantHash& variables)
 {
 	std::shared_ptr<VFrame30::Schema> tabSchema = m_schemaManager->schema(schemaId);

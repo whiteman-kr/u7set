@@ -4,6 +4,7 @@
 #include "../Proto/serialization.pb.h"
 #include "MonitorCentralWidget.h"
 #include "Settings.h"
+#include "../lib/Ui/UiTools.h"
 
 //
 //
@@ -108,6 +109,8 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 //
 //
 
+std::map<QString, DialogSignalInfo*> DialogSignalInfo::m_dialogSignalInfoMap;
+
 DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, MonitorConfigController* configController, MonitorCentralWidget* centralWidget) :
 	QDialog(centralWidget, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogSignalInfo),
@@ -144,29 +147,39 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, MonitorConfigCo
 
 	m_currentPrecision = m_signal.precision();
 
-	// signalIdLabel and captionLabel are promoted to QLabelAppSignalDragAndDrop
+	// signalIdLabel is promoted to QLabelAppSignalDragAndDrop
 	// tu support Drag and Drop Operation (drag part)
 	//
 	ui->signalIdLabel->setAppSignal(signal);
-	ui->captionLabel->setAppSignal(signal);
 
 	// Fill main signal information
 	//
 	if (m_signal.isAnalog())
 	{
 		ui->labelStrUnit->setText(m_signal.unit());
+		ui->labelStrUnitTuning->setText(m_signal.unit());
+
+		ui->pushButtonSetOne->setVisible(false);
+		ui->pushButtonSetZero->setVisible(false);
 	}
 	else
 	{
 		ui->labelStrUnit->setText("");
+		ui->labelStrUnitTuning->setText("");
+
+		ui->editInputValue->setVisible(false);
+		ui->pushButtonSetValue->setVisible(false);
 	}
 	ui->labelValue->setText("");
+	ui->labelValueTuning->setText("");
 
 	QFont font = ui->labelValue->font();
 	font.setPixelSize(m_currentFontSize);
 	ui->labelValue->setFont(font);
+	ui->labelValueTuning->setFont(font);
 
-	ui->editCustomAppID->setText(m_signal.customSignalId());
+	ui->editAppSignalID->setText(m_signal.appSignalId());
+	ui->editCustomAppSignalID->setText(m_signal.customSignalId());
 	ui->editCaption->setPlainText(m_signal.caption());
 	ui->editEquipment->setText(m_signal.equipmentId());
 
@@ -188,17 +201,44 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, MonitorConfigCo
 
 	fillSchemas();
 
-	//
-
 	ui->tabWidget->setCurrentIndex(0);
 
+	// Remove tuning tab
+
+	if (configController->configuration().tuningEnabled == false || m_signal.enableTuning() == false)
+	{
+		for (int i = 0; i < ui->tabWidget->count(); i++)
+		{
+			if (ui->tabWidget->tabText(i) == tr("Tuning"))
+			{
+				ui->tabWidget->removeTab(i);
+				break;
+			}
+		}
+	}
+
+	//
+
 	updateData();
+
+	UiTools::adjustDialogPlacement(this);
 
 	m_updateStateTimerId = startTimer(200);
 }
 
 DialogSignalInfo::~DialogSignalInfo()
 {
+	auto it = m_dialogSignalInfoMap.find(m_signal.appSignalId());
+	if (it == m_dialogSignalInfoMap.end())
+	{
+
+		Q_ASSERT(false);
+	}
+	else
+	{
+		m_dialogSignalInfoMap.erase(it);
+	}
+
 	// Save window position
 	//
 	theSettings.m_signalInfoPos = pos();
@@ -209,22 +249,43 @@ DialogSignalInfo::~DialogSignalInfo()
 
 bool DialogSignalInfo::showDialog(QString appSignalId, MonitorConfigController* configController, MonitorCentralWidget* centralWidget)
 {
-	bool ok = false;
-	AppSignalParam signal = theSignals.signalParam(appSignalId, &ok);
-
-	if (ok == true)
+	auto it = m_dialogSignalInfoMap.find(appSignalId);
+	if (it == m_dialogSignalInfoMap.end())
 	{
-		DialogSignalInfo* dsi = new DialogSignalInfo(signal, configController, centralWidget);
-		dsi->show();
-		dsi->raise();
-		dsi->activateWindow();
+		bool ok = false;
+		AppSignalParam signal = theSignals.signalParam(appSignalId, &ok);
+
+		if (ok == true)
+		{
+			DialogSignalInfo* dsi = new DialogSignalInfo(signal, configController, centralWidget);
+			dsi->show();
+			dsi->raise();
+			dsi->activateWindow();
+
+			m_dialogSignalInfoMap[appSignalId] = dsi;
+		}
+		else
+		{
+			QMessageBox::critical(centralWidget, qAppName(), tr("Signal %1 not found.").arg(appSignalId));
+			return false;
+		}
 	}
 	else
 	{
-		QMessageBox::critical(centralWidget, qAppName(), tr("Signal %1 not found.").arg(appSignalId));
+		DialogSignalInfo* dsi = it->second;
+		if (dsi == nullptr)
+		{
+			Q_ASSERT(dsi);
+			return false;
+		}
+
+		dsi->raise();
+		dsi->activateWindow();
+
+		UiTools::adjustDialogPlacement(dsi);
 	}
 
-	return ok;
+	return true;
 }
 
 void DialogSignalInfo::preparePropertiesContextMenu(const QPoint& pos)
@@ -315,7 +376,7 @@ void DialogSignalInfo::timerEvent(QTimerEvent* event)
 
 void DialogSignalInfo::mousePressEvent(QMouseEvent* event)
 {
-	if (ui->labelValue->underMouse() && event->button() == Qt::RightButton)
+	if ((ui->labelValue->underMouse() || ui->labelValueTuning->underMouse()) && event->button() == Qt::RightButton)
 	{
 		contextMenu(event->pos());
 	}
@@ -406,18 +467,19 @@ void DialogSignalInfo::fillProperties()
 		itemGroup6->setExpanded(true);
 	}
 
-	QTreeWidgetItem* itemGroup7 = new QTreeWidgetItem(QStringList()<<tr("Tuning"));
-
-	itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("EnableTuning")<<(m_signal.enableTuning() ? tr("Yes") : tr("No"))));
 	if (m_signal.enableTuning())
 	{
+		QTreeWidgetItem* itemGroup7 = new QTreeWidgetItem(QStringList()<<tr("Tuning"));
+
+		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("EnableTuning")<<(m_signal.enableTuning() ? tr("Yes") : tr("No"))));
 		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("TuningDefaultValue")<<m_signal.tuningDefaultValue().toString(m_signal.precision())));
 		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("TuningLowBound")<<m_signal.tuningLowBound().toString(m_signal.precision())));
 		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("TuningHighBound")<<m_signal.tuningHighBound().toString(m_signal.precision())));
+
+		ui->treeProperties->addTopLevelItem(itemGroup7);
+		itemGroup7->setExpanded(true);
 	}
 
-	ui->treeProperties->addTopLevelItem(itemGroup7);
-	itemGroup7->setExpanded(true);
 
 	ui->treeProperties->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(ui->treeProperties, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::preparePropertiesContextMenu);
@@ -489,6 +551,7 @@ void DialogSignalInfo::updateData()
 		QFont font = ui->labelValue->font();
 		font.setPixelSize(m_currentFontSize);
 		ui->labelValue->setFont(font);
+		ui->labelValueTuning->setFont(font);
 	}
 
 	// Generate non valid string
@@ -503,6 +566,7 @@ void DialogSignalInfo::updateData()
 	if (strValue != ui->labelValue->text())
 	{
 		ui->labelValue->setText(strValue);
+		ui->labelValueTuning->setText(strValue);
 	}
 
 	//QDateTime systemTime = QDateTime::fromMSecsSinceEpoch(state.time.system);
@@ -698,4 +762,48 @@ void DialogSignalInfo::on_treeSchemas_itemDoubleClicked(QTreeWidgetItem *item, i
 	}
 
 	currentTab->setSchema(item->text(0));
+}
+
+void DialogSignalInfo::on_pushButtonSetZero_clicked()
+{
+	if (m_signal.isDiscrete() == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	m_centralWidget->tuningController()->writeValue(m_signal.appSignalId(), false);
+}
+
+void DialogSignalInfo::on_pushButtonSetOne_clicked()
+{
+	if (m_signal.isDiscrete() == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	m_centralWidget->tuningController()->writeValue(m_signal.appSignalId(), true);
+}
+
+void DialogSignalInfo::on_pushButtonSetValue_clicked()
+{
+	if (m_signal.isAnalog() == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	QString strValue = ui->editInputValue->text();
+
+	bool ok = false;
+
+	double value = strValue.toDouble(&ok);
+	if (ok == false)
+	{
+		QMessageBox::critical(m_centralWidget, qAppName(), tr("Invalid input value!"));
+		return;
+	}
+
+	m_centralWidget->tuningController()->writeValue(m_signal.appSignalId(), value);
 }

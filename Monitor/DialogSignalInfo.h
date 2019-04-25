@@ -32,16 +32,24 @@ class DialogSignalInfo : public QDialog
 	Q_OBJECT
 
 public:
+	static bool showDialog(QString appSignalId, MonitorConfigController* configController, MonitorCentralWidget* centralWidget);
+
+private:
 	DialogSignalInfo(const AppSignalParam& signal, MonitorConfigController* configController, MonitorCentralWidget* centralWidget);
 	~DialogSignalInfo();
 
-	static bool showDialog(QString appSignalId, MonitorConfigController* configController, MonitorCentralWidget* centralWidget);
 
 private slots:
 	void preparePropertiesContextMenu(const QPoint& pos);
 	void prepareSchemasContextMenu(const QPoint& pos);
 
 	void on_treeSchemas_itemDoubleClicked(QTreeWidgetItem *item, int column);
+
+	void on_pushButtonSetZero_clicked();
+
+	void on_pushButtonSetOne_clicked();
+
+	void on_pushButtonSetValue_clicked();
 
 protected:
 	virtual void timerEvent(QTimerEvent* event) override;
@@ -56,6 +64,8 @@ private:
 	void contextMenu(QPoint pos);
 
 private:
+	static std::map<QString, DialogSignalInfo*> m_dialogSignalInfoMap;
+
 	Ui::DialogSignalInfo *ui;
 
 	MonitorConfigController* m_configController = nullptr;
@@ -65,8 +75,6 @@ private:
 	AppSignalParam m_signal;
 
 	int m_updateStateTimerId = -1;
-
-	//SignalFlagsWidget* m_signalFlags = nullptr;
 
 	int m_currentPrecision = 0;
 
