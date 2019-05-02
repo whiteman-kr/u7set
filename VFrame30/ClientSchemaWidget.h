@@ -65,7 +65,7 @@ namespace VFrame30
 		void emitHistoryChanged();
 
 	public slots:
-		void setSchema(QString schemaId);
+		void setSchema(QString schemaId, QStringList highlightIds = QStringList{});
 
 		// Signals
 		//

@@ -5,17 +5,19 @@
 #include "MonitorConfigController.h"
 
 namespace Ui {
-class DialogSignalInfo;
+	class DialogSignalInfo;
 }
 
+
 class MonitorCentralWidget;
+
 
 class SignalFlagsWidget : public QWidget
 {
 	Q_OBJECT
 
 public:
-	SignalFlagsWidget(QWidget *parent = 0);
+	SignalFlagsWidget(QWidget* parent = 0);
 
 	void updateControl(AppSignalStateFlags flags);
 
@@ -44,11 +46,8 @@ private slots:
 	void prepareSchemasContextMenu(const QPoint& pos);
 
 	void on_treeSchemas_itemDoubleClicked(QTreeWidgetItem *item, int column);
-
 	void on_pushButtonSetZero_clicked();
-
 	void on_pushButtonSetOne_clicked();
-
 	void on_pushButtonSetValue_clicked();
 
 protected:
@@ -56,7 +55,6 @@ protected:
 	void mousePressEvent(QMouseEvent* event);
 
 private:
-
 	void fillProperties();
 	void fillSchemas();
 
@@ -69,19 +67,16 @@ private:
 	Ui::DialogSignalInfo *ui;
 
 	MonitorConfigController* m_configController = nullptr;
-
 	MonitorCentralWidget* m_centralWidget = nullptr;
 
 	AppSignalParam m_signal;
 
 	int m_updateStateTimerId = -1;
-
 	int m_currentPrecision = 0;
-
 	E::ValueViewType m_viewType = E::ValueViewType::Dec;
-
 	int m_currentFontSize = 20;
 };
+
 
 class QLabelAppSignalDragAndDrop : public QLabel
 {

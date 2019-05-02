@@ -338,6 +338,16 @@ namespace VFrame30
 		return m_session;
 	}
 
+	const QStringList& CDrawParam::hightlightIds() const
+	{
+		return m_highlightIds;
+	}
+
+	void CDrawParam::setHightlightIds(const QStringList& value)
+	{
+		m_highlightIds = value;
+	}
+
 	void DrawHelper::drawText(QPainter* painter, const FontParam& font, SchemaUnit unit, const QString& str, const QRectF& rect, int flags, QRectF* boundingRect/* = nullptr*/)
 	{
 		if (painter == nullptr)

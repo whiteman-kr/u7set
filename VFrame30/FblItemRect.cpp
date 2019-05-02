@@ -309,7 +309,7 @@ namespace VFrame30
 		QPainter* p = drawParam->painter();
 		p->setBrush(Qt::NoBrush);
 
-		QRectF r = itemRectWithPins();
+		QRectF r = itemRectWithPins(drawParam);
 
 		// --
 		//
@@ -337,8 +337,8 @@ namespace VFrame30
 		r.setTopRight(drawParam->gridToDpi(r.topRight()));
 		r.setBottomLeft(drawParam->gridToDpi(r.bottomLeft()));
 
-		QRectF labelRect(r);	// save rect for future use
-		QRectF userTextRect(r);	// save rect for future use
+		QRectF labelRect{r};	// save rect for future use
+		QRectF userTextRect{r};	// save rect for future use
 
 		// Draw main rect
 		//
@@ -346,13 +346,13 @@ namespace VFrame30
 
 		// Regular pen
 		//
-		QPen pen(lineColor());
+		QPen pen{lineColor()};
 		pen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
 		p->setPen(pen);
 
 		// Bus pen
 		//
-		QPen busPen(lineColor());
+		QPen busPen{lineColor()};
 		busPen.setWidthF(BusSideLineWidth);
 		busPen.setCapStyle(Qt::FlatCap);
 
@@ -371,10 +371,10 @@ namespace VFrame30
 		//
 		const std::vector<AfbPin>& inputPins = inputs();
 
-		QPen redPen(QColor(0xE0B00000));
+		QPen redPen{QColor(0xE0B00000)};
 		redPen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);	// Don't use getter!
 
-		QPen redBusPen(redPen.color());
+		QPen redBusPen{redPen.color()};
 		redBusPen.setWidthF(BusSideLineWidth);
 		redBusPen.setCapStyle(Qt::FlatCap);
 
@@ -635,7 +635,7 @@ namespace VFrame30
 	{
 		QPainter* p = drawParam->painter();
 
-		QRectF r = itemRectPinIndent(drawParam->device());
+		QRectF r = itemRectPinIndent(drawParam);
 
 		QRectF drawRect(r.right(), r.bottom(),
 						widthDocPt(), m_font.drawSize());
@@ -654,7 +654,7 @@ namespace VFrame30
 	}
 
 
-	QRectF FblItemRect::itemRectWithPins() const
+	QRectF FblItemRect::itemRectWithPins(CDrawParam* drawParam) const
 	{
 		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
 
@@ -671,17 +671,16 @@ namespace VFrame30
 		return r;
 	}
 
-	QRectF FblItemRect::itemRectPinIndent(QPaintDevice* paintDevice) const
+	QRectF FblItemRect::itemRectPinIndent(CDrawParam* drawParam) const
 	{
-		if (paintDevice == nullptr)
+		if (drawParam == nullptr)
 		{
-			assert(paintDevice);
-			return QRectF();
+			assert(drawParam);
+			return {};
 		}
 
 		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
-
-		double pinWidth = GetPinWidth(itemUnit(), paintDevice->physicalDpiX());
+		double pinWidth = GetPinWidth(itemUnit(), drawParam->device()->physicalDpiX());
 
 		if (inputsCount() > 0)
 		{

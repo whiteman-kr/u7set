@@ -24,8 +24,8 @@ namespace VFrame30
 		BaseSchemaWidget(schema, schemaView),
 		m_schemaManager(schemaManager)
 	{
-		assert(schemaView);
-		assert(schemaManager);
+		Q_ASSERT(schemaView);
+		Q_ASSERT(schemaManager);
 
 		// --
 		//
@@ -113,7 +113,7 @@ namespace VFrame30
 		std::shared_ptr<VFrame30::SchemaItemSignal> schemaItemSignal = std::dynamic_pointer_cast<VFrame30::SchemaItemSignal>(schemaItem);
 		if (schemaItemSignal == nullptr)
 		{
-			assert(schemaItemSignal);
+			Q_ASSERT(schemaItemSignal);
 			return;
 		}
 
@@ -125,7 +125,7 @@ namespace VFrame30
 		AppSignalController* appSignalController = clientSchemaView()->appSignalController();
 		if (appSignalController == nullptr)
 		{
-			assert(appSignalController);
+			Q_ASSERT(appSignalController);
 			return;
 		}
 
@@ -138,7 +138,7 @@ namespace VFrame30
 				continue;
 			}
 
-			assert(signalParam.appSignalId() == id);
+			Q_ASSERT(signalParam.appSignalId() == id);
 
 			::Proto::AppSignal* protoSignalMessage = protoSetMessage.add_appsignal();
 			signalParam.save(protoSignalMessage);
@@ -235,7 +235,7 @@ namespace VFrame30
 		SchemaHistoryItem currentView = m_backHistory.back();
 		m_backHistory.pop_back();
 
-		assert(currentView.m_schema->schemaId() == schemaId());	// Save current state
+		Q_ASSERT(currentView.m_schema->schemaId() == schemaId());	// Save current state
 		currentView = currentHistoryState();
 
 		m_forwardHistory.push_front(currentView);
@@ -307,7 +307,7 @@ namespace VFrame30
 	{
 		if (m_schemaManager == nullptr)
 		{
-			assert(m_schemaManager);
+			Q_ASSERT(m_schemaManager);
 			return;
 		}
 
@@ -323,6 +323,7 @@ namespace VFrame30
 		//
 		BaseSchemaWidget::setSchema(schema, false);
 
+		clientSchemaView()->setHighlightIds({});
 		clientSchemaView()->setVariables(historyState.m_variables);
 
 		setZoom(historyState.m_zoom, false);
@@ -347,13 +348,17 @@ namespace VFrame30
 		return;
 	}
 
-	void ClientSchemaWidget::setSchema(QString schemaId)
+	void ClientSchemaWidget::setSchema(QString schemaId, QStringList highlightIds)
 	{
 		if (schemaManager() == nullptr)
 		{
-			assert(schemaManager());
+			Q_ASSERT(schemaManager());
 			return;
 		}
+
+		// --
+		//
+		clientSchemaView()->setHighlightIds(highlightIds);
 
 		// Save current state to the history
 		//
@@ -361,8 +366,8 @@ namespace VFrame30
 
 		if (canBackHistory() == false)
 		{
-			VFrame30::SchemaHistoryItem& currentHistoryItem = m_backHistory.back();		// REFERENCE!!!
-			assert(currentHistoryItem.m_schema->schemaId() == this->schemaId());
+			VFrame30::SchemaHistoryItem& currentHistoryItem = m_backHistory.back();		// MUST BE REFERENCE!!!
+			Q_ASSERT(currentHistoryItem.m_schema->schemaId() == this->schemaId());
 
 			currentHistoryItem = currentHistoryState();
 		}
@@ -433,14 +438,14 @@ namespace VFrame30
 	ClientSchemaView* ClientSchemaWidget::clientSchemaView()
 	{
 		ClientSchemaView* v = dynamic_cast<ClientSchemaView*>(schemaView());
-		assert(v);
+		Q_ASSERT(v);
 		return v;
 	}
 
 	const ClientSchemaView* ClientSchemaWidget::clientSchemaView() const
 	{
 		const ClientSchemaView* v = dynamic_cast<const ClientSchemaView*>(schemaView());
-		assert(v);
+		Q_ASSERT(v);
 		return v;
 	}
 

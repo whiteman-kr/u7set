@@ -155,11 +155,12 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& signalList)
 	std::set<QString> signalsSchemasSet;
 	for (const QString& s : signalListSet)
 	{
-		bool ok = false;
-		AppSignalParam signal =	theSignals.signalParam(s, &ok);
+		QStringList schemaIds = schemaManager()->monitorConfigController()->schemasByAppSignalId(s);
 
-		std::set<QString> signalSchemaSet = schemaManager()->monitorConfigController()->schemaAppSignals(signal.appSignalId());
-		signalsSchemasSet.insert(signalSchemaSet.begin(), signalSchemaSet.end());
+		for (const QString& schemaId : schemaIds)
+		{
+			signalsSchemasSet.insert(schemaId);
+		}
 	}
 
 	if (signalsSchemasSet.empty() == true)
@@ -170,15 +171,18 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& signalList)
 	{
 		for (const QString& schemaId : signalsSchemasSet)
 		{
-	//		QAction* a = new QAction(schemaId, &menu);
+			auto f = [this, schemaId, signalList]() -> void
+					 {
+						if (schemaId != this->schemaId())
+						{
+							setSchema(schemaId, signalList);
+						}
+					 };
 
-	//		auto f = [this, s]() -> void
-	//				 {
-	//					signalInfo(s);
-	//				 };
+			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
 
-	//		connect(a, &QAction::triggered, this, f);
-			QAction* a = schemasSubMenu->addAction(schemaId);
+			QAction* a = schemasSubMenu->addAction(actionCaption);
+			connect(a, &QAction::triggered, this, f);
 		}
 	}
 

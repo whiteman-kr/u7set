@@ -83,7 +83,7 @@ namespace VFrame30
 		FblItemRect::Draw(drawParam, schema, layer);
 
 		QPainter* painter = drawParam->painter();
-		QRectF r = itemRectPinIndent(painter->device());
+		QRectF r = itemRectPinIndent(drawParam);
 
 		r.setLeft(r.left() + m_font.drawSize() / 4.0);
 		r.setRight(r.right() - m_font.drawSize() / 4.0);
@@ -202,7 +202,7 @@ namespace VFrame30
 
 		QPainter* painter = drawParam->painter();
 
-		QRectF r = itemRectPinIndent(painter->device());
+		QRectF r = itemRectPinIndent(drawParam);
 		r.setTopRight(drawParam->gridToDpi(r.topRight()));
 		r.setBottomLeft(drawParam->gridToDpi(r.bottomLeft()));
 
@@ -435,7 +435,7 @@ namespace VFrame30
 
 		// Custom draw
 		//
-		QRectF r = itemRectPinIndent(painter->device());
+		QRectF r = itemRectPinIndent(drawParam);
 		r.setTopRight(drawParam->gridToDpi(r.topRight()));
 		r.setBottomLeft(drawParam->gridToDpi(r.bottomLeft()));
 

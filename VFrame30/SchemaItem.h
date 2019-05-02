@@ -299,6 +299,8 @@ namespace VFrame30
 		static const QColor selectionColor;
 		static const QColor lockedSelectionColor;
 		static const QColor commentedColor;
+		static const QColor highlightColor1;
+		static const QColor highlightColor2;
 	};
 
 #ifdef VFRAME30LIB_LIBRARY

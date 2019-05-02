@@ -312,7 +312,6 @@ void DialogSignalInfo::preparePropertiesContextMenu(const QPoint& pos)
 					return;
 				}
 				clipboard->setText(item->text(1));
-
 			};
 
 	connect(actionCopy, &QAction::triggered, this, f);
@@ -353,7 +352,15 @@ void DialogSignalInfo::prepareSchemasContextMenu(const QPoint& pos)
 					return;
 				}
 
-				currentTab->setSchema(item->text(0));
+				QString schemaId = item->text(0);
+
+				if (currentTab->schemaId() != schemaId)
+				{
+					QStringList appSignals;
+					appSignals << m_signal.appSignalId();
+
+					currentTab->setSchema(schemaId, appSignals);
+				}
 			};
 
 	connect(actionSwitch, &QAction::triggered, this, f);
@@ -588,8 +595,6 @@ void DialogSignalInfo::updateData()
 void DialogSignalInfo::contextMenu(QPoint pos)
 {
 	QMenu menu(this);
-	QList<QAction*> actions;
-
 
 	// Precision
 	//
@@ -761,7 +766,17 @@ void DialogSignalInfo::on_treeSchemas_itemDoubleClicked(QTreeWidgetItem *item, i
 		return;
 	}
 
-	currentTab->setSchema(item->text(0));
+	QString schemaId = item->text(0);
+
+	if (currentTab->schemaId() != schemaId)
+	{
+		QStringList appSignals;
+		appSignals << m_signal.appSignalId();
+
+		currentTab->setSchema(schemaId, appSignals);
+	}
+
+	return;
 }
 
 void DialogSignalInfo::on_pushButtonSetZero_clicked()

@@ -156,7 +156,7 @@ namespace VFrame30
 		SchemaItemLoopback::Draw(drawParam, schema, layer);
 
 		QPainter* painter = drawParam->painter();
-		QRectF r = itemRectPinIndent(painter->device());
+		QRectF r = itemRectPinIndent(drawParam);
 
 		// Draw loopback logo
 		//
@@ -278,7 +278,7 @@ namespace VFrame30
 		SchemaItemLoopback::Draw(drawParam, schema, layer);
 
 		QPainter* painter = drawParam->painter();
-		QRectF r = itemRectPinIndent(painter->device());
+		QRectF r = itemRectPinIndent(drawParam);
 
 		// Draw loopback logo
 		//

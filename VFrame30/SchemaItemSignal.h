@@ -47,7 +47,7 @@ namespace VFrame30
 									  int precision);
 
 	protected:
-		void drawMultichannelSlashLines(QPainter* painter, QPen& linePen) const;
+		void drawMultichannelSlashLines(CDrawParam* drawParam, QPen& linePen) const;
 
 		void drawFullLineIds(CDrawParam* drawParam) const;
 
