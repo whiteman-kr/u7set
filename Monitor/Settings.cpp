@@ -61,6 +61,9 @@ void Settings::writeUserScope() const
 	s.setValue("MainWindow/geometry", m_mainWindowGeometry);
 	s.setValue("MainWindow/state", m_mainWindowState);
 
+	s.setValue("DialogSignalInfo/pos", m_signalInfoPos);
+	s.setValue("DialogSignalInfo/geometry", m_signalInfoGeometry);
+
 	s.setValue("DialogSignalSearch/pos", m_signalSearchPos);
 	s.setValue("DialogSignalSearch/geometry", m_signalSearchGeometry);
 	s.setValue("DialogSignalSearch/columnCount", m_signalSearchColumnCount);
@@ -95,6 +98,9 @@ void Settings::loadUserScope()
 	m_mainWindowPos = s.value("MainWindow/pos", QPoint(200, 200)).toPoint();
 	m_mainWindowGeometry = s.value("MainWindow/geometry").toByteArray();
 	m_mainWindowState = s.value("MainWindow/state").toByteArray();
+
+	m_signalInfoPos = s.value("DialogSignalInfo/pos", QPoint(-1, -1)).toPoint();
+	m_signalInfoGeometry = s.value("DialogSignalInfo/geometry").toByteArray();
 
 	m_signalSearchPos = s.value("DialogSignalSearch/pos", QPoint(-1, -1)).toPoint();
 	m_signalSearchGeometry = s.value("DialogSignalSearch/geometry").toByteArray();

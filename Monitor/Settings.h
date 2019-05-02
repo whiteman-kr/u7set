@@ -66,6 +66,11 @@ public:
 	QByteArray m_mainWindowGeometry;
 	QByteArray m_mainWindowState;		// Toolbars/dock's
 
+	// Signal Information dialog
+	//
+	QPoint m_signalInfoPos;
+	QByteArray m_signalInfoGeometry;
+
 	// Signal Seacrh dialog
 	//
 	QPoint m_signalSearchPos;

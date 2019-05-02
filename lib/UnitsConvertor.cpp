@@ -170,7 +170,7 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Input(double elVal, double
 	return  UnitsConvertResult(UnitsConvertResultError::Generic, tr("Unknown unitID"));
 }
 
-UnitsConvertResult UnitsConvertor::electricToPhysical_Output(double elVal, double electricLowLimit, double electricHighLimit, int outputMode)
+UnitsConvertResult UnitsConvertor::electricToPhysical_Output(double elVal, double electricLowLimit, double electricHighLimit, int unitID, int outputMode)
 {
 	if (elVal < electricLowLimit || elVal > electricHighLimit)
 	{
@@ -179,15 +179,16 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Output(double elVal, doubl
 
 	double minElectricLowLimit = 0;
 	double maxElectricHighLimit = 0;
+	int waitUnitID = E::ElectricUnit::NoUnit;
 
 	switch(outputMode)
 	{
-		case E::OutputMode::Plus0_Plus5_V:		minElectricLowLimit = 0;		maxElectricHighLimit = 5;	break;
-		case E::OutputMode::Plus4_Plus20_mA:	minElectricLowLimit = 4;		maxElectricHighLimit = 20;	break;
-		case E::OutputMode::Minus10_Plus10_V:	minElectricLowLimit = -10;		maxElectricHighLimit = 10;	break;
-		case E::OutputMode::Plus0_Plus5_mA:		minElectricLowLimit = 0;		maxElectricHighLimit = 5;	break;
-		case E::OutputMode::Plus0_Plus20_mA:	minElectricLowLimit = 0;		maxElectricHighLimit = 20;	break;
-		case E::OutputMode::Plus0_Plus24_mA:	minElectricLowLimit = 0;		maxElectricHighLimit = 24;	break;
+		case E::OutputMode::Plus0_Plus5_V:		minElectricLowLimit = 0;		maxElectricHighLimit = 5;	waitUnitID = E::ElectricUnit::V;	break;
+		case E::OutputMode::Plus4_Plus20_mA:	minElectricLowLimit = 4;		maxElectricHighLimit = 20;	waitUnitID = E::ElectricUnit::mA;	break;
+		case E::OutputMode::Minus10_Plus10_V:	minElectricLowLimit = -10;		maxElectricHighLimit = 10;	waitUnitID = E::ElectricUnit::V;	break;
+		case E::OutputMode::Plus0_Plus5_mA:		minElectricLowLimit = 0;		maxElectricHighLimit = 5;	waitUnitID = E::ElectricUnit::mA;	break;
+		case E::OutputMode::Plus0_Plus20_mA:	minElectricLowLimit = 0;		maxElectricHighLimit = 20;	waitUnitID = E::ElectricUnit::mA;	break;
+		case E::OutputMode::Plus0_Plus24_mA:	minElectricLowLimit = 0;		maxElectricHighLimit = 24;	waitUnitID = E::ElectricUnit::mA;	break;
 
 		default:
 			assert(false);
@@ -202,6 +203,11 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_Output(double elVal, doubl
 	if (electricHighLimit < minElectricLowLimit || electricHighLimit > maxElectricHighLimit)
 	{
 		return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, minElectricLowLimit, maxElectricHighLimit);
+	}
+
+	if (waitUnitID != unitID)
+	{
+		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect electric unit: \"%1\" for mode: \"%2\"").arg(QMetaEnum::fromType<E::ElectricUnit>().key(unitID)).arg(QMetaEnum::fromType<E::OutputMode>().key(outputMode)));
 	}
 
 	double phVal = (elVal - electricLowLimit) * (OUT_PH_HIGH_LIMIT - OUT_PH_LOW_LIMIT) / (electricHighLimit - electricLowLimit) + OUT_PH_LOW_LIMIT;

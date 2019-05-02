@@ -19,6 +19,7 @@ public:
 
 public:
 	MonitorSchemaWidget* currentTab();
+	VFrame30::TuningController* tuningController();
 
 protected:
 	int addSchemaTabPage(QString schemaId, const QVariantHash& variables);

@@ -90,6 +90,7 @@ private:
 	ArchiveTcpClient* m_tcpClient = nullptr;
 	SimpleThread* m_tcpClientThread = nullptr;
 
+
 	enum  StatusBarColumns
 	{
 		SB_Text,

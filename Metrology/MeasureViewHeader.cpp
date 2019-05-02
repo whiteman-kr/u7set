@@ -16,6 +16,7 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
 	{
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Index"), 100, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Rack"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Module SN"), 100, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "AppSignalID"), 150, MVC_CMN_SHOW, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "CustomAppSignalID"), 150, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "EquipmentID"), 150, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
@@ -58,7 +59,6 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Limit of error"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Result"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Measurement time"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(),
 		MeasureViewColumn(),
 		MeasureViewColumn(),
 		MeasureViewColumn(),
@@ -363,7 +363,7 @@ void MeasureViewHeader::updateColumnState()
 						break;
 
 					case LO_VIEW_TYPE_DETAIL_ELRCTRIC:
-					case LO_VIEW_TYPE_DETAIL_ENGENEERING:
+					case LO_VIEW_TYPE_DETAIL_ENGINEERING:
 
 						setColumnVisible(MVC_CMN_L_PERCENT, false);
 						setColumnVisible(MVC_CMN_L_SYSTEM_ERROR, false);

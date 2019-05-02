@@ -59,6 +59,7 @@ private slots:
 	void				slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 	bool				readConfiguration(const QByteArray& fileData);
+	int					readAppSignalSet(const QByteArray& fileData);
 	bool				readMetrologySignals(const QByteArray& fileData);
 
 	bool				readRacks(const QByteArray& fileData, int fileVersion);

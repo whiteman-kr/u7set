@@ -206,26 +206,26 @@ void SignalPropertyDialog::createPropertyList()
 		QtProperty *engeneeringRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EN_RANGE] + m_param.engeneeringRangeStr());
 
 			item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
-			item->setValue(m_param.engeneeringLowLimit());
+			item->setValue(m_param.lowEngeneeringUnits());
 			item->setAttribute(QLatin1String("singleStep"), 0.001);
-			item->setAttribute(QLatin1String("decimals"), m_param.engeneeringPrecision());
+			item->setAttribute(QLatin1String("decimals"), m_param.decimalPlaces());
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW);
 			engeneeringRangeGroup->addSubProperty(item);
 
 			item = m_pManager->addProperty(QVariant::Double, tr("High limit"));
-			item->setValue(m_param.engeneeringHighLimit());
+			item->setValue(m_param.highEngeneeringUnits());
 			item->setAttribute(QLatin1String("singleStep"), 0.001);
-			item->setAttribute(QLatin1String("decimals"), m_param.engeneeringPrecision());
+			item->setAttribute(QLatin1String("decimals"), m_param.decimalPlaces());
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EN_RANGE_HIGH);
 			engeneeringRangeGroup->addSubProperty(item);
 
 			item = m_pManager->addProperty(QVariant::String, tr("Unit"));
-			item->setValue(m_param.engeneeringUnit());
+			item->setValue(m_param.unit());
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EN_RANGE_UNIT);
 			engeneeringRangeGroup->addSubProperty(item);
 
 			item = m_pManager->addProperty(QVariant::Int, tr("Precision"));
-			item->setValue(m_param.engeneeringPrecision());
+			item->setValue(m_param.decimalPlaces());
 			item->setAttribute(QLatin1String("minimum"), 0);
 			item->setAttribute(QLatin1String("maximum"), 10);
 			item->setAttribute(QLatin1String("singleStep"), 1);
@@ -317,9 +317,6 @@ void SignalPropertyDialog::onPropertyValueChanged(QtProperty *property, const QV
 		return;
 	}
 
-	QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
-	QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
-
 	int groupIndex = -1;
 
 	switch(index)
@@ -331,22 +328,17 @@ void SignalPropertyDialog::onPropertyValueChanged(QtProperty *property, const QV
 		//
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_LOW:			m_param.setElectricLowLimit(value.toDouble());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_HIGH:		m_param.setElectricHighLimit(value.toDouble());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EL_RANGE_UNIT:		m_param.setElectricUnitID(static_cast<E::ElectricUnit>(meu.value(value.toInt())));
-														m_param.setElectricUnit(meu.key(value.toInt()));									groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR:		m_param.setElectricSensorType(static_cast<E::SensorType>(value.toInt()));
-														m_param.setElectricSensor(mst.key(value.toInt()));									groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EL_RANGE_R0:			m_param.setElectricR0(value.toDouble());
-														m_param.setElectricSensor(mst.key( m_param.electricSensorType() ));					groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_EL_RANGE_UNIT:		m_param.setElectricUnitID(static_cast<E::ElectricUnit>(value.toInt()));				groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_EL_RANGE_SENSOR:		m_param.setElectricSensorType(static_cast<E::SensorType>(value.toInt()));			groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_EL_RANGE_R0:			m_param.setElectricR0(value.toDouble());											groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION:	m_param.setElectricPrecision(value.toInt());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 
 		// engeneering limit
 		//
-		case SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW:			m_param.setEngeneeringLowLimit(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EN_RANGE_HIGH:		m_param.setEngeneeringHighLimit(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EN_RANGE_UNIT:		m_param.setEngeneeringUnit(value.toString());										groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EN_RANGE_PRECISION:	m_param.setEngeneeringPrecision(value.toInt());										groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
-
-
+		case SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW:			m_param.setLowEngeneeringUnits(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_EN_RANGE_HIGH:		m_param.setHighEngeneeringUnits(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_EN_RANGE_UNIT:		m_param.setUnit(value.toString());													groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_EN_RANGE_PRECISION:	m_param.setDecimalPlaces(value.toInt());											groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
 	}
 
 	if (groupIndex < 0 || groupIndex >= SIGNAL_PROPERTY_GROUP_COUNT)

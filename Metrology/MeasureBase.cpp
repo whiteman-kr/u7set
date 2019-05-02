@@ -139,6 +139,7 @@ void LinearityMeasurement::clear()
 	m_customAppSignalID.clear();
 	m_caption.clear();
 
+	m_moduleSerialNo = 0;
 	m_location.clear();
 
 	m_percent = 0;
@@ -215,6 +216,16 @@ void LinearityMeasurement::fill_measure_input(const MeasureMultiParam &measurePa
 	// features
 	//
 
+	if (inParam.moduleSerialNoID().isEmpty() == false)
+	{
+		Hash serialNumberModuleHash = calcHash(inParam.moduleSerialNoID());
+		Metrology::SignalState signalState = theSignalBase.signalState(serialNumberModuleHash);
+		if (signalState.valid() == true)
+		{
+			setModuleSerialNo(static_cast<int>(signalState.value()));
+		}
+	}
+
 	setAppSignalID(inParam.appSignalID());
 	setCustomAppSignalID(inParam.customAppSignalID());
 	setCaption(inParam.caption());
@@ -227,7 +238,7 @@ void LinearityMeasurement::fill_measure_input(const MeasureMultiParam &measurePa
 	double electric = isNegativeRange ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();
 	double engeneering = conversion(electric, CT_ELECTRIC_TO_ENGENEER, inParam);
 
-	setPercent(((engeneering - inParam.engeneeringLowLimit()) * 100)/(inParam.engeneeringHighLimit() - inParam.engeneeringLowLimit()));
+	setPercent(((engeneering - inParam.lowEngeneeringUnits()) * 100)/(inParam.highEngeneeringUnits() - inParam.lowEngeneeringUnits()));
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
 	setNominal(MEASURE_LIMIT_TYPE_ENGENEER, engeneering);
@@ -324,6 +335,16 @@ void LinearityMeasurement::fill_measure_output(const MeasureMultiParam &measureP
 	// features
 	//
 
+	if (outParam.moduleSerialNoID().isEmpty() == false)
+	{
+		Hash serialNumberModuleHash = calcHash(outParam.moduleSerialNoID());
+		Metrology::SignalState signalState = theSignalBase.signalState(serialNumberModuleHash);
+		if (signalState.valid() == true)
+		{
+			setModuleSerialNo(static_cast<int>(signalState.value()));
+		}
+	}
+
 	setAppSignalID(outParam.appSignalID());
 	setCustomAppSignalID(outParam.customAppSignalID());
 	setCaption(outParam.caption());
@@ -333,7 +354,7 @@ void LinearityMeasurement::fill_measure_output(const MeasureMultiParam &measureP
 	// nominal
 	//
 
-	double engeneering = (measureParam.percent() * (outParam.engeneeringHighLimit() - outParam.engeneeringLowLimit()) / 100) + outParam.engeneeringLowLimit();
+	double engeneering = (measureParam.percent() * (outParam.highEngeneeringUnits() - outParam.lowEngeneeringUnits()) / 100) + outParam.lowEngeneeringUnits();
 	double electric = conversion(engeneering, CT_ENGENEER_TO_ELECTRIC, outParam);
 
 	setPercent(measureParam.percent());
@@ -401,13 +422,13 @@ void LinearityMeasurement::setLimits(const Metrology::SignalParam& param)
 {
 	setLowLimit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricLowLimit());
 	setHighLimit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricHighLimit());
-	setUnit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricUnit());
+	setUnit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricUnitStr());
 	setLimitPrecision(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricPrecision());
 
-	setLowLimit(MEASURE_LIMIT_TYPE_ENGENEER, param.engeneeringLowLimit());
-	setHighLimit(MEASURE_LIMIT_TYPE_ENGENEER, param.engeneeringHighLimit());
-	setUnit(MEASURE_LIMIT_TYPE_ENGENEER, param.engeneeringUnit());
-	setLimitPrecision(MEASURE_LIMIT_TYPE_ENGENEER, param.engeneeringPrecision());
+	setLowLimit(MEASURE_LIMIT_TYPE_ENGENEER, param.lowEngeneeringUnits());
+	setHighLimit(MEASURE_LIMIT_TYPE_ENGENEER, param.highEngeneeringUnits());
+	setUnit(MEASURE_LIMIT_TYPE_ENGENEER, param.unit());
+	setLimitPrecision(MEASURE_LIMIT_TYPE_ENGENEER, param.decimalPlaces());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -502,6 +523,18 @@ QString LinearityMeasurement::signalID(int type) const
 	}
 
 	return strID;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+QString	LinearityMeasurement::moduleSerialNoStr() const
+{
+	if (m_moduleSerialNo == 0)
+	{
+		return QString("N/A");
+	}
+
+	return QString::number(m_moduleSerialNo);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1063,7 +1096,9 @@ LinearityMeasurement& LinearityMeasurement::operator=(const LinearityMeasurement
 	m_customAppSignalID = from.m_customAppSignalID;
 	m_caption = from.m_caption;
 
+	m_moduleSerialNo = from.m_moduleSerialNo;
 	m_location = from.m_location;
+
 	m_percent = from.m_percent;
 
 	for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)

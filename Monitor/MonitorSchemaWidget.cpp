@@ -212,26 +212,7 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& signalList)
 
 void MonitorSchemaWidget::signalInfo(QString appSignalId)
 {
-	if (theMonitorMainWindow == nullptr)
-	{
-		Q_ASSERT(theMonitorMainWindow);
-		return;
-	}
-
-	bool ok = false;
-	AppSignalParam signal = theSignals.signalParam(appSignalId, &ok);
-
-	if (ok == true)
-	{
-		DialogSignalInfo* dsi = new DialogSignalInfo(signal, theMonitorMainWindow);
-		dsi->show();
-		dsi->raise();
-		dsi->activateWindow();
-	}
-	else
-	{
-		QMessageBox::critical(this, qAppName(), tr("Signal %1 not found.").arg(appSignalId));
-	}
+	DialogSignalInfo::showDialog(appSignalId, theMonitorMainWindow->configController(), theMonitorMainWindow->monitorCentralWidget());
 
 	return;
 }

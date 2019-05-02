@@ -281,7 +281,7 @@ QString MeasureTable::textLinearity(int row, int column) const
 
 	int detailLimitType = MEASURE_LIMIT_TYPE_ELECTRIC;
 
-	if (theOptions.linearity().viewType() == LO_VIEW_TYPE_DETAIL_ENGENEERING)
+	if (theOptions.linearity().viewType() == LO_VIEW_TYPE_DETAIL_ENGINEERING)
 	{
 		detailLimitType = MEASURE_LIMIT_TYPE_ENGENEER;
 	}
@@ -293,6 +293,7 @@ QString MeasureTable::textLinearity(int row, int column) const
 		case MVC_CMN_L_INDEX:					result = QString::number(m->measureID()); break;
 
 		case MVC_CMN_L_RACK:					result = m->location().rack().caption(); break;
+		case MVC_CMN_L_MODULE_SN:				result = m->moduleSerialNoStr(); break;
 		case MVC_CMN_L_APP_ID:					result = m->appSignalID(); break;
 		case MVC_CMN_L_CUSTOM_ID:				result = m->customAppSignalID(); break;
 		case MVC_CMN_L_EQUIPMENT_ID:			result = m->location().equipmentID(); break;

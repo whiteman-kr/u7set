@@ -148,6 +148,11 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 
 		result = true;
 
+		if (bfi.ID == CFG_FILE_ID_APP_SIGNAL_SET)
+		{
+			result &= readAppSignalSet(fileData);						// fill AppSignalSets
+		}
+
 		if (bfi.ID == CFG_FILE_ID_METROLOGY_SIGNALS)
 		{
 			result &= readMetrologySignals(fileData);				// fill MetrologySignals
@@ -170,6 +175,34 @@ bool ConfigSocket::readConfiguration(const QByteArray& fileData)
 	qDebug() << "ConfigSocket::readConfiguration - " << (result == true ? "OK" : "ERROR!");
 
 	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+int ConfigSocket::readAppSignalSet(const QByteArray& fileData)
+{
+	::Proto::AppSignalSet protoAppSignalSet;
+
+	bool result = protoAppSignalSet.ParseFromArray(fileData.constData(), fileData.size());
+	if (result == false)
+	{
+		return 0;
+	}
+
+	int signalCount = protoAppSignalSet.appsignal_size();
+	for(int i = 0; i < signalCount; i++)
+	{
+		const ::Proto::AppSignal& protoAppSignal = protoAppSignalSet.appsignal(i);
+
+		Metrology::SignalParam param;
+		param.serializeFrom(protoAppSignal);
+
+		theSignalBase.appendSignal(param);
+	}
+
+	qDebug() << "ConfigSocket::readAppSignalSet - Signals were loaded" << theSignalBase.signalCount();
+
+	return theSignalBase.signalCount();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -208,6 +241,7 @@ bool ConfigSocket::readMetrologySignals(const QByteArray& fileData)
 
 	return result;
 }
+
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -339,25 +373,19 @@ bool ConfigSocket::readSignals(const QByteArray& fileData, int fileVersion)
 		bool res = param.readFromXml(xml);
 		if (res == true)
 		{
-			if (theSignalBase.appendSignal(param) == -1)
+			Metrology::Signal* pSignal = theSignalBase.signalPtr(param.location().appSignalID());
+			if (pSignal == nullptr)
 			{
-				res = false;
+				continue;
 			}
+
+			pSignal->param().updateParam(param);
 		}
 
 		result &= res;
 	}
 
-	if (theSignalBase.signalCount() != signalCount)
-	{
-		qDebug() << "ConfigSocket::readSignals- Signals loading error, loaded: " << theSignalBase.signalCount() << " from " << signalCount;
-		assert(false);
-		return false;
-	}
-
 	theSignalBase.initSignals();
-
-	qDebug() << "ConfigSocket::readSignals - Signals were loaded: " << theSignalBase.signalCount();
 
 	return result;
 }

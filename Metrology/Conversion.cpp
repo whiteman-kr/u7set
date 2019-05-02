@@ -186,7 +186,7 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 
 		case CT_ENGENEER_TO_ELECTRIC:
 			{
-				double phVal = (val - param.engeneeringLowLimit())*(param.physicalHighLimit() - param.physicalLowLimit())/(param.engeneeringHighLimit() - param.engeneeringLowLimit()) + param.physicalLowLimit();
+				double phVal = (val - param.lowEngeneeringUnits())*(param.physicalHighLimit() - param.physicalLowLimit())/(param.highEngeneeringUnits() - param.lowEngeneeringUnits()) + param.physicalLowLimit();
 				retVal = conversion(phVal, CT_PHYSICAL_TO_ELECTRIC, param);
 			}
 			break;
@@ -194,7 +194,7 @@ double conversion(double val, int conversionType, const Metrology::SignalParam& 
 		case CT_ELECTRIC_TO_ENGENEER:
 			{
 				double phVal = conversion(val, CT_ELECTRIC_TO_PHYSICAL, param);
-				retVal = (phVal - param.physicalLowLimit())*(param.engeneeringHighLimit() - param.engeneeringLowLimit())/(param.physicalHighLimit() - param.physicalLowLimit()) + param.engeneeringLowLimit();
+				retVal = (phVal - param.physicalLowLimit())*(param.highEngeneeringUnits() - param.lowEngeneeringUnits())/(param.physicalHighLimit() - param.physicalLowLimit()) + param.lowEngeneeringUnits();
 			}
 			break;
 

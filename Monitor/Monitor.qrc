@@ -18,5 +18,6 @@
         <file>Images/logo.png</file>
         <file>Images/AppDataSources.svg</file>
         <file>Images/NetworkConnections.svg</file>
+        <file>Images/dragndrop.png</file>
     </qresource>
 </RCC>

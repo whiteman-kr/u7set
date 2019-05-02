@@ -295,6 +295,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0275.sql", "Upgrade to version 275, LM1-SF40.xml CheckAfbVersionsOffset set to 2, bugfix, LM1-SR04.xml, tct MaxInstCount changed to 1024 "},
 	{":/DatabaseUpgrade/Upgrade0276.sql", "Upgrade to version 276, TuningClient, added StatusFlagFunction property"},	
 	{":/DatabaseUpgrade/Upgrade0277.sql", "Upgrade to version 277, Added event scripts properties to Monitor preset"},
+	{":/DatabaseUpgrade/Upgrade0278.sql", "Upgrade to version 278, Added ElectricUnit checking in AOM-4PH preset"},
 };
 
 int DbWorker::counter = 0;
