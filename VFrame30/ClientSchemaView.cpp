@@ -230,6 +230,14 @@ namespace VFrame30
 
 	void ClientSchemaView::mousePressEvent(QMouseEvent* event)
 	{
+		if (event->buttons().testFlag(Qt::RightButton) == true)
+		{
+			// Ignore event
+			//
+			event->ignore();
+			return;
+		}
+
 		if (event->buttons().testFlag(Qt::MidButton) == true)
 		{
 			// It is scrolling by midbutton, let scroll view process it
@@ -383,6 +391,16 @@ namespace VFrame30
 		emit signal_setSchema(schemaId);
 
 		return;
+	}
+
+	VFrame30::SchemaManager* ClientSchemaView::schemaManager()
+	{
+		return m_schemaManager;
+	}
+
+	const VFrame30::SchemaManager* ClientSchemaView::schemaManager() const
+	{
+		return m_schemaManager;
 	}
 
 	bool ClientSchemaView::periodicUpdate() const

@@ -67,6 +67,9 @@ public:
 	MonitorView* monitorSchemaView();
 	const MonitorView* monitorSchemaView() const;
 
+	MonitorSchemaManager* schemaManager();
+	const MonitorSchemaManager* schemaManager() const;
+
 	// Data
 	//
 private:

@@ -19,6 +19,9 @@ public:
 public slots:
 	void configurationArrived(ConfigSettings configuration);
 
+	MonitorSchemaManager* monitorSchemaManager();
+	const MonitorSchemaManager* monitorSchemaManager() const;
+
 	// Data
 	//
 private:

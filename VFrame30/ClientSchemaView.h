@@ -85,6 +85,9 @@ namespace VFrame30
 		// Properties
 		//
 	public:
+		VFrame30::SchemaManager* schemaManager();
+		const VFrame30::SchemaManager* schemaManager() const;
+
 		bool periodicUpdate() const;
 		void setPeriodicUpdate(bool value);
 
