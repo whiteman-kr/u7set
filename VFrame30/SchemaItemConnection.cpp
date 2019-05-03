@@ -519,6 +519,14 @@ namespace VFrame30
 			connectionIndex ++;
 		}
 
+		// Draw highlights for m_appSignalIds
+		//
+		if (drawParam->hightlightIds().contains(m_appSignalId) == true)
+		{
+			QRectF highlightRect = boundingRectInDocPt(drawParam);
+			drawHighlightRect(drawParam, highlightRect);
+		}
+
 		return;
 	}
 

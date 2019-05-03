@@ -140,6 +140,28 @@ namespace VFrame30
 		return 0;
 	}
 
+	void PosRectImpl::drawHighlightRect(CDrawParam* drawParam, const QRectF& rect) const
+	{
+		QPainter* p = drawParam->painter();
+
+		QPen pen{drawParam->blinkPhase() ? SchemaItem::highlightColor1 : SchemaItem::highlightColor2};
+
+		double lineWeight = drawParam->controlBarSize() / 3.0f;
+		pen.setWidthF(lineWeight);
+
+		p->setPen(pen);
+
+		// --
+		//
+		QRectF r{rect};
+		r.setTopRight(drawParam->gridToDpi(r.topRight()));
+		r.setBottomLeft(drawParam->gridToDpi(r.bottomLeft()));
+
+		p->drawRect(r);
+
+		return;
+	}
+
 	// Рисование элемента при его создании изменении
 	//
 	void PosRectImpl::DrawOutline(CDrawParam* drawParam) const

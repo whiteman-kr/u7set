@@ -182,12 +182,15 @@ namespace VFrame30
 
 		VFrame30::CDrawParam drawParam(&p, schema().get(), this, schema()->gridSize(), schema()->pinGridStep());
 
+		drawParam.setControlBarSize(schema()->unit() == VFrame30::SchemaUnit::Display ?	10 * (100.0 / zoom()) : mm2in(2.4) * (100.0 / zoom()));		// Is required for drawing highlights on items
 		drawParam.setBlinkPhase(static_cast<bool>((QTime::currentTime().msec() / 250) % 2));	// 0-249 : false, 250-499 : true, 500-749 : false, 750-999 : true
 		drawParam.setEditMode(false);
 
 		drawParam.setAppSignalController(m_appSignalController);
 		drawParam.setTuningController(m_tuningController);
 		drawParam.setInfoMode(m_infoMode);
+
+		drawParam.setHightlightIds(hightlightIds());
 
 		// Draw schema
 		//
@@ -201,10 +204,12 @@ namespace VFrame30
 		//
 		Ajust(&p, 0, 0, zoom());
 
+		// Draw elements highlighted by its AppSignalId
+		//
+		//drawHighlights();
+
 		// --
 		//
-		//drawMovingEdgesOrVertexConnectionLine(&drawParam);
-
 		p.restore();
 
 		// --
@@ -230,6 +235,14 @@ namespace VFrame30
 
 	void ClientSchemaView::mousePressEvent(QMouseEvent* event)
 	{
+		if (event->buttons().testFlag(Qt::RightButton) == true)
+		{
+			// Ignore event
+			//
+			event->ignore();
+			return;
+		}
+
 		if (event->buttons().testFlag(Qt::MidButton) == true)
 		{
 			// It is scrolling by midbutton, let scroll view process it
@@ -377,12 +390,26 @@ namespace VFrame30
 
 	void ClientSchemaView::setSchema(QString schemaId)
 	{
+		return setSchema(schemaId, {});
+	}
+
+	void ClientSchemaView::setSchema(QString schemaId, const QStringList& highlightAppSignalIds)
+	{
 		// We can't change schema here, because we need to save history, so emit signal and change schema
 		// in ClientSchemaWidget
 		//
-		emit signal_setSchema(schemaId);
-
+		emit signal_setSchema(schemaId, highlightAppSignalIds);
 		return;
+	}
+
+	VFrame30::SchemaManager* ClientSchemaView::schemaManager()
+	{
+		return m_schemaManager;
+	}
+
+	const VFrame30::SchemaManager* ClientSchemaView::schemaManager() const
+	{
+		return m_schemaManager;
 	}
 
 	bool ClientSchemaView::periodicUpdate() const
@@ -403,6 +430,16 @@ namespace VFrame30
 	void ClientSchemaView::setInfoMode(bool value)
 	{
 		m_infoMode = value;
+	}
+
+	const QStringList& ClientSchemaView::hightlightIds() const
+	{
+		return m_highlightIds;
+	}
+
+	void ClientSchemaView::setHighlightIds(const QStringList& value)
+	{
+		m_highlightIds = value;
 	}
 
 	TuningController* ClientSchemaView::tuningController()

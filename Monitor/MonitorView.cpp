@@ -48,4 +48,20 @@ void MonitorView::configurationArrived(ConfigSettings configuration)
 	return;
 }
 
+MonitorSchemaManager* MonitorView::monitorSchemaManager()
+{
+	MonitorSchemaManager* result = dynamic_cast<MonitorSchemaManager*>(schemaManager());
+	Q_ASSERT(result);
+
+	return result;
+}
+
+const MonitorSchemaManager* MonitorView::monitorSchemaManager() const
+{
+	const MonitorSchemaManager* result = dynamic_cast<const MonitorSchemaManager*>(schemaManager());
+	Q_ASSERT(result);
+
+	return result;
+}
+
 

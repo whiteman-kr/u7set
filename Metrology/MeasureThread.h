@@ -86,7 +86,7 @@ public slots:
 
 private slots:
 
-	void					updateSignalParam(const Hash& signalHash);
+	void					updateSignalParam(const QString& appSignalID);
 
 	void					stopMeasure();
 };

@@ -14,6 +14,8 @@ namespace VFrame30
 	const QColor SchemaItem::selectionColor(0x33, 0x99, 0xFF, 0x80);
 	const QColor SchemaItem::lockedSelectionColor(0xF0, 0x80, 0x80, 0xB0);
 	const QColor SchemaItem::commentedColor(0xE0, 0xE0, 0xEF, 0xC0);
+	const QColor SchemaItem::highlightColor1(0x33, 0x99, 0xFF, 0xE0);
+	const QColor SchemaItem::highlightColor2(0x00, 0x00, 0x00, 0x00);	// Transparent
 
 	// SchemaItem
 	//

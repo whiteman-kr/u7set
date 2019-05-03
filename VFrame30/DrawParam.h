@@ -90,6 +90,9 @@ namespace VFrame30
 		const Session& session() const;
 		Session& session();
 
+		const QStringList& hightlightIds() const;
+		void setHightlightIds(const QStringList& value);
+
 	private:
 		QPainter* m_painter = nullptr;
 		Schema* m_schema = nullptr;
@@ -99,6 +102,8 @@ namespace VFrame30
 		TuningController* m_tuningController = nullptr;
 
 		Session m_session;
+
+		QStringList m_highlightIds;
 
 		double m_controlBarSize = 0.0;
 		double m_gridSize = 0.0;
@@ -113,6 +118,7 @@ namespace VFrame30
 
 		double m_cosmeticPenWidth = 0.0;
 	};
+
 
 	class VFRAME30LIBSHARED_EXPORT DrawHelper
 	{

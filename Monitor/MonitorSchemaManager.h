@@ -24,8 +24,8 @@ protected slots:
 	void slot_configurationArrived(ConfigSettings configuration);
 
 public:
-	[[nodiscard]] MonitorConfigController* monitorConfigController();
-	[[nodiscard]] const MonitorConfigController* monitorConfigController() const;
+	MonitorConfigController* monitorConfigController();
+	const MonitorConfigController* monitorConfigController() const;
 
 
 	QString onConfigurationArrivedScript() const;

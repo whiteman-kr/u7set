@@ -119,7 +119,6 @@ protected:
 
 	void drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF clipRect);
 	void drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRect);
-	void drawSelection(QPainter* p);
 	void drawEditConnectionLineOutline(VFrame30::CDrawParam* drawParam);
 	void drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawParam);
 	void drawSelectionArea(QPainter* p);

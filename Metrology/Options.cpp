@@ -973,9 +973,6 @@ void LinearityOption::load()
 
 	m_viewType = s.value(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), LO_VIEW_TYPE_SIMPLE).toInt();
 	m_showEngeneeringValueColumn = s.value(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), true).toBool();
-
-	m_warningIfMeasured = s.value(QString("%1WarningIfMeasured").arg(LINEARITY_OPTIONS_KEY), true).toBool();
-	m_measureEntireModule = s.value(QString("%1MeasureEntireModule").arg(LINEARITY_OPTIONS_KEY), false).toBool();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -997,9 +994,6 @@ void LinearityOption::save()
 
 	s.setValue(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), m_viewType);
 	s.setValue(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), m_showEngeneeringValueColumn);
-
-	s.setValue(QString("%1WarningIfMeasured").arg(LINEARITY_OPTIONS_KEY), m_warningIfMeasured);
-	s.setValue(QString("%1MeasureEntireModule").arg(LINEARITY_OPTIONS_KEY), m_measureEntireModule);
 
 	m_pointBase.saveData(SQL_TABLE_LINEARITY_POINT);
 }
@@ -1023,9 +1017,6 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 
 	m_viewType = from.m_viewType;
 	m_showEngeneeringValueColumn = from.m_showEngeneeringValueColumn;
-
-	m_warningIfMeasured = from.m_warningIfMeasured;
-	m_measureEntireModule = from.m_measureEntireModule;
 
 	return *this;
 }
@@ -1095,6 +1086,62 @@ ComparatorOption& ComparatorOption::operator=(const ComparatorOption& from)
 	m_enableMeasureHysteresis = from.m_enableMeasureHysteresis;
 	m_startComparatorIndex = from.m_startComparatorIndex;
 	m_additionalCheck = from.m_additionalCheck;
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+ModuleOption::ModuleOption(QObject *parent) :
+	QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ModuleOption::ModuleOption(const ModuleOption& from, QObject *parent) :
+	QObject(parent)
+{
+	*this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ModuleOption::~ModuleOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ModuleOption::load()
+{
+	QSettings s;
+
+	m_measureEntireModule = s.value(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), false).toBool();
+	m_warningIfMeasured = s.value(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), true).toBool();
+	m_suffixSN = s.value(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), "_SERIALNO").toString();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ModuleOption::save()
+{
+	QSettings s;
+
+	s.setValue(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), m_measureEntireModule);
+	s.setValue(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), m_warningIfMeasured);
+	s.setValue(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), m_suffixSN);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ModuleOption& ModuleOption::operator=(const ModuleOption& from)
+{
+	m_measureEntireModule = from.m_measureEntireModule;
+	m_warningIfMeasured = from.m_warningIfMeasured;
+	m_suffixSN = from.m_suffixSN;
 
 	return *this;
 }
@@ -1262,8 +1309,8 @@ void Options::load()
 	m_database.load();
 	m_database.create();
 
+	m_module.load();
 	m_linearity.load();
-
 	m_comparator.load();
 
 	m_backup.load();
@@ -1275,13 +1322,21 @@ void Options::load()
 void Options::save()
 {
 	m_projectInfo.save();
+
 	m_toolBar.save();
+
 	m_socket.save();
+
 	m_measureView.save();
+
 	m_signalInfo.save();
+
 	m_database.save();
+
+	m_module.save();
 	m_linearity.save();
 	m_comparator.save();
+
 	m_backup.save();
 }
 
@@ -1344,6 +1399,7 @@ Options& Options::operator=(const Options& from)
 		m_measureView = from.m_measureView;
 		m_signalInfo = from.m_signalInfo;
 		m_database = from.m_database;
+		m_module = from.m_module;
 		m_linearity = from.m_linearity;
 		m_comparator = from.m_comparator;
 		m_backup = from.m_backup;

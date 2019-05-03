@@ -21,6 +21,7 @@
 const char* const				OptionGroupTitle[] =
 {
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Connect to server"),
+								QT_TRANSLATE_NOOP("OptionsDialog.h", "Module"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Linearity"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Comparators"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "List of measurements"),
@@ -33,12 +34,13 @@ const int						OPTION_GROUP_COUNT			= sizeof(OptionGroupTitle)/sizeof(OptionGrou
 
 const int						OPTION_GROUP_UNKNOWN		= -1,
 								OPTION_GROUP_SERVER			= 0,
-								OPTION_GROUP_LINEARITY		= 1,
-								OPTION_GROUP_SETTING		= 2,
-								OPTION_GROUP_MEASURE_VIEW	= 3,
-								OPTION_GROUP_SIGNAL_INFO	= 4,
-								OPTION_GROUP_DATABASE		= 5,
-								OPTION_GROUP_BACKUP			= 6;
+								OPTION_GROUP_MODULE			= 1,
+								OPTION_GROUP_LINEARITY		= 2,
+								OPTION_GROUP_SETTING		= 3,
+								OPTION_GROUP_MEASURE_VIEW	= 4,
+								OPTION_GROUP_SIGNAL_INFO	= 5,
+								OPTION_GROUP_DATABASE		= 6,
+								OPTION_GROUP_BACKUP			= 7;
 
 // ==============================================================================================
 
@@ -47,6 +49,7 @@ const char* const				OptionPageTitle[] =
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Connection to Config Server - TCP/IP"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Connection to Application Data Server - TCP/IP"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Connection to Tuning Server - TCP/IP"),
+								QT_TRANSLATE_NOOP("OptionsDialog.h", "Measuring of module"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Measurements of linearity"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Point of linearity"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Measure comparators"),
@@ -63,14 +66,15 @@ const int						OPTION_PAGE_UNKNOWN				= -1,
 								OPTION_PAGE_CONFIG_SOCKET		= 0,
 								OPTION_PAGE_SIGNAL_SOCKET		= 1,
 								OPTION_PAGE_TUNING_SOCKET		= 2,
-								OPTION_PAGE_LINEARITY_MEASURE	= 3,
-								OPTION_PAGE_LINEARITY_POINT		= 4,
-								OPTION_PAGE_COMPARATOR_MEASURE	= 5,
-								OPTION_PAGE_MEASURE_VIEW_TEXT	= 6,
-								OPTION_PAGE_MEASURE_VIEW_COLUMN	= 7,
-								OPTION_PAGE_SIGNAL_INFO			= 8,
-								OPTION_PAGE_DATABASE			= 9,
-								OPTION_PAGE_BACKUP				= 10;
+								OPTION_PAGE_MODULE_MEASURE		= 3,
+								OPTION_PAGE_LINEARITY_MEASURE	= 4,
+								OPTION_PAGE_LINEARITY_POINT		= 5,
+								OPTION_PAGE_COMPARATOR_MEASURE	= 6,
+								OPTION_PAGE_MEASURE_VIEW_TEXT	= 7,
+								OPTION_PAGE_MEASURE_VIEW_COLUMN	= 8,
+								OPTION_PAGE_SIGNAL_INFO			= 9,
+								OPTION_PAGE_DATABASE			= 10,
+								OPTION_PAGE_BACKUP				= 11;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -79,6 +83,7 @@ const char* const				OptionPageShortTitle[OPTION_PAGE_COUNT] =
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "ConfigurationService"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "AppDataService"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "TuningService"),
+								QT_TRANSLATE_NOOP("OptionsDialog.h", "Measuring"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Measurements"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Points"),
 								QT_TRANSLATE_NOOP("OptionsDialog.h", "Measurements"),
@@ -96,6 +101,7 @@ const int						OptionGroupPage[OPTION_PAGE_COUNT] =
 								OPTION_GROUP_SERVER,		// Group: Connect to server --		Page : ConfigService"),
 								OPTION_GROUP_SERVER,		// Group: Connect to server --		Page : AppDataService"),
 								OPTION_GROUP_SERVER,		// Group: Connect to server --		Page : TuningService"),
+								OPTION_GROUP_MODULE,		// Group: Module --					Page : Measuring"),
 								OPTION_GROUP_LINEARITY,		// Group: Linearity --				Page : Measurements"),
 								OPTION_GROUP_LINEARITY,		// Group: Linearity --				Page : Points"),
 								OPTION_GROUP_SETTING,		// Group: Comparators --			Page : Measurements"),

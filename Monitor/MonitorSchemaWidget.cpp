@@ -147,7 +147,48 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& signalList)
 	// Compose menu
 	//
 	QMenu menu(this);
-	QList<QAction*> actions;
+
+	// Schemas List
+	//
+	QMenu* schemasSubMenu = menu.addMenu(tr("Schemas"));
+
+	std::set<QString> signalsSchemasSet;
+	for (const QString& s : signalListSet)
+	{
+		QStringList schemaIds = schemaManager()->monitorConfigController()->schemasByAppSignalId(s);
+
+		for (const QString& schemaId : schemaIds)
+		{
+			signalsSchemasSet.insert(schemaId);
+		}
+	}
+
+	if (signalsSchemasSet.empty() == true)
+	{
+		schemasSubMenu->setDisabled(true);
+	}
+	else
+	{
+		for (const QString& schemaId : signalsSchemasSet)
+		{
+			auto f = [this, schemaId, signalList]() -> void
+					 {
+						if (schemaId != this->schemaId())
+						{
+							setSchema(schemaId, signalList);
+						}
+					 };
+
+			QString actionCaption = (schema()->schemaId() == schemaId) ? QString("-> %1").arg(schemaId) : schemaId;
+
+			QAction* a = schemasSubMenu->addAction(actionCaption);
+			connect(a, &QAction::triggered, this, f);
+		}
+	}
+
+	// SignalInfo list
+	//
+	menu.addSeparator();
 
 	for (const QString& s : signalListSet)
 	{
@@ -156,7 +197,7 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& signalList)
 
 		QString signalId = ok ? QString("%1 %2").arg(signal.customSignalId()).arg(signal.caption()) : s;
 
-		QAction* a = new QAction(signalId, &menu);
+		QAction* a = menu.addAction(signalId);
 
 		auto f = [this, s]() -> void
 				 {
@@ -164,35 +205,18 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& signalList)
 				 };
 
 		connect(a, &QAction::triggered, this, f);
-
-		actions << a;
 	}
 
-	menu.exec(actions, QCursor::pos(), 0, this);
+	// --
+	//
+	menu.exec(QCursor::pos());
+
+	return;
 }
 
 void MonitorSchemaWidget::signalInfo(QString appSignalId)
 {
-	if (theMonitorMainWindow == nullptr)
-	{
-		Q_ASSERT(theMonitorMainWindow);
-		return;
-	}
-
-	bool ok = false;
-	AppSignalParam signal = theSignals.signalParam(appSignalId, &ok);
-
-	if (ok == true)
-	{
-		DialogSignalInfo* dsi = new DialogSignalInfo(signal, theMonitorMainWindow);
-		dsi->show();
-		dsi->raise();
-		dsi->activateWindow();
-	}
-	else
-	{
-		QMessageBox::critical(this, qAppName(), tr("Signal %1 not found.").arg(appSignalId));
-	}
+	DialogSignalInfo::showDialog(appSignalId, theMonitorMainWindow->configController(), theMonitorMainWindow->monitorCentralWidget());
 
 	return;
 }
@@ -260,4 +284,14 @@ const MonitorView* MonitorSchemaWidget::monitorSchemaView() const
 	const MonitorView* result = dynamic_cast<const MonitorView*>(schemaView());
 	Q_ASSERT(result);
 	return result;
+}
+
+MonitorSchemaManager* MonitorSchemaWidget::schemaManager()
+{
+	return monitorSchemaView()->monitorSchemaManager();
+}
+
+const MonitorSchemaManager* MonitorSchemaWidget::schemaManager() const
+{
+	return monitorSchemaView()->monitorSchemaManager();
 }

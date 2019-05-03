@@ -78,6 +78,8 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
+		void drawHighlightRect(CDrawParam* drawParam, const QRectF& rect) const;
+
 		// Рисование элемента при его создании изменении
 		//
 		virtual void DrawOutline(CDrawParam* drawParam) const override;

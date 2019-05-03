@@ -198,8 +198,6 @@ namespace VFrame30
 
 		//--
 		//
-		QPainter* p = drawParam->painter();
-
 		QPen linePen(lineColor());
 		linePen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);		// Don't use getter!
 
@@ -207,7 +205,7 @@ namespace VFrame30
 		//
 		if (multiChannel() == true)
 		{
-			drawMultichannelSlashLines(p, linePen);
+			drawMultichannelSlashLines(drawParam, linePen);
 		}
 
 		//
@@ -219,16 +217,31 @@ namespace VFrame30
 		if (columnCount() == 0)
 		{
 			drawFullLineIds(drawParam);
-			return;
-		}
-
-		if (multiChannel() == true)
-		{
-			drawMultichannelValues(drawParam, linePen);
 		}
 		else
 		{
-			drawSinglechannelValues(drawParam, linePen);
+			if (multiChannel() == true)
+			{
+				drawMultichannelValues(drawParam, linePen);
+			}
+			else
+			{
+				drawSinglechannelValues(drawParam, linePen);
+			}
+		}
+
+		// Draw highlights for m_appSignalIds, m_impactAppSignalIds
+		//
+		QStringList allIds = m_appSignalIds + m_impactAppSignalIds;
+
+		for (const QString& appSignalId : allIds)
+		{
+			if (drawParam->hightlightIds().contains(appSignalId) == true)
+			{
+				QRectF highlightRect = itemRectPinIndent(drawParam);
+				drawHighlightRect(drawParam, highlightRect);
+				break;
+			}
 		}
 
 		return;
@@ -380,19 +393,21 @@ namespace VFrame30
 	}
 
 
-	void SchemaItemSignal::drawMultichannelSlashLines(QPainter* painter, QPen& linePen) const
+	void SchemaItemSignal::drawMultichannelSlashLines(CDrawParam* drawParam, QPen& linePen) const
 	{
-		if (painter == nullptr)
+		if (drawParam == nullptr)
 		{
-			assert(painter);
+			assert(drawParam);
 			return;
 		}
+
+		QPainter* painter = drawParam->painter();
 
 		double pinWidth = GetPinWidth(itemUnit(), painter->device());
 
 		painter->setPen(linePen);
 
-		QRectF r = itemRectWithPins();
+		QRectF r = itemRectWithPins(drawParam);
 
 		if (inputsCount() > 0)
 		{
@@ -425,7 +440,7 @@ namespace VFrame30
 
 		QPainter* painter = drawParam->painter();
 
-		QRectF rect = itemRectPinIndent(drawParam->device());
+		QRectF rect = itemRectPinIndent(drawParam);
 
 		rect.setLeft(rect.left() + m_font.drawSize() / 4.0);
 		rect.setRight(rect.right() - m_font.drawSize() / 4.0);
@@ -472,7 +487,7 @@ namespace VFrame30
 		}
 
 		QPainter* painter = drawParam->painter();
-		QRectF rect = itemRectPinIndent(drawParam->device());
+		QRectF rect = itemRectPinIndent(drawParam);
 
 		// Get signakls and siognal states
 		//
@@ -792,7 +807,7 @@ namespace VFrame30
 
 		QPainter* painter = drawParam->painter();
 
-		QRectF rect = itemRectPinIndent(drawParam->device());
+		QRectF rect = itemRectPinIndent(drawParam);
 
 		rect.setLeft(rect.left() + m_font.drawSize() / 4.0);
 		rect.setRight(rect.right() - m_font.drawSize() / 4.0);

@@ -156,6 +156,18 @@ namespace VFrame30
 			}
 		}
 
+		// Draw highlights by signals
+		//
+		for (const QString& appSignalId : m_signalIds)
+		{
+			if (drawParam->hightlightIds().contains(appSignalId) == true)
+			{
+				QRectF highlightRect = boundingRectInDocPt(drawParam);
+				drawHighlightRect(drawParam, highlightRect);
+				break;
+			}
+		}
+
 		return;
 	}
 

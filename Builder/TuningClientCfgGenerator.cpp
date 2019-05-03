@@ -652,6 +652,7 @@ namespace Builder
 		{
 			for (QString tag : m_schemaTagList)
 			{
+				tag = tag.toLower();
 				auto tagRange = m_schemaTagToFile.equal_range(tag);
 
 				for (auto it = tagRange.first; it != tagRange.second; ++it)

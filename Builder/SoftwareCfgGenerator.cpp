@@ -233,7 +233,7 @@ namespace Builder
 			QStringList schemaTags = schema->tagsAsList();
 			for (const QString& t : schemaTags)
 			{
-				m_schemaTagToFile.insert({t, schemaFile});
+				m_schemaTagToFile.insert({t.toLower(), schemaFile});
 			}
 		}
 

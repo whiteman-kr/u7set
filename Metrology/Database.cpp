@@ -59,6 +59,7 @@ int SqlFieldBase::init(int objectType, int)
 			append("CustomAppSignalID",				QVariant::String, 64);
 			append("Caption",						QVariant::String, 256);
 
+			append("ModuleSN",						QVariant::Int);
 			append("EquipmentID",					QVariant::String, 256);
 			append("RackIndex",						QVariant::Int);
 			append("RackCaption",					QVariant::String, 64);
@@ -742,6 +743,7 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					measure->setCustomAppSignalID(query.value(field++).toString());
 					measure->setCaption(query.value(field++).toString());
 
+					measure->setModuleSerialNo(query.value(field++).toInt());
 					measure->location().setEquipmentID(query.value(field++).toString());
 					measure->location().rack().setIndex(query.value(field++).toInt());
 					measure->location().rack().setCaption(query.value(field++).toString());
@@ -1057,6 +1059,7 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					query.bindValue(field++, measure->customAppSignalID());
 					query.bindValue(field++, measure->caption());
 
+					query.bindValue(field++, measure->moduleSerialNo());
 					query.bindValue(field++, measure->location().equipmentID());
 					query.bindValue(field++, measure->location().rack().index());
 					query.bindValue(field++, measure->location().rack().caption());

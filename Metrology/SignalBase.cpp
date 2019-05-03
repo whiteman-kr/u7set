@@ -3,6 +3,7 @@
 #include "CalibratorBase.h"
 #include "MeasureBase.h"
 #include "Database.h"
+#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -669,7 +670,7 @@ QString MeasureMultiParam::electricSensorStr() const
 					const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 					if (param.isValid() == true)
 					{
-						result = param.electricSensor();
+						result = param.electricSensorTypeStr();
 					}
 				}
 
@@ -680,19 +681,19 @@ QString MeasureMultiParam::electricSensorStr() const
 					const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 					if (inParam.isValid() == true)
 					{
-						result = inParam.electricSensor() + MultiTextDivider;
+						result = inParam.electricSensorTypeStr() + MultiTextDivider;
 					}
 
 					const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
 					if (outParam.isValid() == true)
 					{
-						if (inParam.electricSensor() != outParam.electricSensor())
+						if (inParam.electricSensorTypeStr() != outParam.electricSensorTypeStr())
 						{
-							result += outParam.electricSensor();
+							result += outParam.electricSensorTypeStr();
 						}
 						else
 						{
-							result = outParam.electricSensor();
+							result = outParam.electricSensorTypeStr();
 						}
 					}
 				}
@@ -704,7 +705,7 @@ QString MeasureMultiParam::electricSensorStr() const
 					const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
 					if (param.isValid() == true)
 					{
-						result = param.electricSensor();
+						result = param.electricSensorTypeStr();
 					}
 				}
 
@@ -815,7 +816,7 @@ QString MeasureMultiParam::engeneeringRangeStr() const
 					const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
 					if (outParam.isValid() == true)
 					{
-						if (inParam.tuningLowBound() != outParam.engeneeringLowLimit() || inParam.tuningHighBound() != outParam.engeneeringHighLimit())
+						if (inParam.tuningLowBound().toDouble() != outParam.lowEngeneeringUnits() || inParam.tuningHighBound().toDouble() != outParam.highEngeneeringUnits())
 						{
 							result += outParam.engeneeringRangeStr();
 						}
@@ -1421,7 +1422,7 @@ void SignalBase::setSignalParam(const Hash& hash, const Metrology::SignalParam& 
 			{
 				m_signalList[index].setParam(param);
 
-				emit updatedSignalParam(param.hash());
+				emit updatedSignalParam(param.appSignalID());
 			}
 		}
 
@@ -1438,7 +1439,7 @@ void SignalBase::setSignalParam(int index, const Metrology::SignalParam& param)
 		{
 			m_signalList[index].setParam(param);
 
-			emit updatedSignalParam(param.hash());
+			emit updatedSignalParam(param.appSignalID());
 		}
 
 	m_signalMutex.unlock();
@@ -1627,6 +1628,45 @@ Metrology::RackParam SignalBase::rackForMeasure(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+QString SignalBase::getSerialNoSignalID(const QString& moduleID)
+{
+	QString appSignalID;
+
+	int signalCount = m_signalList.count();
+	for(int i = 0; i < signalCount; i++)
+	{
+		Metrology::Signal& signal = m_signalList[i];
+
+		if (signal.param().isAnalog() == false)
+		{
+			continue;
+		}
+
+		if (signal.param().electricSensorType() != E::SensorType::NoSensor)
+		{
+			continue;
+		}
+
+		if (signal.param().location().moduleID() != moduleID)
+		{
+			continue;
+		}
+
+		if (signal.param().location().contact() != theOptions.module().suffixSN())
+		{
+			continue;
+		}
+
+		appSignalID = signal.param().location().appSignalID();
+
+		break;
+	}
+
+	return appSignalID;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 int SignalBase::createRackListForMeasure(int outputSignalType)
 {
 	if (outputSignalType < 0 || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
@@ -1753,9 +1793,6 @@ void SignalBase::initSignals()
 
 	m_signalMutex.lock();
 
-		QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
-		QMetaEnum mst = QMetaEnum::fromType<E::SensorType>();
-
 		int count = m_signalList.count();
 
 		for(int i = 0; i < count; i ++)
@@ -1764,21 +1801,6 @@ void SignalBase::initSignals()
 			if (param.isValid() == false)
 			{
 				continue;
-			}
-
-			// units
-			//
-			if (param.electricUnitID() >= 0 && param.electricUnitID() < meu.keyCount())
-			{
-				param.setElectricUnit(meu.key(param.electricUnitID()));
-			}
-
-			// sensors
-			//
-			int sensorType = param.electricSensorType();
-			if (sensorType >= 0 && sensorType < mst.keyCount())
-			{
-				param.setElectricSensor(mst.key(sensorType));
 			}
 
 			// places for tuning signals
@@ -1939,8 +1961,12 @@ int SignalBase::createSignalListForMeasure(int measureKind, int outputSignalType
 						continue;
 					}
 
-					break;
+					if (param.electricSensorType() == E::SensorType::NoSensor)
+					{
+						continue;
+					}
 
+					break;
 
 				case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
 
@@ -1950,6 +1976,11 @@ int SignalBase::createSignalListForMeasure(int measureKind, int outputSignalType
 					}
 
 					if (param.location().place() == -1)
+					{
+						continue;
+					}
+
+					if (param.electricSensorType() == E::SensorType::NoSensor)
 					{
 						continue;
 					}
@@ -2114,6 +2145,12 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 
 				m_requestStateList.append(pSignal->param().hash());
 
+				pSignal->param().setModuleSerialNoID(getSerialNoSignalID(pSignal->param().location().moduleID()));
+				if (pSignal->param().moduleSerialNoID().isEmpty() == false)
+				{
+					m_requestStateList.append(calcHash(pSignal->param().moduleSerialNoID()));
+				}
+
 				if (m_activeSignal.outputSignalType() == OUTPUT_SIGNAL_TYPE_UNUSED)
 				{
 					continue;
@@ -2126,6 +2163,12 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 				}
 
 				m_requestStateList.append(pSignal->param().hash());
+
+				pSignal->param().setModuleSerialNoID(getSerialNoSignalID(pSignal->param().location().moduleID()));
+				if (pSignal->param().moduleSerialNoID().isEmpty() == false)
+				{
+					m_requestStateList.append(calcHash(pSignal->param().moduleSerialNoID()));
+				}
 			}
 
 		m_stateMutex.unlock();

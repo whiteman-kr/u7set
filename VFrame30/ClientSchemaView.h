@@ -1,5 +1,4 @@
-#ifndef CLIENTSCHEMAVIEW_H
-#define CLIENTSCHEMAVIEW_H
+#pragma once
 
 #include "SchemaView.h"
 #include "SchemaManager.h"
@@ -68,11 +67,11 @@ namespace VFrame30
 
 	public:
 		void setSchema(QString schemaId);
+		void setSchema(QString schemaId, const QStringList& highlightAppSignalIds);
 
 	protected:
 		virtual void paintEvent(QPaintEvent* event) override;
 		virtual void timerEvent(QTimerEvent* event) override;
-
 		virtual void mousePressEvent(QMouseEvent* event) override;
 		virtual void mouseReleaseEvent(QMouseEvent* event) override;
 
@@ -80,16 +79,22 @@ namespace VFrame30
 		void startRepaintTimer();
 
 	signals:
-		void signal_setSchema(QString schemaId);
+		void signal_setSchema(QString schemaId, QStringList highlightIds);
 
 		// Properties
 		//
 	public:
+		VFrame30::SchemaManager* schemaManager();
+		const VFrame30::SchemaManager* schemaManager() const;
+
 		bool periodicUpdate() const;
 		void setPeriodicUpdate(bool value);
 
 		bool infoMode() const;
 		void setInfoMode(bool value);
+
+		const QStringList& hightlightIds() const;
+		void setHighlightIds(const QStringList& value);
 
 		// TuningController
 		//
@@ -133,6 +138,8 @@ namespace VFrame30
 		bool m_periodicUpdate = true;		// Update widget every 250 ms
 		bool m_infoMode = false;			// Show some aditional info like labels
 
+		QStringList m_highlightIds;			// Highligted IDs, can be any, like AppSignalID, ConnectiondID... depends on item
+
 		// --
 		//
 		bool m_jsEngineGlobalsWereCreated = false;
@@ -149,4 +156,3 @@ namespace VFrame30
 	};
 }
 
-#endif // CLIENTSCHEMAVIEW_H

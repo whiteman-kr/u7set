@@ -2,6 +2,9 @@
 #include "ui_DialogSignalInfo.h"
 #include "../lib/Types.h"
 #include "../Proto/serialization.pb.h"
+#include "MonitorCentralWidget.h"
+#include "Settings.h"
+#include "../lib/Ui/UiTools.h"
 
 //
 //
@@ -34,10 +37,8 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 
 	const int FLAG_NAME_COUNT = sizeof(flagNameStr) / sizeof(flagNameStr[0]);
 
-
 	double colWidth = size().width() / colCount;
 	double rowHeight = size().height() / rowCount;
-
 
 	QPainter painter(this);
 
@@ -108,46 +109,78 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 //
 //
 
-DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, QWidget* parent) :
-	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
+std::map<QString, DialogSignalInfo*> DialogSignalInfo::m_dialogSignalInfoMap;
+
+DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, MonitorConfigController* configController, MonitorCentralWidget* centralWidget) :
+	QDialog(centralWidget, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogSignalInfo),
-	m_signal(signal)
+	m_signal(signal),
+	m_configController(configController),
+	m_centralWidget(centralWidget)
 {
+	if (m_configController == nullptr || m_centralWidget == nullptr)
+	{
+		Q_ASSERT(m_configController);
+		Q_ASSERT(m_centralWidget);
+		return;
+	}
+
 	ui->setupUi(this);
+	setAttribute(Qt::WA_DeleteOnClose);
+
+	// Restore window pos
+	//
+	if (theSettings.m_signalInfoPos.x() != -1 && theSettings.m_signalInfoPos.y() != -1)
+	{
+		move(theSettings.m_signalInfoPos);
+		restoreGeometry(theSettings.m_signalInfoGeometry);
+	}
+
+	//
 
 	ui->tabWidget->tabBar()->setExpanding(true);
 	ui->tabWidget->setStyleSheet("QTabBar::tab { min-width: 100px; height: 28;}");
 
-	setAttribute(Qt::WA_DeleteOnClose);
+	setWindowTitle(m_signal.customSignalId() + tr(" - ") + m_signal.caption());
 
 	QString str;
 
-	m_precision = signal.precision();
+	m_currentPrecision = m_signal.precision();
 
-	// signalIdLabel and captionLabel are promoted to QLabelAppSignalDragAndDrop
+	// signalIdLabel is promoted to QLabelAppSignalDragAndDrop
 	// tu support Drag and Drop Operation (drag part)
 	//
 	ui->signalIdLabel->setAppSignal(signal);
-	ui->captionLabel->setAppSignal(signal);
 
 	// Fill main signal information
 	//
 	if (m_signal.isAnalog())
 	{
 		ui->labelStrUnit->setText(m_signal.unit());
+		ui->labelStrUnitTuning->setText(m_signal.unit());
+
+		ui->pushButtonSetOne->setVisible(false);
+		ui->pushButtonSetZero->setVisible(false);
 	}
 	else
 	{
 		ui->labelStrUnit->setText("");
+		ui->labelStrUnitTuning->setText("");
+
+		ui->editInputValue->setVisible(false);
+		ui->pushButtonSetValue->setVisible(false);
 	}
 	ui->labelValue->setText("");
+	ui->labelValueTuning->setText("");
 
 	QFont font = ui->labelValue->font();
 	font.setPixelSize(m_currentFontSize);
 	ui->labelValue->setFont(font);
+	ui->labelValueTuning->setFont(font);
 
-	ui->editCustomAppID->setText(m_signal.customSignalId());
-	ui->editCaption->setText(m_signal.caption());
+	ui->editAppSignalID->setText(m_signal.appSignalId());
+	ui->editCustomAppSignalID->setText(m_signal.customSignalId());
+	ui->editCaption->setPlainText(m_signal.caption());
 	ui->editEquipment->setText(m_signal.equipmentId());
 
 	str = E::valueToString<E::SignalType>(m_signal.type());
@@ -162,13 +195,209 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, QWidget* parent
 
 	ui->editChannel->setText(E::valueToString<E::Channel>(m_signal.channel()));
 
+	// Fill additional information
+
+	fillProperties();
+
+	fillSchemas();
+
+	ui->tabWidget->setCurrentIndex(0);
+
+	// Remove tuning tab
+
+	if (configController->configuration().tuningEnabled == false || m_signal.enableTuning() == false)
+	{
+		for (int i = 0; i < ui->tabWidget->count(); i++)
+		{
+			if (ui->tabWidget->tabText(i) == tr("Tuning"))
+			{
+				ui->tabWidget->removeTab(i);
+				break;
+			}
+		}
+	}
+
+	//
+
+	updateData();
+
+	UiTools::adjustDialogPlacement(this);
+
+	m_updateStateTimerId = startTimer(200);
+}
+
+DialogSignalInfo::~DialogSignalInfo()
+{
+	auto it = m_dialogSignalInfoMap.find(m_signal.appSignalId());
+	if (it == m_dialogSignalInfoMap.end())
+	{
+
+		Q_ASSERT(false);
+	}
+	else
+	{
+		m_dialogSignalInfoMap.erase(it);
+	}
+
+	// Save window position
+	//
+	theSettings.m_signalInfoPos = pos();
+	theSettings.m_signalInfoGeometry = saveGeometry();
+
+	delete ui;
+}
+
+bool DialogSignalInfo::showDialog(QString appSignalId, MonitorConfigController* configController, MonitorCentralWidget* centralWidget)
+{
+	auto it = m_dialogSignalInfoMap.find(appSignalId);
+	if (it == m_dialogSignalInfoMap.end())
+	{
+		bool ok = false;
+		AppSignalParam signal = theSignals.signalParam(appSignalId, &ok);
+
+		if (ok == true)
+		{
+			DialogSignalInfo* dsi = new DialogSignalInfo(signal, configController, centralWidget);
+			dsi->show();
+			dsi->raise();
+			dsi->activateWindow();
+
+			m_dialogSignalInfoMap[appSignalId] = dsi;
+		}
+		else
+		{
+			QMessageBox::critical(centralWidget, qAppName(), tr("Signal %1 not found.").arg(appSignalId));
+			return false;
+		}
+	}
+	else
+	{
+		DialogSignalInfo* dsi = it->second;
+		if (dsi == nullptr)
+		{
+			Q_ASSERT(dsi);
+			return false;
+		}
+
+		dsi->raise();
+		dsi->activateWindow();
+
+		UiTools::adjustDialogPlacement(dsi);
+	}
+
+	return true;
+}
+
+void DialogSignalInfo::preparePropertiesContextMenu(const QPoint& pos)
+{
+	Q_UNUSED(pos);
+
+	QMenu menu(this);
+
+	QTreeWidgetItem* item = ui->treeProperties->currentItem();
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	// Copy
+	QAction* actionCopy = new QAction(tr("Copy"), &menu);
+
+	auto f = [this]() -> void
+			 {
+				QClipboard *clipboard = QApplication::clipboard();
+				QTreeWidgetItem* item = ui->treeProperties->currentItem();
+				if (item == nullptr)
+				{
+					return;
+				}
+				clipboard->setText(item->text(1));
+			};
+
+	connect(actionCopy, &QAction::triggered, this, f);
+
+	menu.addAction(actionCopy);
+
+	//
+	menu.exec(QCursor::pos());
+}
+
+void DialogSignalInfo::prepareSchemasContextMenu(const QPoint& pos)
+{
+	Q_UNUSED(pos);
+
+	QMenu menu(this);
+
+	QTreeWidgetItem* item = ui->treeSchemas->currentItem();
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	// Copy
+	QAction* actionSwitch = new QAction(tr("Switch to '%1'").arg(item->text(0)), &menu);
+
+	auto f = [this]() -> void
+			 {
+				QTreeWidgetItem* item = ui->treeSchemas->currentItem();
+				if (item == nullptr)
+				{
+					return;
+				}
+
+				MonitorSchemaWidget* currentTab = m_centralWidget->currentTab();
+				if (currentTab == nullptr)
+				{
+					Q_ASSERT(currentTab);
+					return;
+				}
+
+				QString schemaId = item->text(0);
+
+				if (currentTab->schemaId() != schemaId)
+				{
+					QStringList appSignals;
+					appSignals << m_signal.appSignalId();
+
+					currentTab->setSchema(schemaId, appSignals);
+				}
+			};
+
+	connect(actionSwitch, &QAction::triggered, this, f);
+
+	menu.addAction(actionSwitch);
+
+	//
+	menu.exec(QCursor::pos());
+}
+
+void DialogSignalInfo::timerEvent(QTimerEvent* event)
+{
+	Q_ASSERT(event);
+
+	if  (event->timerId() == m_updateStateTimerId)
+	{
+		updateData();
+	}
+}
+
+void DialogSignalInfo::mousePressEvent(QMouseEvent* event)
+{
+	if ((ui->labelValue->underMouse() || ui->labelValueTuning->underMouse()) && event->button() == Qt::RightButton)
+	{
+		contextMenu(event->pos());
+	}
+}
+
+
+void DialogSignalInfo::fillProperties()
+{
 	// Fill properties list
 	//
 	QStringList columns;
 	columns << "Caption";
 	columns << "Value";
 	ui->treeProperties->setHeaderLabels(columns);
-	ui->treeProperties->setColumnWidth(0, (int)(ui->treeProperties->width() / 2.2));
 
 	QTreeWidgetItem* itemGroup1 = new QTreeWidgetItem(QStringList()<<tr("General"));
 
@@ -192,19 +421,18 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, QWidget* parent
 	ui->treeProperties->addTopLevelItem(itemGroup2);
 	itemGroup2->setExpanded(true);
 
-
-	QTreeWidgetItem* itemGroup3 = new QTreeWidgetItem(QStringList() << tr("Parameters"));
-
 	if (m_signal.isAnalog())
 	{
+		QTreeWidgetItem* itemGroup3 = new QTreeWidgetItem(QStringList() << tr("Parameters"));
+
 		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Precision") << QString::number(m_signal.precision())));
 		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("Aperture") << QString::number(m_signal.aperture(), 'f', m_signal.precision())));
 		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("FilteringTime") << QString::number(m_signal.filteringTime(), 'f', m_signal.precision())));
 		itemGroup3->addChild(new QTreeWidgetItem(QStringList() << tr("SpreadTolerance") << QString::number(m_signal.spreadTolerance(), 'f', m_signal.precision())));
-	}
 
-	ui->treeProperties->addTopLevelItem(itemGroup3);
-	itemGroup3->setExpanded(true);
+		ui->treeProperties->addTopLevelItem(itemGroup3);
+		itemGroup3->setExpanded(true);
+	}
 
 	if (m_signal.isAnalog())
 	{
@@ -246,123 +474,55 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, QWidget* parent
 		itemGroup6->setExpanded(true);
 	}
 
-	QTreeWidgetItem* itemGroup7 = new QTreeWidgetItem(QStringList()<<tr("Tuning"));
-
-	itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("EnableTuning")<<(m_signal.enableTuning() ? tr("Yes") : tr("No"))));
 	if (m_signal.enableTuning())
 	{
+		QTreeWidgetItem* itemGroup7 = new QTreeWidgetItem(QStringList()<<tr("Tuning"));
+
+		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("EnableTuning")<<(m_signal.enableTuning() ? tr("Yes") : tr("No"))));
 		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("TuningDefaultValue")<<m_signal.tuningDefaultValue().toString(m_signal.precision())));
 		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("TuningLowBound")<<m_signal.tuningLowBound().toString(m_signal.precision())));
 		itemGroup7->addChild(new QTreeWidgetItem(QStringList()<<tr("TuningHighBound")<<m_signal.tuningHighBound().toString(m_signal.precision())));
+
+		ui->treeProperties->addTopLevelItem(itemGroup7);
+		itemGroup7->setExpanded(true);
 	}
 
-	ui->treeProperties->addTopLevelItem(itemGroup7);
-	itemGroup7->setExpanded(true);
 
 	ui->treeProperties->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(ui->treeProperties, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::prepareContextMenu);
+	connect(ui->treeProperties, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::preparePropertiesContextMenu);
 
-
-	setWindowTitle(m_signal.customSignalId() + tr(" - ") + m_signal.caption());
-
-	ui->tabWidget->setCurrentIndex(0);
-
-	// Create Flags control
-	//
-	m_signalFlags = new SignalFlagsWidget(ui->widgetFlags);
-	m_signalFlags->move(0, 0);
-	m_signalFlags->resize(ui->widgetFlags->size());
-
-	//
-	m_hash = ::calcHash(m_signal.appSignalId());
-
-	updateData();
-
-	m_updateStateTimerId = startTimer(200);
+	ui->treeProperties->resizeColumnToContents(0);
 }
 
-DialogSignalInfo::~DialogSignalInfo()
+void DialogSignalInfo::fillSchemas()
 {
-	delete ui;
-}
+	QStringList columns;
+	columns << "Schema";
+	ui->treeSchemas->setHeaderLabels(columns);
 
-bool DialogSignalInfo::showDialog(QString appSignalId, QWidget* parent)
-{
-	bool ok = false;
-	AppSignalParam signal = theSignals.signalParam(appSignalId, &ok);
+	QStringList schemas = m_configController->schemasByAppSignalId(m_signal.appSignalId());
 
-	if (ok == true)
+	for (const QString& schema : schemas)
 	{
-		DialogSignalInfo* dsi = new DialogSignalInfo(signal, parent);
-		dsi->show();
-	}
-	else
-	{
-		QMessageBox::critical(parent, qAppName(), tr("Signal %1 not found.").arg(appSignalId));
+
+		QTreeWidgetItem* item = new QTreeWidgetItem();
+		item->setText(0, schema);
+
+		ui->treeSchemas->addTopLevelItem(item);
 	}
 
-	return ok;
+	ui->treeSchemas->setSortingEnabled(true);
+	ui->treeSchemas->sortByColumn(0, Qt::AscendingOrder);
+
+	ui->treeSchemas->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(ui->treeSchemas, &QTreeWidget::customContextMenuRequested,this, &DialogSignalInfo::prepareSchemasContextMenu);
 }
-
-void DialogSignalInfo::prepareContextMenu(const QPoint& pos)
-{
-	Q_UNUSED(pos);
-
-	QMenu menu(this);
-
-	QTreeWidgetItem* item = ui->treeProperties->currentItem();
-	if (item == nullptr)
-	{
-		return;
-	}
-
-	// Copy
-	QAction* actionCopy = new QAction(tr("Copy"), &menu);
-
-	auto f = [this]() -> void
-			 {
-				QClipboard *clipboard = QApplication::clipboard();
-				QTreeWidgetItem* item = ui->treeProperties->currentItem();
-				if (item == nullptr)
-				{
-					return;
-				}
-				clipboard->setText(item->text(1));
-
-			};
-
-	connect(actionCopy, &QAction::triggered, this, f);
-
-	menu.addAction(actionCopy);
-
-	//
-	menu.exec(QCursor::pos());
-}
-
-void DialogSignalInfo::timerEvent(QTimerEvent* event)
-{
-	Q_ASSERT(event);
-
-	if  (event->timerId() == m_updateStateTimerId)
-	{
-		updateData();
-	}
-}
-
-void DialogSignalInfo::mousePressEvent(QMouseEvent* event)
-{
-	if (ui->labelValue->underMouse() && event->button() == Qt::RightButton)
-	{
-		contextMenu(event->pos());
-	}
-}
-
 
 void DialogSignalInfo::updateData()
 {
 	bool ok = false;
 
-	AppSignalState state = theSignals.signalState(m_hash, &ok);
+	AppSignalState state = theSignals.signalState(m_signal.hash(), &ok);
 	if (ok == false)
 	{
 		return;
@@ -379,7 +539,7 @@ void DialogSignalInfo::updateData()
 
 	if (m_signal.isAnalog() == true)
 	{
-		strValue = AppSignalState::toString(state.m_value, m_viewType, m_precision);
+		strValue = AppSignalState::toString(state.m_value, m_viewType, m_currentPrecision);
 	}
 
 	// switch font if needed
@@ -398,6 +558,7 @@ void DialogSignalInfo::updateData()
 		QFont font = ui->labelValue->font();
 		font.setPixelSize(m_currentFontSize);
 		ui->labelValue->setFont(font);
+		ui->labelValueTuning->setFont(font);
 	}
 
 	// Generate non valid string
@@ -412,6 +573,7 @@ void DialogSignalInfo::updateData()
 	if (strValue != ui->labelValue->text())
 	{
 		ui->labelValue->setText(strValue);
+		ui->labelValueTuning->setText(strValue);
 	}
 
 	//QDateTime systemTime = QDateTime::fromMSecsSinceEpoch(state.time.system);
@@ -423,10 +585,8 @@ void DialogSignalInfo::updateData()
 	ui->editLocalTime->setText(localTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
 	ui->editPlantTime->setText(plaitTime.toString("dd.MM.yyyy hh:mm:ss.zzz"));
 
-	if (m_signalFlags)
-	{
-		m_signalFlags->updateControl(state.m_flags);
-	}
+
+	ui->widgetFlags->updateControl(state.m_flags);
 
 	return;
 }
@@ -435,8 +595,6 @@ void DialogSignalInfo::updateData()
 void DialogSignalInfo::contextMenu(QPoint pos)
 {
 	QMenu menu(this);
-	QList<QAction*> actions;
-
 
 	// Precision
 	//
@@ -451,14 +609,14 @@ void DialogSignalInfo::contextMenu(QPoint pos)
 
 		auto f = [this, i]() -> void
 				 {
-					m_precision = i;
+					m_currentPrecision = i;
 				 };
 
 		connect(a, &QAction::triggered, this, f);
 
 		a->setCheckable(true);
 
-		if (i == m_precision)
+		if (i == m_currentPrecision)
 		{
 			a->setChecked(true);
 		}
@@ -590,4 +748,77 @@ void QLabelAppSignalDragAndDrop::mouseMoveEvent(QMouseEvent* event)
 	}
 
 	return;
+}
+
+void DialogSignalInfo::on_treeSchemas_itemDoubleClicked(QTreeWidgetItem *item, int column)
+{
+	Q_UNUSED(column);
+
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	MonitorSchemaWidget* currentTab = m_centralWidget->currentTab();
+	if (currentTab == nullptr)
+	{
+		Q_ASSERT(currentTab);
+		return;
+	}
+
+	QString schemaId = item->text(0);
+
+	if (currentTab->schemaId() != schemaId)
+	{
+		QStringList appSignals;
+		appSignals << m_signal.appSignalId();
+
+		currentTab->setSchema(schemaId, appSignals);
+	}
+
+	return;
+}
+
+void DialogSignalInfo::on_pushButtonSetZero_clicked()
+{
+	if (m_signal.isDiscrete() == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	m_centralWidget->tuningController()->writeValue(m_signal.appSignalId(), false);
+}
+
+void DialogSignalInfo::on_pushButtonSetOne_clicked()
+{
+	if (m_signal.isDiscrete() == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	m_centralWidget->tuningController()->writeValue(m_signal.appSignalId(), true);
+}
+
+void DialogSignalInfo::on_pushButtonSetValue_clicked()
+{
+	if (m_signal.isAnalog() == false)
+	{
+		Q_ASSERT(false);
+		return;
+	}
+
+	QString strValue = ui->editInputValue->text();
+
+	bool ok = false;
+
+	double value = strValue.toDouble(&ok);
+	if (ok == false)
+	{
+		QMessageBox::critical(m_centralWidget, qAppName(), tr("Invalid input value!"));
+		return;
+	}
+
+	m_centralWidget->tuningController()->writeValue(m_signal.appSignalId(), value);
 }
