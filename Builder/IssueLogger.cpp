@@ -6369,6 +6369,32 @@ namespace Builder
 						arg(port1ID).arg(port2ID));
 	}
 
+	/// IssueCode: ALC5996
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Internal error! %1. File: %1 Line: %2 Function: %3
+	///
+	/// Parameters:
+	///		%1 error message
+	///		%2 source file name
+	///		%3 source line number
+	///		%4 function name
+	///
+	/// Description:
+	///		Internal error in specified function. Contact to the RPCT developers.
+	///
+	void IssueLogger::errALC5996(QString errorMsg,
+								 QString fileName,
+								 int lineNo,
+								 QString functionName)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5996,
+				  QString(tr("Internal error! %1. File: %2 Line: %3 Function: %4")).
+								arg(errorMsg).arg(fileName).arg(lineNo).arg(functionName));
+	}
+
 	/// IssueCode: ALC5997
 	///
 	/// IssueType: Error
@@ -6381,7 +6407,7 @@ namespace Builder
 	///		%3 function name
 	///
 	/// Description:
-	///		Null pointer occurred in specified function. Contact to th RPCT developers.
+	///		Null pointer occurred in specified function. Contact to the RPCT developers.
 	///
 	void IssueLogger::errALC5997(QString fileName, int lineNo, QString functionName)
 	{
@@ -6403,7 +6429,7 @@ namespace Builder
 	///		%3 function name
 	///
 	/// Description:
-	///		Internal error in specified function. Contact to th RPCT developers.
+	///		Internal error in specified function. Contact to the RPCT developers.
 	///
 	void IssueLogger::errALC5998(QString fileName, int lineNo, QString functionName)
 	{

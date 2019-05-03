@@ -1148,7 +1148,7 @@ void Signal::initCalculatedProperties()
 	m_hash = calcHash(m_appSignalID);
 }
 
-bool Signal::addStateFlagSignal(AppSignalStateFlagType flagType, const QString& appSignalID)
+bool Signal::addStateFlagSignal(E::AppSignalStateFlagType flagType, const QString& appSignalID)
 {
 	if (m_stateFlagsSignals.contains(flagType) == true)
 	{
@@ -1449,6 +1449,11 @@ Signal* SignalSet::getSignal(const QString& appSignalID)
 
 void SignalSet::append(const int& signalID, Signal *signal)
 {
+	if (signalID > m_maxID)
+	{
+		m_maxID = signalID;
+	}
+
 	SignalPtrOrderedHash::append(signalID, signal);
 
 	m_groupSignals.insert(signal->signalGroupID(), signalID);
@@ -1475,6 +1480,12 @@ void SignalSet::removeAt(const int index)
 	m_groupSignals.remove(signalGroupID, signalID);
 }
 
+void SignalSet::append(Signal* signal)
+{
+	int newID = getMaxID() + 1;
+
+	append(newID, signal);
+}
 
 QVector<int> SignalSet::getChannelSignalsID(const Signal& signal) const
 {
@@ -1549,23 +1560,28 @@ bool SignalSet::serializeFromProtoFile(const QString& filePath)
 	return true;
 }
 
-int SignalSet::getMaxID() const
+int SignalSet::getMaxID()
 {
+	if (m_maxID >= 0)
+	{
+		return m_maxID;
+	}
+
 	int count = SignalPtrOrderedHash::count();
 
-	int maxID = 0;
+	m_maxID = -1;
 
 	for(int i = 0; i < count; i++)
 	{
 		int keyI = key(i);
 
-		if (keyI > maxID)
+		if (keyI > m_maxID)
 		{
-			maxID = keyI;
+			m_maxID = keyI;
 		}
 	}
 
-	return maxID;
+	return m_maxID;
 }
 
 

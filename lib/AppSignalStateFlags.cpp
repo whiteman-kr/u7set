@@ -29,36 +29,6 @@ void AppSignalStateFlags::updateArchivingReasonFlags(const AppSignalStateFlags& 
 	quint32 changedFlags = all ^ prevFlags.all;
 
 	validityChange = (changedFlags & MASK_VALIDITY_AND_AVAILABLE_FLAGS) == 0 ? 0 : 1;
-	simLockUnblChange = (changedFlags & MASK_SIM_LOCK_UNBL_FLAGS) == 0 ? 0 : 1;
+	simBlockUnblChange = (changedFlags & MASK_SIM_BLOCK_UNBL_FLAGS) == 0 ? 0 : 1;
 	limitFlagsChange = (changedFlags & MASK_LIMITS_FLAGS) == 0 ? 0 : 1;
 }
-
-
-QString AppSignalStateFlags::flagTypeStr(AppSignalStateFlagType type)
-{
-	switch(type)
-	{
-	case AppSignalStateFlagType::Validity:
-		return "Validity";
-
-	case AppSignalStateFlagType::Simulated:
-		return "Simulated";
-
-	case AppSignalStateFlagType::Locked:
-		return "Locked";
-
-	case AppSignalStateFlagType::Unbalanced:
-		return "Unbalanced";
-
-	case AppSignalStateFlagType::AboveHighLimit:
-		return "AboveHighLimit";
-
-	case AppSignalStateFlagType::BelowLowLimit:
-		return "BelowLowLimit";
-	}
-
-	assert(false);
-
-	return "???";
-}
-

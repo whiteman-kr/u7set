@@ -303,8 +303,8 @@ public:
 
 	void initCalculatedProperties();
 
-	bool addStateFlagSignal(AppSignalStateFlagType flagType, const QString& appSignalID);
-	QString stateFlagSignal(AppSignalStateFlagType flagType) const { return  m_stateFlagsSignals.value(flagType, QString("???")); }
+	bool addStateFlagSignal(E::AppSignalStateFlagType flagType, const QString& appSignalID);
+	QString stateFlagSignal(E::AppSignalStateFlagType flagType) const { return  m_stateFlagsSignals.value(flagType, QString("???")); }
 
 private:
 	// Private setters for fields, witch can't be changed outside DB engine
@@ -451,6 +451,8 @@ public:
 	virtual void remove(const int& signalID) override;
 	virtual void removeAt(const int index) override;
 
+	void append(Signal* signal);
+
 	QVector<int> getChannelSignalsID(const Signal& signal) const;
 	QVector<int> getChannelSignalsID(int signalGroupID) const;
 
@@ -458,9 +460,11 @@ public:
 
 	bool serializeFromProtoFile(const QString& filePath);
 
-	int getMaxID() const;
+	int getMaxID();
 
 private:
 	QMultiHash<int, int> m_groupSignals;
 	QHash<QString, int> m_strID2IndexMap;
+
+	int m_maxID = -1;
 };

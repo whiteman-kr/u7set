@@ -4,20 +4,7 @@
 #include <type_traits>
 #include <QHash>
 
-enum class AppSignalStateFlagType
-{
-	Validity,
-	Simulated,
-	Locked,
-	Unbalanced,
-	AboveHighLimit,
-	BelowLowLimit
-};
-
-inline uint qHash(AppSignalStateFlagType t, uint seed)
-{
-	return ::qHash(static_cast<int>(t), seed);
-}
+#include "Types.h"
 
 #pragma pack(push, 1)
 
@@ -34,7 +21,7 @@ union AppSignalStateFlags
 											//		if no data available from LM this flag sets to 0
 
 		quint32 simulated : 1;				//	2	sets according to simulation signal of signal (see AFB sim_lock)
-		quint32 locked : 1;					//	3	sets according to blocking signal of signal (see AFB sim_lock)
+		quint32 blocked : 1;					//	3	sets according to blocking signal of signal (see AFB sim_lock)
 		quint32 unbalanced : 1;				//	4	sets according to unbalansed signal of signal (see AFB unbalance)
 
 		quint32 aboveHighLimit: 1;			//	5	sets to 1 if value of signal is greate than HighEngineeringUnits limit
@@ -55,7 +42,7 @@ union AppSignalStateFlags
 		// archiving reasons flags
 		//
 		quint32 validityChange : 1;			//	16	any changes of valid or stateAvailable flags
-		quint32 simLockUnblChange : 1;		//	17	any changes of simulated, locked, unbalanced flags
+		quint32 simBlockUnblChange : 1;		//	17	any changes of simulated, locked, unbalanced flags
 		quint32 limitFlagsChange : 1;		//	18	any changes of aboveHighLimit or belowLowLimit flags
 		quint32 autoPoint : 1;				//	19
 		quint32 fineAperture : 1;			//	20
@@ -87,10 +74,8 @@ union AppSignalStateFlags
 
 	void updateArchivingReasonFlags(const AppSignalStateFlags& prevFlags);
 
-	static QString flagTypeStr(AppSignalStateFlagType type);
-
 	static const quint32 MASK_VALIDITY_AND_AVAILABLE_FLAGS = 0x00000003;
-	static const quint32 MASK_SIM_LOCK_UNBL_FLAGS = 0x0000001C;
+	static const quint32 MASK_SIM_BLOCK_UNBL_FLAGS = 0x0000001C;
 	static const quint32 MASK_LIMITS_FLAGS = 0x00000600;
 	static const quint32 MASK_ALL_ARCHIVING_REASONS = 0x003F0000;
 	static const quint32 MASK_SHORT_TERM_ARCHIVING_REASONE = 0x00100000;			// for now this is fineAperture flag only
@@ -98,6 +83,6 @@ union AppSignalStateFlags
 
 #pragma pack(pop)
 
-typedef QHash<AppSignalStateFlagType, QString> AppSignalStateFlagsMap;
+typedef QHash<E::AppSignalStateFlagType, QString> AppSignalStateFlagsMap;
 
 

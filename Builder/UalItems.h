@@ -140,6 +140,8 @@ namespace Builder
 		bool isLoopbackSource() const { return type() == E::UalItemType::LoopbackSource; }
 		bool isLoopbackTarget() const { return type() == E::UalItemType::LoopbackTarget; }
 		bool isSetFlagsItem() const;
+		bool isSimLockItem() const;
+		bool isMismatchItem() const;
 
 		E::UalItemType type() const;
 
@@ -193,6 +195,8 @@ namespace Builder
 		QHash<QString, int> m_opNameToIndexMap;
 
 		static const QString SET_FLAGS_ITEM_CAPTION;
+		static const QString SIM_LOCK_ITEM_CAPTION;
+		static const QString MISMATCH_ITEM_CAPTION;
 	};
 
 	typedef std::map<QUuid, UalItem*> ConnectedAppItems;		// connected pin Uuid => AppItem*
@@ -263,13 +267,27 @@ namespace Builder
 		static const int FOR_USER_ONLY_PARAM_INDEX = -1;				// index of FB's parameters used by user only
 
 		static const QString IN_PIN_CAPTION;
+		static const QString OUT_PIN_CAPTION;
+
+		static const QString IN_1_PIN_CAPTION;
+		static const QString IN_2_PIN_CAPTION;
+		static const QString IN_3_PIN_CAPTION;
+		static const QString IN_4_PIN_CAPTION;
+
+		static const QString OUT_1_PIN_CAPTION;
+		static const QString OUT_2_PIN_CAPTION;
+		static const QString OUT_3_PIN_CAPTION;
+		static const QString OUT_4_PIN_CAPTION;
+
+		static const QString SIMLOCK_SIM_PIN_CAPTION;
+		static const QString SIMLOCK_BLOCK_PIN_CAPTION;
+
 		static const QString VALIDITY_PIN_CAPTION;
 		static const QString SIMULATED_PIN_CAPTION;
 		static const QString LOCKED_PIN_CAPTION;
 		static const QString UNBALANCED_PIN_CAPTION;
 		static const QString HIGH_LIMIT_PIN_CAPTION;
 		static const QString LOW_LIMIT_PIN_CAPTION;
-		static const QString OUT_PIN_CAPTION;
 
 	public:
 		UalAfb(const UalItem &appItem, bool isBusProcessingAfb);
@@ -397,12 +415,14 @@ namespace Builder
 		bool createConstSignal(const UalItem* ualItem,
 								const QString& constSignalID,
 								E::SignalType constSignalType,
-								E::AnalogAppSignalFormat constAnalogFormat);
+								E::AnalogAppSignalFormat constAnalogFormat,
+								Signal** autoSignalPtr);
 
 		bool createAutoSignal(const UalItem* ualItem,
 								const QString& signalID,
 								E::SignalType signalType,
-								E::AnalogAppSignalFormat analogFormat);
+								E::AnalogAppSignalFormat analogFormat,
+								Signal** autoSignalPtr);
 
 		bool createOptoSignal(const UalItem* ualItem,
 								Signal* s,
@@ -415,7 +435,8 @@ namespace Builder
 									Signal* busSignal,
 									BusShared bus,
 									const QString& outPinCaption,
-									std::shared_ptr<Hardware::DeviceModule> lm);
+									std::shared_ptr<Hardware::DeviceModule> lm,
+									Signal** autoSignalPtr);
 
 		friend class UalSignalsMap;
 
@@ -442,7 +463,7 @@ namespace Builder
 		Address16 regValueAddr() const { return m_regValueAddr; }
 		bool setRegValueAddr(Address16 regValueAddr);
 
-		bool setFlagSignal(AppSignalStateFlagType flagType, UalSignal* flagSignal);
+		bool setFlagSignal(E::AppSignalStateFlagType flagType, UalSignal* flagSignal);
 
 		Address16 ioBufAddr();
 
@@ -475,7 +496,7 @@ namespace Builder
 		bool isCompatible(const BusSignal& busSignal) const;
 		bool isCompatible(const UalSignal* ualSignal) const;
 
-		bool isAutoSignal() const { return m_autoSignalPtr != nullptr; }
+//		bool isAutoSignal() const { return m_autoSignalPtr != nullptr; }
 
 		bool isInput() const { return m_isInput; }
 		bool isTuningable() const { return m_isTuningable; }
@@ -538,11 +559,11 @@ namespace Builder
 
 		void setAcquired(bool acquired);
 
-		bool addStateFlagSignal(AppSignalStateFlagType flagType, UalSignal* flagSignal, IssueLogger* log);
+		bool addStateFlagSignal(E::AppSignalStateFlagType flagType, UalSignal* flagSignal, IssueLogger* log);
 
 	private:
 		const UalItem* m_ualItem = nullptr;
-		Signal* m_autoSignalPtr = nullptr;
+//		Signal* m_autoSignalPtr = nullptr;
 
 		QVector<Signal*> m_refSignals;							// vector of pointers to signal in m_signalSet
 
@@ -569,6 +590,7 @@ namespace Builder
 		bool m_isInput = false;							// signal sources
 		bool m_isTuningable = false;
 		bool m_isOptoSignal = false;
+		Signal* m_optoSignalNativeCopy = nullptr;
 
 		bool m_isOutput = false;
 		bool m_isAcquired = false;
@@ -582,7 +604,7 @@ namespace Builder
 		Address16 m_regBufAddr;							// address in RegBuf (absolute in LM's memory)
 		Address16 m_regValueAddr;						// relative address from beginning of RegBuf ()
 
-		QHash<AppSignalStateFlagType, UalSignal*> m_flagSignals;
+		QHash<E::AppSignalStateFlagType, UalSignal*> m_flagSignals;
 	};
 
 	class UalSignalsMap: public QObject, private QHash<UalSignal*, UalSignal*>

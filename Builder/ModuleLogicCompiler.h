@@ -168,7 +168,7 @@ namespace Builder
 			SignalsWithFlags(ModuleLogicCompiler& compiler);
 			~SignalsWithFlags();
 
-			bool append(const QString& signalWithFlagID, AppSignalStateFlagType flagType, const QString& flagSignalID);
+			bool append(const QString& signalWithFlagID, E::AppSignalStateFlagType flagType, const QString& flagSignalID);
 
 		private:
 			ModuleLogicCompiler& m_compiler;
@@ -269,13 +269,21 @@ namespace Builder
 		bool processSimlockItems();
 		bool processMismatchItems();
 		bool processSetFlagsItems();
-		bool setPinFlagSignal(const UalItem* ualItem, const QString& pinCaption, AppSignalStateFlagType flagType, UalSignal* inSignal, bool* flagIsSet);
+		bool setPinFlagSignal(const UalItem* ualItem,
+							  const QString& pinCaption,
+							  bool pinShouldBeExist,
+							  E::AppSignalStateFlagType flagType,
+							  UalSignal* inSignal,
+							  bool* flagIsSet);
 
-		bool createUalSignalsFromFlagSignals();
+		bool setAcquiredForFlagSignals();
+		bool checkSignalsWithFlags();
+		void writeSignalsWithFlagsReport();
+		void writeSignalsWithFlagsToReport(QStringList* file, const QStringList& signalsWithFlagsIDs);
 
 		bool sortUalSignals();
 
-		bool appendAutoUalSignalsToSignalSet();
+//		bool appendAutoUalSignalsToSignalSet();
 
 		//
 
