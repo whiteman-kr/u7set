@@ -12450,7 +12450,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 		
-		<AFB id="#set_flags_v1"          Caption="set_flags"          Version="1.0001">
+        <AFB id="#set_flags_v1"          Caption="set_flags"          Version="1.0002">
 			<Properties>
 				<Description>Set flag(s) to input signals. Flags accessible only in MATS.</Description>
 				<Category>Other</Category>
@@ -12463,7 +12463,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 				<Pin OpName="i_in"  		Caption="in" 			Type="Discrete" ByteOrder="BigEndian" OpIndex="0"  Size="1"/>
 				<Pin OpName="i_validity" 	Caption="validity"  	Type="Discrete" ByteOrder="BigEndian" OpIndex="1"  Size="1"/>
 				<Pin OpName="i_simulated" 	Caption="simulated"  	Type="Discrete" ByteOrder="BigEndian" OpIndex="2"  Size="1"/>
-				<Pin OpName="i_locked" 		Caption="locked"  		Type="Discrete" ByteOrder="BigEndian" OpIndex="3"  Size="1"/>
+				<Pin OpName="i_blocked" 	Caption="blocked"  		Type="Discrete" ByteOrder="BigEndian" OpIndex="3"  Size="1"/>
 				<Pin OpName="i_unbalanced" 	Caption="unbalanced"  	Type="Discrete" ByteOrder="BigEndian" OpIndex="4"  Size="1"/>
 				<Pin OpName="i_highlimit" 	Caption="high_limit" 	Type="Discrete" ByteOrder="BigEndian" OpIndex="5"  Size="1"/>
 				<Pin OpName="i_lowlimit" 	Caption="low_limit"  	Type="Discrete" ByteOrder="BigEndian" OpIndex="6"  Size="1"/>
@@ -12496,7 +12496,7 @@ function createOutputSignals(videoItemFblElement, afbElement)
 						</Changed>
 					</Script>
 				</Param>
-				<Param OpName="ShowLocked" Caption="ShowLocked" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
+				<Param OpName="ShowBlocked" Caption="ShowBlocked" Visible="false" OpIndex="-1" Size="1" Instantiator="false" User="true" Type="Discrete">
 					<Value>1</Value>
 					<Default>1</Default>
 					<Script>
@@ -12553,7 +12553,7 @@ function createInputSignals(schemaItem, afbElement)
 
 	var showValidity = schemaItem.getParamBoolValue("ShowValidity");
 	var showSimulated = schemaItem.getParamBoolValue("ShowSimulated");
-	var showLocked = schemaItem.getParamBoolValue("ShowLocked");
+	var showBlocked = schemaItem.getParamBoolValue("ShowBlocked");
 	var showUnbalanced = schemaItem.getParamBoolValue("ShowUnbalanced");
 	var showHighLimit = schemaItem.getParamBoolValue("ShowHighLimit");
 	var showLowLimit = schemaItem.getParamBoolValue("ShowLowLimit");
@@ -12576,9 +12576,9 @@ function createInputSignals(schemaItem, afbElement)
 		addSignal(schemaItem, "simulated");
 	}
 	
-	if (showLocked == true)
+    if (showBlocked == true)
 	{
-		addSignal(schemaItem, "locked");
+	    addSignal(schemaItem, "blocked");
 	}
 	
 	if (showUnbalanced == true)
