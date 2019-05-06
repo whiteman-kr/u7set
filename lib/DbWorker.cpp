@@ -297,6 +297,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0277.sql", "Upgrade to version 277, Added event scripts properties to Monitor preset"},
 	{":/DatabaseUpgrade/Upgrade0278.sql", "Upgrade to version 278, Added ElectricUnit checking in AOM-4PH preset"},
 	{":/DatabaseUpgrade/Upgrade0279.sql", "Upgrade to version 279, Update all LM descriptions, renamed set_flags locked->blocked "},
+	{":/DatabaseUpgrade/Upgrade0280.sql", "Upgrade to version 280, RIM configuration has new modes"},
 };
 
 int DbWorker::counter = 0;

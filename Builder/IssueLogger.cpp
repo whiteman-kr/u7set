@@ -1371,6 +1371,32 @@ namespace Builder
 						.arg(tuningServiceId));
 	}
 
+	/// IssueCode: CFG3041
+	///
+	/// IssueType: Error
+	///
+	/// Title: Property %1 has wrong value (%2), required value is %3 in signal %4.
+	///
+	/// Parameters:
+	///         %1 Property Name
+	///         %2 Property Value
+	///         %3 Required Value
+	///			%4 Module StrID
+	///
+	/// Description:
+	///			Occurs if a property value has wrong value, required value is provided
+	///
+	void IssueLogger::errCFG3041(QString name, QString value, QString message, QString signalId)	// Property %1 has wrong value (%2), required value is %3 in signal %4.
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3041,
+				  tr("Property %1 has wrong value (%2), required value is %3 in signal %4.")
+				  .arg(name)
+				  .arg(value)
+				  .arg(message)
+				  .arg(signalId));
+	}
+
 	//
 	// ALP			Application Logic Parsing				4000-4999
 	//
