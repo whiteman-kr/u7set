@@ -86,6 +86,8 @@ const double Ohm_Cu_a_426_HIGH_LIMIT = 185.2340;	// 200
 const double Ohm_Ni_a_617_LOW_LIMIT = 64.8300;		// -70
 const double Ohm_Ni_a_617_HIGH_LIMIT = 223.2100;	// 180
 
+const double Ohm_Raw_LOW_LIMIT = 0;
+const double Ohm_Raw_HIGH_LIMIT = 1500;
 
 // ==============================================================================================
 // class UnitsConvertResult
