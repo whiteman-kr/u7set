@@ -266,6 +266,7 @@ public:
 		Ohm_Cu_a_428 = 30,
 		Ohm_Cu_a_426 = 31,
 		Ohm_Ni_a_617 = 32,
+		Ohm_Raw = 33,
 	};
 	Q_ENUM(SensorType)
 

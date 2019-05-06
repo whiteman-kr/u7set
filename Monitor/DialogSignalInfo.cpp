@@ -151,6 +151,7 @@ DialogSignalInfo::DialogSignalInfo(const AppSignalParam& signal, MonitorConfigCo
 	// tu support Drag and Drop Operation (drag part)
 	//
 	ui->signalIdLabel->setAppSignal(signal);
+	ui->signalIdLabelIcon->setAppSignal(signal);
 
 	// Fill main signal information
 	//
