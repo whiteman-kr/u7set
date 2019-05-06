@@ -489,7 +489,7 @@ namespace Builder
 			r0 = qv.toDouble();
 		}
 
-		if (r0 == 0.0)
+		if (r0 == 0.0 && signal.sensorType() != E::SensorType::Ohm_Raw)
 		{
 			// Signal %1 has wrong R0 (ThermoResistor)
 			//
