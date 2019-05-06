@@ -403,8 +403,11 @@ protected slots:
 	void onUpKey(QKeyEvent* e);
 	void onDownKey(QKeyEvent* e);
 
-	void selectNextLeftItem();
-	void selectNextRightItem();
+private:
+	struct NextSelectionItem;
+protected:
+	bool selectNextLeftItem(NextSelectionItem switchToLeftItem);
+	bool selectNextRightItem(NextSelectionItem switchToRightItem);
 	void selectNextUpItem();
 	void selectNextDownItem();
 
@@ -713,6 +716,24 @@ private:
 private:
 
 	bool m_lastSelectedAddSignal = false;
+
+	// Selection of next schema item via Alt + arrow keys
+	//
+	struct NextSelectionItem
+	{
+		std::shared_ptr<VFrame30::SchemaItem> schemaItem;
+		int pinIndex = 0;
+
+		bool isNull() const						{ return schemaItem == nullptr; }
+		bool isFblItemRect() const				{ return dynamic_cast<VFrame30::FblItemRect*>(schemaItem.get()) != nullptr; }
+		VFrame30::FblItemRect* toFblItemRect()	{ return dynamic_cast<VFrame30::FblItemRect*>(schemaItem.get()); }
+	};
+
+	NextSelectionItem m_nextSelectionFromLeft;
+	NextSelectionItem m_nextSelectionFromRight;
+
+	// --
+	//
 };
 
 
