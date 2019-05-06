@@ -2661,16 +2661,16 @@ void EditSchemaWidget::keyPressEvent(QKeyEvent* e)
 	switch (e->key())
 	{
 		case Qt::Key_Left:
-			onLeftKey();
+			onLeftKey(e);
 			return;
 		case Qt::Key_Right:
-			onRightKey();
+			onRightKey(e);
 			return;
 		case Qt::Key_Up:
-			onUpKey();
+			onUpKey(e);
 			return;
 		case Qt::Key_Down:
-			onDownKey();
+			onDownKey(e);
 			return;
 	}
 
@@ -8504,10 +8504,17 @@ void EditSchemaWidget::addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schem
 	return;
 }
 
-void EditSchemaWidget::onLeftKey()
+void EditSchemaWidget::onLeftKey(QKeyEvent* e)
 {
-	auto selected = selectedNonLockedItems();
+	if (selectedItems().empty() == false && e->modifiers().testFlag(Qt::AltModifier) == true)
+	{
+		selectNextLeftItem();
+		return;
+	}
 
+	// Move selected items to left
+	//
+	auto selected = selectedNonLockedItems();
 	if (selected.empty() == true)
 	{
 		return;
@@ -8545,8 +8552,16 @@ void EditSchemaWidget::onLeftKey()
 	return;
 }
 
-void EditSchemaWidget::onRightKey()
+void EditSchemaWidget::onRightKey(QKeyEvent* e)
 {
+	if (selectedItems().empty() == false && e->modifiers().testFlag(Qt::AltModifier) == true)
+	{
+		selectNextRightItem();
+		return;
+	}
+
+	// Move selected items to right
+	//
 	auto selected = selectedNonLockedItems();
 
 	if (selected.empty() == true)
@@ -8585,8 +8600,16 @@ void EditSchemaWidget::onRightKey()
 	return;
 }
 
-void EditSchemaWidget::onUpKey()
+void EditSchemaWidget::onUpKey(QKeyEvent* e)
 {
+	if (selectedItems().empty() == false && e->modifiers().testFlag(Qt::AltModifier) == true)
+	{
+		selectNextUpItem();
+		return;
+	}
+
+	// --
+	//
 	auto selected = selectedNonLockedItems();
 
 	if (selected.empty() == true)
@@ -8625,8 +8648,16 @@ void EditSchemaWidget::onUpKey()
 	return;
 }
 
-void EditSchemaWidget::onDownKey()
+void EditSchemaWidget::onDownKey(QKeyEvent* e)
 {
+	if (selectedItems().empty() == false && e->modifiers().testFlag(Qt::AltModifier) == true)
+	{
+		selectNextDownItem();
+		return;
+	}
+
+	// --
+	//
 	auto selected = selectedNonLockedItems();
 
 	if (selected.empty() == true)
@@ -8660,6 +8691,632 @@ void EditSchemaWidget::onDownKey()
 
 			m_editEngine->endBatch();
 		}
+	}
+
+	return;
+}
+
+void EditSchemaWidget::selectNextLeftItem()
+{
+	// If Alt is pressed then select the next left item
+	//
+	if (selectedItems().empty() == true)
+	{
+		return;
+	}
+
+	std::shared_ptr<VFrame30::SchemaItem> selectedItem = selectedItems().front();
+
+	// Get selected item pos - left, top + midle heigh
+	//
+	QPointF point;
+
+	if (auto posRectImpl = selectedItem->toType<VFrame30::PosRectImpl>();
+		posRectImpl != nullptr)
+	{
+		if (auto fblItem = posRectImpl->toFblItem();
+			fblItem != nullptr && fblItem->hasInputs() == true)
+		{
+			// If it has input pins then take the first input pin pos
+			//
+			const VFrame30::AfbPin& firstPin = fblItem->inputs().front();
+			point = {firstPin.x(), firstPin.y()};
+		}
+		else
+		{
+			// If it does not have pins, then take left center point
+			//
+			point = {posRectImpl->leftDocPt(), posRectImpl->topDocPt() + posRectImpl->heightDocPt() / 2.0};
+		}
+	}
+
+	if (selectedItem->isType<VFrame30::PosConnectionImpl>() == true ||
+		selectedItem->isType<VFrame30::PosLineImpl>() == true)
+	{
+		std::vector<VFrame30::SchemaPoint> selectedConnectionPoints = selectedItem->getPointList();
+
+		if (selectedConnectionPoints.size() >= 2)
+		{
+			VFrame30::SchemaPoint firstPoint = selectedConnectionPoints.front();
+			VFrame30::SchemaPoint lastPoint = selectedConnectionPoints.back();
+
+			if (firstPoint.X < lastPoint.X)
+			{
+				point = {firstPoint.X, firstPoint.Y};
+			}
+			else
+			{
+				point = {lastPoint.X, lastPoint.Y};
+			}
+		}
+		else
+		{
+			Q_ASSERT(selectedConnectionPoints.size() >= 2);
+		}
+	}
+
+	//  --
+	const double VertFactor = 2.0;
+	point.setY(point.y() * VertFactor);
+
+	// Decay all other items to points
+	//
+	double minDistance = DBL_MAX;
+	std::shared_ptr<VFrame30::SchemaItem> minDistanceItem;
+
+	auto calcDistance = [&minDistance, &minDistanceItem, &point, VertFactor](double x, double y, auto schemaItem)
+		{
+			QPointF p = {x, y * VertFactor};
+
+			if (point.x() - p.x() > -0.000001)
+			{
+				double d = QLineF(point, p).length();
+
+				if (d < minDistance)
+				{
+					minDistance = d;
+					minDistanceItem = schemaItem;
+				}
+			}
+
+			return;
+		};
+
+
+	for (std::shared_ptr<VFrame30::SchemaItem> item : editSchemaView()->activeLayer()->Items)
+	{
+		if (item == selectedItem)
+		{
+			continue;
+		}
+
+		if (auto posRectImpl = item->toType<VFrame30::PosRectImpl>();
+			posRectImpl != nullptr)
+		{
+			QRectF rc = {posRectImpl->leftDocPt(), posRectImpl->topDocPt(),
+						 posRectImpl->widthDocPt(), posRectImpl->heightDocPt()};
+
+			QPointF center = rc.center();
+
+			if (rc.left() < point.x() ||
+				rc.right() < point.x())
+			{
+				calcDistance(center.x(), rc.top(), item);
+				calcDistance(rc.right(), rc.top(), item);
+				calcDistance(rc.right(), center.y(), item);
+				calcDistance(rc.right(), rc.bottom(), item);
+				calcDistance(center.x(), rc.bottom(), item);
+				calcDistance(rc.left(), rc.top(), item);
+				calcDistance(rc.left(), rc.bottom(), item);
+				calcDistance(rc.left(), center.y(), item);
+			}
+
+			continue;
+		}
+
+		if (item->isType<VFrame30::PosConnectionImpl>() == true ||
+			item->isType<VFrame30::PosLineImpl>() == true)
+		{
+			std::vector<VFrame30::SchemaPoint> points = item->getPointList();
+
+			if (points.size() >= 2)
+			{
+				const VFrame30::SchemaPoint& firstPoint = points.front();
+				const VFrame30::SchemaPoint& lastPoint = points.back();
+
+				// At least one point must be at left OR
+				// it is a vertical line on point.x
+				//
+				if ((firstPoint.X < point.x() || lastPoint.X < point.x()) ||
+					(std::abs(firstPoint.X - lastPoint.X) <= 0.000001 && std::abs(firstPoint.X - point.x()) <= 0.000001))
+				{
+					calcDistance(firstPoint.X, firstPoint.Y, item);
+					calcDistance(lastPoint.X, lastPoint.Y, item);
+				}
+			}
+			else
+			{
+				Q_ASSERT(points.size() >= 2);
+			}
+
+			continue;
+		}
+	}
+
+	// Get the closest item
+	//
+	if (minDistanceItem  != nullptr)
+	{
+		selectItem(minDistanceItem);
+	}
+
+	return;
+}
+
+void EditSchemaWidget::selectNextRightItem()
+{
+	if (selectedItems().empty() == true)
+	{
+		return;
+	}
+
+	std::shared_ptr<VFrame30::SchemaItem> selectedItem = selectedItems().front();
+
+	// Get selected item pos - right, top + midle heigh
+	//
+	QPointF point;
+
+	if (auto posRectImpl = selectedItem->toType<VFrame30::PosRectImpl>();
+		posRectImpl != nullptr)
+	{
+		if (auto fblItem = posRectImpl->toFblItem();
+			fblItem != nullptr && fblItem->hasOutputs() == true)
+		{
+			// If it has output pins then take the first output pin pos
+			//
+			const VFrame30::AfbPin& firstPin = fblItem->outputs().front();
+			point = {firstPin.x(), firstPin.y()};
+		}
+		else
+		{
+			// If it does not have pins, then take left center point
+			//
+			point = {posRectImpl->leftDocPt() + posRectImpl->widthDocPt(), posRectImpl->topDocPt() + posRectImpl->heightDocPt() / 2.0};
+		}
+	}
+
+	if (selectedItem->isType<VFrame30::PosConnectionImpl>() == true ||
+		selectedItem->isType<VFrame30::PosLineImpl>() == true)
+	{
+		std::vector<VFrame30::SchemaPoint> selectedConnectionPoints = selectedItem->getPointList();
+
+		if (selectedConnectionPoints.size() >= 2)
+		{
+			VFrame30::SchemaPoint firstPoint = selectedConnectionPoints.front();
+			VFrame30::SchemaPoint lastPoint = selectedConnectionPoints.back();
+
+			if (firstPoint.X < lastPoint.X)
+			{
+				point = {lastPoint.X, lastPoint.Y};
+			}
+			else
+			{
+				point = {firstPoint.X, firstPoint.Y};
+			}
+		}
+		else
+		{
+			Q_ASSERT(selectedConnectionPoints.size() >= 2);
+		}
+	}
+
+	//  --
+	const double VertFactor = 2.0;
+	point.setY(point.y() * VertFactor);
+
+	// Decay all other items to points
+	//
+	double minDistance = DBL_MAX;
+	std::shared_ptr<VFrame30::SchemaItem> minDistanceItem;
+
+	auto calcDistance = [&minDistance, &minDistanceItem, &point, VertFactor](double x, double y, auto schemaItem)
+		{
+			QPointF p = {x, y * VertFactor};
+
+			if (point.x() - 0.000001 <= p.x())
+			{
+				double d = QLineF(point, p).length();
+
+				if (d < minDistance)
+				{
+					minDistance = d;
+					minDistanceItem = schemaItem;
+				}
+			}
+
+			return;
+		};
+
+
+	for (std::shared_ptr<VFrame30::SchemaItem> item : editSchemaView()->activeLayer()->Items)
+	{
+		if (item == selectedItem)
+		{
+			continue;
+		}
+
+		if (auto posRectImpl = item->toType<VFrame30::PosRectImpl>();
+			posRectImpl != nullptr)
+		{
+			QRectF rc = {posRectImpl->leftDocPt(), posRectImpl->topDocPt(),
+						 posRectImpl->widthDocPt(), posRectImpl->heightDocPt()};
+
+			QPointF center = rc.center();
+
+			if (point.x() < rc.left() ||
+				point.x() < rc.right())
+			{
+				calcDistance(center.x(), rc.top(), item);
+				calcDistance(rc.right(), rc.top(), item);
+				calcDistance(rc.right(), center.y(), item);
+				calcDistance(rc.right(), rc.bottom(), item);
+				calcDistance(center.x(), rc.bottom(), item);
+				calcDistance(rc.left(), rc.top(), item);
+				calcDistance(rc.left(), rc.bottom(), item);
+				calcDistance(rc.left(), center.y(), item);
+			}
+
+			continue;
+		}
+
+		if (item->isType<VFrame30::PosConnectionImpl>() == true ||
+			item->isType<VFrame30::PosLineImpl>() == true)
+		{
+			std::vector<VFrame30::SchemaPoint> points = item->getPointList();
+
+			if (points.size() >= 2)
+			{
+				const VFrame30::SchemaPoint& firstPoint = points.front();
+				const VFrame30::SchemaPoint& lastPoint = points.back();
+
+				// At least one point must be at right OR
+				// it is a vertical line on point.x
+				//
+				if ((point.x() < firstPoint.X || point.x() < lastPoint.X) ||
+					(std::abs(firstPoint.X - lastPoint.X) <= 0.000001 && std::abs(firstPoint.X - point.x()) <= 0.000001))
+				{
+					calcDistance(firstPoint.X, firstPoint.Y, item);
+					calcDistance(lastPoint.X, lastPoint.Y, item);
+				}
+			}
+			else
+			{
+				Q_ASSERT(points.size() >= 2);
+			}
+
+			continue;
+		}
+	}
+
+	// Get the closest item
+	//
+	if (minDistanceItem  != nullptr)
+	{
+		selectItem(minDistanceItem);
+	}
+
+	return;
+}
+
+void EditSchemaWidget::selectNextUpItem()
+{
+	// If Alt is pressed then select the next left item
+	//
+	if (selectedItems().empty() == true)
+	{
+		return;
+	}
+
+	std::shared_ptr<VFrame30::SchemaItem> selectedItem = selectedItems().front();
+
+	// Get selected item pos
+	//
+	QPointF point;
+
+	if (auto posRectImpl = selectedItem->toType<VFrame30::PosRectImpl>();
+		posRectImpl != nullptr)
+	{
+		point = {posRectImpl->leftDocPt() + posRectImpl->widthDocPt() / 2.0, posRectImpl->topDocPt()};
+	}
+
+	if (selectedItem->isType<VFrame30::PosLineImpl>() == true)
+	{
+		std::vector<VFrame30::SchemaPoint> selectedConnectionPoints = selectedItem->getPointList();
+
+		if (selectedConnectionPoints.size() >= 2)
+		{
+			// Get center of line
+			//
+			const VFrame30::SchemaPoint& firstPoint = selectedConnectionPoints.front();
+			const VFrame30::SchemaPoint& lastPoint = selectedConnectionPoints.back();
+
+			QLineF line = {firstPoint.X, firstPoint.Y, lastPoint.X, lastPoint.Y};
+
+			point = {line.center().x(), std::max(firstPoint.Y, lastPoint.Y)};
+		}
+		else
+		{
+			Q_ASSERT(selectedConnectionPoints.size() >= 2);
+		}
+	}
+
+	if (selectedItem->isType<VFrame30::PosConnectionImpl>() == true)
+	{
+		std::vector<VFrame30::SchemaPoint> selectedConnectionPoints = selectedItem->getPointList();
+
+		if (selectedConnectionPoints.size() >= 2)
+		{
+			// FOR NOW JUST TAKE CENTER BY RECT END POINTS
+			//
+			const VFrame30::SchemaPoint& firstPoint = selectedConnectionPoints.front();
+			const VFrame30::SchemaPoint& lastPoint = selectedConnectionPoints.back();
+
+			QLineF line = {firstPoint.X, firstPoint.Y, lastPoint.X, lastPoint.Y};
+
+			point = line.center();
+		}
+		else
+		{
+			Q_ASSERT(selectedConnectionPoints.size() >= 2);
+		}
+	}
+
+	//  --
+	const double HorzFactor = 1.5;
+	point.setX(point.x() * HorzFactor);
+
+	// Decay all other items to points
+	//
+	double minDistance = DBL_MAX;
+	std::shared_ptr<VFrame30::SchemaItem> minDistanceItem;
+
+	auto calcDistance = [&minDistance, &minDistanceItem, &point, HorzFactor](double x, double y, auto schemaItem)
+		{
+			QPointF p = {x * HorzFactor, y};
+
+			if (point.y() - p.y() > -0.000001)
+			{
+				double d = QLineF(point, p).length();
+
+				if (d < minDistance)
+				{
+					minDistance = d;
+					minDistanceItem = schemaItem;
+				}
+			}
+
+			return;
+		};
+
+
+	for (std::shared_ptr<VFrame30::SchemaItem> item : editSchemaView()->activeLayer()->Items)
+	{
+		if (item == selectedItem)
+		{
+			continue;
+		}
+
+		if (auto posRectImpl = item->toType<VFrame30::PosRectImpl>();
+			posRectImpl != nullptr)
+		{
+			QRectF rc = {posRectImpl->leftDocPt(), posRectImpl->topDocPt(),
+						 posRectImpl->widthDocPt(), posRectImpl->heightDocPt()};
+
+			QPointF center = rc.center();
+
+			if (rc.top() < point.y() ||
+				rc.bottom() < point.y())
+			{
+				calcDistance(center.x(), rc.top(), item);
+				calcDistance(rc.right(), rc.top(), item);
+				calcDistance(rc.right(), center.y(), item);
+				calcDistance(rc.right(), rc.bottom(), item);
+				calcDistance(center.x(), rc.bottom(), item);
+				calcDistance(rc.left(), rc.top(), item);
+				calcDistance(rc.left(), rc.bottom(), item);
+				calcDistance(rc.left(), center.y(), item);
+			}
+
+			continue;
+		}
+
+//		if (item->isType<VFrame30::PosLineImpl>() == true)
+//		{
+//			std::vector<VFrame30::SchemaPoint> points = item->getPointList();
+
+//			if (points.size() >= 2)
+//			{
+//				const VFrame30::SchemaPoint& firstPoint = points.front();
+//				const VFrame30::SchemaPoint& lastPoint = points.back();
+
+//				QLineF line = {firstPoint.X, firstPoint.Y, lastPoint.X, lastPoint.Y};
+//				calcDistance(line.center().x(), line.center().y(), item);
+//			}
+//			else
+//			{
+//				Q_ASSERT(points.size() >= 2);
+//			}
+
+//			continue;
+//		}
+
+//		if (item->isType<VFrame30::PosConnectionImpl>() == true)
+//		{
+//			std::vector<VFrame30::SchemaPoint> points = item->getPointList();
+
+//			if (points.size() >= 2)
+//			{
+//				VFrame30::SchemaPoint prevPoint = points[0];
+
+//				for (int i = 1; i < points.size(); i++)
+//				{
+//					const VFrame30::SchemaPoint& firstPoint = prevPoint;
+//					const VFrame30::SchemaPoint& lastPoint = points[i];
+
+//					QLineF line = {firstPoint.X, firstPoint.Y, lastPoint.X, lastPoint.Y};
+//					calcDistance(line.center().x(), line.center().y(), item);
+
+//					prevPoint = points[i];
+//				}
+//			}
+//			else
+//			{
+//				Q_ASSERT(points.size() >= 2);
+//			}
+
+//			continue;
+//		}
+	}
+
+	// Get the closest item
+	//
+	if (minDistanceItem  != nullptr)
+	{
+		selectItem(minDistanceItem);
+	}
+
+	return;
+}
+
+void EditSchemaWidget::selectNextDownItem()
+{
+	// If Alt is pressed then select the next left item
+	//
+	if (selectedItems().empty() == true)
+	{
+		return;
+	}
+
+	std::shared_ptr<VFrame30::SchemaItem> selectedItem = selectedItems().front();
+
+	// Get selected item pos
+	//
+	QPointF point;
+
+	if (auto posRectImpl = selectedItem->toType<VFrame30::PosRectImpl>();
+		posRectImpl != nullptr)
+	{
+		point = {posRectImpl->leftDocPt() + posRectImpl->widthDocPt() / 2.0,
+				 posRectImpl->topDocPt() + posRectImpl->heightDocPt()};
+	}
+
+	if (selectedItem->isType<VFrame30::PosLineImpl>() == true)
+	{
+		std::vector<VFrame30::SchemaPoint> selectedConnectionPoints = selectedItem->getPointList();
+
+		if (selectedConnectionPoints.size() >= 2)
+		{
+			// Get center of line
+			//
+			const VFrame30::SchemaPoint& firstPoint = selectedConnectionPoints.front();
+			const VFrame30::SchemaPoint& lastPoint = selectedConnectionPoints.back();
+
+			QLineF line = {firstPoint.X, firstPoint.Y, lastPoint.X, lastPoint.Y};
+
+			point = {line.center().x(), std::min(firstPoint.Y, lastPoint.Y)};
+		}
+		else
+		{
+			Q_ASSERT(selectedConnectionPoints.size() >= 2);
+		}
+	}
+
+	if (selectedItem->isType<VFrame30::PosConnectionImpl>() == true)
+	{
+		std::vector<VFrame30::SchemaPoint> selectedConnectionPoints = selectedItem->getPointList();
+
+		if (selectedConnectionPoints.size() >= 2)
+		{
+			// FOR NOW JUST TAKE CENTER BY RECT END POINTS
+			//
+			const VFrame30::SchemaPoint& firstPoint = selectedConnectionPoints.front();
+			const VFrame30::SchemaPoint& lastPoint = selectedConnectionPoints.back();
+
+			QLineF line = {firstPoint.X, firstPoint.Y, lastPoint.X, lastPoint.Y};
+
+			point = line.center();
+		}
+		else
+		{
+			Q_ASSERT(selectedConnectionPoints.size() >= 2);
+		}
+	}
+
+	//  --
+	const double HorzFactor = 1.5;
+	point.setX(point.x() * HorzFactor);
+
+	// Decay all other items to points
+	//
+	double minDistance = DBL_MAX;
+	std::shared_ptr<VFrame30::SchemaItem> minDistanceItem;
+
+	auto calcDistance = [&minDistance, &minDistanceItem, &point, HorzFactor](double x, double y, auto schemaItem)
+		{
+			QPointF p = {x * HorzFactor, y};
+
+			if (point.y() - 0.000001 <= p.y())
+			{
+				double d = QLineF(point, p).length();
+
+				if (d < minDistance)
+				{
+					minDistance = d;
+					minDistanceItem = schemaItem;
+				}
+			}
+
+			return;
+		};
+
+
+	for (std::shared_ptr<VFrame30::SchemaItem> item : editSchemaView()->activeLayer()->Items)
+	{
+		if (item == selectedItem)
+		{
+			continue;
+		}
+
+		if (auto posRectImpl = item->toType<VFrame30::PosRectImpl>();
+			posRectImpl != nullptr)
+		{
+			QRectF rc = {posRectImpl->leftDocPt(), posRectImpl->topDocPt(),
+						 posRectImpl->widthDocPt(), posRectImpl->heightDocPt()};
+
+			QPointF center = rc.center();
+
+			if (point.y() < rc.top()  ||
+				point.y() < rc.bottom())
+			{
+				calcDistance(center.x(), rc.top(), item);
+				calcDistance(rc.right(), rc.top(), item);
+				calcDistance(rc.right(), center.y(), item);
+				calcDistance(rc.right(), rc.bottom(), item);
+				calcDistance(center.x(), rc.bottom(), item);
+				calcDistance(rc.left(), rc.top(), item);
+				calcDistance(rc.left(), rc.bottom(), item);
+				calcDistance(rc.left(), center.y(), item);
+			}
+
+			continue;
+		}
+	}
+
+	// Get the closest item
+	//
+	if (minDistanceItem  != nullptr)
+	{
+		selectItem(minDistanceItem);
 	}
 
 	return;

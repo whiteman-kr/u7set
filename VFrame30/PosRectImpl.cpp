@@ -659,11 +659,8 @@ namespace VFrame30
 
 	std::vector<SchemaPoint> PosRectImpl::getPointList() const
 	{
-		std::vector<SchemaPoint> v(2);
-
-		v[0] = SchemaPoint(m_leftDocPt, m_topDocPt);
-		v[1] = SchemaPoint(m_leftDocPt + m_widthDocPt, m_topDocPt + m_heightDocPt);
-
+		std::vector<SchemaPoint> v = {{m_leftDocPt, m_topDocPt},
+									  {m_leftDocPt + m_widthDocPt, m_topDocPt + m_heightDocPt}};
 		return v;
 	}
 

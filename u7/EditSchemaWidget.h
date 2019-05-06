@@ -398,10 +398,15 @@ protected slots:
 	void addBusExtractor();
 	void addBusItem(std::shared_ptr<VFrame30::SchemaItemBus> schemaItem);
 
-	void onLeftKey();
-	void onRightKey();
-	void onUpKey();
-	void onDownKey();
+	void onLeftKey(QKeyEvent* e);
+	void onRightKey(QKeyEvent* e);
+	void onUpKey(QKeyEvent* e);
+	void onDownKey(QKeyEvent* e);
+
+	void selectNextLeftItem();
+	void selectNextRightItem();
+	void selectNextUpItem();
+	void selectNextDownItem();
 
 	void sameWidth();
 	void sameHeight();
