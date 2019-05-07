@@ -284,7 +284,7 @@ namespace Builder
 
 		static const QString VALIDITY_PIN_CAPTION;
 		static const QString SIMULATED_PIN_CAPTION;
-		static const QString LOCKED_PIN_CAPTION;
+		static const QString BLOCKED_PIN_CAPTION;
 		static const QString UNBALANCED_PIN_CAPTION;
 		static const QString HIGH_LIMIT_PIN_CAPTION;
 		static const QString LOW_LIMIT_PIN_CAPTION;
