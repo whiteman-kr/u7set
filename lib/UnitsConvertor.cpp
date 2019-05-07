@@ -450,14 +450,17 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoResistor(double elVa
 		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect unitID for Ohm"));
 	}
 
-	if (r0 == 0.0 && sensorType != E::SensorType::Ohm_Raw)
+	if (sensorType != E::SensorType::Ohm_Raw)
 	{
-		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect R0 for Ohm"));
-	}
+		if (r0 == 0.0)
+		{
+			return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect R0 for Ohm"));
+		}
 
-	elVal = elVal / r0 * 100;
-	electricLowLimit = electricLowLimit / r0 * 100;
-	electricHighLimit = electricHighLimit / r0 * 100;
+		elVal = elVal / r0 * 100;
+		electricLowLimit = electricLowLimit / r0 * 100;
+		electricHighLimit = electricHighLimit / r0 * 100;
+	}
 
 	double phVal = 0;
 

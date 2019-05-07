@@ -26,8 +26,8 @@ DialogShortcuts::DialogShortcuts(QWidget* parent)
 
 	QTreeWidgetItem* section = addSection("Main Window");
 
-	addShortcut("Ctrl+B, F7", "Build project", section);
-	addShortcut("Alt+F4", "Exit the application", section);
+	addShortcut("Ctrl + B, F7", "Build project", section);
+	addShortcut("Alt + F4", "Exit the application", section);
 
 	section->setExpanded(true);
 
@@ -43,8 +43,8 @@ DialogShortcuts::DialogShortcuts(QWidget* parent)
 
 	section = addSection("Equipment Tab Page");
 
-	addShortcut("Ctrl+C", "Copy equipment ebject", section);
-	addShortcut("Ctrl+V", "Paste equipment object", section);
+	addShortcut("Ctrl + C", "Copy equipment ebject", section);
+	addShortcut("Ctrl + V", "Paste equipment object", section);
 	addShortcut("Delete", "Delete equipment object", section);
 	addShortcut("F5", "Refresh equipment tree", section);
 
@@ -62,9 +62,9 @@ DialogShortcuts::DialogShortcuts(QWidget* parent)
 
 	section = addSection("Schemas Tab Page");
 
-	addShortcut("Ctrl+N", "Create a new schema", section);
+	addShortcut("Ctrl + N", "Create a new schema", section);
 	addShortcut("Delete", "Delete schema", section);
-	addShortcut("Ctrl+F", "Find text in schemas ID and description", section);
+	addShortcut("Ctrl + F", "Find text in schemas ID and description", section);
 	addShortcut("F5", "Refresh schemas list", section);
 
 	section->setExpanded(true);
@@ -75,34 +75,35 @@ DialogShortcuts::DialogShortcuts(QWidget* parent)
 
 	addShortcut("Escape", "Remove selection", section);
 	addShortcut("F2", "Edit signals list for selected item", section);
-	addShortcut("Ctrl+I", "Toggle Info mode", section);
-	addShortcut("Alt+D", "Attach/Detach window", section);
-	addShortcut("Ctrl+S", "Save schema", section);
-	addShortcut("Ctrl+W, Ctrl+F4", "Close schema", section);
-	addShortcut("Ctrl+Z", "Undo", section);
-	addShortcut("Ctrl+Y", "Redo", section);
-	addShortcut("Ctrl+A", "Select All", section);
-	addShortcut("Ctrl+X", "Cut", section);
-	addShortcut("Ctrl+C", "Copy", section);
-	addShortcut("Ctrl+V", "Paste", section);
+	addShortcut("Ctrl + I", "Toggle Info mode", section);
+	addShortcut("Alt + D", "Attach/Detach window", section);
+	addShortcut("Ctrl + S", "Save schema", section);
+	addShortcut("Ctrl + W, Ctrl + F4", "Close schema", section);
+	addShortcut("Ctrl + Z", "Undo", section);
+	addShortcut("Ctrl + Y", "Redo", section);
+	addShortcut("Ctrl + A", "Select All", section);
+	addShortcut("Ctrl + X", "Cut", section);
+	addShortcut("Ctrl + C", "Copy", section);
+	addShortcut("Ctrl + V", "Paste", section);
 	addShortcut("Delete", "Delete", section);
-	addShortcut("Alt+Enter", "Properties", section);
-	addShortcut("Alt+W", "Same Width", section);
-	addShortcut("Alt+H", "Same Height", section);
-	addShortcut("Ctrl+Home", "Move to Front", section);
-	addShortcut("Ctrl+End", "Send to Back", section);
-	addShortcut("Ctrl+PgUp", "Move forward", section);
-	addShortcut("Ctrl+PgDown", "Move backward", section);
-	addShortcut("Ctrl+/", "Comment/Uncomment", section);
-	addShortcut("Ctrl+L", "Lock/Unlock", section);
-	addShortcut("Ctrl+F", "Find Dialog", section);
+	addShortcut("Alt + Enter", "Properties", section);
+	addShortcut("Alt + Arrow Keys", "Schema Items Navigation", section);
+	addShortcut("Alt + W", "Same Width", section);
+	addShortcut("Alt + H", "Same Height", section);
+	addShortcut("Ctrl + Home", "Move to Front", section);
+	addShortcut("Ctrl + End", "Send to Back", section);
+	addShortcut("Ctrl + PgUp", "Move forward", section);
+	addShortcut("Ctrl + PgDown", "Move backward", section);
+	addShortcut("Ctrl + /", "Comment/Uncomment", section);
+	addShortcut("Ctrl + L", "Lock/Unlock", section);
+	addShortcut("Ctrl + F", "Find Dialog", section);
 	addShortcut("F3", "Find Next (on Schema and in Find Dialog)", section);
-	addShortcut("Shift+F3", "Find Previous (on Schema and in Find Dialog)", section);
-	addShortcut("Alt+N", "Add Application Signal (on selected input/output/internal)", section);
-	addShortcut("Alt+S", "Application Signal Properties (on selected input/output/internal)", section);
-	addShortcut("Ctrl+ \"+\"", "Zoom In", section);
-	addShortcut("Ctrl+ \"-\"", "Zoom Out", section);
-	addShortcut("Ctrl+ \"*\"", "Zoom 100%", section);
+	addShortcut("Shift + F3", "Find Previous (on Schema and in Find Dialog)", section);
+	addShortcut("Alt + N", "Add Application Signal (on selected input/output/internal)", section);
+	addShortcut("Alt + S", "Application Signal Properties (on selected input/output/internal)", section);
+	addShortcut("Ctrl + \"+\"", "Zoom In", section);
+	addShortcut("Ctrl + \"-\"", "Zoom Out", section);
+	addShortcut("Ctrl + \"*\"", "Zoom 100%", section);
 	addShortcut("Ctrl + Drag Items", "Create copies of dragged items", section);
 	addShortcut("Alt + Drag Items", "Items are dragged only horizontally or vertically", section);
 	addShortcut("Space + Drag AFB Items", "Remove binding to links while dragging AFB elements", section);
@@ -115,7 +116,7 @@ DialogShortcuts::DialogShortcuts(QWidget* parent)
 
 	addShortcut("F3", "Find", section);
 	addShortcut("F6", "Find next issue", section);
-	addShortcut("Ctrl+F6", "Find previous issue", section);
+	addShortcut("Ctrl + F6", "Find previous issue", section);
 
 	section->setExpanded(true);
 
