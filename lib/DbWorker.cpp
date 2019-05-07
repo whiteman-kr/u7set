@@ -299,6 +299,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0279.sql", "Upgrade to version 279, Update all LM descriptions, renamed set_flags locked->blocked "},
 	{":/DatabaseUpgrade/Upgrade0280.sql", "Upgrade to version 280, RIM configuration has new modes"},
 	{":/DatabaseUpgrade/Upgrade0281.sql", "Upgrade to version 281, RIM and TIM configuration range checking improvements"},
+	{":/DatabaseUpgrade/Upgrade0282.sql", "Upgrade to version 282, TIM ranges were changed"},
 };
 
 int DbWorker::counter = 0;
