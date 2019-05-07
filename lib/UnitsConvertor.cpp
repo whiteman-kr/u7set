@@ -450,14 +450,17 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoResistor(double elVa
 		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect unitID for Ohm"));
 	}
 
-	if (r0 == 0.0)
+	if (sensorType != E::SensorType::Ohm_Raw)
 	{
-		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect R0 for Ohm"));
-	}
+		if (r0 == 0.0)
+		{
+			return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect R0 for Ohm"));
+		}
 
-	elVal = elVal / r0 * 100;
-	electricLowLimit = electricLowLimit / r0 * 100;
-	electricHighLimit = electricHighLimit / r0 * 100;
+		elVal = elVal / r0 * 100;
+		electricLowLimit = electricLowLimit / r0 * 100;
+		electricHighLimit = electricHighLimit / r0 * 100;
+	}
 
 	double phVal = 0;
 
@@ -538,6 +541,21 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoResistor(double elVa
 			}
 
 			phVal = findConversionVal(elVal, &NI_100_W_1617[0][0], NI_100_W_1617_COUNT, false);
+
+			break;
+
+		case E::SensorType::Ohm_Raw:
+
+			if (electricLowLimit < Ohm_Raw_LOW_LIMIT || electricLowLimit > Ohm_Raw_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::LowLimitOutOfRange, Ohm_Raw_LOW_LIMIT, Ohm_Raw_HIGH_LIMIT);
+			}
+			if (electricHighLimit < Ohm_Raw_LOW_LIMIT || electricHighLimit > Ohm_Raw_HIGH_LIMIT)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::HighLimitOutOfRange, Ohm_Raw_LOW_LIMIT, Ohm_Raw_HIGH_LIMIT);
+			}
+
+			phVal = elVal;
 
 			break;
 

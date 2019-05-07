@@ -133,7 +133,7 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 		return;
 	}
 
-	for(Builder::BuildFileInfo bfi : buildFileInfoArray)
+	for(const Builder::BuildFileInfo& bfi : buildFileInfoArray)
 	{
 		QByteArray fileData;
 		QString errStr;
@@ -150,7 +150,7 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 
 		if (bfi.ID == CFG_FILE_ID_APP_SIGNAL_SET)
 		{
-			result &= readAppSignalSet(fileData);						// fill AppSignalSets
+			result &= readAppSignalSet(fileData);					// fill AppSignalSets
 		}
 
 		if (bfi.ID == CFG_FILE_ID_METROLOGY_SIGNALS)
@@ -179,14 +179,14 @@ bool ConfigSocket::readConfiguration(const QByteArray& fileData)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int ConfigSocket::readAppSignalSet(const QByteArray& fileData)
+bool ConfigSocket::readAppSignalSet(const QByteArray& fileData)
 {
 	::Proto::AppSignalSet protoAppSignalSet;
 
 	bool result = protoAppSignalSet.ParseFromArray(fileData.constData(), fileData.size());
 	if (result == false)
 	{
-		return 0;
+		return false;
 	}
 
 	int signalCount = protoAppSignalSet.appsignal_size();
@@ -202,7 +202,7 @@ int ConfigSocket::readAppSignalSet(const QByteArray& fileData)
 
 	qDebug() << "ConfigSocket::readAppSignalSet - Signals were loaded" << theSignalBase.signalCount();
 
-	return theSignalBase.signalCount();
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

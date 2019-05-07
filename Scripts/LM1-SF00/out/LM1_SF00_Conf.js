@@ -68,6 +68,7 @@ var SensorType;
     SensorType[SensorType["Ohm_Cu_a_428"] = 30] = "Ohm_Cu_a_428";
     SensorType[SensorType["Ohm_Cu_a_426"] = 31] = "Ohm_Cu_a_426";
     SensorType[SensorType["Ohm_Ni_a_617"] = 32] = "Ohm_Ni_a_617";
+    SensorType[SensorType["Ohm_Raw"] = 33] = "Ohm_Raw";
 })(SensorType || (SensorType = {}));
 var OutputMode;
 (function (OutputMode) {

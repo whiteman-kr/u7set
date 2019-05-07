@@ -461,7 +461,7 @@ namespace Metrology
 	{
 		QString typeStr = QMetaEnum::fromType<E::SensorType>().key(m_electricSensorType);
 
-		if (m_electricUnitID == E::ElectricUnit::Ohm)
+		if (m_electricUnitID == E::ElectricUnit::Ohm && m_electricSensorType != E::SensorType::Ohm_Raw)
 		{
 			typeStr += " " + electricR0Str();
 		}

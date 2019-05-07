@@ -159,7 +159,8 @@ namespace Builder
 		void errCFG3030(QString lmID, QString appDataServiceID);							// Etherent adapters 2 and 3 of LM %1 are connected to same AppDataService %2.		
 		void wrnCFG3031(QString objectID, QString propertyName);							// Property %1.%2 should be set to the valid writable catalog of workstation.
 
-		void errCFG3040(QString monitorId, QString tuningServiceId);				// Mode SingleLmControl is not supported by Monitor. Set TuningServiceID.SingleLmControl to false. Monitor EquipmentID %1, TuningServiceID %2.
+		void errCFG3040(QString monitorId, QString tuningServiceId);						// Mode SingleLmControl is not supported by Monitor. Set TuningServiceID.SingleLmControl to false. Monitor EquipmentID %1, TuningServiceID %2.
+		void errCFG3041(QString name, QString value, QString message, QString signalId);	// Property %1 has wrong value (%2), required value is %3 in signal %4.
 
 		// ALP			Application Logic Parsing				4000-4999
 		//
