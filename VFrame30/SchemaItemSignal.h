@@ -115,6 +115,8 @@ namespace VFrame30
 		E::HorzAlign columnHorzAlign(int columnIndex) const;
 		void setColumnHorzAlign(E::HorzAlign value, int columnIndex);
 
+		bool hasImpactColumn() const;
+
 		// Data
 		//
 	protected:

@@ -1334,6 +1334,22 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return;
 	}
 
+	bool SchemaItemSignal::hasImpactColumn() const
+	{
+		for (const Column& c : m_columns)
+		{
+			if (c.data == E::ColumnData::ImpactAppSignalID ||
+				c.data == E::ColumnData::ImpactCaption ||
+				c.data == E::ColumnData::ImpactCustomSignalID ||
+				c.data == E::ColumnData::ImpactState)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	//
 	// CSchemaItemInputSignal
 	//
