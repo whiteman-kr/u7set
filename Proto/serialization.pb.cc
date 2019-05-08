@@ -256,6 +256,9 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* AppSignalDbField_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   AppSignalDbField_reflection_ = NULL;
+const ::google::protobuf::Descriptor* StateFlagSignal_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  StateFlagSignal_reflection_ = NULL;
 const ::google::protobuf::Descriptor* AppSignalCalculatedParam_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   AppSignalCalculatedParam_reflection_ = NULL;
@@ -1699,8 +1702,24 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalDbField));
-  AppSignalCalculatedParam_descriptor_ = file->message_type(75);
-  static const int AppSignalCalculatedParam_offsets_[10] = {
+  StateFlagSignal_descriptor_ = file->message_type(75);
+  static const int StateFlagSignal_offsets_[2] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(StateFlagSignal, flagtype_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(StateFlagSignal, flagsignalid_),
+  };
+  StateFlagSignal_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      StateFlagSignal_descriptor_,
+      StateFlagSignal::default_instance_,
+      StateFlagSignal_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(StateFlagSignal, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(StateFlagSignal, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(StateFlagSignal));
+  AppSignalCalculatedParam_descriptor_ = file->message_type(76);
+  static const int AppSignalCalculatedParam_offsets_[11] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalCalculatedParam, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalCalculatedParam, iobufaddr_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalCalculatedParam, tuningaddr_),
@@ -1711,6 +1730,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalCalculatedParam, lmramaccess_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalCalculatedParam, isconst_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalCalculatedParam, constvalue_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalCalculatedParam, stateflagssignals_),
   };
   AppSignalCalculatedParam_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -1723,7 +1743,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalCalculatedParam));
-  AppSignal_descriptor_ = file->message_type(76);
+  AppSignal_descriptor_ = file->message_type(77);
   static const int AppSignal_offsets_[28] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, appsignalid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, customappsignalid_),
@@ -1765,7 +1785,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignal));
-  AppSignalSet_descriptor_ = file->message_type(77);
+  AppSignalSet_descriptor_ = file->message_type(78);
   static const int AppSignalSet_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalSet, appsignal_),
   };
@@ -1780,7 +1800,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalSet));
-  ProtoAppSignalData_descriptor_ = file->message_type(78);
+  ProtoAppSignalData_descriptor_ = file->message_type(79);
   static const int ProtoAppSignalData_offsets_[18] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ProtoAppSignalData, bustypeid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ProtoAppSignalData, caption_),
@@ -1812,7 +1832,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ProtoAppSignalData));
-  AppSignalState_descriptor_ = file->message_type(79);
+  AppSignalState_descriptor_ = file->message_type(80);
   static const int AppSignalState_offsets_[8] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, value_),
@@ -1834,7 +1854,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalState));
-  Connection_descriptor_ = file->message_type(80);
+  Connection_descriptor_ = file->message_type(81);
   static const int Connection_offsets_[25] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, connectionid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port1equipmentid_),
@@ -1873,7 +1893,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Connection));
-  SchemaDetailsSet_descriptor_ = file->message_type(81);
+  SchemaDetailsSet_descriptor_ = file->message_type(82);
   static const int SchemaDetailsSet_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetailsSet, schemasdetails_),
   };
@@ -1888,7 +1908,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaDetailsSet));
-  SchemaDetails_descriptor_ = file->message_type(82);
+  SchemaDetails_descriptor_ = file->message_type(83);
   static const int SchemaDetails_offsets_[11] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, version_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, schemaid_),
@@ -1913,7 +1933,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaDetails));
-  ArchSignal_descriptor_ = file->message_type(83);
+  ArchSignal_descriptor_ = file->message_type(84);
   static const int ArchSignal_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignal, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignal, isanalog_),
@@ -1930,7 +1950,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ArchSignal));
-  ArchSignals_descriptor_ = file->message_type(84);
+  ArchSignals_descriptor_ = file->message_type(85);
   static const int ArchSignals_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignals, archsignals_),
   };
@@ -1945,7 +1965,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ArchSignals));
-  BusSignal_descriptor_ = file->message_type(85);
+  BusSignal_descriptor_ = file->message_type(86);
   static const int BusSignal_offsets_[19] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, signalid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, caption_),
@@ -1978,7 +1998,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(BusSignal));
-  Bus_descriptor_ = file->message_type(86);
+  Bus_descriptor_ = file->message_type(87);
   static const int Bus_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Bus, uuid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Bus, bustypeid_),
@@ -2164,6 +2184,8 @@ void protobuf_RegisterTypes(const ::std::string&) {
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     AppSignalDbField_descriptor_, &AppSignalDbField::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    StateFlagSignal_descriptor_, &StateFlagSignal::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     AppSignalCalculatedParam_descriptor_, &AppSignalCalculatedParam::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     AppSignal_descriptor_, &AppSignal::default_instance());
@@ -2344,6 +2366,8 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete TuningValue_reflection_;
   delete AppSignalDbField::default_instance_;
   delete AppSignalDbField_reflection_;
+  delete StateFlagSignal::default_instance_;
+  delete StateFlagSignal_reflection_;
   delete AppSignalCalculatedParam::default_instance_;
   delete AppSignalCalculatedParam_reflection_;
   delete AppSignal::default_instance_;
@@ -2648,106 +2672,109 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\030\004 \001(\005:\002-1\022\031\n\ncheckedOut\030\005 \001(\010:\005false\022\022\n"
     "\006userID\030\006 \001(\005:\002-1\022\022\n\007created\030\007 \001(\003:\0010\022\026\n"
     "\007deleted\030\010 \001(\010:\005false\022\032\n\017instanceCreated"
-    "\030\t \001(\003:\0010\022\031\n\016instanceAction\030\n \001(\005:\0010\"\331\002\n"
-    "\030AppSignalCalculatedParam\022\017\n\004hash\030\001 \001(\004:"
-    "\0010\022#\n\tioBufAddr\030\002 \001(\0132\020.Proto.Address16\022"
-    "$\n\ntuningAddr\030\003 \001(\0132\020.Proto.Address16\022!\n"
-    "\007ualAddr\030\004 \001(\0132\020.Proto.Address16\022$\n\nregB"
-    "ufAddr\030\005 \001(\0132\020.Proto.Address16\022&\n\014regVal"
-    "ueAddr\030\006 \001(\0132\020.Proto.Address16\022)\n\017regVal"
-    "idityAddr\030\007 \001(\0132\020.Proto.Address16\022\026\n\013lmR"
-    "amAccess\030\010 \001(\005:\0010\022\026\n\007isConst\030\t \001(\010:\005fals"
-    "e\022\025\n\nconstValue\030\n \001(\001:\0010\"\232\006\n\tAppSignal\022\023"
-    "\n\013appSignalID\030\001 \001(\t\022\031\n\021customAppSignalID"
-    "\030\002 \001(\t\022\017\n\007caption\030\003 \001(\t\022\023\n\013equipmentID\030\004"
-    " \001(\t\022\025\n\rlmEquipmentID\030\005 \001(\t\022\021\n\tbusTypeID"
-    "\030\006 \001(\t\022\022\n\007channel\030\007 \001(\005:\0010\022\037\n\020excludeFro"
-    "mBuild\030\010 \001(\010:\005false\022\025\n\nsignalType\030\020 \001(\005:"
-    "\0011\022\024\n\tinOutType\030\021 \001(\005:\0012\022\023\n\010dataSize\030\025 \001"
-    "(\005:\0010\022\024\n\tbyteOrder\030\026 \001(\005:\0011\022\035\n\022analogSig"
-    "nalFormat\030\032 \001(\005:\0011\022\014\n\004unit\030\033 \001(\t\022\033\n\014enab"
-    "leTuning\030G \001(\010:\005false\022.\n\022tuningDefaultVa"
-    "lue\030H \001(\0132\022.Proto.TuningValue\022*\n\016tuningL"
-    "owBound\030I \001(\0132\022.Proto.TuningValue\022+\n\017tun"
-    "ingHighBound\030J \001(\0132\022.Proto.TuningValue\022\026"
-    "\n\007acquire\030Q \001(\010:\005false\022\026\n\007archive\030R \001(\010:"
-    "\005false\022\030\n\rdecimalPlaces\030S \001(\005:\0012\022\031\n\016coar"
-    "seAperture\030T \001(\001:\0011\022\031\n\014fineAperture\030U \001("
-    "\001:\0030.5\022\037\n\020adaptiveAperture\030V \001(\010:\005false\022"
-    "\026\n\016specPropStruct\030Z \001(\t\022\026\n\016specPropValue"
-    "s\030[ \001(\014\022(\n\007dbField\030x \001(\0132\027.Proto.AppSign"
-    "alDbField\0222\n\tcalcParam\030y \001(\0132\037.Proto.App"
-    "SignalCalculatedParam\"3\n\014AppSignalSet\022#\n"
-    "\tappSignal\030\001 \003(\0132\020.Proto.AppSignal\"\213\004\n\022P"
-    "rotoAppSignalData\022\021\n\tbusTypeID\030\001 \001(\t\022\017\n\007"
-    "caption\030\002 \001(\t\022\022\n\007channel\030\003 \001(\005:\0010\022\024\n\010dat"
-    "aSize\030\004 \001(\005:\00232\022\024\n\tbyteOrder\030\005 \001(\005:\0011\022\035\n"
-    "\022analogSignalFormat\030\006 \001(\005:\0012\022\014\n\004unit\030\007 \001"
-    "(\t\022\033\n\014enableTuning\030\010 \001(\010:\005false\022.\n\022tunin"
-    "gDefaultValue\030\t \001(\0132\022.Proto.TuningValue\022"
-    "*\n\016tuningLowBound\030\n \001(\0132\022.Proto.TuningVa"
-    "lue\022+\n\017tuningHighBound\030\013 \001(\0132\022.Proto.Tun"
-    "ingValue\022\025\n\007acquire\030\014 \001(\010:\004true\022\025\n\007archi"
-    "ve\030\r \001(\010:\004true\022\030\n\rdecimalPlaces\030\016 \001(\005:\0012"
-    "\022\031\n\016coarseAperture\030\017 \001(\001:\0011\022\031\n\014fineApert"
-    "ure\030\020 \001(\001:\0030.5\022\037\n\020adaptiveAperture\030\021 \001(\010"
-    ":\005false\022\037\n\020excludefromBuild\030\022 \001(\010:\005false"
-    "\"\264\001\n\016AppSignalState\022\017\n\004hash\030\001 \001(\004:\0010\022\020\n\005"
-    "value\030\002 \001(\001:\0010\022\020\n\005flags\030\003 \001(\r:\0010\022\025\n\nsyst"
-    "emTime\030\004 \001(\020:\0010\022\024\n\tlocalTime\030\005 \001(\020:\0010\022\024\n"
-    "\tplantTime\030\006 \001(\020:\0010\022\025\n\tarchiveId\030\007 \001(\020:\002"
-    "-1\022\023\n\010packetNo\030\010 \001(\r:\0010\"\224\006\n\nConnection\022\026"
-    "\n\014ConnectionID\030\002 \001(\t:\000\022\032\n\020Port1Equipment"
-    "ID\030\003 \001(\t:\000\022\032\n\020Port2EquipmentID\030\004 \001(\t:\000\022!"
-    "\n\027Port1RawDataDescription\030\005 \001(\t:\000\022!\n\027Por"
-    "t2RawDataDescription\030\006 \001(\t:\000\022\035\n\016ManualSe"
-    "ttings\030\013 \001(\010:\005false\022\034\n\rDisableDataID\030\014 \001"
-    "(\010:\005false\022\036\n\017GenerateVHDFile\030\r \001(\010:\005fals"
-    "e\022\036\n\023Port1TxStartAddress\030\016 \001(\005:\0010\022!\n\024Por"
-    "t1TxWordsQuantity\030\017 \001(\005:\003479\022!\n\024Port1RxW"
-    "ordsQuantity\030\020 \001(\005:\003479\022\036\n\023Port2TxStartA"
-    "ddress\030\021 \001(\005:\0010\022!\n\024Port2TxWordsQuantity\030"
-    "\022 \001(\005:\003479\022!\n\024Port2RxWordsQuantity\030\023 \001(\005"
-    ":\003479\022\031\n\004uuid\030\024 \001(\0132\013.Proto.Uuid\022 \n\021Port"
-    "1EnableSerial\030\025 \001(\010:\005false\022\032\n\017Port1Seria"
-    "lMode\030\026 \001(\005:\0010\022 \n\021Port1EnableDuplex\030\027 \001("
-    "\010:\005false\022 \n\021Port2EnableSerial\030\030 \001(\010:\005fal"
-    "se\022\032\n\017Port2SerialMode\030\031 \001(\005:\0010\022 \n\021Port2E"
-    "nableDuplex\030\032 \001(\010:\005false\022\017\n\004Type\030\033 \001(\005:\001"
-    "0\022\027\n\014ObsoleteMode\030\010 \001(\005:\0010\022\035\n\022ObsoleteSe"
-    "rialMode\030\007 \001(\005:\0010\022#\n\024ObsoleteEnableDuple"
-    "x\030\n \001(\010:\005false\"@\n\020SchemaDetailsSet\022,\n\016sc"
-    "hemasDetails\030\002 \003(\0132\024.Proto.SchemaDetails"
-    "\"\360\001\n\rSchemaDetails\022\017\n\007version\030\002 \001(\005\022\020\n\010s"
-    "chemaId\030\004 \001(\t\022\017\n\007caption\030\005 \001(\t\022\031\n\021exclud"
-    "edfromBuild\030\006 \001(\010\022\023\n\013equipmentId\030\007 \001(\t\022\031"
-    "\n\021lmDescriptionFile\030\010 \001(\t\022\021\n\tsignalIds\030\024"
-    " \003(\t\022\016\n\006labels\030\025 \003(\t\022\023\n\013connections\030\026 \003("
-    "\t\022\032\n\005guids\030\027 \003(\0132\013.Proto.Uuid\022\014\n\004tags\030\030 "
-    "\003(\t\"A\n\nArchSignal\022\014\n\004hash\030\001 \002(\004\022\020\n\010isAna"
-    "log\030\002 \002(\010\022\023\n\013appSignalID\030\003 \002(\t\"5\n\013ArchSi"
-    "gnals\022&\n\013archSignals\030\001 \003(\0132\021.Proto.ArchS"
-    "ignal\"\326\003\n\tBusSignal\022\020\n\010signalId\030\001 \001(\t\022\017\n"
-    "\007caption\030\002 \001(\t\022\014\n\004type\030\003 \001(\005\022\r\n\005units\030\004 "
-    "\001(\t\022\024\n\014analogFormat\030\n \001(\005\022\024\n\tprecision\030\013"
-    " \001(\005:\0012\022\031\n\016coarseAperture\030\014 \001(\001:\0011\022\031\n\014fi"
-    "neAperture\030\r \001(\001:\0030.5\022\037\n\020adaptiveApertur"
-    "e\030\016 \001(\010:\005false\022\021\n\tbusTypeId\030\017 \001(\t\022\023\n\013inb"
-    "usOffset\030  \001(\005\022\032\n\022inbusDiscreteBitNo\030( \001"
-    "(\005\022\027\n\017inbusAnalogSize\0302 \001(\005\022\031\n\021inbusAnal"
-    "ogFormat\0303 \001(\005\022\034\n\024inbusAnalogByteOrder\0304"
-    " \001(\005\022\031\n\021busAnalogLowLimit\0305 \001(\001\022\032\n\022busAn"
-    "alogHighLimit\0306 \001(\001\022\033\n\023inbusAnalogLowLim"
-    "it\0307 \001(\001\022\034\n\024inbusAnalogHighLimit\0308 \001(\001\"\226"
-    "\001\n\003Bus\022\031\n\004uuid\030\001 \001(\0132\013.Proto.Uuid\022\021\n\tbus"
-    "TypeId\030\002 \001(\t\022$\n\nbusSignals\030\003 \003(\0132\020.Proto"
-    ".BusSignal\022!\n\023autoSignalPlacement\030\n \001(\010:"
-    "\004true\022\030\n\rmanualBusSize\030\013 \001(\005:\0010*3\n\nSchem"
-    "aUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004In"
-    "ch\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000\022"
-    "\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000"
-    "\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013Unsig"
-    "nedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 14834);
+    "\030\t \001(\003:\0010\022\031\n\016instanceAction\030\n \001(\005:\0010\"<\n\017"
+    "StateFlagSignal\022\023\n\010flagType\030\001 \001(\005:\0010\022\024\n\014"
+    "flagSignalID\030\002 \001(\t\"\214\003\n\030AppSignalCalculat"
+    "edParam\022\017\n\004hash\030\001 \001(\004:\0010\022#\n\tioBufAddr\030\002 "
+    "\001(\0132\020.Proto.Address16\022$\n\ntuningAddr\030\003 \001("
+    "\0132\020.Proto.Address16\022!\n\007ualAddr\030\004 \001(\0132\020.P"
+    "roto.Address16\022$\n\nregBufAddr\030\005 \001(\0132\020.Pro"
+    "to.Address16\022&\n\014regValueAddr\030\006 \001(\0132\020.Pro"
+    "to.Address16\022)\n\017regValidityAddr\030\007 \001(\0132\020."
+    "Proto.Address16\022\026\n\013lmRamAccess\030\010 \001(\005:\0010\022"
+    "\026\n\007isConst\030\t \001(\010:\005false\022\025\n\nconstValue\030\n "
+    "\001(\001:\0010\0221\n\021stateFlagsSignals\030\013 \003(\0132\026.Prot"
+    "o.StateFlagSignal\"\232\006\n\tAppSignal\022\023\n\013appSi"
+    "gnalID\030\001 \001(\t\022\031\n\021customAppSignalID\030\002 \001(\t\022"
+    "\017\n\007caption\030\003 \001(\t\022\023\n\013equipmentID\030\004 \001(\t\022\025\n"
+    "\rlmEquipmentID\030\005 \001(\t\022\021\n\tbusTypeID\030\006 \001(\t\022"
+    "\022\n\007channel\030\007 \001(\005:\0010\022\037\n\020excludeFromBuild\030"
+    "\010 \001(\010:\005false\022\025\n\nsignalType\030\020 \001(\005:\0011\022\024\n\ti"
+    "nOutType\030\021 \001(\005:\0012\022\023\n\010dataSize\030\025 \001(\005:\0010\022\024"
+    "\n\tbyteOrder\030\026 \001(\005:\0011\022\035\n\022analogSignalForm"
+    "at\030\032 \001(\005:\0011\022\014\n\004unit\030\033 \001(\t\022\033\n\014enableTunin"
+    "g\030G \001(\010:\005false\022.\n\022tuningDefaultValue\030H \001"
+    "(\0132\022.Proto.TuningValue\022*\n\016tuningLowBound"
+    "\030I \001(\0132\022.Proto.TuningValue\022+\n\017tuningHigh"
+    "Bound\030J \001(\0132\022.Proto.TuningValue\022\026\n\007acqui"
+    "re\030Q \001(\010:\005false\022\026\n\007archive\030R \001(\010:\005false\022"
+    "\030\n\rdecimalPlaces\030S \001(\005:\0012\022\031\n\016coarseApert"
+    "ure\030T \001(\001:\0011\022\031\n\014fineAperture\030U \001(\001:\0030.5\022"
+    "\037\n\020adaptiveAperture\030V \001(\010:\005false\022\026\n\016spec"
+    "PropStruct\030Z \001(\t\022\026\n\016specPropValues\030[ \001(\014"
+    "\022(\n\007dbField\030x \001(\0132\027.Proto.AppSignalDbFie"
+    "ld\0222\n\tcalcParam\030y \001(\0132\037.Proto.AppSignalC"
+    "alculatedParam\"3\n\014AppSignalSet\022#\n\tappSig"
+    "nal\030\001 \003(\0132\020.Proto.AppSignal\"\213\004\n\022ProtoApp"
+    "SignalData\022\021\n\tbusTypeID\030\001 \001(\t\022\017\n\007caption"
+    "\030\002 \001(\t\022\022\n\007channel\030\003 \001(\005:\0010\022\024\n\010dataSize\030\004"
+    " \001(\005:\00232\022\024\n\tbyteOrder\030\005 \001(\005:\0011\022\035\n\022analog"
+    "SignalFormat\030\006 \001(\005:\0012\022\014\n\004unit\030\007 \001(\t\022\033\n\014e"
+    "nableTuning\030\010 \001(\010:\005false\022.\n\022tuningDefaul"
+    "tValue\030\t \001(\0132\022.Proto.TuningValue\022*\n\016tuni"
+    "ngLowBound\030\n \001(\0132\022.Proto.TuningValue\022+\n\017"
+    "tuningHighBound\030\013 \001(\0132\022.Proto.TuningValu"
+    "e\022\025\n\007acquire\030\014 \001(\010:\004true\022\025\n\007archive\030\r \001("
+    "\010:\004true\022\030\n\rdecimalPlaces\030\016 \001(\005:\0012\022\031\n\016coa"
+    "rseAperture\030\017 \001(\001:\0011\022\031\n\014fineAperture\030\020 \001"
+    "(\001:\0030.5\022\037\n\020adaptiveAperture\030\021 \001(\010:\005false"
+    "\022\037\n\020excludefromBuild\030\022 \001(\010:\005false\"\264\001\n\016Ap"
+    "pSignalState\022\017\n\004hash\030\001 \001(\004:\0010\022\020\n\005value\030\002"
+    " \001(\001:\0010\022\020\n\005flags\030\003 \001(\r:\0010\022\025\n\nsystemTime\030"
+    "\004 \001(\020:\0010\022\024\n\tlocalTime\030\005 \001(\020:\0010\022\024\n\tplantT"
+    "ime\030\006 \001(\020:\0010\022\025\n\tarchiveId\030\007 \001(\020:\002-1\022\023\n\010p"
+    "acketNo\030\010 \001(\r:\0010\"\224\006\n\nConnection\022\026\n\014Conne"
+    "ctionID\030\002 \001(\t:\000\022\032\n\020Port1EquipmentID\030\003 \001("
+    "\t:\000\022\032\n\020Port2EquipmentID\030\004 \001(\t:\000\022!\n\027Port1"
+    "RawDataDescription\030\005 \001(\t:\000\022!\n\027Port2RawDa"
+    "taDescription\030\006 \001(\t:\000\022\035\n\016ManualSettings\030"
+    "\013 \001(\010:\005false\022\034\n\rDisableDataID\030\014 \001(\010:\005fal"
+    "se\022\036\n\017GenerateVHDFile\030\r \001(\010:\005false\022\036\n\023Po"
+    "rt1TxStartAddress\030\016 \001(\005:\0010\022!\n\024Port1TxWor"
+    "dsQuantity\030\017 \001(\005:\003479\022!\n\024Port1RxWordsQua"
+    "ntity\030\020 \001(\005:\003479\022\036\n\023Port2TxStartAddress\030"
+    "\021 \001(\005:\0010\022!\n\024Port2TxWordsQuantity\030\022 \001(\005:\003"
+    "479\022!\n\024Port2RxWordsQuantity\030\023 \001(\005:\003479\022\031"
+    "\n\004uuid\030\024 \001(\0132\013.Proto.Uuid\022 \n\021Port1Enable"
+    "Serial\030\025 \001(\010:\005false\022\032\n\017Port1SerialMode\030\026"
+    " \001(\005:\0010\022 \n\021Port1EnableDuplex\030\027 \001(\010:\005fals"
+    "e\022 \n\021Port2EnableSerial\030\030 \001(\010:\005false\022\032\n\017P"
+    "ort2SerialMode\030\031 \001(\005:\0010\022 \n\021Port2EnableDu"
+    "plex\030\032 \001(\010:\005false\022\017\n\004Type\030\033 \001(\005:\0010\022\027\n\014Ob"
+    "soleteMode\030\010 \001(\005:\0010\022\035\n\022ObsoleteSerialMod"
+    "e\030\007 \001(\005:\0010\022#\n\024ObsoleteEnableDuplex\030\n \001(\010"
+    ":\005false\"@\n\020SchemaDetailsSet\022,\n\016schemasDe"
+    "tails\030\002 \003(\0132\024.Proto.SchemaDetails\"\360\001\n\rSc"
+    "hemaDetails\022\017\n\007version\030\002 \001(\005\022\020\n\010schemaId"
+    "\030\004 \001(\t\022\017\n\007caption\030\005 \001(\t\022\031\n\021excludedfromB"
+    "uild\030\006 \001(\010\022\023\n\013equipmentId\030\007 \001(\t\022\031\n\021lmDes"
+    "criptionFile\030\010 \001(\t\022\021\n\tsignalIds\030\024 \003(\t\022\016\n"
+    "\006labels\030\025 \003(\t\022\023\n\013connections\030\026 \003(\t\022\032\n\005gu"
+    "ids\030\027 \003(\0132\013.Proto.Uuid\022\014\n\004tags\030\030 \003(\t\"A\n\n"
+    "ArchSignal\022\014\n\004hash\030\001 \002(\004\022\020\n\010isAnalog\030\002 \002"
+    "(\010\022\023\n\013appSignalID\030\003 \002(\t\"5\n\013ArchSignals\022&"
+    "\n\013archSignals\030\001 \003(\0132\021.Proto.ArchSignal\"\326"
+    "\003\n\tBusSignal\022\020\n\010signalId\030\001 \001(\t\022\017\n\007captio"
+    "n\030\002 \001(\t\022\014\n\004type\030\003 \001(\005\022\r\n\005units\030\004 \001(\t\022\024\n\014"
+    "analogFormat\030\n \001(\005\022\024\n\tprecision\030\013 \001(\005:\0012"
+    "\022\031\n\016coarseAperture\030\014 \001(\001:\0011\022\031\n\014fineApert"
+    "ure\030\r \001(\001:\0030.5\022\037\n\020adaptiveAperture\030\016 \001(\010"
+    ":\005false\022\021\n\tbusTypeId\030\017 \001(\t\022\023\n\013inbusOffse"
+    "t\030  \001(\005\022\032\n\022inbusDiscreteBitNo\030( \001(\005\022\027\n\017i"
+    "nbusAnalogSize\0302 \001(\005\022\031\n\021inbusAnalogForma"
+    "t\0303 \001(\005\022\034\n\024inbusAnalogByteOrder\0304 \001(\005\022\031\n"
+    "\021busAnalogLowLimit\0305 \001(\001\022\032\n\022busAnalogHig"
+    "hLimit\0306 \001(\001\022\033\n\023inbusAnalogLowLimit\0307 \001("
+    "\001\022\034\n\024inbusAnalogHighLimit\0308 \001(\001\"\226\001\n\003Bus\022"
+    "\031\n\004uuid\030\001 \001(\0132\013.Proto.Uuid\022\021\n\tbusTypeId\030"
+    "\002 \001(\t\022$\n\nbusSignals\030\003 \003(\0132\020.Proto.BusSig"
+    "nal\022!\n\023autoSignalPlacement\030\n \001(\010:\004true\022\030"
+    "\n\rmanualBusSize\030\013 \001(\005:\0010*3\n\nSchemaUnit\022\013"
+    "\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n"
+    "\024ConnectionDirrection\022\t\n\005Input\020\000\022\n\n\006Outp"
+    "ut\020\001*)\n\rFblSignalType\022\n\n\006Analog\020\000\022\014\n\010Dis"
+    "crete\020\001*:\n\rFblDataFormat\022\017\n\013UnsignedInt\020"
+    "\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 14947);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -2829,6 +2856,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   UnitSet::default_instance_ = new UnitSet();
   TuningValue::default_instance_ = new TuningValue();
   AppSignalDbField::default_instance_ = new AppSignalDbField();
+  StateFlagSignal::default_instance_ = new StateFlagSignal();
   AppSignalCalculatedParam::default_instance_ = new AppSignalCalculatedParam();
   AppSignal::default_instance_ = new AppSignal();
   AppSignalSet::default_instance_ = new AppSignalSet();
@@ -2916,6 +2944,7 @@ void protobuf_AddDesc_serialization_2eproto() {
   UnitSet::default_instance_->InitAsDefaultInstance();
   TuningValue::default_instance_->InitAsDefaultInstance();
   AppSignalDbField::default_instance_->InitAsDefaultInstance();
+  StateFlagSignal::default_instance_->InitAsDefaultInstance();
   AppSignalCalculatedParam::default_instance_->InitAsDefaultInstance();
   AppSignal::default_instance_->InitAsDefaultInstance();
   AppSignalSet::default_instance_->InitAsDefaultInstance();
@@ -30876,6 +30905,271 @@ void AppSignalDbField::Swap(AppSignalDbField* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
+const int StateFlagSignal::kFlagTypeFieldNumber;
+const int StateFlagSignal::kFlagSignalIDFieldNumber;
+#endif  // !_MSC_VER
+
+StateFlagSignal::StateFlagSignal()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void StateFlagSignal::InitAsDefaultInstance() {
+}
+
+StateFlagSignal::StateFlagSignal(const StateFlagSignal& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void StateFlagSignal::SharedCtor() {
+  _cached_size_ = 0;
+  flagtype_ = 0;
+  flagsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+StateFlagSignal::~StateFlagSignal() {
+  SharedDtor();
+}
+
+void StateFlagSignal::SharedDtor() {
+  if (flagsignalid_ != &::google::protobuf::internal::kEmptyString) {
+    delete flagsignalid_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void StateFlagSignal::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* StateFlagSignal::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return StateFlagSignal_descriptor_;
+}
+
+const StateFlagSignal& StateFlagSignal::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+StateFlagSignal* StateFlagSignal::default_instance_ = NULL;
+
+StateFlagSignal* StateFlagSignal::New() const {
+  return new StateFlagSignal;
+}
+
+void StateFlagSignal::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    flagtype_ = 0;
+    if (has_flagsignalid()) {
+      if (flagsignalid_ != &::google::protobuf::internal::kEmptyString) {
+        flagsignalid_->clear();
+      }
+    }
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool StateFlagSignal::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional int32 flagType = 1 [default = 0];
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &flagtype_)));
+          set_has_flagtype();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_flagSignalID;
+        break;
+      }
+
+      // optional string flagSignalID = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_flagSignalID:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_flagsignalid()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->flagsignalid().data(), this->flagsignalid().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void StateFlagSignal::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional int32 flagType = 1 [default = 0];
+  if (has_flagtype()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(1, this->flagtype(), output);
+  }
+
+  // optional string flagSignalID = 2;
+  if (has_flagsignalid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->flagsignalid().data(), this->flagsignalid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      2, this->flagsignalid(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* StateFlagSignal::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional int32 flagType = 1 [default = 0];
+  if (has_flagtype()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(1, this->flagtype(), target);
+  }
+
+  // optional string flagSignalID = 2;
+  if (has_flagsignalid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->flagsignalid().data(), this->flagsignalid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        2, this->flagsignalid(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int StateFlagSignal::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional int32 flagType = 1 [default = 0];
+    if (has_flagtype()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->flagtype());
+    }
+
+    // optional string flagSignalID = 2;
+    if (has_flagsignalid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->flagsignalid());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void StateFlagSignal::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const StateFlagSignal* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const StateFlagSignal*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void StateFlagSignal::MergeFrom(const StateFlagSignal& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_flagtype()) {
+      set_flagtype(from.flagtype());
+    }
+    if (from.has_flagsignalid()) {
+      set_flagsignalid(from.flagsignalid());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void StateFlagSignal::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void StateFlagSignal::CopyFrom(const StateFlagSignal& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool StateFlagSignal::IsInitialized() const {
+
+  return true;
+}
+
+void StateFlagSignal::Swap(StateFlagSignal* other) {
+  if (other != this) {
+    std::swap(flagtype_, other->flagtype_);
+    std::swap(flagsignalid_, other->flagsignalid_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata StateFlagSignal::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = StateFlagSignal_descriptor_;
+  metadata.reflection = StateFlagSignal_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
 const int AppSignalCalculatedParam::kHashFieldNumber;
 const int AppSignalCalculatedParam::kIoBufAddrFieldNumber;
 const int AppSignalCalculatedParam::kTuningAddrFieldNumber;
@@ -30886,6 +31180,7 @@ const int AppSignalCalculatedParam::kRegValidityAddrFieldNumber;
 const int AppSignalCalculatedParam::kLmRamAccessFieldNumber;
 const int AppSignalCalculatedParam::kIsConstFieldNumber;
 const int AppSignalCalculatedParam::kConstValueFieldNumber;
+const int AppSignalCalculatedParam::kStateFlagsSignalsFieldNumber;
 #endif  // !_MSC_VER
 
 AppSignalCalculatedParam::AppSignalCalculatedParam()
@@ -30986,6 +31281,7 @@ void AppSignalCalculatedParam::Clear() {
     isconst_ = false;
     constvalue_ = 0;
   }
+  stateflagssignals_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -31139,6 +31435,21 @@ bool AppSignalCalculatedParam::MergePartialFromCodedStream(
         } else {
           goto handle_uninterpreted;
         }
+        if (input->ExpectTag(90)) goto parse_stateFlagsSignals;
+        break;
+      }
+
+      // repeated .Proto.StateFlagSignal stateFlagsSignals = 11;
+      case 11: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_stateFlagsSignals:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+                input, add_stateflagssignals()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(90)) goto parse_stateFlagsSignals;
         if (input->ExpectAtEnd()) return true;
         break;
       }
@@ -31217,6 +31528,12 @@ void AppSignalCalculatedParam::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteDouble(10, this->constvalue(), output);
   }
 
+  // repeated .Proto.StateFlagSignal stateFlagsSignals = 11;
+  for (int i = 0; i < this->stateflagssignals_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      11, this->stateflagssignals(i), output);
+  }
+
   if (!unknown_fields().empty()) {
     ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
         unknown_fields(), output);
@@ -31285,6 +31602,13 @@ void AppSignalCalculatedParam::SerializeWithCachedSizes(
   // optional double constValue = 10 [default = 0];
   if (has_constvalue()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(10, this->constvalue(), target);
+  }
+
+  // repeated .Proto.StateFlagSignal stateFlagsSignals = 11;
+  for (int i = 0; i < this->stateflagssignals_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        11, this->stateflagssignals(i), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -31367,6 +31691,14 @@ int AppSignalCalculatedParam::ByteSize() const {
     }
 
   }
+  // repeated .Proto.StateFlagSignal stateFlagsSignals = 11;
+  total_size += 1 * this->stateflagssignals_size();
+  for (int i = 0; i < this->stateflagssignals_size(); i++) {
+    total_size +=
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        this->stateflagssignals(i));
+  }
+
   if (!unknown_fields().empty()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
@@ -31392,6 +31724,7 @@ void AppSignalCalculatedParam::MergeFrom(const ::google::protobuf::Message& from
 
 void AppSignalCalculatedParam::MergeFrom(const AppSignalCalculatedParam& from) {
   GOOGLE_CHECK_NE(&from, this);
+  stateflagssignals_.MergeFrom(from.stateflagssignals_);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
     if (from.has_hash()) {
       set_hash(from.hash());
@@ -31476,6 +31809,7 @@ void AppSignalCalculatedParam::Swap(AppSignalCalculatedParam* other) {
     std::swap(lmramaccess_, other->lmramaccess_);
     std::swap(isconst_, other->isconst_);
     std::swap(constvalue_, other->constvalue_);
+    stateflagssignals_.Swap(&other->stateflagssignals_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);

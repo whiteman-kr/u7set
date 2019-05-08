@@ -981,7 +981,6 @@ message TuningValue
     optional double doubleValue = 3 [default = 0.0];
 }
 
-
 message AppSignalDbField
 {
     optional int32 ID = 1 [default = -1];
@@ -996,6 +995,12 @@ message AppSignalDbField
     optional int32 instanceAction = 10 [default = 0];		// VcsItemActionType::Unknown
 }
 
+message StateFlagSignal
+{
+	optional int32 flagType = 1 [default = 0	/* E::AppSignalStateFlagType::Validity */];		// E::AppSignalStateFlagType values
+	optional string flagSignalID = 2;
+}
+
 message AppSignalCalculatedParam
 {
     optional uint64 hash = 1 [default = 0];
@@ -1005,9 +1010,10 @@ message AppSignalCalculatedParam
     optional Address16 regBufAddr = 5;
     optional Address16 regValueAddr = 6;
     optional Address16 regValidityAddr = 7;
-    optional int32 lmRamAccess = 8 [default = 0 /* E::LogicModuleRamAccess::Undefined */];	// E::LogicModuleRamAccess values
+	optional int32 lmRamAccess = 8 [default = 0 /* E::LogicModuleRamAccess::Undefined */];		// E::LogicModuleRamAccess values
     optional bool isConst = 9 [default = false];
     optional double constValue = 10 [default = 0];
+	repeated StateFlagSignal stateFlagsSignals = 11;
 }
 
 message AppSignal

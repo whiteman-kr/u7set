@@ -1042,6 +1042,34 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 
 		calcParam->set_isconst(m_isConst);
 		calcParam->set_constvalue(m_constValue);
+
+		// save state flags signals
+
+		assert(calcParam->stateflagssignals_size() == 0);
+
+		QList<E::AppSignalStateFlagType> flagTypes = m_stateFlagsSignals.uniqueKeys();
+
+		for(E::AppSignalStateFlagType flagType : flagTypes)
+		{
+			QString flagSignalID = m_stateFlagsSignals.value(flagType, QString());
+
+			if (flagSignalID.isEmpty() == true)
+			{
+				assert(false);
+				continue;
+			}
+
+			Proto::StateFlagSignal* protoStateFlagSignal = calcParam->add_stateflagssignals();
+
+			if (protoStateFlagSignal == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			protoStateFlagSignal->set_flagtype(TO_INT(flagType));
+			protoStateFlagSignal->set_flagsignalid(flagSignalID.toStdString());
+		}
 	}
 	else
 	{
@@ -1141,6 +1169,23 @@ void Signal::serializeFrom(const Proto::AppSignal& s)
 
 	m_isConst = calcParam.isconst();
 	m_constValue = calcParam.constvalue();
+
+	// load state flags signals
+
+	m_stateFlagsSignals.clear();
+
+	int flagSignalsCount = calcParam.stateflagssignals_size();
+
+	for(int i = 0; i < flagSignalsCount; i++)
+	{
+		const Proto::StateFlagSignal& protoStateFlagSignal = calcParam.stateflagssignals(i);
+
+		E::AppSignalStateFlagType flagType = static_cast<E::AppSignalStateFlagType>(protoStateFlagSignal.flagtype());
+
+		assert(m_stateFlagsSignals.contains(flagType) == false);
+
+		m_stateFlagsSignals.insert(flagType, QString::fromStdString(protoStateFlagSignal.flagsignalid()));
+	}
 }
 
 void Signal::initCalculatedProperties()

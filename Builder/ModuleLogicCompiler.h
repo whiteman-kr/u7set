@@ -278,6 +278,7 @@ namespace Builder
 
 		bool setAcquiredForFlagSignals();
 		bool checkSignalsWithFlags();
+//		bool linkSignalsWithFlagsInSignalSet();
 		void writeSignalsWithFlagsReport();
 		void writeSignalsWithFlagsToReport(QStringList* file, const QStringList& signalsWithFlagsIDs);
 
@@ -374,7 +375,7 @@ namespace Builder
 		bool disposeNonAcquiredAnalogSignals();
 		bool disposeNonAcquiredBuses();
 
-		bool setSignalsFlagsAddresses();
+//		bool setSignalsFlagsAddresses();
 
 		bool appendAfbsForAnalogInOutSignalsConversion();
 		bool findFbsForAnalogInOutSignalsConversion();

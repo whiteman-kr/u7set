@@ -304,7 +304,8 @@ public:
 	void initCalculatedProperties();
 
 	bool addStateFlagSignal(E::AppSignalStateFlagType flagType, const QString& appSignalID);
-	QString stateFlagSignal(E::AppSignalStateFlagType flagType) const { return  m_stateFlagsSignals.value(flagType, QString("???")); }
+	QString stateFlagSignal(E::AppSignalStateFlagType flagType) const { return  m_stateFlagsSignals.value(flagType, QString()); }
+	bool hasStateFlagsSignals() const { return m_stateFlagsSignals.count(); }
 
 private:
 	// Private setters for fields, witch can't be changed outside DB engine

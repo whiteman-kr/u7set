@@ -66,7 +66,7 @@ const Signal* AppSignals::getSignal(Hash hash) const
 //
 // -------------------------------------------------------------------------------
 
-void AppDataSource::SignalParseInfo::setSignalParams(int i, const Signal& s)
+void AppDataSource::SignalParseInfo::setSignalParams(int i, const Signal& s, const AppSignals& appSignals)
 {
 	appSignalID = s.appSignalID();
 
@@ -79,6 +79,43 @@ void AppDataSource::SignalParseInfo::setSignalParams(int i, const Signal& s)
 	analogSignalFormat = s.analogSignalFormat();
 	byteOrder = s.byteOrder();
 	dataSize = s.dataSize();
+
+	if (s.hasStateFlagsSignals() == true)
+	{
+		static const std::vector<E::AppSignalStateFlagType> flagsTypes = E::values<E::AppSignalStateFlagType>();
+
+		for(E::AppSignalStateFlagType flagType : flagsTypes)
+		{
+			QString flagSignalID = s.stateFlagSignal(flagType);
+
+			if (flagSignalID.isEmpty() == true)
+			{
+				continue;
+			}
+
+			Signal* flagSignal = appSignals.value(flagSignalID, nullptr);
+
+			if (flagSignal == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (flagSignal->regValueAddr().isValid() == false)
+			{
+				assert(false);
+				continue;
+			}
+
+			FlagSignalParceInfo fspi;
+
+			fspi.flagType = flagType;
+			fspi.flagSignalID = flagSignal->appSignalID();
+			fspi.flagSignalAddr = flagSignal->regValueAddr();
+
+			flagsSignalsParceInfo.append(fspi);
+		}
+	}
 }
 
 // -------------------------------------------------------------------------------
@@ -151,10 +188,12 @@ void AppDataSource::prepare(const AppSignals& appSignals, DynamicAppSignalStates
 
 		SignalParseInfo parceInfo;
 
-		parceInfo.setSignalParams(index, *signal);
+		parceInfo.setSignalParams(index, *signal, appSignals);
 
 		m_signalsParseInfo.append(parceInfo);
 	}
+
+	assert(false);		// to do: sort m_signalsParseInfo by flag signals dependency
 
 	m_acquiredSignalsCount = m_signalsParseInfo.count();
 

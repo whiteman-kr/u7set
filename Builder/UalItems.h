@@ -463,7 +463,7 @@ namespace Builder
 		Address16 regValueAddr() const { return m_regValueAddr; }
 		bool setRegValueAddr(Address16 regValueAddr);
 
-		bool setFlagSignal(E::AppSignalStateFlagType flagType, UalSignal* flagSignal);
+//		bool setFlagSignal(E::AppSignalStateFlagType flagType, UalSignal* flagSignal);
 
 		Address16 ioBufAddr();
 
@@ -604,7 +604,7 @@ namespace Builder
 		Address16 m_regBufAddr;							// address in RegBuf (absolute in LM's memory)
 		Address16 m_regValueAddr;						// relative address from beginning of RegBuf ()
 
-		QHash<E::AppSignalStateFlagType, UalSignal*> m_flagSignals;
+		//QHash<E::AppSignalStateFlagType, UalSignal*> m_flagSignals;
 	};
 
 	class UalSignalsMap: public QObject, private QHash<UalSignal*, UalSignal*>

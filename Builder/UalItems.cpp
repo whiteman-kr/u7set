@@ -1830,7 +1830,7 @@ namespace Builder
 		return true;
 	}
 
-	bool UalSignal::setFlagSignal(E::AppSignalStateFlagType flagType, UalSignal* flagSignal)
+/*	bool UalSignal::setFlagSignal(E::AppSignalStateFlagType flagType, UalSignal* flagSignal)
 	{
 		TEST_PTR_RETURN_FALSE(flagSignal);
 
@@ -1851,7 +1851,7 @@ namespace Builder
 		m_flagSignals.insert(flagType, flagSignal);
 
 		return true;
-	}
+	}*/
 
 	void UalSignal::sortRefSignals()
 	{

@@ -109,6 +109,7 @@ class Unit;
 class UnitSet;
 class TuningValue;
 class AppSignalDbField;
+class StateFlagSignal;
 class AppSignalCalculatedParam;
 class AppSignal;
 class AppSignalSet;
@@ -9588,6 +9589,103 @@ class AppSignalDbField : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class StateFlagSignal : public ::google::protobuf::Message {
+ public:
+  StateFlagSignal();
+  virtual ~StateFlagSignal();
+
+  StateFlagSignal(const StateFlagSignal& from);
+
+  inline StateFlagSignal& operator=(const StateFlagSignal& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const StateFlagSignal& default_instance();
+
+  void Swap(StateFlagSignal* other);
+
+  // implements Message ----------------------------------------------
+
+  StateFlagSignal* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const StateFlagSignal& from);
+  void MergeFrom(const StateFlagSignal& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 flagType = 1 [default = 0];
+  inline bool has_flagtype() const;
+  inline void clear_flagtype();
+  static const int kFlagTypeFieldNumber = 1;
+  inline ::google::protobuf::int32 flagtype() const;
+  inline void set_flagtype(::google::protobuf::int32 value);
+
+  // optional string flagSignalID = 2;
+  inline bool has_flagsignalid() const;
+  inline void clear_flagsignalid();
+  static const int kFlagSignalIDFieldNumber = 2;
+  inline const ::std::string& flagsignalid() const;
+  inline void set_flagsignalid(const ::std::string& value);
+  inline void set_flagsignalid(const char* value);
+  inline void set_flagsignalid(const char* value, size_t size);
+  inline ::std::string* mutable_flagsignalid();
+  inline ::std::string* release_flagsignalid();
+  inline void set_allocated_flagsignalid(::std::string* flagsignalid);
+
+  // @@protoc_insertion_point(class_scope:Proto.StateFlagSignal)
+ private:
+  inline void set_has_flagtype();
+  inline void clear_has_flagtype();
+  inline void set_has_flagsignalid();
+  inline void clear_has_flagsignalid();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* flagsignalid_;
+  ::google::protobuf::int32 flagtype_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static StateFlagSignal* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class AppSignalCalculatedParam : public ::google::protobuf::Message {
  public:
   AppSignalCalculatedParam();
@@ -9724,6 +9822,18 @@ class AppSignalCalculatedParam : public ::google::protobuf::Message {
   inline double constvalue() const;
   inline void set_constvalue(double value);
 
+  // repeated .Proto.StateFlagSignal stateFlagsSignals = 11;
+  inline int stateflagssignals_size() const;
+  inline void clear_stateflagssignals();
+  static const int kStateFlagsSignalsFieldNumber = 11;
+  inline const ::Proto::StateFlagSignal& stateflagssignals(int index) const;
+  inline ::Proto::StateFlagSignal* mutable_stateflagssignals(int index);
+  inline ::Proto::StateFlagSignal* add_stateflagssignals();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::StateFlagSignal >&
+      stateflagssignals() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::StateFlagSignal >*
+      mutable_stateflagssignals();
+
   // @@protoc_insertion_point(class_scope:Proto.AppSignalCalculatedParam)
  private:
   inline void set_has_hash();
@@ -9759,9 +9869,10 @@ class AppSignalCalculatedParam : public ::google::protobuf::Message {
   ::google::protobuf::int32 lmramaccess_;
   bool isconst_;
   double constvalue_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::StateFlagSignal > stateflagssignals_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -24168,6 +24279,102 @@ inline void AppSignalDbField::set_instanceaction(::google::protobuf::int32 value
 
 // -------------------------------------------------------------------
 
+// StateFlagSignal
+
+// optional int32 flagType = 1 [default = 0];
+inline bool StateFlagSignal::has_flagtype() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void StateFlagSignal::set_has_flagtype() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void StateFlagSignal::clear_has_flagtype() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void StateFlagSignal::clear_flagtype() {
+  flagtype_ = 0;
+  clear_has_flagtype();
+}
+inline ::google::protobuf::int32 StateFlagSignal::flagtype() const {
+  return flagtype_;
+}
+inline void StateFlagSignal::set_flagtype(::google::protobuf::int32 value) {
+  set_has_flagtype();
+  flagtype_ = value;
+}
+
+// optional string flagSignalID = 2;
+inline bool StateFlagSignal::has_flagsignalid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void StateFlagSignal::set_has_flagsignalid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void StateFlagSignal::clear_has_flagsignalid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void StateFlagSignal::clear_flagsignalid() {
+  if (flagsignalid_ != &::google::protobuf::internal::kEmptyString) {
+    flagsignalid_->clear();
+  }
+  clear_has_flagsignalid();
+}
+inline const ::std::string& StateFlagSignal::flagsignalid() const {
+  return *flagsignalid_;
+}
+inline void StateFlagSignal::set_flagsignalid(const ::std::string& value) {
+  set_has_flagsignalid();
+  if (flagsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    flagsignalid_ = new ::std::string;
+  }
+  flagsignalid_->assign(value);
+}
+inline void StateFlagSignal::set_flagsignalid(const char* value) {
+  set_has_flagsignalid();
+  if (flagsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    flagsignalid_ = new ::std::string;
+  }
+  flagsignalid_->assign(value);
+}
+inline void StateFlagSignal::set_flagsignalid(const char* value, size_t size) {
+  set_has_flagsignalid();
+  if (flagsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    flagsignalid_ = new ::std::string;
+  }
+  flagsignalid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* StateFlagSignal::mutable_flagsignalid() {
+  set_has_flagsignalid();
+  if (flagsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    flagsignalid_ = new ::std::string;
+  }
+  return flagsignalid_;
+}
+inline ::std::string* StateFlagSignal::release_flagsignalid() {
+  clear_has_flagsignalid();
+  if (flagsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = flagsignalid_;
+    flagsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void StateFlagSignal::set_allocated_flagsignalid(::std::string* flagsignalid) {
+  if (flagsignalid_ != &::google::protobuf::internal::kEmptyString) {
+    delete flagsignalid_;
+  }
+  if (flagsignalid) {
+    set_has_flagsignalid();
+    flagsignalid_ = flagsignalid;
+  } else {
+    clear_has_flagsignalid();
+    flagsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
 // AppSignalCalculatedParam
 
 // optional uint64 hash = 1 [default = 0];
@@ -24484,6 +24691,31 @@ inline double AppSignalCalculatedParam::constvalue() const {
 inline void AppSignalCalculatedParam::set_constvalue(double value) {
   set_has_constvalue();
   constvalue_ = value;
+}
+
+// repeated .Proto.StateFlagSignal stateFlagsSignals = 11;
+inline int AppSignalCalculatedParam::stateflagssignals_size() const {
+  return stateflagssignals_.size();
+}
+inline void AppSignalCalculatedParam::clear_stateflagssignals() {
+  stateflagssignals_.Clear();
+}
+inline const ::Proto::StateFlagSignal& AppSignalCalculatedParam::stateflagssignals(int index) const {
+  return stateflagssignals_.Get(index);
+}
+inline ::Proto::StateFlagSignal* AppSignalCalculatedParam::mutable_stateflagssignals(int index) {
+  return stateflagssignals_.Mutable(index);
+}
+inline ::Proto::StateFlagSignal* AppSignalCalculatedParam::add_stateflagssignals() {
+  return stateflagssignals_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::StateFlagSignal >&
+AppSignalCalculatedParam::stateflagssignals() const {
+  return stateflagssignals_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::StateFlagSignal >*
+AppSignalCalculatedParam::mutable_stateflagssignals() {
+  return &stateflagssignals_;
 }
 
 // -------------------------------------------------------------------

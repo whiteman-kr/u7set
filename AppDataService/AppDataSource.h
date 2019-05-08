@@ -21,6 +21,13 @@ public:
 class AppDataSource : public DataSourceOnline
 {
 private:
+	struct FlagSignalParceInfo
+	{
+		E::AppSignalStateFlagType flagType = E::AppSignalStateFlagType::Validity;
+		QString flagSignalID;
+		Address16 flagSignalAddr;
+	};
+
 	struct SignalParseInfo
 	{
 	public:
@@ -37,7 +44,9 @@ private:
 
 		QString appSignalID;
 
-		void setSignalParams(int i, const Signal& s);
+		QVector<FlagSignalParceInfo> flagsSignalsParceInfo;
+
+		void setSignalParams(int i, const Signal& s, const AppSignals& appSignals);
 	};
 
 public:
