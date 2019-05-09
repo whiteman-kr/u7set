@@ -342,12 +342,12 @@ namespace VFrame30
 								 SchemaItemReceiver::showValidity,
 								 SchemaItemReceiver::setShowValidity);
 
-		ADD_PROPERTY_GET_SET_CAT(bool,
-								 PropertyNames::multiLine,
-								 PropertyNames::appearanceCategory,
-								 true,
-								 SchemaItemReceiver::multiline,
-								 SchemaItemReceiver::setMultiline);
+//		ADD_PROPERTY_GET_SET_CAT(bool,
+//								 PropertyNames::multiLine,
+//								 PropertyNames::appearanceCategory,
+//								 true,
+//								 SchemaItemReceiver::multiline,
+//								 SchemaItemReceiver::setMultiline);
 
 		auto strIdProperty = ADD_PROPERTY_GET_SET_CAT(QString,
 								 PropertyNames::appSignalId,
@@ -402,7 +402,7 @@ namespace VFrame30
 		Proto::SchemaItemReceiver* receiver = message->mutable_schemaitem()->mutable_receiveritem();
 
 		receiver->set_showvalidity(m_showValidity);
-		receiver->set_multiline(m_multiline);
+//		receiver->set_multiline(m_multiline);
 		receiver->set_appsignalids(appSignalIds().toStdString());
 		receiver->set_datatype(static_cast<int>(m_dataType));
 		receiver->set_precision(m_precision);
@@ -430,7 +430,7 @@ namespace VFrame30
 		const Proto::SchemaItemReceiver& receiver = message.schemaitem().receiveritem();
 
 		m_showValidity = receiver.showvalidity();
-		m_multiline = receiver.multiline();
+//		m_multiline = receiver.multiline();
 		setAppSignalIds(QString::fromStdString(receiver.appsignalids()));
 		m_dataType = static_cast<E::ColumnData>(receiver.datatype());
 		m_precision = receiver.precision();
@@ -642,15 +642,15 @@ namespace VFrame30
 		}
 	}
 
-	bool SchemaItemReceiver::multiline() const
-	{
-		return m_multiline;
-	}
+//	bool SchemaItemReceiver::multiline() const
+//	{
+//		return m_multiline;
+//	}
 
-	void SchemaItemReceiver::setMultiline(bool value)
-	{
-		m_multiline = value;
-	}
+//	void SchemaItemReceiver::setMultiline(bool value)
+//	{
+//		m_multiline = value;
+//	}
 
 	bool SchemaItemReceiver::isValidityPin(const QUuid& pinGuid) const
 	{

@@ -5644,13 +5644,6 @@ class SchemaItemReceiver : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 analogformat() const;
   inline void set_analogformat(::google::protobuf::int32 value);
 
-  // optional bool multiline = 6 [default = true];
-  inline bool has_multiline() const;
-  inline void clear_multiline();
-  static const int kMultilineFieldNumber = 6;
-  inline bool multiline() const;
-  inline void set_multiline(bool value);
-
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemReceiver)
  private:
   inline void set_has_showvalidity();
@@ -5663,20 +5656,17 @@ class SchemaItemReceiver : public ::google::protobuf::Message {
   inline void clear_has_precision();
   inline void set_has_analogformat();
   inline void clear_has_analogformat();
-  inline void set_has_multiline();
-  inline void clear_has_multiline();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* appsignalids_;
-  ::google::protobuf::int32 datatype_;
   bool showvalidity_;
-  bool multiline_;
+  ::google::protobuf::int32 datatype_;
   ::google::protobuf::int32 precision_;
   ::google::protobuf::int32 analogformat_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -19161,28 +19151,6 @@ inline ::google::protobuf::int32 SchemaItemReceiver::analogformat() const {
 inline void SchemaItemReceiver::set_analogformat(::google::protobuf::int32 value) {
   set_has_analogformat();
   analogformat_ = value;
-}
-
-// optional bool multiline = 6 [default = true];
-inline bool SchemaItemReceiver::has_multiline() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
-}
-inline void SchemaItemReceiver::set_has_multiline() {
-  _has_bits_[0] |= 0x00000020u;
-}
-inline void SchemaItemReceiver::clear_has_multiline() {
-  _has_bits_[0] &= ~0x00000020u;
-}
-inline void SchemaItemReceiver::clear_multiline() {
-  multiline_ = true;
-  clear_has_multiline();
-}
-inline bool SchemaItemReceiver::multiline() const {
-  return multiline_;
-}
-inline void SchemaItemReceiver::set_multiline(bool value) {
-  set_has_multiline();
-  multiline_ = value;
 }
 
 // -------------------------------------------------------------------
