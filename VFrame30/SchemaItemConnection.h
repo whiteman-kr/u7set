@@ -143,11 +143,17 @@ namespace VFrame30
 		// Properties
 		//
 	public:
-		const QString& appSignalId() const;
-		void setAppSignalId(const QString& value);
+		QString appSignalIds() const;
+		void setAppSignalIds(const QString& value);
+
+		const QStringList& appSignalIdsAsList() const;
+		void setAppSignalIdsAsList(const QStringList& value);
 
 		bool showValidity() const;
 		void setShowValidity(bool value);
+
+		bool multiline() const;
+		void setMultiline(bool value);
 
 		bool isValidityPin(const QUuid& pin) const;
 		bool isOutputPin(const QUuid& pinGuid) const;
@@ -164,8 +170,9 @@ namespace VFrame30
 		// Data
 		//
 	private:
-		QString m_appSignalId = "#APPSIGNALID";
+		QStringList m_appSignalIds = {"#APPSIGNALID"};
 		bool m_showValidity = true;
+		bool m_multiline = true;
 
 		E::ColumnData m_dataType = E::ColumnData::AppSignalID;	// Data for displaying
 

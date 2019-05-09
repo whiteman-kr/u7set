@@ -392,44 +392,6 @@ namespace VFrame30
 		return text;
 	}
 
-
-	void SchemaItemSignal::drawMultichannelSlashLines(CDrawParam* drawParam, QPen& linePen) const
-	{
-		if (drawParam == nullptr)
-		{
-			assert(drawParam);
-			return;
-		}
-
-		QPainter* painter = drawParam->painter();
-
-		double pinWidth = GetPinWidth(itemUnit(), painter->device());
-
-		painter->setPen(linePen);
-
-		QRectF r = itemRectWithPins(drawParam);
-
-		if (inputsCount() > 0)
-		{
-			const std::vector<AfbPin>& inputPins = inputs();
-			assert(inputPins.empty() == false);
-
-			painter->drawLine(QPointF(r.left() + (pinWidth / 3.0) * 2.0, inputPins.front().y() - pinWidth / 4.0),
-							  QPointF(r.left() + (pinWidth / 3.0) * 1.0, inputPins.front().y() + pinWidth / 4.0));
-		}
-
-		if (outputsCount() > 0)
-		{
-			const std::vector<AfbPin>& pins = outputs();
-			assert(pins.empty() == false);
-
-			painter->drawLine(QPointF(r.right() - (pinWidth / 3.0) * 2.0, pins.front().y() + pinWidth / 4.0),
-							  QPointF(r.right() - (pinWidth / 3.0) * 1.0, pins.front().y() - pinWidth / 4.0));
-		}
-
-		return;
-	}
-
 	void SchemaItemSignal::drawFullLineIds(CDrawParam* drawParam) const
 	{
 		if (drawParam == nullptr)

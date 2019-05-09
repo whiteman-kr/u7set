@@ -232,7 +232,8 @@ namespace VFrame30
 		arrowRect.setLeft(r.right() - pinWidth);
 
 		p->setPen(textColor());
-		DrawHelper::drawText(p, m_font, itemUnit(), QLatin1String("\xBB"), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
+		//DrawHelper::drawText(p, m_font, itemUnit(), QLatin1String("\xBB"), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
+		DrawHelper::drawText(p, m_font, itemUnit(), QChar(0x25BA), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
 
 		// Draw ConnectionID
 		//
@@ -341,13 +342,20 @@ namespace VFrame30
 								 SchemaItemReceiver::showValidity,
 								 SchemaItemReceiver::setShowValidity);
 
+		ADD_PROPERTY_GET_SET_CAT(bool,
+								 PropertyNames::multiLine,
+								 PropertyNames::appearanceCategory,
+								 true,
+								 SchemaItemReceiver::multiline,
+								 SchemaItemReceiver::setMultiline);
+
 		auto strIdProperty = ADD_PROPERTY_GET_SET_CAT(QString,
 								 PropertyNames::appSignalId,
 								 PropertyNames::functionalCategory,
 								 true,
-								 SchemaItemReceiver::appSignalId,
-								 SchemaItemReceiver::setAppSignalId);
-		strIdProperty->setValidator(PropertyNames::appSignalIdValidator);
+								 SchemaItemReceiver::appSignalIds,
+								 SchemaItemReceiver::setAppSignalIds);
+		strIdProperty->setValidator(PropertyNames::appSignalIDsValidator);
 
 		ADD_PROPERTY_GET_SET_CAT(E::ColumnData,
 								 PropertyNames::dataType,
@@ -394,7 +402,8 @@ namespace VFrame30
 		Proto::SchemaItemReceiver* receiver = message->mutable_schemaitem()->mutable_receiveritem();
 
 		receiver->set_showvalidity(m_showValidity);
-		receiver->set_appsignalid(m_appSignalId.toStdString());
+		receiver->set_multiline(m_multiline);
+		receiver->set_appsignalids(appSignalIds().toStdString());
 		receiver->set_datatype(static_cast<int>(m_dataType));
 		receiver->set_precision(m_precision);
 		receiver->set_analogformat(static_cast<int>(m_analogFormat));
@@ -421,7 +430,8 @@ namespace VFrame30
 		const Proto::SchemaItemReceiver& receiver = message.schemaitem().receiveritem();
 
 		m_showValidity = receiver.showvalidity();
-		m_appSignalId = QString::fromStdString(receiver.appsignalid());
+		m_multiline = receiver.multiline();
+		setAppSignalIds(QString::fromStdString(receiver.appsignalids()));
 		m_dataType = static_cast<E::ColumnData>(receiver.datatype());
 		m_precision = receiver.precision();
 		m_analogFormat = static_cast<E::AnalogFormat>(receiver.analogformat());
@@ -452,12 +462,21 @@ namespace VFrame30
 		int dpiX = drawParam->dpiX();
 		double pinWidth = GetPinWidth(itemUnit(), dpiX);
 
-		// Draw line and symbol >>
+		// --
 		//
 		QPen linePen(lineColor());
 		linePen.setWidthF(m_weight == 0.0 ? drawParam->cosmeticPenWidth() : m_weight);
 		p->setPen(linePen);
 
+		// Draw slash lines
+		//
+		if (appSignalIds().size() > 1)
+		{
+			drawMultichannelSlashLines(drawParam, linePen);
+		}
+
+		// Draw line and symbol >>
+		//
 		p->drawLine(drawParam->gridToDpi(r.left() + pinWidth, r.top()),
 					drawParam->gridToDpi(r.left() + pinWidth, r.bottom()));
 
@@ -467,64 +486,71 @@ namespace VFrame30
 		arrowRect.setRight(r.left() + pinWidth);
 
 		p->setPen(textColor());
-		DrawHelper::drawText(p, m_font, itemUnit(), QLatin1String("\xBB"), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
+
+		//DrawHelper::drawText(p, m_font, itemUnit(), QLatin1String("\xBB"), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
+		DrawHelper::drawText(p, m_font, itemUnit(), QChar(0x25BA), arrowRect, Qt::AlignHCenter | Qt::AlignVCenter);
 
 		r.setLeft(r.left() + pinWidth + m_font.drawSize() / 4.0);
 		r.setRight(r.right() - pinWidth - m_font.drawSize() / 4.0);
 
-		double lineHeight = qMax(drawParam->gridSize() * drawParam->pinGridStep(), m_font.drawSize());
+		double maxGridSize = qMax(drawParam->gridSize() * drawParam->pinGridStep(), m_font.drawSize());
+		double lineHeight = CUtils::snapToGrid(maxGridSize, drawParam->gridSize());
 
 		// Draw Data (AppSignalID, CustomerSignalID, Caption, etc
 		//
-		QString appSignalId = this->appSignalId();
-
 		AppSignalParam signal;
-		signal.setAppSignalId(appSignalId);
-
 		AppSignalState signalState;
-		signalState.m_flags.valid = false;
 
-		bool signalFound = false;
-
-		if (drawParam->isMonitorMode() == true)
+		int textRow = 0;
+		for (const QString& appSignalId : this->appSignalIdsAsList())
 		{
-			signal = drawParam->appSignalController()->signalParam(appSignalId, &signalFound);
-			signalState = drawParam->appSignalController()->signalState(appSignalId, nullptr);
+			signal.setAppSignalId(appSignalId);
+			signalState.m_flags.valid = false;
+
+			if (drawParam->isMonitorMode() == true)
+			{
+				signal = drawParam->appSignalController()->signalParam(appSignalId, nullptr);
+				signalState = drawParam->appSignalController()->signalState(appSignalId, nullptr);
+			}
+
+			QRectF signalRect = {r.left(), r.top() + lineHeight * textRow, r.width(), lineHeight};
+
+			QString dataText = SchemaItemSignal::getCoulumnText(drawParam,
+																m_dataType,
+																signal,
+																signalState,
+																signal,				// There is no impact signalfor connection
+																signalState,		// There is no impact signalfor connection
+																m_analogFormat,
+																m_precision);
+
+			DrawHelper::drawText(p, m_font, itemUnit(), dataText, signalRect, Qt::AlignHCenter | Qt::AlignBottom);
+
+			textRow ++;
 		}
-
-		QRectF signalRect = {r.left(), r.top(), r.width(), lineHeight};
-		QString dataText = SchemaItemSignal::getCoulumnText(drawParam,
-															m_dataType,
-															signal,
-															signalState,
-															signal,				// There is no impact signalfor connection
-															signalState,		// There is no impact signalfor connection
-															m_analogFormat,
-															m_precision);
-
-		DrawHelper::drawText(p, m_font, itemUnit(), dataText, signalRect, Qt::AlignHCenter | Qt::AlignBottom);
 
 		// Draw ConnectionIDs
 		//
-		const QStringList& connIds = connectionIdsAsList();
-		int connectionIndex = 1;
-
 		p->setPen(textColor());
 
-		for (const QString& connectionId : connIds)
+		for (const QString& connectionId : connectionIdsAsList())
 		{
-			QRectF connIdRect = {r.left(), r.top() + lineHeight * connectionIndex, r.width(), lineHeight};
+			QRectF connIdRect = {r.left(), r.top() + lineHeight * textRow, r.width(), lineHeight};
 			DrawHelper::drawText(p, m_font, itemUnit(), connectionId, connIdRect, Qt::AlignHCenter | Qt::AlignVCenter);
 
-			connectionIndex ++;
+			textRow ++;
 		}
 
 		// Draw highlights for m_appSignalIds
 		//
-		if (drawParam->hightlightIds().contains(m_appSignalId) == true)
+		for (const QString& appSignalId : m_appSignalIds)
 		{
-			QRectF highlightRect = boundingRectInDocPt(drawParam);
-			drawHighlightRect(drawParam, highlightRect);
+			if (drawParam->hightlightIds().contains(appSignalId) == true)
+			{
+				QRectF highlightRect = boundingRectInDocPt(drawParam);
+				drawHighlightRect(drawParam, highlightRect);
+				break;
+			}
 		}
 
 		return;
@@ -539,7 +565,7 @@ namespace VFrame30
 
 		// --
 		//
-		int pinCount = 1 + qBound(1, connectionIdsAsList().size(), 256);
+		int pinCount = qBound(2, connectionIdsAsList().size() + appSignalIdsAsList().size(), 256);
 
 		double pinVertGap =	CUtils::snapToGrid(gridSize * static_cast<double>(pinGridStep), gridSize);
 		double minHeight = CUtils::snapToGrid(pinVertGap * static_cast<double>(pinCount), gridSize);
@@ -563,20 +589,38 @@ namespace VFrame30
 							  "\n"
 							  "\nHint: Press F2 to edit AppSignalID and ConnectionID")
 						.arg(connectionIds())
-						.arg(appSignalId());
+						.arg(appSignalIds());
 
 		return str;
 	}
 
-	const QString& SchemaItemReceiver::appSignalId() const
+	QString SchemaItemReceiver::appSignalIds() const
 	{
-		return m_appSignalId;
+		return m_appSignalIds.join(QChar::LineFeed);
 	}
 
-	void SchemaItemReceiver::setAppSignalId(const QString& value)
+	void SchemaItemReceiver::setAppSignalIds(const QString& value)
 	{
-		m_appSignalId = value;
-		m_appSignalId = m_appSignalId.trimmed();
+		setAppSignalIdsAsList(value.split(QRegExp("\\s+"), QString::SkipEmptyParts));
+		return;
+	}
+
+	const QStringList& SchemaItemReceiver::appSignalIdsAsList() const
+	{
+		return m_appSignalIds;
+	}
+
+	void SchemaItemReceiver::setAppSignalIdsAsList(const QStringList& value)
+	{
+		m_appSignalIds = value;
+
+		if (double minHeight = minimumPossibleHeightDocPt(m_cachedGridSize, m_cachedPinGridStep);
+			heightDocPt() < minHeight)
+		{
+			SetHeightInDocPt(minHeight);
+		}
+
+		return;
 	}
 
 	bool SchemaItemReceiver::showValidity() const
@@ -596,6 +640,16 @@ namespace VFrame30
 		{
 			addOutput(1, E::SignalType::Discrete, QLatin1String("validity"));
 		}
+	}
+
+	bool SchemaItemReceiver::multiline() const
+	{
+		return m_multiline;
+	}
+
+	void SchemaItemReceiver::setMultiline(bool value)
+	{
+		m_multiline = value;
 	}
 
 	bool SchemaItemReceiver::isValidityPin(const QUuid& pinGuid) const

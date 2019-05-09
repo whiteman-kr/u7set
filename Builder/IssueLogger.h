@@ -214,7 +214,7 @@ namespace Builder
 		void errALP4137(QString schema, QString schemaItem, QString appSignalId, QString equipmentId, QUuid itemUuid);
 
 		void errALP4150(QString schema, QString schemaItem, QString connectionId, QString equipmentsIds, QUuid itemUuid);
-		void errALP4151(QString schema, QString schemaItem, QString connectionIds, QString equipmentsId, QUuid itemUuid);
+		void errALP4152(QString schema, QString schemaItem, QString connectionId, QString equipmentsId, QUuid itemUuid);
 
 		// ALC			Application logic compiler				5000-5999
 		//

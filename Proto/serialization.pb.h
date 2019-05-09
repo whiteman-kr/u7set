@@ -5611,17 +5611,17 @@ class SchemaItemReceiver : public ::google::protobuf::Message {
   inline bool showvalidity() const;
   inline void set_showvalidity(bool value);
 
-  // optional string appSignalId = 2;
-  inline bool has_appsignalid() const;
-  inline void clear_appsignalid();
-  static const int kAppSignalIdFieldNumber = 2;
-  inline const ::std::string& appsignalid() const;
-  inline void set_appsignalid(const ::std::string& value);
-  inline void set_appsignalid(const char* value);
-  inline void set_appsignalid(const char* value, size_t size);
-  inline ::std::string* mutable_appsignalid();
-  inline ::std::string* release_appsignalid();
-  inline void set_allocated_appsignalid(::std::string* appsignalid);
+  // optional string appSignalIds = 2;
+  inline bool has_appsignalids() const;
+  inline void clear_appsignalids();
+  static const int kAppSignalIdsFieldNumber = 2;
+  inline const ::std::string& appsignalids() const;
+  inline void set_appsignalids(const ::std::string& value);
+  inline void set_appsignalids(const char* value);
+  inline void set_appsignalids(const char* value, size_t size);
+  inline ::std::string* mutable_appsignalids();
+  inline ::std::string* release_appsignalids();
+  inline void set_allocated_appsignalids(::std::string* appsignalids);
 
   // optional int32 dataType = 3 [default = 0];
   inline bool has_datatype() const;
@@ -5644,29 +5644,39 @@ class SchemaItemReceiver : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 analogformat() const;
   inline void set_analogformat(::google::protobuf::int32 value);
 
+  // optional bool multiline = 6 [default = true];
+  inline bool has_multiline() const;
+  inline void clear_multiline();
+  static const int kMultilineFieldNumber = 6;
+  inline bool multiline() const;
+  inline void set_multiline(bool value);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemReceiver)
  private:
   inline void set_has_showvalidity();
   inline void clear_has_showvalidity();
-  inline void set_has_appsignalid();
-  inline void clear_has_appsignalid();
+  inline void set_has_appsignalids();
+  inline void clear_has_appsignalids();
   inline void set_has_datatype();
   inline void clear_has_datatype();
   inline void set_has_precision();
   inline void clear_has_precision();
   inline void set_has_analogformat();
   inline void clear_has_analogformat();
+  inline void set_has_multiline();
+  inline void clear_has_multiline();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::std::string* appsignalid_;
-  bool showvalidity_;
+  ::std::string* appsignalids_;
   ::google::protobuf::int32 datatype_;
+  bool showvalidity_;
+  bool multiline_;
   ::google::protobuf::int32 precision_;
   ::google::protobuf::int32 analogformat_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -19017,73 +19027,73 @@ inline void SchemaItemReceiver::set_showvalidity(bool value) {
   showvalidity_ = value;
 }
 
-// optional string appSignalId = 2;
-inline bool SchemaItemReceiver::has_appsignalid() const {
+// optional string appSignalIds = 2;
+inline bool SchemaItemReceiver::has_appsignalids() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void SchemaItemReceiver::set_has_appsignalid() {
+inline void SchemaItemReceiver::set_has_appsignalids() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void SchemaItemReceiver::clear_has_appsignalid() {
+inline void SchemaItemReceiver::clear_has_appsignalids() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void SchemaItemReceiver::clear_appsignalid() {
-  if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
-    appsignalid_->clear();
+inline void SchemaItemReceiver::clear_appsignalids() {
+  if (appsignalids_ != &::google::protobuf::internal::kEmptyString) {
+    appsignalids_->clear();
   }
-  clear_has_appsignalid();
+  clear_has_appsignalids();
 }
-inline const ::std::string& SchemaItemReceiver::appsignalid() const {
-  return *appsignalid_;
+inline const ::std::string& SchemaItemReceiver::appsignalids() const {
+  return *appsignalids_;
 }
-inline void SchemaItemReceiver::set_appsignalid(const ::std::string& value) {
-  set_has_appsignalid();
-  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
-    appsignalid_ = new ::std::string;
+inline void SchemaItemReceiver::set_appsignalids(const ::std::string& value) {
+  set_has_appsignalids();
+  if (appsignalids_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalids_ = new ::std::string;
   }
-  appsignalid_->assign(value);
+  appsignalids_->assign(value);
 }
-inline void SchemaItemReceiver::set_appsignalid(const char* value) {
-  set_has_appsignalid();
-  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
-    appsignalid_ = new ::std::string;
+inline void SchemaItemReceiver::set_appsignalids(const char* value) {
+  set_has_appsignalids();
+  if (appsignalids_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalids_ = new ::std::string;
   }
-  appsignalid_->assign(value);
+  appsignalids_->assign(value);
 }
-inline void SchemaItemReceiver::set_appsignalid(const char* value, size_t size) {
-  set_has_appsignalid();
-  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
-    appsignalid_ = new ::std::string;
+inline void SchemaItemReceiver::set_appsignalids(const char* value, size_t size) {
+  set_has_appsignalids();
+  if (appsignalids_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalids_ = new ::std::string;
   }
-  appsignalid_->assign(reinterpret_cast<const char*>(value), size);
+  appsignalids_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* SchemaItemReceiver::mutable_appsignalid() {
-  set_has_appsignalid();
-  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
-    appsignalid_ = new ::std::string;
+inline ::std::string* SchemaItemReceiver::mutable_appsignalids() {
+  set_has_appsignalids();
+  if (appsignalids_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalids_ = new ::std::string;
   }
-  return appsignalid_;
+  return appsignalids_;
 }
-inline ::std::string* SchemaItemReceiver::release_appsignalid() {
-  clear_has_appsignalid();
-  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* SchemaItemReceiver::release_appsignalids() {
+  clear_has_appsignalids();
+  if (appsignalids_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = appsignalid_;
-    appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = appsignalids_;
+    appsignalids_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void SchemaItemReceiver::set_allocated_appsignalid(::std::string* appsignalid) {
-  if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
-    delete appsignalid_;
+inline void SchemaItemReceiver::set_allocated_appsignalids(::std::string* appsignalids) {
+  if (appsignalids_ != &::google::protobuf::internal::kEmptyString) {
+    delete appsignalids_;
   }
-  if (appsignalid) {
-    set_has_appsignalid();
-    appsignalid_ = appsignalid;
+  if (appsignalids) {
+    set_has_appsignalids();
+    appsignalids_ = appsignalids;
   } else {
-    clear_has_appsignalid();
-    appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_appsignalids();
+    appsignalids_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
@@ -19151,6 +19161,28 @@ inline ::google::protobuf::int32 SchemaItemReceiver::analogformat() const {
 inline void SchemaItemReceiver::set_analogformat(::google::protobuf::int32 value) {
   set_has_analogformat();
   analogformat_ = value;
+}
+
+// optional bool multiline = 6 [default = true];
+inline bool SchemaItemReceiver::has_multiline() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void SchemaItemReceiver::set_has_multiline() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void SchemaItemReceiver::clear_has_multiline() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void SchemaItemReceiver::clear_multiline() {
+  multiline_ = true;
+  clear_has_multiline();
+}
+inline bool SchemaItemReceiver::multiline() const {
+  return multiline_;
+}
+inline void SchemaItemReceiver::set_multiline(bool value) {
+  set_has_multiline();
+  multiline_ = value;
 }
 
 // -------------------------------------------------------------------

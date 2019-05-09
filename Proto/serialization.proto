@@ -640,10 +640,11 @@ message SchemaItemTransmitter
 message SchemaItemReceiver
 {
     optional bool showValidity = 1 [default = true];
-	optional string appSignalId = 2;
+	optional string appSignalIds = 2;
 	optional int32 dataType = 3 [default = 0];
 	optional int32 precision = 4 [default = 2];
 	optional int32 analogFormat = 5 [default = 102];	// Default 102 (charcode for 'f') is AnalogFormat::f (format as [-]9.9)
+	optional bool multiline = 6 [default = true];
 }
 
 //

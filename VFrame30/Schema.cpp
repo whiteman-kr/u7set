@@ -1260,9 +1260,12 @@ namespace VFrame30
 						if (item->isType<SchemaItemReceiver>() == true)
 						{
 							const SchemaItemReceiver* receiver = item->toType<SchemaItemReceiver>();
-							assert(receiver);
+							Q_ASSERT(receiver);
 
-							signalIds << receiver->appSignalId();
+							for (const QString& appSignalId : receiver->appSignalIdsAsList())
+							{
+								signalIds << appSignalId;
+							}
 						}
 					}
 
