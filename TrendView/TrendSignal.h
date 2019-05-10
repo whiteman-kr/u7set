@@ -139,9 +139,12 @@ namespace TrendLib
 
 	struct TrendArchive
 	{
-		QString appSignalId;		// This fiels is not filled in. Don't use it now
+		TrendArchive() = delete;
+		TrendArchive(QString _appSignalId) : appSignalId(_appSignalId) {}
+
+		QString appSignalId;
 		std::map<TimeStamp, std::shared_ptr<OneHourData>> m_hours;		// Key is rounded to hour (like 9:00, 14:00, ...)
-																		// DO NOT CHANGE type to unordered_map, as it is soppise to be ordered
+																		// DO NOT CHANGE type to unordered_map, as it is suppose to be ordered
 
 		// Serialization
 		//
@@ -299,7 +302,7 @@ namespace TrendLib
 		std::list<TrendSignalParam> m_signalParams;
 
 		mutable QMutex m_archiveMutex;
-		mutable std::map<Hash, TrendArchive> m_archiveLocalTime;
+		mutable std::map<Hash, TrendArchive> m_archiveLocalTime;		// Key is hash from appsignalid
 		mutable std::map<Hash, TrendArchive> m_archiveSystemTime;
 		mutable std::map<Hash, TrendArchive> m_archivePlantTime;
 	};

@@ -3,8 +3,8 @@
 #include "DialogTrendSignalPoint.h"
 #include "TrendSettings.h"
 
-TrendPointsModel::TrendPointsModel(QObject *parent)
-	:QAbstractTableModel(parent)
+TrendPointsModel::TrendPointsModel(QObject* parent)
+	: QAbstractTableModel(parent)
 {
 }
 
@@ -21,7 +21,7 @@ void TrendPointsModel::setPrecision(int value)
 void TrendPointsModel::setSignalData(std::list<std::shared_ptr<TrendLib::OneHourData>>& signalData, E::TimeType timeType)
 {
 	// Delete old data
-
+	//
 	if (rowCount() > 0)
 	{
 		beginRemoveRows(QModelIndex(), 0, rowCount() - 1);
@@ -29,12 +29,12 @@ void TrendPointsModel::setSignalData(std::list<std::shared_ptr<TrendLib::OneHour
 	}
 
 	// Set new data
-
+	//
 	m_signalData.swap(signalData);
 	m_timeType = timeType;
 
 	// Calculate new m_rowCount
-
+	//
 	m_rowCount = 0;
 
 	for (const auto& oneHourDataPtr : m_signalData)
@@ -46,7 +46,7 @@ void TrendPointsModel::setSignalData(std::list<std::shared_ptr<TrendLib::OneHour
 	}
 
 	// Insert new rows
-
+	//
 	if (rowCount() > 0)
 	{
 		beginInsertRows(QModelIndex(), 0, rowCount() - 1);
@@ -94,6 +94,10 @@ TrendLib::TrendStateItem TrendPointsModel::stateItemByIndex(int index, int* oneH
 	}
 
 	int currentIndex = 0;
+	*oneHourIndex = 0;
+	*recordIndex = 0;
+	*stateIndex = 0;
+	*ok = 0;
 
 	for (const auto& oneHourDataPtr : m_signalData)
 	{
@@ -114,6 +118,7 @@ TrendLib::TrendStateItem TrendPointsModel::stateItemByIndex(int index, int* oneH
 
 			(*recordIndex)++;
 		}
+
 		(*oneHourIndex)++;
 	}
 
@@ -121,17 +126,17 @@ TrendLib::TrendStateItem TrendPointsModel::stateItemByIndex(int index, int* oneH
 	return TrendLib::TrendStateItem();
 }
 
-int TrendPointsModel::rowCount(const QModelIndex & /*parent*/) const
+int TrendPointsModel::rowCount(const QModelIndex& /*parent*/) const
 {
 	return m_rowCount;
 }
 
-int TrendPointsModel::columnCount(const QModelIndex & /*parent*/) const
+int TrendPointsModel::columnCount(const QModelIndex& /*parent*/) const
 {
 	return static_cast<int>(Columns::Count);
 }
 
-QVariant TrendPointsModel::data(const QModelIndex &index, int role) const
+QVariant TrendPointsModel::data(const QModelIndex& index, int role) const
 {
 	if (role == Qt::DisplayRole)
 	{
@@ -154,31 +159,27 @@ QVariant TrendPointsModel::data(const QModelIndex &index, int role) const
 
 		switch (index.column())
 		{
-		case static_cast<int>(Columns::Record):
-		{
-			return QString("%1/%2").arg(oneHourIndex).arg(recordIndex);
-		}
-		case static_cast<int>(Columns::Index):
-		{
-			return QString("%1").arg(stateIndex);
-		}
-		case static_cast<int>(Columns::Time):
-		{
-			return stateItem.getTime(m_timeType).toDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz");
-		}
-		case static_cast<int>(Columns::Value):
-		{
-			if (stateItem.isValid() == false)
-			{
-				return QString("???");
-			}
+			case static_cast<int>(Columns::Record):
+				return QString("%1/%2").arg(oneHourIndex).arg(recordIndex);
 
-			return QString::number(stateItem.value, 'f', m_precision);
-		}
-		default:
-			Q_ASSERT(false);
+			case static_cast<int>(Columns::Index):
+				return QString("%1").arg(stateIndex);
+
+			case static_cast<int>(Columns::Time):
+				return stateItem.getTime(m_timeType).toDateTime().toString("dd.MM.yyyy hh:mm:ss.zzz");
+
+			case static_cast<int>(Columns::Value):
+				if (stateItem.isValid() == false)
+				{
+					return QString("???");
+				}
+				return QString::number(stateItem.value, 'f', m_precision);
+
+			default:
+				Q_ASSERT(false);
 		}
 	}
+
 	return QVariant();
 }
 
@@ -191,31 +192,31 @@ QVariant TrendPointsModel::headerData(int section, Qt::Orientation orientation, 
 			switch (section)
 			{
 			case static_cast<int>(Columns::Number):
-				return QString("#");
+				return QStringLiteral("#");
 			case static_cast<int>(Columns::Record):
-				return QString("Record");
+				return QStringLiteral("Record");
 			case static_cast<int>(Columns::Index):
-				return QString("Index");
+				return QStringLiteral("Index");
 			case static_cast<int>(Columns::Time):
-				return QString("Time");
+				return QStringLiteral("Time");
 			case static_cast<int>(Columns::Value):
-				return QString("Value");
+				return QStringLiteral("Value");
 			default:
 				Q_ASSERT(false);
 			}
 		}
 	}
+
 	return QVariant();
 }
 
 
-
-
+//--
 //
-
-DialogTrendSignalPoints::DialogTrendSignalPoints(const TrendLib::TrendSignalParam& trendSignal, TrendLib::TrendSignalSet* trendSignalSet,
+DialogTrendSignalPoints::DialogTrendSignalPoints(const TrendLib::TrendSignalParam& trendSignal,
+												 TrendLib::TrendSignalSet* trendSignalSet,
 												 E::TimeType timeType, E::TrendMode trendMode,
-												 QWidget *parent) :
+												 QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogTrendSignalPoints),
 	m_trendSignal(trendSignal),
@@ -232,16 +233,16 @@ DialogTrendSignalPoints::DialogTrendSignalPoints(const TrendLib::TrendSignalPara
 	ui->setupUi(this);
 	setWindowTitle(tr("Points - %1").arg(m_trendSignal.appSignalId()));
 
+	// --
 	//
-
 	m_editStateItem.local = TimeStamp(QDateTime::currentDateTime()).timeStamp;
 	m_editStateItem.system = m_editStateItem.local;
 	m_editStateItem.plant = m_editStateItem.local;
 	m_editStateItem.setValid(true);
 	m_editStateItem.value = 0;
 
+	// --
 	//
-
 	ui->tableView->setModel(&m_pointsModel);
 	ui->tableView->setWordWrap(false);
 	ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -250,7 +251,7 @@ DialogTrendSignalPoints::DialogTrendSignalPoints(const TrendLib::TrendSignalPara
 	ui->tableView->horizontalHeader()->setSectionResizeMode(static_cast<int>(TrendPointsModel::Columns::Value), QHeaderView::Stretch);
 
 	// Combo
-
+	//
 	ui->comboTimeType->blockSignals(true);
 	ui->comboTimeType->addItem(tr("ServerTime"), static_cast<int>(E::TimeType::Local));
 	ui->comboTimeType->addItem(tr("ServerTime +0UTC"), static_cast<int>(E::TimeType::System));
@@ -268,14 +269,14 @@ DialogTrendSignalPoints::DialogTrendSignalPoints(const TrendLib::TrendSignalPara
 	ui->comboTimeType->blockSignals(false);
 
 	// Precision
-
+	//
 	if (m_trendSignal.type() == E::SignalType::Analog)
 	{
 		m_pointsModel.setPrecision(trendSignal.precision());
 	}
 
 	//
-
+	//
 	updatePoints();
 
 	ui->tableView->resizeColumnsToContents();
@@ -318,7 +319,7 @@ void DialogTrendSignalPoints::on_buttonAdd_clicked()
 	}
 
 	// Add new state item
-
+	//
 	m_editStateItem = stateItems[0];
 
 	m_trendSignalSet->addTrendPoint(m_trendSignal.appSignalId(), m_timeType, m_editStateItem);
@@ -331,7 +332,7 @@ void DialogTrendSignalPoints::on_buttonAdd_clicked()
 	}
 
 	// Select added item
-
+	//
 	int addedIndex = m_pointsModel.stateItemIndex(m_editStateItem);
 	if (addedIndex != -1)
 	{
@@ -339,8 +340,8 @@ void DialogTrendSignalPoints::on_buttonAdd_clicked()
 		ui->tableView->scrollTo(m_pointsModel.index(addedIndex, 0));
 	}
 
+	// --
 	//
-
 	emit signalPointsChanged();
 
 	return;
@@ -391,7 +392,7 @@ void DialogTrendSignalPoints::on_buttonEdit_clicked()
 	}
 
 	// Delete old points
-
+	//
 	std::sort(selectedRows.begin(), selectedRows.end(), std::greater<int>());
 
 	for (int row : selectedRows)
@@ -404,7 +405,7 @@ void DialogTrendSignalPoints::on_buttonEdit_clicked()
 	}
 
 	// Add new points
-
+	//
 	for (TrendLib::TrendStateItem stateItem : stateItems)
 	{
 		m_trendSignalSet->addTrendPoint(m_trendSignal.appSignalId(), m_timeType, stateItem);

@@ -28,7 +28,7 @@ public:
 	};
 
 public:
-	TrendPointsModel(QObject *parent = nullptr);
+	explicit TrendPointsModel(QObject* parent = nullptr);
 
 	int precision() const;
 	void setPrecision(int value);
@@ -38,11 +38,11 @@ public:
 	int stateItemIndex(const TrendLib::TrendStateItem& stateItem) const;
 	TrendLib::TrendStateItem stateItemByIndex(int index, int* oneHourIndex, int* recordIndex, int* stateIndex, bool* ok) const;
 
-	int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+	int rowCount(const QModelIndex& parent = QModelIndex()) const override;
 
 private:
-	int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-	QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+	int columnCount(const QModelIndex& parent = QModelIndex()) const override;
+	QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
 
@@ -66,7 +66,7 @@ public:
 									 TrendLib::TrendSignalSet* trendSignalSet,
 									 E::TimeType timeType,
 									 E::TrendMode trendMode,
-									 QWidget *parent = nullptr);
+									 QWidget* parent = nullptr);
 	~DialogTrendSignalPoints();
 
 signals:
@@ -78,8 +78,7 @@ private slots:
 	void on_buttonRemove_clicked();
 	void on_comboTimeType_currentIndexChanged(int index);
 
-
-	void on_tableView_doubleClicked(const QModelIndex &index);
+	void on_tableView_doubleClicked(const QModelIndex& index);
 
 private:
 	void updatePoints();

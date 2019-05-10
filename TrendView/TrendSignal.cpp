@@ -74,8 +74,8 @@ namespace TrendLib
 
 		for (int i = 0; i < message.records_size(); i++)
 		{
-			data.emplace_back();
-			ok &= data.back().load(message.records(i));
+			TrendStateRecord& record = data.emplace_back();
+			ok &= record.load(message.records(i));
 		}
 
 		return ok;
@@ -91,7 +91,6 @@ namespace TrendLib
 
 		bool ok = true;
 
-		//message->set_app_signal_id(mapAppSignalId.toStdString());
 		message->set_app_signal_id(mapAppSignalId.toStdString());
 
 		for (std::pair<TimeStamp, std::shared_ptr<OneHourData>> p : m_hours)
@@ -459,7 +458,7 @@ namespace TrendLib
 
 				QString appSingalId = QString::fromStdString(messageArchive.app_signal_id());
 
-				auto itp = m_archiveLocalTime.emplace(::calcHash(appSingalId), TrendArchive());
+				auto itp = m_archiveLocalTime.emplace(::calcHash(appSingalId), TrendArchive(appSingalId));
 
 				TrendArchive& ta = itp.first->second;
 				ok &= ta.load(messageArchive);
@@ -471,7 +470,7 @@ namespace TrendLib
 
 				QString appSingalId = QString::fromStdString(messageArchive.app_signal_id());
 
-				auto itp = m_archiveSystemTime.emplace(::calcHash(appSingalId), TrendArchive());
+				auto itp = m_archiveSystemTime.emplace(::calcHash(appSingalId), TrendArchive(appSingalId));
 
 				TrendArchive& ta = itp.first->second;
 				ok &= ta.load(messageArchive);
@@ -483,7 +482,7 @@ namespace TrendLib
 
 				QString appSingalId = QString::fromStdString(messageArchive.app_signal_id());
 
-				auto itp = m_archivePlantTime.emplace(::calcHash(appSingalId), TrendArchive());
+				auto itp = m_archivePlantTime.emplace(::calcHash(appSingalId), TrendArchive(appSingalId));
 
 				TrendArchive& ta = itp.first->second;
 				ok &= ta.load(messageArchive);
@@ -671,6 +670,8 @@ namespace TrendLib
 			return false;
 		}
 
+		outData->clear();
+
 		// Find Signal
 		//
 		QMutexLocker locker(&m_archiveMutex);
@@ -694,18 +695,10 @@ namespace TrendLib
 
 		TrendArchive& archive = archiveIt->second;		// archive is MUTABLE
 
-		std::vector<TimeStamp> allTimeStamps;
-
-		for (auto it = archive.m_hours.begin(); it != archive.m_hours.end(); it++)
-		{
-			allTimeStamps.push_back(it->first);
-		}
-
-		std::sort(allTimeStamps.begin(), allTimeStamps.end(), std::less<TimeStamp>());
-
 		// --
 		//
-		for (TimeStamp archHour : allTimeStamps)
+		//for (TimeStamp archHour : allTimeStamps)
+		for (const auto&[archHour, hourData] : archive.m_hours)
 		{
 			if (archHour.toDateTime().time().minute() != 0 ||
 				archHour.toDateTime().time().second() != 0 ||
@@ -717,15 +710,6 @@ namespace TrendLib
 				return false;
 			}
 
-			auto archHourIt = archive.m_hours.find(archHour);
-
-			if (archHourIt == archive.m_hours.end())
-			{
-				Q_ASSERT(false);
-				return false;
-			}
-
-			std::shared_ptr<OneHourData> hourData = archHourIt->second;
 			if (hourData == nullptr)
 			{
 				Q_ASSERT(hourData);
@@ -754,6 +738,8 @@ namespace TrendLib
 			Q_ASSERT(from <= to);
 			return false;
 		}
+
+		outData->clear();
 
 		// Find Signal
 		//
@@ -802,7 +788,6 @@ namespace TrendLib
 			}
 
 			auto archHourIt = archive.m_hours.find(archHour);
-
 			if (archHourIt == archive.m_hours.end())
 			{
 				continue;
@@ -854,7 +839,7 @@ namespace TrendLib
 			auto archiveIt = m_archive->find(::calcHash(appSignalId));
 			if (archiveIt == m_archive->end())
 			{
-				auto emplaceResult = m_archive->emplace(::calcHash(appSignalId), TrendArchive());
+				auto emplaceResult = m_archive->emplace(::calcHash(appSignalId), TrendArchive(appSignalId));
 				archiveIt = emplaceResult.first;
 			}
 
@@ -944,7 +929,7 @@ namespace TrendLib
 		auto archiveIt = m_archive->find(::calcHash(appSignalId));
 		if (archiveIt == m_archive->end())
 		{
-			m_archive->emplace(::calcHash(appSignalId), TrendArchive());
+			m_archive->emplace(::calcHash(appSignalId), TrendArchive(appSignalId));
 
 			archiveIt = m_archive->find(::calcHash(appSignalId));
 
@@ -973,7 +958,7 @@ namespace TrendLib
 		if (stateTimeHourIt == archive.m_hours.end())
 		{
 			// No such hour, create data and add it
-
+			//
 			hourData = std::make_shared<OneHourData>();
 			archive.m_hours[stateTimeHour] = hourData;
 		}
@@ -993,7 +978,7 @@ namespace TrendLib
 		TimeStamp stateTime = stateItem.getTime(timeType);
 
 		// Try to insert the record between two time-neighbour records
-
+		//
 		TimeStamp previousTime;
 		TimeStamp nextTime;
 		bool timePreviousInitialized = false;
@@ -1023,32 +1008,30 @@ namespace TrendLib
 		}
 
 		// Record was not inserted between two neighbours, add it at the beginning or at the end
-
+		//
 		if (hourData->data.empty() == true)
 		{
 			// If no records exist in hour data, add the record
-
-			TrendStateRecord record;
-			hourData->data.push_back(record);
+			//
+			hourData->data.emplace_back();		// TrendStateRecord record;
 		}
 
 		if (stateTime > nextTime)
 		{
 			// Insert at the end
-
+			//
 			TrendStateRecord& record = hourData->data[hourData->data.size() - 1];
 			record.states.push_back(stateItem);
 		}
 		else
 		{
 			// Insert at the beginning
-
+			//
 			TrendStateRecord& record = hourData->data[0];
 			record.states.insert(record.states.begin(), stateItem);
 		}
 
 		return true;
-
 	}
 
 	bool TrendSignalSet::removeTrendPoint(QString appSignalId, int index, E::TimeType timeType)
@@ -1291,7 +1274,7 @@ namespace TrendLib
 		auto archiveIt = m_archive->find(::calcHash(appSignalId));
 		if (archiveIt == m_archive->end())
 		{
-			auto emplaceResult = m_archive->emplace(::calcHash(appSignalId), TrendArchive());
+			auto emplaceResult = m_archive->emplace(::calcHash(appSignalId), TrendArchive(appSignalId));
 			archiveIt = emplaceResult.first;
 		}
 
