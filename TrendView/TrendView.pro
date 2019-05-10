@@ -41,7 +41,9 @@ SOURCES += \
     DialogTrendSignalProperties.cpp \
     ../Proto/trends.pb.cc \
     TrendRuler.cpp \
-    TrendParam.cpp
+    TrendParam.cpp \
+    DialogTrendSignalPoints.cpp \
+    DialogTrendSignalPoint.cpp
 
 HEADERS += \
     Stable.h \
@@ -56,7 +58,9 @@ HEADERS += \
     ../Proto/trends.pb.h \
     TrendRuler.h \
     TrendParam.h \
-    ../lib/CUtils.h
+    ../lib/CUtils.h \
+    DialogTrendSignalPoints.h \
+    DialogTrendSignalPoint.h
 
 unix {
     target.path = /usr/lib
@@ -68,7 +72,9 @@ RESOURCES += \
 
 FORMS += \
     TrendsMainWindow.ui \
-    DialogTrendSignalProperties.ui
+    DialogTrendSignalProperties.ui \
+    DialogTrendSignalPoints.ui \
+    DialogTrendSignalPoint.ui
 
 
 #protobuf

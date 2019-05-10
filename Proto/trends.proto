@@ -27,6 +27,7 @@ message TrendSignalParam
 
     optional int32 type = 10;				// enum E::SignalType
 	optional string unit = 11;
+	optional int32 precision = 12;
 
     optional double high_limit = 20;
 	optional double low_limit = 21;

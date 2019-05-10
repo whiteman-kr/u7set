@@ -13,18 +13,41 @@ class DialogTrendSignalProperties : public QDialog
 	Q_OBJECT
 
 public:
-	DialogTrendSignalProperties(const TrendLib::TrendSignalParam& trendSignal, QWidget* parent);
+	DialogTrendSignalProperties(const TrendLib::TrendSignalParam& trendSignal,
+								TrendLib::TrendSignalSet* trendSignalSet,
+								E::TimeType timeType,
+								E::TrendMode trendMode,
+								QWidget* parent);
 	~DialogTrendSignalProperties();
 
 	const TrendLib::TrendSignalParam& trendSignal() const;		// result
 
+signals:
+	void signalPropertiesChanged();	// emitted when user presses apply or OK button
+
 public slots:
 	virtual void accept() override;
+
+private slots:
+	void on_buttonPoints_clicked();
+	void on_buttonApply_clicked();
+
+private:
+	bool applyProperties();
 
 private:
 	Ui::DialogTrendSignalProperties *ui;
 
 	TrendLib::TrendSignalParam m_trendSignal;
+
+	// Parameters needed for points dialog
+
+	TrendLib::TrendSignalSet* m_trendSignalSet = nullptr;
+	QString m_appSignalId;
+	E::TimeType m_timeType = E::TimeType::Plant;
+	E::TrendMode m_trendMode = E::TrendMode::Archive;
+
+	//
 };
 
 class ChooseColorWidget : public QLabel

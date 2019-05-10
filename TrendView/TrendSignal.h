@@ -53,6 +53,18 @@ namespace TrendLib
 			return (flags & 0x00000001);
 		}
 
+		void setValid(bool valid)
+		{
+			if (valid == true)
+			{
+				flags |= 0x00000001;
+			}
+			else
+			{
+				flags &= ~0x00000001;
+			}
+		}
+
 		bool isRealtimePoint() const
 		{
 			return (flags & 0x80000000) ? true : false;
@@ -177,6 +189,9 @@ namespace TrendLib
 		QString unit() const;
 		void setUnit(const QString& value);
 
+		int precision() const;
+		void setPrecision(int value);
+
 		double highLimit() const;
 		void setHighLimit(double value);
 
@@ -210,6 +225,7 @@ namespace TrendLib
 
 		E::SignalType m_type = E::SignalType::Analog;
 		QString m_unit;
+		int m_precision = 0;
 
 		double m_highLimit = 1.0;
 		double m_lowLimit = 0;
@@ -251,8 +267,12 @@ namespace TrendLib
 		int discretesSignalsCount() const;
 		int analogSignalsCount() const;
 
+		bool getFullExistingTrendData(QString appSignalId, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
 		bool getExistingTrendData(QString appSignalId, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
 		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
+
+		bool addTrendPoint(QString appSignalId, E::TimeType timeType, TrendStateItem stateItem);
+		bool removeTrendPoint(QString appSignalId, int index, E::TimeType timeType);
 
 		void clear(E::TimeType timeType);
 
