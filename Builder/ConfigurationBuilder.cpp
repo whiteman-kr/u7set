@@ -437,7 +437,13 @@ namespace Builder
 
 		if (jsResult.isError() == true)
 		{
-			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Uncaught exception while generating module configuration '%1': %2").arg(lmDescription->configurationStringFile()).arg(jsResult.toString()));
+			QString errorMessage = tr("Uncaught exception while generating module configuration '%1': %2, lineNumber: %3, Stack: %4, ")
+									.arg(lmDescription->configurationStringFile())
+									.arg(jsResult.toString())
+									.arg(jsResult.property("lineNumber").toInt())
+									.arg(jsResult.property("stack").toString());
+
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, errorMessage);
 			return false;
 		}
 
