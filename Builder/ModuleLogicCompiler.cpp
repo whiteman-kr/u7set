@@ -1549,7 +1549,12 @@ namespace Builder
 		//
 		const LogicPin& outPin = outputs[outPinIndex];
 
-		QString appSignalID = ualReceiver->appSignalId();
+		if (ualReceiver->appSignalIdsAsList().size() > 1)
+		{
+			m_log->errINT1001(QString("SchemaItemReceiver has more then one AppSignalID"), ualItem->schemaID(), ualItem->guid());
+		}
+
+		QString appSignalID = ualReceiver->appSignalIds();
 
 		bool result = true;
 
@@ -5651,7 +5656,12 @@ namespace Builder
 			return true;				// process Serial connections receivers only
 		}
 
-		QString rxSignalID = receiver.appSignalId();
+		if (receiver.appSignalIdsAsList().size() > 1)
+		{
+			m_log->errINT1001(QString("SchemaItemReceiver has more then one AppSignalID"), item->schemaID(), item->guid());
+		}
+
+		QString rxSignalID = receiver.appSignalIds();
 
 		if (m_chassisSignals.contains(rxSignalID) == false)
 		{
@@ -5789,11 +5799,16 @@ namespace Builder
 				continue;
 			}
 
+			if (ualReceiver->appSignalIdsAsList().size() > 1)
+			{
+				m_log->errINT1001(QString("SchemaItemReceiver has more then one AppSignalID"), ualItem->schemaID(), ualItem->guid());
+			}
+
 			SignalAddress16 rxAddress;
 
 			bool res = m_optoModuleStorage->getRxSignalAbsAddress(ualItem->schemaID(),
 													   ualReceiver->connectionIds(),
-													   ualReceiver->appSignalId(),
+													   ualReceiver->appSignalIds(),
 													   lmEquipmentID(),
 													   ualReceiver->guid(),
 													   &rxAddress);

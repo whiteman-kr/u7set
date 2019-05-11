@@ -42,6 +42,8 @@ namespace TrendLib
 		s.setValue("Trends/MainWindow/ToolBar/timeTypeIndex", m_timeTypeIndex);
 		s.setValue("Trends/MainWindow/ToolBar/timeType", m_timeType);
 
+		s.setValue("Trends/DialogTrendSignalPoints/allowPointsEditing", m_allowPointsEditing);
+
 		return;
 	}
 
@@ -57,6 +59,8 @@ namespace TrendLib
 		m_laneCount = s.value("Trends/MainWindow/ToolBar/laneCount", 2).toInt();
 		m_timeTypeIndex = s.value("Trends/MainWindow/ToolBar/timeTypeIndex", 0).toInt();
 		m_timeType = s.value("Trends/MainWindow/ToolBar/timeType", 0).toInt();
+
+		m_allowPointsEditing = s.value("Trends/DialogTrendSignalPoints/allowPointsEditing", false).toBool();
 
 		return;
 	}

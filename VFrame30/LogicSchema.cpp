@@ -195,8 +195,10 @@ namespace VFrame30
 					if (const VFrame30::SchemaItemReceiver* itemReceiver = item->toType<VFrame30::SchemaItemReceiver>();
 						itemReceiver != nullptr)
 					{
-						QString appSignalId = itemReceiver->appSignalId();
-						signalMap.insert(appSignalId);
+						for (const QString& appSignalId : itemReceiver->appSignalIdsAsList())
+						{
+							signalMap.insert(appSignalId);
+						}
 					}
 				}
 

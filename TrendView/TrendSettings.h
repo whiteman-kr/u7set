@@ -41,6 +41,8 @@ namespace TrendLib
 		int m_timeTypeIndex = 0;
 		int m_timeType = 0;
 
+		bool m_allowPointsEditing = false;
+
 	private:
 		mutable QMutex m_mutex;
 	};

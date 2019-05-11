@@ -53,6 +53,18 @@ namespace TrendLib
 			return (flags & 0x00000001);
 		}
 
+		void setValid(bool valid)
+		{
+			if (valid == true)
+			{
+				flags |= 0x00000001;
+			}
+			else
+			{
+				flags &= ~0x00000001;
+			}
+		}
+
 		bool isRealtimePoint() const
 		{
 			return (flags & 0x80000000) ? true : false;
@@ -127,9 +139,12 @@ namespace TrendLib
 
 	struct TrendArchive
 	{
-		QString appSignalId;		// This fiels is not filled in. Don't use it now
+		TrendArchive() = delete;
+		TrendArchive(QString _appSignalId) : appSignalId(_appSignalId) {}
+
+		QString appSignalId;
 		std::map<TimeStamp, std::shared_ptr<OneHourData>> m_hours;		// Key is rounded to hour (like 9:00, 14:00, ...)
-																		// DO NOT CHANGE type to unordered_map, as it is soppise to be ordered
+																		// DO NOT CHANGE type to unordered_map, as it is suppose to be ordered
 
 		// Serialization
 		//
@@ -177,6 +192,9 @@ namespace TrendLib
 		QString unit() const;
 		void setUnit(const QString& value);
 
+		int precision() const;
+		void setPrecision(int value);
+
 		double highLimit() const;
 		void setHighLimit(double value);
 
@@ -210,6 +228,7 @@ namespace TrendLib
 
 		E::SignalType m_type = E::SignalType::Analog;
 		QString m_unit;
+		int m_precision = 0;
 
 		double m_highLimit = 1.0;
 		double m_lowLimit = 0;
@@ -251,8 +270,12 @@ namespace TrendLib
 		int discretesSignalsCount() const;
 		int analogSignalsCount() const;
 
+		bool getFullExistingTrendData(QString appSignalId, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
 		bool getExistingTrendData(QString appSignalId, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
 		bool getTrendData(QString appSignalId, QDateTime from, QDateTime to, E::TimeType timeType, std::list<std::shared_ptr<OneHourData>>* outData) const;
+
+		bool addTrendPoint(QString appSignalId, E::TimeType timeType, TrendStateItem stateItem);
+		bool removeTrendPoint(QString appSignalId, int index, E::TimeType timeType);
 
 		void clear(E::TimeType timeType);
 
@@ -279,7 +302,7 @@ namespace TrendLib
 		std::list<TrendSignalParam> m_signalParams;
 
 		mutable QMutex m_archiveMutex;
-		mutable std::map<Hash, TrendArchive> m_archiveLocalTime;
+		mutable std::map<Hash, TrendArchive> m_archiveLocalTime;		// Key is hash from appsignalid
 		mutable std::map<Hash, TrendArchive> m_archiveSystemTime;
 		mutable std::map<Hash, TrendArchive> m_archivePlantTime;
 	};

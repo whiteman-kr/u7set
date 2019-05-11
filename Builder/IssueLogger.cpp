@@ -2464,11 +2464,11 @@ namespace Builder
 						.arg(equipmentsIds));
 	}
 
-	/// IssueCode: ALP4151
+	/// IssueCode: ALP4152
 	///
 	/// IssueType: Error
 	///
-	/// Title:		Receiver must have the only ConnectionID per channel, LogicSchemaID: %1, Receiver Item: %2, ConnectionIDs: %3, EquipmentID %4.
+	/// Title:		Receiver must have the only AppSignalID per channel, LogicSchemaID: %1, Receiver Item: %2, ConnectionID: %3, EquipmentID %4.
 	///
 	/// Parameters:
 	///		%1 Logic Schema ID
@@ -2477,18 +2477,18 @@ namespace Builder
 	///		%4 Channel EquipmentID(s)
 	///
 	/// Description:
-	///		Receiver must have the only ConnectionID per channel.
+	///		Receiver must have the only AppSignalID per channel.
 	///
-	void IssueLogger::errALP4151(QString schema, QString receiverItem, QString connectionIds, QString equipmentsId, QUuid itemUuid)
+	void IssueLogger::errALP4152(QString schema, QString schemaItem, QString connectionId, QString equipmentsId, QUuid itemUuid)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 4151, itemUuid);
+		addItemsIssues(OutputMessageLevel::Error, 4152, itemUuid);
 
 		LOG_ERROR(IssueType::AlParsing,
-				  4151,
-				  QString(tr("Receiver must have the only ConnectionID per channel, LogicSchemaID: %1, Receiver Item: %2, ConnectionIDs: %3, EquipmentID %4."))
+				  4152,
+				  QString(tr("Receiver must have the only AppSignalID per channel, LogicSchemaID: %1, Receiver Item: %2, ConnectionID: %3, EquipmentID %4."))
 						.arg(schema)
-						.arg(receiverItem)
-						.arg(connectionIds)
+						.arg(schemaItem)
+						.arg(connectionId)
 						.arg(equipmentsId));
 	}
 

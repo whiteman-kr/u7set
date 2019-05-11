@@ -3958,14 +3958,14 @@ namespace Builder
 			return true;
 		}
 
-		int signalIndexInBlocks = schema->equipmentIdList().indexOf(equipmentId);
+		int equipmentIdIndex = schema->equipmentIdList().indexOf(equipmentId);
 
-		if (signalIndexInBlocks == -1)
+		if (equipmentIdIndex == -1)
 		{
 			// "this" AppLogicModule has LM's equipmentID  but Schema's equipmentIdList does not have any.
 			// How did we end up here?
 			//
-			assert(signalIndexInBlocks != -1);
+			assert(equipmentIdIndex != -1);
 			m_log->errINT1001(QString("AppLogicModule::AppLogicModule(%1) signalIndexInBlocks == -1").arg(schema->schemaId()));
 			return false;
 		}
@@ -3992,7 +3992,7 @@ namespace Builder
 					//
 					const QStringList& signalIds = signalItem->appSignalIdList();
 
-					QString signalId = signalIds[signalIndexInBlocks];
+					QString signalId = signalIds[equipmentIdIndex];
 
 					signalItem->setAppSignalIds(signalId);
 
@@ -4038,43 +4038,56 @@ namespace Builder
 			if (VFrame30::SchemaItemConnection* connectionItem = dynamic_cast<VFrame30::SchemaItemConnection*>(item.get());
 				connectionItem != nullptr)
 			{
-				QStringList connectionIds = connectionItem->connectionIdsAsList();
+				VFrame30::SchemaItemReceiver* receiverItem = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+
+				const QStringList& connectionIds = connectionItem->connectionIdsAsList();
+
+				QStringList receiverAppSignalIds;
+				if (receiverItem != nullptr)
+				{
+					receiverAppSignalIds = receiverItem->appSignalIdsAsList();
+				}
 
 				if (connectionIds.size() == 1)
 				{
+					// If it's receiver and has more then one appsignalid then error
+					//
+					if (receiverItem != nullptr && receiverAppSignalIds.size() != 1)
+					{
+						m_log->errALP4152(schema->schemaId(), receiverItem->buildName(), receiverItem->connectionIds(), equipmentId, receiverItem->guid());
+					}
+
+					continue;
+				}
+
+				// Check if this is receiver in multichannel schema, then it must have the same numbers of conntion ids and
+				// appsignal ids
+				//
+				if (receiverItem != nullptr &&
+					(connectionIds.size() != schema->channelCount() || receiverAppSignalIds.size() != schema->channelCount()))
+				{
+					m_log->errALP4131(schema->schemaId(), receiverItem->buildName(), receiverItem->guid());
 					continue;
 				}
 
 				// Get correct ConnectionID
 				//
-				QStringList accessibleConnectionIds;
+				QString connectionId = connectionIds[equipmentIdIndex];
 
-				for (const QString& connectionId : connectionIds)
+				if (bool accessible = m_opticModuleStorage->isConnectionAccessible(equipmentId, connectionId);
+					accessible == false)
 				{
-					bool accessible = m_opticModuleStorage->isConnectionAccessible(equipmentId, connectionId);
-
-					if (accessible == true)
-					{
-						accessibleConnectionIds.push_back(connectionId);
-					}
-				}
-
-				connectionItem->setConnectionIdsAsList(accessibleConnectionIds);
-
-				if (accessibleConnectionIds.isEmpty() == true)
-				{
-					// Connection id is not accessible from any of the LMs
+					// Connection id is not accessible from LMs
 					//
-					m_log->errALP4150(schema->schemaId(), connectionItem->buildName(), connectionIds.join(", "), equipmentId, connectionItem->guid());
+					m_log->errALP4150(schema->schemaId(), connectionItem->buildName(), connectionId, equipmentId, connectionItem->guid());
 					continue;
 				}
 
-				// Receiver can have the only connection id per channel
-				//
-				if (VFrame30::SchemaItemReceiver* receiverItem = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
-					receiverItem != nullptr && accessibleConnectionIds.size() != 1)
+				connectionItem->setConnectionIds(connectionId);
+
+				if (receiverItem != nullptr)
 				{
-					m_log->errALP4151(schema->schemaId(), receiverItem->buildName(), accessibleConnectionIds.join(", "), equipmentId, receiverItem->guid());
+					receiverItem->setAppSignalIds(receiverAppSignalIds[equipmentIdIndex]);
 				}
 
 				continue;

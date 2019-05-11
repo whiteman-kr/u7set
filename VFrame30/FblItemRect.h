@@ -71,6 +71,8 @@ namespace VFrame30
 								 int pinCount,
 								 int index,
 								 double gridSize, int pinGridStep) const;
+	protected:
+		void drawMultichannelSlashLines(CDrawParam* drawParam, QPen& linePen) const;
 
 		// Other public methods
 		//
