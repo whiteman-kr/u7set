@@ -71,20 +71,20 @@ const double mV_Raw_Mul_32_HIGH_LIMIT = 19.000;
 // limits for thermo resistor
 //
 
-const double Ohm_Pt_a_391_LOW_LIMIT = 17.2451;		// -200
-const double Ohm_Pt_a_391_HIGH_LIMIT = 465.6806;	// 1100
+const double Ohm_Pt_a_391_LOW_LIMIT = 17.24;		// -200
+const double Ohm_Pt_a_391_HIGH_LIMIT = 395.16;		// 850
 
-const double Ohm_Pt_a_385_LOW_LIMIT = 18.5201;		// -200
-const double Ohm_Pt_a_385_HIGH_LIMIT = 390.4811;	// 850
+const double Ohm_Pt_a_385_LOW_LIMIT = 18.52;		// -200
+const double Ohm_Pt_a_385_HIGH_LIMIT = 390.48;		// 850
 
-const double Ohm_Cu_a_428_LOW_LIMIT = 14.4500;		// -200
-const double Ohm_Cu_a_428_HIGH_LIMIT = 185.5500;	// 200
+const double Ohm_Cu_a_428_LOW_LIMIT = 20.53;		// -180
+const double Ohm_Cu_a_428_HIGH_LIMIT = 185.60;		// 200
 
-const double Ohm_Cu_a_426_LOW_LIMIT = 78.6915;		// -50
-const double Ohm_Cu_a_426_HIGH_LIMIT = 185.2340;	// 200
+const double Ohm_Cu_a_426_LOW_LIMIT = 78.70;		// -50
+const double Ohm_Cu_a_426_HIGH_LIMIT = 185.20;		// 200
 
-const double Ohm_Ni_a_617_LOW_LIMIT = 64.8300;		// -70
-const double Ohm_Ni_a_617_HIGH_LIMIT = 223.2100;	// 180
+const double Ohm_Ni_a_617_LOW_LIMIT = 64.83;		// -70
+const double Ohm_Ni_a_617_HIGH_LIMIT = 223.21;		// 180
 
 const double Ohm_Raw_LOW_LIMIT = 0;
 const double Ohm_Raw_HIGH_LIMIT = 1500;
