@@ -607,7 +607,7 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 	return true;
 }
 
-bool DataSourceOnline::getDataToParsing(Times* times, quint16* packetNo, const char** rupData, quint32* rupDataSize, bool* dataReceivingTimeout)
+bool DataSourceOnline::getDataToParsing(Times* times, quint16* packetNo, const char** rupData, int* rupDataSize, bool* dataReceivingTimeout)
 {
 	if (m_dataReadyToParsing == false)
 	{

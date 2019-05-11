@@ -2,10 +2,11 @@
 #include "../lib/AppSignal.h"
 #include "../lib/WUtils.h"
 #include "RtTrendsServer.h"
+#include "AppDataSource.h"
 
 // -------------------------------------------------------------------------------
 //
-// AppSignalStateEx class implementation
+// DynamicAppSignalState class implementation
 //
 // -------------------------------------------------------------------------------
 
@@ -15,19 +16,61 @@ DynamicAppSignalState::DynamicAppSignalState()
 	m_current[1].flags.all = 0;
 }
 
-void DynamicAppSignalState::setSignalParams(int index, Signal* signal)
+void DynamicAppSignalState::setSignalParams(const Signal* signal, const AppSignals& appSignals)
 {
-	if (signal == nullptr)
-	{
-		assert(false);
-		return;
-	}
+	TEST_PTR_RETURN(signal);
 
-	m_index = index;
 	m_signal = signal;
 	m_signalHash = calcHash(signal->appSignalID());
 
-	m_isDiscreteSignal = signal->isDiscrete();
+	m_valueAddr = signal->regValueAddr();
+
+	m_signalType = signal->signalType();
+	m_analogSignalFormat = signal->analogSignalFormat();
+	m_byteOrder = signal->byteOrder();
+	m_dataSize = signal->dataSize();
+
+	if (signal->hasStateFlagsSignals() == true)
+	{
+		static const std::vector<E::AppSignalStateFlagType> flagsTypes = E::values<E::AppSignalStateFlagType>();
+
+		for(E::AppSignalStateFlagType flagType : flagsTypes)
+		{
+			QString flagSignalID = signal->stateFlagSignal(flagType);
+
+			if (flagSignalID.isEmpty() == true)
+			{
+				continue;
+			}
+
+			const Signal* flagSignal = appSignals.value(flagSignalID, nullptr);
+
+			if (flagSignal == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (flagSignal->regValueAddr().isValid() == false)
+			{
+				assert(false);
+				continue;
+			}
+
+			FlagSignalParceInfo fspi;
+
+			fspi.flagType = flagType;
+			fspi.flagSignalID = flagSignal->appSignalID();
+			fspi.flagSignalAddr = flagSignal->regValueAddr();
+
+			flagsSignalsParceInfo.append(fspi);
+
+			if (fspi.flagType == E::AppSignalStateFlagType::Validity)
+			{
+				m_validityAddr = fspi.flagSignalAddr;
+			}
+		}
+	}
 
 	m_archive = signal->archive();
 
@@ -49,18 +92,33 @@ void DynamicAppSignalState::setSignalParams(int index, Signal* signal)
 
 bool DynamicAppSignalState::setState(const Times& time,
 								quint16 packetNo,
-								quint32 validity,
-								double value,
+								const char* rupData,
+								int rupDataSize,
 								int autoArchivingGroup,
 								SimpleAppSignalStatesQueue& statesQueue,
 								const QThread* thread)
 {
+	double value = 0;
+
+	bool result = getValue(rupData, rupDataSize, value);
+
+	RETURN_IF_FALSE(result);
+
+	quint32 validity = 0;
+
+	result = getValidity(rupData, rupDataSize, validity);
+
+	RETURN_IF_FALSE(result);
+
+	//
+
 	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
 	SimpleAppSignalState curState = prevState;
 
 	// curState's fields should be updated always
 	//
 	curState.time = time;
+
 	curState.value = value;
 	curState.packetNo = packetNo;
 
@@ -174,6 +232,10 @@ bool DynamicAppSignalState::setState(const Times& time,
 				curState.flags.aboveHighLimit = (curState.value > m_signal->highEngeneeringUnits() ? 1 : 0);
 				curState.flags.belowLowLimit = (curState.value < m_signal->lowEngeneeringUnits() ? 1 : 0);
 			}
+
+			// update flags from flags signals
+
+//			for()
 		}
 	}
 
@@ -413,6 +475,126 @@ void DynamicAppSignalState::rtSessionsProcessing(const SimpleAppSignalState& sta
 	}
 
 	releaseRtProcessingOwnership(thread);
+}
+
+bool DynamicAppSignalState::getValue(const char* rupData, int rupDataSize, double& value)
+{
+	// get double signal value from rupData buffer using parseInfo
+	//
+	int valueOffset = m_valueAddr.offset() * 2;		// offset in Words => offset in Bytes
+	int bitNo = m_valueAddr.bit();
+
+#ifdef QT_DEBUG
+
+	if (valueOffset < 0 ||
+		valueOffset >= rupDataSize ||
+		bitNo < 0 ||
+		bitNo >= SIZE_16BIT)
+	{
+		assert(false);
+		return false;
+	}
+
+#endif
+
+	switch(m_signalType)
+	{
+	case E::SignalType::Discrete:
+		{
+			quint16 rawValue16 = 0;
+
+			assert(m_dataSize == SIZE_1BIT);
+
+			rawValue16 = *reinterpret_cast<const quint16*>(rupData + valueOffset);
+
+			if (m_byteOrder == E::ByteOrder::BigEndian)
+			{
+				rawValue16 = reverseUint16(rawValue16);
+			}
+
+			value = static_cast<double>((rawValue16 >> bitNo) & 0x0001);
+		}
+		break;
+
+	case E::SignalType::Analog:
+		assert(m_dataSize == SIZE_32BIT);
+		assert(bitNo == 0);
+
+		switch (m_analogSignalFormat)
+		{
+		case E::AnalogAppSignalFormat::Float32:
+			{
+				float rawValueFloat = *reinterpret_cast<const float*>(rupData + valueOffset);
+
+				if (m_byteOrder == E::ByteOrder::BigEndian)
+				{
+					rawValueFloat = reverseFloat(rawValueFloat);
+				}
+
+				value = static_cast<double>(rawValueFloat);
+			}
+			break;
+
+		case E::AnalogAppSignalFormat::SignedInt32:
+			{
+				qint32 rawValueInt32 = *reinterpret_cast<const qint32*>(rupData + valueOffset);
+
+				if (m_byteOrder == E::ByteOrder::BigEndian)
+				{
+					rawValueInt32 = reverseInt32(rawValueInt32);
+				}
+
+				value = static_cast<double>(rawValueInt32);
+			}
+			break;
+
+		default:
+			assert(false);			// unknown m_analogSignalFormat
+		}
+
+		break;
+
+	default:
+		assert(false);				// unknown m_signalType
+		return false;
+	}
+
+	return true;
+}
+
+bool DynamicAppSignalState::getValidity(const char* rupData, int rupDataSize, quint32& validity)
+{
+	if (m_validityAddr.isValid() == false)
+	{
+		validity = AppSignalState::VALID;
+		return true;
+	}
+
+	// get signal validity from m_rupData.data buffer using parseInfo
+	//
+	int validityOffset = m_validityAddr.offset();
+
+	assert(validityOffset != BAD_ADDRESS);
+
+	validityOffset *= 2;					// offset in Words => offset in Bytes
+
+	if (validityOffset >= rupDataSize)
+	{
+		assert(false);
+		validity = AppSignalState::INVALID;
+		return false;
+	}
+
+	quint16 rawValue = *reinterpret_cast<const quint16*>(rupData + validityOffset);
+
+	if (m_byteOrder == E::ByteOrder::BigEndian)
+	{
+		rawValue = reverseUint16(rawValue);
+	}
+
+	validity = static_cast<quint32>((rawValue >> m_validityAddr.bit()) & 0x0001);
+
+	return true;
 }
 
 void DynamicAppSignalState::takeRtProcessingOwnership(const QThread* newProcessingOwner)

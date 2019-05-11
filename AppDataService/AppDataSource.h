@@ -20,35 +20,6 @@ public:
 
 class AppDataSource : public DataSourceOnline
 {
-private:
-	struct FlagSignalParceInfo
-	{
-		E::AppSignalStateFlagType flagType = E::AppSignalStateFlagType::Validity;
-		QString flagSignalID;
-		Address16 flagSignalAddr;
-	};
-
-	struct SignalParseInfo
-	{
-	public:
-		Address16 valueAddr;
-		Address16 validityAddr;
-
-		E::SignalType type = E::SignalType::Discrete;
-		E::AnalogAppSignalFormat analogSignalFormat = E::AnalogAppSignalFormat::Float32;
-		E::ByteOrder byteOrder = E::ByteOrder::BigEndian;
-
-		int dataSize = 1;
-
-		int index = DynamicAppSignalState::NO_INDEX;		// index of signal in AppSignals and AppSignalStates
-
-		QString appSignalID;
-
-		QVector<FlagSignalParceInfo> flagsSignalsParceInfo;
-
-		void setSignalParams(int i, const Signal& s, const AppSignals& appSignals);
-	};
-
 public:
 	AppDataSource();
 	AppDataSource(const DataSource& dataSource);
@@ -70,20 +41,13 @@ public:
 private:
 	int getAutoArchivingGroup(qint64 currentSysTime);
 
-	bool getDoubleValue(const char* rupData, int rupDataSize, const SignalParseInfo& parseInfo, double& value);
-	bool getValidity(const char* rupData, int rupDataSize, const SignalParseInfo& parseInfo, quint32& validity);
-
 	void setAcquiredSignalsCount(int count) { m_acquiredSignalsCount = count; }
 
 	void setSignalStatesQueueSize(int size) { m_signalStatesQueueSize = size; }
 	void setSignalStatesQueueMaxSize(int size) { m_signalStatesQueueMaxSize = size; }
 
 private:
-	DynamicAppSignalStates* m_signalStates = nullptr;
-
-	AppSignals* m_appSignals = nullptr;
-
-	QVector<SignalParseInfo> m_signalsParseInfo;
+	QVector<DynamicAppSignalState*> m_signalStates;
 
 	int m_acquiredSignalsCount = 0;
 

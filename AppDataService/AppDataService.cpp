@@ -494,7 +494,7 @@ void AppDataServiceWorker::createAndInitSignalStates()
 			continue;
 		}
 
-		signalState->setSignalParams(index, signal);
+		signalState->setSignalParams(signal, m_appSignals);
 
 		index++;
 	}

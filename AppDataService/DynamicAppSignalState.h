@@ -9,6 +9,7 @@ namespace RtTrends
 }
 
 class AppSignalState;
+class AppSignals;
 
 struct DynamicAppSignalState
 {
@@ -20,12 +21,12 @@ public:
 public:
 	DynamicAppSignalState();
 
-	void setSignalParams(int index, Signal* signal);
+	void setSignalParams(const Signal* signal, const AppSignals& appSignals);
 
 	bool setState(const Times& time,
 				  quint16 packetNo,
-				  quint32 validity,
-				  double value,
+				  const char* rupData,
+				  int rupDataSize,
 				  int autoArchivingGroup,
 				  SimpleAppSignalStatesQueue& statesQueue,
 				  const QThread* thread);
@@ -70,6 +71,25 @@ public:
 	const Signal* signal() const { return m_signal; }
 
 private:
+	bool getValue(const char* rupData, int rupDataSize, double& value);
+	bool getValidity(const char* rupData, int rupDataSize, quint32& validity);
+
+	void setNewCurState(const SimpleAppSignalState& newCurState);
+	void logState(const SimpleAppSignalState& state);
+
+	// Real time trends support
+	//
+	void takeRtProcessingOwnership(const QThread* newProcessingOwner);
+	void releaseRtProcessingOwnership(const QThread* currentProcessingOwner);
+
+private:
+	struct FlagSignalParceInfo
+	{
+		QString flagSignalID;						// is not filled in Release version
+
+		E::AppSignalStateFlagType flagType = E::AppSignalStateFlagType::Validity;
+		Address16 flagSignalAddr;
+	};
 
 	struct RtSession
 	{
@@ -80,20 +100,27 @@ private:
 	};
 
 private:
-	void setNewCurState(const SimpleAppSignalState& newCurState);
-	void logState(const SimpleAppSignalState& state);
+	const Signal* m_signal = nullptr;
+	Hash m_signalHash;
 
-	// Real time trends support
-	//
-	void takeRtProcessingOwnership(const QThread* newProcessingOwner);
-	void releaseRtProcessingOwnership(const QThread* currentProcessingOwner);
+	// parsing parameters
 
-private:
-	SimpleAppSignalState m_current[2];
-	double m_coarseStoredValue;
-	double m_fineStoredValue;
+	Address16 m_valueAddr;
+	Address16 m_validityAddr;
 
-	std::atomic<int> m_curStateIndex = {0};
+	E::SignalType m_signalType = E::SignalType::Discrete;
+	E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::Float32;
+	E::ByteOrder m_byteOrder = E::ByteOrder::BigEndian;
+
+	double m_absCoarseAperture = 0;
+	double m_absFineAperture = 0;
+
+	int m_dataSize = 1;
+
+	QVector<FlagSignalParceInfo> flagsSignalsParceInfo;		// except  Validity flag signal
+
+
+	void init(const Signal& s, const AppSignals& appSignals);
 
 	// paramters needed to update state
 	//
@@ -110,17 +137,16 @@ private:
 	double m_lowLimit = 0;
 	double m_highLimit = 0;
 
+	double m_coarseStoredValue;
+	double m_fineStoredValue;
+
 	//
 
-	double m_absCoarseAperture = 0;
-	double m_absFineAperture = 0;
+	SimpleAppSignalState m_current[2];
+	std::atomic<int> m_curStateIndex = {0};
+
 
 	int m_autoArchivingGroup = NOT_INITIALIZED_AUTOARCHIVING_GROUP;
-
-	Signal* m_signal = nullptr;
-	Hash m_signalHash;
-
-	int m_index = 0;
 
 	// Real time trends support
 
@@ -147,6 +173,7 @@ public:
 	DynamicAppSignalState* operator [] (int index);
 
 	DynamicAppSignalState* getStateByHash(Hash signalHash);
+	DynamicAppSignalState* getStateByID(const QString& signalID) { return getStateByHash(calcHash(signalID)); }
 
 	void buidlHash2State();
 
