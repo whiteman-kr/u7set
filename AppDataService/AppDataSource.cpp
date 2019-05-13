@@ -145,9 +145,6 @@ bool AppDataSource::parsePacket()
 
 	int autoArchivingGroup = getAutoArchivingGroup(times.system.timeStamp);
 
-	quint32 validity = 0;
-	double value = 0;
-
 	const QThread* thread = QThread::currentThread();
 
 	for(DynamicAppSignalState* signalState : m_signalStates)
