@@ -459,6 +459,13 @@ class TrendSignalParam : public ::google::protobuf::Message {
   inline ::std::string* release_unit();
   inline void set_allocated_unit(::std::string* unit);
 
+  // optional int32 precision = 12;
+  inline bool has_precision() const;
+  inline void clear_precision();
+  static const int kPrecisionFieldNumber = 12;
+  inline ::google::protobuf::int32 precision() const;
+  inline void set_precision(::google::protobuf::int32 value);
+
   // optional double high_limit = 20;
   inline bool has_high_limit() const;
   inline void clear_high_limit();
@@ -508,6 +515,8 @@ class TrendSignalParam : public ::google::protobuf::Message {
   inline void clear_has_type();
   inline void set_has_unit();
   inline void clear_has_unit();
+  inline void set_has_precision();
+  inline void clear_has_precision();
   inline void set_has_high_limit();
   inline void clear_has_high_limit();
   inline void set_has_low_limit();
@@ -526,15 +535,16 @@ class TrendSignalParam : public ::google::protobuf::Message {
   ::std::string* caption_;
   ::std::string* equipment_id_;
   ::std::string* unit_;
+  ::google::protobuf::int32 type_;
+  ::google::protobuf::int32 precision_;
   double high_limit_;
   double low_limit_;
-  ::google::protobuf::int32 type_;
-  ::google::protobuf::uint32 color_;
   double view_high_limit_;
   double view_low_limit_;
+  ::google::protobuf::uint32 color_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
 
   friend void  protobuf_AddDesc_trends_2eproto();
   friend void protobuf_AssignDesc_trends_2eproto();
@@ -1813,15 +1823,37 @@ inline void TrendSignalParam::set_allocated_unit(::std::string* unit) {
   }
 }
 
-// optional double high_limit = 20;
-inline bool TrendSignalParam::has_high_limit() const {
+// optional int32 precision = 12;
+inline bool TrendSignalParam::has_precision() const {
   return (_has_bits_[0] & 0x00000040u) != 0;
 }
-inline void TrendSignalParam::set_has_high_limit() {
+inline void TrendSignalParam::set_has_precision() {
   _has_bits_[0] |= 0x00000040u;
 }
-inline void TrendSignalParam::clear_has_high_limit() {
+inline void TrendSignalParam::clear_has_precision() {
   _has_bits_[0] &= ~0x00000040u;
+}
+inline void TrendSignalParam::clear_precision() {
+  precision_ = 0;
+  clear_has_precision();
+}
+inline ::google::protobuf::int32 TrendSignalParam::precision() const {
+  return precision_;
+}
+inline void TrendSignalParam::set_precision(::google::protobuf::int32 value) {
+  set_has_precision();
+  precision_ = value;
+}
+
+// optional double high_limit = 20;
+inline bool TrendSignalParam::has_high_limit() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void TrendSignalParam::set_has_high_limit() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void TrendSignalParam::clear_has_high_limit() {
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline void TrendSignalParam::clear_high_limit() {
   high_limit_ = 0;
@@ -1837,13 +1869,13 @@ inline void TrendSignalParam::set_high_limit(double value) {
 
 // optional double low_limit = 21;
 inline bool TrendSignalParam::has_low_limit() const {
-  return (_has_bits_[0] & 0x00000080u) != 0;
+  return (_has_bits_[0] & 0x00000100u) != 0;
 }
 inline void TrendSignalParam::set_has_low_limit() {
-  _has_bits_[0] |= 0x00000080u;
+  _has_bits_[0] |= 0x00000100u;
 }
 inline void TrendSignalParam::clear_has_low_limit() {
-  _has_bits_[0] &= ~0x00000080u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline void TrendSignalParam::clear_low_limit() {
   low_limit_ = 0;
@@ -1859,13 +1891,13 @@ inline void TrendSignalParam::set_low_limit(double value) {
 
 // optional double view_high_limit = 31;
 inline bool TrendSignalParam::has_view_high_limit() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
+  return (_has_bits_[0] & 0x00000200u) != 0;
 }
 inline void TrendSignalParam::set_has_view_high_limit() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000200u;
 }
 inline void TrendSignalParam::clear_has_view_high_limit() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline void TrendSignalParam::clear_view_high_limit() {
   view_high_limit_ = 0;
@@ -1881,13 +1913,13 @@ inline void TrendSignalParam::set_view_high_limit(double value) {
 
 // optional double view_low_limit = 32;
 inline bool TrendSignalParam::has_view_low_limit() const {
-  return (_has_bits_[0] & 0x00000200u) != 0;
+  return (_has_bits_[0] & 0x00000400u) != 0;
 }
 inline void TrendSignalParam::set_has_view_low_limit() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000400u;
 }
 inline void TrendSignalParam::clear_has_view_low_limit() {
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline void TrendSignalParam::clear_view_low_limit() {
   view_low_limit_ = 0;
@@ -1903,13 +1935,13 @@ inline void TrendSignalParam::set_view_low_limit(double value) {
 
 // optional uint32 color = 40;
 inline bool TrendSignalParam::has_color() const {
-  return (_has_bits_[0] & 0x00000400u) != 0;
+  return (_has_bits_[0] & 0x00000800u) != 0;
 }
 inline void TrendSignalParam::set_has_color() {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00000800u;
 }
 inline void TrendSignalParam::clear_has_color() {
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline void TrendSignalParam::clear_color() {
   color_ = 0u;

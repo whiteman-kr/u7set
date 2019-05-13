@@ -115,10 +115,7 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 			if (VFrame30::SchemaItemReceiver* schemaItemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
 				schemaItemReceiver != nullptr)
 			{
-				QStringList signalList;
-				QString s = schemaItemReceiver->appSignalId();
-				signalList.push_back(s);
-				signalContextMenu(signalList);
+				signalContextMenu(schemaItemReceiver->appSignalIdsAsList());
 				break;
 			}
 

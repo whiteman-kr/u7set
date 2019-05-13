@@ -505,15 +505,21 @@ static int stdColorIndex = 0;
 			return;
 		}
 
-		DialogTrendSignalProperties d(signal, this);
+		DialogTrendSignalProperties d(signal,
+									  &signalSet(),
+									  m_trendWidget->timeType(),
+									  m_trendWidget->trendMode(),
+									  this);
 
-		bool result = d.exec();
-		if (result == QDialog::Accepted)
-		{
-			ok = signalSet().setSignalParam(d.trendSignal());
-			Q_ASSERT(ok);
-			updateWidget();
-		}
+		connect(&d, &DialogTrendSignalProperties::signalPropertiesChanged, this,
+				[&d, this]()
+				{
+					bool ok = signalSet().setSignalParam(d.trendSignal());
+					Q_ASSERT(ok);
+					this->updateWidget();
+				});
+
+		d.exec();
 
 		return;
 	}

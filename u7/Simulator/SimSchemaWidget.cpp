@@ -100,11 +100,7 @@ void SimSchemaWidget::contextMenuRequested(const QPoint& pos)
 
 			if (schemaItemReceiver != nullptr)
 			{
-				QStringList signalList;
-				QString s = schemaItemReceiver->appSignalId();
-				signalList.push_back(s);
-
-				signalContextMenu(signalList);
+				signalContextMenu(schemaItemReceiver->appSignalIdsAsList());
 				break;
 			}
 

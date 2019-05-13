@@ -5663,11 +5663,12 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 					VFrame30::SchemaItemReceiver* itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
 					assert(itemReceiver);
 
-					const QString& appSignal = itemReceiver->appSignalId();
-
-					if (appSignal.isEmpty() == false)
+					for (const QString& appSignal : itemReceiver->appSignalIdsAsList())
 					{
-						signalStrIds << appSignal;
+						if (appSignal.isEmpty() == false)
+						{
+							signalStrIds << appSignal;
+						}
 					}
 				}
 			}
@@ -5843,10 +5844,12 @@ void EditSchemaWidget::appSignalsProperties(QStringList strIds)
 				VFrame30::SchemaItemReceiver* itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
 				assert(itemReceiver);
 
-				const QString& appSignal = itemReceiver->appSignalId();
-				if (appSignal.isEmpty() == false)
+				for (const QString& appSignal : itemReceiver->appSignalIdsAsList())
 				{
-					appSignalSet << appSignal;
+					if (appSignal.isEmpty() == false)
+					{
+						appSignalSet << appSignal;
+					}
 				}
 			}
 		}
@@ -5927,16 +5930,45 @@ void EditSchemaWidget::appSignalsProperties(QStringList strIds)
 			auto itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
 			assert(itemReceiver);
 
-			QString appSignalId = itemReceiver->appSignalId();
+//			QString appSignalId = itemReceiver->appSignalId();
 
-			auto foundInChanged = newIdsMap.find(appSignalId);
+//			auto foundInChanged = newIdsMap.find(appSignalId);
 
-			if (foundInChanged != newIdsMap.end())
+//			if (foundInChanged != newIdsMap.end())
+//			{
+//				// AppSignalIdWasChanged
+//				//
+//				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(foundInChanged->second), item);
+//			}
+			QStringList signalStrIdList = itemReceiver->appSignalIdsAsList();
+			bool itemsSignalsWereChanged = false;
+
+			for (QString& appSignalId : signalStrIdList)
 			{
-				// AppSignalIdWasChanged
-				//
-				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(foundInChanged->second), item);
+				auto foundInChanged = newIdsMap.find(appSignalId);
+
+				if (foundInChanged != newIdsMap.end())
+				{
+					// AppSignalIdWasChanged
+					//
+					appSignalId = foundInChanged->second;		// appSignalId is a reference
+					itemsSignalsWereChanged = true;
+				}
 			}
+
+			if (itemsSignalsWereChanged == true)
+			{
+				QString oneStringIds;
+				for (const QString& s : signalStrIdList)
+				{
+					oneStringIds += s + QChar::LineFeed;
+				}
+
+				std::shared_ptr<VFrame30::SchemaItem> itemPtrCopy(item);
+
+				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(oneStringIds), itemPtrCopy);
+			}
+
 			continue;
 		}
 	}
@@ -6232,7 +6264,7 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 	}
 
 	QString recConnectionIds = receiver->connectionIds();
-	QString appSignalId = receiver->appSignalId();
+	QString appSignalId = receiver->appSignalIds();
 
 	// Get all connections
 	//
@@ -6272,15 +6304,39 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 	connectionIdControl->setPlaceholderText("Enter ConnectionID(s)");
 	connectionIdControl->setPlainText(recConnectionIds);
 
-	QCompleter* completer = new QCompleter(connectionIds, &d);
-	completer->setFilterMode(Qt::MatchContains);
-	completer->setCaseSensitivity(Qt::CaseSensitive);
-	completer->setMaxVisibleItems(20);
-	connectionIdControl->setCompleter(completer);
+	QCompleter* connectionsCompleter = new QCompleter(connectionIds, &d);
+	connectionsCompleter->setFilterMode(Qt::MatchContains);
+	connectionsCompleter->setCaseSensitivity(Qt::CaseSensitive);
+	connectionsCompleter->setMaxVisibleItems(20);
+	connectionIdControl->setCompleter(connectionsCompleter);
 
+	// QCompleter for signals
+	//
+	SignalsModel* signalModel = SignalsModel::instance();
+	Q_ASSERT(signalModel);
+
+	const SignalSet& signalSet = signalModel->signalSet();
+
+	QStringList appSignalIdsCompleterList;
+	appSignalIdsCompleterList.reserve(signalSet.count());
+
+	for (int i = 0; i < signalSet.count(); i++)
+	{
+		const Signal& signal = signalSet[i];
+		appSignalIdsCompleterList.push_back(signal.appSignalID());
+	}
+
+	QCompleter* appSignalsCompleter = new QCompleter(appSignalIdsCompleterList, &d);
+	appSignalsCompleter->setFilterMode(Qt::MatchContains);
+	appSignalsCompleter->setCaseSensitivity(Qt::CaseSensitive);
+	appSignalsCompleter->setMaxVisibleItems(20);
+
+	// AppSignalIDs widgets
+	//
 	QLabel* appSignalIdLabel = new QLabel("AppSignalID:");
-	QLineEdit* appSignalIdEdit = new QLineEdit(appSignalId);
-	appSignalIdEdit->setValidator(new QRegExpValidator(QRegExp(SignalProperties::cacheValidator), this));
+	QTextEditCompleter* appSignalIdEdit = new QTextEditCompleter(&d);
+	appSignalIdEdit->setPlainText(appSignalId);
+	appSignalIdEdit->setCompleter(appSignalsCompleter);
 
 	QWidget* spacer = new QWidget;
 	spacer->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -6313,7 +6369,7 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 	if (result == QDialog::Accepted)
 	{
 		QString newConnectionId = connectionIdControl->toPlainText();
-		QString newAppSignalId = appSignalIdEdit->text().trimmed();
+		QString newAppSignalId = appSignalIdEdit->toPlainText().trimmed();
 
 		if (newConnectionId != recConnectionIds ||
 			newAppSignalId != appSignalId)
@@ -6332,7 +6388,7 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 			else
 			{
 				receiver->setConnectionIds(newConnectionId);
-				receiver->setAppSignalId(newAppSignalId);
+				receiver->setAppSignalIds(newAppSignalId);
 			}
 		}
 
@@ -8007,12 +8063,13 @@ void EditSchemaWidget::selectionChanged()
 					VFrame30::SchemaItemReceiver* itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
 					assert(itemReceiver);
 
-					const QString& appSignal = itemReceiver->appSignalId();
-
-					if (appSignal.isEmpty() == false)
+					for (const QString& appSignal : itemReceiver->appSignalIdsAsList())
 					{
-						enableAppSignalProperies = true;
-						break;
+						if (appSignal.isEmpty() == false)
+						{
+							enableAppSignalProperies = true;
+							break;
+						}
 					}
 				}
 			}
