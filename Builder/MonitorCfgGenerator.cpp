@@ -111,6 +111,12 @@ namespace Builder
 				}
 
 				m_schemaTagList = schemaTags.split(QRegExp("\\W+"), QString::SkipEmptyParts);
+
+				for (QString& tag : m_schemaTagList)
+				{
+					tag = tag.toLower();
+				}
+
 				schemaTags = m_schemaTagList.join("; ");
 
 				xmlWriter.writeTextElement("SchemaTags", schemaTags);
@@ -199,6 +205,8 @@ namespace Builder
 		{
 			for (QString tag : m_schemaTagList)
 			{
+				tag = tag.toLower();
+
 				auto tagRange = m_schemaTagToFile.equal_range(tag);
 
 				for (auto it = tagRange.first; it != tagRange.second; ++it)
@@ -209,8 +217,8 @@ namespace Builder
 					if (mapTag != tag ||
 						schemaFile == nullptr)
 					{
-						assert(mapTag == tag);
-						assert(schemaFile);
+						Q_ASSERT(mapTag == tag);
+						Q_ASSERT(schemaFile);
 						continue;
 					}
 
