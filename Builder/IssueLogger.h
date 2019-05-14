@@ -431,11 +431,11 @@ namespace Builder
 		void errEQP6108(QString appSignalId, QString filter, QString tuningClientEquipmentId);		//Signal %1 specified in filter %2 in Tuning Client %3 does not exist.
 		void errEQP6109(QString equipmentId, QString tuningClientEquipmentId);	//Tuning Source %1 specified in Tuning Client %2 does not exist.
 
-		void errEQP6110(QString appSignalID);								//  Signal %1 has wrong physical low Limit
-		void errEQP6111(QString appSignalID);								//  Signal %1 has wrong physical high Limit
-		void errEQP6112(QString appSignalID, QString value);				//  Signal %1 - engeneering low Limit mismatch electrical low Limit
-		void errEQP6113(QString appSignalID, QString value);				//  Signal %1 - engeneering high Limit mismatch electrical high Limit
-		void errEQP6114(QString appSignalID);								//  Signal %1 has wrong R0 (ThermoResistor)
+		void errEQP6110(QString appSignalID);												//  Signal %1 has wrong physical low Limit
+		void errEQP6111(QString appSignalID);												//  Signal %1 has wrong physical high Limit
+		void errEQP6112(QString appSignalID, QString wrongValue, QString correctValue);		//  Signal %1 - engeneering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3
+		void errEQP6113(QString appSignalID, QString wrongValue, QString correctValue);		//  Signal %1 - engeneering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3
+		void errEQP6114(QString appSignalID);												//  Signal %1 has wrong R0 (ThermoResistor)
 
 	public:
 		void addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids);
