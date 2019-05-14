@@ -300,8 +300,8 @@ public:
 	double dataReceivingRate() const { return m_dataReceivingRate; }
 	void setDataReceivingRate(double rate) { m_dataReceivingRate = rate; }
 
-	quint64 receivedDataSize() const { return m_receivedDataSize; }
-	void setReceivedDataSize(quint64 dataSize) { m_receivedDataSize = dataSize; }
+	qint64 receivedDataSize() const { return m_receivedDataSize; }
+	void setReceivedDataSize(qint64 dataSize) { m_receivedDataSize = dataSize; }
 
 	qint64 receivedFramesCount() const { return m_receivedFramesCount; }
 	void setReceivedFramesCount(qint64 framesCount) { m_receivedFramesCount = framesCount; }

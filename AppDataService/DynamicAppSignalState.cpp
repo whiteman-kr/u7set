@@ -60,14 +60,22 @@ void DynamicAppSignalState::setSignalParams(const Signal* signal, const AppSigna
 			FlagSignalParceInfo fspi;
 
 			fspi.flagType = flagType;
-			fspi.flagSignalID = flagSignal->appSignalID();
+
+#ifdef Q_DEBUG
+			fspi.flagSignalID = flagSignal->appSignalID();				// required for debugging only
+#endif
+
 			fspi.flagSignalAddr = flagSignal->regValueAddr();
 
-			flagsSignalsParceInfo.append(fspi);
+			Q_ASSERT(fspi.flagSignalAddr.bit() >= 0 && fspi.flagSignalAddr.bit() < 16);
 
 			if (fspi.flagType == E::AppSignalStateFlagType::Validity)
 			{
-				m_validityAddr = fspi.flagSignalAddr;
+				m_validityAddr = fspi.flagSignalAddr;		// validity flag should not be append to m_flagsSignalsParceInfo, it is Ok
+			}
+			else
+			{
+				m_flagsSignalsParceInfo.append(fspi);
 			}
 		}
 	}
@@ -87,7 +95,7 @@ void DynamicAppSignalState::setSignalParams(const Signal* signal, const AppSigna
 		m_absFineAperture = fabs(m_highLimit - m_lowLimit) * (m_fineAperture / 100.0);
 	}
 
-	m_current[0].hash = m_current[1].hash = /*m_stored.hash =*/ calcHash(signal->appSignalID());
+	m_current[0].hash = m_current[1].hash = m_signalHash;
 }
 
 bool DynamicAppSignalState::setState(const Times& time,
@@ -98,29 +106,43 @@ bool DynamicAppSignalState::setState(const Times& time,
 								SimpleAppSignalStatesQueue& statesQueue,
 								const QThread* thread)
 {
-	double value = 0;
-
-	bool result = getValue(rupData, rupDataSize, value);
-
-	RETURN_IF_FALSE(result);
-
-	quint32 validity = 0;
-
-	result = getValidity(rupData, rupDataSize, validity);
-
-	RETURN_IF_FALSE(result);
-
-	//
-
 	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
-	SimpleAppSignalState curState = prevState;
+	SimpleAppSignalState curState;
 
 	// curState's fields should be updated always
 	//
+	curState.hash = m_signalHash;
+
 	curState.time = time;
 
-	curState.value = value;
 	curState.packetNo = packetNo;
+
+	curState.flags.stateAvailable = 1;
+
+	// update validity flag
+
+	bool result = false;
+
+	quint32 validity = AppSignalState::VALID;
+
+	if (m_validityAddr.isValid() == true)
+	{
+		result = getBit(rupData, rupDataSize, m_validityAddr, validity);
+
+		RETURN_IF_FALSE(result);
+	}
+
+	curState.flags.valid = validity;
+
+	// update signal value
+
+	double value = 0;
+
+	result = getValue(rupData, rupDataSize, value);
+
+	RETURN_IF_FALSE(result);
+
+	curState.value = value;
 
 	//
 
@@ -132,16 +154,15 @@ bool DynamicAppSignalState::setState(const Times& time,
 			//
 			if (m_prevStateIsStored == false)
 			{
-				statesQueue.pushAutoPoint(prevState, thread);
+				if (m_archive == true)
+				{
+					statesQueue.pushAutoPoint(prevState, thread);
+				}
 
 				rtSessionsProcessing(prevState, true, thread);
 
 				m_prevStateIsStored = true;
 			}
-
-			//			logState(prevState);
-
-			curState.flags.valid = AppSignalState::INVALID;
 		}
 		else
 		{
@@ -156,34 +177,35 @@ bool DynamicAppSignalState::setState(const Times& time,
 		{
 			// prevState is invalid, archive invalid autopoint
 			//
-			SimpleAppSignalState tmpState = curState;
+			SimpleAppSignalState tmpState = prevState;
 
-			tmpState.time += -1;		// current time offset back on 1 ms
-			tmpState.flags.valid = AppSignalState::INVALID;
-			tmpState.value = 0;
+			tmpState.time = curState.time;
+			tmpState.time += -1;						// current time offset back on 1 ms
 
-			statesQueue.pushAutoPoint(tmpState, thread);
+			if (m_archive == true)
+			{
+				statesQueue.pushAutoPoint(tmpState, thread);
+			}
 
 			rtSessionsProcessing(tmpState, true, thread);
-
-//			logState(autoPointState);
-
-			curState.flags.valid = AppSignalState::VALID;
 		}
 		else
 		{
 			//  prevState also is valid, check signal's value
 			//
-			if (m_isDiscreteSignal == true)
+			switch(m_signalType)
 			{
+			case E::SignalType::Discrete:
+
 				if (curState.value != prevState.value)
 				{
 					curState.flags.fineAperture = 0;		// its important!
 					curState.flags.coarseAperture = 1;		//
 				}
-			}
-			else
-			{
+				break;
+
+			case E::SignalType::Analog:
+
 				// is analog signal, check aperture changes
 				//
 				if (m_adaptiveAperture == true)
@@ -231,11 +253,58 @@ bool DynamicAppSignalState::setState(const Times& time,
 
 				curState.flags.aboveHighLimit = (curState.value > m_signal->highEngeneeringUnits() ? 1 : 0);
 				curState.flags.belowLowLimit = (curState.value < m_signal->lowEngeneeringUnits() ? 1 : 0);
+
+				break;
+
+			case E::SignalType::Bus:
+				assert(false);					// bus signals should not be parsed here
+				break;
+			}
+		}
+
+		// update other signal flags
+		//
+		for(const FlagSignalParceInfo& fspi : m_flagsSignalsParceInfo)
+		{
+			quint32 bit = 0;
+
+			result = getBit(rupData, rupDataSize, fspi.flagSignalAddr, bit);
+
+			if (result == false)
+			{
+				continue;
 			}
 
-			// update flags from flags signals
+			switch(fspi.flagType)
+			{
+			case E::AppSignalStateFlagType::Validity:
+			case E::AppSignalStateFlagType::StateAvailable:
+				assert(false);								// this flags should not be in m_flagsSignalsParceInfo array!
+				break;
 
-//			for()
+			case E::AppSignalStateFlagType::Simulated:
+				curState.flags.simulated = bit;
+				break;
+
+			case E::AppSignalStateFlagType::Blocked:
+				curState.flags.blocked = bit;
+				break;
+
+			case E::AppSignalStateFlagType::Unbalanced:
+				curState.flags.unbalanced = bit;
+				break;
+
+			case E::AppSignalStateFlagType::AboveHighLimit:
+				curState.flags.aboveHighLimit = bit;
+				break;
+
+			case E::AppSignalStateFlagType::BelowLowLimit:
+				curState.flags.belowLowLimit = bit;
+				break;
+
+			default:
+				assert(false);								// unknown flagType
+			}
 		}
 	}
 
@@ -250,7 +319,15 @@ bool DynamicAppSignalState::setState(const Times& time,
 
 	if (hasArchivingReason == true)
 	{
-		statesQueue.push(curState, thread);
+/*		if (curState.flags.hasAutoPointReasonOnly() == false && m_signalType == E::SignalType::Discrete)
+		{
+			qDebug() << C_STR(QString("%1 %2").arg(m_signal->appSignalID()).arg(curState.flags.print()));
+		}*/
+
+		if (m_archive == true)
+		{
+			statesQueue.push(curState, thread);
+		}
 
 		// update stored states
 		//
@@ -562,37 +639,31 @@ bool DynamicAppSignalState::getValue(const char* rupData, int rupDataSize, doubl
 	return true;
 }
 
-bool DynamicAppSignalState::getValidity(const char* rupData, int rupDataSize, quint32& validity)
+bool DynamicAppSignalState::getBit(const char* rupData, int rupDataSize, const Address16& addr, quint32& bit)
 {
-	if (m_validityAddr.isValid() == false)
+	if (addr.isValid() == false)
 	{
-		validity = AppSignalState::VALID;
-		return true;
+		return false;
 	}
 
 	// get signal validity from m_rupData.data buffer using parseInfo
 	//
-	int validityOffset = m_validityAddr.offset();
+	int offset = addr.offset() * 2;	// offset in Words => offset in Bytes
 
-	assert(validityOffset != BAD_ADDRESS);
-
-	validityOffset *= 2;					// offset in Words => offset in Bytes
-
-	if (validityOffset >= rupDataSize)
+	if (offset >= rupDataSize)
 	{
 		assert(false);
-		validity = AppSignalState::INVALID;
 		return false;
 	}
 
-	quint16 rawValue = *reinterpret_cast<const quint16*>(rupData + validityOffset);
+	quint16 rawValue = *reinterpret_cast<const quint16*>(rupData + offset);
 
 	if (m_byteOrder == E::ByteOrder::BigEndian)
 	{
-		rawValue = reverseUint16(rawValue);
+		rawValue = (rawValue >> 8) | (rawValue << 8);			// swap bytes
 	}
 
-	validity = static_cast<quint32>((rawValue >> m_validityAddr.bit()) & 0x0001);
+	bit = static_cast<quint32>((rawValue >> addr.bit()) & 0x0001);
 
 	return true;
 }

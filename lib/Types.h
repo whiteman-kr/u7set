@@ -401,7 +401,7 @@ public:
 		Validity,
 		StateAvailable,
 		Simulated,
-		Locked,
+		Blocked,
 		Unbalanced,
 		AboveHighLimit,
 		BelowLowLimit

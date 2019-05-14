@@ -2086,6 +2086,13 @@ namespace Builder
 	void UalSignal::setAcquired(bool acquired)
 	{
 		m_isAcquired = acquired;
+
+		for(Signal* refSignal : m_refSignals)
+		{
+			TEST_PTR_CONTINUE(refSignal);
+
+			refSignal->setAcquire(acquired);
+		}
 	}
 
 	bool UalSignal::addStateFlagSignal(E::AppSignalStateFlagType flagType, UalSignal* flagSignal, IssueLogger* log)

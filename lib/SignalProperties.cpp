@@ -45,6 +45,7 @@ const QString SignalProperties::electricUnitCaption("ElectricUnit");
 const QString SignalProperties::sensorTypeCaption("SensorType");
 const QString SignalProperties::outputModeCaption("OutputMode");
 const QString SignalProperties::acquireCaption("Acquire");
+const QString SignalProperties::archiveCaption("Archive");
 const QString SignalProperties::decimalPlacesCaption("DecimalPlaces");
 const QString SignalProperties::coarseApertureCaption("CoarseAperture");
 const QString SignalProperties::fineApertureCaption("FineAperture");
@@ -263,6 +264,9 @@ void SignalProperties::initProperties()
 
 	auto acquireProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, acquireCaption, true, Signal::acquire, Signal::setAcquire, m_signal);
 	acquireProperty->setCategory(categoryOnlineMonitoringSystem);
+
+	auto archiveProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, archiveCaption, true, Signal::archive, Signal::setArchive, m_signal);
+	archiveProperty->setCategory(categoryOnlineMonitoringSystem);
 
 	auto byteOrderProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::ByteOrder, byteOrderCaption, true, Signal::byteOrder, Signal::setByteOrder, m_signal);
 	byteOrderProperty->setCategory(categoryDataFormat);

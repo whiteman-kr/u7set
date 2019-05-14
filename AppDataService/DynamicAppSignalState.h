@@ -72,7 +72,7 @@ public:
 
 private:
 	bool getValue(const char* rupData, int rupDataSize, double& value);
-	bool getValidity(const char* rupData, int rupDataSize, quint32& validity);
+	bool getBit(const char* rupData, int rupDataSize, const Address16& addr, quint32& bit);
 
 	void setNewCurState(const SimpleAppSignalState& newCurState);
 	void logState(const SimpleAppSignalState& state);
@@ -85,7 +85,9 @@ private:
 private:
 	struct FlagSignalParceInfo
 	{
-		QString flagSignalID;						// is not filled in Release version
+#ifdef Q_DEBUG
+		QString flagSignalID;				// required for debugging only
+#endif
 
 		E::AppSignalStateFlagType flagType = E::AppSignalStateFlagType::Validity;
 		Address16 flagSignalAddr;
@@ -117,7 +119,7 @@ private:
 
 	int m_dataSize = 1;
 
-	QVector<FlagSignalParceInfo> flagsSignalsParceInfo;		// except  Validity flag signal
+	QVector<FlagSignalParceInfo> m_flagsSignalsParceInfo;		// except  Validity flag signal
 
 
 	void init(const Signal& s, const AppSignals& appSignals);
@@ -125,7 +127,6 @@ private:
 	// paramters needed to update state
 	//
 	bool m_prevStateIsStored = false;
-	bool m_isDiscreteSignal = false;
 
 	bool m_archive = false;
 

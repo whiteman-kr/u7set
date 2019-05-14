@@ -132,6 +132,7 @@ public:
 	static const QString sensorTypeCaption;
 	static const QString outputModeCaption;
 	static const QString acquireCaption;
+	static const QString archiveCaption;
 	static const QString decimalPlacesCaption;
 	static const QString coarseApertureCaption;
 	static const QString fineApertureCaption;

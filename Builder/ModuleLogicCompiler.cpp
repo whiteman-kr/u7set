@@ -2791,7 +2791,7 @@ namespace Builder
 									   E::AppSignalStateFlagType::Simulated, outSignal, nullptr);
 
 			result &= setPinFlagSignal(ualItem, UalAfb::SIMLOCK_BLOCK_PIN_CAPTION, true,
-									   E::AppSignalStateFlagType::Locked, outSignal, nullptr);
+									   E::AppSignalStateFlagType::Blocked, outSignal, nullptr);
 		}
 
 		return result;
@@ -2925,7 +2925,7 @@ namespace Builder
 
 			result &= setPinFlagSignal(ualItem, UalAfb::VALIDITY_PIN_CAPTION, false, E::AppSignalStateFlagType::Validity, inSignal, &flagIsSet);
 			result &= setPinFlagSignal(ualItem, UalAfb::SIMULATED_PIN_CAPTION, false, E::AppSignalStateFlagType::Simulated, inSignal, &flagIsSet);
-			result &= setPinFlagSignal(ualItem, UalAfb::BLOCKED_PIN_CAPTION, false, E::AppSignalStateFlagType::Locked, inSignal, &flagIsSet);
+			result &= setPinFlagSignal(ualItem, UalAfb::BLOCKED_PIN_CAPTION, false, E::AppSignalStateFlagType::Blocked, inSignal, &flagIsSet);
 			result &= setPinFlagSignal(ualItem, UalAfb::UNBALANCED_PIN_CAPTION, false, E::AppSignalStateFlagType::Unbalanced, inSignal, &flagIsSet);
 			result &= setPinFlagSignal(ualItem, UalAfb::HIGH_LIMIT_PIN_CAPTION, false, E::AppSignalStateFlagType::AboveHighLimit, inSignal, &flagIsSet);
 			result &= setPinFlagSignal(ualItem, UalAfb::LOW_LIMIT_PIN_CAPTION, false, E::AppSignalStateFlagType::BelowLowLimit, inSignal, &flagIsSet);
