@@ -6,6 +6,7 @@
 #include "../lib/Signal.h"
 
 #include "RawDataDescription.h"
+#include "ModulesRawData.h"
 #include "../lib/Connection.h"
 
 class LmDescription;
@@ -525,6 +526,12 @@ namespace Hardware
 
 		bool isConnectionAccessible(const QString& lmEquipmentID, const QString& connectionID);
 
+		static int getAllNativeRawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log);
+		static int getModuleRawDataSize(const Hardware::DeviceModule* lm, int modulePlace, bool* moduleIsFound, Builder::IssueLogger* log);
+		static int getModuleRawDataSize(const Hardware::DeviceModule* module, Builder::IssueLogger* log);
+
+		static ModuleRawDataDescription* getModuleRawDataDescription(const Hardware::DeviceModule* module);
+
 	private:
 		bool processConnection(ConnectionShared connection);
 		void prepareLmsAccessibleConnections();
@@ -552,5 +559,7 @@ namespace Hardware
 		static QHash<QString, ConnectionShared> m_connections;		// connectionID -> connection
 
 		static QHash<QString, QHash<QString, bool>> m_lmsAccessibleConnections;
+
+		static QHash<QString, ModuleRawDataDescription*> m_modulesRawDataDescription;
 	};
 }

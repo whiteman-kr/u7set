@@ -2552,6 +2552,11 @@ namespace Builder
 			return false;
 		}
 
+		if (s->appSignalID() == "#BSHU1_K1_02SHDU")
+		{
+			DEBUG_STOP;
+		}
+
 		UalSignal* existsSignal = m_ptrToSignalMap.value(s, nullptr);
 
 		if (existsSignal != nullptr)
@@ -2563,7 +2568,13 @@ namespace Builder
 				return true;
 			}
 
-			LOG_INTERNAL_ERROR(m_log);			// ref of same appSignalID to different UalSignals, WTF?
+//			LOG_INTERNAL_ERROR(m_log);			// ref of same appSignalID to different UalSignals, WTF?
+
+			QString msg = QString("Signal %1 try appendRef to %2 and %3 ual signals").
+					arg(s->appSignalID()).arg(ualSignal->refSignalIDsJoined()).arg(existsSignal->refSignalIDsJoined());
+
+			LOG_INTERNAL_ERROR_MSG(m_log, msg);
+
 			return false;
 		}
 

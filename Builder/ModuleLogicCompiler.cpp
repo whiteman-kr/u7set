@@ -2970,6 +2970,11 @@ namespace Builder
 			}
 		}
 
+		if (pin->IsOutput() == true && isConnectedToTerminatorOnly(*pin) == true)
+		{
+			return true;			// output is not used (connected to terminator only), it is Ok
+		}
+
 		UalSignal* flagSignal = m_ualSignals.get(pin->guid());
 
 		if (flagSignal == nullptr)
@@ -10915,14 +10920,14 @@ namespace Builder
 		TEST_PTR_LOG_RETURN_FALSE(rawDataOffset, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(module, m_log);
 
-		int moduleRawDataSize = DeviceHelper::getModuleRawDataSize(module, m_log);
+		int moduleRawDataSize = m_optoModuleStorage->getModuleRawDataSize(module, m_log);
 
 		if (moduleRawDataSize == 0)
 		{
 			return true;
 		}
 
-		ModuleRawDataDescription* desc = DeviceHelper::getModuleRawDataDescription(module);
+		ModuleRawDataDescription* desc = m_optoModuleStorage->getModuleRawDataDescription(module);
 
 		if (desc == nullptr)
 		{
