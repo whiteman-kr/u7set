@@ -1538,3 +1538,34 @@ bool SignalSet::serializeFromProtoFile(const QString& filePath)
 	return true;
 }
 
+QStringList SignalSet::appSignalIdsList(bool removeNumberSign, bool sort) const
+{
+	QStringList result;
+	result.reserve(count());
+
+	for (int i = 0; i < count(); i++)
+	{
+		const Signal& signal = operator[](i);
+		const QString& appSignalId = signal.appSignalID();
+
+		if (removeNumberSign == false ||
+			appSignalId.isEmpty() == true ||
+			appSignalId.at(0) != QChar('#'))
+		{
+			result.push_back(appSignalId);
+		}
+		else
+		{
+			QString chooped = appSignalId;
+			result.push_back(chooped.remove(0, 1));
+		}
+	}
+
+	if (sort == true)
+	{
+		std::sort(result.begin(), result.end());
+	}
+
+	return result;
+}
+
