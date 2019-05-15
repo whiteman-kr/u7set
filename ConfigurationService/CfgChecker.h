@@ -42,7 +42,6 @@ protected:
 private:
 	QString m_workFolder;
 	QString m_autoloadBuildFolder;
-	QDateTime m_lastBuildXmlModifyTime;
 	QString m_lastBuildXmlHash;
 	int m_checkNewBuildInterval;
 

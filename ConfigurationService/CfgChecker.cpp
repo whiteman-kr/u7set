@@ -244,13 +244,6 @@ bool CfgCheckerWorker::updateBuildXml()
 	// Has build.xml been changed?
 	//
 	QString buildXmlPath = m_autoloadBuildFolder + "/build.xml";
-	QFileInfo buildXmlInfo(buildXmlPath);
-
-	if (buildXmlInfo.lastModified() == m_lastBuildXmlModifyTime)
-	{
-		m_state = E::ConfigCheckerState::Actual;
-		return false;
-	}
 
 	QString newBuildXmlHash;
 
@@ -269,9 +262,6 @@ bool CfgCheckerWorker::updateBuildXml()
 	DEBUG_LOG_MSG(m_logger, buildXmlPath + " has been changed");
 
 	m_state = E::ConfigCheckerState::Copy;
-
-	m_lastBuildXmlModifyTime = buildXmlInfo.lastModified();
-	m_lastBuildXmlHash = newBuildXmlHash;
 
 	// Copying into workDirectory/check-date
 	//
@@ -334,6 +324,8 @@ bool CfgCheckerWorker::updateBuildXml()
 	}
 
 	DEBUG_LOG_MSG(m_logger, newCheckDirectoryPath + " renamed to " + newWorkDirectoryPath);
+
+	m_lastBuildXmlHash = newBuildXmlHash;
 
 	emit buildPathChanged(newWorkDirectoryPath);
 
@@ -443,14 +435,9 @@ void CfgCheckerWorker::onThreadStarted()
 
 			QString workBuildXmlFileName = workBuildPath + "/build.xml";
 
-			QFileInfo buildXmlInfo(workBuildXmlFileName);
-
-			m_lastBuildXmlModifyTime = buildXmlInfo.lastModified();
 			if (getFileHash(workBuildXmlFileName, m_lastBuildXmlHash) == false)
 			{
 				renameWorkToBackupCorrupted(workBuildPath);		// ???
-
-				m_lastBuildXmlModifyTime = QDateTime();
 
 				continue;
 			}
