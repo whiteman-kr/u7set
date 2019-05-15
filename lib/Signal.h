@@ -45,7 +45,7 @@ public:
 
 	// Signal identificators
 
-	QString appSignalID() const { return m_appSignalID; }
+	const QString& appSignalID() const { return m_appSignalID; };
 	void setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; }
 
 	QString customAppSignalID() const { return m_customAppSignalID; }
@@ -451,6 +451,8 @@ public:
 	void resetAddresses();
 
 	bool serializeFromProtoFile(const QString& filePath);
+
+	QStringList appSignalIdsList(bool removeNumberSign, bool sort) const;
 
 private:
 	QMultiHash<int, int> m_groupSignals;

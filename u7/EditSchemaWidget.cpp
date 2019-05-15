@@ -6301,7 +6301,7 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 	QLabel* connectionIdLabel = new QLabel("ConnectionID:");
 
 	QTextEditCompleter* connectionIdControl = new QTextEditCompleter(&d);
-	connectionIdControl->setPlaceholderText("Enter ConnectionID(s)");
+	connectionIdControl->setPlaceholderText("Enter ConnectionID(s). Press Ctrl+E to show completer.");
 	connectionIdControl->setPlainText(recConnectionIds);
 
 	QCompleter* connectionsCompleter = new QCompleter(connectionIds, &d);
@@ -6315,16 +6315,7 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 	SignalsModel* signalModel = SignalsModel::instance();
 	Q_ASSERT(signalModel);
 
-	const SignalSet& signalSet = signalModel->signalSet();
-
-	QStringList appSignalIdsCompleterList;
-	appSignalIdsCompleterList.reserve(signalSet.count());
-
-	for (int i = 0; i < signalSet.count(); i++)
-	{
-		const Signal& signal = signalSet[i];
-		appSignalIdsCompleterList.push_back(signal.appSignalID());
-	}
+	QStringList appSignalIdsCompleterList = signalModel->signalSet().appSignalIdsList(true, true);
 
 	QCompleter* appSignalsCompleter = new QCompleter(appSignalIdsCompleterList, &d);
 	appSignalsCompleter->setFilterMode(Qt::MatchContains);
@@ -6335,6 +6326,7 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 	//
 	QLabel* appSignalIdLabel = new QLabel("AppSignalID:");
 	QTextEditCompleter* appSignalIdEdit = new QTextEditCompleter(&d);
+	appSignalIdEdit->setPlaceholderText("Enter AppSchemaIDs separated by lines. Press Ctrl+E to show completer.");
 	appSignalIdEdit->setPlainText(appSignalId);
 	appSignalIdEdit->setCompleter(appSignalsCompleter);
 
@@ -6451,7 +6443,7 @@ bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem>
 	QLabel* connectionIdLabel = new QLabel("ConnectionID(s):");
 
 	QTextEditCompleter* connectionIdControl = new QTextEditCompleter(&d);
-	connectionIdControl->setPlaceholderText("Enter ConnectionID(s)");
+	connectionIdControl->setPlaceholderText("Enter ConnectionID(s). Press Ctrl+E to show completer.");
 	connectionIdControl->setPlainText(transmitterConnectionIds);
 
 	QCompleter* completer = new QCompleter(connectionIds, &d);
@@ -6737,16 +6729,7 @@ void EditSchemaWidget::f2KeyForSignal(std::shared_ptr<VFrame30::SchemaItem> item
 	SignalsModel* signalModel = SignalsModel::instance();
 	Q_ASSERT(signalModel);
 
-	const SignalSet& signalSet = signalModel->signalSet();
-
-	QStringList appSignalIdsCompleterList;
-	appSignalIdsCompleterList.reserve(signalSet.count());
-
-	for (int i = 0; i < signalSet.count(); i++)
-	{
-		const Signal& signal = signalSet[i];
-		appSignalIdsCompleterList.push_back(signal.appSignalID());
-	}
+	QStringList appSignalIdsCompleterList = signalModel->signalSet().appSignalIdsList(true, true);
 
 	QCompleter* completer = new QCompleter(appSignalIdsCompleterList, &d);
 	completer->setFilterMode(Qt::MatchContains);
@@ -6759,7 +6742,7 @@ void EditSchemaWidget::f2KeyForSignal(std::shared_ptr<VFrame30::SchemaItem> item
 	QLabel* appSignalIdsLabel = new QLabel("AppSchemaIDs:", &d);
 
 	QTextEditCompleter* appSignalIdsEdit = new QTextEditCompleter(&d);
-	appSignalIdsEdit->setPlaceholderText("Enter AppSchemaIDs separated by lines");
+	appSignalIdsEdit->setPlaceholderText("Enter AppSchemaIDs separated by lines. Press Ctrl+E to show completer.");
 	appSignalIdsEdit->setPlainText(appSignalIds);
 	appSignalIdsEdit->setCompleter(completer);
 
@@ -6770,7 +6753,7 @@ void EditSchemaWidget::f2KeyForSignal(std::shared_ptr<VFrame30::SchemaItem> item
 
 	QTextEditCompleter* impactAppSignalIdsEdit = new QTextEditCompleter(&d);
 	impactAppSignalIdsEdit->setEnabled(signalItem->hasImpactColumn());
-	impactAppSignalIdsEdit->setPlaceholderText("Enter Impact AppSchemaIDs separated by lines");
+	impactAppSignalIdsEdit->setPlaceholderText("Enter Impact AppSchemaIDs separated by lines. Press Ctrl+E to show completer.");
 	impactAppSignalIdsEdit->setPlainText(impactAppSignalIds);
 	impactAppSignalIdsEdit->setCompleter(completer);
 

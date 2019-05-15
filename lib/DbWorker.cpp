@@ -301,6 +301,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0281.sql", "Upgrade to version 281, RIM and TIM configuration range checking improvements"},
 	{":/DatabaseUpgrade/Upgrade0282.sql", "Upgrade to version 282, TIM ranges were changed"},
 	{":/DatabaseUpgrade/Upgrade0283.sql", "Upgrade to version 283, RIM electric default ranges were changed"},
+	{":/DatabaseUpgrade/Upgrade0284.sql", "Upgrade to version 284, TIM and RIM, rounding added at range checking"},
 };
 
 int DbWorker::counter = 0;
