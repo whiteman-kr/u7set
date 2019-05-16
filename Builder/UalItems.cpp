@@ -2552,11 +2552,6 @@ namespace Builder
 			return false;
 		}
 
-		if (s->appSignalID() == "#BSHU1_K1_02SHDU")
-		{
-			DEBUG_STOP;
-		}
-
 		UalSignal* existsSignal = m_ptrToSignalMap.value(s, nullptr);
 
 		if (existsSignal != nullptr)

@@ -691,7 +691,7 @@ namespace Builder
 
 		// primarily created signals
 		//
-		result &= createUalSignalsFromInOutAndTuningAcquiredSignals();
+		result &= createUalSignalsFromInputAndTuningAcquiredSignals();
 		result &= createUalSignalsFromBusComposers();
 		result &= createUalSignalsFromReceivers();
 
@@ -1300,7 +1300,7 @@ namespace Builder
 		return m_signalsToLoopbacks.contains(appSignalID);
 	}
 
-	bool ModuleLogicCompiler::createUalSignalsFromInOutAndTuningAcquiredSignals()
+	bool ModuleLogicCompiler::createUalSignalsFromInputAndTuningAcquiredSignals()
 	{
 		bool result = true;
 
@@ -1320,7 +1320,7 @@ namespace Builder
 				continue;
 			}
 
-			if (s->isInput() == true || s->isOutput() == true)
+			if (s->isInput() == true)
 			{
 				m_ualSignals.createSignal(s);
 				continue;
@@ -2682,6 +2682,13 @@ namespace Builder
 				continue;
 			}
 
+			UalSignal* ualSignal = m_ualSignals.get(s->appSignalID());
+
+			if (ualSignal == nullptr)
+			{
+				continue;				// this signal is not used in UAL, continue
+			}
+
 			QString signalEquipmentID = s->equipmentID();
 
 			if (s->equipmentID().isEmpty() == true)
@@ -3182,6 +3189,11 @@ namespace Builder
 			return;
 		}
 
+		if (m_signalsWithFlags.isEmpty() == true)
+		{
+			return;
+		}
+
 		QStringList signalsWithFlagsIDs = m_signalsWithFlags.keys();
 
 		QStringList acquiredSignalsWithFlags;
@@ -3208,13 +3220,19 @@ namespace Builder
 
 		QStringList file;
 
-		file.append(QString("--------------------------- Acquired signals with flags ---------------------------\n"));
+		if (acquiredSignalsWithFlags.isEmpty() == false)
+		{
+			file.append(QString("--------------------------- Acquired signals with flags ---------------------------\n"));
 
-		writeSignalsWithFlagsToReport(&file, acquiredSignalsWithFlags);
+			writeSignalsWithFlagsToReport(&file, acquiredSignalsWithFlags);
+		}
 
-		file.append(QString("--------------------------- Non-acquired signals with flags ---------------------------\n"));
+		if (nonAcquiredSignalsWithFlags.isEmpty() == false)
+		{
+			file.append(QString("--------------------------- Non-acquired signals with flags ---------------------------\n"));
 
-		writeSignalsWithFlagsToReport(&file, nonAcquiredSignalsWithFlags);
+			writeSignalsWithFlagsToReport(&file, nonAcquiredSignalsWithFlags);
+		}
 
 		m_resultWriter->addFile(QString("%1/%2").arg(m_lmSubsystemID).arg(lmEquipmentID()), "SignalsWithFlags.txt", file);
 	}

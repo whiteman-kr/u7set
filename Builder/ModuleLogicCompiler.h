@@ -233,7 +233,7 @@ namespace Builder
 
 		bool isLoopbackSignal(const QString& appSignalID);
 
-		bool createUalSignalsFromInOutAndTuningAcquiredSignals();
+		bool createUalSignalsFromInputAndTuningAcquiredSignals();
 
 		bool createUalSignalsFromBusComposers();
 		bool createUalSignalsFromBusComposer(UalItem* ualItem);
