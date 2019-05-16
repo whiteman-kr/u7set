@@ -10,7 +10,7 @@ const char* DeviceHelper::LM_PLATFORM_INTERFACE_CONTROLLER_SUFFUX = "_PI";
 
 void DeviceHelper::init()
 {
-	assert(m_modulesRawDataDescription.count() == 0);
+//	assert(m_modulesRawDataDescription.count() == 0);
 }
 
 
