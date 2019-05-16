@@ -7034,22 +7034,24 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 - engeneering low Limit mismatch electrical low Limit, set electrical low Limit: %2
+	/// Title: Signal %1 - engeneering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3
 	///
 	/// Parameters:
 	///		%1 Application signal ID
-	///		%2 Electrical low Limit
+	///		%2 Wrong electrical low Limit
+	///		%3 Correct electrical low Limit
 	///
 	/// Description:
 	///		Only ThermoCouple and ThermoResistor. Engeneering low Limit mismatch electrical low Limit.
 	///
-	void IssueLogger::errEQP6112(QString appSignalID, QString value)
+	void IssueLogger::errEQP6112(QString appSignalID, QString wrongValue, QString correctValue)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6112,
-				  tr("Signal %1 - engeneering low Limit mismatch electrical low Limit, set electrical low Limit: %2.")
+				  tr("Signal %1 - engeneering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3.")
 				  .arg(appSignalID)
-				  .arg(value)
+				  .arg(wrongValue)
+				  .arg(correctValue)
 				  );
 	}
 
@@ -7057,22 +7059,24 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 - engeneering high Limit mismatch electrical high Limit
+	/// Title: Signal %1 - engeneering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3
 	///
 	/// Parameters:
 	///		%1 Application signal ID
-	///		%2 Electrical high Limit
+	///		%2 Wrong electrical low Limit
+	///		%3 Correct electrical low Limit
 	///
 	/// Description:
 	///		 Only ThermoCouple and ThermoResistor. Engeneering high Limit mismatch electrical high Limit. Only ThermoCouple and ThermoResistor.
 	///
-	void IssueLogger::errEQP6113(QString appSignalID, QString value)
+	void IssueLogger::errEQP6113(QString appSignalID, QString wrongValue, QString correctValue)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6113,
-				  tr("Signal %1 - engeneering high Limit mismatch electrical high Limit, set electrical high Limit: %2.")
+				  tr("Signal %1 - engeneering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3.")
 				  .arg(appSignalID)
-				  .arg(value)
+				  .arg(wrongValue)
+				  .arg(correctValue)
 				  );
 	}
 

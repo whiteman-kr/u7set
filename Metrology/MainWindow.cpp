@@ -188,11 +188,6 @@ void MainWindow::createActions()
 
 	// View
 	//
-	m_pShowCalculatorAction = new QAction(tr("Metrological &calculator ..."), this);
-	m_pShowCalculatorAction->setShortcut(Qt::ALT + Qt::Key_C);
-	m_pShowCalculatorAction->setIcon(QIcon(":/icons/Calculator.png"));
-	m_pShowCalculatorAction->setToolTip(tr("Calculator for converting metrological quantities"));
-	connect(m_pShowCalculatorAction, &QAction::triggered, this, &MainWindow::showCalculator);
 
 	// Tools
 	//
@@ -225,6 +220,12 @@ void MainWindow::createActions()
 	m_pShowTuningSignalListAction->setIcon(QIcon(":/icons/InOut.png"));
 	m_pShowTuningSignalListAction->setToolTip("");
 	connect(m_pShowTuningSignalListAction, &QAction::triggered, this, &MainWindow::showTuningSignalList);
+
+	m_pShowCalculatorAction = new QAction(tr("Metrological &calculator ..."), this);
+	m_pShowCalculatorAction->setShortcut(Qt::ALT + Qt::Key_C);
+	m_pShowCalculatorAction->setIcon(QIcon(":/icons/Calculator.png"));
+	m_pShowCalculatorAction->setToolTip(tr("Calculator for converting metrological quantities"));
+	connect(m_pShowCalculatorAction, &QAction::triggered, this, &MainWindow::showCalculator);
 
 	m_pOptionsAction = new QAction(tr("&Options ..."), this);
 	m_pOptionsAction->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -281,8 +282,6 @@ void MainWindow::createMenu()
 
 	m_pViewPanelMenu = new QMenu("&Panels", m_pViewMenu);
 	m_pViewMenu->addMenu(m_pViewPanelMenu);
-	m_pViewMenu->addSeparator();
-	m_pViewMenu->addAction(m_pShowCalculatorAction);
 
 
 	m_pSettingMenu = pMenuBar->addMenu(tr("&Tools"));
@@ -295,6 +294,8 @@ void MainWindow::createMenu()
 	m_pSettingMenu->addAction(m_pShowComparatorsListAction);
 	m_pSettingMenu->addAction(m_pShowOutputSignalListAction);
 	m_pSettingMenu->addAction(m_pShowTuningSignalListAction);
+	m_pSettingMenu->addSeparator();
+	m_pSettingMenu->addAction(m_pShowCalculatorAction);
 	m_pSettingMenu->addSeparator();
 	m_pSettingMenu->addAction(m_pOptionsAction);
 
@@ -1444,18 +1445,6 @@ void MainWindow::selectAllMeasure()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::showCalculator()
-{
-	if (m_pCalculator == nullptr)
-	{
-		return;
-	}
-
-	m_pCalculator->show();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void MainWindow::calibrators()
 {
 	theCalibratorBase.showInitDialog();
@@ -1517,6 +1506,18 @@ void MainWindow::showRackList()
 		updateRacksOnToolBar();
 		updateSignalsOnToolBar();
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::showCalculator()
+{
+	if (m_pCalculator == nullptr)
+	{
+		return;
+	}
+
+	m_pCalculator->show();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

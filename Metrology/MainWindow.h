@@ -55,7 +55,6 @@ private:
 
 							// menu - View
 							//
-	QAction*				m_pShowCalculatorAction = nullptr;
 
 							// menu - Tools
 							//
@@ -65,6 +64,7 @@ private:
 	QAction*				m_pShowComparatorsListAction = nullptr;
 	QAction*				m_pShowOutputSignalListAction = nullptr;
 	QAction*				m_pShowTuningSignalListAction = nullptr;
+	QAction*				m_pShowCalculatorAction = nullptr;
 	QAction*				m_pOptionsAction;
 
 							// menu - ?
@@ -209,7 +209,6 @@ private slots:
 
 	// menu - View
 	//
-	void					showCalculator();
 
 	// menu - Tools
 	//
@@ -219,6 +218,7 @@ private slots:
 	void					showComparatorsList() {};
 	void					showOutputSignalList();
 	void					showTuningSignalList();
+	void					showCalculator();
 	void					options();
 
 	// menu - ?

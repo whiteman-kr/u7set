@@ -31,6 +31,10 @@ void QTextEditCompleter::setCompleter(QCompleter* completer)
 
 	m_completer->setWidget(this);
 	m_completer->setCompletionMode(QCompleter::PopupCompletion);
+	m_completer->setCaseSensitivity(Qt::CaseSensitive);
+	m_completer->setModelSorting(QCompleter::CaseSensitivelySortedModel);
+	m_completer->setFilterMode(Qt::MatchFlag::MatchStartsWith);
+
 	QObject::connect(m_completer, SIGNAL(activated(QString)),
                      this, SLOT(insertCompletion(QString)));
 }
@@ -43,8 +47,8 @@ QCompleter *QTextEditCompleter::completer() const
 void QTextEditCompleter::insertCompletion(const QString& completion)
 {
 	if (m_completer->widget() != this)
-        return;
-    QTextCursor tc = textCursor();
+		return;
+	QTextCursor tc = textCursor();
 	int extra = completion.length() - m_completer->completionPrefix().length();
     tc.movePosition(QTextCursor::Left);
     tc.movePosition(QTextCursor::EndOfWord);
@@ -54,9 +58,9 @@ void QTextEditCompleter::insertCompletion(const QString& completion)
 
 QString QTextEditCompleter::textUnderCursor() const
 {
-    QTextCursor tc = textCursor();
-    tc.select(QTextCursor::WordUnderCursor);
-    return tc.selectedText();
+	QTextCursor tc = textCursor();
+	tc.select(QTextCursor::WordUnderCursor);
+	return tc.selectedText();
 }
 
 void QTextEditCompleter::focusInEvent(QFocusEvent *e)
@@ -91,11 +95,11 @@ void QTextEditCompleter::keyPressEvent(QKeyEvent *e)
 	if (!m_completer || (ctrlOrShift && e->text().isEmpty()))
         return;
 
-    static QString eow("~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-="); // end of word
+	static QString eow("~!@#$%^&*()_+{}|:\"<>?,./;'[]\\-="); // end of word
     bool hasModifier = (e->modifiers() != Qt::NoModifier) && !ctrlOrShift;
     QString completionPrefix = textUnderCursor();
 
-	if (!isShortcut && (hasModifier || e->text().isEmpty()|| completionPrefix.length() < 2
+	if (!isShortcut && (hasModifier || e->text().isEmpty()|| completionPrefix.length() < 4
                       || eow.contains(e->text().right(1)))) {
 		m_completer->popup()->hide();
         return;
