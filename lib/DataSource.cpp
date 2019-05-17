@@ -154,6 +154,7 @@ const char* DataSource::PROP_DEVICE_SUBSYSTEM_ID = "SubsystemID";
 
 const char* DataSource::PROP_LM_DATA_TYPE = "LmDataType";
 const char* DataSource::PROP_LM_ID = "LmEquipmentID";
+const char* DataSource::PROP_LM_PRESET_NAME = "LmPresetName";
 const char* DataSource::PROP_LM_NUMBER = "LmNumber";
 const char* DataSource::PROP_LM_CHANNEL = "LmChannel";
 const char* DataSource::PROP_LM_SUBSYSTEM_KEY = "LmSubsystemKey";
@@ -192,6 +193,7 @@ bool DataSource::getLmPropertiesFromDevice(const Hardware::DeviceModule* lm,
 
 	m_lmDataType = dataType;
 	m_lmEquipmentID = lm->equipmentIdTemplate();
+	m_lmPresetName = lm->presetName();
 	m_lmModuleType = lm->moduleType();
 	m_lmCaption = lm->caption();
 
@@ -302,6 +304,7 @@ void DataSource::writeToXml(XmlWriteHelper& xml) const
 
 	xml.writeStringAttribute(PROP_LM_DATA_TYPE, dataTypeToString(m_lmDataType));
 	xml.writeStringAttribute(PROP_LM_ID, m_lmEquipmentID);
+	xml.writeStringAttribute(PROP_LM_PRESET_NAME, m_lmPresetName);
 
 	xml.writeIntAttribute(PROP_LM_MODULE_TYPE, m_lmModuleType, true);
 	xml.writeStringAttribute(PROP_LM_SUBSYSTEM, m_lmSubsystem);
@@ -349,6 +352,7 @@ bool DataSource::readFromXml(XmlReadHelper& xml)
 	m_lmDataType = stringToDataType(str);
 
 	result &= xml.readStringAttribute(PROP_LM_ID, &m_lmEquipmentID);
+	result &= xml.readStringAttribute(PROP_LM_PRESET_NAME, &m_lmPresetName);
 
 	result &= xml.readIntAttribute(PROP_LM_MODULE_TYPE, &m_lmModuleType);
 	result &= xml.readStringAttribute(PROP_LM_SUBSYSTEM,&m_lmSubsystem);
@@ -424,6 +428,7 @@ bool DataSource::getInfo(Network::DataSourceInfo* proto) const
 
 	proto->set_id(m_id);
 	proto->set_lmequipmentid(m_lmEquipmentID.toStdString());
+	proto->set_lmpresetname(m_lmPresetName.toStdString());
 	proto->set_lmcaption(m_lmCaption.toStdString());
 	proto->set_lmdatatype(TO_INT(m_lmDataType));
 	proto->set_lmip(m_lmAddressPort.addressStr().toStdString());
@@ -447,6 +452,7 @@ bool DataSource::setInfo(const Network::DataSourceInfo& proto)
 {
 	m_id = proto.id();
 	m_lmEquipmentID = QString::fromStdString(proto.lmequipmentid());
+	m_lmPresetName = QString::fromStdString(proto.lmpresetname());
 	m_lmCaption = QString::fromStdString(proto.lmcaption());
 	m_lmDataType = static_cast<DataType>(proto.lmdatatype());
 	m_lmAddressPort.setAddressPort(QString::fromStdString(proto.lmip()), proto.lmport());

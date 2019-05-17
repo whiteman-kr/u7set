@@ -105,6 +105,7 @@ public:
 
 	static const char* PROP_LM_DATA_TYPE;
 	static const char* PROP_LM_ID;
+	static const char* PROP_LM_PRESET_NAME;
 	static const char* PROP_LM_NUMBER;
 	static const char* PROP_LM_CHANNEL;
 	static const char* PROP_LM_SUBSYSTEM_KEY;
@@ -142,6 +143,9 @@ public:
 
 	QString lmEquipmentID() const { return m_lmEquipmentID; }
 	void setLmEquipmentID(const QString& lmEquipmentID) { m_lmEquipmentID = lmEquipmentID; }
+
+	QString lmPresetName() const { return m_lmPresetName; }
+	void setLmPresetName(const QString& lmPresetName) { m_lmPresetName = lmPresetName; }
 
 	int lmNumber() const { return m_lmNumber; }
 	void setLmNumber(int lmNumber) { m_lmNumber = lmNumber; }
@@ -223,6 +227,7 @@ private:
 	//
 	DataType m_lmDataType = DataType::App;
 	QString m_lmEquipmentID;
+	QString m_lmPresetName;
 	int m_lmNumber = 0;
 	int m_lmModuleType = 0;
 	int m_lmSubsystemKey = 0;

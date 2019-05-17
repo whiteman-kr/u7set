@@ -1205,6 +1205,18 @@ class DataSourceInfo : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 lmrupframesquantity() const;
   inline void set_lmrupframesquantity(::google::protobuf::int32 value);
 
+  // optional string lmPresetName = 17;
+  inline bool has_lmpresetname() const;
+  inline void clear_lmpresetname();
+  static const int kLmPresetNameFieldNumber = 17;
+  inline const ::std::string& lmpresetname() const;
+  inline void set_lmpresetname(const ::std::string& value);
+  inline void set_lmpresetname(const char* value);
+  inline void set_lmpresetname(const char* value, size_t size);
+  inline ::std::string* mutable_lmpresetname();
+  inline ::std::string* release_lmpresetname();
+  inline void set_allocated_lmpresetname(::std::string* lmpresetname);
+
   // @@protoc_insertion_point(class_scope:Network.DataSourceInfo)
  private:
   inline void set_has_id();
@@ -1239,6 +1251,8 @@ class DataSourceInfo : public ::google::protobuf::Message {
   inline void clear_has_lmuniqueid();
   inline void set_has_lmrupframesquantity();
   inline void clear_has_lmrupframesquantity();
+  inline void set_has_lmpresetname();
+  inline void clear_has_lmpresetname();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1257,10 +1271,11 @@ class DataSourceInfo : public ::google::protobuf::Message {
   bool lmdataenable_;
   ::google::protobuf::uint64 lmdataid_;
   ::google::protobuf::uint64 lmuniqueid_;
+  ::std::string* lmpresetname_;
   ::google::protobuf::int32 lmrupframesquantity_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(16 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(17 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -8065,6 +8080,76 @@ inline ::google::protobuf::int32 DataSourceInfo::lmrupframesquantity() const {
 inline void DataSourceInfo::set_lmrupframesquantity(::google::protobuf::int32 value) {
   set_has_lmrupframesquantity();
   lmrupframesquantity_ = value;
+}
+
+// optional string lmPresetName = 17;
+inline bool DataSourceInfo::has_lmpresetname() const {
+  return (_has_bits_[0] & 0x00010000u) != 0;
+}
+inline void DataSourceInfo::set_has_lmpresetname() {
+  _has_bits_[0] |= 0x00010000u;
+}
+inline void DataSourceInfo::clear_has_lmpresetname() {
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline void DataSourceInfo::clear_lmpresetname() {
+  if (lmpresetname_ != &::google::protobuf::internal::kEmptyString) {
+    lmpresetname_->clear();
+  }
+  clear_has_lmpresetname();
+}
+inline const ::std::string& DataSourceInfo::lmpresetname() const {
+  return *lmpresetname_;
+}
+inline void DataSourceInfo::set_lmpresetname(const ::std::string& value) {
+  set_has_lmpresetname();
+  if (lmpresetname_ == &::google::protobuf::internal::kEmptyString) {
+    lmpresetname_ = new ::std::string;
+  }
+  lmpresetname_->assign(value);
+}
+inline void DataSourceInfo::set_lmpresetname(const char* value) {
+  set_has_lmpresetname();
+  if (lmpresetname_ == &::google::protobuf::internal::kEmptyString) {
+    lmpresetname_ = new ::std::string;
+  }
+  lmpresetname_->assign(value);
+}
+inline void DataSourceInfo::set_lmpresetname(const char* value, size_t size) {
+  set_has_lmpresetname();
+  if (lmpresetname_ == &::google::protobuf::internal::kEmptyString) {
+    lmpresetname_ = new ::std::string;
+  }
+  lmpresetname_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* DataSourceInfo::mutable_lmpresetname() {
+  set_has_lmpresetname();
+  if (lmpresetname_ == &::google::protobuf::internal::kEmptyString) {
+    lmpresetname_ = new ::std::string;
+  }
+  return lmpresetname_;
+}
+inline ::std::string* DataSourceInfo::release_lmpresetname() {
+  clear_has_lmpresetname();
+  if (lmpresetname_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = lmpresetname_;
+    lmpresetname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void DataSourceInfo::set_allocated_lmpresetname(::std::string* lmpresetname) {
+  if (lmpresetname_ != &::google::protobuf::internal::kEmptyString) {
+    delete lmpresetname_;
+  }
+  if (lmpresetname) {
+    set_has_lmpresetname();
+    lmpresetname_ = lmpresetname;
+  } else {
+    clear_has_lmpresetname();
+    lmpresetname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------
