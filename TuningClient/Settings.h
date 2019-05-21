@@ -82,6 +82,8 @@ struct ConfigSettings
 
 	bool showSchemasList = true;
 
+	bool showSchemasTabs = true;
+
 	bool filterByEquipment = true;
 
 	bool filterBySchema = true;

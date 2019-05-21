@@ -377,6 +377,12 @@ void MainWindow::createWorkspace()
 
 	// Delete old workspaces
 
+	if (m_noWorkspaceLabel != nullptr)
+	{
+		delete m_noWorkspaceLabel;
+		m_noWorkspaceLabel = nullptr;
+	}
+
 	if (m_logonWorkspace != nullptr)
 	{
 		delete m_logonWorkspace;
@@ -457,7 +463,8 @@ void MainWindow::createWorkspace()
 			}
 			else
 			{
-				m_mainLayout->addWidget(new QLabel("No workspaces exist, configuration error."));
+				m_noWorkspaceLabel = new QLabel("No workspaces exist, configuration error.");
+				m_mainLayout->addWidget(m_noWorkspaceLabel);
 			}
 		}
 	}

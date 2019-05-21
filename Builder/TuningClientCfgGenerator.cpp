@@ -395,12 +395,29 @@ namespace Builder
 			}
 
 			//
-			// showSchemasList
+			// schemasNavigation
 			//
-			bool showSchemasList = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "ShowSchemasList", &ok);
+			int schemasNavigation = getObjectProperty<int>(m_software->equipmentIdTemplate(), "SchemasNavigation", &ok);
 			if (ok == false)
 			{
 				return false;
+			}
+
+			bool showSchemasList = false;
+			bool showSchemasTabs = false;
+
+			switch (schemasNavigation)
+			{
+			case 0:
+				break;
+			case 1:
+				showSchemasList = true;
+				break;
+			case 2:
+				showSchemasTabs = true;
+				break;
+			default:
+				Q_ASSERT(false);
 			}
 
 			//
@@ -483,6 +500,7 @@ namespace Builder
 				xmlWriter.writeAttribute("showSignals", (showSignals ? "true" : "false"));
 				xmlWriter.writeAttribute("showSchemas", (showSchemas? "true" : "false"));
 				xmlWriter.writeAttribute("showSchemasList", (showSchemasList ? "true" : "false"));
+				xmlWriter.writeAttribute("showSchemasTabs", (showSchemasTabs ? "true" : "false"));
 				xmlWriter.writeAttribute("filterByEquipment", (filterByEquipment ? "true" : "false"));
 				xmlWriter.writeAttribute("filterBySchema", (filterBySchema ? "true" : "false"));
 				xmlWriter.writeAttribute("showSOR", (showSOR ? "true" : "false"));
