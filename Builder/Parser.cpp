@@ -3829,6 +3829,7 @@ namespace Builder
 					{
 						// Connection id is not accessible from any of the LMs
 						//
+						alienLmIds = true;
 						m_log->errALP4150(logicSchema->schemaId(), connectionItem->buildName(), connectionId, equipmentIds.join(", "), connectionItem->guid());
 					}
 				}
@@ -4054,6 +4055,7 @@ namespace Builder
 					//
 					if (receiverItem != nullptr && receiverAppSignalIds.size() != 1)
 					{
+						result = false;
 						m_log->errALP4152(schema->schemaId(), receiverItem->buildName(), receiverItem->connectionIds(), equipmentId, receiverItem->guid());
 					}
 
@@ -4066,6 +4068,7 @@ namespace Builder
 				if (receiverItem != nullptr &&
 					(connectionIds.size() != schema->channelCount() || receiverAppSignalIds.size() != schema->channelCount()))
 				{
+					result = false;
 					m_log->errALP4131(schema->schemaId(), receiverItem->buildName(), receiverItem->guid());
 					continue;
 				}
@@ -4079,6 +4082,7 @@ namespace Builder
 				{
 					// Connection id is not accessible from LMs
 					//
+					result = false;
 					m_log->errALP4150(schema->schemaId(), connectionItem->buildName(), connectionId, equipmentId, connectionItem->guid());
 					continue;
 				}

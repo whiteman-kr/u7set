@@ -105,6 +105,7 @@ public:
 
 	static const char* PROP_LM_DATA_TYPE;
 	static const char* PROP_LM_ID;
+	static const char* PROP_LM_PRESET_NAME;
 	static const char* PROP_LM_NUMBER;
 	static const char* PROP_LM_CHANNEL;
 	static const char* PROP_LM_SUBSYSTEM_KEY;
@@ -142,6 +143,9 @@ public:
 
 	QString lmEquipmentID() const { return m_lmEquipmentID; }
 	void setLmEquipmentID(const QString& lmEquipmentID) { m_lmEquipmentID = lmEquipmentID; }
+
+	QString lmPresetName() const { return m_lmPresetName; }
+	void setLmPresetName(const QString& lmPresetName) { m_lmPresetName = lmPresetName; }
 
 	int lmNumber() const { return m_lmNumber; }
 	void setLmNumber(int lmNumber) { m_lmNumber = lmNumber; }
@@ -191,7 +195,7 @@ public:
 	void setServiceID(const QString& serviceID) { m_serviceID = serviceID; }
 
 	quint64 ID() const { return m_id; }
-	void setID(quint32 id) { m_id = id; }
+	void setID(quint64 id) { m_id = id; }
 
 	//
 
@@ -223,6 +227,7 @@ private:
 	//
 	DataType m_lmDataType = DataType::App;
 	QString m_lmEquipmentID;
+	QString m_lmPresetName;
 	int m_lmNumber = 0;
 	int m_lmModuleType = 0;
 	int m_lmSubsystemKey = 0;
@@ -300,8 +305,8 @@ public:
 	double dataReceivingRate() const { return m_dataReceivingRate; }
 	void setDataReceivingRate(double rate) { m_dataReceivingRate = rate; }
 
-	quint64 receivedDataSize() const { return m_receivedDataSize; }
-	void setReceivedDataSize(quint64 dataSize) { m_receivedDataSize = dataSize; }
+	qint64 receivedDataSize() const { return m_receivedDataSize; }
+	void setReceivedDataSize(qint64 dataSize) { m_receivedDataSize = dataSize; }
 
 	qint64 receivedFramesCount() const { return m_receivedFramesCount; }
 	void setReceivedFramesCount(qint64 framesCount) { m_receivedFramesCount = framesCount; }
@@ -353,7 +358,7 @@ public:
 	bool releaseProcessingOwnership(const QThread* processingThread);
 
 	bool processRupFrameTimeQueue(const QThread* thread);
-	bool getDataToParsing(Times* times, quint16* packetNo, const char** rupData, quint32* rupDataSize, bool* dataReceivingTimeout);
+	bool getDataToParsing(Times* times, quint16* packetNo, const char** rupData, int* rupDataSize, bool* dataReceivingTimeout);
 
 	bool rupFramesQueueIsEmpty() const { return m_rupFrameTimeQueue.isEmpty(QThread::currentThread()); }
 
@@ -432,7 +437,7 @@ private:
 	Times m_rupDataTimes;
 	Times m_lastRupDataTimes;
 	quint16 m_packetNo = 0;
-	quint32 m_rupDataSize = 0;
+	int m_rupDataSize = 0;
 };
 
 

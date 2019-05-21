@@ -113,7 +113,7 @@ private:
 	QVector<QString> m_appSignalIDs;
 	const AppDataSourcesIP& m_appDataSources;
 	const AppSignals& m_appSignals;
-	const AppSignalStates& m_appSignalStates;
+	const DynamicAppSignalStates& m_appSignalStates;
 	const AppDataServiceWorker& m_appDataServiceWorker;
 
 	void buildAppSignalIDs();
@@ -123,7 +123,7 @@ public:
 							TcpAppDataServer* server,
 							const AppDataSourcesIP& appDataSources,
 							const AppSignals& appSignals,
-							const AppSignalStates& appSignalStates,
+							const DynamicAppSignalStates& appSignalStates,
 							const AppDataServiceWorker& appDataServiceWorker,
 							std::shared_ptr<CircularLogger> logger);
 

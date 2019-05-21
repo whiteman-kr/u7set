@@ -13,8 +13,9 @@
 #define LOG_WARNING1(type, code, message)	writeWarning1(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 #define LOG_WARNING2(type, code, message)	writeWarning2(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 
-#define LOG_INTERNAL_ERROR(logObject)	logObject->errALC5998(__FILE__, __LINE__, Q_FUNC_INFO);
-#define LOG_NULLPTR_ERROR(logObject)	logObject->errALC5997(__FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_INTERNAL_ERROR(logObject)					logObject->errALC5998(__FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_INTERNAL_ERROR_MSG(logObject, errorMsg)		logObject->errALC5996(errorMsg, __FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_NULLPTR_ERROR(logObject)					logObject->errALC5997(__FILE__, __LINE__, Q_FUNC_INFO);
 
 namespace Builder
 {
@@ -384,6 +385,13 @@ namespace Builder
 		void wrnALC5165(QString lmEquipmentID);											// Tuning is enabled for module %1 but tuningable signals is not found.
 		void errALC5166(QString lmEquipmentID);											// Tuningable signals is found in module %1 but tuning is not enabled.
 		void wrnALC5167(QString appSignalID);											// Signal %1 is excluded from build.
+		void errALC5168(QString flagSignalID,
+						QString flagTypeStr,
+						QString signalWithFlagID,
+						QString alreadyAssignedFlagSignalID,
+						QUuid itemUuid,
+						QString schemaID);					//Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
+		void wrnALC5169(QString setFlagsItemLabel, QUuid itemUuid, QString schemaID);	// No flags assiged on set_flags item %1 (Schema %2)
 
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.
@@ -395,8 +403,12 @@ namespace Builder
 		void wrnALC5193(QString appSignalID, QString portID, QString connectionID);		// Rx signal %1 specified in port %2 raw data description isn't assigned to receiver (Connection %3).
 		void wrnALC5194(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 with manual settings are overlapped.
 
+		// internal errors
+
+		void errALC5996(QString errorMsg, QString fileName, int lineNo, QString functionName);	// Internal error! %1. File: %1 Line: %2 Function: %3
 		void errALC5997(QString fileName, int lineNo, QString functionName);			// Null pointer occurred! File: %1 Line: %2 Function: %3
 		void errALC5998(QString fileName, int lineNo, QString functionName);			// Internal error! File: %1 Line: %2 Function: %3
+
 		void errALC5999(QString compilationProcedureName);								// %1 has been finished with errors.
 
 		// EQP			Equipment issues						6000-6999

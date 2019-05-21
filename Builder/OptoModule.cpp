@@ -6,8 +6,6 @@
 #include "UalItems.h"
 #include "LmDescriptionSet.h"
 
-
-
 namespace Hardware
 {
 
@@ -1265,7 +1263,7 @@ namespace Hardware
 
 			case RawDataDescriptionItem::Type::TxAllModulesRawData:
 
-				partSizeW = DeviceHelper::getAllNativeRawDataSize(lm, m_log);;
+				partSizeW = optoStorage->getAllNativeRawDataSize(lm, m_log);;
 
 				size += partSizeW;
 
@@ -1275,7 +1273,7 @@ namespace Hardware
 				{
 					bool moduleIsFound = false;
 
-					partSizeW = DeviceHelper::getModuleRawDataSize(lm, item.modulePlace, &moduleIsFound, m_log);
+					partSizeW = optoStorage->getModuleRawDataSize(lm, item.modulePlace, &moduleIsFound, m_log);
 
 					size += partSizeW;
 
@@ -2640,6 +2638,8 @@ namespace Hardware
 	QHash<QString, std::shared_ptr<Connection>> OptoModuleStorage::m_connections;
 	QHash<QString, QHash<QString, bool>> OptoModuleStorage::m_lmsAccessibleConnections;
 
+	QHash<QString, ModuleRawDataDescription*> OptoModuleStorage::m_modulesRawDataDescription;
+
 	OptoModuleStorage::OptoModuleStorage(EquipmentSet* equipmentSet,
 										 Builder::LmDescriptionSet* lmDescriptionSet,
 										 Hardware::ConnectionStorage* connectionStorage,
@@ -3319,6 +3319,147 @@ namespace Hardware
 		return m_lmsAccessibleConnections[lmEquipmentID].contains(connectionID);
 	}
 
+	int OptoModuleStorage::getAllNativeRawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log)
+	{
+		if (lm == nullptr || log == nullptr)
+		{
+			assert(false);
+			return 0;
+		}
+
+		int size = 0;
+
+		const Hardware::DeviceChassis* chassis = lm->getParentChassis();
+
+		if (chassis == nullptr)
+		{
+			assert(false);
+			return 0;
+		}
+
+		int count = chassis->childrenCount();
+
+		for(int i = 0; i < count; i++)
+		{
+			Hardware::DeviceObject* device = chassis->child(i);
+
+			if (device == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (device->isModule() == false)
+			{
+				continue;
+			}
+
+			Hardware::DeviceModule* module =  device->toModule();
+
+			if (module == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			if (module->hasRawData() == true)
+			{
+				size += getModuleRawDataSize(module, log);
+			}
+		}
+
+		return size;
+	}
+
+
+	int OptoModuleStorage::getModuleRawDataSize(const Hardware::DeviceModule* lm, int modulePlace, bool* moduleIsFound, Builder::IssueLogger* log)
+	{
+		if (lm == nullptr || log == nullptr || moduleIsFound == nullptr)
+		{
+			assert(false);
+			return 0;
+		}
+
+		*moduleIsFound = false;
+
+		const Hardware::DeviceModule* module = DeviceHelper::getModuleOnPlace(lm, modulePlace);
+
+		if (module == nullptr)
+		{
+			return 0;
+		}
+
+		*moduleIsFound = true;
+
+		int size = 0;
+
+		if (module->hasRawData() == true)
+		{
+			size = getModuleRawDataSize(module, log);
+		}
+
+		return size;
+	}
+
+	int OptoModuleStorage::getModuleRawDataSize(const Hardware::DeviceModule* module, Builder::IssueLogger* log)
+	{
+		if (module == nullptr || log == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		if (module->hasRawData() == false)
+		{
+			return 0;
+		}
+
+		ModuleRawDataDescription* desc = nullptr;
+
+		if (m_modulesRawDataDescription.contains(module->equipmentIdTemplate()))
+		{
+			desc = m_modulesRawDataDescription.value(module->equipmentIdTemplate());
+
+			if (desc == nullptr)
+			{
+				return 0;
+			}
+
+			return desc->rawDataSize();
+		}
+
+		//
+
+		desc = new ModuleRawDataDescription();
+
+		bool result = desc->init(module, log);
+
+		if (result == true)
+		{
+			m_modulesRawDataDescription.insert(module->equipmentIdTemplate(), desc);
+
+			return desc->rawDataSize();
+		}
+
+		// parsing error occured
+		// add nullptr-description to prevent repeated parsing
+		//
+		m_modulesRawDataDescription.insert(module->equipmentIdTemplate(), nullptr);
+
+		return 0;
+	}
+
+	ModuleRawDataDescription* OptoModuleStorage::getModuleRawDataDescription(const Hardware::DeviceModule* module)
+	{
+		if (module == nullptr)
+		{
+			assert(false);
+			return nullptr;
+		}
+
+		return m_modulesRawDataDescription.value(module->equipmentIdTemplate(), nullptr);
+	}
+
 	bool OptoModuleStorage::processConnection(ConnectionShared connection)
 	{
 		if (connection == nullptr)
@@ -3668,6 +3809,18 @@ namespace Hardware
 		m_lmAssociatedModules.clear();
 		m_connections.clear();
 		m_lmsAccessibleConnections.clear();
+
+		for(ModuleRawDataDescription* desc : m_modulesRawDataDescription)
+		{
+			if (desc != nullptr)
+			{
+				delete desc;
+			}
+		}
+
+		m_modulesRawDataDescription.clear();
 	}
+
+
 
 }

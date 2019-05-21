@@ -1042,6 +1042,34 @@ void Signal::serializeTo(Proto::AppSignal* s) const
 
 		calcParam->set_isconst(m_isConst);
 		calcParam->set_constvalue(m_constValue);
+
+		// save state flags signals
+
+		assert(calcParam->stateflagssignals_size() == 0);
+
+		QList<E::AppSignalStateFlagType> flagTypes = m_stateFlagsSignals.uniqueKeys();
+
+		for(E::AppSignalStateFlagType flagType : flagTypes)
+		{
+			QString flagSignalID = m_stateFlagsSignals.value(flagType, QString());
+
+			if (flagSignalID.isEmpty() == true)
+			{
+				assert(false);
+				continue;
+			}
+
+			Proto::StateFlagSignal* protoStateFlagSignal = calcParam->add_stateflagssignals();
+
+			if (protoStateFlagSignal == nullptr)
+			{
+				assert(false);
+				continue;
+			}
+
+			protoStateFlagSignal->set_flagtype(TO_INT(flagType));
+			protoStateFlagSignal->set_flagsignalid(flagSignalID.toStdString());
+		}
 	}
 	else
 	{
@@ -1141,11 +1169,41 @@ void Signal::serializeFrom(const Proto::AppSignal& s)
 
 	m_isConst = calcParam.isconst();
 	m_constValue = calcParam.constvalue();
+
+	// load state flags signals
+
+	m_stateFlagsSignals.clear();
+
+	int flagSignalsCount = calcParam.stateflagssignals_size();
+
+	for(int i = 0; i < flagSignalsCount; i++)
+	{
+		const Proto::StateFlagSignal& protoStateFlagSignal = calcParam.stateflagssignals(i);
+
+		E::AppSignalStateFlagType flagType = static_cast<E::AppSignalStateFlagType>(protoStateFlagSignal.flagtype());
+
+		assert(m_stateFlagsSignals.contains(flagType) == false);
+
+		m_stateFlagsSignals.insert(flagType, QString::fromStdString(protoStateFlagSignal.flagsignalid()));
+	}
 }
 
 void Signal::initCalculatedProperties()
 {
 	m_hash = calcHash(m_appSignalID);
+}
+
+bool Signal::addStateFlagSignal(E::AppSignalStateFlagType flagType, const QString& appSignalID)
+{
+	if (m_stateFlagsSignals.contains(flagType) == true)
+	{
+		assert(false);
+		return false;
+	}
+
+	m_stateFlagsSignals.insert(flagType, appSignalID);
+
+	return true;
 }
 
 bool Signal::isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const
@@ -1434,10 +1492,13 @@ Signal* SignalSet::getSignal(const QString& appSignalID)
 	return &(*this)[index];
 }
 
-
-
 void SignalSet::append(const int& signalID, Signal *signal)
 {
+	if (signalID > m_maxID)
+	{
+		m_maxID = signalID;
+	}
+
 	SignalPtrOrderedHash::append(signalID, signal);
 
 	m_groupSignals.insert(signal->signalGroupID(), signalID);
@@ -1464,6 +1525,12 @@ void SignalSet::removeAt(const int index)
 	m_groupSignals.remove(signalGroupID, signalID);
 }
 
+void SignalSet::append(Signal* signal)
+{
+	int newID = getMaxID() + 1;
+
+	append(newID, signal);
+}
 
 QVector<int> SignalSet::getChannelSignalsID(const Signal& signal) const
 {
@@ -1538,6 +1605,30 @@ bool SignalSet::serializeFromProtoFile(const QString& filePath)
 	return true;
 }
 
+int SignalSet::getMaxID()
+{
+	if (m_maxID >= 0)
+	{
+		return m_maxID;
+	}
+
+	int count = SignalPtrOrderedHash::count();
+
+	m_maxID = -1;
+
+	for(int i = 0; i < count; i++)
+	{
+		int keyI = key(i);
+
+		if (keyI > m_maxID)
+		{
+			m_maxID = keyI;
+		}
+	}
+
+	return m_maxID;
+}
+
 QStringList SignalSet::appSignalIdsList(bool removeNumberSign, bool sort) const
 {
 	QStringList result;
@@ -1568,4 +1659,5 @@ QStringList SignalSet::appSignalIdsList(bool removeNumberSign, bool sort) const
 
 	return result;
 }
+
 

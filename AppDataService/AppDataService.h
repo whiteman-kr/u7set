@@ -48,7 +48,7 @@ public:
 	const AppDataSourcesIP& appDataSourcesIP() const { return m_appDataSourcesIP; }
 	const SignalsToSources& signalsToSources() const { return m_signalsToSources; }
 
-	AppSignalStates& signalStates() { return m_signalStates; }
+	DynamicAppSignalStates& signalStates() { return m_signalStates; }
 
 private:
 	virtual void initCmdLineParser() override;
@@ -117,7 +117,7 @@ private:
 
 	SignalsToSources m_signalsToSources;
 
-	AppSignalStates m_signalStates;
+	DynamicAppSignalStates m_signalStates;
 
 	AppDataProcessingThreadsPool m_appDataProcessingThreadsPool;
 

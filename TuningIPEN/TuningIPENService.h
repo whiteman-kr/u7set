@@ -27,7 +27,7 @@ namespace TuningIPEN
 		QHash<QString, QString> m_signal2Source;
 
 		AppSignals m_appSignals;
-		AppSignalStates m_appSignalStates;
+		DynamicAppSignalStates m_appSignalStates;
 
 		TuningIPEN::TuningIPENSocketWorker* m_tuningSocket = nullptr;
 		SimpleThread* m_tuningSocketThread = nullptr;

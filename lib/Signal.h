@@ -11,6 +11,7 @@
 #include "../VFrame30/Afb.h"
 #include "Hash.h"
 #include "TuningValue.h"
+#include "AppSignalStateFlags.h"
 
 class QXmlStreamAttributes;
 class XmlWriteHelper;
@@ -302,6 +303,10 @@ public:
 
 	void initCalculatedProperties();
 
+	bool addStateFlagSignal(E::AppSignalStateFlagType flagType, const QString& appSignalID);
+	QString stateFlagSignal(E::AppSignalStateFlagType flagType) const { return  m_stateFlagsSignals.value(flagType, QString()); }
+	bool hasStateFlagsSignals() const { return m_stateFlagsSignals.count(); }
+
 private:
 	// Private setters for fields, witch can't be changed outside DB engine
 	// Should be used only by friends
@@ -413,6 +418,8 @@ private:
 	bool m_isConst = false;
 	double m_constValue = 0;
 
+	AppSignalStateFlagsMap m_stateFlagsSignals;
+
 	//
 
 	bool m_needConversion = false;
@@ -445,6 +452,8 @@ public:
 	virtual void remove(const int& signalID) override;
 	virtual void removeAt(const int index) override;
 
+	void append(Signal* signal);
+
 	QVector<int> getChannelSignalsID(const Signal& signal) const;
 	QVector<int> getChannelSignalsID(int signalGroupID) const;
 
@@ -452,9 +461,12 @@ public:
 
 	bool serializeFromProtoFile(const QString& filePath);
 
+	int getMaxID();
 	QStringList appSignalIdsList(bool removeNumberSign, bool sort) const;
 
 private:
 	QMultiHash<int, int> m_groupSignals;
 	QHash<QString, int> m_strID2IndexMap;
+
+	int m_maxID = -1;
 };

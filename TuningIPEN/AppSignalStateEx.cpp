@@ -7,13 +7,13 @@
 //
 // -------------------------------------------------------------------------------
 
-AppSignalStateEx::AppSignalStateEx()
+DynamicAppSignalState::DynamicAppSignalState()
 {
 	m_current.flags.all = 0;
 }
 
 
-void AppSignalStateEx::setSignalParams(int index, Signal* signal)
+void DynamicAppSignalState::setSignalParams(int index, Signal* signal)
 {
 	if (signal == nullptr)
 	{
@@ -43,7 +43,7 @@ void AppSignalStateEx::setSignalParams(int index, Signal* signal)
 }
 
 
-bool AppSignalStateEx::setState(Times time, quint32 validity, double value, int autoArchivingGroup)
+bool DynamicAppSignalState::setState(Times time, quint32 validity, double value, int autoArchivingGroup)
 {
 	// update current state
 	//
@@ -148,7 +148,7 @@ bool AppSignalStateEx::setState(Times time, quint32 validity, double value, int 
 }
 
 
-Hash AppSignalStateEx::hash() const
+Hash DynamicAppSignalState::hash() const
 {
 	assert(m_current.hash == m_stored.hash);
 	assert(m_current.hash != 0);
@@ -157,7 +157,7 @@ Hash AppSignalStateEx::hash() const
 }
 
 
-QString AppSignalStateEx::appSignalID() const
+QString DynamicAppSignalState::appSignalID() const
 {
 	if (m_signal == nullptr)
 	{
@@ -169,7 +169,7 @@ QString AppSignalStateEx::appSignalID() const
 }
 
 
-void AppSignalStateEx::setAutoArchivingGroup(int groupsCount)
+void DynamicAppSignalState::setAutoArchivingGroup(int groupsCount)
 {
 	if (groupsCount == 0)
 	{
@@ -182,13 +182,13 @@ void AppSignalStateEx::setAutoArchivingGroup(int groupsCount)
 }
 
 
-AppSignalStates::~AppSignalStates()
+DynamicAppSignalStates::~DynamicAppSignalStates()
 {
 	clear();
 }
 
 
-void AppSignalStates::clear()
+void DynamicAppSignalStates::clear()
 {
 	m_hash2State.clear();
 
@@ -202,7 +202,7 @@ void AppSignalStates::clear()
 }
 
 
-void AppSignalStates::setSize(int size)
+void DynamicAppSignalStates::setSize(int size)
 {
 	clear();
 
@@ -212,7 +212,7 @@ void AppSignalStates::setSize(int size)
 		return;
 	}
 
-	m_appSignalState = new AppSignalStateEx[size];
+	m_appSignalState = new DynamicAppSignalState[size];
 	m_size = size;
 
 	for(int i = 0; i < m_size; i++)
@@ -222,7 +222,7 @@ void AppSignalStates::setSize(int size)
 }
 
 
-AppSignalStateEx* AppSignalStates::operator [] (int index)
+DynamicAppSignalState* DynamicAppSignalStates::operator [] (int index)
 {
 #ifdef QT_DEBUG
 
@@ -239,7 +239,7 @@ AppSignalStateEx* AppSignalStates::operator [] (int index)
 }
 
 
-void AppSignalStates::buidlHash2State()
+void DynamicAppSignalStates::buidlHash2State()
 {
 	m_hash2State.clear();
 
@@ -247,7 +247,7 @@ void AppSignalStates::buidlHash2State()
 
 	for(int i = 0; i < m_size; i++)
 	{
-		AppSignalStateEx& state = m_appSignalState[i];
+		DynamicAppSignalState& state = m_appSignalState[i];
 
 		Hash hash = state.hash();
 
@@ -263,11 +263,11 @@ void AppSignalStates::buidlHash2State()
 }
 
 
-bool AppSignalStates::getCurrentState(Hash hash, AppSignalState& state) const
+bool DynamicAppSignalStates::getCurrentState(Hash hash, AppSignalState& state) const
 {
 	if (m_hash2State.contains(hash))
 	{
-		const AppSignalStateEx* stateEx = m_hash2State[hash];
+		const DynamicAppSignalState* stateEx = m_hash2State[hash];
 
 		state = stateEx->current();
 
@@ -280,11 +280,11 @@ bool AppSignalStates::getCurrentState(Hash hash, AppSignalState& state) const
 }
 
 
-bool AppSignalStates::getStoredState(Hash hash, AppSignalState& state) const
+bool DynamicAppSignalStates::getStoredState(Hash hash, AppSignalState& state) const
 {
 	if (m_hash2State.contains(hash))
 	{
-		const AppSignalStateEx* stateEx = m_hash2State[hash];
+		const DynamicAppSignalState* stateEx = m_hash2State[hash];
 
 		state = stateEx->stored();
 
@@ -297,7 +297,7 @@ bool AppSignalStates::getStoredState(Hash hash, AppSignalState& state) const
 }
 
 
-void AppSignalStates::setAutoArchivingGroups(int autoArchivingGroupsCount)
+void DynamicAppSignalStates::setAutoArchivingGroups(int autoArchivingGroupsCount)
 {
 	for(int i = 0; i < m_size; i++)
 	{

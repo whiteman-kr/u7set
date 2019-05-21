@@ -128,7 +128,7 @@ public:
 	Q_ENUM(ByteOrder)
 
 	// DataFormat is used only for analog signals
-	// ATTENTION: Keep in sync with AppSignalDataFormat
+	// ATTENTION: Keep in sync with AnalogAppSignalFormat (below)
 	//
 	enum class DataFormat
 	{
@@ -394,6 +394,19 @@ public:
 	};
 	Q_ENUM(UalItemType)
 
+	//
+
+	enum class AppSignalStateFlagType
+	{
+		Validity,
+		StateAvailable,
+		Simulated,
+		Blocked,
+		Unbalanced,
+		AboveHighLimit,
+		BelowLowLimit
+	};
+	Q_ENUM(AppSignalStateFlagType)
 
 	// For Monitor
 	//
@@ -578,8 +591,34 @@ public:
 
 		return false;
 	}
+
+	// Builds array of all enum values
+	//
+	template <typename ENUM_TYPE>
+	static std::vector<ENUM_TYPE> values()
+	{
+		assert(std::is_enum<ENUM_TYPE>::value);
+
+		std::vector<ENUM_TYPE> valuesArray;
+
+		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
+
+		int keyCount = me.keyCount();
+
+		for (int i = 0; i < keyCount; i++)
+		{
+			valuesArray.push_back(static_cast<ENUM_TYPE>(me.value(i)));
+		}
+
+		return valuesArray;
+	}
 };
 
+
+inline uint qHash(E::AppSignalStateFlagType t, uint seed)
+{
+	return ::qHash(static_cast<int>(t), seed);
+}
 
 int getSamplePeriodCounter(E::RtTrendsSamplePeriod period, int lmWorkcycle_ms);
 

@@ -6141,6 +6141,62 @@ namespace Builder
 					arg(appSignalID));
 	}
 
+	/// IssueCode: ALC5168
+	///
+	/// IssueType: Error
+	///
+	/// Title: Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
+	///
+	/// Parameters:
+	///		%1 flag signal ID
+	///		%2 flag type
+	///		%3 signal with flag ID
+	///		%4 already assigned flag signal ID
+	///
+	/// Description:
+	///		Tuningable signals is found in specified module but tuning is not enabled.
+	///
+	void IssueLogger::errALC5168(	QString flagSignalID,
+									QString flagTypeStr,
+									QString signalWithFlagID,
+									QString alreadyAssignedFlagSignalID,
+									QUuid itemUuid,
+									QString schemaID)
+	{
+		if (schemaID.isEmpty() == false)
+		{
+			addItemsIssues(OutputMessageLevel::Error, 5168, itemUuid, schemaID);
+		}
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5168,
+				  QString(tr("Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.")).
+						arg(flagSignalID).arg(flagTypeStr).arg(signalWithFlagID).arg(alreadyAssignedFlagSignalID));
+	}
+
+	/// IssueCode: ALC5169
+	///
+	/// IssueType: Warning
+	///
+	/// Title: No flags assiged on set_flags item %1 (Schema %2)
+	///
+	/// Parameters:
+	///		%1 set_flags item label
+	///		%2 app logic schema ID
+	///
+	/// Description:
+	///		No flags assiged on specified set_flags item.
+	///
+	void IssueLogger::wrnALC5169(QString setFlagsItemLabel, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Warning1, 5169, itemUuid, schemaID);
+
+		LOG_WARNING1(IssueType::AlCompiler,
+				  5169,
+				  QString(tr("No flags assiged on set_flags item %1 (Schema %2)")).
+					arg(setFlagsItemLabel).arg(schemaID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186
@@ -6339,6 +6395,32 @@ namespace Builder
 						arg(port1ID).arg(port2ID));
 	}
 
+	/// IssueCode: ALC5996
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Internal error! %1. File: %1 Line: %2 Function: %3
+	///
+	/// Parameters:
+	///		%1 error message
+	///		%2 source file name
+	///		%3 source line number
+	///		%4 function name
+	///
+	/// Description:
+	///		Internal error in specified function. Contact to the RPCT developers.
+	///
+	void IssueLogger::errALC5996(QString errorMsg,
+								 QString fileName,
+								 int lineNo,
+								 QString functionName)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5996,
+				  QString(tr("Internal error! %1. File: %2 Line: %3 Function: %4")).
+								arg(errorMsg).arg(fileName).arg(lineNo).arg(functionName));
+	}
+
 	/// IssueCode: ALC5997
 	///
 	/// IssueType: Error
@@ -6351,7 +6433,7 @@ namespace Builder
 	///		%3 function name
 	///
 	/// Description:
-	///		Null pointer occurred in specified function. Contact to th RPCT developers.
+	///		Null pointer occurred in specified function. Contact to the RPCT developers.
 	///
 	void IssueLogger::errALC5997(QString fileName, int lineNo, QString functionName)
 	{
@@ -6373,7 +6455,7 @@ namespace Builder
 	///		%3 function name
 	///
 	/// Description:
-	///		Internal error in specified function. Contact to th RPCT developers.
+	///		Internal error in specified function. Contact to the RPCT developers.
 	///
 	void IssueLogger::errALC5998(QString fileName, int lineNo, QString functionName)
 	{

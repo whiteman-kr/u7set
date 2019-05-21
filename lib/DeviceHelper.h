@@ -6,8 +6,6 @@
 #include "Socket.h"
 
 #include "../Builder/IssueLogger.h"
-#include "../Builder/ModulesRawData.h"
-
 
 class DeviceHelper : public QObject
 {
@@ -96,18 +94,12 @@ public:
 
 	static const Hardware::Software* getSoftware(const Hardware::EquipmentSet* equipment, const QString& softwareID);
 
-	static int getAllNativeRawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log);
-	static int getModuleRawDataSize(const Hardware::DeviceModule* lm, int modulePlace, bool* moduleIsFound, Builder::IssueLogger* log);
-	static int getModuleRawDataSize(const Hardware::DeviceModule* module, Builder::IssueLogger* log);
-
-	static ModuleRawDataDescription* getModuleRawDataDescription(const Hardware::DeviceModule* module);
-
 private:
 	static void logPropertyNotFoundError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger* log);
 	static void logPropertyWriteError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger *log);
 
 private:
-	static QHash<QString, ModuleRawDataDescription*> m_modulesRawDataDescription;
+//	static ModulesRawDataDescriptionMap m_modulesRawDataDescription;
 };
 
 template<typename T>

@@ -45,6 +45,11 @@ namespace Builder
 			return true;
 		}
 
+		if (isSetFlagsItem() == true)
+		{
+			return true;			// no parameters processing required
+		}
+
 		bool result = true;
 
 		switch(static_cast<Afb::AfbType>(afb().opCode()))
@@ -157,7 +162,7 @@ namespace Builder
 			result = calculate_INDICATION_paramValues();
 			break;
 
-		case Afb::AfbType::PULSE_GEN:	// opcode 30
+		case Afb::AfbType::PULSE_GEN:		// opcode 30
 			result = calculate_PULSE_GENERATOR_paramValues();
 			break;
 

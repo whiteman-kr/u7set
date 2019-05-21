@@ -2248,14 +2248,14 @@ public:
 			return result;
 		}
 
-		QString name(columns[1]);
-		QString category(columns[2]);
-		QString type(columns[3]);
-		QStringRef min(&columns[4]);
-		QStringRef max(&columns[5]);
-		QStringRef defaultValue(&columns[6]);
-		QStringRef strPrecision(&columns[7]);
-		QString strUpdateFromPreset(columns[8]);
+		const QString& name = columns.at(1);
+		const QString& category = columns.at(2);
+		const QString& type = columns.at(3);
+		const QString& min = columns.at(4);
+		const QString& max = columns.at(5);
+		const QString& defaultValue = columns.at(6);
+		const QString& strPrecision = columns.at(7);
+		const QString& strUpdateFromPreset = columns.at(8);
 
 		result = parseSpecificPropertiesCreate(1,
 											   name,
@@ -2267,11 +2267,11 @@ public:
 											   defaultValue,
 											   strPrecision,
 											   strUpdateFromPreset,
-											   QLatin1String{"false"},
-											   QLatin1String{"true"},
-											   QLatin1String{"None"},
-											   QString{"65535"},
-											   QLatin1String{"false"});
+											   QStringLiteral("false"),
+											   QStringLiteral("true"),
+											   QStringLiteral("None"),
+											   QStringLiteral("65535"),
+											   QStringLiteral("false"));
 
 		return result;
 	}
@@ -2291,16 +2291,16 @@ public:
 			return result;
 		}
 
-		QString name(columns[1]);
-		QString category(columns[2]);
-		QString type(columns[3]);
-		QStringRef min(&columns[4]);
-		QStringRef max(&columns[5]);
-		QStringRef defaultValue(&columns[6]);
-		QStringRef strPrecision(&columns[7]);
-		QString strUpdateFromPreset(columns[8]);
-		QString strExpert(columns[9]);
-		QString strDescription(columns[10]);
+		const QString& name = columns.at(1);
+		const QString& category = columns.at(2);
+		const QString& type = columns.at(3);
+		const QString& min = columns.at(4);
+		const QString& max = columns.at(5);
+		const QString& defaultValue = columns.at(6);
+		const QString& strPrecision = columns.at(7);
+		const QString& strUpdateFromPreset = columns.at(8);
+		const QString& strExpert = columns.at(9);
+		const QString& strDescription = columns.at(10);
 
 		result = parseSpecificPropertiesCreate(2,
 											   name,
@@ -2313,10 +2313,10 @@ public:
 											   strPrecision,
 											   strUpdateFromPreset,
 											   strExpert,
-											   QLatin1String{"true"},
-											   QLatin1String{"None"},
-											   QString{"65535"},
-											   QLatin1String{"false"});
+											   QStringLiteral("true"),
+											   QStringLiteral("None"),
+											   QStringLiteral("65535"),
+											   QStringLiteral("false"));
 
 		return result;
 	}
@@ -2336,17 +2336,17 @@ public:
 			return result;
 		}
 
-		QString name(columns[1]);
-		QString category(columns[2]);
-		QString type(columns[3]);
-		QStringRef min(&columns[4]);
-		QStringRef max(&columns[5]);
-		QStringRef defaultValue(&columns[6]);
-		QStringRef strPrecision(&columns[7]);
-		QString strUpdateFromPreset(columns[8]);
-		QString strExpert(columns[9]);
-		QString strDescription(columns[10]);
-		QString strVisible(columns[11]);
+		const QString& name = columns.at(1);
+		const QString& category = columns.at(2);
+		const QString& type = columns.at(3);
+		const QString& min = columns.at(4);
+		const QString& max = columns.at(5);
+		const QString& defaultValue = columns.at(6);
+		const QString& strPrecision = columns.at(7);
+		const QString& strUpdateFromPreset = columns.at(8);
+		const QString& strExpert = columns.at(9);
+		const QString& strDescription= columns.at(10);
+		const QString& strVisible = columns.at(11);
 
 		result = parseSpecificPropertiesCreate(3,
 											   name,
@@ -2360,9 +2360,9 @@ public:
 											   strUpdateFromPreset,
 											   strExpert,
 											   strVisible,
-											   QLatin1String{"None"},
-											   QString{"65535"},
-											   QLatin1String{"false"});
+											   QStringLiteral("None"),
+											   QStringLiteral("65535"),
+											   QStringLiteral("false"));
 
 		return result;
 	}
@@ -2382,18 +2382,18 @@ public:
 			return result;
 		}
 
-		QString name(columns[1]);
-		QString category(columns[2]);
-		QString type(columns[3]);
-		QStringRef min(&columns[4]);
-		QStringRef max(&columns[5]);
-		QStringRef defaultValue(&columns[6]);
-		QStringRef strPrecision(&columns[7]);
-		QString strUpdateFromPreset(columns[8]);
-		QString strExpert(columns[9]);
-		QString description(columns[10]);
-		QString strVisible(columns[11]);
-		QString strEditor(columns[12]);
+		const QString& name = columns.at(1);
+		const QString& category = columns.at(2);
+		const QString& type = columns.at(3);
+		const QString& min = columns.at(4);
+		const QString& max = columns.at(5);
+		const QString& defaultValue = columns.at(6);
+		const QString& strPrecision = columns.at(7);
+		const QString& strUpdateFromPreset = columns.at(8);
+		const QString& strExpert = columns.at(9);
+		const QString& description = columns.at(10);
+		const QString& strVisible = columns.at(11);
+		const QString& strEditor = columns.at(12);
 
 		result = parseSpecificPropertiesCreate(4,
 											   name,
@@ -2408,8 +2408,8 @@ public:
 											   strExpert,
 											   strVisible,
 											   strEditor,
-											   QString{"65535"},
-											   QLatin1String{"false"});
+											   QStringLiteral("65535"),
+											   QStringLiteral("false"));
 
 		return result;
 	}
@@ -2429,19 +2429,19 @@ public:
 			return result;
 		}
 
-		QString name(columns[1]);
-		QString category(columns[2]);
-		QString type(columns[3]);
-		QStringRef min(&columns[4]);
-		QStringRef max(&columns[5]);
-		QStringRef defaultValue(&columns[6]);
-		QStringRef strPrecision(&columns[7]);
-		QString strUpdateFromPreset(columns[8]);
-		QString strExpert(columns[9]);
-		QString description(columns[10]);
-		QString strVisible(columns[11]);
-		QString strEditor(columns[12]);
-		QString strViewOrder(columns[13]);
+		const QString& name = columns.at(1);
+		const QString& category = columns.at(2);
+		const QString& type = columns.at(3);
+		const QString& min = columns.at(4);
+		const QString& max = columns.at(5);
+		const QString& defaultValue = columns.at(6);
+		const QString& strPrecision = columns.at(7);
+		const QString& strUpdateFromPreset = columns.at(8);
+		const QString& strExpert = columns.at(9);
+		const QString& description = columns.at(10);
+		const QString& strVisible = columns.at(11);
+		const QString& strEditor = columns.at(12);
+		const QString& strViewOrder = columns.at(13);
 
 		result = parseSpecificPropertiesCreate(5,
 											   name,
@@ -2457,7 +2457,7 @@ public:
 											   strVisible,
 											   strEditor,
 											   strViewOrder,
-											   QLatin1String{"false"});
+											   QStringLiteral("false"));
 
 		return result;
 	}
@@ -2477,20 +2477,20 @@ public:
 			return result;
 		}
 
-		QString name(columns[1]);
-		QString category(columns[2]);
-		QString type(columns[3]);
-		QStringRef min(&columns[4]);
-		QStringRef max(&columns[5]);
-		QStringRef defaultValue(&columns[6]);
-		QStringRef strPrecision(&columns[7]);
-		QString strUpdateFromPreset(columns[8]);
-		QString strExpert(columns[9]);
-		QString description(columns[10]);
-		QString strVisible(columns[11]);
-		QString strEditor(columns[12]);
-		QString strViewOrder(columns[13]);
-		QString strEssential(columns[14]);
+		const QString& name = columns.at(1);
+		const QString& category = columns.at(2);
+		const QString& type = columns.at(3);
+		const QString& min = columns.at(4);
+		const QString& max = columns.at(5);
+		const QString& defaultValue = columns.at(6);
+		const QString& strPrecision = columns.at(7);
+		const QString& strUpdateFromPreset = columns.at(8);
+		const QString& strExpert = columns.at(9);
+		const QString& description = columns.at(10);
+		const QString& strVisible = columns.at(11);
+		const QString& strEditor = columns.at(12);
+		const QString& strViewOrder = columns.at(13);
+		const QString& strEssential = columns.at(14);
 
 		result = parseSpecificPropertiesCreate(6,
 											   name,
@@ -2516,10 +2516,10 @@ public:
 														   const QString& category,
 														   const QString& description,
 														   const QString& strType,
-														   QStringRef strMin,
-														   QStringRef strMax,
-														   QStringRef strDefaultValue,
-														   QStringRef strPrecision,
+														   const QString& strMin,
+														   const QString& strMax,
+														   const QString& strDefaultValue,
+														   const QString& strPrecision,
 														   const QString& strUpdateFromPreset,
 														   const QString& strExpert,
 														   const QString& strVisible,
@@ -2614,7 +2614,7 @@ public:
 			//
 			auto p = addDynamicEnumProperty(name, enumValues, true);
 			p->setCategory(category);
-			p->setValue(strDefaultValue.toString());
+			p->setValue(strDefaultValue);
 
 			addedProperty = p;
 		}
@@ -2741,7 +2741,7 @@ public:
 				{
 					// Default Value
 					//
-					QString defaultString = strDefaultValue.toString();
+					QString defaultString = strDefaultValue;
 
 					// Add property with default value
 					//
@@ -2755,7 +2755,7 @@ public:
 				{
 					// Add property with default value
 					//
-					auto p = addProperty(name, category, true, QVariant(strDefaultValue.toString()));
+					auto p = addProperty(name, category, true, QVariant(strDefaultValue));
 					addedProperty = p;
 				}
 				break;
@@ -2802,47 +2802,46 @@ public:
 
 	static std::pair<E::SpecificPropertyType, bool> parseSpecificPropertyType(const QString& strType)
 	{
-		static std::map<uint, E::SpecificPropertyType> typeMap;
-		if (typeMap.empty() == true)	// One time init
-		{
-			typeMap[qHash(QString("qint32"))] = E::SpecificPropertyType::pt_int32;
-			typeMap[qHash(QString("signed int"))] = E::SpecificPropertyType::pt_int32;
-			typeMap[qHash(QString("int32"))] = E::SpecificPropertyType::pt_int32;
-			typeMap[qHash(QString("int"))] = E::SpecificPropertyType::pt_int32;
-			typeMap[qHash(QString("int32_t"))] = E::SpecificPropertyType::pt_int32;
+		static const QHash<QString, E::SpecificPropertyType> typeMap =
+			{
+				{QStringLiteral("qint32"), E::SpecificPropertyType::pt_int32},
+				{QStringLiteral("signed int"), E::SpecificPropertyType::pt_int32},
+				{QStringLiteral("int32"), E::SpecificPropertyType::pt_int32},
+				{QStringLiteral("int"), E::SpecificPropertyType::pt_int32},
+				{QStringLiteral("int32_t"), E::SpecificPropertyType::pt_int32},
 
-			typeMap[qHash(QString("quint32"))] = E::SpecificPropertyType::pt_uint32;
-			typeMap[qHash(QString("unsigned int"))] = E::SpecificPropertyType::pt_uint32;
-			typeMap[qHash(QString("uint32"))] = E::SpecificPropertyType::pt_uint32;
-			typeMap[qHash(QString("uint"))] = E::SpecificPropertyType::pt_uint32;
-			typeMap[qHash(QString("uint32_t"))] = E::SpecificPropertyType::pt_uint32;
+				{QStringLiteral("quint32"), E::SpecificPropertyType::pt_uint32},
+				{QStringLiteral("unsigned int"), E::SpecificPropertyType::pt_uint32},
+				{QStringLiteral("uint32"), E::SpecificPropertyType::pt_uint32},
+				{QStringLiteral("uint"), E::SpecificPropertyType::pt_uint32},
+				{QStringLiteral("uint32_t"), E::SpecificPropertyType::pt_uint32},
 
-			typeMap[qHash(QString("double"))] = E::SpecificPropertyType::pt_double;
-			typeMap[qHash(QString("Double"))] = E::SpecificPropertyType::pt_double;
+				{QStringLiteral("double"), E::SpecificPropertyType::pt_double},
+				{QStringLiteral("Double"), E::SpecificPropertyType::pt_double},
 
-			typeMap[qHash(QString("bool"))] = E::SpecificPropertyType::pt_bool;
-			typeMap[qHash(QString("Bool"))] = E::SpecificPropertyType::pt_bool;
-			typeMap[qHash(QString("boolean"))] = E::SpecificPropertyType::pt_bool;
-			typeMap[qHash(QString("Boolean"))] = E::SpecificPropertyType::pt_bool;
+				{QStringLiteral("bool"), E::SpecificPropertyType::pt_bool},
+				{QStringLiteral("Bool"), E::SpecificPropertyType::pt_bool},
+				{QStringLiteral("boolean"), E::SpecificPropertyType::pt_bool},
+				{QStringLiteral("Boolean"), E::SpecificPropertyType::pt_bool},
 
-			typeMap[qHash(QString("E::Channel"))] = E::SpecificPropertyType::pt_e_channel;
-			typeMap[qHash(QString("e::channel"))] = E::SpecificPropertyType::pt_e_channel;
-			typeMap[qHash(QString("channel"))] = E::SpecificPropertyType::pt_e_channel;
+				{QStringLiteral("E::Channel"), E::SpecificPropertyType::pt_e_channel},
+				{QStringLiteral("e::channel"), E::SpecificPropertyType::pt_e_channel},
+				{QStringLiteral("channel"), E::SpecificPropertyType::pt_e_channel},
 
-			typeMap[qHash(QString("string"))] = E::SpecificPropertyType::pt_string;
-			typeMap[qHash(QString("String"))] = E::SpecificPropertyType::pt_string;
-			typeMap[qHash(QString("QString"))] = E::SpecificPropertyType::pt_string;
-		}
+				{QStringLiteral("string"), E::SpecificPropertyType::pt_string},
+				{QStringLiteral("String"), E::SpecificPropertyType::pt_string},
+				{QStringLiteral("QString"), E::SpecificPropertyType::pt_string},
+			};
 
 		// Check for one of standard types from typeMap
 		//
-		auto typeIt = typeMap.find(qHash(strType));
+		auto typeIt = typeMap.find(strType);
 		if (typeIt == typeMap.end())
 		{
 			return {E::SpecificPropertyType::pt_int32, false};
 		}
 
-		return {typeIt->second, true};
+		return {*typeIt, true};
 	}
 
 	static std::vector<std::pair<QString, int>> parseSpecificPropertyTypeDynamicEnum(const QString& strType, bool* ok)

@@ -353,7 +353,7 @@ namespace TuningIPEN
 		for(int i = 0; i < signalCount; i++)
 		{
 			Signal* appSignal = m_appSignals[i];
-			AppSignalStateEx* appSignalState = m_appSignalStates[i];
+			DynamicAppSignalState* appSignalState = m_appSignalStates[i];
 
 			appSignalState->setSignalParams(i, appSignal);
 		}

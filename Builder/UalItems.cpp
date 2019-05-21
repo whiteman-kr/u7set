@@ -122,6 +122,11 @@ namespace Builder
 			return false;
 		}
 
+		if (ualAfb->isSetFlagsItem() == true)
+		{
+			return true;
+		}
+
 		QString afbStrID = ualAfb->strID();
 
 		Afbl* afbl = (*this).value(afbStrID, nullptr);
@@ -322,6 +327,11 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------------
 
+	const QString UalItem::SET_FLAGS_ITEM_CAPTION = "set_flags";
+	const QString UalItem::SIM_LOCK_ITEM_CAPTION = "simlock";
+	const QString UalItem::MISMATCH_ITEM_CAPTION = "mismatch";
+
+
 	UalItem::UalItem()
 	{
 	}
@@ -416,6 +426,36 @@ namespace Builder
 
 		assert(false);		// unknown type of item
 		return "";
+	}
+
+	bool UalItem::isSetFlagsItem() const
+	{
+		if (isAfb() == false)
+		{
+			return false;
+		}
+
+		return m_appLogicItem.afbElement().caption() == SET_FLAGS_ITEM_CAPTION;
+	}
+
+	bool UalItem::isSimLockItem() const
+	{
+		if (isAfb() == false)
+		{
+			return false;
+		}
+
+		return m_appLogicItem.afbElement().caption() == SIM_LOCK_ITEM_CAPTION;
+	}
+
+	bool UalItem::isMismatchItem() const
+	{
+		if (isAfb() == false)
+		{
+			return false;
+		}
+
+		return m_appLogicItem.afbElement().caption().startsWith(MISMATCH_ITEM_CAPTION);
 	}
 
 	E::UalItemType UalItem::type() const
@@ -517,6 +557,30 @@ namespace Builder
 		return nullptr;
 	}
 
+	const LogicPin* UalItem::getPin(const QString& pinCaption) const
+	{
+		const std::vector<LogicPin>& inputPins = inputs();
+
+		for(const LogicPin& inPin : inputPins)
+		{
+			if (inPin.caption() == pinCaption)
+			{
+				return &inPin;
+			}
+		}
+
+		const std::vector<LogicPin>& outputPins = outputs();
+
+		for(const LogicPin& outPin : outputPins)
+		{
+			if (outPin.caption() == pinCaption)
+			{
+				return &outPin;
+			}
+		}
+
+		return nullptr;
+	}
 
 	// ---------------------------------------------------------------------------------------
 	//
@@ -649,6 +713,29 @@ namespace Builder
 	// AppFb class implementation
 	//
 	// ---------------------------------------------------------------------------------------
+
+	const QString UalAfb::IN_PIN_CAPTION("in");
+	const QString UalAfb::OUT_PIN_CAPTION("out");
+
+	const QString UalAfb::IN_1_PIN_CAPTION("in_1");
+	const QString UalAfb::IN_2_PIN_CAPTION("in_2");
+	const QString UalAfb::IN_3_PIN_CAPTION("in_3");
+	const QString UalAfb::IN_4_PIN_CAPTION("in_4");
+
+	const QString UalAfb::OUT_1_PIN_CAPTION("out_1");
+	const QString UalAfb::OUT_2_PIN_CAPTION("out_2");
+	const QString UalAfb::OUT_3_PIN_CAPTION("out_3");
+	const QString UalAfb::OUT_4_PIN_CAPTION("out_4");
+
+	const QString UalAfb::SIMLOCK_SIM_PIN_CAPTION("sim");
+	const QString UalAfb::SIMLOCK_BLOCK_PIN_CAPTION("block");
+
+	const QString UalAfb::VALIDITY_PIN_CAPTION("validity");
+	const QString UalAfb::SIMULATED_PIN_CAPTION("simulated");
+	const QString UalAfb::BLOCKED_PIN_CAPTION("blocked");
+	const QString UalAfb::UNBALANCED_PIN_CAPTION("unbalanced");
+	const QString UalAfb::HIGH_LIMIT_PIN_CAPTION("high_limit");
+	const QString UalAfb::LOW_LIMIT_PIN_CAPTION("low_limit");
 
 	UalAfb::UalAfb(const UalItem& appItem, bool isBusProcessingAfb) :
 		UalItem(appItem),
@@ -979,9 +1066,9 @@ namespace Builder
 
 	UalSignal::~UalSignal()
 	{
-		if (m_autoSignalPtr != nullptr)
+		if (m_optoSignalNativeCopy != nullptr)
 		{
-			delete m_autoSignalPtr;
+			delete m_optoSignalNativeCopy;
 		}
 
 		m_refSignals.clear();
@@ -999,8 +1086,6 @@ namespace Builder
 			return false;
 		}
 
-		m_autoSignalPtr = nullptr;
-
 		appendRefSignal(s, false);
 
 		// input and tuning signals have already been computed
@@ -1016,54 +1101,48 @@ namespace Builder
 	bool UalSignal::createConstSignal(const UalItem* ualItem,
 										const QString& constSignalID,
 										E::SignalType constSignalType,
-										E::AnalogAppSignalFormat constAnalogFormat)
+										E::AnalogAppSignalFormat constAnalogFormat,
+										Signal** autoSignalPtr)
 	{
-		if (ualItem == nullptr)
-		{
-			assert(false);
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(ualItem);
+		TEST_PTR_RETURN_FALSE(autoSignalPtr);
 
 		m_ualItem = ualItem;
 
 		const UalConst* ualConst = ualItem->ualConst();
 
-		if (ualConst == nullptr)
-		{
-			assert(false);
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(ualConst);
 
 		// const UalSignal creation
 
-		m_autoSignalPtr = new Signal;
+		Signal* autoSignal = *autoSignalPtr = new Signal;
 
-		m_autoSignalPtr->setAppSignalID(constSignalID);
-		m_autoSignalPtr->setCustomAppSignalID(QString(constSignalID).remove("#"));
-		m_autoSignalPtr->setCaption(m_autoSignalPtr->customAppSignalID());
+		autoSignal->setAppSignalID(constSignalID);
+		autoSignal->setCustomAppSignalID(QString(constSignalID).remove("#"));
+		autoSignal->setCaption(autoSignal->customAppSignalID());
 
-		m_autoSignalPtr->setSignalType(constSignalType);
-		m_autoSignalPtr->setInOutType(E::SignalInOutType::Internal);
-		m_autoSignalPtr->setAnalogSignalFormat(constAnalogFormat);
+		autoSignal->setSignalType(constSignalType);
+		autoSignal->setInOutType(E::SignalInOutType::Internal);
+		autoSignal->setAnalogSignalFormat(constAnalogFormat);
 
 		switch(constSignalType)
 		{
 		case E::SignalType::Discrete:
-			m_autoSignalPtr->setDataSize(SIZE_1BIT);
+			autoSignal->setDataSize(SIZE_1BIT);
 			break;
 
 		case E::SignalType::Analog:
 			assert(constAnalogFormat == E::AnalogAppSignalFormat::Float32 || constAnalogFormat == E::AnalogAppSignalFormat::SignedInt32);
-			m_autoSignalPtr->setDataSize(SIZE_32BIT);
+			autoSignal->setDataSize(SIZE_32BIT);
 			break;
 
 		default:
 			assert(false);
 		}
 
-		m_autoSignalPtr->setAcquire(false);
+		autoSignal->setAcquire(false);
 
-		appendRefSignal(m_autoSignalPtr, false);
+		appendRefSignal(autoSignal, false);
 
 		// set Const signal fields
 
@@ -1080,37 +1159,35 @@ namespace Builder
 	bool UalSignal::createAutoSignal(const UalItem* ualItem,
 									const QString& signalID,
 									E::SignalType signalType,
-									E::AnalogAppSignalFormat analogFormat)
+									E::AnalogAppSignalFormat analogFormat,
+									Signal** autoSignalPtr)
 	{
-		if (ualItem == nullptr)
-		{
-			assert(false);
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(ualItem);
+		TEST_PTR_RETURN_FALSE(autoSignalPtr);
 
 		m_ualItem = ualItem;
 
 		// analog or discrete auto UalSignal creation
 
-		m_autoSignalPtr = new Signal;
+		Signal* autoSignal = *autoSignalPtr = new Signal;
 
-		m_autoSignalPtr->setAppSignalID(signalID);
-		m_autoSignalPtr->setCustomAppSignalID(QString(signalID).remove("#"));
-		m_autoSignalPtr->setCaption(m_autoSignalPtr->customAppSignalID());
+		autoSignal->setAppSignalID(signalID);
+		autoSignal->setCustomAppSignalID(QString(signalID).remove("#"));
+		autoSignal->setCaption(autoSignal->customAppSignalID());
 
-		m_autoSignalPtr->setSignalType(signalType);
-		m_autoSignalPtr->setInOutType(E::SignalInOutType::Internal);
-		m_autoSignalPtr->setAnalogSignalFormat(analogFormat);
+		autoSignal->setSignalType(signalType);
+		autoSignal->setInOutType(E::SignalInOutType::Internal);
+		autoSignal->setAnalogSignalFormat(analogFormat);
 
 		switch(signalType)
 		{
 		case E::SignalType::Discrete:
-			m_autoSignalPtr->setDataSize(SIZE_1BIT);
+			autoSignal->setDataSize(SIZE_1BIT);
 			break;
 
 		case E::SignalType::Analog:
 			assert(analogFormat == E::AnalogAppSignalFormat::Float32 || analogFormat == E::AnalogAppSignalFormat::SignedInt32);
-			m_autoSignalPtr->setDataSize(SIZE_32BIT);
+			autoSignal->setDataSize(SIZE_32BIT);
 			break;
 
 		case E::SignalType::Bus:
@@ -1118,9 +1195,9 @@ namespace Builder
 			assert(false);
 		}
 
-		m_autoSignalPtr->setAcquire(false);
+		autoSignal->setAcquire(false);
 
-		appendRefSignal(m_autoSignalPtr, false);
+		appendRefSignal(autoSignal, false);
 
 		return true;
 	}
@@ -1164,13 +1241,9 @@ namespace Builder
 
 		if (needToCreateNativeCopy == true)
 		{
-			refSignal = m_autoSignalPtr = createNativeCopyOfSignal(templateSignal, lmEquipmentID);
+			refSignal = createNativeCopyOfSignal(templateSignal, lmEquipmentID);
 
-			if (refSignal == nullptr)
-			{
-				assert(false);
-				return false;
-			}
+			TEST_PTR_RETURN_FALSE(refSignal);
 		}
 		else
 		{
@@ -1193,7 +1266,8 @@ namespace Builder
 											Signal* busSignal,
 											Builder::BusShared bus,
 											const QString& outPinCaption,
-											std::shared_ptr<Hardware::DeviceModule> lm)
+											std::shared_ptr<Hardware::DeviceModule> lm,
+											Signal** autoSignalPtr)
 	{
 		// create parent Bus signal
 		//
@@ -1212,22 +1286,20 @@ namespace Builder
 			//
 			QString appSignalID = QString("#AUTO_BUS_%1_%2").arg(ualItem->label()).arg(outPinCaption.toUpper());
 
-			m_autoSignalPtr = new Signal;
+			busSignal = *autoSignalPtr = new Signal;
 
-			m_autoSignalPtr->setAppSignalID(appSignalID);
-			m_autoSignalPtr->setCustomAppSignalID(appSignalID.remove("#"));
-			m_autoSignalPtr->setCaption(m_autoSignalPtr->customAppSignalID());
+			busSignal->setAppSignalID(appSignalID);
+			busSignal->setCustomAppSignalID(appSignalID.remove("#"));
+			busSignal->setCaption(busSignal->customAppSignalID());
 
-			m_autoSignalPtr->setSignalType(E::SignalType::Bus);
-			m_autoSignalPtr->setBusTypeID(bus->busTypeID());
+			busSignal->setSignalType(E::SignalType::Bus);
+			busSignal->setBusTypeID(bus->busTypeID());
 
-			m_autoSignalPtr->setDataSizeW(bus->sizeW());
+			busSignal->setDataSizeW(bus->sizeW());
 
-			m_autoSignalPtr->setAcquire(false);
+			busSignal->setAcquire(false);
 
-			m_autoSignalPtr->setLm(lm);
-
-			busSignal = m_autoSignalPtr;
+			busSignal->setLm(lm);
 		}
 		else
 		{
@@ -1358,13 +1430,15 @@ namespace Builder
 			return nullptr;
 		}
 
-		Signal* nativeCopySignal = new Signal(*templateSignal);
+		Q_ASSERT(m_optoSignalNativeCopy == nullptr);
 
-		nativeCopySignal->setAcquire(false);								// reset Acquired flag
-		nativeCopySignal->setEquipmentID(lmEquipmentID);					// associate new signal with current lm
-		nativeCopySignal->setInOutType(E::SignalInOutType::Internal);		// set signal type to Internal (it is important!!!)
+		m_optoSignalNativeCopy = new Signal(*templateSignal);
 
-		return nativeCopySignal;
+		m_optoSignalNativeCopy->setAcquire(false);								// reset Acquired flag
+		m_optoSignalNativeCopy->setEquipmentID(lmEquipmentID);					// associate new signal with current lm
+		m_optoSignalNativeCopy->setInOutType(E::SignalInOutType::Internal);		// set signal type to Internal (it is important!!!)
+
+		return m_optoSignalNativeCopy;
 	}
 
 	Address16 UalSignal::ioBufAddr()
@@ -1397,12 +1471,7 @@ namespace Builder
 
 		if (m_isOptoSignal == true)
 		{
-			Signal* s = m_autoSignalPtr;
-
-			if (s == nullptr)
-			{
-				s = signal();
-			}
+			Signal* s = signal();
 
 			if (s == nullptr)
 			{
@@ -1761,12 +1830,33 @@ namespace Builder
 		return true;
 	}
 
+/*	bool UalSignal::setFlagSignal(E::AppSignalStateFlagType flagType, UalSignal* flagSignal)
+	{
+		TEST_PTR_RETURN_FALSE(flagSignal);
+
+		if (m_flagSignals.value(flagType, nullptr) != nullptr)
+		{
+			void errALC5168(QString flagSignalID,
+							QString flagTypeStr,
+							QString signalWithFlagID,
+							QString alreadyAssignedFlagSignalID,
+							QUuid itemUuid,
+							QString schemaID);					//Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
+
+
+			assert(false);			// signal for this flag is already assigned
+			return false;
+		}
+
+		m_flagSignals.insert(flagType, flagSignal);
+
+		return true;
+	}*/
 
 	void UalSignal::sortRefSignals()
 	{
 		// sorting m_refSignals by appSignalID ascending
 		//
-
 		int count = m_refSignals.count();
 
 		for(int i = 0; i < count - 1; i++)
@@ -1993,6 +2083,48 @@ namespace Builder
 		return m_busChildSignals.value(busSignalID, nullptr);
 	}
 
+	void UalSignal::setAcquired(bool acquired)
+	{
+		m_isAcquired = acquired;
+
+		for(Signal* refSignal : m_refSignals)
+		{
+			TEST_PTR_CONTINUE(refSignal);
+
+			refSignal->setAcquire(acquired);
+		}
+	}
+
+	bool UalSignal::addStateFlagSignal(E::AppSignalStateFlagType flagType, UalSignal* flagSignal, IssueLogger* log)
+	{
+		bool result = true;
+
+		for(Signal* s : m_refSignals)
+		{
+			TEST_PTR_CONTINUE(s);
+
+			bool res = s->addStateFlagSignal(flagType, flagSignal->appSignalID());
+
+			if (res == false)
+			{
+				//Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
+				//
+				log->errALC5168(flagSignal->appSignalID(),
+								E::valueToString<E::AppSignalStateFlagType>(flagType),
+								s->appSignalID(),
+								s->stateFlagSignal(flagType),
+								QUuid(),
+								QString());
+
+
+			}
+
+			result &= res;
+		}
+
+		return result;
+	}
+
 	// ---------------------------------------------------------------------------------------
 	//
 	// AppSignalsMap class implementation
@@ -2108,12 +2240,16 @@ namespace Builder
 		//
 		ualSignal = new UalSignal;
 
+		Signal* autoSignalPtr = nullptr;
+
 		bool result = ualSignal->createConstSignal(ualItem,
 									  constSignalID,
 									  constSignalType,
-									  constAnalogFormat);
+									  constAnalogFormat,
+									  &autoSignalPtr);
 		if (result == false)
 		{
+			DELETE_IF_NOT_NULL(autoSignalPtr);
 			delete ualSignal;
 			return nullptr;
 		}
@@ -2122,8 +2258,18 @@ namespace Builder
 
 		if (result == false)
 		{
+			DELETE_IF_NOT_NULL(autoSignalPtr);
 			delete ualSignal;
 			return nullptr;
+		}
+
+		if (autoSignalPtr != nullptr)
+		{
+			m_compiler.signalSet()->append(autoSignalPtr);
+		}
+		else
+		{
+			assert(false);
 		}
 
 		return ualSignal;
@@ -2166,10 +2312,13 @@ namespace Builder
 		//
 		ualSignal = new UalSignal;
 
-		result = ualSignal->createAutoSignal(ualItem, signalID, outAfbSignal.type(), analogFormat);
+		Signal* autoSignalPtr = nullptr;
+
+		result = ualSignal->createAutoSignal(ualItem, signalID, outAfbSignal.type(), analogFormat, &autoSignalPtr);
 
 		if (result == false)
 		{
+			DELETE_IF_NOT_NULL(autoSignalPtr);
 			delete ualSignal;
 			return nullptr;
 		}
@@ -2178,8 +2327,18 @@ namespace Builder
 
 		if (result == false)
 		{
+			DELETE_IF_NOT_NULL(autoSignalPtr);
 			delete ualSignal;
 			return nullptr;
+		}
+
+		if (autoSignalPtr != nullptr)
+		{
+			m_compiler.signalSet()->append(autoSignalPtr);
+		}
+		else
+		{
+			assert(false);
 		}
 
 		return ualSignal;
@@ -2268,10 +2427,13 @@ namespace Builder
 		//
 		UalSignal* busParentSignal = new UalSignal;
 
-		bool result = busParentSignal->createBusParentSignal(ualItem, s, bus, outPinCaption, lm);
+		Signal* autoSignalPtr = nullptr;
+
+		bool result = busParentSignal->createBusParentSignal(ualItem, s, bus, outPinCaption, lm, &autoSignalPtr);
 
 		if (result == false)
 		{
+			DELETE_IF_NOT_NULL(autoSignalPtr);
 			delete busParentSignal;
 			return nullptr;
 		}
@@ -2280,6 +2442,7 @@ namespace Builder
 
 		if (result == false)
 		{
+			DELETE_IF_NOT_NULL(autoSignalPtr);
 			delete busParentSignal;
 			return nullptr;
 		}
@@ -2325,8 +2488,14 @@ namespace Builder
 
 		if (result == false)
 		{
+			DELETE_IF_NOT_NULL(autoSignalPtr);
 			delete busParentSignal;
 			return nullptr;
+		}
+
+		if (autoSignalPtr != nullptr)
+		{
+			m_compiler.signalSet()->append(autoSignalPtr);
 		}
 
 		return busParentSignal;
@@ -2394,7 +2563,13 @@ namespace Builder
 				return true;
 			}
 
-			LOG_INTERNAL_ERROR(m_log);			// ref of same appSignalID to different UalSignals, WTF?
+//			LOG_INTERNAL_ERROR(m_log);			// ref of same appSignalID to different UalSignals, WTF?
+
+			QString msg = QString("Signal %1 try appendRef to %2 and %3 ual signals").
+					arg(s->appSignalID()).arg(ualSignal->refSignalIDsJoined()).arg(existsSignal->refSignalIDsJoined());
+
+			LOG_INTERNAL_ERROR_MSG(m_log, msg);
+
 			return false;
 		}
 

@@ -4,29 +4,17 @@
 #include <QHostAddress>
 
 
-QHash<QString, ModuleRawDataDescription*> DeviceHelper::m_modulesRawDataDescription;
-
 const char* DeviceHelper::LM_PLATFORM_INTERFACE_CONTROLLER_SUFFUX = "_PI";
 
 void DeviceHelper::init()
 {
-	assert(m_modulesRawDataDescription.count() == 0);
+//	assert(m_modulesRawDataDescription.count() == 0);
 }
 
 
 void DeviceHelper::shutdown()
 {
-	for(ModuleRawDataDescription* desc : m_modulesRawDataDescription)
-	{
-		if (desc != nullptr)
-		{
-			delete desc;
-		}
-	}
-
-	m_modulesRawDataDescription.clear();
 }
-
 
 bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QString& name, int* value, Builder::IssueLogger *log)
 {
@@ -678,151 +666,6 @@ const Hardware::Software* DeviceHelper::getSoftware(const Hardware::EquipmentSet
 	return device->toSoftware();
 }
 
-int DeviceHelper::getAllNativeRawDataSize(const Hardware::DeviceModule* lm, Builder::IssueLogger* log)
-{
-	if (lm == nullptr || log == nullptr)
-	{
-		assert(false);
-		return 0;
-	}
-
-	int size = 0;
-
-	const Hardware::DeviceChassis* chassis = lm->getParentChassis();
-
-	if (chassis == nullptr)
-	{
-		assert(false);
-		return 0;
-	}
-
-	int count = chassis->childrenCount();
-
-	for(int i = 0; i < count; i++)
-	{
-		Hardware::DeviceObject* device = chassis->child(i);
-
-		if (device == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
-		if (device->isModule() == false)
-		{
-			continue;
-		}
-
-		Hardware::DeviceModule* module =  device->toModule();
-
-		if (module == nullptr)
-		{
-			assert(false);
-			continue;
-		}
-
-		if (module->hasRawData() == true)
-		{
-			size += getModuleRawDataSize(module, log);
-		}
-	}
-
-	return size;
-}
-
-
-int DeviceHelper::getModuleRawDataSize(const Hardware::DeviceModule* lm, int modulePlace, bool* moduleIsFound, Builder::IssueLogger* log)
-{
-	if (lm == nullptr || log == nullptr || moduleIsFound == nullptr)
-	{
-		assert(false);
-		return 0;
-	}
-
-	*moduleIsFound = false;
-
-	const Hardware::DeviceModule* module = getModuleOnPlace(lm, modulePlace);
-
-	if (module == nullptr)
-	{
-		return 0;
-	}
-
-	*moduleIsFound = true;
-
-	int size = 0;
-
-	if (module->hasRawData() == true)
-	{
-		size = getModuleRawDataSize(module, log);
-	}
-
-	return size;
-}
-
-
-int DeviceHelper::getModuleRawDataSize(const Hardware::DeviceModule* module, Builder::IssueLogger* log)
-{
-	if (module == nullptr || log == nullptr)
-	{
-		assert(false);
-		return false;
-	}
-
-	if (module->hasRawData() == false)
-	{
-		return 0;
-	}
-
-	ModuleRawDataDescription* desc = nullptr;
-
-	if (m_modulesRawDataDescription.contains(module->equipmentIdTemplate()))
-	{
-		desc = m_modulesRawDataDescription.value(module->equipmentIdTemplate());
-
-		if (desc == nullptr)
-		{
-			return 0;
-		}
-
-		return desc->rawDataSize();
-	}
-
-	//
-
-	desc = new ModuleRawDataDescription();
-
-	bool result = desc->init(module, log);
-
-	if (result == true)
-	{
-		m_modulesRawDataDescription.insert(module->equipmentIdTemplate(), desc);
-
-		return desc->rawDataSize();
-	}
-
-	// parsing error occured
-	// add nullptr-description to prevent repeated parsing
-	//
-	m_modulesRawDataDescription.insert(module->equipmentIdTemplate(), nullptr);
-
-	return 0;
-}
-
-
-
-ModuleRawDataDescription* DeviceHelper::getModuleRawDataDescription(const Hardware::DeviceModule* module)
-{
-	if (module == nullptr)
-	{
-		assert(false);
-		return nullptr;
-	}
-
-	return m_modulesRawDataDescription.value(module->equipmentIdTemplate(), nullptr);
-}
-
-
 void DeviceHelper::logPropertyNotFoundError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger *log)
 {
 	if (log != nullptr && device != nullptr)
@@ -831,7 +674,6 @@ void DeviceHelper::logPropertyNotFoundError(const Hardware::DeviceObject* device
 		return;
 	}
 }
-
 
 void DeviceHelper::logPropertyWriteError(const Hardware::DeviceObject* device, const QString& propertyName, Builder::IssueLogger *log)
 {

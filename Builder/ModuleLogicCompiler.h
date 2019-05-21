@@ -15,6 +15,7 @@
 #include "MemWriteMap.h"
 
 #include "../lib/Connection.h"
+#include "../lib/AppSignalStateFlags.h"
 
 class LmDescription;
 
@@ -161,6 +162,18 @@ namespace Builder
 			static QString getAutoLoopbackID(const UalItem* ualItem, const LogicPin& outputPin);
 		};
 
+		class SignalsWithFlags : public QHash<QString, AppSignalStateFlagsMap*>
+		{
+		public:
+			SignalsWithFlags(ModuleLogicCompiler& compiler);
+			~SignalsWithFlags();
+
+			bool append(const QString& signalWithFlagID, E::AppSignalStateFlagType flagType, const QString& flagSignalID);
+
+		private:
+			ModuleLogicCompiler& m_compiler;
+		};
+
 	public:
 		ModuleLogicCompiler(ApplicationLogicCompiler& appLogicCompiler, const Hardware::DeviceModule* lm);
 		~ModuleLogicCompiler();
@@ -241,6 +254,7 @@ namespace Builder
 		bool linkConnectedItems(UalItem* srcUalItem, const LogicPin& outPin, UalSignal* ualSignal);
 		bool linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkAfbInput(UalItem* srcItem, UalItem* afbItem, QUuid inPinUuid, UalSignal* ualSignal);
+		bool linkSetFlagsItemInput(UalItem* srcItem, UalItem* setFlagsItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkBusComposerInput(UalItem* srcItem, UalItem* busComposerItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkBusExtractorInput(UalItem* srcItem, UalItem* busExtractorItem, QUuid inPinUuid, UalSignal* ualSignal);
 		bool linkLoopbackSource(UalItem* loopbackSourceItem, QUuid inPinUuid, UalSignal* ualSignal);
@@ -249,6 +263,28 @@ namespace Builder
 		bool linkLoopbackTarget(UalItem* loopbackTargetItem);
 
 		bool checkBusProcessingItemsConnections();
+
+		bool processSignalsWithFlags();
+		bool processAcquiredIOSignalsValidity();
+		bool processSimlockItems();
+		bool processMismatchItems();
+		bool processSetFlagsItems();
+		bool setPinFlagSignal(const UalItem* ualItem,
+							  const QString& pinCaption,
+							  bool pinShouldBeExist,
+							  E::AppSignalStateFlagType flagType,
+							  UalSignal* inSignal,
+							  bool* flagIsSet);
+
+		bool setAcquiredForFlagSignals();
+		bool checkSignalsWithFlags();
+//		bool linkSignalsWithFlagsInSignalSet();
+		void writeSignalsWithFlagsReport();
+		void writeSignalsWithFlagsToReport(QStringList* file, const QStringList& signalsWithFlagsIDs);
+
+		bool sortUalSignals();
+
+//		bool appendAutoUalSignalsToSignalSet();
 
 		//
 
@@ -339,7 +375,7 @@ namespace Builder
 		bool disposeNonAcquiredAnalogSignals();
 		bool disposeNonAcquiredBuses();
 
-		bool setInputSignalsValidityAddresses();
+//		bool setSignalsFlagsAddresses();
 
 		bool appendAfbsForAnalogInOutSignalsConversion();
 		bool findFbsForAnalogInOutSignalsConversion();
@@ -518,6 +554,8 @@ namespace Builder
 
 		CodeItem codeSetMemory(int addrFrom, quint16 constValue, int sizeW, const QString& comment);
 
+		UalSignalsMap& ualSignals() { return m_ualSignals; }
+
 	private:
 		// input parameters
 		//
@@ -591,7 +629,7 @@ namespace Builder
 		QHash<QString, Signal*> m_ioSignals;					// input/output signals of current chassis, AppSignalID => Signal*
 		QHash<QString, Signal*> m_equipmentSignals;				// equipment signals to app signals map, signal EquipmentID => Signal*
 
-		QVector<QPair<Signal*, Signal*>> m_signalsWithValidity;		// device signals with linked validity signals
+		SignalsWithFlags m_signalsWithFlags;
 
 		QHash<QString, Loopback*> m_loopbacks;
 		QHash<QString, Loopback*> m_signalsToLoopbacks;
@@ -628,12 +666,7 @@ namespace Builder
 		QVector<UalSignal*> m_acquiredBuses;							// acquired bus signals, used in UAL
 		QVector<UalSignal*> m_nonAcquiredBuses;							// non acquired bus signals, used in UAL
 
-		//QHash<Signal*, Signal*> m_acquiredDiscreteInputSignalsMap;		// is used in conjunction with m_acquiredDiscreteInputSignals
-																		// for grant unique records
-
 		QHash<QUuid, QUuid> m_outPinSignal;								// output pin GUID -> signal GUID
-
-//		QString msg;
 
 		ResourcesUsageInfo m_resourcesUsageInfo;
 
