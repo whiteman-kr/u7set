@@ -2629,7 +2629,7 @@ namespace Builder
 			determineBusTypeByOutput(afb, &outBusType);
 
 			if ((inBusType.isEmpty() == true && outBusType.isEmpty() == true) ||
-				(inBusType.isEmpty() == false && inBusType != outBusType))
+				(inBusType.isEmpty() == false && outBusType.isEmpty() == false && inBusType != outBusType))
 			{
 				// Output bus type cannot be determined (Logic schema %1, item %2)
 				//
@@ -7695,51 +7695,55 @@ namespace Builder
 			return false;
 		}
 
-		CodeItem cmd;
+		QString comment = QString("%1.%2 << %3").arg(ualAfb->caption()).arg(inAfbSignal.caption()).arg(inUalSignal->refSignalIDsJoined());
 
-		int wordAccAddr = m_memoryMap.wordAccumulatorAddress();
+		CodeItem cmd;
 
 		if (inUalSignal->isConst() == true)
 		{
-			switch(inUalSignal->constDiscreteValue())
+			if (inputSize == SIZE_16BIT)
 			{
-			case 0:
-				cmd.fill(Address16(wordAccAddr, 0), m_memoryMap.constBit0Addr());
-				break;
+				quint16 constVal = inUalSignal->constDiscreteValue() == 0 ? 0 : 0xFFFF;
 
-			case 1:
-				cmd.fill(Address16(wordAccAddr, 0), m_memoryMap.constBit1Addr());
-				break;
-
-			default:
-				assert(false);
-				LOG_INTERNAL_ERROR(m_log);
-				return false;
+				cmd.writeFuncBlockConst(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), constVal, ualAfb->caption());
 			}
+			else
+			{
+				assert(inputSize == SIZE_32BIT);
+
+				qint32 constVal = inUalSignal->constDiscreteValue() == 0 ? 0 : static_cast<qint32>(0xFFFFFFFF);
+
+				cmd.writeFuncBlockConstInt32(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), constVal, ualAfb->caption());
+			}
+
+			cmd.setComment(comment);
+			code->append(cmd);
 		}
 		else
 		{
+			int wordAccAddr = m_memoryMap.wordAccumulatorAddress();
+
 			cmd.fill(Address16(wordAccAddr, 0), inUalSignal->ualAddr());
-		}
 
-		code->append(cmd);
-
-		if (inputSize == SIZE_16BIT)
-		{
-			cmd.writeFuncBlock(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), wordAccAddr, ualAfb->caption());
-		}
-		else
-		{
-			cmd.mov(wordAccAddr + 1, wordAccAddr);
 			code->append(cmd);
 
-			assert(inputSize == SIZE_32BIT);
-			cmd.writeFuncBlock32(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), wordAccAddr, ualAfb->caption());
+			if (inputSize == SIZE_16BIT)
+			{
+				cmd.writeFuncBlock(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), wordAccAddr, ualAfb->caption());
+			}
+			else
+			{
+				assert(inputSize == SIZE_32BIT);
+
+				cmd.mov(wordAccAddr + 1, wordAccAddr);
+				code->append(cmd);
+
+				cmd.writeFuncBlock32(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), wordAccAddr, ualAfb->caption());
+			}
+
+			cmd.setComment(comment);
+			code->append(cmd);
 		}
-
-		cmd.setComment(QString("%1.%2 << %3").arg(ualAfb->caption()).arg(inAfbSignal.caption()).arg(inUalSignal->refSignalIDsJoined()));
-
-		code->append(cmd);
 
 		return true;
 	}
