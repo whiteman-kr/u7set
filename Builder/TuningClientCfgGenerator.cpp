@@ -653,7 +653,7 @@ namespace Builder
 			return false;
 		}
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "ObjectFilters.xml", CFG_FILE_ID_TUNING_FILTERS, "",  QString::fromLocal8Bit(data));
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "ObjectFilters.xml", CFG_FILE_ID_TUNING_FILTERS, "",  data);
 
 		if (buildFile == nullptr)
 		{
