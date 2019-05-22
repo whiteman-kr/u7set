@@ -5967,8 +5967,8 @@ namespace Builder
 			return false;
 		}
 
-		int y1 = signal.lowADC();
-		int y2 = signal.highADC();
+		int y1 = signal.lowDAC();
+		int y2 = signal.highDAC();
 
 		QString errorMsg;
 

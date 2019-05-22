@@ -101,10 +101,6 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 
 Signal::~Signal()
 {
-	if (m_cachedSpecPropValues != nullptr)
-	{
-		delete m_cachedSpecPropValues;
-	}
 }
 
 void Signal::initSpecificProperties()
@@ -327,7 +323,7 @@ void Signal::setHighADC(int highADC)
 
 int Signal::lowDAC() const
 {
-	return getSpecPropInt(SignalProperties::lowDACCaption);
+	return static_cast<int>(getSpecPropUInt(SignalProperties::lowDACCaption));
 }
 
 void Signal::setLowDAC(int lowDAC)
@@ -337,7 +333,7 @@ void Signal::setLowDAC(int lowDAC)
 
 int Signal::highDAC() const
 {
-	return getSpecPropInt(SignalProperties::highDACCaption);
+	return static_cast<int>(getSpecPropUInt(SignalProperties::highDACCaption));
 }
 
 void Signal::setHighDAC(int highDAC)
@@ -489,10 +485,8 @@ void Signal::cacheSpecPropValues()
 {
 	if (m_cachedSpecPropValues == nullptr)
 	{
-		m_cachedSpecPropValues = new SignalSpecPropValues;
+		m_cachedSpecPropValues = std::make_shared<SignalSpecPropValues>();
 	}
-
-	//m_cachedSpecPropValues->createFromSpecPropStruct(m_specPropStruct);
 
 	m_cachedSpecPropValues->parseValuesFromArray(m_protoSpecPropValues);
 }

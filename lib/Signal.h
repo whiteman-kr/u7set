@@ -379,7 +379,7 @@ private:
 	QString m_specPropStruct;
 	QByteArray m_protoSpecPropValues;					// serialized protobuf message Proto::PropertyValues
 
-	SignalSpecPropValues* m_cachedSpecPropValues = nullptr;
+	std::shared_ptr<SignalSpecPropValues> m_cachedSpecPropValues;
 
 	// Signal fields from database
 	//
