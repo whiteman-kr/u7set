@@ -17,6 +17,20 @@ class SignalFlagsWidget : public QWidget
 	Q_OBJECT
 
 public:
+	enum class SignalFlagsFields
+	{
+		Valid = 0,
+		StateAvailable,
+		Simulated,
+		Blocked,
+		Unbalanced,
+		AboveHighLimit,
+		BelowLowLimit,
+		Count
+	};
+
+
+public:
 	SignalFlagsWidget(QWidget* parent = 0);
 
 	void updateControl(AppSignalStateFlags flags);

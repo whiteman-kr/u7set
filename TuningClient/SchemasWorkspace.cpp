@@ -16,6 +16,8 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 	assert(m_tuningSignalManager);
 	assert(m_tuninTcpClient);
 
+	QHBoxLayout* mainLayout = new QHBoxLayout(this);
+
 	if (theConfigSettings.showSchemasList == true)
 	{
 		m_schemasList = new QTreeWidget();
@@ -77,30 +79,44 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 
 		m_hSplitter->addWidget(m_schemaWidget);
 
-		QHBoxLayout* layout = new QHBoxLayout(this);
-
-		layout->addWidget(m_hSplitter);
+		mainLayout->addWidget(m_hSplitter);
 
 		m_hSplitter->restoreState(theSettings.m_schemasWorkspaceSplitterState);
 	}
 	else
 	{
-
-		QTabWidget* tab = new QTabWidget();
-
-		for (const SchemaSettings& schemaID : theConfigSettings.schemas)
+		if (theConfigSettings.showSchemasTabs == true)
 		{
+			// Create tab
+
+			QTabWidget* tab = new QTabWidget();
+
+			for (const SchemaSettings& schemaID : theConfigSettings.schemas)
+			{
+				std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaID.m_id);
+
+				TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, schema, &m_schemaManager);
+
+				tab->addTab(schemaWidget, schemaID.m_caption);
+			}
+
+			mainLayout->addWidget(tab);
+		}
+		else
+		{
+			// No tab
+
+			const SchemaSettings& schemaID = theConfigSettings.schemas[0];
+
 			std::shared_ptr<VFrame30::Schema> schema = m_schemaManager.schema(schemaID.m_id);
 
 			TuningSchemaWidget* schemaWidget = new TuningSchemaWidget(m_tuningSignalManager, &m_tuningController, schema, &m_schemaManager);
 
-			tab->addTab(schemaWidget, schemaID.m_caption);
+			mainLayout->addWidget(schemaWidget);
 		}
-		QHBoxLayout* layout = new QHBoxLayout(this);
-
-		layout->addWidget(tab);
 	}
 
+	return;
 }
 
 SchemasWorkspace::~SchemasWorkspace()
