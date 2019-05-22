@@ -49,6 +49,24 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation /*orientation*/, 
 	case ArchiveColumns::Valid:
 		return tr("Valid");
 
+	case ArchiveColumns::StateAvailable:
+		return tr("StateAvailable");
+
+	case ArchiveColumns::Simulated:
+		return tr("Simulated");
+
+	case ArchiveColumns::Blocked:
+		return tr("Blocked");
+
+	case ArchiveColumns::Unbalanced:
+		return tr("Unbalanced");
+
+	case ArchiveColumns::OutOfLimits:
+		return tr("OutOfLimits");
+
+	case ArchiveColumns::ArchivingReason:
+		return tr("ArchivingReason");
+
 	case ArchiveColumns::Time:
 		return tr("Time");
 	}
@@ -149,6 +167,79 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 				result = m_cachedSignalState.isValid() ? "" : "no";
 			}
 			break;
+		case ArchiveColumns::StateAvailable:
+			{
+				result = m_cachedSignalState.m_flags.stateAvailable ? "" : "no";
+			}
+			break;
+		case ArchiveColumns::Simulated:
+			{
+				result = m_cachedSignalState.m_flags.simulated ? "yes" : "";
+			}
+			break;
+		case ArchiveColumns::Blocked:
+			{
+				result = m_cachedSignalState.m_flags.blocked ? "yes" : "";
+			}
+			break;
+		case ArchiveColumns::Unbalanced:
+			{
+				result = m_cachedSignalState.m_flags.unbalanced ? "yes" : "";
+			}
+			break;
+		case ArchiveColumns::OutOfLimits:
+			{
+				QString resultString;
+
+				if (m_cachedSignalState.m_flags.belowLowLimit == true)
+				{
+					resultString += QStringLiteral("LOW ");
+				}
+				if (m_cachedSignalState.m_flags.aboveHighLimit == true)
+				{
+					resultString += QStringLiteral("HIGH ");
+				}
+				if (resultString.isEmpty() == false)
+				{
+					result = resultString.trimmed();
+				}
+			}
+			break;
+		case ArchiveColumns::ArchivingReason:
+			{
+				QString resultString;
+
+				if (m_cachedSignalState.m_flags.validityChange == true)
+				{
+					resultString += QStringLiteral("VAL ");
+				}
+				if (m_cachedSignalState.m_flags.simBlockUnblChange == true)
+				{
+					resultString += QStringLiteral("SIMLOCK ");
+				}
+				if (m_cachedSignalState.m_flags.limitFlagsChange == true)
+				{
+					resultString += QStringLiteral("LIMIT ");
+				}
+				if (m_cachedSignalState.m_flags.autoPoint == true)
+				{
+					resultString += QStringLiteral("AUTO ");
+				}
+				if (m_cachedSignalState.m_flags.fineAperture == true)
+				{
+					resultString += QStringLiteral("FINEAP ");
+				}
+				if (m_cachedSignalState.m_flags.coarseAperture == true)
+				{
+					resultString += QStringLiteral("COARSEAP ");
+				}
+
+				if (resultString.isEmpty() == false)
+				{
+					result = resultString.trimmed();
+				}
+			}
+			break;
 		case ArchiveColumns::Time:
 			{
 				const TimeStamp& ts = m_cachedSignalState.time(m_timeType);
@@ -165,7 +256,11 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 	if (role == Qt::TextAlignmentRole &&
 		(column ==  static_cast<int>(ArchiveColumns::Row) ||
 		 column ==  static_cast<int>(ArchiveColumns::State) ||
-		column ==  static_cast<int>(ArchiveColumns::Valid)))
+		 column ==  static_cast<int>(ArchiveColumns::Valid) ||
+		 column ==  static_cast<int>(ArchiveColumns::StateAvailable) ||
+		 column ==  static_cast<int>(ArchiveColumns::Simulated) ||
+		 column ==  static_cast<int>(ArchiveColumns::Blocked) ||
+		 column ==  static_cast<int>(ArchiveColumns::Unbalanced)))
 	{
 		return QVariant(Qt::AlignCenter);
 	}
@@ -432,6 +527,7 @@ ArchiveView::ArchiveView(QWidget* parent) :
 ArchiveView::~ArchiveView()
 {
 	theSettings.m_archiveHorzHeader = horizontalHeader()->saveState();
+	theSettings.m_archiveHorzHeaderCount = static_cast<int>(ArchiveColumns::ColumnCount);
 }
 
 void ArchiveView::contextMenuEvent(QContextMenuEvent* event)
@@ -603,13 +699,17 @@ void ArchiveView::headerColumnContextMenuRequested(const QPoint& pos)
 	std::vector<std::pair<ArchiveColumns, QString>> actionsData;
 	actionsData.reserve(static_cast<int>(ArchiveColumns::ColumnCount));
 
-	actionsData.emplace_back(ArchiveColumns::Row, tr("Row"));
-	actionsData.emplace_back(ArchiveColumns::AppSignalId, tr("AppSignalID"));
-	actionsData.emplace_back(ArchiveColumns::CustomSignalId, tr("SignalID"));
-	actionsData.emplace_back(ArchiveColumns::Caption, tr("Caption"));
-	actionsData.emplace_back(ArchiveColumns::State, tr("State"));
-	actionsData.emplace_back(ArchiveColumns::Valid, tr("Valid"));
-	actionsData.emplace_back(ArchiveColumns::Time, tr("Time"));
+	ArchiveModel* archiveModel = dynamic_cast<ArchiveModel*>(model());
+	if (archiveModel == nullptr)
+	{
+		Q_ASSERT(archiveModel);
+		return;
+	}
+
+	for(int i = 0; i < archiveModel->columnCount(); i++)
+	{
+		actionsData.emplace_back(static_cast<ArchiveColumns>(i), archiveModel->headerData(i, Qt::Horizontal).toString());
+	}
 
 	for (std::pair<ArchiveColumns, QString> ad : actionsData)
 	{

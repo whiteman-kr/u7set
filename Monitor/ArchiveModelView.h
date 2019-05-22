@@ -9,7 +9,19 @@ enum class ArchiveColumns
 	CustomSignalId,
 	Caption,
 	State,
-	Valid,					// Hidden by default in MonitorArchiveWidget::MonitorArchiveWidget!!!, cannot do it in ArchiveView constructor, don't know why(((
+
+	// Next are hidden by default in MonitorArchiveWidget::MonitorArchiveWidget!!!, cannot do it in ArchiveView constructor, don't know why(((
+
+	Valid,
+	StateAvailable,
+	Simulated,
+	Blocked,
+	Unbalanced,
+	OutOfLimits,
+	ArchivingReason,
+
+	// Next are visible by default
+
 	Time,
 
 	ColumnCount

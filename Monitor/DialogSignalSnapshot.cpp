@@ -39,39 +39,39 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 	QVariant v1;
 	QVariant v2;
 
-	switch (static_cast<SignalSnapshotModel::Columns>(m_column))
+	switch (static_cast<SnapshotColumns>(m_column))
 	{
-	case SignalSnapshotModel::Columns::SignalID:
+	case SnapshotColumns::SignalID:
 		{
 			v1 = s1.customSignalId();
 			v2 = s2.customSignalId();
 		}
 		break;
-	case SignalSnapshotModel::Columns::EquipmentID:
+	case SnapshotColumns::EquipmentID:
 		{
 			v1 = s1.equipmentId();
 			v2 = s2.equipmentId();
 		}
 		break;
-	case SignalSnapshotModel::Columns::AppSignalID:
+	case SnapshotColumns::AppSignalID:
 		{
 			v1 = s1.appSignalId();
 			v2 = s2.appSignalId();
 		}
 		break;
-	case SignalSnapshotModel::Columns::Caption:
+	case SnapshotColumns::Caption:
 		{
 			v1 = s1.caption();
 			v2 = s2.caption();
 		}
 		break;
-	case SignalSnapshotModel::Columns::Units:
+	case SnapshotColumns::Units:
 		{
 			v1 = s1.unit();
 			v2 = s2.unit();
 		}
 		break;
-	case SignalSnapshotModel::Columns::Type:
+	case SnapshotColumns::Type:
 		{
 			if (s1.isDiscrete() == true && s2.isDiscrete() == true)
 			{
@@ -101,25 +101,25 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 		}
 		break;
 
-	case SignalSnapshotModel::Columns::SystemTime:
+	case SnapshotColumns::SystemTime:
 		{
 			v1 = st1.m_time.system.timeStamp;
 			v2 = st2.m_time.system.timeStamp;
 		}
 		break;
-	case SignalSnapshotModel::Columns::LocalTime:
+	case SnapshotColumns::LocalTime:
 		{
 			v1 = st1.m_time.local.timeStamp;
 			v2 = st2.m_time.local.timeStamp;
 		}
 		break;
-	case SignalSnapshotModel::Columns::PlantTime:
+	case SnapshotColumns::PlantTime:
 		{
 			v1 = st1.m_time.plant.timeStamp;
 			v2 = st2.m_time.plant.timeStamp;
 		}
 		break;
-	case SignalSnapshotModel::Columns::Value:
+	case SnapshotColumns::Value:
 		{
 			if (s1.isAnalog() == s2.isAnalog())
 			{
@@ -133,10 +133,49 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 			}
 		}
 		break;
-	case SignalSnapshotModel::Columns::Valid:
+	case SnapshotColumns::Valid:
 		{
 			v1 = st1.m_flags.valid;
 			v2 = st2.m_flags.valid;
+		}
+		break;
+	case SnapshotColumns::StateAvailable:
+		{
+			v1 = st1.m_flags.stateAvailable;
+			v2 = st2.m_flags.stateAvailable;
+		}
+		break;
+	case SnapshotColumns::Simulated:
+		{
+			v1 = st1.m_flags.simulated;
+			v2 = st2.m_flags.simulated;
+		}
+		break;
+	case SnapshotColumns::Blocked:
+		{
+			v1 = st1.m_flags.blocked;
+			v2 = st2.m_flags.blocked;
+		}
+		break;
+	case SnapshotColumns::Unbalanced:
+		{
+			v1 = st1.m_flags.unbalanced;
+			v2 = st2.m_flags.unbalanced;
+		}
+		break;
+	case SnapshotColumns::OutOfLimits:
+		{
+			if (st1.m_flags.belowLowLimit == st2.m_flags.belowLowLimit)
+			{
+				v1 = st1.m_flags.aboveHighLimit;
+				v2 = st2.m_flags.aboveHighLimit;
+			}
+			else
+			{
+				v1 = st1.m_flags.belowLowLimit;
+				v2 = st2.m_flags.belowLowLimit;
+			}
+
 		}
 		break;
 	default:
@@ -160,46 +199,19 @@ SignalSnapshotModel::SignalSnapshotModel(QObject* parent)
 	m_columnsNames << tr("Equipment ID");
 	m_columnsNames << tr("App Signal ID");
 	m_columnsNames << tr("Caption");
-	m_columnsNames << tr("Units");
 	m_columnsNames << tr("Type");
 
 	m_columnsNames << tr("Server Time UTC%100").arg(QChar(0x00B1));
 	m_columnsNames << tr("Server Time");
 	m_columnsNames << tr("Plant Time");
 	m_columnsNames << tr("Value");
+	m_columnsNames << tr("Units");
 	m_columnsNames << tr("Valid");
-
-
-	if (theSettings.m_signalSnapshotColumns.isEmpty() == true)
-	{
-		m_columnsIndexes.push_back(static_cast<int>(Columns::SignalID));
-		m_columnsIndexes.push_back(static_cast<int>(Columns::Caption));
-		m_columnsIndexes.push_back(static_cast<int>(Columns::Units));
-		m_columnsIndexes.push_back(static_cast<int>(Columns::Type));
-
-		m_columnsIndexes.push_back(static_cast<int>(Columns::LocalTime));
-		m_columnsIndexes.push_back(static_cast<int>(Columns::Value));
-		m_columnsIndexes.push_back(static_cast<int>(Columns::Valid));
-	}
-	else
-	{
-        std::vector<int> columnsIndexes;
-
-        columnsIndexes.clear();
-        columnsIndexes.reserve(theSettings.m_signalSnapshotColumns.size());
-        columnsIndexes = theSettings.m_signalSnapshotColumns.toStdVector();
-
-        m_columnsIndexes.clear();
-        m_columnsIndexes.reserve(theSettings.m_signalSnapshotColumns.size());
-
-        for (int c : columnsIndexes)
-        {
-            if (c < static_cast<int>(m_columnsNames.size()))
-            {
-                m_columnsIndexes.push_back(c);
-            }
-        }
-	}
+	m_columnsNames << tr("StateAvailable");
+	m_columnsNames << tr("Simulated");
+	m_columnsNames << tr("Blocked");
+	m_columnsNames << tr("Unbalanced");
+	m_columnsNames << tr("OutOfLimits");
 
 	// Copy signals to model
 
@@ -364,44 +376,6 @@ void SignalSnapshotModel::fillSignals()
 	//
 }
 
-std::vector<int> SignalSnapshotModel::columnsIndexes() const
-{
-	return m_columnsIndexes;
-}
-
-void SignalSnapshotModel::setColumnsIndexes(std::vector<int> columnsIndexes)
-{
-	if (columnCount() > 0)
-	{
-		beginRemoveColumns(QModelIndex(), 0, columnCount() - 1);
-
-		removeColumns(0, columnCount());
-
-		m_columnsIndexes.clear();
-
-		endRemoveColumns();
-	}
-
-	beginInsertColumns(QModelIndex(), 0, (int)columnsIndexes.size() - 1);
-
-	m_columnsIndexes = columnsIndexes;
-
-	insertColumns(0, (int)m_columnsIndexes.size());
-
-	endInsertColumns();
-}
-
-int SignalSnapshotModel::columnIndex(int index) const
-{
-	if (index <0 || index >= m_columnsIndexes.size())
-	{
-		Q_ASSERT(false);
-		return -1;
-	}
-
-	return m_columnsIndexes[index];
-}
-
 QStringList SignalSnapshotModel::columnsNames() const
 {
 	return m_columnsNames;
@@ -498,7 +472,7 @@ QModelIndex SignalSnapshotModel::parent(const QModelIndex &index) const
 int SignalSnapshotModel::columnCount(const QModelIndex &parent) const
 {
 	Q_UNUSED(parent);
-	return static_cast<int>(m_columnsIndexes.size());
+	return static_cast<int>(SnapshotColumns::ColumnCount);
 
 }
 
@@ -560,13 +534,7 @@ void SignalSnapshotModel::sort(int column, Qt::SortOrder sortOrder)
 		return;
 	}
 
-	if (column < 0 || column >= m_columnsIndexes.size())
-	{
-		Q_ASSERT(false);
-		return;
-	}
-
-	int sortColumn = m_columnsIndexes[column];
+	int sortColumn = column;
 
 	std::sort(m_filteredSignals.begin(), m_filteredSignals.end(), SignalSnapshotSorter(sortColumn, this));
 
@@ -582,24 +550,24 @@ void SignalSnapshotModel::sort(int column, Qt::SortOrder sortOrder)
 
 QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 {
+	int col = index.column();
+	if (col < 0 || col >= static_cast<int>(SnapshotColumns::ColumnCount))
+	{
+		Q_ASSERT(false);
+		return QVariant();
+	}
+
+	int row = index.row();
+	if (row >= m_filteredSignals.size())
+	{
+		Q_ASSERT(false);
+		return QVariant();
+	}
+
+	SnapshotColumns columnIndex = static_cast<SnapshotColumns>(col);
+
 	if (role == Qt::DisplayRole)
 	{
-		int col = index.column();
-		if (col < 0 || col >= m_columnsIndexes.size())
-		{
-			Q_ASSERT(false);
-			return QVariant();
-		}
-
-		int row = index.row();
-		if (row >= m_filteredSignals.size())
-		{
-			Q_ASSERT(false);
-			return QVariant();
-		}
-
-		Columns columnIndex = static_cast<Columns>(m_columnsIndexes[col]);
-
 		int signalIndex = m_filteredSignals[row];
 
 		if (signalIndex >= m_allSignals.size() || signalIndex >= m_allStates.size())
@@ -618,24 +586,54 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 
 		switch (columnIndex)
 		{
-		case Columns::SystemTime:
+		case SnapshotColumns::SystemTime:
 			{
 				QDateTime time = state.m_time.systemToDateTime();
 				return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
 			}
-		case Columns::LocalTime:
+		case SnapshotColumns::LocalTime:
 			{
 				QDateTime time = state.m_time.localToDateTime();
 				return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
 			}
-		case Columns::PlantTime:
+		case SnapshotColumns::PlantTime:
 			{
 				QDateTime time = state.m_time.plantToDateTime();
 				return time.toString("dd.MM.yyyy hh:mm:ss.zzz");
 			}
-		case Columns::Valid:
+		case SnapshotColumns::Valid:
 			{
 				return (state.m_flags.valid == true) ? tr("") : tr("no");
+			}
+		case SnapshotColumns::StateAvailable:
+			{
+				return (state.m_flags.stateAvailable == true) ? tr("") : tr("no");
+			}
+		case SnapshotColumns::Simulated:
+			{
+				return (state.m_flags.simulated == true) ? tr("yes") : tr("");
+			}
+		case SnapshotColumns::Blocked:
+			{
+				return (state.m_flags.blocked == true) ? tr("yes") : tr("");
+			}
+		case SnapshotColumns::Unbalanced:
+			{
+				return (state.m_flags.unbalanced == true) ? tr("yes") : tr("");
+			}
+		case SnapshotColumns::OutOfLimits:
+			{
+				QString resultString;
+
+				if (state.m_flags.belowLowLimit == true)
+				{
+					resultString += QStringLiteral("LOW ");
+				}
+				if (state.m_flags.aboveHighLimit == true)
+				{
+					resultString += QStringLiteral("HIGH ");
+				}
+				return resultString.trimmed();
 			}
 		}
 
@@ -647,7 +645,7 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 
 		switch (columnIndex)
 		{
-		case Columns::Value:
+		case SnapshotColumns::Value:
 			{
 				if (state.m_flags.valid == true)
 				{
@@ -669,32 +667,32 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 				return tr("?");
 			}
 
-		case Columns::SignalID:
+		case SnapshotColumns::SignalID:
 			{
 				return s.customSignalId();
 			}
 
-		case Columns::EquipmentID:
+		case SnapshotColumns::EquipmentID:
 			{
 				return s.equipmentId();
 			}
 
-		case Columns::AppSignalID:
+		case SnapshotColumns::AppSignalID:
 			{
 				return s.appSignalId();
 			}
 
-		case Columns::Caption:
+		case SnapshotColumns::Caption:
 			{
 				return s.caption();
 			}
 
-		case Columns::Units:
+		case SnapshotColumns::Units:
 			{
 				return s.unit();
 			}
 
-		case Columns::Type:
+		case SnapshotColumns::Type:
 			{
 				QString str = E::valueToString<E::SignalType>(s.type());
 
@@ -715,6 +713,17 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 		return QVariant();
 	} // End of if (role == Qt::DisplayRole)
 
+	if (role == Qt::TextAlignmentRole &&
+		 (columnIndex ==  SnapshotColumns::Value ||
+		 columnIndex ==  SnapshotColumns::Valid ||
+		 columnIndex ==  SnapshotColumns::StateAvailable ||
+		 columnIndex ==  SnapshotColumns::Simulated ||
+		 columnIndex ==  SnapshotColumns::Blocked ||
+		 columnIndex ==  SnapshotColumns::Unbalanced))
+	{
+		return QVariant(Qt::AlignCenter);
+	}
+
 	return QVariant();
 }
 
@@ -722,20 +731,18 @@ QVariant SignalSnapshotModel::headerData(int section, Qt::Orientation orientatio
 {
 	if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
 	{
-		if (section < 0 || section >= m_columnsIndexes.size())
+		if (section < 0 || section >= static_cast<int>(SnapshotColumns::ColumnCount))
 		{
 			Q_ASSERT(false);
 			return QVariant();
 		}
 
-		int displayIndex = m_columnsIndexes[section];
-
-        if (displayIndex < 0 || displayIndex >= static_cast<int>(m_columnsNames.size()))
+		if (section < 0 || section >= static_cast<int>(m_columnsNames.size()))
         {
             return "???";
         }
 
-		return m_columnsNames.at(displayIndex);
+		return m_columnsNames.at(section);
 	}
 
 	return QVariant();
@@ -789,6 +796,7 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	ui->tableView->horizontalHeader()->setStretchLastSection(false);
 	ui->tableView->setGridStyle(Qt::PenStyle::NoPen);
     ui->tableView->setSortingEnabled(true);
+	ui->tableView->setWordWrap(false);
 
 	int fontHeight = fontMetrics().height() + 4;
 
@@ -798,8 +806,33 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 
 	connect(ui->tableView->horizontalHeader(), &QHeaderView::sortIndicatorChanged, this, &DialogSignalSnapshot::sortIndicatorChanged);
 
+	ui->tableView->horizontalHeader()->setHighlightSections(false);
+	ui->tableView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
+
+	connect(ui->tableView->horizontalHeader(), &QWidget::customContextMenuRequested, this, &DialogSignalSnapshot::headerColumnContextMenuRequested);
+
+	ui->tableView->horizontalHeader()->restoreState(theSettings.m_snapshotHorzHeader);
+
 	ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(ui->tableView, &QTreeWidget::customContextMenuRequested,this, &DialogSignalSnapshot::prepareContextMenu);
+	connect(ui->tableView, &QTreeWidget::customContextMenuRequested,this, &DialogSignalSnapshot::contextMenuRequested);
+
+	if (theSettings.m_snapshotHorzHeader.isEmpty() == true || theSettings.m_snapshotHorzHeaderCount != static_cast<int>(SnapshotColumns::ColumnCount))
+	{
+		// First time? Set what is should be hidden by deafult
+		//
+		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::EquipmentID));
+		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::AppSignalID));
+		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::Type));
+		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::SystemTime));
+		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::LocalTime));
+		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::PlantTime));
+		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::Valid));
+		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::StateAvailable));
+		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::Simulated));
+		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::Blocked));
+		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::Unbalanced));
+		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::OutOfLimits));
+	}
 
 	// Type combo setup
 	//
@@ -871,7 +904,85 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 
 DialogSignalSnapshot::~DialogSignalSnapshot()
 {
+	theSettings.m_snapshotHorzHeader = ui->tableView->horizontalHeader()->saveState();
+	theSettings.m_snapshotHorzHeaderCount = static_cast<int>(SnapshotColumns::ColumnCount);
+
 	delete ui;
+}
+
+void DialogSignalSnapshot::headerColumnContextMenuRequested(const QPoint& pos)
+{
+	QMenu menu(this);
+
+	QList<QAction*> actions;
+
+	std::vector<std::pair<SnapshotColumns, QString>> actionsData;
+	actionsData.reserve(static_cast<int>(SnapshotColumns::ColumnCount));
+
+	SignalSnapshotModel* model = dynamic_cast<SignalSnapshotModel*>(ui->tableView->model());
+	if (model == nullptr)
+	{
+		Q_ASSERT(model);
+		return;
+	}
+
+	QStringList columns = model->columnsNames();
+
+	for(int i = 0; i < columns.size(); i++)
+	{
+		actionsData.emplace_back(static_cast<SnapshotColumns>(i), columns[i]);
+	}
+
+	for (std::pair<SnapshotColumns, QString> ad : actionsData)
+	{
+		QAction* action = new QAction(ad.second, nullptr);
+		action->setData(QVariant::fromValue(ad.first));
+		action->setCheckable(true);
+		action->setChecked(!ui->tableView->horizontalHeader()->isSectionHidden(static_cast<int>(ad.first)));
+
+		if (ui->tableView->horizontalHeader()->count() - ui->tableView->horizontalHeader()->hiddenSectionCount() == 1 &&
+			action->isChecked() == true)
+		{
+			action->setEnabled(false);			// Impossible to uncheck the last column
+		}
+
+		connect(action, &QAction::toggled, this, &DialogSignalSnapshot::headerColumnToggled);
+
+		actions << action;
+	}
+
+	menu.exec(actions, mapToGlobal(pos), 0, this);
+	return;
+}
+
+void DialogSignalSnapshot::headerColumnToggled(bool checked)
+{
+	QAction* action = dynamic_cast<QAction*>(sender());
+
+	if (action == nullptr)
+	{
+		Q_ASSERT(action);
+		return ;
+	}
+
+	int column = action->data().value<int>();
+
+	if (column >= static_cast<int>(SnapshotColumns::ColumnCount))
+	{
+		Q_ASSERT(column < static_cast<int>(SnapshotColumns::ColumnCount));
+		return;
+	}
+
+	if (checked == true)
+	{
+		ui->tableView->showColumn(column);
+	}
+	else
+	{
+		ui->tableView->hideColumn(column);
+	}
+
+	return;
 }
 
 void DialogSignalSnapshot::fillSchemas()
@@ -917,21 +1028,9 @@ void DialogSignalSnapshot::fillSignals()
 	ui->tableView->sortByColumn(theSettings.m_signalSnapshotSortColumn, theSettings.m_signalSnapshotSortOrder);
 }
 
-void DialogSignalSnapshot::on_buttonColumns_clicked()
-{
-	DialogColumns dc(this, m_model->columnsNames(), m_model->columnsIndexes());
-	if (dc.exec() == QDialog::Accepted)
-	{
-		m_model->setColumnsIndexes(dc.columnsIndexes());
-		ui->tableView->resizeColumnsToContents();
-	}
-}
-
 void DialogSignalSnapshot::on_DialogSignalSnapshot_finished(int result)
 {
 	Q_UNUSED(result);
-
-	theSettings.m_signalSnapshotColumns = QVector<int>::fromStdVector(m_model->columnsIndexes());
 
 	// Save window position
 	//
@@ -940,7 +1039,7 @@ void DialogSignalSnapshot::on_DialogSignalSnapshot_finished(int result)
 
 }
 
-void DialogSignalSnapshot::prepareContextMenu(const QPoint& pos)
+void DialogSignalSnapshot::contextMenuRequested(const QPoint& pos)
 {
 	Q_UNUSED(pos);
 
@@ -1009,9 +1108,7 @@ void DialogSignalSnapshot::timerEvent(QTimerEvent* event)
 			//
 			for (int col = 0; col < m_model->columnCount(); col++)
 			{
-				 int displayIndex = m_model->columnIndex(col);
-
-				 if (displayIndex >= static_cast<int>(SignalSnapshotModel::Columns::SystemTime))
+				 if (col >= static_cast<int>(SnapshotColumns::SystemTime))
 				 {
 					 for (int row = from; row <= to; row++)
 					 {

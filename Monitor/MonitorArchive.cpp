@@ -187,12 +187,18 @@ static int no = 1;
 	m_view->setModel(m_model);
 	setCentralWidget(m_view);
 
-	if (theSettings.m_archiveHorzHeader.isEmpty() == true)
+	if (theSettings.m_archiveHorzHeader.isEmpty() == true || theSettings.m_archiveHorzHeaderCount != static_cast<int>(ArchiveColumns::ColumnCount))
 	{
 		// First time? Set what is should be hidden by deafult
 		//
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::AppSignalId));
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::Valid));
+		m_view->hideColumn(static_cast<int>(ArchiveColumns::StateAvailable));
+		m_view->hideColumn(static_cast<int>(ArchiveColumns::Simulated));
+		m_view->hideColumn(static_cast<int>(ArchiveColumns::Blocked));
+		m_view->hideColumn(static_cast<int>(ArchiveColumns::Unbalanced));
+		m_view->hideColumn(static_cast<int>(ArchiveColumns::OutOfLimits));
+		m_view->hideColumn(static_cast<int>(ArchiveColumns::ArchivingReason));
 	}
 
 	connect(m_view, &ArchiveView::requestToShowSignalInfo, this, &MonitorArchiveWidget::showSignalInfo);

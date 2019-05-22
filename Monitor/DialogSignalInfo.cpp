@@ -28,30 +28,32 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 	const int colCount = 8;
 	const int rowCount = 2;
 
-	static const char* const flagNameStr[] =
+	static const QString flagNames[static_cast<int>(SignalFlagsFields::Count)] =
 	{
-		"VAL",
-//		"OVRFLW",
-//		"UNDRFLW",
+		QStringLiteral("VALID"),
+		QStringLiteral("STATE"),
+		QStringLiteral("SIM"),
+		QStringLiteral("LOCK"),
+		QStringLiteral("UNBL"),
+		QStringLiteral("HIGH"),
+		QStringLiteral("LOW")
 	};
-
-	const int FLAG_NAME_COUNT = sizeof(flagNameStr) / sizeof(flagNameStr[0]);
 
 	double colWidth = size().width() / colCount;
 	double rowHeight = size().height() / rowCount;
 
 	QPainter painter(this);
 
-	QBrush alertBrush(QColor(192, 0, 0));
-	QColor noAlertBrush(Qt::darkGreen);
-	QColor noFlagBrush(Qt::lightGray);
-
+	static QBrush alertBrush(QColor(192, 0, 0));
+	static QColor noAlertBrush(Qt::darkGreen);
+	static QColor noFlagBrush(Qt::lightGray);
 
 	QFont font = painter.font();
 	font.setPixelSize(14);
 	painter.setFont(font);
 
 	int flagNo = 0;
+
 	double y = 0;
 
 	for (int j = 0; j < rowCount; j++)
@@ -60,25 +62,51 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 
 		for (int i = 0; i < colCount; i++)
 		{
+
+			// Draw the rectangle for flag
+
 			QRect flagRect(x + 1, y + 1, colWidth - 2, rowHeight - 2);
 
-			if (flagNo < FLAG_NAME_COUNT)
+			if (flagNo < static_cast<int>(SignalFlagsFields::Count))
 			{
-				bool value = (m_flags.all & (1 << flagNo)) != 0;
 
-				if (flagNo == 0)
+				bool value = false;
+
+				switch (flagNo)
 				{
-					value = !value;	//VAL
+				case static_cast<int>(SignalFlagsFields::Valid):
+					value = !m_flags.valid;
+					break;
+
+				case static_cast<int>(SignalFlagsFields::StateAvailable):
+					value = !m_flags.stateAvailable;
+					break;
+
+				case static_cast<int>(SignalFlagsFields::Simulated):
+					value = m_flags.simulated;
+					break;
+
+				case static_cast<int>(SignalFlagsFields::Blocked):
+					value = m_flags.blocked;
+					break;
+
+				case static_cast<int>(SignalFlagsFields::Unbalanced):
+					value = m_flags.unbalanced;
+					break;
+
+				case static_cast<int>(SignalFlagsFields::AboveHighLimit):
+					value = m_flags.aboveHighLimit;
+					break;
+
+				case static_cast<int>(SignalFlagsFields::BelowLowLimit):
+					value = m_flags.belowLowLimit;
+					break;
+
+				default:
+					Q_ASSERT(false);
 				}
 
-				if (value)
-				{
-					painter.setBrush(alertBrush);
-				}
-				else
-				{
-					painter.setBrush(noAlertBrush);
-				}
+				painter.setBrush(value == true ? alertBrush : noAlertBrush);
 			}
 			else
 			{
@@ -88,20 +116,22 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 			painter.setPen(Qt::NoPen);
 			painter.drawRect(flagRect);
 
-			if (flagNo < FLAG_NAME_COUNT)
+			// Draw the text description for flag
+
+			if (flagNo < static_cast<int>(SignalFlagsFields::Count))
 			{
 				painter.setPen(Qt::white);
-				painter.drawText(flagRect, Qt::AlignHCenter | Qt::AlignCenter, flagNameStr[flagNo]);
+				painter.drawText(flagRect, Qt::AlignHCenter | Qt::AlignCenter, flagNames[flagNo]);
 			}
 
-			flagNo++;
 			x += colWidth;
+
+			flagNo++;
 		}
 
 		y += rowHeight;
 	}
 }
-
 
 //
 //

@@ -82,7 +82,8 @@ public:
 	//
 	QPoint m_signalSnapshotPos;
 	QByteArray m_signalSnapshotGeometry;
-	QVector<int> m_signalSnapshotColumns;
+	QByteArray m_snapshotHorzHeader;
+	int m_snapshotHorzHeaderCount = 0;	// Stores SnapshotColumns::ColumnCount constant to restore default settings if columns set changes
     SignalSnapshotModel::SignalType m_signalSnapshotSignalType = SignalSnapshotModel::SignalType::All;
 	QStringList m_signalSnapshotMaskList;
 	SignalSnapshotModel::MaskType m_signalSnapshotMaskType = SignalSnapshotModel::MaskType::AppSignalId;
@@ -97,6 +98,7 @@ public:
 	QByteArray m_archiveWindowGeometry;
 	QByteArray m_archiveWindowState;
 	QByteArray m_archiveHorzHeader;
+	int m_archiveHorzHeaderCount = 0;	// Stores ArchiveColumns::ColumnCount constant to restore default settings if columns set changes
 	int m_archiveTimeType = static_cast<int>(E::TimeType::Local);
 	QStringList m_archiveSignalsDialogFilterCompleter;
 

@@ -34,6 +34,31 @@ private:
 };
 
 
+enum class SnapshotColumns
+{
+	SignalID = 0,		// Signal Param Columns
+	EquipmentID,
+	AppSignalID,
+	Caption,
+	Type,
+
+	SystemTime,			// Signal State Columns
+	LocalTime,
+	PlantTime,
+	Value,
+	Units,
+	Valid,
+	StateAvailable,
+	Simulated,
+	Blocked,
+	Unbalanced,
+	OutOfLimits,
+
+	ColumnCount
+};
+
+Q_DECLARE_METATYPE(SnapshotColumns);
+
 class SignalSnapshotModel : public QAbstractItemModel
 {
 	Q_OBJECT
@@ -41,22 +66,6 @@ class SignalSnapshotModel : public QAbstractItemModel
 	friend class SignalSnapshotSorter;
 
 public:
-
-	enum class Columns
-	{
-		SignalID = 0,		// Signal Param Columns
-		EquipmentID,
-		AppSignalID,
-		Caption,
-		Units,
-		Type,
-
-		SystemTime,			// Signal State Columns
-		LocalTime,
-		PlantTime,
-		Value,
-		Valid
-	};
 
 	enum class SignalType
 	{
@@ -81,10 +90,6 @@ public:
 public:
 	// Properties
 
-	std::vector<int> columnsIndexes() const;
-	void setColumnsIndexes(std::vector<int> columnsIndexes);
-
-	int columnIndex(int index) const;
 	QStringList columnsNames() const;
 
 	// Overrides
@@ -123,7 +128,6 @@ protected:
 private:
 
 	QStringList m_columnsNames;
-	std::vector<int> m_columnsIndexes;
 
 	// Model data
 
@@ -150,12 +154,14 @@ public:
 	explicit DialogSignalSnapshot(MonitorConfigController* configController, TcpSignalClient* tcpSignalClient, QWidget *parent = 0);
 	~DialogSignalSnapshot();
 
-private slots:
-	void on_buttonColumns_clicked();
+protected slots:
+	void headerColumnContextMenuRequested(const QPoint& pos);
+	void headerColumnToggled(bool checked);
 
+private slots:
 	void on_DialogSignalSnapshot_finished(int result);
 
-	void prepareContextMenu(const QPoint& pos);
+	void contextMenuRequested(const QPoint& pos);
 
 	void on_tableView_doubleClicked(const QModelIndex &index);
 
