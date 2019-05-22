@@ -397,14 +397,38 @@ namespace Builder
 			//
 			// schemasNavigation
 			//
-			int schemasNavigation = getObjectProperty<int>(m_software->equipmentIdTemplate(), "SchemasNavigation", &ok);
-			if (ok == false)
+			bool showSchemasList = false;
+			bool showSchemasTabs = false;
+
+			// TEMPORARY SOLUTION TO PERFORM BUILD ON GITLAB, REMOVE THIS AFTER PROJECT UPDATE
+
+			int remove_schemasNavigation_property_skipping = 1;
+
+			int schemasNavigation = 1;
+
+			Hardware::DeviceObject* object = m_equipment->deviceObject(m_software->equipmentIdTemplate());
+			if (object == nullptr)
 			{
 				return false;
 			}
 
-			bool showSchemasList = false;
-			bool showSchemasTabs = false;
+			bool exists = object->propertyExists("SchemasNavigation");
+			if (exists == true)
+			{
+				schemasNavigation = getObjectProperty<int>(m_software->equipmentIdTemplate(), "SchemasNavigation", &ok);
+				if (ok == false)
+				{
+					return false;
+				}
+			}
+
+			// TEMPORARY SOLUTION TO PERFORM BUILD ON GITLAB, REMOVE THIS AFTER PROJECT UPDATE
+
+			//int schemasNavigation = getObjectProperty<int>(m_software->equipmentIdTemplate(), "SchemasNavigation", &ok);
+			//if (ok == false)
+			//{
+			//	return false;
+			//}
 
 			switch (schemasNavigation)
 			{
