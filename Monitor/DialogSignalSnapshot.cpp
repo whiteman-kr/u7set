@@ -5,6 +5,56 @@
 #include "MonitorCentralWidget.h"
 #include "TcpSignalClient.h"
 
+//
+// MonitorExportPrint
+//
+
+SnapshotExportPrint::SnapshotExportPrint(ConfigSettings* configuration, QWidget* parent)
+	:ExportPrint(parent),
+	  m_configuration(configuration)
+{
+
+}
+
+void SnapshotExportPrint::generateHeader(QTextCursor& cursor)
+{
+	if (m_configuration == nullptr)
+	{
+		Q_ASSERT(m_configuration);
+		return;
+	}
+
+	QTextBlockFormat headerCenterFormat = cursor.blockFormat();
+	headerCenterFormat.setAlignment(Qt::AlignHCenter);
+
+	QTextBlockFormat regularFormat = cursor.blockFormat();
+	regularFormat.setAlignment(Qt::AlignLeft);
+
+	QTextCharFormat headerCharFormat = cursor.charFormat();
+	headerCharFormat.setFontWeight(static_cast<int>(QFont::Bold));
+	headerCharFormat.setFontPointSize(12.0);
+
+	QTextCharFormat regularCharFormat = cursor.charFormat();
+	headerCharFormat.setFontPointSize(10.0);
+
+	cursor.setBlockFormat(headerCenterFormat);
+	cursor.setCharFormat(headerCharFormat);
+	cursor.insertText(QObject::tr("Snapshot - %1\n").arg(m_configuration->project));
+	cursor.insertText("\n");
+
+	cursor.setBlockFormat(regularFormat);
+	cursor.setCharFormat(regularCharFormat);
+	cursor.insertText(tr("Generated: %1\n").arg(QDateTime::currentDateTime().toString("dd/MM/yyyy  HH:mm:ss")));
+	cursor.insertText(tr("Monitor: %1\n").arg(m_configuration->softwareEquipmentId));
+	cursor.insertText("\n");
+
+	cursor.insertText("\n");
+}
+
+//
+// SignalSnapshotSorter
+//
+
 SignalSnapshotSorter::SignalSnapshotSorter(int column, SignalSnapshotModel *model):
 	m_column(column),
 	m_model(model)
@@ -756,7 +806,8 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogSignalSnapshot),
 	m_configController(configController),
-	m_tcpSignalClient(tcpSignalClient)
+	m_tcpSignalClient(tcpSignalClient),
+	m_configuration(configController->configuration())
 {
 	ui->setupUi(this);
 
@@ -791,7 +842,7 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
     ui->tableView->setModel(m_model);
     ui->tableView->verticalHeader()->hide();
 	ui->tableView->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
-	ui->tableView->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
+	ui->tableView->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
 	ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Interactive);
 	ui->tableView->horizontalHeader()->setStretchLastSection(false);
 	ui->tableView->setGridStyle(Qt::PenStyle::NoPen);
@@ -1285,3 +1336,47 @@ void DialogSignalSnapshot::on_comboMaskType_currentIndexChanged(int index)
 
 }
 
+void DialogSignalSnapshot::on_buttonExport_clicked()
+{
+	Q_ASSERT(m_model);
+	if (m_model->rowCount() == 0)
+	{
+		QMessageBox::warning(this, qAppName(), tr("Nothing to export."));
+		return;
+	}
+
+	QString fileName = QFileDialog::getSaveFileName(this,
+													tr("Save File"),
+													"untitled.pdf",
+													tr("Portable Documnet Format (*.pdf);;CSV Files, semicolon separated (*.csv);;Plaintext (*.txt);;HTML (*.html)"));
+
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	QFileInfo fileInfo(fileName);
+	QString extension = fileInfo.completeSuffix();
+
+	if (extension.compare(QLatin1String("csv"), Qt::CaseInsensitive) == 0 ||
+		extension.compare(QLatin1String("pdf"), Qt::CaseInsensitive) == 0 ||
+		extension.compare(QLatin1String("htm"), Qt::CaseInsensitive) == 0 ||
+		extension.compare(QLatin1String("html"), Qt::CaseInsensitive) == 0 ||
+		extension.compare(QLatin1String("txt"), Qt::CaseInsensitive) == 0/* ||
+		extension.compare(QLatin1String("odt"), Qt::CaseInsensitive) == 0*/)
+	{
+		SnapshotExportPrint ep(&m_configuration, this);
+		ep.exportTable(ui->tableView, fileName, extension);
+
+		return;
+	}
+
+	QMessageBox::critical(this, qAppName(), tr("Unsupported file format."));
+	return;
+}
+
+void DialogSignalSnapshot::on_buttonPrint_clicked()
+{
+	SnapshotExportPrint ep(&m_configuration, this);
+	ep.printTable(ui->tableView);
+}
