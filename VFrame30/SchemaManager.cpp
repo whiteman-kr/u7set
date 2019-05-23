@@ -62,7 +62,7 @@ namespace VFrame30
 
 	void SchemaManager::setGlobalScript(const QString& value)
 	{
-		m_globalScript = value;
+		m_globalScript = value + QChar::LineFeed;
 	}
 
 }
