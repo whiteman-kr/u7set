@@ -5,10 +5,25 @@
 #include "DialogChooseArchiveSignals.h"
 #include "ArchiveTcpClient.h"
 #include "ArchiveModelView.h"
+#include "../lib/ExportPrint.h"
 
 class MonitorArchiveWidget;
 class QPrinter;
 class QTextDocument;
+
+class MonitorExportPrint : public ExportPrint
+{
+public:
+
+	MonitorExportPrint(ArchiveSource* source, ConfigSettings* configuration, QWidget* parent);
+
+private:
+	virtual void generateHeader(QTextCursor& cursor) override;
+
+	ArchiveSource* m_source = nullptr;
+	ConfigSettings* m_configuration = nullptr;
+
+};
 
 class MonitorArchive
 {
@@ -39,10 +54,6 @@ protected:
 	void requestData();
 	void cancelRequest();
 
-	bool exportToTextDocument(QTextDocument* doc, bool onlySelectedRows);
-	bool saveArchiveWithDocWriter(QString fileName, QString format);
-	bool saveArchiveToCsv(QString fileName);
-
 	// Events
 	//
 protected:
@@ -68,7 +79,6 @@ protected slots:
 	void removeSignal(QString appSignalId);		// Slot to ArchiveView::requestToRemoveSignal
 
 
-	void printRequested(QPrinter* printer);
 
 	void slot_configurationArrived(ConfigSettings configuration);
 
@@ -120,9 +130,6 @@ private:
 	QLabel* m_statusBarConnectionStateLabel = nullptr;
 
 	ArchiveSource m_source;
-
-	const int m_maxReportStates = 10000;
-	const int m_maxReportStatesForCsv = 5000000;
 };
 
 
