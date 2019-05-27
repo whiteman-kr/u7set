@@ -4,6 +4,7 @@
 #include "../lib/AppSignalManager.h"
 #include "DialogColumns.h"
 #include "MonitorConfigController.h"
+#include "../lib/ExportPrint.h"
 
 
 namespace Ui {
@@ -14,6 +15,19 @@ class MonitorConfigController;
 class TcpSignalClient;
 class SignalSnapshotModel;
 struct ConfigSettings;
+
+class SnapshotExportPrint : public ExportPrint
+{
+public:
+
+	SnapshotExportPrint(ConfigSettings* configuration, QWidget* parent);
+
+private:
+	virtual void generateHeader(QTextCursor& cursor) override;
+
+	ConfigSettings* m_configuration = nullptr;
+
+};
 
 class SignalSnapshotSorter
 {
@@ -185,6 +199,10 @@ private slots:
 
 	void on_comboMaskType_currentIndexChanged(int index);
 
+	void on_buttonExport_clicked();
+
+	void on_buttonPrint_clicked();
+
 private:
 	virtual void timerEvent(QTimerEvent* event) override;
 
@@ -195,6 +213,7 @@ private:
 	void fillSignals();
 
 private:
+	ConfigSettings m_configuration;
 
 	Ui::DialogSignalSnapshot *ui;
 
