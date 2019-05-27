@@ -1830,29 +1830,6 @@ namespace Builder
 		return true;
 	}
 
-/*	bool UalSignal::setFlagSignal(E::AppSignalStateFlagType flagType, UalSignal* flagSignal)
-	{
-		TEST_PTR_RETURN_FALSE(flagSignal);
-
-		if (m_flagSignals.value(flagType, nullptr) != nullptr)
-		{
-			void errALC5168(QString flagSignalID,
-							QString flagTypeStr,
-							QString signalWithFlagID,
-							QString alreadyAssignedFlagSignalID,
-							QUuid itemUuid,
-							QString schemaID);					//Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
-
-
-			assert(false);			// signal for this flag is already assigned
-			return false;
-		}
-
-		m_flagSignals.insert(flagType, flagSignal);
-
-		return true;
-	}*/
-
 	void UalSignal::sortRefSignals()
 	{
 		// sorting m_refSignals by appSignalID ascending
@@ -2275,7 +2252,7 @@ namespace Builder
 		return ualSignal;
 	}
 
-	UalSignal* UalSignalsMap::createAutoSignal(const UalItem *ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal)
+	UalSignal* UalSignalsMap::createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal)
 	{
 		QString signalID = QString("%1_%2_%3").arg(AUTO_SIGNAL_ID_PREFIX).arg(ualItem->label()).arg(outAfbSignal.caption());
 

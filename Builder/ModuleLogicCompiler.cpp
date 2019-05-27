@@ -81,7 +81,9 @@ namespace Builder
 			return false;
 		}
 
-		ualSignalWithFlag->addStateFlagSignal(flagType, ualFlagSignal, m_compiler.log());
+		bool res = ualSignalWithFlag->addStateFlagSignal(flagType, ualFlagSignal, m_compiler.log());
+
+		RETURN_IF_FALSE(res);
 
 		AppSignalStateFlagsMap* signalFlagsMap = value(signalWithFlagID, nullptr);
 
@@ -1686,7 +1688,6 @@ namespace Builder
 		{
 			// create signal (non-opto! validity is Input signal from module's PI controller)
 			//
-
 			ualSignal = m_ualSignals.createSignal(ualItem, s, validityPin.guid());
 
 			if (ualSignal == nullptr)

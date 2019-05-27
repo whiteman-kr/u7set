@@ -1191,7 +1191,6 @@ bool Signal::addStateFlagSignal(E::AppSignalStateFlagType flagType, const QStrin
 {
 	if (m_stateFlagsSignals.contains(flagType) == true)
 	{
-		assert(false);
 		return false;
 	}
 
