@@ -1567,6 +1567,7 @@ namespace Builder
 		if (ualReceiver->appSignalIdsAsList().size() > 1)
 		{
 			m_log->errINT1001(QString("SchemaItemReceiver has more then one AppSignalID"), ualItem->schemaID(), ualItem->guid());
+			return false;
 		}
 
 		QString appSignalID = ualReceiver->appSignalIds();
@@ -1629,7 +1630,90 @@ namespace Builder
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
-		UalSignal* ualSignal = m_ualSignals.get(appSignalID);
+		bool connectedToTerminatorOnly = isConnectedToTerminatorOnly(outPin);
+
+		if (connectedToTerminatorOnly == true)
+		{
+			return true;				// not needed to create signal
+		}
+
+		bool result = true;
+
+		Signal* receivedSignal = m_signals->getSignal(appSignalID);
+
+		if (receivedSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR(log());			// signal should be exists in signalSet
+			return false;
+		}
+
+		Signal* compatibleConnectedSignal = getCompatibleConnectedSignal(outPin, *receivedSignal);
+
+		// after that compatibleConnectedSignal can be nullptr, it is Ok
+
+		UalSignal* ualSignal = nullptr;
+
+		switch(receivedSignal->signalType())
+		{
+		case E::SignalType::Analog:
+		case E::SignalType::Discrete:
+			if (compatibleConnectedSignal == nullptr)
+			{
+				ualSignal = m_ualSignals.createAutoSignal(ualItem, outPin.guid(), *receivedSignal);
+			}
+			else
+			{
+				ualSignal = m_ualSignals.createSignal(ualItem, compatibleConnectedSignal, outPin.guid());
+			}
+			break;
+
+		case E::SignalType::Bus:
+			{
+				BusShared bus = m_signals->getBus(receivedSignal->busTypeID());
+
+				if (bus == nullptr)
+				{
+					// Bus type ID '%1' is undefined (Logic schema '%2').
+					//
+					m_log->errALC5100(receivedSignal->busTypeID(), ualItem->guid(), ualItem->schemaID());
+					return false;
+				}
+				if (compatibleConnectedSignal != nullptr && compatibleConnectedSignal->isBus() == false)
+				{
+					assert(false);
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
+				std::shared_ptr<Hardware::DeviceModule> lm = getLmSharedPtr();
+
+				if (lm == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
+				ualSignal = m_ualSignals.createBusParentSignal(ualItem, compatibleConnectedSignal, bus,
+															   outPin.guid(), outPin.caption(), lm);
+			}
+			break;
+
+		default:
+			assert(false);
+		}
+
+		if (ualSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		ualSignal->setReceivedOptoAppSignalID(receivedSignal->appSignalID());
+
+		result &= linkConnectedItems(ualItem, outPin, ualSignal);
+
+
+/*		UalSignal* ualSignal = m_ualSignals.get(appSignalID);
 
 		if (ualSignal != nullptr)
 		{
@@ -1659,7 +1743,7 @@ namespace Builder
 
 		// link connected signals to UalSignal
 		//
-		bool result = linkConnectedItems(ualItem, outPin, ualSignal);
+		bool result = linkConnectedItems(ualItem, outPin, ualSignal);*/
 
 		return result;
 	}
@@ -3499,6 +3583,20 @@ namespace Builder
 	Signal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal)
 	{
 		return getCompatibleConnectedSignal(outPin, outAfbSignal, QString());
+	}
+
+	Signal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const Signal& s)
+	{
+		LogicAfbSignal dummySignal;
+
+		dummySignal.setType(s.signalType());
+		dummySignal.setDataFormat(s.dataFormat());
+		dummySignal.setSize(s.dataSize());
+		dummySignal.setByteOrder(s.byteOrder());
+
+		QString busTypeID = s.busTypeID();
+
+		return getCompatibleConnectedSignal(outPin, dummySignal, busTypeID);
 	}
 
 	Signal* ModuleLogicCompiler::getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString busTypeID)

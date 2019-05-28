@@ -290,6 +290,7 @@ namespace Builder
 
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString& busTypeID);
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal);
+		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const Signal& s);
 		Signal* getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString busTypeID);
 		bool isCompatible(const LogicAfbSignal& outAfbSignal, const QString& busTypeID, const Signal* s);
 
