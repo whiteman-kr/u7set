@@ -449,7 +449,7 @@ namespace Builder
 		bool appendRefSignal(Signal* s, bool isOptoSignal);
 		bool appendBusChildRefSignals(const QString &busSignalID, Signal* s);
 
-		Signal* createNativeCopyOfSignal(const Signal* templateSignal, const QString& lmEquipmentID);
+		//Signal* createNativeCopyOfSignal(const Signal* templateSignal, const QString& lmEquipmentID);
 
 		void setComputed() { m_computed = true; }
 		bool isComputed() const { return m_computed; }

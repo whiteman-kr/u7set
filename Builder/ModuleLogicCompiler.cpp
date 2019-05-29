@@ -1586,42 +1586,7 @@ namespace Builder
 
 		const LogicPin& validityPin = outputs[validityPinIndex];
 
-		Hardware::OptoPortShared port = m_optoModuleStorage->getOptoPort(connection->port1EquipmentID());
-
-		if (port == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);				// port isn't found
-			return false;
-		}
-
-		if (port->lmID() != lmEquipmentID())
-		{
-			if (connection->isSinglePort() == true)
-			{
-				LOG_INTERNAL_ERROR(m_log);				// port associated with current LM isn't found
-				return false;
-			}
-
-			assert(connection->isPortToPort() == true);
-
-			port = m_optoModuleStorage->getOptoPort(connection->port2EquipmentID());
-
-			if (port == nullptr)
-			{
-				LOG_INTERNAL_ERROR(m_log);				// port isn't found
-				return false;
-			}
-
-			if (port->lmID() != lmEquipmentID())
-			{
-				LOG_INTERNAL_ERROR(m_log);				// port associated with current LM isn't found
-				return false;
-			}
-		}
-
-		QString validitySignalID = port->validitySignalID();
-
-		result &= createUalSignalFromReceiverValidity(ualItem, validityPin, validitySignalID);
+		result &= createUalSignalFromReceiverValidity(ualItem, validityPin, connection);
 
 		return result;
 	}
@@ -1748,15 +1713,33 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createUalSignalFromReceiverValidity(UalItem* ualItem, const LogicPin& validityPin, const QString& validitySignalEquipmentID)
+	bool ModuleLogicCompiler::createUalSignalFromReceiverValidity(UalItem* ualItem,
+																  const LogicPin& validityPin,
+																  std::shared_ptr<Hardware::Connection> connection)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(connection, m_log);
 
-		Signal* s = m_equipmentSignals.value(validitySignalEquipmentID);
+		if (isConnectedToTerminatorOnly(validityPin) == true)
+		{
+			return true;								// ualSignal is not required
+		}
+
+		Hardware::OptoPortShared port = m_optoModuleStorage->getLmAssociatedOptoPort(lmEquipmentID(), connection->connectionID());
+
+		if (port == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);					// port isn't found
+			return false;
+		}
+
+		QString validitySignalID = port->validitySignalID();
+
+		Signal* s = m_equipmentSignals.value(validitySignalID);
 
 		if (s == nullptr)
 		{
-			m_log->errALC5133(validitySignalEquipmentID, ualItem->guid(), ualItem->label(), ualItem->schemaID());
+			m_log->errALC5133(validitySignalID, ualItem->guid(), ualItem->label(), ualItem->schemaID());
 			return false;
 		}
 
@@ -3590,7 +3573,12 @@ namespace Builder
 		LogicAfbSignal dummySignal;
 
 		dummySignal.setType(s.signalType());
-		dummySignal.setDataFormat(s.dataFormat());
+
+		if (s.isBus() == false)
+		{
+			dummySignal.setDataFormat(s.dataFormat());
+		}
+
 		dummySignal.setSize(s.dataSize());
 		dummySignal.setByteOrder(s.byteOrder());
 
@@ -7469,6 +7457,8 @@ namespace Builder
 
 			code->newLine();
 		}
+
+		code->finalizeByNewLine();
 
 		//m_alpCode_calculate(&m_resourcesUsageInfo.convertAnalogInputSignals);
 
@@ -11644,7 +11634,7 @@ namespace Builder
 			RETURN_IF_FALSE(result);
 		}
 
-		if (expertMode() == true)
+		if (m_context->generateExtraDebugInfo() == true)
 		{
 			BuildFile* binFile = m_resultWriter->addFile(DIR_BIN, QString("%1.bin").arg(lmEquipmentID()), "", "", binCode);
 

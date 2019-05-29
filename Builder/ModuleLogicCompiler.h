@@ -243,7 +243,7 @@ namespace Builder
 		bool createUalSignalsFromReceivers();
 		bool createUalSignalsFromReceiver(UalItem* ualItem);
 		bool createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& appSignalID);
-		bool createUalSignalFromReceiverValidity(UalItem* ualItem, const LogicPin& validityPin, const QString& validitySignalEquipmentID);
+		bool createUalSignalFromReceiverValidity(UalItem* ualItem, const LogicPin& validityPin, std::shared_ptr<Hardware::Connection> connection);
 		bool getReceiverConnectionID(const UalReceiver* receiver, QString* connectionID, const QString& schemaID);
 
 		bool createUalSignalFromSignal(UalItem* ualItem, int passNo);

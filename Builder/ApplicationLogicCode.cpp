@@ -1833,6 +1833,14 @@ namespace Builder
 		newLine();
 	}
 
+	void CodeSnippet::finalizeByNewLine()
+	{
+		if (last().isNewLine() == false)
+		{
+			newLine();
+		}
+	}
+
 	void CodeSnippet::init(CodeSnippetMetrics* codeFragmentMetrics)
 	{
 		if (codeFragmentMetrics == nullptr)

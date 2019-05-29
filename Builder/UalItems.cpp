@@ -1425,7 +1425,7 @@ namespace Builder
 		return childSignal->appendRefSignal(s, false);
 	}
 
-	Signal* UalSignal::createNativeCopyOfSignal(const Signal* templateSignal, const QString &lmEquipmentID)
+/*	Signal* UalSignal::createNativeCopyOfSignal(const Signal* templateSignal, const QString &lmEquipmentID)
 	{
 		if (templateSignal == nullptr)
 		{
@@ -1442,7 +1442,7 @@ namespace Builder
 		m_optoSignalNativeCopy->setInOutType(E::SignalInOutType::Internal);		// set signal type to Internal (it is important!!!)
 
 		return m_optoSignalNativeCopy;
-	}
+	}*/
 
 	Address16 UalSignal::ioBufAddr()
 	{
