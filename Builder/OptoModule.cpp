@@ -3732,12 +3732,7 @@ namespace Hardware
 
 	bool OptoModuleStorage::addModule(DeviceModule* module)
 	{
-		if (module == nullptr)
-		{
-			assert(false);
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
+		TEST_PTR_LOG_RETURN_FALSE(module, m_log);
 
 		if (module->isLogicModule() != true &&
 			module->isOptoModule() != true &&
@@ -3748,25 +3743,27 @@ namespace Hardware
 			return true;
 		}
 
+		TEST_PTR_LOG_RETURN_FALSE(module->parent(), m_log);
+
+		if (module->parent()->isChassis() == false)
+		{
+			// Module %1 should be installed in chassis.
+			//
+			m_log->errCFG3042(module->equipmentIdTemplate(), module->uuid());
+			return false;
+		}
+
 		// Get LogicModule description
 		//
-		assert(m_lmDescriptionSet);
+		TEST_PTR_LOG_RETURN_FALSE(m_lmDescriptionSet, m_log);
 
 		const DeviceModule* chassisLm = DeviceHelper::getAssociatedLmOrBvb(module);
 
 		if (chassisLm == nullptr)
 		{
-			if (module->parent() != nullptr && module->parent()->isChassis() == true)
-			{
-				// LM- or BVB-family module is not found is chassis %1
-				//
-				m_log->errALC5149(module->parent()->equipmentIdTemplate());
-			}
-			else
-			{
-				LOG_INTERNAL_ERROR(m_log);
-			}
-
+			// LM- or BVB-family module is not found is chassis %1
+			//
+			m_log->errALC5149(module->parent()->equipmentIdTemplate());
 			return false;
 		}
 
@@ -3774,9 +3771,9 @@ namespace Hardware
 
 		if (lmDescription == nullptr)
 		{
-			QString lmDescriptionFile = LmDescription::lmDescriptionFile(module);
-
-			m_log->errEQP6004(module->equipmentIdTemplate(), lmDescriptionFile, module->uuid());
+			// File LmDescriptionFile %1 is not found, LogicModule %2.
+			//
+			m_log->errEQP6004(module->equipmentIdTemplate(), LmDescription::lmDescriptionFile(module), module->uuid());
 			return false;
 		}
 
