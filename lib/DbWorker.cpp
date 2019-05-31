@@ -303,6 +303,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0283.sql", "Upgrade to version 283, RIM electric default ranges were changed"},
 	{":/DatabaseUpgrade/Upgrade0284.sql", "Upgrade to version 284, TIM and RIM, rounding added at range checking"},
 	{":/DatabaseUpgrade/Upgrade0285.sql", "Upgrade to version 285, TuningClient has new property that describes schemas navigation type"},
+	{":/DatabaseUpgrade/Upgrade0286.sql", "Upgrade to version 286, Added valid range checking for AIM and WAIM"},
 };
 
 int DbWorker::counter = 0;
