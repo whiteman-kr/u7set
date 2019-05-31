@@ -71,6 +71,7 @@ bool AppDataReceiverThread::tryCreateAndBindSocket()
 
 		if (prevServerTime != -1 && serverTime - prevServerTime < 1000)
 		{
+			msleep(200);
 			continue;
 		}
 
@@ -129,18 +130,6 @@ void AppDataReceiverThread::receivePackets()
 	{
 		qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
 
-/*		if (m_socket->waitForReadyRead(500) == false)
-		{
-			if (serverTime - lastPacketTime > 3000)
-			{
-				qDebug() << "No RUP packets received in 3 seconds";
-				closeSocket();
-				return;
-			}
-
-			continue;
-		}*/
-
 		qint64 size = m_socket->pendingDatagramSize();
 
 		if (size == -1)
@@ -152,7 +141,7 @@ void AppDataReceiverThread::receivePackets()
 				return;
 			}
 
-			usleep(500);
+			msleep(5);
 			continue;
 		}
 
