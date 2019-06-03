@@ -23,7 +23,6 @@ DialogSignalInfo::DialogSignalInfo(Hash appSignalHash, Hash instanceIdHash, Tuni
 	assert(m_signalManager);
 
 	bool found = false;
-
 	AppSignalParam asp = m_signalManager->signalParam(m_appSignalHash, &found);
 
 	ui->m_lineAppSignalId->setText(asp.appSignalId());
@@ -37,6 +36,7 @@ DialogSignalInfo::DialogSignalInfo(Hash appSignalHash, Hash instanceIdHash, Tuni
 
 	m_timerId = startTimer(500);
 
+	return;
 }
 
 DialogSignalInfo::~DialogSignalInfo()
@@ -60,9 +60,7 @@ void DialogSignalInfo::timerEvent(QTimerEvent* event)
 void DialogSignalInfo::updateInfo()
 {
 	bool found = false;
-
 	AppSignalParam asp = m_signalManager->signalParam(m_appSignalHash, &found);
-
 	TuningSignalState state = m_signalManager->state(m_appSignalHash, &found);
 
 	QString text;
@@ -93,7 +91,7 @@ void DialogSignalInfo::updateInfo()
 	ui->m_labelValue->setText(text);
 
 	// Flags and info
-
+	//
 	text.clear();
 
 	if (state.controlIsEnabled() == false)
@@ -156,4 +154,6 @@ void DialogSignalInfo::updateInfo()
 
 		ui->m_textEdit->setPlainText(text);
 	}
+
+	return;
 }

@@ -596,7 +596,16 @@ void DialogSignalInfo::updateData()
 	//
 	if (state.m_flags.valid == false)
 	{
-		strValue = QStringLiteral("?");
+		if (state.m_flags.stateAvailable == true)
+		{
+			// Even state is not valid in some reason LM has value for this signal, show it
+			//
+			strValue = QString("? (%1)").arg(strValue);
+		}
+		else
+		{
+			strValue = QStringLiteral("?");
+		}
 	}
 
 	// --

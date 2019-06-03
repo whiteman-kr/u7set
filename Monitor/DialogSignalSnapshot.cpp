@@ -697,24 +697,36 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 		{
 		case SnapshotColumns::Value:
 			{
-				if (state.m_flags.valid == true)
+				QString valueResult;
+
+				switch (s.type())
 				{
-					if (s.isDiscrete() == true)
-					{
-						return static_cast<int>(state.m_value) == 0 ? "0" : "1";
-					}
-
-					if (s.isAnalog() == true)
-					{
-						QString str = QString::number(state.m_value, 'f', s.precision());
-
-						return str;
-					}
-
+				case E::SignalType::Analog:
+					valueResult = state.toString(state.m_value, E::ValueViewType::Dec, s.precision());
+					break;
+				case E::SignalType::Discrete:
+					valueResult = static_cast<int>(state.m_value) == 0 ? "0" : "1";
+					break;
+				case E::SignalType::Bus:
+					valueResult = tr("Bus Type");
+					break;
+				default:
 					Q_ASSERT(false);
 				}
 
-				return tr("?");
+				if (state.m_flags.valid == false)
+				{
+					if (state.m_flags.stateAvailable == true)
+					{
+						valueResult = QString("? (%1)").arg(valueResult);
+					}
+					else
+					{
+						valueResult = QStringLiteral("?");
+					}
+				}
+
+				return valueResult;
 			}
 
 		case SnapshotColumns::SignalID:

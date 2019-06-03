@@ -11,6 +11,7 @@ class MonitorArchiveWidget;
 class QPrinter;
 class QTextDocument;
 
+
 class MonitorExportPrint : public ExportPrint
 {
 public:
@@ -25,6 +26,7 @@ private:
 
 };
 
+
 class MonitorArchive
 {
 public:
@@ -38,6 +40,7 @@ public:
 private:
 	static std::map<QString, MonitorArchiveWidget*> m_archiveList;
 };
+
 
 class MonitorArchiveWidget : public QMainWindow
 {
