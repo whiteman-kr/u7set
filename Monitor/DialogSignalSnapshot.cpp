@@ -171,15 +171,31 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 		break;
 	case SnapshotColumns::Value:
 		{
-			if (s1.isAnalog() == s2.isAnalog())
+			if (st1.m_flags.valid != st2.m_flags.valid)
 			{
-				v1 = st1.m_value;
-				v2 = st2.m_value;
+				v1 = st1.m_flags.valid;
+				v2 = st2.m_flags.valid;
 			}
 			else
 			{
-				v1 = s1.isAnalog();
-				v2 = s2.isAnalog();
+				if (st1.m_flags.stateAvailable != st2.m_flags.stateAvailable)
+				{
+					v1 = st1.m_flags.stateAvailable;
+					v2 = st2.m_flags.stateAvailable;
+				}
+				else
+				{
+					if (s1.isAnalog() == s2.isAnalog())
+					{
+						v1 = st1.m_value;
+						v2 = st2.m_value;
+					}
+					else
+					{
+						v1 = s1.isAnalog();
+						v2 = s2.isAnalog();
+					}
+				}
 			}
 		}
 		break;
@@ -583,6 +599,8 @@ void SignalSnapshotModel::sort(int column, Qt::SortOrder sortOrder)
 	{
 		return;
 	}
+
+	updateStates(0, static_cast<int>(m_filteredSignals.size() - 1));
 
 	int sortColumn = column;
 

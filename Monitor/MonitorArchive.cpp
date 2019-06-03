@@ -258,6 +258,8 @@ static int no = 1;
 	m_view->setModel(m_model);
 	setCentralWidget(m_view);
 
+	m_view->setWordWrap(false);
+
 	if (theSettings.m_archiveHorzHeader.isEmpty() == true || theSettings.m_archiveHorzHeaderCount != static_cast<int>(ArchiveColumns::ColumnCount))
 	{
 		// First time? Set what is should be hidden by deafult
