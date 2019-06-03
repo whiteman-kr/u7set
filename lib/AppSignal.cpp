@@ -62,6 +62,41 @@ bool AppSignalState::isValid() const
 	return m_flags.valid;
 }
 
+bool AppSignalState::isStateAvailable() const
+{
+	return m_flags.stateAvailable;
+}
+
+bool AppSignalState::isSimulated() const
+{
+	return m_flags.simulated;
+}
+
+bool AppSignalState::isBlocked() const
+{
+	return m_flags.blocked;
+}
+
+bool AppSignalState::isUnbalanced() const
+{
+	return m_flags.unbalanced;
+}
+
+bool AppSignalState::isAboveHighLimit() const
+{
+	return m_flags.aboveHighLimit;
+}
+
+bool AppSignalState::isBelowLowLimit() const
+{
+	return m_flags.belowLowLimit;
+}
+
+bool AppSignalState::isOutOfLimits() const
+{
+	return isAboveHighLimit() || isBelowLowLimit();
+}
+
 void AppSignalState::save(Proto::AppSignalState* protoState)
 {
 	if (protoState == nullptr)
