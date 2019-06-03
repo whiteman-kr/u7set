@@ -304,7 +304,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0284.sql", "Upgrade to version 284, TIM and RIM, rounding added at range checking"},
 	{":/DatabaseUpgrade/Upgrade0285.sql", "Upgrade to version 285, TuningClient has new property that describes schemas navigation type"},
 	{":/DatabaseUpgrade/Upgrade0286.sql", "Upgrade to version 286, Added valid range checking for AIM and WAIM"},
-	{":/DatabaseUpgrade/Upgrade0287.sql", "Upgrade to version 287, AOM-4PH CFG and RX packet format change"},
+	{":/DatabaseUpgrade/Upgrade0287.sql", "Upgrade to version 287, Empty update"},
 };
 
 int DbWorker::counter = 0;
