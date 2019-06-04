@@ -306,6 +306,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0286.sql", "Upgrade to version 286, Added valid range checking for AIM and WAIM"},
 	{":/DatabaseUpgrade/Upgrade0287.sql", "Upgrade to version 287, Empty update"},
 	{":/DatabaseUpgrade/Upgrade0288.sql", "Upgrade to version 288, LM1-SF40.xml, DBCOMP version set to 5, MISMATCH version set to 4 and removed zero out for FP version "},
+	{":/DatabaseUpgrade/Upgrade0289.sql", "Upgrade to version 289, Set Outputs to Safe State signals were removed in AOM-4PH, Data frames number is changed from 2 to 1"},
 };
 
 int DbWorker::counter = 0;
