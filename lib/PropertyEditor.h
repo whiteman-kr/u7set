@@ -207,15 +207,8 @@ namespace ExtWidgets
 	signals:
 		void valueChanged(QVariant value);
 
-		//private slots:
-		//void onButtonPressed();
-
-		//private:
-		//bool eventFilter(QObject* watched, QEvent* event);
-
 	private:
 		QComboBox* m_combo = nullptr;
-        int m_oldValue;
 
 	};
 	class MultiColorEdit : public QWidget
