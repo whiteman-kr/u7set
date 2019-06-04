@@ -225,8 +225,8 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 		break;
 	case SnapshotColumns::Unbalanced:
 		{
-			v1 = st1.m_flags.unbalanced;
-			v2 = st2.m_flags.unbalanced;
+			v1 = st1.m_flags.mismatch;
+			v2 = st2.m_flags.mismatch;
 		}
 		break;
 	case SnapshotColumns::OutOfLimits:
@@ -687,7 +687,7 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 			}
 		case SnapshotColumns::Unbalanced:
 			{
-				return (state.m_flags.unbalanced == true) ? tr("yes") : tr("");
+				return (state.m_flags.mismatch == true) ? tr("yes") : tr("");
 			}
 		case SnapshotColumns::OutOfLimits:
 			{

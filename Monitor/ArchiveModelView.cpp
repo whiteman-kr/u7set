@@ -184,7 +184,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 			break;
 		case ArchiveColumns::Unbalanced:
 			{
-				result = m_cachedSignalState.m_flags.unbalanced ? QStringLiteral("yes") : QString();
+				result = m_cachedSignalState.m_flags.mismatch ? QStringLiteral("yes") : QString();
 			}
 			break;
 		case ArchiveColumns::OutOfLimits:
@@ -211,7 +211,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 				{
 					resultString << QStringLiteral("VAL");
 				}
-				if (m_cachedSignalState.m_flags.simBlockUnblChange == true)
+				if (m_cachedSignalState.m_flags.simBlockMismatchChange == true)
 				{
 					resultString << QStringLiteral("SIMLOCK");
 				}

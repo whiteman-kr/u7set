@@ -290,8 +290,8 @@ bool DynamicAppSignalState::setState(const Times& time,
 				curState.flags.blocked = bit;
 				break;
 
-			case E::AppSignalStateFlagType::Unbalanced:
-				curState.flags.unbalanced = bit;
+			case E::AppSignalStateFlagType::Mismatch:
+				curState.flags.mismatch = bit;
 				break;
 
 			case E::AppSignalStateFlagType::AboveHighLimit:

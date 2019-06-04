@@ -77,9 +77,9 @@ bool AppSignalState::isBlocked() const
 	return m_flags.blocked;
 }
 
-bool AppSignalState::isUnbalanced() const
+bool AppSignalState::isMismatch() const
 {
-	return m_flags.unbalanced;
+	return m_flags.mismatch;
 }
 
 bool AppSignalState::isAboveHighLimit() const
