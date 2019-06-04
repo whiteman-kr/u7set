@@ -91,7 +91,7 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 					break;
 
 				case static_cast<int>(SignalFlagsFields::Unbalanced):
-					value = m_flags.unbalanced;
+					value = m_flags.mismatch;
 					break;
 
 				case static_cast<int>(SignalFlagsFields::AboveHighLimit):
