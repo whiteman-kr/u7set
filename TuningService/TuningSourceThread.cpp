@@ -183,6 +183,35 @@ namespace Tuning
 		m_readHighBound.setType(m_tuningValueType);
 	}
 
+	void TuningSourceHandler::TuningCommandQueue::push(const TuningCommand& cmd)
+	{
+		m_mutex.lock();
+
+		append(cmd);
+
+		m_mutex.unlock();
+	}
+
+	bool TuningSourceHandler::TuningCommandQueue::pop(TuningCommand* cmd)
+	{
+		TEST_PTR_RETURN_FALSE(cmd);
+
+		bool result = false;
+
+		m_mutex.lock();
+
+		if (isEmpty() == false)
+		{
+			*cmd = takeFirst();
+			result = true;
+		}
+
+		m_mutex.unlock();
+
+		return result;
+	}
+
+
 	// ----------------------------------------------------------------------------------
 	//
 	// TuningSourceHandler class implementation
@@ -197,9 +226,8 @@ namespace Tuning
 		m_logger(logger),
 		m_tuningLog(tuningLog),
 		m_socket(parent),
-		m_replyQueue(parent, 10),
-		m_tuningCommandQueue(1000, false)
-	{
+		m_replyQueue(parent, 10)
+{
 		m_sourceEquipmentID = source.lmEquipmentID();
 		m_sourceIP = source.lmAddressPort();
 		m_sourceUniqueID = source.lmUniqueID();
@@ -473,11 +501,11 @@ namespace Tuning
 
 		m_tuningCommandQueue.push(cmd);
 
-		DEBUG_LOG_MSG(m_logger, QString("Queue write command: source %1 (%2), signal %3, value %4").
+/*		DEBUG_LOG_MSG(m_logger, QString("Queue write command: source %1 (%2), signal %3, value %4").
 					  arg(sourceEquipmentID()).
 					  arg(m_sourceIP.addressStr()).
 					  arg(m_tuningSignals[signalIndex].appSignalID()).
-					  arg(newValue.toString()));
+					  arg(newValue.toString()));*/
 
 		return NetworkError::Success;
 	}
@@ -613,15 +641,13 @@ namespace Tuning
 			return true;		// while wating reply has not another processing
 		}
 
-		if (m_tuningCommandQueue.isEmpty() == true)
-		{
-			return false;		// queue is empty, go to next processing
-		}
-
 		// get command from queue and send FOTIP request
 		//
 
-		m_tuningCommandQueue.pop(&m_lastProcessedCommand);
+		if (m_tuningCommandQueue.pop(&m_lastProcessedCommand) == false)
+		{
+			return false;		// queue is empty, go to next processing
+		}
 
 		bool result = prepareFotipRequest(m_lastProcessedCommand, m_request);
 
