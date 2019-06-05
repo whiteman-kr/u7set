@@ -25,14 +25,6 @@ windows build job:
   tags:
     - vs2017
   script:
-#Run XML validation
-    - "echo ----------------------------------------------"
-    - "echo               Run XML validation"
-    - "echo ----------------------------------------------"
-    - "pushd ."	
-    - "cd %CI_PROJECT_DIR%\\u7\\LogicModuleDescription"
-    - "call validate_xmls.bat"
-    - "popd ."
     - "echo %CI_COMMIT_SHA%"
     - "git status"
     - "git log -1"
@@ -98,17 +90,28 @@ windows build job:
     - "mkdir \"%CI_PROJECT_DIR%/bin/release/printsupport\""
     - "copy C:\\Qt\\5.12.2\\msvc2017_64\\plugins\\printsupport\\windowsprintersupport.dll \"%CI_PROJECT_DIR%/bin/release/printsupport/\""
 
+#Run XML validation
+    - "echo ----------------------------------------------"
+    - "echo               Run XML validation"
+    - "echo ----------------------------------------------"
+    - "pushd ."	
+    - "cd %CI_PROJECT_DIR%\\u7\\LogicModuleDescription"
+    - "call validate_xmls.bat"
+    - "popd ."
+
 #Run unit tests
     - "echo ----------------------------------------------"
     - "echo               Run unit tests"
     - "echo ----------------------------------------------"
     - "%CI_PROJECT_DIR%\\bin\\release\\u7databasetests.exe"
+
 #Run Builder test
     - "echo ----------------------------------------------"
     - "echo               Run BuilderConsole tests"
     - "echo ----------------------------------------------"
     - "rmdir /Q /S c:\\temp\\build\\test_simulator-debug"    
     - "%CI_PROJECT_DIR%\\bin\\release\\BuilderConsole.exe 127.0.0.1 5432 u7 P2ssw0rd test_simulator_v286 Administrator P2ssw0rd c:\\temp\\build\\ debug"    
+  
   artifacts:
     name: "u7set_0.8.%CI_PIPELINE_ID%_%CI_BUILD_REF_SLUG%_%CI_COMMIT_SHA%"
     paths:
