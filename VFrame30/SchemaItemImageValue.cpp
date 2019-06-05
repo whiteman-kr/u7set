@@ -23,8 +23,6 @@ namespace VFrame30
 
 	SchemaItemImageValue::SchemaItemImageValue(SchemaUnit unit)
 	{
-		//VProperty* p = nullptr;
-
 		// Functional
 		//
 		auto strIdProperty = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true, SchemaItemImageValue::signalIdsString, SchemaItemImageValue::setSignalIdsString);
@@ -34,6 +32,14 @@ namespace VFrame30
 
 		ADD_PROPERTY_GET_SET_CAT(PropertyVector<ImageItem>, PropertyNames::images, PropertyNames::functionalCategory, true, SchemaItemImageValue::images, SchemaItemImageValue::setImages);
 		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::currentImageId, PropertyNames::functionalCategory, true, SchemaItemImageValue::currentImageId, SchemaItemImageValue::setCurrentImageId);
+
+		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemImageValue::lineWeight, SchemaItemImageValue::setLineWeight);
+
+		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemImageValue::lineColor, SchemaItemImageValue::setLineColor);
+		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColor, PropertyNames::appearanceCategory, true, SchemaItemImageValue::fillColor, SchemaItemImageValue::setFillColor)
+
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::drawRect, PropertyNames::appearanceCategory, true, SchemaItemImageValue::drawRect, SchemaItemImageValue::setDrawRect);
+		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fill, PropertyNames::appearanceCategory, true, SchemaItemImageValue::fillRect, SchemaItemImageValue::setFillRect);
 
 		// --
 		//
@@ -69,6 +75,12 @@ namespace VFrame30
 		{
 			image->save(valueMessage->add_images());
 		}
+
+		valueMessage->set_lineweight(m_lineWeight);
+		valueMessage->set_linecolor(m_lineColor.rgba());
+		valueMessage->set_fillcolor(m_fillColor.rgba());
+		valueMessage->set_drawrect(m_drawRect);
+		valueMessage->set_fillrect(m_fillRect);
 
 		return true;
 	}
@@ -110,6 +122,12 @@ namespace VFrame30
 			loadOk &= image->load(valueMessage.images(i));
 		}
 
+		m_lineWeight = valueMessage.lineweight();
+		m_lineColor = QColor::fromRgba(valueMessage.linecolor());
+		m_fillColor = QColor::fromRgba(valueMessage.fillcolor());
+		m_drawRect = valueMessage.drawrect();
+		m_fillRect = valueMessage.fillrect();
+
 		return loadOk;
 	}
 
@@ -117,7 +135,7 @@ namespace VFrame30
 	//
 	void SchemaItemImageValue::Draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
 	{
-		//QPainter* p = drawParam->painter();
+		QPainter* p = drawParam->painter();
 
 		// Initialization drawing resources
 		//
@@ -127,7 +145,15 @@ namespace VFrame30
 		//
 		QRectF rect = boundingRectInDocPt(drawParam);
 
-		// --
+		// Drawing background
+		//
+		if (m_fillRect == true)
+		{
+			m_fillBrush->setColor(m_fillColor);
+			drawParam->painter()->fillRect(rect, *m_fillBrush);
+		}
+
+		// Draw Image
 		//
 		std::shared_ptr<ImageItem> currentImage;
 
@@ -156,6 +182,16 @@ namespace VFrame30
 			}
 		}
 
+		// Drawing frame rect
+		//
+		if (drawRect() == true)
+		{
+			m_rectPen->setWidthF(m_lineWeight == 0.0 ? drawParam->cosmeticPenWidth() : m_lineWeight);
+
+			p->setPen(*m_rectPen);
+			p->drawRect(rect);
+		}
+
 		// Draw highlights by signals
 		//
 		for (const QString& appSignalId : m_signalIds)
@@ -173,6 +209,23 @@ namespace VFrame30
 
 	void SchemaItemImageValue::initDrawingResources() const
 	{
+		if (m_rectPen.get() == nullptr)
+		{
+			m_rectPen = std::make_unique<QPen>();
+		}
+
+		if (m_rectPen->color() != lineColor())
+		{
+			m_rectPen->setColor(lineColor());
+		}
+
+		// --
+		//
+		if (m_fillBrush.get() == nullptr)
+		{
+			m_fillBrush = std::make_unique<QBrush>(Qt::SolidPattern);
+		}
+
 		return;
 	}
 
@@ -340,6 +393,78 @@ namespace VFrame30
 	{
 		m_currentImageId = value;
 	}
+
+	// Weight property
+	//
+	double SchemaItemImageValue::lineWeight() const
+	{
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			return CUtils::RoundDisplayPoint(m_lineWeight);
+		}
+		else
+		{
+			double pt = CUtils::ConvertPoint(m_lineWeight, SchemaUnit::Inch, Settings::regionalUnit(), 0);
+			pt = CUtils::RoundPoint(pt, Settings::regionalUnit());
+			return pt;
+		}
+	}
+
+	void SchemaItemImageValue::setLineWeight(double weight)
+	{
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			m_lineWeight = CUtils::RoundDisplayPoint(weight);
+		}
+		else
+		{
+			double pt = CUtils::ConvertPoint(weight, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			m_lineWeight = pt;
+		}
+	}
+
+	// LineColor property
+	//
+	const QColor& SchemaItemImageValue::lineColor() const
+	{
+		return m_lineColor;
+	}
+	void SchemaItemImageValue::setLineColor(const QColor& color)
+	{
+		m_lineColor = color;
+	}
+
+	// FillColor property
+	//
+	const QColor& SchemaItemImageValue::fillColor() const
+	{
+		return m_fillColor;
+	}
+	void SchemaItemImageValue::setFillColor(const QColor& color)
+	{
+		m_fillColor = color;
+	}
+
+	bool SchemaItemImageValue::drawRect() const
+	{
+		return m_drawRect;
+	}
+
+	void SchemaItemImageValue::setDrawRect(bool value)
+	{
+		m_drawRect = value;
+	}
+
+	bool SchemaItemImageValue::fillRect() const
+	{
+		return m_fillRect;
+	}
+
+	void SchemaItemImageValue::setFillRect(bool value)
+	{
+		m_fillRect = value;
+	}
+
 
 }
 
