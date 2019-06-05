@@ -25,6 +25,14 @@ windows build job:
   tags:
     - vs2017
   script:
+#Run XML validation
+    - "echo ----------------------------------------------"
+    - "echo               Run XML validation"
+    - "echo ----------------------------------------------"
+    - "pushd ."	
+    - "cd %CI_PROJECT_DIR%\\u7\\LogicModuleDescription"
+    - "call validate_xmls.bat"
+    - "popd ."
     - "echo %CI_COMMIT_SHA%"
     - "git status"
     - "git log -1"
