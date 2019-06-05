@@ -31,6 +31,7 @@ void AppDataReceiverThread::fillAppDataReceiveState(Network::AppDataReceiveState
 	adrs->set_errdatagramsize(m_errDatagramSize);
 	adrs->set_errsimversion(m_errSimVersion);
 	adrs->set_errunknownappdatasourceip(m_errUnknownAppDataSourceIP);
+	adrs->set_errrupframecrc(m_errRupFrameCRC);
 }
 
 void AppDataReceiverThread::run()
@@ -193,6 +194,12 @@ void AppDataReceiverThread::receivePackets()
 				m_errDatagramSize++;
 				continue;
 			}
+		}
+
+		if (simFrame.rupFrame.checkCRC64() == false)
+		{
+			m_errRupFrameCRC++;
+			continue;
 		}
 
 		AppDataSourceShared dataSource = m_appDataSourcesIP.value(ip, nullptr);

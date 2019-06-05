@@ -1549,6 +1549,13 @@ class AppDataReceiveState : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 errunknownappdatasourceip() const;
   inline void set_errunknownappdatasourceip(::google::protobuf::int64 value);
 
+  // optional int64 errRupFrameCRC = 7 [default = 0];
+  inline bool has_errrupframecrc() const;
+  inline void clear_errrupframecrc();
+  static const int kErrRupFrameCRCFieldNumber = 7;
+  inline ::google::protobuf::int64 errrupframecrc() const;
+  inline void set_errrupframecrc(::google::protobuf::int64 value);
+
   // @@protoc_insertion_point(class_scope:Network.AppDataReceiveState)
  private:
   inline void set_has_receivedframescount();
@@ -1563,6 +1570,8 @@ class AppDataReceiveState : public ::google::protobuf::Message {
   inline void clear_has_errsimversion();
   inline void set_has_errunknownappdatasourceip();
   inline void clear_has_errunknownappdatasourceip();
+  inline void set_has_errrupframecrc();
+  inline void clear_has_errrupframecrc();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -1572,9 +1581,10 @@ class AppDataReceiveState : public ::google::protobuf::Message {
   ::google::protobuf::int64 errdatagramsize_;
   ::google::protobuf::int64 errsimversion_;
   ::google::protobuf::int64 errunknownappdatasourceip_;
+  ::google::protobuf::int64 errrupframecrc_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -8341,6 +8351,28 @@ inline ::google::protobuf::int64 AppDataReceiveState::errunknownappdatasourceip(
 inline void AppDataReceiveState::set_errunknownappdatasourceip(::google::protobuf::int64 value) {
   set_has_errunknownappdatasourceip();
   errunknownappdatasourceip_ = value;
+}
+
+// optional int64 errRupFrameCRC = 7 [default = 0];
+inline bool AppDataReceiveState::has_errrupframecrc() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void AppDataReceiveState::set_has_errrupframecrc() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void AppDataReceiveState::clear_has_errrupframecrc() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void AppDataReceiveState::clear_errrupframecrc() {
+  errrupframecrc_ = GOOGLE_LONGLONG(0);
+  clear_has_errrupframecrc();
+}
+inline ::google::protobuf::int64 AppDataReceiveState::errrupframecrc() const {
+  return errrupframecrc_;
+}
+inline void AppDataReceiveState::set_errrupframecrc(::google::protobuf::int64 value) {
+  set_has_errrupframecrc();
+  errrupframecrc_ = value;
 }
 
 // -------------------------------------------------------------------

@@ -115,6 +115,7 @@ message AppDataReceiveState
     optional int64 errDatagramSize = 4 [default = 0];
     optional int64 errSimVersion = 5 [default = 0];
     optional int64 errUnknownAppDataSourceIP = 6 [default = 0];
+	optional int64 errRupFrameCRC = 7 [default = 0];
 }
 
 // Getting Application Data Sources states
