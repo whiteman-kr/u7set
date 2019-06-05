@@ -501,11 +501,11 @@ namespace Tuning
 
 		m_tuningCommandQueue.push(cmd);
 
-/*		DEBUG_LOG_MSG(m_logger, QString("Queue write command: source %1 (%2), signal %3, value %4").
+		LOG_MSG(m_logger, QString("Queue write command: source %1 (%2), signal %3, value %4").
 					  arg(sourceEquipmentID()).
 					  arg(m_sourceIP.addressStr()).
 					  arg(m_tuningSignals[signalIndex].appSignalID()).
-					  arg(newValue.toString()));*/
+					  arg(newValue.toString()));
 
 		return NetworkError::Success;
 	}
