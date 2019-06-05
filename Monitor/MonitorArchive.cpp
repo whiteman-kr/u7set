@@ -269,7 +269,7 @@ static int no = 1;
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::StateAvailable));
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::Simulated));
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::Blocked));
-		m_view->hideColumn(static_cast<int>(ArchiveColumns::Unbalanced));
+		m_view->hideColumn(static_cast<int>(ArchiveColumns::Mismatch));
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::OutOfLimits));
 		m_view->hideColumn(static_cast<int>(ArchiveColumns::ArchivingReason));
 	}

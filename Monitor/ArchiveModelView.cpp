@@ -58,8 +58,8 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation /*orientation*/, 
 	case ArchiveColumns::Blocked:
 		return tr("Blocked");
 
-	case ArchiveColumns::Unbalanced:
-		return tr("Unbalanced");
+	case ArchiveColumns::Mismatch:
+		return tr("Mismatch");
 
 	case ArchiveColumns::OutOfLimits:
 		return tr("OutOfLimits");
@@ -182,7 +182,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 				result = m_cachedSignalState.m_flags.blocked ? QStringLiteral("yes") : QString();
 			}
 			break;
-		case ArchiveColumns::Unbalanced:
+		case ArchiveColumns::Mismatch:
 			{
 				result = m_cachedSignalState.m_flags.mismatch ? QStringLiteral("yes") : QString();
 			}
@@ -255,7 +255,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 		 column ==  static_cast<int>(ArchiveColumns::StateAvailable) ||
 		 column ==  static_cast<int>(ArchiveColumns::Simulated) ||
 		 column ==  static_cast<int>(ArchiveColumns::Blocked) ||
-		 column ==  static_cast<int>(ArchiveColumns::Unbalanced)))
+		 column ==  static_cast<int>(ArchiveColumns::Mismatch)))
 	{
 		return QVariant(Qt::AlignCenter);
 	}
