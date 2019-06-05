@@ -938,19 +938,15 @@ namespace ExtWidgets
 
 		m_combo = new QComboBox(parent);
 
-		if (m_combo->count() == 0)
+		for (std::pair<int, QString> i : p->enumValues())
 		{
-			m_combo->blockSignals(true);
-			for (std::pair<int, QString> i : p->enumValues())
-			{
-				m_combo->addItem(i.second, i.first);
-			}
-			m_combo->blockSignals(false);
+			m_combo->addItem(i.second, i.first);
 		}
-
-		connect(m_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(indexChanged(int)));
+		m_combo->setCurrentIndex(-1);
 
 		m_combo->setEnabled(readOnly == false);
+
+		connect(m_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(indexChanged(int)));
 
 		QHBoxLayout* lt = new QHBoxLayout;
 		lt->setContentsMargins(0, 0, 0, 0);
@@ -974,14 +970,14 @@ namespace ExtWidgets
             return;
         }
 
-		m_oldValue = property->value().toInt();
+		m_combo->blockSignals(true);
 
 		// select an item with a value
 		//
 		bool found =  false;
 		for (int i = 0; i < m_combo->count(); i++)
 		{
-            if (m_combo->itemData(i).toInt() == m_oldValue)
+			if (m_combo->itemData(i).toInt() ==  property->value().toInt())
 			{
 				m_combo->setCurrentIndex(i);
 				found = true;
@@ -993,17 +989,15 @@ namespace ExtWidgets
 			m_combo->setCurrentIndex(-1);
         }
 
+		m_combo->blockSignals(false);
+
 		m_combo->setEnabled(readOnly == false);
 	}
 
 	void MultiEnumEdit::indexChanged(int index)
 	{
 		int value = m_combo->itemData(index).toInt();
-        if (m_oldValue != value)
-		{
-            m_oldValue = value;
-			emit valueChanged(m_combo->itemText(index));
-        }
+		emit valueChanged(value);
 	}
 
 
@@ -3284,12 +3278,12 @@ namespace ExtWidgets
 
 			// Do not set property, if it has same value
 
-			if (pObject->propertyValue(propertyName) == value)
+			QVariant oldValue = pObject->propertyValue(propertyName);
+
+			if (oldValue == value)
 			{
 				continue;
 			}
-
-			QVariant oldValue = pObject->propertyValue(propertyName);
 
 			// Warning!!! If property changing changes the list of properties (e.g. SpecificProperties),
 			// property pointer becomes unusable! So next calls to property-> will cause crash
@@ -3304,7 +3298,7 @@ namespace ExtWidgets
 							  .arg(propertyName);
 			}
 
-            modifiedObjects.append(i);
+			modifiedObjects.append(i);
 		}
 
 		if (errorString.isEmpty() == false)

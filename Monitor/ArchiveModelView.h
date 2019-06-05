@@ -16,7 +16,7 @@ enum class ArchiveColumns
 	StateAvailable,
 	Simulated,
 	Blocked,
-	Unbalanced,
+	Mismatch,
 	OutOfLimits,
 	ArchivingReason,
 

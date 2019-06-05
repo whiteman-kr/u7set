@@ -223,7 +223,7 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 			v2 = st2.m_flags.blocked;
 		}
 		break;
-	case SnapshotColumns::Unbalanced:
+	case SnapshotColumns::Mismatch:
 		{
 			v1 = st1.m_flags.mismatch;
 			v2 = st2.m_flags.mismatch;
@@ -276,7 +276,7 @@ SignalSnapshotModel::SignalSnapshotModel(QObject* parent)
 	m_columnsNames << tr("StateAvailable");
 	m_columnsNames << tr("Simulated");
 	m_columnsNames << tr("Blocked");
-	m_columnsNames << tr("Unbalanced");
+	m_columnsNames << tr("Mismatch");
 	m_columnsNames << tr("OutOfLimits");
 
 	// Copy signals to model
@@ -685,7 +685,7 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 			{
 				return (state.m_flags.blocked == true) ? tr("yes") : tr("");
 			}
-		case SnapshotColumns::Unbalanced:
+		case SnapshotColumns::Mismatch:
 			{
 				return (state.m_flags.mismatch == true) ? tr("yes") : tr("");
 			}
@@ -799,7 +799,7 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 		 columnIndex ==  SnapshotColumns::StateAvailable ||
 		 columnIndex ==  SnapshotColumns::Simulated ||
 		 columnIndex ==  SnapshotColumns::Blocked ||
-		 columnIndex ==  SnapshotColumns::Unbalanced))
+		 columnIndex ==  SnapshotColumns::Mismatch))
 	{
 		return QVariant(Qt::AlignCenter);
 	}
@@ -911,7 +911,7 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::StateAvailable));
 		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::Simulated));
 		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::Blocked));
-		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::Unbalanced));
+		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::Mismatch));
 		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::OutOfLimits));
 	}
 

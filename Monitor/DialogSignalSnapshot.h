@@ -64,7 +64,7 @@ enum class SnapshotColumns
 	StateAvailable,
 	Simulated,
 	Blocked,
-	Unbalanced,
+	Mismatch,
 	OutOfLimits,
 
 	ColumnCount

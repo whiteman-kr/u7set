@@ -36,7 +36,7 @@ class AppSignalState
 	Q_PROPERTY(bool StateAvailable READ isStateAvailable)
 	Q_PROPERTY(bool Simulated READ isSimulated)
 	Q_PROPERTY(bool Blocked READ isBlocked)
-	Q_PROPERTY(bool Unbalanced READ isMismatch)
+	Q_PROPERTY(bool Mismatch READ isMismatch)
 	Q_PROPERTY(bool AboveHighLimit READ isAboveHighLimit)
 	Q_PROPERTY(bool BelowLowLimit READ isBelowLowLimit)
 	Q_PROPERTY(bool OutOfLimits READ isOutOfLimits)

@@ -34,7 +34,7 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 		QStringLiteral("STATE"),
 		QStringLiteral("SIM"),
 		QStringLiteral("LOCK"),
-		QStringLiteral("UNBL"),
+		QStringLiteral("MISMATCH"),
 		QStringLiteral("HIGH"),
 		QStringLiteral("LOW")
 	};
@@ -90,7 +90,7 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 					value = m_flags.blocked;
 					break;
 
-				case static_cast<int>(SignalFlagsFields::Unbalanced):
+				case static_cast<int>(SignalFlagsFields::Mismatch):
 					value = m_flags.mismatch;
 					break;
 
