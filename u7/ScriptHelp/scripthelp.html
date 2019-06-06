@@ -127,11 +127,14 @@
 <p>&nbsp;</p>
 <p><strong>Essential Properties</strong></p>
 <p>&nbsp;</p>
-<p><strong><em>Obj</em><em>ectName</em> (string)</strong></p>
+<p><strong><em>Obj</em><em>ectName : </em>string</strong></p>
 <p>A name of an item. Must be unique on the schema.</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>AcceptC</em><em>lick </em>(bool)</strong></p>
+<p><strong><em>AcceptC</em><em>lick : boolean</em></strong></p>
 <p>When set to true, mouse cursor is displayed as a "hand" above an item and ClickScript is executed on the left mouse button click.</p>
+<p>&nbsp;</p>
+<p><strong>BlinkPhase : <em>boolean</em></strong></p>
+<p>On every drawing cycle inverts its value. Can be used to implement text or background blinking.</p>
 <p><strong>&nbsp;</strong></p>
 <p><strong>Scripts</strong></p>
 <p><strong><em>&nbsp;</em></strong></p>
@@ -164,10 +167,10 @@
 <p>&nbsp;</p>
 <p><strong>Essential Properties</strong></p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>Li</em><em>neColor</em> (string)</strong></p>
+<p><strong><em>Li</em><em>neColor </em>: <em>string</em></strong></p>
 <p>A color name of the line</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>LineW</em><em>eight </em>(int)</strong></p>
+<p><strong><em>LineW</em><em>eight : double</em></strong></p>
 <p>Line weight, in pixels</p>
 <p><strong>&nbsp;</strong></p>
 <p><strong>Example of PreDrawScript for SchemaItemLine:</strong></p>
@@ -182,40 +185,42 @@
 <p>&nbsp;</p>
 <p><strong>Essential Properties</strong></p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>Fill (boolean)</em></strong></p>
+<p><strong><em>Fill : boolean</em></strong></p>
 <p>Switches rectangle filling</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>FillColor</em> (string)</strong></p>
+<p><em><strong>FillColor : string</strong></em></p>
 <p>Rectangle fill color name</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>TextCo</em><em>lor</em> (string)</strong></p>
+<p><em><strong>TextColor : string</strong></em></p>
 <p>Text color name</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>LineC</em><em>olor</em> (string)</strong></p>
+<p><em><strong>LineColor : string</strong></em></p>
 <p>Border line color name</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>Lin</em><em>eWeight </em>(int)</strong></p>
+<p><em><strong>LineWeight : double</strong></em></p>
 <p>Border line weight, in pixels</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>AlignH</em><em>orz </em>(enum)</strong></p>
-<p>Horizontal text alignment</p>
-<p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>AlignVe</em><em>rt </em>(enum)</strong></p>
-<p>Vertical text alignment</p>
-<p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>FontBold (boolean)</em></strong></p>
+<p><em><strong>AlignHorz : int</strong></em></p>
+<p>Horizontal text alignment:</p>
+<p>AlignLeft = 1<br /> AlignRight = 2<br /> AlignHCenter = 4<br /> AlignJustify = 8</p>
+<p>&nbsp;</p>
+<p><em><strong>AlignVert : int</strong></em></p>
+<p>Vertical text alignment:</p>
+<p>AlignTop = 32<br /> AlignBottom = 64<br /> AlignVCenter = 128<br /> AlignBaseline = 256</p>
+<p>&nbsp;</p>
+<p><strong><em>FontBold : </em><em>boolean</em></strong></p>
 <p>Bold font</p>
 <p>&nbsp;</p>
-<p><strong><em>FontItalic (boolean)</em></strong></p>
+<p><strong><em>FontItalic : boolean</em></strong></p>
 <p>Italic font</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>FontName (string)</em></strong></p>
+<p><strong><em>FontName : string</em></strong></p>
 <p>Font name</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>FontSize (int)</em></strong></p>
+<p><strong><em>FontSize : int</em></strong></p>
 <p>Font size</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>Text (string)</em></strong></p>
+<p><strong><em>Text : string</em></strong></p>
 <p>Rectangle text</p>
 <p><strong>&nbsp;</strong></p>
 <p><strong>Example of PreDrawScript for SchemaItemRect</strong></p>
@@ -237,40 +242,42 @@
 <p>&nbsp;</p>
 <p><strong>Essential Properties</strong></p>
 <p>&nbsp;</p>
-<p><strong><em>DrawRect (boolean)</em></strong></p>
+<p><strong><em>DrawRect : boolean</em></strong></p>
 <p>Draw the border</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>FillC</em><em>olor</em> (string)</strong></p>
+<p><em><strong>FillColor : string</strong></em></p>
 <p>Rectangle fill color name</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>LineColor</em> (string)</strong></p>
+<p><em><strong>LineColor : string</strong></em></p>
 <p>Border line color name</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>LineWeight</em> (int)</strong></p>
+<p><em><strong>LineWeight : double</strong></em></p>
 <p>Border line weight, in pixels</p>
 <p>&nbsp;</p>
-<p><strong><em>TextColor</em> (string)</strong></p>
+<p><em><strong>TextColor : string</strong></em></p>
 <p>Text color name</p>
 <p>&nbsp;</p>
-<p><strong><em>AlignHorz</em> (enum)</strong></p>
-<p>Horizontal text alignment</p>
+<p><em><strong>AlignHorz : int</strong></em></p>
+<p>Horizontal text alignment:</p>
+<p>AlignLeft = 1<br /> AlignRight = 2<br /> AlignHCenter = 4<br /> AlignJustify = 8</p>
 <p>&nbsp;</p>
-<p><strong><em>AlignVer</em><em>t</em> (enum)</strong></p>
-<p>Vertical text alignment</p>
+<p><em><strong>AlignVert : int</strong></em></p>
+<p>Vertical text alignment:</p>
+<p>AlignTop = 32<br /> AlignBottom = 64<br /> AlignVCenter = 128<br /> AlignBaseline = 256</p>
 <p>&nbsp;</p>
-<p><strong><em>FontBold (boolean)</em></strong></p>
+<p><strong><em>FontBold : boolean</em></strong></p>
 <p>Bold font</p>
 <p>&nbsp;</p>
-<p><strong><em>FontItalic (boolean)</em></strong></p>
+<p><strong><em>FontItalic : boolean</em></strong></p>
 <p>Italic font</p>
 <p>&nbsp;</p>
-<p><strong><em>FontName (string)</em></strong></p>
+<p><strong><em>FontName : string</em></strong></p>
 <p>Font name</p>
 <p>&nbsp;</p>
-<p><strong><em>FontSize (int)</em></strong></p>
+<p><strong><em>FontSize : int</em></strong></p>
 <p>Font size</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>Text (string)</em></strong></p>
+<p><strong><em>Text : string</em></strong></p>
 <p>Rectangle text, can contain macros:</p>
 <p>&nbsp;</p>
 <p>$(value) - signal value</p>
@@ -279,14 +286,9 @@
 <p>$(appsignalid) - signal identifier</p>
 <p>$(equipmentid) - signal equipment id</p>
 <p>&nbsp;</p>
-<p><strong><em>AppSignalIDs (string array)</em></strong></p>
-<p>Application identifiers for an item</p>
-<p>&nbsp;</p>
-<p><strong><em>Precision (int)</em></strong></p>
+<p><strong><em>Precision : int</em></strong></p>
 <p>Numbers precision</p>
-<p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>Signal Source (enum)</em></strong></p>
-<p>Determies the default source of signal values - ApplicationDataService or TuningService</p>
+<p>&nbsp;</p>
 <p><strong>&nbsp;</strong></p>
 <p><strong>Example of PreDrawScript for SchemaItemValue</strong></p>
 <p><em>(function(schemaItemValue)</em></p>
@@ -311,45 +313,61 @@
 <p><strong>&nbsp;</strong></p>
 <p>This control is used to display different images depending on signal values.</p>
 <p><strong>&nbsp;</strong></p>
+<p><strong>Accessing signals identifiers</strong></p>
+<p>To access signal identifiers of this item, use the following code:</p>
+<p>&nbsp;</p>
+<p><em>var appSignalId = schemaItemValue.SignalIDs[0];</em></p>
+<p>&nbsp;</p>
 <p><strong>Essential Properties</strong></p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>AppSignalIDs (string array)</em></strong></p>
-<p>Application identifiers for an item</p>
-<p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>CurrentImageID</em></strong> <strong>(string)</strong></p>
+<p><strong><em>CurrentImageID</em></strong> <strong>: <em>string</em></strong></p>
 <p>An identifier of current image</p>
-<p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>Images </em>(images array)</strong></p>
-<p>Images array</p>
-<p><strong>&nbsp;</strong></p>
+<p>&nbsp;</p>
+<p><em><strong>LineWeight : double</strong></em></p>
+<p>Border line weight, in pixels</p>
+<p>&nbsp;</p>
+<p><strong><em>DrawRect : boolean</em><br /></strong></p>
+<p>Bounding rectangle drawing</p>
+<p>&nbsp;</p>
+<p><strong><em>Fill : boolean</em><br /></strong></p>
+<p>Rectangle filling</p>
+<p>&nbsp;</p>
+<p><em><strong>LineColor : string</strong></em></p>
+<p>Border line color name</p>
+<p>&nbsp;</p>
+<p><em><strong>FillColor : string</strong></em></p>
+<p>Rectangle fill color name</p>
+<p>&nbsp;</p>
 <h2><a name="_SchemaItemLineEdit"></a><a name="_SchemaItemLineEdit"></a>SchemaItemLineEdit</h2>
 <p>&nbsp;</p>
 <p>This control is used to create user input fields.</p>
 <p><strong>&nbsp;</strong></p>
 <p><strong>Essential Properties:</strong></p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>AlignHorz </em>(enum)</strong></p>
-<p>Horizontal text alignment</p>
+<p><em><strong>AlignHorz : int</strong></em></p>
+<p>Horizontal text alignment:</p>
+<p>AlignLeft = 1<br /> AlignRight = 2<br /> AlignHCenter = 4<br /> AlignJustify = 8</p>
+<p>&nbsp;</p>
+<p><em><strong>AlignVert : int</strong></em></p>
+<p>Vertical text alignment:</p>
+<p>AlignTop = 32<br /> AlignBottom = 64<br /> AlignVCenter = 128<br /> AlignBaseline = 256</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>AlignVert</em> (enum)</strong></p>
-<p>Vertical text alignment</p>
-<p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>MaxLength </em>(int)</strong></p>
+<p><strong><em>MaxLength </em>: <em>int</em></strong></p>
 <p>Maximum text length</p>
 <p>&nbsp;</p>
-<p><strong><em>PlaceholderText </em>(string)</strong></p>
+<p><strong><em>PlaceholderText </em>: <em>string</em></strong></p>
 <p>Property holds the line edit's placeholder text. Setting this property makes the line edit display a grayed-out placeholder text as long as the line edit is empty. Normally, an empty line edit shows the placeholder text even when it has focus. However, if the content is horizontally centered, the placeholder text is not displayed under the cursor when the line edit has focus. By default, this property contains an empty string.</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>StyleSheet</em> (string)</strong></p>
+<p><strong><em>StyleSheet</em> : <em>string</em></strong></p>
 <p>A stylesheet of a widget. Detailed description of this field can be found in Qt documentation.</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>Text </em>(string)</strong></p>
+<p><strong><em>Text </em>: <em>string</em></strong></p>
 <p>Property holds the line edit's text.</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>ReadOnly</em></strong> <strong>(boolean)</strong></p>
+<p><strong><em>ReadOnly</em></strong> <strong>: <em>boolean</em></strong></p>
 <p>This property holds whether the line edit is read only. In read-only mode, the user can still copy the text to the clipboard, or drag and drop the text, but cannot edit it. LineEdit does not show a cursor in read-only mode.</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>Tooltip</em></strong> <strong>(string)</strong></p>
+<p><strong><em>Tooltip</em></strong> <strong>: <em>string</em></strong></p>
 <p>Gets or sets the tooltip text in the control.</p>
 <p><strong>&nbsp;</strong></p>
 <p><strong>Scripts</strong></p>
@@ -408,28 +426,28 @@
 <p><strong>&nbsp;</strong></p>
 <p><strong>Essential Properties</strong></p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>AutoRepeat</em> (bool)</strong></p>
+<p><strong><em>AutoRepeat</em> : <em>boolean</em></strong></p>
 <p>If true, Clicked script is repeated while user holds the left mouse button.</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>AutoRepeatDelay</em></strong> <strong>(int)</strong></p>
+<p><strong><em>AutoRepeatDelay</em></strong> <strong>: <em>int</em></strong></p>
 <p>A delay in milliseconds before auto repeating starts.</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>AutoRepeatInterval</em></strong> <strong>(int)</strong></p>
+<p><strong><em>AutoRepeatInterval</em></strong> : <em><strong>int</strong></em></p>
 <p>An interval in milliseconds of auto repeating.</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>Checkable</em></strong> <strong>(bool)</strong></p>
+<p><strong><em>Checkable</em></strong> <strong>: <em>boolean</em></strong></p>
 <p>If set, button is checkable.</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>CheckedDefault</em> (bool)</strong></p>
+<p><strong><em>CheckedDefault</em> : <em>boolean</em></strong></p>
 <p>The default state of checkable button.</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>StyleSheet</em> (string)</strong></p>
+<p><strong><em>StyleSheet</em> : <em>string</em></strong></p>
 <p>A stylesheet of a widget. Detailed description of this field can be found in Qt documentation.</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>Text</em></strong> <strong>(string)</strong></p>
+<p><strong><em>Text</em></strong> <strong>: <em>string</em></strong></p>
 <p>Gets or sets the text in the control.</p>
 <p><strong><em>&nbsp;</em></strong></p>
-<p><strong><em>Toolti</em><em>p </em>(string)</strong></p>
+<p><strong><em>Toolti</em><em>p </em>: <em>string</em></strong></p>
 <p>Gets or sets the tooltip text in the control.</p>
 <p><strong>&nbsp;</strong></p>
 <p><strong>Scripts</strong></p>
