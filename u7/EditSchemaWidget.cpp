@@ -35,6 +35,7 @@
 #include "DialogInputEx.h"
 #include "../lib/QScintillaLexers/LexerJavaScript.h"
 #include "../lib/Ui/TextEditCompleter.h"
+#include <cfloat>
 
 
 const EditSchemaWidget::MouseStateCursor EditSchemaWidget::m_mouseStateCursor[] =
