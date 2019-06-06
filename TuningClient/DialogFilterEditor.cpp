@@ -22,8 +22,8 @@ DialogFilterEditor::DialogFilterEditor(TuningSignalManager* tuningSignalManager,
 												  false,		/*typeTabEnabled*/
 												  false,		/*typeCounterEnabled*/
 												  TuningFilter::Source::User,
-												  theSettings.m_tuningFiltersSplitterPosition,
-												  theSettings.m_tuningFiltersPropertyEditorSplitterPos
+												  theSettings.m_dialogFiltersEditorSplitterPosition,
+												  theSettings.m_dialogFiltersEditorPropertyEditorSplitterPosition
 												  );
 
 	connect(m_tuningFilterEditor, &TuningFilterEditor::getCurrentSignalValue, this, &DialogFilterEditor::onGetCurrentSignalValue, Qt::DirectConnection);
@@ -43,10 +43,10 @@ DialogFilterEditor::DialogFilterEditor(TuningSignalManager* tuningSignalManager,
     l->addWidget(m_tuningFilterEditor);
     l->addLayout(okCancelButtonsLayout);
 
-    if (theSettings.m_presetEditorPos.x() != -1 && theSettings.m_presetEditorPos.y() != -1)
+	if (theSettings.m_dialogFiltersEditorPos.x() != -1 && theSettings.m_dialogFiltersEditorPos.y() != -1)
     {
-        move(theSettings.m_presetEditorPos);
-        restoreGeometry(theSettings.m_presetEditorGeometry);
+		move(theSettings.m_dialogFiltersEditorPos);
+		restoreGeometry(theSettings.m_dialogFiltersEditorGeometry);
     }
     else
     {
@@ -56,10 +56,10 @@ DialogFilterEditor::DialogFilterEditor(TuningSignalManager* tuningSignalManager,
 
 DialogFilterEditor::~DialogFilterEditor()
 {
-    theSettings.m_presetEditorPos = pos();
-    theSettings.m_presetEditorGeometry = saveGeometry();
+	theSettings.m_dialogFiltersEditorPos = pos();
+	theSettings.m_dialogFiltersEditorGeometry = saveGeometry();
 
-	m_tuningFilterEditor->saveUserInterfaceSettings(&theSettings.m_tuningFiltersSplitterPosition, &theSettings.m_tuningFiltersPropertyEditorSplitterPos);
+	m_tuningFilterEditor->saveUserInterfaceSettings(&theSettings.m_dialogFiltersEditorSplitterPosition, &theSettings.m_dialogFiltersEditorPropertyEditorSplitterPosition);
 
 }
 

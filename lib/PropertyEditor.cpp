@@ -1,6 +1,5 @@
 #include "../lib/PropertyObject.h"
 #include "../lib/PropertyEditor.h"
-#include "Settings.h"
 #include "TuningValue.h"
 
 #include <QtTreePropertyBrowser>
@@ -34,6 +33,7 @@
 #include <QDesktopWidget>
 #include <QTextBrowser>
 #include <QTreeWidget>
+#include <QSplitter>
 
 namespace ExtWidgets
 {
@@ -138,17 +138,26 @@ namespace ExtWidgets
 
 		// Left Layout
 
-		QVBoxLayout* leftLayout = new QVBoxLayout();
-		leftLayout->addWidget(m_treeWidget);
-		leftLayout->addLayout(addRemoveLayout);
+		QVBoxLayout* treeAddRemoveLayout = new QVBoxLayout();
+		treeAddRemoveLayout->addWidget(m_treeWidget);
+		treeAddRemoveLayout->addLayout(addRemoveLayout);
 
 		// Top Layout
 
+		QWidget* leftWidget = new QWidget();
 
-		QHBoxLayout* horzLayout = new QHBoxLayout();
-		horzLayout->addLayout(leftLayout);
-		horzLayout->addLayout(moveLayout);
-		horzLayout->addWidget(m_propertyEditor);
+		QHBoxLayout* leftLayout = new QHBoxLayout(leftWidget);
+		leftLayout->setContentsMargins(0, 0, 0, 0);
+		leftLayout->addLayout(treeAddRemoveLayout);
+		leftLayout->addLayout(moveLayout);
+
+
+		// Splitter
+
+		m_splitter = new QSplitter();
+
+		m_splitter->addWidget(leftWidget);
+		m_splitter->addWidget(m_propertyEditor);
 
 		// Ok/Cancel
 
@@ -163,7 +172,7 @@ namespace ExtWidgets
 		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::reject);
 		buttonsLayout->addWidget(b);
 
-		mainLayout->addLayout(horzLayout);
+		mainLayout->addWidget(m_splitter);
 
 		//
 
@@ -177,6 +186,22 @@ namespace ExtWidgets
 		{
 			m_treeWidget->topLevelItem(0)->setSelected(true);
 		}
+
+		if (thePropertyEditorSettings.m_arrayPropertyEditorSize != QSize(-1, -1))
+		{
+			resize(thePropertyEditorSettings.m_arrayPropertyEditorSize);
+		}
+
+		if (thePropertyEditorSettings.m_arrayPropertyEditorSplitterState.isEmpty() == false)
+		{
+			m_splitter->restoreState(thePropertyEditorSettings.m_arrayPropertyEditorSplitterState);
+		}
+	}
+
+	PropertyArrayEditorDialog::~PropertyArrayEditorDialog()
+	{
+		thePropertyEditorSettings.m_arrayPropertyEditorSplitterState = m_splitter->saveState();
+		thePropertyEditorSettings.m_arrayPropertyEditorSize = size();
 	}
 
 	QVariant PropertyArrayEditorDialog::value()
@@ -601,6 +626,22 @@ namespace ExtWidgets
 	int FilePathPropertyType::filePathTypeId()
 	{
 		return qMetaTypeId<FilePathPropertyType>();
+	}
+
+	void PropertyEditorSettings::restore(QSettings& s)
+	{
+		m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePropertyEditorWindowPos", QPoint(-1, -1)).toPoint();
+		m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLinePropertyEditorGeometry").toByteArray();
+		m_arrayPropertyEditorSplitterState = s.value("PropertyEditor/arrayPropertyEditorSplitterState").toByteArray();
+		m_arrayPropertyEditorSize = s.value("PropertyEditor/arrayPropertyEditorSize").toSize();
+	}
+
+	void PropertyEditorSettings::store(QSettings& s)
+	{
+		s.setValue("PropertyEditor/multiLinePropertyEditorWindowPos", m_multiLinePropertyEditorWindowPos);
+		s.setValue("PropertyEditor/multiLinePropertyEditorGeometry", m_multiLinePropertyEditorGeometry);
+		s.setValue("PropertyEditor/arrayPropertyEditorSplitterState", m_arrayPropertyEditorSplitterState);
+		s.setValue("PropertyEditor/arrayPropertyEditorSize", m_arrayPropertyEditorSize);
 	}
 
 	//
@@ -1166,10 +1207,10 @@ namespace ExtWidgets
 	{
 		setWindowTitle(p->caption());
 
-		if (theSettings.m_multiLinePropertyEditorWindowPos.x() != -1 && theSettings.m_multiLinePropertyEditorWindowPos.y() != -1)
+		if (thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos.x() != -1 && thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos.y() != -1)
 		{
-			move(theSettings.m_multiLinePropertyEditorWindowPos);
-			restoreGeometry(theSettings.m_multiLinePropertyEditorGeometry);
+			move(thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos);
+			restoreGeometry(thePropertyEditorSettings.m_multiLinePropertyEditorGeometry);
 		}
 		else
 		{
@@ -1303,8 +1344,8 @@ namespace ExtWidgets
 	{
 		Q_UNUSED(result);
 
-		theSettings.m_multiLinePropertyEditorWindowPos = pos();
-		theSettings.m_multiLinePropertyEditorGeometry = saveGeometry();
+		thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos = pos();
+		thePropertyEditorSettings.m_multiLinePropertyEditorGeometry = saveGeometry();
 
 	}
 
@@ -3325,3 +3366,5 @@ namespace ExtWidgets
 	}
 
 }
+
+ExtWidgets::PropertyEditorSettings thePropertyEditorSettings;
