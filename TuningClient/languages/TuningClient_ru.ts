@@ -3559,6 +3559,19 @@ Data will not be available at the time of reconnection.</source>
     </message>
 </context>
 <context>
+    <name>SchemasWorkspace</name>
+    <message>
+        <location filename="../SchemasWorkspace.cpp" line="34"/>
+        <source>ID</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../SchemasWorkspace.cpp" line="35"/>
+        <source>Caption</source>
+        <translation>Наименование</translation>
+    </message>
+</context>
+<context>
     <name>SwitchFiltersPage</name>
     <message>
         <location filename="../SwitchFiltersPage.cpp" line="171"/>
@@ -4211,7 +4224,7 @@ Are you sure you want to take control and activate the source %1?</source>
     </message>
     <message>
         <location filename="../TuningPage.cpp" line="856"/>
-        <location filename="../TuningPage.cpp" line="2100"/>
+        <location filename="../TuningPage.cpp" line="2116"/>
         <source>Set All</source>
         <translation>Установить все</translation>
     </message>
@@ -4350,22 +4363,22 @@ Are you sure you STILL WANT TO APPLY the changes?</source>
         <translation>Восстановить из фильтра...</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1668"/>
+        <location filename="../TuningPage.cpp" line="1673"/>
         <source>Add Signals To Filter</source>
         <translation>Добавить сигналы в фильтр</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1669"/>
+        <location filename="../TuningPage.cpp" line="1674"/>
         <source>Enter the filter name:</source>
         <translation>Введите имя фильтра:</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1670"/>
+        <location filename="../TuningPage.cpp" line="1675"/>
         <source>Name</source>
         <translation>Наименование</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1760"/>
+        <location filename="../TuningPage.cpp" line="1770"/>
         <source>No auto-created filters exist.</source>
         <translation>Нет автоматически созданных фильтров.</translation>
     </message>
@@ -4386,52 +4399,52 @@ Are you sure you want to take control and activate the source %1?</source>
 Вы уверены, что хотите активировать клиент и источник %1?</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1954"/>
+        <location filename="../TuningPage.cpp" line="1964"/>
         <source>No signals were added.</source>
         <translation>Нет добавленных сигналов.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1963"/>
+        <location filename="../TuningPage.cpp" line="1973"/>
         <source>Error</source>
         <translation>Ошибка</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="1966"/>
+        <location filename="../TuningPage.cpp" line="1976"/>
         <source>Adding signals complete.</source>
         <translation>Добавление сигналов завершено.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2022"/>
+        <location filename="../TuningPage.cpp" line="2038"/>
         <source>No values restored from the filter for current signals.</source>
         <translation>Нет сигналов, восстановленных из фильтра.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2026"/>
+        <location filename="../TuningPage.cpp" line="2042"/>
         <source>%1 values were restored from the filter. Check them and apply the changes.</source>
         <translation>%1 значений было восстановлено из фильтра.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2100"/>
+        <location filename="../TuningPage.cpp" line="2116"/>
         <source>There is limits mismatch in signal &apos;%1&apos;. Operation is disabled.</source>
         <translation>Несоответствие границ сигнала %1. Невозможно выполнить действие.</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2108"/>
+        <location filename="../TuningPage.cpp" line="2124"/>
         <source>Set All Discretes To On</source>
         <translation>Установить все дискреты в &quot;1&quot;</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2139"/>
+        <location filename="../TuningPage.cpp" line="2155"/>
         <source>Set All Discretes To Off</source>
         <translation>Установить все дискреты в &quot;0&quot;</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2171"/>
+        <location filename="../TuningPage.cpp" line="2187"/>
         <source>Set All To Defaults</source>
         <translation>Установить все по умолчанию</translation>
     </message>
     <message>
-        <location filename="../TuningPage.cpp" line="2196"/>
+        <location filename="../TuningPage.cpp" line="2212"/>
         <source>Invalid default value &apos;%1&apos; in signal %2 [%3]</source>
         <translation>Недопустимое значение по умолчанию %1 в сигнале %2 [%3]</translation>
     </message>
@@ -4732,62 +4745,62 @@ Are you sure you want to take control and %1 the source %2?</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="751"/>
+        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="749"/>
         <source>TuningTcpClient::processReadTuningSignals, error received: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="773"/>
+        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="771"/>
         <source>TuningTcpClient::processReadTuningSignals, TuningSignalState error received: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="816"/>
+        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="814"/>
         <source>Error writing value &apos;%1&apos; to signal &apos;%2&apos; (%3), logic module &apos;%4&apos;: %5</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="872"/>
+        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="870"/>
         <source>TuningTcpClient::requestWriteTuningSignals, isConnected() == false.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="878"/>
+        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="876"/>
         <source>TuningTcpClient::requestWriteTuningSignals, isClearToSendRequest() == false, reconnecting.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="937"/>
+        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="935"/>
         <source>TuningTcpClient::processWriteTuningSignals, error received: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="952"/>
+        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="950"/>
         <source>TuningTcpClient::processWriteTuningSignals, TuningSignalWriteResult error received: %1, hash = %2</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="969"/>
+        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="967"/>
         <source>TuningTcpClient::requestApplyTuningSignals, isConnected() == false.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="975"/>
+        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="973"/>
         <source>TuningTcpClient::requestApplyTuningSignals, isClearToSendRequest() == false, reconnecting.</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="998"/>
+        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="996"/>
         <source>TuningTcpClient::processApplyTuningSignals, error received: %1</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="1012"/>
+        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="1010"/>
         <source>TuningTcpClient::slot_configurationArrived</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="1023"/>
+        <location filename="../../lib/Tuning/TuningTcpClient.cpp" line="1021"/>
         <source>TuningTcpClient::slot_signalsUpdated</source>
         <translation></translation>
     </message>

@@ -84,6 +84,11 @@ namespace VFrame30
 			return false;
 		}
 
+		if (writingEnabled() == false)
+		{
+			return true;	// Access is denied, this is not an error
+		}
+
 		appSignalId = appSignalId.trimmed();
 
 		bool ok = false;
@@ -146,6 +151,11 @@ namespace VFrame30
 		ok = m_tcpClient->writeTuningSignal(appSignalId, tuningValue);
 
 		return ok;
+	}
+
+	bool TuningController::writingEnabled() const
+	{
+		return true;
 	}
 
 }
