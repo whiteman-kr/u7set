@@ -1664,6 +1664,11 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 
 void TuningPage::slot_saveSignalsToNewFilter()
 {
+	if (theMainWindow->userManager()->login(this) == false)
+	{
+		return;
+	}
+
 	bool ok;
 	QString filterName = QInputDialog::getText(this, tr("Add Signals To Filter"),
 											tr("Enter the filter name:"), QLineEdit::Normal,
@@ -1715,6 +1720,11 @@ void TuningPage::slot_saveSignalsToNewFilter()
 
 void TuningPage::slot_saveSignalsToExistingFilter()
 {
+	if (theMainWindow->userManager()->login(this) == false)
+	{
+		return;
+	}
+
 	std::shared_ptr<TuningFilter> root = m_tuningFilterStorage->root();
 
 	if (root == nullptr)
@@ -1991,9 +2001,15 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 				continue;
 			}
 
-			bool exists = filter->filterSignal(hash, tv);
+			bool exists = filter->filterSignalExists(hash);
 			if (exists == true)
 			{
+				bool exists = filter->filterSignal(hash, tv);
+				if (exists == false)
+				{
+					Q_ASSERT(false);
+					return;
+				}
 
 				bool found = false;
 
