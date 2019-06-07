@@ -495,7 +495,7 @@ quint64 DataSource::generateID() const
 // -----------------------------------------------------------------------------
 
 DataSourceOnline::DataSourceOnline() :
-	m_rupFrameTimeQueue(200 /*5 * 200 * Rup::MAX_FRAME_COUNT*/)
+	m_rupFrameTimeQueue(10)
 {
 }
 
@@ -514,7 +514,9 @@ DataSourceOnline::~DataSourceOnline()
 
 bool DataSourceOnline::init()
 {
-	m_rupFrameTimeQueue.resize(lmRupFramesQuantity() * 200 * 3);			// 3 seconds queue
+	m_rupFrameTimeQueue.resize(lmRupFramesQuantity() * 200 * 5);			// 5 seconds queue
+
+	setRupFramesQueueSize(m_rupFrameTimeQueue.queueSize(QThread::currentThread()));
 
 	return true;
 }
@@ -552,6 +554,11 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 	if (frameNumber == 0)
 	{
 		m_firstFrameServerTime = rupFrameTime.serverTime;
+	}
+
+	if (frameNumber > 0)
+	{
+		DEBUG_STOP;
 	}
 
 	// copy RUP frame header
@@ -703,7 +710,7 @@ void DataSourceOnline::pushRupFrame(qint64 serverTime, const Rup::Frame& rupFram
 		// is not an error - queue is full
 	}
 
-	m_rupFrameTimeQueue.completePush(thread, &m_rupFramesQueueSize, &m_rupFramesQueueMaxSize);
+	m_rupFrameTimeQueue.completePush(thread, &m_rupFramesQueueCurSize, &m_rupFramesQueueCurMaxSize);
 }
 
 bool DataSourceOnline::takeProcessingOwnership(const QThread* processingThread)

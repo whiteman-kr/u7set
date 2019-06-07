@@ -308,8 +308,8 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_SPEED: return source.dataReceivingRate();
 				case DSC_RECEIVES_DATA: return source.dataReceives();
 				case DSC_RECEIVED_DATA_ID: return "0x" + QString("%1").arg(source.receivedDataID(), sizeof(source.receivedDataID()) * 2, 16, QChar('0')).toUpper();
-				case DSC_RUP_FRAMES_QUEUE_SIZE: return source.rupFramesQueueSize();
-				case DSC_RUP_FRAMES_QUEUE_MAX_SIZE: return source.rupFramesQueueMaxSize();
+				case DSC_RUP_FRAMES_QUEUE_SIZE: return source.rupFramesQueueCurSize();
+				case DSC_RUP_FRAMES_QUEUE_MAX_SIZE: return source.rupFramesQueueCurMaxSize();
 				case DSC_RECEIVED_FRAMES_COUNT: return source.receivedFramesCount();
 				case DSC_RECEIVED_PACKET_COUNT: return source.receivedPacketCount();
 				case DSC_DATA_PROCESSING_ENABLED: return source.dataProcessingEnabled();
@@ -317,8 +317,8 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_LAST_PACKET_SYSTEM_TIME: return QDateTime::fromMSecsSinceEpoch(source.lastPacketSystemTime());
 				case DSC_RUP_FRAME_PLANT_TIME: return QDateTime::fromMSecsSinceEpoch(source.rupFramePlantTime());
 				case DSC_RUP_FRAME_NUMERATOR: return source.rupFrameNumerator();
-				case DSC_SIGNAL_STATES_QUEUE_SIZE: return source.signalStatesQueueSize();
-				case DSC_SIGNAL_STATES_QUEUE_MAX_SIZE: return source.signalStatesQueueMaxSize();
+				case DSC_SIGNAL_STATES_QUEUE_SIZE: return source.signalStatesQueueCurSize();
+				case DSC_SIGNAL_STATES_QUEUE_MAX_SIZE: return source.signalStatesQueueCurMaxSize();
 				case DSC_ACQUIRED_SIGNALS_COUNT: return source.acquiredSignalsCount();
 
 				case DSC_ERROR_PROTOCOL_VERSION: return source.errorProtocolVersion();

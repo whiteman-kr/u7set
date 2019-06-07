@@ -202,6 +202,11 @@ void AppDataReceiverThread::receivePackets()
 			continue;
 		}
 
+		if (reverseUint16(simFrame.rupFrame.header.frameNumber) > 0)
+		{
+			DEBUG_STOP;
+		}
+
 		AppDataSourceShared dataSource = m_appDataSourcesIP.value(ip, nullptr);
 
 		if (dataSource == nullptr)

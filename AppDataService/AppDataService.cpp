@@ -478,7 +478,19 @@ void AppDataServiceWorker::createAndInitSignalStates()
 		return;
 	}
 
-	int signalCount = m_appSignals.count();
+	int signalCount = 0;
+
+	for(Signal* signal : m_appSignals)
+	{
+		TEST_PTR_CONTINUE(signal);
+
+		if (signal->isBus() == true)
+		{
+			continue;
+		}
+
+		signalCount++;
+	}
 
 	m_signalStates.setSize(signalCount);
 
@@ -486,13 +498,14 @@ void AppDataServiceWorker::createAndInitSignalStates()
 
 	for(Signal* signal : m_appSignals)
 	{
-		DynamicAppSignalState* signalState = m_signalStates[index];
+		TEST_PTR_CONTINUE(signal);
 
-		if (signalState == nullptr)
+		if (signal->isBus() == true)
 		{
-			assert(false);
 			continue;
 		}
+
+		DynamicAppSignalState* signalState = m_signalStates[index];
 
 		signalState->setSignalParams(signal, m_appSignals);
 

@@ -202,8 +202,8 @@ void DialogAppDataSourceInfo::updateData()
 	setDataItemText("Uptime", QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
 
 	setDataItemNumber("ReceivedDataID", ds.state.receiveddataid());
-	setDataItemNumber("RupFramesQueueSize", ds.state.rupframesqueuesize());
-	setDataItemNumber("RupFramesQueueMaxSize", ds.state.rupframesqueuemaxsize());
+	setDataItemNumber("RupFramesQueueCurSize", ds.state.rupframesqueuecursize());
+	setDataItemNumber("RupFramesQueueCurMaxSize", ds.state.rupframesqueuecurmaxsize());
 	setDataItemNumber("DataReceivingRate", ds.state.datareceivingrate() / 1024.0);
 	setDataItemNumber("ReceivedDataSize", ds.state.receiveddatasize());
 	setDataItemNumber("ReceivedFramesCount", ds.state.receivedframescount());
@@ -220,8 +220,8 @@ void DialogAppDataSourceInfo::updateData()
 	setDataItemText("RupFramePlantTime", tm.toString("dd/MM/yyyy HH:mm:ss.zzz"));
 
 	setDataItemNumber("RupFrameNumerator", ds.state.rupframenumerator());
-	setDataItemNumber("SignalStatesQueueSize", ds.state.signalstatesqueuesize());
-	setDataItemNumber("SignalStatesQueueMaxSize", ds.state.signalstatesqueuemaxsize());
+	setDataItemNumber("SignalStatesQueueCurSize", ds.state.signalstatesqueuecursize());
+	setDataItemNumber("SignalStatesQueueCurMaxSize", ds.state.signalstatesqueuecurmaxsize());
 	setDataItemNumber("AcquiredSignalsCount", ds.state.acquiredsignalscount());
 
 	// errors

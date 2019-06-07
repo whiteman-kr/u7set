@@ -290,8 +290,11 @@ public:
 	int rupFramesQueueSize() const { return m_rupFramesQueueSize; }
 	void setRupFramesQueueSize(int size) { m_rupFramesQueueSize = size; }
 
-	int rupFramesQueueMaxSize() const { return m_rupFramesQueueMaxSize; }
-	void setRupFramesQueueMaxSize(int size) { m_rupFramesQueueMaxSize = size; }
+	int rupFramesQueueCurSize() const { return m_rupFramesQueueCurSize; }
+	void setRupFramesQueueCurSize(int size) { m_rupFramesQueueCurSize = size; }
+
+	int rupFramesQueueCurMaxSize() const { return m_rupFramesQueueCurMaxSize; }
+	void setRupFramesQueueCurMaxSize(int size) { m_rupFramesQueueCurMaxSize = size; }
 
 	qint64 rupFramePlantTime() const { return m_rupFramePlantTime; }
 	void setRupFramePlantTime(qint64 time) { m_rupFramePlantTime = time; }
@@ -383,7 +386,8 @@ private:
 	quint64 m_receivedDataID = 0;
 
 	qint32 m_rupFramesQueueSize = 0;
-	qint32 m_rupFramesQueueMaxSize = 0;
+	qint32 m_rupFramesQueueCurSize = 0;
+	qint32 m_rupFramesQueueCurMaxSize = 0;
 
 	qint64 m_rupFramePlantTime = 0;
 	quint16 m_rupFrameNumerator = 0;
