@@ -10,31 +10,39 @@
 
 // ----------------------------------------------------------------------------------------------
 
-class SourceOption : public QObject
+class PathOption : public QObject
 {
 	Q_OBJECT
 
 public:
 
-	explicit	SourceOption(QObject *parent = 0);
-				SourceOption(const SourceOption& from, QObject *parent = 0);
-	virtual		~SourceOption();
+	explicit	PathOption(QObject *parent = nullptr);
+				PathOption(const PathOption& from, QObject *parent = nullptr);
+	virtual		~PathOption();
 
 private:
 
-	QString				m_path;
+	QString				m_signalPath;
+	QString				m_sourcePath;
+	QString				m_localIP;
 
 public:
 
 	void				clear();
 
-	QString				path() const { return m_path; }
-	void				setPath(const QString& path) { m_path = path; }
+	QString				signalPath() const { return m_signalPath; }
+	void				setSignalPath(const QString& path) { m_signalPath = path; }
+
+	QString				sourcePath() const { return m_sourcePath; }
+	void				setSourcePath(const QString& path) { m_sourcePath = path; }
+
+	QString				localIP() const { return m_localIP; }
+	void				setLocalIP(const QString& ip) { m_localIP = ip; }
 
 	void				load();
 	void				save();
 
-	SourceOption&		operator=(const SourceOption& from);
+	PathOption&			operator=(const PathOption& from);
 };
 
 // ==============================================================================================
@@ -45,20 +53,20 @@ class Options : public QObject
 
 public:
 
-	explicit	Options(QObject *parent = 0);
-				Options(const Options& from, QObject *parent = 0);
+	explicit	Options(QObject *parent = nullptr);
+				Options(const Options& from, QObject *parent = nullptr);
 	virtual		~Options();
 
 private:
 
 	QMutex				m_mutex;
 
-	SourceOption		m_source;
+	PathOption			m_path;
 
 public:
 
-	SourceOption&		source() { return m_source; }
-	void				setSource(const SourceOption& source) { m_source = source; }
+	PathOption&			path() { return m_path; }
+	void				setPath(const PathOption& path) { m_path = path; }
 
 	void				load();
 	void				save();

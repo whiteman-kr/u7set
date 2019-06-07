@@ -1052,7 +1052,7 @@ DialogInputTuningValue::DialogInputTuningValue(TuningValue value, TuningValue de
 {
 
 	m_discreteCheck = new QCheckBox();
-	connect(m_discreteCheck, &QCheckBox::toggled, this, &DialogInputTuningValue::on_m_checkBox_clicked);
+	connect(m_discreteCheck, &QCheckBox::stateChanged, this, &DialogInputTuningValue::on_m_checkBox_stateChanged);
 
 	m_analogEdit = new QLineEdit();
 
@@ -1093,6 +1093,8 @@ DialogInputTuningValue::DialogInputTuningValue(TuningValue value, TuningValue de
 	{
 		setWindowTitle(tr("Enter the value:"));
 
+		m_discreteCheck->blockSignals(true);
+
 		if (sameValue == true)
 		{
 			m_discreteCheck->setChecked(value.discreteValue() != 0);
@@ -1102,8 +1104,10 @@ DialogInputTuningValue::DialogInputTuningValue(TuningValue value, TuningValue de
 		{
 			m_discreteCheck->setTristate(true);
 			m_discreteCheck->setCheckState(Qt::PartiallyChecked);
-			m_discreteCheck->setText(tr("Unknown"));
+			m_discreteCheck->setText(tr("Different values"));
 		}
+
+		m_discreteCheck->blockSignals(false);
 
 		m_buttonDefault->setText(tr("Default: ") + m_defaultValue.toString());
 	}
@@ -1201,9 +1205,9 @@ void DialogInputTuningValue::accept()
 	QDialog::accept();
 }
 
-void DialogInputTuningValue::on_m_checkBox_clicked(bool checked)
+void DialogInputTuningValue::on_m_checkBox_stateChanged(int state)
 {
-	m_discreteCheck->setText(checked ? tr("1") : tr("0"));
+	m_discreteCheck->setText(state == Qt::Checked ? tr("1") : tr("0"));
 }
 
 void DialogInputTuningValue::on_m_buttonDefault_clicked()

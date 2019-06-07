@@ -6,7 +6,10 @@
 
 #include "Options.h"
 #include "SourceWorker.h"
+#include "SignalBase.h"
+#include "FrameBase.h"
 
+#include "../../lib/Signal.h"
 #include "../../lib/HostAddressPort.h"
 
 // ==============================================================================================
@@ -71,27 +74,37 @@ namespace PS
 		SourceWorker*		m_pWorker = nullptr;
 
 		PS::SourceInfo		m_si;
+		QVector<PS::Signal>	m_signalList;
+		FrameBase			m_frameBase;
 
 	public:
 
-		void				clear();
+		void					clear();
 
-		PS::SourceInfo&		info() { return m_si; }
+		//
 
-		bool				run();
-		bool				stop();
+		PS::SourceInfo&			info() { return m_si; }
+		QVector<PS::Signal>&	signalList()  { return m_signalList; }
+		FrameBase&				frameBase() { return m_frameBase; }
 
-		bool				isRunning();
-		int					sentFrames();
+		//
 
-		Source&				operator=(const Source& from);
+		bool					run();
+		bool					stop();
+
+		bool					isRunning();
+		int						sentFrames();
+
+		//
+
+		Source&					operator=(const Source& from);
 
 	signals:
 
 	public slots:
 
-		bool				createWorker();
-		void				deleteWorker();
+		bool					createWorker();
+		void					deleteWorker();
 
 	};
 }
@@ -104,7 +117,7 @@ class SourceBase : public QObject
 
 public:
 
-	explicit SourceBase(QObject *parent = 0);
+	explicit SourceBase(QObject *parent = nullptr);
 	virtual ~SourceBase();
 
 private:
@@ -117,7 +130,7 @@ public:
 	void					clear();
 	int						count() const;
 
-	int						readFromXml();
+	int						readFromFile(const QString& path, const SignalBase& signalBase);
 
 	int						append(const PS::Source &source);
 	void					remove(int index);
@@ -141,10 +154,6 @@ signals:
 public slots:
 
 };
-
-// ----------------------------------------------------------------------------------------------
-
-extern SourceBase theSourceBase;
 
 // ==============================================================================================
 
@@ -213,7 +222,7 @@ public:
 
 	int						sourceCount() const;
 	PS::Source*				sourceAt(int index) const;
-	void					set(const QVector<PS::Source *> list_add);
+	void					set(const QVector<PS::Source*> list_add);
 	void					clear();
 
 	QString					text(int row, int column, PS::Source *pSource) const;
