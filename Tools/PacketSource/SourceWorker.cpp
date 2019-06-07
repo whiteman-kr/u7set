@@ -90,10 +90,6 @@ void SourceWorker::process()
 				memcpy(m_simFrame.rupFrame.data, pFrameData->data(), Rup::FRAME_DATA_SIZE);
 			}
 
-			// crc64 RupFrame
-			//
-			m_simFrame.rupFrame.calcCRC64();
-
 			// version and IP of simFrame
 			//
 			m_simFrame.simVersion = reverseUint16(PS::SIM_FRAME_VERSION);
@@ -102,6 +98,10 @@ void SourceWorker::process()
 			// revers header
 			//
 			m_simFrame.rupFrame.header.reverseBytes();
+
+			// crc64 RupFrame
+			//
+			m_simFrame.rupFrame.calcCRC64();
 
 			// send udp
 			//
