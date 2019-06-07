@@ -31,6 +31,8 @@ public:
 
 	void setClient(TcpAppDataClient* clientSocket) { m_clientSocket = clientSocket; }
 
+	const AppDataSource* getDataSource(int row) const;
+
 public slots:
 	void invalidateData();
 	void reloadList();
