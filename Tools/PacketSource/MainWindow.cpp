@@ -5,9 +5,10 @@
 #include <QDebug>
 #include <QClipboard>
 #include <QCloseEvent>
+
 #include "../../lib/Ui/DialogAbout.h"
 
-#include "SourceOptionDialog.h"
+#include "PathOptionDialog.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -31,7 +32,7 @@ bool MainWindow::createInterface()
 {
 	setWindowIcon(QIcon(":/icons/PacketSource.png"));
 	setWindowTitle(tr("Packet Source"));
-	resize(550, 750);
+	resize(1000, 700);
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());
 
 	createActions();
@@ -41,6 +42,7 @@ bool MainWindow::createInterface()
 	createContextMenu();
 	createHeaderContexMenu();
 	createStatusBar();
+	loadSignals();
 	loadSources();
 
 	if (Rup::VERSION != PS::SUPPORT_VERSION)
@@ -151,6 +153,11 @@ void MainWindow::createViews()
 	// View of sources
 	//
 	m_pSourceView = new QTableView(this);
+	if (m_pSourceView == nullptr)
+	{
+		return;
+	}
+
 	m_pSourceView->setModel(&m_sourceTable);
 	m_pSourceView->verticalHeader()->setDefaultSectionSize(22);
 
@@ -161,14 +168,65 @@ void MainWindow::createViews()
 
 	m_pSourceView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
+	connect(m_pSourceView, &QTableView::clicked , this, &MainWindow::onSourceListClicked);
+
+	// View of Signals
+	//
+	m_pSignalView = new QTableView(this);
+	if (m_pSignalView == nullptr)
+	{
+		return;
+	}
+
+	m_pSignalView->setModel(&m_signalTable);
+	m_pSignalView->verticalHeader()->setDefaultSectionSize(22);
+
+	for(int column = 0; column < SIGNAL_LIST_COLUMN_COUNT; column++)
+	{
+		m_pSignalView->setColumnWidth(column, SignalListColumnWidth[column]);
+	}
+
+	m_pSignalView->setSelectionBehavior(QAbstractItemView::SelectRows);
+
+	connect(m_pSignalView, &QTableView::doubleClicked , this, &MainWindow::onSignalListDoubleClicked);
+
+
+	// View of Frame Data
+	//
+	m_pFrameDataView = new QTableView(this);
+	if (m_pFrameDataView == nullptr)
+	{
+		return;
+	}
+
+	m_pFrameDataView->setModel(&m_frameDataTable);
+	m_pFrameDataView->verticalHeader()->setDefaultSectionSize(22);
+
+	for(int column = 0; column < FRAME_LIST_COLUMN_COUNT; column++)
+	{
+		m_pFrameDataView->setColumnWidth(column, FrameListColumnWidth[column]);
+	}
+
+	m_pFrameDataView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_pFrameDataView->setMaximumWidth(180);
+
+	connect(m_pFrameDataView, &QTableView::doubleClicked , this, &MainWindow::onFrameDataListDoubleClicked);
+
 	// Layouts
 	//
+
+	QVBoxLayout *ssLayout = new QVBoxLayout;
+
+	ssLayout->addWidget(m_pSourceView);
+	ssLayout->addWidget(m_pSignalView);
+
+	QHBoxLayout *mainLayout = new QHBoxLayout;
+
+	mainLayout->addLayout(ssLayout);
+	mainLayout->addWidget(m_pFrameDataView);
+
+
 	QWidget* pWidget = new QWidget(this);
-
-	QVBoxLayout *mainLayout = new QVBoxLayout;
-
-	mainLayout->addWidget(m_pSourceView);
-
 	pWidget->setLayout(mainLayout);
 
 	setCentralWidget(pWidget);
@@ -186,7 +244,7 @@ void MainWindow::createContextMenu()
 	m_sourceContextMenu->addAction(m_sourceStopAction);
 
 	m_pSourceView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pSourceView, &QTableView::customContextMenuRequested, this, &MainWindow::onContextSourceMenu);
+	connect(m_pSourceView, &QTableView::customContextMenuRequested, this, &MainWindow::onSourceContextMenu);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -196,26 +254,50 @@ void MainWindow::createHeaderContexMenu()
 	// init header context menu for View of sources
 	//
 	m_pSourceView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pSourceView->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &MainWindow::onHeaderContextMenu);
+	connect(m_pSourceView->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &MainWindow::onSourceHeaderContextMenu);
 
-	m_headerContextMenu = new QMenu(m_pSourceView);
+	m_sourceHeaderContextMenu = new QMenu(m_pSourceView);
 
 	for(int column = 0; column < SOURCE_LIST_COLUMN_COUNT; column++)
 	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(SourceListColumn[column]);
-		if (m_pColumnAction[column] != nullptr)
+		m_pSourceColumnAction[column] = m_sourceHeaderContextMenu->addAction(SourceListColumn[column]);
+		if (m_pSourceColumnAction[column] != nullptr)
 		{
-			m_pColumnAction[column]->setCheckable(true);
-			m_pColumnAction[column]->setChecked(true);
+			m_pSourceColumnAction[column]->setCheckable(true);
+			m_pSourceColumnAction[column]->setChecked(true);
 
-			connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &MainWindow::onColumnAction);
+			connect(m_sourceHeaderContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &MainWindow::onSourceColumnAction);
 		}
 	}
 
-	hideColumn(SOURCE_LIST_COLUMN_MODULE_TYPE, true);
-	hideColumn(SOURCE_LIST_COLUMN_SUB_SYSTEM, true);
-	hideColumn(SOURCE_LIST_COLUMN_FRAME_COUNT, true);
-	hideColumn(SOURCE_LIST_COLUMN_SERVER_IP, true);
+	hideSourceColumn(SOURCE_LIST_COLUMN_MODULE_TYPE, true);
+	hideSourceColumn(SOURCE_LIST_COLUMN_SUB_SYSTEM, true);
+	hideSourceColumn(SOURCE_LIST_COLUMN_FRAME_COUNT, true);
+	hideSourceColumn(SOURCE_LIST_COLUMN_SERVER_IP, true);
+
+	// init header context menu for View of signals
+	//
+	m_pSignalView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_pSignalView->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &MainWindow::onSignalHeaderContextMenu);
+
+	m_signalHeaderContextMenu = new QMenu(m_pSignalView);
+
+	for(int column = 0; column < SIGNAL_LIST_COLUMN_COUNT; column++)
+	{
+		m_pSignalColumnAction[column] = m_signalHeaderContextMenu->addAction(SignalListColumn[column]);
+		if (m_pSignalColumnAction[column] != nullptr)
+		{
+			m_pSignalColumnAction[column]->setCheckable(true);
+			m_pSignalColumnAction[column]->setChecked(true);
+
+			connect(m_signalHeaderContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &MainWindow::onSignalColumnAction);
+		}
+	}
+
+	hideSignalColumn(SIGNAL_LIST_COLUMN_APP_ID, true);
+	hideSignalColumn(SIGNAL_LIST_COLUMN_FORMAT, true);
+	hideSignalColumn(SIGNAL_LIST_COLUMN_STATE_OFFSET, true);
+	hideSignalColumn(SIGNAL_LIST_COLUMN_STATE_BIT, true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -240,14 +322,27 @@ void MainWindow::createStatusBar()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::loadSignals()
+{
+	int signalCount = m_signalBase.readFromFile(theOptions.path().signalPath());
+	if (signalCount == 0)
+	{
+		QMessageBox::information(this, windowTitle(), tr("No single uploaded!"));
+		return;
+
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::loadSources()
 {
 	QVector<PS::Source*> ptrSourceList;
 
-	int sourceCount = theSourceBase.readFromXml();
+	int sourceCount = m_sourceBase.readFromFile(theOptions.path().sourcePath(), m_signalBase);
 	for(int i = 0; i < sourceCount; i++)
 	{
-		ptrSourceList.append(theSourceBase.sourcePtr(i));
+		ptrSourceList.append(m_sourceBase.sourcePtr(i));
 	}
 
 	m_sourceTable.clear();
@@ -258,7 +353,7 @@ void MainWindow::loadSources()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::hideColumn(int column, bool hide)
+void MainWindow::hideSourceColumn(int column, bool hide)
 {
 	if (column < 0 || column >= SOURCE_LIST_COLUMN_COUNT)
 	{
@@ -268,12 +363,33 @@ void MainWindow::hideColumn(int column, bool hide)
 	if (hide == true)
 	{
 		m_pSourceView->hideColumn(column);
-		m_pColumnAction[column]->setChecked(false);
+		m_pSourceColumnAction[column]->setChecked(false);
 	}
 	else
 	{
 		m_pSourceView->showColumn(column);
-		m_pColumnAction[column]->setChecked(true);
+		m_pSourceColumnAction[column]->setChecked(true);
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::hideSignalColumn(int column, bool hide)
+{
+	if (column < 0 || column >= SIGNAL_LIST_COLUMN_COUNT)
+	{
+		return;
+	}
+
+	if (hide == true)
+	{
+		m_pSignalView->hideColumn(column);
+		m_pSignalColumnAction[column]->setChecked(false);
+	}
+	else
+	{
+		m_pSignalView->showColumn(column);
+		m_pSignalColumnAction[column]->setChecked(true);
 	}
 }
 
@@ -306,7 +422,7 @@ void MainWindow::stopUpdateSourceListTimer()
 
 void MainWindow::startSource()
 {
-	if (theSourceBase.count() == 0)
+	if (m_sourceBase.count() == 0)
 	{
 		return;
 	}
@@ -323,7 +439,7 @@ void MainWindow::startSource()
 
 	for( int i = 0; i < count; i++)
 	{
-		theSourceBase.runSourece(m_pSourceView->selectionModel()->selectedRows().at(i).row());
+		m_sourceBase.runSourece(m_pSourceView->selectionModel()->selectedRows().at(i).row());
 	}
 }
 
@@ -343,7 +459,7 @@ void MainWindow::stopSource()
 
 	for( int i = 0; i < count; i++)
 	{
-		theSourceBase.stopSourece(m_pSourceView->selectionModel()->selectedRows().at(i).row());
+		m_sourceBase.stopSourece(m_pSourceView->selectionModel()->selectedRows().at(i).row());
 	}
 }
 
@@ -358,39 +474,95 @@ void MainWindow::selectAllSource()
 
 void MainWindow::optionSource()
 {
-	SourceOptionDialog dialog(this);
+	PathOptionDialog dialog(this);
 	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}
 
-	theSourceBase.stopAllSoureces();
+	m_sourceBase.stopAllSoureces();
 
 	loadSources();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::onContextSourceMenu(QPoint)
+void MainWindow::updateSignalList(PS::Source* pSource)
+{
+	if (pSource == nullptr)
+	{
+		return;
+	}
+
+	QVector<PS::Signal*> signalList;
+
+	m_signalTable.clear();
+
+	int count = pSource->signalList().count();
+	for(int i = 0; i < count; i++)
+	{
+		PS::Signal* pSignal = &pSource->signalList()[i];
+		if ( pSignal == nullptr)
+		{
+			continue;
+		}
+
+		signalList.append(pSignal);
+	}
+
+	m_signalTable.set(signalList);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::updateFrameDataList(PS::Source* pSource)
+{
+	if (pSource == nullptr)
+	{
+		return;
+	}
+
+	QVector<PS::FrameData*> frameDataList;
+
+	m_frameDataTable.clear();
+
+	int count = pSource->frameBase().count();
+	for(int i = 0; i < count; i++)
+	{
+		PS::FrameData* pFrameData = pSource->frameBase().frameDataPtr(i);
+		if (pFrameData == nullptr)
+		{
+			continue;
+		}
+
+		frameDataList.append(pFrameData);
+	}
+
+	m_frameDataTable.set(frameDataList);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::onSourceContextMenu(QPoint)
 {
 	m_sourceContextMenu->exec(QCursor::pos());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::onHeaderContextMenu(QPoint)
+void MainWindow::onSourceHeaderContextMenu(QPoint)
 {
-	if (m_headerContextMenu == nullptr)
+	if (m_sourceHeaderContextMenu == nullptr)
 	{
 		return;
 	}
 
-	m_headerContextMenu->exec(QCursor::pos());
+	m_sourceHeaderContextMenu->exec(QCursor::pos());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::onColumnAction(QAction* action)
+void MainWindow::onSourceColumnAction(QAction* action)
 {
 	if (action == nullptr)
 	{
@@ -399,9 +571,40 @@ void MainWindow::onColumnAction(QAction* action)
 
 	for(int column = 0; column < SOURCE_LIST_COLUMN_COUNT; column++)
 	{
-		if (m_pColumnAction[column] == action)
+		if (m_pSourceColumnAction[column] == action)
 		{
-			hideColumn(column, !action->isChecked());
+			hideSourceColumn(column, !action->isChecked());
+			break;
+		}
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::onSignalHeaderContextMenu(QPoint)
+{
+	if (m_signalHeaderContextMenu == nullptr)
+	{
+		return;
+	}
+
+	m_signalHeaderContextMenu->exec(QCursor::pos());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::onSignalColumnAction(QAction* action)
+{
+	if (action == nullptr)
+	{
+		return;
+	}
+
+	for(int column = 0; column < SIGNAL_LIST_COLUMN_COUNT; column++)
+	{
+		if (m_pSignalColumnAction[column] == action)
+		{
+			hideSignalColumn(column, !action->isChecked());
 			break;
 		}
 	}
@@ -424,11 +627,87 @@ void MainWindow::updateSourceState()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::onSourceListClicked(const QModelIndex& index)
+{
+	int sourceIndex = index.row();
+	if (sourceIndex < 0 || sourceIndex >= m_sourceBase.count())
+	{
+		return;
+	}
+
+	PS::Source*	pSource = m_sourceBase.sourcePtr(sourceIndex);
+	if (pSource == nullptr)
+	{
+		return;
+	}
+
+	updateSignalList(pSource);
+	updateFrameDataList(pSource);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::onSignalListDoubleClicked(const QModelIndex& index)
+{
+	int signalIndex = index.row();
+	if (signalIndex < 0 || signalIndex >= m_signalTable.signalCount())
+	{
+		return;
+	}
+
+	PS::Signal* pSignal = m_signalTable.signalPtr(signalIndex);
+	if (pSignal == nullptr)
+	{
+		return;
+	}
+
+	if (pSignal->regValueAddr().offset() == BAD_ADDRESS || pSignal->regValueAddr().bit() == BAD_ADDRESS)
+	{
+		return;
+	}
+
+	if (pSignal->valueData() == nullptr)
+	{
+		return;
+	}
+
+	SignalStateDialog dialog(pSignal);
+	if (dialog.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	pSignal->setState(dialog.state());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::onFrameDataListDoubleClicked(const QModelIndex& index)
+{
+	int byteIndex = index.row();
+	if (byteIndex < 0 || byteIndex >= m_frameDataTable.dataSize())
+	{
+		return;
+	}
+
+	quint8 byte = m_frameDataTable.byte(byteIndex);
+
+	FrameDataStateDialog dialog(byte);
+	if (dialog.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	m_frameDataTable.setByte(byteIndex, dialog.byte());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::closeEvent(QCloseEvent* e)
 {
 	stopUpdateSourceListTimer();
 
-	theSourceBase.stopAllSoureces();
+	m_sourceBase.stopAllSoureces();
 
 	QMainWindow::closeEvent(e);
 }

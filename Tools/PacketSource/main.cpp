@@ -2,6 +2,7 @@
 
 #include "MainWindow.h"
 #include "Options.h"
+#include "../../lib/ProtoSerialization.h"
 
 #if __has_include("../../gitlabci_version.h")
 #	include "../../gitlabci_version.h"
@@ -30,6 +31,8 @@ int main(int argc, char *argv[])
 	int result = a.exec();
 
 	theOptions.unload();
+
+	google::protobuf::ShutdownProtobufLibrary();
 
 	return result;
 }

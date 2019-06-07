@@ -13,7 +13,7 @@ class SourceWorker : public QObject
 
 public:
 
-	explicit SourceWorker(QObject* pSource = 0);
+	explicit SourceWorker(QObject* pSource = nullptr);
 	virtual ~SourceWorker();
 
 private:

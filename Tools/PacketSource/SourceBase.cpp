@@ -6,6 +6,7 @@
 
 #include "../../lib/XmlHelper.h"
 #include "../../Builder/CfgFiles.h"
+#include "../../lib/DataSource.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -69,6 +70,13 @@ PS::Source::~Source()
 
 void PS::Source::clear()
 {
+	m_sourceMutex.lock();
+
+		m_si.clear();
+		m_signalList.clear();
+		m_frameBase.clear();
+
+	m_sourceMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -131,6 +139,8 @@ PS::Source& PS::Source::operator=(const PS::Source& from)
 		m_pWorker = from.m_pWorker;
 
 		m_si = from.m_si;
+		m_signalList = from.m_signalList;
+		m_frameBase = from.m_frameBase;
 
 	m_sourceMutex.unlock();
 
@@ -200,10 +210,6 @@ void PS::Source::deleteWorker()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SourceBase theSourceBase;
-
-// -------------------------------------------------------------------------------------------------------------------
-
 SourceBase::SourceBase(QObject *parent) :
 	QObject(parent)
 {
@@ -244,13 +250,13 @@ int SourceBase::count() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SourceBase::readFromXml()
+int SourceBase::readFromFile(const QString& path, const SignalBase& signalBase)
 {
 	clear();
 
 	QString msgTitle = tr("Loading sources");
 
-	if (theOptions.source().path().isEmpty() == true)
+	if (path.isEmpty() == true)
 	{
 		QMessageBox::information(nullptr, msgTitle, tr("Please, input path to sources directory!"));
 		return 0;
@@ -259,7 +265,7 @@ int SourceBase::readFromXml()
 	// read Server IP and Server Port
 	//
 
-	QString fileCfg = theOptions.source().path() + "/" + Builder::FILE_CONFIGURATION_XML;
+	QString fileCfg = path + "/" + Builder::FILE_CONFIGURATION_XML;
 
 	QFile fileCfgXml(fileCfg);
 	if (fileCfgXml.exists() == false)
@@ -291,7 +297,7 @@ int SourceBase::readFromXml()
 	// read Data Sources
 	//
 
-	QString fileSource = theOptions.source().path() + "/" + Builder::FILE_APP_DATA_SOURCES_XML;
+	QString fileSource = path + "/" + Builder::FILE_APP_DATA_SOURCES_XML;
 
 	QFile fileSourceXml(fileSource);
 	if (fileSourceXml.exists() == false)
@@ -320,8 +326,10 @@ int SourceBase::readFromXml()
 			continue;
 		}
 
-		if (xmlSource.name() == "DataSource")
+		if (xmlSource.name() == DataSource::ELEMENT_DATA_SOURCE)
 		{
+			// Source Info
+			//
 			PS::SourceInfo si;
 
 			QString ip;
@@ -339,12 +347,77 @@ int SourceBase::readFromXml()
 
 			si.index = indexSource++;
 
-			si.dataID = dataID.toInt(nullptr, 16);
+			si.dataID = dataID.toUInt(nullptr, 16);
 
 			si.lmAddress.setAddressPort(ip, port);
 			si.serverAddress.setAddressPort(serverAddress.addressStr(), serverAddress.port());
 
-			append(si);
+			//
+			//
+			PS::Source source;
+			source.info() = si;
+
+			//
+			//
+			source.frameBase().setFrameCount(si.frameCount);
+
+			// Source Signals
+			//
+			if (xmlSource.readNextStartElement() == false)
+			{
+				continue;
+			}
+
+			if (xmlSource.name() == DataSource::ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS)
+			{
+				int signalCount = 0;
+				xmlSource.readIntAttribute(DataSource::PROP_COUNT , &signalCount);
+
+				QString strAssociatedSignalIDs;
+				xmlSource.readStringElement(DataSource::ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS, &strAssociatedSignalIDs);
+				QStringList associatedSignalList = strAssociatedSignalIDs.split(",", QString::SkipEmptyParts);
+
+				if (associatedSignalList.count() != signalCount)
+				{
+					assert(0);
+					continue;
+				}
+
+				//
+
+				for (int i = 0; i < signalCount; i++)
+				{
+					PS::Signal signal;
+
+					int signalIndex = signalBase.findIndex(associatedSignalList[i]);
+					if (signalIndex == -1)
+					{
+						signal.setAppSignalID(associatedSignalList[i]);
+					}
+					else
+					{
+						signal = signalBase.signal(signalIndex);
+						signal.calcOffset();
+
+						int frameIndex = signal.frameIndex();
+						if (frameIndex >= 0 && frameIndex < source.info().frameCount)
+						{
+							PS::FrameData* pFrameData = source.frameBase().frameDataPtr(frameIndex);
+							if (pFrameData != nullptr)
+							{
+								if (signal.frameOffset() >= 0 && signal.frameOffset() < Rup::FRAME_DATA_SIZE)
+								{
+									signal.setValueData(&pFrameData->data()[signal.frameOffset()]);
+								}
+							}
+						}
+					}
+
+					source.signalList().append(signal);
+				}
+			}
+
+			append(source);
 		}
 	}
 

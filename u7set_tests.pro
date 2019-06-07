@@ -4,7 +4,8 @@ CONFIG += ordered
 
 win32:SUBDIRS += Protobuf
 SUBDIRS += ./Test/u7databaseTests \
-    Test/TestAppDataService
+	Test/TestAppDataService \
+	Test/UalTester
 
 
 
