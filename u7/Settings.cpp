@@ -1,5 +1,6 @@
 #include "../u7/Settings.h"
 #include "../Tools/qtkeychain-0.8/keychain.h"
+#include "../lib/PropertyEditor.h"
 
 Settings theSettings;
 
@@ -129,8 +130,6 @@ void Settings::writeUserScope() const
     s.setValue("TextEditorProperties/geometry", m_DialogTextEditorWindowGeometry);
 
 	s.setValue("PropertyEditor/fontScaleFactor", m_propertyEditorFontScaleFactor);
-	s.setValue("PropertyEditor/multiLinePos", m_multiLinePropertyEditorWindowPos);
-	s.setValue("PropertyEditor/multiLineGeometry", m_multiLinePropertyEditorGeometry);
 	s.setValue("PropertyEditor/scriptHelpPos", m_scriptHelpWindowPos);
 	s.setValue("PropertyEditor/scriptHelpGeometry", m_scriptHelpWindowGeometry);
 
@@ -176,6 +175,8 @@ void Settings::writeUserScope() const
 	s.setValue("BuildTabPage/m_buildWarningLevel", m_buildWarningLevel);
 	s.setValue("BuildTabPage/m_buildSerachCompleter", m_buildSerachCompleter);
 
+	thePropertyEditorSettings.store(s);
+
 	return;
 }
 void Settings::loadUserScope()
@@ -211,9 +212,6 @@ void Settings::loadUserScope()
 	{
 		m_propertyEditorFontScaleFactor = 1.0;
 	}
-
-	m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePos", QPoint(-1, -1)).toPoint();
-	m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLineGeometry").toByteArray();
 
 	m_scriptHelpWindowPos = s.value("PropertyEditor/scriptHelpPos", QPoint(-1, -1)).toPoint();
 	m_scriptHelpWindowGeometry = s.value("PropertyEditor/scriptHelpGeometry").toByteArray();
@@ -289,6 +287,8 @@ void Settings::loadUserScope()
 
 	m_buildWarningLevel = s.value("BuildTabPage/m_buildWarningLevel").toBool();
 	m_buildSerachCompleter = s.value("BuildTabPage/m_buildSerachCompleter").toStringList();
+
+	thePropertyEditorSettings.restore(s);
 
     return;
 }

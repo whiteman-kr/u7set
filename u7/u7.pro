@@ -91,7 +91,6 @@ SOURCES +=\
     EquipmentVcsDialog.cpp \
     ../lib/DataSource.cpp \
     ../lib/SocketIO.cpp \
-    ../lib/PropertyEditorOld.cpp \
     ../lib/PropertyEditor.cpp \
     ../lib/Types.cpp \
     ../lib/PropertyEditorDialog.cpp \
@@ -230,7 +229,6 @@ HEADERS  += \
     ../lib/DataSource.h \
     ../lib/SocketIO.h \
     ../lib/PropertyObject.h \
-    ../lib/PropertyEditorOld.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/DebugInstCounter.h \

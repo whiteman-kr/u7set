@@ -1,5 +1,6 @@
 #include "Settings.h"
 #include "../lib/SocketIO.h"
+#include "../lib/PropertyEditor.h"
 
 
 //
@@ -149,20 +150,18 @@ void Settings::StoreUser()
 	s.setValue("TuningWorkspace/Splitter/state", m_tuningWorkspaceSplitterState);
 	s.setValue("SchemasWorkspace/Splitter/state", m_schemasWorkspaceSplitterState);
 
-	s.setValue("PropertyEditor/multiLinePos", m_multiLinePropertyEditorWindowPos);
-	s.setValue("PropertyEditor/multiLineGeometry", m_multiLinePropertyEditorGeometry);
-
 	s.setValue("PresetProperties/splitterState", m_presetPropertiesSplitterState);
 	s.setValue("PresetProperties/pos", m_presetPropertiesWindowPos);
 	s.setValue("PresetProperties/geometry", m_presetPropertiesWindowGeometry);
 
+
 	// Preset editor
 
-    s.setValue("TuningFiltersEditor/pos", m_presetEditorPos);
-    s.setValue("TuningFiltersEditor/geometry", m_presetEditorGeometry);
+	s.setValue("DialogFiltersEditor/pos", m_dialogFiltersEditorPos);
+	s.setValue("DialogFiltersEditor/geometry", m_dialogFiltersEditorGeometry);
 
-	s.setValue("TuningFiltersEditor/MainSplitterPosition", m_tuningFiltersSplitterPosition);
-	s.setValue("TuningFiltersEditor/PropertyEditorSplitterPos", m_tuningFiltersPropertyEditorSplitterPos);
+	s.setValue("DialogFiltersEditor/splitterPosition", m_dialogFiltersEditorSplitterPosition);
+	s.setValue("DialogFiltersEditor/propertyEditorSplitterPosition", m_dialogFiltersEditorPropertyEditorSplitterPosition);
 
 	//	SwitchPresetsPage options
 
@@ -176,6 +175,8 @@ void Settings::StoreUser()
 	//
 
 	s.setValue("MainWindow/language", m_language);
+
+	thePropertyEditorSettings.store(s);
 
 }
 
@@ -192,9 +193,6 @@ void Settings::RestoreUser()
 	m_tuningWorkspaceSplitterState = s.value("TuningWorkspace/Splitter/state").toByteArray();
 	m_schemasWorkspaceSplitterState = s.value("SchemasWorkspace/Splitter/state").toByteArray();
 
-	m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePos", QPoint(-1, -1)).toPoint();
-	m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLineGeometry").toByteArray();
-
 	m_presetPropertiesSplitterState = s.value("PresetProperties/splitterState").toInt();
 	if (m_presetPropertiesSplitterState < 100)
 		m_presetPropertiesSplitterState = 100;
@@ -203,11 +201,11 @@ void Settings::RestoreUser()
 
 	// Preset Editor
 
-    m_presetEditorPos = s.value("TuningFiltersEditor/pos", QPoint(-1, -1)).toPoint();
-    m_presetEditorGeometry = s.value("TuningFiltersEditor/geometry").toByteArray();
+	m_dialogFiltersEditorPos = s.value("DialogFiltersEditor/pos", QPoint(-1, -1)).toPoint();
+	m_dialogFiltersEditorGeometry = s.value("DialogFiltersEditor/geometry").toByteArray();
 
-	m_tuningFiltersSplitterPosition = s.value("TuningFiltersEditor/MainSplitterPosition").toByteArray();
-	m_tuningFiltersPropertyEditorSplitterPos = s.value("TuningFiltersEditor/PropertyEditorSplitterPos").toInt();
+	m_dialogFiltersEditorSplitterPosition = s.value("DialogFiltersEditor/splitterPosition").toByteArray();
+	m_dialogFiltersEditorPropertyEditorSplitterPosition = s.value("DialogFiltersEditor/propertyEditorSplitterPosition").toInt();
 
 	//	SwitchPresetsPage options
 
@@ -232,6 +230,8 @@ void Settings::RestoreUser()
 	//
 
 	m_language = s.value("MainWindow/language", m_language).toString();
+
+	thePropertyEditorSettings.restore(s);
 }
 
 QStringList Settings::instanceHistory()

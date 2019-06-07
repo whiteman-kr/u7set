@@ -121,17 +121,14 @@ public:
     QPoint m_DialogTextEditorWindowPos;
     QByteArray m_DialogTextEditorWindowGeometry;
 
-	// Property Editor Options
+	// Ide Property Editor Options
 	//
 	double m_propertyEditorFontScaleFactor = 1.0;
-
-	QPoint m_multiLinePropertyEditorWindowPos;
-	QByteArray m_multiLinePropertyEditorGeometry;
 
 	QPoint m_scriptHelpWindowPos;
 	QByteArray m_scriptHelpWindowGeometry;
 
-    // Tuning Filters editor Options
+	// Tuning Filters editor Options
     //
 	QByteArray m_tuningFiltersSplitterPosition;
     int m_tuningFiltersPropertyEditorSplitterPos = -1;

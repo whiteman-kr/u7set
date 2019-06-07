@@ -690,11 +690,11 @@ void TuningTcpClient::requestReadTuningSignals()
 		return;
 	}
 
-	int signalCount = static_cast<int>(m_signalHashes.size());
+	int totalSignalCount = static_cast<int>(m_signalHashes.size());
 
 	// If no signals in the database, start the new request loop
 	//
-	if (signalCount == 0)
+	if (totalSignalCount == 0)
 	{
 		resetToGetTuningSourcesState();
 		return;
@@ -704,16 +704,16 @@ void TuningTcpClient::requestReadTuningSignals()
 	//
 	m_readTuningSignalCount = TDS_TUNING_MAX_READ_STATES;
 
-	if (m_readTuningSignalIndex >= signalCount - 1)
+	if (m_readTuningSignalIndex >= totalSignalCount)
 	{
 		// Possibly, the database was updated and last requested index is larger than current database size
 		//
 		m_readTuningSignalIndex = 0;
 	}
 
-	if (m_readTuningSignalIndex + m_readTuningSignalCount >= signalCount)
+	if (m_readTuningSignalIndex + m_readTuningSignalCount >= totalSignalCount)
 	{
-		m_readTuningSignalCount = signalCount - m_readTuningSignalIndex;
+		m_readTuningSignalCount = totalSignalCount - m_readTuningSignalIndex;
 	}
 
 	// Create the request

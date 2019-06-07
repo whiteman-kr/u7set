@@ -30,6 +30,9 @@ namespace VFrame30
 
 		Q_INVOKABLE bool writeValue(QString appSignalId, QVariant value);
 
+	protected:
+		virtual bool writingEnabled() const;
+
 	private:
 		ITuningSignalManager* m_signalManager = nullptr;
 		ITuningTcpClient* m_tcpClient = nullptr;

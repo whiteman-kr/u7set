@@ -423,9 +423,11 @@ bool MeasureThread::prepareCalibrator(CalibratorManager* pCalibratorManager, int
 
 	bool result =  pCalibratorManager->setUnit(calibratorMode, calibratorUnit);;
 
-	if (pCalibratorManager->calibrator()->type() == CALIBRATOR_TYPE_TRXII)
+	switch (pCalibratorManager->calibrator()->type())
 	{
-		QThread::msleep(1000);
+		case CALIBRATOR_TYPE_TRXII:		QThread::msleep(1000);	break;
+		case CALIBRATOR_TYPE_CALYS75:	QThread::msleep(500);	break;
+		default: assert(0); break;
 	}
 
 	return result;

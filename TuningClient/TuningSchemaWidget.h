@@ -6,6 +6,17 @@
 #include "TuningSchemaView.h"
 #include "TuningSchemaManager.h"
 
+class TuningClientTuningController : public VFrame30::TuningController
+{
+	Q_OBJECT
+
+public:
+	TuningClientTuningController(ITuningSignalManager* signalManager, ITuningTcpClient* tcpClient, QObject* parent = nullptr);
+
+protected:
+	virtual bool writingEnabled() const override;
+};
+
 class TuningSchemaWidget : public VFrame30::ClientSchemaWidget
 {
 	Q_OBJECT
@@ -14,7 +25,7 @@ class TuningSchemaWidget : public VFrame30::ClientSchemaWidget
 public:
 
 	TuningSchemaWidget(TuningSignalManager* tuningSignalManager,
-					   VFrame30::TuningController* tuningController,
+					   TuningClientTuningController* tuningController,
 					   std::shared_ptr<VFrame30::Schema> schema,
 					   TuningSchemaManager* schemaManager);
 	~TuningSchemaWidget();
