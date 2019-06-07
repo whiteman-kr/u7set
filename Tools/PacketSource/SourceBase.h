@@ -50,6 +50,8 @@ namespace PS
 
 		HostAddressPort		lmAddress;
 		HostAddressPort		serverAddress;
+
+		int					signalCount = 0;
 	};
 
 	//
@@ -167,6 +169,7 @@ const char* const			SourceListColumn[] =
 							QT_TRANSLATE_NOOP("SourceList.h", "IP (LM)"),
 							QT_TRANSLATE_NOOP("SourceList.h", "IP (AppDataSrv)"),
 							QT_TRANSLATE_NOOP("SourceList.h", "State"),
+							QT_TRANSLATE_NOOP("SourceList.h", "Signal count"),
 };
 
 const int					SOURCE_LIST_COLUMN_COUNT			= sizeof(SourceListColumn)/sizeof(SourceListColumn[0]);
@@ -178,7 +181,8 @@ const int					SOURCE_LIST_COLUMN_CAPTION			= 0,
 							SOURCE_LIST_COLUMN_FRAME_COUNT		= 4,
 							SOURCE_LIST_COLUMN_LM_IP			= 5,
 							SOURCE_LIST_COLUMN_SERVER_IP		= 6,
-							SOURCE_LIST_COLUMN_STATE			= 7;
+							SOURCE_LIST_COLUMN_STATE			= 7,
+							SOURCE_LIST_COLUMN_SIGNAL_COUNT		= 8;
 
 const int					SourceListColumnWidth[SOURCE_LIST_COLUMN_COUNT] =
 {
@@ -190,6 +194,7 @@ const int					SourceListColumnWidth[SOURCE_LIST_COLUMN_COUNT] =
 							120, // SOURCE_LIST_COLUMN_LM_IP
 							120, // SOURCE_LIST_COLUMN_SERVER_IP
 							100, // SOURCE_LIST_COLUMN_STATE
+							100, // SOURCE_LIST_COLUMN_SIGNAL_COUNT
 };
 
 // ==============================================================================================

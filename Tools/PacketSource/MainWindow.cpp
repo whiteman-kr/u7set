@@ -274,6 +274,7 @@ void MainWindow::createHeaderContexMenu()
 	hideSourceColumn(SOURCE_LIST_COLUMN_SUB_SYSTEM, true);
 	hideSourceColumn(SOURCE_LIST_COLUMN_FRAME_COUNT, true);
 	hideSourceColumn(SOURCE_LIST_COLUMN_SERVER_IP, true);
+	hideSourceColumn(SOURCE_LIST_COLUMN_SIGNAL_COUNT, true);
 
 	// init header context menu for View of signals
 	//
@@ -329,8 +330,9 @@ void MainWindow::loadSignals()
 	{
 		QMessageBox::information(this, windowTitle(), tr("No single uploaded!"));
 		return;
-
 	}
+
+	qDebug() << "Loaded signals:" << signalCount;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -344,6 +346,8 @@ void MainWindow::loadSources()
 	{
 		ptrSourceList.append(m_sourceBase.sourcePtr(i));
 	}
+
+	qDebug() << "Loaded sources:" << sourceCount;
 
 	m_sourceTable.clear();
 	m_sourceTable.set(ptrSourceList);

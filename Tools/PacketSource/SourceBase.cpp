@@ -370,14 +370,15 @@ int SourceBase::readFromFile(const QString& path, const SignalBase& signalBase)
 
 			if (xmlSource.name() == DataSource::ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS)
 			{
-				int signalCount = 0;
-				xmlSource.readIntAttribute(DataSource::PROP_COUNT , &signalCount);
+				xmlSource.readIntAttribute(DataSource::PROP_COUNT , &source.info().signalCount);
+
+				qDebug() << "Loading source:" << source.info().lmAddress.addressPortStr() << ", signals:" << source.info().signalCount;
 
 				QString strAssociatedSignalIDs;
 				xmlSource.readStringElement(DataSource::ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS, &strAssociatedSignalIDs);
 				QStringList associatedSignalList = strAssociatedSignalIDs.split(",", QString::SkipEmptyParts);
 
-				if (associatedSignalList.count() != signalCount)
+				if (associatedSignalList.count() != source.info().signalCount)
 				{
 					assert(0);
 					continue;
@@ -385,7 +386,7 @@ int SourceBase::readFromFile(const QString& path, const SignalBase& signalBase)
 
 				//
 
-				for (int i = 0; i < signalCount; i++)
+				for (int i = 0; i < source.info().signalCount; i++)
 				{
 					PS::Signal signal;
 
@@ -393,6 +394,7 @@ int SourceBase::readFromFile(const QString& path, const SignalBase& signalBase)
 					if (signalIndex == -1)
 					{
 						signal.setAppSignalID(associatedSignalList[i]);
+						qDebug() << "Signal:" << associatedSignalList[i] << "has not been found";
 					}
 					else
 					{
@@ -748,6 +750,7 @@ QString SourceTable::text(int row, int column, PS::Source* pSource) const
 		case SOURCE_LIST_COLUMN_LM_IP:			result = pSource->info().lmAddress.addressStr() + " (" + QString::number(pSource->info().lmAddress.port()) + ")";			break;
 		case SOURCE_LIST_COLUMN_SERVER_IP:		result = pSource->info().serverAddress.addressStr() + " (" + QString::number(pSource->info().serverAddress.port()) + ")";	break;
 		case SOURCE_LIST_COLUMN_STATE:			result = pSource->isRunning() ? QString::number(pSource->sentFrames()) : tr("Stopped");										break;
+		case SOURCE_LIST_COLUMN_SIGNAL_COUNT:	result = QString::number(pSource->info().signalCount);							break;
 		default:								assert(0);
 	}
 
