@@ -21,6 +21,7 @@ DialogTrendSignalPoint::DialogTrendSignalPoint(std::vector<TrendLib::TrendStateI
 			ui->dateTimeEdit->setDateTime(stateItem.getTime(m_timeType).toDateTime());
 			ui->editValue->setText(QString::number(stateItem.value, 'f', m_precision));
 			ui->checkBoxValid->setChecked(stateItem.isValid());
+			ui->checkBoxRealtime->setChecked(stateItem.isRealtimePoint());
 			firstItem = false;
 		}
 		else
@@ -36,6 +37,10 @@ DialogTrendSignalPoint::DialogTrendSignalPoint(std::vector<TrendLib::TrendStateI
 			if (stateItem.isValid() != (*m_stateItems)[0].isValid())
 			{
 				ui->checkBoxValid->setCheckState(Qt::PartiallyChecked);
+			}
+			if (stateItem.isRealtimePoint() != (*m_stateItems)[0].isRealtimePoint())
+			{
+				ui->checkBoxRealtime->setCheckState(Qt::PartiallyChecked);
 			}
 		}
 	}
@@ -54,6 +59,8 @@ void DialogTrendSignalPoint::accept()
 	bool setTime = ui->dateTimeEdit->isEnabled() == true;
 
 	bool setValid = ui->checkBoxValid->checkState() != Qt::PartiallyChecked;
+
+	bool setRealtime = ui->checkBoxRealtime->checkState() != Qt::PartiallyChecked;
 
 	bool setValue = true;
 
@@ -85,6 +92,8 @@ void DialogTrendSignalPoint::accept()
 
 	bool valid = ui->checkBoxValid->checkState() == Qt::Checked;
 
+	bool realTime = ui->checkBoxRealtime->checkState() == Qt::Checked;
+
 	TimeStamp time(ui->dateTimeEdit->dateTime());
 
 	for (TrendLib::TrendStateItem& stateItem : *m_stateItems )
@@ -97,6 +106,18 @@ void DialogTrendSignalPoint::accept()
 		if (setValid == true)
 		{
 			stateItem.setValid(valid);
+		}
+
+		if (setRealtime == true)
+		{
+			if (realTime)
+			{
+				stateItem.setRealtimePointFlag();
+			}
+			else
+			{
+				stateItem.resetRealtimePointFlag();
+			}
 		}
 
 		if (setTime == true)

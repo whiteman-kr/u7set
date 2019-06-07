@@ -241,7 +241,7 @@ bool ArchFilePartition::read(ArchFileRecord* recordBuffer, int maxRecordsToRead,
 
 	qint64 readSize =  m_file.read(reinterpret_cast<char*>(recordBuffer), sizeof(ArchFileRecord) * maxRecordsToRead);
 
-	*readCount = readSize / sizeof(ArchFileRecord);
+	*readCount = static_cast<int>(readSize / sizeof(ArchFileRecord));
 
 	return true;
 }

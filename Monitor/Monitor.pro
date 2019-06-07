@@ -109,7 +109,8 @@ SOURCES += main.cpp \
     ../lib/Ui/TuningSourcesWidget.cpp \
     ../lib/Ui/AppDataSourcesWidget.cpp \
     DialogDataSources.cpp \
-    ../lib/TcpClientsStatistics.cpp
+    ../lib/TcpClientsStatistics.cpp \
+    ../lib/ExportPrint.cpp
 
 HEADERS  += \
     MonitorMainWindow.h \
@@ -179,7 +180,8 @@ HEADERS  += \
     ../lib/Ui/TuningSourcesWidget.h \
     ../lib/Ui/AppDataSourcesWidget.h \
     DialogDataSources.h \
-    ../lib/TcpClientsStatistics.h
+    ../lib/TcpClientsStatistics.h \
+    ../lib/ExportPrint.h
 
 
 FORMS    += \

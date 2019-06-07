@@ -403,7 +403,7 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, qui
 {
 	connect(this, &BaseServiceStateWidget::connectionStatisticChanged, this, &AppDataServiceWidget::updateStateInfo);
 
-	setStateTabMaxRowQuantity(13);
+	setStateTabMaxRowQuantity(14);
 	setClientQuantityRowIndexOnStateTab(5);
 
 	// Data Sources
@@ -474,6 +474,7 @@ void AppDataServiceWidget::updateServiceState()
 	stateTabModel()->setData(stateTabModel()->index(10, 1), static_cast<qint64>(state.errdatagramsize()));
 	stateTabModel()->setData(stateTabModel()->index(11, 1), static_cast<qint64>(state.errsimversion()));
 	stateTabModel()->setData(stateTabModel()->index(12, 1), static_cast<qint64>(state.errunknownappdatasourceip()));
+	stateTabModel()->setData(stateTabModel()->index(13, 1), static_cast<qint64>(state.errrupframecrc()));
 }
 
 void AppDataServiceWidget::updateStateInfo()
@@ -489,6 +490,7 @@ void AppDataServiceWidget::updateStateInfo()
 		stateTabModel()->setData(stateTabModel()->index(10, 0), "Datagram size errors");
 		stateTabModel()->setData(stateTabModel()->index(11, 0), "Simulation version errors");
 		stateTabModel()->setData(stateTabModel()->index(12, 0), "Unknown AppDataSource IP errors");
+		stateTabModel()->setData(stateTabModel()->index(13, 0), "RUP frames CRC errors");
 
 		if (m_tcpClientSocket == nullptr || m_tcpClientSocket->stateIsReady() == false)
 		{

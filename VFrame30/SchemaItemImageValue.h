@@ -17,6 +17,14 @@ namespace VFrame30
 		Q_PROPERTY(QStringList SignalIDs READ signalIds WRITE setSignalIds)
 		Q_PROPERTY(QString CurrentImageID READ currentImageId WRITE setCurrentImageId)
 
+		Q_PROPERTY(double LineWeight READ lineWeight WRITE setLineWeight)
+
+		Q_PROPERTY(bool DrawRect READ drawRect WRITE setDrawRect)
+		Q_PROPERTY(bool Fill READ fillRect WRITE setFillRect)
+
+		Q_PROPERTY(QColor LineColor READ lineColor WRITE setLineColor)
+		Q_PROPERTY(QColor FillColor READ fillColor WRITE setFillColor)
+
 	public:
 		SchemaItemImageValue(void);
 		explicit SchemaItemImageValue(SchemaUnit unit);
@@ -65,6 +73,21 @@ namespace VFrame30
 		QString currentImageId() const;
 		void setCurrentImageId(QString value);
 
+		double lineWeight() const;
+		void setLineWeight(double lineWeight);
+
+		const QColor& lineColor() const;
+		void setLineColor(const QColor& color);
+
+		const QColor& fillColor() const;
+		void setFillColor(const QColor& color);
+
+		bool drawRect() const;
+		void setDrawRect(bool value);
+
+		bool fillRect() const;
+		void setFillRect(bool value);
+
 	private:
 		QStringList m_signalIds = {"#APPSIGNALID"};
 		E::SignalSource m_signalSource = E::SignalSource::AppDataService;
@@ -74,6 +97,21 @@ namespace VFrame30
 		// MonitorMode variables
 		//
 		QString m_currentImageId;
+
+		// --
+		//
+		double m_lineWeight = 0.0;
+
+		QColor m_lineColor = {qRgba(0x00, 0x00, 0x00, 0xFF)};
+		QColor m_fillColor = {qRgba(0x00, 0x00, 0xC0, 0xFF)};
+
+		bool m_drawRect = false;							// Rect is visible, thikness 0 is possible
+		bool m_fillRect = false;
+
+		// Drawing resources
+		//
+		mutable std::unique_ptr<QPen> m_rectPen;
+		mutable std::unique_ptr<QBrush> m_fillBrush;
 	};
 }
 

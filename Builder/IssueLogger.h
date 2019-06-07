@@ -162,6 +162,9 @@ namespace Builder
 		void errCFG3040(QString monitorId, QString tuningServiceId);						// Mode SingleLmControl is not supported by Monitor. Set TuningServiceID.SingleLmControl to false. Monitor EquipmentID %1, TuningServiceID %2.
 		void errCFG3041(QString name, QString value, QString message, QString signalId);	// Property %1 has wrong value (%2), required value is %3 in signal %4.
 
+		void errCFG3042(QString moduleEquipmentID, QUuid moduleUuid);		// Module %1 should be installed in chassis.
+
+
 		// ALP			Application Logic Parsing				4000-4999
 		//
 		void errALP4000(QString schema, const std::vector<QUuid>& itemsUuids);

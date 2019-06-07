@@ -81,7 +81,9 @@ namespace Builder
 			return false;
 		}
 
-		ualSignalWithFlag->addStateFlagSignal(flagType, ualFlagSignal, m_compiler.log());
+		bool res = ualSignalWithFlag->addStateFlagSignal(flagType, ualFlagSignal, m_compiler.log());
+
+		RETURN_IF_FALSE(res);
 
 		AppSignalStateFlagsMap* signalFlagsMap = value(signalWithFlagID, nullptr);
 
@@ -1686,7 +1688,6 @@ namespace Builder
 		{
 			// create signal (non-opto! validity is Input signal from module's PI controller)
 			//
-
 			ualSignal = m_ualSignals.createSignal(ualItem, s, validityPin.guid());
 
 			if (ualSignal == nullptr)
@@ -2629,7 +2630,7 @@ namespace Builder
 			determineBusTypeByOutput(afb, &outBusType);
 
 			if ((inBusType.isEmpty() == true && outBusType.isEmpty() == true) ||
-				(inBusType.isEmpty() == false && inBusType != outBusType))
+				(inBusType.isEmpty() == false && outBusType.isEmpty() == false && inBusType != outBusType))
 			{
 				// Output bus type cannot be determined (Logic schema %1, item %2)
 				//
@@ -2871,7 +2872,7 @@ namespace Builder
 					continue;
 				}
 
-				result &= setPinFlagSignal(ualItem, outPinCaption, true, E::AppSignalStateFlagType::Unbalanced, inSignal, nullptr);
+				result &= setPinFlagSignal(ualItem, outPinCaption, true, E::AppSignalStateFlagType::Mismatch, inSignal, nullptr);
 			}
 
 			if (foundInputsCount < MISMATCH_MIN_PIN_COUNT)
@@ -2933,7 +2934,7 @@ namespace Builder
 			result &= setPinFlagSignal(ualItem, UalAfb::VALIDITY_PIN_CAPTION, false, E::AppSignalStateFlagType::Validity, inSignal, &flagIsSet);
 			result &= setPinFlagSignal(ualItem, UalAfb::SIMULATED_PIN_CAPTION, false, E::AppSignalStateFlagType::Simulated, inSignal, &flagIsSet);
 			result &= setPinFlagSignal(ualItem, UalAfb::BLOCKED_PIN_CAPTION, false, E::AppSignalStateFlagType::Blocked, inSignal, &flagIsSet);
-			result &= setPinFlagSignal(ualItem, UalAfb::UNBALANCED_PIN_CAPTION, false, E::AppSignalStateFlagType::Unbalanced, inSignal, &flagIsSet);
+			result &= setPinFlagSignal(ualItem, UalAfb::MISMATCH_PIN_CAPTION, false, E::AppSignalStateFlagType::Mismatch, inSignal, &flagIsSet);
 			result &= setPinFlagSignal(ualItem, UalAfb::HIGH_LIMIT_PIN_CAPTION, false, E::AppSignalStateFlagType::AboveHighLimit, inSignal, &flagIsSet);
 			result &= setPinFlagSignal(ualItem, UalAfb::LOW_LIMIT_PIN_CAPTION, false, E::AppSignalStateFlagType::BelowLowLimit, inSignal, &flagIsSet);
 
@@ -5872,10 +5873,11 @@ namespace Builder
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2));
 
 				result = appItem->init(fb.pointer, errorMsg);
+				appItem->setLabel(signal.appSignalID());
 
 				if (errorMsg.isEmpty() == false)
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorMsg);
+					LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
 					result = false;
 				}
 			}
@@ -5893,10 +5895,11 @@ namespace Builder
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
 
 				result = appItem->init(fb.pointer, errorMsg);
+				appItem->setLabel(signal.appSignalID());
 
 				if (errorMsg.isEmpty() == false)
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorMsg);
+					LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
 					result = false;
 				}
 			}
@@ -5904,9 +5907,8 @@ namespace Builder
 			break;
 
 		default:
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  QString(tr("Unknown conversion for signal %1, analogSignalFormat %2")).
-					  arg(signal.appSignalID()).arg(static_cast<int>(signal.analogSignalFormat())));
+			LOG_INTERNAL_ERROR_MSG(m_log, QString(tr("Unknown conversion for signal %1, analogSignalFormat %2")).
+										arg(signal.appSignalID()).arg(static_cast<int>(signal.analogSignalFormat())));
 			result = false;
 		}
 
@@ -5967,8 +5969,8 @@ namespace Builder
 			return false;
 		}
 
-		int y1 = signal.lowADC();
-		int y2 = signal.highADC();
+		int y1 = signal.lowDAC();
+		int y2 = signal.highDAC();
 
 		QString errorMsg;
 
@@ -5987,10 +5989,11 @@ namespace Builder
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
 
 				result = appItem->init(fb.pointer, errorMsg);
+				appItem->setLabel(signal.appSignalID());
 
 				if (errorMsg.isEmpty() == false)
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorMsg);
+					LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
 					result = false;
 				}
 			}
@@ -6008,10 +6011,11 @@ namespace Builder
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
 
 				result = appItem->init(fb.pointer, errorMsg);
+				appItem->setLabel(signal.appSignalID());
 
 				if (errorMsg.isEmpty() == false)
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorMsg);
+					LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
 					result = false;
 				}
 			}
@@ -6019,9 +6023,8 @@ namespace Builder
 			break;
 
 		default:
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  QString(tr("Unknown conversion for signal %1, analogSignalFormat %2")).
-					  arg(signal.appSignalID()).arg(static_cast<int>(signal.analogSignalFormat())));
+			LOG_INTERNAL_ERROR_MSG(m_log, QString(tr("Unknown conversion for signal %1, analogSignalFormat %2")).
+												arg(signal.appSignalID()).arg(static_cast<int>(signal.analogSignalFormat())));
 			result = false;
 		}
 
@@ -6866,6 +6869,29 @@ namespace Builder
 
 		LOG_MESSAGE(m_log, QString(tr("Generation of AFB initialization code...")));
 
+		QHash<QString, QString> instanceUsedBy;
+
+		for(UalAfb* ualAfb : m_ualAfbs)
+		{
+			TEST_PTR_CONTINUE(ualAfb);
+
+			if (ualAfb->hasRam() == true)
+			{
+				continue;
+			}
+
+			QString instantiatorID = ualAfb->instantiatorID();
+
+			if (instanceUsedBy.contains(instantiatorID) == false)
+			{
+				instanceUsedBy.insert(instantiatorID, ualAfb->label());
+			}
+			else
+			{
+				instanceUsedBy.insert(instantiatorID, QString("%1, %2").arg(instanceUsedBy.value(instantiatorID)).arg(ualAfb->label()));
+			}
+		}
+
 		bool result = true;
 
 		code->comment_nl("AFBs initialization code");
@@ -6889,7 +6915,7 @@ namespace Builder
 				{
 					// initialize all params for each instance of FB with RAM
 					//
-					result &= generateInitAppFbParamsCode(code, *ualAfb);
+					result &= generateInitAppFbParamsCode(code, *ualAfb, ualAfb->label());
 				}
 				else
 				{
@@ -6902,7 +6928,7 @@ namespace Builder
 					{
 						instantiatorStrIDsMap.insert(instantiatorID, 0);
 
-						result &= generateInitAppFbParamsCode(code, *ualAfb);
+						result &= generateInitAppFbParamsCode(code, *ualAfb, instanceUsedBy.value(instantiatorID));
 					}
 				}
 			}
@@ -6913,7 +6939,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb)
+	bool ModuleLogicCompiler::generateInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb, const QString& usedBy)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
@@ -6937,6 +6963,8 @@ namespace Builder
 				arg(fbInstance).
 				arg(appFb.instantiatorID()).
 			   arg(appFb.hasRam() ? "has RAM" : "non RAM"));
+
+		code->comment(QString(tr("Used by item(s): %1")).arg(usedBy));
 
 		displayAfbParams(code, appFb);
 
@@ -7695,51 +7723,55 @@ namespace Builder
 			return false;
 		}
 
-		CodeItem cmd;
+		QString comment = QString("%1.%2 << %3").arg(ualAfb->caption()).arg(inAfbSignal.caption()).arg(inUalSignal->refSignalIDsJoined());
 
-		int wordAccAddr = m_memoryMap.wordAccumulatorAddress();
+		CodeItem cmd;
 
 		if (inUalSignal->isConst() == true)
 		{
-			switch(inUalSignal->constDiscreteValue())
+			if (inputSize == SIZE_16BIT)
 			{
-			case 0:
-				cmd.fill(Address16(wordAccAddr, 0), m_memoryMap.constBit0Addr());
-				break;
+				quint16 constVal = inUalSignal->constDiscreteValue() == 0 ? 0 : 0xFFFF;
 
-			case 1:
-				cmd.fill(Address16(wordAccAddr, 0), m_memoryMap.constBit1Addr());
-				break;
-
-			default:
-				assert(false);
-				LOG_INTERNAL_ERROR(m_log);
-				return false;
+				cmd.writeFuncBlockConst(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), constVal, ualAfb->caption());
 			}
+			else
+			{
+				assert(inputSize == SIZE_32BIT);
+
+				qint32 constVal = inUalSignal->constDiscreteValue() == 0 ? 0 : static_cast<qint32>(0xFFFFFFFF);
+
+				cmd.writeFuncBlockConstInt32(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), constVal, ualAfb->caption());
+			}
+
+			cmd.setComment(comment);
+			code->append(cmd);
 		}
 		else
 		{
+			int wordAccAddr = m_memoryMap.wordAccumulatorAddress();
+
 			cmd.fill(Address16(wordAccAddr, 0), inUalSignal->ualAddr());
-		}
 
-		code->append(cmd);
-
-		if (inputSize == SIZE_16BIT)
-		{
-			cmd.writeFuncBlock(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), wordAccAddr, ualAfb->caption());
-		}
-		else
-		{
-			cmd.mov(wordAccAddr + 1, wordAccAddr);
 			code->append(cmd);
 
-			assert(inputSize == SIZE_32BIT);
-			cmd.writeFuncBlock32(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), wordAccAddr, ualAfb->caption());
+			if (inputSize == SIZE_16BIT)
+			{
+				cmd.writeFuncBlock(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), wordAccAddr, ualAfb->caption());
+			}
+			else
+			{
+				assert(inputSize == SIZE_32BIT);
+
+				cmd.mov(wordAccAddr + 1, wordAccAddr);
+				code->append(cmd);
+
+				cmd.writeFuncBlock32(ualAfb->opcode(), ualAfb->instance(), inAfbSignal.operandIndex(), wordAccAddr, ualAfb->caption());
+			}
+
+			cmd.setComment(comment);
+			code->append(cmd);
 		}
-
-		cmd.setComment(QString("%1.%2 << %3").arg(ualAfb->caption()).arg(inAfbSignal.caption()).arg(inUalSignal->refSignalIDsJoined()));
-
-		code->append(cmd);
 
 		return true;
 	}

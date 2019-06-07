@@ -15,16 +15,16 @@
   </property>
   <layout class="QGridLayout" name="gridLayout_3">
    <property name="leftMargin">
-    <number>9</number>
+    <number>2</number>
    </property>
    <property name="topMargin">
-    <number>9</number>
+    <number>2</number>
    </property>
    <property name="rightMargin">
-    <number>9</number>
+    <number>2</number>
    </property>
    <property name="bottomMargin">
-    <number>9</number>
+    <number>2</number>
    </property>
    <item row="0" column="0">
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -34,25 +34,37 @@
      <item>
       <widget class="QGroupBox" name="groupBox">
        <property name="title">
-        <string>Signals Filter</string>
+        <string>Filter</string>
        </property>
        <layout class="QGridLayout" name="gridLayout_2">
+        <property name="leftMargin">
+         <number>2</number>
+        </property>
+        <property name="topMargin">
+         <number>2</number>
+        </property>
+        <property name="rightMargin">
+         <number>2</number>
+        </property>
+        <property name="bottomMargin">
+         <number>2</number>
+        </property>
         <item row="0" column="0">
          <layout class="QGridLayout" name="gridLayout" columnstretch="0,1,0,1,0,0,0">
           <property name="leftMargin">
-           <number>6</number>
+           <number>0</number>
           </property>
           <property name="topMargin">
-           <number>6</number>
+           <number>0</number>
           </property>
           <property name="rightMargin">
-           <number>6</number>
+           <number>0</number>
           </property>
           <property name="bottomMargin">
-           <number>6</number>
+           <number>0</number>
           </property>
           <property name="spacing">
-           <number>6</number>
+           <number>2</number>
           </property>
           <item row="0" column="2">
            <widget class="QLabel" name="label_3">
@@ -152,9 +164,9 @@
       </widget>
      </item>
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0,0">
+      <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0">
        <property name="spacing">
-        <number>6</number>
+        <number>0</number>
        </property>
        <property name="leftMargin">
         <number>0</number>
@@ -206,28 +218,6 @@
          </property>
          <property name="text">
           <string>Print...</string>
-         </property>
-         <property name="autoDefault">
-          <bool>false</bool>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="buttonColumns">
-         <property name="minimumSize">
-          <size>
-           <width>100</width>
-           <height>0</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>100</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>Columns...</string>
          </property>
          <property name="autoDefault">
           <bool>false</bool>

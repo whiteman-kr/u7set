@@ -402,7 +402,7 @@ public:
 		StateAvailable,
 		Simulated,
 		Blocked,
-		Unbalanced,
+		Mismatch,
 		AboveHighLimit,
 		BelowLowLimit
 	};

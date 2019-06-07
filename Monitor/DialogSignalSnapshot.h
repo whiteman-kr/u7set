@@ -4,6 +4,7 @@
 #include "../lib/AppSignalManager.h"
 #include "DialogColumns.h"
 #include "MonitorConfigController.h"
+#include "../lib/ExportPrint.h"
 
 
 namespace Ui {
@@ -14,6 +15,18 @@ class MonitorConfigController;
 class TcpSignalClient;
 class SignalSnapshotModel;
 struct ConfigSettings;
+
+class SnapshotExportPrint : public ExportPrint
+{
+public:
+
+	SnapshotExportPrint(ConfigSettings* configuration, QWidget* parent);
+
+private:
+	virtual void generateHeader(QTextCursor& cursor) override;
+
+	ConfigSettings* m_configuration = nullptr;
+};
 
 class SignalSnapshotSorter
 {
@@ -34,6 +47,32 @@ private:
 };
 
 
+enum class SnapshotColumns
+{
+	SignalID = 0,		// Signal Param Columns
+	EquipmentID,
+	AppSignalID,
+	Caption,
+	Type,
+
+	SystemTime,			// Signal State Columns
+	LocalTime,
+	PlantTime,
+	Value,
+	Units,
+	Valid,
+	StateAvailable,
+	Simulated,
+	Blocked,
+	Mismatch,
+	OutOfLimits,
+
+	ColumnCount
+};
+
+Q_DECLARE_METATYPE(SnapshotColumns);
+
+
 class SignalSnapshotModel : public QAbstractItemModel
 {
 	Q_OBJECT
@@ -41,22 +80,6 @@ class SignalSnapshotModel : public QAbstractItemModel
 	friend class SignalSnapshotSorter;
 
 public:
-
-	enum class Columns
-	{
-		SignalID = 0,		// Signal Param Columns
-		EquipmentID,
-		AppSignalID,
-		Caption,
-		Units,
-		Type,
-
-		SystemTime,			// Signal State Columns
-		LocalTime,
-		PlantTime,
-		Value,
-		Valid
-	};
 
 	enum class SignalType
 	{
@@ -81,10 +104,6 @@ public:
 public:
 	// Properties
 
-	std::vector<int> columnsIndexes() const;
-	void setColumnsIndexes(std::vector<int> columnsIndexes);
-
-	int columnIndex(int index) const;
 	QStringList columnsNames() const;
 
 	// Overrides
@@ -123,7 +142,6 @@ protected:
 private:
 
 	QStringList m_columnsNames;
-	std::vector<int> m_columnsIndexes;
 
 	// Model data
 
@@ -150,12 +168,14 @@ public:
 	explicit DialogSignalSnapshot(MonitorConfigController* configController, TcpSignalClient* tcpSignalClient, QWidget *parent = 0);
 	~DialogSignalSnapshot();
 
-private slots:
-	void on_buttonColumns_clicked();
+protected slots:
+	void headerColumnContextMenuRequested(const QPoint& pos);
+	void headerColumnToggled(bool checked);
 
+private slots:
 	void on_DialogSignalSnapshot_finished(int result);
 
-	void prepareContextMenu(const QPoint& pos);
+	void contextMenuRequested(const QPoint& pos);
 
 	void on_tableView_doubleClicked(const QModelIndex &index);
 
@@ -179,6 +199,10 @@ private slots:
 
 	void on_comboMaskType_currentIndexChanged(int index);
 
+	void on_buttonExport_clicked();
+
+	void on_buttonPrint_clicked();
+
 private:
 	virtual void timerEvent(QTimerEvent* event) override;
 
@@ -189,6 +213,7 @@ private:
 	void fillSignals();
 
 private:
+	ConfigSettings m_configuration;
 
 	Ui::DialogSignalSnapshot *ui;
 

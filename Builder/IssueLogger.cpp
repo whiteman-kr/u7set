@@ -1397,6 +1397,28 @@ namespace Builder
 				  .arg(signalId));
 	}
 
+	/// IssueCode: CFG3042
+	///
+	/// IssueType: Error
+	///
+	/// Title: Module %1 should be installed in chassis.
+	///
+	/// Parameters:
+	///         %1 Module equipmentID
+	///
+	/// Description:
+	///			Modules should be installed in chassis. Check equipment configuration.
+	///
+	void IssueLogger::errCFG3042(QString moduleEquipmentID, QUuid moduleUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 3042, moduleUuid);
+
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3042,
+				  tr("Module %1 should be installed in chassis")
+				  .arg(moduleEquipmentID));
+	}
+
 	//
 	// ALP			Application Logic Parsing				4000-4999
 	//

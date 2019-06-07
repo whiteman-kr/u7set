@@ -82,6 +82,8 @@ struct ConfigSettings
 
 	bool showSchemasList = true;
 
+	bool showSchemasTabs = true;
+
 	bool filterByEquipment = true;
 
 	bool filterBySchema = true;
@@ -147,7 +149,7 @@ public:
 	bool m_simulationMode = false;
 #endif
 
-	//
+	// MainWindow options
 
 	QPoint m_mainWindowPos;
 	QByteArray m_mainWindowGeometry;
@@ -156,26 +158,21 @@ public:
 	QByteArray m_tuningWorkspaceSplitterState;
 	QByteArray m_schemasWorkspaceSplitterState;
 
+	// DialogProperties Options
 
-	// Property Editor Options
-	//
-	QPoint m_multiLinePropertyEditorWindowPos;
-	QByteArray m_multiLinePropertyEditorGeometry;
-
-	int m_presetPropertiesSplitterState;
+	int m_presetPropertiesSplitterState = 0;
 	QPoint m_presetPropertiesWindowPos;
 	QByteArray m_presetPropertiesWindowGeometry;
 
-	// Preset Editor options
+	// DialogFiltersEditor options
 
-	QPoint m_presetEditorPos;
-	QByteArray m_presetEditorGeometry;
+	QPoint m_dialogFiltersEditorPos = QPoint(-1, -1);
+	QByteArray m_dialogFiltersEditorGeometry;
 
+	QByteArray m_dialogFiltersEditorSplitterPosition;
+	int m_dialogFiltersEditorPropertyEditorSplitterPosition = -1;
 
-	QByteArray m_tuningFiltersSplitterPosition;
-	int m_tuningFiltersPropertyEditorSplitterPos = -1;
-
-	//	SwitchPresetsPage options
+	// SwitchPresetsPage options
 
 	int m_switchPresetsPageColCount = 8;
 	int m_switchPresetsPageRowCount = 3;

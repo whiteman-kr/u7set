@@ -37,7 +37,7 @@ void AppSignalStateFlags::updateArchivingReasonFlags(const AppSignalStateFlags& 
 	quint32 changedFlags = all ^ prevFlags.all;
 
 	validityChange = (changedFlags & MASK_VALIDITY_AND_AVAILABLE_FLAGS) == 0 ? 0 : 1;
-	simBlockUnblChange = (changedFlags & MASK_SIM_BLOCK_UNBL_FLAGS) == 0 ? 0 : 1;
+	simBlockMismatchChange = (changedFlags & MASK_SIM_BLOCK_UNBL_FLAGS) == 0 ? 0 : 1;
 	limitFlagsChange = (changedFlags & MASK_LIMITS_FLAGS) == 0 ? 0 : 1;
 }
 
@@ -46,7 +46,7 @@ QString AppSignalStateFlags::print()
 	return QString("Valid=%1 Avail=%2 Sim=%3 Blk=%4 Unbl=%5 HLim=%6 LLim=%7 "
 				   "[Reasons: ValCh=%8 SBUCh=%9 Lim=%10 Auto=%11 Fine=%12 Coarse=%13]").
 			arg(valid).arg(stateAvailable).arg(simulated).arg(blocked).
-			arg(unbalanced).arg(aboveHighLimit).arg(belowLowLimit).
-			arg(validityChange).arg(simBlockUnblChange).arg(limitFlagsChange).
+			arg(mismatch).arg(aboveHighLimit).arg(belowLowLimit).
+			arg(validityChange).arg(simBlockMismatchChange).arg(limitFlagsChange).
 			arg(autoPoint).arg(fineAperture).arg(coarseAperture);
 }

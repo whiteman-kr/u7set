@@ -6161,6 +6161,41 @@ class SchemaItemImageValue : public ::google::protobuf::Message {
   inline ::std::string* release_currentimageid();
   inline void set_allocated_currentimageid(::std::string* currentimageid);
 
+  // optional double lineWeight = 6 [default = 0];
+  inline bool has_lineweight() const;
+  inline void clear_lineweight();
+  static const int kLineWeightFieldNumber = 6;
+  inline double lineweight() const;
+  inline void set_lineweight(double value);
+
+  // optional uint32 lineColor = 7 [default = 4278190080];
+  inline bool has_linecolor() const;
+  inline void clear_linecolor();
+  static const int kLineColorFieldNumber = 7;
+  inline ::google::protobuf::uint32 linecolor() const;
+  inline void set_linecolor(::google::protobuf::uint32 value);
+
+  // optional uint32 fillColor = 8 [default = 4278190272];
+  inline bool has_fillcolor() const;
+  inline void clear_fillcolor();
+  static const int kFillColorFieldNumber = 8;
+  inline ::google::protobuf::uint32 fillcolor() const;
+  inline void set_fillcolor(::google::protobuf::uint32 value);
+
+  // optional bool drawRect = 9 [default = false];
+  inline bool has_drawrect() const;
+  inline void clear_drawrect();
+  static const int kDrawRectFieldNumber = 9;
+  inline bool drawrect() const;
+  inline void set_drawrect(bool value);
+
+  // optional bool fillRect = 10 [default = false];
+  inline bool has_fillrect() const;
+  inline void clear_fillrect();
+  static const int kFillRectFieldNumber = 10;
+  inline bool fillrect() const;
+  inline void set_fillrect(bool value);
+
   // repeated .Proto.ImageItem images = 14;
   inline int images_size() const;
   inline void clear_images();
@@ -6181,16 +6216,31 @@ class SchemaItemImageValue : public ::google::protobuf::Message {
   inline void clear_has_signalsource();
   inline void set_has_currentimageid();
   inline void clear_has_currentimageid();
+  inline void set_has_lineweight();
+  inline void clear_has_lineweight();
+  inline void set_has_linecolor();
+  inline void clear_has_linecolor();
+  inline void set_has_fillcolor();
+  inline void clear_has_fillcolor();
+  inline void set_has_drawrect();
+  inline void clear_has_drawrect();
+  inline void set_has_fillrect();
+  inline void clear_has_fillrect();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::std::string* signalids_;
   ::std::string* currentimageid_;
-  ::google::protobuf::RepeatedPtrField< ::Proto::ImageItem > images_;
   ::google::protobuf::int32 signalsource_;
+  ::google::protobuf::uint32 linecolor_;
+  double lineweight_;
+  ::google::protobuf::uint32 fillcolor_;
+  bool drawrect_;
+  bool fillrect_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::ImageItem > images_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -20000,6 +20050,116 @@ inline void SchemaItemImageValue::set_allocated_currentimageid(::std::string* cu
     clear_has_currentimageid();
     currentimageid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
+}
+
+// optional double lineWeight = 6 [default = 0];
+inline bool SchemaItemImageValue::has_lineweight() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void SchemaItemImageValue::set_has_lineweight() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void SchemaItemImageValue::clear_has_lineweight() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void SchemaItemImageValue::clear_lineweight() {
+  lineweight_ = 0;
+  clear_has_lineweight();
+}
+inline double SchemaItemImageValue::lineweight() const {
+  return lineweight_;
+}
+inline void SchemaItemImageValue::set_lineweight(double value) {
+  set_has_lineweight();
+  lineweight_ = value;
+}
+
+// optional uint32 lineColor = 7 [default = 4278190080];
+inline bool SchemaItemImageValue::has_linecolor() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void SchemaItemImageValue::set_has_linecolor() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void SchemaItemImageValue::clear_has_linecolor() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void SchemaItemImageValue::clear_linecolor() {
+  linecolor_ = 4278190080u;
+  clear_has_linecolor();
+}
+inline ::google::protobuf::uint32 SchemaItemImageValue::linecolor() const {
+  return linecolor_;
+}
+inline void SchemaItemImageValue::set_linecolor(::google::protobuf::uint32 value) {
+  set_has_linecolor();
+  linecolor_ = value;
+}
+
+// optional uint32 fillColor = 8 [default = 4278190272];
+inline bool SchemaItemImageValue::has_fillcolor() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void SchemaItemImageValue::set_has_fillcolor() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void SchemaItemImageValue::clear_has_fillcolor() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void SchemaItemImageValue::clear_fillcolor() {
+  fillcolor_ = 4278190272u;
+  clear_has_fillcolor();
+}
+inline ::google::protobuf::uint32 SchemaItemImageValue::fillcolor() const {
+  return fillcolor_;
+}
+inline void SchemaItemImageValue::set_fillcolor(::google::protobuf::uint32 value) {
+  set_has_fillcolor();
+  fillcolor_ = value;
+}
+
+// optional bool drawRect = 9 [default = false];
+inline bool SchemaItemImageValue::has_drawrect() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void SchemaItemImageValue::set_has_drawrect() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void SchemaItemImageValue::clear_has_drawrect() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void SchemaItemImageValue::clear_drawrect() {
+  drawrect_ = false;
+  clear_has_drawrect();
+}
+inline bool SchemaItemImageValue::drawrect() const {
+  return drawrect_;
+}
+inline void SchemaItemImageValue::set_drawrect(bool value) {
+  set_has_drawrect();
+  drawrect_ = value;
+}
+
+// optional bool fillRect = 10 [default = false];
+inline bool SchemaItemImageValue::has_fillrect() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void SchemaItemImageValue::set_has_fillrect() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void SchemaItemImageValue::clear_has_fillrect() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void SchemaItemImageValue::clear_fillrect() {
+  fillrect_ = false;
+  clear_has_fillrect();
+}
+inline bool SchemaItemImageValue::fillrect() const {
+  return fillrect_;
+}
+inline void SchemaItemImageValue::set_fillrect(bool value) {
+  set_has_fillrect();
+  fillrect_ = value;
 }
 
 // repeated .Proto.ImageItem images = 14;

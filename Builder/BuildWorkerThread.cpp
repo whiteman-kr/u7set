@@ -906,6 +906,8 @@ namespace Builder
 
 		signalSet->findAndRemoveExcludedFromBuildSignals();
 
+		signalSet->cacheSpecPropValues();
+
 		result = signalSet->checkSignals();
 
 		if (result == false)
@@ -924,9 +926,9 @@ namespace Builder
 			return false;
 		}
 
-		LOG_SUCCESS(m_context->m_log, tr("Ok"));
-
 		signalSet->initCalculatedSignalsProperties();
+
+		LOG_SUCCESS(m_context->m_log, tr("Ok"));
 
 		return true;
 	}

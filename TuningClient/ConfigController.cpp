@@ -358,14 +358,16 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 					QMessageBox::critical(m_parent, tr("Error"), completeErrorMessage);
 				}
 			}
+		}
 
-			for (auto si : schemasDetails)
+		// If this file is schema details - place the information about it
+
+		for (auto si : schemasDetails)
+		{
+			if (f.ID == si.m_schemaId)
 			{
-				if (f.ID == si.m_schemaId)
-				{
-					SchemaSettings s(si.m_schemaId, si.m_caption);
-					readSettings.schemas.push_back(s);
-				}
+				SchemaSettings s(si.m_schemaId, si.m_caption);
+				readSettings.schemas.push_back(s);
 			}
 		}
 	}
@@ -377,6 +379,7 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 			theConfigSettings.filterByEquipment != readSettings.filterByEquipment ||
 			theConfigSettings.filterBySchema != readSettings.filterBySchema ||
 			theConfigSettings.showSchemasList != readSettings.showSchemasList ||
+			theConfigSettings.showSchemasTabs != readSettings.showSchemasTabs ||
 			theConfigSettings.showSchemas != readSettings.showSchemas ||
 			theConfigSettings.showSignals != readSettings.showSignals ||
 			theConfigSettings.showSOR != readSettings.showSOR ||
@@ -585,6 +588,7 @@ bool ConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigS
 			outSetting->showSignals = dasXmlElement.attribute("showSignals") == "true" ? true : false;
 			outSetting->showSchemas = dasXmlElement.attribute("showSchemas") == "true" ? true : false;
 			outSetting->showSchemasList = dasXmlElement.attribute("showSchemasList") == "true" ? true : false;
+			outSetting->showSchemasTabs = dasXmlElement.attribute("showSchemasTabs") == "true" ? true : false;
 			outSetting->filterByEquipment = dasXmlElement.attribute("filterByEquipment") == "true" ? true : false;
 			outSetting->filterBySchema = dasXmlElement.attribute("filterBySchema") == "true" ? true : false;
 			outSetting->showSOR = dasXmlElement.attribute("showSOR") == "true" ? true : false;

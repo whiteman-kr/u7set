@@ -43,11 +43,24 @@ Q_DECLARE_METATYPE(ExtWidgets::FilePathPropertyType)
 
 namespace ExtWidgets
 {
+
+	struct PropertyEditorSettings
+	{
+		QByteArray m_arrayPropertyEditorSplitterState;
+		QSize m_arrayPropertyEditorSize = QSize(-1, -1);
+
+		QPoint m_multiLinePropertyEditorWindowPos;
+		QByteArray m_multiLinePropertyEditorGeometry;
+
+		void restore(QSettings& s);
+		void store(QSettings& s);
+	};
+
+	//
+
 	class PropertyEditor;
 
-
 	static QString propertyVectorText(QVariant& value);
-
 
 	class PropertyArrayEditorDialog : public QDialog
 	{
@@ -55,6 +68,7 @@ namespace ExtWidgets
 
 	public:
 		PropertyArrayEditorDialog(QWidget* parent, const QString& propertyName, const QVariant& value);
+		~PropertyArrayEditorDialog();
 		QVariant value();
 
 	private slots:
@@ -76,6 +90,8 @@ namespace ExtWidgets
 
 		QTreeWidget* m_treeWidget = nullptr;
 		PropertyEditor* m_propertyEditor = nullptr;
+
+		QSplitter* m_splitter = nullptr;
 
 		std::shared_ptr<Property> m_property;
 	};
@@ -207,15 +223,8 @@ namespace ExtWidgets
 	signals:
 		void valueChanged(QVariant value);
 
-		//private slots:
-		//void onButtonPressed();
-
-		//private:
-		//bool eventFilter(QObject* watched, QEvent* event);
-
 	private:
 		QComboBox* m_combo = nullptr;
-        int m_oldValue;
 
 	};
 	class MultiColorEdit : public QWidget
@@ -546,5 +555,7 @@ namespace ExtWidgets
 	};
 
 }
+
+extern ExtWidgets::PropertyEditorSettings thePropertyEditorSettings;
 
 #endif // PROPERTYEDITOR_H

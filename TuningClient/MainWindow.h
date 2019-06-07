@@ -58,6 +58,8 @@ private:
 
 	SchemasWorkspace* m_schemasWorkspace = nullptr;
 
+	QLabel* m_noWorkspaceLabel = nullptr;
+
 	UserManager m_userManager;
 public:
 

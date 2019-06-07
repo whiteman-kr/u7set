@@ -22,6 +22,7 @@ namespace Builder
 		bool checkSignals();
 		bool bindSignalsToLMs(Hardware::EquipmentSet* equipment);
 		void initCalculatedSignalsProperties();
+		void cacheSpecPropValues();
 
 		BusShared getBus(const QString & busTypeID) const { return m_busses.getBus(busTypeID); }
 
@@ -40,7 +41,7 @@ namespace Builder
 		QString buildBusSignalCaption(const Signal& s, BusShared bus, const BusSignal& busSignal);
 
 		bool checkSignalPropertiesRanges(const Signal& s);
-		bool checkSignalPropertyRanges(const Signal& s, double properyValue, const QString& propertyName);
+		bool checkSignalPropertyRanges(const Signal& s, const QString& propertyName);
 		bool checkSignalTuningValuesRanges(const Signal& s, const TuningValue& tuningValue, const QString& propertyName);
 
 	private:

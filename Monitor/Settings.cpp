@@ -71,7 +71,9 @@ void Settings::writeUserScope() const
 
 	s.setValue("DialogSignalSnapshot/pos", m_signalSnapshotPos);
 	s.setValue("DialogSignalSnapshot/geometry", m_signalSnapshotGeometry);
-	s.setValue("DialogSignalSnapshot/columns", QVariant::fromValue<QList<int>>(m_signalSnapshotColumns.toList()));
+	s.setValue("DialogSignalSnapshot/horzHeader", m_snapshotHorzHeader);
+	s.setValue("DialogSignalSnapshot/horzHeaderCount", m_snapshotHorzHeaderCount);
+
     s.setValue("DialogSignalSnapshot/type", static_cast<int>(m_signalSnapshotSignalType));
 	s.setValue("DialogSignalSnapshot/mask", m_signalSnapshotMaskList);
 
@@ -85,7 +87,10 @@ void Settings::writeUserScope() const
 	s.setValue("ArchiveWindow/geometry", m_archiveWindowGeometry);
 	s.setValue("ArchiveWindow/state", m_archiveWindowState);
 	s.setValue("ArchiveWindow/horzHeader", m_archiveHorzHeader);
+	s.setValue("ArchiveWindow/horzHeaderCount", m_archiveHorzHeaderCount);
+
 	s.setValue("ArchiveWindow/timeType", m_archiveTimeType);
+
 
 	s.setValue("DialogChooseArchiveSignals/filter", m_archiveSignalsDialogFilterCompleter);
 
@@ -109,7 +114,8 @@ void Settings::loadUserScope()
 
 	m_signalSnapshotPos = s.value("DialogSignalSnapshot/pos", QPoint(-1, -1)).toPoint();
 	m_signalSnapshotGeometry = s.value("DialogSignalSnapshot/geometry").toByteArray();
-	m_signalSnapshotColumns = s.value("DialogSignalSnapshot/columns").value<QList<int>>().toVector();
+	m_snapshotHorzHeader = s.value("DialogSignalSnapshot/horzHeader").toByteArray();
+	m_snapshotHorzHeaderCount = s.value("DialogSignalSnapshot/horzHeaderCount").toInt();
     m_signalSnapshotSignalType = static_cast<SignalSnapshotModel::SignalType>(s.value("DialogSignalSnapshot/type", static_cast<int>(m_signalSnapshotSignalType)).toInt());
 	m_signalSnapshotMaskList = s.value("DialogSignalSnapshot/mask").toStringList();
 	m_signalSnapshotMaskType = static_cast<SignalSnapshotModel::MaskType>(s.value("DialogSignalSnapshot/maskType", static_cast<int>(m_signalSnapshotMaskType)).toInt());
@@ -121,6 +127,7 @@ void Settings::loadUserScope()
 	m_archiveWindowGeometry = s.value("ArchiveWindow/geometry").toByteArray();
 	m_archiveWindowState = s.value("ArchiveWindow/state").toByteArray();
 	m_archiveHorzHeader = s.value("ArchiveWindow/horzHeader").toByteArray();
+	m_archiveHorzHeaderCount = s.value("ArchiveWindow/horzHeaderCount").toInt();
 	m_archiveTimeType = s.value("ArchiveWindow/timeType").toInt();
 	m_archiveSignalsDialogFilterCompleter = s.value("DialogChooseArchiveSignals/filter").toStringList();
 

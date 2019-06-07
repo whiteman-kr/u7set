@@ -395,12 +395,29 @@ namespace Builder
 			}
 
 			//
-			// showSchemasList
+			// schemasNavigation
 			//
-			bool showSchemasList = getObjectProperty<bool>(m_software->equipmentIdTemplate(), "ShowSchemasList", &ok);
+			bool showSchemasList = false;
+			bool showSchemasTabs = false;
+
+			int schemasNavigation = getObjectProperty<int>(m_software->equipmentIdTemplate(), "SchemasNavigation", &ok);
 			if (ok == false)
 			{
 				return false;
+			}
+
+			switch (schemasNavigation)
+			{
+			case 0:
+				break;
+			case 1:
+				showSchemasList = true;
+				break;
+			case 2:
+				showSchemasTabs = true;
+				break;
+			default:
+				Q_ASSERT(false);
 			}
 
 			//
@@ -483,6 +500,7 @@ namespace Builder
 				xmlWriter.writeAttribute("showSignals", (showSignals ? "true" : "false"));
 				xmlWriter.writeAttribute("showSchemas", (showSchemas? "true" : "false"));
 				xmlWriter.writeAttribute("showSchemasList", (showSchemasList ? "true" : "false"));
+				xmlWriter.writeAttribute("showSchemasTabs", (showSchemasTabs ? "true" : "false"));
 				xmlWriter.writeAttribute("filterByEquipment", (filterByEquipment ? "true" : "false"));
 				xmlWriter.writeAttribute("filterBySchema", (filterBySchema ? "true" : "false"));
 				xmlWriter.writeAttribute("showSOR", (showSOR ? "true" : "false"));
@@ -611,7 +629,7 @@ namespace Builder
 			return false;
 		}
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "ObjectFilters.xml", CFG_FILE_ID_TUNING_FILTERS, "",  QString::fromLocal8Bit(data));
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_software->equipmentIdTemplate(), "ObjectFilters.xml", CFG_FILE_ID_TUNING_FILTERS, "",  data);
 
 		if (buildFile == nullptr)
 		{

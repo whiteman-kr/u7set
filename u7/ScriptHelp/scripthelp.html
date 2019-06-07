@@ -1,11 +1,571 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
-<html><head><meta content="text/html; charset=ISO-8859-1" http-equiv="content-type"><title>Scripts Help</title></head>
-<body><big style="font-weight: bold;"><span style="font-family: Times New Roman;">Contents</span></big><br><br><big><a style="color: green;" href="#General_Information">General Information</a></big><br style="font-family: Times New Roman; color: black;"><br style="color: black;"><a style="color: green;" href="#Schema_Items"><big></big></a><big><a style="color: green;" href="#Global_Variables">Global Variables</a></big><br style="color: black;"><br style="color: black;"><big><a style="color: green;" href="#SchemaView">SchemaView</a><br style="color: black;"><a style="color: green;" href="#ScriptAppSignalController">ScriptAppSignalController</a></big><big><br style="color: black;"><a style="color: green;" href="#TuningController">TuningController</a><br style="color: black;"><br style="color: black;"></big><big style="color: black;"><a style="color: green;" href="#Schema_Items">Schema Items</a><br><br><a style="color: green;" href="#SchemaItem">SchemaItem</a></big><br style="color: black;"><big style="color: black;"><a style="color: green;" href="#SchemaItemLineEdit">SchemaItemLineEdit</a></big><br style="color: black;"><big style="color: black;"><a style="color: green;" href="#SchemaItemPushButton">SchemaItemPushButton</a></big><br style="color: black;"><br style="color: black;"><big><a style="color: green;" href="#Signals_parameters_and_states">Signals Parameters and States</a><br style="color: black;"><br style="color: black;"><a style="color: green;" href="#AppSignalParam">AppSignalParam</a><br style="color: black;"><a style="color: green;" href="#AppSignalState">AppSignalState</a><br style="color: black;"><a style="color: green;" href="#TuningSignalState">TuningSignalState</a><br></big><span style="font-family: Times New Roman;"></span><span style="font-family: Times New Roman;">&nbsp;&nbsp; &nbsp;</span><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;"><a name="General_Information"></a><big style="font-weight: bold;">General Information</big></span><br><br><span style="color: red;">TODO</span><br><br><a name="Global_Variables"><span style="font-family: Times New Roman; font-weight: bold;"><big>Global variables</big></span><br><br><br></a><a name="SchemaView"><span style="font-weight: bold;">SchemaView</span><br><br>Is accessed by <span style="font-family: Times New Roman;"><span style="font-weight: bold;">view</span> </span>object name and is used for switching schemas,&nbsp; searching items and widget&nbsp;and displaying message boxes.<br style="font-family: Times New Roman;"><br><span style="font-weight: bold;">Functions:</span><br><span style="font-family: Times New Roman;"><br>void setSchema(QString schemaId);</span><br><br>sets the active schema specified in <span style="font-weight: bold;">schemaId</span> parameter.<br><span style="font-family: Times New Roman;"><br>QObject* findSchemaItem(QString objectName);</span><br><br>finds a schema item by its object name. Return value has SchemaItem type or null if item is not found.<br><span style="font-family: Times New Roman;"><br>QObject* findWidget(QString objectName);</span><br><span style="font-family: Times New Roman;"><br></span>finds a schema control widget (edit control, button, etc...) by its
-object name. Return value has QWidget type or null if item is not found.<br><br><span style="font-family: Times New Roman;"></span><span style="font-family: Times New Roman;">Q_INVOKABLE void warningMessageBox(QString text);</span><br><br>displayes a warning message box with specified text.<br><span style="font-family: Times New Roman;"><br>Q_INVOKABLE void errorMessageBox(QString text);</span><br><span style="font-family: Times New Roman;"><br></span>displayes an error message box with specified text.<br><span style="font-family: Times New Roman;"><br></span><span style="font-family: Times New Roman;">Q_INVOKABLE void infoMessageBox(QString text);</span><br><span style="font-family: Times New Roman;"><br></span>displayes an information message box with specified text.<br><span style="font-family: Times New Roman;"><br></span><span style="font-family: Times New Roman;">Q_INVOKABLE bool questionMessageBox(QString text);</span><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;">&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;<br></span>displayes a question message box with specified text. If user clicked
-"Yes", returns true, otherwise returns false.<br><br>QVariant variable(QString name);<br><br>retrieves a value of the variable.<br><br>void setVariable(QString name, const QString&amp; value);<br><br><span style="color: rgb(192, 192, 192);">		</span><span style="color: rgb(128, 0, 128);"></span>sets the value of the variable.<br><br><span style="font-weight: bold;">Example</span>:<br><span style="font-family: Courier New,Courier,monospace;"><br>view.setSchema("MYSCHEMA");</span><br><span style="font-family: Times New Roman;"><br></span><span style="font-family: Times New Roman; font-weight: bold;"></span></a><a name="ScriptAppSignalController"></a><span style="color: black; font-weight: bold;">ScriptAppSignalController</span><br><br><span style="font-family: Times New Roman;">Is accessed by <span style="font-weight: bold;">signals</span> </span>object name and is used to get signals parameters and values in Monitor application.<br><br><span style="font-weight: bold;">Functions</span>:<br style="font-family: Times New Roman;"><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;">QVariant signalParam(QString signalId) const;<br>&nbsp;&nbsp;&nbsp; <br>Returns AppSignalParam</span><br><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;">QVariant signalParam(Hash signalHash) const;</span><br style="font-family: Times New Roman;"><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;">Returns AppSignalParam</span><br><br><span style="font-family: Times New Roman;">QVariant signalState(QString signalId) const;</span><br><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;">Returns AppSignalState</span><br><br><span style="font-family: Times New Roman;">QVariant signalState(Hash signalHash) const;</span><br><br><span style="font-family: Times New Roman;">Returns AppSignalState</span><br><br>If error is orrured, for example if&nbsp;signal does not exist, the return value is <span style="font-weight: bold;">undefined.</span><br><br><span style="font-weight: bold;">Example</span>:<br><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">var sp = signals.signalParam("#SIGNALID_001");</span><br style="font-family: Courier New,Courier,monospace;"><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">var st = signals.signalState("SIGNALID_001");</span><br style="font-family: Courier New,Courier,monospace;"><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">if &nbsp;(sp == undefined || st == undefined)</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">{</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp; return</span>;<br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">}</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Times New Roman; font-weight: bold;"></span><span style="font-family: Times New Roman;">&nbsp;&nbsp;&nbsp; &nbsp;</span><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman; font-weight: bold;"><a name="TuningController"></a>TuningController</span><br><br><span style="font-family: Times New Roman;">Is accessed by <span style="font-weight: bold;">tuning</span> </span>object
-name and is used to get tuning signals parameters and states, write
-tuning values and in Monitor and TuningClient applications.<br><span style="font-family: Times New Roman;"><br style="font-family: Times New Roman;"></span><span style="font-family: Times New Roman;">Q_INVOKABLE QVariant signalParam(const
-QString&amp; appSignalID);</span><br><br>returns AppSignalParam or undefined if signal does not exist.<br><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;">Q_INVOKABLE QVariant signalState(const
-QString&amp; appSignalID);</span><br><br>returns TuningSignalState or undefined if signal does not exist.<br><br><span style="font-family: Times New Roman;">Q_INVOKABLE bool writeValue(QString appSignalID, QVariant value);</span><br style="font-family: Times New Roman;"><br style="font-family: Times New Roman;">writes value of tuning signal. If successful, returns true, otherwise returns false.<br><span style="font-weight: bold;"><br>Example</span>:<br><span style="font-family: Courier New,Courier,monospace;"><br>tuning.writeValue("SIGNALID", v);<br><br></span><span style="font-family: Times New Roman;"><a name="Schema_Items"></a><big style="font-weight: bold;">Schema Items</big></span><br style="font-family: Times New Roman;"><br style="font-family: Times New Roman;"><span style="font-weight: bold; font-family: Times New Roman;"><a name="SchemaItem"></a>SchemaItem</span><br style="font-family: Times New Roman;"><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;">SchemaItem is a base class for all items that are displayed on schemas.</span><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;">&nbsp;&nbsp; &nbsp;</span><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman; font-weight: bold;">Properties</span><br style="font-family: Times New Roman; font-weight: bold;"><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;"><span style="font-weight: bold; font-style: italic;">ObjectName</span> (string)<br><br>A name</span> of an item. Must be unique on the schema.<br style="font-family: Times New Roman;"><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman; font-style: italic; font-weight: bold;">AcceptClick</span><span style="font-style: italic; font-weight: bold;"> </span>(bool)<br><br>When set to true, mouse cursor is displayed as a "hand" above an item
-and ClickScript is executed on the left mouse button click.<br><span style="font-family: Times New Roman;"><br></span><span style="font-family: Times New Roman;"><span style="font-weight: bold;">Scripts</span></span><br><br><big>Parameters:<br style="font-weight: bold;"></big><br>schemaItem - the processed schema item. Object type: SchemaItem<br><br><span style="font-family: Times New Roman;"><span style="font-family: Courier New,Courier,monospace;"></span></span><span style="font-family: Times New Roman;"><span style="font-weight: bold; font-style: italic;">ClickScript</span><br><br>A script that is executed when user clicks the left mouse button on the item.<br><br>Example:<br><span style="font-family: Courier New,Courier,monospace;"><br>function(schemaItem)</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">{</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">&nbsp;&nbsp;&nbsp; view.setSchema("SCHEMA002"); </span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Courier New,Courier,monospace;">}</span></span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Times New Roman;"><br><span style="font-weight: bold;"><span style="font-style: italic;">PreDrawScript</span></span><br><br></span><span style="font-family: Times New Roman;">A script that is executed before item is drawn.<br></span><br><span style="font-family: Times New Roman;">Example:<br><span style="font-family: Courier New,Courier,monospace;"><br></span></span><span style="font-family: Courier New,Courier,monospace;">function(schemaItem)<br>{<br>&nbsp;&nbsp;&nbsp; enableControlBySignal(schemaItem.ObjectName, "#ANALOG_001");<br>}</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Times New Roman;">&nbsp;&nbsp; &nbsp;</span><br style="font-family: Times New Roman;"><span style="font-weight: bold; font-family: Times New Roman;"><a name="SchemaItemLineEdit"></a>SchemaItemLineEdit</span><br><br><span style="font-family: Times New Roman;">This control is used </span>to create user input fields.<br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;"></span><span style="font-family: Times New Roman;">&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;</span><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman; font-weight: bold;">Properties:</span><br style="font-family: Times New Roman; font-weight: bold;"><span style="font-family: Times New Roman; font-weight: bold;"><br><span style="font-style: italic;">StyleSheet</span></span> (string)<br><br>A stylesheet of a widget. Detailed description of this field can be found in Qt documentation.<br><br style="font-family: Times New Roman; font-weight: bold;"><span style="font-family: Times New Roman; font-weight: bold;"><span style="font-style: italic;">Text</span></span><span style="font-weight: bold; font-style: italic;"> </span><span style="font-weight: bold;"></span>(string)<br><br style="font-family: Times New Roman; font-weight: bold;">Gets or sets the text in the control.<br><br><span style="font-family: Times New Roman; font-weight: bold;"><span style="font-style: italic;">Tooltip</span></span><span style="font-weight: bold; font-style: italic;"> </span><span style="font-weight: bold;"></span>(string)<br style="font-family: Times New Roman;"><br>Gets or sets the tooltip text in the control.<br><span style="font-family: Times New Roman;">&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;</span><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;"><span style="font-weight: bold;">Scripts</span>:</span><br><br><big>Parameters:<br style="font-weight: bold;"></big><br>schemaItem - the processed schema item. Object type: SchemaItem<br><br>lineEditWidget - the processed&nbsp;widget. Object type: QLineEdit<br><br>text - current text in the control. Object type: QString<br><br><span style="font-family: Times New Roman;"><span style="font-style: italic; font-weight: bold;">AfterCreate</span><br><br>This script is executed when the control is created.<br><br></span><span style="font-family: Times New Roman;">Example:<br><span style="font-family: Courier New,Courier,monospace;"><br></span></span><span style="font-family: Courier New,Courier,monospace;">function(schemaItem, lineEditWidget, text)<br>{<br></span><span style="font-family: Courier New,Courier,monospace;">}</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Times New Roman;"><br><span style="font-weight: bold; font-style: italic;">EditingFinished</span><br></span><span style="font-family: Times New Roman;"><br>This script is executed when editing is finished<br><br></span><span style="font-family: Times New Roman;">Example:<br><span style="font-family: Courier New,Courier,monospace;"><br></span></span><span style="font-family: Courier New,Courier,monospace;">function(schemaItem, lineEditWidget, text)<br>{<br></span><span style="font-family: Courier New,Courier,monospace;">}</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Times New Roman;"><br></span><span style="font-family: Times New Roman;"><span style="font-weight: bold; font-style: italic;">ReturnPressed</span><br><br></span><span style="font-family: Times New Roman;">This script is executed when Return key is pressed.<br><br></span><span style="font-family: Times New Roman;">Example:<br><span style="font-family: Courier New,Courier,monospace;"><br></span></span><span style="font-family: Courier New,Courier,monospace;">function(schemaItem, lineEditWidget, text)<br>{<br></span><span style="font-family: Courier New,Courier,monospace;">}</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Times New Roman;"></span><span style="font-family: Times New Roman;"><br><span style="font-style: italic; font-weight: bold;">TextChanged</span><br><br></span><span style="font-family: Times New Roman;">This script is executed when the text is changed by user.<br><br></span><span style="font-family: Times New Roman;">Example:<br><span style="font-family: Courier New,Courier,monospace;"><br></span></span><span style="font-family: Courier New,Courier,monospace;">function(schemaItem, lineEditWidget, text)<br>{<br></span><span style="font-family: Courier New,Courier,monospace;">}</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Times New Roman;"></span><span style="font-family: Times New Roman;">&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;</span><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;"><a name="SchemaItemPushButton"></a><span style="font-weight: bold;">SchemaItemPushButton</span></span><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;">&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;</span><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;"><span style="font-weight: bold;">Properties</span>:</span><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;"><br><span style="font-weight: bold; font-style: italic;">AutoRepeat</span></span> (bool)<br><br>If true, Clicked script is repeated while user holds the left mouse button.<br><br><span style="font-family: Times New Roman; font-weight: bold; font-style: italic;">AutoRepeatDelay</span> (int)<br>&nbsp;&nbsp;&nbsp; <br>A delay in milliseconds before auto repeating starts.<br><br style="font-family: Times New Roman; font-weight: bold; font-style: italic;"><span style="font-family: Times New Roman; font-weight: bold; font-style: italic;">AutoRepeatInterval</span> (int)<br style="font-family: Times New Roman; font-weight: bold; font-style: italic;"><br>An interval in milliseconds of auto repeating.<br><br><span style="font-family: Times New Roman; font-weight: bold; font-style: italic;">Checkable</span> (bool)<br><br>If set, button is checkable.<br><br style="font-family: Times New Roman; font-weight: bold; font-style: italic;"><span style="font-family: Times New Roman; font-weight: bold; font-style: italic;">CheckedDefault</span> (bool)<br><br>The default state of checkable button.<br><br style="font-family: Times New Roman; font-weight: bold; font-style: italic;"><span style="font-family: Times New Roman; font-weight: bold;"><span style="font-style: italic;">StyleSheet</span></span> (string)<br><br>A stylesheet of a widget. Detailed description of this field can be found in Qt documentation.<br><br style="font-family: Times New Roman; font-weight: bold;"><span style="font-family: Times New Roman; font-weight: bold;"><span style="font-style: italic;">Text</span></span><span style="font-weight: bold; font-style: italic;"> </span><span style="font-weight: bold;"></span>(string)<br><br style="font-family: Times New Roman; font-weight: bold;">Gets or sets the text in the control.<br><br><span style="font-family: Times New Roman; font-weight: bold;"><span style="font-style: italic;">Tooltip</span></span><span style="font-weight: bold; font-style: italic;"> </span><span style="font-weight: bold;"></span>(string)<br style="font-family: Times New Roman;"><br>Gets or sets the tooltip text in the control.<br><span style="font-family: Times New Roman;"></span><span style="font-family: Times New Roman;">&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;</span><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;"><span style="font-weight: bold;">Scripts</span></span><span style="font-weight: bold;">:</span><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;"><br><span style="font-weight: bold; font-style: italic;"></span></span><big>Parameters:<br style="font-weight: bold;"></big><br>schemaItem - the processed schema item. Object type: SchemaItem<br><br>pushButtonWidget - the processed&nbsp;widget. Object type:&nbsp;QPushButton<br><br>checked - check state of the button. Object type: bool<br><br><span style="font-family: Times New Roman;"><span style="font-weight: bold; font-style: italic;">AfterCreate</span></span><br style="font-family: Times New Roman; font-weight: bold; font-style: italic;"><span style="font-family: Times New Roman; font-weight: bold; font-style: italic;"><br></span><span style="font-family: Times New Roman;">This script is executed when the control is created.<br><br></span><span style="font-family: Times New Roman;">Example:<br><span style="font-family: Courier New,Courier,monospace;"><br></span></span><span style="font-family: Courier New,Courier,monospace;">function(schemaItem, pushButtonWidget, checked)<br>{<br></span><span style="font-family: Courier New,Courier,monospace;">}</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Times New Roman; font-weight: bold; font-style: italic;"><br>Clicked</span><br style="font-family: Times New Roman; font-weight: bold; font-style: italic;"><span style="font-family: Times New Roman; font-weight: bold; font-style: italic;"><br></span><span style="font-family: Times New Roman;">This script is executed when the left mouse button is clicked.<br><br></span><span style="font-family: Times New Roman;">Example:<br><span style="font-family: Courier New,Courier,monospace;"><br></span></span><span style="font-family: Courier New,Courier,monospace;">function(schemaItem, pushButtonWidget, checked)<br>{<br></span><span style="font-family: Courier New,Courier,monospace;">}</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Times New Roman;"><br><span style="font-weight: bold; font-style: italic;"></span></span><span style="font-family: Times New Roman; font-weight: bold; font-style: italic;"></span><span style="font-family: Times New Roman; font-weight: bold; font-style: italic;">Pressed</span><br><span style="font-family: Times New Roman;">&nbsp;&nbsp; <br>This script is executed when the left mouse button is pressed.<br><br></span><span style="font-family: Times New Roman;">Example:<br><span style="font-family: Courier New,Courier,monospace;"><br></span></span><span style="font-family: Courier New,Courier,monospace;">function(schemaItem, pushButtonWidget, checked)<br>{<br></span><span style="font-family: Courier New,Courier,monospace;">}</span><br><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Times New Roman; font-weight: bold; font-style: italic;">Released</span><br style="font-family: Times New Roman; font-weight: bold; font-style: italic;"><span style="font-family: Times New Roman; font-weight: bold; font-style: italic;"><br></span><span style="font-family: Times New Roman;">This script is executed when the left mouse button is released.</span><br><span style="font-family: Times New Roman;"><br></span><span style="font-family: Times New Roman;">Example:<br><span style="font-family: Courier New,Courier,monospace;"><br></span></span><span style="font-family: Courier New,Courier,monospace;">function(schemaItem, pushButtonWidget, checked)<br>{<br></span><span style="font-family: Courier New,Courier,monospace;">}</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Times New Roman;"></span><span style="font-family: Times New Roman; font-weight: bold; font-style: italic;"><br></span><span style="font-family: Times New Roman; font-weight: bold; font-style: italic;">Toggled</span><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;"><br></span><span style="font-family: Times New Roman;">This script is executed when the check state of the button is changed.</span><br><span style="font-family: Times New Roman;"><br></span><span style="font-family: Times New Roman;">Example:<br><span style="font-family: Courier New,Courier,monospace;"><br></span></span><span style="font-family: Courier New,Courier,monospace;">function(schemaItem, pushButtonWidget, checked)<br>{<br></span><span style="font-family: Courier New,Courier,monospace;">}</span><br style="font-family: Courier New,Courier,monospace;"><span style="font-family: Times New Roman;"><span style="font-weight: bold; font-style: italic;"></span></span><span style="font-family: Times New Roman; font-weight: bold; font-style: italic;"></span><span style="font-family: Times New Roman;">&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; </span><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman; font-weight: bold;"><a name="Signals_parameters_and_states"></a><big>Signals parameters and states</big></span><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;">&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;</span><span style="font-family: Times New Roman; font-weight: bold;"><br><a name="AppSignalParam"></a>AppSignalParam</span><br><br>Describes signals parameters.<br><br><span style="font-weight: bold;">Properties:</span><br><br><big style="font-family: monospace;">Hash:&nbsp;quint64;<br>AppSignalID: string;<br>CustomSignalID: string;<br>Caption: string;<br>EquipmentID:string;<br>Unit: string;<br>Precision: number;<br><span style="color: rgb(128, 0, 128);"></span><span style="color: rgb(192, 192, 192);"></span>Channel: number;<br>EnableTuning: boolean;<br>TuningDefaultValue: boolean;<br>TuningLowBound: boolean;<br>TuningHighBound: boolean;<br>IsInput: boolean;<br>IsOutput: boolean;<br>IsInternal: boolean;<br>IsAnalog: boolean;<br>IsDiscrete: boolean;</big><br><span style="font-family: Times New Roman;">&nbsp;&nbsp; <br></span><span style="font-family: Times New Roman;"><a name="AppSignalState"></a><span style="font-weight: bold;">AppSignalState</span></span><br><br>Describes signal state in the Monitor application.<br><br><span style="font-weight: bold;">Properties:</span><br><span style="font-family: Times New Roman;"><br></span><big style="font-family: monospace;">Hash:&nbsp;quint64;<br>Value: QVariant;<br>Valid: boolean;</big><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;">&nbsp; &nbsp;</span><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman;"> <a name="TuningSignalState"></a><span style="font-weight: bold;">TuningSignalState</span></span><br><br>Describes tuning signal state in the Monitor and TuningClient applications.<br><br style="font-family: Times New Roman;"><span style="font-family: Times New Roman; font-weight: bold;">Properties:</span><span style="font-family: Times New Roman;"><br><br></span><big><span style="font-family: monospace;">Hash: quint64;</span><br style="font-family: monospace;"><span style="font-family: monospace;">Value: QVariant;</span><br style="font-family: monospace;"><span style="font-family: monospace;"></span><span style="color: rgb(192, 192, 192); font-family: monospace;"></span><span style="font-family: monospace;">LowBound</span><span style="color: rgb(192, 192, 192); font-family: monospace;"></span><span style="font-family: monospace;">: QVariant;</span><br style="font-family: monospace;"><span style="color: rgb(192, 192, 192); font-family: monospace;"></span><span style="font-family: monospace;">HighBound: QVariant;</span><br style="font-family: monospace;"><span style="font-family: monospace;">Valid: boolean;</span><br style="font-family: monospace;"><span style="font-family: monospace;">OutOfRange</span><span style="color: rgb(192, 192, 192); font-family: monospace;"></span><span style="font-family: monospace;">: boolean;</span><br style="font-family: monospace;"><span style="color: rgb(192, 192, 192); font-family: monospace;"></span><span style="font-family: monospace;">WriteInProgress</span><span style="color: rgb(192, 192, 192); font-family: monospace;"></span><span style="font-family: monospace;">: boolean;</span><br style="font-family: monospace;"><span style="color: rgb(192, 192, 192); font-family: monospace;"></span><span style="font-family: monospace;">ControlIsEnabled: boolean;</span><br style="font-family: monospace;"><span style="color: rgb(192, 192, 192); font-family: monospace;"></span><span style="font-family: monospace;">WritingIsEnabled: boolean;</span><span style="color: rgb(192, 192, 192); font-family: monospace;"></span></big>
-<pre style="margin: 0px; text-indent: 0px; font-family: monospace;"><br></pre><span style="font-family: monospace;"></span><br></body></html>
+<h1><span style="color: #000000;">RPCT Scripting Reference</span></h1>
+<h2><strong><span style="color: #000000;">Table of Contents</span></strong></h2>
+<p><span style="color: #000000;"><a style="color: #000000;" href="#_Toc10536921">General Information</a></span></p>
+<p><span style="color: #000000;"><a style="color: #000000;" href="#_Toc10536922">Global variables</a></span></p>
+<p><span style="color: #000000;"><a style="color: #000000;" href="#_Toc10536923">SchemaView</a></span></p>
+<p><span style="color: #000000;"><a style="color: #000000;" href="#_Toc10536924">ScriptAppSignalController</a></span></p>
+<p><span style="color: #000000;"><a style="color: #000000;" href="#_Toc10536925">TuningController</a></span></p>
+<p><span style="color: #000000;"><a style="color: #000000;" href="#_Toc10536926">Schema Items</a></span></p>
+<p><span style="color: #000000;"><a style="color: #000000;" href="#_Toc10536927">Setting properties of a schema item</a></span></p>
+<p><span style="color: #000000;"><a style="color: #000000;" href="#_Toc10536928">SchemaItem</a></span></p>
+<p><span style="color: #000000;"><a style="color: #000000;" href="#_Toc10536929">SchemaItemLine</a></span></p>
+<p><span style="color: #000000;"><a style="color: #000000;" href="#_SchemaItemRect">SchemaItemRect</a></span></p>
+<p><span style="color: #000000;"><a style="color: #000000;" href="#_Toc10536930">SchemaItemValue</a></span></p>
+<p><span style="color: #000000;"><a style="color: #000000;" href="#_Toc10536931">SchemaItemImageValue</a></span></p>
+<p><span style="color: #000000;"><a style="color: #000000;" href="#_SchemaItemLineEdit">SchemaItemLineEdit</a></span></p>
+<p><span style="color: #000000;"><a style="color: #000000;" href="#_Toc10536932">SchemaItemPushButton</a></span></p>
+<p><span style="color: #000000;"><a style="color: #000000;" href="#_Toc10536933">Signals parameters and states</a></span></p>
+<p><span style="color: #000000;"><a style="color: #000000;" href="#_Toc10536934">AppSignalParam</a></span></p>
+<p><span style="color: #000000;"><a style="color: #000000;" href="#_Toc10536935">AppSignalState</a></span></p>
+<p><a href="#_Toc10536936"><span style="color: #000000;">TuningSignalState</span></a></p>
+<h1><a name="_Toc10536921"></a><a name="_Toc10535781"></a>General Information</h1>
+<p>Using scripts, project designer is able to customize displayed schemas. Scripts allow to change colors, text messages and other appearance properties of schema items. Also scripts can read signal values, set tuning signal values and perform some additional actions.</p>
+<p>Scripts are written in JavaScript language.</p>
+<p>Every schema item is an object that has a set of properties. These properties can be changed manually in Schema Editor or by script at the run time. For example, properties can change text, foreground and background color. Different&nbsp;items have special properties.</p>
+<p>Schema items have scripts that executed at certain events: before drawing, at mouse click, etc. For example, all schema items have <strong>PreDrawScript</strong>, <strong>ClickScript</strong> events. Different items have special events.</p>
+<p>When script is called, some parameters are passed to it. For example, script function always has a handle to processed schema item.</p>
+<p>To access random schema items, variables and to switch between schemas, global <strong>SchemaView</strong> object is provided.</p>
+<p>To access signal values that are received from Application Data Service, <strong>ScriptAppSignalController</strong> object is provided.</p>
+<p>To access and set tunable signal values using Tuning Service, <strong>TuninglController</strong> object is provided.</p>
+<h1><a name="_Toc10536922"></a><a name="_Toc10535782"></a>Global variables</h1>
+<h2><a name="_Toc10536923"></a><a name="_Toc10535783"></a>SchemaView</h2>
+<p>This object is accessed by <strong>view</strong> object name and is used for switching schemas, searching items and widgets and displaying message boxes.</p>
+<p>&nbsp;</p>
+<p><strong>Functions</strong></p>
+<p>&nbsp;</p>
+<p><em><strong>setSchema(schemaId : string) : void;</strong></em></p>
+<p>Sets the active schema specified in <strong>schemaId</strong> parameter.</p>
+<p>&nbsp;</p>
+<p><em><strong>findSchemaItem(objectName : string) : object;</strong></em></p>
+<p>Finds a schema item by its name (<strong>ObjectName</strong> property). Return value has <strong>SchemaItem</strong> type or <strong>undefined</strong> if item is not found.</p>
+<p>&nbsp;</p>
+<p><em><strong>findWidget(objectName : string) : object;</strong></em></p>
+<p>Finds a schema control widget (edit control, button, etc...) by its name (<strong>ObjectName</strong> property). Return value has <strong>QWidget</strong> type or <strong>undefined</strong> if item is not found.</p>
+<p>&nbsp;</p>
+<p><em><strong>warningMessageBox(text : string) : void;</strong></em></p>
+<p>Displays a warning message box with specified <strong>text</strong>.</p>
+<p>&nbsp;</p>
+<p><em><strong>errorMessageBox(text : string) : void;</strong></em></p>
+<p>Displays an error message box with specified <strong>text</strong>.</p>
+<p>&nbsp;</p>
+<p><em><strong>infoMessageBox(text : string) : void;</strong></em></p>
+<p>Displays an information message box with specified <strong>text</strong>.</p>
+<p>&nbsp;</p>
+<p><em><strong>questionMessageBox(text : string) : boolean;</strong></em></p>
+<p>Displays a question message box with specified <strong>text</strong>. If user clicked "Yes", returns <strong>true</strong>, otherwise returns <strong>false</strong>.</p>
+<p>&nbsp;</p>
+<p><em><strong>variableExists(QString name) : boolean;</strong></em></p>
+<p>Returns <strong>true</strong> if variable specified by <strong>name</strong> exists, otherwise returns <strong>false</strong>.</p>
+<p>&nbsp;</p>
+<p><em><strong>variable(QString name) : string;</strong></em></p>
+<p>Retrieves a value of the variable specified by <strong>name</strong>.</p>
+<p>&nbsp;</p>
+<p><em><strong>setVariable(name : string, value : string) : void;</strong></em></p>
+<p>Sets the value of the variable specified by <strong>name</strong>.</p>
+<p>&nbsp;</p>
+<p><strong>Example</strong></p>
+<p><em>view.setSchema("MYSCHEMA");</em></p>
+<p><em>view.infoMessageBox(&ldquo;Hello world!&rdquo;);</em></p>
+<p><em>if (view.questionMessageBox(&ldquo;Are you sure?&rdquo;) == true)</em></p>
+<p>{</p>
+<p><em>&nbsp;&nbsp;&nbsp; ....</em></p>
+<p><em>}</em></p>
+<p>&nbsp;</p>
+<h1><a name="_Toc10536924"></a><a name="_Toc10535784"></a>ScriptAppSignalController</h1>
+<p>&nbsp;</p>
+<p>This object is accessed by <strong>signals</strong> object name and is used to get signals parameters and values in Monitor application.</p>
+<p>&nbsp;</p>
+<p>&nbsp;<strong>Functions</strong></p>
+<p>&nbsp;</p>
+<p><em><strong>signalParam(signalId : string) : object;</strong></em></p>
+<p>Returns <strong>AppSignalParam</strong> structure of signal specified by <strong>signalId</strong>. If error occurs, the return value is <strong>undefined.</strong></p>
+<p>&nbsp;</p>
+<p><em><strong>signalState(signalId : string) : object;</strong></em></p>
+<p>Returns <strong>AppSignalState</strong> structure of signal specified by <strong>signalId</strong>. If error occurs, the return value is <strong>undefined.</strong></p>
+<p>&nbsp;</p>
+<p><strong>Example</strong></p>
+<p><em>var sp = signals.signalParam("#SIGNALID_001");</em></p>
+<p><em>var st = signals.signalState("SIGNALID_001");</em></p>
+<p><em>if &nbsp;(sp == undefined || st == undefined)</em></p>
+<p><em>{</em></p>
+<p><em>&nbsp;&nbsp;&nbsp; return;</em></p>
+<p><em>}</em></p>
+<p>&nbsp;</p>
+<h2><a name="_Toc10536925"></a><a name="_Toc10535785"></a>TuningController</h2>
+<h2>&nbsp;</h2>
+<p>This object is accessed by <strong>tuning</strong> object name and is used to get tuning signals parameters and states, write tuning values and in Monitor and TuningClient applications.</p>
+<p>&nbsp;</p>
+<p><strong>Functions</strong></p>
+<p>&nbsp;</p>
+<p><em><strong>signalParam(appSignalID : string) : object;</strong></em></p>
+<p>Returns <strong>AppSignalParam</strong> structure or <strong>undefined</strong> if signal does not exist.</p>
+<p>&nbsp;</p>
+<p><em><strong>signalState(appSignalID : string) : object;</strong></em></p>
+<p>Returns <strong>TuningSignalState</strong> structure or <strong>undefined</strong> if signal does not exist.</p>
+<p>&nbsp;</p>
+<p><em><strong>writeValue(appSignalID : string, value : number) : boolean;</strong></em></p>
+<p>Writes value of tuning signal. If successful, returns <strong>true</strong>, otherwise returns <strong>false</strong>.</p>
+<p>&nbsp;</p>
+<p><strong>Example</strong></p>
+<p><em>tuning.writeValue("SIGNALID", v);</em></p>
+<p>&nbsp;</p>
+<h1><a name="_Toc10536926"></a><a name="_Toc10535786"></a>Schema Items</h1>
+<p>&nbsp;</p>
+<h2><a name="_Toc10536927"></a><a name="_Toc10535787"></a>Setting properties of a schema item</h2>
+<p>&nbsp;</p>
+<p>To set a property value of a schema item, use the following code:</p>
+<p>&nbsp;</p>
+<p><em>schemaItem.setPropertyValue("PropertyName", PropertyValue);</em></p>
+<p>&nbsp;or</p>
+<p><em>schemaItem.PropertyName = PropertyValue;</em></p>
+<p>&nbsp;</p>
+<p>To view full set of properties of a schema item, open the Proprties window in Schema Editor in RPCT.</p>
+<h2>&nbsp;</h2>
+<h2><a name="_Toc10536928"></a><a name="_Toc10535788"></a>SchemaItem</h2>
+<p>&nbsp;</p>
+<p>SchemaItem is a base class for all items that are displayed on schemas.</p>
+<p>&nbsp;</p>
+<p><strong>Essential Properties</strong></p>
+<p>&nbsp;</p>
+<p><strong><em>Obj</em><em>ectName : </em>string</strong></p>
+<p>A name of an item. Must be unique on the schema.</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>AcceptC</em><em>lick : boolean</em></strong></p>
+<p>When set to true, mouse cursor is displayed as a "hand" above an item and ClickScript is executed on the left mouse button click.</p>
+<p>&nbsp;</p>
+<p><strong>BlinkPhase : <em>boolean</em></strong></p>
+<p>On every drawing cycle inverts its value. Can be used to implement text or background blinking.</p>
+<p><strong>&nbsp;</strong></p>
+<p><strong>Scripts</strong></p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>ClickScript</em></strong></p>
+<p>A script that is executed when user clicks the left mouse button on the item.</p>
+<p>Parameters:</p>
+<p><strong>schemaItem</strong> - the processed schema item. Object type: SchemaItem</p>
+<p>&nbsp;</p>
+<p><strong>Example</strong></p>
+<p><em>(function(schemaItem)</em></p>
+<p><em>{</em></p>
+<p><em>&nbsp;&nbsp;&nbsp; view.setSchema("SCHEMA002");</em></p>
+<p><em>})</em></p>
+<p>&nbsp;</p>
+<p><strong><em>PreDrawScript</em></strong></p>
+<p>A script that is executed before item is drawn.</p>
+<p>Parameters:</p>
+<p><strong>schemaItem</strong> - the processed schema item. Object type: SchemaItem</p>
+<p>&nbsp;</p>
+<p><strong>Example</strong></p>
+<p><em>(function(schemaItem)</em></p>
+<p><em>{</em></p>
+<p><em>})</em></p>
+<p><strong>&nbsp;</strong></p>
+<p><strong>Schema items derived from SchemaItem have special properties.</strong></p>
+<p><strong>&nbsp;</strong></p>
+<h2><a name="_Toc10536929"></a><a name="_Toc10535789"></a>SchemaItemLine</h2>
+<p>&nbsp;</p>
+<p>This control is used to display lines.</p>
+<p>&nbsp;</p>
+<p><strong>Essential Properties</strong></p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>Li</em><em>neColor </em>: <em>string</em></strong></p>
+<p>A color name of the line</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>LineW</em><em>eight : double</em></strong></p>
+<p>Line weight, in pixels</p>
+<p><strong>&nbsp;</strong></p>
+<p><strong>Example of PreDrawScript for SchemaItemLine:</strong></p>
+<p><em>(function(schemaItem)</em></p>
+<p><em>{</em></p>
+<p><em>&nbsp;&nbsp;&nbsp; schemaItem.LineColor = "#c0c0c0";</em></p>
+<p><em>})</em></p>
+<p>&nbsp;</p>
+<h2><a name="_SchemaItemRect"></a><a name="_SchemaItemRect"></a>SchemaItemRect</h2>
+<p><strong>&nbsp;</strong></p>
+<p>This control is used to display rectangles and text messages.</p>
+<p>&nbsp;</p>
+<p><strong>Essential Properties</strong></p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>Fill : boolean</em></strong></p>
+<p>Switches rectangle filling</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><em><strong>FillColor : string</strong></em></p>
+<p>Rectangle fill color name</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><em><strong>TextColor : string</strong></em></p>
+<p>Text color name</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><em><strong>LineColor : string</strong></em></p>
+<p>Border line color name</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><em><strong>LineWeight : double</strong></em></p>
+<p>Border line weight, in pixels</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><em><strong>AlignHorz : int</strong></em></p>
+<p>Horizontal text alignment:</p>
+<p>AlignLeft = 1<br /> AlignRight = 2<br /> AlignHCenter = 4<br /> AlignJustify = 8</p>
+<p>&nbsp;</p>
+<p><em><strong>AlignVert : int</strong></em></p>
+<p>Vertical text alignment:</p>
+<p>AlignTop = 32<br /> AlignBottom = 64<br /> AlignVCenter = 128<br /> AlignBaseline = 256</p>
+<p>&nbsp;</p>
+<p><strong><em>FontBold : </em><em>boolean</em></strong></p>
+<p>Bold font</p>
+<p>&nbsp;</p>
+<p><strong><em>FontItalic : boolean</em></strong></p>
+<p>Italic font</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>FontName : string</em></strong></p>
+<p>Font name</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>FontSize : int</em></strong></p>
+<p>Font size</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>Text : string</em></strong></p>
+<p>Rectangle text</p>
+<p><strong>&nbsp;</strong></p>
+<p><strong>Example of PreDrawScript for SchemaItemRect</strong></p>
+<p><em>(function(schemaItem)</em></p>
+<p><em>{</em></p>
+<p><em>&nbsp;&nbsp;&nbsp; schemaItem.Text = "Hello World";</em></p>
+<p><em>&nbsp;&nbsp;&nbsp; schemaItem.FillColor = "red";</em></p>
+<p><em>&nbsp;&nbsp;&nbsp; schemaItem.BackColor = "#000000";</em></p>
+<p><em>})</em></p>
+<p>&nbsp;</p>
+<h2><a name="_Toc10536930"></a><a name="_Toc10535790"></a>SchemaItemValue</h2>
+<p><strong>&nbsp;</strong></p>
+<p>This item is used to display signal values. To customize its behaivour, <strong>PreDrawScript</strong> and <strong>ClickScript</strong> are used.</p>
+<p>&nbsp;</p>
+<p><strong>Accessing signals identifiers</strong></p>
+<p>To access signal identifiers of this item, use the following code:</p>
+<p>&nbsp;</p>
+<p><em>var appSignalId = schemaItemValue.SignalIDs[0];</em></p>
+<p>&nbsp;</p>
+<p><strong>Essential Properties</strong></p>
+<p>&nbsp;</p>
+<p><strong><em>DrawRect : boolean</em></strong></p>
+<p>Draw the border</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><em><strong>FillColor : string</strong></em></p>
+<p>Rectangle fill color name</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><em><strong>LineColor : string</strong></em></p>
+<p>Border line color name</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><em><strong>LineWeight : double</strong></em></p>
+<p>Border line weight, in pixels</p>
+<p>&nbsp;</p>
+<p><em><strong>TextColor : string</strong></em></p>
+<p>Text color name</p>
+<p>&nbsp;</p>
+<p><em><strong>AlignHorz : int</strong></em></p>
+<p>Horizontal text alignment:</p>
+<p>AlignLeft = 1<br /> AlignRight = 2<br /> AlignHCenter = 4<br /> AlignJustify = 8</p>
+<p>&nbsp;</p>
+<p><em><strong>AlignVert : int</strong></em></p>
+<p>Vertical text alignment:</p>
+<p>AlignTop = 32<br /> AlignBottom = 64<br /> AlignVCenter = 128<br /> AlignBaseline = 256</p>
+<p>&nbsp;</p>
+<p><strong><em>FontBold : boolean</em></strong></p>
+<p>Bold font</p>
+<p>&nbsp;</p>
+<p><strong><em>FontItalic : boolean</em></strong></p>
+<p>Italic font</p>
+<p>&nbsp;</p>
+<p><strong><em>FontName : string</em></strong></p>
+<p>Font name</p>
+<p>&nbsp;</p>
+<p><strong><em>FontSize : int</em></strong></p>
+<p>Font size</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>Text : string</em></strong></p>
+<p>Rectangle text, can contain macros:</p>
+<p>&nbsp;</p>
+<p>$(value) - signal value</p>
+<p>$(caption) - signal caption</p>
+<p>$(signalid) - custom signal identifier</p>
+<p>$(appsignalid) - signal identifier</p>
+<p>$(equipmentid) - signal equipment id</p>
+<p>&nbsp;</p>
+<p><strong><em>Precision : int</em></strong></p>
+<p>Numbers precision</p>
+<p>&nbsp;</p>
+<p><strong>&nbsp;</strong></p>
+<p><strong>Example of PreDrawScript for SchemaItemValue</strong></p>
+<p><em>(function(schemaItemValue)</em></p>
+<p><em>{</em></p>
+<p><em>&nbsp;&nbsp;&nbsp; var appSignalId = schemaItemValue.SignalIDs[0];</em></p>
+<p><em>&nbsp;</em></p>
+<p><em>&nbsp;&nbsp;&nbsp; // Get data from TuningService</em></p>
+<p><em>&nbsp;&nbsp;&nbsp; var signalParam = tuning.signalParam(appSignalId);</em></p>
+<p><em>&nbsp;&nbsp;&nbsp; var signalState = tuning.signalState(appSignalId);</em></p>
+<p><em>&nbsp;</em></p>
+<p><em>&nbsp;&nbsp;&nbsp; // Get signal state</em></p>
+<p><em>&nbsp;&nbsp;&nbsp; if (signalState.Valid == true)</em></p>
+<p><em>&nbsp;&nbsp;&nbsp; {</em></p>
+<p><em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; schemaItemValue.Text = signalState.Value;</em></p>
+<p><em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; schemaItemValue.TextColor = "white";</em></p>
+<p><em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; schemaItemValue.FillColor = schemaItemValue.BlinkPhase ? "black" : "#A00000";</em></p>
+<p><em>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; schemaItemValue.LineColor = "#000000";</em></p>
+<p><em>&nbsp;&nbsp;&nbsp; }</em></p>
+<p><em>})</em></p>
+<p>&nbsp;</p>
+<h2><a name="_Toc10536931"></a><a name="_Toc10535791"></a>SchemaItemImageValue</h2>
+<p><strong>&nbsp;</strong></p>
+<p>This control is used to display different images depending on signal values.</p>
+<p><strong>&nbsp;</strong></p>
+<p><strong>Accessing signals identifiers</strong></p>
+<p>To access signal identifiers of this item, use the following code:</p>
+<p>&nbsp;</p>
+<p><em>var appSignalId = schemaItemValue.SignalIDs[0];</em></p>
+<p>&nbsp;</p>
+<p><strong>Essential Properties</strong></p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>CurrentImageID</em></strong> <strong>: <em>string</em></strong></p>
+<p>An identifier of current image</p>
+<p>&nbsp;</p>
+<p><em><strong>LineWeight : double</strong></em></p>
+<p>Border line weight, in pixels</p>
+<p>&nbsp;</p>
+<p><strong><em>DrawRect : boolean</em><br /></strong></p>
+<p>Bounding rectangle drawing</p>
+<p>&nbsp;</p>
+<p><strong><em>Fill : boolean</em><br /></strong></p>
+<p>Rectangle filling</p>
+<p>&nbsp;</p>
+<p><em><strong>LineColor : string</strong></em></p>
+<p>Border line color name</p>
+<p>&nbsp;</p>
+<p><em><strong>FillColor : string</strong></em></p>
+<p>Rectangle fill color name</p>
+<p>&nbsp;</p>
+<h2><a name="_SchemaItemLineEdit"></a><a name="_SchemaItemLineEdit"></a>SchemaItemLineEdit</h2>
+<p>&nbsp;</p>
+<p>This control is used to create user input fields.</p>
+<p><strong>&nbsp;</strong></p>
+<p><strong>Essential Properties:</strong></p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><em><strong>AlignHorz : int</strong></em></p>
+<p>Horizontal text alignment:</p>
+<p>AlignLeft = 1<br /> AlignRight = 2<br /> AlignHCenter = 4<br /> AlignJustify = 8</p>
+<p>&nbsp;</p>
+<p><em><strong>AlignVert : int</strong></em></p>
+<p>Vertical text alignment:</p>
+<p>AlignTop = 32<br /> AlignBottom = 64<br /> AlignVCenter = 128<br /> AlignBaseline = 256</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>MaxLength </em>: <em>int</em></strong></p>
+<p>Maximum text length</p>
+<p>&nbsp;</p>
+<p><strong><em>PlaceholderText </em>: <em>string</em></strong></p>
+<p>Property holds the line edit's placeholder text. Setting this property makes the line edit display a grayed-out placeholder text as long as the line edit is empty. Normally, an empty line edit shows the placeholder text even when it has focus. However, if the content is horizontally centered, the placeholder text is not displayed under the cursor when the line edit has focus. By default, this property contains an empty string.</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>StyleSheet</em> : <em>string</em></strong></p>
+<p>A stylesheet of a widget. Detailed description of this field can be found in Qt documentation.</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>Text </em>: <em>string</em></strong></p>
+<p>Property holds the line edit's text.</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>ReadOnly</em></strong> <strong>: <em>boolean</em></strong></p>
+<p>This property holds whether the line edit is read only. In read-only mode, the user can still copy the text to the clipboard, or drag and drop the text, but cannot edit it. LineEdit does not show a cursor in read-only mode.</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>Tooltip</em></strong> <strong>: <em>string</em></strong></p>
+<p>Gets or sets the tooltip text in the control.</p>
+<p><strong>&nbsp;</strong></p>
+<p><strong>Scripts</strong></p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>AfterCreate</em></strong></p>
+<p>This script is executed when the control is created.</p>
+<p>&nbsp;</p>
+<p>Parameters:</p>
+<p>schemaItem - the processed schema item. Object type: SchemaItem</p>
+<p>lineEditWidget - the processed&nbsp;widget. Object type: QLineEdit</p>
+<p>text - current text in the control. Object type: QString</p>
+<p>&nbsp;</p>
+<p><strong>Example</strong></p>
+<p><em>(function(schemaItem, lineEditWidget, text)</em></p>
+<p><em>{</em></p>
+<p><em>})</em></p>
+<p>&nbsp;</p>
+<p><strong><em>EditingFinished</em></strong></p>
+<p>This script is executed when editing is finished</p>
+<p>&nbsp;</p>
+<p>Parameters:</p>
+<p>&nbsp;</p>
+<p>schemaItem - the processed schema item. Object type: SchemaItem</p>
+<p>lineEditWidget - the processed&nbsp;widget. Object type: QLineEdit</p>
+<p>text - current text in the control. Object type: QString</p>
+<p>&nbsp;</p>
+<p><strong>Example</strong></p>
+<p><em>(function(schemaItem, lineEditWidget, text){</em></p>
+<p><em>})</em></p>
+<p>&nbsp;</p>
+<p><strong><em>ReturnPressed</em></strong></p>
+<p>This script is executed when Return key is pressed.</p>
+<p>&nbsp;</p>
+<p>Parameters:</p>
+<p>schemaItem - the processed schema item. Object type: SchemaItem</p>
+<p>lineEditWidget - the processed&nbsp;widget. Object type: QLineEdit</p>
+<p>text - current text in the control. Object type: QString</p>
+<p>&nbsp;</p>
+<p><strong>Example</strong></p>
+<p><em>(function(schemaItem, lineEditWidget, text){</em></p>
+<p><em>})</em></p>
+<p>&nbsp;</p>
+<p><strong><em>TextChanged</em></strong></p>
+<p>This script is executed when the text is changed by user.</p>
+<p>&nbsp;</p>
+<p>Parameters:</p>
+<p>schemaItem - the processed schema item. Object type: SchemaItem</p>
+<p>lineEditWidget - the processed&nbsp;widget. Object type: QLineEdit</p>
+<p>text - current text in the control. Object type: QString</p>
+<p>&nbsp;</p>
+<p><strong>Example</strong></p>
+<p><em>(function(schemaItem, lineEditWidget, text){</em></p>
+<p><em>})</em></p>
+<p><strong>&nbsp;</strong></p>
+<h2><a name="_Toc10536932"></a><a name="_Toc10535792"></a>SchemaItemPushButton</h2>
+<p><strong>&nbsp;</strong></p>
+<p><strong>Essential Properties</strong></p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>AutoRepeat</em> : <em>boolean</em></strong></p>
+<p>If true, Clicked script is repeated while user holds the left mouse button.</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>AutoRepeatDelay</em></strong> <strong>: <em>int</em></strong></p>
+<p>A delay in milliseconds before auto repeating starts.</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>AutoRepeatInterval</em></strong> : <em><strong>int</strong></em></p>
+<p>An interval in milliseconds of auto repeating.</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>Checkable</em></strong> <strong>: <em>boolean</em></strong></p>
+<p>If set, button is checkable.</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>CheckedDefault</em> : <em>boolean</em></strong></p>
+<p>The default state of checkable button.</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>StyleSheet</em> : <em>string</em></strong></p>
+<p>A stylesheet of a widget. Detailed description of this field can be found in Qt documentation.</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>Text</em></strong> <strong>: <em>string</em></strong></p>
+<p>Gets or sets the text in the control.</p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>Toolti</em><em>p </em>: <em>string</em></strong></p>
+<p>Gets or sets the tooltip text in the control.</p>
+<p><strong>&nbsp;</strong></p>
+<p><strong>Scripts</strong></p>
+<p><strong><em>&nbsp;</em></strong></p>
+<p><strong><em>AfterCreate</em></strong></p>
+<p>This script is executed when the control is created.</p>
+<p>&nbsp;</p>
+<p>Parameters:</p>
+<p>schemaItem - the processed schema item. Object type: SchemaItem</p>
+<p>pushButtonWidget - the processed&nbsp;widget. Object type:&nbsp;QPushButton</p>
+<p>checked - check state of the button. Object type: bool</p>
+<p>&nbsp;</p>
+<p><strong>Example:</strong></p>
+<p><em>(function(schemaItem, pushButtonWidget, checked)</em></p>
+<p><em>{</em></p>
+<p><em>})</em></p>
+<p>&nbsp;</p>
+<p><strong><em>Clicked</em></strong></p>
+<p>This script is executed when the left mouse button is clicked.</p>
+<p>&nbsp;</p>
+<p>Parameters:</p>
+<p>schemaItem - the processed schema item. Object type: SchemaItem</p>
+<p>pushButtonWidget - the processed&nbsp;widget. Object type:&nbsp;QPushButton</p>
+<p>checked - check state of the button. Object type: bool</p>
+<p>&nbsp;</p>
+<p><strong>Example</strong></p>
+<p><em>(function(schemaItem, pushButtonWidget, checked){</em></p>
+<p><em>})</em></p>
+<p>&nbsp;</p>
+<p><strong><em>Pressed</em></strong></p>
+<p>This script is executed when the left mouse button is pressed.</p>
+<p>&nbsp;</p>
+<p>Parameters:</p>
+<p>schemaItem - the processed schema item. Object type: SchemaItem</p>
+<p>pushButtonWidget - the processed&nbsp;widget. Object type: QPushButton</p>
+<p>checked - check state of the button. Object type: bool</p>
+<p>&nbsp;</p>
+<p><strong>Example</strong></p>
+<p><em>(function(schemaItem, pushButtonWidget, checked){</em></p>
+<p><em>})</em></p>
+<p>&nbsp;</p>
+<p><strong><em>Released</em></strong></p>
+<p>This script is executed when the left mouse button is released.</p>
+<p>&nbsp;</p>
+<p>Parameters:</p>
+<p>schemaItem - the processed schema item. Object type: SchemaItem</p>
+<p>pushButtonWidget - the processed&nbsp;widget. Object type:&nbsp;QPushButton</p>
+<p>checked - check state of the button. Object type: bool</p>
+<p>&nbsp;</p>
+<p><strong>Example</strong></p>
+<p>&nbsp;<em>(function(schemaItem, pushButtonWidget, checked){</em></p>
+<p><em>})</em></p>
+<p>&nbsp;</p>
+<p><strong><em>Toggled</em></strong></p>
+<p>This script is executed when the check state of the button is changed.</p>
+<p>&nbsp;</p>
+<p>Parameters:</p>
+<p>schemaItem - the processed schema item. Object type: SchemaItem</p>
+<p>pushButtonWidget - the processed widget. Object type:&nbsp;QPushButton</p>
+<p>checked - check state of the button. Object type: bool</p>
+<p>&nbsp;</p>
+<p><strong>Example</strong></p>
+<p>&nbsp;<em>(function(schemaItem, pushButtonWidget, checked){</em></p>
+<p><em>})</em></p>
+<p><strong>&nbsp;</strong></p>
+<h1><a name="_Toc10536933"></a><a name="_Toc10535793"></a>Signals parameters and states</h1>
+<p><strong>&nbsp;</strong></p>
+<h2><a name="_Toc10536934"></a><a name="_Toc10535794"></a>AppSignalParam</h2>
+<p><strong>&nbsp;</strong></p>
+<p>Describes signals static parameters.</p>
+<p>&nbsp;</p>
+<p><strong>Properties</strong></p>
+<p>Hash: 64-bit number;</p>
+<p>AppSignalID: string;</p>
+<p>CustomSignalID: string;</p>
+<p>Caption: string;</p>
+<p>EquipmentID: string;</p>
+<p>Unit: string;</p>
+<p>Precision: number;</p>
+<p>Channel: number;</p>
+<p>EnableTuning: boolean;</p>
+<p>TuningDefaultValue: boolean;</p>
+<p>TuningLowBound: number;</p>
+<p>TuningHighBound: number;</p>
+<p>IsInput: boolean;</p>
+<p>IsOutput: boolean;</p>
+<p>IsInternal: boolean;</p>
+<p>IsAnalog: boolean;</p>
+<p>IsDiscrete: boolean;</p>
+<p><strong>&nbsp;</strong></p>
+<h2><a name="_Toc10536935"></a><a name="_Toc10535795"></a>AppSignalState</h2>
+<p>&nbsp;</p>
+<p>Describes signal state in the Monitor application, is received from Application Data Service.</p>
+<p>&nbsp;</p>
+<p><strong>Properties</strong></p>
+<p>Hash: 64-bit number;</p>
+<p>Value: number;</p>
+<p>Valid: boolean;</p>
+<p>StateAvailable: boolean;</p>
+<p>Simulated: boolean;</p>
+<p>Blocked: boolean;</p>
+<p>Unbalanced: boolean;</p>
+<p>AboveHighLimit: boolean;</p>
+<p>BelowLowLimit: boolean;</p>
+<p>OutOfLimits: boolean;</p>
+<p><strong>&nbsp;</strong></p>
+<h2><a name="_Toc10536936"></a><a name="_Toc10535796"></a>TuningSignalState</h2>
+<p><strong>&nbsp;</strong></p>
+<p>Describes tuning signal state in the Monitor and TuningClient applications, is received from TuningService. Can be used in Monitor only if Tuning feature is turned on.</p>
+<p>&nbsp;</p>
+<p><strong>Properties</strong></p>
+<p>Hash: 64-bit number;</p>
+<p>Value: number;</p>
+<p>LowBound: number;</p>
+<p>HighBound: number;</p>
+<p>Valid: boolean;</p>
+<p>OutOfRange: boolean;</p>
+<p>WriteInProgress: boolean;</p>
+<p>ControlIsEnabled: boolean;</p>
+<p>WritingIsEnabled: boolean;</p>
+<p>&nbsp;</p>

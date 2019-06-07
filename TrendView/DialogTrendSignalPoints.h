@@ -24,6 +24,7 @@ public:
 		Index,
 		Time,
 		Value,
+		Realtime,
 		Count
 	};
 

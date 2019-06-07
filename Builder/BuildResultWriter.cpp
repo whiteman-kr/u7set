@@ -8,6 +8,7 @@
 #include <QCryptographicHash>
 #include <QStandardPaths>
 #include <QHostInfo>
+#include <QTextCodec>
 
 namespace Builder
 {
@@ -103,7 +104,7 @@ namespace Builder
 
 	bool BuildFile::write(const BuildResult& buildResult, const QString& dataString, IssueLogger* log)
 	{
-		if (open(buildResult, false, log) == false)
+		if (open(buildResult, true, log) == false)
 		{
 			return false;
 		}
@@ -111,6 +112,8 @@ namespace Builder
 		QByteArray data;
 
 		QTextStream textStream(&data);
+
+		textStream.setCodec("UTF-8");
 
 		textStream << dataString;
 
@@ -142,6 +145,8 @@ namespace Builder
 		QByteArray data;
 
 		QTextStream textStream(&data);
+
+		textStream.setCodec("UTF-8");
 
 		for(auto string : stringList)
 		{

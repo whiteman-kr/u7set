@@ -324,6 +324,11 @@ Qt::ItemFlags TuningModelClient::flags(const QModelIndex& index) const
 			return f;
 		}
 
+		if (m_tuningSignalManager->newValueIsUnapplied(hash) == true)
+		{
+			f &= ~Qt::ItemIsSelectable;
+		}
+
 		bool ok = false;
 
 		AppSignalParam asp = m_tuningSignalManager->signalParam(hash, &ok);

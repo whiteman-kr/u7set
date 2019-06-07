@@ -325,6 +325,18 @@ namespace Builder
 		}
 	}
 
+	void SignalSet::cacheSpecPropValues()
+	{
+		int signalsCount = count();
+
+		for(int i = 0; i < signalsCount; i++)
+		{
+			Signal& s = (*this)[i];
+
+			s.cacheSpecPropValues();
+		}
+	}
+
 	Signal* SignalSet::appendBusChildSignal(const Signal& s, BusShared bus, const BusSignal& busSignal)
 	{
 		m_maxSignalID++;
@@ -464,25 +476,26 @@ namespace Builder
 
 		bool result = true;
 
-		result &= checkSignalPropertyRanges(s, s.lowEngeneeringUnits(), "LowEngeneeringUnits");
-		result &= checkSignalPropertyRanges(s, s.highEngeneeringUnits(), "HighEngeneeringUnits");
+		result &= checkSignalPropertyRanges(s, SignalProperties::lowEngeneeringUnitsCaption);
+		result &= checkSignalPropertyRanges(s, SignalProperties::highEngeneeringUnitsCaption);
+		result &= checkSignalPropertyRanges(s, SignalProperties::lowValidRangeCaption);
+		result &= checkSignalPropertyRanges(s, SignalProperties::highValidRangeCaption);
 
-		result &= checkSignalPropertyRanges(s, s.lowValidRange(), "LowValidRange");
-		result &= checkSignalPropertyRanges(s, s.highValidRange(), "HighValidRange");
-
-		result &= checkSignalTuningValuesRanges(s, s.tuningDefaultValue(), "TuningDefaultValue");
-		result &= checkSignalTuningValuesRanges(s, s.tuningLowBound(), "TuningLowBound");
-		result &= checkSignalTuningValuesRanges(s, s.tuningHighBound(), "TuningHighBound");
+		result &= checkSignalTuningValuesRanges(s, s.tuningDefaultValue(), SignalProperties::tuningDefaultValueCaption);
+		result &= checkSignalTuningValuesRanges(s, s.tuningLowBound(), SignalProperties::tuningLowBoundCaption);
+		result &= checkSignalTuningValuesRanges(s, s.tuningHighBound(), SignalProperties::tuningHighBoundCaption);
 
 		return result;
 	}
 
-	bool SignalSet::checkSignalPropertyRanges(const Signal& s, double properyValue, const QString& propertyName)
+	bool SignalSet::checkSignalPropertyRanges(const Signal& s, const QString& propertyName)
 	{
 		if (s.isAnalog() == false)
 		{
 			return true;
 		}
+
+		double properyValue = s.getSpecPropDouble(propertyName);
 
 		bool result = true;
 

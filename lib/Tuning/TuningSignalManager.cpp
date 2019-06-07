@@ -133,7 +133,7 @@ AppSignalParam TuningSignalManager::signalParam(Hash hash, bool* found) const
 			*found = false;
 		}
 
-		return AppSignalParam();
+		return {};
 	}
 
 	if (found != nullptr)

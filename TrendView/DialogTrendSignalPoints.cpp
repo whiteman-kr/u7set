@@ -175,7 +175,16 @@ QVariant TrendPointsModel::data(const QModelIndex& index, int role) const
 				}
 				return QString::number(stateItem.value, 'f', m_precision);
 
-			default:
+		case static_cast<int>(Columns::Realtime):
+			if (stateItem.isRealtimePoint() == true)
+			{
+				return QString("yes");
+			}
+			else
+			{
+				return QString("no");
+			}
+		default:
 				Q_ASSERT(false);
 		}
 	}
@@ -201,6 +210,8 @@ QVariant TrendPointsModel::headerData(int section, Qt::Orientation orientation, 
 				return QStringLiteral("Time");
 			case static_cast<int>(Columns::Value):
 				return QStringLiteral("Value");
+			case static_cast<int>(Columns::Realtime):
+				return QStringLiteral("Realtime");
 			default:
 				Q_ASSERT(false);
 			}

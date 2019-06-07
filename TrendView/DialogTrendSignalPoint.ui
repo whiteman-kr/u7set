@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>400</width>
-    <height>175</height>
+    <height>207</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -19,10 +19,13 @@
      <property name="verticalSpacing">
       <number>16</number>
      </property>
-     <item row="0" column="0">
-      <widget class="QLabel" name="label">
-       <property name="text">
-        <string>Time:</string>
+     <item row="5" column="0" colspan="2">
+      <widget class="QDialogButtonBox" name="buttonBox">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="standardButtons">
+        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
        </property>
       </widget>
      </item>
@@ -43,16 +46,6 @@
        </property>
       </widget>
      </item>
-     <item row="1" column="0">
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>Value:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="1">
-      <widget class="QLineEdit" name="editValue"/>
-     </item>
      <item row="2" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
@@ -60,14 +53,21 @@
        </property>
       </widget>
      </item>
-     <item row="2" column="1">
-      <widget class="QCheckBox" name="checkBoxValid">
+     <item row="1" column="0">
+      <widget class="QLabel" name="label_2">
        <property name="text">
-        <string/>
+        <string>Value:</string>
        </property>
       </widget>
      </item>
-     <item row="3" column="1">
+     <item row="0" column="0">
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>Time:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="4" column="1">
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -80,13 +80,27 @@
        </property>
       </spacer>
      </item>
-     <item row="4" column="0" colspan="2">
-      <widget class="QDialogButtonBox" name="buttonBox">
-       <property name="orientation">
-        <enum>Qt::Horizontal</enum>
+     <item row="3" column="0">
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>Realtime:</string>
        </property>
-       <property name="standardButtons">
-        <set>QDialogButtonBox::Cancel|QDialogButtonBox::Ok</set>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLineEdit" name="editValue"/>
+     </item>
+     <item row="2" column="1">
+      <widget class="QCheckBox" name="checkBoxValid">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="1">
+      <widget class="QCheckBox" name="checkBoxRealtime">
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>
@@ -94,6 +108,12 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>dateTimeEdit</tabstop>
+  <tabstop>editValue</tabstop>
+  <tabstop>checkBoxValid</tabstop>
+  <tabstop>checkBoxRealtime</tabstop>
+ </tabstops>
  <resources/>
  <connections>
   <connection>
