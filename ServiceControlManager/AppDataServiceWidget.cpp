@@ -375,6 +375,11 @@ void DataSourcesStateModel::updateData(const QModelIndex& topLeft, const QModelI
 	emit dataChanged(topLeft, bottomRight, QVector<int>() << Qt::DisplayRole);
 }
 
+const AppDataSource* DataSourcesStateModel::getDataSource(int row) const
+{
+	return m_dataSource[row];
+}
+
 void DataSourcesStateModel::invalidateData()
 {
 	beginResetModel();
@@ -633,7 +638,7 @@ void AppDataServiceWidget::onAppDataSourceDoubleClicked(const QModelIndex &index
 	TEST_PTR_RETURN(m_tcpClientSocket);
 
 	int row = index.row();
-	const AppDataSource* ads = m_tcpClientSocket->dataSources()[row];
+	const AppDataSource* ads = m_dataSourcesStateModel->getDataSource(row);
 
 	TEST_PTR_RETURN(ads);
 
