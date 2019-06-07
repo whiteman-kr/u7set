@@ -10,15 +10,15 @@ Options theOptions;
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SourceOption::SourceOption(QObject *parent) :
+PathOption::PathOption(QObject *parent) :
 	QObject(parent)
 {
-	m_path.clear();
+	clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SourceOption::SourceOption(const SourceOption& from, QObject *parent) :
+PathOption::PathOption(const PathOption& from, QObject *parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -26,33 +26,48 @@ SourceOption::SourceOption(const SourceOption& from, QObject *parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SourceOption::~SourceOption()
+PathOption::~PathOption()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SourceOption::load()
+void PathOption::clear()
+{
+	m_signalPath.clear();
+	m_sourcePath.clear();
+	m_localIP.clear();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void PathOption::load()
 {
 	QSettings s;
 
-	m_path = s.value(QString("%1Path").arg(SOURCE_REG_KEY), QString()).toString();
+	m_signalPath = s.value(QString("%1SignalPath").arg(SOURCE_REG_KEY), QString()).toString();
+	m_sourcePath = s.value(QString("%1SourcePath").arg(SOURCE_REG_KEY), QString()).toString();
+	m_localIP = s.value(QString("%1LocalIP").arg(SOURCE_REG_KEY), QString("127.0.0.1")).toString();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SourceOption::save()
+void PathOption::save()
 {
 	QSettings s;
 
-	s.setValue(QString("%1Path").arg(SOURCE_REG_KEY), m_path);
+	s.setValue(QString("%1SignalPath").arg(SOURCE_REG_KEY), m_signalPath);
+	s.setValue(QString("%1SourcePath").arg(SOURCE_REG_KEY), m_sourcePath);
+	s.setValue(QString("%1LocalIP").arg(SOURCE_REG_KEY), m_localIP);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SourceOption& SourceOption::operator=(const SourceOption& from)
+PathOption& PathOption::operator=(const PathOption& from)
 {
-	m_path = from.m_path;
+	m_signalPath = from.m_signalPath;
+	m_sourcePath = from.m_sourcePath;
+	m_localIP = from.m_localIP;
 
 	return *this;
 }
@@ -84,14 +99,14 @@ Options::~Options()
 
 void Options::load()
 {
-	m_source.load();
+	m_path.load();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void Options::save()
 {
-	m_source.save();
+	m_path.save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -115,7 +130,7 @@ Options& Options::operator=(const Options& from)
 {
 	m_mutex.lock();
 
-		m_source = from.m_source;
+		m_path = from.m_path;
 
 	m_mutex.unlock();
 
