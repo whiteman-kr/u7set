@@ -556,11 +556,6 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 		m_firstFrameServerTime = rupFrameTime.serverTime;
 	}
 
-	if (frameNumber > 0)
-	{
-		DEBUG_STOP;
-	}
-
 	// copy RUP frame header
 	//
 	memcpy(m_rupFramesHeaders + frameNumber, &rupFrameHeader, sizeof(rupFrameHeader));
