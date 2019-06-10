@@ -162,6 +162,38 @@ bool MainWindow::createToolBars()
 
 void MainWindow::createViews()
 {
+	// Search signal text panel
+	//
+	m_pFindSignalTextPanel = new FindSignalTextPanel(this);
+	if (m_pFindSignalTextPanel != nullptr)
+	{
+		m_pFindSignalTextPanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+
+		addDockWidget(Qt::RightDockWidgetArea, m_pFindSignalTextPanel);
+
+		m_pFindSignalTextPanel->hide();
+
+		QAction* findAction = m_pFindSignalTextPanel->toggleViewAction();
+		if (findAction != nullptr)
+		{
+			findAction->setText(tr("&Find ..."));
+			findAction->setShortcut(Qt::CTRL + Qt::Key_F);
+			findAction->setIcon(QIcon(":/icons/Find.png"));
+			findAction->setToolTip(tr("Find text in list of signals"));
+
+			if (m_sourceMenu != nullptr)
+			{
+				m_sourceMenu->addAction(findAction);
+			}
+
+			if (m_mainToolBar != nullptr)
+			{
+				m_mainToolBar->addAction(findAction);
+			}
+		}
+	}
+
+
 	// View of sources
 	//
 	m_pSourceView = new QTableView(this);

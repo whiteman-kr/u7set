@@ -65,7 +65,8 @@ SourceBase.cpp \
     ../../lib/SimpleMutex.cpp \
     ../../lib/Times.cpp \
     PathOptionDialog.cpp \
-    ../../lib/Address16.cpp
+    ../../lib/Address16.cpp \
+    FindSignalTextPanel.cpp
 
 
 HEADERS += \
@@ -108,7 +109,8 @@ SourceBase.h \
     ../../lib/SimpleMutex.h \
     ../../lib/Times.h \
     PathOptionDialog.h \
-    ../../lib/Address16.h
+    ../../lib/Address16.h \
+    FindSignalTextPanel.h
 
 RESOURCES += \
 resources.qrc
@@ -160,3 +162,4 @@ unix {
 DISTFILES += \
 	../../Proto/network.proto \
 	../../Proto/serialization.proto \
+    icons/Search.png

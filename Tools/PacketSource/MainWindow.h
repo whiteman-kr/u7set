@@ -15,6 +15,7 @@
 #include <QTimer>
 
 #include "SourceBase.h"
+#include "FindSignalTextPanel.h"
 
 // ==============================================================================================
 
@@ -54,6 +55,10 @@ private:
 	// Elements of interface - ToolBar
 	//
 	QToolBar*				m_mainToolBar = nullptr;
+
+	// Elements of interface - Panels
+	//
+	FindSignalTextPanel*		m_pFindSignalTextPanel = nullptr;
 
 	// Elements of interface - StatusBar
 	//
@@ -108,6 +113,12 @@ private:
 
 	void					updateSignalList(PS::Source* pSource);
 	void					updateFrameDataList(PS::Source* pSource);
+
+public:
+
+	QTableView*				sourceView() { return m_pSourceView; }
+	QTableView*				signalView() { return m_pSignalView; }
+	QTableView*				frameDataView() { return m_pFrameDataView; }
 
 protected:
 
