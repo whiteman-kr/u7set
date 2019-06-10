@@ -73,6 +73,7 @@ void PS::Source::clear()
 	m_sourceMutex.lock();
 
 		m_si.clear();
+		m_associatedSignalList.clear();
 		m_signalList.clear();
 		m_frameBase.clear();
 
@@ -127,24 +128,6 @@ int PS::Source::sentFrames()
 	}
 
 	return m_pWorker->sentFrames();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-PS::Source& PS::Source::operator=(const PS::Source& from)
-{
-	m_sourceMutex.lock();
-
-		m_pThread = from.m_pThread;
-		m_pWorker = from.m_pWorker;
-
-		m_si = from.m_si;
-		m_signalList = from.m_signalList;
-		m_frameBase = from.m_frameBase;
-
-	m_sourceMutex.unlock();
-
-	return *this;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -207,6 +190,61 @@ void PS::Source::deleteWorker()
 }
 
 // -------------------------------------------------------------------------------------------------------------------
+
+void PS::Source::initSignals(const SignalBase& signalBase)
+{
+	for (int i = 0; i < m_si.signalCount; i++)
+	{
+		PS::Signal* pSignal = signalBase.signalPtr(m_associatedSignalList[i]);
+		if (pSignal == nullptr)
+		{
+			PS::Signal signal;
+			signal.setAppSignalID(m_associatedSignalList[i]);
+			qDebug() << "Signal:" << m_associatedSignalList[i] << "has not been found";
+			m_signalList.append(signal);
+		}
+		else
+		{
+			pSignal->calcOffset();
+
+			int frameIndex = pSignal->frameIndex();
+			if (frameIndex >= 0 && frameIndex < m_si.frameCount)
+			{
+				PS::FrameData* pFrameData = m_frameBase.frameDataPtr(frameIndex);
+				if (pFrameData != nullptr)
+				{
+					if (pSignal->frameOffset() >= 0 && pSignal->frameOffset() < Rup::FRAME_DATA_SIZE)
+					{
+						pSignal->setValueData(&pFrameData->data()[pSignal->frameOffset()]);
+					}
+				}
+			}
+
+			m_signalList.append(*pSignal);
+		}
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+PS::Source& PS::Source::operator=(const PS::Source& from)
+{
+	m_sourceMutex.lock();
+
+		m_pThread = from.m_pThread;
+		m_pWorker = from.m_pWorker;
+
+		m_si = from.m_si;
+		m_associatedSignalList = from.m_associatedSignalList;
+		m_signalList = from.m_signalList;
+		m_frameBase = from.m_frameBase;
+
+	m_sourceMutex.unlock();
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -250,7 +288,7 @@ int SourceBase::count() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SourceBase::readFromFile(const QString& path, const SignalBase& signalBase)
+int SourceBase::readFromFile(const QString& path)
 {
 	clear();
 
@@ -376,52 +414,20 @@ int SourceBase::readFromFile(const QString& path, const SignalBase& signalBase)
 
 				QString strAssociatedSignalIDs;
 				xmlSource.readStringElement(DataSource::ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS, &strAssociatedSignalIDs);
-				QStringList associatedSignalList = strAssociatedSignalIDs.split(",", QString::SkipEmptyParts);
+				source.associatedSignalList() = strAssociatedSignalIDs.split(",", QString::SkipEmptyParts);
 
-				if (associatedSignalList.count() != source.info().signalCount)
+				if (source.associatedSignalList().count() != source.info().signalCount)
 				{
 					assert(0);
 					continue;
-				}
-
-				//
-
-				for (int i = 0; i < source.info().signalCount; i++)
-				{
-					PS::Signal signal;
-
-					int signalIndex = signalBase.findIndex(associatedSignalList[i]);
-					if (signalIndex == -1)
-					{
-						signal.setAppSignalID(associatedSignalList[i]);
-						qDebug() << "Signal:" << associatedSignalList[i] << "has not been found";
-					}
-					else
-					{
-						signal = signalBase.signal(signalIndex);
-						signal.calcOffset();
-
-						int frameIndex = signal.frameIndex();
-						if (frameIndex >= 0 && frameIndex < source.info().frameCount)
-						{
-							PS::FrameData* pFrameData = source.frameBase().frameDataPtr(frameIndex);
-							if (pFrameData != nullptr)
-							{
-								if (signal.frameOffset() >= 0 && signal.frameOffset() < Rup::FRAME_DATA_SIZE)
-								{
-									signal.setValueData(&pFrameData->data()[signal.frameOffset()]);
-								}
-							}
-						}
-					}
-
-					source.signalList().append(signal);
 				}
 			}
 
 			append(source);
 		}
 	}
+
+	emit sourcesLoaded();
 
 	return count();
 }

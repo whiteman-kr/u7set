@@ -42,7 +42,7 @@ bool MainWindow::createInterface()
 	createContextMenu();
 	createHeaderContexMenu();
 	createStatusBar();
-	loadSignals();
+
 	loadSources();
 
 	if (Rup::VERSION != PS::SUPPORT_VERSION)
@@ -323,8 +323,30 @@ void MainWindow::createStatusBar()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::loadSources()
+{
+	connect(&m_sourceBase, &SourceBase::sourcesLoaded, this, &MainWindow::loadSignals, Qt::QueuedConnection);
+
+	QVector<PS::Source*> ptrSourceList;
+
+	int sourceCount = m_sourceBase.readFromFile(theOptions.path().sourcePath());
+	for(int i = 0; i < sourceCount; i++)
+	{
+		ptrSourceList.append(m_sourceBase.sourcePtr(i));
+	}
+
+	qDebug() << "Loaded sources:" << sourceCount;
+
+	m_sourceTable.clear();
+	m_sourceTable.set(ptrSourceList);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::loadSignals()
 {
+	connect(&m_signalBase, &SignalBase::signalsLoaded, this, &MainWindow::initSignalsInSources, Qt::QueuedConnection);
+
 	int signalCount = m_signalBase.readFromFile(theOptions.path().signalPath());
 	if (signalCount == 0)
 	{
@@ -337,22 +359,19 @@ void MainWindow::loadSignals()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::loadSources()
+void MainWindow::initSignalsInSources()
 {
-	QVector<PS::Source*> ptrSourceList;
-
-	int sourceCount = m_sourceBase.readFromFile(theOptions.path().sourcePath(), m_signalBase);
+	int sourceCount = m_sourceBase.count();
 	for(int i = 0; i < sourceCount; i++)
 	{
-		ptrSourceList.append(m_sourceBase.sourcePtr(i));
+		PS::Source* pSource = m_sourceBase.sourcePtr(i);
+		if (pSource == nullptr)
+		{
+			continue;
+		}
+
+		pSource->initSignals(m_signalBase);
 	}
-
-	qDebug() << "Loaded sources:" << sourceCount;
-
-	m_sourceTable.clear();
-	m_sourceTable.set(ptrSourceList);
-
-	m_statusServer->setText(tr(""));
 }
 
 // -------------------------------------------------------------------------------------------------------------------

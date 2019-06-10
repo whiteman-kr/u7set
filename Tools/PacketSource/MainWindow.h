@@ -71,8 +71,6 @@ private:
 	void					createContextMenu();
 	void					createHeaderContexMenu();
 	void					createStatusBar();
-	void					loadSignals();
-	void					loadSources();
 
 	//
 
@@ -138,6 +136,12 @@ private slots:
 							// menu - ?
 							//
 	void					aboutApp();
+
+	// slot of data
+	//
+	void					loadSources();
+	void					loadSignals();
+	void					initSignalsInSources();
 
 	// slot of lists
 	//

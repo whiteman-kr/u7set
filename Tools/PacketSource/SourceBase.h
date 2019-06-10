@@ -76,6 +76,7 @@ namespace PS
 		SourceWorker*		m_pWorker = nullptr;
 
 		PS::SourceInfo		m_si;
+		QStringList			m_associatedSignalList;
 		QVector<PS::Signal>	m_signalList;
 		FrameBase			m_frameBase;
 
@@ -86,6 +87,7 @@ namespace PS
 		//
 
 		PS::SourceInfo&			info() { return m_si; }
+		QStringList&			associatedSignalList()  { return m_associatedSignalList; }
 		QVector<PS::Signal>&	signalList()  { return m_signalList; }
 		FrameBase&				frameBase() { return m_frameBase; }
 
@@ -96,6 +98,10 @@ namespace PS
 
 		bool					isRunning();
 		int						sentFrames();
+
+		//
+
+		void					initSignals(const SignalBase& signalBase);
 
 		//
 
@@ -132,7 +138,7 @@ public:
 	void					clear();
 	int						count() const;
 
-	int						readFromFile(const QString& path, const SignalBase& signalBase);
+	int						readFromFile(const QString& path);
 
 	int						append(const PS::Source &source);
 	void					remove(int index);
@@ -152,6 +158,8 @@ public:
 	void					stopAllSoureces();
 
 signals:
+
+	void					sourcesLoaded();
 
 public slots:
 

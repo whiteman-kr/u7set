@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <QMessageBox>
 #include <QFile>
+#include <QProgressDialog>`
 
 #include "../../lib/XmlHelper.h"
 #include "../../Builder/CfgFiles.h"
@@ -448,9 +449,22 @@ int SignalBase::readFromFile(const QString& path)
 		return 0;
 	}
 
+	QString strProgressLabel;
 	int signalCount = protoAppSignalSet.appsignal_size();
+
+	QProgressDialog* pprd = new QProgressDialog(tr("Loading signals..."), tr("&Cancel"), 0, signalCount);
+	pprd->setMinimumDuration(0);
+	pprd->setWindowTitle("Please Wait");
+
 	for(int i = 0; i < signalCount; i++)
 	{
+		pprd->setValue(i) ;
+		qApp->processEvents();
+		if (pprd->wasCanceled())
+		{
+			 break;
+		}
+
 		const ::Proto::AppSignal& protoAppSignal = protoAppSignalSet.appsignal(i);
 
 		PS::Signal signal;
@@ -459,6 +473,10 @@ int SignalBase::readFromFile(const QString& path)
 		append(signal);
 	}
 
+	delete pprd;
+
+	emit signalsLoaded();
+
 	return count();
 }
 
@@ -466,12 +484,23 @@ int SignalBase::readFromFile(const QString& path)
 
 int SignalBase::append(const PS::Signal& signal)
 {
+	if (signal.appSignalID().isEmpty() == true || signal.hash() == UNDEFINED_HASH)
+	{
+		assert(false);
+		return -1;
+	}
+
 	int index = -1;
 
 	m_signalMutex.lock();
 
+	if (m_signalHashMap.contains(signal.hash()) == false)
+	{
 		m_signalList.append(signal);
 		index = m_signalList.count() - 1;
+
+		m_signalHashMap.insert(signal.hash(), index);
+	}
 
 	m_signalMutex.unlock();
 
@@ -480,16 +509,80 @@ int SignalBase::append(const PS::Signal& signal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalBase::remove(int index)
+PS::Signal* SignalBase::signalPtr(const Hash& hash) const
 {
+	if (hash == UNDEFINED_HASH)
+	{
+		assert(hash != 0);
+		return nullptr;
+	}
+
+	PS::Signal* pSignal = nullptr;
+
+	m_signalMutex.lock();
+
+		if (m_signalHashMap.contains(hash) == true)
+		{
+			int index = m_signalHashMap[hash];
+			if (index >= 0 && index < m_signalList.count())
+			{
+				pSignal = (PS::Signal*) &m_signalList[index];
+			}
+		}
+
+	m_signalMutex.unlock();
+
+	return pSignal;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+SignalBase& SignalBase::operator=(const SignalBase& from)
+{
+	m_signalMutex.lock();
+
+		m_signalList = from.m_signalList;
+
+	m_signalMutex.unlock();
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+PS::Signal SignalBase::signal(const Hash& hash) const
+{
+	PS::Signal signal;
+
+	m_signalMutex.lock();
+
+		int index = m_signalHashMap[hash];
+		if (index >= 0 && index < m_signalList.count())
+		{
+			signal = m_signalList[index];
+		}
+
+	m_signalMutex.unlock();
+
+	return signal;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+PS::Signal* SignalBase::signalPtr(int index) const
+{
+	PS::Signal* pSignal = nullptr;
+
 	m_signalMutex.lock();
 
 		if (index >= 0 && index < m_signalList.count())
 		{
-			m_signalList.remove(index);
+			pSignal = (PS::Signal*) &m_signalList[index];
 		}
 
 	m_signalMutex.unlock();
+
+	return pSignal;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -512,24 +605,6 @@ PS::Signal SignalBase::signal(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PS::Signal* SignalBase::signalPtr(int index)
-{
-	PS::Signal* pSignal = nullptr;
-
-	m_signalMutex.lock();
-
-		if (index >= 0 && index < m_signalList.count())
-		{
-			pSignal = &m_signalList[index];
-		}
-
-	m_signalMutex.unlock();
-
-	return pSignal;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void SignalBase::setSignal(int index, const PS::Signal &signal)
 {
 	m_signalMutex.lock();
@@ -544,49 +619,15 @@ void SignalBase::setSignal(int index, const PS::Signal &signal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int	 SignalBase::findIndex(const QString& appSignalID) const
+PS::Signal* SignalBase::signalPtr(const QString& appSignalID) const
 {
 	if (appSignalID.isEmpty() == true)
 	{
-		return -1;
+		assert(false);
+		return nullptr;
 	}
 
-	Hash hash = calcHash(appSignalID);
-	if (hash == UNDEFINED_HASH)
-	{
-		return -1;
-	}
-
-	int index = -1;
-
-	m_signalMutex.lock();
-
-		int count = m_signalList.count();
-		for(int i = 0; i < count; i++)
-		{
-			if(m_signalList[i].hash() == hash)
-			{
-				index = i;
-				break;
-			}
-		}
-
-	m_signalMutex.unlock();
-
-	return index;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-SignalBase& SignalBase::operator=(const SignalBase& from)
-{
-	m_signalMutex.lock();
-
-		m_signalList = from.m_signalList;
-
-	m_signalMutex.unlock();
-
-	return *this;
+	return signalPtr(calcHash(appSignalID));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -679,6 +720,14 @@ QVariant SignalTable::data(const QModelIndex &index, int role) const
 	if (role == Qt::TextAlignmentRole)
 	{
 		return Qt::AlignCenter;
+	}
+
+	if (role == Qt::TextColorRole)
+	{
+		if (pSignal->regValueAddr().offset() == BAD_ADDRESS || pSignal->regValueAddr().bit() == BAD_ADDRESS)
+		{
+			return QColor(0xD0, 0xD0, 0xD0);
+		}
 	}
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)

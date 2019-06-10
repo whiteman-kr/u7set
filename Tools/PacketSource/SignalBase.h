@@ -86,6 +86,7 @@ private:
 
 	mutable QMutex			m_signalMutex;
 	QVector<PS::Signal>		m_signalList;
+	QMap<Hash, int>			m_signalHashMap;
 
 public:
 
@@ -95,17 +96,21 @@ public:
 	int						readFromFile(const QString& path);
 
 	int						append(const PS::Signal& signal);
-	void					remove(int index);
 
+	PS::Signal*				signalPtr(const QString& appSignalID) const;
+	PS::Signal*				signalPtr(const Hash& hash) const;
+	PS::Signal				signal(const Hash& hash) const;
+
+	PS::Signal*				signalPtr(int index) const;
 	PS::Signal				signal(int index) const;
-	PS::Signal*				signalPtr(int index);
-	void					setSignal(int index, const PS::Signal& signal);
 
-	int						findIndex(const QString& appSignalID ) const;
+	void					setSignal(int index, const PS::Signal& signal);
 
 	SignalBase&				operator=(const SignalBase& from);
 
 signals:
+
+	void					signalsLoaded();
 
 public slots:
 
