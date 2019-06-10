@@ -44,6 +44,7 @@ private:
 	QAction*				m_sourceStartAction = nullptr;
 	QAction*				m_sourceStopAction = nullptr;
 	QAction*				m_sourceSelectAllAction = nullptr;
+	QAction*				m_findAction = nullptr;
 	QAction*				m_optionAction = nullptr;
 	QAction*				m_sourceTextCopyAction = nullptr;
 	QAction*				m_signalTextCopyAction = nullptr;
@@ -58,7 +59,7 @@ private:
 
 	// Elements of interface - Panels
 	//
-	FindSignalTextPanel*		m_pFindSignalTextPanel = nullptr;
+	FindSignalTextPanel*	m_pFindSignalTextPanel = nullptr;
 
 	// Elements of interface - StatusBar
 	//
@@ -135,6 +136,7 @@ private slots:
 	void					startSource();
 	void					stopSource();
 	void					selectAllSource();
+	void					findTextSignal();
 	void					optionSource();
 	void					copyText(QTableView* pView);
 	void					copySourceText();

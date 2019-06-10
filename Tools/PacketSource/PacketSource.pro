@@ -66,7 +66,8 @@ SourceBase.cpp \
     ../../lib/Times.cpp \
     PathOptionDialog.cpp \
     ../../lib/Address16.cpp \
-    FindSignalTextPanel.cpp
+    FindSignalTextPanel.cpp \
+    FindData.cpp
 
 
 HEADERS += \
@@ -110,7 +111,8 @@ SourceBase.h \
     ../../lib/Times.h \
     PathOptionDialog.h \
     ../../lib/Address16.h \
-    FindSignalTextPanel.h
+    FindSignalTextPanel.h \
+    FindData.h
 
 RESOURCES += \
 resources.qrc
