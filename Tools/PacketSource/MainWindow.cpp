@@ -78,11 +78,11 @@ void MainWindow::createActions()
 	m_sourceSelectAllAction->setToolTip(tr("Select all sources"));
 	connect(m_sourceSelectAllAction, &QAction::triggered, this, &MainWindow::selectAllSource);
 
-	m_sourceOptionAction = new QAction(tr("&Options"), this);
-	m_sourceOptionAction->setShortcut(Qt::CTRL + Qt::Key_O);
-	m_sourceOptionAction->setIcon(QIcon(":/icons/Options.png"));
-	m_sourceOptionAction->setToolTip(tr("Options of sources"));
-	connect(m_sourceOptionAction, &QAction::triggered, this, &MainWindow::optionSource);
+	m_optionAction = new QAction(tr("&Options"), this);
+	m_optionAction->setShortcut(Qt::CTRL + Qt::Key_O);
+	m_optionAction->setIcon(QIcon(":/icons/Options.png"));
+	m_optionAction->setToolTip(tr("Options of sources"));
+	connect(m_optionAction, &QAction::triggered, this, &MainWindow::optionSource);
 
 	// ?
 	//
@@ -90,6 +90,18 @@ void MainWindow::createActions()
 	m_pAboutAppAction->setIcon(QIcon(":/icons/About.png"));
 	m_pAboutAppAction->setToolTip("");
 	connect(m_pAboutAppAction, &QAction::triggered, this, &MainWindow::aboutApp);
+
+	// source contex menu
+	//
+	m_sourceTextCopyAction = new QAction(tr("&Copy"), this);
+	connect(m_sourceTextCopyAction, &QAction::triggered, this, &MainWindow::copySourceText);
+
+
+	// signal contex menu
+	//
+	m_signalTextCopyAction = new QAction(tr("&Copy"), this);
+	connect(m_signalTextCopyAction, &QAction::triggered, this, &MainWindow::copySignalText);
+
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -111,13 +123,13 @@ void MainWindow::createMenu()
 	m_sourceMenu->addSeparator();
 	m_sourceMenu->addAction(m_sourceSelectAllAction);
 	m_sourceMenu->addSeparator();
-	m_sourceMenu->addAction(m_sourceOptionAction);
+	m_sourceMenu->addAction(m_optionAction);
 
 	//
 	//
-	m_pInfoMenu = pMenuBar->addMenu(tr("&?"));
+	m_infoMenu = pMenuBar->addMenu(tr("&?"));
 
-	m_pInfoMenu->addAction(m_pAboutAppAction);
+	m_infoMenu->addAction(m_pAboutAppAction);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -141,7 +153,7 @@ bool MainWindow::createToolBars()
 	m_mainToolBar->addAction(m_sourceStartAction);
 	m_mainToolBar->addAction(m_sourceStopAction);
 	m_mainToolBar->addSeparator();
-	m_mainToolBar->addAction(m_sourceOptionAction);
+	m_mainToolBar->addAction(m_optionAction);
 
 	return true;
 }
@@ -242,9 +254,21 @@ void MainWindow::createContextMenu()
 
 	m_sourceContextMenu->addAction(m_sourceStartAction);
 	m_sourceContextMenu->addAction(m_sourceStopAction);
+	m_sourceContextMenu->addSeparator();
+	m_sourceContextMenu->addAction(m_sourceTextCopyAction);
 
 	m_pSourceView->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(m_pSourceView, &QTableView::customContextMenuRequested, this, &MainWindow::onSourceContextMenu);
+
+
+	// View of signals
+	//
+	m_signalContextMenu = new QMenu(this);
+
+	m_signalContextMenu->addAction(m_signalTextCopyAction);
+
+	m_pSignalView->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_pSignalView, &QTableView::customContextMenuRequested, this, &MainWindow::onSignalContextMenu);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -510,6 +534,45 @@ void MainWindow::optionSource()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::copyText(QTableView* pView)
+{
+	if (pView == nullptr)
+	{
+		return;
+	}
+
+	QString textClipboard;
+
+	int row = pView->selectionModel()->currentIndex().row();
+	int column = pView->selectionModel()->currentIndex().column();
+
+	if (row == -1 || column == -1)
+	{
+		return;
+	}
+
+	textClipboard = pView->model()->data(pView->model()->index(row, column)).toString();
+
+	QClipboard *clipboard = QApplication::clipboard();
+	clipboard->setText(textClipboard);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::copySourceText()
+{
+	copyText(m_pSourceView);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::copySignalText()
+{
+	copyText(m_pSignalView);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::updateSignalList(PS::Source* pSource)
 {
 	if (pSource == nullptr)
@@ -600,6 +663,12 @@ void MainWindow::onSourceColumnAction(QAction* action)
 			break;
 		}
 	}
+}
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::onSignalContextMenu(QPoint)
+{
+	m_signalContextMenu->exec(QCursor::pos());
 }
 
 // -------------------------------------------------------------------------------------------------------------------

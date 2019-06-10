@@ -32,9 +32,9 @@ private:
 	// Elements of interface - Menu
 	//
 	QMenu*					m_sourceMenu = nullptr;
-	QMenu*					m_viewMenu = nullptr;
 	QMenu*					m_sourceContextMenu = nullptr;
-	QMenu*					m_pInfoMenu = nullptr;
+	QMenu*					m_signalContextMenu = nullptr;
+	QMenu*					m_infoMenu = nullptr;
 
 	// Actions of main menu
 	//
@@ -43,7 +43,9 @@ private:
 	QAction*				m_sourceStartAction = nullptr;
 	QAction*				m_sourceStopAction = nullptr;
 	QAction*				m_sourceSelectAllAction = nullptr;
-	QAction*				m_sourceOptionAction = nullptr;
+	QAction*				m_optionAction = nullptr;
+	QAction*				m_sourceTextCopyAction = nullptr;
+	QAction*				m_signalTextCopyAction = nullptr;
 
 							// menu - ?
 							//
@@ -123,12 +125,17 @@ private slots:
 	void					stopSource();
 	void					selectAllSource();
 	void					optionSource();
+	void					copyText(QTableView* pView);
+	void					copySourceText();
+	void					copySignalText();
+
 
 							// ContextMenu
 							//
 	void					onSourceContextMenu(QPoint);
 	void					onSourceHeaderContextMenu(QPoint);
 	void					onSourceColumnAction(QAction* action);
+	void					onSignalContextMenu(QPoint);
 	void					onSignalHeaderContextMenu(QPoint);
 	void					onSignalColumnAction(QAction* action);
 
