@@ -688,35 +688,6 @@ QVariant SourceTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-//	if (role == Qt::BackgroundColorRole)
-//	{
-//		if (column == SOURCE_LIST_COLUMN_ID)
-//		{
-//			if (option->isConnected() == false)
-//			{
-//				return QColor(0xFF, 0xA0, 0xA0);
-//			}
-//		}
-
-//		if (column == SOURCE_LIST_COLUMN_RECEIVED)
-//        {
-//			if (option->isNoReply() == true)
-//            {
-//                return QColor(0xFF, 0xA0, 0xA0);
-//            }
-//        }
-
-//		if (column == SOURCE_LIST_COLUMN_SKIPPED)
-//		{
-//			if ( (double) option->skippedBytes() * 100.0 / (double) option->receivedBytes() > MAX_SKIPPED_BYTES)
-//			{
-//				return QColor(0xFF, 0xA0, 0xA0);
-//			}
-//		}
-
-//		return QVariant();
-//	}
-
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
 		return text(row, column, pSource);
@@ -748,13 +719,13 @@ QString SourceTable::text(int row, int column, PS::Source* pSource) const
 
 	switch (column)
 	{
+		case SOURCE_LIST_COLUMN_LM_IP:			result = pSource->info().lmAddress.addressStr() + " (" + QString::number(pSource->info().lmAddress.port()) + ")";			break;
+		case SOURCE_LIST_COLUMN_SERVER_IP:		result = pSource->info().serverAddress.addressStr() + " (" + QString::number(pSource->info().serverAddress.port()) + ")";	break;
 		case SOURCE_LIST_COLUMN_CAPTION:		result = pSource->info().caption;												break;
 		case SOURCE_LIST_COLUMN_EQUIPMENT_ID:	result = pSource->info().equipmentID;											break;
 		case SOURCE_LIST_COLUMN_MODULE_TYPE:	result = QString::number(pSource->info().moduleType);							break;
 		case SOURCE_LIST_COLUMN_SUB_SYSTEM:		result = pSource->info().subSystem;												break;
 		case SOURCE_LIST_COLUMN_FRAME_COUNT:	result = QString::number(pSource->info().frameCount);							break;
-		case SOURCE_LIST_COLUMN_LM_IP:			result = pSource->info().lmAddress.addressStr() + " (" + QString::number(pSource->info().lmAddress.port()) + ")";			break;
-		case SOURCE_LIST_COLUMN_SERVER_IP:		result = pSource->info().serverAddress.addressStr() + " (" + QString::number(pSource->info().serverAddress.port()) + ")";	break;
 		case SOURCE_LIST_COLUMN_STATE:			result = pSource->isRunning() ? QString::number(pSource->sentFrames()) : tr("Stopped");										break;
 		case SOURCE_LIST_COLUMN_SIGNAL_COUNT:	result = QString::number(pSource->info().signalCount);							break;
 		default:								assert(0);

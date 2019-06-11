@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QClipboard>
 #include <QCloseEvent>
+#include <QSortFilterProxyModel>
 
 #include "../../lib/Ui/DialogAbout.h"
 
@@ -210,7 +211,12 @@ void MainWindow::createViews()
 		return;
 	}
 
-	m_pSourceView->setModel(&m_sourceTable);
+	QSortFilterProxyModel* pSourceProxyModel = new QSortFilterProxyModel(this);
+	pSourceProxyModel->setSourceModel(&m_sourceTable);
+	m_pSourceView->setModel(pSourceProxyModel);
+	m_pSourceView->setSortingEnabled(true);
+	pSourceProxyModel->sort(SOURCE_LIST_COLUMN_LM_IP, Qt::AscendingOrder);
+
 	m_pSourceView->verticalHeader()->setDefaultSectionSize(22);
 
 	for(int column = 0; column < SOURCE_LIST_COLUMN_COUNT; column++)
@@ -230,7 +236,12 @@ void MainWindow::createViews()
 		return;
 	}
 
-	m_pSignalView->setModel(&m_signalTable);
+	QSortFilterProxyModel* pSignalProxyModel = new QSortFilterProxyModel(this);
+	pSignalProxyModel->setSourceModel(&m_signalTable);
+	m_pSignalView->setModel(pSignalProxyModel);
+	m_pSignalView->setSortingEnabled(true);
+	pSignalProxyModel->sort(SIGNAL_LIST_COLUMN_CUSTOM_ID, Qt::AscendingOrder);
+
 	m_pSignalView->verticalHeader()->setDefaultSectionSize(22);
 
 	for(int column = 0; column < SIGNAL_LIST_COLUMN_COUNT; column++)
@@ -241,7 +252,6 @@ void MainWindow::createViews()
 	m_pSignalView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
 	connect(m_pSignalView, &QTableView::doubleClicked , this, &MainWindow::onSignalListDoubleClicked);
-
 
 	// View of Frame Data
 	//
@@ -509,6 +519,17 @@ void MainWindow::stopUpdateSourceListTimer()
 
 void MainWindow::startSource()
 {
+	if(m_pSourceView == nullptr)
+	{
+		return;
+	}
+
+	QSortFilterProxyModel* pSourceProxyModel = dynamic_cast<QSortFilterProxyModel*>(m_pSourceView->model());
+	if(pSourceProxyModel == nullptr)
+	{
+		return;
+	}
+
 	if (m_sourceBase.count() == 0)
 	{
 		return;
@@ -526,7 +547,8 @@ void MainWindow::startSource()
 
 	for( int i = 0; i < count; i++)
 	{
-		m_sourceBase.runSourece(m_pSourceView->selectionModel()->selectedRows().at(i).row());
+		int sourceIndex = pSourceProxyModel->mapToSource(m_pSourceView->selectionModel()->selectedRows().at(i)).row();
+		m_sourceBase.runSourece(sourceIndex);
 	}
 }
 
@@ -534,6 +556,17 @@ void MainWindow::startSource()
 
 void MainWindow::stopSource()
 {
+	if(m_pSourceView == nullptr)
+	{
+		return;
+	}
+
+	QSortFilterProxyModel* pSourceProxyModel = dynamic_cast<QSortFilterProxyModel*>(m_pSourceView->model());
+	if(pSourceProxyModel == nullptr)
+	{
+		return;
+	}
+
 //	m_sourceStartAction->setEnabled(true);
 //	m_sourceStopAction->setEnabled(false);
 
@@ -546,7 +579,8 @@ void MainWindow::stopSource()
 
 	for( int i = 0; i < count; i++)
 	{
-		m_sourceBase.stopSourece(m_pSourceView->selectionModel()->selectedRows().at(i).row());
+		int sourceIndex = pSourceProxyModel->mapToSource(m_pSourceView->selectionModel()->selectedRows().at(i)).row();
+		m_sourceBase.stopSourece(sourceIndex);
 	}
 }
 
@@ -769,7 +803,18 @@ void MainWindow::updateSourceState()
 
 void MainWindow::onSourceListClicked(const QModelIndex& index)
 {
-	int sourceIndex = index.row();
+	if(m_pSourceView == nullptr)
+	{
+		return;
+	}
+
+	QSortFilterProxyModel* pSourceProxyModel = dynamic_cast<QSortFilterProxyModel*>(m_pSourceView->model());
+	if(pSourceProxyModel == nullptr)
+	{
+		return;
+	}
+
+	int sourceIndex = pSourceProxyModel->mapToSource(index).row();
 	if (sourceIndex < 0 || sourceIndex >= m_sourceBase.count())
 	{
 		return;
@@ -789,7 +834,18 @@ void MainWindow::onSourceListClicked(const QModelIndex& index)
 
 void MainWindow::onSignalListDoubleClicked(const QModelIndex& index)
 {
-	int signalIndex = index.row();
+	if(m_pSignalView == nullptr)
+	{
+		return;
+	}
+
+	QSortFilterProxyModel* pSignalProxyModel = dynamic_cast<QSortFilterProxyModel*>(m_pSignalView->model());
+	if(pSignalProxyModel == nullptr)
+	{
+		return;
+	}
+
+	int signalIndex = pSignalProxyModel->mapToSource(index).row();
 	if (signalIndex < 0 || signalIndex >= m_signalTable.signalCount())
 	{
 		return;
