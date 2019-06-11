@@ -317,8 +317,8 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_LAST_PACKET_SYSTEM_TIME: return QDateTime::fromMSecsSinceEpoch(source.lastPacketSystemTime());
 				case DSC_RUP_FRAME_PLANT_TIME: return QDateTime::fromMSecsSinceEpoch(source.rupFramePlantTime());
 				case DSC_RUP_FRAME_NUMERATOR: return source.rupFrameNumerator();
-				case DSC_SIGNAL_STATES_QUEUE_SIZE: return source.signalStatesQueueCurSize();
-				case DSC_SIGNAL_STATES_QUEUE_MAX_SIZE: return source.signalStatesQueueCurMaxSize();
+				case DSC_SIGNAL_STATES_QUEUE_SIZE: return QString("%1 (%2%%)").arg(source.signalStatesQueueCurSize()).arg(0.01 * source.signalStatesQueueCurSize() / source.signalStatesQueueSize());
+				case DSC_SIGNAL_STATES_QUEUE_MAX_SIZE: return QString("%1 (%2%%)").arg(source.signalStatesQueueCurMaxSize()).arg(0.01 * source.signalStatesQueueCurMaxSize() / source.signalStatesQueueSize());
 				case DSC_ACQUIRED_SIGNALS_COUNT: return source.acquiredSignalsCount();
 
 				case DSC_ERROR_PROTOCOL_VERSION: return source.errorProtocolVersion();
