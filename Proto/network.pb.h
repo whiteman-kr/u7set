@@ -1677,19 +1677,19 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline ::google::protobuf::uint64 receiveddataid() const;
   inline void set_receiveddataid(::google::protobuf::uint64 value);
 
-  // optional int32 rupFramesQueueSize = 5 [default = 0];
-  inline bool has_rupframesqueuesize() const;
-  inline void clear_rupframesqueuesize();
-  static const int kRupFramesQueueSizeFieldNumber = 5;
-  inline ::google::protobuf::int32 rupframesqueuesize() const;
-  inline void set_rupframesqueuesize(::google::protobuf::int32 value);
+  // optional int32 rupFramesQueueCurSize = 5 [default = 0];
+  inline bool has_rupframesqueuecursize() const;
+  inline void clear_rupframesqueuecursize();
+  static const int kRupFramesQueueCurSizeFieldNumber = 5;
+  inline ::google::protobuf::int32 rupframesqueuecursize() const;
+  inline void set_rupframesqueuecursize(::google::protobuf::int32 value);
 
-  // optional int32 rupFramesQueueMaxSize = 6 [default = 0];
-  inline bool has_rupframesqueuemaxsize() const;
-  inline void clear_rupframesqueuemaxsize();
-  static const int kRupFramesQueueMaxSizeFieldNumber = 6;
-  inline ::google::protobuf::int32 rupframesqueuemaxsize() const;
-  inline void set_rupframesqueuemaxsize(::google::protobuf::int32 value);
+  // optional int32 rupFramesQueueCurMaxSize = 6 [default = 0];
+  inline bool has_rupframesqueuecurmaxsize() const;
+  inline void clear_rupframesqueuecurmaxsize();
+  static const int kRupFramesQueueCurMaxSizeFieldNumber = 6;
+  inline ::google::protobuf::int32 rupframesqueuecurmaxsize() const;
+  inline void set_rupframesqueuecurmaxsize(::google::protobuf::int32 value);
 
   // optional double dataReceivingRate = 7 [default = 0];
   inline bool has_datareceivingrate() const;
@@ -1761,19 +1761,19 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 rupframenumerator() const;
   inline void set_rupframenumerator(::google::protobuf::int32 value);
 
-  // optional int32 signalStatesQueueSize = 17 [default = 0];
-  inline bool has_signalstatesqueuesize() const;
-  inline void clear_signalstatesqueuesize();
-  static const int kSignalStatesQueueSizeFieldNumber = 17;
-  inline ::google::protobuf::int32 signalstatesqueuesize() const;
-  inline void set_signalstatesqueuesize(::google::protobuf::int32 value);
+  // optional int32 signalStatesQueueCurSize = 17 [default = 0];
+  inline bool has_signalstatesqueuecursize() const;
+  inline void clear_signalstatesqueuecursize();
+  static const int kSignalStatesQueueCurSizeFieldNumber = 17;
+  inline ::google::protobuf::int32 signalstatesqueuecursize() const;
+  inline void set_signalstatesqueuecursize(::google::protobuf::int32 value);
 
-  // optional int32 signalStatesQueueMaxSize = 18 [default = 0];
-  inline bool has_signalstatesqueuemaxsize() const;
-  inline void clear_signalstatesqueuemaxsize();
-  static const int kSignalStatesQueueMaxSizeFieldNumber = 18;
-  inline ::google::protobuf::int32 signalstatesqueuemaxsize() const;
-  inline void set_signalstatesqueuemaxsize(::google::protobuf::int32 value);
+  // optional int32 signalStatesQueueCurMaxSize = 18 [default = 0];
+  inline bool has_signalstatesqueuecurmaxsize() const;
+  inline void clear_signalstatesqueuecurmaxsize();
+  static const int kSignalStatesQueueCurMaxSizeFieldNumber = 18;
+  inline ::google::protobuf::int32 signalstatesqueuecurmaxsize() const;
+  inline void set_signalstatesqueuecurmaxsize(::google::protobuf::int32 value);
 
   // optional int32 acquiredSignalsCount = 19 [default = 0];
   inline bool has_acquiredsignalscount() const;
@@ -1843,6 +1843,20 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline ::std::string* release_lmequipmentid();
   inline void set_allocated_lmequipmentid(::std::string* lmequipmentid);
 
+  // optional int32 rupFramesQueueSize = 28 [default = 0];
+  inline bool has_rupframesqueuesize() const;
+  inline void clear_rupframesqueuesize();
+  static const int kRupFramesQueueSizeFieldNumber = 28;
+  inline ::google::protobuf::int32 rupframesqueuesize() const;
+  inline void set_rupframesqueuesize(::google::protobuf::int32 value);
+
+  // optional int32 signalStatesQueueSize = 29 [default = 0];
+  inline bool has_signalstatesqueuesize() const;
+  inline void clear_signalstatesqueuesize();
+  static const int kSignalStatesQueueSizeFieldNumber = 29;
+  inline ::google::protobuf::int32 signalstatesqueuesize() const;
+  inline void set_signalstatesqueuesize(::google::protobuf::int32 value);
+
   // @@protoc_insertion_point(class_scope:Network.AppDataSourceState)
  private:
   inline void set_has_id();
@@ -1853,10 +1867,10 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline void clear_has_uptime();
   inline void set_has_receiveddataid();
   inline void clear_has_receiveddataid();
-  inline void set_has_rupframesqueuesize();
-  inline void clear_has_rupframesqueuesize();
-  inline void set_has_rupframesqueuemaxsize();
-  inline void clear_has_rupframesqueuemaxsize();
+  inline void set_has_rupframesqueuecursize();
+  inline void clear_has_rupframesqueuecursize();
+  inline void set_has_rupframesqueuecurmaxsize();
+  inline void clear_has_rupframesqueuecurmaxsize();
   inline void set_has_datareceivingrate();
   inline void clear_has_datareceivingrate();
   inline void set_has_receiveddatasize();
@@ -1877,10 +1891,10 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline void clear_has_rupframeplanttime();
   inline void set_has_rupframenumerator();
   inline void clear_has_rupframenumerator();
-  inline void set_has_signalstatesqueuesize();
-  inline void clear_has_signalstatesqueuesize();
-  inline void set_has_signalstatesqueuemaxsize();
-  inline void clear_has_signalstatesqueuemaxsize();
+  inline void set_has_signalstatesqueuecursize();
+  inline void clear_has_signalstatesqueuecursize();
+  inline void set_has_signalstatesqueuecurmaxsize();
+  inline void clear_has_signalstatesqueuecurmaxsize();
   inline void set_has_acquiredsignalscount();
   inline void clear_has_acquiredsignalscount();
   inline void set_has_errorprotocolversion();
@@ -1899,14 +1913,18 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline void clear_has_errornonmonotonicplanttime();
   inline void set_has_lmequipmentid();
   inline void clear_has_lmequipmentid();
+  inline void set_has_rupframesqueuesize();
+  inline void clear_has_rupframesqueuesize();
+  inline void set_has_signalstatesqueuesize();
+  inline void clear_has_signalstatesqueuesize();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
   ::google::protobuf::uint64 id_;
   ::google::protobuf::int64 uptime_;
   ::google::protobuf::uint64 receiveddataid_;
-  ::google::protobuf::int32 rupframesqueuesize_;
-  ::google::protobuf::int32 rupframesqueuemaxsize_;
+  ::google::protobuf::int32 rupframesqueuecursize_;
+  ::google::protobuf::int32 rupframesqueuecurmaxsize_;
   double datareceivingrate_;
   ::google::protobuf::int64 receiveddatasize_;
   ::google::protobuf::int64 receivedframescount_;
@@ -1918,20 +1936,22 @@ class AppDataSourceState : public ::google::protobuf::Message {
   ::google::protobuf::int64 processedpacketcount_;
   ::google::protobuf::int64 lastpacketsystemtime_;
   ::google::protobuf::int64 rupframeplanttime_;
-  ::google::protobuf::int32 signalstatesqueuesize_;
-  ::google::protobuf::int32 signalstatesqueuemaxsize_;
+  ::google::protobuf::int32 signalstatesqueuecursize_;
+  ::google::protobuf::int32 signalstatesqueuecurmaxsize_;
   ::google::protobuf::int64 errorprotocolversion_;
   ::google::protobuf::int64 errorframesquantity_;
   ::google::protobuf::int64 errorframeno_;
   ::google::protobuf::int64 errordataid_;
+  ::google::protobuf::int32 acquiredsignalscount_;
+  ::google::protobuf::int32 rupframesqueuesize_;
   ::google::protobuf::int64 errorframesize_;
   ::google::protobuf::int64 errorduplicateplanttime_;
   ::google::protobuf::int64 errornonmonotonicplanttime_;
   ::std::string* lmequipmentid_;
-  ::google::protobuf::int32 acquiredsignalscount_;
+  ::google::protobuf::int32 signalstatesqueuesize_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(27 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(29 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -8467,48 +8487,48 @@ inline void AppDataSourceState::set_receiveddataid(::google::protobuf::uint64 va
   receiveddataid_ = value;
 }
 
-// optional int32 rupFramesQueueSize = 5 [default = 0];
-inline bool AppDataSourceState::has_rupframesqueuesize() const {
+// optional int32 rupFramesQueueCurSize = 5 [default = 0];
+inline bool AppDataSourceState::has_rupframesqueuecursize() const {
   return (_has_bits_[0] & 0x00000010u) != 0;
 }
-inline void AppDataSourceState::set_has_rupframesqueuesize() {
+inline void AppDataSourceState::set_has_rupframesqueuecursize() {
   _has_bits_[0] |= 0x00000010u;
 }
-inline void AppDataSourceState::clear_has_rupframesqueuesize() {
+inline void AppDataSourceState::clear_has_rupframesqueuecursize() {
   _has_bits_[0] &= ~0x00000010u;
 }
-inline void AppDataSourceState::clear_rupframesqueuesize() {
-  rupframesqueuesize_ = 0;
-  clear_has_rupframesqueuesize();
+inline void AppDataSourceState::clear_rupframesqueuecursize() {
+  rupframesqueuecursize_ = 0;
+  clear_has_rupframesqueuecursize();
 }
-inline ::google::protobuf::int32 AppDataSourceState::rupframesqueuesize() const {
-  return rupframesqueuesize_;
+inline ::google::protobuf::int32 AppDataSourceState::rupframesqueuecursize() const {
+  return rupframesqueuecursize_;
 }
-inline void AppDataSourceState::set_rupframesqueuesize(::google::protobuf::int32 value) {
-  set_has_rupframesqueuesize();
-  rupframesqueuesize_ = value;
+inline void AppDataSourceState::set_rupframesqueuecursize(::google::protobuf::int32 value) {
+  set_has_rupframesqueuecursize();
+  rupframesqueuecursize_ = value;
 }
 
-// optional int32 rupFramesQueueMaxSize = 6 [default = 0];
-inline bool AppDataSourceState::has_rupframesqueuemaxsize() const {
+// optional int32 rupFramesQueueCurMaxSize = 6 [default = 0];
+inline bool AppDataSourceState::has_rupframesqueuecurmaxsize() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void AppDataSourceState::set_has_rupframesqueuemaxsize() {
+inline void AppDataSourceState::set_has_rupframesqueuecurmaxsize() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void AppDataSourceState::clear_has_rupframesqueuemaxsize() {
+inline void AppDataSourceState::clear_has_rupframesqueuecurmaxsize() {
   _has_bits_[0] &= ~0x00000020u;
 }
-inline void AppDataSourceState::clear_rupframesqueuemaxsize() {
-  rupframesqueuemaxsize_ = 0;
-  clear_has_rupframesqueuemaxsize();
+inline void AppDataSourceState::clear_rupframesqueuecurmaxsize() {
+  rupframesqueuecurmaxsize_ = 0;
+  clear_has_rupframesqueuecurmaxsize();
 }
-inline ::google::protobuf::int32 AppDataSourceState::rupframesqueuemaxsize() const {
-  return rupframesqueuemaxsize_;
+inline ::google::protobuf::int32 AppDataSourceState::rupframesqueuecurmaxsize() const {
+  return rupframesqueuecurmaxsize_;
 }
-inline void AppDataSourceState::set_rupframesqueuemaxsize(::google::protobuf::int32 value) {
-  set_has_rupframesqueuemaxsize();
-  rupframesqueuemaxsize_ = value;
+inline void AppDataSourceState::set_rupframesqueuecurmaxsize(::google::protobuf::int32 value) {
+  set_has_rupframesqueuecurmaxsize();
+  rupframesqueuecurmaxsize_ = value;
 }
 
 // optional double dataReceivingRate = 7 [default = 0];
@@ -8731,48 +8751,48 @@ inline void AppDataSourceState::set_rupframenumerator(::google::protobuf::int32 
   rupframenumerator_ = value;
 }
 
-// optional int32 signalStatesQueueSize = 17 [default = 0];
-inline bool AppDataSourceState::has_signalstatesqueuesize() const {
+// optional int32 signalStatesQueueCurSize = 17 [default = 0];
+inline bool AppDataSourceState::has_signalstatesqueuecursize() const {
   return (_has_bits_[0] & 0x00010000u) != 0;
 }
-inline void AppDataSourceState::set_has_signalstatesqueuesize() {
+inline void AppDataSourceState::set_has_signalstatesqueuecursize() {
   _has_bits_[0] |= 0x00010000u;
 }
-inline void AppDataSourceState::clear_has_signalstatesqueuesize() {
+inline void AppDataSourceState::clear_has_signalstatesqueuecursize() {
   _has_bits_[0] &= ~0x00010000u;
 }
-inline void AppDataSourceState::clear_signalstatesqueuesize() {
-  signalstatesqueuesize_ = 0;
-  clear_has_signalstatesqueuesize();
+inline void AppDataSourceState::clear_signalstatesqueuecursize() {
+  signalstatesqueuecursize_ = 0;
+  clear_has_signalstatesqueuecursize();
 }
-inline ::google::protobuf::int32 AppDataSourceState::signalstatesqueuesize() const {
-  return signalstatesqueuesize_;
+inline ::google::protobuf::int32 AppDataSourceState::signalstatesqueuecursize() const {
+  return signalstatesqueuecursize_;
 }
-inline void AppDataSourceState::set_signalstatesqueuesize(::google::protobuf::int32 value) {
-  set_has_signalstatesqueuesize();
-  signalstatesqueuesize_ = value;
+inline void AppDataSourceState::set_signalstatesqueuecursize(::google::protobuf::int32 value) {
+  set_has_signalstatesqueuecursize();
+  signalstatesqueuecursize_ = value;
 }
 
-// optional int32 signalStatesQueueMaxSize = 18 [default = 0];
-inline bool AppDataSourceState::has_signalstatesqueuemaxsize() const {
+// optional int32 signalStatesQueueCurMaxSize = 18 [default = 0];
+inline bool AppDataSourceState::has_signalstatesqueuecurmaxsize() const {
   return (_has_bits_[0] & 0x00020000u) != 0;
 }
-inline void AppDataSourceState::set_has_signalstatesqueuemaxsize() {
+inline void AppDataSourceState::set_has_signalstatesqueuecurmaxsize() {
   _has_bits_[0] |= 0x00020000u;
 }
-inline void AppDataSourceState::clear_has_signalstatesqueuemaxsize() {
+inline void AppDataSourceState::clear_has_signalstatesqueuecurmaxsize() {
   _has_bits_[0] &= ~0x00020000u;
 }
-inline void AppDataSourceState::clear_signalstatesqueuemaxsize() {
-  signalstatesqueuemaxsize_ = 0;
-  clear_has_signalstatesqueuemaxsize();
+inline void AppDataSourceState::clear_signalstatesqueuecurmaxsize() {
+  signalstatesqueuecurmaxsize_ = 0;
+  clear_has_signalstatesqueuecurmaxsize();
 }
-inline ::google::protobuf::int32 AppDataSourceState::signalstatesqueuemaxsize() const {
-  return signalstatesqueuemaxsize_;
+inline ::google::protobuf::int32 AppDataSourceState::signalstatesqueuecurmaxsize() const {
+  return signalstatesqueuecurmaxsize_;
 }
-inline void AppDataSourceState::set_signalstatesqueuemaxsize(::google::protobuf::int32 value) {
-  set_has_signalstatesqueuemaxsize();
-  signalstatesqueuemaxsize_ = value;
+inline void AppDataSourceState::set_signalstatesqueuecurmaxsize(::google::protobuf::int32 value) {
+  set_has_signalstatesqueuecurmaxsize();
+  signalstatesqueuecurmaxsize_ = value;
 }
 
 // optional int32 acquiredSignalsCount = 19 [default = 0];
@@ -9019,6 +9039,50 @@ inline void AppDataSourceState::set_allocated_lmequipmentid(::std::string* lmequ
     clear_has_lmequipmentid();
     lmequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
+}
+
+// optional int32 rupFramesQueueSize = 28 [default = 0];
+inline bool AppDataSourceState::has_rupframesqueuesize() const {
+  return (_has_bits_[0] & 0x08000000u) != 0;
+}
+inline void AppDataSourceState::set_has_rupframesqueuesize() {
+  _has_bits_[0] |= 0x08000000u;
+}
+inline void AppDataSourceState::clear_has_rupframesqueuesize() {
+  _has_bits_[0] &= ~0x08000000u;
+}
+inline void AppDataSourceState::clear_rupframesqueuesize() {
+  rupframesqueuesize_ = 0;
+  clear_has_rupframesqueuesize();
+}
+inline ::google::protobuf::int32 AppDataSourceState::rupframesqueuesize() const {
+  return rupframesqueuesize_;
+}
+inline void AppDataSourceState::set_rupframesqueuesize(::google::protobuf::int32 value) {
+  set_has_rupframesqueuesize();
+  rupframesqueuesize_ = value;
+}
+
+// optional int32 signalStatesQueueSize = 29 [default = 0];
+inline bool AppDataSourceState::has_signalstatesqueuesize() const {
+  return (_has_bits_[0] & 0x10000000u) != 0;
+}
+inline void AppDataSourceState::set_has_signalstatesqueuesize() {
+  _has_bits_[0] |= 0x10000000u;
+}
+inline void AppDataSourceState::clear_has_signalstatesqueuesize() {
+  _has_bits_[0] &= ~0x10000000u;
+}
+inline void AppDataSourceState::clear_signalstatesqueuesize() {
+  signalstatesqueuesize_ = 0;
+  clear_has_signalstatesqueuesize();
+}
+inline ::google::protobuf::int32 AppDataSourceState::signalstatesqueuesize() const {
+  return signalstatesqueuesize_;
+}
+inline void AppDataSourceState::set_signalstatesqueuesize(::google::protobuf::int32 value) {
+  set_has_signalstatesqueuesize();
+  signalstatesqueuesize_ = value;
 }
 
 // -------------------------------------------------------------------

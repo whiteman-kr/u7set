@@ -36,7 +36,8 @@ public:
 	int acquiredSignalsCount() const { return m_acquiredSignalsCount; }
 
 	int signalStatesQueueSize() const { return m_signalStatesQueueSize; }
-	int signalStatesQueueMaxSize() const { return m_signalStatesQueueMaxSize; }
+	int signalStatesQueueCurSize() const { return m_signalStatesQueueCurSize; }
+	int signalStatesQueueCurMaxSize() const { return m_signalStatesQueueCurMaxSize; }
 
 private:
 	int getAutoArchivingGroup(qint64 currentSysTime);
@@ -44,7 +45,8 @@ private:
 	void setAcquiredSignalsCount(int count) { m_acquiredSignalsCount = count; }
 
 	void setSignalStatesQueueSize(int size) { m_signalStatesQueueSize = size; }
-	void setSignalStatesQueueMaxSize(int size) { m_signalStatesQueueMaxSize = size; }
+	void setSignalStatesQueueCurSize(int size) { m_signalStatesQueueCurSize = size; }
+	void setSignalStatesQueueCurMaxSize(int size) { m_signalStatesQueueCurMaxSize = size; }
 
 private:
 	QVector<DynamicAppSignalState*> m_signalStates;
@@ -54,7 +56,8 @@ private:
 	SimpleAppSignalStatesQueue m_signalStatesQueue;
 
 	int m_signalStatesQueueSize = 0;
-	int m_signalStatesQueueMaxSize = 0;
+	int m_signalStatesQueueCurSize = 0;
+	int m_signalStatesQueueCurMaxSize = 0;
 
 	// app data parsing
 	//

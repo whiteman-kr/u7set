@@ -108,6 +108,11 @@ void AppDataSource::prepare(const AppSignals& appSignals, DynamicAppSignalStates
 			continue;
 		}
 
+		if (signal->isBus() == true)
+		{
+			continue;
+		}
+
 		DynamicAppSignalState* dynState = signalStates->getStateByID(signal->appSignalID());
 
 		TEST_PTR_CONTINUE(dynState);
@@ -161,7 +166,7 @@ bool AppDataSource::parsePacket()
 		}
 	}
 
-	m_signalStatesQueue.getSizes(&m_signalStatesQueueSize, &m_signalStatesQueueMaxSize, nullptr, thread);
+	m_signalStatesQueue.getSizes(&m_signalStatesQueueCurSize, &m_signalStatesQueueCurMaxSize, &m_signalStatesQueueSize, thread);
 
 	return true;
 }
@@ -175,7 +180,8 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 	proto->set_uptime(uptime());
 	proto->set_receiveddataid(receivedDataID());
 	proto->set_rupframesqueuesize(rupFramesQueueSize());
-	proto->set_rupframesqueuemaxsize(rupFramesQueueMaxSize());
+	proto->set_rupframesqueuecursize(rupFramesQueueCurSize());
+	proto->set_rupframesqueuecurmaxsize(rupFramesQueueCurMaxSize());
 	proto->set_datareceivingrate(dataReceivingRate());
 	proto->set_receiveddatasize(receivedDataSize());
 	proto->set_receivedframescount(receivedFramesCount());
@@ -187,7 +193,8 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 	proto->set_rupframeplanttime(rupFramePlantTime());
 	proto->set_rupframenumerator(rupFrameNumerator());
 	proto->set_signalstatesqueuesize(signalStatesQueueSize());
-	proto->set_signalstatesqueuemaxsize(signalStatesQueueMaxSize());
+	proto->set_signalstatesqueuecursize(signalStatesQueueCurSize());
+	proto->set_signalstatesqueuecurmaxsize(signalStatesQueueCurMaxSize());
 	proto->set_acquiredsignalscount(acquiredSignalsCount());
 	proto->set_errorprotocolversion(errorProtocolVersion());
 	proto->set_errorframesquantity(errorFramesQuantity());
@@ -208,7 +215,8 @@ void AppDataSource::setState(const Network::AppDataSourceState& proto)
 	setUptime(proto.uptime());
 	setReceivedDataID(proto.receiveddataid());
 	setRupFramesQueueSize(proto.rupframesqueuesize());
-	setRupFramesQueueMaxSize(proto.rupframesqueuemaxsize());
+	setRupFramesQueueCurSize(proto.rupframesqueuecursize());
+	setRupFramesQueueCurMaxSize(proto.rupframesqueuecurmaxsize());
 	setDataReceivingRate(proto.datareceivingrate());
 	setReceivedDataSize(proto.receiveddatasize());
 	setReceivedFramesCount(proto.receivedframescount());
@@ -220,7 +228,8 @@ void AppDataSource::setState(const Network::AppDataSourceState& proto)
 	setRupFramePlantTime(proto.rupframeplanttime());
 	setRupFrameNumerator(proto.rupframenumerator());
 	setSignalStatesQueueSize(proto.signalstatesqueuesize());
-	setSignalStatesQueueMaxSize(proto.signalstatesqueuemaxsize());
+	setSignalStatesQueueCurSize(proto.signalstatesqueuecursize());
+	setSignalStatesQueueCurMaxSize(proto.signalstatesqueuecurmaxsize());
 	setAcquiredSignalsCount(proto.acquiredsignalscount());
 	setErrorProtocolVersion(proto.errorprotocolversion());
 	setErrorFramesQuantity(proto.errorframesquantity());
@@ -237,7 +246,7 @@ bool AppDataSource::getSignalState(SimpleAppSignalState* state, const QThread* t
 
 	bool result = m_signalStatesQueue.pop(state, thread);
 
-	m_signalStatesQueueSize = m_signalStatesQueue.size(thread);
+	m_signalStatesQueueCurSize = m_signalStatesQueue.size(thread);
 
 	return result;
 }
