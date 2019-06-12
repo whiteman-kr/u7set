@@ -25,14 +25,20 @@ public:
 	void saveColumnVisibility(int index, bool visible);
 	void saveColumnPosition(int index, int position);
 
+	bool getColumnVisibility(int index);
+	int getColumnPosition(int index);
+	int getColumnWidth(int index);
+
 public slots:
 	void saveColumnWidth(int index);
 	void saveAllHeaderGeomery();
+	void checkNewColumns();
 
 private:
 	QTableView* m_tableView = nullptr;
 	QStringList m_columnNameList;
 	QString m_settingBranchName;
+	QVector<int> m_defaultVisibleColumnSet;
 };
 
 class EditColumnsVisibilityDialog : public QDialog

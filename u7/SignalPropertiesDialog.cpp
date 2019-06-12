@@ -9,20 +9,6 @@
 #include "../lib/DbController.h"
 #include "../lib/WidgetUtils.h"
 
-const std::vector<std::pair<E::SignalType, E::SignalInOutType>> signalTypeSequence =
-{
-	{E::Analog, E::SignalInOutType::Input},
-	{E::Analog, E::SignalInOutType::Output},
-	{E::Analog, E::SignalInOutType::Internal},
-
-	{E::Discrete, E::SignalInOutType::Input},
-	{E::Discrete, E::SignalInOutType::Output},
-	{E::Discrete, E::SignalInOutType::Internal},
-
-	{E::Bus, E::SignalInOutType::Input},
-	{E::Bus, E::SignalInOutType::Output},
-	{E::Bus, E::SignalInOutType::Internal},
-};
 
 // Returns vector of pairs,
 //	first: previous AppSignalID
@@ -106,6 +92,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 				continue;
 			}
 			ObjectState state;
+			SignalsModel::trimSignalTextFields(*signalPtrVector[i]);
 			dbController->setSignalWorkcopy(signalPtrVector[i], &state, parent);
 			if (state.errCode != ERR_SIGNAL_OK)
 			{
@@ -206,7 +193,6 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 				assert(field.length() > 0);
 			}
 
-			assert(static_cast<size_t>(fields.size()) >= signalTypeSequence.size() + 2);
 			fileFields.push_back(fields);
 		}
 	}
@@ -272,60 +258,37 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 
 		int precision = appSignal.decimalPlaces();
 
-		for (const QStringList& propertyDescription : fileFields)
+		SignalPropertyManager& manager = SignalsModel::instance()->signalPropertyManager();
+		manager.reloadPropertyBehaviour();
+
+		for (auto property : signalProperties->properties())
 		{
-			for (auto property : signalProperties->properties())
+			int propertyIndex = manager.index(property->caption());
+
+			if (propertyIndex == -1)
 			{
-				if (property->caption() != propertyDescription[0])
+				if (property->category().isEmpty() == false)
 				{
-					continue;
+					// PropertyManager have to know about all properties
+					assert(false);
 				}
+				continue;
+			}
 
-				if (isPropertyDependentOnPrecision(property->caption()) == true)
-				{
-					property->setPrecision(precision);
-				}
+			if (manager.dependsOnPrecision(propertyIndex))
+			{
+				property->setPrecision(precision);
+			}
 
-				bool descriptionFound = false;
+			E::PropertyBehaviourType behaviour = manager.getBehaviour(appSignal, propertyIndex);
+			if (manager.isHidden(behaviour))
+			{
+				property->setVisible(false);
+			}
 
-				for (int i = 0; i < signalTypeSequence.size(); i++)
-				{
-					if ((appSignal.signalType() == signalTypeSequence[i].first &&
-						 appSignal.inOutType() == signalTypeSequence[i].second) == false)
-					{
-						continue;
-					}
-
-					descriptionFound = true;
-
-					const QString& propertyState = propertyDescription[i + 2].toLower();
-
-					if (propertyState == "hide")
-					{
-						property->setVisible(false);
-						break;
-					}
-
-					if (propertyState == "read")
-					{
-						property->setReadOnly(true);
-						break;
-					}
-
-					if (propertyState == "expert")
-					{
-						if (theSettings.isExpertMode() == false)
-						{
-							property->setVisible(false);
-						}
-
-						break;
-					}
-
-					assert(propertyState == "write");
-				}
-
-				assert(descriptionFound == true);
+			if (behaviour == E::PropertyBehaviourType::Read)
+			{
+				property->setReadOnly(true);
 			}
 		}
 

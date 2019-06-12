@@ -371,6 +371,15 @@ public:
 	};
 	Q_ENUM(SpecificPropertyType)
 
+	enum class PropertyBehaviourType
+	{
+		Hide,
+		Read,
+		Write,
+		Expert
+	};
+	Q_ENUM(PropertyBehaviourType)
+
 	//
 
 	enum class UalItemType
