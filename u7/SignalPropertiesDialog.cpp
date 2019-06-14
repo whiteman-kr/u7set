@@ -259,7 +259,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		int precision = appSignal.decimalPlaces();
 
 		SignalPropertyManager& manager = SignalsModel::instance()->signalPropertyManager();
-		manager.reloadPropertyBehaviour();
+		manager.reloadPropertyBehaviour(dbController, parent);
 
 		for (auto property : signalProperties->properties())
 		{

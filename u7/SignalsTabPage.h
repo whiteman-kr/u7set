@@ -95,7 +95,7 @@ public:
 	bool isReadOnly(E::PropertyBehaviourType behaviour) const;
 
 	void detectNewProperties(const Signal& signal);
-	void reloadPropertyBehaviour();
+	void reloadPropertyBehaviour(DbController* dbController, QWidget* parent);
 
 private:
 	bool isNotCorrect(int propertyIndex) const;

@@ -293,19 +293,12 @@ void SignalPropertyManager::detectNewProperties(const Signal &signal)
 	}
 }
 
-void SignalPropertyManager::reloadPropertyBehaviour()
+void SignalPropertyManager::reloadPropertyBehaviour(DbController* dbController, QWidget* parent)
 {
-	SignalsModel* signalsModel = SignalsModel::instance();
-	if (signalsModel == nullptr)
-	{
-		return;
-	}
-	DbController* dbController = signalsModel->dbController();
 	if (dbController == nullptr)
 	{
 		return;
 	}
-	QWidget* parent = signalsModel->parentWindow();
 
 	DbFileInfo mcInfo = dbController->systemFileInfo(dbController->etcFileId());
 
@@ -550,7 +543,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 	Signal& s = m_signalSet[row];
 
 	SignalPropertyManager& manager = m_model->signalPropertyManager();
-	manager.reloadPropertyBehaviour();
+	manager.reloadPropertyBehaviour(m_model->dbController(), parent);
 
 	E::PropertyBehaviourType behaviour = manager.getBehaviour(s, col);
 	if (manager.isHidden(behaviour) || manager.isReadOnly(behaviour))
@@ -1753,7 +1746,7 @@ void SignalsModel::initLazyLoadSignals()
 
 	loadUsers();
 
-	m_propertyManager.reloadPropertyBehaviour();
+	m_propertyManager.reloadPropertyBehaviour(m_dbController, m_parentWindow);
 
 	QVector<int> signalIds;
 	dbController()->getSignalsIDs(&signalIds, m_parentWindow);
@@ -3369,6 +3362,23 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QStri
 	m_dbController(dbController),
 	m_signalId(signalId)
 {
+	// Initial data
+	//
+	std::vector<DbChangeset> signalChanges;
+	dbController->getSignalHistory(signalId, &signalChanges, this);
+
+	QVector<std::pair<QString, std::function<QVariant (DbChangeset&)>>> changesetColumnDescription =
+	{
+		{"Changeset", [](DbChangeset& c) { return c.changeset(); }},
+		{"User", [](DbChangeset& c) { return c.username(); }},
+		{"Date", [](DbChangeset& c) { return c.date().toString("dd MMM yyyy HH:mm:ss"); }},
+		{"Comment", [](DbChangeset& c) { return c.comment();}},
+	};
+
+	int changesetColumnCount = changesetColumnDescription.size();
+
+	// Interface
+	//
 	setWindowTitle(tr("History - ") + appSignalId);
 
 	setWindowPosition(this, "SignalHistoryDialog");
@@ -3376,31 +3386,7 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QStri
 	setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 	setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
 
-	std::vector<DbChangeset> signalChanges;
-	dbController->getSignalHistory(signalId, &signalChanges, this);
-
 	QVBoxLayout* vl = new QVBoxLayout;
-
-	m_historyModel = new QStandardItemModel(static_cast<int>(signalChanges.size()), 4, this);
-
-	m_historyModel->setHeaderData(0, Qt::Horizontal, "Changeset");
-	m_historyModel->setHeaderData(1, Qt::Horizontal, "User");
-	m_historyModel->setHeaderData(2, Qt::Horizontal, "Date");
-	m_historyModel->setHeaderData(3, Qt::Horizontal, "Comment");
-
-	int row = 0;
-	for (DbChangeset& changeset : signalChanges)
-	{
-		m_historyModel->setData(m_historyModel->index(row, 0), changeset.changeset());
-		m_historyModel->setData(m_historyModel->index(row, 1), changeset.username());
-		m_historyModel->setData(m_historyModel->index(row, 2), changeset.date().toString("dd MMM yyyy HH:mm:ss"));
-		m_historyModel->setData(m_historyModel->index(row, 3), changeset.comment());
-
-		row++;
-	}
-
-	QTableView* historyView = new QTableView(this);
-	vl->addWidget(historyView);
 
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(this);
 	buttonBox->setOrientation(Qt::Horizontal);
@@ -3410,7 +3396,12 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QStri
 
 	setLayout(vl);
 
+	m_historyModel = new QStandardItemModel(static_cast<int>(signalChanges.size()), changesetColumnCount, this);
+
+	QTableView* historyView = new QTableView(this);
 	historyView->setModel(m_historyModel);
+	vl->addWidget(historyView);
+
 	historyView->verticalHeader()->setDefaultAlignment(Qt::AlignRight | Qt::AlignVCenter);
 	historyView->setAlternatingRowColors(false);
 	historyView->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
@@ -3423,7 +3414,84 @@ SignalHistoryDialog::SignalHistoryDialog(DbController* dbController, const QStri
 	historyView->horizontalHeader()->setDefaultSectionSize(150);
 	historyView->horizontalHeader()->setStretchLastSection(true);
 
-	new TableDataVisibilityController(historyView, "SignalHistoryDialog", QVector<int>() << 0 << 1 << 2 << 3);
+	// Changeset details
+	//
+	QVector<int> defaultColumns;
+
+	for (int i = 0; i < changesetColumnCount; i++)
+	{
+		m_historyModel->setHeaderData(i, Qt::Horizontal, changesetColumnDescription[i].first);
+		defaultColumns.push_back(i);
+	}
+
+	QVector<Signal> signalInstances;
+	signalInstances.reserve(static_cast<int>(signalChanges.size()));
+	std::vector<int> signalIds = { signalId };
+	std::vector<Signal> signalInstance;
+
+	SignalPropertyManager signalPropertyManager;
+	signalPropertyManager.reloadPropertyBehaviour(dbController, parent);
+
+	int row = 0;
+	for (DbChangeset& changeset : signalChanges)
+	{
+		for (int i = 0; i < changesetColumnCount; i++)
+		{
+			m_historyModel->setData(m_historyModel->index(row, i), changesetColumnDescription[i].second(changeset));
+		}
+
+		dbController->getSpecificSignals(&signalIds, changeset.changeset(), &signalInstance, this);
+
+		if (signalInstance.size() == 1)
+		{
+			signalInstances.push_back(signalInstance[0]);
+			signalPropertyManager.detectNewProperties(signalInstance[0]);
+			signalInstance.clear();
+		}
+		else
+		{
+			assert(false);
+		}
+
+		row++;
+	}
+
+	// Signal instances details
+	//
+	for (int propertyIndex = 0; propertyIndex < signalPropertyManager.count(); propertyIndex++)
+	{
+		if (signalInstances.count() == 0)
+		{
+			break;
+		}
+
+		QVariant previousValue = signalPropertyManager.value(&signalInstances[0], propertyIndex);
+
+		QList<QStandardItem*> column;
+		int columnIndex = m_historyModel->columnCount();
+
+		for (int signalIndex = 0; signalIndex < signalInstances.count(); signalIndex++)
+		{
+			QVariant currentValue = signalPropertyManager.value(&signalInstances[signalIndex], propertyIndex);
+			QStandardItem* newItem = new QStandardItem(currentValue.toString());
+
+			if (currentValue != previousValue)
+			{
+				column.last()->setData(QColor(Qt::yellow), Qt::BackgroundRole);
+				previousValue = currentValue;
+				if (defaultColumns.contains(columnIndex) == false)
+				{
+					defaultColumns.push_back(columnIndex);
+				}
+			}
+			column.push_back(newItem);
+		}
+
+		m_historyModel->appendColumn(column);
+		m_historyModel->setHeaderData(columnIndex, Qt::Horizontal, signalPropertyManager.caption(propertyIndex));
+	}
+
+	new TableDataVisibilityController(historyView, "SignalHistoryDialog", defaultColumns);
 }
 
 void SignalHistoryDialog::closeEvent(QCloseEvent* event)

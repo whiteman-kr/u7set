@@ -17,7 +17,7 @@ class TableDataVisibilityController : public QObject
 {
 	Q_OBJECT
 public:
-	TableDataVisibilityController(QTableView* parent, const QString& settingsBranchName, const QVector<int>& defaultVisibleColumnSet);
+	TableDataVisibilityController(QTableView* parent, const QString& settingsBranchName, const QVector<int>& defaultVisibleColumnSet, bool showAllDefaultColumns = false);
 	virtual ~TableDataVisibilityController();
 
 	void editColumnsVisibilityAndOrder();
@@ -28,6 +28,8 @@ public:
 	bool getColumnVisibility(int index);
 	int getColumnPosition(int index);
 	int getColumnWidth(int index);
+
+	void showColumn(int index, bool visible = true);
 
 public slots:
 	void saveColumnWidth(int index);

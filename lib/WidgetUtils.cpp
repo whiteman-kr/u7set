@@ -66,7 +66,7 @@ void setWindowPosition(QWidget* window, QString widgetKey)
 	window->setGeometry(windowRect);
 }
 
-TableDataVisibilityController::TableDataVisibilityController(QTableView* parent, const QString& settingsBranchName, const QVector<int>& defaultVisibleColumnSet) :
+TableDataVisibilityController::TableDataVisibilityController(QTableView* parent, const QString& settingsBranchName, const QVector<int>& defaultVisibleColumnSet, bool showAllDefaultColumns) :
 	QObject(parent->horizontalHeader()),
 	m_tableView(parent),
 	m_settingBranchName(settingsBranchName),
@@ -106,7 +106,12 @@ TableDataVisibilityController::TableDataVisibilityController(QTableView* parent,
 			m_tableView->setColumnWidth(i, columnWidth);
 		}
 
-		horizontalHeader->setSectionHidden(i, !settings.value(m_settingBranchName + "/ColumnVisibility/" + columnName, defaultVisibleColumnSet.contains(i)).toBool());
+		bool visible = defaultVisibleColumnSet.contains(i);
+		if (showAllDefaultColumns == false)
+		{
+			visible = settings.value(m_settingBranchName + "/ColumnVisibility/" + columnName, visible).toBool();
+		}
+		horizontalHeader->setSectionHidden(i, !visible);
 
 		int position = settings.value(m_settingBranchName + "/ColumnPosition/" + columnName, -1).toInt();
 		if (position == -1)
@@ -264,6 +269,11 @@ int TableDataVisibilityController::getColumnWidth(int index)
 	QSettings settings;
 	int width = m_tableView->columnWidth(index);
 	return settings.value((m_settingBranchName + "/ColumnWidth/%1").arg(m_columnNameList[index].replace("/", "|")).replace("\n", " "), width).toBool();
+}
+
+void TableDataVisibilityController::showColumn(int index, bool visible)
+{
+	m_tableView->horizontalHeader()->setSectionHidden(index, !visible);
 }
 
 EditColumnsVisibilityDialog::EditColumnsVisibilityDialog(QTableView* tableView, TableDataVisibilityController* controller) :
