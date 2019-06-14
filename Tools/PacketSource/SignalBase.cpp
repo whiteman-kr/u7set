@@ -3,7 +3,7 @@
 #include <assert.h>
 #include <QMessageBox>
 #include <QFile>
-#include <QProgressDialog>`
+#include <QProgressDialog>
 
 #include "../../lib/XmlHelper.h"
 #include "../../Builder/CfgFiles.h"

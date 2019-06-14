@@ -4,7 +4,15 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets concurrent serialport network sql qml xml
+QT       += core
+QT       += gui
+QT       += widgets
+QT       += concurrent
+QT       += serialport
+QT       += network
+QT       += sql
+QT       += qml
+QT       += xml
 #axcontainer
 
 TARGET = Metrology

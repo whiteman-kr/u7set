@@ -26,5 +26,7 @@ SUBDIRS += qtservice \
     TuningClient \
     TuningIPEN \
     mconf \
+	./Tools/CommView \
     ./Tools/PacketSource \
-    ./Test/u7databaseTests
+	./Test/u7databaseTests
+
