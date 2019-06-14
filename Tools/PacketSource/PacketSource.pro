@@ -65,7 +65,6 @@ SourceBase.cpp \
     ../../lib/SimpleMutex.cpp \
     ../../lib/Times.cpp \
     PathOptionDialog.cpp \
-    ../../lib/Address16.cpp \
     FindSignalTextPanel.cpp \
     FindData.cpp
 
@@ -110,7 +109,6 @@ SourceBase.h \
     ../../lib/SimpleMutex.h \
     ../../lib/Times.h \
     PathOptionDialog.h \
-    ../../lib/Address16.h \
     FindSignalTextPanel.h \
     FindData.h
 
