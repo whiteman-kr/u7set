@@ -159,6 +159,9 @@ public:
 
 	QByteArray m_specificEditorSplitterState;
 
+	QByteArray m_svgEditorSplitterState;
+	bool m_svgEditorStretch = true;
+
 	// CreateSchema dialog
 	//
 	QString m_lastSelectedLmDescriptionFile;

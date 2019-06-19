@@ -76,9 +76,10 @@ namespace ExtWidgets
 	//
 	// ------------ PropertyArrayEditorDialog ------------
 	//
-	PropertyArrayEditorDialog::PropertyArrayEditorDialog(QWidget* parent, const QString& propertyName, const QVariant& value):
+	PropertyArrayEditorDialog::PropertyArrayEditorDialog(PropertyEditor* propertyEditor, QWidget* parent, const QString& propertyName, const QVariant& value):
 		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
-		m_value(value)
+		m_value(value),
+		m_parentPropertyEditor(propertyEditor)
 	{
 		if (variantIsPropertyVector(m_value) == false && variantIsPropertyList(m_value) == false)
 		{
@@ -105,8 +106,8 @@ namespace ExtWidgets
 
 		connect(m_treeWidget, &QTreeWidget::itemSelectionChanged, this, &PropertyArrayEditorDialog::onSelectionChanged);
 
-		m_propertyEditor = new PropertyEditor(this);
-		connect(m_propertyEditor, &PropertyEditor::propertiesChanged, this, &PropertyArrayEditorDialog::onPropertiesChanged);
+		m_childPropertyEditor = m_parentPropertyEditor->createChildPropertyEditor(this);
+		connect(m_childPropertyEditor, &PropertyEditor::propertiesChanged, this, &PropertyArrayEditorDialog::onPropertiesChanged);
 
 		// Move Up/Down
 
@@ -157,7 +158,7 @@ namespace ExtWidgets
 		m_splitter = new QSplitter();
 
 		m_splitter->addWidget(leftWidget);
-		m_splitter->addWidget(m_propertyEditor);
+		m_splitter->addWidget(m_childPropertyEditor);
 
 		// Ok/Cancel
 
@@ -372,10 +373,10 @@ namespace ExtWidgets
 
 	void PropertyArrayEditorDialog::onSelectionChanged()
 	{
-		if (m_treeWidget == nullptr || m_propertyEditor == nullptr)
+		if (m_treeWidget == nullptr || m_childPropertyEditor == nullptr)
 		{
 			Q_ASSERT(m_treeWidget);
-			Q_ASSERT(m_propertyEditor);
+			Q_ASSERT(m_childPropertyEditor);
 			return;
 		}
 
@@ -435,8 +436,8 @@ namespace ExtWidgets
 			}
 		}
 
-		m_propertyEditor->setObjects(propertyObjectList);
-		m_propertyEditor->resizeColumnToContents(0);
+		m_childPropertyEditor->setObjects(propertyObjectList);
+		m_childPropertyEditor->resizeColumnToContents(0);
 
 		return;
 	}
@@ -1200,7 +1201,7 @@ namespace ExtWidgets
 	//
 	// ---------MultiTextEditorDialog----------
 	//
-	MultiTextEditorDialog::MultiTextEditorDialog(QWidget* parent, PropertyEditor* propertyEditor, const QString &text, std::shared_ptr<Property> p):
+	MultiTextEditorDialog::MultiTextEditorDialog(PropertyEditor* propertyEditor, QWidget* parent, const QString &text, std::shared_ptr<Property> p):
 		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint),
 		m_propertyEditor(propertyEditor),
 		m_property(p)
@@ -1516,7 +1517,7 @@ namespace ExtWidgets
 				return;
 			}
 
-			MultiTextEditorDialog multlLineEdit(this, m_propertyEditor, m_oldValue.toString(), m_property);
+			MultiTextEditorDialog multlLineEdit(m_propertyEditor, this, m_oldValue.toString(), m_property);
 			if (multlLineEdit.exec() != QDialog::Accepted)
 			{
 				return;
@@ -1814,10 +1815,11 @@ namespace ExtWidgets
 	//
 	// ---------QtMultiCheckBox----------
 	//
-	MultiArrayEdit::MultiArrayEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly):
+	MultiArrayEdit::MultiArrayEdit(PropertyEditor* propertyEditor, QWidget* parent, std::shared_ptr<Property> p, bool readOnly):
 		QWidget(parent),
 		m_property(p),
-		m_currentValue(p->value())
+		m_currentValue(p->value()),
+		m_propertyEditor(propertyEditor)
 	{
 
 		m_lineEdit = new QLineEdit(parent);
@@ -1880,7 +1882,7 @@ namespace ExtWidgets
 			return;
 		}
 
-		PropertyArrayEditorDialog d(this, m_property->caption(), m_currentValue);
+		PropertyArrayEditorDialog d(m_propertyEditor, this, m_property->caption(), m_currentValue);
 		if (d.exec() != QDialog::Accepted)
 		{
 			return;
@@ -2152,7 +2154,7 @@ namespace ExtWidgets
 
 			if (variantIsPropertyList(propertyPtr->value()) == true || variantIsPropertyVector(propertyPtr->value()))
 			{
-				MultiArrayEdit* m_editor = new MultiArrayEdit(parent, propertyPtr, property->isEnabled() == false);
+				MultiArrayEdit* m_editor = new MultiArrayEdit(m_propertyEditor, parent, propertyPtr, property->isEnabled() == false);
 				editor = m_editor;
 
 				if (manager->sameValue(property) == true)
@@ -3352,6 +3354,11 @@ namespace ExtWidgets
             emit propertiesChanged(modifiedObjects);
 		}
 		return;
+	}
+
+	PropertyEditor* PropertyEditor::createChildPropertyEditor(QWidget* parent)
+	{
+		return new PropertyEditor(parent);
 	}
 
 	PropertyTextEditor* PropertyEditor::createPropertyTextEditor(Property* property, QWidget* parent)

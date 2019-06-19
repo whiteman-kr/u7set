@@ -179,7 +179,8 @@ SOURCES +=\
     ../lib/QScintillaLexers/LexerJavaScript.cpp \
     ../lib/QScintillaLexers/LexerXML.cpp \
     DialogShortcuts.cpp \
-    ../lib/Ui/UiTools.cpp
+    ../lib/Ui/UiTools.cpp \
+    SvgEditor.cpp
 
 
 HEADERS  += \
@@ -321,7 +322,8 @@ HEADERS  += \
     ../lib/QScintillaLexers/LexerJavaScript.h \
     ../lib/QScintillaLexers/LexerXML.h \
     DialogShortcuts.h \
-    ../lib/Ui/UiTools.h
+    ../lib/Ui/UiTools.h \
+    SvgEditor.h
 
 
 FORMS    += \

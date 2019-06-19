@@ -360,7 +360,8 @@ public:
 		Script,
 		TuningFilter,
 		SpecificPropertyStruct,
-		LoadFileDialog
+		LoadFileDialog,
+		Svg
 	};
 	Q_ENUM(PropertySpecificEditor)
 
