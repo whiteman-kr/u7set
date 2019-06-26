@@ -2101,8 +2101,6 @@ namespace Builder
 								s->stateFlagSignal(flagType),
 								QUuid(),
 								QString());
-
-
 			}
 
 			result &= res;

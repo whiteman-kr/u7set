@@ -621,6 +621,8 @@ namespace Builder
 		UalSignalsMap m_ualSignals;
 		UalAfbsMap m_ualAfbs;
 
+		QHash<UalSignal*, UalSignal*> m_outUalSignals;		// output UAL signals map: outUalSignal -> sourceUalSignal
+
 		// service maps
 		//
 		HashedVector<QUuid, UalItem*> m_ualItems;				// item GUID => item ptr

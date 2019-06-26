@@ -2279,9 +2279,9 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid inPinUuid, UalSignal* ualSignal)
+	bool ModuleLogicCompiler::linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid inPinUuid, UalSignal* srcUalSignal)
 	{
-		if (srcItem == nullptr || signalItem == nullptr || ualSignal == nullptr || ualSignal->signal() == nullptr)
+		if (srcItem == nullptr || signalItem == nullptr || srcUalSignal == nullptr || srcUalSignal->signal() == nullptr)
 		{
 			LOG_NULLPTR_ERROR(m_log);
 			return false;
@@ -2313,7 +2313,7 @@ namespace Builder
 
 		UalSignal* existsSignal = m_ualSignals.get(s->appSignalID());
 
-		if (existsSignal != nullptr && existsSignal != ualSignal && existsSignal->isSource() == true)
+		if (existsSignal != nullptr && existsSignal != srcUalSignal && existsSignal->isSource() == true)
 		{
 			// Can't assign value to input/tuningable/opto/const signal %1 (Logic schema %2).
 			//
@@ -2323,7 +2323,7 @@ namespace Builder
 
 		// check signals compatibility
 		//
-		bool result = ualSignal->isCompatible(s);
+		bool result = srcUalSignal->isCompatible(s);
 
 		if (result == false)
 		{
@@ -2333,18 +2333,41 @@ namespace Builder
 			return false;
 		}
 
-		result = m_ualSignals.appendRefPin(signalItem, inPinUuid, ualSignal);
-
-		if (result == false)
+		if (s->isOutput() == true)
 		{
-			return false;
+			// create separate UAL signal for each output signal
+
+			UalSignal* outUalSignal = m_ualSignals.createSignal(s);
+
+			if (result == false)
+			{
+				return false;
+			}
+
+			result = m_ualSignals.appendRefPin(signalItem, inPinUuid, outUalSignal);
+
+			if (result == false)
+			{
+				return false;
+			}
+
+			m_outUalSignals.insert(outUalSignal, srcUalSignal);
 		}
-
-		result = m_ualSignals.appendRefSignal(s, ualSignal);
-
-		if (result == false)
+		else
 		{
-			return false;
+			result = m_ualSignals.appendRefPin(signalItem, inPinUuid, srcUalSignal);
+
+			if (result == false)
+			{
+				return false;
+			}
+
+			result = m_ualSignals.appendRefSignal(s, srcUalSignal);
+
+			if (result == false)
+			{
+				return false;
+			}
 		}
 
 		const std::vector<LogicPin>& outputs = signalItem->outputs();
@@ -2359,11 +2382,11 @@ namespace Builder
 		{
 			const LogicPin& output = outputs[0];
 
-			m_ualSignals.appendRefPin(signalItem, output.guid(), ualSignal);
+			m_ualSignals.appendRefPin(signalItem, output.guid(), srcUalSignal);
 
 			// recursive linking of items
 			//
-			result = linkConnectedItems(signalItem, output, ualSignal);
+			result = linkConnectedItems(signalItem, output, srcUalSignal);
 		}
 
 		return result;
@@ -2810,9 +2833,10 @@ namespace Builder
 				m_ualSignals.createSignal(linkedValiditySignal);
 			}
 
-			m_signalsWithFlags.append(s->appSignalID(),
-									  E::AppSignalStateFlagType::Validity,
-									  linkedValiditySignal->appSignalID());
+			bool res = m_signalsWithFlags.append(s->appSignalID(),
+												  E::AppSignalStateFlagType::Validity,
+												  linkedValiditySignal->appSignalID());
+			result &= res;
 		}
 
 		return result;
