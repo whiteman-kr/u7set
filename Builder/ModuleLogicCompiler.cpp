@@ -2749,10 +2749,6 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
-/*		result &= linkSignalsWithFlagsInSignalSet();
-
-		RETURN_IF_FALSE(result);*/
-
 		writeSignalsWithFlagsReport();
 
 		return result;
@@ -3213,66 +3209,6 @@ namespace Builder
 
 		return result;
 	}
-
-/*	bool ModuleLogicCompiler::linkSignalsWithFlagsInSignalSet()
-	{
-		// this function is called after checkSignalsWithFlags()
-		// so most checks and error reporting can be omited
-
-		bool result = true;
-
-		std::vector<E::AppSignalStateFlagType> flagTypes = E::values<E::AppSignalStateFlagType>();
-
-		QStringList signalsWithFlagsIDs = m_signalsWithFlags.keys();
-
-		for(const QString& signalWithFlagsID : signalsWithFlagsIDs)
-		{
-			UalSignal* ualSignal = m_ualSignals.get(signalWithFlagsID);
-
-			if (ualSignal == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			const QVector<Signal*>& signalWithFlagRefSignals = ualSignal->refSignals();
-
-			const AppSignalStateFlagsMap* signalFlags = m_signalsWithFlags.value(signalWithFlagsID, nullptr);
-
-			if (signalFlags == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			for(E::AppSignalStateFlagType flagType : flagTypes)
-			{
-				QString flagSignalID = signalFlags->value(flagType, QString());
-
-				if (flagSignalID.isEmpty() == true)
-				{
-					continue;
-				}
-
-				for(Signal* signalWithFlagRefSignal : signalWithFlagRefSignals)
-				{
-					if (signalWithFlagRefSignal == nullptr)
-					{
-						assert(false);
-						continue;
-					}
-
-					if (signalWithFlagRefSignal->isAcquired() == true)
-					{
-						signalWithFlagRefSignal->setFlagSignal(flagType, flagSignalID);
-					}
-				}
-			}
-		}
-
-		return result;
-
-	}*/
 
 	void ModuleLogicCompiler::writeSignalsWithFlagsReport()
 	{

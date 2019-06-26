@@ -278,7 +278,6 @@ namespace Builder
 
 		bool setAcquiredForFlagSignals();
 		bool checkSignalsWithFlags();
-//		bool linkSignalsWithFlagsInSignalSet();
 		void writeSignalsWithFlagsReport();
 		void writeSignalsWithFlagsToReport(QStringList* file, const QStringList& signalsWithFlagsIDs);
 
