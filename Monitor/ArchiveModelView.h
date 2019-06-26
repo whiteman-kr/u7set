@@ -11,17 +11,17 @@ enum class ArchiveColumns
 	State,
 
 	// Next are hidden by default in MonitorArchiveWidget::MonitorArchiveWidget!!!, cannot do it in ArchiveView constructor, don't know why(((
-
+	//
 	Valid,
 	StateAvailable,
 	Simulated,
 	Blocked,
-	Unbalanced,
+	Mismatch,
 	OutOfLimits,
 	ArchivingReason,
 
 	// Next are visible by default
-
+	//
 	Time,
 
 	ColumnCount

@@ -7,5 +7,6 @@
         <file>icons/PacketSource.png</file>
         <file>icons/SelectAll.png</file>
         <file>Images/logo.png</file>
+        <file>icons/Find.png</file>
     </qresource>
 </RCC>

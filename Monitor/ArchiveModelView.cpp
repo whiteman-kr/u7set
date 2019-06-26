@@ -58,8 +58,8 @@ QVariant ArchiveModel::headerData(int section, Qt::Orientation /*orientation*/, 
 	case ArchiveColumns::Blocked:
 		return tr("Blocked");
 
-	case ArchiveColumns::Unbalanced:
-		return tr("Unbalanced");
+	case ArchiveColumns::Mismatch:
+		return tr("Mismatch");
 
 	case ArchiveColumns::OutOfLimits:
 		return tr("OutOfLimits");
@@ -164,80 +164,75 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 			break;
 		case ArchiveColumns::Valid:
 			{
-				result = m_cachedSignalState.isValid() ? "" : "no";
+				result = m_cachedSignalState.isValid() ? QString() : QStringLiteral("no");
 			}
 			break;
 		case ArchiveColumns::StateAvailable:
 			{
-				result = m_cachedSignalState.m_flags.stateAvailable ? "" : "no";
+				result = m_cachedSignalState.m_flags.stateAvailable ? QString() : QStringLiteral("no");
 			}
 			break;
 		case ArchiveColumns::Simulated:
 			{
-				result = m_cachedSignalState.m_flags.simulated ? "yes" : "";
+				result = m_cachedSignalState.m_flags.simulated ? QStringLiteral("yes") : QString();
 			}
 			break;
 		case ArchiveColumns::Blocked:
 			{
-				result = m_cachedSignalState.m_flags.blocked ? "yes" : "";
+				result = m_cachedSignalState.m_flags.blocked ? QStringLiteral("yes") : QString();
 			}
 			break;
-		case ArchiveColumns::Unbalanced:
+		case ArchiveColumns::Mismatch:
 			{
-				result = m_cachedSignalState.m_flags.unbalanced ? "yes" : "";
+				result = m_cachedSignalState.m_flags.mismatch ? QStringLiteral("yes") : QString();
 			}
 			break;
 		case ArchiveColumns::OutOfLimits:
 			{
-				QString resultString;
+				QStringList resultString;
 
 				if (m_cachedSignalState.m_flags.belowLowLimit == true)
 				{
-					resultString += QStringLiteral("LOW ");
+					resultString << QStringLiteral("LOW ");
 				}
 				if (m_cachedSignalState.m_flags.aboveHighLimit == true)
 				{
-					resultString += QStringLiteral("HIGH ");
+					resultString << QStringLiteral("HIGH ");
 				}
-				if (resultString.isEmpty() == false)
-				{
-					result = resultString.trimmed();
-				}
+
+				result = resultString.join(' ');
 			}
 			break;
 		case ArchiveColumns::ArchivingReason:
 			{
-				QString resultString;
+				QStringList resultString;
 
 				if (m_cachedSignalState.m_flags.validityChange == true)
 				{
-					resultString += QStringLiteral("VAL ");
+					resultString << QStringLiteral("VAL");
 				}
-				if (m_cachedSignalState.m_flags.simBlockUnblChange == true)
+				if (m_cachedSignalState.m_flags.simBlockMismatchChange == true)
 				{
-					resultString += QStringLiteral("SIMLOCK ");
+					resultString << QStringLiteral("SIMLOCK");
 				}
 				if (m_cachedSignalState.m_flags.limitFlagsChange == true)
 				{
-					resultString += QStringLiteral("LIMIT ");
+					resultString << QStringLiteral("LIMIT");
 				}
 				if (m_cachedSignalState.m_flags.autoPoint == true)
 				{
-					resultString += QStringLiteral("AUTO ");
+					resultString << QStringLiteral("AUTO");
 				}
 				if (m_cachedSignalState.m_flags.fineAperture == true)
 				{
-					resultString += QStringLiteral("FINEAP ");
+					resultString << QStringLiteral("FINEAP");
 				}
 				if (m_cachedSignalState.m_flags.coarseAperture == true)
 				{
-					resultString += QStringLiteral("COARSEAP ");
+					resultString << QStringLiteral("COARSEAP");
 				}
 
-				if (resultString.isEmpty() == false)
-				{
-					result = resultString.trimmed();
-				}
+				result = resultString.join(' ');
 			}
 			break;
 		case ArchiveColumns::Time:
@@ -260,7 +255,7 @@ QVariant ArchiveModel::data(int row, int column, int role) const
 		 column ==  static_cast<int>(ArchiveColumns::StateAvailable) ||
 		 column ==  static_cast<int>(ArchiveColumns::Simulated) ||
 		 column ==  static_cast<int>(ArchiveColumns::Blocked) ||
-		 column ==  static_cast<int>(ArchiveColumns::Unbalanced)))
+		 column ==  static_cast<int>(ArchiveColumns::Mismatch)))
 	{
 		return QVariant(Qt::AlignCenter);
 	}

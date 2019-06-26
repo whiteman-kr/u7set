@@ -34,7 +34,7 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 		QStringLiteral("STATE"),
 		QStringLiteral("SIM"),
 		QStringLiteral("LOCK"),
-		QStringLiteral("UNBL"),
+		QStringLiteral("MISMATCH"),
 		QStringLiteral("HIGH"),
 		QStringLiteral("LOW")
 	};
@@ -90,8 +90,8 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 					value = m_flags.blocked;
 					break;
 
-				case static_cast<int>(SignalFlagsFields::Unbalanced):
-					value = m_flags.unbalanced;
+				case static_cast<int>(SignalFlagsFields::Mismatch):
+					value = m_flags.mismatch;
 					break;
 
 				case static_cast<int>(SignalFlagsFields::AboveHighLimit):
@@ -596,7 +596,16 @@ void DialogSignalInfo::updateData()
 	//
 	if (state.m_flags.valid == false)
 	{
-		strValue = QStringLiteral("?");
+		if (state.m_flags.stateAvailable == true)
+		{
+			// Even state is not valid in some reason LM has value for this signal, show it
+			//
+			strValue = QString("? (%1)").arg(strValue);
+		}
+		else
+		{
+			strValue = QStringLiteral("?");
+		}
 	}
 
 	// --

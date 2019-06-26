@@ -1,6 +1,5 @@
 #include "../lib/PropertyObject.h"
 #include "../lib/PropertyEditor.h"
-#include "Settings.h"
 #include "TuningValue.h"
 
 #include <QtTreePropertyBrowser>
@@ -34,6 +33,7 @@
 #include <QDesktopWidget>
 #include <QTextBrowser>
 #include <QTreeWidget>
+#include <QSplitter>
 
 namespace ExtWidgets
 {
@@ -76,9 +76,10 @@ namespace ExtWidgets
 	//
 	// ------------ PropertyArrayEditorDialog ------------
 	//
-	PropertyArrayEditorDialog::PropertyArrayEditorDialog(QWidget* parent, const QString& propertyName, const QVariant& value):
+	PropertyArrayEditorDialog::PropertyArrayEditorDialog(PropertyEditor* propertyEditor, QWidget* parent, const QString& propertyName, const QVariant& value):
 		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
-		m_value(value)
+		m_value(value),
+		m_parentPropertyEditor(propertyEditor)
 	{
 		if (variantIsPropertyVector(m_value) == false && variantIsPropertyList(m_value) == false)
 		{
@@ -105,8 +106,8 @@ namespace ExtWidgets
 
 		connect(m_treeWidget, &QTreeWidget::itemSelectionChanged, this, &PropertyArrayEditorDialog::onSelectionChanged);
 
-		m_propertyEditor = new PropertyEditor(this);
-		connect(m_propertyEditor, &PropertyEditor::propertiesChanged, this, &PropertyArrayEditorDialog::onPropertiesChanged);
+		m_childPropertyEditor = m_parentPropertyEditor->createChildPropertyEditor(this);
+		connect(m_childPropertyEditor, &PropertyEditor::propertiesChanged, this, &PropertyArrayEditorDialog::onPropertiesChanged);
 
 		// Move Up/Down
 
@@ -138,17 +139,26 @@ namespace ExtWidgets
 
 		// Left Layout
 
-		QVBoxLayout* leftLayout = new QVBoxLayout();
-		leftLayout->addWidget(m_treeWidget);
-		leftLayout->addLayout(addRemoveLayout);
+		QVBoxLayout* treeAddRemoveLayout = new QVBoxLayout();
+		treeAddRemoveLayout->addWidget(m_treeWidget);
+		treeAddRemoveLayout->addLayout(addRemoveLayout);
 
 		// Top Layout
 
+		QWidget* leftWidget = new QWidget();
 
-		QHBoxLayout* horzLayout = new QHBoxLayout();
-		horzLayout->addLayout(leftLayout);
-		horzLayout->addLayout(moveLayout);
-		horzLayout->addWidget(m_propertyEditor);
+		QHBoxLayout* leftLayout = new QHBoxLayout(leftWidget);
+		leftLayout->setContentsMargins(0, 0, 0, 0);
+		leftLayout->addLayout(treeAddRemoveLayout);
+		leftLayout->addLayout(moveLayout);
+
+
+		// Splitter
+
+		m_splitter = new QSplitter();
+
+		m_splitter->addWidget(leftWidget);
+		m_splitter->addWidget(m_childPropertyEditor);
 
 		// Ok/Cancel
 
@@ -163,7 +173,7 @@ namespace ExtWidgets
 		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::reject);
 		buttonsLayout->addWidget(b);
 
-		mainLayout->addLayout(horzLayout);
+		mainLayout->addWidget(m_splitter);
 
 		//
 
@@ -177,6 +187,22 @@ namespace ExtWidgets
 		{
 			m_treeWidget->topLevelItem(0)->setSelected(true);
 		}
+
+		if (thePropertyEditorSettings.m_arrayPropertyEditorSize != QSize(-1, -1))
+		{
+			resize(thePropertyEditorSettings.m_arrayPropertyEditorSize);
+		}
+
+		if (thePropertyEditorSettings.m_arrayPropertyEditorSplitterState.isEmpty() == false)
+		{
+			m_splitter->restoreState(thePropertyEditorSettings.m_arrayPropertyEditorSplitterState);
+		}
+	}
+
+	PropertyArrayEditorDialog::~PropertyArrayEditorDialog()
+	{
+		thePropertyEditorSettings.m_arrayPropertyEditorSplitterState = m_splitter->saveState();
+		thePropertyEditorSettings.m_arrayPropertyEditorSize = size();
 	}
 
 	QVariant PropertyArrayEditorDialog::value()
@@ -347,10 +373,10 @@ namespace ExtWidgets
 
 	void PropertyArrayEditorDialog::onSelectionChanged()
 	{
-		if (m_treeWidget == nullptr || m_propertyEditor == nullptr)
+		if (m_treeWidget == nullptr || m_childPropertyEditor == nullptr)
 		{
 			Q_ASSERT(m_treeWidget);
-			Q_ASSERT(m_propertyEditor);
+			Q_ASSERT(m_childPropertyEditor);
 			return;
 		}
 
@@ -410,8 +436,8 @@ namespace ExtWidgets
 			}
 		}
 
-		m_propertyEditor->setObjects(propertyObjectList);
-		m_propertyEditor->resizeColumnToContents(0);
+		m_childPropertyEditor->setObjects(propertyObjectList);
+		m_childPropertyEditor->resizeColumnToContents(0);
 
 		return;
 	}
@@ -601,6 +627,22 @@ namespace ExtWidgets
 	int FilePathPropertyType::filePathTypeId()
 	{
 		return qMetaTypeId<FilePathPropertyType>();
+	}
+
+	void PropertyEditorSettings::restore(QSettings& s)
+	{
+		m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePropertyEditorWindowPos", QPoint(-1, -1)).toPoint();
+		m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLinePropertyEditorGeometry").toByteArray();
+		m_arrayPropertyEditorSplitterState = s.value("PropertyEditor/arrayPropertyEditorSplitterState").toByteArray();
+		m_arrayPropertyEditorSize = s.value("PropertyEditor/arrayPropertyEditorSize").toSize();
+	}
+
+	void PropertyEditorSettings::store(QSettings& s)
+	{
+		s.setValue("PropertyEditor/multiLinePropertyEditorWindowPos", m_multiLinePropertyEditorWindowPos);
+		s.setValue("PropertyEditor/multiLinePropertyEditorGeometry", m_multiLinePropertyEditorGeometry);
+		s.setValue("PropertyEditor/arrayPropertyEditorSplitterState", m_arrayPropertyEditorSplitterState);
+		s.setValue("PropertyEditor/arrayPropertyEditorSize", m_arrayPropertyEditorSize);
 	}
 
 	//
@@ -938,19 +980,15 @@ namespace ExtWidgets
 
 		m_combo = new QComboBox(parent);
 
-		if (m_combo->count() == 0)
+		for (std::pair<int, QString> i : p->enumValues())
 		{
-			m_combo->blockSignals(true);
-			for (std::pair<int, QString> i : p->enumValues())
-			{
-				m_combo->addItem(i.second, i.first);
-			}
-			m_combo->blockSignals(false);
+			m_combo->addItem(i.second, i.first);
 		}
-
-		connect(m_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(indexChanged(int)));
+		m_combo->setCurrentIndex(-1);
 
 		m_combo->setEnabled(readOnly == false);
+
+		connect(m_combo, SIGNAL(currentIndexChanged(int)), this, SLOT(indexChanged(int)));
 
 		QHBoxLayout* lt = new QHBoxLayout;
 		lt->setContentsMargins(0, 0, 0, 0);
@@ -974,14 +1012,14 @@ namespace ExtWidgets
             return;
         }
 
-		m_oldValue = property->value().toInt();
+		m_combo->blockSignals(true);
 
 		// select an item with a value
 		//
 		bool found =  false;
 		for (int i = 0; i < m_combo->count(); i++)
 		{
-            if (m_combo->itemData(i).toInt() == m_oldValue)
+			if (m_combo->itemData(i).toInt() ==  property->value().toInt())
 			{
 				m_combo->setCurrentIndex(i);
 				found = true;
@@ -993,17 +1031,15 @@ namespace ExtWidgets
 			m_combo->setCurrentIndex(-1);
         }
 
+		m_combo->blockSignals(false);
+
 		m_combo->setEnabled(readOnly == false);
 	}
 
 	void MultiEnumEdit::indexChanged(int index)
 	{
 		int value = m_combo->itemData(index).toInt();
-        if (m_oldValue != value)
-		{
-            m_oldValue = value;
-			emit valueChanged(m_combo->itemText(index));
-        }
+		emit valueChanged(value);
 	}
 
 
@@ -1165,17 +1201,17 @@ namespace ExtWidgets
 	//
 	// ---------MultiTextEditorDialog----------
 	//
-	MultiTextEditorDialog::MultiTextEditorDialog(QWidget* parent, PropertyEditor* propertyEditor, const QString &text, std::shared_ptr<Property> p):
+	MultiTextEditorDialog::MultiTextEditorDialog(PropertyEditor* propertyEditor, QWidget* parent, const QString &text, std::shared_ptr<Property> p):
 		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint),
 		m_propertyEditor(propertyEditor),
 		m_property(p)
 	{
 		setWindowTitle(p->caption());
 
-		if (theSettings.m_multiLinePropertyEditorWindowPos.x() != -1 && theSettings.m_multiLinePropertyEditorWindowPos.y() != -1)
+		if (thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos.x() != -1 && thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos.y() != -1)
 		{
-			move(theSettings.m_multiLinePropertyEditorWindowPos);
-			restoreGeometry(theSettings.m_multiLinePropertyEditorGeometry);
+			move(thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos);
+			restoreGeometry(thePropertyEditorSettings.m_multiLinePropertyEditorGeometry);
 		}
 		else
 		{
@@ -1309,8 +1345,8 @@ namespace ExtWidgets
 	{
 		Q_UNUSED(result);
 
-		theSettings.m_multiLinePropertyEditorWindowPos = pos();
-		theSettings.m_multiLinePropertyEditorGeometry = saveGeometry();
+		thePropertyEditorSettings.m_multiLinePropertyEditorWindowPos = pos();
+		thePropertyEditorSettings.m_multiLinePropertyEditorGeometry = saveGeometry();
 
 	}
 
@@ -1481,7 +1517,7 @@ namespace ExtWidgets
 				return;
 			}
 
-			MultiTextEditorDialog multlLineEdit(this, m_propertyEditor, m_oldValue.toString(), m_property);
+			MultiTextEditorDialog multlLineEdit(m_propertyEditor, this, m_oldValue.toString(), m_property);
 			if (multlLineEdit.exec() != QDialog::Accepted)
 			{
 				return;
@@ -1779,10 +1815,11 @@ namespace ExtWidgets
 	//
 	// ---------QtMultiCheckBox----------
 	//
-	MultiArrayEdit::MultiArrayEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly):
+	MultiArrayEdit::MultiArrayEdit(PropertyEditor* propertyEditor, QWidget* parent, std::shared_ptr<Property> p, bool readOnly):
 		QWidget(parent),
 		m_property(p),
-		m_currentValue(p->value())
+		m_currentValue(p->value()),
+		m_propertyEditor(propertyEditor)
 	{
 
 		m_lineEdit = new QLineEdit(parent);
@@ -1845,7 +1882,7 @@ namespace ExtWidgets
 			return;
 		}
 
-		PropertyArrayEditorDialog d(this, m_property->caption(), m_currentValue);
+		PropertyArrayEditorDialog d(m_propertyEditor, this, m_property->caption(), m_currentValue);
 		if (d.exec() != QDialog::Accepted)
 		{
 			return;
@@ -2117,7 +2154,7 @@ namespace ExtWidgets
 
 			if (variantIsPropertyList(propertyPtr->value()) == true || variantIsPropertyVector(propertyPtr->value()))
 			{
-				MultiArrayEdit* m_editor = new MultiArrayEdit(parent, propertyPtr, property->isEnabled() == false);
+				MultiArrayEdit* m_editor = new MultiArrayEdit(m_propertyEditor, parent, propertyPtr, property->isEnabled() == false);
 				editor = m_editor;
 
 				if (manager->sameValue(property) == true)
@@ -3284,12 +3321,12 @@ namespace ExtWidgets
 
 			// Do not set property, if it has same value
 
-			if (pObject->propertyValue(propertyName) == value)
+			QVariant oldValue = pObject->propertyValue(propertyName);
+
+			if (oldValue == value)
 			{
 				continue;
 			}
-
-			QVariant oldValue = pObject->propertyValue(propertyName);
 
 			// Warning!!! If property changing changes the list of properties (e.g. SpecificProperties),
 			// property pointer becomes unusable! So next calls to property-> will cause crash
@@ -3304,7 +3341,7 @@ namespace ExtWidgets
 							  .arg(propertyName);
 			}
 
-            modifiedObjects.append(i);
+			modifiedObjects.append(i);
 		}
 
 		if (errorString.isEmpty() == false)
@@ -3319,6 +3356,11 @@ namespace ExtWidgets
 		return;
 	}
 
+	PropertyEditor* PropertyEditor::createChildPropertyEditor(QWidget* parent)
+	{
+		return new PropertyEditor(parent);
+	}
+
 	PropertyTextEditor* PropertyEditor::createPropertyTextEditor(Property* property, QWidget* parent)
 	{
         Q_UNUSED(property);
@@ -3331,3 +3373,5 @@ namespace ExtWidgets
 	}
 
 }
+
+ExtWidgets::PropertyEditorSettings thePropertyEditorSettings;

@@ -733,7 +733,7 @@ namespace Builder
 	const QString UalAfb::VALIDITY_PIN_CAPTION("validity");
 	const QString UalAfb::SIMULATED_PIN_CAPTION("simulated");
 	const QString UalAfb::BLOCKED_PIN_CAPTION("blocked");
-	const QString UalAfb::UNBALANCED_PIN_CAPTION("unbalanced");
+	const QString UalAfb::MISMATCH_PIN_CAPTION("mismatch");
 	const QString UalAfb::HIGH_LIMIT_PIN_CAPTION("high_limit");
 	const QString UalAfb::LOW_LIMIT_PIN_CAPTION("low_limit");
 

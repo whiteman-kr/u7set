@@ -77,18 +77,80 @@ namespace Tcp
 
 			quint32 CRC32 = 0;
 
-			void calcCRC()
-			{
-				this->CRC32 = ::CRC32(reinterpret_cast<const char*>(this), sizeof(Header) - sizeof(quint32));
-			}
-
-			bool checkCRC()
-			{
-				return ::CRC32(reinterpret_cast<const char*>(this), sizeof(Header) - sizeof(quint32)) == this->CRC32;
-			}
+			void calcCRC();
+			bool checkCRC();
 		};
 
 		#pragma pack(pop)
+
+	public:
+		SocketWorker(const SoftwareInfo& softwareInfo);
+
+		virtual ~SocketWorker();
+
+		bool isConnected() const;
+		void closeConnection();
+
+		virtual void onInitConnection();
+		virtual void onConnection();
+		virtual void onDisconnection();
+
+		int watchdogTimerTimeout() const { return m_watchdogTimerTimeout; }
+		void setWatchdogTimerTimeout(int timeout_ms) { m_watchdogTimerTimeout = timeout_ms; }
+		void enableWatchdogTimer(bool enable);
+
+		HostAddressPort localAddressPort() const;
+
+		void restartWatchdogTimer();
+
+		ConnectionState getConnectionState() const;
+
+		SoftwareInfo localSoftwareInfo() const;
+		SoftwareInfo connectedSoftwareInfo() const;
+
+		HostAddressPort peerAddr() const;
+
+	signals:
+		void disconnected(const SocketWorker* socketWorker);
+		void closeConnectionSignal();
+
+	protected:
+		virtual void createSocket();
+		void deleteSocket();
+
+		virtual void onThreadStarted() override;
+		virtual void onThreadFinished() override;
+
+		virtual void onHeaderAndDataReady() {}
+
+		qint64 socketWrite(const char* data, qint64 size);
+		qint64 socketWrite(const Header& header);
+
+		void addSentBytes(int bytes);
+		void addReceivedBytes(int bytes);
+
+		void addRequest();
+		void addReply();
+
+		void setStateConnected(const HostAddressPort& peerAddr);
+		void setStateDisconnected();
+
+	protected slots:
+		virtual void onWatchdogTimerTimeout();
+
+	private:
+		int readHeader(int bytesAvailable);
+		int readData(int bytesAvailable);
+
+		virtual void initReadStatusVariables() = 0;
+
+	private slots:
+		void onSocketStateChanged(QAbstractSocket::SocketState newState);
+		void onSocketConnected();
+		void onSocketDisconnected();
+		void onSocketReadyRead();
+		void onSocketBytesWritten();
+		void onCloseConnection();
 
 	protected:
 		enum ReadState
@@ -123,76 +185,6 @@ namespace Tcp
 		char* m_receiveDataBuffer = nullptr;
 
 		bool m_headerAndDataReady = false;					// set to TRUE when full header and data read from socket
-
-		virtual void createSocket();
-		void deleteSocket();
-
-		virtual void onThreadStarted() override;
-		virtual void onThreadFinished() override;
-
-		virtual void onHeaderAndDataReady() {}
-
-		qint64 socketWrite(const char* data, qint64 size);
-		qint64 socketWrite(const Header& header);
-
-		void resetStaticstics();
-
-		void addSentBytes(int bytes);
-		void addReceivedBytes(int bytes);
-
-		void addRequest();
-		void addReply();
-
-		void setStateConnected(const HostAddressPort& peerAddr);
-		void setStateDisconnected();
-
-	private:
-		int readHeader(int bytesAvailable);
-		int readData(int bytesAvailable);
-
-		virtual void initReadStatusVariables() = 0;
-
-	private slots:
-		void onSocketStateChanged(QAbstractSocket::SocketState newState);
-		void onSocketConnected();
-		void onSocketDisconnected();
-		void onSocketReadyRead();
-		void onSocketBytesWritten();
-
-	protected slots:
-		virtual void onWatchdogTimerTimeout();
-
-	signals:
-		void disconnected(const SocketWorker* socketWorker);
-
-	public:
-		SocketWorker(const SoftwareInfo& softwareInfo);
-
-		virtual ~SocketWorker() override;
-
-		bool isConnected() const;
-		bool isUnconnected() const;
-
-		void closeConnection();
-
-		virtual void onInitConnection();
-		virtual void onConnection();
-		virtual void onDisconnection();
-
-		int watchdogTimerTimeout() const { return m_watchdogTimerTimeout; }
-		void setWatchdogTimerTimeout(int timeout_ms) { m_watchdogTimerTimeout = timeout_ms; }
-		void enableWatchdogTimer(bool enable);
-
-		HostAddressPort localAddressPort() const;
-
-		void restartWatchdogTimer();
-
-		ConnectionState getConnectionState() const;
-
-		SoftwareInfo localSoftwareInfo() const;
-		SoftwareInfo connectedSoftwareInfo() const;
-
-		HostAddressPort peerAddr() const;
 	};
 
 	// -------------------------------------------------------------------------------------
@@ -201,56 +193,9 @@ namespace Tcp
 	//
 	// -------------------------------------------------------------------------------------
 
-
 	class Server : public SocketWorker
 	{
 		Q_OBJECT
-
-	private:
-		enum ServerState
-		{
-			WainigForRequest,
-			RequestProcessing,
-		};
-
-		static int staticId;
-
-		int m_id = 0;
-
-		qintptr m_connectedSocketDescriptor = 0;
-
-		ServerState m_serverState = ServerState::WainigForRequest;
-
-		double m_requestProcessingPorgress = 0;
-
-		bool m_autoAck = true;
-
-		QTimer m_autoAckTimer;
-
-		char* m_protobufBuffer = nullptr;
-
-		QMutex m_statesMutex;
-
-		virtual void onThreadStarted() final;
-		virtual void onThreadFinished() final;
-
-		virtual void initReadStatusVariables() final;
-
-		virtual void createSocket() final;
-
-		void onHeaderAndDataReady() final;
-
-	protected:
-		std::list<Tcp::ConnectionState> m_connectionStates;
-
-	signals:
-		void connectedSoftwareInfoChanged();	// Inform listener that some connection state changed
-
-	private slots:
-		void onAutoAckTimer();
-
-	public slots:
-		void updateClientsInfo(const std::list<Tcp::ConnectionState> connectionStates);	// Update connection states of all clients from listener
 
 	public:
 		Server(const SoftwareInfo& sotwareInfo);
@@ -279,8 +224,54 @@ namespace Tcp
 		bool sendReply(const char* replyData, quint32 replyDataSize);
 
 		void sendClientList();
-	};
 
+	public slots:
+		void updateClientsInfo(const std::list<Tcp::ConnectionState> connectionStates);	// Update connection states of all clients from listener
+
+	signals:
+		void connectedSoftwareInfoChanged();	// Inform listener that some connection state changed
+
+	protected:
+		std::list<Tcp::ConnectionState> m_connectionStates;
+
+	private:
+		virtual void onThreadStarted() final;
+		virtual void onThreadFinished() final;
+
+		virtual void initReadStatusVariables() final;
+
+		virtual void createSocket() final;
+
+		void onHeaderAndDataReady() final;
+
+	private slots:
+		void onAutoAckTimer();
+
+	private:
+		enum ServerState
+		{
+			WainigForRequest,
+			RequestProcessing,
+		};
+
+		static int staticId;
+
+		int m_id = 0;
+
+		qintptr m_connectedSocketDescriptor = 0;
+
+		ServerState m_serverState = ServerState::WainigForRequest;
+
+		double m_requestProcessingPorgress = 0;
+
+		bool m_autoAck = true;
+
+		QTimer m_autoAckTimer;
+
+		char* m_protobufBuffer = nullptr;
+
+		QMutex m_statesMutex;
+	};
 
 	// -------------------------------------------------------------------------------------
 	//
@@ -300,7 +291,6 @@ namespace Tcp
 	signals:
 		void newConnection(qintptr socketDescriptor);
 	};
-
 
 	// -------------------------------------------------------------------------------------
 	//
@@ -372,7 +362,6 @@ namespace Tcp
 		~ServerThread();
 	};
 
-
 	// -------------------------------------------------------------------------------------
 	//
 	// Tcp::ClientWorker class declaration
@@ -383,57 +372,6 @@ namespace Tcp
 	{
 		Q_OBJECT
 
-	private:
-		enum ClientState
-		{
-			ClearToSendRequest,
-			WaitingForReply,
-		};
-
-		HostAddressPort m_serversAddressPort[2];
-		HostAddressPort m_selectedServer;
-		int m_selectedServerIndex = 0;
-
-		QTimer m_periodicTimer;
-		QTimer m_replyTimeoutTimer;
-
-		quint32 m_requestNumerator = 1;
-
-		Header m_sentRequestHeader;
-
-		bool m_autoSwitchServer = true;
-
-		int m_connectTimeout = 0;
-
-		ClientState m_clientState = ClientState::ClearToSendRequest;
-
-		char* m_protobufBuffer = nullptr;
-
-	private:
-		void autoSwitchServer();
-		void selectServer(int serverIndex, bool reconnect);
-
-		void connectToServer();
-
-		virtual void onThreadStarted() final;
-		virtual void onThreadFinished() final;
-
-		virtual void onHeaderAndDataReady() final;
-
-		virtual void initReadStatusVariables() final;
-
-		void restartReplyTimeoutTimer();
-		void stopReplyTimeoutTimer();
-
-		void processAck();
-
-	private slots:
-		void onPeriodicTimer();
-		void onReplyTimeoutTimer();
-
-	protected slots:
-		virtual void onWatchdogTimerTimeout() override;
-
 	public:
 		Client(const SoftwareInfo& softwareInfo,
 			   const HostAddressPort& serverAddressPort);
@@ -442,7 +380,7 @@ namespace Tcp
 			   const HostAddressPort& serverAddressPort1,
 			   const HostAddressPort& serverAddressPort2);
 
-		virtual ~Client();
+		virtual ~Client() override;
 
 		void setServer(const HostAddressPort& serverAddressPort, bool reconnect);
 		void setServers(const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2, bool reconnect);
@@ -482,5 +420,54 @@ namespace Tcp
 		bool sendRequest(quint32 requestID, google::protobuf::Message& protobufMessage);
 
 		virtual void processReply(quint32 requestID, const char* replyData, quint32 replyDataSize) = 0;
+
+	protected slots:
+		virtual void onWatchdogTimerTimeout() override;
+
+	private:
+		void autoSwitchServer();
+		void selectServer(int serverIndex, bool reconnect);
+
+		void connectToServer();
+
+		virtual void onThreadStarted() final;
+		virtual void onThreadFinished() final;
+
+		virtual void onHeaderAndDataReady() final;
+
+		virtual void initReadStatusVariables() final;
+
+		void restartReplyTimeoutTimer();
+		void stopReplyTimeoutTimer();
+
+	private slots:
+		void onPeriodicTimer();
+		void onReplyTimeoutTimer();
+
+	private:
+		enum ClientState
+		{
+			ClearToSendRequest,
+			WaitingForReply,
+		};
+
+		HostAddressPort m_serversAddressPort[2];
+		HostAddressPort m_selectedServer;
+		int m_selectedServerIndex = 0;
+
+		QTimer m_periodicTimer;
+		QTimer m_replyTimeoutTimer;
+
+		quint32 m_requestNumerator = 1;
+
+		Header m_sentRequestHeader;
+
+		bool m_autoSwitchServer = true;
+
+		int m_connectTimeout = 0;
+
+		ClientState m_clientState = ClientState::ClearToSendRequest;
+
+		char* m_protobufBuffer = nullptr;
 	};
 }

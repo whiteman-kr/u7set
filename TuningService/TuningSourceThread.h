@@ -206,6 +206,16 @@ namespace Tuning
 			NetworkError m_writeErrorCode = NetworkError::Success;	// last write error code, NetworkError:  Success, TuningValueOutOfRange, TuningNoReply
 		};
 
+		class TuningCommandQueue : private QList<TuningCommand>
+		{
+		public:
+			void push(const TuningCommand& cmd);
+			bool pop(TuningCommand* cmd);
+
+		private:
+			QMutex m_mutex;
+		};
+
 	public:
 		TuningSourceHandler(const TuningServiceSettings& settings,
 						   const TuningSource& source,
@@ -322,7 +332,7 @@ namespace Tuning
 
 		Queue<Rup::Frame> m_replyQueue;
 
-		QueueOnList<TuningCommand> m_tuningCommandQueue;
+		TuningCommandQueue m_tuningCommandQueue;
 
 		TuningCommand m_lastProcessedCommand;
 

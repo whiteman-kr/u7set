@@ -50,4 +50,5 @@ private:
 	qint64 m_errDatagramSize = 0;
 	qint64 m_errSimVersion = 0;
 	qint64 m_errUnknownAppDataSourceIP = 0;
+	qint64 m_errRupFrameCRC = 0;
 };

@@ -31,7 +31,15 @@ class AppSignalState
 
 	Q_PROPERTY(Hash Hash READ hash)
 	Q_PROPERTY(double Value READ value)
+
 	Q_PROPERTY(bool Valid READ isValid)
+	Q_PROPERTY(bool StateAvailable READ isStateAvailable)
+	Q_PROPERTY(bool Simulated READ isSimulated)
+	Q_PROPERTY(bool Blocked READ isBlocked)
+	Q_PROPERTY(bool Mismatch READ isMismatch)
+	Q_PROPERTY(bool AboveHighLimit READ isAboveHighLimit)
+	Q_PROPERTY(bool BelowLowLimit READ isBelowLowLimit)
+	Q_PROPERTY(bool OutOfLimits READ isOutOfLimits)
 
 public:
 	AppSignalState() = default;
@@ -52,6 +60,13 @@ public:
 	double value() const;
 
 	bool isValid() const;
+	bool isStateAvailable() const;
+	bool isSimulated() const;
+	bool isBlocked() const;
+	bool isMismatch() const;
+	bool isAboveHighLimit() const;
+	bool isBelowLowLimit() const;
+	bool isOutOfLimits() const;		//  isAboveHighLimit() || isBelowLowLimit()
 
 	void save(Proto::AppSignalState* protoState);
 	Hash load(const Proto::AppSignalState& protoState);

@@ -180,6 +180,7 @@ namespace Builder
 		std::shared_ptr<VFrame30::Schema> schema() { return m_appLogicItem.m_schema; }
 
 		QString label() const { return m_appLogicItem.m_fblItem->label(); }
+		void setLabel(const QString& label) { m_appLogicItem.m_fblItem->setLabel(label); }
 
 		const LogicSignal& signal() { return *(m_appLogicItem.m_fblItem->toSignalElement()); }
 
@@ -285,7 +286,7 @@ namespace Builder
 		static const QString VALIDITY_PIN_CAPTION;
 		static const QString SIMULATED_PIN_CAPTION;
 		static const QString BLOCKED_PIN_CAPTION;
-		static const QString UNBALANCED_PIN_CAPTION;
+		static const QString MISMATCH_PIN_CAPTION;
 		static const QString HIGH_LIMIT_PIN_CAPTION;
 		static const QString LOW_LIMIT_PIN_CAPTION;
 

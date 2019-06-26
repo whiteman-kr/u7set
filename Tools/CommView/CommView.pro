@@ -4,15 +4,18 @@
 #
 #-------------------------------------------------
 
-QT       += core gui serialport widgets
+QT       += core
+QT       += gui
+QT       += serialport
+QT       += widgets
 
 TARGET = CommView
 TEMPLATE = app
 
 #c++17 support
 #
-#gcc:CONFIG += c++1z
-#win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+gcc:CONFIG += c++1z
+win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 # DESTDIR
 #
@@ -31,7 +34,7 @@ SOURCES += main.cpp\
     SerialPortDialog.cpp \
     SerialPortList.cpp \
     SerialPortWorker.cpp \
-    Crc.cpp \
+	../../lib/Crc.cpp \
     WorkerBase.cpp \
     TestResultDialog.cpp \
     OptionDialog.cpp
@@ -42,7 +45,7 @@ HEADERS  += MainWindow.h \
     SerialPortList.h \
     SerialPortWorker.h \
     SerialPortPacket.h \
-    Crc.h \
+	../../lib/Crc.h \
     WorkerBase.h \
     TestResultDialog.h \
     OptionDialog.h

@@ -15,21 +15,26 @@
 
 // ==============================================================================================
 
-class SourceOptionDialog : public QDialog
+class PathOptionDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit SourceOptionDialog(QWidget *parent = 0);
-	virtual ~SourceOptionDialog();
+	explicit PathOptionDialog(QWidget *parent = nullptr);
+	virtual ~PathOptionDialog();
 
 private:
 
-	SourceOption			m_sourceOption;
+	PathOption				m_pathOption;
 
-	QLineEdit*				m_pathEdit = nullptr;
-	QPushButton*			m_selectPathBtn = nullptr;
+	QLineEdit*				m_signalPathEdit = nullptr;
+	QPushButton*			m_selectSignalPathBtn = nullptr;
+
+	QLineEdit*				m_sourcePathEdit = nullptr;
+	QPushButton*			m_selectSourcePathBtn = nullptr;
+
+	QLineEdit*				m_localIPEdit = nullptr;
 
 	QDialogButtonBox*		m_buttonBox = nullptr;
 
@@ -37,7 +42,7 @@ private:
 
 public:
 
-	SourceOption&			option() { return m_sourceOption; }
+	PathOption&				option() { return m_pathOption; }
 
 signals:
 
@@ -45,7 +50,8 @@ private slots:
 
 	// slots of buttons
 	//
-	void					onSelectPath();
+	void					onSelectSignalPath();
+	void					onSelectSourcePath();
 	void					onOk();
 };
 

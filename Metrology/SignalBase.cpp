@@ -213,6 +213,8 @@ void MeasureMultiParam::clear()
 		m_outputSignalType = OUTPUT_SIGNAL_TYPE_UNUSED;
 
 		m_pCalibratorManager = nullptr;
+		m_percent = 0;
+		m_negativeRange = false;
 
 	m_mutex.unlock();
 }
@@ -861,6 +863,8 @@ MeasureMultiParam& MeasureMultiParam::operator=(const MeasureMultiParam& from)
 		m_outputSignalType = from.m_outputSignalType;
 
 		m_pCalibratorManager = from.m_pCalibratorManager;
+		m_percent = from.m_percent;
+		m_negativeRange  = from.m_negativeRange ;
 
 	m_mutex.unlock();
 
@@ -966,12 +970,12 @@ Metrology::Signal* MeasureSignal::metrologySignal(int type, int channel) const
 {
 	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
-		return 0;
+		return nullptr;
 	}
 
 	if (channel < 0 || channel >= Metrology::ChannelCount)
 	{
-		return 0;
+		return nullptr;
 	}
 
 	Metrology::Signal* pSignal = nullptr;

@@ -15,6 +15,7 @@
 #include <QTimer>
 
 #include "SourceBase.h"
+#include "FindSignalTextPanel.h"
 
 // ==============================================================================================
 
@@ -24,7 +25,7 @@ class MainWindow : public QMainWindow
 
 public:
 
-	explicit MainWindow(QMainWindow* parent = 0);
+	explicit MainWindow(QMainWindow* parent = nullptr);
 	virtual ~MainWindow();
 
 private:
@@ -32,9 +33,9 @@ private:
 	// Elements of interface - Menu
 	//
 	QMenu*					m_sourceMenu = nullptr;
-	QMenu*					m_viewMenu = nullptr;
 	QMenu*					m_sourceContextMenu = nullptr;
-	QMenu*					m_pInfoMenu = nullptr;
+	QMenu*					m_signalContextMenu = nullptr;
+	QMenu*					m_infoMenu = nullptr;
 
 	// Actions of main menu
 	//
@@ -43,7 +44,10 @@ private:
 	QAction*				m_sourceStartAction = nullptr;
 	QAction*				m_sourceStopAction = nullptr;
 	QAction*				m_sourceSelectAllAction = nullptr;
-	QAction*				m_sourceOptionAction = nullptr;
+	QAction*				m_findAction = nullptr;
+	QAction*				m_optionAction = nullptr;
+	QAction*				m_sourceTextCopyAction = nullptr;
+	QAction*				m_signalTextCopyAction = nullptr;
 
 							// menu - ?
 							//
@@ -52,6 +56,10 @@ private:
 	// Elements of interface - ToolBar
 	//
 	QToolBar*				m_mainToolBar = nullptr;
+
+	// Elements of interface - Panels
+	//
+	FindSignalTextPanel*	m_pFindSignalTextPanel = nullptr;
 
 	// Elements of interface - StatusBar
 	//
@@ -71,22 +79,47 @@ private:
 	void					createContextMenu();
 	void					createHeaderContexMenu();
 	void					createStatusBar();
-	void					loadSources();
+
+	//
+
+	SignalBase				m_signalBase;
+	SourceBase				m_sourceBase;
 
 	// update lists
 	//
 	QTableView*				m_pSourceView = nullptr;
 	SourceTable				m_sourceTable;
-	QAction*				m_pColumnAction[SOURCE_LIST_COLUMN_COUNT];
-	QMenu*					m_headerContextMenu = nullptr;
+	QAction*				m_pSourceColumnAction[SOURCE_LIST_COLUMN_COUNT];
+	QMenu*					m_sourceHeaderContextMenu = nullptr;
 
-	void					hideColumn(int column, bool hide);
+	void					hideSourceColumn(int column, bool hide);
+
+	QTableView*				m_pSignalView = nullptr;
+	SignalTable				m_signalTable;
+	QAction*				m_pSignalColumnAction[SIGNAL_LIST_COLUMN_COUNT];
+	QMenu*					m_signalHeaderContextMenu = nullptr;
+
+	void					hideSignalColumn(int column, bool hide);
+
+	QTableView*				m_pFrameDataView = nullptr;
+	FrameDataTable			m_frameDataTable;
 
 	// update timers
 	//
 	QTimer*					m_updateSourceListTimer = nullptr;
 	void					startUpdateSourceListTimer();
 	void					stopUpdateSourceListTimer();
+
+	//
+
+	void					updateSignalList(PS::Source* pSource);
+	void					updateFrameDataList(PS::Source* pSource);
+
+public:
+
+	QTableView*				sourceView() { return m_pSourceView; }
+	QTableView*				signalView() { return m_pSignalView; }
+	QTableView*				frameDataView() { return m_pFrameDataView; }
 
 protected:
 
@@ -103,21 +136,40 @@ private slots:
 	void					startSource();
 	void					stopSource();
 	void					selectAllSource();
+	void					findTextSignal();
 	void					optionSource();
+	void					copyText(QTableView* pView);
+	void					copySourceText();
+	void					copySignalText();
+
 
 							// ContextMenu
 							//
-	void					onContextSourceMenu(QPoint);
-	void					onHeaderContextMenu(QPoint);
-	void					onColumnAction(QAction* action);
+	void					onSourceContextMenu(QPoint);
+	void					onSourceHeaderContextMenu(QPoint);
+	void					onSourceColumnAction(QAction* action);
+	void					onSignalContextMenu(QPoint);
+	void					onSignalHeaderContextMenu(QPoint);
+	void					onSignalColumnAction(QAction* action);
+
 
 							// menu - ?
 							//
 	void					aboutApp();
 
-	// slot for update lists
+	// slot of data
+	//
+	void					loadSources();
+	void					loadSignals();
+	void					initSignalsInSources();
+
+	// slot of lists
 	//
 	void					updateSourceState();
+
+	void					onSourceListClicked(const QModelIndex& index);
+	void					onSignalListDoubleClicked(const QModelIndex& index);
+	void					onFrameDataListDoubleClicked(const QModelIndex& index);
 };
 
 // ==============================================================================================

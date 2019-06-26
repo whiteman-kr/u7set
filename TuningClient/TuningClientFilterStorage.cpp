@@ -287,10 +287,10 @@ void TuningClientFilterStorage::updateCounters(const TuningSignalManager* object
 	{
 		updateCounters(objects, tcpClient, filter->childFilter(i).get());
 
-		// Add child filters' counters
+		// Add child filters' counters for all empty filters
 		//
 
-		if (filter->isRoot() == false)
+		if (filter->isRoot() == false && filter->isEmpty() == true)
 		{
 			TuningCounters childCounters = filter->childFilter(i)->counters();
 

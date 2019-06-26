@@ -6,6 +6,7 @@
 
 #include "../../lib/XmlHelper.h"
 #include "../../Builder/CfgFiles.h"
+#include "../../lib/DataSource.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -69,6 +70,14 @@ PS::Source::~Source()
 
 void PS::Source::clear()
 {
+	m_sourceMutex.lock();
+
+		m_si.clear();
+		m_associatedSignalList.clear();
+		m_signalList.clear();
+		m_frameBase.clear();
+
+	m_sourceMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -119,22 +128,6 @@ int PS::Source::sentFrames()
 	}
 
 	return m_pWorker->sentFrames();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-PS::Source& PS::Source::operator=(const PS::Source& from)
-{
-	m_sourceMutex.lock();
-
-		m_pThread = from.m_pThread;
-		m_pWorker = from.m_pWorker;
-
-		m_si = from.m_si;
-
-	m_sourceMutex.unlock();
-
-	return *this;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -197,11 +190,62 @@ void PS::Source::deleteWorker()
 }
 
 // -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
+
+void PS::Source::initSignals(const SignalBase& signalBase)
+{
+	for (int i = 0; i < m_si.signalCount; i++)
+	{
+		PS::Signal* pSignal = signalBase.signalPtr(m_associatedSignalList[i]);
+		if (pSignal == nullptr)
+		{
+			PS::Signal signal;
+			signal.setAppSignalID(m_associatedSignalList[i]);
+			qDebug() << "Signal:" << m_associatedSignalList[i] << "has not been found";
+			m_signalList.append(signal);
+		}
+		else
+		{
+			pSignal->calcOffset();
+
+			int frameIndex = pSignal->frameIndex();
+			if (frameIndex >= 0 && frameIndex < m_si.frameCount)
+			{
+				PS::FrameData* pFrameData = m_frameBase.frameDataPtr(frameIndex);
+				if (pFrameData != nullptr)
+				{
+					if (pSignal->frameOffset() >= 0 && pSignal->frameOffset() < Rup::FRAME_DATA_SIZE)
+					{
+						pSignal->setValueData(&pFrameData->data()[pSignal->frameOffset()]);
+					}
+				}
+			}
+
+			m_signalList.append(*pSignal);
+		}
+	}
+}
+
 // -------------------------------------------------------------------------------------------------------------------
 
-SourceBase theSourceBase;
+PS::Source& PS::Source::operator=(const PS::Source& from)
+{
+	m_sourceMutex.lock();
 
+		m_pThread = from.m_pThread;
+		m_pWorker = from.m_pWorker;
+
+		m_si = from.m_si;
+		m_associatedSignalList = from.m_associatedSignalList;
+		m_signalList = from.m_signalList;
+		m_frameBase = from.m_frameBase;
+
+	m_sourceMutex.unlock();
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
 SourceBase::SourceBase(QObject *parent) :
@@ -244,13 +288,13 @@ int SourceBase::count() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SourceBase::readFromXml()
+int SourceBase::readFromFile(const QString& path)
 {
 	clear();
 
 	QString msgTitle = tr("Loading sources");
 
-	if (theOptions.source().path().isEmpty() == true)
+	if (path.isEmpty() == true)
 	{
 		QMessageBox::information(nullptr, msgTitle, tr("Please, input path to sources directory!"));
 		return 0;
@@ -259,7 +303,7 @@ int SourceBase::readFromXml()
 	// read Server IP and Server Port
 	//
 
-	QString fileCfg = theOptions.source().path() + "/" + Builder::FILE_CONFIGURATION_XML;
+	QString fileCfg = path + "/" + Builder::FILE_CONFIGURATION_XML;
 
 	QFile fileCfgXml(fileCfg);
 	if (fileCfgXml.exists() == false)
@@ -291,7 +335,7 @@ int SourceBase::readFromXml()
 	// read Data Sources
 	//
 
-	QString fileSource = theOptions.source().path() + "/" + Builder::FILE_APP_DATA_SOURCES_XML;
+	QString fileSource = path + "/" + Builder::FILE_APP_DATA_SOURCES_XML;
 
 	QFile fileSourceXml(fileSource);
 	if (fileSourceXml.exists() == false)
@@ -320,8 +364,10 @@ int SourceBase::readFromXml()
 			continue;
 		}
 
-		if (xmlSource.name() == "DataSource")
+		if (xmlSource.name() == DataSource::ELEMENT_DATA_SOURCE)
 		{
+			// Source Info
+			//
 			PS::SourceInfo si;
 
 			QString ip;
@@ -339,14 +385,49 @@ int SourceBase::readFromXml()
 
 			si.index = indexSource++;
 
-			si.dataID = dataID.toInt(nullptr, 16);
+			si.dataID = dataID.toUInt(nullptr, 16);
 
 			si.lmAddress.setAddressPort(ip, port);
 			si.serverAddress.setAddressPort(serverAddress.addressStr(), serverAddress.port());
 
-			append(si);
+			//
+			//
+			PS::Source source;
+			source.info() = si;
+
+			//
+			//
+			source.frameBase().setFrameCount(si.frameCount);
+
+			// Source Signals
+			//
+			if (xmlSource.readNextStartElement() == false)
+			{
+				continue;
+			}
+
+			if (xmlSource.name() == DataSource::ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS)
+			{
+				xmlSource.readIntAttribute(DataSource::PROP_COUNT , &source.info().signalCount);
+
+				qDebug() << "Loading source:" << source.info().lmAddress.addressPortStr() << ", signals:" << source.info().signalCount;
+
+				QString strAssociatedSignalIDs;
+				xmlSource.readStringElement(DataSource::ELEMENT_DATA_SOURCE_ASSOCIATED_SIGNALS, &strAssociatedSignalIDs);
+				source.associatedSignalList() = strAssociatedSignalIDs.split(",", QString::SkipEmptyParts);
+
+				if (source.associatedSignalList().count() != source.info().signalCount)
+				{
+					assert(0);
+					continue;
+				}
+			}
+
+			append(source);
 		}
 	}
+
+	emit sourcesLoaded();
 
 	return count();
 }
@@ -607,35 +688,6 @@ QVariant SourceTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-//	if (role == Qt::BackgroundColorRole)
-//	{
-//		if (column == SOURCE_LIST_COLUMN_ID)
-//		{
-//			if (option->isConnected() == false)
-//			{
-//				return QColor(0xFF, 0xA0, 0xA0);
-//			}
-//		}
-
-//		if (column == SOURCE_LIST_COLUMN_RECEIVED)
-//        {
-//			if (option->isNoReply() == true)
-//            {
-//                return QColor(0xFF, 0xA0, 0xA0);
-//            }
-//        }
-
-//		if (column == SOURCE_LIST_COLUMN_SKIPPED)
-//		{
-//			if ( (double) option->skippedBytes() * 100.0 / (double) option->receivedBytes() > MAX_SKIPPED_BYTES)
-//			{
-//				return QColor(0xFF, 0xA0, 0xA0);
-//			}
-//		}
-
-//		return QVariant();
-//	}
-
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
 		return text(row, column, pSource);
@@ -667,14 +719,15 @@ QString SourceTable::text(int row, int column, PS::Source* pSource) const
 
 	switch (column)
 	{
+		case SOURCE_LIST_COLUMN_LM_IP:			result = pSource->info().lmAddress.addressStr() + " (" + QString::number(pSource->info().lmAddress.port()) + ")";			break;
+		case SOURCE_LIST_COLUMN_SERVER_IP:		result = pSource->info().serverAddress.addressStr() + " (" + QString::number(pSource->info().serverAddress.port()) + ")";	break;
 		case SOURCE_LIST_COLUMN_CAPTION:		result = pSource->info().caption;												break;
 		case SOURCE_LIST_COLUMN_EQUIPMENT_ID:	result = pSource->info().equipmentID;											break;
 		case SOURCE_LIST_COLUMN_MODULE_TYPE:	result = QString::number(pSource->info().moduleType);							break;
 		case SOURCE_LIST_COLUMN_SUB_SYSTEM:		result = pSource->info().subSystem;												break;
 		case SOURCE_LIST_COLUMN_FRAME_COUNT:	result = QString::number(pSource->info().frameCount);							break;
-		case SOURCE_LIST_COLUMN_LM_IP:			result = pSource->info().lmAddress.addressStr() + " (" + QString::number(pSource->info().lmAddress.port()) + ")";			break;
-		case SOURCE_LIST_COLUMN_SERVER_IP:		result = pSource->info().serverAddress.addressStr() + " (" + QString::number(pSource->info().serverAddress.port()) + ")";	break;
 		case SOURCE_LIST_COLUMN_STATE:			result = pSource->isRunning() ? QString::number(pSource->sentFrames()) : tr("Stopped");										break;
+		case SOURCE_LIST_COLUMN_SIGNAL_COUNT:	result = QString::number(pSource->info().signalCount);							break;
 		default:								assert(0);
 	}
 

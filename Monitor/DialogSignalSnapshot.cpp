@@ -171,15 +171,31 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 		break;
 	case SnapshotColumns::Value:
 		{
-			if (s1.isAnalog() == s2.isAnalog())
+			if (st1.m_flags.valid != st2.m_flags.valid)
 			{
-				v1 = st1.m_value;
-				v2 = st2.m_value;
+				v1 = st1.m_flags.valid;
+				v2 = st2.m_flags.valid;
 			}
 			else
 			{
-				v1 = s1.isAnalog();
-				v2 = s2.isAnalog();
+				if (st1.m_flags.stateAvailable != st2.m_flags.stateAvailable)
+				{
+					v1 = st1.m_flags.stateAvailable;
+					v2 = st2.m_flags.stateAvailable;
+				}
+				else
+				{
+					if (s1.isAnalog() == s2.isAnalog())
+					{
+						v1 = st1.m_value;
+						v2 = st2.m_value;
+					}
+					else
+					{
+						v1 = s1.isAnalog();
+						v2 = s2.isAnalog();
+					}
+				}
 			}
 		}
 		break;
@@ -207,10 +223,10 @@ bool SignalSnapshotSorter::sortFunction(int index1, int index2) const
 			v2 = st2.m_flags.blocked;
 		}
 		break;
-	case SnapshotColumns::Unbalanced:
+	case SnapshotColumns::Mismatch:
 		{
-			v1 = st1.m_flags.unbalanced;
-			v2 = st2.m_flags.unbalanced;
+			v1 = st1.m_flags.mismatch;
+			v2 = st2.m_flags.mismatch;
 		}
 		break;
 	case SnapshotColumns::OutOfLimits:
@@ -260,7 +276,7 @@ SignalSnapshotModel::SignalSnapshotModel(QObject* parent)
 	m_columnsNames << tr("StateAvailable");
 	m_columnsNames << tr("Simulated");
 	m_columnsNames << tr("Blocked");
-	m_columnsNames << tr("Unbalanced");
+	m_columnsNames << tr("Mismatch");
 	m_columnsNames << tr("OutOfLimits");
 
 	// Copy signals to model
@@ -584,6 +600,8 @@ void SignalSnapshotModel::sort(int column, Qt::SortOrder sortOrder)
 		return;
 	}
 
+	updateStates(0, static_cast<int>(m_filteredSignals.size() - 1));
+
 	int sortColumn = column;
 
 	std::sort(m_filteredSignals.begin(), m_filteredSignals.end(), SignalSnapshotSorter(sortColumn, this));
@@ -667,9 +685,9 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 			{
 				return (state.m_flags.blocked == true) ? tr("yes") : tr("");
 			}
-		case SnapshotColumns::Unbalanced:
+		case SnapshotColumns::Mismatch:
 			{
-				return (state.m_flags.unbalanced == true) ? tr("yes") : tr("");
+				return (state.m_flags.mismatch == true) ? tr("yes") : tr("");
 			}
 		case SnapshotColumns::OutOfLimits:
 			{
@@ -697,24 +715,36 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 		{
 		case SnapshotColumns::Value:
 			{
-				if (state.m_flags.valid == true)
+				QString valueResult;
+
+				switch (s.type())
 				{
-					if (s.isDiscrete() == true)
-					{
-						return static_cast<int>(state.m_value) == 0 ? "0" : "1";
-					}
-
-					if (s.isAnalog() == true)
-					{
-						QString str = QString::number(state.m_value, 'f', s.precision());
-
-						return str;
-					}
-
+				case E::SignalType::Analog:
+					valueResult = state.toString(state.m_value, E::ValueViewType::Dec, s.precision());
+					break;
+				case E::SignalType::Discrete:
+					valueResult = static_cast<int>(state.m_value) == 0 ? "0" : "1";
+					break;
+				case E::SignalType::Bus:
+					valueResult = tr("Bus Type");
+					break;
+				default:
 					Q_ASSERT(false);
 				}
 
-				return tr("?");
+				if (state.m_flags.valid == false)
+				{
+					if (state.m_flags.stateAvailable == true)
+					{
+						valueResult = QString("? (%1)").arg(valueResult);
+					}
+					else
+					{
+						valueResult = QStringLiteral("?");
+					}
+				}
+
+				return valueResult;
 			}
 
 		case SnapshotColumns::SignalID:
@@ -769,7 +799,7 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
 		 columnIndex ==  SnapshotColumns::StateAvailable ||
 		 columnIndex ==  SnapshotColumns::Simulated ||
 		 columnIndex ==  SnapshotColumns::Blocked ||
-		 columnIndex ==  SnapshotColumns::Unbalanced))
+		 columnIndex ==  SnapshotColumns::Mismatch))
 	{
 		return QVariant(Qt::AlignCenter);
 	}
@@ -881,7 +911,7 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::StateAvailable));
 		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::Simulated));
 		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::Blocked));
-		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::Unbalanced));
+		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::Mismatch));
 		ui->tableView->hideColumn(static_cast<int>(SnapshotColumns::OutOfLimits));
 	}
 

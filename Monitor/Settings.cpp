@@ -87,6 +87,8 @@ void Settings::writeUserScope() const
 	s.setValue("ArchiveWindow/geometry", m_archiveWindowGeometry);
 	s.setValue("ArchiveWindow/state", m_archiveWindowState);
 	s.setValue("ArchiveWindow/horzHeader", m_archiveHorzHeader);
+	s.setValue("ArchiveWindow/horzHeaderCount", m_archiveHorzHeaderCount);
+
 	s.setValue("ArchiveWindow/timeType", m_archiveTimeType);
 
 
@@ -125,6 +127,7 @@ void Settings::loadUserScope()
 	m_archiveWindowGeometry = s.value("ArchiveWindow/geometry").toByteArray();
 	m_archiveWindowState = s.value("ArchiveWindow/state").toByteArray();
 	m_archiveHorzHeader = s.value("ArchiveWindow/horzHeader").toByteArray();
+	m_archiveHorzHeaderCount = s.value("ArchiveWindow/horzHeaderCount").toInt();
 	m_archiveTimeType = s.value("ArchiveWindow/timeType").toInt();
 	m_archiveSignalsDialogFilterCompleter = s.value("DialogChooseArchiveSignals/filter").toStringList();
 

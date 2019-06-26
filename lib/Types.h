@@ -360,7 +360,8 @@ public:
 		Script,
 		TuningFilter,
 		SpecificPropertyStruct,
-		LoadFileDialog
+		LoadFileDialog,
+		Svg
 	};
 	Q_ENUM(PropertySpecificEditor)
 
@@ -402,7 +403,7 @@ public:
 		StateAvailable,
 		Simulated,
 		Blocked,
-		Unbalanced,
+		Mismatch,
 		AboveHighLimit,
 		BelowLowLimit
 	};

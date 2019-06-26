@@ -91,7 +91,6 @@ SOURCES +=\
     EquipmentVcsDialog.cpp \
     ../lib/DataSource.cpp \
     ../lib/SocketIO.cpp \
-    ../lib/PropertyEditorOld.cpp \
     ../lib/PropertyEditor.cpp \
     ../lib/Types.cpp \
     ../lib/PropertyEditorDialog.cpp \
@@ -180,7 +179,8 @@ SOURCES +=\
     ../lib/QScintillaLexers/LexerJavaScript.cpp \
     ../lib/QScintillaLexers/LexerXML.cpp \
     DialogShortcuts.cpp \
-    ../lib/Ui/UiTools.cpp
+    ../lib/Ui/UiTools.cpp \
+    SvgEditor.cpp
 
 
 HEADERS  += \
@@ -230,7 +230,6 @@ HEADERS  += \
     ../lib/DataSource.h \
     ../lib/SocketIO.h \
     ../lib/PropertyObject.h \
-    ../lib/PropertyEditorOld.h \
     ../lib/PropertyEditor.h \
     ../lib/PropertyEditorDialog.h \
     ../lib/DebugInstCounter.h \
@@ -323,7 +322,8 @@ HEADERS  += \
     ../lib/QScintillaLexers/LexerJavaScript.h \
     ../lib/QScintillaLexers/LexerXML.h \
     DialogShortcuts.h \
-    ../lib/Ui/UiTools.h
+    ../lib/Ui/UiTools.h \
+    SvgEditor.h
 
 
 FORMS    += \

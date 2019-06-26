@@ -695,6 +695,12 @@ message SchemaItemImageValue
 	optional int32 signalSource = 2 [default = 0];
 	optional string currentImageId = 3;
 
+    optional double lineWeight = 6 [default = 0];
+	optional uint32 lineColor = 7 [default = 0xFF000000];
+	optional uint32 fillColor = 8 [default = 0xFF0000C0];
+	optional bool drawRect = 9 [default = false];
+	optional bool fillRect = 10 [default = false];
+
     repeated ImageItem images = 14;
 }
 

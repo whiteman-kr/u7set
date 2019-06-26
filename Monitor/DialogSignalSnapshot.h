@@ -26,7 +26,6 @@ private:
 	virtual void generateHeader(QTextCursor& cursor) override;
 
 	ConfigSettings* m_configuration = nullptr;
-
 };
 
 class SignalSnapshotSorter
@@ -65,13 +64,14 @@ enum class SnapshotColumns
 	StateAvailable,
 	Simulated,
 	Blocked,
-	Unbalanced,
+	Mismatch,
 	OutOfLimits,
 
 	ColumnCount
 };
 
 Q_DECLARE_METATYPE(SnapshotColumns);
+
 
 class SignalSnapshotModel : public QAbstractItemModel
 {

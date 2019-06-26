@@ -6,7 +6,10 @@
 
 #include "Options.h"
 #include "SourceWorker.h"
+#include "SignalBase.h"
+#include "FrameBase.h"
 
+#include "../../lib/Signal.h"
 #include "../../lib/HostAddressPort.h"
 
 // ==============================================================================================
@@ -47,6 +50,8 @@ namespace PS
 
 		HostAddressPort		lmAddress;
 		HostAddressPort		serverAddress;
+
+		int					signalCount = 0;
 	};
 
 	//
@@ -71,27 +76,43 @@ namespace PS
 		SourceWorker*		m_pWorker = nullptr;
 
 		PS::SourceInfo		m_si;
+		QStringList			m_associatedSignalList;
+		QVector<PS::Signal>	m_signalList;
+		FrameBase			m_frameBase;
 
 	public:
 
-		void				clear();
+		void					clear();
 
-		PS::SourceInfo&		info() { return m_si; }
+		//
 
-		bool				run();
-		bool				stop();
+		PS::SourceInfo&			info() { return m_si; }
+		QStringList&			associatedSignalList()  { return m_associatedSignalList; }
+		QVector<PS::Signal>&	signalList()  { return m_signalList; }
+		FrameBase&				frameBase() { return m_frameBase; }
 
-		bool				isRunning();
-		int					sentFrames();
+		//
 
-		Source&				operator=(const Source& from);
+		bool					run();
+		bool					stop();
+
+		bool					isRunning();
+		int						sentFrames();
+
+		//
+
+		void					initSignals(const SignalBase& signalBase);
+
+		//
+
+		Source&					operator=(const Source& from);
 
 	signals:
 
 	public slots:
 
-		bool				createWorker();
-		void				deleteWorker();
+		bool					createWorker();
+		void					deleteWorker();
 
 	};
 }
@@ -104,7 +125,7 @@ class SourceBase : public QObject
 
 public:
 
-	explicit SourceBase(QObject *parent = 0);
+	explicit SourceBase(QObject *parent = nullptr);
 	virtual ~SourceBase();
 
 private:
@@ -117,7 +138,7 @@ public:
 	void					clear();
 	int						count() const;
 
-	int						readFromXml();
+	int						readFromFile(const QString& path);
 
 	int						append(const PS::Source &source);
 	void					remove(int index);
@@ -138,49 +159,50 @@ public:
 
 signals:
 
+	void					sourcesLoaded();
+
 public slots:
 
 };
-
-// ----------------------------------------------------------------------------------------------
-
-extern SourceBase theSourceBase;
 
 // ==============================================================================================
 
 const char* const			SourceListColumn[] =
 {
+							QT_TRANSLATE_NOOP("SourceList.h", "IP (LM)"),
+							QT_TRANSLATE_NOOP("SourceList.h", "IP (AppDataSrv)"),
 							QT_TRANSLATE_NOOP("SourceList.h", "Caption"),
 							QT_TRANSLATE_NOOP("SourceList.h", "Equipment ID"),
 							QT_TRANSLATE_NOOP("SourceList.h", "Module type"),
 							QT_TRANSLATE_NOOP("SourceList.h", "SubSystem"),
 							QT_TRANSLATE_NOOP("SourceList.h", "Frame count"),
-							QT_TRANSLATE_NOOP("SourceList.h", "IP (LM)"),
-							QT_TRANSLATE_NOOP("SourceList.h", "IP (AppDataSrv)"),
 							QT_TRANSLATE_NOOP("SourceList.h", "State"),
+							QT_TRANSLATE_NOOP("SourceList.h", "Signal count"),
 };
 
 const int					SOURCE_LIST_COLUMN_COUNT			= sizeof(SourceListColumn)/sizeof(SourceListColumn[0]);
 
-const int					SOURCE_LIST_COLUMN_CAPTION			= 0,
-							SOURCE_LIST_COLUMN_EQUIPMENT_ID		= 1,
-							SOURCE_LIST_COLUMN_MODULE_TYPE		= 2,
-							SOURCE_LIST_COLUMN_SUB_SYSTEM		= 3,
-							SOURCE_LIST_COLUMN_FRAME_COUNT		= 4,
-							SOURCE_LIST_COLUMN_LM_IP			= 5,
-							SOURCE_LIST_COLUMN_SERVER_IP		= 6,
-							SOURCE_LIST_COLUMN_STATE			= 7;
+const int					SOURCE_LIST_COLUMN_LM_IP			= 0,
+							SOURCE_LIST_COLUMN_SERVER_IP		= 1,
+							SOURCE_LIST_COLUMN_CAPTION			= 2,
+							SOURCE_LIST_COLUMN_EQUIPMENT_ID		= 3,
+							SOURCE_LIST_COLUMN_MODULE_TYPE		= 4,
+							SOURCE_LIST_COLUMN_SUB_SYSTEM		= 5,
+							SOURCE_LIST_COLUMN_FRAME_COUNT		= 6,
+							SOURCE_LIST_COLUMN_STATE			= 7,
+							SOURCE_LIST_COLUMN_SIGNAL_COUNT		= 8;
 
 const int					SourceListColumnWidth[SOURCE_LIST_COLUMN_COUNT] =
 {
+							150, // SOURCE_LIST_COLUMN_LM_IP
+							150, // SOURCE_LIST_COLUMN_SERVER_IP
 							100, // SOURCE_LIST_COLUMN_CAPTION
 							150, // SOURCE_LIST_COLUMN_EQUIPMENT_ID
 							100, // SOURCE_LIST_COLUMN_MODULE_TYPE
 							100, // SOURCE_LIST_COLUMN_SUB_SYSTEM
 							100, // SOURCE_LIST_COLUMN_FRAME_COUNT
-							120, // SOURCE_LIST_COLUMN_LM_IP
-							120, // SOURCE_LIST_COLUMN_SERVER_IP
 							100, // SOURCE_LIST_COLUMN_STATE
+							100, // SOURCE_LIST_COLUMN_SIGNAL_COUNT
 };
 
 // ==============================================================================================
@@ -195,7 +217,7 @@ class SourceTable : public QAbstractTableModel
 
 public:
 
-	explicit SourceTable(QObject* parent = 0);
+	explicit SourceTable(QObject* parent = nullptr);
 	virtual ~SourceTable();
 
 private:
@@ -213,12 +235,14 @@ public:
 
 	int						sourceCount() const;
 	PS::Source*				sourceAt(int index) const;
-	void					set(const QVector<PS::Source *> list_add);
+	void					set(const QVector<PS::Source*> list_add);
 	void					clear();
 
 	QString					text(int row, int column, PS::Source *pSource) const;
 
 	void					updateColumn(int column);
+
+
 };
 
 // ==============================================================================================

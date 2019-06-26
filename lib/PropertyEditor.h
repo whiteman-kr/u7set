@@ -17,6 +17,7 @@
 #include <QComboBox>
 #include <QStringList>
 #include <QPlainTextEdit>
+#include <QSvgRenderer>
 
 class QtTreePropertyBrowser;
 class QtProperty;
@@ -43,18 +44,37 @@ Q_DECLARE_METATYPE(ExtWidgets::FilePathPropertyType)
 
 namespace ExtWidgets
 {
+
+	struct PropertyEditorSettings
+	{
+		QByteArray m_arrayPropertyEditorSplitterState;
+		QSize m_arrayPropertyEditorSize = QSize(-1, -1);
+
+		QPoint m_multiLinePropertyEditorWindowPos;
+		QByteArray m_multiLinePropertyEditorGeometry;
+
+		void restore(QSettings& s);
+		void store(QSettings& s);
+	};
+
+	//
+
 	class PropertyEditor;
 
+	//
+	// PropertyArrayEditorDialog
+	//
 
 	static QString propertyVectorText(QVariant& value);
-
 
 	class PropertyArrayEditorDialog : public QDialog
 	{
 		Q_OBJECT
 
 	public:
-		PropertyArrayEditorDialog(QWidget* parent, const QString& propertyName, const QVariant& value);
+		PropertyArrayEditorDialog(PropertyEditor* propertyEditor, QWidget* parent, const QString& propertyName, const QVariant& value);
+		~PropertyArrayEditorDialog();
+
 		QVariant value();
 
 	private slots:
@@ -71,28 +91,35 @@ namespace ExtWidgets
 		void moveItems(bool forward);
 
 	private:
-
 		QVariant m_value;
 
+		PropertyEditor* m_parentPropertyEditor = nullptr;
+
 		QTreeWidget* m_treeWidget = nullptr;
-		PropertyEditor* m_propertyEditor = nullptr;
+		PropertyEditor* m_childPropertyEditor = nullptr;
+
+		QSplitter* m_splitter = nullptr;
 
 		std::shared_ptr<Property> m_property;
 	};
 
-
-
-
-	const int PropertyEditorTextMaxLength = 32767;
+	//
+	// PropertyEditorHelp
+	//
 
 	class PropertyEditorHelp : public QDialog
 	{
 	public:
-
 		explicit PropertyEditorHelp(const QString &caption, const QString& text, QWidget* parent);
 		~PropertyEditorHelp();
 
 	};
+
+	//
+	// PropertyTextEditor
+	//
+
+	const int PropertyEditorTextMaxLength = 32767;
 
 	class PropertyTextEditor : public QWidget
 	{
@@ -100,8 +127,7 @@ namespace ExtWidgets
 
 	public:
 		PropertyTextEditor(QWidget* parent);
-
-        virtual ~PropertyTextEditor();
+		virtual ~PropertyTextEditor();
 
 		virtual void setText(const QString& text) = 0;
 
@@ -114,6 +140,7 @@ namespace ExtWidgets
 		bool modified();
 
 		bool hasOkCancelButtons();
+
 	protected:
 		void setHasOkCancelButtons(bool value);
 
@@ -137,6 +164,10 @@ namespace ExtWidgets
 
 		bool m_hasOkCancelButtons = true;
 	};
+
+	//
+	// PropertyPlainTextEditor
+	//
 
 	class PropertyPlainTextEditor : public PropertyTextEditor
 	{
@@ -193,6 +224,10 @@ namespace ExtWidgets
 
 	};
 
+	//
+	// MultiEnumEdit
+	//
+
 	class MultiEnumEdit : public QWidget
 	{
 		Q_OBJECT
@@ -207,15 +242,8 @@ namespace ExtWidgets
 	signals:
 		void valueChanged(QVariant value);
 
-		//private slots:
-		//void onButtonPressed();
-
-		//private:
-		//bool eventFilter(QObject* watched, QEvent* event);
-
 	private:
 		QComboBox* m_combo = nullptr;
-        int m_oldValue;
 
 	};
 	class MultiColorEdit : public QWidget
@@ -249,12 +277,16 @@ namespace ExtWidgets
 	};
 
 
+	//
+	// MultiTextEditorDialog
+	//
+
 	class MultiTextEditorDialog : public QDialog
 	{
 		Q_OBJECT
 
 	public:
-		MultiTextEditorDialog(QWidget* parent, PropertyEditor* propertyEditor, const QString& text, std::shared_ptr<Property> p);
+		MultiTextEditorDialog(PropertyEditor* propertyEditor, QWidget* parent, const QString& text, std::shared_ptr<Property> p);
 		QString text();
 
 	private slots:
@@ -294,6 +326,10 @@ namespace ExtWidgets
 	};
 
 
+	//
+	// MultiCheckBox
+	//
+
 	class MultiCheckBox : public QWidget
 	{
 		Q_OBJECT
@@ -317,6 +353,10 @@ namespace ExtWidgets
 
 	};
 
+
+	//
+	// MultiTextEdit
+	//
 
 	class MultiTextEdit : public QWidget
 	{
@@ -354,12 +394,16 @@ namespace ExtWidgets
 		PropertyEditor* m_propertyEditor = nullptr;
 	};
 
+	//
+	// MultiArrayEdit
+	//
+
 	class MultiArrayEdit : public QWidget
 	{
 		Q_OBJECT
 
 	public:
-		explicit MultiArrayEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly);
+		explicit MultiArrayEdit(PropertyEditor* propertyEditor, QWidget* parent, std::shared_ptr<Property> p, bool readOnly);
 		void setValue(QVariant value, bool readOnly);
 
 	signals:
@@ -375,7 +419,13 @@ namespace ExtWidgets
 
 		QVariant m_currentValue;
 		std::shared_ptr<Property> m_property;
+
+		PropertyEditor* m_propertyEditor = nullptr;
 	};
+
+	//
+	// MultiVariantPropertyManager
+	//
 
 	class MultiVariantPropertyManager : public QtAbstractPropertyManager
 	{
@@ -425,6 +475,10 @@ namespace ExtWidgets
 
 	};
 
+	//
+	// MultiVariantFactory
+	//
+
 	class MultiVariantFactory : public QtAbstractEditorFactory<MultiVariantPropertyManager>
 	{
 		Q_OBJECT
@@ -462,6 +516,10 @@ namespace ExtWidgets
 		bool readOnly = false;
 
 	};
+
+	//
+	// PropertyEditor
+	//
 
 	class PropertyEditor : public QtTreePropertyBrowser
 	{
@@ -503,6 +561,10 @@ namespace ExtWidgets
 	protected:
 		virtual void valueChanged(QtProperty* property, QVariant value);
 
+	public:
+		virtual PropertyEditor* createChildPropertyEditor(QWidget* parent);
+
+	protected:
 		virtual PropertyTextEditor* createPropertyTextEditor(Property *property, QWidget* parent);
 
 	protected slots:
@@ -546,5 +608,7 @@ namespace ExtWidgets
 	};
 
 }
+
+extern ExtWidgets::PropertyEditorSettings thePropertyEditorSettings;
 
 #endif // PROPERTYEDITOR_H

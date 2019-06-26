@@ -27,8 +27,7 @@ namespace VFrame30
 		p->setValidator(QStringLiteral("Images (*.png *.bmp *.jpg *.jpeg *.gif);; All Files (*.*)"));
 
 		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::svg, PropertyNames::imageCategory, true, SchemaItemImage::svgData, SchemaItemImage::setSvgData);
-		p->setSpecificEditor(E::PropertySpecificEditor::LoadFileDialog);
-		p->setValidator(QStringLiteral("Svg Files (*.svg);; All Files (*.*)"));
+		p->setSpecificEditor(E::PropertySpecificEditor::Svg);
 
 		// --
 		//

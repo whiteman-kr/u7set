@@ -13,10 +13,7 @@ public:
 protected:
 	virtual void generateHeader(QTextCursor& cursor);
 
-
-
 private:
-
 	bool exportToTextDocument(QTableView* tableView, QTextDocument* doc, bool onlySelectedRows);
 
 	bool saveArchiveWithDocWriter(QTableView* tableView, QString fileName, QString format);

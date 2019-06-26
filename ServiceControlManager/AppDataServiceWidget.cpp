@@ -308,8 +308,8 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_SPEED: return source.dataReceivingRate();
 				case DSC_RECEIVES_DATA: return source.dataReceives();
 				case DSC_RECEIVED_DATA_ID: return "0x" + QString("%1").arg(source.receivedDataID(), sizeof(source.receivedDataID()) * 2, 16, QChar('0')).toUpper();
-				case DSC_RUP_FRAMES_QUEUE_SIZE: return source.rupFramesQueueSize();
-				case DSC_RUP_FRAMES_QUEUE_MAX_SIZE: return source.rupFramesQueueMaxSize();
+				case DSC_RUP_FRAMES_QUEUE_SIZE: return source.rupFramesQueueCurSize();
+				case DSC_RUP_FRAMES_QUEUE_MAX_SIZE: return source.rupFramesQueueCurMaxSize();
 				case DSC_RECEIVED_FRAMES_COUNT: return source.receivedFramesCount();
 				case DSC_RECEIVED_PACKET_COUNT: return source.receivedPacketCount();
 				case DSC_DATA_PROCESSING_ENABLED: return source.dataProcessingEnabled();
@@ -317,8 +317,8 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_LAST_PACKET_SYSTEM_TIME: return QDateTime::fromMSecsSinceEpoch(source.lastPacketSystemTime());
 				case DSC_RUP_FRAME_PLANT_TIME: return QDateTime::fromMSecsSinceEpoch(source.rupFramePlantTime());
 				case DSC_RUP_FRAME_NUMERATOR: return source.rupFrameNumerator();
-				case DSC_SIGNAL_STATES_QUEUE_SIZE: return source.signalStatesQueueSize();
-				case DSC_SIGNAL_STATES_QUEUE_MAX_SIZE: return source.signalStatesQueueMaxSize();
+				case DSC_SIGNAL_STATES_QUEUE_SIZE: return QString("%1 (%2%%)").arg(source.signalStatesQueueCurSize()).arg(0.01 * source.signalStatesQueueCurSize() / source.signalStatesQueueSize());
+				case DSC_SIGNAL_STATES_QUEUE_MAX_SIZE: return QString("%1 (%2%%)").arg(source.signalStatesQueueCurMaxSize()).arg(0.01 * source.signalStatesQueueCurMaxSize() / source.signalStatesQueueSize());
 				case DSC_ACQUIRED_SIGNALS_COUNT: return source.acquiredSignalsCount();
 
 				case DSC_ERROR_PROTOCOL_VERSION: return source.errorProtocolVersion();
@@ -375,6 +375,11 @@ void DataSourcesStateModel::updateData(const QModelIndex& topLeft, const QModelI
 	emit dataChanged(topLeft, bottomRight, QVector<int>() << Qt::DisplayRole);
 }
 
+const AppDataSource* DataSourcesStateModel::getDataSource(int row) const
+{
+	return m_dataSource[row];
+}
+
 void DataSourcesStateModel::invalidateData()
 {
 	beginResetModel();
@@ -403,7 +408,7 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, qui
 {
 	connect(this, &BaseServiceStateWidget::connectionStatisticChanged, this, &AppDataServiceWidget::updateStateInfo);
 
-	setStateTabMaxRowQuantity(13);
+	setStateTabMaxRowQuantity(14);
 	setClientQuantityRowIndexOnStateTab(5);
 
 	// Data Sources
@@ -474,6 +479,7 @@ void AppDataServiceWidget::updateServiceState()
 	stateTabModel()->setData(stateTabModel()->index(10, 1), static_cast<qint64>(state.errdatagramsize()));
 	stateTabModel()->setData(stateTabModel()->index(11, 1), static_cast<qint64>(state.errsimversion()));
 	stateTabModel()->setData(stateTabModel()->index(12, 1), static_cast<qint64>(state.errunknownappdatasourceip()));
+	stateTabModel()->setData(stateTabModel()->index(13, 1), static_cast<qint64>(state.errrupframecrc()));
 }
 
 void AppDataServiceWidget::updateStateInfo()
@@ -489,6 +495,7 @@ void AppDataServiceWidget::updateStateInfo()
 		stateTabModel()->setData(stateTabModel()->index(10, 0), "Datagram size errors");
 		stateTabModel()->setData(stateTabModel()->index(11, 0), "Simulation version errors");
 		stateTabModel()->setData(stateTabModel()->index(12, 0), "Unknown AppDataSource IP errors");
+		stateTabModel()->setData(stateTabModel()->index(13, 0), "RUP frames CRC errors");
 
 		if (m_tcpClientSocket == nullptr || m_tcpClientSocket->stateIsReady() == false)
 		{
@@ -631,7 +638,7 @@ void AppDataServiceWidget::onAppDataSourceDoubleClicked(const QModelIndex &index
 	TEST_PTR_RETURN(m_tcpClientSocket);
 
 	int row = index.row();
-	const AppDataSource* ads = m_tcpClientSocket->dataSources()[row];
+	const AppDataSource* ads = m_dataSourcesStateModel->getDataSource(row);
 
 	TEST_PTR_RETURN(ads);
 

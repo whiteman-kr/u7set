@@ -2939,7 +2939,7 @@ namespace Builder
 					continue;
 				}
 
-				result &= setPinFlagSignal(ualItem, outPinCaption, true, E::AppSignalStateFlagType::Unbalanced, inSignal, nullptr);
+				result &= setPinFlagSignal(ualItem, outPinCaption, true, E::AppSignalStateFlagType::Mismatch, inSignal, nullptr);
 			}
 
 			if (foundInputsCount < MISMATCH_MIN_PIN_COUNT)
@@ -3001,7 +3001,7 @@ namespace Builder
 			result &= setPinFlagSignal(ualItem, UalAfb::VALIDITY_PIN_CAPTION, false, E::AppSignalStateFlagType::Validity, inSignal, &flagIsSet);
 			result &= setPinFlagSignal(ualItem, UalAfb::SIMULATED_PIN_CAPTION, false, E::AppSignalStateFlagType::Simulated, inSignal, &flagIsSet);
 			result &= setPinFlagSignal(ualItem, UalAfb::BLOCKED_PIN_CAPTION, false, E::AppSignalStateFlagType::Blocked, inSignal, &flagIsSet);
-			result &= setPinFlagSignal(ualItem, UalAfb::UNBALANCED_PIN_CAPTION, false, E::AppSignalStateFlagType::Unbalanced, inSignal, &flagIsSet);
+			result &= setPinFlagSignal(ualItem, UalAfb::MISMATCH_PIN_CAPTION, false, E::AppSignalStateFlagType::Mismatch, inSignal, &flagIsSet);
 			result &= setPinFlagSignal(ualItem, UalAfb::HIGH_LIMIT_PIN_CAPTION, false, E::AppSignalStateFlagType::AboveHighLimit, inSignal, &flagIsSet);
 			result &= setPinFlagSignal(ualItem, UalAfb::LOW_LIMIT_PIN_CAPTION, false, E::AppSignalStateFlagType::BelowLowLimit, inSignal, &flagIsSet);
 
@@ -5959,10 +5959,11 @@ namespace Builder
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2));
 
 				result = appItem->init(fb.pointer, errorMsg);
+				appItem->setLabel(signal.appSignalID());
 
 				if (errorMsg.isEmpty() == false)
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorMsg);
+					LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
 					result = false;
 				}
 			}
@@ -5980,10 +5981,11 @@ namespace Builder
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
 
 				result = appItem->init(fb.pointer, errorMsg);
+				appItem->setLabel(signal.appSignalID());
 
 				if (errorMsg.isEmpty() == false)
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorMsg);
+					LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
 					result = false;
 				}
 			}
@@ -5991,9 +5993,8 @@ namespace Builder
 			break;
 
 		default:
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  QString(tr("Unknown conversion for signal %1, analogSignalFormat %2")).
-					  arg(signal.appSignalID()).arg(static_cast<int>(signal.analogSignalFormat())));
+			LOG_INTERNAL_ERROR_MSG(m_log, QString(tr("Unknown conversion for signal %1, analogSignalFormat %2")).
+										arg(signal.appSignalID()).arg(static_cast<int>(signal.analogSignalFormat())));
 			result = false;
 		}
 
@@ -6074,10 +6075,11 @@ namespace Builder
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
 
 				result = appItem->init(fb.pointer, errorMsg);
+				appItem->setLabel(signal.appSignalID());
 
 				if (errorMsg.isEmpty() == false)
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorMsg);
+					LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
 					result = false;
 				}
 			}
@@ -6095,10 +6097,11 @@ namespace Builder
 				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
 
 				result = appItem->init(fb.pointer, errorMsg);
+				appItem->setLabel(signal.appSignalID());
 
 				if (errorMsg.isEmpty() == false)
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined, errorMsg);
+					LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
 					result = false;
 				}
 			}
@@ -6106,9 +6109,8 @@ namespace Builder
 			break;
 
 		default:
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  QString(tr("Unknown conversion for signal %1, analogSignalFormat %2")).
-					  arg(signal.appSignalID()).arg(static_cast<int>(signal.analogSignalFormat())));
+			LOG_INTERNAL_ERROR_MSG(m_log, QString(tr("Unknown conversion for signal %1, analogSignalFormat %2")).
+												arg(signal.appSignalID()).arg(static_cast<int>(signal.analogSignalFormat())));
 			result = false;
 		}
 
@@ -6953,6 +6955,29 @@ namespace Builder
 
 		LOG_MESSAGE(m_log, QString(tr("Generation of AFB initialization code...")));
 
+		QHash<QString, QString> instanceUsedBy;
+
+		for(UalAfb* ualAfb : m_ualAfbs)
+		{
+			TEST_PTR_CONTINUE(ualAfb);
+
+			if (ualAfb->hasRam() == true)
+			{
+				continue;
+			}
+
+			QString instantiatorID = ualAfb->instantiatorID();
+
+			if (instanceUsedBy.contains(instantiatorID) == false)
+			{
+				instanceUsedBy.insert(instantiatorID, ualAfb->label());
+			}
+			else
+			{
+				instanceUsedBy.insert(instantiatorID, QString("%1, %2").arg(instanceUsedBy.value(instantiatorID)).arg(ualAfb->label()));
+			}
+		}
+
 		bool result = true;
 
 		code->comment_nl("AFBs initialization code");
@@ -6976,7 +7001,7 @@ namespace Builder
 				{
 					// initialize all params for each instance of FB with RAM
 					//
-					result &= generateInitAppFbParamsCode(code, *ualAfb);
+					result &= generateInitAppFbParamsCode(code, *ualAfb, ualAfb->label());
 				}
 				else
 				{
@@ -6989,7 +7014,7 @@ namespace Builder
 					{
 						instantiatorStrIDsMap.insert(instantiatorID, 0);
 
-						result &= generateInitAppFbParamsCode(code, *ualAfb);
+						result &= generateInitAppFbParamsCode(code, *ualAfb, instanceUsedBy.value(instantiatorID));
 					}
 				}
 			}
@@ -7000,7 +7025,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::generateInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb)
+	bool ModuleLogicCompiler::generateInitAppFbParamsCode(CodeSnippet* code, const UalAfb& appFb, const QString& usedBy)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(code, m_log);
 
@@ -7024,6 +7049,8 @@ namespace Builder
 				arg(fbInstance).
 				arg(appFb.instantiatorID()).
 			   arg(appFb.hasRam() ? "has RAM" : "non RAM"));
+
+		code->comment(QString(tr("Used by item(s): %1")).arg(usedBy));
 
 		displayAfbParams(code, appFb);
 

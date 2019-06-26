@@ -5,6 +5,7 @@
 #include <QThread>
 #include <QUdpSocket>
 
+#include "Options.h"
 #include "SourceBase.h"
 
 #include "../../lib/WUtils.h"
@@ -43,7 +44,7 @@ void SourceWorker::process()
 		return;
 	}
 
-	if (pSocket->bind(QHostAddress::LocalHost, PS::UDP_PORT + pSource->info().index) == false)
+	if (pSocket->bind(QHostAddress(theOptions.path().localIP()), PS::UDP_PORT + pSource->info().index) == false)
 	{
 		pSocket->close();
 		delete pSocket;
@@ -51,6 +52,8 @@ void SourceWorker::process()
 		emit finished();
 		return;
 	}
+
+	int currentFrameIndex = 0;
 
 	while(m_finishThread == false)
 	{
@@ -81,16 +84,24 @@ void SourceWorker::process()
 
 			// data RupFrame
 			//
-			m_simFrame.rupFrame.data;
-
-			// crc64 RupFrame
-			//
-			m_simFrame.rupFrame.calcCRC64();
+			PS::FrameData* pFrameData = pSource->frameBase().frameDataPtr(currentFrameIndex);
+			if (pFrameData != nullptr)
+			{
+				memcpy(m_simFrame.rupFrame.data, pFrameData->data(), Rup::FRAME_DATA_SIZE);
+			}
 
 			// version and IP of simFrame
 			//
 			m_simFrame.simVersion = reverseUint16(PS::SIM_FRAME_VERSION);
 			m_simFrame.sourceIP = reverseUint32(pSource->info().lmAddress.address32());
+
+			// revers header
+			//
+			m_simFrame.rupFrame.header.reverseBytes();
+
+			// crc64 RupFrame
+			//
+			m_simFrame.rupFrame.calcCRC64();
 
 			// send udp
 			//
@@ -101,6 +112,12 @@ void SourceWorker::process()
 			QThread::msleep(PS::SEND_TIMEOUT);
 
 			m_sentFrames++;
+
+			currentFrameIndex++;
+			if (currentFrameIndex >= pSource->info().frameCount)
+			{
+				currentFrameIndex = 0;
+			}
 		}
 
 		m_numerator++;
