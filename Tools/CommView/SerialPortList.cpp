@@ -454,9 +454,9 @@ QString CommHeaderTable::text(int row, int column) const
 			case COMM_PACKET_FIELD_TRANSID:		result.sprintf("0x%04X",  pHeader->TransID);	break;
 			case COMM_PACKET_FIELD_NUMERATOR:	result.sprintf("0x%04X",  pHeader->Numerator);	break;
 			case COMM_PACKET_FIELD_DATASIZE:	result.sprintf("0x%04X",  pHeader->DataSize);	break;
-			case COMM_PACKET_FIELD_DATAID:		result.sprintf("0x%08X",  Swap4Bytes(pHeader->DataUID));								break;
-			case COMM_PACKET_FIELD_HEADER_CRC:	result = "0x" + QString("%1").arg(Swap8Bytes(pHeader->CRC64), 0, 16).toUpper();			break;
-			case COMM_PACKET_FIELD_DATA_CRC:	result = "0x" + QString("%1").arg(Swap8Bytes(portOption->dataCRC()), 0, 16).toUpper();	break;
+			case COMM_PACKET_FIELD_DATAID:		result.sprintf("0x%08X",  SWAP_4_BYTES(pHeader->DataUID));								break;
+			case COMM_PACKET_FIELD_HEADER_CRC:	result = "0x" + QString("%1").arg(SWAP_8_BYTES(pHeader->CRC64), 0, 16).toUpper();			break;
+			case COMM_PACKET_FIELD_DATA_CRC:	result = "0x" + QString("%1").arg(SWAP_8_BYTES(portOption->dataCRC()), 0, 16).toUpper();	break;
 		}
 	}
 	else
@@ -468,9 +468,9 @@ QString CommHeaderTable::text(int row, int column) const
 			case COMM_PACKET_FIELD_TRANSID:		result = QString::number(pHeader->TransID);		break;
 			case COMM_PACKET_FIELD_NUMERATOR:	result = QString::number(pHeader->Numerator);	break;
 			case COMM_PACKET_FIELD_DATASIZE:	result = QString::number(pHeader->DataSize);	break;
-			case COMM_PACKET_FIELD_DATAID:		result = QString::number(Swap4Bytes(pHeader->DataUID));			break;
-			case COMM_PACKET_FIELD_HEADER_CRC:	result = QString::number(Swap8Bytes(pHeader->CRC64));			break;
-			case COMM_PACKET_FIELD_DATA_CRC:	result = QString::number(Swap8Bytes(portOption->dataCRC()));	break;
+			case COMM_PACKET_FIELD_DATAID:		result = QString::number(SWAP_4_BYTES(pHeader->DataUID));			break;
+			case COMM_PACKET_FIELD_HEADER_CRC:	result = QString::number(SWAP_8_BYTES(pHeader->CRC64));			break;
+			case COMM_PACKET_FIELD_DATA_CRC:	result = QString::number(SWAP_8_BYTES(portOption->dataCRC()));	break;
 		}
 	}
 
