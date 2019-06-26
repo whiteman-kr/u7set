@@ -670,8 +670,6 @@ function generate_niosConfiguration(confFirmware, log, frame, module, LMNumber, 
         return false;
     }
     var equipmentID = module.propertyValue("EquipmentID");
-    var FamilyBUMD1 = 0x5700;
-    var FamilyBUMZ1 = 0x5800;
     var ioModulesMaxCount = 16;
     var chassis = module.jsParent();
     var ptr = 0;
@@ -734,10 +732,10 @@ function generate_niosConfiguration(confFirmware, log, frame, module, LMNumber, 
             log.errCFG3000("EquipmentID", "I/O_module");
             return false;
         }
-        var customModuleFamily = ioModule.jsModuleFamily();
-        if (customModuleFamily != FamilyBUMD1 && customModuleFamily != FamilyBUMZ1) {
+        if (ioModule.jsModuleFamily() == FamilyBVB15ID) {
             continue;
         }
+        var customModuleFamily = ioModule.jsModuleFamily();
         var ioEquipmentID = ioModule.jsPropertyString("EquipmentID");
         var checkProperties = ["ModuleVersion", "Place", "PresetName", "ConfigurationScript", "TxDiagDataSize", "TxAppDataSize"];
         for (var cp = 0; cp < checkProperties.length; cp++) {

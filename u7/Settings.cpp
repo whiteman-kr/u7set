@@ -159,6 +159,8 @@ void Settings::writeUserScope() const
 	s.setValue("AfbLibraryCheck/mainSplitter", m_afbLibratyCheckSplitterState);
 
 	s.setValue("SpecificEditor/mainSplitter", m_specificEditorSplitterState);
+	s.setValue("SvgEditor/mainSplitter", m_svgEditorSplitterState);
+	s.setValue("SvgEditor/stretch", m_svgEditorStretch);
 
 	s.setValue("CreateSchema/lastSelectedLmDescriptionFile", m_lastSelectedLmDescriptionFile);
 
@@ -266,6 +268,9 @@ void Settings::loadUserScope()
 	m_afbLibratyCheckSplitterState = s.value("AfbLibraryCheck/mainSplitter").toByteArray();
 
 	m_specificEditorSplitterState = s.value("SpecificEditor/mainSplitter").toByteArray();
+
+	m_svgEditorSplitterState = s.value("SvgEditor/mainSplitter").toByteArray();
+	m_svgEditorStretch = s.value("SvgEditor/stretch", m_svgEditorStretch).toBool();
 
 	//
 	m_lastSelectedLmDescriptionFile = s.value("CreateSchema/lastSelectedLmDescriptionFile", "").toString();

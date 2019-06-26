@@ -22,6 +22,8 @@ public:
 
     virtual void saveSettings();
 
+	virtual ExtWidgets::PropertyEditor* createChildPropertyEditor(QWidget* parent) override;
+
 	virtual ExtWidgets::PropertyTextEditor* createPropertyTextEditor(Property *property, QWidget* parent) override;
 
 private:
@@ -132,7 +134,6 @@ private:
 	DbController* m_dbController = nullptr;
 
 };
-
 
 
 #endif // IDEPROPERTYEDITOR_H

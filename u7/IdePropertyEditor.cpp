@@ -1,6 +1,7 @@
 #include "Settings.h"
 #include "IdePropertyEditor.h"
 #include "SpecificPropertiesEditor.h"
+#include "SvgEditor.h"
 
 //
 // IdePropertyEditor
@@ -41,6 +42,11 @@ void IdePropertyEditor::saveSettings()
     theSettings.m_scriptHelpWindowGeometry = scriptHelpWindowGeometry();
 }
 
+ExtWidgets::PropertyEditor* IdePropertyEditor::createChildPropertyEditor(QWidget* parent)
+{
+	return new IdePropertyEditor(parent, m_dbController);
+}
+
 ExtWidgets::PropertyTextEditor* IdePropertyEditor::createPropertyTextEditor(Property *property, QWidget* parent)
 {
 
@@ -59,6 +65,15 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditor::createPropertyTextEditor(Prop
 		//
 
 		SpecificPropertiesEditor* editor = new SpecificPropertiesEditor(parent);
+		return editor;
+	}
+
+	if (property->specificEditor() == E::PropertySpecificEditor::Svg)
+	{
+		// This is Specific Properties
+		//
+
+		SvgEditor* editor = new SvgEditor(parent);
 		return editor;
 	}
 
