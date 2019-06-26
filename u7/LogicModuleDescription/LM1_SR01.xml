@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM1_SR01" DescriptionNumber="1" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0020">
+<LogicModule Name="LM1_SR01" DescriptionNumber="1" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0021">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -347,7 +347,7 @@
 			<Pin OpName="o_nan"				OpIndex ="15"	PinType = "Output"/>
 			<Pin OpName="o_version"			OpIndex ="16"	PinType = "Output"/>
 		</AFBComponent>
-		<AFBComponent Caption="FUNC"		OpCode="16"	ImpVersion="3"		VersionOpIndex="13"	MaxInstCount="256" SimulationFunc="afb_func">
+		<AFBComponent Caption="FUNC"		OpCode="16"	ImpVersion="1"		VersionOpIndex="13"	MaxInstCount="256" SimulationFunc="afb_func">
 			<Pin OpName="i_conf"		OpIndex ="0"	PinType = "Param"/>
 			<Pin OpName="i_data"		OpIndex ="1"	PinType = "Input"/>
 			<Pin OpName="o_result"		OpIndex ="5"	PinType = "Output"/>
@@ -6611,38 +6611,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#math_cos_fp_v1"    Caption="math_cos_fp"    Version="1.0007">
-			<Properties>				
-				<Description>mathtion Block outputs the cosine calculation result</Description>
-				<Category>Math</Category>
-				<OpCode>16</OpCode>
-				<HasRam>true</HasRam>				
-				<InternalUse>false</InternalUse>
-				<MinWidth>26</MinWidth>
-			</Properties>
-			<Inputs>
-				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="1" Size="32"/>           
-			</Inputs>
-			<Outputs>
-				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="5" Size="32"/>
-			</Outputs>
-			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
-					<Value>4</Value>
-					<Default>4</Default>
-					<LowLimit>1</LowLimit>
-					<HighLimit>8</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-			</Params>
-			<CommonScript>
-				<Library></Library>
-				<AfterCreation></AfterCreation>
-			</CommonScript>
-		</AFB>
-
 		<AFB id="#math_exp_fp_v1"    Caption="math_exp_fp"    Version="1.0006">
 			<Properties>				
 				<Description>Function Block outputs the exponential calculation result</Description>
@@ -6979,39 +6947,6 @@ function createOutputSignals(videoItemFblElement, afbElement)
 	return createOutputSignals(videoItemFblElement, afbElement);
 })
 				</AfterCreation>
-			</CommonScript>
-		</AFB>
-
-		<AFB id="#math_sin_fp_v1"    Caption="math_sin_fp"    Version="1.0006">
-			<Properties>				
-				<Description>Function Block outputs the sine calculation result</Description>
-				<Category>Math</Category>
-				<OpCode>16</OpCode>
-				<HasRam>true</HasRam>
-				<RequiredStart>true</RequiredStart>
-				<InternalUse>false</InternalUse>
-				<MinWidth>26</MinWidth>
-			</Properties>
-			<Inputs>
-				<Pin OpName="i_data" Caption="in" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="1" Size="32"/>           
-			</Inputs>
-			<Outputs>
-				<Pin OpName="o_result" Caption="out" Type="Analog" ByteOrder="BigEndian" DataFormat="Float" OpIndex="5" Size="32"/>
-			</Outputs>
-			<Params>            
-				<Param OpName="i_conf" Caption="Config" Visible="false" OpIndex="0" Size="5" Instantiator="true" User="false" Type="Analog" ByteOrder="BigEndian" DataFormat="UnsignedInt">
-					<Value>3</Value>
-					<Default>3</Default>
-					<LowLimit>1</LowLimit>
-					<HighLimit>8</HighLimit>
-					<Script>
-						<Changed></Changed>
-					</Script>
-				</Param>
-			</Params>
-			<CommonScript>
-				<Library></Library>
-				<AfterCreation></AfterCreation>
 			</CommonScript>
 		</AFB>
 
