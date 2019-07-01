@@ -987,9 +987,6 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 
 	var equipmentID = module.propertyValue("EquipmentID");
 
-	var FamilyBUMD1: number = 0x5700;
-	var FamilyBUMZ1: number = 0x5800;
-
 	var ioModulesMaxCount: number = 16;
 
 	var chassis: DeviceObject = module.jsParent();
@@ -1080,11 +1077,11 @@ function generate_niosConfiguration(confFirmware: ModuleFirmware, log: IssueLogg
 			return false;
 		}
 
-		var customModuleFamily : number = ioModule.jsModuleFamily();
-
-		if (customModuleFamily != FamilyBUMD1 && customModuleFamily != FamilyBUMZ1) {
+		if (ioModule.jsModuleFamily() == FamilyBVB15ID) {
 			continue;
 		}
+
+		var customModuleFamily : number = ioModule.jsModuleFamily();
 
 		var ioEquipmentID: string = ioModule.jsPropertyString("EquipmentID");
 
