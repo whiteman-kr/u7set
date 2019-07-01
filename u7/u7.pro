@@ -301,7 +301,6 @@ HEADERS  += \
     Simulator/SimMemoryWidget.h \
     Simulator/SimOutputWidget.h \
     Simulator/SimProjectWidget.h \
-    ../lib/TuningValue.h \
     SpecificPropertiesEditor.h \
     ../lib/CommonTypes.h \
     ../lib/Times.h \

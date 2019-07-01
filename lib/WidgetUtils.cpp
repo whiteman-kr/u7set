@@ -66,10 +66,11 @@ void setWindowPosition(QWidget* window, QString widgetKey)
 	window->setGeometry(windowRect);
 }
 
-TableDataVisibilityController::TableDataVisibilityController(QTableView* parent, const QString& settingsBranchName, const QVector<int>& defaultVisibleColumnSet) :
+TableDataVisibilityController::TableDataVisibilityController(QTableView* parent, const QString& settingsBranchName, const QVector<int>& defaultVisibleColumnSet, bool showAllDefaultColumns) :
 	QObject(parent->horizontalHeader()),
 	m_tableView(parent),
-	m_settingBranchName(settingsBranchName)
+	m_settingBranchName(settingsBranchName),
+	m_defaultVisibleColumnSet(defaultVisibleColumnSet)
 {
 	connect(parent, &QObject::destroyed, this, &TableDataVisibilityController::saveAllHeaderGeomery, Qt::DirectConnection);
 
@@ -105,7 +106,12 @@ TableDataVisibilityController::TableDataVisibilityController(QTableView* parent,
 			m_tableView->setColumnWidth(i, columnWidth);
 		}
 
-		horizontalHeader->setSectionHidden(i, !settings.value(m_settingBranchName + "/ColumnVisibility/" + columnName, defaultVisibleColumnSet.contains(i)).toBool());
+		bool visible = defaultVisibleColumnSet.contains(i);
+		if (showAllDefaultColumns == false)
+		{
+			visible = settings.value(m_settingBranchName + "/ColumnVisibility/" + columnName, visible).toBool();
+		}
+		horizontalHeader->setSectionHidden(i, !visible);
 
 		int position = settings.value(m_settingBranchName + "/ColumnPosition/" + columnName, -1).toInt();
 		if (position == -1)
@@ -126,7 +132,7 @@ TableDataVisibilityController::TableDataVisibilityController(QTableView* parent,
 		horizontalHeader->moveSection(oldVisualIndex, i);
 	}
 
-	QAction* columnsAction = new QAction("Columns", m_tableView);
+	QAction* columnsAction = new QAction("Rearrange columns", m_tableView);
 	connect(columnsAction, &QAction::triggered, this, &TableDataVisibilityController::editColumnsVisibilityAndOrder);
 	horizontalHeader->addAction(columnsAction);
 	connect(horizontalHeader, &QHeaderView::sectionResized, this, &TableDataVisibilityController::saveColumnWidth);
@@ -177,6 +183,61 @@ void TableDataVisibilityController::saveAllHeaderGeomery()
 	}
 }
 
+void TableDataVisibilityController::checkNewColumns()
+{
+	auto* model = m_tableView->model();
+
+	int columnCount = m_columnNameList.count();
+	int newColumnCount = model->columnCount();
+
+	if (columnCount == newColumnCount)
+	{
+		return;
+	}
+
+	QMap<int, int> positionMap;
+	QSettings settings;
+	QHeaderView* horizontalHeader = m_tableView->horizontalHeader();
+
+	m_columnNameList.reserve(newColumnCount);
+
+	for (int i = columnCount; i < newColumnCount; i++)
+	{
+		m_columnNameList.push_back(model->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString());
+
+		QString columnName = QString("%1").arg(m_columnNameList[i].replace("/", "|")).replace("\n", " ");
+		int columnWidth = settings.value(m_settingBranchName + "/ColumnWidth/" + columnName, -1).toInt();
+		if (columnWidth == -1)
+		{
+			m_tableView->resizeColumnToContents(i);
+		}
+		else
+		{
+			m_tableView->setColumnWidth(i, columnWidth);
+		}
+
+		horizontalHeader->setSectionHidden(i, !settings.value(m_settingBranchName + "/ColumnVisibility/" + columnName, m_defaultVisibleColumnSet.contains(i)).toBool());
+
+		int position = settings.value(m_settingBranchName + "/ColumnPosition/" + columnName, -1).toInt();
+		if (position == -1)
+		{
+			position = m_defaultVisibleColumnSet.indexOf(i);
+		}
+		if (position == -1)
+		{
+			position = i;
+		}
+		positionMap.insert(position, i);
+	}
+
+	for (int i = columnCount; i < newColumnCount; i++)
+	{
+		int logicalIndex = positionMap[i];
+		int oldVisualIndex = horizontalHeader->visualIndex(logicalIndex);
+		horizontalHeader->moveSection(oldVisualIndex, i);
+	}
+}
+
 void TableDataVisibilityController::saveColumnVisibility(int index, bool visible)
 {
 	QSettings settings;
@@ -189,10 +250,38 @@ void TableDataVisibilityController::saveColumnPosition(int index, int position)
 	settings.setValue((m_settingBranchName + "/ColumnPosition/%1").arg(m_columnNameList[index].replace("/", "|")).replace("\n", " "), position);
 }
 
+bool TableDataVisibilityController::getColumnVisibility(int index)
+{
+	QSettings settings;
+	bool visible = m_tableView->horizontalHeader()->isSectionHidden(index);
+	return settings.value((m_settingBranchName + "/ColumnVisibility/%1").arg(m_columnNameList[index].replace("/", "|")).replace("\n", " "), visible).toBool();
+}
+
+int TableDataVisibilityController::getColumnPosition(int index)
+{
+	QSettings settings;
+	int position = m_tableView->horizontalHeader()->visualIndex(index);
+	return settings.value((m_settingBranchName + "/ColumnPosition/%1").arg(m_columnNameList[index].replace("/", "|")).replace("\n", " "), position).toBool();
+}
+
+int TableDataVisibilityController::getColumnWidth(int index)
+{
+	QSettings settings;
+	int width = m_tableView->columnWidth(index);
+	return settings.value((m_settingBranchName + "/ColumnWidth/%1").arg(m_columnNameList[index].replace("/", "|")).replace("\n", " "), width).toBool();
+}
+
+void TableDataVisibilityController::showColumn(int index, bool visible)
+{
+	m_tableView->horizontalHeader()->setSectionHidden(index, !visible);
+}
+
 EditColumnsVisibilityDialog::EditColumnsVisibilityDialog(QTableView* tableView, TableDataVisibilityController* controller) :
-	QDialog(nullptr, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint),
+	QDialog(tableView, Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint),
 	m_controller(controller)
 {
+	setWindowTitle("Rearrange Columns");
+
 	m_columnModel = new QStandardItemModel(this);
 	m_header = tableView->horizontalHeader();
 	for (int i = 0; i < m_header->count(); i++)

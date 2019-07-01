@@ -336,6 +336,8 @@ public:
 	virtual void removeAt(const int index);
 
 	const VALUE value(const KEY& key) const;
+	const VALUE* valuePtr(const KEY& key) const;
+	const VALUE* valuePtrByIndex(const int index) const;
 
 	const KEY key(const int index) const;
 	int keyIndex(const KEY& key) const;
@@ -476,6 +478,24 @@ const VALUE PtrOrderedHash<KEY, VALUE>::value(const KEY& key) const
 	assert(false);
 
 	return VALUE();
+}
+
+template<typename KEY, typename VALUE>
+const VALUE* PtrOrderedHash<KEY, VALUE>::valuePtr(const KEY& key) const
+{
+	if (m_hash.contains(key))
+	{
+		int valueIndex = m_hash[key];
+		return m_valueVector[valueIndex];
+	}
+
+	return nullptr;
+}
+
+template<typename KEY, typename VALUE>
+const VALUE*PtrOrderedHash<KEY, VALUE>::valuePtrByIndex(const int index) const
+{
+	return m_valueVector[index];
 }
 
 

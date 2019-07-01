@@ -1,3 +1,6 @@
+#include <QMessageBox>
+#include <QDialogButtonBox>
+#include <QVBoxLayout>
 #include "SignalPropertiesDialog.h"
 #include "SignalsTabPage.h"
 #include "Settings.h"
@@ -6,20 +9,6 @@
 #include "../lib/DbController.h"
 #include "../lib/WidgetUtils.h"
 
-const std::vector<std::pair<E::SignalType, E::SignalInOutType>> signalTypeSequence =
-{
-	{E::Analog, E::SignalInOutType::Input},
-	{E::Analog, E::SignalInOutType::Output},
-	{E::Analog, E::SignalInOutType::Internal},
-
-	{E::Discrete, E::SignalInOutType::Input},
-	{E::Discrete, E::SignalInOutType::Output},
-	{E::Discrete, E::SignalInOutType::Internal},
-
-	{E::Bus, E::SignalInOutType::Input},
-	{E::Bus, E::SignalInOutType::Output},
-	{E::Bus, E::SignalInOutType::Internal},
-};
 
 // Returns vector of pairs,
 //	first: previous AppSignalID
@@ -103,6 +92,7 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 				continue;
 			}
 			ObjectState state;
+			SignalsModel::trimSignalTextFields(*signalPtrVector[i]);
 			dbController->setSignalWorkcopy(signalPtrVector[i], &state, parent);
 			if (state.errCode != ERR_SIGNAL_OK)
 			{
@@ -203,7 +193,6 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 				assert(field.length() > 0);
 			}
 
-			assert(static_cast<size_t>(fields.size()) >= signalTypeSequence.size() + 2);
 			fileFields.push_back(fields);
 		}
 	}
@@ -226,6 +215,37 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 	{
 		Signal& appSignal = *signalVector[i];
 
+		bool uppercaseAppSignalID = true;
+		if (m_dbController->getProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, &uppercaseAppSignalID, this) == false)
+		{
+			assert(false);
+		}
+		if (uppercaseAppSignalID)
+		{
+			QString upperAppSignalId = appSignal.appSignalID().toUpper();
+			if (appSignal.appSignalID() != upperAppSignalId)
+			{
+				QString message;
+				if (readOnly == false && checkoutSignal(appSignal, message) == false)
+				{
+					if (message.isEmpty() == false)
+					{
+						showError(message);
+					}
+					setWindowTitle("Signal properties (read only)");
+					readOnly = true;
+				}
+
+				if (readOnly == false)
+				{
+					appSignal.setAppSignalID(upperAppSignalId);
+					if (m_editedSignalsId.contains(appSignal.ID()) == false)
+					{
+						m_editedSignalsId.push_back(appSignal.ID());
+					}
+				}
+			}
+		}
 		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(appSignal);
 
 		if (readOnly == true)
@@ -238,60 +258,37 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 
 		int precision = appSignal.decimalPlaces();
 
-		for (const QStringList& propertyDescription : fileFields)
+		SignalPropertyManager& manager = SignalsModel::instance()->signalPropertyManager();
+		manager.reloadPropertyBehaviour(dbController, parent);
+
+		for (auto property : signalProperties->properties())
 		{
-			for (auto property : signalProperties->properties())
+			int propertyIndex = manager.index(property->caption());
+
+			if (propertyIndex == -1)
 			{
-				if (property->caption() != propertyDescription[0])
+				if (property->category().isEmpty() == false)
 				{
-					continue;
+					// PropertyManager have to know about all properties
+					assert(false);
 				}
+				continue;
+			}
 
-				if (isPropertyDependentOnPrecision(property->caption()) == true)
-				{
-					property->setPrecision(precision);
-				}
+			if (manager.dependsOnPrecision(propertyIndex))
+			{
+				property->setPrecision(precision);
+			}
 
-				bool descriptionFound = false;
+			E::PropertyBehaviourType behaviour = manager.getBehaviour(appSignal, propertyIndex);
+			if (manager.isHidden(behaviour))
+			{
+				property->setVisible(false);
+			}
 
-				for (int i = 0; i < signalTypeSequence.size(); i++)
-				{
-					if ((appSignal.signalType() == signalTypeSequence[i].first &&
-						 appSignal.inOutType() == signalTypeSequence[i].second) == false)
-					{
-						continue;
-					}
-
-					descriptionFound = true;
-
-					const QString& propertyState = propertyDescription[i + 2].toLower();
-
-					if (propertyState == "hide")
-					{
-						property->setVisible(false);
-						break;
-					}
-
-					if (propertyState == "read")
-					{
-						property->setReadOnly(true);
-						break;
-					}
-
-					if (propertyState == "expert")
-					{
-						if (theSettings.isExpertMode() == false)
-						{
-							property->setVisible(false);
-						}
-
-						break;
-					}
-
-					assert(propertyState == "write");
-				}
-
-				assert(descriptionFound == true);
+			if (behaviour == E::PropertyBehaviourType::Read)
+			{
+				property->setReadOnly(true);
 			}
 		}
 
@@ -370,6 +367,19 @@ void SignalPropertiesDialog::checkAndSaveSignal()
 		if (signal.appSignalID().isEmpty() || signal.appSignalID()[0] != '#')
 		{
 			signal.setAppSignalID("#" + signal.appSignalID());
+		}
+
+		bool uppercaseAppSignalId = true;
+		if (m_dbController->getProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, &uppercaseAppSignalId, this) == false)
+		{
+			assert(false);
+		}
+		else
+		{
+			if (uppercaseAppSignalId)
+			{
+				signal.setAppSignalID(signal.appSignalID().toUpper());
+			}
 		}
 
 		signal.setCustomAppSignalID(signal.customAppSignalID().trimmed());
@@ -469,9 +479,12 @@ void SignalPropertiesDialog::checkoutSignals(QList<std::shared_ptr<PropertyObjec
 			continue;
 		}
 		QString message;
-		if (checkoutSignal(signal, message) && !message.isEmpty())
+		if (checkoutSignal(signal, message) == false)
 		{
-			showError(message);
+			if (message.isEmpty() == false)
+			{
+				showError(message);
+			}
 			setWindowTitle("Signal properties (read only)");
 			m_buttonBox->setStandardButtons(QDialogButtonBox::Cancel);
 			return;
@@ -508,6 +521,7 @@ bool SignalPropertiesDialog::checkoutSignal(Signal& s, QString& message)
 		}
 		else
 		{
+			message = tr("Signal %1 is checked out by other user").arg(s.appSignalID());
 			return false;
 		}
 	}
@@ -521,6 +535,9 @@ bool SignalPropertiesDialog::checkoutSignal(Signal& s, QString& message)
 	{
 		return false;
 	}
+
+	// First time collect all error output
+	//
 	foreach (const ObjectState& objectState, objectStates)
 	{
 		if (objectState.errCode != ERR_SIGNAL_OK)
@@ -528,11 +545,23 @@ bool SignalPropertiesDialog::checkoutSignal(Signal& s, QString& message)
 			message += errorMessage(objectState) + "\n";
 		}
 	}
+
+	// Then decide do we have error
+	//
 	foreach (const ObjectState& objectState, objectStates)
 	{
-		if (objectState.errCode == ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER
-				&& objectState.userId != m_dbController->currentUser().userId() && !m_dbController->currentUser().isAdminstrator())
+		switch (objectState.errCode)
 		{
+		case ERR_SIGNAL_CHECKED_OUT_BY_ANOTHER_USER:
+			if (objectState.userId != m_dbController->currentUser().userId() &&
+					m_dbController->currentUser().isAdminstrator() == false)
+			{
+				return false;
+			}
+			break;
+		case ERR_SIGNAL_OK:
+			break;
+		default:
 			return false;
 		}
 	}

@@ -17,7 +17,7 @@ class TableDataVisibilityController : public QObject
 {
 	Q_OBJECT
 public:
-	TableDataVisibilityController(QTableView* parent, const QString& settingsBranchName, const QVector<int>& defaultVisibleColumnSet);
+	TableDataVisibilityController(QTableView* parent, const QString& settingsBranchName, const QVector<int>& defaultVisibleColumnSet, bool showAllDefaultColumns = false);
 	virtual ~TableDataVisibilityController();
 
 	void editColumnsVisibilityAndOrder();
@@ -25,14 +25,22 @@ public:
 	void saveColumnVisibility(int index, bool visible);
 	void saveColumnPosition(int index, int position);
 
+	bool getColumnVisibility(int index);
+	int getColumnPosition(int index);
+	int getColumnWidth(int index);
+
+	void showColumn(int index, bool visible = true);
+
 public slots:
 	void saveColumnWidth(int index);
 	void saveAllHeaderGeomery();
+	void checkNewColumns();
 
 private:
 	QTableView* m_tableView = nullptr;
 	QStringList m_columnNameList;
 	QString m_settingBranchName;
+	QVector<int> m_defaultVisibleColumnSet;
 };
 
 class EditColumnsVisibilityDialog : public QDialog

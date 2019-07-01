@@ -110,6 +110,7 @@ public:
 	static const QString typeCaption;
 	static const QString inOutTypeCaption;
 	static const QString cacheValidator;
+	static const QString upperCacheValidator;
 	static const QString appSignalIDCaption;
 	static const QString customSignalIDCaption;
 	static const QString busTypeIDCaption;

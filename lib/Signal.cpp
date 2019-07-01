@@ -1384,10 +1384,18 @@ bool Signal::setSpecPropValue(const QString& name, const QVariant& qv, bool isEn
 
 	if (isEnum == true)
 	{
-		return spv.setEnumValue(name, qv.toInt());
+		result = spv.setEnumValue(name, qv.toInt());
+	}
+	else
+	{
+		result = spv.setValue(name, qv);
 	}
 
-	spv.setValue(name, qv);
+	if (result == false)
+	{
+		assert(false);
+		return false;
+	}
 
 	spv.serializeValuesToArray(&m_protoSpecPropValues);
 
