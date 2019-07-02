@@ -167,10 +167,8 @@ HEADERS  += \
     Trend/RtTrendTcpClient.h \
     Trend/ArchiveTrendTcpClient.h \
     MonitorTuningTcpClient.h \
-    ../lib/Tuning/TuningSignalManager.h \
     ../lib/Tuning/TuningSignalState.h \
     ../lib/Tuning/TuningSourceState.h \
-    ../lib/Tuning/TuningTcpClient.h \
     ../lib/LogFile.h \
     ../lib/Ui/DialogAlert.h \
     ../lib/Ui/UiTools.h \

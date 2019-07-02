@@ -129,7 +129,6 @@ HEADERS  += MainWindow.h \
     AppDataSourceWidget.h \
     ../lib/Times.h \
     ../lib/Tuning/TuningSignalState.h \
-    ../lib/PropertyObject.h \
     ../lib/SignalProperties.h \
     ../AppDataService/RtTrendsServer.h \
     ../lib/AppSignalStateFlags.h \
