@@ -5,6 +5,7 @@
 
 #include "DbStruct.h"
 #include "../lib/Signal.h"
+#include "../lib/WUtils.h"
 
 #define AUTO_COMPLETE std::shared_ptr<int*> progressCompleted(nullptr, [this](void*) { this->m_progress->setCompleted(true); } );
 
@@ -145,6 +146,7 @@ public slots:
     // Signal management
     //
     void slot_getSignalsIDs(QVector<int>* signalsIDs);
+	void slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAppSignalID);
 	void slot_getSignals(SignalSet* signalSet, bool excludeDeleted);
 	void slot_getTuningableSignals(SignalSet* signalSet);
 	void getSignals(SignalSet* signalSet, bool excludeDeleted, bool tuningableOnly);

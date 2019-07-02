@@ -78,6 +78,8 @@ void Settings::StoreSystem()
 
 	s.setValue("m_configuratorIpAddress2", m_configuratorIpAddress2);
 	s.setValue("m_configuratorPort2", m_configuratorPort2);
+
+	s.setValue("m_enableSimulation", m_enableSimulation);
 }
 
 void Settings::RestoreSystem()
@@ -119,11 +121,11 @@ void Settings::RestoreSystem()
 	m_configuratorIpAddress2 = s.value("m_configuratorIpAddress2", "127.0.0.1").toString();
 	m_configuratorPort2 = s.value("m_configuratorPort2", PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST).toInt();
 
+	m_enableSimulation = s.value("m_enableSimulation", m_enableSimulation).toBool();
+
 	// Determine the Local settings folder
 
 	m_localAppDataPath = QDir::toNativeSeparators(QStandardPaths::writableLocation(QStandardPaths::AppDataLocation));
-
-	qDebug() << m_localAppDataPath;
 
 	QDir dir(m_localAppDataPath);
 
@@ -133,6 +135,9 @@ void Settings::RestoreSystem()
 	}
 
 	m_userFiltersFile = QDir::toNativeSeparators(m_localAppDataPath + "/UserFilters.xml");
+
+
+
 
 }
 

@@ -308,6 +308,8 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0288.sql", "Upgrade to version 288, LM1-SF40.xml, DBCOMP version set to 5, MISMATCH version set to 4 and removed zero out for FP version "},
 	{":/DatabaseUpgrade/Upgrade0289.sql", "Upgrade to version 289, Set Outputs to Safe State signals were removed in AOM-4PH, Data frames number is changed from 2 to 1"},
 	{":/DatabaseUpgrade/Upgrade0290.sql", "Upgrade to version 290, Set AFB FuncBlock version to 1 for SR01, SR02. Remove unimplemented afbs like cos, sin, expe for all LMs"},
+	{":/DatabaseUpgrade/Upgrade0291.sql", "Upgrade to version 291, Set Code Memory Size to 98304 for LM1_SF40"},
+	{":/DatabaseUpgrade/Upgrade0292.sql", "Upgrade to version 292, Function get_signals_id_appsignalid creation"},
 };
 
 int DbWorker::counter = 0;
@@ -4505,6 +4507,53 @@ void DbWorker::slot_getSignalsIDs(QVector<int> *signalsIDs)
 
 	return;
 }
+
+void DbWorker::slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAppSignalID)
+{
+	AUTO_COMPLETE
+
+	// Check parameters
+	//
+	TEST_PTR_RETURN(signalsIDAppSignalID);
+
+	// Operation
+	//
+	QSqlDatabase db = QSqlDatabase::database(projectConnectionName());
+
+	if (db.isOpen() == false)
+	{
+		emitError(db, tr("Cannot get signals' IDs. Database connection is not opened."));
+		return;
+	}
+
+	// request
+	//
+	QString request = QString("SELECT * FROM get_signals_id_appsignalid(%1, %2)")
+		.arg(currentUser().userId()).arg("false");
+	QSqlQuery q(db);
+
+	bool result = q.exec(request);
+
+	if (result == false)
+	{
+		emitError(db, tr("Can't get signals' IDs! Error: ") +  q.lastError().text());
+		return;
+	}
+
+	ID_AppSignalID iasi;
+
+	while(q.next() != false)
+	{
+
+		iasi.ID = q.value(0).toInt();
+		iasi.appSignalID = q.value(1).toString();
+
+		signalsIDAppSignalID->append(iasi);
+	}
+
+	return;
+}
+
 
 
 void DbWorker::slot_getSignals(SignalSet* signalSet, bool excludeDeleted)

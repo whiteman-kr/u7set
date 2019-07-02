@@ -214,7 +214,6 @@ TuningSignalState TuningSignalManager::state(const QString& appSignalId, bool* f
 	return state(signalHash, found);
 }
 
-#ifdef Q_DEBUG
 void TuningSignalManager::validateStates()
 {
 	bool ok = false;
@@ -247,7 +246,6 @@ void TuningSignalManager::validateStates()
 
 	return;
 }
-#endif
 
 void TuningSignalManager::invalidateStates()
 {
