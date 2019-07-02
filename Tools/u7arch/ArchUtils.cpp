@@ -167,12 +167,22 @@ QString ArchUtils::getPlantTimeStr(const ArchFileRecord& ar)
 
 QString ArchUtils::getFlagsStr(const ArchFileRecord& ar)
 {
-	return QString("%1 [%2 %3 %4 %5]").
+	return QString("st = [ %1 %2 %3 %4 %5 %6 %7 ] rs = [ %8 %9 %10 %11 %12 %13 ]").
+
 			arg(ar.state.flags.valid == 1 ? "VLD" : "NVL").
-			arg(ar.state.flags.fineAperture == 1 ? "FA" : "  ").
-			arg(ar.state.flags.coarseAperture == 1 ? "CA" : "  ").
+			arg(ar.state.flags.stateAvailable == 1 ? "AVL " : "NAVL").
+			arg(ar.state.flags.simulated == 1 ? "SIM " : "   ").
+			arg(ar.state.flags.blocked == 1 ? "BLK " : "   ").
+			arg(ar.state.flags.mismatch == 1 ? "MISM" : "    ").
+			arg(ar.state.flags.aboveHighLimit == 1 ? "HLIM" : "    ").
+			arg(ar.state.flags.belowLowLimit == 1 ? "LLIM" : "    ").
+
+			arg(ar.state.flags.validityChange == 1 ? "VAL" : "   ").
+			arg(ar.state.flags.simBlockMismatchChange == 1 ? "SBM" : "   ").
+			arg(ar.state.flags.limitFlagsChange == 1 ? "LIM" : "   ").
 			arg(ar.state.flags.autoPoint == 1 ? "AP" : "  ").
-			arg(ar.state.flags.validityChange == 1 ? "VP" : "  ");
+			arg(ar.state.flags.fineAperture == 1 ? "FA" : "  ").
+			arg(ar.state.flags.coarseAperture == 1 ? "CA" : "  ");
 }
 
 QString ArchUtils::getValueStr(const ArchFileRecord& ar)
