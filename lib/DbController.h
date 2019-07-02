@@ -126,6 +126,7 @@ public:
 	// Signals management
 	//
 	bool getSignalsIDs(QVector<int>* signalIDs, QWidget* parentWidget);
+	bool getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAppSignalID, QWidget* parentWidget);
 	bool getSignals(SignalSet* signalSet, bool excludeDeleted, QWidget* parentWidget);
 	bool getTuningableSignals(SignalSet* signalSet, QWidget* parentWidget);
 	bool getLatestSignal(int signalID, Signal* signal, QWidget* parentWidget);
@@ -230,6 +231,7 @@ signals:
 	void signal_addDeviceObject(Hardware::DeviceObject* device, int parentId);
 
 	void signal_getSignalsIDs(QVector<int>* signalIDs);
+	void signal_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAppSignalID);
 	void signal_getSignals(SignalSet* signalSet, bool excludeDeleted);
 	void signal_getTuningableSignals(SignalSet* signalSet);
 	void signal_getLatestSignal(int signalID, Signal* signal);
