@@ -52,6 +52,7 @@ public:
 
 	void initSpecificProperties();
 
+	bool isLoaded() const { return m_isLoaded; }
 	void setIsLoaded(bool isLoaded) { m_isLoaded = isLoaded; }
 
 	// Signal identificators

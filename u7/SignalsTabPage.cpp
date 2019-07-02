@@ -1069,7 +1069,7 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 {
 	int row = index.row();
 	int col = index.column();
-	if (row == m_signalSet.count() || m_signalSet.valuePtrByIndex(row) == nullptr)
+	if (row == m_signalSet.count() || m_signalSet[row].isLoaded() == false)
 	{
 		return QVariant();
 	}
@@ -1748,19 +1748,29 @@ void SignalsModel::initLazyLoadSignals()
 
 	m_propertyManager.reloadPropertyBehaviour(m_dbController, m_parentWindow);
 
-	QVector<int> signalIds;
-	dbController()->getSignalsIDs(&signalIds, m_parentWindow);
+	QVector<ID_AppSignalID> signalIds;
+	dbController()->getSignalsIDAppSignalID(&signalIds, m_parentWindow);
 
-	for (int id : signalIds)
+	for (const ID_AppSignalID& id : signalIds)
 	{
-		m_signalSet.SignalPtrOrderedHash::append(id, nullptr);
+		m_signalSet.append(id.ID, new Signal(id));
 	}
 
 	if (signalIds.count() > 0)
 	{
 		QVector<Signal> signalsArray;
-		signalsArray.reserve(250);
-		dbController()->getLatestSignalsWithoutProgress(signalIds.mid(0, 250), &signalsArray, m_parentWindow);
+		QVector<int> signalId;
+
+		const int SignalPortionCount = 250;
+
+		signalsArray.reserve(SignalPortionCount);
+		signalId.reserve(SignalPortionCount);
+
+		for (int i = 0; i < SignalPortionCount; i++)
+		{
+			signalId.append(signalIds[i].ID);
+		}
+		dbController()->getLatestSignalsWithoutProgress(signalId, &signalsArray, m_parentWindow);
 
 		for (const Signal& loadedSignal : signalsArray)
 		{
@@ -1784,7 +1794,7 @@ void SignalsModel::finishLoadSignals()
 		QVector<int> signalIds;
 		for (int i = 0; i < m_signalSet.count(); i++)
 		{
-			if (m_signalSet.valuePtrByIndex(i) == nullptr)
+			if (m_signalSet[i].isLoaded() == false)
 			{
 				signalIds.push_back(m_signalSet.key(i));
 			}
@@ -1828,7 +1838,7 @@ void SignalsModel::loadNextSignalsPortion()
 
 	while ((low >= 0 || high < rowCount()) && signalIds.count() <= 248)
 	{
-		while (low >= 0 && m_signalSet.valuePtrByIndex(low) != nullptr)
+		while (low >= 0 && m_signalSet[low].isLoaded() == true)
 		{
 			low--;
 		}
@@ -1839,7 +1849,7 @@ void SignalsModel::loadNextSignalsPortion()
 			low--;
 		}
 
-		while (high < rowCount() && m_signalSet.valuePtrByIndex(high) != nullptr)
+		while (high < rowCount() && m_signalSet[high].isLoaded() == true)
 		{
 			high++;
 		}
