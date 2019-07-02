@@ -704,6 +704,11 @@ void DialogBusEditor::onSignalCreate(E::SignalType type)
 	bs.setSignalId(signalId);
 	bs.setCaption(signalId);
 
+	if (type == E::SignalType::Analog)
+	{
+		bs.setInbusAnalogFormat(E::DataFormat::Float);
+	}
+
 	if (type == E::SignalType::Bus)
 	{
 		bs.setBusTypeId("BUSTYPEID");
