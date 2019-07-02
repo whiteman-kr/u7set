@@ -83,9 +83,7 @@ public:
 	virtual ~TuningTcpClient();
 
 public:
-#ifdef Q_DEBUG
 	void setSimulationMode(bool value);
-#endif
 
 	// Tuning sources
 	//
@@ -221,9 +219,8 @@ private:
 	QString m_activeClientIp;
 	bool m_currentClientIsActive = false;
 
-#ifdef Q_DEBUG
+protected:
 	bool m_simulationMode = false;
-#endif
 
 private:
 	// Cached protobuf messages

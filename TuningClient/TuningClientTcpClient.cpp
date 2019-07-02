@@ -187,9 +187,7 @@ QString TuningClientTcpClient::getStateToolTip() const
 
 bool TuningClientTcpClient::takeClientControl(QWidget* parentWidget)
 {
-#ifdef Q_DEBUG
-	if (theSettings.m_simulationMode == false)
-#endif
+	if (m_simulationMode == false)
 	{
 		if (activeTuningSourceCount() == 0)
 		{

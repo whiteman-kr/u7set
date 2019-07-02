@@ -50,9 +50,7 @@ public:
 	// State manipulation
 	//
 public:
-#ifdef Q_DEBUG
 	void validateStates();
-#endif
 	void invalidateStates();
 
 	void setState(const QString& appSignalId, const TuningSignalState& state);
