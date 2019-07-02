@@ -221,7 +221,7 @@ public:
 
 private:
 
-	QMutex				m_dataMutex;
+	mutable QMutex		m_dataMutex;
 
 	bool				m_connected = false;
 	bool                m_noReply = true;
@@ -288,9 +288,9 @@ public:
 	void				setPacketCount(int count) { m_packetCount = count; }
 	void				incPacketCount(int count) { m_packetCount += count; }
 
-	bool                isDataUidOk();
-	bool                isHeaderCrcOk();
-	bool                isDataCrcOk();
+	bool                isDataUidOk() const;
+	bool                isHeaderCrcOk() const;
+	bool                isDataCrcOk() const;
 
 	TestResult&			testResult() { return m_testResult; }
 	void				runTest();

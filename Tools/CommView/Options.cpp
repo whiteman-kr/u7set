@@ -384,17 +384,17 @@ QString SerialPortOption::packetCountStr()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SerialPortOption::isDataUidOk()
+bool SerialPortOption::isDataUidOk() const
 {
 	bool duidOk = false;
 
 	m_dataMutex.lock();
 
-		SerialPortDataHeader* pHeader = (SerialPortDataHeader*) m_data.data();
+		quint32 dataUID = *reinterpret_cast<const quint32*>(m_data.constData() + SERIAL_PORT_HEADER_SIZE);
 
-		 quint32 dataUID = *(quint32*) (m_data.data() + SERIAL_PORT_HEADER_SIZE);
+		const SerialPortDataHeader* pHeader = reinterpret_cast<const SerialPortDataHeader*>(m_data.constData());
 
-		if (pHeader->DataUID == Swap8Bytes(dataUID))
+		if (pHeader->DataUID == SWAP_4_BYTES(dataUID))
 		{
 			duidOk = true;
 		}
@@ -406,15 +406,15 @@ bool SerialPortOption::isDataUidOk()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SerialPortOption::isHeaderCrcOk()
+bool SerialPortOption::isHeaderCrcOk() const
 {
     bool crcOk = false;
 
     m_dataMutex.lock();
 
-        SerialPortDataHeader* pHeader = (SerialPortDataHeader*) m_data.data();
+		const SerialPortDataHeader* pHeader = reinterpret_cast<const SerialPortDataHeader*>(m_data.constData());
 
-		if (pHeader->CRC64 == Swap8Bytes(Crc::crc64(m_data.data(), SERIAL_PORT_HEADER_SIZE - sizeof(quint64))))
+		if (pHeader->CRC64 == SWAP_8_BYTES(Crc::crc64(m_data.data(), SERIAL_PORT_HEADER_SIZE - sizeof(quint64))))
         {
             crcOk = true;
         }
@@ -426,22 +426,22 @@ bool SerialPortOption::isHeaderCrcOk()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SerialPortOption::isDataCrcOk()
+bool SerialPortOption::isDataCrcOk() const
 {
     bool crcOk = false;
 
-    m_dataMutex.lock();
+	m_dataMutex.lock();
 
-		quint64 dataCRC64 = *(quint64*) (m_data.data() + (m_dataSize - sizeof(quint64)));
+		const quint64 dataCRC64 = *reinterpret_cast<const quint64*>(m_data.constData() + (static_cast<const quint32>(m_dataSize) - sizeof(quint64)));
 
-		if (dataCRC64 == Swap8Bytes(Crc::crc64((m_data.data() + SERIAL_PORT_HEADER_SIZE), m_dataSize - SERIAL_PORT_HEADER_SIZE - sizeof(quint64))))
+		if (dataCRC64 == SWAP_8_BYTES(Crc::crc64((m_data.data() + SERIAL_PORT_HEADER_SIZE), static_cast<const quint32>(m_dataSize) - SERIAL_PORT_HEADER_SIZE - sizeof(quint64))))
         {
             crcOk = true;
         }
 
-    m_dataMutex.unlock();
+	m_dataMutex.unlock();
 
-    return crcOk;
+	return crcOk;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

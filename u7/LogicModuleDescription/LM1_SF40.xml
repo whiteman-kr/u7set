@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<LogicModule Name="LM1_SF40" DescriptionNumber="40" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0002">
+<LogicModule Name="LM1_SF40" DescriptionNumber="40" ConfigurationScriptFile="LM1_SF00_Conf.js" Version="1.0003">
 	<FlashMemory>
 	    <AppLogicFrameCount>256</AppLogicFrameCount>
 		<AppLogicFramePayload>1016</AppLogicFramePayload>
@@ -19,7 +19,7 @@
 		<MaxConfigurationCount>12</MaxConfigurationCount>
 	</FlashMemory>
 	<Memory>
-	    <CodeMemorySize>65536</CodeMemorySize>
+		<CodeMemorySize>98304</CodeMemorySize>
 		<AppMemorySize>65536</AppMemorySize>
 		<AppDataOffset>57782</AppDataOffset>
 		<AppDataSize>256</AppDataSize>
