@@ -21,6 +21,13 @@ const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
 
 class SignalSpecPropValues;
 
+struct ID_AppSignalID
+{
+	int ID;
+	QString appSignalID;
+};
+
+Q_DECLARE_METATYPE(ID_AppSignalID);
 
 class Signal
 {
@@ -39,10 +46,13 @@ public:
 public:
 	Signal();
 	Signal(const Signal& s);
+	Signal(const ID_AppSignalID& ids);
 	Signal(const Hardware::DeviceSignal& deviceSignal);
 	virtual ~Signal();
 
 	void initSpecificProperties();
+
+	void setIsLoaded(bool isLoaded) { m_isLoaded = isLoaded; }
 
 	// Signal identificators
 
@@ -472,10 +482,3 @@ private:
 	int m_maxID = -1;
 };
 
-struct ID_AppSignalID
-{
-	int ID;
-	QString appSignalID;
-};
-
-Q_DECLARE_METATYPE(ID_AppSignalID);

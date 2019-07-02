@@ -33,6 +33,14 @@ Signal::Signal(const Signal& s)
 	*this = s;
 }
 
+Signal::Signal(const ID_AppSignalID& ids)
+{
+	m_ID = ids.ID;
+	m_appSignalID = ids.appSignalID;
+
+	m_isLoaded = false;
+}
+
 Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 {
 	if (deviceSignal.isDiagSignal() == true)

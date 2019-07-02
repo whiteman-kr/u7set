@@ -4946,6 +4946,8 @@ void DbWorker::getSignalData(QSqlQuery& q, Signal& s)
 	s.setDeleted(q.value(SD_DELETED).toBool());
 	s.setInstanceCreated(q.value(SD_INSTANCE_CREATED).toDateTime());
 	s.setInstanceAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(SD_INSTANCE_ACTION).toInt()));
+
+	s.setIsLoaded(true);
 }
 
 
