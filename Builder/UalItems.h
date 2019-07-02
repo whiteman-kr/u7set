@@ -627,9 +627,10 @@ namespace Builder
 		UalSignal* createConstSignal(const UalItem* ualItem,
 									 E::SignalType constSignalType,
 									 E::AnalogAppSignalFormat constAnalogFormat,
-									 QUuid outPinUuid);
+									 QUuid outPinUuid,
+									 const QString& lmEquipmentID);
 
-		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal);
+		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal, const QString &lmEquipmentID);
 
 		UalSignal* createOptoSignal(const UalItem* ualItem, Signal* s, const QString& lmEquipmentID, bool isBusChildSignal, QUuid outPinUuid);
 

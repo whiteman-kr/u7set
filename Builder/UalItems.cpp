@@ -2179,7 +2179,8 @@ namespace Builder
 	UalSignal* UalSignalsMap::createConstSignal(const UalItem* ualItem,
 												E::SignalType constSignalType,
 												E::AnalogAppSignalFormat constAnalogFormat,
-												QUuid outPinUuid)
+												QUuid outPinUuid,
+												const QString& lmEquipmentID)
 	{
 		if (ualItem == nullptr)
 		{
@@ -2188,7 +2189,10 @@ namespace Builder
 			return nullptr;
 		}
 
-		QString constSignalID = QString("%1_%2").arg(AUTO_CONST_SIGNAL_ID_PREFIX).arg(ualItem->label());
+		QString constSignalID = QString("%1_%2_%3").
+										arg(AUTO_CONST_SIGNAL_ID_PREFIX).
+										arg(lmEquipmentID).
+										arg(ualItem->label());
 
 		UalSignal* ualSignal = m_idToSignalMap.value(constSignalID, nullptr);
 
@@ -2252,9 +2256,13 @@ namespace Builder
 		return ualSignal;
 	}
 
-	UalSignal* UalSignalsMap::createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal)
+	UalSignal* UalSignalsMap::createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal, const QString& lmEquipmentID)
 	{
-		QString signalID = QString("%1_%2_%3").arg(AUTO_SIGNAL_ID_PREFIX).arg(ualItem->label()).arg(outAfbSignal.caption());
+		QString signalID = QString("%1_%2_%3_%4").
+								arg(AUTO_SIGNAL_ID_PREFIX).
+								arg(lmEquipmentID).
+								arg(ualItem->label()).
+								arg(outAfbSignal.caption());
 
 		signalID = signalID.toUpper().remove(QRegularExpression("[^#A-Z0-9_]"));
 
