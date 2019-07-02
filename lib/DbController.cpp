@@ -81,6 +81,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_addDeviceObject, m_worker, &DbWorker::slot_addDeviceObject);
 
 	connect(this, &DbController::signal_getSignalsIDs, m_worker, &DbWorker::slot_getSignalsIDs);
+	connect(this, &DbController::signal_getSignalsIDAppSignalID, m_worker, &DbWorker::slot_getSignalsIDAppSignalID);
 	connect(this, &DbController::signal_getSignals, m_worker, &DbWorker::slot_getSignals);
 	connect(this, &DbController::signal_getTuningableSignals, m_worker, &DbWorker::slot_getTuningableSignals);
 	connect(this, &DbController::signal_getLatestSignal, m_worker, &DbWorker::slot_getLatestSignal);
@@ -1725,13 +1726,9 @@ bool DbController::getDeviceTreeLatestVersion(const DbFileInfo& file, std::share
 	return ok;
 }
 
-bool DbController::getSignalsIDs(QVector<int> *signalIDs, QWidget* parentWidget)
+bool DbController::getSignalsIDs(QVector<int>* signalIDs, QWidget* parentWidget)
 {
-	if (signalIDs == nullptr)
-	{
-		assert(signalIDs != nullptr);
-		return false;
-	}
+	TEST_PTR_RETURN_FALSE(signalIDs);
 
 	// Init progress and check availability
 	//
@@ -1749,6 +1746,25 @@ bool DbController::getSignalsIDs(QVector<int> *signalIDs, QWidget* parentWidget)
 	return ok;
 }
 
+bool DbController::getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAppSignalID, QWidget* parentWidget)
+{
+	TEST_PTR_RETURN_FALSE(signalsIDAppSignalID);
+
+	// Init progress and check availability
+	//
+	bool ok = initOperation();
+
+	if (ok == false)
+	{
+		return false;
+	}
+
+	emit signal_getSignalsIDAppSignalID(signalsIDAppSignalID);
+
+	ok = waitForComplete(parentWidget, tr("Getting signals' IDs"));
+
+	return ok;
+}
 
 bool DbController::getSignals(SignalSet* signalSet, bool excludeDeleted, QWidget* parentWidget)
 {

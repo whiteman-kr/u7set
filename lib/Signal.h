@@ -330,6 +330,9 @@ private:
 	void updateTuningValuesType();
 
 private:
+	bool m_isLoaded = false;										// == false - only m_ID and m_appSignalID fields is initialized from database
+																	// == true - all Signal fields is initialized from database
+
 	// Signal identificators
 	//
 	QString m_appSignalID;
@@ -427,9 +430,7 @@ private:
 	std::shared_ptr<Hardware::DeviceModule> m_lm;		// valid in compile-time only
 };
 
-
 typedef PtrOrderedHash<int, Signal> SignalPtrOrderedHash;
-
 
 class SignalSet : public SignalPtrOrderedHash
 {
@@ -470,3 +471,11 @@ private:
 
 	int m_maxID = -1;
 };
+
+struct ID_AppSignalID
+{
+	int ID;
+	QString appSignalID;
+};
+
+Q_DECLARE_METATYPE(ID_AppSignalID);
