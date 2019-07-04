@@ -1287,7 +1287,11 @@ namespace Builder
 		{
 			// create auto bus signal
 			//
-			QString appSignalID = QString("%1_%2_%3").arg(AUTO_BUS_ID_PREFIX).arg(ualItem->label()).arg(outPinCaption.toUpper());
+			QString appSignalID = QString("%1_%2_%3_%4").
+										arg(AUTO_BUS_ID_PREFIX).
+										arg(lm->equipmentIdTemplate()).
+										arg(ualItem->label()).
+										arg(outPinCaption.toUpper());
 
 			busSignal = *autoSignalPtr = new Signal;
 

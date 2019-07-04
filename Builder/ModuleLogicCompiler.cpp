@@ -1574,7 +1574,7 @@ namespace Builder
 
 		bool result = true;
 
-		result &= createUalSignalFromReceiverOutput(ualItem, outPin, appSignalID);
+		result &= createUalSignalFromReceiverOutput(ualItem, outPin, appSignalID, connection->isSinglePort());
 
 		// UalSignal creation from receiver's validity pin
 		//
@@ -1591,7 +1591,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& appSignalID)
+	bool ModuleLogicCompiler::createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& receivedAppSignalID, bool isSinglePortConnection)
 	{
 		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
 
@@ -1604,15 +1604,34 @@ namespace Builder
 
 		bool result = true;
 
-		Signal* receivedSignal = m_signals->getSignal(appSignalID);
+		Signal* receivedSignal = m_signals->getSignal(receivedAppSignalID);
 
 		if (receivedSignal == nullptr)
 		{
-			LOG_INTERNAL_ERROR(log());			// signal should be exists in signalSet
+			// Signal identifier %1 is not found (Logic schema %2).
+			//
+			m_log->errALC5000(receivedAppSignalID, ualItem->guid(), ualItem->schemaID());
 			return false;
 		}
 
-		Signal* compatibleConnectedSignal = getCompatibleConnectedSignal(outPin, *receivedSignal);
+		Signal* compatibleConnectedSignal = nullptr;
+
+		if (isSinglePortConnection == true)
+		{
+			compatibleConnectedSignal = receivedSignal;
+		}
+		else
+		{
+			if (m_chassisSignals.contains(receivedAppSignalID) == true)
+			{
+				// LM's %1 native signal %2 can't be received via opto connection (Logic schema %3)
+				//
+				m_log->errALC5170(lmEquipmentID(), receivedAppSignalID, ualItem->guid(), ualItem->schemaID());
+				return false;
+			}
+
+			compatibleConnectedSignal = getCompatibleConnectedSignal(outPin, *receivedSignal);
+		}
 
 		// after that compatibleConnectedSignal can be nullptr, it is Ok
 
@@ -1673,7 +1692,7 @@ namespace Builder
 			return false;
 		}
 
-		ualSignal->setReceivedOptoAppSignalID(receivedSignal->appSignalID());
+		ualSignal->setReceivedOptoAppSignalID(receivedAppSignalID);
 
 		result &= linkConnectedItems(ualItem, outPin, ualSignal);
 
