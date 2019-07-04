@@ -2831,7 +2831,7 @@ namespace Builder
 			std::shared_ptr<DbFile> file;
 			ok = db->getLatestVersion(fi, &file, nullptr);
 
-			if (ok == false)
+			if (ok == false || file == nullptr)
 			{
 				// Getting file instance error, file ID %1, file name '%2', database message '%3'.
 				//

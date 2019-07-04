@@ -781,8 +781,7 @@ namespace VFrame30
 
 	void SchemaItem::setNewGuid()
 	{
-		QUuid uuid = QUuid::createUuid();
-		setGuid(uuid);
+		setGuid(QUuid::createUuid());
 
 		// FblItem is not derived from SchemaItem, setNewGuid must be called manualy
 		//

@@ -206,6 +206,10 @@ namespace Builder
 
 		void wrnALP4070(QString schema, const std::vector<QUuid>& itemsUuids);						// Schema %1 has %2 commented functional item(s).
 
+		void errALP4080(QString schema, QString frameSchemaId, QUuid itemUuid);						// SchemaItemFrame has reference (property SchemaID) to unknown schema %1, Schema %2.
+		void errALP4081(QString schema, QUuid itemUuid);											// SchemaItemFrame.SchemaID has recursive reference to schema %1, property must be distincive from schema where it is placed.
+		void errALP4082(QString schema, QString frameSchemaId, QUuid itemUuid);						//
+
 		// Multichannel pasing errors
 		//
 		void errALP4130(QString schema, QString schemaItem, QUuid itemUuid);

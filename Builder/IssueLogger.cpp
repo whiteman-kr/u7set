@@ -2235,7 +2235,7 @@ namespace Builder
 	/// Title: Schema %1 has %2 commented functional item(s).
 	///
 	/// Parameters:
-	///		%1 Schema StrID
+	///		%1 SchemaID
 	///		%2 Commennted item(s) count
 	///
 	/// Description:
@@ -2250,6 +2250,76 @@ namespace Builder
 					tr("Schema %1 has %2 commented functional item(s).")
 						.arg(schema)
 						.arg(itemsUuids.size()));
+	}
+
+	/// IssueCode: ALP4080
+	///
+	/// IssueType: Error
+	///
+	/// Title: SchemaItemFrame has reference (property SchemaID) to unknown schema %1, Schema %2.
+	///
+	/// Parameters:
+	///		%1 Not found schema ID
+	///		%2 Schema ID
+	///
+	/// Description:
+	///			Schema has SchemaItemFrame wchich has reference (property SchemaID) to unknown schema.
+	///
+	void IssueLogger::errALP4080(QString schema, QString frameSchemaId, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4080, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4080,
+				  tr("SchemaItemFrame has reference (property SchemaID) to unknown schema %1, Schema %2.")
+						.arg(frameSchemaId)
+						.arg(schema));
+	}
+
+	/// IssueCode: ALP4081
+	///
+	/// IssueType: Error
+	///
+	/// Title: SchemaItemFrame.SchemaID has recursive reference to schema %1, property must be distincive from schema where it is placed.
+	///
+	/// Parameters:
+	///		%1 Schema ID
+	///
+	/// Description:
+	///			SchemaItemFrame.SchemaID has recursive reference to the same schema where it is placed.
+	///
+	void IssueLogger::errALP4081(QString schema, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4081, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4081,
+				  tr("SchemaItemFrame.SchemaID has recursive reference to schema %1, property must be distincive from schema where it is placed.")
+						.arg(schema));
+	}
+
+	/// IssueCode: ALP4082
+	///
+	/// IssueType: Error
+	///
+	/// Title: SchemaItemFrame has reference (property SchemaID) to unknown schema %1, Schema %2.
+	///
+	/// Parameters:
+	///		%1 Not found schema ID
+	///		%2 Schema ID
+	///
+	/// Description:
+	///			Schema has SchemaItemFrame wchich has reference (property SchemaID) to unknown schema.
+	///
+	void IssueLogger::errALP4082(QString schema, QString frameSchemaId, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4082, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4082,
+				  tr("SchemaItemFrame has reference (property SchemaID) to unknown schema %1, Schema %2.")
+						.arg(frameSchemaId)
+						.arg(schema));
 	}
 
 	/// IssueCode: ALP4130
