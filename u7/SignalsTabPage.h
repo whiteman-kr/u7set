@@ -188,6 +188,12 @@ private:
 		  [](const Signal* s){ return s->acquire(); },
 		  [](Signal* s, QVariant v){ s->setAcquire(v.toBool()); }, },
 
+		{ SignalProperties::archiveCaption,
+		  SignalProperties::archiveCaption,
+		  QVariant::Bool, {},
+		  [](const Signal* s){ return s->archive(); },
+		  [](Signal* s, QVariant v){ s->setArchive(v.toBool()); }, },
+
 		{ SignalProperties::decimalPlacesCaption,
 		  generateCaption(SignalProperties::decimalPlacesCaption),
 		  QVariant::Int, {},
