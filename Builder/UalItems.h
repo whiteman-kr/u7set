@@ -639,8 +639,6 @@ namespace Builder
 		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& templateOutAfbSignal);
 		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const Signal& templateSignal);
 
-//		UalSignal* createOptoSignal(const UalItem* ualItem, Signal* s, const QString& lmEquipmentID, bool isBusChildSignal, QUuid outPinUuid);
-
 		UalSignal* createBusParentSignal(const UalItem* ualItem, Signal* s, BusShared bus, QUuid outPinUuid, const QString& outPinCaption, std::shared_ptr<Hardware::DeviceModule> lm);
 
 		bool appendRefPin(const UalItem* ualItem, QUuid pinUuid, UalSignal* ualSignal);
@@ -657,7 +655,7 @@ namespace Builder
 		bool getReport(QStringList& report) const;
 
 	private:
-		UalSignal* createAutoSignal(const UalItem* ualItem,
+		UalSignal* privateCreateAutoSignal(const UalItem* ualItem,
 									QUuid outPinUuid,
 									E::SignalType signalType,
 									E::AnalogAppSignalFormat analogFormat);
