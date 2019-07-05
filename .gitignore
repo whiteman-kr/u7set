@@ -15,3 +15,5 @@ Test/build-u7database*/**
 Test/bin/**
 Metrology/Metrology.db
 Tools/build-*/**
+Test/AfbTests/LM1_SF00/AFB_TESTS/UALTESTS/Reports/*
+Test/AfbTests/LM1_SF00/AFB_TESTS/UALTESTS/Archive/**
