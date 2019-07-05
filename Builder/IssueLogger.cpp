@@ -6219,6 +6219,29 @@ namespace Builder
 					arg(setFlagsItemLabel).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5170
+	///
+	/// IssueType: Error
+	///
+	/// Title: LM's %1 native signal %2 can't be received via opto connection (Logic schema %3)
+	///
+	/// Parameters:
+	///		%1 LM equipmentID
+	///		%2 application signal ID
+	///
+	/// Description:
+	///		LM's native signal can't be received via opto connection.
+	///
+	void IssueLogger::errALC5170(QString lmEquipmentID, QString appSignalID, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5170, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5170,
+				  QString(tr("LM's %1 native signal %2 can't be received via opto connection (Logic schema %3)")).
+						arg(lmEquipmentID).arg(appSignalID).arg(schemaID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186
