@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <type_traits>
 
 #include "Signal.h"
 #include "PropertyObject.h"
@@ -91,11 +92,26 @@ bool SignalSpecPropValues::setEnumValue(const QString& name, ENUM_TYPE enumItemV
 }
 
 
+struct SignalPropertyDescription
+{
+	QString name;
+	QString caption;
+	QVariant::Type type;
+
+	std::list<std::pair<int, QString>> enumValues;
+
+	std::function<QVariant (const Signal*)> valueGetter;
+	std::function<void (Signal*, const QVariant&)> valueSetter;
+};
+
+
 class SignalProperties : public PropertyObject
 {
 	Q_OBJECT
 
 public:
+	static QString generateCaption(const QString& name);
+
 	static const QString idCaption;
 	static const QString signalGroupIDCaption;
 	static const QString signalInstanceIDCaption;
@@ -165,7 +181,7 @@ public:
 	static const QString lastEditedSignalFieldValuePlace;
 
 public:
-	explicit SignalProperties(Signal& signal);
+	explicit SignalProperties(Signal& signal, bool savePropertyDescription = false);
 
 	Signal& signal() { return m_signal; }
 	void updateSpecPropValues();
@@ -174,6 +190,8 @@ public:
 	void setSpecPropStruct(const QString & specPropStruct);
 
 	int getPrecision();
+
+	std::vector<SignalPropertyDescription> getProperties() const { return m_propertyDescription; }
 
 	Q_INVOKABLE QString appSignalID() const { return m_signal.appSignalID(); }
 	Q_INVOKABLE QString customAppSignalID() const { return m_signal.customAppSignalID(); }
@@ -207,7 +225,104 @@ public:
 
 
 private:
-	void initProperties();
+	void initProperties(bool savePropertyDescription = false);
+
+	template <class TYPE>
+	typename std::enable_if<std::is_enum<TYPE>::value == true>::type
+	addPropertyDescription(const QString& name,
+						   std::function<TYPE (const Signal&)> getter,
+						   std::function<void (Signal&, TYPE)> setter = std::function<void (Signal&, TYPE)>())
+	{
+		assert(std::is_enum<TYPE>::value == true);
+
+		SignalPropertyDescription newProperty;
+
+		newProperty.name = name;
+		newProperty.caption = generateCaption(name);
+
+		newProperty.enumValues = E::enumValues<TYPE>();
+		newProperty.type = QVariant::Int;
+
+		newProperty.valueGetter = [getter](const Signal* s){ return TO_INT(getter(*s)); };
+		if (setter == nullptr)
+		{
+			newProperty.valueSetter = [](Signal*, const QVariant&){};
+		}
+		else
+		{
+			newProperty.valueSetter = [setter](Signal* s, const QVariant& v){ setter(*s, IntToEnum<TYPE>(v.toInt())); };
+		}
+
+		m_propertyDescription.push_back(newProperty);
+	}
+
+	template <class TYPE>
+	typename std::enable_if<std::is_enum<TYPE>::value == false && std::is_same<TYPE, TuningValue>::value == false>::type
+	addPropertyDescription(const QString& name,
+						   std::function<TYPE (const Signal&)> getter,
+						   std::function<void (Signal&, TYPE)> setter = std::function<void (Signal&, TYPE)>())
+	{
+		assert(std::is_enum<TYPE>::value == false);
+
+		SignalPropertyDescription newProperty;
+
+		newProperty.name = name;
+		newProperty.caption = generateCaption(name);
+
+		newProperty.type = static_cast<QVariant::Type>(qMetaTypeId<TYPE>());
+
+		newProperty.valueGetter = [getter](const Signal* s){ return QVariant::fromValue<TYPE>(getter(*s)); };
+		if (setter == nullptr)
+		{
+			newProperty.valueSetter = [](Signal*, const QVariant&){};
+		}
+		else
+		{
+			newProperty.valueSetter = [setter](Signal* s, const QVariant& v){ setter(*s, v.value<TYPE>()); };
+		}
+
+		m_propertyDescription.push_back(newProperty);
+	}
+
+	template <class TYPE>
+	typename std::enable_if<std::is_same<TYPE, TuningValue>::value == true>::type
+	addPropertyDescription(const QString& name,
+						   std::function<TYPE (const Signal&)> getter,
+						   std::function<void (Signal&, TYPE)> setter = std::function<void (Signal&, TYPE)>())
+	{
+		SignalPropertyDescription newProperty;
+
+		newProperty.name = name;
+		newProperty.caption = generateCaption(name);
+
+		newProperty.type = static_cast<QVariant::Type>(qMetaTypeId<TuningValue>());
+
+		newProperty.valueGetter = [getter](const Signal* s){ return getter(*s).toVariant(); };
+		if (setter == nullptr)
+		{
+			newProperty.valueSetter = [](Signal*, const QVariant&){};
+		}
+		else
+		{
+			newProperty.valueSetter = [getter, setter](Signal* s, const QVariant& v)
+			{
+				TuningValue newValue(getter(*s));
+				if (v.type() == QVariant::String)
+				{
+					bool ok = false;
+					newValue.fromString(v.toString(), &ok);
+					assert(ok == true);
+				}
+				else
+				{
+					newValue.fromVariant(v);
+				}
+				setter(*s, newValue);
+			};
+		}
+
+		m_propertyDescription.push_back(newProperty);
+	}
 
 	void createSpecificProperties();
 	void deleteSpecificProperties();
@@ -217,6 +332,8 @@ private:
 private:
 	Signal m_signal;
 	SignalSpecPropValues m_specPropValues;
+
+	std::vector<SignalPropertyDescription> m_propertyDescription;
 
 	static std::shared_ptr<OrderedHash<int, QString>> m_outputModeHash;
 };

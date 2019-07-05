@@ -44,17 +44,6 @@ const int	FI_ANY = 0,
 			FI_CAPTION = 4;
 
 
-struct SignalPropertyDescription
-{
-	QString name;
-	QString caption;
-	QVariant::Type type;
-	std::list<std::pair<int, QString>> enumValues;
-	std::function<QVariant (const Signal*)> valueGetter;
-	std::function<void (Signal*, const QVariant&)> valueSetter;
-};
-
-
 class SignalPropertyManager
 {
 public:
@@ -95,6 +84,7 @@ public:
 	bool isReadOnly(E::PropertyBehaviourType behaviour) const;
 
 	void detectNewProperties(const Signal& signal);
+	void loadNotSpecificProperties(const SignalProperties& signalProperties);
 	void reloadPropertyBehaviour(DbController* dbController, QWidget* parent);
 
 private:
@@ -102,7 +92,6 @@ private:
 	QString typeName(E::SignalType type, E::SignalInOutType inOutType);
 	QString typeName(int typeIndex, int inOutTypeIndex);
 
-	static QString generateCaption(const QString& name);
 	static TuningValue variant2TuningValue(const QVariant& variant, TuningValueType type);
 
 	void addNewProperty(const SignalPropertyDescription& newProperty);
@@ -132,7 +121,7 @@ private:
 		  SignalProperties::equipmentIDCaption,
 		  QVariant::String, {},
 		  [](const Signal* s){ return s->equipmentID(); },
-		  [](Signal* s, QVariant v){ s->setAppSignalID(v.toString()); }, },
+		  [](Signal* s, QVariant v){ s->setEquipmentID(v.toString()); }, },
 
 		{ SignalProperties::busTypeIDCaption,
 		  SignalProperties::busTypeIDCaption,
@@ -140,119 +129,17 @@ private:
 		  [](const Signal* s){ return s->busTypeID(); },
 		  [](Signal* s, QVariant v){ s->setBusTypeID(v.toString()); }, },
 
-		{ SignalProperties::captionCaption,
-		  SignalProperties::captionCaption,
-		  QVariant::String, {},
-		  [](const Signal* s){ return s->caption(); },
-		  [](Signal* s, QVariant v){ s->setAppSignalID(v.toString()); }, },
-
 		{ SignalProperties::typeCaption,
 		  "A/D/B",
 		  QVariant::String, {},
 		  [](const Signal* s){ return E::valueToString<E::SignalType>(s->signalType()).left(1); },
 		  nullptr },
 
-		{ SignalProperties::analogSignalFormatCaption,
-		  generateCaption(SignalProperties::analogSignalFormatCaption),
-		  QVariant::Int, E::enumValues<E::AnalogAppSignalFormat>(),
-		  [](const Signal* s){ return TO_INT(s->analogSignalFormat()); },
-		  [](Signal* s, QVariant v){ s->setAnalogSignalFormat(IntToEnum<E::AnalogAppSignalFormat>(v.toInt())); }, },
-
 		{ SignalProperties::inOutTypeCaption,
 		  "Input-output type",
 		  QVariant::Int, E::enumValues<E::SignalInOutType>(),
 		  [](const Signal* s){ return TO_INT(s->inOutType()); },
 		  [](Signal* s, QVariant v){ s->setInOutType(IntToEnum<E::SignalInOutType>(v.toInt())); }, },
-
-		{ SignalProperties::byteOrderCaption,
-		  generateCaption(SignalProperties::byteOrderCaption),
-		  QVariant::Int, E::enumValues<E::ByteOrder>(),
-		  [](const Signal* s){ return TO_INT(s->byteOrder()); },
-		  [](Signal* s, QVariant v){ s->setByteOrder(IntToEnum<E::ByteOrder>(v.toInt())); }, },
-
-		{ SignalProperties::dataSizeCaption,
-		  generateCaption(SignalProperties::dataSizeCaption),
-		  QVariant::Int, {},
-		  [](const Signal* s){ return s->dataSize(); },
-		  [](Signal* s, QVariant v){ s->setDataSize(v.toInt()); }, },
-
-		{ SignalProperties::unitCaption,
-		  SignalProperties::unitCaption,
-		  QVariant::String, {},
-		  [](const Signal* s){ return s->unit(); },
-		  [](Signal* s, QVariant v){ s->setUnit(v.toString()); }, },
-
-		{ SignalProperties::acquireCaption,
-		  SignalProperties::acquireCaption,
-		  QVariant::Bool, {},
-		  [](const Signal* s){ return s->acquire(); },
-		  [](Signal* s, QVariant v){ s->setAcquire(v.toBool()); }, },
-
-		{ SignalProperties::archiveCaption,
-		  SignalProperties::archiveCaption,
-		  QVariant::Bool, {},
-		  [](const Signal* s){ return s->archive(); },
-		  [](Signal* s, QVariant v){ s->setArchive(v.toBool()); }, },
-
-		{ SignalProperties::decimalPlacesCaption,
-		  generateCaption(SignalProperties::decimalPlacesCaption),
-		  QVariant::Int, {},
-		  [](const Signal* s){ return s->decimalPlaces(); },
-		  [](Signal* s, QVariant v){ s->setDecimalPlaces(v.toInt()); }, },
-
-		{ SignalProperties::excludeFromBuildCaption,
-		  generateCaption(SignalProperties::excludeFromBuildCaption),
-		  QVariant::Bool, {},
-		  [](const Signal* s){ return s->excludeFromBuild(); },
-		  [](Signal* s, QVariant v){ s->setExcludeFromBuild(v.toBool()); }, },
-
-		{ SignalProperties::adaptiveApertureCaption,
-		  generateCaption(SignalProperties::adaptiveApertureCaption),
-		  QVariant::Bool, {},
-		  [](const Signal* s){ return s->adaptiveAperture(); },
-		  [](Signal* s, QVariant v){ s->setAdaptiveAperture(v.toBool()); }, },
-
-		{ SignalProperties::coarseApertureCaption,
-		  generateCaption(SignalProperties::coarseApertureCaption),
-		  QVariant::Double, {},
-		  [](const Signal* s){ return s->coarseAperture(); },
-		  [](Signal* s, QVariant v){ s->setCoarseAperture(v.toDouble()); }, },
-
-		{ SignalProperties::fineApertureCaption,
-		  generateCaption(SignalProperties::fineApertureCaption),
-		  QVariant::Double, {},
-		  [](const Signal* s){ return s->fineAperture(); },
-		  [](Signal* s, QVariant v){ s->setFineAperture(v.toDouble()); }, },
-
-		{ SignalProperties::specificPropertiesStructCaption,
-		  generateCaption(SignalProperties::specificPropertiesStructCaption),
-		  QVariant::String, {},
-		  [](const Signal* s){ return s->specPropStruct(); },
-		  [](Signal* s, QVariant v){ s->setSpecPropStruct(v.toString()); }, },
-
-		{ SignalProperties::enableTuningCaption,
-		  generateCaption(SignalProperties::enableTuningCaption),
-		  QVariant::Bool, {},
-		  [](const Signal* s){ return s->enableTuning(); },
-		  [](Signal* s, QVariant v){ s->setEnableTuning(v.toBool()); }, },
-
-		{ SignalProperties::tuningDefaultValueCaption,
-		  generateCaption(SignalProperties::tuningDefaultValueCaption),
-		  QVariant::String, {},
-		  [](const Signal* s){ return s->tuningDefaultValue().toVariant(); },
-		  [](Signal* s, QVariant v){ s->setTuningDefaultValue(variant2TuningValue(v, s->tuningDefaultValue().type())); }, },
-
-		{ SignalProperties::tuningLowBoundCaption,
-		  generateCaption(SignalProperties::tuningLowBoundCaption),
-		  QVariant::String, {},
-		  [](const Signal* s){ return s->tuningLowBound().toVariant(); },
-		  [](Signal* s, QVariant v){ s->setTuningLowBound(variant2TuningValue(v, s->tuningDefaultValue().type())); }, },
-
-		{ SignalProperties::tuningHighBoundCaption,
-		  generateCaption(SignalProperties::tuningHighBoundCaption),
-		  QVariant::String, {},
-		  [](const Signal* s){ return s->tuningHighBound().toVariant(); },
-		  [](Signal* s, QVariant v){ s->setTuningHighBound(variant2TuningValue(v, s->tuningDefaultValue().type())); }, },
 	};
 };
 
@@ -370,6 +257,7 @@ public slots:
 
 private:
 	void detectNewProperties(const Signal& signal);
+	void loadNotSpecificProperties(Signal& signal);
 	// Data
 	//
 	SignalPropertyManager m_propertyManager;

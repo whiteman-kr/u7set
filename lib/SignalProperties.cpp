@@ -3,6 +3,21 @@
 #include "../u7/Settings.h"
 
 
+#define ADD_SIGNAL_PROPERTY_GETTER(TYPE, NAME, VISIBLE, GETTER, OWNER) \
+	ADD_PROPERTY_GETTER_INDIRECT(TYPE, NAME, VISIBLE, GETTER, OWNER); \
+	if (savePropertyDescription == true) \
+	{ \
+		addPropertyDescription<TYPE>(NAME, &GETTER); \
+	}
+
+#define ADD_SIGNAL_PROPERTY_GETTER_SETTER(TYPE, NAME, VISIBLE, GETTER, SETTER, OWNER) \
+	ADD_PROPERTY_GETTER_SETTER_INDIRECT(TYPE, NAME, VISIBLE, GETTER, SETTER, OWNER); \
+	if (savePropertyDescription == true) \
+	{ \
+		addPropertyDescription<TYPE>(NAME, &GETTER, &SETTER); \
+	}
+
+
 // -------------------------------------------------------------------------------------------------------------
 //
 // SignalSpecPropValue class implementation
@@ -111,10 +126,10 @@ const QString SignalProperties::defaultBusChildAnalogSpecPropStruct(
 const QString SignalProperties::lastEditedSignalFieldValuePlace("SignalsTabPage/LastEditedSignal/");
 
 
-SignalProperties::SignalProperties(Signal& signal) :
+SignalProperties::SignalProperties(Signal& signal, bool savePropertyDescription) :
 	m_signal(signal)
 {
-	initProperties();
+	initProperties(savePropertyDescription);
 }
 
 void SignalProperties::updateSpecPropValues()
@@ -182,60 +197,70 @@ int SignalProperties::getPrecision()
 	return precision;
 }
 
-void SignalProperties::initProperties()
+void SignalProperties::initProperties(bool savePropertyDescription)
 {
-	ADD_PROPERTY_GETTER_INDIRECT(int, idCaption, false, Signal::ID, m_signal);
-	ADD_PROPERTY_GETTER_INDIRECT(int, signalGroupIDCaption, false, Signal::signalGroupID, m_signal);
-	ADD_PROPERTY_GETTER_INDIRECT(int, signalInstanceIDCaption, false, Signal::signalInstanceID, m_signal);
-	ADD_PROPERTY_GETTER_INDIRECT(int, changesetIDCaption, false, Signal::changesetID, m_signal);
-	ADD_PROPERTY_GETTER_INDIRECT(bool, checkedOutCaption, false, Signal::checkedOut, m_signal);
-	ADD_PROPERTY_GETTER_INDIRECT(int, userIdCaption, false, Signal::userID, m_signal);
-	ADD_PROPERTY_GETTER_INDIRECT(E::Channel, channelCaption, false, Signal::channel, m_signal);
-	ADD_PROPERTY_GETTER_INDIRECT(QDateTime, createdCaption, false, Signal::created, m_signal);
-	ADD_PROPERTY_GETTER_INDIRECT(bool, deletedCaption, false, Signal::deleted, m_signal);
-	ADD_PROPERTY_GETTER_INDIRECT(QDateTime, instanceCreatedCaption, false, Signal::instanceCreated, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(int, idCaption, false, Signal::ID, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(int, signalGroupIDCaption, false, Signal::signalGroupID, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(int, signalInstanceIDCaption, false, Signal::signalInstanceID, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(int, changesetIDCaption, false, Signal::changesetID, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(bool, checkedOutCaption, false, Signal::checkedOut, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(int, userIdCaption, false, Signal::userID, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(E::Channel, channelCaption, false, Signal::channel, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(QDateTime, createdCaption, false, Signal::created, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(bool, deletedCaption, false, Signal::deleted, m_signal);
+	ADD_SIGNAL_PROPERTY_GETTER(QDateTime, instanceCreatedCaption, false, Signal::instanceCreated, m_signal);
 
-	auto excludeFromBuildProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, excludeFromBuildCaption, true,
+	auto excludeFromBuildProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, excludeFromBuildCaption, true,
 																		Signal::excludeFromBuild,
 																		Signal::setExcludeFromBuild, m_signal);
 	excludeFromBuildProperty->setCategory(categorySignalProcessing);
 
-	auto signalTypeProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::SignalType, typeCaption, true, Signal::signalType, Signal::setSignalType, m_signal);
+	auto signalTypeProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::SignalType, typeCaption, true, Signal::signalType, Signal::setSignalType, m_signal);
 	signalTypeProperty->setCategory(categorySignalType);
 
-	auto signalInOutTypeProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::SignalInOutType, inOutTypeCaption, true, Signal::inOutType, Signal::setInOutType, m_signal);
+	auto signalInOutTypeProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::SignalInOutType, inOutTypeCaption, true, Signal::inOutType, Signal::setInOutType, m_signal);
 	signalInOutTypeProperty->setCategory(categorySignalType);
 
-	auto strIdProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, appSignalIDCaption, true, Signal::appSignalID, Signal::setAppSignalID, m_signal);
+	auto strIdProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, appSignalIDCaption, true, Signal::appSignalID, Signal::setAppSignalID, m_signal);
 	strIdProperty->setValidator(cacheValidator);
 	strIdProperty->setCategory(categoryIdentification);
 
-	auto extStrIdProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, customSignalIDCaption, true, Signal::customAppSignalID, Signal::setCustomAppSignalID, m_signal);
+	auto extStrIdProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, customSignalIDCaption, true, Signal::customAppSignalID, Signal::setCustomAppSignalID, m_signal);
 	extStrIdProperty->setValidator(cacheValidator);
 	extStrIdProperty->setCategory(categoryIdentification);
 
-	auto busTypeIDProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, busTypeIDCaption, true, Signal::busTypeID, Signal::setBusTypeID, m_signal);
+	auto busTypeIDProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, busTypeIDCaption, true, Signal::busTypeID, Signal::setBusTypeID, m_signal);
 	busTypeIDProperty->setCategory(categoryIdentification);
 
-	auto nameProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, captionCaption, true, Signal::caption, Signal::setCaption, m_signal);
+	auto nameProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, captionCaption, true, Signal::caption, Signal::setCaption, m_signal);
 	nameProperty->setValidator(captionValidator);
 	nameProperty->setCategory(categoryIdentification);
 
-	auto equipmentProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, equipmentIDCaption, true, Signal::equipmentID, Signal::setEquipmentID, m_signal);
+	auto equipmentProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, equipmentIDCaption, true, Signal::equipmentID, Signal::setEquipmentID, m_signal);
 	equipmentProperty->setCategory(categoryIdentification);
 
-	auto enableTuningProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, enableTuningCaption, true, Signal::enableTuning, Signal::setEnableTuning, m_signal);
+	auto enableTuningProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, enableTuningCaption, true, Signal::enableTuning, Signal::setEnableTuning, m_signal);
 	enableTuningProperty->setCategory(categoryTuning);
 
-	auto tuningDefaultValueProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(TuningValue, tuningDefaultValueCaption, true, Signal::tuningDefaultValue, Signal::setTuningDefaultValue, m_signal);
+	auto tuningDefaultValueProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(TuningValue, tuningDefaultValueCaption, true, Signal::tuningDefaultValue, Signal::setTuningDefaultValue, m_signal);
 	tuningDefaultValueProperty->setCategory(categoryTuning);
 
-	auto tuningLowBoundProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(TuningValue, tuningLowBoundCaption, true, Signal::tuningLowBound, Signal::setTuningLowBound, m_signal);
+	auto tuningLowBoundProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(TuningValue, tuningLowBoundCaption, true, Signal::tuningLowBound, Signal::setTuningLowBound, m_signal);
 	tuningLowBoundProperty->setCategory(categoryTuning);
 
-	auto tuningHighBoundProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(TuningValue, tuningHighBoundCaption, true, Signal::tuningHighBound, Signal::setTuningHighBound, m_signal);
+	auto tuningHighBoundProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(TuningValue, tuningHighBoundCaption, true, Signal::tuningHighBound, Signal::setTuningHighBound, m_signal);
 	tuningHighBoundProperty->setCategory(categoryTuning);
 
+	if (savePropertyDescription)
+	{
+		addPropertyDescription<int>(dataSizeCaption,
+									&Signal::dataSize,
+									static_cast<void (Signal::*)(int)>(&Signal::setDataSize));
+
+		addPropertyDescription<E::AnalogAppSignalFormat>(analogSignalFormatCaption,
+														 &Signal::analogSignalFormat,
+														 static_cast<void (Signal::*)(E::AnalogAppSignalFormat)>(&Signal::setAnalogSignalFormat));
+	}
 	auto dataSizeProperty = addProperty<int>(dataSizeCaption, QString(), true,
 										(std::function<int(void)>)std::bind(&Signal::dataSize, &m_signal),
 										std::bind(static_cast<void (Signal::*)(int)>(&Signal::setDataSize), &m_signal, std::placeholders::_1));
@@ -247,28 +272,28 @@ void SignalProperties::initProperties()
 																		  std::bind(static_cast<void (Signal::*)(E::AnalogAppSignalFormat)>(&Signal::setAnalogSignalFormat), &m_signal, std::placeholders::_1));
 	analogSignalFormatProperty->setCategory(categoryDataFormat);
 
-	auto unitProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(QString, unitCaption, true, Signal::unit, Signal::setUnit, m_signal);
+	auto unitProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, unitCaption, true, Signal::unit, Signal::setUnit, m_signal);
 	unitProperty->setCategory(categorySignalProcessing);
 
-	auto decimalPlacesProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(int, decimalPlacesCaption, true, Signal::decimalPlaces, Signal::setDecimalPlaces, m_signal);
+	auto decimalPlacesProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(int, decimalPlacesCaption, true, Signal::decimalPlaces, Signal::setDecimalPlaces, m_signal);
 	decimalPlacesProperty->setCategory(categoryOnlineMonitoringSystem);
 
-	auto coarseApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, coarseApertureCaption, true, Signal::coarseAperture, Signal::setCoarseAperture, m_signal);
+	auto coarseApertureProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(double, coarseApertureCaption, true, Signal::coarseAperture, Signal::setCoarseAperture, m_signal);
 	coarseApertureProperty->setCategory(categoryOnlineMonitoringSystem);
 
-	auto fineApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(double, fineApertureCaption, true, Signal::fineAperture, Signal::setFineAperture, m_signal);
+	auto fineApertureProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(double, fineApertureCaption, true, Signal::fineAperture, Signal::setFineAperture, m_signal);
 	fineApertureProperty->setCategory(categoryOnlineMonitoringSystem);
 
-	auto adaptiveApertureProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, adaptiveApertureCaption, true, Signal::adaptiveAperture, Signal::setAdaptiveAperture, m_signal);
+	auto adaptiveApertureProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, adaptiveApertureCaption, true, Signal::adaptiveAperture, Signal::setAdaptiveAperture, m_signal);
 	adaptiveApertureProperty->setCategory(categoryOnlineMonitoringSystem);
 
-	auto acquireProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, acquireCaption, true, Signal::acquire, Signal::setAcquire, m_signal);
+	auto acquireProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, acquireCaption, true, Signal::acquire, Signal::setAcquire, m_signal);
 	acquireProperty->setCategory(categoryOnlineMonitoringSystem);
 
-	auto archiveProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(bool, archiveCaption, true, Signal::archive, Signal::setArchive, m_signal);
+	auto archiveProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(bool, archiveCaption, true, Signal::archive, Signal::setArchive, m_signal);
 	archiveProperty->setCategory(categoryOnlineMonitoringSystem);
 
-	auto byteOrderProperty = ADD_PROPERTY_GETTER_SETTER_INDIRECT(E::ByteOrder, byteOrderCaption, true, Signal::byteOrder, Signal::setByteOrder, m_signal);
+	auto byteOrderProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::ByteOrder, byteOrderCaption, true, Signal::byteOrder, Signal::setByteOrder, m_signal);
 	byteOrderProperty->setCategory(categoryDataFormat);
 
 	// append signal specific properties
@@ -276,6 +301,11 @@ void SignalProperties::initProperties()
 
 	createSpecificProperties();
 
+	if (savePropertyDescription)
+	{
+		addPropertyDescription<QString>(specificPropertiesStructCaption,
+										&Signal::specPropStruct);
+	}
 	auto propSpecPropStruct = ADD_PROPERTY_GETTER_SETTER(QString, specificPropertiesStructCaption, true,
 															 SignalProperties::specPropStruct, SignalProperties::setSpecPropStruct);
 	propSpecPropStruct->setCategory(categoryExpertProperties);
@@ -853,4 +883,40 @@ int SignalSpecPropValues::getPropertyIndex(const QString& name) const
 	}
 
 	return -1;
+}
+
+QString SignalProperties::generateCaption(const QString& name)
+{
+	QString result;
+	if (name.isEmpty())
+	{
+		assert(false);
+		return result;
+	}
+	result += name[0].toUpper();
+	for (int i = 1; i < name.count(); i++)
+	{
+		if (name[i].isUpper())
+		{
+			if (i + 1 < name.count() && name[i + 1].isUpper())	// abbreviation?
+			{
+				result += ' ';
+				while (i < name.count() && name[i].isUpper())
+				{
+					result += name[i];
+					i++;
+				}
+				result += ' ';
+			}
+			else
+			{
+				result += ' ' + name[i].toLower();
+			}
+		}
+		else
+		{
+			result += name[i];
+		}
+	}
+	return result.trimmed();
 }

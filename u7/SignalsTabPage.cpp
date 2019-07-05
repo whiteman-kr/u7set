@@ -24,7 +24,6 @@
 
 const int DEFAULT_COLUMN_WIDTH = 50;
 
-
 SignalPropertyManager::SignalPropertyManager()
 {
 	for (size_t i = 0; i < m_propertyDescription.size(); i++)
@@ -241,7 +240,7 @@ void SignalPropertyManager::detectNewProperties(const Signal &signal)
 		QVariant::Type type = specificProperty->value().type();
 
 		newProperty.name = propertyName;
-		newProperty.caption = generateCaption(propertyName);
+		newProperty.caption = SignalProperties::generateCaption(propertyName);
 		newProperty.type = type;
 		if (propertyIsEnum)
 		{
@@ -290,6 +289,23 @@ void SignalPropertyManager::detectNewProperties(const Signal &signal)
 		}
 
 		addNewProperty(newProperty);
+	}
+}
+
+void SignalPropertyManager::loadNotSpecificProperties(const SignalProperties& signalProperties)
+{
+	std::vector<SignalPropertyDescription> propetyDescription = signalProperties.getProperties();
+
+	for (SignalPropertyDescription& property : propetyDescription)
+	{
+		if (index(property.name) == -1)
+		{
+			auto propertyPtr = signalProperties.propertyByCaption(property.name);
+			if (propertyPtr != nullptr && propertyPtr->category().isEmpty() == false)
+			{
+				addNewProperty(property);
+			}
+		}
 	}
 }
 
@@ -404,7 +420,10 @@ void SignalPropertyManager::reloadPropertyBehaviour(DbController* dbController, 
 		int propertyIndex = m_propertyName2IndexMap.value(behaviour.name, -1);
 		if (propertyIndex != -1)
 		{
-			m_propertyIndex2BehaviourIndexMap[propertyIndex] = static_cast<int>(m_propertyBehaviorDescription.size() - 1);
+			int behaviourIndex = m_propertyBehaviorDescription.size() - 1;
+			assert(m_propertyDescription[propertyIndex].name == m_propertyBehaviorDescription[behaviourIndex].name);
+
+			m_propertyIndex2BehaviourIndexMap[propertyIndex] = behaviourIndex;
 		}
 	}
 }
@@ -427,42 +446,6 @@ QString SignalPropertyManager::typeName(int typeIndex, int inOutTypeIndex)
 {
 	return typeName(IntToEnum<E::SignalType>(QMetaEnum::fromType<E::SignalType>().value(typeIndex)),
 					IntToEnum<E::SignalInOutType>(QMetaEnum::fromType<E::SignalInOutType>().value(inOutTypeIndex)));
-}
-
-QString SignalPropertyManager::generateCaption(const QString& name)
-{
-	QString result;
-	if (name.isEmpty())
-	{
-		assert(false);
-		return result;
-	}
-	result += name[0].toUpper();
-	for (int i = 1; i < name.count(); i++)
-	{
-		if (name[i].isUpper())
-		{
-			if (i + 1 < name.count() && name[i + 1].isUpper())	// abbreviation?
-			{
-				result += ' ';
-				while (i < name.count() && name[i].isUpper())
-				{
-					result += name[i];
-					i++;
-				}
-				result += ' ';
-			}
-			else
-			{
-				result += ' ' + name[i].toLower();
-			}
-		}
-		else
-		{
-			result += name[i];
-		}
-	}
-	return result.trimmed();
 }
 
 TuningValue SignalPropertyManager::variant2TuningValue(const QVariant& variant, TuningValueType type)
@@ -618,8 +601,24 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 		return cb;
 	}
 	default:
-		assert(false);
-		return QStyledItemDelegate::createEditor(parent, option, index);
+		if (manager.type(col) == qMetaTypeId<TuningValue>())
+		{
+			QLineEdit* le = new QLineEdit(parent);
+			if (s.isAnalog())
+			{
+				le->setValidator(new QDoubleValidator(le));
+			}
+			else
+			{
+				le->setValidator(new QIntValidator(le));
+			}
+			return le;
+		}
+		else
+		{
+			assert(false);
+			return QStyledItemDelegate::createEditor(parent, option, index);
+		}
 	}
 }
 
@@ -692,8 +691,15 @@ void SignalsDelegate::setEditorData(QWidget *editor, const QModelIndex &index) c
 		le->setText(manager.value(&s, col).toString());
 		break;
 	default:
-		assert(false);
-		return;
+		if (type == qMetaTypeId<TuningValue>())
+		{
+			le->setText(manager.value(&s, col).toString());
+		}
+		else
+		{
+			assert(false);
+			return;
+		}
 	}
 }
 
@@ -795,8 +801,15 @@ void SignalsDelegate::setModelData(QWidget *editor, QAbstractItemModel *, const 
 		manager.setValue(&s, col, value.toUInt());
 		break;
 	default:
-		assert(false);
-		return;
+		if (type == qMetaTypeId<TuningValue>())
+		{
+			manager.setValue(&s, col, value);
+		}
+		else
+		{
+			assert(false);
+			return;
+		}
 	}
 
 	m_model->saveSignal(s);
@@ -1542,6 +1555,23 @@ void SignalsModel::detectNewProperties(const Signal& signal)
 	}
 }
 
+void SignalsModel::loadNotSpecificProperties(Signal& signal)
+{
+	int oldColumnCount = columnCount();
+
+	SignalProperties signalProperties(signal, true);
+
+	m_propertyManager.loadNotSpecificProperties(signalProperties);
+
+	if (oldColumnCount < columnCount())
+	{
+		beginInsertColumns(QModelIndex(), oldColumnCount, columnCount() - 1);
+		endInsertColumns();
+
+		emit updateColumnList();
+	}
+}
+
 bool SignalsModel::editSignals(QVector<int> ids)
 {
 	loadSignalSet(ids, false);
@@ -1778,6 +1808,8 @@ void SignalsModel::initLazyLoadSignals()
 
 			detectNewProperties(loadedSignal);
 		}
+
+		loadNotSpecificProperties(signalsArray[0]);
 
 		if (m_signalSet.count() > 0)
 		{
