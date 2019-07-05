@@ -63,7 +63,7 @@ check #OUT_LATCH_FRONT_FP01 == 0
 set #TUN_IN_FP3 = 1, #SET03 = 0, #RESET03 = 0
 check #OUT_LATCH_FRONT_FP01 == 1
 
- #TUN_IN_FP3 = 1, #SET03 = 5, #RESET03 = 0
+set #TUN_IN_FP3 = 1, #SET03 = 1, #RESET03 = 0
 check #OUT_LATCH_FRONT_FP01 == 1
 
 endtest
