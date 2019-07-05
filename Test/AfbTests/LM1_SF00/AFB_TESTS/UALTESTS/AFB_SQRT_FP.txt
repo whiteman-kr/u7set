@@ -1,0 +1,48 @@
+﻿test AFB_SQRT_FP, AFB tests for AFB_SQRT_FP element
+schema AFB_SQRT_FP
+compatible MODULE_LM1SF00
+// in > = 0, out= sqrt(in)
+set #TUN_IN_FP1 = 4
+check #OUT_SQRT_FP001 == 2
+
+set #TUN_IN_FP1 = 128
+check #OUT_SQRT_FP001 == 11.3137084
+
+set #TUN_IN_FP1 = 0
+check #OUT_SQRT_FP001 == 0
+check #OUT_ZERO_SQRT_FP001 == 1
+
+//if IN < 0 -> NaN
+set #TUN_IN_FP1 = -1
+check #OUT_SQRT_FP001 == nan
+check #OUT_NAN_SQRT_FP001 == 1
+
+set #TUN_IN_FP1 = -15.8
+check #OUT_SQRT_FP001 == nan
+check #OUT_NAN_SQRT_FP001 == 1
+
+set #TUN_IN_FP1 = -0.1
+check #OUT_SQRT_FP001 == nan
+check #OUT_NAN_SQRT_FP001 == 1
+
+set #TUN_IN_FP1 = 0.1
+check #OUT_SQRT_FP001 == 0.31622776
+
+set #TUN_IN_FP1 = 12.5
+check #OUT_SQRT_FP001 == 3.5355339
+
+set #TUN_IN_FP1 = 999.9
+check #OUT_SQRT_FP001 == 31.62119542
+
+set #TUN_IN_FP1 = 0.99
+check #OUT_SQRT_FP001 == 0.9949874371
+
+set #TUN_IN_FP1 = 1000000
+check #OUT_SQRT_FP001 == 1000.0
+
+
+//set #TUN_IN_FP1 = NaN
+//check #OUT_NAN_SQRT_FP001 = 1
+//set #TUN_IN_SQRT_FP001 = +∞
+//check #OVERFLOW_SQRT_FP001 = 1
+endtest

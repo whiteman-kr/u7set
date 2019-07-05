@@ -1,0 +1,12 @@
+test AFB_FF_T_DECAY_1, AFB tests for AFB_FF_T_DECAY element
+schema AFB_FF_T_DECAY
+compatible MODULE_LM1SF00
+set #TUN_DSCR1 = 1 , #TUN_DSCR2 = 1 
+check #OUT_FF_T_DECAY == 1 //Yt=Yt-1
+set #TUN_DSCR1 = 1 , #TUN_DSCR2 = 0 
+check #OUT_FF_T_DECAY == 1 //Yt=Yt-1
+set #TUN_DSCR1 = 0 , #TUN_DSCR2 = 1 
+check #OUT_FF_T_DECAY == 1 //Yt=not(Yt-1)
+set #TUN_DSCR1 = 0 , #TUN_DSCR2 = 0 
+check #OUT_FF_T_DECAY == 0 //Yt=Yt-1
+endtest

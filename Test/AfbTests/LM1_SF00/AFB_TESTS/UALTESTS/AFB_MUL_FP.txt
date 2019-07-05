@@ -1,0 +1,53 @@
+test AFB_MUL_FP01, AFB tests for AFB_MUL_FP element
+schema AFB_MUL_FP
+compatible MODULE_LM1SF00
+
+set #TUN_IN_FP1 = 2 , #TUN_IN_FP2 = 2
+check #OUT_MUL_FP001 == 4
+
+set #TUN_IN_FP1 = 25.5 , #TUN_IN_FP2 = 2.6
+check #OUT_MUL_FP001 == 66.3
+
+set #TUN_IN_FP1 = -45 , #TUN_IN_FP2 = 12
+check #OUT_MUL_FP001 == -540
+
+set #TUN_IN_FP1 = 2.55 , #TUN_IN_FP2 = 154.9
+check #OUT_MUL_FP001 == 394.995
+
+set #TUN_IN_FP1 = 0 , #TUN_IN_FP2 = 0 
+check #OUT_MUL_FP001 == 0
+check #OUT_ZERO_MUL_FP001 == 1
+
+set #TUN_IN_FP1 = 55 , #TUN_IN_FP2 = nan
+check #OUT_NAN_MUL_FP001 == 1 
+
+set #TUN_IN_FP1 = 1 , #TUN_IN_FP2 = -150.5 
+check #OUT_MUL_FP001 == -150.5
+
+set #TUN_IN_FP1 = 1 , #TUN_IN_FP2 = 0
+check #OUT_MUL_FP001 == 0
+check #OUT_ZERO_MUL_FP001 == 1
+
+set #TUN_IN_FP1 = 0 , #TUN_IN_FP2 = 1
+check #OUT_MUL_FP001 == 0
+
+check #OUT_ZERO_MUL_FP001 == 1
+set #TUN_IN_FP1 = 0 , #TUN_IN_FP2 = -1.1
+check #OUT_MUL_FP001 == 0
+check #OUT_ZERO_MUL_FP001 == 1
+
+set #TUN_IN_FP1 = 0 , #TUN_IN_FP2 = inf
+check #OUT_MUL_FP001 == 0
+check #OUT_NAN_MUL_FP001 == 1 
+
+set #TUN_IN_FP1 = 0 , #TUN_IN_FP2 = nan
+check #OUT_NAN_MUL_FP001 == 1
+
+set #TUN_IN_FP1 = nan , #TUN_IN_FP2 = 1.58
+check #OUT_NAN_MUL_FP001 == 1
+
+set #TUN_IN_FP1 = 0 , #TUN_IN_FP2 = 1.8
+check #OUT_MUL_FP001 ==0
+check #UNDERFLOW_MUL_FP001 == 0 
+endtest
+

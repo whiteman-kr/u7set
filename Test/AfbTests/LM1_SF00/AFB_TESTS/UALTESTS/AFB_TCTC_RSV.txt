@@ -1,0 +1,35 @@
+test AFB_TCTC_RSV_1, AFB tests for TCTC_RSV element
+schema TCTC_RSV
+compatible MODULE_LM1SF00
+//time 1000
+set #TUN_DSCR1 = 0
+delay 1000
+check #OUT_TCTC_RSV1 == 0
+
+set #TUN_DSCR1 = 1
+delay 1000
+check #OUT_TCTC_RSV1 == 1
+
+set #TUN_DSCR1 = 1
+delay 1000
+check #OUT_TCTC_RSV1 == 1
+
+set #TUN_DSCR1 = 0
+delay 1000
+check #OUT_TCTC_RSV1 == 0
+
+set #TUN_DSCR1 = 0
+delay 500
+check #OUT_TCTC_RSV1 == 0
+
+set #TUN_DSCR1 = 1
+delay 500
+check #OUT_TCTC_RSV1 == 1
+set #TUN_DSCR1 = 1
+delay 100
+check #OUT_TCTC_RSV1 == 1
+
+set #TUN_DSCR1 = 1
+check #OUT_TCTC_RSV1 == 1
+
+endtest

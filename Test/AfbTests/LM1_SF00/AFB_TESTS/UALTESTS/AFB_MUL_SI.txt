@@ -1,0 +1,32 @@
+test AFB_MUL_SI, AFB tests for AFB_MUL_SI element
+schema AFB_MUL_SI
+compatible MODULE_LM1SF00
+//multiplication
+set #TUN_IN_SI1 = 2 , #TUN_IN_SI2 = 2
+check #OUT_MUL_SI001 == 4
+set #TUN_IN_SI1 = 20 , #TUN_IN_SI2 = 22
+check #OUT_MUL_SI001 == 440
+set #TUN_IN_SI1 = -2220 , #TUN_IN_SI2 = -1000
+check #OUT_MUL_SI001 == 2200000
+set #TUN_IN_SI1 = -2 , #TUN_IN_SI2 = 2
+check #OUT_MUL_SI001 == -4
+set #TUN_IN_SI1 = -100 , #TUN_IN_SI2 = -250
+check #OUT_MUL_SI001 == 25000
+//zero
+set #TUN_IN_SI1 = 0, #TUN_IN_SI2 = 0
+check #OUT_MUL_SI001 == 440
+check #OUT_ZERO_MUL_SI001 ==1
+
+set #TUN_IN_SI1 = 100, #TUN_IN_SI2 = 0
+check #OUT_MUL_SI001 == 0
+check #OUT_ZERO_MUL_SI001 == 1
+
+set #TUN_IN_SI1 = 0, #TUN_IN_SI2 = 100
+check #OUT_MUL_SI001 == 0
+check #OUT_ZERO_MUL_SI001 == 1
+
+//overflow
+set #TUN_IN_SI1 = 2147483647, #TUN_IN_SI2 = 2147483647 // уточнить
+check #OUT_ZERO_MUL_SI001 == 1
+endtest
+

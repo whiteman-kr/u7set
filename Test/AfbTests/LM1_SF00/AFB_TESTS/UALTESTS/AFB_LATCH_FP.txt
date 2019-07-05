@@ -1,0 +1,71 @@
+test AFB_LATCH_DECAY_FP01, AFB tests for AFB_LATCH_FP element
+schema AFB_LATCH_FP
+compatible MODULE_LM1SF00
+
+set #TUN_IN_FP1 = 0, #SET01 = 0, #RESET01 = 0
+check #OUT_LATCH_DECAY_FP01 == 0
+
+set #TUN_IN_FP1 = 1, #SET01 = 0, #RESET01 = 0
+check #OUT_LATCH_DECAY_FP01 == 0
+
+set #TUN_IN_FP1 = 1, #SET01 = 1, #RESET01 = 0
+check #OUT_LATCH_DECAY_FP01 == 0
+
+set #TUN_IN_FP1 = 0, #SET01 = 1, #RESET01 = 0
+check #OUT_LATCH_DECAY_FP01 == 0  
+
+set #TUN_IN_FP1 = 1, #SET01 = 0, #RESET01 = 1
+check #OUT_LATCH_DECAY_FP01 == 0 
+
+set #TUN_IN_FP1 = 1, #SET01 = 1, #RESET01 = 1
+check #OUT_LATCH_DECAY_FP01 == 0 
+
+endtest
+
+test AFB_LATCH_FRONT_FP01, AFB tests for AFB_LATCH_FP element
+schema AFB_LATCH_FP
+compatible MODULE_LM1SF00
+
+set #TUN_IN_FP2 = 0, #SET02 = 0, #RESET02 = 1
+check #OUT_LATCH_FRONT_FP01 == 0
+
+set #TUN_IN_FP2 = 9.99, #SET02 = 0, #RESET02 = 0
+check #OUT_LATCH_FRONT_FP01 == 0
+
+set #TUN_IN_FP2 = 256.5, #SET02 = 1, #RESET02 = 0
+check #OUT_LATCH_FRONT_FP01 == 256.5
+
+set #TUN_IN_FP2 = 256.5, #SET02 = 0, #RESET02 = 1
+check #OUT_LATCH_FRONT_FP01 == 0
+
+set #TUN_IN_FP2 = 256.5, #SET02 = 1, #RESET02 = 1
+check #OUT_LATCH_FRONT_FP01 == 0
+
+set #TUN_IN_FP2 = 48578.8, #SET02 = 1, #RESET02 = 0
+check #OUT_LATCH_FRONT_FP01 == 48578.8
+
+set #TUN_IN_FP2 = 0, #SET02 = 0, #RESET02 = 1
+check #OUT_LATCH_FRONT_FP01 == 0
+
+endtest
+
+test AFB_LATCH_STATE_FP01, AFB tests for AFB_LATCH_FP element
+schema AFB_LATCH_FP
+compatible MODULE_LM1SF00
+
+set #TUN_IN_FP3 = 0, #SET03 = 0, #RESET03 = 1
+check #OUT_LATCH_STATE_FP01 == 0
+delay 50
+
+set #TUN_IN_FP3 = 1, #SET03 = 1, #RESET03 = 0
+check #OUT_LATCH_FRONT_FP01 == 0
+
+set #TUN_IN_FP3 = 1, #SET03 = 0, #RESET03 = 0
+check #OUT_LATCH_FRONT_FP01 == 1
+
+ #TUN_IN_FP3 = 1, #SET03 = 5, #RESET03 = 0
+check #OUT_LATCH_FRONT_FP01 == 1
+
+endtest
+
+
