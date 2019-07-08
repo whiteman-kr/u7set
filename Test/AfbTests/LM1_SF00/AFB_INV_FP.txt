@@ -1,0 +1,68 @@
+test AFB_INV_FP, AFB tests for AFB_INV_FP element
+schema AFB_INV_FP
+compatible MODULE_LM1SF00
+set #TUN_IN_FP1 = 0
+check #OUT_INV_FP001 == inf
+check #OUT_DIV_DY_ZERO_INV_FP001 == 1
+
+
+
+set #TUN_IN_FP1 = 0.1 
+check #OUT_INV_FP001 == 10
+
+set #TUN_IN_FP1 = -0.1 
+check #OUT_INV_FP001 == -10
+
+set #TUN_IN_FP1 = 0.2 
+check #OUT_INV_FP001 == 5
+
+set #TUN_IN_FP1 = -0.2
+check #OUT_INV_FP001 == -5 
+
+set #TUN_IN_FP1 = 1 
+check #OUT_INV_FP001 == 1
+
+set #TUN_IN_FP1 = 2  
+check #OUT_INV_FP001 == 0.5
+
+set #TUN_IN_FP1 = 100 
+check #OUT_INV_FP001 == 0.01
+
+set #TUN_IN_FP1 = -100 
+check #OUT_INV_FP001 == -0.01
+
+set #TUN_IN_FP1 = 12.5 
+check #OUT_INV_FP001 == 0.08
+
+set #TUN_IN_FP1 = 25.6
+check #OUT_INV_FP001 == 0.0390625
+
+set #TUN_IN_FP1 = 150.5
+check #OUT_INV_FP001 == 0.006644518
+
+
+set #TUN_IN_FP1 = 125.5 
+check #OUT_INV_FP001 == 0.007968128
+
+
+set #TUN_IN_FP1 = 100 
+check #OUT_INV_FP001 == 0.01
+
+set #TUN_IN_FP1 = 150.5
+check #OUT_INV_FP001 == 0.006644518
+
+set #TUN_IN_FP1 = 99.9
+check #OUT_INV_FP001 == 0.01001001001001001
+
+set #TUN_IN_FP1 = 0.00001
+check #OUT_INV_FP001 == 99999.99999999999
+
+set #TUN_IN_FP1 = 0.001
+check #OUT_INV_FP001 == 1000.0
+
+
+
+
+
+
+endtest

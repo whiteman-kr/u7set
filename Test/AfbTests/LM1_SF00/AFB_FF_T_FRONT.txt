@@ -1,0 +1,12 @@
+test AFB_FF_T_FRONT_1, AFB tests for AFB_FF_T_FRONT element
+schema AFB_FF_T_FRONT
+compatible MODULE_LM1SF00
+set #TUN_DSCR1 = 1
+check #OUT_FF_T_FRONT == 1 
+set #TUN_DSCR1 = 0
+check #OUT_FF_T_FRONT == 0
+set #TUN_DSCR1 = 0
+check #OUT_FF_T_FRONT == 0
+set #TUN_DSCR1 = 0
+check #OUT_FF_T_FRONT == 0
+endtest

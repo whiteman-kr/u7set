@@ -1,0 +1,60 @@
+test AFB_ADD_SI, AFB tests for AFB_ADD_SI element
+schema AFB_ADD_SI
+compatible MODULE_LM1SF00
+
+set #TUN_IN_SI1 = 0 , #TUN_IN_SI2 = 0
+check #OUT_ADD_SI001 == 0
+check #OUT_ZERO_ADD_FP001 == 1
+
+
+set #TUN_IN_SI1 = 1 , #TUN_IN_SI2 = 1
+check #OUT_ADD_SI001 == 2
+
+set #TUN_IN_SI1 = 1 , #TUN_IN_SI2 = 2
+check #OUT_ADD_SI001 == 3
+
+
+
+set #TUN_IN_SI1 = 2 , #TUN_IN_SI2 = 1
+check #OUT_ADD_SI001 == 3
+
+
+ set #TUN_IN_SI1 = 2 , #TUN_IN_SI2 = 2
+check #OUT_ADD_SI001 == 4
+
+
+set #TUN_IN_SI1 = 1200 , #TUN_IN_SI2 = 6880
+check #OUT_ADD_SI001 == 8080
+
+set #TUN_IN_SI1 = -17000 , #TUN_IN_SI2 = 28
+check #OUT_ADD_SI001 == -16972
+
+set #TUN_IN_SI1 = 1 , #TUN_IN_SI2 = -1
+check #OUT_ADD_SI001 == 0
+check #OUT_ZERO_ADD_FP001 == 1
+
+set #TUN_IN_SI1 = 1 , #TUN_IN_SI2 = 0
+check #OUT_ADD_SI001 == 1
+
+set #TUN_IN_SI1 = 0 , #TUN_IN_SI2 = 1
+check #OUT_ADD_SI001 == 1
+
+set #TUN_IN_SI1 = 0 , #TUN_IN_SI2 = 0
+check #OUT_ADD_SI001 == 0
+check #OUT_ZERO_ADD_FP001 == 1
+
+set #TUN_IN_SI1 = -150, #TUN_IN_SI2 = 150
+check #OUT_ADD_SI001 == 0
+check #OUT_ZERO_ADD_SI001 == 1
+
+set #TUN_IN_SI1 = 0 , #TUN_IN_SI2 = 0
+check #OUT_ADD_SI001 == 0
+check #OUT_ZERO_ADD_SI001 == 1
+
+// #TUN_IN_SI1 = ±∞ , #TUN_IN_SI2 = ±∞  // верно задать значения
+// check #OUT_ADD_SI001 = число
+// check #OVERFLOW_ADD_SI001 =1
+// #TUN_IN_SI1 = NAN , #TUN_IN_SI2 = NAN
+// check #OUT_NAN_ADD_SI001 = 1
+endtest
+

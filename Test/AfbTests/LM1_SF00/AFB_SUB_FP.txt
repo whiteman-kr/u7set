@@ -1,0 +1,24 @@
+test AFB_SUB_FP, AFB tests for AFB_SUB_FP element
+schema AFB_SUB_FP
+compatible MODULE_LM1SF00
+set #TUN_IN_FP1 = 2.1 , #TUN_IN_FP2 = 1.1
+check #OUT_SUB_FP001 == 1.0
+set #TUN_IN_FP1 = 20.5 , #TUN_IN_FP2 = 10.5
+check #OUT_SUB_FP001 == 10.0
+set #TUN_IN_FP1 = 255.6 , #TUN_IN_FP2 = 458.6
+check #OUT_SUB_FP001 == -203
+set #TUN_IN_FP1 = 150.8, #TUN_IN_FP2 = 150.8
+check #OUT_SUB_FP001 == 0
+check #OUT_ZERO_SUB_FP001 == 1
+set #TUN_IN_FP1 = 0.1 , #TUN_IN_FP2 = 0.1
+check #OUT_SUB_FP001 == 0
+check #OUT_ZERO_SUB_FP001 == 1
+check #UNDERFLOW_SUB_FP001 == 1
+//set #TUN_IN_FP1 = ±∞ , #TUN_IN_FP2 = ±∞  // верно задать значения
+// check #OUT_SUB_FP1 = число
+// check #OVERFLOW_SUB_FP1 =1
+//set #TUN_IN_FP1 = Proper , #TUN_IN_FP2 = NAN
+// check #OUT_NAN_SUB_FP1 = 1
+//set #TUN_IN_FP1 = NAN , #TUN_IN_FP2 = Proper
+// check #OUT_NAN_SUB_FP1 = 1
+endtest
