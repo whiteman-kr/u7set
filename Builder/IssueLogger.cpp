@@ -2302,14 +2302,14 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: SchemaItemFrame has reference (property SchemaID) to unknown schema %1, Schema %2.
+	/// Title: SchemaItemFrame has reference to schema %1 which has different units and SchemaItemFrame.AutoScale is false, Schema %2.
 	///
 	/// Parameters:
 	///		%1 Not found schema ID
 	///		%2 Schema ID
 	///
 	/// Description:
-	///			Schema has SchemaItemFrame wchich has reference (property SchemaID) to unknown schema.
+	///			SchemaItemFrame has reference to schema which has different units and SchemaItemFrame.AutoScale is false. If AutoScale is false then both schemas must have identical units.
 	///
 	void IssueLogger::errALP4082(QString schema, QString frameSchemaId, QUuid itemUuid)
 	{
@@ -2317,7 +2317,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4082,
-				  tr("SchemaItemFrame has reference (property SchemaID) to unknown schema %1, Schema %2.")
+				  tr("SchemaItemFrame has reference to schema %1 which has different units and SchemaItemFrame.AutoScale is false, Schema %2.")
 						.arg(frameSchemaId)
 						.arg(schema));
 	}

@@ -716,7 +716,7 @@ bool SchemaListModelEx::updateFiles(const QModelIndexList& selectedIndexes, cons
 		}
 	}
 
-	// Removes
+	// Removes rows in reverse sequence (row by row), and from high to low fileid (to remove children first)
 	//
 	for (auto rit = removeRows.rbegin(); rit != removeRows.rend(); ++rit)
 	{

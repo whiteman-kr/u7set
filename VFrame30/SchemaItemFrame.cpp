@@ -248,6 +248,7 @@ namespace VFrame30
 					// To do all other cases
 					//
 					Q_ASSERT(false);
+					int to_do;
 				}
 
 				// --
@@ -258,6 +259,7 @@ namespace VFrame30
 
 		// Remove frame (this item) from source schema
 		//
+		int to_do;
 
 		return ErrorCode::Ok;
 	}

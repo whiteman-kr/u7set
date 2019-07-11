@@ -322,24 +322,26 @@ namespace Builder
 								// All is Ok))
 								//
 								break;
+
 							case SchemaItemFrame::ErrorCode::ParamError:
-								log->errINT1001("Input params error SchemaItemFrame::ErrorCode SchemaItemFrame::setSchemaToFrame(VFrame30::Schema*, VFrame30::Schema*)", schema->schemaId(), frameItem->guid());
+								log->errINT1001("Input params error SchemaItemFrame::ErrorCode SchemaItemFrame::setSchemaToFrame(VFrame30::Schema*, VFrame30::Schema*), report to developers.", schema->schemaId(), frameItem->guid());
 								break;
+
 							case SchemaItemFrame::ErrorCode::InternalError:
-								log->errINT1001("InternalError in SchemaItemFrame::setSchemaToFrame(VFrame30::Schema*, VFrame30::Schema*), report to developers", schema->schemaId(), frameItem->guid());
+								log->errINT1001("Internal error in SchemaItemFrame::setSchemaToFrame(VFrame30::Schema*, VFrame30::Schema*), report to developers.", schema->schemaId(), frameItem->guid());
 								break;
+
 							case SchemaItemFrame::ErrorCode::SourceSchemaHasSameId:
 								log->errALP4081(frameItem->schemaId(), frameItem->guid());
-								{
-									bool schekIt;	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-								}
 								break;
+
 							case SchemaItemFrame::ErrorCode::SchemasHasDiffrenetUnitsWithoutAutoscale:
 								log->errALP4082(schemaId, frameItem->schemaId(), frameItem->guid());
 								{
 									bool schekIt;	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 								}
 								break;
+
 							default:
 								Q_ASSERT(false);
 								log->errINT1000(tr("Processing item SchemaItemFrame on Schema %1, SchemaItemFrame.SchemaID = %2, function SchemaItemFrame::setSchemaToFrame returned unknows error code %3.")
