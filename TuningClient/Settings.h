@@ -145,9 +145,8 @@ public:
 
 	int m_requestInterval = 100;
 
-#ifdef Q_DEBUG
+	bool m_enableSimulation = false;
 	bool m_simulationMode = false;
-#endif
 
 	// MainWindow options
 

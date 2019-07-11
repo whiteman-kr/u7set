@@ -1,0 +1,151 @@
+test AFB_TCONV_FP1, AFB tests for AFB_TCONV_FP element
+schema AFB_TCONV_FP
+compatible MODULE_LM1SF00
+set #TUN_IN_FP1 = 0
+check #OUT_TCONV_FP_SI1  == 0
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = 1.1
+check #OUT_TCONV_FP_SI1  == 1
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = 1.399
+check #OUT_TCONV_FP_SI1  == 1
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = 1.4
+check #OUT_TCONV_FP_SI1  == 1
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = 1.41
+check #OUT_TCONV_FP_SI1  == 1
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = 1.499
+check #OUT_TCONV_FP_SI1  == 1
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = 1.5
+check #OUT_TCONV_FP_SI1  == 2
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = 1.9
+check #OUT_TCONV_FP_SI1  == 2
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = 2.2
+check #OUT_TCONV_FP_SI1  == 2
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = 2.5
+check #OUT_TCONV_FP_SI1  == 2
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = 2.55
+check #OUT_TCONV_FP_SI1  == 3
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = 2.99
+check #OUT_TCONV_FP_SI1  == 3
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = 100.99
+check #OUT_TCONV_FP_SI1  == 101
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = 0.99
+check #OUT_TCONV_FP_SI1  == 1
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+//  UF
+set #TUN_IN_FP1 = 0.333
+check #OUT_TCONV_FP_SI1  == 0
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 1
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = 0.1
+check #OUT_TCONV_FP_SI1  == 0
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 1
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = 0.268
+check #OUT_TCONV_FP_SI1  == 0
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 1
+check #OUT_NAN_TCONV_FP_SI == 0
+
+// -
+
+set #TUN_IN_FP1 = -0.333
+check #OUT_TCONV_FP_SI1  == 0
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 1
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = -1.99
+check #OUT_TCONV_FP_SI1  == -2
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = -255.65
+check #OUT_TCONV_FP_SI1  == -256
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+// Nan
+
+// 2**31
+
+set #TUN_IN_FP1 = -2147483648.0
+check #OUT_TCONV_FP_SI1  == -2147483648
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = 2147483646.0 //!!!
+check #OUT_TCONV_FP_SI1  == 2147483646
+check #OUT_OVER_FLOW_TCONV_FP_SI == 0
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+set #TUN_IN_FP1 = 2147483647.0 //!!!
+check #OUT_TCONV_FP_SI1  == 2147483647
+check #OUT_OVER_FLOW_TCONV_FP_SI == 1
+check #OUT_UNDERFLOW_FP_SI == 0
+check #OUT_NAN_TCONV_FP_SI == 0
+
+
+endtest
+

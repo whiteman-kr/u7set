@@ -1,0 +1,96 @@
+test AFB_POLY_1, AFB tests for AFB_POLY element
+schema AFB_POLY
+compatible MODULE_LM1SF00
+// 2 parameters
+set #TUN_IN_FP1 = 0
+check #OUT_POLY001 == 2
+
+set #TUN_IN_FP1 = 1
+check #OUT_POLY001 == 5
+
+set #TUN_IN_FP1 = -1
+check #OUT_POLY001 == -1
+
+set #TUN_IN_FP1 = 0.1
+check #OUT_POLY001 == 2.3
+
+set #TUN_IN_FP1 = -0.1
+check #OUT_POLY001  == 1.7
+
+set #TUN_IN_FP1 = 2559.6
+check #OUT_POLY001 == 7680.7999999999
+
+set #TUN_IN_FP1 = -10000
+check #OUT_POLY001 == -29998.0
+
+endtest
+
+test AFB_POLY_2, AFB tests for AFB_POLY element
+schema AFB_POLY
+compatible MODULE_LM1SF00
+// 5 parameters
+set #TUN_IN_FP2 = 1
+check #OUT_POLY002  == 23.0
+
+set #TUN_IN_FP2 = 0
+check #OUT_POLY002  == 2.0
+
+set #TUN_IN_FP2 = -1
+check #OUT_POLY002  == 5.0
+
+set #TUN_IN_FP2 = -9.99
+check #OUT_POLY002  == 64209.42
+
+set #TUN_IN_FP2 = -0.09
+check #OUT_POLY002  == 1.76658526
+endtest
+
+test AFB_POLY_3, AFB tests for AFB_POLY element
+schema AFB_POLY
+compatible MODULE_LM1SF00
+// 7 parameters
+
+set #TUN_IN_FP3 = 1
+check #OUT_POLY003  == 7.95999956
+
+set #TUN_IN_FP3 = 0
+check #OUT_POLY003  == 0.1000000000
+
+set #TUN_IN_FP3 = -1
+check #OUT_POLY003  ==-5.05999994
+
+set #TUN_IN_FP3 = -0.1
+check #OUT_POLY003  == 0.245055392
+set #TUN_IN_FP3 = 0.1
+check #OUT_POLY003  == -0.021599598
+
+endtest
+
+test AFB_POLY_4, AFB tests for AFB_POLY element
+schema AFB_POLY
+compatible MODULE_LM1SF00
+// 9 parameters
+
+set #TUN_IN_FP4 = 0
+check #OUT_POLY004  == -1.200000047
+
+set #TUN_IN_FP4 = 1
+check #OUT_POLY004  == 8.58999931
+
+set #TUN_IN_FP4 = -1
+check #OUT_POLY004  == -25.58999979
+
+set #TUN_IN_FP4 = 0.1
+check #OUT_POLY004  == -0.87386372
+
+set #TUN_IN_FP4 = -0.1
+check #OUT_POLY004  == -1.527087514
+
+set #TUN_IN_FP4 = 2.5
+check #OUT_POLY004  == 585.42773437
+
+set #TUN_IN_FP4 = -2.5
+check #OUT_POLY004  == -20127.8666700
+
+
+endtest

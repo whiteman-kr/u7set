@@ -1,0 +1,33 @@
+test AFB_LIM_FP01, AFB tests for AFB_LIM_FP element
+schema AFB_LIM_FP
+compatible MODULE_LM1SF00
+set #TUN_IN_FP1 = 1, #TUN_IN_FP2 = 0, #TUN_IN_FP3 = 0
+check #OUT_LIM_FP01 == 0
+check #NAN_LIM_FP01 == 0
+check #OUT_MAX_LIM_FP01 ==  0
+check #OUT_MIN_LIM_FP01 == 0
+check #PARAM_ERR_LIM_FP01 == 1
+
+set #TUN_IN_FP1 = 1, #TUN_IN_FP2 = 1.1, #TUN_IN_FP3 = 1
+check #OUT_LIM_FP01 == 1
+check #NAN_LIM_FP01 == 0
+check #OUT_MAX_LIM_FP01 ==  0
+check #OUT_MIN_LIM_FP01 == 1
+check #PARAM_ERR_LIM_FP01 == 0
+
+set #TUN_IN_FP1 = 0.99, #TUN_IN_FP2 = 1.1, #TUN_IN_FP3 = 1
+check #OUT_LIM_FP01 == 1
+check #NAN_LIM_FP01 == 0
+check #OUT_MAX_LIM_FP01 ==  0
+check #OUT_MIN_LIM_FP01 == 1
+check #PARAM_ERR_LIM_FP01 == 0
+
+set #TUN_IN_FP1 = -1.1, #TUN_IN_FP2 = 0, #TUN_IN_FP3 = -1.5
+check #OUT_LIM_FP01 == -1.1
+check #NAN_LIM_FP01 == 0
+check #OUT_MAX_LIM_FP01 ==  0
+check #OUT_MIN_LIM_FP01 == 0
+check #PARAM_ERR_LIM_FP01 == 0
+
+
+endtest

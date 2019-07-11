@@ -1928,7 +1928,8 @@ namespace Builder
 		UalSignal* ualSignal = m_ualSignals.createConstSignal(ualItem,
 															  constSignalType,
 															  constAnalogFormat,
-															  outPin.guid());
+															  outPin.guid(),
+															  lmEquipmentID());
 		if (ualSignal == nullptr)
 		{
 			assert(false);
@@ -2017,7 +2018,7 @@ namespace Builder
 			case E::SignalType::Discrete:
 				if (s == nullptr)
 				{
-					ualSignal = m_ualSignals.createAutoSignal(ualItem, outPin.guid(), outAfbSignal);
+					ualSignal = m_ualSignals.createAutoSignal(ualItem, outPin.guid(), outAfbSignal, lmEquipmentID());
 				}
 				else
 				{

@@ -1,0 +1,15 @@
+test AFB_SIMLOCK1, AFB tests for AFB_SIMLOCK element
+schema AFB_SIMLOCK
+compatible MODULE_LM1SF00
+set #TUN_DSCR1 = 0 , #TUN_DSCR_SIM1 = 0 , #TUN_DSCR_BLOCK1 = 0
+check #OUT_SIMLOCK1 == 0
+
+set #TUN_DSCR1 = 1 , #TUN_DSCR_SIM1 = 0 , #TUN_DSCR_BLOCK1 = 0
+check #OUT_SIMLOCK1 == 1
+
+set #TUN_DSCR1 = 0 , #TUN_DSCR_SIM1 = 1 , #TUN_DSCR_BLOCK1 = 0
+check #OUT_SIMLOCK1 == 1
+
+set #TUN_DSCR1 = 0 , #TUN_DSCR_SIM1 = 0 , #TUN_DSCR_BLOCK1 = 1
+check #OUT_SIMLOCK1 == 0
+endtest

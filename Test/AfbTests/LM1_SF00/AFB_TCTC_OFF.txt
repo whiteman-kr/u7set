@@ -1,0 +1,105 @@
+test AFB_TCTC_OFF_1, AFB tests for TCTC_OFF element
+schema TCTC_OFF
+compatible MODULE_LM1SF00
+//time 1000
+set #TUN_DSCR1 = 0
+delay 1000
+check #OUT_TCTC_OFF1 == 0
+
+set #TUN_DSCR1 = 1
+delay 1000
+check #OUT_TCTC_OFF1 == 1
+
+set #TUN_DSCR1 = 1
+delay 1000
+check #OUT_TCTC_OFF1 == 1
+
+set #TUN_DSCR1 = 0
+delay 1000
+check #OUT_TCTC_OFF1 == 0
+
+set #TUN_DSCR1 = 0
+delay 500
+check #OUT_TCTC_OFF1 == 0
+
+set #TUN_DSCR1 = 1
+delay 500
+check #OUT_TCTC_OFF1 == 1
+set #TUN_DSCR1 = 1
+delay 100
+check #OUT_TCTC_OFF1 == 1
+
+set #TUN_DSCR1 = 1
+check #OUT_TCTC_OFF1 == 1
+
+endtest
+
+
+test AFB_TCTC_OFF_2, AFB tests for TCTC_OFF element
+schema TCTC_OFF
+compatible MODULE_LM1SF00
+//time 5000
+set #TUN_DSCR2 = 0
+delay 5000
+check #OUT_TCTC_OFF2 == 0
+
+set #TUN_DSCR2 = 1
+delay 5000
+check #OUT_TCTC_OFF2 == 1
+
+set #TUN_DSCR2 = 1
+delay 5000
+check #OUT_TCTC_OFF2 == 1
+
+set #TUN_DSCR2 = 0
+delay 5000
+check #OUT_TCTC_OFF2 == 0
+
+set #TUN_DSCR2 = 0
+delay 1000
+check #OUT_TCTC_OFF2 == 0
+
+set #TUN_DSCR2 = 0
+delay 100
+check #OUT_TCTC_OFF2 == 0
+
+set #TUN_DSCR2 = 0
+delay 10000
+check #OUT_TCTC_OFF2 == 0
+
+endtest
+
+test AFB_TCTC_OFF_3, AFB tests for TCTC_OFF element
+schema TCTC_OFF
+compatible MODULE_LM1SF00
+//time 10000
+set #TUN_DSCR3 = 0
+delay 10000
+set #TUN_DSCR3 = 1
+check #OUT_TCTC_OFF3 == 1
+
+set #TUN_DSCR3 = 1
+delay 10000
+check #OUT_TCTC_OFF3 == 1
+
+set #TUN_DSCR3 = 1
+delay 10000
+check #OUT_TCTC_OFF3 == 1
+
+set #TUN_DSCR3 = 0
+delay 10000
+check #OUT_TCTC_OFF3 == 0
+
+set #TUN_DSCR3 = 0
+delay 5000
+check #OUT_TCTC_OFF3 == 0
+
+set #TUN_DSCR3 = 0
+delay 1000
+check #OUT_TCTC_OFF3 == 0
+
+set #TUN_DSCR3 = 0
+delay 10
+check #OUT_TCTC_OFF3 == 0
+
+endtest

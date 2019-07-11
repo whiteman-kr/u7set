@@ -1,0 +1,87 @@
+test AFB_DAMP_FP, AFB tests for AFB_DAMP_FP element
+schema AFB_DAMP_FP
+compatible MODULE_LM1SF00
+set #TUN_IN_FP1 = 0, #TUN_DSCR1 = 0, #TUN_IN_SI1 = 0
+check #OUT_DAMP_FP1 == 0
+check #OVERFLOW_DAMP_FP1 == 0
+check #UNDERFLOW_DAMP_FP1 == 0
+check #ZERO_DAMP_FP1 == 0
+check #NAN_DAMP_FP1 == 0
+check #PARAM_ERR_DAMP_FP1 == 1
+
+set #TUN_IN_FP1 = 0, #TUN_DSCR1 = 0, #TUN_IN_SI1 = 2
+check #OUT_DAMP_FP1 == 0
+check #OVERFLOW_DAMP_FP1 == 0
+check #UNDERFLOW_DAMP_FP1 == 0
+check #ZERO_DAMP_FP1 == 0
+check #NAN_DAMP_FP1 == 0
+check #PARAM_ERR_DAMP_FP1 == 1
+
+set #TUN_IN_FP1 = 0, #TUN_DSCR1 = 0, #TUN_IN_SI1 = 5
+check #OUT_DAMP_FP1 == 0
+check #OVERFLOW_DAMP_FP1 == 0
+check #UNDERFLOW_DAMP_FP1 == 0
+check #ZERO_DAMP_FP1 == 1
+check #NAN_DAMP_FP1 == 0
+check #PARAM_ERR_DAMP_FP1 == 0
+
+set #TUN_IN_FP1 = 1, #TUN_DSCR1 = 1, #TUN_IN_SI1 = 100
+check #OUT_DAMP_FP1 == 1.0
+check #OVERFLOW_DAMP_FP1 == 0
+check #UNDERFLOW_DAMP_FP1 == 0
+check #ZERO_DAMP_FP1 == 0
+check #NAN_DAMP_FP1 == 0
+check #PARAM_ERR_DAMP_FP1 == 0
+
+set #TUN_IN_FP1 = 1.25, #TUN_DSCR1 = 1, #TUN_IN_SI1 = 5
+check #OUT_DAMP_FP1 == 1.25
+check #OVERFLOW_DAMP_FP1 == 0
+check #UNDERFLOW_DAMP_FP1 == 0
+check #ZERO_DAMP_FP1 == 0
+check #NAN_DAMP_FP1 == 0
+check #PARAM_ERR_DAMP_FP1 == 0
+
+set #TUN_IN_FP1 = 126.4, #TUN_DSCR1 = 1, #TUN_IN_SI1 = 10
+check #OUT_DAMP_FP1 == 126.4
+check #OVERFLOW_DAMP_FP1 == 0
+check #UNDERFLOW_DAMP_FP1 == 0
+check #ZERO_DAMP_FP1 == 0
+check #NAN_DAMP_FP1 == 0
+check #PARAM_ERR_DAMP_FP1 == 0 
+
+set #TUN_IN_FP1 = 126.4, #TUN_DSCR1 = 0, #TUN_IN_SI1 = 10
+check #OUT_DAMP_FP1 == 126.4
+check #OVERFLOW_DAMP_FP1 == 0
+check #UNDERFLOW_DAMP_FP1 == 0
+check #ZERO_DAMP_FP1 == 0
+check #NAN_DAMP_FP1 == 0
+check #PARAM_ERR_DAMP_FP1 == 0 
+
+set #TUN_IN_FP1 = 2147483647.0, #TUN_DSCR1 = 0, #TUN_IN_SI1 = 10
+check #OUT_DAMP_FP1 == 2147483647.0
+check #OVERFLOW_DAMP_FP1 == 0
+check #UNDERFLOW_DAMP_FP1 == 0
+check #ZERO_DAMP_FP1 == 0
+check #NAN_DAMP_FP1 == 0
+check #PARAM_ERR_DAMP_FP1 == 0 
+
+set #TUN_IN_FP1 = 2147483648.0, #TUN_DSCR1 = 0, #TUN_IN_SI1 = 10
+check #OUT_DAMP_FP1 == 2147483648.0
+check #OVERFLOW_DAMP_FP1 == 0
+check #UNDERFLOW_DAMP_FP1 == 0
+check #ZERO_DAMP_FP1 == 0
+check #NAN_DAMP_FP1 == 0
+check #PARAM_ERR_DAMP_FP1 == 0 
+
+set #TUN_IN_FP1 = -100.9, #TUN_DSCR1 = 0, #TUN_IN_SI1 = 10
+check #OUT_DAMP_FP1 == -100.9
+check #OVERFLOW_DAMP_FP1 == 0
+check #UNDERFLOW_DAMP_FP1 == 0
+check #ZERO_DAMP_FP1 == 0
+check #NAN_DAMP_FP1 == 0
+check #PARAM_ERR_DAMP_FP1 == 0 
+
+
+
+endtest
+

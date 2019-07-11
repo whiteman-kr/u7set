@@ -1,0 +1,91 @@
+test AFB_CNT_UP1, AFB tests for AFB_CNT_UP element
+schema AFB_CNT_UP
+compatible MODULE_LM1SF00
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =1
+check #OUT_CNT_UP1 == 0
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 0
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 1
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 1
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 2
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 2
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 3
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 3
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 4
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 4
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 5
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 5
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 6
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 6
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 7
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 7
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 8
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 8
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 9
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 9
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 10
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 10
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 11
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 11
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 12
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 12
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 13
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 13
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 14
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 14
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 15
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 15
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 16
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 16
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 17
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 17
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 18
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 18
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 19
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 19
+set #TUN_DSCR1 = 1, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 20
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0
+check #OUT_CNT_UP1 == 20
+set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =1
+check #OUT_CNT_UP1 == 0
+
+endtest

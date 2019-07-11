@@ -63,15 +63,11 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	m_tcpClient->setInstanceId(theSettings.instanceStrId());
 	m_tcpClient->setRequestInterval(theSettings.m_requestInterval);
 
-#ifdef Q_DEBUG
-
 	if (theSettings.m_simulationMode == true)
 	{
 		QMessageBox::warning(this, qAppName(), tr("Warning! TuningClient is running in debugging simulation mode!"));
+		m_tcpClient->setSimulationMode(theSettings.m_simulationMode);	// For debugging
 	}
-
-	m_tcpClient->setSimulationMode(theSettings.m_simulationMode);	// For debugging
-#endif
 
 	m_tcpClientThread = new SimpleThread(m_tcpClient);
 	m_tcpClientThread->start();

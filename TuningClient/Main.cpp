@@ -158,12 +158,13 @@ int main(int argc, char* argv[])
 	QCommandLineOption idOption("id", "Set the TuningClient ID.", "TuningClient ID");
 	parser.addOption(idOption);
 
-#ifdef Q_DEBUG
 	// A boolean option with simulation (-simulate)
 
 	QCommandLineOption simulationOption("simulate", "Simulate signals values");
-	parser.addOption(simulationOption);
-#endif
+	if (theSettings.m_enableSimulation == true)
+	{
+		parser.addOption(simulationOption);
+	}
 
 	parser.process(*qApp);
 
@@ -174,9 +175,10 @@ int main(int argc, char* argv[])
 	    theSettings.setInstanceStrId(clientID);
 	}
 
-#ifdef Q_DEBUG
-	theSettings.m_simulationMode = parser.isSet(simulationOption);
-#endif
+	if (theSettings.m_enableSimulation == true)
+	{
+		theSettings.m_simulationMode = parser.isSet(simulationOption);
+	}
 
 	//
 	//

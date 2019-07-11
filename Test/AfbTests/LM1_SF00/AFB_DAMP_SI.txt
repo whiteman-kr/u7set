@@ -1,0 +1,49 @@
+test AFB_DAMP_SI, AFB tests for AFB_DAMP_SI element
+schema AFB_DAMP_SI
+compatible MODULE_LM1SF00
+set #TUN_IN_SI1 = 0, #TUN_DSCR1 = 0, #TUN_IN_SI2 = 0
+check #OUT_DAMP_SI1 == 0 
+check #OUT_ZERO_DAMP_SI ==0 
+check #OUT_PARAM_ERR_DAMP_SI1 == 1
+
+set #TUN_IN_SI1 = 5, #TUN_DSCR1 = 0, #TUN_IN_SI2 = 5
+check #OUT_DAMP_SI1 == 5 
+check #OUT_ZERO_DAMP_SI ==0 
+check #OUT_PARAM_ERR_DAMP_SI1 == 0
+
+set #TUN_IN_SI1 = 4, #TUN_DSCR1 = 0, #TUN_IN_SI2 = 4
+check #OUT_DAMP_SI1 == 4 
+check #OUT_ZERO_DAMP_SI ==0 
+check #OUT_PARAM_ERR_DAMP_SI1 == 1
+
+set #TUN_IN_SI1 = 5, #TUN_DSCR1 = 1, #TUN_IN_SI2 = 5
+check #OUT_DAMP_SI1 == 5 
+check #OUT_ZERO_DAMP_SI ==0 
+check #OUT_PARAM_ERR_DAMP_SI1 == 0
+
+set #TUN_IN_SI1 = 256, #TUN_DSCR1 = 0, #TUN_IN_SI2 = 5
+check #OUT_DAMP_SI1 == 256 
+check #OUT_ZERO_DAMP_SI ==0 
+check #OUT_PARAM_ERR_DAMP_SI1 == 0
+
+set #TUN_IN_SI1 = 256, #TUN_DSCR1 = 1, #TUN_IN_SI2 = 5
+check #OUT_DAMP_SI1 == 256 
+check #OUT_ZERO_DAMP_SI ==0 
+check #OUT_PARAM_ERR_DAMP_SI1 == 0
+
+set #TUN_IN_SI1 = 256, #TUN_DSCR1 = 0, #TUN_IN_SI2 = 100
+check #OUT_DAMP_SI1 == 256 
+check #OUT_ZERO_DAMP_SI ==0 
+check #OUT_PARAM_ERR_DAMP_SI1 == 0
+
+set #TUN_IN_SI1 = 256, #TUN_DSCR1 = 1, #TUN_IN_SI2 = 100
+check #OUT_DAMP_SI1 == 256 
+check #OUT_ZERO_DAMP_SI ==0 
+check #OUT_PARAM_ERR_DAMP_SI1 == 0
+
+set #TUN_IN_SI1 = 101100011, #TUN_DSCR1 = 1, #TUN_IN_SI2 = 5
+check #OUT_DAMP_SI1 == 101100011 
+check #OUT_ZERO_DAMP_SI ==0 
+check #OUT_PARAM_ERR_DAMP_SI1 == 0
+
+endtest

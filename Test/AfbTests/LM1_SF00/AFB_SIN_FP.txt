@@ -1,0 +1,5 @@
+test AFB_SIN_FP, AFB tests for AFB_SIN_FP element
+schema AFB_SIN_FP
+compatible MODULE_LM1SF00
+set #TUN_IN_FP1 = 0
+check #OUT_ABS_SI001  == 0
