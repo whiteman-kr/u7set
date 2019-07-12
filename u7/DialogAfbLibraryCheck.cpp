@@ -73,7 +73,7 @@ DialogAfbLibraryCheck::DialogAfbLibraryCheck(DbController* db, QWidget* parent)
 
 	m_afbComponentTreeWidget->setSortingEnabled(true);
 
-	QLabel* l = new QLabel(tr("Components"));
+	QLabel* l = new QLabel(tr("AFB Components"));
 	topLayout->addWidget(l);
 
 	topLayout->addWidget(m_afbComponentTreeWidget, 1);
@@ -84,7 +84,7 @@ DialogAfbLibraryCheck::DialogAfbLibraryCheck(DbController* db, QWidget* parent)
 	QVBoxLayout* bottomLayout = new QVBoxLayout(bottomWidget);
 	bottomLayout->setContentsMargins(0, 0, 0, 0);
 
-	l = new QLabel(tr("AFB Elements"));
+	l = new QLabel(tr("AFB Items"));
 	bottomLayout->addWidget(l);
 
 	m_afbElementTreeWidget = new QTreeWidget(this);
