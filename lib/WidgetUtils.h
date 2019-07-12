@@ -30,6 +30,7 @@ public:
 	int getColumnWidth(int index);
 
 	void showColumn(int index, bool visible = true);
+	void relocateAllColumns();
 
 public slots:
 	void saveColumnWidth(int index);
@@ -41,6 +42,7 @@ private:
 	QStringList m_columnNameList;
 	QString m_settingBranchName;
 	QVector<int> m_defaultVisibleColumnSet;
+	bool m_showAllDefaultColumns;
 };
 
 class EditColumnsVisibilityDialog : public QDialog

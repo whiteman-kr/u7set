@@ -2397,6 +2397,8 @@ void SignalsTabPage::projectOpened()
 
 void SignalsTabPage::projectClosed()
 {
+	m_signalsColumnVisibilityController->saveAllHeaderGeomery();
+
 	this->setEnabled(false);
 
 	m_signalsModel->clearSignals();

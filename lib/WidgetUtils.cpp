@@ -70,67 +70,17 @@ TableDataVisibilityController::TableDataVisibilityController(QTableView* parent,
 	QObject(parent->horizontalHeader()),
 	m_tableView(parent),
 	m_settingBranchName(settingsBranchName),
-	m_defaultVisibleColumnSet(defaultVisibleColumnSet)
+	m_defaultVisibleColumnSet(defaultVisibleColumnSet),
+	m_showAllDefaultColumns(showAllDefaultColumns)
 {
 	connect(parent, &QObject::destroyed, this, &TableDataVisibilityController::saveAllHeaderGeomery, Qt::DirectConnection);
 
-	auto* model = m_tableView->model();
-	int columnCount = model->columnCount();
-	m_columnNameList.reserve(columnCount);
-	for (int i = 0; i < columnCount; i++)
-	{
-		m_columnNameList.push_back(model->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString());
-	}
-
-	QMap<int, int> positionMap;
-	QSettings settings;
 	QHeaderView* horizontalHeader = m_tableView->horizontalHeader();
 
 	horizontalHeader->setContextMenuPolicy(Qt::ActionsContextMenu);
 	horizontalHeader->setSectionsMovable(true);
 
-	// Use only on first time
-	//
-	int positionForUnknownColumns = defaultVisibleColumnSet.count();
-
-	for (int i = 0; i < columnCount; i++)
-	{
-		QString columnName = QString("%1").arg(m_columnNameList[i].replace("/", "|")).replace("\n", " ");
-		int columnWidth = settings.value(m_settingBranchName + "/ColumnWidth/" + columnName, -1).toInt();
-		if (columnWidth == -1)
-		{
-			m_tableView->resizeColumnToContents(i);
-		}
-		else
-		{
-			m_tableView->setColumnWidth(i, columnWidth);
-		}
-
-		bool visible = defaultVisibleColumnSet.contains(i);
-		if (showAllDefaultColumns == false)
-		{
-			visible = settings.value(m_settingBranchName + "/ColumnVisibility/" + columnName, visible).toBool();
-		}
-		horizontalHeader->setSectionHidden(i, !visible);
-
-		int position = settings.value(m_settingBranchName + "/ColumnPosition/" + columnName, -1).toInt();
-		if (position == -1)
-		{
-			position = defaultVisibleColumnSet.indexOf(i);
-		}
-		if (position == -1)
-		{
-			position = positionForUnknownColumns++;
-		}
-		positionMap.insert(position, i);
-	}
-
-	for (int i = 0; i < columnCount; i++)
-	{
-		int logicalIndex = positionMap[i];
-		int oldVisualIndex = horizontalHeader->visualIndex(logicalIndex);
-		horizontalHeader->moveSection(oldVisualIndex, i);
-	}
+	checkNewColumns();
 
 	QAction* columnsAction = new QAction("Rearrange columns", m_tableView);
 	connect(columnsAction, &QAction::triggered, this, &TableDataVisibilityController::editColumnsVisibilityAndOrder);
@@ -152,7 +102,8 @@ void TableDataVisibilityController::editColumnsVisibilityAndOrder()
 
 	dlg.exec();
 
-	saveWindowPosition(&dlg, m_settingBranchName + "/ColumnsVisibilityDialog");
+	saveWindowPosition(&dlg, m_settingBranchName + "ColumnsVisibilityDialog");
+	saveAllHeaderGeomery();
 }
 
 void TableDataVisibilityController::saveColumnWidth(int index)
@@ -169,6 +120,10 @@ void TableDataVisibilityController::saveColumnWidth(int index)
 
 void TableDataVisibilityController::saveAllHeaderGeomery()
 {
+	if (m_tableView->isEnabled() == false)
+	{
+		return;
+	}
 	auto header = m_tableView->horizontalHeader();
 	int columnCount = m_columnNameList.count();
 	for (int i = 0; i < columnCount; i++)
@@ -179,6 +134,7 @@ void TableDataVisibilityController::saveAllHeaderGeomery()
 			saveColumnWidth(i);
 		}
 		saveColumnVisibility(i, visible);
+
 		saveColumnPosition(i, header->visualIndex(i));
 	}
 }
@@ -195,17 +151,22 @@ void TableDataVisibilityController::checkNewColumns()
 		return;
 	}
 
-	QMap<int, int> positionMap;
 	QSettings settings;
 	QHeaderView* horizontalHeader = m_tableView->horizontalHeader();
 
+	m_columnNameList.clear();
 	m_columnNameList.reserve(newColumnCount);
 
-	for (int i = columnCount; i < newColumnCount; i++)
+	for (int i = 0; i < newColumnCount; i++)
 	{
-		m_columnNameList.push_back(model->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString());
+		QString columnName = model->headerData(i, Qt::Horizontal, Qt::DisplayRole).toString();
+		if (m_columnNameList.contains(columnName))
+		{
+			assert(false);	// Columns should be named differently
+		}
+		m_columnNameList.push_back(columnName);
 
-		QString columnName = QString("%1").arg(m_columnNameList[i].replace("/", "|")).replace("\n", " ");
+		columnName = columnName.replace("/", "|").replace("\n", " ");
 		int columnWidth = settings.value(m_settingBranchName + "/ColumnWidth/" + columnName, -1).toInt();
 		if (columnWidth == -1)
 		{
@@ -216,26 +177,15 @@ void TableDataVisibilityController::checkNewColumns()
 			m_tableView->setColumnWidth(i, columnWidth);
 		}
 
-		horizontalHeader->setSectionHidden(i, !settings.value(m_settingBranchName + "/ColumnVisibility/" + columnName, m_defaultVisibleColumnSet.contains(i)).toBool());
-
-		int position = settings.value(m_settingBranchName + "/ColumnPosition/" + columnName, -1).toInt();
-		if (position == -1)
+		bool visible = m_defaultVisibleColumnSet.contains(i);
+		if (m_showAllDefaultColumns == false)
 		{
-			position = m_defaultVisibleColumnSet.indexOf(i);
+			visible = settings.value(m_settingBranchName + "/ColumnVisibility/" + columnName, visible).toBool();
 		}
-		if (position == -1)
-		{
-			position = i;
-		}
-		positionMap.insert(position, i);
+		horizontalHeader->setSectionHidden(i, !visible);
 	}
 
-	for (int i = columnCount; i < newColumnCount; i++)
-	{
-		int logicalIndex = positionMap[i];
-		int oldVisualIndex = horizontalHeader->visualIndex(logicalIndex);
-		horizontalHeader->moveSection(oldVisualIndex, i);
-	}
+	relocateAllColumns();
 }
 
 void TableDataVisibilityController::saveColumnVisibility(int index, bool visible)
@@ -274,6 +224,35 @@ int TableDataVisibilityController::getColumnWidth(int index)
 void TableDataVisibilityController::showColumn(int index, bool visible)
 {
 	m_tableView->horizontalHeader()->setSectionHidden(index, !visible);
+}
+
+void TableDataVisibilityController::relocateAllColumns()
+{
+	QSettings settings;
+	QHeaderView* horizontalHeader = m_tableView->horizontalHeader();
+	std::vector<std::pair<int, int>> index2position;
+
+	for (int i = 0; i < m_columnNameList.count(); i++)
+	{
+		QString columnName = QString("%1").arg(m_columnNameList[i].replace("/", "|")).replace("\n", " ");
+		int position = settings.value(m_settingBranchName + "/ColumnPosition/" + columnName, -1).toInt();
+		if (position == -1)
+		{
+			continue;
+		}
+		index2position.push_back(std::make_pair(i, position));
+	}
+
+	std::sort(index2position.begin(), index2position.end(), [](std::pair<int, int> v1, std::pair<int, int> v2){ return v1.second < v2.second; });
+
+	for (size_t i = 0; i < index2position.size(); i++)
+	{
+		auto i2p = index2position[i];
+		int oldVisualIndex = horizontalHeader->visualIndex(i2p.first);
+		int newVisualIndex = i2p.second;
+
+		horizontalHeader->moveSection(oldVisualIndex, newVisualIndex);
+	}
 }
 
 EditColumnsVisibilityDialog::EditColumnsVisibilityDialog(QTableView* tableView, TableDataVisibilityController* controller) :
