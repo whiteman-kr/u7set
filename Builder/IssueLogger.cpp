@@ -2560,7 +2560,8 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:		Receiver must have the only AppSignalID per channel, LogicSchemaID: %1, Receiver Item: %2, ConnectionID: %3, EquipmentID %4.
+	/// Title:		Connection in singlechannel schema usage must have one ConnectionID for multichannel case it must have the same number of ConnectionIDs as logic schema.
+	/// must have the only AppSignalID per channel, LogicSchemaID: %1, Receiver Item: %2, ConnectionID: %3, EquipmentID %4.
 	///
 	/// Parameters:
 	///		%1 Logic Schema ID
@@ -2582,6 +2583,55 @@ namespace Builder
 						.arg(schemaItem)
 						.arg(connectionId)
 						.arg(equipmentsId));
+	}
+
+	/// IssueCode: ALP4153
+	///
+	/// IssueType: Error
+	///
+	///
+	/// Title:		Multichannel transmitter/receiver must have the same number of ConnectionIDs as schema's channel number (number of schema's EquipmentIDs), LogicSchema %2, SchemaItem %3.
+	///
+	/// Parameters:
+	///		%1 Logic Schema ID
+	///		%2 Transmitter item description
+	///
+	/// Description:
+	///		Multichannel transmitter/receiver must have the same number of ConnectionIDs as schema's channel number (number of schema's EquipmentIDs).
+	///
+	void IssueLogger::errALP4153(QString schema, QString schemaItem, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4153, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4153,
+				  QString(tr("Multichannel transmitter/receiver must have the same number of ConnectionIDs as schema's channel number (number of schema's EquipmentIDs), LogicSchema %2, SchemaItem %3.")
+						.arg(schema)
+						.arg(schemaItem)));
+	}
+
+	/// IssueCode: ALP4154
+	///
+	/// IssueType: Error
+	///
+	/// Title:		Property ConnectionID is empty (LogicSchema %1, SchemaItem %2).
+	///
+	/// Parameters:
+	///		%1 Logic Schema ID
+	///		%2 Receiver item description
+	///
+	/// Description:
+	///		Property ConnectionID for Receiver/Transmitter must not be empty.
+	///
+	void IssueLogger::errALP4154(QString schema, QString schemaItem, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4154, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4154,
+				  QString(tr("Property ConnectionID for is empty, for Receiver/Transmitter it must not be empty (LogicSchema %1, SchemaItem %2).")
+						.arg(schema)
+						.arg(schemaItem)));
 	}
 
 

@@ -4034,39 +4034,52 @@ namespace Builder
 				}
 			}
 
-			// Filter connections
+			// Filter Receiver connections
 			//
 			if (VFrame30::SchemaItemConnection* connectionItem = dynamic_cast<VFrame30::SchemaItemConnection*>(item.get());
 				connectionItem != nullptr)
 			{
-				VFrame30::SchemaItemReceiver* receiverItem = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
-
 				const QStringList& connectionIds = connectionItem->connectionIdsAsList();
 
-				QStringList receiverAppSignalIds;
-				if (receiverItem != nullptr)
+				if (connectionIds.isEmpty() == true)
 				{
-					receiverAppSignalIds = receiverItem->appSignalIdsAsList();
+					// Property ConnectionID for Receiver/Transmitter must not be empty.
+					//
+					result = false;
+					m_log->errALP4154(schema->schemaId(), connectionItem->buildName(), connectionItem->guid());
+					continue;
 				}
+			}
+
+
+			// Filter connections
+			//
+			if (VFrame30::SchemaItemReceiver* receiverItem = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
+				receiverItem != nullptr)
+			{
+				const QStringList& connectionIds = receiverItem->connectionIdsAsList();
+				const QStringList& receiverAppSignalIds = receiverItem->appSignalIdsAsList();
 
 				if (connectionIds.size() == 1)
 				{
-					// If it's receiver and has more then one appsignalid then error
+					// If it's singlechannel receiver and has more then one appsignalid then error
 					//
-					if (receiverItem != nullptr && receiverAppSignalIds.size() != 1)
+					if (receiverAppSignalIds.size() != 1)
 					{
 						result = false;
 						m_log->errALP4152(schema->schemaId(), receiverItem->buildName(), receiverItem->connectionIds(), equipmentId, receiverItem->guid());
+						continue;
 					}
 
+					// The next code is for multichannel receiver, so just do @continue@ to next item
+					//
 					continue;
 				}
 
 				// Check if this is receiver in multichannel schema, then it must have the same numbers of conntion ids and
 				// appsignal ids
 				//
-				if (receiverItem != nullptr &&
-					(connectionIds.size() != schema->channelCount() || receiverAppSignalIds.size() != schema->channelCount()))
+				if (connectionIds.size() != schema->channelCount() || receiverAppSignalIds.size() != schema->channelCount())
 				{
 					result = false;
 					m_log->errALP4131(schema->schemaId(), receiverItem->buildName(), receiverItem->guid());
@@ -4075,6 +4088,13 @@ namespace Builder
 
 				// Get correct ConnectionID
 				//
+				if (equipmentIdIndex >= connectionIds.size())
+				{
+					result = false;
+					m_log->errINT1001(tr("equipmentIdIndex >= connectionIds.size() for receiver %1").arg(receiverItem->buildName()), schema->schemaId(), receiverItem->guid());
+					continue;
+				}
+
 				QString connectionId = connectionIds[equipmentIdIndex];
 
 				if (bool accessible = m_opticModuleStorage->isConnectionAccessible(equipmentId, connectionId);
@@ -4083,16 +4103,57 @@ namespace Builder
 					// Connection id is not accessible from LMs
 					//
 					result = false;
-					m_log->errALP4150(schema->schemaId(), connectionItem->buildName(), connectionId, equipmentId, connectionItem->guid());
+					m_log->errALP4150(schema->schemaId(), receiverItem->buildName(), connectionId, equipmentId, receiverItem->guid());
 					continue;
 				}
 
-				connectionItem->setConnectionIds(connectionId);
+				receiverItem->setConnectionIds(connectionId);
+				receiverItem->setAppSignalIds(receiverAppSignalIds[equipmentIdIndex]);
 
-				if (receiverItem != nullptr)
+				continue;
+			}
+
+			if (VFrame30::SchemaItemTransmitter* transmitterItem = dynamic_cast<VFrame30::SchemaItemTransmitter*>(item.get());
+				transmitterItem != nullptr)
+			{
+				const QStringList& connectionIds = transmitterItem->connectionIdsAsList();
+
+				if (connectionIds.size() == 1)
 				{
-					receiverItem->setAppSignalIds(receiverAppSignalIds[equipmentIdIndex]);
+					// The next code is for multichannel transmitter, so just make @continue@ to next item
+					//
+					continue;
 				}
+
+				// Check if this is transmitter in multichannel schema, then it must have the same numbers of connection ids
+				//
+				if (connectionIds.size() != schema->channelCount())
+				{
+					result = false;
+					m_log->errALP4153(schema->schemaId(), transmitterItem->buildName(), transmitterItem->guid());
+					continue;
+				}
+
+				if (equipmentIdIndex >= connectionIds.size())
+				{
+					result = false;
+					m_log->errINT1001(tr("equipmentIdIndex >= connectionIds.size() for transmitter %1").arg(transmitterItem->buildName()), schema->schemaId(), transmitterItem->guid());
+					continue;
+				}
+
+				QString connectionId = connectionIds[equipmentIdIndex];
+
+				if (bool accessible = m_opticModuleStorage->isConnectionAccessible(equipmentId, connectionId);
+					accessible == false)
+				{
+					// Connection id is not accessible from this LMs
+					//
+					result = false;
+					m_log->errALP4150(schema->schemaId(), transmitterItem->buildName(), connectionId, equipmentId, transmitterItem->guid());
+					continue;
+				}
+
+				transmitterItem->setConnectionIds(connectionId);
 
 				continue;
 			}
