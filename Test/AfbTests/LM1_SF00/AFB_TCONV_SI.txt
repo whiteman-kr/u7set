@@ -1,0 +1,43 @@
+test AFB_TCONV_SI1, AFB tests for AFB_TCONV_SI element
+schema AFB_TCONV_SI
+compatible MODULE_LM1SF00
+
+set #TUN_IN_SI1 = 0
+check #OUT_TCONV_SI_FP1  == 0.0
+set #TUN_IN_SI1 = 1
+check #OUT_TCONV_SI_FP1  == 1.0
+set #TUN_IN_SI1 = 25
+check #OUT_TCONV_SI_FP1  == 25.0
+set #TUN_IN_SI1 = 215
+check #OUT_TCONV_SI_FP1  == 215.0
+set #TUN_IN_SI1 = 999
+check #OUT_TCONV_SI_FP1  == 999.0
+set #TUN_IN_SI1 = 256
+check #OUT_TCONV_SI_FP1  == 256.0
+set #TUN_IN_SI1 = 131072
+check #OUT_TCONV_SI_FP1  == 131072.0
+set #TUN_IN_SI1 = -131072
+check #OUT_TCONV_SI_FP1  == -131072.0
+set #TUN_IN_SI1 = -1
+check #OUT_TCONV_SI_FP1  == -1.0
+set #TUN_IN_SI1 = 21474
+check #OUT_TCONV_SI_FP1  == 21474.0
+set #TUN_IN_SI1 = 0
+check #OUT_TCONV_SI_FP1  == 0.0
+
+set #TUN_IN_SI1 = 2147483647
+check #OUT_TCONV_SI_FP1  == 2147483600.0
+
+set #TUN_IN_SI1 = -2147483648
+check #OUT_TCONV_SI_FP1  == -2147483648.0
+
+set #TUN_IN_SI1 = 2147483646
+check #OUT_TCONV_SI_FP1  == 2147483646.0
+
+set #TUN_IN_SI1 = 2147483640
+check #OUT_TCONV_SI_FP1  == 2147483640.0
+
+set #TUN_IN_SI1 = 2147483647
+check #OUT_TCONV_SI_FP1  == 2147483648.0
+
+endtest

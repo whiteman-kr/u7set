@@ -1,0 +1,49 @@
+test AFB_ADD_FP, AFB tests for AFB_ADD_FP element
+schema AFB_ADD_FP
+compatible MODULE_LM1SF00
+
+set #TUN_IN_FP1 = 1.2 , #TUN_IN_FP2 = 2.4
+check #OUT_ADD_FP001 == 3.6
+
+
+set #TUN_IN_FP1 = 1200.25 , #TUN_IN_FP2 = 6880.6
+check #OUT_ADD_FP001 == 8080.85
+
+set #TUN_IN_FP1 = -17000.01 , #TUN_IN_FP2 = 28.5628
+check #OUT_ADD_FP001 == -16971.4472
+
+set #TUN_IN_FP1 = 1 , #TUN_IN_FP2 = -1
+check #OUT_ADD_FP001 == 0
+check #OUT_ZERO_ADD_FP001 == 1
+
+set #TUN_IN_FP1 = 1.0 , #TUN_IN_FP2 = 0
+check #OUT_ADD_FP001 == 1
+
+set #TUN_IN_FP1 = 0 , #TUN_IN_FP2 = 1.0
+check #OUT_ADD_FP001 == 1
+
+set #TUN_IN_FP1 = 0 , #TUN_IN_FP2 = 0
+check #OUT_ADD_FP001 == 0
+check #OUT_ZERO_ADD_FP001 == 1
+
+set #TUN_IN_FP1 = -150, #TUN_IN_FP2 = 150
+check #OUT_ADD_FP001 == 0
+check #OUT_ZERO_ADD_FP001 == 1
+
+set #TUN_IN_FP1 = 0 , #TUN_IN_FP2 = 0
+check #OUT_ADD_FP001 == 0
+check #OUT_ZERO_ADD_FP001 == 1
+
+// set #TUN_IN_FP1 = NAN , #TUN_IN_FP2 = NAN
+// check #OUT_NAN_ADD_FP001 = 1
+
+// set #TUN_IN_FP1 = ±∞ , #TUN_IN_FP2 = ±∞  // верно задать значения
+// check #OUT_ADD_FP001 = число
+// check #OVERFLOW_ADD_FP001 =1
+// set #TUN_IN_FP1 =  ? , #TUN_IN_FP2 = ?  // узнать диапазон
+// check #OUT_ADD_FP001 = число
+// check #UNDERFLOW_ADD_FP001 =1
+// set #TUN_IN_FP1 = NAN , #TUN_IN_FP2 = NAN
+// check #OUT_NAN_ADD_FP001 = 1
+endtest
+

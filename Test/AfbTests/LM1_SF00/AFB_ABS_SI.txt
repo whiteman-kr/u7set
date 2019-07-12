@@ -1,0 +1,23 @@
+test AFB_ABS_SI, AFB tests for AFB_ABS_SI element
+schema AFB_ABS_SI
+compatible MODULE_LM1SF00
+
+set #TUN_IN_FP1 = 0
+check #OUT_ABS_SI001  == 0
+set #TUN_IN_SI1 = 1
+check #OUT_ABS_SI001  == 1
+set #TUN_IN_SI1 = 2
+check #OUT_ABS_SI001  == 2
+set #TUN_IN_SI1 = 9
+check #OUT_ABS_SI001  == 9
+set #TUN_IN_FP1 = -1
+
+check #OUT_ABS_SI001  == 1 
+set #TUN_IN_FP1 =-1545
+check #OUT_ABS_SI001  == 1545
+set #TUN_IN_FP1 = 0
+check #OUT_ABS_SI001  == 0
+set #TUN_IN_FP1 = -100
+check #OUT_ABS_SI001  == 100
+
+endtest

@@ -1,0 +1,114 @@
+test AFB_DIV_FP, AFB tests for AFB_DIV_FP element
+schema AFB_DIV_FP
+compatible MODULE_LM1SF00
+
+//
+set #TUN_IN_FP1 = 0, #TUN_IN_FP2 = 0, #TUN_IN_CTRL1 = 0
+check #OUT_DIV_FP001 == nan
+check #OUT_NAN_DIV_FP001 == 1
+check #OUT_DIV_BY_ZERO_DIV_FP001 == 0
+//
+set #TUN_IN_FP1 = 1, #TUN_IN_FP2 = 0, #TUN_IN_CTRL1 = 1
+check #OUT_DIV_FP001 == nan
+check #OUT_NAN_DIV_FP001 == 1
+check #OUT_DIV_BY_ZERO_DIV_FP001 == 0
+//
+set #TUN_IN_FP1 = 999.85, #TUN_IN_FP2 = 255, #TUN_IN_CTRL1 = 0
+check #OUT_DIV_FP001 == 3.92
+check #OUT_NAN_DIV_FP001 == 0
+check #OUT_DIV_BY_ZERO_DIV_FP001 == 0
+//
+set #TUN_IN_FP1 = 5.6, #TUN_IN_FP2 = 2, #TUN_IN_CTRL1 = 0
+check #OUT_DIV_FP001 == 2.8
+check #OUT_NAN_DIV_FP001 == 0
+check #OUT_DIV_BY_ZERO_DIV_FP001 == 0
+//
+set #TUN_IN_FP1 = 4, #TUN_IN_FP2 = 2 , #TUN_IN_CTRL1 = 1
+check #OUT_DIV_FP001 == 0
+check #OUT_NAN_DIV_FP001 == 0
+check #OUT_DIV_BY_ZERO_DIV_FP001 == 0
+check #OVERFLOW_DIV_FP001 == 0
+check #UNDERFLOW_DIV_FP001 == 0
+check #OUT_ZERO_DIV_FP001 ==1
+
+//
+set #TUN_IN_FP1 = 278972752, #TUN_IN_FP2 = 0, #TUN_IN_CTRL1 = 1
+check #OUT_DIV_FP001 == nan
+check #OUT_NAN_DIV_FP001 == 1
+check #OUT_DIV_BY_ZERO_DIV_FP001 == 0
+check #OVERFLOW_DIV_FP001 == 0
+check #UNDERFLOW_DIV_FP001 == 0
+check #OUT_ZERO_DIV_FP001 ==0
+
+//
+set #TUN_IN_FP1 = 4, #TUN_IN_FP2 = 0, #TUN_IN_CTRL1 = 0
+check #OUT_DIV_FP001 == inf
+check #OUT_NAN_DIV_FP001 == 0
+check #OUT_DIV_BY_ZERO_DIV_FP001 == 1
+check #OVERFLOW_DIV_FP001 == 0
+check #UNDERFLOW_DIV_FP001 == 0
+check #OUT_ZERO_DIV_FP001 ==0
+
+//
+set #TUN_IN_FP1 = 5.6, #TUN_IN_FP2 = 0
+check #OUT_DIV_FP001 == inf
+check #OUT_NAN_DIV_FP001 == 0
+check #OUT_DIV_BY_ZERO_DIV_FP001 == 1
+check #OVERFLOW_DIV_FP001 == 0
+check #UNDERFLOW_DIV_FP001 == 0
+check #OUT_ZERO_DIV_FP001 ==0
+
+//
+set #TUN_IN_FP1 = 66.5 , #TUN_IN_FP2 = 4.7
+check #OUT_DIV_FP001 == 14.1489 // уточнить сколько знаков после запятой выводить
+check #OUT_NAN_DIV_FP001 == 0
+check #OUT_DIV_BY_ZERO_DIV_FP001 == 0
+check #OVERFLOW_DIV_FP001 == 0
+check #UNDERFLOW_DIV_FP001 == 0
+check #OUT_ZERO_DIV_FP001 ==0
+//
+set #TUN_IN_FP1 = 0 , #TUN_IN_FP2 = 12.37
+check #OUT_DIV_FP001 == 0
+check #OUT_NAN_DIV_FP001 == 0
+check #OUT_DIV_BY_ZERO_DIV_FP001 == 0
+check #OVERFLOW_DIV_FP001 == 0
+check #UNDERFLOW_DIV_FP001 == 0
+check #OUT_ZERO_DIV_FP001 ==1
+//
+set #TUN_IN_FP1 = 0 , #TUN_IN_FP2 = 12.37
+check #OUT_DIV_FP001 == 0
+check #OUT_NAN_DIV_FP001 == 0
+check #OUT_DIV_BY_ZERO_DIV_FP001 == 0
+check #OVERFLOW_DIV_FP001 == 0
+check #UNDERFLOW_DIV_FP001 == 0
+check #OUT_ZERO_DIV_FP001 ==1
+//
+set #TUN_IN_FP1 = 123.6 , #TUN_IN_FP2 = 0
+check #OUT_DIV_FP001 == inf
+check #OUT_NAN_DIV_FP001 == 0
+check #OUT_DIV_BY_ZERO_DIV_FP001 == 1
+check #OVERFLOW_DIV_FP001 == 0
+check #UNDERFLOW_DIV_FP001 == 0
+check #OUT_ZERO_DIV_FP001 ==0
+//
+set #TUN_IN_FP1 = -295.9 , #TUN_IN_FP2 = 0
+check #OUT_DIV_FP001 == inf
+check #OUT_NAN_DIV_FP001 == 0
+check #OUT_DIV_BY_ZERO_DIV_FP001 == 1
+check #OVERFLOW_DIV_FP001 == 0
+check #UNDERFLOW_DIV_FP001 == 0
+check #OUT_ZERO_DIV_FP001 ==0
+//
+set #TUN_IN_FP1 = 0 , #TUN_IN_FP2 = 0
+check #OUT_DIV_FP001 == nan
+check #OUT_NAN_DIV_FP001 == 1
+check #OUT_DIV_BY_ZERO_DIV_FP001 == 0
+check #OVERFLOW_DIV_FP001 == 0
+check #UNDERFLOW_DIV_FP001 == 0
+check #OUT_ZERO_DIV_FP001 ==0
+
+endtest
+
+
+
+

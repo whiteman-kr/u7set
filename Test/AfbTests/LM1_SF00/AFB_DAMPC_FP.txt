@@ -1,0 +1,118 @@
+test AFB_DAMPC_FP_1, AFB tests for AFB_DAMP_FP element
+schema AFB_DAMP_FP
+compatible MODULE_LM1SF00
+//dtime = 5ms
+set #TUN_IN_FP1 = 0
+check #OUT_DAMPC_FP1 == 0
+check #OUT_OVERFLOW_DAMPC_FP1 == 0
+check #OUT_UNDERFLOW_DAMPC_FP1 == 0
+check #OUT_ZERO_DAMPC_FP1 == 1
+check #OUT_NAN_DAMPC_FP1 == 0
+check #OUT_PARAM_ERR_DAMPC_FP1 == 0
+
+set #TUN_IN_FP1 = 1
+check #OUT_DAMPC_FP1 == 1
+check #OUT_OVERFLOW_DAMPC_FP1 == 0
+check #OUT_UNDERFLOW_DAMPC_FP1 == 0
+check #OUT_ZERO_DAMPC_FP1 == 0
+check #OUT_NAN_DAMPC_FP1 == 0
+check #OUT_PARAM_ERR_DAMPC_FP1 == 0
+
+set #TUN_IN_FP1 = 4
+check #OUT_DAMPC_FP1 == 4
+check #OUT_OVERFLOW_DAMPC_FP1 == 0
+check #OUT_UNDERFLOW_DAMPC_FP1 == 0
+check #OUT_ZERO_DAMPC_FP1 == 0
+check #OUT_NAN_DAMPC_FP1 == 0
+check #OUT_PARAM_ERR_DAMPC_FP1 == 0
+
+set #TUN_IN_FP1 = 144
+check #OUT_DAMPC_FP1 == 144
+check #OUT_OVERFLOW_DAMPC_FP1 == 0
+check #OUT_UNDERFLOW_DAMPC_FP1 == 0
+check #OUT_ZERO_DAMPC_FP1 == 0
+check #OUT_NAN_DAMPC_FP1 == 0
+check #OUT_PARAM_ERR_DAMPC_FP1 == 0
+
+set #TUN_IN_FP1 = 99999999
+check #OUT_DAMPC_FP1 == 99999999
+check #OUT_OVERFLOW_DAMPC_FP1 == 0
+check #OUT_UNDERFLOW_DAMPC_FP1 == 0
+check #OUT_ZERO_DAMPC_FP1 == 0
+check #OUT_NAN_DAMPC_FP1 == 0
+check #OUT_PARAM_ERR_DAMPC_FP1 == 0
+
+set #TUN_IN_FP1 = 1755226632288.6277 //  проверить граничные значения!!!
+check #OUT_DAMPC_FP1 == 1755226632288.6277
+check #OUT_OVERFLOW_DAMPC_FP1 == 0
+check #OUT_UNDERFLOW_DAMPC_FP1 == 0
+check #OUT_ZERO_DAMPC_FP1 == 0
+check #OUT_NAN_DAMPC_FP1 == 0
+check #OUT_PARAM_ERR_DAMPC_FP1 == 0
+endtest
+
+test AFB_DAMPC_FP_2, AFB tests for AFB_DAMP_FP element
+schema AFB_DAMP_FP
+compatible MODULE_LM1SF00
+//dtime = 10ms
+set #TUN_IN_FP2 = 0
+check #OUT_DAMPC_FP2 == 0
+check #OUT_OVERFLOW_DAMPC_FP2 == 0
+check #OUT_UNDERFLOW_DAMPC_FP2 == 0
+check #OUT_ZERO_DAMPC_FP2 == 1 // This flag set if OUT == 0
+check #OUT_NAN_DAMPC_FP2 == 0
+check #OUT_PARAM_ERR_DAMPC_FP2 == 0
+
+set #TUN_IN_FP2 = 0.1
+check #OUT_DAMPC_FP2 == 0.1
+check #OUT_OVERFLOW_DAMPC_FP2 == 0
+check #OUT_UNDERFLOW_DAMPC_FP2 == 0
+check #OUT_ZERO_DAMPC_FP2 == 0 
+check #OUT_NAN_DAMPC_FP2 == 0
+check #OUT_PARAM_ERR_DAMPC_FP2 == 0
+
+set #TUN_IN_FP2 = 10
+check #OUT_DAMPC_FP2 == 10
+check #OUT_OVERFLOW_DAMPC_FP2 == 0
+check #OUT_UNDERFLOW_DAMPC_FP2 == 0
+check #OUT_ZERO_DAMPC_FP2 == 0
+check #OUT_NAN_DAMPC_FP2 == 0
+check #OUT_PARAM_ERR_DAMPC_FP2 == 0
+
+set #TUN_IN_FP2 = 99999.99
+check #OUT_DAMPC_FP2 == 99999.99
+check #OUT_OVERFLOW_DAMPC_FP2 == 0
+check #OUT_UNDERFLOW_DAMPC_FP2 == 0
+check #OUT_ZERO_DAMPC_FP2 == 0 // This flag set if OUT == 0
+check #OUT_NAN_DAMPC_FP2 == 0
+check #OUT_PARAM_ERR_DAMPC_FP2 == 0
+endtest
+
+test AFB_DAMPC_FP_3, AFB tests for AFB_DAMP_FP element
+schema AFB_DAMP_FP
+compatible MODULE_LM1SF00
+//dtime = 100ms
+set #TUN_IN_FP3 = 0
+check #OUT_DAMPC_FP3 == 0
+check #OUT_OVERFLOW_DAMPC_FP3 == 0
+check #OUT_UNDERFLOW_DAMPC_FP3 == 0
+check #OUT_ZERO_DAMPC_FP3 == 1 // This flag set if OUT == 0
+check #OUT_NAN_DAMPC_FP3 == 0
+check #OUT_PARAM_ERR_DAMPC_FP3 == 0
+
+set #TUN_IN_FP3 = 0.01
+check #OUT_DAMPC_FP3 == 0.01
+check #OUT_OVERFLOW_DAMPC_FP3 == 0
+check #OUT_UNDERFLOW_DAMPC_FP3 == 0
+check #OUT_ZERO_DAMPC_FP3 == 0 
+check #OUT_NAN_DAMPC_FP3 == 0
+check #OUT_PARAM_ERR_DAMPC_FP3 == 0
+
+set #TUN_IN_FP3 = 777.888
+check #OUT_DAMPC_FP3 == 777.888
+check #OUT_OVERFLOW_DAMPC_FP3 == 0
+check #OUT_UNDERFLOW_DAMPC_FP3 == 0
+check #OUT_ZERO_DAMPC_FP3 == 0 
+check #OUT_NAN_DAMPC_FP3 == 0
+check #OUT_PARAM_ERR_DAMPC_FP3 == 0
+endtest

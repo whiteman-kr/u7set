@@ -1,0 +1,69 @@
+//check #OUT_SCALE_FP_FP01 ==
+//check #OVERFLOW_SCALE_FP_FP01 ==
+//check #UNDERRFLOW_SCALE_FP_FP01 ==
+//check #ZERO_SCALE_FP_FP01 ==
+//check #NAN_SCALE_FP_FP01 =
+
+test AFB_SCALE_FP_FP_01, AFB tests for AFB_SCALE_FP_FP element
+schema AFB_SCALE_FP_FP
+compatible MODULE_LM1SF00
+set #TUN_IN_FP1 = 0
+check #OUT_SCALE_FP_FP01 == 0
+check #ZERO_SCALE_FP_FP01 == 1
+set #TUN_IN_FP1 = 0.01
+check #OUT_SCALE_FP_FP01 == 0.01
+check #ZERO_SCALE_FP_FP01 == 0
+set #TUN_IN_FP1 = 0.1
+check #OUT_SCALE_FP_FP01 == 0.1
+check #ZERO_SCALE_FP_FP01 == 0
+set #TUN_IN_FP1 = 1
+check #OUT_SCALE_FP_FP01 == 1
+check #ZERO_SCALE_FP_FP01 == 0
+set #TUN_IN_FP1 = 1.5
+check #OUT_SCALE_FP_FP01 == 1.5
+check #ZERO_SCALE_FP_FP01 == 0
+set #TUN_IN_FP1 = 25.5
+check #OUT_SCALE_FP_FP01== 25.5
+check #ZERO_SCALE_FP_FP01 == 0
+set #TUN_IN_FP1 = 100
+check #OUT_SCALE_FP_FP01 == 100
+check #ZERO_SCALE_FP_FP01 == 0
+set #TUN_IN_FP1 = 2147483648
+check #OUT_SCALE_FP_FP01 == 2147483648
+check #ZERO_SCALE_FP_FP01 == 0
+set #TUN_IN_FP1 = -2147483647
+check #OUT_SCALE_FP_FP01 == -2147483647
+check #ZERO_SCALE_FP_FP01 == 0
+set #TUN_IN_FP1 = -1000.9
+check #OUT_SCALE_FP_FP01 == -1000.9
+check #ZERO_SCALE_FP_FP01 == 0
+set #TUN_IN_FP1 = -0.01
+check #OUT_SCALE_FP_FP01 == -0.01
+check #ZERO_SCALE_FP_FP01 == 0
+set #TUN_IN_FP1 = -0.2
+check #OUT_SCALE_FP_FP01 == -0.2
+check #ZERO_SCALE_FP_FP01 == 0
+endtest
+
+test AFB_SCALE_FP_FP_02, AFB tests for AFB_SCALE_FP_FP element
+schema AFB_SCALE_FP_FP
+compatible MODULE_LM1SF00
+set #TUN_IN_FP2 = 0
+check #OUT_SCALE_FP_FP02 == 0
+check #ZERO_SCALE_FP_FP02 == 1
+set #TUN_IN_FP2 = 0.1
+check #OUT_SCALE_FP_FP02 == 0.1
+check #ZERO_SCALE_FP_FP02 == 0
+set #TUN_IN_FP2 = 500.1
+check #OUT_SCALE_FP_FP02 == 500.1
+check #ZERO_SCALE_FP_FP02 == 0
+set #TUN_IN_FP2 = 2147483648
+check #OUT_SCALE_FP_FP02 == 2147483648
+check #ZERO_SCALE_FP_FP02 == 0
+set #TUN_IN_FP2 = 2147483648
+check #OUT_SCALE_FP_FP02 == -2147483647
+check #ZERO_SCALE_FP_FP02 == 0
+set #TUN_IN_FP2 = -0.1
+check #OUT_SCALE_FP_FP02 == -0.1
+check #ZERO_SCALE_FP_FP02 == 0
+endtest

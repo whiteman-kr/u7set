@@ -1,0 +1,221 @@
+// off
+test AFB_TCT_OFF_1, AFB tests for TCT_OFF 
+compatible MODULE_LM1SF00
+// Time 1000
+set #TUN_DSCR1 = 0, #TUN_TIME1 = 1000
+check #OUT_TCT_OFF == 1
+check #PARAM_ERR_TCT_OFF == 0
+set #TUN_DSCR1 = 1, #TUN_TIME1 = 1000
+check #OUT_TCT_OFF == 1
+check #PARAM_ERR_TCT_OFF == 0
+endtest
+
+test AFB_TCT_OFF_2, AFB tests for TCT_OFF 
+compatible MODULE_LM1SF00
+// Time 5000
+set #TUN_DSCR1 = 0, #TUN_TIME1 = 5000
+check #OUT_TCT_OFF == 0
+check #PARAM_ERR_TCT_OFF == 0
+set #TUN_DSCR1 = 1, #TUN_TIME1 = 5000
+check #OUT_TCT_OFF == 1
+check #PARAM_ERR_TCT_OFF == 0
+endtest
+
+test AFB_TCT_OFF_3, AFB tests for TCT_OFF 
+compatible MODULE_LM1SF00
+// Time 8000
+set #TUN_DSCR1 = 0, #TUN_TIME1 = 8000
+check #OUT_TCT_OFF == 1
+check #PARAM_ERR_TCT_OFF == 0
+set #TUN_DSCR1 = 1, #TUN_TIME1 = 8000
+check #OUT_TCT_OFF == 1
+check #PARAM_ERR_TCT_OFF == 0
+endtest
+
+test AFB_TCT_OFF_4, AFB tests for TCT_OFF 
+compatible MODULE_LM1SF00
+// Time 15000
+set #TUN_DSCR1 = 0, #TUN_TIME1 = 15000
+check #OUT_TCT_OFF == 1
+check #PARAM_ERR_TCT_OFF == 0
+set #TUN_DSCR1 = 1, #TUN_TIME1 = 15000
+check #OUT_TCT_OFF == 1
+check #PARAM_ERR_TCT_OFF == 0
+endtest
+
+// on
+test AFB_TCT_ON_1, AFB tests for TCT_ON
+compatible MODULE_LM1SF00
+// Time 1000
+set #TUN_DSCR2 = 0, #TUN_TIME1 = 1000
+check #OUT_TCT_ON == 0
+check #PARAM_ERR_TCT_ON == 0
+set #TUN_DSCR2 = 1, #TUN_TIME2 = 1000
+check #OUT_TCT_ON == 1
+check #PARAM_ERR_TCT_ON == 0
+endtest
+
+test AFB_TCT_ON_2, AFB tests for TCT_ON
+compatible MODULE_LM1SF00
+// Time 5000
+set #TUN_DSCR1 = 0, #TUN_TIME1 = 5000
+check #OUT_TCT_ON == 1
+check #PARAM_ERR_TCT_ON == 0
+set #TUN_DSCR2 = 1, #TUN_TIME2 = 5000
+check #OUT_TCT_ON == 1
+check #PARAM_ERR_TCT_ON == 0
+endtest
+
+test AFB_TCT_ON_3, AFB tests for TCT_ON
+compatible MODULE_LM1SF00
+// Time 10000
+set #TUN_DSCR1 = 0, #TUN_TIME1 = 10000
+check #OUT_TCT_ON == 1
+check #PARAM_ERR_TCT_ON == 0
+set #TUN_DSCR2 = 1, #TUN_TIME2 = 10000
+check #OUT_TCT_ON == 1
+check #PARAM_ERR_TCT_ON == 0
+endtest
+
+test AFB_TCT_ON_4, AFB tests for TCT_ON
+compatible MODULE_LM1SF00
+// Time 50000
+set #TUN_DSCR1 = 0, #TUN_TIME1 = 50000
+check #OUT_TCT_ON == 1
+check #PARAM_ERR_TCT_ON == 0
+set #TUN_DSCR2 = 1, #TUN_TIME2 = 50000
+check #OUT_TCT_ON == 1
+check #PARAM_ERR_TCT_ON == 0
+endtest
+
+//TCT_FILTER
+test AFB_TCT_FILTER_1, AFB tests for TCT_FILTER
+compatible MODULE_LM1SF00
+// Time 1000
+set #TUN_DSCR3 = 0, #TUN_TIME3 = 1000
+check #OUT_TCT_FILTER == 0
+check #PARAM_ERR_TCT_FILTER == 0
+set #TUN_DSCR3 = 1, #TUN_TIME3 = 1000
+check #OUT_TCT_FILTER == 1
+check #PARAM_ERR_TCT_FILTER == 0
+endtest
+
+test AFB_TCT_FILTER_2, AFB tests for TCT_FILTER
+compatible MODULE_LM1SF00
+// Time 5000
+set #TUN_DSCR3 = 0, #TUN_TIME3 = 5000
+check #OUT_TCT_FILTER == 1
+check #PARAM_ERR_TCT_FILTER == 0
+set #TUN_DSCR3 = 1, #TUN_TIME3 = 5000
+check #OUT_TCT_FILTER == 0
+check #PARAM_ERR_TCT_FILTER == 0
+endtest
+
+test AFB_TCT_FILTER_3, AFB tests for TCT_FILTER
+compatible MODULE_LM1SF00
+// Time 10000
+set #TUN_DSCR3 = 0, #TUN_TIME3 = 10000
+check #OUT_TCT_FILTER== 0
+check #PARAM_ERR_TCT_FILTER == 0
+set #TUN_DSCR3 = 1, #TUN_TIME3 = 10000
+check #OUT_TCT_FILTER== 0
+check #PARAM_ERR_TCT_FILTER == 0
+endtest
+
+test AFB_TCT_FILTER_4, AFB tests for TCT_FILTER
+compatible MODULE_LM1SF00
+// Time 0
+set #TUN_DSCR3 = 0, #TUN_TIME3 = 0
+check #OUT_TCT_FILTER== 0
+check #PARAM_ERR_TCT_FILTER == 0
+set #TUN_DSCR3 = 1, #TUN_TIME3 = 0
+check #OUT_TCT_FILTER== 1
+check #PARAM_ERR_TCT_FILTER == 0
+endtest
+
+test AFB_TCT_RSV_1, AFB tests for TCT_RSV
+compatible MODULE_LM1SF00
+// Time 1000
+set #TUN_DSCR4  = 0, #TUN_TIME4 = 1000
+check #OUT_TCT_RSV == 0
+check #PARAM_ERR_TCT_RSV == 0
+set #TUN_DSCR4 = 1, #TUN_TIME4 = 1000
+check #OUT_TCT_RSV == 1
+check #PARAM_ERR_TCT_RSV == 0
+endtest
+
+test AFB_TCT_RSV_2, AFB tests for TCT_RSV
+compatible MODULE_LM1SF00
+// Time 5000
+set #TUN_DSCR4 = 0, #TUN_TIME4 = 5000
+check #OUT_TCT_RSV == 0
+check #PARAM_ERR_TCT_RSV == 0
+set #TUN_DSCR4 = 1, #TUN_TIME4 = 5000
+check #OUT_TCT_RSV == 1
+check #PARAM_ERR_TCT_RSV == 0
+endtest
+
+test AFB_TCT_RSV_3, AFB tests for TCT_RSV
+compatible MODULE_LM1SF00
+// Time 10000
+set #TUN_DSCR4 = 0, #TUN_TIME4 = 10000
+check #OUT_TCT_RSV == 1
+check #PARAM_ERR_TCT_RSV == 0
+set #TUN_DSCR4 = 1, #TUN_TIME4 = 10000
+check #OUT_TCT_RSV == 1
+check #PARAM_ERR_TCT_RSV == 0
+endtest
+
+test AFB_TCT_RSV_4, AFB tests for TCT_RSV
+compatible MODULE_LM1SF00
+// Time 0
+set #TUN_DSCR4 = 0, #TUN_TIME4 = 0
+check #OUT_TCT_RSV == 0
+check #PARAM_ERR_TCT_RSV == 0
+set #TUN_DSCR4 = 1, #TUN_TIME4 = 0
+check #OUT_TCT_RSV == 0
+check #PARAM_ERR_TCT_RSV == 0
+endtest
+
+test AFB_TCT_VIBR_1, AFB tests for TCT_VIBR
+compatible MODULE_LM1SF00
+// Time 1000
+set #TUN_DSCR5 = 0, #TUN_TIME5 = 1000
+check #OUT_TCT_VIBR == 0
+check #PARAM_ERR_TCT_VIBR == 0
+set #TUN_DSCR5 = 1, #TUN_TIME5 = 1000
+check #OUT_TCT_RSV == 1
+check #PARAM_ERR_TCT_RSV == 0
+endtest
+
+test AFB_TCT_VIBR_2, AFB tests for TCT_VIBR
+compatible MODULE_LM1SF00
+// Time 5000
+set #TUN_DSCR5 = 0, #TUN_TIME5 = 5000
+check #OUT_TCT_VIBR == 0
+check #PARAM_ERR_TCT_VIBR == 0
+set #TUN_DSCR5 = 1, #TUN_TIME5 = 5000
+check #OUT_TCT_RSV == 1
+check #PARAM_ERR_TCT_RSV == 0
+endtest
+test AFB_TCT_VIBR_3, AFB tests for TCT_VIBR
+compatible MODULE_LM1SF00
+// Time 10000
+set #TUN_DSCR5 = 0, #TUN_TIME5 = 10000
+check #OUT_TCT_VIBR == 0
+check #PARAM_ERR_TCT_VIBR == 0
+set #TUN_DSCR5 = 1, #TUN_TIME5 = 10000
+check #OUT_TCT_RSV == 1
+check #PARAM_ERR_TCT_RSV == 0
+endtest
+
+test AFB_TCT_VIBR_4, AFB tests for TCT_VIBR
+compatible MODULE_LM1SF00
+// Time 
+set #TUN_DSCR5 = 0, #TUN_TIME5 = 0
+check #OUT_TCT_VIBR == 0
+check #PARAM_ERR_TCT_VIBR == 0
+set #TUN_DSCR5 = 1, #TUN_TIME5 = 0
+check #OUT_TCT_RSV == 1
+check #PARAM_ERR_TCT_RSV == 0
+endtest
