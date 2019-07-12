@@ -164,10 +164,6 @@ void Settings::writeUserScope() const
 
 	s.setValue("CreateSchema/lastSelectedLmDescriptionFile", m_lastSelectedLmDescriptionFile);
 
-	s.setValue("SchemaItem/pos", m_schemaItemPropertiesWindowPos);
-	s.setValue("SchemaItem/geometry", m_schemaItemPropertiesWindowGeometry);
-	s.setValue("SchemaItem/Splitter/state", m_schemaItemSplitterState);
-
 	s.setValue("Main/m_expertMode", m_expertMode);
 
 	s.setValue("m_infoMode", m_infoMode);
@@ -274,15 +270,6 @@ void Settings::loadUserScope()
 
 	//
 	m_lastSelectedLmDescriptionFile = s.value("CreateSchema/lastSelectedLmDescriptionFile", "").toString();
-
-	m_schemaItemPropertiesWindowPos = s.value("SchemaItem/pos", QPoint(-1, -1)).toPoint();
-	m_schemaItemPropertiesWindowGeometry = s.value("SchemaItem/geometry").toByteArray();
-
-	m_schemaItemSplitterState = s.value("SchemaItem/Splitter/state").toInt();
-    if (m_schemaItemSplitterState < 150)
-	{
-        m_schemaItemSplitterState = 150;
-	}
 
 	m_expertMode = s.value("Main/m_expertMode", false).toBool();
 

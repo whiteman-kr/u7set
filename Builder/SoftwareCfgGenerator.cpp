@@ -1,9 +1,7 @@
 #include "SoftwareCfgGenerator.h"
 #include "ApplicationLogicCompiler.h"
-#include "IssueLogger.h"
 #include "../lib/DeviceHelper.h"
 #include "../lib/ServiceSettings.h"
-#include "../VFrame30/Schema.h"
 
 
 namespace Builder
@@ -154,12 +152,14 @@ namespace Builder
 			return false;
 		}
 
+		// Remove all marked as deleted files
+		//
 		filesTree.removeIf([](const DbFileInfo& f)
 			{
 				return f.action() == VcsItemAction::Deleted;
 			});
 
-		// Remove all unsuported fileas and marked for deleting
+		// Remove all unsuported files and marked for deleting
 		//
 		std::vector<DbFileInfo> files = filesTree.toVectorIf([](const DbFileInfo& f)
 						{
@@ -172,13 +172,30 @@ namespace Builder
 									 f.fileName().endsWith(QLatin1String(".") + Db::File::TvsFileExtension, Qt::CaseInsensitive));
 						});
 
+		// Multithreaded load all schemas
+		//
 		bool returnResult = true;
+		std::atomic_bool iterruptRequest = false;
 
-		QString group = "Schema";
+		std::vector<QFuture<std::shared_ptr<VFrame30::Schema>>> loadSchemaTasks;
+		loadSchemaTasks.reserve(files.size());
 
 		for (const DbFileInfo& f : files)
 		{
-			QString subDir = "Schemas." + f.extension();
+			// Check for cancel
+			//
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
+
+			// --
+			//
+			LOG_MESSAGE(log, tr("Loading %1").arg(f.fileName()));
+
+			// --
+			//
+			//QString subDir = "Schemas." + f.extension();
 
 			std::shared_ptr<DbFile> file;
 
@@ -190,52 +207,256 @@ namespace Builder
 				continue;
 			}
 
-			// Parse file
+			// Read schema files
 			//
-			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file->data());
+			auto task = QtConcurrent::run([file, log, &returnResult, &iterruptRequest]() -> std::shared_ptr<VFrame30::Schema>
+				{
+					if (iterruptRequest == true)
+					{
+						return false;
+					}
 
-			if (schema == nullptr)
+					std::shared_ptr<VFrame30::Schema> result = VFrame30::Schema::Create(file->data());
+
+					if (result == nullptr)
+					{
+						// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
+						//
+						log->errCMN0010(file->fileName());
+						returnResult = false;
+					}
+
+					return result;
+				});
+
+			loadSchemaTasks.push_back(task);
+		}
+
+		// Wait for finish and process interrupt request
+		//
+		do
+		{
+			bool allFinished = true;
+			for (auto& task : loadSchemaTasks)
 			{
-				log->errCMN0010(f.fileName());
-				returnResult = false;
-				continue;
+				QThread::yieldCurrentThread();
+				if (task.isRunning() == true)
+				{
+					allFinished = false;
+					break;
+				}
 			}
 
-			//qDebug() << "Build: schema " << schema->schemaId() << " is loaded";
-
-			// --
-			//
-			std::shared_ptr<SchemaFile> schemaFile = std::make_shared<SchemaFile>(schema->schemaId(), file->fileName(), subDir, group, "");
-			if (bool parseOk = schemaFile->details.parseDetails(schema->details());
-				parseOk == false)
+			if (allFinished == true)
 			{
-				log->errINT1001(tr("Parse schema detais error."), schema->schemaId());
-				returnResult = false;
-				continue;
+				break;
 			}
+			else
+			{
+				// Set iterruptRequest, so work threads can get it and exit
+				//
+				iterruptRequest = QThread::currentThread()->isInterruptionRequested();
+				QThread::yieldCurrentThread();
+			}
+		} while (1);
+
+		// Remove excluded from build schemas
+		//
+		std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;
+
+		for (auto& task : loadSchemaTasks)
+		{
+			std::shared_ptr<VFrame30::Schema> schema = task.result();
 
 			if (schema->excludeFromBuild() == true)
 			{
 				continue;
 			}
 
-			// Add file to build result
-			//
-			if (bool ok = context->m_buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schema->tagsAsList().join(";"), file->data(), false);
-				ok == false)
-			{
-				returnResult = false;
-				continue;
-			}
+			schemas[schema->schemaId()] = schema;
+		}
 
-			// --
-			//
-			QStringList schemaTags = schema->tagsAsList();
-			for (const QString& t : schemaTags)
+		// All schemas are parsed and loaded to map schemas
+		// iterate them and expand SchemaItemFrame
+		//
+		for (auto& [schemaId, schema] : schemas)
+		{
+			for (std::shared_ptr<VFrame30::SchemaLayer> layer :  schema->Layers)
 			{
-				m_schemaTagToFile.insert({t.toLower(), schemaFile});
+				for (std::shared_ptr<VFrame30::SchemaItem>& item :  layer->Items)
+				{
+					Q_ASSERT(item);
+
+					if (item->isCommented() == true)
+					{
+						continue;
+					}
+
+					if (item->isType<VFrame30::SchemaItemFrame>() == true)
+					{
+						VFrame30::SchemaItemFrame* frameItem = item->toType<VFrame30::SchemaItemFrame>();
+						Q_ASSERT(frameItem);
+
+						if (auto sourceSchemaIt = schemas.find(frameItem->schemaId());
+							sourceSchemaIt == schemas.end())
+						{
+							// Source schema is not found
+							//
+							log->errALP4080(schemaId, frameItem->schemaId(), frameItem->guid());
+
+							returnResult = false;
+							continue;
+						}
+						else
+						{
+							using namespace VFrame30;
+
+							VFrame30::Schema* sourceSchema = sourceSchemaIt->second.get();
+							Q_ASSERT(sourceSchema);
+
+							SchemaItemFrame::ErrorCode result = frameItem->setSchemaToFrame(schema.get(), sourceSchema);
+
+							switch (result)
+							{
+							case SchemaItemFrame::ErrorCode::Ok:
+								// All is Ok))
+								//
+								break;
+
+							case SchemaItemFrame::ErrorCode::ParamError:
+								log->errINT1001("Input params error SchemaItemFrame::ErrorCode SchemaItemFrame::setSchemaToFrame(VFrame30::Schema*, VFrame30::Schema*), report to developers.", schema->schemaId(), frameItem->guid());
+								break;
+
+							case SchemaItemFrame::ErrorCode::InternalError:
+								log->errINT1001("Internal error in SchemaItemFrame::setSchemaToFrame(VFrame30::Schema*, VFrame30::Schema*), report to developers.", schema->schemaId(), frameItem->guid());
+								break;
+
+							case SchemaItemFrame::ErrorCode::SourceSchemaHasSameId:
+								log->errALP4081(frameItem->schemaId(), frameItem->guid());
+								break;
+
+							case SchemaItemFrame::ErrorCode::SchemasHasDiffrenetUnitsWithoutAutoscale:
+								log->errALP4082(schemaId, frameItem->schemaId(), frameItem->guid());
+								{
+									bool schekIt;	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+								}
+								break;
+
+							default:
+								Q_ASSERT(false);
+								log->errINT1000(tr("Processing item SchemaItemFrame on Schema %1, SchemaItemFrame.SchemaID = %2, function SchemaItemFrame::setSchemaToFrame returned unknows error code %3.")
+													.arg(schemaId)
+													.arg(frameItem->schemaId())
+													.arg(static_cast<int>(result)));
+							}
+						}
+					}
+				}
 			}
 		}
+
+
+		// --
+		//
+		//QString group = "Schema";
+
+		//			// --
+		//			//
+		//			std::shared_ptr<SchemaFile> schemaFile = std::make_shared<SchemaFile>(schema->schemaId(), file->fileName(), subDir, group, "");
+		//			if (bool parseOk = schemaFile->details.parseDetails(schema->details());
+		//				parseOk == false)
+		//			{
+		//				log->errINT1001(tr("Parse schema detais error."), schema->schemaId());
+		//				returnResult = false;
+		//				continue;
+		//			}
+
+
+		// Add file to build result
+		//
+		//sae NEW schema to file !!!!!!!!!!!!!!!!
+		//if (bool ok = context->m_buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schema->tagsAsList().join(";"), file->data(), false);
+//		if (bool ok = context->m_buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schema->tagsAsList().join(";"), file->data(), false);
+//			ok == false)
+//		{
+//			returnResult = false;
+//			continue;
+//		}
+
+//		אצאצףאצףאמצףאמצףזכהא !!!!!!!!!!!!!!!!!!
+
+//		// --
+//		//
+//		QStringList schemaTags = schema->tagsAsList();
+//		for (const QString& t : schemaTags)
+//		{
+//			m_schemaTagToFile.insert({t.toLower(), schemaFile});
+//		}
+
+
+
+//		for (const DbFileInfo& f : files)
+//		{
+//			QString subDir = "Schemas." + f.extension();
+
+//			std::shared_ptr<DbFile> file;
+
+//			if (bool ok  = db.getLatestVersion(f, &file, nullptr);
+//				ok == false || file.get() == nullptr)
+//			{
+//				log->errPDB2002(f.fileId(), f.fileName(), db.lastError());
+//				returnResult = false;
+//				continue;
+//			}
+
+//			// Parse file
+//			//
+//			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file->data());
+
+//			if (schema == nullptr)
+//			{
+//				log->errCMN0010(f.fileName());
+//				returnResult = false;
+//				continue;
+//			}
+
+//			//qDebug() << "Build: schema " << schema->schemaId() << " is loaded";
+
+//			// --
+//			//
+//			std::shared_ptr<SchemaFile> schemaFile = std::make_shared<SchemaFile>(schema->schemaId(), file->fileName(), subDir, group, "");
+//			if (bool parseOk = schemaFile->details.parseDetails(schema->details());
+//				parseOk == false)
+//			{
+//				log->errINT1001(tr("Parse schema detais error."), schema->schemaId());
+//				returnResult = false;
+//				continue;
+//			}
+
+//			if (schema->excludeFromBuild() == true)
+//			{
+//				continue;
+//			}
+
+//			// Add file to build result
+//			//
+//			if (bool ok = context->m_buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schema->tagsAsList().join(";"), file->data(), false);
+//				ok == false)
+//			{
+//				returnResult = false;
+//				continue;
+//			}
+
+//			אצאצףאצףאמצףאמצףזכהא !!!!!!!!!!!!!!!!!!
+
+//			// --
+//			//
+//			QStringList schemaTags = schema->tagsAsList();
+//			for (const QString& t : schemaTags)
+//			{
+//				m_schemaTagToFile.insert({t.toLower(), schemaFile});
+//			}
+//		}
 
 		return returnResult;
 	}

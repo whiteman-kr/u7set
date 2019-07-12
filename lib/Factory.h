@@ -1,7 +1,7 @@
 #pragma once
 
 #include <QtGlobal>
-#include <map>
+#include <unordered_map>
 #include <memory>
 #include "../lib/CUtils.h"
 
@@ -13,29 +13,37 @@ public:
 	void Register(const std::string& className)
 	{
 		quint32 classHash = CUtils::GetClassHashCode(className);
+
+		Q_ASSERT(factories.find(classHash) == std::end(factories));
 		factories[classHash] = std::make_shared<DerivedType<DerivedClass>>();		// new DerivedType<DerivedClass>();
+
+		return;
 	}
 
 	template<typename DerivedClass>
 	void Register()
 	{
 		quint32 classHash = CUtils::GetClassHashCode(DerivedClass::staticMetaObject.className());
+
+		Q_ASSERT(factories.find(classHash) == std::end(factories));
 		factories[classHash] = std::make_shared<DerivedType<DerivedClass>>();		// new DerivedType<DerivedClass>();
+
+		return;
 	}
 
 	std::shared_ptr<BaseClass> Create(quint32 classHash)
 	{
 		auto it = factories.find(classHash);
-		if (it == factories.end())
+		if (Q_LIKELY(it != factories.end()))
 		{
-			// Crash? Forger to register class? VFrame30Library.cpp?
-			//
-			Q_ASSERT(it != factories.end());
-			return nullptr;
+			return it->second->Create();
 		}
 		else
 		{
-			return it->second->Create();
+			// Crash? Forger to register class? VFrame30Library.cpp?
+			//
+			Q_ASSERT(it == factories.end());
+			return {};
 		}
 	}
 
@@ -52,15 +60,14 @@ public:
 	class DerivedType : public BaseType
 	{
 	public:
-		virtual std::shared_ptr<BaseClass> Create() const
+		virtual std::shared_ptr<BaseClass> Create() const override
 		{
-			std::shared_ptr<BaseClass> ptr = std::make_shared<DerivedClass>();
-			return ptr;
+			return std::make_shared<DerivedClass>();
 		}
 	};
 
 private:
-	std::map<quint32, std::shared_ptr<BaseType>> factories;
+	std::unordered_map<quint32, std::shared_ptr<BaseType>> factories;
 };
 
 

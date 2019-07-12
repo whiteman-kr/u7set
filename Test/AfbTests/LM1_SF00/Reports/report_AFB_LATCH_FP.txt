@@ -1,4 +1,82 @@
-Report from: 05-07-2019 19:52:24
+Report from: 09-07-2019 10:44:48
 
 Test File: AFB_LATCH_FP.txt
+
+Test AFB_LATCH_DECAY_FP01, AFB tests for AFB_LATCH_FP element
+    Set #TUN_IN_FP1=0.0
+    Set #SET01=0
+    Set #RESET01=0
+    Check #OUT_LATCH_DECAY_FP01=0.0 - Ok
+    Set #TUN_IN_FP1=1.0
+    Set #SET01=0
+    Set #RESET01=0
+    Check #OUT_LATCH_DECAY_FP01=0.0 - Ok
+    Set #TUN_IN_FP1=1.0
+    Set #SET01=1
+    Set #RESET01=0
+    Check #OUT_LATCH_DECAY_FP01=0.0 - Ok
+    Set #TUN_IN_FP1=0.0
+    Set #SET01=1
+    Set #RESET01=0
+    Check #OUT_LATCH_DECAY_FP01=0.0 - Ok
+    Set #TUN_IN_FP1=1.0
+    Set #SET01=0
+    Set #RESET01=1
+    Check #OUT_LATCH_DECAY_FP01=0.0 - Ok
+    Set #TUN_IN_FP1=1.0
+    Set #SET01=1
+    Set #RESET01=1
+    Check #OUT_LATCH_DECAY_FP01=0.0 - Ok
+Endtest AFB_LATCH_DECAY_FP01 - Ok
+
+Test AFB_LATCH_FRONT_FP01, AFB tests for AFB_LATCH_FP element
+    Set #TUN_IN_FP2=0.0
+    Set #SET02=0
+    Set #RESET02=1
+    Check #OUT_LATCH_FRONT_FP01=0.0 - Ok
+    Set #TUN_IN_FP2=9.99
+    Set #SET02=0
+    Set #RESET02=0
+    Check #OUT_LATCH_FRONT_FP01=0.0 - Ok
+    Set #TUN_IN_FP2=256.5
+    Set #SET02=1
+    Set #RESET02=0
+    Check #OUT_LATCH_FRONT_FP01=256.5 - Ok
+    Set #TUN_IN_FP2=256.5
+    Set #SET02=0
+    Set #RESET02=1
+    Check #OUT_LATCH_FRONT_FP01=0.0 - Ok
+    Set #TUN_IN_FP2=256.5
+    Set #SET02=1
+    Set #RESET02=1
+    Check #OUT_LATCH_FRONT_FP01=0.0 - Ok
+    Set #TUN_IN_FP2=48578.8
+    Set #SET02=1
+    Set #RESET02=0
+    Check #OUT_LATCH_FRONT_FP01=48578.8 - Fail    [ received: 0.0 ]
+    Set #TUN_IN_FP2=0.0
+    Set #SET02=0
+    Set #RESET02=1
+    Check #OUT_LATCH_FRONT_FP01=0.0 - Ok
+Endtest AFB_LATCH_FRONT_FP01 - error(s): 1
+
+Test AFB_LATCH_STATE_FP01, AFB tests for AFB_LATCH_FP element
+    Set #TUN_IN_FP3=0.0
+    Set #SET03=0
+    Set #RESET03=1
+    Check #OUT_LATCH_STATE_FP01=0.0 - Ok
+    Delay 50 ms
+    Set #TUN_IN_FP3=1.0
+    Set #SET03=1
+    Set #RESET03=0
+    Check #OUT_LATCH_FRONT_FP01=0.0 - Ok
+    Set #TUN_IN_FP3=1.0
+    Set #SET03=0
+    Set #RESET03=0
+    Check #OUT_LATCH_FRONT_FP01=1.0 - Fail    [ received: 0.0 ]
+    Set #TUN_IN_FP3=1.0
+    Set #SET03=1
+    Set #RESET03=0
+    Check #OUT_LATCH_FRONT_FP01=1.0 - Fail    [ received: 0.0 ]
+Endtest AFB_LATCH_STATE_FP01 - error(s): 2
 

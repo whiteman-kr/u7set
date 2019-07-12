@@ -166,12 +166,6 @@ public:
 	//
 	QString m_lastSelectedLmDescriptionFile;
 
-	// SchemaItem properties
-    //
-    QPoint m_schemaItemPropertiesWindowPos;
-    QByteArray m_schemaItemPropertiesWindowGeometry;
-    int m_schemaItemSplitterState = 0;
-
 	// Find SchemaItem
 	//
 	bool m_findSchemaItemCaseSensitive = false;

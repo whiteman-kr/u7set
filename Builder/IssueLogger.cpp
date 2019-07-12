@@ -2235,7 +2235,7 @@ namespace Builder
 	/// Title: Schema %1 has %2 commented functional item(s).
 	///
 	/// Parameters:
-	///		%1 Schema StrID
+	///		%1 SchemaID
 	///		%2 Commennted item(s) count
 	///
 	/// Description:
@@ -2250,6 +2250,76 @@ namespace Builder
 					tr("Schema %1 has %2 commented functional item(s).")
 						.arg(schema)
 						.arg(itemsUuids.size()));
+	}
+
+	/// IssueCode: ALP4080
+	///
+	/// IssueType: Error
+	///
+	/// Title: SchemaItemFrame has reference (property SchemaID) to unknown schema %1, Schema %2.
+	///
+	/// Parameters:
+	///		%1 Not found schema ID
+	///		%2 Schema ID
+	///
+	/// Description:
+	///			Schema has SchemaItemFrame wchich has reference (property SchemaID) to unknown schema.
+	///
+	void IssueLogger::errALP4080(QString schema, QString frameSchemaId, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4080, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4080,
+				  tr("SchemaItemFrame has reference (property SchemaID) to unknown schema %1, Schema %2.")
+						.arg(frameSchemaId)
+						.arg(schema));
+	}
+
+	/// IssueCode: ALP4081
+	///
+	/// IssueType: Error
+	///
+	/// Title: SchemaItemFrame.SchemaID has recursive reference to schema %1, property must be distincive from schema where it is placed.
+	///
+	/// Parameters:
+	///		%1 Schema ID
+	///
+	/// Description:
+	///			SchemaItemFrame.SchemaID has recursive reference to the same schema where it is placed.
+	///
+	void IssueLogger::errALP4081(QString schema, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4081, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4081,
+				  tr("SchemaItemFrame.SchemaID has recursive reference to schema %1, property must be distincive from schema where it is placed.")
+						.arg(schema));
+	}
+
+	/// IssueCode: ALP4082
+	///
+	/// IssueType: Error
+	///
+	/// Title: SchemaItemFrame has reference to schema %1 which has different units and SchemaItemFrame.AutoScale is false, Schema %2.
+	///
+	/// Parameters:
+	///		%1 Not found schema ID
+	///		%2 Schema ID
+	///
+	/// Description:
+	///			SchemaItemFrame has reference to schema which has different units and SchemaItemFrame.AutoScale is false. If AutoScale is false then both schemas must have identical units.
+	///
+	void IssueLogger::errALP4082(QString schema, QString frameSchemaId, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4082, itemUuid, schema);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4082,
+				  tr("SchemaItemFrame has reference to schema %1 which has different units and SchemaItemFrame.AutoScale is false, Schema %2.")
+						.arg(frameSchemaId)
+						.arg(schema));
 	}
 
 	/// IssueCode: ALP4130
@@ -2490,7 +2560,8 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:		Receiver must have the only AppSignalID per channel, LogicSchemaID: %1, Receiver Item: %2, ConnectionID: %3, EquipmentID %4.
+	/// Title:		Connection in singlechannel schema usage must have one ConnectionID for multichannel case it must have the same number of ConnectionIDs as logic schema.
+	/// must have the only AppSignalID per channel, LogicSchemaID: %1, Receiver Item: %2, ConnectionID: %3, EquipmentID %4.
 	///
 	/// Parameters:
 	///		%1 Logic Schema ID
@@ -2512,6 +2583,55 @@ namespace Builder
 						.arg(schemaItem)
 						.arg(connectionId)
 						.arg(equipmentsId));
+	}
+
+	/// IssueCode: ALP4153
+	///
+	/// IssueType: Error
+	///
+	///
+	/// Title:		Multichannel transmitter/receiver must have the same number of ConnectionIDs as schema's channel number (number of schema's EquipmentIDs), LogicSchema %2, SchemaItem %3.
+	///
+	/// Parameters:
+	///		%1 Logic Schema ID
+	///		%2 Transmitter item description
+	///
+	/// Description:
+	///		Multichannel transmitter/receiver must have the same number of ConnectionIDs as schema's channel number (number of schema's EquipmentIDs).
+	///
+	void IssueLogger::errALP4153(QString schema, QString schemaItem, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4153, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4153,
+				  QString(tr("Multichannel transmitter/receiver must have the same number of ConnectionIDs as schema's channel number (number of schema's EquipmentIDs), LogicSchema %2, SchemaItem %3.")
+						.arg(schema)
+						.arg(schemaItem)));
+	}
+
+	/// IssueCode: ALP4154
+	///
+	/// IssueType: Error
+	///
+	/// Title:		Property ConnectionID is empty (LogicSchema %1, SchemaItem %2).
+	///
+	/// Parameters:
+	///		%1 Logic Schema ID
+	///		%2 Receiver item description
+	///
+	/// Description:
+	///		Property ConnectionID for Receiver/Transmitter must not be empty.
+	///
+	void IssueLogger::errALP4154(QString schema, QString schemaItem, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 4154, itemUuid);
+
+		LOG_ERROR(IssueType::AlParsing,
+				  4154,
+				  QString(tr("Property ConnectionID for is empty, for Receiver/Transmitter it must not be empty (LogicSchema %1, SchemaItem %2).")
+						.arg(schema)
+						.arg(schemaItem)));
 	}
 
 

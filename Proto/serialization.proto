@@ -387,6 +387,7 @@ message SchemaItem
 	optional SchemaItemLine Line = 117;						// +PosLineImpl
 	optional SchemaItemPath Path = 118;						// +PosConnectionImpl
 	optional SchemaItemImage Image = 119;					// +PosRectImpl
+	optional SchemaItemFrame Frame = 120;					// +PosRectImpl
 
     optional SchemaItemSignal Signal = 124;					// +FblItemRect
 	optional SchemaItemInput InputSignal = 125;				// +Signal
@@ -490,6 +491,16 @@ message SchemaItemPath
 message SchemaItemImage
 {
     optional ImageItem image = 1;
+}
+
+//
+// SchemaItemFrame
+//
+message SchemaItemFrame
+{
+    optional string schemaId = 1 [default = "SCHEMAID"];
+	optional bool allowScale = 2 [default = true];
+	optional bool keepAspectRatio = 3 [default = true];
 }
 
 

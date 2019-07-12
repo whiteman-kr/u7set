@@ -8,10 +8,10 @@ namespace Builder
 	//
 	bool LmDescriptionSet::loadFile(IssueLogger* log, DbController* db, QString objectId, QString fileName)
 	{
-		assert(log);
-		assert(db);
-		assert(objectId.isEmpty() == false);
-		assert(fileName.isEmpty() == false);
+		Q_ASSERT(log);
+		Q_ASSERT(db);
+		Q_ASSERT(objectId.isEmpty() == false);
+		Q_ASSERT(fileName.isEmpty() == false);
 
 		std::vector<DbFileInfo> fileList;
 

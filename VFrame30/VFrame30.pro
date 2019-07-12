@@ -49,6 +49,7 @@ OTHER_FILES += \
     ../Proto/proto_compile.sh
 
 HEADERS += VFrame30Lib_global.h \
+    SchemaItemFrame.h \
     Stable.h \
     Settings.h \
     PosRectImpl.h \
@@ -127,6 +128,7 @@ HEADERS += VFrame30Lib_global.h \
     ImageItem.h
 
 SOURCES += \
+    SchemaItemFrame.cpp \
     Settings.cpp \
     PosRectImpl.cpp \
     PosLineImpl.cpp \

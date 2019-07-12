@@ -11,6 +11,7 @@
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/SchemaItemLine.h"
 #include "../VFrame30/SchemaItemRect.h"
+#include "../VFrame30/SchemaItemFrame.h"
 #include "../VFrame30/SchemaItemImage.h"
 #include "../VFrame30/SchemaItemPath.h"
 #include "../VFrame30/SchemaItemSignal.h"
@@ -1953,6 +1954,15 @@ void EditSchemaWidget::createActions()
 				addItem(image);
 			});
 
+	m_addFrameAction = new QAction(tr("Frame"), this);
+	m_addFrameAction->setEnabled(true);
+	m_addFrameAction->setIcon(QIcon(":/Images/Images/SchemaItemFrame.svg"));
+	connect(m_addFrameAction, &QAction::triggered,
+			[this](bool)
+			{
+				addItem(std::make_shared<VFrame30::SchemaItemFrame>(schema()->unit()));
+			});
+
 	// ----------------------------------------
 	m_addSeparatorAction0 = new QAction(this);
 	m_addSeparatorAction0->setSeparator(true);
@@ -2501,6 +2511,7 @@ void EditSchemaWidget::createActions()
 		m_addMenu->addAction(m_addPathAction);
 		m_addMenu->addAction(m_addTextAction);
 		m_addMenu->addAction(m_addImageAction);
+		m_addMenu->addAction(m_addFrameAction);
 
 		m_addMenu->addAction(m_addSeparatorAction0);
 
@@ -7858,6 +7869,9 @@ void EditSchemaWidget::properties()
 	m_itemsPropertiesDialog->setObjects(editSchemaView()->selectedItems());
 	m_itemsPropertiesDialog->setReadOnly(m_editEngine->readOnly());
 	m_itemsPropertiesDialog->show();
+	m_itemsPropertiesDialog->ensureVisible();
+	m_itemsPropertiesDialog->setFocus();
+
 	return;
 }
 
@@ -7938,6 +7952,7 @@ void EditSchemaWidget::selectionChanged()
 
 	m_itemsPropertiesDialog->setObjects(editSchemaView()->selectedItems());
 	m_itemsPropertiesDialog->setReadOnly(m_editEngine->readOnly());
+	m_itemsPropertiesDialog->ensureVisible();
 
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
 	auto selectectNotLocked = selectedNonLockedItems();

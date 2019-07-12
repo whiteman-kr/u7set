@@ -14,21 +14,25 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 	m_propertyEditor = new SchemaItemPropertyEditor(editEngine, this);
 	m_propertyEditor->setReadOnly(editEngine->readOnly());
 
-	m_propertyEditor->setSplitterPosition(theSettings.m_schemaItemSplitterState);
-	if (theSettings.m_schemaItemPropertiesWindowPos.x() != -1 && theSettings.m_schemaItemPropertiesWindowPos.y() != -1)
-    {
-	   move(theSettings.m_schemaItemPropertiesWindowPos);
-	   restoreGeometry(theSettings.m_schemaItemPropertiesWindowGeometry);
-	}
-    else
-    {
-        QRect scr = QApplication::desktop()->screenGeometry();
-        move( scr.center() - rect().center() );
-    }
-
 	ui->horizontalLayout->addWidget(m_propertyEditor);
 
 	setWindowTitle(tr("Schema Item(s) Properties"));
+
+	// --
+	//
+	QSettings settings;
+
+	int splitterValue = settings.value("SchemaItemPropertiesDialog/Splitter").toInt();
+	if (splitterValue < 100)
+	{
+		splitterValue = 100;
+	}
+
+	m_propertyEditor->setSplitterPosition(splitterValue);
+
+	restoreGeometry(settings.value("SchemaItemPropertiesDialog/Geometry").toByteArray());
+
+	ensureVisible();
 
 	return;
 }
@@ -59,25 +63,50 @@ void SchemaItemPropertiesDialog::setReadOnly(bool value)
 	m_propertyEditor->setReadOnly(value);
 }
 
-void SchemaItemPropertiesDialog::closeEvent(QCloseEvent * e)
+void SchemaItemPropertiesDialog::ensureVisible()
 {
-    Q_UNUSED(e);
-    saveSettings();
+	if (QScreen* screen = QGuiApplication::screenAt(geometry().center());
+		screen == nullptr)
+	{
+		QScreen* newScreen = QGuiApplication::screens().at(0);
 
+		if (QScreen* parentScreen = parentWidget()->window()->windowHandle()->screen();
+			parentScreen != nullptr)
+		{
+			newScreen = parentScreen;
+		}
+
+		QRect screenGeometry = newScreen->geometry();
+
+		move(screenGeometry.left() + screenGeometry.width() / 2 - width() / 2,
+			 screenGeometry.top() + screenGeometry.height() / 2 - height() / 2);
+	}
+	else
+	{
+	}
+
+	return;
+}
+
+void SchemaItemPropertiesDialog::closeEvent(QCloseEvent*)
+{
+	saveSettings();
 }
 
 void SchemaItemPropertiesDialog::done(int r)
 {
-    saveSettings();
+	saveSettings();
     QDialog::done(r);
 }
 
 void SchemaItemPropertiesDialog::saveSettings()
 {
-	theSettings.m_schemaItemSplitterState = m_propertyEditor->splitterPosition();
-	theSettings.m_schemaItemPropertiesWindowPos = pos();
-	theSettings.m_schemaItemPropertiesWindowGeometry = saveGeometry();
+	QSettings settings;
 
+	settings.setValue("SchemaItemPropertiesDialog/Splitter", m_propertyEditor->splitterPosition());
+	settings.setValue("SchemaItemPropertiesDialog/Geometry", saveGeometry());
+
+	return;
 }
 
 //
