@@ -6362,6 +6362,28 @@ namespace Builder
 						arg(lmEquipmentID).arg(appSignalID).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5171
+	///
+	/// IssueType: Error
+	///
+	/// Title: Internal application signal %1 cannot be linked to equipment input/output signal %2.
+	///
+	/// Parameters:
+	///		%1 application signal ID
+	///		%2 equipment signal ID
+	///
+	/// Description:
+	///		Only input/output application signals can be linked to equipment input/output signals.
+	///
+	///
+	void IssueLogger::errALC5171(QString appSignalID, QString equipmentSignalID)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5171,
+				  QString(tr("Internal application signal %1 cannot be linked to equipment input/output signal %2.")).
+						arg(appSignalID).arg(equipmentSignalID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186
