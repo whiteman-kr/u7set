@@ -1,4 +1,5 @@
 #include "SchemaTabPageEx.h"
+#include "../lib/StandardColors.h"
 #include "CreateSchemaDialog.h"
 #include "CheckInDialog.h"
 #include "Settings.h"
@@ -304,21 +305,21 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 	{
 		if (file->state() == VcsState::CheckedOut)
 		{
-			QBrush b(QColor(0xFF, 0xFF, 0xFF));
+			QBrush b{StandardColors::VcsCheckedIn};
 
 			switch (file->action().value())
 			{
 			case VcsItemAction::Added:
-				b.setColor(QColor(0xF9, 0xFF, 0xF9));
+				b.setColor(StandardColors::VcsAdded);
 				break;
 			case VcsItemAction::Modified:
-				b.setColor(QColor(0xEA, 0xF0, 0xFF));
+				b.setColor(StandardColors::VcsModified);
 				break;
 			case VcsItemAction::Deleted:
-				b.setColor(QColor(0xFF, 0xF4, 0xF4));
+				b.setColor(StandardColors::VcsDeleted);
 				break;
 			default:
-				assert(false);
+				Q_ASSERT(false);
 			}
 
 			return {b};

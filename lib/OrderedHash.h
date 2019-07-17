@@ -337,6 +337,7 @@ public:
 
 	const VALUE value(const KEY& key) const;
 	const VALUE* valuePtr(const KEY& key) const;
+	VALUE* valuePtr(const KEY& key);
 	const VALUE* valuePtrByIndex(const int index) const;
 
 	const KEY key(const int index) const;
@@ -482,6 +483,18 @@ const VALUE PtrOrderedHash<KEY, VALUE>::value(const KEY& key) const
 
 template<typename KEY, typename VALUE>
 const VALUE* PtrOrderedHash<KEY, VALUE>::valuePtr(const KEY& key) const
+{
+	if (m_hash.contains(key))
+	{
+		int valueIndex = m_hash[key];
+		return m_valueVector[valueIndex];
+	}
+
+	return nullptr;
+}
+
+template<typename KEY, typename VALUE>
+VALUE* PtrOrderedHash<KEY, VALUE>::valuePtr(const KEY& key)
 {
 	if (m_hash.contains(key))
 	{

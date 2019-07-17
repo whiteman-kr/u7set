@@ -1,0 +1,22 @@
+Report from: 16-07-2019 15:05:03
+
+Test File: AFB_SCAL_SI_SI.txt
+
+Test AFB_SCALE_SI_SI01, AFB tests for AFB_SCALE_SI_SI element
+    //
+    Set #TUN_IN_SI1=0
+    Check #OUT_SCALE_SI_SI01=0 - Ok
+    Check #OVERFLOW_SCALE_SI_SI01=0 - Ok
+    Check #ZERO_SCALE_SI_SI01=1 - Ok
+    //
+    Set #TUN_IN_SI1=1
+    Check #OUT_SCALE_SI_SI01=1 - Ok
+    Check #OVERFLOW_SCALE_SI_SI01=0 - Ok
+    Check #ZERO_SCALE_SI_SI01=0 - Ok
+    //
+    Set #TUN_IN_SI1=100
+    Check #OUT_SCALE_SI_SI01=100 - Ok
+    Check #OVERFLOW_SCALE_SI_SI01=0 - Ok
+    Check #ZERO_SCALE_SI_SI01=0 - Ok
+Endtest AFB_SCALE_SI_SI01 - Ok
+

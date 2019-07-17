@@ -1,6 +1,7 @@
 #include "EquipmentTabPage.h"
 #include "../lib/DbController.h"
 #include "../lib/Subsystem.h"
+#include "../lib/StandardColors.h"
 #include "Settings.h"
 #include "CheckInDialog.h"
 #include "EquipmentVcsDialog.h"
@@ -219,18 +220,18 @@ QVariant EquipmentModel::data(const QModelIndex& index, int role) const
 		{
 			if (devieFileInfo.state() == VcsState::CheckedOut)
 			{
-				QBrush b(QColor(0xFF, 0xFF, 0xFF));
+				QBrush b(StandardColors::VcsCheckedIn);
 
 				switch (static_cast<VcsItemAction::VcsItemActionType>(devieFileInfo.action().toInt()))
 				{
 				case VcsItemAction::Added:
-					b.setColor(QColor(0xE9, 0xFF, 0xE9));
+					b.setColor(StandardColors::VcsAdded);
 					break;
 				case VcsItemAction::Modified:
-					b.setColor(QColor(0xEA, 0xF0, 0xFF));
+					b.setColor(StandardColors::VcsModified);
 					break;
 				case VcsItemAction::Deleted:
-					b.setColor(QColor(0xFF, 0xF0, 0xF0));
+					b.setColor(StandardColors::VcsDeleted);
 					break;
 				}
 

@@ -206,7 +206,7 @@ public:
 
 	void clearSignals();
 
-	const SignalSet& signalSet() const	{ return m_signalSet;	};
+	const SignalSet& signalSet() const	{ return m_signalSet; }
 
 	Signal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
 	Signal* getSignalByStrID(const QString signalStrID);
