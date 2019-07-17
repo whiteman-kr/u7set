@@ -318,6 +318,8 @@ public:
 	QString stateFlagSignal(E::AppSignalStateFlagType flagType) const { return  m_stateFlagsSignals.value(flagType, QString()); }
 	bool hasStateFlagsSignals() const { return m_stateFlagsSignals.count(); }
 
+	void initTuningValues();
+
 private:
 	// Private setters for fields, witch can't be changed outside DB engine
 	// Should be used only by friends
@@ -475,6 +477,8 @@ public:
 
 	int getMaxID();
 	QStringList appSignalIdsList(bool removeNumberSign, bool sort) const;
+
+	void replaceOrAppendIfNotExists(int signalID, const Signal& s);
 
 private:
 	QMultiHash<int, int> m_groupSignals;

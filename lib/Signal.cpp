@@ -1207,6 +1207,28 @@ bool Signal::addStateFlagSignal(E::AppSignalStateFlagType flagType, const QStrin
 	return true;
 }
 
+void Signal::initTuningValues()
+{
+	switch (signalType())
+	{
+	case E::SignalType::Analog:
+		m_tuningLowBound.setValue(m_tuningLowBound.type(), static_cast<qint64>(lowEngeneeringUnits()), lowEngeneeringUnits());
+		m_tuningHighBound.setValue(m_tuningHighBound.type(), static_cast<qint64>(highEngeneeringUnits()), highEngeneeringUnits());
+		break;
+
+	case E::SignalType::Discrete:
+		m_tuningLowBound.setValue(m_tuningLowBound.type(), 0, 0);
+		m_tuningHighBound.setValue(m_tuningHighBound.type(), 1, 1);
+		break;
+
+	case E::SignalType::Bus:
+		break;
+
+	default:
+		assert(false);
+	}
+}
+
 bool Signal::isCompatibleFormatPrivate(E::SignalType signalType, E::DataFormat dataFormat, int size, E::ByteOrder byteOrder, const QString& busTypeID) const
 {
 	if (m_signalType != signalType)
@@ -1256,7 +1278,6 @@ void Signal::updateTuningValuesType()
 	m_tuningLowBound.setType(tvType);
 	m_tuningHighBound.setType(tvType);
 }
-
 
 double Signal::getSpecPropDouble(const QString& name) const
 {
@@ -1669,4 +1690,16 @@ QStringList SignalSet::appSignalIdsList(bool removeNumberSign, bool sort) const
 	return result;
 }
 
+void SignalSet::replaceOrAppendIfNotExists(int signalID, const Signal& s)
+{
+	Signal* existsSignal = valuePtr(signalID);
 
+	if (existsSignal != nullptr)
+	{
+		*existsSignal = s;
+	}
+	else
+	{
+		append(signalID, new Signal(s));
+	}
+}
