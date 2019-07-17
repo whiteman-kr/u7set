@@ -1435,26 +1435,43 @@ void SignalsModel::addSignal()
 
 	signal.initSpecificProperties();
 
-	signal.setLowADC(loader(SignalProperties::lowADCCaption).toInt());
-	signal.setHighADC(loader(SignalProperties::highADCCaption).toInt());
-	signal.setLowEngeneeringUnits(loader(SignalProperties::lowEngeneeringUnitsCaption, 0).toDouble());
-	signal.setHighEngeneeringUnits(loader(SignalProperties::highEngeneeringUnitsCaption, 100).toDouble());
-	signal.setUnit(loader(SignalProperties::unitCaption).toString());
-	signal.setLowValidRange(loader(SignalProperties::lowValidRangeCaption).toDouble());
-	signal.setHighValidRange(loader(SignalProperties::highValidRangeCaption).toDouble());
+	auto setter = [&signal, this](const QString& name, QVariant value) {
+		int index = m_propertyManager.index(name);
+		if (index == -1)
+		{
+			return;
+		}
 
-	signal.setElectricLowLimit(loader(SignalProperties::electricLowLimitCaption).toDouble());
-	signal.setElectricHighLimit(loader(SignalProperties::electricHighLimitCaption).toDouble());
-	signal.setElectricUnit(static_cast<E::ElectricUnit>(loader(SignalProperties::electricUnitCaption).toInt()));
-	signal.setSensorType(static_cast<E::SensorType>(loader(SignalProperties::sensorTypeCaption).toInt()));
-	signal.setOutputMode(static_cast<E::OutputMode>(loader(SignalProperties::outputModeCaption).toInt()));
+		if (m_propertyManager.getBehaviour(signal, index) == E::PropertyBehaviourType::Write)
+		{
+			m_propertyManager.setValue(&signal, index, value);
+		}
+	};
 
-	signal.setAcquire(loader(SignalProperties::acquireCaption).toBool());
-	signal.setDecimalPlaces(loader(SignalProperties::decimalPlacesCaption).toInt());
-	signal.setCoarseAperture(loader(SignalProperties::coarseApertureCaption).toDouble());
-	signal.setFineAperture(loader(SignalProperties::fineApertureCaption).toDouble());
-	signal.setFilteringTime(loader(SignalProperties::filteringTimeCaption).toDouble());
-	signal.setSpreadTolerance(loader(SignalProperties::spreadToleranceCaption).toDouble());
+	setter(SignalProperties::lowEngeneeringUnitsCaption, 0.0);
+	setter(SignalProperties::highEngeneeringUnitsCaption, 100.0);
+
+	for (int i = 0; i < m_propertyManager.count(); i++)
+	{
+		if (m_propertyManager.getBehaviour(signal, i) != E::PropertyBehaviourType::Write)
+		{
+			continue;
+		}
+
+		QString name = m_propertyManager.name(i);
+		QVariant value = settings.value(SignalProperties::lastEditedSignalFieldValuePlace + name, QVariant());
+		if (value.isValid() == false)
+		{
+			continue;
+		}
+
+		QVariant::Type type = m_propertyManager.type(i);
+		if (value.canConvert(type) && value.convert(type))
+		{
+			m_propertyManager.setValue(&signal, i, value);
+		}
+	}
+
 	signal.setInOutType(E::SignalInOutType::Internal);
 	signal.setByteOrder(E::ByteOrder::BigEndian);
 

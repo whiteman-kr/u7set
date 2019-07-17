@@ -613,30 +613,27 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 		return;
 	}
 
+	SignalsModel* model = SignalsModel::instance();
+
+	if (model == nullptr)
+	{
+		return;
+	}
+
+	SignalPropertyManager& manager = model->signalPropertyManager();
+
 	const Signal& signal = *m_signalVector[0];
 
 	QSettings settings(QSettings::UserScope, qApp->organizationName());
 
-	auto saver = [&settings](const QString& name, auto value)
+	for (int i = 0; i < manager.count(); i++)
 	{
-		settings.setValue(SignalProperties::lastEditedSignalFieldValuePlace + name, value);
-	};
+		if (manager.isHidden(manager.getBehaviour(signal, i)))
+		{
+			continue;
+		}
 
-	saver(SignalProperties::acquireCaption, signal.acquire());
-	saver(SignalProperties::decimalPlacesCaption, signal.decimalPlaces());
-	saver(SignalProperties::unitCaption, signal.unit());
-	saver(SignalProperties::coarseApertureCaption, signal.coarseAperture());
-	saver(SignalProperties::fineApertureCaption, signal.fineAperture());
-	saver(SignalProperties::byteOrderCaption, signal.byteOrder());
-
-	SignalSpecPropValues spv;
-
-	spv.create(signal);
-
-	for(const SignalSpecPropValue& sv : spv.values())
-	{
-		QVariant qv = sv.value();
-
-		settings.setValue(SignalProperties::lastEditedSignalFieldValuePlace + sv.name(), qv);
+		QString name = manager.name(i);
+		settings.setValue(SignalProperties::lastEditedSignalFieldValuePlace + name, manager.value(&signal, i));
 	}
 }
