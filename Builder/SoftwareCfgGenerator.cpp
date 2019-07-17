@@ -213,7 +213,7 @@ namespace Builder
 				{
 					if (iterruptRequest == true)
 					{
-						return false;
+						return nullptr;
 					}
 
 					std::shared_ptr<VFrame30::Schema> result = VFrame30::Schema::Create(file->data());
