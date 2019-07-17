@@ -2085,13 +2085,22 @@ namespace Builder
 		}
 	}
 
-	bool UalSignal::addStateFlagSignal(E::AppSignalStateFlagType flagType, UalSignal* flagSignal, IssueLogger* log)
+	bool UalSignal::addStateFlagSignal(const QString& signalWithFlagID, E::AppSignalStateFlagType flagType, UalSignal* flagSignal, IssueLogger* log)
 	{
 		bool result = true;
+
+		bool signalWithFlagID_isFound = false;
 
 		for(Signal* s : m_refSignals)
 		{
 			TEST_PTR_CONTINUE(s);
+
+			if (s->appSignalID() != signalWithFlagID)
+			{
+				continue;
+			}
+
+			signalWithFlagID_isFound = true;
 
 			bool res = s->addStateFlagSignal(flagType, flagSignal->appSignalID());
 
@@ -2108,6 +2117,14 @@ namespace Builder
 			}
 
 			result &= res;
+		}
+
+		if (signalWithFlagID_isFound == false)
+		{
+			LOG_INTERNAL_ERROR_MSG(log,
+								   QString("UalSignal::addStateFlagSignal error. SignalWithFlagID %1 is not found in UalSignal %2 to assigninf flag signal %3").
+										arg(signalWithFlagID).arg(refSignalIDsJoined()).arg(flagSignal->appSignalID()));
+			result = false;
 		}
 
 		return result;

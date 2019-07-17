@@ -81,7 +81,7 @@ namespace Builder
 			return false;
 		}
 
-		bool res = ualSignalWithFlag->addStateFlagSignal(flagType, ualFlagSignal, m_compiler.log());
+		bool res = ualSignalWithFlag->addStateFlagSignal(signalWithFlagID, flagType, ualFlagSignal, m_compiler.log());
 
 		RETURN_IF_FALSE(res);
 
@@ -2310,7 +2310,7 @@ namespace Builder
 			return false;
 		}
 
-		if (s->isOutput() == true)
+/*		if (s->isOutput() == true)
 		{
 			// create separate UAL signal for each output signal
 
@@ -2345,7 +2345,25 @@ namespace Builder
 			{
 				return false;
 			}
+		}*/
+
+		//
+
+		result = m_ualSignals.appendRefPin(signalItem, inPinUuid, srcUalSignal);
+
+		if (result == false)
+		{
+			return false;
 		}
+
+		result = m_ualSignals.appendRefSignal(s, srcUalSignal);
+
+		if (result == false)
+		{
+			return false;
+		}
+
+		//
 
 		const std::vector<LogicPin>& outputs = signalItem->outputs();
 
