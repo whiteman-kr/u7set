@@ -1390,6 +1390,13 @@ void SignalsModel::addSignal()
 
 	signal.setSignalType(static_cast<E::SignalType>(signalTypeCombo->currentIndex()));
 
+	if (signal.isAnalog())
+	{
+		// Temporary default value, should be removed later
+		//
+		signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
+	}
+
 	initNewSignal(signal);
 
 	if (!deviceIdEdit->text().isEmpty())

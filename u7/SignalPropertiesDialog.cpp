@@ -152,32 +152,13 @@ void initNewSignal(Signal& signal)
 	{
 	case E::SignalType::Analog:
 	{
-		signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
 		signal.setDataSize(FLOAT32_SIZE);
-
-		auto value = signal.tuningLowBound();
-		value.setFloatValue(loader(SignalProperties::lowEngeneeringUnitsCaption, 0).toFloat());
-		signal.setTuningLowBound(value);
-
-		value = signal.tuningHighBound();
-		value.setFloatValue(loader(SignalProperties::highEngeneeringUnitsCaption, 100).toFloat());
-		signal.setTuningHighBound(value);
-
 		break;
 	}
 
 	case E::SignalType::Discrete:
 	{
 		signal.setDataSize(DISCRETE_SIZE);
-
-		auto value = signal.tuningLowBound();
-		value.setDiscreteValue(0);
-		signal.setTuningLowBound(value);
-
-		value = signal.tuningHighBound();
-		value.setDiscreteValue(1);
-		signal.setTuningHighBound(value);
-
 		break;
 	}
 
