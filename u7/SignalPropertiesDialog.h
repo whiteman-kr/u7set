@@ -22,6 +22,7 @@ namespace ExtWidgets
 
 
 std::vector<std::pair<QString, QString> > editApplicationSignals(QStringList& signalId, DbController* dbController, QWidget *parent = 0);
+void initNewSignal(Signal& signal);
 
 
 class SignalPropertiesDialog : public QDialog
