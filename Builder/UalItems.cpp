@@ -2106,14 +2106,16 @@ namespace Builder
 
 			if (res == false)
 			{
-				//Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
+				// Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
 				//
-				log->errALC5168(flagSignal->appSignalID(),
+				log->wrnALC5168(flagSignal->appSignalID(),
 								E::valueToString<E::AppSignalStateFlagType>(flagType),
 								s->appSignalID(),
 								s->stateFlagSignal(flagType),
 								QUuid(),
 								QString());
+
+				res = true;		// remove after wrnALC5168 transform to Error
 			}
 
 			result &= res;

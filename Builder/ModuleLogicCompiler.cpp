@@ -95,15 +95,17 @@ namespace Builder
 
 		if (signalFlagsMap->contains(flagType) == true)
 		{
-			//Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
+
+			// Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
 			//
-			m_compiler.log()->errALC5168(	flagSignalID,
+			m_compiler.log()->wrnALC5168(	flagSignalID,
 											E::valueToString<E::AppSignalStateFlagType>(flagType),
 											signalWithFlagID,
 											signalFlagsMap->value(flagType),
 											QUuid(),
 											QString());
-			return false;
+
+			return true;	// replce with "return false;" after wrnALC5168 transform to Error
 		}
 
 		signalFlagsMap->insert(flagType, flagSignalID);
