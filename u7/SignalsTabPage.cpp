@@ -1131,6 +1131,15 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 			case QMetaType::Double:
 			case QMetaType::Float:
 				return QString::number(value.toDouble(), 'f', signal.decimalPlaces());
+			case QMetaType::Short:
+			case QMetaType::UShort:
+			case QMetaType::Int:
+			case QMetaType::UInt:
+			case QMetaType::Long:
+			case QMetaType::ULong:
+			case QMetaType::LongLong:
+			case QMetaType::ULongLong:
+				return value.toString();
 			default:
 				assert(false);
 				return QVariant();
