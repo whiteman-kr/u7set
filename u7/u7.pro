@@ -184,6 +184,7 @@ SOURCES +=\
 
 
 HEADERS  += \
+    ../lib/StandardColors.h \
     CentralWidget.h \
     CreateProjectDialog.h \
     CreateUserDialogDialog.h \
