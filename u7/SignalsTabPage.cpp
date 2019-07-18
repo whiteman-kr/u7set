@@ -1397,93 +1397,16 @@ void SignalsModel::addSignal()
 
 	Signal signal;
 
-	QSettings settings;
-	auto loader = [&settings](const QString& name, QVariant defaultValue = QVariant())
-	{
-		return settings.value(SignalProperties::lastEditedSignalFieldValuePlace + name, defaultValue);
-	};
-
 	signal.setSignalType(static_cast<E::SignalType>(signalTypeCombo->currentIndex()));
 
-	switch (signal.signalType())
+	if (signal.isAnalog())
 	{
-	case E::SignalType::Analog:
-	{
+		// Temporary default value, should be removed later
+		//
 		signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
-		signal.setDataSize(FLOAT32_SIZE);
-
-		auto value = signal.tuningLowBound();
-		value.setFloatValue(loader(SignalProperties::lowEngeneeringUnitsCaption, 0).toFloat());
-		signal.setTuningLowBound(value);
-
-		value = signal.tuningHighBound();
-		value.setFloatValue(loader(SignalProperties::highEngeneeringUnitsCaption, 100).toFloat());
-		signal.setTuningHighBound(value);
-
-		break;
 	}
 
-	case E::SignalType::Discrete:
-	{
-		signal.setDataSize(DISCRETE_SIZE);
-
-		auto value = signal.tuningLowBound();
-		value.setDiscreteValue(0);
-		signal.setTuningLowBound(value);
-
-		value = signal.tuningHighBound();
-		value.setDiscreteValue(1);
-		signal.setTuningHighBound(value);
-
-		break;
-	}
-
-	case E::SignalType::Bus:
-	default:
-		break;
-	}
-
-	signal.initSpecificProperties();
-
-	auto setter = [&signal, this](const QString& name, QVariant value) {
-		int index = m_propertyManager.index(name);
-		if (index == -1)
-		{
-			return;
-		}
-
-		if (m_propertyManager.getBehaviour(signal, index) == E::PropertyBehaviourType::Write)
-		{
-			m_propertyManager.setValue(&signal, index, value);
-		}
-	};
-
-	setter(SignalProperties::lowEngeneeringUnitsCaption, 0.0);
-	setter(SignalProperties::highEngeneeringUnitsCaption, 100.0);
-
-	for (int i = 0; i < m_propertyManager.count(); i++)
-	{
-		if (m_propertyManager.getBehaviour(signal, i) != E::PropertyBehaviourType::Write)
-		{
-			continue;
-		}
-
-		QString name = m_propertyManager.name(i);
-		QVariant value = settings.value(SignalProperties::lastEditedSignalFieldValuePlace + name, QVariant());
-		if (value.isValid() == false)
-		{
-			continue;
-		}
-
-		QVariant::Type type = m_propertyManager.type(i);
-		if (value.canConvert(type) && value.convert(type))
-		{
-			m_propertyManager.setValue(&signal, i, value);
-		}
-	}
-
-	signal.setInOutType(E::SignalInOutType::Internal);
-	signal.setByteOrder(E::ByteOrder::BigEndian);
+	initNewSignal(signal);
 
 	if (!deviceIdEdit->text().isEmpty())
 	{
