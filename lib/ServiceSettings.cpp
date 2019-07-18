@@ -309,7 +309,7 @@ QStringList CfgServiceSettings::knownClients()
 
 	for(const QPair<QString, E::SoftwareType>& client : clients)
 	{
-		knownClients.append(client.first);
+		knownClients.append(client.first.trimmed());
 	}
 
 	return knownClients;
