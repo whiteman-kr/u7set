@@ -1812,7 +1812,12 @@ void SignalsModel::initLazyLoadSignals()
 		QVector<Signal> signalsArray;
 		QVector<int> signalId;
 
-		const int SignalPortionCount = 250;
+		int SignalPortionCount = signalIds.count();
+
+		if (SignalPortionCount > 250)
+		{
+			SignalPortionCount = 250;
+		}
 
 		signalsArray.reserve(SignalPortionCount);
 		signalId.reserve(SignalPortionCount);
