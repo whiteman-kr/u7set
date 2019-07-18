@@ -672,7 +672,7 @@ namespace VFrame30
 		if (inputsCount() > 0)
 		{
 			const std::vector<AfbPin>& inputPins = inputs();
-			assert(inputPins.empty() == false);
+			Q_ASSERT(inputPins.empty() == false);
 
 			painter->drawLine(QPointF(r.left() + (pinWidth / 3.0) * 2.0, inputPins.front().y() - pinWidth / 4.0),
 							  QPointF(r.left() + (pinWidth / 3.0) * 1.0, inputPins.front().y() + pinWidth / 4.0));
@@ -681,7 +681,7 @@ namespace VFrame30
 		if (outputsCount() > 0)
 		{
 			const std::vector<AfbPin>& pins = outputs();
-			assert(pins.empty() == false);
+			Q_ASSERT(pins.empty() == false);
 
 			painter->drawLine(QPointF(r.right() - (pinWidth / 3.0) * 2.0, pins.front().y() + pinWidth / 4.0),
 							  QPointF(r.right() - (pinWidth / 3.0) * 1.0, pins.front().y() - pinWidth / 4.0));
