@@ -242,8 +242,8 @@ namespace Builder
 
 		bool createUalSignalsFromReceivers();
 		bool createUalSignalsFromReceiver(UalItem* ualItem);
-		bool createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& appSignalID);
-		bool createUalSignalFromReceiverValidity(UalItem* ualItem, const LogicPin& validityPin, const QString& validitySignalEquipmentID);
+		bool createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& appSignalID, bool isSinglePortConnection);
+		bool createUalSignalFromReceiverValidity(UalItem* ualItem, const LogicPin& validityPin, std::shared_ptr<Hardware::Connection> connection);
 		bool getReceiverConnectionID(const UalReceiver* receiver, QString* connectionID, const QString& schemaID);
 
 		bool createUalSignalFromSignal(UalItem* ualItem, int passNo);
@@ -278,18 +278,16 @@ namespace Builder
 
 		bool setAcquiredForFlagSignals();
 		bool checkSignalsWithFlags();
-//		bool linkSignalsWithFlagsInSignalSet();
 		void writeSignalsWithFlagsReport();
 		void writeSignalsWithFlagsToReport(QStringList* file, const QStringList& signalsWithFlagsIDs);
 
 		bool sortUalSignals();
 
-//		bool appendAutoUalSignalsToSignalSet();
-
 		//
 
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal, const QString& busTypeID);
 		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal);
+		Signal* getCompatibleConnectedSignal(const LogicPin& outPin, const Signal& s);
 		Signal* getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString busTypeID);
 		bool isCompatible(const LogicAfbSignal& outAfbSignal, const QString& busTypeID, const Signal* s);
 
@@ -346,8 +344,6 @@ namespace Builder
 
 		bool groupTxSignals();
 
-		bool appendLinkedValiditySignal(const Signal* s);
-
 		bool listsUniquenessCheck() const;
 		bool listUniquenessCheck(QHash<UalSignal*, UalSignal*>& signalsMap, const QVector<UalSignal*>& signalList) const;
 		void sortSignalList(QVector<UalSignal*> &signalList);
@@ -374,8 +370,6 @@ namespace Builder
 		//
 		bool disposeNonAcquiredAnalogSignals();
 		bool disposeNonAcquiredBuses();
-
-//		bool setSignalsFlagsAddresses();
 
 		bool appendAfbsForAnalogInOutSignalsConversion();
 		bool findFbsForAnalogInOutSignalsConversion();
@@ -512,7 +506,6 @@ namespace Builder
 		bool calcAppLogicUniqueID(const QByteArray& lmAppCode);
 		bool writeTuningInfoFile();
 		bool writeOcmRsSignalsXml();
-		void writeLMCodeTestFile();
 
 		bool displayResourcesUsageInfo();
 		void calcOptoDiscretesStatistics();
@@ -619,6 +612,8 @@ namespace Builder
 
 		UalSignalsMap m_ualSignals;
 		UalAfbsMap m_ualAfbs;
+
+		QHash<UalSignal*, UalSignal*> m_outUalSignals;		// output UAL signals map: outUalSignal -> sourceUalSignal
 
 		// service maps
 		//

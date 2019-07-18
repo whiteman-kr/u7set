@@ -57,6 +57,7 @@
         <file>Images/SchemaFolder.svg</file>
         <file>Images/SchemaItemImage.svg</file>
         <file>Images/SchemaItemImageValue.svg</file>
+        <file>Images/SchemaItemFrame.svg</file>
     </qresource>
     <qresource prefix="/">
         <file>ScriptHelp/scripthelp.html</file>

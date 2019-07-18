@@ -134,6 +134,7 @@ public:
 	bool getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray, QWidget* parentWidget);
 	bool getCheckedOutSignalsIDs(QVector<int>* signalIDs, QWidget* parentWidget);
 	bool addSignal(E::SignalType signalType, QVector<Signal>* newSignal, QWidget* parentWidget);
+	bool getLatestSignalsWithoutProgress(QVector<int> signalIDs, QVector<Signal>* signalsArray, QWidget* parentWidget);
 
 	bool checkoutSignals(QVector<int>* signalIDs, QVector<ObjectState>* objectStates, QWidget* parentWidget);
 	bool setSignalWorkcopy(Signal* signal, ObjectState* objectState, QWidget* parentWidget);
@@ -291,6 +292,7 @@ public:
 public:
 	void enableProgress();
 	void disableProgress();
+	bool isProgressEnabled() const;
 
 	const QString& host() const;
 	void setHost(const QString& host);

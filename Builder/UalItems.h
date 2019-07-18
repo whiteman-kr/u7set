@@ -403,6 +403,11 @@ namespace Builder
 		// represent all signal in application logic schemas, and signals, which createad in compiling time
 		//
 	public:
+		static const QString AUTO_CONST_SIGNAL_ID_PREFIX;
+		static const QString AUTO_SIGNAL_ID_PREFIX;
+		static const QString AUTO_BUS_ID_PREFIX;
+
+	public:
 		UalSignal();
 		UalSignal(const UalSignal&) = delete;
 
@@ -425,12 +430,12 @@ namespace Builder
 								E::AnalogAppSignalFormat analogFormat,
 								Signal** autoSignalPtr);
 
-		bool createOptoSignal(const UalItem* ualItem,
+/*		bool createOptoSignal(const UalItem* ualItem,
 								Signal* s,
 								const QString &lmEquipmentID,
 								BusShared bus,
 								bool isBusChildSignal,
-								IssueLogger* log);
+								IssueLogger* log);*/
 
 		bool createBusParentSignal(const UalItem* ualItem,
 									Signal* busSignal,
@@ -445,7 +450,7 @@ namespace Builder
 		bool appendRefSignal(Signal* s, bool isOptoSignal);
 		bool appendBusChildRefSignals(const QString &busSignalID, Signal* s);
 
-		Signal* createNativeCopyOfSignal(const Signal* templateSignal, const QString& lmEquipmentID);
+		//Signal* createNativeCopyOfSignal(const Signal* templateSignal, const QString& lmEquipmentID);
 
 		void setComputed() { m_computed = true; }
 		bool isComputed() const { return m_computed; }
@@ -502,6 +507,7 @@ namespace Builder
 		bool isInput() const { return m_isInput; }
 		bool isTuningable() const { return m_isTuningable; }
 		bool isOptoSignal() const { return m_isOptoSignal; }
+		void setReceivedOptoAppSignalID(const QString& recvAppSignalID);
 
 		bool isSource() const { return m_isInput || m_isTuningable || m_isOptoSignal || m_isConst; }
 
@@ -560,11 +566,10 @@ namespace Builder
 
 		void setAcquired(bool acquired);
 
-		bool addStateFlagSignal(E::AppSignalStateFlagType flagType, UalSignal* flagSignal, IssueLogger* log);
+		bool addStateFlagSignal(const QString& signalWithFlagID, E::AppSignalStateFlagType flagType, UalSignal* flagSignal, IssueLogger* log);
 
 	private:
 		const UalItem* m_ualItem = nullptr;
-//		Signal* m_autoSignalPtr = nullptr;
 
 		QVector<Signal*> m_refSignals;							// vector of pointers to signal in m_signalSet
 
@@ -591,7 +596,9 @@ namespace Builder
 		bool m_isInput = false;							// signal sources
 		bool m_isTuningable = false;
 		bool m_isOptoSignal = false;
-		Signal* m_optoSignalNativeCopy = nullptr;
+		QString m_receivedOptoAppSignalID;
+
+		Signal* m_optoSignalNativeCopy = nullptr;		// delete this!
 
 		bool m_isOutput = false;
 		bool m_isAcquired = false;
@@ -627,12 +634,10 @@ namespace Builder
 		UalSignal* createConstSignal(const UalItem* ualItem,
 									 E::SignalType constSignalType,
 									 E::AnalogAppSignalFormat constAnalogFormat,
-									 QUuid outPinUuid,
-									 const QString& lmEquipmentID);
+									 QUuid outPinUuid);
 
-		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& outAfbSignal, const QString &lmEquipmentID);
-
-		UalSignal* createOptoSignal(const UalItem* ualItem, Signal* s, const QString& lmEquipmentID, bool isBusChildSignal, QUuid outPinUuid);
+		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const LogicAfbSignal& templateOutAfbSignal);
+		UalSignal* createAutoSignal(const UalItem* ualItem, QUuid outPinUuid, const Signal& templateSignal);
 
 		UalSignal* createBusParentSignal(const UalItem* ualItem, Signal* s, BusShared bus, QUuid outPinUuid, const QString& outPinCaption, std::shared_ptr<Hardware::DeviceModule> lm);
 
@@ -650,6 +655,11 @@ namespace Builder
 		bool getReport(QStringList& report) const;
 
 	private:
+		UalSignal* privateCreateAutoSignal(const UalItem* ualItem,
+									QUuid outPinUuid,
+									E::SignalType signalType,
+									E::AnalogAppSignalFormat analogFormat);
+
 		bool insertNew(QUuid pinUuid, UalSignal* newUalSignal);
 		void appendPinRefToSignal(QUuid pinUuid, UalSignal* ualSignal);
 
@@ -669,11 +679,6 @@ namespace Builder
 		QHash<QUuid, UalSignal*> m_pinToSignalMap;
 		QHash<UalSignal*, QUuid> m_signalToPinsMap;
 		QHash<Signal*, UalSignal*> m_ptrToSignalMap;
-
-		//
-
-		static const QString AUTO_CONST_SIGNAL_ID_PREFIX;
-		static const QString AUTO_SIGNAL_ID_PREFIX;
 	};
 
 }

@@ -182,7 +182,6 @@ HEADERS  += \
     ../lib/SoftwareInfo.h \
     ../lib/TuningValue.h \
     ../Builder/CfgFiles.h \
-    ../lib/PropertyObject.h \
     ../lib/SignalProperties.h \
     ../lib/Ui/DialogAbout.h \
 	../lib/UnitsConvertor.h \

@@ -319,6 +319,7 @@ namespace Builder
 
 		bool isCommand() const { return m_isCommand == true; }
 		bool isComment() const { return m_isCommand == false; }
+		bool isNewLine() const { return m_isCommand == false && m_comment.isEmpty(); }
 
 		bool hasError() const { return m_result == false; }
 
@@ -401,6 +402,7 @@ namespace Builder
 		void comment(const QString& cmt);
 		void newLine();
 		void comment_nl(const QString& cmt);
+		void finalizeByNewLine();
 
 		void init(CodeSnippetMetrics* codeFragmentMetrics);
 		void calculate(CodeSnippetMetrics* codeFragmentMetrics);

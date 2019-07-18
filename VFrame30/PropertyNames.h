@@ -10,6 +10,8 @@ namespace VFrame30
 		PropertyNames() = delete;
 
 	public:
+		static const QString schemaId;
+
 		static const QString acceptClick;
 		static const QString clickScript;
 		static const QString preDrawScript;

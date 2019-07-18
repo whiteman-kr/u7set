@@ -183,7 +183,7 @@ void DbProgress::disableProgress()
 	m_progressEnabled = false;
 }
 
-bool DbProgress::isProgressEnabled()
+bool DbProgress::isProgressEnabled() const
 {
 	return m_progressEnabled;
 }

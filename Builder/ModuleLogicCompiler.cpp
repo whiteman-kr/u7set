@@ -81,7 +81,7 @@ namespace Builder
 			return false;
 		}
 
-		bool res = ualSignalWithFlag->addStateFlagSignal(flagType, ualFlagSignal, m_compiler.log());
+		bool res = ualSignalWithFlag->addStateFlagSignal(signalWithFlagID, flagType, ualFlagSignal, m_compiler.log());
 
 		RETURN_IF_FALSE(res);
 
@@ -197,7 +197,6 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::createUalSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::processSignalsWithFlags),
 			PROC_TO_CALL(ModuleLogicCompiler::sortUalSignals),
-//			PROC_TO_CALL(ModuleLogicCompiler::appendAutoUalSignalsToSignalSet),
 			PROC_TO_CALL(ModuleLogicCompiler::processTxSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::processSinglePortRxSignals),
 			PROC_TO_CALL(ModuleLogicCompiler::buildTuningData),
@@ -697,10 +696,7 @@ namespace Builder
 		result &= createUalSignalsFromBusComposers();
 		result &= createUalSignalsFromReceivers();
 
-		if (result == false)
-		{
-			return false;
-		}
+		RETURN_IF_FALSE(result);
 
 		// secondary created signals
 		//
@@ -713,26 +709,24 @@ namespace Builder
 				continue;
 			}
 
-			bool res = true;
-
 			switch(ualItem->type())
 			{
 			// UAL items that can generate signals
 			//
 			case E::UalItemType::Signal:
-				res = createUalSignalFromSignal(ualItem, 1);
+				result = createUalSignalFromSignal(ualItem, 1);
 				break;
 
 			case E::UalItemType::Const:
-				res = createUalSignalFromConst(ualItem);
+				result = createUalSignalFromConst(ualItem);
 				break;
 
 			case E::UalItemType::Afb:
-				res = createUalSignalsFromAfbOuts(ualItem);
+				result = createUalSignalsFromAfbOuts(ualItem);
 				break;
 
 			case E::UalItemType::BusExtractor:
-				res = linkUalSignalsFromBusExtractor(ualItem);
+				result = linkUalSignalsFromBusExtractor(ualItem);
 				break;
 
 			// UAL items already processed
@@ -757,20 +751,12 @@ namespace Builder
 				result = false;
 			}
 
-			result &= res;
-		}
-
-		if (result == false)
-		{
-			return false;
+			RETURN_IF_FALSE(result);
 		}
 
 		result &= linkLoopbackTargets();
 
-		if (result == false)
-		{
-			return false;
-		}
+		RETURN_IF_FALSE(result);
 
 		// link signals connected to loopback targets
 		//
@@ -793,10 +779,7 @@ namespace Builder
 
 		result &= checkBusProcessingItemsConnections();
 
-		if (result == false)
-		{
-			return false;
-		}
+		RETURN_IF_FALSE(result);
 
 		signalSet()->buildID2IndexMap();
 
@@ -1567,13 +1550,14 @@ namespace Builder
 		if (ualReceiver->appSignalIdsAsList().size() > 1)
 		{
 			m_log->errINT1001(QString("SchemaItemReceiver has more then one AppSignalID"), ualItem->schemaID(), ualItem->guid());
+			return false;
 		}
 
 		QString appSignalID = ualReceiver->appSignalIds();
 
 		bool result = true;
 
-		result &= createUalSignalFromReceiverOutput(ualItem, outPin, appSignalID);
+		result &= createUalSignalFromReceiverOutput(ualItem, outPin, appSignalID, connection->isSinglePort());
 
 		// UalSignal creation from receiver's validity pin
 		//
@@ -1585,94 +1569,146 @@ namespace Builder
 
 		const LogicPin& validityPin = outputs[validityPinIndex];
 
-		Hardware::OptoPortShared port = m_optoModuleStorage->getOptoPort(connection->port1EquipmentID());
+		result &= createUalSignalFromReceiverValidity(ualItem, validityPin, connection);
 
-		if (port == nullptr)
+		return result;
+	}
+
+	bool ModuleLogicCompiler::createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& receivedAppSignalID, bool isSinglePortConnection)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
+
+		bool connectedToTerminatorOnly = isConnectedToTerminatorOnly(outPin);
+
+		if (connectedToTerminatorOnly == true)
 		{
-			LOG_INTERNAL_ERROR(m_log);				// port isn't found
+			return true;				// not needed to create signal
+		}
+
+		bool result = true;
+
+		Signal* receivedSignal = m_signals->getSignal(receivedAppSignalID);
+
+		if (receivedSignal == nullptr)
+		{
+			// Signal identifier %1 is not found (Logic schema %2).
+			//
+			m_log->errALC5000(receivedAppSignalID, ualItem->guid(), ualItem->schemaID());
 			return false;
 		}
 
-		if (port->lmID() != lmEquipmentID())
+		Signal* compatibleConnectedSignal = nullptr;
+
+		if (isSinglePortConnection == true)
 		{
-			if (connection->isSinglePort() == true)
+			compatibleConnectedSignal = receivedSignal;
+		}
+		else
+		{
+			if (m_chassisSignals.contains(receivedAppSignalID) == true)
 			{
-				LOG_INTERNAL_ERROR(m_log);				// port associated with current LM isn't found
+				// LM's %1 native signal %2 can't be received via opto connection (Logic schema %3)
+				//
+				m_log->errALC5170(lmEquipmentID(), receivedAppSignalID, ualItem->guid(), ualItem->schemaID());
 				return false;
 			}
 
-			assert(connection->isPortToPort() == true);
+			compatibleConnectedSignal = getCompatibleConnectedSignal(outPin, *receivedSignal);
+		}
 
-			port = m_optoModuleStorage->getOptoPort(connection->port2EquipmentID());
+		// after that compatibleConnectedSignal can be nullptr, it is Ok
 
-			if (port == nullptr)
+		UalSignal* ualSignal = nullptr;
+
+		switch(receivedSignal->signalType())
+		{
+		case E::SignalType::Analog:
+		case E::SignalType::Discrete:
+			if (compatibleConnectedSignal == nullptr)
 			{
-				LOG_INTERNAL_ERROR(m_log);				// port isn't found
-				return false;
+				ualSignal = m_ualSignals.createAutoSignal(ualItem, outPin.guid(), *receivedSignal);
 			}
-
-			if (port->lmID() != lmEquipmentID())
+			else
 			{
-				LOG_INTERNAL_ERROR(m_log);				// port associated with current LM isn't found
-				return false;
+				ualSignal = m_ualSignals.createSignal(ualItem, compatibleConnectedSignal, outPin.guid());
 			}
+			break;
+
+		case E::SignalType::Bus:
+			{
+				BusShared bus = m_signals->getBus(receivedSignal->busTypeID());
+
+				if (bus == nullptr)
+				{
+					// Bus type ID '%1' is undefined (Logic schema '%2').
+					//
+					m_log->errALC5100(receivedSignal->busTypeID(), ualItem->guid(), ualItem->schemaID());
+					return false;
+				}
+				if (compatibleConnectedSignal != nullptr && compatibleConnectedSignal->isBus() == false)
+				{
+					assert(false);
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
+				std::shared_ptr<Hardware::DeviceModule> lm = getLmSharedPtr();
+
+				if (lm == nullptr)
+				{
+					LOG_INTERNAL_ERROR(m_log);
+					return false;
+				}
+
+				ualSignal = m_ualSignals.createBusParentSignal(ualItem, compatibleConnectedSignal, bus,
+															   outPin.guid(), outPin.caption(), lm);
+			}
+			break;
+
+		default:
+			assert(false);
+		}
+
+		if (ualSignal == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);
+			return false;
+		}
+
+		ualSignal->setReceivedOptoAppSignalID(receivedAppSignalID);
+
+		result &= linkConnectedItems(ualItem, outPin, ualSignal);
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::createUalSignalFromReceiverValidity(UalItem* ualItem,
+																  const LogicPin& validityPin,
+																  std::shared_ptr<Hardware::Connection> connection)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
+		TEST_PTR_LOG_RETURN_FALSE(connection, m_log);
+
+		if (isConnectedToTerminatorOnly(validityPin) == true)
+		{
+			return true;								// ualSignal is not required
+		}
+
+		Hardware::OptoPortShared port = m_optoModuleStorage->getLmAssociatedOptoPort(lmEquipmentID(), connection->connectionID());
+
+		if (port == nullptr)
+		{
+			LOG_INTERNAL_ERROR(m_log);					// port isn't found
+			return false;
 		}
 
 		QString validitySignalID = port->validitySignalID();
 
-		result &= createUalSignalFromReceiverValidity(ualItem, validityPin, validitySignalID);
-
-		return result;
-	}
-
-	bool ModuleLogicCompiler::createUalSignalFromReceiverOutput(UalItem* ualItem, const LogicPin& outPin, const QString& appSignalID)
-	{
-		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
-
-		UalSignal* ualSignal = m_ualSignals.get(appSignalID);
-
-		if (ualSignal != nullptr)
-		{
-			// signal already in map
-			//
-			m_ualSignals.appendRefPin(ualItem, outPin.guid(), ualSignal);
-		}
-		else
-		{
-			// create opto signal
-			//
-			Signal* s = m_signals->getSignal(appSignalID);
-
-			if (s == nullptr)
-			{
-				m_log->errALC5000(appSignalID, ualItem->guid(), ualItem->schemaID());
-				return false;
-			}
-
-			ualSignal = m_ualSignals.createOptoSignal(ualItem, s, lmEquipmentID(), false, outPin.guid());
-
-			if (ualSignal == nullptr)
-			{
-				return false;
-			}
-		}
-
-		// link connected signals to UalSignal
-		//
-		bool result = linkConnectedItems(ualItem, outPin, ualSignal);
-
-		return result;
-	}
-
-	bool ModuleLogicCompiler::createUalSignalFromReceiverValidity(UalItem* ualItem, const LogicPin& validityPin, const QString& validitySignalEquipmentID)
-	{
-		TEST_PTR_LOG_RETURN_FALSE(ualItem, m_log);
-
-		Signal* s = m_equipmentSignals.value(validitySignalEquipmentID);
+		Signal* s = m_equipmentSignals.value(validitySignalID);
 
 		if (s == nullptr)
 		{
-			m_log->errALC5133(validitySignalEquipmentID, ualItem->guid(), ualItem->label(), ualItem->schemaID());
+			m_log->errALC5133(validitySignalID, ualItem->guid(), ualItem->label(), ualItem->schemaID());
 			return false;
 		}
 
@@ -1928,8 +1964,7 @@ namespace Builder
 		UalSignal* ualSignal = m_ualSignals.createConstSignal(ualItem,
 															  constSignalType,
 															  constAnalogFormat,
-															  outPin.guid(),
-															  lmEquipmentID());
+															  outPin.guid());
 		if (ualSignal == nullptr)
 		{
 			assert(false);
@@ -2018,7 +2053,7 @@ namespace Builder
 			case E::SignalType::Discrete:
 				if (s == nullptr)
 				{
-					ualSignal = m_ualSignals.createAutoSignal(ualItem, outPin.guid(), outAfbSignal, lmEquipmentID());
+					ualSignal = m_ualSignals.createAutoSignal(ualItem, outPin.guid(), outAfbSignal);
 				}
 				else
 				{
@@ -2213,9 +2248,9 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid inPinUuid, UalSignal* ualSignal)
+	bool ModuleLogicCompiler::linkSignal(UalItem* srcItem, UalItem* signalItem, QUuid inPinUuid, UalSignal* srcUalSignal)
 	{
-		if (srcItem == nullptr || signalItem == nullptr || ualSignal == nullptr || ualSignal->signal() == nullptr)
+		if (srcItem == nullptr || signalItem == nullptr || srcUalSignal == nullptr || srcUalSignal->signal() == nullptr)
 		{
 			LOG_NULLPTR_ERROR(m_log);
 			return false;
@@ -2237,6 +2272,14 @@ namespace Builder
 			return false;
 		}
 
+		if (s->isInput() == true)
+		{
+			// Can't assign value to input signal %1 (Logic schema %2).
+			//
+			m_log->errALC5087(signalItem->schemaID(), s->appSignalID(), signalItem->guid());
+			return false;
+		}
+
 		if (s->enableTuning() == true)
 		{
 			// Can't assign value to tuningable signal '%1' (Logic schema '%2').
@@ -2247,7 +2290,7 @@ namespace Builder
 
 		UalSignal* existsSignal = m_ualSignals.get(s->appSignalID());
 
-		if (existsSignal != nullptr && existsSignal != ualSignal && existsSignal->isSource() == true)
+		if (existsSignal != nullptr && existsSignal != srcUalSignal && existsSignal->isSource() == true)
 		{
 			// Can't assign value to input/tuningable/opto/const signal %1 (Logic schema %2).
 			//
@@ -2257,7 +2300,7 @@ namespace Builder
 
 		// check signals compatibility
 		//
-		bool result = ualSignal->isCompatible(s);
+		bool result = srcUalSignal->isCompatible(s);
 
 		if (result == false)
 		{
@@ -2267,19 +2310,60 @@ namespace Builder
 			return false;
 		}
 
-		result = m_ualSignals.appendRefPin(signalItem, inPinUuid, ualSignal);
+/*		if (s->isOutput() == true)
+		{
+			// create separate UAL signal for each output signal
+
+			UalSignal* outUalSignal = m_ualSignals.createSignal(s);
+
+			if (result == false)
+			{
+				return false;
+			}
+
+			result = m_ualSignals.appendRefPin(signalItem, inPinUuid, outUalSignal);
+
+			if (result == false)
+			{
+				return false;
+			}
+
+			m_outUalSignals.insert(outUalSignal, srcUalSignal);
+		}
+		else
+		{
+			result = m_ualSignals.appendRefPin(signalItem, inPinUuid, srcUalSignal);
+
+			if (result == false)
+			{
+				return false;
+			}
+
+			result = m_ualSignals.appendRefSignal(s, srcUalSignal);
+
+			if (result == false)
+			{
+				return false;
+			}
+		}*/
+
+		//
+
+		result = m_ualSignals.appendRefPin(signalItem, inPinUuid, srcUalSignal);
 
 		if (result == false)
 		{
 			return false;
 		}
 
-		result = m_ualSignals.appendRefSignal(s, ualSignal);
+		result = m_ualSignals.appendRefSignal(s, srcUalSignal);
 
 		if (result == false)
 		{
 			return false;
 		}
+
+		//
 
 		const std::vector<LogicPin>& outputs = signalItem->outputs();
 
@@ -2293,11 +2377,11 @@ namespace Builder
 		{
 			const LogicPin& output = outputs[0];
 
-			m_ualSignals.appendRefPin(signalItem, output.guid(), ualSignal);
+			m_ualSignals.appendRefPin(signalItem, output.guid(), srcUalSignal);
 
 			// recursive linking of items
 			//
-			result = linkConnectedItems(signalItem, output, ualSignal);
+			result = linkConnectedItems(signalItem, output, srcUalSignal);
 		}
 
 		return result;
@@ -2660,10 +2744,6 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
-/*		result &= linkSignalsWithFlagsInSignalSet();
-
-		RETURN_IF_FALSE(result);*/
-
 		writeSignalsWithFlagsReport();
 
 		return result;
@@ -2744,9 +2824,10 @@ namespace Builder
 				m_ualSignals.createSignal(linkedValiditySignal);
 			}
 
-			m_signalsWithFlags.append(s->appSignalID(),
-									  E::AppSignalStateFlagType::Validity,
-									  linkedValiditySignal->appSignalID());
+			bool res = m_signalsWithFlags.append(s->appSignalID(),
+												  E::AppSignalStateFlagType::Validity,
+												  linkedValiditySignal->appSignalID());
+			result &= res;
 		}
 
 		return result;
@@ -3124,66 +3205,6 @@ namespace Builder
 		return result;
 	}
 
-/*	bool ModuleLogicCompiler::linkSignalsWithFlagsInSignalSet()
-	{
-		// this function is called after checkSignalsWithFlags()
-		// so most checks and error reporting can be omited
-
-		bool result = true;
-
-		std::vector<E::AppSignalStateFlagType> flagTypes = E::values<E::AppSignalStateFlagType>();
-
-		QStringList signalsWithFlagsIDs = m_signalsWithFlags.keys();
-
-		for(const QString& signalWithFlagsID : signalsWithFlagsIDs)
-		{
-			UalSignal* ualSignal = m_ualSignals.get(signalWithFlagsID);
-
-			if (ualSignal == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			const QVector<Signal*>& signalWithFlagRefSignals = ualSignal->refSignals();
-
-			const AppSignalStateFlagsMap* signalFlags = m_signalsWithFlags.value(signalWithFlagsID, nullptr);
-
-			if (signalFlags == nullptr)
-			{
-				assert(false);
-				continue;
-			}
-
-			for(E::AppSignalStateFlagType flagType : flagTypes)
-			{
-				QString flagSignalID = signalFlags->value(flagType, QString());
-
-				if (flagSignalID.isEmpty() == true)
-				{
-					continue;
-				}
-
-				for(Signal* signalWithFlagRefSignal : signalWithFlagRefSignals)
-				{
-					if (signalWithFlagRefSignal == nullptr)
-					{
-						assert(false);
-						continue;
-					}
-
-					if (signalWithFlagRefSignal->isAcquired() == true)
-					{
-						signalWithFlagRefSignal->setFlagSignal(flagType, flagSignalID);
-					}
-				}
-			}
-		}
-
-		return result;
-
-	}*/
-
 	void ModuleLogicCompiler::writeSignalsWithFlagsReport()
 	{
 		if (m_context->generateExtraDebugInfo() == false)
@@ -3286,38 +3307,6 @@ namespace Builder
 
 		return true;
 	}
-
-/*	bool ModuleLogicCompiler::appendAutoUalSignalsToSignalSet()
-	{
-		int id = m_signals->getMaxID() + 1;
-
-		for(UalSignal* ualSignal : m_ualSignals)
-		{
-			TEST_PTR_CONTINUE(ualSignal);
-
-			if (ualSignal->isAutoSignal() == false)
-			{
-				continue;
-			}
-
-			Signal* s = ualSignal->signal();
-
-			s->setLm(getLmSharedPtr());
-
-			if (s->equipmentID().isEmpty() == true)
-			{
-				s->setEquipmentID(lmEquipmentID());
-			}
-
-			m_signals->append(id, s);
-
-			id++;
-		}
-
-		m_signals->buildID2IndexMap();
-
-		return true;
-	}*/
 
 	bool ModuleLogicCompiler::linkLoopbackTarget(UalItem* loopbackTargetItem)
 	{
@@ -3500,6 +3489,25 @@ namespace Builder
 	Signal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const LogicAfbSignal& outAfbSignal)
 	{
 		return getCompatibleConnectedSignal(outPin, outAfbSignal, QString());
+	}
+
+	Signal* ModuleLogicCompiler::getCompatibleConnectedSignal(const LogicPin& outPin, const Signal& s)
+	{
+		LogicAfbSignal dummySignal;
+
+		dummySignal.setType(s.signalType());
+
+		if (s.isBus() == false)
+		{
+			dummySignal.setDataFormat(s.dataFormat());
+		}
+
+		dummySignal.setSize(s.dataSize());
+		dummySignal.setByteOrder(s.byteOrder());
+
+		QString busTypeID = s.busTypeID();
+
+		return getCompatibleConnectedSignal(outPin, dummySignal, busTypeID);
 	}
 
 	Signal* ModuleLogicCompiler::getCompatibleConnectedBusSignal(const LogicPin& outPin, const QString busTypeID)
@@ -5045,52 +5053,6 @@ namespace Builder
 		return true;
 	}
 
-	bool ModuleLogicCompiler::appendLinkedValiditySignal(const Signal* s)
-	{
-		TEST_PTR_RETURN_FALSE(s);
-
-/*		if (s->isInput() == false || s->isAcquired() == false)
-		{
-			assert(false);
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		QString linkedValiditySignalEquipmentID  = m_linkedValidtySignalsID.value(s->equipmentID(), QString());
-
-		if (linkedValiditySignalEquipmentID.isEmpty() == true)
-		{
-			return true;
-		}
-
-		Signal* linkedValiditySignal = m_equipmentSignals.value(linkedValiditySignalEquipmentID, nullptr);
-
-		if (linkedValiditySignal == nullptr)
-		{
-			LOG_WARNING_OBSOLETE(m_log, Builder:::IssueType::NotDefined,
-					  QString(tr("Linked validity signal with equipmentID '%1' is not found (input signal '%2')")).
-								 arg(linkedValiditySignalEquipmentID).
-								 arg(s->appSignalID()));
-			return true;
-		}
-
-		if (linkedValiditySignal->isInput() == false ||
-			linkedValiditySignal->isDiscrete() == false)
-		{
-			assert(false);							// validity signal must be discrete input signal
-													// no matter is "acquired" or not
-			return false;
-		}
-
-		if (m_acquiredDiscreteInputSignalsMap.contains(linkedValiditySignal) == false)
-		{
-			m_acquiredDiscreteInputSignals.append(linkedValiditySignal);
-			m_acquiredDiscreteInputSignalsMap.insert(linkedValiditySignal, linkedValiditySignal);
-		}*/
-
-		return true;
-	}
-
 	bool ModuleLogicCompiler::listsUniquenessCheck() const
 	{
 		bool result = true;
@@ -5276,7 +5238,10 @@ namespace Builder
 					break;
 
 				case E::SignalInOutType::Internal:
-					assert(false);							// internal signals can't be i/o Signals
+					// Internal application signal %1 cannot be linked to equipment input/output signal %2.
+					//
+					log()->errALC5171(s->appSignalID(), s->equipmentID());
+					result = false;
 					break;
 
 				default:
@@ -5298,7 +5263,10 @@ namespace Builder
 					break;
 
 				case E::SignalInOutType::Internal:
-					assert(false);							// internal signals can't be i/o Signals
+					// Internal application signal %1 cannot be linked to equipment input/output signal %2.
+					//
+					log()->errALC5171(s->appSignalID(), s->equipmentID());
+					result = false;
 					break;
 
 				default:
@@ -5482,60 +5450,6 @@ namespace Builder
 
 		return result;
 	}
-
-/*	bool ModuleLogicCompiler::setSignalsFlagsAddresses()
-	{
-		bool result = true;
-
-		QStringList signalIDs = m_signalsWithFlags.keys();
-
-		for(const QString& signalID : signalIDs)
-		{
-			UalSignal* signalWithFlags = m_ualSignals.get(signalID);
-
-			TEST_PTR_CONTINUE(signalWithFlags);
-
-			AppSignalStateFlagsMap* signalFlags = m_signalsWithFlags.value(signalID, nullptr);
-
-			TEST_PTR_CONTINUE(signalFlags);
-
-			if (signalFlags->isEmpty() == true)
-			{
-				assert(false);
-			}
-
-			QList<E::AppSignalStateFlagType> flagsTypes = signalFlags->uniqueKeys();
-
-			for(E::AppSignalStateFlagType flagType : flagsTypes)
-			{
-				QString flagSignalID = signalFlags->value(flagType, QString());
-
-				if (flagSignalID.isEmpty() == true)
-				{
-					assert(false);
-					continue;
-				}
-
-				UalSignal* flagSignal = m_ualSignals.get(flagSignalID);
-
-				TEST_PTR_CONTINUE(flagSignal);
-
-				assert(flagSignal->isAcquired() == true);
-
-				if (flagSignal->regValueAddr().isValid() == false)
-				{
-					assert(false);
-					continue;
-				}
-
-				signalWithFlags->setFlagSignal(flagType, flagSignal);
-			}
-
-			//signalWithFlags->setFlagsAddresses
-		}
-
-		return result;
-	}*/
 
 	bool ModuleLogicCompiler::appendAfbsForAnalogInOutSignalsConversion()
 	{
@@ -7399,6 +7313,8 @@ namespace Builder
 
 			code->newLine();
 		}
+
+		code->finalizeByNewLine();
 
 		//m_alpCode_calculate(&m_resourcesUsageInfo.convertAnalogInputSignals);
 
@@ -10382,24 +10298,8 @@ namespace Builder
 
 		result &= copyOptoPortTxDiscreteSignals(code, port);
 
-/*
-		// rest of manually configured buffer fills by 0
-		//
-		if (port->manualSettings() == true && port->txUsedDataSizeW() < port->txDataSizeW())
-		{
-			int fillSize = port->txDataSizeW() - port->txUsedDataSizeW();
-
-			cmd.setMem(port->txBufAbsAddress() + port->txUsedDataSizeW(),
-					   0, fillSize);
-			cmd.setComment("rest of manually configured buffer fills by 0");
-
-			m_code.append(cmd);
-			m_code.newLine();
-		}*/
-
 		return result;
 	}
-
 
 	bool ModuleLogicCompiler::copyOptoPortTxRawData(CodeSnippet* code,  Hardware::OptoPortShared port)
 	{
@@ -11574,7 +11474,7 @@ namespace Builder
 			RETURN_IF_FALSE(result);
 		}
 
-		if (expertMode() == true)
+		if (m_context->generateExtraDebugInfo() == true)
 		{
 			BuildFile* binFile = m_resultWriter->addFile(DIR_BIN, QString("%1.bin").arg(lmEquipmentID()), "", "", binCode);
 
@@ -11621,28 +11521,9 @@ namespace Builder
 
 		result &= writeTuningInfoFile();
 
-		//
-		// writeLMCodeTestFile();
-		//
-
 		result &= writeOcmRsSignalsXml();
 
 		//
-
-/*		int startAddr = m_memoryMap.regBufStartAddr();
-		int endAddr = startAddr + m_memoryMap.regBufSizeW();
-
-		for(int addr = startAddr ; addr < endAddr; addr++)
-		{
-			int wrCount = m_memoryMap.getMemoryWriteCount(addr);
-
-			if (wrCount == 0)
-			{
-				assert(false);
-			}
-
-			qDebug() << "[" << addr << "] wrCount =" << wrCount;
-		} */
 
 		return result;
 	}
@@ -12078,23 +11959,6 @@ namespace Builder
 		});*/
 
 		return true;
-	}
-
-	void ModuleLogicCompiler::writeLMCodeTestFile()
-	{
-		/*
-
-		ApplicationLogicCode m_testCode;
-
-		Command cmd;
-
-		cmd.nop();
-
-		m_testCode.append(cmd);
-
-		m_resultWriter->addFile(m_lm->subSysID(), QString("lm_test_code.mif"), mifCode);
-
-		*/
 	}
 
 	bool ModuleLogicCompiler::displayResourcesUsageInfo()

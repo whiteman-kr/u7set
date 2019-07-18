@@ -2,7 +2,7 @@
 
 #include "MainTabPage.h"
 #include "GlobalMessanger.h"
-#include "../lib/Signal.h"
+#include "../lib/SignalProperties.h"
 #include <QStyledItemDelegate>
 #include <QSortFilterProxyModel>
 #include <QDialog>
@@ -22,6 +22,13 @@ class QCheckBox;
 class QLineEdit;
 class QCompleter;
 class QActionGroup;
+class QStandardItemModel;
+class TableDataVisibilityController;
+
+
+#define SIGNAL_TYPE_COUNT (QMetaEnum::fromType<E::SignalType>().keyCount())
+#define IN_OUT_TYPE_COUNT (QMetaEnum::fromType<E::SignalInOutType>().keyCount())
+#define TOTAL_SIGNAL_TYPE_COUNT (SIGNAL_TYPE_COUNT * IN_OUT_TYPE_COUNT)
 
 
 const int	ST_ANALOG = TO_INT(E::SignalType::Analog),
@@ -35,6 +42,106 @@ const int	FI_ANY = 0,
 			FI_CUSTOM_APP_SIGNAL_ID = 2,
 			FI_EQUIPMENT_ID = 3,
 			FI_CAPTION = 4;
+
+
+class SignalPropertyManager
+{
+public:
+	struct PropertyBehaviourDescription
+	{
+		QString name;
+		bool dependsOnPrecision = false;
+		std::vector<E::PropertyBehaviourType> behaviourType = std::vector<E::PropertyBehaviourType>(
+					static_cast<size_t>(TOTAL_SIGNAL_TYPE_COUNT),
+					E::PropertyBehaviourType::Write);
+	};
+
+	static const E::PropertyBehaviourType defaultBehaviour = E::PropertyBehaviourType::Write;
+
+public:
+	SignalPropertyManager();
+
+	// Data for models
+	//
+
+	int count() const;
+
+	int index(const QString& name);
+	QString caption(int propertyIndex) const;
+	QString name(int propertyIndex);
+
+	QVariant value(const Signal* signal, int propertyIndex) const;
+	const std::list<std::pair<int, QString>> values(int propertyIndex) const;
+
+	void setValue(Signal* signal, int propertyIndex, const QVariant& value);
+
+	QVariant::Type type(const int propertyIndex) const;
+	E::PropertyBehaviourType getBehaviour(const Signal& signal, const int propertyIndex) const;
+	E::PropertyBehaviourType getBehaviour(E::SignalType type, E::SignalInOutType directionType, const int propertyIndex) const;
+	bool dependsOnPrecision(const int propertyIndex) const;
+	bool isHiddenFor(E::SignalType type, const int propertyIndex) const;
+	bool isHidden(E::PropertyBehaviourType behaviour) const;
+	bool isReadOnly(E::PropertyBehaviourType behaviour) const;
+
+	void detectNewProperties(const Signal& signal);
+	void loadNotSpecificProperties(const SignalProperties& signalProperties);
+	void reloadPropertyBehaviour(DbController* dbController, QWidget* parent);
+
+private:
+	bool isNotCorrect(int propertyIndex) const;
+	QString typeName(E::SignalType type, E::SignalInOutType inOutType);
+	QString typeName(int typeIndex, int inOutTypeIndex);
+
+	static TuningValue variant2TuningValue(const QVariant& variant, TuningValueType type);
+
+	void addNewProperty(const SignalPropertyDescription& newProperty);
+
+	static void trimm(QStringList& stringList);
+
+	std::vector<PropertyBehaviourDescription> m_propertyBehaviorDescription;
+	QHash<QString, int> m_propertyName2IndexMap;
+	QHash<int, int> m_propertyIndex2BehaviourIndexMap;
+
+	// is initialized by non specific properties
+	//
+	std::vector<SignalPropertyDescription> m_propertyDescription = {
+		{ SignalProperties::appSignalIDCaption,
+		  SignalProperties::appSignalIDCaption,
+		  QVariant::String, {},
+		  [](const Signal* s){ return s->appSignalID(); },
+		  [](Signal* s, QVariant v){ s->setAppSignalID(v.toString()); }, },
+
+		{ SignalProperties::customSignalIDCaption,
+		  SignalProperties::customSignalIDCaption,
+		  QVariant::String, {},
+		  [](const Signal* s){ return s->customAppSignalID(); },
+		  [](Signal* s, QVariant v){ s->setCustomAppSignalID(v.toString()); }, },
+
+		{ SignalProperties::equipmentIDCaption,
+		  SignalProperties::equipmentIDCaption,
+		  QVariant::String, {},
+		  [](const Signal* s){ return s->equipmentID(); },
+		  [](Signal* s, QVariant v){ s->setEquipmentID(v.toString()); }, },
+
+		{ SignalProperties::busTypeIDCaption,
+		  SignalProperties::busTypeIDCaption,
+		  QVariant::String, {},
+		  [](const Signal* s){ return s->busTypeID(); },
+		  [](Signal* s, QVariant v){ s->setBusTypeID(v.toString()); }, },
+
+		{ SignalProperties::typeCaption,
+		  "A/D/B",
+		  QVariant::String, {},
+		  [](const Signal* s){ return E::valueToString<E::SignalType>(s->signalType()).left(1); },
+		  nullptr },
+
+		{ SignalProperties::inOutTypeCaption,
+		  "Input-output type",
+		  QVariant::Int, E::enumValues<E::SignalInOutType>(),
+		  [](const Signal* s){ return TO_INT(s->inOutType()); },
+		  [](Signal* s, QVariant v){ s->setInOutType(IntToEnum<E::SignalInOutType>(v.toInt())); }, },
+	};
+};
 
 
 struct CreatingSignalOptions
@@ -84,7 +191,7 @@ class SignalsModel : public QAbstractTableModel
 	Q_OBJECT
 public:
 	SignalsModel(DbController* dbController, SignalsTabPage* parent = nullptr);
-	virtual ~SignalsModel();
+	virtual ~SignalsModel() override;
 
 	virtual int rowCount(const QModelIndex& parentIndex = QModelIndex()) const override;
 	virtual int columnCount(const QModelIndex& parent = QModelIndex()) const override;
@@ -93,13 +200,13 @@ public:
 	virtual QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
 	bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) override;
-	Qt::ItemFlags flags(const QModelIndex & index) const;
+	Qt::ItemFlags flags(const QModelIndex & index) const override;
 
 	SignalsDelegate* createDelegate(SignalsProxyModel* signalsProxyModel) { return new SignalsDelegate(m_signalSet, this, signalsProxyModel, parent()); }
 
 	void clearSignals();
 
-	const SignalSet& signalSet() const	{ return m_signalSet;	};
+	const SignalSet& signalSet() const	{ return m_signalSet; }
 
 	Signal getSignalByID(int signalID) { return m_signalSet.value(signalID); }			// for debug purposes
 	Signal* getSignalByStrID(const QString signalStrID);
@@ -109,6 +216,8 @@ public:
 	const Signal& signal(int row) const { return m_signalSet[row]; }
 	QVector<int> getSameChannelSignals(int row);
 	bool isEditableSignal(int row);
+
+	SignalPropertyManager& signalPropertyManager() { return m_propertyManager; }
 
 	DbController* dbController();
 	const DbController* dbController() const;
@@ -132,8 +241,14 @@ signals:
 	void setCheckedoutSignalActionsVisibility(bool state);
 	void aboutToClearSignals();
 	void signalsRestored(int focusedSignalId = -1);
+	void signalsLoadingFinished();
+	void updateColumnList();
 
 public slots:
+	void initLazyLoadSignals();
+	void finishLoadSignals();
+	void loadNextSignalsPortion();
+	void loadUsers();
 	void loadSignals();
 	void loadSignalSet(QVector<int> keys, bool updateView = true);
 	void loadSignal(int signalId, bool updateView = true);
@@ -141,23 +256,22 @@ public slots:
 	void showError(QString message);
 
 private:
+	void detectNewProperties(const Signal& signal);
+	void loadNotSpecificProperties(Signal& signal);
 	// Data
 	//
+	SignalPropertyManager m_propertyManager;
 	SignalSet m_signalSet;
 	QMap<int, QString> m_usernameMap;
+	bool m_partialLoading = true;
 
 	SignalsTabPage* m_parentWindow;
 	DbController* m_dbController;
 	static SignalsModel* m_instance;
 
-	QString getSensorStr(int sensorID) const;
-	QString getOutputModeStr(int outputMode) const;
+	/*QString getSensorStr(int sensorID) const;
+	QString getOutputModeStr(int outputMode) const;*/
 	QString getUserStr(int userID) const;
-
-	const QPixmap lock = QPixmap(":/Images/Images/lock.png");
-	const QPixmap plus = QPixmap(":/Images/Images/plus.png");
-	const QPixmap pencil = QPixmap(":/Images/Images/pencil.png");
-	const QPixmap cross = QPixmap(":/Images/Images/cross.png");
 
 	void changeCheckedoutSignalActionsVisibility();
 };
@@ -176,7 +290,16 @@ public:
 	void setSignalIdFilter(QStringList strIds);
 	void setIdFilterField(int field);
 
+signals:
+	void aboutToSort();
+	void aboutToFilter();
+
+protected:
+	void sort(int column, Qt::SortOrder order = Qt::AscendingOrder) override;
+
 private:
+	void applyNewFilter();
+
 	SignalsModel* m_sourceModel;
 	int m_signalType = ST_ANY;
 	int m_idFilterField = FI_EQUIPMENT_ID;
@@ -188,7 +311,7 @@ class CheckedoutSignalsModel : public QSortFilterProxyModel
 {
 	Q_OBJECT
 public:
-	CheckedoutSignalsModel(SignalsModel* sourceModel, QTableView* view, QObject* parent = 0);
+	CheckedoutSignalsModel(SignalsModel* sourceModel, QTableView* view, QObject* parent = nullptr);
 
 	virtual QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
 	bool setData(const QModelIndex & index, const QVariant & value, int role = Qt::EditRole) override;
@@ -211,13 +334,11 @@ class CheckinSignalsDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	CheckinSignalsDialog(QString title, SignalsModel* sourceModel, QModelIndexList selection, bool showUndoButton = true, QWidget *parent = 0);
+	CheckinSignalsDialog(SignalsModel* sourceModel, TableDataVisibilityController* columnManager, QModelIndexList selection, QWidget *parent = nullptr);
 
 public slots:
 	void checkinSelected();
-	void undoSelected();
 	void cancel();
-	void openUndoDialog();
 
 protected:
 	void closeEvent(QCloseEvent* event);
@@ -237,7 +358,7 @@ class UndoSignalsDialog : public QDialog
 {
 	Q_OBJECT
 public:
-	UndoSignalsDialog(SignalsModel* sourceModel, QWidget *parent = 0);
+	UndoSignalsDialog(SignalsModel* sourceModel, TableDataVisibilityController* columnManager, QWidget *parent = nullptr);
 
 	void setCheckStates(QModelIndexList selection, bool fromSourceModel);
 	void saveDialogGeometry();
@@ -254,15 +375,32 @@ private:
 };
 
 
+class SignalHistoryDialog : public QDialog
+{
+	Q_OBJECT
+public:
+	SignalHistoryDialog(DbController* dbController, const QString& appSignalId, int signalId, QWidget *parent = nullptr);
+
+protected:
+	void closeEvent(QCloseEvent* event);
+
+private:
+	DbController* m_dbController = nullptr;
+	QStandardItemModel* m_historyModel = nullptr;
+	int m_signalId = -1;
+};
+
+
 class SignalsTabPage : public MainTabPage
 {
 	Q_OBJECT
 
 public:
 	SignalsTabPage(DbController* dbcontroller, QWidget* parent);
-	virtual ~SignalsTabPage();
+	virtual ~SignalsTabPage() override;
 
 	static bool updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties);
+	int getMiddleVisibleRow();
 
 protected:
 	void CreateActions(QToolBar* toolBar);
@@ -280,13 +418,16 @@ public slots:
 	void projectOpened();
 	void projectClosed();
 
+	void onTabPageChanged();
+	void stopLoadingSignals();
+
 	void editSignal();
 	void cloneSignal();
 	void deleteSignal();
 
 	void undoSignalChanges();
-	void showPendingChanges();
 	void checkIn();
+	void viewSignalHistory();
 
 	void changeSignalActionsVisibility();
 
@@ -309,7 +450,10 @@ private:
 	static SignalsTabPage* m_instance;
 	SignalsModel* m_signalsModel = nullptr;
 	SignalsProxyModel* m_signalsProxyModel = nullptr;
+	QTabWidget* m_tabWidget = nullptr;
+	QTimer* m_loadSignalsTimer = nullptr;
 	QTableView* m_signalsView = nullptr;
+	TableDataVisibilityController* m_signalsColumnVisibilityController = nullptr;
 	QComboBox* m_signalTypeFilterCombo = nullptr;
 	QComboBox* m_signalIdFieldCombo = nullptr;
 	QLineEdit* m_filterEdit = nullptr;

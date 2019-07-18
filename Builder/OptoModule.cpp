@@ -3204,6 +3204,47 @@ namespace Hardware
 		return true;
 	}
 
+	OptoPortShared OptoModuleStorage::getLmAssociatedOptoPort(const QString& lmID, const QString& connectionID)
+	{
+		std::shared_ptr<Hardware::Connection> connection = getConnection(connectionID);
+
+		if (connection == nullptr)
+		{
+			return nullptr;
+		}
+
+		Hardware::OptoPortShared port = getOptoPort(connection->port1EquipmentID());
+
+		if (port == nullptr)
+		{
+			return nullptr;
+		}
+
+		if (port->lmID() != lmID)
+		{
+			if (connection->isSinglePort() == true)
+			{
+				return nullptr;
+			}
+
+			assert(connection->isPortToPort() == true);
+
+			port = getOptoPort(connection->port2EquipmentID());
+
+			if (port == nullptr)
+			{
+				return nullptr;
+			}
+
+			if (port->lmID() != lmID)
+			{
+				return nullptr;
+			}
+		}
+
+		return port;
+	}
+
 	QString OptoModuleStorage::getOptoPortAssociatedLmID(OptoPortShared optoPort)
 	{
 		if (optoPort == nullptr)

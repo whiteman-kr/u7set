@@ -184,6 +184,7 @@ SOURCES +=\
 
 
 HEADERS  += \
+    ../lib/StandardColors.h \
     CentralWidget.h \
     CreateProjectDialog.h \
     CreateUserDialogDialog.h \
@@ -301,7 +302,6 @@ HEADERS  += \
     Simulator/SimMemoryWidget.h \
     Simulator/SimOutputWidget.h \
     Simulator/SimProjectWidget.h \
-    ../lib/TuningValue.h \
     SpecificPropertiesEditor.h \
     ../lib/CommonTypes.h \
     ../lib/Times.h \

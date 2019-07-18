@@ -2,6 +2,7 @@
 
 namespace VFrame30
 {
+	const QString PropertyNames::schemaId("SchemaID");
 
 	const QString PropertyNames::acceptClick("AcceptClick");
 	const QString PropertyNames::clickScript("ClickScript");

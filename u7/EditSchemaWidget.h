@@ -598,6 +598,7 @@ private:
 		QAction* m_addPathAction = nullptr;
 		QAction* m_addTextAction = nullptr;
 		QAction* m_addImageAction = nullptr;
+		QAction* m_addFrameAction = nullptr;
 		// ------------------------------
 		QAction* m_addSeparatorAction0 = nullptr;
 		QAction* m_addLinkAction = nullptr;

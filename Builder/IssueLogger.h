@@ -206,6 +206,10 @@ namespace Builder
 
 		void wrnALP4070(QString schema, const std::vector<QUuid>& itemsUuids);						// Schema %1 has %2 commented functional item(s).
 
+		void errALP4080(QString schema, QString frameSchemaId, QUuid itemUuid);						// SchemaItemFrame has reference (property SchemaID) to unknown schema %1, Schema %2.
+		void errALP4081(QString schema, QUuid itemUuid);											// SchemaItemFrame.SchemaID has recursive reference to schema %1, property must be distincive from schema where it is placed.
+		void errALP4082(QString schema, QString frameSchemaId, QUuid itemUuid);						//
+
 		// Multichannel pasing errors
 		//
 		void errALP4130(QString schema, QString schemaItem, QUuid itemUuid);
@@ -217,8 +221,12 @@ namespace Builder
 		void errALP4136(QString schema, QString schemaItem, QString appSignalId, QUuid itemUuid);
 		void errALP4137(QString schema, QString schemaItem, QString appSignalId, QString equipmentId, QUuid itemUuid);
 
+		// Connections + multichannel connections
+		//
 		void errALP4150(QString schema, QString schemaItem, QString connectionId, QString equipmentsIds, QUuid itemUuid);
 		void errALP4152(QString schema, QString schemaItem, QString connectionId, QString equipmentsId, QUuid itemUuid);
+		void errALP4153(QString schema, QString schemaItem, QUuid itemUuid);			// Multichannel transmitter must have the same number of ConnectionIDs as schema's channel number (number of schema's EquipmentIDs), Logic Schema %1, SchemaItem %2.
+		void errALP4154(QString schema, QString schemaItem, QUuid itemUuid);			// Property ConnectionID is empty (LogicSchema %2, SchemaItem %3).
 
 		// ALC			Application logic compiler				5000-5999
 		//
@@ -395,6 +403,8 @@ namespace Builder
 						QUuid itemUuid,
 						QString schemaID);					//Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
 		void wrnALC5169(QString setFlagsItemLabel, QUuid itemUuid, QString schemaID);	// No flags assiged on set_flags item %1 (Schema %2)
+		void errALC5170(QString lmEquipmentID, QString appSignalID, QUuid itemUuid, QString schemaID);	// LM's %1 native signal %2 can't be received via opto connection (Logic schema %3)
+		void errALC5171(QString appSignalID, QString equipmentSignalID);				// Internal application signal %1 cannot be linked to equipment input/output signal %2.
 
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.

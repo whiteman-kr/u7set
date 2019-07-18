@@ -11,6 +11,7 @@
 #include "../VFrame30/UfbSchema.h"
 #include "../VFrame30/SchemaItemLine.h"
 #include "../VFrame30/SchemaItemRect.h"
+#include "../VFrame30/SchemaItemFrame.h"
 #include "../VFrame30/SchemaItemImage.h"
 #include "../VFrame30/SchemaItemPath.h"
 #include "../VFrame30/SchemaItemSignal.h"
@@ -1061,7 +1062,7 @@ void EditSchemaView::drawGrid(QPainter* p)
 	}
 	else
 	{
-		// Проредить грид, если точки находятся ближе чем 2 мм друг к другу
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ 2 пїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ
 		//
 		while (gridSize * scale < 2.6 / 25.4)
 		{
@@ -1168,9 +1169,9 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 			return SchemaItemAction::NoAction;
 		}
 
-		// Проверка на захват управляющих прямоугольников ControlBarSizeIn
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ControlBarSizeIn
 		//
-		QRectF itemRectangle;		// Нормализированный прямоугольник
+		QRectF itemRectangle;		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 
 		itemRectangle.setX(itemPos->leftDocPt());
 		itemRectangle.setY(itemPos->topDocPt());
@@ -1229,7 +1230,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 		double x2 = itemPos->endXDocPt();
 		double y2 = itemPos->endYDocPt();
 
-		// Если просто на линии, то SchemaItemAction.MoveItem
+		// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ SchemaItemAction.MoveItem
 		//
 		if (schemaItem->IsIntersectPoint(point.x(), point.y()) == true)
 		{
@@ -1249,8 +1250,8 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 			return SchemaItemAction::NoAction;
 		}
 
-		// Проверка на захват управляющих прямоугольников ControlBarSizeIn
-		// Прямоугольники, за которые можно хвататься и изменять элемент
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ControlBarSizeIn
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		//
 		QRectF controlRectangles[2];
 
@@ -1280,7 +1281,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 			return SchemaItemAction::NoAction;
 		}
 
-		// Проверка на захват управляющих прямоугольников ControlBarSizeIn
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ControlBarSizeIn
 		//
 		std::list<VFrame30::SchemaPoint> points = itemPos->GetPointList();
 
@@ -1296,7 +1297,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 			}
 		}
 
-		// Проверка всех отрезков
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		//
 		VFrame30::SchemaPoint lastPoint;
 
@@ -1309,14 +1310,14 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 				continue;
 			}
 
-			// Нормализация линии
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 			//
 			double x1 = std::min(lastPoint.X, pt->X);
 			double y1 = std::min(lastPoint.Y, pt->Y);
 			double x2 = std::max(lastPoint.X, pt->X);
 			double y2 = std::max(lastPoint.Y, pt->Y);
 
-			// Расширение линии
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 			//
 			if (std::abs(x1 - x2) < std::abs(y1 - y2))
 			{
@@ -1953,6 +1954,15 @@ void EditSchemaWidget::createActions()
 				addItem(image);
 			});
 
+	m_addFrameAction = new QAction(tr("Frame"), this);
+	m_addFrameAction->setEnabled(true);
+	m_addFrameAction->setIcon(QIcon(":/Images/Images/SchemaItemFrame.svg"));
+	connect(m_addFrameAction, &QAction::triggered,
+			[this](bool)
+			{
+				addItem(std::make_shared<VFrame30::SchemaItemFrame>(schema()->unit()));
+			});
+
 	// ----------------------------------------
 	m_addSeparatorAction0 = new QAction(this);
 	m_addSeparatorAction0->setSeparator(true);
@@ -2501,6 +2511,7 @@ void EditSchemaWidget::createActions()
 		m_addMenu->addAction(m_addPathAction);
 		m_addMenu->addAction(m_addTextAction);
 		m_addMenu->addAction(m_addImageAction);
+		//m_addMenu->addAction(m_addFrameAction);
 
 		m_addMenu->addAction(m_addSeparatorAction0);
 
@@ -2927,11 +2938,11 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 	{
 		QPointF docPoint = widgetPointToDocument(me->pos(), false);
 
-		// Если выделен один объект, и клик на изменение размеров этого объекта или изменение ребер, вершин и т.п.
+		// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅ.пїЅ.
 		//
 		if (selectedItems().size() == 1)
 		{
-			// Проверить установлена ли мышка на месте откудова можно начинанть изменять размер объекта
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			//
 			int movingEdgePointIndex = 0;
 			auto selectedItem = selectedItems()[0];
@@ -2949,7 +2960,7 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 
 				if (findResult != std::end(m_sizeActionToMouseCursor))
 				{
-					// Теперь получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
+					// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ Xin пїЅ Yin пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 					//
 					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
 
@@ -2964,13 +2975,13 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 				}
 			}
 
-			// Проверять на изменение вершин линии
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 			//
 			if (dynamic_cast<VFrame30::IPosLine*>(selectedItem.get()) != nullptr)
 			{
 				if (possibleAction == SchemaItemAction::MoveStartLinePoint)
 				{
-					// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
+					// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ Xin пїЅ Yin пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 					//
 					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
 
@@ -2987,7 +2998,7 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 
 				if (possibleAction == SchemaItemAction::MoveEndLinePoint)
 				{
-					// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
+					// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ Xin пїЅ Yin пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 					//
 					docPoint = widgetPointToDocument(me->pos(), snapToGrid());
 
@@ -3003,7 +3014,7 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 				}
 			}
 
-			// Проверять на изменение вершин и ребер соединения
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			//
 			if (dynamic_cast<VFrame30::IPosConnection*>(selectedItem.get()) != nullptr)
 			{
@@ -3069,7 +3080,7 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 			}
 		}
 
-		// Проверить выделенные элементы, на возможность выполнения команды их перемещения
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		//
 		for (auto si = selectedItems().begin(); si != selectedItems().end(); ++si)
 		{
@@ -3078,7 +3089,7 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 
 			if (possibleAction == SchemaItemAction::MoveItem)
 			{
-				// Теперь получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
+				// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ Xin пїЅ Yin пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 				//
 				docPoint = widgetPointToDocument(me->pos(), snapToGrid());
 
@@ -3142,8 +3153,8 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 			}
 		}
 
-		// Если клик на поверхности которую можно перемещать (выделенный или просто объект)
-		// то переход в режим перемещения объекта
+		// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ)
+		// пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		//
 		auto itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPoint);
 
@@ -3152,19 +3163,19 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 		{
 			if (std::find(selectedItems().begin(), selectedItems().end(), itemUnderPoint) != selectedItems().end())
 			{
-				// Переход в режим перемещения всех выделенных элементов
-				// SelectedItems уже заполнен
+				// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
+				// SelectedItems пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 				//
 			}
 			else
 			{
-				// Переход в режим перемещения одного элемента
+				// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 				//
 				editSchemaView()->clearSelection();
 				editSchemaView()->setSelectedItem(itemUnderPoint);
 			}
 
-			// Получить новые Xin и Yin привязанные к сетке, потомучто старые были для определения наличия элемента под мышой
+			// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ Xin пїЅ Yin пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 			//
 			docPoint = widgetPointToDocument(me->pos(), snapToGrid());
 
@@ -3179,7 +3190,7 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 		}
 	}
 
-	// Если клик просто поверх элементиа то он выделяется и переходим в режим перемещения элемента
+	// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	//
 	if (me->modifiers().testFlag(Qt::ShiftModifier) == false)
 	{
@@ -3317,13 +3328,13 @@ void EditSchemaWidget::mouseLeftUp_Selection(QMouseEvent* me)
 	m_nextSelectionFromLeft = {};		// Reset state for slection next items via Alt + Arrow Keys
 	m_nextSelectionFromRight = {};
 
-	// Определить какие элеиенты попали в выделенную область,
-	// добавить их в selectedItem
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ,
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅ selectedItem
 	//
 	bool shiftIsPressed = me->modifiers().testFlag(Qt::ShiftModifier);
 
-	// может быть такое что шифт был нажат, но в процессе выделения его отпстили,
-	// поэтому и удаляются все элементы из выделения
+	// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ,
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	//
 	if (shiftIsPressed == false)
 	{
@@ -3332,16 +3343,16 @@ void EditSchemaWidget::mouseLeftUp_Selection(QMouseEvent* me)
 
 	editSchemaView()->m_mouseSelectionEndPoint = widgetPointToDocument(me->pos(), false);
 
-	// Высислить координаты выделения для листа
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 	//
 	QRectF pageSelectionArea = QRectF(editSchemaView()->m_mouseSelectionStartPoint, editSchemaView()->m_mouseSelectionEndPoint)
 							   .normalized();
 
-	// Поиск элементов внутри pageSelectionArea
+	// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ pageSelectionArea
 	//
 	auto activeLayer = editSchemaView()->activeLayer();
 
-	// Если клик без движения мышки, то выделение касается только верхнего элемента
+	// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 	//
 	if (editSchemaView()->m_mouseSelectionStartPoint == editSchemaView()->m_mouseSelectionEndPoint)
 	{
@@ -3349,7 +3360,7 @@ void EditSchemaWidget::mouseLeftUp_Selection(QMouseEvent* me)
 
 		if (item != nullptr)
 		{
-			// Если такой элемент уже есть в списке, то удалить его из списка выделенных
+			// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			//
 			bool wasDeleted = editSchemaView()->removeFromSelection(item);
 
@@ -3363,14 +3374,14 @@ void EditSchemaWidget::mouseLeftUp_Selection(QMouseEvent* me)
 	}
 	else
 	{
-		// Прямоугольная облась выделения , выделяеються (или развыделяются)
-		// все элементы входязщие в прямоугольник
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ , пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
+		// пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		//
 		auto itemsInRect = activeLayer->getItemListInRectangle(pageSelectionArea);
 
 		for (auto item = itemsInRect.begin(); item != itemsInRect.end(); ++item)
 		{
-			// Если такой элемент уже есть в списке, то удалить его из списка выделенных
+			// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			//
 			auto findResult = std::find(selectedItems().begin(), selectedItems().end(), *item);
 
@@ -3739,7 +3750,7 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosRectEndPoint(QMouseEvent* event)
 	}
 	else
 	{
-		// Добавить элемент в активный слой
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ
 		//
 		m_editEngine->runAddItem(editSchemaView()->m_newItem, editSchemaView()->activeLayer());
 	}
@@ -3777,18 +3788,18 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 
 	if (itemPos->GetPointList().size() >= 2)
 	{
-		// Если линия началась или окончилась на таком же элементе, то соединить эти две (или три) линии
+		// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅ (пїЅпїЅпїЅ пїЅпїЅпїЅ) пїЅпїЅпїЅпїЅпїЅ
 		//
 		auto points = itemPos->GetPointList();
 
 		VFrame30::SchemaPoint startPoint = points.front();
 		VFrame30::SchemaPoint endPoint = points.back();
 
-		// Поиск элементов которые лежат на точках startPoint, endPoint
+		// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ startPoint, endPoint
 		//
-		QUuid startItemGuid = QUuid();			// Здесь сохранится ИД элемента линии которая будет подключенна к Первой точке новой линии
-		bool startPointAddedToOther = false;	// Новый элемент был присоединен к существующему (конечные точки лежат на одной координте)
-		bool endPointAddedToOther = false;		// Новый элемент был присоединен к существующему (конечные точки лежат на одной координте)
+		QUuid startItemGuid = QUuid();			// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
+		bool startPointAddedToOther = false;	// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
+		bool endPointAddedToOther = false;		// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ (пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ)
 
 
 		std::list<std::shared_ptr<VFrame30::SchemaItem>> linksUnderStartPoint =
@@ -3811,8 +3822,8 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 		{
 			assert(linkUnderStartPoint->metaObject()->className() == editSchemaView()->m_newItem->metaObject()->className());
 
-			// Это такой же эелемент, если точка schemaItemStartPoint лежит на первой или последней точке schemaItemStartPoint,
-			// то объеденить schemaItemStartPoint и новый элемент
+			// пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ schemaItemStartPoint пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ schemaItemStartPoint,
+			// пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ schemaItemStartPoint пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			//
 			assert(dynamic_cast<VFrame30::IPosConnection*>(linkUnderStartPoint.get()) != nullptr);
 
@@ -3823,16 +3834,16 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 			if (std::abs(existingItemPoints.front().X - startPoint.X) < 0.000001 &&
 				std::abs(existingItemPoints.front().Y - startPoint.Y) < 0.000001)
 			{
-				// Стартовая точка новой линии лежит на стартовой точке старой линии
+				// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 				//
-				startItemGuid = linkUnderStartPoint->guid();		// Сохранить, что бы потом не подключить к этой же линии и последнюю точку, что бы не получилось кольцо
+				startItemGuid = linkUnderStartPoint->guid();		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 				startPointAddedToOther = true;
 
 				// --
 				points.reverse();
 				existingItemPoints.pop_front();
 				points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
-				points.reverse();								// Если будет объединение по последней точке, то этот Recerse очень важен
+				points.reverse();								// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅпїЅ Recerse пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 
 				std::vector<VFrame30::SchemaPoint> newPoints(points.begin(), points.end());
 				newPoints = EditConnectionLine::removeUnwantedPoints(newPoints);
@@ -3844,9 +3855,9 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 				if (std::abs(existingItemPoints.back().X - startPoint.X) < 0.000001 &&
 					std::abs(existingItemPoints.back().Y - startPoint.Y) < 0.000001)
 				{
-					// ПЕРВАЯ точка новой линии лежит на ПОСЛЕДНЕЙ точке существующей линии
+					// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 					//
-					startItemGuid = linkUnderStartPoint->guid();	// Сохранить, что бы потом не подключить к этой же линии и последнюю точку, что бы не получилось кольцо
+					startItemGuid = linkUnderStartPoint->guid();	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ
 					startPointAddedToOther = true;
 
 					// --
@@ -3868,14 +3879,14 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 		//
 		if (linkUnderEndPoint != nullptr &&
 			fblRectUnderEndPoint.get() == nullptr &&				// End point is not on BlItemRect pin
-			linkUnderEndPoint->guid() != startItemGuid)				// Элемент не должен быть в пердыдущем условии присоединен к ЭТОЙ ЖЕ линии
+			linkUnderEndPoint->guid() != startItemGuid)				// пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		{
-			// Должен быть такой же тип элемента
+			// пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			//
 			assert(linkUnderEndPoint->metaObject()->className() == editSchemaView()->m_newItem->metaObject()->className());
 
-			// Это такой же эелемент, если точка schemaItemEndPoint лежит на первой или последней точке schemaItemEndPoint,
-			// то объеденить schemaItemEndPoint и новый элемент
+			// пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ schemaItemEndPoint пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ schemaItemEndPoint,
+			// пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ schemaItemEndPoint пїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			//
 			assert(dynamic_cast<VFrame30::IPosConnection*>(linkUnderEndPoint.get()) != nullptr);
 			VFrame30::IPosConnection* existingItemPos = dynamic_cast<VFrame30::IPosConnection*>(linkUnderEndPoint.get());
@@ -3885,13 +3896,13 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 			if (std::abs(existingItemPoints.front().X - endPoint.X) < 0.000001 &&
 				std::abs(existingItemPoints.front().Y - endPoint.Y) < 0.000001)
 			{
-				// ПОСЛЕДНЯЯ точка новой линии лежит на Первой точке старой линии
+				// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 				//
 				endPointAddedToOther = true;
 
-				if (startPointAddedToOther == true)	// Новая линия уже была поглащена элементом schemaItemStartPoint
+				if (startPointAddedToOther == true)	// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ schemaItemStartPoint
 				{
-					// Объединения двух элемнтов - schemaItemStartPoint и schemaItemEndPoint
+					// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ - schemaItemStartPoint пїЅ schemaItemEndPoint
 					//
 					existingItemPoints.pop_front();
 					points.insert(points.end(), existingItemPoints.begin(), existingItemPoints.end());
@@ -3905,7 +3916,7 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 				}
 				else
 				{
-					// К элементу schemaItemEndPoint добавить points
+					// пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ schemaItemEndPoint пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ points
 					//
 					existingItemPoints.pop_front();
 
@@ -3922,13 +3933,13 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 				if (std::abs(existingItemPoints.back().X - endPoint.X) < 0.000001 &&
 					std::abs(existingItemPoints.back().Y - endPoint.Y) < 0.000001)
 				{
-					// ПОСЛЕДНЯЯ точка новой линии лежит на ПОСЛЕДНЕЙ точке существующей линии
+					// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 					//
 					endPointAddedToOther = true;
 
-					if (startPointAddedToOther == true)	// Новая линия уже была поглащена элементом schemaItemStartPoint
+					if (startPointAddedToOther == true)	// пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ schemaItemStartPoint
 					{
-						// Объединения двух элемнтов - schemaItemStartPoint и schemaItemEndPoint
+						// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ - schemaItemStartPoint пїЅ schemaItemEndPoint
 						//
 						existingItemPoints.reverse();
 						existingItemPoints.pop_front();
@@ -3943,7 +3954,7 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 					}
 					else
 					{
-						// К элементу schemaItemEndPoint добавить points
+						// пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ schemaItemEndPoint пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ points
 						//
 						existingItemPoints.reverse();
 						existingItemPoints.pop_front();
@@ -4061,7 +4072,7 @@ void EditSchemaWidget::mouseMove_Scrolling(QMouseEvent*)
 
 void EditSchemaWidget::mouseMove_Selection(QMouseEvent* me)
 {
-	// Выполнить перерисовку выделения.
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ.
 	//
 	editSchemaView()->m_mouseSelectionEndPoint = widgetPointToDocument(me->pos(), false);
 	editSchemaView()->update();
@@ -4766,7 +4777,7 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 	//
 	bool posInterfaceFound = false;
 
-	// Добавляется элемент с расположением ISchemaPosLine
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ISchemaPosLine
 	//
 	if (dynamic_cast<VFrame30::IPosLine*>(newItem.get()) != nullptr)
 	{
@@ -4774,7 +4785,7 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 		setMouseState(MouseState::AddSchemaPosLineStartPoint);
 	}
 
-	// Добавляется элемент с расположением ISchemaPosRect
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ISchemaPosRect
 	//
 	if (dynamic_cast<VFrame30::IPosRect*>(newItem.get()) != nullptr)
 	{
@@ -4785,7 +4796,7 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 		itemPos->minimumPossibleHeightDocPt(schema()->gridSize(), schema()->pinGridStep());		// chachedGridSize and pinStep will be initialized here
 	}
 
-	// Добавляется элемент с расположением ISchemaPosConnection
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ ISchemaPosConnection
 	//
 	if (dynamic_cast<VFrame30::IPosConnection*>(newItem.get()) != nullptr)
 	{
@@ -4795,7 +4806,7 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 
 	if (posInterfaceFound == true)
 	{
-		// Интефейс элемента найден, дальше изменить состояние мышки
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 		//
 		setMouseCursor(mapFromGlobal(QCursor::pos()));
 	}
@@ -4823,7 +4834,7 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 		}
 	}
 
-	// ЕСЛИ ВИСНЕТ ГДЕ ТО ЗДЕСЬ, ТО ТЫ ДОБАВИЛ КАКОЕТО ДЕЙСТВИЕ И НЕ ДОБАВИЛ ЗАПИСЬ В mouseStateToCursor!!!!!!!
+	// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅ mouseStateToCursor!!!!!!!
 	//
 	int movingEdgePointIndex = -1;
 
@@ -4831,7 +4842,7 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 	//
 	if (mouseState() == MouseState::None)
 	{
-		// Определить над каким элементом мышка, и что с ним можно сделать
+		// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ, пїЅ пїЅпїЅпїЅ пїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 		//
 		// Convert pixels to document points
 		//
@@ -4841,7 +4852,7 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 		{
 			std::shared_ptr<VFrame30::SchemaItem> itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPos);
 
-			// Если элемент не выделен, то его можно только перемещать
+			// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ, пїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
 			//
 			if (itemUnderPoint != nullptr &&
 				editSchemaView()->getPossibleAction(itemUnderPoint.get(), docPos, &movingEdgePointIndex) == SchemaItemAction::MoveItem)
@@ -4909,7 +4920,7 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 		return;
 	}
 
-	// Назначение курсора для создания нового элемента по типам
+	// пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ
 	//
 	if (dynamic_cast<VFrame30::IPosLine*>(editSchemaView()->m_newItem.get()) != nullptr)
 	{
@@ -7858,6 +7869,9 @@ void EditSchemaWidget::properties()
 	m_itemsPropertiesDialog->setObjects(editSchemaView()->selectedItems());
 	m_itemsPropertiesDialog->setReadOnly(m_editEngine->readOnly());
 	m_itemsPropertiesDialog->show();
+	m_itemsPropertiesDialog->ensureVisible();
+	m_itemsPropertiesDialog->setFocus();
+
 	return;
 }
 
@@ -7938,6 +7952,7 @@ void EditSchemaWidget::selectionChanged()
 
 	m_itemsPropertiesDialog->setObjects(editSchemaView()->selectedItems());
 	m_itemsPropertiesDialog->setReadOnly(m_editEngine->readOnly());
+	m_itemsPropertiesDialog->ensureVisible();
 
 	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
 	auto selectectNotLocked = selectedNonLockedItems();

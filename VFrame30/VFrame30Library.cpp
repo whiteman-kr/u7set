@@ -9,6 +9,7 @@
 #include "SchemaLayer.h"
 #include "SchemaItemLine.h"
 #include "SchemaItemRect.h"
+#include "SchemaItemFrame.h"
 #include "SchemaItemPath.h"
 #include "SchemaItemImage.h"
 #include "FblItemLine.h"
@@ -59,6 +60,7 @@ namespace VFrame30
 		SchemaItemFactory.Register<SchemaItemPath>();
 		SchemaItemFactory.Register<FblItemLine>();
 		SchemaItemFactory.Register<FblItemRect>();
+		SchemaItemFactory.Register<SchemaItemFrame>();
 		SchemaItemFactory.Register<SchemaItemLink>();
 		SchemaItemFactory.Register<SchemaItemImage>();
 		SchemaItemFactory.Register<SchemaItemAfb>();

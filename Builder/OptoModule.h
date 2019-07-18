@@ -512,6 +512,8 @@ namespace Hardware
 		static OptoPortShared getOptoPort(const QString& optoPortID);
 		bool getLmAssociatedOptoPorts(const QString& lmID, QList<OptoPortShared>& associatedPorts);
 
+		OptoPortShared getLmAssociatedOptoPort(const QString& lmID, const QString& connectionID);
+
 		static QString getOptoPortAssociatedLmID(OptoPortShared optoPort);
 
 		static bool getOptoPortValidityAbsAddr(const QString& lmID,

@@ -1,4 +1,5 @@
 #include "SchemaTabPageEx.h"
+#include "../lib/StandardColors.h"
 #include "CreateSchemaDialog.h"
 #include "CheckInDialog.h"
 #include "Settings.h"
@@ -304,21 +305,21 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 	{
 		if (file->state() == VcsState::CheckedOut)
 		{
-			QBrush b(QColor(0xFF, 0xFF, 0xFF));
+			QBrush b{StandardColors::VcsCheckedIn};
 
 			switch (file->action().value())
 			{
 			case VcsItemAction::Added:
-				b.setColor(QColor(0xF9, 0xFF, 0xF9));
+				b.setColor(StandardColors::VcsAdded);
 				break;
 			case VcsItemAction::Modified:
-				b.setColor(QColor(0xEA, 0xF0, 0xFF));
+				b.setColor(StandardColors::VcsModified);
 				break;
 			case VcsItemAction::Deleted:
-				b.setColor(QColor(0xFF, 0xF4, 0xF4));
+				b.setColor(StandardColors::VcsDeleted);
 				break;
 			default:
-				assert(false);
+				Q_ASSERT(false);
 			}
 
 			return {b};
@@ -648,7 +649,7 @@ bool SchemaListModelEx::updateFiles(const QModelIndexList& selectedIndexes, cons
 	//
 	QModelIndexList sortedRowList = selectedIndexes;
 
-	qSort(sortedRowList.begin(), sortedRowList.end(),
+	qSort(sortedRowList.begin(), sortedRowList.end(),		// Actually, this sort is not required anymore, as rows to remove are stored in map removeRows, which is sorted itslef
 		[](QModelIndex& m1, QModelIndex m2)
 		{
 			return m1.internalId() >= m2.internalId();
@@ -656,6 +657,14 @@ bool SchemaListModelEx::updateFiles(const QModelIndexList& selectedIndexes, cons
 
 	// Update model
 	//
+	struct RemoveRows
+	{
+		QModelIndex parentModelIndex;
+		std::map<int, int> childrenRows;	// map where key is child row to delete and value if FileId to delete
+	};
+
+	std::map<int, RemoveRows> removeRows;	// key - parent.fileid for deleting row. Used fileid as it must be dleted children first
+
 	for (QModelIndex& index : sortedRowList)
 	{
 		int fileId = static_cast<int>(index.internalId());
@@ -671,7 +680,7 @@ bool SchemaListModelEx::updateFiles(const QModelIndexList& selectedIndexes, cons
 
 		if (file.fileId() != fileId)
 		{
-			assert(file.fileId() == fileId);
+			Q_ASSERT(file.fileId() == fileId);
 			continue;
 		}
 
@@ -680,9 +689,12 @@ bool SchemaListModelEx::updateFiles(const QModelIndexList& selectedIndexes, cons
 			QModelIndex pi = index.parent();
 			int childIndex = m_files.indexInParent(fileId);
 
-			beginRemoveRows(pi, childIndex, childIndex);
-			m_files.removeFile(file);
-			endRemoveRows();
+//			beginRemoveRows(pi, childIndex, childIndex);
+//			m_files.removeFile(file);
+//			endRemoveRows();
+
+			removeRows[static_cast<int>(pi.internalId())].parentModelIndex = pi;
+			removeRows[static_cast<int>(pi.internalId())].childrenRows.insert({childIndex, file.fileId()});
 		}
 		else
 		{
@@ -699,7 +711,27 @@ bool SchemaListModelEx::updateFiles(const QModelIndexList& selectedIndexes, cons
 			}
 
 			QModelIndex bottomRight = this->index(index.row(), static_cast<int>(Columns::ColumnCount) - 1, index.parent());
+			Q_ASSERT(bottomRight.isValid() == true);
+
 			emit dataChanged(index, bottomRight);
+		}
+	}
+
+	// Removes rows in reverse sequence (row by row), and from high to low fileid (to remove children first)
+	//
+	for (auto rit = removeRows.rbegin(); rit != removeRows.rend(); ++rit)
+	{
+		//int parentFileId = rit->first;
+		const RemoveRows& removeRows = rit->second;
+
+		for (auto crit = removeRows.childrenRows.rbegin(); crit != removeRows.childrenRows.rend(); ++crit)
+		{
+			int childrenRow = crit->first;
+			int fileId = crit->second;
+
+			beginRemoveRows(removeRows.parentModelIndex, childrenRow, childrenRow);
+			m_files.removeFile(fileId);
+			endRemoveRows();
 		}
 	}
 
@@ -4652,6 +4684,7 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 	m_toolBar->addAction(m_schemaWidget->m_addPathAction);
 	m_toolBar->addAction(m_schemaWidget->m_addTextAction);
 	m_toolBar->addAction(m_schemaWidget->m_addImageAction);
+	//m_toolBar->addAction(m_schemaWidget->m_addFrameAction);
 
 	if (schema->isLogicSchema() == true)
 	{
