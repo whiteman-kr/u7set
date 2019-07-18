@@ -505,11 +505,11 @@ namespace Builder
 //		bool isAutoSignal() const { return m_autoSignalPtr != nullptr; }
 
 		bool isInput() const { return m_isInput; }
-		bool isTuningable() const { return m_isTuningable; }
+		bool isTunable() const { return m_isTunable; }
 		bool isOptoSignal() const { return m_isOptoSignal; }
 		void setReceivedOptoAppSignalID(const QString& recvAppSignalID);
 
-		bool isSource() const { return m_isInput || m_isTuningable || m_isOptoSignal || m_isConst; }
+		bool isSource() const { return m_isInput || m_isTunable || m_isOptoSignal || m_isConst; }
 
 		bool isOutput() const { return m_isOutput; }
 		bool isStrictOutput() const { return m_isOutput == true && isSource() == false && m_isBusChild == false; }
@@ -539,7 +539,7 @@ namespace Builder
 		void sortRefSignals();
 
 		Signal* getInputSignal();
-		Signal* getTuningableSignal();
+		Signal* getTunableSignal();
 		QVector<Signal*> getAnalogOutputSignals();
 
 		QStringList refSignalIDs() const;
@@ -594,7 +594,7 @@ namespace Builder
 		BusShared m_bus;
 
 		bool m_isInput = false;							// signal sources
-		bool m_isTuningable = false;
+		bool m_isTunable = false;
 		bool m_isOptoSignal = false;
 		QString m_receivedOptoAppSignalID;
 

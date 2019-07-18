@@ -1396,14 +1396,14 @@ namespace Builder
 
 		m_refSignals.append(s);
 
-		// In UalSignal, Input, Tuningable and Opto signals treat as Source
+		// In UalSignal, Input, Tunable and Opto signals treat as Source
 
 		m_isInput |= s->isInput();
-		m_isTuningable |= s->enableTuning();
+		m_isTunable |= s->enableTuning();
 		m_isOptoSignal |= isOptoSignal;
 
-		// UalSignal can be Input and Output simultaneously (also as Tuningable and Output, OptoSignal and Output)
-		// for example, if Input Signal directly connected to Output Signal (or Tuningable => Output, OptoSignal => Output)
+		// UalSignal can be Input and Output simultaneously (also as Tunable and Output, OptoSignal and Output)
+		// for example, if Input Signal directly connected to Output Signal (or Tunable => Output, OptoSignal => Output)
 		// in this case m_ualAddress set to Sourcet signal ioBufAddr and memory for that signal is not allocate (used ioBuf memory)
 		// value of Source signal can't be changed by UAL
 
@@ -1463,9 +1463,9 @@ namespace Builder
 			return inSignal->ioBufAddr();
 		}
 
-		if (m_isTuningable == true)
+		if (m_isTunable == true)
 		{
-			Signal* tunSignal = getTuningableSignal();
+			Signal* tunSignal = getTunableSignal();
 
 			if (tunSignal == nullptr)
 			{
@@ -1879,20 +1879,20 @@ namespace Builder
 		return inputSignal;
 	}
 
-	Signal* UalSignal::getTuningableSignal()
+	Signal* UalSignal::getTunableSignal()
 	{
-		Signal* tuningableSignal = nullptr;
+		Signal* tunableSignal = nullptr;
 
 		for(Signal* s : m_refSignals)
 		{
 			if (s->enableTuning() == true)
 			{
-				tuningableSignal = s;
+				tunableSignal = s;
 				break;
 			}
 		}
 
-		return tuningableSignal;
+		return tunableSignal;
 	}
 
 	QVector<Signal*> UalSignal::getAnalogOutputSignals()
@@ -2726,7 +2726,7 @@ namespace Builder
 			str.append(ualSignal->isBusChild() == true ? "true" : "false");
 			str += ";";
 
-			str.append(ualSignal->isTuningable() == true ? "true" : "false");
+			str.append(ualSignal->isTunable() == true ? "true" : "false");
 			str += ";";
 
 			str.append(ualSignal->isOptoSignal() == true ? "true" : "false");

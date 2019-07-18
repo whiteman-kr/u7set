@@ -1835,7 +1835,7 @@ namespace Builder
 		// UalSignal is not yet created
 		//
 
-		// Only Input and Tuningable signals really can generate UalSignal
+		// Only Input and Tunable signals really can generate UalSignal
 		//
 		if (s->isInput() == false && s->enableTuning() == false)
 		{
@@ -1854,7 +1854,7 @@ namespace Builder
 
 		if (ualItem->inputs().size() != 0)
 		{
-			// Can't assign value to input or tuningable signal '%1' (Logic schema '%2').
+			// Can't assign value to input or tunable signal '%1' (Logic schema '%2').
 			//
 			m_log->errALC5121(s->appSignalID(), ualItem->guid(), ualItem->schemaID());
 			return false;
@@ -2284,7 +2284,7 @@ namespace Builder
 
 		if (s->enableTuning() == true)
 		{
-			// Can't assign value to tuningable signal '%1' (Logic schema '%2').
+			// Can't assign value to tunable signal '%1' (Logic schema '%2').
 			//
 			m_log->errALC5071(signalItem->schemaID(), s->appSignalID(), signalItem->guid());
 			return false;
@@ -2294,7 +2294,7 @@ namespace Builder
 
 		if (existsSignal != nullptr && existsSignal != srcUalSignal && existsSignal->isSource() == true)
 		{
-			// Can't assign value to input/tuningable/opto/const signal %1 (Logic schema %2).
+			// Can't assign value to input/tunable/opto/const signal %1 (Logic schema %2).
 			//
 			m_log->errALC5121(s->appSignalID(), signalItem->guid(), signalItem->schemaID());
 			return false;
@@ -4092,7 +4092,7 @@ namespace Builder
 		{
 			if (tuningEnabled == true)
 			{
-				// Tuning is enabled for module %1 but tuningable signals is not found.
+				// Tuning is enabled for module %1 but tunable signals is not found.
 				//
 				m_log->wrnALC5165(lmEquipmentID());
 			}
@@ -4101,7 +4101,7 @@ namespace Builder
 		{
 			if (tuningEnabled == false)
 			{
-				// Tuningable signals is found in module %1 but tuning is not enabled.
+				// Tunable signals is found in module %1 but tuning is not enabled.
 				//
 				m_log->errALC5166(lmEquipmentID());
 				delete tuningData;
@@ -4297,7 +4297,7 @@ namespace Builder
 		//	+ acquired
 		//	+ discrete
 		//	+ internal
-		//  - tuningable
+		//  - tunable
 		//  - bus child signal
 		//	+ used in UAL || is a SerialRx signal
 
@@ -4310,7 +4310,7 @@ namespace Builder
 				s->isAcquired() == true &&
 				s->isDiscrete() == true &&
 				s->isInternal() == true &&
-				s->isTuningable() == false)
+				s->isTunable() == false)
 			{
 				m_acquiredDiscreteInternalSignals.append(s);
 			}
@@ -4353,7 +4353,7 @@ namespace Builder
 		//	+ acquired
 		//	+ discrete
 		//	+ internal
-		//	+ tuningable
+		//	+ tunable
 		//	+ no matter used in UAL or not
 
 		QVector<Signal*> tuningSignals;
@@ -4376,7 +4376,7 @@ namespace Builder
 
 			if (ualSignal->isAcquired() == true &&
 				ualSignal->isDiscrete() == true &&
-				ualSignal->isTuningable() == true)
+				ualSignal->isTunable() == true)
 			{
 				m_acquiredDiscreteTuningSignals.append(ualSignal);
 			}
@@ -4490,7 +4490,7 @@ namespace Builder
 				s->isAcquired() == false &&
 				s->isDiscrete() == true &&
 				s->isInternal() == true &&
-				s->isTuningable() == false)
+				s->isTunable() == false)
 			{
 				m_nonAcquiredDiscreteInternalSignals.append(s);
 			}
@@ -4578,7 +4578,7 @@ namespace Builder
 				s->isAcquired() == true &&
 				s->isAnalog() == true &&
 				s->isInternal() == true &&
-				s->isTuningable() == false)
+				s->isTunable() == false)
 			{
 				m_acquiredAnalogInternalSignals.append(s);
 			}
@@ -4643,7 +4643,7 @@ namespace Builder
 		//	+ acquired
 		//	+ discrete
 		//	+ internal
-		//	+ tuningable
+		//	+ tunable
 		//	+ no matter used in UAL or not
 
 		QVector<Signal*> tuningSignals;
@@ -4666,7 +4666,7 @@ namespace Builder
 
 			if (ualSignal->isAcquired() == true &&
 				ualSignal->isAnalog() == true &&
-				ualSignal->isTuningable() == true)
+				ualSignal->isTunable() == true)
 			{
 				m_acquiredAnalogTuningSignals.append(ualSignal);
 			}
@@ -4956,7 +4956,7 @@ namespace Builder
 					break;
 
 				case E::SignalInOutType::Internal:
-					if (ualSignal->isTuningable() == true)
+					if (ualSignal->isTunable() == true)
 					{
 						s->setLmRamAccess(E::LogicModuleRamAccess::Read);
 					}
@@ -5138,7 +5138,7 @@ namespace Builder
 
 			if (setDiscreteInputSignalsUalAddresses() == false) break;
 
-			if (setTuningableSignalsUalAddresses() == false) break;
+			if (setTunableSignalsUalAddresses() == false) break;
 
 			if (disposeDiscreteSignalsInBitMemory() == false) break;
 
@@ -5284,7 +5284,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::setTuningableSignalsUalAddresses()
+	bool ModuleLogicCompiler::setTunableSignalsUalAddresses()
 	{
 		if (m_tuningData == nullptr)
 		{
@@ -9273,7 +9273,7 @@ namespace Builder
 
 		// m_alpCode_init(&m_resourcesUsageInfo.copyAcquiredTuningAnalogSignalsToRegBuf);
 
-		code->comment_nl("Copy acquired tuningable analog signals to regBuf");
+		code->comment_nl("Copy acquired tunable analog signals to regBuf");
 
 		int startUalAddr = -1;
 		int startRegBufAddr = -1;
@@ -9294,7 +9294,7 @@ namespace Builder
 				return false;
 			}
 
-			Signal* s = ualSignal->getTuningableSignal();
+			Signal* s = ualSignal->getTunableSignal();
 
 			if (s == nullptr)
 			{
@@ -9396,7 +9396,7 @@ namespace Builder
 
 		//m_alpCode_init(&m_resourcesUsageInfo.copyAcquiredTuningDiscreteSignalsToRegBuf);
 
-		code->comment_nl("Copy acquired tuningable discrete signals to regBuf");
+		code->comment_nl("Copy acquired tunable discrete signals to regBuf");
 
 		int startUalAddr = -1;
 		int startRegBufAddr = -1;
@@ -9412,7 +9412,7 @@ namespace Builder
 		{
 			TEST_PTR_CONTINUE(ualAddr);
 
-			Signal* s = ualAddr->getTuningableSignal();
+			Signal* s = ualAddr->getTunableSignal();
 
 			TEST_PTR_CONTINUE(s);
 

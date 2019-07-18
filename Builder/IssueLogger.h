@@ -298,10 +298,10 @@ namespace Builder
 		void errALC5065(int address);								// Write address %1 of application memory is out of range 0..65535.
 		void errALC5066(int addrTo, int addrFrom, int sizeW);		// Command MOVEMEM %1, %2, %3 can't write to bit-addressed memory.
 		void errALC5067(int addrTo, int bit, int value);			// Command MOVBC %1, %2, #%3 can't write out of application bit- or word-addressed memory.
-		void errALC5068(QString appSignalID);						// TuningHighBound property of tuningable signal %1 must be greate than TuningLowBound.
-		void errALC5069(QString appSignalID);						// TuningDefaultValue property of tuningable signal %1 must be in range from TuningLowBound to TuningHighBound.
+		void errALC5068(QString appSignalID);						// TuningHighBound property of tunable signal %1 must be greate than TuningLowBound.
+		void errALC5069(QString appSignalID);						// TuningDefaultValue property of tunable signal %1 must be in range from TuningLowBound to TuningHighBound.
 		void wrnALC5070(QString appSignalID);						// Signal %1 has Little Endian byte order.
-		void errALC5071(QString schemaID, QString appSignalID, QUuid itemUuid);					// Can't assign value to tuningable signal %1 (Logic schema %2).
+		void errALC5071(QString schemaID, QString appSignalID, QUuid itemUuid);					// Can't assign value to tunable signal %1 (Logic schema %2).
 		void wrnALC5072(int coefCount, QString coefCaption, QUuid itemUuid, QString schemaID);	// Possible error. AFB 'Poly' CoefCount = %1, but coefficient %2 is not equal to 0 (Logic schema %3).
 		void wrnALC5073();											// Usage of code memory exceed 95%.
 		void errALC5074();											// Usage of code memory exceed 100%.
@@ -349,7 +349,7 @@ namespace Builder
 		void errALC5118(QString appSignalID, QUuid itemUuid, QString schemaID);			// Signal %1 is not connected to any signal source. (Logic schema %2).
 		void errALC5119(QUuid constItemUuid, QString schemaID);							// Type of Constant is uncompatible with type of linked schema items (Logic schema %1).
 		void errALC5120(QUuid ualItemUuid, QString ualItemLabel, QString pin, QString schemaID);			// UalSignal is not found for pin %1 (Logic schema %2).
-		void errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID);		// Can't assign value to input/tuningable/opto/const signal %1 (Logic schema %2).
+		void errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID);		// Can't assign value to input/tunable/opto/const signal %1 (Logic schema %2).
 		void errALC5122(QUuid ualItemUuid, QString schemaID);							// Different busTypes on AFB output (Logic schema %1).
 		void errALC5123(QUuid ualItemUuid, QString schemaID);							// Different busTypes on AFB inputs (Logic schema %1).
 		void errALC5124(QString appSignalID, QUuid signalUuid, QUuid ualItemUuid, QString schemaID);	// Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
@@ -374,7 +374,7 @@ namespace Builder
 		void errALC5143(QString loopbackID, QUuid loopbackTargetItemUuid, QString schemaID);		// LoopbackSource is not exists for LoopbackTarget with ID %1 (Logic schema %2).
 		void errALC5144(QString s1ID, QUuid s1Guid, QString s2ID, QUuid s2Guid, QString lbId, QUuid lbGuid, QString schemaID);	// Non compatible signals %1 and %2 are connected to same Loopback %3 (Logic schema %4)
 		void errALC5145(QString signalID, QUuid signalGuid, QString schemaID);			// Input signal %1 is connected to LoopbackTarget (Logic schema %2).
-		void errALC5146(QString signalID, QUuid signalGuid, QString schemaID);			// Tuningable signal %1 is connected to LoopbackTarget (Logic schema %2).
+		void errALC5146(QString signalID, QUuid signalGuid, QString schemaID);			// Tunable signal %1 is connected to LoopbackTarget (Logic schema %2).
 		void errALC5147(QString signalID, QString lbID1, QString lbID2);				// Signal %1 is connected to different LoopbackTargets %2 and %3 (Logic schema %4)
 		void wrnALC5148(QString signalID);												// Internal signal %1 is unused.
 		void errALC5149(QString chassisEquipmentID);									// LM- or BVB-family module is not found in chassis %1
@@ -393,8 +393,8 @@ namespace Builder
 		void errALC5162(QString connectionID);											// In single-port connection %1 Port2EquipmentID property is not empty.
 		void errALC5163(QString connectionID);											// Port1EquipmentID property is empty in connection %1.
 		void errALC5164(QString connectionID);											// Port2EquipmentID property is empty in connection %1.
-		void wrnALC5165(QString lmEquipmentID);											// Tuning is enabled for module %1 but tuningable signals is not found.
-		void errALC5166(QString lmEquipmentID);											// Tuningable signals is found in module %1 but tuning is not enabled.
+		void wrnALC5165(QString lmEquipmentID);											// Tuning is enabled for module %1 but tunable signals is not found.
+		void errALC5166(QString lmEquipmentID);											// Tunable signals is found in module %1 but tuning is not enabled.
 		void wrnALC5167(QString appSignalID);											// Signal %1 is excluded from build.
 		void wrnALC5168(QString flagSignalID,
 						QString flagTypeStr,

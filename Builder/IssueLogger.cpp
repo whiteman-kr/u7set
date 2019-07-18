@@ -4171,19 +4171,19 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   TuningHighBound property of tuningable signal %1 must be greate than TuningLowBound
+	/// Title:	   TuningHighBound property of tunable signal %1 must be greate than TuningLowBound
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		TuningHighBound property of tuningable signal must be greate than TuningLowBound. Check signal properties.
+	///		TuningHighBound property of tunable signal must be greate than TuningLowBound. Check signal properties.
 	///
 	void IssueLogger::errALC5068(QString appSignalID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5068,
-				  QString(tr("TuningHighBound property of tuningable signal %1 must be greate than TuningLowBound")).
+				  QString(tr("TuningHighBound property of tunable signal %1 must be greate than TuningLowBound")).
 					arg(appSignalID));
 	}
 
@@ -4192,20 +4192,20 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   TuningDefaultValue property of tuningable signal %1 must be in range from TuningLowBound to TuningHighBound.
+	/// Title:	   TuningDefaultValue property of tunable signal %1 must be in range from TuningLowBound to TuningHighBound.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		TuningDefaultValue property of tuningable signal must be in range from TuningLowBound to TuningHighBound.
+	///		TuningDefaultValue property of tunable signal must be in range from TuningLowBound to TuningHighBound.
 	///		Check signal's TuningDefaultValue property.
 	///
 	void IssueLogger::errALC5069(QString appSignalID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5069,
-				  QString(tr("TuningDefaultValue property of tuningable signal %1 must be in range from TuningLowBound to TuningHighBound.")).
+				  QString(tr("TuningDefaultValue property of tunable signal %1 must be in range from TuningLowBound to TuningHighBound.")).
 					arg(appSignalID));
 	}
 
@@ -4235,13 +4235,13 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Can't assign value to tuningable signal %1 (Logic schema %2).
+	/// Title:	   Can't assign value to tunable signal %1 (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		Can't assign value to tuningable signal. Such signals are read-only.
+	///		Can't assign value to tunable signal. Such signals are read-only.
 	///
 	void IssueLogger::errALC5071(QString schemaID, QString appSignalID, QUuid itemUuid)
 	{
@@ -4249,7 +4249,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5071,
-				  QString(tr("Can't assign value to tuningable signal %1 (Logic schema %2).")).
+				  QString(tr("Can't assign value to tunable signal %1 (Logic schema %2).")).
 					arg(appSignalID).arg(schemaID));
 	}
 
@@ -5260,14 +5260,14 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Can't assign value to input/tuningable/opto/const signal %1 (Logic schema %2).
+	/// Title:	   Can't assign value to input/tunable/opto/const signal %1 (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 App signal ID
 	///		%2 Logic schema ID
 	///
 	/// Description:
-	///		Value of input/tuningable/opto/const signals cannot be modified by UAL.
+	///		Value of input/tunable/opto/const signals cannot be modified by UAL.
 	///
 	void IssueLogger::errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID)
 	{
@@ -5275,7 +5275,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5121,
-				  QString(tr("Can't assign value to input/tuningable/opto/const signal %1 (Logic schema %2).")).
+				  QString(tr("Can't assign value to input/tunable/opto/const signal %1 (Logic schema %2).")).
 							arg(appSignalID).arg(schemaID));
 	}
 
@@ -5826,14 +5826,14 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Tuningable signal %1 is connected to LoopbackTarget (Logic schema %2).
+	/// Title:	   Tunable signal %1 is connected to LoopbackTarget (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 Signal ID
 	///		%2 Logic schema ID
 	///
 	/// Description:
-	///		Input signal cannot be connected to loopback target.
+	///		Tunable signal cannot be connected to loopback target.
 	///
 	void IssueLogger::errALC5146(QString signalID, QUuid signalGuid, QString schemaID)
 	{
@@ -5841,7 +5841,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5146,
-				  QString(tr("Tuningable signal %1 is connected to LoopbackTarget (Logic schema %2).")).arg(signalID).arg(schemaID));
+				  QString(tr("Tunable signal %1 is connected to LoopbackTarget (Logic schema %2).")).arg(signalID).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5147
@@ -6227,19 +6227,19 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Tuning is enabled for module %1 but tuningable signals is not found.
+	/// Title: Tuning is enabled for module %1 but tunable signals is not found.
 	///
 	/// Parameters:
 	///		%1 LM's equipmentID
 	///
 	/// Description:
-	///		Tuning is enabled for specified module but tuningable signals is not found.
+	///		Tuning is enabled for specified module but tunable signals is not found.
 	///
 	void IssueLogger::wrnALC5165(QString lmEquipmentID)
 	{
 		LOG_WARNING1(IssueType::AlCompiler,
 				  5165,
-				  QString(tr("Tuning is enabled for module %1 but tuningable signals is not found.")).
+				  QString(tr("Tuning is enabled for module %1 but tunable signals is not found.")).
 					arg(lmEquipmentID));
 	}
 
@@ -6247,19 +6247,19 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Tuningable signals is found in module %1 but tuning is not enabled.
+	/// Title: Tunable signals is found in module %1 but tuning is not enabled.
 	///
 	/// Parameters:
 	///		%1 LM's equipmentID
 	///
 	/// Description:
-	///		Tuningable signals is found in specified module but tuning is not enabled.
+	///		Tunable signals is found in specified module but tuning is not enabled.
 	///
 	void IssueLogger::errALC5166(QString lmEquipmentID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5166,
-				  QString(tr("Tuningable signals is found in module %1 but tuning is not enabled.")).
+				  QString(tr("Tunable signals is found in module %1 but tuning is not enabled.")).
 					arg(lmEquipmentID));
 	}
 
@@ -6296,7 +6296,7 @@ namespace Builder
 	///		%4 already assigned flag signal ID
 	///
 	/// Description:
-	///		Tuningable signals is found in specified module but tuning is not enabled.
+	///		Duplicate assigning of signal to flag of specified signal
 	///
 	void IssueLogger::wrnALC5168(	QString flagSignalID,
 									QString flagTypeStr,

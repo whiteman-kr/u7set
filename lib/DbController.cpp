@@ -83,7 +83,7 @@ DbController::DbController() :
 	connect(this, &DbController::signal_getSignalsIDs, m_worker, &DbWorker::slot_getSignalsIDs);
 	connect(this, &DbController::signal_getSignalsIDAppSignalID, m_worker, &DbWorker::slot_getSignalsIDAppSignalID);
 	connect(this, &DbController::signal_getSignals, m_worker, &DbWorker::slot_getSignals);
-	connect(this, &DbController::signal_getTuningableSignals, m_worker, &DbWorker::slot_getTuningableSignals);
+	connect(this, &DbController::signal_getTunableSignals, m_worker, &DbWorker::slot_getTunableSignals);
 	connect(this, &DbController::signal_getLatestSignal, m_worker, &DbWorker::slot_getLatestSignal);
 	connect(this, &DbController::signal_getLatestSignals, m_worker, &DbWorker::slot_getLatestSignals);
 	connect(this, &DbController::signal_getLatestSignalsByAppSignalIDs, m_worker, &DbWorker::slot_getLatestSignalsByAppSignalIDs);
@@ -1790,7 +1790,7 @@ bool DbController::getSignals(SignalSet* signalSet, bool excludeDeleted, QWidget
 	return ok;
 }
 
-bool DbController::getTuningableSignals(SignalSet* signalSet, QWidget* parentWidget)
+bool DbController::getTunableSignals(SignalSet* signalSet, QWidget* parentWidget)
 {
 	if (signalSet == nullptr)
 	{
@@ -1807,9 +1807,9 @@ bool DbController::getTuningableSignals(SignalSet* signalSet, QWidget* parentWid
 		return false;
 	}
 
-	emit signal_getTuningableSignals(signalSet);
+	emit signal_getTunableSignals(signalSet);
 
-	ok = waitForComplete(parentWidget, tr("Reading tuningable signals"));
+	ok = waitForComplete(parentWidget, tr("Reading tunable signals"));
 
 	return ok;
 }

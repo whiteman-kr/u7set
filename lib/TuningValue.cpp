@@ -91,7 +91,7 @@ void TuningValue::setInt32Value(qint32 intValue)
 
 qint64 TuningValue::int64Value() const
 {
-	assert(false);		// remove when tuningable int64 will exists
+	assert(false);		// remove when tunable int64 will exists
 
 	assert(m_type == TuningValueType::SignedInt64);
 	return m_int64;
@@ -99,7 +99,7 @@ qint64 TuningValue::int64Value() const
 
 void TuningValue::setInt64Value(qint64 intValue)
 {
-	assert(false);		// remove when tuningable int64 will exists
+	assert(false);		// remove when tunable int64 will exists
 
 	assert(m_type == TuningValueType::SignedInt64);
 	m_int64 = intValue;
@@ -119,7 +119,7 @@ void TuningValue::setFloatValue(float floatValue)
 
 double TuningValue::doubleValue() const
 {
-	assert(false);		// remove when tuningable Double will exists
+	assert(false);		// remove when tunable Double will exists
 
 	assert(m_type == TuningValueType::Double);
 	return m_double;
@@ -127,7 +127,7 @@ double TuningValue::doubleValue() const
 
 void TuningValue::setDoubleValue(double doubleValue)
 {
-	assert(false);		// remove when tuningable Double will exists
+	assert(false);		// remove when tunable Double will exists
 
 	assert(m_type == TuningValueType::Double);
 	m_double = doubleValue;
@@ -163,7 +163,7 @@ QVariant TuningValue::toVariant() const
 
 	case TuningValueType::SignedInt64:
 
-		assert(false);		// remove when tuningable int64 will exist
+		assert(false);		// remove when tunable int64 will exist
 		return QVariant(int64Value());
 
 	case TuningValueType::Float:
@@ -172,7 +172,7 @@ QVariant TuningValue::toVariant() const
 
 	case TuningValueType::Double:
 
-		assert(false);		// remove when tuningable double will exist
+		assert(false);		// remove when tunable double will exist
 		return QVariant(doubleValue());
 
 	default:
@@ -202,7 +202,7 @@ void TuningValue::fromVariant(QVariant value)
 
 	case QVariant::LongLong:
 
-		assert(false);		// remove when tuningable int64 will exist
+		assert(false);		// remove when tunable int64 will exist
 		m_type = TuningValueType::SignedInt64;
 		m_int64 = value.toLongLong();
 
@@ -217,7 +217,7 @@ void TuningValue::fromVariant(QVariant value)
 
 	case QVariant::Double:
 
-		assert(false);		// remove when tuningable double will exist
+		assert(false);		// remove when tunable double will exist
 		m_type = TuningValueType::Double;
 		m_double = value.toDouble();
 

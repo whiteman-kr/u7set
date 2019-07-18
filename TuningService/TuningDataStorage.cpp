@@ -354,7 +354,7 @@ namespace  Tuning
 
 						signal->setTuningAddr(Address16(sizeB / WORD_SIZE_IN_BYTES, bitNo));
 
-						// tuningable discrete signals pack in 32-bit container that place in LM memory in BigEndian format
+						// tunable discrete signals pack in 32-bit container that place in LM memory in BigEndian format
 						// but access to this discretes is performeds as word-addressed
 						// so,
 						//   if discrete bitNo < 16 we add 1 to signal offset (in words)

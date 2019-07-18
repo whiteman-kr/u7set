@@ -176,19 +176,19 @@ namespace Builder
 				return false;
 			}
 
-			// check tuningable signals properties
+			// check tunable signals properties
 			//
 			if (s.enableTuning() == true)
 			{
 				if (s.isInternal() == false)
 				{
-					LOG_INTERNAL_ERROR(m_log);				// only Internals can be tuningable
+					LOG_INTERNAL_ERROR(m_log);				// only Internals can be tunable
 					return false;
 				}
 
 				if (s.tuningLowBound() >= s.tuningHighBound())
 				{
-					// TuningHighBound property of tuningable signal '%1' must be greate than TuningLowBound.
+					// TuningHighBound property of tunable signal '%1' must be greate than TuningLowBound.
 					//
 					m_log->errALC5068(s.appSignalID());
 					result = false;
@@ -200,7 +200,7 @@ namespace Builder
 					if (s.tuningDefaultValue() < s.tuningLowBound() ||
 						s.tuningDefaultValue() > s.tuningHighBound())
 					{
-						// TuningDefaultValue property of tuningable signal %1 must be in range from TuningLowBound to TuningHighBound.
+						// TuningDefaultValue property of tunable signal %1 must be in range from TuningLowBound to TuningHighBound.
 						//
 						m_log->errALC5069(s.appSignalID());
 						result = false;

@@ -416,7 +416,7 @@ IdeTuningFiltersEditor::IdeTuningFiltersEditor(DbController* dbController, QWidg
 	// Load tuning signals
 	//
 
-	bool ok = m_dbController->getTuningableSignals(&tuningSignalSet, parent);
+	bool ok = m_dbController->getTunableSignals(&tuningSignalSet, parent);
 	if (ok == true)
 	{
 		int count = tuningSignalSet.count();

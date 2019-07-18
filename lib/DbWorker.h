@@ -148,8 +148,8 @@ public slots:
     void slot_getSignalsIDs(QVector<int>* signalsIDs);
 	void slot_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAppSignalID);
 	void slot_getSignals(SignalSet* signalSet, bool excludeDeleted);
-	void slot_getTuningableSignals(SignalSet* signalSet);
-	void getSignals(SignalSet* signalSet, bool excludeDeleted, bool tuningableOnly);
+	void slot_getTunableSignals(SignalSet* signalSet);
+	void getSignals(SignalSet* signalSet, bool excludeDeleted, bool tunableOnly);
     void slot_getLatestSignal(int signalID, Signal* signal);
 	void slot_getLatestSignals(QVector<int> signalIDs, QVector<Signal>* signalsArray);
 	void slot_getLatestSignalsByAppSignalIDs(QStringList appSignalIds, QVector<Signal>* signalArray);

@@ -418,7 +418,7 @@ private:
 											// or
 
 	Address16 m_tuningAddr;					// signal address in tuning buffer
-											// only for tuningable signals
+											// only for tunable signals
 
 	Address16 m_ualAddr;					// signal address is used in UAL
 											// may be equal to m_ioBufAddr, m_tuningAddr, m_regValueAddr or not

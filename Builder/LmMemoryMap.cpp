@@ -367,14 +367,14 @@ namespace Builder
 		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogInternalSignals, "acquired analog internal signals");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogOptoSignals, "acquired analog opto signals");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogBusChildSignals, "acquired analog bus child signals");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogTuningSignals, "acquired analog tuningable signals");
+		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogTuningSignals, "acquired analog tunable signals");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredAnalogConstSignals, "acquired analog const signals");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredBuses, "acquired buses");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteInputSignals, "acquired discrete input signals");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteOutputSignals, "acquired discrete output signals (from bit memory)");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteInternalSignals, "acquired discrete internal signals (from bit memory)");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteOptoAndBusChildSignals, "acquired discrete opto and bus child signals");
-		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteTuningSignals, "acquired discrete tuningable signals");
+		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteTuningSignals, "acquired discrete tunable signals");
 		addRecordSignals(memFile, m_appWordAdressed.acquiredDiscreteConstSignals, "acquired discrete const signals");
 		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredAnalogInputSignals, "non acquired analog input signals");
 		addRecordSignals(memFile, m_appWordAdressed.nonAcquiredAnalogOutputSignals, "non acquired analog output signals");

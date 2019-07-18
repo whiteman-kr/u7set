@@ -4562,13 +4562,13 @@ void DbWorker::slot_getSignals(SignalSet* signalSet, bool excludeDeleted)
 }
 
 
-void DbWorker::slot_getTuningableSignals(SignalSet* signalSet)
+void DbWorker::slot_getTunableSignals(SignalSet* signalSet)
 {
 	getSignals(signalSet, true, true);
 }
 
 
-void DbWorker::getSignals(SignalSet* signalSet, bool excludeDeleted, bool tuningableOnly)
+void DbWorker::getSignals(SignalSet* signalSet, bool excludeDeleted, bool tunableOnly)
 {
 	AUTO_COMPLETE
 
@@ -4643,7 +4643,7 @@ void DbWorker::getSignals(SignalSet* signalSet, bool excludeDeleted, bool tuning
 			continue;
 		}
 
-		if (tuningableOnly == true && s->enableTuning() == false)
+		if (tunableOnly == true && s->enableTuning() == false)
 		{
 			delete s;
 			continue;
