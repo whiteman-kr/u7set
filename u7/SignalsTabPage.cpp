@@ -6,6 +6,7 @@
 #include "../lib/SignalProperties.h"
 #include "../lib/WidgetUtils.h"
 #include "../lib/WUtils.h"
+#include "../lib/StandardColors.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
 #include <QMessageBox>
 #include <QFormLayout>
@@ -1093,18 +1094,18 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 	{
 		if (signal.checkedOut())
 		{
-			QBrush b(QColor(0xFF, 0xFF, 0xFF));
+			QBrush b(StandardColors::VcsCheckedIn);
 
 			switch (signal.instanceAction().value())
 			{
 			case VcsItemAction::Added:
-				b.setColor(QColor(0xF9, 0xFF, 0xF9));
+				b.setColor(StandardColors::VcsAdded);
 				break;
 			case VcsItemAction::Modified:
-				b.setColor(QColor(0xEA, 0xF0, 0xFF));
+				b.setColor(StandardColors::VcsModified);
 				break;
 			case VcsItemAction::Deleted:
-				b.setColor(QColor(0xFF, 0xF4, 0xF4));
+				b.setColor(StandardColors::VcsDeleted);
 				break;
 			default:
 				assert(false);
@@ -1478,11 +1479,14 @@ void SignalsModel::addSignal()
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
-		QVector<Signal*> resultSignalVector;
+		QVector<Signal> resultSignalVector;
+
 		resultSignalVector.reserve(signalCount * channelCount);
+
 		for (int s = 0; s < signalCount; s++)
 		{
 			QVector<Signal> signalVector;
+
 			for (int i = 0; i < channelCount; i++)
 			{
 				signalVector << signal;
@@ -1506,22 +1510,22 @@ void SignalsModel::addSignal()
 			{
 				for (int i = 0; i < signalVector.count(); i++)
 				{
-					Signal* newSignal = new Signal;
-
-					*newSignal = signalVector[i];
-
-					resultSignalVector.append(newSignal);
+					resultSignalVector.append(signalVector[i]);
 				}
 			}
 		}
+
 		if (!resultSignalVector.isEmpty())
 		{
-			int firstInsertedSignalId = resultSignalVector[0]->ID();
+			int firstInsertedSignalId = resultSignalVector[0].ID();
+
 			beginInsertRows(QModelIndex(), m_signalSet.count(), m_signalSet.count() + resultSignalVector.count() - 1);
+
 			for (int i = 0; i < resultSignalVector.count(); i++)
 			{
-				Signal* s = resultSignalVector[i];
-				m_signalSet.append(s->ID(), s);
+				const Signal& s = resultSignalVector[i];
+
+				m_signalSet.replaceOrAppendIfNotExists(s.ID(), s);
 			}
 			endInsertRows();
 			emit dataChanged(createIndex(m_signalSet.count() - resultSignalVector.count(), 0), createIndex(m_signalSet.count() - 1, columnCount() - 1), QVector<int>() << Qt::EditRole << Qt::DisplayRole);
@@ -1783,7 +1787,7 @@ void SignalsModel::initLazyLoadSignals()
 
 	for (const ID_AppSignalID& id : signalIds)
 	{
-		m_signalSet.append(id.ID, new Signal(id));
+		m_signalSet.replaceOrAppendIfNotExists(id.ID, Signal(id));
 	}
 
 	if (signalIds.count() > 0)
@@ -1804,7 +1808,7 @@ void SignalsModel::initLazyLoadSignals()
 
 		for (const Signal& loadedSignal : signalsArray)
 		{
-			m_signalSet.append(loadedSignal.ID(), new Signal(loadedSignal));
+			m_signalSet.replaceOrAppendIfNotExists(loadedSignal.ID(), loadedSignal);
 
 			detectNewProperties(loadedSignal);
 		}
@@ -1841,7 +1845,7 @@ void SignalsModel::finishLoadSignals()
 
 			for (const Signal& loadedSignal: signalsToLoad)
 			{
-				m_signalSet.append(loadedSignal.ID(), new Signal(loadedSignal));
+				m_signalSet.replaceOrAppendIfNotExists(loadedSignal.ID(), loadedSignal);
 
 				detectNewProperties(loadedSignal);
 			}
@@ -1902,7 +1906,7 @@ void SignalsModel::loadNextSignalsPortion()
 
 		for (const Signal& loadedSignal: signalsToLoad)
 		{
-			m_signalSet.append(loadedSignal.ID(), new Signal(loadedSignal));
+			m_signalSet.replaceOrAppendIfNotExists(loadedSignal.ID(), loadedSignal);
 
 			detectNewProperties(loadedSignal);
 		}
