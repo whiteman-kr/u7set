@@ -2323,6 +2323,7 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 	toolBar->addAction(action);
 
 	action = new QAction(QIcon(":/Images/Images/SchemaDelete.svg"), tr("Delete signal"), this);
+	action->setShortcut(Qt::Key_Delete);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::deleteSignal);
 	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setEnabled);
 	m_signalsView->addAction(action);
