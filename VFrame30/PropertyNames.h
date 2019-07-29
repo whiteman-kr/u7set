@@ -12,6 +12,11 @@ namespace VFrame30
 	public:
 		static const QString schemaId;
 
+		static const QString top;
+		static const QString left;
+		static const QString width;
+		static const QString height;
+
 		static const QString acceptClick;
 		static const QString clickScript;
 		static const QString preDrawScript;
@@ -75,8 +80,6 @@ namespace VFrame30
 		static const QString ufbSchemaId;
 		static const QString ufbSchemaVersion;
 
-		static const QString width;
-		static const QString height;
 		static const QString locked;
 
 		static const QString checkable;
@@ -147,6 +150,7 @@ namespace VFrame30
 		static const QString apertureCategory;
 		static const QString constCategory;
 		static const QString imageCategory;
+		static const QString positionAndSizeCategory;
 
 		static const QString widgetPropStyleSheet;
 		static const QString widgetPropToolTip;

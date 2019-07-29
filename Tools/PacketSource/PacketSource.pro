@@ -37,7 +37,6 @@ SourceBase.cpp \
 ../../lib/XmlHelper.cpp \
 ../../lib/SocketIO.cpp \
 ../../lib/HostAddressPort.cpp \
-../../lib/PlainObjectHeap.cpp \
 ../../lib/SimpleThread.cpp \
 ../../lib/Crc.cpp \
 ../../lib/DataProtocols.cpp \
@@ -55,7 +54,6 @@ SourceBase.cpp \
     ../../lib/ProtoSerialization.cpp \
 	../../Proto/network.pb.cc \
 	../../Proto/serialization.pb.cc \
-    ../../lib/PropertyObject.cpp \
     ../../lib/ModuleFirmware.cpp \
     ../../lib/SignalProperties.cpp \
     ../../lib/DataSource.cpp \

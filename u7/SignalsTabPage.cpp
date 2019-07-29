@@ -421,7 +421,7 @@ void SignalPropertyManager::reloadPropertyBehaviour(DbController* dbController, 
 		int propertyIndex = m_propertyName2IndexMap.value(behaviour.name, -1);
 		if (propertyIndex != -1)
 		{
-			int behaviourIndex = m_propertyBehaviorDescription.size() - 1;
+			int behaviourIndex = static_cast<int>(m_propertyBehaviorDescription.size()) - 1;
 			assert(m_propertyDescription[propertyIndex].name == m_propertyBehaviorDescription[behaviourIndex].name);
 
 			m_propertyIndex2BehaviourIndexMap[propertyIndex] = behaviourIndex;

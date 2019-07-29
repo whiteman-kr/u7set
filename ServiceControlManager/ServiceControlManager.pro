@@ -73,7 +73,6 @@ SOURCES += MainWindow.cpp \
     AppDataSourceWidget.cpp \
     ../lib/Times.cpp \
     ../lib/Tuning/TuningSignalState.cpp \
-    ../lib/PropertyObject.cpp \
     ../lib/SignalProperties.cpp \
     ../AppDataService/RtTrendsServer.cpp \
 	../lib/AppSignalStateFlags.cpp \

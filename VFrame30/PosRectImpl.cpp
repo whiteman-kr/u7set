@@ -1,15 +1,12 @@
 #include "PosRectImpl.h"
 #include "DrawParam.h"
+#include "PropertyNames.h"
 
 namespace VFrame30
 {
 	PosRectImpl::PosRectImpl(void)
 	{
 		Init();
-	}
-
-	PosRectImpl::~PosRectImpl(void)
-	{
 	}
 
 	void PosRectImpl::Init()
@@ -23,6 +20,36 @@ namespace VFrame30
 	void PosRectImpl::propertyDemand(const QString& prop)
 	{
 		SchemaItem::propertyDemand(prop);
+
+		int precision = 0;
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			precision = 0;
+		}
+		else
+		{
+			precision = Settings::regionalUnit() == SchemaUnit::Millimeter ? 1 : 3;		// 1 for mm, 3 for inches
+		}
+
+		Property* p = nullptr;
+
+		p = addProperty<double, PosRectImpl, &PosRectImpl::left, &PosRectImpl::setLeft>(PropertyNames::left, PropertyNames::positionAndSizeCategory, true);
+		p->setPrecision(precision);
+		p->setViewOrder(0);
+
+		p = addProperty<double, PosRectImpl, &PosRectImpl::top, &PosRectImpl::setTop>(PropertyNames::top, PropertyNames::positionAndSizeCategory, true);
+		p->setPrecision(precision);
+		p->setViewOrder(1);
+
+		p = addProperty<double, PosRectImpl, &PosRectImpl::width, &PosRectImpl::setWidth>(PropertyNames::width, PropertyNames::positionAndSizeCategory, true);
+		p->setPrecision(precision);
+		p->setViewOrder(2);
+
+		p = addProperty<double, PosRectImpl, &PosRectImpl::height, &PosRectImpl::setHeight>(PropertyNames::height, PropertyNames::positionAndSizeCategory, true);
+		p->setPrecision(precision);
+		p->setViewOrder(3);
+
+		return;
 	}
 
 	void PosRectImpl::dump() const
@@ -470,7 +497,7 @@ namespace VFrame30
 	{
 		return m_leftDocPt;
 	}
-	void PosRectImpl::setLeftDocPt(double value) 
+	void PosRectImpl::setLeftDocPt(double value)
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -555,7 +582,7 @@ namespace VFrame30
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
-	void PosRectImpl::setLeft(double value) 
+	void PosRectImpl::setLeft(const double& value)
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -581,7 +608,7 @@ namespace VFrame30
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}			
 	}
-	void PosRectImpl::setTop(double value) 
+	void PosRectImpl::setTop(const double& value)
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -608,20 +635,17 @@ namespace VFrame30
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}
 	}
-	void PosRectImpl::setWidth(double value) 
+	void PosRectImpl::setWidth(const double& value)
 	{
-		if (value < 0)
-		{
-			value = 0;
-		}
+		const double normalizedValue = value < 0 ? 0 : value;
 
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			setWidthDocPt(CUtils::RoundDisplayPoint(value));
+			setWidthDocPt(CUtils::RoundDisplayPoint(normalizedValue));
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			double pt = CUtils::ConvertPoint(normalizedValue, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 			setWidthDocPt(pt);
 		}
 	}
@@ -639,20 +663,17 @@ namespace VFrame30
 			return CUtils::RoundPoint(pt, Settings::regionalUnit());
 		}			
 	}
-	void PosRectImpl::setHeight(double value) 
+	void PosRectImpl::setHeight(const double& value)
 	{
-		if (value < 0)	
-		{
-			value = 0;
-		}
+		double normalizedValue = value < 0 ? 0 : value;
 
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			setHeightDocPt(CUtils::RoundDisplayPoint(value));
+			setHeightDocPt(CUtils::RoundDisplayPoint(normalizedValue));
 		}
 		else
 		{
-			double pt = CUtils::ConvertPoint(value, Settings::regionalUnit(), SchemaUnit::Inch, 0);
+			double pt = CUtils::ConvertPoint(normalizedValue, Settings::regionalUnit(), SchemaUnit::Inch, 0);
 			setHeightDocPt(pt);
 		}
 	}

@@ -68,7 +68,6 @@ SOURCES += \
     ../TuningService/TuningDataStorage.cpp \
     ../TuningService/TuningSource.cpp \
     ../lib/LogicModuleSet.cpp \
-    ../lib/PropertyObject.cpp \
     ../lib/ModuleFirmware.cpp \
     ../lib/Signal.cpp \
     ../lib/Subsystem.cpp \

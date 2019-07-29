@@ -13,7 +13,7 @@ SimSchemaManager::SimSchemaManager(/*MonitorConfigController* configController, 
 std::shared_ptr<VFrame30::Schema> SimSchemaManager::loadSchema(QString schemaId)
 {
 	assert(false);
-	bool to_do_SimSchemaManager_loadSchema;
+	//bool to_do_SimSchemaManager_loadSchema;
 	return std::shared_ptr<VFrame30::Schema>();
 //	QByteArray data;
 //	QString errorString;
