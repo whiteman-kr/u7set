@@ -94,6 +94,8 @@ namespace Builder
 		//
 		bool generateSoftwareConfiguration(const LmsUniqueIdMap& lmsUniqueIdMap);
 
+		bool writeFirmwareStatistics(BuildResultWriter& buildResultWriter);
+
 		bool writeBinaryFiles(BuildResultWriter& buildResultWriter);
 
 		void generateModulesInformation(BuildResultWriter& buildWriter,

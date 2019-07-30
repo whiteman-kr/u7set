@@ -300,7 +300,21 @@ namespace Builder
 				}
 			}
 
+			//
+
 			ok = cfgBuilder.writeDataFiles();
+
+			if (ok == false ||
+				QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				break;
+			}
+
+			//
+			// Write Firmware Statistics
+			//
+
+			ok = writeFirmwareStatistics(*m_context->m_buildResultWriter);
 
 			if (ok == false ||
 				QThread::currentThread()->isInterruptionRequested() == true)
@@ -1363,6 +1377,15 @@ namespace Builder
 		return result;
 	}
 
+
+	bool BuildWorkerThread::writeFirmwareStatistics(BuildResultWriter& buildResultWriter)
+	{
+		bool result = true;
+
+		result &= buildResultWriter.writeFirmwareStatistics();
+
+		return result;
+	}
 
 	bool BuildWorkerThread::writeBinaryFiles(BuildResultWriter &buildResultWriter)
 	{
