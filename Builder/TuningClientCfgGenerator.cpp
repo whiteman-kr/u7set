@@ -265,54 +265,73 @@ namespace Builder
 			//
 			// ConfigurationServiceID1,2
 			//
-
-			QStringList configServiceIdProperties;
-			configServiceIdProperties << "ConfigurationServiceID1";
-			configServiceIdProperties << "ConfigurationServiceID2";
-
-			for (const QString& cfgsProperty : configServiceIdProperties)
 			{
-				QString configurationServiceId = getObjectProperty<QString>(m_software->equipmentIdTemplate(), cfgsProperty, &ok).trimmed();
-				if (ok == false)
+
+				QString configServiceIdProperties[2];
+				configServiceIdProperties[0] = "ConfigurationServiceID1";
+				configServiceIdProperties[1] = "ConfigurationServiceID2";
+
+				QString configurationServiceId[2];
+
+				for (int i = 0; i < 2; i++)
 				{
+					const QString& cfgsProperty = configServiceIdProperties[i];
+
+					configurationServiceId[i] = getObjectProperty<QString>(m_software->equipmentIdTemplate(), cfgsProperty, &ok).trimmed();
+					if (ok == false)
+					{
+						return false;
+					}
+				}
+
+				if (configurationServiceId[0].isEmpty() == true && configurationServiceId[1].isEmpty() == true)
+				{
+					m_log->errCFG3022(m_software->equipmentId(), configServiceIdProperties[0]);
+					m_log->errCFG3022(m_software->equipmentId(), configServiceIdProperties[1]);
 					return false;
 				}
 
-				if (configurationServiceId.isEmpty() == true)
+				if (configurationServiceId[0].isEmpty() == true)
 				{
-					m_log->errCFG3022(m_software->equipmentId(), cfgsProperty);
+					m_log->wrnCFG3016(m_software->equipmentId(), configServiceIdProperties[0]);
+					configurationServiceId[0] = configurationServiceId[1];
 
-					QString errorStr = tr("TuningClient configuration error %1, property %2 is invalid")
-							.arg(m_software->equipmentIdTemplate()).arg(cfgsProperty);
-
-					writeErrorSection(xmlWriter, errorStr);
-					return false;
+					std::swap(configServiceIdProperties[0], configServiceIdProperties[1]);	// Property #2 will be processed first
 				}
 
-				Hardware::Software* cfgs = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(configurationServiceId));
-
-				if (cfgs == nullptr)
+				if (configurationServiceId[1].isEmpty() == true)
 				{
-					m_log->errCFG3021(m_software->equipmentIdTemplate(), cfgsProperty, configurationServiceId);
-
-					QString errorStr = tr("Object %1 is not found").arg(configurationServiceId);
-
-					writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
-					return false;
+					m_log->wrnCFG3016(m_software->equipmentId(), configServiceIdProperties[1]);
+					configurationServiceId[1] = configurationServiceId[0];
 				}
 
-				if (cfgs->type() != E::SoftwareType::ConfigurationService)
+				for (int i = 0; i < 2; i++)
 				{
-					m_log->errCFG3017(m_software->equipmentIdTemplate(), cfgsProperty, configurationServiceId);
+					Hardware::Software* cfgs = dynamic_cast<Hardware::Software*>(m_equipment->deviceObject(configurationServiceId[i]));
 
-					QString errorStr = tr("Property '%1.%2' is linked to not compatible software '%3'.")
-						.arg(m_software->equipmentIdTemplate())
-						.arg(cfgsProperty)
-						.arg(configurationServiceId);
+					if (cfgs == nullptr)
+					{
+						m_log->errCFG3021(m_software->equipmentIdTemplate(), configServiceIdProperties[i], configurationServiceId[i]);
+
+						QString errorStr = tr("Object %1 is not found").arg(configurationServiceId[i]);
+
+						writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+						return false;
+					}
+
+					if (cfgs->type() != E::SoftwareType::ConfigurationService)
+					{
+						m_log->errCFG3017(m_software->equipmentIdTemplate(), configServiceIdProperties[i], configurationServiceId[i]);
+
+						QString errorStr = tr("Property '%1.%2' is linked to not compatible software '%3'.")
+								.arg(m_software->equipmentIdTemplate())
+								.arg(configServiceIdProperties[i])
+								.arg(configurationServiceId[i]);
 
 
-					writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
-					return false;
+						writeErrorSection(m_cfgXml->xmlWriter(), errorStr);
+						return false;
+					}
 				}
 			}
 
