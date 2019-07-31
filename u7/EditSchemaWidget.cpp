@@ -5877,10 +5877,21 @@ void EditSchemaWidget::appSignalsProperties(QStringList strIds)
 		return;
 	}
 
+	// ::editApplicationSignals -- returns vector of pairs or empty vector if edit was cancelled
+	//		first: previous AppSignalID
+	//		second: new AppSignalID
+	//
 	std::vector<std::pair<QString, QString>> result = ::editApplicationSignals(strIds, db(), this);
 
+	if (result.empty() == true)
+	{
+		// Edit signal properties cancelled
+		//
+		return;
+	}
+
 	std::map<QString, QString> newIdsMap;
-	for (auto& p : result)
+	for (const auto& p : result)
 	{
 		if (p.first != p.second)
 		{

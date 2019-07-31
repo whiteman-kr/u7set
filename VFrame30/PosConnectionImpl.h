@@ -26,7 +26,7 @@ namespace VFrame30
 
 	protected:
 		PosConnectionImpl(void);
-		virtual ~PosConnectionImpl(void);
+		virtual ~PosConnectionImpl(void) = default;
 
 	private:
 		void Init(void);
@@ -109,16 +109,16 @@ namespace VFrame30
 		//
 	public:
 		virtual double left() const override;
-		virtual void setLeft(double value) override;
+		virtual void setLeft(const double& value) override;
 
 		virtual double top() const override;
-		virtual void setTop(double value) override;
+		virtual void setTop(const double& value) override;
 
 		virtual double width() const override;
-		virtual void setWidth(double value) override;
+		virtual void setWidth(const double& value) override;
  
 		virtual double height() const override;
-		virtual void setHeight(double value) override;
+		virtual void setHeight(const double& value) override;
 
 		// IPointList implementation
 		//

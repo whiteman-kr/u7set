@@ -58,7 +58,6 @@ SOURCES += \
     ../lib/OutputLog.cpp \
     ../Builder/ModulesRawData.cpp \
     ../lib/DbStruct.cpp \
-    ../lib/PropertyObject.cpp \
     ../lib/ProtoSerialization.cpp
 
 HEADERS += \

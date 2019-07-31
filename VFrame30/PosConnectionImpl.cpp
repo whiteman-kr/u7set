@@ -1,15 +1,12 @@
 #include "PosConnectionImpl.h"
 #include "DrawParam.h"
+#include "PropertyNames.h"
 
 namespace VFrame30
 {
 	PosConnectionImpl::PosConnectionImpl(void)
 	{
 		Init();
-	}
-
-	PosConnectionImpl::~PosConnectionImpl(void)
-	{
 	}
 
 	void PosConnectionImpl::Init(void)
@@ -19,6 +16,36 @@ namespace VFrame30
 	void PosConnectionImpl::propertyDemand(const QString& prop)
 	{
 		SchemaItem::propertyDemand(prop);
+
+		int precision = 0;
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			precision = 0;
+		}
+		else
+		{
+			precision = Settings::regionalUnit() == SchemaUnit::Millimeter ? 1 : 3;		// 1 for mm, 3 for inches
+		}
+
+		Property* p = nullptr;
+
+		p = addProperty<double, PosConnectionImpl, &PosConnectionImpl::left, &PosConnectionImpl::setLeft>(PropertyNames::left, PropertyNames::positionAndSizeCategory, true);
+		p->setPrecision(precision);
+		p->setViewOrder(0);
+
+		p = addProperty<double, PosConnectionImpl, &PosConnectionImpl::top, &PosConnectionImpl::setTop>(PropertyNames::top, PropertyNames::positionAndSizeCategory, true);
+		p->setPrecision(precision);
+		p->setViewOrder(1);
+
+		//p = addProperty<double, PosRectImpl, &PosConnectionImpl::width, &PosConnectionImpl::setWidth>(PropertyNames::width, PropertyNames::positionAndSizeCategory, true);
+		//p->setPrecision(precision);
+		//p->setViewOrder(2);
+
+		//p = addProperty<double, PosRectImpl, &PosConnectionImpl::height, &PosConnectionImpl::setHeight>(PropertyNames::height, PropertyNames::positionAndSizeCategory, true);
+		//p->setPrecision(precision);
+		//p->setViewOrder(3);
+
+		return;
 	}
 
 	// Serialization
@@ -535,7 +562,7 @@ namespace VFrame30
 		return val;
 	}
 	
-	void PosConnectionImpl::setLeft(double)
+	void PosConnectionImpl::setLeft(const double&)
 	{
 		// Нет реализации - by design, хотя можно что то и придумать
 		//
@@ -568,7 +595,7 @@ namespace VFrame30
 		return val;
 	}
 	
-	void PosConnectionImpl::setTop(double)
+	void PosConnectionImpl::setTop(const double&)
 	{
 		// Нет реализации - by design, хотя можно что то и придумать
 		//
@@ -605,7 +632,7 @@ namespace VFrame30
 		return val;
 	}
 	
-	void PosConnectionImpl::setWidth(double)
+	void PosConnectionImpl::setWidth(const double&)
 	{
 		// Нет реализации - by design, хотя можно что то и придумать
 		//
@@ -642,7 +669,7 @@ namespace VFrame30
 		return val;
 	}
 
-	void PosConnectionImpl::setHeight(double)
+	void PosConnectionImpl::setHeight(const double&)
 	{
 		// Нет реализации - by design, хотя можно что то и придумать
 		//

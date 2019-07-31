@@ -130,6 +130,10 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 			QMessageBox::critical(parent, "Error", message);
 		}
 	}
+	else
+	{
+		return {};	// Cancel is pressed
+	}
 
 	for (int i = 0; i < signalPtrVector.count(); i++)
 	{

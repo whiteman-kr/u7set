@@ -37,16 +37,16 @@ namespace VFrame30
 	{
 	public:
 		virtual double left() const = 0;
-		virtual void setLeft(double value) = 0;
+		virtual void setLeft(const double& value) = 0;
 
 		virtual double top() const = 0;
-		virtual void setTop(double value) = 0;
+		virtual void setTop(const double& value) = 0;
 
 		virtual double width() const = 0;
-		virtual void setWidth(double value) = 0;
+		virtual void setWidth(const double& value) = 0;
 
 		virtual double height() const = 0;
-		virtual void setHeight(double value) = 0;
+		virtual void setHeight(const double& value) = 0;
 	};
 
 	// Interface IPointList, for storing and restoring point list
@@ -179,16 +179,16 @@ namespace VFrame30
 		//
 	public:
 		virtual double left() const override;
-		virtual void setLeft(double) override;
+		virtual void setLeft(const double& value) override;
 
 		virtual double top() const override;
-		virtual void setTop(double) override;
+		virtual void setTop(const double& value) override;
 
 		virtual double width() const override;
-		virtual void setWidth(double) override;
+		virtual void setWidth(const double& value) override;
 
 		virtual double height() const override;
-		virtual void setHeight(double) override;
+		virtual void setHeight(const double& value) override;
 
 		// IPointList implementation
 		//

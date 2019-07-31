@@ -99,7 +99,6 @@ SOURCES +=\
     ../Proto/serialization.pb.cc \
     ../lib/PropertyEditor.cpp \
     ../lib/PropertyEditorDialog.cpp \
-    ../lib/PropertyObject.cpp \
     ../lib/LogFile.cpp \
     ../Builder/IssueLogger.cpp \
     ../lib/OutputLog.cpp \
