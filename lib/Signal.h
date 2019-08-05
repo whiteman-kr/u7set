@@ -106,7 +106,7 @@ public:
 	void setDataSize(E::SignalType signalType, E::AnalogAppSignalFormat dataFormat);
 	void setDataSizeW(int sizeW);
 
-	int sizeW() const { return (m_dataSize / SIZE_16BIT + (m_dataSize % SIZE_16BIT ? 1 : 0)); }
+	int sizeW() const { return (m_dataSize / SIZE_16BIT + ((m_dataSize % SIZE_16BIT) ? 1 : 0)); }
 
 	E::ByteOrder byteOrder() const { return m_byteOrder; }
 	int byteOrderInt() const { return TO_INT(m_byteOrder); }

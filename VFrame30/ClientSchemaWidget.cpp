@@ -29,7 +29,8 @@ namespace VFrame30
 
 		// --
 		//
-		connect(this->schemaView(), &VFrame30::SchemaView::signal_schemaChanged, this, [this](VFrame30::Schema* schema)
+		connect(this->schemaView(), &VFrame30::SchemaView::signal_schemaChanged, this,
+			[this](VFrame30::Schema* schema)
 			{
 				emit this->signal_schemaChanged(this, schema);
 			});

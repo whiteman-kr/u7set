@@ -1,8 +1,5 @@
 #include "TrendMainWindow.h"
 #include "ui_TrendsMainWindow.h"
-#include <cfloat>
-#include <QtWidgets>
-#include <QtPrintSupport>
 #include "TrendSettings.h"
 #include "TrendWidget.h"
 #include "TrendSignal.h"
@@ -146,7 +143,8 @@ namespace TrendLib
 			(frameGeometry().width() > screenRect.width() ||
 			 frameGeometry().height() > screenRect.height()))
 		{
-			resize(screenRect.width() * 0.7, screenRect.height() * 0.7);
+			resize(static_cast<int>(screenRect.width() * 0.7),
+				   static_cast<int>(screenRect.height() * 0.7));
 		}
 	}
 
@@ -510,7 +508,9 @@ static int stdColorIndex = 0;
 									  m_trendWidget->timeType(),
 									  m_trendWidget->trendMode(),
 									  this);
+#pragma warning( push )
 
+#pragma warning (disable: 6326)
 		connect(&d, &DialogTrendSignalProperties::signalPropertiesChanged, this,
 				[&d, this]()
 				{
@@ -518,6 +518,7 @@ static int stdColorIndex = 0;
 					Q_ASSERT(ok);
 					this->updateWidget();
 				});
+#pragma warning( pop )
 
 		d.exec();
 

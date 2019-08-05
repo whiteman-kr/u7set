@@ -334,10 +334,10 @@ void SignalProperties::createSpecificProperties()
 	{
 		QVariant qv;
 
-		bool result = m_specPropValues.getValue(specificProperty->caption(), &qv);
+		bool getValueResult = m_specPropValues.getValue(specificProperty->caption(), &qv);
 
-		assert(result == true);
-		Q_UNUSED(result)
+		Q_ASSERT(getValueResult);
+		Q_UNUSED(getValueResult)
 
 		specificProperty->setValue(qv);
 
@@ -591,11 +591,10 @@ bool SignalSpecPropValues::createFromSpecPropStruct(const QString& specPropStruc
 	{
 		SignalSpecPropValue specPropValue;
 
-		bool result = specPropValue.create(property);
-
-		if (result == false)
+		bool createResult = specPropValue.create(property);
+		if (createResult == false)
 		{
-			assert(false);
+			Q_ASSERT(createResult);
 			return false;
 		}
 
