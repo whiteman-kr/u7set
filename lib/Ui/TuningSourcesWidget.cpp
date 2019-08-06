@@ -221,20 +221,20 @@ void DialogTuningSourceInfo::updateData()
 	setDataItemText("IsReply", ts.state.isreply() ? "Yes" : "No");
 
 	{
-		QTreeWidgetItem*  item = dataItem("IsReply");
-		if (item == nullptr)
+		QTreeWidgetItem* isReplyItem = dataItem("IsReply");
+		if (isReplyItem == nullptr)
 		{
-			assert(item);
+			assert(isReplyItem);
 			return;
 		}
 
 		if (ts.state.isreply() == false)
 		{
-			item->setForeground(1, QBrush(DialogSourceInfo::dataItemErrorColor));
+			isReplyItem->setForeground(1, QBrush(DialogSourceInfo::dataItemErrorColor));
 		}
 		else
 		{
-			item->setForeground(1, QBrush(Qt::black));
+			isReplyItem->setForeground(1, QBrush(Qt::black));
 		}
 	}
 

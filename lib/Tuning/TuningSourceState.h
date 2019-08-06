@@ -25,7 +25,7 @@ public:
 	::Network::TuningSourceState state;
 
 private:
-	int m_previousStateUpdatePeriod = 5;
+	qint64 m_previousStateUpdatePeriod = 5;
 
 	bool m_valid = true;
 

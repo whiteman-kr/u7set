@@ -23,7 +23,7 @@ void TuningSource::setNewState(const ::Network::TuningSourceState& newState)
 {
 	QDateTime ct = QDateTime::currentDateTime();
 
-	int secsTo = m_perviousStateLastUpdateTime.secsTo(ct);
+	qint64 secsTo = m_perviousStateLastUpdateTime.secsTo(ct);
 
 	if (secsTo > m_previousStateUpdatePeriod)
 	{

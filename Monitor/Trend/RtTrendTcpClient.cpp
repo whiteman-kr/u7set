@@ -252,8 +252,8 @@ void RtTrendTcpClient::processTrendStateChanges(const QByteArray& data)
 	std::shared_ptr<TrendLib::RealtimeData> realtimeData = std::make_shared<TrendLib::RealtimeData>();
 	std::map<Hash, TrendLib::RealtimeDataChunk> realtimeDataBySignals;
 
-	TrendLib::TrendStateItem minState;
-	TrendLib::TrendStateItem maxState;
+	TrendLib::TrendStateItem minState{};	// Initialized by zeroes
+	TrendLib::TrendStateItem maxState{};	// Initialized by zeroes
 
 	int stateCount = m_stateChangesReply.signalstates_size();
 

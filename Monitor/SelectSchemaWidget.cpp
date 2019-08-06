@@ -298,9 +298,9 @@ int SelectSchemaModel::columnCount(const QModelIndex& parent) const
 	return 1;
 }
 
-QVariant SelectSchemaModel::data(const QModelIndex& index, int role) const
+QVariant SelectSchemaModel::data(const QModelIndex& modelIndex, int role) const
 {
-	int row = index.row();
+	int row = modelIndex.row();
 
 	if (role == Qt::DisplayRole)
 	{

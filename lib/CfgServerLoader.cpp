@@ -726,15 +726,15 @@ bool CfgLoader::readConfigurationXml()
 			continue;
 		}
 
-		CfgFileInfo cfi;
+		CfgFileInfo xcfi;
 
-		cfi.readFromXml(xmlReader);
+		xcfi.readFromXml(xmlReader);
 
-		m_cfgFilesInfo.insert(cfi.pathFileName, cfi);
+		m_cfgFilesInfo.insert(xcfi.pathFileName, xcfi);
 
-		if (cfi.ID.isEmpty() == false)
+		if (xcfi.ID.isEmpty() == false)
 		{
-			m_fileIDPathMap.insert(cfi.ID, cfi.pathFileName);
+			m_fileIDPathMap.insert(xcfi.ID, xcfi.pathFileName);
 		}
 	}
 

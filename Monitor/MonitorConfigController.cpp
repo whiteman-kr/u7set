@@ -445,10 +445,14 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 
 bool MonitorConfigController::xmlReadBuildInfoNode(const QDomNode& buildInfoNode, ConfigSettings* outSetting)
 {
-	if (outSetting == nullptr ||
-		buildInfoNode.nodeName() != "BuildInfo")
+	if (outSetting == nullptr)
 	{
 		Q_ASSERT(outSetting);
+		return false;
+	}
+
+	if (buildInfoNode.nodeName() != "BuildInfo")
+	{
 		Q_ASSERT(buildInfoNode.nodeName() == "BuildInfo");
 		return false;
 	}
@@ -463,10 +467,14 @@ bool MonitorConfigController::xmlReadBuildInfoNode(const QDomNode& buildInfoNode
 
 bool MonitorConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting)
 {
-	if (outSetting == nullptr ||
-		softwareNode.nodeName() != "Software")
+	if (outSetting == nullptr)
 	{
 		Q_ASSERT(outSetting);
+		return false;
+	}
+
+	if (softwareNode.nodeName() != "Software")
+	{
 		Q_ASSERT(softwareNode.nodeName() == "Software");
 		return false;
 	}
@@ -504,10 +512,14 @@ bool MonitorConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, 
 
 bool MonitorConfigController::xmlReadSettingsNode(const QDomNode& settingsNode, ConfigSettings* outSetting)
 {
-	if (outSetting == nullptr ||
-		settingsNode.nodeName() != "Settings")
+	if (outSetting == nullptr)
 	{
 		Q_ASSERT(outSetting);
+		return false;
+	}
+
+	if (settingsNode.nodeName() != "Settings")
+	{
 		Q_ASSERT(settingsNode.nodeName() == "Settings");
 		return false;
 	}
