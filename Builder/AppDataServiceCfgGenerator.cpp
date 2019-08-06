@@ -1,8 +1,5 @@
 #include "AppDataServiceCfgGenerator.h"
-#include "../lib/ServiceSettings.h"
-#include "../lib/WUtils.h"
 #include "Builder.h"
-#
 
 class DataSource;
 
@@ -45,20 +42,13 @@ namespace Builder
 
 	bool AppDataServiceCfgGenerator::writeSettings()
 	{
-		AppDataServiceSettings dasSettings;
+		bool result = m_settings.readFromDevice(m_equipment, m_software, m_log);
 
-		bool result = true;
-
-		result = dasSettings.readFromDevice(m_equipment, m_software, m_log);
-
-		if (result == false)
-		{
-			return false;
-		}
+		RETURN_IF_FALSE(result);
 
 		XmlWriteHelper xml(m_cfgXml->xmlWriter());
 
-		result = dasSettings.writeToXml(xml);
+		result = m_settings.writeToXml(xml);
 
 		return result;
 	}
@@ -70,6 +60,10 @@ namespace Builder
 		m_associatedAppSignals.clear();
 
 		QVector<DataSource> dataSources;
+
+		quint32 receivingNetmask = m_settings.appDataReceivingNetmask.toIPv4Address();
+
+		quint32 receivingSubnet = m_settings.appDataReceivingIP.address32() & receivingNetmask;
 
 		for(Hardware::DeviceModule* lm : m_lmList)
 		{
@@ -99,7 +93,19 @@ namespace Builder
 					//
 					m_log->errCFG3030(lm->equipmentIdTemplate(), m_software->equipmentIdTemplate());
 					result = false;
-					break;
+					continue;
+				}
+
+				if ((ds.lmAddress().toIPv4Address() & receivingNetmask) != receivingSubnet)
+				{
+					// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
+					//
+					m_log->errCFG3043(ds.lmAddress().toString(),
+									  ds.lmAdapterID(),
+									  m_settings.appDataReceivingIP.addressStr(),
+									  equipmentID());
+					result = false;
+					continue;
 				}
 
 				connectedAdaptersCount++;
@@ -110,20 +116,14 @@ namespace Builder
 			}
 		}
 
-		if (result == false)
-		{
-			return false;
-		}
+		RETURN_IF_FALSE(result)
 
 		//
 
 		QByteArray fileData;
 		result &= DataSourcesXML<DataSource>::writeToXml(dataSources, &fileData);
 
-		if (result == false)
-		{
-			return false;
-		}
+		RETURN_IF_FALSE(result)
 
 		//
 

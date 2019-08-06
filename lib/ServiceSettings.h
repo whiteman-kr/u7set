@@ -168,6 +168,7 @@ public:
 	QHostAddress clientRequestNetmask;
 
 	HostAddressPort tuningDataIP;
+	QHostAddress tuningDataNetmask;
 
 	bool singleLmControl = true;
 	bool disableModulesTypeChecking = false;

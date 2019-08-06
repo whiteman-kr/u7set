@@ -1419,6 +1419,32 @@ namespace Builder
 				  .arg(moduleEquipmentID));
 	}
 
+	/// IssueCode: CFG3043
+	///
+	/// IssueType: Error
+	///
+	/// Title: Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
+	///
+	/// Parameters:
+	///         %1 data source IP
+	///         %2 data source equipmentID
+	///			%3 data receiving IP
+	///			%4 receiving equipmentID
+	///
+	/// Description:
+	///			Different subnet address in data source and data receving IP. Check specified addresses.
+	///
+	void IssueLogger::errCFG3043(	QString dataSourceIP,
+									QString dataSourceEquipmentID,
+									QString dataReceivingIP,
+									QString receivingEquipmentID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3043,
+				  QString(tr("Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4)")).
+								arg(dataSourceIP).arg(dataSourceEquipmentID).arg(dataReceivingIP).arg(receivingEquipmentID));
+	}
+
 	//
 	// ALP			Application Logic Parsing				4000-4999
 	//

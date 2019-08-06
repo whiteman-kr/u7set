@@ -164,6 +164,11 @@ namespace Builder
 
 		void errCFG3042(QString moduleEquipmentID, QUuid moduleUuid);		// Module %1 should be installed in chassis.
 
+		void errCFG3043(QString dataSourceIP,
+						QString dataSourceEquipmentID,
+						QString dataReceivingIP,
+						QString receivingEquipmentID);		// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
+
 
 		// ALP			Application Logic Parsing				4000-4999
 		//
