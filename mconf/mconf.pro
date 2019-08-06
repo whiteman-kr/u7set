@@ -22,10 +22,11 @@ QT += core sql network xml widgets gui serialport qml
 TARGET = mconf
 TEMPLATE = app
 
-#c++17 support
+# c++17 support
 #
 gcc:CONFIG += c++1z
-win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+win32:QMAKE_CXXFLAGS += /std:c++17		# CONFIG += c++17 has no effect yet
+win32:QMAKE_CXXFLAGS += /analyze		# Static code analyze
 
 #Application icon
 win32:RC_ICONS += Images/MConf.ico

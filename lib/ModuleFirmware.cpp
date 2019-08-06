@@ -476,7 +476,6 @@ static ModuleFirmware err;
 
 		// Load general parameters
 		//
-
 		if (jConfig.value(QLatin1String("buildSoftware")).isUndefined() == true)
 		{
 			*errorCode = "Parse firmware error: cant find field buildSoftware";
@@ -504,7 +503,6 @@ static ModuleFirmware err;
 		}
 		else
 		{
-
 			m_debug = jConfig.value(QLatin1String("buildConfig")).toString() == "debug";
 		}
 
@@ -526,7 +524,6 @@ static ModuleFirmware err;
 
 		// Load subsystems information
 		//
-
 		QJsonArray jSubsystemInfoArray = jConfig.value(QLatin1String("z_i_subsystemsInfo")).toArray();
 
 		for (const QJsonValueRef jSubsystemInfoRef : jSubsystemInfoArray)
@@ -642,7 +639,6 @@ static ModuleFirmware err;
 
 		// Load subsystems firmware data
 		//
-
 		QJsonArray jSubsystemDataArray = jConfig.value(QLatin1String("z_s_subsystemsData")).toArray();
 
 		for (const QJsonValueRef jSubsystemDataRef : jSubsystemDataArray)
@@ -724,9 +720,9 @@ static ModuleFirmware err;
 						return false;
 					}
 
-					for (int v = 0; v < eepromFrameCount; v++)
+					for (int eepromFrame = 0; eepromFrame < eepromFrameCount; eepromFrame++)
 					{
-						QString zFrame = "z_frame_" + QString::number(v).rightJustified(4, '0');
+						QString zFrame = "z_frame_" + QString::number(eepromFrame).rightJustified(4, '0');
 
 						QJsonValue jFrameVal = jFirmwareData.value(zFrame);
 						if (jFrameVal.isUndefined() == true || jFrameVal.isObject() == false)
@@ -747,19 +743,19 @@ static ModuleFirmware err;
 
 						int dataWordPos = 0;
 
-						quint16* frameWordPtr = (quint16*)firmwareData.frames[v].data();
+						quint16* frameWordPtr = (quint16*)firmwareData.frames[eepromFrame].data();
 
 						const int frameStringWidth = 16;
-						const int linesCount = ceil((float)firmwareData.eepromFrameSize / 2 / frameStringWidth);
+						const int linesCount = static_cast<int>(ceil(static_cast<float>(firmwareData.eepromFrameSize) / 2 / frameStringWidth));
 
 						for (int l = 0; l < linesCount; l++)
 						{
-							QJsonValue v;
+							QJsonValue jsval;
 
 							QString stringName = "data" + QString::number(l * frameStringWidth, 16).rightJustified(4, '0');
-							v = jFrame.value(stringName);
+							jsval = jFrame.value(stringName);
 
-							if (v.isUndefined() == true)
+							if (jsval.isUndefined() == true)
 							{
 								// data strings may be skipped
 								//
@@ -767,14 +763,14 @@ static ModuleFirmware err;
 								continue;
 							}
 
-							QString stringValue = v.toString();
+							QString stringValue = jsval.toString();
 
 							for (QString& s : stringValue.split(' ')) // split takes much time, try to optimize
 							{
-								bool ok = false;
-								quint16 v = s.toUInt(&ok, 16);
+								bool convertOk = false;
+								quint16 v = s.toUInt(&convertOk, 16);
 
-								if (ok == false)
+								if (convertOk == false)
 								{
 									assert(false);
 									return false;
@@ -790,10 +786,10 @@ static ModuleFirmware err;
 							}
 						} // linesCount
 
-						if (Crc::checkDataBlockCrc(v, firmwareData.frames[v]) == false)
+						if (Crc::checkDataBlockCrc(eepromFrame, firmwareData.frames[eepromFrame]) == false)
 						{
 
-							*errorCode = tr("File data is corrupt, CRC check error in subsystem %1, UartId %2h, frame %3.").arg(fw.subsysId()).arg(QString::number(uartId, 16)).arg(v);
+							*errorCode = tr("File data is corrupt, CRC check error in subsystem %1, UartId %2h, frame %3.").arg(fw.subsysId()).arg(QString::number(uartId, 16)).arg(eepromFrame);
 							return false;
 						}
 					}
