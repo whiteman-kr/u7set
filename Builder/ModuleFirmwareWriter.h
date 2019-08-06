@@ -59,6 +59,8 @@ namespace Hardware
 
 		UartChannelData& uartChannelData(const QString& subsysId, int uartId);
 
+		bool writeFirmwareStatistics(QStringList &dest, Builder::IssueLogger* log);
+
 		bool save(QByteArray &dest, Builder::IssueLogger* log);
 
 		// Functions called and used by Application Logic and Tuning Builder

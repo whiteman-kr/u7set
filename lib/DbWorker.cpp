@@ -310,6 +310,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0290.sql", "Upgrade to version 290, Set AFB FuncBlock version to 1 for SR01, SR02. Remove unimplemented afbs like cos, sin, expe for all LMs"},
 	{":/DatabaseUpgrade/Upgrade0291.sql", "Upgrade to version 291, Set Code Memory Size to 98304 for LM1_SF40"},
 	{":/DatabaseUpgrade/Upgrade0292.sql", "Upgrade to version 292, Function get_signals_id_appsignalid creation"},
+	{":/DatabaseUpgrade/Upgrade0293.sql", "Upgrade to version 293, RIM configuration corrections, AIM/AOM/TIM/RIM/WAIM configuration does not return false on first error"},
 };
 
 int DbWorker::counter = 0;

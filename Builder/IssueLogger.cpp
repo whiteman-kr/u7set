@@ -6582,6 +6582,53 @@ namespace Builder
 						arg(port1ID).arg(port2ID));
 	}
 
+
+
+
+
+	/// IssueCode: wrnALC5800
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Flash memory usage for Subsystem %1, UART %2 exceeds 95%.
+	///
+	/// Parameters:
+	///		%1 Subsystem ID
+	///		%2 UART ID
+	///
+	/// Description:
+	///		Flash memory usage for a subsystem exceeds 95% for some UART.
+	///
+	void IssueLogger::wrnALC5800(QString subsystemID, int uartId)
+	{
+		LOG_WARNING0(IssueType::AlCompiler,
+				  5800,
+				  QString(tr("Flash memory usage for SubsystemID %1, UART %2h exceeds 95%.")).
+								arg(subsystemID).arg(QString::number(uartId, 16)));
+	}
+
+	/// IssueCode: errALC5801
+	///
+	/// IssueType: Error
+	///
+	/// Title: Not enough memory to store binary data for SubsystemID %1, LM Number: %2, UART ID: %3.
+	///
+	/// Parameters:
+	///		%1 Subsystem ID
+	///		%2 LM Number which reached the limit
+	///		%3 UART ID
+	///
+	/// Description:
+	///		It is not enough flash memory to store data for a subsystem
+	///
+	void IssueLogger::errALC5801(QString subsystemID, int lmNumber, int uartId)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5801,
+				  QString(tr("Not enough memory to store binary data for SubsystemID %1, LM Number: %2, UART ID: %3h.")).
+								arg(subsystemID).arg(lmNumber).arg(QString::number(uartId, 16)));
+	}
+
 	/// IssueCode: ALC5996
 	///
 	/// IssueType: Error

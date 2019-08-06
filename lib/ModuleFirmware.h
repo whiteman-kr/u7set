@@ -19,6 +19,7 @@ namespace Hardware
 	{
 		int eepromFramePayloadSize = 0;
 		int eepromFrameSize = 0;
+		int maxFrameIndex = 0;	// Used for statistics, contains maximum frame index
 
 		int uartId = -1;
 		QString uartType;

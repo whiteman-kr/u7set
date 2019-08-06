@@ -416,6 +416,11 @@ namespace Builder
 		void wrnALC5193(QString appSignalID, QString portID, QString connectionID);		// Rx signal %1 specified in port %2 raw data description isn't assigned to receiver (Connection %3).
 		void wrnALC5194(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 with manual settings are overlapped.
 
+		// firmware writing errors
+
+		void wrnALC5800(QString subsystemID, int uartId);								// Flash memory usage for Subsystem %1, UART %2 exceeds 95%.
+		void errALC5801(QString subsystemID, int lmNumber, int uartId);					// Not enough memory to store binary data for Subsystem %1, LM Number: %2, UART ID: %3.
+
 		// internal errors
 
 		void errALC5996(QString errorMsg, QString fileName, int lineNo, QString functionName);	// Internal error! %1. File: %1 Line: %2 Function: %3

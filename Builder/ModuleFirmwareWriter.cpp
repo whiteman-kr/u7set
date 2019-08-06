@@ -118,10 +118,6 @@ namespace Hardware
 
 	UartChannelData& ModuleFirmwareWriter::uartChannelData(const QString& subsysId, int uartId)
 	{
-		//static UartChannelData err;
-
-		//return err;
-
 		ModuleChannelData& subsystemChannelData = m_moduleChannelData[subsysId];
 
 		UartChannelData& moduleChannelData = subsystemChannelData[uartId];
@@ -129,9 +125,203 @@ namespace Hardware
 		return moduleChannelData;
 	}
 
+	bool ModuleFirmwareWriter::writeFirmwareStatistics(QStringList &dest, Builder::IssueLogger* log)
+	{
+		if (log == nullptr)
+		{
+			assert(log);
+			return false;
+		}
+
+
+		auto reportWriter = [&dest](const QStringList& header, const std::vector<QStringList>& strings)
+			{
+
+			std::vector<int> columnWidth;
+
+			// Count column width
+
+			for (const QString& s : header)
+			{
+				columnWidth.push_back(s.length());
+			}
+
+			for (const QStringList& reportText : strings)
+			{
+
+				for (int i = 0; i < static_cast<int>(reportText.size()); i++)
+				{
+					const QString& s = reportText[i];
+					columnWidth[i] = std::max(columnWidth[i], s.length());
+				}
+
+			}
+
+			// Write strings
+
+			QString text = "   ";
+
+			for (int i = 0; i < static_cast<int>(header.size()); i++)
+			{
+				const QString& s = header[i];
+				text += tr("| %1 ").arg(s.rightJustified(columnWidth[i], ' '));
+			}
+
+			dest << text;
+
+			text = "---";
+
+			for (int i = 0; i < static_cast<int>(header.size()); i++)
+			{
+				QString d(columnWidth[i], '-');
+
+				text += tr("+-%1-").arg(d.rightJustified(columnWidth[i], ' '));
+			}
+
+			dest << text;
+
+			for (const QStringList& reportText : strings)
+			{
+				text = "   ";
+
+				for (int i = 0; i < static_cast<int>(reportText.size()); i++)
+				{
+					const QString& s = reportText[i];
+					text += tr("| %1 ").arg(s.rightJustified(columnWidth[i], ' '));
+				}
+
+				dest << text;
+			}
+		};
+
+		// Subsystems logic modules report
+
+		dest << "Subsystems Logic Modules";
+		dest << "";
+
+		{
+			QStringList reportHeader;
+			reportHeader << "Subsystem ID";
+			reportHeader << "LM Equipment ID";
+			reportHeader << "LM Number";
+
+			std::vector<QStringList> reportStrings;
+
+			for (const auto& moduleChannelDataIt : m_moduleChannelData)
+			{
+				QStringList reportText;
+
+				const QString subsystemId = moduleChannelDataIt.first;
+				reportText << subsystemId;
+
+				bool ok = false;
+				const ModuleFirmware& sf = firmware(subsystemId, &ok);
+				if (ok == false)
+				{
+					Q_ASSERT(ok);
+					return false;
+				}
+
+				const std::vector<LogicModuleInfo>& logicModulesInfo = sf.logicModulesInfo();
+
+				for (const LogicModuleInfo& lmInfo : logicModulesInfo)
+				{
+					reportText << lmInfo.equipmentId;
+					reportText << QString::number(lmInfo.lmNumber);
+
+					reportStrings.push_back(reportText);
+
+					reportText.clear();
+					reportText << "";
+				}
+			}
+
+			reportWriter(reportHeader, reportStrings);
+		}
+
+		dest << "";
+
+		// UART usage report
+
+		dest << "UART Usage Statistics";
+		dest << "";
+
+		{
+
+			QStringList reportHeader;
+			reportHeader << "Subsystem ID";
+			reportHeader << "Uart ID";
+			reportHeader << "Uart Type";
+
+			reportHeader << "Frames Used";
+			reportHeader << "Frames Used, %";
+
+			std::vector<QStringList> reportStrings;
+
+			for (const auto& moduleChannelDataIt : m_moduleChannelData)
+			{
+				QStringList reportText;
+
+				const QString subsystemId = moduleChannelDataIt.first;
+
+				reportText << subsystemId;
+
+				bool ok = false;
+				const ModuleFirmware& sf = firmware(subsystemId, &ok);
+				if (ok == false)
+				{
+					Q_ASSERT(ok);
+					return false;
+				}
+
+				std::vector<UartPair> uartList = sf.uartList();
+
+				for (const auto& uart : uartList)
+				{
+					int uartId = uart.first;
+					const QString uartType = uart.second;
+
+					const ModuleFirmwareData& moduleFirmwareData = sf.firmwareData(uartId, &ok);
+					if (ok == false)
+					{
+						Q_ASSERT(ok);
+						return false;
+					}
+
+					reportText << tr("%1h").arg(QString::number(uartId, 16));
+					reportText << uartType;
+
+					int framesCount = static_cast<int>(moduleFirmwareData.frames.size());
+					int framesUsed = moduleFirmwareData.maxFrameIndex + 1;
+
+					reportText << tr("%1 / %2").arg(framesUsed).arg(framesCount);
+
+					double framesUsedPercent = (double)framesUsed / framesCount * 100;
+
+					QString framesUsedPercentString = QString::number(framesUsedPercent, 'f', 1);
+
+					if (framesUsedPercent > 95)
+					{
+						framesUsedPercentString = "!" + framesUsedPercentString;
+					}
+
+					reportText << framesUsedPercentString;
+
+					reportStrings.push_back(reportText);
+
+					reportText.clear();
+					reportText << "";
+				}
+			}
+
+			reportWriter(reportHeader, reportStrings);
+		}
+
+		return true;
+	}
+
 	bool ModuleFirmwareWriter::save(QByteArray& dest, Builder::IssueLogger* log)
 	{
-
 		if (log == nullptr)
 		{
 			assert(log);
@@ -460,6 +650,11 @@ namespace Hardware
 		quint8* ptr = static_cast<quint8*>(scriptFirmwareData->frames[frameIndex].data() + offset);
 		*ptr = data;
 
+		if (scriptFirmwareData->maxFrameIndex < frameIndex)
+		{
+			scriptFirmwareData->maxFrameIndex = frameIndex;
+		}
+
 		return true;
 	}
 
@@ -484,6 +679,11 @@ namespace Hardware
 
 		quint16* ptr = reinterpret_cast<quint16*>(scriptFirmwareData->frames[frameIndex].data() + offset);
 		*ptr = dataBE;
+
+		if (scriptFirmwareData->maxFrameIndex < frameIndex)
+		{
+			scriptFirmwareData->maxFrameIndex = frameIndex;
+		}
 
 		return true;
 	}
@@ -510,6 +710,11 @@ namespace Hardware
 		quint32* ptr = reinterpret_cast<quint32*>(scriptFirmwareData->frames[frameIndex].data() + offset);
 		*ptr = dataBE;
 
+		if (scriptFirmwareData->maxFrameIndex < frameIndex)
+		{
+			scriptFirmwareData->maxFrameIndex = frameIndex;
+		}
+
 		return true;
 	}
 
@@ -534,6 +739,11 @@ namespace Hardware
 
 		float* ptr = reinterpret_cast<float*>(scriptFirmwareData->frames[frameIndex].data() + offset);
 		*ptr = dataBE;
+
+		if (scriptFirmwareData->maxFrameIndex < frameIndex)
+		{
+			scriptFirmwareData->maxFrameIndex = frameIndex;
+		}
 
 		return true;
 	}
@@ -560,6 +770,11 @@ namespace Hardware
 
 		quint64* ptr = reinterpret_cast<quint64*>(scriptFirmwareData->frames[frameIndex].data() + offset);
 		*ptr = dataBE;
+
+		if (scriptFirmwareData->maxFrameIndex < frameIndex)
+		{
+			scriptFirmwareData->maxFrameIndex = frameIndex;
+		}
 
 		return true;
 	}
@@ -1002,6 +1217,8 @@ static QByteArray err;
 
 				std::vector<int> channelStartFrame;
 
+				firmwareData.maxFrameIndex = storageConfigFrame;
+
 				int frame = startDataFrame;
 				int lmNumberCount = static_cast<int>(channelNumbersAndSize.size());
 
@@ -1010,9 +1227,17 @@ static QByteArray err;
 					int channel = channelNumbersAndSize[c].first;
 					int size = (quint16)channelNumbersAndSize[c].second;
 
+					int eepromFrameCount = firmware.eepromFrameCount(uartId);
+					int eepromFrameCount95 = static_cast<double>(eepromFrameCount) * 0.95;
+
+					if (frame == eepromFrameCount95)
+					{
+						log->wrnALC5800(firmware.subsysId(), uartId);
+					}
+
 					if (frame >= firmware.eepromFrameCount(uartId))
 					{
-						log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, SubsystemID %1, LM number %2: data is too big. frame = %3, frameCount = %4").arg(firmware.subsysId()).arg(channel).arg(frame).arg(firmware.eepromFrameCount(uartId)));
+						log->errALC5801(firmware.subsysId(), channel, uartId);
 						return false;
 					}
 
@@ -1051,6 +1276,8 @@ static QByteArray err;
 					*(quint16*)ptr = qToBigEndian((quint16)size);           // Frames count
 					ptr += sizeof(quint16);
 
+					firmwareData.maxFrameIndex = frame;
+
 					frame++;
 
 					if (size != 0)
@@ -1068,13 +1295,20 @@ static QByteArray err;
 								index = 0;
 							}
 
+							if (frame == eepromFrameCount95 && index == 0)
+							{
+								log->wrnALC5800(firmware.subsysId(), uartId);
+							}
+
 							if (frame >= firmware.eepromFrameCount(uartId))
 							{
-								log->errINT1000(QString("ModuleFirmwareWriter::storeChannelData error, SubsystemID %1, LM number %2: data is too big. frame = %3, frameCount = %4").arg(firmware.subsysId()).arg(channel).arg(frame).arg(firmware.eepromFrameCount(uartId)));
+								log->errALC5801(firmware.subsysId(), channel, uartId);
 								return false;
 							}
 
 							firmwareData.frames[frame][index++] = binaryData[i];
+
+							firmwareData.maxFrameIndex = frame;
 						}
 
 						//switch to the next frame

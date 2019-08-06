@@ -760,6 +760,30 @@ namespace Builder
 		return cfgFile;
 	}
 
+	bool BuildResultWriter::writeFirmwareStatistics()
+	{
+		bool result = true;
+
+		QStringList fileData;
+
+		if (m_firmwareWriter.writeFirmwareStatistics(fileData, m_log) == true)
+		{
+			BuildFile* buildFile = addFile("Reports", QString("FirmwareStatistics.txt"), fileData);
+
+			if (buildFile == nullptr)
+			{
+				result = false;
+			}
+		}
+		else
+		{
+			result = false;
+		}
+
+		return result;
+
+	}
+
 	bool BuildResultWriter::writeBinaryFiles()
 	{
 		bool result = true;
