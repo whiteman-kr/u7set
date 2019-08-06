@@ -1074,9 +1074,9 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 			m_appSignalIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
 		}
 
-		for (QString& s : m_appSignalIds)
+		for (QString& sref : m_appSignalIds)
 		{
-			s = s.trimmed();
+			sref = sref.trimmed();
 		}
 
 		adjustHeight();
@@ -1136,9 +1136,9 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 			m_impactAppSignalIds = s.split(QChar::LineFeed, QString::SkipEmptyParts);
 		}
 
-		for (QString& s : m_impactAppSignalIds)
+		for (QString& sref : m_impactAppSignalIds)
 		{
-			s = s.trimmed();
+			sref = sref.trimmed();
 		}
 
 		adjustHeight();

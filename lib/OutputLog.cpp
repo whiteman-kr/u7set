@@ -423,13 +423,13 @@ void OutputLog::writeDump(const std::vector<quint8>& data)
 	
 	for (unsigned int i = 0 ; i < data.size(); i++)
 	{
-		if (i % 32 == 0 && i != 0)
+		if ((i % 32) == 0 && i != 0)
 		{
 			writeMessage(QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString);
 			dataString.clear();
 		}
 
-		dataString += (i %16 ? " " : " ' ")  + QString().setNum(data[i], 16).rightJustified(2, '0');
+		dataString += ((i % 16) ? " " : " ' ")  + QString().setNum(data[i], 16).rightJustified(2, '0');
 
 		if (i == data.size() - 1 && i % 32 > 0)	// last iteration
 		{

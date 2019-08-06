@@ -1,14 +1,5 @@
 #include "TrendWidget.h"
-#include <cstdlib>
-#include <fstream>
-#include <QPaintEngine>
-#include <QPainter>
-#include <QPrinter>
-#include <QWidget>
-#include <QPdfWriter>
-#include <QMouseEvent>
 #include "../Proto/trends.pb.h"
-#include <cfloat>
 
 namespace TrendLib
 {
@@ -158,7 +149,7 @@ namespace TrendLib
 		QByteArray ba = QByteArray::fromRawData(serializedString.data(), static_cast<int>(serializedString.size()));
 		QByteArray compressedData = qCompress(ba, 3);
 
-		int written = file.write(compressedData);
+		qint64 written = file.write(compressedData);
 
 		if (written != compressedData.size())
 		{
@@ -291,12 +282,12 @@ namespace TrendLib
 		TrendParam drawParam = m_trendParam;
 
 		QRectF rc(pdfWriter.pageLayout().paintRect(QPageLayout::Inch));
-		double resolution = pdfWriter.resolution();
+		int resolution = pdfWriter.resolution();
 
-		QRectF drawRect(rc.left() * resolution,
-						rc.top() * resolution,
-						rc.width() * resolution,
-						rc.height() * resolution);
+		QRectF drawRect(rc.left() * static_cast<double>(resolution),
+						rc.top() * static_cast<double>(resolution),
+						rc.width() * static_cast<double>(resolution),
+						rc.height() * static_cast<double>(resolution));
 
 		drawParam.setRect(drawRect);
 		drawParam.setDpi(resolution, resolution);
@@ -333,13 +324,13 @@ namespace TrendLib
 		//
 		TrendParam drawParam = m_trendParam;
 
-		QRectF rc(printer->pageLayout().paintRect(QPageLayout::Inch));
-		double resolution = printer->resolution();
+		QRectF rc{printer->pageLayout().paintRect(QPageLayout::Inch)};
+		int resolution = printer->resolution();
 
-		QRectF drawRect(rc.left() * resolution,
-						rc.top() * resolution,
-						rc.width() * resolution,
-						rc.height() * resolution);
+		QRectF drawRect{rc.left() * static_cast<double>(resolution),
+						rc.top() * static_cast<double>(resolution),
+						rc.width() * static_cast<double>(resolution),
+						rc.height() * static_cast<double>(resolution)};
 
 		drawParam.setRect(drawRect);
 		drawParam.setDpi(resolution, resolution);
@@ -707,8 +698,8 @@ namespace TrendLib
 
 					double coefx = m_trendParam.duration() / trendAreaRectPixels.width();
 
-					int mouseOffset = event->pos().x() - trendAreaRectPixels.left();
-					mouseOffset = qBound<int>(1, mouseOffset, trendAreaRectPixels.width());
+					int mouseOffset = static_cast<int>(event->pos().x() - trendAreaRectPixels.left());
+					mouseOffset = qBound<int>(1, mouseOffset, static_cast<int>(trendAreaRectPixels.width()));
 
 					TimeStamp ts(laneStartTime + static_cast<qint64>(mouseOffset * coefx));
 
@@ -766,13 +757,13 @@ namespace TrendLib
 
 			if (numSteps < 0)
 			{
-				newLaneDuration = oldDuration * 1.1;
-				startTime -= (newLaneDuration - oldDuration) / 2.0;
+				newLaneDuration = static_cast<qint64>(oldDuration * 1.1);
+				startTime -= static_cast<qint64>((newLaneDuration - oldDuration) / 2.0);
 			}
 			else
 			{
-				newLaneDuration = oldDuration * 0.9;
-				startTime += (oldDuration - newLaneDuration) / 2.0;
+				newLaneDuration = static_cast<qint64>(oldDuration * 0.9);
+				startTime += static_cast<qint64>((oldDuration - newLaneDuration) / 2.0);
 			}
 
 			// Set new values to controls and draw param
@@ -993,22 +984,25 @@ namespace TrendLib
 			{
 				// Calc time
 				//
-				QRectF signalRect = tsp.tempDrawRect();
+				QRectF signalRectTsp = tsp.tempDrawRect();
 
 				double highLimit = qMax(tsp.viewHighLimit(), tsp.viewLowLimit());
 				double lowLimit = qMin(tsp.viewHighLimit(), tsp.viewLowLimit());
 
-				if (fabs(highLimit - lowLimit) <= DBL_MIN)
+				if (fabs(highLimit - lowLimit) <= DBL_MIN ||
+					signalRectTsp.height() <= DBL_EPSILON)
 				{
 					// Div by zero possible
 					//
 					continue;
 				}
 
-				double coef = (highLimit - lowLimit) / signalRect.height();
+				double coefHeight = (highLimit - lowLimit) / signalRectTsp.height();
 
-				qint64 newHighLimit = lowLimit + (signalRect.bottom() - top) * coef;
-				qint64 newLowLimit = lowLimit + (signalRect.bottom() - bottom) * coef;
+//				qint64 newHighLimit = static_cast<qint64>(lowLimit + (signalRectTsp.bottom() - top) * coefHeight);
+//				qint64 newLowLimit = static_cast<qint64>(lowLimit + (signalRectTsp.bottom() - bottom) * coefHeight);
+				double newHighLimit = lowLimit + (signalRectTsp.bottom() - top) * coefHeight;
+				double newLowLimit = lowLimit + (signalRectTsp.bottom() - bottom) * coefHeight;
 
 				tsp.setViewLowLimit(newLowLimit);
 				tsp.setViewHighLimit(newHighLimit);

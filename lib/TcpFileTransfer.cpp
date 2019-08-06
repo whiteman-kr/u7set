@@ -544,7 +544,7 @@ namespace Tcp
 		}
 		else
 		{
-			m_reply.totalParts = m_reply.fileSize / FILE_PART_SIZE + (m_reply.fileSize % FILE_PART_SIZE ? 1 : 0);
+			m_reply.totalParts = static_cast<qint32>(m_reply.fileSize / FILE_PART_SIZE + ((m_reply.fileSize % FILE_PART_SIZE) ? 1 : 0));
 		}
 
 		// read file into memory and check file consistensy

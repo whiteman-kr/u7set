@@ -52,8 +52,8 @@ void DialogSettings::showEvent(QShowEvent*)
 	// Resize depends on monitor size, DPI, resolution
 	//
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-	resize(screen.width() * 0.23, height());
 
+	resize(static_cast<int>(screen.width() * 0.23), height());
 	move(screen.center() - rect().center());
 
 	return;

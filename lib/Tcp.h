@@ -126,8 +126,8 @@ namespace Tcp
 		qint64 socketWrite(const char* data, qint64 size);
 		qint64 socketWrite(const Header& header);
 
-		void addSentBytes(int bytes);
-		void addReceivedBytes(int bytes);
+		void addSentBytes(qint64 bytes);
+		void addReceivedBytes(qint64 bytes);
 
 		void addRequest();
 		void addReply();

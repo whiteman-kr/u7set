@@ -160,38 +160,38 @@ void DialogAppDataSourceInfo::updateData()
 	item->setData(0, Qt::UserRole, 0);
 
 	setDataItemText("ID", tr("%1 (%2h)").arg(QString::number(ds.info.id())).arg(QString::number(ds.info.id(), 16)));
-	setDataItemText("EquipmentID", ds.info.lmequipmentid().c_str());
-	setDataItemText("Caption", ds.info.lmcaption().c_str());
+	setDataItemText("EquipmentID", QString::fromStdString(ds.info.lmequipmentid()));
+	setDataItemText("Caption", QString::fromStdString(ds.info.lmcaption()));
 	setDataItemNumber("DataType", ds.info.lmdatatype());
-	setDataItemText("IP", ds.info.lmip().c_str());
+	setDataItemText("IP", QString::fromStdString(ds.info.lmip()));
 	setDataItemNumber("Port", ds.info.lmport());
-	setDataItemText("Channel", ds.info.lmsubsystemchannel().c_str());
+	setDataItemText("Channel", QString::fromStdString(ds.info.lmsubsystemchannel()));
 	setDataItemNumber("SubsystemID", ds.info.lmsubsystemid());
-	setDataItemText("Subsystem", ds.info.lmsubsystem().c_str());
+	setDataItemText("Subsystem", QString::fromStdString(ds.info.lmsubsystem()));
 
 	setDataItemNumber("LmNumber", ds.info.lmnumber());
 	setDataItemText("LmModuleType", tr("%1 (%2h)").arg(QString::number(ds.info.lmmoduletype())).arg(QString::number(ds.info.lmmoduletype(), 16)));
-	setDataItemText("LmAdapterID", ds.info.lmadapterid().c_str());
+	setDataItemText("LmAdapterID", QString::fromStdString(ds.info.lmadapterid()));
 	setDataItemNumber("LmDataEnable", ds.info.lmdataenable());
 	setDataItemText("LmDataID", tr("%1 (%2h)").arg(QString::number(ds.info.lmdataid())).arg(QString::number(ds.info.lmdataid(), 16)));
 
 	setDataItemText("DataReceives", ds.state.datareceives() ? "Yes" : "No");
 
 	{
-		QTreeWidgetItem*  item = dataItem("DataReceives");
-		if (item == nullptr)
+		QTreeWidgetItem* dataReceivesItem = dataItem("DataReceives");
+		if (dataReceivesItem == nullptr)
 		{
-			assert(item);
+			assert(dataReceivesItem);
 			return;
 		}
 
 		if (ds.state.datareceives() == false)
 		{
-			item->setForeground(1, QBrush(DialogSourceInfo::dataItemErrorColor));
+			dataReceivesItem->setForeground(1, QBrush(DialogSourceInfo::dataItemErrorColor));
 		}
 		else
 		{
-			item->setForeground(1, QBrush(Qt::black));
+			dataReceivesItem->setForeground(1, QBrush(Qt::black));
 		}
 	}
 
@@ -204,7 +204,7 @@ void DialogAppDataSourceInfo::updateData()
 	setDataItemNumber("ReceivedDataID", ds.state.receiveddataid());
 	setDataItemNumber("RupFramesQueueCurSize", ds.state.rupframesqueuecursize());
 	setDataItemNumber("RupFramesQueueCurMaxSize", ds.state.rupframesqueuecurmaxsize());
-	setDataItemNumber("DataReceivingRate", ds.state.datareceivingrate() / 1024.0);
+	setDataItemNumber("DataReceivingRate", static_cast<qint64>(ds.state.datareceivingrate() / 1024.0));
 	setDataItemNumber("ReceivedDataSize", ds.state.receiveddatasize());
 	setDataItemNumber("ReceivedFramesCount", ds.state.receivedframescount());
 	setDataItemNumber("ReceivedPacketCount", ds.state.receivedpacketcount());

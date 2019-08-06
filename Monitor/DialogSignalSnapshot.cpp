@@ -1203,13 +1203,12 @@ void DialogSignalSnapshot::timerEvent(QTimerEvent* event)
 
 void DialogSignalSnapshot::maskChanged()
 {
-	QString mask = ui->editMask->text();
-
+	QString maskText = ui->editMask->text();
 	QStringList masks;
 
-	if (mask.isEmpty() == false)
+	if (maskText.isEmpty() == false)
 	{
-		masks = ui->editMask->text().split(';');
+		masks = maskText.split(';');
 
 		for (auto mask : masks)
 		{
@@ -1225,6 +1224,7 @@ void DialogSignalSnapshot::maskChanged()
 					Q_ASSERT(model);
 					return;
 				}
+
 				model->setStringList(theSettings.m_signalSnapshotMaskList);
 			}
 		}

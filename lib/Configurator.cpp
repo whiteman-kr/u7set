@@ -213,13 +213,13 @@ void CONF_IDENTIFICATION_DATA_V1::dump(QStringList& out) const
 	out << "Configuration counter: " + QString().setNum(count);
 			
 	out << "First time configured: ";
-	out << "__Date: " + QDateTime().fromTime_t(firstConfiguration.date).toString();
+	out << "__Date: " + QDateTime().fromTime_t(static_cast<uint>(firstConfiguration.date)).toString();
 	out << "__Host: " + QString(firstConfiguration.host);
 	out << "__ConfigurationId: " + firstConfiguration.configurationId.toQUuid().toString();
 	out << "__Configurator factory no: " + QString().setNum(firstConfiguration.configuratorFactoryNo);
 
 	out << "Last time configured: ";
-	out << "__Date: " + QDateTime().fromTime_t(lastConfiguration.date).toString();
+	out << "__Date: " + QDateTime().fromTime_t(static_cast<uint>(lastConfiguration.date)).toString();
 	out << "__Host: " + QString(lastConfiguration.host);
 	out << "__ConfigurationId: " + lastConfiguration.configurationId.toQUuid().toString();
 	out << "__Configurator factory no: " + QString().setNum(lastConfiguration.configuratorFactoryNo);
@@ -277,7 +277,7 @@ void CONF_IDENTIFICATION_DATA_V2::dump(QStringList& out) const
 	out << "Configuration counter: " + QString().setNum(count);
 
 	out << "First time configured: ";
-	out << "__Date: " + QDateTime().fromTime_t(firstConfiguration.date).toString();
+	out << "__Date: " + QDateTime().fromTime_t(static_cast<uint>(firstConfiguration.date)).toString();
 	out << "__Host: " + QString(firstConfiguration.host);
 	out << "__User: " + QString(firstConfiguration.userName);
 	out << "__Build No: " + QString::number(firstConfiguration.buildNo).rightJustified(6, '0');
@@ -285,7 +285,7 @@ void CONF_IDENTIFICATION_DATA_V2::dump(QStringList& out) const
 	out << "__ConfigurationId: " + firstConfiguration.configurationId.toQUuid().toString();
 
 	out << "Last time configured: ";
-	out << "__Date: " + QDateTime().fromTime_t(lastConfiguration.date).toString();
+	out << "__Date: " + QDateTime().fromTime_t(static_cast<uint>(lastConfiguration.date)).toString();
 	out << "__Host: " + QString(lastConfiguration.host);
 	out << "__User: " + QString(lastConfiguration.userName);
 	out << "__Build No: " + QString::number(lastConfiguration.buildNo).rightJustified(6, '0');
@@ -679,7 +679,7 @@ bool Configurator::send(int moduleUartId,
 
 	if (writtenBytes != buffer.size())
 	{
-		m_Log->writeError(tr("Written bytes number is ") + writtenBytes + ", expected is " + sizeof(buffer));
+		m_Log->writeError(tr("Written bytes number %1, expected %2").arg(writtenBytes).arg(buffer.size()));
 		m_Log->writeError(tr("Operation terminated."));
 		return false;
 	}
@@ -1023,7 +1023,7 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 		Crc::setDataBlockCrc(IdentificationFrameIndex, identificationData.data(), (int)identificationData.size());
 
 		CONF_HEADER_V1 replyIdentificationHeader = CONF_HEADER_V1();
-		auto replyData = std::vector<uint8_t>();
+		std::vector<uint8_t> replyData;
 		if (send(moduleUartId, Write, IdentificationFrameIndex, blockSize, identificationData, &replyIdentificationHeader, &replyData) == false)
 		{
 			throw tr("Communication error.");
@@ -1111,10 +1111,10 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 					// Write data
 					//
 					CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
-					auto replyData = std::vector<uint8_t>();
-					bool ok = send(moduleUartId, Write, frameIndex, blockSize, frameData, &replyHeader, &replyData);
+					std::vector<uint8_t> replyBuffer;
+					bool sendResult = send(moduleUartId, Write, frameIndex, blockSize, frameData, &replyHeader, &replyBuffer);
 
-					if (ok == false)
+					if (sendResult == false)
 					{
 						throw tr("Communication error.");
 					}
@@ -1737,8 +1737,8 @@ void Configurator::uploadServiceInformation(quint32 factoryNo, QDate manufacture
         Crc::setDataBlockCrc(IdentificationFrameIndex, identificationData.data(), (int)identificationData.size());
 				
         CONF_HEADER_V1 replyIdentificationHeader = CONF_HEADER_V1();
-		auto replyData = std::vector<uint8_t>();
-		if (send(moduleUartId, Write, IdentificationFrameIndex, blockSize, identificationData, &replyIdentificationHeader, &replyData) == false)
+		std::vector<uint8_t> replyDatBuffera;
+		if (send(moduleUartId, Write, IdentificationFrameIndex, blockSize, identificationData, &replyIdentificationHeader, &replyDatBuffera) == false)
         {
             throw tr("Communication error.");
         }
@@ -1784,8 +1784,8 @@ void Configurator::uploadServiceInformation(quint32 factoryNo, QDate manufacture
                 // --
                 //
                 CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
-				auto replyData = std::vector<uint8_t>();
-				if (send(moduleUartId, Write, ConfiguartionFrameIndex, blockSize, writeData, &replyHeader, &replyData) == false)
+				std::vector<uint8_t> replyDataV1;
+				if (send(moduleUartId, Write, ConfiguartionFrameIndex, blockSize, writeData, &replyHeader, &replyDataV1) == false)
                 {
                     throw tr("Communication error.");
                 }
@@ -1909,16 +1909,16 @@ void Configurator::readFirmware(const QString& fileName)
 		//
 		QString dataString;
 
-		for (size_t i = 0 ; i < frame.size(); i++)
+		for (size_t i = 0; i < frame.size(); i++)
 		{
-			if (i % 32 == 0 && i != 0)
+			if ((i % 32) == 0 && i != 0)
 			{
 				QString s = QString().setNum(i - 32, 16).rightJustified(4, '0') + ":" + dataString;
 				out << s << "\n";
 				dataString.clear();
 			}
 
-			dataString += (i %16 ? " " : " ' ")  + QString().setNum(frame[i], 16).rightJustified(2, '0');
+			dataString += ((i % 16) ? " " : " ' ")  + QString().setNum(frame[i], 16).rightJustified(2, '0');
 
 			if (i == frame.size() - 1 && i % 32 > 0)	// last iteration
 			{
