@@ -658,7 +658,7 @@ void FilteredArchiveSignalsModel::filterSignals(DialogChooseArchiveSignals::Arch
 	int schemaIndex = -1;
 	if (sit != m_schemasDetails.end())
 	{
-		schemaIndex = std::distance(m_schemasDetails.begin(), sit);
+		schemaIndex = static_cast<int>(std::distance(m_schemasDetails.begin(), sit));
 		Q_ASSERT(schemaIndex < m_schemasDetails.size());
 	}
 

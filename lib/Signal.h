@@ -106,7 +106,7 @@ public:
 	void setDataSize(E::SignalType signalType, E::AnalogAppSignalFormat dataFormat);
 	void setDataSizeW(int sizeW);
 
-	int sizeW() const { return (m_dataSize / SIZE_16BIT + (m_dataSize % SIZE_16BIT ? 1 : 0)); }
+	int sizeW() const { return (m_dataSize / SIZE_16BIT + ((m_dataSize % SIZE_16BIT) ? 1 : 0)); }
 
 	E::ByteOrder byteOrder() const { return m_byteOrder; }
 	int byteOrderInt() const { return TO_INT(m_byteOrder); }
@@ -318,6 +318,8 @@ public:
 	QString stateFlagSignal(E::AppSignalStateFlagType flagType) const { return  m_stateFlagsSignals.value(flagType, QString()); }
 	bool hasStateFlagsSignals() const { return m_stateFlagsSignals.count(); }
 
+	void initTuningValues();
+
 private:
 	// Private setters for fields, witch can't be changed outside DB engine
 	// Should be used only by friends
@@ -416,7 +418,7 @@ private:
 											// or
 
 	Address16 m_tuningAddr;					// signal address in tuning buffer
-											// only for tuningable signals
+											// only for tunable signals
 
 	Address16 m_ualAddr;					// signal address is used in UAL
 											// may be equal to m_ioBufAddr, m_tuningAddr, m_regValueAddr or not
@@ -475,6 +477,8 @@ public:
 
 	int getMaxID();
 	QStringList appSignalIdsList(bool removeNumberSign, bool sort) const;
+
+	void replaceOrAppendIfNotExists(int signalID, const Signal& s);
 
 private:
 	QMultiHash<int, int> m_groupSignals;

@@ -851,11 +851,11 @@ namespace Log
 
 		if (m_filteredRecordsIndex.empty() == false)
 		{
-			int count = static_cast<int>(m_filteredRecordsIndex.size());
+			int filterRecordsCount = static_cast<int>(m_filteredRecordsIndex.size());
 
-			beginInsertRows(QModelIndex(), 0, count - 1);
+			beginInsertRows(QModelIndex(), 0, filterRecordsCount - 1);
 
-			insertRows(0, static_cast<int>(count));
+			insertRows(0, static_cast<int>(filterRecordsCount));
 
 			endInsertRows();
 		}
@@ -1201,12 +1201,13 @@ namespace Log
 
 		for (int c = 0; c < m_table->horizontalHeader()->count() ; c++)
 		{
-			int columnWidth = totalWidth * m_model.columnWidthPercent(c);
+			int columnWidth = static_cast<int>(totalWidth * m_model.columnWidthPercent(c));
 
 			if (columnWidth >= s.width())
 			{
 				columnWidth = 100;
 			}
+
 			m_table->setColumnWidth(c, columnWidth);
 		}
 

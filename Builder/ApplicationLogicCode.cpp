@@ -1218,7 +1218,7 @@ namespace Builder
 
 			int tabLen = 32 - (cmdStr.length() - 1 + 3);
 
-			int tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
+			int tabCount = tabLen / 8 + ((tabLen % 8) ? 1 : 0);
 
 			for(int i = 0; i < tabCount; i++)
 			{
@@ -1248,7 +1248,7 @@ namespace Builder
 				tabLen += 16;
 			}
 
-			int tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
+			int tabCount = tabLen / 8 + ((tabLen % 8) ? 1 : 0);
 
 			for(int i = 0; i < tabCount; i++)
 			{
@@ -2177,7 +2177,7 @@ namespace Builder
 			}
 
 			int tabLen = 40 - (codeStr.length() - 1 + 8);
-			int tabCount = tabLen / 8 + (tabLen % 8 ? 1 : 0);
+			int tabCount = tabLen / 8 + ((tabLen % 8) ? 1 : 0);
 
 			for(int i = 0; i < tabCount; i++)
 			{

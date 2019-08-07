@@ -82,9 +82,9 @@ private:
 template<typename ENUM_TYPE>
 bool SignalSpecPropValues::setEnumValue(const QString& name, ENUM_TYPE enumItemValue)
 {
-	if (std::is_enum<ENUM_TYPE>::value == false)
+	if constexpr (std::is_enum<ENUM_TYPE>::value == false)
 	{
-		assert(false);
+		static_assert(false);
 		return false;
 	}
 
@@ -233,7 +233,7 @@ private:
 						   std::function<TYPE (const Signal&)> getter,
 						   std::function<void (Signal&, TYPE)> setter = std::function<void (Signal&, TYPE)>())
 	{
-		assert(std::is_enum<TYPE>::value == true);
+		static_assert(std::is_enum<TYPE>::value);
 
 		SignalPropertyDescription newProperty;
 
@@ -262,7 +262,7 @@ private:
 						   std::function<TYPE (const Signal&)> getter,
 						   std::function<void (Signal&, TYPE)> setter = std::function<void (Signal&, TYPE)>())
 	{
-		assert(std::is_enum<TYPE>::value == false);
+		static_assert(std::is_enum<TYPE>::value == false);
 
 		SignalPropertyDescription newProperty;
 

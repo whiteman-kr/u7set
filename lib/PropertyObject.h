@@ -376,13 +376,15 @@ public:
 
 	virtual QVariant enumValue() const override final
 	{
-		if (std::is_enum<TYPE>::value == false)
+		if constexpr (std::is_enum<TYPE>::value == false)
 		{
 			Q_ASSERT(isEnum());
-			return QVariant();
+			return {};
 		}
-
-		return value();
+		else
+		{
+			return value();
+		}
 	}
 
 public:
@@ -447,7 +449,7 @@ private:
 	template <typename ENUM>
 	void setEnumValueInternal(const char* value, enum_tag)				// Overriden from class Property
 	{
-		Q_ASSERT(std::is_enum<TYPE>::value == true);
+		static_assert(std::is_enum<TYPE>::value);
 
 		QVariant v(value);
 		setValue(v);
@@ -601,13 +603,15 @@ public:
 
 	virtual QVariant enumValue() const override final
 	{
-		if (std::is_enum<TYPE>::value == false)
+		if constexpr (std::is_enum<TYPE>::value == false)
 		{
 			Q_ASSERT(isEnum());
-			return QVariant();
+			return {};
 		}
-
-		return value();
+		else
+		{
+			return value();
+		}
 	}
 
 public:
@@ -661,7 +665,7 @@ private:
 	template <typename ENUM>
 	void setEnumValueInternal(int value, enum_tag)				// Overriden from class Propery
 	{
-		Q_ASSERT(std::is_enum<TYPE>::value == true);
+		static_assert(std::is_enum<TYPE>::value);
 
 		if (m_setter)
 		{
@@ -682,7 +686,7 @@ private:
 	template <typename ENUM>
 	void setEnumValueInternal(const char* value, enum_tag)				// Overriden from class Propery
 	{
-		Q_ASSERT(std::is_enum<TYPE>::value == true);
+		static_assert(std::is_enum<TYPE>::value);
 
 		QVariant v(value);
 		setValue(v);
@@ -978,17 +982,18 @@ public:
 
 	virtual void setEnumValue(const char* value) override final	// Overriden from class Propery
 	{
-		QVariant v(value);
-
-		if (v.canConvert(m_value.userType()) == true)
+		if (QVariant v(value);
+			v.canConvert(m_value.userType()) == true)
 		{
-			QVariant v(value);
-
 			bool ok = v.convert(m_value.userType());
-			Q_ASSERT(ok);
-			Q_UNUSED(ok);
-
-			m_value.setValue(v);
+			if (Q_LIKELY(ok == true))
+			{
+				m_value.setValue(v);
+			}
+			else
+			{
+				Q_ASSERT(ok);
+			}
 		}
 		else
 		{

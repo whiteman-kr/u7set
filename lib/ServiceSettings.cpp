@@ -309,7 +309,7 @@ QStringList CfgServiceSettings::knownClients()
 
 	for(const QPair<QString, E::SoftwareType>& client : clients)
 	{
-		knownClients.append(client.first);
+		knownClients.append(client.first.trimmed());
 	}
 
 	return knownClients;
@@ -552,25 +552,24 @@ bool TuningServiceSettings::readFromDevice(Hardware::Software *software, Builder
 {
 	bool result = true;
 
-	QString clientRequestIPStr;
-	int clientRequestPort = 0;
-	QString clientNetmaskStr;
-	QString tuningDataIPStr;
-	int tuningDataPort = 0;
+	result &= DeviceHelper::getIpPortProperty(software,
+											  PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT,
+											  &clientRequestIP, false, "", 0, log);
 
-	result &= DeviceHelper::getStrProperty(software, PROP_CLIENT_REQUEST_IP, &clientRequestIPStr, log);
-	result &= DeviceHelper::getIntProperty(software, PROP_CLIENT_REQUEST_PORT, &clientRequestPort, log);
-	result &= DeviceHelper::getStrProperty(software, PROP_CLIENT_REQUEST_NETMASK, &clientNetmaskStr, log);
-	result &= DeviceHelper::getStrProperty(software, PROP_TUNING_DATA_IP, &tuningDataIPStr, log);
-	result &= DeviceHelper::getIntProperty(software, PROP_TUNING_DATA_PORT, &tuningDataPort, log);
+	result &= DeviceHelper::getIPv4Property(software,
+											PROP_CLIENT_REQUEST_NETMASK,
+											&clientRequestNetmask, false, "", log);
+
+	result &= DeviceHelper::getIpPortProperty(software,
+											  PROP_TUNING_DATA_IP, PROP_TUNING_DATA_PORT,
+											  &tuningDataIP, false, "", 0, log);
+
+	result &= DeviceHelper::getIPv4Property(software,
+											PROP_TUNING_DATA_NETMASK,
+											&tuningDataNetmask, false, "", log);
 
 	result &= DeviceHelper::getBoolProperty(software, PROP_SINGLE_LM_CONTROL, &singleLmControl, log);
 	result &= DeviceHelper::getBoolProperty(software, PROP_DISABLE_MODULES_TYPE_CHECKING, &disableModulesTypeChecking, log);
-
-	clientRequestIP = HostAddressPort(clientRequestIPStr, clientRequestPort);
-	clientRequestNetmask.setAddress(clientNetmaskStr);
-
-	tuningDataIP = HostAddressPort(tuningDataIPStr, tuningDataPort);
 
 	result &= fillTuningClientsInfo(software, singleLmControl, log);
 
@@ -584,6 +583,7 @@ bool TuningServiceSettings::writeToXml(XmlWriteHelper& xml)
 	xml.writeHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, clientRequestIP);
 	xml.writeHostAddress(PROP_CLIENT_REQUEST_NETMASK, clientRequestNetmask);
 	xml.writeHostAddressPort(PROP_TUNING_DATA_IP, PROP_TUNING_DATA_PORT, tuningDataIP);
+	xml.writeHostAddress(PROP_TUNING_DATA_NETMASK, tuningDataNetmask);
 
 	xml.writeBoolElement(PROP_SINGLE_LM_CONTROL, singleLmControl);
 	xml.writeBoolElement(PROP_DISABLE_MODULES_TYPE_CHECKING, disableModulesTypeChecking);
@@ -637,6 +637,7 @@ bool TuningServiceSettings::readFromXml(XmlReadHelper& xml)
 	result &= xml.readHostAddressPort(PROP_CLIENT_REQUEST_IP, PROP_CLIENT_REQUEST_PORT, &clientRequestIP);
 	result &= xml.readHostAddress(PROP_CLIENT_REQUEST_NETMASK, &clientRequestNetmask);
 	result &= xml.readHostAddressPort(PROP_TUNING_DATA_IP, PROP_TUNING_DATA_PORT, &tuningDataIP);
+	result &= xml.readHostAddress(PROP_TUNING_DATA_NETMASK, &tuningDataNetmask);
 
 	result = xml.findElement(PROP_SINGLE_LM_CONTROL);
 

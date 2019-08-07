@@ -17,7 +17,7 @@ MonitorCentralWidget::MonitorCentralWidget(MonitorSchemaManager* schemaManager,
 	tabBar()->setExpanding(true);
 
 	QSize sz = fontMetrics().size(Qt::TextSingleLine, "XEMPTYSCHEMAX");
-	sz.setHeight(sz.height() * 1.75);
+	sz.setHeight(static_cast<int>(sz.height() * 1.75));
 
 	setStyleSheet(QString("QTabBar::tab { min-width: %1px; min-height: %2px;})").arg(sz.width()).arg(sz.height()));
 

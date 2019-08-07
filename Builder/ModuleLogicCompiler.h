@@ -352,7 +352,7 @@ namespace Builder
 
 		bool calculateIoSignalsAddresses();
 
-		bool setTuningableSignalsUalAddresses();
+		bool setTunableSignalsUalAddresses();
 
 		// disposing discrete signals in memory
 		//
@@ -632,8 +632,8 @@ namespace Builder
 
 		QVector<UalSignal*> m_acquiredDiscreteInputSignals;				// acquired discrete input signals, no matter used in UAL or not
 		QVector<UalSignal*> m_acquiredDiscreteStrictOutputSignals;		// acquired discrete strict output signals, used in UAL
-		QVector<UalSignal*> m_acquiredDiscreteInternalSignals;			// acquired discrete internal non tuningable signals, used in UAL
-		QVector<UalSignal*> m_acquiredDiscreteTuningSignals;			// acquired discrete internal tuningable signals, no matter used in UAL or not
+		QVector<UalSignal*> m_acquiredDiscreteInternalSignals;			// acquired discrete internal non tunable signals, used in UAL
+		QVector<UalSignal*> m_acquiredDiscreteTuningSignals;			// acquired discrete internal tunable signals, no matter used in UAL or not
 		QVector<UalSignal*> m_acquiredDiscreteConstSignals;
 		QVector<UalSignal*> m_acquiredDiscreteOptoAndBusChildSignals;
 
@@ -647,7 +647,7 @@ namespace Builder
 		QVector<UalSignal*> m_acquiredAnalogInternalSignals;			// acquired analog internal signals, used in UAL
 		QVector<UalSignal*> m_acquiredAnalogOptoSignals;				// acquired analog opto signals (simple copied from opto buffers)
 		QVector<UalSignal*> m_acquiredAnalogBusChildSignals;			// acquired analog opto signals (unlike to opto signals may require conversion from inbus format)
-		QVector<UalSignal*> m_acquiredAnalogTuningSignals;				// acquired analog internal tuningable signals, no matter used in UAL or not
+		QVector<UalSignal*> m_acquiredAnalogTuningSignals;				// acquired analog internal tunable signals, no matter used in UAL or not
 
 		QHash<int, UalSignal*> m_acquiredAnalogConstIntSignals;
 		QHash<float, UalSignal*> m_acquiredAnalogConstFloatSignals;

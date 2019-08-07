@@ -707,6 +707,8 @@ namespace Builder
 			}
 		}
 
+		// Sort std::vector<AppLogicItem> by it's
+
 		// Remove already added items
 		//
 		for (const AppLogicItem& orderedItem : orderedList)
@@ -1287,7 +1289,7 @@ namespace Builder
 			currentIt = std::prev(orderedItems.end());
 		}
 
-		for (auto currentIt = orderedItems.begin(); currentIt != orderedItems.end(); ++currentIt)
+		for (/*auto currentIt = orderedItems.begin(); */; currentIt != orderedItems.end(); ++currentIt)
 		{
 			if (*interruptProcess == true)
 			{
@@ -1309,7 +1311,7 @@ namespace Builder
 				auto foundDepIterator = itemsWithInputs.find(out.guid());
 				if (foundDepIterator == itemsWithInputs.end())
 				{
-					assert(foundDepIterator != itemsWithInputs.end());
+					Q_ASSERT(foundDepIterator != itemsWithInputs.end());
 					log->errINT1001("Output was not found in itemsWithInputs map, assert(foundDepIterator != itemsWithInputs.end())");
 					continue;
 				}
@@ -1349,7 +1351,7 @@ namespace Builder
 				{
 					// Obviusly dependant item is not in orderedList yet, add it right after currentItem
 					//
-					assert(std::find(orderedItems.begin(), orderedItems.end(), dep) == orderedItems.end());
+					Q_ASSERT(std::find(orderedItems.begin(), orderedItems.end(), dep) == orderedItems.end());
 
 					orderedItems.insert(std::next(currentIt), dep);
 					remainItems.erase(remainIt);
@@ -1409,7 +1411,7 @@ namespace Builder
 					continue;	// Process other dependtants, do not break!
 				}
 
-				assert(false);
+				Q_ASSERT(false);
 
 				// Process other dependtants, do not break!
 				//
@@ -2126,13 +2128,13 @@ namespace Builder
 					//
 					QUuid ufbOutputBlockPinAssoc = ufbOutputBlockPin.associatedIOs().front();
 					bool foundUfbIntItem = false;
-					for (AppLogicItem& ufbItem : ufbItemsCopy)
+					for (AppLogicItem& ufbItemCopy : ufbItemsCopy)
 					{
-						if (ufbItem.m_fblItem->hasOutput(ufbOutputBlockPinAssoc) == true)
+						if (ufbItemCopy.m_fblItem->hasOutput(ufbOutputBlockPinAssoc) == true)
 						{
 							foundUfbIntItem = true;
 
-							VFrame30::AfbPin& ufbIntItemPin = ufbItem.m_fblItem->output(ufbOutputBlockPinAssoc);
+							VFrame30::AfbPin& ufbIntItemPin = ufbItemCopy.m_fblItem->output(ufbOutputBlockPinAssoc);
 
 							for (VFrame30::AfbPin* schemaInputItemPin : targetItems)
 							{

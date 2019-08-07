@@ -235,14 +235,14 @@ namespace Tcp
 		return socketWrite(reinterpret_cast<const char*>(&header), sizeof(header));
 	}
 
-	void SocketWorker::addSentBytes(int bytes)
+	void SocketWorker::addSentBytes(qint64 bytes)
 	{
 		AUTO_LOCK(m_stateMutex);
 
 		m_state.sentBytes += bytes;
 	}
 
-	void SocketWorker::addReceivedBytes(int bytes)
+	void SocketWorker::addReceivedBytes(qint64 bytes)
 	{
 		AUTO_LOCK(m_stateMutex);
 
@@ -312,15 +312,15 @@ namespace Tcp
 			bytesToRead = bytesAvailable;
 		}
 
-		int bytesRead = m_tcpSocket->read(reinterpret_cast<char*>(&m_header) + m_readHeaderSize, bytesToRead);
+		qint64 bytesRead = m_tcpSocket->read(reinterpret_cast<char*>(&m_header) + m_readHeaderSize, bytesToRead);
 
-		m_readHeaderSize += bytesRead;
+		m_readHeaderSize += static_cast<quint32>(bytesRead);
 
 		assert(m_readHeaderSize <= sizeof(SocketWorker::Header));
 
 		if (m_readHeaderSize < sizeof(SocketWorker::Header))
 		{
-			return bytesRead;
+			return static_cast<int>(bytesRead);
 		}
 
 		// Full requestHeader is read
@@ -342,7 +342,7 @@ namespace Tcp
 
 			m_readState = ReadState::WaitingNothing;
 
-			return bytesRead;
+			return static_cast<int>(bytesRead);
 		}
 
 		if (m_header.dataSize > TCP_MAX_DATA_SIZE)
@@ -358,7 +358,7 @@ namespace Tcp
 
 		m_readState = ReadState::WaitingForData;
 
-		return bytesRead;
+		return static_cast<int>(bytesRead);
 	}
 
 	int SocketWorker::readData(int bytesAvailable)
@@ -387,9 +387,9 @@ namespace Tcp
 			return 0;
 		}
 
-		int bytesRead = m_tcpSocket->read(m_receiveDataBuffer + m_readDataSize, bytesToRead);
+		qint64 bytesRead = m_tcpSocket->read(m_receiveDataBuffer + m_readDataSize, bytesToRead);
 
-		m_readDataSize += bytesRead;
+		m_readDataSize += static_cast<quint32>(bytesRead);
 
 		assert(m_readDataSize <= m_header.dataSize);
 
@@ -400,7 +400,7 @@ namespace Tcp
 			m_readState = ReadState::WaitingNothing;
 		}
 
-		return bytesRead;
+		return static_cast<int>(bytesRead);
 	}
 
 	void SocketWorker::onSocketStateChanged(QAbstractSocket::SocketState newState)
@@ -468,7 +468,7 @@ namespace Tcp
 			return;
 		}
 
-		int bytesAvailable = m_tcpSocket->bytesAvailable();
+		qint64 bytesAvailable = m_tcpSocket->bytesAvailable();
 
 		addReceivedBytes(bytesAvailable);
 
@@ -483,11 +483,11 @@ namespace Tcp
 				return;
 
 			case ReadState::WaitingForHeader:
-				bytesRead = readHeader(bytesAvailable);
+				bytesRead = readHeader(static_cast<int>(bytesAvailable));
 				break;
 
 			case ReadState::WaitingForData:
-				bytesRead = readData(bytesAvailable);
+				bytesRead = readData(static_cast<int>(bytesAvailable));
 				break;
 
 			default:

@@ -104,7 +104,6 @@ SOURCES += \
     ../lib/SoftwareInfo.cpp \
     ../lib/TuningValue.cpp \
     ../lib/Signal.cpp \
-    ../lib/PropertyObject.cpp \
     ../lib/SignalProperties.cpp \
     ../lib/Ui/DialogAbout.cpp \
 	../lib/UnitsConvertor.cpp \

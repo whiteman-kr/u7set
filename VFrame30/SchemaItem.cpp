@@ -633,7 +633,7 @@ namespace VFrame30
 		assert(true);
 		return 0;
 	}
-	void SchemaItem::setLeft(double)
+	void SchemaItem::setLeft(const double& /*value*/)
 	{
 		assert(true);
 	}
@@ -643,7 +643,7 @@ namespace VFrame30
 		assert(false);
 		return 0;
 	}
-	void SchemaItem::setTop(double)
+	void SchemaItem::setTop(const double& /*value*/)
 	{
 		assert(false);
 	}
@@ -653,7 +653,7 @@ namespace VFrame30
 		assert(false);
 		return 0;
 	}
-	void SchemaItem::setWidth(double)
+	void SchemaItem::setWidth(const double& /*value*/)
 	{
 		assert(false);
 	}
@@ -663,7 +663,7 @@ namespace VFrame30
 		assert(false);
 		return 0;
 	}
-	void SchemaItem::setHeight(double)
+	void SchemaItem::setHeight(const double& /*value*/)
 	{
 		assert(false);
 	}

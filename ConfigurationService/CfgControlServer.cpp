@@ -64,7 +64,7 @@ bool CfgControlServer::checkClientID()
 {
 	QString connectedClientID = connectedSoftwareInfo().equipmentID();
 
-	return m_knownClients.contains(connectedClientID);
+	return m_knownClients.contains(connectedClientID.trimmed());
 }
 
 void CfgControlServer::sendServiceState()

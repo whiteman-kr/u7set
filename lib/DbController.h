@@ -128,7 +128,7 @@ public:
 	bool getSignalsIDs(QVector<int>* signalIDs, QWidget* parentWidget);
 	bool getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAppSignalID, QWidget* parentWidget);
 	bool getSignals(SignalSet* signalSet, bool excludeDeleted, QWidget* parentWidget);
-	bool getTuningableSignals(SignalSet* signalSet, QWidget* parentWidget);
+	bool getTunableSignals(SignalSet* signalSet, QWidget* parentWidget);
 	bool getLatestSignal(int signalID, Signal* signal, QWidget* parentWidget);
 	bool getLatestSignals(QVector<int> signalIDs, QVector<Signal>* signalsArray, QWidget* parentWidget);
 	bool getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray, QWidget* parentWidget);
@@ -234,7 +234,7 @@ signals:
 	void signal_getSignalsIDs(QVector<int>* signalIDs);
 	void signal_getSignalsIDAppSignalID(QVector<ID_AppSignalID>* signalsIDAppSignalID);
 	void signal_getSignals(SignalSet* signalSet, bool excludeDeleted);
-	void signal_getTuningableSignals(SignalSet* signalSet);
+	void signal_getTunableSignals(SignalSet* signalSet);
 	void signal_getLatestSignal(int signalID, Signal* signal);
 	void signal_getLatestSignals(QVector<int> signalIDs, QVector<Signal>* signalsArray);
 	void signal_getLatestSignalsByAppSignalIDs(QStringList appSignalIDs, QVector<Signal>* signalArray);

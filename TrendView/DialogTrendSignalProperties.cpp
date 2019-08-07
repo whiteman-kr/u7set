@@ -1,7 +1,6 @@
 #include "DialogTrendSignalProperties.h"
 #include "ui_DialogTrendSignalProperties.h"
 #include "DialogTrendSignalPoints.h"
-#include <QColorDialog>
 
 //
 // DialogTrendSignalProperties
@@ -86,11 +85,7 @@ void DialogTrendSignalProperties::on_buttonPoints_clicked()
 							  m_trendMode,
 							  this);
 
-	connect(&d, &DialogTrendSignalPoints::signalPointsChanged, this,
-			[this]()
-			{
-				this->emit signalPropertiesChanged();
-			});
+	connect(&d, &DialogTrendSignalPoints::signalPointsChanged, this, &DialogTrendSignalProperties::signalPropertiesChanged);
 
 	d.exec();
 

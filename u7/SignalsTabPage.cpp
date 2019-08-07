@@ -6,6 +6,7 @@
 #include "../lib/SignalProperties.h"
 #include "../lib/WidgetUtils.h"
 #include "../lib/WUtils.h"
+#include "../lib/StandardColors.h"
 #include "./Forms/ComparePropertyObjectDialog.h"
 #include <QMessageBox>
 #include <QFormLayout>
@@ -420,7 +421,7 @@ void SignalPropertyManager::reloadPropertyBehaviour(DbController* dbController, 
 		int propertyIndex = m_propertyName2IndexMap.value(behaviour.name, -1);
 		if (propertyIndex != -1)
 		{
-			int behaviourIndex = m_propertyBehaviorDescription.size() - 1;
+			int behaviourIndex = static_cast<int>(m_propertyBehaviorDescription.size()) - 1;
 			assert(m_propertyDescription[propertyIndex].name == m_propertyBehaviorDescription[behaviourIndex].name);
 
 			m_propertyIndex2BehaviourIndexMap[propertyIndex] = behaviourIndex;
@@ -1093,18 +1094,18 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 	{
 		if (signal.checkedOut())
 		{
-			QBrush b(QColor(0xFF, 0xFF, 0xFF));
+			QBrush b(StandardColors::VcsCheckedIn);
 
 			switch (signal.instanceAction().value())
 			{
 			case VcsItemAction::Added:
-				b.setColor(QColor(0xF9, 0xFF, 0xF9));
+				b.setColor(StandardColors::VcsAdded);
 				break;
 			case VcsItemAction::Modified:
-				b.setColor(QColor(0xEA, 0xF0, 0xFF));
+				b.setColor(StandardColors::VcsModified);
 				break;
 			case VcsItemAction::Deleted:
-				b.setColor(QColor(0xFF, 0xF4, 0xF4));
+				b.setColor(StandardColors::VcsDeleted);
 				break;
 			default:
 				assert(false);
@@ -1130,6 +1131,15 @@ QVariant SignalsModel::data(const QModelIndex &index, int role) const
 			case QMetaType::Double:
 			case QMetaType::Float:
 				return QString::number(value.toDouble(), 'f', signal.decimalPlaces());
+			case QMetaType::Short:
+			case QMetaType::UShort:
+			case QMetaType::Int:
+			case QMetaType::UInt:
+			case QMetaType::Long:
+			case QMetaType::ULong:
+			case QMetaType::LongLong:
+			case QMetaType::ULongLong:
+				return value.toString();
 			default:
 				assert(false);
 				return QVariant();
@@ -1387,76 +1397,16 @@ void SignalsModel::addSignal()
 
 	Signal signal;
 
-	QSettings settings;
-	auto loader = [&settings](const QString& name, QVariant defaultValue = QVariant())
-	{
-		return settings.value(SignalProperties::lastEditedSignalFieldValuePlace + name, defaultValue);
-	};
-
 	signal.setSignalType(static_cast<E::SignalType>(signalTypeCombo->currentIndex()));
 
-	switch (signal.signalType())
+	if (signal.isAnalog())
 	{
-	case E::SignalType::Analog:
-	{
+		// Temporary default value, should be removed later
+		//
 		signal.setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);
-		signal.setDataSize(FLOAT32_SIZE);
-
-		auto value = signal.tuningLowBound();
-		value.setFloatValue(loader(SignalProperties::lowEngeneeringUnitsCaption, 0).toFloat());
-		signal.setTuningLowBound(value);
-
-		value = signal.tuningHighBound();
-		value.setFloatValue(loader(SignalProperties::highEngeneeringUnitsCaption, 100).toFloat());
-		signal.setTuningHighBound(value);
-
-		break;
 	}
 
-	case E::SignalType::Discrete:
-	{
-		signal.setDataSize(DISCRETE_SIZE);
-
-		auto value = signal.tuningLowBound();
-		value.setDiscreteValue(0);
-		signal.setTuningLowBound(value);
-
-		value = signal.tuningHighBound();
-		value.setDiscreteValue(1);
-		signal.setTuningHighBound(value);
-
-		break;
-	}
-
-	case E::SignalType::Bus:
-	default:
-		break;
-	}
-
-	signal.initSpecificProperties();
-
-	signal.setLowADC(loader(SignalProperties::lowADCCaption).toInt());
-	signal.setHighADC(loader(SignalProperties::highADCCaption).toInt());
-	signal.setLowEngeneeringUnits(loader(SignalProperties::lowEngeneeringUnitsCaption, 0).toDouble());
-	signal.setHighEngeneeringUnits(loader(SignalProperties::highEngeneeringUnitsCaption, 100).toDouble());
-	signal.setUnit(loader(SignalProperties::unitCaption).toString());
-	signal.setLowValidRange(loader(SignalProperties::lowValidRangeCaption).toDouble());
-	signal.setHighValidRange(loader(SignalProperties::highValidRangeCaption).toDouble());
-
-	signal.setElectricLowLimit(loader(SignalProperties::electricLowLimitCaption).toDouble());
-	signal.setElectricHighLimit(loader(SignalProperties::electricHighLimitCaption).toDouble());
-	signal.setElectricUnit(static_cast<E::ElectricUnit>(loader(SignalProperties::electricUnitCaption).toInt()));
-	signal.setSensorType(static_cast<E::SensorType>(loader(SignalProperties::sensorTypeCaption).toInt()));
-	signal.setOutputMode(static_cast<E::OutputMode>(loader(SignalProperties::outputModeCaption).toInt()));
-
-	signal.setAcquire(loader(SignalProperties::acquireCaption).toBool());
-	signal.setDecimalPlaces(loader(SignalProperties::decimalPlacesCaption).toInt());
-	signal.setCoarseAperture(loader(SignalProperties::coarseApertureCaption).toDouble());
-	signal.setFineAperture(loader(SignalProperties::fineApertureCaption).toDouble());
-	signal.setFilteringTime(loader(SignalProperties::filteringTimeCaption).toDouble());
-	signal.setSpreadTolerance(loader(SignalProperties::spreadToleranceCaption).toDouble());
-	signal.setInOutType(E::SignalInOutType::Internal);
-	signal.setByteOrder(E::ByteOrder::BigEndian);
+	initNewSignal(signal);
 
 	if (!deviceIdEdit->text().isEmpty())
 	{
@@ -1478,11 +1428,14 @@ void SignalsModel::addSignal()
 
 	if (dlg.exec() == QDialog::Accepted)
 	{
-		QVector<Signal*> resultSignalVector;
+		QVector<Signal> resultSignalVector;
+
 		resultSignalVector.reserve(signalCount * channelCount);
+
 		for (int s = 0; s < signalCount; s++)
 		{
 			QVector<Signal> signalVector;
+
 			for (int i = 0; i < channelCount; i++)
 			{
 				signalVector << signal;
@@ -1506,22 +1459,22 @@ void SignalsModel::addSignal()
 			{
 				for (int i = 0; i < signalVector.count(); i++)
 				{
-					Signal* newSignal = new Signal;
-
-					*newSignal = signalVector[i];
-
-					resultSignalVector.append(newSignal);
+					resultSignalVector.append(signalVector[i]);
 				}
 			}
 		}
+
 		if (!resultSignalVector.isEmpty())
 		{
-			int firstInsertedSignalId = resultSignalVector[0]->ID();
+			int firstInsertedSignalId = resultSignalVector[0].ID();
+
 			beginInsertRows(QModelIndex(), m_signalSet.count(), m_signalSet.count() + resultSignalVector.count() - 1);
+
 			for (int i = 0; i < resultSignalVector.count(); i++)
 			{
-				Signal* s = resultSignalVector[i];
-				m_signalSet.append(s->ID(), s);
+				const Signal& s = resultSignalVector[i];
+
+				m_signalSet.replaceOrAppendIfNotExists(s.ID(), s);
 			}
 			endInsertRows();
 			emit dataChanged(createIndex(m_signalSet.count() - resultSignalVector.count(), 0), createIndex(m_signalSet.count() - 1, columnCount() - 1), QVector<int>() << Qt::EditRole << Qt::DisplayRole);
@@ -1783,7 +1736,7 @@ void SignalsModel::initLazyLoadSignals()
 
 	for (const ID_AppSignalID& id : signalIds)
 	{
-		m_signalSet.append(id.ID, new Signal(id));
+		m_signalSet.replaceOrAppendIfNotExists(id.ID, Signal(id));
 	}
 
 	if (signalIds.count() > 0)
@@ -1791,7 +1744,12 @@ void SignalsModel::initLazyLoadSignals()
 		QVector<Signal> signalsArray;
 		QVector<int> signalId;
 
-		const int SignalPortionCount = 250;
+		int SignalPortionCount = signalIds.count();
+
+		if (SignalPortionCount > 250)
+		{
+			SignalPortionCount = 250;
+		}
 
 		signalsArray.reserve(SignalPortionCount);
 		signalId.reserve(SignalPortionCount);
@@ -1804,7 +1762,7 @@ void SignalsModel::initLazyLoadSignals()
 
 		for (const Signal& loadedSignal : signalsArray)
 		{
-			m_signalSet.append(loadedSignal.ID(), new Signal(loadedSignal));
+			m_signalSet.replaceOrAppendIfNotExists(loadedSignal.ID(), loadedSignal);
 
 			detectNewProperties(loadedSignal);
 		}
@@ -1841,7 +1799,7 @@ void SignalsModel::finishLoadSignals()
 
 			for (const Signal& loadedSignal: signalsToLoad)
 			{
-				m_signalSet.append(loadedSignal.ID(), new Signal(loadedSignal));
+				m_signalSet.replaceOrAppendIfNotExists(loadedSignal.ID(), loadedSignal);
 
 				detectNewProperties(loadedSignal);
 			}
@@ -1902,7 +1860,7 @@ void SignalsModel::loadNextSignalsPortion()
 
 		for (const Signal& loadedSignal: signalsToLoad)
 		{
-			m_signalSet.append(loadedSignal.ID(), new Signal(loadedSignal));
+			m_signalSet.replaceOrAppendIfNotExists(loadedSignal.ID(), loadedSignal);
 
 			detectNewProperties(loadedSignal);
 		}
@@ -2310,6 +2268,7 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 	toolBar->addAction(action);
 
 	action = new QAction(QIcon(":/Images/Images/SchemaDelete.svg"), tr("Delete signal"), this);
+	action->setShortcut(Qt::Key_Delete);
 	connect(action, &QAction::triggered, this, &SignalsTabPage::deleteSignal);
 	connect(this, &SignalsTabPage::setSignalActionsVisibility, action, &QAction::setEnabled);
 	m_signalsView->addAction(action);

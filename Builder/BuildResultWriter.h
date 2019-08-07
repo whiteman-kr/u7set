@@ -145,6 +145,8 @@ namespace Builder
 
 		ConfigurationXmlFile* createConfigurationXmlFile(const QString& subDir);
 
+		bool writeFirmwareStatistics();
+
 		bool writeBinaryFiles();
 
 		bool writeConfigurationXmlFiles();

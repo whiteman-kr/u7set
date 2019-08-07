@@ -24,7 +24,8 @@ namespace Sim
 	{
 		QMutexLocker guard(&m_mutex);
 
-		int to_do_TimeController_inc;
+		Q_ASSERT(false);
+		//int to_do_TimeController_inc;
 
 		return;
 	}

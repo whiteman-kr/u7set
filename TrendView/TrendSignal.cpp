@@ -543,7 +543,10 @@ namespace TrendLib
 		{
 			if (s.appSignalId() == appSignalId)
 			{
-				*ok = true;
+				if (ok != nullptr)
+				{
+					*ok = true;
+				}
 				return s;
 			}
 		}

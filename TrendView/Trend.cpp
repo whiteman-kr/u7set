@@ -1,7 +1,4 @@
 #include "Trend.h"
-#include <QPainter>
-#include <cfloat>
-#include <type_traits>
 #include "../lib/CUtils.h"
 #include "../Proto/trends.pb.h"
 
@@ -348,15 +345,15 @@ namespace TrendLib
 			QDate date = p.timeStamp.toDateTime().date();
 
 			if (lastDate != date &&
-				time == QTime(0, 0, 0, 0))
+				time == QTime{0, 0, 0, 0})
 			{
 				lastDate = date;
 
 				double x = static_cast<double>(p.x * dpiX + 1) / dpiX;
 
-				QPointF pt1(x, insideRect.top());
-				QPointF pt2(x, insideRect.bottom());
-				painter->drawLine(pt1, pt2);
+				QPointF linePt1{x, insideRect.top()};
+				QPointF linePt2{x, insideRect.bottom()};
+				painter->drawLine(linePt1, linePt2);
 			}
 		}
 
@@ -799,11 +796,11 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 			const TrendSignalParam& signal = analogs[i];
 			Q_ASSERT(signal.isAnalog() == true);
 
-			double highLimit = qMax(signal.viewHighLimit(), signal.viewLowLimit());
-			double lowLimit = qMin(signal.viewHighLimit(), signal.viewLowLimit());
+			double signalHighLimit = qMax(signal.viewHighLimit(), signal.viewLowLimit());
+			double signalLowLimit = qMin(signal.viewHighLimit(), signal.viewLowLimit());
 
-			double delta = highLimit - lowLimit;
-			if (delta <= DBL_MIN)
+			double signalDelta = signalHighLimit - signalLowLimit;
+			if (signalDelta <= DBL_MIN)
 			{
 				// Divide by 0 possible
 				//
@@ -816,9 +813,9 @@ static const std::array<double, 4> possibleGridIntervals = {0.1, 0.2, 0.25, 0.5}
 			{
 				double y = p.first;
 
-				double relation = delta / signalRect.height();
+				double relation = signalDelta / signalRect.height();
 				double baseY = signalRect.height() - (y - signalRect.top());
-				double value = lowLimit + baseY * relation;
+				double value = signalLowLimit + baseY * relation;
 
 				// This signal is draw in 0 pos
 				//  2 | 0
@@ -1359,11 +1356,11 @@ static const int recomendedSize = 8192;
 					// Draw distance between rulers
 					//
 					qint64 rulersDistance = ruler.timeStamp().timeStamp - prevRuler.timeStamp().timeStamp;
-					int msecs = rulersDistance % 1000_ms;
-					int secs = (rulersDistance / 1_sec) % 60;
-					int mins = (rulersDistance / 1_min) % 60;
-					int hours = (rulersDistance / 1_hour) % 60;
-					int days = (rulersDistance / 1_day) % 24;
+					int msecs = static_cast<int>(rulersDistance % 1000_ms);
+					int secs = static_cast<int>(rulersDistance / 1_sec) % 60;
+					int mins = static_cast<int>(rulersDistance / 1_min) % 60;
+					int hours = static_cast<int>(rulersDistance / 1_hour) % 60;
+					int days = static_cast<int>(rulersDistance / 1_day) % 24;
 
 					QString distanceText;
 
@@ -1444,8 +1441,8 @@ static const int recomendedSize = 8192;
 							continue;
 						}
 
-						double k = (highLimit - lowLimit) / signalRect.height();
-						double y = (state.value - lowLimit) / k;
+						double vertCoef = (highLimit - lowLimit) / signalRect.height();
+						double y = (state.value - lowLimit) / vertCoef;
 
 						// Get text bounding rect
 						//

@@ -310,6 +310,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0290.sql", "Upgrade to version 290, Set AFB FuncBlock version to 1 for SR01, SR02. Remove unimplemented afbs like cos, sin, expe for all LMs"},
 	{":/DatabaseUpgrade/Upgrade0291.sql", "Upgrade to version 291, Set Code Memory Size to 98304 for LM1_SF40"},
 	{":/DatabaseUpgrade/Upgrade0292.sql", "Upgrade to version 292, Function get_signals_id_appsignalid creation"},
+	{":/DatabaseUpgrade/Upgrade0293.sql", "Upgrade to version 293, RIM configuration corrections, AIM/AOM/TIM/RIM/WAIM configuration does not return false on first error"},
 };
 
 int DbWorker::counter = 0;
@@ -572,12 +573,12 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 
 	// Open database and get project list
 	//
-	std::shared_ptr<int*> removeDatabase(nullptr, [this](void*)
-		{
-			QSqlDatabase::removeDatabase(postgresConnectionName());		// remove database
-		});
-
 	{
+		std::shared_ptr<int*> removeDatabase(nullptr, [this](void*)
+			{
+				QSqlDatabase::removeDatabase(postgresConnectionName());		// remove database
+			});
+
 		QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", postgresConnectionName());
 		if (db.lastError().isValid() == true)
 		{
@@ -652,80 +653,78 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 				QSqlDatabase::removeDatabase(projectDatabaseConnectionName);		// remove database
 			});
 
-		{
-			QSqlDatabase projectDb = QSqlDatabase::addDatabase("QPSQL", projectDatabaseConnectionName);
-			projectDb.setHostName(host());
-			projectDb.setPort(port());
-			projectDb.setDatabaseName(pi->databaseName());
-			projectDb.setUserName(serverUsername());
-			projectDb.setPassword(serverPassword());
+		// --
+		//
+		QSqlDatabase projectDb = QSqlDatabase::addDatabase("QPSQL", projectDatabaseConnectionName);
+		projectDb.setHostName(host());
+		projectDb.setPort(port());
+		projectDb.setDatabaseName(pi->databaseName());
+		projectDb.setUserName(serverUsername());
+		projectDb.setPassword(serverPassword());
 
-			bool result = projectDb.open();
+		bool result = projectDb.open();
+		if (result == false)
+		{
+			emitError(projectDb, projectDb.lastError());
+			continue;
+		}
+
+		// Get project version, scope is for versionQuery
+		//
+		{
+			QString createVersionTableSql = QString("SELECT max(VersionNo) FROM Version;");
+
+			QSqlQuery versionQuery(projectDb);
+			result = versionQuery.exec(createVersionTableSql);
+
+			int projectVersion = -1;
+
 			if (result == false)
 			{
-				emitError(projectDb, projectDb.lastError());
-				continue;
+				qDebug() << versionQuery.lastError();
 			}
-
-			// Get project version, scope is for versionQuery
-			//
+			else
 			{
-				QString createVersionTableSql = QString("SELECT max(VersionNo) FROM Version;");
-
-				QSqlQuery versionQuery(projectDb);
-				result = versionQuery.exec(createVersionTableSql);
-
-				int projectVersion = -1;
-
-				if (result == false)
+				if (versionQuery.next())
 				{
-					qDebug() << versionQuery.lastError();
+					projectVersion = versionQuery.value(0).toInt();
 				}
-				else
-				{
-					if (versionQuery.next())
-					{
-						projectVersion = versionQuery.value(0).toInt();
-					}
-				}
-
-				pi->setVersion(projectVersion);
 			}
 
-			// From this version ProjectProperties table is added, so it is possible to request propertyes
-			//
-			if (pi->version() >= 41)
-			{
-				QString getProjectDescriptionSql = QString("SELECT Value FROM ProjectProperties WHERE Name = 'Description';");
-
-				QSqlQuery q(projectDb);
-				result = q.exec(getProjectDescriptionSql);
-
-				QString projectDescription;
-
-				if (result == false)
-				{
-					qDebug() << q.lastError();
-				}
-				else
-				{
-					if (q.next())
-					{
-						projectDescription = q.value(0).toString();
-					}
-				}
-
-				pi->setDescription(projectDescription);
-			}
-
-			// --
-			//
-			projectDb.close();
+			pi->setVersion(projectVersion);
 		}
+
+		// From this version ProjectProperties table is added, so it is possible to request propertyes
+		//
+		if (pi->version() >= 41)
+		{
+			QString getProjectDescriptionSql = QString("SELECT Value FROM ProjectProperties WHERE Name = 'Description';");
+
+			QSqlQuery q(projectDb);
+			result = q.exec(getProjectDescriptionSql);
+
+			QString projectDescription;
+
+			if (result == false)
+			{
+				qDebug() << q.lastError();
+			}
+			else
+			{
+				if (q.next())
+				{
+					projectDescription = q.value(0).toString();
+				}
+			}
+
+			pi->setDescription(projectDescription);
+		}
+
+		// --
+		//
+		projectDb.close();
 	}
 
-	// Database will be removed by the removeDatabase shared_ptr
-	//
 	return;
 }
 
@@ -1868,13 +1867,13 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 					}
 
 
-					QSqlQuery versionQuery(db);
+					QSqlQuery addVersionQuery(db);
 
-					result = versionQuery.exec(addVersionRecord);
+					result = addVersionQuery.exec(addVersionRecord);
 
 					if (result == false)
 					{
-						emitError(QSqlDatabase(), versionQuery.lastError(), false);
+						emitError(QSqlDatabase(), addVersionQuery.lastError(), false);
 						break;
 					}
 				}
@@ -4562,13 +4561,13 @@ void DbWorker::slot_getSignals(SignalSet* signalSet, bool excludeDeleted)
 }
 
 
-void DbWorker::slot_getTuningableSignals(SignalSet* signalSet)
+void DbWorker::slot_getTunableSignals(SignalSet* signalSet)
 {
 	getSignals(signalSet, true, true);
 }
 
 
-void DbWorker::getSignals(SignalSet* signalSet, bool excludeDeleted, bool tuningableOnly)
+void DbWorker::getSignals(SignalSet* signalSet, bool excludeDeleted, bool tunableOnly)
 {
 	AUTO_COMPLETE
 
@@ -4643,7 +4642,7 @@ void DbWorker::getSignals(SignalSet* signalSet, bool excludeDeleted, bool tuning
 			continue;
 		}
 
-		if (tuningableOnly == true && s->enableTuning() == false)
+		if (tunableOnly == true && s->enableTuning() == false)
 		{
 			delete s;
 			continue;
@@ -5053,7 +5052,7 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 		QString errMsg;
 		ObjectState objectState;
 
-		bool result = setSignalWorkcopy(db, signal, objectState, errMsg);
+		result = setSignalWorkcopy(db, signal, objectState, errMsg);
 
 		if (result == false)
 		{

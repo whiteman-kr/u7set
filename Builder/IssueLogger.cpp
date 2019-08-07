@@ -1419,6 +1419,32 @@ namespace Builder
 				  .arg(moduleEquipmentID));
 	}
 
+	/// IssueCode: CFG3043
+	///
+	/// IssueType: Error
+	///
+	/// Title: Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
+	///
+	/// Parameters:
+	///         %1 data source IP
+	///         %2 data source equipmentID
+	///			%3 data receiving IP
+	///			%4 receiving equipmentID
+	///
+	/// Description:
+	///			Different subnet address in data source and data receving IP. Check specified addresses.
+	///
+	void IssueLogger::errCFG3043(	QString dataSourceIP,
+									QString dataSourceEquipmentID,
+									QString dataReceivingIP,
+									QString receivingEquipmentID)
+	{
+		LOG_ERROR(IssueType::FscConfiguration,
+				  3043,
+				  QString(tr("Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4)")).
+								arg(dataSourceIP).arg(dataSourceEquipmentID).arg(dataReceivingIP).arg(receivingEquipmentID));
+	}
+
 	//
 	// ALP			Application Logic Parsing				4000-4999
 	//
@@ -4171,19 +4197,19 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   TuningHighBound property of tuningable signal %1 must be greate than TuningLowBound
+	/// Title:	   TuningHighBound property of tunable signal %1 must be greate than TuningLowBound
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		TuningHighBound property of tuningable signal must be greate than TuningLowBound. Check signal properties.
+	///		TuningHighBound property of tunable signal must be greate than TuningLowBound. Check signal properties.
 	///
 	void IssueLogger::errALC5068(QString appSignalID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5068,
-				  QString(tr("TuningHighBound property of tuningable signal %1 must be greate than TuningLowBound")).
+				  QString(tr("TuningHighBound property of tunable signal %1 must be greate than TuningLowBound")).
 					arg(appSignalID));
 	}
 
@@ -4192,20 +4218,20 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   TuningDefaultValue property of tuningable signal %1 must be in range from TuningLowBound to TuningHighBound.
+	/// Title:	   TuningDefaultValue property of tunable signal %1 must be in range from TuningLowBound to TuningHighBound.
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		TuningDefaultValue property of tuningable signal must be in range from TuningLowBound to TuningHighBound.
+	///		TuningDefaultValue property of tunable signal must be in range from TuningLowBound to TuningHighBound.
 	///		Check signal's TuningDefaultValue property.
 	///
 	void IssueLogger::errALC5069(QString appSignalID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5069,
-				  QString(tr("TuningDefaultValue property of tuningable signal %1 must be in range from TuningLowBound to TuningHighBound.")).
+				  QString(tr("TuningDefaultValue property of tunable signal %1 must be in range from TuningLowBound to TuningHighBound.")).
 					arg(appSignalID));
 	}
 
@@ -4235,13 +4261,13 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Can't assign value to tuningable signal %1 (Logic schema %2).
+	/// Title:	   Can't assign value to tunable signal %1 (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 Application signal ID
 	///
 	/// Description:
-	///		Can't assign value to tuningable signal. Such signals are read-only.
+	///		Can't assign value to tunable signal. Such signals are read-only.
 	///
 	void IssueLogger::errALC5071(QString schemaID, QString appSignalID, QUuid itemUuid)
 	{
@@ -4249,7 +4275,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5071,
-				  QString(tr("Can't assign value to tuningable signal %1 (Logic schema %2).")).
+				  QString(tr("Can't assign value to tunable signal %1 (Logic schema %2).")).
 					arg(appSignalID).arg(schemaID));
 	}
 
@@ -5260,14 +5286,14 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Can't assign value to input/tuningable/opto/const signal %1 (Logic schema %2).
+	/// Title:	   Can't assign value to input/tunable/opto/const signal %1 (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 App signal ID
 	///		%2 Logic schema ID
 	///
 	/// Description:
-	///		Value of input/tuningable/opto/const signals cannot be modified by UAL.
+	///		Value of input/tunable/opto/const signals cannot be modified by UAL.
 	///
 	void IssueLogger::errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID)
 	{
@@ -5275,7 +5301,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5121,
-				  QString(tr("Can't assign value to input/tuningable/opto/const signal %1 (Logic schema %2).")).
+				  QString(tr("Can't assign value to input/tunable/opto/const signal %1 (Logic schema %2).")).
 							arg(appSignalID).arg(schemaID));
 	}
 
@@ -5826,14 +5852,14 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Tuningable signal %1 is connected to LoopbackTarget (Logic schema %2).
+	/// Title:	   Tunable signal %1 is connected to LoopbackTarget (Logic schema %2).
 	///
 	/// Parameters:
 	///		%1 Signal ID
 	///		%2 Logic schema ID
 	///
 	/// Description:
-	///		Input signal cannot be connected to loopback target.
+	///		Tunable signal cannot be connected to loopback target.
 	///
 	void IssueLogger::errALC5146(QString signalID, QUuid signalGuid, QString schemaID)
 	{
@@ -5841,7 +5867,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5146,
-				  QString(tr("Tuningable signal %1 is connected to LoopbackTarget (Logic schema %2).")).arg(signalID).arg(schemaID));
+				  QString(tr("Tunable signal %1 is connected to LoopbackTarget (Logic schema %2).")).arg(signalID).arg(schemaID));
 	}
 
 	/// IssueCode: ALC5147
@@ -6227,19 +6253,19 @@ namespace Builder
 	///
 	/// IssueType: Warning
 	///
-	/// Title: Tuning is enabled for module %1 but tuningable signals is not found.
+	/// Title: Tuning is enabled for module %1 but tunable signals is not found.
 	///
 	/// Parameters:
 	///		%1 LM's equipmentID
 	///
 	/// Description:
-	///		Tuning is enabled for specified module but tuningable signals is not found.
+	///		Tuning is enabled for specified module but tunable signals is not found.
 	///
 	void IssueLogger::wrnALC5165(QString lmEquipmentID)
 	{
 		LOG_WARNING1(IssueType::AlCompiler,
 				  5165,
-				  QString(tr("Tuning is enabled for module %1 but tuningable signals is not found.")).
+				  QString(tr("Tuning is enabled for module %1 but tunable signals is not found.")).
 					arg(lmEquipmentID));
 	}
 
@@ -6247,19 +6273,19 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Tuningable signals is found in module %1 but tuning is not enabled.
+	/// Title: Tunable signals is found in module %1 but tuning is not enabled.
 	///
 	/// Parameters:
 	///		%1 LM's equipmentID
 	///
 	/// Description:
-	///		Tuningable signals is found in specified module but tuning is not enabled.
+	///		Tunable signals is found in specified module but tuning is not enabled.
 	///
 	void IssueLogger::errALC5166(QString lmEquipmentID)
 	{
 		LOG_ERROR(IssueType::AlCompiler,
 				  5166,
-				  QString(tr("Tuningable signals is found in module %1 but tuning is not enabled.")).
+				  QString(tr("Tunable signals is found in module %1 but tuning is not enabled.")).
 					arg(lmEquipmentID));
 	}
 
@@ -6285,9 +6311,9 @@ namespace Builder
 
 	/// IssueCode: ALC5168
 	///
-	/// IssueType: Error
+	/// IssueType: Warning
 	///
-	/// Title: Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
+	/// Title: Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
 	///
 	/// Parameters:
 	///		%1 flag signal ID
@@ -6296,9 +6322,9 @@ namespace Builder
 	///		%4 already assigned flag signal ID
 	///
 	/// Description:
-	///		Tuningable signals is found in specified module but tuning is not enabled.
+	///		Duplicate assigning of signal to flag of specified signal
 	///
-	void IssueLogger::errALC5168(	QString flagSignalID,
+	void IssueLogger::wrnALC5168(	QString flagSignalID,
 									QString flagTypeStr,
 									QString signalWithFlagID,
 									QString alreadyAssignedFlagSignalID,
@@ -6307,12 +6333,12 @@ namespace Builder
 	{
 		if (schemaID.isEmpty() == false)
 		{
-			addItemsIssues(OutputMessageLevel::Error, 5168, itemUuid, schemaID);
+			addItemsIssues(OutputMessageLevel::Warning0, 5168, itemUuid, schemaID);
 		}
 
-		LOG_ERROR(IssueType::AlCompiler,
+		LOG_WARNING0(IssueType::AlCompiler,
 				  5168,
-				  QString(tr("Error of assigning signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.")).
+				  QString(tr("Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.")).
 						arg(flagSignalID).arg(flagTypeStr).arg(signalWithFlagID).arg(alreadyAssignedFlagSignalID));
 	}
 
@@ -6580,6 +6606,53 @@ namespace Builder
 				  5194,
 				  QString(tr("Tx data memory areas of ports %1 and %2 with manual settings are overlapped.")).
 						arg(port1ID).arg(port2ID));
+	}
+
+
+
+
+
+	/// IssueCode: wrnALC5800
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Flash memory usage for Subsystem %1, UART %2 exceeds 95%.
+	///
+	/// Parameters:
+	///		%1 Subsystem ID
+	///		%2 UART ID
+	///
+	/// Description:
+	///		Flash memory usage for a subsystem exceeds 95% for some UART.
+	///
+	void IssueLogger::wrnALC5800(QString subsystemID, int uartId)
+	{
+		LOG_WARNING0(IssueType::AlCompiler,
+				  5800,
+				  QString(tr("Flash memory usage for SubsystemID %1, UART %2h exceeds 95%.")).
+								arg(subsystemID).arg(QString::number(uartId, 16)));
+	}
+
+	/// IssueCode: errALC5801
+	///
+	/// IssueType: Error
+	///
+	/// Title: Not enough memory to store binary data for SubsystemID %1, LM Number: %2, UART ID: %3.
+	///
+	/// Parameters:
+	///		%1 Subsystem ID
+	///		%2 LM Number which reached the limit
+	///		%3 UART ID
+	///
+	/// Description:
+	///		It is not enough flash memory to store data for a subsystem
+	///
+	void IssueLogger::errALC5801(QString subsystemID, int lmNumber, int uartId)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5801,
+				  QString(tr("Not enough memory to store binary data for SubsystemID %1, LM Number: %2, UART ID: %3h.")).
+								arg(subsystemID).arg(lmNumber).arg(QString::number(uartId, 16)));
 	}
 
 	/// IssueCode: ALC5996

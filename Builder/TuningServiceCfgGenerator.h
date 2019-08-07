@@ -1,6 +1,7 @@
 #pragma once
 
 #include "SoftwareCfgGenerator.h"
+#include "../lib/ServiceSettings.h"
 #include "../TuningService/TuningDataStorage.h"
 #include "../TuningService/TuningSource.h"
 #include "Builder.h"
@@ -21,6 +22,7 @@ namespace Builder
 		virtual bool generateConfiguration() override;
 
 	private:
+		TuningServiceSettings m_settings;
 		const LmsUniqueIdMap m_lmsUniqueIdMap;
 		SubsystemKeyMap m_subsystemKeyMap;
 

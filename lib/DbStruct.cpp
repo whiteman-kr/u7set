@@ -767,9 +767,9 @@ int DbFileTree::indexInParent(int fileId) const
 	assert(ch.m_fileId == file->parentId());
 
 	int index = 0;
-	for (auto file : ch.m_children)
+	for (const auto& fileChild : ch.m_children)
 	{
-		if (file->fileId() == fileId)
+		if (fileChild->fileId() == fileId)
 		{
 			return index;
 		}

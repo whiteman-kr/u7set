@@ -174,7 +174,7 @@ void CircularLoggerWorker::removeOldFiles()
 
 void CircularLoggerWorker::checkFileSize()
 {
-	int fileSize = m_file.size();
+	qint64 fileSize = m_file.size();
 
 	if (fileSize >= m_fileSizeLimit * 1024 * 1024)
 	{

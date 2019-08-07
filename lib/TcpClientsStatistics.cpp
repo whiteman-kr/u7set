@@ -275,10 +275,10 @@ void DialogStatistics::update()
 			QDateTime startTime = QDateTime::fromMSecsSinceEpoch(stat.state.startTime);
 			item->setText(static_cast<int>(Columns::StartTime), startTime.toString("dd/MM/yyyy HH:mm:ss"));
 
-			int upTime = (QDateTime::currentMSecsSinceEpoch() - stat.state.startTime) / 1000.0;
-			int s = upTime % 60; upTime /= 60;
-			int m = upTime % 60; upTime /= 60;
-			int h = upTime % 24; upTime /= 24;
+			qint64 upTime = (QDateTime::currentMSecsSinceEpoch() - stat.state.startTime) / 1000;
+			qint64 s = upTime % 60; upTime /= 60;
+			qint64 m = upTime % 60; upTime /= 60;
+			qint64 h = upTime % 24; upTime /= 24;
 			item->setText(static_cast<int>(Columns::UpTime), QString("%1d %2:%3:%4").arg(upTime).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
 
 			item->setText(static_cast<int>(Columns::SentKbytes), QString::number(stat.state.sentBytes / 1024.0, 'f', 2));

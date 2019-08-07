@@ -28,16 +28,16 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 	const int colCount = 8;
 	const int rowCount = 2;
 
-	static const QString flagNames[static_cast<int>(SignalFlagsFields::Count)] =
-	{
-		QStringLiteral("VALID"),
-		QStringLiteral("STATE"),
-		QStringLiteral("SIM"),
-		QStringLiteral("LOCK"),
-		QStringLiteral("MISMATCH"),
-		QStringLiteral("HIGH"),
-		QStringLiteral("LOW")
-	};
+	static const std::array<QString, static_cast<int>(SignalFlagsFields::Count)> flagNames =
+		{
+			QStringLiteral("VALID"),
+			QStringLiteral("STATE"),
+			QStringLiteral("SIM"),
+			QStringLiteral("LOCK"),
+			QStringLiteral("MISMATCH"),
+			QStringLiteral("HIGH"),
+			QStringLiteral("LOW")
+		};
 
 	double colWidth = size().width() / colCount;
 	double rowHeight = size().height() / rowCount;
@@ -62,43 +62,45 @@ void SignalFlagsWidget::paintEvent(QPaintEvent *)
 
 		for (int i = 0; i < colCount; i++)
 		{
-
 			// Draw the rectangle for flag
-
-			QRect flagRect(x + 1, y + 1, colWidth - 2, rowHeight - 2);
+			//
+			QRect flagRect{static_cast<int>(x + 1),
+						   static_cast<int>(y + 1),
+						   static_cast<int>(colWidth - 2),
+						   static_cast<int>(rowHeight - 2)};
 
 			if (flagNo < static_cast<int>(SignalFlagsFields::Count))
 			{
 
 				bool value = false;
 
-				switch (flagNo)
+				switch (static_cast<SignalFlagsFields>(flagNo))
 				{
-				case static_cast<int>(SignalFlagsFields::Valid):
+				case SignalFlagsFields::Valid:
 					value = !m_flags.valid;
 					break;
 
-				case static_cast<int>(SignalFlagsFields::StateAvailable):
+				case SignalFlagsFields::StateAvailable:
 					value = !m_flags.stateAvailable;
 					break;
 
-				case static_cast<int>(SignalFlagsFields::Simulated):
+				case SignalFlagsFields::Simulated:
 					value = m_flags.simulated;
 					break;
 
-				case static_cast<int>(SignalFlagsFields::Blocked):
+				case SignalFlagsFields::Blocked:
 					value = m_flags.blocked;
 					break;
 
-				case static_cast<int>(SignalFlagsFields::Mismatch):
+				case SignalFlagsFields::Mismatch:
 					value = m_flags.mismatch;
 					break;
 
-				case static_cast<int>(SignalFlagsFields::AboveHighLimit):
+				case SignalFlagsFields::AboveHighLimit:
 					value = m_flags.aboveHighLimit;
 					break;
 
-				case static_cast<int>(SignalFlagsFields::BelowLowLimit):
+				case SignalFlagsFields::BelowLowLimit:
 					value = m_flags.belowLowLimit;
 					break;
 

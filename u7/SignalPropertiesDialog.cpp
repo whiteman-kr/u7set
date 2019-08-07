@@ -130,6 +130,10 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 			QMessageBox::critical(parent, "Error", message);
 		}
 	}
+	else
+	{
+		return {};	// Cancel is pressed
+	}
 
 	for (int i = 0; i < signalPtrVector.count(); i++)
 	{
@@ -137,6 +141,81 @@ std::vector<std::pair<QString, QString>> editApplicationSignals(QStringList& sig
 		result[i].second = signalPtrVector[i]->appSignalID();
 	}
 	return result;
+}
+
+
+void initNewSignal(Signal& signal)
+{
+	QSettings settings;
+	auto loader = [&settings](const QString& name, QVariant defaultValue = QVariant())
+	{
+		return settings.value(SignalProperties::lastEditedSignalFieldValuePlace + name, defaultValue);
+	};
+
+	switch (signal.signalType())
+	{
+	case E::SignalType::Analog:
+	{
+		signal.setDataSize(FLOAT32_SIZE);
+		break;
+	}
+
+	case E::SignalType::Discrete:
+	{
+		signal.setDataSize(DISCRETE_SIZE);
+		break;
+	}
+
+	case E::SignalType::Bus:
+	default:
+		break;
+	}
+
+	signal.initSpecificProperties();
+
+	SignalPropertyManager& propertyManager = SignalsModel::instance()->signalPropertyManager();
+
+	auto setter = [&signal, &propertyManager](const QString& name, QVariant value) {
+		int index = propertyManager.index(name);
+		if (index == -1)
+		{
+			return;
+		}
+
+		if (propertyManager.getBehaviour(signal, index) == E::PropertyBehaviourType::Write)
+		{
+			propertyManager.setValue(&signal, index, value);
+		}
+	};
+
+	setter(SignalProperties::lowEngeneeringUnitsCaption, 0.0);
+	setter(SignalProperties::highEngeneeringUnitsCaption, 100.0);
+
+	for (int i = 0; i < propertyManager.count(); i++)
+	{
+		if (propertyManager.getBehaviour(signal, i) != E::PropertyBehaviourType::Write)
+		{
+			continue;
+		}
+
+		QString name = propertyManager.name(i);
+		QVariant value = settings.value(SignalProperties::lastEditedSignalFieldValuePlace + name, QVariant());
+		if (value.isValid() == false)
+		{
+			continue;
+		}
+
+		QVariant::Type type = propertyManager.type(i);
+		if (value.canConvert(type) && value.convert(type))
+		{
+			propertyManager.setValue(&signal, i, value);
+		}
+	}
+
+	signal.initTuningValues();
+
+	signal.setInOutType(E::SignalInOutType::Internal);
+	signal.setByteOrder(E::ByteOrder::BigEndian);
 }
 
 
@@ -613,30 +692,27 @@ void SignalPropertiesDialog::saveLastEditedSignalProperties()
 		return;
 	}
 
+	SignalsModel* model = SignalsModel::instance();
+
+	if (model == nullptr)
+	{
+		return;
+	}
+
+	SignalPropertyManager& manager = model->signalPropertyManager();
+
 	const Signal& signal = *m_signalVector[0];
 
 	QSettings settings(QSettings::UserScope, qApp->organizationName());
 
-	auto saver = [&settings](const QString& name, auto value)
+	for (int i = 0; i < manager.count(); i++)
 	{
-		settings.setValue(SignalProperties::lastEditedSignalFieldValuePlace + name, value);
-	};
+		if (manager.isHidden(manager.getBehaviour(signal, i)))
+		{
+			continue;
+		}
 
-	saver(SignalProperties::acquireCaption, signal.acquire());
-	saver(SignalProperties::decimalPlacesCaption, signal.decimalPlaces());
-	saver(SignalProperties::unitCaption, signal.unit());
-	saver(SignalProperties::coarseApertureCaption, signal.coarseAperture());
-	saver(SignalProperties::fineApertureCaption, signal.fineAperture());
-	saver(SignalProperties::byteOrderCaption, signal.byteOrder());
-
-	SignalSpecPropValues spv;
-
-	spv.create(signal);
-
-	for(const SignalSpecPropValue& sv : spv.values())
-	{
-		QVariant qv = sv.value();
-
-		settings.setValue(SignalProperties::lastEditedSignalFieldValuePlace + sv.name(), qv);
+		QString name = manager.name(i);
+		settings.setValue(SignalProperties::lastEditedSignalFieldValuePlace + name, manager.value(&signal, i));
 	}
 }

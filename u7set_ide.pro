@@ -7,6 +7,8 @@ SUBDIRS += qtpropertybrowser \
  	GetGitProjectVersion \
 	QScintilla \	
 	VFrame30 \
+    Builder \
+    Simulator \
 	u7
 
 

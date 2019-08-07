@@ -1,5 +1,6 @@
 #include "PosLineImpl.h"
 #include "DrawParam.h"
+#include "PropertyNames.h"
 
 namespace VFrame30
 {
@@ -8,16 +9,47 @@ namespace VFrame30
 		Init();
 	}
 
-	PosLineImpl::~PosLineImpl(void)
-	{
-	}
-
 	void PosLineImpl::Init()
 	{
 		m_startXDocPt = 0;
 		m_startYDocPt = 0;
 		m_endXDocPt = 0;
 		m_endYDocPt = 0;	
+	}
+
+	void PosLineImpl::propertyDemand(const QString& prop)
+	{
+		SchemaItem::propertyDemand(prop);
+
+		int precision = 0;
+		if (itemUnit() == SchemaUnit::Display)
+		{
+			precision = 0;
+		}
+		else
+		{
+			precision = Settings::regionalUnit() == SchemaUnit::Millimeter ? 1 : 3;		// 1 for mm, 3 for inches
+		}
+
+		Property* p = nullptr;
+
+		p = addProperty<double, PosLineImpl, &PosLineImpl::left, &PosLineImpl::setLeft>(PropertyNames::left, PropertyNames::positionAndSizeCategory, true);
+		p->setPrecision(precision);
+		p->setViewOrder(0);
+
+		p = addProperty<double, PosLineImpl, &PosLineImpl::top, &PosLineImpl::setTop>(PropertyNames::top, PropertyNames::positionAndSizeCategory, true);
+		p->setPrecision(precision);
+		p->setViewOrder(1);
+
+		p = addProperty<double, PosLineImpl, &PosLineImpl::width, &PosLineImpl::setWidth>(PropertyNames::width, PropertyNames::positionAndSizeCategory, true);
+		p->setPrecision(precision);
+		p->setViewOrder(2);
+
+		p = addProperty<double, PosLineImpl, &PosLineImpl::height, &PosLineImpl::setHeight>(PropertyNames::height, PropertyNames::positionAndSizeCategory, true);
+		p->setPrecision(precision);
+		p->setViewOrder(3);
+
+		return;
 	}
 
 	// Serialization
@@ -374,7 +406,7 @@ namespace VFrame30
 
 		return pt;
 	}
-	void PosLineImpl::setLeft(double value)
+	void PosLineImpl::setLeft(const double& value)
 	{
 		double left = std::min(m_startXDocPt, m_endXDocPt);
 
@@ -410,7 +442,7 @@ namespace VFrame30
 				
 		return pt;
 	}
-	void PosLineImpl::setTop(double value)
+	void PosLineImpl::setTop(const double& value)
 	{
 		double top = std::min(m_startYDocPt, m_endYDocPt);
 
@@ -446,13 +478,9 @@ namespace VFrame30
 
 		return pt;
 	}
-	void PosLineImpl::setWidth(double value)
+	void PosLineImpl::setWidth(const double& value)
 	{
-		double pt = value;
-		if (pt < 0)
-		{
-			pt = 0;
-		}
+		double pt = value < 0 ? 0 : value;
 
 		if (itemUnit() == SchemaUnit::Display)
 		{
@@ -488,13 +516,9 @@ namespace VFrame30
 
 		return pt;	
 	}
-	void PosLineImpl::setHeight(double value)
+	void PosLineImpl::setHeight(const double& value)
 	{
-		double pt = value;
-		if (pt < 0)
-		{
-			pt = 0;
-		}
+		double pt = value < 0 ? 0 : value;
 
 		if (itemUnit() == SchemaUnit::Display)
 		{

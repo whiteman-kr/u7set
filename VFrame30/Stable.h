@@ -1,21 +1,21 @@
-#ifndef STABLE_H
-#define STABLE_H
+#pragma once
 
 // VFrame30 Library
 //
 #ifdef _MSC_VER
 	#pragma warning(disable : 4251)
-	#pragma warning(disable : 4481)
-	#pragma warning(disable : 4482)
+//	#pragma warning(disable : 4481)
+//	#pragma warning(disable : 4482)
 #endif
 
 // Standard Template Library includes 
 //
-#ifdef _MSC_VER
-	#pragma warning(push)
-	#pragma warning(disable : 6011)
-	#pragma warning(disable : 4996)		// You will see C4996 if you are using members of the <hash_map> and <hash_set> header files in the std namespace.
-#endif
+//#ifdef _MSC_VER
+//	#pragma warning(push)
+//	#pragma warning(disable : 6011)
+//	#pragma warning(disable : 4996)		// You will see C4996 if you are using members of the <hash_map> and <hash_set> header files in the std namespace.
+//#endif
+
 #include <iostream>
 #include <fstream>
 #include <list>
@@ -35,19 +35,22 @@
 #include <optional>
 #include <iterator>
 #include <type_traits>
-#ifdef _MSC_VER
-	#pragma warning(pop)
-#endif
+//#ifdef _MSC_VER
+//	#pragma warning(pop)
+//#endif
 
 // Qt includes
 //
 #ifdef _MSC_VER
 	#pragma warning(push)
 	#pragma warning(disable : 4127)
+	#pragma warning(disable : 4251)
+	#pragma warning(disable : 4512)
 	#pragma warning(disable : 4800)
 	#pragma warning(disable : 6011)
-	#pragma warning(disable : 4512)
+	#pragma warning(disable : 6326)		// MSVC warning C6326: potential comparison of a constant with another constant
 #endif
+
 #include <qglobal.h>
 #include <QApplication>
 #include <QMainWindow>
@@ -108,4 +111,3 @@
    #endif
 #endif
 
-#endif // STABLE_H

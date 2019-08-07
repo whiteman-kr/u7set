@@ -470,7 +470,7 @@ namespace VFrame30
 
 		// Draw slash lines
 		//
-		if (appSignalIds().size() > 1)
+		if (appSignalIdsAsList().size() > 1)
 		{
 			drawMultichannelSlashLines(drawParam, linePen);
 		}

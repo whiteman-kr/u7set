@@ -31,7 +31,7 @@ SimSchemaWidget::SimSchemaWidget(std::shared_ptr<VFrame30::Schema> schema,
 
 	// --
 	//
-	bool vynesti_etu_huinyu_iz_konstructora_v_bazovyi_class;
+	//bool vynesti_etu_huinyu_iz_konstructora_v_bazovyi_class;
 	connect(simSchemaView(), &SimSchemaView::signal_setSchema, this, &VFrame30::ClientSchemaWidget::setSchema);
 
 	return;
@@ -152,7 +152,7 @@ void SimSchemaWidget::signalContextMenu(const QStringList signalList)
 
 void SimSchemaWidget::signalInfo(QString appSignalId)
 {
-	bool to_do_show_signal_info_dialog;
+	//bool to_do_show_signal_info_dialog;
 
 //	if (theMonitorMainWindow == nullptr)
 //	{
