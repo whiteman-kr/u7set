@@ -33,6 +33,7 @@ public:
 	void setPort(quint16 port);
 
 	bool setAddressPort(const QString& addressStr, quint16 Port);
+	bool setAddressPort(const QString& addressStr, int port);
 
 	bool setAddressPortStr(const QString& addressPortStr, quint16 defaultPort);
 

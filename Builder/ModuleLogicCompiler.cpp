@@ -10481,7 +10481,7 @@ namespace Builder
 					break;
 
 				case E::AnalogAppSignalFormat::SignedInt32:
-					cmd.movConstFloat(txSignalAddress.offset(), ualSignal->constAnalogIntValue());
+					cmd.movConstInt32(txSignalAddress.offset(), ualSignal->constAnalogIntValue());
 					cmd.setComment(QString("%1 (const %2) >> %3").arg(ualSignal->refSignalIDsJoined()).
 								   arg(ualSignal->constAnalogIntValue()).arg(port->connectionID()));
 					break;
@@ -11653,7 +11653,7 @@ namespace Builder
 
 		m_appLogicUniqueID = crc.result();
 
-		return DeviceHelper::setIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
+		return DeviceHelper::setUIntProperty(const_cast<Hardware::DeviceModule*>(m_lm),
 											DataSource::LmEthernetAdapterProperties::PROP_LM_APP_DATA_UID,
 											crc.result32(),
 											m_log);

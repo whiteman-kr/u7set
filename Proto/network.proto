@@ -89,7 +89,7 @@ message DataSourceInfo
     optional int32 lmModuleType = 11 [default = 0];
     optional string lmAdapterID = 12;
     optional bool lmDataEnable = 13 [default = false];
-    optional uint64 lmDataID = 14 [default = 0];
+	optional uint32 lmDataID = 14 [default = 0];
     optional uint64 lmUniqueID = 15 [default = 0];
     optional int32 lmRupFramesQuantity = 16 [default = 0];
 	optional string lmPresetName = 17;

@@ -72,7 +72,7 @@ public:
 		QString appDataIP;
 		int appDataPort = 0;
 		QString appDataServiceID;
-		quint64 appDataUID = 0;
+		quint32 appDataUID = 0;
 		int appDataSize = 0;
 		int appDataFramesQuantity = 0;
 
@@ -80,7 +80,7 @@ public:
 		QString diagDataIP;
 		int diagDataPort = 0;
 		QString diagDataServiceID;
-		quint64 diagDataUID = 0;
+		quint32 diagDataUID = 0;
 		int diagDataSize = 0;
 		int diagDataFramesQuantity = 0;
 

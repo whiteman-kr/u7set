@@ -117,17 +117,14 @@ bool HostAddressPort::setAddressPort(const QString& addressStr, quint16 port)
 {
 	bool result = setAddress(addressStr);
 
-	if (port < Socket::PORT_LOWEST || port > Socket::PORT_HIGHEST)
-	{
-		assert(false);
-		result = false;
-	}
-	else
-	{
-		setPort(port);
-	}
+	setPort(port);
 
 	return result;
+}
+
+bool HostAddressPort::setAddressPort(const QString& addressStr, int port)
+{
+	return setAddressPort(addressStr, static_cast<quint16>(port));
 }
 
 bool HostAddressPort::setAddressPortStr(const QString& addressPortStr, quint16 defaultPort)
@@ -196,7 +193,7 @@ bool HostAddressPort::isValidPort(const QString& portStr)
 {
 	bool ok = false;
 
-	int port = portStr.toUInt(&ok);
+	int port = portStr.toInt(&ok);
 
 	if (ok == false)
 	{
