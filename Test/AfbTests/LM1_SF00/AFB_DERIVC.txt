@@ -1,0 +1,13 @@
+test AFB_DERIVC1, AFB tests for AFB_DERIVC element
+schema AFB_DERIVC
+compatible MODULE_LM1SF00
+//0<td<5 RPCT NO action, Sets PARAM_ERR 
+set #TUN_IN_FP1 = 10 , #TUN_RESET1 = 0, #TUN_PAUSE1 = 0
+check #OUT_DERIVC1 == 0
+check #PARAM_ERR_DERIVC1 == 0
+check #OWERFLOW_DERIVC1 == 0
+check #UNDERFLOW_DERIVC1 ==  0
+check #ZERO_DERIVC1 == 1
+check #NAN_DERIVC1 == 0
+
+endtest

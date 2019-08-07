@@ -1,0 +1,23 @@
+Report from: 26-07-2019 10:32:58
+
+Test File: AFB_FF_T_DECAY.txt
+
+Test AFB_FF_T_DECAY_1, AFB tests for AFB_FF_T_DECAY element
+    Set #TUN_DSCR1=1
+    Set #TUN_DSCR2=1
+    //Yt=Yt-1
+    Check #OUT_FF_T_DECAY=1 - Fail    [ received: 0 ]
+    Set #TUN_DSCR1=1
+    Set #TUN_DSCR2=0
+    //Yt=Yt-1
+    Check #OUT_FF_T_DECAY=1 - Fail    [ received: 0 ]
+    Set #TUN_DSCR1=0
+    Set #TUN_DSCR2=1
+    //Yt=not(Yt-1)
+    Check #OUT_FF_T_DECAY=1 - Ok
+    Set #TUN_DSCR1=0
+    Set #TUN_DSCR2=0
+    //Yt=Yt-1
+    Check #OUT_FF_T_DECAY=0 - Fail    [ received: 1 ]
+Endtest AFB_FF_T_DECAY_1 - error(s): 3
+
