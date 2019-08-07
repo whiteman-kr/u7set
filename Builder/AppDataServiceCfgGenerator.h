@@ -1,6 +1,8 @@
 #pragma once
 
 #include "SoftwareCfgGenerator.h"
+#include "../lib/ServiceSettings.h"
+#include "../lib/WUtils.h"
 #include "../lib/DeviceHelper.h"
 #include "../lib/XmlHelper.h"
 #include "../lib/DataSource.h"
@@ -31,6 +33,7 @@ namespace Builder
 		bool findAppDataSourceAssociatedSignals(DataSource& appDataSource);
 
 	private:
+		AppDataServiceSettings m_settings;
 		const QHash<QString, quint64>& m_lmUniqueIdMap;
 		SubsystemKeyMap m_subsystemKeyMap;
 

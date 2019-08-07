@@ -1,6 +1,4 @@
-#include "../lib/ServiceSettings.h"
 #include "../lib/Subsystem.h"
-#include "../TuningService/TuningSource.h"
 #include "TuningServiceCfgGenerator.h"
 #include "Context.h"
 
@@ -11,8 +9,8 @@ namespace Builder
 														 Hardware::Software* software,
 														 const LmsUniqueIdMap& lmsUniqueIdMap) :
 		SoftwareCfgGenerator(context, software),
-		m_tuningDataStorage(context->m_tuningDataStorage.get()),
-		m_lmsUniqueIdMap(lmsUniqueIdMap)
+		m_lmsUniqueIdMap(lmsUniqueIdMap),
+		m_tuningDataStorage(context->m_tuningDataStorage.get())
 	{
 		initSubsystemKeyMap(&m_subsystemKeyMap, context->m_subsystems.get());
 	}
@@ -48,15 +46,13 @@ namespace Builder
 
 	bool TuningServiceCfgGenerator::writeSettings()
 	{
-		TuningServiceSettings settings;
+		bool result = m_settings.readFromDevice(m_software, m_log);
 
-		bool result = true;
-
-		result &= settings.readFromDevice(m_software, m_log);
+		RETURN_IF_FALSE(result);
 
 		XmlWriteHelper xml(m_cfgXml->xmlWriter());
 
-		result &= settings.writeToXml(xml);
+		result = m_settings.writeToXml(xml);
 
 		return result;
 	}
@@ -67,6 +63,10 @@ namespace Builder
 		bool result = true;
 
 		QVector<Tuning::TuningSource> tuningSources;
+
+		quint32 receivingNetmask = m_settings.tuningDataNetmask.toIPv4Address();
+
+		quint32 receivingSubnet = m_settings.tuningDataIP.address32() & receivingNetmask;
 
 		for(Hardware::DeviceModule* lm : m_lmList)
 		{
@@ -86,11 +86,23 @@ namespace Builder
 												   m_log);
 			if (result == false)
 			{
-				break;
+				continue;
 			}
 
 			if (ts.lmDataEnable() == false || ts.serviceID() != m_software->equipmentIdTemplate())
 			{
+				continue;
+			}
+
+			if ((ts.lmAddress().toIPv4Address() & receivingNetmask) != receivingSubnet)
+			{
+				// Different subnet address in data source IP %1 (%2) and data receiving IP %3 (%4).
+				//
+				m_log->errCFG3043(ts.lmAddress().toString(),
+								  ts.lmAdapterID(),
+								  m_settings.tuningDataIP.addressStr(),
+								  equipmentID());
+				result = false;
 				continue;
 			}
 
@@ -110,18 +122,12 @@ namespace Builder
 			tuningSources.append(ts);
 		}
 
-		if (result == false)
-		{
-			return false;
-		}
+		RETURN_IF_FALSE(result)
 
 		QByteArray fileData;
 		result &= DataSourcesXML<Tuning::TuningSource>::writeToXml(tuningSources, &fileData);
 
-		if (result == false)
-		{
-			return false;
-		}
+		RETURN_IF_FALSE(result)
 
 		//
 
