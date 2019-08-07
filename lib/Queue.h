@@ -405,7 +405,7 @@ FastThreadSafeQueue<T>::FastThreadSafeQueue(int queueSize) :
 	m_readIndex(1),
 	m_writeIndex(1)
 {
-	assert(std::is_trivially_copyable<T>::value == true);
+	static_assert(std::is_trivially_copyable<T>::value == true);
 	resize(queueSize);
 }
 

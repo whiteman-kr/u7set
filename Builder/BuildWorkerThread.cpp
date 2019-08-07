@@ -187,8 +187,8 @@ namespace Builder
 			//
 			// Loading connections
 			//
-			if (bool ok = loadConnections();
-				ok == false)
+			if (bool loadConnectionsOk = loadConnections();
+				loadConnectionsOk == false)
 			{
 				break;
 			}

@@ -573,12 +573,12 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 
 	// Open database and get project list
 	//
-	std::shared_ptr<int*> removeDatabase(nullptr, [this](void*)
-		{
-			QSqlDatabase::removeDatabase(postgresConnectionName());		// remove database
-		});
-
 	{
+		std::shared_ptr<int*> removeDatabase(nullptr, [this](void*)
+			{
+				QSqlDatabase::removeDatabase(postgresConnectionName());		// remove database
+			});
+
 		QSqlDatabase db = QSqlDatabase::addDatabase("QPSQL", postgresConnectionName());
 		if (db.lastError().isValid() == true)
 		{
@@ -653,80 +653,78 @@ void DbWorker::slot_getProjectList(std::vector<DbProject>* out)
 				QSqlDatabase::removeDatabase(projectDatabaseConnectionName);		// remove database
 			});
 
-		{
-			QSqlDatabase projectDb = QSqlDatabase::addDatabase("QPSQL", projectDatabaseConnectionName);
-			projectDb.setHostName(host());
-			projectDb.setPort(port());
-			projectDb.setDatabaseName(pi->databaseName());
-			projectDb.setUserName(serverUsername());
-			projectDb.setPassword(serverPassword());
+		// --
+		//
+		QSqlDatabase projectDb = QSqlDatabase::addDatabase("QPSQL", projectDatabaseConnectionName);
+		projectDb.setHostName(host());
+		projectDb.setPort(port());
+		projectDb.setDatabaseName(pi->databaseName());
+		projectDb.setUserName(serverUsername());
+		projectDb.setPassword(serverPassword());
 
-			bool result = projectDb.open();
+		bool result = projectDb.open();
+		if (result == false)
+		{
+			emitError(projectDb, projectDb.lastError());
+			continue;
+		}
+
+		// Get project version, scope is for versionQuery
+		//
+		{
+			QString createVersionTableSql = QString("SELECT max(VersionNo) FROM Version;");
+
+			QSqlQuery versionQuery(projectDb);
+			result = versionQuery.exec(createVersionTableSql);
+
+			int projectVersion = -1;
+
 			if (result == false)
 			{
-				emitError(projectDb, projectDb.lastError());
-				continue;
+				qDebug() << versionQuery.lastError();
 			}
-
-			// Get project version, scope is for versionQuery
-			//
+			else
 			{
-				QString createVersionTableSql = QString("SELECT max(VersionNo) FROM Version;");
-
-				QSqlQuery versionQuery(projectDb);
-				result = versionQuery.exec(createVersionTableSql);
-
-				int projectVersion = -1;
-
-				if (result == false)
+				if (versionQuery.next())
 				{
-					qDebug() << versionQuery.lastError();
+					projectVersion = versionQuery.value(0).toInt();
 				}
-				else
-				{
-					if (versionQuery.next())
-					{
-						projectVersion = versionQuery.value(0).toInt();
-					}
-				}
-
-				pi->setVersion(projectVersion);
 			}
 
-			// From this version ProjectProperties table is added, so it is possible to request propertyes
-			//
-			if (pi->version() >= 41)
-			{
-				QString getProjectDescriptionSql = QString("SELECT Value FROM ProjectProperties WHERE Name = 'Description';");
-
-				QSqlQuery q(projectDb);
-				result = q.exec(getProjectDescriptionSql);
-
-				QString projectDescription;
-
-				if (result == false)
-				{
-					qDebug() << q.lastError();
-				}
-				else
-				{
-					if (q.next())
-					{
-						projectDescription = q.value(0).toString();
-					}
-				}
-
-				pi->setDescription(projectDescription);
-			}
-
-			// --
-			//
-			projectDb.close();
+			pi->setVersion(projectVersion);
 		}
+
+		// From this version ProjectProperties table is added, so it is possible to request propertyes
+		//
+		if (pi->version() >= 41)
+		{
+			QString getProjectDescriptionSql = QString("SELECT Value FROM ProjectProperties WHERE Name = 'Description';");
+
+			QSqlQuery q(projectDb);
+			result = q.exec(getProjectDescriptionSql);
+
+			QString projectDescription;
+
+			if (result == false)
+			{
+				qDebug() << q.lastError();
+			}
+			else
+			{
+				if (q.next())
+				{
+					projectDescription = q.value(0).toString();
+				}
+			}
+
+			pi->setDescription(projectDescription);
+		}
+
+		// --
+		//
+		projectDb.close();
 	}
 
-	// Database will be removed by the removeDatabase shared_ptr
-	//
 	return;
 }
 
@@ -1869,13 +1867,13 @@ void DbWorker::slot_upgradeProject(QString projectName, QString password, bool d
 					}
 
 
-					QSqlQuery versionQuery(db);
+					QSqlQuery addVersionQuery(db);
 
-					result = versionQuery.exec(addVersionRecord);
+					result = addVersionQuery.exec(addVersionRecord);
 
 					if (result == false)
 					{
-						emitError(QSqlDatabase(), versionQuery.lastError(), false);
+						emitError(QSqlDatabase(), addVersionQuery.lastError(), false);
 						break;
 					}
 				}
@@ -5054,7 +5052,7 @@ bool DbWorker::addSignal(E::SignalType signalType, QVector<Signal>* newSignal)
 		QString errMsg;
 		ObjectState objectState;
 
-		bool result = setSignalWorkcopy(db, signal, objectState, errMsg);
+		result = setSignalWorkcopy(db, signal, objectState, errMsg);
 
 		if (result == false)
 		{

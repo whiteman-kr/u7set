@@ -82,9 +82,9 @@ private:
 template<typename ENUM_TYPE>
 bool SignalSpecPropValues::setEnumValue(const QString& name, ENUM_TYPE enumItemValue)
 {
-	if (std::is_enum<ENUM_TYPE>::value == false)
+	if constexpr (std::is_enum<ENUM_TYPE>::value == false)
 	{
-		assert(false);
+		static_assert(false);
 		return false;
 	}
 

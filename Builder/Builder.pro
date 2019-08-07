@@ -8,8 +8,8 @@ CONFIG += staticlib
 #
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17
-
-CONFIG += warn_on				# The compiler should output as many warnings as possible. If warn_off is also specified, the last one takes effect.
+win32:QMAKE_CXXFLAGS += /analyze		# Static code analyze
+CONFIG += warn_on						# The compiler should output as many warnings as possible. If warn_off is also specified, the last one takes effect.
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

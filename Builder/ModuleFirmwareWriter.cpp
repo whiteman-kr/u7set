@@ -433,7 +433,7 @@ namespace Hardware
 
 					int frameSize = (int)frame.size();
 
-					int linesCount = ceil((float)frameSize / 2 / frameStringWidth);
+					int linesCount = static_cast<int>(ceil((float)frameSize / 2.0 / frameStringWidth));
 
 					QJsonObject jFrame;
 
@@ -449,17 +449,17 @@ namespace Hardware
 					for (int l = 0; l < linesCount; l++)
 					{
 						// Check if line is full of zeroes
-
+						//
 						bool lineOfZeroes = true;
 
-						for (int i = 0; i < frameStringWidth * sizeof(quint16); i++)
+						for (int ip = 0; ip < frameStringWidth * sizeof(quint16); ip++)
 						{
-							if (dataBytePos + i >= frameSize)
+							if (dataBytePos + ip >= frameSize)
 							{
 								break;
 							}
 
-							if (frame[dataBytePos + i] != 0)
+							if (frame[dataBytePos + ip] != 0)
 							{
 								lineOfZeroes = false;
 								break;
@@ -476,7 +476,7 @@ namespace Hardware
 
 						str.fill(' ');
 
-						for (int i = 0; i < frameStringWidth; i++)
+						for (int ip = 0; ip < frameStringWidth; ip++)
 						{
 							quint16 value = ((quint16)frame[dataBytePos++] << 8);
 							if (dataBytePos >= frameSize)
@@ -491,12 +491,12 @@ namespace Hardware
 
 							int len = static_cast<int>(strlen(buf));
 
-							memset(str.data() + i * recCharsCount, '0', numCharsCount);
-							memcpy(str.data() + i * recCharsCount + (numCharsCount - len), buf, len);
+							memset(str.data() + ip * recCharsCount, '0', numCharsCount);
+							memcpy(str.data() + ip * recCharsCount + (numCharsCount - len), buf, len);
 
 							if (dataBytePos >= frameSize)
 							{
-								str[i * recCharsCount + numCharsCount] = 0;
+								str[ip * recCharsCount + numCharsCount] = 0;
 								break;
 							}
 						}
@@ -1181,9 +1181,9 @@ static QByteArray err;
 				const int LMNumber_Max = 64;
 
 				std::vector<std::pair<int, int>> channelNumbersAndSize;
-				for (auto it = channelData.binaryDataMap.begin(); it != channelData.binaryDataMap.end(); it++)
+				for (auto channelDataIt = channelData.binaryDataMap.begin(); channelDataIt != channelData.binaryDataMap.end(); channelDataIt++)
 				{
-					int channel = it->first;
+					int channel = channelDataIt->first;
 
 					if (channel < LMNumber_Min || channel > LMNumber_Max)
 					{
@@ -1191,7 +1191,7 @@ static QByteArray err;
 						return false;
 					}
 
-					const QByteArray& data = it->second;
+					const QByteArray& data = channelDataIt->second;
 
 					double fSize = (double)data.size() / firmware.eepromFramePayloadSize(uartId);
 					fSize = ceil(fSize);
@@ -1228,7 +1228,7 @@ static QByteArray err;
 					int size = (quint16)channelNumbersAndSize[c].second;
 
 					int eepromFrameCount = firmware.eepromFrameCount(uartId);
-					int eepromFrameCount95 = static_cast<double>(eepromFrameCount) * 0.95;
+					int eepromFrameCount95 = static_cast<int>(eepromFrameCount * 0.95);
 
 					if (frame == eepromFrameCount95)
 					{

@@ -532,9 +532,9 @@ namespace Builder
 			// SchemaTags
 			//
 			{
-				bool ok = true;
-				QString schemaTags = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "SchemaTags", &ok);
-				if (ok == false)
+				bool getObjectSchemaTagesOk = true;
+				QString schemaTags = getObjectProperty<QString>(m_software->equipmentIdTemplate(), "SchemaTags", &getObjectSchemaTagesOk);
+				if (getObjectSchemaTagesOk == false)
 				{
 					return false;
 				}
