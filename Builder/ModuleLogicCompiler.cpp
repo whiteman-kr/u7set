@@ -873,9 +873,9 @@ namespace Builder
 				std::shared_ptr<UalLoopbackSource> loopbackSource = std::make_shared<UalLoopbackSource>();
 				loopbackSource->setLoopbackId(loopbackID);
 
-				UalItem* newUalItem = new UalItem(AppLogicItem(loopbackSource, ualItem->schema()));
-				createdItems.append(newUalItem);
-				m_pinParent.insert(loopbackSource->inputs()[0].guid(), newUalItem);
+				UalItem* newSourceUalItem = new UalItem(AppLogicItem(loopbackSource, ualItem->schema()));
+				createdItems.append(newSourceUalItem);
+				m_pinParent.insert(loopbackSource->inputs()[0].guid(), newSourceUalItem);
 
 				// link ualItem output and loopback source input to each other
 				//
@@ -898,9 +898,9 @@ namespace Builder
 					std::shared_ptr<UalLoopbackTarget> loopbackTarget = std::make_shared<UalLoopbackTarget>();
 					loopbackTarget->setLoopbackId(loopbackID);
 
-					UalItem* newUalItem = new UalItem(AppLogicItem(loopbackTarget, ualItem->schema()));
-					createdItems.append(newUalItem);
-					m_pinParent.insert(loopbackTarget->outputs()[0].guid(), newUalItem);
+					UalItem* newTargetUalItem = new UalItem(AppLogicItem(loopbackTarget, ualItem->schema()));
+					createdItems.append(newTargetUalItem);
+					m_pinParent.insert(loopbackTarget->outputs()[0].guid(), newTargetUalItem);
 
 					// link loopback target output and ualItem input to each other
 					//
@@ -1186,7 +1186,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getSignalsAndPinsLinkedToOutPin(const UalItem* item,
+	bool ModuleLogicCompiler::getSignalsAndPinsLinkedToOutPin(const UalItem* ualItem,
 															const LogicPin& outPin,
 															QHash<QString, bool>* linkedSignals,
 															QHash<const UalItem*, bool>* linkedItems,
@@ -1203,7 +1203,7 @@ namespace Builder
 
 		if (linkedPins != nullptr)
 		{
-			linkedPins->insert(outPin.guid(), item);
+			linkedPins->insert(outPin.guid(), ualItem);
 		}
 
 		for(QUuid inPin : associatedInPins)
@@ -3414,15 +3414,15 @@ namespace Builder
 
 				// yes, this is 'in' pin of set_flags item
 
-				const LogicPin* outPin = connectedItem->getPin(UalAfb::OUT_PIN_CAPTION);
+				const LogicPin* connectedItemOutPin = connectedItem->getPin(UalAfb::OUT_PIN_CAPTION);
 
-				if (outPin == nullptr)
+				if (connectedItemOutPin == nullptr)
 				{
 					assert(false);
 					continue;
 				}
 
-				Signal* s = getCompatibleConnectedSignal(*outPin, outAfbSignal, busTypeID);
+				Signal* s = getCompatibleConnectedSignal(*connectedItemOutPin, outAfbSignal, busTypeID);
 
 				if (s == nullptr)
 				{
@@ -6342,17 +6342,17 @@ namespace Builder
 
 		for(QUuid inPinUuid : associatedInputs)
 		{
-			UalItem* ualItem = m_pinParent.value(inPinUuid, nullptr);
+			UalItem* nearestUalItem = m_pinParent.value(inPinUuid, nullptr);
 
-			if (ualItem == nullptr)
+			if (nearestUalItem == nullptr)
 			{
 				assert(false);
 				continue;
 			}
 
-			if (ualItem->isSignal() == true)
+			if (nearestUalItem->isSignal() == true)
 			{
-				*nearestSignalID = ualItem->strID();
+				*nearestSignalID = nearestUalItem->strID();
 				return true;
 			}
 		}
@@ -10609,7 +10609,7 @@ namespace Builder
 
 		int count = txDiscreteSignals.count();
 
-		int wordCount = count / WORD_SIZE + (count % WORD_SIZE ? 1 : 0);
+		int wordCount = count / WORD_SIZE + ((count % WORD_SIZE) ? 1 : 0);
 
 		int bitAccumulatorAddress = m_memoryMap.bitAccumulatorAddress();
 
