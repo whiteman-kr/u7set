@@ -1,0 +1,17 @@
+Report from: 07-08-2019 10:15:30
+
+Test File: AFB_DERIVC.txt
+
+Test AFB_DERIVC1, AFB tests for AFB_DERIVC element
+    //0<td<5 RPCT NO action, Sets PARAM_ERR
+    Set #TUN_IN_FP1=10.0
+    Set #TUN_RESET1=0
+    Set #TUN_PAUSE1=0
+    Check #OUT_DERIVC1=0.0 - Ok
+    Check #PARAM_ERR_DERIVC1=0 - Ok
+    Check #OWERFLOW_DERIVC1=0 - Ok
+    Check #UNDERFLOW_DERIVC1=0 - Ok
+    Check #ZERO_DERIVC1=1 - Ok
+    Check #NAN_DERIVC1=0 - Ok
+Endtest AFB_DERIVC1 - Ok
+
