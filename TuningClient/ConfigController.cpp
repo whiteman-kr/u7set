@@ -265,7 +265,6 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 	{
 		// Get SchemaDetails.pbuf file
 		//
-		QString parsingError;
 
 		QByteArray ba;
 		QString fileName = "/" + theSettings.instanceStrId() + "/SchemaDetails.pbuf";

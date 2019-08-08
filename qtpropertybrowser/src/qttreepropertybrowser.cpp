@@ -52,6 +52,13 @@
 #include <QStyle>
 #include <QPalette>
 
+// Suppress static code ananlyzer messages
+//
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable : 6011)
+#endif
+
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
 #endif
@@ -1143,6 +1150,10 @@ void QtTreePropertyBrowser::setFontSizeF(qreal size)
 
 #if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
+#endif
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
 #endif
 
 #include "moc_qttreepropertybrowser.cpp"

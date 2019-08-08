@@ -187,7 +187,7 @@ void SwitchFiltersPage::updateFilters(std::shared_ptr<TuningFilter> root)
         QPushButton* b = new QPushButton(this);
         QPixmap pixmap(":/Images/Images/ButtonSettings.png");
         b->setIcon(QIcon(pixmap));
-        b->setIconSize(QSize(controlHeight * 0.8, controlHeight * 0.8));
+		b->setIconSize(QSize(static_cast<int>(controlHeight * 0.8), static_cast<int>(controlHeight * 0.8)));
         b->setFixedSize(controlHeight, controlHeight);
         connect(b, &QPushButton::clicked, this, &SwitchFiltersPage::onOptions);
         scrollControlsLayout->addWidget(b);
