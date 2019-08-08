@@ -170,7 +170,7 @@ namespace Builder
 		}
 		else
 		{
-			this->bitNo.b1 = bitNo;
+			this->bitNo.b1 = static_cast<quint8>(bitNo);
 		}
 	}
 
@@ -183,7 +183,7 @@ namespace Builder
 		}
 		else
 		{
-			this->bitNo.b2 = bitNo;
+			this->bitNo.b2 = static_cast<quint8>(bitNo);
 		}
 	}
 

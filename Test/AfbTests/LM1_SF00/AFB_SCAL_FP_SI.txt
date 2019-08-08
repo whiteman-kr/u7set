@@ -42,5 +42,4 @@ check #UNDERRFLOW_SCALE_FP_SI01 ==0
 check #ZERO_SCALE_FP_SI01 ==0
 check #NAN_SCALE_FP_SI01 ==0
 
-
 endtest

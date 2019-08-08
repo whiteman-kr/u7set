@@ -16,6 +16,7 @@ INCLUDEPATH += $$PWD
 #
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+win32:QMAKE_CXXFLAGS += /analyze		# Static code analyze
 
 #Application icon
 win32:RC_ICONS += Images/TuningClient.ico

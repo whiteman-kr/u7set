@@ -1544,7 +1544,7 @@ void protobuf_AddDesc_network_2eproto() {
     "\t\022\032\n\022lmSubsystemChannel\030\t \001(\t\022\023\n\010lmNumbe"
     "r\030\n \001(\005:\0010\022\027\n\014lmModuleType\030\013 \001(\005:\0010\022\023\n\013l"
     "mAdapterID\030\014 \001(\t\022\033\n\014lmDataEnable\030\r \001(\010:\005"
-    "false\022\023\n\010lmDataID\030\016 \001(\004:\0010\022\025\n\nlmUniqueID"
+    "false\022\023\n\010lmDataID\030\016 \001(\r:\0010\022\025\n\nlmUniqueID"
     "\030\017 \001(\004:\0010\022\036\n\023lmRupFramesQuantity\030\020 \001(\005:\001"
     "0\022\024\n\014lmPresetName\030\021 \001(\t\"\033\n\031GetDataSource"
     "sInfoRequest\"\\\n\027GetDataSourcesInfoReply\022"
@@ -4286,7 +4286,7 @@ void DataSourceInfo::SharedCtor() {
   lmmoduletype_ = 0;
   lmadapterid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   lmdataenable_ = false;
-  lmdataid_ = GOOGLE_ULONGLONG(0);
+  lmdataid_ = 0u;
   lmuniqueid_ = GOOGLE_ULONGLONG(0);
   lmrupframesquantity_ = 0;
   lmpresetname_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
@@ -4385,7 +4385,7 @@ void DataSourceInfo::Clear() {
       }
     }
     lmdataenable_ = false;
-    lmdataid_ = GOOGLE_ULONGLONG(0);
+    lmdataid_ = 0u;
     lmuniqueid_ = GOOGLE_ULONGLONG(0);
     lmrupframesquantity_ = 0;
   }
@@ -4619,13 +4619,13 @@ bool DataSourceInfo::MergePartialFromCodedStream(
         break;
       }
 
-      // optional uint64 lmDataID = 14 [default = 0];
+      // optional uint32 lmDataID = 14 [default = 0];
       case 14: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_lmDataID:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
-                   ::google::protobuf::uint64, ::google::protobuf::internal::WireFormatLite::TYPE_UINT64>(
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &lmdataid_)));
           set_has_lmdataid();
         } else {
@@ -4791,9 +4791,9 @@ void DataSourceInfo::SerializeWithCachedSizes(
     ::google::protobuf::internal::WireFormatLite::WriteBool(13, this->lmdataenable(), output);
   }
 
-  // optional uint64 lmDataID = 14 [default = 0];
+  // optional uint32 lmDataID = 14 [default = 0];
   if (has_lmdataid()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt64(14, this->lmdataid(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(14, this->lmdataid(), output);
   }
 
   // optional uint64 lmUniqueID = 15 [default = 0];
@@ -4918,9 +4918,9 @@ void DataSourceInfo::SerializeWithCachedSizes(
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(13, this->lmdataenable(), target);
   }
 
-  // optional uint64 lmDataID = 14 [default = 0];
+  // optional uint32 lmDataID = 14 [default = 0];
   if (has_lmdataid()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt64ToArray(14, this->lmdataid(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(14, this->lmdataid(), target);
   }
 
   // optional uint64 lmUniqueID = 15 [default = 0];
@@ -5045,10 +5045,10 @@ int DataSourceInfo::ByteSize() const {
       total_size += 1 + 1;
     }
 
-    // optional uint64 lmDataID = 14 [default = 0];
+    // optional uint32 lmDataID = 14 [default = 0];
     if (has_lmdataid()) {
       total_size += 1 +
-        ::google::protobuf::internal::WireFormatLite::UInt64Size(
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->lmdataid());
     }
 

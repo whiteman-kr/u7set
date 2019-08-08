@@ -35,7 +35,8 @@ public:
 	static void init();
 	static void shutdown();
 
-	static bool getIntProperty(const Hardware::DeviceObject* device, const QString& name, int* value, Builder::IssueLogger* log);
+	static bool getIntProperty(const Hardware::DeviceObject* device, const QString& name, qint32* value, Builder::IssueLogger* log);
+	static bool getUIntProperty(const Hardware::DeviceObject* device, const QString& name, quint32* value, Builder::IssueLogger *log);
 	static bool getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString *value, Builder::IssueLogger* log);
 	static bool getStrListProperty(const Hardware::DeviceObject* device, const QString& name, QStringList* strList, Builder::IssueLogger* log);
 	static bool getBoolProperty(const Hardware::DeviceObject* device, const QString& name, bool* value, Builder::IssueLogger* log);
@@ -75,7 +76,8 @@ public:
 	template<typename T>
 	static bool getProperty(const Hardware::DeviceObject* device, const QString& name, T* value, Builder::IssueLogger* log);
 
-	static bool setIntProperty(Hardware::DeviceObject* device, const QString& name, int value, Builder::IssueLogger* log);
+	static bool setIntProperty(Hardware::DeviceObject* device, const QString& name, qint32 value, Builder::IssueLogger* log);
+	static bool setUIntProperty(Hardware::DeviceObject* device, const QString& name, quint32 value, Builder::IssueLogger* log);
 
 	static Hardware::DeviceObject* getChildDeviceObjectBySuffix(const Hardware::DeviceObject* device, const QString& suffix);
 	static Hardware::DeviceObject* getChildDeviceObjectBySuffix(const Hardware::DeviceObject* device, const QString& suffix, Builder::IssueLogger* log);

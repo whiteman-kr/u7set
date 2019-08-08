@@ -235,7 +235,7 @@ namespace Builder
 		qint32 signedIntValue() const;
 		void setSignedIntValue(qint32 value);
 
-		double floatValue() const;
+		float floatValue() const;
 		void setFloatValue(double value);
 
 		QString toString() const;

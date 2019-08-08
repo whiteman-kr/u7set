@@ -1,0 +1,31 @@
+Report from: 07-08-2019 11:51:13
+
+Test File: AFB_INTEGRATORC.txt
+
+Test AFB_INTEGRATORC1, AFB tests for AFB_INTEGRATORC element
+    Set #TUN_TRACK_IN1=1.0
+    Set #TUN_IN_FP2=1.0
+    Set #TUN_RESET1=0
+    Set #TUN_PAUSE1=0
+    Set #TUN_IN_TRACK1=0
+    Set #TUN_IN_KI1=1.0
+    Check #OUT_INTEGRATORC1=0.0 - Ok
+    Check #PARAM_ERR_INTEGRATORC1=1 - Fail    [ received: 0 ]
+    Check #OWERFLOW_INTEGRATORC1=0 - Ok
+    Check #UNDERFLOW_INTEGRATORC1=0 - Ok
+    Check #ZERO_INTEGRATORC1=0 - Fail    [ received: 1 ]
+    Check #NAN_INTEGRATORC1=0 - Ok
+    Set #TUN_TRACK_IN1=999.0
+    Set #TUN_IN_FP1=1.0
+    Set #TUN_RESET1=0
+    Set #TUN_PAUSE1=0
+    Set #TUN_IN_TRACK1=0
+    Set #TUN_IN_KI1=1.0
+    Check #OUT_INTEGRATORC1=0.0 - Ok
+    Check #PARAM_ERR_INTEGRATORC1=1 - Fail    [ received: 0 ]
+    Check #OWERFLOW_INTEGRATORC1=0 - Ok
+    Check #UNDERFLOW_INTEGRATORC1=0 - Ok
+    Check #ZERO_INTEGRATORC1=0 - Fail    [ received: 1 ]
+    Check #NAN_INTEGRATORC1=0 - Ok
+Endtest AFB_INTEGRATORC1 - error(s): 4
+
