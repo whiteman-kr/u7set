@@ -797,7 +797,7 @@ void DialogConnections::onUndo()
 
 			DbFileInfo fi = m_connections.fileInfo(uuid);
 
-			bool ok = m_db->getLatestVersion(fi, &file, this);
+			ok = m_db->getLatestVersion(fi, &file, this);
 			if (ok == true && file != nullptr)
 			{
 				QByteArray data;

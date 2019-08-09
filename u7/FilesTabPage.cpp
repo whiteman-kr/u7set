@@ -53,7 +53,8 @@ int FileTreeModelItem::childIndex(FileTreeModelItem* child) const
 		return -1;
 	}
 
-	return std::distance(m_children.begin(), fr);
+	int result = static_cast<int>(std::distance(m_children.begin(), fr));
+	return result;
 }
 
 FileTreeModelItem* FileTreeModelItem::childByFileId(int fileId) const
@@ -1797,7 +1798,7 @@ void FilesTabPage::setActionState()
 		// Don't need to go further
 		//
 		if (canAnyBeCheckedIn == true &&
-			canAnyBeCheckedIn == true )
+			canAnyBeCheckedOut == true )
 		{
 			break;
 		}

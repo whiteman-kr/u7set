@@ -1107,19 +1107,19 @@ namespace ExtWidgets
 		QColorDialog dialog(color, this);
 		if (dialog.exec() == QDialog::Accepted)
 		{
-            QColor color = dialog.selectedColor();
+			QColor selectedColor = dialog.selectedColor();
             QString str = QString("[%1;%2;%3;%4]").
-                          arg(color.red()).
-                          arg(color.green()).
-                          arg(color.blue()).
-                          arg(color.alpha());
+						  arg(selectedColor.red()).
+						  arg(selectedColor.green()).
+						  arg(selectedColor.blue()).
+						  arg(selectedColor.alpha());
 
-            if (color != m_oldColor)
+			if (selectedColor != m_oldColor)
             {
-                m_oldColor = color;
+				m_oldColor = selectedColor;
                 m_lineEdit->setText(str);
 
-                emit valueChanged(color);
+				emit valueChanged(selectedColor);
             }
 		}
 	}
