@@ -64,13 +64,9 @@ void Settings::StoreSystem()
 	QSettings s(QSettings::UserScope, qApp->organizationName(), qApp->applicationName());
 #endif
 
-	QString instanceHistoryString;
-	for (const QString& s : m_instanceHistory)
-	{
-		instanceHistoryString += s + ";";
-	}
-
+	QString instanceHistoryString = m_instanceHistory.join(';');
 	s.setValue("m_instanceHistory", instanceHistoryString);
+
 	s.setValue("m_instanceStrId", m_instanceStrId);
 
 	s.setValue("m_configuratorIpAddress1", m_configuratorIpAddress1);

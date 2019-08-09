@@ -464,7 +464,7 @@ bool TuningModelClient::setData(const QModelIndex& index, const QVariant& value,
 				state.controlIsEnabled() == true &&
 				m_tuningTcpClient->writingIsEnabled(state) == true)
 		{
-			bool ok = false;
+			ok = false;
 			double v = value.toDouble(&ok);
 			if (ok == false)
 			{
@@ -730,11 +730,11 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 
 	if (pageFilter->isButton() == true)
 	{
-		TuningFilter* parent = m_pageFilter->parentFilter();
+		TuningFilter* parentFilter = m_pageFilter->parentFilter();
 
-		if (parent != nullptr && parent->isTab() == true)
+		if (parentFilter != nullptr && parentFilter->isTab() == true)
 		{
-			tabFilter = parent;
+			tabFilter = parentFilter;
 		}
 	}
 
@@ -1045,7 +1045,7 @@ void TuningPage::fillObjectsList()
 			{
 				TuningFilterSignal filterSignal;
 
-				bool ok = m_treeFilter->filterSignal(hash, filterSignal);
+				ok = m_treeFilter->filterSignal(hash, filterSignal);
 				if (ok == false)
 				{
 					Q_ASSERT(false);
@@ -1069,7 +1069,7 @@ void TuningPage::fillObjectsList()
 				{
 					TuningFilterSignal filterSignal;
 
-					bool ok = m_pageFilter->filterSignal(hash, filterSignal);
+					ok = m_pageFilter->filterSignal(hash, filterSignal);
 					if (ok == false)
 					{
 						Q_ASSERT(false);
@@ -1090,7 +1090,7 @@ void TuningPage::fillObjectsList()
 
 		if (filterValue != FilterType::All && asp.isDiscrete() == true)
 		{
-			bool ok = false;
+			ok = false;
 
 			const TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
 
@@ -1605,7 +1605,7 @@ void TuningPage::slot_listContextMenuRequested(const QPoint& pos)
 
 			if (menuSignalCount > 16)
 			{
-				QAction* a = new QAction(tr("..."), &menu);
+				a = new QAction(tr("..."), &menu);
 				a->setEnabled(false);
 				menu.addAction(a);
 				break;
@@ -2004,7 +2004,7 @@ void TuningPage::restoreSignalsFromFilter(TuningFilter* filter)
 			bool exists = filter->filterSignalExists(hash);
 			if (exists == true)
 			{
-				bool exists = filter->filterSignal(hash, tv);
+				exists = filter->filterSignal(hash, tv);
 				if (exists == false)
 				{
 					Q_ASSERT(false);

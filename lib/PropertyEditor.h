@@ -50,6 +50,8 @@ namespace ExtWidgets
 		QByteArray m_arrayPropertyEditorSplitterState;
 		QSize m_arrayPropertyEditorSize = QSize(-1, -1);
 
+		QSize m_stringListEditorSize = QSize(-1, -1);
+
 		QPoint m_multiLinePropertyEditorWindowPos;
 		QByteArray m_multiLinePropertyEditorGeometry;
 
@@ -99,6 +101,38 @@ namespace ExtWidgets
 		PropertyEditor* m_childPropertyEditor = nullptr;
 
 		QSplitter* m_splitter = nullptr;
+
+		std::shared_ptr<Property> m_property;
+	};
+
+	class StringListEditorDialog : public QDialog
+	{
+		Q_OBJECT
+
+	public:
+		StringListEditorDialog(PropertyEditor* propertyEditor, QWidget* parent, const QString& propertyName, const QVariant& value);
+		~StringListEditorDialog();
+
+		QVariant value();
+
+	private slots:
+		void onMoveUp();
+		void onMoveDown();
+		void onAdd();
+		void onRemove();
+		void itemChanged(QTreeWidgetItem *item, int column);
+
+	private:
+		void updateStrings();
+		void moveItems(bool forward);
+
+	private:
+		QStringList m_strings;
+
+		PropertyEditor* m_parentPropertyEditor = nullptr;
+
+		QTreeWidget* m_treeWidget = nullptr;
+		PropertyEditor* m_childPropertyEditor = nullptr;
 
 		std::shared_ptr<Property> m_property;
 	};

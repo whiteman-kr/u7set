@@ -659,7 +659,7 @@ void MainWindow::updateStatusBar()
 				return;
 			}
 
-			QString text = tr(" %1 %2 ").arg(f->caption()).arg(counters.discreteCounter);
+			text = tr(" %1 %2 ").arg(f->caption()).arg(counters.discreteCounter);
 
 			if (l->text() != text)
 			{
