@@ -790,7 +790,7 @@ QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
             return QString();
 		}
 
-		return QVariant();
+		// return QVariant();	Unreachable
 	} // End of if (role == Qt::DisplayRole)
 
 	if (role == Qt::TextAlignmentRole &&

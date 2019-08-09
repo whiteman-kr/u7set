@@ -99,7 +99,7 @@ private:
 	//
 private:
 	volatile bool m_requestInProgress = false;
-	int m_currentRequestId = 0;
+	quint32 m_currentRequestId = 0;
 	ArchiveRequest m_requestData;
 	bool m_needCancelRequest = false;
 

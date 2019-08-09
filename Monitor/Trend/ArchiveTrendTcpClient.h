@@ -95,7 +95,7 @@ private:
 	bool requestInProgress = false;
 	RequestQueue m_currentRequest;
 	Hash m_currentSignalHash = 0;
-	int m_currentRequestId = 0;
+	quint32 m_currentRequestId = 0;
 
 	std::shared_ptr<TrendLib::OneHourData> m_receivedData;
 
