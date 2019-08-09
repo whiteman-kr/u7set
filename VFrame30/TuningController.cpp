@@ -99,9 +99,9 @@ namespace VFrame30
 			return false;
 		}
 
-		switch (value.type())
+		switch (static_cast<QMetaType::Type>(value.type()))		// From help: Although this function is declared as returning QVariant::Type, the return value should be interpreted as QMetaType::Type. In particular, QVariant::UserType is returned here only if the value is equal or greater than QMetaType::User.
 		{
-		case QVariant::Bool:
+		case QMetaType::Bool:
 			if (appSignal.toTuningType() != TuningValueType::Discrete)
 			{
 				assert(false);	// Bool is allowed only for discrete signals
@@ -109,14 +109,14 @@ namespace VFrame30
 			}
 			break;
 
-		case QVariant::Int:
+		case QMetaType::Int:
 			if (appSignal.toTuningType() == TuningValueType::Discrete)
 			{
 				value = value.toInt() == 0 ? false : true;	// Discrete signals can be set by 0 or 1
 			}
 			break;
 
-		case QVariant::LongLong:
+		case QMetaType::LongLong:
 			assert(false);	// Must not arrive from script
 			return false;
 
@@ -124,7 +124,7 @@ namespace VFrame30
 			assert(false);	// Must not arrive from script
 			return false;
 
-		case QVariant::Double:
+		case QMetaType::Double:
 			if (appSignal.toTuningType() == TuningValueType::Discrete)
 			{
 				value = value.toBool();	// Discrete signals can be set by 0.0 or 1.0
