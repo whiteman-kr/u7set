@@ -539,7 +539,7 @@ void DialogBusEditor::onCheckIn()
 		bool fileWasRemoved = false;
 		QString errorMessage;
 
-		bool ok = m_busses.checkIn(uuid, comment, &fileWasRemoved, &errorMessage);
+		ok = m_busses.checkIn(uuid, comment, &fileWasRemoved, &errorMessage);
 		if (ok == false)
 		{
 			QMessageBox::critical(this, qAppName(), errorMessage);

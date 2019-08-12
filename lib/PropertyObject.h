@@ -234,13 +234,13 @@ public:
 		m_precision = std::clamp<qint16>(static_cast<qint16>(value), 0, 128);
 	}
 
-	quint16 viewOrder() const
+	int viewOrder() const
 	{
 		return m_viewOrder;
 	}
-	void setViewOrder(quint16 value)
+	void setViewOrder(int value)
 	{
-		m_viewOrder = value;
+		m_viewOrder = static_cast<quint16>(value);
 	}
 
 	virtual QVariant value() const = 0;

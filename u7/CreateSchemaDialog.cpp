@@ -465,7 +465,7 @@ void CreateSchemaDialog::setWidthHeight(VFrame30::Schema* schema)
 
 	double w = 0;
 	double h = 0;
-	double precision = 0;
+	int precision = 0;
 
 	if (schema->unit() == VFrame30::SchemaUnit::Display)
 	{

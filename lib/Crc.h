@@ -13,7 +13,7 @@ public:
 	static quint16 crc4(quint16 value);
 	static quint64 crc64(const void* src, qint64 l);
 	static quint64 setDataBlockCrc(quint16 frameIndex, void* datablock, int blockSize);
-	static bool checkDataBlockCrc(int frameIndex, const std::vector<quint8>& frame);
+	static bool checkDataBlockCrc(quint16 frameIndex, const std::vector<quint8>& frame);
 
 
 private:

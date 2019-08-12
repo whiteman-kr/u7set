@@ -26,8 +26,7 @@ int ConfigConnection::port() const
 
 HostAddressPort ConfigConnection::address() const
 {
-	HostAddressPort h(m_ip, m_port);
-	return h;
+	return HostAddressPort{m_ip, static_cast<quint16>(m_port)};
 }
 
 MonitorConfigController::MonitorConfigController(const SoftwareInfo& softwareInfo, HostAddressPort address1, HostAddressPort address2) :

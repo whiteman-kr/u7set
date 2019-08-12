@@ -717,7 +717,7 @@ namespace Builder
 		}
 
 		int pass = 0;
-		size_t checkRemainsCount = -1;			// it's ok to give a second change for setItemsOrder to remove some items form fblItems
+		size_t checkRemainsCount = std::numeric_limits<size_t>::max();			// it's ok to give a second change for setItemsOrder to remove some items form fblItems
 		while (fblItems.empty() == false)
 		{
 			if (*interruptProcess == true)
@@ -1705,7 +1705,12 @@ namespace Builder
 				return false;
 			}
 
-			QFuture<bool> task =  QtConcurrent::run(std::bind(&AppLogicModule::orderItems, m, log, &iterruptRequest));
+			QFuture<bool> task =  QtConcurrent::run(
+				[m, log, &iterruptRequest]() -> bool
+				{
+					return m->orderItems(log, &iterruptRequest);
+				});
+
 			orderTasks.push_back(task);
 		}
 
@@ -2607,7 +2612,12 @@ namespace Builder
 				return false;
 			}
 
-			QFuture<bool> task =  QtConcurrent::run(std::bind(&Parser::parseAppLogicSchema, this, schema, &readyParseDataContainer, &iterruptRequest));
+			QFuture<bool> task =  QtConcurrent::run(
+				[this, schema, &readyParseDataContainer, &iterruptRequest]() -> bool
+				{
+					return this->parseAppLogicSchema(schema, &readyParseDataContainer, &iterruptRequest);
+				});
+
 			parseTasks.push_back(task);
 		}
 

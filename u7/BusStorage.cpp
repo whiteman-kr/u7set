@@ -179,7 +179,7 @@ bool BusStorage::save(const QUuid& uuid, QString* errorMessage)
 
 		// Save to existing file
 		//
-		bool ok = m_db->getLatestVersion(fi, &file, nullptr);
+		ok = m_db->getLatestVersion(fi, &file, nullptr);
 		if (ok == false || file == nullptr)
 		{
 			*errorMessage = m_db->lastError();

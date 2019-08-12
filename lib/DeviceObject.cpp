@@ -665,7 +665,7 @@ namespace Hardware
 		for (int i = 0; i < 4; i++)
 		{
 			bool ok = false;
-			quint8 b = l[i].toInt(&ok);
+			quint8 b = static_cast<quint8>(l[i].toInt(&ok));
 
 			if (ok == false)
 			{
@@ -2068,7 +2068,7 @@ R"DELIM({
 			}
 		}
 
-		m_customModuleFamily = modulemessage.custommodulefamily();
+		m_customModuleFamily = static_cast<uint16_t>(modulemessage.custommodulefamily());
 
 		m_configurationScript = QString::fromStdString(modulemessage.configurationscript());
 		m_rawDataDescription = QString::fromStdString(modulemessage.rawdatadescription());
@@ -2120,7 +2120,7 @@ R"DELIM({
 
 	void DeviceModule::setCustomModuleFamily(int value)
 	{
-		m_customModuleFamily = value;
+		m_customModuleFamily = static_cast<uint16_t>(value);
 	}
 
 	int DeviceModule::moduleVersion() const
@@ -2604,7 +2604,7 @@ R"DELIM({
 		}
 
 		quint16 _m16 = (int)m >> 16;
-		quint16 _p16 = p;
+		quint16 _p16 = static_cast<quint16>(p);
 
 		quint32 result = (_m16 << 16) | _p16;
 		return result;

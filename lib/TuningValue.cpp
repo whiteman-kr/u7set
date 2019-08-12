@@ -184,23 +184,25 @@ QVariant TuningValue::toVariant() const
 
 void TuningValue::fromVariant(QVariant value)
 {
-	switch (value.type())
+	switch (static_cast<QMetaType::Type>(value.type()))	// From help: Although this function is declared as returning QVariant::Type, the return value
+														// should be interpreted as QMetaType::Type. In particular, QVariant::UserType is returned here only
+														// if the value is equal or greater than QMetaType::User.
 	{
-	case QVariant::Bool:
+	case QMetaType::Bool:
 
 		m_type = TuningValueType::Discrete;
 		m_int64 = value.toBool() == true ? 1 : 0;
 
 		break;
 
-	case QVariant::Int:
+	case QMetaType::Int:
 
 		m_type = TuningValueType::SignedInt32;
 		m_int64 = value.toInt();
 
 		break;
 
-	case QVariant::LongLong:
+	case QMetaType::LongLong:
 
 		assert(false);		// remove when tunable int64 will exist
 		m_type = TuningValueType::SignedInt64;
@@ -215,7 +217,7 @@ void TuningValue::fromVariant(QVariant value)
 
 		break;
 
-	case QVariant::Double:
+	case QMetaType::Double:
 
 		assert(false);		// remove when tunable double will exist
 		m_type = TuningValueType::Double;

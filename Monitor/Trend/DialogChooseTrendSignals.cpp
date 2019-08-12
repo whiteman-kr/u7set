@@ -510,8 +510,6 @@ QVariant FilteredTrendSignalsModel::data(const QModelIndex& index, int role) con
 	default:
 		return QVariant();
 	}
-
-	return QVariant();
 }
 
 void FilteredTrendSignalsModel::filterSignals(QString filter)

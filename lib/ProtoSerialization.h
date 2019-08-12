@@ -55,9 +55,7 @@ namespace Proto
 
 		bool saveToFile(const QString& fileName) const
 		{
-			std::wstring wfnstr(fileName.toStdWString());
-
-			std::fstream output(wfnstr, std::ios::out | std::ios::binary);
+			std::fstream output(fileName.toStdString(), std::ios::out | std::ios::binary);
 			if (output.is_open() == false || output.bad() == true)
 			{
 				assert(false);
@@ -68,9 +66,9 @@ namespace Proto
 		}
 		bool saveToFile(const wchar_t* fileName) const
 		{
-			std::wstring wfnstr(fileName);
+			QString fn = QString::fromWCharArray(fileName);
 
-			std::fstream output(wfnstr, std::ios::out | std::ios::binary);
+			std::fstream output(fn.toStdString(), std::ios::out | std::ios::binary);
 			if (output.is_open() == false || output.bad() == true)
 			{
 				assert(false);
@@ -248,9 +246,7 @@ namespace Proto
 
 		[[nodiscard]] bool Load(const QString& fileName)
 		{
-			std::wstring wfnstr(fileName.toStdWString());
-
-			std::fstream input(wfnstr, std::ios::in | std::ios::binary);
+			std::fstream input(fileName.toStdString(), std::ios::in | std::ios::binary);
 			if (input.is_open() == false || input.bad() == true)
 			{
 				return false;
@@ -260,9 +256,9 @@ namespace Proto
 		}
 		bool Load(const wchar_t* fileName)
 		{
-			std::wstring wfnstr(fileName);
+			QString fn = QString::fromWCharArray(fileName);
 
-			std::fstream input(wfnstr, std::ios::in | std::ios::binary);
+			std::fstream input(fn.toStdString(), std::ios::in | std::ios::binary);
 			if (input.is_open() == false || input.bad() == true)
 			{
 				assert(false);
@@ -359,9 +355,9 @@ namespace Proto
 
 		static std::shared_ptr<VFrameType> Create(const wchar_t* fileName)
 		{
-			std::wstring wfnstr(fileName);
+			QString fn = QString::fromWCharArray(fileName);
 
-			std::fstream input(wfnstr, std::ios::in | std::ios::binary);
+			std::fstream input(fn.toStdString(), std::ios::in | std::ios::binary);
 			if (input.bad() == true)
 			{
 				return nullptr;

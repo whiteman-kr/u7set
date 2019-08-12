@@ -43,12 +43,12 @@ QModelIndex SchemaListModelEx::index(int row, int column, const QModelIndex& par
 	if (parent.isValid() == false)
 	{
 		parentFileId = m_files.rootFileId();
-		assert(parentFileId != -1);
+		Q_ASSERT(parentFileId != -1);
 	}
 	else
 	{
 		parentFileId = static_cast<int>(parent.internalId());
-		assert(parentFileId != -1);
+		Q_ASSERT(parentFileId != -1);
 	}
 
 	// --
@@ -56,7 +56,7 @@ QModelIndex SchemaListModelEx::index(int row, int column, const QModelIndex& par
 	auto file = m_files.child(parentFileId, row);
 	if (file == nullptr)
 	{
-		assert(file);
+		Q_ASSERT(file);
 		return {};
 	}
 
@@ -70,24 +70,24 @@ QModelIndex SchemaListModelEx::parent(const QModelIndex& index) const
 		return {};
 	}
 
-	int fileId = index.internalId();
+	int fileId = static_cast<int>(index.internalId());
 	if (fileId == m_files.rootFileId())
 	{
 		qDebug() << fileId << ",  " << m_files.rootFileId();
-		assert(fileId != m_files.rootFileId());
+		Q_ASSERT(fileId != m_files.rootFileId());
 		return {};
 	}
 
 	auto file = m_files.file(fileId);
 	if (file == nullptr)
 	{
-		assert(file);
+		Q_ASSERT(file);
 		return {};
 	}
 
 	if (file->fileId() != fileId)
 	{
-		assert(file->fileId() == fileId);
+		Q_ASSERT(file->fileId() == fileId);
 		return {};
 	}
 
@@ -99,18 +99,18 @@ QModelIndex SchemaListModelEx::parent(const QModelIndex& index) const
 	auto parentFile = m_files.file(file->parentId());
 	if (parentFile == nullptr)
 	{
-		assert(parentFile);
+		Q_ASSERT(parentFile);
 		return {};
 	}
 
-	assert(parentFile->fileId() == file->parentId());
+	Q_ASSERT(parentFile->fileId() == file->parentId());
 
 	// Determine the position of the parent in the parent's parent
 	//
 	int parentRow = m_files.indexInParent(parentFile->fileId());
 	if (parentRow == -1)
 	{
-		assert(parentRow != -1);
+		Q_ASSERT(parentRow != -1);
 		return {};
 	}
 
@@ -130,7 +130,7 @@ int SchemaListModelEx::rowCount(const QModelIndex& parentIndex/* = QModelIndex()
 		return m_files.rootChildrenCount();
 	}
 
-	int fileId = parentIndex.internalId();
+	int fileId = static_cast<int>(parentIndex.internalId());
 	int rowCount = m_files.childrenCount(fileId);
 
 	return rowCount;
@@ -151,14 +151,14 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 	//int row = index.row();
 	Columns column = static_cast<Columns>(index.column());
 
-	int fileId = index.internalId();
+	int fileId = static_cast<int>(index.internalId());
 	std::shared_ptr<DbFileInfo> file = m_files.file(fileId);
 
 	bool systemFile = isSystemFile(fileId);
 
 	if (file == nullptr)
 	{
-		assert(file);
+		Q_ASSERT(file);
 		return {};
 	}
 
@@ -295,7 +295,7 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 			return detailsColumnText(file->fileId());
 
 		default:
-			assert(false);
+			Q_ASSERT(false);
 		}
 
 		return QVariant{};
@@ -355,7 +355,7 @@ QVariant SchemaListModelEx::data(const QModelIndex& index, int role/* = Qt::Disp
 			}
 			else
 			{
-				assert(fn.isEmpty() == false);		// Empty file name?
+				Q_ASSERT(fn.isEmpty() == false);		// Empty file name?
 				return {};
 			}
 		}
@@ -437,7 +437,7 @@ QVariant SchemaListModelEx::headerData(int section, Qt::Orientation orientation,
 			case Columns::TagsColumn:		return QStringLiteral("Tags");
 			case Columns::DetailsColumn:	return QStringLiteral("Details");
 			default:
-				assert(false);
+				Q_ASSERT(false);
 			}
 		}
 
@@ -451,7 +451,7 @@ std::pair<QModelIndex, bool> SchemaListModelEx::addFile(QModelIndex parentIndex,
 {
 	if (file == nullptr)
 	{
-		assert(file);
+		Q_ASSERT(file);
 		return {{}, false};
 	}
 
@@ -459,13 +459,13 @@ std::pair<QModelIndex, bool> SchemaListModelEx::addFile(QModelIndex parentIndex,
 
 	if (file->parentId() != parentFile.fileId())
 	{
-		assert(file->parentId() == parentFile.fileId());
+		Q_ASSERT(file->parentId() == parentFile.fileId());
 		return {{}, false};
 	}
 
 	if (m_files.hasFile(file->parentId()) == false)
 	{
-		assert(m_files.hasFile(file->fileId()));
+		Q_ASSERT(m_files.hasFile(file->fileId()));
 		return {{}, false};
 	}
 
@@ -473,14 +473,14 @@ std::pair<QModelIndex, bool> SchemaListModelEx::addFile(QModelIndex parentIndex,
 	//
 	if (m_files.empty() == true)
 	{
-		assert(m_files.empty() == false);
+		Q_ASSERT(m_files.empty() == false);
 		return {{}, false};		// At least parent must be present
 	}
 
 	// We rely that NEW (just created) fileId is always bigger the previously cretated files.
 	// It is required to update indexes, and for beginInsertRows to point chich index has been added.
 	//
-	assert(file->fileId() > m_files.files().crbegin()->second->fileId());
+	Q_ASSERT(file->fileId() > m_files.files().crbegin()->second->fileId());
 
 	// --
 	//
@@ -493,7 +493,7 @@ std::pair<QModelIndex, bool> SchemaListModelEx::addFile(QModelIndex parentIndex,
 	m_files.addFile(file);
 	if (m_files.hasFile(file->fileId()) == false)
 	{
-		assert(m_files.hasFile(file->fileId()));
+		Q_ASSERT(m_files.hasFile(file->fileId()));
 		return {{}, false};
 	}
 
@@ -514,7 +514,7 @@ std::pair<QModelIndex, bool> SchemaListModelEx::addFile(QModelIndex parentIndex,
 
 	//
 	QModelIndex addedModelIndex = index(insertIndex, 0, parentIndex);
-	assert(addedModelIndex.isValid() == true);
+	Q_ASSERT(addedModelIndex.isValid() == true);
 
 	return {addedModelIndex, true};
 }
@@ -540,7 +540,7 @@ bool SchemaListModelEx::moveFilesUpdate(const QModelIndexList& selectedIndexes,
 {
 	if (addedFilesIndexes == nullptr)
 	{
-		assert(addedFilesIndexes);
+		Q_ASSERT(addedFilesIndexes);
 
 		refresh();
 		return false;
@@ -548,7 +548,7 @@ bool SchemaListModelEx::moveFilesUpdate(const QModelIndexList& selectedIndexes,
 
 	if (movedFiles.empty() == true)
 	{
-		assert(movedFiles.empty() == false);
+		Q_ASSERT(movedFiles.empty() == false);
 
 		refresh();
 		return false;
@@ -556,7 +556,7 @@ bool SchemaListModelEx::moveFilesUpdate(const QModelIndexList& selectedIndexes,
 
 	if (movedToParnetId == DbFileInfo::Null)
 	{
-		assert(movedToParnetId != DbFileInfo::Null);
+		Q_ASSERT(movedToParnetId != DbFileInfo::Null);
 		refresh();
 		return false;
 	}
@@ -587,7 +587,7 @@ bool SchemaListModelEx::moveFilesUpdate(const QModelIndexList& selectedIndexes,
 	{
 		// Cant find ModelIndex for parent
 		//
-		assert(matched.size() != 1);
+		Q_ASSERT(matched.size() != 1);
 
 		// Mitigate error
 		//
@@ -596,11 +596,11 @@ bool SchemaListModelEx::moveFilesUpdate(const QModelIndexList& selectedIndexes,
 	}
 
 	QModelIndex movedToParentIndex = matched.front();
-	assert(movedToParentIndex.isValid());
+	Q_ASSERT(movedToParentIndex.isValid());
 
 	if (movedToParnetId != file(movedToParentIndex).fileId())
 	{
-		assert(movedToParnetId == file(movedToParentIndex).fileId());
+		Q_ASSERT(movedToParnetId == file(movedToParentIndex).fileId());
 
 		refresh();
 		return false;
@@ -618,7 +618,7 @@ bool SchemaListModelEx::moveFilesUpdate(const QModelIndexList& selectedIndexes,
 		}
 		else
 		{
-			assert(ok);
+			Q_ASSERT(ok);
 		}
 	}
 
@@ -627,7 +627,7 @@ bool SchemaListModelEx::moveFilesUpdate(const QModelIndexList& selectedIndexes,
 
 bool SchemaListModelEx::updateFiles(const QModelIndexList& selectedIndexes, const std::vector<DbFileInfo>& files)
 {
-	// assert(deletedFiles.size() == selectedIndexes.size()); -- sizes can be different, from deletedFiles
+	// Q_ASSERT(deletedFiles.size() == selectedIndexes.size()); -- sizes can be different, from deletedFiles
 	// could be removed system files before. Do not uncommnet this assertion
 	//
 	if (files.empty() == true)
@@ -663,7 +663,7 @@ bool SchemaListModelEx::updateFiles(const QModelIndexList& selectedIndexes, cons
 		std::map<int, int> childrenRows;	// map where key is child row to delete and value if FileId to delete
 	};
 
-	std::map<int, RemoveRows> removeRows;	// key - parent.fileid for deleting row. Used fileid as it must be dleted children first
+	std::map<int, RemoveRows> removeRowsMap;	// key - parent.fileid for deleting row. Used fileid as it must be dleted children first
 
 	for (QModelIndex& index : sortedRowList)
 	{
@@ -693,8 +693,8 @@ bool SchemaListModelEx::updateFiles(const QModelIndexList& selectedIndexes, cons
 //			m_files.removeFile(file);
 //			endRemoveRows();
 
-			removeRows[static_cast<int>(pi.internalId())].parentModelIndex = pi;
-			removeRows[static_cast<int>(pi.internalId())].childrenRows.insert({childIndex, file.fileId()});
+			removeRowsMap[static_cast<int>(pi.internalId())].parentModelIndex = pi;
+			removeRowsMap[static_cast<int>(pi.internalId())].childrenRows.insert({childIndex, file.fileId()});
 		}
 		else
 		{
@@ -702,7 +702,7 @@ bool SchemaListModelEx::updateFiles(const QModelIndexList& selectedIndexes, cons
 
 			if (modelFile == nullptr)
 			{
-				assert(m_files.hasFile(file.fileId()) == true);
+				Q_ASSERT(m_files.hasFile(file.fileId()) == true);
 				continue;
 			}
 			else
@@ -719,7 +719,7 @@ bool SchemaListModelEx::updateFiles(const QModelIndexList& selectedIndexes, cons
 
 	// Removes rows in reverse sequence (row by row), and from high to low fileid (to remove children first)
 	//
-	for (auto rit = removeRows.rbegin(); rit != removeRows.rend(); ++rit)
+	for (auto rit = removeRowsMap.rbegin(); rit != removeRowsMap.rend(); ++rit)
 	{
 		//int parentFileId = rit->first;
 		const RemoveRows& removeRows = rit->second;
@@ -758,8 +758,8 @@ DbFileInfo SchemaListModelEx::file(const QModelIndex& modelIndex) const
 		return m_parentFile;
 	}
 
-	int fileId = modelIndex.internalId();
-	assert(fileId != -1);
+	int fileId = static_cast<int>(modelIndex.internalId());
+	Q_ASSERT(fileId != -1);
 
 	return file(fileId);
 }
@@ -771,8 +771,8 @@ std::shared_ptr<DbFileInfo> SchemaListModelEx::fileSharedPtr(const QModelIndex& 
 		return std::make_shared<DbFileInfo>(m_parentFile);
 	}
 
-	int fileId = modelIndex.internalId();
-	assert(fileId != -1);
+	int fileId = static_cast<int>(modelIndex.internalId());
+	Q_ASSERT(fileId != -1);
 
 	return m_files.file(fileId);
 }
@@ -784,8 +784,8 @@ bool SchemaListModelEx::isFolder(const QModelIndex& modelIndex) const
 		return false;
 	}
 
-	int fileId = modelIndex.internalId();
-	assert(fileId != -1);
+	int fileId = static_cast<int>(modelIndex.internalId());
+	Q_ASSERT(fileId != -1);
 
 	// --
 	//
@@ -827,7 +827,7 @@ const QStringList& SchemaListModelEx::tagFilter() const
 
 void SchemaListModelEx::applyFilter(DbFileTree* filesTree, const std::map<int, VFrame30::SchemaDetails>& detailsMap)
 {
-	assert(filesTree);
+	Q_ASSERT(filesTree);
 
 	// Filetr by filter text
 	//
@@ -885,7 +885,7 @@ void SchemaListModelEx::applyFilter(DbFileTree* filesTree, const std::map<int, V
 		}
 		else
 		{
-			assert(dit != detailsMap.end());
+			Q_ASSERT(dit != detailsMap.end());
 		}
 	}
 
@@ -904,7 +904,7 @@ void SchemaListModelEx::applyFilter(DbFileTree* filesTree, const std::map<int, V
 		auto parentIt = files.find(file->parentId());
 		if (parentIt == files.end())
 		{
-			assert(false);
+			Q_ASSERT(false);
 			continue;
 		}
 
@@ -916,15 +916,15 @@ void SchemaListModelEx::applyFilter(DbFileTree* filesTree, const std::map<int, V
 		{
 			parentFiles[parentFile->fileId()] = parentFile;
 
-			auto parentIt = files.find(parentFile->parentId());
-			if (parentIt == files.end())
+			auto parentInParentIt = files.find(parentFile->parentId());
+			if (parentInParentIt == files.end())
 			{
-				assert(false);
+				Q_ASSERT(false);
 				parentFile.reset();
 			}
 			else
 			{
-				parentFile = parentIt->second;
+				parentFile = parentInParentIt->second;
 			}
 		}
 	}
@@ -945,7 +945,7 @@ void SchemaListModelEx::applyFilter(DbFileTree* filesTree, const std::map<int, V
 
 void SchemaListModelEx::applyTagFilter(DbFileTree* filesTree, const std::map<int, VFrame30::SchemaDetails>& detailsMap)
 {
-	assert(filesTree);
+	Q_ASSERT(filesTree);
 
 	if (m_tagFilter.isEmpty() == true)
 	{
@@ -1010,7 +1010,7 @@ void SchemaListModelEx::applyTagFilter(DbFileTree* filesTree, const std::map<int
 		auto parentIt = files.find(file->parentId());
 		if (parentIt == files.end())
 		{
-			assert(false);
+			Q_ASSERT(false);
 			continue;
 		}
 
@@ -1022,15 +1022,15 @@ void SchemaListModelEx::applyTagFilter(DbFileTree* filesTree, const std::map<int
 		{
 			parentFiles[parentFile->fileId()] = parentFile;
 
-			auto parentIt = files.find(parentFile->parentId());
-			if (parentIt == files.end())
+			auto parentInParentIt = files.find(parentFile->parentId());
+			if (parentInParentIt == files.end())
 			{
-				assert(false);
+				Q_ASSERT(false);
 				parentFile.reset();
 			}
 			else
 			{
-				parentFile = parentIt->second;
+				parentFile = parentInParentIt->second;
 			}
 		}
 	}
@@ -1152,7 +1152,7 @@ void SchemaListModelEx::refresh()
 void SchemaListModelEx::projectOpened(DbProject /*project*/)
 {
 	m_parentFile = db()->systemFileInfo(Db::File::SchemasFileName);
-	assert(m_parentFile.fileId() != -1);
+	Q_ASSERT(m_parentFile.fileId() != -1);
 
 	std::vector<DbFileInfo> systemFiles = db()->systemFiles();
 	for (const DbFileInfo& sf : systemFiles)
@@ -1294,7 +1294,7 @@ void SchemaProxyListModel::setSourceModel(QAbstractItemModel* sourceModel)
 	QSortFilterProxyModel::setSourceModel(sourceModel);
 
 	m_sourceModel = dynamic_cast<SchemaListModelEx*>(sourceModel);
-	assert(m_sourceModel != nullptr);
+	Q_ASSERT(m_sourceModel != nullptr);
 
 	return;
 }
@@ -1372,7 +1372,7 @@ SchemaFileViewEx::SchemaFileViewEx(DbController* dbc, QWidget* parent) :
 	HasDbController(dbc),
 	m_filesModel(dbc, this)
 {
-	assert(dbc != nullptr);
+	Q_ASSERT(dbc != nullptr);
 
 	setUniformRowHeights(true);
 	setWordWrap(false);
@@ -1622,7 +1622,7 @@ std::vector<std::shared_ptr<DbFileInfo>> SchemaFileViewEx::selectedFiles() const
 
 		if (file->fileId() == -1)
 		{
-			assert(file->fileId() != -1);
+			Q_ASSERT(file->fileId() != -1);
 			return result;
 		}
 
@@ -2009,7 +2009,7 @@ SchemasTabPageEx::SchemasTabPageEx(DbController* dbc, QWidget* parent) :
 	m_tabWidget->setMovable(true);
 
 	QSize sz = fontMetrics().size(Qt::TextSingleLine, "APPLICATION LOGIC");
-	sz.setHeight(sz.height() * 1.75);
+	sz.setHeight(static_cast<int>(sz.height() * 1.75));
 
 	QString ss = QString("QTabBar::tab{ min-width: %1px; min-height: %2px;}").arg(sz.width()).arg(sz.height());
 	m_tabWidget->tabBar()->setStyleSheet(ss);
@@ -2061,7 +2061,7 @@ bool SchemasTabPageEx::resetModified()
 
 void SchemasTabPageEx::refreshControlTabPage()
 {
-	assert(m_controlTabPage);
+	Q_ASSERT(m_controlTabPage);
 	m_controlTabPage->refresh();
 
 	return;
@@ -2210,7 +2210,7 @@ SchemaControlTabPageEx::~SchemaControlTabPageEx()
 
 VFrame30::Schema* SchemaControlTabPageEx::createSchema() const
 {
-	assert(false);
+	Q_ASSERT(false);
 	return nullptr;
 }
 
@@ -2254,7 +2254,7 @@ bool SchemaControlTabPageEx::resetModified()
 
 void SchemaControlTabPageEx::refresh()
 {
-	assert(m_filesView);
+	Q_ASSERT(m_filesView);
 
 	if (m_filesView != nullptr)
 	{
@@ -2301,7 +2301,7 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPageEx::createSchema(const DbF
 {
 	if (parentFile.isNull() == true)
 	{
-		assert(parentFile.isNull() == false);
+		Q_ASSERT(parentFile.isNull() == false);
 		return {};
 	}
 
@@ -2341,7 +2341,7 @@ std::shared_ptr<VFrame30::Schema> SchemaControlTabPageEx::createSchema(const DbF
 
 	// What kind of schema suppose to be created?
 	//
-	assert(false);
+	Q_ASSERT(false);
 
 	return {};
 }
@@ -2376,7 +2376,7 @@ void SchemaControlTabPageEx::removeFromOpenedList(EditSchemaTabPageEx* editTabPa
 {
 	if (editTabPage == nullptr)
 	{
-		assert(editTabPage);
+		Q_ASSERT(editTabPage);
 		return;
 	}
 
@@ -2388,7 +2388,7 @@ void SchemaControlTabPageEx::detachOrAttachWindow(EditSchemaTabPageEx* editTabPa
 {
 	if (editTabPage == nullptr)
 	{
-		assert(editTabPage);
+		Q_ASSERT(editTabPage);
 		return;
 	}
 
@@ -2397,7 +2397,7 @@ void SchemaControlTabPageEx::detachOrAttachWindow(EditSchemaTabPageEx* editTabPa
 	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
 	if (tabWidget == nullptr)
 	{
-		assert(tabWidget != nullptr);
+		Q_ASSERT(tabWidget != nullptr);
 		return;
 	}
 
@@ -2473,7 +2473,7 @@ int SchemaControlTabPageEx::showSelectFolderDialog(int parentFileId, int current
 		});
 
 	std::shared_ptr<DbFileInfo> schemaFile = files.rootFile();		// SchemaFile
-	assert(schemaFile->directoryAttribute() == true);
+	Q_ASSERT(schemaFile->directoryAttribute() == true);
 
 	static QIcon staticFolderIcon(":/Images/Images/SchemaFolder.svg");
 	const QIcon* const ptrToIcon = &staticFolderIcon;
@@ -2482,7 +2482,7 @@ int SchemaControlTabPageEx::showSelectFolderDialog(int parentFileId, int current
 	std::function<void(std::shared_ptr<DbFileInfo>, QTreeWidgetItem*)> addChilderenFilesFunc =
 		[&addChilderenFilesFunc, &files, treeWidget, currentSelectionFileId, &treeItemToSelect, ptrToIcon](std::shared_ptr<DbFileInfo> parent, QTreeWidgetItem* parentTreeItem)
 		{
-			assert(parent->isNull() == false);
+			Q_ASSERT(parent->isNull() == false);
 
 			const auto& childeren = files.children(parent->fileId());
 
@@ -2491,8 +2491,8 @@ int SchemaControlTabPageEx::showSelectFolderDialog(int parentFileId, int current
 				if (file->isNull() == true ||
 					file->directoryAttribute() == false)
 				{
-					assert(file->isNull() == false);
-					assert(file->directoryAttribute() == true);
+					Q_ASSERT(file->isNull() == false);
+					Q_ASSERT(file->directoryAttribute() == true);
 					return;
 				}
 
@@ -2575,7 +2575,7 @@ void SchemaControlTabPageEx::openSelectedFile()
 	auto selectedFiles = m_filesView->selectedFiles();
 	if (selectedFiles.size() != 1)
 	{
-		assert(selectedFiles.size() == 1);
+		Q_ASSERT(selectedFiles.size() == 1);
 		return;
 	}
 
@@ -2589,7 +2589,7 @@ void SchemaControlTabPageEx::viewSelectedFile()
 	auto selectedFiles = m_filesView->selectedFiles();
 	if (selectedFiles.size() != 1)
 	{
-		assert(selectedFiles.size() == 1);
+		Q_ASSERT(selectedFiles.size() == 1);
 		return;
 	}
 
@@ -2602,7 +2602,7 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 {
 	if (file.isNull() == true)
 	{
-		assert(file.isNull() == false);
+		Q_ASSERT(file.isNull() == false);
 		return;
 	}
 
@@ -2624,12 +2624,12 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 		return;
 	}
 
-	assert(file.state() == VcsState::CheckedOut && file.userId() == db()->currentUser().userId());
+	Q_ASSERT(file.state() == VcsState::CheckedOut && file.userId() == db()->currentUser().userId());
 
 	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
 	if (tabWidget == nullptr)
 	{
-		assert(tabWidget != nullptr);
+		Q_ASSERT(tabWidget != nullptr);
 		return;
 	}
 
@@ -2677,7 +2677,7 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 
 	if (vf == nullptr)
 	{
-		assert(vf != nullptr);
+		Q_ASSERT(vf != nullptr);
 		return;
 	}
 
@@ -2691,12 +2691,12 @@ void SchemaControlTabPageEx::openFile(const DbFileInfo& file)
 	connect(editTabPage, &EditSchemaTabPageEx::aboutToClose, this, &SchemaControlTabPageEx::removeFromOpenedList);
 	connect(editTabPage, &EditSchemaTabPageEx::pleaseDetachOrAttachWindow, this, &SchemaControlTabPageEx::detachOrAttachWindow);
 
-	assert(tabWidget->parent());
+	Q_ASSERT(tabWidget->parent());
 
 	SchemasTabPageEx* schemasTabPage = dynamic_cast<SchemasTabPageEx*>(tabWidget->parent());
 	if (schemasTabPage == nullptr)
 	{
-		assert(dynamic_cast<SchemasTabPageEx*>(tabWidget->parent()));
+		Q_ASSERT(dynamic_cast<SchemasTabPageEx*>(tabWidget->parent()));
 		return;
 	}
 
@@ -2726,7 +2726,7 @@ void SchemaControlTabPageEx::viewFile(const DbFileInfo& file)
 {
 	if (file.isNull() == true)
 	{
-		assert(file.isNull() == false);
+		Q_ASSERT(file.isNull() == false);
 		return;
 	}
 
@@ -2735,7 +2735,7 @@ void SchemaControlTabPageEx::viewFile(const DbFileInfo& file)
 	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
 	if (tabWidget == nullptr)
 	{
-		assert(tabWidget != nullptr);
+		Q_ASSERT(tabWidget != nullptr);
 		return;
 	}
 
@@ -2861,7 +2861,7 @@ void SchemaControlTabPageEx::addLogicSchema(QStringList deviceStrIds, QString lm
 	GlobalMessanger::instance().fireChangeCurrentTab(this->parentWidget()->parentWidget()->parentWidget());
 
 	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(this->parentWidget()->parentWidget());
-	assert(tabWidget);
+	Q_ASSERT(tabWidget);
 
 	if (tabWidget != nullptr)
 	{
@@ -2879,7 +2879,7 @@ void SchemaControlTabPageEx::addFile()
     QModelIndexList selectedRows = m_filesView->selectionModel()->selectedRows();
 	if (selectedRows.size() != 1)
     {
-		assert(selectedRows.size() == 1);
+		Q_ASSERT(selectedRows.size() == 1);
         return;
     }
 
@@ -2904,8 +2904,8 @@ void SchemaControlTabPageEx::addFile()
 	if (parentFile.isNull() == true ||
 		parentFile.directoryAttribute() == false)
 	{
-		assert(parentFile.isNull() == false);
-		assert(parentFile.directoryAttribute());
+		Q_ASSERT(parentFile.isNull() == false);
+		Q_ASSERT(parentFile.directoryAttribute());
 		return;
 	}
 
@@ -2915,7 +2915,7 @@ void SchemaControlTabPageEx::addFile()
 	std::shared_ptr<VFrame30::Schema> schema = createSchema(parentFile);
 	if (schema == nullptr)
 	{
-		assert(schema);
+		Q_ASSERT(schema);
 		return;
 	}
 
@@ -2962,7 +2962,7 @@ void SchemaControlTabPageEx::addFile()
 		extension = Db::File::DvsFileExtension;
     }
 
-	assert(extension.isEmpty() == false);
+	Q_ASSERT(extension.isEmpty() == false);
 
     schema->setSchemaId(defaultId);
 
@@ -3044,7 +3044,7 @@ void SchemaControlTabPageEx::addSchemaFileToDb(std::shared_ptr<VFrame30::Schema>
 {
 	if (schema == nullptr)
 	{
-		assert(schema);
+		Q_ASSERT(schema);
 		return;
 	}
 
@@ -3118,7 +3118,7 @@ void SchemaControlTabPageEx::addFolder()
 	QModelIndexList selectedRows = m_filesView->selectionModel()->selectedRows();
 	if (selectedRows.size() != 1)
 	{
-		assert(selectedRows.size() == 1);
+		Q_ASSERT(selectedRows.size() == 1);
 		return;
 	}
 
@@ -3143,8 +3143,8 @@ void SchemaControlTabPageEx::addFolder()
 	if (parentFile.isNull() == true ||
 		parentFile.directoryAttribute() == false)
 	{
-		assert(parentFile.isNull() == false);
-		assert(parentFile.directoryAttribute());
+		Q_ASSERT(parentFile.isNull() == false);
+		Q_ASSERT(parentFile.directoryAttribute());
 		return;
 	}
 
@@ -3227,14 +3227,14 @@ void SchemaControlTabPageEx::cloneFile()
 	auto selectedFiles = m_filesView->selectedFiles();
 	if (selectedFiles.size() != 1)
 	{
-		assert(selectedFiles.size() == 1);
+		Q_ASSERT(selectedFiles.size() == 1);
 		return;
 	}
 
 	DbFileInfo fileToClone = *(selectedFiles.front());
 	if (fileToClone.fileId() == -1)
 	{
-		assert(fileToClone.fileId() != -1);
+		Q_ASSERT(fileToClone.fileId() != -1);
 		return;
 	}
 
@@ -3253,7 +3253,7 @@ void SchemaControlTabPageEx::cloneFile()
 	std::shared_ptr<VFrame30::Schema> schema(VFrame30::Schema::Create(out->data()));
 	if (schema == nullptr)
 	{
-		assert(schema != nullptr);
+		Q_ASSERT(schema != nullptr);
 		return;
 	}
 
@@ -3304,7 +3304,7 @@ void SchemaControlTabPageEx::cloneFile()
 
 		if (c != 0)
 		{
-			assert(c == 0);
+			Q_ASSERT(c == 0);
 			QMessageBox::critical(this, qAppName(), tr("Cannot clone schema, not all GUIDs were updated. Please, inform developers about this problem."));
 			return;
 		}
@@ -3336,11 +3336,11 @@ void SchemaControlTabPageEx::deleteFiles()
 
 	if (files.empty() == true)
 	{
-		assert(files.empty() == false);
+		Q_ASSERT(files.empty() == false);
 		return;
 	}
 
-	assert(selectedIndexes.size() == files.size());
+	Q_ASSERT(selectedIndexes.size() == files.size());
 
 	// --
 	//
@@ -3399,7 +3399,7 @@ void SchemaControlTabPageEx::deleteFiles()
 	//
 	for (auto editWidget : m_openedFiles)
 	{
-		assert(editWidget);
+		Q_ASSERT(editWidget);
 
 		for (std::shared_ptr<DbFileInfo> fi : deleteFiles)
 		{
@@ -3428,11 +3428,11 @@ void SchemaControlTabPageEx::moveFiles()
 
 	if (files.empty() == true)
 	{
-		assert(files.empty() == false);
+		Q_ASSERT(files.empty() == false);
 		return;
 	}
 
-	assert(selectedIndexes.size() == files.size());
+	Q_ASSERT(selectedIndexes.size() == files.size());
 
 	// If schema is opened, can't move it
 	//
@@ -3441,7 +3441,7 @@ void SchemaControlTabPageEx::moveFiles()
 		auto foundTab = std::find_if(m_openedFiles.begin(), m_openedFiles.end(),
 					[&file](const EditSchemaTabPageEx* tabPage)
 					{
-						assert(tabPage);
+						Q_ASSERT(tabPage);
 						return	tabPage->fileInfo().fileId() == file->fileId() &&
 								tabPage->readOnly() == false;
 					});
@@ -3472,7 +3472,7 @@ void SchemaControlTabPageEx::moveFiles()
 
 	if (filesToMove.empty() == true)
 	{
-		assert(filesToMove.empty() == false);
+		Q_ASSERT(filesToMove.empty() == false);
 		return;
 	}
 
@@ -3512,7 +3512,7 @@ void SchemaControlTabPageEx::moveFiles()
 															  QVariant::fromValue(moveToFileId),
 															  1,
 															  Qt::MatchExactly | Qt::MatchRecursive);
-	assert(matched.size() == 1);
+	Q_ASSERT(matched.size() == 1);
 
 	if (matched.size() == 1)
 	{
@@ -3531,7 +3531,7 @@ void SchemaControlTabPageEx::moveFiles()
 	// Select moved files
 	//
 	QItemSelectionModel* selectionModel = m_filesView->selectionModel();
-	assert(selectionModel);
+	Q_ASSERT(selectionModel);
 
 	selectionModel->reset();
 
@@ -3556,11 +3556,11 @@ void SchemaControlTabPageEx::checkOutFiles()
 	const std::vector<std::shared_ptr<DbFileInfo>> files = m_filesView->selectedFiles();
 	if (files.empty() == true)
 	{
-		assert(files.empty() == false);
+		Q_ASSERT(files.empty() == false);
 		return;
 	}
 
-	assert(selectedIndexes.size() == files.size());
+	Q_ASSERT(selectedIndexes.size() == files.size());
 
 	// --
 	//
@@ -3613,11 +3613,11 @@ void SchemaControlTabPageEx::checkInFiles()
 	const std::vector<std::shared_ptr<DbFileInfo>> selectedFiles = m_filesView->selectedFiles();
 	if (selectedFiles.empty() == true)
 	{
-		assert(selectedFiles.empty() == false);
+		Q_ASSERT(selectedFiles.empty() == false);
 		return;
 	}
 
-	assert(selectedIndexes.size() == selectedFiles.size());
+	Q_ASSERT(selectedIndexes.size() == selectedFiles.size());
 
 	// --
 	//
@@ -3654,7 +3654,7 @@ void SchemaControlTabPageEx::checkInFiles()
 	{
 		if (editWidget == nullptr)
 		{
-			assert(editWidget);
+			Q_ASSERT(editWidget);
 			continue;
 		}
 
@@ -3709,7 +3709,7 @@ void SchemaControlTabPageEx::checkInFiles()
 	{
 		if (editWidget == nullptr)
 		{
-			assert(editWidget);
+			Q_ASSERT(editWidget);
 			continue;
 		}
 
@@ -3774,7 +3774,7 @@ void SchemaControlTabPageEx::undoChangesFiles()
 	//
 	for (auto editWidget : m_openedFiles)
 	{
-		assert(editWidget);
+		Q_ASSERT(editWidget);
 
 		for (const DbFileInfo& fi : undoFiles)
 		{
@@ -3933,7 +3933,7 @@ void SchemaControlTabPageEx::compareObject(DbChangesetObject object, CompareData
 		}
 		break;
 	default:
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	if (source == nullptr)
@@ -3990,7 +3990,7 @@ void SchemaControlTabPageEx::compareObject(DbChangesetObject object, CompareData
 		}
 		break;
 	default:
-		assert(false);
+		Q_ASSERT(false);
 	}
 
 	if (target == nullptr)
@@ -4083,7 +4083,7 @@ void SchemaControlTabPageEx::compareObject(DbChangesetObject object, CompareData
 					}
 				}
 
-				assert(layerFound);
+				Q_ASSERT(layerFound);
 			}
 		}
 	}
@@ -4093,7 +4093,7 @@ void SchemaControlTabPageEx::compareObject(DbChangesetObject object, CompareData
 	QTabWidget* tabWidget = dynamic_cast<QTabWidget*>(parentWidget()->parentWidget());
 	if (tabWidget == nullptr)
 	{
-		assert(tabWidget != nullptr);
+		Q_ASSERT(tabWidget != nullptr);
 		return;
 	}
 
@@ -4267,7 +4267,7 @@ void SchemaControlTabPageEx::showFileProperties()
 		auto foundTab = std::find_if(m_openedFiles.begin(), m_openedFiles.end(),
 					[&file](const EditSchemaTabPageEx* tabPage)
 					{
-						assert(tabPage);
+						Q_ASSERT(tabPage);
 						return	tabPage->fileInfo().fileId() == file->fileId() &&
 								tabPage->readOnly() == false;
 					});
@@ -4302,7 +4302,7 @@ void SchemaControlTabPageEx::showFileProperties()
 		std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file->data());
 		if (schema == nullptr)
 		{
-			assert(schema != nullptr);
+			Q_ASSERT(schema != nullptr);
 			return;
 		}
 
@@ -4333,7 +4333,7 @@ void SchemaControlTabPageEx::showFileProperties()
 
 	for (auto[schemaFile, schema] : schemas)
 	{
-		assert(schema != nullptr);
+		Q_ASSERT(schema != nullptr);
 
 		propertyObjects.push_back(schema);
 
@@ -4342,7 +4342,7 @@ void SchemaControlTabPageEx::showFileProperties()
 		std::shared_ptr<Property> schemaIdProp = schema->propertyByCaption("SchemaID");
 		if (schemaIdProp == nullptr)
 		{
-			assert(schemaIdProp != nullptr);
+			Q_ASSERT(schemaIdProp != nullptr);
 			continue;
 		}
 
@@ -4395,7 +4395,7 @@ void SchemaControlTabPageEx::showFileProperties()
 
 			if (data.isEmpty() == true)
 			{
-				assert(data.isEmpty() == false);
+				Q_ASSERT(data.isEmpty() == false);
 				return;
 			}
 
@@ -4420,7 +4420,7 @@ void SchemaControlTabPageEx::showFileProperties()
 				//
 				QString newFileName = schema->schemaId() + "." + file->extension();
 
-				if (bool ok = db()->renameFile(*file, newFileName, file.get(), this);
+				if (ok = db()->renameFile(*file, newFileName, file.get(), this);
 					ok == false)
 				{
 					// Don't save file if it was not renamed, as it will lead that filename differs from SchemaID
@@ -4449,7 +4449,7 @@ void SchemaControlTabPageEx::showFileProperties()
 
 void SchemaControlTabPageEx::ctrlF()
 {
-	assert(m_searchEdit);
+	Q_ASSERT(m_searchEdit);
 
 	m_searchEdit->setFocus();
 	m_searchEdit->selectAll();
@@ -4461,8 +4461,8 @@ void SchemaControlTabPageEx::search()
 {
 	// Search for text in schemas
 	//
-	assert(m_filesView);
-	assert(m_searchEdit);
+	Q_ASSERT(m_filesView);
+	Q_ASSERT(m_searchEdit);
 
 	QString searchText = m_searchEdit->text().trimmed();
 
@@ -4482,7 +4482,7 @@ void SchemaControlTabPageEx::search()
 		QSettings{}.setValue("SchemaControlTabPageEx/SearchCompleter", completerStringList);
 
 		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_searchCompleter->model());
-		assert(completerModel);
+		Q_ASSERT(completerModel);
 
 		if (completerModel != nullptr)
 		{
@@ -4506,7 +4506,7 @@ void SchemaControlTabPageEx::searchSchemaForLm(QString equipmentId)
 	QTabWidget* parentTabWidget = dynamic_cast<QTabWidget*>(this->parentWidget()->parentWidget());
 	if (parentTabWidget == nullptr)
 	{
-		assert(parentTabWidget);
+		Q_ASSERT(parentTabWidget);
 	}
 	else
 	{
@@ -4529,8 +4529,8 @@ void SchemaControlTabPageEx::filter()
 {
 	// Search for text in schemas
 	//
-	assert(m_filesView);
-	assert(m_filterEdit);
+	Q_ASSERT(m_filesView);
+	Q_ASSERT(m_filterEdit);
 
 	QString filterText = m_filterEdit->text().trimmed();
 
@@ -4544,7 +4544,7 @@ void SchemaControlTabPageEx::filter()
 		QSettings{}.setValue("SchemaControlTabPageEx/SearchCompleter", completerStringList);
 
 		QStringListModel* completerModel = dynamic_cast<QStringListModel*>(m_searchCompleter->model());
-		assert(completerModel);
+		Q_ASSERT(completerModel);
 
 		if (completerModel != nullptr)
 		{
@@ -4583,7 +4583,7 @@ void SchemaControlTabPageEx::filter()
 
 void SchemaControlTabPageEx::resetFilter()
 {
-	assert(m_filesView);
+	Q_ASSERT(m_filesView);
 
 	m_filterEdit->clear();
 
@@ -4647,8 +4647,8 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 	m_schemaWidget(nullptr),
 	m_tabWidget(tabWidget)
 {
-	assert(m_tabWidget);
-	assert(schema.get() != nullptr);
+	Q_ASSERT(m_tabWidget);
+	Q_ASSERT(schema.get() != nullptr);
 
 	setWindowTitle(schema->schemaId());
 
@@ -4818,7 +4818,7 @@ void EditSchemaTabPageEx::closeEvent(QCloseEvent* event)
 			event->ignore();
 			return;
 		default:
-			assert(false);
+			Q_ASSERT(false);
 		}
 	}
 
@@ -4854,7 +4854,8 @@ void EditSchemaTabPageEx::ensureVisible()
 		(frameGeometry().width() > screenRect.width() ||
 		 frameGeometry().height() > screenRect.height()))
 	{
-		resize(screenRect.width() * 0.7, screenRect.height() * 0.7);
+		resize(static_cast<int>(screenRect.width() * 0.7),
+			   static_cast<int>(screenRect.height() * 0.7));
 	}
 
 	return;
@@ -4920,7 +4921,7 @@ void EditSchemaTabPageEx::updateAfbSchemaItems()
 {
 	if (m_schemaWidget == nullptr)
 	{
-		assert(m_schemaWidget);
+		Q_ASSERT(m_schemaWidget);
 		return;
 	}
 
@@ -4933,7 +4934,7 @@ void EditSchemaTabPageEx::updateUfbSchemaItems()
 {
 	if (m_schemaWidget == nullptr)
 	{
-		assert(m_schemaWidget);
+		Q_ASSERT(m_schemaWidget);
 		return;
 	}
 
@@ -4946,7 +4947,7 @@ void EditSchemaTabPageEx::updateBussesSchemaItems()
 {
 	if (m_schemaWidget == nullptr)
 	{
-		assert(m_schemaWidget);
+		Q_ASSERT(m_schemaWidget);
 		return;
 	}
 
@@ -4993,7 +4994,7 @@ void EditSchemaTabPageEx::closeTab()
 		case QMessageBox::Cancel:
 			return;
 		default:
-			assert(false);
+			Q_ASSERT(false);
 		}
 	}
 
@@ -5109,7 +5110,7 @@ void EditSchemaTabPageEx::undoChangesFile()
 		fileInfo().state() != VcsState::CheckedOut ||
 		fileInfo().userId() != db()->currentUser().userId())
 	{
-		assert(fileInfo().userId() == db()->currentUser().userId());
+		Q_ASSERT(fileInfo().userId() == db()->currentUser().userId());
 		return;
 	}
 
@@ -5147,7 +5148,7 @@ void EditSchemaTabPageEx::fileMenuTriggered()
 {
 	if (m_toolBar == nullptr)
 	{
-		assert(m_toolBar);
+		Q_ASSERT(m_toolBar);
 		return;
 	}
 
@@ -5156,7 +5157,7 @@ void EditSchemaTabPageEx::fileMenuTriggered()
 
 	if (w == nullptr)
 	{
-		assert(w);
+		Q_ASSERT(w);
 		return;
 	}
 
@@ -5172,7 +5173,7 @@ void EditSchemaTabPageEx::sizeAndPosMenuTriggered()
 {
 	if (m_toolBar == nullptr)
 	{
-		assert(m_toolBar);
+		Q_ASSERT(m_toolBar);
 		return;
 	}
 
@@ -5180,7 +5181,7 @@ void EditSchemaTabPageEx::sizeAndPosMenuTriggered()
 
 	if (w == nullptr)
 	{
-		assert(w);
+		Q_ASSERT(w);
 		return;
 	}
 
@@ -5196,7 +5197,7 @@ void EditSchemaTabPageEx::itemsOrderTriggered()
 {
 	if (m_toolBar == nullptr)
 	{
-		assert(m_toolBar);
+		Q_ASSERT(m_toolBar);
 		return;
 	}
 
@@ -5204,7 +5205,7 @@ void EditSchemaTabPageEx::itemsOrderTriggered()
 
 	if (w == nullptr)
 	{
-		assert(w);
+		Q_ASSERT(w);
 		return;
 	}
 
@@ -5223,7 +5224,7 @@ bool EditSchemaTabPageEx::saveWorkcopy()
 		fileInfo().state() != VcsState::CheckedOut ||
 		fileInfo().userId() != db()->currentUser().userId())
 	{
-		assert(fileInfo().userId() == db()->currentUser().userId());
+		Q_ASSERT(fileInfo().userId() == db()->currentUser().userId());
 		return false;
 	}
 
@@ -5232,7 +5233,7 @@ bool EditSchemaTabPageEx::saveWorkcopy()
 
 	if (data.isEmpty() == true)
 	{
-		assert(data.isEmpty() == false);
+		Q_ASSERT(data.isEmpty() == false);
 		return false;
 	}
 
@@ -5319,7 +5320,7 @@ void EditSchemaTabPageEx::setCurrentWorkcopy()
 		fileInfo().state() != VcsState::CheckedOut ||
 		(fileInfo().userId() != db()->currentUser().userId() && db()->currentUser().isAdminstrator() == false))
 	{
-		assert(fileInfo().userId() == db()->currentUser().userId());
+		Q_ASSERT(fileInfo().userId() == db()->currentUser().userId());
 		return;
 	}
 
@@ -5358,20 +5359,20 @@ void EditSchemaTabPageEx::setCurrentWorkcopy()
 
 std::shared_ptr<VFrame30::Schema> EditSchemaTabPageEx::schema()
 {
-	assert(m_schemaWidget);
+	Q_ASSERT(m_schemaWidget);
 	std::shared_ptr<VFrame30::Schema> s = m_schemaWidget->schema();
 	return s;
 }
 
 const DbFileInfo& EditSchemaTabPageEx::fileInfo() const
 {
-	assert(m_schemaWidget);
+	Q_ASSERT(m_schemaWidget);
 	return m_schemaWidget->fileInfo();
 }
 
 void EditSchemaTabPageEx::setFileInfo(const DbFileInfo& fi)
 {
-	assert(m_schemaWidget);
+	Q_ASSERT(m_schemaWidget);
 	m_schemaWidget->setFileInfo(fi);
 
 	m_schemaWidget->schema()->setChangeset(fi.changeset());
@@ -5381,13 +5382,13 @@ void EditSchemaTabPageEx::setFileInfo(const DbFileInfo& fi)
 
 bool EditSchemaTabPageEx::readOnly() const
 {
-	assert(m_schemaWidget);
+	Q_ASSERT(m_schemaWidget);
 	return m_schemaWidget->readOnly();
 }
 
 void EditSchemaTabPageEx::setReadOnly(bool value)
 {
-	assert(m_schemaWidget);
+	Q_ASSERT(m_schemaWidget);
 	m_schemaWidget->setReadOnly(value);
 
 	setPageTitle();
@@ -5395,13 +5396,13 @@ void EditSchemaTabPageEx::setReadOnly(bool value)
 
 bool EditSchemaTabPageEx::modified() const
 {
-	assert(m_schemaWidget);
+	Q_ASSERT(m_schemaWidget);
 	return m_schemaWidget->modified();
 }
 
 void EditSchemaTabPageEx::resetModified()
 {
-	assert(m_schemaWidget);
+	Q_ASSERT(m_schemaWidget);
 	return m_schemaWidget->resetModified();
 }
 
