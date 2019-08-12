@@ -14,13 +14,13 @@ DialogChoosePreset::DialogChoosePreset(QWidget* parent, DbController* db, Hardwa
 {
 	ui->setupUi(this);
 
-	QStringList l;
-	l << tr("Caption");
-	l << tr("PresetName");
-	l << tr("Type");
+	QStringList columnNames;
+	columnNames << tr("Caption");
+	columnNames << tr("PresetName");
+	columnNames << tr("Type");
 
-	ui->m_presetTree->setColumnCount(l.size());
-	ui->m_presetTree->setHeaderLabels(l);
+	ui->m_presetTree->setColumnCount(columnNames.size());
+	ui->m_presetTree->setHeaderLabels(columnNames);
 	int il = 0;
 	ui->m_presetTree->setColumnWidth(il++, 250);
 	ui->m_presetTree->setColumnWidth(il++, 150);
@@ -174,7 +174,10 @@ void DialogChoosePreset::showEvent(QShowEvent*)
 	// Resize depends on monitor size, DPI, resolution
 	//
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-	resize(screen.width() * 0.26, screen.height() * 0.45);
+
+	resize(static_cast<int>(screen.width() * 0.26),
+		   static_cast<int>(screen.height() * 0.45));
+
 	move(screen.center() - rect().center());
 
 	return;

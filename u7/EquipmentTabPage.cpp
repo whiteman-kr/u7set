@@ -3351,11 +3351,11 @@ void EquipmentView::updateFromPreset()
 		}
 
 		QByteArray data;
-		bool ok = device->saveToByteArray(&data);
+		ok = device->saveToByteArray(&data);
 
 		if (ok == false)
 		{
-			assert(false);
+			Q_ASSERT(false);
 			continue;
 		}
 
@@ -3398,7 +3398,7 @@ void EquipmentView::updateFromPreset()
 		DbFileInfo presetFileInfo;
 		presetFileInfo.setFileId(presetFileId);
 
-		bool ok = db()->getDeviceTreeLatestVersion(presetFileInfo, &device, this);
+		ok = db()->getDeviceTreeLatestVersion(presetFileInfo, &device, this);
 		if (ok == false)
 		{
 			return;
@@ -3468,16 +3468,16 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		addDeviceList == nullptr ||
 		deviceSignalsToUpdateAppSignals == nullptr)
 	{
-		assert(updateDeviceList);
-		assert(deleteDeviceList);
-		assert(addDeviceList);
-		assert(deviceSignalsToUpdateAppSignals);
+		Q_ASSERT(updateDeviceList);
+		Q_ASSERT(deleteDeviceList);
+		Q_ASSERT(addDeviceList);
+		Q_ASSERT(deviceSignalsToUpdateAppSignals);
 		return false;
 	}
 
 	if (device == nullptr)
 	{
-		assert(device);
+		Q_ASSERT(device);
 		return false;
 	}
 
@@ -3486,9 +3486,9 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 		device->presetName() != preset->presetName() ||
 		device->presetRoot() != preset->presetRoot()))
 	{
-		assert(preset);
-		assert(device->presetName() == preset->presetName());
-		assert(device->presetRoot() == preset->presetRoot());
+		Q_ASSERT(preset);
+		Q_ASSERT(device->presetName() == preset->presetName());
+		Q_ASSERT(device->presetRoot() == preset->presetRoot());
 		return false;
 	}
 
@@ -3698,12 +3698,11 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 	for (int i = 0; i < device->childrenCount(); i++)
 	{
 		std::shared_ptr<Hardware::DeviceObject> deviceChild = device->childSharedPtr(i);
-		std::shared_ptr<Hardware::DeviceObject> preset;		// not intialized, as deviceChild is not preset
 
 		if (deviceChild->preset() == false)
 		{
 			updateDeviceFromPreset(deviceChild,
-								   preset,
+								   {},			// not intialized, as deviceChild is not preset
 								   forceUpdateProperties,
 								   presetsToUpdate,
 								   updateDeviceList,
@@ -4578,7 +4577,7 @@ void EquipmentTabPage::setActionState()
 		// Don't need to go further
 		//
 		if (canAnyBeCheckedIn == true &&
-			canAnyBeCheckedIn == true )
+			canAnyBeCheckedOut == true )
 		{
 			break;
 		}
@@ -4730,15 +4729,15 @@ void EquipmentTabPage::setActionState()
 
 		bool allowCopyToClipboard = true;	// allow copy if all selected objects are the same type
 
-		const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(selectedIndexList.first());
-		assert(device);
+		const Hardware::DeviceObject* firstSelectedDevice = m_equipmentModel->deviceObject(selectedIndexList.first());
+		Q_ASSERT(firstSelectedDevice);
 
-		Hardware::DeviceType type = device->deviceType();
+		Hardware::DeviceType type = firstSelectedDevice->deviceType();
 
 		for (const QModelIndex& mi : selectedIndexList)
 		{
 			const Hardware::DeviceObject* device = m_equipmentModel->deviceObject(mi);
-			assert(device);
+			Q_ASSERT(device);
 
 			// System can be very big so forbid it's copying
 			//

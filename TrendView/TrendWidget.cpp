@@ -770,7 +770,7 @@ namespace TrendLib
 			//
 			m_trendParam.setLaneDuration(newLaneDuration);		// This func can limit value
 
-			if (m_trendParam.duration() != oldDuration)
+			if (m_trendParam.duration() != static_cast<quint64>(oldDuration))
 			{
 				m_trendParam.setStartTimeStamp(startTime);
 

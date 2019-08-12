@@ -409,10 +409,10 @@ void SignalPropertyManager::reloadPropertyBehaviour(DbController* dbController, 
 			}
 
 			bool ok = false;
-			auto result = E::stringToValue<E::PropertyBehaviourType>(fields[typeIndexes[i]], &ok);
+			E::PropertyBehaviourType behaviourType = E::stringToValue<E::PropertyBehaviourType>(fields[typeIndexes[i]], &ok);
 			if (ok == true)
 			{
-				behaviour.behaviourType[i] = result;
+				behaviour.behaviourType[i] = behaviourType;
 			}
 		}
 
@@ -1006,10 +1006,10 @@ bool SignalsModel::undoSignal(int id)
 	}
 	QVector<ObjectState> states;
 
-	for (int id : signalsIDs)
+	for (int signalId : signalsIDs)
 	{
 		ObjectState state;
-		dbController()->undoSignalChanges(id, &state, parentWindow());
+		dbController()->undoSignalChanges(signalId, &state, parentWindow());
 		if (state.errCode != ERR_SIGNAL_OK)
 		{
 			states << state;
@@ -1021,9 +1021,9 @@ bool SignalsModel::undoSignal(int id)
 		showErrors(states);
 	}
 
-	for (int id : signalsIDs)
+	for (int signalId : signalsIDs)
 	{
-		loadSignal(id, true);
+		loadSignal(signalId, true);
 	}
 
 	return true;
@@ -1692,10 +1692,10 @@ QVector<int> SignalsModel::cloneSignals(const QSet<int>& signalIDs)
 
 void SignalsModel::deleteSignalGroups(const QSet<int>& signalGroupIDs)
 {
-	foreach (const int groupID, signalGroupIDs)
+	for (const int groupID : signalGroupIDs)
 	{
 		QVector<int> signalIDs = m_signalSet.getChannelSignalsID(groupID);
-		foreach (const int signalID, signalIDs)
+		for (const int signalID : signalIDs)
 		{
 			deleteSignal(signalID);
 		}

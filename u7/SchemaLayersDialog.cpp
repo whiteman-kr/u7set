@@ -72,7 +72,9 @@ void SchemaLayersDialog::showEvent(QShowEvent*)
 	// Resize depends on monitor size, DPI, resolution
 	//
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-	resize(screen.width() * 0.20, screen.height() * 0.15);
+
+	resize(static_cast<int>(screen.width() * 0.20),
+		   static_cast<int>(screen.height() * 0.15));
 
 	move(screen.center() - rect().center());
 

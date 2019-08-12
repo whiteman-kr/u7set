@@ -73,6 +73,31 @@ namespace ExtWidgets
 		return QString();
 	}
 
+	QString stringListText(QVariant& value)
+	{
+		if (value.userType() == QVariant::StringList)
+		{
+			const int TextMaxLength = 128;
+
+			QStringList strings = value.toStringList();
+
+			QString val = strings.join(' ');
+
+			if (val.length() > TextMaxLength)
+			{
+				val = QObject::tr("StringList [%1 items]").arg(static_cast<int>(strings.size()));
+			}
+
+			val.remove(QChar::LineFeed);
+			val.remove(QChar::CarriageReturn);
+
+			return val;
+		}
+
+		Q_ASSERT(false);
+		return QString();
+	}
+
 	//
 	// ------------ PropertyArrayEditorDialog ------------
 	//
@@ -619,6 +644,310 @@ namespace ExtWidgets
 		return;
 	}
 
+	//
+	// ------------ StringListEditorDialog ------------
+	//
+	StringListEditorDialog::StringListEditorDialog(PropertyEditor* propertyEditor, QWidget* parent, const QString& propertyName, const QVariant& value):
+		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
+		m_parentPropertyEditor(propertyEditor)
+	{
+		if (value.userType() != QVariant::StringList)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		m_strings = value.toStringList();
+
+		setWindowTitle(propertyName);
+
+		setMinimumSize(320, 480);
+
+		QVBoxLayout* mainLayout = new QVBoxLayout();
+
+		// Create Editor
+
+		m_treeWidget = new QTreeWidget();
+		QStringList headerLabels;
+		headerLabels << tr("Strings");
+
+		m_treeWidget->setColumnCount(headerLabels.size());
+		m_treeWidget->setHeaderLabels(headerLabels);
+		m_treeWidget->setSelectionMode(QAbstractItemView::ExtendedSelection);
+		m_treeWidget->setRootIsDecorated(false);
+
+		m_treeWidget->header()->hide();
+
+		connect (m_treeWidget, &QTreeWidget::itemChanged, this, &StringListEditorDialog::itemChanged);
+
+		// Buttons
+
+		QVBoxLayout* buttonsLayout = new QVBoxLayout();
+
+		QPushButton* b = new QPushButton(tr("Add"));
+		connect(b, &QPushButton::clicked, this, &StringListEditorDialog::onAdd);
+		buttonsLayout->addWidget(b);
+
+		b = new QPushButton(tr("Remove"));
+		connect(b, &QPushButton::clicked, this, &StringListEditorDialog::onRemove);
+		buttonsLayout->addWidget(b);
+
+		b = new QPushButton(tr("Up"));
+		connect(b, &QPushButton::clicked, this, &StringListEditorDialog::onMoveUp);
+		buttonsLayout->addWidget(b);
+
+		b = new QPushButton(tr("Down"));
+		connect(b, &QPushButton::clicked, this, &StringListEditorDialog::onMoveDown);
+		buttonsLayout->addWidget(b);
+
+		buttonsLayout->addStretch();
+
+		// Top Layout
+
+		QWidget* leftWidget = new QWidget();
+
+		QHBoxLayout* leftLayout = new QHBoxLayout(leftWidget);
+		leftLayout->setContentsMargins(0, 0, 0, 0);
+		leftLayout->addWidget(m_treeWidget);
+		leftLayout->addLayout(buttonsLayout);
+
+		// Ok/Cancel
+
+		QHBoxLayout* okCancelButtonsLayout = new QHBoxLayout();
+		okCancelButtonsLayout->addStretch();
+
+		b = new QPushButton(tr("OK"), this);
+		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::accept);
+		okCancelButtonsLayout->addWidget(b);
+
+		b = new QPushButton(tr("Cancel"), this);
+		connect(b, &QPushButton::clicked, this, &PropertyArrayEditorDialog::reject);
+		okCancelButtonsLayout->addWidget(b);
+
+		mainLayout->addWidget(leftWidget);
+
+		//
+
+		mainLayout->addLayout(okCancelButtonsLayout);
+
+		setLayout(mainLayout);
+
+		updateStrings();
+
+		if (m_treeWidget->topLevelItemCount() > 0)
+		{
+			m_treeWidget->topLevelItem(0)->setSelected(true);
+		}
+
+		if (thePropertyEditorSettings.m_stringListEditorSize != QSize(-1, -1))
+		{
+			resize(thePropertyEditorSettings.m_stringListEditorSize);
+		}
+
+	}
+
+	StringListEditorDialog::~StringListEditorDialog()
+	{
+		thePropertyEditorSettings.m_stringListEditorSize = size();
+	}
+
+	QVariant StringListEditorDialog::value()
+	{
+		return m_strings;
+	}
+
+	void StringListEditorDialog::onMoveUp()
+	{
+		moveItems(false);
+	}
+
+	void StringListEditorDialog::onMoveDown()
+	{
+		moveItems(true);
+	}
+
+	void StringListEditorDialog::onAdd()
+	{
+		if (m_treeWidget == nullptr)
+		{
+			Q_ASSERT(m_treeWidget);
+			return;
+		}
+
+		// Create new string
+
+		m_strings.push_back(tr("String - %1").arg(m_strings.size() + 1));
+
+		m_treeWidget->clearSelection();
+
+		updateStrings();
+
+		QTreeWidgetItem* item = m_treeWidget->topLevelItem(m_treeWidget->topLevelItemCount() - 1);
+		if (item == nullptr)
+		{
+			Q_ASSERT(item);
+			return;
+		}
+
+		item->setSelected(true);
+
+		return;
+	}
+
+	void StringListEditorDialog::onRemove()
+	{
+		if (m_treeWidget == nullptr)
+		{
+			Q_ASSERT(m_treeWidget);
+			return;
+		}
+
+		// Find selected indexes and sort in descending order
+
+		std::vector<int> selectedRows;
+
+		auto selectedIndexes = m_treeWidget->selectionModel()->selectedIndexes();
+		for (auto si : selectedIndexes)
+		{
+			selectedRows.push_back(si.row());
+		}
+
+		std::sort(selectedRows.begin(), selectedRows.end(), std::greater<int>());
+
+		// Delete tree items and objects
+
+		for (int row : selectedRows)
+		{
+			QTreeWidgetItem* item = m_treeWidget->takeTopLevelItem(row);
+			if (item == nullptr)
+			{
+				Q_ASSERT(item);
+				return;
+			}
+			delete item;
+
+			if (row < 0 || row >= static_cast<int>(m_strings.size()))
+			{
+				Q_ASSERT(false);
+				return;
+			}
+
+			m_strings.removeAt(row);
+		}
+
+		updateStrings();
+
+		return;
+	}
+
+	void StringListEditorDialog::itemChanged(QTreeWidgetItem *item, int column)
+	{
+		Q_UNUSED(column);
+
+		if (item == nullptr)
+		{
+			Q_ASSERT(item);
+			return;
+		}
+
+		int index = m_treeWidget->indexOfTopLevelItem(item);
+		if (index < 0 || index >= static_cast<int>(m_strings.size()))
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		m_strings[index] = item->text(0);
+
+		return;
+	}
+
+	void StringListEditorDialog::updateStrings()
+	{
+		m_treeWidget->blockSignals(true);
+
+		int index = 0;
+
+		for (const QString& s : m_strings)
+		{
+			QTreeWidgetItem* twi = nullptr;
+
+			if (m_treeWidget->topLevelItemCount() > index)
+			{
+				twi = m_treeWidget->topLevelItem(index);
+			}
+			else
+			{
+				twi = new QTreeWidgetItem();
+				twi->setFlags(twi->flags() | Qt::ItemIsEditable);
+				m_treeWidget->addTopLevelItem(twi);
+
+			}
+
+			twi->setText(0, s);
+			index++;
+		}
+
+		m_treeWidget->blockSignals(false);
+
+		return;
+	}
+
+	void StringListEditorDialog::moveItems(bool forward)
+	{
+		int direction = forward ? 1 : -1;
+
+		auto selectedIndexes = m_treeWidget->selectionModel()->selectedIndexes();
+		if (selectedIndexes.isEmpty() == true)
+		{
+			return;
+		}
+
+		std::vector<int> selectedRows;
+		for (auto si : selectedIndexes)
+		{
+			selectedRows.push_back(si.row());
+		}
+
+		// Sort indexes
+		//
+		if (direction < 0)
+		{
+			std::sort(selectedRows.begin(), selectedRows.end(), std::less<int>());
+		}
+		else
+		{
+			std::sort(selectedRows.begin(), selectedRows.end(), std::greater<int>());
+		}
+
+		for (int row : selectedRows)
+		{
+			int row2 = row + direction;
+			if (row2 < 0 || row2 >= m_treeWidget->topLevelItemCount())
+			{
+				break;
+			}
+
+			if (row < 0 || row >= static_cast<int>(m_strings.size()) ||
+				row2 < 0 || row2 >= static_cast<int>(m_strings.size()))
+			{
+				Q_ASSERT(false);
+				return;
+			}
+
+			std::swap(m_strings[row], m_strings[row2]);
+
+			QTreeWidgetItem* item1 = m_treeWidget->topLevelItem(row);
+			item1->setSelected(false);
+
+			QTreeWidgetItem* item2 = m_treeWidget->topLevelItem(row2);
+			item2->setSelected(true);
+		}
+
+		updateStrings();
+
+		return;
+	}
 
 	//
 	// ------------ FilePathPropertyType ------------
@@ -631,18 +960,24 @@ namespace ExtWidgets
 
 	void PropertyEditorSettings::restore(QSettings& s)
 	{
-		m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePropertyEditorWindowPos", QPoint(-1, -1)).toPoint();
-		m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLinePropertyEditorGeometry").toByteArray();
 		m_arrayPropertyEditorSplitterState = s.value("PropertyEditor/arrayPropertyEditorSplitterState").toByteArray();
 		m_arrayPropertyEditorSize = s.value("PropertyEditor/arrayPropertyEditorSize").toSize();
+
+		m_stringListEditorSize = s.value("PropertyEditor/m_stringListEditorSize").toSize();
+
+		m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePropertyEditorWindowPos", QPoint(-1, -1)).toPoint();
+		m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLinePropertyEditorGeometry").toByteArray();
 	}
 
 	void PropertyEditorSettings::store(QSettings& s)
 	{
-		s.setValue("PropertyEditor/multiLinePropertyEditorWindowPos", m_multiLinePropertyEditorWindowPos);
-		s.setValue("PropertyEditor/multiLinePropertyEditorGeometry", m_multiLinePropertyEditorGeometry);
 		s.setValue("PropertyEditor/arrayPropertyEditorSplitterState", m_arrayPropertyEditorSplitterState);
 		s.setValue("PropertyEditor/arrayPropertyEditorSize", m_arrayPropertyEditorSize);
+
+		s.setValue("PropertyEditor/m_stringListEditorSize", m_stringListEditorSize);
+
+		s.setValue("PropertyEditor/multiLinePropertyEditorWindowPos", m_multiLinePropertyEditorWindowPos);
+		s.setValue("PropertyEditor/multiLinePropertyEditorGeometry", m_multiLinePropertyEditorGeometry);
 	}
 
 	//
@@ -1107,19 +1442,19 @@ namespace ExtWidgets
 		QColorDialog dialog(color, this);
 		if (dialog.exec() == QDialog::Accepted)
 		{
-            QColor color = dialog.selectedColor();
+			QColor selectedColor = dialog.selectedColor();
             QString str = QString("[%1;%2;%3;%4]").
-                          arg(color.red()).
-                          arg(color.green()).
-                          arg(color.blue()).
-                          arg(color.alpha());
+						  arg(selectedColor.red()).
+						  arg(selectedColor.green()).
+						  arg(selectedColor.blue()).
+						  arg(selectedColor.alpha());
 
-            if (color != m_oldColor)
+			if (selectedColor != m_oldColor)
             {
-                m_oldColor = color;
+				m_oldColor = selectedColor;
                 m_lineEdit->setText(str);
 
-                emit valueChanged(color);
+				emit valueChanged(selectedColor);
             }
 		}
 	}
@@ -1813,7 +2148,7 @@ namespace ExtWidgets
 
 
 	//
-	// ---------QtMultiCheckBox----------
+	// ---------MultiArrayEdit----------
 	//
 	MultiArrayEdit::MultiArrayEdit(PropertyEditor* propertyEditor, QWidget* parent, std::shared_ptr<Property> p, bool readOnly):
 		QWidget(parent),
@@ -1843,6 +2178,11 @@ namespace ExtWidgets
 			m_lineEdit->setText("<PropertyList>");
 		}
 
+		if (m_currentValue.userType() == QVariant::StringList)
+		{
+			m_lineEdit->setText("<StringList>");
+		}
+
 		m_button = new QToolButton(parent);
 		m_button->setText("...");
 
@@ -1865,37 +2205,72 @@ namespace ExtWidgets
 
 		m_currentValue = value;
 
-		m_lineEdit->setText(propertyVectorText(m_currentValue));
-
-		if (variantIsPropertyVector(m_currentValue) == false && variantIsPropertyList(m_currentValue) == false)
+		if (m_currentValue.userType() == QVariant::StringList)
 		{
-			Q_ASSERT(false);
+			m_lineEdit->setText(stringListText(m_currentValue));
 			return;
 		}
+
+		if (variantIsPropertyVector(m_currentValue) == true || variantIsPropertyList(m_currentValue) == true)
+		{
+			m_lineEdit->setText(propertyVectorText(m_currentValue));
+			return;
+		}
+
+		Q_ASSERT(false);
+		return;
 	}
 
 	void MultiArrayEdit::onButtonPressed()
 	{
-		if (variantIsPropertyVector(m_currentValue) == false && variantIsPropertyList(m_currentValue) == false)
+		if (variantIsPropertyVector(m_currentValue) == false &&
+				variantIsPropertyList(m_currentValue) == false &&
+				m_currentValue.userType() != QVariant::StringList)
 		{
 			Q_ASSERT(false);
 			return;
 		}
 
-		PropertyArrayEditorDialog d(m_propertyEditor, this, m_property->caption(), m_currentValue);
-		if (d.exec() != QDialog::Accepted)
+		QVariant newValue;
+
+		if (variantIsPropertyVector(m_currentValue) == true || variantIsPropertyList(m_currentValue) == true)
 		{
-			return;
+			PropertyArrayEditorDialog d(m_propertyEditor, this, m_property->caption(), m_currentValue);
+			if (d.exec() != QDialog::Accepted)
+			{
+				return;
+			}
+			newValue = d.value();
 		}
 
-		if (d.value() != m_currentValue)
+		if (m_currentValue.userType() == QVariant::StringList)
 		{
-			 emit valueChanged(d.value());
+			StringListEditorDialog d(m_propertyEditor, this, m_property->caption(), m_currentValue);
+			if (d.exec() != QDialog::Accepted)
+			{
+				return;
+			}
+			newValue = d.value();
 		}
 
-		m_currentValue = d.value();
+		if (newValue != m_currentValue)
+		{
+			 emit valueChanged(newValue);
+		}
 
-		m_lineEdit->setText(propertyVectorText(m_currentValue));
+		m_currentValue = newValue;
+
+		if (variantIsPropertyVector(m_currentValue) == true || variantIsPropertyList(m_currentValue) == true)
+		{
+			m_lineEdit->setText(propertyVectorText(m_currentValue));
+		}
+		else
+		{
+			if (m_currentValue.userType() == QVariant::StringList)
+			{
+				m_lineEdit->setText(stringListText(m_currentValue));
+			}
+		}
 	}
 
 	//
@@ -2196,6 +2571,22 @@ namespace ExtWidgets
 
 				connect(m_editor, &MultiFilePathEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
 				connect(m_editor, &MultiFilePathEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
+
+				break;
+			}
+
+			if (propertyPtr->value().userType() == QVariant::StringList)
+			{
+				MultiArrayEdit* m_editor = new MultiArrayEdit(m_propertyEditor, parent, propertyPtr, property->isEnabled() == false);
+				editor = m_editor;
+
+				if (manager->sameValue(property) == true)
+				{
+					m_editor->setValue(propertyPtr->value(), property->isEnabled() == false);
+				}
+
+				connect(m_editor, &MultiArrayEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
+				connect(m_editor, &MultiArrayEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
 
 				break;
 			}
@@ -2705,7 +3096,13 @@ namespace ExtWidgets
 					}
 					break;
 
-				case QVariant::Color:
+			case QVariant::StringList:
+				{
+					return stringListText(value);
+				}
+				break;
+
+			case QVariant::Color:
 					{
                         QColor color = value.value<QColor>();
 						QString val = QString("[%1;%2;%3;%4]").

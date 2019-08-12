@@ -60,11 +60,11 @@ void SvgWidget::paintEvent(QPaintEvent* pe)
 			double ky = (double)widgetSize.height() / svgSize.height();
 
 			int w = widgetSize.width();
-			int h = (double)svgSize.height() * kx;
+			int h = static_cast<int>(svgSize.height() * kx);
 
 			if (h > widgetSize.height())
 			{
-				w = (double)svgSize.width() * ky;
+				w = static_cast<int>(svgSize.width() * ky);
 				h = widgetSize.height();
 			}
 

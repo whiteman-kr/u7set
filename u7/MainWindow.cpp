@@ -175,7 +175,8 @@ void MainWindow::showEvent(QShowEvent*)
 		(frameGeometry().width() > screenRect.width() ||
 		 frameGeometry().height() > screenRect.height()))
 	{
-		resize(screenRect.width() * 0.7, screenRect.height() * 0.7);
+		resize(static_cast<int>(screenRect.width() * 0.7),
+			   static_cast<int>(screenRect.height() * 0.7));
 	}
 
 	return;
@@ -611,8 +612,6 @@ void MainWindow::updateUfbsAfbsBusses()
 	QStringList updateDetails;
 
 	{
-		bool ok = false;
-
 		std::vector<DbFileInfo> allFiles;
 		allFiles.reserve(ufbSchemaFileInfos.size() + alSchemaFileInfos.size());
 

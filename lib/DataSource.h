@@ -180,7 +180,7 @@ public:
 	HostAddressPort lmAddressPort() const { return m_lmAddressPort; }
 
 	int lmPort() const { return m_lmAddressPort.port(); }
-	void setLmPort(int port) { m_lmAddressPort.setPort(port); }
+	void setLmPort(int port) { Q_ASSERT(port >= 0 && port <= 65535); m_lmAddressPort.setPort(static_cast<quint16>(port)); }
 
 	int lmRupFramesQuantity() const { return m_lmRupFramesQuantity; }
 	void setLmRupFramesQuantity(int lmRupFramesQuantity) { m_lmRupFramesQuantity = lmRupFramesQuantity; }

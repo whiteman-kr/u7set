@@ -43,7 +43,7 @@ quint64 Crc::setDataBlockCrc(quint16 frameIndex, void* datablock, int blockSize)
 	return crc;
 }
 
-bool Crc::checkDataBlockCrc(int frameIndex, const std::vector<quint8>& frame)
+bool Crc::checkDataBlockCrc(quint16 frameIndex, const std::vector<quint8>& frame)
 {
 	std::vector<quint8> checkCrcFrame = frame;
 

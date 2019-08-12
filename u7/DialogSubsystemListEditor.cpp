@@ -141,7 +141,9 @@ void DialogSubsystemListEditor::showEvent(QShowEvent*)
 	// Resize depends on monitor size, DPI, resolution
 	//
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-	resize(screen.width() * 0.30, screen.height() * 0.60);
+
+	resize(static_cast<int>(screen.width() * 0.30),
+		   static_cast<int>(screen.height() * 0.60));
 	move(screen.center() - rect().center());
 
 	// --
@@ -149,10 +151,10 @@ void DialogSubsystemListEditor::showEvent(QShowEvent*)
 	assert(ui->m_list);
 	assert(ui->m_list->columnCount() == 4);
 
-	ui->m_list->setColumnWidth(0, ui->m_list->width() * 0.15);
-	ui->m_list->setColumnWidth(1, ui->m_list->width() * 0.15);
-	ui->m_list->setColumnWidth(2, ui->m_list->width() * 0.30);
-	ui->m_list->setColumnWidth(3, ui->m_list->width() * 0.30);
+	ui->m_list->setColumnWidth(0, static_cast<int>(ui->m_list->width() * 0.15));
+	ui->m_list->setColumnWidth(1, static_cast<int>(ui->m_list->width() * 0.15));
+	ui->m_list->setColumnWidth(2, static_cast<int>(ui->m_list->width() * 0.30));
+	ui->m_list->setColumnWidth(3, static_cast<int>(ui->m_list->width() * 0.30));
 
 	return;
 }
@@ -337,9 +339,10 @@ void DialogSubsystemListEditor::on_m_add_clicked()
 	//
 	for (int i = 0; i < ui->m_list->topLevelItemCount(); i++)
 	{
-		QTreeWidgetItem* item = ui->m_list->topLevelItem(i);
-		item->setText(0, QString::number(i));
-		item->setData(0, Qt::UserRole, i);
+		QTreeWidgetItem* ti = ui->m_list->topLevelItem(i);
+
+		ti->setText(0, QString::number(i));
+		ti->setData(0, Qt::UserRole, i);
 	}
 
 	// Select the created element

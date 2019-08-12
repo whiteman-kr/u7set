@@ -188,9 +188,7 @@ HostAddressPort Settings::configuratorAddress1() const
 {
 	QMutexLocker l(&m_mutex);
 
-	HostAddressPort result;
-	result.setAddress(m_configuratorIpAddress1);
-	result.setPort(m_configuratorPort1);
+	HostAddressPort result{m_configuratorIpAddress1, static_cast<quint16>(m_configuratorPort1)};
 
 	return result;
 }
@@ -199,9 +197,7 @@ HostAddressPort Settings::configuratorAddress2() const
 {
 	QMutexLocker l(&m_mutex);
 
-	HostAddressPort result;
-	result.setAddress(m_configuratorIpAddress2);
-	result.setPort(m_configuratorPort2);
+	HostAddressPort result{m_configuratorIpAddress2, static_cast<quint16>(m_configuratorPort2)};
 
 	return result;
 }

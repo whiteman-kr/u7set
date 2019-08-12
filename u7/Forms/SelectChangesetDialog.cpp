@@ -160,7 +160,9 @@ int SelectChangesetDialog::getSignalChangeset(DbController* db, DbChangesetObjec
 void SelectChangesetDialog::showEvent(QShowEvent*)
 {
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-	resize(screen.width() * 0.40, screen.height() * 0.35);
+
+	resize(static_cast<int>(screen.width() * 0.40),
+		   static_cast<int>(screen.height() * 0.35));
 
 	move(screen.center() - rect().center());
 

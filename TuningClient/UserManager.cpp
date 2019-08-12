@@ -88,7 +88,7 @@ void LogonWorkspace::onTimer()
 {
 	if (m_userManager->isLoggedIn() == true)
 	{
-		int s = QDateTime::currentDateTime().secsTo(m_userManager->logoutPendingTime());
+		int s = static_cast<int>(QDateTime::currentDateTime().secsTo(m_userManager->logoutPendingTime()));
 
 		QTime logoutTime(0, 0, 0);
 		logoutTime = logoutTime.addSecs(s);
