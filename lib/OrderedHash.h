@@ -1,6 +1,16 @@
 #pragma once
 
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable : 6011)
+#endif
+
 #include <QVector>
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
+
 #include <QHash>
 #include <cassert>
 

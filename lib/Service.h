@@ -40,9 +40,13 @@ struct ServiceInfo
 	QString shortName;
 };
 
-HashedVector<E::SoftwareType, ServiceInfo> initServiceInfo();
+class ServicesInfo : public HashedVector<E::SoftwareType, ServiceInfo>
+{
+public:
+	ServicesInfo();
+};
 
-static HashedVector<E::SoftwareType, ServiceInfo> serviceInfo = initServiceInfo();
+static ServicesInfo servicesInfo;
 
 class Service;
 
@@ -93,7 +97,7 @@ public:
 														//		return newInstance;
 														// }
 
-	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const = 0;
+	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const = 0;
 
 	QString equipmentID() const { return m_equipmentID; }
 
@@ -187,7 +191,7 @@ private:
 	void startBaseRequestSocketThread();
 	void stopBaseRequestSocketThread();
 
-	void getServiceInfo(Network::ServiceInfo& serviceInfo);
+	void getServiceInfo(Network::ServiceInfo& servicesInfo);
 
 private:
 	QMutex m_mutex;
