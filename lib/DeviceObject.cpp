@@ -1971,6 +1971,7 @@ R"DELIM({
 		auto configScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, "ConfigurationScript", true, DeviceModule::configurationScript, DeviceModule::setConfigurationScript)
 		configScriptProp->setExpert(true);
 		configScriptProp->setIsScript(true);
+		configScriptProp->setDisableTableEditor(true);
 
 		auto rawDataDescrProp = ADD_PROPERTY_GETTER_SETTER(QString, "RawDataDescription", true, DeviceModule::rawDataDescription, DeviceModule::setRawDataDescription)
 		rawDataDescrProp->setExpert(true);

@@ -4,6 +4,7 @@
 #include "GlobalMessanger.h"
 #include "../lib/DeviceObject.h"
 #include "IdePropertyEditor.h"
+#include "../lib/PropertyTable.h"
 
 class DbController;
 
@@ -254,6 +255,8 @@ public slots:
 	void modeSwitched();
 	void showConnections();
 
+	void propertiesModeTabChanged(int index);
+
 	//void moduleConfiguration();
 
 	void setProperties();
@@ -344,6 +347,7 @@ private:
 	QToolBar* m_toolBar = nullptr;
 
 	IdePropertyEditor* m_propertyEditor = nullptr;
+	ExtWidgets::PropertyTable* m_propertyTable = nullptr;
 };
 
 

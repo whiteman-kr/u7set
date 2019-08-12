@@ -180,7 +180,8 @@ SOURCES +=\
     ../lib/QScintillaLexers/LexerXML.cpp \
     DialogShortcuts.cpp \
     ../lib/Ui/UiTools.cpp \
-    SvgEditor.cpp
+    SvgEditor.cpp \
+    ../lib/PropertyTable.cpp
 
 
 HEADERS  += \
@@ -323,7 +324,8 @@ HEADERS  += \
     ../lib/QScintillaLexers/LexerXML.h \
     DialogShortcuts.h \
     ../lib/Ui/UiTools.h \
-    SvgEditor.h
+    SvgEditor.h \
+    ../lib/PropertyTable.h
 
 
 FORMS    += \

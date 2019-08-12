@@ -47,10 +47,10 @@ ExtWidgets::PropertyEditor* IdePropertyEditor::createChildPropertyEditor(QWidget
 	return new IdePropertyEditor(parent, m_dbController);
 }
 
-ExtWidgets::PropertyTextEditor* IdePropertyEditor::createPropertyTextEditor(Property *property, QWidget* parent)
+ExtWidgets::PropertyTextEditor* IdePropertyEditor::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent)
 {
 
-	if (property->specificEditor() == E::PropertySpecificEditor::TuningFilter)
+	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::TuningFilter)
     {
         // This is Filters Editor for TuningClient
         //
@@ -59,7 +59,7 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditor::createPropertyTextEditor(Prop
         return editor;
     }
 
-	if (property->specificEditor() == E::PropertySpecificEditor::SpecificPropertyStruct)
+	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::SpecificPropertyStruct)
 	{
 		// This is Specific Properties
 		//
@@ -68,7 +68,7 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditor::createPropertyTextEditor(Prop
 		return editor;
 	}
 
-	if (property->specificEditor() == E::PropertySpecificEditor::Svg)
+	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::Svg)
 	{
 		// This is Specific Properties
 		//
@@ -77,7 +77,7 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditor::createPropertyTextEditor(Prop
 		return editor;
 	}
 
-	if (property->isScript() == false)
+	if (propertyPtr->isScript() == false)
 	{
 		return new ExtWidgets::PropertyPlainTextEditor(parent);
 	}

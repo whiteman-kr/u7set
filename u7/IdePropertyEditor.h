@@ -24,7 +24,7 @@ public:
 
 	virtual ExtWidgets::PropertyEditor* createChildPropertyEditor(QWidget* parent) override;
 
-	virtual ExtWidgets::PropertyTextEditor* createPropertyTextEditor(Property *property, QWidget* parent) override;
+	virtual ExtWidgets::PropertyTextEditor* createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent) override;
 
 private:
 
