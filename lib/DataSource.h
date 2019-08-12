@@ -299,8 +299,8 @@ public:
 	qint64 rupFramePlantTime() const { return m_rupFramePlantTime; }
 	void setRupFramePlantTime(qint64 time) { m_rupFramePlantTime = time; }
 
-	qint32 rupFrameNumerator() const { return m_rupFrameNumerator; }
-	void setRupFrameNumerator(qint32 num) { m_rupFrameNumerator = num; }
+	quint16 rupFrameNumerator() const { return m_rupFrameNumerator; }
+	void setRupFrameNumerator(quint16 num) { m_rupFrameNumerator = num; }
 
 	bool dataReceives() const { return m_dataReceives; }
 	void setDataReceives(bool receives) { m_dataReceives = receives; }

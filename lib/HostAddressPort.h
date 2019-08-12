@@ -5,19 +5,17 @@
 
 class HostAddressPort
 {
-private:
-	QHostAddress m_hostAddress;
-	quint16 m_port = 0;
-
 public:
 	HostAddressPort() {}
 
 	HostAddressPort(const QHostAddress& addr, quint16 port);
+	HostAddressPort(const QHostAddress& addr, int port);
 	HostAddressPort(quint32 ip4Addr, quint16 port);
 	HostAddressPort(quint8* ip6Addr, quint16 port);
 	HostAddressPort(const Q_IPV6ADDR& ip6Addr, quint16 port);
 	HostAddressPort(const sockaddr* sockaddr, quint16 port);
 	HostAddressPort(const QString& address, quint16 port);
+	HostAddressPort(const QString& address, int port);
 
 	HostAddressPort(const HostAddressPort &copy);
 
@@ -31,6 +29,7 @@ public:
 	void setAddress(const sockaddr* sockaddr);
 	bool setAddress(const QString& address);
 	void setPort(quint16 port);
+	void setPort(int port);
 
 	bool setAddressPort(const QString& addressStr, quint16 Port);
 	bool setAddressPort(const QString& addressStr, int port);
@@ -57,5 +56,9 @@ public:
 	// if port number is not pesent in addressPortStr, variable port is set to defaultPort
 	//
 	static bool splitAddressPortStr(const QString& addressPortStr, QString* addressStr, quint16* port, quint16 defaultPort);
+
+private:
+	QHostAddress m_hostAddress;
+	quint16 m_port = 0;
 };
 

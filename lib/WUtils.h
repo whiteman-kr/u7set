@@ -120,4 +120,12 @@ private:
 	QElapsedTimer m_timer;
 };
 
+inline quint16 __checkAndCastToQuint16(int value)
+{
+	assert(value >= 0 && value <= 65535);
+	return static_cast<quint16>(value);
+}
+
+#define CHECK_AND_CAST_TO_QUINT16(value)  __checkAndCastToQuint16(value)
+
 
