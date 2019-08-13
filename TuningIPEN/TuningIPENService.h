@@ -77,7 +77,7 @@ namespace TuningIPEN
 		virtual ~TuningIPENServiceWorker();
 
 		virtual ServiceWorker* createInstance() const override;
-		virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const override;
+		virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const override;
 
 		void setTuningService(TuningIPENService* tuningService) { m_tuningIPENService = tuningService; }
 

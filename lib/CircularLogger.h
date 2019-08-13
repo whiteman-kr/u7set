@@ -1,16 +1,9 @@
 #pragma once
 
-#include <QObject>
-#include <QTimer>
 #include <QFile>
 #include <QTextStream>
-#include <QSystemSemaphore>
-#include <memory>
 
 #include "SimpleThread.h"
-
-class QFile;
-class QTextStream;
 
 // ----------------------------------------------------------------------------------
 //
@@ -23,7 +16,7 @@ class CircularLoggerWorker : public SimpleThreadWorker
 	Q_OBJECT
 public:
 	CircularLoggerWorker(QString logPath, QString logName, int fileCount, int fileSizeInMB);
-	~CircularLoggerWorker();
+	~CircularLoggerWorker() override;
 
 	static bool writeFileCheck(const QString& logPath, const QString& logName);
 

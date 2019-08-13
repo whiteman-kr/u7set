@@ -20,7 +20,7 @@ public:
 	virtual ~DiagDataServiceWorker();
 
 	virtual ServiceWorker* createInstance() const override;
-	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const override;
+	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const override;
 
 private:
 	void initCmdLineParser() override;

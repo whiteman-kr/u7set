@@ -23,7 +23,7 @@ public:
 							   std::shared_ptr<CircularLogger> logger);
 
 	virtual ServiceWorker* createInstance() const override;
-	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const;
+	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const;
 
 public slots:
 	void onBuildPathChanged(QString newBuildPath);

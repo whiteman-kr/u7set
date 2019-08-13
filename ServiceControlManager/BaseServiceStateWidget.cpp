@@ -97,12 +97,12 @@ void BaseServiceStateWidget::updateServiceState()
 	QString serviceName = "Unknown Service";
 	QString serviceShortName = "???";
 
-	for (int i = 0; i < serviceInfo.count(); i++)
+	for (int i = 0; i < servicesInfo.count(); i++)
 	{
-		if (static_cast<E::SoftwareType>(m_serviceInfo.softwareinfo().softwaretype()) == serviceInfo[i].softwareType)
+		if (static_cast<E::SoftwareType>(m_serviceInfo.softwareinfo().softwaretype()) == servicesInfo[i].softwareType)
 		{
-			serviceName = serviceInfo[i].name;
-			serviceShortName = serviceInfo[i].shortName;
+			serviceName = servicesInfo[i].name;
+			serviceShortName = servicesInfo[i].shortName;
 			break;
 		}
 	}

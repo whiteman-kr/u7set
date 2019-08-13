@@ -327,9 +327,6 @@ namespace RtTrends
 			return;
 		}
 
-/*		sendReply(m_rtTrendsGetStateChangesReply);
-		return;*/
-
 		const QHash<Hash, SignalStatesQueue*>& trackedSignals = m_session->trackedSignals();
 
 		int states = 0;
@@ -350,9 +347,9 @@ namespace RtTrends
 
 			do
 			{
-				bool result = clientQueue.pop(&ss, thread);
+				bool res = clientQueue.pop(&ss, thread);
 
-				if (result == false)
+				if (res == false)
 				{
 					break;
 				}
@@ -381,11 +378,8 @@ namespace RtTrends
 			} while(count < 1000);
 		}
 
-//		qDebug() << C_STR(QString("RtTrendsServer(%1) rt states = %2").arg(m_session->id()).arg(states));
-
 		sendReply(m_rtTrendsGetStateChangesReply);
 	}
-
 
 	// -----------------------------------------------------------------------------------------------
 	//

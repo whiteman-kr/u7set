@@ -22,6 +22,13 @@
 
 // Qt includes
 //
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable : 6011)
+	#pragma warning(disable : 4251)
+	#pragma warning(disable : 4127)
+#endif
+
 #include <QApplication>
 #include <QThread>
 #include <QDebug>
@@ -41,6 +48,9 @@
 #include <QHash>
 #include <QMap>
 
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
 
 // Disable some warnings
 //
