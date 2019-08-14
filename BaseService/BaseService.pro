@@ -16,7 +16,8 @@ TEMPLATE = app
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 win32:QMAKE_CXXFLAGS += /analyze
-CONFIG += warn_on
+
+include(../warnings.pri)
 
 # DESTDIR
 #
@@ -60,7 +61,8 @@ HEADERS += \
     ../lib/OrderedHash.h \
 	Stable.h
 
-include(../qtservice/src/qtservice.pri)
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
 
@@ -76,3 +78,5 @@ win32 {
 unix {
 	LIBS += -lprotobuf
 }
+
+include(../qtservice/src/qtservice.pri)

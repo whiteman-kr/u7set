@@ -1,31 +1,19 @@
 #pragma once
 
-#include <QObject>
-#include <assert.h>
-#include <QThread>
-#include <QTimer>
-#include <QUuid>
 #include <QUdpSocket>
-#include <QTimerEvent>
-#include <QMutexLocker>
+#include <QTimer>
 #include <QQueue>
-#include <QDateTime>
+#include <QUuid>
 
 #include "../lib/SocketIO.h"
 #include "../lib/SimpleThread.h"
 #include "../lib/CircularLogger.h"
-#include "../Proto/network.pb.h"
+#include "../lib/WUtils.h"
 
+#include "../Proto/network.pb.h"
 
 class UdpClientSocket;
 class UdpServerSocket;
-
-
-// -------------------------------------------------------------------
-//
-// UDP Request class
-//
-// -------------------------------------------------------------------
 
 struct RequestHeader
 {
@@ -37,33 +25,8 @@ struct RequestHeader
 	quint32 dataSize;
 };
 
-
 class UdpRequest
 {
-private:
-	QHostAddress m_address;
-	quint16 m_port = 0;
-
-	char m_rawData[MAX_DATAGRAM_SIZE];
-	quint32 m_rawDataSize = sizeof(RequestHeader);
-
-	unsigned int m_writeDataIndex = 0;
-	unsigned int m_readDataIndex = 0;
-
-private:
-	char* rawData() { return m_rawData; }				// return pointer on request header
-	RequestHeader* header() { return reinterpret_cast<RequestHeader*>(m_rawData); }
-	char* data() { return m_rawData + sizeof(RequestHeader); }						// return pointer on request data after header
-
-	char* writeDataPtr() { return m_rawData + sizeof(RequestHeader) + m_writeDataIndex; }	// pointer for write request data
-	char* readDataPtr() { return m_rawData + sizeof(RequestHeader) + m_readDataIndex; }	// pointer for read request data
-
-
-	void setRawDataSize(quint32 rawDataSize) { m_rawDataSize = rawDataSize; }
-
-friend class UdpClientSocket;
-friend class UdpServerSocket;
-
 public:
 	UdpRequest();
 	UdpRequest(const QHostAddress& senderAddress, qint16 senderPort, char* receivedData, quint32 receivedDataSize);
@@ -80,8 +43,8 @@ public:
 	const RequestHeader* header() const { return reinterpret_cast<const RequestHeader*>(m_rawData); }
 	const char* data() const { return m_rawData + sizeof(RequestHeader); }									// return pointer on request data after header
 
-	quint32 rawDataSize() const { return m_rawDataSize; }						// full request length with header
-	quint32 dataSize() const { return m_rawDataSize - sizeof(RequestHeader); }	// request length without header
+	qint64 rawDataSize() const { return m_rawDataSize; }						// full request length with header
+	qint64 dataSize() const { return m_rawDataSize - sizeof(RequestHeader); }	// request length without header
 
 	quint32 ID() const { return header()->id; }
 	void setID(quint32 id) { header()->id = id; }
@@ -103,38 +66,49 @@ public:
 	bool isEmpty() const { return m_rawDataSize < sizeof(RequestHeader); }
 
 	void initAck(const UdpRequest& request);
+	void initWrite();
 
-	void initWrite()
-	{
-		m_writeDataIndex = 0;
-		header()->dataSize = 0;
-		m_rawDataSize = sizeof(RequestHeader);
-	}
-
+	bool writeData(const char* data, qint64 dataSize);
 	bool writeDword(quint32 dw);
-	bool writeData(const char* data, quint32 dataSize);
 	bool writeData(const QByteArray& data);
 	bool writeData(google::protobuf::Message& protobufMessage);
 
-	void initRead()
-	{
-		m_readDataIndex = 0;
-	}
+	void initRead();
 
 	quint32 readDword();
+
+	friend class UdpClientSocket;
+	friend class UdpServerSocket;
+
+private:
+	char* rawData() { return m_rawData; }				// return pointer on request header
+	RequestHeader* header() { return reinterpret_cast<RequestHeader*>(m_rawData); }
+	char* data() { return m_rawData + sizeof(RequestHeader); }						// return pointer on request data after header
+
+	char* writeDataPtr() { return m_rawData + sizeof(RequestHeader) + m_writeDataIndex; }	// pointer for write request data
+	char* readDataPtr() { return m_rawData + sizeof(RequestHeader) + m_readDataIndex; }	// pointer for read request data
+
+	void setRawDataSize(qint64 rawDataSize) { m_rawDataSize = rawDataSize; }
+
+private:
+	QHostAddress m_address;
+	quint16 m_port = 0;
+
+	char m_rawData[MAX_DATAGRAM_SIZE];
+	qint64 m_rawDataSize = sizeof(RequestHeader);
+
+	unsigned int m_writeDataIndex = 0;
+	unsigned int m_readDataIndex = 0;
 };
-
-
-// -------------------------------------------------------------------
-//
-// UDP Sockets' Base class
-//
-// -------------------------------------------------------------------
 
 class UdpSocket : public SimpleThreadWorker
 {
-private:
-	static bool metaTypesRegistered;
+public:
+	UdpSocket();
+	virtual ~UdpSocket();
+
+protected:
+	virtual void registerMetaTypes();
 
 protected:
 	QUdpSocket m_socket;
@@ -143,52 +117,13 @@ protected:
 	UdpRequest m_request;
 	UdpRequest m_ack;
 
-public:
-	UdpSocket();
-	virtual ~UdpSocket();
-
-protected:
-	virtual void registerMetaTypes();
+private:
+	static bool metaTypesRegistered;
 };
-
-
-// -------------------------------------------------------------------
-//
-// UDP Client classes
-//
-// -------------------------------------------------------------------
 
 class UdpClientSocket : public UdpSocket
 {
 	Q_OBJECT
-
-private:
-	enum State
-	{
-		ReadyToSend,
-		WaitingForAck
-	};
-
-	mutable QMutex m_mutex;
-
-	QHostAddress m_serverAddress;
-	qint16 m_port = 0;
-
-	State m_state = State::ReadyToSend;
-	quint32 m_requestNo = 1;
-	quint32 m_protocolVersion = 1;
-	quint32 m_clientID = 0;
-
-	int m_msTimeout = 100;
-	int m_retryCount = 0;
-	int m_retryCtr = 0;
-	quint32 m_ackTimeoutCtr = 0;
-
-private:
-	void retryRequest();
-
-	virtual void onThreadStarted() final;
-	virtual void onThreadFinished() final;
 
 public:
 	UdpClientSocket(const QHostAddress& serverAddress, quint16 port);
@@ -225,17 +160,37 @@ private slots:
 	void onSendRequest(UdpRequest request);
 	void onSocketReadyRead();
 	void onAckTimerTimeout();
+
+private:
+	void retryRequest();
+
+	virtual void onThreadStarted() final;
+	virtual void onThreadFinished() final;
+
+private:
+	enum State
+	{
+		ReadyToSend,
+		WaitingForAck
+	};
+
+	mutable QMutex m_mutex;
+
+	QHostAddress m_serverAddress;
+	qint16 m_port = 0;
+
+	State m_state = State::ReadyToSend;
+	quint32 m_requestNo = 1;
+	quint32 m_protocolVersion = 1;
+	quint32 m_clientID = 0;
+
+	int m_msTimeout = 100;
+	int m_retryCount = 0;
+	int m_retryCtr = 0;
+	quint32 m_ackTimeoutCtr = 0;
 };
 
-
-// -------------------------------------------------------------------
-//
-// UDP Server classes
-//
-// -------------------------------------------------------------------
-
 class UdpClientRequestHandler;
-
 
 // UdpRequestProcessor is a base class for request's handlers
 //
@@ -243,11 +198,9 @@ class UdpRequestProcessor : public QObject
 {
 	Q_OBJECT
 
-private:
-	UdpClientRequestHandler* m_clientRequestHandler;
-
 public:
 	UdpRequestProcessor();
+	virtual ~UdpRequestProcessor();
 
 	virtual void onThreadStarted() { qDebug() << "UdpRequestProcessor thread started"; }
 	virtual void onThreadFinished() { qDebug() << "UdpRequestProcessor thread finished"; }
@@ -261,20 +214,14 @@ public slots:
 	void onThreadFinishedSlot();
 
 	void onRequestQueueIsNotEmpty();
-};
 
+private:
+	UdpClientRequestHandler* m_clientRequestHandler = nullptr;
+};
 
 class UdpClientRequestHandler : public QObject
 {
 	Q_OBJECT
-
-private:
-	QMutex m_queueMutex;
-	QThread m_handlerThread;
-
-	QQueue<UdpRequest> requestQueue;
-
-	qint64 m_lastRequestTime;
 
 public:
 	UdpClientRequestHandler(UdpRequestProcessor* udpRequestProcessor);
@@ -288,33 +235,19 @@ public:
 
 signals:
 	void requestQueueIsNotEmpty();
+
+private:
+	QMutex m_queueMutex;
+	QThread m_handlerThread;
+
+	QQueue<UdpRequest> requestQueue;
+
+	qint64 m_lastRequestTime = 0;
 };
-
-
-
-// -------------------------------------------------------------------
-//
-// UDP Server classes
-//
-// -------------------------------------------------------------------
 
 class UdpServerSocket : public UdpSocket
 {
 	Q_OBJECT
-
-private:
-	QHostAddress m_bindToAddress;
-	qint16 m_port;
-	std::shared_ptr<CircularLogger> m_logger;
-
-	QMutex m_clientMapMutex;
-
-	QHash<quint32, UdpClientRequestHandler*> clientRequestHandlerMap;
-
-	void bind();
-
-	virtual void onThreadStarted() final;
-	virtual void onThreadFinished() final;
 
 public:
 	UdpServerSocket(const QHostAddress& bindToAddress, quint16 port, std::shared_ptr<CircularLogger> logger);
@@ -334,7 +267,22 @@ public slots:
 private slots:
 	void onTimer();
 	void onSocketReadyRead();
-};
 
+private:
+	virtual void onThreadStarted() final;
+	virtual void onThreadFinished() final;
+
+	void bind();
+
+private:
+	QHostAddress m_bindToAddress;
+	qint16 m_port = 0;
+	std::shared_ptr<CircularLogger> m_logger;
+
+	QMutex m_clientMapMutex;
+
+	QHash<quint32, UdpClientRequestHandler*> clientRequestHandlerMap;
+
+};
 
 typedef SimpleThread UdpSocketThread;
