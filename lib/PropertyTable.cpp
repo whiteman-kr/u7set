@@ -7,55 +7,85 @@
 
 namespace ExtWidgets
 {
-	PropertyTableItemDelegate::PropertyTableItemDelegate(QObject *parent) :
-		QItemDelegate(parent)
+	PropertyTableItemDelegate::PropertyTableItemDelegate(PropertyTable* propertyTable, PropertyTableModel* model) :
+		QItemDelegate(propertyTable),
+		m_propertyTable(propertyTable),
+		m_model(model)
 	{
 	}
 
-	// TableView need to create an Editor
-	// Create Editor when we construct PropertyTableItemDelegate
-	// and return the Editor
 	QWidget* PropertyTableItemDelegate::createEditor(QWidget *parent,
 													 const QStyleOptionViewItem &option,
 													 const QModelIndex &index) const
 	{
+		Q_UNUSED(option);
 
-		QSpinBox *editor = new QSpinBox(parent);
-		editor->setMinimum(0);
-		editor->setMaximum(100);
-		return editor;
+		if (m_model == nullptr)
+		{
+			Q_ASSERT(m_model);
+			return new QWidget(parent);
+		}
+
+		std::shared_ptr<Property> p = m_model->propertyByIndex(index);
+		if (p == nullptr)
+		{
+			Q_ASSERT(p);
+			return new QWidget(parent);
+		}
+
+		m_cellEditor = m_propertyTable->createCellEditor(p, true, p->readOnly() == true || m_propertyTable->isReadOnly() == true, parent);
+
+		connect(m_cellEditor, &PropertyEditCellWidget::valueChanged, this, &PropertyTableItemDelegate::onValueChanged);
+		connect(this, &PropertyTableItemDelegate::valueChanged, m_propertyTable, &PropertyTable::onValueChanged);
+
+		return m_cellEditor;
 	}
 
-	// Then, we set the Editor
-	// Gets the data from Model and feeds the data to Editor
 	void PropertyTableItemDelegate::setEditorData(QWidget *editor,
 												  const QModelIndex &index) const
 	{
-		// Get the value via index of the Model
-		int value = index.model()->data(index, Qt::EditRole).toInt();
+		if (m_model == nullptr)
+		{
+			Q_ASSERT(m_model);
+			return;
+		}
 
-		// Put the value into the SpinBox
-		QSpinBox *spinbox = static_cast<QSpinBox*>(editor);
-		spinbox->setValue(value);
+		std::shared_ptr<Property> p = m_model->propertyByIndex(index);
+		if (p == nullptr)
+		{
+			Q_ASSERT(p);
+			return;
+		}
+
+		PropertyEditCellWidget *cellEditor = dynamic_cast<PropertyEditCellWidget*>(editor);
+		if (cellEditor == nullptr)
+		{
+			Q_ASSERT(cellEditor);
+			return;
+		}
+		cellEditor->setValue(p, p->readOnly() == true || m_propertyTable->isReadOnly() == true);
 	}
 
-	// When we modify data, this model reflect the change
-	void PropertyTableItemDelegate::setModelData(QWidget *editor,
-												 QAbstractItemModel *model,
-												 const QModelIndex &index) const
+	void PropertyTableItemDelegate::setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const
 	{
-		/*QSpinBox *spinbox = static_cast<QSpinBox*>(editor);
-		spinbox->interpretText();
-		int value = spinbox->value();
-		model->setData(index, value, Qt::EditRole);*/
+		Q_UNUSED(editor);
+		Q_UNUSED(model);
+		Q_UNUSED(index);
+
+		// This function is called when user press Enter or changes selection
 	}
 
-	// Give the SpinBox the info on size and location
 	void PropertyTableItemDelegate::updateEditorGeometry(QWidget *editor,
 														 const QStyleOptionViewItem &option,
 														 const QModelIndex &index) const
 	{
+		Q_UNUSED(index);
 		editor->setGeometry(option.rect);
+	}
+
+	void PropertyTableItemDelegate::onValueChanged(QVariant value)
+	{
+		emit valueChanged(value);
 	}
 
 	//
@@ -128,7 +158,20 @@ namespace ExtWidgets
 		}
 	}
 
-	Property* PropertyTableModel::propertyByIndex(const QModelIndex& mi) const
+	std::shared_ptr<PropertyObject> PropertyTableModel::propertyObjectByIndex(const QModelIndex& mi) const
+	{
+		if (mi.row() < 0 || mi.row() >= static_cast<int>(m_tableObjects.size()))
+		{
+			Q_ASSERT(false);
+			return nullptr;
+		}
+
+		const PropertyTableObject& pto = m_tableObjects[mi.row()];
+
+		return pto.propertyObject;
+	}
+
+	std::shared_ptr<Property> PropertyTableModel::propertyByIndex(const QModelIndex& mi) const
 	{
 		if (mi.row() < 0 || mi.row() >= static_cast<int>(m_tableObjects.size()))
 		{
@@ -144,7 +187,7 @@ namespace ExtWidgets
 			return nullptr;
 		}
 
-		return pto.properties[mi.column()].get();
+		return pto.properties[mi.column()];
 	}
 
 	int PropertyTableModel::rowCount(const QModelIndex &parent) const
@@ -169,28 +212,28 @@ namespace ExtWidgets
 	{
 		if (role== Qt::DecorationRole)
 		{
-			Property* p = propertyByIndex(index);
+			std::shared_ptr<Property> p = propertyByIndex(index);
 			if (p == nullptr)
 			{
 				Q_ASSERT(p);
 				return QVariant();
 			}
 
-			bool enabled = m_propertyTable->readOnly() == false && p->readOnly() == false;
+			bool enabled = m_propertyTable->isReadOnly() == false && p->readOnly() == false;
 
-			return PropertyEditorBase::propertyIcon(p, /*sameValue*/true, enabled);
+			return PropertyEditorBase::propertyIcon(p.get(), /*sameValue*/true, enabled);
 		}
 
 		if (role == Qt::DisplayRole)
 		{
-			Property* p = propertyByIndex(index);
+			std::shared_ptr<Property> p = propertyByIndex(index);
 			if (p == nullptr)
 			{
 				Q_ASSERT(p);
 				return QVariant();
 			}
 
-			return PropertyEditorBase::propertyValueText(p);
+			return PropertyEditorBase::propertyValueText(p.get());
 		}
 
 		return QVariant();
@@ -222,6 +265,21 @@ namespace ExtWidgets
 
 
 	//
+	// PropertyTableView
+	//
+
+	void PropertyTableView::closeCurrentEditorIfOpen()
+	{
+		QWidget* editWidget = indexWidget(currentIndex());
+		if (editWidget != nullptr)
+		{
+			closeEditor(editWidget, QAbstractItemDelegate::RevertModelCache);
+		}
+
+		return;
+	}
+
+	//
 	// PropertyTable
 	//
 
@@ -234,7 +292,7 @@ namespace ExtWidgets
 
 		// Table View
 
-		m_tableView = new QTableView();
+		m_tableView = new PropertyTableView();
 		l->addWidget(m_tableView);
 
 		m_tableView->setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -242,6 +300,7 @@ namespace ExtWidgets
 		connect(m_tableView, &QTableView::doubleClicked, this, &PropertyTable::onCellDoubleClicked);
 
 		m_tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+		m_tableView->setTabKeyNavigation(false);
 
 		// Model
 
@@ -250,10 +309,20 @@ namespace ExtWidgets
 
 		// Edit Delegate
 
-		m_itemDelegate = new PropertyTableItemDelegate(this);
+		m_itemDelegate = new PropertyTableItemDelegate(this, m_tableModel);
 		m_tableView->setItemDelegate(m_itemDelegate);
 
 		//
+	}
+
+	void PropertyTable::clear()
+	{
+		m_tableModel->clear();
+	}
+
+	void PropertyTable::closeCurrentEditor()
+	{
+		m_tableView->closeCurrentEditorIfOpen();
 	}
 
 	void PropertyTable::setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects)
@@ -299,40 +368,61 @@ namespace ExtWidgets
 		return;
 	}
 
-	void PropertyTable::clear()
-	{
-		m_tableModel->clear();
-	}
-
-
-	void PropertyTable::updatePropertyValues(const QString& propertyName)
-	{
-
-	}
 
 	const QList<std::shared_ptr<PropertyObject>>& PropertyTable::objects() const
 	{
 		return m_objects;
 	}
 
-	bool PropertyTable::expertMode() const
+	void PropertyTable::valueChanged(std::vector<std::pair<std::shared_ptr<PropertyObject>, QString>> modifiedObjectsData, const QVariant& value)
 	{
-		return m_expertMode;
-	}
+		// Set the new property value in all objects
+		//
+		QString errorString;
 
-	void PropertyTable::setExpertMode(bool expertMode)
-	{
-		m_expertMode = expertMode;
-	}
+		QList<std::shared_ptr<PropertyObject>> modifiedObjects;
 
-	bool PropertyTable::readOnly() const
-	{
-		return m_readOnly;
-	}
+		for (auto i : modifiedObjectsData)
+		{
+			std::shared_ptr<PropertyObject> pObject = i.first;
+			const QString& propertyName = i.second;
 
-	void PropertyTable::setReadOnly(bool readOnly)
-	{
-		m_readOnly = readOnly;
+			// Do not set property, if it has same value
+
+			QVariant oldValue = pObject->propertyValue(propertyName);
+
+			if (oldValue == value)
+			{
+				continue;
+			}
+
+			// Warning!!! If property changing changes the list of properties (e.g. SpecificProperties),
+			// property pointer becomes unusable! So next calls to property-> will cause crash
+
+			pObject->setPropertyValue(propertyName, value);
+
+			QVariant newValue = pObject->propertyValue(propertyName);
+
+			if (oldValue == newValue && errorString.isEmpty() == true)
+			{
+				errorString = QString("Property: %1 - incorrect input value")
+							  .arg(propertyName);
+			}
+
+			modifiedObjects.append(pObject);
+		}
+
+		if (errorString.isEmpty() == false)
+		{
+			emit showErrorMessage(errorString);
+		}
+
+		if (modifiedObjects.count() > 0)
+		{
+			emit propertiesChanged(modifiedObjects);
+		}
+
+		return;
 	}
 
 	void PropertyTable::updatePropertiesList()
@@ -346,10 +436,7 @@ namespace ExtWidgets
 		return;
 	}
 
-	void PropertyTable::updatePropertiesValues()
-	{
-		updatePropertyValues(QString());
-	}
+
 
 	void PropertyTable::onCellDoubleClicked(const QModelIndex &index)
 	{
@@ -366,7 +453,7 @@ namespace ExtWidgets
 
 			for (const QModelIndex& mi : selectedIndexes)
 			{
-				Property* p = m_tableModel->propertyByIndex(mi);
+				std::shared_ptr<Property> p = m_tableModel->propertyByIndex(mi);
 				if (p == nullptr)
 				{
 					Q_ASSERT(p);
@@ -388,7 +475,7 @@ namespace ExtWidgets
 			}
 		}
 
-		Property* cellProperty = m_tableModel->propertyByIndex(index);
+		std::shared_ptr<Property> cellProperty = m_tableModel->propertyByIndex(index);
 		if (cellProperty == nullptr)
 		{
 			Q_ASSERT(cellProperty);
@@ -396,6 +483,59 @@ namespace ExtWidgets
 		}
 
 		m_tableView->edit(index);
+	}
+
+	void PropertyTable::onShowErrorMessage (QString message)
+	{
+		QMessageBox::warning(this, "Error", message);
+	}
+
+
+	void PropertyTable::onValueChanged(QVariant value)
+	{
+		QModelIndexList selectedIndexes = m_tableView->selectionModel()->selectedIndexes();
+		if (selectedIndexes.isEmpty() == true)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		std::vector<std::pair<std::shared_ptr<PropertyObject>, QString>> modifiedObjectsData;
+
+		for (const QModelIndex& mi : selectedIndexes)
+		{
+			std::shared_ptr<PropertyObject> po = m_tableModel->propertyObjectByIndex(mi);
+
+			if (po == nullptr)
+			{
+				Q_ASSERT(po);
+				return;
+			}
+
+			std::shared_ptr<Property> p = m_tableModel->propertyByIndex(mi);
+			if (p == nullptr)
+			{
+				Q_ASSERT(p);
+				return;
+			}
+
+			modifiedObjectsData.emplace_back(std::make_pair(po, p->caption()));
+
+		}
+
+		if (modifiedObjectsData.empty() == false)
+		{
+			valueChanged(modifiedObjectsData, value);
+		}
+
+		// Force redraw all selected cells
+
+		for (const QModelIndex& mi : selectedIndexes)
+		{
+			m_tableView->update(mi);
+		}
+
+		return;
 	}
 
 	void PropertyTable::fillProperties()
@@ -428,7 +568,7 @@ namespace ExtWidgets
 						continue;
 					}
 
-					if (p->expert() && m_expertMode == false)
+					if (p->expert() && expertMode() == false)
 					{
 						continue;
 					}
@@ -488,6 +628,8 @@ namespace ExtWidgets
 				commonProperties.push_back(name);
 			}
 		}
+
+		std::sort(commonProperties.begin(), commonProperties.end());
 
 		std::vector<PropertyTableObject> tableObjects;
 

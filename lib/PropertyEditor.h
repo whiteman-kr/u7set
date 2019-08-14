@@ -23,6 +23,12 @@ namespace ExtWidgets
 		virtual PropertyEditor* createChildPropertyEditor(QWidget* parent);
 		virtual PropertyTextEditor* createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent);
 
+		bool expertMode() const;
+		void setExpertMode(bool expertMode);
+
+		bool isReadOnly() const;
+		void setReadOnly(bool readOnly);
+
 	public:
 		//  Base Editor functions used by list and table editors
 		//
@@ -35,7 +41,12 @@ namespace ExtWidgets
 		static QIcon drawImage(const QImage& image);
 		static QIcon propertyIcon(Property* p, bool sameValue, bool enabled);
 
-		PropertyEditCellWidget* createCellEditor(std::shared_ptr<Property> propertyPtr, bool sameValue, bool enabled, QWidget* parent);
+		PropertyEditCellWidget* createCellEditor(std::shared_ptr<Property> propertyPtr, bool sameValue, bool readOnly, QWidget* parent);
+
+	private:
+		bool m_expertMode = false;
+		bool m_readOnly = false;
+
 	};
 
 	//
@@ -224,6 +235,8 @@ namespace ExtWidgets
 		PropertyEditCellWidget(QWidget* parent);
 		~PropertyEditCellWidget();
 
+		virtual void setValue(std::shared_ptr<Property> property, bool readOnly);
+
 	signals:
 		void valueChanged(QVariant value);
 
@@ -252,7 +265,7 @@ namespace ExtWidgets
 
 	public:
 		explicit MultiFilePathEdit(QWidget* parent, bool readOnly);
-		void setValue(std::shared_ptr<Property> property, bool readOnly);
+		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
 
 	public slots:
 		void onEditingFinished();
@@ -281,7 +294,7 @@ namespace ExtWidgets
 
 	public:
 		explicit MultiEnumEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly);
-		void setValue(std::shared_ptr<Property> property, bool readOnly);
+		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
 
 	public slots:
 		void indexChanged(int index);
@@ -301,7 +314,7 @@ namespace ExtWidgets
 
 	public:
 		explicit MultiColorEdit(QWidget* parent, bool readOnly);
-		void setValue(std::shared_ptr<Property> property, bool readOnly);
+		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
 
 	public slots:
 		void onEditingFinished();
@@ -384,8 +397,8 @@ namespace ExtWidgets
 		Q_OBJECT
 
 	public:
-		explicit MultiCheckBox(QWidget* parent);
-		void setValue(Qt::CheckState state, bool readOnly);
+		explicit MultiCheckBox(QWidget* parent, bool readOnly);
+		void setValue(std::shared_ptr<Property> propertyPtr, bool readOnly);
 
 	public slots:
 		void changeValueOnButtonClick();
@@ -409,7 +422,7 @@ namespace ExtWidgets
 
 	public:
 		explicit MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, bool readOnly, QWidget* parent);
-		void setValue(std::shared_ptr<Property> property, bool readOnly);
+		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
 
 	public slots:
 		void onTextEdited(const QString &text);
@@ -446,7 +459,7 @@ namespace ExtWidgets
 
 	public:
 		explicit MultiArrayEdit(PropertyEditorBase* propertyEditorBase, QWidget* parent, std::shared_ptr<Property> p, bool readOnly);
-		void setValue(QVariant value, bool readOnly);
+		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
 
 	private slots:
 		void onButtonPressed();
@@ -594,11 +607,6 @@ namespace ExtWidgets
 
 		const QList<std::shared_ptr<PropertyObject>>& objects() const;
 
-		void setExpertMode(bool expertMode);
-
-		bool readOnly() const;
-		void setReadOnly(bool readOnly);
-
 		// Help description functions
 
 		void setScriptHelp(const QString& text);
@@ -611,7 +619,7 @@ namespace ExtWidgets
 		void setScriptHelpWindowGeometry(const QByteArray& value);
 
 	protected:
-		virtual void valueChanged(QtProperty* property, QVariant value);
+		virtual void valueChanged(QString propertyName, QVariant value);
 
 	protected slots:
 		void updatePropertiesList();
@@ -620,7 +628,6 @@ namespace ExtWidgets
 	private slots:
 		void onValueChanged(QtProperty* property, QVariant value);
 		void onShowErrorMessage (QString message);
-		void onCurrentItemChanged(QtBrowserItem* current);
 
 	signals:
 		void showErrorMessage(QString message);
@@ -643,9 +650,6 @@ namespace ExtWidgets
 		MultiVariantPropertyManager* m_propertyVariantManager = nullptr;
 
 		QList<std::shared_ptr<PropertyObject>> m_objects;
-
-		bool m_expertMode = false;
-		bool m_readOnly = false;
 
 		QString m_scriptHelp;
 		QPoint m_scriptHelpWindowPos;

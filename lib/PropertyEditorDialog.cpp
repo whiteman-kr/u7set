@@ -82,7 +82,7 @@ bool PropertyEditorDialog::onPropertiesChanged(std::shared_ptr<PropertyObject> o
 
 void PropertyEditorDialog::onOk()
 {
-	if (pe->readOnly() == true)
+	if (pe->isReadOnly() == true)
 	{
 		return;
 	}

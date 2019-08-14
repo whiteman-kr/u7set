@@ -3952,7 +3952,7 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//connect(m_equipmentModel, &EquipmentModel::dataChanged, this, &EquipmentTabPage::modelDataChanged);
 	connect(m_equipmentView, &EquipmentView::updateState, this, &EquipmentTabPage::setActionState);
 
-    connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
+	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
 	connect(m_propertyTable, &ExtWidgets::PropertyTable::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
 
 	connect(m_equipmentModel, &EquipmentModel::objectVcsStateChanged, this, &EquipmentTabPage::objectVcsStateChanged);
@@ -4853,13 +4853,8 @@ void EquipmentTabPage::propertiesModeTabChanged(int index)
 	if (index == 0)
 	{
 		m_propertyEditor->updatePropertyValues(QString());
-	}
-	else
-	{
-		if (index == 1)
-		{
-			m_propertyTable->updatePropertyValues(QString());
-		}
+
+		m_propertyTable->closeCurrentEditor();
 	}
 }
 
@@ -4964,10 +4959,6 @@ void EquipmentTabPage::propertiesChanged(QList<std::shared_ptr<PropertyObject>> 
 	if (m_propertyEditor != nullptr)
 	{
 		m_propertyEditor->updatePropertyValues("EquipmentID");
-	}
-	if (m_propertyTable != nullptr)
-	{
-		m_propertyTable->updatePropertyValues("EquipmentID");
 	}
 
 	// --

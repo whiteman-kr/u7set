@@ -27,9 +27,25 @@ namespace ExtWidgets
 		return new PropertyPlainTextEditor(parent);
 	}
 
-	//
-	// ------------ PropertyEditorHelper ------------
-	//
+	bool PropertyEditorBase::expertMode() const
+	{
+		return m_expertMode;
+	}
+
+	void PropertyEditorBase::setExpertMode(bool expertMode)
+	{
+		m_expertMode = expertMode;
+	}
+
+	bool PropertyEditorBase::isReadOnly() const
+	{
+		return m_readOnly;
+	}
+
+	void PropertyEditorBase::setReadOnly(bool readOnly)
+	{
+		m_readOnly = readOnly;
+	}
 
 	QString PropertyEditorBase::propertyVectorText(QVariant& value)
 	{
@@ -360,15 +376,13 @@ namespace ExtWidgets
 		return QIcon();
 	}
 
-	PropertyEditCellWidget* PropertyEditorBase::createCellEditor(std::shared_ptr<Property> propertyPtr, bool sameValue, bool enabled, QWidget* parent)
+	PropertyEditCellWidget* PropertyEditorBase::createCellEditor(std::shared_ptr<Property> propertyPtr, bool sameValue, bool readOnly, QWidget* parent)
 	{
 		if (propertyPtr == nullptr)
 		{
 			Q_ASSERT(propertyPtr);
 			return new PropertyEditCellWidget(parent);
 		}
-
-		bool readOnly = enabled == false;
 
 		PropertyEditCellWidget* editor = nullptr;
 
@@ -382,7 +396,7 @@ namespace ExtWidgets
 
 				if (sameValue == true)
 				{
-					m_editor->setValue(propertyPtr->value(), enabled == false);
+					m_editor->setValue(propertyPtr, readOnly);
 				}
 
 				break;
@@ -421,7 +435,7 @@ namespace ExtWidgets
 
 				if (sameValue == true)
 				{
-					m_editor->setValue(propertyPtr->value(), readOnly);
+					m_editor->setValue(propertyPtr, readOnly);
 				}
 
 				break;
@@ -445,11 +459,16 @@ namespace ExtWidgets
 			{
 			case QVariant::Bool:
 			{
-				MultiCheckBox* m_editor = new MultiCheckBox(parent);
+				MultiCheckBox* m_editor = new MultiCheckBox(parent, readOnly);
 
 				editor = m_editor;
 
-				Qt::CheckState state;
+				if (sameValue == true)
+				{
+					m_editor->setValue(propertyPtr, readOnly);
+				}
+
+				/*Qt::CheckState state;
 
 				if (sameValue == false)
 				{
@@ -461,7 +480,7 @@ namespace ExtWidgets
 				}
 
 				m_editor->setValue(state, readOnly);
-
+				*/
 				QTimer::singleShot(10, m_editor, &MultiCheckBox::changeValueOnButtonClick);
 
 			}
@@ -1604,6 +1623,15 @@ namespace ExtWidgets
 
 	}
 
+	void PropertyEditCellWidget::setValue(std::shared_ptr<Property> property, bool readOnly)
+	{
+		Q_UNUSED(property);
+		Q_UNUSED(readOnly);
+
+		Q_ASSERT(false);
+		return;
+	}
+
 	//
 	// ------------ MultiFilePathEdit ------------
 	//
@@ -2613,11 +2641,11 @@ namespace ExtWidgets
 		m_button->setEnabled(readOnly == false);
 	}
 
-	void MultiArrayEdit::setValue(QVariant value, bool readOnly)
+	void MultiArrayEdit::setValue(std::shared_ptr<Property> property, bool readOnly)
 	{
 		m_button->setEnabled(readOnly == false);
 
-		m_currentValue = value;
+		m_currentValue = property->value();
 
 		if (m_currentValue.userType() == QVariant::StringList)
 		{
@@ -2745,10 +2773,16 @@ namespace ExtWidgets
 		painter.drawText(textRect, Qt::AlignVCenter,  text());
 	}
 
-	MultiCheckBox::MultiCheckBox(QWidget* parent):
+	MultiCheckBox::MultiCheckBox(QWidget* parent, bool readOnly):
 		PropertyEditCellWidget(parent)
 	{
 		m_checkBox = new PropertyEditorCheckBox(parent);
+
+		m_checkBox->setEnabled(readOnly == false);
+
+		m_checkBox->setCheckState(Qt::PartiallyChecked);
+		updateText();
+
 		connect(m_checkBox, &QCheckBox::stateChanged, this, &MultiCheckBox::onStateChanged);
 
 		QHBoxLayout*lt = new QHBoxLayout;
@@ -2757,7 +2791,7 @@ namespace ExtWidgets
 		setLayout(lt);
 	}
 
-	void MultiCheckBox::setValue(Qt::CheckState state, bool readOnly)
+	void MultiCheckBox::setValue(std::shared_ptr<Property> propertyPtr, bool readOnly)
 	{
 		if (m_checkBox == nullptr)
 		{
@@ -2765,10 +2799,15 @@ namespace ExtWidgets
 			return;
 		}
 
+		m_checkBox->setTristate(false);
+
+		Qt::CheckState state = propertyPtr->value().toBool() ? Qt::Checked : Qt::Unchecked;
+
 		m_checkBox->blockSignals(true);
 		m_checkBox->setCheckState(state);
 
 		updateText();
+
 		m_checkBox->setEnabled(readOnly == false);
 		m_checkBox->blockSignals(false);
 	}
@@ -2853,7 +2892,12 @@ namespace ExtWidgets
 			return nullptr;
 		}
 
-		PropertyEditCellWidget* editorWidget = m_propertyEditor->createCellEditor(propertyPtr, manager->sameValue(property), property->isEnabled(), parent);
+		PropertyEditCellWidget* editorWidget = m_propertyEditor->createCellEditor(propertyPtr, manager->sameValue(property), property->isEnabled() == false, parent);
+		if (editorWidget == nullptr)
+		{
+			Q_ASSERT(editorWidget);
+			return new QWidget(parent);
+		}
 
 		connect(editorWidget, &PropertyEditCellWidget::valueChanged, this, &MultiVariantFactory::slotSetValue);
 		connect(editorWidget, &QObject::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
@@ -3232,8 +3276,6 @@ namespace ExtWidgets
 
 		connect(this, &PropertyEditor::showErrorMessage, this, &PropertyEditor::onShowErrorMessage, Qt::QueuedConnection);
 
-		connect(this, &QtTreePropertyBrowser::currentItemChanged, this, &PropertyEditor::onCurrentItemChanged);
-
 		setScriptHelp(tr("<h1>This is a sample script help!</h1>"));
 
 		m_scriptHelpWindowPos = QPoint(-1, -1);
@@ -3244,21 +3286,6 @@ namespace ExtWidgets
 	void PropertyEditor::saveSettings()
 	{
 
-	}
-
-	void PropertyEditor::onCurrentItemChanged(QtBrowserItem* current)
-	{
-		if (current == nullptr)
-		{
-			return;
-		}
-
-
-		if (current->property() == nullptr)
-		{
-			Q_ASSERT(current->property());
-			return;
-		}
 	}
 
 	void PropertyEditor::setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects)
@@ -3353,8 +3380,7 @@ namespace ExtWidgets
 
             subProperty = m_propertyVariantManager->addProperty(caption);
             subProperty->setToolTip(description);
-			subProperty->setEnabled(m_readOnly == false && readOnly == false);
-
+			subProperty->setEnabled(isReadOnly() == false && readOnly == false);
 
 			if (propertyPtr->essential() == true)
 			{
@@ -3450,7 +3476,7 @@ namespace ExtWidgets
 					continue;
 				}
 
-				if (p->expert() && m_expertMode == false)
+				if (p->expert() && expertMode() == false)
 				{
 					continue;
 				}
@@ -3553,7 +3579,7 @@ namespace ExtWidgets
 			//
 			QString description = p->description().isEmpty() ? p->caption() : p->description();
 
-			if (p->readOnly() == true || m_readOnly == true)
+			if (p->readOnly() == true || isReadOnly() == true)
 			{
 				description = QString("[ReadOnly] ") + description;
 			}
@@ -3683,21 +3709,6 @@ namespace ExtWidgets
         }
 	}
 
-	void PropertyEditor::setExpertMode(bool expertMode)
-	{
-		m_expertMode = expertMode;
-	}
-
-	bool PropertyEditor::readOnly() const
-	{
-		return m_readOnly;
-	}
-
-	void PropertyEditor::setReadOnly(bool readOnly)
-	{
-		m_readOnly = readOnly;
-	}
-
 	void PropertyEditor::setScriptHelp(const QString& text)
 	{
 		m_scriptHelp = text;
@@ -3730,18 +3741,16 @@ namespace ExtWidgets
 
 	void PropertyEditor::onValueChanged(QtProperty* property, QVariant value)
 	{
-       valueChanged(property, value);
+	   valueChanged(property->propertyName(), value);
 	}
 
-	void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
+	void PropertyEditor::valueChanged(QString propertyName, QVariant value)
 	{
 		// Set the new property value in all objects
 		//
         QList<std::shared_ptr<PropertyObject>> modifiedObjects;
 
 		QString errorString;
-
-		QString propertyName = property->propertyName();
 
 		for (auto i : m_objects)
 		{

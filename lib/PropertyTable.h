@@ -18,29 +18,33 @@ namespace ExtWidgets
 	};
 
 	class PropertyTable;
+	class PropertyTableModel;
 
 	class PropertyTableItemDelegate : public QItemDelegate
 	{
 		Q_OBJECT
 	public:
-		explicit PropertyTableItemDelegate(QObject *parent = 0);
+		explicit PropertyTableItemDelegate(PropertyTable* propertyTable, PropertyTableModel* model);
 
-		// Create Editor when we construct MyDelegate
-		QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+		virtual QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
-		// Then, we set the Editor
-		void setEditorData(QWidget *editor, const QModelIndex &index) const;
+		virtual void setEditorData(QWidget *editor, const QModelIndex &index) const override;
 
-		// When we modify data, this model reflect the change
-		void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const;
+		virtual void setModelData(QWidget *editor, QAbstractItemModel *model, const QModelIndex &index) const override;
 
-		// Give the SpinBox the info on size and location
-		void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+		virtual void updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
+
+	private slots:
+		void onValueChanged(QVariant value);
 
 	signals:
+		void valueChanged(QVariant value);
 
-	public slots:
+	private:
+		PropertyTable* m_propertyTable = nullptr;
+		PropertyTableModel* m_model = nullptr;
 
+		mutable PropertyEditCellWidget *m_cellEditor = nullptr;
 	};
 
 	class PropertyTableModel : public QAbstractTableModel
@@ -52,7 +56,9 @@ namespace ExtWidgets
 		void clear();
 		void setTableObjects(std::vector<PropertyTableObject>& tableObjects);
 
-		Property* propertyByIndex(const QModelIndex& mi) const;
+		std::shared_ptr<PropertyObject> propertyObjectByIndex(const QModelIndex& mi) const;
+
+		std::shared_ptr<Property> propertyByIndex(const QModelIndex& mi) const;
 
 	private:
 		int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -70,43 +76,42 @@ namespace ExtWidgets
 
 	};
 
+	class PropertyTableView : public QTableView
+	{
+	public:
+		void closeCurrentEditorIfOpen();
+	};
+
 	class PropertyTable : public QWidget, public PropertyEditorBase
 	{
 		Q_OBJECT
 	public:
 		explicit PropertyTable(QWidget *parent = nullptr);
 
+		void clear();
+
+		void closeCurrentEditor();
+
 		void setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects);
 		void setObjects(const QList<std::shared_ptr<PropertyObject>>& objects);
 
 		const QList<std::shared_ptr<PropertyObject>>& objects() const;
 
-		void clear();
-
-		void updatePropertyValues(const QString& propertyName);
-
-		bool expertMode() const;
-		void setExpertMode(bool expertMode);
-
-		bool readOnly() const;
-		void setReadOnly(bool readOnly);
-
 	protected:
-//		virtual void valueChanged(QtProperty* property, QVariant value);
+		virtual void valueChanged(std::vector<std::pair<std::shared_ptr<PropertyObject>, QString>> modifiedObjectsData, const QVariant& value);
 
 	protected slots:
 		void updatePropertiesList();
-		void updatePropertiesValues();
 
 	private slots:
 		void onCellDoubleClicked(const QModelIndex &index);
+		void onShowErrorMessage (QString message);
 
-//		void onValueChanged(QtProperty* property, QVariant value);
-//		void onShowErrorMessage (QString message);
-//		void onCurrentItemChanged(QtBrowserItem* current);
+	public slots:
+		void onValueChanged(QVariant value);
 
 	signals:
-//		void showErrorMessage(QString message);
+		void showErrorMessage(QString message);
 		void propertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
 
 	private:
@@ -114,15 +119,13 @@ namespace ExtWidgets
 
 	private:
 
-		QTableView* m_tableView = nullptr;
+		PropertyTableView* m_tableView = nullptr;
+
 		PropertyTableModel* m_tableModel = nullptr;
 
 		PropertyTableItemDelegate* m_itemDelegate = nullptr;
 
 		QList<std::shared_ptr<PropertyObject>> m_objects;
-
-		bool m_expertMode = false;
-		bool m_readOnly = false;
 
 	};
 

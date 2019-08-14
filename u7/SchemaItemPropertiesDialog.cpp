@@ -127,11 +127,11 @@ SchemaItemPropertyEditor::~SchemaItemPropertyEditor()
 {
 }
 
-void SchemaItemPropertyEditor::valueChanged(QtProperty* property, QVariant value)
+void SchemaItemPropertyEditor::valueChanged(QString propertyName, QVariant value)
 {
-	if (value.isValid() == false || property == nullptr)
+	if (value.isValid() == false)
 	{
-		assert(property != nullptr);
+		assert(false);
 		return;
 	}
 
@@ -147,7 +147,7 @@ void SchemaItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 
 		// Do not set property, if it has the same value
 		//
-		if (vi->propertyValue(property->propertyName()) == value)
+		if (vi->propertyValue(propertyName) == value)
 		{
 			continue;
 		}
@@ -172,7 +172,7 @@ void SchemaItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 		items.push_back(vi);
 	}
 
-	editEngine()->runSetProperty(property->propertyName(), value, items);
+	editEngine()->runSetProperty(propertyName, value, items);
 
 	return;
 }
