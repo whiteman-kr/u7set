@@ -226,7 +226,7 @@ void AppDataSource::setState(const Network::AppDataSourceState& proto)
 	setProcessedPacketCount(proto.processedpacketcount());
 	setLastPacketSystemTime(proto.lastpacketsystemtime());
 	setRupFramePlantTime(proto.rupframeplanttime());
-	setRupFrameNumerator(proto.rupframenumerator());
+	setRupFrameNumerator(static_cast<quint16>(proto.rupframenumerator()));
 	setSignalStatesQueueSize(proto.signalstatesqueuesize());
 	setSignalStatesQueueCurSize(proto.signalstatesqueuecursize());
 	setSignalStatesQueueCurMaxSize(proto.signalstatesqueuecurmaxsize());
