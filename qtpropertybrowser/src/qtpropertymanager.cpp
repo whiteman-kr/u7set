@@ -70,6 +70,7 @@
 	#pragma warning(disable : 6001)
 	#pragma warning(disable : 6246)
 	#pragma warning(disable : 4244)
+	#pragma warning(disable : 4456)
 #endif
 
 #if QT_VERSION >= 0x040400

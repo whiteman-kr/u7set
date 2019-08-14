@@ -57,6 +57,7 @@
 #ifdef _MSC_VER
 	#pragma warning(push)
 	#pragma warning(disable : 6011)
+	#pragma warning(disable : 4996)
 #endif
 
 #if QT_VERSION >= 0x040400

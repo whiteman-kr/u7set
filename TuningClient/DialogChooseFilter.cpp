@@ -78,27 +78,29 @@ TuningFilter* DialogChooseFilter::chosenFilter() const
 
 void DialogChooseFilter::accept()
 {
-	QList <QListWidgetItem*> selected = m_listBox->selectedItems();
+	QList<QListWidgetItem*> selected = m_listBox->selectedItems();
 
 	if (selected.empty() == true)
 	{
 		return;
 	}
 
-	for (QListWidgetItem* item : selected)
+	QListWidgetItem* item = selected.front();
+	if (item == nullptr)
 	{
-		if (item == nullptr)
-		{
-			assert(item);
-			return;
-		}
-
-		TuningFilter* cf = item->data(Qt::UserRole).value<TuningFilter*>();
-		assert(cf);
-
-		m_chosenFilter = cf;
-		break;
+		Q_ASSERT(item);
+		return;
 	}
 
+	TuningFilter* cf = item->data(Qt::UserRole).value<TuningFilter*>();
+	if (cf == nullptr)
+	{
+		Q_ASSERT(cf);
+		return;
+	}
+
+	m_chosenFilter = cf;
+
 	QDialog::accept();
+	return;
 }
