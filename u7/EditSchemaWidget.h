@@ -744,9 +744,12 @@ class SchemaFindDialog : public QDialog
 
 public:
 	explicit SchemaFindDialog(QWidget* parent);
+	virtual ~SchemaFindDialog();
 
 	QString findText() const;
 	void setFocusToEditLine();
+
+	void ensureVisible();
 
 signals:
 	void findPrev(Qt::CaseSensitivity cs);
@@ -765,6 +768,12 @@ public slots:
 								const std::list<std::pair<QString, QString>>& foundProps,
 								QString searchText,
 								Qt::CaseSensitivity cs);
+
+private:
+	virtual void closeEvent(QCloseEvent* e);
+	virtual void done(int r);
+
+	void saveSettings();
 
 private:
 	QLineEdit* m_findTextEdit = nullptr;

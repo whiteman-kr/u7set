@@ -44,7 +44,6 @@ TuningModelSorter::TuningModelSorter(TuningModelColumns column, Qt::SortOrder or
 
 bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const TuningModelHashSet& set2, TuningModelColumns column, Qt::SortOrder order) const
 {
-
 	QVariant v1;
 	QVariant v2;
 
@@ -68,18 +67,20 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 		}
 	}
 
-	bool ok = false;
+	bool ok1 = false;
+	bool ok2 = false;
 
-	asp1 = m_tuningSignalManager->signalParam(set1.firstHash(), &ok);
-	asp2 = m_tuningSignalManager->signalParam(set2.firstHash(), &ok);
+	asp1 = m_tuningSignalManager->signalParam(set1.firstHash(), &ok1);
+	asp2 = m_tuningSignalManager->signalParam(set2.firstHash(), &ok2);
 
-	if (set1.hash[valueColumnIndex] != UNDEFINED_HASH)
+	if (ok1 == true && set1.hash[valueColumnIndex] != UNDEFINED_HASH)
 	{
-		tss1 = m_tuningSignalManager->state(set1.hash[valueColumnIndex], &ok);
+		tss1 = m_tuningSignalManager->state(set1.hash[valueColumnIndex], &ok1);
 	}
-	if (set2.hash[valueColumnIndex] != UNDEFINED_HASH)
+
+	if (ok2 == true && set2.hash[valueColumnIndex] != UNDEFINED_HASH)
 	{
-		tss2 = m_tuningSignalManager->state(set2.hash[valueColumnIndex], &ok);
+		tss2 = m_tuningSignalManager->state(set2.hash[valueColumnIndex], &ok2);
 	}
 
 	//
@@ -93,162 +94,150 @@ bool TuningModelSorter::sortFunction(const TuningModelHashSet& set1, const Tunin
 
 	switch (sortColumn)
 	{
-	case TuningModelColumns::CustomAppSignalID:
-	{
-		v1 = asp1.customSignalId();
-		v2 = asp2.customSignalId();
-	}
+		case TuningModelColumns::CustomAppSignalID:
+		{
+			v1 = asp1.customSignalId();
+			v2 = asp2.customSignalId();
+		}
 		break;
-	case TuningModelColumns::EquipmentID:
-	{
-		v1 = asp1.equipmentId();
-		v2 = asp2.equipmentId();
-	}
+		case TuningModelColumns::EquipmentID:
+		{
+			v1 = asp1.equipmentId();
+			v2 = asp2.equipmentId();
+		}
 		break;
 	case TuningModelColumns::AppSignalID:
-	{
-		v1 = asp1.appSignalId();
-		v2 = asp2.appSignalId();
-	}
+		{
+			v1 = asp1.appSignalId();
+			v2 = asp2.appSignalId();
+		}
 		break;
 	case TuningModelColumns::Caption:
-	{
-		v1 = asp1.caption();
-		v2 = asp2.caption();
-	}
+		{
+			v1 = asp1.caption();
+			v2 = asp2.caption();
+		}
 		break;
 	case TuningModelColumns::Units:
-	{
-		v1 = asp1.unit();
-		v2 = asp2.unit();
-	}
+		{
+			v1 = asp1.unit();
+			v2 = asp2.unit();
+		}
 		break;
 	case TuningModelColumns::Type:
-	{
-		v1 = static_cast<int>(asp1.toTuningType());
-		v2 = static_cast<int>(asp2.toTuningType());
-	}
+		{
+			v1 = static_cast<int>(asp1.toTuningType());
+			v2 = static_cast<int>(asp2.toTuningType());
+		}
 		break;
 
 	case TuningModelColumns::Default:
-	{
-		if (asp1.isAnalog() == asp2.isAnalog())
 		{
-			double tv1 = m_model->defaultValue(asp1).toDouble();
-			double tv2 = m_model->defaultValue(asp2).toDouble();
-
-			if (tv1 == tv2)
+			if (asp1.isAnalog() == asp2.isAnalog())
 			{
-				return asp1.customSignalId() < asp2.customSignalId();
+				double tv1 = m_model->defaultValue(asp1).toDouble();
+				double tv2 = m_model->defaultValue(asp2).toDouble();
+
+				if (tv1 == tv2)
+				{
+					return asp1.customSignalId() < asp2.customSignalId();
+				}
+
+				if (order == Qt::AscendingOrder)
+					return tv1 < tv2;
+				else
+					return tv1 > tv2;
 			}
-
-			if (order == Qt::AscendingOrder)
-				return tv1 < tv2;
 			else
-				return tv1 > tv2;
-
-			v1 = tv1;
-			v2 = tv2;
+			{
+				v1 = asp1.isAnalog();
+				v2 = asp2.isAnalog();
+			}
 		}
-		else
-		{
-			v1 = asp1.isAnalog();
-			v2 = asp2.isAnalog();
-		}
-	}
 		break;
 	case TuningModelColumns::ValueFirst:
-	{
-		if (asp1.isAnalog() == asp2.isAnalog())
 		{
-			double tv1 = tss1.value().toDouble();
-			double tv2 = tss2.value().toDouble();
-
-			if (tv1 == tv2)
+			if (asp1.isAnalog() == asp2.isAnalog())
 			{
-				return asp1.customSignalId() < asp2.customSignalId();
+				double tv1 = tss1.value().toDouble();
+				double tv2 = tss2.value().toDouble();
+
+				if (tv1 == tv2)
+				{
+					return asp1.customSignalId() < asp2.customSignalId();
+				}
+
+				if (order == Qt::AscendingOrder)
+					return tv1 < tv2;
+				else
+					return tv1 > tv2;
 			}
-
-			if (order == Qt::AscendingOrder)
-				return tv1 < tv2;
 			else
-				return tv1 > tv2;
-
-			v1 = tv1;
-			v2 = tv2;
+			{
+				v1 = asp1.isAnalog();
+				v2 = asp2.isAnalog();
+			}
 		}
-		else
-		{
-			v1 = asp1.isAnalog();
-			v2 = asp2.isAnalog();
-		}
-	}
 		break;
 	case TuningModelColumns::LowLimit:
-	{
-		if (asp1.isAnalog() == asp2.isAnalog())
 		{
-			double tv1 = asp1.tuningLowBound().toDouble();
-			double tv2 = asp2.tuningLowBound().toDouble();
-
-			if (tv1 == tv2)
+			if (asp1.isAnalog() == asp2.isAnalog())
 			{
-				return asp1.customSignalId() < asp2.customSignalId();
+				double tv1 = asp1.tuningLowBound().toDouble();
+				double tv2 = asp2.tuningLowBound().toDouble();
+
+				if (tv1 == tv2)
+				{
+					return asp1.customSignalId() < asp2.customSignalId();
+				}
+
+				if (order == Qt::AscendingOrder)
+					return tv1 < tv2;
+				else
+					return tv1 > tv2;
 			}
-
-			if (order == Qt::AscendingOrder)
-				return tv1 < tv2;
 			else
-				return tv1 > tv2;
-
-			v1 = tv1;
-			v2 = tv2;
+			{
+				v1 = asp1.isAnalog();
+				v2 = asp2.isAnalog();
+			}
 		}
-		else
-		{
-			v1 = asp1.isAnalog();
-			v2 = asp2.isAnalog();
-		}
-	}
 		break;
 	case TuningModelColumns::HighLimit:
-	{
-		if (asp1.isAnalog() == asp2.isAnalog())
 		{
-			double tv1 = asp1.tuningHighBound().toDouble();
-			double tv2 = asp2.tuningHighBound().toDouble();
-
-			if (tv1 == tv2)
+			if (asp1.isAnalog() == asp2.isAnalog())
 			{
-				return asp1.customSignalId() < asp2.customSignalId();
+				double tv1 = asp1.tuningHighBound().toDouble();
+				double tv2 = asp2.tuningHighBound().toDouble();
+
+				if (tv1 == tv2)
+				{
+					return asp1.customSignalId() < asp2.customSignalId();
+				}
+
+				if (order == Qt::AscendingOrder)
+					return tv1 < tv2;
+				else
+					return tv1 > tv2;
 			}
-
-			if (order == Qt::AscendingOrder)
-				return tv1 < tv2;
 			else
-				return tv1 > tv2;
-
-			v1 = tv1;
-			v2 = tv2;
+			{
+				v1 = asp1.isAnalog();
+				v2 = asp2.isAnalog();
+			}
 		}
-		else
-		{
-			v1 = asp1.isAnalog();
-			v2 = asp2.isAnalog();
-		}
-	}
 		break;
 	case TuningModelColumns::Valid:
-	{
-		v1 = tss1.valid();
-		v2 = tss2.valid();
-	}
+		{
+			v1 = tss1.valid();
+			v2 = tss2.valid();
+		}
 		break;
 	case TuningModelColumns::OutOfRange:
-	{
-		v1 = tss1.outOfRange();
-		v2 = tss2.outOfRange();
-	}
+		{
+			v1 = tss1.outOfRange();
+			v2 = tss2.outOfRange();
+		}
 		break;
 	default:
 		assert(false);

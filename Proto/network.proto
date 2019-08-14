@@ -137,7 +137,7 @@ message AppDataSourceState
     optional int64 processedPacketCount = 13 [default = 0];
     optional int64 lastPacketSystemTime = 14 [default = 0];
     optional int64 rupFramePlantTime = 15 [default = 0];
-    optional int32 rupFrameNumerator = 16 [default = 0];
+	optional uint16 rupFrameNumerator = 16 [default = 0];
 	optional int32 signalStatesQueueCurSize = 17 [default = 0];
 	optional int32 signalStatesQueueCurMaxSize = 18 [default = 0];
     optional int32 acquiredSignalsCount = 19 [default = 0];

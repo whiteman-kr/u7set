@@ -184,7 +184,7 @@ void SubnetChecker::checkNextHost()
 		readAck();
 	}
 
-	for (const ServiceInfo& sInfo : serviceInfo)
+	for (const ServiceInfo& sInfo : servicesInfo)
 	{
 		QHostAddress ip(m_ip);
 

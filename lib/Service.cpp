@@ -1,9 +1,6 @@
 #include "../lib/Service.h"
 #include "../lib/WUtils.h"
 
-
-//QHash<E::SoftwareType, ServiceInfo> serviceInfoMap = initServiceInfoMap();
-
 ServiceInfo::ServiceInfo()
 {
 }
@@ -17,10 +14,8 @@ ServiceInfo::ServiceInfo(E::SoftwareType _softwareType, quint16 _port, QString _
 }
 
 
-HashedVector<E::SoftwareType, ServiceInfo> initServiceInfo()
+ServicesInfo::ServicesInfo()
 {
-	HashedVector<E::SoftwareType, ServiceInfo> sInfoMap;
-
 	const ServiceInfo serviceInfo[] =
 	{
 		ServiceInfo(E::SoftwareType::BaseService, PORT_BASE_SERVICE, "Base Service", "BaseSrv"),
@@ -33,10 +28,8 @@ HashedVector<E::SoftwareType, ServiceInfo> initServiceInfo()
 
 	for(const ServiceInfo& sInfo : serviceInfo)
 	{
-		sInfoMap.insert(sInfo.softwareType, sInfo);
+		insert(sInfo.softwareType, sInfo);
 	}
-
-	return sInfoMap;
 }
 
 
@@ -405,7 +398,7 @@ void Service::stopServiceWorkerThread()
 
 void Service::startBaseRequestSocketThread()
 {
-	ServiceInfo sInfo = serviceInfo.value(m_serviceWorkerFactory.softwareType());
+	ServiceInfo sInfo = servicesInfo.value(m_serviceWorkerFactory.softwareType());
 
 	UdpServerSocket* serverSocket = new UdpServerSocket(QHostAddress::AnyIPv4, sInfo.port, m_logger);
 

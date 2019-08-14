@@ -1152,20 +1152,20 @@ void TuningFilterEditor::on_m_pastePreset_clicked()
 
 	std::shared_ptr<TuningFilter> parentFilter = nullptr;
 
-	for (auto p : selectedItems)
+	if (selectedItems.isEmpty() == false)
 	{
-		std::shared_ptr<TuningFilter> filter = p->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
+		QTreeWidgetItem* firstTreeItem = selectedItems.front();
+		Q_ASSERT(firstTreeItem);
+
+		std::shared_ptr<TuningFilter> filter = firstTreeItem->data(0, Qt::UserRole).value<std::shared_ptr<TuningFilter>>();
 		if (filter == nullptr)
 		{
-			assert(filter);
+			Q_ASSERT(filter);
 			return;
 		}
 
 		parentFilter = filter;
-
-		parentItem = p;
-
-		break;
+		parentItem = firstTreeItem;
 	}
 
 	std::shared_ptr<TuningFilter> pastedRoot = m_filterStorage->pasteFromClipboard();
@@ -1183,7 +1183,6 @@ void TuningFilterEditor::on_m_pastePreset_clicked()
 
 	for (int i = 0; i < count; i++)
 	{
-
 		std::shared_ptr<TuningFilter> newFilter = pastedRoot->childFilter(i);
 
 		QUuid uid = QUuid::createUuid();

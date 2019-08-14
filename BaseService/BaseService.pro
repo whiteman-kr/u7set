@@ -15,6 +15,8 @@ TEMPLATE = app
 #
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+win32:QMAKE_CXXFLAGS += /analyze
+CONFIG += warn_on
 
 # DESTDIR
 #
@@ -55,7 +57,8 @@ HEADERS += \
     ../lib/CommandLineParser.h \
     ../lib/WUtils.h \
     ../lib/SoftwareInfo.h \
-    ../lib/OrderedHash.h
+    ../lib/OrderedHash.h \
+	Stable.h
 
 include(../qtservice/src/qtservice.pri)
 

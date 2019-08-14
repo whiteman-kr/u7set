@@ -405,41 +405,42 @@ namespace Tcp
 
 	void SocketWorker::onSocketStateChanged(QAbstractSocket::SocketState newState)
 	{
+		Q_UNUSED(newState);
 		return;			// its Ok!
 
-		QString stateStr;
+//		QString stateStr;
 
-		switch(newState)
-		{
-		case QAbstractSocket::UnconnectedState:
-			stateStr = "Socket state: UnconnectedState";
-			break;
+//		switch(newState)
+//		{
+//		case QAbstractSocket::UnconnectedState:
+//			stateStr = "Socket state: UnconnectedState";
+//			break;
 
-		case QAbstractSocket::HostLookupState:
-			stateStr = "Socket state: HostLookupState";
-			break;
+//		case QAbstractSocket::HostLookupState:
+//			stateStr = "Socket state: HostLookupState";
+//			break;
 
-		case QAbstractSocket::ConnectingState:
-			stateStr = "Socket state: ConnectingState";
-			break;
+//		case QAbstractSocket::ConnectingState:
+//			stateStr = "Socket state: ConnectingState";
+//			break;
 
-		case QAbstractSocket::ConnectedState:
-			stateStr = "Socket state: ConnectedState";
-			break;
+//		case QAbstractSocket::ConnectedState:
+//			stateStr = "Socket state: ConnectedState";
+//			break;
 
-		case QAbstractSocket::BoundState:
-			stateStr = "Socket state: BoundState";
-			break;
+//		case QAbstractSocket::BoundState:
+//			stateStr = "Socket state: BoundState";
+//			break;
 
-		case QAbstractSocket::ClosingState:
-			stateStr = "Socket state: ClosingState";
-			break;
+//		case QAbstractSocket::ClosingState:
+//			stateStr = "Socket state: ClosingState";
+//			break;
 
-		default:
-			assert(false);
-		}
+//		default:
+//			assert(false);
+//		}
 
-		qDebug() << qPrintable(stateStr);
+//		qDebug() << qPrintable(stateStr);
 	}
 
 	void SocketWorker::onSocketConnected()
