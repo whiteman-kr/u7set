@@ -293,7 +293,7 @@ namespace Builder
 	public:
 		UalAfb(const UalItem &appItem, bool isBusProcessingAfb);
 
-		quint16 instance() const { return m_instance; }
+		int instance() const { return m_instance; }
 		quint16 opcode() const { return static_cast<quint16>(afb().opCode()); }		// return FB type
 		QString caption() const { return afb().caption(); }
 		QString typeCaption() const { return afb().componentCaption(); }
@@ -306,7 +306,7 @@ namespace Builder
 
 		QString instantiatorID() const;
 
-		void setInstance(quint16 instance) { m_instance = instance; }
+		void setInstance(int instance) { m_instance = instance; }
 		void setNumber(int number) { m_number = number; }
 
 		bool getAfbParamByIndex(int index, LogicAfbParam* afbParam) const;
@@ -369,7 +369,7 @@ namespace Builder
 		int lmDescriptionNumber() const;
 
 	private:
-		quint16 m_instance = -1;
+		int m_instance = -1;
 		int m_number = -1;
 		bool m_isBusProcessing = false;
 		mutable QString m_instantiatorID;

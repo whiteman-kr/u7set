@@ -3447,7 +3447,7 @@ namespace ExtWidgets
 
 			// now check if all properties have the same type and values
 			//
-			int type;
+			int type = 0;
 			QVariant value;
 
 			bool sameType = true;

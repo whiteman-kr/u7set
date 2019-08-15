@@ -38,11 +38,8 @@ private:
     void saveSettings();
 
 private:
-
 	Ui::SchemaItemPropertiesDialog *ui;
-
 	SchemaItemPropertyEditor* m_propertyEditor = nullptr;
-
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_items;
 };
 

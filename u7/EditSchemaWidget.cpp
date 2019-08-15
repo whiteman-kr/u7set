@@ -7879,9 +7879,12 @@ void EditSchemaWidget::properties()
 
 	m_itemsPropertiesDialog->setObjects(editSchemaView()->selectedItems());
 	m_itemsPropertiesDialog->setReadOnly(m_editEngine->readOnly());
+
 	m_itemsPropertiesDialog->show();
 	m_itemsPropertiesDialog->ensureVisible();
-	m_itemsPropertiesDialog->setFocus();
+
+	m_itemsPropertiesDialog->raise();
+	m_itemsPropertiesDialog->activateWindow();
 
 	return;
 }
@@ -10481,6 +10484,8 @@ void EditSchemaWidget::find()
 	}
 
 	m_findDialog->show();
+	m_findDialog->ensureVisible();
+
 	m_findDialog->raise();
 	m_findDialog->activateWindow();
 
@@ -11020,14 +11025,9 @@ void EditSchemaWidget::setCompareItemActions(const std::map<QUuid, CompareAction
 }
 
 SchemaFindDialog::SchemaFindDialog(QWidget* parent) :
-	QDialog(parent)
+	QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint)
 {
 	setWindowTitle(tr("Find and Replace"));
-
-	setWindowFlags((windowFlags() &
-					~Qt::WindowMinimizeButtonHint &
-					~Qt::WindowMaximizeButtonHint &
-					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
 	// FindText/Replace - text for search
 	//
@@ -11058,7 +11058,6 @@ SchemaFindDialog::SchemaFindDialog(QWidget* parent) :
 	QString selectionColor = QString("QTextEdit { selection-background-color: %1; selection-color: %2; }")
 							 .arg(highlight.name())
 							 .arg(highlightText.name());
-
 	m_findResult->setStyleSheet(selectionColor);
 
 	// Find buttons
@@ -11141,7 +11140,17 @@ SchemaFindDialog::SchemaFindDialog(QWidget* parent) :
 
 	m_nextButton->setDefault(true);
 
+	QSettings settings;
+	restoreGeometry(settings.value("SchemaFindDialog/Geometry").toByteArray());
+
+	ensureVisible();
+
 	return;
+}
+
+SchemaFindDialog::~SchemaFindDialog()
+{
+	qDebug() << Q_FUNC_INFO;
 }
 
 QString SchemaFindDialog::findText() const
@@ -11159,6 +11168,31 @@ void SchemaFindDialog::setFocusToEditLine()
 
 	m_findTextEdit->setFocus();
 	m_findTextEdit->selectAll();
+
+	return;
+}
+
+void SchemaFindDialog::ensureVisible()
+{
+	if (QScreen* screen = QGuiApplication::screenAt(geometry().center());
+		screen == nullptr)
+	{
+		QScreen* newScreen = QGuiApplication::screens().at(0);
+
+		if (QScreen* parentScreen = parentWidget()->window()->windowHandle()->screen();
+			parentScreen != nullptr)
+		{
+			newScreen = parentScreen;
+		}
+
+		QRect screenGeometry = newScreen->geometry();
+
+		move(screenGeometry.left() + screenGeometry.width() / 2 - width() / 2,
+			 screenGeometry.top() + screenGeometry.height() / 2 - height() / 2);
+	}
+	else
+	{
+	}
 
 	return;
 }
@@ -11239,6 +11273,25 @@ void SchemaFindDialog::replaceAllPressed()
 	}
 
 	emit replaceAll(findText, replaceWith, cs);
+
+	return;
+}
+
+void SchemaFindDialog::closeEvent(QCloseEvent*)
+{
+	saveSettings();
+}
+
+void SchemaFindDialog::done(int r)
+{
+	saveSettings();
+	QDialog::done(r);
+}
+
+void SchemaFindDialog::saveSettings()
+{
+	QSettings settings;
+	settings.setValue("SchemaFindDialog/Geometry", saveGeometry());
 
 	return;
 }

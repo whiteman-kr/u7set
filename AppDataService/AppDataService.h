@@ -39,7 +39,7 @@ public:
 	~AppDataServiceWorker();
 
 	virtual ServiceWorker* createInstance() const override;
-	virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const override;
+	virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const override;
 
 	bool isConnectedToConfigurationService(quint32 &ip, quint16 &port) const;
 	bool isConnectedToArchiveService(quint32 &ip, quint16 &port) const;

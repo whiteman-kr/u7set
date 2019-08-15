@@ -20,7 +20,7 @@ public:
 
 signals:
 	void setChecked(int count);
-	void hostFound(quint32 ip, quint16 port, Network::ServiceInfo serviceInfo);
+	void hostFound(quint32 ip, quint16 port, Network::ServiceInfo servicesInfo);
 
 public slots:
 	void startChecking();

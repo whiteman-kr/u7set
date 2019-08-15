@@ -43,7 +43,18 @@
 #include <QCoreApplication>
 #include <stdio.h>
 #include <QTimer>
+
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable : 6011)
+#endif
+
 #include <QVector>
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
+
 #include <QProcess>
 
 // WhiteMan 04.01.2017

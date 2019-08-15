@@ -27,7 +27,7 @@ namespace Tuning
 		~TuningServiceWorker();
 
 		virtual ServiceWorker* createInstance() const override;
-		virtual void getServiceSpecificInfo(Network::ServiceInfo& serviceInfo) const;
+		virtual void getServiceSpecificInfo(Network::ServiceInfo& servicesInfo) const;
 
 		const TuningClientContext* getClientContext(QString clientID) const;
 		const TuningClientContext* getClientContext(const std::string& clientID) const;
