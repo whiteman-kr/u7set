@@ -146,7 +146,6 @@ include(../qtservice/src/qtservice.pri)
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
-
 #protobuf
 #
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS		# Remove Protobuf 4996 warning, Can't remove it in sources, don't know why
