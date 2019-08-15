@@ -146,11 +146,8 @@ HEADERS += \
     ../lib/SimpleAppSignalState.h \
     DynamicAppSignalState.h
 
-include(../qtservice/src/qtservice.pri)
-
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
-
 
 win32:QMAKE_CXXFLAGS += /std:c++17
 
@@ -174,3 +171,6 @@ DISTFILES += \
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 CONFIG(release, debug|release): unix:QMAKE_CXXFLAGS += -DNDEBUG
+
+include(../qtservice/src/qtservice.pri)
+
