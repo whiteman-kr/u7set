@@ -1,9 +1,7 @@
-#include <QApplication>
-#include <QTranslator>
-
 #include "MainWindow.h"
 #include "Options.h"
 #include "../lib/ProtoSerialization.h"
+#include "../lib/MemLeaksDetection.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -11,6 +9,8 @@
 
 int main(int argc, char *argv[])
 {
+	initMemoryLeaksDetection();
+
     QApplication a(argc, argv);
 
     a.setApplicationName("Metrology");
@@ -45,6 +45,8 @@ int main(int argc, char *argv[])
     theOptions.unload();
 
     google::protobuf::ShutdownProtobufLibrary();
+
+	dumpMemoryLeaks();
 
     return result;
 }

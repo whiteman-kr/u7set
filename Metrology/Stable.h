@@ -1,102 +1,132 @@
-#ifndef STABLE_H
-#define STABLE_H
+﻿#pragma once
 
 // C includes, must be before c++ includes
 //
 #include <assert.h>
 #include <stdint.h>
 
-
 // C++ includes
 //
-#include <memory>
-#include <vector>
+#include <algorithm>
+#include <atomic>
+#include <functional>
+#include <iostream>
+#include <limits>
 #include <list>
 #include <map>
+#include <memory>
+#include <vector>
 #include <set>
-#include <algorithm>
-#include <functional>
 #include <type_traits>
-#include <limits>
 
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable : 6011)
+	#pragma warning(disable : 4251)
+	#pragma warning(disable : 4127)
+	#pragma warning(disable : 6326)
+#endif
 
 // Qt includes
 //
+#include <QAbstractSocket>
 #include <QApplication>
-#include <QGuiApplication>
-#include <QThread>
+
+#include <QCommandLineParser>
+#include <QCoreApplication>
+
 #include <QDebug>
-#include <QtNetwork/QHostAddress>
+#include <QDateTime>
+
+#include <QElapsedTimer>
+#include <QEventLoop>
+
+#include <QFile>
+#include <QFileInfo>
+
+#include <QHash>
+#include <QHostAddress>
+
+#include <QMap>
+#include <QMetaClassInfo>
+#include <QMetaEnum>
+#include <QMetaObject>
 #include <QMutex>
 #include <QMutexLocker>
-#include <QDateTime>
-#include <QPoint>
-#include <QUuid>
+
+#include <QObject>
+
+#include <QQueue>
+
 #include <QSettings>
+#include <QString>
+#include <QStringList>
+
+#include <QTextStream>
+#include <QThread>
+#include <QTimer>
+#include <QTranslator>
+
+#include <QtCore>
+#include <QtGlobal>
+#include <QtNetwork/QHostAddress>
+
+#include <QUdpSocket>
+#include <QUuid>
+
+#include <QVariant>
+#include <QVector>
+
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-#include <QJsonObject>
-#include <QJsonDocument>
-#include <QJsonArray>
-#include <QFile>
-#include <QTextStream>
-#include <QMetaObject>
-#include <QMetaClassInfo>
-#include <QJSEngine>
-#include <QQmlEngine>
-#include <QHash>
-#include <QMap>
 
-
-// Qt Widgets
+// Qt widgets
 //
-#include <QMainWindow>
-
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-
-#include <QAction>
-#include <QMenu>
-#include <QMenuBar>
-#include <QStatusBar>
-#include <QLabel>
-#include <QPushButton>
-#include <QCheckBox>
-#include <QScrollArea>
-#include <QScrollBar>
-
-#include <QListWidget>
-#include <QTableWidget>
-#include <QTabWidget>
-#include <QTreeWidget>
-
-#include <QHeaderView>
-#include <QListView>
-
-#include <QSplitter>
-#include <QTextEdit>
-
-#include <QMessageBox>
-#include <QInputDialog>
-#include <QProgressDialog>
-#include <QFileDialog>
-#include <QErrorMessage>
 
 #include <QAbstractItemModel>
 #include <QAbstractTableModel>
+#include <QAction>
 
+#include <QCheckBox>
 #include <QCloseEvent>
 
+#include <QErrorMessage>
+
+#include <QFileDialog>
+
+#include <QHBoxLayout>
+#include <QHeaderView>
+
+#include <QInputDialog>
+
+#include <QLabel>
+#include <QListView>
+#include <QListWidget>
+
+#include <QMainWindow>
+#include <QMenu>
+#include <QMenuBar>
+#include <QMessageBox>
+
+#include <QVBoxLayout>
+
 #include <QPainter>
+#include <QProgressDialog>
+#include <QPushButton>
 
-// Qt Sql
-//
-#include <QSql>
-#include <QSqlDatabase>
-#include <QSqlError>
-#include <QSqlQuery>
-#include <QSqlDriver>
+#include <QScrollArea>
+#include <QScrollBar>
+#include <QSplitter>
+#include <QStatusBar>
 
+#include <QTableWidget>
+#include <QTabWidget>
+#include <QTextEdit>
+#include <QTreeWidget>
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
+#endif
 
 // Disable some warnings
 //
@@ -109,8 +139,15 @@
 #endif
 #endif
 
-#endif // STABLE_H
-
-
+// Turn on memory leaks detection
+//
+#if defined (Q_OS_WIN) && defined (Q_DEBUG)
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+	#ifndef DBG_NEW
+		#define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+		#define new DBG_NEW
+	#endif
+#endif
 
 
