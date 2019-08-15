@@ -60,8 +60,8 @@ public:
 	E::PropertySpecificEditor specificEditor() const;
 	void setSpecificEditor(E::PropertySpecificEditor value);
 
-	quint16 viewOrder() const;
-	void setViewOrder(quint16 value);
+	int viewOrder() const;
+	void setViewOrder(int value);
 
 	bool essential() const;
 	void setEssential(bool value);

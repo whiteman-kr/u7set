@@ -100,8 +100,9 @@ namespace EditEngine
 		default:
 			assert(false);
 		}
-*/
+
 		return false;
+*/
 	}
 
 	void SetOrderCommand::executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
