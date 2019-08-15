@@ -40,6 +40,8 @@ namespace Rup
 		quint16 year;				// 1970..65535
 
 		void reverseBytes();
+
+		void setDateTime(const QDateTime& dateTime);
 	};
 
 	struct Header

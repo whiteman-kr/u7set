@@ -5,11 +5,9 @@ QT += qml
 QT += xml
 QT += widgets
 
-
 TARGET = TuningSrv
 CONFIG += console
 CONFIG -= app_bundle
-
 
 TEMPLATE = app
 
@@ -17,6 +15,8 @@ TEMPLATE = app
 #
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+
+include(../warnings.pri)
 
 # DESTDIR
 #
@@ -29,11 +29,11 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
-
 SOURCES += \
     ../lib/BuildInfo.cpp \
     ../lib/CfgServerLoader.cpp \
     ../lib/CircularLogger.cpp \
+    ../lib/MemLeaksDetection.cpp \
     ../lib/Service.cpp \
     ../lib/SocketIO.cpp \
     ../lib/UdpSocket.cpp \
@@ -80,6 +80,7 @@ HEADERS += \
     ../lib/BuildInfo.h \
     ../lib/CfgServerLoader.h \
     ../lib/CircularLogger.h \
+    ../lib/MemLeaksDetection.h \
     ../lib/OrderedHash.h \
     ../lib/Service.h \
     ../lib/SocketIO.h \
@@ -88,6 +89,7 @@ HEADERS += \
     ../lib/WUtils.h \
     ../lib/TcpFileTransfer.h \
     ../lib/Tcp.h \
+    Stable.h \
     TuningService.h \
     ../lib/DataSource.h \
     ../lib/XmlHelper.h \
@@ -126,7 +128,8 @@ HEADERS += \
 
 include(../qtservice/src/qtservice.pri)
 
-win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 

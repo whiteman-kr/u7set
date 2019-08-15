@@ -791,19 +791,7 @@ namespace Tuning
 		rupHeader.framesQuantity = 1;
 		rupHeader.frameNumber = 0;
 
-		QDateTime now = QDateTime::currentDateTime();
-
-		QDate date = now.date();
-		QTime time = now.time();
-
-		rupHeader.timeStamp.year = date.year();
-		rupHeader.timeStamp.month = date.month();
-		rupHeader.timeStamp.day = date.day();
-
-		rupHeader.timeStamp.hour = time.hour();
-		rupHeader.timeStamp.minute = time.minute();
-		rupHeader.timeStamp.second = time.second();
-		rupHeader.timeStamp.millisecond = time.msec();
+		rupHeader.timeStamp.setDateTime(QDateTime::currentDateTime());
 
 		m_rupNumerator++;
 
@@ -843,7 +831,7 @@ namespace Tuning
 
 		//
 
-		fotipHeader.operationCode = TO_INT(tuningCmd.opCode);
+		fotipHeader.operationCode = static_cast<quint16>(tuningCmd.opCode);
 
 		// operation-specific initialization
 		//
@@ -1326,7 +1314,7 @@ namespace Tuning
 			result = false;
 		}
 
-		if (fotipHeader.romSizeB !=  m_tuningFlashSizeB)
+		if (fotipHeader.romSizeB !=  static_cast<quint32>(m_tuningFlashSizeB))
 		{
 			m_stat.errFotipRomSize++;
 			result = false;
