@@ -371,7 +371,7 @@ namespace ExtWidgets
 		return m_objects;
 	}
 
-	void PropertyTable::valueChanged(std::vector<std::pair<std::shared_ptr<PropertyObject>, QString>> modifiedObjectsData, const QVariant& value)
+	void PropertyTable::valueChanged(QMap<QString, std::shared_ptr<PropertyObject>> modifiedObjectsData, const QVariant& value)
 	{
 		// Set the new property value in all objects
 		//
@@ -379,34 +379,36 @@ namespace ExtWidgets
 
 		QList<std::shared_ptr<PropertyObject>> modifiedObjects;
 
-		for (auto i : modifiedObjectsData)
+		for (const QString& propertyName : modifiedObjectsData.keys())
 		{
-			std::shared_ptr<PropertyObject> pObject = i.first;
-			const QString& propertyName = i.second;
+			QList<std::shared_ptr<PropertyObject>> objects= modifiedObjectsData.values(propertyName);
 
-			// Do not set property, if it has same value
-
-			QVariant oldValue = pObject->propertyValue(propertyName);
-
-			if (oldValue == value)
+			for (std::shared_ptr<PropertyObject> object : objects)
 			{
-				continue;
+				// Do not set property, if it has same value
+
+				QVariant oldValue = object->propertyValue(propertyName);
+
+				if (oldValue == value)
+				{
+					continue;
+				}
+
+				// Warning!!! If property changing changes the list of properties (e.g. SpecificProperties),
+				// property pointer becomes unusable! So next calls to property-> will cause crash
+
+				object->setPropertyValue(propertyName, value);
+
+				QVariant newValue = object->propertyValue(propertyName);
+
+				if (oldValue == newValue && errorString.isEmpty() == true)
+				{
+					errorString = QString("Property: %1 - incorrect input value")
+								  .arg(propertyName);
+				}
+
+				modifiedObjects.append(object);
 			}
-
-			// Warning!!! If property changing changes the list of properties (e.g. SpecificProperties),
-			// property pointer becomes unusable! So next calls to property-> will cause crash
-
-			pObject->setPropertyValue(propertyName, value);
-
-			QVariant newValue = pObject->propertyValue(propertyName);
-
-			if (oldValue == newValue && errorString.isEmpty() == true)
-			{
-				errorString = QString("Property: %1 - incorrect input value")
-							  .arg(propertyName);
-			}
-
-			modifiedObjects.append(pObject);
 		}
 
 		if (errorString.isEmpty() == false)
@@ -433,7 +435,12 @@ namespace ExtWidgets
 		return;
 	}
 
+	void PropertyTable::updatePropertiesValues()
+	{
+		// Force redraw all cells
 
+		m_tableView->viewport()->update();
+	}
 
 	void PropertyTable::onCellDoubleClicked(const QModelIndex &index)
 	{
@@ -497,7 +504,7 @@ namespace ExtWidgets
 			return;
 		}
 
-		std::vector<std::pair<std::shared_ptr<PropertyObject>, QString>> modifiedObjectsData;
+		QMap<QString, std::shared_ptr<PropertyObject>> modifiedObjectsData;
 
 		for (const QModelIndex& mi : selectedIndexes)
 		{
@@ -516,8 +523,7 @@ namespace ExtWidgets
 				return;
 			}
 
-			modifiedObjectsData.emplace_back(std::make_pair(po, p->caption()));
-
+			modifiedObjectsData.insertMulti(p->caption(), po);
 		}
 
 		if (modifiedObjectsData.empty() == false)

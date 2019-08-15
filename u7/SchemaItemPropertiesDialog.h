@@ -14,6 +14,7 @@ namespace EditEngine
 }
 
 class SchemaItemPropertyEditor;
+class SchemaItemPropertyTable;
 
 
 
@@ -37,9 +38,15 @@ private:
 
     void saveSettings();
 
+private slots:
+	void propertiesModeTabChanged(int index);
+
 private:
 	Ui::SchemaItemPropertiesDialog *ui;
+
 	SchemaItemPropertyEditor* m_propertyEditor = nullptr;
+	SchemaItemPropertyTable* m_propertyTable = nullptr;
+
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_items;
 };
 
@@ -67,3 +74,27 @@ private:
 	EditEngine::EditEngine* m_editEngine = nullptr;
 };
 
+
+//
+//
+//	SchemaItemPropertyTable
+//
+//
+
+class SchemaItemPropertyTable : public IdePropertyTable
+{
+	Q_OBJECT
+
+public:
+	explicit SchemaItemPropertyTable(EditEngine::EditEngine* editEngine, QWidget* parent);
+	virtual ~SchemaItemPropertyTable();
+
+protected slots:
+	virtual void valueChanged(QMap<QString, std::shared_ptr<PropertyObject>> modifiedObjectsData, const QVariant& value) override;
+
+protected:
+	EditEngine::EditEngine* editEngine();
+
+private:
+	EditEngine::EditEngine* m_editEngine = nullptr;
+};

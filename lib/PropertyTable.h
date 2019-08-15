@@ -98,10 +98,11 @@ namespace ExtWidgets
 		const QList<std::shared_ptr<PropertyObject>>& objects() const;
 
 	protected:
-		virtual void valueChanged(std::vector<std::pair<std::shared_ptr<PropertyObject>, QString>> modifiedObjectsData, const QVariant& value);
+		virtual void valueChanged(QMap<QString, std::shared_ptr<PropertyObject>> modifiedObjectsData, const QVariant& value);
 
 	protected slots:
 		void updatePropertiesList();
+		void updatePropertiesValues();
 
 	private slots:
 		void onCellDoubleClicked(const QModelIndex &index);
