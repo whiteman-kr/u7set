@@ -5,11 +5,9 @@
 //
 //	For turn on memory leaks detection:
 //
-//	1) insert code snipped shown below in Stable.h
-//	2) call initMemoryLeaksDetection() at the beginning of main()
-//	3) call dumpMemoryLeaks() before exit from main()
-
-//	This code snippet should be placed in Stable.h:
+//	1) call initMemoryLeaksDetection() at the beginning of main()
+//	2) call dumpMemoryLeaks() before exit from main()
+//	3) place next code snipped in your precompiled header (ex. Stable.h)
 //
 //	#if defined (Q_OS_WIN) && defined (Q_DEBUG)
 //	#define _CRTDBG_MAP_ALLOC

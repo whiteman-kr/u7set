@@ -74,6 +74,11 @@ void initMemoryLeaksDetection()
 {
 #if defined (Q_OS_WIN) && defined(Q_DEBUG)
 
+#ifndef _CRTDBG_MAP_ALLOC
+	assert(false);				// _CRTDBG_MAP_ALLOC should be declared in Stable.h !
+								// see instructions in file MemLeaksDetection.h
+#endif
+
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
 	_CrtSetReportHook2(_CRT_RPTHOOK_INSTALL, reportingHook);
 
