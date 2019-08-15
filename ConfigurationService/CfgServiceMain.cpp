@@ -1,13 +1,11 @@
 #include "ConfigurationService.h"
-
+#include "../lib/MemLeaksDetection.h"
 
 #define CIRCULAR_LOGGER_PTR_ASSERTING
 
 int main(int argc, char *argv[])
 {
-#if defined (Q_OS_WIN) && defined (Q_DEBUG)
-	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );	// Memory leak report on app exit
-#endif
+	initMemoryLeaksDetection();
 
 	QCoreApplication app(argc, argv);
 
@@ -29,7 +27,9 @@ int main(int argc, char *argv[])
 
 	google::protobuf::ShutdownProtobufLibrary();
 
-	LOGGER_SHUTDOWN(logger)
+	LOGGER_SHUTDOWN(logger);
+
+	dumpMemoryLeaks();
 
 	return result;
 }

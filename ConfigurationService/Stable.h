@@ -96,7 +96,6 @@
 
 // Turn on memory leaks detection
 //
-
 #if defined (Q_OS_WIN) && defined (Q_DEBUG)
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>

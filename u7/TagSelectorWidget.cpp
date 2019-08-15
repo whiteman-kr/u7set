@@ -296,9 +296,17 @@ namespace TagSelector
 
 	FlowLayout::~FlowLayout()
 	{
-		QLayoutItem *item;
-		while ((item = takeAt(0)))
+		//QLayoutItem *item;
+		//while ((item = takeAt(0)))
+		//	delete item;
+		// Prev three lines ate the same as the next cycle
+		//
+		for (auto item : itemList)
+		{
 			delete item;
+		}
+
+		itemList.clear();
 	}
 
 	void FlowLayout::addItem(QLayoutItem *item)

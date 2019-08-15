@@ -2012,7 +2012,7 @@ public:
 										   bool visible,
 										   const E::PropertySpecificEditor editor,
 										   quint16 viewOrder,
-											bool essential)
+										   bool essential)
 	{
 		static_assert(PropertyObject::m_lastSpecificPropertiesVersion >= 1 && PropertyObject::m_lastSpecificPropertiesVersion <= 6);	// Function must be reviewed if version is raised
 
