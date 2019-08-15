@@ -73,7 +73,7 @@ namespace  TuningIPEN
 
 		if (value == 0)
 		{
-			quint16 v = ~0x0001;
+			quint16 v = 0xFFFE; //~0x0001;
 
 			v <<= bit;
 
