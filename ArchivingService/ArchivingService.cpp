@@ -311,17 +311,18 @@ void ArchivingService::onConfigurationReady(const QByteArray configurationXmlDat
 			continue;
 		}
 
-		bool fileResult = true;
+		bool res = true;
 
 		if (bfi.pathFileName.endsWith("ArchSignals.proto"))
 		{
-			fileResult = loadArchSignalsProto(fileData);
+			res = loadArchSignalsProto(fileData);
 
-			logFileLoadResult(fileResult, bfi.pathFileName);
+			logFileLoadResult(res, bfi.pathFileName);
 		}
 
-		if (fileResult == false)
+		if (res == false)
 		{
+			fileResult = false;
 			break;
 		}
 	}

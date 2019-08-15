@@ -32,6 +32,7 @@ unix {
 
 
 SOURCES += \
+    ../lib/MemLeaksDetection.cpp \
     ../lib/UdpSocket.cpp \
     ../lib/SocketIO.cpp \
     ../lib/CircularLogger.cpp \
@@ -46,6 +47,7 @@ SOURCES += \
     ../lib/SoftwareInfo.cpp
 
 HEADERS += \
+	../lib/MemLeaksDetection.h \
     ../lib/SocketIO.h \
     ../lib/UdpSocket.h \
     ../lib/CircularLogger.h \

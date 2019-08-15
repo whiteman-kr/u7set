@@ -40,6 +40,7 @@ unix {
 
 
 SOURCES += \
+	../lib/MemLeaksDetection.cpp \
 	../lib/UdpSocket.cpp \
 	../lib/Service.cpp \
 	../lib/SocketIO.cpp \
@@ -90,6 +91,7 @@ SOURCES += \
     DynamicAppSignalState.cpp
 
 HEADERS += \
+	../lib/MemLeaksDetection.h \
 	Stable.h \
     ../lib/SocketIO.h \
     ../lib/UdpSocket.h \
@@ -167,7 +169,6 @@ unix {
 DISTFILES += \
     ../Proto/network.proto \
     ../Proto/serialization.proto
-
 
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 CONFIG(release, debug|release): unix:QMAKE_CXXFLAGS += -DNDEBUG
