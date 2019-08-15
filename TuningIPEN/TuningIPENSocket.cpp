@@ -167,16 +167,7 @@ namespace TuningIPEN
 		rh.framesQuantity = 1;
 		rh.frameNumber = 0;
 
-		QDateTime t = QDateTime::currentDateTime();
-
-		rh.timeStamp.year = t.date().year();
-		rh.timeStamp.month = t.date().month();
-		rh.timeStamp.day = t.date().day();
-
-		rh.timeStamp.hour = t.time().hour();
-		rh.timeStamp.minute = t.time().minute();
-		rh.timeStamp.second = t.time().second();
-		rh.timeStamp.millisecond = t.time().msec();
+		rh.timeStamp.setDateTime(QDateTime::currentDateTime());
 
 		FotipHeader& fh = m_reqFrame.fotip.header;
 
@@ -213,13 +204,13 @@ namespace TuningIPEN
 
 		// For IPEN only !!!! end
 
-		fh.operationCode = TO_INT(sr.operation);
+		fh.operationCode = static_cast<quint16>(sr.operation);
 		fh.flags.all = 0;
 		fh.startAddress = sr.startAddressW;
 		fh.fotipFrameSize = 1432;
-		fh.romSize = sr.romSizeW * 2;					// words => bytes
-		fh.romFrameSize = sr.frameSizeW * 2;			// words => bytes
-		fh.dataType = TO_INT(sr.dataType);
+		fh.romSize = sr.romSizeW * 2;									// words => bytes
+		fh.romFrameSize = static_cast<quint16>(sr.frameSizeW * 2);		// words => bytes
+		fh.dataType = static_cast<quint16>(sr.dataType);
 		fh.uniqueId = sr.uniqueID;
 
 		memset(fh.reserve, 0, FOTIP_HEADER_RESERVE_SIZE);
@@ -242,7 +233,10 @@ namespace TuningIPEN
 
 		int size = sizeof(m_reqFrame);
 
-		qint64 result = m_socket->writeDatagram(reinterpret_cast<char*>(&m_reqFrame), size, QHostAddress(sr.lmIP), sr.lmPort);
+		qint64 result = m_socket->writeDatagram(reinterpret_cast<char*>(&m_reqFrame),
+												size,
+												QHostAddress(sr.lmIP),
+												static_cast<quint16>(sr.lmPort));
 
 		if (result == -1)
 		{

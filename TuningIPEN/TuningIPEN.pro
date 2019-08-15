@@ -17,8 +17,10 @@ TEMPLATE = app
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
+include(../warnings.pri)
 
 SOURCES +=\
+	../lib/MemLeaksDetection.cpp \
 	TuningMainWindow.cpp \
 	../lib/ServiceSettings.cpp \
 	../lib/DeviceHelper.cpp \
@@ -66,6 +68,7 @@ SOURCES +=\
     ../lib/SimpleMutex.cpp
 
 HEADERS  += TuningMainWindow.h \
+	../lib/MemLeaksDetection.h \
 	../lib/ServiceSettings.h \
 	../lib/DeviceHelper.h \
 	../lib/XmlHelper.h \
@@ -89,6 +92,7 @@ HEADERS  += TuningMainWindow.h \
 	../lib/Crc.h \
 	AnalogSignalSetter.h \
     ../lib/WUtils.h \
+	Stable.h \
     TuningIPENService.h \
     ../Builder/IssueLogger.h \
     ../lib/HostAddressPort.h \
@@ -111,8 +115,10 @@ HEADERS  += TuningMainWindow.h \
     ../lib/WidgetUtils.h \
     ../lib/SimpleMutex.h
 
-include(../qtservice/src/qtservice.pri)
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
+include(../qtservice/src/qtservice.pri)
 
 # DESTDIR
 #
