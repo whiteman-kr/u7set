@@ -4,60 +4,27 @@
 #include "SvgEditor.h"
 
 //
-// IdePropertyEditor
+// IdePropertyEditorHelper
 //
 
-IdePropertyEditor::IdePropertyEditor(QWidget* parent, DbController* dbController /*= nullptr*/) :
-	PropertyEditor(parent),
-	m_dbController(dbController)
+ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent, DbController* dbController)
 {
-    // Set script help data
-    //
-    QFile file(":/ScriptHelp/scripthelp.html");
-
-    if (file.open(QIODevice::ReadOnly) == true)
-    {
-        QByteArray data = file.readAll();
-        if (data.size() > 0)
-        {
-            setScriptHelp(QString::fromUtf8(data));
-        }
-    }
-
-    setScriptHelpWindowPos(theSettings.m_scriptHelpWindowPos);
-    setScriptHelpWindowGeometry(theSettings.m_scriptHelpWindowGeometry);
-	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
+	if (propertyPtr == nullptr || parent == nullptr || dbController == nullptr)
 	{
-		setFontSizeF(fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
+		Q_ASSERT(propertyPtr);
+		Q_ASSERT(parent);
+		Q_ASSERT(dbController);
+		return new ExtWidgets::PropertyPlainTextEditor(parent);
 	}
-}
-
-IdePropertyEditor::~IdePropertyEditor()
-{
-}
-
-void IdePropertyEditor::saveSettings()
-{
-    theSettings.m_scriptHelpWindowPos = scriptHelpWindowPos();
-    theSettings.m_scriptHelpWindowGeometry = scriptHelpWindowGeometry();
-}
-
-ExtWidgets::PropertyEditor* IdePropertyEditor::createChildPropertyEditor(QWidget* parent)
-{
-	return new IdePropertyEditor(parent, m_dbController);
-}
-
-ExtWidgets::PropertyTextEditor* IdePropertyEditor::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent)
-{
 
 	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::TuningFilter)
-    {
-        // This is Filters Editor for TuningClient
-        //
+	{
+		// This is Filters Editor for TuningClient
+		//
 
-		IdeTuningFiltersEditor* editor = new IdeTuningFiltersEditor(m_dbController, parent);
-        return editor;
-    }
+		IdeTuningFiltersEditor* editor = new IdeTuningFiltersEditor(dbController, parent);
+		return editor;
+	}
 
 	if (propertyPtr->specificEditor() == E::PropertySpecificEditor::SpecificPropertyStruct)
 	{
@@ -86,6 +53,61 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditor::createPropertyTextEditor(std:
 		return new IdeCodeEditor(CodeType::JavaScript, parent);
 	}
 }
+
+
+//
+// IdePropertyEditor
+//
+
+IdePropertyEditor::IdePropertyEditor(QWidget* parent, DbController* dbController /*= nullptr*/) :
+	PropertyEditor(parent),
+	m_dbController(dbController)
+{
+	QFile file(":/ScriptHelp/scripthelp.html");
+	setScriptHelp(file);
+}
+
+IdePropertyEditor::~IdePropertyEditor()
+{
+}
+
+ExtWidgets::PropertyEditor* IdePropertyEditor::createChildPropertyEditor(QWidget* parent)
+{
+	return new IdePropertyEditor(parent, m_dbController);
+}
+
+ExtWidgets::PropertyTextEditor* IdePropertyEditor::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent)
+{
+	return IdePropertyEditorHelper::createPropertyTextEditor(propertyPtr, parent, m_dbController);
+}
+
+//
+// IdePropertyTable
+//
+
+IdePropertyTable::IdePropertyTable(QWidget* parent, DbController* dbController):
+	PropertyTable(parent),
+	m_dbController(dbController)
+{
+	QFile file(":/ScriptHelp/scripthelp.html");
+	setScriptHelp(file);
+}
+
+IdePropertyTable::~IdePropertyTable()
+{
+
+}
+
+ExtWidgets::PropertyEditor* IdePropertyTable::createChildPropertyEditor(QWidget* parent)
+{
+	return new IdePropertyEditor(parent, m_dbController);
+}
+
+ExtWidgets::PropertyTextEditor* IdePropertyTable::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent)
+{
+	return IdePropertyEditorHelper::createPropertyTextEditor(propertyPtr, parent, m_dbController);
+}
+
 
 //
 // DialogFindReplace

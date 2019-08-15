@@ -20,6 +20,9 @@ namespace ExtWidgets
 	class PropertyEditorBase
 	{
 	public:
+
+		PropertyEditorBase();
+
 		virtual PropertyEditor* createChildPropertyEditor(QWidget* parent);
 		virtual PropertyTextEditor* createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent);
 
@@ -43,10 +46,26 @@ namespace ExtWidgets
 
 		PropertyEditCellWidget* createCellEditor(std::shared_ptr<Property> propertyPtr, bool sameValue, bool readOnly, QWidget* parent);
 
+		// Help description functions
+
+		void setScriptHelp(QFile& file);
+
+		void setScriptHelp(const QString& text);
+		QString scriptHelp() const;
+
+		QPoint scriptHelpWindowPos() const;
+		void setScriptHelpWindowPos(const QPoint& value);
+
+		QByteArray scriptHelpWindowGeometry() const;
+		void setScriptHelpWindowGeometry(const QByteArray& value);
+
 	private:
 		bool m_expertMode = false;
 		bool m_readOnly = false;
 
+		QString m_scriptHelp;
+		QPoint m_scriptHelpWindowPos = QPoint(-1, -1);
+		QByteArray m_scriptHelpWindowGeometry;
 	};
 
 	//
@@ -578,6 +597,13 @@ namespace ExtWidgets
 		QPoint m_multiLinePropertyEditorWindowPos;
 		QByteArray m_multiLinePropertyEditorGeometry;
 
+		// Ide Property Editor Options
+		//
+		double m_propertyEditorFontScaleFactor = 1.0;
+
+		QPoint m_scriptHelpWindowPos;
+		QByteArray m_scriptHelpWindowGeometry;
+
 		void restore(QSettings& s);
 		void store(QSettings& s);
 	};
@@ -595,8 +621,6 @@ namespace ExtWidgets
 	public:
 		explicit PropertyEditor(QWidget* parent);
 
-		virtual void saveSettings();
-
 		// Public functions
 		//
 	public:
@@ -606,17 +630,6 @@ namespace ExtWidgets
 		void setObjects(const QList<std::shared_ptr<PropertyObject>>& objects);
 
 		const QList<std::shared_ptr<PropertyObject>>& objects() const;
-
-		// Help description functions
-
-		void setScriptHelp(const QString& text);
-		QString scriptHelp() const;
-
-		QPoint scriptHelpWindowPos() const;
-		void setScriptHelpWindowPos(const QPoint& value);
-
-		QByteArray scriptHelpWindowGeometry() const;
-		void setScriptHelpWindowGeometry(const QByteArray& value);
 
 	protected:
 		virtual void valueChanged(QString propertyName, QVariant value);
@@ -650,10 +663,6 @@ namespace ExtWidgets
 		MultiVariantPropertyManager* m_propertyVariantManager = nullptr;
 
 		QList<std::shared_ptr<PropertyObject>> m_objects;
-
-		QString m_scriptHelp;
-		QPoint m_scriptHelpWindowPos;
-		QByteArray m_scriptHelpWindowGeometry;
 
 	};
 }

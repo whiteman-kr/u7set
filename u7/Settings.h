@@ -121,13 +121,6 @@ public:
     QPoint m_DialogTextEditorWindowPos;
     QByteArray m_DialogTextEditorWindowGeometry;
 
-	// Ide Property Editor Options
-	//
-	double m_propertyEditorFontScaleFactor = 1.0;
-
-	QPoint m_scriptHelpWindowPos;
-	QByteArray m_scriptHelpWindowGeometry;
-
 	// Tuning Filters editor Options
     //
 	QByteArray m_tuningFiltersSplitterPosition;

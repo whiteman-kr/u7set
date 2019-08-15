@@ -153,7 +153,6 @@ namespace Hardware
 		auto specificProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::specificProperties, true, DeviceObject::specificProperties, DeviceObject::setSpecificProperties);
 		specificProp->setExpert(true);
 		specificProp->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
-		specificProp->setDisableTableEditor(true);
 
 		auto presetProp = ADD_PROPERTY_GETTER(bool, PropertyNames::preset, true, DeviceObject::preset);
 		presetProp->setExpert(true);
@@ -1972,7 +1971,6 @@ R"DELIM({
 		auto configScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, "ConfigurationScript", true, DeviceModule::configurationScript, DeviceModule::setConfigurationScript)
 		configScriptProp->setExpert(true);
 		configScriptProp->setIsScript(true);
-		configScriptProp->setDisableTableEditor(true);
 
 		auto rawDataDescrProp = ADD_PROPERTY_GETTER_SETTER(QString, "RawDataDescription", true, DeviceModule::rawDataDescription, DeviceModule::setRawDataDescription)
 		rawDataDescrProp->setExpert(true);

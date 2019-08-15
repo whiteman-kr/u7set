@@ -36,7 +36,6 @@ namespace ExtWidgets
 		m_cellEditor = m_propertyTable->createCellEditor(p, true, p->readOnly() == true || m_propertyTable->isReadOnly() == true, parent);
 
 		connect(m_cellEditor, &PropertyEditCellWidget::valueChanged, this, &PropertyTableItemDelegate::onValueChanged);
-		connect(this, &PropertyTableItemDelegate::valueChanged, m_propertyTable, &PropertyTable::onValueChanged);
 
 		return m_cellEditor;
 	}
@@ -195,7 +194,6 @@ namespace ExtWidgets
 		Q_UNUSED(parent);
 
 		int result = static_cast<int>(m_tableObjects.size());
-		qDebug() << result;
 		return result;
 	}
 
@@ -204,7 +202,6 @@ namespace ExtWidgets
 		Q_UNUSED(parent);
 
 		int result = static_cast<int>(m_propertyNames.size());
-		qDebug() << result;
 		return result;
 	}
 
@@ -310,9 +307,9 @@ namespace ExtWidgets
 		// Edit Delegate
 
 		m_itemDelegate = new PropertyTableItemDelegate(this, m_tableModel);
-		m_tableView->setItemDelegate(m_itemDelegate);
+		connect(m_itemDelegate, &PropertyTableItemDelegate::valueChanged, this, &PropertyTable::onValueChanged);
 
-		//
+		m_tableView->setItemDelegate(m_itemDelegate);
 	}
 
 	void PropertyTable::clear()

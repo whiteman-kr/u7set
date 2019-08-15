@@ -12,10 +12,6 @@ SchemaPropertiesDialog::SchemaPropertiesDialog(EditEngine::EditEngine* editEngin
 
 	m_propertyEditor = new SchemaPropertyEditor(editEngine, this);
     m_propertyEditor->setResizeMode(ExtWidgets::PropertyEditor::ResizeToContents);
-	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
-	{
-		m_propertyEditor->setFontSizeF(m_propertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
-	}
 
 	m_propertyEditor->setReadOnly(editEngine->readOnly());
 
