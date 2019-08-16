@@ -229,7 +229,7 @@ void CONF_IDENTIFICATION_DATA_V1::dump(QStringList& out) const
 
 #ifdef _MSC_VER
 	#pragma warning(push)
-	#pragma warning(disable: 3996) // warning for std::strncpy
+	#pragma warning(disable: 4996) // warning for std::strncpy
 #endif
 
 void CONF_IDENTIFICATION_DATA_V1::createFirstConfiguration()
