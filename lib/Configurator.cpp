@@ -227,6 +227,11 @@ void CONF_IDENTIFICATION_DATA_V1::dump(QStringList& out) const
 	return;
 }
 
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 3996) // warning for std::strncpy
+#endif
+
 void CONF_IDENTIFICATION_DATA_V1::createFirstConfiguration()
 {
 	marker = IdentificationStructMarker;
@@ -242,7 +247,7 @@ void CONF_IDENTIFICATION_DATA_V1::createFirstConfiguration()
 	firstConfiguration.configuratorFactoryNo = 0;
 
 	QString hostName = QHostInfo::localHostName().right(sizeof(firstConfiguration.host) - 1);
-	strncpy_s(firstConfiguration.host, sizeof(firstConfiguration.host), hostName.toStdString().data(), sizeof(firstConfiguration.host));
+	std::strncpy(firstConfiguration.host, hostName.toStdString().data(), sizeof(firstConfiguration.host));
 
 	lastConfiguration = firstConfiguration;
 }
@@ -261,7 +266,7 @@ void CONF_IDENTIFICATION_DATA_V1::createNextConfiguration()
 	lastConfiguration.configuratorFactoryNo = 0;
 
 	QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
-	strncpy_s(lastConfiguration.host, sizeof(lastConfiguration.host), hostName.toStdString().data(), sizeof(lastConfiguration.host));
+	std::strncpy(lastConfiguration.host, hostName.toStdString().data(), sizeof(lastConfiguration.host));
 
 	lastConfiguration = lastConfiguration;
 }
@@ -308,15 +313,15 @@ void CONF_IDENTIFICATION_DATA_V2::createFirstConfiguration(Hardware::ModuleFirmw
 	firstConfiguration.date = QDateTime::currentDateTime().toTime_t();
 
 	QString hostName = QHostInfo::localHostName().right(sizeof(firstConfiguration.host) - 1);
-	strncpy_s(firstConfiguration.host, sizeof(firstConfiguration.host), hostName.toStdString().data(), sizeof(firstConfiguration.host));
+	std::strncpy(firstConfiguration.host, hostName.toStdString().data(), sizeof(firstConfiguration.host));
 
 	firstConfiguration.buildNo = storage->buildNumber();
 
 	QString buildConfig = storage->buildConfig().right(sizeof(firstConfiguration) - 1);
-	strncpy_s(firstConfiguration.buildConfig, sizeof(firstConfiguration.buildConfig), buildConfig.toStdString().data(), sizeof(firstConfiguration.buildConfig));
+	std::strncpy(firstConfiguration.buildConfig, buildConfig.toStdString().data(), sizeof(firstConfiguration.buildConfig));
 
 	QString userName = storage->userName().right(sizeof(firstConfiguration.userName) - 1);
-	strncpy_s(firstConfiguration.userName, sizeof(firstConfiguration.userName), userName.toStdString().data(), sizeof(firstConfiguration.userName));
+	std::strncpy(firstConfiguration.userName, userName.toStdString().data(), sizeof(firstConfiguration.userName));
 
 	lastConfiguration = firstConfiguration;
 }
@@ -331,16 +336,20 @@ void CONF_IDENTIFICATION_DATA_V2::createNextConfiguration(Hardware::ModuleFirmwa
 	lastConfiguration.date = QDateTime().currentDateTime().toTime_t();
 
 	QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
-	strncpy_s(lastConfiguration.host, sizeof(lastConfiguration.host), hostName.toStdString().data(), sizeof(lastConfiguration.host));
+	std::strncpy(lastConfiguration.host, hostName.toStdString().data(), sizeof(lastConfiguration.host));
 
 	lastConfiguration.buildNo = storage->buildNumber();
 
 	QString buildConfig = storage->buildConfig().right(sizeof(lastConfiguration.buildConfig) - 1);
-	strncpy_s(lastConfiguration.buildConfig, sizeof(lastConfiguration.buildConfig), buildConfig.toStdString().data(), sizeof(lastConfiguration.buildConfig));
+	std::strncpy(lastConfiguration.buildConfig, buildConfig.toStdString().data(), sizeof(lastConfiguration.buildConfig));
 
 	QString userName = storage->userName().right(sizeof(lastConfiguration.userName) - 1);
-	strncpy_s(lastConfiguration.userName, sizeof(lastConfiguration.userName), userName.toStdString().data(), sizeof(lastConfiguration.userName));
+	std::strncpy(lastConfiguration.userName, userName.toStdString().data(), sizeof(lastConfiguration.userName));
 }
+
+#ifdef _MSC_VER
+	#pragma warning(pop)		//#pragma warning(disable: 3996) // warning for std::strncpy
+#endif
 
 //
 // Configurator
