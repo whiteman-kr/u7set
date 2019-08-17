@@ -506,7 +506,7 @@ void OptionsPointsDialog::onAutomaticCalculatePoints()
 	{
 		if (QString::compare(pEdit->metaObject()->className(),"QLineEdit") == 0)
 		{
-			cursorPosition = ((QLineEdit*)pEdit)->cursorPosition();
+			cursorPosition = dynamic_cast<QLineEdit*>(pEdit)->cursorPosition();
 		}
 	}
 
@@ -534,7 +534,7 @@ void OptionsPointsDialog::onAutomaticCalculatePoints()
 	m_linearity.setLowLimitRange(low.toDouble());
 	m_linearity.setHighLimitRange(high.toDouble());
 
-	m_linearity.recalcPoints(value.toDouble());
+	m_linearity.recalcPoints(value.toInt());
 
 	updateList();
 
@@ -543,7 +543,7 @@ void OptionsPointsDialog::onAutomaticCalculatePoints()
 		pEdit->setFocus();
 		if (cursorPosition != -1)
 		{
-			((QLineEdit*)pEdit)->setCursorPosition(cursorPosition);
+			dynamic_cast<QLineEdit*>(pEdit)->setCursorPosition(cursorPosition);
 		}
 	}
 }

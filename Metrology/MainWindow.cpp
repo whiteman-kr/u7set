@@ -1584,8 +1584,6 @@ void MainWindow::setMeasureKind(int index)
 		return;
 	}
 
-
-
 	theOptions.toolBar().setMeasureKind(kind);
 	theOptions.toolBar().save();
 
@@ -1597,7 +1595,7 @@ void MainWindow::setMeasureKind(int index)
 
 void MainWindow::setMeasureTimeout(QString value)
 {
-	theOptions.toolBar().setMeasureTimeout(value.toDouble() * 1000);
+	theOptions.toolBar().setMeasureTimeout(static_cast<int>(value.toDouble() * 1000));
 	theOptions.toolBar().save();
 
 	m_statusMeasureTimeout->setRange(0, theOptions.toolBar().measureTimeout());

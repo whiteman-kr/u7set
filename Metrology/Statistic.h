@@ -82,7 +82,7 @@ class StatisticTable : public QAbstractTableModel
 
 public:
 
-	explicit StatisticTable(QObject* parent = 0);
+	explicit StatisticTable(QObject* parent = nullptr);
 	virtual ~StatisticTable();
 
 private:
@@ -119,7 +119,7 @@ class StatisticDialog : public QDialog
 
 public:
 
-	explicit StatisticDialog(QWidget *parent = 0);
+	explicit StatisticDialog(QWidget *parent = nullptr);
 	virtual ~StatisticDialog();
 
 private:

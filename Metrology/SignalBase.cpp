@@ -1201,7 +1201,7 @@ void SignalBase::clearSignalList()
 
 int SignalBase::appendSignal(const Metrology::SignalParam& param)
 {
-	if (param.appSignalID().isEmpty() == true || param.hash() == 0)
+	if (param.appSignalID().isEmpty() == true || param.hash() == UNDEFINED_HASH)
 	{
 		assert(false);
 		return -1;
@@ -1243,7 +1243,7 @@ Metrology::Signal* SignalBase::signalPtr(const QString& appSignalID)
 
 Metrology::Signal* SignalBase::signalPtr(const Hash& hash)
 {
-	if (hash == 0)
+	if (hash == UNDEFINED_HASH)
 	{
 		assert(hash != 0);
 		return nullptr;
@@ -1303,7 +1303,7 @@ Metrology::Signal SignalBase::signal(const QString& appSignalID)
 
 Metrology::Signal SignalBase::signal(const Hash& hash)
 {
-	if (hash == 0)
+	if (hash == UNDEFINED_HASH)
 	{
 		assert(hash != 0);
 		return Metrology::Signal();
@@ -1363,9 +1363,9 @@ Metrology::SignalParam SignalBase::signalParam(const QString& appSignalID)
 
 Metrology::SignalParam SignalBase::signalParam(const Hash& hash)
 {
-	if (hash == 0)
+	if (hash == UNDEFINED_HASH)
 	{
-		assert(hash != 0);
+		assert(hash != UNDEFINED_HASH);
 		return Metrology::SignalParam();
 	}
 
@@ -1410,9 +1410,9 @@ Metrology::SignalParam SignalBase::signalParam(int index)
 
 void SignalBase::setSignalParam(const Hash& hash, const Metrology::SignalParam& param)
 {
-	if (hash == 0)
+	if (hash == UNDEFINED_HASH)
 	{
-		assert(hash != 0);
+		assert(hash != UNDEFINED_HASH);
 		return;
 	}
 
@@ -1466,9 +1466,9 @@ Metrology::SignalState SignalBase::signalState(const QString& appSignalID)
 
 Metrology::SignalState SignalBase::signalState(const Hash& hash)
 {
-	if (hash == 0)
+	if (hash == UNDEFINED_HASH)
 	{
-		assert(hash != 0);
+		assert(hash != UNDEFINED_HASH);
 		return Metrology::SignalState();
 	}
 
@@ -1526,9 +1526,9 @@ void SignalBase::setSignalState(const QString& appSignalID, const Metrology::Sig
 
 void SignalBase::setSignalState(const Hash& hash, const Metrology::SignalState &state)
 {
-	if (hash == 0)
+	if (hash == UNDEFINED_HASH)
 	{
-		assert(hash != 0);
+		assert(hash != UNDEFINED_HASH);
 		return;
 	}
 
@@ -1582,7 +1582,7 @@ int SignalBase::hashForRequestStateCount() const
 
 Hash SignalBase::hashForRequestState(int index)
 {
-	Hash hash;
+	Hash hash = UNDEFINED_HASH;
 
 	m_stateMutex.lock();
 
@@ -1741,7 +1741,7 @@ int SignalBase::createRackListForMeasure(int outputSignalType)
 			}
 
 			Hash rackHash = param.location().rack().hash();
-			if (rackHash == 0)
+			if (rackHash == UNDEFINED_HASH)
 			{
 				continue;
 			}
@@ -1846,7 +1846,7 @@ void SignalBase::updateRackParam()
 				continue;
 			}
 
-			if (param.location().rack().hash() == 0)
+			if (param.location().rack().hash() == UNDEFINED_HASH)
 			{
 				continue;
 			}

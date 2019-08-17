@@ -18,7 +18,7 @@ private:
 
 	int					m_index = -1;
 
-	Hash				m_hash = 0;							// hash calcHash from rack group caption
+	Hash				m_hash = UNDEFINED_HASH;			// hash calcHash from rack group caption
 	QString				m_caption;							// rack group caption
 
 	QString				m_rackEquipmentID[Metrology::ChannelCount];
@@ -48,7 +48,7 @@ class RackGroupBase : public QObject
 
 public:
 
-	explicit RackGroupBase(QObject *parent = 0);
+	explicit RackGroupBase(QObject *parent = nullptr);
 	virtual ~RackGroupBase() {}
 
 private:
@@ -87,7 +87,7 @@ class RackBase : public QObject
 
 public:
 
-	explicit RackBase(QObject *parent = 0);
+	explicit RackBase(QObject *parent = nullptr);
 	virtual ~RackBase() {}
 
 private:

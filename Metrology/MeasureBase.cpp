@@ -268,7 +268,7 @@ void LinearityMeasurement::fill_measure_input(const MeasureMultiParam &measurePa
 		averageElVal += elVal;
 		averageEnVal += enVal;
 
-		QThread::msleep((theOptions.linearity().measureTimeInPoint() * 1000) / measureCount);
+		QThread::msleep(static_cast<unsigned long>((theOptions.linearity().measureTimeInPoint() * 1000) / measureCount));
 	}
 
 	averageElVal /= measureCount;
@@ -393,7 +393,7 @@ void LinearityMeasurement::fill_measure_output(const MeasureMultiParam &measureP
 		averageElVal += elVal;
 		averagePhVal += enVal;
 
-		QThread::msleep((theOptions.linearity().measureTimeInPoint() * 1000) / measureCount);
+		QThread::msleep(static_cast<unsigned long>((theOptions.linearity().measureTimeInPoint() * 1000) / measureCount));
 	}
 
 	averageElVal /= measureCount;
@@ -487,14 +487,14 @@ void LinearityMeasurement::calcAdditionalParam(int limitType)
 		sumDeviation += pow(measure(limitType) - measureItemArray(limitType, index), 2);		// 1. sum of deviations
 	}
 
-	sumDeviation /= (double) measureCount() - 1;												// 2. divide on (count of measure - 1)
+	sumDeviation /= static_cast<double>(measureCount() - 1);									// 2. divide on (count of measure - 1)
 	double sco = sqrt(sumDeviation);															// 3. sqrt
 
 	setAdditionalParam(MEASURE_ADDITIONAL_PARAM_SD, sco);
 
 		// according to GOST 8.207-76 paragraph 2.4
 		//
-	double estimateSCO = sco / sqrt((double) measureCount());
+	double estimateSCO = sco / sqrt(static_cast<double>(measureCount()));
 
 		// Student's rate according to GOST 27.202 on P = 0.95
 		// or GOST 8.207-76 application 2 (last page)
@@ -1293,8 +1293,8 @@ int MeasureBase::load(int measureType)
 
 				switch(measureType)
 				{
-					case MEASURE_TYPE_LINEARITY:			data.pMeasurement = new LinearityMeasurement[data.recordCount];		break;
-					case MEASURE_TYPE_COMPARATOR:			data.pMeasurement = new ComparatorMeasurement[data.recordCount];	break;
+					case MEASURE_TYPE_LINEARITY:			data.pMeasurement = new LinearityMeasurement[static_cast<quint64>(data.recordCount)];	break;
+					case MEASURE_TYPE_COMPARATOR:			data.pMeasurement = new ComparatorMeasurement[static_cast<quint64>(data.recordCount)];	break;
 					default:								assert(0);
 				}
 
@@ -1538,9 +1538,9 @@ bool MeasureBase::remove(int index, bool removeData)
 
 Metrology::SignalStatistic MeasureBase::statistic(const Hash& signalHash)
 {
-	if (signalHash == 0)
+	if (signalHash == UNDEFINED_HASH)
 	{
-		assert(signalHash != 0);
+		assert(signalHash != UNDEFINED_HASH);
 		return Metrology::SignalStatistic();
 	}
 
@@ -1552,7 +1552,7 @@ Metrology::SignalStatistic MeasureBase::statistic(const Hash& signalHash)
 		for(int i = 0; i < measureCount; i ++)
 		{
 			Measurement* pMeasurement = m_measureList[i];
-			if (pMeasurement == 0)
+			if (pMeasurement == nullptr)
 			{
 				continue;
 			}
