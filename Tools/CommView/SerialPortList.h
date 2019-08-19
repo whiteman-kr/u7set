@@ -48,7 +48,7 @@ class CommStateTable : public QAbstractTableModel
 
 public:
 
-	explicit CommStateTable(QObject* parent = 0);
+	explicit CommStateTable(QObject* parent = nullptr);
 	virtual ~CommStateTable();
 
 private:
@@ -88,7 +88,7 @@ class CommHeaderTable : public QAbstractTableModel
 
 public:
 
-	explicit CommHeaderTable(QObject* parent = 0);
+	explicit CommHeaderTable(QObject* parent = nullptr);
 	virtual ~CommHeaderTable();
 
 private:
@@ -120,7 +120,7 @@ class CommDataTable : public QAbstractTableModel
 
 public:
 
-	explicit CommDataTable(QObject* parent = 0);
+	explicit CommDataTable(QObject* parent = nullptr);
 	virtual ~CommDataTable();
 
 private:
