@@ -91,6 +91,8 @@ private:
 	QLineEdit*		m_pLinOutLowEdit = nullptr;
 	QLineEdit*		m_pLinOutHighEdit = nullptr;
 
+	QFont*			m_digitFont = nullptr;
+
 	void			conversionTr();
 	void			conversionTc();
 	void			conversionLin();

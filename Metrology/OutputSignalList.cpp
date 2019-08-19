@@ -513,9 +513,9 @@ void OutputSignalItemDialog::selectInputSignal()
 	}
 
 	Hash selectedSignalHash = dialog.selectedSignalHash();
-	if (selectedSignalHash == 0)
+	if (selectedSignalHash == UNDEFINED_HASH)
 	{
-		assert(selectedSignalHash != 0);
+		assert(selectedSignalHash != UNDEFINED_HASH);
 		return;
 	}
 
@@ -547,9 +547,9 @@ void OutputSignalItemDialog::selectOutputSignal()
 	}
 
 	Hash selectedSignalHash = dialog.selectedSignalHash();
-	if (selectedSignalHash == 0)
+	if (selectedSignalHash == UNDEFINED_HASH)
 	{
-		assert(selectedSignalHash != 0);
+		assert(selectedSignalHash != UNDEFINED_HASH);
 		return;
 	}
 

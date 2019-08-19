@@ -205,7 +205,7 @@ class Calibrator : public QObject
 
 public:
 
-	explicit Calibrator(int channel = INVALID_CALIBRATOR_CHANNEL, QObject *parent = 0);
+	explicit Calibrator(int channel = INVALID_CALIBRATOR_CHANNEL, QObject *parent = nullptr);
 	virtual ~Calibrator();
 
 private:

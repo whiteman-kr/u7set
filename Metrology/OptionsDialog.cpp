@@ -411,7 +411,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					QStringList errorTypeList;
 					for(int e = 0; e < MEASURE_ERROR_TYPE_COUNT; e++)
 					{
-						errorTypeList.append(ErrorType[e]);
+						errorTypeList.append(MeasureErrorType[e]);
 					}
 					item->setAttribute(QLatin1String("enumNames"), errorTypeList);
 					item->setValue(m_options.linearity().errorType());
@@ -552,7 +552,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					QStringList errorTypeList;
 					for(int e = 0; e < MEASURE_ERROR_TYPE_COUNT; e++)
 					{
-						errorTypeList.append(ErrorType[e]);
+						errorTypeList.append(MeasureErrorType[e]);
 					}
 					item->setAttribute(QLatin1String("enumNames"), errorTypeList);
 					item->setValue(m_options.comparator().m_errorType);
@@ -796,7 +796,7 @@ void OptionsDialog::appendProperty(QtProperty* property, int page, int param)
 	}
 
 	m_propertyItemList[property] = (page << 8) | param;
-	m_propertyValueList[property] = ((QtVariantProperty*) property)->value();
+	m_propertyValueList[property] = dynamic_cast<QtVariantProperty*>(property)->value();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -892,9 +892,12 @@ bool OptionsDialog::setActivePage(int page)
 
 	// select tree item
 	//
-	if (m_pPageTree != nullptr && pActivePage->m_pTreeWidgetItem != nullptr)
+	if (m_pPageTree != nullptr && pActivePage != nullptr)
 	{
-		m_pPageTree->setCurrentItem(pActivePage->m_pTreeWidgetItem);
+		if (pActivePage->m_pTreeWidgetItem != nullptr)
+		{
+			m_pPageTree->setCurrentItem(pActivePage->m_pTreeWidgetItem);
+		}
 	}
 
 	return true;
@@ -917,7 +920,7 @@ void OptionsDialog::onPropertyValueChanged(QtProperty *property, const QVariant 
 	m_currentPropertyItem = property;
 	m_currentPropertyValue = value;
 
-	int type = ((QtVariantProperty*)property)->propertyType();
+	int type = dynamic_cast<QtVariantProperty*>(property) ->propertyType();
 
 	if (type == QVariant::Bool ||									// check
 		type == QtVariantPropertyManager::enumTypeId() ||			// list of values
@@ -954,7 +957,7 @@ void OptionsDialog::restoreProperty()
 
 	QVariant value = m_propertyValueList[property];
 
-	((QtVariantProperty*) property)->setValue(value);
+	dynamic_cast<QtVariantProperty*>(property)->setValue(value);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1159,7 +1162,7 @@ void OptionsDialog::updateServerPage()
 {
 	QtVariantProperty *property = nullptr;
 
-	property = (QtVariantProperty*) m_propertyItemList.key((OPTION_PAGE_CONFIG_SOCKET << 8) | SOCKET_CLIENT_PARAM_EQUIPMENT_ID2);
+	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((OPTION_PAGE_CONFIG_SOCKET << 8) | SOCKET_CLIENT_PARAM_EQUIPMENT_ID2));
 	if (property != nullptr)
 	{
 		property->setValue(m_options.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY));
@@ -1176,7 +1179,7 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 		return;
 	}
 
-	OptionsPointsDialog* dialog = (OptionsPointsDialog*) page->getWidget();
+	OptionsPointsDialog* dialog = dynamic_cast<OptionsPointsDialog*>(page->getWidget());
 	if (dialog == nullptr)
 	{
 		return;
@@ -1197,13 +1200,13 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 
 	QtVariantProperty *property = nullptr;
 
-	property = (QtVariantProperty*) m_propertyItemList.key((OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_RANGE_TYPE);
+	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_RANGE_TYPE));
 	if (property != nullptr)
 	{
 		property->setValue(m_options.linearity().rangeType());
 	}
 
-	property = (QtVariantProperty*) m_propertyItemList.key((OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_POINT_COUNT);
+	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_POINT_COUNT));
 	if (property != nullptr)
 	{
 		property->setValue(m_options.linearity().points().count());
@@ -1216,7 +1219,7 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 		}
 	}
 
-	property = (QtVariantProperty*) m_propertyItemList.key((OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_LOW_RANGE);
+	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_LOW_RANGE));
 	if (property != nullptr)
 	{
 		property->setValue(m_options.linearity().lowLimitRange());
@@ -1229,7 +1232,7 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 		}
 	}
 
-	property = (QtVariantProperty*) m_propertyItemList.key((OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_HIGH_RANGE);
+	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_HIGH_RANGE));
 	if (property != nullptr)
 	{
 		property->setValue(m_options.linearity().highLimitRange());
@@ -1243,7 +1246,7 @@ void OptionsDialog::updateLinearityPage(bool isDialog)
 
 	}
 
-	property = (QtVariantProperty*) m_propertyItemList.key((OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_VALUE_POINTS);
+	property = dynamic_cast<QtVariantProperty*>(m_propertyItemList.key((OPTION_PAGE_LINEARITY_MEASURE << 8) | LO_PARAM_VALUE_POINTS));
 	if (property != nullptr)
 	{
 		property->setValue(m_options.linearity().points().text());
@@ -1260,7 +1263,7 @@ void OptionsDialog::updateMeasureViewPage(bool isDialog)
 		return;
 	}
 
-	OptionsMeasureViewHeaderDialog* dialog = (OptionsMeasureViewHeaderDialog*) page->getWidget();
+	OptionsMeasureViewHeaderDialog* dialog = dynamic_cast<OptionsMeasureViewHeaderDialog*> (page->getWidget());
 	if (dialog == nullptr)
 	{
 		return;
@@ -1273,7 +1276,7 @@ void OptionsDialog::updateMeasureViewPage(bool isDialog)
 		m_options.setMeasureView(dialog->m_header);
 
 		int measureType = dialog->measureType();
-		if (measureType >= 0 || measureType < MEASURE_TYPE_COUNT)
+		if (measureType >= 0 && measureType < MEASURE_TYPE_COUNT)
 		{
 			m_options.m_updateColumnView[measureType] = true;
 		}

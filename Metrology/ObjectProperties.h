@@ -9,6 +9,7 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
+#include <QHeaderView>
 #include <QTableWidget>
 #include <QDialogButtonBox>
 #include <QMessageBox>
@@ -65,7 +66,7 @@ class SignalPropertyDialog : public QDialog
 
 public:
 
-	explicit SignalPropertyDialog(const Metrology::SignalParam& param, QWidget *parent = 0);
+	explicit SignalPropertyDialog(const Metrology::SignalParam& param, QWidget *parent = nullptr);
 	virtual ~SignalPropertyDialog();
 
 private:
@@ -124,7 +125,7 @@ class RackPropertyDialog : public QDialog
 
 public:
 
-	RackPropertyDialog(const Metrology::RackParam& rack, const RackBase& rackBase, QWidget *parent = 0);
+	RackPropertyDialog(const Metrology::RackParam& rack, const RackBase& rackBase, QWidget *parent = nullptr);
 	virtual ~RackPropertyDialog();
 
 private:
@@ -173,7 +174,7 @@ class RackGroupPropertyDialog : public QDialog
 
 public:
 
-	explicit RackGroupPropertyDialog(const RackBase& rackBase, QWidget *parent = 0);
+	explicit RackGroupPropertyDialog(const RackBase& rackBase, QWidget *parent = nullptr);
 	virtual ~RackGroupPropertyDialog();
 
 private:

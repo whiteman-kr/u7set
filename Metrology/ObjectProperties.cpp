@@ -883,7 +883,7 @@ void RackGroupPropertyDialog::updateRackList()
 
 	for(int channel = 0; channel < Metrology::ChannelCount; channel++)
 	{
-		property = (QtVariantProperty*) m_propertyMap.key(channel);
+		property = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(channel));
 		if (property == nullptr)
 		{
 			continue;

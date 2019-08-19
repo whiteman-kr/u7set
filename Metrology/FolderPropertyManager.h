@@ -16,7 +16,7 @@ class FolderEdit : public QWidget
 
 public:
 
-	explicit FolderEdit(QWidget *parent = 0);
+	explicit FolderEdit(QWidget *parent = nullptr);
 	virtual ~FolderEdit();
 
 private:
@@ -53,7 +53,7 @@ class VariantFactory : public QtVariantEditorFactory
 
 public:
 
-	explicit VariantFactory(QObject *parent = 0) : QtVariantEditorFactory(parent) {}
+	explicit VariantFactory(QObject *parent = nullptr) : QtVariantEditorFactory(parent) {}
 	virtual ~VariantFactory();
 
 private:
@@ -83,7 +83,7 @@ class VariantManager : public QtVariantPropertyManager
 	Q_OBJECT
 
 public:
-	explicit VariantManager(QObject *parent = 0) : QtVariantPropertyManager(parent) {}
+	explicit VariantManager(QObject *parent = nullptr) : QtVariantPropertyManager(parent) {}
 	virtual ~VariantManager() {}
 
 private:

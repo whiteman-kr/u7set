@@ -264,7 +264,7 @@ int SignalListTable::signalCount() const
 
 Metrology::Signal* SignalListTable::signal(int index) const
 {
-	Metrology::Signal* signal;
+	Metrology::Signal* signal = nullptr;
 
 	m_signalMutex.lock();
 

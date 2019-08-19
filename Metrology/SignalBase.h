@@ -152,7 +152,7 @@ class SignalBase : public QObject
 
 public:
 
-	explicit SignalBase(QObject *parent = 0);
+	explicit SignalBase(QObject *parent = nullptr);
 	virtual ~SignalBase() {}
 
 private:
