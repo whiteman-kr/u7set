@@ -30,7 +30,7 @@ SourceWorker::~SourceWorker()
 
 void SourceWorker::process()
 {
-	PS::Source* pSource = (PS::Source*) m_pSource;
+	PS::Source* pSource = dynamic_cast<PS::Source*>(m_pSource);
 	if (pSource == nullptr)
 	{
 		emit finished();
@@ -44,7 +44,7 @@ void SourceWorker::process()
 		return;
 	}
 
-	if (pSocket->bind(QHostAddress(theOptions.path().localIP()), PS::UDP_PORT + pSource->info().index) == false)
+	if (pSocket->bind(QHostAddress(theOptions.path().localIP()), PS::UDP_PORT + static_cast<quint16>(pSource->info().index)) == false)
 	{
 		pSocket->close();
 		delete pSocket;
@@ -65,22 +65,22 @@ void SourceWorker::process()
 			header.frameSize = Socket::ENTIRE_UDP_SIZE;
 			header.protocolVersion = PS::SUPPORT_VERSION;
 			header.flags.appData = 1;
-			header.dataId = pSource->info().dataID;
-			header.moduleType = pSource->info().moduleType;
-			header.numerator = m_numerator;
-			header.framesQuantity = pSource->info().frameCount;
-			header.frameNumber = frameNumber;
+			header.dataId = static_cast<quint16>(pSource->info().dataID);
+			header.moduleType = static_cast<quint16>(pSource->info().moduleType);
+			header.numerator = static_cast<quint16>(m_numerator);
+			header.framesQuantity = static_cast<quint16>(pSource->info().frameCount);
+			header.frameNumber = static_cast<quint16>(frameNumber);
 
 			QDateTime&& time = QDateTime::currentDateTime();
 			Rup::TimeStamp& timeStamp = header.timeStamp;
-			timeStamp.year = time.date().year();
-			timeStamp.month = time.date().month();
-			timeStamp.day = time.date().day();
+			timeStamp.year = static_cast<quint16>(time.date().year());
+			timeStamp.month = static_cast<quint16>(time.date().month());
+			timeStamp.day = static_cast<quint16>(time.date().day());
 
-			timeStamp.hour = time.time().hour();
-			timeStamp.minute = time.time().minute();
-			timeStamp.second = time.time().second();
-			timeStamp.millisecond = time.time().msec();
+			timeStamp.hour = static_cast<quint16>(time.time().hour());
+			timeStamp.minute = static_cast<quint16>(time.time().minute());
+			timeStamp.second = static_cast<quint16>(time.time().second());
+			timeStamp.millisecond = static_cast<quint16>(time.time().msec());
 
 			// data RupFrame
 			//
