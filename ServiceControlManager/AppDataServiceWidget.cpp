@@ -1,5 +1,5 @@
 #include "AppDataServiceWidget.h"
-#include "TcpAppDataClient.h"
+#include "ScmTcpAppDataClient.h"
 #include "AppDataSourceWidget.h"
 #include <QTableView>
 #include <QAction>
@@ -235,8 +235,6 @@ const QVector<int> defaultSignalColumnVisibility =
 	SC_HIGH_VALID_RANGE,
 	SC_COUNT
 };
-
-
 
 DataSourcesStateModel::DataSourcesStateModel(QObject* parent) :
 	QAbstractTableModel(parent),
@@ -509,7 +507,7 @@ void AppDataServiceWidget::updateStateInfo()
 	}
 
 	quint32 ip = m_serviceInfo.clientrequestip();
-	quint16 port = m_serviceInfo.clientrequestport();
+	qint32 port = m_serviceInfo.clientrequestport();
 
 	quint32 workingIp = getWorkingClientRequestIp();
 
@@ -529,7 +527,7 @@ void AppDataServiceWidget::updateStateInfo()
 
 	if (m_tcpClientSocket == nullptr)
 	{
-		createTcpConnection(getWorkingClientRequestIp(), port);
+		createTcpConnection(getWorkingClientRequestIp(), static_cast<quint16>(port));
 	}
 }
 
@@ -819,10 +817,19 @@ QVariant SignalStateModel::headerData(int section, Qt::Orientation orientation, 
 {
 	if (role == Qt::DisplayRole)
 	{
-		if (orientation == Qt::Horizontal && section < DATA_SOURCE_COLUMN_COUNT)
+		if (orientation == Qt::Horizontal)
 		{
-			return signalColumnStr[section];
+			if (section >= 0 && section < SIGNAL_COLUMN_COUNT)
+			{
+				return signalColumnStr[section];
+			}
+			else
+			{
+				assert(false);
+				return "???";
+			}
 		}
+
 		if (orientation == Qt::Vertical)
 		{
 			return section + 1;
