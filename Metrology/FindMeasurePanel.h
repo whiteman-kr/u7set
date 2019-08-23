@@ -20,7 +20,7 @@ public:
 
 	FindItem();
 	FindItem(int row, int column, const QString& text, int beginPos, int endPos);
-	virtual ~FindItem();
+	virtual ~FindItem() {}
 
 private:
 
@@ -85,7 +85,7 @@ class FindMeasureTable : public QAbstractTableModel
 
 public:
 
-	explicit FindMeasureTable(QObject* parent = 0);
+	explicit FindMeasureTable(QObject* parent = nullptr);
 	virtual ~FindMeasureTable();
 
 private:
@@ -121,7 +121,7 @@ class FindMeasurePanel : public QDockWidget
 
 public:
 
-	explicit FindMeasurePanel(QWidget* parent = 0);
+	explicit FindMeasurePanel(QWidget* parent = nullptr);
 	virtual ~FindMeasurePanel();
 
 private:

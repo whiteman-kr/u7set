@@ -4,7 +4,6 @@
 #include <QHash>
 #include <cassert>
 
-
 // Ordered hash of unique pairs key->valuse
 //
 

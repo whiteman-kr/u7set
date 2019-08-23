@@ -16,7 +16,7 @@ void DeviceHelper::shutdown()
 {
 }
 
-bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QString& name, int* value, Builder::IssueLogger *log)
+bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QString& name, qint32* value, Builder::IssueLogger *log)
 {
 	if (device == nullptr ||
 		value == nullptr ||
@@ -48,6 +48,40 @@ bool DeviceHelper::getIntProperty(const Hardware::DeviceObject* device, const QS
 
 	return true;
 }
+
+bool DeviceHelper::getUIntProperty(const Hardware::DeviceObject* device, const QString& name, quint32* value, Builder::IssueLogger *log)
+{
+	if (device == nullptr ||
+		value == nullptr ||
+		log == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	QVariant val = device->propertyValue(name);
+
+	if (val.isValid() == false)
+	{
+		logPropertyNotFoundError(device, name, log);
+		return false;
+	}
+
+	bool ok = false;
+
+	*value = val.toUInt(&ok);
+
+	if (ok == false)
+	{
+		// Property '%1.%2' conversion error.
+		//
+		log->errCFG3023(device->equipmentIdTemplate(), name);
+		return false;
+	}
+
+	return true;
+}
+
 
 bool DeviceHelper::getStrProperty(const Hardware::DeviceObject* device, const QString& name, QString* value, Builder::IssueLogger* log)
 {
@@ -328,7 +362,34 @@ bool DeviceHelper::isPropertyExists(const Hardware::DeviceObject* device, const 
 	return device->propertyExists(name);
 }
 
-bool DeviceHelper::setIntProperty(Hardware::DeviceObject* device, const QString& name, int value, Builder::IssueLogger* log)
+bool DeviceHelper::setIntProperty(Hardware::DeviceObject* device, const QString& name, qint32 value, Builder::IssueLogger* log)
+{
+	if (device == nullptr ||
+		log == nullptr)
+	{
+		assert(false);
+		return false;
+	}
+
+	if (device->propertyExists(name) == false)
+	{
+		logPropertyNotFoundError(device, name, log);
+		return false;
+	}
+
+	QVariant v(value);
+
+	bool result = device->setPropertyValue(name, v);
+
+	if (result == false)
+	{
+		logPropertyWriteError(device, name, log);
+	}
+
+	return result;
+}
+
+bool DeviceHelper::setUIntProperty(Hardware::DeviceObject* device, const QString& name, quint32 value, Builder::IssueLogger* log)
 {
 	if (device == nullptr ||
 		log == nullptr)
@@ -355,7 +416,6 @@ bool DeviceHelper::setIntProperty(Hardware::DeviceObject* device, const QString&
 	return result;
 
 }
-
 
 Hardware::DeviceObject* DeviceHelper::getChildDeviceObjectBySuffix(const Hardware::DeviceObject* device, const QString& suffix)
 {

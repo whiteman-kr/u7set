@@ -72,7 +72,7 @@ public:
 		QString appDataIP;
 		int appDataPort = 0;
 		QString appDataServiceID;
-		quint64 appDataUID = 0;
+		quint32 appDataUID = 0;
 		int appDataSize = 0;
 		int appDataFramesQuantity = 0;
 
@@ -80,7 +80,7 @@ public:
 		QString diagDataIP;
 		int diagDataPort = 0;
 		QString diagDataServiceID;
-		quint64 diagDataUID = 0;
+		quint32 diagDataUID = 0;
 		int diagDataSize = 0;
 		int diagDataFramesQuantity = 0;
 
@@ -180,7 +180,7 @@ public:
 	HostAddressPort lmAddressPort() const { return m_lmAddressPort; }
 
 	int lmPort() const { return m_lmAddressPort.port(); }
-	void setLmPort(int port) { m_lmAddressPort.setPort(port); }
+	void setLmPort(int port) { Q_ASSERT(port >= 0 && port <= 65535); m_lmAddressPort.setPort(static_cast<quint16>(port)); }
 
 	int lmRupFramesQuantity() const { return m_lmRupFramesQuantity; }
 	void setLmRupFramesQuantity(int lmRupFramesQuantity) { m_lmRupFramesQuantity = lmRupFramesQuantity; }
@@ -299,8 +299,8 @@ public:
 	qint64 rupFramePlantTime() const { return m_rupFramePlantTime; }
 	void setRupFramePlantTime(qint64 time) { m_rupFramePlantTime = time; }
 
-	qint32 rupFrameNumerator() const { return m_rupFrameNumerator; }
-	void setRupFrameNumerator(qint32 num) { m_rupFrameNumerator = num; }
+	quint16 rupFrameNumerator() const { return m_rupFrameNumerator; }
+	void setRupFrameNumerator(quint16 num) { m_rupFrameNumerator = num; }
 
 	bool dataReceives() const { return m_dataReceives; }
 	void setDataReceives(bool receives) { m_dataReceives = receives; }

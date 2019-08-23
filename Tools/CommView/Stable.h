@@ -29,7 +29,6 @@
 
 // Qt includes
 //
-#include <QAbstractSocket>
 #include <QApplication>
 
 #include <QCommandLineParser>
@@ -45,7 +44,6 @@
 #include <QFileInfo>
 
 #include <QHash>
-#include <QHostAddress>
 
 #include <QMap>
 #include <QMetaClassInfo>
@@ -71,7 +69,6 @@
 #include <QtGlobal>
 #include <QtNetwork/QHostAddress>
 
-#include <QUdpSocket>
 #include <QUuid>
 
 #include <QVariant>

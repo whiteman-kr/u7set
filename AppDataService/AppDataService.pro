@@ -17,6 +17,8 @@ TEMPLATE = app
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
+include(../warnings.pri)
+
 # DESTDIR
 #
 win32 {
@@ -30,6 +32,7 @@ unix {
 
 
 SOURCES += \
+	../lib/MemLeaksDetection.cpp \
 	../lib/UdpSocket.cpp \
 	../lib/Service.cpp \
 	../lib/SocketIO.cpp \
@@ -80,6 +83,7 @@ SOURCES += \
     DynamicAppSignalState.cpp
 
 HEADERS += \
+	../lib/MemLeaksDetection.h \
 	Stable.h \
     ../lib/SocketIO.h \
     ../lib/UdpSocket.h \
@@ -136,13 +140,8 @@ HEADERS += \
     ../lib/SimpleAppSignalState.h \
     DynamicAppSignalState.h
 
-include(../qtservice/src/qtservice.pri)
-
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
-
-
-win32:QMAKE_CXXFLAGS += /std:c++17
 
 #protobuf
 #
@@ -161,6 +160,8 @@ DISTFILES += \
     ../Proto/network.proto \
     ../Proto/serialization.proto
 
-
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG
 CONFIG(release, debug|release): unix:QMAKE_CXXFLAGS += -DNDEBUG
+
+include(../qtservice/src/qtservice.pri)
+

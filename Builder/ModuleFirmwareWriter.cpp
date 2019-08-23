@@ -415,7 +415,7 @@ namespace Hardware
 				{
 					std::vector<quint8>& frame = firmwareData.frames[i];
 
-					Crc::setDataBlockCrc(i, frame.data(), (int)frame.size());
+					Crc::setDataBlockCrc(static_cast<quint16>(i), frame.data(), (int)frame.size());
 				}
 
 				// Save all frames to file

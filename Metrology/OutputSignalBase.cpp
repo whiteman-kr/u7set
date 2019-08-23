@@ -24,7 +24,7 @@ OutputSignal::OutputSignal(const OutputSignal& from)
 
 bool OutputSignal::isValid() const
 {
-	if (m_hash == 0)
+	if (m_hash == UNDEFINED_HASH)
 	{
 		return false;
 	}

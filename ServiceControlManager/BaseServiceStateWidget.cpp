@@ -13,7 +13,7 @@
 #include "../lib/WidgetUtils.h"
 
 
-BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, qint32 udpPort, QWidget *parent) :
+BaseServiceStateWidget::BaseServiceStateWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget* parent) :
 	QMainWindow(parent),
 	m_udpIp(udpIp),
 	m_udpPort(udpPort),
@@ -97,12 +97,12 @@ void BaseServiceStateWidget::updateServiceState()
 	QString serviceName = "Unknown Service";
 	QString serviceShortName = "???";
 
-	for (int i = 0; i < serviceInfo.count(); i++)
+	for (int i = 0; i < servicesInfo.count(); i++)
 	{
-		if (static_cast<E::SoftwareType>(m_serviceInfo.softwareinfo().softwaretype()) == serviceInfo[i].softwareType)
+		if (static_cast<E::SoftwareType>(m_serviceInfo.softwareinfo().softwaretype()) == servicesInfo[i].softwareType)
 		{
-			serviceName = serviceInfo[i].name;
-			serviceShortName = serviceInfo[i].shortName;
+			serviceName = servicesInfo[i].name;
+			serviceShortName = servicesInfo[i].shortName;
 			break;
 		}
 	}
@@ -128,11 +128,11 @@ void BaseServiceStateWidget::updateServiceState()
 
 				m_connectionStateStatus->setText("Connected to service" + QString(" - %1").arg(m_udpAckQuantity));
 
-				quint32 time = m_serviceInfo.uptime();
+				qint64 time = m_serviceInfo.uptime();
 
-				int s = time % 60; time /= 60;
-				int m = time % 60; time /= 60;
-				int h = time % 24; time /= 24;
+				qint64 s = time % 60; time /= 60;
+				qint64 m = time % 60; time /= 60;
+				qint64 h = time % 24; time /= 24;
 
 				QString&& uptimeStr = QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
 
@@ -171,19 +171,21 @@ void BaseServiceStateWidget::updateServiceState()
 
 				m_stateTabModel->setData(m_stateTabModel->index(3, 0), "Runing time");
 
-				quint32 time = m_serviceInfo.serviceuptime();
+				qint64 time = m_serviceInfo.serviceuptime();
 
-				int s = time % 60; time /= 60;
-				int m = time % 60; time /= 60;
-				int h = time % 24; time /= 24;
+				qint64 s = time % 60; time /= 60;
+				qint64 m = time % 60; time /= 60;
+				qint64 h = time % 24; time /= 24;
 
-				QString&& serviceUptimeStr = QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
+				QString&& srvUptimeStr = QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
 
-				m_stateTabModel->setData(m_stateTabModel->index(3, 1), serviceUptimeStr);
+				m_stateTabModel->setData(m_stateTabModel->index(3, 1), srvUptimeStr);
 
 				quint32 ip = m_serviceInfo.clientrequestip();
-				quint16 port = m_serviceInfo.clientrequestport();
+				qint32 port = m_serviceInfo.clientrequestport();
+
 				QString address = QHostAddress(ip).toString() + QString(":%1").arg(port);
+
 				if (ip != getWorkingClientRequestIp())
 				{
 					address = QHostAddress(ip).toString() + QString(":%1").arg(port) + " => " + QHostAddress(getWorkingClientRequestIp()).toString() + QString(":%1").arg(port);
@@ -348,7 +350,8 @@ void BaseServiceStateWidget::serviceAckReceived(const UdpRequest udpRequest)
 		{
 			Network::ServiceInfo newServiceState;
 
-			bool result = newServiceState.ParseFromArray(udpRequest.data(), udpRequest.dataSize());
+			bool result = newServiceState.ParseFromArray(udpRequest.data(),
+														 static_cast<int>(udpRequest.dataSize()));
 
 			assert(result == true);
 

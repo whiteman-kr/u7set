@@ -227,6 +227,11 @@ void CONF_IDENTIFICATION_DATA_V1::dump(QStringList& out) const
 	return;
 }
 
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable: 4996) // warning for std::strncpy
+#endif
+
 void CONF_IDENTIFICATION_DATA_V1::createFirstConfiguration()
 {
 	marker = IdentificationStructMarker;
@@ -242,7 +247,7 @@ void CONF_IDENTIFICATION_DATA_V1::createFirstConfiguration()
 	firstConfiguration.configuratorFactoryNo = 0;
 
 	QString hostName = QHostInfo::localHostName().right(sizeof(firstConfiguration.host) - 1);
-	strncpy(firstConfiguration.host, hostName.toStdString().data(), sizeof(firstConfiguration.host));
+	std::strncpy(firstConfiguration.host, hostName.toStdString().data(), sizeof(firstConfiguration.host));
 
 	lastConfiguration = firstConfiguration;
 }
@@ -261,7 +266,7 @@ void CONF_IDENTIFICATION_DATA_V1::createNextConfiguration()
 	lastConfiguration.configuratorFactoryNo = 0;
 
 	QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
-	strncpy(lastConfiguration.host, hostName.toStdString().data(), sizeof(lastConfiguration.host));
+	std::strncpy(lastConfiguration.host, hostName.toStdString().data(), sizeof(lastConfiguration.host));
 
 	lastConfiguration = lastConfiguration;
 }
@@ -308,15 +313,15 @@ void CONF_IDENTIFICATION_DATA_V2::createFirstConfiguration(Hardware::ModuleFirmw
 	firstConfiguration.date = QDateTime::currentDateTime().toTime_t();
 
 	QString hostName = QHostInfo::localHostName().right(sizeof(firstConfiguration.host) - 1);
-	strncpy(firstConfiguration.host, hostName.toStdString().data(), sizeof(firstConfiguration.host));
+	std::strncpy(firstConfiguration.host, hostName.toStdString().data(), sizeof(firstConfiguration.host));
 
 	firstConfiguration.buildNo = storage->buildNumber();
 
 	QString buildConfig = storage->buildConfig().right(sizeof(firstConfiguration) - 1);
-	strncpy(firstConfiguration.buildConfig, buildConfig.toStdString().data(), sizeof(firstConfiguration.buildConfig));
+	std::strncpy(firstConfiguration.buildConfig, buildConfig.toStdString().data(), sizeof(firstConfiguration.buildConfig));
 
 	QString userName = storage->userName().right(sizeof(firstConfiguration.userName) - 1);
-	strncpy(firstConfiguration.userName, userName.toStdString().data(), sizeof(firstConfiguration.userName));
+	std::strncpy(firstConfiguration.userName, userName.toStdString().data(), sizeof(firstConfiguration.userName));
 
 	lastConfiguration = firstConfiguration;
 }
@@ -331,16 +336,20 @@ void CONF_IDENTIFICATION_DATA_V2::createNextConfiguration(Hardware::ModuleFirmwa
 	lastConfiguration.date = QDateTime().currentDateTime().toTime_t();
 
 	QString hostName = QHostInfo::localHostName().right(sizeof(lastConfiguration.host) - 1);
-	strncpy(lastConfiguration.host, hostName.toStdString().data(), sizeof(lastConfiguration.host));
+	std::strncpy(lastConfiguration.host, hostName.toStdString().data(), sizeof(lastConfiguration.host));
 
 	lastConfiguration.buildNo = storage->buildNumber();
 
 	QString buildConfig = storage->buildConfig().right(sizeof(lastConfiguration.buildConfig) - 1);
-	strncpy(lastConfiguration.buildConfig, buildConfig.toStdString().data(), sizeof(lastConfiguration.buildConfig));
+	std::strncpy(lastConfiguration.buildConfig, buildConfig.toStdString().data(), sizeof(lastConfiguration.buildConfig));
 
 	QString userName = storage->userName().right(sizeof(lastConfiguration.userName) - 1);
-	strncpy(lastConfiguration.userName, userName.toStdString().data(), sizeof(lastConfiguration.userName));
+	std::strncpy(lastConfiguration.userName, userName.toStdString().data(), sizeof(lastConfiguration.userName));
 }
+
+#ifdef _MSC_VER
+	#pragma warning(pop)		//#pragma warning(disable: 3996) // warning for std::strncpy
+#endif
 
 //
 // Configurator
@@ -660,7 +669,7 @@ bool Configurator::send(int moduleUartId,
 
 	default:
 		assert(false);
-		m_Log->writeError(__FUNCTION__ + tr(" Unknown command ") + opcode + ".");
+		m_Log->writeError(__FUNCTION__ + tr(" Unknown command %1.").arg(opcode));
 		return false;
 	}
 
@@ -677,7 +686,7 @@ bool Configurator::send(int moduleUartId,
     qint64 writtenBytes = m_serialPort->write((char*)buffer.data(), buffer.size());
     m_serialPort->flush();
 
-	if (writtenBytes != buffer.size())
+	if (writtenBytes != static_cast<qint64>(buffer.size()))
 	{
 		m_Log->writeError(tr("Written bytes number %1, expected %2").arg(writtenBytes).arg(buffer.size()));
 		m_Log->writeError(tr("Operation terminated."));
@@ -891,7 +900,7 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 
 		int protocolVersion = pingReceivedHeader.version;
 		int moduleUartId = 0;
-		int blockSize = 0;
+		uint16_t blockSize = 0;
 		int frameSize = 0;
 		int blockCount = 0;
 
@@ -965,7 +974,8 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 			{
 				CONF_HEADER_V1 readReceivedHeader = CONF_HEADER_V1();
 
-				if (send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<uint8_t>(), &readReceivedHeader, &identificationData) == false)
+				if (bool sendOk = send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<uint8_t>(), &readReceivedHeader, &identificationData);
+					sendOk == false)
 				{
 					throw tr("Communication error.");
 				}
@@ -1077,7 +1087,7 @@ void Configurator::uploadFirmwareWorker(ModuleFirmwareStorage *storage, const QS
 			{
 				m_Log->writeMessage("Write configuration...");
 
-				for (int i = 0; i < conf.eepromFrameCount(m_currentUartId); i++)
+				for (uint16_t i = 0; i < conf.eepromFrameCount(m_currentUartId); i++)
 				{
 					if (m_cancelFlag == true)
 					{
@@ -1210,7 +1220,7 @@ void Configurator::readServiceInformationWorker(int /*param*/)
 
 		int protocolVersion = pingReceivedHeader.version;
 		int moduleUartId = 0;
-		int blockSize = 0;
+		uint16_t blockSize = 0;
 
 		switch (protocolVersion)
 		{
@@ -1263,7 +1273,8 @@ void Configurator::readServiceInformationWorker(int /*param*/)
 			{
 				CONF_HEADER_V1 readReceivedHeader = CONF_HEADER_V1();
 
-				if (send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &identificationData) == false)
+				if (bool sendOk = send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &identificationData);
+					sendOk == false)
 				{
 					throw tr("Communication error.");
 				}
@@ -1378,7 +1389,7 @@ bool Configurator::readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxF
 
 		int protocolVersion = pingReceivedHeader.version;
 		int moduleUartId = 0;
-		int eepromFrameSize = 0;
+		uint16_t eepromFrameSize = 0;
 		int eepromSize = 0;
 
 		switch (protocolVersion)
@@ -1487,7 +1498,8 @@ bool Configurator::readFirmwareWorker(ModuleFirmwareData* firmwareData, int maxF
 					std::vector<quint8>& readData = firmwareData->frames[i];
 					CONF_HEADER readReceivedHeader = CONF_HEADER();
 
-					if (send(moduleUartId, Read, i, eepromFrameSize, std::vector<quint8>(), &readReceivedHeader, &readData) == false)
+					if (bool sendOk = send(moduleUartId, Read, i, eepromFrameSize, std::vector<quint8>(), &readReceivedHeader, &readData);
+						sendOk == false)
 					{
 						throw tr("Communication error.");
 					}
@@ -1617,7 +1629,7 @@ void Configurator::uploadServiceInformation(quint32 factoryNo, QDate manufacture
 
         int protocolVersion = pingReceivedHeader.version;
         int moduleUartId = 0;
-        int blockSize = 0;
+		uint16_t blockSize = 0;
         int frameSize = 0;
 		
         switch (protocolVersion)
@@ -1672,7 +1684,8 @@ void Configurator::uploadServiceInformation(quint32 factoryNo, QDate manufacture
             {
                 CONF_HEADER_V1 readReceivedHeader = CONF_HEADER_V1();
 
-                if (send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &identificationData) == false)
+				if (bool sendOk = send(moduleUartId, Read, IdentificationFrameIndex, blockSize, std::vector<quint8>(), &readReceivedHeader, &identificationData);
+					sendOk == false)
                 {
                     throw tr("Communication error.");
                 }
@@ -1765,12 +1778,12 @@ void Configurator::uploadServiceInformation(quint32 factoryNo, QDate manufacture
                 QDate now = QDate::currentDate();
 
                 writeServiceStruct.setFactoryNo(factoryNo);
-                writeServiceStruct.setManufactureYear(manufactureDate.year());
-                writeServiceStruct.setManufactureMonth(manufactureDate.month());
-                writeServiceStruct.setManufactureDay(manufactureDate.day());
-                writeServiceStruct.setConfigureYear(now.year());
-                writeServiceStruct.setConfigureMonth(now.month());
-                writeServiceStruct.setConfigureDay(now.day());
+				writeServiceStruct.setManufactureYear(static_cast<uint16_t>(manufactureDate.year()));
+				writeServiceStruct.setManufactureMonth(static_cast<uint16_t>(manufactureDate.month()));
+				writeServiceStruct.setManufactureDay(static_cast<uint16_t>(manufactureDate.day()));
+				writeServiceStruct.setConfigureYear(static_cast<uint16_t>(now.year()));
+				writeServiceStruct.setConfigureMonth(static_cast<uint16_t>(now.month()));
+				writeServiceStruct.setConfigureDay(static_cast<uint16_t>(now.day()));
                 writeServiceStruct.setFirmwareCrc(firmwareCrc);
 
                 std::vector<quint8> writeData;
@@ -2014,7 +2027,7 @@ void Configurator::eraseFlashMemory(int)
 
 		int protocolVersion = pingReceivedHeader.version;
 		int moduleUartId = 0;
-		int blockSize = 0;
+		uint16_t blockSize = 0;
 		int romSize = 0;
 		
 		switch (protocolVersion)
@@ -2117,7 +2130,9 @@ void Configurator::eraseFlashMemory(int)
 					//
 					CONF_HEADER_V1 replyHeader = CONF_HEADER_V1();
 					auto replyData = std::vector<uint8_t>();
-					if (send(moduleUartId, Write, i, blockSize, writeData, &replyHeader, &replyData) == false)
+
+					if (bool sendOk = send(moduleUartId, Write, i, blockSize, writeData, &replyHeader, &replyData);
+						sendOk == false)
 					{
 						throw tr("Communication error.");
 					}

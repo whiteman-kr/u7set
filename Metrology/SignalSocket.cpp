@@ -99,7 +99,7 @@ void SignalSocket::requestSignalState()
 
 	int startIndex = m_signalStateRequestIndex;
 
-	for (int i = 0; SIGNAL_SOCKET_MAX_READ_SIGNAL; i++)
+	for (int i = 0; i< SIGNAL_SOCKET_MAX_READ_SIGNAL; i++)
 	{
 		if (m_signalStateRequestIndex >= hashCount)
 		{
@@ -108,9 +108,9 @@ void SignalSocket::requestSignalState()
 		}
 
 		Hash hash = theSignalBase.hashForRequestState(i + startIndex);
-		if (hash == 0)
+		if (hash == UNDEFINED_HASH)
 		{
-			assert(hash != 0);
+			assert(hash != UNDEFINED_HASH);
 			continue;
 		}
 
@@ -133,7 +133,7 @@ void SignalSocket::replySignalState(const char* replyData, quint32 replyDataSize
 		return;
 	}
 
-	bool result = m_getSignalStateReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_getSignalStateReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
 	if (result == false)
 	{
 		qDebug() << "SignalSocket::replySignalState - error: ParseFromArray";
@@ -153,9 +153,9 @@ void SignalSocket::replySignalState(const char* replyData, quint32 replyDataSize
 	for (int i = 0; i < m_getSignalStateReply.appsignalstates_size(); i++)
 	{
 		Hash hash = m_getSignalStateReply.appsignalstates(i).hash();
-		if (hash == 0)
+		if (hash == UNDEFINED_HASH)
 		{
-			assert(hash != 0);
+			assert(hash != UNDEFINED_HASH);
 			continue;
 		}
 

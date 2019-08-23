@@ -640,7 +640,7 @@ QVariant FilteredArchiveSignalsModel::data(const QModelIndex& index, int role) c
 		return QVariant();
 	}
 
-	return QVariant();
+	//return QVariant();	unreachable
 }
 
 void FilteredArchiveSignalsModel::filterSignals(DialogChooseArchiveSignals::ArchiveSignalType signalType, QString signalIdFilter, QString schemaId)

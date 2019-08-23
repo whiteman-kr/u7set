@@ -82,8 +82,6 @@ bool DataSource::LmEthernetAdapterProperties::getLmEthernetAdapterNetworkPropert
 	if (adptrNo == LM_ETHERNET_ADAPTER2 ||
 		adptrNo == LM_ETHERNET_ADAPTER3)
 	{
-		int dataUID = 0;
-
 		// application data adapter
 		//
 		result &= DeviceHelper::getBoolProperty(adapter, PROP_APP_DATA_ENABLE, &appDataEnable, log);
@@ -91,9 +89,7 @@ bool DataSource::LmEthernetAdapterProperties::getLmEthernetAdapterNetworkPropert
 		result &= DeviceHelper::getIntProperty(adapter, PROP_APP_DATA_PORT, &appDataPort, log);
 		result &= DeviceHelper::getStrProperty(adapter, PROP_APP_DATA_SERVICE_ID, &appDataServiceID, log);
 
-		result &= DeviceHelper::getIntProperty(lm, PROP_LM_APP_DATA_UID, &dataUID, log);
-
-		appDataUID = dataUID;
+		result &= DeviceHelper::getUIntProperty(lm, PROP_LM_APP_DATA_UID, &appDataUID, log);
 
 		result &= DeviceHelper::getIntProperty(lm, PROP_LM_APP_DATA_SIZE, &appDataSize, log);
 

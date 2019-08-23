@@ -1184,12 +1184,12 @@ class DataSourceInfo : public ::google::protobuf::Message {
   inline bool lmdataenable() const;
   inline void set_lmdataenable(bool value);
 
-  // optional uint64 lmDataID = 14 [default = 0];
+  // optional uint32 lmDataID = 14 [default = 0];
   inline bool has_lmdataid() const;
   inline void clear_lmdataid();
   static const int kLmDataIDFieldNumber = 14;
-  inline ::google::protobuf::uint64 lmdataid() const;
-  inline void set_lmdataid(::google::protobuf::uint64 value);
+  inline ::google::protobuf::uint32 lmdataid() const;
+  inline void set_lmdataid(::google::protobuf::uint32 value);
 
   // optional uint64 lmUniqueID = 15 [default = 0];
   inline bool has_lmuniqueid() const;
@@ -1269,10 +1269,10 @@ class DataSourceInfo : public ::google::protobuf::Message {
   ::std::string* lmadapterid_;
   ::google::protobuf::int32 lmmoduletype_;
   bool lmdataenable_;
-  ::google::protobuf::uint64 lmdataid_;
   ::google::protobuf::uint64 lmuniqueid_;
-  ::std::string* lmpresetname_;
+  ::google::protobuf::uint32 lmdataid_;
   ::google::protobuf::int32 lmrupframesquantity_;
+  ::std::string* lmpresetname_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(17 + 31) / 32];
@@ -1754,12 +1754,12 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 rupframeplanttime() const;
   inline void set_rupframeplanttime(::google::protobuf::int64 value);
 
-  // optional int32 rupFrameNumerator = 16 [default = 0];
+  // optional uint32 rupFrameNumerator = 16 [default = 0];
   inline bool has_rupframenumerator() const;
   inline void clear_rupframenumerator();
   static const int kRupFrameNumeratorFieldNumber = 16;
-  inline ::google::protobuf::int32 rupframenumerator() const;
-  inline void set_rupframenumerator(::google::protobuf::int32 value);
+  inline ::google::protobuf::uint32 rupframenumerator() const;
+  inline void set_rupframenumerator(::google::protobuf::uint32 value);
 
   // optional int32 signalStatesQueueCurSize = 17 [default = 0];
   inline bool has_signalstatesqueuecursize() const;
@@ -1931,7 +1931,7 @@ class AppDataSourceState : public ::google::protobuf::Message {
   ::google::protobuf::int64 receivedpacketcount_;
   bool datareceives_;
   bool dataprocessingenabled_;
-  ::google::protobuf::int32 rupframenumerator_;
+  ::google::protobuf::uint32 rupframenumerator_;
   ::google::protobuf::int64 lostedpacketcount_;
   ::google::protobuf::int64 processedpacketcount_;
   ::google::protobuf::int64 lastpacketsystemtime_;
@@ -8046,7 +8046,7 @@ inline void DataSourceInfo::set_lmdataenable(bool value) {
   lmdataenable_ = value;
 }
 
-// optional uint64 lmDataID = 14 [default = 0];
+// optional uint32 lmDataID = 14 [default = 0];
 inline bool DataSourceInfo::has_lmdataid() const {
   return (_has_bits_[0] & 0x00002000u) != 0;
 }
@@ -8057,13 +8057,13 @@ inline void DataSourceInfo::clear_has_lmdataid() {
   _has_bits_[0] &= ~0x00002000u;
 }
 inline void DataSourceInfo::clear_lmdataid() {
-  lmdataid_ = GOOGLE_ULONGLONG(0);
+  lmdataid_ = 0u;
   clear_has_lmdataid();
 }
-inline ::google::protobuf::uint64 DataSourceInfo::lmdataid() const {
+inline ::google::protobuf::uint32 DataSourceInfo::lmdataid() const {
   return lmdataid_;
 }
-inline void DataSourceInfo::set_lmdataid(::google::protobuf::uint64 value) {
+inline void DataSourceInfo::set_lmdataid(::google::protobuf::uint32 value) {
   set_has_lmdataid();
   lmdataid_ = value;
 }
@@ -8729,7 +8729,7 @@ inline void AppDataSourceState::set_rupframeplanttime(::google::protobuf::int64 
   rupframeplanttime_ = value;
 }
 
-// optional int32 rupFrameNumerator = 16 [default = 0];
+// optional uint32 rupFrameNumerator = 16 [default = 0];
 inline bool AppDataSourceState::has_rupframenumerator() const {
   return (_has_bits_[0] & 0x00008000u) != 0;
 }
@@ -8740,13 +8740,13 @@ inline void AppDataSourceState::clear_has_rupframenumerator() {
   _has_bits_[0] &= ~0x00008000u;
 }
 inline void AppDataSourceState::clear_rupframenumerator() {
-  rupframenumerator_ = 0;
+  rupframenumerator_ = 0u;
   clear_has_rupframenumerator();
 }
-inline ::google::protobuf::int32 AppDataSourceState::rupframenumerator() const {
+inline ::google::protobuf::uint32 AppDataSourceState::rupframenumerator() const {
   return rupframenumerator_;
 }
-inline void AppDataSourceState::set_rupframenumerator(::google::protobuf::int32 value) {
+inline void AppDataSourceState::set_rupframenumerator(::google::protobuf::uint32 value) {
   set_has_rupframenumerator();
   rupframenumerator_ = value;
 }

@@ -22,7 +22,7 @@ class OptionsPointsDialog : public QDialog
 
 public:
 
-	explicit OptionsPointsDialog(const LinearityOption& linearity, QWidget *parent = 0);
+	explicit OptionsPointsDialog(const LinearityOption& linearity, QWidget *parent = nullptr);
 	virtual ~OptionsPointsDialog();
 
 private:

@@ -40,7 +40,7 @@ namespace  TuningIPEN
 		//
 		int neededSize = m_signalSizeBits * m_signalCount;
 
-		m_tripleFramesCount = neededSize / m_tuningFrameSizeBits + (neededSize % m_tuningFrameSizeBits ? 1 : 0);
+		m_tripleFramesCount = neededSize / m_tuningFrameSizeBits + ((neededSize % m_tuningFrameSizeBits) ? 1 : 0);
 
 		m_usedFramesCount = m_tripleFramesCount * FRAMES_3;
 
@@ -73,7 +73,7 @@ namespace  TuningIPEN
 
 		if (value == 0)
 		{
-			quint16 v = ~0x0001;
+			quint16 v = 0xFFFE; //~0x0001;
 
 			v <<= bit;
 

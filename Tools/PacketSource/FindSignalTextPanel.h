@@ -21,7 +21,7 @@ public:
 
 	FindItem();
 	FindItem(int row, int column, const QString& text, int beginPos, int endPos);
-	virtual ~FindItem();
+	virtual ~FindItem() {}
 
 private:
 

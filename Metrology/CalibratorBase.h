@@ -51,7 +51,7 @@ class CalibratorBase : public QObject
 
 public:
 
-	explicit CalibratorBase(QObject *parent = 0);
+	explicit CalibratorBase(QObject *parent = nullptr);
 	virtual ~CalibratorBase();
 
 private:
@@ -92,7 +92,7 @@ private:
 
 public:
 
-	void					init(QWidget* parent = 0);
+	void					init(QWidget* parent = nullptr);
 	void					showInitDialog();
 
 	int						calibratorCount() const;

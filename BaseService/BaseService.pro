@@ -15,6 +15,9 @@ TEMPLATE = app
 #
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
+win32:QMAKE_CXXFLAGS += /analyze
+
+include(../warnings.pri)
 
 # DESTDIR
 #
@@ -29,6 +32,7 @@ unix {
 
 
 SOURCES += \
+    ../lib/MemLeaksDetection.cpp \
     ../lib/UdpSocket.cpp \
     ../lib/SocketIO.cpp \
     ../lib/CircularLogger.cpp \
@@ -43,6 +47,7 @@ SOURCES += \
     ../lib/SoftwareInfo.cpp
 
 HEADERS += \
+	../lib/MemLeaksDetection.h \
     ../lib/SocketIO.h \
     ../lib/UdpSocket.h \
     ../lib/CircularLogger.h \
@@ -55,9 +60,11 @@ HEADERS += \
     ../lib/CommandLineParser.h \
     ../lib/WUtils.h \
     ../lib/SoftwareInfo.h \
-    ../lib/OrderedHash.h
+    ../lib/OrderedHash.h \
+	Stable.h
 
-include(../qtservice/src/qtservice.pri)
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
 win32:QMAKE_CXXFLAGS += -D_SCL_SECURE_NO_WARNINGS
 
@@ -73,3 +80,5 @@ win32 {
 unix {
 	LIBS += -lprotobuf
 }
+
+include(../qtservice/src/qtservice.pri)

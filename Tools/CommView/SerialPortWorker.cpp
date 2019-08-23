@@ -178,7 +178,7 @@ void SerialPortWorker::process()
             m_option->setPacketCount(0);
         }
 
-		m_option->setQueueBytes(m_port->bytesAvailable());
+		m_option->setQueueBytes(static_cast<int>(m_port->bytesAvailable()));
 
 		if (m_port->bytesAvailable() == 0)
 		{
@@ -201,18 +201,18 @@ void SerialPortWorker::process()
 		//
 		if (requestData.count() == m_option->dataSize())
 		{
-			SerialPortDataHeader* pHeader = (SerialPortDataHeader*) requestData.data();			// take header of packet
-			if (pHeader->Signature == SERIAL_PORT_DATA_SIGN)									// if header is correct
+			SerialPortDataHeader* pHeader = reinterpret_cast<SerialPortDataHeader*>(requestData.data());	// take header of packet
+			if (pHeader->Signature == SERIAL_PORT_DATA_SIGN)												// if header is correct
 			{
-				m_option->setData(requestData);													// update data in packet
-				requestData.clear();															// clear received data
+				m_option->setData(requestData);																// update data in packet
+				requestData.clear();																		// clear received data
 
-				m_option->incPacketCount(1);													// inc packet count
+				m_option->incPacketCount(1);																// inc packet count
 			}
 			else
 			{
-				requestData.remove(0, 1);														//
-				m_option->incSkippedBytes(1);													// inc skipped bytes
+				requestData.remove(0, 1);																	//
+				m_option->incSkippedBytes(1);																// inc skipped bytes
 			}
 		}
 

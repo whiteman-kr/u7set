@@ -1,4 +1,4 @@
-#include "TcpAppDataClient.h"
+#include "ScmTcpAppDataClient.h"
 
 
 TcpAppDataClient::TcpAppDataClient(const SoftwareInfo& softwareInfo,
@@ -19,6 +19,11 @@ TcpAppDataClient::TcpAppDataClient(const SoftwareInfo& softwareInfo,
 TcpAppDataClient::~TcpAppDataClient()
 {
 	clearDataSources();
+
+	if (m_updateStatesTimer != nullptr)
+	{
+		delete m_updateStatesTimer;
+	}
 }
 
 

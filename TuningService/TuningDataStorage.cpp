@@ -344,7 +344,7 @@ namespace  Tuning
 
 				case TYPE_DISCRETE:
 					{
-						quint16 defaultValue = signal->tuningDefaultValue().discreteValue();
+						quint16 defaultValue = static_cast<quint16>(signal->tuningDefaultValue().discreteValue());
 
 						int bitNo = discreteCount % SIZE_32BIT;
 

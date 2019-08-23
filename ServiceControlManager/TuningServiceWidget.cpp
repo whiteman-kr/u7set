@@ -94,7 +94,7 @@ void TuningServiceWidget::updateStateInfo()
 	if (m_serviceInfo.servicestate() == ServiceState::Work)
 	{
 		quint32 ip = m_serviceInfo.clientrequestip();
-		quint16 port = m_serviceInfo.clientrequestport();
+		qint32 port = m_serviceInfo.clientrequestport();
 
 		quint32 workingIp = getWorkingClientRequestIp();
 
@@ -115,7 +115,7 @@ void TuningServiceWidget::updateStateInfo()
 
 		if (m_tcpClientSocket == nullptr)
 		{
-			createTcpConnection(getWorkingClientRequestIp(), port);
+			createTcpConnection(getWorkingClientRequestIp(), static_cast<quint16>(port));
 		}
 	}
 }

@@ -16,6 +16,13 @@ HostAddressPort::HostAddressPort(const QHostAddress& addr, quint16 port)
 	m_port = port;
 }
 
+HostAddressPort::HostAddressPort(const QHostAddress& addr, int port)
+{
+	assert(port >= 0 && port <= 65535);
+
+	m_hostAddress = addr;
+	m_port = static_cast<quint16>(port);
+}
 
 HostAddressPort::HostAddressPort(quint32 ip4Addr, quint16 port)
 {
@@ -30,7 +37,6 @@ HostAddressPort::HostAddressPort(quint8* ip6Addr, quint16 port)
 	m_port = port;
 }
 
-
 HostAddressPort::HostAddressPort(const Q_IPV6ADDR& ip6Addr, quint16 port)
 {
 	m_hostAddress.setAddress(ip6Addr);
@@ -44,20 +50,25 @@ HostAddressPort::HostAddressPort(const sockaddr* sockaddr, quint16 port)
 	m_port = port;
 }
 
-
 HostAddressPort::HostAddressPort(const QString& address, quint16 port)
 {
 	m_hostAddress.setAddress(address);
 	m_port = port;
 }
 
+HostAddressPort::HostAddressPort(const QString& address, int port)
+{
+	assert(port >= 0 && port <= 65535);
+
+	m_hostAddress.setAddress(address);
+	m_port = static_cast<quint16>(port);
+}
 
 HostAddressPort::HostAddressPort(const HostAddressPort& copy)
 {
 	m_hostAddress = copy.m_hostAddress;
 	m_port = copy.m_port;
 }
-
 
 HostAddressPort& HostAddressPort::operator=(const HostAddressPort& other)
 {
@@ -107,27 +118,30 @@ bool HostAddressPort::setAddress(const QString& address)
 	return m_hostAddress.setAddress(address);
 }
 
-
 void HostAddressPort::setPort(quint16 port)
 {
 	m_port = port;
+}
+
+void HostAddressPort::setPort(int port)
+{
+	assert(port >= 0 && port <= 65535);
+
+	m_port = static_cast<quint16>(port);
 }
 
 bool HostAddressPort::setAddressPort(const QString& addressStr, quint16 port)
 {
 	bool result = setAddress(addressStr);
 
-	if (port < Socket::PORT_LOWEST || port > Socket::PORT_HIGHEST)
-	{
-		assert(false);
-		result = false;
-	}
-	else
-	{
-		setPort(port);
-	}
+	setPort(port);
 
 	return result;
+}
+
+bool HostAddressPort::setAddressPort(const QString& addressStr, int port)
+{
+	return setAddressPort(addressStr, static_cast<quint16>(port));
 }
 
 bool HostAddressPort::setAddressPortStr(const QString& addressPortStr, quint16 defaultPort)
@@ -196,7 +210,7 @@ bool HostAddressPort::isValidPort(const QString& portStr)
 {
 	bool ok = false;
 
-	int port = portStr.toUInt(&ok);
+	int port = portStr.toInt(&ok);
 
 	if (ok == false)
 	{

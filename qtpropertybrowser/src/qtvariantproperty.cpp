@@ -51,6 +51,17 @@
 #    pragma warning(disable: 4786) /* MS VS 6: truncating debug info after 255 characters */
 #endif
 
+// Suppress static code ananlyzer messages
+//
+#ifdef _MSC_VER
+	#pragma warning(push)
+	#pragma warning(disable : 6001)
+	#pragma warning(disable : 6246)
+	#pragma warning(disable : 4244)
+	#pragma warning(disable : 4457)
+#endif
+
+
 #if QT_VERSION >= 0x040400
 QT_BEGIN_NAMESPACE
 #endif
@@ -2357,6 +2368,10 @@ void QtVariantEditorFactory::disconnectPropertyManager(QtVariantPropertyManager 
 
 #if QT_VERSION >= 0x040400
 QT_END_NAMESPACE
+#endif
+
+#ifdef _MSC_VER
+	#pragma warning(pop)
 #endif
 
 #include "moc_qtvariantproperty.cpp"

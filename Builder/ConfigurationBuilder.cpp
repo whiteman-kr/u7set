@@ -262,6 +262,8 @@ namespace Builder
 			int ssKey = m_subsystems->ssKey(m->propertyValue("SubsystemID").toString());
 			int lmNumber = m->propertyValue("LMNumber").toInt();
 
+			Q_ASSERT(ssKey >= 0 && ssKey <= std::numeric_limits<quint16>::max());
+
 			lmReport << "\r\n";
 			lmReport << "StrID: " + m->equipmentIdTemplate();
 			lmReport << "Caption: " + m->caption();
@@ -270,7 +272,7 @@ namespace Builder
 			lmReport << "Subsystem code: " + QString::number(ssKey);
 			lmReport << "LM Number: " + QString::number(lmNumber);
 
-			quint16 jumpers = ssKey << 6;
+			quint16 jumpers = static_cast<quint16>(ssKey) << 6;
 			jumpers |= lmNumber;
 
 			quint16 crc4 = Crc::crc4(jumpers);

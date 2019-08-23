@@ -378,8 +378,8 @@ namespace Builder
 			newSignal->setSpecPropStruct(SignalProperties::defaultBusChildAnalogSpecPropStruct);
 			newSignal->createSpecPropValues();
 
-			newSignal->setLowADC(busSignal.inbusAnalogLowLimit);
-			newSignal->setHighADC(busSignal.inbusAnalogHighLimit);
+			newSignal->setLowADC(static_cast<int>(busSignal.inbusAnalogLowLimit));
+			newSignal->setHighADC(static_cast<int>(busSignal.inbusAnalogHighLimit));
 
 			newSignal->setLowEngeneeringUnits(busSignal.busAnalogLowLimit);
 			newSignal->setHighEngeneeringUnits(busSignal.busAnalogHighLimit);

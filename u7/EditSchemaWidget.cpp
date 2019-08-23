@@ -562,8 +562,8 @@ void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 		return;
 	}
 
-	float xdif = m_editEndDocPt.x() - m_editStartDocPt.x();
-	float ydif = m_editEndDocPt.y() - m_editStartDocPt.y();
+	double xdif = m_editEndDocPt.x() - m_editStartDocPt.x();
+	double ydif = m_editEndDocPt.y() - m_editStartDocPt.y();
 
 	// Shift position
 	//
@@ -1140,7 +1140,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 
 	// --
 	//
-	float controlBarSize = ControlBar(schemaItem->itemUnit(), zoom());
+	double controlBarSize = ControlBar(schemaItem->itemUnit(), zoom());
 	bool ctrlIsPressed = QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
 
 	// SchemaItem position and point are the same units
@@ -3442,8 +3442,8 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 
 	// --
 	//
-	float xdif = mouseMovingEndPointIn.x() - mouseMovingStartPointIn.x();
-	float ydif = mouseMovingEndPointIn.y() - mouseMovingStartPointIn.y();
+	double xdif = mouseMovingEndPointIn.x() - mouseMovingStartPointIn.x();
+	double ydif = mouseMovingEndPointIn.y() - mouseMovingStartPointIn.y();
 
 	if (std::abs(xdif) < 0.0000001 && std::abs(ydif) < 0.0000001)
 	{
@@ -6391,8 +6391,9 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 		{
 			if (setViaEditEngine == true)
 			{
-				if (bool ok = m_editEngine->startBatch();
-					ok == true)
+				ok = m_editEngine->startBatch();
+
+				if (ok == true)
 				{
 					m_editEngine->runSetProperty(VFrame30::PropertyNames::connectionId, QVariant(newConnectionId), item);
 					m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(newAppSignalId), item);
@@ -6691,7 +6692,6 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 
 		int newIntValue = intValueEdit->text().toInt();
 
-		QLocale locale;
 		double newFloatValue = locale.toFloat(floatValueEdit->text());
 		int newDiscreteValue = discreteValueEdit->text().toInt();
 
@@ -7879,9 +7879,12 @@ void EditSchemaWidget::properties()
 
 	m_itemsPropertiesDialog->setObjects(editSchemaView()->selectedItems());
 	m_itemsPropertiesDialog->setReadOnly(m_editEngine->readOnly());
+
 	m_itemsPropertiesDialog->show();
 	m_itemsPropertiesDialog->ensureVisible();
-	m_itemsPropertiesDialog->setFocus();
+
+	m_itemsPropertiesDialog->raise();
+	m_itemsPropertiesDialog->activateWindow();
 
 	return;
 }
@@ -7965,7 +7968,7 @@ void EditSchemaWidget::selectionChanged()
 	m_itemsPropertiesDialog->setReadOnly(m_editEngine->readOnly());
 	m_itemsPropertiesDialog->ensureVisible();
 
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
 	auto selectectNotLocked = selectedNonLockedItems();
 
 	// Edit Menu
@@ -8014,7 +8017,7 @@ void EditSchemaWidget::selectionChanged()
 	// Comment Action
 	//
 	bool hasFblItems = false;
-	for (auto& selItem : selected)
+	for (const auto& selItem : selected)
 	{
 		if (selItem->isFblItem() == true)
 		{
@@ -8047,14 +8050,13 @@ void EditSchemaWidget::selectionChanged()
 
 		if (selectedItems().empty() == false)
 		{
-			auto& selected = selectedItems();
-
-			for (auto item : selected)
+			//auto& selected = selectedItems();
+			for (const auto& item : selected)
 			{
 				if (dynamic_cast<VFrame30::SchemaItemSignal*>(item.get()) != nullptr)
 				{
 					auto itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
-					assert(itemSignal);
+					Q_ASSERT(itemSignal);
 
 					const QStringList& signalStrIdList = itemSignal->appSignalIdList();
 
@@ -8071,7 +8073,7 @@ void EditSchemaWidget::selectionChanged()
 				if (dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get()) != nullptr)
 				{
 					VFrame30::SchemaItemReceiver* itemReceiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
-					assert(itemReceiver);
+					Q_ASSERT(itemReceiver);
 
 					for (const QString& appSignal : itemReceiver->appSignalIdsAsList())
 					{
@@ -8101,9 +8103,9 @@ void EditSchemaWidget::selectionChanged()
 	{
 		if (selectedItems().size() == 1)
 		{
-			std::shared_ptr<VFrame30::SchemaItem> selected = selectedItems().front();
+			std::shared_ptr<VFrame30::SchemaItem> selectedFrontItem = selectedItems().front();
 
-			auto itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(selected.get());
+			auto itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(selectedFrontItem.get());
 
 			if (itemSignal != nullptr)
 			{
@@ -9292,7 +9294,7 @@ void EditSchemaWidget::selectNextUpItem()
 		}
 	}
 
-	if (pointInitialized = false)
+	if (pointInitialized == false)
 	{
 		Q_ASSERT(pointInitialized);
 		return;
@@ -9515,7 +9517,7 @@ void EditSchemaWidget::selectNextDownItem()
 		}
 	}
 
-	if (pointInitialized = false)
+	if (pointInitialized == false)
 	{
 		Q_ASSERT(pointInitialized);
 		return;
@@ -10482,6 +10484,8 @@ void EditSchemaWidget::find()
 	}
 
 	m_findDialog->show();
+	m_findDialog->ensureVisible();
+
 	m_findDialog->raise();
 	m_findDialog->activateWindow();
 
@@ -10916,7 +10920,6 @@ void EditSchemaWidget::setMouseState(MouseState state)
 
 	if (state == MouseState::Moving ||
 		state == MouseState::SizingTopLeft ||
-		state == MouseState::SizingTopLeft ||
 		state == MouseState::SizingTop ||
 		state == MouseState::SizingTopRight ||
 		state == MouseState::SizingRight ||
@@ -11022,14 +11025,9 @@ void EditSchemaWidget::setCompareItemActions(const std::map<QUuid, CompareAction
 }
 
 SchemaFindDialog::SchemaFindDialog(QWidget* parent) :
-	QDialog(parent)
+	QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint)
 {
 	setWindowTitle(tr("Find and Replace"));
-
-	setWindowFlags((windowFlags() &
-					~Qt::WindowMinimizeButtonHint &
-					~Qt::WindowMaximizeButtonHint &
-					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
 
 	// FindText/Replace - text for search
 	//
@@ -11060,7 +11058,6 @@ SchemaFindDialog::SchemaFindDialog(QWidget* parent) :
 	QString selectionColor = QString("QTextEdit { selection-background-color: %1; selection-color: %2; }")
 							 .arg(highlight.name())
 							 .arg(highlightText.name());
-
 	m_findResult->setStyleSheet(selectionColor);
 
 	// Find buttons
@@ -11143,7 +11140,17 @@ SchemaFindDialog::SchemaFindDialog(QWidget* parent) :
 
 	m_nextButton->setDefault(true);
 
+	QSettings settings;
+	restoreGeometry(settings.value("SchemaFindDialog/Geometry").toByteArray());
+
+	ensureVisible();
+
 	return;
+}
+
+SchemaFindDialog::~SchemaFindDialog()
+{
+	qDebug() << Q_FUNC_INFO;
 }
 
 QString SchemaFindDialog::findText() const
@@ -11161,6 +11168,31 @@ void SchemaFindDialog::setFocusToEditLine()
 
 	m_findTextEdit->setFocus();
 	m_findTextEdit->selectAll();
+
+	return;
+}
+
+void SchemaFindDialog::ensureVisible()
+{
+	if (QScreen* screen = QGuiApplication::screenAt(geometry().center());
+		screen == nullptr)
+	{
+		QScreen* newScreen = QGuiApplication::screens().at(0);
+
+		if (QScreen* parentScreen = parentWidget()->window()->windowHandle()->screen();
+			parentScreen != nullptr)
+		{
+			newScreen = parentScreen;
+		}
+
+		QRect screenGeometry = newScreen->geometry();
+
+		move(screenGeometry.left() + screenGeometry.width() / 2 - width() / 2,
+			 screenGeometry.top() + screenGeometry.height() / 2 - height() / 2);
+	}
+	else
+	{
+	}
 
 	return;
 }
@@ -11241,6 +11273,25 @@ void SchemaFindDialog::replaceAllPressed()
 	}
 
 	emit replaceAll(findText, replaceWith, cs);
+
+	return;
+}
+
+void SchemaFindDialog::closeEvent(QCloseEvent*)
+{
+	saveSettings();
+}
+
+void SchemaFindDialog::done(int r)
+{
+	saveSettings();
+	QDialog::done(r);
+}
+
+void SchemaFindDialog::saveSettings()
+{
+	QSettings settings;
+	settings.setValue("SchemaFindDialog/Geometry", saveGeometry());
 
 	return;
 }

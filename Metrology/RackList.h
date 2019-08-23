@@ -45,7 +45,7 @@ class RackListTable : public QAbstractTableModel
 
 public:
 
-	explicit RackListTable(QObject* parent = 0);
+	explicit RackListTable(QObject* parent = nullptr);
 	virtual ~RackListTable();
 
 private:
@@ -84,7 +84,7 @@ class RackListDialog : public QDialog
 
 public:
 
-	explicit RackListDialog(QWidget *parent = 0);
+	explicit RackListDialog(QWidget *parent = nullptr);
 	virtual ~RackListDialog();
 
 private:

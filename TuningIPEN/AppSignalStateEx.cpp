@@ -243,7 +243,7 @@ void DynamicAppSignalStates::buidlHash2State()
 {
 	m_hash2State.clear();
 
-	m_hash2State.reserve(m_size * 1.3);
+	m_hash2State.reserve(static_cast<int>(m_size * 1.3));
 
 	for(int i = 0; i < m_size; i++)
 	{
@@ -334,7 +334,7 @@ void AppSignals::buildHash2Signal()
 {
 	m_hash2Signal.clear();
 
-	m_hash2Signal.reserve(count() * 1.3);
+	m_hash2Signal.reserve(static_cast<int>(count() * 1.3));
 
 	for(Signal* signal : *this)
 	{

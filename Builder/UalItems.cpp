@@ -669,11 +669,11 @@ namespace Builder
 		m_signedIntValue = value;
 	}
 
-	double AppFbParamValue::floatValue() const
+	float AppFbParamValue::floatValue() const
 	{
 		assert(isFloat32() == true);
 
-		return m_floatValue;
+		return static_cast<float>(m_floatValue);
 	}
 
 	void AppFbParamValue::setFloatValue(double value)
@@ -1671,7 +1671,7 @@ namespace Builder
 		assert(m_isConst == true);
 		assert(constAnalogFormat() == E::AnalogAppSignalFormat::Float32);
 
-		return m_constFloatValue;
+		return static_cast<float>(m_constFloatValue);
 	}
 
 	double UalSignal::constValue() const

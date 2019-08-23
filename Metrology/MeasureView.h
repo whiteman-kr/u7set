@@ -16,7 +16,7 @@ class MeasureTable : public QAbstractTableModel
 
 public:
 
-	explicit MeasureTable(QObject* parent = 0);
+	explicit MeasureTable(QObject* parent = nullptr);
 	virtual ~MeasureTable();
 
 private:
@@ -62,7 +62,7 @@ class MeasureView : public QTableView
 
 public:
 
-	explicit MeasureView(int measureType, QWidget *parent = 0);
+	explicit MeasureView(int measureType, QWidget *parent = nullptr);
 	virtual ~MeasureView();
 
 private:

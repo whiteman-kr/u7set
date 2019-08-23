@@ -66,13 +66,13 @@ const int	MEASURE_LIMIT_TYPE_UNDEFINED	= -1,
 
 // ==============================================================================================
 
-const char* const ErrorType[] =
+const char* const MeasureErrorType[] =
 {
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Absolute"),
 			QT_TRANSLATE_NOOP("MeasureBase.h", "Reduced"),
 };
 
-const int	MEASURE_ERROR_TYPE_COUNT	= sizeof(ErrorType)/sizeof(ErrorType[0]);
+const int	MEASURE_ERROR_TYPE_COUNT	= sizeof(MeasureErrorType)/sizeof(MeasureErrorType[0]);
 
 const int	MEASURE_ERROR_TYPE_UNKNOWN	= -1,
 			MEASURE_ERROR_TYPE_ABSOLUTE	= 0,
@@ -139,7 +139,7 @@ public:
 private:
 
 	int				m_measureType = MEASURE_TYPE_UNKNOWN;			// measure type
-	Hash			m_signalHash = 0;								// hash calced from AppSignalID by function calcHash()
+	Hash			m_signalHash = UNDEFINED_HASH;					// hash calced from AppSignalID by function calcHash()
 
 	int				m_measureID = -1;								// primary key of record in SQL table
 	bool			m_filter = false;								// filter for record, if "true" - hide record

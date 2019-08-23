@@ -182,7 +182,7 @@ struct CONF_IDENTIFICATION_DATA_V1
 	void createFirstConfiguration();
 	void createNextConfiguration();
 
-	static int structVersion() {	return 1;	}
+	static uint16_t structVersion() {	return 1;	}
 };
 
 struct CONF_IDENTIFICATION_DATA_V2
@@ -211,7 +211,7 @@ struct CONF_IDENTIFICATION_DATA_V2
 	void createFirstConfiguration(Hardware::ModuleFirmwareStorage* storage);
 	void createNextConfiguration(Hardware::ModuleFirmwareStorage* storage);
 
-	static int structVersion() {	return 2;	}
+	static uint16_t structVersion() {	return 2;	}
 };
 
 #pragma pack(pop)

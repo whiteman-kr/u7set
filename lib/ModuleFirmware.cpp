@@ -61,11 +61,12 @@ namespace Hardware
 	}
 
 	void ModuleFirmware::init(const QString& subsysId,
-			  int ssKey, const QString& lmDescriptionFile,
-			  int lmDescriptionNumber)
+							  int ssKey,
+							  const QString& lmDescriptionFile,
+							  int lmDescriptionNumber)
 	{
 		m_subsysId = subsysId;
-		m_ssKey = ssKey;
+		m_ssKey = static_cast<quint16>(ssKey);
 		m_lmDescriptionFile = lmDescriptionFile;
 		m_lmDescriptionNumber = lmDescriptionNumber;
 	}
@@ -768,7 +769,7 @@ static ModuleFirmware err;
 							for (QString& s : stringValue.split(' ')) // split takes much time, try to optimize
 							{
 								bool convertOk = false;
-								quint16 v = s.toUInt(&convertOk, 16);
+								quint16 v = static_cast<quint16>(s.toUInt(&convertOk, 16));
 
 								if (convertOk == false)
 								{
@@ -786,7 +787,7 @@ static ModuleFirmware err;
 							}
 						} // linesCount
 
-						if (Crc::checkDataBlockCrc(eepromFrame, firmwareData.frames[eepromFrame]) == false)
+						if (Crc::checkDataBlockCrc(static_cast<quint16>(eepromFrame), firmwareData.frames[eepromFrame]) == false)
 						{
 
 							*errorCode = tr("File data is corrupt, CRC check error in subsystem %1, UartId %2h, frame %3.").arg(fw.subsysId()).arg(QString::number(uartId, 16)).arg(eepromFrame);

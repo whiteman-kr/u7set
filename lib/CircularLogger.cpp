@@ -1,13 +1,10 @@
 #include <QDir>
+#include <QStandardPaths>
 #include <QDateTime>
 #include <QCoreApplication>
-#include <QDebug>
-#include <QStandardPaths>
-#include <cassert>
 
 #include "../lib/WUtils.h"
 #include "../lib/CircularLogger.h"
-
 
 // ----------------------------------------------------------------------------------
 //

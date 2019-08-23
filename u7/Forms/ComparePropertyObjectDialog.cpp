@@ -4,6 +4,8 @@
 #ifdef Q_OS_WIN
 #pragma warning(push)
 #pragma warning(disable : 4267)
+#pragma warning(disable : 6330)
+#pragma warning(disable : 4244)
 #endif
 	#include "../../lib/diff_match_patch.h"
 #ifdef Q_OS_WIN
@@ -171,7 +173,9 @@ void ComparePropertyObjectDialog::showEvent(QShowEvent*)
 	// Resize depends on monitor size, DPI, resolution
 	//
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-	resize(screen.width() * 0.30, screen.height() * 0.45);
+
+	resize(static_cast<int>(screen.width() * 0.30),
+		   static_cast<int>(screen.height() * 0.45));
 
 	move(screen.center() - rect().center());
 

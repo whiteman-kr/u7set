@@ -10,6 +10,7 @@
 
 #include "../lib/SocketIO.h"
 #include "../lib/Tcp.h"
+#include "../lib/MemLeaksDetection.h"
 
 
 const char* const semaphoreString = "ServiceControlManagerSemaphore";
@@ -18,9 +19,7 @@ const char* const sharedMemoryString = "ServiceControlManagerSharedMemory";
 
 int main(int argc, char *argv[])
 {
-#if defined (Q_OS_WIN) && defined (Q_DEBUG)
-	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );	// Memory leak report on app exit
-#endif
+	initMemoryLeaksDetection();
 
 	QApplication a(argc, argv);
 
@@ -74,18 +73,24 @@ int main(int argc, char *argv[])
     a.setWindowIcon(QIcon(":/images/SearchComputer.png"));
 
     QSettings settings;
+
     QString locale = settings.value("locale", QLocale::system().name()).toString().left(2);
+
+	QTranslator* qtTranslator = nullptr;
+	QTranslator* qtbaseTranslator = nullptr;
+	QTranslator* appTranslator = nullptr;
+
     if (locale != "en")
     {
-        QTranslator *qtTranslator = new QTranslator(qApp);
+		qtTranslator = new QTranslator(qApp);
         qtTranslator->load(QString("qt_%1.qm").arg(locale),":/translations");
         qApp->installTranslator(qtTranslator);
 
-        QTranslator *qtbaseTranslator = new QTranslator(qApp);
+		qtbaseTranslator = new QTranslator(qApp);
         qtbaseTranslator->load(QString("qtbase_%1.qm").arg(locale),":/translations");
         qApp->installTranslator(qtbaseTranslator);
 
-        QTranslator *appTranslator = new QTranslator(qApp);
+		appTranslator = new QTranslator(qApp);
         appTranslator->load(QString("ServiceControlManager_%1.qm").arg(locale),":/translations");
         qApp->installTranslator(appTranslator);
     }
@@ -94,10 +99,21 @@ int main(int argc, char *argv[])
 
 	si.init(E::SoftwareType::ServiceControlManager, "SCM", 1, 0);
 
-	MainWindow w(si);
-    w.showMaximized();
+	MainWindow* mainWindow = new MainWindow(si);
+
+	mainWindow->showMaximized();
 
 	atexit(google::protobuf::ShutdownProtobufLibrary);
 
-    return a.exec();
+	int result = a.exec();
+
+	delete mainWindow;
+
+	DELETE_IF_NOT_NULL(qtTranslator);
+	DELETE_IF_NOT_NULL(qtbaseTranslator);
+	DELETE_IF_NOT_NULL(appTranslator);
+
+	dumpMemoryLeaks();
+
+	return result;
 }

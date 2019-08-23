@@ -184,7 +184,7 @@ void SubnetChecker::checkNextHost()
 		readAck();
 	}
 
-	for (const ServiceInfo& sInfo : serviceInfo)
+	for (const ServiceInfo& sInfo : servicesInfo)
 	{
 		QHostAddress ip(m_ip);
 
@@ -241,7 +241,7 @@ void SubnetChecker::readAck()
 		{
 			Network::ServiceInfo newServiceInfo;
 
-			newServiceInfo.ParseFromArray(readBuffer, size);
+			newServiceInfo.ParseFromArray(readBuffer, static_cast<int>(size));
 
 			emit hostFound(sender.toIPv4Address(), senderPort, newServiceInfo);
 		}

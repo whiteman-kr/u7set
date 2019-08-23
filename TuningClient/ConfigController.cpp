@@ -265,7 +265,6 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 	{
 		// Get SchemaDetails.pbuf file
 		//
-		QString parsingError;
 
 		QByteArray ba;
 		QString fileName = "/" + theSettings.instanceStrId() + "/SchemaDetails.pbuf";
@@ -462,10 +461,14 @@ bool ConfigController::getFileBlockedById(const QString& id, QByteArray* fileDat
 
 bool ConfigController::xmlReadBuildInfoNode(const QDomNode& node, ConfigSettings* outSetting)
 {
-	if (outSetting == nullptr ||
-			node.nodeName() != "BuildInfo")
+	if (outSetting == nullptr)
 	{
 		assert(outSetting);
+		return false;
+	}
+
+	if (node.nodeName() != "BuildInfo")
+	{
 		assert(node.nodeName() == "BuildInfo");
 		return false;
 	}
@@ -485,10 +488,14 @@ bool ConfigController::xmlReadBuildInfoNode(const QDomNode& node, ConfigSettings
 
 bool ConfigController::xmlReadSoftwareNode(const QDomNode& softwareNode, ConfigSettings* outSetting)
 {
-	if (outSetting == nullptr ||
-			softwareNode.nodeName() != "Software")
+	if (outSetting == nullptr)
 	{
 		assert(outSetting);
+		return false;
+	}
+
+	if (softwareNode.nodeName() != "Software")
+	{
 		assert(softwareNode.nodeName() == "Software");
 		return false;
 	}

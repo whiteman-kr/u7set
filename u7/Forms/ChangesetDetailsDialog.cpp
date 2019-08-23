@@ -158,7 +158,9 @@ void ChangesetDetailsDialog::showEvent(QShowEvent*)
 	// Resize depends on monitor size, DPI, resolution
 	//
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
-	resize(screen.width() * 0.35, screen.height() * 0.45);
+
+	resize(static_cast<int>(screen.width() * 0.35),
+		   static_cast<int>(screen.height() * 0.45));
 
 	move(screen.center() - rect().center());
 
@@ -166,12 +168,12 @@ void ChangesetDetailsDialog::showEvent(QShowEvent*)
 	//
 	int listWidth = ui->objects->width();
 
-	assert(ui->objects->columnCount() == 5);
-	ui->objects->setColumnWidth(0, listWidth * 0.10);
-	ui->objects->setColumnWidth(1, listWidth * 0.25);
-	ui->objects->setColumnWidth(2, listWidth * 0.40);
-	ui->objects->setColumnWidth(3, listWidth * 0.10);
-	ui->objects->setColumnWidth(4, listWidth * 0.10);
+	Q_ASSERT(ui->objects->columnCount() == 5);
+	ui->objects->setColumnWidth(0, static_cast<int>(listWidth * 0.10));
+	ui->objects->setColumnWidth(1, static_cast<int>(listWidth * 0.25));
+	ui->objects->setColumnWidth(2, static_cast<int>(listWidth * 0.40));
+	ui->objects->setColumnWidth(3, static_cast<int>(listWidth * 0.10));
+	ui->objects->setColumnWidth(4, static_cast<int>(listWidth * 0.10));
 
 	return;
 }

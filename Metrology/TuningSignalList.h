@@ -66,7 +66,7 @@ class TuningSourceTable : public QAbstractTableModel
 
 public:
 
-	explicit TuningSourceTable(QObject* parent = 0);
+	explicit TuningSourceTable(QObject* parent = nullptr);
 	virtual ~TuningSourceTable();
 
 private:
@@ -139,7 +139,7 @@ class TuningSignalTable : public QAbstractTableModel
 
 public:
 
-	explicit TuningSignalTable(QObject* parent = 0);
+	explicit TuningSignalTable(QObject* parent = nullptr);
 	virtual ~TuningSignalTable();
 
 private:
@@ -174,7 +174,7 @@ class TuningSignalListDialog : public QDialog
 
 public:
 
-	explicit TuningSignalListDialog(QWidget *parent = 0);
+	explicit TuningSignalListDialog(QWidget *parent = nullptr);
 	virtual ~TuningSignalListDialog();
 
 private:
@@ -282,7 +282,7 @@ class TuningSignalStateDialog : public QDialog
 
 public:
 
-	explicit TuningSignalStateDialog(const Metrology::SignalParam& param, QWidget *parent = 0);
+	explicit TuningSignalStateDialog(const Metrology::SignalParam& param, QWidget *parent = nullptr);
 	virtual ~TuningSignalStateDialog();
 
 private:

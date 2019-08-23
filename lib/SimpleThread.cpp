@@ -1,4 +1,5 @@
 #include "../lib/SimpleThread.h"
+
 #include <cassert>
 #include <QTimer>
 #include <QMetaMethod>
@@ -46,6 +47,15 @@ SimpleThread::~SimpleThread()
 {
 	m_thread.quit();
 	m_thread.wait();
+
+	foreach(SimpleThreadWorker* worker, m_workerList)
+	{
+		if (worker == nullptr)
+		{
+			assert(false);
+			continue;
+		}
+	}
 }
 
 
