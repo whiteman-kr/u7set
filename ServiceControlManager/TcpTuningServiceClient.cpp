@@ -326,7 +326,7 @@ void TcpTuningServiceClient::onGetTuningSourceFilling(const char *replyData, qui
 		return;
 	}
 
-	m_signalsSourceID.resize(m_getTuningSourceFillingReply.signalcount());
+	m_signalsSourceID.resize(static_cast<int>(m_getTuningSourceFillingReply.signalcount()));
 
 	int totalSignalQuantity = 0;
 

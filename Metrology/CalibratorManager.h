@@ -20,7 +20,7 @@ class CalibratorManager : public QDialog
 
 public:
 
-	explicit CalibratorManager(Calibrator* pCalibrator, QWidget* parent = 0);
+	explicit CalibratorManager(Calibrator* pCalibrator, QWidget* parent = nullptr);
 	virtual ~CalibratorManager();
 
 private:

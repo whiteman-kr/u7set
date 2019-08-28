@@ -132,10 +132,6 @@ QString DialogInputEx::textValue() const
 
 		return m_lineEdit->text();
 	}
-
-	assert(false);
-
-	return QString();
 }
 
 void DialogInputEx::setTextValue(const QString& value)

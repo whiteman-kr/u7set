@@ -322,7 +322,7 @@ namespace TuningIPEN
 			view->setItemDelegate(delegate);
 
 			QFont font = view->font();
-			font.setPointSize(font.pointSize() * 1.2);
+			font.setPointSize(static_cast<int>(font.pointSize() * 1.2));
 			view->setFont(font);
 
 			view->resizeColumnsToContents();
@@ -345,7 +345,7 @@ namespace TuningIPEN
 
 		// ========== Second tab ==========
 		QFont font = m_beamDoorsWidget->font();
-		font.setPointSize(font.pointSize() * 1.3);
+		font.setPointSize(static_cast<int>(font.pointSize() * 1.3));
 		m_beamDoorsWidget->setFont(font);
 
 		m_beamDoorsWidget->setModel(tripleChannelSignalsModel);
@@ -401,7 +401,7 @@ namespace TuningIPEN
 		vl->addStretch();
 
 		font = m_reactivityWidget->font();
-		font.setPointSize(font.pointSize() * 1.4);
+		font.setPointSize(static_cast<int>(font.pointSize() * 1.4));
 		setFontRecursive(m_reactivityWidget, font);
 		// ========== Third tab ==========
 
@@ -455,7 +455,7 @@ namespace TuningIPEN
 		hl->addWidget(groupBox);
 
 		font = m_automaticPowerRegulatorWidget->font();
-		font.setPointSize(font.pointSize() * 1.4);
+		font.setPointSize(static_cast<int>(font.pointSize() * 1.4));
 		setFontRecursive(m_automaticPowerRegulatorWidget, font);
 		// ========== Fourth tab ==========
 	}

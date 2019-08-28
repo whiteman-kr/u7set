@@ -30,7 +30,7 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
-	explicit MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = 0);
+	explicit MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent = nullptr);
 	virtual ~MainWindow();
 
 private:
@@ -215,7 +215,7 @@ private slots:
 	void					calibrators();
 	void					showRackList();
 	void					showSignalList();
-	void					showComparatorsList() {};
+	void					showComparatorsList() {}
 	void					showOutputSignalList();
 	void					showTuningSignalList();
 	void					showCalculator();
@@ -224,7 +224,7 @@ private slots:
 	// menu - ?
 	//
 	void					showStatistic();
-	void					aboutConnection() {};
+	void					aboutConnection() {}
 	void					aboutApp();
 
 	// Slots of tab -- page measure type

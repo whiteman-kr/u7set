@@ -20,7 +20,7 @@ class MeasureThread : public QThread
 
 public:
 
-	explicit MeasureThread(QObject *parent = 0);
+	explicit MeasureThread(QObject *parent = nullptr);
 	virtual ~MeasureThread();
 
 private:
@@ -56,7 +56,7 @@ private:
 
 public:
 
-	void					init(QWidget* parent = 0);
+	void					init(QWidget* parent = nullptr);
 	void					setMeasureType(int measureType) { m_measureType = measureType; }
 	bool					enableMesureIsSignal();
 	bool					signalIsMeasured(QString& signalID);

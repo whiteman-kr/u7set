@@ -1,9 +1,7 @@
-#include <QApplication>
-#include <QTranslator>
-
 #include "MainWindow.h"
 #include "Options.h"
 #include "../lib/ProtoSerialization.h"
+#include "../lib/MemLeaksDetection.h"
 
 #if __has_include("../gitlabci_version.h")
 #	include "../gitlabci_version.h"
@@ -11,6 +9,8 @@
 
 int main(int argc, char *argv[])
 {
+	initMemoryLeaksDetection();
+
     QApplication a(argc, argv);
 
     a.setApplicationName("Metrology");
@@ -37,14 +37,23 @@ int main(int argc, char *argv[])
 	QString equipmentID = theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY);
 	si.init(E::SoftwareType::Metrology, equipmentID, 1, 0);
 
-	MainWindow w(si);
-    w.show();
+
+	// in order to keep the dumpMemoryLeaks() list clean, the MainWindow is created using "new".
+	// MainWindow w(si);
+	// w.show();
+	//
+	MainWindow* pMainWindow = new MainWindow(si);
+	pMainWindow->show();
 
     int result = a.exec();
+
+	delete pMainWindow;
 
     theOptions.unload();
 
     google::protobuf::ShutdownProtobufLibrary();
+
+	dumpMemoryLeaks();
 
     return result;
 }

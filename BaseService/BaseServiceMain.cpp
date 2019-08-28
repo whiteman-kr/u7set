@@ -1,7 +1,7 @@
 #include "../lib/Service.h"
 #include "../lib/WUtils.h"
 #include "../lib/CircularLogger.h"
-
+#include "../lib/MemLeaksDetection.h"
 
 class BaseServiceWorker : public ServiceWorker
 {
@@ -19,6 +19,9 @@ public:
 	virtual ServiceWorker* createInstance() const override
 	{
 		BaseServiceWorker* newInstance = new BaseServiceWorker(softwareInfo(), serviceName(), argc(), argv(), m_logger);
+
+		newInstance->init();
+
 		return newInstance;
 	}
 
@@ -54,9 +57,7 @@ private:
 
 int main(int argc, char *argv[])
 {
-#if defined (Q_OS_WIN) && defined (Q_DEBUG)
-	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );	// Memory leak report on app exit
-#endif
+	initMemoryLeaksDetection();
 
 	QCoreApplication app(argc, argv);
 
@@ -79,6 +80,8 @@ int main(int argc, char *argv[])
 	google::protobuf::ShutdownProtobufLibrary();
 
 	LOGGER_SHUTDOWN(logger);
+
+	dumpMemoryLeaks();
 
 	return result;
 }

@@ -191,14 +191,14 @@ void SpecificPropertyDescription::setSpecificEditor(E::PropertySpecificEditor va
 	m_specificEditor = value;
 }
 
-quint16 SpecificPropertyDescription::viewOrder() const
+int SpecificPropertyDescription::viewOrder() const
 {
 	return m_viewOrder;
 }
 
-void SpecificPropertyDescription::setViewOrder(quint16 value)
+void SpecificPropertyDescription::setViewOrder(int value)
 {
-	m_viewOrder = value;
+	m_viewOrder = static_cast<quint16>(value);
 }
 
 bool SpecificPropertyDescription::essential() const
@@ -454,7 +454,7 @@ QString SpecificPropertyModel::toText() const
 															   spd->expert(),
 															   spd->visible(),
 															   spd->specificEditor(),
-															   spd->viewOrder(),
+															   static_cast<quint16>(spd->viewOrder()),
 															   spd->essential());
 		result += "\r\n";
 	}

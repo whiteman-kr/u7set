@@ -4,9 +4,12 @@
 #
 #-------------------------------------------------
 
-QT       += core network qml xml
-
-QT       -= gui
+QT  += core
+QT  -= gui
+QT  += network
+QT  += widgets
+QT  += qml
+QT  += xml
 
 TARGET = CfgSrv
 CONFIG   += console
@@ -30,9 +33,11 @@ unix {
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
+include(../warnings.pri)
 
 SOURCES += \
     ../lib/CfgServerLoader.cpp \
+	../lib/MemLeaksDetection.cpp \
     ../lib/Tcp.cpp \
     ../lib/TcpFileTransfer.cpp \
     ../lib/SimpleThread.cpp \
@@ -62,6 +67,7 @@ SOURCES += \
 
 HEADERS += \
     ../lib/CfgServerLoader.h \
+	../lib/MemLeaksDetection.h \
     ../lib/Tcp.h \
     ../lib/TcpFileTransfer.h \
     ../lib/SimpleThread.h \
@@ -88,7 +94,11 @@ HEADERS += \
     ../Builder/ModulesRawData.h \
     ../lib/DbStruct.h \
     ../lib/PropertyObject.h \
-    ../lib/ProtoSerialization.h
+    ../lib/ProtoSerialization.h \
+	Stable.h
+
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
 include(../qtservice/src/qtservice.pri)
 

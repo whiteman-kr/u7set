@@ -15,6 +15,11 @@ Calculator::Calculator(QWidget* parent) :
 
 Calculator::~Calculator()
 {
+	if (m_digitFont != nullptr)
+	{
+		delete m_digitFont;
+		m_digitFont = nullptr;
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -24,7 +29,7 @@ void Calculator::createInterface()
 	// create elements of interface
 	//
 
-	QFont* font = new QFont("Arial", 16, 2);
+	m_digitFont = new QFont("Arial", 16, 2);
 
 	// Thermistor
 	//
@@ -39,7 +44,7 @@ void Calculator::createInterface()
 	m_pTrDegreeEdit = new QLineEdit(tr("100"), this);
 	QLabel* pTrDegreeLabel = new QLabel(tr("°C"), this);
 	pTrDegreeLabel->setFixedWidth(30);
-	m_pTrDegreeEdit->setFont(*font);
+	m_pTrDegreeEdit->setFont(*m_digitFont);
 
 	tr_C_Layout->addWidget(m_pTrDegreeRadio);
 	tr_C_Layout->addWidget(m_pTrDegreeEdit);
@@ -52,7 +57,7 @@ void Calculator::createInterface()
 	m_pTrElectricEdit = new QLineEdit(this);
 	QLabel* pTrElectricLabel = new QLabel(tr("Ohm"), this);
 	pTrElectricLabel->setFixedWidth(30);
-	m_pTrElectricEdit->setFont(*font);
+	m_pTrElectricEdit->setFont(*m_digitFont);
 
 	tr_Ohm_Layout->addWidget(m_pTrElectricRadio);
 	tr_Ohm_Layout->addWidget(m_pTrElectricEdit);
@@ -65,7 +70,7 @@ void Calculator::createInterface()
 	m_pTrR0Edit = new QLineEdit(tr("100"), this);
 	QLabel* pTrR0Label = new QLabel(tr(""), this);
 	pTrR0Label->setFixedWidth(30);
-	m_pTrR0Edit->setFont(*font);
+	m_pTrR0Edit->setFont(*m_digitFont);
 
 	m_tr_R0_Layout->addWidget(new QLabel(tr("R0"), this));
 	m_tr_R0_Layout->addWidget(m_pTrR0Edit);
@@ -93,7 +98,7 @@ void Calculator::createInterface()
 	m_pTcDegreeEdit = new QLineEdit(tr("400"), this);
 	QLabel* pTcDegreeLabel = new QLabel(tr("°C"), this);
 	pTcDegreeLabel->setFixedWidth(30);
-	m_pTcDegreeEdit->setFont(*font);
+	m_pTcDegreeEdit->setFont(*m_digitFont);
 
 	tc_C_Layout->addWidget(m_pTcDegreeRadio);
 	tc_C_Layout->addWidget(m_pTcDegreeEdit);
@@ -106,7 +111,7 @@ void Calculator::createInterface()
 	m_pTcElectricEdit = new QLineEdit(this);
 	QLabel* pTcElectricLabel = new QLabel(tr("mV"), this);
 	pTcElectricLabel->setFixedWidth(30);
-	m_pTcElectricEdit->setFont(*font);
+	m_pTcElectricEdit->setFont(*m_digitFont);
 
 	tc_mV_Layout->addWidget(m_pTcElectricRadio);
 	tc_mV_Layout->addWidget(m_pTcElectricEdit);
@@ -130,7 +135,7 @@ void Calculator::createInterface()
 	m_pLinInValEdit = new QLineEdit(tr("2.5"), this);
 	QLabel* pLinInValLabel = new QLabel(tr("In"), this);
 	pLinInValLabel->setFixedWidth(30);
-	m_pLinInValEdit->setFont(*font);
+	m_pLinInValEdit->setFont(*m_digitFont);
 
 	lin_inval_Layout->addWidget(m_pLinInRadio);
 	lin_inval_Layout->addWidget(m_pLinInValEdit);
@@ -143,7 +148,7 @@ void Calculator::createInterface()
 	m_pLinOutValEdit = new QLineEdit(tr("0"), this);
 	QLabel* pLinOutValLabel = new QLabel(tr("Out"), this);
 	pLinOutValLabel->setFixedWidth(30);
-	m_pLinOutValEdit->setFont(*font);
+	m_pLinOutValEdit->setFont(*m_digitFont);
 
 	lin_outval_Layout->addWidget(m_pLinOutRadio);
 	lin_outval_Layout->addWidget(m_pLinOutValEdit);

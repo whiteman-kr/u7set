@@ -202,7 +202,7 @@ double PS::Signal::state() const
 			{
 				case E::AnalogAppSignalFormat::SignedInt32:
 					{
-						quint32* pDataPtr = (quint32*) (m_pValueData);
+						quint32* pDataPtr = reinterpret_cast<quint32*>(m_pValueData);
 						if (pDataPtr == nullptr)
 						{
 							break;
@@ -215,7 +215,7 @@ double PS::Signal::state() const
 
 				case E::AnalogAppSignalFormat::Float32:
 					{
-						quint32* pDataPtr = (quint32*) (m_pValueData);
+						quint32* pDataPtr = reinterpret_cast<quint32*>(m_pValueData);
 						if (pDataPtr == nullptr)
 						{
 							break;
@@ -235,7 +235,7 @@ double PS::Signal::state() const
 
 		case E::SignalType::Discrete:
 			{
-				quint16* pDataPtr = (quint16*) (m_pValueData);
+				quint16* pDataPtr = reinterpret_cast<quint16*>(m_pValueData);
 				if (pDataPtr == nullptr)
 				{
 					break;
@@ -285,7 +285,7 @@ void PS::Signal::setState(double state)
 			{
 				case E::AnalogAppSignalFormat::SignedInt32:
 					{
-						quint32* pDataPtr = (quint32*) (m_pValueData);
+						quint32* pDataPtr = reinterpret_cast<quint32*>(m_pValueData);
 						if (pDataPtr == nullptr)
 						{
 							break;
@@ -298,7 +298,7 @@ void PS::Signal::setState(double state)
 
 				case E::AnalogAppSignalFormat::Float32:
 					{
-						quint32* pDataPtr = (quint32*) (m_pValueData);
+						quint32* pDataPtr = reinterpret_cast<quint32*>(m_pValueData);
 						if (pDataPtr == nullptr)
 						{
 							break;
@@ -317,7 +317,7 @@ void PS::Signal::setState(double state)
 
 		case E::SignalType::Discrete:
 			{
-				quint16* pDataPtr = (quint16*) (m_pValueData);
+				quint16* pDataPtr = reinterpret_cast<quint16*>(m_pValueData);
 				if (pDataPtr == nullptr)
 				{
 					break;

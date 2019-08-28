@@ -17,6 +17,22 @@ namespace Rup
 		year = reverseUint16(year);
 	}
 
+	void TimeStamp::setDateTime(const QDateTime& dateTime)
+	{
+		QDate date = dateTime.date();
+
+		year = static_cast<quint16>(date.year());
+		month = static_cast<quint16>(date.month());
+		day = static_cast<quint16>(date.day());
+
+		QTime time = dateTime.time();
+
+		hour = static_cast<quint16>(time.hour());
+		minute = static_cast<quint16>(time.minute());
+		second = static_cast<quint16>(time.second());
+		millisecond = static_cast<quint16>(time.msec());
+	}
+
 	void Header::reverseBytes()
 	{
 		frameSize = reverseUint16(frameSize);

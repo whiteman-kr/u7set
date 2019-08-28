@@ -22,13 +22,6 @@ TuningSource::TuningSource(const Network::DataSourceInfo& info) :
 	m_subSystem (QString::fromStdString(info.lmsubsystem())),
 	m_lmNumber (info.lmnumber())
 {
-
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-TuningSource::~TuningSource()
-{
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -153,8 +146,8 @@ void TuningSourceBase::setState(quint64 sourceID, const Network::TuningSourceSta
 				TuningSourceState& sourceState = m_sourceList[index].state();
 
 				sourceState.setIsReply(state.isreply());
-				sourceState.setRequestCount(state.requestcount());
-				sourceState.setReplyCount(state.replycount());
+				sourceState.setRequestCount(static_cast<quint64>(state.requestcount()));
+				sourceState.setReplyCount(static_cast<quint64>(state.replycount()));
 				sourceState.setCommandQueueSize(state.commandqueuesize());
 			}
 		}
@@ -282,9 +275,9 @@ int TuningSignalBase::append(Metrology::Signal* pSignal)
 
 Metrology::Signal* TuningSignalBase::signal(const Hash& hash) const
 {
-	if (hash == 0)
+	if (hash == UNDEFINED_HASH)
 	{
-		assert(hash != 0);
+		assert(hash != UNDEFINED_HASH);
 		return nullptr;
 	}
 
@@ -329,7 +322,7 @@ Metrology::Signal* TuningSignalBase::signal(int index) const
 
 Metrology::SignalState TuningSignalBase::state(const Hash& hash)
 {
-	if (hash == 0)
+	if (hash == UNDEFINED_HASH)
 	{
 		assert(hash != 0);
 		return Metrology::SignalState();
@@ -362,9 +355,9 @@ Metrology::SignalState TuningSignalBase::state(const Hash& hash)
 
 void TuningSignalBase::setState(const Network::TuningSignalState& state)
 {
-	if (state.signalhash() == 0)
+	if (state.signalhash() == UNDEFINED_HASH)
 	{
-		assert(state.signalhash() != 0);
+		assert(state.signalhash() != UNDEFINED_HASH);
 		return;
 	}
 
@@ -458,9 +451,9 @@ int TuningBase::cmdFowWriteCount() const
 
 void TuningBase::appendCmdFowWrite(const TuningWriteCmd& cmd)
 {
-	if (cmd.signalHash() == 0)
+	if (cmd.signalHash() == UNDEFINED_HASH)
 	{
-		assert(cmd.signalHash() != 0);
+		assert(cmd.signalHash() != UNDEFINED_HASH);
 		return;
 	}
 

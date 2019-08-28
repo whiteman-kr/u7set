@@ -1,0 +1,43 @@
+Report from: 23-08-2019 17:11:52
+
+Test File: AFB_BUS_NOT.txt
+
+Test AFB_BUS_NOT_1, BUS_NOT function test
+    Set #TUN_DSCR_BUS_01_INP01=0
+    Set #TUN_DSCR_BUS_02_INP01=0
+    Set #TUN_DSCR_BUS_03_INP01=0
+    Set #TUN_DSCR_BUS_04_INP01=0
+    Set #TUN_DSCR_BUS_05_INP01=0
+    Check #OUT_BUS_NOT_01=1 - Ok
+    Check #OUT_BUS_NOT_02=1 - Ok
+    Check #OUT_BUS_NOT_03=1 - Ok
+    Check #OUT_BUS_NOT_04=1 - Ok
+    Check #OUT_BUS_NOT_05=1 - Ok
+Endtest AFB_BUS_NOT_1 - Ok
+
+Test AFB_BUS_NOT_2, BUS_NOT function test
+    Set #TUN_DSCR_BUS_01_INP01=1
+    Set #TUN_DSCR_BUS_02_INP01=1
+    Set #TUN_DSCR_BUS_03_INP01=1
+    Set #TUN_DSCR_BUS_04_INP01=1
+    Set #TUN_DSCR_BUS_05_INP01=1
+    Check #OUT_BUS_NOT_01=0 - Ok
+    Check #OUT_BUS_NOT_02=0 - Ok
+    Check #OUT_BUS_NOT_03=0 - Ok
+    Check #OUT_BUS_NOT_04=0 - Ok
+    Check #OUT_BUS_NOT_05=0 - Ok
+Endtest AFB_BUS_NOT_2 - Ok
+
+Test AFB_BUS_NOT_3, BUS_NOT function test
+    Set #TUN_DSCR_BUS_01_INP01=1
+    Set #TUN_DSCR_BUS_02_INP01=0
+    Set #TUN_DSCR_BUS_03_INP01=1
+    Set #TUN_DSCR_BUS_04_INP01=0
+    Set #TUN_DSCR_BUS_05_INP01=1
+    Check #OUT_BUS_NOT_01=0 - Ok
+    Check #OUT_BUS_NOT_02=1 - Ok
+    Check #OUT_BUS_NOT_03=0 - Ok
+    Check #OUT_BUS_NOT_04=1 - Ok
+    Check #OUT_BUS_NOT_05=0 - Ok
+Endtest AFB_BUS_NOT_3 - Ok
+

@@ -23,6 +23,8 @@ TEMPLATE = app
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
+include(../warnings.pri)
+
 # DESTDIR
 #
 win32 {
@@ -36,6 +38,7 @@ unix {
 
 SOURCES += \
     ../lib/HostAddressPort.cpp \
+    ../lib/MemLeaksDetection.cpp \
     ArchivingService.cpp \
     ../lib/Queue.cpp \
     ../lib/Service.cpp \
@@ -84,6 +87,7 @@ SOURCES += \
 
 HEADERS += \
     ../lib/HostAddressPort.h \
+    ../lib/MemLeaksDetection.h \
     ArchivingService.h \
     Stable.h \
     ../lib/Queue.h \
@@ -141,7 +145,6 @@ include(../qtservice/src/qtservice.pri)
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
-
 
 #protobuf
 #

@@ -25,6 +25,8 @@ include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
+include(../warnings.pri)
+
 # DESTDIR
 #
 win32 {
@@ -36,12 +38,8 @@ unix {
 	CONFIG(release, debug|release): DESTDIR = ../bin_unix/release
 }
 
-
-CONFIG += precompile_header
-PRECOMPILED_HEADER = Stable.h
-
-
 SOURCES += \
+	../lib/MemLeaksDetection.cpp \
     MainWindow.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
@@ -112,6 +110,7 @@ SOURCES += \
 #../lib/ExcelHelper.cpp
 
 HEADERS  += \
+	../lib/MemLeaksDetection.h \
     MainWindow.h \
     Calibrator.h \
     CalibratorBase.h \
@@ -186,6 +185,9 @@ HEADERS  += \
 	../lib/UnitsConvertor.h \
     ../lib/UnitsConvertorTable.h
 #../lib/ExcelHelper.h
+
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
 FORMS    +=
 

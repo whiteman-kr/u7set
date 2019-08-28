@@ -17,6 +17,8 @@ TEMPLATE = app
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
+include(../warnings.pri)
+
 # DESTDIR
 #
 win32 {
@@ -37,7 +39,8 @@ SOURCES += main.cpp\
 	../../lib/Crc.cpp \
     WorkerBase.cpp \
     TestResultDialog.cpp \
-    OptionDialog.cpp
+    OptionDialog.cpp \
+    ../../lib/MemLeaksDetection.cpp
 
 HEADERS  += MainWindow.h \
     Options.h \
@@ -48,9 +51,14 @@ HEADERS  += MainWindow.h \
 	../../lib/Crc.h \
     WorkerBase.h \
     TestResultDialog.h \
-    OptionDialog.h
+    OptionDialog.h \
+    Stable.h \
+    ../../lib/MemLeaksDetection.h
 
 RESOURCES += \
 	resources.qrc
+
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
 DISTFILES +=

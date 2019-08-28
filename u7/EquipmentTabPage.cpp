@@ -3569,8 +3569,6 @@ bool EquipmentView::updateDeviceFromPreset(std::shared_ptr<Hardware::DeviceObjec
 					++dit;
 					continue;
 				}
-
-				assert(false);
 			}
 
 			// Check if there are any new proprties in preset, the add them to device

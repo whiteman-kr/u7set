@@ -7,6 +7,7 @@
 #include <QVBoxLayout>
 #include <QStatusBar>
 #include <QClipboard>
+#include <QTableWidget>
 
 #include "MainWindow.h"
 #include "MeasureView.h"
@@ -18,12 +19,6 @@
 // -------------------------------------------------------------------------------------------------------------------
 
 FindItem::FindItem()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-FindItem::~FindItem()
 {
 }
 

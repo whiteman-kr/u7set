@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include "../lib/DbController.h"
+#include "../VFrame30/Afb.h"
 
 enum class AfbComponentColumns
 {

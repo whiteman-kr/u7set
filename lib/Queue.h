@@ -170,7 +170,7 @@ public:
 	{
 		// checking, that memcpy can be used to copy queue items of type TYPE
 		//
-		assert(std::is_trivially_copyable<TYPE>::value == true);
+		assert(std::is_trivially_copyable<TYPE>::value);
 	}
 
 	Queue(int queueSize) :
