@@ -210,7 +210,7 @@ void TuningTcpClient::applyTuningSignals()
 
 	m_writeQueue.emplace(TuningWriteCommand(true));
 
-	writeLogSignalChange(tr("Apply command is sent."));
+	writeLogSignalChange(tr("'Apply' command is sent."));
 
 	return;
 }
