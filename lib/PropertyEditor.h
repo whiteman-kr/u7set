@@ -37,7 +37,7 @@ namespace ExtWidgets
 		//
 		static QString propertyVectorText(QVariant& value);
 		static QString stringListText(const QVariant& value);
-		static QString propertyValueText(Property* p);
+		static QString propertyValueText(Property* p, int row);	// row is used for StringList
 
 		static QIcon drawCheckBox(int state, bool enabled);
 		static QIcon drawColorBox(QColor color);
@@ -45,6 +45,7 @@ namespace ExtWidgets
 		static QIcon propertyIcon(Property* p, bool sameValue, bool enabled);
 
 		PropertyEditCellWidget* createCellEditor(std::shared_ptr<Property> propertyPtr, bool sameValue, bool readOnly, QWidget* parent);
+		PropertyEditCellWidget* createCellRowEditor(std::shared_ptr<Property> propertyPtr, int row, bool sameValue, bool readOnly, QWidget* parent);
 
 		// Help description functions
 
@@ -435,12 +436,18 @@ namespace ExtWidgets
 	// MultiTextEdit
 	//
 
+
 	class MultiTextEdit : public PropertyEditCellWidget
 	{
 		Q_OBJECT
 
 	public:
 		explicit MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, bool readOnly, QWidget* parent);
+
+		// Row parameter is used for QStringList property type. In this case, valueChanged signal returns QString type, NOT QStringList!
+		//
+		explicit MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, int row, bool readOnly, QWidget* parent);
+
 		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
 
 	public slots:
@@ -463,6 +470,7 @@ namespace ExtWidgets
 		bool m_textEdited = false;
 
 		std::shared_ptr<Property> m_property;
+		int m_row = -1;
 		int m_userType = 0;
 
 		PropertyEditorBase* m_propertyEditorBase = nullptr;

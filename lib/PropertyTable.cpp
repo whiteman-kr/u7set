@@ -26,14 +26,16 @@ namespace ExtWidgets
 			return new QWidget(parent);
 		}
 
-		std::shared_ptr<Property> p = m_model->propertyByIndex(index);
+		int row = -1;
+
+		std::shared_ptr<Property> p = m_model->propertyByIndex(index, &row);
 		if (p == nullptr)
 		{
 			Q_ASSERT(p);
 			return new QWidget(parent);
 		}
 
-		m_cellEditor = m_propertyTable->createCellEditor(p, true, p->readOnly() == true || m_propertyTable->isReadOnly() == true, parent);
+		m_cellEditor = m_propertyTable->createCellRowEditor(p, row, true, p->readOnly() == true || m_propertyTable->isReadOnly() == true, parent);
 
 		connect(m_cellEditor, &PropertyEditCellWidget::valueChanged, this, &PropertyTableItemDelegate::onValueChanged);
 
@@ -49,7 +51,7 @@ namespace ExtWidgets
 			return;
 		}
 
-		std::shared_ptr<Property> p = m_model->propertyByIndex(index);
+		std::shared_ptr<Property> p = m_model->propertyByIndex(index, nullptr);
 		if (p == nullptr)
 		{
 			Q_ASSERT(p);
@@ -145,7 +147,13 @@ namespace ExtWidgets
 
 			// Copy objects
 
-			int count = static_cast<int>(tableObjects.size());
+			int count = 0;
+
+			for (const PropertyTableObject& pto : tableObjects)
+			{
+				count += pto.rowCount;
+
+			}
 
 			beginInsertRows(QModelIndex(), 0, count - 1);
 
@@ -159,41 +167,65 @@ namespace ExtWidgets
 
 	std::shared_ptr<PropertyObject> PropertyTableModel::propertyObjectByIndex(const QModelIndex& mi) const
 	{
-		if (mi.row() < 0 || mi.row() >= static_cast<int>(m_tableObjects.size()))
+		int row = 0;
+
+		for (const PropertyTableObject& pto : m_tableObjects)
 		{
-			Q_ASSERT(false);
-			return nullptr;
+			if (row + pto.rowCount > mi.row())
+			{
+
+				return pto.propertyObject;
+			}
+
+			row += pto.rowCount;
 		}
 
-		const PropertyTableObject& pto = m_tableObjects[mi.row()];
-
-		return pto.propertyObject;
+		Q_ASSERT(false);
+		return nullptr;
 	}
 
-	std::shared_ptr<Property> PropertyTableModel::propertyByIndex(const QModelIndex& mi) const
+	std::shared_ptr<Property> PropertyTableModel::propertyByIndex(const QModelIndex& mi, int* propertyRow) const
 	{
-		if (mi.row() < 0 || mi.row() >= static_cast<int>(m_tableObjects.size()))
+		int row = 0;
+
+		for (const PropertyTableObject& pto : m_tableObjects)
 		{
-			Q_ASSERT(false);
-			return nullptr;
+			if (row + pto.rowCount > mi.row())
+			{
+				if (propertyRow != nullptr)
+				{
+					*propertyRow = mi.row() - row;
+				}
+
+				if (mi.column() < 0 || mi.column() >= static_cast<int>(pto.properties.size()))
+				{
+					Q_ASSERT(false);
+					return nullptr;
+				}
+
+				return pto.properties[mi.column()];
+			}
+
+			row += pto.rowCount;
 		}
 
-		const PropertyTableObject& pto = m_tableObjects[mi.row()];
 
-		if (mi.column() < 0 || mi.column() >= static_cast<int>(pto.properties.size()))
-		{
-			Q_ASSERT(false);
-			return nullptr;
-		}
 
-		return pto.properties[mi.column()];
+		Q_ASSERT(false);
+		return nullptr;
 	}
 
 	int PropertyTableModel::rowCount(const QModelIndex &parent) const
 	{
 		Q_UNUSED(parent);
 
-		int result = static_cast<int>(m_tableObjects.size());
+		int result = 0;
+
+		for (const PropertyTableObject& pto : m_tableObjects)
+		{
+			result += pto.rowCount;
+		}
+
 		return result;
 	}
 
@@ -209,10 +241,17 @@ namespace ExtWidgets
 	{
 		if (role== Qt::DecorationRole)
 		{
-			std::shared_ptr<Property> p = propertyByIndex(index);
+			int row = -1;
+
+			std::shared_ptr<Property> p = propertyByIndex(index, &row);
 			if (p == nullptr)
 			{
 				Q_ASSERT(p);
+				return QVariant();
+			}
+
+			if (p->value().userType() != QVariant::StringList && row > 0)
+			{
 				return QVariant();
 			}
 
@@ -223,14 +262,21 @@ namespace ExtWidgets
 
 		if (role == Qt::DisplayRole)
 		{
-			std::shared_ptr<Property> p = propertyByIndex(index);
+			int row = -1;
+
+			std::shared_ptr<Property> p = propertyByIndex(index, &row);
 			if (p == nullptr)
 			{
 				Q_ASSERT(p);
 				return QVariant();
 			}
 
-			return PropertyEditorBase::propertyValueText(p.get());
+			if (p->value().userType() != QVariant::StringList && row > 0)
+			{
+				return QVariant();
+			}
+
+			return PropertyEditorBase::propertyValueText(p.get(), row);
 		}
 
 		return QVariant();
@@ -282,15 +328,30 @@ namespace ExtWidgets
 
 	PropertyTable::PropertyTable(QWidget *parent) :
 		QWidget(parent),
+		m_tableModel(this),
 		PropertyEditorBase()
 	{
-		QHBoxLayout* l = new QHBoxLayout(this);
-		l->setContentsMargins(0, 0, 0, 0);
+		QVBoxLayout* mainLayout = new QVBoxLayout(this);
+		mainLayout->setContentsMargins(0, 0, 0, 0);
+
+		// Property Mask
+
+		m_editPropertyMask = new QLineEdit();
+		connect(m_editPropertyMask, &QLineEdit::editingFinished, this, &PropertyTable::onPropertyMaskChanged);
+
+		// Toolbar
+
+		QHBoxLayout* toolsLayout = new QHBoxLayout();
+
+		toolsLayout->addWidget(m_editPropertyMask);
+		toolsLayout->addStretch();
+
+		mainLayout->addLayout(toolsLayout);
 
 		// Table View
 
 		m_tableView = new PropertyTableView();
-		l->addWidget(m_tableView);
+		mainLayout->addWidget(m_tableView);
 
 		m_tableView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
@@ -301,12 +362,11 @@ namespace ExtWidgets
 
 		// Model
 
-		m_tableModel = new PropertyTableModel(this);
-		m_tableView->setModel(m_tableModel);
+		m_tableView->setModel(&m_tableModel);
 
 		// Edit Delegate
 
-		m_itemDelegate = new PropertyTableItemDelegate(this, m_tableModel);
+		m_itemDelegate = new PropertyTableItemDelegate(this, &m_tableModel);
 		connect(m_itemDelegate, &PropertyTableItemDelegate::valueChanged, this, &PropertyTable::onValueChanged);
 
 		m_tableView->setItemDelegate(m_itemDelegate);
@@ -314,12 +374,17 @@ namespace ExtWidgets
 
 	void PropertyTable::clear()
 	{
-		m_tableModel->clear();
+		m_tableModel.clear();
 	}
 
 	void PropertyTable::closeCurrentEditor()
 	{
 		m_tableView->closeCurrentEditorIfOpen();
+	}
+
+	const QList<std::shared_ptr<PropertyObject>>& PropertyTable::objects() const
+	{
+		return m_objects;
 	}
 
 	void PropertyTable::setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects)
@@ -365,13 +430,29 @@ namespace ExtWidgets
 		return;
 	}
 
-
-	const QList<std::shared_ptr<PropertyObject>>& PropertyTable::objects() const
+	QString PropertyTable::propertyMask() const
 	{
-		return m_objects;
+		return m_propertyMasks.join(';');
 	}
 
-	void PropertyTable::valueChanged(QMap<QString, std::shared_ptr<PropertyObject>> modifiedObjectsData, const QVariant& value)
+	void PropertyTable::setPropertyMask(const QString& propertyMask)
+	{
+		if (m_editPropertyMask == nullptr)
+		{
+			Q_ASSERT(m_editPropertyMask);
+			return;
+		}
+
+		m_editPropertyMask->blockSignals(true);
+		m_editPropertyMask->setText(propertyMask);
+		m_editPropertyMask->blockSignals(false);
+
+		m_propertyMasks = propertyMask.split(';', QString::SkipEmptyParts);
+
+		fillProperties();
+	}
+
+	void PropertyTable::valueChanged(QMap<QString, std::pair<std::shared_ptr<PropertyObject>, QVariant>> modifiedObjectsData)
 	{
 		// Set the new property value in all objects
 		//
@@ -381,10 +462,13 @@ namespace ExtWidgets
 
 		for (const QString& propertyName : modifiedObjectsData.keys())
 		{
-			QList<std::shared_ptr<PropertyObject>> objects= modifiedObjectsData.values(propertyName);
+			QList<std::pair<std::shared_ptr<PropertyObject>, QVariant>> objectsData = modifiedObjectsData.values(propertyName);
 
-			for (std::shared_ptr<PropertyObject> object : objects)
+			for (auto objectData : objectsData)
 			{
+				std::shared_ptr<PropertyObject> object = objectData.first;
+				QVariant value = objectData.second;
+
 				// Do not set property, if it has same value
 
 				QVariant oldValue = object->propertyValue(propertyName);
@@ -457,10 +541,17 @@ namespace ExtWidgets
 
 			for (const QModelIndex& mi : selectedIndexes)
 			{
-				std::shared_ptr<Property> p = m_tableModel->propertyByIndex(mi);
+				int row = -1;
+
+				std::shared_ptr<Property> p = m_tableModel.propertyByIndex(mi, &row);
 				if (p == nullptr)
 				{
 					Q_ASSERT(p);
+					return;
+				}
+
+				if (p->value().userType() != QVariant::StringList && row > 0)
+				{
 					return;
 				}
 
@@ -479,19 +570,21 @@ namespace ExtWidgets
 			}
 		}
 
-		std::shared_ptr<Property> cellProperty = m_tableModel->propertyByIndex(index);
-		if (cellProperty == nullptr)
-		{
-			Q_ASSERT(cellProperty);
-			return;
-		}
-
 		m_tableView->edit(index);
 	}
 
 	void PropertyTable::onShowErrorMessage (QString message)
 	{
 		QMessageBox::warning(this, "Error", message);
+	}
+
+	void PropertyTable::onPropertyMaskChanged()
+	{
+		QString str = m_editPropertyMask->text().trimmed();
+
+		m_propertyMasks = str.split(';', QString::SkipEmptyParts);
+
+		fillProperties();
 	}
 
 
@@ -504,11 +597,14 @@ namespace ExtWidgets
 			return;
 		}
 
-		QMap<QString, std::shared_ptr<PropertyObject>> modifiedObjectsData;
+
+		QMap<QString, std::pair<std::shared_ptr<PropertyObject>, QVariant>> modifiedObjectsData;
 
 		for (const QModelIndex& mi : selectedIndexes)
 		{
-			std::shared_ptr<PropertyObject> po = m_tableModel->propertyObjectByIndex(mi);
+			QVariant newValue = value;
+
+			std::shared_ptr<PropertyObject> po = m_tableModel.propertyObjectByIndex(mi);
 
 			if (po == nullptr)
 			{
@@ -516,19 +612,36 @@ namespace ExtWidgets
 				return;
 			}
 
-			std::shared_ptr<Property> p = m_tableModel->propertyByIndex(mi);
+			int row = -1;
+
+			std::shared_ptr<Property> p = m_tableModel.propertyByIndex(mi, &row);
 			if (p == nullptr)
 			{
 				Q_ASSERT(p);
 				return;
 			}
 
-			modifiedObjectsData.insertMulti(p->caption(), po);
+			if (p->value().userType() == QVariant::StringList && newValue.userType() == QVariant::String)
+			{
+				QStringList l = p->value().toStringList();
+
+				if (row < 0 || row >= static_cast<int>(l.size()))
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+				l[row] = newValue.toString();
+
+				newValue = l;
+			}
+
+			modifiedObjectsData.insertMulti(p->caption(), std::make_pair(po, newValue));
 		}
 
 		if (modifiedObjectsData.empty() == false)
 		{
-			valueChanged(modifiedObjectsData, value);
+			valueChanged(modifiedObjectsData);
 		}
 
 		// Force redraw all selected cells
@@ -576,11 +689,32 @@ namespace ExtWidgets
 						continue;
 					}
 
-					propertyItems.insertMulti(p->caption(), p);
+					const QString& propertyName = p->caption();
 
-					if (propertyNames.indexOf(p->caption()) == -1)
+					if (m_propertyMasks.empty() == false)
 					{
-						propertyNames.append(p->caption());
+						bool maskMatch = false;
+
+						for (const QString& mask : m_propertyMasks)
+						{
+							if (propertyName.contains(mask) == true)
+							{
+								maskMatch = true;
+								break;
+							}
+						}
+
+						if (maskMatch == false)
+						{
+							continue;
+						}
+					}
+
+					propertyItems.insertMulti(propertyName, p);
+
+					if (propertyNames.indexOf(propertyName) == -1)
+					{
+						propertyNames.append(propertyName);
 					}
 				}
 			}
@@ -599,7 +733,7 @@ namespace ExtWidgets
 
 				// now check if all properties have the same type and values
 				//
-				int type;
+				int type = -1;
 
 				bool sameType = true;
 
@@ -694,6 +828,6 @@ namespace ExtWidgets
 			}
 		}
 
-		m_tableModel->setTableObjects(tableObjects);
+		m_tableModel.setTableObjects(tableObjects);
 	}
 }

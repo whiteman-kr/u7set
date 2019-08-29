@@ -18,7 +18,7 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 	m_propertyTable->setReadOnly(editEngine->readOnly());
 
 	QTabWidget* tabWidget = new QTabWidget();
-	tabWidget->addTab(m_propertyEditor, "List view");
+	tabWidget->addTab(m_propertyEditor, "Tree view");
 	tabWidget->addTab(m_propertyTable, "Table view");
 
 	tabWidget->setTabPosition(QTabWidget::South);
@@ -40,6 +40,8 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 	}
 
 	m_propertyEditor->setSplitterPosition(splitterValue);
+
+	m_propertyTable->setPropertyMask(settings.value("SchemaItemPropertiesDialog/PropertiesMask").toString());
 
 	restoreGeometry(settings.value("SchemaItemPropertiesDialog/Geometry").toByteArray());
 
@@ -117,6 +119,7 @@ void SchemaItemPropertiesDialog::saveSettings()
 	QSettings settings;
 
 	settings.setValue("SchemaItemPropertiesDialog/Splitter", m_propertyEditor->splitterPosition());
+	settings.setValue("SchemaItemPropertiesDialog/PropertiesMask", m_propertyTable->propertyMask());
 	settings.setValue("SchemaItemPropertiesDialog/Geometry", saveGeometry());
 
 	return;
@@ -235,27 +238,32 @@ SchemaItemPropertyTable::~SchemaItemPropertyTable()
 {
 }
 
-void SchemaItemPropertyTable::valueChanged(QMap<QString, std::shared_ptr<PropertyObject>> modifiedObjectsData, const QVariant& value)
+void SchemaItemPropertyTable::valueChanged(QMap<QString, std::pair<std::shared_ptr<PropertyObject>, QVariant>> modifiedObjectsData)
 {
-	if (value.isValid() == false)
+	bool result = editEngine()->startBatch();
+	if (result == false)
 	{
-		assert(false);
 		return;
 	}
 
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
-
 	for (const QString& propertyName : modifiedObjectsData.keys())
 	{
-		QList<std::shared_ptr<PropertyObject>> objects = modifiedObjectsData.values(propertyName);
+		QList<std::pair<std::shared_ptr<PropertyObject>, QVariant>> objectsData = modifiedObjectsData.values(propertyName);
 
-		items.clear();
-
-		for (std::shared_ptr<PropertyObject> object : objects)
+		for (auto objectData : objectsData)
 		{
+			std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
 
-			std::shared_ptr<VFrame30::SchemaItem> vi = std::dynamic_pointer_cast<VFrame30::SchemaItem>(object);
+			std::shared_ptr<VFrame30::SchemaItem> vi = std::dynamic_pointer_cast<VFrame30::SchemaItem>(objectData.first);
 			assert(vi.get() != nullptr);
+
+			QVariant value = objectData.second;
+
+			if (value.isValid() == false)
+			{
+				assert(false);
+				return;
+			}
 
 			// Do not set property, if it has the same value
 			//
@@ -265,15 +273,13 @@ void SchemaItemPropertyTable::valueChanged(QMap<QString, std::shared_ptr<Propert
 			}
 
 			items.push_back(vi);
+
+			editEngine()->runSetProperty(propertyName, value, items);
 		}
 
-		if (items.empty() == true)
-		{
-			continue;
-		}
-
-		editEngine()->runSetProperty(propertyName, value, items);
 	}
+
+	editEngine()->endBatch();
 
 	return;
 }

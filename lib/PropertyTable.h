@@ -58,7 +58,7 @@ namespace ExtWidgets
 
 		std::shared_ptr<PropertyObject> propertyObjectByIndex(const QModelIndex& mi) const;
 
-		std::shared_ptr<Property> propertyByIndex(const QModelIndex& mi) const;
+		std::shared_ptr<Property> propertyByIndex(const QModelIndex& mi, int* propertyRow) const;
 
 	private:
 		int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -92,13 +92,15 @@ namespace ExtWidgets
 
 		void closeCurrentEditor();
 
+		const QList<std::shared_ptr<PropertyObject>>& objects() const;
 		void setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects);
 		void setObjects(const QList<std::shared_ptr<PropertyObject>>& objects);
 
-		const QList<std::shared_ptr<PropertyObject>>& objects() const;
+		QString propertyMask() const;
+		void setPropertyMask(const QString& propertyMask);
 
 	protected:
-		virtual void valueChanged(QMap<QString, std::shared_ptr<PropertyObject>> modifiedObjectsData, const QVariant& value);
+		virtual void valueChanged(QMap<QString, std::pair<std::shared_ptr<PropertyObject>, QVariant>> modifiedObjectsData);
 
 	protected slots:
 		void updatePropertiesList();
@@ -107,6 +109,7 @@ namespace ExtWidgets
 	private slots:
 		void onCellDoubleClicked(const QModelIndex &index);
 		void onShowErrorMessage (QString message);
+		void onPropertyMaskChanged();
 
 	public slots:
 		void onValueChanged(QVariant value);
@@ -122,11 +125,15 @@ namespace ExtWidgets
 
 		PropertyTableView* m_tableView = nullptr;
 
-		PropertyTableModel* m_tableModel = nullptr;
+		QLineEdit* m_editPropertyMask = nullptr;
+
+		PropertyTableModel m_tableModel;
 
 		PropertyTableItemDelegate* m_itemDelegate = nullptr;
 
 		QList<std::shared_ptr<PropertyObject>> m_objects;
+
+		QStringList m_propertyMasks;
 
 	};
 

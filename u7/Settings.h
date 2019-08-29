@@ -103,6 +103,8 @@ public:
 
     int m_equipmentTabPagePropertiesSplitterState = 0;
 
+	QString m_equipmentTabPagePropertiesMask;
+
 	// Signals Tab Page
 	//
 	//QByteArray m_equipmentTabPageSplitterState;

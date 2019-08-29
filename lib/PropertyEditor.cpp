@@ -117,7 +117,7 @@ namespace ExtWidgets
 		return QString();
 	}
 
-	QString PropertyEditorBase::propertyValueText(Property* p)
+	QString PropertyEditorBase::propertyValueText(Property* p, int row)
 	{
 		QVariant value = p->value();
 
@@ -211,6 +211,19 @@ namespace ExtWidgets
 
 		case QVariant::StringList:
 		{
+			if (row != -1)
+			{
+				QStringList strings = value.toStringList();
+
+				if (row < 0 || row >= static_cast<int>(strings.size()))
+				{
+					Q_ASSERT(false);
+					return QString();
+				}
+
+				return strings[row];
+			}
+
 			return stringListText(value);
 		}
 			break;
@@ -388,6 +401,11 @@ namespace ExtWidgets
 
 	PropertyEditCellWidget* PropertyEditorBase::createCellEditor(std::shared_ptr<Property> propertyPtr, bool sameValue, bool readOnly, QWidget* parent)
 	{
+		return createCellRowEditor(propertyPtr, -1, sameValue, readOnly, parent);
+	}
+
+	PropertyEditCellWidget* PropertyEditorBase::createCellRowEditor(std::shared_ptr<Property> propertyPtr, int row, bool sameValue, bool readOnly, QWidget* parent)
+	{
 		if (propertyPtr == nullptr)
 		{
 			Q_ASSERT(propertyPtr);
@@ -440,12 +458,27 @@ namespace ExtWidgets
 
 			if (propertyPtr->value().userType() == QVariant::StringList)
 			{
-				MultiArrayEdit* m_editor = new MultiArrayEdit(this, parent, propertyPtr, readOnly);
-				editor = m_editor;
-
-				if (sameValue == true)
+				if (row == -1)
 				{
-					m_editor->setValue(propertyPtr, readOnly);
+					MultiArrayEdit* m_editor = new MultiArrayEdit(this, parent, propertyPtr, readOnly);
+					editor = m_editor;
+
+					if (sameValue == true)
+					{
+						m_editor->setValue(propertyPtr, readOnly);
+					}
+
+				}
+				else
+				{
+					MultiTextEdit* m_editor = new MultiTextEdit(this, propertyPtr, row, readOnly, parent);
+
+					editor = m_editor;
+
+					if (sameValue == true)
+					{
+						m_editor->setValue(propertyPtr, readOnly);
+					}
 				}
 
 				break;
@@ -2201,12 +2234,18 @@ namespace ExtWidgets
 	//
 
 	MultiTextEdit::MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, bool readOnly, QWidget* parent):
+		MultiTextEdit(propertyEditorBase, p, -1, readOnly, parent)
+
+	{
+	}
+
+	MultiTextEdit::MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, int row, bool readOnly, QWidget* parent):
 		PropertyEditCellWidget(parent),
 		m_property(p),
+		m_row(row),
 		m_userType(p->value().userType()),
 		m_propertyEditorBase(propertyEditorBase)
 	{
-
 		if (p == nullptr || m_propertyEditorBase == nullptr)
 		{
 			assert(p);
@@ -2230,7 +2269,8 @@ namespace ExtWidgets
 
 		if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog ||
 				m_userType == QVariant::ByteArray ||
-				(m_userType == QVariant::String && p->password() == false))
+				(m_userType == QVariant::String && p->password() == false) ||
+				(m_userType == QVariant::StringList && m_row != -1))
 		{
 			m_button = new QToolButton(parent);
 			m_button->setText("...");
@@ -2253,16 +2293,16 @@ namespace ExtWidgets
 
 		if (m_property->specificEditor() != E::PropertySpecificEditor::LoadFileDialog &&	// for LoadFileDialog, Validator is used as mask
 				p->validator().isEmpty() == false)
-        {
+		{
 			QRegExp regexp(p->validator());
 			QRegExpValidator* v = new QRegExpValidator(regexp, this);
-            m_lineEdit->setValidator(v);
-        }
+			m_lineEdit->setValidator(v);
+		}
 
 		if (m_userType == QVariant::String && p->password() == true)
-        {
-            m_lineEdit->setEchoMode(QLineEdit::Password);
-        }
+		{
+			m_lineEdit->setEchoMode(QLineEdit::Password);
+		}
 
 		m_lineEdit->setReadOnly(readOnly == true);
 
@@ -2463,6 +2503,31 @@ namespace ExtWidgets
 				m_lineEdit->setReadOnly(readOnly == true || longText == true);
 			}
 			break;
+		case QVariant::StringList:
+			{
+				QStringList l = property->value().toStringList();
+				if (m_row < 0 || m_row >= static_cast<int>(l.size()))
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+				QString editText = l[m_row];
+				m_oldValue = editText;
+
+				bool longText = editText.length() > PropertyEditorTextMaxLength;
+
+				if (longText == true)
+				{
+					m_lineEdit->setText(tr("<%1 bytes>").arg(editText.length()));
+				}
+				else
+				{
+					m_lineEdit->setText(editText);
+				}
+				m_lineEdit->setReadOnly(readOnly == true || longText == true);
+			}
+			break;
 		case QVariant::Int:
 		{
 			m_oldValue = property->value().toInt();
@@ -2532,6 +2597,7 @@ namespace ExtWidgets
 		switch (m_userType)
 		{
 		case QVariant::String:
+		case QVariant::StringList:
 		{
 			if (m_lineEdit->text() != m_oldValue.toString() || m_oldValue.isNull() == true)
 			{
@@ -3219,34 +3285,31 @@ namespace ExtWidgets
         //
         if (sameValue(property) == true)
 		{
-			return PropertyEditorBase::propertyValueText(p.get());
+			return PropertyEditorBase::propertyValueText(p.get(), -1/*row*/);
 		}
-		else
+
+		QVariant value = p->value();
+
+		// PropertyVector, PropertyList
+		//
+		if (variantIsPropertyVector(value) == true)
 		{
-			QVariant value = p->value();
-
-			// PropertyVector, PropertyList
-			//
-			if (variantIsPropertyVector(value) == true)
-			{
-				return tr("<PropertyVector>");
-			}
-
-			if (variantIsPropertyList(value) == true)
-			{
-				return tr("<PropertyList>");
-			}
-
-			switch (value.type())
-			{
-				case QVariant::Bool:
-					return "<Different values>";
-				default:
-					return QString();
-			}
+			return tr("<PropertyVector>");
 		}
 
-		return QString();
+		if (variantIsPropertyList(value) == true)
+		{
+			return tr("<PropertyList>");
+		}
+
+		switch (value.type())
+		{
+		case QVariant::Bool:
+			return "<Different values>";
+		default:
+			return QString();
+		}
+
 	}
 
 	QString MultiVariantPropertyManager::displayText(const QtProperty* property) const

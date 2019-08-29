@@ -90,7 +90,7 @@ public:
 	virtual ~SchemaItemPropertyTable();
 
 protected slots:
-	virtual void valueChanged(QMap<QString, std::shared_ptr<PropertyObject>> modifiedObjectsData, const QVariant& value) override;
+	virtual void valueChanged(QMap<QString, std::pair<std::shared_ptr<PropertyObject>, QVariant> > modifiedObjectsData) override;
 
 protected:
 	EditEngine::EditEngine* editEngine();

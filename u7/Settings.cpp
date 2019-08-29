@@ -120,6 +120,7 @@ void Settings::writeUserScope() const
 
 	s.setValue("EquipmentTabPage/Splitter/state", m_equipmentTabPageSplitterState);
     s.setValue("EquipmentTabPage/PropertiesSplitter/state", m_equipmentTabPagePropertiesSplitterState);
+	s.setValue("EquipmentTabPage/PropertiesTable/PropertiesMask", m_equipmentTabPagePropertiesMask);
 
 	s.setValue("BuildTabPage/Splitter/state", m_buildTabPageSplitterState);
 
@@ -192,6 +193,7 @@ void Settings::loadUserScope()
 	{
         m_equipmentTabPagePropertiesSplitterState = 150;
 	}
+	m_equipmentTabPagePropertiesMask = s.value("EquipmentTabPage/PropertiesTable/PropertiesMask").toString();
 
     m_buildTabPageSplitterState = s.value("BuildTabPage/Splitter/state").toByteArray();
 

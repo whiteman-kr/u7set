@@ -3887,9 +3887,10 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
     m_propertyEditor->setSplitterPosition(theSettings.m_equipmentTabPagePropertiesSplitterState);
 
 	m_propertyTable = new IdePropertyTable(this, dbcontroller);
+	m_propertyTable->setPropertyMask(theSettings.m_equipmentTabPagePropertiesMask);
 
 	QTabWidget* tabWidget = new QTabWidget();
-	tabWidget->addTab(m_propertyEditor, "List view");
+	tabWidget->addTab(m_propertyEditor, "Tree view");
 	tabWidget->addTab(m_propertyTable, "Table view");
 
 	tabWidget->setTabPosition(QTabWidget::South);
@@ -3962,6 +3963,7 @@ EquipmentTabPage::~EquipmentTabPage()
 {
 	theSettings.m_equipmentTabPageSplitterState = m_splitter->saveState();
     theSettings.m_equipmentTabPagePropertiesSplitterState = m_propertyEditor->splitterPosition();
+	theSettings.m_equipmentTabPagePropertiesMask = m_propertyTable->propertyMask();
 	theSettings.writeUserScope();
 }
 
