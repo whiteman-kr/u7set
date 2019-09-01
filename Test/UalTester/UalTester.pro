@@ -55,16 +55,16 @@ SOURCES += \
     ../../Builder/ModulesRawData.cpp \
     ../../lib/OutputLog.cpp \
     ../../lib/DbStruct.cpp \
-    ../../lib/AppSignal.cpp \
-    SignalStateSocket.cpp \
-    ../../lib/Signal.cpp \
-    ../../lib/Tuning/TuningSignalState.cpp \
-    ../../lib/TuningValue.cpp \
-    ../../lib/SignalProperties.cpp \
-    SignalBase.cpp \
-    TestFile.cpp \
-    TuningSocket.cpp \
-    TuningSignalBase.cpp \
+	../../lib/AppSignal.cpp \
+	SignalStateSocket.cpp \
+	../../lib/Signal.cpp \
+	../../lib/Tuning/TuningSignalState.cpp \
+	../../lib/TuningValue.cpp \
+	../../lib/SignalProperties.cpp \
+	SignalBase.cpp \
+	TestFile.cpp \
+	TuningSocket.cpp \
+	TuningSignalBase.cpp \
 	CmdLineParam.cpp \
 	../../lib/MemLeaksDetection.cpp
 
