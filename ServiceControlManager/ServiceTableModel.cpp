@@ -94,14 +94,16 @@ void ServiceTableModel::startUdpSocketThread()
 	{
 		for (int j = 0; j < servicesInfo.count(); j++)
 		{
-			UdpClientSocket* clientSocket = m_hostsInfo[i].servicesData[j].clientSocket;
+			UdpClientSocket*& clientSocket = m_hostsInfo[i].servicesData[j].clientSocket;
 
 			assert(clientSocket == nullptr);
 
 			clientSocket = new UdpClientSocket(QHostAddress(m_hostsInfo[i].ip), servicesInfo[j].port);
+
 			connect(clientSocket, &UdpClientSocket::ackTimeout, this, &ServiceTableModel::serviceNotFound);
 			connect(clientSocket, &UdpClientSocket::ackReceived, this, &ServiceTableModel::serviceAckReceived);
-			m_hostsInfo[i].servicesData[j].clientSocket = clientSocket;
+
+//			m_hostsInfo[i].servicesData[j].clientSocket = clientSocket;
 
 			m_socketThread->addWorker(clientSocket);
 
@@ -124,7 +126,9 @@ void ServiceTableModel::finishtUdpSocketThread()
 	}
 
 	m_socketThread->quitAndWait();
+
 	delete m_socketThread;
+
 	m_socketThread = nullptr;
 
 	for (int i = 0; i < m_hostsInfo.count(); i++)
@@ -190,20 +194,20 @@ QVariant ServiceTableModel::data(const QModelIndex &index, int role) const
 			if (serviceState != ServiceState::Undefined &&
 				serviceState != ServiceState::Unavailable)
 			{
-				quint32 time = si.uptime();
-				int s = time % 60; time /= 60;
-				int m = time % 60; time /= 60;
-				int h = time % 24; time /= 24;
+				qint64 time = si.uptime();
+				qint64 s = time % 60; time /= 60;
+				qint64 m = time % 60; time /= 60;
+				qint64 h = time % 24; time /= 24;
 				str += tr("Uptime") + QString(" (%1d %2:%3:%4)\n").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
 			}
 			switch(serviceState)
 			{
 				case ServiceState::Work:
 				{
-					quint32 time = si.serviceuptime();
-					int s = time % 60; time /= 60;
-					int m = time % 60; time /= 60;
-					int h = time % 24; time /= 24;
+					qint64 time = si.serviceuptime();
+					qint64 s = time % 60; time /= 60;
+					qint64 m = time % 60; time /= 60;
+					qint64 h = time % 24; time /= 24;
 					str += tr("Running") + QString(" (%1d %2:%3:%4)").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0'));
 				} break;
 				case ServiceState::Stopped: str += tr("Stopped"); break;
@@ -374,7 +378,8 @@ void ServiceTableModel::serviceAckReceived(const UdpRequest udpRequest)
 
 			Network::ServiceInfo newServiceInfo;
 
-			if (newServiceInfo.ParseFromArray(udpRequest.data(), udpRequest.dataSize()) == false)
+			if (newServiceInfo.ParseFromArray(udpRequest.data(),
+											  static_cast<int>(udpRequest.dataSize())) == false)
 			{
 				assert(false);
 				return;

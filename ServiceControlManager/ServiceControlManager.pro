@@ -16,6 +16,8 @@ TEMPLATE = app
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
+include(../warnings.pri)
+
 # DESTDIR
 #
 win32 {
@@ -29,12 +31,14 @@ unix {
 
 
 SOURCES += MainWindow.cpp \
+	../lib/MemLeaksDetection.cpp \
     ScanOptionsWidget.cpp \
+	ScmMain.cpp \
+	ScmTcpAppDataClient.cpp \
     ServiceTableModel.cpp \
     ../lib/UdpSocket.cpp \
     ../lib/SocketIO.cpp \
     ../lib/DataSource.cpp \
-    main.cpp \
     BaseServiceStateWidget.cpp \
     ConfigurationServiceWidget.cpp \
     ../lib/SimpleThread.cpp \
@@ -43,7 +47,6 @@ SOURCES += MainWindow.cpp \
     ../lib/DataProtocols.cpp \
     ../lib/WUtils.cpp \
     ../lib/Crc.cpp \
-    TcpAppDataClient.cpp \
     ../lib/Tcp.cpp \
     ../Proto/network.pb.cc \
     ../lib/Signal.cpp \
@@ -82,7 +85,9 @@ SOURCES += MainWindow.cpp \
     ../AppDataService/DynamicAppSignalState.cpp
 
 HEADERS  += MainWindow.h \
+    ../lib/MemLeaksDetection.h \
     ScanOptionsWidget.h \
+    ScmTcpAppDataClient.h \
     ServiceTableModel.h \
     ../lib/UdpSocket.h \
     ../lib/SocketIO.h \
@@ -95,7 +100,7 @@ HEADERS  += MainWindow.h \
     ../lib/DataProtocols.h \
     ../lib/WUtils.h \
     ../lib/Crc.h \
-    TcpAppDataClient.h \
+    Stable.h \
     ../lib/Tcp.h \
     ../Proto/network.pb.h \
     ../lib/Signal.h \
@@ -136,6 +141,9 @@ HEADERS  += MainWindow.h \
     ../AppDataService/DynamicAppSignalState.h
 
 include(../qtservice/src/qtservice.pri)
+
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
 FORMS    +=
 

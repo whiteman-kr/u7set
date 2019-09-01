@@ -1,0 +1,58 @@
+Report from: 23-08-2019 11:15:58
+
+Test File: AFB_BUS_OR.txt
+
+Test AFB_BUS_OR_1, BUS_2OR function test
+    Set #TUN_DSCR_BUS_01_INP01=0
+    Set #TUN_DSCR_BUS_01_INP02=0
+    Set #TUN_DSCR_BUS_02_INP01=1
+    Set #TUN_DSCR_BUS_02_INP02=0
+    Set #TUN_DSCR_BUS_03_INP01=1
+    Set #TUN_DSCR_BUS_03_INP02=1
+    Set #TUN_DSCR_BUS_04_INP01=0
+    Set #TUN_DSCR_BUS_04_INP02=1
+    Set #TUN_DSCR_BUS_05_INP01=1
+    Set #TUN_DSCR_BUS_05_INP02=1
+    Check #OUT_BUS_2OR_01=0 - Ok
+    Check #OUT_BUS_2OR_02=1 - Ok
+    Check #OUT_BUS_2OR_03=1 - Ok
+    Check #OUT_BUS_2OR_04=1 - Ok
+    Check #OUT_BUS_2OR_05=1 - Ok
+Endtest AFB_BUS_OR_1 - Ok
+
+Test AFB_BUS_OR_2, BUS_2OR function test
+    Set #TUN_DSCR_BUS_01_INP01=1
+    Set #TUN_DSCR_BUS_01_INP02=1
+    Set #TUN_DSCR_BUS_02_INP01=1
+    Set #TUN_DSCR_BUS_02_INP02=1
+    Set #TUN_DSCR_BUS_03_INP01=1
+    Set #TUN_DSCR_BUS_03_INP02=1
+    Set #TUN_DSCR_BUS_04_INP01=1
+    Set #TUN_DSCR_BUS_04_INP02=1
+    Set #TUN_DSCR_BUS_05_INP01=1
+    Set #TUN_DSCR_BUS_05_INP02=1
+    Check #OUT_BUS_2OR_01=1 - Ok
+    Check #OUT_BUS_2OR_02=1 - Ok
+    Check #OUT_BUS_2OR_03=1 - Ok
+    Check #OUT_BUS_2OR_04=1 - Ok
+    Check #OUT_BUS_2OR_05=1 - Ok
+Endtest AFB_BUS_OR_2 - Ok
+
+Test AFB_BUS_OR_3, BUS_2OR function test
+    Set #TUN_DSCR_BUS_01_INP01=0
+    Set #TUN_DSCR_BUS_01_INP02=0
+    Set #TUN_DSCR_BUS_02_INP01=0
+    Set #TUN_DSCR_BUS_02_INP02=0
+    Set #TUN_DSCR_BUS_03_INP01=0
+    Set #TUN_DSCR_BUS_03_INP02=0
+    Set #TUN_DSCR_BUS_04_INP01=0
+    Set #TUN_DSCR_BUS_04_INP02=0
+    Set #TUN_DSCR_BUS_05_INP01=0
+    Set #TUN_DSCR_BUS_05_INP02=0
+    Check #OUT_BUS_2OR_01=0 - Ok
+    Check #OUT_BUS_2OR_02=0 - Ok
+    Check #OUT_BUS_2OR_03=0 - Ok
+    Check #OUT_BUS_2OR_04=0 - Ok
+    Check #OUT_BUS_2OR_05=0 - Ok
+Endtest AFB_BUS_OR_3 - Ok
+
