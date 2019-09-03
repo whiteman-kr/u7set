@@ -129,10 +129,10 @@ namespace Builder
 		Q_OBJECT
 
 	public:
-		BuildResultWriter(QString outputPath, QObject* parent = nullptr);
+		BuildResultWriter(QObject* parent = nullptr);
 		~BuildResultWriter();
 
-		bool start(DbController *db, IssueLogger* log, bool release, int changesetID);
+		bool start(const QString& outputPath, DbController *db, IssueLogger* log, bool release, int changesetID);
 		bool finish();
 
 		BuildFile* addFile(const QString& subDir, const QString& fileName, const QByteArray& data, bool compress = false);
@@ -168,6 +168,9 @@ namespace Builder
 		QString outputPath() const;
 
 	private:
+		QString checkOutputPath(QString outputPath);
+		bool isWritable(const QString& outputPath);
+
 		BuildFile* createBuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, bool compress);
 
 		bool createBuildResults();

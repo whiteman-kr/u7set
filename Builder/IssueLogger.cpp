@@ -370,6 +370,28 @@ namespace Builder
 				  QString(tr("File %1 already linked to %2.")).arg(fileName).arg(cfgXmlFileName));
 	}
 
+	/// IssueCode: CMN0022
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Build output path %1. Standard writeble location will be used: %2
+	///
+	/// Parameters:
+	///		%1 issue message
+	///		%2 path will be used to writing build result
+	///
+	/// Description:
+	///		Selected build output path is not writable.
+	///		Standard writable location will be used.
+	///
+	void IssueLogger::wrnCMN0022(QString issue, QString stdWritablePath)
+	{
+		LOG_WARNING0(IssueType::Common,
+				  22,
+				  QString(tr("Build output path %1. Standard writeble location will be used: %2")).arg(issue).arg(stdWritablePath));
+	}
+
+
 	// INT			Internal issues							1000-1999
 	//
 

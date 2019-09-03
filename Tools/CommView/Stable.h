@@ -69,6 +69,9 @@
 #include <QtGlobal>
 #include <QtNetwork/QHostAddress>
 
+#include <QtSerialPort/QSerialPort>
+#include <QtSerialPort/QSerialPortInfo>
+
 #include <QUuid>
 
 #include <QVariant>
