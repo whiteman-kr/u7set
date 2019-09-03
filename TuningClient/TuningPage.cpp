@@ -1332,6 +1332,8 @@ bool TuningPage::write()
 		return false;
 	}
 
+	m_tuningTcpClient->writeLogSignalChange(tr("'Write' button is pressed."));
+
 	m_tuningTcpClient->writeTuningSignal(commands);
 
 	return true;

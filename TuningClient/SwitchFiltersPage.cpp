@@ -585,6 +585,8 @@ bool SwitchFiltersPage::changeFilterSignals(std::shared_ptr<TuningFilter> filter
 		m_tuningTcpClient->writeTuningSignal(f.appSignalId(), tv);
 	}
 
+	m_tuningTcpClient->writeLogSignalChange(tr("'%1' filter is toggled.").arg(filter->caption()));
+
 	return true;
 }
 
