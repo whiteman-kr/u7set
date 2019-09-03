@@ -161,6 +161,11 @@ void Settings::writeUserScope() const
 
 	s.setValue("CreateSchema/lastSelectedLmDescriptionFile", m_lastSelectedLmDescriptionFile);
 
+	s.setValue("SchemaItemPropertiesDialog/Splitter", m_schemaItemPropertiesSplitterPosition);
+	s.setValue("SchemaItemPropertiesDialog/PropertiesMask", m_schemaItemPropertiesPropertyMask);
+	s.setValue("SchemaItemPropertiesDialog/ExpandValuesToAllRows", m_schemaItemPropertiesExpandValuesToAllRows);
+	s.setValue("SchemaItemPropertiesDialog/Geometry", m_schemaItemPropertiesGeometry);
+
 	s.setValue("Main/m_expertMode", m_expertMode);
 
 	s.setValue("m_infoMode", m_infoMode);
@@ -258,7 +263,22 @@ void Settings::loadUserScope()
 	m_svgEditorStretch = s.value("SvgEditor/stretch", m_svgEditorStretch).toBool();
 
 	//
+
 	m_lastSelectedLmDescriptionFile = s.value("CreateSchema/lastSelectedLmDescriptionFile", "").toString();
+
+	//
+
+	m_schemaItemPropertiesSplitterPosition = s.value("SchemaItemPropertiesDialog/Splitter").toInt();
+	if (m_schemaItemPropertiesSplitterPosition < 100)
+	{
+		m_schemaItemPropertiesSplitterPosition = 100;
+	}
+
+	m_schemaItemPropertiesPropertyMask = s.value("SchemaItemPropertiesDialog/PropertiesMask").toString();
+	m_schemaItemPropertiesExpandValuesToAllRows = s.value("SchemaItemPropertiesDialog/ExpandValuesToAllRows", m_schemaItemPropertiesExpandValuesToAllRows).toBool();
+	m_schemaItemPropertiesGeometry = s.value("SchemaItemPropertiesDialog/Geometry").toByteArray();
+
+	//
 
 	m_expertMode = s.value("Main/m_expertMode", false).toBool();
 

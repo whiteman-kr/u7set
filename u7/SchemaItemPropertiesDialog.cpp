@@ -11,14 +11,14 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 {
 	ui->setupUi(this);
 
-	m_propertyEditor = new SchemaItemPropertyEditor(editEngine, this);
-	m_propertyEditor->setReadOnly(editEngine->readOnly());
-
-	m_propertyTable = new SchemaItemPropertyTable(editEngine, this);
-	m_propertyTable->setReadOnly(editEngine->readOnly());
-
 	QTabWidget* tabWidget = new QTabWidget();
+
+	m_propertyEditor = new SchemaItemPropertyEditor(editEngine, tabWidget);
+	m_propertyEditor->setReadOnly(editEngine->readOnly());
 	tabWidget->addTab(m_propertyEditor, "Tree view");
+
+	m_propertyTable = new SchemaItemPropertyTable(editEngine, tabWidget);
+	m_propertyTable->setReadOnly(editEngine->readOnly());
 	tabWidget->addTab(m_propertyTable, "Table view");
 
 	tabWidget->setTabPosition(QTabWidget::South);
@@ -31,19 +31,10 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 
 	// --
 	//
-	QSettings settings;
-
-	int splitterValue = settings.value("SchemaItemPropertiesDialog/Splitter").toInt();
-	if (splitterValue < 100)
-	{
-		splitterValue = 100;
-	}
-
-	m_propertyEditor->setSplitterPosition(splitterValue);
-
-	m_propertyTable->setPropertyMask(settings.value("SchemaItemPropertiesDialog/PropertiesMask").toString());
-
-	restoreGeometry(settings.value("SchemaItemPropertiesDialog/Geometry").toByteArray());
+	m_propertyEditor->setSplitterPosition(theSettings.m_schemaItemPropertiesSplitterPosition);
+	m_propertyTable->setPropertyMask(theSettings.m_schemaItemPropertiesPropertyMask);
+	m_propertyTable->setExpandValuesToAllRows(theSettings.m_schemaItemPropertiesExpandValuesToAllRows);
+	restoreGeometry(theSettings.m_schemaItemPropertiesGeometry);
 
 	ensureVisible();
 
@@ -116,11 +107,10 @@ void SchemaItemPropertiesDialog::done(int r)
 
 void SchemaItemPropertiesDialog::saveSettings()
 {
-	QSettings settings;
-
-	settings.setValue("SchemaItemPropertiesDialog/Splitter", m_propertyEditor->splitterPosition());
-	settings.setValue("SchemaItemPropertiesDialog/PropertiesMask", m_propertyTable->propertyMask());
-	settings.setValue("SchemaItemPropertiesDialog/Geometry", saveGeometry());
+	theSettings.m_schemaItemPropertiesSplitterPosition = m_propertyEditor->splitterPosition();
+	theSettings.m_schemaItemPropertiesPropertyMask = m_propertyTable->propertyMask();
+	theSettings.m_schemaItemPropertiesExpandValuesToAllRows = m_propertyTable->expandValuesToAllRows();
+	theSettings.m_schemaItemPropertiesGeometry = saveGeometry();
 
 	return;
 }

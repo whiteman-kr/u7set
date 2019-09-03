@@ -7,10 +7,10 @@
 
 namespace ExtWidgets
 {
-	PropertyTableItemDelegate::PropertyTableItemDelegate(PropertyTable* propertyTable, PropertyTableModel* model) :
+	PropertyTableItemDelegate::PropertyTableItemDelegate(PropertyTable* propertyTable, PropertyTableProxyModel* proxyModel) :
 		QItemDelegate(propertyTable),
 		m_propertyTable(propertyTable),
-		m_model(model)
+		m_proxyModel(proxyModel)
 	{
 	}
 
@@ -20,15 +20,15 @@ namespace ExtWidgets
 	{
 		Q_UNUSED(option);
 
-		if (m_model == nullptr)
+		if (m_proxyModel == nullptr)
 		{
-			Q_ASSERT(m_model);
+			Q_ASSERT(m_proxyModel);
 			return new QWidget(parent);
 		}
 
 		int row = -1;
 
-		std::shared_ptr<Property> p = m_model->propertyByIndex(index, &row);
+		std::shared_ptr<Property> p = m_proxyModel->propertyByIndex(index, &row);
 		if (p == nullptr)
 		{
 			Q_ASSERT(p);
@@ -45,13 +45,13 @@ namespace ExtWidgets
 	void PropertyTableItemDelegate::setEditorData(QWidget *editor,
 												  const QModelIndex &index) const
 	{
-		if (m_model == nullptr)
+		if (m_proxyModel == nullptr)
 		{
-			Q_ASSERT(m_model);
+			Q_ASSERT(m_proxyModel);
 			return;
 		}
 
-		std::shared_ptr<Property> p = m_model->propertyByIndex(index, nullptr);
+		std::shared_ptr<Property> p = m_proxyModel->propertyByIndex(index, nullptr);
 		if (p == nullptr)
 		{
 			Q_ASSERT(p);
@@ -87,6 +87,40 @@ namespace ExtWidgets
 	void PropertyTableItemDelegate::onValueChanged(QVariant value)
 	{
 		emit valueChanged(value);
+	}
+
+	//
+	// PropertyTableProxyModel
+	//
+
+	PropertyTableProxyModel::PropertyTableProxyModel(QObject *parent):
+		QSortFilterProxyModel(parent)
+	{
+
+	}
+
+	std::shared_ptr<PropertyObject> PropertyTableProxyModel::propertyObjectByIndex(const QModelIndex& mi) const
+	{
+		PropertyTableModel* sm = dynamic_cast<PropertyTableModel*>(sourceModel());
+		if (sm == nullptr)
+		{
+			Q_ASSERT(sm);
+			return nullptr;
+		}
+
+		return sm->propertyObjectByIndex(mapToSource(mi));
+	}
+
+	std::shared_ptr<Property> PropertyTableProxyModel::propertyByIndex(const QModelIndex& mi, int* propertyRow) const
+	{
+		PropertyTableModel* sm = dynamic_cast<PropertyTableModel*>(sourceModel());
+		if (sm == nullptr)
+		{
+			Q_ASSERT(sm);
+			return nullptr;
+		}
+
+		return sm->propertyByIndex(mapToSource(mi), propertyRow);
 	}
 
 	//
@@ -209,10 +243,64 @@ namespace ExtWidgets
 			row += pto.rowCount;
 		}
 
-
-
 		Q_ASSERT(false);
 		return nullptr;
+	}
+
+	void PropertyTableModel::recalculateRowCount(std::shared_ptr<PropertyObject> object)
+	{
+		for (PropertyTableObject& pto : m_tableObjects)
+		{
+			if (pto.propertyObject.get() == object.get())
+			{
+				int oldRowCount = pto.rowCount;
+
+				pto.rowCount = 1;
+
+				for (auto p : pto.properties)
+				{
+					int type = p.get()->value().userType();
+
+					if (type == QVariant::StringList)
+					{
+						QStringList l = p.get()->value().toStringList();
+
+						if (pto.rowCount < static_cast<int>(l.size()))
+						{
+							pto.rowCount = static_cast<int>(l.size());
+						}
+					}
+				}
+
+				if (oldRowCount > pto.rowCount)
+				{
+					// Rows were deleted
+
+					int rowsRemoved = oldRowCount - pto.rowCount;
+
+					beginRemoveRows(QModelIndex(), 0, rowsRemoved - 1);
+					endRemoveRows();
+
+				}
+				else
+				{
+					if (oldRowCount < pto.rowCount)
+					{
+						// Rows were added
+
+						int rowsAdded = pto.rowCount - oldRowCount;
+
+						beginInsertRows(QModelIndex(), 0, rowsAdded - 1);
+						endInsertRows();
+					}
+				}
+
+				return;
+			}
+		}
+
+		Q_ASSERT(false);
+		return;
 	}
 
 	int PropertyTableModel::rowCount(const QModelIndex &parent) const
@@ -250,7 +338,8 @@ namespace ExtWidgets
 				return QVariant();
 			}
 
-			if (p->value().userType() != QVariant::StringList && row > 0)
+			if (m_propertyTable->expandValuesToAllRows() == false &&
+					p->value().userType() != QVariant::StringList &&  row > 0)
 			{
 				return QVariant();
 			}
@@ -271,7 +360,8 @@ namespace ExtWidgets
 				return QVariant();
 			}
 
-			if (p->value().userType() != QVariant::StringList && row > 0)
+			if (m_propertyTable->expandValuesToAllRows() == false &&
+					p->value().userType() != QVariant::StringList &&  row > 0)
 			{
 				return QVariant();
 			}
@@ -322,6 +412,17 @@ namespace ExtWidgets
 		return;
 	}
 
+	void PropertyTableView::keyPressEvent(QKeyEvent *event)
+	{
+		if (event->key() == Qt::Key_F2 || event->key() == Qt::Key_Return)
+		{
+			emit editKeyPressed();
+			return;
+		}
+
+		QTableView::keyPressEvent(event);
+	}
+
 	//
 	// PropertyTable
 	//
@@ -348,26 +449,35 @@ namespace ExtWidgets
 
 		mainLayout->addLayout(toolsLayout);
 
+		// Model
+
+		m_proxyModel.setSourceModel(&m_tableModel);
+
 		// Table View
 
 		m_tableView = new PropertyTableView();
 		mainLayout->addWidget(m_tableView);
 
+		m_tableView->setModel(&m_proxyModel);
 		m_tableView->setSelectionMode(QAbstractItemView::ExtendedSelection);
-
-		connect(m_tableView, &QTableView::doubleClicked, this, &PropertyTable::onCellDoubleClicked);
-
 		m_tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
 		m_tableView->setTabKeyNavigation(false);
 
-		// Model
+		m_tableView->setSortingEnabled(true);
+		m_tableView->sortByColumn(1, Qt::AscendingOrder);
 
-		m_tableView->setModel(&m_tableModel);
+		m_tableView->setContextMenuPolicy(Qt::CustomContextMenu);
+		connect(m_tableView, &PropertyTableView::customContextMenuRequested, this, &PropertyTable::onTableContextMenuRequested);
+
+		connect(m_tableView, &QTableView::doubleClicked, this, &PropertyTable::onCellDoubleClicked);
+
+		connect(m_tableView, &PropertyTableView::editKeyPressed, this, &PropertyTable::onCellEditKeyPressed);
 
 		// Edit Delegate
 
-		m_itemDelegate = new PropertyTableItemDelegate(this, &m_tableModel);
+		m_itemDelegate = new PropertyTableItemDelegate(this, &m_proxyModel);
 		connect(m_itemDelegate, &PropertyTableItemDelegate::valueChanged, this, &PropertyTable::onValueChanged);
+		connect(m_itemDelegate, &QItemDelegate::closeEditor, this, &PropertyTable::onCellEditorClosed);
 
 		m_tableView->setItemDelegate(m_itemDelegate);
 	}
@@ -452,6 +562,16 @@ namespace ExtWidgets
 		fillProperties();
 	}
 
+	bool PropertyTable::expandValuesToAllRows() const
+	{
+		return m_expandValuesToAllRows;
+	}
+
+	void PropertyTable::setExpandValuesToAllRows(bool value)
+	{
+		m_expandValuesToAllRows = value;
+	}
+
 	void PropertyTable::valueChanged(QMap<QString, std::pair<std::shared_ptr<PropertyObject>, QVariant>> modifiedObjectsData)
 	{
 		// Set the new property value in all objects
@@ -488,7 +608,7 @@ namespace ExtWidgets
 				if (oldValue == newValue && errorString.isEmpty() == true)
 				{
 					errorString = QString("Property: %1 - incorrect input value")
-								  .arg(propertyName);
+							.arg(propertyName);
 				}
 
 				modifiedObjects.append(object);
@@ -528,49 +648,13 @@ namespace ExtWidgets
 
 	void PropertyTable::onCellDoubleClicked(const QModelIndex &index)
 	{
-		QModelIndexList selectedIndexes = m_tableView->selectionModel()->selectedIndexes();
-		if (selectedIndexes.isEmpty() == true)
-		{
-			return;
-		}
+		Q_UNUSED(index);
+		startEditProperty();
+	}
 
-		// Check if selected cells have the same type
-		{
-			bool firstCell = true;
-			int type = -1;
-
-			for (const QModelIndex& mi : selectedIndexes)
-			{
-				int row = -1;
-
-				std::shared_ptr<Property> p = m_tableModel.propertyByIndex(mi, &row);
-				if (p == nullptr)
-				{
-					Q_ASSERT(p);
-					return;
-				}
-
-				if (p->value().userType() != QVariant::StringList && row > 0)
-				{
-					return;
-				}
-
-				if (firstCell == true)
-				{
-					type = p->value().userType();
-					firstCell = false;
-				}
-				else
-				{
-					if (type != p->value().userType())
-					{
-						return;
-					}
-				}
-			}
-		}
-
-		m_tableView->edit(index);
+	void PropertyTable::onCellEditKeyPressed()
+	{
+		startEditProperty();
 	}
 
 	void PropertyTable::onShowErrorMessage (QString message)
@@ -587,6 +671,97 @@ namespace ExtWidgets
 		fillProperties();
 	}
 
+	void PropertyTable::onTableContextMenuRequested(const QPoint &pos)
+	{
+		Q_UNUSED(pos);
+
+		QMenu menu(this);
+
+		// Determine if row operations are avaliable
+		//
+
+		bool addRowOperationsEnabled = false;
+		bool removeRowOperationsEnabled = false;
+
+		QModelIndexList selectedIndexes = m_tableView->selectionModel()->selectedIndexes();
+		if (selectedIndexes.size() == 1)
+		{
+			std::shared_ptr<Property> po = m_proxyModel.propertyByIndex(selectedIndexes[0], nullptr);
+			if (po == nullptr)
+			{
+				Q_ASSERT(po);
+				return;
+			}
+
+			if (po->value().userType() == QVariant::StringList)
+			{
+				addRowOperationsEnabled = true;
+
+				QStringList strings = po->value().toStringList();
+
+				if (strings.isEmpty() == false)
+				{
+					removeRowOperationsEnabled = true;
+				}
+			}
+		}
+
+		if (addRowOperationsEnabled == true)
+		{
+			QAction* a = menu.addAction(tr("Insert String Before..."));
+			connect(a, &QAction::triggered, this, &PropertyTable::onInsertStringBefore);
+
+			a = menu.addAction(tr("Insert String After..."));
+			connect(a, &QAction::triggered, this, &PropertyTable::onInsertStringAfter);
+		}
+
+		if (removeRowOperationsEnabled == true)
+		{
+			QAction* a = menu.addAction(tr("Remove String..."));
+			connect(a, &QAction::triggered, this, &PropertyTable::onRemoveString);
+		}
+
+		if (addRowOperationsEnabled == true || removeRowOperationsEnabled == true)
+		{
+			menu.addSeparator();
+		}
+
+		//
+
+		QAction* a = menu.addAction(tr("Expand Values to all Rows"));
+		a->setCheckable(true);
+		a->setChecked(expandValuesToAllRows());
+		connect(a, &QAction::triggered, this, &PropertyTable::onUniqueRowValuesChanged);
+
+		if (menu.actions().empty() == true)
+		{
+			return;
+		}
+
+		menu.exec(QCursor::pos());
+	}
+
+	void PropertyTable::onInsertStringBefore()
+	{
+		addString(false);
+	}
+
+	void PropertyTable::onInsertStringAfter()
+	{
+		addString(true);
+	}
+
+	void PropertyTable::onRemoveString()
+	{
+		removeString();
+	}
+
+	void PropertyTable::onUniqueRowValuesChanged()
+	{
+		setExpandValuesToAllRows(!expandValuesToAllRows());
+
+		updatePropertiesValues();
+	}
 
 	void PropertyTable::onValueChanged(QVariant value)
 	{
@@ -597,14 +772,13 @@ namespace ExtWidgets
 			return;
 		}
 
-
 		QMap<QString, std::pair<std::shared_ptr<PropertyObject>, QVariant>> modifiedObjectsData;
 
 		for (const QModelIndex& mi : selectedIndexes)
 		{
 			QVariant newValue = value;
 
-			std::shared_ptr<PropertyObject> po = m_tableModel.propertyObjectByIndex(mi);
+			std::shared_ptr<PropertyObject> po = m_proxyModel.propertyObjectByIndex(mi);
 
 			if (po == nullptr)
 			{
@@ -614,7 +788,7 @@ namespace ExtWidgets
 
 			int row = -1;
 
-			std::shared_ptr<Property> p = m_tableModel.propertyByIndex(mi, &row);
+			std::shared_ptr<Property> p = m_proxyModel.propertyByIndex(mi, &row);
 			if (p == nullptr)
 			{
 				Q_ASSERT(p);
@@ -652,6 +826,14 @@ namespace ExtWidgets
 		}
 
 		return;
+	}
+
+	void PropertyTable::onCellEditorClosed(QWidget *editor, QAbstractItemDelegate::EndEditHint hint)
+	{
+		Q_UNUSED(editor);
+		Q_UNUSED(hint);
+
+		m_tableView->setFocus();
 	}
 
 	void PropertyTable::fillProperties()
@@ -817,9 +999,9 @@ namespace ExtWidgets
 						type == QVariant::Uuid ||
 						type == QVariant::String ||
 						type == QVariant::StringList)
-					{
-						pto.properties.push_back(p);
-					}
+				{
+					pto.properties.push_back(p);
+				}
 			}
 
 			if (pto.properties.size() > 0)
@@ -829,5 +1011,172 @@ namespace ExtWidgets
 		}
 
 		m_tableModel.setTableObjects(tableObjects);
+	}
+
+	void PropertyTable::startEditProperty()
+	{
+		QModelIndexList selectedIndexes = m_tableView->selectionModel()->selectedIndexes();
+		if (selectedIndexes.isEmpty() == true)
+		{
+			return;
+		}
+
+		// Check if selected cells have the same type
+		{
+			bool firstCell = true;
+			int type = -1;
+
+			for (const QModelIndex& mi : selectedIndexes)
+			{
+				int row = -1;
+
+				std::shared_ptr<Property> p = m_proxyModel.propertyByIndex(mi, &row);
+				if (p == nullptr)
+				{
+					Q_ASSERT(p);
+					return;
+				}
+
+				if (expandValuesToAllRows() == false &&
+						p->value().userType() != QVariant::StringList &&  row > 0)
+				{
+					return;
+				}
+
+				if (firstCell == true)
+				{
+					type = p->value().userType();
+					firstCell = false;
+				}
+				else
+				{
+					if (type != p->value().userType())
+					{
+						QMessageBox::critical(this, qAppName(), tr("Please select properties of same type."));
+						return;
+					}
+				}
+			}
+		}
+
+		QModelIndex index = m_tableView->currentIndex();
+
+		m_tableView->edit(index);
+	}
+
+	void PropertyTable::addString(bool after)
+	{
+		QModelIndexList selectedIndexes = m_tableView->selectionModel()->selectedIndexes();
+		if (selectedIndexes.size() != 1)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		int row = -1;
+
+		std::shared_ptr<PropertyObject> po = m_proxyModel.propertyObjectByIndex(selectedIndexes[0]);
+		if (po == nullptr)
+		{
+			Q_ASSERT(po);
+			return;
+		}
+
+		std::shared_ptr<Property> p = m_proxyModel.propertyByIndex(selectedIndexes[0], &row);
+		if (p == nullptr)
+		{
+			Q_ASSERT(p);
+			return;
+		}
+
+		if (p->value().userType() != QVariant::StringList)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		bool ok = false;
+		QString text = QInputDialog::getText(this, qAppName(),
+											 tr("Enter the value:"),
+											 QLineEdit::Normal,
+											 tr("NewLine"),
+											 &ok);
+
+		if (ok == false || text.isEmpty() == true)
+		{
+			return;
+		}
+
+		if (after == true)
+		{
+			row++;
+		}
+
+		QStringList strings = p->value().toStringList();
+
+		strings.insert(row, text);
+
+		onValueChanged(strings);
+
+		m_tableModel.recalculateRowCount(po);
+
+		updatePropertiesValues();
+
+		return;
+	}
+
+	void PropertyTable::removeString()
+	{
+		QModelIndexList selectedIndexes = m_tableView->selectionModel()->selectedIndexes();
+		if (selectedIndexes.size() != 1)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		int row = -1;
+
+		std::shared_ptr<PropertyObject> po = m_proxyModel.propertyObjectByIndex(selectedIndexes[0]);
+		if (po == nullptr)
+		{
+			Q_ASSERT(po);
+			return;
+		}
+
+		std::shared_ptr<Property> p = m_proxyModel.propertyByIndex(selectedIndexes[0], &row);
+		if (p == nullptr)
+		{
+			Q_ASSERT(p);
+			return;
+		}
+
+		if (p->value().userType() != QVariant::StringList)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		QStringList strings = p->value().toStringList();
+
+		if (strings.isEmpty() == true)
+		{
+			return;
+		}
+
+		if (row >= static_cast<int>(strings.size()))
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		strings.erase(strings.begin() + row);
+
+		onValueChanged(strings);
+
+		m_tableModel.recalculateRowCount(po);
+
+		updatePropertiesValues();
+
+		return;
 	}
 }

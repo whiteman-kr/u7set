@@ -1,6 +1,7 @@
 #ifndef PROPERTYTABLE_H
 #define PROPERTYTABLE_H
 
+#include <QSortFilterProxyModel>
 #include <QAbstractItemModel>
 #include "../lib/PropertyObject.h"
 #include "../lib/PropertyEditor.h"
@@ -19,12 +20,13 @@ namespace ExtWidgets
 
 	class PropertyTable;
 	class PropertyTableModel;
+	class PropertyTableProxyModel;
 
 	class PropertyTableItemDelegate : public QItemDelegate
 	{
 		Q_OBJECT
 	public:
-		explicit PropertyTableItemDelegate(PropertyTable* propertyTable, PropertyTableModel* model);
+		explicit PropertyTableItemDelegate(PropertyTable* propertyTable, PropertyTableProxyModel* proxyModel);
 
 		virtual QWidget* createEditor(QWidget *parent, const QStyleOptionViewItem &option, const QModelIndex &index) const override;
 
@@ -42,9 +44,23 @@ namespace ExtWidgets
 
 	private:
 		PropertyTable* m_propertyTable = nullptr;
-		PropertyTableModel* m_model = nullptr;
+		PropertyTableProxyModel* m_proxyModel = nullptr;
 
 		mutable PropertyEditCellWidget *m_cellEditor = nullptr;
+	};
+
+	class PropertyTableProxyModel : public QSortFilterProxyModel
+	{
+		Q_OBJECT
+
+	public:
+		PropertyTableProxyModel(QObject *parent = 0);
+
+		std::shared_ptr<PropertyObject> propertyObjectByIndex(const QModelIndex& mi) const;
+		std::shared_ptr<Property> propertyByIndex(const QModelIndex& mi, int* propertyRow) const;
+
+	protected:
+		//bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
 	};
 
 	class PropertyTableModel : public QAbstractTableModel
@@ -57,8 +73,9 @@ namespace ExtWidgets
 		void setTableObjects(std::vector<PropertyTableObject>& tableObjects);
 
 		std::shared_ptr<PropertyObject> propertyObjectByIndex(const QModelIndex& mi) const;
-
 		std::shared_ptr<Property> propertyByIndex(const QModelIndex& mi, int* propertyRow) const;
+
+		void recalculateRowCount(std::shared_ptr<PropertyObject> object);
 
 	private:
 		int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -78,8 +95,16 @@ namespace ExtWidgets
 
 	class PropertyTableView : public QTableView
 	{
+		Q_OBJECT
+
 	public:
 		void closeCurrentEditorIfOpen();
+
+	protected:
+		virtual void keyPressEvent(QKeyEvent *event) override;
+
+	signals:
+		void editKeyPressed();
 	};
 
 	class PropertyTable : public QWidget, public PropertyEditorBase
@@ -99,6 +124,9 @@ namespace ExtWidgets
 		QString propertyMask() const;
 		void setPropertyMask(const QString& propertyMask);
 
+		bool expandValuesToAllRows() const;
+		void setExpandValuesToAllRows(bool value);
+
 	protected:
 		virtual void valueChanged(QMap<QString, std::pair<std::shared_ptr<PropertyObject>, QVariant>> modifiedObjectsData);
 
@@ -108,11 +136,21 @@ namespace ExtWidgets
 
 	private slots:
 		void onCellDoubleClicked(const QModelIndex &index);
+		void onCellEditKeyPressed();
 		void onShowErrorMessage (QString message);
 		void onPropertyMaskChanged();
+		void onTableContextMenuRequested(const QPoint &pos);
+
+		// Context menu slots
+
+		void onInsertStringBefore();
+		void onInsertStringAfter();
+		void onRemoveString();
+		void onUniqueRowValuesChanged();
 
 	public slots:
 		void onValueChanged(QVariant value);
+		void onCellEditorClosed(QWidget *editor, QAbstractItemDelegate::EndEditHint hint);
 
 	signals:
 		void showErrorMessage(QString message);
@@ -120,12 +158,18 @@ namespace ExtWidgets
 
 	private:
 		void fillProperties();
+		void startEditProperty();
+
+		void addString(bool after);
+		void removeString();
 
 	private:
 
 		PropertyTableView* m_tableView = nullptr;
 
 		QLineEdit* m_editPropertyMask = nullptr;
+
+		PropertyTableProxyModel m_proxyModel;
 
 		PropertyTableModel m_tableModel;
 
@@ -134,6 +178,8 @@ namespace ExtWidgets
 		QList<std::shared_ptr<PropertyObject>> m_objects;
 
 		QStringList m_propertyMasks;
+
+		bool m_expandValuesToAllRows = true;
 
 	};
 

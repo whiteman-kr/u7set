@@ -217,7 +217,8 @@ namespace ExtWidgets
 
 				if (row < 0 || row >= static_cast<int>(strings.size()))
 				{
-					Q_ASSERT(false);
+					// No string exists in this row, it is ok - other property can have more rows
+					//
 					return QString();
 				}
 
@@ -1842,6 +1843,8 @@ namespace ExtWidgets
 		lt->addWidget(m_combo);
 
 		setLayout(lt);
+
+		QTimer::singleShot(0, m_combo, SLOT(setFocus()));
 	}
 
 	void MultiEnumEdit::setValue(std::shared_ptr<Property> property, bool readOnly)
@@ -2912,6 +2915,8 @@ namespace ExtWidgets
 
 		m_checkBox->setEnabled(readOnly == false);
 		m_checkBox->blockSignals(false);
+
+		QTimer::singleShot(0, m_checkBox, SLOT(setFocus()));
 	}
 
 	void MultiCheckBox::changeValueOnButtonClick()

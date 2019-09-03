@@ -161,6 +161,13 @@ public:
 	//
 	QString m_lastSelectedLmDescriptionFile;
 
+	// SchemaItemPropertiesDialog
+
+	int m_schemaItemPropertiesSplitterPosition = 100;
+	QString m_schemaItemPropertiesPropertyMask;
+	bool m_schemaItemPropertiesExpandValuesToAllRows = true;
+	QByteArray m_schemaItemPropertiesGeometry;
+
 	// Find SchemaItem
 	//
 	bool m_findSchemaItemCaseSensitive = false;

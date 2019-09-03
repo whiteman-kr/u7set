@@ -9,11 +9,10 @@
 
 ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent, DbController* dbController)
 {
-	if (propertyPtr == nullptr || parent == nullptr || dbController == nullptr)
+	if (propertyPtr == nullptr || parent == nullptr)
 	{
 		Q_ASSERT(propertyPtr);
 		Q_ASSERT(parent);
-		Q_ASSERT(dbController);
 		return new ExtWidgets::PropertyPlainTextEditor(parent);
 	}
 
@@ -21,6 +20,11 @@ ExtWidgets::PropertyTextEditor* IdePropertyEditorHelper::createPropertyTextEdito
 	{
 		// This is Filters Editor for TuningClient
 		//
+		if (dbController == nullptr)
+		{
+			Q_ASSERT(dbController);
+			return new ExtWidgets::PropertyPlainTextEditor(parent);
+		}
 
 		IdeTuningFiltersEditor* editor = new IdeTuningFiltersEditor(dbController, parent);
 		return editor;
