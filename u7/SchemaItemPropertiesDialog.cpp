@@ -11,16 +11,16 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 {
 	ui->setupUi(this);
 
-	QTabWidget* tabWidget = new QTabWidget();
 
-	m_propertyEditor = new SchemaItemPropertyEditor(editEngine, tabWidget);
+	m_propertyEditor = new SchemaItemPropertyEditor(editEngine, this);
 	m_propertyEditor->setReadOnly(editEngine->readOnly());
-	tabWidget->addTab(m_propertyEditor, "Tree view");
 
-	m_propertyTable = new SchemaItemPropertyTable(editEngine, tabWidget);
+	m_propertyTable = new SchemaItemPropertyTable(editEngine, this);
 	m_propertyTable->setReadOnly(editEngine->readOnly());
-	tabWidget->addTab(m_propertyTable, "Table view");
 
+	QTabWidget* tabWidget = new QTabWidget();
+	tabWidget->addTab(m_propertyEditor, "Tree view");
+	tabWidget->addTab(m_propertyTable, "Table view");
 	tabWidget->setTabPosition(QTabWidget::South);
 
 	connect(tabWidget, &QTabWidget::currentChanged, this, &SchemaItemPropertiesDialog::propertiesModeTabChanged);
@@ -228,7 +228,7 @@ SchemaItemPropertyTable::~SchemaItemPropertyTable()
 {
 }
 
-void SchemaItemPropertyTable::valueChanged(QMap<QString, std::pair<std::shared_ptr<PropertyObject>, QVariant>> modifiedObjectsData)
+void SchemaItemPropertyTable::valueChanged(const ExtWidgets::ModifiedObjectsData& modifiedObjectsData)
 {
 	bool result = editEngine()->startBatch();
 	if (result == false)

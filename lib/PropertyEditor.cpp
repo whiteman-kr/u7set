@@ -3415,7 +3415,12 @@ namespace ExtWidgets
 
 	void PropertyEditor::setObjects(const QList<std::shared_ptr<PropertyObject>>& objects)
 	{
-        setVisible(false);
+		bool wasVisible = isVisible();
+
+		if (wasVisible == true)
+		{
+			setVisible(false);
+		}
 
 		// Disconnect updatePropertiesList slot from previous objects
 
@@ -3443,7 +3448,10 @@ namespace ExtWidgets
 			}
 		}
 
-		setVisible(true);
+		if (wasVisible == true)
+		{
+			setVisible(true);
+		}
 
 		return;
 	}
@@ -3556,11 +3564,19 @@ namespace ExtWidgets
 
 	void PropertyEditor::updatePropertiesList()
 	{
-		setVisible(false);
+		bool wasVisible = isVisible();
+
+		if (wasVisible == true)
+		{
+			setVisible(false);
+		}
 
 		fillProperties();
 
-		setVisible(true);
+		if (wasVisible == true)
+		{
+			setVisible(true);
+		}
 
 		return;
 	}

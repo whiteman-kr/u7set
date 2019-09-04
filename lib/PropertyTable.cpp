@@ -7,6 +7,103 @@
 
 namespace ExtWidgets
 {
+	//
+	// DialogReplace
+	//
+
+	DialogReplace::DialogReplace(const QString& what, const QString& to, bool caseSensitive, QWidget* parent):
+		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
+		m_what(what),
+		m_to(to),
+		m_caseSensitive(caseSensitive)
+	{
+		QGridLayout* gl = new QGridLayout();
+
+		QLabel* l = new QLabel(tr("Find what:"));
+		gl->addWidget(l, 0, 0);
+
+		m_editWhat = new QLineEdit();
+		m_editWhat->setText(what);
+		gl->addWidget(m_editWhat, 0, 1);
+
+		l = new QLabel(tr("Replace with:"));
+		gl->addWidget(l, 1, 0);
+
+		m_editTo = new QLineEdit();
+		m_editTo->setText(to);
+		gl->addWidget(m_editTo, 1, 1);
+
+		m_checkCase = new QCheckBox(tr("Case Sensitive"));
+		m_checkCase->setChecked(caseSensitive);
+
+		gl->addWidget(m_checkCase, 2, 1);
+
+		//
+
+		QHBoxLayout* hl = new QHBoxLayout();
+		hl->addStretch();
+
+		QPushButton* b = new QPushButton(tr("OK"));
+		connect(b, &QPushButton::clicked, this, &QDialog::accept);
+		hl->addWidget(b);
+
+		b = new QPushButton(tr("Cancel"));
+		connect(b, &QPushButton::clicked, this, &QDialog::reject);
+		hl->addWidget(b);
+
+		//
+
+		QVBoxLayout* vl = new QVBoxLayout();
+		vl->addLayout(gl);
+		vl->addLayout(hl);
+
+		setLayout(vl);
+	}
+
+	const QString DialogReplace::what() const
+	{
+		return m_what;
+	}
+
+	const QString DialogReplace::to() const
+	{
+		return m_to;
+	}
+
+	bool DialogReplace::caseSensitive() const
+	{
+		return m_caseSensitive;
+	}
+
+	void DialogReplace::accept()
+	{
+		if (m_editWhat->text().isEmpty() == true)
+		{
+			QMessageBox::critical(this, qAppName(), tr("Please fill the \"Find What\" field!"));
+			m_editWhat->setFocus();
+			return;
+		}
+		m_what = m_editWhat->text();
+
+		if (m_editTo->text().isEmpty() == true)
+		{
+			QMessageBox::critical(this, qAppName(), tr("Please fill the \"Replace With\" field!"));
+			m_editTo->setFocus();
+			return;
+		}
+		m_to = m_editTo->text();
+
+		m_caseSensitive = m_checkCase->isChecked();
+
+		QDialog::accept();
+	}
+
+
+	//
+	// PropertyTableItemDelegate
+	//
+
+
 	PropertyTableItemDelegate::PropertyTableItemDelegate(PropertyTable* propertyTable, PropertyTableProxyModel* proxyModel) :
 		QItemDelegate(propertyTable),
 		m_propertyTable(propertyTable),
@@ -303,6 +400,19 @@ namespace ExtWidgets
 		return;
 	}
 
+	bool PropertyTableModel::hasMultiRows() const
+	{
+		for (const PropertyTableObject& pto : m_tableObjects)
+		{
+			if (pto.rowCount > 1)
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
 	int PropertyTableModel::rowCount(const QModelIndex &parent) const
 	{
 		Q_UNUSED(parent);
@@ -420,6 +530,12 @@ namespace ExtWidgets
 			return;
 		}
 
+		if (event->key() == Qt::Key_Space)
+		{
+			emit spaceKeyPressed();
+			return;
+		}
+
 		QTableView::keyPressEvent(event);
 	}
 
@@ -433,7 +549,8 @@ namespace ExtWidgets
 		PropertyEditorBase()
 	{
 		QVBoxLayout* mainLayout = new QVBoxLayout(this);
-		mainLayout->setContentsMargins(0, 0, 0, 0);
+		mainLayout->setContentsMargins(1, 1, 1, 1);
+		mainLayout->setSpacing(2);
 
 		// Property Mask
 
@@ -444,6 +561,7 @@ namespace ExtWidgets
 
 		QHBoxLayout* toolsLayout = new QHBoxLayout();
 
+		toolsLayout->addWidget(new QLabel(tr("Search:")));
 		toolsLayout->addWidget(m_editPropertyMask);
 		toolsLayout->addStretch();
 
@@ -472,6 +590,7 @@ namespace ExtWidgets
 		connect(m_tableView, &QTableView::doubleClicked, this, &PropertyTable::onCellDoubleClicked);
 
 		connect(m_tableView, &PropertyTableView::editKeyPressed, this, &PropertyTable::onCellEditKeyPressed);
+		connect(m_tableView, &PropertyTableView::spaceKeyPressed, this, &PropertyTable::onCellToggleKeyPressed);
 
 		// Edit Delegate
 
@@ -572,7 +691,7 @@ namespace ExtWidgets
 		m_expandValuesToAllRows = value;
 	}
 
-	void PropertyTable::valueChanged(QMap<QString, std::pair<std::shared_ptr<PropertyObject>, QVariant>> modifiedObjectsData)
+	void PropertyTable::valueChanged(const ModifiedObjectsData& modifiedObjectsData)
 	{
 		// Set the new property value in all objects
 		//
@@ -649,12 +768,23 @@ namespace ExtWidgets
 	void PropertyTable::onCellDoubleClicked(const QModelIndex &index)
 	{
 		Q_UNUSED(index);
-		startEditProperty();
+		startEditing();
 	}
 
 	void PropertyTable::onCellEditKeyPressed()
 	{
-		startEditProperty();
+		if (getSelectionType() != QVariant::Bool)
+		{
+			startEditing();
+		}
+	}
+
+	void PropertyTable::onCellToggleKeyPressed()
+	{
+		if (getSelectionType() == QVariant::Bool)
+		{
+			toggleSelected();
+		}
 	}
 
 	void PropertyTable::onShowErrorMessage (QString message)
@@ -726,12 +856,29 @@ namespace ExtWidgets
 			menu.addSeparator();
 		}
 
+		// Replace
+
+		int selectionType = getSelectionType();
+
+		if (selectionType == QVariant::String ||
+				selectionType == QVariant::StringList)
+		{
+			QAction* a = menu.addAction(tr("Replace..."));
+			connect(a, &QAction::triggered, this, &PropertyTable::onReplace);
+		}
+
 		//
 
-		QAction* a = menu.addAction(tr("Expand Values to all Rows"));
-		a->setCheckable(true);
-		a->setChecked(expandValuesToAllRows());
-		connect(a, &QAction::triggered, this, &PropertyTable::onUniqueRowValuesChanged);
+		if (m_tableModel.hasMultiRows() == true)
+		{
+			menu.addSeparator();
+
+			// Expand
+			QAction* a = menu.addAction(tr("Expand Values to all Rows"));
+			a->setCheckable(true);
+			a->setChecked(expandValuesToAllRows());
+			connect(a, &QAction::triggered, this, &PropertyTable::onUniqueRowValuesChanged);
+		}
 
 		if (menu.actions().empty() == true)
 		{
@@ -763,6 +910,139 @@ namespace ExtWidgets
 		updatePropertiesValues();
 	}
 
+	void PropertyTable::onReplace()
+	{
+		int selectionType = getSelectionType();
+
+		if (selectionType != QVariant::String &&
+				selectionType != QVariant::StringList)
+		{
+			return;
+		}
+
+		static bool caseSensitive = true;
+		static QString replaceWhat;
+		static QString replaceTo;
+
+		DialogReplace d(replaceWhat, replaceTo, caseSensitive, this);
+		if (d.exec() != QDialog::Accepted)
+		{
+			return;
+		}
+
+		replaceWhat = d.what();
+		replaceTo = d.to();
+		caseSensitive = d.caseSensitive();
+
+		//
+
+		QModelIndexList selectedIndexes = m_tableView->selectionModel()->selectedIndexes();
+		if (selectedIndexes.isEmpty() == true)
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		ModifiedObjectsData modifiedObjectsData;
+
+		std::map<std::pair<QString, std::shared_ptr<PropertyObject>>, QVariant> multiRowValues;
+
+		for (const QModelIndex& mi : selectedIndexes)
+		{
+			std::shared_ptr<PropertyObject> po = m_proxyModel.propertyObjectByIndex(mi);
+
+			if (po == nullptr)
+			{
+				Q_ASSERT(po);
+				return;
+			}
+
+			int row = -1;
+
+			std::shared_ptr<Property> p = m_proxyModel.propertyByIndex(mi, &row);
+			if (p == nullptr)
+			{
+				Q_ASSERT(p);
+				return;
+			}
+
+			if (p->value().userType() == QVariant::String)
+			{
+				QString s = p->value().toString();
+
+				s = s.replace(replaceWhat, replaceTo, caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+
+				modifiedObjectsData.insertMulti(p->caption(), std::make_pair(po, s));
+			}
+
+			if (p->value().userType() == QVariant::StringList)
+			{
+				// StringList property can have more than one modified string.
+				// Because of this we need to take already added value from multiRowValues and make new modification.
+				// If it is not added yet, we take value from the property
+
+				QVariant value;
+
+				auto propertyKey = std::make_pair(p->caption(), po);
+
+				auto it = multiRowValues.find(propertyKey);
+				if (it == multiRowValues.end())
+				{
+					value = p->value();
+				}
+				else
+				{
+					value = it->second;
+				}
+
+				QStringList l = value.toStringList();
+
+				if (row < 0 || row >= static_cast<int>(l.size()))
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+				QString s = l[row];
+
+				s = s.replace(replaceWhat, replaceTo, caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive);
+
+				l[row] = s;
+
+				multiRowValues[propertyKey] = l;
+			}
+		}
+
+		// Fill stringListValues
+
+		for (auto it : multiRowValues)
+		{
+			std::pair<QString, std::shared_ptr<PropertyObject>> key = it.first;
+
+			const QString& propertyName = key.first;
+			const std::shared_ptr<PropertyObject>& po = key.second;
+			const QVariant& value = it.second;
+
+			modifiedObjectsData.insertMulti(propertyName, std::make_pair(po, value));
+		}
+
+		if (modifiedObjectsData.empty() == true)
+		{
+			return;
+		}
+
+		valueChanged(modifiedObjectsData);
+
+		// Force redraw all selected cells
+
+		for (const QModelIndex& mi : selectedIndexes)
+		{
+			m_tableView->update(mi);
+		}
+
+		return;
+	}
+
 	void PropertyTable::onValueChanged(QVariant value)
 	{
 		QModelIndexList selectedIndexes = m_tableView->selectionModel()->selectedIndexes();
@@ -772,7 +1052,7 @@ namespace ExtWidgets
 			return;
 		}
 
-		QMap<QString, std::pair<std::shared_ptr<PropertyObject>, QVariant>> modifiedObjectsData;
+		ModifiedObjectsData modifiedObjectsData;
 
 		for (const QModelIndex& mi : selectedIndexes)
 		{
@@ -813,10 +1093,12 @@ namespace ExtWidgets
 			modifiedObjectsData.insertMulti(p->caption(), std::make_pair(po, newValue));
 		}
 
-		if (modifiedObjectsData.empty() == false)
+		if (modifiedObjectsData.empty() == true)
 		{
-			valueChanged(modifiedObjectsData);
+			return;
 		}
+
+		valueChanged(modifiedObjectsData);
 
 		// Force redraw all selected cells
 
@@ -1013,7 +1295,69 @@ namespace ExtWidgets
 		m_tableModel.setTableObjects(tableObjects);
 	}
 
-	void PropertyTable::startEditProperty()
+	// returns -1 if no type is selected or they are different
+	//
+	int PropertyTable::getSelectionType()
+	{
+		QModelIndexList selectedIndexes = m_tableView->selectionModel()->selectedIndexes();
+		if (selectedIndexes.isEmpty() == true)
+		{
+			return -1;
+		}
+
+		// Check if selected cells have the same type
+		bool firstCell = true;
+		int type = -1;
+
+		for (const QModelIndex& mi : selectedIndexes)
+		{
+			int row = -1;
+
+			std::shared_ptr<Property> p = m_proxyModel.propertyByIndex(mi, &row);
+			if (p == nullptr)
+			{
+				Q_ASSERT(p);
+				return -1;
+			}
+
+			if (expandValuesToAllRows() == false &&
+					p->value().userType() != QVariant::StringList &&
+					row > 0)
+			{
+				// empty cell with no-repeated value is selected
+				return -1;
+			}
+
+			if (firstCell == true)
+			{
+				type = p->value().userType();
+				firstCell = false;
+			}
+			else
+			{
+				if (type != p->value().userType())
+				{
+					QMessageBox::critical(this, qAppName(), tr("Please select properties of same type."));
+					return -1;
+				}
+			}
+		}
+
+		return type;
+	}
+
+	void PropertyTable::startEditing()
+	{
+		if (getSelectionType() == -1)
+		{
+			return;
+		}
+
+		QModelIndex index = m_tableView->currentIndex();
+		m_tableView->edit(index);
+	}
+
+	void PropertyTable::toggleSelected()
 	{
 		QModelIndexList selectedIndexes = m_tableView->selectionModel()->selectedIndexes();
 		if (selectedIndexes.isEmpty() == true)
@@ -1021,47 +1365,47 @@ namespace ExtWidgets
 			return;
 		}
 
-		// Check if selected cells have the same type
+		ModifiedObjectsData modifiedObjectsData;
+
+		for (const QModelIndex& mi : selectedIndexes)
 		{
-			bool firstCell = true;
-			int type = -1;
-
-			for (const QModelIndex& mi : selectedIndexes)
+			std::shared_ptr<PropertyObject> po = m_proxyModel.propertyObjectByIndex(mi);
+			if (po == nullptr)
 			{
-				int row = -1;
+				Q_ASSERT(po);
+				return;
+			}
 
-				std::shared_ptr<Property> p = m_proxyModel.propertyByIndex(mi, &row);
-				if (p == nullptr)
-				{
-					Q_ASSERT(p);
-					return;
-				}
+			int row = -1;
 
-				if (expandValuesToAllRows() == false &&
-						p->value().userType() != QVariant::StringList &&  row > 0)
-				{
-					return;
-				}
+			std::shared_ptr<Property> p = m_proxyModel.propertyByIndex(mi, &row);
+			if (p == nullptr)
+			{
+				Q_ASSERT(p);
+				return;
+			}
 
-				if (firstCell == true)
-				{
-					type = p->value().userType();
-					firstCell = false;
-				}
-				else
-				{
-					if (type != p->value().userType())
-					{
-						QMessageBox::critical(this, qAppName(), tr("Please select properties of same type."));
-						return;
-					}
-				}
+			if (p->value().userType() == QVariant::Bool)
+			{
+				bool b = p->value().toBool();
+
+				modifiedObjectsData.insertMulti(p->caption(), std::make_pair(po, !b));
 			}
 		}
 
-		QModelIndex index = m_tableView->currentIndex();
+		if (modifiedObjectsData.empty() == true)
+		{
+			return;
+		}
 
-		m_tableView->edit(index);
+		valueChanged(modifiedObjectsData);
+
+		// Force redraw all selected cells
+
+		for (const QModelIndex& mi : selectedIndexes)
+		{
+			m_tableView->update(mi);
+		}
 	}
 
 	void PropertyTable::addString(bool after)

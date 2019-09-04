@@ -8,6 +8,34 @@
 
 namespace ExtWidgets
 {
+	class DialogReplace : public QDialog
+	{
+		Q_OBJECT
+
+	public:
+		DialogReplace(const QString& what, const QString& to, bool caseSensitive, QWidget* parent);
+
+		const QString what() const;
+		const QString to() const;
+		bool caseSensitive() const;
+
+	protected:
+		virtual void accept() override;
+
+	private:
+
+		QLineEdit* m_editWhat = nullptr;
+		QLineEdit* m_editTo = nullptr;
+
+		QCheckBox* m_checkCase = nullptr;
+
+		QString m_what;
+		QString m_to;
+		bool m_caseSensitive = false;
+
+	};
+
+	typedef QMap<QString, std::pair<std::shared_ptr<PropertyObject>, QVariant>> ModifiedObjectsData;
 
 	struct PropertyTableObject
 	{
@@ -77,6 +105,8 @@ namespace ExtWidgets
 
 		void recalculateRowCount(std::shared_ptr<PropertyObject> object);
 
+		bool hasMultiRows() const;
+
 	private:
 		int rowCount(const QModelIndex &parent = QModelIndex()) const override;
 		int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -105,6 +135,7 @@ namespace ExtWidgets
 
 	signals:
 		void editKeyPressed();
+		void spaceKeyPressed();
 	};
 
 	class PropertyTable : public QWidget, public PropertyEditorBase
@@ -128,7 +159,7 @@ namespace ExtWidgets
 		void setExpandValuesToAllRows(bool value);
 
 	protected:
-		virtual void valueChanged(QMap<QString, std::pair<std::shared_ptr<PropertyObject>, QVariant>> modifiedObjectsData);
+		virtual void valueChanged(const ModifiedObjectsData& modifiedObjectsData);
 
 	protected slots:
 		void updatePropertiesList();
@@ -137,6 +168,7 @@ namespace ExtWidgets
 	private slots:
 		void onCellDoubleClicked(const QModelIndex &index);
 		void onCellEditKeyPressed();
+		void onCellToggleKeyPressed();
 		void onShowErrorMessage (QString message);
 		void onPropertyMaskChanged();
 		void onTableContextMenuRequested(const QPoint &pos);
@@ -148,6 +180,8 @@ namespace ExtWidgets
 		void onRemoveString();
 		void onUniqueRowValuesChanged();
 
+		void onReplace();
+
 	public slots:
 		void onValueChanged(QVariant value);
 		void onCellEditorClosed(QWidget *editor, QAbstractItemDelegate::EndEditHint hint);
@@ -158,7 +192,11 @@ namespace ExtWidgets
 
 	private:
 		void fillProperties();
-		void startEditProperty();
+
+		int getSelectionType();	// returns -1 if no type is selected or they are different
+
+		void startEditing();
+		void toggleSelected();
 
 		void addString(bool after);
 		void removeString();
