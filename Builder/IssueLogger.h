@@ -97,6 +97,7 @@ namespace Builder
 		void errCMN0019(QString fileID, QString subDir);		// Can't find file with ID = %1 in build subdirectory %2.
 		void errCMN0020(QString fileName);						// Can't find build file %1.
 		void errCMN0021(QString fileName, QString cfgXmlFileName);	// File %1 already linked to %2.
+		void wrnCMN0022(QString issue, QString stdWritablePath);	// Build output path %1. Standard writeble location will be used: %2
 
 		// INT			Internal issues							1000-1999
 		//
