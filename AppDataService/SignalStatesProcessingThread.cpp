@@ -20,8 +20,9 @@ void SignalStatesProcessingThread::registerDestSignalStatesQueue(SimpleAppSignal
 
     if (m_queueMap.contains(destQueuePtr) == true)
     {
-	assert(false);
-	return;
+		assert(false);
+		m_queueMapMutex.unlock();
+		return;
     }
 
     m_queueMap.insert(destQueuePtr, destQueue);
