@@ -89,6 +89,7 @@ namespace Tuning
 	private:
 		void writeBigEndianUint32Bit(quint8* dataPtr, int bitNo, quint32 bitValue);
 		void sortSignalsByAcquiredProperty(QVector<Signal *>& tuningSignals);
+		void sortByAppSignalID(QVector<Signal *>& signalList);
 
 	protected:
 		QString m_lmEquipmentID;
