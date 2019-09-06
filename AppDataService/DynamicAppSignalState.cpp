@@ -311,6 +311,8 @@ bool DynamicAppSignalState::setState(const Times& time,
 	if (m_autoArchivingGroup == autoArchivingGroup)
 	{
 		curState.flags.autoPoint = 1;
+
+		qDebug() << "auto" << appSignalID();
 	}
 
 	curState.flags.updateArchivingReasonFlags(prevState.flags);
@@ -792,6 +794,11 @@ bool DynamicAppSignalStates::getCurrentState(Hash hash, AppSignalState& state) c
 
 void DynamicAppSignalStates::setAutoArchivingGroups(int autoArchivingGroupsCount)
 {
+	if (autoArchivingGroupsCount <= 0)
+	{
+		return;
+	}
+
 	int count = 0;
 
 	for(int i = 0; i < m_size; i++)
@@ -800,10 +807,6 @@ void DynamicAppSignalStates::setAutoArchivingGroups(int autoArchivingGroupsCount
 		{
 			m_appSignalState[i].setAutoArchivingGroup(count % autoArchivingGroupsCount);
 			count++;
-		}
-		else
-		{
-			m_appSignalState[i].setAutoArchivingGroup(DynamicAppSignalState::NO_AUTOARCHIVING_GROUP);
 		}
 	}
 }

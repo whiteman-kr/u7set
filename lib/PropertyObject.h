@@ -54,7 +54,7 @@ class PropertyObject;
 	CATEGORY,\
 	VISIBLE,\
 	(std::function<TYPE(void)>)std::bind(&GETTER, this), \
-	std::bind(&SETTER, this, std::placeholders::_1));
+	std::bind(&SETTER, this, std::placeholders::_1))
 
 // Add property which has getter and setter
 //
@@ -997,7 +997,7 @@ public:
 			v.canConvert(m_value.userType()) == true)
 		{
 			bool ok = v.convert(m_value.userType());
-			if (Q_LIKELY(ok == true))
+			if (ok == true)
 			{
 				m_value.setValue(v);
 			}

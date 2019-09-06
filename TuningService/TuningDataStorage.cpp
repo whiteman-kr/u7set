@@ -738,47 +738,53 @@ namespace  Tuning
 	{
 		int count = tuningSignals.count();
 
-		// 1 Sort tuning signals by Acquire property
-		//
-		for(int i = 0; i < count - 1; i++)
+		QVector<Signal*> acquired;
+		QVector<Signal*> nonAcquired;
+
+		acquired.reserve(count);
+		nonAcquired.reserve(count);
+
+		for(Signal* s : tuningSignals)
 		{
-			for(int k = i + 1; k < count; k++)
+			TEST_PTR_CONTINUE(s);
+
+			if (s->acquire() == true)
 			{
-				Signal* s1 = tuningSignals[i];
-				Signal* s2 = tuningSignals[k];
-
-				TEST_PTR_CONTINUE(s1);
-				TEST_PTR_CONTINUE(s2);
-
-				if (s1->isAcquired() == false && s2->isAcquired() == true)
-				{
-					tuningSignals[i] = s2;
-					tuningSignals[k] = s1;
-				}
+				acquired.append(s);
+			}
+			else
+			{
+				nonAcquired.append(s);
 			}
 		}
 
-		// 2 Sort tuning Acquired and non Acquired signals by appSignalID
-		//
+		sortByAppSignalID(acquired);
+		sortByAppSignalID(nonAcquired);
+
+		tuningSignals.clear();
+
+		tuningSignals.append(acquired);
+		tuningSignals.append(nonAcquired);
+	}
+
+	void TuningData::sortByAppSignalID(QVector<Signal*>& signalList)
+	{
+		int count = signalList.size();
+
 		for(int i = 0; i < count - 1; i++)
 		{
 			for(int k = i + 1; k < count; k++)
 			{
-				Signal* s1 = tuningSignals[i];
-				Signal* s2 = tuningSignals[k];
+				Signal* s1 = signalList[i];
+				Signal* s2 = signalList[k];
 
 				TEST_PTR_CONTINUE(s1);
 				TEST_PTR_CONTINUE(s2);
 
-				if (s1->isAcquired() != s2->isAcquired())
-				{
-					continue;
-				}
-
 				if (s1->appSignalID() > s2->appSignalID())
 				{
-					tuningSignals[i] = s2;
-					tuningSignals[k] = s1;
+					signalList[i] = s2;
+					signalList[k] = s1;
 				}
 			}
 		}

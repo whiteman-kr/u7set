@@ -41,6 +41,7 @@ MonitorSchemaWidget::MonitorSchemaWidget(std::shared_ptr<VFrame30::Schema> schem
 
 MonitorSchemaWidget::~MonitorSchemaWidget()
 {
+	qDebug() << Q_FUNC_INFO;
 }
 
 void MonitorSchemaWidget::createActions()

@@ -18,13 +18,13 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope* message) const final;
+		virtual bool LoadData(const Proto::Envelope& message) final;
 
 		// Methods
 	public:
-		virtual QWidget* createWidget(QWidget* parent, bool editMode) override;
-		virtual void updateWidgetProperties(QWidget* widget) const override;
+		virtual QWidget* createWidget(QWidget* parent, bool editMode) final;
+		virtual void updateWidgetProperties(QWidget* widget) const final;
 
 	protected slots:
 		void afterCreate(QLineEdit* control);

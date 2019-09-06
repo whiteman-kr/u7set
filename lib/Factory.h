@@ -34,7 +34,7 @@ public:
 	std::shared_ptr<BaseClass> Create(quint32 classHash)
 	{
 		auto it = factories.find(classHash);
-		if (Q_LIKELY(it != factories.end()))
+		if (it != factories.end())
 		{
 			return it->second->Create();
 		}

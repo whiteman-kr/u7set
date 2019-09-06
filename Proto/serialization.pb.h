@@ -2270,6 +2270,61 @@ class Schema : public ::google::protobuf::Message {
   inline ::std::string* release_tags();
   inline void set_allocated_tags(::std::string* tags);
 
+  // optional bool joinHorzPriority = 31 [default = false];
+  inline bool has_joinhorzpriority() const;
+  inline void clear_joinhorzpriority();
+  static const int kJoinHorzPriorityFieldNumber = 31;
+  inline bool joinhorzpriority() const;
+  inline void set_joinhorzpriority(bool value);
+
+  // optional string joinLeftSchemaId = 32;
+  inline bool has_joinleftschemaid() const;
+  inline void clear_joinleftschemaid();
+  static const int kJoinLeftSchemaIdFieldNumber = 32;
+  inline const ::std::string& joinleftschemaid() const;
+  inline void set_joinleftschemaid(const ::std::string& value);
+  inline void set_joinleftschemaid(const char* value);
+  inline void set_joinleftschemaid(const char* value, size_t size);
+  inline ::std::string* mutable_joinleftschemaid();
+  inline ::std::string* release_joinleftschemaid();
+  inline void set_allocated_joinleftschemaid(::std::string* joinleftschemaid);
+
+  // optional string joinTopSchemaId = 33;
+  inline bool has_jointopschemaid() const;
+  inline void clear_jointopschemaid();
+  static const int kJoinTopSchemaIdFieldNumber = 33;
+  inline const ::std::string& jointopschemaid() const;
+  inline void set_jointopschemaid(const ::std::string& value);
+  inline void set_jointopschemaid(const char* value);
+  inline void set_jointopschemaid(const char* value, size_t size);
+  inline ::std::string* mutable_jointopschemaid();
+  inline ::std::string* release_jointopschemaid();
+  inline void set_allocated_jointopschemaid(::std::string* jointopschemaid);
+
+  // optional string joinRightSchemaId = 34;
+  inline bool has_joinrightschemaid() const;
+  inline void clear_joinrightschemaid();
+  static const int kJoinRightSchemaIdFieldNumber = 34;
+  inline const ::std::string& joinrightschemaid() const;
+  inline void set_joinrightschemaid(const ::std::string& value);
+  inline void set_joinrightschemaid(const char* value);
+  inline void set_joinrightschemaid(const char* value, size_t size);
+  inline ::std::string* mutable_joinrightschemaid();
+  inline ::std::string* release_joinrightschemaid();
+  inline void set_allocated_joinrightschemaid(::std::string* joinrightschemaid);
+
+  // optional string joinBottomSchemaId = 35;
+  inline bool has_joinbottomschemaid() const;
+  inline void clear_joinbottomschemaid();
+  static const int kJoinBottomSchemaIdFieldNumber = 35;
+  inline const ::std::string& joinbottomschemaid() const;
+  inline void set_joinbottomschemaid(const ::std::string& value);
+  inline void set_joinbottomschemaid(const char* value);
+  inline void set_joinbottomschemaid(const char* value, size_t size);
+  inline ::std::string* mutable_joinbottomschemaid();
+  inline ::std::string* release_joinbottomschemaid();
+  inline void set_allocated_joinbottomschemaid(::std::string* joinbottomschemaid);
+
   // repeated .Proto.Envelope layers = 100;
   inline int layers_size() const;
   inline void clear_layers();
@@ -2329,6 +2384,16 @@ class Schema : public ::google::protobuf::Message {
   inline void clear_has_backgroundcolor();
   inline void set_has_tags();
   inline void clear_has_tags();
+  inline void set_has_joinhorzpriority();
+  inline void clear_has_joinhorzpriority();
+  inline void set_has_joinleftschemaid();
+  inline void clear_has_joinleftschemaid();
+  inline void set_has_jointopschemaid();
+  inline void clear_has_jointopschemaid();
+  inline void set_has_joinrightschemaid();
+  inline void clear_has_joinrightschemaid();
+  inline void set_has_joinbottomschemaid();
+  inline void clear_has_joinbottomschemaid();
   inline void set_has_afbs();
   inline void clear_has_afbs();
   inline void set_has_logic_schema();
@@ -2344,16 +2409,21 @@ class Schema : public ::google::protobuf::Message {
   double width_;
   double height_;
   int unit_;
-  bool excludefrombuild_;
+  ::google::protobuf::uint32 backgroundcolor_;
   ::std::string* tags_;
+  ::std::string* joinleftschemaid_;
+  ::std::string* jointopschemaid_;
+  ::std::string* joinrightschemaid_;
+  ::std::string* joinbottomschemaid_;
   ::google::protobuf::RepeatedPtrField< ::Proto::Envelope > layers_;
   ::Proto::AfbElementCollection* afbs_;
   ::Proto::LogicSchema* logic_schema_;
   ::Proto::UfbSchema* ufb_schema_;
-  ::google::protobuf::uint32 backgroundcolor_;
+  bool excludefrombuild_;
+  bool joinhorzpriority_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(18 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -15076,6 +15146,308 @@ inline void Schema::set_allocated_tags(::std::string* tags) {
   }
 }
 
+// optional bool joinHorzPriority = 31 [default = false];
+inline bool Schema::has_joinhorzpriority() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void Schema::set_has_joinhorzpriority() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void Schema::clear_has_joinhorzpriority() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void Schema::clear_joinhorzpriority() {
+  joinhorzpriority_ = false;
+  clear_has_joinhorzpriority();
+}
+inline bool Schema::joinhorzpriority() const {
+  return joinhorzpriority_;
+}
+inline void Schema::set_joinhorzpriority(bool value) {
+  set_has_joinhorzpriority();
+  joinhorzpriority_ = value;
+}
+
+// optional string joinLeftSchemaId = 32;
+inline bool Schema::has_joinleftschemaid() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void Schema::set_has_joinleftschemaid() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void Schema::clear_has_joinleftschemaid() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void Schema::clear_joinleftschemaid() {
+  if (joinleftschemaid_ != &::google::protobuf::internal::kEmptyString) {
+    joinleftschemaid_->clear();
+  }
+  clear_has_joinleftschemaid();
+}
+inline const ::std::string& Schema::joinleftschemaid() const {
+  return *joinleftschemaid_;
+}
+inline void Schema::set_joinleftschemaid(const ::std::string& value) {
+  set_has_joinleftschemaid();
+  if (joinleftschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    joinleftschemaid_ = new ::std::string;
+  }
+  joinleftschemaid_->assign(value);
+}
+inline void Schema::set_joinleftschemaid(const char* value) {
+  set_has_joinleftschemaid();
+  if (joinleftschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    joinleftschemaid_ = new ::std::string;
+  }
+  joinleftschemaid_->assign(value);
+}
+inline void Schema::set_joinleftschemaid(const char* value, size_t size) {
+  set_has_joinleftschemaid();
+  if (joinleftschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    joinleftschemaid_ = new ::std::string;
+  }
+  joinleftschemaid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Schema::mutable_joinleftschemaid() {
+  set_has_joinleftschemaid();
+  if (joinleftschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    joinleftschemaid_ = new ::std::string;
+  }
+  return joinleftschemaid_;
+}
+inline ::std::string* Schema::release_joinleftschemaid() {
+  clear_has_joinleftschemaid();
+  if (joinleftschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = joinleftschemaid_;
+    joinleftschemaid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Schema::set_allocated_joinleftschemaid(::std::string* joinleftschemaid) {
+  if (joinleftschemaid_ != &::google::protobuf::internal::kEmptyString) {
+    delete joinleftschemaid_;
+  }
+  if (joinleftschemaid) {
+    set_has_joinleftschemaid();
+    joinleftschemaid_ = joinleftschemaid;
+  } else {
+    clear_has_joinleftschemaid();
+    joinleftschemaid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string joinTopSchemaId = 33;
+inline bool Schema::has_jointopschemaid() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void Schema::set_has_jointopschemaid() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void Schema::clear_has_jointopschemaid() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void Schema::clear_jointopschemaid() {
+  if (jointopschemaid_ != &::google::protobuf::internal::kEmptyString) {
+    jointopschemaid_->clear();
+  }
+  clear_has_jointopschemaid();
+}
+inline const ::std::string& Schema::jointopschemaid() const {
+  return *jointopschemaid_;
+}
+inline void Schema::set_jointopschemaid(const ::std::string& value) {
+  set_has_jointopschemaid();
+  if (jointopschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    jointopschemaid_ = new ::std::string;
+  }
+  jointopschemaid_->assign(value);
+}
+inline void Schema::set_jointopschemaid(const char* value) {
+  set_has_jointopschemaid();
+  if (jointopschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    jointopschemaid_ = new ::std::string;
+  }
+  jointopschemaid_->assign(value);
+}
+inline void Schema::set_jointopschemaid(const char* value, size_t size) {
+  set_has_jointopschemaid();
+  if (jointopschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    jointopschemaid_ = new ::std::string;
+  }
+  jointopschemaid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Schema::mutable_jointopschemaid() {
+  set_has_jointopschemaid();
+  if (jointopschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    jointopschemaid_ = new ::std::string;
+  }
+  return jointopschemaid_;
+}
+inline ::std::string* Schema::release_jointopschemaid() {
+  clear_has_jointopschemaid();
+  if (jointopschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = jointopschemaid_;
+    jointopschemaid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Schema::set_allocated_jointopschemaid(::std::string* jointopschemaid) {
+  if (jointopschemaid_ != &::google::protobuf::internal::kEmptyString) {
+    delete jointopschemaid_;
+  }
+  if (jointopschemaid) {
+    set_has_jointopschemaid();
+    jointopschemaid_ = jointopschemaid;
+  } else {
+    clear_has_jointopschemaid();
+    jointopschemaid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string joinRightSchemaId = 34;
+inline bool Schema::has_joinrightschemaid() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void Schema::set_has_joinrightschemaid() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void Schema::clear_has_joinrightschemaid() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void Schema::clear_joinrightschemaid() {
+  if (joinrightschemaid_ != &::google::protobuf::internal::kEmptyString) {
+    joinrightschemaid_->clear();
+  }
+  clear_has_joinrightschemaid();
+}
+inline const ::std::string& Schema::joinrightschemaid() const {
+  return *joinrightschemaid_;
+}
+inline void Schema::set_joinrightschemaid(const ::std::string& value) {
+  set_has_joinrightschemaid();
+  if (joinrightschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    joinrightschemaid_ = new ::std::string;
+  }
+  joinrightschemaid_->assign(value);
+}
+inline void Schema::set_joinrightschemaid(const char* value) {
+  set_has_joinrightschemaid();
+  if (joinrightschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    joinrightschemaid_ = new ::std::string;
+  }
+  joinrightschemaid_->assign(value);
+}
+inline void Schema::set_joinrightschemaid(const char* value, size_t size) {
+  set_has_joinrightschemaid();
+  if (joinrightschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    joinrightschemaid_ = new ::std::string;
+  }
+  joinrightschemaid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Schema::mutable_joinrightschemaid() {
+  set_has_joinrightschemaid();
+  if (joinrightschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    joinrightschemaid_ = new ::std::string;
+  }
+  return joinrightschemaid_;
+}
+inline ::std::string* Schema::release_joinrightschemaid() {
+  clear_has_joinrightschemaid();
+  if (joinrightschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = joinrightschemaid_;
+    joinrightschemaid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Schema::set_allocated_joinrightschemaid(::std::string* joinrightschemaid) {
+  if (joinrightschemaid_ != &::google::protobuf::internal::kEmptyString) {
+    delete joinrightschemaid_;
+  }
+  if (joinrightschemaid) {
+    set_has_joinrightschemaid();
+    joinrightschemaid_ = joinrightschemaid;
+  } else {
+    clear_has_joinrightschemaid();
+    joinrightschemaid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string joinBottomSchemaId = 35;
+inline bool Schema::has_joinbottomschemaid() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+inline void Schema::set_has_joinbottomschemaid() {
+  _has_bits_[0] |= 0x00002000u;
+}
+inline void Schema::clear_has_joinbottomschemaid() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline void Schema::clear_joinbottomschemaid() {
+  if (joinbottomschemaid_ != &::google::protobuf::internal::kEmptyString) {
+    joinbottomschemaid_->clear();
+  }
+  clear_has_joinbottomschemaid();
+}
+inline const ::std::string& Schema::joinbottomschemaid() const {
+  return *joinbottomschemaid_;
+}
+inline void Schema::set_joinbottomschemaid(const ::std::string& value) {
+  set_has_joinbottomschemaid();
+  if (joinbottomschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    joinbottomschemaid_ = new ::std::string;
+  }
+  joinbottomschemaid_->assign(value);
+}
+inline void Schema::set_joinbottomschemaid(const char* value) {
+  set_has_joinbottomschemaid();
+  if (joinbottomschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    joinbottomschemaid_ = new ::std::string;
+  }
+  joinbottomschemaid_->assign(value);
+}
+inline void Schema::set_joinbottomschemaid(const char* value, size_t size) {
+  set_has_joinbottomschemaid();
+  if (joinbottomschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    joinbottomschemaid_ = new ::std::string;
+  }
+  joinbottomschemaid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Schema::mutable_joinbottomschemaid() {
+  set_has_joinbottomschemaid();
+  if (joinbottomschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    joinbottomschemaid_ = new ::std::string;
+  }
+  return joinbottomschemaid_;
+}
+inline ::std::string* Schema::release_joinbottomschemaid() {
+  clear_has_joinbottomschemaid();
+  if (joinbottomschemaid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = joinbottomschemaid_;
+    joinbottomschemaid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Schema::set_allocated_joinbottomschemaid(::std::string* joinbottomschemaid) {
+  if (joinbottomschemaid_ != &::google::protobuf::internal::kEmptyString) {
+    delete joinbottomschemaid_;
+  }
+  if (joinbottomschemaid) {
+    set_has_joinbottomschemaid();
+    joinbottomschemaid_ = joinbottomschemaid;
+  } else {
+    clear_has_joinbottomschemaid();
+    joinbottomschemaid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
 // repeated .Proto.Envelope layers = 100;
 inline int Schema::layers_size() const {
   return layers_.size();
@@ -15103,13 +15475,13 @@ Schema::mutable_layers() {
 
 // required .Proto.AfbElementCollection afbs = 101;
 inline bool Schema::has_afbs() const {
-  return (_has_bits_[0] & 0x00000400u) != 0;
+  return (_has_bits_[0] & 0x00008000u) != 0;
 }
 inline void Schema::set_has_afbs() {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00008000u;
 }
 inline void Schema::clear_has_afbs() {
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00008000u;
 }
 inline void Schema::clear_afbs() {
   if (afbs_ != NULL) afbs_->::Proto::AfbElementCollection::Clear();
@@ -15141,13 +15513,13 @@ inline void Schema::set_allocated_afbs(::Proto::AfbElementCollection* afbs) {
 
 // optional .Proto.LogicSchema logic_schema = 200;
 inline bool Schema::has_logic_schema() const {
-  return (_has_bits_[0] & 0x00000800u) != 0;
+  return (_has_bits_[0] & 0x00010000u) != 0;
 }
 inline void Schema::set_has_logic_schema() {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00010000u;
 }
 inline void Schema::clear_has_logic_schema() {
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00010000u;
 }
 inline void Schema::clear_logic_schema() {
   if (logic_schema_ != NULL) logic_schema_->::Proto::LogicSchema::Clear();
@@ -15179,13 +15551,13 @@ inline void Schema::set_allocated_logic_schema(::Proto::LogicSchema* logic_schem
 
 // optional .Proto.UfbSchema ufb_schema = 201;
 inline bool Schema::has_ufb_schema() const {
-  return (_has_bits_[0] & 0x00001000u) != 0;
+  return (_has_bits_[0] & 0x00020000u) != 0;
 }
 inline void Schema::set_has_ufb_schema() {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00020000u;
 }
 inline void Schema::clear_has_ufb_schema() {
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00020000u;
 }
 inline void Schema::clear_ufb_schema() {
   if (ufb_schema_ != NULL) ufb_schema_->::Proto::UfbSchema::Clear();

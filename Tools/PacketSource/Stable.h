@@ -67,6 +67,7 @@
 #include <QTimer>
 #include <QTranslator>
 
+#include <QtConcurrent/QtConcurrent>
 #include <QtCore>
 #include <QtGlobal>
 #include <QtNetwork/QHostAddress>

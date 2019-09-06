@@ -18,7 +18,7 @@ namespace Sim
 	bool CommandProcessor_LM1_SF00::runCommand(const DeviceCommand& command)
 	{
 		auto it = m_nameToFuncCommand.find(command.m_command.simulationFunc);
-		if (Q_UNLIKELY(it == m_nameToFuncCommand.end()))
+		if (it == m_nameToFuncCommand.end())
 		{
 			SimException::raise(QString("Cannot find command %1").arg(command.m_command.simulationFunc), "CommandProcessor_LM1_SF00::runCommand");
 		}
@@ -89,7 +89,7 @@ namespace Sim
 		// AFB
 		//
 		auto it = m_nameToFuncAfb.find(afbSimFunc);
-		if (Q_UNLIKELY(it == m_nameToFuncAfb.end()))
+		if (it == m_nameToFuncAfb.end())
 		{
 			SimException::raise(QString("Cannot find AFB func %1").arg(afbSimFunc), "CommandProcessor_LM1_SF00::command_startafb");
 		}

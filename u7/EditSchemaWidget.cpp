@@ -1123,13 +1123,13 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 	//
 	if (schemaItem == nullptr)
 	{
-		assert(schemaItem != nullptr);
+		Q_ASSERT(schemaItem != nullptr);
 		return SchemaItemAction::NoAction;
 	}
 
 	if (schemaItem->itemUnit() != schema()->unit())
 	{
-		assert(schemaItem->itemUnit() == schema()->unit());
+		Q_ASSERT(schemaItem->itemUnit() == schema()->unit());
 		return SchemaItemAction::NoAction;
 	}
 
@@ -1323,8 +1323,8 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 			{
 				// The line is vertical
 				//
-				x1 -= controlBarSize / 4;
-				x2 += controlBarSize / 4;
+				x1 -= controlBarSize / 4.0;
+				x2 += controlBarSize / 4.0;
 
 				if (point.x() >= x1 && point.x() <= x2 &&
 					point.y() >= y1 && point.y() <= y2)
@@ -1337,8 +1337,8 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 			{
 				// The line is horizontal
 				//
-				y1 -= controlBarSize / 4;
-				y2 += controlBarSize / 4;
+				y1 -= controlBarSize / 4.0;
+				y2 += controlBarSize / 4.0;
 
 				if (point.x() >= x1 && point.x() <= x2 &&
 					point.y() >= y1 && point.y() <= y2)
