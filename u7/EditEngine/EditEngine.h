@@ -90,6 +90,9 @@ namespace EditEngine
 
 		void runSetSchemaProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::Schema>& schema);
 
+		void runNopItem(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items);
+		void runNopItem(const std::shared_ptr<VFrame30::SchemaItem>& item);
+
 	signals:
 		void stateChanged(bool canUndo, bool canRedo);
 		void modifiedChanged(bool modified);

@@ -251,8 +251,8 @@ void SchemaItemPropertyTable::valueChanged(const ExtWidgets::ModifiedObjectsData
 
 			if (value.isValid() == false)
 			{
-				assert(false);
-				return;
+				Q_ASSERT(false);
+				continue;
 			}
 
 			// Do not set property, if it has the same value
@@ -266,7 +266,6 @@ void SchemaItemPropertyTable::valueChanged(const ExtWidgets::ModifiedObjectsData
 
 			editEngine()->runSetProperty(propertyName, value, items);
 		}
-
 	}
 
 	editEngine()->endBatch();

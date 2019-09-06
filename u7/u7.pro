@@ -66,6 +66,7 @@ SOURCES +=\
     CreateProjectDialog.cpp \
     CreateUserDialogDialog.cpp \
     DialogSettings.cpp \
+    EditEngine/EditEngineNop.cpp \
     FilesTabPage.cpp \
     LoginDialog.cpp \
     Main.cpp \
@@ -201,6 +202,7 @@ HEADERS  += \
     CreateProjectDialog.h \
     CreateUserDialogDialog.h \
     DialogSettings.h \
+    EditEngine/EditEngineNop.h \
     FilesTabPage.h \
     LoginDialog.h \
     MainTabPage.h \
