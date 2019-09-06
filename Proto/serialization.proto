@@ -295,6 +295,12 @@ message Schema
 	optional uint32 backgroundColor = 8;
 	optional string tags = 9;
 
+    optional bool joinHorzPriority = 31 [default = false];
+    optional string joinLeftSchemaId = 32;
+	optional string joinTopSchemaId = 33;
+	optional string joinRightSchemaId = 34;
+	optional string joinBottomSchemaId = 35;
+
 	repeated Envelope layers = 100;				// Layer list
 	required AfbElementCollection afbs = 101;	// Not used anymore, keep for compability
 

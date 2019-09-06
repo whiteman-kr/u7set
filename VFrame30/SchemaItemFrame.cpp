@@ -167,15 +167,16 @@ namespace VFrame30
 			return ErrorCode::SourceSchemaHasSameId;
 		}
 
-		if (allowScale() == false && destSchema->unit() != sourceSchema->unit())
+		if (destSchema->unit() != sourceSchema->unit())
 		{
-			return ErrorCode::SchemasHasDiffrenetUnitsWithoutAutoscale;
+			return ErrorCode::SchemasHasDiffrenetUnits;
 		}
 
 		// Copy layer by layer, if layer does not exist on destSchema, then copy to compile layer,
 		// if compile layer does not exists either, then copy to the first layer
 		//
 		QRectF destRect{leftDocPt(), topDocPt(), widthDocPt(), heightDocPt()};
+		QRectF sourceRect{0, 0, sourceSchema->docWidth(), sourceSchema->docHeight()};
 
 		for (std::shared_ptr<SchemaLayer> sourceLayer : sourceSchema->Layers)
 		{
@@ -186,6 +187,9 @@ namespace VFrame30
 
 			if (foundDestLayerIt == destSchema->Layers.end())
 			{
+				// Source layer is not found in destination, copy to compile layer,
+				// if compile layer does not exists either, then copy to the first layer
+				//
 				foundDestLayerIt = std::find_if(destSchema->Layers.begin(), destSchema->Layers.end(),
 												[](auto l) { return l->compile(); } );
 
@@ -197,9 +201,15 @@ namespace VFrame30
 
 			Q_ASSERT(foundDestLayerIt != destSchema->Layers.end());
 
-			// Copy all form source layre to destLayer, keep the order of items and insert all them right at the end of items
+			// Copy all form sourceLayer to destLayer, keep the order of items and insert all them right at the end of items
 			//
 			std::shared_ptr<SchemaLayer> destLayer = *foundDestLayerIt;
+
+			if (destLayer == nullptr)
+			{
+				Q_ASSERT(destLayer);
+				return ErrorCode::InternalError;
+			}
 
 			for (std::shared_ptr<SchemaItem> sourceItem : sourceLayer->Items)
 			{
@@ -239,16 +249,45 @@ namespace VFrame30
 					// Direct copy, with shifting itmes to destRect
 					//
 					newItem->MoveItem(destRect.left(), destRect.top());
-
-					// No need to set units for item
-					//
 				}
 				else
 				{
-					// To do all other cases
+					// moving and scaling to dest rect
 					//
-					Q_ASSERT(false);
-					int to_do;
+					double scaleFactorHorz = destRect.width() / sourceRect.width();
+					double scaleFactorVert = destRect.height() / sourceRect.height();
+
+					// Set new Pos
+					//
+					newItem->setLeft(newItem->left() * scaleFactorHorz);
+					newItem->setTop(newItem->top() * scaleFactorVert);
+
+					newItem->MoveItem(destRect.left(), destRect.top());
+
+					// Set new width and height
+					//
+					newItem->SetWidthInDocPt(newItem->GetWidthInDocPt() * scaleFactorHorz);
+					newItem->SetHeightInDocPt(newItem->GetHeightInDocPt() * scaleFactorVert);
+
+					// set font size, leave it for the same units (example Pixel vs Pixel, most likely the font must be similar)
+					//
+					if (auto fontSizeProp = newItem->propertyByCaption(PropertyNames::fontSize);
+						fontSizeProp != nullptr)
+					{
+						bool convOk = false;
+						double v = fontSizeProp->value().toDouble(&convOk);
+
+						if (convOk == true)
+						{
+							fontSizeProp->setValue(v * scaleFactorVert);
+						}
+					}
+
+					if (VFrame30::FblItemRect* fblItemRect = newItem->toType<VFrame30::FblItemRect>();
+						fblItemRect != nullptr)
+					{
+						//fblItemRect->adjustHeight(destSchema->gridSize() * scaleFactorVert);
+					}
 				}
 
 				// --
@@ -256,10 +295,6 @@ namespace VFrame30
 				destLayer->Items.push_back(newItem);
 			}
 		}
-
-		// Remove frame (this item) from source schema
-		//
-		int to_do;
 
 		return ErrorCode::Ok;
 	}

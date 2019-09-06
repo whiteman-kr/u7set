@@ -1191,11 +1191,13 @@ const QString& DbFileInfo::details() const noexcept
 
 void DbFileInfo::setDetails(const QString& value)
 {
-	m_details = value;
-
-	if (m_details.isEmpty())
+	if (value.isEmpty() == true)
 	{
-		m_details = "{}";
+		m_details = QStringLiteral("{}");
+	}
+	else
+	{
+		m_details = value;
 	}
 
 	return;
@@ -1407,6 +1409,12 @@ const QByteArray& DbFile::data() const
 void DbFile::setData(const QByteArray& data)
 {
 	m_data = data;
+	m_size = m_data.size();
+}
+
+void DbFile::setData(QByteArray&& data)
+{
+	m_data = std::move(data);
 	m_size = m_data.size();
 }
 

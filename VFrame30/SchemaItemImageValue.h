@@ -33,13 +33,13 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope* message) const final;
+		virtual bool LoadData(const Proto::Envelope& message) final;
 
 		// Draw Functions
 		//
 	public:
-		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
 
 	protected:
 		void initDrawingResources() const;
@@ -48,8 +48,8 @@ namespace VFrame30
 		void drawImage(CDrawParam* drawParam, const QString& imageId, const QRectF& rect);
 
 	protected:
-		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
-		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const final;
+		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const final;
 
 		// Java Script invocables specific for SchemaItemImageValue
 		//

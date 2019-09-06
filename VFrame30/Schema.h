@@ -87,6 +87,9 @@ namespace VFrame30
 
 		std::shared_ptr<SchemaItem> getItemById(const QUuid& id) const;
 
+		template<typename SchemaItemType>
+		bool hasSchemaItemType() const;
+
 		// Properties and Datas
 		//
 	public:
@@ -104,6 +107,21 @@ namespace VFrame30
 
 		void setTags(QString tags);
 		void setTagsList(const QStringList& tags);
+
+		bool joinHorzPriority() const;
+		void setJoinHorzPriority(bool value);
+
+		QString joinLeftSchemaId() const;
+		void setJoinLeftSchemaId(const QString& value);
+
+		QString joinTopSchemaId() const;
+		void setJoinTopSchemaId(const QString& value);
+
+		QString joinRightSchemaId() const;
+		void setJoinRightSchemaId(const QString& value);
+
+		QString joinBottomSchemaId() const;
+		void setJoinBottomSchemaId(const QString& value);
 
 		double docWidth() const;
 		void setDocWidth(double width);
@@ -159,6 +177,12 @@ namespace VFrame30
 		QString m_caption;
 
 		QStringList m_tags;
+
+		bool m_joinHorzPriority = false;
+		QString m_joinLeftSchemaId;
+		QString m_joinTopSchemaId;
+		QString m_joinRightSchemaId;
+		QString m_joinBottomSchemaId;
 
 		double m_width = 0.0;					// pixels or inches, depends on m_unit
 		double m_height = 0.0;					// pixels or inches, depends on m_unit

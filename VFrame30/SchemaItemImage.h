@@ -17,8 +17,8 @@ namespace VFrame30
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope* message) const final;
+		virtual bool LoadData(const Proto::Envelope& message) final;
 
 		// Draw Functions
 		//
@@ -27,11 +27,11 @@ namespace VFrame30
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
-		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
 
 	protected:
-		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const override;
-		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const override;
+		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const final;
+		virtual double minimumPossibleWidthDocPt(double gridSize, int pinGridStep) const final;
 
 		// Properties and Data
 		//

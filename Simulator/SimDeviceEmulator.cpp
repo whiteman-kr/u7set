@@ -149,7 +149,7 @@ namespace Sim
 		QString errorMessage;
 		bool ok = m_device->m_afbComponents.addInstantiatorParam(afbOpCode, instanceNo, param, &errorMessage);
 
-		if (Q_UNLIKELY(ok == false))
+		if (ok == false)
 		{
 			m_device->FAULT(QString("Add addInstantiatorParam error, %1").arg(errorMessage));
 			return false;
@@ -176,7 +176,7 @@ namespace Sim
 	bool ScriptDeviceEmulator::writeRamBit(quint32 offsetW, quint32 bitNo, quint32 data)
 	{
 		bool ok = m_device->m_ram.writeBit(offsetW, bitNo, data, E::ByteOrder::BigEndian);
-		if (Q_UNLIKELY(ok == false))
+		if (ok == false)
 		{
 			m_device->FAULT(QString("Write access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
 		}
@@ -189,7 +189,7 @@ namespace Sim
 		quint16 data = 0;
 		bool ok = m_device->m_ram.readBit(offsetW, bitNo, &data, E::ByteOrder::BigEndian);
 
-		if (Q_UNLIKELY(ok == false))
+		if (ok == false)
 		{
 			m_device->FAULT(QString("Read access RAM error, offsetW %1, bitNo %2").arg(offsetW).arg(bitNo));
 		}
@@ -201,7 +201,7 @@ namespace Sim
 	{
 		bool ok = m_device->m_ram.writeWord(offsetW, data, E::ByteOrder::BigEndian);
 
-		if (Q_UNLIKELY(ok == false))
+		if (ok == false)
 		{
 			m_device->FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
 		}
@@ -214,7 +214,7 @@ namespace Sim
 		quint16 data = 0;
 		bool ok = m_device->m_ram.readWord(offsetW, &data, E::ByteOrder::BigEndian);
 
-		if (Q_UNLIKELY(ok == false))
+		if (ok == false)
 		{
 			m_device->FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
 		}
@@ -226,7 +226,7 @@ namespace Sim
 	{
 		bool ok = m_device->m_ram.writeDword(offsetW, data, E::ByteOrder::BigEndian);
 
-		if (Q_UNLIKELY(ok == false))
+		if (ok == false)
 		{
 			m_device->FAULT(QString("Write access RAM error, offsetW %1").arg(offsetW));
 		}
@@ -239,7 +239,7 @@ namespace Sim
 		quint32 data = 0;
 		bool ok = m_device->m_ram.readDword(offsetW, &data, E::ByteOrder::BigEndian);
 
-		if (Q_UNLIKELY(ok == false))
+		if (ok == false)
 		{
 			m_device->FAULT(QString("Read access RAM error, offsetW %1").arg(offsetW));
 		}
@@ -783,7 +783,7 @@ namespace Sim
 		while (m_logicUnit.programCounter < m_plainAppLogic.size() &&
 			  (m_logicUnit.phase == CyclePhase::IdrPhase || m_logicUnit.phase == CyclePhase::AlpPhase))
 		{
-			if (Q_UNLIKELY(m_logicUnit.programCounter >= m_offsetToCommand.size()))
+			if (m_logicUnit.programCounter >= m_offsetToCommand.size())
 			{
 				assert(false);
 				FAULT("Command not found in current ProgramCounter.");
@@ -792,8 +792,7 @@ namespace Sim
 
 			int commandIndex = m_offsetToCommand[m_logicUnit.programCounter];
 
-			if (Q_UNLIKELY(commandIndex == -1 ||
-						   commandIndex > m_commands.size()))
+			if (commandIndex == -1 || commandIndex > m_commands.size())
 			{
 				FAULT(QString("Command not found for ProgramCounter %1").arg(m_logicUnit.programCounter));
 				break;
@@ -803,14 +802,14 @@ namespace Sim
 			assert(m_logicUnit.programCounter == command.m_offset);
 
 			if (bool ok = runCommand(command);
-				Q_UNLIKELY(ok == false && m_currentMode != DeviceMode::Fault))
+				ok == false && m_currentMode != DeviceMode::Fault)
 			{
 				FAULT(QString("Run command %1 unknown error.").arg(command.m_string));
 				result = false;
 				break;
 			}
 
-			if (Q_UNLIKELY(m_currentMode == DeviceMode::Fault))
+			if (m_currentMode == DeviceMode::Fault)
 			{
 				result = false;
 				break;
@@ -929,7 +928,7 @@ namespace Sim
 	{
 		// eepromOffset - in bytes
 		//
-		if (Q_UNLIKELY(eepromOffset < 0 || eepromOffset > m_plainAppLogic.size() - sizeof(TYPE)))
+		if (eepromOffset < 0 || eepromOffset > m_plainAppLogic.size() - sizeof(TYPE))
 		{
 			assert(eepromOffset >= 0 &&
 				   eepromOffset - sizeof(TYPE) <= m_plainAppLogic.size());

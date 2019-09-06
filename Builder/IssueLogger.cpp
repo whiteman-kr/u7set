@@ -2282,45 +2282,45 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: SchemaItemFrame has reference (property SchemaID) to unknown schema %1, Schema %2.
+	/// Title: Schema %1 has join to unknown schema %2, check properties Join(Left/Top/Right/Bottom)SchemaID for schema %1.
 	///
 	/// Parameters:
-	///		%1 Not found schema ID
-	///		%2 Schema ID
+	///		%1 Schema ID
+	///		%2 Schema ID used for joining
 	///
 	/// Description:
-	///			Schema has SchemaItemFrame wchich has reference (property SchemaID) to unknown schema.
+	///			Schema has join to unknown schema, check schema properties Join(Left/Top/Right/Bottom)SchemaID.
 	///
-	void IssueLogger::errALP4080(QString schema, QString frameSchemaId, QUuid itemUuid)
+	void IssueLogger::errALP4080(QString schema, QString pannelSchemaId)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 4080, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4080, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4080,
-				  tr("SchemaItemFrame has reference (property SchemaID) to unknown schema %1, Schema %2.")
-						.arg(frameSchemaId)
-						.arg(schema));
+				  tr("Schema %1 has join to unknown schema %2, check properties Join(Left/Top/Right/Bottom)SchemaID for schema %1.")
+						.arg(schema)
+						.arg(pannelSchemaId));
 	}
 
 	/// IssueCode: ALP4081
 	///
 	/// IssueType: Error
 	///
-	/// Title: SchemaItemFrame.SchemaID has recursive reference to schema %1, property must be distincive from schema where it is placed.
+	/// Title: SchemaID %1 has recursive reference, property Join(Left/Top/Right/Bottom)SchemaID must be distincive from SchemaID.
 	///
 	/// Parameters:
 	///		%1 Schema ID
 	///
 	/// Description:
-	///			SchemaItemFrame.SchemaID has recursive reference to the same schema where it is placed.
+	///			SchemaID has recursive reference, property Join(Left/Top/Right/Bottom)SchemaID must be distincive from SchemaID.
 	///
-	void IssueLogger::errALP4081(QString schema, QUuid itemUuid)
+	void IssueLogger::errALP4081(QString schema)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 4081, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4081, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4081,
-				  tr("SchemaItemFrame.SchemaID has recursive reference to schema %1, property must be distincive from schema where it is placed.")
+				  tr("SchemaID %1 has recursive reference, property Join(Left/Top/Right/Bottom)SchemaID must be distincive from SchemaID.")
 						.arg(schema));
 	}
 
@@ -2328,24 +2328,24 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: SchemaItemFrame has reference to schema %1 which has different units and SchemaItemFrame.AutoScale is false, Schema %2.
+	/// Title: Join schemas with different units, schemas %1 and %2 must have the same unit.
 	///
 	/// Parameters:
-	///		%1 Not found schema ID
-	///		%2 Schema ID
+	///		%1 Schema ID
+	///		%2 Schema to join
 	///
 	/// Description:
-	///			SchemaItemFrame has reference to schema which has different units and SchemaItemFrame.AutoScale is false. If AutoScale is false then both schemas must have identical units.
+	///			Join schemas with different units, both schemas must have the same unit..
 	///
-	void IssueLogger::errALP4082(QString schema, QString frameSchemaId, QUuid itemUuid)
+	void IssueLogger::errALP4082(QString schema, QString pannelSchemaId)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 4082, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4082, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4082,
-				  tr("SchemaItemFrame has reference to schema %1 which has different units and SchemaItemFrame.AutoScale is false, Schema %2.")
-						.arg(frameSchemaId)
-						.arg(schema));
+				  tr("Join schemas with different units, schemas %1 and %2 must have the same unit.")
+						.arg(schema)
+						.arg(pannelSchemaId));
 	}
 
 	/// IssueCode: ALP4130

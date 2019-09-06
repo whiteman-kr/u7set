@@ -566,7 +566,7 @@ namespace Sim
 	{
 		auto it = m_params.find(opIndex);
 
-		if (Q_UNLIKELY(it == m_params.end()))
+		if (it == m_params.end())
 		{
 			SimException::raise(QString("Param %1 is not found in AFB.").arg(opIndex));
 		}
@@ -746,7 +746,7 @@ namespace Sim
 		assert(errorMessage);
 
 		auto foundIt = m_components.find(afbOpCode);
-		if (Q_UNLIKELY(foundIt == m_components.end()))
+		if (foundIt == m_components.end())
 		{
 			// Component should be created in init();
 			//
