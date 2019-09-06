@@ -29,7 +29,7 @@
 
 // Qt includes
 //
-#include <QApplication>
+#include <QAbstractSocket>
 
 #include <QCommandLineParser>
 #include <QCoreApplication>
@@ -44,6 +44,7 @@
 #include <QFileInfo>
 
 #include <QHash>
+#include <QHostAddress>
 
 #include <QMap>
 #include <QMetaClassInfo>
@@ -69,9 +70,7 @@
 #include <QtGlobal>
 #include <QtNetwork/QHostAddress>
 
-#include <QtSerialPort/QSerialPort>
-#include <QtSerialPort/QSerialPortInfo>
-
+#include <QUdpSocket>
 #include <QUuid>
 
 #include <QVariant>
@@ -79,50 +78,6 @@
 
 #include <QXmlStreamReader>
 #include <QXmlStreamWriter>
-
-// Qt widgets
-//
-
-#include <QAbstractItemModel>
-#include <QAbstractTableModel>
-#include <QAction>
-
-#include <QCheckBox>
-#include <QCloseEvent>
-
-#include <QErrorMessage>
-
-#include <QFileDialog>
-
-#include <QHBoxLayout>
-#include <QHeaderView>
-
-#include <QInputDialog>
-
-#include <QLabel>
-#include <QListView>
-#include <QListWidget>
-
-#include <QMainWindow>
-#include <QMenu>
-#include <QMenuBar>
-#include <QMessageBox>
-
-#include <QVBoxLayout>
-
-#include <QPainter>
-#include <QProgressDialog>
-#include <QPushButton>
-
-#include <QScrollArea>
-#include <QScrollBar>
-#include <QSplitter>
-#include <QStatusBar>
-
-#include <QTableWidget>
-#include <QTabWidget>
-#include <QTextEdit>
-#include <QTreeWidget>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)
@@ -132,6 +87,7 @@
 //
 #ifdef Q_OS_WIN
 #pragma warning(disable : 4482)		// nonstandard extension used: enum 'enum' used in qualified name
+#pragma warning(disable : 4251)
 
 	// Disable 4996 warning
 #ifndef _SCL_SECURE_NO_WARNINGS
