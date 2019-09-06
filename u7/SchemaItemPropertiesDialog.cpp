@@ -15,7 +15,7 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 	m_propertyEditor = new SchemaItemPropertyEditor(editEngine, this);
 	m_propertyEditor->setReadOnly(editEngine->readOnly());
 
-	m_propertyTable = new SchemaItemPropertyTable(editEngine, this);
+	m_propertyTable = new SchemaItemPropertyTable(editEngine, this, this);
 	m_propertyTable->setReadOnly(editEngine->readOnly());
 
 	QTabWidget* tabWidget = new QTabWidget();
@@ -44,6 +44,11 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 SchemaItemPropertiesDialog::~SchemaItemPropertiesDialog()
 {
 	delete ui;
+}
+
+const std::vector<std::shared_ptr<VFrame30::SchemaItem>> SchemaItemPropertiesDialog::objects() const
+{
+	return m_items;
 }
 
 void SchemaItemPropertiesDialog::setObjects(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
@@ -215,9 +220,10 @@ EditEngine::EditEngine* SchemaItemPropertyEditor::editEngine()
 //		SchemaItemPropertyBrowser
 //
 //
-SchemaItemPropertyTable::SchemaItemPropertyTable(EditEngine::EditEngine* editEngine, QWidget* parent) :
+SchemaItemPropertyTable::SchemaItemPropertyTable(EditEngine::EditEngine* editEngine, SchemaItemPropertiesDialog* schemaItemPropertiesDialog, QWidget* parent) :
 	IdePropertyTable(parent),
-	m_editEngine(editEngine)
+	m_editEngine(editEngine),
+	m_schemaItemPropertiesDialog(schemaItemPropertiesDialog)
 {
 	assert(m_editEngine);
 
@@ -235,6 +241,12 @@ void SchemaItemPropertyTable::valueChanged(const ExtWidgets::ModifiedObjectsData
 	{
 		return;
 	}
+
+	// Select all items to keep selection even if properties of some items were not modified
+
+	editEngine()->runNopItem(m_schemaItemPropertiesDialog->objects());
+
+	// Modify properties
 
 	for (const QString& propertyName : modifiedObjectsData.keys())
 	{

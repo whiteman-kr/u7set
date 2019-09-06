@@ -27,7 +27,9 @@ public:
 	virtual ~SchemaItemPropertiesDialog();
 
 public:
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>> objects() const;
 	void setObjects(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items);
+
 	void setReadOnly(bool value);
 
 	void ensureVisible();
@@ -86,7 +88,7 @@ class SchemaItemPropertyTable : public IdePropertyTable
 	Q_OBJECT
 
 public:
-	explicit SchemaItemPropertyTable(EditEngine::EditEngine* editEngine, QWidget* parent);
+	explicit SchemaItemPropertyTable(EditEngine::EditEngine* editEngine, SchemaItemPropertiesDialog* schemaItemPropertiesDialog, QWidget* parent);
 	virtual ~SchemaItemPropertyTable();
 
 protected slots:
@@ -97,4 +99,5 @@ protected:
 
 private:
 	EditEngine::EditEngine* m_editEngine = nullptr;
+	SchemaItemPropertiesDialog* m_schemaItemPropertiesDialog = nullptr;
 };
