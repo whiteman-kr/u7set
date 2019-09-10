@@ -807,67 +807,72 @@ namespace ExtWidgets
 
 		QMenu menu(this);
 
-		// Determine if row operations are avaliable
-		//
-
-		bool addRowOperationsEnabled = false;
-		bool removeRowOperationsEnabled = false;
-
-		QModelIndexList selectedIndexes = m_tableView->selectionModel()->selectedIndexes();
-		if (selectedIndexes.size() == 1)
+		if (isSelectionReadOnly() == false && isReadOnly() == false)
 		{
-			std::shared_ptr<Property> po = m_proxyModel.propertyByIndex(selectedIndexes[0], nullptr);
-			if (po == nullptr)
+			// Non-ReadOnly operations
+
+			// Determine if row operations are avaliable
+			//
+
+			bool addRowOperationsEnabled = false;
+			bool removeRowOperationsEnabled = false;
+
+			QModelIndexList selectedIndexes = m_tableView->selectionModel()->selectedIndexes();
+			if (selectedIndexes.size() == 1)
 			{
-				Q_ASSERT(po);
-				return;
-			}
-
-			if (po->value().userType() == QVariant::StringList)
-			{
-				addRowOperationsEnabled = true;
-
-				QStringList strings = po->value().toStringList();
-
-				if (strings.isEmpty() == false)
+				std::shared_ptr<Property> po = m_proxyModel.propertyByIndex(selectedIndexes[0], nullptr);
+				if (po == nullptr)
 				{
-					removeRowOperationsEnabled = true;
+					Q_ASSERT(po);
+					return;
+				}
+
+				if (po->value().userType() == QVariant::StringList)
+				{
+					addRowOperationsEnabled = true;
+
+					QStringList strings = po->value().toStringList();
+
+					if (strings.isEmpty() == false)
+					{
+						removeRowOperationsEnabled = true;
+					}
 				}
 			}
+
+			if (addRowOperationsEnabled == true)
+			{
+				QAction* a = menu.addAction(tr("Insert String Before..."));
+				connect(a, &QAction::triggered, this, &PropertyTable::onInsertStringBefore);
+
+				a = menu.addAction(tr("Insert String After..."));
+				connect(a, &QAction::triggered, this, &PropertyTable::onInsertStringAfter);
+			}
+
+			if (removeRowOperationsEnabled == true)
+			{
+				QAction* a = menu.addAction(tr("Remove String..."));
+				connect(a, &QAction::triggered, this, &PropertyTable::onRemoveString);
+			}
+
+			if (addRowOperationsEnabled == true || removeRowOperationsEnabled == true)
+			{
+				menu.addSeparator();
+			}
+
+			// Replace
+
+			int selectionType = getSelectionType();
+
+			if (selectionType == QVariant::String ||
+					selectionType == QVariant::StringList)
+			{
+				QAction* a = menu.addAction(tr("Replace..."));
+				connect(a, &QAction::triggered, this, &PropertyTable::onReplace);
+			}
+
+			// End of Non-ReadOnly operations
 		}
-
-		if (addRowOperationsEnabled == true)
-		{
-			QAction* a = menu.addAction(tr("Insert String Before..."));
-			connect(a, &QAction::triggered, this, &PropertyTable::onInsertStringBefore);
-
-			a = menu.addAction(tr("Insert String After..."));
-			connect(a, &QAction::triggered, this, &PropertyTable::onInsertStringAfter);
-		}
-
-		if (removeRowOperationsEnabled == true)
-		{
-			QAction* a = menu.addAction(tr("Remove String..."));
-			connect(a, &QAction::triggered, this, &PropertyTable::onRemoveString);
-		}
-
-		if (addRowOperationsEnabled == true || removeRowOperationsEnabled == true)
-		{
-			menu.addSeparator();
-		}
-
-		// Replace
-
-		int selectionType = getSelectionType();
-
-		if (selectionType == QVariant::String ||
-				selectionType == QVariant::StringList)
-		{
-			QAction* a = menu.addAction(tr("Replace..."));
-			connect(a, &QAction::triggered, this, &PropertyTable::onReplace);
-		}
-
-		//
 
 		if (m_tableModel.hasMultiRows() == true)
 		{
@@ -1344,6 +1349,33 @@ namespace ExtWidgets
 		}
 
 		return type;
+	}
+
+	bool PropertyTable::isSelectionReadOnly()
+	{
+		QModelIndexList selectedIndexes = m_tableView->selectionModel()->selectedIndexes();
+		if (selectedIndexes.isEmpty() == true)
+		{
+			return false;
+		}
+
+		for (const QModelIndex& mi : selectedIndexes)
+		{
+
+			std::shared_ptr<Property> p = m_proxyModel.propertyByIndex(mi, nullptr);
+			if (p == nullptr)
+			{
+				Q_ASSERT(p);
+				return false;
+			}
+
+			if (p->readOnly() == true)
+			{
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	void PropertyTable::startEditing()

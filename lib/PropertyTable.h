@@ -194,6 +194,7 @@ namespace ExtWidgets
 		void fillProperties();
 
 		int getSelectionType();	// returns -1 if no type is selected or they are different
+		bool isSelectionReadOnly();
 
 		void startEditing();
 		void toggleSelected();
