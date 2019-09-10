@@ -47,6 +47,8 @@ namespace Tcp
 		SoftwareInfo connectedSoftwareInfo;
 		SoftwareInfo localSoftwareInfo;
 
+		QString clientDescription;
+
 		bool isActual = false;
 
 		void dump();
@@ -374,11 +376,13 @@ namespace Tcp
 
 	public:
 		Client(const SoftwareInfo& softwareInfo,
-			   const HostAddressPort& serverAddressPort);
+			   const HostAddressPort& serverAddressPort,
+			   const QString& clientDescription);
 
 		Client(const SoftwareInfo& softwareInfo,
 			   const HostAddressPort& serverAddressPort1,
-			   const HostAddressPort& serverAddressPort2);
+			   const HostAddressPort& serverAddressPort2,
+			   const QString& clientDescription);
 
 		virtual ~Client() override;
 
@@ -450,6 +454,8 @@ namespace Tcp
 			ClearToSendRequest,
 			WaitingForReply,
 		};
+
+		QString m_clientDescription;
 
 		HostAddressPort m_serversAddressPort[2];
 		HostAddressPort m_selectedServer;

@@ -2,6 +2,7 @@
 
 #include "../lib/SimpleThread.h"
 #include "../lib/CircularLogger.h"
+#include "../lib/SimpleMutex.h"
 
 #include "AppDataSource.h"
 
@@ -10,7 +11,7 @@ class SignalStatesProcessingThread : public RunOverrideThread
 public:
 	SignalStatesProcessingThread(const AppDataSources& appDataSources, CircularLoggerShared log);
 
-	void registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue, const QString& description);
+	void registerDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue, bool isArchivingQueue, const QString& description);
 	void unregisterDestSignalStatesQueue(SimpleAppSignalStatesQueueShared destQueue, const QString& description);
 
 	void run() override;
@@ -21,7 +22,7 @@ private:
 
 	//
 
-	QMutex m_queueMapMutex;
+	SimpleMutex m_queuesMutex;
 
-	QHash<SimpleAppSignalStatesQueue*, SimpleAppSignalStatesQueueShared> m_queueMap;
+	QVector<QPair<SimpleAppSignalStatesQueueShared, bool>> m_queues;
 };

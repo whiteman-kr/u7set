@@ -3,7 +3,7 @@
 
 TcpAppDataClient::TcpAppDataClient(const SoftwareInfo& softwareInfo,
 								   const HostAddressPort& serverAddressPort) :
-	Tcp::Client(softwareInfo, serverAddressPort)
+	Tcp::Client(softwareInfo, serverAddressPort, "TcpAppDataClient")
 {
 }
 
@@ -11,7 +11,7 @@ TcpAppDataClient::TcpAppDataClient(const SoftwareInfo& softwareInfo,
 TcpAppDataClient::TcpAppDataClient(const SoftwareInfo& softwareInfo,
 								   const HostAddressPort& serverAddressPort1,
 								   const HostAddressPort& serverAddressPort2) :
-	Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2)
+	Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2, "TcpAppDataClient")
 {
 }
 

@@ -4,7 +4,7 @@ TcpArchiveClient::TcpArchiveClient(const SoftwareInfo& softwareInfo,
 								   const HostAddressPort& serverAddressPort,
 								   SignalStatesProcessingThread* signalStatesProcessingThread,
 								   CircularLoggerShared logger) :
-	Tcp::Client(softwareInfo, serverAddressPort),
+	Tcp::Client(softwareInfo, serverAddressPort, "TcpArchiveClient"),
 	m_signalStatesProcessingThread(signalStatesProcessingThread),
 	m_logger(logger),
 	m_timer(this)
@@ -37,7 +37,7 @@ void TcpArchiveClient::onClientThreadStarted()
 
 	if (m_signalStatesProcessingThread != nullptr)
 	{
-		m_signalStatesProcessingThread->registerDestSignalStatesQueue(m_signalStatesQueue, "TcpArchiveClient");
+		m_signalStatesProcessingThread->registerDestSignalStatesQueue(m_signalStatesQueue, true, "TcpArchiveClient");
 	}
 	else
 	{

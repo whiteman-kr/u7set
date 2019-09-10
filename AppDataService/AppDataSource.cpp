@@ -240,7 +240,7 @@ void AppDataSource::setState(const Network::AppDataSourceState& proto)
 	setErrorNonmonotonicPlantTime(proto.errornonmonotonicplanttime());
 }
 
-bool AppDataSource::getSignalState(SimpleAppSignalState* state, const QThread* thread)
+bool AppDataSource::getSignalState(SimpleAppSignalStateArchiveFlag* state, const QThread* thread)
 {
 	TEST_PTR_RETURN_FALSE(state);
 

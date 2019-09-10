@@ -62,12 +62,36 @@ SimpleAppSignalStatesQueue::SimpleAppSignalStatesQueue(int queueSize) :
 {
 }
 
-void SimpleAppSignalStatesQueue::pushAutoPoint(SimpleAppSignalState state, const QThread* thread)
-{
-	// state is a copy!
-	//
-	state.flags.autoPoint = 1;
-	state.packetNo = 0;			// auto state
+// ---------------------------------------------------------------------------------------------------------
+//
+// SimpleAppSignalStatesArchiveQueue class implementation
+//
+// ---------------------------------------------------------------------------------------------------------
 
-	push(state, thread);
+SimpleAppSignalStatesArchiveFlagQueue::SimpleAppSignalStatesArchiveFlagQueue(int queueSize) :
+	FastThreadSafeQueue<SimpleAppSignalStateArchiveFlag>(queueSize)
+{
 }
+
+void SimpleAppSignalStatesArchiveFlagQueue::push(const SimpleAppSignalState& state, bool sendStateToArchive, const QThread* thread)
+{
+	SimpleAppSignalStateArchiveFlag st;
+
+	st.state = state;
+	st.sendStateToArchive = sendStateToArchive;
+
+	FastThreadSafeQueue<SimpleAppSignalStateArchiveFlag>::push(st, thread);
+}
+
+void SimpleAppSignalStatesArchiveFlagQueue::pushAutoPoint(const SimpleAppSignalState& state, bool sendStateToArchive, const QThread* thread)
+{
+	SimpleAppSignalStateArchiveFlag st;
+
+	st.state = state;
+	st.state.flags.autoPoint = 1;
+	st.state.packetNo = 0;			// auto state
+	st.sendStateToArchive = sendStateToArchive;
+
+	FastThreadSafeQueue<SimpleAppSignalStateArchiveFlag>::push(st, thread);
+}
+

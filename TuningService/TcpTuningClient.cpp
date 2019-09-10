@@ -5,7 +5,7 @@ namespace Tuning
 {
 
 	TcpTuningClient::TcpTuningClient(const SoftwareInfo& softwareInfo, const HostAddressPort& hostAddr) :
-		Tcp::Client(softwareInfo, hostAddr)
+		Tcp::Client(softwareInfo, hostAddr, "TcpTuningClient")
 	{
 	}
 
