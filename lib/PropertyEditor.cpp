@@ -1,44 +1,63 @@
-#include "../lib/PropertyObject.h"
+#include "Stable.h"
 #include "../lib/PropertyEditor.h"
 #include "TuningValue.h"
 
-#include <QtTreePropertyBrowser>
-#include <QtGroupPropertyManager>
-#include <QtStringPropertyManager>
-#include <QtEnumPropertyManager>
-#include <QtIntPropertyManager>
-#include <QtDoublePropertyManager>
-#include <QtBoolPropertyManager>
-#include <QList>
-#include <QMetaProperty>
-#include <QDebug>
-#include <QMap>
-#include <QStringList>
-#include <QKeyEvent>
-#include <QMessageBox>
-#include <QTimer>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QStyle>
-#include <QStyleOptionButton>
-#include <QPainter>
-#include <QApplication>
 #include <QToolButton>
-#include <QPushButton>
-#include <QTextEdit>
-#include <QDialog>
-#include <QRegExpValidator>
-#include <QColorDialog>
 #include <QFileDialog>
 #include <QDesktopWidget>
+#include <QColorDialog>
 #include <QTextBrowser>
-#include <QTreeWidget>
-#include <QSplitter>
+#include <QPlainTextEdit>
 
 namespace ExtWidgets
 {
 
-	QString propertyVectorText(QVariant& value)
+	//
+	// ------------ PropertyEditorBase ------------
+	//
+
+	PropertyEditorBase::PropertyEditorBase()
+	{
+		//
+
+		setScriptHelpWindowPos(thePropertyEditorSettings.m_scriptHelpWindowPos);
+
+		setScriptHelpWindowGeometry(thePropertyEditorSettings.m_scriptHelpWindowGeometry);
+
+	}
+
+	PropertyEditor* PropertyEditorBase::createChildPropertyEditor(QWidget* parent)
+	{
+		return new PropertyEditor(parent);
+	}
+
+	PropertyTextEditor* PropertyEditorBase::createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent)
+	{
+		Q_UNUSED(propertyPtr);
+		return new PropertyPlainTextEditor(parent);
+	}
+
+	bool PropertyEditorBase::expertMode() const
+	{
+		return m_expertMode;
+	}
+
+	void PropertyEditorBase::setExpertMode(bool expertMode)
+	{
+		m_expertMode = expertMode;
+	}
+
+	bool PropertyEditorBase::isReadOnly() const
+	{
+		return m_readOnly;
+	}
+
+	void PropertyEditorBase::setReadOnly(bool readOnly)
+	{
+		m_readOnly = readOnly;
+	}
+
+	QString PropertyEditorBase::propertyVectorText(QVariant& value)
 	{
 		// PropertyVector
 		//
@@ -73,7 +92,7 @@ namespace ExtWidgets
 		return QString();
 	}
 
-	QString stringListText(QVariant& value)
+	QString PropertyEditorBase::stringListText(const QVariant& value)
 	{
 		if (value.userType() == QVariant::StringList)
 		{
@@ -98,13 +117,507 @@ namespace ExtWidgets
 		return QString();
 	}
 
+	QString PropertyEditorBase::propertyValueText(Property* p, int row)
+	{
+		QVariant value = p->value();
+
+		// PropertyVector, PropertyList
+		//
+		if (variantIsPropertyVector(value) == true || variantIsPropertyList(value) == true)
+		{
+			return propertyVectorText(value);
+		}
+
+		// enum is special
+		//
+		if (p->isEnum())
+		{
+			int v = value.toInt();
+			for (std::pair<int, QString>& i : p->enumValues())
+			{
+				if (i.first == v)
+				{
+					return i.second;
+				}
+			}
+			return QString();
+		}
+
+		// all other types
+		//
+		int type = value.userType();
+
+		if (type == FilePathPropertyType::filePathTypeId())
+		{
+			FilePathPropertyType f = value.value<FilePathPropertyType>();
+			return f.filePath;
+		}
+
+		if (type == TuningValue::tuningValueTypeId())
+		{
+			TuningValue t = value.value<TuningValue>();
+			return t.toString(p->precision());
+		}
+
+		char numberFormat = p->precision() > 5 ? 'g' : 'f';
+
+		switch (type)
+		{
+		case QVariant::Int:
+		{
+			int val = value.toInt();
+			return QString::number(val);
+		}
+			break;
+
+		case QVariant::UInt:
+		{
+			quint32 val = value.toUInt();
+			return QString::number(val);
+		}
+			break;
+
+		case QMetaType::Float:
+		{
+			float val = value.toFloat();
+			return QString::number(val, numberFormat, p->precision());
+		}
+			break;
+		case QVariant::Double:
+		{
+			double val = value.toDouble();
+			return QString::number(val, numberFormat, p->precision());
+		}
+			break;
+		case QVariant::Bool:
+		{
+			return value.toBool() == true ? "True" : "False";
+		}
+			break;
+		case QVariant::String:
+		{
+			QString val = value.toString();
+
+			if (val.length() > PropertyEditorTextMaxLength)
+			{
+				val = QObject::tr("<%1 bytes>").arg(val.length());
+			}
+
+			val.replace("\n", " ");
+
+			return val;
+		}
+			break;
+
+		case QVariant::StringList:
+		{
+			if (row != -1)
+			{
+				QStringList strings = value.toStringList();
+
+				if (row < 0 || row >= static_cast<int>(strings.size()))
+				{
+					// No string exists in this row, it is ok - other property can have more rows
+					//
+					return QString();
+				}
+
+				return strings[row];
+			}
+
+			return stringListText(value);
+		}
+			break;
+
+		case QVariant::Color:
+		{
+			QColor color = value.value<QColor>();
+			QString val = QString("[%1;%2;%3;%4]").
+					arg(color.red()).
+					arg(color.green()).
+					arg(color.blue()).
+					arg(color.alpha());
+			return val;
+		}
+			break;
+
+		case QVariant::Uuid:
+		{
+			QUuid uuid = value.value<QUuid>();
+			return uuid.toString();
+		}
+			break;
+
+		case QVariant::ByteArray:
+		{
+			QByteArray array = value.value<QByteArray>();
+			return QObject::tr("Data <%1 bytes>").arg(array.size());
+		}
+			break;
+
+		case QVariant::Image:
+		{
+			QImage image = value.value<QImage>();
+			return QObject::tr("Image <Width = %1 Height = %2>").arg(image.width()).arg(image.height());
+		}
+			break;
+
+		default:
+			Q_ASSERT(false);
+		}
+
+		return QString();
+	}
+
+	QIcon PropertyEditorBase::drawCheckBox(int state, bool enabled)
+	{
+		QStyleOptionButton opt;
+		switch (state)
+		{
+			case Qt::Checked:
+				opt.state |= QStyle::State_On;
+				break;
+			case Qt::Unchecked:
+				opt.state |= QStyle::State_Off;
+				break;
+			case Qt::PartiallyChecked:
+				opt.state |= QStyle::State_NoChange;
+				break;
+			default:
+				Q_ASSERT(false);
+		}
+
+		if (enabled == false)
+		{
+			opt.state |= QStyle::State_ReadOnly;
+		}
+		else
+		{
+			opt.state |= QStyle::State_Enabled;
+		}
+
+		const QStyle* style = QApplication::style();
+
+		const int indicatorWidth = style->pixelMetric(QStyle::PM_IndicatorWidth, &opt);
+		const int indicatorHeight = style->pixelMetric(QStyle::PM_IndicatorHeight, &opt);
+
+		opt.rect = QRect(0, 0, indicatorWidth, indicatorHeight);
+		QPixmap pixmap = QPixmap(indicatorWidth, indicatorHeight);
+		pixmap.fill(Qt::transparent);
+		{
+			QPainter painter(&pixmap);
+			style->drawPrimitive(QStyle::PE_IndicatorCheckBox, &opt, &painter);
+		}
+		return QIcon(pixmap);
+	}
+
+	QIcon PropertyEditorBase::drawColorBox(QColor color)
+	{
+		const QStyle* style = QApplication::style();
+		// Figure out size of an indicator and make sure it is not scaled down in a list view item
+		// by making the pixmap as big as a list view icon and centering the indicator in it.
+		// (if it is smaller, it can't be helped)
+		const int indicatorWidth = style->pixelMetric(QStyle::PM_IndicatorWidth);
+		const int indicatorHeight = style->pixelMetric(QStyle::PM_IndicatorHeight);
+		const int listViewIconSize = indicatorWidth;
+		const int pixmapWidth = indicatorWidth;
+		const int pixmapHeight = qMax(indicatorHeight, listViewIconSize);
+
+		QRect rect = QRect(0, 0, indicatorWidth - 1, indicatorHeight - 1);
+		QPixmap pixmap = QPixmap(pixmapWidth, pixmapHeight);
+		pixmap.fill(Qt::transparent);
+		{
+			// Center?
+			const int xoff = (pixmapWidth  > indicatorWidth)  ? (pixmapWidth  - indicatorWidth)  / 2 : 0;
+			const int yoff = (pixmapHeight > indicatorHeight) ? (pixmapHeight - indicatorHeight) / 2 : 0;
+			QPainter painter(&pixmap);
+			painter.translate(xoff, yoff);
+
+			painter.setPen(QColor(Qt::black));
+			painter.setBrush(QBrush(color));
+			painter.drawRect(rect);
+		}
+		return QIcon(pixmap);
+	}
+
+	QIcon PropertyEditorBase::drawImage(const QImage& image)
+	{
+		if (image.isNull() == false)
+		{
+			const QStyle* style = QApplication::style();
+			const int indicatorWidth = style->pixelMetric(QStyle::PM_IndicatorWidth);
+			const int indicatorHeight = style->pixelMetric(QStyle::PM_IndicatorHeight);
+			const int listViewIconSize = indicatorWidth;
+			const int pixmapWidth = indicatorWidth;
+			const int pixmapHeight = qMax(indicatorHeight, listViewIconSize);
+
+			QImage smallImage = image.scaled(pixmapWidth, pixmapHeight, Qt::KeepAspectRatio);
+
+			return QIcon(QPixmap::fromImage(smallImage));
+		}
+
+		return QIcon();
+	}
+
+	QIcon PropertyEditorBase::propertyIcon(Property* p, bool sameValue, bool enabled)
+	{
+		QVariant value = p->value();
+
+		switch (value.userType())
+		{
+			case QVariant::Bool:
+				{
+					if (sameValue == true)
+					{
+						Qt::CheckState checkState = value.toBool() == true ? Qt::Checked : Qt::Unchecked;
+						return drawCheckBox(checkState, enabled);
+					}
+					else
+					{
+						return drawCheckBox(Qt::PartiallyChecked, enabled);
+					}
+				}
+				break;
+			case QVariant::Color:
+				{
+					if (sameValue == true)
+					{
+						QColor color = value.value<QColor>();
+						return drawColorBox(color);
+					}
+				}
+				break;
+		case QVariant::Image:
+			{
+				if (sameValue == true)
+				{
+					QImage image = value.value<QImage>();
+					return drawImage(image);
+				}
+			}
+			break;
+		}
+		return QIcon();
+	}
+
+	PropertyEditCellWidget* PropertyEditorBase::createCellEditor(std::shared_ptr<Property> propertyPtr, bool sameValue, bool readOnly, QWidget* parent)
+	{
+		return createCellRowEditor(propertyPtr, -1, sameValue, readOnly, parent);
+	}
+
+	PropertyEditCellWidget* PropertyEditorBase::createCellRowEditor(std::shared_ptr<Property> propertyPtr, int row, bool sameValue, bool readOnly, QWidget* parent)
+	{
+		if (propertyPtr == nullptr)
+		{
+			Q_ASSERT(propertyPtr);
+			return new PropertyEditCellWidget(parent);
+		}
+
+		PropertyEditCellWidget* editor = nullptr;
+
+		while (true)
+		{
+
+			if (variantIsPropertyList(propertyPtr->value()) == true || variantIsPropertyVector(propertyPtr->value()))
+			{
+				MultiArrayEdit* m_editor = new MultiArrayEdit(this, parent, propertyPtr, readOnly);
+				editor = m_editor;
+
+				if (sameValue == true)
+				{
+					m_editor->setValue(propertyPtr, readOnly);
+				}
+
+				break;
+			}
+
+			if (propertyPtr->isEnum())
+			{
+				MultiEnumEdit* m_editor = new MultiEnumEdit(parent, propertyPtr, readOnly);
+				editor = m_editor;
+
+				if (sameValue == true)
+				{
+					m_editor->setValue(propertyPtr, readOnly);
+				}
+
+				break;
+			}
+
+			if (propertyPtr->value().userType() == FilePathPropertyType::filePathTypeId())
+			{
+				MultiFilePathEdit* m_editor = new MultiFilePathEdit(parent, readOnly);
+				editor = m_editor;
+
+				if (sameValue == true)
+				{
+					m_editor->setValue(propertyPtr, readOnly);
+				}
+
+				break;
+			}
+
+			if (propertyPtr->value().userType() == QVariant::StringList)
+			{
+				if (row == -1)
+				{
+					MultiArrayEdit* m_editor = new MultiArrayEdit(this, parent, propertyPtr, readOnly);
+					editor = m_editor;
+
+					if (sameValue == true)
+					{
+						m_editor->setValue(propertyPtr, readOnly);
+					}
+
+				}
+				else
+				{
+					MultiTextEdit* m_editor = new MultiTextEdit(this, propertyPtr, row, readOnly, parent);
+
+					editor = m_editor;
+
+					if (sameValue == true)
+					{
+						m_editor->setValue(propertyPtr, readOnly);
+					}
+				}
+
+				break;
+			}
+
+			if (propertyPtr->value().userType() == TuningValue::tuningValueTypeId())
+			{
+				MultiTextEdit* m_editor = new MultiTextEdit(this, propertyPtr, readOnly, parent);
+
+				editor = m_editor;
+
+				if (sameValue == true)
+				{
+					m_editor->setValue(propertyPtr, readOnly);
+				}
+
+				break;
+			}
+
+			switch(propertyPtr->value().userType())
+			{
+			case QVariant::Bool:
+			{
+				MultiCheckBox* m_editor = new MultiCheckBox(parent, readOnly);
+
+				editor = m_editor;
+
+				if (sameValue == true)
+				{
+					m_editor->setValue(propertyPtr, readOnly);
+				}
+
+				QTimer::singleShot(10, m_editor, &MultiCheckBox::changeValueOnButtonClick);
+
+			}
+				break;
+			case QVariant::String:
+			case QVariant::Int:
+			case QVariant::UInt:
+			case QMetaType::Float:
+			case QVariant::Double:
+			case QVariant::Uuid:
+			case QVariant::ByteArray:
+			case QVariant::Image:
+			{
+				MultiTextEdit* m_editor = new MultiTextEdit(this, propertyPtr, readOnly, parent);
+
+				editor = m_editor;
+
+				if (sameValue == true)
+				{
+					m_editor->setValue(propertyPtr, readOnly);
+				}
+
+			}
+				break;
+
+			case QVariant::Color:
+			{
+				MultiColorEdit* m_editor = new MultiColorEdit(parent, readOnly);
+
+				editor = m_editor;
+
+				if (sameValue == true)
+				{
+					m_editor->setValue(propertyPtr, readOnly);
+				}
+
+			}
+				break;
+
+			default:
+				Q_ASSERT(false);
+			}
+
+			break;
+		}
+
+		if (editor == nullptr)
+		{
+			Q_ASSERT(editor);
+			return new PropertyEditCellWidget(parent);
+		}
+
+		return editor;
+	}
+
+	void PropertyEditorBase::setScriptHelp(QFile& file)
+	{
+		// Set script help data
+		//
+		if (file.open(QIODevice::ReadOnly) == true)
+		{
+			QByteArray data = file.readAll();
+			if (data.size() > 0)
+			{
+				setScriptHelp(QString::fromUtf8(data));
+			}
+		}
+	}
+
+	void PropertyEditorBase::setScriptHelp(const QString& text)
+	{
+		m_scriptHelp = text;
+	}
+
+	QString PropertyEditorBase::scriptHelp() const
+	{
+		return m_scriptHelp;
+	}
+
+	QPoint PropertyEditorBase::scriptHelpWindowPos() const
+	{
+		return m_scriptHelpWindowPos;
+	}
+
+	void PropertyEditorBase::setScriptHelpWindowPos(const QPoint& value)
+	{
+		m_scriptHelpWindowPos = value;
+	}
+
+	QByteArray PropertyEditorBase::scriptHelpWindowGeometry() const
+	{
+		return m_scriptHelpWindowGeometry;
+
+	}
+	void PropertyEditorBase::setScriptHelpWindowGeometry(const QByteArray& value)
+	{
+		m_scriptHelpWindowGeometry = value;
+	}
+
 	//
 	// ------------ PropertyArrayEditorDialog ------------
 	//
-	PropertyArrayEditorDialog::PropertyArrayEditorDialog(PropertyEditor* propertyEditor, QWidget* parent, const QString& propertyName, const QVariant& value):
+	PropertyArrayEditorDialog::PropertyArrayEditorDialog(PropertyEditorBase* propertyEditorBase, QWidget* parent, const QString& propertyName, const QVariant& value):
 		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
 		m_value(value),
-		m_parentPropertyEditor(propertyEditor)
+		m_propertyEditorBase(propertyEditorBase)
 	{
 		if (variantIsPropertyVector(m_value) == false && variantIsPropertyList(m_value) == false)
 		{
@@ -131,7 +644,7 @@ namespace ExtWidgets
 
 		connect(m_treeWidget, &QTreeWidget::itemSelectionChanged, this, &PropertyArrayEditorDialog::onSelectionChanged);
 
-		m_childPropertyEditor = m_parentPropertyEditor->createChildPropertyEditor(this);
+		m_childPropertyEditor = m_propertyEditorBase->createChildPropertyEditor(this);
 		connect(m_childPropertyEditor, &PropertyEditor::propertiesChanged, this, &PropertyArrayEditorDialog::onPropertiesChanged);
 
 		// Move Up/Down
@@ -647,9 +1160,8 @@ namespace ExtWidgets
 	//
 	// ------------ StringListEditorDialog ------------
 	//
-	StringListEditorDialog::StringListEditorDialog(PropertyEditor* propertyEditor, QWidget* parent, const QString& propertyName, const QVariant& value):
-		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
-		m_parentPropertyEditor(propertyEditor)
+	StringListEditorDialog::StringListEditorDialog(QWidget* parent, const QString& propertyName, const QVariant& value):
+		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint)
 	{
 		if (value.userType() != QVariant::StringList)
 		{
@@ -958,33 +1470,11 @@ namespace ExtWidgets
 		return qMetaTypeId<FilePathPropertyType>();
 	}
 
-	void PropertyEditorSettings::restore(QSettings& s)
-	{
-		m_arrayPropertyEditorSplitterState = s.value("PropertyEditor/arrayPropertyEditorSplitterState").toByteArray();
-		m_arrayPropertyEditorSize = s.value("PropertyEditor/arrayPropertyEditorSize").toSize();
-
-		m_stringListEditorSize = s.value("PropertyEditor/m_stringListEditorSize").toSize();
-
-		m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePropertyEditorWindowPos", QPoint(-1, -1)).toPoint();
-		m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLinePropertyEditorGeometry").toByteArray();
-	}
-
-	void PropertyEditorSettings::store(QSettings& s)
-	{
-		s.setValue("PropertyEditor/arrayPropertyEditorSplitterState", m_arrayPropertyEditorSplitterState);
-		s.setValue("PropertyEditor/arrayPropertyEditorSize", m_arrayPropertyEditorSize);
-
-		s.setValue("PropertyEditor/m_stringListEditorSize", m_stringListEditorSize);
-
-		s.setValue("PropertyEditor/multiLinePropertyEditorWindowPos", m_multiLinePropertyEditorWindowPos);
-		s.setValue("PropertyEditor/multiLinePropertyEditorGeometry", m_multiLinePropertyEditorGeometry);
-	}
-
 	//
 	// ------------ PropertyEditorHelp ------------
 	//
 
-	PropertyEditorHelp::PropertyEditorHelp(const QString& caption, const QString& text, QWidget* parent):
+	PropertyEditorHelpDialog::PropertyEditorHelpDialog(const QString& caption, const QString& text, QWidget* parent):
 		QDialog(parent, Qt::WindowTitleHint | Qt::WindowCloseButtonHint | Qt::WindowMaximizeButtonHint)
 	{
 		setWindowTitle(caption);
@@ -1005,7 +1495,7 @@ namespace ExtWidgets
 
 	}
 
-	PropertyEditorHelp::~PropertyEditorHelp()
+	PropertyEditorHelpDialog::~PropertyEditorHelpDialog()
 	{
 
 	}
@@ -1193,12 +1683,34 @@ namespace ExtWidgets
 		m_prevPlainText = newText;
 	}
 
+	//
+	// ------------ PropertyEditCellWidget ------------
+	//
+
+	PropertyEditCellWidget::PropertyEditCellWidget(QWidget* parent)
+		:QWidget(parent)
+	{
+	}
+
+	PropertyEditCellWidget::~PropertyEditCellWidget()
+	{
+	}
+
+	void PropertyEditCellWidget::setValue(std::shared_ptr<Property> property, bool readOnly)
+	{
+		Q_UNUSED(property);
+		Q_UNUSED(readOnly);
+
+		Q_ASSERT(false);
+		return;
+	}
 
 	//
-	// ------------ QtMultiFilePathEdit ------------
+	// ------------ MultiFilePathEdit ------------
 	//
+
 	MultiFilePathEdit::MultiFilePathEdit(QWidget* parent, bool readOnly):
-		QWidget(parent)
+		PropertyEditCellWidget(parent)
 	{
 		m_lineEdit = new QLineEdit(parent);
 
@@ -1299,7 +1811,7 @@ namespace ExtWidgets
 	// ------------ QtMultiEnumEdit ------------
 	//
 	MultiEnumEdit::MultiEnumEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly):
-		QWidget(parent)
+		PropertyEditCellWidget(parent)
 	{
 		if (p == nullptr)
 		{
@@ -1331,6 +1843,8 @@ namespace ExtWidgets
 		lt->addWidget(m_combo);
 
 		setLayout(lt);
+
+		QTimer::singleShot(0, m_combo, SLOT(setFocus()));
 	}
 
 	void MultiEnumEdit::setValue(std::shared_ptr<Property> property, bool readOnly)
@@ -1383,7 +1897,7 @@ namespace ExtWidgets
 	//
 
 	MultiColorEdit::MultiColorEdit(QWidget* parent, bool readOnly):
-		QWidget(parent)
+		PropertyEditCellWidget(parent)
 	{
 		m_lineEdit = new QLineEdit(parent);
 
@@ -1536,9 +2050,9 @@ namespace ExtWidgets
 	//
 	// ---------MultiTextEditorDialog----------
 	//
-	MultiTextEditorDialog::MultiTextEditorDialog(PropertyEditor* propertyEditor, QWidget* parent, const QString &text, std::shared_ptr<Property> p):
+	MultiTextEditorDialog::MultiTextEditorDialog(PropertyEditorBase* propertyEditorBase, QWidget* parent, const QString &text, std::shared_ptr<Property> p):
 		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowMinMaxButtonsHint | Qt::WindowCloseButtonHint),
-		m_propertyEditor(propertyEditor),
+		m_propertyEditorBase(propertyEditorBase),
 		m_property(p)
 	{
 		setWindowTitle(p->caption());
@@ -1557,7 +2071,7 @@ namespace ExtWidgets
 
 		// Create Editor
 
-		m_editor = m_propertyEditor->createPropertyTextEditor(m_property.get(), this);
+		m_editor = m_propertyEditorBase->createPropertyTextEditor(m_property, this);
 
 		m_editor->setText(text);
 
@@ -1595,7 +2109,7 @@ namespace ExtWidgets
 
 		// Property Editor help
 
-		if (p->isScript() && m_propertyEditor->scriptHelp().isEmpty() == false)
+		if (p->isScript() && m_propertyEditorBase->scriptHelp().isEmpty() == false)
 		{
 			QPushButton* helpButton = new QPushButton("?", this);
 
@@ -1605,13 +2119,13 @@ namespace ExtWidgets
 			{
 				if (m_propertyEditorHelp == nullptr)
 				{
-					m_propertyEditorHelp = new PropertyEditorHelp(tr("Script Help"), m_propertyEditor->scriptHelp(), this);
+					m_propertyEditorHelp = new PropertyEditorHelpDialog(tr("Script Help"), m_propertyEditorBase->scriptHelp(), this);
 					m_propertyEditorHelp->show();
 
-					if (m_propertyEditor->scriptHelpWindowPos().x() != -1 && m_propertyEditor->scriptHelpWindowPos().y() != -1)
+					if (m_propertyEditorBase->scriptHelpWindowPos().x() != -1 && m_propertyEditorBase->scriptHelpWindowPos().y() != -1)
 					{
-						m_propertyEditorHelp->move(m_propertyEditor->scriptHelpWindowPos());
-						m_propertyEditorHelp->restoreGeometry(m_propertyEditor->scriptHelpWindowGeometry());
+						m_propertyEditorHelp->move(m_propertyEditorBase->scriptHelpWindowPos());
+						m_propertyEditorHelp->restoreGeometry(m_propertyEditorBase->scriptHelpWindowGeometry());
 					}
 					else
 					{
@@ -1633,11 +2147,10 @@ namespace ExtWidgets
 						m_propertyEditorHelp->resize(defaultWidth, defaultHeight);
 					}
 
-					connect(m_propertyEditorHelp, &PropertyEditorHelp::destroyed, [this] (QObject*)
+					connect(m_propertyEditorHelp, &PropertyEditorHelpDialog::destroyed, [this] (QObject*)
 					{
-						m_propertyEditor->setScriptHelpWindowPos(m_propertyEditorHelp->pos());
-						m_propertyEditor->setScriptHelpWindowGeometry(m_propertyEditorHelp->saveGeometry());
-						m_propertyEditor->saveSettings();
+						m_propertyEditorBase->setScriptHelpWindowPos(m_propertyEditorHelp->pos());
+						m_propertyEditorBase->setScriptHelpWindowGeometry(m_propertyEditorHelp->saveGeometry());
 
 						m_propertyEditorHelp = nullptr;
 
@@ -1723,17 +2236,24 @@ namespace ExtWidgets
 	// ---------MultiTextEdit----------
 	//
 
-	MultiTextEdit::MultiTextEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly, PropertyEditor* propertyEditor):
-		QWidget(parent),
-		m_property(p),
-		m_userType(p->value().userType()),
-		m_propertyEditor(propertyEditor)
-	{
+	MultiTextEdit::MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, bool readOnly, QWidget* parent):
+		MultiTextEdit(propertyEditorBase, p, -1, readOnly, parent)
 
-		if (p == nullptr || propertyEditor == nullptr)
+	{
+	}
+
+	MultiTextEdit::MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, int row, bool readOnly, QWidget* parent):
+		PropertyEditCellWidget(parent),
+		m_property(p),
+		m_row(row),
+		m_userType(p->value().userType()),
+		m_propertyEditorBase(propertyEditorBase)
+	{
+		if (p == nullptr || m_propertyEditorBase == nullptr)
 		{
 			assert(p);
-			assert(propertyEditor);
+			assert(m_propertyEditorBase);
+			return;
 		}
 
 		if (m_userType == QVariant::Uuid)
@@ -1752,7 +2272,8 @@ namespace ExtWidgets
 
 		if (m_property->specificEditor() == E::PropertySpecificEditor::LoadFileDialog ||
 				m_userType == QVariant::ByteArray ||
-				(m_userType == QVariant::String && p->password() == false))
+				(m_userType == QVariant::String && p->password() == false) ||
+				(m_userType == QVariant::StringList && m_row != -1))
 		{
 			m_button = new QToolButton(parent);
 			m_button->setText("...");
@@ -1775,16 +2296,16 @@ namespace ExtWidgets
 
 		if (m_property->specificEditor() != E::PropertySpecificEditor::LoadFileDialog &&	// for LoadFileDialog, Validator is used as mask
 				p->validator().isEmpty() == false)
-        {
+		{
 			QRegExp regexp(p->validator());
 			QRegExpValidator* v = new QRegExpValidator(regexp, this);
-            m_lineEdit->setValidator(v);
-        }
+			m_lineEdit->setValidator(v);
+		}
 
 		if (m_userType == QVariant::String && p->password() == true)
-        {
-            m_lineEdit->setEchoMode(QLineEdit::Password);
-        }
+		{
+			m_lineEdit->setEchoMode(QLineEdit::Password);
+		}
 
 		m_lineEdit->setReadOnly(readOnly == true);
 
@@ -1852,7 +2373,7 @@ namespace ExtWidgets
 				return;
 			}
 
-			MultiTextEditorDialog multlLineEdit(m_propertyEditor, this, m_oldValue.toString(), m_property);
+			MultiTextEditorDialog multlLineEdit(m_propertyEditorBase, this, m_oldValue.toString(), m_property);
 			if (multlLineEdit.exec() != QDialog::Accepted)
 			{
 				return;
@@ -1985,6 +2506,31 @@ namespace ExtWidgets
 				m_lineEdit->setReadOnly(readOnly == true || longText == true);
 			}
 			break;
+		case QVariant::StringList:
+			{
+				QStringList l = property->value().toStringList();
+				if (m_row < 0 || m_row >= static_cast<int>(l.size()))
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+				QString editText = l[m_row];
+				m_oldValue = editText;
+
+				bool longText = editText.length() > PropertyEditorTextMaxLength;
+
+				if (longText == true)
+				{
+					m_lineEdit->setText(tr("<%1 bytes>").arg(editText.length()));
+				}
+				else
+				{
+					m_lineEdit->setText(editText);
+				}
+				m_lineEdit->setReadOnly(readOnly == true || longText == true);
+			}
+			break;
 		case QVariant::Int:
 		{
 			m_oldValue = property->value().toInt();
@@ -2054,6 +2600,7 @@ namespace ExtWidgets
 		switch (m_userType)
 		{
 		case QVariant::String:
+		case QVariant::StringList:
 		{
 			if (m_lineEdit->text() != m_oldValue.toString() || m_oldValue.isNull() == true)
 			{
@@ -2150,11 +2697,11 @@ namespace ExtWidgets
 	//
 	// ---------MultiArrayEdit----------
 	//
-	MultiArrayEdit::MultiArrayEdit(PropertyEditor* propertyEditor, QWidget* parent, std::shared_ptr<Property> p, bool readOnly):
-		QWidget(parent),
+	MultiArrayEdit::MultiArrayEdit(PropertyEditorBase* propertyEditorBase, QWidget* parent, std::shared_ptr<Property> p, bool readOnly):
+		PropertyEditCellWidget(parent),
 		m_property(p),
 		m_currentValue(p->value()),
-		m_propertyEditor(propertyEditor)
+		m_propertyEditorBase(propertyEditorBase)
 	{
 
 		m_lineEdit = new QLineEdit(parent);
@@ -2199,21 +2746,21 @@ namespace ExtWidgets
 		m_button->setEnabled(readOnly == false);
 	}
 
-	void MultiArrayEdit::setValue(QVariant value, bool readOnly)
+	void MultiArrayEdit::setValue(std::shared_ptr<Property> property, bool readOnly)
 	{
 		m_button->setEnabled(readOnly == false);
 
-		m_currentValue = value;
+		m_currentValue = property->value();
 
 		if (m_currentValue.userType() == QVariant::StringList)
 		{
-			m_lineEdit->setText(stringListText(m_currentValue));
+			m_lineEdit->setText(PropertyEditorBase::stringListText(m_currentValue));
 			return;
 		}
 
 		if (variantIsPropertyVector(m_currentValue) == true || variantIsPropertyList(m_currentValue) == true)
 		{
-			m_lineEdit->setText(propertyVectorText(m_currentValue));
+			m_lineEdit->setText(PropertyEditorBase::propertyVectorText(m_currentValue));
 			return;
 		}
 
@@ -2235,7 +2782,7 @@ namespace ExtWidgets
 
 		if (variantIsPropertyVector(m_currentValue) == true || variantIsPropertyList(m_currentValue) == true)
 		{
-			PropertyArrayEditorDialog d(m_propertyEditor, this, m_property->caption(), m_currentValue);
+			PropertyArrayEditorDialog d(m_propertyEditorBase, this, m_property->caption(), m_currentValue);
 			if (d.exec() != QDialog::Accepted)
 			{
 				return;
@@ -2245,7 +2792,7 @@ namespace ExtWidgets
 
 		if (m_currentValue.userType() == QVariant::StringList)
 		{
-			StringListEditorDialog d(m_propertyEditor, this, m_property->caption(), m_currentValue);
+			StringListEditorDialog d(this, m_property->caption(), m_currentValue);
 			if (d.exec() != QDialog::Accepted)
 			{
 				return;
@@ -2262,13 +2809,13 @@ namespace ExtWidgets
 
 		if (variantIsPropertyVector(m_currentValue) == true || variantIsPropertyList(m_currentValue) == true)
 		{
-			m_lineEdit->setText(propertyVectorText(m_currentValue));
+			m_lineEdit->setText(PropertyEditorBase::propertyVectorText(m_currentValue));
 		}
 		else
 		{
 			if (m_currentValue.userType() == QVariant::StringList)
 			{
-				m_lineEdit->setText(stringListText(m_currentValue));
+				m_lineEdit->setText(PropertyEditorBase::stringListText(m_currentValue));
 			}
 		}
 	}
@@ -2276,95 +2823,7 @@ namespace ExtWidgets
 	//
 	// ---------QtMultiCheckBox----------
 	//
-    static QIcon drawCheckBox(int state, bool enabled)
-	{
-		QStyleOptionButton opt;
-		switch (state)
-		{
-			case Qt::Checked:
-				opt.state |= QStyle::State_On;
-				break;
-			case Qt::Unchecked:
-				opt.state |= QStyle::State_Off;
-				break;
-			case Qt::PartiallyChecked:
-				opt.state |= QStyle::State_NoChange;
-				break;
-			default:
-				Q_ASSERT(false);
-		}
 
-        if (enabled == false)
-        {
-            opt.state |= QStyle::State_ReadOnly;
-        }
-        else
-        {
-            opt.state |= QStyle::State_Enabled;
-        }
-
-		const QStyle* style = QApplication::style();
-
-		const int indicatorWidth = style->pixelMetric(QStyle::PM_IndicatorWidth, &opt);
-		const int indicatorHeight = style->pixelMetric(QStyle::PM_IndicatorHeight, &opt);
-
-		opt.rect = QRect(0, 0, indicatorWidth, indicatorHeight);
-		QPixmap pixmap = QPixmap(indicatorWidth, indicatorHeight);
-		pixmap.fill(Qt::transparent);
-		{
-			QPainter painter(&pixmap);
-			style->drawPrimitive(QStyle::PE_IndicatorCheckBox, &opt, &painter);
-		}
-		return QIcon(pixmap);
-	}
-
-	static QIcon drawColorBox(QColor color)
-	{
-		const QStyle* style = QApplication::style();
-		// Figure out size of an indicator and make sure it is not scaled down in a list view item
-		// by making the pixmap as big as a list view icon and centering the indicator in it.
-		// (if it is smaller, it can't be helped)
-		const int indicatorWidth = style->pixelMetric(QStyle::PM_IndicatorWidth);
-		const int indicatorHeight = style->pixelMetric(QStyle::PM_IndicatorHeight);
-		const int listViewIconSize = indicatorWidth;
-		const int pixmapWidth = indicatorWidth;
-		const int pixmapHeight = qMax(indicatorHeight, listViewIconSize);
-
-		QRect rect = QRect(0, 0, indicatorWidth - 1, indicatorHeight - 1);
-		QPixmap pixmap = QPixmap(pixmapWidth, pixmapHeight);
-		pixmap.fill(Qt::transparent);
-		{
-			// Center?
-			const int xoff = (pixmapWidth  > indicatorWidth)  ? (pixmapWidth  - indicatorWidth)  / 2 : 0;
-			const int yoff = (pixmapHeight > indicatorHeight) ? (pixmapHeight - indicatorHeight) / 2 : 0;
-			QPainter painter(&pixmap);
-			painter.translate(xoff, yoff);
-
-			painter.setPen(QColor(Qt::black));
-			painter.setBrush(QBrush(color));
-			painter.drawRect(rect);
-		}
-		return QIcon(pixmap);
-	}
-
-	static QIcon drawImage(const QImage& image)
-	{
-		if (image.isNull() == false)
-		{
-			const QStyle* style = QApplication::style();
-			const int indicatorWidth = style->pixelMetric(QStyle::PM_IndicatorWidth);
-			const int indicatorHeight = style->pixelMetric(QStyle::PM_IndicatorHeight);
-			const int listViewIconSize = indicatorWidth;
-			const int pixmapWidth = indicatorWidth;
-			const int pixmapHeight = qMax(indicatorHeight, listViewIconSize);
-
-			QImage smallImage = image.scaled(pixmapWidth, pixmapHeight, Qt::KeepAspectRatio);
-
-			return QIcon(QPixmap::fromImage(smallImage));
-		}
-
-		return QIcon();
-	}
 
 	void PropertyEditorCheckBox::paintEvent(QPaintEvent *e)
 	{
@@ -2419,10 +2878,16 @@ namespace ExtWidgets
 		painter.drawText(textRect, Qt::AlignVCenter,  text());
 	}
 
-	MultiCheckBox::MultiCheckBox(QWidget* parent):
-		QWidget(parent)
+	MultiCheckBox::MultiCheckBox(QWidget* parent, bool readOnly):
+		PropertyEditCellWidget(parent)
 	{
 		m_checkBox = new PropertyEditorCheckBox(parent);
+
+		m_checkBox->setEnabled(readOnly == false);
+
+		m_checkBox->setCheckState(Qt::PartiallyChecked);
+		updateText();
+
 		connect(m_checkBox, &QCheckBox::stateChanged, this, &MultiCheckBox::onStateChanged);
 
 		QHBoxLayout*lt = new QHBoxLayout;
@@ -2431,7 +2896,7 @@ namespace ExtWidgets
 		setLayout(lt);
 	}
 
-	void MultiCheckBox::setValue(Qt::CheckState state, bool readOnly)
+	void MultiCheckBox::setValue(std::shared_ptr<Property> propertyPtr, bool readOnly)
 	{
 		if (m_checkBox == nullptr)
 		{
@@ -2439,12 +2904,19 @@ namespace ExtWidgets
 			return;
 		}
 
+		m_checkBox->setTristate(false);
+
+		Qt::CheckState state = propertyPtr->value().toBool() ? Qt::Checked : Qt::Unchecked;
+
 		m_checkBox->blockSignals(true);
 		m_checkBox->setCheckState(state);
 
 		updateText();
+
 		m_checkBox->setEnabled(readOnly == false);
 		m_checkBox->blockSignals(false);
+
+		QTimer::singleShot(0, m_checkBox, SLOT(setFocus()));
 	}
 
 	void MultiCheckBox::changeValueOnButtonClick()
@@ -2511,11 +2983,14 @@ namespace ExtWidgets
 			Q_ASSERT(property);
 			return new QWidget();
 		}
+		if (m_propertyEditor == nullptr)
+		{
+			Q_ASSERT(m_propertyEditor);
+			return new QWidget();
+		}
 
 		m_manager = manager;
 		m_property = property;
-
-		QWidget* editor = nullptr;
 
 		std::shared_ptr<Property> propertyPtr = manager->value(property);
 		if (propertyPtr == nullptr)
@@ -2524,172 +2999,17 @@ namespace ExtWidgets
 			return nullptr;
 		}
 
-		while (true)
+		PropertyEditCellWidget* editorWidget = m_propertyEditor->createCellEditor(propertyPtr, manager->sameValue(property), property->isEnabled() == false, parent);
+		if (editorWidget == nullptr)
 		{
-
-			if (variantIsPropertyList(propertyPtr->value()) == true || variantIsPropertyVector(propertyPtr->value()))
-			{
-				MultiArrayEdit* m_editor = new MultiArrayEdit(m_propertyEditor, parent, propertyPtr, property->isEnabled() == false);
-				editor = m_editor;
-
-				if (manager->sameValue(property) == true)
-				{
-					m_editor->setValue(propertyPtr->value(), property->isEnabled() == false);
-				}
-
-				connect(m_editor, &MultiArrayEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
-				connect(m_editor, &MultiArrayEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
-
-				break;
-			}
-
-			if (propertyPtr->isEnum())
-			{
-				MultiEnumEdit* m_editor = new MultiEnumEdit(parent, propertyPtr, property->isEnabled() == false);
-				editor = m_editor;
-
-				if (manager->sameValue(property) == true)
-				{
-					m_editor->setValue(propertyPtr, property->isEnabled() == false);
-				}
-
-				connect(m_editor, &MultiEnumEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
-				connect(m_editor, &MultiEnumEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
-
-				break;
-			}
-
-			if (propertyPtr->value().userType() == FilePathPropertyType::filePathTypeId())
-			{
-				MultiFilePathEdit* m_editor = new MultiFilePathEdit(parent, property->isEnabled() == false);
-				editor = m_editor;
-
-				if (manager->sameValue(property) == true)
-				{
-					m_editor->setValue(propertyPtr, property->isEnabled() == false);
-				}
-
-				connect(m_editor, &MultiFilePathEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
-				connect(m_editor, &MultiFilePathEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
-
-				break;
-			}
-
-			if (propertyPtr->value().userType() == QVariant::StringList)
-			{
-				MultiArrayEdit* m_editor = new MultiArrayEdit(m_propertyEditor, parent, propertyPtr, property->isEnabled() == false);
-				editor = m_editor;
-
-				if (manager->sameValue(property) == true)
-				{
-					m_editor->setValue(propertyPtr->value(), property->isEnabled() == false);
-				}
-
-				connect(m_editor, &MultiArrayEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
-				connect(m_editor, &MultiArrayEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
-
-				break;
-			}
-
-			if (propertyPtr->value().userType() == TuningValue::tuningValueTypeId())
-			{
-				MultiTextEdit* m_editor = new MultiTextEdit(parent, propertyPtr, property->isEnabled() == false, m_propertyEditor);
-
-				editor = m_editor;
-
-				if (manager->sameValue(property) == true)
-				{
-					m_editor->setValue(propertyPtr, property->isEnabled() == false);
-				}
-
-				connect(m_editor, &MultiTextEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
-				connect(m_editor, &MultiTextEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
-
-				break;
-			}
-
-			switch(propertyPtr->value().userType())
-			{
-			case QVariant::Bool:
-			{
-				MultiCheckBox* m_editor = new MultiCheckBox(parent);
-
-				editor = m_editor;
-
-				connect(m_editor, &MultiCheckBox::valueChanged, this, &MultiVariantFactory::slotSetValue);
-				connect(m_editor, &MultiCheckBox::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
-
-				Qt::CheckState state;
-
-				if (manager->sameValue(property) == false)
-				{
-					state = Qt::PartiallyChecked;
-				}
-				else
-				{
-					state = propertyPtr->value().toBool() ? Qt::Checked : Qt::Unchecked;
-				}
-
-				m_editor->setValue(state, m_property->isEnabled() == false);
-
-				QTimer::singleShot(10, m_editor, &MultiCheckBox::changeValueOnButtonClick);
-
-				//m_editor->changeValueOnButtonClick();
-			}
-				break;
-			case QVariant::String:
-			case QVariant::Int:
-			case QVariant::UInt:
-			case QMetaType::Float:
-			case QVariant::Double:
-			case QVariant::Uuid:
-			case QVariant::ByteArray:
-			case QVariant::Image:
-			{
-				MultiTextEdit* m_editor = new MultiTextEdit(parent, propertyPtr, property->isEnabled() == false, m_propertyEditor);
-
-				editor = m_editor;
-
-				if (manager->sameValue(property) == true)
-				{
-					m_editor->setValue(propertyPtr, property->isEnabled() == false);
-				}
-
-				connect(m_editor, &MultiTextEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
-				connect(m_editor, &MultiTextEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
-			}
-				break;
-
-			case QVariant::Color:
-			{
-				MultiColorEdit* m_editor = new MultiColorEdit(parent, property->isEnabled() == false);
-
-				editor = m_editor;
-
-				if (manager->sameValue(property) == true)
-				{
-					m_editor->setValue(propertyPtr, property->isEnabled() == false);
-				}
-
-				connect(m_editor, &MultiColorEdit::valueChanged, this, &MultiVariantFactory::slotSetValue);
-				connect(m_editor, &MultiColorEdit::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
-			}
-				break;
-
-			default:
-				Q_ASSERT(false);
-			}
-
-			break;
+			Q_ASSERT(editorWidget);
+			return new QWidget(parent);
 		}
 
-		if (editor == nullptr)
-		{
-			Q_ASSERT(editor);
-			return new QWidget();
-		}
+		connect(editorWidget, &PropertyEditCellWidget::valueChanged, this, &MultiVariantFactory::slotSetValue);
+		connect(editorWidget, &QObject::destroyed, this, &MultiVariantFactory::slotEditorDestroyed);
 
-		return editor;
+		return editorWidget;
 	}
 
 	void MultiVariantFactory::connectPropertyManager (MultiVariantPropertyManager* manager)
@@ -2941,43 +3261,7 @@ namespace ExtWidgets
             return QIcon();
         }
 
-        QVariant value = p->value();
-
-        switch (value.userType())
-		{
-			case QVariant::Bool:
-				{
-					if (sameValue(property) == true)
-					{
-                        Qt::CheckState checkState = value.toBool() == true ? Qt::Checked : Qt::Unchecked;
-						return drawCheckBox(checkState, property->isEnabled() == true);
-					}
-					else
-					{
-						return drawCheckBox(Qt::PartiallyChecked, property->isEnabled() == true);
-					}
-				}
-				break;
-			case QVariant::Color:
-				{
-					if (sameValue(property) == true)
-					{
-                        QColor color = value.value<QColor>();
-						return drawColorBox(color);
-					}
-				}
-				break;
-		case QVariant::Image:
-			{
-				if (sameValue(property) == true)
-				{
-					QImage image = value.value<QImage>();
-					return drawImage(image);
-				}
-			}
-			break;
-		}
-		return QIcon();
+		return PropertyEditorBase::propertyIcon(p.get(), sameValue(property) == true, property->isEnabled() == true);
 	}
 
 	QString MultiVariantPropertyManager::valueText(const QtProperty* property) const
@@ -3002,167 +3286,35 @@ namespace ExtWidgets
             return "";
         }
 
-        QVariant value = p->value();
-
         // Output the text
         //
         if (sameValue(property) == true)
 		{
-			// PropertyVector, PropertyList
-			//
-			if (variantIsPropertyVector(value) == true || variantIsPropertyList(value) == true)
-			{
-				return propertyVectorText(value);
-			}
-
-            // enum is special
-            //
-            if (p->isEnum())
-            {
-				int v = value.toInt();
-                for (std::pair<int, QString>& i : p->enumValues())
-                {
-                    if (i.first == v)
-                    {
-                        return i.second;
-                    }
-                }
-                return QString();
-            }
-
-            // all other types
-            //
-            int type = value.userType();
-
-            if (type == FilePathPropertyType::filePathTypeId())
-			{
-                FilePathPropertyType f = value.value<FilePathPropertyType>();
-				return f.filePath;
-			}
-
-			if (type == TuningValue::tuningValueTypeId())
-			{
-				TuningValue t = value.value<TuningValue>();
-				return t.toString(p->precision());
-			}
-
-			char numberFormat = p->precision() > 5 ? 'g' : 'f';
-
-			switch (type)
-			{
-				case QVariant::Int:
-					{
-                        int val = value.toInt();
-						return QString::number(val);
-					}
-					break;
-
-				case QVariant::UInt:
-					{
-                        quint32 val = value.toUInt();
-						return QString::number(val);
-					}
-					break;
-
-				case QMetaType::Float:
-					{
-						float val = value.toFloat();
-						return QString::number(val, numberFormat, p->precision());
-					}
-					break;
-				case QVariant::Double:
-					{
-                        double val = value.toDouble();
-						return QString::number(val, numberFormat, p->precision());
-					}
-					break;
-				case QVariant::Bool:
-					{
-                        return value.toBool() == true ? "True" : "False";
-					}
-					break;
-				case QVariant::String:
-					{
-                        QString val = value.toString();
-
-						if (val.length() > PropertyEditorTextMaxLength)
-						{
-							val = tr("<%1 bytes>").arg(val.length());
-						}
-
-						val.replace("\n", " ");
-
-						return val;
-					}
-					break;
-
-			case QVariant::StringList:
-				{
-					return stringListText(value);
-				}
-				break;
-
-			case QVariant::Color:
-					{
-                        QColor color = value.value<QColor>();
-						QString val = QString("[%1;%2;%3;%4]").
-									  arg(color.red()).
-									  arg(color.green()).
-									  arg(color.blue()).
-									  arg(color.alpha());
-						return val;
-					}
-					break;
-
-				case QVariant::Uuid:
-					{
-                        QUuid uuid = value.value<QUuid>();
-						return uuid.toString();
-					}
-					break;
-
-				case QVariant::ByteArray:
-					{
-						QByteArray array = value.value<QByteArray>();
-						return tr("Data <%1 bytes>").arg(array.size());
-					}
-					break;
-
-				case QVariant::Image:
-					{
-						QImage image = value.value<QImage>();
-						return tr("Image <Width = %1 Height = %2>").arg(image.width()).arg(image.height());
-					}
-					break;
-
-			default:
-					Q_ASSERT(false);
-			}
+			return PropertyEditorBase::propertyValueText(p.get(), -1/*row*/);
 		}
-		else
+
+		QVariant value = p->value();
+
+		// PropertyVector, PropertyList
+		//
+		if (variantIsPropertyVector(value) == true)
 		{
-			// PropertyVector, PropertyList
-			//
-			if (variantIsPropertyVector(value) == true)
-			{
-				return tr("<PropertyVector>");
-			}
-
-			if (variantIsPropertyList(value) == true)
-			{
-				return tr("<PropertyList>");
-			}
-
-			switch (value.type())
-			{
-				case QVariant::Bool:
-					return "<Different values>";
-				default:
-					return QString();
-			}
+			return tr("<PropertyVector>");
 		}
 
-		return QString();
+		if (variantIsPropertyList(value) == true)
+		{
+			return tr("<PropertyList>");
+		}
+
+		switch (value.type())
+		{
+		case QVariant::Bool:
+			return "<Different values>";
+		default:
+			return QString();
+		}
+
 	}
 
 	QString MultiVariantPropertyManager::displayText(const QtProperty* property) const
@@ -3180,11 +3332,51 @@ namespace ExtWidgets
 	}
 
 	//
+	// ------- Property Editor Settings ----------
+	//
+
+	void PropertyEditorSettings::restore(QSettings& s)
+	{
+		m_arrayPropertyEditorSplitterState = s.value("PropertyEditor/arrayPropertyEditorSplitterState").toByteArray();
+		m_arrayPropertyEditorSize = s.value("PropertyEditor/arrayPropertyEditorSize").toSize();
+
+		m_stringListEditorSize = s.value("PropertyEditor/m_stringListEditorSize").toSize();
+
+		m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePropertyEditorWindowPos", QPoint(-1, -1)).toPoint();
+		m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLinePropertyEditorGeometry").toByteArray();
+
+		m_propertyEditorFontScaleFactor = s.value("PropertyEditor/fontScaleFactor").toDouble();
+		if (m_propertyEditorFontScaleFactor < 1.0 || m_propertyEditorFontScaleFactor > 3.0)
+		{
+			m_propertyEditorFontScaleFactor = 1.0;
+		}
+
+		m_scriptHelpWindowPos = s.value("PropertyEditor/scriptHelpPos", QPoint(-1, -1)).toPoint();
+		m_scriptHelpWindowGeometry = s.value("PropertyEditor/scriptHelpGeometry").toByteArray();
+	}
+
+	void PropertyEditorSettings::store(QSettings& s)
+	{
+		s.setValue("PropertyEditor/arrayPropertyEditorSplitterState", m_arrayPropertyEditorSplitterState);
+		s.setValue("PropertyEditor/arrayPropertyEditorSize", m_arrayPropertyEditorSize);
+
+		s.setValue("PropertyEditor/m_stringListEditorSize", m_stringListEditorSize);
+
+		s.setValue("PropertyEditor/multiLinePropertyEditorWindowPos", m_multiLinePropertyEditorWindowPos);
+		s.setValue("PropertyEditor/multiLinePropertyEditorGeometry", m_multiLinePropertyEditorGeometry);
+
+		s.setValue("PropertyEditor/fontScaleFactor", m_propertyEditorFontScaleFactor);
+		s.setValue("PropertyEditor/scriptHelpPos", m_scriptHelpWindowPos);
+		s.setValue("PropertyEditor/scriptHelpGeometry", m_scriptHelpWindowGeometry);
+	}
+
+	//
 	// ------- Property Editor ----------
 	//
 
 	PropertyEditor::PropertyEditor(QWidget* parent) :
-		QtTreePropertyBrowser(parent)
+		QtTreePropertyBrowser(parent),
+		PropertyEditorBase()
 	{
 		setResizeMode(ResizeMode::Interactive);
 
@@ -3201,33 +3393,16 @@ namespace ExtWidgets
 
 		connect(this, &PropertyEditor::showErrorMessage, this, &PropertyEditor::onShowErrorMessage, Qt::QueuedConnection);
 
-		connect(this, &QtTreePropertyBrowser::currentItemChanged, this, &PropertyEditor::onCurrentItemChanged);
-
 		setScriptHelp(tr("<h1>This is a sample script help!</h1>"));
 
-		m_scriptHelpWindowPos = QPoint(-1, -1);
+		//
+
+		if (thePropertyEditorSettings.m_propertyEditorFontScaleFactor != 1.0)
+		{
+			setFontSizeF(fontSizeF() * thePropertyEditorSettings.m_propertyEditorFontScaleFactor);
+		}
 
 		return;
-	}
-
-	void PropertyEditor::saveSettings()
-	{
-
-	}
-
-	void PropertyEditor::onCurrentItemChanged(QtBrowserItem* current)
-	{
-		if (current == nullptr)
-		{
-			return;
-		}
-
-
-		if (current->property() == nullptr)
-		{
-			Q_ASSERT(current->property());
-			return;
-		}
 	}
 
 	void PropertyEditor::setObjects(const std::vector<std::shared_ptr<PropertyObject>>& objects)
@@ -3240,7 +3415,12 @@ namespace ExtWidgets
 
 	void PropertyEditor::setObjects(const QList<std::shared_ptr<PropertyObject>>& objects)
 	{
-        setVisible(false);
+		bool wasVisible = isVisible();
+
+		if (wasVisible == true)
+		{
+			setVisible(false);
+		}
 
 		// Disconnect updatePropertiesList slot from previous objects
 
@@ -3268,7 +3448,10 @@ namespace ExtWidgets
 			}
 		}
 
-		setVisible(true);
+		if (wasVisible == true)
+		{
+			setVisible(true);
+		}
 
 		return;
 	}
@@ -3322,8 +3505,7 @@ namespace ExtWidgets
 
             subProperty = m_propertyVariantManager->addProperty(caption);
             subProperty->setToolTip(description);
-			subProperty->setEnabled(m_readOnly == false && readOnly == false);
-
+			subProperty->setEnabled(isReadOnly() == false && readOnly == false);
 
 			if (propertyPtr->essential() == true)
 			{
@@ -3382,11 +3564,19 @@ namespace ExtWidgets
 
 	void PropertyEditor::updatePropertiesList()
 	{
-		setVisible(false);
+		bool wasVisible = isVisible();
+
+		if (wasVisible == true)
+		{
+			setVisible(false);
+		}
 
 		fillProperties();
 
-		setVisible(true);
+		if (wasVisible == true)
+		{
+			setVisible(true);
+		}
 
 		return;
 	}
@@ -3419,7 +3609,7 @@ namespace ExtWidgets
 					continue;
 				}
 
-				if (p->expert() && m_expertMode == false)
+				if (p->expert() && expertMode() == false)
 				{
 					continue;
 				}
@@ -3522,7 +3712,7 @@ namespace ExtWidgets
 			//
 			QString description = p->description().isEmpty() ? p->caption() : p->description();
 
-			if (p->readOnly() == true || m_readOnly == true)
+			if (p->readOnly() == true || isReadOnly() == true)
 			{
 				description = QString("[ReadOnly] ") + description;
 			}
@@ -3652,65 +3842,18 @@ namespace ExtWidgets
         }
 	}
 
-	void PropertyEditor::setExpertMode(bool expertMode)
-	{
-		m_expertMode = expertMode;
-	}
-
-	bool PropertyEditor::readOnly() const
-	{
-		return m_readOnly;
-	}
-
-	void PropertyEditor::setReadOnly(bool readOnly)
-	{
-		m_readOnly = readOnly;
-	}
-
-	void PropertyEditor::setScriptHelp(const QString& text)
-	{
-		m_scriptHelp = text;
-	}
-
-	QString PropertyEditor::scriptHelp() const
-	{
-		return m_scriptHelp;
-	}
-
-	QPoint PropertyEditor::scriptHelpWindowPos() const
-	{
-		return m_scriptHelpWindowPos;
-	}
-
-	void PropertyEditor::setScriptHelpWindowPos(const QPoint& value)
-	{
-		m_scriptHelpWindowPos = value;
-	}
-
-	QByteArray PropertyEditor::scriptHelpWindowGeometry() const
-	{
-		return m_scriptHelpWindowGeometry;
-
-	}
-	void PropertyEditor::setScriptHelpWindowGeometry(const QByteArray& value)
-	{
-		m_scriptHelpWindowGeometry = value;
-	}
-
 	void PropertyEditor::onValueChanged(QtProperty* property, QVariant value)
 	{
-       valueChanged(property, value);
+	   valueChanged(property->propertyName(), value);
 	}
 
-	void PropertyEditor::valueChanged(QtProperty* property, QVariant value)
+	void PropertyEditor::valueChanged(QString propertyName, QVariant value)
 	{
 		// Set the new property value in all objects
 		//
         QList<std::shared_ptr<PropertyObject>> modifiedObjects;
 
 		QString errorString;
-
-		QString propertyName = property->propertyName();
 
 		for (auto i : m_objects)
 		{
@@ -3751,17 +3894,6 @@ namespace ExtWidgets
             emit propertiesChanged(modifiedObjects);
 		}
 		return;
-	}
-
-	PropertyEditor* PropertyEditor::createChildPropertyEditor(QWidget* parent)
-	{
-		return new PropertyEditor(parent);
-	}
-
-	PropertyTextEditor* PropertyEditor::createPropertyTextEditor(Property* property, QWidget* parent)
-	{
-        Q_UNUSED(property);
-		return new PropertyPlainTextEditor(parent);
 	}
 
 	void PropertyEditor::onShowErrorMessage(QString message)

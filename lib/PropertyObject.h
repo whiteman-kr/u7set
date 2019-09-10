@@ -186,6 +186,16 @@ public:
 		m_essential = value;
 	}
 
+	bool disableTableEditor() const
+	{
+		return m_disableTableEditor;
+	}
+	void setDisableTableEditor(bool value)
+	{
+		m_disableTableEditor = value;
+	}
+
+
 	E::PropertySpecificEditor specificEditor()
 	{
 		return m_specificEditor;
@@ -288,6 +298,7 @@ private:
 			bool m_visible : 1;
 			bool m_expert : 1;
 			bool m_essential : 1;
+			bool m_disableTableEditor : 1;
 		};
 		uint16_t m_flags = 0;
 	};

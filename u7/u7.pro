@@ -66,6 +66,7 @@ SOURCES +=\
     CreateProjectDialog.cpp \
     CreateUserDialogDialog.cpp \
     DialogSettings.cpp \
+    EditEngine/EditEngineNop.cpp \
     FilesTabPage.cpp \
     LoginDialog.cpp \
     Main.cpp \
@@ -191,7 +192,8 @@ SOURCES +=\
     ../lib/QScintillaLexers/LexerXML.cpp \
     DialogShortcuts.cpp \
     ../lib/Ui/UiTools.cpp \
-    SvgEditor.cpp
+    SvgEditor.cpp \
+    ../lib/PropertyTable.cpp
 
 
 HEADERS  += \
@@ -200,6 +202,7 @@ HEADERS  += \
     CreateProjectDialog.h \
     CreateUserDialogDialog.h \
     DialogSettings.h \
+    EditEngine/EditEngineNop.h \
     FilesTabPage.h \
     LoginDialog.h \
     MainTabPage.h \
@@ -334,7 +337,8 @@ HEADERS  += \
     ../lib/QScintillaLexers/LexerXML.h \
     DialogShortcuts.h \
     ../lib/Ui/UiTools.h \
-    SvgEditor.h
+    SvgEditor.h \
+    ../lib/PropertyTable.h
 
 
 FORMS    += \
