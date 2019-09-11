@@ -1,0 +1,6 @@
+QTreeWidget#SchemasTreeWidget{font-size:14px;}
+QTreeWidget#FilterTreeWidget{font:bold 14px;}
+QTabWidget#TuningTabWidget{font:bold 14px;}
+QPushButton{font:14px;}
+FilterButton{font:bold 14px;}
+TuningTableView{background-color: #7fffff;font:bold 14px;}
