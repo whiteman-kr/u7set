@@ -103,7 +103,7 @@ bool DynamicAppSignalState::setState(const Times& time,
 								const char* rupData,
 								int rupDataSize,
 								int autoArchivingGroup,
-								SimpleAppSignalStatesQueue& statesQueue,
+								SimpleAppSignalStatesArchiveFlagQueue& statesQueue,
 								const QThread* thread)
 {
 	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
@@ -118,6 +118,7 @@ bool DynamicAppSignalState::setState(const Times& time,
 	curState.packetNo = packetNo;
 
 	curState.flags.stateAvailable = 1;
+
 
 	// update validity flag
 
@@ -156,7 +157,7 @@ bool DynamicAppSignalState::setState(const Times& time,
 			{
 				if (m_archive == true)
 				{
-					statesQueue.pushAutoPoint(prevState, thread);
+					statesQueue.pushAutoPoint(prevState, m_archive, thread);
 				}
 
 				rtSessionsProcessing(prevState, true, thread);
@@ -184,7 +185,7 @@ bool DynamicAppSignalState::setState(const Times& time,
 
 			if (m_archive == true)
 			{
-				statesQueue.pushAutoPoint(tmpState, thread);
+				statesQueue.pushAutoPoint(tmpState, m_archive, thread);
 			}
 
 			rtSessionsProcessing(tmpState, true, thread);
@@ -321,15 +322,7 @@ bool DynamicAppSignalState::setState(const Times& time,
 
 	if (hasArchivingReason == true)
 	{
-/*		if (curState.flags.hasAutoPointReasonOnly() == false && m_signalType == E::SignalType::Discrete)
-		{
-			qDebug() << C_STR(QString("%1 %2").arg(m_signal->appSignalID()).arg(curState.flags.print()));
-		}*/
-
-		if (m_archive == true)
-		{
-			statesQueue.push(curState, thread);
-		}
+		statesQueue.push(curState, m_archive, thread);
 
 		// update stored states
 		//
@@ -362,7 +355,7 @@ bool DynamicAppSignalState::setState(const Times& time,
 }
 
 void DynamicAppSignalState::setUnavailable(const Times& time,
-			  SimpleAppSignalStatesQueue& statesQueue,
+			  SimpleAppSignalStatesArchiveFlagQueue& statesQueue,
 			  const QThread* thread)
 {
 	SimpleAppSignalState prevState = current();			// prevState is a COPY of current()!
@@ -379,7 +372,7 @@ void DynamicAppSignalState::setUnavailable(const Times& time,
 		// prevState is not stored, archive it
 		//
 
-		statesQueue.pushAutoPoint(prevState, thread);
+		statesQueue.pushAutoPoint(prevState, m_archive, thread);
 
 		rtSessionsProcessing(prevState, true, thread);
 
@@ -395,7 +388,7 @@ void DynamicAppSignalState::setUnavailable(const Times& time,
 
 	curState.flags.updateArchivingReasonFlags(prevState.flags);
 
-	statesQueue.push(curState, thread);
+	statesQueue.push(curState, m_archive, thread);
 
 	m_prevStateIsStored = true;
 

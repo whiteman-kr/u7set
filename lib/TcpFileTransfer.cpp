@@ -69,7 +69,7 @@ namespace Tcp
 
 	FileClient::FileClient(const SoftwareInfo& softwareInfo, const QString& rootFolder,
 						   const HostAddressPort &serverAddressPort) :
-		Client(softwareInfo, serverAddressPort)
+		Client(softwareInfo, serverAddressPort, "FileClient")
 	{
 		m_rootFolder = rootFolder;
 
@@ -82,7 +82,7 @@ namespace Tcp
 						   const QString &rootFolder,
 						   const HostAddressPort& serverAddressPort1,
 						   const HostAddressPort& serverAddressPort2) :
-		Client(softwareInfo, serverAddressPort1, serverAddressPort2)
+		Client(softwareInfo, serverAddressPort1, serverAddressPort2,  "FileClient")
 	{
 		m_rootFolder = rootFolder;
 

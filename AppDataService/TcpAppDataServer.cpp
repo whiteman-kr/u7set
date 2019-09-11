@@ -8,23 +8,106 @@
 //
 // -------------------------------------------------------------------------------
 
-TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo, AppDataReceiverThread *appDataReceiverThread) :
+TcpAppDataServer::TcpAppDataServer(const SoftwareInfo& softwareInfo,
+								   AppDataReceiverThread* appDataReceiverThread,
+								   SignalStatesProcessingThread* signalStatesProcessingThread) :
 	Tcp::Server(softwareInfo),
-	m_appDataReceiverThread(appDataReceiverThread)
+	m_appDataReceiverThread(appDataReceiverThread),
+	m_signalStatesProcessingThread(signalStatesProcessingThread)
 {
-
 }
-
 
 TcpAppDataServer::~TcpAppDataServer()
 {
 }
 
+void TcpAppDataServer::onServerThreadStarted()
+{
+	m_signalCount = m_thread->appSignalIDsCount();
+	m_signalListPartCount = getSignalListPartCount(m_signalCount);
+
+	qDebug() << "TcpAppDataServer::onServerThreadStarted()";
+}
+
+void TcpAppDataServer::onServerThreadFinished()
+{
+	if (m_signalStatesQueue != nullptr)
+	{
+		m_signalStatesProcessingThread->unregisterDestSignalStatesQueue(m_signalStatesQueue, "TcpAppDataServer");
+	}
+
+	qDebug() << "TcpAppDataServer::onServerThreadFinished()";
+}
+
+void TcpAppDataServer::onConnection()
+{
+	qDebug() << "TcpAppDataServer::onConnection()";
+}
+
+void TcpAppDataServer::onDisconnection()
+{
+	qDebug() << "TcpAppDataServer::onDisconnection()";
+}
+
+void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
+{
+	switch(requestID)
+	{
+	case ADS_GET_STATE:
+		onGetState();
+		break;
+
+	case RQID_GET_CLIENT_LIST:
+		sendClientList();
+		break;
+
+	case ADS_GET_APP_SIGNAL_LIST_START:
+		onGetAppSignalListStartRequest();
+		break;
+
+	case ADS_GET_APP_SIGNAL_LIST_NEXT:
+		onGetAppSignalListNextRequest(requestData, requestDataSize);
+		break;
+
+	case ADS_GET_APP_SIGNAL_PARAM:
+		onGetAppSignalParamRequest(requestData, requestDataSize);
+		break;
+
+	case ADS_GET_APP_SIGNAL:
+		onGetAppSignalParamRequest(requestData, requestDataSize);
+		break;
+
+	case ADS_GET_APP_SIGNAL_STATE:
+		onGetAppSignalStateRequest(requestData, requestDataSize);
+		break;
+
+	case ADS_GET_APP_SIGNAL_STATE_CHANGES:
+		onGetAppSignalStateChangesRequest(requestData, requestDataSize);
+		break;
+
+	case ADS_GET_APP_DATA_SOURCES_INFO:
+		onGetAppDataSourcesInfoRequest();
+		break;
+
+	case ADS_GET_APP_DATA_SOURCES_STATES:
+		onGetAppDataSourcesStatesRequest();
+		break;
+
+	case ADS_GET_SETTINGS:
+		onGetSettings();
+		break;
+
+	default:
+		assert(false);
+		break;
+	}
+}
 
 Tcp::Server* TcpAppDataServer::getNewInstance()
 {
-	TcpAppDataServer* newServer =  new TcpAppDataServer(localSoftwareInfo(), m_appDataReceiverThread);
-
+	TcpAppDataServer* newServer =  new TcpAppDataServer(localSoftwareInfo(),
+														m_appDataReceiverThread,
+														m_signalStatesProcessingThread);
 	newServer->setThread(m_thread);
 
 	return newServer;
@@ -67,85 +150,6 @@ void TcpAppDataServer::onGetState()
 	sendReply(m_getAppDataServiceState);
 }
 
-
-void TcpAppDataServer::onServerThreadStarted()
-{
-	m_signalCount = m_thread->appSignalIDsCount();
-	m_signalListPartCount = getSignalListPartCount(m_signalCount);
-
-	qDebug() << "TcpAppDataServer::onServerThreadStarted()";
-}
-
-
-void TcpAppDataServer::onServerThreadFinished()
-{
-	qDebug() << "TcpAppDataServer::onServerThreadFinished()";
-}
-
-
-void TcpAppDataServer::onConnection()
-{
-	qDebug() << "TcpAppDataServer::onConnection()";
-}
-
-
-void TcpAppDataServer::onDisconnection()
-{
-	qDebug() << "TcpAppDataServer::onDisconnection()";
-}
-
-
-void TcpAppDataServer::processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize)
-{
-	switch(requestID)
-	{
-	case ADS_GET_STATE:
-		onGetState();
-		break;
-
-	case RQID_GET_CLIENT_LIST:
-		sendClientList();
-		break;
-
-	case ADS_GET_APP_SIGNAL_LIST_START:
-		onGetAppSignalListStartRequest();
-		break;
-
-	case ADS_GET_APP_SIGNAL_LIST_NEXT:
-		onGetAppSignalListNextRequest(requestData, requestDataSize);
-		break;
-
-	case ADS_GET_APP_SIGNAL_PARAM:
-		onGetAppSignalParamRequest(requestData, requestDataSize);
-		break;
-
-	case ADS_GET_APP_SIGNAL:
-		onGetAppSignalParamRequest(requestData, requestDataSize);
-		break;
-
-	case ADS_GET_APP_SIGNAL_STATE:
-		onGetAppSignalStateRequest(requestData, requestDataSize);
-		break;
-
-	case ADS_GET_APP_DATA_SOURCES_INFO:
-		onGetAppDataSourcesInfoRequest();
-		break;
-
-	case ADS_GET_APP_DATA_SOURCES_STATES:
-		onGetAppDataSourcesStatesRequest();
-		break;
-
-	case ADS_GET_SETTINGS:
-		onGetSettings();
-		break;
-
-	default:
-		assert(false);
-		break;
-	}
-}
-
-
 void TcpAppDataServer::onGetAppSignalListStartRequest()
 {
 	m_getSignalListStartReply.set_totalitemcount(m_signalCount);
@@ -158,7 +162,6 @@ void TcpAppDataServer::onGetAppSignalListStartRequest()
 
 	sendReply(m_getSignalListStartReply);
 }
-
 
 void TcpAppDataServer::onGetAppSignalListNextRequest(const char* requestData, quint32 requestDataSize)
 {
@@ -204,7 +207,6 @@ void TcpAppDataServer::onGetAppSignalListNextRequest(const char* requestData, qu
 
 	sendReply(m_getSignalListNextReply);
 }
-
 
 void TcpAppDataServer::onGetAppSignalParamRequest(const char* requestData, quint32 requestDataSize)
 {
@@ -288,7 +290,6 @@ void TcpAppDataServer::onGetAppSignalRequest(const char* requestData, quint32 re
 	sendReply(m_getAppSignalReply);
 }
 
-
 void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize)
 {
 	bool result = m_getAppSignalStateRequest.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
@@ -330,49 +331,94 @@ void TcpAppDataServer::onGetAppSignalStateRequest(const char* requestData, quint
 		appSignalState.save(protoAppSignalState);
 	}
 
+	qint64 utc = 0;
+	qint64 local = 0;
+
+	getServerTimes(&utc, &local);
+
+	m_getAppSignalStateReply.set_servertimeutc(utc);
+	m_getAppSignalStateReply.set_servertimelocal(local);
+
 	sendReply(m_getAppSignalStateReply);
 
 	static int ctr = 0;
 
 	ctr++;
 
-	if ((ctr % 100) == 0)
+	if ((ctr % 1000) == 0)
 	{
 		qDebug() << "Send states" << ctr;
 	}
 }
 
-
-int TcpAppDataServer::getSignalListPartCount(int signalCount)
+void TcpAppDataServer::onGetAppSignalStateChangesRequest(const char* requestData, quint32 requestDataSize)
 {
-	return signalCount / ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART +
-			((signalCount % ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART) == 0 ? 0 : 1);
+	if (m_signalStatesQueue == nullptr)
+	{
+		m_signalStatesQueue = std::make_shared<SimpleAppSignalStatesQueue>(10000);
+		m_signalStatesProcessingThread->registerDestSignalStatesQueue(m_signalStatesQueue, false, "TcpAppDataServer");
+	}
+
+	bool result = m_getAppSignalStateChangesRequest.ParseFromArray(reinterpret_cast<const void*>(requestData), requestDataSize);
+
+	m_getAppSignalStateChangesReply.Clear();
+
+	if (result == false)
+	{
+		m_getAppSignalStateChangesReply.set_error(TO_INT(NetworkError::ParseRequestError));
+		sendReply(m_getAppSignalStateChangesReply);
+		return;
+	}
+
+	QThread* thisThread = QThread::currentThread();
+
+	SimpleAppSignalState state;
+
+	int pendingStatesCount = 0;
+
+	for(int i = 0; i < ADS_GET_APP_SIGNAL_STATE_MAX; i++)
+	{
+
+		result = m_signalStatesQueue->pop(&state, thisThread);
+
+		if (result == false)
+		{
+			break;		// queue is empty - pendingStatesCount == 0
+		}
+
+		::Proto::AppSignalState* protoState = m_getAppSignalStateChangesReply.add_appsignalstates();
+
+		state.save(protoState);
+
+		if (i + 1 == ADS_GET_APP_SIGNAL_STATE_MAX)
+		{
+			// on last iteration set pendingStatesCount to actual value
+			//
+			pendingStatesCount = m_signalStatesQueue->size(thisThread);
+		}
+	}
+
+	m_getAppSignalStateChangesReply.set_pendingstatescount(pendingStatesCount);
+
+	qint64 utc = 0;
+	qint64 local = 0;
+
+	getServerTimes(&utc, &local);
+
+	m_getAppSignalStateChangesReply.set_servertimeutc(utc);
+	m_getAppSignalStateChangesReply.set_servertimelocal(local);
+
+	sendReply(m_getAppSignalStateChangesReply);
+
+	static int ctr = 0;
+
+	ctr++;
+
+	if ((ctr % 1000) == 0)
+	{
+		qDebug() << "Send states changes" << ctr;
+	}
 }
-
-
-const QVector<QString>& TcpAppDataServer::appSignalIDs() const
-{
-	return m_thread->appSignalIDs();
-}
-
-
-const AppSignals& TcpAppDataServer::appSignals() const
-{
-	return m_thread->appSignals();
-}
-
-
-const AppDataSourcesIP& TcpAppDataServer::appDataSources() const
-{
-	return m_thread->appDataSources();
-}
-
-
-bool TcpAppDataServer::getAppSignalStateState(Hash hash, AppSignalState& state)
-{
-	return m_thread->getAppSignalState(hash, state);
-}
-
 
 void TcpAppDataServer::onGetAppDataSourcesInfoRequest()
 {
@@ -390,7 +436,6 @@ void TcpAppDataServer::onGetAppDataSourcesInfoRequest()
 
 	sendReply(m_getDataSourcesInfoReply);
 }
-
 
 void TcpAppDataServer::onGetAppDataSourcesStatesRequest()
 {
@@ -418,6 +463,46 @@ void TcpAppDataServer::onGetSettings()
 	sendReply(m_getServiceSettings);
 }
 
+int TcpAppDataServer::getSignalListPartCount(int signalCount)
+{
+	return signalCount / ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART +
+			((signalCount % ADS_GET_APP_SIGNAL_LIST_ITEMS_PER_PART) == 0 ? 0 : 1);
+}
+
+const QVector<QString>& TcpAppDataServer::appSignalIDs() const
+{
+	return m_thread->appSignalIDs();
+}
+
+const AppSignals& TcpAppDataServer::appSignals() const
+{
+	return m_thread->appSignals();
+}
+
+const AppDataSourcesIP& TcpAppDataServer::appDataSources() const
+{
+	return m_thread->appDataSources();
+}
+
+bool TcpAppDataServer::getAppSignalStateState(Hash hash, AppSignalState& state)
+{
+	return m_thread->getAppSignalState(hash, state);
+}
+
+void TcpAppDataServer::getServerTimes(qint64* utc, qint64* local)
+{
+	TEST_PTR_RETURN(utc);
+	TEST_PTR_RETURN(local);
+
+	QDateTime currentTimeLocal = QDateTime::currentDateTime();
+
+	*utc = currentTimeLocal.toMSecsSinceEpoch();
+
+	currentTimeLocal.setTimeSpec(Qt::UTC);
+
+	*local = currentTimeLocal.toMSecsSinceEpoch();
+}
+
 
 // -------------------------------------------------------------------------------
 //
@@ -440,23 +525,6 @@ TcpAppDataServerThread::TcpAppDataServerThread(const HostAddressPort& listenAddr
 {
 	server->setThread(this);
 	buildAppSignalIDs();
-}
-
-
-void TcpAppDataServerThread::buildAppSignalIDs()
-{
-	m_appSignalIDs.clear();
-
-	m_appSignalIDs.resize(m_appSignals.count());
-
-	int i = 0;
-
-	for(Signal* signal : m_appSignals)
-	{
-		m_appSignalIDs[i] = signal->appSignalID();
-
-		i++;
-	}
 }
 
 
@@ -489,3 +557,22 @@ QString TcpAppDataServerThread::cfgServiceIP2Str() const
 {
 	return m_appDataServiceWorker.cfgServiceIP2().addressPortStr();
 }
+
+void TcpAppDataServerThread::buildAppSignalIDs()
+{
+	m_appSignalIDs.clear();
+
+	m_appSignalIDs.resize(m_appSignals.count());
+
+	int i = 0;
+
+	for(Signal* signal : m_appSignals)
+	{
+		m_appSignalIDs[i] = signal->appSignalID();
+
+		i++;
+	}
+}
+
+
+

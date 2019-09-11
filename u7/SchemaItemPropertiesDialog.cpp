@@ -11,26 +11,30 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 {
 	ui->setupUi(this);
 
+
 	m_propertyEditor = new SchemaItemPropertyEditor(editEngine, this);
 	m_propertyEditor->setReadOnly(editEngine->readOnly());
 
-	ui->horizontalLayout->addWidget(m_propertyEditor);
+	m_propertyTable = new SchemaItemPropertyTable(editEngine, this, this);
+	m_propertyTable->setReadOnly(editEngine->readOnly());
+
+	QTabWidget* tabWidget = new QTabWidget();
+	tabWidget->addTab(m_propertyEditor, "Tree view");
+	tabWidget->addTab(m_propertyTable, "Table view");
+	tabWidget->setTabPosition(QTabWidget::South);
+
+	connect(tabWidget, &QTabWidget::currentChanged, this, &SchemaItemPropertiesDialog::propertiesModeTabChanged);
+
+	ui->horizontalLayout->addWidget(tabWidget);
 
 	setWindowTitle(tr("Schema Item(s) Properties"));
 
 	// --
 	//
-	QSettings settings;
-
-	int splitterValue = settings.value("SchemaItemPropertiesDialog/Splitter").toInt();
-	if (splitterValue < 100)
-	{
-		splitterValue = 100;
-	}
-
-	m_propertyEditor->setSplitterPosition(splitterValue);
-
-	restoreGeometry(settings.value("SchemaItemPropertiesDialog/Geometry").toByteArray());
+	m_propertyEditor->setSplitterPosition(theSettings.m_schemaItemPropertiesSplitterPosition);
+	m_propertyTable->setPropertyMask(theSettings.m_schemaItemPropertiesPropertyMask);
+	m_propertyTable->setExpandValuesToAllRows(theSettings.m_schemaItemPropertiesExpandValuesToAllRows);
+	restoreGeometry(theSettings.m_schemaItemPropertiesGeometry);
 
 	ensureVisible();
 
@@ -40,6 +44,11 @@ SchemaItemPropertiesDialog::SchemaItemPropertiesDialog(EditEngine::EditEngine* e
 SchemaItemPropertiesDialog::~SchemaItemPropertiesDialog()
 {
 	delete ui;
+}
+
+const std::vector<std::shared_ptr<VFrame30::SchemaItem>> SchemaItemPropertiesDialog::objects() const
+{
+	return m_items;
 }
 
 void SchemaItemPropertiesDialog::setObjects(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
@@ -54,6 +63,7 @@ void SchemaItemPropertiesDialog::setObjects(const std::vector<std::shared_ptr<VF
 	}
 
 	m_propertyEditor->setObjects(ol);
+	m_propertyTable->setObjects(ol);
 
 	return;
 }
@@ -61,6 +71,7 @@ void SchemaItemPropertiesDialog::setObjects(const std::vector<std::shared_ptr<VF
 void SchemaItemPropertiesDialog::setReadOnly(bool value)
 {
 	m_propertyEditor->setReadOnly(value);
+	m_propertyTable->setReadOnly(value);
 }
 
 void SchemaItemPropertiesDialog::ensureVisible()
@@ -101,15 +112,37 @@ void SchemaItemPropertiesDialog::done(int r)
 
 void SchemaItemPropertiesDialog::saveSettings()
 {
-	QSettings settings;
-
-	settings.setValue("SchemaItemPropertiesDialog/Splitter", m_propertyEditor->splitterPosition());
-	settings.setValue("SchemaItemPropertiesDialog/Geometry", saveGeometry());
+	theSettings.m_schemaItemPropertiesSplitterPosition = m_propertyEditor->splitterPosition();
+	theSettings.m_schemaItemPropertiesPropertyMask = m_propertyTable->propertyMask();
+	theSettings.m_schemaItemPropertiesExpandValuesToAllRows = m_propertyTable->expandValuesToAllRows();
+	theSettings.m_schemaItemPropertiesGeometry = saveGeometry();
 
 	return;
 }
 
 //
+void SchemaItemPropertiesDialog::propertiesModeTabChanged(int index)
+{
+	if (m_propertyEditor == nullptr)
+	{
+		Q_ASSERT(m_propertyEditor);
+		return;
+	}
+
+	if (m_propertyTable == nullptr)
+	{
+		Q_ASSERT(m_propertyTable);
+		return;
+	}
+
+	if (index == 0)
+	{
+		m_propertyEditor->updatePropertyValues(QString());
+
+		m_propertyTable->closeCurrentEditor();
+	}
+}
+
 //
 //		SchemaItemPropertyBrowser
 //
@@ -127,11 +160,11 @@ SchemaItemPropertyEditor::~SchemaItemPropertyEditor()
 {
 }
 
-void SchemaItemPropertyEditor::valueChanged(QtProperty* property, QVariant value)
+void SchemaItemPropertyEditor::valueChanged(QString propertyName, QVariant value)
 {
-	if (value.isValid() == false || property == nullptr)
+	if (value.isValid() == false)
 	{
-		assert(property != nullptr);
+		assert(false);
 		return;
 	}
 
@@ -147,7 +180,7 @@ void SchemaItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 
 		// Do not set property, if it has the same value
 		//
-		if (vi->propertyValue(property->propertyName()) == value)
+		if (vi->propertyValue(propertyName) == value)
 		{
 			continue;
 		}
@@ -172,12 +205,87 @@ void SchemaItemPropertyEditor::valueChanged(QtProperty* property, QVariant value
 		items.push_back(vi);
 	}
 
-	editEngine()->runSetProperty(property->propertyName(), value, items);
+	editEngine()->runSetProperty(propertyName, value, items);
 
 	return;
 }
 
 EditEngine::EditEngine* SchemaItemPropertyEditor::editEngine()
+{
+	return m_editEngine;
+}
+
+
+//
+//		SchemaItemPropertyBrowser
+//
+//
+SchemaItemPropertyTable::SchemaItemPropertyTable(EditEngine::EditEngine* editEngine, SchemaItemPropertiesDialog* schemaItemPropertiesDialog, QWidget* parent) :
+	IdePropertyTable(parent),
+	m_editEngine(editEngine),
+	m_schemaItemPropertiesDialog(schemaItemPropertiesDialog)
+{
+	assert(m_editEngine);
+
+	connect(m_editEngine, &EditEngine::EditEngine::propertiesChanged, this, &SchemaItemPropertyTable::updatePropertiesValues);
+}
+
+SchemaItemPropertyTable::~SchemaItemPropertyTable()
+{
+}
+
+void SchemaItemPropertyTable::valueChanged(const ExtWidgets::ModifiedObjectsData& modifiedObjectsData)
+{
+	bool result = editEngine()->startBatch();
+	if (result == false)
+	{
+		return;
+	}
+
+	// Select all items to keep selection even if properties of some items were not modified
+
+	editEngine()->runNopItem(m_schemaItemPropertiesDialog->objects());
+
+	// Modify properties
+
+	for (const QString& propertyName : modifiedObjectsData.keys())
+	{
+		QList<std::pair<std::shared_ptr<PropertyObject>, QVariant>> objectsData = modifiedObjectsData.values(propertyName);
+
+		for (auto objectData : objectsData)
+		{
+			std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+
+			std::shared_ptr<VFrame30::SchemaItem> vi = std::dynamic_pointer_cast<VFrame30::SchemaItem>(objectData.first);
+			assert(vi.get() != nullptr);
+
+			QVariant value = objectData.second;
+
+			if (value.isValid() == false)
+			{
+				Q_ASSERT(false);
+				continue;
+			}
+
+			// Do not set property, if it has the same value
+			//
+			if (vi->propertyValue(propertyName) == value)
+			{
+				continue;
+			}
+
+			items.push_back(vi);
+
+			editEngine()->runSetProperty(propertyName, value, items);
+		}
+	}
+
+	editEngine()->endBatch();
+
+	return;
+}
+
+EditEngine::EditEngine* SchemaItemPropertyTable::editEngine()
 {
 	return m_editEngine;
 }

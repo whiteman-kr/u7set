@@ -49,7 +49,7 @@ public:
 	virtual ~SchemaPropertyEditor();
 
 protected slots:
-	virtual void valueChanged(QtProperty* property, QVariant value) override;
+	virtual void valueChanged(QString propertyName, QVariant value) override;
 
 protected:
 	EditEngine::EditEngine* editEngine();

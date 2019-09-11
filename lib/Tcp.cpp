@@ -817,6 +817,7 @@ namespace Tcp
 			m_stateMutex.lock();
 
 			m_state.connectedSoftwareInfo.serializeFrom(inMessage);
+			m_state.clientDescription = QString::fromStdString(inMessage.clientdescription());
 
 			Network::SoftwareInfo outMessage;
 
@@ -1049,8 +1050,10 @@ namespace Tcp
 	// -------------------------------------------------------------------------------------
 
 	Client::Client(const SoftwareInfo& softwareInfo,
-				   const HostAddressPort &serverAddressPort) :
+				   const HostAddressPort &serverAddressPort,
+				   const QString& clientDescription) :
 		SocketWorker(softwareInfo),
+		m_clientDescription(clientDescription),
 		m_periodicTimer(this),
 		m_replyTimeoutTimer(this)
 	{
@@ -1061,8 +1064,9 @@ namespace Tcp
 
 	Client::Client(const SoftwareInfo& softwareInfo,
 				   const HostAddressPort& serverAddressPort1,
-				   const HostAddressPort& serverAddressPort2) :
+				   const HostAddressPort& serverAddressPort2, const QString &clientDescription) :
 		SocketWorker(softwareInfo),
+		m_clientDescription(clientDescription),
 		m_periodicTimer(this),
 		m_replyTimeoutTimer(this)
 	{
@@ -1138,6 +1142,7 @@ namespace Tcp
 		Network::SoftwareInfo message;
 
 		locSoftwareInfo.serializeTo(&message);
+		message.set_clientdescription(m_clientDescription.toStdString());
 
 		sendRequest(RQID_INTRODUCE_MYSELF, message);
 	}

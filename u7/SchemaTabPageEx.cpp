@@ -4323,10 +4323,6 @@ void SchemaControlTabPageEx::showFileProperties()
 
 	ExtWidgets::PropertyEditor* propertyEditor = new ExtWidgets::PropertyEditor(this);
 	propertyEditor->setReadOnly(readOnly);
-	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
-	{
-		propertyEditor->setFontSizeF(propertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
-	}
 
 	std::vector<std::shared_ptr<PropertyObject>> propertyObjects;
 	propertyObjects.reserve(schemas.size());

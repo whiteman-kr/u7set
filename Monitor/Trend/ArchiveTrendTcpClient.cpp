@@ -4,7 +4,8 @@
 ArchiveTrendTcpClient::ArchiveTrendTcpClient(MonitorConfigController* configController) :
 	Tcp::Client(configController->softwareInfo(),
 				configController->configuration().archiveService1.address(),
-				configController->configuration().archiveService2.address()),
+				configController->configuration().archiveService2.address(),
+				"ArchiveTrendTcpClient"),
 	TcpClientStatistics(this),
 	m_cfgController(configController)
 {

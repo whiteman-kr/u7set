@@ -3885,15 +3885,20 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 
 	m_propertyEditor = new IdePropertyEditor(m_splitter, dbcontroller);
     m_propertyEditor->setSplitterPosition(theSettings.m_equipmentTabPagePropertiesSplitterState);
-	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
-	{
-		m_propertyEditor->setFontSizeF(m_propertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
-	}
 
+	m_propertyTable = new IdePropertyTable(this, dbcontroller);
+	m_propertyTable->setPropertyMask(theSettings.m_equipmentTabPagePropertiesMask);
+
+	QTabWidget* tabWidget = new QTabWidget();
+	tabWidget->addTab(m_propertyEditor, "Tree view");
+	tabWidget->addTab(m_propertyTable, "Table view");
+
+	tabWidget->setTabPosition(QTabWidget::South);
+
+	connect(tabWidget, &QTabWidget::currentChanged, this, &EquipmentTabPage::propertiesModeTabChanged);
 
 	m_splitter->addWidget(m_equipmentView);
-	m_splitter->addWidget(m_propertyEditor);
-
+	m_splitter->addWidget(tabWidget);
 
 	m_splitter->setStretchFactor(0, 2);
 	m_splitter->setStretchFactor(1, 1);
@@ -3942,7 +3947,8 @@ EquipmentTabPage::EquipmentTabPage(DbController* dbcontroller, QWidget* parent) 
 	//connect(m_equipmentModel, &EquipmentModel::dataChanged, this, &EquipmentTabPage::modelDataChanged);
 	connect(m_equipmentView, &EquipmentView::updateState, this, &EquipmentTabPage::setActionState);
 
-    connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
+	connect(m_propertyEditor, &ExtWidgets::PropertyEditor::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
+	connect(m_propertyTable, &ExtWidgets::PropertyTable::propertiesChanged, this, &EquipmentTabPage::propertiesChanged);
 
 	connect(m_equipmentModel, &EquipmentModel::objectVcsStateChanged, this, &EquipmentTabPage::objectVcsStateChanged);
 
@@ -3957,6 +3963,7 @@ EquipmentTabPage::~EquipmentTabPage()
 {
 	theSettings.m_equipmentTabPageSplitterState = m_splitter->saveState();
     theSettings.m_equipmentTabPagePropertiesSplitterState = m_propertyEditor->splitterPosition();
+	theSettings.m_equipmentTabPagePropertiesMask = m_propertyTable->propertyMask();
 	theSettings.writeUserScope();
 }
 
@@ -4242,6 +4249,7 @@ void EquipmentTabPage::projectClosed()
 {
 	this->setEnabled(false);
 	m_propertyEditor->clear();
+	m_propertyTable->clear();
 	return;
 }
 
@@ -4824,6 +4832,28 @@ void EquipmentTabPage::showConnections()
 	return;
 }
 
+void EquipmentTabPage::propertiesModeTabChanged(int index)
+{
+	if (m_propertyEditor == nullptr)
+	{
+		Q_ASSERT(m_propertyEditor);
+		return;
+	}
+
+	if (m_propertyTable == nullptr)
+	{
+		Q_ASSERT(m_propertyTable);
+		return;
+	}
+
+	if (index == 0)
+	{
+		m_propertyEditor->updatePropertyValues(QString());
+
+		m_propertyTable->closeCurrentEditor();
+	}
+}
+
 //void EquipmentTabPage::moduleConfiguration()
 //{
 	// Show modules configurations dialog
@@ -4865,6 +4895,7 @@ void EquipmentTabPage::showConnections()
 void EquipmentTabPage::setProperties()
 {
 	assert(m_propertyEditor != nullptr);
+	assert(m_propertyTable != nullptr);
 
 	// Get objects from the selected rows
 	//
@@ -4873,6 +4904,7 @@ void EquipmentTabPage::setProperties()
 	if (selectedIndexList.empty() == true)
 	{
 		m_propertyEditor->clear();
+		m_propertyTable->clear();
 		return;
 	}
 
@@ -4897,15 +4929,20 @@ void EquipmentTabPage::setProperties()
 	m_propertyEditor->setExpertMode(isPresetMode() || theSettings.isExpertMode());
 	m_propertyEditor->setReadOnly(checkedOutList.isEmpty() == true);
 
+	m_propertyTable->setExpertMode(isPresetMode() || theSettings.isExpertMode());
+	m_propertyTable->setReadOnly(checkedOutList.isEmpty() == true);
+
 	// Set objects to the PropertyEditor
 	//
 	if (checkedOutList.isEmpty() == false)
 	{
 		m_propertyEditor->setObjects(checkedOutList);
+		m_propertyTable->setObjects(checkedOutList);
 	}
 	else
 	{
 		m_propertyEditor->setObjects(checkedInList);
+		m_propertyTable->setObjects(checkedInList);
 	}
 
 	return;

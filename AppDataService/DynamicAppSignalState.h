@@ -28,11 +28,11 @@ public:
 				  const char* rupData,
 				  int rupDataSize,
 				  int autoArchivingGroup,
-				  SimpleAppSignalStatesQueue& statesQueue,
+				  SimpleAppSignalStatesArchiveFlagQueue& statesQueue,
 				  const QThread* thread);
 
 	void setUnavailable(const Times& time,
-				  SimpleAppSignalStatesQueue& statesQueue,
+				  SimpleAppSignalStatesArchiveFlagQueue& statesQueue,
 				  const QThread* thread);
 
 //	void invalidate() { m_current[0].flags.all = m_current[1].flags.all = 0; }
@@ -47,7 +47,7 @@ public:
 
 	const SimpleAppSignalState& current() const { return m_current[m_curStateIndex.load()]; }
 
-	int autoArchiningGroup() const { return m_autoArchivingGroup; }
+	int autoArchivingGroup() const { return m_autoArchivingGroup; }
 	void setAutoArchivingGroup(int archivingGroup);
 
 	// Real time trends support

@@ -31,7 +31,7 @@ public:
 	bool getState(Network::AppDataSourceState* proto) const;
 	void setState(const Network::AppDataSourceState& proto);
 
-	bool getSignalState(SimpleAppSignalState* state, const QThread* thread);
+	bool getSignalState(SimpleAppSignalStateArchiveFlag* state, const QThread* thread);
 
 	int acquiredSignalsCount() const { return m_acquiredSignalsCount; }
 
@@ -53,7 +53,7 @@ private:
 
 	int m_acquiredSignalsCount = 0;
 
-	SimpleAppSignalStatesQueue m_signalStatesQueue;
+	SimpleAppSignalStatesArchiveFlagQueue m_signalStatesQueue;
 
 	int m_signalStatesQueueSize = 0;
 	int m_signalStatesQueueCurSize = 0;
