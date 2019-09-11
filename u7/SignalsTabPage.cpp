@@ -103,13 +103,14 @@ QVariant SignalPropertyManager::value(const Signal* signal, int propertyIndex) c
 	}
 }
 
-const std::list<std::pair<int, QString> > SignalPropertyManager::values(int propertyIndex) const
+const std::vector<std::pair<int, QString> > SignalPropertyManager::values(int propertyIndex) const
 {
 	if (isNotCorrect(propertyIndex))
 	{
 		assert(false);
 		return {};
 	}
+
 	return m_propertyDescription[static_cast<size_t>(propertyIndex)].enumValues;
 }
 

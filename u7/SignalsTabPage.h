@@ -71,7 +71,7 @@ public:
 	QString name(int propertyIndex);
 
 	QVariant value(const Signal* signal, int propertyIndex) const;
-	const std::list<std::pair<int, QString>> values(int propertyIndex) const;
+	const std::vector<std::pair<int, QString>> values(int propertyIndex) const;
 
 	void setValue(Signal* signal, int propertyIndex, const QVariant& value);
 

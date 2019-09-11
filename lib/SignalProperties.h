@@ -93,7 +93,7 @@ struct SignalPropertyDescription
 	QString caption;
 	QVariant::Type type;
 
-	std::list<std::pair<int, QString>> enumValues;
+	std::vector<std::pair<int, QString>> enumValues;
 
 	std::function<QVariant (const Signal*)> valueGetter;
 	std::function<void (Signal*, const QVariant&)> valueSetter;
