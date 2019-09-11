@@ -1503,13 +1503,10 @@ namespace Builder
 		return m_refSignals[0];
 	}
 
-	bool UalSignal::isCompatible(const Signal* s) const
+	bool UalSignal::isCompatible(const Signal* s, IssueLogger* log) const
 	{
-		if (s == nullptr)
-		{
-			assert(false);
-			return false;
-		}
+		TEST_PTR_RETURN_FALSE(log);
+		TEST_PTR_LOG_RETURN_FALSE(s, log);
 
 		if (m_refSignals.count() < 1 || m_refSignals[0] == nullptr)
 		{
@@ -1520,8 +1517,10 @@ namespace Builder
 		return m_refSignals[0]->isCompatibleFormat(*s);
 	}
 
-	bool UalSignal::isCompatible(const LogicAfbSignal& afbSignal) const
+	bool UalSignal::isCompatible(const UalItem& ualItem, const LogicAfbSignal& afbSignal, IssueLogger* log) const
 	{
+		TEST_PTR_RETURN_FALSE(log);
+
 		if (m_refSignals.count() < 1 || m_refSignals[0] == nullptr)
 		{
 			assert(false);
@@ -1548,6 +1547,10 @@ namespace Builder
 					{
 						return true;
 					}
+
+					// Non-discrete busses is not allowed on input '%1'. (Item %2, logic schema %3).
+					//
+					log->errALC5172(afbSignal.caption(), ualItem.label(), ualItem.guid(), ualItem.schemaID());
 
 					return false;
 
@@ -1579,8 +1582,10 @@ namespace Builder
 		return m_refSignals[0]->isCompatibleFormat(afbSignal.type(), afbSignal.dataFormat(), afbSignal.size(), afbSignal.byteOrder());
 	}
 
-	bool UalSignal::isCompatible(const Builder::BusSignal& busSignal) const
+	bool UalSignal::isCompatible(const Builder::BusSignal& busSignal, IssueLogger* log) const
 	{
+		TEST_PTR_RETURN_FALSE(log);
+
 		if (m_refSignals.count() < 1 || m_refSignals[0] == nullptr)
 		{
 			assert(false);
@@ -1603,9 +1608,9 @@ namespace Builder
 		return false;
 	}
 
-	bool UalSignal::isCompatible(const UalSignal* ualSignal) const
+	bool UalSignal::isCompatible(const UalSignal* ualSignal, IssueLogger* log) const
 	{
-		return isCompatible(ualSignal->signal());
+		return isCompatible(ualSignal->signal(), log);
 	}
 
 	void UalSignal::setReceivedOptoAppSignalID(const QString& recvAppSignalID)

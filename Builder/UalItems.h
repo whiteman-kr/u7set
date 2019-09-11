@@ -497,10 +497,10 @@ namespace Builder
 		const QVector<Signal*>& refSignals() const { return m_refSignals; }
 		int refSignalsCount() const { return m_refSignals.count(); }
 
-		bool isCompatible(const Signal* s) const;
-		bool isCompatible(const LogicAfbSignal& afbSignal) const;
-		bool isCompatible(const BusSignal& busSignal) const;
-		bool isCompatible(const UalSignal* ualSignal) const;
+		bool isCompatible(const Signal* s, IssueLogger* log) const;
+		bool isCompatible(const UalItem &ualItem, const LogicAfbSignal& afbSignal, IssueLogger* log) const;
+		bool isCompatible(const BusSignal& busSignal, IssueLogger* log) const;
+		bool isCompatible(const UalSignal* ualSignal, IssueLogger *log) const;
 
 //		bool isAutoSignal() const { return m_autoSignalPtr != nullptr; }
 

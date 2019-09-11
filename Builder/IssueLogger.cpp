@@ -6432,6 +6432,30 @@ namespace Builder
 						arg(appSignalID).arg(equipmentSignalID));
 	}
 
+	/// IssueCode: ALC5172
+	///
+	/// IssueType: Error
+	///
+	/// Title: Non-discrete busses is not allowed on input '%1'. (Item %2, logic schema %3).
+	///
+	/// Parameters:
+	///		%1 caption of AFB input
+	///		%2 UAL item label
+	///		%3 UAL schema ID
+	///
+	/// Description:
+	///		Non-discrete bus cannot be connected to specified input.
+	///
+	void IssueLogger::errALC5172(QString inputCaption, QString itemLabel, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5172, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5172,
+				  QString(tr("Non-discrete busses is not allowed on input '%1'. (Item %2, logic schema %3).")).
+						arg(inputCaption).arg(itemLabel).arg(schemaID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186

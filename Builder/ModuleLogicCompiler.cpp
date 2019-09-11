@@ -2302,7 +2302,7 @@ namespace Builder
 
 		// check signals compatibility
 		//
-		bool result = srcUalSignal->isCompatible(s);
+		bool result = srcUalSignal->isCompatible(s, log());
 
 		if (result == false)
 		{
@@ -2425,7 +2425,7 @@ namespace Builder
 			return false;
 		}
 
-		result = ualSignal->isCompatible(inSignal);
+		result = ualSignal->isCompatible(*destItem, inSignal, log());
 
 		if (result == false)
 		{
@@ -2540,7 +2540,7 @@ namespace Builder
 			return false;
 		}
 
-		if (ualSignal->isCompatible(busSignal) == false)
+		if (ualSignal->isCompatible(busSignal, log()) == false)
 		{
 			// Uncompatible signals connection (Logic schema '%1').
 			//
@@ -7482,7 +7482,7 @@ namespace Builder
 		TEST_PTR_LOG_RETURN_FALSE(ualAfb, m_log);
 		TEST_PTR_LOG_RETURN_FALSE(inUalSignal, m_log);
 
-		if (inUalSignal->isCompatible(inAfbSignal) == false)
+		if (inUalSignal->isCompatible(*ualAfb, inAfbSignal, log()) == false)
 		{
 			// Uncompatible signals connection (Logic schema '%1').
 			//
@@ -7843,7 +7843,7 @@ namespace Builder
 			return false;
 		}
 
-		if (outUalSignal->isCompatible(outAfbSignal) == false)
+		if (outUalSignal->isCompatible(*ualAfb, outAfbSignal, log()) == false)
 		{
 			// Uncompatible signals connection (Logic schema '%1').
 			//
@@ -8242,7 +8242,7 @@ namespace Builder
 				continue;
 			}
 
-			if (busChildSignal->isCompatible(inputSignal) == false)
+			if (busChildSignal->isCompatible(inputSignal, log()) == false)
 			{
 				assert(false);						// this error should be detected early
 				LOG_INTERNAL_ERROR(m_log);
@@ -8635,7 +8635,7 @@ namespace Builder
 				continue;
 			}
 
-			if (busChildSignal->isCompatible(inputSignal) == false)
+			if (busChildSignal->isCompatible(inputSignal, log()) == false)
 			{
 				assert(false);						// this error should be detected early
 				LOG_INTERNAL_ERROR(m_log);
