@@ -90,7 +90,7 @@ public:
 
 public:
 	virtual bool isEnum() const = 0;
-	virtual std::list<std::pair<int, QString>> enumValues() const = 0;
+	virtual std::vector<std::pair<int, QString>> enumValues() const = 0;
 
 	virtual QVariant enumValue() const = 0;		// if is enum, returns QVariant with TYPE or QVariant::string if type
 												// cannot be get (dynamic enum properties)
@@ -363,11 +363,11 @@ private:
 	}
 
 public:
-	virtual std::list<std::pair<int, QString>> enumValues() const override final
+	virtual std::vector<std::pair<int, QString>> enumValues() const override final
 	{
 		Q_ASSERT(std::is_enum<TYPE>::value);
 
-		std::list<std::pair<int, QString>> result;
+		std::vector<std::pair<int, QString>> result;
 
 		QMetaEnum me = metaEnum<TYPE>(enumness<std::is_enum<TYPE>::value>());
 		if (me.isValid() == false)
@@ -377,6 +377,8 @@ public:
 		}
 
 		int keyCount = me.keyCount();
+		result.reserve(keyCount);
+
 		for (int i = 0; i < keyCount; i++)
 		{
 			result.push_back(std::make_pair(me.value(i), QString::fromLocal8Bit(me.key(i))));
@@ -590,11 +592,11 @@ private:
 	}
 
 public:
-	virtual std::list<std::pair<int, QString>> enumValues() const override final
+	virtual std::vector<std::pair<int, QString>> enumValues() const override final
 	{
 		Q_ASSERT(std::is_enum<TYPE>::value);
 
-		std::list<std::pair<int, QString>> result;
+		std::vector<std::pair<int, QString>> result;
 
 		QMetaEnum me = metaEnum<TYPE>(enumness<std::is_enum<TYPE>::value>());
 		if (me.isValid() == false)
@@ -604,6 +606,8 @@ public:
 		}
 
 		int keyCount = me.keyCount();
+		result.reserve(keyCount);
+
 		for (int i = 0; i < keyCount; i++)
 		{
 			result.push_back(std::make_pair(me.value(i), QString::fromLocal8Bit(me.key(i))));
@@ -867,9 +871,9 @@ public:
 	}
 
 public:
-	virtual std::list<std::pair<int, QString>> enumValues() const override final
+	virtual std::vector<std::pair<int, QString>> enumValues() const override final
 	{
-		std::list<std::pair<int, QString>> result;
+		std::vector<std::pair<int, QString>> result;
 
 		if (isEnum() == false)
 		{
@@ -910,6 +914,8 @@ public:
 				}
 
 				int keyCount = me.keyCount();
+				result.reserve(keyCount);
+
 				for (int i = 0; i < keyCount; i++)
 				{
 					result.push_back(std::make_pair(me.value(i), QString::fromLocal8Bit(me.key(i))));
@@ -1134,18 +1140,9 @@ public:
 		return true;	// This is dynamic enumeration
 	}
 
-	virtual std::list<std::pair<int, QString>> enumValues() const override final
+	virtual std::vector<std::pair<int, QString>> enumValues() const override final
 	{
-		std::list<std::pair<int, QString>> result;
-
-		auto values = m_enumValues->getKeyValueVector();
-
-		for (auto i : values)
-		{
-			result.push_back(std::make_pair(i.first, i.second));
-		}
-
-		return result;
+		return m_enumValues->getKeyValueVector();
 	}
 
 	virtual QVariant enumValue() const override final
@@ -1313,11 +1310,12 @@ public:
 		return true;	// This is dynamic enumeration
 	}
 
-	virtual std::list<std::pair<int, QString>> enumValues() const override final
+	virtual std::vector<std::pair<int, QString>> enumValues() const override final
 	{
-		std::list<std::pair<int, QString>> result;
+		std::vector<std::pair<int, QString>> result;
+		result.reserve(m_enumValues.size());
 
-		for (auto[str, key] : m_enumValues)
+		for (const auto&[str, key] : m_enumValues)
 		{
 			result.push_back({key, str});
 		}
@@ -1560,8 +1558,6 @@ public:
 
 		auto property = std::make_shared<PropertyTypedValue<TYPE, CLASS, get, set>>(dynamic_cast<CLASS*>(this));
 
-		uint hash = qHash(caption);
-
 		property->setCaption(caption);
 		property->setCategory(category);
 		property->setVisible(visible);
@@ -1571,7 +1567,7 @@ public:
 			property->setReadOnly(true);
 		}
 
-		m_properties[hash] = std::dynamic_pointer_cast<Property>(property);
+		m_properties[caption] = std::dynamic_pointer_cast<Property>(property);
 
 		emit propertyListChanged();
 
@@ -1599,8 +1595,6 @@ public:
 
 		std::shared_ptr<PropertyValue<TYPE>> property = std::make_shared<PropertyValue<TYPE>>();
 
-		uint hash = qHash(caption);
-
 		property->setCaption(caption);
 		property->setCategory(category);
 		property->setVisible(visible);
@@ -1612,7 +1606,7 @@ public:
 			property->setReadOnly(true);
 		}
 
-		m_properties[hash] = property;
+		m_properties[caption] = property;
 
 		emit propertyListChanged();
 
@@ -1626,14 +1620,12 @@ public:
 	{
 		std::shared_ptr<PropertyValueNoGetterSetter> property = std::make_shared<PropertyValueNoGetterSetter>();
 
-		uint hash = qHash(caption);
-
 		property->setCaption(caption);
 		property->setCategory(category);
 		property->setVisible(visible);
 		property->setValue(value);
 
-		m_properties[hash] = property;
+		m_properties[caption] = property;
 
 		emit propertyListChanged();
 
@@ -1653,8 +1645,6 @@ public:
 			return nullptr;
 		}
 
-		uint hash = qHash(caption);
-
 		std::shared_ptr<PropertyValue<OrderedHash<int, QString>>> property = std::make_shared<PropertyValue<OrderedHash<int, QString>>>(enumValues);
 
 		property->setCaption(caption);
@@ -1672,7 +1662,7 @@ public:
 			property->setReadOnly(true);
 		}
 
-		m_properties[hash] = property;
+		m_properties[caption] = property;
 
 		emit propertyListChanged();
 
@@ -1686,8 +1676,6 @@ public:
 			std::function<int(void)> getter = std::function<int(void)>(),
 			std::function<void(int)> setter = std::function<void(int)>())
 	{
-		uint hash = qHash(caption);
-
 		auto property = std::make_shared<PropertyValue<std::vector<std::pair<QString, int>>>>(enumValues);
 
 		property->setCaption(caption);
@@ -1695,7 +1683,7 @@ public:
 		property->setGetter(getter);
 		property->setSetter(setter);
 
-		m_properties[hash] = property;
+		m_properties[caption] = property;
 
 		emit propertyListChanged();
 
@@ -1711,9 +1699,9 @@ public:
 		std::vector<std::shared_ptr<Property>> result;
 		result.reserve(m_properties.size());
 
-		for (const std::pair<uint, std::shared_ptr<Property>>& p : m_properties)
+		for( auto it = m_properties.cbegin(); it != m_properties.cend(); ++it )
 		{
-			result.push_back(p.second);
+			result.push_back(it.value());
 		}
 
 		return result;
@@ -1724,17 +1712,14 @@ public:
 		// Specific properties cannot be demanded,
 		// they are not in propertyDemand
 		//
-
 		std::vector<std::shared_ptr<Property>> result;
 		result.reserve(m_properties.size());
 
-		for (const auto[key, prop] : m_properties)
+		for(auto it = m_properties.cbegin(); it != m_properties.cend(); ++it )
 		{
-			Q_UNUSED(key);
-
-			if (prop->specific() == true)
+			if (it.value()->specific() == true)
 			{
-				result.push_back(prop);
+				result.push_back(it.value());
 			}
 		}
 
@@ -1743,11 +1728,9 @@ public:
 
 	Q_INVOKABLE bool propertyExists(const QString& caption, bool demandIfNotExists) const
 	{
-		uint hash = qHash(caption);
-
 		if (demandIfNotExists == false)
 		{
-			return m_properties.find(hash) != m_properties.end();
+			return m_properties.find(caption) != m_properties.end();
 		}
 		else
 		{
@@ -1770,8 +1753,7 @@ public:
 
 	bool removeProperty(const QString& caption)
 	{
-		uint hash = qHash(caption);
-		size_t removed = m_properties.erase(hash);
+		size_t removed = m_properties.remove(caption);
 
 		if (removed > 0)
 		{
@@ -1792,7 +1774,7 @@ public:
 
 		for(auto it = m_properties.begin(); it != m_properties.end();)
 		{
-			if(it->second->specific() == true)
+			if(it.value()->specific() == true)
 			{
 				it = m_properties.erase(it);
 				someRemoved = true;
@@ -1822,8 +1804,7 @@ public:
 	{
 		for (std::shared_ptr<Property> p : properties)
 		{
-			uint hash = qHash(p->caption());
-			m_properties[hash] = p;
+			m_properties[p->caption()] = p;
 		}
 
 		if (properties.empty() == false)
@@ -1836,8 +1817,7 @@ public:
 
 	void addProperty(std::shared_ptr<Property> property)
 	{
-		uint hash = qHash(property->caption());
-		m_properties[hash] = property;
+		m_properties[property->caption()] = property;
 
 		emit propertyListChanged();
 
@@ -1850,51 +1830,47 @@ public:
 	//
 	std::shared_ptr<Property> propertyByCaption(const QString& caption)
 	{
-		uint hash = qHash(caption);
-
-		if (auto it = m_properties.find(hash);
+		if (auto it = m_properties.find(caption);
 			it == m_properties.end())
 		{
 			propertyDemand(caption);
 
-			if (auto itt = m_properties.find(hash);
+			if (auto itt = m_properties.find(caption);
 				itt == m_properties.end())
 			{
 				return std::shared_ptr<Property>();
 			}
 			else
 			{
-				return itt->second;
+				return itt.value();
 			}
 		}
 		else
 		{
-			return it->second;
+			return it.value();
 		}
 	}
 
 	const std::shared_ptr<Property> propertyByCaption(const QString& caption) const
 	{
-		uint hash = qHash(caption);
-
-		if (auto it = m_properties.find(hash);
+		if (auto it = m_properties.find(caption);
 			it == m_properties.end())
 		{
 			const_cast<PropertyObject*>(this)->propertyDemand(caption);
 
-			if (auto itt = m_properties.find(hash);
+			if (auto itt = m_properties.find(caption);
 				itt == m_properties.end())
 			{
 				return std::shared_ptr<Property>();
 			}
 			else
 			{
-				return itt->second;
+				return itt.value();
 			}
 		}
 		else
 		{
-			return it->second;
+			return it.value();
 		}
 	}
 
@@ -1993,19 +1969,15 @@ public:
 		return true;
 	}
 
-	std::list<std::pair<int, QString>> enumValues(const QString& caption)
+	std::vector<std::pair<int, QString>> enumValues(const QString& caption)
 	{
-		std::list<std::pair<int, QString>> result;
-
 		auto property = propertyByCaption(caption);
 		if (property == nullptr)
 		{
-			return result;
+			return {};
 		}
 
-		result = property->enumValues();
-
-		return result;
+		return property->enumValues();
 	}
 
 	static const int m_lastSpecificPropertiesVersion = 6;
@@ -2927,7 +2899,7 @@ signals:
 	void propertyListChanged();		// One or more properties were added or deleted
 
 private:
-	std::map<uint, std::shared_ptr<Property>> m_properties;		// key is property caption hash qHash(QString)
+	QHash<QString, std::shared_ptr<Property>> m_properties;		// key is property Caption
 	mutable bool m_allPropsAlreadyDemanded = false;
 };
 

@@ -719,7 +719,6 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 	m_objectList = new TuningTableView(m_tuningTcpClient);
     m_objectList->setWordWrap(false);
 
-	QFont f = m_objectList->font();
 
 	// Models and data
 	//
@@ -747,8 +746,14 @@ TuningPage::TuningPage(std::shared_ptr<TuningFilter> treeFilter,
 	std::vector<QString> valueColumnsAppSignalIdSuffixes = tabFilter->valueColumnsAppSignalIdSuffixes();
 
 	m_model = new TuningModelClient(m_tuningSignalManager, m_tuningTcpClient, valueColumnsAppSignalIdSuffixes, this);
-	m_model->setFont(f.family(), f.pointSize(), false);
-	m_model->setImportantFont(f.family(), f.pointSize(), true);
+
+	QFont f = m_objectList->font();
+
+	f.setBold(false);
+	m_model->setFont(f);
+
+	f.setBold(true);
+	m_model->setImportantFont(f);
 
 	if (tabFilter->columnCustomAppId() == true)
 	{
