@@ -1555,12 +1555,12 @@ namespace Builder
 					return false;
 
 				case E::BusDataFormat::Mixed:
-
-					assert(false);	// mixed busses processing is not implemented now
-					return false;
+					// any bus can be connected to this afbSignal
+					//
+					return true;
 
 				default:
-					assert(false);
+					LOG_INTERNAL_ERROR_MSG(log, "Unknown E::BusDataFormat");
 				}
 
 				return false;
@@ -1570,9 +1570,14 @@ namespace Builder
 			{
 				// discrete signal connection to bus input checking
 				//
-				if (afbSignal.busDataFormat() == E::BusDataFormat::Discrete)
+				switch(afbSignal.busDataFormat())
 				{
+				case E::BusDataFormat::Discrete:
+				case E::BusDataFormat::Mixed:
 					return true;
+
+				default:
+					LOG_INTERNAL_ERROR_MSG(log, "Unknown E::BusDataFormat");
 				}
 			}
 

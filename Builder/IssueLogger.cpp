@@ -5373,7 +5373,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
+	/// Title:	   Discrete signal %1 is connected to non-discrete or non-mixed bus input (Logic schema %2)
 	///
 	/// Parameters:
 	///		%1 App signal ID
@@ -5389,7 +5389,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5124,
-				  QString(tr("Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)")).
+				  QString(tr("Discrete signal %1 is connected to non-discrete or non-mixed bus input (Logic schema %2)")).
 								arg(appSignalID).arg(schemaID));
 	}
 

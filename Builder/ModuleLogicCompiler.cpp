@@ -3647,9 +3647,11 @@ namespace Builder
 					continue;			// check remaining inputs
 				}
 
-				if (ualSignal->isDiscrete() && afbSignal.isBus() == true && afbSignal.busDataFormat() == E::BusDataFormat::Discrete)
+				if (ualSignal->isDiscrete() && afbSignal.isBus() == true &&
+						(afbSignal.busDataFormat() == E::BusDataFormat::Discrete ||
+							afbSignal.busDataFormat() == E::BusDataFormat::Mixed))
 				{
-					// discrete signal to "discrete" bus - is allowed connection, but bus type is still unknown
+					// discrete signal to "discrete" or "mixed" bus - is allowed connection, but bus type is still unknown
 					continue;
 				}
 
@@ -7623,12 +7625,12 @@ namespace Builder
 			return false;
 		}
 
-		if (inAfbSignal.busDataFormat() != E::BusDataFormat::Discrete)
+		if (inAfbSignal.busDataFormat() != E::BusDataFormat::Discrete && inAfbSignal.busDataFormat() != E::BusDataFormat::Mixed)
 		{
-			// Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
+			// Discrete signal %1 is connected to non-discrete or non-mixed bus input (Logic schema %2)
 			//
 			m_log->errALC5124(inUalSignal->refSignalIDsJoined(), inUalSignal->ualItemGuid(),
-							  ualAfb->guid(), ualAfb->schemaID());	// Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
+							  ualAfb->guid(), ualAfb->schemaID());
 
 			return false;
 		}
@@ -7708,10 +7710,13 @@ namespace Builder
 			return false;
 		}
 
-		if (inAfbSignal.busDataFormat() != E::BusDataFormat::Discrete)
+		bool result = inUalSignal->isCompatible(*ualAfb, inAfbSignal, log());
+
+		if (result == false)
 		{
-			assert(false);
-			LOG_INTERNAL_ERROR(m_log);			// unknown BusDataFormat
+			// Uncompatible signals connection (Logic schema %1).
+			//
+			log()->errALC5117(inUalSignal->ualItemGuid(), inUalSignal->ualItemLabel(), ualAfb->guid(), ualAfb->label(), ualAfb->schemaID());
 			return false;
 		}
 
@@ -7916,13 +7921,6 @@ namespace Builder
 			return false;
 		}
 
-		if (outAfbSignal.busDataFormat() != E::BusDataFormat::Discrete)
-		{
-			assert(false);
-			LOG_INTERNAL_ERROR(m_log);			// unknown BusDataFormat
-			return false;
-		}
-
 		if (outUalSignal->ualAddr().isValid() == false)
 		{
 			// Undefined UAL address of signal '%1' (Logic schema '%2').
@@ -8043,13 +8041,6 @@ namespace Builder
 			((outputSignalSize % SIZE_16BIT) != 0))
 		{
 			assert(false);						// pins or signals size are not multiple 16
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		if (inputSignalSize < inputsBusSize)
-		{
-			assert(false);						// is not allowed now
 			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
