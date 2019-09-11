@@ -312,6 +312,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0292.sql", "Upgrade to version 292, Function get_signals_id_appsignalid creation"},
 	{":/DatabaseUpgrade/Upgrade0293.sql", "Upgrade to version 293, RIM configuration corrections, AIM/AOM/TIM/RIM/WAIM configuration does not return false on first error"},
 	{":/DatabaseUpgrade/Upgrade0294.sql", "Upgrade to version 294, Set MaxInstCount from 256 to 1024 for AFB FLIP_FLOP in LM1_SR03"},
+	{":/DatabaseUpgrade/Upgrade0295.sql", "Upgrade to version 295, Set inputs and outputs BusDataFormat to Mixed for AFB bus_switch (for all LMs)"},
 };
 
 int DbWorker::counter = 0;
