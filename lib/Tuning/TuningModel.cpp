@@ -629,25 +629,22 @@ void TuningModel::setColumnTypes(std::vector<TuningModelColumns> columnsIndexes)
 
 }
 
-void TuningModel::setFont(const QString& fontName, int fontSize, bool fontBold)
+void TuningModel::setFont(const QFont& font)
 {
 	if (m_font != nullptr)
 	{
 		delete m_font;
 	}
-	m_font = new QFont(fontName, fontSize);
-	m_font->setBold(fontBold);
+	m_font = new QFont(font);
 }
 
-void TuningModel::setImportantFont(const QString& fontName, int fontSize, bool fontBold)
+void TuningModel::setImportantFont(const QFont& font)
 {
 	if (m_importantFont != nullptr)
 	{
 		delete m_importantFont;
 	}
-	m_importantFont = new QFont(fontName, fontSize);
-	m_importantFont->setBold(fontBold);
-
+	m_importantFont = new QFont(font);
 }
 
 int TuningModel::rowCount(const QModelIndex& parent) const

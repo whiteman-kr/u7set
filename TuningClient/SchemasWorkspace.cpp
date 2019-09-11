@@ -28,6 +28,7 @@ SchemasWorkspace::SchemasWorkspace(ConfigController* configController,
 	if (theConfigSettings.showSchemasList == true)
 	{
 		m_schemasList = new QTreeWidget();
+		m_schemasList->setObjectName("SchemasTreeWidget");
 		m_schemasList->setRootIsDecorated(false);
 
 		QStringList headerLabels;

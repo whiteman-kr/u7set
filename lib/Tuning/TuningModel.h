@@ -96,8 +96,8 @@ public:
 
 	// Font
 
-	void setFont(const QString& fontName, int fontSize, bool fontBold);
-	void setImportantFont(const QString& fontName, int fontSize, bool fontBold);
+	void setFont(const QFont& font);
+	void setImportantFont(const QFont& font);
 
 	// Item count
 
