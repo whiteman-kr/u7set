@@ -4737,6 +4737,7 @@ EditSchemaTabPageEx::EditSchemaTabPageEx(QTabWidget* tabWidget,
 		m_toolBar->addAction(m_schemaWidget->m_addImageValueAction);
 		m_toolBar->addAction(m_schemaWidget->m_addPushButtonAction);
 		m_toolBar->addAction(m_schemaWidget->m_addLineEditAction);
+		m_toolBar->addAction(m_schemaWidget->m_addIndicatorAction);
 	}
 
 	if (schema->isTuningSchema())
