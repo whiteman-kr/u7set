@@ -78,15 +78,13 @@ class PropertyObject;
 class Property
 {
 public:
-	Property() = default;
-	Property(const Property&) = default;
-	Property(Property&&) = default;
-	Property& operator=(const Property&) = default;
-	Property& operator=(Property&&) = default;
+	Property() noexcept = default;
+	Property(const Property&) noexcept = default;
+	Property(Property&&) noexcept = default;
+	Property& operator=(const Property&) noexcept = default;
+	Property& operator=(Property&&) noexcept = default;
+	virtual ~Property() = default;
 
-	virtual ~Property()
-	{
-	}
 
 public:
 	virtual bool isEnum() const = 0;
@@ -96,170 +94,170 @@ public:
 												// cannot be get (dynamic enum properties)
 
 public:
-	QString caption() const
+	QString caption() const noexcept
 	{
 		return m_caption;
 	}
-	void setCaption(const QString& value)
+	void setCaption(const QString& value) noexcept
 	{
 		m_caption = value;
 	}
 
-	QString description() const
+	QString description() const noexcept
 	{
 		return m_description;
 	}
-	void setDescription(const QString& value)
+	void setDescription(const QString& value) noexcept
 	{
 		m_description = value;
 	}
 
-	QString category() const
+	QString category() const noexcept
 	{
 		return m_category;
 	}
-	void setCategory(const QString& value)
+	void setCategory(const QString& value) noexcept
 	{
 		m_category = value;
 	}
 
-	QString validator() const
+	QString validator() const noexcept
 	{
 		return m_validator;
 	}
-	void setValidator(const QString& value)
+	void setValidator(const QString& value) noexcept
 	{
 		m_validator = value;
 	}
 
-	bool readOnly() const
+	bool readOnly() const noexcept
 	{
 		return m_readOnly;
 	}
-	void setReadOnly(bool value)
+	void setReadOnly(bool value) noexcept
 	{
 		m_readOnly = value;
 	}
 
-	bool updateFromPreset() const
+	bool updateFromPreset() const noexcept
 	{
 		return m_updateFromPreset;
 	}
-	void setUpdateFromPreset(bool value)
+	void setUpdateFromPreset(bool value) noexcept
 	{
 		m_updateFromPreset = value;
 	}
 
-	bool specific() const
+	bool specific() const noexcept
 	{
 		return m_specific;
 	}
-	void setSpecific(bool value)
+	void setSpecific(bool value) noexcept
 	{
 		m_specific = value;
 	}
 
-	bool visible() const
+	bool visible() const noexcept
 	{
 		return m_visible;
 	}
-	void setVisible(bool value)
+	void setVisible(bool value) noexcept
 	{
 		m_visible = value;
 	}
 
-	bool expert() const
+	bool expert() const noexcept
 	{
 		return m_expert;
 	}
-	void setExpert(bool value)
+	void setExpert(bool value) noexcept
 	{
 		m_expert = value;
 	}
 
-	bool essential() const
+	bool essential() const noexcept
 	{
 		return m_essential;
 	}
-	void setEssential(bool value)
+	void setEssential(bool value) noexcept
 	{
 		m_essential = value;
 	}
 
-	bool disableTableEditor() const
+	bool disableTableEditor() const noexcept
 	{
 		return m_disableTableEditor;
 	}
-	void setDisableTableEditor(bool value)
+	void setDisableTableEditor(bool value) noexcept
 	{
 		m_disableTableEditor = value;
 	}
 
 
-	E::PropertySpecificEditor specificEditor()
+	E::PropertySpecificEditor specificEditor() noexcept
 	{
 		return m_specificEditor;
 	}
 
-	void setSpecificEditor(E::PropertySpecificEditor value)
+	void setSpecificEditor(E::PropertySpecificEditor value) noexcept
 	{
 		m_specificEditor = value;
 	}
 
-	bool password() const
+	bool password() const noexcept
 	{
 		return m_specificEditor == E::PropertySpecificEditor::Password;
 	}
-	void setPassword(bool value)
+	void setPassword(bool value) noexcept
 	{
 		m_specificEditor = value ? E::PropertySpecificEditor::Password : E::PropertySpecificEditor::None;
 	}
 
-	bool isScript() const
+	bool isScript() const noexcept
 	{
 		return m_specificEditor == E::PropertySpecificEditor::Script ||
 				caption().contains("Script") == true;
 	}
-	void setIsScript(bool value)
+	void setIsScript(bool value) noexcept
 	{
 		m_specificEditor = value ? E::PropertySpecificEditor::Script : E::PropertySpecificEditor::None;
 	}
 
-	int precision() const
+	int precision() const noexcept
 	{
 		return m_precision;
 	}
-	void setPrecision(int value)
+	void setPrecision(int value) noexcept
 	{
 		m_precision = std::clamp<qint16>(static_cast<qint16>(value), 0, 128);
 	}
 
-	int viewOrder() const
+	int viewOrder() const noexcept
 	{
 		return m_viewOrder;
 	}
-	void setViewOrder(int value)
+	void setViewOrder(int value) noexcept
 	{
 		m_viewOrder = static_cast<quint16>(value);
 	}
 
-	virtual QVariant value() const = 0;
-	virtual void setValue(const QVariant& value) = 0;
+	virtual QVariant value() const noexcept = 0;
+	virtual void setValue(const QVariant& value) noexcept = 0;
 
-	virtual void setEnumValue(int value) = 0;
-	virtual void setEnumValue(const char* value) = 0;
+	virtual void setEnumValue(int value) noexcept = 0;
+	virtual void setEnumValue(const char* value) noexcept = 0;
 
-	virtual const QVariant& lowLimit() const = 0;
-	virtual void setLowLimit(const QVariant& value) = 0;
+	virtual const QVariant& lowLimit() const noexcept = 0;
+	virtual void setLowLimit(const QVariant& value) noexcept = 0;
 
-	virtual const QVariant& highLimit() const = 0;
-	virtual void setHighLimit(const QVariant& value) = 0;
+	virtual const QVariant& highLimit() const noexcept = 0;
+	virtual void setHighLimit(const QVariant& value) noexcept = 0;
 
-	virtual bool isTheSameType(Property* property) = 0;
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) = 0;
+	virtual bool isTheSameType(Property* property) noexcept = 0;
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept = 0;
 
 protected:
-	void copy(const Property* source)
+	void copy(const Property* source) noexcept
 	{
 		if (source == nullptr ||
 			source == this)
@@ -321,20 +319,20 @@ class PropertyTypedValue : public Property
 {
 public:
 	PropertyTypedValue() = delete;
-	PropertyTypedValue(CLASS* object) :
+	PropertyTypedValue(CLASS* object) noexcept :
 		Property(),
 		m_object(object)
 	{
 		Q_ASSERT(object);
 	}
 
-	PropertyTypedValue(const PropertyTypedValue&) = default;
-	PropertyTypedValue(PropertyTypedValue&&) = default;
-	PropertyTypedValue& operator=(const PropertyTypedValue&) = default;
-	PropertyTypedValue& operator=(PropertyTypedValue&&) = default;
+	PropertyTypedValue(const PropertyTypedValue&) noexcept = default;
+	PropertyTypedValue(PropertyTypedValue&&) noexcept = default;
+	PropertyTypedValue& operator=(const PropertyTypedValue&) noexcept = default;
+	PropertyTypedValue& operator=(PropertyTypedValue&&) noexcept = default;
 
 public:
-	virtual bool isEnum() const override final
+	virtual bool isEnum() const noexcept override final
 	{
 		return std::is_enum<TYPE>::value;
 	}
@@ -363,7 +361,7 @@ private:
 	}
 
 public:
-	virtual std::vector<std::pair<int, QString>> enumValues() const override final
+	virtual std::vector<std::pair<int, QString>> enumValues() const noexcept override final
 	{
 		Q_ASSERT(std::is_enum<TYPE>::value);
 
@@ -387,7 +385,7 @@ public:
 		return result;
 	}
 
-	virtual QVariant enumValue() const override final
+	virtual QVariant enumValue() const noexcept override final
 	{
 		if constexpr (std::is_enum<TYPE>::value == false)
 		{
@@ -401,7 +399,7 @@ public:
 	}
 
 public:
-	virtual QVariant value() const override final
+	virtual QVariant value() const noexcept override final
 	{
 		QVariant result(QVariant::fromValue((m_object->*get)()));
 		return result;
@@ -421,7 +419,7 @@ public:
 		}
 	}
 
-	void setValue(const QVariant& value) override final	// Overriden from class Propery
+	void setValue(const QVariant& value) noexcept override final	// Overriden from class Propery
 	{
 		if (set == nullptr)
 		{
@@ -434,18 +432,18 @@ public:
 		}
 	}
 
-	virtual void setEnumValue(int value) override final			// Overriden from class Property
+	virtual void setEnumValue(int value) noexcept override final			// Overriden from class Property
 	{
 		setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
 	}
-	virtual void setEnumValue(const char* value) override final	// Overriden from class Property
+	virtual void setEnumValue(const char* value) noexcept override final	// Overriden from class Property
 	{
 		return setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
 	}
 
 private:
 	template <typename ENUM>
-	void setEnumValueInternal(int value, enum_tag)				// Overriden from class Property
+	void setEnumValueInternal(int value, enum_tag) noexcept 			// Overriden from class Property
 	{
 		static_assert(set);
 		static_assert(std::is_enum<TYPE>::value);
@@ -453,14 +451,14 @@ private:
 		(m_object->*set)(static_cast<TYPE>(value));
 	}
 	template <typename NON_ENUM>
-	void setEnumValueInternal(int value, non_enum_tag)
+	void setEnumValueInternal(int value, non_enum_tag) noexcept
 	{
 		Q_UNUSED(value)
 		Q_ASSERT(false);
 	}
 
 	template <typename ENUM>
-	void setEnumValueInternal(const char* value, enum_tag)				// Overriden from class Property
+	void setEnumValueInternal(const char* value, enum_tag) noexcept 			// Overriden from class Property
 	{
 		static_assert(std::is_enum<TYPE>::value);
 
@@ -470,14 +468,14 @@ private:
 		return;
 	}
 	template <typename NON_ENUM>
-	void setEnumValueInternal(const char* value, non_enum_tag)
+	void setEnumValueInternal(const char* value, non_enum_tag) noexcept
 	{
 		Q_UNUSED(value)
 		Q_ASSERT(false);
 	}
 
 public:
-	virtual const QVariant& lowLimit() const override final
+	virtual const QVariant& lowLimit() const noexcept override final
 	{
 		// Limits must be checked in getter/setter
 		//
@@ -485,13 +483,13 @@ public:
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
-	virtual void setLowLimit(const QVariant&) override final
+	virtual void setLowLimit(const QVariant&) noexcept override final
 	{
 		// Limits must be checked in getter/setter
 		Q_ASSERT(false);
 	}
 
-	virtual const QVariant& highLimit() const override final
+	virtual const QVariant& highLimit() const noexcept override final
 	{
 		// Limits must be checked in getter/setter
 		//
@@ -499,13 +497,13 @@ public:
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
-	virtual void setHighLimit(const QVariant&) override final
+	virtual void setHighLimit(const QVariant&) noexcept override final
 	{
 		// Limits must be checked in getter/setter
 		Q_ASSERT(false);
 	}
 
-	virtual bool isTheSameType(Property* property) override final
+	virtual bool isTheSameType(Property* property) noexcept override final
 	{
 		if (dynamic_cast<decltype(this)>(property) == nullptr)
 		{
@@ -515,7 +513,7 @@ public:
 		return true;
 	}
 
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override final
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept override final
 	{
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
@@ -556,14 +554,14 @@ template <typename TYPE>
 class PropertyValue : public Property
 {
 public:
-	PropertyValue() = default;
-	PropertyValue(const PropertyValue&) = default;
-	PropertyValue(PropertyValue&&) = default;
-	PropertyValue& operator=(const PropertyValue&) = default;
-	PropertyValue& operator=(PropertyValue&&) = default;
+	PropertyValue() noexcept = default;
+	PropertyValue(const PropertyValue&) noexcept = default;
+	PropertyValue(PropertyValue&&) noexcept = default;
+	PropertyValue& operator=(const PropertyValue&) noexcept = default;
+	PropertyValue& operator=(PropertyValue&&) noexcept = default;
 
 public:
-	virtual bool isEnum() const override final
+	virtual bool isEnum() const noexcept override final
 	{
 		return std::is_enum<TYPE>::value;
 	}
@@ -592,7 +590,7 @@ private:
 	}
 
 public:
-	virtual std::vector<std::pair<int, QString>> enumValues() const override final
+	virtual std::vector<std::pair<int, QString>> enumValues() const noexcept override final
 	{
 		Q_ASSERT(std::is_enum<TYPE>::value);
 
@@ -616,7 +614,7 @@ public:
 		return result;
 	}
 
-	virtual QVariant enumValue() const override final
+	virtual QVariant enumValue() const noexcept override final
 	{
 		if constexpr (std::is_enum<TYPE>::value == false)
 		{
@@ -630,7 +628,7 @@ public:
 	}
 
 public:
-	virtual QVariant value() const override final
+	virtual QVariant value() const noexcept override final
 	{
 		if (m_getter)
 		{
@@ -641,7 +639,7 @@ public:
 		return {};
 	}
 
-	void setValueDirect(const TYPE& value)				// Not virtual, is called from class ProprtyObject for direct access
+	void setValueDirect(const TYPE& value)noexcept 			// Not virtual, is called from class ProprtyObject for direct access
 	{
 		if (m_setter)
 		{
@@ -653,7 +651,7 @@ public:
 		}
 	}
 
-	void setValue(const QVariant& value) override final	// Overriden from class Propery
+	void setValue(const QVariant& value) noexcept override final	// Overriden from class Propery
 	{
 		if (!m_setter)
 		{
@@ -667,18 +665,18 @@ public:
 		}
 	}
 
-	virtual void setEnumValue(int value) override final			// Overriden from class Propery
+	virtual void setEnumValue(int value) noexcept override final			// Overriden from class Propery
 	{
 		setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
 	}
-	virtual void setEnumValue(const char* value) override final	// Overriden from class Propery
+	virtual void setEnumValue(const char* value) noexcept override final	// Overriden from class Propery
 	{
 		return setEnumValueInternal<TYPE>(value, enumness<std::is_enum<TYPE>::value>());
 	}
 
 private:
 	template <typename ENUM>
-	void setEnumValueInternal(int value, enum_tag)				// Overriden from class Propery
+	void setEnumValueInternal(int value, enum_tag) noexcept 			// Overriden from class Propery
 	{
 		static_assert(std::is_enum<TYPE>::value);
 
@@ -692,14 +690,14 @@ private:
 		}
 	}
 	template <typename NON_ENUM>
-	void setEnumValueInternal(int value, non_enum_tag)
+	void setEnumValueInternal(int value, non_enum_tag) noexcept
 	{
 		Q_UNUSED(value)
 		Q_ASSERT(false);
 	}
 
 	template <typename ENUM>
-	void setEnumValueInternal(const char* value, enum_tag)				// Overriden from class Propery
+	void setEnumValueInternal(const char* value, enum_tag) noexcept 			// Overriden from class Propery
 	{
 		static_assert(std::is_enum<TYPE>::value);
 
@@ -709,14 +707,14 @@ private:
 		return;
 	}
 	template <typename NON_ENUM>
-	void setEnumValueInternal(const char* value, non_enum_tag)
+	void setEnumValueInternal(const char* value, non_enum_tag) noexcept
 	{
 		Q_UNUSED(value)
 		Q_ASSERT(false);
 	}
 
 public:
-	virtual const QVariant& lowLimit() const override final
+	virtual const QVariant& lowLimit() const noexcept override final
 	{
 		// Limits must be checked in getter/setter
 		//
@@ -724,13 +722,13 @@ public:
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
-	virtual void setLowLimit(const QVariant&) override final
+	virtual void setLowLimit(const QVariant&) noexcept override final
 	{
 		// Limits must be checked in getter/setter
 		Q_ASSERT(false);
 	}
 
-	virtual const QVariant& highLimit() const override final
+	virtual const QVariant& highLimit() const noexcept override final
 	{
 		// Limits must be checked in getter/setter
 		//
@@ -738,22 +736,22 @@ public:
 		static QVariant staticQVariant;
 		return staticQVariant;
 	}
-	virtual void setHighLimit(const QVariant&) override final
+	virtual void setHighLimit(const QVariant&) noexcept override final
 	{
 		// Limits must be checked in getter/setter
 		Q_ASSERT(false);
 	}
 
-	void setGetter(const std::function<TYPE(void)>& getter)
+	void setGetter(const std::function<TYPE(void)>& getter) noexcept
 	{
 		m_getter = getter;
 	}
-	void setSetter(const std::function<void(TYPE)>& setter)
+	void setSetter(const std::function<void(TYPE)>& setter) noexcept
 	{
 		m_setter = setter;
 	}
 
-	virtual bool isTheSameType(Property* property) override final
+	virtual bool isTheSameType(Property* property) noexcept override final
 	{
 		if (dynamic_cast<PropertyValue<TYPE>*>(property) == nullptr)
 		{
@@ -763,7 +761,7 @@ public:
 		return true;
 	}
 
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override final
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept override final
 	{
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
@@ -809,18 +807,16 @@ private:
 class PropertyValueNoGetterSetter : public Property
 {
 public:
-	PropertyValueNoGetterSetter() = default;
-	PropertyValueNoGetterSetter(const PropertyValueNoGetterSetter&) = default;
-	PropertyValueNoGetterSetter(PropertyValueNoGetterSetter&&) = default;
-	PropertyValueNoGetterSetter& operator=(const PropertyValueNoGetterSetter&) = default;
-	PropertyValueNoGetterSetter& operator=(PropertyValueNoGetterSetter&&) = default;
+	PropertyValueNoGetterSetter() noexcept = default;
+	PropertyValueNoGetterSetter(const PropertyValueNoGetterSetter&) noexcept = default;
+	PropertyValueNoGetterSetter(PropertyValueNoGetterSetter&&) noexcept = default;
+	PropertyValueNoGetterSetter& operator=(const PropertyValueNoGetterSetter&) noexcept = default;
+	PropertyValueNoGetterSetter& operator=(PropertyValueNoGetterSetter&&) noexcept = default;
+	virtual ~PropertyValueNoGetterSetter() = default;
 
-	virtual ~PropertyValueNoGetterSetter()
-	{
-	}
 
 public:
-	virtual bool isEnum() const override final
+	virtual bool isEnum() const noexcept override final
 	{
 		if (m_value.isValid() == false)
 		{
@@ -857,7 +853,7 @@ public:
 		}
 	}
 
-	virtual QVariant enumValue() const override final
+	virtual QVariant enumValue() const noexcept override final
 	{
 #ifdef _DEBUG
 		if (isEnum() == false)		// Commented for perfomance reasone
@@ -871,7 +867,7 @@ public:
 	}
 
 public:
-	virtual std::vector<std::pair<int, QString>> enumValues() const override final
+	virtual std::vector<std::pair<int, QString>> enumValues() const noexcept override final
 	{
 		std::vector<std::pair<int, QString>> result;
 
@@ -927,12 +923,12 @@ public:
 	}
 
 public:
-	virtual QVariant value() const override final
+	virtual QVariant value() const noexcept override final
 	{
 		return m_value;
 	}
 
-	void setValue(const QVariant& value) override final	// Overriden from class Propery
+	void setValue(const QVariant& value) noexcept override final	// Overriden from class Propery
 	{
 		if (m_value.isValid() == false)
 		{
@@ -985,7 +981,7 @@ public:
 		}
 	};
 
-	virtual void setEnumValue(int value) override final	// Overriden from class Propery
+	virtual void setEnumValue(int value) noexcept override final	// Overriden from class Propery
 	{
 		// cannot implement it now, but it's possible
 		// The problem is, I dont see the way QVariant with enum inside can be set from integer and keep that enum type
@@ -997,7 +993,7 @@ public:
 		return;
 	}
 
-	virtual void setEnumValue(const char* value) override final	// Overriden from class Propery
+	virtual void setEnumValue(const char* value) noexcept override final	// Overriden from class Propery
 	{
 		if (QVariant v(value);
 			v.canConvert(m_value.userType()) == true)
@@ -1019,7 +1015,7 @@ public:
 	}
 
 private:
-	void checkLimits()
+	void checkLimits() noexcept
 	{
 		if (m_lowLimit.isValid() == true)
 		{
@@ -1043,31 +1039,31 @@ private:
 	}
 
 public:
-	void setLimits(const QVariant& low, const QVariant& high)
+	void setLimits(const QVariant& low, const QVariant& high) noexcept
 	{
 		m_lowLimit = low;
 		m_highLimit = high;
 	}
 
-	virtual const QVariant& lowLimit() const override final
+	virtual const QVariant& lowLimit() const noexcept override final
 	{
 		return m_lowLimit;
 	}
-	virtual void setLowLimit(const QVariant& value) override final
+	virtual void setLowLimit(const QVariant& value) noexcept override final
 	{
 		m_lowLimit = value;
 	}
 
-	virtual const QVariant& highLimit() const override final
+	virtual const QVariant& highLimit() const noexcept override final
 	{
 		return m_highLimit;
 	}
-	virtual void setHighLimit(const QVariant& value) override final
+	virtual void setHighLimit(const QVariant& value) noexcept override final
 	{
 		m_highLimit = value;
 	}
 
-	virtual bool isTheSameType(Property* property) override final
+	virtual bool isTheSameType(Property* property) noexcept override final
 	{
 		if (dynamic_cast<PropertyValueNoGetterSetter*>(property) == nullptr)
 		{
@@ -1077,7 +1073,7 @@ public:
 		return true;
 	}
 
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override final
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept override final
 	{
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
@@ -1135,23 +1131,23 @@ public:
 	}
 
 public:
-	virtual bool isEnum() const override final
+	virtual bool isEnum() const noexcept override final
 	{
 		return true;	// This is dynamic enumeration
 	}
 
-	virtual std::vector<std::pair<int, QString>> enumValues() const override final
+	virtual std::vector<std::pair<int, QString>> enumValues() const noexcept override final
 	{
 		return m_enumValues->getKeyValueVector();
 	}
 
-	virtual QVariant enumValue() const override final
+	virtual QVariant enumValue() const noexcept override final
 	{
 		return value();
 	}
 
 public:
-	virtual QVariant value() const override final
+	virtual QVariant value() const noexcept override final
 	{
 		if (m_getter)
 		{
@@ -1164,7 +1160,7 @@ public:
 		}
 	}
 
-	void setValueDirect(const int& value)				// Not virtual, is called from class ProprtyObject for direct access
+	void setValueDirect(const int& value) noexcept 			// Not virtual, is called from class ProprtyObject for direct access
 	{
 		// setValueDirect is used for non enum types only
 		//
@@ -1172,7 +1168,7 @@ public:
 		return;
 	}
 
-	void setValue(const QVariant& value) override final	// Overriden from class Propery
+	void setValue(const QVariant& value) noexcept override final	// Overriden from class Propery
 	{
 		if (value.type() == QVariant::Int)
 		{
@@ -1190,7 +1186,7 @@ public:
 		Q_ASSERT(false);
 	}
 
-	virtual void setEnumValue(int value) override final	// Overriden from class Propery
+	virtual void setEnumValue(int value) noexcept override final	// Overriden from class Propery
 	{
 		if (m_setter)
 		{
@@ -1202,7 +1198,7 @@ public:
 		}
 	}
 
-	virtual void setEnumValue(const char* value) override final	// Overriden from class Propery
+	virtual void setEnumValue(const char* value) noexcept override final	// Overriden from class Propery
 	{
 		int key = m_enumValues->key(QString(value));
 		setEnumValue(key);
@@ -1214,42 +1210,42 @@ private:
 	}
 
 public:
-	void setLimits(const QVariant& low, const QVariant& high)
+	void setLimits(const QVariant& low, const QVariant& high) noexcept
 	{
 		Q_UNUSED(low);
 		Q_UNUSED(high);
 	}
 
-	virtual const QVariant& lowLimit() const override final
+	virtual const QVariant& lowLimit() const noexcept override final
 	{
 		static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		return dummy;
 	}
-	virtual void setLowLimit(const QVariant& value) override final
+	virtual void setLowLimit(const QVariant& value) noexcept override final
 	{
 		Q_UNUSED(value);
 	}
 
-	virtual const QVariant& highLimit() const override final
+	virtual const QVariant& highLimit() const noexcept override final
 	{
 		static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		return dummy;
 	}
-	virtual void setHighLimit(const QVariant& value) override final
+	virtual void setHighLimit(const QVariant& value) noexcept override final
 	{
 		Q_UNUSED(value);
 	}
 
-	void setGetter(std::function<int(void)> getter)
+	void setGetter(std::function<int(void)> getter) noexcept
 	{
 		m_getter = getter;
 	}
-	void setSetter(std::function<void(int)> setter)
+	void setSetter(std::function<void(int)> setter) noexcept
 	{
 		m_setter = setter;
 	}
 
-	virtual bool isTheSameType(Property* property) override final
+	virtual bool isTheSameType(Property* property) noexcept override final
 	{
 		if (dynamic_cast<PropertyValue<OrderedHash<int, QString>>*>(property) == nullptr)
 		{
@@ -1259,7 +1255,7 @@ public:
 		return true;
 	}
 
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override final
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept override final
 	{
 		// Implementation is not requiered yet
 		// To do if requeired
@@ -1288,7 +1284,7 @@ template <>
 class PropertyValue<std::vector<std::pair<QString, int>>> : public Property
 {
 public:
-	PropertyValue(const std::vector<std::pair<QString, int>>& enumValues) :
+	PropertyValue(const std::vector<std::pair<QString, int>>& enumValues) noexcept :
 		m_enumValues(enumValues)
 	{
 		if (m_enumValues.empty() == false)
@@ -1305,12 +1301,12 @@ public:
 	}
 
 public:
-	virtual bool isEnum() const override final
+	virtual bool isEnum() const noexcept override final
 	{
 		return true;	// This is dynamic enumeration
 	}
 
-	virtual std::vector<std::pair<int, QString>> enumValues() const override final
+	virtual std::vector<std::pair<int, QString>> enumValues() const noexcept override final
 	{
 		std::vector<std::pair<int, QString>> result;
 		result.reserve(m_enumValues.size());
@@ -1323,7 +1319,7 @@ public:
 		return result;
 	}
 
-	virtual QVariant enumValue() const override final
+	virtual QVariant enumValue() const noexcept override final
 	{
 		for (auto[str, key] : m_enumValues)
 		{
@@ -1338,7 +1334,7 @@ public:
 	}
 
 public:
-	virtual QVariant value() const override final
+	virtual QVariant value() const noexcept override final
 	{
 		if (m_getter)
 		{
@@ -1351,7 +1347,7 @@ public:
 		}
 	}
 
-	virtual void setValue(const QVariant& value) override final		// Overriden from class Propery
+	virtual void setValue(const QVariant& value) noexcept override final		// Overriden from class Propery
 	{
 		if (value.type() == QVariant::Int)
 		{
@@ -1369,7 +1365,7 @@ public:
 		return;
 	}
 
-	virtual void setEnumValue(int value) override final				// Overriden from class Propery
+	virtual void setEnumValue(int value) noexcept override final				// Overriden from class Propery
 	{
 		if (m_setter)
 		{
@@ -1381,7 +1377,7 @@ public:
 		}
 	}
 
-	virtual void setEnumValue(const char* value) override final		// Overriden from class Propery
+	virtual void setEnumValue(const char* value) noexcept override final		// Overriden from class Propery
 	{
 		QString strvalue(value);
 
@@ -1401,52 +1397,52 @@ public:
 	}
 
 private:
-	void checkLimits()
+	void checkLimits() noexcept
 	{
 	}
 
 public:
-	void setLimits(const QVariant& low, const QVariant& high)
+	void setLimits(const QVariant& low, const QVariant& high) noexcept
 	{
 		Q_UNUSED(low);
 		Q_UNUSED(high);
 	}
 
-	virtual const QVariant& lowLimit() const override final
+	virtual const QVariant& lowLimit() const noexcept override final
 	{
 		static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		return dummy;
 	}
-	virtual void setLowLimit(const QVariant& value) override final
+	virtual void setLowLimit(const QVariant& value) noexcept override final
 	{
 		Q_UNUSED(value);
 	}
 
-	virtual const QVariant& highLimit() const override final
+	virtual const QVariant& highLimit() const noexcept override final
 	{
 		static const QVariant dummy;			//	for return from lowLimt, hughLimt
 		return dummy;
 	}
-	virtual void setHighLimit(const QVariant& value) override final
+	virtual void setHighLimit(const QVariant& value) noexcept override final
 	{
 		Q_UNUSED(value);
 	}
 
-	void setGetter(std::function<int(void)> getter)
+	void setGetter(std::function<int(void)> getter) noexcept
 	{
 		m_getter = getter;
 	}
-	void setSetter(std::function<void(int)> setter)
+	void setSetter(std::function<void(int)> setter) noexcept
 	{
 		m_setter = setter;
 	}
 
-	virtual bool isTheSameType(Property* property) override final
+	virtual bool isTheSameType(Property* property) noexcept override final
 	{
 		return dynamic_cast<PropertyValue<std::vector<std::pair<QString, int>>>*>(property) != nullptr;
 	}
 
-	virtual void updateFromPreset(Property* presetProperty, bool updateValue) override final
+	virtual void updateFromPreset(Property* presetProperty, bool updateValue) noexcept override final
 	{
 		if (presetProperty == nullptr ||
 			isTheSameType(presetProperty) == false)
@@ -1500,6 +1496,7 @@ public:
 	explicit PropertyObject(QObject* parent = nullptr)  :
 		QObject(parent)
 	{
+		m_properties.reserve(16);
 	}
 
 	PropertyObject(const PropertyObject& src) :

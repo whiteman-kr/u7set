@@ -128,7 +128,7 @@ namespace Hardware
 	// DeviceObject
 	//
 	//
-	DeviceObject::DeviceObject(bool preset /*= false*/) :
+	DeviceObject::DeviceObject(bool preset /*= false*/) noexcept :
 		m_preset(preset)
 	{
 		auto fileIdProp = ADD_PROPERTY_GETTER(int, PropertyNames::fileId, true, DeviceObject::fileId);
@@ -564,12 +564,12 @@ namespace Hardware
 		return;
 	}
 
-	DeviceObject* DeviceObject::parent()
+	DeviceObject* DeviceObject::parent() noexcept
 	{
 		return m_parent;
 	}
 
-	const DeviceObject* DeviceObject::parent() const
+	const DeviceObject* DeviceObject::parent() const noexcept
 	{
 		return m_parent;
 	}
@@ -2290,7 +2290,7 @@ R"DELIM({
 	// DeviceDiagSignal
 	//
 	//
-	DeviceSignal::DeviceSignal(bool preset /*= false*/) :
+	DeviceSignal::DeviceSignal(bool preset /*= false*/) noexcept :
 		DeviceObject(preset)
 	{
 

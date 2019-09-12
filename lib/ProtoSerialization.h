@@ -47,7 +47,7 @@ namespace Proto
 	class ObjectSerialization
 	{
 	public:
-		ObjectSerialization(ProtoCompress compression = ProtoCompress::Auto, size_t autoCompressionLimit = 4096) :
+		ObjectSerialization(ProtoCompress compression = ProtoCompress::Auto, size_t autoCompressionLimit = 4096) noexcept:
 			m_compression(compression),
 			m_autoCompressionLimit(autoCompressionLimit)
 		{

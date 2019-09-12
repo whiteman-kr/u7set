@@ -118,7 +118,7 @@ namespace Hardware
 		Q_OBJECT
 
 	protected:
-		explicit DeviceObject(bool preset = false);
+		explicit DeviceObject(bool preset = false) noexcept;
 
 	public:
 		virtual ~DeviceObject();
@@ -170,8 +170,8 @@ namespace Hardware
 		// Properties, etc
 		//
 	public:
-		DeviceObject* parent();
-		const DeviceObject* parent() const;
+		DeviceObject* parent() noexcept;
+		const DeviceObject* parent() const noexcept;
 		Q_INVOKABLE QObject* jsParent() const;
 
 		Q_INVOKABLE int jsPropertyInt(QString name) const;
@@ -575,7 +575,7 @@ namespace Hardware
 		Q_OBJECT
 
 	public:
-		explicit DeviceSignal(bool preset = false);
+		explicit DeviceSignal(bool preset = false) noexcept;
 		virtual ~DeviceSignal();
 
 	protected:
