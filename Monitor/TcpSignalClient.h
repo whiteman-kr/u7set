@@ -15,9 +15,11 @@
 //				|
 //		ADS_GET_APP_SIGNAL_PARAM
 //				|
-//		ADS_GET_APP_SIGNAL_STATE <------+
-//				|						|			Repeat it
-//				+------------------------
+//		ADS_GET_APP_SIGNAL_STATE_CHANGES <----+
+//              |                             |
+//		ADS_GET_APP_SIGNAL_STATE              |
+//				|						      |
+//				+-----------------------------+
 //
 
 class TcpSignalClient : public Tcp::Client, public TcpClientStatistics
@@ -44,7 +46,7 @@ public:
 
 protected:
 	void resetToGetSignalList();
-	void resetToGetState();
+	void resetToGetState(bool resetStateIndex);
 
 	void requestSignalListStart();
 	void processSignalListStart(const QByteArray& data);
@@ -54,6 +56,9 @@ protected:
 
 	void requestSignalParam(int startIndex);
 	void processSignalParam(const QByteArray& data);
+
+	void requestSignalStateChanges();
+	void processSignalStateChanges(const QByteArray& data);
 
 	void requestSignalState(int startIndex);
 	void processSignalState(const QByteArray& data);
@@ -81,6 +86,9 @@ private:
 	::Network::GetAppSignalParamRequest m_getSignalParamRequest;
 	::Network::GetAppSignalParamReply m_getSignalParamReply;
 	int m_lastSignalParamStartIndex = 0;
+
+	::Network::GetAppSignalStateChangesRequest m_getSignalStateChangesRequest;
+	::Network::GetAppSignalStateChangesReply m_getSignalStateChangesReply;
 
 	::Network::GetAppSignalStateRequest m_getSignalStateRequest;
 	::Network::GetAppSignalStateReply m_getSignalStateReply;

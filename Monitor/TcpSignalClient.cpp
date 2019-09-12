@@ -94,6 +94,10 @@ void TcpSignalClient::processReply(quint32 requestID, const char* replyData, qui
 		processSignalParam(data);
 		break;
 
+	case ADS_GET_APP_SIGNAL_STATE_CHANGES:
+		processSignalStateChanges(data);
+		break;
+
 	case ADS_GET_APP_SIGNAL_STATE:
 		processSignalState(data);
 		break;
@@ -102,7 +106,7 @@ void TcpSignalClient::processReply(quint32 requestID, const char* replyData, qui
 		Q_ASSERT(false);
 		qDebug() << "Wrong requestID in TcpSignalClient::processReply()";
 
-		resetToGetState();
+		resetToGetState(true);
 	}
 
 	return;
@@ -114,18 +118,25 @@ void TcpSignalClient::resetToGetSignalList()
 
 	theSignals.reset();
 	m_signalList.clear();
+	m_lastSignalParamStartIndex = 0;
+	m_lastSignalStateStartIndex = 0;
 
 	requestSignalListStart();
 	return;
 }
 
-void TcpSignalClient::resetToGetState()
+void TcpSignalClient::resetToGetState(bool resetStateIndex)
 {
 	QThread::msleep(theSettings.requestTimeInterval());
 
+	if (resetStateIndex == true)
+	{
+		m_lastSignalStateStartIndex = 0;
+	}
+
 	if (m_signalList.empty() == false)
 	{
-		requestSignalState(0);
+		requestSignalStateChanges();
 	}
 	else
 	{
@@ -146,7 +157,6 @@ void TcpSignalClient::requestSignalListStart()
 void TcpSignalClient::processSignalListStart(const QByteArray& data)
 {
 	bool ok = m_getSignalListStartReply.ParseFromArray(data.constData(), data.size());
-
 	if (ok == false)
 	{
 		Q_ASSERT(ok);
@@ -279,8 +289,8 @@ void TcpSignalClient::requestSignalParam(int startIndex)
 
 	if (startIndex >= m_signalList.size())
 	{
-		requestSignalState(0);		// END OF RECEIVING SIGNALS PARAMS,
-									// Here the new loop starts!!!
+		resetToGetState(true);	// END OF RECEIVING SIGNALS PARAMS,
+								// Here the new loop starts!!!
 		return;
 	}
 
@@ -288,8 +298,7 @@ void TcpSignalClient::requestSignalParam(int startIndex)
 	m_getSignalParamRequest.mutable_signalhashes()->Reserve(ADS_GET_APP_SIGNAL_PARAM_MAX);
 
 	for (int i = startIndex;
-		 i < startIndex + ADS_GET_APP_SIGNAL_PARAM_MAX &&
-		 i < m_signalList.size();
+		 i < startIndex + ADS_GET_APP_SIGNAL_PARAM_MAX && i < m_signalList.size();
 		 i++)
 	{
 		Hash signalHash = calcHash(m_signalList[i]);
@@ -316,7 +325,7 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 		qDebug() << "TcpSignalClient::processSignalParam, error received: " << m_getSignalParamReply.error();
 		Q_ASSERT(m_getSignalParamReply.error() != 0);
 
-		resetToGetState();
+		resetToGetState(true);
 		return;
 	}
 
@@ -352,26 +361,91 @@ void TcpSignalClient::processSignalParam(const QByteArray& data)
 	return;
 }
 
+// AppSignalStateChanges
+//
+void TcpSignalClient::requestSignalStateChanges()
+{
+	Q_ASSERT(isClearToSendRequest());
+
+	sendRequest(ADS_GET_APP_SIGNAL_STATE, m_getSignalStateChangesRequest);
+
+	return;
+}
+
+void TcpSignalClient::processSignalStateChanges(const QByteArray& data)
+{
+	if (bool ok = m_getSignalStateChangesReply.ParseFromArray(data.constData(), data.size());
+		ok == false)
+	{
+		Q_ASSERT(ok);
+		resetToGetState(true);
+		return;
+	}
+
+//	optional int32 error = 1 [default = 0];
+//	optional int64 serverTimeUtc = 2;
+//	optional int64 serverTimeLocal = 3;
+//	optional int32 pendingStatesCount = 4 [default = 0];
+//	repeated Proto.AppSignalState appSignalStates = 5;		// Limited to ADS_GET_APP_SIGNAL_STATE_MAX (2000)
+
+	if (m_getSignalStateChangesReply.error() != 0)
+	{
+		qDebug() << "TcpSignalClient::processSignalStateChanges, error received: " << m_getSignalStateChangesReply.error();
+		Q_ASSERT(m_getSignalStateChangesReply.error() != 0);
+
+		resetToGetState(true);
+		return;
+	}
+
+	int signalStateCount = m_getSignalStateChangesReply.appsignalstates_size();
+
+	std::vector<AppSignalState> states;
+	states.reserve(signalStateCount);
+
+	for (int i = 0; i < signalStateCount; i++)
+	{
+		const ::Proto::AppSignalState& protoState = m_getSignalStateChangesReply.appsignalstates(i);
+		Q_ASSERT(protoState.hash() != 0);
+
+		states.emplace_back(protoState);
+	}
+
+	theSignals.setState(states);
+
+	if (m_getSignalStateChangesReply.pendingstatescount() >= ADS_GET_APP_SIGNAL_STATE_MAX)
+	{
+		// A lot of signals are in teh event queue, request one more time
+		//
+		requestSignalStateChanges();
+	}
+	else
+	{
+		// Update all signals
+		//
+		requestSignalState(m_lastSignalStateStartIndex + ADS_GET_APP_SIGNAL_STATE_MAX);
+	}
+
+	return;
+}
 
 // AppSignalState
 //
 void TcpSignalClient::requestSignalState(int startIndex)
 {
 	Q_ASSERT(isClearToSendRequest());
-	m_lastSignalStateStartIndex = startIndex;
 
 	if (startIndex >= m_signalList.size())
 	{
-		resetToGetState();
-		return;
+		startIndex = 0;
 	}
+
+	m_lastSignalStateStartIndex = startIndex;
 
 	m_getSignalStateRequest.mutable_signalhashes()->Clear();
 	m_getSignalStateRequest.mutable_signalhashes()->Reserve(ADS_GET_APP_SIGNAL_STATE_MAX);
 
 	for (int i = startIndex;
-		 i < startIndex + ADS_GET_APP_SIGNAL_STATE_MAX &&
-		 i < m_signalList.size();
+		 i < startIndex + ADS_GET_APP_SIGNAL_STATE_MAX && i < m_signalList.size();
 		 i++)
 	{
 		Hash signalHash = calcHash(m_signalList[i]);
@@ -384,12 +458,11 @@ void TcpSignalClient::requestSignalState(int startIndex)
 
 void TcpSignalClient::processSignalState(const QByteArray& data)
 {
-	bool ok = m_getSignalStateReply.ParseFromArray(data.constData(), data.size());
-
-	if (ok == false)
+	if (bool ok = m_getSignalStateReply.ParseFromArray(data.constData(), data.size());
+		ok == false)
 	{
 		Q_ASSERT(ok);
-		resetToGetState();
+		resetToGetState(true);
 		return;
 	}
 
@@ -398,7 +471,7 @@ void TcpSignalClient::processSignalState(const QByteArray& data)
 		qDebug() << "TcpSignalClient::processSignalState, error received: " << m_getSignalStateReply.error();
 		Q_ASSERT(m_getSignalStateReply.error() != 0);
 
-		resetToGetState();
+		resetToGetState(true);
 		return;
 	}
 
@@ -417,8 +490,7 @@ void TcpSignalClient::processSignalState(const QByteArray& data)
 
 	theSignals.setState(states);
 
-	requestSignalState(m_lastSignalStateStartIndex + ADS_GET_APP_SIGNAL_STATE_MAX);
-
+	resetToGetState(false);
 	return;
 }
 
