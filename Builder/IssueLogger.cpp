@@ -5373,7 +5373,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
+	/// Title:	   Discrete signal %1 is connected to non-discrete or non-mixed bus input (Logic schema %2)
 	///
 	/// Parameters:
 	///		%1 App signal ID
@@ -5389,7 +5389,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5124,
-				  QString(tr("Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)")).
+				  QString(tr("Discrete signal %1 is connected to non-discrete or non-mixed bus input (Logic schema %2)")).
 								arg(appSignalID).arg(schemaID));
 	}
 
@@ -6430,6 +6430,30 @@ namespace Builder
 				  5171,
 				  QString(tr("Internal application signal %1 cannot be linked to equipment input/output signal %2.")).
 						arg(appSignalID).arg(equipmentSignalID));
+	}
+
+	/// IssueCode: ALC5172
+	///
+	/// IssueType: Error
+	///
+	/// Title: Non-discrete busses is not allowed on input '%1'. (Item %2, logic schema %3).
+	///
+	/// Parameters:
+	///		%1 caption of AFB input
+	///		%2 UAL item label
+	///		%3 UAL schema ID
+	///
+	/// Description:
+	///		Non-discrete bus cannot be connected to specified input.
+	///
+	void IssueLogger::errALC5172(QString inputCaption, QString itemLabel, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5172, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5172,
+				  QString(tr("Non-discrete busses is not allowed on input '%1'. (Item %2, logic schema %3).")).
+						arg(inputCaption).arg(itemLabel).arg(schemaID));
 	}
 
 	//
