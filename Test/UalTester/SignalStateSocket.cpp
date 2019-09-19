@@ -7,7 +7,7 @@
 // -------------------------------------------------------------------------------------------------------------------
 
 SignalStateSocket::SignalStateSocket(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort, SignalBase* pSignalBase)
-	: Tcp::Client(softwareInfo, serverAddressPort)
+        : Tcp::Client(softwareInfo, serverAddressPort, "SignalStateSocket")
 	, m_pSignalBase(pSignalBase)
 {
 }
