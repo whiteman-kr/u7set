@@ -571,7 +571,7 @@ QWidget *SignalsDelegate::createEditor(QWidget *parent, const QStyleOptionViewIt
 
 		if (manager.name(col).right(2) == "ID")
 		{
-			QRegExp rx4ID("^[#]?[A-Za-z\\d_]*$");
+			QRegExp rx4ID(SignalProperties::cacheValidator);
 			le->setValidator(new QRegExpValidator(rx4ID, le));
 		}
 		else
@@ -1260,6 +1260,8 @@ void SignalsModel::loadSignals()
 		}
 	}
 
+	m_parentWindow->updateFindOrReplaceDialog();
+
 	changeCheckedoutSignalActionsVisibility();
 }
 
@@ -1775,6 +1777,11 @@ void SignalsModel::initLazyLoadSignals()
 			endInsertRows();
 		}
 	}
+	else
+	{
+		Signal signal;
+		loadNotSpecificProperties(signal);
+	}
 }
 
 void SignalsModel::finishLoadSignals()
@@ -2058,6 +2065,11 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 
 SignalsTabPage::~SignalsTabPage()
 {
+	if (m_findSignalDialog != nullptr)
+	{
+		m_findSignalDialog->close();
+		delete m_findSignalDialog;
+	}
 }
 
 bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Hardware::DeviceSignal*>& deviceSignalsToUpdate, const QStringList& forceUpdateProperties)
@@ -2301,6 +2313,11 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
+	action = new QAction(QIcon(":/Images/Images/Search.svg"), tr("Search"), this);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::findOrReplaceSignal);
+	m_signalsView->addAction(action);
+	toolBar->addAction(action);
+
 	changeSignalActionsVisibility();
 }
 
@@ -2363,6 +2380,12 @@ void SignalsTabPage::projectClosed()
 	m_signalsModel->clearSignals();
 
 	resetSignalIdFilter();
+
+	if (m_findSignalDialog != nullptr)
+	{
+		m_findSignalDialog->close();
+		delete m_findSignalDialog;
+	}
 }
 
 void SignalsTabPage::onTabPageChanged()
@@ -2379,10 +2402,22 @@ void SignalsTabPage::onTabPageChanged()
 		return;
 	}
 
+	if (m_findSignalDialog != nullptr)
+	{
+		if (tabWidget->currentWidget() == this)
+		{
+			findOrReplaceSignal();
+		}
+		else
+		{
+			m_findSignalDialog->hide();
+		}
+	}
+
 	if (m_loadSignalsTimer == nullptr)
 	{
 		m_tabWidget = tabWidget;
-		disconnect(tabWidget, &QTabWidget::currentChanged, this, &SignalsTabPage::onTabPageChanged);
+		/*disconnect(tabWidget, &QTabWidget::currentChanged, this, &SignalsTabPage::onTabPageChanged);*/
 		return;
 	}
 
@@ -2413,6 +2448,8 @@ void SignalsTabPage::stopLoadingSignals()
 
 	m_loadSignalsTimer->deleteLater();
 	m_loadSignalsTimer = nullptr;
+
+	updateFindOrReplaceDialog();
 }
 
 void SignalsTabPage::editSignal()
@@ -2490,6 +2527,30 @@ void SignalsTabPage::deleteSignal()
 		}
 	}
 	m_signalsModel->deleteSignals(deletedSignalIDs);
+}
+
+void SignalsTabPage::findOrReplaceSignal()
+{
+	if (m_findSignalDialog == nullptr)
+	{
+		const DbUser user = dbController()->currentUser();
+		m_findSignalDialog = new FindSignalDialog(user.userId(), user.isAdminstrator(), m_signalsView);
+		m_findSignalDialog->setModal(false);
+
+		connect(m_findSignalDialog, &FindSignalDialog::signalSelected, this, &SignalsTabPage::restoreSelection);
+	}
+	m_findSignalDialog->show();
+	m_findSignalDialog->activateWindow();
+	m_findSignalDialog->raise();
+	m_findSignalDialog->setFocus();
+}
+
+void SignalsTabPage::updateFindOrReplaceDialog()
+{
+	if (m_findSignalDialog != nullptr)
+	{
+		m_findSignalDialog->notifyThatSignalSetHasChanged();
+	}
 }
 
 void SignalsTabPage::undoSignalChanges()
@@ -3502,4 +3563,659 @@ void SignalHistoryDialog::closeEvent(QCloseEvent* event)
 	saveWindowPosition(this, "SignalHistoryDialog");
 
 	QDialog::closeEvent(event);
+}
+
+
+const QString FindSignalDialog::notUniqueMessage("No - not unique");
+const QString FindSignalDialog::notEditableMessage("No - checked out by another user");
+const QString FindSignalDialog::notCorrectIdMessage("No - uncorrect ID");
+const QString FindSignalDialog::cannotCheckoutMessage("No - can't checkout");
+const QString FindSignalDialog::replaceableMessage("Yes");
+const QString FindSignalDialog::replacedMessage("Yes - replaced");
+
+FindSignalDialog::FindSignalDialog(int currentUserId, bool currentUserIsAdmin, QTableView* parent) :
+	QDialog(parent, Qt::Dialog),
+	m_signalTable(parent),
+	m_findString(new QLineEdit(this)),
+	m_replaceString(new QLineEdit(this)),
+	m_searchInPropertyList(new QComboBox(this)),
+	m_searchInSelected(new QCheckBox("Search in selected only", this)),
+	m_caseSensitive(new QCheckBox("Case sensitive", this)),
+	m_wholeWords(new QCheckBox("Whole words only", this)),
+	m_signalsQuantityLabel(new QLabel(this)),
+	m_canBeReplacedQuantityLabel(new QLabel(this)),
+	m_foundList(new QTableView(this)),
+	m_foundListModel(new QStandardItemModel(0, 3, this)),
+	m_replaceAllButton(new QPushButton("Replace All", this)),
+	m_replaceAndFindNextButton(new QPushButton("Replace and Find", this)),
+	m_findPreviousButton(new QPushButton("Find Previous", this)),
+	m_findNextButton(new QPushButton("Find Next", this)),
+	m_regExp4Id(SignalProperties::cacheValidator),
+	m_currentUserId(currentUserId),
+	m_currentUserIsAdmin(currentUserIsAdmin)
+{
+	m_signalProxyModel = dynamic_cast<SignalsProxyModel*>(m_signalTable->model());
+	if (m_signalProxyModel == nullptr)
+	{
+		assert(false);
+		deleteLater();
+	}
+
+	m_signalModel = dynamic_cast<SignalsModel*>(m_signalProxyModel->sourceModel());
+	if (m_signalModel == nullptr)
+	{
+		assert(false);
+		deleteLater();
+	}
+
+	m_searchInPropertyList->addItems(QStringList() <<
+									 SignalProperties::appSignalIDCaption <<
+									 SignalProperties::customSignalIDCaption <<
+									 SignalProperties::captionCaption <<
+									 SignalProperties::equipmentIDCaption);
+
+	m_foundList->setModel(m_foundListModel);
+
+	m_foundList->verticalHeader()->setDefaultAlignment(Qt::AlignRight | Qt::AlignVCenter);
+	m_foundList->setAlternatingRowColors(false);
+	m_foundList->setStyleSheet("QTableView::item:focus{background-color:darkcyan}");
+	m_foundList->setEditTriggers(QTableView::NoEditTriggers);
+	m_foundList->setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
+	m_foundList->setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectRows);
+
+	m_foundList->verticalHeader()->setDefaultSectionSize(static_cast<int>(m_foundList->fontMetrics().height() * 1.4));
+	m_foundList->verticalHeader()->setResizeMode(QHeaderView::Fixed);
+
+	m_foundList->horizontalHeader()->setHighlightSections(false);
+	m_foundList->horizontalHeader()->setDefaultSectionSize(100);
+	m_foundList->horizontalHeader()->setStretchLastSection(true);
+
+	m_foundListModel->setHeaderData(0, Qt::Horizontal, "Found");
+	m_foundListModel->setHeaderData(1, Qt::Horizontal, "Replace result");
+	m_foundListModel->setHeaderData(2, Qt::Horizontal, "Can be replaced");
+
+	m_replaceAllButton->setAutoDefault(false);
+	m_replaceAndFindNextButton->setAutoDefault(false);
+	m_findPreviousButton->setAutoDefault(false);
+	m_findNextButton->setAutoDefault(false);
+
+	connect(m_findString, &QLineEdit::returnPressed, this, &FindSignalDialog::generateListIfNeeded);
+	connect(m_replaceString, &QLineEdit::textEdited, this, &FindSignalDialog::updateAllReplacement);
+
+	connect(m_foundList->selectionModel(), &QItemSelectionModel::selectionChanged, this, &FindSignalDialog::selectCurrentSignalOnAppSignalsTab);
+
+	connect(m_replaceAllButton, &QPushButton::clicked, this, &FindSignalDialog::replaceAll);
+	connect(m_replaceAndFindNextButton, &QPushButton::clicked, this, &FindSignalDialog::replaceAndFindNext);
+	connect(m_findPreviousButton, &QPushButton::clicked, this, &FindSignalDialog::findPrevious);
+	connect(m_findNextButton, &QPushButton::clicked, this, &FindSignalDialog::findNext);
+
+	QFormLayout* form = new QFormLayout;
+
+	form->addRow("Find:", m_findString);
+	form->addRow("Replace with:", m_replaceString);
+	form->addRow("Search in:", m_searchInPropertyList);
+
+	QVBoxLayout* vLayout = new QVBoxLayout;
+	vLayout->addLayout(form);
+
+	vLayout->addWidget(m_searchInSelected);
+	vLayout->addWidget(m_caseSensitive);
+	vLayout->addWidget(m_wholeWords);
+
+	form = new QFormLayout;
+	form->addRow("Found signals:", m_signalsQuantityLabel);
+	form->addRow("Can be replaced:", m_canBeReplacedQuantityLabel);
+	vLayout->addLayout(form);
+
+	vLayout->addWidget(m_foundList);
+
+	QHBoxLayout* hLayout = new QHBoxLayout;
+
+	hLayout->addWidget(m_replaceAllButton);
+	hLayout->addWidget(m_replaceAndFindNextButton);
+	hLayout->addWidget(m_findPreviousButton);
+	hLayout->addWidget(m_findNextButton);
+
+	vLayout->addLayout(hLayout);
+
+	setLayout(vLayout);
+
+	setWindowPosition(this, "FindSignalDialog");
+	new TableDataVisibilityController(m_foundList, "FindSignalDialog", QVector<int>() << 0 << 1 << 2);
+
+	QTimer::singleShot(0, [this](){ m_findString->setFocus(); });
+}
+
+void FindSignalDialog::notifyThatSignalSetHasChanged()
+{
+	m_isMatchToCurrentSignalSet = false;
+	generateListIfNeeded();
+}
+
+void FindSignalDialog::closeEvent(QCloseEvent* event)
+{
+	saveDialogGeometry();
+
+	QDialog::closeEvent(event);
+}
+
+void FindSignalDialog::generateListIfNeeded()
+{
+	SearchOptions currentOptions = getCurrentSearchOptions();
+	if (m_searchOptionsUsedLastTime == currentOptions && m_isMatchToCurrentSignalSet == true)
+	{
+		return;
+	}
+
+	if (currentOptions.findString.isEmpty())
+	{
+		m_findString->setFocus();
+		return;
+	}
+
+	m_searchOptionsUsedLastTime = currentOptions;
+
+	QString fieldName = m_searchInPropertyList->currentText();
+	m_checkCorrectnessOfId = ((fieldName == SignalProperties::appSignalIDCaption) ||
+							  (fieldName == SignalProperties::customSignalIDCaption));
+
+	reloadCurrentIdsMap();
+
+	int selectedSignalId = getSignalId(getSelectedRow());
+
+	m_foundListModel->removeRows(0, m_foundListModel->rowCount());
+	m_totalSignalQuantity = 0;
+	m_replaceableSignalQuantity = 0;
+
+	if (currentOptions.searchInSelected == false)
+	{
+		for (int i = 0; i < m_signalModel->rowCount(); i++)
+		{
+			addSignalIfNeeded(m_signalModel->signal(i));
+		}
+	}
+	else
+	{
+		QModelIndexList selection = m_signalTable->selectionModel()->selectedRows(0);
+		if (selection.count() == 0)
+		{
+			QMessageBox::warning(this, tr("Warning"), tr("No one signal was selected!"));
+		}
+		for (int i = 0; i < selection.count(); i++)
+		{
+			int row = m_signalProxyModel->mapToSource(selection[i]).row();
+			addSignalIfNeeded(m_signalModel->signal(row));
+		}
+	}
+
+	markFistInstancesIfItTheyNotUnique();
+
+	for (int currentIndex = 0; currentIndex < m_foundListModel->rowCount(); currentIndex++)
+	{
+		if (selectedSignalId == getSignalId(currentIndex))
+		{
+			m_foundList->setCurrentIndex(m_foundListModel->index(currentIndex, 0));
+		}
+	}
+
+	m_signalsQuantityLabel->setText(QString::number(m_totalSignalQuantity));
+	m_canBeReplacedQuantityLabel->setText(QString::number(m_replaceableSignalQuantity));
+	m_isMatchToCurrentSignalSet = true;
+}
+
+void FindSignalDialog::updateAllReplacement()
+{
+	m_replaceableSignalQuantity = 0;
+
+	reloadCurrentIdsMap();
+
+	for (int i = 0; i < m_foundListModel->rowCount(); i++)
+	{
+		updateReplacement(i);
+	}
+
+	markFistInstancesIfItTheyNotUnique();
+
+	m_canBeReplacedQuantityLabel->setText(QString::number(m_replaceableSignalQuantity));
+}
+
+void FindSignalDialog::updateReplacement(int row)
+{
+	int signalId = getSignalId(row);
+	int signalIndex = m_signalModel->keyIndex(signalId);
+	const Signal& signal = m_signalModel->signal(signalIndex);
+
+	updateReplacement(signal, row);
+}
+
+void FindSignalDialog::updateReplacement(const Signal& signal, int row)
+{
+	QString propertyValue = getProperty(signal);
+
+	int start = 0;
+	int end = -1;
+
+	QString replaced = propertyValue;
+	while (match(replaced, start, end) == true)
+	{
+		replaced = replaced.left(start) + m_replaceString->text() + replaced.mid(end);
+		start += m_replaceString->text().length();
+	}
+
+	m_foundListModel->setData(m_foundListModel->index(row, 1), replaced, Qt::DisplayRole);
+
+	bool replaceable = true;
+
+	if (replaceable == true && checkForEditableSignal(signal) == false)
+	{
+		replaceable = false;
+		m_foundListModel->setData(m_foundListModel->index(row, 2), notEditableMessage, Qt::DisplayRole);
+	}
+
+	if (replaceable == true && m_checkCorrectnessOfId == true && checkForCorrectSignalId(replaced) == false)
+	{
+		replaceable = false;
+		m_foundListModel->setData(m_foundListModel->index(row, 2), notCorrectIdMessage, Qt::DisplayRole);
+	}
+
+	if (replaceable == true && m_checkCorrectnessOfId == true && checkForUniqueSignalId(propertyValue, replaced) == false)
+	{
+		replaceable = false;
+		m_foundListModel->setData(m_foundListModel->index(row, 2), notUniqueMessage, Qt::DisplayRole);
+	}
+
+	m_foundListModel->setData(m_foundListModel->index(row, 2), replaceable, Qt::UserRole);
+	if (replaceable == true)
+	{
+		m_replaceableSignalQuantity++;
+		m_foundListModel->setData(m_foundListModel->index(row, 2), replaceableMessage, Qt::DisplayRole);
+	}
+}
+
+void FindSignalDialog::addSignalIfNeeded(const Signal& signal)
+{
+	QString propertyValue = getProperty(signal);
+
+	int start = 0;
+	int end = -1;
+	if (match(propertyValue, start, end) == true)
+	{
+		int currentIndex = m_foundListModel->rowCount();
+		m_foundListModel->insertRows(currentIndex, 1);
+
+		m_foundListModel->setData(m_foundListModel->index(currentIndex, 0), propertyValue, Qt::DisplayRole);
+		m_foundListModel->setData(m_foundListModel->index(currentIndex, 0), signal.ID(), Qt::UserRole);
+
+		m_totalSignalQuantity++;
+
+		updateReplacement(signal, currentIndex);
+	}
+}
+
+bool FindSignalDialog::match(QString signalProperty, int& start, int& end)
+{
+	if (m_findString == nullptr)
+	{
+		assert(false);
+		close();
+		return false;
+	}
+	QString findString = m_searchOptionsUsedLastTime.findString;
+	if (findString.isEmpty())
+	{
+		return false;
+	}
+
+	if (m_searchOptionsUsedLastTime.caseSensitive == false)
+	{
+		signalProperty = signalProperty.toUpper();
+	}
+
+	start = signalProperty.indexOf(findString, start);
+	if (start != -1)
+	{
+		end = start + findString.size();
+
+		if (m_searchOptionsUsedLastTime.wholeWords == true)
+		{
+			bool isPartOfWord = false;
+
+			if (start > 0)
+			{
+				QChar previousChar = signalProperty[start - 1];
+				if (previousChar.isLetterOrNumber() || previousChar == '_')
+				{
+					isPartOfWord = true;
+				}
+			}
+
+			if (end < signalProperty.size())
+			{
+				QChar nextChar = signalProperty[end];
+				if (nextChar.isLetterOrNumber() || nextChar == '_')
+				{
+					isPartOfWord = true;
+				}
+			}
+
+			if (isPartOfWord == true)
+			{
+				start = -1;
+				end = -1;
+				return false;
+			}
+		}
+		return true;
+	}
+	return false;
+}
+
+bool FindSignalDialog::checkForEditableSignal(const Signal& signal)
+{
+	return (signal.checkedOut() == false || signal.userID() == m_currentUserId || m_currentUserIsAdmin == true);
+}
+
+bool FindSignalDialog::checkForUniqueSignalId(const QString& original, const QString& replaced)
+{
+	bool result = true;
+
+	if (m_repeatedSignalIds.contains(original))
+	{
+		result = false;
+	}
+
+	if (m_signalIds.contains(replaced) == true)
+	{
+		result = false;
+		m_repeatedSignalIds.insert(replaced);
+	}
+	else
+	{
+		m_signalIds.insert(replaced);
+	}
+
+	return result;
+}
+
+bool FindSignalDialog::checkForCorrectSignalId(const QString& replaced)
+{
+	return m_regExp4Id.exactMatch(replaced);
+}
+
+FindSignalDialog::SearchOptions FindSignalDialog::getCurrentSearchOptions()
+{
+	SearchOptions options;
+	if (m_findString == nullptr ||
+			m_searchInPropertyList == nullptr ||
+			m_searchInSelected == nullptr ||
+			m_caseSensitive == nullptr ||
+			m_wholeWords == nullptr)
+	{
+		assert(false);
+		return options;
+	}
+
+	SignalPropertyManager& manager = m_signalModel->signalPropertyManager();
+	int propertyIndex = manager.index(m_searchInPropertyList->currentText());
+
+	if (propertyIndex == -1)
+	{
+		assert(false);
+		return options;
+	}
+
+	options.searchedPropertyIndex = propertyIndex;
+	options.searchInSelected = m_searchInSelected->isChecked();
+	options.caseSensitive = m_caseSensitive->isChecked();
+	options.wholeWords = m_wholeWords->isChecked();
+
+	options.findString = m_findString->text();
+
+	if (options.caseSensitive == false)
+	{
+		options.findString = options.findString.toUpper();
+	}
+
+	return options;
+}
+
+QString FindSignalDialog::getProperty(const Signal& signal)
+{
+	if (m_searchOptionsUsedLastTime.searchedPropertyIndex == -1)
+	{
+		return QString();
+	}
+
+	SignalPropertyManager& manager = m_signalModel->signalPropertyManager();
+	return manager.value(&signal, m_searchOptionsUsedLastTime.searchedPropertyIndex).toString();
+}
+
+void FindSignalDialog::setProperty(Signal& signal, const QString& value)
+{
+	if (m_searchOptionsUsedLastTime.searchedPropertyIndex == -1)
+	{
+		assert(false);
+		return;
+	}
+
+	SignalPropertyManager& manager = m_signalModel->signalPropertyManager();
+	manager.setValue(&signal, m_searchOptionsUsedLastTime.searchedPropertyIndex, value);
+}
+
+int FindSignalDialog::getSignalId(int row)
+{
+	return m_foundListModel->data(m_foundListModel->index(row, 0), Qt::UserRole).toInt();
+}
+
+int FindSignalDialog::getSelectedRow()
+{
+	return m_foundList->currentIndex().row();
+}
+
+void FindSignalDialog::selectRow(int row)
+{
+	m_foundList->setCurrentIndex(m_foundListModel->index(row, 0));
+}
+
+bool FindSignalDialog::isReplaceable(int row)
+{
+	bool replaceable = m_foundListModel->data(m_foundListModel->index(row, 2), Qt::UserRole).toBool();
+	if (replaceable == false)
+	{
+		return false;
+	}
+	int signalId = getSignalId(row);
+
+	m_signalModel->loadSignal(signalId, true);
+
+	int signalIndex = m_signalModel->keyIndex(signalId);
+	if (signalIndex == -1)	// Doesn't exist???
+	{
+		assert(false);
+		return false;
+	}
+
+	return m_signalModel->isEditableSignal(signalIndex);
+}
+
+void FindSignalDialog::replace(int row)
+{
+	int signalId = getSignalId(row);
+	int signalIndex = m_signalModel->keyIndex(signalId);
+	if (signalIndex == -1)	// Doesn't exist???
+	{
+		assert(false);
+		return;
+	}
+
+	QString errorMessage;
+	bool checkedout = m_signalModel->checkoutSignal(signalIndex, errorMessage);
+	if (checkedout == false)
+	{
+		m_foundListModel->setData(m_foundListModel->index(row, 2), cannotCheckoutMessage + ':' + errorMessage, Qt::DisplayRole);
+		m_foundListModel->setData(m_foundListModel->index(row, 2), false, Qt::UserRole);
+		return;
+	}
+
+	Signal signal = m_signalModel->getSignalByID(signalId);
+	QString newValue = m_foundListModel->data(m_foundListModel->index(row, 1), Qt::DisplayRole).toString();
+
+	setProperty(signal, newValue);
+
+	m_signalModel->saveSignal(signal);
+	m_foundListModel->setData(m_foundListModel->index(row, 2), replacedMessage, Qt::DisplayRole);
+}
+
+void FindSignalDialog::reloadCurrentIdsMap()
+{
+	if (m_checkCorrectnessOfId == false)
+	{
+		return;
+	}
+
+	m_signalIds.clear();
+	m_repeatedSignalIds.clear();
+
+	for (int i = 0; i < m_signalModel->rowCount(); i++)
+	{
+		QString id = getProperty(m_signalModel->signal(i));
+		if (m_signalIds.contains(id))
+		{
+			m_repeatedSignalIds.insert(id);
+		}
+		else
+		{
+			m_signalIds.insert(id);
+		}
+	}
+}
+
+void FindSignalDialog::markFistInstancesIfItTheyNotUnique()
+{
+	if (m_checkCorrectnessOfId == false)
+	{
+		return;
+	}
+
+	for (int currentIndex = 0; currentIndex < m_foundListModel->rowCount(); currentIndex++)
+	{
+		bool replaceable = m_foundListModel->data(m_foundListModel->index(currentIndex, 2), Qt::UserRole).toBool();
+		QString replacement = m_foundListModel->data(m_foundListModel->index(currentIndex, 1), Qt::DisplayRole).toString();
+		if (replaceable == true && m_repeatedSignalIds.contains(replacement) == true)
+		{
+			m_foundListModel->setData(m_foundListModel->index(currentIndex, 2), false, Qt::UserRole);
+			m_foundListModel->setData(m_foundListModel->index(currentIndex, 2), notUniqueMessage, Qt::DisplayRole);
+			m_replaceableSignalQuantity--;
+		}
+	}
+}
+
+void FindSignalDialog::saveDialogGeometry()
+{
+	saveWindowPosition(this, "FindSignalDialog");
+}
+
+void FindSignalDialog::replaceAll()
+{
+	generateListIfNeeded();
+
+	bool allAreReplaceable = true;
+
+	for (int row = 0; row < m_foundListModel->rowCount(); row++)
+	{
+		if (isReplaceable(row) == false)
+		{
+			allAreReplaceable = false;
+			break;
+		}
+	}
+
+	if (allAreReplaceable == false)
+	{
+		QMessageBox msgBox(
+					QMessageBox::Warning,
+					"Warning",
+					"Some signals have not replaceable values",
+					QMessageBox::Yes | QMessageBox::Cancel,
+					this);
+
+		msgBox.setButtonText(QMessageBox::Yes, "Replace all possible");
+
+		if (msgBox.exec() == QMessageBox::Cancel)
+		{
+			return;
+		}
+	}
+
+	for (int row = 0; row < m_foundListModel->rowCount(); row++)
+	{
+		if (isReplaceable(row) == true)
+		{
+			replace(row);
+		}
+	}
+}
+
+void FindSignalDialog::replaceAndFindNext()
+{
+	generateListIfNeeded();
+
+	int row = getSelectedRow();
+
+	if (isReplaceable(row) == true)
+	{
+		replace(row);
+		selectRow(row + 1);
+	}
+	else
+	{
+		QMessageBox msgBox(
+					QMessageBox::Warning,
+					"Warning",
+					"Value could not be replaced",
+					QMessageBox::Yes | QMessageBox::Cancel,
+					this);
+
+		msgBox.setButtonText(QMessageBox::Yes, "Skip and goto next");
+
+		if (msgBox.exec() == QMessageBox::Yes)
+		{
+			selectRow(row + 1);
+		}
+	}
+}
+
+void FindSignalDialog::findPrevious()
+{
+	generateListIfNeeded();
+
+	int row = getSelectedRow();
+
+	if (row > 0)
+	{
+		selectRow(row - 1);
+	}
+}
+
+void FindSignalDialog::findNext()
+{
+	generateListIfNeeded();
+
+	int row = getSelectedRow();
+
+	if (row < m_foundListModel->rowCount() - 1)
+	{
+		selectRow(row + 1);
+	}
+}
+
+void FindSignalDialog::selectCurrentSignalOnAppSignalsTab()
+{
+	QModelIndex index = m_foundList->currentIndex();
+	if (index.isValid())
+	{
+		m_signalTable->clearSelection();
+		int signalId = m_foundListModel->data(m_foundListModel->index(index.row(), 0), Qt::UserRole).toInt();
+		emit signalSelected(signalId);
+	}
 }

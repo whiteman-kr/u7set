@@ -6,6 +6,7 @@
 #include <QStyledItemDelegate>
 #include <QSortFilterProxyModel>
 #include <QDialog>
+#include <QHash>
 
 class DbController;
 class QTableView;
@@ -391,6 +392,113 @@ private:
 };
 
 
+class FindSignalDialog : public QDialog
+{
+	Q_OBJECT
+
+	class SearchOptions
+	{
+	public:
+		QString findString;
+		int searchedPropertyIndex;
+		bool searchInSelected;
+		bool caseSensitive;
+		bool wholeWords;
+
+		bool operator==(const SearchOptions &other) const {
+			return findString == other.findString &&
+					searchedPropertyIndex == other.searchedPropertyIndex &&
+					searchInSelected == other.searchInSelected &&
+					caseSensitive == other.caseSensitive &&
+					wholeWords == other.wholeWords;
+		}
+	};
+
+	static const QString notUniqueMessage;
+	static const QString notEditableMessage;
+	static const QString notCorrectIdMessage;
+	static const QString cannotCheckoutMessage;
+	static const QString replaceableMessage;
+	static const QString replacedMessage;
+
+public:
+	FindSignalDialog(int currentUserId, bool currentUserIsAdmin, QTableView* parent = nullptr);
+	void notifyThatSignalSetHasChanged();
+
+signals:
+	void signalSelected(int signalId);
+
+protected:
+	void closeEvent(QCloseEvent* event);
+
+private:
+	void addSignalIfNeeded(const Signal& signal);
+	bool match(QString signalProperty, int& start, int& end);
+	bool checkForEditableSignal(const Signal& signal);
+	bool checkForUniqueSignalId(const QString& original, const QString& replaced);
+	bool checkForCorrectSignalId(const QString& replaced);
+	SearchOptions getCurrentSearchOptions();
+	QString getProperty(const Signal& signal);
+	void setProperty(Signal& signal, const QString& value);
+	int getSignalId(int row);
+	int getSelectedRow();
+	void selectRow(int row);
+	bool isReplaceable(int row);
+	void replace(int row);
+	void reloadCurrentIdsMap();
+	void markFistInstancesIfItTheyNotUnique();
+
+	void saveDialogGeometry();
+
+private slots:
+	void generateListIfNeeded();
+	void updateAllReplacement();
+	void updateReplacement(int row);
+	void updateReplacement(const Signal& signal, int row);
+	void replaceAll();
+	void replaceAndFindNext();
+	void findPrevious();
+	void findNext();
+	void selectCurrentSignalOnAppSignalsTab();
+
+private:
+	QTableView* m_signalTable = nullptr;
+	SignalsProxyModel* m_signalProxyModel = nullptr;
+	SignalsModel* m_signalModel = nullptr;
+
+	QLineEdit* m_findString = nullptr;
+	QLineEdit* m_replaceString = nullptr;
+
+	QComboBox* m_searchInPropertyList = nullptr;
+
+	QCheckBox* m_searchInSelected = nullptr;
+	QCheckBox* m_caseSensitive = nullptr;
+	QCheckBox* m_wholeWords = nullptr;
+
+	QLabel* m_signalsQuantityLabel = nullptr;
+	QLabel* m_canBeReplacedQuantityLabel = nullptr;
+	int m_totalSignalQuantity = 0;
+	int m_replaceableSignalQuantity = 0;
+	bool m_checkCorrectnessOfId = false;
+
+	QTableView* m_foundList = nullptr;
+	QStandardItemModel* m_foundListModel = nullptr;
+
+	QPushButton* m_replaceAllButton = nullptr;
+	QPushButton* m_replaceAndFindNextButton = nullptr;
+	QPushButton* m_findPreviousButton = nullptr;
+	QPushButton* m_findNextButton = nullptr;
+
+	SearchOptions m_searchOptionsUsedLastTime;
+	bool m_isMatchToCurrentSignalSet = false;
+	QSet<QString> m_signalIds;
+	QSet<QString> m_repeatedSignalIds;
+	QRegExp m_regExp4Id;
+	int m_currentUserId = -1;
+	bool m_currentUserIsAdmin = false;
+};
+
+
 class SignalsTabPage : public MainTabPage
 {
 	Q_OBJECT
@@ -424,6 +532,8 @@ public slots:
 	void editSignal();
 	void cloneSignal();
 	void deleteSignal();
+	void findOrReplaceSignal();
+	void updateFindOrReplaceDialog();
 
 	void undoSignalChanges();
 	void checkIn();
@@ -462,6 +572,7 @@ private:
 	int m_lastVerticalScrollPosition = -1;
 	int m_lastHorizontalScrollPosition = -1;
 	bool m_changingSelectionManualy = false;
+	FindSignalDialog* m_findSignalDialog = nullptr;
 
 	QVector<int> m_selectedRowsSignalID;
 	int m_focusedCellSignalID = -1;
