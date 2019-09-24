@@ -7,7 +7,7 @@
 // -------------------------------------------------------------------------------------------------------------------
 
 SignalStateSocket::SignalStateSocket(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort, SignalBase* pSignalBase)
-	: Tcp::Client(softwareInfo, serverAddressPort)
+        : Tcp::Client(softwareInfo, serverAddressPort, "SignalStateSocket")
 	, m_pSignalBase(pSignalBase)
 {
 }
@@ -118,7 +118,7 @@ void SignalStateSocket::replySignalState(const char* replyData, quint32 replyDat
 	bool result = m_getSignalStateReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
 	if (result == false)
 	{
-		//qDebug() << "SignalStateSocket::replySignalState - error: ParseFromArray";
+		qDebug() << "SignalStateSocket::replySignalState - error: ParseFromArray";
 		assert(result);
 		requestSignalState();
 		return;
@@ -126,7 +126,7 @@ void SignalStateSocket::replySignalState(const char* replyData, quint32 replyDat
 
 	if (m_getSignalStateReply.error() != 0)
 	{
-		//qDebug() << "SignalStateSocket::replySignalState - error: " << m_getSignalStateReply.error();
+		qDebug() << "SignalStateSocket::replySignalState - error: " << m_getSignalStateReply.error();
 		assert(m_getSignalStateReply.error() != 0);
 		requestSignalState();
 		return;

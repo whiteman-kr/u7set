@@ -425,33 +425,46 @@ public:
 	{
 		Dec, Hex, Bin16, Bin32, Bin64, Exp, Count
 	};
-
 	Q_ENUM(ValueViewType)
 
+	// SchemaItemIndicator Type
+	//
+	enum class IndicatorType
+	{
+		HistogramVert,
+		ArrowIndicator,
+		Trend,
+		CustomDraw
+	};
+	Q_ENUM(IndicatorType)
+
+
 public:
+	template <typename ENUM_TYPE>
+	static QMetaEnum metaEnum()
+	{
+		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
+		Q_ASSERT(me.isValid() == true);
+
+		return me;
+	}
+
 	// Convert enum value (not index) to QString
 	//
 	template <typename ENUM_TYPE>
 	static QString valueToString(int value)
 	{
-		assert(std::is_enum<ENUM_TYPE>::value);
-
-		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
-		if (me.isValid() == false)
-		{
-			assert(me.isValid() == true);
-			return QString();
-		}
+		static_assert(std::is_enum<ENUM_TYPE>::value);
+		static QMetaEnum me = metaEnum<ENUM_TYPE>();
 
 		const char* str = me.valueToKey(value);
 		if (str == nullptr)
 		{
-			assert(str);
+			Q_ASSERT(str);
 			return QString();
 		}
 
-		QString result(str);
-		return result;
+		return {str};
 	}
 
 	// Convert enum value (not index) to QString
@@ -459,24 +472,17 @@ public:
 	template <typename ENUM_TYPE>
 	static QString valueToString(ENUM_TYPE value)
 	{
-		assert(std::is_enum<ENUM_TYPE>::value);
-
-		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
-		if (me.isValid() == false)
-		{
-			assert(me.isValid() == true);
-			return QString();
-		}
+		static_assert(std::is_enum<ENUM_TYPE>::value);
+		static QMetaEnum me = metaEnum<ENUM_TYPE>();
 
 		const char* str = me.valueToKey(static_cast<int>(value));
 		if (str == nullptr)
 		{
-			assert(str);
-			return QString();
+			Q_ASSERT(str);
+			return {};
 		}
 
-		QString result(str);
-		return result;
+		return {str};
 	}
 
 	// Convert QString to enum value (not index)
@@ -493,23 +499,20 @@ public:
 	template <typename ENUM_TYPE>
 	static ENUM_TYPE stringToValue(const QString& str, bool* ok)
 	{
-		assert(std::is_enum<ENUM_TYPE>::value);
+		static_assert(std::is_enum<ENUM_TYPE>::value);
 
 		if (ok != nullptr)
 		{
 			*ok = true;
 		}
 
-		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
-
+		static QMetaEnum me = metaEnum<ENUM_TYPE>();
 		if (me.isValid() == false)
 		{
-			assert(me.isValid() == true);
 			return static_cast<ENUM_TYPE>(me.value(0));
 		}
 
 		int keyCount = me.keyCount();
-
 		for (int i = 0; i < keyCount; i++)
 		{
 			if (QString::fromLocal8Bit(me.key(i)) == str)
@@ -520,7 +523,7 @@ public:
 
 		if (ok == nullptr)
 		{
-			assert(false);		// key is not found!
+			Q_ASSERT(false);		// key is not found!
 		}
 		else
 		{
@@ -533,20 +536,17 @@ public:
 	// Get list of enum values and assigned String
 	//
 	template <typename ENUM_TYPE>
-	static std::list<std::pair<int, QString>> enumValues()
+	static std::vector<std::pair<int, QString>> enumValues()
 	{
-		assert(std::is_enum<ENUM_TYPE>::value);
+		static_assert(std::is_enum<ENUM_TYPE>::value);
 
-		std::list<std::pair<int, QString>> result;
+		static QMetaEnum me = metaEnum<ENUM_TYPE>();
 
-		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
-		if (me.isValid() == false)
-		{
-			assert(me.isValid() == true);
-			return result;
-		}
+		std::vector<std::pair<int, QString>> result;
 
 		int keyCount = me.keyCount();
+		result.reserve(keyCount);
+
 		for (int i = 0; i < keyCount; i++)
 		{
 			result.push_back(std::make_pair(me.value(i), QString::fromLocal8Bit(me.key(i))));
@@ -560,19 +560,14 @@ public:
 	template <typename ENUM_TYPE>
 	static QStringList enumKeyStrings()
 	{
-		assert(std::is_enum<ENUM_TYPE>::value);
+		static_assert(std::is_enum<ENUM_TYPE>::value);
 
-		QStringList result;
-
-		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
-
-		if (me.isValid() == false)
-		{
-			assert(me.isValid() == true);
-			return result;
-		}
+		static QMetaEnum me = metaEnum<ENUM_TYPE>();
 
 		int keyCount = me.keyCount();
+
+		QStringList result;
+		result.reserve(keyCount);
 
 		for (int i = 0; i < keyCount; i++)
 		{
@@ -587,9 +582,9 @@ public:
 	template <typename ENUM_TYPE>
 	static bool contains(int value)
 	{
-		assert(std::is_enum<ENUM_TYPE>::value);
+		static_assert(std::is_enum<ENUM_TYPE>::value);
 
-		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
+		static QMetaEnum me = metaEnum<ENUM_TYPE>();
 
 		int keyCount = me.keyCount();
 		for (int i = 0; i < keyCount; i++)
@@ -608,13 +603,14 @@ public:
 	template <typename ENUM_TYPE>
 	static std::vector<ENUM_TYPE> values()
 	{
-		assert(std::is_enum<ENUM_TYPE>::value);
+		static_assert(std::is_enum<ENUM_TYPE>::value);
 
-		std::vector<ENUM_TYPE> valuesArray;
-
-		QMetaEnum me = QMetaEnum::fromType<ENUM_TYPE>();
+		static QMetaEnum me = metaEnum<ENUM_TYPE>();
 
 		int keyCount = me.keyCount();
+
+		std::vector<ENUM_TYPE> valuesArray;
+		valuesArray.reserve(keyCount);
 
 		for (int i = 0; i < keyCount; i++)
 		{

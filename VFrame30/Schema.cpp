@@ -37,16 +37,33 @@ namespace VFrame30
 
 		ADD_PROPERTY_GETTER(int, "Changeset", true, Schema::changeset);
 		ADD_PROPERTY_GETTER_SETTER(QString, "Caption", true, Schema::caption, Schema::setCaption);
+
 		ADD_PROPERTY_GETTER_SETTER(QString, "Tags", true, Schema::tagsAsString, Schema::setTags);
+
 		ADD_PROPERTY_GETTER_SETTER(bool, "ExcludeFromBuild", true, Schema::excludeFromBuild, Schema::setExcludeFromBuild);
 		ADD_PROPERTY_GETTER_SETTER(double, "SchemaWidth", true, Schema::docWidthRegional, Schema::setDocWidthRegional);
 		ADD_PROPERTY_GETTER_SETTER(double, "SchemaHeight", true, Schema::docHeightRegional, Schema::setDocHeightRegional);
 		ADD_PROPERTY_GETTER_SETTER(QColor, "BackgroundColor", true, Schema::backgroundColor, Schema::setBackgroundColor);
 
+		// Monitor properties
+		//
+		ADD_PROPERTY_GET_SET_CAT(bool, "JoinHorzPriority", "Monitor", true, Schema::joinHorzPriority, Schema::setJoinHorzPriority)
+			->setViewOrder(100);
+		ADD_PROPERTY_GET_SET_CAT(QString, "JoinLeftSchemaID", "Monitor", true, Schema::joinLeftSchemaId, Schema::setJoinLeftSchemaId)
+			->setViewOrder(101);
+		ADD_PROPERTY_GET_SET_CAT(QString, "JoinTopSchemaID", "Monitor", true, Schema::joinTopSchemaId, Schema::setJoinTopSchemaId)
+			->setViewOrder(102);
+		ADD_PROPERTY_GET_SET_CAT(QString, "JoinRightSchemaID", "Monitor", true, Schema::joinRightSchemaId, Schema::setJoinRightSchemaId)
+			->setViewOrder(103);
+		ADD_PROPERTY_GET_SET_CAT(QString, "JoinBottomSchemaID", "Monitor", true, Schema::joinBottomSchemaId, Schema::setJoinBottomSchemaId)
+			->setViewOrder(104);
+
 		m_guid = QUuid();  // GUID_NULL
 
 		m_width = 0;
 		m_height = 0;
+
+		return;
 	}
 
 	// Serialization
@@ -87,6 +104,12 @@ namespace VFrame30
 		Proto::Write(mutableSchema->mutable_caption(), m_caption);
 
 		mutableSchema->set_tags(tagsAsString().toStdString());
+
+		mutableSchema->set_joinhorzpriority(m_joinHorzPriority);
+		mutableSchema->set_joinleftschemaid(m_joinLeftSchemaId.toStdString());
+		mutableSchema->set_jointopschemaid(m_joinTopSchemaId.toStdString());
+		mutableSchema->set_joinrightschemaid(m_joinRightSchemaId.toStdString());
+		mutableSchema->set_joinbottomschemaid(m_joinBottomSchemaId.toStdString());
 
 		mutableSchema->set_width(m_width);
 		mutableSchema->set_height(m_height);
@@ -131,6 +154,12 @@ namespace VFrame30
 			setTags(QString::fromStdString(schema.tags()));
 		}
 
+		m_joinHorzPriority = schema.joinhorzpriority();
+		m_joinLeftSchemaId = QString::fromStdString(schema.joinleftschemaid());
+		m_joinTopSchemaId = QString::fromStdString(schema.jointopschemaid());
+		m_joinRightSchemaId = QString::fromStdString(schema.joinrightschemaid());
+		m_joinBottomSchemaId = QString::fromStdString(schema.joinbottomschemaid());
+
 		m_width = schema.width();
 		m_height = schema.height();
 		m_unit = static_cast<SchemaUnit>(schema.unit());
@@ -141,7 +170,7 @@ namespace VFrame30
 			m_backgroundColor = schema.backgroundcolor();
 		}
 
-		// ????????? Layers
+		// Layers
 		//
 		Layers.clear();
 
@@ -772,6 +801,23 @@ namespace VFrame30
 		return std::shared_ptr<SchemaItem>();
 	}
 
+	template<typename SchemaItemType>
+	bool Schema::hasSchemaItemType() const
+	{
+		for (std::shared_ptr<VFrame30::SchemaLayer> layer : Layers)
+		{
+			for (std::shared_ptr<VFrame30::SchemaItem> item : Layers)
+			{
+				if (dynamic_cast<SchemaItemType>(item) != nullptr)
+				{
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 	// Properties and Data
 	//
 
@@ -877,6 +923,56 @@ namespace VFrame30
 		}
 
 		return;
+	}
+
+	bool Schema::joinHorzPriority() const
+	{
+		return m_joinHorzPriority;
+	}
+
+	void Schema::setJoinHorzPriority(bool value)
+	{
+		m_joinHorzPriority = value;
+	}
+
+	QString Schema::joinLeftSchemaId() const
+	{
+		return m_joinLeftSchemaId;
+	}
+
+	void Schema::setJoinLeftSchemaId(const QString& value)
+	{
+		m_joinLeftSchemaId = value;
+	}
+
+	QString Schema::joinTopSchemaId() const
+	{
+		return m_joinTopSchemaId;
+	}
+
+	void Schema::setJoinTopSchemaId(const QString& value)
+	{
+		m_joinTopSchemaId = value;
+	}
+
+	QString Schema::joinRightSchemaId() const
+	{
+		return m_joinRightSchemaId;
+	}
+
+	void Schema::setJoinRightSchemaId(const QString& value)
+	{
+		m_joinRightSchemaId = value;
+	}
+
+	QString Schema::joinBottomSchemaId() const
+	{
+		return m_joinBottomSchemaId;
+	}
+
+	void Schema::setJoinBottomSchemaId(const QString& value)
+	{
+		m_joinBottomSchemaId = value;
 	}
 
 

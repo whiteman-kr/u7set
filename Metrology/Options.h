@@ -6,8 +6,8 @@
 #include <QObject>
 #include <QMutex>
 #include <QVector>
-#include <QColor>
 #include <QFont>
+#include <QColor>
 
 #include "MeasureViewHeader.h"
 #include "ObjectVector.h"
@@ -28,8 +28,8 @@ class ProjectInfo: public QObject
 
 public:
 
-	explicit ProjectInfo(QObject *parent = 0);
-	explicit ProjectInfo(const ProjectInfo& from, QObject *parent = 0);
+	explicit ProjectInfo(QObject *parent = nullptr);
+	explicit ProjectInfo(const ProjectInfo& from, QObject *parent = nullptr);
 	virtual ~ProjectInfo();
 
 private:
@@ -120,7 +120,7 @@ class SocketClientOption
 public:
 
 	SocketClientOption();
-	virtual ~SocketClientOption();
+	virtual ~SocketClientOption() {}
 
 private:
 
@@ -215,8 +215,8 @@ class SocketOption : public QObject
 
 public:
 
-	explicit SocketOption(QObject *parent = 0);
-	explicit SocketOption(const SocketOption& from, QObject *parent = 0);
+	explicit SocketOption(QObject *parent = nullptr);
+	explicit SocketOption(const SocketOption& from, QObject *parent = nullptr);
 	virtual ~SocketOption();
 
 private:
@@ -247,8 +247,8 @@ class ToolBarOption : public QObject
 
 public:
 
-	explicit ToolBarOption(QObject *parent = 0);
-	explicit ToolBarOption(const ToolBarOption& from, QObject *parent = 0);
+	explicit ToolBarOption(QObject *parent = nullptr);
+	explicit ToolBarOption(const ToolBarOption& from, QObject *parent = nullptr);
 	virtual ~ToolBarOption();
 
 private:
@@ -324,8 +324,8 @@ class MeasureViewOption : public QObject
 	Q_OBJECT
 
 public:
-	explicit MeasureViewOption(QObject *parent = 0);
-	explicit MeasureViewOption(const MeasureViewOption& from, QObject *parent = 0);
+	explicit MeasureViewOption(QObject *parent = nullptr);
+	explicit MeasureViewOption(const MeasureViewOption& from, QObject *parent = nullptr);
 	virtual ~MeasureViewOption();
 
 //private:
@@ -413,8 +413,8 @@ class SignalInfoOption : public QObject
 
 public:
 
-	explicit SignalInfoOption(QObject *parent = 0);
-	explicit SignalInfoOption(const SignalInfoOption& from, QObject *parent = 0);
+	explicit SignalInfoOption(QObject *parent = nullptr);
+	explicit SignalInfoOption(const SignalInfoOption& from, QObject *parent = nullptr);
 	virtual ~SignalInfoOption();
 
 private:
@@ -488,8 +488,8 @@ class DatabaseOption : public QObject
 
 public:
 
-	explicit DatabaseOption(QObject *parent = 0);
-	explicit DatabaseOption(const DatabaseOption& from, QObject *parent = 0);
+	explicit DatabaseOption(QObject *parent = nullptr);
+	explicit DatabaseOption(const DatabaseOption& from, QObject *parent = nullptr);
 	virtual ~DatabaseOption();
 
 private:
@@ -542,8 +542,8 @@ class ModuleOption : public QObject
 
 public:
 
-	explicit ModuleOption(QObject *parent = 0);
-	explicit ModuleOption(const ModuleOption& from, QObject *parent = 0);
+	explicit ModuleOption(QObject *parent = nullptr);
+	explicit ModuleOption(const ModuleOption& from, QObject *parent = nullptr);
 	virtual ~ModuleOption();
 
 private:
@@ -635,7 +635,7 @@ class LinearityPointBase : public ObjectVector<LinearityPoint>
 public:
 
 	LinearityPointBase();
-	virtual ~LinearityPointBase();
+	virtual ~LinearityPointBase() { clear(); }
 
 	QString				text();
 
@@ -718,8 +718,8 @@ class LinearityOption : public QObject
 
 public:
 
-	explicit LinearityOption(QObject *parent = 0);
-	explicit LinearityOption(const LinearityOption& from, QObject *parent = 0);
+	explicit LinearityOption(QObject *parent = nullptr);
+	explicit LinearityOption(const LinearityOption& from, QObject *parent = nullptr);
 	virtual ~LinearityOption();
 
 private:
@@ -817,8 +817,8 @@ class ComparatorOption : public QObject
 
 public:
 
-	explicit ComparatorOption(QObject *parent = 0);
-	explicit ComparatorOption(const ComparatorOption& from, QObject *parent = 0);
+	explicit ComparatorOption(QObject *parent = nullptr);
+	explicit ComparatorOption(const ComparatorOption& from, QObject *parent = nullptr);
 	virtual ~ComparatorOption();
 
 //private:
@@ -867,8 +867,8 @@ class BackupOption : public QObject
 
 public:
 
-	explicit BackupOption(QObject *parent = 0);
-	explicit BackupOption(const BackupOption& from, QObject *parent = 0);
+	explicit BackupOption(QObject *parent = nullptr);
+	explicit BackupOption(const BackupOption& from, QObject *parent = nullptr);
 	virtual ~BackupOption();
 
 private:
@@ -907,8 +907,8 @@ class Options : public QObject
 
 public:
 
-	explicit Options(QObject *parent = 0);
-	explicit Options(const Options& from, QObject *parent = 0);
+	explicit Options(QObject *parent = nullptr);
+	explicit Options(const Options& from, QObject *parent = nullptr);
 	virtual ~Options();
 
 public:

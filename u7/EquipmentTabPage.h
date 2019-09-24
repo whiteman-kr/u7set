@@ -254,6 +254,8 @@ public slots:
 	void modeSwitched();
 	void showConnections();
 
+	void propertiesModeTabChanged(int index);
+
 	//void moduleConfiguration();
 
 	void setProperties();
@@ -344,6 +346,7 @@ private:
 	QToolBar* m_toolBar = nullptr;
 
 	IdePropertyEditor* m_propertyEditor = nullptr;
+	IdePropertyTable* m_propertyTable = nullptr;
 };
 
 

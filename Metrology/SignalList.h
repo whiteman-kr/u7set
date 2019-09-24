@@ -83,7 +83,7 @@ class SignalListTable : public QAbstractTableModel
 
 public:
 
-	explicit SignalListTable(QObject* parent = 0);
+	explicit SignalListTable(QObject* parent = nullptr);
 	virtual ~SignalListTable();
 
 private:
@@ -120,7 +120,7 @@ class SignalListDialog : public QDialog
 
 public:
 
-	explicit SignalListDialog(bool hasButtons, QWidget *parent = 0);
+	explicit SignalListDialog(bool hasButtons, QWidget *parent = nullptr);
 	virtual ~SignalListDialog();
 
 private:
@@ -161,7 +161,7 @@ private:
 	static E::SignalInOutType m_typeIO;
 	static int				m_currenIndex;
 
-	Hash					m_selectedSignalHash = 0;
+	Hash					m_selectedSignalHash = UNDEFINED_HASH;
 
 	void					createInterface(bool hasButtons);
 	void					createHeaderContexMenu();

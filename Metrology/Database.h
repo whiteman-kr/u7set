@@ -21,7 +21,7 @@ class SqlFieldBase : public QSqlRecord
 public:
 
 	SqlFieldBase();
-	virtual ~SqlFieldBase();
+	virtual ~SqlFieldBase() {}
 
 public:
 
@@ -222,7 +222,7 @@ class SqlObjectInfo
 public:
 
 	SqlObjectInfo();
-	virtual ~SqlObjectInfo();
+	virtual ~SqlObjectInfo() {}
 
 private:
 
@@ -346,7 +346,7 @@ class Database : public QObject
 
 public:
 
-	explicit Database(QObject* parent = 0);
+	explicit Database(QObject* parent = nullptr);
 	virtual ~Database();
 
 private:

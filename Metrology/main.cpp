@@ -37,10 +37,17 @@ int main(int argc, char *argv[])
 	QString equipmentID = theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY);
 	si.init(E::SoftwareType::Metrology, equipmentID, 1, 0);
 
-	MainWindow w(si);
-    w.show();
+
+	// in order to keep the dumpMemoryLeaks() list clean, the MainWindow is created using "new".
+	// MainWindow w(si);
+	// w.show();
+	//
+	MainWindow* pMainWindow = new MainWindow(si);
+	pMainWindow->show();
 
     int result = a.exec();
+
+	delete pMainWindow;
 
     theOptions.unload();
 

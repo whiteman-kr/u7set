@@ -1,8 +1,12 @@
 #include <QCoreApplication>
 #include <UalTester.h>
 
+#include "../../lib/MemLeaksDetection.h"
+
 int main(int argc, char *argv[])
 {
+	initMemoryLeaksDetection();
+
 	QCoreApplication a(argc, argv);
 
 	a.setApplicationName("UalTester");
@@ -15,6 +19,8 @@ int main(int argc, char *argv[])
 	int result = a.exec();
 
 	google::protobuf::ShutdownProtobufLibrary();
+
+	dumpMemoryLeaks();
 
 	return result;
 }

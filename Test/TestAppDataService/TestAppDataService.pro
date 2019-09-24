@@ -42,6 +42,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 HEADERS += \
     ../../lib/ServiceSettings.h \
+    ../../lib/SimpleMutex.h \
     ../../lib/XmlHelper.h \
     ../../lib/HostAddressPort.h \
     ../../lib/OutputLog.h \
@@ -75,6 +76,7 @@ HEADERS += \
 
 
 SOURCES += \
+    ../../lib/SimpleMutex.cpp \
     ../../lib/XmlHelper.cpp \
     ../../lib/ServiceSettings.cpp \
     ../../lib/HostAddressPort.cpp \
@@ -86,7 +88,7 @@ SOURCES += \
     ../../lib/DbStruct.cpp \
     ../../lib/ProtoSerialization.cpp \
     ../../lib/Types.cpp \
-    ../../lib/PropertyObject.cpp \
+#    ../../lib/PropertyObject.cpp \
     ../../lib/DataSource.cpp \
     ../../lib/Crc.cpp \
     ../../lib/Queue.cpp \

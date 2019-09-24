@@ -247,7 +247,7 @@ bool UdpClientSocket::isWaitingForAck() const
 {
 	AUTO_LOCK(m_mutex)
 
-	bool result = m_state == WaitingForAck;
+	bool result = (m_state == WaitingForAck);
 
 	return result;
 }
@@ -391,7 +391,7 @@ void UdpClientSocket::onAckTimerTimeout()
 
 	   emit ackTimeout(m_request);
 
-	   qDebug() << "Ack timeout: server " << m_request.address().toString() << " : " << m_request.port();
+	   // qDebug() << "Ack timeout: server " << m_request.address().toString() << " : " << m_request.port();
 	}
 }
 

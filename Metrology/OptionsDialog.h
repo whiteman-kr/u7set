@@ -167,7 +167,7 @@ class OptionsDialog : public QDialog
 
 public:
 
-	explicit OptionsDialog(QWidget *parent = 0);
+	explicit OptionsDialog(QWidget *parent = nullptr);
 	virtual ~OptionsDialog();
 
 private:

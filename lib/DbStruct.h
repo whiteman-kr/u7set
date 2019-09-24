@@ -538,6 +538,7 @@ public:
 	const QByteArray& data() const;
 	//QByteArray& data();				// Commented, as this function cannot set size after changing data
 	void setData(const QByteArray& data);
+	void setData(QByteArray&& data);
 	void swapData(QByteArray& data);
 	void clearData();
 

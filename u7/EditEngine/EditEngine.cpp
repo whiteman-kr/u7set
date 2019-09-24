@@ -9,6 +9,7 @@
 #include "EditEngineSetProperty.h"
 #include "EditEngineSetObject.h"
 #include "EditEngineSetSchemaProperty.h"
+#include "EditEngineNop.h"
 
 namespace EditEngine
 {
@@ -388,6 +389,19 @@ namespace EditEngine
 	{
 		addCommand(std::make_shared<SetSchemaPropertyCommand>(m_schemaView, propertyName, value, schema, m_hScrollBar, m_vScrollBar), true);
 		return;
+	}
+
+	void EditEngine::runNopItem(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
+	{
+		addCommand(std::make_shared<NopItemCommand>(m_schemaView, items, m_hScrollBar, m_vScrollBar), true);
+	}
+
+	void EditEngine::runNopItem(const std::shared_ptr<VFrame30::SchemaItem>& item)
+	{
+		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+		items.push_back(item);
+
+		return runNopItem(items);
 	}
 
 	//

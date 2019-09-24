@@ -1,4 +1,0 @@
-Report from: 05-07-2019 19:49:33
-
-Test File: AFB_DEC_NUM.txt
-

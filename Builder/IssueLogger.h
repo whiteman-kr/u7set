@@ -97,6 +97,7 @@ namespace Builder
 		void errCMN0019(QString fileID, QString subDir);		// Can't find file with ID = %1 in build subdirectory %2.
 		void errCMN0020(QString fileName);						// Can't find build file %1.
 		void errCMN0021(QString fileName, QString cfgXmlFileName);	// File %1 already linked to %2.
+		void wrnCMN0022(QString issue, QString stdWritablePath);	// Build output path %1. Standard writeble location will be used: %2
 
 		// INT			Internal issues							1000-1999
 		//
@@ -211,9 +212,9 @@ namespace Builder
 
 		void wrnALP4070(QString schema, const std::vector<QUuid>& itemsUuids);						// Schema %1 has %2 commented functional item(s).
 
-		void errALP4080(QString schema, QString frameSchemaId, QUuid itemUuid);						// SchemaItemFrame has reference (property SchemaID) to unknown schema %1, Schema %2.
-		void errALP4081(QString schema, QUuid itemUuid);											// SchemaItemFrame.SchemaID has recursive reference to schema %1, property must be distincive from schema where it is placed.
-		void errALP4082(QString schema, QString frameSchemaId, QUuid itemUuid);						//
+		void errALP4080(QString schema, QString pannelSchemaId);									// Schema %1 has join to unknown schema %2.
+		void errALP4081(QString schema);															// SchemaID %1 has recursive reference, property Join(Left/Top/Right/Bottom)SchemaID must be distincive from SchemaID.
+		void errALP4082(QString schema, QString pannelSchemaId);									// Join schemas with different unit, schemas %1 and %2 must have the same unit.
 
 		// Multichannel pasing errors
 		//
@@ -357,9 +358,9 @@ namespace Builder
 		void errALC5121(QString appSignalID, QUuid ualItemUuid, QString schemaID);		// Can't assign value to input/tunable/opto/const signal %1 (Logic schema %2).
 		void errALC5122(QUuid ualItemUuid, QString schemaID);							// Different busTypes on AFB output (Logic schema %1).
 		void errALC5123(QUuid ualItemUuid, QString schemaID);							// Different busTypes on AFB inputs (Logic schema %1).
-		void errALC5124(QString appSignalID, QUuid signalUuid, QUuid ualItemUuid, QString schemaID);	// Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
+		void errALC5124(QString appSignalID, QUuid signalUuid, QUuid ualItemUuid, QString schemaID);	// Discrete signal %1 is connected to non-discrete or non-mixed bus input (Logic schema %2)
 		void errALC5125(QString pinCaption, QUuid transmitterUuid, QString schemaID);	// Input %1 of transmitter is connected unnamed signal (Logic schema %2).
-		void errALC5126(QUuid ualItemUuid, QString schemaID);							// Signal and bus inputs sizes are not multiples (Logic schema %1).
+		void errALC5126(QUuid ualItemUuid, QString schemaID);							// Signal and bus inputs sizes are not multiples  (Logic schema %1).
 		void errALC5127(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Output bus type cannot be determined (Logic schema %1, item %2)
 		void errALC5128(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// All AFB's bus inputs connected to discretes (Logic schema %1, item %2).
 		void errALC5129(QUuid ualItemUuid, QString itemLabel, QString schemaID);		// Unknown AFB type (opCode) (Logic schema %1, item %2).
@@ -410,6 +411,7 @@ namespace Builder
 		void wrnALC5169(QString setFlagsItemLabel, QUuid itemUuid, QString schemaID);	// No flags assiged on set_flags item %1 (Schema %2)
 		void errALC5170(QString lmEquipmentID, QString appSignalID, QUuid itemUuid, QString schemaID);	// LM's %1 native signal %2 can't be received via opto connection (Logic schema %3)
 		void errALC5171(QString appSignalID, QString equipmentSignalID);				// Internal application signal %1 cannot be linked to equipment input/output signal %2.
+		void errALC5172(QString inputCaption, QString itemLabel, QUuid itemUuid, QString schemaID);			// Non-discrete busses is not allowed on input '%1'. (Item %2, logic schema %3).
 
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.

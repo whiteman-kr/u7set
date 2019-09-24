@@ -62,6 +62,7 @@ OTHER_FILES += \
 
 HEADERS += VFrame30Lib_global.h \
     SchemaItemFrame.h \
+    SchemaItemIndicator.h \
     Stable.h \
     Settings.h \
     PosRectImpl.h \
@@ -141,6 +142,7 @@ HEADERS += VFrame30Lib_global.h \
 
 SOURCES += \
     SchemaItemFrame.cpp \
+    SchemaItemIndicator.cpp \
     Settings.cpp \
     PosRectImpl.cpp \
     PosLineImpl.cpp \

@@ -80,8 +80,8 @@ namespace Builder
 
 		// --
 		//
-		m_context->m_buildResultWriter = std::make_shared<BuildResultWriter>(buildOutputPath());
-		m_context->m_buildResultWriter->start(&m_context->m_db, m_context->m_log, release(), 0 /* Load correct ChangesetID */);
+		m_context->m_buildResultWriter = std::make_shared<BuildResultWriter>();
+		m_context->m_buildResultWriter->start(buildOutputPath(), &m_context->m_db, m_context->m_log, release(), 0 /* Load correct ChangesetID */);
 
 		do
 		{

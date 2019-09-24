@@ -542,17 +542,9 @@ namespace Builder
 	//
 	// --------------------------------------------------------------------------------------
 
-	BuildResultWriter::BuildResultWriter(QString outputPath, QObject* parent) :
+	BuildResultWriter::BuildResultWriter(QObject* parent) :
 		QObject(parent)
 	{
-		if (outputPath.isEmpty() == true)
-		{
-			outputPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
-		}
-
-		QDir dir(outputPath);
-
-		m_outputPath = dir.absolutePath();
 	}
 
 	BuildResultWriter::~BuildResultWriter()
@@ -571,7 +563,7 @@ namespace Builder
 		m_buildFiles.clear();
 	}
 
-	bool BuildResultWriter::start(DbController* db, IssueLogger* log, bool release, int changesetID)
+	bool BuildResultWriter::start(const QString& outputPath, DbController* db, IssueLogger* log, bool release, int changesetID)
 	{
 		m_dbController = db;
 		m_log = log;
@@ -581,6 +573,8 @@ namespace Builder
 			assert(false);
 			return false;
 		}
+
+		m_outputPath = checkOutputPath(outputPath);
 
 		TEST_PTR_LOG_RETURN_FALSE(m_dbController, m_log);
 
@@ -910,6 +904,71 @@ namespace Builder
 	QString BuildResultWriter::outputPath() const
 	{
 		return m_outputPath;
+	}
+
+	QString BuildResultWriter::checkOutputPath(QString outputPath)
+	{
+		QString usedPath = QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation);
+
+		do
+		{
+			if (outputPath.isEmpty() == true)
+			{
+				// Build output path %1. Standard writeble location will be used: %2
+				//
+				m_log->wrnCMN0022(" is empty", usedPath);
+				break;
+			}
+
+			outputPath = QDir(outputPath).absolutePath();
+
+			if (QDir().exists(outputPath) == false)
+			{
+				if (QDir().mkpath(outputPath) == false)
+				{
+					// Build output path %1. Standard writeble location will be used: %2
+					//
+					m_log->wrnCMN0022(QString("'%1' is can't be created").arg(outputPath), usedPath);
+					break;
+				}
+			}
+
+			if (isWritable(outputPath) == false)
+			{
+				// Build output path %1. Standard writeble location will be used: %2
+				//
+				m_log->wrnCMN0022(QString("'%1' is not writable").arg(outputPath), usedPath);
+				break;
+			}
+
+			usedPath = outputPath;
+			break;
+		}
+		while(1);
+
+		return QDir(usedPath).absolutePath();
+	}
+
+	bool BuildResultWriter::isWritable(const QString& outputPath)
+	{
+		QFile testFile(outputPath + QDir::separator() + QString("%1.temp").arg(QDateTime::currentMSecsSinceEpoch()));
+
+		if (testFile.open(QIODevice::ReadWrite) == false)
+		{
+			return false;
+		}
+
+		qint64 result = testFile.write("test writing");
+
+		if (result == -1)
+		{
+			testFile.remove();
+			return false;
+		}
+
+		testFile.remove();
+
+		return true;
 	}
 
 	BuildFile* BuildResultWriter::createBuildFile(const QString& subDir, const QString& fileName, const QString& id, const QString& tag, bool compress)

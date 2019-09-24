@@ -4,7 +4,8 @@
 ArchiveTcpClient::ArchiveTcpClient(MonitorConfigController* configController) :
 	Tcp::Client(configController->softwareInfo(),
 				configController->configuration().archiveService1.address(),
-				configController->configuration().archiveService2.address()),
+				configController->configuration().archiveService2.address(),
+				"ArchiveTcpClient"),
 	TcpClientStatistics(this),
 	m_cfgController(configController)
 {

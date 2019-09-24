@@ -28,7 +28,7 @@ bool RackGroup::isValid() const
 
 void RackGroup::clear()
 {
-	m_hash = 0;
+	m_hash = UNDEFINED_HASH;
 	m_caption.clear();
 }
 
@@ -40,7 +40,7 @@ void RackGroup::setCaption(const QString& caption)
 
 	if (m_caption.isEmpty() == true)
 	{
-		m_hash = 0;
+		m_hash = UNDEFINED_HASH;
 		return;
 	}
 
@@ -356,7 +356,7 @@ Metrology::RackParam* RackBase::rackPtr(const QString& rackID)
 
 Metrology::RackParam* RackBase::rackPtr(const Hash& hash)
 {
-	if (hash == 0)
+	if (hash == UNDEFINED_HASH)
 	{
 		assert(hash != 0);
 		return nullptr;
@@ -416,7 +416,7 @@ Metrology::RackParam RackBase::rack(const QString& rackID)
 
 Metrology::RackParam RackBase::rack(const Hash& hash)
 {
-	if (hash == 0)
+	if (hash == UNDEFINED_HASH)
 	{
 		assert(hash != 0);
 		return Metrology::RackParam();
@@ -481,7 +481,7 @@ void RackBase::setRack(const QString& rackID, const Metrology::RackParam& rack)
 
 void RackBase::setRack(const Hash& hash, const Metrology::RackParam& rack)
 {
-	if (hash == 0)
+	if (hash == UNDEFINED_HASH)
 	{
 		assert(hash != 0);
 		return;

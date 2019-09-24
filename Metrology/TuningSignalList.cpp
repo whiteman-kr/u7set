@@ -515,7 +515,7 @@ QString TuningSignalTable::signalStateStr(Metrology::Signal* pSignal) const
 
 		case E::SignalType::Discrete:
 
-			stateStr = pSignal->state().value() == 0 ? QString("No") : QString("Yes");
+			stateStr = pSignal->state().value() == 0.0 ? QString("No") : QString("Yes");
 
 			break;
 

@@ -47,10 +47,10 @@ private:
 
 	mutable QMutex			m_signalMutex;
 
-	int						m_index = -1;	// for database
+	int						m_index = -1;									// for database
 
 	QString					m_appSignalID[MEASURE_IO_SIGNAL_TYPE_COUNT];
-	Hash					m_hash = 0;		// calcHash form m_appSignalID
+	Hash					m_hash = UNDEFINED_HASH;						// calcHash form m_appSignalID
 
 	int						m_type = OUTPUT_SIGNAL_TYPE_UNUSED;
 
@@ -89,7 +89,7 @@ class OutputSignalBase : public QObject
 
 public:
 
-	explicit OutputSignalBase(QObject *parent = 0);
+	explicit OutputSignalBase(QObject *parent = nullptr);
 	virtual ~OutputSignalBase() {}
 
 private:

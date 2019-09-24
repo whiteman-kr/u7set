@@ -2,79 +2,87 @@
 #define PROPERTYEDITOR_H
 
 #include "../lib/PropertyObject.h"
-#include "../qtpropertybrowser/src/qteditorfactory.h"
-#include <memory>
-#include <QWidget>
-#include <QMap>
-#include <QVariant>
-#include <QSpinBox>
-#include <QCheckBox>
+
 #include <QtTreePropertyBrowser>
 #include <QtVariantPropertyManager>
-#include <QTextEdit>
-#include <QDialog>
-#include <QSet>
-#include <QComboBox>
-#include <QStringList>
-#include <QPlainTextEdit>
-#include <QSvgRenderer>
+#include <QtGroupPropertyManager>
 
-class QtTreePropertyBrowser;
 class QtProperty;
-
-Q_DECLARE_METATYPE(std::shared_ptr<Property>)
-
-namespace ExtWidgets
-{
-	struct FilePathPropertyType
-	{
-		FilePathPropertyType()
-		{
-			filter = "*.*";
-		}
-
-		QString filePath;
-		QString filter;
-
-		static int filePathTypeId();
-	};
-}
-
-Q_DECLARE_METATYPE(ExtWidgets::FilePathPropertyType)
+class QPlainTextEdit;
 
 namespace ExtWidgets
 {
+	//
+	class PropertyEditor;
+	class PropertyEditCellWidget;
+	class PropertyTextEditor;
 
-	struct PropertyEditorSettings
+	class PropertyEditorBase
 	{
-		QByteArray m_arrayPropertyEditorSplitterState;
-		QSize m_arrayPropertyEditorSize = QSize(-1, -1);
+	public:
 
-		QSize m_stringListEditorSize = QSize(-1, -1);
+		PropertyEditorBase();
 
-		QPoint m_multiLinePropertyEditorWindowPos;
-		QByteArray m_multiLinePropertyEditorGeometry;
+		virtual PropertyEditor* createChildPropertyEditor(QWidget* parent);
+		virtual PropertyTextEditor* createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent);
 
-		void restore(QSettings& s);
-		void store(QSettings& s);
+		bool expertMode() const;
+		void setExpertMode(bool expertMode);
+
+		bool isReadOnly() const;
+		void setReadOnly(bool readOnly);
+
+	public:
+		//  Base Editor functions used by list and table editors
+		//
+		static QString propertyVectorText(QVariant& value);
+		static QString stringListText(const QVariant& value);
+		static QString propertyValueText(Property* p, int row);	// row is used for StringList
+
+		static QIcon drawCheckBox(int state, bool enabled);
+		static QIcon drawColorBox(QColor color);
+		static QIcon drawImage(const QImage& image);
+		static QIcon propertyIcon(Property* p, bool sameValue, bool enabled);
+
+		PropertyEditCellWidget* createCellEditor(std::shared_ptr<Property> propertyPtr, bool sameValue, bool readOnly, QWidget* parent);
+		PropertyEditCellWidget* createCellRowEditor(std::shared_ptr<Property> propertyPtr, int row, bool sameValue, bool readOnly, QWidget* parent);
+
+		// Help description functions
+
+		void setScriptHelp(QFile& file);
+
+		void setScriptHelp(const QString& text);
+		QString scriptHelp() const;
+
+		QPoint scriptHelpWindowPos() const;
+		void setScriptHelpWindowPos(const QPoint& value);
+
+		QByteArray scriptHelpWindowGeometry() const;
+		void setScriptHelpWindowGeometry(const QByteArray& value);
+
+	private:
+		bool m_expertMode = false;
+		bool m_readOnly = false;
+
+		QString m_scriptHelp;
+		QPoint m_scriptHelpWindowPos = QPoint(-1, -1);
+		QByteArray m_scriptHelpWindowGeometry;
 	};
 
 	//
-
-	class PropertyEditor;
+	// -----------------------------------------  Editor dialogs ---------------------------------------
+	//
 
 	//
 	// PropertyArrayEditorDialog
 	//
-
-	static QString propertyVectorText(QVariant& value);
 
 	class PropertyArrayEditorDialog : public QDialog
 	{
 		Q_OBJECT
 
 	public:
-		PropertyArrayEditorDialog(PropertyEditor* propertyEditor, QWidget* parent, const QString& propertyName, const QVariant& value);
+		PropertyArrayEditorDialog(PropertyEditorBase* propertyEditorBase, QWidget* parent, const QString& propertyName, const QVariant& value);
 		~PropertyArrayEditorDialog();
 
 		QVariant value();
@@ -95,7 +103,7 @@ namespace ExtWidgets
 	private:
 		QVariant m_value;
 
-		PropertyEditor* m_parentPropertyEditor = nullptr;
+		PropertyEditorBase* m_propertyEditorBase = nullptr;
 
 		QTreeWidget* m_treeWidget = nullptr;
 		PropertyEditor* m_childPropertyEditor = nullptr;
@@ -105,12 +113,16 @@ namespace ExtWidgets
 		std::shared_ptr<Property> m_property;
 	};
 
+	//
+	// StringListEditorDialog
+	//
+
 	class StringListEditorDialog : public QDialog
 	{
 		Q_OBJECT
 
 	public:
-		StringListEditorDialog(PropertyEditor* propertyEditor, QWidget* parent, const QString& propertyName, const QVariant& value);
+		StringListEditorDialog(QWidget* parent, const QString& propertyName, const QVariant& value);
 		~StringListEditorDialog();
 
 		QVariant value();
@@ -129,10 +141,7 @@ namespace ExtWidgets
 	private:
 		QStringList m_strings;
 
-		PropertyEditor* m_parentPropertyEditor = nullptr;
-
 		QTreeWidget* m_treeWidget = nullptr;
-		PropertyEditor* m_childPropertyEditor = nullptr;
 
 		std::shared_ptr<Property> m_property;
 	};
@@ -141,11 +150,11 @@ namespace ExtWidgets
 	// PropertyEditorHelp
 	//
 
-	class PropertyEditorHelp : public QDialog
+	class PropertyEditorHelpDialog : public QDialog
 	{
 	public:
-		explicit PropertyEditorHelp(const QString &caption, const QString& text, QWidget* parent);
-		~PropertyEditorHelp();
+		explicit PropertyEditorHelpDialog(const QString &caption, const QString& text, QWidget* parent);
+		~PropertyEditorHelpDialog();
 
 	};
 
@@ -229,19 +238,57 @@ namespace ExtWidgets
 
 	};
 
-	class MultiFilePathEdit : public QWidget
+
+	//
+	// -----------------------------------------  Editor widgets ---------------------------------------
+	//
+
+	//
+	// PropertyEditWidget - a base class for Multi*Edit classes
+	//
+
+	class PropertyEditCellWidget : public QWidget
+	{
+		Q_OBJECT
+
+	public:
+		PropertyEditCellWidget(QWidget* parent);
+		~PropertyEditCellWidget();
+
+		virtual void setValue(std::shared_ptr<Property> property, bool readOnly);
+
+	signals:
+		void valueChanged(QVariant value);
+
+	};
+
+	//
+	// MultiFilePathEdit
+	//
+
+	struct FilePathPropertyType
+	{
+		FilePathPropertyType()
+		{
+			filter = "*.*";
+		}
+
+		QString filePath;
+		QString filter;
+
+		static int filePathTypeId();
+	};
+
+	class MultiFilePathEdit : public PropertyEditCellWidget
 	{
 		Q_OBJECT
 
 	public:
 		explicit MultiFilePathEdit(QWidget* parent, bool readOnly);
-		void setValue(std::shared_ptr<Property> property, bool readOnly);
+		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
 
 	public slots:
 		void onEditingFinished();
-
-	signals:
-		void valueChanged(QVariant value);
 
 	private slots:
 		void onButtonPressed();
@@ -255,44 +302,42 @@ namespace ExtWidgets
 		bool m_escape = false;
 		QVariant m_oldPath;
 
-
 	};
 
 	//
 	// MultiEnumEdit
 	//
 
-	class MultiEnumEdit : public QWidget
+	class MultiEnumEdit : public PropertyEditCellWidget
 	{
 		Q_OBJECT
 
 	public:
 		explicit MultiEnumEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly);
-		void setValue(std::shared_ptr<Property> property, bool readOnly);
+		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
 
 	public slots:
 		void indexChanged(int index);
-
-	signals:
-		void valueChanged(QVariant value);
 
 	private:
 		QComboBox* m_combo = nullptr;
 
 	};
-	class MultiColorEdit : public QWidget
+
+	//
+	// MultiColorEdit
+	//
+
+	class MultiColorEdit : public PropertyEditCellWidget
 	{
 		Q_OBJECT
 
 	public:
 		explicit MultiColorEdit(QWidget* parent, bool readOnly);
-		void setValue(std::shared_ptr<Property> property, bool readOnly);
+		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
 
 	public slots:
 		void onEditingFinished();
-
-	signals:
-		void valueChanged(QVariant value);
 
 	private slots:
 		void onButtonPressed();
@@ -310,7 +355,6 @@ namespace ExtWidgets
 
 	};
 
-
 	//
 	// MultiTextEditorDialog
 	//
@@ -320,7 +364,7 @@ namespace ExtWidgets
 		Q_OBJECT
 
 	public:
-		MultiTextEditorDialog(PropertyEditor* propertyEditor, QWidget* parent, const QString& text, std::shared_ptr<Property> p);
+		MultiTextEditorDialog(PropertyEditorBase* propertyEditorBase, QWidget* parent, const QString& text, std::shared_ptr<Property> p);
 		QString text();
 
 	private slots:
@@ -335,13 +379,17 @@ namespace ExtWidgets
 
 		PropertyTextEditor* m_editor = nullptr;
 
-		PropertyEditor* m_propertyEditor = nullptr;
+		PropertyEditorBase* m_propertyEditorBase = nullptr;
 
-		PropertyEditorHelp* m_propertyEditorHelp = nullptr;
+		PropertyEditorHelpDialog* m_propertyEditorHelp = nullptr;
 
 		std::shared_ptr<Property> m_property;
 
 	};
+
+	//
+	// PropertyEditorCheckBox
+	//
 
 	class PropertyEditorCheckBox : public QCheckBox
 	{
@@ -364,20 +412,17 @@ namespace ExtWidgets
 	// MultiCheckBox
 	//
 
-	class MultiCheckBox : public QWidget
+	class MultiCheckBox : public PropertyEditCellWidget
 	{
 		Q_OBJECT
 
 	public:
-		explicit MultiCheckBox(QWidget* parent);
-		void setValue(Qt::CheckState state, bool readOnly);
+		explicit MultiCheckBox(QWidget* parent, bool readOnly);
+		void setValue(std::shared_ptr<Property> propertyPtr, bool readOnly);
 
 	public slots:
 		void changeValueOnButtonClick();
 		void onStateChanged(int state);
-
-	signals:
-		void valueChanged(QVariant value);
 
 	private:
 		void updateText();
@@ -387,25 +432,27 @@ namespace ExtWidgets
 
 	};
 
-
 	//
 	// MultiTextEdit
 	//
 
-	class MultiTextEdit : public QWidget
+
+	class MultiTextEdit : public PropertyEditCellWidget
 	{
 		Q_OBJECT
 
 	public:
-		explicit MultiTextEdit(QWidget* parent, std::shared_ptr<Property> p, bool readOnly, PropertyEditor* propertyEditor);
-		void setValue(std::shared_ptr<Property> property, bool readOnly);
+		explicit MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, bool readOnly, QWidget* parent);
+
+		// Row parameter is used for QStringList property type. In this case, valueChanged signal returns QString type, NOT QStringList!
+		//
+		explicit MultiTextEdit(PropertyEditorBase* propertyEditorBase, std::shared_ptr<Property> p, int row, bool readOnly, QWidget* parent);
+
+		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
 
 	public slots:
 		void onTextEdited(const QString &text);
 		void onEditingFinished();
-
-	signals:
-		void valueChanged(QVariant value);
 
 	private slots:
 		void onButtonPressed();
@@ -423,38 +470,35 @@ namespace ExtWidgets
 		bool m_textEdited = false;
 
 		std::shared_ptr<Property> m_property;
+		int m_row = -1;
 		int m_userType = 0;
 
-		PropertyEditor* m_propertyEditor = nullptr;
+		PropertyEditorBase* m_propertyEditorBase = nullptr;
 	};
 
 	//
 	// MultiArrayEdit
 	//
 
-	class MultiArrayEdit : public QWidget
+	class MultiArrayEdit : public PropertyEditCellWidget
 	{
 		Q_OBJECT
 
 	public:
-		explicit MultiArrayEdit(PropertyEditor* propertyEditor, QWidget* parent, std::shared_ptr<Property> p, bool readOnly);
-		void setValue(QVariant value, bool readOnly);
-
-	signals:
-		void valueChanged(QVariant value);
+		explicit MultiArrayEdit(PropertyEditorBase* propertyEditorBase, QWidget* parent, std::shared_ptr<Property> p, bool readOnly);
+		void setValue(std::shared_ptr<Property> property, bool readOnly) override;
 
 	private slots:
 		void onButtonPressed();
 
 	private:
-
 		QLineEdit* m_lineEdit = nullptr;
 		QToolButton* m_button = nullptr;
 
 		QVariant m_currentValue;
 		std::shared_ptr<Property> m_property;
 
-		PropertyEditor* m_propertyEditor = nullptr;
+		PropertyEditorBase* m_propertyEditorBase = nullptr;
 	};
 
 	//
@@ -551,11 +595,32 @@ namespace ExtWidgets
 
 	};
 
+	struct PropertyEditorSettings
+	{
+		QByteArray m_arrayPropertyEditorSplitterState;
+		QSize m_arrayPropertyEditorSize = QSize(-1, -1);
+
+		QSize m_stringListEditorSize = QSize(-1, -1);
+
+		QPoint m_multiLinePropertyEditorWindowPos;
+		QByteArray m_multiLinePropertyEditorGeometry;
+
+		// Ide Property Editor Options
+		//
+		double m_propertyEditorFontScaleFactor = 1.0;
+
+		QPoint m_scriptHelpWindowPos;
+		QByteArray m_scriptHelpWindowGeometry;
+
+		void restore(QSettings& s);
+		void store(QSettings& s);
+	};
+
 	//
 	// PropertyEditor
 	//
 
-	class PropertyEditor : public QtTreePropertyBrowser
+	class PropertyEditor : public QtTreePropertyBrowser, public PropertyEditorBase
 	{
 		friend class MultiTextEditorDialog;
 
@@ -563,8 +628,6 @@ namespace ExtWidgets
 
 	public:
 		explicit PropertyEditor(QWidget* parent);
-
-		virtual void saveSettings();
 
 		// Public functions
 		//
@@ -576,30 +639,8 @@ namespace ExtWidgets
 
 		const QList<std::shared_ptr<PropertyObject>>& objects() const;
 
-		void setExpertMode(bool expertMode);
-
-		bool readOnly() const;
-		void setReadOnly(bool readOnly);
-
-		// Help description functions
-
-		void setScriptHelp(const QString& text);
-		QString scriptHelp() const;
-
-		QPoint scriptHelpWindowPos() const;
-		void setScriptHelpWindowPos(const QPoint& value);
-
-		QByteArray scriptHelpWindowGeometry() const;
-		void setScriptHelpWindowGeometry(const QByteArray& value);
-
 	protected:
-		virtual void valueChanged(QtProperty* property, QVariant value);
-
-	public:
-		virtual PropertyEditor* createChildPropertyEditor(QWidget* parent);
-
-	protected:
-		virtual PropertyTextEditor* createPropertyTextEditor(Property *property, QWidget* parent);
+		virtual void valueChanged(QString propertyName, QVariant value);
 
 	protected slots:
 		void updatePropertiesList();
@@ -608,11 +649,10 @@ namespace ExtWidgets
 	private slots:
 		void onValueChanged(QtProperty* property, QVariant value);
 		void onShowErrorMessage (QString message);
-		void onCurrentItemChanged(QtBrowserItem* current);
 
 	signals:
 		void showErrorMessage(QString message);
-        void propertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
+		void propertiesChanged(QList<std::shared_ptr<PropertyObject>> objects);
 
 	private:
 		void fillProperties();
@@ -632,16 +672,11 @@ namespace ExtWidgets
 
 		QList<std::shared_ptr<PropertyObject>> m_objects;
 
-		bool m_expertMode = false;
-		bool m_readOnly = false;
-
-		QString m_scriptHelp;
-		QPoint m_scriptHelpWindowPos;
-		QByteArray m_scriptHelpWindowGeometry;
-
 	};
-
 }
+
+Q_DECLARE_METATYPE(std::shared_ptr<Property>)
+Q_DECLARE_METATYPE(ExtWidgets::FilePathPropertyType)
 
 extern ExtWidgets::PropertyEditorSettings thePropertyEditorSettings;
 

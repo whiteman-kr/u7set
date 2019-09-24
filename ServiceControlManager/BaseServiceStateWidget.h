@@ -15,7 +15,7 @@ class BaseServiceStateWidget : public QMainWindow
 {
 	Q_OBJECT
 public:
-	explicit BaseServiceStateWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, qint32 udpPort, QWidget *parent = nullptr);
+	explicit BaseServiceStateWidget(const SoftwareInfo& softwareInfo, quint32 udpIp, quint16 udpPort, QWidget* parent = nullptr);
 	virtual ~BaseServiceStateWidget();
 
 	int addTab(QWidget* page, const QString& label);

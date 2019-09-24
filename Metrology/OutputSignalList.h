@@ -7,7 +7,9 @@
 #include <QMenuBar>
 #include <QAction>
 #include <QVBoxLayout>
+#include <QHeaderView>
 #include <QTableView>
+#include <QTableWidget>
 #include <QGroupBox>
 #include <QComboBox>
 #include <QCheckBox>
@@ -69,7 +71,7 @@ class OutputSignalTable : public QAbstractTableModel
 
 public:
 
-	explicit OutputSignalTable(QObject* parent = 0);
+	explicit OutputSignalTable(QObject* parent = nullptr);
 	virtual ~OutputSignalTable();
 
 private:
@@ -106,8 +108,8 @@ class OutputSignalItemDialog : public QDialog
 
 public:
 
-	explicit OutputSignalItemDialog(QWidget *parent = 0);
-	explicit OutputSignalItemDialog(const OutputSignal& signal, QWidget *parent = 0);
+	explicit OutputSignalItemDialog(QWidget *parent = nullptr);
+	explicit OutputSignalItemDialog(const OutputSignal& signal, QWidget *parent = nullptr);
 	virtual ~OutputSignalItemDialog();
 
 private:
@@ -160,7 +162,7 @@ class OutputSignalDialog : public QDialog
 
 public:
 
-	explicit OutputSignalDialog(QWidget *parent = 0);
+	explicit OutputSignalDialog(QWidget *parent = nullptr);
 	virtual ~OutputSignalDialog();
 
 private:

@@ -628,6 +628,7 @@ private:
 		QAction* m_addImageValueAction = nullptr;
 		QAction* m_addPushButtonAction = nullptr;
 		QAction* m_addLineEditAction = nullptr;
+		QAction* m_addIndicatorAction = nullptr;
 
 	// Edit
 	//

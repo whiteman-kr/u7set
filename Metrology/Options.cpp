@@ -3,6 +3,7 @@
 #include <QSettings>
 #include <QTemporaryDir>
 #include <QMessageBox>
+
 #include "Database.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -116,12 +117,6 @@ ProjectInfo& ProjectInfo::operator=(const ProjectInfo& from)
 // -------------------------------------------------------------------------------------------------------------------
 
 SocketClientOption::SocketClientOption()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-SocketClientOption::~SocketClientOption()
 {
 }
 
@@ -806,13 +801,6 @@ LinearityPointBase::LinearityPointBase()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearityPointBase::~LinearityPointBase()
-{
-	clear();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 QString LinearityPointBase::text()
 {
 	QString result;
@@ -943,7 +931,7 @@ void LinearityOption::recalcPoints(int count)
 	}
 	else
 	{
-		double value = (double) (m_highLimitRange - m_lowLimitRange) / (count - 1);
+		double value = static_cast<double>((m_highLimitRange - m_lowLimitRange) / (count - 1));
 
 		for (int p = 0; p < count ; p++)
 		{

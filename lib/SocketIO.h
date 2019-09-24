@@ -176,6 +176,7 @@ const quint32 ADS_GET_APP_SIGNAL_LIST_NEXT = 0x1201;
 const quint32 ADS_GET_APP_SIGNAL_PARAM = 0x1301;
 const quint32 ADS_GET_APP_SIGNAL = 0x1302;
 const quint32 ADS_GET_APP_SIGNAL_STATE = 0x1303;
+const quint32 ADS_GET_APP_SIGNAL_STATE_CHANGES = 0x1304;
 
 // Limiters and other constants
 //

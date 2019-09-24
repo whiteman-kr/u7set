@@ -14,6 +14,7 @@ namespace EditEngine
 }
 
 class SchemaItemPropertyEditor;
+class SchemaItemPropertyTable;
 
 
 
@@ -26,7 +27,9 @@ public:
 	virtual ~SchemaItemPropertiesDialog();
 
 public:
+	const std::vector<std::shared_ptr<VFrame30::SchemaItem>> objects() const;
 	void setObjects(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items);
+
 	void setReadOnly(bool value);
 
 	void ensureVisible();
@@ -37,9 +40,15 @@ private:
 
     void saveSettings();
 
+private slots:
+	void propertiesModeTabChanged(int index);
+
 private:
 	Ui::SchemaItemPropertiesDialog *ui;
+
 	SchemaItemPropertyEditor* m_propertyEditor = nullptr;
+	SchemaItemPropertyTable* m_propertyTable = nullptr;
+
 	std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_items;
 };
 
@@ -58,7 +67,7 @@ public:
 	virtual ~SchemaItemPropertyEditor();
 
 protected slots:
-	virtual void valueChanged(QtProperty* property, QVariant value) override;
+	virtual void valueChanged(QString propertyName, QVariant value) override;
 
 protected:
 	EditEngine::EditEngine* editEngine();
@@ -67,3 +76,28 @@ private:
 	EditEngine::EditEngine* m_editEngine = nullptr;
 };
 
+
+//
+//
+//	SchemaItemPropertyTable
+//
+//
+
+class SchemaItemPropertyTable : public IdePropertyTable
+{
+	Q_OBJECT
+
+public:
+	explicit SchemaItemPropertyTable(EditEngine::EditEngine* editEngine, SchemaItemPropertiesDialog* schemaItemPropertiesDialog, QWidget* parent);
+	virtual ~SchemaItemPropertyTable();
+
+protected slots:
+	virtual void valueChanged(const ExtWidgets::ModifiedObjectsData& modifiedObjectsData) override;
+
+protected:
+	EditEngine::EditEngine* editEngine();
+
+private:
+	EditEngine::EditEngine* m_editEngine = nullptr;
+	SchemaItemPropertiesDialog* m_schemaItemPropertiesDialog = nullptr;
+};

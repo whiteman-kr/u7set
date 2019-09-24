@@ -8,8 +8,12 @@ SUBDIRS += qtpropertybrowser \
 	QScintilla \	
 	TrendView \
 	VFrame30 \
+	Builder \
+	BuilderConsole \
 	u7 \
 	Monitor \
+	Simulator \
+	SimulatorConsole \
 	mconf \
 	TuningClient
 

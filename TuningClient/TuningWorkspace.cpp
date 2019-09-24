@@ -383,6 +383,7 @@ void TuningWorkspace::updateFiltersTree(std::shared_ptr<TuningFilter> rootFilter
 	{
 		m_filterTree = new QTreeWidget();
 		m_filterTree->setSortingEnabled(true);
+		m_filterTree->setObjectName("FilterTreeWidget");
 
 		m_filterTree->viewport()->installEventFilter(this);
 		m_filterTree->installEventFilter(this);
@@ -758,6 +759,7 @@ void TuningWorkspace::createTabPages()
 		if (m_tab == nullptr)
 		{
 			m_tab = new QTabWidget();
+			m_tab->setObjectName("TuningTabWidget");
 
 			m_rightLayout->addWidget(m_tab);
 

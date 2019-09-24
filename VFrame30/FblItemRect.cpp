@@ -693,7 +693,7 @@ namespace VFrame30
 
 	QRectF FblItemRect::itemRectWithPins(CDrawParam* /*drawParam*/) const
 	{
-		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
+		QRectF r{leftDocPt(), topDocPt(), widthDocPt(), heightDocPt()};
 
 		if (std::abs(r.left() - r.right()) < 0.000001)
 		{

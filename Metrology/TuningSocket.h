@@ -45,7 +45,7 @@ public:
 	TuningSocket(const SoftwareInfo& softwareInfo,
 				 const HostAddressPort& serverAddressPort1,
 				 const HostAddressPort& serverAddressPort2);
-	virtual ~TuningSocket();
+	virtual ~TuningSocket() override;
 
 private:
 

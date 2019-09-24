@@ -71,7 +71,7 @@ void ConfigurationServiceWidget::updateStateInfo()
 		stateTabModel()->setData(stateTabModel()->index(8, 1), clientsTabModel()->rowCount());
 
 		quint32 ip = m_serviceInfo.clientrequestip();
-		quint16 port = m_serviceInfo.clientrequestport();
+		qint32 port = m_serviceInfo.clientrequestport();
 		QString address = QHostAddress(ip).toString() + QString(":%1").arg(port);
 		quint32 workingIp = getWorkingClientRequestIp();
 
@@ -86,6 +86,7 @@ void ConfigurationServiceWidget::updateStateInfo()
 		if (m_tcpClientSocket != nullptr)
 		{
 			HostAddressPort&& curAddress = m_tcpClientSocket->currentServerAddressPort();
+
 			if (curAddress.address32() != ip || curAddress.port() != port)
 			{
 				dropTcpConnection();
@@ -94,7 +95,7 @@ void ConfigurationServiceWidget::updateStateInfo()
 
 		if (m_tcpClientSocket == nullptr)
 		{
-			createTcpConnection(getWorkingClientRequestIp(), port);
+			createTcpConnection(getWorkingClientRequestIp(), static_cast<quint16>(port));
 		}
 	}
 }

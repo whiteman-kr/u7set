@@ -44,6 +44,8 @@ class GetAppSignalRequest;
 class GetAppSignalReply;
 class GetAppSignalStateRequest;
 class GetAppSignalStateReply;
+class GetAppSignalStateChangesRequest;
+class GetAppSignalStateChangesReply;
 class DataSourceInfo;
 class GetDataSourcesInfoRequest;
 class GetDataSourcesInfoReply;
@@ -975,10 +977,24 @@ class GetAppSignalStateReply : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 error() const;
   inline void set_error(::google::protobuf::int32 value);
 
-  // repeated .Proto.AppSignalState appSignalStates = 2;
+  // optional int64 serverTimeUtc = 2;
+  inline bool has_servertimeutc() const;
+  inline void clear_servertimeutc();
+  static const int kServerTimeUtcFieldNumber = 2;
+  inline ::google::protobuf::int64 servertimeutc() const;
+  inline void set_servertimeutc(::google::protobuf::int64 value);
+
+  // optional int64 serverTimeLocal = 3;
+  inline bool has_servertimelocal() const;
+  inline void clear_servertimelocal();
+  static const int kServerTimeLocalFieldNumber = 3;
+  inline ::google::protobuf::int64 servertimelocal() const;
+  inline void set_servertimelocal(::google::protobuf::int64 value);
+
+  // repeated .Proto.AppSignalState appSignalStates = 4;
   inline int appsignalstates_size() const;
   inline void clear_appsignalstates();
-  static const int kAppSignalStatesFieldNumber = 2;
+  static const int kAppSignalStatesFieldNumber = 4;
   inline const ::Proto::AppSignalState& appsignalstates(int index) const;
   inline ::Proto::AppSignalState* mutable_appsignalstates(int index);
   inline ::Proto::AppSignalState* add_appsignalstates();
@@ -991,14 +1007,20 @@ class GetAppSignalStateReply : public ::google::protobuf::Message {
  private:
   inline void set_has_error();
   inline void clear_has_error();
+  inline void set_has_servertimeutc();
+  inline void clear_has_servertimeutc();
+  inline void set_has_servertimelocal();
+  inline void clear_has_servertimelocal();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
+  ::google::protobuf::int64 servertimeutc_;
+  ::google::protobuf::int64 servertimelocal_;
   ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState > appsignalstates_;
   ::google::protobuf::int32 error_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -1006,6 +1028,203 @@ class GetAppSignalStateReply : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static GetAppSignalStateReply* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class GetAppSignalStateChangesRequest : public ::google::protobuf::Message {
+ public:
+  GetAppSignalStateChangesRequest();
+  virtual ~GetAppSignalStateChangesRequest();
+
+  GetAppSignalStateChangesRequest(const GetAppSignalStateChangesRequest& from);
+
+  inline GetAppSignalStateChangesRequest& operator=(const GetAppSignalStateChangesRequest& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetAppSignalStateChangesRequest& default_instance();
+
+  void Swap(GetAppSignalStateChangesRequest* other);
+
+  // implements Message ----------------------------------------------
+
+  GetAppSignalStateChangesRequest* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetAppSignalStateChangesRequest& from);
+  void MergeFrom(const GetAppSignalStateChangesRequest& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // @@protoc_insertion_point(class_scope:Network.GetAppSignalStateChangesRequest)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[1];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetAppSignalStateChangesRequest* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class GetAppSignalStateChangesReply : public ::google::protobuf::Message {
+ public:
+  GetAppSignalStateChangesReply();
+  virtual ~GetAppSignalStateChangesReply();
+
+  GetAppSignalStateChangesReply(const GetAppSignalStateChangesReply& from);
+
+  inline GetAppSignalStateChangesReply& operator=(const GetAppSignalStateChangesReply& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const GetAppSignalStateChangesReply& default_instance();
+
+  void Swap(GetAppSignalStateChangesReply* other);
+
+  // implements Message ----------------------------------------------
+
+  GetAppSignalStateChangesReply* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const GetAppSignalStateChangesReply& from);
+  void MergeFrom(const GetAppSignalStateChangesReply& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 error = 1 [default = 0];
+  inline bool has_error() const;
+  inline void clear_error();
+  static const int kErrorFieldNumber = 1;
+  inline ::google::protobuf::int32 error() const;
+  inline void set_error(::google::protobuf::int32 value);
+
+  // optional int64 serverTimeUtc = 2;
+  inline bool has_servertimeutc() const;
+  inline void clear_servertimeutc();
+  static const int kServerTimeUtcFieldNumber = 2;
+  inline ::google::protobuf::int64 servertimeutc() const;
+  inline void set_servertimeutc(::google::protobuf::int64 value);
+
+  // optional int64 serverTimeLocal = 3;
+  inline bool has_servertimelocal() const;
+  inline void clear_servertimelocal();
+  static const int kServerTimeLocalFieldNumber = 3;
+  inline ::google::protobuf::int64 servertimelocal() const;
+  inline void set_servertimelocal(::google::protobuf::int64 value);
+
+  // optional int32 pendingStatesCount = 4 [default = 0];
+  inline bool has_pendingstatescount() const;
+  inline void clear_pendingstatescount();
+  static const int kPendingStatesCountFieldNumber = 4;
+  inline ::google::protobuf::int32 pendingstatescount() const;
+  inline void set_pendingstatescount(::google::protobuf::int32 value);
+
+  // repeated .Proto.AppSignalState appSignalStates = 5;
+  inline int appsignalstates_size() const;
+  inline void clear_appsignalstates();
+  static const int kAppSignalStatesFieldNumber = 5;
+  inline const ::Proto::AppSignalState& appsignalstates(int index) const;
+  inline ::Proto::AppSignalState* mutable_appsignalstates(int index);
+  inline ::Proto::AppSignalState* add_appsignalstates();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >&
+      appsignalstates() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >*
+      mutable_appsignalstates();
+
+  // @@protoc_insertion_point(class_scope:Network.GetAppSignalStateChangesReply)
+ private:
+  inline void set_has_error();
+  inline void clear_has_error();
+  inline void set_has_servertimeutc();
+  inline void clear_has_servertimeutc();
+  inline void set_has_servertimelocal();
+  inline void clear_has_servertimelocal();
+  inline void set_has_pendingstatescount();
+  inline void clear_has_pendingstatescount();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int64 servertimeutc_;
+  ::google::protobuf::int32 error_;
+  ::google::protobuf::int32 pendingstatescount_;
+  ::google::protobuf::int64 servertimelocal_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState > appsignalstates_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(5 + 31) / 32];
+
+  friend void  protobuf_AddDesc_network_2eproto();
+  friend void protobuf_AssignDesc_network_2eproto();
+  friend void protobuf_ShutdownFile_network_2eproto();
+
+  void InitAsDefaultInstance();
+  static GetAppSignalStateChangesReply* default_instance_;
 };
 // -------------------------------------------------------------------
 
@@ -2345,6 +2564,18 @@ class SoftwareInfo : public ::google::protobuf::Message {
   inline ::google::protobuf::uint32 crc() const;
   inline void set_crc(::google::protobuf::uint32 value);
 
+  // optional string clientDescription = 11;
+  inline bool has_clientdescription() const;
+  inline void clear_clientdescription();
+  static const int kClientDescriptionFieldNumber = 11;
+  inline const ::std::string& clientdescription() const;
+  inline void set_clientdescription(const ::std::string& value);
+  inline void set_clientdescription(const char* value);
+  inline void set_clientdescription(const char* value, size_t size);
+  inline ::std::string* mutable_clientdescription();
+  inline ::std::string* release_clientdescription();
+  inline void set_allocated_clientdescription(::std::string* clientdescription);
+
   // @@protoc_insertion_point(class_scope:Network.SoftwareInfo)
  private:
   inline void set_has_softwaretype();
@@ -2367,6 +2598,8 @@ class SoftwareInfo : public ::google::protobuf::Message {
   inline void clear_has_buildno();
   inline void set_has_crc();
   inline void clear_has_crc();
+  inline void set_has_clientdescription();
+  inline void clear_has_clientdescription();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -2380,9 +2613,10 @@ class SoftwareInfo : public ::google::protobuf::Message {
   ::std::string* username_;
   ::google::protobuf::int32 buildno_;
   ::google::protobuf::uint32 crc_;
+  ::std::string* clientdescription_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -7443,7 +7677,51 @@ inline void GetAppSignalStateReply::set_error(::google::protobuf::int32 value) {
   error_ = value;
 }
 
-// repeated .Proto.AppSignalState appSignalStates = 2;
+// optional int64 serverTimeUtc = 2;
+inline bool GetAppSignalStateReply::has_servertimeutc() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void GetAppSignalStateReply::set_has_servertimeutc() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void GetAppSignalStateReply::clear_has_servertimeutc() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void GetAppSignalStateReply::clear_servertimeutc() {
+  servertimeutc_ = GOOGLE_LONGLONG(0);
+  clear_has_servertimeutc();
+}
+inline ::google::protobuf::int64 GetAppSignalStateReply::servertimeutc() const {
+  return servertimeutc_;
+}
+inline void GetAppSignalStateReply::set_servertimeutc(::google::protobuf::int64 value) {
+  set_has_servertimeutc();
+  servertimeutc_ = value;
+}
+
+// optional int64 serverTimeLocal = 3;
+inline bool GetAppSignalStateReply::has_servertimelocal() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void GetAppSignalStateReply::set_has_servertimelocal() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void GetAppSignalStateReply::clear_has_servertimelocal() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void GetAppSignalStateReply::clear_servertimelocal() {
+  servertimelocal_ = GOOGLE_LONGLONG(0);
+  clear_has_servertimelocal();
+}
+inline ::google::protobuf::int64 GetAppSignalStateReply::servertimelocal() const {
+  return servertimelocal_;
+}
+inline void GetAppSignalStateReply::set_servertimelocal(::google::protobuf::int64 value) {
+  set_has_servertimelocal();
+  servertimelocal_ = value;
+}
+
+// repeated .Proto.AppSignalState appSignalStates = 4;
 inline int GetAppSignalStateReply::appsignalstates_size() const {
   return appsignalstates_.size();
 }
@@ -7465,6 +7743,127 @@ GetAppSignalStateReply::appsignalstates() const {
 }
 inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >*
 GetAppSignalStateReply::mutable_appsignalstates() {
+  return &appsignalstates_;
+}
+
+// -------------------------------------------------------------------
+
+// GetAppSignalStateChangesRequest
+
+// -------------------------------------------------------------------
+
+// GetAppSignalStateChangesReply
+
+// optional int32 error = 1 [default = 0];
+inline bool GetAppSignalStateChangesReply::has_error() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void GetAppSignalStateChangesReply::set_has_error() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void GetAppSignalStateChangesReply::clear_has_error() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void GetAppSignalStateChangesReply::clear_error() {
+  error_ = 0;
+  clear_has_error();
+}
+inline ::google::protobuf::int32 GetAppSignalStateChangesReply::error() const {
+  return error_;
+}
+inline void GetAppSignalStateChangesReply::set_error(::google::protobuf::int32 value) {
+  set_has_error();
+  error_ = value;
+}
+
+// optional int64 serverTimeUtc = 2;
+inline bool GetAppSignalStateChangesReply::has_servertimeutc() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void GetAppSignalStateChangesReply::set_has_servertimeutc() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void GetAppSignalStateChangesReply::clear_has_servertimeutc() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void GetAppSignalStateChangesReply::clear_servertimeutc() {
+  servertimeutc_ = GOOGLE_LONGLONG(0);
+  clear_has_servertimeutc();
+}
+inline ::google::protobuf::int64 GetAppSignalStateChangesReply::servertimeutc() const {
+  return servertimeutc_;
+}
+inline void GetAppSignalStateChangesReply::set_servertimeutc(::google::protobuf::int64 value) {
+  set_has_servertimeutc();
+  servertimeutc_ = value;
+}
+
+// optional int64 serverTimeLocal = 3;
+inline bool GetAppSignalStateChangesReply::has_servertimelocal() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void GetAppSignalStateChangesReply::set_has_servertimelocal() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void GetAppSignalStateChangesReply::clear_has_servertimelocal() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void GetAppSignalStateChangesReply::clear_servertimelocal() {
+  servertimelocal_ = GOOGLE_LONGLONG(0);
+  clear_has_servertimelocal();
+}
+inline ::google::protobuf::int64 GetAppSignalStateChangesReply::servertimelocal() const {
+  return servertimelocal_;
+}
+inline void GetAppSignalStateChangesReply::set_servertimelocal(::google::protobuf::int64 value) {
+  set_has_servertimelocal();
+  servertimelocal_ = value;
+}
+
+// optional int32 pendingStatesCount = 4 [default = 0];
+inline bool GetAppSignalStateChangesReply::has_pendingstatescount() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void GetAppSignalStateChangesReply::set_has_pendingstatescount() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void GetAppSignalStateChangesReply::clear_has_pendingstatescount() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void GetAppSignalStateChangesReply::clear_pendingstatescount() {
+  pendingstatescount_ = 0;
+  clear_has_pendingstatescount();
+}
+inline ::google::protobuf::int32 GetAppSignalStateChangesReply::pendingstatescount() const {
+  return pendingstatescount_;
+}
+inline void GetAppSignalStateChangesReply::set_pendingstatescount(::google::protobuf::int32 value) {
+  set_has_pendingstatescount();
+  pendingstatescount_ = value;
+}
+
+// repeated .Proto.AppSignalState appSignalStates = 5;
+inline int GetAppSignalStateChangesReply::appsignalstates_size() const {
+  return appsignalstates_.size();
+}
+inline void GetAppSignalStateChangesReply::clear_appsignalstates() {
+  appsignalstates_.Clear();
+}
+inline const ::Proto::AppSignalState& GetAppSignalStateChangesReply::appsignalstates(int index) const {
+  return appsignalstates_.Get(index);
+}
+inline ::Proto::AppSignalState* GetAppSignalStateChangesReply::mutable_appsignalstates(int index) {
+  return appsignalstates_.Mutable(index);
+}
+inline ::Proto::AppSignalState* GetAppSignalStateChangesReply::add_appsignalstates() {
+  return appsignalstates_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >&
+GetAppSignalStateChangesReply::appsignalstates() const {
+  return appsignalstates_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::AppSignalState >*
+GetAppSignalStateChangesReply::mutable_appsignalstates() {
   return &appsignalstates_;
 }
 
@@ -9724,6 +10123,76 @@ inline ::google::protobuf::uint32 SoftwareInfo::crc() const {
 inline void SoftwareInfo::set_crc(::google::protobuf::uint32 value) {
   set_has_crc();
   crc_ = value;
+}
+
+// optional string clientDescription = 11;
+inline bool SoftwareInfo::has_clientdescription() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void SoftwareInfo::set_has_clientdescription() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void SoftwareInfo::clear_has_clientdescription() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void SoftwareInfo::clear_clientdescription() {
+  if (clientdescription_ != &::google::protobuf::internal::kEmptyString) {
+    clientdescription_->clear();
+  }
+  clear_has_clientdescription();
+}
+inline const ::std::string& SoftwareInfo::clientdescription() const {
+  return *clientdescription_;
+}
+inline void SoftwareInfo::set_clientdescription(const ::std::string& value) {
+  set_has_clientdescription();
+  if (clientdescription_ == &::google::protobuf::internal::kEmptyString) {
+    clientdescription_ = new ::std::string;
+  }
+  clientdescription_->assign(value);
+}
+inline void SoftwareInfo::set_clientdescription(const char* value) {
+  set_has_clientdescription();
+  if (clientdescription_ == &::google::protobuf::internal::kEmptyString) {
+    clientdescription_ = new ::std::string;
+  }
+  clientdescription_->assign(value);
+}
+inline void SoftwareInfo::set_clientdescription(const char* value, size_t size) {
+  set_has_clientdescription();
+  if (clientdescription_ == &::google::protobuf::internal::kEmptyString) {
+    clientdescription_ = new ::std::string;
+  }
+  clientdescription_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SoftwareInfo::mutable_clientdescription() {
+  set_has_clientdescription();
+  if (clientdescription_ == &::google::protobuf::internal::kEmptyString) {
+    clientdescription_ = new ::std::string;
+  }
+  return clientdescription_;
+}
+inline ::std::string* SoftwareInfo::release_clientdescription() {
+  clear_has_clientdescription();
+  if (clientdescription_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = clientdescription_;
+    clientdescription_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SoftwareInfo::set_allocated_clientdescription(::std::string* clientdescription) {
+  if (clientdescription_ != &::google::protobuf::internal::kEmptyString) {
+    delete clientdescription_;
+  }
+  if (clientdescription) {
+    set_has_clientdescription();
+    clientdescription_ = clientdescription;
+  } else {
+    clear_has_clientdescription();
+    clientdescription_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------

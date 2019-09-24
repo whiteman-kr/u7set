@@ -12,10 +12,6 @@ SchemaPropertiesDialog::SchemaPropertiesDialog(EditEngine::EditEngine* editEngin
 
 	m_propertyEditor = new SchemaPropertyEditor(editEngine, this);
     m_propertyEditor->setResizeMode(ExtWidgets::PropertyEditor::ResizeToContents);
-	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
-	{
-		m_propertyEditor->setFontSizeF(m_propertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
-	}
 
 	m_propertyEditor->setReadOnly(editEngine->readOnly());
 
@@ -57,11 +53,11 @@ SchemaPropertyEditor::~SchemaPropertyEditor()
 {
 }
 
-void SchemaPropertyEditor::valueChanged(QtProperty* property, QVariant value)
+void SchemaPropertyEditor::valueChanged(QString propertyName, QVariant value)
 {
-	if (value.isValid() == false || property == nullptr)
+	if (value.isValid() == false)
 	{
-		assert(property != nullptr);
+		assert(false);
 		return;
 	}
 
@@ -76,9 +72,9 @@ void SchemaPropertyEditor::valueChanged(QtProperty* property, QVariant value)
 	std::shared_ptr<VFrame30::Schema> schema = std::dynamic_pointer_cast<VFrame30::Schema>(objectsList.front());
 	assert(schema.get() != nullptr);
 
-	if (schema->propertyValue(property->propertyName()) != value)
+	if (schema->propertyValue(propertyName) != value)
 	{
-		editEngine()->runSetSchemaProperty(property->propertyName(), value, schema);
+		editEngine()->runSetSchemaProperty(propertyName, value, schema);
 	}
 
 	return;

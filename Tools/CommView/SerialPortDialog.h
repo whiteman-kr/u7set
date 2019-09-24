@@ -20,7 +20,7 @@ class SerialPortDialog : public QDialog
 
 public:
 
-	explicit SerialPortDialog(const SerialPortOption& portOption, QWidget *parent = 0);
+	explicit SerialPortDialog(const SerialPortOption& portOption, QWidget *parent = nullptr);
 	virtual ~SerialPortDialog();
 
 private:

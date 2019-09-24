@@ -44,7 +44,7 @@ class OptionsMeasureViewHeaderDialog : public QDialog
 	Q_OBJECT
 
 public:
-	explicit OptionsMeasureViewHeaderDialog(const MeasureViewOption& header, QWidget *parent = 0);
+	explicit OptionsMeasureViewHeaderDialog(const MeasureViewOption& header, QWidget *parent = nullptr);
 	virtual ~OptionsMeasureViewHeaderDialog();
 
 	MeasureViewOption	m_header;
