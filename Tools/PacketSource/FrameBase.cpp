@@ -484,7 +484,7 @@ void FrameDataStateDialog::createInterface()
 
 		m_stateEdit = new QLineEdit(QString::number(m_byte));
 		m_stateEdit->setAlignment(Qt::AlignHCenter);
-		m_stateEdit->setValidator(new QIntValidator(0, 255));
+		m_stateEdit->setValidator(new QIntValidator(0, 255, this));
 
 		QLabel* rangeLabel = new QLabel("Range: 0 .. 255");
 		rangeLabel->setAlignment(Qt::AlignHCenter);

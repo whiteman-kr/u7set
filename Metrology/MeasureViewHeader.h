@@ -79,7 +79,7 @@ class MeasureViewHeader : public QObject
 
 public:
 
-	explicit MeasureViewHeader(QObject *parent = 0);
+	explicit MeasureViewHeader(QObject *parent = nullptr);
 	virtual ~MeasureViewHeader();
 
 private:

@@ -1024,7 +1024,7 @@ void SpecificPropertiesEditor::tableSelectionChanged(const QItemSelection &selec
 	bool cloneEnabled = selection.size() == 1;
 	bool removeEnabled = selection.size() > 0;
 
-	if (m_propertyEditor->readOnly() == false)
+	if (m_propertyEditor->isReadOnly() == false)
 	{
 		m_cloneButton->setEnabled(cloneEnabled);
 		m_removeButton->setEnabled(removeEnabled);

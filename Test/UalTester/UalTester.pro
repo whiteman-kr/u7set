@@ -16,6 +16,8 @@ TEMPLATE = app
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
+include(../warnings.pri)
+
 # DESTDIR
 #
 win32 {
@@ -53,18 +55,18 @@ SOURCES += \
     ../../Builder/ModulesRawData.cpp \
     ../../lib/OutputLog.cpp \
     ../../lib/DbStruct.cpp \
-    ../../lib/PropertyObject.cpp \
-    ../../lib/AppSignal.cpp \
-    SignalStateSocket.cpp \
-    ../../lib/Signal.cpp \
-    ../../lib/Tuning/TuningSignalState.cpp \
-    ../../lib/TuningValue.cpp \
-    ../../lib/SignalProperties.cpp \
-    SignalBase.cpp \
-    TestFile.cpp \
-    TuningSocket.cpp \
-    TuningSignalBase.cpp \
-    CmdLineParam.cpp
+	../../lib/AppSignal.cpp \
+	SignalStateSocket.cpp \
+	../../lib/Signal.cpp \
+	../../lib/Tuning/TuningSignalState.cpp \
+	../../lib/TuningValue.cpp \
+	../../lib/SignalProperties.cpp \
+	SignalBase.cpp \
+	TestFile.cpp \
+	TuningSocket.cpp \
+	TuningSignalBase.cpp \
+	CmdLineParam.cpp \
+	../../lib/MemLeaksDetection.cpp
 
 
 HEADERS += \
@@ -105,8 +107,13 @@ HEADERS += \
     TestFile.h \
     TuningSocket.h \
     TuningSignalBase.h \
-    CmdLineParam.h
+	CmdLineParam.h \
+	Stable.h \
+	../../lib/MemLeaksDetection.h
 
+
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
 
 # Remove Protobuf 4996 warning, Can't remove it in sources, don't know why

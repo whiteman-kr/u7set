@@ -28,16 +28,31 @@ struct SimpleAppSignalState
 	void print() const;
 };
 
-
 class SimpleAppSignalStatesQueue : public FastThreadSafeQueue<SimpleAppSignalState>
 {
 public:
 	SimpleAppSignalStatesQueue(int queueSize);
-
-	void pushAutoPoint(SimpleAppSignalState state, const QThread* thread);
 };
 
 typedef std::shared_ptr<SimpleAppSignalStatesQueue> SimpleAppSignalStatesQueueShared;
+
+
+struct SimpleAppSignalStateArchiveFlag
+{
+	SimpleAppSignalState state;
+	bool sendStateToArchive = false;
+};
+
+class SimpleAppSignalStatesArchiveFlagQueue : public FastThreadSafeQueue<SimpleAppSignalStateArchiveFlag>
+{
+public:
+	SimpleAppSignalStatesArchiveFlagQueue(int queueSize);
+
+	void push(const SimpleAppSignalState& state, bool sendStateToArchive, const QThread* thread);
+	void pushAutoPoint(const SimpleAppSignalState& state, bool sendStateToArchive, const QThread* thread);
+};
+
+
 
 
 

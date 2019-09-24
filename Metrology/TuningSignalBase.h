@@ -53,11 +53,11 @@ public:
 
 	TuningSource();
 	explicit TuningSource(const Network::DataSourceInfo& info);
-	virtual ~TuningSource();
+	virtual ~TuningSource() {}
 
 private:
 
-	quint64					m_sourceID = -1;
+	quint64					m_sourceID = 0;
 
 	QString					m_equipmentID;
 	QString					m_caption;
@@ -111,7 +111,7 @@ class TuningSourceBase : public QObject
 
 public:
 
-	explicit TuningSourceBase(QObject *parent = 0);
+	explicit TuningSourceBase(QObject *parent = nullptr);
 	virtual ~TuningSourceBase();
 
 private:
@@ -147,7 +147,7 @@ class TuningSignalBase : public QObject
 
 public:
 
-	explicit TuningSignalBase(QObject *parent = 0);
+	explicit TuningSignalBase(QObject *parent = nullptr);
 	virtual ~TuningSignalBase();
 
 private:
@@ -233,7 +233,7 @@ class TuningBase: public QObject
 
 public:
 
-	explicit TuningBase(QObject *parent = 0);
+	explicit TuningBase(QObject *parent = nullptr);
 	virtual ~TuningBase();
 
 private:

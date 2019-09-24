@@ -22,7 +22,7 @@ bool TuningWriteCommand::load(const Network::TuningWriteCommand& message)
 // TuningTcpClient
 //
 TuningTcpClient::TuningTcpClient(const SoftwareInfo& softwareInfo, TuningSignalManager* signalManager) :
-	Tcp::Client(softwareInfo, HostAddressPort("0.0.0.0", 0)),
+	Tcp::Client(softwareInfo, HostAddressPort("0.0.0.0", 0), "TuningTcpClient"),
 	m_instanceId(softwareInfo.equipmentID()),
 	m_instanceIdHash(::calcHash(softwareInfo.equipmentID())),
 	m_signals(signalManager)
@@ -210,7 +210,7 @@ void TuningTcpClient::applyTuningSignals()
 
 	m_writeQueue.emplace(TuningWriteCommand(true));
 
-	writeLogSignalChange(tr("Apply command is sent."));
+	writeLogSignalChange(tr("'Apply' command is sent."));
 
 	return;
 }

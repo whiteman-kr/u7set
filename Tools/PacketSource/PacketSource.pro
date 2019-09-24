@@ -14,6 +14,7 @@ TEMPLATE = app
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
+include(../warnings.pri)
 
 # DESTDIR
 #
@@ -25,7 +26,6 @@ unix {
 CONFIG(debug, debug|release): DESTDIR = ../../bin_unix/debug
 CONFIG(release, debug|release): DESTDIR = ../../bin_unix/release
 }
-
 
 
 SOURCES += \
@@ -64,7 +64,8 @@ SourceBase.cpp \
     ../../lib/Times.cpp \
     PathOptionDialog.cpp \
     FindSignalTextPanel.cpp \
-    FindData.cpp
+    FindData.cpp \
+    ../../lib/MemLeaksDetection.cpp
 
 
 HEADERS += \
@@ -108,10 +109,16 @@ SourceBase.h \
     ../../lib/Times.h \
     PathOptionDialog.h \
     FindSignalTextPanel.h \
-    FindData.h
+    FindData.h \
+    Stable.h \
+    ../../lib/MemLeaksDetection.h
 
 RESOURCES += \
 resources.qrc
+
+
+CONFIG += precompile_header
+PRECOMPILED_HEADER = Stable.h
 
 
 #c++11 support for GCC

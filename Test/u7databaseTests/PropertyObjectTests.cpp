@@ -213,7 +213,7 @@ void PropertyObjectTests::testMethods()
 	{
 		PropertyClass p;
 
-		std::list<std::pair<int, QString>> result = p.enumValues("PriorityStatProp");
+		std::vector<std::pair<int, QString>> result = p.enumValues("PriorityStatProp");
 
 		QVERIFY2(result.size() == 6, "PropertyObject::enumValues(), Property PriorityStatProp not found");
 

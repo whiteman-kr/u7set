@@ -3,7 +3,7 @@
 
 // -------------------------------------------------------------------------------
 //
-// AppDataProcessingThread2 class implementation
+// AppDataProcessingThread class implementation
 //
 // -------------------------------------------------------------------------------
 

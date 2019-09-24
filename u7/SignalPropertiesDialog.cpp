@@ -232,11 +232,6 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 
 	m_propertyEditor->setExpertMode(theSettings.isExpertMode());
 
-	if (theSettings.m_propertyEditorFontScaleFactor != 1.0)
-	{
-		m_propertyEditor->setFontSizeF(m_propertyEditor->fontSizeF() * theSettings.m_propertyEditorFontScaleFactor);
-	}
-
 	DbFileInfo mcInfo = dbController->systemFileInfo(dbController->etcFileId());
 
 	if (mcInfo.isNull() == true)

@@ -140,8 +140,20 @@ namespace Builder
 
 	bool SoftwareCfgGenerator::loadAllSchemas(Context* context)
 	{
+		if (context == nullptr)
+		{
+			Q_ASSERT(context);
+			return false;
+		}
+
 		DbController& db = context->m_db;
 		IssueLogger* log = context->m_log;
+
+		if (log == nullptr)
+		{
+			Q_ASSERT(log);
+			return false;
+		}
 
 		DbFileTree filesTree;									// Filed in loadAllSchemas
 
@@ -152,12 +164,14 @@ namespace Builder
 			return false;
 		}
 
+		// Remove all marked as deleted files
+		//
 		filesTree.removeIf([](const DbFileInfo& f)
 			{
 				return f.action() == VcsItemAction::Deleted;
 			});
 
-		// Remove all unsuported fileas and marked for deleting
+		// Remove all unsuported files and marked for deleting
 		//
 		std::vector<DbFileInfo> files = filesTree.toVectorIf([](const DbFileInfo& f)
 						{
@@ -170,56 +184,210 @@ namespace Builder
 									 f.fileName().endsWith(QLatin1String(".") + Db::File::TvsFileExtension, Qt::CaseInsensitive));
 						});
 
-		bool returnResult = true;
+		// Multithreaded load all schemas
+		//
+		struct FileSchemaStruct
+		{
+			std::shared_ptr<DbFile> file;
+			std::shared_ptr<VFrame30::Schema> schema;		// This param my be nullptr if schema does not have any SchemaItemFrame
+		};
 
-		QString group = "Schema";
+		std::map<QString, FileSchemaStruct> schemaMap;		// Key is SchemaID
+		QMutex schemasMutex;	// Used only in loading schemas, when concurency is possible
+
+		// --
+		//
+		std::atomic_bool returnResult = true;		// returnResult is used in multithreaded schema load, that's why it is atomic
+		std::atomic_bool iterruptRequest = false;
+
+		std::vector<QFuture<bool>> loadSchemaTasks;
+		loadSchemaTasks.reserve(files.size());
 
 		for (const DbFileInfo& f : files)
 		{
-			QString subDir = "Schemas." + f.extension();
+			// Check for cancel
+			//
+			if (QThread::currentThread()->isInterruptionRequested() == true)
+			{
+				return false;
+			}
 
-			std::shared_ptr<DbFile> file;
+			// --
+			//
+			LOG_MESSAGE(log, tr("Loading %1").arg(f.fileName()));
 
-			if (bool ok  = db.getLatestVersion(f, &file, nullptr);
-				ok == false || file.get() == nullptr)
+			// --
+			//
+			std::shared_ptr<DbFile> fileLatestVersion;
+
+			if (bool ok  = db.getLatestVersion(f, &fileLatestVersion, nullptr);
+				ok == false || fileLatestVersion.get() == nullptr)
 			{
 				log->errPDB2002(f.fileId(), f.fileName(), db.lastError());
 				returnResult = false;
 				continue;
 			}
 
-			// Parse file
+			// Read schema files
 			//
-			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file->data());
+			auto task = QtConcurrent::run(
+				[fileLatestVersion, log, &returnResult, &iterruptRequest, &schemaMap, &schemasMutex]() -> bool
+				{
+					if (iterruptRequest == true)
+					{
+						return false;
+					}
 
-			if (schema == nullptr)
+					std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(fileLatestVersion->data());
+					if (schema == nullptr)
+					{
+						// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
+						//
+						log->errCMN0010(fileLatestVersion->fileName());
+						returnResult = false;
+					}
+
+					// ADD EVEN EXCLUDED FOR BUILD SCHEMAS
+					// as it can be pannel schema
+					//
+					//if (schema->excludeFromBuild() == false)
+					{
+						QMutexLocker locker(&schemasMutex);	// Mutext used only here, as only here concurent access to schemas is possible
+						schemaMap[schema->schemaId()] = FileSchemaStruct{fileLatestVersion, schema};
+					}
+
+					return true;
+				});
+
+			loadSchemaTasks.push_back(task);
+		}
+
+		// Wait for finish and process interrupt request
+		//
+		do
+		{
+			bool allFinished = true;
+			for (auto& task : loadSchemaTasks)
 			{
-				log->errCMN0010(f.fileName());
-				returnResult = false;
-				continue;
+				QThread::yieldCurrentThread();
+				if (task.isRunning() == true)
+				{
+					allFinished = false;
+					break;
+				}
 			}
 
-			//qDebug() << "Build: schema " << schema->schemaId() << " is loaded";
+			if (allFinished == true)
+			{
+				break;	// THE EXIT FROM DO/WHILE LOOP!
+			}
+			else
+			{
+				// Set iterruptRequest, so work threads can get it and exit
+				//
+				iterruptRequest = QThread::currentThread()->isInterruptionRequested();
+				QThread::yieldCurrentThread();
+			}
+		} while (true);
 
-			// --
+		filesTree.clear();		// Files are already loaded and not required anymore
+		files.clear();			// Files are already loaded and not required anymore
+
+		// All schemas are parsed and loaded to map schemas
+		// iterate them and joint schemas to left/right/top/buttom
+		//
+		QString group{"Schema"};
+		bool schemaItemFrameWasProcessed = false;
+
+		auto findPannelSchemaFunc = [&schemaMap, log](QString pannelSchemaId)
+			{
+				if (auto pannelSchemaIt = schemaMap.find(pannelSchemaId);
+					pannelSchemaIt != schemaMap.end())
+				{
+					return pannelSchemaIt->second.schema;
+				}
+
+				return std::shared_ptr<VFrame30::Schema>{};
+			};
+
+		auto joinSschemasFunc = [context, log, findPannelSchemaFunc, &schemaItemFrameWasProcessed](auto schema, QString pannelSchemaId, Qt::Edge edge)
+		{
+			if (pannelSchemaId.isEmpty() == false)
+			{
+				std::shared_ptr<VFrame30::Schema> pannelSchema = findPannelSchemaFunc(pannelSchemaId);
+
+				if (pannelSchema == nullptr)
+				{
+					log->errALP4080(schema->schemaId(), pannelSchemaId);
+					return false;
+				}
+
+				// Expand schema, move all items right
+				//
+				joinSchemas(context, schema.get(), pannelSchema.get(), edge);
+
+				schemaItemFrameWasProcessed = true;
+			}
+
+			return true;
+		};
+
+		for (auto& [schemaId, fileSchema] : schemaMap)
+		{
+			std::shared_ptr<DbFile>& file = fileSchema.file;
+			std::shared_ptr<VFrame30::Schema>& schema = fileSchema.schema;
+
+			Q_ASSERT(file);
+			Q_ASSERT(schema);
+
+			if (schema->schemaId() != schemaId)
+			{
+				Q_ASSERT(schema->schemaId() == schemaId);
+				log->errINT1000(tr("SchemaIDs are not equal: ") + Q_FUNC_INFO);
+				return false;
+			}
+
+			// Left schemas
 			//
-			std::shared_ptr<SchemaFile> schemaFile = std::make_shared<SchemaFile>(schema->schemaId(), file->fileName(), subDir, group, "");
-			if (bool parseOk = schemaFile->details.parseDetails(schema->details());
-				parseOk == false)
+			bool joinResult = true;
+
+			if (schema->joinHorzPriority() == true)
 			{
-				log->errINT1001(tr("Parse schema detais error."), schema->schemaId());
+				joinResult &= joinSschemasFunc(schema, schema->joinLeftSchemaId().trimmed(), Qt::LeftEdge);
+				joinResult &= joinSschemasFunc(schema, schema->joinRightSchemaId().trimmed(), Qt::RightEdge);
+
+				joinResult &= joinSschemasFunc(schema, schema->joinTopSchemaId().trimmed(), Qt::TopEdge);
+				joinResult &= joinSschemasFunc(schema, schema->joinBottomSchemaId().trimmed(), Qt::BottomEdge);
+			}
+			else
+			{
+				joinResult &= joinSschemasFunc(schema, schema->joinTopSchemaId().trimmed(), Qt::TopEdge);
+				joinResult &= joinSschemasFunc(schema, schema->joinBottomSchemaId().trimmed(), Qt::BottomEdge);
+
+				joinResult &= joinSschemasFunc(schema, schema->joinLeftSchemaId().trimmed(), Qt::LeftEdge);
+				joinResult &= joinSschemasFunc(schema, schema->joinRightSchemaId().trimmed(), Qt::RightEdge);
+			}
+
+			if (joinResult == false)
+			{
 				returnResult = false;
-				continue;
 			}
 
-			if (schema->excludeFromBuild() == true)
-			{
-				continue;
-			}
-
+			//
 			// Add file to build result
 			//
-			if (bool ok = context->m_buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schema->tagsAsList().join(";"), file->data(), false);
+			QString subDir = "Schemas." + file->extension();
+			QStringList schemaTags = schema->tagsAsList();
+
+			if (schemaItemFrameWasProcessed == true)
+			{
+				QByteArray ba;
+				schema->saveToByteArray(&ba);
+
+				file->setData(std::move(ba));
+			}
+
+			if (bool ok = context->m_buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schemaTags.join(";"), file->data(), false);
 				ok == false)
 			{
 				returnResult = false;
@@ -228,181 +396,57 @@ namespace Builder
 
 			// --
 			//
-			QStringList schemaTags = schema->tagsAsList();
+			std::shared_ptr<SchemaFile> schemaFile = std::make_shared<SchemaFile>(schema->schemaId(), file->fileName(), subDir, group, "");
+
+			if (bool parseOk = schemaFile->details.parseDetails(schema->details());
+				parseOk == false)
+			{
+				log->errINT1001(tr("Parse schema detais error."), schema->schemaId());
+				returnResult = false;
+				continue;
+			}
+
 			for (const QString& t : schemaTags)
 			{
 				m_schemaTagToFile.insert({t.toLower(), schemaFile});
 			}
 		}
 
-		return returnResult;
-
-//		=============================================
-//		=============================================
-//		=============================================
-//		=============================================
-//		=============================================
-//		=============================================
-//
-//		DbController& db = context->m_db;
-//		IssueLogger* log = context->m_log;
-
-//		DbFileTree filesTree;									// Filed in loadAllSchemas
-
-//		if (bool ok = db.getFileListTree(&filesTree, db.schemaFileId(), "%", true, nullptr);
-//			ok == false)
-//		{
-//			log->errPDB2001(db.schemaFileId(), "%", db.lastError());
-//			return false;
-//		}
-
-//		// Remove all marked as deleted files
-//		//
-//		filesTree.removeIf([](const DbFileInfo& f)
-//			{
-//				return f.action() == VcsItemAction::Deleted;
-//			});
-
-//		// Remove all unsuported files and marked for deleting
-//		//
-//		std::vector<DbFileInfo> files = filesTree.toVectorIf([](const DbFileInfo& f)
-//						{
-//							return  (f.action() != VcsItemAction::Deleted) &&
-//									(f.isFolder() == false) &&
-//									(f.fileName().endsWith(QLatin1String(".") + Db::File::AlFileExtension, Qt::CaseInsensitive) ||
-//									 f.fileName().endsWith(QLatin1String(".") + Db::File::MvsFileExtension, Qt::CaseInsensitive) ||
-//									 f.fileName().endsWith(QLatin1String(".") + Db::File::DvsFileExtension, Qt::CaseInsensitive) ||
-//									 f.fileName().endsWith(QLatin1String(".") + Db::File::UfbFileExtension, Qt::CaseInsensitive) ||
-//									 f.fileName().endsWith(QLatin1String(".") + Db::File::TvsFileExtension, Qt::CaseInsensitive));
-//						});
-
-//		// Multithreaded load all schemas
-//		//
-//		bool returnResult = true;
-//		std::atomic_bool iterruptRequest = false;
-
-//		std::vector<QFuture<std::shared_ptr<VFrame30::Schema>>> loadSchemaTasks;
-//		loadSchemaTasks.reserve(files.size());
-
-//		for (const DbFileInfo& f : files)
-//		{
-//			// Check for cancel
-//			//
-//			if (QThread::currentThread()->isInterruptionRequested() == true)
-//			{
-//				return false;
-//			}
-
-//			// --
-//			//
-//			LOG_MESSAGE(log, tr("Loading %1").arg(f.fileName()));
-
-//			// --
-//			//
-//			//QString subDir = "Schemas." + f.extension();
-
-//			std::shared_ptr<DbFile> file;
-
-//			if (bool ok  = db.getLatestVersion(f, &file, nullptr);
-//				ok == false || file.get() == nullptr)
-//			{
-//				log->errPDB2002(f.fileId(), f.fileName(), db.lastError());
-//				returnResult = false;
-//				continue;
-//			}
-
-//			// Read schema files
-//			//
-//			auto task = QtConcurrent::run([file, log, &returnResult, &iterruptRequest]() -> std::shared_ptr<VFrame30::Schema>
-//				{
-//					if (iterruptRequest == true)
-//					{
-//						return false;
-//					}
-
-//					std::shared_ptr<VFrame30::Schema> result = VFrame30::Schema::Create(file->data());
-
-//					if (result == nullptr)
-//					{
-//						// File loading/parsing error, file is damaged or has incompatible format, file name '%1'.
-//						//
-//						log->errCMN0010(file->fileName());
-//						returnResult = false;
-//					}
-
-//					return result;
-//				});
-
-//			loadSchemaTasks.push_back(task);
-//		}
-
-//		// Wait for finish and process interrupt request
-//		//
-//		do
-//		{
-//			bool allFinished = true;
-//			for (auto& task : loadSchemaTasks)
-//			{
-//				QThread::yieldCurrentThread();
-//				if (task.isRunning() == true)
-//				{
-//					allFinished = false;
-//					break;
-//				}
-//			}
-
-//			if (allFinished == true)
-//			{
-//				break;
-//			}
-//			else
-//			{
-//				// Set iterruptRequest, so work threads can get it and exit
-//				//
-//				iterruptRequest = QThread::currentThread()->isInterruptionRequested();
-//				QThread::yieldCurrentThread();
-//			}
-//		} while (1);
-
-//		// Remove excluded from build schemas
-//		//
-//		std::map<QString, std::shared_ptr<VFrame30::Schema>> schemas;
-
-//		for (auto& task : loadSchemaTasks)
-//		{
-//			std::shared_ptr<VFrame30::Schema> schema = task.result();
-
-//			if (schema->excludeFromBuild() == true)
-//			{
-//				continue;
-//			}
-
-//			schemas[schema->schemaId()] = schema;
-//		}
-
-//		// All schemas are parsed and loaded to map schemas
-//		// iterate them and expand SchemaItemFrame
-//		//
-//		for (auto& [schemaId, schema] : schemas)
-//		{
+			// Look for SchemaItemFrame
+			//
 //			for (std::shared_ptr<VFrame30::SchemaLayer> layer :  schema->Layers)
 //			{
+//				if (layer == nullptr)
+//				{
+//					Q_ASSERT(layer);
+//					log->errINT1000(tr("Layer is nullptr for schema %1: ").arg(schemaId) + Q_FUNC_INFO);
+//					return false;
+//				}
+
 //				for (std::shared_ptr<VFrame30::SchemaItem>& item :  layer->Items)
 //				{
-//					Q_ASSERT(item);
+//					if (item == nullptr)
+//					{
+//						Q_ASSERT(item);
+//						log->errINT1000(tr("SchemaItem is nullptr for schema %1: ").arg(schemaId) + Q_FUNC_INFO);
+//						return false;
+//					}
 
 //					if (item->isCommented() == true)
 //					{
 //						continue;
 //					}
 
-//					if (item->isType<VFrame30::SchemaItemFrame>() == true)
+					// Frame item is found, make the substitude of schema items
+					//
+//					if (VFrame30::SchemaItemFrame* frameItem = item->toType<VFrame30::SchemaItemFrame>();
+//						frameItem != nullptr)
 //					{
-//						VFrame30::SchemaItemFrame* frameItem = item->toType<VFrame30::SchemaItemFrame>();
-//						Q_ASSERT(frameItem);
+//						using namespace VFrame30;
 
-//						if (auto sourceSchemaIt = schemas.find(frameItem->schemaId());
-//							sourceSchemaIt == schemas.end())
+//						auto sourceSchemaIt = schemaMap.find(frameItem->schemaId());
+
+//						if (sourceSchemaIt == schemaMap.end())
 //						{
 //							// Source schema is not found
 //							//
@@ -411,158 +455,90 @@ namespace Builder
 //							returnResult = false;
 //							continue;
 //						}
-//						else
+
+//						const VFrame30::Schema* sourceSchema = sourceSchemaIt->second.schema.get();
+//						Q_ASSERT(sourceSchema);
+
+//						SchemaItemFrame::ErrorCode resultCode = frameItem->setSchemaToFrame(schema.get(), sourceSchema);
+
+//						switch (resultCode)
 //						{
-//							using namespace VFrame30;
+//						case SchemaItemFrame::ErrorCode::Ok:	// All is Ok))
+//							break;
 
-//							VFrame30::Schema* sourceSchema = sourceSchemaIt->second.get();
-//							Q_ASSERT(sourceSchema);
+//						case SchemaItemFrame::ErrorCode::ParamError:
+//							log->errINT1001("Input params error SchemaItemFrame::ErrorCode SchemaItemFrame::setSchemaToFrame(VFrame30::Schema*, VFrame30::Schema*), report to developers.", schema->schemaId(), frameItem->guid());
+//							break;
 
-//							SchemaItemFrame::ErrorCode result = frameItem->setSchemaToFrame(schema.get(), sourceSchema);
+//						case SchemaItemFrame::ErrorCode::InternalError:
+//							log->errINT1001("Internal error in SchemaItemFrame::setSchemaToFrame(VFrame30::Schema*, VFrame30::Schema*), report to developers.", schema->schemaId(), frameItem->guid());
+//							break;
 
-//							switch (result)
-//							{
-//							case SchemaItemFrame::ErrorCode::Ok:
-//								// All is Ok))
-//								//
-//								break;
+//						case SchemaItemFrame::ErrorCode::SourceSchemaHasSameId:
+//							log->errALP4081(frameItem->schemaId(), frameItem->guid());
+//							break;
 
-//							case SchemaItemFrame::ErrorCode::ParamError:
-//								log->errINT1001("Input params error SchemaItemFrame::ErrorCode SchemaItemFrame::setSchemaToFrame(VFrame30::Schema*, VFrame30::Schema*), report to developers.", schema->schemaId(), frameItem->guid());
-//								break;
+//						case SchemaItemFrame::ErrorCode::SchemasHasDiffrenetUnits:
+//							log->errALP4082(schemaId, frameItem->schemaId(), frameItem->guid());
+//							break;
 
-//							case SchemaItemFrame::ErrorCode::InternalError:
-//								log->errINT1001("Internal error in SchemaItemFrame::setSchemaToFrame(VFrame30::Schema*, VFrame30::Schema*), report to developers.", schema->schemaId(), frameItem->guid());
-//								break;
-
-//							case SchemaItemFrame::ErrorCode::SourceSchemaHasSameId:
-//								log->errALP4081(frameItem->schemaId(), frameItem->guid());
-//								break;
-
-//							case SchemaItemFrame::ErrorCode::SchemasHasDiffrenetUnitsWithoutAutoscale:
-//								log->errALP4082(schemaId, frameItem->schemaId(), frameItem->guid());
-//								{
-//									bool schekIt;	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//								}
-//								break;
-
-//							default:
-//								Q_ASSERT(false);
-//								log->errINT1000(tr("Processing item SchemaItemFrame on Schema %1, SchemaItemFrame.SchemaID = %2, function SchemaItemFrame::setSchemaToFrame returned unknows error code %3.")
-//													.arg(schemaId)
-//													.arg(frameItem->schemaId())
-//													.arg(static_cast<int>(result)));
-//							}
+//						default:
+//							Q_ASSERT(false);
+//							log->errINT1000(tr("Processing item SchemaItemFrame on Schema %1, SchemaItemFrame.SchemaID = %2, function SchemaItemFrame::setSchemaToFrame returned unknows error code %3.")
+//												.arg(schemaId)
+//												.arg(frameItem->schemaId())
+//												.arg(static_cast<int>(resultCode)));
 //						}
 //					}
-//				}
+//				}		// for (std::shared_ptr<VFrame30::SchemaItem>& item :  layer->Items)
+
+//				// Remove all frames form the layes
+//				//
+//				layer->Items.remove_if([](const auto& item){	return item->isType<VFrame30::SchemaItemFrame>();	});
+
+//			}		// for (std::shared_ptr<VFrame30::SchemaLayer> layer :  schema->Layers)
+
+//			//
+//			// Add file to build result
+//			//
+//			QString subDir = "Schemas." + file->extension();
+//			QStringList schemaTags = schema->tagsAsList();
+
+//			if (schemaItemFrameWasProcessed == true)
+//			{
+//				QByteArray ba;
+//				schema->saveToByteArray(&ba);
+
+//				file->setData(std::move(ba));
 //			}
-//		}
 
+//			if (bool ok = context->m_buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schemaTags.join(";"), file->data(), false);
+//				ok == false)
+//			{
+//				returnResult = false;
+//				continue;
+//			}
 
-//		// --
-//		//
-//		//QString group = "Schema";
+//			// --
+//			//
+//			std::shared_ptr<SchemaFile> schemaFile = std::make_shared<SchemaFile>(schema->schemaId(), file->fileName(), subDir, group, "");
 
-//		//			// --
-//		//			//
-//		//			std::shared_ptr<SchemaFile> schemaFile = std::make_shared<SchemaFile>(schema->schemaId(), file->fileName(), subDir, group, "");
-//		//			if (bool parseOk = schemaFile->details.parseDetails(schema->details());
-//		//				parseOk == false)
-//		//			{
-//		//				log->errINT1001(tr("Parse schema detais error."), schema->schemaId());
-//		//				returnResult = false;
-//		//				continue;
-//		//			}
+//			if (bool parseOk = schemaFile->details.parseDetails(schema->details());
+//				parseOk == false)
+//			{
+//				log->errINT1001(tr("Parse schema detais error."), schema->schemaId());
+//				returnResult = false;
+//				continue;
+//			}
 
+//			for (const QString& t : schemaTags)
+//			{
+//				m_schemaTagToFile.insert({t.toLower(), schemaFile});
+//			}
 
-//		// Add file to build result
-//		//
-//		//sae NEW schema to file !!!!!!!!!!!!!!!!
-//		//if (bool ok = context->m_buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schema->tagsAsList().join(";"), file->data(), false);
-////		if (bool ok = context->m_buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schema->tagsAsList().join(";"), file->data(), false);
-////			ok == false)
-////		{
-////			returnResult = false;
-////			continue;
-////		}
+//		}		// for (auto& [schemaId, schema] : schemas)
 
-////		אצאצףאצףאמצףאמצףזכהא !!!!!!!!!!!!!!!!!!
-
-////		// --
-////		//
-////		QStringList schemaTags = schema->tagsAsList();
-////		for (const QString& t : schemaTags)
-////		{
-////			m_schemaTagToFile.insert({t.toLower(), schemaFile});
-////		}
-
-
-
-////		for (const DbFileInfo& f : files)
-////		{
-////			QString subDir = "Schemas." + f.extension();
-
-////			std::shared_ptr<DbFile> file;
-
-////			if (bool ok  = db.getLatestVersion(f, &file, nullptr);
-////				ok == false || file.get() == nullptr)
-////			{
-////				log->errPDB2002(f.fileId(), f.fileName(), db.lastError());
-////				returnResult = false;
-////				continue;
-////			}
-
-////			// Parse file
-////			//
-////			std::shared_ptr<VFrame30::Schema> schema = VFrame30::Schema::Create(file->data());
-
-////			if (schema == nullptr)
-////			{
-////				log->errCMN0010(f.fileName());
-////				returnResult = false;
-////				continue;
-////			}
-
-////			//qDebug() << "Build: schema " << schema->schemaId() << " is loaded";
-
-////			// --
-////			//
-////			std::shared_ptr<SchemaFile> schemaFile = std::make_shared<SchemaFile>(schema->schemaId(), file->fileName(), subDir, group, "");
-////			if (bool parseOk = schemaFile->details.parseDetails(schema->details());
-////				parseOk == false)
-////			{
-////				log->errINT1001(tr("Parse schema detais error."), schema->schemaId());
-////				returnResult = false;
-////				continue;
-////			}
-
-////			if (schema->excludeFromBuild() == true)
-////			{
-////				continue;
-////			}
-
-////			// Add file to build result
-////			//
-////			if (bool ok = context->m_buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schema->tagsAsList().join(";"), file->data(), false);
-////				ok == false)
-////			{
-////				returnResult = false;
-////				continue;
-////			}
-
-////			אצאצףאצףאמצףאמצףזכהא !!!!!!!!!!!!!!!!!!
-
-////			// --
-////			//
-////			QStringList schemaTags = schema->tagsAsList();
-////			for (const QString& t : schemaTags)
-////			{
-////				m_schemaTagToFile.insert({t.toLower(), schemaFile});
-////			}
-////		}
-
-//		return returnResult;
+		return returnResult;
 	}
 
 
@@ -993,6 +969,190 @@ namespace Builder
 		return true;
 	}
 
+	bool SoftwareCfgGenerator::joinSchemas(Context* context, VFrame30::Schema* schema, const VFrame30::Schema* pannel, Qt::Edge edge)
+	{
+		if (context == nullptr || schema == nullptr || pannel == nullptr)
+		{
+			Q_ASSERT(context);
+			Q_ASSERT(schema);
+			Q_ASSERT(pannel);
+			return false;
+		}
+
+		IssueLogger* log = context->m_log;
+
+		if (schema->unit() != pannel->unit())
+		{
+			log->errALP4082(schema->schemaId(), pannel->schemaId());
+			return false;
+		}
+
+		if (schema->schemaId() == pannel->schemaId())
+		{
+			log->errALP4081(schema->schemaId());
+			return false;
+		}
+
+		// Expand schema and calc rects
+		//
+		QRectF schemaRect;		// New rect for existing items
+		QRectF pannelRect;		// Rect to move pannel items yo
+
+		switch (edge)
+		{
+		case Qt::Edge::LeftEdge:
+		case Qt::Edge::RightEdge:
+			{
+				schemaRect = QRectF{0, 0, schema->docWidth(), schema->docHeight()};
+				pannelRect = QRectF{0, 0, pannel->docWidth(), pannel->docHeight()};
+
+				schema->setDocWidth(schema->docWidth() + pannel->docWidth());
+				schema->setDocHeight(std::max(schema->docHeight(), pannel->docHeight()));
+
+				if (edge == Qt::Edge::LeftEdge)
+				{
+					schemaRect.moveRight(schema->docWidth());
+				}
+				else // edge == Qt::Edge::RightEdge)
+				{
+					pannelRect.moveRight(schema->docWidth());
+				}
+			}
+			break;
+
+		case Qt::Edge::TopEdge:
+		case Qt::Edge::BottomEdge:
+			{
+				schemaRect = QRectF{0, 0, schema->docWidth(), schema->docHeight()};
+				pannelRect = QRectF{0, 0, pannel->docWidth(), pannel->docHeight()};
+
+				schema->setDocWidth(std::max(schema->docWidth(), pannel->docWidth()));
+				schema->setDocHeight(schema->docHeight() + pannel->docHeight());
+
+				if (edge == Qt::Edge::TopEdge)
+				{
+					schemaRect.moveBottom(schema->docHeight());
+				}
+				else // edge == Qt::Edge::BottomEdge)
+				{
+					pannelRect.moveBottom(schema->docHeight());
+				}
+			}
+			break;
+
+		default:
+			Q_ASSERT(false);
+			log->errINT1000(tr("Edge param error, edge %1,  function %2").arg(edge).arg(Q_FUNC_INFO));
+			return false;
+		}
+
+		Q_ASSERT(schemaRect.isNull() == false);
+		Q_ASSERT(pannelRect.isNull() == false);
+
+		// Move schema items to new pos in schemaRect
+		//
+		if (schemaRect.topLeft().isNull() == false)
+		{
+			for (std::shared_ptr<VFrame30::SchemaLayer> layer :  schema->Layers)
+			{
+				if (layer == nullptr)
+				{
+					Q_ASSERT(layer);
+					log->errINT1000(QString("Layer is nullptr for schema %1: %2").arg(schema->schemaId()).arg(Q_FUNC_INFO));
+					return false;
+				}
+
+				for (std::shared_ptr<VFrame30::SchemaItem>& item :  layer->Items)
+				{
+					if (item == nullptr)
+					{
+						Q_ASSERT(item);
+						log->errINT1000(tr("Item is nullptr for schema %1: %2").arg(schema->schemaId()).arg(Q_FUNC_INFO));
+						return false;
+					}
+
+					item->MoveItem(schemaRect.left(), schemaRect.top());
+				}
+			}
+		}
+
+		// Add pannel items to pannelRect
+		//
+		for (std::shared_ptr<VFrame30::SchemaLayer> pannelLayer : pannel->Layers)
+		{
+			Q_ASSERT(pannelLayer);
+
+			auto foundDestLayerIt = std::find_if(schema->Layers.begin(), schema->Layers.end(),
+												 [pannelLayer](auto l) { return l->name() == pannelLayer->name(); } );
+
+			if (foundDestLayerIt == schema->Layers.end())
+			{
+				// Source layer is not found in destination, copy to compile layer,
+				// if compile layer does not exists either, then copy to the first layer
+				//
+				foundDestLayerIt = std::find_if(schema->Layers.begin(), schema->Layers.end(),
+												[](auto l) { return l->compile(); } );
+
+				if (foundDestLayerIt == schema->Layers.end())
+				{
+					foundDestLayerIt = schema->Layers.begin();
+				}
+			}
+
+			Q_ASSERT(foundDestLayerIt != schema->Layers.end());
+
+			// Copy all form sourceLayer to destLayer, keep the order of items and insert all them right at the end of items
+			//
+			std::shared_ptr<VFrame30::SchemaLayer> destLayer = *foundDestLayerIt;
+
+			if (destLayer == nullptr)
+			{
+				Q_ASSERT(destLayer);
+				return false;
+			}
+
+			for (std::shared_ptr<VFrame30::SchemaItem> sourceItem : pannelLayer->Items)
+			{
+				// Make a deep copy of source item, set new guid and label to it
+				//
+				Proto::Envelope savedItem;
+
+				if (bool saveOk = sourceItem->Save(&savedItem);
+					saveOk == false)
+				{
+					Q_ASSERT(saveOk);
+					return false;
+				}
+
+				std::shared_ptr<VFrame30::SchemaItem> newItem = VFrame30::SchemaItem::Create(savedItem);
+				if (newItem == nullptr)
+				{
+					Q_ASSERT(newItem);
+					return false;
+				}
+
+				newItem->setNewGuid();		// generate new guids for item and its pins
+
+				if (VFrame30::FblItemRect* fblItemRect = newItem->toType<VFrame30::FblItemRect>();
+					fblItemRect != nullptr)
+				{
+					// From new label for FblItemRect: SchemaID_FblItemRectLabel
+					//
+					fblItemRect->setLabel(schema->schemaId() + "_" + fblItemRect->label());
+				}
+
+				// Insert newItem to destionation schema layer
+				//
+				newItem->MoveItem(pannelRect.left(), pannelRect.top());
+
+				// --
+				//
+				destLayer->Items.push_back(newItem);
+			}
+		}
+
+		return true;
+	}
 }
 
 

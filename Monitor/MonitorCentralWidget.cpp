@@ -108,8 +108,6 @@ void MonitorCentralWidget::slot_closeCurrentTab()
 
 	slot_closeTab(curTabWidget);
 
-	curTabWidget->emitHistoryChanged();
-
 	return;
 }
 

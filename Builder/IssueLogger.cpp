@@ -370,6 +370,28 @@ namespace Builder
 				  QString(tr("File %1 already linked to %2.")).arg(fileName).arg(cfgXmlFileName));
 	}
 
+	/// IssueCode: CMN0022
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Build output path %1. Standard writeble location will be used: %2
+	///
+	/// Parameters:
+	///		%1 issue message
+	///		%2 path will be used to writing build result
+	///
+	/// Description:
+	///		Selected build output path is not writable.
+	///		Standard writable location will be used.
+	///
+	void IssueLogger::wrnCMN0022(QString issue, QString stdWritablePath)
+	{
+		LOG_WARNING0(IssueType::Common,
+				  22,
+				  QString(tr("Build output path %1. Standard writeble location will be used: %2")).arg(issue).arg(stdWritablePath));
+	}
+
+
 	// INT			Internal issues							1000-1999
 	//
 
@@ -2282,45 +2304,45 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: SchemaItemFrame has reference (property SchemaID) to unknown schema %1, Schema %2.
+	/// Title: Schema %1 has join to unknown schema %2, check properties Join(Left/Top/Right/Bottom)SchemaID for schema %1.
 	///
 	/// Parameters:
-	///		%1 Not found schema ID
-	///		%2 Schema ID
+	///		%1 Schema ID
+	///		%2 Schema ID used for joining
 	///
 	/// Description:
-	///			Schema has SchemaItemFrame wchich has reference (property SchemaID) to unknown schema.
+	///			Schema has join to unknown schema, check schema properties Join(Left/Top/Right/Bottom)SchemaID.
 	///
-	void IssueLogger::errALP4080(QString schema, QString frameSchemaId, QUuid itemUuid)
+	void IssueLogger::errALP4080(QString schema, QString pannelSchemaId)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 4080, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4080, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4080,
-				  tr("SchemaItemFrame has reference (property SchemaID) to unknown schema %1, Schema %2.")
-						.arg(frameSchemaId)
-						.arg(schema));
+				  tr("Schema %1 has join to unknown schema %2, check properties Join(Left/Top/Right/Bottom)SchemaID for schema %1.")
+						.arg(schema)
+						.arg(pannelSchemaId));
 	}
 
 	/// IssueCode: ALP4081
 	///
 	/// IssueType: Error
 	///
-	/// Title: SchemaItemFrame.SchemaID has recursive reference to schema %1, property must be distincive from schema where it is placed.
+	/// Title: SchemaID %1 has recursive reference, property Join(Left/Top/Right/Bottom)SchemaID must be distincive from SchemaID.
 	///
 	/// Parameters:
 	///		%1 Schema ID
 	///
 	/// Description:
-	///			SchemaItemFrame.SchemaID has recursive reference to the same schema where it is placed.
+	///			SchemaID has recursive reference, property Join(Left/Top/Right/Bottom)SchemaID must be distincive from SchemaID.
 	///
-	void IssueLogger::errALP4081(QString schema, QUuid itemUuid)
+	void IssueLogger::errALP4081(QString schema)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 4081, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4081, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4081,
-				  tr("SchemaItemFrame.SchemaID has recursive reference to schema %1, property must be distincive from schema where it is placed.")
+				  tr("SchemaID %1 has recursive reference, property Join(Left/Top/Right/Bottom)SchemaID must be distincive from SchemaID.")
 						.arg(schema));
 	}
 
@@ -2328,24 +2350,24 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: SchemaItemFrame has reference to schema %1 which has different units and SchemaItemFrame.AutoScale is false, Schema %2.
+	/// Title: Join schemas with different units, schemas %1 and %2 must have the same unit.
 	///
 	/// Parameters:
-	///		%1 Not found schema ID
-	///		%2 Schema ID
+	///		%1 Schema ID
+	///		%2 Schema to join
 	///
 	/// Description:
-	///			SchemaItemFrame has reference to schema which has different units and SchemaItemFrame.AutoScale is false. If AutoScale is false then both schemas must have identical units.
+	///			Join schemas with different units, both schemas must have the same unit..
 	///
-	void IssueLogger::errALP4082(QString schema, QString frameSchemaId, QUuid itemUuid)
+	void IssueLogger::errALP4082(QString schema, QString pannelSchemaId)
 	{
-		addItemsIssues(OutputMessageLevel::Error, 4082, itemUuid, schema);
+		addItemsIssues(OutputMessageLevel::Error, 4082, schema);
 
 		LOG_ERROR(IssueType::AlParsing,
 				  4082,
-				  tr("SchemaItemFrame has reference to schema %1 which has different units and SchemaItemFrame.AutoScale is false, Schema %2.")
-						.arg(frameSchemaId)
-						.arg(schema));
+				  tr("Join schemas with different units, schemas %1 and %2 must have the same unit.")
+						.arg(schema)
+						.arg(pannelSchemaId));
 	}
 
 	/// IssueCode: ALP4130
@@ -5351,7 +5373,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title:	   Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)
+	/// Title:	   Discrete signal %1 is connected to non-discrete or non-mixed bus input (Logic schema %2)
 	///
 	/// Parameters:
 	///		%1 App signal ID
@@ -5367,7 +5389,7 @@ namespace Builder
 
 		LOG_ERROR(IssueType::AlCompiler,
 				  5124,
-				  QString(tr("Discrete signal %1 is connected to non-discrete bus input (Logic schema %2)")).
+				  QString(tr("Discrete signal %1 is connected to non-discrete or non-mixed bus input (Logic schema %2)")).
 								arg(appSignalID).arg(schemaID));
 	}
 
@@ -6408,6 +6430,30 @@ namespace Builder
 				  5171,
 				  QString(tr("Internal application signal %1 cannot be linked to equipment input/output signal %2.")).
 						arg(appSignalID).arg(equipmentSignalID));
+	}
+
+	/// IssueCode: ALC5172
+	///
+	/// IssueType: Error
+	///
+	/// Title: Non-discrete busses is not allowed on input '%1'. (Item %2, logic schema %3).
+	///
+	/// Parameters:
+	///		%1 caption of AFB input
+	///		%2 UAL item label
+	///		%3 UAL schema ID
+	///
+	/// Description:
+	///		Non-discrete bus cannot be connected to specified input.
+	///
+	void IssueLogger::errALC5172(QString inputCaption, QString itemLabel, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5172, itemUuid, schemaID);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5172,
+				  QString(tr("Non-discrete busses is not allowed on input '%1'. (Item %2, logic schema %3).")).
+						arg(inputCaption).arg(itemLabel).arg(schemaID));
 	}
 
 	//

@@ -318,7 +318,6 @@ bool Calibrator::recv()
 	m_lastResponse = requestData;
 	m_lastResponse.remove(CalibratorTerminator[m_type]);
 
-	//qDebug("Function: %s, Serial Port: " + m_portName.toLocal8Bit() + ", response: " + m_lastResponse.toLocal8Bit() + ", Timeout: %d", __FUNCTION__, m_timeout);
 	qDebug("Function: %s, Serial Port: " + m_portName.toLocal8Bit() + ", Timeout: %d", __FUNCTION__, m_timeout);
 
 	emit responseIsReceived(m_lastResponse);
@@ -478,7 +477,7 @@ bool Calibrator::setUnit(int mode, int unit)
 		default:						assert(false);
 	}
 
-	qDebug("Function: %s, Serial port: " + m_portName.toLocal8Bit() + ", Mode: %s, Unit: %s", __FUNCTION__, CalibratorMode[mode], CalibratorUnit[unit]);
+	//qDebug("Function: %s, Serial port: " + m_portName.toLocal8Bit() + ", Mode: %s, Unit: %s", __FUNCTION__, CalibratorMode[mode], CalibratorUnit[unit]);
 
 	emit unitIsChanged();
 

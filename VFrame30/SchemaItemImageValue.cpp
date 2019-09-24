@@ -36,7 +36,7 @@ namespace VFrame30
 		ADD_PROPERTY_GET_SET_CAT(double, PropertyNames::lineWeight, PropertyNames::appearanceCategory, true, SchemaItemImageValue::lineWeight, SchemaItemImageValue::setLineWeight);
 
 		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::lineColor, PropertyNames::appearanceCategory, true, SchemaItemImageValue::lineColor, SchemaItemImageValue::setLineColor);
-		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColor, PropertyNames::appearanceCategory, true, SchemaItemImageValue::fillColor, SchemaItemImageValue::setFillColor)
+		ADD_PROPERTY_GET_SET_CAT(QColor, PropertyNames::fillColor, PropertyNames::appearanceCategory, true, SchemaItemImageValue::fillColor, SchemaItemImageValue::setFillColor);
 
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::drawRect, PropertyNames::appearanceCategory, true, SchemaItemImageValue::drawRect, SchemaItemImageValue::setDrawRect);
 		ADD_PROPERTY_GET_SET_CAT(bool, PropertyNames::fill, PropertyNames::appearanceCategory, true, SchemaItemImageValue::fillRect, SchemaItemImageValue::setFillRect);

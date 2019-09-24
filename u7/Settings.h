@@ -103,6 +103,8 @@ public:
 
     int m_equipmentTabPagePropertiesSplitterState = 0;
 
+	QString m_equipmentTabPagePropertiesMask;
+
 	// Signals Tab Page
 	//
 	//QByteArray m_equipmentTabPageSplitterState;
@@ -120,13 +122,6 @@ public:
     //
     QPoint m_DialogTextEditorWindowPos;
     QByteArray m_DialogTextEditorWindowGeometry;
-
-	// Ide Property Editor Options
-	//
-	double m_propertyEditorFontScaleFactor = 1.0;
-
-	QPoint m_scriptHelpWindowPos;
-	QByteArray m_scriptHelpWindowGeometry;
 
 	// Tuning Filters editor Options
     //
@@ -165,6 +160,13 @@ public:
 	// CreateSchema dialog
 	//
 	QString m_lastSelectedLmDescriptionFile;
+
+	// SchemaItemPropertiesDialog
+
+	int m_schemaItemPropertiesSplitterPosition = 100;
+	QString m_schemaItemPropertiesPropertyMask;
+	bool m_schemaItemPropertiesExpandValuesToAllRows = true;
+	QByteArray m_schemaItemPropertiesGeometry;
 
 	// Find SchemaItem
 	//

@@ -6,9 +6,21 @@
 #include "../lib/QScintillaLexers/LexerJavaScript.h"
 
 #include "../lib/PropertyEditor.h"
+#include "../lib/PropertyTable.h"
 #include "../lib/DbController.h"
 #include "../lib/Types.h"
 #include "../lib/Tuning/TuningFilterEditor.h"
+
+//
+// IdePropertyEditorHelper
+//
+
+class IdePropertyEditorHelper
+{
+public:
+	static ExtWidgets::PropertyTextEditor* createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent, DbController* dbController);
+};
+
 
 //
 // IdePropertyEditor
@@ -20,17 +32,31 @@ public:
 	IdePropertyEditor(QWidget* parent, DbController* dbController = nullptr);
     virtual ~IdePropertyEditor();
 
-    virtual void saveSettings();
-
 	virtual ExtWidgets::PropertyEditor* createChildPropertyEditor(QWidget* parent) override;
 
-	virtual ExtWidgets::PropertyTextEditor* createPropertyTextEditor(Property *property, QWidget* parent) override;
+	virtual ExtWidgets::PropertyTextEditor* createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent) override;
 
 private:
-
 	DbController* m_dbController = nullptr;
 };
 
+//
+// IdePropertyTable
+//
+
+class IdePropertyTable : public ExtWidgets::PropertyTable
+{
+public:
+	IdePropertyTable(QWidget* parent, DbController* dbController = nullptr);
+	virtual ~IdePropertyTable();
+
+	virtual ExtWidgets::PropertyEditor* createChildPropertyEditor(QWidget* parent) override;
+
+	virtual ExtWidgets::PropertyTextEditor* createPropertyTextEditor(std::shared_ptr<Property> propertyPtr, QWidget* parent) override;
+
+private:
+	DbController* m_dbController = nullptr;
+};
 
 //
 // DialogFindReplace

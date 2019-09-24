@@ -240,7 +240,7 @@ void AppDataSource::setState(const Network::AppDataSourceState& proto)
 	setErrorNonmonotonicPlantTime(proto.errornonmonotonicplanttime());
 }
 
-bool AppDataSource::getSignalState(SimpleAppSignalState* state, const QThread* thread)
+bool AppDataSource::getSignalState(SimpleAppSignalStateArchiveFlag* state, const QThread* thread)
 {
 	TEST_PTR_RETURN_FALSE(state);
 
@@ -253,6 +253,11 @@ bool AppDataSource::getSignalState(SimpleAppSignalState* state, const QThread* t
 
 int AppDataSource::getAutoArchivingGroup(qint64 currentSysTime)
 {
+	if (m_autoArchivingGroupsCount <= 0)
+	{
+		return DynamicAppSignalState::NO_AUTOARCHIVING_GROUP;
+	}
+
 	if (m_lastAutoArchivingTime == 0)
 	{
 		m_lastAutoArchivingTime = (currentSysTime / TIME_1S) * TIME_1S;		// rounds time to seconds

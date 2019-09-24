@@ -120,6 +120,7 @@ void Settings::writeUserScope() const
 
 	s.setValue("EquipmentTabPage/Splitter/state", m_equipmentTabPageSplitterState);
     s.setValue("EquipmentTabPage/PropertiesSplitter/state", m_equipmentTabPagePropertiesSplitterState);
+	s.setValue("EquipmentTabPage/PropertiesTable/PropertiesMask", m_equipmentTabPagePropertiesMask);
 
 	s.setValue("BuildTabPage/Splitter/state", m_buildTabPageSplitterState);
 
@@ -128,10 +129,6 @@ void Settings::writeUserScope() const
 
     s.setValue("TextEditorProperties/pos", m_DialogTextEditorWindowPos);
     s.setValue("TextEditorProperties/geometry", m_DialogTextEditorWindowGeometry);
-
-	s.setValue("PropertyEditor/fontScaleFactor", m_propertyEditorFontScaleFactor);
-	s.setValue("PropertyEditor/scriptHelpPos", m_scriptHelpWindowPos);
-	s.setValue("PropertyEditor/scriptHelpGeometry", m_scriptHelpWindowGeometry);
 
 	s.setValue("TuningFiltersEditor/MainSplitterPosition", m_tuningFiltersSplitterPosition);
     s.setValue("TuningFiltersEditor/PropertyEditorSplitterPos", m_tuningFiltersPropertyEditorSplitterPos);
@@ -163,6 +160,11 @@ void Settings::writeUserScope() const
 	s.setValue("SvgEditor/stretch", m_svgEditorStretch);
 
 	s.setValue("CreateSchema/lastSelectedLmDescriptionFile", m_lastSelectedLmDescriptionFile);
+
+	s.setValue("SchemaItemPropertiesDialog/Splitter", m_schemaItemPropertiesSplitterPosition);
+	s.setValue("SchemaItemPropertiesDialog/PropertiesMask", m_schemaItemPropertiesPropertyMask);
+	s.setValue("SchemaItemPropertiesDialog/ExpandValuesToAllRows", m_schemaItemPropertiesExpandValuesToAllRows);
+	s.setValue("SchemaItemPropertiesDialog/Geometry", m_schemaItemPropertiesGeometry);
 
 	s.setValue("Main/m_expertMode", m_expertMode);
 
@@ -196,6 +198,7 @@ void Settings::loadUserScope()
 	{
         m_equipmentTabPagePropertiesSplitterState = 150;
 	}
+	m_equipmentTabPagePropertiesMask = s.value("EquipmentTabPage/PropertiesTable/PropertiesMask").toString();
 
     m_buildTabPageSplitterState = s.value("BuildTabPage/Splitter/state").toByteArray();
 
@@ -204,15 +207,6 @@ void Settings::loadUserScope()
 
     m_DialogTextEditorWindowPos = s.value("TextEditorProperties/pos", QPoint(-1, -1)).toPoint();
     m_DialogTextEditorWindowGeometry = s.value("TextEditorProperties/geometry").toByteArray();
-
-	m_propertyEditorFontScaleFactor = s.value("PropertyEditor/fontScaleFactor").toDouble();
-	if (m_propertyEditorFontScaleFactor < 1.0 || m_propertyEditorFontScaleFactor > 3.0)
-	{
-		m_propertyEditorFontScaleFactor = 1.0;
-	}
-
-	m_scriptHelpWindowPos = s.value("PropertyEditor/scriptHelpPos", QPoint(-1, -1)).toPoint();
-	m_scriptHelpWindowGeometry = s.value("PropertyEditor/scriptHelpGeometry").toByteArray();
 
 	m_tuningFiltersSplitterPosition = s.value("TuningFiltersEditor/MainSplitterPosition").toByteArray();
     m_tuningFiltersPropertyEditorSplitterPos = s.value("TuningFiltersEditor/PropertyEditorSplitterPos").toInt();
@@ -269,7 +263,22 @@ void Settings::loadUserScope()
 	m_svgEditorStretch = s.value("SvgEditor/stretch", m_svgEditorStretch).toBool();
 
 	//
+
 	m_lastSelectedLmDescriptionFile = s.value("CreateSchema/lastSelectedLmDescriptionFile", "").toString();
+
+	//
+
+	m_schemaItemPropertiesSplitterPosition = s.value("SchemaItemPropertiesDialog/Splitter").toInt();
+	if (m_schemaItemPropertiesSplitterPosition < 100)
+	{
+		m_schemaItemPropertiesSplitterPosition = 100;
+	}
+
+	m_schemaItemPropertiesPropertyMask = s.value("SchemaItemPropertiesDialog/PropertiesMask").toString();
+	m_schemaItemPropertiesExpandValuesToAllRows = s.value("SchemaItemPropertiesDialog/ExpandValuesToAllRows", m_schemaItemPropertiesExpandValuesToAllRows).toBool();
+	m_schemaItemPropertiesGeometry = s.value("SchemaItemPropertiesDialog/Geometry").toByteArray();
+
+	//
 
 	m_expertMode = s.value("Main/m_expertMode", false).toBool();
 

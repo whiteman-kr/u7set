@@ -173,7 +173,9 @@ void AppDataServiceWorker::runTcpAppDataServer()
 {
 	assert(m_tcpAppDataServerThread == nullptr);
 
-	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer(softwareInfo(), m_appDataReceiverThread);
+	TcpAppDataServer* tcpAppDataSever = new TcpAppDataServer(softwareInfo(),
+															 m_appDataReceiverThread,
+															 m_signalStatesProcessingThread);
 
 	m_tcpAppDataServerThread = new TcpAppDataServerThread(	m_cfgSettings.clientRequestIP,
 															tcpAppDataSever,

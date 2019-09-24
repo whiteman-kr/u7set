@@ -3,6 +3,7 @@
 #include "MainWindow.h"
 #include "Options.h"
 #include "../../lib/ProtoSerialization.h"
+#include "../../lib/MemLeaksDetection.h"
 
 #if __has_include("../../gitlabci_version.h")
 #	include "../../gitlabci_version.h"
@@ -10,6 +11,8 @@
 
 int main(int argc, char *argv[])
 {
+	initMemoryLeaksDetection();
+
 	QApplication a(argc, argv);
 
 	a.setApplicationName("Packet Source");
@@ -25,14 +28,18 @@ int main(int argc, char *argv[])
 
 	theOptions.load();
 
-	MainWindow w;
-	w.show();
+	MainWindow* pMainWindow = new MainWindow;
+	pMainWindow->show();
 
 	int result = a.exec();
+
+	delete pMainWindow;
 
 	theOptions.unload();
 
 	google::protobuf::ShutdownProtobufLibrary();
+
+	dumpMemoryLeaks();
 
 	return result;
 }

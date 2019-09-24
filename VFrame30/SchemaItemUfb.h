@@ -26,18 +26,18 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* pLayer) const override;
+		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* pLayer) const final;
 
 		// Serialization
 		//
 	protected:
-		virtual bool SaveData(Proto::Envelope* message) const override;
-		virtual bool LoadData(const Proto::Envelope& message) override;
+		virtual bool SaveData(Proto::Envelope* message) const final;
+		virtual bool LoadData(const Proto::Envelope& message) final;
 
 		// Methods
 		//
 	public:
-		virtual QString buildName() const override;
+		virtual QString buildName() const final;
 
 		bool updateUfbElement(const UfbSchema* ufbSchema, QString* errorMsg);
 

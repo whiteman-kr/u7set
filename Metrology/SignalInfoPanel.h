@@ -68,7 +68,7 @@ class SignalInfoTable : public QAbstractTableModel
 
 public:
 
-	explicit SignalInfoTable(QObject* parent = 0);
+	explicit SignalInfoTable(QObject* parent = nullptr);
 	virtual ~SignalInfoTable();
 
 private:
@@ -111,7 +111,7 @@ class SignalInfoPanel : public QDockWidget
 
 public:
 
-	explicit SignalInfoPanel(QWidget* parent = 0);
+	explicit SignalInfoPanel(QWidget* parent = nullptr);
 	virtual ~SignalInfoPanel();
 
 private:

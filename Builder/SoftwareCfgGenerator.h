@@ -60,6 +60,8 @@ namespace Builder
 		static bool buildSoftwareList(Hardware::EquipmentSet *equipment, IssueLogger* log);
 		static bool checkLmToSoftwareLinks(IssueLogger* log);
 
+		static bool joinSchemas(Context* context, VFrame30::Schema* schema, const VFrame30::Schema* pannel, Qt::Edge edge);
+
 	protected:
 		Context* m_context = nullptr;
 		DbController* m_dbController = nullptr;

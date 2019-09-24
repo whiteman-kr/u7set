@@ -6,6 +6,7 @@
 #include "../lib/Tcp.h"
 
 #include "AppDataSource.h"
+#include "SignalStatesProcessingThread.h"
 
 
 class TcpAppDataServerThread;
@@ -20,16 +21,24 @@ class AppDataReceiverThread;
 
 class TcpAppDataServer : public Tcp::Server
 {
+public:
+	TcpAppDataServer(const SoftwareInfo& softwareInfo,
+					 AppDataReceiverThread* appDataReceiverThread,
+					 SignalStatesProcessingThread* signalStatesProcessingThread);
+
+	virtual ~TcpAppDataServer() override;
+
+	virtual void onServerThreadStarted() override;
+	virtual void onServerThreadFinished() override;
+
+	virtual void onConnection() override;
+	virtual void onDisconnection() override;
+
+	virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
+
+	void setThread(TcpAppDataServerThread* thread) { m_thread = thread; }
+
 private:
-	TcpAppDataServerThread* m_thread = nullptr;
-
-	AppDataReceiverThread* m_appDataReceiverThread = nullptr;
-
-	// precalculated variables
-	//
-	int m_signalCount = 0;
-	int m_signalListPartCount = 0;
-
 	virtual Server* getNewInstance() override;
 
 	// Request processing functions
@@ -43,11 +52,38 @@ private:
 	void onGetAppSignalRequest(const char* requestData, quint32 requestDataSize);			// returns class Signal
 
 	void onGetAppSignalStateRequest(const char* requestData, quint32 requestDataSize);
+	void onGetAppSignalStateChangesRequest(const char* requestData, quint32 requestDataSize);
 
 	void onGetAppDataSourcesInfoRequest();
 	void onGetAppDataSourcesStatesRequest();
 
 	void onGetSettings();
+
+	// helper functions
+	//
+	int getSignalListPartCount(int signalCount);
+
+	const QVector<QString>& appSignalIDs() const;
+	const AppSignals& appSignals() const;
+	const AppDataSourcesIP& appDataSources() const;
+
+	bool getAppSignalStateState(Hash hash, AppSignalState& state);
+//	bool getDataSourceState(Hash hash, AppSignalState& state);
+
+	void getServerTimes(qint64* utc, qint64* local);
+
+private:
+	TcpAppDataServerThread* m_thread = nullptr;
+
+	AppDataReceiverThread* m_appDataReceiverThread = nullptr;
+	SignalStatesProcessingThread* m_signalStatesProcessingThread = nullptr;
+
+	SimpleAppSignalStatesQueueShared m_signalStatesQueue;
+
+	// precalculated variables
+	//
+	int m_signalCount = 0;
+	int m_signalListPartCount = 0;
 
 	// reused protobuf messages
 	//
@@ -67,37 +103,15 @@ private:
 	Network::GetAppSignalStateRequest m_getAppSignalStateRequest;
 	Network::GetAppSignalStateReply m_getAppSignalStateReply;
 
+	Network::GetAppSignalStateChangesRequest m_getAppSignalStateChangesRequest;
+	Network::GetAppSignalStateChangesReply m_getAppSignalStateChangesReply;
+
 	//
 
 	Network::GetDataSourcesInfoReply m_getDataSourcesInfoReply;
 	Network::GetAppDataSourcesStatesReply m_getAppDataSourcesStatesReply;
 
 	Network::ServiceSettings m_getServiceSettings;
-
-	// helper functions
-	//
-	int getSignalListPartCount(int signalCount);
-
-	const QVector<QString>& appSignalIDs() const;
-	const AppSignals& appSignals() const;
-	const AppDataSourcesIP& appDataSources() const;
-
-	bool getAppSignalStateState(Hash hash, AppSignalState& state);
-	bool getDataSourceState(Hash hash, AppSignalState& state);
-
-public:
-	TcpAppDataServer(const SoftwareInfo& softwareInfo, AppDataReceiverThread* appDataReceiverThread);
-	virtual ~TcpAppDataServer() override;
-
-	virtual void onServerThreadStarted() override;
-	virtual void onServerThreadFinished() override;
-
-	virtual void onConnection() override;
-	virtual void onDisconnection() override;
-
-	virtual void processRequest(quint32 requestID, const char* requestData, quint32 requestDataSize) override;
-
-	void setThread(TcpAppDataServerThread* thread) { m_thread = thread; }
 };
 
 
@@ -109,15 +123,6 @@ public:
 
 class TcpAppDataServerThread : public Tcp::ServerThread
 {
-private:
-	QVector<QString> m_appSignalIDs;
-	const AppDataSourcesIP& m_appDataSources;
-	const AppSignals& m_appSignals;
-	const DynamicAppSignalStates& m_appSignalStates;
-	const AppDataServiceWorker& m_appDataServiceWorker;
-
-	void buildAppSignalIDs();
-
 public:
 	TcpAppDataServerThread(const HostAddressPort& listenAddressPort,
 							TcpAppDataServer* server,
@@ -141,5 +146,15 @@ public:
 	QString equipmentID() const;
 	QString cfgServiceIP1Str() const;
 	QString cfgServiceIP2Str() const;
+
+private:
+	void buildAppSignalIDs();
+
+private:
+	QVector<QString> m_appSignalIDs;
+	const AppDataSourcesIP& m_appDataSources;
+	const AppSignals& m_appSignals;
+	const DynamicAppSignalStates& m_appSignalStates;
+	const AppDataServiceWorker& m_appDataServiceWorker;
 };
 

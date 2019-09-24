@@ -127,7 +127,7 @@ namespace VFrame30
 
 	std::shared_ptr<SchemaItem> SchemaItem::CreateObject(const Proto::Envelope& message)
 	{
-		// Эта функция может создавать только один экземпляр
+		// this func can create just one instance
 		//
 		if (message.has_schemaitem() == false)
 		{
@@ -140,7 +140,7 @@ namespace VFrame30
 
 		if (schemaItem == nullptr)
 		{
-			assert(schemaItem);
+			Q_ASSERT(schemaItem);		// Add class to the factory, VFrame30Library.cpp
 			return nullptr;
 		}
 		
@@ -553,8 +553,6 @@ namespace VFrame30
 		return;
 	}
 
-	// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
-	//
 	void SchemaItem::DrawSelection(CDrawParam*, bool) const
 	{
 	}

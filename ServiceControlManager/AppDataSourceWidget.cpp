@@ -4,7 +4,7 @@
 #include <QTableView>
 #include <QStandardItemModel>
 #include <QHeaderView>
-#include "TcpAppDataClient.h"
+#include "ScmTcpAppDataClient.h"
 #include <QHBoxLayout>
 #include <QSplitter>
 #include "../lib/WidgetUtils.h"

@@ -10,7 +10,7 @@
 
 TuningSocket::TuningSocket(const SoftwareInfo& softwareInfo,
 						   const HostAddressPort& serverAddressPort) :
-	Tcp::Client(softwareInfo, serverAddressPort)
+	Tcp::Client(softwareInfo, serverAddressPort, "TuningSocket")
 {
 }
 
@@ -19,7 +19,7 @@ TuningSocket::TuningSocket(const SoftwareInfo& softwareInfo,
 TuningSocket::TuningSocket(const SoftwareInfo& softwareInfo,
 						   const HostAddressPort& serverAddressPort1,
 						   const HostAddressPort& serverAddressPort2) :
-	Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2)
+	Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2, "TuningSocket")
 {
 }
 
@@ -132,7 +132,7 @@ void TuningSocket::replyTuningSourcesInfo(const char* replyData, quint32 replyDa
 		return;
 	}
 
-	bool result = m_tuningDataSourcesInfoReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_tuningDataSourcesInfoReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
 	if (result == false)
 	{
 		qDebug() << "TuningSocket::replyTuningSourcesInfo - error: ParseFromArray";
@@ -204,7 +204,7 @@ void TuningSocket::replyTuningSourcesState(const char* replyData, quint32 replyD
 		return;
 	}
 
-	bool result = m_tuningDataSourcesStatesReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_tuningDataSourcesStatesReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
 	if (result == false)
 	{
 		qDebug() << "TuningSocket::replyTuningSourcesState - error: ParseFromArray";
@@ -305,7 +305,7 @@ void TuningSocket::replyReadTuningSignals(const char* replyData, quint32 replyDa
 		return;
 	}
 
-	bool result = m_readTuningSignalsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_readTuningSignalsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
 	if (result == false)
 	{
 		qDebug() << "TuningSocket::replyReadTuningSignals - error: ParseFromArray";
@@ -370,7 +370,7 @@ void TuningSocket::requestWriteTuningSignals()
 	{
 		TuningWriteCmd cmd = theSignalBase.tuning().cmdFowWrite();
 
-		if (cmd.signalHash() == 0)
+		if (cmd.signalHash() == UNDEFINED_HASH)
 		{
 			assert(cmd.signalHash() != 0);
 			continue;
@@ -396,7 +396,7 @@ void TuningSocket::requestWriteTuningSignals()
 			case TuningValueType::SignedInt64:	tv->set_intvalue(cmd.value().toLongLong());		break;
 			case TuningValueType::Float:
 			case TuningValueType::Double:		tv->set_doublevalue(cmd.value().toDouble());	break;
-			default:							assert(false); continue;						break;
+			default:							assert(false); continue;
 		}
 
 		wrCmd->set_allocated_value(tv);
@@ -418,7 +418,7 @@ void TuningSocket::replyWriteTuningSignals(const char* replyData, quint32 replyD
 		return;
 	}
 
-	bool result = m_writeTuningSignalsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_writeTuningSignalsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
 	if (result == false)
 	{
 		qDebug() << "TuningSocket::replyWriteTuningSignals - error: ParseFromArray";

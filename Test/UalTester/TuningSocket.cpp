@@ -7,7 +7,7 @@
 // -------------------------------------------------------------------------------------------------------------------
 
 TuningSocket::TuningSocket(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort, TuningBase* pTuningBase)
-	: Tcp::Client(softwareInfo, serverAddressPort)
+        : Tcp::Client(softwareInfo, serverAddressPort, "TuningSocket")
 	, m_pTuningBase(pTuningBase)
 {
 }
