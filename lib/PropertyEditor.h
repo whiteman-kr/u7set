@@ -37,7 +37,11 @@ namespace ExtWidgets
 		//
 		static QString propertyVectorText(QVariant& value);
 		static QString stringListText(const QVariant& value);
+		static QString colorVectorText(QVariant& value);
 		static QString propertyValueText(Property* p, int row);	// row is used for StringList
+
+		static QString colorToText(QColor color);
+		static QColor colorFromText(const QString& t);
 
 		static QIcon drawCheckBox(int state, bool enabled);
 		static QIcon drawColorBox(QColor color);
@@ -114,16 +118,19 @@ namespace ExtWidgets
 	};
 
 	//
-	// StringListEditorDialog
+	// VectorEditorDialog
+	// Supports:
+	//	- QStringList
+	//	- QVector<QColor>
 	//
 
-	class StringListEditorDialog : public QDialog
+	class VectorEditorDialog : public QDialog
 	{
 		Q_OBJECT
 
 	public:
-		StringListEditorDialog(QWidget* parent, const QString& propertyName, const QVariant& value);
-		~StringListEditorDialog();
+		VectorEditorDialog(QWidget* parent, const QString& propertyName, const QVariant& value);
+		~VectorEditorDialog();
 
 		QVariant value();
 
@@ -135,11 +142,19 @@ namespace ExtWidgets
 		void itemChanged(QTreeWidgetItem *item, int column);
 
 	private:
-		void updateStrings();
+		void updateVectorData();
 		void moveItems(bool forward);
 
+		bool isValueStringList() const;
+		bool isValueColorVector() const;
+
 	private:
+
+		int m_valueType = 0;
+
 		QStringList m_strings;
+
+		QVector<QColor> m_colors;
 
 		QTreeWidget* m_treeWidget = nullptr;
 
@@ -344,7 +359,6 @@ namespace ExtWidgets
 
 	private:
 		bool eventFilter(QObject* watched, QEvent* event);
-		QColor colorFromText(const QString& t);
 
 
 	private:
@@ -600,7 +614,7 @@ namespace ExtWidgets
 		QByteArray m_arrayPropertyEditorSplitterState;
 		QSize m_arrayPropertyEditorSize = QSize(-1, -1);
 
-		QSize m_stringListEditorSize = QSize(-1, -1);
+		QSize m_vectorEditorSize = QSize(-1, -1);
 
 		QPoint m_multiLinePropertyEditorWindowPos;
 		QByteArray m_multiLinePropertyEditorGeometry;
@@ -677,6 +691,7 @@ namespace ExtWidgets
 
 Q_DECLARE_METATYPE(std::shared_ptr<Property>)
 Q_DECLARE_METATYPE(ExtWidgets::FilePathPropertyType)
+Q_DECLARE_METATYPE(QVector<QColor>)
 
 extern ExtWidgets::PropertyEditorSettings thePropertyEditorSettings;
 
