@@ -1439,18 +1439,24 @@ namespace ExtWidgets
 			}
 			delete item;
 
-			if (row < 0 || row >= static_cast<int>(m_strings.size()))
-			{
-				Q_ASSERT(false);
-				return;
-			}
-
 			if (isValueStringList())
 			{
+				if (row < 0 || row >= static_cast<int>(m_strings.size()))
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
 				m_strings.removeAt(row);
 			}
 			if (isValueColorVector())
 			{
+				if (row < 0 || row >= static_cast<int>(m_colors.size()))
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
 				m_colors.removeAt(row);
 			}
 		}
