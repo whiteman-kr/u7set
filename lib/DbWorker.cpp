@@ -314,6 +314,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0294.sql", "Upgrade to version 294, Set MaxInstCount from 256 to 1024 for AFB FLIP_FLOP in LM1_SR03"},
 	{":/DatabaseUpgrade/Upgrade0295.sql", "Upgrade to version 295, Set inputs and outputs BusDataFormat to Mixed for AFB bus_switch (for all LMs)"},
 	{":/DatabaseUpgrade/Upgrade0296.sql", "Upgrade to version 296, RIM FilteringTime has range (0.1 .. 131.07 s)"},
+	{":/DatabaseUpgrade/Upgrade0297.sql", "Upgrade to version 297, If TuningEnable/AppDataEnable/DiagDataEnable flag in LM is false, IP address is zero"},
 };
 
 int DbWorker::counter = 0;
