@@ -59,7 +59,7 @@ set #TUN_IN_FP2 = 0
 check #OUT_DAMPC_FP2 == 0
 check #OUT_OVERFLOW_DAMPC_FP2 == 0
 check #OUT_UNDERFLOW_DAMPC_FP2 == 0
-check #OUT_ZERO_DAMPC_FP2 == 1 // This flag set if OUT == 0
+check #OUT_ZERO_DAMPC_FP2 == 0 // This flag set if OUT == 0
 check #OUT_NAN_DAMPC_FP2 == 0
 check #OUT_PARAM_ERR_DAMPC_FP2 == 0
 
@@ -96,7 +96,7 @@ set #TUN_IN_FP3 = 0
 check #OUT_DAMPC_FP3 == 0
 check #OUT_OVERFLOW_DAMPC_FP3 == 0
 check #OUT_UNDERFLOW_DAMPC_FP3 == 0
-check #OUT_ZERO_DAMPC_FP3 == 1 // This flag set if OUT == 0
+check #OUT_ZERO_DAMPC_FP3 == 0 // This flag set if OUT == 0
 check #OUT_NAN_DAMPC_FP3 == 0
 check #OUT_PARAM_ERR_DAMPC_FP3 == 0
 
