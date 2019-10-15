@@ -532,9 +532,17 @@ void StatisticDialog::updateList()
 			continue;
 		}
 
-		if (param.isAnalog() == false || param.isInput() == false)
+		if (param.isInternal() == true)
 		{
 			continue;
+		}
+
+		if (param.isInput() == true || param.isOutput() == true)
+		{
+			if (param.electricUnitID() == E::ElectricUnit::NoUnit)
+			{
+				continue;
+			}
 		}
 
 		if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
