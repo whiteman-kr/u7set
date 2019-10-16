@@ -681,7 +681,8 @@ void StatisticDialog::selectSignalForMeasure()
 	{
 		switch (theOptions.toolBar().measureKind())
 		{
-			case MEASURE_KIND_ONE:
+			case MEASURE_KIND_ONE_RACK:
+			case MEASURE_KIND_ONE_MODULE:
 
 				if (pMainWindow->rackCombo()->itemData(i).toInt() == pMetrologySignal->param().location().rack().index())
 				{
@@ -690,7 +691,7 @@ void StatisticDialog::selectSignalForMeasure()
 
 				break;
 
-			case MEASURE_KIND_MULTI:
+			case MEASURE_KIND_MULTI_RACK:
 
 				if (pMainWindow->rackCombo()->itemData(i).toInt() == pMetrologySignal->param().location().rack().groupIndex())
 				{

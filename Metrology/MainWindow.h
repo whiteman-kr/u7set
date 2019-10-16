@@ -160,10 +160,6 @@ public:
 
 	void					updateRacksOnToolBar();
 	void					updateSignalsOnToolBar();
-	void					updateSignalPositionOnToolBar();
-	void					updateChassisOnToolBar(const Metrology::SignalLocation& location);
-	void					updateModuleOnToolBar(const Metrology::SignalLocation& location);
-	void					updatePlaceOnToolBar(const Metrology::SignalLocation& location);
 
 	QComboBox*				rackCombo() { return m_asRackCombo; }
 	QComboBox*				signalCombo() { return m_asSignalCombo; }
@@ -219,7 +215,7 @@ private slots:
 	void					showOutputSignalList();
 	void					showTuningSignalList();
 	void					showCalculator();
-	void					options();
+	void					showOptions();
 
 	// menu - ?
 	//

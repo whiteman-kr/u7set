@@ -74,7 +74,8 @@ public:
 private:
 
 	mutable QMutex			m_signalMutex;
-	MeasureMultiParam		m_activeSignalParam[Metrology::ChannelCount];
+	int						m_signalCount = 0;
+	QVector<IoSignalParam>	m_ioParamList;
 
 	int						columnCount(const QModelIndex &parent) const;
 	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -84,12 +85,12 @@ private:
 
 public:
 
-	int						signalCount() const { return Metrology::ChannelCount; }
-	MeasureMultiParam		signalParam(int index) const;
-	void					set(const MeasureSignal &activeSignal);
+	int						signalCount() const { return m_signalCount; }
+	IoSignalParam			signalParam(int index) const;
+	void					set(const QVector<IoSignalParam>& ioParamList);
 	void					clear();
 
-	QString					text(int row, int column, const MeasureMultiParam &measureParam) const;
+	QString					text(int column, const IoSignalParam& ioParam) const;
 	QString					signalStateStr(const Metrology::SignalParam& param, const Metrology::SignalState& state) const;
 
 	void					updateColumn(int column);
@@ -153,7 +154,7 @@ public slots:
 
 	// slot informs that signal for measure was selected
 	//
-	void					activeSignalChanged(const MeasureSignal &signal);
+	void					activeSignalChanged(const MeasureSignal& activeSignal);
 
 	// slot informs that signal for measure has updated his state
 	//

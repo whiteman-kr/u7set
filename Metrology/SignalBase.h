@@ -12,26 +12,30 @@
 
 // ==============================================================================================
 
-class MetrologyMultiSignal
+class MultiChannelSignal
 {
 public:
 
-	MetrologyMultiSignal();
-	MetrologyMultiSignal(const MetrologyMultiSignal& from);
-	virtual ~MetrologyMultiSignal() {}
+	explicit MultiChannelSignal();
+	MultiChannelSignal(const MultiChannelSignal& from);
+	virtual ~MultiChannelSignal() {}
 
 private:
 
 	mutable QMutex				m_mutex;
-	Metrology::Signal*			m_pSignal[Metrology::ChannelCount];
+	int							m_channelCount = 0;
+	QVector<Metrology::Signal*>	m_pSignalList;
 
 	Metrology::SignalLocation	m_location;
 	QString						m_strID;		// depend from SignalLocation and measureKind
 
 public:
 
-	bool						isEmpty() const;
 	void						clear();
+	bool						isEmpty() const;
+
+	int							channelCount() const { return m_channelCount; }
+	void						setChannelCount(int count);
 
 	Metrology::Signal*			metrologySignal(int channel) const;
 	bool						setMetrologySignal(int measureKind, int channel, Metrology::Signal* pSignal);
@@ -39,7 +43,7 @@ public:
 	Metrology::SignalLocation	location() const { return m_location; }
 	QString						strID() const { return m_strID; }
 
-	MetrologyMultiSignal&		operator=(const MetrologyMultiSignal& from);
+	MultiChannelSignal&			operator=(const MultiChannelSignal& from);
 };
 
 // ==============================================================================================
@@ -48,13 +52,13 @@ public:
 
 // ----------------------------------------------------------------------------------------------
 
-class MeasureMultiParam
+class IoSignalParam
 {
 public:
 
-	MeasureMultiParam();
-	MeasureMultiParam(const MeasureMultiParam& from);
-	virtual~MeasureMultiParam() {}
+	IoSignalParam();
+	IoSignalParam(const IoSignalParam& from);
+	virtual~IoSignalParam() {}
 
 private:
 
@@ -66,6 +70,7 @@ private:
 	CalibratorManager*		m_pCalibratorManager = nullptr;
 	double					m_percent = 0;
 	bool					m_negativeRange = false;
+	double					m_tunSignalState = 0;			// for restore tun value after measuring
 
 public:
 
@@ -101,10 +106,15 @@ public:
 	bool					isNegativeRange() const { return m_negativeRange; }
 	void					setNegativeRange(bool negativeRange) { m_negativeRange = negativeRange; }
 
-	MeasureMultiParam&		operator=(const MeasureMultiParam& from);
+	double					tunSignalState() const { return m_tunSignalState; }
+	void					setTunSignalState(double state) { m_tunSignalState = state; }
+
+	IoSignalParam&			operator=(const IoSignalParam& from);
 };
 
 // ==============================================================================================
+// class MeasureSignal consists of two classes multi-channel signals: input and output
+//
 
 class MeasureSignal
 {
@@ -120,7 +130,8 @@ private:
 
 	int						m_outputSignalType = OUTPUT_SIGNAL_TYPE_UNUSED;
 
-	MetrologyMultiSignal	m_signal[MEASURE_IO_SIGNAL_TYPE_COUNT];
+	int						m_channelCount = 0;
+	MultiChannelSignal		m_signal[MEASURE_IO_SIGNAL_TYPE_COUNT];
 
 public:
 
@@ -129,8 +140,11 @@ public:
 
 	int						outputSignalType() const { return m_outputSignalType; }
 
-	MetrologyMultiSignal	signal(int type) const;
-	bool					setSignal(int type, const MetrologyMultiSignal& signal);
+	int						channelCount() const { return m_channelCount; }
+	void					setChannelCount(int count);
+
+	MultiChannelSignal		multiSignal(int type) const;
+	bool					setMultiSignal(int type, const MultiChannelSignal& signal);
 
 	Metrology::Signal*		metrologySignal(int type, int channel) const;
 	bool					setMetrologySignal(int measureKind, int outputSignalType, int channel, Metrology::Signal* pSignal);
