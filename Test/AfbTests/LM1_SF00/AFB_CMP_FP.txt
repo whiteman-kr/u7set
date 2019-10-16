@@ -9,7 +9,6 @@ compatible MODULE_LM1SF00
 set #TUN_IN_FP1 = nan, #TUN_SET_CMP_FP_EQ001 = nan
 check #OUT_CMP_FP_EQ001 == 0
 check #NAN_CMP_FP_EQ001 == 1
-delay 10000
 
 // nan check
 set #TUN_IN_FP1 = nan, #TUN_SET_CMP_FP_EQ001 = 22.5
