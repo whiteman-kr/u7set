@@ -970,8 +970,7 @@ namespace Hardware
 		setDescriptionFields(scriptFirmware->subsysId(), scriptFirmwareData->uartId , descriptionVersion, fields.split(';'));
 	}
 
-
-	void ModuleFirmwareWriter::jsAddDescription(int channel, QString descriptionCSV)
+	void ModuleFirmwareWriter::jsInsertDescription(int index, int channel, QString descriptionCSV)
 	{
 		if (scriptUartChannelData == nullptr)	//maybe setScriptFirmware is not called!
 		{
@@ -1000,10 +999,27 @@ namespace Hardware
 		}
 		else
 		{
-			std::vector<QVariantList>& descriptonData = dd->second;
-			descriptonData.push_back(v);
-		}
+			std::vector<QVariantList>& descriptionData = dd->second;
+			if (index == -1)
+			{
+				descriptionData.push_back(v);
+			}
+			else
+			{
+				if (index < 0 || index >= static_cast<int>(descriptionData.size()))
+				{
+					Q_ASSERT(false);
+					return;
+				}
 
+				descriptionData.insert(descriptionData.begin() + index, v);
+			}
+		}
+	}
+
+	void ModuleFirmwareWriter::jsAddDescription(int channel, QString descriptionCSV)
+	{
+		return jsInsertDescription(-1, channel, descriptionCSV);
 	}
 
 	void ModuleFirmwareWriter::jsSetUniqueID(int lmNumber, quint64 uniqueID)
@@ -1033,19 +1049,37 @@ namespace Hardware
 			return;
 		}
 
-		QByteArray& log = m_scriptLog[scriptFirmware->subsysId()];
+		QStringList& log = m_scriptLog[scriptFirmware->subsysId()];
 
-		log.append(logString);
+		log.push_back(logString);
 	}
 
-	const QByteArray& ModuleFirmwareWriter::scriptLog(const QString& subsysId) const
+	void ModuleFirmwareWriter::replaceLog(const QString& subsysId, const QString& oldString, const QString& newString)
+	{
+		if (m_scriptLog.find(subsysId) == m_scriptLog.end())
+		{
+			Q_ASSERT(false);
+			return;
+		}
+
+		QStringList& l = m_scriptLog.at(subsysId);
+
+		l.replaceInStrings(oldString, newString);
+
+		return;
+	}
+
+	QByteArray ModuleFirmwareWriter::scriptLog(const QString& subsysId) const
 	{
 static QByteArray err;
 		if (m_scriptLog.find(subsysId) == m_scriptLog.end())
 		{
 			return err;
 		}
-		return m_scriptLog.at(subsysId);
+
+		const QStringList& l = m_scriptLog.at(subsysId);
+
+		return l.join(QString()).toUtf8();
 	}
 
 	quint64 ModuleFirmwareWriter::uniqueID(const QString& subsysId, int uartId, int lmNumber)
@@ -1121,6 +1155,29 @@ static QByteArray err;
 				quint64* pUniqueIdPtr = (quint64*)(pData + UniqueIdOffset);
 
 				*pUniqueIdPtr = uidBE;
+
+				// Write uniqueID description
+
+				QString equipmentId;
+
+				const std::vector<LogicModuleInfo>& mi = mf.logicModulesInfo();
+				for (auto& lmi : mi)
+				{
+					if (lmi.lmNumber == lmNumber && lmi.subsystemId == subsysId)
+					{
+						equipmentId = lmi.equipmentId;
+						break;
+					}
+				}
+
+				const int UniqueIdDescriptionPos = 9;
+
+				jsInsertDescription(UniqueIdDescriptionPos, lmNumber, tr("%1;%2;%3;0;64;UniqueID;0x%4").arg(equipmentId).arg(frameNumber).arg(UniqueIdOffset).arg(QString::number(genericUniqueId, 16)));
+
+				QString oldString = tr("    [%1:%2] UniqueID = 0\r\n").arg(frameNumber).arg(UniqueIdOffset);
+				QString newString = tr("    [%1:%2] UniqueID = 0x%3\r\n").arg(frameNumber).arg(UniqueIdOffset).arg(QString::number(genericUniqueId, 16));
+
+				replaceLog(subsysId, oldString, newString);
 			}
 			else
 			{
