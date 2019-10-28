@@ -359,9 +359,10 @@ CalibratorManager* CalibratorBase::calibratorForMeasure(int index) const
 
 	switch(theOptions.toolBar().measureKind())
 	{
-		case MEASURE_KIND_ONE:		pManager = firstConnectedCalibrator();	break;	// we need only one - connected;
-		case MEASURE_KIND_MULTI:	pManager = calibratorManager(index);	break;
-		default:					assert(0);
+		case MEASURE_KIND_ONE_RACK:
+		case MEASURE_KIND_ONE_MODULE:	pManager = firstConnectedCalibrator();	break;	// we need only one - connected;
+		case MEASURE_KIND_MULTI_RACK:	pManager = calibratorManager(index);	break;
+		default:						assert(0);
 	}
 
 	return pManager;

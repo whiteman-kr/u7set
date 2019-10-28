@@ -40,15 +40,17 @@ const int	MeasureTimeoutCount = sizeof(MeasureTimeout)/sizeof(MeasureTimeout[0])
 
 const char* const	MeasureKind[] =
 {
-			QT_TRANSLATE_NOOP("MeasureBase.h", " in one rack"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", " in several racks"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", " Single channel"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", " Single module"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", " Multi channel"),
 };
 
 const int	MEASURE_KIND_COUNT		= sizeof(MeasureKind)/sizeof(MeasureKind[0]);
 
 const int	MEASURE_KIND_UNKNOWN	= -1,
-			MEASURE_KIND_ONE		= 0,
-			MEASURE_KIND_MULTI		= 1;
+			MEASURE_KIND_ONE_RACK	= 0,
+			MEASURE_KIND_ONE_MODULE	= 1,
+			MEASURE_KIND_MULTI_RACK	= 2;
 
 // ==============================================================================================
 
@@ -189,7 +191,7 @@ class LinearityMeasurement : public Measurement
 public:
 
 	LinearityMeasurement();
-	LinearityMeasurement(const MeasureMultiParam& measureParam);
+	LinearityMeasurement(const IoSignalParam& ioParam);
 	virtual ~LinearityMeasurement();
 
 private:
@@ -226,8 +228,8 @@ public:
 
 	void			virtual clear();
 
-	void			fill_measure_input(const MeasureMultiParam& measureParam, bool isNegativeRange);
-	void			fill_measure_output(const MeasureMultiParam& measureParam);
+	void			fill_measure_input(const IoSignalParam& ioParam, bool isNegativeRange);
+	void			fill_measure_output(const IoSignalParam& ioParam);
 
 	void			setLimits(const Metrology::SignalParam& param);
 	void			calcError();

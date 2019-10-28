@@ -92,23 +92,23 @@ LinearityMeasurement::LinearityMeasurement() :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-LinearityMeasurement::LinearityMeasurement(const MeasureMultiParam &measureParam)
+LinearityMeasurement::LinearityMeasurement(const IoSignalParam &ioParam)
 {
 	clear();
 
-	if (measureParam.isValid() == false)
+	if (ioParam.isValid() == false)
 	{
 		return;
 	}
 
-	int outputSignalType = measureParam.outputSignalType();
+	int outputSignalType = ioParam.outputSignalType();
 	if (outputSignalType < 0 || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
 	{
 		assert(0);
 		return;
 	}
 
-	if (measureParam.calibratorManager() == nullptr)
+	if (ioParam.calibratorManager() == nullptr)
 	{
 		assert(0);
 		return;
@@ -116,9 +116,9 @@ LinearityMeasurement::LinearityMeasurement(const MeasureMultiParam &measureParam
 
 	switch (outputSignalType)
 	{
-		case OUTPUT_SIGNAL_TYPE_UNUSED:			fill_measure_input(measureParam, measureParam.isNegativeRange());	break;
+		case OUTPUT_SIGNAL_TYPE_UNUSED:			fill_measure_input(ioParam, ioParam.isNegativeRange());	break;
 		case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
-		case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	fill_measure_output(measureParam);	break;
+		case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	fill_measure_output(ioParam);							break;
 		default:								assert(0);
 	}
 }
@@ -180,28 +180,28 @@ void LinearityMeasurement::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearityMeasurement::fill_measure_input(const MeasureMultiParam &measureParam, bool isNegativeRange)
+void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam, bool isNegativeRange)
 {
-	if (measureParam.isValid() == false)
+	if (ioParam.isValid() == false)
 	{
 		assert(false);
 		return;
 	}
 
-	if (measureParam.calibratorManager() == nullptr)
+	if (ioParam.calibratorManager() == nullptr)
 	{
 		assert(0);
 		return;
 	}
 
-	Calibrator* pCalibrator = measureParam.calibratorManager()->calibrator();
+	Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
 	if (pCalibrator == nullptr)
 	{
 		assert(false);
 		return;
 	}
 
-	Metrology::SignalParam inParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	Metrology::SignalParam inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 	if (inParam.isValid() == false)
 	{
 		assert(false);
@@ -292,35 +292,35 @@ void LinearityMeasurement::fill_measure_input(const MeasureMultiParam &measurePa
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void LinearityMeasurement::fill_measure_output(const MeasureMultiParam &measureParam)
+void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 {
-	if (measureParam.isValid() == false)
+	if (ioParam.isValid() == false)
 	{
 		assert(false);
 		return;
 	}
 
-	if (measureParam.calibratorManager() == nullptr)
+	if (ioParam.calibratorManager() == nullptr)
 	{
 		assert(0);
 		return;
 	}
 
-	Calibrator* pCalibrator = measureParam.calibratorManager()->calibrator();
+	Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
 	if (pCalibrator == nullptr)
 	{
 		assert(false);
 		return;
 	}
 
-	int outputSignalType = measureParam.outputSignalType();
+	int outputSignalType = ioParam.outputSignalType();
 	if (outputSignalType < 0 || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
 	{
 		assert(0);
 		return;
 	}
 
-	Metrology::SignalParam outParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+	Metrology::SignalParam outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 	if (outParam.isValid() == false)
 	{
 		assert(false);
@@ -354,10 +354,10 @@ void LinearityMeasurement::fill_measure_output(const MeasureMultiParam &measureP
 	// nominal
 	//
 
-	double engeneering = (measureParam.percent() * (outParam.highEngeneeringUnits() - outParam.lowEngeneeringUnits()) / 100) + outParam.lowEngeneeringUnits();
+	double engeneering = (ioParam.percent() * (outParam.highEngeneeringUnits() - outParam.lowEngeneeringUnits()) / 100) + outParam.lowEngeneeringUnits();
 	double electric = conversion(engeneering, CT_ENGENEER_TO_ELECTRIC, outParam);
 
-	setPercent(measureParam.percent());
+	setPercent(ioParam.percent());
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
 	setNominal(MEASURE_LIMIT_TYPE_ENGENEER, engeneering);
@@ -381,8 +381,8 @@ void LinearityMeasurement::fill_measure_output(const MeasureMultiParam &measureP
 
 		if (outParam.isOutput() == true)
 		{
-			measureParam.calibratorManager()->value();
-			measureParam.calibratorManager()->waitReadyForManage();
+			ioParam.calibratorManager()->value();
+			ioParam.calibratorManager()->waitReadyForManage();
 
 			elVal = pCalibrator->measureValue();
 		}

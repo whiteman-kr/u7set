@@ -447,7 +447,7 @@ void ToolBarOption::load()
 	QSettings s;
 
 	m_measureTimeout = s.value(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), 0).toInt();
-	m_measureKind = s.value(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MEASURE_KIND_ONE).toInt();
+	m_measureKind = s.value(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MEASURE_KIND_ONE_RACK).toInt();
 	m_outputSignalType = s.value(QString("%1OutputSignalType").arg(TOOLBAR_OPTIONS_KEY), OUTPUT_SIGNAL_TYPE_UNUSED).toInt();
 }
 
@@ -1273,9 +1273,10 @@ int Options::channelCount()
 
 	switch(m_toolBar.measureKind())
 	{
-		case MEASURE_KIND_ONE:		count = 1;							break;
-		case MEASURE_KIND_MULTI:	count = Metrology::ChannelCount;	break;
-		default:					assert(0);
+		case MEASURE_KIND_ONE_RACK:		count = 1;							break;
+		case MEASURE_KIND_ONE_MODULE:	count = Metrology::InputCount;		break;
+		case MEASURE_KIND_MULTI_RACK:	count = Metrology::ChannelCount;	break;
+		default:						assert(0);
 	}
 
 	return count;

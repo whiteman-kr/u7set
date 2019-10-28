@@ -30,9 +30,7 @@ private:
 	int						m_measureType = MEASURE_TYPE_UNKNOWN;
 	bool					m_cmdStopMeasure = true;
 
-	MeasureMultiParam		m_activeSignalParam[Metrology::ChannelCount];
-
-	double					m_tunSignalState[Metrology::ChannelCount];
+	QVector<IoSignalParam>	m_activeIoParamList;
 
 	void					waitMeasureTimeout();
 
@@ -42,7 +40,7 @@ private:
 	bool					hasConnectedCalibrators();
 	bool					setCalibratorUnit();
 	bool					prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit);
-	void					polarityTest(double electricVal, MeasureMultiParam& param);
+	void					polarityTest(double electricVal, IoSignalParam& ioParam);
 
 	// function of measure
 	//
@@ -59,8 +57,9 @@ public:
 	void					init(QWidget* parent = nullptr);
 	void					setMeasureType(int measureType) { m_measureType = measureType; }
 	bool					enableMesureIsSignal();
-	bool					signalIsMeasured(QString& signalID);
-	bool					setActiveSignalParam();
+	bool					signalIsMeasured(const MeasureSignal& activeSignal, QString& signalID);
+	bool					setActiveSignalParam(const MeasureSignal& activeSignal);
+	bool					inputsOfmoduleIsSame();
 
 	void					stop() { m_cmdStopMeasure = true; }
 
