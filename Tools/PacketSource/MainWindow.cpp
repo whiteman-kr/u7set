@@ -32,7 +32,7 @@ MainWindow::~MainWindow()
 
 bool MainWindow::createInterface()
 {
-	setWindowIcon(QIcon(":/icons/PacketSource.png"));
+    //setWindowIcon(QIcon(":/icons/PacketSource.ico"));
 	setWindowTitle(tr("Packet Source"));
 	resize(1000, 700);
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());

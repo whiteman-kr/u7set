@@ -27,6 +27,9 @@ win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 include(../warnings.pri)
 
+#Application icon
+win32:RC_ICONS += icons/Metrology.ico
+
 # DESTDIR
 #
 win32 {
@@ -39,7 +42,7 @@ unix {
 }
 
 SOURCES += \
-	../lib/MemLeaksDetection.cpp \
+    ../lib/MemLeaksDetection.cpp \
     MainWindow.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
