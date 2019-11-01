@@ -123,7 +123,6 @@ MainWindow::~MainWindow()
 
 bool MainWindow::createInterface()
 {
-	setWindowIcon(QIcon(":/icons/Metrology.ico"));
 	setWindowTitle(tr("Metrology"));
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());
 
@@ -1294,19 +1293,22 @@ void MainWindow::setMeasureKind(int index)
 		return;
 	}
 
-	if (theSignalBase.racks().groups().count() == 0)
+	if (kind == MEASURE_KIND_MULTI_RACK)
 	{
-		m_measureKindList->blockSignals(true);
-		m_measureKindList->setCurrentIndex(MEASURE_KIND_ONE_RACK);
-		m_measureKindList->blockSignals(false);
+		if (theSignalBase.racks().groups().count() == 0)
+		{
+			m_measureKindList->blockSignals(true);
+			m_measureKindList->setCurrentIndex(theOptions.toolBar().measureKind());
+			m_measureKindList->blockSignals(false);
 
-		QMessageBox::information(this, windowTitle(), tr("For measurements in several racks simultaneously, "
-														 "you need to combine several racks into groups."
-														 "Currently, no groups have been found.\n"
-														 "To create a group of racks, click menu \"Tool\" - \"Racks ...\" ."));
+			QMessageBox::information(this, windowTitle(), tr("For measurements in several racks simultaneously, "
+															 "you need to combine several racks into groups."
+															 "Currently, no groups have been found.\n"
+															 "To create a group of racks, click menu \"Tool\" - \"Racks ...\" ."));
 
 
-		return;
+			return;
+		}
 	}
 
 	theOptions.toolBar().setMeasureKind(kind);
