@@ -1184,10 +1184,6 @@ void ComparatorMeasurement::updateHysteresis(Measurement* pMeasurement)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureBase theMeasureBase;
-
-// -------------------------------------------------------------------------------------------------------------------
-
 MeasureBase::MeasureBase(QObject *parent) :
 	QObject(parent)
 {
@@ -1489,6 +1485,8 @@ int MeasureBase::append(Measurement* pMeasurement)
 
 	m_measureMutex.unlock();
 
+	emit measurementAppend();
+
 	return index;
 }
 
@@ -1531,12 +1529,14 @@ bool MeasureBase::remove(int index, bool removeData)
 
 	m_measureMutex.unlock();
 
+	emit measurementRemoved();
+
 	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Metrology::SignalStatistic MeasureBase::statistic(const Hash& signalHash)
+Metrology::SignalStatistic MeasureBase::getSignalStatistic(const Hash& signalHash)
 {
 	if (signalHash == UNDEFINED_HASH)
 	{

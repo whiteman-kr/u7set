@@ -348,7 +348,7 @@ class MeasureBase : public QObject
 
 public:
 
-	explicit MeasureBase(QObject *parent = 0);
+	explicit MeasureBase(QObject *parent = nullptr);
 	virtual ~MeasureBase();
 
 private:
@@ -369,12 +369,14 @@ public:
 	Measurement*				measurement(int index) const;
 	bool						remove(int index, bool removeData = true);
 
-	Metrology::SignalStatistic	statistic(const Hash& signalHash);
+	Metrology::SignalStatistic	getSignalStatistic(const Hash& signalHash);
+
+signals:
+
+	void						measurementAppend();
+	void						measurementRemoved();
+
 };
-
-// ==============================================================================================
-
-extern MeasureBase theMeasureBase;
 
 // ==============================================================================================
 

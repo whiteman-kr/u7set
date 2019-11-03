@@ -109,7 +109,6 @@ bool MeasureThread::signalIsMeasured(const MeasureSignal& activeSignal, QString&
 	}
 
 	// temporary solution
-	// metrologySignal.setStatistic(theMeasureBase.statisticItem(param.hash()));
 	// find signal in list of statistics
 	//
 	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_parent);
@@ -134,16 +133,15 @@ bool MeasureThread::signalIsMeasured(const MeasureSignal& activeSignal, QString&
 			continue;
 		}
 
-		Metrology::SignalParam& param = pMetrologySignal->param();
-		if (param.isValid() == false)
+		if (pMetrologySignal->param().isValid() == false)
 		{
 			continue;
 		}
 
-		pMetrologySignal->setStatistic(pMeasureView->table().m_measureBase.statistic(param.hash()));
-		if (pMetrologySignal->statistic().measureCount() != 0)
+		Metrology::SignalStatistic ss = pMeasureView->table().m_measureBase.getSignalStatistic(pMetrologySignal->param().hash());
+		if (ss.measureCount() != 0)
 		{
-			signalID.append(param.customAppSignalID() + "\n");
+			signalID.append(pMetrologySignal->param().customAppSignalID() + "\n");
 
 			isMeasured = true;
 		}
@@ -778,7 +776,7 @@ void MeasureThread::measureLinearity()
 
 void MeasureThread::measureComprators()
 {
-	emit measureInfo(tr("Comprators "));
+	emit measureInfo(tr("Comprators"));
 
 	waitMeasureTimeout();
 }

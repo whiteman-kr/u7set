@@ -108,7 +108,8 @@ SOURCES += \
     ../lib/SignalProperties.cpp \
     ../lib/Ui/DialogAbout.cpp \
 	../lib/UnitsConvertor.cpp \
-    ../lib/UnitsConvertorTable.cpp
+    ../lib/UnitsConvertorTable.cpp \
+    StatisticBase.cpp
 
 #../lib/ExcelHelper.cpp
 
@@ -186,8 +187,9 @@ HEADERS  += \
     ../lib/SignalProperties.h \
     ../lib/Ui/DialogAbout.h \
 	../lib/UnitsConvertor.h \
-    ../lib/UnitsConvertorTable.h
+    ../lib/UnitsConvertorTable.h \
 #../lib/ExcelHelper.h
+    StatisticBase.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

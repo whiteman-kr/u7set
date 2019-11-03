@@ -123,6 +123,9 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 		return;
 	}
 
+	QTime responseTime;
+	responseTime.start();
+
 	clearConfiguration();
 
 	bool result = false;
@@ -161,6 +164,8 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 		m_loadedFiles.append(bfi.pathFileName);
 	}
 
+	qDebug() << __FUNCTION__ << " Time for read: " << responseTime.elapsed() << " ms";
+
 	emit configurationLoaded();
 
 	return;
@@ -183,6 +188,9 @@ bool ConfigSocket::readAppSignalSet(const QByteArray& fileData)
 {
 	::Proto::AppSignalSet protoAppSignalSet;
 
+	QTime responseTime;
+	responseTime.start();
+
 	bool result = protoAppSignalSet.ParseFromArray(fileData.constData(), fileData.size());
 	if (result == false)
 	{
@@ -200,7 +208,7 @@ bool ConfigSocket::readAppSignalSet(const QByteArray& fileData)
 		theSignalBase.appendSignal(param);
 	}
 
-	qDebug() << "ConfigSocket::readAppSignalSet - Signals were loaded" << theSignalBase.signalCount();
+	qDebug() << __FUNCTION__ << "Signals were loaded" << theSignalBase.signalCount() << " Time for load: " << responseTime.elapsed() << " ms";
 
 	return true;
 }
@@ -235,9 +243,14 @@ bool ConfigSocket::readMetrologySignals(const QByteArray& fileData)
 		return false;
 	}
 
+	QTime responseTime;
+	responseTime.start();
+
 	result &= readRacks(fileData, fileVersion);
 	result &= readTuningSources(fileData, fileVersion);
 	result &= readSignals(fileData, fileVersion);
+
+	qDebug() << __FUNCTION__ << " Time for read: " << responseTime.elapsed() << " ms";
 
 	return result;
 }
@@ -357,6 +370,9 @@ bool ConfigSocket::readSignals(const QByteArray& fileData, int fileVersion)
 		return false;
 	}
 
+	QTime responseTime;
+	responseTime.start();
+
 	Metrology::SignalParam param;
 
 	int signalCount = 0;
@@ -384,6 +400,8 @@ bool ConfigSocket::readSignals(const QByteArray& fileData, int fileVersion)
 
 		result &= res;
 	}
+
+	qDebug() << __FUNCTION__ << " Time for read: " << responseTime.elapsed() << " ms";
 
 	theSignalBase.initSignals();
 

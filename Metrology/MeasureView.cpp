@@ -35,6 +35,9 @@ void MeasureTable::setMeasureType(int measureType)
 	m_measureType = measureType;
 	m_header.init(measureType);
 	m_measureBase.load(measureType);
+
+	connect(&m_measureBase, &MeasureBase::measurementAppend, &theSignalBase.statistic(), &StatisticBase::measurementAppend);
+	connect(&m_measureBase, &MeasureBase::measurementRemoved, &theSignalBase.statistic(), &StatisticBase::measurementRemoved);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

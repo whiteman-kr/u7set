@@ -9,6 +9,7 @@
 #include "RackBase.h"
 #include "OutputSignalBase.h"
 #include "TuningSignalBase.h"
+#include "StatisticBase.h"
 
 // ==============================================================================================
 
@@ -201,13 +202,9 @@ private:
 	mutable QMutex			m_activeSignalMutex;
 	MeasureSignal			m_activeSignal;
 
-	// output signals
-	//
-	OutputSignalBase		m_outputSignalBase;
-
-	// sources and signals of tuning
-	//
-	TuningBase				m_tuningBase;
+	OutputSignalBase		m_outputSignalBase;		// output signals
+	TuningBase				m_tuningBase;			// sources and signals of tuning
+	StatisticBase			m_statisticBase;		// statistics of measured signals
 
 public:
 
@@ -284,6 +281,7 @@ public:
 	//
 	OutputSignalBase&		outputSignals() { return m_outputSignalBase; }		// output signals
 	TuningBase&				tuning() { return m_tuningBase; }					// sources and signals of tuning
+	StatisticBase&			statistic() { return m_statisticBase; }				// statistics of measured signals
 
 signals:
 

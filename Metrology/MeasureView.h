@@ -36,6 +36,8 @@ private:
 
 public:
 
+	MeasureBase			m_measureBase;
+
 	int					measureType() const { return m_measureType; }
 	void				setMeasureType(int measureType);
 
@@ -50,8 +52,6 @@ public:
 
 	QColor				backgroundColor(int row, int column) const;
 	QString				text(int row, int column) const;
-
-	MeasureBase		m_measureBase;
 };
 
 // ==============================================================================================

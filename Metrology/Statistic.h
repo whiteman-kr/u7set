@@ -12,8 +12,6 @@
 #include <QLabel>
 #include <QStatusBar>
 
-#include "../lib/Signal.h"
-
 #include "SignalBase.h"
 
 // ==============================================================================================
@@ -87,9 +85,6 @@ public:
 
 private:
 
-	mutable QMutex			m_signalMutex;
-	QList<Metrology::Signal*> m_signalList;
-
 	static bool				m_showADCInHex;
 
 	int						columnCount(const QModelIndex &parent) const;
@@ -100,9 +95,7 @@ private:
 
 public:
 
-	int						signalCount() const;
-	Metrology::Signal*		signal(int index) const;
-	void					set(const QList<Metrology::Signal*> list_add);
+	void					set();
 	void					clear();
 
 	QString					text(int row, int column, Metrology::Signal* pSignal) const;
@@ -162,9 +155,6 @@ private:
 
 	static int				m_measureType;
 
-	int						m_MeasuredCount = 0;
-	int						m_invalidMeasureCount = 0;
-
 	void					createInterface();
 	void					createHeaderContexMenu();
 	void					createContextMenu();
@@ -180,6 +170,7 @@ private slots:
 
 	// slots for updating
 	//
+	void					reloadList();
 	void					updateList();
 
 	// slots of menu
@@ -202,7 +193,6 @@ private slots:
 	void					showADCInHex();
 	void					gotoNextNotMeasured();
 	void					gotoNextInvalid();
-
 
 	void					onContextMenu(QPoint);
 

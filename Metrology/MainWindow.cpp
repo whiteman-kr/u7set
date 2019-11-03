@@ -24,8 +24,8 @@
 #include "TuningSignalList.h"
 #include "OutputSignalList.h"
 #include "Statistic.h"
-#include "../lib/Ui/DialogAbout.h"
 
+#include "../lib/Ui/DialogAbout.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -71,6 +71,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent) :
 	connect(m_pConfigSocket, &ConfigSocket::socketConnected, this, &MainWindow::configSocketConnected, Qt::QueuedConnection);
 	connect(m_pConfigSocket, &ConfigSocket::socketDisconnected, this, &MainWindow::configSocketDisconnected, Qt::QueuedConnection);
 	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &MainWindow::configSocketConfigurationLoaded);
+	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, &theSignalBase.statistic(), &StatisticBase::signalLoaded);
 
 	m_pConfigSocket->start();
 
@@ -1953,8 +1954,6 @@ void MainWindow::closeEvent(QCloseEvent* e)
 	}
 
 	theSignalBase.clear();
-
-	theMeasureBase.clear();
 
 	theCalibratorBase.clear();
 
