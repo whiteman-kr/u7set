@@ -23,7 +23,6 @@
 #include "SignalList.h"
 #include "TuningSignalList.h"
 #include "OutputSignalList.h"
-#include "Statistic.h"
 
 #include "../lib/Ui/DialogAbout.h"
 
@@ -72,6 +71,11 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent) :
 	connect(m_pConfigSocket, &ConfigSocket::socketDisconnected, this, &MainWindow::configSocketDisconnected, Qt::QueuedConnection);
 	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &MainWindow::configSocketConfigurationLoaded);
 	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, &theSignalBase.statistic(), &StatisticBase::signalLoaded);
+
+	if (m_pStatisticPanel != nullptr)
+	{
+		connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pStatisticPanel, &StatisticPanel::updateList);
+	}
 
 	m_pConfigSocket->start();
 
@@ -130,8 +134,8 @@ bool MainWindow::createInterface()
 	createActions();
 	createMenu();
 	createToolBars();
-	createMeasureViews();
 	createPanels();
+	createMeasureViews();
 	createStatusBar();
 	createContextMenu();
 
@@ -507,6 +511,112 @@ bool MainWindow::createToolBars()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::createPanels()
+{
+	// Search measurements panel
+	//
+	m_pFindMeasurePanel = new FindMeasurePanel(this);
+	if (m_pFindMeasurePanel != nullptr)
+	{
+		m_pFindMeasurePanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+
+		addDockWidget(Qt::RightDockWidgetArea, m_pFindMeasurePanel);
+
+		m_pFindMeasurePanel->hide();
+
+		QAction* findAction = m_pFindMeasurePanel->toggleViewAction();
+		if (findAction != nullptr)
+		{
+			findAction->setText(tr("&Find ..."));
+			findAction->setShortcut(Qt::CTRL + Qt::Key_F);
+			findAction->setIcon(QIcon(":/icons/Find.png"));
+			findAction->setToolTip(tr("Find data in list of measurements"));
+
+			if (m_pEditMenu != nullptr)
+			{
+				m_pEditMenu->addAction(findAction);
+			}
+
+			if (m_pMeasureControlToolBar != nullptr)
+			{
+				m_pMeasureControlToolBar->addAction(findAction);
+			}
+		}
+
+		connect(this, &MainWindow::changedMeasureType, m_pFindMeasurePanel, &FindMeasurePanel::clear, Qt::QueuedConnection);
+	}
+
+	// Panel statistics
+	//
+	m_pStatisticPanel = new StatisticPanel(this);
+	if (m_pStatisticPanel != nullptr)
+	{
+		m_pStatisticPanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+
+		addDockWidget(Qt::RightDockWidgetArea, m_pStatisticPanel);
+
+		if (m_pViewPanelMenu != nullptr)
+		{
+			m_pViewPanelMenu->addAction(m_pStatisticPanel->toggleViewAction());
+		}
+
+		m_pStatisticPanel->hide();
+
+		connect(this, &MainWindow::changedMeasureType, m_pStatisticPanel, &StatisticPanel::changedMeasureType, Qt::QueuedConnection);
+		connect(this, &MainWindow::changedOutputSignalType, m_pStatisticPanel, &StatisticPanel::changedOutputSignalType, Qt::QueuedConnection);
+	}
+
+
+	// Separator
+	//
+	if (m_pViewPanelMenu != nullptr)
+	{
+		m_pViewPanelMenu->addSeparator();
+	}
+
+	// Panel signal information
+	//
+	m_pSignalInfoPanel = new SignalInfoPanel(this);
+	if (m_pSignalInfoPanel != nullptr)
+	{
+		m_pSignalInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
+
+		addDockWidget(Qt::BottomDockWidgetArea, m_pSignalInfoPanel);
+
+		if (m_pViewPanelMenu != nullptr)
+		{
+			m_pViewPanelMenu->addAction(m_pSignalInfoPanel->toggleViewAction());
+		}
+
+		m_pSignalInfoPanel->hide();
+	}
+
+	// Panel comparator information
+	//
+	m_pComparatorInfoPanel = new QDockWidget(tr("Panel comparator information"), this);
+	m_pComparatorInfoPanel->setObjectName("Panel comparator information");
+	if (m_pComparatorInfoPanel != nullptr)
+	{
+		m_pComparatorInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
+
+		m_pComparatorInfoView = new QTableView;
+		if (m_pComparatorInfoView != nullptr)
+		{
+			m_pComparatorInfoPanel->setWidget(m_pComparatorInfoView);
+		}
+		addDockWidget(Qt::BottomDockWidgetArea, m_pComparatorInfoPanel);
+
+		if (m_pViewPanelMenu != nullptr)
+		{
+			m_pViewPanelMenu->addAction(m_pComparatorInfoPanel->toggleViewAction());
+		}
+
+		m_pComparatorInfoPanel->hide();
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::createMeasureViews()
 {
 	m_pMainTab = new QTabWidget();
@@ -576,89 +686,6 @@ void MainWindow::appendMeasureView(int measureType, MeasureView* pView)
 	}
 
 	m_measureViewMap[measureType] = pView;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::createPanels()
-{
-	// Search measurements panel
-	//
-	m_pFindMeasurePanel = new FindMeasurePanel(this);
-	if (m_pFindMeasurePanel != nullptr)
-	{
-		m_pFindMeasurePanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
-
-		addDockWidget(Qt::RightDockWidgetArea, m_pFindMeasurePanel);
-
-		m_pFindMeasurePanel->hide();
-
-		QAction* findAction = m_pFindMeasurePanel->toggleViewAction();
-		if (findAction != nullptr)
-		{
-			findAction->setText(tr("&Find ..."));
-			findAction->setShortcut(Qt::CTRL + Qt::Key_F);
-			findAction->setIcon(QIcon(":/icons/Find.png"));
-			findAction->setToolTip(tr("Find data in list of measurements"));
-
-			if (m_pEditMenu != nullptr)
-			{
-				m_pEditMenu->addAction(findAction);
-			}
-
-			if (m_pMeasureControlToolBar != nullptr)
-			{
-				m_pMeasureControlToolBar->addAction(findAction);
-			}
-		}
-	}
-
-	// Separator
-	//
-	if (m_pViewPanelMenu != nullptr)
-	{
-		m_pViewPanelMenu->addSeparator();
-	}
-
-	// Panel signal information
-	//
-	m_pSignalInfoPanel = new SignalInfoPanel(this);
-	if (m_pSignalInfoPanel != nullptr)
-	{
-		m_pSignalInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
-
-		addDockWidget(Qt::BottomDockWidgetArea, m_pSignalInfoPanel);
-
-		if (m_pViewPanelMenu != nullptr)
-		{
-			m_pViewPanelMenu->addAction(m_pSignalInfoPanel->toggleViewAction());
-		}
-
-		m_pSignalInfoPanel->hide();
-	}
-
-	// Panel comparator information
-	//
-	m_pComparatorInfoPanel = new QDockWidget(tr("Panel comparator information"), this);
-	m_pComparatorInfoPanel->setObjectName("Panel comparator information");
-	if (m_pComparatorInfoPanel != nullptr)
-	{
-		m_pComparatorInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
-
-		m_pComparatorInfoView = new QTableView;
-		if (m_pComparatorInfoView != nullptr)
-		{
-			m_pComparatorInfoPanel->setWidget(m_pComparatorInfoView);
-		}
-		addDockWidget(Qt::BottomDockWidgetArea, m_pComparatorInfoPanel);
-
-		if (m_pViewPanelMenu != nullptr)
-		{
-			m_pViewPanelMenu->addAction(m_pComparatorInfoPanel->toggleViewAction());
-		}
-
-		m_pComparatorInfoPanel->hide();
-	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -984,7 +1011,7 @@ void MainWindow::setMeasureType(int measureType)
 
 	m_measureType = measureType;
 
-	m_pFindMeasurePanel->clear();
+	emit changedMeasureType(m_measureType);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1273,8 +1300,12 @@ void MainWindow::showOptions()
 
 void MainWindow::showStatistic()
 {
-	StatisticDialog dialog(this);
-	dialog.exec();
+	if (m_pStatisticPanel == nullptr)
+	{
+		return;
+	}
+
+	m_pStatisticPanel->show();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1346,6 +1377,8 @@ void MainWindow::setOutputSignalType(int index)
 
 	theOptions.toolBar().setOutputSignalType(type);
 	theOptions.toolBar().save();
+
+	emit changedOutputSignalType(type);
 
 	updateRacksOnToolBar();
 	updateSignalsOnToolBar();

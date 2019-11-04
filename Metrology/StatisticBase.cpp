@@ -38,6 +38,9 @@ void StatisticBase::clear()
 
 void StatisticBase::createSignalList()
 {
+	QTime responseTime;
+	responseTime.start();
+
 	m_signalMutex.lock();
 
 		int count = theSignalBase.signalCount();
@@ -51,6 +54,11 @@ void StatisticBase::createSignalList()
 
 			Metrology::SignalParam& param = pSignal->param();
 			if (param.isValid() == false)
+			{
+				continue;
+			}
+
+			if (param.isAnalog() == false)
 			{
 				continue;
 			}
@@ -79,6 +87,8 @@ void StatisticBase::createSignalList()
 		m_signalCount = m_signalList.count();
 
 	m_signalMutex.unlock();
+
+	qDebug() << __FUNCTION__ << " Time for create: " << responseTime.elapsed() << " ms";
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -101,13 +111,16 @@ Metrology::Signal* StatisticBase::signal(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticBase::updateState(QTableView* pView)
+void StatisticBase::updateSignalsState(QTableView* pView)
 {
 	MeasureView* pMeasureView = dynamic_cast<MeasureView*> (pView);
 	if (pMeasureView == nullptr)
 	{
 		return;
 	}
+
+	QTime responseTime;
+	responseTime.start();
 
 	m_signalMutex.lock();
 
@@ -125,6 +138,60 @@ void StatisticBase::updateState(QTableView* pView)
 
 			Metrology::SignalStatistic ss = pMeasureView->table().m_measureBase.getSignalStatistic(pSignal->param().hash());
 			pSignal->setStatistic(ss);
+
+			if (pSignal->statistic().measureCount() != 0)
+			{
+				m_measuredCount++;
+			}
+
+			if (pSignal->statistic().state() == Metrology::StatisticStateFailed)
+			{
+				m_invalidMeasureCount ++;
+			}
+		}
+
+	m_signalMutex.unlock();
+
+	qDebug() << __FUNCTION__ << " Time for update: " << responseTime.elapsed() << " ms";
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void StatisticBase::updateSignalState(QTableView* pView, Hash signalHash)
+{
+	MeasureView* pMeasureView = dynamic_cast<MeasureView*> (pView);
+	if (pMeasureView == nullptr)
+	{
+		return;
+	}
+
+	if (signalHash == UNDEFINED_HASH)
+	{
+		return;
+	}
+
+	Metrology::Signal* pSignal = theSignalBase.signalPtr(signalHash);
+	if (pSignal == nullptr || pSignal->param().isValid() == false)
+	{
+		return;
+	}
+
+	Metrology::SignalStatistic ss = pMeasureView->table().m_measureBase.getSignalStatistic(pSignal->param().hash());
+	pSignal->setStatistic(ss);
+
+	m_signalMutex.lock();
+
+		m_measuredCount = 0;
+		m_invalidMeasureCount = 0;
+
+		int count = m_signalList.count();
+		for(int i = 0; i < count; i++)
+		{
+			pSignal = m_signalList[i];
+			if (pSignal == nullptr)
+			{
+				continue;
+			}
 
 			if (pSignal->statistic().measureCount() != 0)
 			{

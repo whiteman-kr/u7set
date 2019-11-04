@@ -8,6 +8,8 @@
 #include "Database.h"
 #include "Options.h"
 
+#include "MainWindow.h"
+
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -35,9 +37,6 @@ void MeasureTable::setMeasureType(int measureType)
 	m_measureType = measureType;
 	m_header.init(measureType);
 	m_measureBase.load(measureType);
-
-	connect(&m_measureBase, &MeasureBase::measurementAppend, &theSignalBase.statistic(), &StatisticBase::measurementAppend);
-	connect(&m_measureBase, &MeasureBase::measurementRemoved, &theSignalBase.statistic(), &StatisticBase::measurementRemoved);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -295,13 +294,13 @@ QString MeasureTable::textLinearity(int row, int column) const
 	{
 		case MVC_CMN_L_INDEX:					result = QString::number(m->measureID()); break;
 
-		case MVC_CMN_L_RACK:					result = m->location().rack().caption(); break;
 		case MVC_CMN_L_MODULE_SN:				result = m->moduleSerialNoStr(); break;
 		case MVC_CMN_L_APP_ID:					result = m->appSignalID(); break;
 		case MVC_CMN_L_CUSTOM_ID:				result = m->customAppSignalID(); break;
 		case MVC_CMN_L_EQUIPMENT_ID:			result = m->location().equipmentID(); break;
 		case MVC_CMN_L_NAME:					result = m->caption(); break;
 
+		case MVC_CMN_L_RACK:					result = m->location().rack().caption(); break;
 		case MVC_CMN_L_CHASSIS:					result = m->location().chassisStr(); break;
 		case MVC_CMN_L_MODULE:					result = m->location().moduleStr(); break;
 		case MVC_CMN_L_PLACE:					result = m->location().placeStr(); break;
@@ -521,6 +520,15 @@ MeasureView::MeasureView(int measureType, QWidget *parent) :
 {
 	m_table.setMeasureType(measureType);
 	setModel(&m_table);
+
+	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
+	if (pMainWindow != nullptr)
+	{
+		if (pMainWindow->statisticPanel() != nullptr)
+		{
+			connect(&m_table.m_measureBase, &MeasureBase::updatedMeasureBase, pMainWindow->statisticPanel(), &StatisticPanel::updateSignalInList);
+		}
+	}
 
 	setSelectionBehavior(QAbstractItemView::SelectRows);
 

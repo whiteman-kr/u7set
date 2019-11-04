@@ -1,14 +1,15 @@
-#ifndef STATISTICDIALOG_H
-#define STATISTICDIALOG_H
+#ifndef STATISTICPANEL_H
+#define STATISTICPANEL_H
 
 #include <QDebug>
-#include <QDialog>
+#include <QDockWidget>
 #include <QMainWindow>
 #include <QMenu>
 #include <QMenuBar>
 #include <QAction>
 #include <QVBoxLayout>
 #include <QTableView>
+#include <QTableWidget>
 #include <QLabel>
 #include <QStatusBar>
 
@@ -18,11 +19,11 @@
 
 const char* const			StatisticColumn[] =
 {
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Rack"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "AppSignalID"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "CustomSignalID"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "EquipmentID"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Caption"),
+							QT_TRANSLATE_NOOP("StatisticDialog.h", "Rack"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Chassis"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Module"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Place"),
@@ -37,11 +38,11 @@ const char* const			StatisticColumn[] =
 
 const int					STATISTIC_COLUMN_COUNT			= sizeof(StatisticColumn)/sizeof(StatisticColumn[0]);
 
-const int					STATISTIC_COLUMN_RACK			= 0,
-							STATISTIC_COLUMN_APP_ID			= 1,
-							STATISTIC_COLUMN_CUSTOM_ID		= 2,
-							STATISTIC_COLUMN_EQUIPMENT_ID	= 3,
-							STATISTIC_COLUMN_CAPTION		= 4,
+const int					STATISTIC_COLUMN_APP_ID			= 0,
+							STATISTIC_COLUMN_CUSTOM_ID		= 1,
+							STATISTIC_COLUMN_EQUIPMENT_ID	= 2,
+							STATISTIC_COLUMN_CAPTION		= 3,
+							STATISTIC_COLUMN_RACK			= 4,
 							STATISTIC_COLUMN_CHASSIS		= 5,
 							STATISTIC_COLUMN_MODULE			= 6,
 							STATISTIC_COLUMN_PLACE			= 7,
@@ -55,11 +56,11 @@ const int					STATISTIC_COLUMN_RACK			= 0,
 
 const int					StatisticColumnWidth[STATISTIC_COLUMN_COUNT] =
 {
-							100,	// STATISTIC_COLUMN_RACK
 							250,	// STATISTIC_COLUMN_APP_ID
 							250,	// STATISTIC_COLUMN_CUSTOM_ID
 							250,	// STATISTIC_COLUMN_EQUIPMENT_ID
 							150,	// STATISTIC_COLUMN_CAPTION
+							100,	// STATISTIC_COLUMN_RACK
 							 60,	// STATISTIC_COLUMN_CHASSIS
 							 60,	// STATISTIC_COLUMN_MODULE
 							 60,	// STATISTIC_COLUMN_PLACE
@@ -85,8 +86,6 @@ public:
 
 private:
 
-	static bool				m_showADCInHex;
-
 	int						columnCount(const QModelIndex &parent) const;
 	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
 
@@ -100,31 +99,36 @@ public:
 
 	QString					text(int row, int column, Metrology::Signal* pSignal) const;
 
-	bool					showADCInHex() const { return m_showADCInHex; }
-	void					setShowADCInHex(bool show) { m_showADCInHex = show; }
+	void					updateSignal(Hash signalHash);
 };
+
 
 // ==============================================================================================
 
-class StatisticDialog : public QDialog
+#define						SIGNAL_INFO_OPTIONS_KEY		"Options/SignalInfo/"
+
+// ==============================================================================================
+
+class StatisticPanel : public QDockWidget
 {
 	Q_OBJECT
 
 public:
 
-	explicit StatisticDialog(QWidget *parent = nullptr);
-	virtual ~StatisticDialog();
+	explicit StatisticPanel(QWidget* parent = nullptr);
+	virtual ~StatisticPanel();
 
 private:
 
+	// elements of interface
+	//
 	QMainWindow*			m_pMainWindow = nullptr;
+	QMainWindow*			m_pStatisticWindow = nullptr;
 
 	QMenuBar*				m_pMenuBar = nullptr;
 	QMenu*					m_pSignalMenu = nullptr;
 	QMenu*					m_pEditMenu = nullptr;
 	QMenu*					m_pViewMenu = nullptr;
-	QMenu*					m_pViewMeasureTypeMenu = nullptr;
-	QMenu*					m_pViewShowMenu = nullptr;
 	QMenu*					m_pViewGotoMenu = nullptr;
 	QMenu*					m_pContextMenu = nullptr;
 
@@ -134,10 +138,8 @@ private:
 	QAction*				m_pFindAction = nullptr;
 	QAction*				m_pCopyAction = nullptr;
 	QAction*				m_pSelectAllAction = nullptr;
+	QAction*				m_pSignalPropertyAction = nullptr;
 
-	QAction*				m_pTypeLinearityAction = nullptr;
-	QAction*				m_pTypeComparatorsAction = nullptr;
-	QAction*				m_pShowADCInHexAction = nullptr;
 	QAction*				m_pGotoNextNotMeasuredAction = nullptr;
 	QAction*				m_pGotoNextInvalidAction = nullptr;
 
@@ -164,14 +166,19 @@ private:
 	void					updateVisibleColunm();
 	void					hideColumn(int column, bool hide);
 
-signals:
+protected:
+
+	bool					eventFilter(QObject *object, QEvent *event);
+
+public slots:
+
+	void					changedMeasureType(int type);
+	void					changedOutputSignalType(int type);
+
+	void					updateList();							// slots for reload list
+	void					updateSignalInList(Hash signalHash);	// slots for updating one singal in list
 
 private slots:
-
-	// slots for updating
-	//
-	void					reloadList();
-	void					updateList();
 
 	// slots of menu
 	//
@@ -184,13 +191,11 @@ private slots:
 							//
 	void					find();
 	void					copy();
-	void					selectAll() { m_pView->selectAll(); }
+	void					selectAll();
+	void					signalProperty();
 
 							// View
 							//
-	void					showTypeLinearity();
-	void					showTypeComparators();
-	void					showADCInHex();
 	void					gotoNextNotMeasured();
 	void					gotoNextInvalid();
 
@@ -200,8 +205,12 @@ private slots:
 	//
 	void					onHeaderContextMenu(QPoint);
 	void					onColumnAction(QAction* action);
+
+	// slots for list
+	//
+	void					onListDoubleClicked(const QModelIndex&) { selectSignalForMeasure(); }
 };
 
 // ==============================================================================================
 
-#endif // STATISTICDIALOG_H
+#endif // STATISTICPANEL_H

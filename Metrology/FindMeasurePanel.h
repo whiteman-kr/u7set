@@ -126,7 +126,7 @@ public:
 
 private:
 
-	QMainWindow*		m_pMainWindow;
+	QMainWindow*		m_pMainWindow = nullptr;
 
 	int					m_measureType = MEASURE_TYPE_UNKNOWN;
 
@@ -148,14 +148,15 @@ private:
 	void				loadSettings();
 	void				saveSettings();
 
-public:
-
-	void				clear() { m_table.clear(); m_statusLabel->setText(QString()); }
-
 protected:
 
 	bool				event(QEvent* e);
 	bool				eventFilter(QObject* object, QEvent* e);
+
+public slots:
+
+	void				clear()	{ m_table.clear(); m_statusLabel->setText(QString()); }
+
 
 private slots:
 

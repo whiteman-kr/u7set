@@ -373,9 +373,7 @@ public:
 
 signals:
 
-	void						measurementAppend();
-	void						measurementRemoved();
-
+	void						updatedMeasureBase(Hash signalHash);
 };
 
 // ==============================================================================================

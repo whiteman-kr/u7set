@@ -105,11 +105,11 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 
 		switch (column)
 		{
-			case SIGNAL_LIST_COLUMN_RACK:				result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_APP_ID:				result = Qt::AlignLeft;		break;
 			case SIGNAL_LIST_COLUMN_CUSTOM_ID:			result = Qt::AlignLeft;		break;
 			case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:		result = Qt::AlignLeft;		break;
 			case SIGNAL_LIST_COLUMN_CAPTION:			result = Qt::AlignLeft;		break;
+			case SIGNAL_LIST_COLUMN_RACK:				result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_CHASSIS:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_MODULE:				result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_PLACE:				result = Qt::AlignCenter;	break;
@@ -223,11 +223,11 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 
 	switch (column)
 	{
-		case SIGNAL_LIST_COLUMN_RACK:				result = param.location().rack().caption();	break;
 		case SIGNAL_LIST_COLUMN_APP_ID:				result = param.appSignalID();				break;
 		case SIGNAL_LIST_COLUMN_CUSTOM_ID:			result = param.customAppSignalID();			break;
 		case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:		result = param.location().equipmentID();	break;
 		case SIGNAL_LIST_COLUMN_CAPTION:			result = param.caption();					break;
+		case SIGNAL_LIST_COLUMN_RACK:				result = param.location().rack().caption();	break;
 		case SIGNAL_LIST_COLUMN_CHASSIS:			result = param.location().chassisStr();		break;
 		case SIGNAL_LIST_COLUMN_MODULE:				result = param.location().moduleStr();		break;
 		case SIGNAL_LIST_COLUMN_PLACE:				result = param.location().placeStr();		break;
@@ -509,10 +509,10 @@ void SignalListDialog::createContextMenu()
 	//
 	m_pContextMenu = new QMenu(tr(""), this);
 
-	m_pContextMenu->addAction(m_pCopyAction);
-	m_pContextMenu->addSeparator();
 	m_pContextMenu->addMenu(m_pViewTypeADMenu);
 	m_pContextMenu->addMenu(m_pViewTypeIOMenu);
+	m_pContextMenu->addSeparator();
+	m_pContextMenu->addAction(m_pCopyAction);
 	m_pContextMenu->addSeparator();
 	m_pContextMenu->addAction(m_pSignalPropertyAction);
 

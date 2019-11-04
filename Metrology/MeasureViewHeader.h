@@ -108,12 +108,12 @@ public:
 // ==============================================================================================
 
 const int				MVC_CMN_L_INDEX				= 0;
-const int				MVC_CMN_L_RACK				= 1;
-const int				MVC_CMN_L_MODULE_SN			= 2;
-const int				MVC_CMN_L_APP_ID			= 3;
-const int				MVC_CMN_L_CUSTOM_ID			= 4;
-const int				MVC_CMN_L_EQUIPMENT_ID		= 5;
-const int				MVC_CMN_L_NAME				= 6;
+const int				MVC_CMN_L_MODULE_SN			= 1;
+const int				MVC_CMN_L_APP_ID			= 2;
+const int				MVC_CMN_L_CUSTOM_ID			= 3;
+const int				MVC_CMN_L_EQUIPMENT_ID		= 4;
+const int				MVC_CMN_L_NAME				= 5;
+const int				MVC_CMN_L_RACK				= 6;
 const int				MVC_CMN_L_CHASSIS			= 7;
 const int				MVC_CMN_L_MODULE			= 8;
 const int				MVC_CMN_L_PLACE				= 9;

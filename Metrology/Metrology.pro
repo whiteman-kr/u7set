@@ -78,7 +78,6 @@ SOURCES += \
     SignalList.cpp \
     FindMeasurePanel.cpp \
     SignalInfoPanel.cpp \
-    Statistic.cpp \
     ExportData.cpp \
     FindData.cpp \
     TuningSocket.cpp \
@@ -109,7 +108,8 @@ SOURCES += \
     ../lib/Ui/DialogAbout.cpp \
 	../lib/UnitsConvertor.cpp \
     ../lib/UnitsConvertorTable.cpp \
-    StatisticBase.cpp
+    StatisticBase.cpp \
+    StatisticPanel.cpp
 
 #../lib/ExcelHelper.cpp
 
@@ -157,7 +157,6 @@ HEADERS  += \
     SignalList.h \
     FindMeasurePanel.h \
     SignalInfoPanel.h \
-    Statistic.h \
     ExportData.h \
     FindData.h \
     TuningSocket.h \
@@ -189,7 +188,8 @@ HEADERS  += \
 	../lib/UnitsConvertor.h \
     ../lib/UnitsConvertorTable.h \
 #../lib/ExcelHelper.h
-    StatisticBase.h
+    StatisticBase.h \
+    StatisticPanel.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
