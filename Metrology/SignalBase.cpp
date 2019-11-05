@@ -132,9 +132,9 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 
 		switch(measureKind)
 		{
-			case MEASURE_KIND_ONE_RACK:		m_strID = param.customAppSignalID();																						break;
-			case MEASURE_KIND_ONE_MODULE:	m_strID = param.location().moduleID();																						break;
-			case MEASURE_KIND_MULTI_RACK:	m_strID.sprintf("CH %02d _ MD %02d _ IN %02d", m_location.chassis() + 1, m_location.module() + 1, m_location.place() + 1);	break;
+			case MEASURE_KIND_ONE_RACK:		m_strID = param.customAppSignalID();																			break;
+			case MEASURE_KIND_ONE_MODULE:	m_strID = param.location().moduleID();																			break;
+			case MEASURE_KIND_MULTI_RACK:	m_strID.sprintf("CH %02d _ MD %02d _ IN %02d", m_location.chassis(), m_location.module(), m_location.place());	break;
 			default:						assert(false);
 		}
 
@@ -425,7 +425,6 @@ QString IoSignalParam::equipmentID() const
 	m_mutex.unlock();
 
 	return result;
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1216,6 +1215,7 @@ void SignalBase::clearSignalList()
 
 	m_outputSignalBase.empty();			// set all output signals vlue nullptr
 	m_tuningBase.Signals().clear();		// remove all tuning signals
+	m_statisticBase.clear();
 
 	m_signalHashMap.clear();
 	m_signalList.clear();
@@ -1854,6 +1854,8 @@ void SignalBase::initSignals()
 	m_outputSignalBase.init();
 
 	m_tuningBase.Signals().createSignalList();
+
+	m_statisticBase.createSignalList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1997,7 +1999,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, int outputSignalType
 						continue;
 					}
 
-					if (param.electricSensorType() == E::SensorType::NoSensor)
+					if (param.electricUnitID() == E::ElectricUnit::NoUnit)
 					{
 						continue;
 					}
@@ -2016,7 +2018,7 @@ int SignalBase::createSignalListForMeasure(int measureKind, int outputSignalType
 						continue;
 					}
 
-					if (param.electricSensorType() == E::SensorType::NoSensor)
+					if (param.electricUnitID() == E::ElectricUnit::NoUnit)
 					{
 						continue;
 					}

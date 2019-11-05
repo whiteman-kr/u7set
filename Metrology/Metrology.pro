@@ -27,6 +27,9 @@ win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 include(../warnings.pri)
 
+#Application icon
+win32:RC_ICONS += icons/Metrology.ico
+
 # DESTDIR
 #
 win32 {
@@ -39,7 +42,7 @@ unix {
 }
 
 SOURCES += \
-	../lib/MemLeaksDetection.cpp \
+    ../lib/MemLeaksDetection.cpp \
     MainWindow.cpp \
     Calibrator.cpp \
     CalibratorBase.cpp \
@@ -75,7 +78,6 @@ SOURCES += \
     SignalList.cpp \
     FindMeasurePanel.cpp \
     SignalInfoPanel.cpp \
-    Statistic.cpp \
     ExportData.cpp \
     FindData.cpp \
     TuningSocket.cpp \
@@ -105,7 +107,9 @@ SOURCES += \
     ../lib/SignalProperties.cpp \
     ../lib/Ui/DialogAbout.cpp \
 	../lib/UnitsConvertor.cpp \
-    ../lib/UnitsConvertorTable.cpp
+    ../lib/UnitsConvertorTable.cpp \
+    StatisticBase.cpp \
+    StatisticPanel.cpp
 
 #../lib/ExcelHelper.cpp
 
@@ -153,7 +157,6 @@ HEADERS  += \
     SignalList.h \
     FindMeasurePanel.h \
     SignalInfoPanel.h \
-    Statistic.h \
     ExportData.h \
     FindData.h \
     TuningSocket.h \
@@ -183,8 +186,10 @@ HEADERS  += \
     ../lib/SignalProperties.h \
     ../lib/Ui/DialogAbout.h \
 	../lib/UnitsConvertor.h \
-    ../lib/UnitsConvertorTable.h
+    ../lib/UnitsConvertorTable.h \
 #../lib/ExcelHelper.h
+    StatisticBase.h \
+    StatisticPanel.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

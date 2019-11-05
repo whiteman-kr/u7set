@@ -1184,10 +1184,6 @@ void ComparatorMeasurement::updateHysteresis(Measurement* pMeasurement)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureBase theMeasureBase;
-
-// -------------------------------------------------------------------------------------------------------------------
-
 MeasureBase::MeasureBase(QObject *parent) :
 	QObject(parent)
 {
@@ -1489,6 +1485,8 @@ int MeasureBase::append(Measurement* pMeasurement)
 
 	m_measureMutex.unlock();
 
+	emit updatedMeasureBase(pMeasurement->signalHash());
+
 	return index;
 }
 
@@ -1519,28 +1517,44 @@ bool MeasureBase::remove(int index, bool removeData)
 		return false;
 	}
 
+	Hash signalHash = UNDEFINED_HASH;
+
 	m_measureMutex.lock();
 
 		Measurement* pMeasurement = m_measureList[index];
-		if (pMeasurement != nullptr && removeData == true)
+		if (pMeasurement != nullptr)
 		{
-			delete pMeasurement;
+			signalHash = pMeasurement->signalHash();
+
+			if (removeData == true)
+			{
+				delete pMeasurement;
+			}
 		}
 
 		m_measureList.remove(index);
 
 	m_measureMutex.unlock();
 
+	emit updatedMeasureBase(signalHash);
+
 	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Metrology::SignalStatistic MeasureBase::statistic(const Hash& signalHash)
+Metrology::SignalStatistic MeasureBase::getSignalStatistic(const Hash& signalHash)
 {
 	if (signalHash == UNDEFINED_HASH)
 	{
 		assert(signalHash != UNDEFINED_HASH);
+		return Metrology::SignalStatistic();
+	}
+
+	int errorType = theOptions.linearity().errorType();
+	if (errorType < 0 || errorType >= MEASURE_ERROR_TYPE_COUNT)
+	{
+		assert(0);
 		return Metrology::SignalStatistic();
 	}
 
@@ -1568,12 +1582,6 @@ Metrology::SignalStatistic MeasureBase::statistic(const Hash& signalHash)
 					{
 						LinearityMeasurement* pLinearityMeasurement = dynamic_cast<LinearityMeasurement*>(pMeasurement);
 						if (pLinearityMeasurement == nullptr)
-						{
-							break;
-						}
-
-						int errorType = theOptions.linearity().errorType();
-						if (errorType < 0 || errorType >= MEASURE_ERROR_TYPE_COUNT)
 						{
 							break;
 						}
