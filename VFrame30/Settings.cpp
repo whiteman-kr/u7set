@@ -29,7 +29,7 @@ namespace VFrame30
 			return m_defaultGridSizePx;
 		}
 
-		assert(regionalUnit() == SchemaUnit::Inch || regionalUnit() == SchemaUnit::Millimeter);
+		Q_ASSERT(regionalUnit() == SchemaUnit::Inch || regionalUnit() == SchemaUnit::Millimeter);
 
 		switch (regionalUnit())
 		{

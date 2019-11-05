@@ -429,14 +429,17 @@ public:
 
 	// SchemaItemIndicator Type
 	//
-	enum class IndicatorType
+	enum class IndicatorType	// MUST BE SEQUENTIAL, AS VALUE IS A VECTOR INDEX
 	{
 		HistogramVert,
 		ArrowIndicator,
-		Trend,
-		CustomDraw
+		//Trend,
+		//CustomDraw
+		// !!!! COUNT IS DEFINED IN THE NEXT FUNCTION IndicatorTypeCount !!!
 	};
 	Q_ENUM(IndicatorType)
+
+	static const size_t IndicatorTypeCount = 2;
 
 
 public:

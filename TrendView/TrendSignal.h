@@ -241,7 +241,7 @@ namespace TrendLib
 		// Temporary variables used in drawing
 		//
 	private:
-		int m_tempSignalIndex;		// Signal index, separate for disrctes and analogs, filled in getting signal list in TrendSignalSet::analogSignals/discreteSignals
+		int m_tempSignalIndex = -1;	// Signal index, separate for disrctes and analogs, filled in getting signal list in TrendSignalSet::analogSignals/discreteSignals
 		QRectF m_tempDrawRect;		// Draw signal area
 	};
 

@@ -229,7 +229,7 @@ namespace VFrame30
 		return QPointF(x, y);
 	}
 
-	QPointF CDrawParam::gridToDpi(QPointF pos) const
+	QPointF CDrawParam::gridToDpi(const QPointF& pos) const
 	{
 		if (schemaView() == nullptr)
 		{
@@ -256,6 +256,11 @@ namespace VFrame30
 
 		Q_ASSERT(false);
 		return pos;
+	}
+
+	QRectF CDrawParam::gridToDpi(const QRectF& rect) const
+	{
+		return {gridToDpi(rect.topLeft()), gridToDpi(rect.bottomRight())};
 	}
 
 	bool CDrawParam::isEditMode() const

@@ -22,7 +22,7 @@ namespace VFrame30
 	SchemaItem::SchemaItem() :
 		Proto::ObjectSerialization<SchemaItem>(Proto::ProtoCompress::Never),
 		m_itemUnit(SchemaUnit::Display)
-	{	
+	{
 		m_guid = QUuid::createUuid();
 
 //		auto guidProp = ADD_PROPERTY_GETTER(QUuid, PropertyNames::guid, true, SchemaItem::guid);
@@ -73,7 +73,7 @@ namespace VFrame30
 
 		return;
 	}
-	
+
 	// Serialization
 	//
 	bool SchemaItem::SaveData(Proto::Envelope* message) const
@@ -143,7 +143,7 @@ namespace VFrame30
 			Q_ASSERT(schemaItem);		// Add class to the factory, VFrame30Library.cpp
 			return nullptr;
 		}
-		
+
 		schemaItem->LoadData(message);
 
 		return schemaItem;
@@ -513,7 +513,7 @@ namespace VFrame30
 			return;
 		}
 
-		for (auto vi = items.cbegin(); vi != items.cend(); ++vi)				
+		for (auto vi = items.cbegin(); vi != items.cend(); ++vi)
 		{
 			vi->get()->DrawOutline(pDrawParam);
 		}
@@ -565,7 +565,7 @@ namespace VFrame30
 			return;
 		}
 
-		for (auto vi = items.cbegin(); vi != items.cend(); ++vi)				
+		for (auto vi = items.cbegin(); vi != items.cend(); ++vi)
 		{
 			vi->get()->DrawSelection(pDrawParam, drawSizeBar);
 		}
@@ -581,7 +581,7 @@ namespace VFrame30
 	}
 
 	// Определение, входит ли точка в элемент, x и y в дюймах или в пикселях
-	// 
+	//
 	bool SchemaItem::IsIntersectPoint(double x, double y) const
 	{
 		if (itemUnit() == SchemaUnit::Display)
@@ -598,9 +598,9 @@ namespace VFrame30
 
 	// Определение, пересекает ли элемент указанный прямоугольник (использовать для выделения),
 	// координаты и размер прямоугольника заданы в дюймах или пикселях
-	// 
+	//
 	bool SchemaItem::IsIntersectRect(double x, double y, double width, double height) const
-	{ 
+	{
 		x = x; y = y; width = width; height = height;		// убираю unreferenced warning
 		assert(false);
 		return false;

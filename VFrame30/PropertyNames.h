@@ -44,6 +44,7 @@ namespace VFrame30
 		static const QString lineColor;
 		static const QString lineWeight;
 		static const QString fillColor;
+		static const QString backgroundColor;
 		static const QString fill;
 		static const QString drawRect;
 		static const QString textColor;
@@ -62,6 +63,30 @@ namespace VFrame30
 		static const QString images;
 		static const QString svg;
 		static const QString currentImageId;
+
+		static const QString drawGrid;
+		static const QString drawGridForAllBars;
+		static const QString drawGridValues;
+		static const QString drawGridValueForAllBars;
+		static const QString drawGridValueUnits;
+		static const QString gridMainStep;
+		static const QString gridSmallStep;
+
+		static const QString indicatorSignalColors;
+		static const QString indicatorType;
+		static const QString indicatorSettings;
+
+		static const QString indicatorStartValue;
+		static const QString indicatorEndValue;
+		static const QString indicatorBarWidth;
+		static const QString indicatorDrawBarRect;
+		static const QString indicatorStartAngle;
+		static const QString indicatorSpanAngle;
+
+		static const QString indicatorMargingLeft;
+		static const QString indicatorMargingTop;
+		static const QString indicatorMargingRight;
+		static const QString indicatorMargingBottom;
 
 		// --
 		//
