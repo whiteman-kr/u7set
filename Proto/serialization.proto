@@ -1282,28 +1282,30 @@ message Bus
 //
 // Comparator
 //
-message Comparator
+message ComparatorSignal
 {
-    optional string inSignalID = 1;
-
-    optional int32 cmpType = 2 [default = 1];				// Comparator::CmpType::Equ;
-	optional int32 analogSignalFormat = 3 [default = 1];	// E::AnalogSignalFormat::SignedInt32
-
-    optional bool cmpValueIsConst = 4 [default = true];
-	optional double cmpConstValue = 5 [default = 0.0];
-	optional string cmpSignalId = 6;
-
-    optional bool hysteresisIsConst = 7 [default = true];
-	optional double hysteresisConstValue = 8 [default = 0.0];
-	optional string hysteresisSignalId = 9;
-
-    optional string outSignalId = 10;
-
-    optional string schemaId = 11;
-	optional string lmId = 12;
-	optional Uuid uuid = 13;
+    optional bool isConst = 1 [default = true];
+	optional double constValue = 2 [default = 0.0];
+	optional string appSignalId = 3;
+	optional bool isAcquired = 4;
 }
 
+message Comparator
+{
+    optional int32 cmpType = 1 [default = 1];				// Comparator::CmpType::Equ;
+
+    optional int32 inAnalogSignalFormat = 2 [default = 1];	// E::AnalogSignalFormat::SignedInt32
+
+    optional ComparatorSignal input = 3;
+	optional ComparatorSignal compare = 4;
+	optional ComparatorSignal hysteresis = 5;
+	optional ComparatorSignal output = 6;
+
+    optional bool allSignalsIsAcquired = 7 [default = false];
+
+    optional string schemaId = 8;
+	optional Uuid schemaItemUuid = 9;
+}
 
 message LmComparatorSet
 {
