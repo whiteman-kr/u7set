@@ -1052,6 +1052,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	project.setDatabaseName(databaseName);
 	project.setProjectName(projectName);
+	project.setVersion(DbWorker::databaseVersion());	// Other project version just cannot be opened
 
 	QString projectDescription;
 	QString projectUppercaseAppSignalId;

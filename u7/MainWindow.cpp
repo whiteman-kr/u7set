@@ -935,7 +935,13 @@ void MainWindow::pendingChanges()
 
 void MainWindow::projectOpened(DbProject project)
 {
-	setWindowTitle(qApp->applicationName() + QString(" - ") + project.projectName() + QString(" - ") + dbController()->currentUser().username());
+	QString title = QString("%1 - %2 (Version %3) - %4")
+						.arg(qApp->applicationName())
+						.arg(project.projectName())
+						.arg(project.version())
+						.arg(dbController()->currentUser().username());
+
+	setWindowTitle(title);
 
 	// Action, disable/enable
 	//
