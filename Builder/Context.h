@@ -13,7 +13,7 @@
 #include "BuildResultWriter.h"
 #include "LmDescriptionSet.h"
 #include "OptoModule.h"
-#include "ComparatorStorage.h"
+#include "ComparatorSet.h"
 
 
 namespace Builder
@@ -83,7 +83,7 @@ namespace Builder
 		std::shared_ptr<Hardware::OptoModuleStorage> m_opticModuleStorage;
 
 		std::shared_ptr<Tuning::TuningDataStorage> m_tuningDataStorage;
-		std::shared_ptr<ComparatorStorage> m_comparatorStorage;
+		std::shared_ptr<ComparatorSet> m_comparatorSet;
 
 		//--
 		//

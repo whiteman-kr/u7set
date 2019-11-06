@@ -1277,3 +1277,41 @@ message Bus
 	optional bool autoSignalPlacement = 10 [default = true];
 	optional int32 manualBusSize = 11 [default = 0];
 }
+
+
+//
+// Comparator
+//
+message Comparator
+{
+    optional string inSignalID = 1;
+
+    optional int32 cmpType = 2 [default = 1];				// Comparator::CmpType::Equ;
+	optional int32 analogSignalFormat = 3 [default = 1];	// E::AnalogSignalFormat::SignedInt32
+
+    optional bool cmpValueIsConst = 4 [default = true];
+	optional double cmpConstValue = 5 [default = 0.0];
+	optional string cmpSignalId = 6;
+
+    optional bool hysteresisIsConst = 7 [default = true];
+	optional double hysteresisConstValue = 8 [default = 0.0];
+	optional string hysteresisSignalId = 9;
+
+    optional string outSignalId = 10;
+
+    optional string schemaId = 11;
+	optional string lmId = 12;
+	optional Uuid uuid = 13;
+}
+
+
+message LmComparatorSet
+{
+    optional string lmEquipmentID = 1;
+	repeated Comparator comparator = 2;
+}
+
+message ComparatorSet
+{
+    repeated LmComparatorSet lmComparatorSet = 1;
+}

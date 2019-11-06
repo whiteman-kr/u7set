@@ -10,7 +10,7 @@
 #include "BuildResultWriter.h"
 #include "OptoModule.h"
 #include "LmMemoryMap.h"
-#include "ComparatorStorage.h"
+#include "ComparatorSet.h"
 #include "UalItems.h"
 #include "MemWriteMap.h"
 
@@ -564,7 +564,7 @@ namespace Builder
 		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
 		SignalSet* m_signals = nullptr;
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
-		ComparatorStorage* m_cmpStorage = nullptr;
+		ComparatorSet* m_cmpSet = nullptr;
 
 		std::shared_ptr<LmDescription> m_lmDescription;
 		AppLogicData* m_appLogicData = nullptr;

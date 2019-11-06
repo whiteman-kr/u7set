@@ -1,13 +1,13 @@
 #pragma once
 
 #include "../lib/Types.h"
+#include "../Proto/serialization.pb.h"
 
 #include <QUuid>
-#include <memory>
+#include <QMutex>
 
 namespace Builder
 {
-
 	// ------------------------------------------------------------------------------------------------
 	//
 	//	Comparator class declaration
@@ -49,7 +49,7 @@ namespace Builder
 		void setHysteresisIsConst(bool hysteresisIsConst);
 
 		double hysteresisConstValue() const;
-		void sethysteresisConstValue(double gysteresisConstValue);
+		void setHysteresisConstValue(double hysteresisConstValue);
 
 		QString hysteresisSignalID() const;
 		void setHysteresisSignalID(const QString& hysteresisSignalID);
@@ -60,8 +60,14 @@ namespace Builder
 		QString schemaID() const;
 		void setSchemaID(const QString& schemaID);
 
+		QString	lmID() const;
+		void setLmID(const QString& lmID);
+
 		QUuid uuid() const;
 		void setUuid(QUuid uuid);
+
+		void serializeTo(Proto::Comparator* c) const;
+		void serializeFrom(const Proto::Comparator& c);
 
 	private:
 		QString	m_inSignalID;
@@ -80,30 +86,70 @@ namespace Builder
 		QString m_outSignalID;
 
 		QString m_schemaID;
+		QString m_lmID;
 		QUuid m_uuid;
 	};
 
-
 	// ------------------------------------------------------------------------------------------------
 	//
-	//	ComparatorStorage class declaration
+	//	LmComparatorSet class declaration
 	//
 	// ------------------------------------------------------------------------------------------------
 
-	class ComparatorStorage
+	class LmComparatorSet
 	{
 	public:
-		ComparatorStorage();
+		LmComparatorSet();
+		virtual ~LmComparatorSet();
 
-		void insert(const QString& lmID, std::shared_ptr<Comparator> comparator);
+		void clear();
 
-		QList<std::shared_ptr<Comparator>> getByLmID(const QString& lmID);
-		QList<std::shared_ptr<Comparator>> getByInputSignalID(const QString& appSignalID);
+		QString	lmID() const;
+		void setLmID(const QString& lmID);
+
+		int comparatorCount() const;
+		std::shared_ptr<Comparator> comparator(int index) const;
+
+		void insert(std::shared_ptr<Comparator> comparator);
+
+		void serializeTo(Proto::LmComparatorSet* set);
+		void serializeFrom(const Proto::LmComparatorSet& set);
 
 	private:
-		QHash<QString, std::shared_ptr<Comparator>> m_byLm;
-		QHash<QString, std::shared_ptr<Comparator>> m_bySignal;
+		mutable QMutex m_mutex;
+
+		QString m_lmID;
+		QList<std::shared_ptr<Comparator>> m_comparatorList;
 	};
 
+	// ------------------------------------------------------------------------------------------------
+	//
+	//	ComparatorSet class declaration
+	//
+	// ------------------------------------------------------------------------------------------------
 
+	class ComparatorSet
+	{
+	public:
+		ComparatorSet();
+		virtual ~ComparatorSet();
+
+		void clear();
+
+		int lmCount() const;
+		std::shared_ptr<LmComparatorSet> lmComparatorSet(int index) const;
+		std::shared_ptr<LmComparatorSet> lmComparatorSet(const QString& lmID) const;
+
+		void insert(const QString& lmID, std::shared_ptr<Comparator> comparator);	// insert Comparator
+		void insert(std::shared_ptr<LmComparatorSet> lmComparatorSet);				// insert LmComparatorSet
+
+		void serializeTo(Proto::ComparatorSet* set);
+		void serializeFrom(const Proto::ComparatorSet& set);
+
+	private:
+		mutable QMutex m_mutex;
+
+		QMap<QString, std::shared_ptr<LmComparatorSet>> m_setMap;
+		QList<std::shared_ptr<LmComparatorSet>> m_lmList;
+	};
 }

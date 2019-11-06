@@ -228,7 +228,7 @@ namespace Builder
 			// Compile application logic
 			//
 			m_context->m_tuningDataStorage = std::make_shared<Tuning::TuningDataStorage>();
-			m_context->m_comparatorStorage = std::make_shared<ComparatorStorage>();
+			m_context->m_comparatorSet = std::make_shared<ComparatorSet>();
 
 			ok = compileApplicationLogic();
 
