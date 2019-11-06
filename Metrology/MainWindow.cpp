@@ -562,6 +562,8 @@ void MainWindow::createPanels()
 
 		m_pStatisticPanel->hide();
 
+		connect(&theSignalBase, &SignalBase::activeSignalChanged, m_pStatisticPanel, &StatisticPanel::activeSignalChanged, Qt::QueuedConnection);
+
 		connect(this, &MainWindow::changedMeasureType, m_pStatisticPanel, &StatisticPanel::changedMeasureType, Qt::QueuedConnection);
 		connect(this, &MainWindow::changedOutputSignalType, m_pStatisticPanel, &StatisticPanel::changedOutputSignalType, Qt::QueuedConnection);
 	}

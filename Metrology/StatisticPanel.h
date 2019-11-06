@@ -175,8 +175,10 @@ public slots:
 	void					changedMeasureType(int type);
 	void					changedOutputSignalType(int type);
 
-	void					updateList();							// slots for reload list
-	void					updateSignalInList(Hash signalHash);	// slots for updating one singal in list
+	void					activeSignalChanged(const MeasureSignal& activeSignal);	// slot informs that signal for measure was selected
+
+	void					updateList();											// slots for reload list
+	void					updateSignalInList(Hash signalHash);					// slots for updating one singal in list
 
 private slots:
 

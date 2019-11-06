@@ -152,13 +152,8 @@ protected:
 
 public slots:
 
-	// slot informs that signal for measure was selected
-	//
-	void					activeSignalChanged(const MeasureSignal& activeSignal);
-
-	// slot informs that signal for measure has updated his state
-	//
-	void					updateSignalState();
+	void					activeSignalChanged(const MeasureSignal& activeSignal);		// slot informs that signal for measure was selected
+	void					updateSignalState();										// slot informs that signal for measure has updated his state
 
 private slots:
 

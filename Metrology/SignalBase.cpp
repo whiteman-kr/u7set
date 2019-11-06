@@ -145,6 +145,28 @@ bool MultiChannelSignal::setMetrologySignal(int measureKind, int channel, Metrol
 
 // -------------------------------------------------------------------------------------------------------------------
 
+Metrology::Signal* MultiChannelSignal::firstMetrologySignal() const
+{
+	Metrology::Signal* pSignal = nullptr;
+
+	m_mutex.lock();
+
+		for(int c = 0; c < m_channelCount; c++ )
+		{
+			if (m_pSignalList[c] != nullptr)
+			{
+				pSignal = m_pSignalList[c];
+				break;
+			}
+		}
+
+	m_mutex.unlock();
+
+	return pSignal;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 MultiChannelSignal& MultiChannelSignal::operator=(const MultiChannelSignal& from)
 {
 	m_mutex.lock();

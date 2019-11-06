@@ -562,6 +562,64 @@ void StatisticPanel::changedOutputSignalType(int type)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void StatisticPanel::activeSignalChanged(const MeasureSignal& activeSignal)
+{
+	if (activeSignal.isEmpty() == true)
+	{
+		return;
+	}
+
+	int signalCount = activeSignal.channelCount();
+	if (signalCount == 0)
+	{
+		return;
+	}
+
+	activeSignal.multiSignal(0).metrologySignal(Metrology::Channel_0);
+
+	Metrology::Signal* pSignal = nullptr;
+
+	switch (theOptions.toolBar().outputSignalType())
+	{
+		case OUTPUT_SIGNAL_TYPE_UNUSED:			pSignal = activeSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).firstMetrologySignal();	break;
+		case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
+		case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	pSignal = activeSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).firstMetrologySignal();	break;
+		default:								assert(0);																					break;
+	}
+
+	if (pSignal == nullptr)
+	{
+		return;
+	}
+
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	int foundIndex = -1;
+
+	int signaCount = theSignalBase.statistic().signalCount();
+	for(int i = 0; i < signaCount; i++)
+	{
+		if (theSignalBase.statistic().signal(i) == pSignal)
+		{
+			foundIndex = i;
+			break;
+		}
+	}
+
+	if (foundIndex == -1)
+	{
+		return;
+	}
+
+	m_pView->setCurrentIndex(m_pView->model()->index(foundIndex, 0));
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void StatisticPanel::updateList()
 {
 	updateVisibleColunm();

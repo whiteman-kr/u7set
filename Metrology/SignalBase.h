@@ -40,6 +40,7 @@ public:
 
 	Metrology::Signal*			metrologySignal(int channel) const;
 	bool						setMetrologySignal(int measureKind, int channel, Metrology::Signal* pSignal);
+	Metrology::Signal*			firstMetrologySignal() const;
 
 	Metrology::SignalLocation	location() const { return m_location; }
 	QString						strID() const { return m_strID; }
