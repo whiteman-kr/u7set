@@ -33,6 +33,11 @@ namespace VFrame30
 	{
 	public:
 		AfbPin();
+		AfbPin(const AfbPin& rhs) = default;
+		AfbPin(AfbPin&& rhs) noexcept = default;
+
+		AfbPin& operator=(const AfbPin& rhs) = default;
+		AfbPin& operator=(AfbPin&& rhs) noexcept = default;
 
 		AfbPin(ConnectionDirrection dirrection,
 			   const QUuid& guid,
@@ -41,7 +46,6 @@ namespace VFrame30
 			   QString caption);
 
 		AfbPin(ConnectionDirrection dirrection, const QUuid& guid, const Afb::AfbSignal& afbSignal);
-
 		AfbPin(const Proto::FblConnectionPoint& cpm);
 
 		// Other
@@ -98,7 +102,7 @@ namespace VFrame30
 		SchemaPoint m_point;				// Don't remove position!!!
 		ConnectionDirrection m_dirrection = ConnectionDirrection::Input;
 		int m_afbOperandIndex = 0;
-		E::SignalType m_signalType;			// Here we care ONLY about is it BUS or its regular signal, ceep in mind that a lot of code does not care about analog/discrete pin
+		E::SignalType m_signalType;			// Here we care ONLY about is it BUS or its regular signal, keep in mind that a lot of code does not care about analog/discrete pin
 
 		std::vector<QUuid> m_associatedIOs;	// if connection is an output, the list contains GUID associated inputs
 		
