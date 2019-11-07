@@ -1405,7 +1405,10 @@ static const int recomendedSize = 8192;
 				if (ruler.timeStamp() >= startLaneTime &&
 					ruler.timeStamp() <= finishLaneTime)
 				{
-					QBrush fillRectBrush(drawParam.backColor2nd());
+					QColor semitransaprentColor = drawParam.backColor2nd();
+					semitransaprentColor.setAlpha(200);
+
+					QBrush fillRectBrush(semitransaprentColor);
 
 					// Join two vectors discretes + analogs
 					// x: calculated pos for ruler
@@ -1470,7 +1473,7 @@ static const int recomendedSize = 8192;
 							if (trendSignal.isAnalog() == true)
 							{
 								drawRect.setLeft(x + 2.0 / dpiX);
-								drawRect.setTop(signalRect.bottom() - y - boundRect.height() / 2.0);
+								drawRect.setTop(signalRect.bottom() - y /*- boundRect.height() / 2.0*/);	// just below the trend line
 
 								drawRect.setHeight(boundRect.height() * 1.1);
 								drawRect.setWidth(boundRect.width() * 1.2);
