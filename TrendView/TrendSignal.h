@@ -195,6 +195,9 @@ namespace TrendLib
 		int precision() const;
 		void setPrecision(int value);
 
+		double lineWeight() const;
+		void setLineWeight(double value);
+
 		double highLimit() const;
 		void setHighLimit(double value);
 
@@ -229,6 +232,8 @@ namespace TrendLib
 		E::SignalType m_type = E::SignalType::Analog;
 		QString m_unit;
 		int m_precision = 0;
+
+		double m_lineWeight = 0;		// 0 is cosmetic pen
 
 		double m_highLimit = 1.0;
 		double m_lowLimit = 0;
