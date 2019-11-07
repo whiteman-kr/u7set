@@ -10,7 +10,7 @@
 #if defined(HAVE_LIBSECRET)
 const SecretSchema* qtkeychainSchema(void) {
     static const SecretSchema schema = {
-        "org.qt.keychain", SECRET_SCHEMA_NONE,
+        "org.qt.keychain", SECRET_SCHEMA_DONT_MATCH_NAME,
         {
             { "user", SECRET_SCHEMA_ATTRIBUTE_STRING },
             { "server", SECRET_SCHEMA_ATTRIBUTE_STRING },
@@ -223,9 +223,10 @@ bool LibSecretKeyring::isAvailable() {
 bool LibSecretKeyring::findPassword(const QString &user, const QString &server,
                                     QKeychain::JobPrivate *self)
 {
-	Q_UNUSED(user)
-	Q_UNUSED(server)
-	Q_UNUSED(self)
+	Q_UNUSED(user);
+	Q_UNUSED(server);
+	Q_UNUSED(self);
+
 #if defined(HAVE_LIBSECRET)
     if (!isAvailable()) {
         return false;
@@ -258,12 +259,13 @@ bool LibSecretKeyring::writePassword(const QString &display_name,
                                      const QByteArray &password,
                                      QKeychain::JobPrivate *self)
 {
-	Q_UNUSED(display_name)
-	Q_UNUSED(user)
-	Q_UNUSED(server)
-	Q_UNUSED(mode)
-	Q_UNUSED(password)
-	Q_UNUSED(self)
+	Q_UNUSED(display_name);
+	Q_UNUSED(user);
+	Q_UNUSED(server);
+	Q_UNUSED(mode);
+	Q_UNUSED(password);
+	Q_UNUSED(self);
+
 #if defined(HAVE_LIBSECRET)
     if (!isAvailable()) {
         return false;
