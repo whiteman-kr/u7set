@@ -8,7 +8,7 @@ namespace TrendLib
 	{
 	}
 
-	TrendRuler::TrendRuler(TimeStamp& timeStamp) :
+	TrendRuler::TrendRuler(const TimeStamp& timeStamp) :
 		m_timeStamp(timeStamp)
 	{
 	}

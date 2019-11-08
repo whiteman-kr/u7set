@@ -15,7 +15,7 @@ namespace TrendLib
 	{
 	public:
 		TrendRuler();
-		TrendRuler(TimeStamp& timeStamp);
+		TrendRuler(const TimeStamp& timeStamp);
 
 	public:
 		bool save(::Proto::TrendRuler* message) const;
