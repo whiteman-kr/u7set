@@ -29,6 +29,8 @@ message TrendSignalParam
 	optional string unit = 11;
 	optional int32 precision = 12;
 
+    optional double line_weight = 19 [default = 0];
+
     optional double high_limit = 20;
 	optional double low_limit = 21;
 	optional double view_high_limit = 31;

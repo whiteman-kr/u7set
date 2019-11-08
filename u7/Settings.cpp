@@ -1,5 +1,5 @@
 #include "../u7/Settings.h"
-#include "../Tools/qtkeychain-0.8/keychain.h"
+#include "../Tools/qtkeychain-0.9.1/keychain.h"
 #include "../lib/PropertyEditor.h"
 
 Settings theSettings;

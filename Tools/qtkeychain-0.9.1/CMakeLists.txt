@@ -5,7 +5,7 @@ include(FindPkgConfig)
 
 ###
 
-set(QTKEYCHAIN_VERSION 0.8.0)
+set(QTKEYCHAIN_VERSION 0.9.1)
 set(QTKEYCHAIN_SOVERSION 1)
 
 ###
@@ -18,6 +18,7 @@ include(ECMSetupVersion)
 include(ECMGeneratePriFile)
 
 option(BUILD_WITH_QT4 "Build qtkeychain with Qt4 no matter if Qt5 was found" OFF)
+option(BUILD_TEST_APPLICATION "Build test application" ON)
 option(BUILD_TRANSLATIONS "Build translations" ON)
 option(QTKEYCHAIN_STATIC "Build static library" OFF)
 
@@ -38,7 +39,7 @@ if( NOT BUILD_WITH_QT4 )
     find_package(Qt5Core QUIET)
 endif()
 
-if (Qt5Core_FOUND)
+if (Qt5Core_FOUND AND NOT BUILD_WITH_QT4)
   set(QTKEYCHAIN_VERSION_INFIX 5)
 
   if(UNIX AND NOT APPLE AND NOT ANDROID)
@@ -49,13 +50,17 @@ if (Qt5Core_FOUND)
       qt5_add_dbus_interface(${ARGN})
     endmacro()
   endif()
-  find_package(Qt5LinguistTools REQUIRED)
-  macro(qt_add_translation)
-    qt5_add_translation(${ARGN})
-  endmacro(qt_add_translation)
-  macro(qt_create_translation)
-    qt5_create_translation(${ARGN})
-  endmacro(qt_create_translation)
+
+  if(BUILD_TRANSLATIONS)
+    find_package(Qt5LinguistTools REQUIRED)
+    macro(qt_add_translation)
+      qt5_add_translation(${ARGN})
+    endmacro(qt_add_translation)
+    macro(qt_create_translation)
+      qt5_create_translation(${ARGN})
+    endmacro(qt_create_translation)
+  endif()
+
   macro(qt_wrap_cpp)
     qt5_wrap_cpp(${ARGN})
   endmacro()
@@ -118,7 +123,7 @@ add_definitions( -Wall )
 
 if(WIN32)
     list(APPEND qtkeychain_SOURCES keychain_win.cpp)
-    if (!USE_CREDENTIAL_STORE)
+    if (NOT USE_CREDENTIAL_STORE)
         list(APPEND qtkeychain_LIBRARIES crypt32)
         list(APPEND qtkeychain_SOURCES plaintextstore.cpp)
     endif()
@@ -152,6 +157,7 @@ if(UNIX AND NOT APPLE AND NOT ANDROID)
             add_definitions(-DHAVE_LIBSECRET=1)
         endif()
         INCLUDE_DIRECTORIES(${LIBSECRET_INCLUDE_DIRS})
+        list(APPEND qtkeychain_LIBRARIES ${LIBSECRET_LIBRARIES})
     endif()
 
     list(APPEND qtkeychain_SOURCES keychain_unix.cpp gnomekeyring.cpp libsecret.cpp plaintextstore.cpp)
@@ -224,8 +230,10 @@ install(TARGETS ${QTKEYCHAIN_TARGET_NAME}
   ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
 )
 
-add_executable( testclient testclient.cpp )
-target_link_libraries( testclient ${QTKEYCHAIN_TARGET_NAME})
+if(BUILD_TEST_APPLICATION)
+    add_executable( testclient testclient.cpp )
+    target_link_libraries( testclient ${QTKEYCHAIN_TARGET_NAME})
+endif()
 
 
 ###

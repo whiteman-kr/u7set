@@ -6254,14 +6254,14 @@ void EditSchemaWidget::f2KeyForRect(std::shared_ptr<VFrame30::SchemaItem> item)
 {
 	if (item == nullptr)
 	{
-		assert(item);
+		Q_ASSERT(item);
 		return;
 	}
 
 	VFrame30::SchemaItemRect* rectItem = dynamic_cast<VFrame30::SchemaItemRect*>(item.get());
 	if (rectItem == nullptr)
 	{
-		assert(rectItem);
+		Q_ASSERT(rectItem);
 		return;
 	}
 
@@ -6269,16 +6269,36 @@ void EditSchemaWidget::f2KeyForRect(std::shared_ptr<VFrame30::SchemaItem> item)
 
 	// Show input dialog
 	//
-	bool ok;
-	QString newValue = QInputDialog::getMultiLineText(this, tr("Set text"),
-													  tr("Text:"), text, &ok);
-	if (ok == true &&
-		newValue.isEmpty() == false &&
-		newValue != text)
+	QInputDialog dialog{this};
+	dialog.setWindowFlags((dialog.windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	dialog.setWindowTitle(tr("Set text"));
+	dialog.setLabelText(tr("Text:"));
+	dialog.setInputMode(QInputDialog::TextInput);
+	dialog.setOption(QInputDialog::UsePlainTextEditForTextInput, true);
+	dialog.setTextValue(text);
+
+	int width = QSettings().value("f2KeyForRect\\width").toInt();
+	int height = QSettings().value("f2KeyForRect\\height").toInt();
+	dialog.resize(width, height);
+
+	if (int result = dialog.exec();
+		result == QDialog::Accepted)
 	{
-		m_editEngine->runSetProperty(VFrame30::PropertyNames::text, QVariant(newValue), item);
-		editSchemaView()->update();
+		QString newValue = dialog.textValue();
+
+		if (newValue.isEmpty() == false && newValue != text)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::text, QVariant(newValue), item);
+			editSchemaView()->update();
+		}
 	}
+
+	QSettings().setValue("f2KeyForRect\\width", dialog.width());
+	QSettings().setValue("f2KeyForRect\\height", dialog.height());
 
 	return;
 }
@@ -6287,14 +6307,14 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 {
 	if (item == nullptr)
 	{
-		assert(item);
+		Q_ASSERT(item);
 		return false;
 	}
 
 	VFrame30::SchemaItemReceiver* receiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
 	if (receiver == nullptr)
 	{
-		assert(receiver);
+		Q_ASSERT(receiver);
 		return false;
 	}
 
@@ -6314,10 +6334,10 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 		return false;
 	}
 
-	auto ls = logicSchema();
+	std::shared_ptr<VFrame30::LogicSchema> ls = logicSchema();
 	if (ls == nullptr)
 	{
-		assert(ls);
+		Q_ASSERT(ls);
 		return false;
 	}
 
@@ -6389,9 +6409,16 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
 
+	int width = QSettings().value("f2KeyForReceiver\\width").toInt();
+	int height = QSettings().value("f2KeyForReceiver\\height").toInt();
+	d.resize(width, height);
+
 	// --
 	//
 	int result = d.exec();
+
+	QSettings().setValue("f2KeyForReceiver\\width", d.width());
+	QSettings().setValue("f2KeyForReceiver\\height", d.height());
 
 	if (result == QDialog::Accepted)
 	{
@@ -6431,14 +6458,14 @@ bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem>
 {
 	if (item == nullptr)
 	{
-		assert(item);
+		Q_ASSERT(item);
 		return false;
 	}
 
 	VFrame30::SchemaItemTransmitter* transmitter = dynamic_cast<VFrame30::SchemaItemTransmitter*>(item.get());
 	if (transmitter == nullptr)
 	{
-		assert(transmitter);
+		Q_ASSERT(transmitter);
 		return false;
 	}
 
@@ -6460,7 +6487,7 @@ bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem>
 	auto ls = logicSchema();
 	if (ls == nullptr)
 	{
-		assert(ls);
+		Q_ASSERT(ls);
 		return false;
 	}
 
@@ -6509,9 +6536,16 @@ bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem>
 	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
 
+	int width = QSettings().value("f2KeyForTransmitter\\width").toInt();
+	int height = QSettings().value("f2KeyForTransmitter\\height").toInt();
+	d.resize(width, height);
+
 	// --
 	//
 	int result = d.exec();
+
+	QSettings().setValue("f2KeyForTransmitter\\width", d.width());
+	QSettings().setValue("f2KeyForTransmitter\\height", d.height());
 
 	if (result == QDialog::Accepted)
 	{
@@ -6694,6 +6728,10 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 				}
 			});
 
+	int width = QSettings().value("f2KeyForConst\\width").toInt();
+	int height = QSettings().value("f2KeyForConst\\height").toInt();
+	d.resize(width, height);
+
 	// --
 	//
 	int result = d.exec();
@@ -6729,6 +6767,9 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 
 		editSchemaView()->update();
 	}
+
+	QSettings().setValue("f2KeyForConst\\width", d.width());
+	QSettings().setValue("f2KeyForConst\\height", d.height());
 
 	return;
 }
@@ -6849,15 +6890,14 @@ void EditSchemaWidget::f2KeyForLoopback(std::shared_ptr<VFrame30::SchemaItem> it
 {
 	if (item == nullptr)
 	{
-		assert(item);
+		Q_ASSERT(item);
 		return;
 	}
 
 	VFrame30::SchemaItemLoopback* loopbackItem = dynamic_cast<VFrame30::SchemaItemLoopback*>(item.get());
-
 	if (loopbackItem == nullptr)
 	{
-		assert(loopbackItem);
+		Q_ASSERT(loopbackItem);
 		return;
 	}
 
@@ -6865,23 +6905,38 @@ void EditSchemaWidget::f2KeyForLoopback(std::shared_ptr<VFrame30::SchemaItem> it
 
 	// Show input dialog
 	//
-	bool ok = false;
-	QString newValue = QInputDialog::getText(this,
-											 tr("Set LoopbackID"),
-											 tr("LoopbackID:"),
-											 QLineEdit::Normal,
-											 loopbackId,
-											 &ok).trimmed();
+	QInputDialog d{this};
 
-	if (ok == true &&
-		newValue.isEmpty() == false &&
-		newValue != loopbackId)
+	d.setWindowFlags((d.windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	d.setWindowTitle(tr("Set LoopbackID"));
+	d.setLabelText(tr("LoopbackID:"));
+	d.setInputMode(QInputDialog::TextInput);
+	d.setTextValue(loopbackId);
+
+	int width = QSettings().value("f2KeyForLoopback\\width").toInt();
+	int height = QSettings().value("f2KeyForLoopback\\height").toInt();
+	d.resize(width, height);
+
+	if (int result = d.exec();
+		result == QDialog::Accepted)
 	{
-		m_editEngine->runSetProperty(VFrame30::PropertyNames::loopbackId, QVariant(newValue), item);
-		editSchemaView()->update();
+		QString newValue = d.textValue();
 
-		EditSchemaWidget::m_lastUsedLoopbackId = newValue;
+		if (newValue.isEmpty() == false && newValue != loopbackId)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::loopbackId, QVariant(newValue), item);
+			editSchemaView()->update();
+
+			EditSchemaWidget::m_lastUsedLoopbackId = newValue;
+		}
 	}
+
+	QSettings().setValue("f2KeyForLoopback\\width", d.width());
+	QSettings().setValue("f2KeyForLoopback\\height", d.height());
 
 	return;
 }
@@ -7245,6 +7300,11 @@ void EditSchemaWidget::f2KeyForBus(std::shared_ptr<VFrame30::SchemaItem> item)
 		busTypeCombo->setCurrentIndex(dataIndex);
 	}
 
+	// Spacer
+	//
+	QWidget* spacer = new QWidget;
+	spacer->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+
 	// --
 	//
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -7253,12 +7313,17 @@ void EditSchemaWidget::f2KeyForBus(std::shared_ptr<VFrame30::SchemaItem> item)
 
 	layout->addWidget(busTypeLabel);
 	layout->addWidget(busTypeCombo);
+	layout->addWidget(spacer);
 	layout->addWidget(buttonBox);
 
 	d.setLayout(layout);
 
 	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	int width = QSettings().value("f2KeyForBus\\width").toInt();
+	int height = QSettings().value("f2KeyForBus\\height").toInt();
+	d.resize(width, height);
 
 	// --
 	//
@@ -7288,6 +7353,8 @@ void EditSchemaWidget::f2KeyForBus(std::shared_ptr<VFrame30::SchemaItem> item)
 		editSchemaView()->update();
 	}
 
+	QSettings().setValue("f2KeyForBus\\width", d.width());
+	QSettings().setValue("f2KeyForBus\\height", d.height());
 
 	return;
 }
