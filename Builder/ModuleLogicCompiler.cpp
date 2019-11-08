@@ -9140,40 +9140,16 @@ namespace Builder
 	{
 		TEST_PTR_RETURN_FALSE(appFb);
 
-		// set cmp type of value
+		// set compare type of value
 		//
-		cmp->setCmpValueIsConst(appFb->isConstComaparator());
-		cmp->setHysteresisIsConst(!appFb->caption().contains("dh"));
+		cmp->compare().setIsConst(appFb->isConstComaparator());
+		cmp->hysteresis().setIsConst(!appFb->caption().contains("dh"));
 
-		//	set value, hysteresis and cmp type
+		//	set comparator type, compare-value, hysteresis-value
 		//
 		for(const AppFbParamValue& pv : appFb->paramValuesArray())
 		{
-			if (pv.opName() == "i_sp_s" && cmp->cmpValueIsConst() == true) // set value
-
-			{
-				switch (pv.dataFormat())
-				{
-					case E::DataFormat::Float :			cmp->setCmpConstValue(pv.floatValue());			cmp->setAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);		break;
-					case E::DataFormat::SignedInt :		cmp->setCmpConstValue(pv.signedIntValue());		cmp->setAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);	break;
-					case E::DataFormat::UnsignedInt :	cmp->setCmpConstValue(pv.unsignedIntValue());	cmp->setAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);	break;
-					default:							assert(0);
-				}
-			}
-
-			if (pv.opName() == "hysteresis" && cmp->hysteresisIsConst() == true) // set hysteresis
-
-			{
-				switch (pv.dataFormat())
-				{
-					case E::DataFormat::Float :			cmp->setHysteresisConstValue(pv.floatValue());			break;
-					case E::DataFormat::SignedInt :		cmp->setHysteresisConstValue(pv.signedIntValue());		break;
-					case E::DataFormat::UnsignedInt :	cmp->setHysteresisConstValue(pv.unsignedIntValue());	break;
-					default:							assert(0);
-				}
-			}
-
-			if (pv.opName() == "i_conf") // set cmp type of comparator - i_conf: =(1(SI)), > (2(SI)), < (3(SI)), ≠ (4(SI)),= (5(FP)), > (6(FP)), < (7(FP)), ≠ (8(FP))
+			if (pv.opName() == "i_conf") // set comparator type: =(1(SI)), > (2(SI)), < (3(SI)), ≠ (4(SI)),= (5(FP)), > (6(FP)), < (7(FP)), ≠ (8(FP))
 			{
 				switch (pv.unsignedIntValue())
 				{
@@ -9185,6 +9161,28 @@ namespace Builder
 					case 7:			cmp->setCmpType(Comparator::CmpType::Less);		break;
 					case 4:
 					case 8:			cmp->setCmpType(Comparator::CmpType::NotEqu);	break;
+				}
+			}
+
+			if (pv.opName() == "i_sp_s" && cmp->compare().isConst() == true) // set compare-value
+			{
+				switch (pv.dataFormat())
+				{
+					case E::DataFormat::Float :			cmp->compare().setConstValue(pv.floatValue());			cmp->setInAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);		break;
+					case E::DataFormat::SignedInt :		cmp->compare().setConstValue(pv.signedIntValue());		cmp->setInAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);	break;
+					case E::DataFormat::UnsignedInt :	cmp->compare().setConstValue(pv.unsignedIntValue());	cmp->setInAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);	break;
+					default:							assert(0);
+				}
+			}
+
+			if (pv.opName() == "hysteresis" && cmp->hysteresis().isConst() == true) // set hysteresis-value
+			{
+				switch (pv.dataFormat())
+				{
+					case E::DataFormat::Float :			cmp->hysteresis().setConstValue(pv.floatValue());		break;
+					case E::DataFormat::SignedInt :		cmp->hysteresis().setConstValue(pv.signedIntValue());	break;
+					case E::DataFormat::UnsignedInt :	cmp->hysteresis().setConstValue(pv.unsignedIntValue());	break;
+					default:							assert(0);
 				}
 			}
 		}
@@ -9206,19 +9204,46 @@ namespace Builder
 				continue;
 			}
 
+			// input Signal
+			//
 			if (pin.caption() == "in")
 			{
-				cmp->setInSignalID(ualSignal->appSignalID());
+				cmp->input().setAppSignalID(ualSignal->appSignalID());
+				cmp->input().setIsAcquired(ualSignal->isAcquired());
 			}
 
-			if (pin.caption() == "set" && cmp->cmpValueIsConst() == false)
+			// compare Signal
+			//
+			if (pin.caption() == "set" && cmp->compare().isConst() == false) //
 			{
-				cmp->setCmpSignalID(ualSignal->appSignalID());
+				if (ualSignal->isConst() == true)
+				{
+					cmp->compare().setIsConst(true);
+					cmp->compare().setConstValue(ualSignal->constValue());
+					cmp->compare().setIsAcquired(false);
+				}
+				else
+				{
+					cmp->compare().setAppSignalID(ualSignal->appSignalID());
+					cmp->compare().setIsAcquired(ualSignal->isAcquired());
+				}
 			}
 
-			if ((pin.caption() == "hyst" || pin.caption() == "db") && cmp->hysteresisIsConst() == false)
+			// hysteresis Signal
+			//
+			if ((pin.caption() == "hyst" || pin.caption() == "db") && cmp->hysteresis().isConst() == false)
 			{
-				cmp->setHysteresisSignalID(ualSignal->appSignalID());
+				if (ualSignal->isConst() == true)
+				{
+					cmp->hysteresis().setIsConst(true);
+					cmp->hysteresis().setConstValue(ualSignal->constValue());
+					cmp->hysteresis().setIsAcquired(false);
+				}
+				else
+				{
+					cmp->hysteresis().setAppSignalID(ualSignal->appSignalID());
+					cmp->hysteresis().setIsAcquired(ualSignal->isAcquired());
+				}
 			}
 		}
 
@@ -9236,21 +9261,23 @@ namespace Builder
 				continue;
 			}
 
+			// output Signal
+			//
 			if (pin.caption() == "out")
 			{
-				cmp->setOutSignalID(ualSignal->appSignalID());
+				cmp->output().setAppSignalID(ualSignal->appSignalID());
+				cmp->output().setIsAcquired(ualSignal->isAcquired());
 			}
 		}
 
 		// set schemaID
 		//
 		cmp->setSchemaID(appFb->schemaID());
-		cmp->setLmID(lmEquipmentID());
 		cmp->setUuid(appFb->guid());
 
 		// tests
 		//
-		if (cmp->inSignalID().isEmpty() == true)
+		if (cmp->input().appSignalID().isEmpty() == true)
 		{
 			assert(false);
 			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty input signal").arg(appFb->caption()).arg(appFb->schemaID());
@@ -9259,7 +9286,7 @@ namespace Builder
 			return false;
 		}
 
-		//		if (cmp->outSignalID().isEmpty() == true)
+		//		if (cmp->output().appSignalID().isEmpty() == true)
 		//		{
 		//			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty output signal").arg(appFb->caption()).arg(appFb->schemaID());
 		//			LOG_INTERNAL_ERROR_MSG(m_log, strError);
@@ -9267,7 +9294,7 @@ namespace Builder
 		//			return false;
 		//		}
 
-		if (cmp->cmpValueIsConst() == false && cmp->cmpSignalID().isEmpty() == true)
+		if (cmp->compare().isConst() == false && cmp->compare().appSignalID().isEmpty() == true)
 		{
 			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty cmp signal").arg(appFb->caption()).arg(appFb->schemaID());
 			LOG_INTERNAL_ERROR_MSG(m_log, strError);
@@ -9275,7 +9302,7 @@ namespace Builder
 			return false;
 		}
 
-		if (cmp->hysteresisIsConst() == false && cmp->hysteresisSignalID().isEmpty() == true)
+		if (cmp->hysteresis().isConst() == false && cmp->hysteresis().appSignalID().isEmpty() == true)
 		{
 			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty hysteresis signal").arg(appFb->caption()).arg(appFb->schemaID());
 			LOG_INTERNAL_ERROR_MSG(m_log, strError);

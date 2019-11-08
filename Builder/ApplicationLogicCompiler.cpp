@@ -1219,7 +1219,7 @@ namespace Builder
 
 		protoComparatorSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
 
-		BuildFile* comparatorSetFile = buildResultWriter()->addFile(Builder::DIR_COMMON, FILE_COMPARATORS_ASGS, CFG_FILE_ID_COMPARATOR_SET, "", data, true);
+		BuildFile* comparatorSetFile = buildResultWriter()->addFile(Builder::DIR_COMMON, FILE_COMPARATORS_SET, CFG_FILE_ID_COMPARATOR_SET, "", data, true);
 
 		return comparatorSetFile != nullptr;
 	}

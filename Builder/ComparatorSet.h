@@ -14,6 +14,41 @@ namespace Builder
 	//
 	// ------------------------------------------------------------------------------------------------
 
+	class ComparatorSignal
+	{
+	public:
+
+		ComparatorSignal();
+
+		bool isConst() const;
+		void setIsConst(bool isConst);
+
+		double constValue() const;
+		void setConstValue(double constValue);
+
+		QString appSignalID() const;
+		void setAppSignalID(const QString& appSignalID);
+
+		bool isAcquired() const;
+		void setIsAcquired(bool isAcquired);
+
+		void serializeTo(Proto::ComparatorSignal* s) const;
+		void serializeFrom(const Proto::ComparatorSignal& s);
+
+	private:
+
+		bool m_isConst = true;
+		double m_constValue = 0;						// if m_isConst == true
+		QString m_appSignalID;							// if m_isConst == false
+		bool m_isAcquired = true;
+	};
+
+	// ------------------------------------------------------------------------------------------------
+	//
+	//	Comparator class declaration
+	//
+	// ------------------------------------------------------------------------------------------------
+
 	class Comparator
 	{
 	public:
@@ -27,41 +62,19 @@ namespace Builder
 
 		Comparator();
 
-		QString	inSignalID() const;
-		void setInSignalID(const QString& inSignalID);
-
 		CmpType cmpType() const;
 		void setCmpType(CmpType cmpType);
 
-		E::AnalogAppSignalFormat analogSignalFormat() const;
-		void setAnalogSignalFormat(E::AnalogAppSignalFormat analogSignalFormat);
+		E::AnalogAppSignalFormat intAnalogSignalFormat() const;
+		void setInAnalogSignalFormat(E::AnalogAppSignalFormat intAnalogSignalFormat);
 
-		bool cmpValueIsConst() const;
-		void setCmpValueIsConst(bool cmpValueIsConst);
-
-		double cmpConstValue() const;
-		void setCmpConstValue(double cmpConstValue);
-
-		QString cmpSignalID() const;
-		void setCmpSignalID(const QString& cmpSignalID);
-
-		bool hysteresisIsConst() const;
-		void setHysteresisIsConst(bool hysteresisIsConst);
-
-		double hysteresisConstValue() const;
-		void setHysteresisConstValue(double hysteresisConstValue);
-
-		QString hysteresisSignalID() const;
-		void setHysteresisSignalID(const QString& hysteresisSignalID);
-
-		QString outSignalID() const;
-		void setOutSignalID(const QString& outSignalID);
+		ComparatorSignal& input();
+		ComparatorSignal& compare();
+		ComparatorSignal& hysteresis();
+		ComparatorSignal& output();
 
 		QString schemaID() const;
 		void setSchemaID(const QString& schemaID);
-
-		QString	lmID() const;
-		void setLmID(const QString& lmID);
 
 		QUuid uuid() const;
 		void setUuid(QUuid uuid);
@@ -70,23 +83,15 @@ namespace Builder
 		void serializeFrom(const Proto::Comparator& c);
 
 	private:
-		QString	m_inSignalID;
-
 		CmpType m_cmpType= CmpType::Equ;
-		E::AnalogAppSignalFormat m_analogSignalFormat = E::AnalogAppSignalFormat::SignedInt32;
+		E::AnalogAppSignalFormat m_inAnalogSignalFormat = E::AnalogAppSignalFormat::SignedInt32;
 
-		bool m_cmpValueIsConst = true;
-		double m_cmpConstValue = 0;					// if m_cmpValueIsConst == true
-		QString m_cmpSignalID;						// if m_cmpValueIsConst == false
-
-		bool m_hysteresisIsConst = true;
-		double m_hysteresisConstValue = 0;			// if m_hysteresisIsConst == true
-		QString m_hysteresisSignalID;				// if m_hysteresisIsConst == false
-
-		QString m_outSignalID;
+		ComparatorSignal m_inputSignal;
+		ComparatorSignal m_compareSignal;
+		ComparatorSignal m_hysteresisSignal;
+		ComparatorSignal m_outputSignal;
 
 		QString m_schemaID;
-		QString m_lmID;
 		QUuid m_uuid;
 	};
 

@@ -6,22 +6,88 @@ namespace Builder
 {
 	// ------------------------------------------------------------------------------------------------
 	//
+	//	ComparatorSignal class implementation
+	//
+	// ------------------------------------------------------------------------------------------------
+
+	ComparatorSignal::ComparatorSignal()
+	{
+	}
+
+	bool ComparatorSignal::isConst() const
+	{
+		return m_isConst;
+	}
+
+	void ComparatorSignal::setIsConst(bool isConst)
+	{
+		m_isConst = isConst;
+	}
+
+	double ComparatorSignal::constValue() const
+	{
+		assert(m_isConst == true);
+
+		return m_constValue;
+	}
+
+	void ComparatorSignal::setConstValue(double constValue)
+	{
+		assert(m_isConst == true);
+
+		m_constValue = constValue;
+	}
+
+	QString ComparatorSignal::appSignalID() const
+	{
+		return m_appSignalID;
+	}
+
+	void ComparatorSignal::setAppSignalID(const QString& appSignalID)
+	{
+		m_appSignalID = appSignalID;
+	}
+
+	bool ComparatorSignal::isAcquired() const
+	{
+		return m_isAcquired;
+	}
+
+	void ComparatorSignal::setIsAcquired(bool isAcquired)
+	{
+		m_isAcquired = isAcquired;
+	}
+
+	void ComparatorSignal::serializeTo(Proto::ComparatorSignal* s) const
+	{
+		if (s == nullptr)
+		{
+			assert(false);
+			return;
+		}
+
+		s->set_isconst(m_isConst);
+		s->set_constvalue(m_constValue);
+		s->set_appsignalid(m_appSignalID.toStdString());
+		s->set_isacquired(m_isAcquired);
+	}
+
+	void ComparatorSignal::serializeFrom(const Proto::ComparatorSignal& s)
+	{
+		m_isConst = s.isconst();
+		m_constValue = s.constvalue();
+		m_appSignalID = QString::fromStdString(s.appsignalid());
+		m_isAcquired = s.isacquired();
+	}
+
+	// ------------------------------------------------------------------------------------------------
+	//
 	//	Comparator class implementation
 	//
 	// ------------------------------------------------------------------------------------------------
 
 	Comparator::Comparator()
 	{
-	}
-
-	QString	Comparator::inSignalID() const
-	{
-		return m_inSignalID;
-	}
-
-	void Comparator::setInSignalID(const QString& inSignalID)
-	{
-		m_inSignalID = inSignalID;
 	}
 
 	Comparator::CmpType Comparator::cmpType() const
@@ -34,100 +100,34 @@ namespace Builder
 		m_cmpType = cmpType;
 	}
 
-	E::AnalogAppSignalFormat Comparator::analogSignalFormat() const
+	E::AnalogAppSignalFormat Comparator::intAnalogSignalFormat() const
 	{
-		return m_analogSignalFormat;
+		return m_inAnalogSignalFormat;
 	}
 
-	void Comparator::setAnalogSignalFormat(E::AnalogAppSignalFormat analogSignalFormat)
+	void Comparator::setInAnalogSignalFormat(E::AnalogAppSignalFormat analogSignalFormat)
 	{
-		m_analogSignalFormat = analogSignalFormat;
+		m_inAnalogSignalFormat = analogSignalFormat;
 	}
 
-	bool Comparator::cmpValueIsConst() const
+	ComparatorSignal& Comparator::input()
 	{
-		return m_cmpValueIsConst;
+		return m_inputSignal;
 	}
 
-	void Comparator::setCmpValueIsConst(bool cmpValueIsConst)
+	ComparatorSignal& Comparator::compare()
 	{
-		m_cmpValueIsConst = cmpValueIsConst;
+		return m_compareSignal;
 	}
 
-	double Comparator::cmpConstValue() const
+	ComparatorSignal& Comparator::hysteresis()
 	{
-		assert(m_cmpValueIsConst == true);
-
-		return m_cmpConstValue;
+		return m_hysteresisSignal;
 	}
 
-	void Comparator::setCmpConstValue(double cmpConstValue)
+	ComparatorSignal& Comparator::output()
 	{
-		assert(m_cmpValueIsConst == true);
-
-		m_cmpConstValue = cmpConstValue;
-	}
-
-	QString Comparator::cmpSignalID() const
-	{
-		assert(m_cmpValueIsConst == false);
-
-		return m_cmpSignalID;
-	}
-
-	void Comparator::setCmpSignalID(const QString& cmpSignalID)
-	{
-		assert(m_cmpValueIsConst == false);
-
-		m_cmpSignalID = cmpSignalID;
-	}
-
-	bool Comparator::hysteresisIsConst() const
-	{
-		return m_hysteresisIsConst;
-	}
-
-	void Comparator::setHysteresisIsConst(bool hysteresisIsConst)
-	{
-		m_hysteresisIsConst = hysteresisIsConst;
-	}
-
-	double Comparator::hysteresisConstValue() const
-	{
-		assert(m_hysteresisIsConst == true);
-
-		return m_hysteresisConstValue;
-	}
-
-	void Comparator::setHysteresisConstValue(double hysteresisConstValue)
-	{
-		assert(m_hysteresisIsConst == true);
-
-		m_hysteresisConstValue = hysteresisConstValue;
-	}
-
-	QString Comparator::hysteresisSignalID() const
-	{
-		assert(m_hysteresisIsConst == false);
-
-		return m_hysteresisSignalID;
-	}
-
-	void Comparator::setHysteresisSignalID(const QString& hysteresisSignalID)
-	{
-		assert(m_hysteresisIsConst == false);
-
-		m_hysteresisSignalID = hysteresisSignalID;
-	}
-
-	QString Comparator::outSignalID() const
-	{
-		return m_outSignalID;
-	}
-
-	void Comparator::setOutSignalID(const QString& outSignalID)
-	{
-		m_outSignalID = outSignalID;
+		return m_outputSignal;
 	}
 
 	QString Comparator::schemaID() const
@@ -140,16 +140,6 @@ namespace Builder
 		m_schemaID = schemaID;
 	}
 
-	QString	Comparator::lmID() const
-	{
-		return m_lmID;
-	}
-
-	void Comparator::setLmID(const QString& lmEquipmentID)
-	{
-		m_lmID = lmEquipmentID;
-	}
-
 	QUuid Comparator::uuid() const
 	{
 		return m_uuid;
@@ -160,7 +150,6 @@ namespace Builder
 		m_uuid = uuid;
 	}
 
-
 	void Comparator::serializeTo(Proto::Comparator* c) const
 	{
 		if (c == nullptr)
@@ -169,46 +158,30 @@ namespace Builder
 			return;
 		}
 
-		c->set_insignalid(m_inSignalID.toStdString());
-
 		c->set_cmptype(TO_INT(m_cmpType));
-		c->set_analogsignalformat(TO_INT(m_analogSignalFormat));
+		c->set_inanalogsignalformat(TO_INT(m_inAnalogSignalFormat));
 
-		c->set_cmpvalueisconst(m_cmpValueIsConst);
-		c->set_cmpconstvalue(m_cmpConstValue);
-		c->set_cmpsignalid(m_cmpSignalID.toStdString());
-
-		c->set_hysteresisisconst(m_hysteresisIsConst);
-		c->set_hysteresisconstvalue(m_hysteresisConstValue);
-		c->set_hysteresissignalid(m_hysteresisSignalID.toStdString());
-
-		c->set_outsignalid(m_outSignalID.toStdString());
+		m_inputSignal.serializeTo(c->mutable_input());
+		m_compareSignal.serializeTo(c->mutable_input());
+		m_hysteresisSignal.serializeTo(c->mutable_input());
+		m_outputSignal.serializeTo(c->mutable_input());
 
 		c->set_schemaid(m_schemaID.toStdString());
-		c->set_lmid(m_lmID.toStdString());
-		Proto::Write(c->mutable_uuid(), m_uuid);
+		Proto::Write(c->mutable_schemaitemuuid(), m_uuid);
 	}
 
 	void Comparator::serializeFrom(const Proto::Comparator& c)
 	{
-		m_inSignalID = QString::fromStdString(c.insignalid());
-
 		m_cmpType = static_cast<Comparator::CmpType>(c.cmptype());
-		m_analogSignalFormat = static_cast<E::AnalogAppSignalFormat>(c.analogsignalformat());
+		m_inAnalogSignalFormat = static_cast<E::AnalogAppSignalFormat>(c.inanalogsignalformat());
 
-		m_cmpValueIsConst = c.cmpvalueisconst();
-		m_cmpConstValue = c.cmpconstvalue();
-		m_cmpSignalID = QString::fromStdString(c.cmpsignalid());
-
-		m_hysteresisIsConst = c.hysteresisisconst();
-		m_hysteresisConstValue = c.hysteresisconstvalue();
-		m_hysteresisSignalID = QString::fromStdString(c.hysteresissignalid());
-
-		m_outSignalID = QString::fromStdString(c.outsignalid());
+		m_inputSignal.serializeFrom(c.input());
+		m_compareSignal.serializeFrom(c.compare());
+		m_hysteresisSignal.serializeFrom(c.hysteresis());
+		m_outputSignal.serializeFrom(c.output());
 
 		m_schemaID = QString::fromStdString(c.schemaid());
-		m_lmID = QString::fromStdString(c.lmid());
-		m_uuid = Proto::Read(c.uuid());
+		m_uuid = Proto::Read(c.schemaitemuuid());
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -414,7 +387,12 @@ namespace Builder
 			return;
 		}
 
-		if (comparator->inSignalID().isEmpty() == true || comparator->outSignalID().isEmpty() == true)
+		if (comparator->input().appSignalID().isEmpty() == true || comparator->input().isAcquired() == false)
+		{
+			return;
+		}
+
+		if (comparator->output().appSignalID().isEmpty() == true || comparator->output().isAcquired() == false)
 		{
 			return;
 		}

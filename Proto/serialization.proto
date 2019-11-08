@@ -1287,7 +1287,7 @@ message ComparatorSignal
     optional bool isConst = 1 [default = true];
 	optional double constValue = 2 [default = 0.0];
 	optional string appSignalId = 3;
-	optional bool isAcquired = 4;
+	optional bool isAcquired = 4 [default = false];
 }
 
 message Comparator
