@@ -4,6 +4,7 @@
 #include <QHeaderView>
 
 #include "MainWindow.h"
+#include "Delegate.h"
 #include "Options.h"
 #include "ExportData.h"
 #include "FindData.h"
@@ -160,17 +161,14 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::BackgroundColorRole)
 	{
-		if (column == STATISTIC_COLUMN_APP_ID || column == STATISTIC_COLUMN_CUSTOM_ID || column == STATISTIC_COLUMN_EQUIPMENT_ID || column == STATISTIC_COLUMN_STATE)
+		if (column == STATISTIC_COLUMN_CUSTOM_ID || column == STATISTIC_COLUMN_EQUIPMENT_ID || column == STATISTIC_COLUMN_STATE)
 		{
 			if (pSignal->statistic().measureCount() != 0)
 			{
-				if (pSignal->statistic().state() == Metrology::StatisticStateFailed)
+				switch (pSignal->statistic().state())
 				{
-					return theOptions.measureView().colorErrorLimit();
-				}
-				if (pSignal->statistic().state() == Metrology::StatisticStateSuccess)
-				{
-					return theOptions.measureView().colorNotError();
+					case Metrology::StatisticStateFailed:	return theOptions.measureView().colorErrorLimit();	break;
+					case Metrology::StatisticStateSuccess:	return theOptions.measureView().colorNotError();	break;
 				}
 			}
 		}
@@ -418,6 +416,11 @@ void StatisticPanel::createInterface()
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
 	connect(m_pView, &QTableView::doubleClicked , this, &StatisticPanel::onListDoubleClicked);
+
+
+	StatisticsStateDelegate* stateDelegate = new StatisticsStateDelegate(m_pStatisticWindow);
+	m_pView->setItemDelegateForColumn(STATISTIC_COLUMN_APP_ID, stateDelegate);
+
 
 	m_pStatisticWindow->setCentralWidget(m_pView);
 

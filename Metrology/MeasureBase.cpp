@@ -1551,6 +1551,13 @@ Metrology::SignalStatistic MeasureBase::getSignalStatistic(const Hash& signalHas
 		return Metrology::SignalStatistic();
 	}
 
+	int limitType = theOptions.linearity().showErrorFromLimit();
+	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
+	{
+		assert(0);
+		return Metrology::SignalStatistic();
+	}
+
 	int errorType = theOptions.linearity().errorType();
 	if (errorType < 0 || errorType >= MEASURE_ERROR_TYPE_COUNT)
 	{
@@ -1588,7 +1595,7 @@ Metrology::SignalStatistic MeasureBase::getSignalStatistic(const Hash& signalHas
 
 						si.measureCount()++;
 
-						if (pLinearityMeasurement->error(MEASURE_LIMIT_TYPE_ENGENEER, errorType) > pLinearityMeasurement->errorLimit(MEASURE_LIMIT_TYPE_ENGENEER, errorType))
+						if (pLinearityMeasurement->error(limitType, errorType) > pLinearityMeasurement->errorLimit(limitType, errorType))
 						{
 							si.setState(Metrology::StatisticStateFailed);
 						}

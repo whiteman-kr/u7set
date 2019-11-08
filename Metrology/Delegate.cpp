@@ -1,6 +1,7 @@
 #include "Delegate.h"
 
 #include "FindMeasurePanel.h"
+#include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -137,6 +138,69 @@ void FindTextDelegate::paint(QPainter *painter, const QStyleOptionViewItem &opti
 	painter->setPen(option.palette.text().color());
 	painter->drawText(textRect, Qt::AlignLeft, item.text());
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+StatisticsStateDelegate::StatisticsStateDelegate(QObject *parent) :
+	QStyledItemDelegate(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void StatisticsStateDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+	int row = index.row();
+	if (row < 0 || row >= theSignalBase.statistic().signalCount())
+	{
+		QStyledItemDelegate::paint(painter, option, index);
+		return;
+	}
+
+	Metrology::Signal* pSignal = theSignalBase.statistic().signal(row);
+	if (pSignal == nullptr || pSignal->param().isValid() == false)
+	{
+		QStyledItemDelegate::paint(painter, option, index);
+		return;
+	}
+
+	if (pSignal->statistic().measureCount() == 0)
+	{
+		QStyledItemDelegate::paint(painter, option, index);
+		return;
+	}
+
+//	if ((option.state & QStyle::State_Selected) != 0)
+//	{
+//		if ((option.state & QStyle::State_HasFocus) != 0)
+//		{
+//			painter->fillRect(option.rect, option.palette.highlight());
+//		}
+//		else
+//		{
+//			painter->fillRect(option.rect, option.palette.window());
+//		}
+//	}
+
+	switch (pSignal->statistic().state())
+	{
+		case Metrology::StatisticStateFailed:
+			painter->fillRect(option.rect, theOptions.measureView().colorErrorLimit());
+			painter->drawImage(QPointF(option.rect.right() - 20, option.rect.top()), QImage(":/icons/CheckRed.png"));
+			break;
+		case Metrology::StatisticStateSuccess:
+			painter->fillRect(option.rect, theOptions.measureView().colorNotError());
+			painter->drawImage(QPointF(option.rect.right() - 20, option.rect.top()), QImage(":/icons/CheckGreen.png"));
+			break;
+	}
+
+	QRect textRect = option.rect;
+	textRect.setRect(option.rect.left() + 3, option.rect.top() + 3, option.rect.right(), option.rect.bottom());
+	painter->drawText(textRect, Qt::AlignLeft, pSignal->param().appSignalID());
+}
+
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
