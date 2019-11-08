@@ -1172,6 +1172,7 @@ static QByteArray err;
 
 				const int UniqueIdDescriptionPos = 9;
 
+				setScriptFirmware(subsysId, uartId);
 				jsInsertDescription(UniqueIdDescriptionPos, lmNumber, tr("%1;%2;%3;0;64;UniqueID;0x%4").arg(equipmentId).arg(frameNumber).arg(UniqueIdOffset).arg(QString::number(genericUniqueId, 16)));
 
 				QString oldString = tr("    [%1:%2] UniqueID = 0\r\n").arg(frameNumber).arg(UniqueIdOffset);
