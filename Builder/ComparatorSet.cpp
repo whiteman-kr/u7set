@@ -112,22 +112,22 @@ namespace Builder
 
 	ComparatorSignal& Comparator::input()
 	{
-		return m_signal[SignalType::Input];
+		return m_inputSignal;
 	}
 
 	ComparatorSignal& Comparator::compare()
 	{
-		return m_signal[SignalType::Compare];
+		return m_compareSignal;
 	}
 
 	ComparatorSignal& Comparator::hysteresis()
 	{
-		return m_signal[SignalType::Hysteresis];
+		return m_hysteresisSignal;
 	}
 
 	ComparatorSignal& Comparator::output()
 	{
-		return m_signal[SignalType::Output];
+		return m_outputSignal;
 	}
 
 	QString Comparator::schemaID() const
@@ -161,10 +161,10 @@ namespace Builder
 		c->set_cmptype(TO_INT(m_cmpType));
 		c->set_inanalogsignalformat(TO_INT(m_inAnalogSignalFormat));
 
-		m_signal[SignalType::Input].serializeTo(c->mutable_input());
-		m_signal[SignalType::Compare].serializeTo(c->mutable_compare());
-		m_signal[SignalType::Hysteresis].serializeTo(c->mutable_hysteresis());
-		m_signal[SignalType::Output].serializeTo(c->mutable_output());
+		m_inputSignal.serializeTo(c->mutable_input());
+		m_compareSignal.serializeTo(c->mutable_compare());
+		m_hysteresisSignal.serializeTo(c->mutable_hysteresis());
+		m_outputSignal.serializeTo(c->mutable_output());
 
 		c->set_schemaid(m_schemaID.toStdString());
 		Proto::Write(c->mutable_schemaitemuuid(), m_uuid);
@@ -175,10 +175,10 @@ namespace Builder
 		m_cmpType = static_cast<Comparator::CmpType>(c.cmptype());
 		m_inAnalogSignalFormat = static_cast<E::AnalogAppSignalFormat>(c.inanalogsignalformat());
 
-		m_signal[SignalType::Input].serializeFrom(c.input());
-		m_signal[SignalType::Compare].serializeFrom(c.compare());
-		m_signal[SignalType::Hysteresis].serializeFrom(c.hysteresis());
-		m_signal[SignalType::Output].serializeFrom(c.output());
+		m_inputSignal.serializeFrom(c.input());
+		m_compareSignal.serializeFrom(c.compare());
+		m_hysteresisSignal.serializeFrom(c.hysteresis());
+		m_outputSignal.serializeFrom(c.output());
 
 		m_schemaID = QString::fromStdString(c.schemaid());
 		m_uuid = Proto::Read(c.schemaitemuuid());
@@ -339,8 +339,7 @@ namespace Builder
 			return;
 		}
 
-		if (comparator->output().appSignalID().isEmpty() == true)
-		//if (comparator->output().appSignalID().isEmpty() == true || comparator->output().isAcquired() == false)
+		if (comparator->output().appSignalID().isEmpty() == true || comparator->output().isAcquired() == false)
 		{
 			return;
 		}
@@ -410,7 +409,7 @@ namespace Builder
 					continue;
 				}
 
-				// set every comporator in proto message
+				// set every comporator to proto message
 				//
 				Proto::Comparator* protoComparator = protoLmComparatorSet->add_comparator();
 				pComparator->serializeTo(protoComparator);
@@ -446,10 +445,9 @@ namespace Builder
 					continue;
 				}
 
-				pComparator->serializeFrom(protoComparator);
-
-				// insert comparator
+				// get every comporator from proto message
 				//
+				pComparator->serializeFrom(protoComparator);
 				insert(lmID, pComparator);
 			}
 		}

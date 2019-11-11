@@ -60,16 +60,6 @@ namespace Builder
 			NotEqu
 		};
 
-		enum SignalType
-		{
-			Input,
-			Compare,
-			Hysteresis,
-			Output
-		};
-
-		static const int SignalTypeCount = SignalType::Output + 1;
-
 		Comparator();
 
 		CmpType cmpType() const;
@@ -96,7 +86,10 @@ namespace Builder
 		CmpType m_cmpType= CmpType::Equ;
 		E::AnalogAppSignalFormat m_inAnalogSignalFormat = E::AnalogAppSignalFormat::SignedInt32;
 
-		ComparatorSignal m_signal[SignalTypeCount];
+		ComparatorSignal m_inputSignal;
+		ComparatorSignal m_compareSignal;
+		ComparatorSignal m_hysteresisSignal;
+		ComparatorSignal m_outputSignal;
 
 		QString m_schemaID;
 		QUuid m_uuid;
