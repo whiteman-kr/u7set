@@ -60,6 +60,16 @@ namespace Builder
 			NotEqu
 		};
 
+		enum SignalType
+		{
+			Input,
+			Compare,
+			Hysteresis,
+			Output
+		};
+
+		static const int SignalTypeCount = SignalType::Output + 1;
+
 		Comparator();
 
 		CmpType cmpType() const;
@@ -86,10 +96,7 @@ namespace Builder
 		CmpType m_cmpType= CmpType::Equ;
 		E::AnalogAppSignalFormat m_inAnalogSignalFormat = E::AnalogAppSignalFormat::SignedInt32;
 
-		ComparatorSignal m_inputSignal;
-		ComparatorSignal m_compareSignal;
-		ComparatorSignal m_hysteresisSignal;
-		ComparatorSignal m_outputSignal;
+		ComparatorSignal m_signal[SignalTypeCount];
 
 		QString m_schemaID;
 		QUuid m_uuid;
@@ -117,9 +124,6 @@ namespace Builder
 
 		void insert(std::shared_ptr<Comparator> comparator);
 
-		void serializeTo(Proto::LmComparatorSet* set);
-		void serializeFrom(const Proto::LmComparatorSet& set);
-
 	private:
 		mutable QMutex m_mutex;
 
@@ -145,8 +149,10 @@ namespace Builder
 		std::shared_ptr<LmComparatorSet> lmComparatorSet(int index) const;
 		std::shared_ptr<LmComparatorSet> lmComparatorSet(const QString& lmID) const;
 
+		int comparatorCount() const;
+		QList<std::shared_ptr<Comparator>> getByInputSignalID(const QString& appSignalID) const;
+
 		void insert(const QString& lmID, std::shared_ptr<Comparator> comparator);	// insert Comparator
-		void insert(std::shared_ptr<LmComparatorSet> lmComparatorSet);				// insert LmComparatorSet
 
 		void serializeTo(Proto::ComparatorSet* set);
 		void serializeFrom(const Proto::ComparatorSet& set);
@@ -156,5 +162,7 @@ namespace Builder
 
 		QMap<QString, std::shared_ptr<LmComparatorSet>> m_setMap;
 		QList<std::shared_ptr<LmComparatorSet>> m_lmList;
+
+		QHash<QString, std::shared_ptr<Comparator>> m_bySignal;
 	};
 }

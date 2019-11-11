@@ -112,22 +112,22 @@ namespace Builder
 
 	ComparatorSignal& Comparator::input()
 	{
-		return m_inputSignal;
+		return m_signal[SignalType::Input];
 	}
 
 	ComparatorSignal& Comparator::compare()
 	{
-		return m_compareSignal;
+		return m_signal[SignalType::Compare];
 	}
 
 	ComparatorSignal& Comparator::hysteresis()
 	{
-		return m_hysteresisSignal;
+		return m_signal[SignalType::Hysteresis];
 	}
 
 	ComparatorSignal& Comparator::output()
 	{
-		return m_outputSignal;
+		return m_signal[SignalType::Output];
 	}
 
 	QString Comparator::schemaID() const
@@ -161,10 +161,10 @@ namespace Builder
 		c->set_cmptype(TO_INT(m_cmpType));
 		c->set_inanalogsignalformat(TO_INT(m_inAnalogSignalFormat));
 
-		m_inputSignal.serializeTo(c->mutable_input());
-		m_compareSignal.serializeTo(c->mutable_input());
-		m_hysteresisSignal.serializeTo(c->mutable_input());
-		m_outputSignal.serializeTo(c->mutable_input());
+		m_signal[SignalType::Input].serializeTo(c->mutable_input());
+		m_signal[SignalType::Compare].serializeTo(c->mutable_compare());
+		m_signal[SignalType::Hysteresis].serializeTo(c->mutable_hysteresis());
+		m_signal[SignalType::Output].serializeTo(c->mutable_output());
 
 		c->set_schemaid(m_schemaID.toStdString());
 		Proto::Write(c->mutable_schemaitemuuid(), m_uuid);
@@ -175,10 +175,10 @@ namespace Builder
 		m_cmpType = static_cast<Comparator::CmpType>(c.cmptype());
 		m_inAnalogSignalFormat = static_cast<E::AnalogAppSignalFormat>(c.inanalogsignalformat());
 
-		m_inputSignal.serializeFrom(c.input());
-		m_compareSignal.serializeFrom(c.compare());
-		m_hysteresisSignal.serializeFrom(c.hysteresis());
-		m_outputSignal.serializeFrom(c.output());
+		m_signal[SignalType::Input].serializeFrom(c.input());
+		m_signal[SignalType::Compare].serializeFrom(c.compare());
+		m_signal[SignalType::Hysteresis].serializeFrom(c.hysteresis());
+		m_signal[SignalType::Output].serializeFrom(c.output());
 
 		m_schemaID = QString::fromStdString(c.schemaid());
 		m_uuid = Proto::Read(c.schemaitemuuid());
@@ -252,73 +252,6 @@ namespace Builder
 		 m_comparatorList.append(comparator);
 	}
 
-	void LmComparatorSet::serializeTo(Proto::LmComparatorSet* set)
-	{
-		if (set == nullptr)
-		{
-			assert(false);
-			return;
-		}
-
-		if (m_lmID.isEmpty() == true)
-		{
-			assert(false);
-			return;
-		}
-
-		// set equipmentID of LM in proto message
-		//
-		set->set_lmequipmentid(m_lmID.toStdString());
-
-		// get all comparator of LM
-		//
-		int count = comparatorCount();
-		for(int i = 0; i < count; i++)
-		{
-			std::shared_ptr<Comparator> pComparator = comparator(i);
-			if (pComparator == nullptr)
-			{
-				continue;
-			}
-
-			// set every comporator in proto message
-			//
-			Proto::Comparator* protoComparator = set->add_comparator();
-			pComparator->serializeTo(protoComparator);
-		}
-	}
-
-	void LmComparatorSet::serializeFrom(const Proto::LmComparatorSet& set)
-	{
-		// get equipmentID of LM
-		//
-		m_lmID = QString::fromStdString(set.lmequipmentid());
-		if (m_lmID.isEmpty() == true)
-		{
-			return;
-		}
-
-		// get all comparator of LM
-		//
-		int count = set.comparator_size();
-		for(int i = 0; i < count; i++)
-		{
-			const Proto::Comparator& protoComparator = set.comparator(i);
-
-			std::shared_ptr<Comparator> pComparator = std::make_shared<Comparator>();
-			if (pComparator == nullptr)
-			{
-				continue;
-			}
-
-			pComparator->serializeFrom(protoComparator);
-
-			// insert comparator
-			//
-			insert(pComparator);
-		}
-	}
-
 	// ------------------------------------------------------------------------------------------------
 	//
 	//	ComparatorSet class implementation
@@ -373,6 +306,20 @@ namespace Builder
 		return m_setMap[lmID];
 	}
 
+	int ComparatorSet::comparatorCount() const
+	{
+		QMutexLocker l(&m_mutex);
+
+		return m_bySignal.count();
+	}
+
+	QList<std::shared_ptr<Comparator>> ComparatorSet::getByInputSignalID(const QString& appSignalID) const
+	{
+		QMutexLocker l(&m_mutex);
+
+		return m_bySignal.values(appSignalID);
+	}
+
 	void ComparatorSet::insert(const QString& lmID, std::shared_ptr<Comparator> comparator)
 	{
 		QMutexLocker l(&m_mutex);
@@ -392,10 +339,13 @@ namespace Builder
 			return;
 		}
 
-		if (comparator->output().appSignalID().isEmpty() == true || comparator->output().isAcquired() == false)
+		if (comparator->output().appSignalID().isEmpty() == true)
+		//if (comparator->output().appSignalID().isEmpty() == true || comparator->output().isAcquired() == false)
 		{
 			return;
 		}
+
+		m_bySignal.insertMulti(comparator->input().appSignalID(), comparator);
 
 		std::shared_ptr<LmComparatorSet> lmComparatorSet = nullptr;
 
@@ -421,24 +371,6 @@ namespace Builder
 		lmComparatorSet->insert(comparator);
 	}
 
-	void ComparatorSet::insert(std::shared_ptr<LmComparatorSet> lmComparatorSet)
-	{
-		QMutexLocker l(&m_mutex);
-
-		if (lmComparatorSet == nullptr)
-		{
-			return;
-		}
-
-		if (m_setMap.contains(lmComparatorSet->lmID()) == true)
-		{
-			return;
-		}
-
-		m_setMap.insert(lmComparatorSet->lmID(), lmComparatorSet);
-		m_lmList.append(lmComparatorSet);
-	}
-
 	void ComparatorSet::serializeTo(Proto::ComparatorSet* set)
 	{
 		if (set == nullptr)
@@ -447,39 +379,81 @@ namespace Builder
 			return;
 		}
 
-		int count = lmCount();
-		for(int i = 0; i < count; i++)
+		int lmcount = lmCount();
+		for(int lm = 0; lm < lmcount; lm++)
 		{
-			std::shared_ptr<LmComparatorSet> pLmComparatorSet = lmComparatorSet(i);
+			std::shared_ptr<LmComparatorSet> pLmComparatorSet = lmComparatorSet(lm);
 			if (pLmComparatorSet == nullptr)
 			{
 				continue;
 			}
 
 			::Proto::LmComparatorSet* protoLmComparatorSet = set->add_lmcomparatorset();
-			pLmComparatorSet->serializeTo(protoLmComparatorSet);
+
+			if (pLmComparatorSet->lmID().isEmpty() == true)
+			{
+				continue;
+			}
+
+			// set equipmentID of LM in proto message
+			//
+			protoLmComparatorSet->set_lmequipmentid(pLmComparatorSet->lmID().toStdString());
+
+			// get all comparator of LM
+			//
+			int cmpcount = pLmComparatorSet->comparatorCount();
+			for(int c = 0; c < cmpcount; c++)
+			{
+				std::shared_ptr<Comparator> pComparator = pLmComparatorSet->comparator(c);
+				if (pComparator == nullptr)
+				{
+					continue;
+				}
+
+				// set every comporator in proto message
+				//
+				Proto::Comparator* protoComparator = protoLmComparatorSet->add_comparator();
+				pComparator->serializeTo(protoComparator);
+			}
 		}
 	}
 
 	void ComparatorSet::serializeFrom(const Proto::ComparatorSet& set)
 	{
-		int count = set.lmcomparatorset_size();
-		for(int i = 0; i < count; i++)
+		int lmcount = set.lmcomparatorset_size();
+		for(int lm = 0; lm < lmcount; lm++)
 		{
-			const Proto::LmComparatorSet& protoLmComparatorSet = set.lmcomparatorset(i);
+			const Proto::LmComparatorSet& protoLmComparatorSet = set.lmcomparatorset(lm);
 
-			std::shared_ptr<LmComparatorSet> pLmComparatorSet = std::make_shared<LmComparatorSet>();
-			if (pLmComparatorSet == nullptr)
+			// get equipmentID of LM
+			//
+			QString lmID = QString::fromStdString(protoLmComparatorSet.lmequipmentid());
+			if (lmID.isEmpty() == true)
 			{
-				continue;
+				return;
 			}
 
-			pLmComparatorSet->serializeFrom(protoLmComparatorSet);
+			// get all comparator of LM
+			//
+			int cmpcount = protoLmComparatorSet.comparator_size();
+			for(int c = 0; c < cmpcount; c++)
+			{
+				const Proto::Comparator& protoComparator = protoLmComparatorSet.comparator(c);
 
-			insert(pLmComparatorSet);
+				std::shared_ptr<Comparator> pComparator = std::make_shared<Comparator>();
+				if (pComparator == nullptr)
+				{
+					continue;
+				}
+
+				pComparator->serializeFrom(protoComparator);
+
+				// insert comparator
+				//
+				insert(lmID, pComparator);
+			}
 		}
 	}
-
 }
 
 
