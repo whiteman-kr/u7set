@@ -176,6 +176,8 @@ namespace TrendLib
 		message->set_unit(m_unit.toStdString());
 		message->set_precision(m_precision);
 
+		message->set_line_weight(m_lineWeight);
+
 		message->set_high_limit(m_highLimit);
 		message->set_low_limit(m_lowLimit);
 		message->set_view_high_limit(m_viewHighLimit);
@@ -196,6 +198,8 @@ namespace TrendLib
 		m_type = static_cast<E::SignalType>(message.type());
 		m_unit = QString::fromStdString(message.unit());
 		m_precision = message.precision();
+
+		m_lineWeight = message.line_weight();
 
 		m_highLimit = message.high_limit();
 		m_lowLimit = message.low_limit();
@@ -290,6 +294,16 @@ namespace TrendLib
 	void TrendSignalParam::setPrecision(int value)
 	{
 		m_precision = value;
+	}
+
+	double TrendSignalParam::lineWeight() const
+	{
+		return m_lineWeight;
+	}
+
+	void TrendSignalParam::setLineWeight(double value)
+	{
+		m_lineWeight = qBound<double>(0.0, value, 10.0);
 	}
 
 	double TrendSignalParam::highLimit() const

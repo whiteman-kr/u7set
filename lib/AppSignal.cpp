@@ -52,12 +52,12 @@ static const TimeStamp dummy;
 	return dummy;
 }
 
-double AppSignalState::value() const
+double AppSignalState::value() const  noexcept
 {
 	return m_value;
 }
 
-bool AppSignalState::isValid() const
+bool AppSignalState::isValid() const  noexcept
 {
 	return m_flags.valid;
 }

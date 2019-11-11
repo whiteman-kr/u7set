@@ -57,9 +57,9 @@ public:
 	Hash hash() const;
 	const Times& time() const;
 	const TimeStamp& time(E::TimeType timeType) const;
-	double value() const;
+	double value() const noexcept;
 
-	bool isValid() const;
+	bool isValid() const noexcept;
 	bool isStateAvailable() const;
 	bool isSimulated() const;
 	bool isBlocked() const;

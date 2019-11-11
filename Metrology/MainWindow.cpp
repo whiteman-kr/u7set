@@ -69,13 +69,9 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent) :
 
 	connect(m_pConfigSocket, &ConfigSocket::socketConnected, this, &MainWindow::configSocketConnected, Qt::QueuedConnection);
 	connect(m_pConfigSocket, &ConfigSocket::socketDisconnected, this, &MainWindow::configSocketDisconnected, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pStatisticPanel, &StatisticPanel::updateList);
 	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &MainWindow::configSocketConfigurationLoaded);
 	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, &theSignalBase.statistic(), &StatisticBase::signalLoaded);
-
-	if (m_pStatisticPanel != nullptr)
-	{
-		connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pStatisticPanel, &StatisticPanel::updateList);
-	}
 
 	m_pConfigSocket->start();
 
@@ -562,6 +558,8 @@ void MainWindow::createPanels()
 
 		m_pStatisticPanel->hide();
 
+		connect(&theSignalBase, &SignalBase::activeSignalChanged, m_pStatisticPanel, &StatisticPanel::activeSignalChanged, Qt::QueuedConnection);
+
 		connect(this, &MainWindow::changedMeasureType, m_pStatisticPanel, &StatisticPanel::changedMeasureType, Qt::QueuedConnection);
 		connect(this, &MainWindow::changedOutputSignalType, m_pStatisticPanel, &StatisticPanel::changedOutputSignalType, Qt::QueuedConnection);
 	}
@@ -966,11 +964,11 @@ void MainWindow::updateSignalsOnToolBar()
 	m_asSignalCombo->setCurrentIndex(0);
 
 	m_asChassisCombo->model()->sort(0);
-	m_asChassisCombo->setEnabled(true);
+	m_asChassisCombo->setEnabled(false);
 	m_asModuleCombo->model()->sort(0);
-	m_asModuleCombo->setEnabled(true);
+	m_asModuleCombo->setEnabled(false);
 	m_asPlaceCombo->model()->sort(0);
-	m_asPlaceCombo->setEnabled(true);
+	m_asPlaceCombo->setEnabled(false);
 
 	setMeasureSignal(0);
 }
@@ -1293,6 +1291,11 @@ void MainWindow::showOptions()
 		}
 
 		pView->updateColumn();
+	}
+
+	if (m_pStatisticPanel != nullptr)
+	{
+		m_pStatisticPanel->updateList();
 	}
 }
 

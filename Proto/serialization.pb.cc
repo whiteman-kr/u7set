@@ -115,6 +115,12 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* SchemaItemFrame_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   SchemaItemFrame_reflection_ = NULL;
+const ::google::protobuf::Descriptor* IndicatorHistogramVert_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  IndicatorHistogramVert_reflection_ = NULL;
+const ::google::protobuf::Descriptor* IndicatorArrowIndicator_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  IndicatorArrowIndicator_reflection_ = NULL;
 const ::google::protobuf::Descriptor* SchemaItemIndicator_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   SchemaItemIndicator_reflection_ = NULL;
@@ -894,9 +900,68 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemFrame));
-  SchemaItemIndicator_descriptor_ = file->message_type(28);
-  static const int SchemaItemIndicator_offsets_[1] = {
+  IndicatorHistogramVert_descriptor_ = file->message_type(28);
+  static const int IndicatorHistogramVert_offsets_[15] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorHistogramVert, startvalue_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorHistogramVert, endvalue_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorHistogramVert, barwidth_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorHistogramVert, leftmargin_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorHistogramVert, topmargin_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorHistogramVert, rightmargin_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorHistogramVert, bottommargin_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorHistogramVert, drawbarrect_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorHistogramVert, drawgrid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorHistogramVert, drawgridforallbars_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorHistogramVert, drawgridvalues_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorHistogramVert, drawgridvalueforallbars_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorHistogramVert, drawgridvalueunits_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorHistogramVert, gridmainstep_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorHistogramVert, gridsmallstep_),
+  };
+  IndicatorHistogramVert_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      IndicatorHistogramVert_descriptor_,
+      IndicatorHistogramVert::default_instance_,
+      IndicatorHistogramVert_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorHistogramVert, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorHistogramVert, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(IndicatorHistogramVert));
+  IndicatorArrowIndicator_descriptor_ = file->message_type(29);
+  static const int IndicatorArrowIndicator_offsets_[4] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorArrowIndicator, startvalue_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorArrowIndicator, endvalue_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorArrowIndicator, startangle_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorArrowIndicator, spanangle_),
+  };
+  IndicatorArrowIndicator_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      IndicatorArrowIndicator_descriptor_,
+      IndicatorArrowIndicator::default_instance_,
+      IndicatorArrowIndicator_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorArrowIndicator, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(IndicatorArrowIndicator, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(IndicatorArrowIndicator));
+  SchemaItemIndicator_descriptor_ = file->message_type(30);
+  static const int SchemaItemIndicator_offsets_[13] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemIndicator, signalids_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemIndicator, signalsource_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemIndicator, precision_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemIndicator, analogformat_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemIndicator, font_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemIndicator, drawrect_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemIndicator, lineweight_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemIndicator, backgroundcolor_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemIndicator, linecolor_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemIndicator, signalcolors_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemIndicator, type_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemIndicator, indicatorhistogramvert_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemIndicator, indicatorarrowindicator_),
   };
   SchemaItemIndicator_reflection_ =
     new ::google::protobuf::internal::GeneratedMessageReflection(
@@ -909,7 +974,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemIndicator));
-  FblConnectionPoint_descriptor_ = file->message_type(29);
+  FblConnectionPoint_descriptor_ = file->message_type(31);
   static const int FblConnectionPoint_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblConnectionPoint, point_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblConnectionPoint, dirrection_),
@@ -930,7 +995,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblConnectionPoint));
-  FblItem_descriptor_ = file->message_type(30);
+  FblItem_descriptor_ = file->message_type(32);
   static const int FblItem_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblItem, points_),
   };
@@ -945,7 +1010,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblItem));
-  FblItemRect_descriptor_ = file->message_type(31);
+  FblItemRect_descriptor_ = file->message_type(33);
   static const int FblItemRect_offsets_[9] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblItemRect, weight_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblItemRect, linecolor_),
@@ -968,7 +1033,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblItemRect));
-  FblItemLine_descriptor_ = file->message_type(32);
+  FblItemLine_descriptor_ = file->message_type(34);
   static const int FblItemLine_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblItemLine, weight_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(FblItemLine, linecolor_),
@@ -984,7 +1049,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(FblItemLine));
-  SchemaItemSignalColumn_descriptor_ = file->message_type(33);
+  SchemaItemSignalColumn_descriptor_ = file->message_type(35);
   static const int SchemaItemSignalColumn_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemSignalColumn, width_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemSignalColumn, data_),
@@ -1001,7 +1066,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemSignalColumn));
-  SchemaItemSignal_descriptor_ = file->message_type(34);
+  SchemaItemSignal_descriptor_ = file->message_type(36);
   static const int SchemaItemSignal_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemSignal, appsignalids_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemSignal, precision_),
@@ -1021,7 +1086,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemSignal));
-  SchemaItemInput_descriptor_ = file->message_type(35);
+  SchemaItemInput_descriptor_ = file->message_type(37);
   static const int SchemaItemInput_offsets_[1] = {
   };
   SchemaItemInput_reflection_ =
@@ -1035,7 +1100,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemInput));
-  SchemaItemOutput_descriptor_ = file->message_type(36);
+  SchemaItemOutput_descriptor_ = file->message_type(38);
   static const int SchemaItemOutput_offsets_[1] = {
   };
   SchemaItemOutput_reflection_ =
@@ -1049,7 +1114,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemOutput));
-  SchemaItemInOut_descriptor_ = file->message_type(37);
+  SchemaItemInOut_descriptor_ = file->message_type(39);
   static const int SchemaItemInOut_offsets_[1] = {
   };
   SchemaItemInOut_reflection_ =
@@ -1063,7 +1128,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemInOut));
-  SchemaItemLink_descriptor_ = file->message_type(38);
+  SchemaItemLink_descriptor_ = file->message_type(40);
   static const int SchemaItemLink_offsets_[1] = {
   };
   SchemaItemLink_reflection_ =
@@ -1077,7 +1142,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemLink));
-  SchemaItemAfb_descriptor_ = file->message_type(39);
+  SchemaItemAfb_descriptor_ = file->message_type(41);
   static const int SchemaItemAfb_offsets_[6] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemAfb, params_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemAfb, afbstrid_),
@@ -1097,7 +1162,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemAfb));
-  SchemaItemConst_descriptor_ = file->message_type(40);
+  SchemaItemConst_descriptor_ = file->message_type(42);
   static const int SchemaItemConst_offsets_[7] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemConst, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemConst, intvalue_),
@@ -1118,7 +1183,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemConst));
-  SchemaItemConnection_descriptor_ = file->message_type(41);
+  SchemaItemConnection_descriptor_ = file->message_type(43);
   static const int SchemaItemConnection_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemConnection, connectionid_),
   };
@@ -1133,7 +1198,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemConnection));
-  SchemaItemTransmitter_descriptor_ = file->message_type(42);
+  SchemaItemTransmitter_descriptor_ = file->message_type(44);
   static const int SchemaItemTransmitter_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemTransmitter, pincount_),
   };
@@ -1148,7 +1213,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemTransmitter));
-  SchemaItemReceiver_descriptor_ = file->message_type(43);
+  SchemaItemReceiver_descriptor_ = file->message_type(45);
   static const int SchemaItemReceiver_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemReceiver, showvalidity_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemReceiver, appsignalids_),
@@ -1167,7 +1232,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemReceiver));
-  SchemaItemUfb_descriptor_ = file->message_type(44);
+  SchemaItemUfb_descriptor_ = file->message_type(46);
   static const int SchemaItemUfb_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemUfb, ufbschemaid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemUfb, ufbcaption_),
@@ -1184,7 +1249,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemUfb));
-  SchemaItemTerminator_descriptor_ = file->message_type(45);
+  SchemaItemTerminator_descriptor_ = file->message_type(47);
   static const int SchemaItemTerminator_offsets_[1] = {
   };
   SchemaItemTerminator_reflection_ =
@@ -1198,7 +1263,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemTerminator));
-  SchemaItemValue_descriptor_ = file->message_type(46);
+  SchemaItemValue_descriptor_ = file->message_type(48);
   static const int SchemaItemValue_offsets_[13] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, signalids_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemValue, signalsource_),
@@ -1225,7 +1290,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemValue));
-  SchemaItemImageValue_descriptor_ = file->message_type(47);
+  SchemaItemImageValue_descriptor_ = file->message_type(49);
   static const int SchemaItemImageValue_offsets_[9] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemImageValue, signalids_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemImageValue, signalsource_),
@@ -1248,7 +1313,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemImageValue));
-  SchemaItemBus_descriptor_ = file->message_type(48);
+  SchemaItemBus_descriptor_ = file->message_type(50);
   static const int SchemaItemBus_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemBus, bustypeid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemBus, bustypehash_),
@@ -1265,7 +1330,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemBus));
-  SchemaItemBusComposer_descriptor_ = file->message_type(49);
+  SchemaItemBusComposer_descriptor_ = file->message_type(51);
   static const int SchemaItemBusComposer_offsets_[1] = {
   };
   SchemaItemBusComposer_reflection_ =
@@ -1279,7 +1344,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemBusComposer));
-  SchemaItemBusExtractor_descriptor_ = file->message_type(50);
+  SchemaItemBusExtractor_descriptor_ = file->message_type(52);
   static const int SchemaItemBusExtractor_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemBusExtractor, properties_),
   };
@@ -1294,7 +1359,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemBusExtractor));
-  SchemaItemLoopback_descriptor_ = file->message_type(51);
+  SchemaItemLoopback_descriptor_ = file->message_type(53);
   static const int SchemaItemLoopback_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemLoopback, loopbackid_),
   };
@@ -1309,7 +1374,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemLoopback));
-  SchemaItemLoopbackSource_descriptor_ = file->message_type(52);
+  SchemaItemLoopbackSource_descriptor_ = file->message_type(54);
   static const int SchemaItemLoopbackSource_offsets_[1] = {
   };
   SchemaItemLoopbackSource_reflection_ =
@@ -1323,7 +1388,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemLoopbackSource));
-  SchemaItemLoopbackTarget_descriptor_ = file->message_type(53);
+  SchemaItemLoopbackTarget_descriptor_ = file->message_type(55);
   static const int SchemaItemLoopbackTarget_offsets_[1] = {
   };
   SchemaItemLoopbackTarget_reflection_ =
@@ -1337,7 +1402,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemLoopbackTarget));
-  SchemaItemControl_descriptor_ = file->message_type(54);
+  SchemaItemControl_descriptor_ = file->message_type(56);
   static const int SchemaItemControl_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemControl, stylesheet_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemControl, tooltip_),
@@ -1353,7 +1418,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemControl));
-  SchemaItemPushButton_descriptor_ = file->message_type(55);
+  SchemaItemPushButton_descriptor_ = file->message_type(57);
   static const int SchemaItemPushButton_offsets_[11] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemPushButton, text_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemPushButton, checkable_),
@@ -1378,7 +1443,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemPushButton));
-  SchemaItemLineEdit_descriptor_ = file->message_type(56);
+  SchemaItemLineEdit_descriptor_ = file->message_type(58);
   static const int SchemaItemLineEdit_offsets_[10] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemLineEdit, text_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaItemLineEdit, horzalign_),
@@ -1402,7 +1467,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaItemLineEdit));
-  DeviceObject_descriptor_ = file->message_type(57);
+  DeviceObject_descriptor_ = file->message_type(59);
   static const int DeviceObject_offsets_[22] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, uuid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceObject, equipmentid_),
@@ -1438,7 +1503,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceObject));
-  DeviceRoot_descriptor_ = file->message_type(58);
+  DeviceRoot_descriptor_ = file->message_type(60);
   static const int DeviceRoot_offsets_[1] = {
   };
   DeviceRoot_reflection_ =
@@ -1452,7 +1517,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceRoot));
-  DeviceSystem_descriptor_ = file->message_type(59);
+  DeviceSystem_descriptor_ = file->message_type(61);
   static const int DeviceSystem_offsets_[1] = {
   };
   DeviceSystem_reflection_ =
@@ -1466,7 +1531,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceSystem));
-  DeviceRack_descriptor_ = file->message_type(60);
+  DeviceRack_descriptor_ = file->message_type(62);
   static const int DeviceRack_offsets_[1] = {
   };
   DeviceRack_reflection_ =
@@ -1480,7 +1545,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceRack));
-  DeviceChassis_descriptor_ = file->message_type(61);
+  DeviceChassis_descriptor_ = file->message_type(63);
   static const int DeviceChassis_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceChassis, type_),
   };
@@ -1495,7 +1560,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceChassis));
-  DeviceModule_descriptor_ = file->message_type(62);
+  DeviceModule_descriptor_ = file->message_type(64);
   static const int DeviceModule_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, typeobsolete_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceModule, configurationscript_),
@@ -1514,7 +1579,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceModule));
-  DeviceController_descriptor_ = file->message_type(63);
+  DeviceController_descriptor_ = file->message_type(65);
   static const int DeviceController_offsets_[1] = {
   };
   DeviceController_reflection_ =
@@ -1528,7 +1593,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceController));
-  DeviceSignal_descriptor_ = file->message_type(64);
+  DeviceSignal_descriptor_ = file->message_type(66);
   static const int DeviceSignal_offsets_[16] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceSignal, obsoletetype_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(DeviceSignal, byteorder_),
@@ -1558,7 +1623,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(DeviceSignal));
-  Workstation_descriptor_ = file->message_type(65);
+  Workstation_descriptor_ = file->message_type(67);
   static const int Workstation_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Workstation, type_),
   };
@@ -1573,7 +1638,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Workstation));
-  Software_descriptor_ = file->message_type(66);
+  Software_descriptor_ = file->message_type(68);
   static const int Software_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Software, type_),
   };
@@ -1588,7 +1653,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Software));
-  ModuleConfiguration_descriptor_ = file->message_type(67);
+  ModuleConfiguration_descriptor_ = file->message_type(69);
   static const int ModuleConfiguration_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfiguration, struct_description_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfiguration, values_),
@@ -1605,7 +1670,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ModuleConfiguration));
-  ModuleConfigurationValue_descriptor_ = file->message_type(68);
+  ModuleConfigurationValue_descriptor_ = file->message_type(70);
   static const int ModuleConfigurationValue_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfigurationValue, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ModuleConfigurationValue, value_),
@@ -1621,7 +1686,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ModuleConfigurationValue));
-  Property_descriptor_ = file->message_type(69);
+  Property_descriptor_ = file->message_type(71);
   static const int Property_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Property, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Property, value_),
@@ -1637,7 +1702,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Property));
-  SignalSpecPropValue_descriptor_ = file->message_type(70);
+  SignalSpecPropValue_descriptor_ = file->message_type(72);
   static const int SignalSpecPropValue_offsets_[10] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SignalSpecPropValue, name_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SignalSpecPropValue, type_),
@@ -1661,7 +1726,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SignalSpecPropValue));
-  SignalSpecPropValues_descriptor_ = file->message_type(71);
+  SignalSpecPropValues_descriptor_ = file->message_type(73);
   static const int SignalSpecPropValues_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SignalSpecPropValues, value_),
   };
@@ -1676,7 +1741,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SignalSpecPropValues));
-  Address16_descriptor_ = file->message_type(72);
+  Address16_descriptor_ = file->message_type(74);
   static const int Address16_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Address16, offset_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Address16, bit_),
@@ -1692,7 +1757,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Address16));
-  Unit_descriptor_ = file->message_type(73);
+  Unit_descriptor_ = file->message_type(75);
   static const int Unit_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Unit, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Unit, caption_),
@@ -1708,7 +1773,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Unit));
-  UnitSet_descriptor_ = file->message_type(74);
+  UnitSet_descriptor_ = file->message_type(76);
   static const int UnitSet_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(UnitSet, unit_),
   };
@@ -1723,7 +1788,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(UnitSet));
-  TuningValue_descriptor_ = file->message_type(75);
+  TuningValue_descriptor_ = file->message_type(77);
   static const int TuningValue_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningValue, type_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(TuningValue, intvalue_),
@@ -1740,7 +1805,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(TuningValue));
-  AppSignalDbField_descriptor_ = file->message_type(76);
+  AppSignalDbField_descriptor_ = file->message_type(78);
   static const int AppSignalDbField_offsets_[10] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalDbField, id_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalDbField, signalgroupid_),
@@ -1764,7 +1829,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalDbField));
-  StateFlagSignal_descriptor_ = file->message_type(77);
+  StateFlagSignal_descriptor_ = file->message_type(79);
   static const int StateFlagSignal_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(StateFlagSignal, flagtype_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(StateFlagSignal, flagsignalid_),
@@ -1780,7 +1845,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(StateFlagSignal));
-  AppSignalCalculatedParam_descriptor_ = file->message_type(78);
+  AppSignalCalculatedParam_descriptor_ = file->message_type(80);
   static const int AppSignalCalculatedParam_offsets_[11] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalCalculatedParam, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalCalculatedParam, iobufaddr_),
@@ -1805,7 +1870,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalCalculatedParam));
-  AppSignal_descriptor_ = file->message_type(79);
+  AppSignal_descriptor_ = file->message_type(81);
   static const int AppSignal_offsets_[28] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, appsignalid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignal, customappsignalid_),
@@ -1847,7 +1912,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignal));
-  AppSignalSet_descriptor_ = file->message_type(80);
+  AppSignalSet_descriptor_ = file->message_type(82);
   static const int AppSignalSet_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalSet, appsignal_),
   };
@@ -1862,7 +1927,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalSet));
-  ProtoAppSignalData_descriptor_ = file->message_type(81);
+  ProtoAppSignalData_descriptor_ = file->message_type(83);
   static const int ProtoAppSignalData_offsets_[18] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ProtoAppSignalData, bustypeid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ProtoAppSignalData, caption_),
@@ -1894,7 +1959,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ProtoAppSignalData));
-  AppSignalState_descriptor_ = file->message_type(82);
+  AppSignalState_descriptor_ = file->message_type(84);
   static const int AppSignalState_offsets_[8] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(AppSignalState, value_),
@@ -1916,7 +1981,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(AppSignalState));
-  Connection_descriptor_ = file->message_type(83);
+  Connection_descriptor_ = file->message_type(85);
   static const int Connection_offsets_[25] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, connectionid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Connection, port1equipmentid_),
@@ -1955,7 +2020,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Connection));
-  SchemaDetailsSet_descriptor_ = file->message_type(84);
+  SchemaDetailsSet_descriptor_ = file->message_type(86);
   static const int SchemaDetailsSet_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetailsSet, schemasdetails_),
   };
@@ -1970,7 +2035,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaDetailsSet));
-  SchemaDetails_descriptor_ = file->message_type(85);
+  SchemaDetails_descriptor_ = file->message_type(87);
   static const int SchemaDetails_offsets_[11] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, version_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(SchemaDetails, schemaid_),
@@ -1995,7 +2060,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(SchemaDetails));
-  ArchSignal_descriptor_ = file->message_type(86);
+  ArchSignal_descriptor_ = file->message_type(88);
   static const int ArchSignal_offsets_[3] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignal, hash_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignal, isanalog_),
@@ -2012,7 +2077,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ArchSignal));
-  ArchSignals_descriptor_ = file->message_type(87);
+  ArchSignals_descriptor_ = file->message_type(89);
   static const int ArchSignals_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ArchSignals, archsignals_),
   };
@@ -2027,7 +2092,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ArchSignals));
-  BusSignal_descriptor_ = file->message_type(88);
+  BusSignal_descriptor_ = file->message_type(90);
   static const int BusSignal_offsets_[19] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, signalid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(BusSignal, caption_),
@@ -2060,7 +2125,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(BusSignal));
-  Bus_descriptor_ = file->message_type(89);
+  Bus_descriptor_ = file->message_type(91);
   static const int Bus_offsets_[5] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Bus, uuid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Bus, bustypeid_),
@@ -2079,7 +2144,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Bus));
-  ComparatorSignal_descriptor_ = file->message_type(90);
+  ComparatorSignal_descriptor_ = file->message_type(92);
   static const int ComparatorSignal_offsets_[4] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ComparatorSignal, isconst_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ComparatorSignal, constvalue_),
@@ -2097,7 +2162,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ComparatorSignal));
-  Comparator_descriptor_ = file->message_type(91);
+  Comparator_descriptor_ = file->message_type(93);
   static const int Comparator_offsets_[9] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Comparator, cmptype_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(Comparator, inanalogsignalformat_),
@@ -2120,7 +2185,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(Comparator));
-  LmComparatorSet_descriptor_ = file->message_type(92);
+  LmComparatorSet_descriptor_ = file->message_type(94);
   static const int LmComparatorSet_offsets_[2] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LmComparatorSet, lmequipmentid_),
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(LmComparatorSet, comparator_),
@@ -2136,7 +2201,7 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(LmComparatorSet));
-  ComparatorSet_descriptor_ = file->message_type(93);
+  ComparatorSet_descriptor_ = file->message_type(95);
   static const int ComparatorSet_offsets_[1] = {
     GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(ComparatorSet, lmcomparatorset_),
   };
@@ -2223,6 +2288,10 @@ void protobuf_RegisterTypes(const ::std::string&) {
     SchemaItemImage_descriptor_, &SchemaItemImage::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     SchemaItemFrame_descriptor_, &SchemaItemFrame::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    IndicatorHistogramVert_descriptor_, &IndicatorHistogramVert::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    IndicatorArrowIndicator_descriptor_, &IndicatorArrowIndicator::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     SchemaItemIndicator_descriptor_, &SchemaItemIndicator::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
@@ -2419,6 +2488,10 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete SchemaItemFrame::default_instance_;
   delete SchemaItemFrame_reflection_;
   delete SchemaItemFrame::_default_schemaid_;
+  delete IndicatorHistogramVert::default_instance_;
+  delete IndicatorHistogramVert_reflection_;
+  delete IndicatorArrowIndicator::default_instance_;
+  delete IndicatorArrowIndicator_reflection_;
   delete SchemaItemIndicator::default_instance_;
   delete SchemaItemIndicator_reflection_;
   delete FblConnectionPoint::default_instance_;
@@ -2705,8 +2778,30 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\001 \001(\0132\020.Proto.ImageItem\"f\n\017SchemaItemFra"
     "me\022\032\n\010schemaId\030\001 \001(\t:\010SCHEMAID\022\030\n\nallowS"
     "cale\030\002 \001(\010:\004true\022\035\n\017keepAspectRatio\030\003 \001("
-    "\010:\004true\"&\n\023SchemaItemIndicator\022\017\n\004type\030\001"
-    " \001(\r:\0010\"\353\001\n\022FblConnectionPoint\022!\n\005point\030"
+    "\010:\004true\"\225\003\n\026IndicatorHistogramVert\022\022\n\nst"
+    "artValue\030\001 \001(\001\022\020\n\010endValue\030\002 \001(\001\022\020\n\010barW"
+    "idth\030\020 \001(\001\022\022\n\nleftMargin\030\024 \001(\001\022\021\n\ttopMar"
+    "gin\030\025 \001(\001\022\023\n\013rightMargin\030\026 \001(\001\022\024\n\014bottom"
+    "Margin\030\027 \001(\001\022\031\n\013drawBarRect\030  \001(\010:\004true\022"
+    "\026\n\010drawGrid\030( \001(\010:\004true\022!\n\022drawGridForAl"
+    "lBars\030) \001(\010:\005false\022\034\n\016drawGridValues\030* \001"
+    "(\010:\004true\022&\n\027drawGridValueForAllBars\030+ \001("
+    "\010:\005false\022 \n\022drawGridValueUnits\030, \001(\010:\004tr"
+    "ue\022\030\n\014gridMainStep\0302 \001(\001:\00250\022\031\n\rgridSmal"
+    "lStep\0303 \001(\001:\00210\"f\n\027IndicatorArrowIndicat"
+    "or\022\022\n\nstartValue\030\001 \001(\001\022\020\n\010endValue\030\002 \001(\001"
+    "\022\022\n\nstartAngle\030\020 \001(\001\022\021\n\tspanAngle\030\021 \001(\001\""
+    "\225\003\n\023SchemaItemIndicator\022\021\n\tsignalIds\030\001 \001"
+    "(\t\022\027\n\014signalSource\030\002 \001(\005:\0010\022\024\n\tprecision"
+    "\030\003 \001(\005:\0012\022\031\n\014analogFormat\030\004 \001(\005:\003102\022\036\n\004"
+    "font\030\t \001(\0132\020.Proto.FontParam\022\027\n\010drawRect"
+    "\030\n \001(\010:\005false\022\025\n\nlineWeight\030\013 \001(\001:\0010\022\027\n\017"
+    "backgroundColor\030\020 \001(\r\022\021\n\tlineColor\030\021 \001(\r"
+    "\022\024\n\014signalColors\030\022 \003(\r\022\017\n\004type\030  \001(\r:\0010\022"
+    "=\n\026indicatorHistogramVert\0300 \001(\0132\035.Proto."
+    "IndicatorHistogramVert\022\?\n\027indicatorArrow"
+    "Indicator\0301 \001(\0132\036.Proto.IndicatorArrowIn"
+    "dicator\"\353\001\n\022FblConnectionPoint\022!\n\005point\030"
     "\001 \001(\0132\022.Proto.SchemaPoint\022/\n\ndirrection\030"
     "\002 \001(\0162\033.Proto.ConnectionDirrection\022\031\n\004uu"
     "id\030\003 \001(\0132\013.Proto.Uuid\022\030\n\014operandIndex\030\004 "
@@ -2941,26 +3036,27 @@ void protobuf_AddDesc_serialization_2eproto() {
     "\013.Proto.Uuid\022\021\n\tbusTypeId\030\002 \001(\t\022$\n\nbusSi"
     "gnals\030\003 \003(\0132\020.Proto.BusSignal\022!\n\023autoSig"
     "nalPlacement\030\n \001(\010:\004true\022\030\n\rmanualBusSiz"
-    "e\030\013 \001(\005:\0010\"i\n\020ComparatorSignal\022\025\n\007isCons"
+    "e\030\013 \001(\005:\0010\"p\n\020ComparatorSignal\022\025\n\007isCons"
     "t\030\001 \001(\010:\004true\022\025\n\nconstValue\030\002 \001(\001:\0010\022\023\n\013"
-    "appSignalId\030\003 \001(\t\022\022\n\nisAcquired\030\004 \001(\010\"\305\002"
-    "\n\nComparator\022\022\n\007cmpType\030\001 \001(\005:\0011\022\037\n\024inAn"
-    "alogSignalFormat\030\002 \001(\005:\0011\022&\n\005input\030\003 \001(\013"
-    "2\027.Proto.ComparatorSignal\022(\n\007compare\030\004 \001"
-    "(\0132\027.Proto.ComparatorSignal\022+\n\nhysteresi"
-    "s\030\005 \001(\0132\027.Proto.ComparatorSignal\022\'\n\006outp"
-    "ut\030\006 \001(\0132\027.Proto.ComparatorSignal\022#\n\024all"
-    "SignalsIsAcquired\030\007 \001(\010:\005false\022\020\n\010schema"
-    "Id\030\010 \001(\t\022#\n\016schemaItemUuid\030\t \001(\0132\013.Proto"
-    ".Uuid\"O\n\017LmComparatorSet\022\025\n\rlmEquipmentI"
-    "D\030\001 \001(\t\022%\n\ncomparator\030\002 \003(\0132\021.Proto.Comp"
-    "arator\"@\n\rComparatorSet\022/\n\017lmComparatorS"
-    "et\030\001 \003(\0132\026.Proto.LmComparatorSet*3\n\nSche"
-    "maUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter\020\001\022\010\n\004I"
-    "nch\020\002*-\n\024ConnectionDirrection\022\t\n\005Input\020\000"
-    "\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006Analog\020"
-    "\000\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022\017\n\013Unsi"
-    "gnedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float\020\002", 16035);
+    "appSignalId\030\003 \001(\t\022\031\n\nisAcquired\030\004 \001(\010:\005f"
+    "alse\"\305\002\n\nComparator\022\022\n\007cmpType\030\001 \001(\005:\0011\022"
+    "\037\n\024inAnalogSignalFormat\030\002 \001(\005:\0011\022&\n\005inpu"
+    "t\030\003 \001(\0132\027.Proto.ComparatorSignal\022(\n\007comp"
+    "are\030\004 \001(\0132\027.Proto.ComparatorSignal\022+\n\nhy"
+    "steresis\030\005 \001(\0132\027.Proto.ComparatorSignal\022"
+    "\'\n\006output\030\006 \001(\0132\027.Proto.ComparatorSignal"
+    "\022#\n\024allSignalsIsAcquired\030\007 \001(\010:\005false\022\020\n"
+    "\010schemaId\030\010 \001(\t\022#\n\016schemaItemUuid\030\t \001(\0132"
+    "\013.Proto.Uuid\"O\n\017LmComparatorSet\022\025\n\rlmEqu"
+    "ipmentID\030\001 \001(\t\022%\n\ncomparator\030\002 \003(\0132\021.Pro"
+    "to.Comparator\"@\n\rComparatorSet\022/\n\017lmComp"
+    "aratorSet\030\001 \003(\0132\026.Proto.LmComparatorSet*"
+    "3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016\n\nMillimeter"
+    "\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDirrection\022\t\n\005"
+    "Input\020\000\022\n\n\006Output\020\001*)\n\rFblSignalType\022\n\n\006"
+    "Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFblDataFormat\022"
+    "\017\n\013UnsignedInt\020\000\022\r\n\tSignedInt\020\001\022\t\n\005Float"
+    "\020\002", 16922);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -2997,6 +3093,8 @@ void protobuf_AddDesc_serialization_2eproto() {
   SchemaItemFrame::_default_schemaid_ =
       new ::std::string("SCHEMAID", 8);
   SchemaItemFrame::default_instance_ = new SchemaItemFrame();
+  IndicatorHistogramVert::default_instance_ = new IndicatorHistogramVert();
+  IndicatorArrowIndicator::default_instance_ = new IndicatorArrowIndicator();
   SchemaItemIndicator::default_instance_ = new SchemaItemIndicator();
   FblConnectionPoint::default_instance_ = new FblConnectionPoint();
   FblItem::default_instance_ = new FblItem();
@@ -3091,6 +3189,8 @@ void protobuf_AddDesc_serialization_2eproto() {
   SchemaItemPath::default_instance_->InitAsDefaultInstance();
   SchemaItemImage::default_instance_->InitAsDefaultInstance();
   SchemaItemFrame::default_instance_->InitAsDefaultInstance();
+  IndicatorHistogramVert::default_instance_->InitAsDefaultInstance();
+  IndicatorArrowIndicator::default_instance_->InitAsDefaultInstance();
   SchemaItemIndicator::default_instance_->InitAsDefaultInstance();
   FblConnectionPoint::default_instance_->InitAsDefaultInstance();
   FblItem::default_instance_->InitAsDefaultInstance();
@@ -13291,6 +13391,9 @@ bool SchemaItem::IsInitialized() const {
   if (has_path()) {
     if (!this->path().IsInitialized()) return false;
   }
+  if (has_indicator()) {
+    if (!this->indicator().IsInitialized()) return false;
+  }
   if (has_signal()) {
     if (!this->signal().IsInitialized()) return false;
   }
@@ -15816,7 +15919,1083 @@ void SchemaItemFrame::Swap(SchemaItemFrame* other) {
 // ===================================================================
 
 #ifndef _MSC_VER
+const int IndicatorHistogramVert::kStartValueFieldNumber;
+const int IndicatorHistogramVert::kEndValueFieldNumber;
+const int IndicatorHistogramVert::kBarWidthFieldNumber;
+const int IndicatorHistogramVert::kLeftMarginFieldNumber;
+const int IndicatorHistogramVert::kTopMarginFieldNumber;
+const int IndicatorHistogramVert::kRightMarginFieldNumber;
+const int IndicatorHistogramVert::kBottomMarginFieldNumber;
+const int IndicatorHistogramVert::kDrawBarRectFieldNumber;
+const int IndicatorHistogramVert::kDrawGridFieldNumber;
+const int IndicatorHistogramVert::kDrawGridForAllBarsFieldNumber;
+const int IndicatorHistogramVert::kDrawGridValuesFieldNumber;
+const int IndicatorHistogramVert::kDrawGridValueForAllBarsFieldNumber;
+const int IndicatorHistogramVert::kDrawGridValueUnitsFieldNumber;
+const int IndicatorHistogramVert::kGridMainStepFieldNumber;
+const int IndicatorHistogramVert::kGridSmallStepFieldNumber;
+#endif  // !_MSC_VER
+
+IndicatorHistogramVert::IndicatorHistogramVert()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void IndicatorHistogramVert::InitAsDefaultInstance() {
+}
+
+IndicatorHistogramVert::IndicatorHistogramVert(const IndicatorHistogramVert& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void IndicatorHistogramVert::SharedCtor() {
+  _cached_size_ = 0;
+  startvalue_ = 0;
+  endvalue_ = 0;
+  barwidth_ = 0;
+  leftmargin_ = 0;
+  topmargin_ = 0;
+  rightmargin_ = 0;
+  bottommargin_ = 0;
+  drawbarrect_ = true;
+  drawgrid_ = true;
+  drawgridforallbars_ = false;
+  drawgridvalues_ = true;
+  drawgridvalueforallbars_ = false;
+  drawgridvalueunits_ = true;
+  gridmainstep_ = 50;
+  gridsmallstep_ = 10;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+IndicatorHistogramVert::~IndicatorHistogramVert() {
+  SharedDtor();
+}
+
+void IndicatorHistogramVert::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void IndicatorHistogramVert::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* IndicatorHistogramVert::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return IndicatorHistogramVert_descriptor_;
+}
+
+const IndicatorHistogramVert& IndicatorHistogramVert::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+IndicatorHistogramVert* IndicatorHistogramVert::default_instance_ = NULL;
+
+IndicatorHistogramVert* IndicatorHistogramVert::New() const {
+  return new IndicatorHistogramVert;
+}
+
+void IndicatorHistogramVert::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    startvalue_ = 0;
+    endvalue_ = 0;
+    barwidth_ = 0;
+    leftmargin_ = 0;
+    topmargin_ = 0;
+    rightmargin_ = 0;
+    bottommargin_ = 0;
+    drawbarrect_ = true;
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    drawgrid_ = true;
+    drawgridforallbars_ = false;
+    drawgridvalues_ = true;
+    drawgridvalueforallbars_ = false;
+    drawgridvalueunits_ = true;
+    gridmainstep_ = 50;
+    gridsmallstep_ = 10;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool IndicatorHistogramVert::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional double startValue = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &startvalue_)));
+          set_has_startvalue();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(17)) goto parse_endValue;
+        break;
+      }
+
+      // optional double endValue = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_endValue:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &endvalue_)));
+          set_has_endvalue();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(129)) goto parse_barWidth;
+        break;
+      }
+
+      // optional double barWidth = 16;
+      case 16: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_barWidth:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &barwidth_)));
+          set_has_barwidth();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(161)) goto parse_leftMargin;
+        break;
+      }
+
+      // optional double leftMargin = 20;
+      case 20: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_leftMargin:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &leftmargin_)));
+          set_has_leftmargin();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(169)) goto parse_topMargin;
+        break;
+      }
+
+      // optional double topMargin = 21;
+      case 21: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_topMargin:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &topmargin_)));
+          set_has_topmargin();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(177)) goto parse_rightMargin;
+        break;
+      }
+
+      // optional double rightMargin = 22;
+      case 22: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_rightMargin:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &rightmargin_)));
+          set_has_rightmargin();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(185)) goto parse_bottomMargin;
+        break;
+      }
+
+      // optional double bottomMargin = 23;
+      case 23: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_bottomMargin:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &bottommargin_)));
+          set_has_bottommargin();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(256)) goto parse_drawBarRect;
+        break;
+      }
+
+      // optional bool drawBarRect = 32 [default = true];
+      case 32: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_drawBarRect:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &drawbarrect_)));
+          set_has_drawbarrect();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(320)) goto parse_drawGrid;
+        break;
+      }
+
+      // optional bool drawGrid = 40 [default = true];
+      case 40: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_drawGrid:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &drawgrid_)));
+          set_has_drawgrid();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(328)) goto parse_drawGridForAllBars;
+        break;
+      }
+
+      // optional bool drawGridForAllBars = 41 [default = false];
+      case 41: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_drawGridForAllBars:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &drawgridforallbars_)));
+          set_has_drawgridforallbars();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(336)) goto parse_drawGridValues;
+        break;
+      }
+
+      // optional bool drawGridValues = 42 [default = true];
+      case 42: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_drawGridValues:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &drawgridvalues_)));
+          set_has_drawgridvalues();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(344)) goto parse_drawGridValueForAllBars;
+        break;
+      }
+
+      // optional bool drawGridValueForAllBars = 43 [default = false];
+      case 43: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_drawGridValueForAllBars:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &drawgridvalueforallbars_)));
+          set_has_drawgridvalueforallbars();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(352)) goto parse_drawGridValueUnits;
+        break;
+      }
+
+      // optional bool drawGridValueUnits = 44 [default = true];
+      case 44: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_drawGridValueUnits:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &drawgridvalueunits_)));
+          set_has_drawgridvalueunits();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(401)) goto parse_gridMainStep;
+        break;
+      }
+
+      // optional double gridMainStep = 50 [default = 50];
+      case 50: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_gridMainStep:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &gridmainstep_)));
+          set_has_gridmainstep();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(409)) goto parse_gridSmallStep;
+        break;
+      }
+
+      // optional double gridSmallStep = 51 [default = 10];
+      case 51: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_gridSmallStep:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &gridsmallstep_)));
+          set_has_gridsmallstep();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void IndicatorHistogramVert::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional double startValue = 1;
+  if (has_startvalue()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(1, this->startvalue(), output);
+  }
+
+  // optional double endValue = 2;
+  if (has_endvalue()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(2, this->endvalue(), output);
+  }
+
+  // optional double barWidth = 16;
+  if (has_barwidth()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(16, this->barwidth(), output);
+  }
+
+  // optional double leftMargin = 20;
+  if (has_leftmargin()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(20, this->leftmargin(), output);
+  }
+
+  // optional double topMargin = 21;
+  if (has_topmargin()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(21, this->topmargin(), output);
+  }
+
+  // optional double rightMargin = 22;
+  if (has_rightmargin()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(22, this->rightmargin(), output);
+  }
+
+  // optional double bottomMargin = 23;
+  if (has_bottommargin()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(23, this->bottommargin(), output);
+  }
+
+  // optional bool drawBarRect = 32 [default = true];
+  if (has_drawbarrect()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(32, this->drawbarrect(), output);
+  }
+
+  // optional bool drawGrid = 40 [default = true];
+  if (has_drawgrid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(40, this->drawgrid(), output);
+  }
+
+  // optional bool drawGridForAllBars = 41 [default = false];
+  if (has_drawgridforallbars()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(41, this->drawgridforallbars(), output);
+  }
+
+  // optional bool drawGridValues = 42 [default = true];
+  if (has_drawgridvalues()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(42, this->drawgridvalues(), output);
+  }
+
+  // optional bool drawGridValueForAllBars = 43 [default = false];
+  if (has_drawgridvalueforallbars()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(43, this->drawgridvalueforallbars(), output);
+  }
+
+  // optional bool drawGridValueUnits = 44 [default = true];
+  if (has_drawgridvalueunits()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(44, this->drawgridvalueunits(), output);
+  }
+
+  // optional double gridMainStep = 50 [default = 50];
+  if (has_gridmainstep()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(50, this->gridmainstep(), output);
+  }
+
+  // optional double gridSmallStep = 51 [default = 10];
+  if (has_gridsmallstep()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(51, this->gridsmallstep(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* IndicatorHistogramVert::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional double startValue = 1;
+  if (has_startvalue()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(1, this->startvalue(), target);
+  }
+
+  // optional double endValue = 2;
+  if (has_endvalue()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(2, this->endvalue(), target);
+  }
+
+  // optional double barWidth = 16;
+  if (has_barwidth()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(16, this->barwidth(), target);
+  }
+
+  // optional double leftMargin = 20;
+  if (has_leftmargin()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(20, this->leftmargin(), target);
+  }
+
+  // optional double topMargin = 21;
+  if (has_topmargin()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(21, this->topmargin(), target);
+  }
+
+  // optional double rightMargin = 22;
+  if (has_rightmargin()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(22, this->rightmargin(), target);
+  }
+
+  // optional double bottomMargin = 23;
+  if (has_bottommargin()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(23, this->bottommargin(), target);
+  }
+
+  // optional bool drawBarRect = 32 [default = true];
+  if (has_drawbarrect()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(32, this->drawbarrect(), target);
+  }
+
+  // optional bool drawGrid = 40 [default = true];
+  if (has_drawgrid()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(40, this->drawgrid(), target);
+  }
+
+  // optional bool drawGridForAllBars = 41 [default = false];
+  if (has_drawgridforallbars()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(41, this->drawgridforallbars(), target);
+  }
+
+  // optional bool drawGridValues = 42 [default = true];
+  if (has_drawgridvalues()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(42, this->drawgridvalues(), target);
+  }
+
+  // optional bool drawGridValueForAllBars = 43 [default = false];
+  if (has_drawgridvalueforallbars()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(43, this->drawgridvalueforallbars(), target);
+  }
+
+  // optional bool drawGridValueUnits = 44 [default = true];
+  if (has_drawgridvalueunits()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(44, this->drawgridvalueunits(), target);
+  }
+
+  // optional double gridMainStep = 50 [default = 50];
+  if (has_gridmainstep()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(50, this->gridmainstep(), target);
+  }
+
+  // optional double gridSmallStep = 51 [default = 10];
+  if (has_gridsmallstep()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(51, this->gridsmallstep(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int IndicatorHistogramVert::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional double startValue = 1;
+    if (has_startvalue()) {
+      total_size += 1 + 8;
+    }
+
+    // optional double endValue = 2;
+    if (has_endvalue()) {
+      total_size += 1 + 8;
+    }
+
+    // optional double barWidth = 16;
+    if (has_barwidth()) {
+      total_size += 2 + 8;
+    }
+
+    // optional double leftMargin = 20;
+    if (has_leftmargin()) {
+      total_size += 2 + 8;
+    }
+
+    // optional double topMargin = 21;
+    if (has_topmargin()) {
+      total_size += 2 + 8;
+    }
+
+    // optional double rightMargin = 22;
+    if (has_rightmargin()) {
+      total_size += 2 + 8;
+    }
+
+    // optional double bottomMargin = 23;
+    if (has_bottommargin()) {
+      total_size += 2 + 8;
+    }
+
+    // optional bool drawBarRect = 32 [default = true];
+    if (has_drawbarrect()) {
+      total_size += 2 + 1;
+    }
+
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional bool drawGrid = 40 [default = true];
+    if (has_drawgrid()) {
+      total_size += 2 + 1;
+    }
+
+    // optional bool drawGridForAllBars = 41 [default = false];
+    if (has_drawgridforallbars()) {
+      total_size += 2 + 1;
+    }
+
+    // optional bool drawGridValues = 42 [default = true];
+    if (has_drawgridvalues()) {
+      total_size += 2 + 1;
+    }
+
+    // optional bool drawGridValueForAllBars = 43 [default = false];
+    if (has_drawgridvalueforallbars()) {
+      total_size += 2 + 1;
+    }
+
+    // optional bool drawGridValueUnits = 44 [default = true];
+    if (has_drawgridvalueunits()) {
+      total_size += 2 + 1;
+    }
+
+    // optional double gridMainStep = 50 [default = 50];
+    if (has_gridmainstep()) {
+      total_size += 2 + 8;
+    }
+
+    // optional double gridSmallStep = 51 [default = 10];
+    if (has_gridsmallstep()) {
+      total_size += 2 + 8;
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void IndicatorHistogramVert::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const IndicatorHistogramVert* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const IndicatorHistogramVert*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void IndicatorHistogramVert::MergeFrom(const IndicatorHistogramVert& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_startvalue()) {
+      set_startvalue(from.startvalue());
+    }
+    if (from.has_endvalue()) {
+      set_endvalue(from.endvalue());
+    }
+    if (from.has_barwidth()) {
+      set_barwidth(from.barwidth());
+    }
+    if (from.has_leftmargin()) {
+      set_leftmargin(from.leftmargin());
+    }
+    if (from.has_topmargin()) {
+      set_topmargin(from.topmargin());
+    }
+    if (from.has_rightmargin()) {
+      set_rightmargin(from.rightmargin());
+    }
+    if (from.has_bottommargin()) {
+      set_bottommargin(from.bottommargin());
+    }
+    if (from.has_drawbarrect()) {
+      set_drawbarrect(from.drawbarrect());
+    }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (from.has_drawgrid()) {
+      set_drawgrid(from.drawgrid());
+    }
+    if (from.has_drawgridforallbars()) {
+      set_drawgridforallbars(from.drawgridforallbars());
+    }
+    if (from.has_drawgridvalues()) {
+      set_drawgridvalues(from.drawgridvalues());
+    }
+    if (from.has_drawgridvalueforallbars()) {
+      set_drawgridvalueforallbars(from.drawgridvalueforallbars());
+    }
+    if (from.has_drawgridvalueunits()) {
+      set_drawgridvalueunits(from.drawgridvalueunits());
+    }
+    if (from.has_gridmainstep()) {
+      set_gridmainstep(from.gridmainstep());
+    }
+    if (from.has_gridsmallstep()) {
+      set_gridsmallstep(from.gridsmallstep());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void IndicatorHistogramVert::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void IndicatorHistogramVert::CopyFrom(const IndicatorHistogramVert& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool IndicatorHistogramVert::IsInitialized() const {
+
+  return true;
+}
+
+void IndicatorHistogramVert::Swap(IndicatorHistogramVert* other) {
+  if (other != this) {
+    std::swap(startvalue_, other->startvalue_);
+    std::swap(endvalue_, other->endvalue_);
+    std::swap(barwidth_, other->barwidth_);
+    std::swap(leftmargin_, other->leftmargin_);
+    std::swap(topmargin_, other->topmargin_);
+    std::swap(rightmargin_, other->rightmargin_);
+    std::swap(bottommargin_, other->bottommargin_);
+    std::swap(drawbarrect_, other->drawbarrect_);
+    std::swap(drawgrid_, other->drawgrid_);
+    std::swap(drawgridforallbars_, other->drawgridforallbars_);
+    std::swap(drawgridvalues_, other->drawgridvalues_);
+    std::swap(drawgridvalueforallbars_, other->drawgridvalueforallbars_);
+    std::swap(drawgridvalueunits_, other->drawgridvalueunits_);
+    std::swap(gridmainstep_, other->gridmainstep_);
+    std::swap(gridsmallstep_, other->gridsmallstep_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata IndicatorHistogramVert::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = IndicatorHistogramVert_descriptor_;
+  metadata.reflection = IndicatorHistogramVert_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int IndicatorArrowIndicator::kStartValueFieldNumber;
+const int IndicatorArrowIndicator::kEndValueFieldNumber;
+const int IndicatorArrowIndicator::kStartAngleFieldNumber;
+const int IndicatorArrowIndicator::kSpanAngleFieldNumber;
+#endif  // !_MSC_VER
+
+IndicatorArrowIndicator::IndicatorArrowIndicator()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void IndicatorArrowIndicator::InitAsDefaultInstance() {
+}
+
+IndicatorArrowIndicator::IndicatorArrowIndicator(const IndicatorArrowIndicator& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void IndicatorArrowIndicator::SharedCtor() {
+  _cached_size_ = 0;
+  startvalue_ = 0;
+  endvalue_ = 0;
+  startangle_ = 0;
+  spanangle_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+IndicatorArrowIndicator::~IndicatorArrowIndicator() {
+  SharedDtor();
+}
+
+void IndicatorArrowIndicator::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void IndicatorArrowIndicator::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* IndicatorArrowIndicator::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return IndicatorArrowIndicator_descriptor_;
+}
+
+const IndicatorArrowIndicator& IndicatorArrowIndicator::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+IndicatorArrowIndicator* IndicatorArrowIndicator::default_instance_ = NULL;
+
+IndicatorArrowIndicator* IndicatorArrowIndicator::New() const {
+  return new IndicatorArrowIndicator;
+}
+
+void IndicatorArrowIndicator::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    startvalue_ = 0;
+    endvalue_ = 0;
+    startangle_ = 0;
+    spanangle_ = 0;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool IndicatorArrowIndicator::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional double startValue = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &startvalue_)));
+          set_has_startvalue();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(17)) goto parse_endValue;
+        break;
+      }
+
+      // optional double endValue = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_endValue:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &endvalue_)));
+          set_has_endvalue();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(129)) goto parse_startAngle;
+        break;
+      }
+
+      // optional double startAngle = 16;
+      case 16: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_startAngle:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &startangle_)));
+          set_has_startangle();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(137)) goto parse_spanAngle;
+        break;
+      }
+
+      // optional double spanAngle = 17;
+      case 17: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_spanAngle:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &spanangle_)));
+          set_has_spanangle();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void IndicatorArrowIndicator::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional double startValue = 1;
+  if (has_startvalue()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(1, this->startvalue(), output);
+  }
+
+  // optional double endValue = 2;
+  if (has_endvalue()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(2, this->endvalue(), output);
+  }
+
+  // optional double startAngle = 16;
+  if (has_startangle()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(16, this->startangle(), output);
+  }
+
+  // optional double spanAngle = 17;
+  if (has_spanangle()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(17, this->spanangle(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* IndicatorArrowIndicator::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional double startValue = 1;
+  if (has_startvalue()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(1, this->startvalue(), target);
+  }
+
+  // optional double endValue = 2;
+  if (has_endvalue()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(2, this->endvalue(), target);
+  }
+
+  // optional double startAngle = 16;
+  if (has_startangle()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(16, this->startangle(), target);
+  }
+
+  // optional double spanAngle = 17;
+  if (has_spanangle()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(17, this->spanangle(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int IndicatorArrowIndicator::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional double startValue = 1;
+    if (has_startvalue()) {
+      total_size += 1 + 8;
+    }
+
+    // optional double endValue = 2;
+    if (has_endvalue()) {
+      total_size += 1 + 8;
+    }
+
+    // optional double startAngle = 16;
+    if (has_startangle()) {
+      total_size += 2 + 8;
+    }
+
+    // optional double spanAngle = 17;
+    if (has_spanangle()) {
+      total_size += 2 + 8;
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void IndicatorArrowIndicator::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const IndicatorArrowIndicator* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const IndicatorArrowIndicator*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void IndicatorArrowIndicator::MergeFrom(const IndicatorArrowIndicator& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_startvalue()) {
+      set_startvalue(from.startvalue());
+    }
+    if (from.has_endvalue()) {
+      set_endvalue(from.endvalue());
+    }
+    if (from.has_startangle()) {
+      set_startangle(from.startangle());
+    }
+    if (from.has_spanangle()) {
+      set_spanangle(from.spanangle());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void IndicatorArrowIndicator::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void IndicatorArrowIndicator::CopyFrom(const IndicatorArrowIndicator& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool IndicatorArrowIndicator::IsInitialized() const {
+
+  return true;
+}
+
+void IndicatorArrowIndicator::Swap(IndicatorArrowIndicator* other) {
+  if (other != this) {
+    std::swap(startvalue_, other->startvalue_);
+    std::swap(endvalue_, other->endvalue_);
+    std::swap(startangle_, other->startangle_);
+    std::swap(spanangle_, other->spanangle_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata IndicatorArrowIndicator::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = IndicatorArrowIndicator_descriptor_;
+  metadata.reflection = IndicatorArrowIndicator_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int SchemaItemIndicator::kSignalIdsFieldNumber;
+const int SchemaItemIndicator::kSignalSourceFieldNumber;
+const int SchemaItemIndicator::kPrecisionFieldNumber;
+const int SchemaItemIndicator::kAnalogFormatFieldNumber;
+const int SchemaItemIndicator::kFontFieldNumber;
+const int SchemaItemIndicator::kDrawRectFieldNumber;
+const int SchemaItemIndicator::kLineWeightFieldNumber;
+const int SchemaItemIndicator::kBackgroundColorFieldNumber;
+const int SchemaItemIndicator::kLineColorFieldNumber;
+const int SchemaItemIndicator::kSignalColorsFieldNumber;
 const int SchemaItemIndicator::kTypeFieldNumber;
+const int SchemaItemIndicator::kIndicatorHistogramVertFieldNumber;
+const int SchemaItemIndicator::kIndicatorArrowIndicatorFieldNumber;
 #endif  // !_MSC_VER
 
 SchemaItemIndicator::SchemaItemIndicator()
@@ -15825,6 +17004,9 @@ SchemaItemIndicator::SchemaItemIndicator()
 }
 
 void SchemaItemIndicator::InitAsDefaultInstance() {
+  font_ = const_cast< ::Proto::FontParam*>(&::Proto::FontParam::default_instance());
+  indicatorhistogramvert_ = const_cast< ::Proto::IndicatorHistogramVert*>(&::Proto::IndicatorHistogramVert::default_instance());
+  indicatorarrowindicator_ = const_cast< ::Proto::IndicatorArrowIndicator*>(&::Proto::IndicatorArrowIndicator::default_instance());
 }
 
 SchemaItemIndicator::SchemaItemIndicator(const SchemaItemIndicator& from)
@@ -15835,7 +17017,18 @@ SchemaItemIndicator::SchemaItemIndicator(const SchemaItemIndicator& from)
 
 void SchemaItemIndicator::SharedCtor() {
   _cached_size_ = 0;
+  signalids_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  signalsource_ = 0;
+  precision_ = 2;
+  analogformat_ = 102;
+  font_ = NULL;
+  drawrect_ = false;
+  lineweight_ = 0;
+  backgroundcolor_ = 0u;
+  linecolor_ = 0u;
   type_ = 0u;
+  indicatorhistogramvert_ = NULL;
+  indicatorarrowindicator_ = NULL;
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
 }
 
@@ -15844,7 +17037,13 @@ SchemaItemIndicator::~SchemaItemIndicator() {
 }
 
 void SchemaItemIndicator::SharedDtor() {
+  if (signalids_ != &::google::protobuf::internal::kEmptyString) {
+    delete signalids_;
+  }
   if (this != default_instance_) {
+    delete font_;
+    delete indicatorhistogramvert_;
+    delete indicatorarrowindicator_;
   }
 }
 
@@ -15871,8 +17070,32 @@ SchemaItemIndicator* SchemaItemIndicator::New() const {
 
 void SchemaItemIndicator::Clear() {
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    type_ = 0u;
+    if (has_signalids()) {
+      if (signalids_ != &::google::protobuf::internal::kEmptyString) {
+        signalids_->clear();
+      }
+    }
+    signalsource_ = 0;
+    precision_ = 2;
+    analogformat_ = 102;
+    if (has_font()) {
+      if (font_ != NULL) font_->::Proto::FontParam::Clear();
+    }
+    drawrect_ = false;
+    lineweight_ = 0;
+    backgroundcolor_ = 0u;
   }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    linecolor_ = 0u;
+    type_ = 0u;
+    if (has_indicatorhistogramvert()) {
+      if (indicatorhistogramvert_ != NULL) indicatorhistogramvert_->::Proto::IndicatorHistogramVert::Clear();
+    }
+    if (has_indicatorarrowindicator()) {
+      if (indicatorarrowindicator_ != NULL) indicatorarrowindicator_->::Proto::IndicatorArrowIndicator::Clear();
+    }
+  }
+  signalcolors_.Clear();
   ::memset(_has_bits_, 0, sizeof(_has_bits_));
   mutable_unknown_fields()->Clear();
 }
@@ -15883,14 +17106,207 @@ bool SchemaItemIndicator::MergePartialFromCodedStream(
   ::google::protobuf::uint32 tag;
   while ((tag = input->ReadTag()) != 0) {
     switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
-      // optional uint32 type = 1 [default = 0];
+      // optional string signalIds = 1;
       case 1: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_signalids()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->signalids().data(), this->signalids().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(16)) goto parse_signalSource;
+        break;
+      }
+
+      // optional int32 signalSource = 2 [default = 0];
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_signalSource:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &signalsource_)));
+          set_has_signalsource();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(24)) goto parse_precision;
+        break;
+      }
+
+      // optional int32 precision = 3 [default = 2];
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_precision:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &precision_)));
+          set_has_precision();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(32)) goto parse_analogFormat;
+        break;
+      }
+
+      // optional int32 analogFormat = 4 [default = 102];
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_analogFormat:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &analogformat_)));
+          set_has_analogformat();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(74)) goto parse_font;
+        break;
+      }
+
+      // optional .Proto.FontParam font = 9;
+      case 9: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_font:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_font()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(80)) goto parse_drawRect;
+        break;
+      }
+
+      // optional bool drawRect = 10 [default = false];
+      case 10: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_drawRect:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   bool, ::google::protobuf::internal::WireFormatLite::TYPE_BOOL>(
+                 input, &drawrect_)));
+          set_has_drawrect();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(89)) goto parse_lineWeight;
+        break;
+      }
+
+      // optional double lineWeight = 11 [default = 0];
+      case 11: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_lineWeight:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &lineweight_)));
+          set_has_lineweight();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(128)) goto parse_backgroundColor;
+        break;
+      }
+
+      // optional uint32 backgroundColor = 16;
+      case 16: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_backgroundColor:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &backgroundcolor_)));
+          set_has_backgroundcolor();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(136)) goto parse_lineColor;
+        break;
+      }
+
+      // optional uint32 lineColor = 17;
+      case 17: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_lineColor:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, &linecolor_)));
+          set_has_linecolor();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(144)) goto parse_signalColors;
+        break;
+      }
+
+      // repeated uint32 signalColors = 18;
+      case 18: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_signalColors:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitive<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 2, 144, input, this->mutable_signalcolors())));
+        } else if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag)
+                   == ::google::protobuf::internal::WireFormatLite::
+                      WIRETYPE_LENGTH_DELIMITED) {
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitiveNoInline<
+                   ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
+                 input, this->mutable_signalcolors())));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(144)) goto parse_signalColors;
+        if (input->ExpectTag(256)) goto parse_type;
+        break;
+      }
+
+      // optional uint32 type = 32 [default = 0];
+      case 32: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_type:
           DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
                    ::google::protobuf::uint32, ::google::protobuf::internal::WireFormatLite::TYPE_UINT32>(
                  input, &type_)));
           set_has_type();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(386)) goto parse_indicatorHistogramVert;
+        break;
+      }
+
+      // optional .Proto.IndicatorHistogramVert indicatorHistogramVert = 48;
+      case 48: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_indicatorHistogramVert:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_indicatorhistogramvert()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(394)) goto parse_indicatorArrowIndicator;
+        break;
+      }
+
+      // optional .Proto.IndicatorArrowIndicator indicatorArrowIndicator = 49;
+      case 49: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_indicatorArrowIndicator:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_indicatorarrowindicator()));
         } else {
           goto handle_uninterpreted;
         }
@@ -15916,9 +17332,77 @@ bool SchemaItemIndicator::MergePartialFromCodedStream(
 
 void SchemaItemIndicator::SerializeWithCachedSizes(
     ::google::protobuf::io::CodedOutputStream* output) const {
-  // optional uint32 type = 1 [default = 0];
+  // optional string signalIds = 1;
+  if (has_signalids()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->signalids().data(), this->signalids().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      1, this->signalids(), output);
+  }
+
+  // optional int32 signalSource = 2 [default = 0];
+  if (has_signalsource()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(2, this->signalsource(), output);
+  }
+
+  // optional int32 precision = 3 [default = 2];
+  if (has_precision()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->precision(), output);
+  }
+
+  // optional int32 analogFormat = 4 [default = 102];
+  if (has_analogformat()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(4, this->analogformat(), output);
+  }
+
+  // optional .Proto.FontParam font = 9;
+  if (has_font()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      9, this->font(), output);
+  }
+
+  // optional bool drawRect = 10 [default = false];
+  if (has_drawrect()) {
+    ::google::protobuf::internal::WireFormatLite::WriteBool(10, this->drawrect(), output);
+  }
+
+  // optional double lineWeight = 11 [default = 0];
+  if (has_lineweight()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(11, this->lineweight(), output);
+  }
+
+  // optional uint32 backgroundColor = 16;
+  if (has_backgroundcolor()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(16, this->backgroundcolor(), output);
+  }
+
+  // optional uint32 lineColor = 17;
+  if (has_linecolor()) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(17, this->linecolor(), output);
+  }
+
+  // repeated uint32 signalColors = 18;
+  for (int i = 0; i < this->signalcolors_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(
+      18, this->signalcolors(i), output);
+  }
+
+  // optional uint32 type = 32 [default = 0];
   if (has_type()) {
-    ::google::protobuf::internal::WireFormatLite::WriteUInt32(1, this->type(), output);
+    ::google::protobuf::internal::WireFormatLite::WriteUInt32(32, this->type(), output);
+  }
+
+  // optional .Proto.IndicatorHistogramVert indicatorHistogramVert = 48;
+  if (has_indicatorhistogramvert()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      48, this->indicatorhistogramvert(), output);
+  }
+
+  // optional .Proto.IndicatorArrowIndicator indicatorArrowIndicator = 49;
+  if (has_indicatorarrowindicator()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      49, this->indicatorarrowindicator(), output);
   }
 
   if (!unknown_fields().empty()) {
@@ -15929,9 +17413,81 @@ void SchemaItemIndicator::SerializeWithCachedSizes(
 
 ::google::protobuf::uint8* SchemaItemIndicator::SerializeWithCachedSizesToArray(
     ::google::protobuf::uint8* target) const {
-  // optional uint32 type = 1 [default = 0];
+  // optional string signalIds = 1;
+  if (has_signalids()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->signalids().data(), this->signalids().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->signalids(), target);
+  }
+
+  // optional int32 signalSource = 2 [default = 0];
+  if (has_signalsource()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(2, this->signalsource(), target);
+  }
+
+  // optional int32 precision = 3 [default = 2];
+  if (has_precision()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->precision(), target);
+  }
+
+  // optional int32 analogFormat = 4 [default = 102];
+  if (has_analogformat()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(4, this->analogformat(), target);
+  }
+
+  // optional .Proto.FontParam font = 9;
+  if (has_font()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        9, this->font(), target);
+  }
+
+  // optional bool drawRect = 10 [default = false];
+  if (has_drawrect()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(10, this->drawrect(), target);
+  }
+
+  // optional double lineWeight = 11 [default = 0];
+  if (has_lineweight()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(11, this->lineweight(), target);
+  }
+
+  // optional uint32 backgroundColor = 16;
+  if (has_backgroundcolor()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(16, this->backgroundcolor(), target);
+  }
+
+  // optional uint32 lineColor = 17;
+  if (has_linecolor()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(17, this->linecolor(), target);
+  }
+
+  // repeated uint32 signalColors = 18;
+  for (int i = 0; i < this->signalcolors_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteUInt32ToArray(18, this->signalcolors(i), target);
+  }
+
+  // optional uint32 type = 32 [default = 0];
   if (has_type()) {
-    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(1, this->type(), target);
+    target = ::google::protobuf::internal::WireFormatLite::WriteUInt32ToArray(32, this->type(), target);
+  }
+
+  // optional .Proto.IndicatorHistogramVert indicatorHistogramVert = 48;
+  if (has_indicatorhistogramvert()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        48, this->indicatorhistogramvert(), target);
+  }
+
+  // optional .Proto.IndicatorArrowIndicator indicatorArrowIndicator = 49;
+  if (has_indicatorarrowindicator()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        49, this->indicatorarrowindicator(), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -15945,14 +17501,99 @@ int SchemaItemIndicator::ByteSize() const {
   int total_size = 0;
 
   if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
-    // optional uint32 type = 1 [default = 0];
-    if (has_type()) {
+    // optional string signalIds = 1;
+    if (has_signalids()) {
       total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->signalids());
+    }
+
+    // optional int32 signalSource = 2 [default = 0];
+    if (has_signalsource()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->signalsource());
+    }
+
+    // optional int32 precision = 3 [default = 2];
+    if (has_precision()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->precision());
+    }
+
+    // optional int32 analogFormat = 4 [default = 102];
+    if (has_analogformat()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->analogformat());
+    }
+
+    // optional .Proto.FontParam font = 9;
+    if (has_font()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->font());
+    }
+
+    // optional bool drawRect = 10 [default = false];
+    if (has_drawrect()) {
+      total_size += 1 + 1;
+    }
+
+    // optional double lineWeight = 11 [default = 0];
+    if (has_lineweight()) {
+      total_size += 1 + 8;
+    }
+
+    // optional uint32 backgroundColor = 16;
+    if (has_backgroundcolor()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->backgroundcolor());
+    }
+
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional uint32 lineColor = 17;
+    if (has_linecolor()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::UInt32Size(
+          this->linecolor());
+    }
+
+    // optional uint32 type = 32 [default = 0];
+    if (has_type()) {
+      total_size += 2 +
         ::google::protobuf::internal::WireFormatLite::UInt32Size(
           this->type());
     }
 
+    // optional .Proto.IndicatorHistogramVert indicatorHistogramVert = 48;
+    if (has_indicatorhistogramvert()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->indicatorhistogramvert());
+    }
+
+    // optional .Proto.IndicatorArrowIndicator indicatorArrowIndicator = 49;
+    if (has_indicatorarrowindicator()) {
+      total_size += 2 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->indicatorarrowindicator());
+    }
+
   }
+  // repeated uint32 signalColors = 18;
+  {
+    int data_size = 0;
+    for (int i = 0; i < this->signalcolors_size(); i++) {
+      data_size += ::google::protobuf::internal::WireFormatLite::
+        UInt32Size(this->signalcolors(i));
+    }
+    total_size += 2 * this->signalcolors_size() + data_size;
+  }
+
   if (!unknown_fields().empty()) {
     total_size +=
       ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
@@ -15978,9 +17619,45 @@ void SchemaItemIndicator::MergeFrom(const ::google::protobuf::Message& from) {
 
 void SchemaItemIndicator::MergeFrom(const SchemaItemIndicator& from) {
   GOOGLE_CHECK_NE(&from, this);
+  signalcolors_.MergeFrom(from.signalcolors_);
   if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_signalids()) {
+      set_signalids(from.signalids());
+    }
+    if (from.has_signalsource()) {
+      set_signalsource(from.signalsource());
+    }
+    if (from.has_precision()) {
+      set_precision(from.precision());
+    }
+    if (from.has_analogformat()) {
+      set_analogformat(from.analogformat());
+    }
+    if (from.has_font()) {
+      mutable_font()->::Proto::FontParam::MergeFrom(from.font());
+    }
+    if (from.has_drawrect()) {
+      set_drawrect(from.drawrect());
+    }
+    if (from.has_lineweight()) {
+      set_lineweight(from.lineweight());
+    }
+    if (from.has_backgroundcolor()) {
+      set_backgroundcolor(from.backgroundcolor());
+    }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (from.has_linecolor()) {
+      set_linecolor(from.linecolor());
+    }
     if (from.has_type()) {
       set_type(from.type());
+    }
+    if (from.has_indicatorhistogramvert()) {
+      mutable_indicatorhistogramvert()->::Proto::IndicatorHistogramVert::MergeFrom(from.indicatorhistogramvert());
+    }
+    if (from.has_indicatorarrowindicator()) {
+      mutable_indicatorarrowindicator()->::Proto::IndicatorArrowIndicator::MergeFrom(from.indicatorarrowindicator());
     }
   }
   mutable_unknown_fields()->MergeFrom(from.unknown_fields());
@@ -16000,12 +17677,27 @@ void SchemaItemIndicator::CopyFrom(const SchemaItemIndicator& from) {
 
 bool SchemaItemIndicator::IsInitialized() const {
 
+  if (has_font()) {
+    if (!this->font().IsInitialized()) return false;
+  }
   return true;
 }
 
 void SchemaItemIndicator::Swap(SchemaItemIndicator* other) {
   if (other != this) {
+    std::swap(signalids_, other->signalids_);
+    std::swap(signalsource_, other->signalsource_);
+    std::swap(precision_, other->precision_);
+    std::swap(analogformat_, other->analogformat_);
+    std::swap(font_, other->font_);
+    std::swap(drawrect_, other->drawrect_);
+    std::swap(lineweight_, other->lineweight_);
+    std::swap(backgroundcolor_, other->backgroundcolor_);
+    std::swap(linecolor_, other->linecolor_);
+    signalcolors_.Swap(&other->signalcolors_);
     std::swap(type_, other->type_);
+    std::swap(indicatorhistogramvert_, other->indicatorhistogramvert_);
+    std::swap(indicatorarrowindicator_, other->indicatorarrowindicator_);
     std::swap(_has_bits_[0], other->_has_bits_[0]);
     _unknown_fields_.Swap(&other->_unknown_fields_);
     std::swap(_cached_size_, other->_cached_size_);
@@ -40398,7 +42090,7 @@ bool ComparatorSignal::MergePartialFromCodedStream(
         break;
       }
 
-      // optional bool isAcquired = 4;
+      // optional bool isAcquired = 4 [default = false];
       case 4: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
@@ -40451,7 +42143,7 @@ void ComparatorSignal::SerializeWithCachedSizes(
       3, this->appsignalid(), output);
   }
 
-  // optional bool isAcquired = 4;
+  // optional bool isAcquired = 4 [default = false];
   if (has_isacquired()) {
     ::google::protobuf::internal::WireFormatLite::WriteBool(4, this->isacquired(), output);
   }
@@ -40484,7 +42176,7 @@ void ComparatorSignal::SerializeWithCachedSizes(
         3, this->appsignalid(), target);
   }
 
-  // optional bool isAcquired = 4;
+  // optional bool isAcquired = 4 [default = false];
   if (has_isacquired()) {
     target = ::google::protobuf::internal::WireFormatLite::WriteBoolToArray(4, this->isacquired(), target);
   }
@@ -40517,7 +42209,7 @@ int ComparatorSignal::ByteSize() const {
           this->appsignalid());
     }
 
-    // optional bool isAcquired = 4;
+    // optional bool isAcquired = 4 [default = false];
     if (has_isacquired()) {
       total_size += 1 + 1;
     }

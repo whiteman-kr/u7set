@@ -60,5 +60,19 @@ public:
 
 // ==============================================================================================
 
+class StatisticsStateDelegate : public QStyledItemDelegate
+{
+	Q_OBJECT
+
+public:
+
+	StatisticsStateDelegate(QObject *parent);
+
+	void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+};
+
+// ==============================================================================================
+
+
 
 #endif // DELEGATE_H

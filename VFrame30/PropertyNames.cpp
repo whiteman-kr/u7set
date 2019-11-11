@@ -36,6 +36,7 @@ namespace VFrame30
 	const QString PropertyNames::lineColor{"LineColor"};
 	const QString PropertyNames::lineWeight{"LineWeight"};
 	const QString PropertyNames::fillColor{"FillColor"};
+	const QString PropertyNames::backgroundColor{"BackgroundColor"};
 	const QString PropertyNames::fill{"Fill"};
 	const QString PropertyNames::drawRect{"DrawRect"};
 	const QString PropertyNames::textColor{"TextColor"};
@@ -54,6 +55,30 @@ namespace VFrame30
 	const QString PropertyNames::images{"Images"};
 	const QString PropertyNames::svg{"Svg"};
 	const QString PropertyNames::currentImageId{"CurrentImageID"};
+
+	const QString PropertyNames::drawGrid{"DrawGrid"};
+	const QString PropertyNames::drawGridForAllBars{"DrawGridForAllBars"};
+	const QString PropertyNames::drawGridValues{"DrawGridValues"};
+	const QString PropertyNames::drawGridValueForAllBars{"DrawGridValueForAllBars"};
+	const QString PropertyNames::drawGridValueUnits{"DrawGridValueUnits"};
+	const QString PropertyNames::gridMainStep{"GridMainStep"};
+	const QString PropertyNames::gridSmallStep{"GridSmallStep"};
+
+	const QString PropertyNames::indicatorSignalColors{"SignalColors"};
+	const QString PropertyNames::indicatorType{"IndicatorType"};
+	const QString PropertyNames::indicatorSettings{"IndicatorSettings"};
+
+	const QString PropertyNames::indicatorStartValue{"StartValue"};
+	const QString PropertyNames::indicatorEndValue{"EndValue"};
+	const QString PropertyNames::indicatorBarWidth{"BarWidth"};
+	const QString PropertyNames::indicatorDrawBarRect{"DrawBarRect"};
+	const QString PropertyNames::indicatorStartAngle{"StartAngle"};
+	const QString PropertyNames::indicatorSpanAngle{"SpanAngle"};
+
+	const QString PropertyNames::indicatorMargingLeft{"MarginLeft"};
+	const QString PropertyNames::indicatorMargingTop{"MarginTop"};
+	const QString PropertyNames::indicatorMargingRight{"MarginRight"};
+	const QString PropertyNames::indicatorMargingBottom{"MarginBottom"};
 
 	// SchemaItemValue Colors
 	//

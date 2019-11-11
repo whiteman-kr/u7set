@@ -4,6 +4,7 @@
 #include <QHeaderView>
 
 #include "MainWindow.h"
+#include "Delegate.h"
 #include "Options.h"
 #include "ExportData.h"
 #include "FindData.h"
@@ -160,17 +161,14 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::BackgroundColorRole)
 	{
-		if (column == STATISTIC_COLUMN_APP_ID || column == STATISTIC_COLUMN_CUSTOM_ID || column == STATISTIC_COLUMN_EQUIPMENT_ID || column == STATISTIC_COLUMN_STATE)
+		if (column == STATISTIC_COLUMN_CUSTOM_ID || column == STATISTIC_COLUMN_EQUIPMENT_ID || column == STATISTIC_COLUMN_STATE)
 		{
 			if (pSignal->statistic().measureCount() != 0)
 			{
-				if (pSignal->statistic().state() == Metrology::StatisticStateFailed)
+				switch (pSignal->statistic().state())
 				{
-					return theOptions.measureView().colorErrorLimit();
-				}
-				if (pSignal->statistic().state() == Metrology::StatisticStateSuccess)
-				{
-					return theOptions.measureView().colorNotError();
+					case Metrology::StatisticStateFailed:	return theOptions.measureView().colorErrorLimit();	break;
+					case Metrology::StatisticStateSuccess:	return theOptions.measureView().colorNotError();	break;
 				}
 			}
 		}
@@ -419,6 +417,11 @@ void StatisticPanel::createInterface()
 
 	connect(m_pView, &QTableView::doubleClicked , this, &StatisticPanel::onListDoubleClicked);
 
+
+	StatisticsStateDelegate* stateDelegate = new StatisticsStateDelegate(m_pStatisticWindow);
+	m_pView->setItemDelegateForColumn(STATISTIC_COLUMN_APP_ID, stateDelegate);
+
+
 	m_pStatisticWindow->setCentralWidget(m_pView);
 
 	//
@@ -559,6 +562,64 @@ void StatisticPanel::changedOutputSignalType(int type)
 
 	updateList();
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void StatisticPanel::activeSignalChanged(const MeasureSignal& activeSignal)
+{
+	if (activeSignal.isEmpty() == true)
+	{
+		return;
+	}
+
+	int signalCount = activeSignal.channelCount();
+	if (signalCount == 0)
+	{
+		return;
+	}
+
+	activeSignal.multiSignal(0).metrologySignal(Metrology::Channel_0);
+
+	Metrology::Signal* pSignal = nullptr;
+
+	switch (theOptions.toolBar().outputSignalType())
+	{
+		case OUTPUT_SIGNAL_TYPE_UNUSED:			pSignal = activeSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).firstMetrologySignal();	break;
+		case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
+		case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	pSignal = activeSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).firstMetrologySignal();	break;
+		default:								assert(0);																					break;
+	}
+
+	if (pSignal == nullptr)
+	{
+		return;
+	}
+
+	if (m_pView == nullptr)
+	{
+		return;
+	}
+
+	int foundIndex = -1;
+
+	int signaCount = theSignalBase.statistic().signalCount();
+	for(int i = 0; i < signaCount; i++)
+	{
+		if (theSignalBase.statistic().signal(i) == pSignal)
+		{
+			foundIndex = i;
+			break;
+		}
+	}
+
+	if (foundIndex == -1)
+	{
+		return;
+	}
+
+	m_pView->setCurrentIndex(m_pView->model()->index(foundIndex, 0));
+}
+
 
 // -------------------------------------------------------------------------------------------------------------------
 

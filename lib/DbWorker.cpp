@@ -316,6 +316,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0296.sql", "Upgrade to version 296, RIM FilteringTime has range (0.1 .. 131.07 s)"},
 	{":/DatabaseUpgrade/Upgrade0297.sql", "Upgrade to version 297, If TuningEnable/AppDataEnable/DiagDataEnable flag in LM is false, IP address is zero"},
 	{":/DatabaseUpgrade/Upgrade0298.sql", "Upgrade to version 298, Added descriptions of LmNumberCount and UniqueID in bts file"},
+	{":/DatabaseUpgrade/Upgrade0299.sql", "Upgrade to version 299, be_to_le_16si->be_to_le_16ui, le_to_be_16si->le_to_be_16ui"},
 };
 
 int DbWorker::counter = 0;
@@ -1051,6 +1052,7 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	project.setDatabaseName(databaseName);
 	project.setProjectName(projectName);
+	project.setVersion(DbWorker::databaseVersion());	// Other project version just cannot be opened
 
 	QString projectDescription;
 	QString projectUppercaseAppSignalId;

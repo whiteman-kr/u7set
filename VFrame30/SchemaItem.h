@@ -163,14 +163,14 @@ namespace VFrame30
 
 		// Determine and Calculation Functions
 		//
-	public:	
+	public:
 		// Определение, входит ли точка в элемент, x и y в дюймах или в пикселях
-		// 
+		//
 		virtual bool IsIntersectPoint(double x, double y) const;
 
 		// Определение, пересекает ли элемент указанный прямоугольник (использовать для выделения),
 		// координаты и размер прямоугольника заданы в дюймах или пикселях
-		// 
+		//
 		virtual bool IsIntersectRect(double x, double y, double width, double height) const;
 
 		static double penDeviceWidth(const QPaintDevice* device, double penWidth);

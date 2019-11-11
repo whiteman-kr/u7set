@@ -508,9 +508,9 @@ win32 {
 DEFINES += QTKEYCHAIN_NO_EXPORT
 DEFINES += USE_CREDENTIAL_STORE
 
-INCLUDEPATH += ./qtkeychain-0.8
+INCLUDEPATH += ./qtkeychain-0.9.1
 
-include(../Tools/qtkeychain-0.8/qt5keychain.pri)
+include(../Tools/qtkeychain-0.9.1/qt5keychain.pri)
 
 # Simulator Lib
 #
