@@ -109,7 +109,8 @@ SOURCES += \
 	../lib/UnitsConvertor.cpp \
     ../lib/UnitsConvertorTable.cpp \
     StatisticBase.cpp \
-    StatisticPanel.cpp
+    StatisticPanel.cpp \
+    ../Builder/ComparatorSet.cpp
 
 #../lib/ExcelHelper.cpp
 
@@ -189,7 +190,8 @@ HEADERS  += \
     ../lib/UnitsConvertorTable.h \
 #../lib/ExcelHelper.h
     StatisticBase.h \
-    StatisticPanel.h
+    StatisticPanel.h \
+    ../Builder/ComparatorSet.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

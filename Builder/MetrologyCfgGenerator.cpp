@@ -194,6 +194,15 @@ namespace Builder
 			return false;
 		}
 
+		result = m_cfgXml->addLinkToFile(DIR_COMMON, FILE_COMPARATORS_SET);
+		if (result == false)
+		{
+			// Can't link build file %1 into /%2/configuration.xml.
+			//
+			m_log->errCMN0018(QString("%1\\%2").arg(DIR_COMMON).arg(FILE_COMPARATORS_SET), equipmentID());
+			return false;
+		}
+
 		return true;
 	}
 
@@ -331,10 +340,10 @@ namespace Builder
 
 							case E::ElectricUnit::Ohm:
 
-								if (testElectricRange_ThermoResistor(signal) == false)
-								{
-									hasWrongField = true;
-								}
+//								if (testElectricRange_ThermoResistor(signal) == false)
+//								{
+//									hasWrongField = true;
+//								}
 								break;
 						}
 					}

@@ -6,6 +6,7 @@
 #include "../lib/XmlHelper.h"
 #include "../lib/UnitsConvertor.h"
 #include "../Builder/CfgFiles.h"
+#include "../Builder/ComparatorSet.h"
 
 // Attention !!!
 // If you want to change any function writeToXml you must change CFG_FILE_VER_METROLOGY_SIGNALS
@@ -336,6 +337,8 @@ namespace Metrology
 		SignalParam				m_param;
 		SignalState				m_state;
 
+		QList<std::shared_ptr<::Builder::Comparator>> m_comparatorList;
+
 		SignalStatistic			m_statistic;
 
 	public:
@@ -346,8 +349,12 @@ namespace Metrology
 		SignalState&			state() { return m_state; }
 		void					setState(const Metrology::SignalState& state) { m_state = state; }
 
+		void					setComparatorList(const QList<std::shared_ptr<::Builder::Comparator>>& list) { m_comparatorList = list; }
+		int						comparatorCount() { return m_comparatorList.count(); }
+
 		SignalStatistic&		statistic() { return m_statistic; }
 		void					setStatistic(const SignalStatistic& statistic) { m_statistic = statistic; }
+
 	};
 
 	// ==============================================================================================

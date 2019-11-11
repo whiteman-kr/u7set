@@ -282,7 +282,11 @@ public:
 	OutputSignalBase&		outputSignals() { return m_outputSignalBase; }		// output signals
 	TuningBase&				tuning() { return m_tuningBase; }					// sources and signals of tuning
 	StatisticBase&			statistic() { return m_statisticBase; }				// statistics of measured signals
-
+	
+	// comparators
+	//
+	bool					loadComparators(const ::Builder::ComparatorSet& comparatorSet);
+	
 signals:
 
 	void					updatedSignalParam(const QString& appSignalID);

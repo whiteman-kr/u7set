@@ -2298,5 +2298,43 @@ void SignalBase::clearActiveSignal()
 }
 
 // -------------------------------------------------------------------------------------------------------------------
+
+bool SignalBase::loadComparators(const ::Builder::ComparatorSet& comparatorSet)
+{
+	int count = signalCount();
+	for(int i = 0; i < count; i ++)
+	{
+		Metrology::Signal* pSignal = signalPtr(i);
+		if (pSignal == nullptr)
+		{
+			continue;
+		}
+
+		if (pSignal->param().isValid() == false)
+		{
+			continue;
+		}
+
+		// only analog signals
+		//
+		if (pSignal->param().isAnalog() == false)
+		{
+			continue;
+		}
+
+		// only analog-input or analog-internal signals
+		//
+		if (pSignal->param().isOutput() == true)
+		{
+			continue;
+		}
+		
+		pSignal->setComparatorList(comparatorSet.getByInputSignalID(pSignal->param().appSignalID()));
+	}
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
