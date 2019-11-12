@@ -353,25 +353,30 @@ void BaseServiceStateWidget::serviceAckReceived(const UdpRequest udpRequest)
 			bool result = newServiceState.ParseFromArray(udpRequest.data(),
 														 static_cast<int>(udpRequest.dataSize()));
 
-			assert(result == true);
-
-			ServiceState oldState = static_cast<ServiceState>(m_serviceInfo.servicestate());
-			ServiceState newState = static_cast<ServiceState>(newServiceState.servicestate());
-
-			if (newState != ServiceState::Work && oldState == ServiceState::Work)
+			if (result == true)
 			{
-				emit invalidateData();
-			}
+				ServiceState oldState = static_cast<ServiceState>(m_serviceInfo.servicestate());
+				ServiceState newState = static_cast<ServiceState>(newServiceState.servicestate());
 
-			if (newState == ServiceState::Work &&
-					(oldState != ServiceState::Work || newServiceState.serviceuptime() < m_serviceInfo.serviceuptime()))
+				if (newState != ServiceState::Work && oldState == ServiceState::Work)
+				{
+					emit invalidateData();
+				}
+
+				if (newState == ServiceState::Work &&
+						(oldState != ServiceState::Work || newServiceState.serviceuptime() < m_serviceInfo.serviceuptime()))
+				{
+					emit needToReloadData();
+				}
+
+				m_serviceInfo = newServiceState;
+
+				updateServiceState();
+			}
+			else
 			{
-				emit needToReloadData();
+				assert(false);
 			}
-
-			m_serviceInfo = newServiceState;
-
-			updateServiceState();
 		}
 		break;
 		case RQID_SERVICE_START:
@@ -392,6 +397,14 @@ void BaseServiceStateWidget::serviceNotFound()
 		m_serviceInfo.set_servicestate(TO_INT(ServiceState::Unavailable));
 		updateServiceState();
 	}
+}
+
+void BaseServiceStateWidget::createTcpConnection(quint32 ip, quint16 port)
+{
+	Q_UNUSED(ip);
+	Q_UNUSED(port);
+
+	assert(port > std::numeric_limits<quint16>::lowest() && port < std::numeric_limits<quint16>::max());
 }
 
 int BaseServiceStateWidget::addTab(QWidget* page, const QString& label)
