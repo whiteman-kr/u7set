@@ -3345,7 +3345,8 @@ namespace Builder
 			// this error should be detected early, during loopbacks preprocessing
 			//
 			assert(false);
-			LOG_INTERNAL_ERROR(m_log);
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("LB ID = %1 target %2 schema %3").
+								   arg(loopbackID).arg(loopbackTargetItem->label()).arg(loopbackTargetItem->schemaID()));
 			return false;
 		}
 

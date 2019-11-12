@@ -551,6 +551,8 @@ void DynamicAppSignalState::rtSessionsProcessing(const SimpleAppSignalState& sta
 
 bool DynamicAppSignalState::getValue(const char* rupData, int rupDataSize, double& value)
 {
+	Q_UNUSED(rupDataSize);
+
 	// get double signal value from rupData buffer using parseInfo
 	//
 	int valueOffset = m_valueAddr.offset() * 2;		// offset in Words => offset in Bytes

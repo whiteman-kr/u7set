@@ -224,6 +224,8 @@ namespace Tcp
 	{
 		assert(replyDataSize >= sizeof(GetFileReply));
 
+		Q_UNUSED(replyDataSize);
+
 		const GetFileReply* reply = reinterpret_cast<const GetFileReply*>(replyData);
 
 		if (reply->errorCode != FileTransferResult::Ok)
