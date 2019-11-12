@@ -34,6 +34,7 @@ void ExportPrint::printTable(QTableView* tableView)
 		if (printer == nullptr)
 		{
 			Q_ASSERT(printer);
+			return;
 		}
 
 		QTextDocument doc;

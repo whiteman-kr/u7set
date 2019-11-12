@@ -404,6 +404,7 @@ bool DbController::getProjectProperty(QString propertyName, bool* out, QWidget* 
 	if (out == nullptr)
 	{
 		assert(out);
+		return false;
 	}
 
 	QString propValueStr;

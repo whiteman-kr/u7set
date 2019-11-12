@@ -68,7 +68,8 @@ namespace Builder
 		m_signalSet(context->m_signalSet.get()),
 		m_subsystems(context->m_subsystems.get()),
 		m_opticModuleStorage(context->m_opticModuleStorage.get()),
-		m_log(context->m_log)
+		m_log(context->m_log),
+		m_generateExtraDebugInfo(context->generateExtraDebugInfo())
 	{
 
 		assert(m_db);
@@ -302,6 +303,57 @@ namespace Builder
 		return true;
 	}
 
+	bool ConfigurationBuilder::writeDataFiles()
+	{
+		QStringList subsystemsList = m_buildResultWriter->firmwareWriter()->subsystems();
+
+		// Save confCollection items to binary files
+		//
+		for (auto ss : subsystemsList)
+		{
+			const QByteArray& log = m_buildResultWriter->firmwareWriter()->scriptLog(ss);
+
+			if (log.isEmpty() == false)
+			{
+				if (m_buildResultWriter->addFile(ss, ss.toLower() + ".mct", log) == nullptr)
+				{
+					return false;
+				}
+			}
+		}
+
+		if (m_generateExtraDebugInfo == true)
+		{
+			if (writeExtraDataFiles() == false)
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	bool ConfigurationBuilder::jsIsInterruptRequested()
+	{
+		if(m_buildWorkerThread == nullptr)
+		{
+			assert(m_buildWorkerThread);
+			return false;
+		}
+
+		return m_buildWorkerThread->isInterruptRequested();
+	}
+
+	DbController* ConfigurationBuilder::db()
+	{
+		return m_db;
+	}
+
+	IssueLogger *ConfigurationBuilder::log() const
+	{
+		return m_log;
+	}
+
 	bool ConfigurationBuilder::runConfigurationScriptFile(const std::vector<Hardware::DeviceModule*>& subsystemModules, LmDescription* lmDescription)
 	{
 
@@ -457,47 +509,106 @@ namespace Builder
 		return true;
 	}
 
-
-	bool ConfigurationBuilder::writeDataFiles()
+	bool ConfigurationBuilder::writeExtraDataFiles()
 	{
-		QStringList subsystemsList = m_buildResultWriter->firmwareWriter()->subsystems();
+		// Write equipment configuration to JSON
 
-		// Save confCollection items to binary files
-		//
-		for (auto ss : subsystemsList)
+		QJsonObject jEquipment;
+
+		writeDeviceObjectToJson(m_deviceRoot, jEquipment);
+
+		QByteArray jEquipmentBytes = QJsonDocument(jEquipment).toJson();
+
+		if (m_buildResultWriter->addFile("Reports", "Equipment.json", jEquipmentBytes) == nullptr)
 		{
-			const QByteArray& log = m_buildResultWriter->firmwareWriter()->scriptLog(ss);
-
-			if (log.isEmpty() == false)
-			{
-				if (m_buildResultWriter->addFile(ss, ss.toLower() + ".mct", log) == nullptr)
-				{
-					return false;
-				}
-			}
+			LOG_ERROR_OBSOLETE(m_log, IssuePrefix::NotDefined, tr("Failed to save Equipment.json file!"));
+			return false;
 		}
+
+		//
 
 		return true;
 	}
 
-	bool ConfigurationBuilder::jsIsInterruptRequested()
+	bool ConfigurationBuilder::writeDeviceObjectToJson(const Hardware::DeviceObject* object, QJsonObject& jParent)
 	{
-		if(m_buildWorkerThread == nullptr)
+		if (object == nullptr)
 		{
-			assert(m_buildWorkerThread);
+			Q_ASSERT(object);
 			return false;
 		}
 
-		return m_buildWorkerThread->isInterruptRequested();
+		QJsonObject jObject;
+
+		// Type
+
+		jObject.insert(QLatin1String("className"), object->metaObject()->className());
+
+		// Properties
+
+		QJsonObject jProperties;
+
+		for (const std::shared_ptr<Property>& sp : object->properties())
+		{
+			Property* p = sp.get();
+			if (p == nullptr)
+			{
+				Q_ASSERT(p);
+				return false;
+			}
+
+			if (p->caption() == QLatin1String("ConfigurationScript") ||
+					p->caption() == QLatin1String("SpecificProperties") ||
+					p->caption() == QLatin1String("SignalSpecificProperties") ||
+					p->caption() == QLatin1String("EquipmentIDTemplate"))
+			{
+				continue;
+			}
+
+			QString value = p->value().toString();
+			if (value.length() > 512)
+			{
+				value = tr("<Text, %1 symbols>").arg(value.length());
+			}
+
+			jProperties.insert(p->caption(), value);
+		}
+
+		if (jProperties.count() != 0)
+		{
+			jObject.insert(QLatin1String("objectProperties"), jProperties);
+		}
+
+		// Children
+
+		QJsonObject jObjects;
+
+		int childCount = object->childrenCount();
+		for (int i = 0; i < childCount; i++)
+		{
+			writeDeviceObjectToJson(object->child(i), jObjects);
+		}
+
+		if (jObjects.count() != 0)
+		{
+			jObject.insert(QLatin1String("objects"), jObjects);
+		}
+
+		// Append to parent
+
+		if (object->isRoot())
+		{
+			jParent.insert(QLatin1String("root"), jObject);
+		}
+		else
+		{
+			jParent.insert(object->equipmentId(), jObject);
+		}
+
+		return true;
+
 	}
 
-	DbController* ConfigurationBuilder::db()
-	{
-		return m_db;
-	}
 
-	IssueLogger *ConfigurationBuilder::log() const
-	{
-		return m_log;
-	}
+
 }

@@ -29,6 +29,8 @@ TuningSchemaWidget::TuningSchemaWidget(TuningSignalManager* tuningSignalManager,
 	assert(tuningController);
 	assert(schemaManager);
 
+	Q_UNUSED(tuningSignalManager);
+
 	clientSchemaView()->setTuningController(tuningController);
 
 	// --
