@@ -317,13 +317,11 @@ void FindMeasurePanel::createContextMenu()
 
 	m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
 	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
-	m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
 
 	m_pContextMenu->addSeparator();
 
 	m_pSelectAllAction = m_pContextMenu->addAction(tr("Select &All"));
 	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
-	m_pSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
 
 	connect(m_pCopyAction, &QAction::triggered, this, &FindMeasurePanel::copy);
 	connect(m_pSelectAllAction, &QAction::triggered, this, &FindMeasurePanel::selectAll);

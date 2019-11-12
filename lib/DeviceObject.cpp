@@ -1837,7 +1837,7 @@ R"DELIM({
 	DeviceChassis::DeviceChassis(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, "Type", true, DeviceChassis::type, DeviceChassis::setType)
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, "Type", true, DeviceChassis::type, DeviceChassis::setType);
 		typeProp->setUpdateFromPreset(true);
 		typeProp->setExpert(true);
 
@@ -1962,20 +1962,20 @@ R"DELIM({
 	DeviceModule::DeviceModule(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		auto familyTypeProp = ADD_PROPERTY_GETTER_SETTER(DeviceModule::FamilyType, "ModuleFamily", true, DeviceModule::moduleFamily, DeviceModule::setModuleFamily)
+		auto familyTypeProp = ADD_PROPERTY_GETTER_SETTER(DeviceModule::FamilyType, "ModuleFamily", true, DeviceModule::moduleFamily, DeviceModule::setModuleFamily);
 		familyTypeProp->setExpert(true);
 
-		auto moduleVersionProp = ADD_PROPERTY_GETTER_SETTER(int, "ModuleVersion", true, DeviceModule::moduleVersion, DeviceModule::setModuleVersion)
+		auto moduleVersionProp = ADD_PROPERTY_GETTER_SETTER(int, "ModuleVersion", true, DeviceModule::moduleVersion, DeviceModule::setModuleVersion);
 		moduleVersionProp->setExpert(true);
 
-		auto configScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, "ConfigurationScript", true, DeviceModule::configurationScript, DeviceModule::setConfigurationScript)
+		auto configScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, "ConfigurationScript", true, DeviceModule::configurationScript, DeviceModule::setConfigurationScript);
 		configScriptProp->setExpert(true);
 		configScriptProp->setIsScript(true);
 
-		auto rawDataDescrProp = ADD_PROPERTY_GETTER_SETTER(QString, "RawDataDescription", true, DeviceModule::rawDataDescription, DeviceModule::setRawDataDescription)
+		auto rawDataDescrProp = ADD_PROPERTY_GETTER_SETTER(QString, "RawDataDescription", true, DeviceModule::rawDataDescription, DeviceModule::setRawDataDescription);
 		rawDataDescrProp->setExpert(true);
 
-		auto customFamilyTypeProp = ADD_PROPERTY_GETTER_SETTER(int, "CustomModuleFamily", true, DeviceModule::customModuleFamily, DeviceModule::setCustomModuleFamily)
+		auto customFamilyTypeProp = ADD_PROPERTY_GETTER_SETTER(int, "CustomModuleFamily", true, DeviceModule::customModuleFamily, DeviceModule::setCustomModuleFamily);
 		customFamilyTypeProp->setExpert(true);
 
 		familyTypeProp->setUpdateFromPreset(true);

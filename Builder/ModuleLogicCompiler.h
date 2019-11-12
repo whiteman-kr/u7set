@@ -393,6 +393,8 @@ namespace Builder
 
 		bool setOptoRawInSignalsAsComputed();
 
+		bool fillComparatorStorage();
+
 		// pass #2 compilation functions
 		//
 		bool finalizeOptoConnectionsProcessing();

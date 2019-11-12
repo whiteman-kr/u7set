@@ -208,6 +208,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::appendAfbsForAnalogInOutSignalsConversion),
 			PROC_TO_CALL(ModuleLogicCompiler::setOutputSignalsAsComputed),
 			PROC_TO_CALL(ModuleLogicCompiler::setOptoRawInSignalsAsComputed),
+			PROC_TO_CALL(ModuleLogicCompiler::fillComparatorStorage),
 		};
 
 		bool result = runProcs(procs);
@@ -6500,6 +6501,20 @@ namespace Builder
 		return result;
 	}
 
+	bool ModuleLogicCompiler::fillComparatorStorage()
+	{
+		bool result = true;
+
+		for(UalAfb* ualAfb : m_ualAfbs)
+		{
+			TEST_PTR_CONTINUE(ualAfb);
+
+			result &= addToComparatorStorage(ualAfb);
+		}
+
+		return result;
+	}
+
 	bool ModuleLogicCompiler::finalizeOptoConnectionsProcessing()
 	{
 		bool result = true;
@@ -9096,8 +9111,6 @@ namespace Builder
 		return false;
 	}
 
-
-
 	bool ModuleLogicCompiler::addToComparatorStorage(const UalAfb* appFb)
 	{
 		if (appFb == nullptr)
@@ -9116,12 +9129,11 @@ namespace Builder
 
 		bool result = initComparator(cmp, appFb);
 
-		if (result == true)
-		{
-			m_cmpStorage->insert(lmEquipmentID(), cmp);
-		}
+		RETURN_IF_FALSE(result);
 
-		return result;
+		m_cmpStorage->insert(lmEquipmentID(), cmp);
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* appFb)

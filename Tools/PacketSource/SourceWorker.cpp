@@ -65,7 +65,7 @@ void SourceWorker::process()
 			header.frameSize = Socket::ENTIRE_UDP_SIZE;
 			header.protocolVersion = PS::SUPPORT_VERSION;
 			header.flags.appData = 1;
-			header.dataId = static_cast<quint16>(pSource->info().dataID);
+			header.dataId = static_cast<quint32>(pSource->info().dataID);
 			header.moduleType = static_cast<quint16>(pSource->info().moduleType);
 			header.numerator = static_cast<quint16>(m_numerator);
 			header.framesQuantity = static_cast<quint16>(pSource->info().frameCount);

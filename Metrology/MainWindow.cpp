@@ -23,9 +23,8 @@
 #include "SignalList.h"
 #include "TuningSignalList.h"
 #include "OutputSignalList.h"
-#include "Statistic.h"
-#include "../lib/Ui/DialogAbout.h"
 
+#include "../lib/Ui/DialogAbout.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -70,7 +69,9 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent) :
 
 	connect(m_pConfigSocket, &ConfigSocket::socketConnected, this, &MainWindow::configSocketConnected, Qt::QueuedConnection);
 	connect(m_pConfigSocket, &ConfigSocket::socketDisconnected, this, &MainWindow::configSocketDisconnected, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pStatisticPanel, &StatisticPanel::updateList);
 	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &MainWindow::configSocketConfigurationLoaded);
+	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, &theSignalBase.statistic(), &StatisticBase::signalLoaded);
 
 	m_pConfigSocket->start();
 
@@ -123,15 +124,14 @@ MainWindow::~MainWindow()
 
 bool MainWindow::createInterface()
 {
-	setWindowIcon(QIcon(":/icons/Metrology.ico"));
 	setWindowTitle(tr("Metrology"));
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());
 
 	createActions();
 	createMenu();
 	createToolBars();
-	createMeasureViews();
 	createPanels();
+	createMeasureViews();
 	createStatusBar();
 	createContextMenu();
 
@@ -231,7 +231,7 @@ void MainWindow::createActions()
 	m_pOptionsAction->setShortcut(Qt::CTRL + Qt::Key_O);
 	m_pOptionsAction->setIcon(QIcon(":/icons/Options.png"));
 	m_pOptionsAction->setToolTip(tr("Editing application settings"));
-	connect(m_pOptionsAction, &QAction::triggered, this, &MainWindow::options);
+	connect(m_pOptionsAction, &QAction::triggered, this, &MainWindow::showOptions);
 
 	// ?
 	//
@@ -507,6 +507,114 @@ bool MainWindow::createToolBars()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::createPanels()
+{
+	// Search measurements panel
+	//
+	m_pFindMeasurePanel = new FindMeasurePanel(this);
+	if (m_pFindMeasurePanel != nullptr)
+	{
+		m_pFindMeasurePanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+
+		addDockWidget(Qt::RightDockWidgetArea, m_pFindMeasurePanel);
+
+		m_pFindMeasurePanel->hide();
+
+		QAction* findAction = m_pFindMeasurePanel->toggleViewAction();
+		if (findAction != nullptr)
+		{
+			findAction->setText(tr("&Find ..."));
+			findAction->setShortcut(Qt::CTRL + Qt::Key_F);
+			findAction->setIcon(QIcon(":/icons/Find.png"));
+			findAction->setToolTip(tr("Find data in list of measurements"));
+
+			if (m_pEditMenu != nullptr)
+			{
+				m_pEditMenu->addAction(findAction);
+			}
+
+			if (m_pMeasureControlToolBar != nullptr)
+			{
+				m_pMeasureControlToolBar->addAction(findAction);
+			}
+		}
+
+		connect(this, &MainWindow::changedMeasureType, m_pFindMeasurePanel, &FindMeasurePanel::clear, Qt::QueuedConnection);
+	}
+
+	// Panel statistics
+	//
+	m_pStatisticPanel = new StatisticPanel(this);
+	if (m_pStatisticPanel != nullptr)
+	{
+		m_pStatisticPanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+
+		addDockWidget(Qt::RightDockWidgetArea, m_pStatisticPanel);
+
+		if (m_pViewPanelMenu != nullptr)
+		{
+			m_pViewPanelMenu->addAction(m_pStatisticPanel->toggleViewAction());
+		}
+
+		m_pStatisticPanel->hide();
+
+		connect(&theSignalBase, &SignalBase::activeSignalChanged, m_pStatisticPanel, &StatisticPanel::activeSignalChanged, Qt::QueuedConnection);
+
+		connect(this, &MainWindow::changedMeasureType, m_pStatisticPanel, &StatisticPanel::changedMeasureType, Qt::QueuedConnection);
+		connect(this, &MainWindow::changedOutputSignalType, m_pStatisticPanel, &StatisticPanel::changedOutputSignalType, Qt::QueuedConnection);
+	}
+
+
+	// Separator
+	//
+	if (m_pViewPanelMenu != nullptr)
+	{
+		m_pViewPanelMenu->addSeparator();
+	}
+
+	// Panel signal information
+	//
+	m_pSignalInfoPanel = new SignalInfoPanel(this);
+	if (m_pSignalInfoPanel != nullptr)
+	{
+		m_pSignalInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
+
+		addDockWidget(Qt::BottomDockWidgetArea, m_pSignalInfoPanel);
+
+		if (m_pViewPanelMenu != nullptr)
+		{
+			m_pViewPanelMenu->addAction(m_pSignalInfoPanel->toggleViewAction());
+		}
+
+		m_pSignalInfoPanel->hide();
+	}
+
+	// Panel comparator information
+	//
+	m_pComparatorInfoPanel = new QDockWidget(tr("Panel comparator information"), this);
+	m_pComparatorInfoPanel->setObjectName("Panel comparator information");
+	if (m_pComparatorInfoPanel != nullptr)
+	{
+		m_pComparatorInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
+
+		m_pComparatorInfoView = new QTableView;
+		if (m_pComparatorInfoView != nullptr)
+		{
+			m_pComparatorInfoPanel->setWidget(m_pComparatorInfoView);
+		}
+		addDockWidget(Qt::BottomDockWidgetArea, m_pComparatorInfoPanel);
+
+		if (m_pViewPanelMenu != nullptr)
+		{
+			m_pViewPanelMenu->addAction(m_pComparatorInfoPanel->toggleViewAction());
+		}
+
+		m_pComparatorInfoPanel->hide();
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::createMeasureViews()
 {
 	m_pMainTab = new QTabWidget();
@@ -576,89 +684,6 @@ void MainWindow::appendMeasureView(int measureType, MeasureView* pView)
 	}
 
 	m_measureViewMap[measureType] = pView;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::createPanels()
-{
-	// Search measurements panel
-	//
-	m_pFindMeasurePanel = new FindMeasurePanel(this);
-	if (m_pFindMeasurePanel != nullptr)
-	{
-		m_pFindMeasurePanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
-
-		addDockWidget(Qt::RightDockWidgetArea, m_pFindMeasurePanel);
-
-		m_pFindMeasurePanel->hide();
-
-		QAction* findAction = m_pFindMeasurePanel->toggleViewAction();
-		if (findAction != nullptr)
-		{
-			findAction->setText(tr("&Find ..."));
-			findAction->setShortcut(Qt::CTRL + Qt::Key_F);
-			findAction->setIcon(QIcon(":/icons/Find.png"));
-			findAction->setToolTip(tr("Find data in list of measurements"));
-
-			if (m_pEditMenu != nullptr)
-			{
-				m_pEditMenu->addAction(findAction);
-			}
-
-			if (m_pMeasureControlToolBar != nullptr)
-			{
-				m_pMeasureControlToolBar->addAction(findAction);
-			}
-		}
-	}
-
-	// Separator
-	//
-	if (m_pViewPanelMenu != nullptr)
-	{
-		m_pViewPanelMenu->addSeparator();
-	}
-
-	// Panel signal information
-	//
-	m_pSignalInfoPanel = new SignalInfoPanel(this);
-	if (m_pSignalInfoPanel != nullptr)
-	{
-		m_pSignalInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
-
-		addDockWidget(Qt::BottomDockWidgetArea, m_pSignalInfoPanel);
-
-		if (m_pViewPanelMenu != nullptr)
-		{
-			m_pViewPanelMenu->addAction(m_pSignalInfoPanel->toggleViewAction());
-		}
-
-		m_pSignalInfoPanel->hide();
-	}
-
-	// Panel comparator information
-	//
-	m_pComparatorInfoPanel = new QDockWidget(tr("Panel comparator information"), this);
-	m_pComparatorInfoPanel->setObjectName("Panel comparator information");
-	if (m_pComparatorInfoPanel != nullptr)
-	{
-		m_pComparatorInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
-
-		m_pComparatorInfoView = new QTableView;
-		if (m_pComparatorInfoView != nullptr)
-		{
-			m_pComparatorInfoPanel->setWidget(m_pComparatorInfoView);
-		}
-		addDockWidget(Qt::BottomDockWidgetArea, m_pComparatorInfoPanel);
-
-		if (m_pViewPanelMenu != nullptr)
-		{
-			m_pViewPanelMenu->addAction(m_pComparatorInfoPanel->toggleViewAction());
-		}
-
-		m_pComparatorInfoPanel->hide();
-	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -770,7 +795,8 @@ void MainWindow::updateRacksOnToolBar()
 
 	switch (measureKind)
 	{
-		case MEASURE_KIND_ONE:
+		case MEASURE_KIND_ONE_RACK:
+		case MEASURE_KIND_ONE_MODULE:
 			{
 				for(int r = 0; r < rackCount; r++)
 				{
@@ -793,7 +819,7 @@ void MainWindow::updateRacksOnToolBar()
 			}
 			break;
 
-		case MEASURE_KIND_MULTI:
+		case MEASURE_KIND_MULTI_RACK:
 			{
 				int rackGroupCount = theSignalBase.racks().groups().count();
 
@@ -887,7 +913,7 @@ void MainWindow::updateSignalsOnToolBar()
 			continue;
 		}
 
-		MetrologyMultiSignal signal = measureSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		MultiChannelSignal signal = measureSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
 		if (signal.isEmpty() == true)
 		{
 			continue;
@@ -908,21 +934,21 @@ void MainWindow::updateSignalsOnToolBar()
 		{
 			chassisMap.insert(signal.location().chassis(), s);
 
-			m_asChassisCombo->addItem(QString::number(signal.location().chassis()), signal.location().chassis());
+			m_asChassisCombo->addItem(QString::number(signal.location().chassis()).rightJustified(2, '0'), signal.location().chassis());
 		}
 
 		if (moduleMap.contains(signal.location().module()) == false)
 		{
 			moduleMap.insert(signal.location().module(), s);
 
-			m_asModuleCombo->addItem(QString::number(signal.location().module()), signal.location().module());
+			m_asModuleCombo->addItem(QString::number(signal.location().module()).rightJustified(2, '0'), signal.location().module());
 		}
 
 		if (placeMap.contains(signal.location().place()) == false)
 		{
 			placeMap.insert(signal.location().place(), s);
 
-			m_asPlaceCombo->addItem(QString::number(signal.location().place()), signal.location().place());
+			m_asPlaceCombo->addItem(QString::number(signal.location().place()).rightJustified(2, '0'), signal.location().place());
 		}
 	}
 
@@ -937,290 +963,14 @@ void MainWindow::updateSignalsOnToolBar()
 	m_asSignalCombo->setEnabled(true);
 	m_asSignalCombo->setCurrentIndex(0);
 
-	m_asChassisCombo->setEnabled(true);
-	m_asModuleCombo->setEnabled(true);
-	m_asPlaceCombo->setEnabled(true);
-
-	//updateChassisOnToolBar(theSignalBase.signalForMeasure(0).signal(MEASURE_IO_SIGNAL_TYPE_INPUT).location());
-
-	setMeasureSignal(0);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::updateSignalPositionOnToolBar()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::updateChassisOnToolBar(const Metrology::SignalLocation& location)
-{
-	m_asChassisCombo->clear();
-	m_asChassisCombo->setEnabled(false);
-
-	int measureKind = theOptions.toolBar().measureKind();
-	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
-	{
-		return;
-	}
-
-	// get rackIndex or rackGroupIndex, it depend from measureKind
-	//
-	int rackIndex = m_asRackCombo->currentData().toInt();
-	if (rackIndex == -1)
-	{
-		return;
-	}
-
-	QMap<int, int> chassisMap;
-
-	int signalCount = theSignalBase.signalForMeasureCount();
-
-	m_asChassisCombo->blockSignals(true);
-
-	for(int s = 0; s < signalCount; s++)
-	{
-		MeasureSignal measureSignal = theSignalBase.signalForMeasure(s);
-		if (measureSignal.isEmpty() == true)
-		{
-			continue;
-		}
-
-		MetrologyMultiSignal signal = measureSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
-		if (signal.isEmpty() == true)
-		{
-			continue;
-		}
-
-		switch (measureKind)
-		{
-			case MEASURE_KIND_ONE:
-
-				if (rackIndex != signal.location().rack().index())
-				{
-					continue;
-				}
-
-				break;
-
-			case MEASURE_KIND_MULTI:
-
-				if (rackIndex != signal.location().rack().groupIndex())
-				{
-					continue;
-				}
-
-				break;
-
-			default:
-				assert(0);
-		}
-
-
-		if (chassisMap.contains(signal.location().chassis()) == false)
-		{
-			chassisMap.insert(signal.location().chassis(), s);
-
-			m_asChassisCombo->addItem(QString::number(signal.location().chassis()), signal.location().chassis());
-		}
-	}
-
-	m_asChassisCombo->blockSignals(false);
-	m_asChassisCombo->setCurrentIndex(0);
-
-	if (m_asChassisCombo->count() == 0)
-	{
-		return;
-	}
-
 	m_asChassisCombo->model()->sort(0);
-	m_asChassisCombo->setEnabled(true);
-
-	updateModuleOnToolBar(location);
-	updatePlaceOnToolBar(location);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::updateModuleOnToolBar(const Metrology::SignalLocation& location)
-{
-	m_asModuleCombo->clear();
-	m_asModuleCombo->setEnabled(false);
-
-	int measureKind = theOptions.toolBar().measureKind();
-	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
-	{
-		return;
-	}
-
-	// get rackIndex or rackGroupIndex, it depend from measureKind
-	//
-	int rackIndex = m_asRackCombo->currentData().toInt();
-	if (rackIndex == -1)
-	{
-		return;
-	}
-
-	QMap<int, int> moduleMap;
-
-	int signalCount = theSignalBase.signalForMeasureCount();
-
-	m_asModuleCombo->blockSignals(true);
-
-	for(int s = 0; s < signalCount; s++)
-	{
-		MeasureSignal measureSignal = theSignalBase.signalForMeasure(s);
-		if (measureSignal.isEmpty() == true)
-		{
-			continue;
-		}
-
-		MetrologyMultiSignal signal = measureSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
-		if (signal.isEmpty() == true)
-		{
-			continue;
-		}
-
-		switch (measureKind)
-		{
-			case MEASURE_KIND_ONE:
-
-				if (rackIndex != signal.location().rack().index())
-				{
-					continue;
-				}
-
-				break;
-
-			case MEASURE_KIND_MULTI:
-
-				if (rackIndex != signal.location().rack().groupIndex())
-				{
-					continue;
-				}
-
-				break;
-
-			default:
-				assert(0);
-		}
-
-		if (location.chassis() != signal.location().chassis())
-		{
-			continue;
-		}
-
-		if (moduleMap.contains(signal.location().module()) == false)
-		{
-			moduleMap.insert(signal.location().module(), s);
-
-			m_asModuleCombo->addItem(QString::number(signal.location().module()), signal.location().module());
-		}
-	}
-
-	m_asModuleCombo->blockSignals(false);
-	m_asModuleCombo->setCurrentIndex(0);
-
-	if (m_asModuleCombo->count() == 0)
-	{
-		return;
-	}
-
+	m_asChassisCombo->setEnabled(false);
 	m_asModuleCombo->model()->sort(0);
-	m_asModuleCombo->setEnabled(true);
-
-	updatePlaceOnToolBar(location);
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::updatePlaceOnToolBar(const Metrology::SignalLocation& location)
-{
-	m_asPlaceCombo->clear();
+	m_asModuleCombo->setEnabled(false);
+	m_asPlaceCombo->model()->sort(0);
 	m_asPlaceCombo->setEnabled(false);
 
-	int measureKind = theOptions.toolBar().measureKind();
-	if (measureKind < 0 || measureKind >= MEASURE_KIND_COUNT)
-	{
-		return;
-	}
-
-	// get rackIndex or rackGroupIndex, it depend from measureKind
-	//
-	int rackIndex = m_asRackCombo->currentData().toInt();
-	if (rackIndex == -1)
-	{
-		return;
-	}
-
-	QMap<int, int> placeMap;
-
-	int signalCount = theSignalBase.signalForMeasureCount();
-
-	m_asPlaceCombo->blockSignals(true);
-
-	for(int s = 0; s < signalCount; s++)
-	{
-		MeasureSignal measureSignal = theSignalBase.signalForMeasure(s);
-		if (measureSignal.isEmpty() == true)
-		{
-			continue;
-		}
-
-		MetrologyMultiSignal signal = measureSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
-		if (signal.isEmpty() == true)
-		{
-			continue;
-		}
-
-		switch (measureKind)
-		{
-			case MEASURE_KIND_ONE:
-
-				if (rackIndex != signal.location().rack().index())
-				{
-					continue;
-				}
-
-				break;
-
-			case MEASURE_KIND_MULTI:
-
-				if (rackIndex != signal.location().rack().groupIndex())
-				{
-					continue;
-				}
-
-				break;
-
-			default:
-				assert(0);
-		}
-
-		if (location.chassis() != signal.location().chassis())
-		{
-			continue;
-		}
-
-		if (placeMap.contains(signal.location().place()) == false)
-		{
-			placeMap.insert(signal.location().place(), s);
-
-			m_asPlaceCombo->addItem(QString::number(signal.location().place()), signal.location().place());
-		}
-	}
-
-	m_asPlaceCombo->blockSignals(false);
-	m_asPlaceCombo->setCurrentIndex(0);
-
-	if (m_asPlaceCombo->count() == 0)
-	{
-		return;
-	}
-
-	m_asPlaceCombo->model()->sort(0);
-	m_asPlaceCombo->setEnabled(true);
+	setMeasureSignal(0);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1259,7 +1009,7 @@ void MainWindow::setMeasureType(int measureType)
 
 	m_measureType = measureType;
 
-	m_pFindMeasurePanel->clear();
+	emit changedMeasureType(m_measureType);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1501,7 +1251,7 @@ void MainWindow::showRackList()
 		return;
 	}
 
-	if (theOptions.toolBar().measureKind() == MEASURE_KIND_MULTI)
+	if (theOptions.toolBar().measureKind() == MEASURE_KIND_MULTI_RACK)
 	{
 		updateRacksOnToolBar();
 		updateSignalsOnToolBar();
@@ -1522,7 +1272,7 @@ void MainWindow::showCalculator()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::options()
+void MainWindow::showOptions()
 {
 	OptionsDialog dialog(this);
 	dialog.exec();
@@ -1542,14 +1292,23 @@ void MainWindow::options()
 
 		pView->updateColumn();
 	}
+
+	if (m_pStatisticPanel != nullptr)
+	{
+		m_pStatisticPanel->updateList();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void MainWindow::showStatistic()
 {
-	StatisticDialog dialog(this);
-	dialog.exec();
+	if (m_pStatisticPanel == nullptr)
+	{
+		return;
+	}
+
+	m_pStatisticPanel->show();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1569,19 +1328,22 @@ void MainWindow::setMeasureKind(int index)
 		return;
 	}
 
-	if (theSignalBase.racks().groups().count() == 0)
+	if (kind == MEASURE_KIND_MULTI_RACK)
 	{
-		m_measureKindList->blockSignals(true);
-		m_measureKindList->setCurrentIndex(MEASURE_KIND_ONE);
-		m_measureKindList->blockSignals(false);
+		if (theSignalBase.racks().groups().count() == 0)
+		{
+			m_measureKindList->blockSignals(true);
+			m_measureKindList->setCurrentIndex(theOptions.toolBar().measureKind());
+			m_measureKindList->blockSignals(false);
 
-		QMessageBox::information(this, windowTitle(), tr("For measurements in several racks simultaneously, "
-														 "you need to combine several racks into groups."
-														 "Currently, no groups have been found.\n"
-														 "To create a group of racks, click menu \"Tool\" - \"Racks ...\" ."));
+			QMessageBox::information(this, windowTitle(), tr("For measurements in several racks simultaneously, "
+															 "you need to combine several racks into groups."
+															 "Currently, no groups have been found.\n"
+															 "To create a group of racks, click menu \"Tool\" - \"Racks ...\" ."));
 
 
-		return;
+			return;
+		}
 	}
 
 	theOptions.toolBar().setMeasureKind(kind);
@@ -1618,6 +1380,8 @@ void MainWindow::setOutputSignalType(int index)
 
 	theOptions.toolBar().setOutputSignalType(type);
 	theOptions.toolBar().save();
+
+	emit changedOutputSignalType(type);
 
 	updateRacksOnToolBar();
 	updateSignalsOnToolBar();
@@ -1662,15 +1426,15 @@ void MainWindow::setMeasureSignal(int index)
 
 	theSignalBase.setActiveSignal(measureSignal);
 
-	MetrologyMultiSignal signal = measureSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	MultiChannelSignal signal = measureSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
 	if (signal.isEmpty() == true)
 	{
 		return;
 	}
 
-	m_asChassisCombo->setCurrentText(QString::number(signal.location().chassis()));
-	m_asModuleCombo->setCurrentText(QString::number(signal.location().module()));
-	m_asPlaceCombo->setCurrentText(QString::number(signal.location().place()));
+	m_asChassisCombo->setCurrentText(QString::number(signal.location().chassis()).rightJustified(2, '0'));
+	m_asModuleCombo->setCurrentText(QString::number(signal.location().module()).rightJustified(2, '0'));
+	m_asPlaceCombo->setCurrentText(QString::number(signal.location().place()).rightJustified(2, '0'));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -2097,8 +1861,8 @@ void MainWindow::setNextMeasureSignal(bool& signalIsSelected)
 
 	// if module numbers not equal then disabling selection of next input
 	//
-	if (	currActiveSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() != nextActiveSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() ||
-			currActiveSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module() != nextActiveSignal.signal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module())
+	if (	currActiveSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() != nextActiveSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() ||
+			currActiveSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module() != nextActiveSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module())
 	{
 		return;
 	}
@@ -2226,8 +1990,6 @@ void MainWindow::closeEvent(QCloseEvent* e)
 	}
 
 	theSignalBase.clear();
-
-	theMeasureBase.clear();
 
 	theCalibratorBase.clear();
 

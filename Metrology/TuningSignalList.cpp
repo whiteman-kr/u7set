@@ -824,9 +824,9 @@ void TuningSignalListDialog::createContextMenu()
 	//
 	m_pContextMenu = new QMenu(tr(""), this);
 
-	m_pContextMenu->addAction(m_pCopyAction);
-	m_pContextMenu->addSeparator();
 	m_pContextMenu->addMenu(m_pViewTypeADMenu);
+	m_pContextMenu->addSeparator();
+	m_pContextMenu->addAction(m_pCopyAction);
 
 	// init context menu
 	//

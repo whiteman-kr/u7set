@@ -10,8 +10,8 @@ namespace VFrame30
 	{
 		qDebug() << "LogicSchema::LogicSchema(void)";
 
-		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::equipmentIds, true, LogicSchema::equipmentIds, LogicSchema::setEquipmentIds)
-		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::lmDescriptionFile, true, LogicSchema::lmDescriptionFile, LogicSchema::setLmDescriptionFile)
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::equipmentIds, true, LogicSchema::equipmentIds, LogicSchema::setEquipmentIds);
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::lmDescriptionFile, true, LogicSchema::lmDescriptionFile, LogicSchema::setLmDescriptionFile);
 
 		setUnit(SchemaUnit::Inch);
 

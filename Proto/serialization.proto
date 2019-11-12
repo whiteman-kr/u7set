@@ -513,9 +513,58 @@ message SchemaItemFrame
 //
 // SchemaItemIndicator
 //
+message IndicatorHistogramVert
+{
+    optional double startValue = 1;
+	optional double endValue = 2;
+
+    optional double barWidth = 16;
+
+    optional double leftMargin = 20;
+	optional double topMargin = 21;
+	optional double rightMargin = 22;
+	optional double bottomMargin = 23;
+
+    optional bool drawBarRect = 32 [default = true];
+
+    optional bool drawGrid = 40 [default = true];
+	optional bool drawGridForAllBars = 41 [default = false];
+	optional bool drawGridValues = 42 [default = true];
+	optional bool drawGridValueForAllBars = 43 [default = false];
+	optional bool drawGridValueUnits = 44 [default = true];
+	optional double gridMainStep = 50 [default = 50.0];
+	optional double gridSmallStep = 51 [default = 10.0];
+}
+
+message IndicatorArrowIndicator
+{
+    optional double startValue = 1;
+	optional double endValue = 2;
+
+    optional double startAngle = 16;
+	optional double spanAngle = 17;
+}
+
 message SchemaItemIndicator
 {
-    optional uint32 type = 1 [default = 0];
+    optional string signalIds = 1;
+	optional int32 signalSource = 2 [default = 0];
+	optional int32 precision = 3 [default = 2];
+	optional int32 analogFormat = 4 [default = 102];	// Default 102 (charcode for 'f') is AnalogFormat::f
+
+    optional FontParam font = 9;
+
+    optional bool drawRect = 10 [default = false];
+	optional double lineWeight = 11 [default = 0];
+
+    optional uint32 backgroundColor = 16;
+	optional uint32 lineColor = 17;
+	repeated uint32 signalColors = 18;
+
+    optional uint32 type = 32 [default = 0];
+
+    optional IndicatorHistogramVert indicatorHistogramVert = 48;
+	optional IndicatorArrowIndicator indicatorArrowIndicator = 49;
 }
 
 

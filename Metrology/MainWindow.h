@@ -20,6 +20,7 @@
 #include "TuningSocket.h"
 #include "MeasureThread.h"
 #include "FindMeasurePanel.h"
+#include "StatisticPanel.h"
 #include "SignalInfoPanel.h"
 #include "Calculator.h"
 
@@ -112,6 +113,7 @@ private:
 	// Elements of interface - Panels
 	//
 	FindMeasurePanel*		m_pFindMeasurePanel = nullptr;
+	StatisticPanel*			m_pStatisticPanel = nullptr;
 	SignalInfoPanel*		m_pSignalInfoPanel = nullptr;
 	QDockWidget*			m_pComparatorInfoPanel = nullptr;
 	QTableView*				m_pComparatorInfoView = nullptr;
@@ -153,17 +155,13 @@ public:
 	void					createActions();
 	void					createMenu();
 	bool					createToolBars();
-	void					createMeasureViews();
 	void					createPanels();
+	void					createMeasureViews();
 	void					createStatusBar();
 	void					createContextMenu();
 
 	void					updateRacksOnToolBar();
 	void					updateSignalsOnToolBar();
-	void					updateSignalPositionOnToolBar();
-	void					updateChassisOnToolBar(const Metrology::SignalLocation& location);
-	void					updateModuleOnToolBar(const Metrology::SignalLocation& location);
-	void					updatePlaceOnToolBar(const Metrology::SignalLocation& location);
 
 	QComboBox*				rackCombo() { return m_asRackCombo; }
 	QComboBox*				signalCombo() { return m_asSignalCombo; }
@@ -171,6 +169,7 @@ public:
 	MeasureView*			activeMeasureView() { return measureView(m_measureType); }
 	MeasureView*			measureView(int measureType);
 	void					appendMeasureView(int measureType, MeasureView* pView);
+	StatisticPanel*			statisticPanel() { return m_pStatisticPanel; }
 
 	ConfigSocket*			configSocket() { return m_pConfigSocket; }
 	SignalSocket*			signalSocket() { return m_pSignalSocket; }
@@ -188,6 +187,13 @@ protected:
 
 signals:
 
+
+	//
+	void					changedMeasureType(int type);		// appear when changing the type of measurement
+	void					changedOutputSignalType(int type);	// appear when changing the OutputSignalType
+
+	// from measureComplite
+	//
 	void					appendMeasure(Measurement*);
 
 private slots:
@@ -219,7 +225,7 @@ private slots:
 	void					showOutputSignalList();
 	void					showTuningSignalList();
 	void					showCalculator();
-	void					options();
+	void					showOptions();
 
 	// menu - ?
 	//

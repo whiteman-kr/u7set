@@ -76,19 +76,25 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 		if (state.controlIsEnabled() == false)
 		{
-			QColor color = QColor(Qt::gray);
+			QColor color = theSettings.m_columnDisabledBackColor;
 			return QBrush(color);
 		}
 
 		if (state.valid() == false)
 		{
-            QColor color = redColor;
+			QColor color = theSettings.m_columnErrorBackColor;
+			return QBrush(color);
+		}
+
+		if (m_tuningTcpClient->writingIsEnabled(state) == false)
+		{
+			QColor color = theSettings.m_columnDisabledBackColor;
 			return QBrush(color);
 		}
 
 		if (m_blink == true && m_tuningSignalManager->newValueIsUnapplied(hash) == true)
 		{
-			QColor color = QColor(Qt::yellow);
+			QColor color = theSettings.m_columnUnappliedBackColor;
 			return QBrush(color);
 		}
 
@@ -97,7 +103,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 		if (tvDefault != state.value())
 		{
-			QColor color = QColor(Qt::gray);
+			QColor color = theSettings.m_columnDefaultMismatchBackColor;
 			return QBrush(color);
 		}
 	}
@@ -121,7 +127,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 			if (state.valid() == false)
 			{
-                color = redColor;
+				color = theSettings.m_columnErrorBackColor;
 				break;
 			}
 		}
@@ -134,7 +140,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 			if (state.limitsUnbalance(asp) == true)
 			{
-                color = redColor;
+				color = theSettings.m_columnErrorBackColor;
 				break;
 			}
 		}
@@ -145,7 +151,7 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 			if (state.outOfRange() == true)
 			{
-                color = redColor;
+				color = theSettings.m_columnErrorBackColor;
 				break;
 			}
 		}
@@ -158,11 +164,9 @@ QBrush TuningModelClient::backColor(const QModelIndex& index) const
 
 			if (defaultVal < asp.tuningLowBound() || defaultVal > asp.tuningHighBound())
 			{
-                color = redColor;
+				color = theSettings.m_columnErrorBackColor;
 				break;
 			}
-
-			color = QColor(Qt::gray);
 		}
 	}
 
@@ -208,25 +212,25 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 
 		if (state.controlIsEnabled() == false)
 		{
-			QColor color = QColor(Qt::white);
+			QColor color = theSettings.m_columnDisabledTextColor;
 			return QBrush(color);
 		}
 
 		if (state.valid() == false)
 		{
-			QColor color = QColor(Qt::white);
+			QColor color = theSettings.m_columnErrorTextColor;
 			return QBrush(color);
 		}
 
         if (m_tuningTcpClient->writingIsEnabled(state) == false)
         {
-            QColor color = QColor(Qt::darkGray);
+			QColor color = theSettings.m_columnDisabledTextColor;
             return QBrush(color);
         }
 
 		if (m_blink == true && m_tuningSignalManager->newValueIsUnapplied(hash) == true)
 		{
-			QColor color = QColor(Qt::black);
+			QColor color = theSettings.m_columnUnappliedTextColor;
 			return QBrush(color);
 		}
 	}
@@ -250,7 +254,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 
 			if (state.valid() == false)
 			{
-				color = QColor(Qt::white);
+				color = theSettings.m_columnErrorTextColor;
 				break;
 			}
 		}
@@ -263,7 +267,7 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 
 			if (state.limitsUnbalance(asp) == true)
 			{
-				color = QColor(Qt::white);
+				color = theSettings.m_columnErrorTextColor;
 				break;
 			}
 		}
@@ -274,15 +278,9 @@ QBrush TuningModelClient::foregroundColor(const QModelIndex& index) const
 
 			if (state.outOfRange() == true)
 			{
-				color = QColor(Qt::white);
+				color = theSettings.m_columnErrorTextColor;
 				break;
 			}
-		}
-
-		if (columnType == static_cast<int>(TuningModelColumns::Default))
-		{
-			color = QColor(Qt::white);
-			break;
 		}
 	}
 

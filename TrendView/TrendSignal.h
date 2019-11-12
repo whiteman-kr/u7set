@@ -195,6 +195,9 @@ namespace TrendLib
 		int precision() const;
 		void setPrecision(int value);
 
+		double lineWeight() const;
+		void setLineWeight(double value);
+
 		double highLimit() const;
 		void setHighLimit(double value);
 
@@ -230,6 +233,8 @@ namespace TrendLib
 		QString m_unit;
 		int m_precision = 0;
 
+		double m_lineWeight = 0;		// 0 is cosmetic pen
+
 		double m_highLimit = 1.0;
 		double m_lowLimit = 0;
 
@@ -241,7 +246,7 @@ namespace TrendLib
 		// Temporary variables used in drawing
 		//
 	private:
-		int m_tempSignalIndex;		// Signal index, separate for disrctes and analogs, filled in getting signal list in TrendSignalSet::analogSignals/discreteSignals
+		int m_tempSignalIndex = -1;	// Signal index, separate for disrctes and analogs, filled in getting signal list in TrendSignalSet::analogSignals/discreteSignals
 		QRectF m_tempDrawRect;		// Draw signal area
 	};
 
