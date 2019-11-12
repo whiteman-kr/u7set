@@ -267,6 +267,7 @@ void SignalPropertyManager::detectNewProperties(const Signal &signal)
 
 			return qv;
 		};
+
 		newProperty.valueSetter = [propertyIsEnum, propertyName](Signal* s, const QVariant& v)
 		{
 			bool isEnum = propertyIsEnum;
@@ -275,6 +276,8 @@ void SignalPropertyManager::detectNewProperties(const Signal &signal)
 			bool result = s->setSpecPropValue(name, v, isEnum);
 
 			assert(result == true);
+
+			Q_UNUSED(result);
 		};
 
 		switch (newProperty.type)
