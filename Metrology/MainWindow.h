@@ -221,7 +221,7 @@ private slots:
 	void					calibrators();
 	void					showRackList();
 	void					showSignalList();
-	void					showComparatorsList() {}
+	void					showComparatorsList();
 	void					showOutputSignalList();
 	void					showTuningSignalList();
 	void					showCalculator();

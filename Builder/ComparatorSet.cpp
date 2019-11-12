@@ -387,8 +387,7 @@ namespace Builder
 			return;
 		}
 
-		if (comparator->output().appSignalID().isEmpty() == true)
-		//if (comparator->output().appSignalID().isEmpty() == true || comparator->output().isAcquired() == false)
+		if (comparator->output().appSignalID().isEmpty() == true || comparator->output().isAcquired() == false)
 		{
 			return;
 		}

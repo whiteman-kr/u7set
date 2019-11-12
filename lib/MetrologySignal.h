@@ -279,6 +279,7 @@ namespace Metrology
 		void					setValid(bool valid) { m_flags.valid = valid; }
 	};
 
+
 	// ==============================================================================================
 
 	const char* const StatisticState[] =
@@ -349,8 +350,7 @@ namespace Metrology
 		SignalState&			state() { return m_state; }
 		void					setState(const Metrology::SignalState& state) { m_state = state; }
 
-		void					setComparatorList(const QList<std::shared_ptr<::Builder::Comparator>>& list) { m_comparatorList = list; }
-		int						comparatorCount() { return m_comparatorList.count(); }
+		QList<std::shared_ptr<::Builder::Comparator>>& comparatorList() { return m_comparatorList; }
 
 		SignalStatistic&		statistic() { return m_statistic; }
 		void					setStatistic(const SignalStatistic& statistic) { m_statistic = statistic; }

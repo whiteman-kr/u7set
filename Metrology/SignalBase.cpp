@@ -2326,32 +2326,37 @@ bool SignalBase::loadComparators(const ::Builder::ComparatorSet& comparatorSet)
 	int count = signalCount();
 	for(int i = 0; i < count; i ++)
 	{
-		Metrology::Signal* pSignal = signalPtr(i);
-		if (pSignal == nullptr)
+		Metrology::Signal* pInputSignal = signalPtr(i);
+		if (pInputSignal == nullptr)
 		{
 			continue;
 		}
 
-		if (pSignal->param().isValid() == false)
+		if (pInputSignal->param().isValid() == false)
 		{
 			continue;
 		}
 
 		// only analog signals
 		//
-		if (pSignal->param().isAnalog() == false)
+		if (pInputSignal->param().isAnalog() == false)
 		{
 			continue;
 		}
 
 		// only analog-input or analog-internal signals
 		//
-		if (pSignal->param().isOutput() == true)
+		if (pInputSignal->param().isOutput() == true)
 		{
 			continue;
 		}
-		
-		pSignal->setComparatorList(comparatorSet.getByInputSignalID(pSignal->param().appSignalID()));
+
+		if (comparatorSet.getByInputSignalID(pInputSignal->param().appSignalID()).count() == 0)
+		{
+			continue;
+		}
+
+		pInputSignal->comparatorList() = comparatorSet.getByInputSignalID(pInputSignal->param().appSignalID());
 	}
 
 	return true;

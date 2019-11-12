@@ -340,10 +340,10 @@ namespace Builder
 
 							case E::ElectricUnit::Ohm:
 
-//								if (testElectricRange_ThermoResistor(signal) == false)
-//								{
-//									hasWrongField = true;
-//								}
+								if (testElectricRange_ThermoResistor(signal) == false)
+								{
+									hasWrongField = true;
+								}
 								break;
 						}
 					}
