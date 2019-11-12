@@ -11749,10 +11749,30 @@ namespace Builder
 			}
 		}
 
-		const QVector<Signal*>& discreteSignals = m_tuningData->getDiscreteSignals();
+		QVector<Signal*> discreteSignals = m_tuningData->getDiscreteSignals();
 
 		if (discreteSignals.count() > 0)
 		{
+			// sort signals by ioBufAddr ascending
+			//
+			for(int i = 0; i < discreteSignals.count() - 1; i++)
+			{
+				for(int k = i + 1; k < discreteSignals.count(); k++)
+				{
+					Signal* s1 = discreteSignals[i];
+					Signal* s2 = discreteSignals[k];
+
+					TEST_PTR_CONTINUE(s1);
+					TEST_PTR_CONTINUE(s2);
+
+					if (s1->ioBufAddr().bitAddress() > s2->ioBufAddr().bitAddress())
+					{
+						discreteSignals[i] = s2;
+						discreteSignals[k] = s1;
+					}
+				}
+			}
+
 			file.append(QString("\nDiscrete signals (1 bit)"));
 			file.append(line);
 			file.append(QString("Address\t\tOffset\t\tAppSignalID\t\t\tDefault\t\tLow Limit\tHigh Limit"));
@@ -11769,10 +11789,10 @@ namespace Builder
 				QString str;
 
 				str.sprintf("%05d:%02d\t%05d:%02d\t%-24s\t%d\t\t%d\t\t%d",
-								signal->tuningAddr().offset() + m_tuningData->tuningDataOffsetW(),
-								signal->tuningAddr().bit(),
-								signal->tuningAddr().offset(),
-								signal->tuningAddr().bit(),
+								signal->ioBufAddr().offset(),
+								signal->ioBufAddr().bit(),
+								signal->ioBufAddr().offset() - m_tuningData->tuningDataOffsetW(),
+								signal->ioBufAddr().bit(),
 								C_STR(signal->appSignalID()),
 								signal->tuningDefaultValue().discreteValue(),
 								0,
