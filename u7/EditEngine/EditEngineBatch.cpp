@@ -11,11 +11,11 @@ namespace EditEngine
 		return;
 	}
 
-	void BatchCommand::executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void BatchCommand::executeCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		for (auto it = m_batchCommands.begin(); it != m_batchCommands.end(); ++it)
 		{
-			std::vector<std::shared_ptr<VFrame30::SchemaItem>> commandSelection;
+			std::vector<SchemaItemPtr> commandSelection;
 
 			std::shared_ptr<EditCommand> command = *it;
 			command->executeCommand(&commandSelection);
@@ -29,11 +29,11 @@ namespace EditEngine
 		return;
 	}
 
-	void BatchCommand::unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void BatchCommand::unExecuteCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		for (auto it = m_batchCommands.rbegin(); it != m_batchCommands.rend(); ++it)
 		{
-			std::vector<std::shared_ptr<VFrame30::SchemaItem>> commandSelection;
+			std::vector<SchemaItemPtr> commandSelection;
 
 			std::shared_ptr<EditCommand> command = *it;
 			command->unExecuteCommand(&commandSelection);

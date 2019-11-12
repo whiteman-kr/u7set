@@ -46,12 +46,12 @@ SchemaItemPropertiesDialog::~SchemaItemPropertiesDialog()
 	delete ui;
 }
 
-const std::vector<std::shared_ptr<VFrame30::SchemaItem>> SchemaItemPropertiesDialog::objects() const
+const std::vector<SchemaItemPtr> SchemaItemPropertiesDialog::objects() const
 {
 	return m_items;
 }
 
-void SchemaItemPropertiesDialog::setObjects(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
+void SchemaItemPropertiesDialog::setObjects(const std::vector<SchemaItemPtr>& items)
 {
 	m_items = items;
 
@@ -170,12 +170,12 @@ void SchemaItemPropertyEditor::valueChanged(QString propertyName, QVariant value
 
 	// Set the new property value in all objects
 	//
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+	std::vector<SchemaItemPtr> items;
 	QList<std::shared_ptr<PropertyObject>> objectsList = objects();
 
 	for (auto i : objectsList)
 	{
-		std::shared_ptr<VFrame30::SchemaItem> vi = std::dynamic_pointer_cast<VFrame30::SchemaItem>(i);
+		SchemaItemPtr vi = std::dynamic_pointer_cast<VFrame30::SchemaItem>(i);
 		assert(vi.get() != nullptr);
 
 		// Do not set property, if it has the same value
@@ -201,7 +201,7 @@ void SchemaItemPropertyEditor::valueChanged(QString propertyName, QVariant value
 	items.clear();
 	for (auto i : objectsList)
 	{
-		std::shared_ptr<VFrame30::SchemaItem> vi = std::dynamic_pointer_cast<VFrame30::SchemaItem>(i);
+		SchemaItemPtr vi = std::dynamic_pointer_cast<VFrame30::SchemaItem>(i);
 		items.push_back(vi);
 	}
 
@@ -254,9 +254,9 @@ void SchemaItemPropertyTable::valueChanged(const ExtWidgets::ModifiedObjectsData
 
 		for (auto objectData : objectsData)
 		{
-			std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+			std::vector<SchemaItemPtr> items;
 
-			std::shared_ptr<VFrame30::SchemaItem> vi = std::dynamic_pointer_cast<VFrame30::SchemaItem>(objectData.first);
+			SchemaItemPtr vi = std::dynamic_pointer_cast<VFrame30::SchemaItem>(objectData.first);
 			assert(vi.get() != nullptr);
 
 			QVariant value = objectData.second;

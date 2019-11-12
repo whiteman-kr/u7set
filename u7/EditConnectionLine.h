@@ -100,7 +100,7 @@ public:
 	void moveToPin_offset(std::shared_ptr<VFrame30::SchemaLayer> layer,
 				   QPointF offset,
 				   double gridSize);
-	std::shared_ptr<VFrame30::SchemaItem> moveToPin_schemaItem() const;
+	SchemaItemPtr moveToPin_schemaItem() const;
 	void moveToPin_setMoveWholeLink();
 
 	bool moveToPin_isInput() const;

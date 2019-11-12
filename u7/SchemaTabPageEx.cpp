@@ -3283,7 +3283,7 @@ void SchemaControlTabPageEx::cloneFile()
 	{
 		layer->setGuid(QUuid::createUuid());
 
-		for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+		for (SchemaItemPtr item : layer->Items)
 		{
 			item->setNewGuid();
 
@@ -4004,11 +4004,11 @@ void SchemaControlTabPageEx::compareObject(DbChangesetObject object, CompareData
 
 	for (std::shared_ptr<VFrame30::SchemaLayer> targetLayer : target->Layers)
 	{
-		for (std::shared_ptr<VFrame30::SchemaItem> targetItem : targetLayer->Items)
+		for (SchemaItemPtr targetItem : targetLayer->Items)
 		{
 			// Look for this item in source
 			//
-			std::shared_ptr<VFrame30::SchemaItem> sourceItem = source->getItemById(targetItem->guid());
+			SchemaItemPtr sourceItem = source->getItemById(targetItem->guid());
 
 			if (sourceItem != nullptr)
 			{
@@ -4058,11 +4058,11 @@ void SchemaControlTabPageEx::compareObject(DbChangesetObject object, CompareData
 	//
 	for (std::shared_ptr<VFrame30::SchemaLayer> sourceLayer : source->Layers)
 	{
-		for (std::shared_ptr<VFrame30::SchemaItem> sourceItem : sourceLayer->Items)
+		for (SchemaItemPtr sourceItem : sourceLayer->Items)
 		{
 			// Look for this item in source
 			//
-			std::shared_ptr<VFrame30::SchemaItem> targetItem = target->getItemById(sourceItem->guid());
+			SchemaItemPtr targetItem = target->getItemById(sourceItem->guid());
 
 			if (targetItem == nullptr)
 			{

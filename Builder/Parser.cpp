@@ -1812,7 +1812,7 @@ namespace Builder
 			// later these fake items must be removed and their connections must be rebind
 			//
 			//
-			std::vector<std::shared_ptr<VFrame30::SchemaItem>> fakeItems;
+			std::vector<SchemaItemPtr> fakeItems;
 			fakeItems.reserve(128);
 
 			// Find VFrame30::SchemaItemUfb and insert AFTER them actual ufbs
@@ -2198,7 +2198,7 @@ namespace Builder
 
 			// Remove Fake Items
 			//
-			for (std::shared_ptr<VFrame30::SchemaItem> fakeItem : fakeItems)
+			for (SchemaItemPtr fakeItem : fakeItems)
 			{
 				module->removeInOutItemKeepAssoc(fakeItem->guid());
 			}
@@ -2939,9 +2939,9 @@ namespace Builder
 
 			for (std::shared_ptr<VFrame30::SchemaLayer> layer :  schema->Layers)
 			{
-				std::list<std::shared_ptr<VFrame30::SchemaItem>> newItemList;
+				std::list<SchemaItemPtr> newItemList;
 
-				for (std::shared_ptr<VFrame30::SchemaItem>& item :  layer->Items)
+				for (SchemaItemPtr& item :  layer->Items)
 				{
 					Q_ASSERT(item);
 
@@ -3000,7 +3000,7 @@ namespace Builder
 
 				uuids.insert(std::make_pair(layer->guid(), schema->schemaId()));		// Layer guid is also included in check
 
-				for (const std::shared_ptr<VFrame30::SchemaItem>& item : layer->Items)
+				for (const SchemaItemPtr& item : layer->Items)
 				{
 					if (item->isFblItem() == false)
 					{
@@ -3082,7 +3082,7 @@ namespace Builder
 					continue;
 				}
 
-				for (const std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+				for (const SchemaItemPtr& item : layer->Items)
 				{
 					if (item->isType<VFrame30::SchemaItemSignal>() == false)
 					{
@@ -3301,7 +3301,7 @@ namespace Builder
 		{
 			if (l->compile() == true)
 			{
-				for (std::shared_ptr<VFrame30::SchemaItem>& si : l->Items)
+				for (SchemaItemPtr& si : l->Items)
 				{
 					if (dynamic_cast<VFrame30::SchemaItemAfb*>(si.get()) != nullptr)
 					{
@@ -3361,7 +3361,7 @@ namespace Builder
 		{
 			if (l->compile() == true)
 			{
-				for (std::shared_ptr<VFrame30::SchemaItem>& si : l->Items)
+				for (SchemaItemPtr& si : l->Items)
 				{
 					if (dynamic_cast<VFrame30::SchemaItemBus*>(si.get()) != nullptr)
 					{
@@ -3426,7 +3426,7 @@ namespace Builder
 		{
 			if (l->compile() == true)
 			{
-				for (std::shared_ptr<VFrame30::SchemaItem>& si : l->Items)
+				for (SchemaItemPtr& si : l->Items)
 				{
 					if (si->isType<VFrame30::SchemaItemUfb>() == true)
 					{
@@ -3481,13 +3481,13 @@ namespace Builder
 
 		bool ok = true;
 
-		std::map<QString, std::shared_ptr<VFrame30::SchemaItem>> loopbackIds;		// Key is LoopbackID
+		std::map<QString, SchemaItemPtr> loopbackIds;		// Key is LoopbackID
 
 		for (std::shared_ptr<VFrame30::SchemaLayer> l : schema->Layers)
 		{
 			if (l->compile() == true)
 			{
-				for (std::shared_ptr<VFrame30::SchemaItem> si : l->Items)
+				for (const SchemaItemPtr& si : l->Items)
 				{
 					VFrame30::SchemaItemLoopbackSource* loopbackItem = dynamic_cast<VFrame30::SchemaItemLoopbackSource*>(si.get());
 
@@ -3531,7 +3531,7 @@ namespace Builder
 
 		bool ok = true;
 
-		std::map<QString, std::shared_ptr<VFrame30::SchemaItem>> loopbackIds;		// Key is LoopbackID
+		std::map<QString, SchemaItemPtr> loopbackIds;		// Key is LoopbackID
 
 		for (const AppLogicItem& appLogicItem : module->items())
 		{
@@ -3618,7 +3618,7 @@ namespace Builder
 		//
 		bool result = true;
 
-		for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+		for (const SchemaItemPtr& item : layer->Items)
 		{
 			// Check for nested UFBs
 			//
@@ -3790,7 +3790,7 @@ namespace Builder
 		// Check if all connection elements are from related Logic Module
 		//
 		bool alienLmIds = false;
-		for (std::shared_ptr<VFrame30::SchemaItem>& item : layer->Items)
+		for (SchemaItemPtr& item : layer->Items)
 		{
 			// Checking signals
 			//
@@ -3991,7 +3991,7 @@ namespace Builder
 
 		bool result = true;
 
-		for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+		for (SchemaItemPtr item : layer->Items)
 		{
 			// Filter signals
 			//
@@ -4525,7 +4525,7 @@ namespace Builder
 				// Get SchemaItemLink by this id,
 				// save it's and points to newBranch
 				//
-				std::shared_ptr<VFrame30::SchemaItem> schemaItem = layer->getItemById(id);
+				SchemaItemPtr schemaItem = layer->getItemById(id);
 				VFrame30::SchemaItemLink* link = dynamic_cast<VFrame30::SchemaItemLink*>(schemaItem.get());
 
 				if (schemaItem == nullptr ||
@@ -4600,7 +4600,7 @@ namespace Builder
 
 		bool result = true;
 
-		for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+		for (SchemaItemPtr item : layer->Items)
 		{
 			if (dynamic_cast<VFrame30::FblItemLine*>(item.get()) != nullptr)
 			{

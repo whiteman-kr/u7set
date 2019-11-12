@@ -978,23 +978,23 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return str;
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> SchemaItemSignal::transformIntoInput()
+	SchemaItemPtr SchemaItemSignal::transformIntoInput()
 	{
 		return transformIntoType<VFrame30::SchemaItemInput>();
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> SchemaItemSignal::transformIntoInOut()
+	SchemaItemPtr SchemaItemSignal::transformIntoInOut()
 	{
 		return transformIntoType<VFrame30::SchemaItemInOut>();
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> SchemaItemSignal::transformIntoOutput()
+	SchemaItemPtr SchemaItemSignal::transformIntoOutput()
 	{
 		return transformIntoType<VFrame30::SchemaItemOutput>();
 	}
 
 	template <typename TYPE>
-	std::shared_ptr<VFrame30::SchemaItem> SchemaItemSignal::transformIntoType()
+	SchemaItemPtr SchemaItemSignal::transformIntoType()
 	{
 		Proto::Envelope message;
 		SaveData(&message);
