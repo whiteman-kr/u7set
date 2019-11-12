@@ -62,6 +62,9 @@ namespace Builder
 
 		bool runConfigurationScriptFile(const std::vector<Hardware::DeviceModule *> &subsystemModules, LmDescription *lmDescription);
 
+		bool writeExtraDataFiles();
+		bool writeDeviceObjectToJson(const Hardware::DeviceObject* object, QJsonObject& jParent);
+
 
 	private:
 		Builder::BuildResultWriter* m_buildResultWriter = nullptr;
@@ -76,6 +79,7 @@ namespace Builder
 		Hardware::SubsystemStorage* m_subsystems = nullptr;
 		Hardware::OptoModuleStorage *m_opticModuleStorage = nullptr;
 		mutable IssueLogger* m_log = nullptr;
+		bool m_generateExtraDebugInfo = false;
 	};
 
 }
