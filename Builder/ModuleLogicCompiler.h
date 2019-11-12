@@ -393,7 +393,7 @@ namespace Builder
 
 		bool setOptoRawInSignalsAsComputed();
 
-		bool fillComparatorStorage();
+		bool fillComparatorSet();
 
 		// pass #2 compilation functions
 		//
@@ -459,7 +459,7 @@ namespace Builder
 
 		bool isConnectedToTerminator(const LogicPin& outPin);
 
-		bool addToComparatorStorage(const UalAfb *appFb);
+		bool addToComparatorSet(const UalAfb *appFb);
 		bool initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* appFb);
 
 		bool copyAcquiredAnalogOptoSignalsToRegBuf(CodeSnippet* code);

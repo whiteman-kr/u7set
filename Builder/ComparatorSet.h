@@ -61,6 +61,7 @@ namespace Builder
 		};
 
 		Comparator();
+		virtual ~Comparator();
 
 		CmpType cmpType() const;
 		void setCmpType(CmpType cmpType);
@@ -73,11 +74,22 @@ namespace Builder
 		ComparatorSignal& hysteresis();
 		ComparatorSignal& output();
 
+		const ComparatorSignal& input() const;
+		const ComparatorSignal& compare() const;
+		const ComparatorSignal& hysteresis() const;
+		const ComparatorSignal& output() const;
+
+		QString label() const;
+		void setLabel(const QString& label);
+
+		int precision() const;
+		void setPrecision(int precision);
+
 		QString schemaID() const;
 		void setSchemaID(const QString& schemaID);
 
-		QUuid uuid() const;
-		void setUuid(QUuid uuid);
+		QUuid schemaItemUuid() const;
+		void setSchemaItemUuid(QUuid schemaItemUuid);
 
 		void serializeTo(Proto::Comparator* c) const;
 		void serializeFrom(const Proto::Comparator& c);
@@ -91,8 +103,10 @@ namespace Builder
 		ComparatorSignal m_hysteresisSignal;
 		ComparatorSignal m_outputSignal;
 
+		int m_precision = 2;
+		QString m_label;
 		QString m_schemaID;
-		QUuid m_uuid;
+		QUuid m_schemaItemUuid;
 	};
 
 	// ------------------------------------------------------------------------------------------------

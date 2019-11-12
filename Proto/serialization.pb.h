@@ -13111,10 +13111,29 @@ class Comparator : public ::google::protobuf::Message {
   inline bool allsignalsisacquired() const;
   inline void set_allsignalsisacquired(bool value);
 
-  // optional string schemaId = 8;
+  // optional int32 precision = 8 [default = 2];
+  inline bool has_precision() const;
+  inline void clear_precision();
+  static const int kPrecisionFieldNumber = 8;
+  inline ::google::protobuf::int32 precision() const;
+  inline void set_precision(::google::protobuf::int32 value);
+
+  // optional string label = 9;
+  inline bool has_label() const;
+  inline void clear_label();
+  static const int kLabelFieldNumber = 9;
+  inline const ::std::string& label() const;
+  inline void set_label(const ::std::string& value);
+  inline void set_label(const char* value);
+  inline void set_label(const char* value, size_t size);
+  inline ::std::string* mutable_label();
+  inline ::std::string* release_label();
+  inline void set_allocated_label(::std::string* label);
+
+  // optional string schemaId = 10;
   inline bool has_schemaid() const;
   inline void clear_schemaid();
-  static const int kSchemaIdFieldNumber = 8;
+  static const int kSchemaIdFieldNumber = 10;
   inline const ::std::string& schemaid() const;
   inline void set_schemaid(const ::std::string& value);
   inline void set_schemaid(const char* value);
@@ -13123,10 +13142,10 @@ class Comparator : public ::google::protobuf::Message {
   inline ::std::string* release_schemaid();
   inline void set_allocated_schemaid(::std::string* schemaid);
 
-  // optional .Proto.Uuid schemaItemUuid = 9;
+  // optional .Proto.Uuid schemaItemUuid = 11;
   inline bool has_schemaitemuuid() const;
   inline void clear_schemaitemuuid();
-  static const int kSchemaItemUuidFieldNumber = 9;
+  static const int kSchemaItemUuidFieldNumber = 11;
   inline const ::Proto::Uuid& schemaitemuuid() const;
   inline ::Proto::Uuid* mutable_schemaitemuuid();
   inline ::Proto::Uuid* release_schemaitemuuid();
@@ -13148,6 +13167,10 @@ class Comparator : public ::google::protobuf::Message {
   inline void clear_has_output();
   inline void set_has_allsignalsisacquired();
   inline void clear_has_allsignalsisacquired();
+  inline void set_has_precision();
+  inline void clear_has_precision();
+  inline void set_has_label();
+  inline void clear_has_label();
   inline void set_has_schemaid();
   inline void clear_has_schemaid();
   inline void set_has_schemaitemuuid();
@@ -13161,12 +13184,14 @@ class Comparator : public ::google::protobuf::Message {
   ::Proto::ComparatorSignal* compare_;
   ::Proto::ComparatorSignal* hysteresis_;
   ::Proto::ComparatorSignal* output_;
+  bool allsignalsisacquired_;
+  ::google::protobuf::int32 precision_;
+  ::std::string* label_;
   ::std::string* schemaid_;
   ::Proto::Uuid* schemaitemuuid_;
-  bool allsignalsisacquired_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -32033,15 +32058,107 @@ inline void Comparator::set_allsignalsisacquired(bool value) {
   allsignalsisacquired_ = value;
 }
 
-// optional string schemaId = 8;
-inline bool Comparator::has_schemaid() const {
+// optional int32 precision = 8 [default = 2];
+inline bool Comparator::has_precision() const {
   return (_has_bits_[0] & 0x00000080u) != 0;
 }
-inline void Comparator::set_has_schemaid() {
+inline void Comparator::set_has_precision() {
   _has_bits_[0] |= 0x00000080u;
 }
-inline void Comparator::clear_has_schemaid() {
+inline void Comparator::clear_has_precision() {
   _has_bits_[0] &= ~0x00000080u;
+}
+inline void Comparator::clear_precision() {
+  precision_ = 2;
+  clear_has_precision();
+}
+inline ::google::protobuf::int32 Comparator::precision() const {
+  return precision_;
+}
+inline void Comparator::set_precision(::google::protobuf::int32 value) {
+  set_has_precision();
+  precision_ = value;
+}
+
+// optional string label = 9;
+inline bool Comparator::has_label() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void Comparator::set_has_label() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void Comparator::clear_has_label() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void Comparator::clear_label() {
+  if (label_ != &::google::protobuf::internal::kEmptyString) {
+    label_->clear();
+  }
+  clear_has_label();
+}
+inline const ::std::string& Comparator::label() const {
+  return *label_;
+}
+inline void Comparator::set_label(const ::std::string& value) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(value);
+}
+inline void Comparator::set_label(const char* value) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(value);
+}
+inline void Comparator::set_label(const char* value, size_t size) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Comparator::mutable_label() {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  return label_;
+}
+inline ::std::string* Comparator::release_label() {
+  clear_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = label_;
+    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Comparator::set_allocated_label(::std::string* label) {
+  if (label_ != &::google::protobuf::internal::kEmptyString) {
+    delete label_;
+  }
+  if (label) {
+    set_has_label();
+    label_ = label;
+  } else {
+    clear_has_label();
+    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string schemaId = 10;
+inline bool Comparator::has_schemaid() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void Comparator::set_has_schemaid() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void Comparator::clear_has_schemaid() {
+  _has_bits_[0] &= ~0x00000200u;
 }
 inline void Comparator::clear_schemaid() {
   if (schemaid_ != &::google::protobuf::internal::kEmptyString) {
@@ -32103,15 +32220,15 @@ inline void Comparator::set_allocated_schemaid(::std::string* schemaid) {
   }
 }
 
-// optional .Proto.Uuid schemaItemUuid = 9;
+// optional .Proto.Uuid schemaItemUuid = 11;
 inline bool Comparator::has_schemaitemuuid() const {
-  return (_has_bits_[0] & 0x00000100u) != 0;
+  return (_has_bits_[0] & 0x00000400u) != 0;
 }
 inline void Comparator::set_has_schemaitemuuid() {
-  _has_bits_[0] |= 0x00000100u;
+  _has_bits_[0] |= 0x00000400u;
 }
 inline void Comparator::clear_has_schemaitemuuid() {
-  _has_bits_[0] &= ~0x00000100u;
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline void Comparator::clear_schemaitemuuid() {
   if (schemaitemuuid_ != NULL) schemaitemuuid_->::Proto::Uuid::Clear();

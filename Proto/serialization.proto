@@ -1352,8 +1352,10 @@ message Comparator
 
     optional bool allSignalsIsAcquired = 7 [default = false];
 
-    optional string schemaId = 8;
-	optional Uuid schemaItemUuid = 9;
+    optional int32 precision = 8 [default = 2];
+	optional string label = 9;
+	optional string schemaId = 10;
+	optional Uuid schemaItemUuid = 11;
 }
 
 message LmComparatorSet

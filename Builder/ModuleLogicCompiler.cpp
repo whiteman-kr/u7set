@@ -208,7 +208,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::appendAfbsForAnalogInOutSignalsConversion),
 			PROC_TO_CALL(ModuleLogicCompiler::setOutputSignalsAsComputed),
 			PROC_TO_CALL(ModuleLogicCompiler::setOptoRawInSignalsAsComputed),
-			PROC_TO_CALL(ModuleLogicCompiler::fillComparatorStorage),
+			PROC_TO_CALL(ModuleLogicCompiler::fillComparatorSet),
 		};
 
 		bool result = runProcs(procs);
@@ -6501,7 +6501,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::fillComparatorStorage()
+	bool ModuleLogicCompiler::fillComparatorSet()
 	{
 		bool result = true;
 
@@ -6509,7 +6509,7 @@ namespace Builder
 		{
 			TEST_PTR_CONTINUE(ualAfb);
 
-			result &= addToComparatorStorage(ualAfb);
+			result &= addToComparatorSet(ualAfb);
 		}
 
 		return result;
@@ -9111,7 +9111,7 @@ namespace Builder
 		return false;
 	}
 
-	bool ModuleLogicCompiler::addToComparatorStorage(const UalAfb* appFb)
+	bool ModuleLogicCompiler::addToComparatorSet(const UalAfb* appFb)
 	{
 		if (appFb == nullptr)
 		{
@@ -9270,10 +9270,12 @@ namespace Builder
 			}
 		}
 
-		// set schemaID
 		//
+		//
+		cmp->setLabel(appFb->label());
+		cmp->setPrecision(appFb->logicFb().precision());
 		cmp->setSchemaID(appFb->schemaID());
-		cmp->setUuid(appFb->guid());
+		cmp->setSchemaItemUuid(appFb->guid());
 
 		// tests
 		//

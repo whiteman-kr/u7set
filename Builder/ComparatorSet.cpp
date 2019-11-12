@@ -90,6 +90,10 @@ namespace Builder
 	{
 	}
 
+	Comparator::~Comparator()
+	{
+	}
+
 	Comparator::CmpType Comparator::cmpType() const
 	{
 		return m_cmpType;
@@ -130,6 +134,46 @@ namespace Builder
 		return m_outputSignal;
 	}
 
+	const ComparatorSignal& Comparator::input() const
+	{
+		return m_inputSignal;
+	}
+
+	const ComparatorSignal& Comparator::compare() const
+	{
+		return m_compareSignal;
+	}
+
+	const ComparatorSignal& Comparator::hysteresis() const
+	{
+		return m_hysteresisSignal;
+	}
+
+	const ComparatorSignal& Comparator::output() const
+	{
+		return m_outputSignal;
+	}
+
+	QString Comparator::label() const
+	{
+		return m_label;
+	}
+
+	void Comparator::setLabel(const QString& label)
+	{
+		m_label = label;
+	}
+
+	int Comparator::precision() const
+	{
+		return m_precision;
+	}
+
+	void Comparator::setPrecision(int precision)
+	{
+		m_precision = precision;
+	}
+
 	QString Comparator::schemaID() const
 	{
 		return m_schemaID;
@@ -140,14 +184,14 @@ namespace Builder
 		m_schemaID = schemaID;
 	}
 
-	QUuid Comparator::uuid() const
+	QUuid Comparator::schemaItemUuid() const
 	{
-		return m_uuid;
+		return m_schemaItemUuid;
 	}
 
-	void Comparator::setUuid(QUuid uuid)
+	void Comparator::setSchemaItemUuid(QUuid schemaItemUuid)
 	{
-		m_uuid = uuid;
+		m_schemaItemUuid = schemaItemUuid;
 	}
 
 	void Comparator::serializeTo(Proto::Comparator* c) const
@@ -166,8 +210,10 @@ namespace Builder
 		m_hysteresisSignal.serializeTo(c->mutable_hysteresis());
 		m_outputSignal.serializeTo(c->mutable_output());
 
+		c->set_label(m_label.toStdString());
+		c->set_precision(m_precision);
 		c->set_schemaid(m_schemaID.toStdString());
-		Proto::Write(c->mutable_schemaitemuuid(), m_uuid);
+		Proto::Write(c->mutable_schemaitemuuid(), m_schemaItemUuid);
 	}
 
 	void Comparator::serializeFrom(const Proto::Comparator& c)
@@ -180,8 +226,10 @@ namespace Builder
 		m_hysteresisSignal.serializeFrom(c.hysteresis());
 		m_outputSignal.serializeFrom(c.output());
 
+		m_label = QString::fromStdString(c.label());
+		m_precision = c.precision();
 		m_schemaID = QString::fromStdString(c.schemaid());
-		m_uuid = Proto::Read(c.schemaitemuuid());
+		m_schemaItemUuid = Proto::Read(c.schemaitemuuid());
 	}
 
 	// ------------------------------------------------------------------------------------------------
@@ -339,7 +387,8 @@ namespace Builder
 			return;
 		}
 
-		if (comparator->output().appSignalID().isEmpty() == true || comparator->output().isAcquired() == false)
+		if (comparator->output().appSignalID().isEmpty() == true)
+		//if (comparator->output().appSignalID().isEmpty() == true || comparator->output().isAcquired() == false)
 		{
 			return;
 		}
