@@ -503,14 +503,17 @@ include(../qtpropertybrowser/src/qtpropertybrowser.pri)
 #
 win32 {
     LIBS += Advapi32.lib
+
+    DEFINES += QTKEYCHAIN_NO_EXPORT
+    DEFINES += USE_CREDENTIAL_STORE
+
+    INCLUDEPATH += ./qtkeychain-0.9.1
+
+    include(../Tools/qtkeychain-0.9.1/qt5keychain.pri)
 }
-
-DEFINES += QTKEYCHAIN_NO_EXPORT
-DEFINES += USE_CREDENTIAL_STORE
-
-INCLUDEPATH += ./qtkeychain-0.9.1
-
-include(../Tools/qtkeychain-0.9.1/qt5keychain.pri)
+unix {
+    LIBS += -lqtkeychain
+}
 
 # Simulator Lib
 #

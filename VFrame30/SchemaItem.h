@@ -17,6 +17,7 @@ namespace VFrame30
 {
 	class Schema;
 	class SchemaLayer;
+	class SchemaItem;
 	class SchemaItemAfb;
 	class SchemaItemSignal;
 	class SchemaView;
@@ -26,6 +27,8 @@ namespace VFrame30
 
 	class CDrawParam;
 }
+
+using SchemaItemPtr = std::shared_ptr<VFrame30::SchemaItem>;
 
 namespace VFrame30
 {
@@ -308,5 +311,3 @@ namespace VFrame30
 #endif
 
 }
-
-

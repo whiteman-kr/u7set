@@ -45,7 +45,7 @@ namespace VFrame30
 		virtual void mousePressEvent(QMouseEvent* event) override;
 		virtual void mouseMoveEvent(QMouseEvent* event) override;
 
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsUnderCursor(const QPoint& pos);
+		std::vector<SchemaItemPtr> itemsUnderCursor(const QPoint& pos);
 
 		// History functions
 		//

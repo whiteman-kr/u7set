@@ -194,7 +194,7 @@ namespace VFrame30
 
 		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
 		{
-			const std::shared_ptr<VFrame30::SchemaItem>& item = *it;
+			const SchemaItemPtr& item = *it;
 
 			if (qobject_cast<SchemaItemType>(item.get()) != nullptr &&
 				item->IsIntersectPoint(x, y) == true)
@@ -213,7 +213,7 @@ namespace VFrame30
 
 		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
 		{
-			const std::shared_ptr<VFrame30::SchemaItem>& item = *it;
+			const SchemaItemPtr& item = *it;
 
 			if (item->IsIntersectPoint(x, y) == true)
 			{
@@ -237,7 +237,7 @@ namespace VFrame30
 
 		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
 		{
-			const std::shared_ptr<VFrame30::SchemaItem>& item = *it;
+			const SchemaItemPtr& item = *it;
 
 			if (item->IsIntersectPoint(x, y) == true)
 			{
@@ -273,7 +273,7 @@ namespace VFrame30
 
 		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
 		{
-			const std::shared_ptr<VFrame30::SchemaItem>& item = *it;
+			const SchemaItemPtr& item = *it;
 
 			if (dynamic_cast<VFrame30::FblItemRect*>(item.get()) != nullptr &&
 				item->IsIntersectPoint(x, y) == true)

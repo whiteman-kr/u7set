@@ -278,7 +278,7 @@ namespace VFrame30
 
 			for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
 			{
-				const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
+				const SchemaItemPtr& item = *vi;
 
 				if (item->acceptClick() == true &&
 					item->IsIntersectPoint(x, y) == true &&
@@ -336,7 +336,7 @@ namespace VFrame30
 
 				for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
 				{
-					const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
+					const SchemaItemPtr& item = *vi;
 
 					if (item == m_leftClickOverItem &&
 						item->acceptClick() == true &&

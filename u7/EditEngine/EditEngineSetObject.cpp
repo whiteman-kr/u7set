@@ -9,7 +9,7 @@ namespace EditEngine
 	SetObjectCommand::SetObjectCommand(EditSchemaView* schemaView,
 									   const QByteArray& oldState,
 									   const QByteArray& newState,
-									   const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
+									   const std::vector<SchemaItemPtr>& items,
 									   QScrollBar* hScrollBar,
 									   QScrollBar* vScrollBar) :
 		EditCommand(schemaView, hScrollBar, vScrollBar)
@@ -32,9 +32,9 @@ namespace EditEngine
 		return;
 	}
 
-	void SetObjectCommand::executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void SetObjectCommand::executeCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> selection;
+		std::vector<SchemaItemPtr> selection;
 		selection.reserve(m_items.size());
 
 		for (const Record& r : m_items)
@@ -50,9 +50,9 @@ namespace EditEngine
 		return;
 	}
 
-	void SetObjectCommand::unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void SetObjectCommand::unExecuteCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> selection;
+		std::vector<SchemaItemPtr> selection;
 		selection.reserve(m_items.size());
 
 		for (const Record& r : m_items)

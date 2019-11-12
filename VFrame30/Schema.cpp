@@ -79,7 +79,7 @@ namespace VFrame30
 //		{
 //			layer->setGuid(QUuid::createUuid());
 
-//			for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+//			for (SchemaItemPtr item : layer->Items)
 //			{
 //				item->setNewGuid();
 
@@ -806,7 +806,7 @@ namespace VFrame30
 	{
 		for (std::shared_ptr<VFrame30::SchemaLayer> layer : Layers)
 		{
-			for (std::shared_ptr<VFrame30::SchemaItem> item : Layers)
+			for (const SchemaItemPtr& item : Layers)
 			{
 				if (dynamic_cast<SchemaItemType>(item) != nullptr)
 				{

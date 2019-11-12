@@ -3,6 +3,7 @@
 #include "../lib/Crc.h"
 #include <QtEndian>
 #include <QHostInfo>
+#include <cstring>
 
 //#ifdef Q_OS_WIN32
 //#include "./ftdi/ftd2xx.h"
