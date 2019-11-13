@@ -27,8 +27,8 @@ public:
 	virtual ~SchemaItemPropertiesDialog();
 
 public:
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>> objects() const;
-	void setObjects(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items);
+	const std::vector<SchemaItemPtr> objects() const;
+	void setObjects(const std::vector<SchemaItemPtr>& items);
 
 	void setReadOnly(bool value);
 
@@ -49,7 +49,7 @@ private:
 	SchemaItemPropertyEditor* m_propertyEditor = nullptr;
 	SchemaItemPropertyTable* m_propertyTable = nullptr;
 
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_items;
+	std::vector<SchemaItemPtr> m_items;
 };
 
 //

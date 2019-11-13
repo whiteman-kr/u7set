@@ -10,21 +10,21 @@ namespace EditEngine
 		DeleteItemCommand();		// deleted;
 	public:
 		DeleteItemCommand(EditSchemaView* schemaView,
-			std::vector<std::shared_ptr<VFrame30::SchemaItem>> items,
+			std::vector<SchemaItemPtr> items,
 			std::shared_ptr<VFrame30::SchemaLayer> layer,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar);
 
 	protected:
-		virtual void executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect) override;
-		virtual void unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect) override;
+		virtual void executeCommand(std::vector<SchemaItemPtr>* itemsToSelect) override;
+		virtual void unExecuteCommand(std::vector<SchemaItemPtr>* itemsToSelect) override;
 
 		// Data
 		//
 	private:
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_items;				// Items for delete operation
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_prevOrder;			// Item's order in the layer before delete
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_selectedItems;
+		std::vector<SchemaItemPtr> m_items;				// Items for delete operation
+		std::vector<SchemaItemPtr> m_prevOrder;			// Item's order in the layer before delete
+		std::vector<SchemaItemPtr> m_selectedItems;
 
 		std::shared_ptr<VFrame30::SchemaLayer> m_layer;
 	};

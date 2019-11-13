@@ -62,12 +62,12 @@ namespace VFrame30
 	public:
 		virtual QString toolTipText(int dpiX, int dpiY) const override;
 
-		std::shared_ptr<VFrame30::SchemaItem> transformIntoInput();
-		std::shared_ptr<VFrame30::SchemaItem> transformIntoInOut();
-		std::shared_ptr<VFrame30::SchemaItem> transformIntoOutput();
+		SchemaItemPtr transformIntoInput();
+		SchemaItemPtr transformIntoInOut();
+		SchemaItemPtr transformIntoOutput();
 
 		template <typename TYPE>
-		std::shared_ptr<VFrame30::SchemaItem> transformIntoType();
+		SchemaItemPtr transformIntoType();
 
 		// Properties
 		//

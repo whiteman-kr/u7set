@@ -206,6 +206,11 @@ void initNewSignal(Signal& signal)
 		}
 
 		QVariant::Type type = propertyManager.type(i);
+		if (type == QVariant::String && propertyManager.value(&signal, i).toString().isEmpty() == false)
+		{
+			continue;
+		}
+
 		if (value.canConvert(type) && value.convert(type))
 		{
 			propertyManager.setValue(&signal, i, value);

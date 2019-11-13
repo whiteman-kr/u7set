@@ -28,7 +28,7 @@ namespace VFrame30
 		{
 			// Control items on Compile layer are ok, but on other layers they must be disabled (grayed)
 			//
-			for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+			for (SchemaItemPtr& item : layer->Items)
 			{
 				if (item->isControl() == false)
 				{
@@ -38,7 +38,7 @@ namespace VFrame30
 				VFrame30::SchemaItemControl* controlItem = item->toType<VFrame30::SchemaItemControl>();
 				if (controlItem == nullptr)
 				{
-					assert(controlItem);
+					Q_ASSERT(controlItem);
 					continue;
 				}
 

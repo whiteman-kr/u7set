@@ -6,7 +6,7 @@ namespace EditEngine
 
 	SetOrderCommand::SetOrderCommand(EditSchemaView* schemaView,
 									 SetOrder setOrder,
-									 const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
+									 const std::vector<SchemaItemPtr>& items,
 									 std::shared_ptr<VFrame30::SchemaLayer> layer,
 									 QScrollBar* hScrollBar,
 									 QScrollBar* vScrollBar) :
@@ -25,8 +25,8 @@ namespace EditEngine
 
 	bool SetOrderCommand::checkIfCommandChangesOrder(
 			SetOrder /*setOrder*/,
-			const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& /*items*/,
-			const std::list<std::shared_ptr<VFrame30::SchemaItem>>& /*layerItems*/)
+			const std::vector<SchemaItemPtr>& /*items*/,
+			const std::list<SchemaItemPtr>& /*layerItems*/)
 	{
 		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 		return true;
@@ -41,11 +41,11 @@ namespace EditEngine
 		{
 		case SetOrder::BringToFront:
 			{
-				std::vector<std::shared_ptr<VFrame30::SchemaItem>> selectedItemsOrder;
-				std::list<std::shared_ptr<VFrame30::SchemaItem>> newOrder;
+				std::vector<SchemaItemPtr> selectedItemsOrder;
+				std::list<SchemaItemPtr> newOrder;
 				selectedItemsOrder.reserve(items.size());
 
-				for (std::shared_ptr<VFrame30::SchemaItem> si : layerItems)
+				for (SchemaItemPtr si : layerItems)
 				{
 					auto found = std::find(items.begin(), items.end(), si);
 
@@ -105,7 +105,7 @@ namespace EditEngine
 */
 	}
 
-	void SetOrderCommand::executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void SetOrderCommand::executeCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		m_oldOrder = m_layer->Items;
 
@@ -113,11 +113,11 @@ namespace EditEngine
 		{
 		case SetOrder::BringToFront:
 			{
-				std::vector<std::shared_ptr<VFrame30::SchemaItem>> selectedItemsOrder;
-				std::list<std::shared_ptr<VFrame30::SchemaItem>> newOrder;
+				std::vector<SchemaItemPtr> selectedItemsOrder;
+				std::list<SchemaItemPtr> newOrder;
 				selectedItemsOrder.reserve(m_items.size());
 
-				for (std::shared_ptr<VFrame30::SchemaItem> si : m_layer->Items)
+				for (SchemaItemPtr si : m_layer->Items)
 				{
 					auto found = std::find(m_items.begin(), m_items.end(), si);
 
@@ -152,7 +152,7 @@ namespace EditEngine
 				struct SetOrderItemStruct
 				{
 					bool isSelected;
-					std::shared_ptr<VFrame30::SchemaItem> item;
+					SchemaItemPtr item;
 				};
 
 				std::list<SetOrderItemStruct> newOrder;
@@ -206,12 +206,12 @@ namespace EditEngine
 			break;
 		case SetOrder::SendToBack:
 			{
-				std::vector<std::shared_ptr<VFrame30::SchemaItem>> selectedItemsOrder;
+				std::vector<SchemaItemPtr> selectedItemsOrder;
 				selectedItemsOrder.reserve(m_items.size());
 
-				std::list<std::shared_ptr<VFrame30::SchemaItem>> newOrder;
+				std::list<SchemaItemPtr> newOrder;
 
-				for (std::shared_ptr<VFrame30::SchemaItem> si : m_layer->Items)
+				for (SchemaItemPtr si : m_layer->Items)
 				{
 					auto found = std::find(m_items.begin(), m_items.end(), si);
 
@@ -246,7 +246,7 @@ namespace EditEngine
 				struct SetOrderItemStruct
 				{
 					bool isSelected;
-					std::shared_ptr<VFrame30::SchemaItem> item;
+					SchemaItemPtr item;
 				};
 
 				std::list<SetOrderItemStruct> newOrder;
@@ -307,7 +307,7 @@ namespace EditEngine
 		return;
 	}
 
-	void SetOrderCommand::unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void SetOrderCommand::unExecuteCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		*itemsToSelect = m_items;
 

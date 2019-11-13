@@ -166,12 +166,12 @@ void EditConnectionLine::moveEndPointPos(std::shared_ptr<VFrame30::SchemaLayer> 
 	// Try to to detect situation for PreferedMovePointWay::VertCorner
 	//
 	bool docPointIsOnHorzLine = false;
-	std::list<std::shared_ptr<VFrame30::SchemaItem>> linksUnderDocPoint = layer->getItemListUnderPoint(toPoint, "VFrame30::SchemaItemLink");
+	std::list<SchemaItemPtr> linksUnderDocPoint = layer->getItemListUnderPoint(toPoint, "VFrame30::SchemaItemLink");
 
 	if (preferedWay == PreferedMovePointWay::Auto &&
 		linksUnderDocPoint.empty() == false)
 	{
-		for (std::shared_ptr<VFrame30::SchemaItem> connItem : linksUnderDocPoint)
+		for (SchemaItemPtr& connItem : linksUnderDocPoint)
 		{
 			VFrame30::IPosConnection* connectionUndertDocPoint = dynamic_cast<VFrame30::IPosConnection*>(connItem.get());
 
@@ -1006,9 +1006,9 @@ void EditConnectionLine::moveToPin_offset(std::shared_ptr<VFrame30::SchemaLayer>
 	return;
 }
 
-std::shared_ptr<VFrame30::SchemaItem> EditConnectionLine::moveToPin_schemaItem() const
+SchemaItemPtr EditConnectionLine::moveToPin_schemaItem() const
 {
-	assert(m_mode == MoveToPin);
+	Q_ASSERT(m_mode == MoveToPin);
 	return m_moveToPin.schemaItem;
 }
 

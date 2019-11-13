@@ -4,7 +4,7 @@
 namespace EditEngine
 {
 	DeleteItemCommand::DeleteItemCommand(EditSchemaView* schemaView,
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items,
+		std::vector<SchemaItemPtr> items,
 		std::shared_ptr<VFrame30::SchemaLayer> layer,
 		QScrollBar* hScrollBar,
 		QScrollBar* vScrollBar)
@@ -24,10 +24,10 @@ namespace EditEngine
 		return;
 	}
 
-	void DeleteItemCommand::executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void DeleteItemCommand::executeCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		std::for_each(m_items.begin(), m_items.end(),
-			[this](std::shared_ptr<VFrame30::SchemaItem> item)
+			[this](SchemaItemPtr item)
 			{
 				m_layer->Items.erase(std::remove(m_layer->Items.begin(), m_layer->Items.end(), item), m_layer->Items.end());
 			}
@@ -39,7 +39,7 @@ namespace EditEngine
 		return;
 	}
 
-	void DeleteItemCommand::unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void DeleteItemCommand::unExecuteCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		m_layer->Items.assign(m_prevOrder.begin(), m_prevOrder.end());
 

@@ -12,13 +12,13 @@ namespace EditEngine
 		SetPropertyCommand(EditSchemaView* schemaView,
 				QString propertyName,
 				QVariant value,
-				const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
+				const std::vector<SchemaItemPtr>& items,
 				QScrollBar* hScrollBar,
 				QScrollBar* vScrollBar);
 
 	protected:
-		virtual void executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect) override;
-		virtual void unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect) override;
+		virtual void executeCommand(std::vector<SchemaItemPtr>* itemsToSelect) override;
+		virtual void unExecuteCommand(std::vector<SchemaItemPtr>* itemsToSelect) override;
 
 		//--
 		//
@@ -27,7 +27,7 @@ namespace EditEngine
 			QString propertyName;
 			QVariant oldValue;
 			QVariant newValue;
-			std::shared_ptr<VFrame30::SchemaItem> item;
+			SchemaItemPtr item;
 		};
 
 		// Data

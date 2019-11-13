@@ -356,7 +356,7 @@ void CreateSchemaDialog::accept()
 		{
 			layer->setGuid(QUuid::createUuid());
 
-			for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+			for (SchemaItemPtr& item : layer->Items)
 			{
 				item->setNewGuid();
 

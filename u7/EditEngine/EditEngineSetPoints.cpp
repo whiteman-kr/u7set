@@ -6,7 +6,7 @@ namespace EditEngine
 
 	SetPointsCommand::SetPointsCommand(EditSchemaView* schemaView,
 			const std::vector<std::vector<VFrame30::SchemaPoint>>& points,
-			const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
+			const std::vector<SchemaItemPtr>& items,
 			bool selectChangedItems,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
@@ -28,7 +28,7 @@ namespace EditEngine
 		return;
 	}
 
-	void SetPointsCommand::executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void SetPointsCommand::executeCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		if (m_items.size() != m_newPoints.size())
 		{
@@ -49,7 +49,7 @@ namespace EditEngine
 		return;
 	}
 
-	void SetPointsCommand::unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void SetPointsCommand::unExecuteCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		if (m_items.size() != m_newPoints.size())
 		{

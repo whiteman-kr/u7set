@@ -423,7 +423,7 @@ namespace Builder
 //					return false;
 //				}
 
-//				for (std::shared_ptr<VFrame30::SchemaItem>& item :  layer->Items)
+//				for (SchemaItemPtr& item :  layer->Items)
 //				{
 //					if (item == nullptr)
 //					{
@@ -490,7 +490,7 @@ namespace Builder
 //												.arg(static_cast<int>(resultCode)));
 //						}
 //					}
-//				}		// for (std::shared_ptr<VFrame30::SchemaItem>& item :  layer->Items)
+//				}		// for (SchemaItemPtr& item :  layer->Items)
 
 //				// Remove all frames form the layes
 //				//
@@ -1062,7 +1062,7 @@ namespace Builder
 					return false;
 				}
 
-				for (std::shared_ptr<VFrame30::SchemaItem>& item :  layer->Items)
+				for (SchemaItemPtr& item :  layer->Items)
 				{
 					if (item == nullptr)
 					{
@@ -1111,7 +1111,7 @@ namespace Builder
 				return false;
 			}
 
-			for (std::shared_ptr<VFrame30::SchemaItem> sourceItem : pannelLayer->Items)
+			for (SchemaItemPtr sourceItem : pannelLayer->Items)
 			{
 				// Make a deep copy of source item, set new guid and label to it
 				//
@@ -1124,7 +1124,7 @@ namespace Builder
 					return false;
 				}
 
-				std::shared_ptr<VFrame30::SchemaItem> newItem = VFrame30::SchemaItem::Create(savedItem);
+				SchemaItemPtr newItem = VFrame30::SchemaItem::Create(savedItem);
 				if (newItem == nullptr)
 				{
 					Q_ASSERT(newItem);

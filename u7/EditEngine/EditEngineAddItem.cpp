@@ -3,7 +3,7 @@
 
 namespace EditEngine
 {
-	AddItemCommand::AddItemCommand(EditSchemaView* schemaView, std::list<std::shared_ptr<VFrame30::SchemaItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
+	AddItemCommand::AddItemCommand(EditSchemaView* schemaView, std::list<SchemaItemPtr> items, std::shared_ptr<VFrame30::SchemaLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar)
 		: EditCommand(schemaView, hScrollBar, vScrollBar)
 	{
 		assert(schemaView != nullptr);
@@ -18,7 +18,7 @@ namespace EditEngine
 		return;
 	}
 
-	void AddItemCommand::executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void AddItemCommand::executeCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		m_layer->Items.insert(m_layer->Items.end(), m_items.begin(), m_items.end());
 
@@ -27,12 +27,12 @@ namespace EditEngine
 		return;
 	}
 
-	void AddItemCommand::unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void AddItemCommand::unExecuteCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		for (auto si = m_items.begin(); si != m_items.end(); ++si)
 		{
 			auto findResult = std::find_if(m_layer->Items.begin(), m_layer->Items.end(),
-				[&si](std::shared_ptr<VFrame30::SchemaItem> item)
+				[&si](SchemaItemPtr item)
 				{
 					return item.get() == si->get();
 				});

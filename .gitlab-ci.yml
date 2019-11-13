@@ -111,6 +111,17 @@ windows build job:
     - "echo ----------------------------------------------"
     - "rmdir /Q /S c:\\temp\\build\\test_simulator-debug"    
     - "%CI_PROJECT_DIR%\\bin\\release\\BuilderConsole.exe 127.0.0.1 5432 u7 P2ssw0rd test_simulator_v286 Administrator P2ssw0rd c:\\temp\\build\\ debug"    
+
+#Remove some files not requiered for releases
+    - "echo ----------------------------------------------"
+    - "echo               Remove some files not requiered for releases"
+    - "echo ----------------------------------------------"
+    - "del /F /Q bin\\release\\BuilderConsole.exe"
+    - "del /F /Q bin\\release\\CommView.exe"
+    - "del /F /Q bin\\release\\DiagDataSrv.exe"
+    - "del /F /Q bin\\release\\SimulatorConsole.exe"
+    - "del /F /Q bin\\release\\TuningIPEN.exe"
+    - "del /F /Q bin\\release\\u7databasetests.exe"
   
   artifacts:
     name: "u7set_0.8.%CI_PIPELINE_ID%_%CI_BUILD_REF_SLUG%_%CI_COMMIT_SHA%"

@@ -81,7 +81,7 @@ namespace VFrame30
 		//
 		QPointF docPos = widgetPointToDocument(m_dragStartPosition);
 
-		std::shared_ptr<VFrame30::SchemaItem> schemaItem;
+		SchemaItemPtr schemaItem;
 
 		for (auto layer : schema()->Layers)
 		{
@@ -175,9 +175,9 @@ namespace VFrame30
 	}
 
 
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> ClientSchemaWidget::itemsUnderCursor(const QPoint& pos)
+	std::vector<SchemaItemPtr> ClientSchemaWidget::itemsUnderCursor(const QPoint& pos)
 	{
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> result;
+		std::vector<SchemaItemPtr> result;
 		result.reserve(8);
 
 		QPointF docPoint;
@@ -202,7 +202,7 @@ namespace VFrame30
 
 			for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
 			{
-				const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
+				const SchemaItemPtr& item = *vi;
 
 				if (item->IsIntersectPoint(x, y) == true)
 				{

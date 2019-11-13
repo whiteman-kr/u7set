@@ -230,7 +230,7 @@ namespace EditEngine
 	{
 		assert(command);
 
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsToSelect;
+		std::vector<SchemaItemPtr> itemsToSelect;
 		itemsToSelect.reserve(16);
 
 		// Start
@@ -248,7 +248,7 @@ namespace EditEngine
 	{
 		assert(command);
 
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsToSelect;
+		std::vector<SchemaItemPtr> itemsToSelect;
 		itemsToSelect.reserve(16);
 
 		// Start
@@ -262,7 +262,7 @@ namespace EditEngine
 		return;
 	}
 
-	void EditEngine::selectItems(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
+	void EditEngine::selectItems(const std::vector<SchemaItemPtr>& items)
 	{
 		if (m_schemaView == nullptr)
 		{
@@ -275,78 +275,78 @@ namespace EditEngine
 		return;
 	}
 
-	void EditEngine::runAddItem(std::list<std::shared_ptr<VFrame30::SchemaItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer)
+	void EditEngine::runAddItem(std::list<SchemaItemPtr> items, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
 		addCommand(std::make_shared<AddItemCommand>(m_schemaView, items, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runAddItem(std::vector<std::shared_ptr<VFrame30::SchemaItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer)
+	void EditEngine::runAddItem(std::vector<SchemaItemPtr> items, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
-		std::list<std::shared_ptr<VFrame30::SchemaItem>> l(items.begin(), items.end());
+		std::list<SchemaItemPtr> l(items.begin(), items.end());
 		addCommand(std::make_shared<AddItemCommand>(m_schemaView, l, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runAddItem(std::shared_ptr<VFrame30::SchemaItem> item, std::shared_ptr<VFrame30::SchemaLayer> layer)
+	void EditEngine::runAddItem(SchemaItemPtr item, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
-		std::list<std::shared_ptr<VFrame30::SchemaItem>> items;
+		std::list<SchemaItemPtr> items;
 		items.push_back(item);
 
 		addCommand(std::make_shared<AddItemCommand>(m_schemaView, items, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runDeleteItem(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items, std::shared_ptr<VFrame30::SchemaLayer> layer)
+	void EditEngine::runDeleteItem(const std::vector<SchemaItemPtr>& items, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
 		addCommand(std::make_shared<DeleteItemCommand>(m_schemaView, items, layer, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runDeleteItem(std::shared_ptr<VFrame30::SchemaItem> item, std::shared_ptr<VFrame30::SchemaLayer> layer)
+	void EditEngine::runDeleteItem(SchemaItemPtr item, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> v;
+		std::vector<SchemaItemPtr> v;
 		v.push_back(item);
 
 		return runDeleteItem(v, layer);
 	}
 
-	void EditEngine::runSetPoints(const std::vector<std::vector<VFrame30::SchemaPoint>>& points, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items, bool selectChangedItems)
+	void EditEngine::runSetPoints(const std::vector<std::vector<VFrame30::SchemaPoint>>& points, const std::vector<SchemaItemPtr>& items, bool selectChangedItems)
 	{
 		addCommand(std::make_shared<SetPointsCommand>(m_schemaView, points, items, selectChangedItems, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runSetPoints(const std::vector<VFrame30::SchemaPoint>& points, const std::shared_ptr<VFrame30::SchemaItem>& item, bool selectChangedItems)
+	void EditEngine::runSetPoints(const std::vector<VFrame30::SchemaPoint>& points, const SchemaItemPtr& item, bool selectChangedItems)
 	{
 		std::vector<VFrame30::SchemaPoint> ip(points.begin(), points.end());
 
 		std::vector<std::vector<VFrame30::SchemaPoint>> allpoints;
 		allpoints.push_back(ip);
 
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+		std::vector<SchemaItemPtr> items;
 		items.push_back(item);
 
 		runSetPoints(allpoints, items, selectChangedItems);
 		return;
 	}
 
-	void EditEngine::runMoveItem(double xdiff, double ydiff, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items, bool snapToGrid)
+	void EditEngine::runMoveItem(double xdiff, double ydiff, const std::vector<SchemaItemPtr>& items, bool snapToGrid)
 	{
 		addCommand(std::make_shared<MoveItemCommand>(m_schemaView, xdiff, ydiff, items, snapToGrid, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runMoveItem(double xdiff, double ydiff, const std::shared_ptr<VFrame30::SchemaItem>& item, bool snapToGrid)
+	void EditEngine::runMoveItem(double xdiff, double ydiff, const SchemaItemPtr& item, bool snapToGrid)
 	{
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+		std::vector<SchemaItemPtr> items;
 		items.push_back(item);
 
 		runMoveItem(xdiff, ydiff, items, snapToGrid);
 		return;
 	}
 
-	void EditEngine::runSetOrder(SetOrder setOrder, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items, std::shared_ptr<VFrame30::SchemaLayer> layer)
+	void EditEngine::runSetOrder(SetOrder setOrder, const std::vector<SchemaItemPtr>& items, std::shared_ptr<VFrame30::SchemaLayer> layer)
 	{
 		bool willThisChangeTheActualOrder = SetOrderCommand::checkIfCommandChangesOrder(setOrder, items, layer->Items);
 		if (willThisChangeTheActualOrder == false)
@@ -358,28 +358,28 @@ namespace EditEngine
 		return;
 	}
 
-	void EditEngine::runSetProperty(const QString& propertyName, QVariant value, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
+	void EditEngine::runSetProperty(const QString& propertyName, QVariant value, const std::vector<SchemaItemPtr>& items)
 	{
 		addCommand(std::make_shared<SetPropertyCommand>(m_schemaView, propertyName, value, items, m_hScrollBar, m_vScrollBar), true);
 		return;
 	}
 
-	void EditEngine::runSetProperty(const QString& propertyName, QVariant value, const std::shared_ptr<VFrame30::SchemaItem>& item)
+	void EditEngine::runSetProperty(const QString& propertyName, QVariant value, const SchemaItemPtr& item)
 	{
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+		std::vector<SchemaItemPtr> items;
 		items.push_back(item);
 
 		return runSetProperty(propertyName, value, items);
 	}
 
-	void EditEngine::runSetObject(const QByteArray& currentState, const QByteArray& newState, const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
+	void EditEngine::runSetObject(const QByteArray& currentState, const QByteArray& newState, const std::vector<SchemaItemPtr>& items)
 	{
 		addCommand(std::make_shared<SetObjectCommand>(m_schemaView, currentState, newState, items, m_hScrollBar, m_vScrollBar), true);
 	}
 
-	void EditEngine::runSetObject(const QByteArray& currentState, const QByteArray& newState, const std::shared_ptr<VFrame30::SchemaItem>& item)
+	void EditEngine::runSetObject(const QByteArray& currentState, const QByteArray& newState, const SchemaItemPtr& item)
 	{
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+		std::vector<SchemaItemPtr> items;
 		items.push_back(item);
 
 		return runSetObject(currentState, newState, items);
@@ -391,14 +391,14 @@ namespace EditEngine
 		return;
 	}
 
-	void EditEngine::runNopItem(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
+	void EditEngine::runNopItem(const std::vector<SchemaItemPtr>& items)
 	{
 		addCommand(std::make_shared<NopItemCommand>(m_schemaView, items, m_hScrollBar, m_vScrollBar), true);
 	}
 
-	void EditEngine::runNopItem(const std::shared_ptr<VFrame30::SchemaItem>& item)
+	void EditEngine::runNopItem(const SchemaItemPtr& item)
 	{
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+		std::vector<SchemaItemPtr> items;
 		items.push_back(item);
 
 		return runNopItem(items);
@@ -426,7 +426,7 @@ namespace EditEngine
 		saveViewPos();
 	}
 
-	void EditCommand::execute(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void EditCommand::execute(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		assert(itemsToSelect);
 
@@ -438,7 +438,7 @@ namespace EditEngine
 		return;
 	}
 
-	void EditCommand::unExecute(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void EditCommand::unExecute(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		assert(itemsToSelect);
 

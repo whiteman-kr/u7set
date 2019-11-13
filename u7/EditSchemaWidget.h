@@ -155,17 +155,17 @@ public:
 
 	// Selection
 	//
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selectedItems() const;
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selectedNonLockedItems() const;
+	const std::vector<SchemaItemPtr>& selectedItems() const;
+	std::vector<SchemaItemPtr> selectedNonLockedItems() const;
 
-	void setSelectedItems(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items);
-	void setSelectedItems(const std::list<std::shared_ptr<VFrame30::SchemaItem>>& items);
-	void setSelectedItem(const std::shared_ptr<VFrame30::SchemaItem>& item);
-	void addSelection(const std::shared_ptr<VFrame30::SchemaItem>& item, bool emitSectionChanged = true);
+	void setSelectedItems(const std::vector<SchemaItemPtr>& items);
+	void setSelectedItems(const std::list<SchemaItemPtr>& items);
+	void setSelectedItem(const SchemaItemPtr& item);
+	void addSelection(const SchemaItemPtr& item, bool emitSectionChanged = true);
 
 	void clearSelection();
-	bool removeFromSelection(const std::shared_ptr<VFrame30::SchemaItem>& item, bool emitSectionChanged = true);
-	bool isItemSelected(const std::shared_ptr<VFrame30::SchemaItem>& item);
+	bool removeFromSelection(const SchemaItemPtr& item, bool emitSectionChanged = true);
+	bool isItemSelected(const SchemaItemPtr& item);
 
 	// Data
 	//
@@ -176,8 +176,8 @@ private:
 	// Temporary data can be changed in EditSchemaWidget
 	//
 protected:
-	std::shared_ptr<VFrame30::SchemaItem> m_newItem;
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_selectedItems;
+	SchemaItemPtr m_newItem;
+	std::vector<SchemaItemPtr> m_selectedItems;
 
 	std::map<QUuid, CompareAction> m_itemsActions;
 	bool m_compareWidget = false;
@@ -297,13 +297,13 @@ public:
 	bool updateBussesForSchema();
 
 protected:
-	void addItem(std::shared_ptr<VFrame30::SchemaItem> newItem);
+	void addItem(SchemaItemPtr newItem);
 
 	void setMouseCursor(QPoint mousePos);
 
 	QPointF magnetPointToPin(QPointF docPoint);
 
-	void movePosConnectionEndPoint(std::shared_ptr<VFrame30::SchemaItem> schemaItem, EditConnectionLine* ecl, QPointF toPoint);
+	void movePosConnectionEndPoint(SchemaItemPtr schemaItem, EditConnectionLine* ecl, QPointF toPoint);
 
 	// Move ConnectionLinks withFblItemPects' pins
 	//
@@ -346,20 +346,20 @@ protected slots:
 	void appSignalsSelectedProperties();
 	void appSignalsProperties(QStringList strIds);
 	void addNewAppSignalSelected();
-	void addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> schemaItem);
+	void addNewAppSignal(SchemaItemPtr schemaItem);
 
 	void escapeKey();
 
 	void f2Key();
-	void f2KeyForRect(std::shared_ptr<VFrame30::SchemaItem> item);
-	bool f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> item, bool setViaEditEngine);
-	bool f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem> item, bool setViaEditEngine);
-	void f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item);
-	void f2KeyForSignal(std::shared_ptr<VFrame30::SchemaItem> item);
-	void f2KeyForLoopback(std::shared_ptr<VFrame30::SchemaItem> item);
-	void f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item);
-	void f2KeyForImageValue(std::shared_ptr<VFrame30::SchemaItem> item);
-	void f2KeyForBus(std::shared_ptr<VFrame30::SchemaItem> item);
+	void f2KeyForRect(SchemaItemPtr item);
+	bool f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEngine);
+	bool f2KeyForTransmitter(SchemaItemPtr item, bool setViaEditEngine);
+	void f2KeyForConst(SchemaItemPtr item);
+	void f2KeyForSignal(SchemaItemPtr item);
+	void f2KeyForLoopback(SchemaItemPtr item);
+	void f2KeyForValue(SchemaItemPtr item);
+	void f2KeyForImageValue(SchemaItemPtr item);
+	void f2KeyForBus(SchemaItemPtr item);
 
 	void deleteKey();
 
@@ -370,8 +370,8 @@ protected slots:
 	void modifiedChangedSlot(bool modified);
 
 	void selectAll();
-	void selectItem(std::shared_ptr<VFrame30::SchemaItem> item);
-	void selectItems(std::vector<std::shared_ptr<VFrame30::SchemaItem>> items);
+	void selectItem(SchemaItemPtr item);
+	void selectItems(std::vector<SchemaItemPtr> items);
 
 	void editCut();
 	void editCopy();
@@ -437,7 +437,7 @@ protected:
 	void findNext(Qt::CaseSensitivity cs);
 	void findPrev(Qt::CaseSensitivity cs);
 
-	int replace(std::shared_ptr<VFrame30::SchemaItem> item, QString findText, QString replaceWith, Qt::CaseSensitivity cs);
+	int replace(SchemaItemPtr item, QString findText, QString replaceWith, Qt::CaseSensitivity cs);
 	void replaceAndFind(QString findText, QString replaceWith, Qt::CaseSensitivity cs);
 	void replaceAll(QString findText, QString replaceWith, Qt::CaseSensitivity cs);
 
@@ -451,8 +451,8 @@ public:
 
 	std::shared_ptr<VFrame30::SchemaLayer> activeLayer();
 
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selectedItems() const;
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selectedNonLockedItems() const;
+	const std::vector<SchemaItemPtr>& selectedItems() const;
+	std::vector<SchemaItemPtr> selectedNonLockedItems() const;
 
 	EditSchemaView* editSchemaView();
 	const EditSchemaView* editSchemaView() const;
@@ -723,7 +723,7 @@ private:
 	//
 	struct NextSelectionItem
 	{
-		std::shared_ptr<VFrame30::SchemaItem> schemaItem;
+		SchemaItemPtr schemaItem;
 		int pinIndex = 0;
 
 		bool isNull() const						{ return schemaItem == nullptr; }
@@ -765,7 +765,7 @@ protected slots:
 
 public slots:
 	void updateCompleter();
-	void updateFoundInformation(std::shared_ptr<VFrame30::SchemaItem> item,
+	void updateFoundInformation(SchemaItemPtr item,
 								const std::list<std::pair<QString, QString>>& foundProps,
 								QString searchText,
 								Qt::CaseSensitivity cs);

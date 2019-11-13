@@ -9,17 +9,17 @@ namespace EditEngine
 	{
 		AddItemCommand();		// deleted;
 	public:
-		AddItemCommand(EditSchemaView* schemaView, std::list<std::shared_ptr<VFrame30::SchemaItem>> items, std::shared_ptr<VFrame30::SchemaLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
+		AddItemCommand(EditSchemaView* schemaView, std::list<SchemaItemPtr> items, std::shared_ptr<VFrame30::SchemaLayer> layer, QScrollBar* hScrollBar, QScrollBar* vScrollBar);
 
 	protected:
-		virtual void executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect) override;
-		virtual void unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect) override;
+		virtual void executeCommand(std::vector<SchemaItemPtr>* itemsToSelect) override;
+		virtual void unExecuteCommand(std::vector<SchemaItemPtr>* itemsToSelect) override;
 
 		// Data
 		//
 	private:
-		std::list<std::shared_ptr<VFrame30::SchemaItem>> m_items;
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_selectedItems;
+		std::list<SchemaItemPtr> m_items;
+		std::vector<SchemaItemPtr> m_selectedItems;
 		std::shared_ptr<VFrame30::SchemaLayer> m_layer;
 	};
 
