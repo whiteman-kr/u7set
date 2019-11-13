@@ -2408,12 +2408,6 @@ bool SignalBase::loadComparators(const ::Builder::ComparatorSet& comparatorSet)
 		}
 
 		QList<std::shared_ptr<Builder::Comparator>> list = comparatorSet.getByInputSignalID(pInputSignal->param().appSignalID());
-
-		if (list.count() != 0)
-		{
-			int a = 0;
-		}
-
 		pInputSignal->setComparatorList(list);
 	}
 

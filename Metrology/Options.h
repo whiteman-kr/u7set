@@ -382,29 +382,26 @@ const char* const		SignalInfoParam[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "Font of signal information list"),
 						QT_TRANSLATE_NOOP("Options.h", "Show electric state"),
-						QT_TRANSLATE_NOOP("Options.h", "Show ADC state"),
-						QT_TRANSLATE_NOOP("Options.h", "Show ADC (hex) state"),
 						QT_TRANSLATE_NOOP("Options.h", "Color flag no validity"),
 						QT_TRANSLATE_NOOP("Options.h", "Color flag overflow"),
 						QT_TRANSLATE_NOOP("Options.h", "Color flag underflow"),
+						QT_TRANSLATE_NOOP("Options.h", "Time for updating state of signal, ms"),
 };
 
 const int				SIO_PARAM_COUNT					= sizeof(SignalInfoParam)/sizeof(SignalInfoParam[0]);
 
 const int				SIO_PARAM_FONT					= 0,
 						SIO_PARAM_ELECTRIC_STATE		= 1,
-						SIO_PARAM_ADC_STATE				= 2,
-						SIO_PARAM_ADC_HEX_STATE			= 3,
-						SIO_PARAM_COLOR_FLAG_VALID		= 4,
-						SIO_PARAM_COLOR_FLAG_OVERFLOW	= 5,
-						SIO_PARAM_COLOR_FLAG_UNDERFLOW	= 6;
+						SIO_PARAM_COLOR_FLAG_VALID		= 2,
+						SIO_PARAM_COLOR_FLAG_OVERFLOW	= 3,
+						SIO_PARAM_COLOR_FLAG_UNDERFLOW	= 4,
+						SIO_PARAM_TIME_FOR_UPDATE			= 5;
 
 // ----------------------------------------------------------------------------------------------
 
 #define					COLOR_FLAG_VALID		QColor(0xFF, 0xA0, 0xA0)
 #define					COLOR_FLAG_OVERFLOW		QColor(0xFF, 0xD0, 0xA0)
 #define					COLOR_FLAG_OVERBREAK	QColor(0xFF, 0xD0, 0xA0)
-#define					COLOR_FLAG_STATE_TRUE	QColor(0xA0, 0xFF, 0xA0)
 
 // ----------------------------------------------------------------------------------------------
 
@@ -427,7 +424,8 @@ private:
 	QColor				m_colorFlagValid = COLOR_FLAG_VALID;
 	QColor				m_colorFlagOverflow = COLOR_FLAG_OVERFLOW;
 	QColor				m_colorFlagUnderflow = COLOR_FLAG_OVERBREAK;
-	QColor				m_colorFlagStateTrue = COLOR_FLAG_STATE_TRUE;
+
+	int					m_timeForUpdate = 250; // 250 ms
 
 public:
 
@@ -446,14 +444,95 @@ public:
 	QColor				colorFlagUnderflow() const { return m_colorFlagUnderflow; }
 	void				setColorFlagUnderflow(QColor color) { m_colorFlagUnderflow = color; }
 
-	QColor				colorFlagStateTrue() const { return m_colorFlagStateTrue; }
-	void				setFlagColorStateTrue(QColor color) { m_colorFlagStateTrue = color; }
+	int					timeForUpdate() const { return m_timeForUpdate; }
+	void				setTimeForUpdate(int ms) { m_timeForUpdate = ms; }
 
 	void				load();
 	void				save();
 
 	SignalInfoOption&	operator=(const SignalInfoOption& from);
 };
+
+// ==============================================================================================
+
+#define					COMPARATOR_INFO_OPTIONS_KEY		"Options/ComparatorInfo/"
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const		ComparatorInfoParam[] =
+{
+						QT_TRANSLATE_NOOP("Options.h", "Font of signal information list"),
+						QT_TRANSLATE_NOOP("Options.h", "Displaying, if comparator has state \"logical 0\""),
+						QT_TRANSLATE_NOOP("Options.h", "Displaying, if comparator has state \"logical 1\""),
+						QT_TRANSLATE_NOOP("Options.h", "Color, if comparator has state \"logical 0\""),
+						QT_TRANSLATE_NOOP("Options.h", "Color, if comparator has state \"logical 1\""),
+						QT_TRANSLATE_NOOP("Options.h", "Time for updating state of signal, ms"),
+};
+
+const int				CIO_PARAM_COUNT						= sizeof(ComparatorInfoParam)/sizeof(ComparatorInfoParam[0]);
+
+const int				CIO_PARAM_FONT						= 0,
+						CIO_PARAM_DISPLAYING_STATE_FALSE	= 1,
+						CIO_PARAM_DISPLAYING_STATE_TRUE		= 2,
+						CIO_PARAM_COLOR_STATE_FALSE			= 3,
+						CIO_PARAM_COLOR_STATE_TRUE			= 4,
+						CIO_PARAM_TIME_FOR_UPDATE			= 5;
+
+// ----------------------------------------------------------------------------------------------
+
+#define					COLOR_COMPARATOR_STATE_FALSE		QColor(0xFF, 0xFF, 0xFF)
+#define					COLOR_COMPARATOR_STATE_TRUE			QColor(0xA0, 0xFF, 0xA0)
+
+// ----------------------------------------------------------------------------------------------
+
+class ComparatorInfoOption : public QObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit ComparatorInfoOption(QObject *parent = nullptr);
+	explicit ComparatorInfoOption(const ComparatorInfoOption& from, QObject *parent = nullptr);
+	virtual ~ComparatorInfoOption();
+
+private:
+
+	QFont				m_font;
+
+	QString				m_displayingStateFalse;
+	QString				m_displayingStateTrue;
+
+	QColor				m_colorStateFalse = COLOR_COMPARATOR_STATE_FALSE;
+	QColor				m_colorStateTrue = COLOR_COMPARATOR_STATE_TRUE;
+
+	int					m_timeForUpdate = 250; // 250 ms
+
+public:
+
+	QFont&				font() { return m_font; }
+	void				setFont(QFont font) { m_font = font; }
+
+	QString				displayingStateFalse() const { return m_displayingStateFalse; }
+	void				setDisplayingStateFalse(const QString& state) { m_displayingStateFalse = state; }
+
+	QString				displayingStateTrue() const { return m_displayingStateTrue; }
+	void				setDisplayingStateTrue(const QString& state) { m_displayingStateTrue = state; }
+
+	QColor				colorStateFalse() const { return m_colorStateFalse; }
+	void				setColorStateFalse(QColor color) { m_colorStateFalse = color; }
+
+	QColor				colorStateTrue() const { return m_colorStateTrue; }
+	void				setColorStateTrue(QColor color) { m_colorStateTrue = color; }
+
+	int					timeForUpdate() const { return m_timeForUpdate; }
+	void				setTimeForUpdate(int ms) { m_timeForUpdate = ms; }
+
+	void				load();
+	void				save();
+
+	ComparatorInfoOption&	operator=(const ComparatorInfoOption& from);
+};
+
 
 
 // ==============================================================================================
@@ -918,64 +997,68 @@ public:
 
 public:
 
-	int					channelCount();
+	bool					m_updateColumnView[MEASURE_TYPE_COUNT];			 // determined the need to update the view after changing settings
 
-	bool				m_updateColumnView[MEASURE_TYPE_COUNT];			 // determined the need to update the view after changing settings
+	int						channelCount();
 
 private:
 
-	QMutex				m_mutex;
+	QMutex					m_mutex;
 
-	ProjectInfo			m_projectInfo;
-	ToolBarOption		m_toolBar;
-	SocketOption		m_socket;
-	MeasureViewOption	m_measureView;
-	SignalInfoOption	m_signalInfo;
-	DatabaseOption		m_database;
-	ModuleOption		m_module;
-	LinearityOption		m_linearity;
-	ComparatorOption	m_comparator;
-	BackupOption		m_backup;
+	ProjectInfo				m_projectInfo;
+	ToolBarOption			m_toolBar;
+	SocketOption			m_socket;
+	MeasureViewOption		m_measureView;
+	SignalInfoOption		m_signalInfo;
+	ComparatorInfoOption	m_сomparatorInfo;
+	DatabaseOption			m_database;
+	ModuleOption			m_module;
+	LinearityOption			m_linearity;
+	ComparatorOption		m_comparator;
+	BackupOption			m_backup;
 
 public:
 
-	ProjectInfo&		projectInfo() { return m_projectInfo; }
-	void				setProjectInfo(const ProjectInfo& projectInfo) { m_projectInfo = projectInfo; }
+	ProjectInfo&			projectInfo() { return m_projectInfo; }
+	void					setProjectInfo(const ProjectInfo& projectInfo) { m_projectInfo = projectInfo; }
 
-	ToolBarOption&		toolBar() { return m_toolBar; }
-	void				setToolBar(const ToolBarOption& toolBar) { m_toolBar = toolBar; }
+	ToolBarOption&			toolBar() { return m_toolBar; }
+	void					setToolBar(const ToolBarOption& toolBar) { m_toolBar = toolBar; }
 
-	SocketOption&		socket() { return m_socket; }
-	void				setSocket(const SocketOption& socket) { m_socket = socket; }
+	SocketOption&			socket() { return m_socket; }
+	void					setSocket(const SocketOption& socket) { m_socket = socket; }
 
-	MeasureViewOption&	measureView() { return m_measureView; }
-	void				setMeasureView(const MeasureViewOption& measureView) { m_measureView = measureView; }
+	MeasureViewOption&		measureView() { return m_measureView; }
+	void					setMeasureView(const MeasureViewOption& measureView) { m_measureView = measureView; }
 
-	SignalInfoOption&	signalInfo() { return m_signalInfo; }
-	void				setSignalInfo(const SignalInfoOption& signalInfo) { m_signalInfo = signalInfo; }
+	SignalInfoOption&		signalInfo() { return m_signalInfo; }
+	void					setSignalInfo(const SignalInfoOption& signalInfo) { m_signalInfo = signalInfo; }
 
-	DatabaseOption&		database() { return m_database; }
-	void				setDatabase(const DatabaseOption& database) { m_database = database; }
+	ComparatorInfoOption&	comparatorInfo() { return m_сomparatorInfo; }
+	void					setComparatorInfo(const ComparatorInfoOption& сomparatorInfo) { m_сomparatorInfo = сomparatorInfo; }
 
-	ModuleOption&		module() { return m_module; }
-	void				setModule(const ModuleOption& module) { m_module = module; }
+	DatabaseOption&			database() { return m_database; }
+	void					setDatabase(const DatabaseOption& database) { m_database = database; }
 
-	LinearityOption&	linearity() { return m_linearity; }
-	void				setLinearity(const LinearityOption& linearity) { m_linearity = linearity; }
+	ModuleOption&			module() { return m_module; }
+	void					setModule(const ModuleOption& module) { m_module = module; }
 
-	ComparatorOption&	comparator() { return m_comparator; }
-	void				setComparator(const ComparatorOption& comparator) { m_comparator = comparator; }
+	LinearityOption&		linearity() { return m_linearity; }
+	void					setLinearity(const LinearityOption& linearity) { m_linearity = linearity; }
 
-	BackupOption&		backup() { return m_backup; }
-	void				etBackup(const BackupOption& backup) { m_backup = backup; }
+	ComparatorOption&		comparator() { return m_comparator; }
+	void					setComparator(const ComparatorOption& comparator) { m_comparator = comparator; }
 
-	void				load();
-	void				save();
-	void				unload();
+	BackupOption&			backup() { return m_backup; }
+	void					etBackup(const BackupOption& backup) { m_backup = backup; }
 
-	bool				readFromXml(const QByteArray& fileData);
+	void					load();
+	void					save();
+	void					unload();
 
-	Options&			operator=(const Options& from);
+	bool					readFromXml(const QByteArray& fileData);
+
+	Options&				operator=(const Options& from);
 };
 
 // ==============================================================================================

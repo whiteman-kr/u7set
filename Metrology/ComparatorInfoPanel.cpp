@@ -112,7 +112,7 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::FontRole)
 	{
-		return theOptions.signalInfo().font();
+		return theOptions.comparatorInfo().font();
 	}
 
 	if (role == Qt::BackgroundColorRole)
@@ -120,7 +120,11 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 		Metrology::SignalState state = theSignalBase.signalState(pComparator->output().appSignalID());
 		if (state.value() != 0.0)
 		{
-			return theOptions.signalInfo().colorFlagStateTrue();
+			return theOptions.comparatorInfo().colorStateTrue();
+		}
+		else
+		{
+			return theOptions.comparatorInfo().colorStateFalse();
 		}
 
 		return QVariant();
@@ -153,9 +157,17 @@ QString ComparatorInfoTable::text(std::shared_ptr<::Builder::Comparator> pCompar
 		case ::Builder::Comparator::CmpType::NotEqu:	stateStr = "≠ ";		break;
 	}
 
+	int precision = pComparator->precision();
+	switch (pComparator->intAnalogSignalFormat())
+	{
+		case E::AnalogAppSignalFormat::Float32:		precision = pComparator->precision();	break;
+		case E::AnalogAppSignalFormat::SignedInt32:	precision = 0;							break;
+		default:									assert(0);
+	}
+
 	if (pComparator->compare().isConst() == true)
 	{
-		stateStr += QString::number(pComparator->compare().constValue(), 10, pComparator->precision());
+		stateStr += QString::number(pComparator->compare().constValue(), 10, precision);
 	}
 	else
 	{
@@ -171,8 +183,7 @@ QString ComparatorInfoTable::text(std::shared_ptr<::Builder::Comparator> pCompar
 		}
 
 		Metrology::SignalState compareState = theSignalBase.signalState(pCompareSignal->param().hash());
-
-		stateStr += QString::number(compareState.value(), 10, pComparator->precision());
+		stateStr += QString::number(compareState.value(), 10, precision);
 	}
 
 	stateStr += " : ";
@@ -180,11 +191,11 @@ QString ComparatorInfoTable::text(std::shared_ptr<::Builder::Comparator> pCompar
 	Metrology::SignalState outputState = theSignalBase.signalState(pComparator->output().appSignalID());
 	if (outputState.value() == 0.0)
 	{
-		stateStr += "false";
+		stateStr += theOptions.comparatorInfo().displayingStateFalse();
 	}
 	else
 	{
-		stateStr += "true";
+		stateStr += theOptions.comparatorInfo().displayingStateTrue();
 	}
 
 	return stateStr;
@@ -295,7 +306,7 @@ void ComparatorInfoPanel::createInterface()
 
 	m_pView = new QTableView(m_pComparatorInfoWindow);
 	m_pView->setModel(&m_comparatorTable);
-	QSize cellSize = QFontMetrics(theOptions.signalInfo().font()).size(Qt::TextSingleLine,"A");
+	QSize cellSize = QFontMetrics(theOptions.comparatorInfo().font()).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
 	m_pComparatorInfoWindow->setCentralWidget(m_pView);
@@ -320,26 +331,9 @@ void ComparatorInfoPanel::createContextMenu()
 	//
 	m_pContextMenu = new QMenu(tr(""), m_pComparatorInfoWindow);
 
-	m_pShowMenu = new QMenu(tr("Show"), m_pComparatorInfoWindow);
-
-	m_pShowElectricValueAction = m_pShowMenu->addAction(tr("Electrical state"));
-	m_pShowElectricValueAction->setCheckable(true);
-	m_pShowElectricValueAction->setChecked(theOptions.signalInfo().showElectricState());
-
-	m_pContextMenu->addMenu(m_pShowMenu);
-
-	m_pContextMenu->addSeparator();
-
-	m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
-	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
-
-	m_pContextMenu->addSeparator();
-
 	m_pComparatorPropertyAction = m_pContextMenu->addAction(tr("Properties ..."));
 	m_pComparatorPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
-	connect(m_pShowElectricValueAction, &QAction::triggered, this, &ComparatorInfoPanel::showElectricValue);
-	connect(m_pCopyAction, &QAction::triggered, this, &ComparatorInfoPanel::copy);
 	connect(m_pComparatorPropertyAction, &QAction::triggered, this, &ComparatorInfoPanel::comparatorProperty);
 
 	// init context menu
@@ -377,7 +371,7 @@ void ComparatorInfoPanel::startComparatorStateTimer()
 		connect(m_updateComparatorStateTimer, &QTimer::timeout, this, &ComparatorInfoPanel::updateComparatorState);
 	}
 
-	m_updateComparatorStateTimer->start(COMPARATOR_INFO_UPDATE_TIMER);
+	m_updateComparatorStateTimer->start(theOptions.comparatorInfo().timeForUpdate());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -392,10 +386,16 @@ void ComparatorInfoPanel::stopComparatorStateTimer()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void ComparatorInfoPanel::restartComparatorStateTimer()
+{
+	stopComparatorStateTimer();
+	startComparatorStateTimer();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void ComparatorInfoPanel::onContextMenu(QPoint)
 {
-	m_pShowElectricValueAction->setChecked(theOptions.signalInfo().showElectricState());
-
 	m_pContextMenu->exec(QCursor::pos());
 }
 
@@ -474,7 +474,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	//
 	//
-	QSize cellSize = QFontMetrics(theOptions.signalInfo().font()).size(Qt::TextSingleLine,"A");
+	QSize cellSize = QFontMetrics(theOptions.comparatorInfo().font()).size(Qt::TextSingleLine,"A");
 
 	if (activeSignal.outputSignalType() == OUTPUT_SIGNAL_TYPE_UNUSED)
 	{
@@ -491,46 +491,6 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 void ComparatorInfoPanel::updateComparatorState()
 {
 	m_comparatorTable.updateState();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ComparatorInfoPanel::showElectricValue()
-{
-	theOptions.signalInfo().setShowElectricState(m_pShowElectricValueAction->isChecked());
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void ComparatorInfoPanel::copy()
-{
-	QString textClipboard;
-
-	int rowCount = m_pView->model()->rowCount();
-	int columnCount = m_pView->model()->columnCount();
-
-	for(int row = 0; row < rowCount; row++)
-	{
-		if (m_pView->selectionModel()->isRowSelected(row, QModelIndex()) == false)
-		{
-			continue;
-		}
-
-		for(int column = 0; column < columnCount; column++)
-		{
-			if (m_pView->isColumnHidden(column) == true)
-			{
-				continue;
-			}
-
-			textClipboard.append(m_pView->model()->data(m_pView->model()->index(row, column)).toString() + "\t");
-		}
-
-		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
-	}
-
-	QClipboard *clipboard = QApplication::clipboard();
-	clipboard->setText(textClipboard);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

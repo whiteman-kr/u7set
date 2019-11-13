@@ -554,7 +554,7 @@ void SignalInfoPanel::startSignalStateTimer()
 		connect(m_updateSignalStateTimer, &QTimer::timeout, this, &SignalInfoPanel::updateSignalState);
 	}
 
-	m_updateSignalStateTimer->start(SIGNAL_INFO_UPDATE_TIMER);
+	m_updateSignalStateTimer->start(theOptions.signalInfo().timeForUpdate());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -565,6 +565,14 @@ void SignalInfoPanel::stopSignalStateTimer()
 	{
 		m_updateSignalStateTimer->stop();
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoPanel::restartSignalStateTimer()
+{
+	stopSignalStateTimer();
+	startSignalStateTimer();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -72,10 +72,7 @@ private:
 	QTableView*				m_pView = nullptr;
 	ComparatorInfoTable		m_comparatorTable;
 
-	QMenu*					m_pShowMenu = nullptr;
 	QMenu*					m_pContextMenu = nullptr;
-	QAction*				m_pShowElectricValueAction = nullptr;
-	QAction*				m_pCopyAction = nullptr;
 	QAction*				m_pComparatorPropertyAction = nullptr;
 
 	void					createInterface();
@@ -90,6 +87,7 @@ private:
 public:
 
 	void					clear() { m_comparatorTable.clear(); }
+	void					restartComparatorStateTimer();
 
 protected:
 
@@ -104,8 +102,6 @@ private slots:
 
 	// slots of menu
 	//
-	void					showElectricValue();
-	void					copy();
 	void					comparatorProperty();
 
 	void					onContextMenu(QPoint);

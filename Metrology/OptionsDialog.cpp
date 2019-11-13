@@ -261,6 +261,7 @@ PropertyPage* OptionsDialog::createPage(int page)
 		case OPTION_PAGE_COMPARATOR_MEASURE:
 		case OPTION_PAGE_MEASURE_VIEW_TEXT:
 		case OPTION_PAGE_SIGNAL_INFO:
+		case OPTION_PAGE_COMPARATOR_INFO:
 		case OPTION_PAGE_DATABASE:
 		case OPTION_PAGE_BACKUP:				pPropertyPage = createPropertyList(page);	break;
 		case OPTION_PAGE_LINEARITY_POINT:
@@ -655,16 +656,79 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					appendProperty(item, page, SIO_PARAM_COLOR_FLAG_UNDERFLOW);
 					colorGroup->addSubProperty(item);
 
+				QtProperty *timeGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Time for updating"));
+
+					item = manager->addProperty(QVariant::Int, SignalInfoParam[SIO_PARAM_TIME_FOR_UPDATE]);
+					item->setValue(m_options.signalInfo().timeForUpdate());
+					appendProperty(item, page, SIO_PARAM_TIME_FOR_UPDATE);
+					timeGroup->addSubProperty(item);
+
 				editor->setFactoryForManager(manager, factory);
 
 				editor->addProperty(fontGroup);
 				editor->addProperty(measureGroup);
 				editor->addProperty(colorGroup);
+				editor->addProperty(timeGroup);
 
 				expandProperty(editor, OPTION_PAGE_SIGNAL_INFO, SIO_PARAM_FONT, false);
 				expandProperty(editor, OPTION_PAGE_SIGNAL_INFO, SIO_PARAM_COLOR_FLAG_VALID, false);
 				expandProperty(editor, OPTION_PAGE_SIGNAL_INFO, SIO_PARAM_COLOR_FLAG_OVERFLOW, false);
 				expandProperty(editor, OPTION_PAGE_SIGNAL_INFO, SIO_PARAM_COLOR_FLAG_UNDERFLOW, false);
+			}
+
+			break;
+
+		case OPTION_PAGE_COMPARATOR_INFO:
+			{
+				QtProperty *fontGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Font"));
+
+					item = manager->addProperty(QVariant::Font, ComparatorInfoParam[CIO_PARAM_FONT]);
+					item->setValue(m_options.comparatorInfo().font());
+					appendProperty(item, page, CIO_PARAM_FONT);
+					fontGroup->addSubProperty(item);
+
+				QtProperty *stateGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Displaying comparator state"));
+
+					item = manager->addProperty(QVariant::String, ComparatorInfoParam[CIO_PARAM_DISPLAYING_STATE_FALSE]);
+					item->setValue(m_options.comparatorInfo().displayingStateFalse());
+					appendProperty(item, page, CIO_PARAM_DISPLAYING_STATE_FALSE);
+					stateGroup->addSubProperty(item);
+
+					item = manager->addProperty(QVariant::String, ComparatorInfoParam[CIO_PARAM_DISPLAYING_STATE_TRUE]);
+					item->setValue(m_options.comparatorInfo().displayingStateTrue());
+					appendProperty(item, page, CIO_PARAM_DISPLAYING_STATE_TRUE);
+					stateGroup->addSubProperty(item);
+
+
+				QtProperty *colorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Colors"));
+
+					item = manager->addProperty(QVariant::Color, ComparatorInfoParam[CIO_PARAM_COLOR_STATE_FALSE]);
+					item->setValue(m_options.comparatorInfo().colorStateFalse());
+					appendProperty(item, page, CIO_PARAM_COLOR_STATE_FALSE);
+					colorGroup->addSubProperty(item);
+
+					item = manager->addProperty(QVariant::Color, ComparatorInfoParam[CIO_PARAM_COLOR_STATE_TRUE]);
+					item->setValue(m_options.comparatorInfo().colorStateTrue());
+					appendProperty(item, page, CIO_PARAM_COLOR_STATE_TRUE);
+					colorGroup->addSubProperty(item);
+
+				QtProperty *timeGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Time for updating"));
+
+					item = manager->addProperty(QVariant::Int, ComparatorInfoParam[CIO_PARAM_TIME_FOR_UPDATE]);
+					item->setValue(m_options.comparatorInfo().timeForUpdate());
+					appendProperty(item, page, CIO_PARAM_TIME_FOR_UPDATE);
+					timeGroup->addSubProperty(item);
+
+				editor->setFactoryForManager(manager, factory);
+
+				editor->addProperty(fontGroup);
+				editor->addProperty(stateGroup);
+				editor->addProperty(colorGroup);
+				editor->addProperty(timeGroup);
+
+				expandProperty(editor, OPTION_PAGE_COMPARATOR_INFO, CIO_PARAM_FONT, false);
+				expandProperty(editor, OPTION_PAGE_COMPARATOR_INFO, CIO_PARAM_COLOR_STATE_FALSE, false);
+				expandProperty(editor, OPTION_PAGE_COMPARATOR_INFO, CIO_PARAM_COLOR_STATE_TRUE, false);
 			}
 
 			break;
@@ -1120,6 +1184,22 @@ void OptionsDialog::applyProperty()
 				case SIO_PARAM_COLOR_FLAG_VALID:		m_options.signalInfo().setColorFlagValid(QColor(value.toString()));		break;
 				case SIO_PARAM_COLOR_FLAG_OVERFLOW:		m_options.signalInfo().setColorFlagOverflow(QColor(value.toString()));	break;
 				case SIO_PARAM_COLOR_FLAG_UNDERFLOW:	m_options.signalInfo().setColorFlagUnderflow(QColor(value.toString()));	break;
+				case SIO_PARAM_TIME_FOR_UPDATE:			m_options.signalInfo().setTimeForUpdate(value.toInt());					break;
+				default:								assert(0);
+			}
+
+			break;
+
+		case OPTION_PAGE_COMPARATOR_INFO:
+
+			switch(param)
+			{
+				case CIO_PARAM_FONT:					m_options.comparatorInfo().font().fromString(value.toString());				break;
+				case CIO_PARAM_DISPLAYING_STATE_FALSE:	m_options.comparatorInfo().setDisplayingStateFalse(value.toString());		break;
+				case CIO_PARAM_DISPLAYING_STATE_TRUE:	m_options.comparatorInfo().setDisplayingStateTrue(value.toString());		break;
+				case CIO_PARAM_COLOR_STATE_FALSE:		m_options.comparatorInfo().setColorStateFalse(QColor(value.toString()));	break;
+				case CIO_PARAM_COLOR_STATE_TRUE:		m_options.comparatorInfo().setColorStateTrue(QColor(value.toString()));		break;
+				case CIO_PARAM_TIME_FOR_UPDATE:			m_options.comparatorInfo().setTimeForUpdate(value.toInt());					break;
 				default:								assert(0);
 			}
 

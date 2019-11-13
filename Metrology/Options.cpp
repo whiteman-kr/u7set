@@ -637,7 +637,8 @@ void SignalInfoOption::load()
 	m_colorFlagValid = s.value(QString("%1ColorFlagValid").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_VALID.rgb()).toInt();
 	m_colorFlagOverflow = s.value(QString("%1ColorFlagOverflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERFLOW.rgb()).toInt();
 	m_colorFlagUnderflow = s.value(QString("%1ColorFlagUnderflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERBREAK.rgb()).toInt();
-	m_colorFlagStateTrue = s.value(QString("%1ColorFlagStateTrue").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_STATE_TRUE.rgb()).toInt();
+
+	m_timeForUpdate = s.value(QString("%1TimeForUpdate").arg(SIGNAL_INFO_OPTIONS_KEY), 250).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -653,7 +654,8 @@ void SignalInfoOption::save()
 	s.setValue(QString("%1ColorFlagValid").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagValid.rgb());
 	s.setValue(QString("%1ColorFlagOverflow").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagOverflow.rgb());
 	s.setValue(QString("%1ColorFlagUnderflow").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagUnderflow.rgb());
-	s.setValue(QString("%1ColorFlagStateTrue").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagStateTrue.rgb());
+
+	s.setValue(QString("%1TimeForUpdate").arg(SIGNAL_INFO_OPTIONS_KEY), m_timeForUpdate);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -667,6 +669,83 @@ SignalInfoOption& SignalInfoOption::operator=(const SignalInfoOption& from)
 	m_colorFlagValid = from.m_colorFlagValid;
 	m_colorFlagOverflow = from.m_colorFlagOverflow;
 	m_colorFlagUnderflow = from.m_colorFlagUnderflow;
+
+	m_timeForUpdate = from.m_timeForUpdate;
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+ComparatorInfoOption::ComparatorInfoOption(QObject *parent) :
+	QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ComparatorInfoOption::ComparatorInfoOption(const ComparatorInfoOption& from, QObject *parent) :
+	QObject(parent)
+{
+	*this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+
+ComparatorInfoOption::~ComparatorInfoOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorInfoOption::load()
+{
+	QSettings s;
+
+	m_font.fromString(s.value(QString("%1Font").arg(COMPARATOR_INFO_OPTIONS_KEY), "Segoe UI, 10").toString());
+
+	m_displayingStateFalse = s.value(QString("%1DisplayingStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), "False").toString();
+	m_displayingStateTrue = s.value(QString("%1DisplayingStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), "True").toString();
+
+	m_colorStateFalse = s.value(QString("%1ColorStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), COLOR_COMPARATOR_STATE_FALSE.rgb()).toInt();
+	m_colorStateTrue = s.value(QString("%1ColorStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), COLOR_COMPARATOR_STATE_TRUE.rgb()).toInt();
+
+	m_timeForUpdate = s.value(QString("%1TimeForUpdate").arg(COMPARATOR_INFO_OPTIONS_KEY), 250).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorInfoOption::save()
+{
+	QSettings s;
+
+	s.setValue(QString("%1Font").arg(COMPARATOR_INFO_OPTIONS_KEY), m_font.toString());
+
+	s.setValue(QString("%1DisplayingStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), m_displayingStateFalse);
+	s.setValue(QString("%1DisplayingStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), m_displayingStateTrue);
+
+	s.setValue(QString("%1ColorStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), m_colorStateFalse.rgb());
+	s.setValue(QString("%1ColorStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), m_colorStateTrue.rgb());
+
+	s.setValue(QString("%1TimeForUpdate").arg(COMPARATOR_INFO_OPTIONS_KEY), m_timeForUpdate);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ComparatorInfoOption& ComparatorInfoOption::operator=(const ComparatorInfoOption& from)
+{
+	m_font.fromString(from.m_font.toString());
+
+	m_displayingStateFalse = from.m_displayingStateFalse;
+	m_displayingStateTrue = from.m_displayingStateTrue;
+
+	m_colorStateFalse = from.m_colorStateFalse;
+	m_colorStateTrue = from.m_colorStateTrue;
+
+	m_timeForUpdate = from.m_timeForUpdate;
 
 	return *this;
 }
@@ -1296,6 +1375,7 @@ void Options::load()
 	m_measureView.load();
 
 	m_signalInfo.load();
+	m_сomparatorInfo.load();
 
 	m_database.load();
 	m_database.create();
@@ -1321,6 +1401,7 @@ void Options::save()
 	m_measureView.save();
 
 	m_signalInfo.save();
+	m_сomparatorInfo.save();
 
 	m_database.save();
 
@@ -1389,6 +1470,7 @@ Options& Options::operator=(const Options& from)
 		m_socket = from.m_socket;
 		m_measureView = from.m_measureView;
 		m_signalInfo = from.m_signalInfo;
+		m_сomparatorInfo = from.m_сomparatorInfo;
 		m_database = from.m_database;
 		m_module = from.m_module;
 		m_linearity = from.m_linearity;

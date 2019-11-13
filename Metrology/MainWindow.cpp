@@ -1297,6 +1297,16 @@ void MainWindow::showOptions()
 		pView->updateColumn();
 	}
 
+	if (m_pSignalInfoPanel != nullptr)
+	{
+		m_pSignalInfoPanel->restartSignalStateTimer();
+	}
+
+	if (m_pComparatorInfoPanel != nullptr)
+	{
+		m_pComparatorInfoPanel->restartComparatorStateTimer();
+	}
+
 	if (m_pStatisticPanel != nullptr)
 	{
 		m_pStatisticPanel->updateList();

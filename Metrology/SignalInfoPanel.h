@@ -145,6 +145,7 @@ private:
 public:
 
 	void					clear() { m_signalParamTable.clear(); }
+	void					restartSignalStateTimer();
 
 protected:
 
