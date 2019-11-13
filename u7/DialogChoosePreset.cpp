@@ -14,15 +14,15 @@ DialogChoosePreset::DialogChoosePreset(QWidget* parent, DbController* db, Hardwa
 {
 	ui->setupUi(this);
 
-	QStringList columnNames;
-	columnNames << tr("Caption");
-	columnNames << tr("PresetName");
-	columnNames << tr("Type");
+	Q_ASSERT(m_db);
+
+	QStringList columnNames{tr("Caption"), tr("Certificates"), tr("PresetName"), tr("Type")};
 
 	ui->m_presetTree->setColumnCount(columnNames.size());
 	ui->m_presetTree->setHeaderLabels(columnNames);
 	int il = 0;
 	ui->m_presetTree->setColumnWidth(il++, 250);
+	ui->m_presetTree->setColumnWidth(il++, 150);
 	ui->m_presetTree->setColumnWidth(il++, 150);
 	ui->m_presetTree->setColumnWidth(il++, 150);
 
@@ -55,29 +55,30 @@ DialogChoosePreset::DialogChoosePreset(QWidget* parent, DbController* db, Hardwa
 
 	// Read DeviceObjects from raw data
 	//
-	presets.clear();
-	presets.reserve(files.size());
+	m_presets.clear();
+	m_presets.reserve(files.size());
 
 	for (std::shared_ptr<DbFile>& f : files)
 	{
 		std::shared_ptr<Hardware::DeviceObject> object(Hardware::DeviceObject::fromDbFile(*f));
-		assert(object != nullptr);
+		Q_ASSERT(object != nullptr);
 
-		presets.push_back(object);
+		m_presets.push_back(object);
 	}
 
 	// Choose preset
 	//
+	std::map<QString, QTreeWidgetItem*> categoryTreeItem;
 
-	for (std::shared_ptr<Hardware::DeviceObject>& p : presets)
+	for (std::shared_ptr<Hardware::DeviceObject>& preset : m_presets)
 	{
-		QStringList l;
+		Q_ASSERT(preset);
 
-		Hardware::DeviceType presetType = p->deviceType();
+		Hardware::DeviceType presetType = preset->deviceType();
 
 		if (static_cast<int>(presetType) >= static_cast<int>(Hardware::DeviceType::DeviceTypeCount))
 		{
-			assert(false);
+			Q_ASSERT(false);
 			continue;
 		}
 
@@ -143,16 +144,19 @@ DialogChoosePreset::DialogChoosePreset(QWidget* parent, DbController* db, Hardwa
 			continue;
 		}
 
-		l << p->caption();
-		l << p->presetName();
+		QStringList l;
+		l << preset->caption();
+		l << (preset->propertyExists("Certificates") ? preset->propertyByCaption("Certificates")->value().toString() : QString{});
+		l << preset->caption();
+		l << preset->presetName();
 		l << Hardware::DeviceTypeNames[static_cast<int>(presetType)];
 
 		QTreeWidgetItem* item = new QTreeWidgetItem(l);
-		item->setData(0, Qt::UserRole, p->presetName());
+		item->setData(0, Qt::UserRole, preset->presetName());
 
 		ui->m_presetTree->addTopLevelItem(item);
 
-		if (m_lastSelectedPreset == p->presetName())
+		if (m_lastSelectedPreset == preset->presetName())
 		{
 			ui->m_presetTree->setCurrentItem(item);
 		}
@@ -175,7 +179,7 @@ void DialogChoosePreset::showEvent(QShowEvent*)
 	//
 	QRect screen = QDesktopWidget().availableGeometry(parentWidget());
 
-	resize(static_cast<int>(screen.width() * 0.26),
+	resize(static_cast<int>(screen.width() * 0.35),
 		   static_cast<int>(screen.height() * 0.45));
 
 	move(screen.center() - rect().center());
@@ -185,8 +189,7 @@ void DialogChoosePreset::showEvent(QShowEvent*)
 
 void DialogChoosePreset::on_DialogChoosePreset_accepted()
 {
-
-	auto list = ui->m_presetTree->selectedItems();
+	QList<QTreeWidgetItem*> list = ui->m_presetTree->selectedItems();
 	if (list.size() != 1)
 	{
 		return;
@@ -194,8 +197,7 @@ void DialogChoosePreset::on_DialogChoosePreset_accepted()
 
 	QString data = list[0]->data(0, Qt::UserRole).toString();
 
-
-	for (std::shared_ptr<Hardware::DeviceObject>& p : presets)
+	for (std::shared_ptr<Hardware::DeviceObject>& p : m_presets)
 	{
 		if (data == p->presetName())
 		{
@@ -205,16 +207,18 @@ void DialogChoosePreset::on_DialogChoosePreset_accepted()
 		}
 	}
 
-	assert(false);
+	Q_ASSERT(false);
 	return;
 }
 
 void DialogChoosePreset::on_DialogChoosePreset_finished(int result)
 {
 	Q_UNUSED(result);
+
 	m_lastSortColumn = ui->m_presetTree->header()->sortIndicatorSection();
 	m_lastSortOrder = ui->m_presetTree->header()->sortIndicatorOrder();
 
+	return;
 }
 
 void DialogChoosePreset::on_m_presetTree_doubleClicked(const QModelIndex& index)
@@ -222,6 +226,7 @@ void DialogChoosePreset::on_m_presetTree_doubleClicked(const QModelIndex& index)
 	Q_UNUSED(index);
 
 	on_DialogChoosePreset_accepted();
-
 	accept();
+
+	return;
 }

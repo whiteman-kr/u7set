@@ -1511,7 +1511,7 @@ void EquipmentView::addPreset()
 {
 	if (isConfigurationMode() == false)
 	{
-		assert(isConfigurationMode() == true);
+		Q_ASSERT(isConfigurationMode() == true);
 		return;
 	}
 
@@ -1524,7 +1524,7 @@ void EquipmentView::addPreset()
 		Hardware::DeviceObject* selectedObject = equipmentModel()->deviceObject(singleSelectedIndex);
 		if (selectedObject == nullptr)
 		{
-			assert(selectedObject != nullptr);
+			Q_ASSERT(selectedObject != nullptr);
 			return;
 		}
 
