@@ -212,15 +212,15 @@ void MainWindow::createActions()
 	m_pShowComparatorsListAction->setToolTip("");
 	connect(m_pShowComparatorsListAction, &QAction::triggered, this, &MainWindow::showComparatorsList);
 
-	m_pShowOutputSignalListAction = new QAction(tr("Output signals ..."), this);
-	m_pShowOutputSignalListAction->setIcon(QIcon(":/icons/InOut.png"));
-	m_pShowOutputSignalListAction->setToolTip("");
-	connect(m_pShowOutputSignalListAction, &QAction::triggered, this, &MainWindow::showOutputSignalList);
-
 	m_pShowTuningSignalListAction = new QAction(tr("Tuning signals ..."), this);
 	m_pShowTuningSignalListAction->setIcon(QIcon(":/icons/InOut.png"));
 	m_pShowTuningSignalListAction->setToolTip("");
 	connect(m_pShowTuningSignalListAction, &QAction::triggered, this, &MainWindow::showTuningSignalList);
+
+	m_pShowOutputSignalListAction = new QAction(tr("Output signals ..."), this);
+	m_pShowOutputSignalListAction->setIcon(QIcon(":/icons/InOut.png"));
+	m_pShowOutputSignalListAction->setToolTip("");
+	connect(m_pShowOutputSignalListAction, &QAction::triggered, this, &MainWindow::showOutputSignalList);
 
 	m_pShowCalculatorAction = new QAction(tr("Metrological &calculator ..."), this);
 	m_pShowCalculatorAction->setShortcut(Qt::ALT + Qt::Key_C);
@@ -280,25 +280,27 @@ void MainWindow::createMenu()
 
 
 	m_pViewMenu = pMenuBar->addMenu(tr("&View"));
-
 	m_pViewPanelMenu = new QMenu("&Panels", m_pViewMenu);
+
 	m_pViewMenu->addMenu(m_pViewPanelMenu);
 
 
-	m_pSettingMenu = pMenuBar->addMenu(tr("&Tools"));
+	m_pToolsMenu = pMenuBar->addMenu(tr("&Tools"));
+	m_pToolsListsMenu = new QMenu("&Lists", m_pViewMenu);
 
-	m_pSettingMenu->addAction(m_pCalibratorsAction);
-	m_pSettingMenu->addSeparator();
-	m_pSettingMenu->addAction(m_pShowRackListAction);
-	m_pSettingMenu->addAction(m_pShowSignalListAction);
-	m_pSettingMenu->addSeparator();
-	m_pSettingMenu->addAction(m_pShowComparatorsListAction);
-	m_pSettingMenu->addAction(m_pShowOutputSignalListAction);
-	m_pSettingMenu->addAction(m_pShowTuningSignalListAction);
-	m_pSettingMenu->addSeparator();
-	m_pSettingMenu->addAction(m_pShowCalculatorAction);
-	m_pSettingMenu->addSeparator();
-	m_pSettingMenu->addAction(m_pOptionsAction);
+	m_pToolsMenu->addAction(m_pCalibratorsAction);
+	m_pToolsMenu->addSeparator();
+	m_pToolsListsMenu->addAction(m_pShowRackListAction);
+	m_pToolsListsMenu->addAction(m_pShowSignalListAction);
+	m_pToolsListsMenu->addAction(m_pShowComparatorsListAction);
+	m_pToolsListsMenu->addAction(m_pShowTuningSignalListAction);
+	m_pToolsListsMenu->addSeparator();
+	m_pToolsListsMenu->addAction(m_pShowOutputSignalListAction);
+	m_pToolsMenu->addMenu(m_pToolsListsMenu);
+	m_pToolsMenu->addSeparator();
+	m_pToolsMenu->addAction(m_pShowCalculatorAction);
+	m_pToolsMenu->addSeparator();
+	m_pToolsMenu->addAction(m_pOptionsAction);
 
 
 	m_pInfoMenu = pMenuBar->addMenu(tr("&?"));
@@ -1214,6 +1216,14 @@ void MainWindow::showComparatorsList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::showTuningSignalList()
+{
+	TuningSignalListDialog dialog(this);
+	dialog.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::showOutputSignalList()
 {
 	OutputSignalDialog dialog(this);
@@ -1227,14 +1237,6 @@ void MainWindow::showOutputSignalList()
 		QMessageBox::information(this, windowTitle(), tr("Attempt to save output signals was unsuccessfully!"));
 		return;
 	}
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::showTuningSignalList()
-{
-	TuningSignalListDialog dialog(this);
-	dialog.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -64,8 +64,8 @@ private:
 	QAction*				m_pShowRackListAction = nullptr;
 	QAction*				m_pShowSignalListAction = nullptr;
 	QAction*				m_pShowComparatorsListAction = nullptr;
-	QAction*				m_pShowOutputSignalListAction = nullptr;
 	QAction*				m_pShowTuningSignalListAction = nullptr;
+	QAction*				m_pShowOutputSignalListAction = nullptr;
 	QAction*				m_pShowCalculatorAction = nullptr;
 	QAction*				m_pOptionsAction;
 
@@ -85,7 +85,8 @@ private:
 	QMenu*					m_pEditMenu = nullptr;
 	QMenu*					m_pViewMenu = nullptr;
 	QMenu*					m_pViewPanelMenu = nullptr;
-	QMenu*					m_pSettingMenu = nullptr;
+	QMenu*					m_pToolsMenu = nullptr;
+	QMenu*					m_pToolsListsMenu = nullptr;
 	QMenu*					m_pInfoMenu = nullptr;
 
 	// Elements of interface - ToolBar
@@ -223,8 +224,8 @@ private slots:
 	void					showRackList();
 	void					showSignalList();
 	void					showComparatorsList();
-	void					showOutputSignalList();
 	void					showTuningSignalList();
+	void					showOutputSignalList();
 	void					showCalculator();
 	void					showOptions();
 
