@@ -23,7 +23,7 @@
 #include "SignalList.h"
 #include "ComparatorList.h"
 #include "TuningSignalList.h"
-#include "OutputSignalList.h"
+#include "SignalConnectionList.h"
 
 #include "../lib/Ui/DialogAbout.h"
 
@@ -41,7 +41,7 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent) :
 	// load signal base
 	//
 	theSignalBase.racks().groups().load();		// load rack groups for multichannel measuring
-	theSignalBase.outputSignals().load();		// load output signals base
+	theSignalBase.signalConnections().load();	// load signal connections base
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 	connect(&theSignalBase.tuning().Signals(), &TuningSignalBase::signalsCreated, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
 
@@ -217,10 +217,10 @@ void MainWindow::createActions()
 	m_pShowTuningSignalListAction->setToolTip("");
 	connect(m_pShowTuningSignalListAction, &QAction::triggered, this, &MainWindow::showTuningSignalList);
 
-	m_pShowOutputSignalListAction = new QAction(tr("Output signals ..."), this);
-	m_pShowOutputSignalListAction->setIcon(QIcon(":/icons/InOut.png"));
-	m_pShowOutputSignalListAction->setToolTip("");
-	connect(m_pShowOutputSignalListAction, &QAction::triggered, this, &MainWindow::showOutputSignalList);
+	m_pShowSignalConnectionListAction = new QAction(tr("Signal connections ..."), this);
+	m_pShowSignalConnectionListAction->setIcon(QIcon(":/icons/InOut.png"));
+	m_pShowSignalConnectionListAction->setToolTip("");
+	connect(m_pShowSignalConnectionListAction, &QAction::triggered, this, &MainWindow::showSignalConnectionList);
 
 	m_pShowCalculatorAction = new QAction(tr("Metrological &calculator ..."), this);
 	m_pShowCalculatorAction->setShortcut(Qt::ALT + Qt::Key_C);
@@ -295,7 +295,7 @@ void MainWindow::createMenu()
 	m_pToolsListsMenu->addAction(m_pShowComparatorsListAction);
 	m_pToolsListsMenu->addAction(m_pShowTuningSignalListAction);
 	m_pToolsListsMenu->addSeparator();
-	m_pToolsListsMenu->addAction(m_pShowOutputSignalListAction);
+	m_pToolsListsMenu->addAction(m_pShowSignalConnectionListAction);
 	m_pToolsMenu->addMenu(m_pToolsListsMenu);
 	m_pToolsMenu->addSeparator();
 	m_pToolsMenu->addAction(m_pShowCalculatorAction);
@@ -406,34 +406,34 @@ bool MainWindow::createToolBars()
 	}
 
 
-	// Control panel output signals
+	// Control panel signal connections
 	//
-	m_pOutputSignalToolBar = new QToolBar(this);
-	if (m_pOutputSignalToolBar != nullptr)
+	m_pSignalConnectionToolBar = new QToolBar(this);
+	if (m_pSignalConnectionToolBar != nullptr)
 	{
-		m_pOutputSignalToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-		m_pOutputSignalToolBar->setWindowTitle(tr("Control panel output signals"));
-		m_pOutputSignalToolBar->setObjectName(m_pOutputSignalToolBar->windowTitle());
+		m_pSignalConnectionToolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
+		m_pSignalConnectionToolBar->setWindowTitle(tr("Control panel signal connections"));
+		m_pSignalConnectionToolBar->setObjectName(m_pSignalConnectionToolBar->windowTitle());
 		addToolBarBreak(Qt::RightToolBarArea);
-		addToolBar(m_pOutputSignalToolBar);
+		addToolBar(m_pSignalConnectionToolBar);
 
-		QLabel* outputSignalLabel = new QLabel(m_pOutputSignalToolBar);
-		m_outputSignalTypeList = new QComboBox(m_pOutputSignalToolBar);
+		QLabel* signalConnectionLabel = new QLabel(m_pSignalConnectionToolBar);
+		m_signalConnectionTypeList = new QComboBox(m_pSignalConnectionToolBar);
 
-		m_pOutputSignalToolBar->addWidget(outputSignalLabel);
-		outputSignalLabel->setText(tr(" Output signals "));
-		outputSignalLabel->setEnabled(false);
+		m_pSignalConnectionToolBar->addWidget(signalConnectionLabel);
+		signalConnectionLabel->setText(tr(" Signal connections "));
+		signalConnectionLabel->setEnabled(false);
 
-		m_pOutputSignalToolBar->addWidget(m_outputSignalTypeList);
+		m_pSignalConnectionToolBar->addWidget(m_signalConnectionTypeList);
 
-		for(int s = 0; s < OUTPUT_SIGNAL_TYPE_COUNT; s++)
+		for(int s = 0; s < SIGNAL_CONNECTION_TYPE_COUNT; s++)
 		{
-			m_outputSignalTypeList->addItem(OutputSignalType[s]);
+			m_signalConnectionTypeList->addItem(SignalConnectionType[s]);
 		}
 
-		m_outputSignalTypeList->setCurrentIndex(theOptions.toolBar().outputSignalType());
+		m_signalConnectionTypeList->setCurrentIndex(theOptions.toolBar().signalConnectionType());
 
-		connect(m_outputSignalTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setOutputSignalType);
+		connect(m_signalConnectionTypeList, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &MainWindow::setSignalConnectionType);
 	}
 
 	// Control panel selecting analog signal
@@ -564,7 +564,7 @@ void MainWindow::createPanels()
 		connect(&theSignalBase, &SignalBase::activeSignalChanged, m_pStatisticPanel, &StatisticPanel::activeSignalChanged, Qt::QueuedConnection);
 
 		connect(this, &MainWindow::changedMeasureType, m_pStatisticPanel, &StatisticPanel::changedMeasureType, Qt::QueuedConnection);
-		connect(this, &MainWindow::changedOutputSignalType, m_pStatisticPanel, &StatisticPanel::changedOutputSignalType, Qt::QueuedConnection);
+		connect(this, &MainWindow::changedSignalConnectionType, m_pStatisticPanel, &StatisticPanel::changedSignalConnectionType, Qt::QueuedConnection);
 	}
 
 
@@ -775,13 +775,13 @@ void MainWindow::updateRacksOnToolBar()
 		return;
 	}
 
-	int outputSignalType = theOptions.toolBar().outputSignalType();
-	if (outputSignalType < 0 || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
+	int signalConnectionType = theOptions.toolBar().signalConnectionType();
+	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		return;
 	}
 
-	int rackCount = theSignalBase.createRackListForMeasure(outputSignalType);
+	int rackCount = theSignalBase.createRackListForMeasure(signalConnectionType);
 	if (rackCount == 0)
 	{
 		return;
@@ -874,8 +874,8 @@ void MainWindow::updateSignalsOnToolBar()
 		return;
 	}
 
-	int outputSignalType = theOptions.toolBar().outputSignalType();
-	if (outputSignalType < 0 || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
+	int signalConnectionType = theOptions.toolBar().signalConnectionType();
+	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		return;
 	}
@@ -888,7 +888,7 @@ void MainWindow::updateSignalsOnToolBar()
 		return;
 	}
 
-	int signalCount = theSignalBase.createSignalListForMeasure(measureKind, outputSignalType, rackIndex);
+	int signalCount = theSignalBase.createSignalListForMeasure(measureKind, signalConnectionType, rackIndex);
 	if (signalCount == 0)
 	{
 		return;
@@ -992,7 +992,7 @@ void MainWindow::setMeasureType(int measureType)
 		case MEASURE_TYPE_COMPARATOR:
 
 			m_pMeasureKind->show();
-			m_pOutputSignalToolBar->show();
+			m_pSignalConnectionToolBar->show();
 			m_pAnalogSignalToolBar->show();
 
 			m_pSignalInfoPanel->show();
@@ -1050,10 +1050,10 @@ bool MainWindow::signalSourceIsValid(bool showMsg)
 {
 	bool result = false;
 
-	switch (theOptions.toolBar().outputSignalType())
+	switch (theOptions.toolBar().signalConnectionType())
 	{
-		case OUTPUT_SIGNAL_TYPE_UNUSED:
-		case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
+		case SIGNAL_CONNECTION_TYPE_UNUSED:
+		case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
 
 			if (theCalibratorBase.connectedCalibratorsCount() == 0)
 			{
@@ -1068,7 +1068,7 @@ bool MainWindow::signalSourceIsValid(bool showMsg)
 
 			break;
 
-		case OUTPUT_SIGNAL_TYPE_FROM_TUNING:
+		case SIGNAL_CONNECTION_TYPE_FROM_TUNING:
 
 			if (tuningSocketIsConnected() == false)
 			{
@@ -1224,17 +1224,17 @@ void MainWindow::showTuningSignalList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::showOutputSignalList()
+void MainWindow::showSignalConnectionList()
 {
-	OutputSignalDialog dialog(this);
+	SignalConnectionDialog dialog(this);
 	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}
 
-	if (theSignalBase.outputSignals().save() == false)
+	if (theSignalBase.signalConnections().save() == false)
 	{
-		QMessageBox::information(this, windowTitle(), tr("Attempt to save output signals was unsuccessfully!"));
+		QMessageBox::information(this, windowTitle(), tr("Attempt to save signal connections was unsuccessfully!"));
 		return;
 	}
 }
@@ -1381,7 +1381,7 @@ void MainWindow::setMeasureTimeout(QString value)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::setOutputSignalType(int index)
+void MainWindow::setSignalConnectionType(int index)
 {
 	if (index == -1)
 	{
@@ -1389,15 +1389,15 @@ void MainWindow::setOutputSignalType(int index)
 	}
 
 	int type = index;
-	if (type < 0 || type >= OUTPUT_SIGNAL_TYPE_COUNT)
+	if (type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		return;
 	}
 
-	theOptions.toolBar().setOutputSignalType(type);
+	theOptions.toolBar().setSignalConnectionType(type);
 	theOptions.toolBar().save();
 
-	emit changedOutputSignalType(type);
+	emit changedSignalConnectionType(type);
 
 	updateRacksOnToolBar();
 	updateSignalsOnToolBar();
@@ -1702,7 +1702,7 @@ void MainWindow::tuningSocketDisconnected()
 {
 	if (m_measureThread.isRunning() == true)
 	{
-		if (theOptions.toolBar().outputSignalType() == OUTPUT_SIGNAL_TYPE_FROM_TUNING)
+		if (theOptions.toolBar().signalConnectionType() == SIGNAL_CONNECTION_TYPE_FROM_TUNING)
 		{
 			m_measureThread.stop();
 		}
@@ -1762,7 +1762,7 @@ void MainWindow::tuningSignalsCreated()
 void MainWindow::measureThreadStarted()
 {
 	m_pMeasureKind->setDisabled(true);
-	m_pOutputSignalToolBar->setDisabled(true);
+	m_pSignalConnectionToolBar->setDisabled(true);
 	m_pAnalogSignalToolBar->setDisabled(true);
 
 	m_statusMeasureThreadInfo->setText(QString());
@@ -1788,7 +1788,7 @@ void MainWindow::measureThreadStarted()
 void MainWindow::measureThreadStoped()
 {
 	m_pMeasureKind->setEnabled(true);
-	m_pOutputSignalToolBar->setEnabled(true);
+	m_pSignalConnectionToolBar->setEnabled(true);
 	m_pAnalogSignalToolBar->setEnabled(true);
 
 	m_statusMeasureThreadInfo->setText(QString());

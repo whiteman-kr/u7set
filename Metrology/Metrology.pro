@@ -94,9 +94,7 @@ SOURCES += \
     ../lib/OutputLog.cpp \
     ../lib/MetrologySignal.cpp \
     RackList.cpp \
-    OutputSignalList.cpp \
     ObjectProperties.cpp \
-    OutputSignalBase.cpp \
     RackBase.cpp \
     MeasureBase.cpp \
     ../lib/CircularLogger.cpp \
@@ -112,7 +110,9 @@ SOURCES += \
     StatisticPanel.cpp \
     ../Builder/ComparatorSet.cpp \
     ComparatorList.cpp \
-    ComparatorInfoPanel.cpp
+    ComparatorInfoPanel.cpp \
+    SignalConnectionList.cpp \
+    SignalConnectionBase.cpp
 
 #../lib/ExcelHelper.cpp
 
@@ -176,9 +176,7 @@ HEADERS  += \
     ../lib/OutputLog.h \
     ../lib/MetrologySignal.h \
     RackList.h \
-    OutputSignalList.h \
     ObjectProperties.h \
-    OutputSignalBase.h \
     RackBase.h \
     MeasureBase.h \
     ../lib/CircularLogger.h \
@@ -195,7 +193,9 @@ HEADERS  += \
     StatisticPanel.h \
     ../Builder/ComparatorSet.h \
     ComparatorList.h \
-    ComparatorInfoPanel.h
+    ComparatorInfoPanel.h \
+    SignalConnectionList.h \
+    SignalConnectionBase.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h

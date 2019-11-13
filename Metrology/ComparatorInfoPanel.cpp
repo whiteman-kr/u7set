@@ -476,7 +476,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 	//
 	QSize cellSize = QFontMetrics(theOptions.comparatorInfo().font()).size(Qt::TextSingleLine,"A");
 
-	if (activeSignal.outputSignalType() == OUTPUT_SIGNAL_TYPE_UNUSED)
+	if (activeSignal.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNUSED)
 	{
 		m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 	}
@@ -505,7 +505,7 @@ void ComparatorInfoPanel::comparatorProperty()
 
 //	Metrology::SignalParam param;
 
-//	if (theOptions.toolBar().outputSignalType() == OUTPUT_SIGNAL_TYPE_UNUSED)
+//	if (theOptions.toolBar().signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNUSED)
 //	{
 //		param = m_comparatorParamTable.signal(index).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 //	}

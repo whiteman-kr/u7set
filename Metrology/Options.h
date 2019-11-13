@@ -255,7 +255,7 @@ private:
 
 	int					m_measureTimeout = 0;									// in milliseconds, timeout between the time when the calibrator is set value and the time when the application is save measurement
 	int					m_measureKind = MEASURE_KIND_ONE_RACK;					// measure kind: each channel separately - 0 or for all channels together - 1
-	int					m_outputSignalType = OUTPUT_SIGNAL_TYPE_UNUSED;			// selected type of output signal
+	int					m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNUSED;	// selected type of connection
 
 public:
 
@@ -265,8 +265,8 @@ public:
 	int					measureKind() const { return m_measureKind; }
 	void				setMeasureKind(int kind) { m_measureKind = kind; }
 
-	int					outputSignalType() const { return m_outputSignalType; }
-	void				setOutputSignalType(int type) { m_outputSignalType = type; }
+	int					signalConnectionType() const { return m_signalConnectionType; }
+	void				setSignalConnectionType(int type) { m_signalConnectionType = type; }
 
 
 	void				load();

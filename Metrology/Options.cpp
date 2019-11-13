@@ -448,7 +448,7 @@ void ToolBarOption::load()
 
 	m_measureTimeout = s.value(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), 0).toInt();
 	m_measureKind = s.value(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MEASURE_KIND_ONE_RACK).toInt();
-	m_outputSignalType = s.value(QString("%1OutputSignalType").arg(TOOLBAR_OPTIONS_KEY), OUTPUT_SIGNAL_TYPE_UNUSED).toInt();
+	m_signalConnectionType = s.value(QString("%1SignalConnectionType").arg(TOOLBAR_OPTIONS_KEY), SIGNAL_CONNECTION_TYPE_UNUSED).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -459,7 +459,7 @@ void ToolBarOption::save()
 
 	s.setValue(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), m_measureTimeout);
 	s.setValue(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), m_measureKind);
-	s.setValue(QString("%1OutputSignalType").arg(TOOLBAR_OPTIONS_KEY), m_outputSignalType);
+	s.setValue(QString("%1SignalConnectionType").arg(TOOLBAR_OPTIONS_KEY), m_signalConnectionType);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -468,7 +468,7 @@ ToolBarOption& ToolBarOption::operator=(const ToolBarOption& from)
 {
 	m_measureTimeout = from.m_measureTimeout;
 	m_measureKind = from.m_measureKind;
-	m_outputSignalType = from.m_outputSignalType;
+	m_signalConnectionType = from.m_signalConnectionType;
 
 	return *this;
 }

@@ -19,10 +19,10 @@
 
 const char* const			ComparatorListColumn[] =
 {
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Input signal"),
+							QT_TRANSLATE_NOOP("SignalListDialog.h", "AppSignalID (input)"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Value"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Hysteresis"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Output signal"),
+							QT_TRANSLATE_NOOP("SignalListDialog.h", "AppSignalID (output)"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Schema"),
 };
 

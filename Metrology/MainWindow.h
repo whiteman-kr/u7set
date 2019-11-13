@@ -65,7 +65,7 @@ private:
 	QAction*				m_pShowSignalListAction = nullptr;
 	QAction*				m_pShowComparatorsListAction = nullptr;
 	QAction*				m_pShowTuningSignalListAction = nullptr;
-	QAction*				m_pShowOutputSignalListAction = nullptr;
+	QAction*				m_pShowSignalConnectionListAction = nullptr;
 	QAction*				m_pShowCalculatorAction = nullptr;
 	QAction*				m_pOptionsAction;
 
@@ -94,13 +94,13 @@ private:
 	QToolBar*				m_pMeasureControlToolBar = nullptr;
 	QToolBar*				m_pMeasureTimeout = nullptr;
 	QToolBar*				m_pMeasureKind = nullptr;
-	QToolBar*				m_pOutputSignalToolBar = nullptr;
+	QToolBar*				m_pSignalConnectionToolBar = nullptr;
 	QToolBar*				m_pAnalogSignalToolBar = nullptr;
 
 	// Elements of interface - Items of ToolBars
 	//
 	QComboBox*				m_measureKindList = nullptr;
-	QComboBox*				m_outputSignalTypeList = nullptr;
+	QComboBox*				m_signalConnectionTypeList = nullptr;
 
 	QComboBox*				m_asRackCombo = nullptr;
 	QComboBox*				m_asSignalCombo = nullptr;
@@ -191,8 +191,8 @@ signals:
 
 
 	//
-	void					changedMeasureType(int type);		// appear when changing the type of measurement
-	void					changedOutputSignalType(int type);	// appear when changing the OutputSignalType
+	void					changedMeasureType(int type);			// appear when changing the type of measurement
+	void					changedSignalConnectionType(int type);	// appear when changing the SignalConnectionType
 
 	// from measureComplite
 	//
@@ -225,7 +225,7 @@ private slots:
 	void					showSignalList();
 	void					showComparatorsList();
 	void					showTuningSignalList();
-	void					showOutputSignalList();
+	void					showSignalConnectionList();
 	void					showCalculator();
 	void					showOptions();
 
@@ -243,7 +243,7 @@ private slots:
 	//
 	void					setMeasureKind(int index);
 	void					setMeasureTimeout(QString value);
-	void					setOutputSignalType(int index);
+	void					setSignalConnectionType(int index);
 
 	// Slots of analog signal toolbar
 	//

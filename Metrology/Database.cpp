@@ -226,12 +226,12 @@ int SqlFieldBase::init(int objectType, int)
 
 			break;
 
-		case SQL_TABLE_OUTPUT_SIGNAL:
+		case SQL_TABLE_SIGNAL_CONNECTION:
 
 			append("ObjectID",						QVariant::Int);
 			append("SignalID",						QVariant::Int);
 
-			append("OutputSignalType",				QVariant::Int);
+			append("SignalConncetionType",			QVariant::Int);
 
 			append("InputAppSignalID",				QVariant::String, 64);
 			append("OutputAppSignalID",				QVariant::String, 64);
@@ -894,9 +894,9 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 				}
 				break;
 
-			case SQL_TABLE_OUTPUT_SIGNAL:
+			case SQL_TABLE_SIGNAL_CONNECTION:
 				{
-					OutputSignal* signal = static_cast<OutputSignal*> (pRecord) + readedCount;
+					SignalConnection* signal = static_cast<SignalConnection*> (pRecord) + readedCount;
 
 					signal->setIndex(query.value(field++).toInt());
 
@@ -1225,9 +1225,9 @@ int SqlTable::write(void* pRecord, int count, int* key)
 				}
 				break;
 
-			case SQL_TABLE_OUTPUT_SIGNAL:
+			case SQL_TABLE_SIGNAL_CONNECTION:
 				{
-					OutputSignal* signal = static_cast<OutputSignal*> (pRecord) + r;
+					SignalConnection* signal = static_cast<SignalConnection*> (pRecord) + r;
 
 					signal->setIndex(lastKey() + 1);
 					query.bindValue(field++, signal->index());

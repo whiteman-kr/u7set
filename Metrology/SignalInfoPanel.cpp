@@ -144,7 +144,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 		{
 			Metrology::SignalState state;
 
-			if (ioParam.outputSignalType() == OUTPUT_SIGNAL_TYPE_UNUSED)
+			if (ioParam.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNUSED)
 			{
 				state = theSignalBase.signalState(ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT).hash());
 			}
@@ -205,7 +205,7 @@ QString SignalInfoTable::text(int column, const IoSignalParam& ioParam) const
 			stateStr = signalStateStr(inParam, inState);
 		}
 
-		if (ioParam.outputSignalType() != OUTPUT_SIGNAL_TYPE_UNUSED)
+		if (ioParam.signalConnectionType() != SIGNAL_CONNECTION_TYPE_UNUSED)
 		{
 			Metrology::SignalParam outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 			if (outParam.isValid() == true)
@@ -640,7 +640,7 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 			}
 
 			ioParam.setParam(type, param);
-			ioParam.setOutputSignalType(activeSignal.outputSignalType());
+			ioParam.setSignalConnectionType(activeSignal.signalConnectionType());
 			ioParam.setCalibratorManager(theCalibratorBase.calibratorForMeasure(c));
 		}
 
@@ -653,7 +653,7 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 	//
 	QSize cellSize = QFontMetrics(theOptions.signalInfo().font()).size(Qt::TextSingleLine,"A");
 
-	if (activeSignal.outputSignalType() == OUTPUT_SIGNAL_TYPE_UNUSED)
+	if (activeSignal.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNUSED)
 	{
 		m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 	}
@@ -722,7 +722,7 @@ void SignalInfoPanel::signalProperty()
 
 	Metrology::SignalParam param;
 
-	if (theOptions.toolBar().outputSignalType() == OUTPUT_SIGNAL_TYPE_UNUSED)
+	if (theOptions.toolBar().signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNUSED)
 	{
 		param = m_signalParamTable.signalParam(index).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 	}

@@ -56,7 +56,7 @@ const char* const		SqlTabletName[] =
 
 						QT_TRANSLATE_NOOP("Database.h", "ReportOption"),
 						QT_TRANSLATE_NOOP("Database.h", "RackGroup"),
-						QT_TRANSLATE_NOOP("Database.h", "OutputSignal"),
+						QT_TRANSLATE_NOOP("Database.h", "SignalConnection"),
 };
 
 const int				SQL_TABLE_COUNT							= sizeof(SqlTabletName)/sizeof(SqlTabletName[0]);
@@ -77,7 +77,7 @@ const int				SQL_TABLE_UNKNONW						= -1,
 						SQL_TABLE_COMPLEX_COMPARATOR_SIGNAL		= 12,
 						SQL_TABLE_REPORT_HEADER					= 13,
 						SQL_TABLE_RACK_GROUP					= 14,
-						SQL_TABLE_OUTPUT_SIGNAL					= 15;
+						SQL_TABLE_SIGNAL_CONNECTION				= 15;
 
 // ==============================================================================================
 
@@ -108,7 +108,7 @@ const int				SqlTableVersion[SQL_TABLE_COUNT] =
 
 						0,					//	SQL_TABLE_REPORT_HEADER
 						0,					//	SQL_TABLE_RACK_GROUP
-						0,					//	SQL_TABLE_OUTPUT_SIGNAL
+						0,					//	SQL_TABLE_SIGNAL_CONNECTION
 };
 
 // ==============================================================================================
@@ -141,7 +141,7 @@ const int				SqlObjectID[SQL_TABLE_COUNT] =
 
 						400,		//	SQL_TABLE_REPORT_HEADER
 						530,		//	SQL_TABLE_RACK_GROUP
-						620,		//	SQL_TABLE_OUTPUT_SIGNAL
+						620,		//	SQL_TABLE_SIGNAL_CONNECTION
 };
 
 // ==============================================================================================
@@ -173,7 +173,7 @@ const int				SqlTableByMeasureType[SQL_TABLE_COUNT] =
 
 						MEASURE_TYPE_UNKNOWN,				//	SQL_TABLE_REPORT_HEADER						// SQL_TABLE_CONFIG
 						MEASURE_TYPE_UNKNOWN,				//	SQL_TABLE_RACK_GROUP						// SQL_TABLE_CONFIG
-						MEASURE_TYPE_UNKNOWN,				//	SQL_TABLE_OUTPUT_SIGNAL						// SQL_TABLE_CONFIG
+						MEASURE_TYPE_UNKNOWN,				//	SQL_TABLE_SIGNAL_CONNECTION					// SQL_TABLE_CONFIG
 };
 
 // ----------------------------------------------------------------------------------------------
@@ -199,7 +199,7 @@ const int				SqlTableAppointType[SQL_TABLE_COUNT] =
 
 						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_REPORT_HEADER
 						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_RACK_GROUP
-						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_OUTPUT_SIGNAL
+						SQL_TABLE_IS_CONFIG,				//	SQL_TABLE_SIGNAL_CONNECTION
 };
 
 // ==============================================================================================

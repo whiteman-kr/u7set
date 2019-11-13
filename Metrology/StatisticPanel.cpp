@@ -112,7 +112,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 			case STATISTIC_COLUMN_EN_RANGE:			result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_MEASURE_COUNT:	result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_STATE:			result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_OUTPUT_TYPE:		result = Qt::AlignCenter;	break;
+			case STATISTIC_COLUMN_SIGNAL_CONNECTION:		result = Qt::AlignCenter;	break;
 			default:								assert(0);
 		}
 
@@ -126,9 +126,9 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::TextColorRole)
 	{
-		switch (theOptions.toolBar().outputSignalType())
+		switch (theOptions.toolBar().signalConnectionType())
 		{
-			case OUTPUT_SIGNAL_TYPE_UNUSED:
+			case SIGNAL_CONNECTION_TYPE_UNUSED:
 
 				if (pSignal->param().isOutput() == true)
 				{
@@ -137,8 +137,8 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 
 				break;
 
-			case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
-			case OUTPUT_SIGNAL_TYPE_FROM_TUNING:
+			case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
+			case SIGNAL_CONNECTION_TYPE_FROM_TUNING:
 
 				if (pSignal->param().isInput() == true)
 				{
@@ -255,7 +255,7 @@ QString StatisticTable::text(int row, int column, Metrology::Signal* pSignal) co
 		case STATISTIC_COLUMN_EN_RANGE:			result = param.engeneeringRangeStr();				break;
 		case STATISTIC_COLUMN_MEASURE_COUNT:	result = pSignal->statistic().measureCountStr();	break;
 		case STATISTIC_COLUMN_STATE:			result = pSignal->statistic().stateStr();			break;
-		case STATISTIC_COLUMN_OUTPUT_TYPE:		result.clear();										break;
+		case STATISTIC_COLUMN_SIGNAL_CONNECTION:		result.clear();										break;
 		default:								assert(0);
 	}
 
@@ -553,9 +553,9 @@ void StatisticPanel::changedMeasureType(int type)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void StatisticPanel::changedOutputSignalType(int type)
+void StatisticPanel::changedSignalConnectionType(int type)
 {
-	if (type < 0 || type >= OUTPUT_SIGNAL_TYPE_COUNT)
+	if (type < 0 || type >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		return;
 	}
@@ -582,11 +582,11 @@ void StatisticPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	Metrology::Signal* pSignal = nullptr;
 
-	switch (theOptions.toolBar().outputSignalType())
+	switch (theOptions.toolBar().signalConnectionType())
 	{
-		case OUTPUT_SIGNAL_TYPE_UNUSED:			pSignal = activeSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).firstMetrologySignal();	break;
-		case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
-		case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	pSignal = activeSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).firstMetrologySignal();	break;
+		case SIGNAL_CONNECTION_TYPE_UNUSED:			pSignal = activeSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).firstMetrologySignal();	break;
+		case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
+		case SIGNAL_CONNECTION_TYPE_FROM_TUNING:	pSignal = activeSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).firstMetrologySignal();	break;
 		default:								assert(0);																					break;
 	}
 
@@ -725,7 +725,7 @@ void StatisticPanel::updateVisibleColunm()
 	hideColumn(STATISTIC_COLUMN_ADC, true);
 	hideColumn(STATISTIC_COLUMN_PH_RANGE, true);
 	hideColumn(STATISTIC_COLUMN_EL_RANGE, true);
-	hideColumn(STATISTIC_COLUMN_OUTPUT_TYPE, true);
+	hideColumn(STATISTIC_COLUMN_SIGNAL_CONNECTION, true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -792,9 +792,9 @@ void StatisticPanel::selectSignalForMeasure()
 		return;
 	}
 
-	switch (theOptions.toolBar().outputSignalType())
+	switch (theOptions.toolBar().signalConnectionType())
 	{
-		case OUTPUT_SIGNAL_TYPE_UNUSED:
+		case SIGNAL_CONNECTION_TYPE_UNUSED:
 
 			if (pMetrologySignal->param().isOutput() == true)
 			{
@@ -804,8 +804,8 @@ void StatisticPanel::selectSignalForMeasure()
 
 			break;
 
-		case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
-		case OUTPUT_SIGNAL_TYPE_FROM_TUNING:
+		case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
+		case SIGNAL_CONNECTION_TYPE_FROM_TUNING:
 
 			if (pMetrologySignal->param().isInput() == true)
 			{
