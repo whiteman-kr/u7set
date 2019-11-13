@@ -9147,11 +9147,11 @@ namespace Builder
 
 		//	set comparator type, compare-value, hysteresis-value
 		//
-		for(const AppFbParamValue& pv : appFb->paramValuesArray())
+		for(Afb::AfbParam pv : appFb->logicFb().params())
 		{
 			if (pv.opName() == "i_conf") // set comparator type: =(1(SI)), > (2(SI)), < (3(SI)), ≠ (4(SI)),= (5(FP)), > (6(FP)), < (7(FP)), ≠ (8(FP))
 			{
-				switch (pv.unsignedIntValue())
+				switch (pv.value().toInt())
 				{
 					case 1:
 					case 5:			cmp->setCmpType(Comparator::CmpType::Equ);		break;
@@ -9168,9 +9168,9 @@ namespace Builder
 			{
 				switch (pv.dataFormat())
 				{
-					case E::DataFormat::Float :			cmp->compare().setConstValue(pv.floatValue());			cmp->setInAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);		break;
-					case E::DataFormat::SignedInt :		cmp->compare().setConstValue(pv.signedIntValue());		cmp->setInAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);	break;
-					case E::DataFormat::UnsignedInt :	cmp->compare().setConstValue(pv.unsignedIntValue());	cmp->setInAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);	break;
+					case E::DataFormat::Float :			cmp->compare().setConstValue(pv.value().toDouble());	cmp->setInAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);		break;
+					case E::DataFormat::SignedInt :		cmp->compare().setConstValue(pv.value().toInt());		cmp->setInAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);	break;
+					case E::DataFormat::UnsignedInt :	cmp->compare().setConstValue(pv.value().toInt());		cmp->setInAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);	break;
 					default:							assert(0);
 				}
 			}
@@ -9179,9 +9179,9 @@ namespace Builder
 			{
 				switch (pv.dataFormat())
 				{
-					case E::DataFormat::Float :			cmp->hysteresis().setConstValue(pv.floatValue());		break;
-					case E::DataFormat::SignedInt :		cmp->hysteresis().setConstValue(pv.signedIntValue());	break;
-					case E::DataFormat::UnsignedInt :	cmp->hysteresis().setConstValue(pv.unsignedIntValue());	break;
+					case E::DataFormat::Float :			cmp->hysteresis().setConstValue(pv.value().toDouble());		break;
+					case E::DataFormat::SignedInt :		cmp->hysteresis().setConstValue(pv.value().toInt());		break;
+					case E::DataFormat::UnsignedInt :	cmp->hysteresis().setConstValue(pv.value().toInt());		break;
 					default:							assert(0);
 				}
 			}
