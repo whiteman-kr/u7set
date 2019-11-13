@@ -10830,9 +10830,9 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#sub_si_v1"          Caption="sub_si"          Version="1.0006">
-			<Properties>				
-				<Description>Multiply Block with signed int data format.</Description>
+        <AFB id="#sub_si_v1"          Caption="sub_si"          Version="1.0007">
+		    <Properties>
+			    <Description>Subtract Block with signed int data format.</Description>
 				<Category>Math</Category>
 				<OpCode>13</OpCode>
 				<HasRam>false</HasRam>				
