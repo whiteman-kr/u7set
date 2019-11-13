@@ -16,7 +16,7 @@ DialogChoosePreset::DialogChoosePreset(QWidget* parent, DbController* db, Hardwa
 
 	Q_ASSERT(m_db);
 
-	QStringList columnNames{tr("Caption"), tr("Certificates"), tr("PresetName"), tr("Type")};
+	QStringList columnNames{tr("Caption"), tr("Certification"), tr("PresetName"), tr("Type")};
 
 	ui->m_presetTree->setColumnCount(columnNames.size());
 	ui->m_presetTree->setHeaderLabels(columnNames);
@@ -146,7 +146,7 @@ DialogChoosePreset::DialogChoosePreset(QWidget* parent, DbController* db, Hardwa
 
 		QStringList l;
 		l << preset->caption();
-		l << (preset->propertyExists("Certificates") ? preset->propertyByCaption("Certificates")->value().toString() : QString{});
+		l << (preset->propertyExists("Certification") ? preset->propertyByCaption("Certification")->value().toString() : QString{});
 		l << preset->caption();
 		l << preset->presetName();
 		l << Hardware::DeviceTypeNames[static_cast<int>(presetType)];
