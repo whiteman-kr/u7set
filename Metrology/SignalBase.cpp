@@ -1680,7 +1680,7 @@ Metrology::RackParam SignalBase::rackForMeasure(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalBase::getSerialNoSignalID(const QString& moduleID)
+QString SignalBase::findAppSignalIDforSerialNo(const QString& moduleID)
 {
 	QString appSignalID;
 
@@ -1690,6 +1690,11 @@ QString SignalBase::getSerialNoSignalID(const QString& moduleID)
 		Metrology::Signal& signal = m_signalList[i];
 
 		if (signal.param().isAnalog() == false)
+		{
+			continue;
+		}
+
+		if (signal.param().electricUnitID() != E::ElectricUnit::NoUnit)
 		{
 			continue;
 		}
@@ -2261,14 +2266,40 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 
 				m_requestStateList.append(pSignal->param().hash());
 
-				// append hash of signal that contains ID of module for input signal
+				// append hash of signal that contains ID of module for input signal - Serial Number
 				//
-				pSignal->param().setModuleSerialNoID(getSerialNoSignalID(pSignal->param().location().moduleID()));
+				QString appSignalID_of_SerialNo = findAppSignalIDforSerialNo(pSignal->param().location().moduleID());
+				pSignal->param().setModuleSerialNoID(appSignalID_of_SerialNo);
 				if (pSignal->param().moduleSerialNoID().isEmpty() == false)
 				{
 					m_requestStateList.append(calcHash(pSignal->param().moduleSerialNoID()));
 				}
 
+				// append hash of comparators input signal
+				//
+				int comparatorCount = pSignal->comparatorCount();
+				for (int c = 0; c < comparatorCount; c++)
+				{
+					std::shared_ptr<::Builder::Comparator> comparator = pSignal->comparator(c);
+
+					if (comparator->compare().isConst() == false && comparator->compare().appSignalID().isEmpty() == false)
+					{
+						m_requestStateList.append(calcHash(comparator->compare().appSignalID()));
+					}
+
+					if (comparator->hysteresis().isConst() == false && comparator->hysteresis().appSignalID().isEmpty() == false)
+					{
+						m_requestStateList.append(calcHash(comparator->hysteresis().appSignalID()));
+					}
+
+					if (comparator->output().isAcquired() == true)
+					{
+						m_requestStateList.append(calcHash(comparator->output().appSignalID()));
+					}
+				}
+
+				// if input has not output signals got to next channel
+				//
 				if (m_activeSignal.outputSignalType() == OUTPUT_SIGNAL_TYPE_UNUSED)
 				{
 					continue;
@@ -2286,11 +2317,36 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 
 				// append hash of signal that contains ID of module for output signal
 				//
-				pSignal->param().setModuleSerialNoID(getSerialNoSignalID(pSignal->param().location().moduleID()));
+				appSignalID_of_SerialNo = findAppSignalIDforSerialNo(pSignal->param().location().moduleID());
+				pSignal->param().setModuleSerialNoID(appSignalID_of_SerialNo);
 				if (pSignal->param().moduleSerialNoID().isEmpty() == false)
 				{
 					m_requestStateList.append(calcHash(pSignal->param().moduleSerialNoID()));
 				}
+
+				// append hash of comparators output signal
+				//
+				comparatorCount = pSignal->comparatorCount();
+				for (int c = 0; c < comparatorCount; c++)
+				{
+					std::shared_ptr<::Builder::Comparator> comparator = pSignal->comparator(c);
+
+					if (comparator->compare().isConst() == false && comparator->compare().appSignalID().isEmpty() == false)
+					{
+						m_requestStateList.append(calcHash(comparator->compare().appSignalID()));
+					}
+
+					if (comparator->hysteresis().isConst() == false && comparator->hysteresis().appSignalID().isEmpty() == false)
+					{
+						m_requestStateList.append(calcHash(comparator->hysteresis().appSignalID()));
+					}
+
+					if (comparator->output().isAcquired() == true)
+					{
+						m_requestStateList.append(calcHash(comparator->output().appSignalID()));
+					}
+				}
+
 			}
 
 		m_stateMutex.unlock();
@@ -2351,12 +2407,14 @@ bool SignalBase::loadComparators(const ::Builder::ComparatorSet& comparatorSet)
 			continue;
 		}
 
-		if (comparatorSet.getByInputSignalID(pInputSignal->param().appSignalID()).count() == 0)
+		QList<std::shared_ptr<Builder::Comparator>> list = comparatorSet.getByInputSignalID(pInputSignal->param().appSignalID());
+
+		if (list.count() != 0)
 		{
-			continue;
+			int a = 0;
 		}
 
-		pInputSignal->comparatorList() = comparatorSet.getByInputSignalID(pInputSignal->param().appSignalID());
+		pInputSignal->setComparatorList(list);
 	}
 
 	return true;

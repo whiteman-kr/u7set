@@ -592,17 +592,12 @@ void MainWindow::createPanels()
 
 	// Panel comparator information
 	//
-	m_pComparatorInfoPanel = new QDockWidget(tr("Panel comparator information"), this);
+	m_pComparatorInfoPanel = new ComparatorInfoPanel(this);
 	m_pComparatorInfoPanel->setObjectName("Panel comparator information");
 	if (m_pComparatorInfoPanel != nullptr)
 	{
 		m_pComparatorInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
 
-		m_pComparatorInfoView = new QTableView;
-		if (m_pComparatorInfoView != nullptr)
-		{
-			m_pComparatorInfoPanel->setWidget(m_pComparatorInfoView);
-		}
 		addDockWidget(Qt::BottomDockWidgetArea, m_pComparatorInfoPanel);
 
 		if (m_pViewPanelMenu != nullptr)

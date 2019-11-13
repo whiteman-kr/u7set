@@ -98,7 +98,6 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 		switch (column)
 		{
 			case COMPARATOR_LIST_COLUMN_INPUT:				result = Qt::AlignLeft;		break;
-			case COMPARATOR_LIST_COLUMN_COMPARE:			result = Qt::AlignLeft;		break;
 			case COMPARATOR_LIST_COLUMN_VALUE:				result = Qt::AlignLeft;		break;
 			case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = Qt::AlignLeft;		break;
 			case COMPARATOR_LIST_COLUMN_OUTPUT:				result = Qt::AlignLeft;		break;
@@ -136,26 +135,24 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Builder::
 		return QString();
 	}
 
-	QString cmpTypeStr;
+	QString compareValue;
 
 	switch (comparator->cmpType())
 	{
-		case ::Builder::Comparator::CmpType::Equ:		cmpTypeStr = "= (Equ)";			break;
-		case ::Builder::Comparator::CmpType::Greate:	cmpTypeStr = "> (Greate)";		break;
-		case ::Builder::Comparator::CmpType::Less:		cmpTypeStr = "< (Less)";		break;
-		case ::Builder::Comparator::CmpType::NotEqu:	cmpTypeStr = "≠ (NotEqu)";		break;
-		default:										cmpTypeStr = "???";	assert(0);	break;
+		case ::Builder::Comparator::CmpType::Equ:		compareValue = "= ";	break;
+		case ::Builder::Comparator::CmpType::Greate:	compareValue = "> ";	break;
+		case ::Builder::Comparator::CmpType::Less:		compareValue = "< ";	break;
+		case ::Builder::Comparator::CmpType::NotEqu:	compareValue = "≠ ";	break;
+		default:										compareValue = "??? ";	assert(0);	break;
 	}
-
-	QString compareValue;
 
 	if (comparator->compare().isConst() == true)
 	{
-		compareValue = QString::number(comparator->compare().constValue(), 10, comparator->precision());
+		compareValue += QString::number(comparator->compare().constValue(), 10, comparator->precision());
 	}
 	else
 	{
-		compareValue = comparator->compare().appSignalID();
+		compareValue += comparator->compare().appSignalID();
 	}
 
 	QString hysteresisValue;
@@ -174,7 +171,6 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Builder::
 	switch (column)
 	{
 		case COMPARATOR_LIST_COLUMN_INPUT:				result = comparator->input().appSignalID();		break;
-		case COMPARATOR_LIST_COLUMN_COMPARE:			result = cmpTypeStr;							break;
 		case COMPARATOR_LIST_COLUMN_VALUE:				result = compareValue;							break;
 		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = hysteresisValue;						break;
 		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparator->output().appSignalID();	break;
@@ -451,7 +447,12 @@ void ComparatorListDialog::updateList()
 			continue;
 		}
 
-		comparatorList.append(pSignal->comparatorList());
+		int comparatorCount = pSignal->comparatorCount();
+		for (int c = 0; c < comparatorCount; c++)
+		{
+			std::shared_ptr<::Builder::Comparator> comparator = pSignal->comparator(c);
+			comparatorList.append(pSignal->comparator(c));
+		}
 	}
 
 	m_comparatorTable.set(comparatorList);
@@ -468,6 +469,8 @@ void ComparatorListDialog::updateVisibleColunm()
 	{
 		hideColumn(c, false);
 	}
+
+	hideColumn(COMPARATOR_LIST_COLUMN_SCHEMA, true);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

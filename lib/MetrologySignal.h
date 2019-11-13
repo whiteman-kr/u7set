@@ -339,6 +339,7 @@ namespace Metrology
 		SignalState				m_state;
 
 		QList<std::shared_ptr<::Builder::Comparator>> m_comparatorList;
+		int						m_comparatorCount = 0;
 
 		SignalStatistic			m_statistic;
 
@@ -350,7 +351,9 @@ namespace Metrology
 		SignalState&			state() { return m_state; }
 		void					setState(const Metrology::SignalState& state) { m_state = state; }
 
-		QList<std::shared_ptr<::Builder::Comparator>>& comparatorList() { return m_comparatorList; }
+		void					setComparatorList(QList<std::shared_ptr<::Builder::Comparator>>& comparatorList);
+		int						comparatorCount() const { return m_comparatorCount; }
+		std::shared_ptr<::Builder::Comparator> comparator(int index) const;
 
 		SignalStatistic&		statistic() { return m_statistic; }
 		void					setStatistic(const SignalStatistic& statistic) { m_statistic = statistic; }

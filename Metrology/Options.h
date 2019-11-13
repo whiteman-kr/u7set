@@ -404,6 +404,7 @@ const int				SIO_PARAM_FONT					= 0,
 #define					COLOR_FLAG_VALID		QColor(0xFF, 0xA0, 0xA0)
 #define					COLOR_FLAG_OVERFLOW		QColor(0xFF, 0xD0, 0xA0)
 #define					COLOR_FLAG_OVERBREAK	QColor(0xFF, 0xD0, 0xA0)
+#define					COLOR_FLAG_STATE_TRUE	QColor(0xA0, 0xFF, 0xA0)
 
 // ----------------------------------------------------------------------------------------------
 
@@ -426,6 +427,7 @@ private:
 	QColor				m_colorFlagValid = COLOR_FLAG_VALID;
 	QColor				m_colorFlagOverflow = COLOR_FLAG_OVERFLOW;
 	QColor				m_colorFlagUnderflow = COLOR_FLAG_OVERBREAK;
+	QColor				m_colorFlagStateTrue = COLOR_FLAG_STATE_TRUE;
 
 public:
 
@@ -443,6 +445,9 @@ public:
 
 	QColor				colorFlagUnderflow() const { return m_colorFlagUnderflow; }
 	void				setColorFlagUnderflow(QColor color) { m_colorFlagUnderflow = color; }
+
+	QColor				colorFlagStateTrue() const { return m_colorFlagStateTrue; }
+	void				setFlagColorStateTrue(QColor color) { m_colorFlagStateTrue = color; }
 
 	void				load();
 	void				save();

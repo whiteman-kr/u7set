@@ -20,7 +20,6 @@
 const char* const			ComparatorListColumn[] =
 {
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Input signal"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Compare"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Value"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Hysteresis"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Output signal"),
@@ -30,17 +29,15 @@ const char* const			ComparatorListColumn[] =
 const int					COMPARATOR_LIST_COLUMN_COUNT			= sizeof(ComparatorListColumn)/sizeof(ComparatorListColumn[0]);
 
 const int					COMPARATOR_LIST_COLUMN_INPUT			= 0,
-							COMPARATOR_LIST_COLUMN_COMPARE			= 1,
-							COMPARATOR_LIST_COLUMN_VALUE			= 2,
-							COMPARATOR_LIST_COLUMN_HYSTERESIS		= 3,
-							COMPARATOR_LIST_COLUMN_OUTPUT			= 4,
-							COMPARATOR_LIST_COLUMN_SCHEMA			= 5;
+							COMPARATOR_LIST_COLUMN_VALUE			= 1,
+							COMPARATOR_LIST_COLUMN_HYSTERESIS		= 2,
+							COMPARATOR_LIST_COLUMN_OUTPUT			= 3,
+							COMPARATOR_LIST_COLUMN_SCHEMA			= 4;
 
 
 const int					ComparatorListColumnWidth[COMPARATOR_LIST_COLUMN_COUNT] =
 {
 							250,	// COMPARATOR_LIST_COLUMN_INPUT
-							100,	// COMPARATOR_LIST_COLUMN_COMPARE
 							250,	// COMPARATOR_LIST_COLUMN_VALUE
 							250,	// COMPARATOR_LIST_COLUMN_HYSTERESIS
 							250,	// COMPARATOR_LIST_COLUMN_OUTPUT

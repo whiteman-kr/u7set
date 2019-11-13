@@ -259,7 +259,7 @@ public:
 
 	// module
 	//
-	QString					getSerialNoSignalID(const QString& moduleID);
+	QString					findAppSignalIDforSerialNo(const QString& moduleID);
 
 	// signals for measure
 	//

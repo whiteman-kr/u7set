@@ -111,7 +111,8 @@ SOURCES += \
     StatisticBase.cpp \
     StatisticPanel.cpp \
     ../Builder/ComparatorSet.cpp \
-    ComparatorList.cpp
+    ComparatorList.cpp \
+    ComparatorInfoPanel.cpp
 
 #../lib/ExcelHelper.cpp
 
@@ -193,7 +194,8 @@ HEADERS  += \
     StatisticBase.h \
     StatisticPanel.h \
     ../Builder/ComparatorSet.h \
-    ComparatorList.h
+    ComparatorList.h \
+    ComparatorInfoPanel.h
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
