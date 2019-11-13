@@ -3340,14 +3340,13 @@ namespace Builder
 
 		if (loopbackUalSignal == nullptr)
 		{
-			// LoopbackSource is not exists for LoopbackTarget with ID %1 (Logic schema %2).
+			// This is a critical error!
+			// Loopback source signal is't connected to any signal source (is not initialized)
 			//
-			// this error should be detected early, during loopbacks preprocessing
+			// Corresponding message will display during execution createUalSignalFromSignal(...) on pass 2.
+			// So, to continue compilation we return TRUE here!
 			//
-			assert(false);
-			LOG_INTERNAL_ERROR_MSG(m_log, QString("LB ID = %1 target %2 schema %3").
-								   arg(loopbackID).arg(loopbackTargetItem->label()).arg(loopbackTargetItem->schemaID()));
-			return false;
+			return true;
 		}
 
 		const std::vector<LogicPin>& outputs = loopbackTargetItem->outputs();
