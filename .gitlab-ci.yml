@@ -114,7 +114,7 @@ windows build job:
 
 #Remove some files not requiered for releases
     - "echo ----------------------------------------------"
-    - "echo               Remove some files not requiered for releases
+    - "echo               Remove some files not requiered for releases"
     - "echo ----------------------------------------------"
     - "del /F /Q bin\\release\\BuilderConsole.exe"
     - "del /F /Q bin\\release\\CommView.exe"
