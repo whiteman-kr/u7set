@@ -11094,10 +11094,10 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 		
-        <AFB id="#set_flags_v1"          Caption="set_flags"          Version="1.0003">
-			<Properties>
-				<Description>Set flag(s) to input signals. Flags accessible only in MATS.</Description>
-				<Category>Other</Category>
+        <AFB id="#set_flags_v1"          Caption="set_flags"          Version="1.0004">
+		    <Properties>
+			    <Description>Set flag(s) to input signals. Flags accessible only in MATS.</Description>
+				<Category>Flags</Category>
 				<OpCode>65535</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
