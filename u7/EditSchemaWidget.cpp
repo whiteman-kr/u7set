@@ -6034,16 +6034,13 @@ void EditSchemaWidget::addNewAppSignalSelected()
 
 void EditSchemaWidget::addNewAppSignal(SchemaItemPtr schemaItem)
 {
-	qDebug() << "RPCT-2286 log: " << "void EditSchemaWidget::addNewAppSignal(SchemaItemPtr schemaItem)";
-
 	if (isLogicSchema() == false ||
 		schemaItem == nullptr ||
 		dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get()) == nullptr)
 	{
-		assert(isLogicSchema() == false);
-		assert(schemaItem);
-		assert(dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get()) != nullptr);
-		qDebug() << "RPCT-2286 log: return condition 1";
+		Q_ASSERT(isLogicSchema() == false);
+		Q_ASSERT(schemaItem);
+		Q_ASSERT(dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get()) != nullptr);
 		return;
 	}
 
@@ -6051,7 +6048,6 @@ void EditSchemaWidget::addNewAppSignal(SchemaItemPtr schemaItem)
 	if (equipmentIdList.isEmpty() == true)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Cannot create Application Signal as schema property EquipmentIDs is empty."));
-		qDebug() << "RPCT-2286 log: return condition 2";
 		return;
 	}
 
@@ -6067,11 +6063,9 @@ void EditSchemaWidget::addNewAppSignal(SchemaItemPtr schemaItem)
 		// This is just created signal item
 		//
 		itemsAppSignals.clear();				// clear - means generate new AppSignalIds
-		qDebug() << "RPCT-2286 log: Check point 1";
 	}
 	else
 	{
-		qDebug() << "RPCT-2286 log: Check point 2";
 	}
 
 	m_createSignalDialoOptions.init(schema()->schemaId(),
@@ -6079,16 +6073,10 @@ void EditSchemaWidget::addNewAppSignal(SchemaItemPtr schemaItem)
 									equipmentIdList,
 									itemsAppSignals);
 
-	qDebug() << "RPCT-2286 log: Check point 3";
-
 	QStringList signalsIds = CreateSignalDialog::showDialog(db(), &m_createSignalDialoOptions, this);
-
-	qDebug() << "RPCT-2286 log: Check point 4";
 
 	if (signalsIds.isEmpty() == false)
 	{
-		qDebug() << "RPCT-2286 log: Check point 5 signalsIds: " << signalsIds.join(", ");
-
 		// Set value
 		//
 		QString oneStringIds;
@@ -6097,12 +6085,8 @@ void EditSchemaWidget::addNewAppSignal(SchemaItemPtr schemaItem)
 			oneStringIds += s + QChar::LineFeed;
 		}
 
-		qDebug() << "RPCT-2286 log: Check point 6";
 		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(oneStringIds), schemaItem);
-		qDebug() << "RPCT-2286 log: Check point 7";
 	}
-
-	qDebug() << "RPCT-2286 log: Check point 8";
 
 	//--------------------------------------------------
 //	QStringList equipmentIdList = logicSchema()->equipmentIdList();

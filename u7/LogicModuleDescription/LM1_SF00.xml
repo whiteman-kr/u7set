@@ -9728,9 +9728,9 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#sub_si_v1"          Caption="sub_si"          Version="1.0006">
+        <AFB id="#sub_si_v1"          Caption="sub_si"          Version="1.0007">
 			<Properties>				
-				<Description>Multiply Block with signed int data format.</Description>
+			    <Description>Subtract Block with signed int data format.</Description>
 				<Category>Math</Category>
 				<OpCode>13</OpCode>
 				<HasRam>false</HasRam>				
@@ -11137,10 +11137,10 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 		
-        <AFB id="#set_flags_v1"          Caption="set_flags"          Version="1.0003">
+        <AFB id="#set_flags_v1"          Caption="set_flags"          Version="1.0004">
 			<Properties>
 				<Description>Set flag(s) to input signals. Flags accessible only in MATS.</Description>
-				<Category>Other</Category>
+				<Category>Flags</Category>
 				<OpCode>65535</OpCode>
 				<HasRam>false</HasRam>
 				<InternalUse>false</InternalUse>
