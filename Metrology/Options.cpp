@@ -637,6 +637,7 @@ void SignalInfoOption::load()
 	m_colorFlagValid = s.value(QString("%1ColorFlagValid").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_VALID.rgb()).toInt();
 	m_colorFlagOverflow = s.value(QString("%1ColorFlagOverflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERFLOW.rgb()).toInt();
 	m_colorFlagUnderflow = s.value(QString("%1ColorFlagUnderflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERBREAK.rgb()).toInt();
+	m_colorFlagStateTrue = s.value(QString("%1ColorFlagStateTrue").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_STATE_TRUE.rgb()).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -652,6 +653,7 @@ void SignalInfoOption::save()
 	s.setValue(QString("%1ColorFlagValid").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagValid.rgb());
 	s.setValue(QString("%1ColorFlagOverflow").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagOverflow.rgb());
 	s.setValue(QString("%1ColorFlagUnderflow").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagUnderflow.rgb());
+	s.setValue(QString("%1ColorFlagStateTrue").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagStateTrue.rgb());
 }
 
 // -------------------------------------------------------------------------------------------------------------------

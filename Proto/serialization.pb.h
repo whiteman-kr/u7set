@@ -126,6 +126,10 @@ class ArchSignal;
 class ArchSignals;
 class BusSignal;
 class Bus;
+class ComparatorSignal;
+class Comparator;
+class LmComparatorSet;
+class ComparatorSet;
 
 enum SchemaUnit {
   Display = 0,
@@ -12876,6 +12880,510 @@ class Bus : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static Bus* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ComparatorSignal : public ::google::protobuf::Message {
+ public:
+  ComparatorSignal();
+  virtual ~ComparatorSignal();
+
+  ComparatorSignal(const ComparatorSignal& from);
+
+  inline ComparatorSignal& operator=(const ComparatorSignal& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ComparatorSignal& default_instance();
+
+  void Swap(ComparatorSignal* other);
+
+  // implements Message ----------------------------------------------
+
+  ComparatorSignal* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ComparatorSignal& from);
+  void MergeFrom(const ComparatorSignal& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional bool isConst = 1 [default = true];
+  inline bool has_isconst() const;
+  inline void clear_isconst();
+  static const int kIsConstFieldNumber = 1;
+  inline bool isconst() const;
+  inline void set_isconst(bool value);
+
+  // optional double constValue = 2 [default = 0];
+  inline bool has_constvalue() const;
+  inline void clear_constvalue();
+  static const int kConstValueFieldNumber = 2;
+  inline double constvalue() const;
+  inline void set_constvalue(double value);
+
+  // optional string appSignalId = 3;
+  inline bool has_appsignalid() const;
+  inline void clear_appsignalid();
+  static const int kAppSignalIdFieldNumber = 3;
+  inline const ::std::string& appsignalid() const;
+  inline void set_appsignalid(const ::std::string& value);
+  inline void set_appsignalid(const char* value);
+  inline void set_appsignalid(const char* value, size_t size);
+  inline ::std::string* mutable_appsignalid();
+  inline ::std::string* release_appsignalid();
+  inline void set_allocated_appsignalid(::std::string* appsignalid);
+
+  // optional bool isAcquired = 4 [default = false];
+  inline bool has_isacquired() const;
+  inline void clear_isacquired();
+  static const int kIsAcquiredFieldNumber = 4;
+  inline bool isacquired() const;
+  inline void set_isacquired(bool value);
+
+  // @@protoc_insertion_point(class_scope:Proto.ComparatorSignal)
+ private:
+  inline void set_has_isconst();
+  inline void clear_has_isconst();
+  inline void set_has_constvalue();
+  inline void clear_has_constvalue();
+  inline void set_has_appsignalid();
+  inline void clear_has_appsignalid();
+  inline void set_has_isacquired();
+  inline void clear_has_isacquired();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  double constvalue_;
+  ::std::string* appsignalid_;
+  bool isconst_;
+  bool isacquired_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static ComparatorSignal* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class Comparator : public ::google::protobuf::Message {
+ public:
+  Comparator();
+  virtual ~Comparator();
+
+  Comparator(const Comparator& from);
+
+  inline Comparator& operator=(const Comparator& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const Comparator& default_instance();
+
+  void Swap(Comparator* other);
+
+  // implements Message ----------------------------------------------
+
+  Comparator* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const Comparator& from);
+  void MergeFrom(const Comparator& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 cmpType = 1 [default = 1];
+  inline bool has_cmptype() const;
+  inline void clear_cmptype();
+  static const int kCmpTypeFieldNumber = 1;
+  inline ::google::protobuf::int32 cmptype() const;
+  inline void set_cmptype(::google::protobuf::int32 value);
+
+  // optional int32 inAnalogSignalFormat = 2 [default = 1];
+  inline bool has_inanalogsignalformat() const;
+  inline void clear_inanalogsignalformat();
+  static const int kInAnalogSignalFormatFieldNumber = 2;
+  inline ::google::protobuf::int32 inanalogsignalformat() const;
+  inline void set_inanalogsignalformat(::google::protobuf::int32 value);
+
+  // optional .Proto.ComparatorSignal input = 3;
+  inline bool has_input() const;
+  inline void clear_input();
+  static const int kInputFieldNumber = 3;
+  inline const ::Proto::ComparatorSignal& input() const;
+  inline ::Proto::ComparatorSignal* mutable_input();
+  inline ::Proto::ComparatorSignal* release_input();
+  inline void set_allocated_input(::Proto::ComparatorSignal* input);
+
+  // optional .Proto.ComparatorSignal compare = 4;
+  inline bool has_compare() const;
+  inline void clear_compare();
+  static const int kCompareFieldNumber = 4;
+  inline const ::Proto::ComparatorSignal& compare() const;
+  inline ::Proto::ComparatorSignal* mutable_compare();
+  inline ::Proto::ComparatorSignal* release_compare();
+  inline void set_allocated_compare(::Proto::ComparatorSignal* compare);
+
+  // optional .Proto.ComparatorSignal hysteresis = 5;
+  inline bool has_hysteresis() const;
+  inline void clear_hysteresis();
+  static const int kHysteresisFieldNumber = 5;
+  inline const ::Proto::ComparatorSignal& hysteresis() const;
+  inline ::Proto::ComparatorSignal* mutable_hysteresis();
+  inline ::Proto::ComparatorSignal* release_hysteresis();
+  inline void set_allocated_hysteresis(::Proto::ComparatorSignal* hysteresis);
+
+  // optional .Proto.ComparatorSignal output = 6;
+  inline bool has_output() const;
+  inline void clear_output();
+  static const int kOutputFieldNumber = 6;
+  inline const ::Proto::ComparatorSignal& output() const;
+  inline ::Proto::ComparatorSignal* mutable_output();
+  inline ::Proto::ComparatorSignal* release_output();
+  inline void set_allocated_output(::Proto::ComparatorSignal* output);
+
+  // optional bool allSignalsIsAcquired = 7 [default = false];
+  inline bool has_allsignalsisacquired() const;
+  inline void clear_allsignalsisacquired();
+  static const int kAllSignalsIsAcquiredFieldNumber = 7;
+  inline bool allsignalsisacquired() const;
+  inline void set_allsignalsisacquired(bool value);
+
+  // optional int32 precision = 8 [default = 2];
+  inline bool has_precision() const;
+  inline void clear_precision();
+  static const int kPrecisionFieldNumber = 8;
+  inline ::google::protobuf::int32 precision() const;
+  inline void set_precision(::google::protobuf::int32 value);
+
+  // optional string label = 9;
+  inline bool has_label() const;
+  inline void clear_label();
+  static const int kLabelFieldNumber = 9;
+  inline const ::std::string& label() const;
+  inline void set_label(const ::std::string& value);
+  inline void set_label(const char* value);
+  inline void set_label(const char* value, size_t size);
+  inline ::std::string* mutable_label();
+  inline ::std::string* release_label();
+  inline void set_allocated_label(::std::string* label);
+
+  // optional string schemaId = 10;
+  inline bool has_schemaid() const;
+  inline void clear_schemaid();
+  static const int kSchemaIdFieldNumber = 10;
+  inline const ::std::string& schemaid() const;
+  inline void set_schemaid(const ::std::string& value);
+  inline void set_schemaid(const char* value);
+  inline void set_schemaid(const char* value, size_t size);
+  inline ::std::string* mutable_schemaid();
+  inline ::std::string* release_schemaid();
+  inline void set_allocated_schemaid(::std::string* schemaid);
+
+  // optional .Proto.Uuid schemaItemUuid = 11;
+  inline bool has_schemaitemuuid() const;
+  inline void clear_schemaitemuuid();
+  static const int kSchemaItemUuidFieldNumber = 11;
+  inline const ::Proto::Uuid& schemaitemuuid() const;
+  inline ::Proto::Uuid* mutable_schemaitemuuid();
+  inline ::Proto::Uuid* release_schemaitemuuid();
+  inline void set_allocated_schemaitemuuid(::Proto::Uuid* schemaitemuuid);
+
+  // @@protoc_insertion_point(class_scope:Proto.Comparator)
+ private:
+  inline void set_has_cmptype();
+  inline void clear_has_cmptype();
+  inline void set_has_inanalogsignalformat();
+  inline void clear_has_inanalogsignalformat();
+  inline void set_has_input();
+  inline void clear_has_input();
+  inline void set_has_compare();
+  inline void clear_has_compare();
+  inline void set_has_hysteresis();
+  inline void clear_has_hysteresis();
+  inline void set_has_output();
+  inline void clear_has_output();
+  inline void set_has_allsignalsisacquired();
+  inline void clear_has_allsignalsisacquired();
+  inline void set_has_precision();
+  inline void clear_has_precision();
+  inline void set_has_label();
+  inline void clear_has_label();
+  inline void set_has_schemaid();
+  inline void clear_has_schemaid();
+  inline void set_has_schemaitemuuid();
+  inline void clear_has_schemaitemuuid();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 cmptype_;
+  ::google::protobuf::int32 inanalogsignalformat_;
+  ::Proto::ComparatorSignal* input_;
+  ::Proto::ComparatorSignal* compare_;
+  ::Proto::ComparatorSignal* hysteresis_;
+  ::Proto::ComparatorSignal* output_;
+  bool allsignalsisacquired_;
+  ::google::protobuf::int32 precision_;
+  ::std::string* label_;
+  ::std::string* schemaid_;
+  ::Proto::Uuid* schemaitemuuid_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static Comparator* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class LmComparatorSet : public ::google::protobuf::Message {
+ public:
+  LmComparatorSet();
+  virtual ~LmComparatorSet();
+
+  LmComparatorSet(const LmComparatorSet& from);
+
+  inline LmComparatorSet& operator=(const LmComparatorSet& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const LmComparatorSet& default_instance();
+
+  void Swap(LmComparatorSet* other);
+
+  // implements Message ----------------------------------------------
+
+  LmComparatorSet* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const LmComparatorSet& from);
+  void MergeFrom(const LmComparatorSet& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string lmEquipmentID = 1;
+  inline bool has_lmequipmentid() const;
+  inline void clear_lmequipmentid();
+  static const int kLmEquipmentIDFieldNumber = 1;
+  inline const ::std::string& lmequipmentid() const;
+  inline void set_lmequipmentid(const ::std::string& value);
+  inline void set_lmequipmentid(const char* value);
+  inline void set_lmequipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_lmequipmentid();
+  inline ::std::string* release_lmequipmentid();
+  inline void set_allocated_lmequipmentid(::std::string* lmequipmentid);
+
+  // repeated .Proto.Comparator comparator = 2;
+  inline int comparator_size() const;
+  inline void clear_comparator();
+  static const int kComparatorFieldNumber = 2;
+  inline const ::Proto::Comparator& comparator(int index) const;
+  inline ::Proto::Comparator* mutable_comparator(int index);
+  inline ::Proto::Comparator* add_comparator();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::Comparator >&
+      comparator() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::Comparator >*
+      mutable_comparator();
+
+  // @@protoc_insertion_point(class_scope:Proto.LmComparatorSet)
+ private:
+  inline void set_has_lmequipmentid();
+  inline void clear_has_lmequipmentid();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* lmequipmentid_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::Comparator > comparator_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static LmComparatorSet* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ComparatorSet : public ::google::protobuf::Message {
+ public:
+  ComparatorSet();
+  virtual ~ComparatorSet();
+
+  ComparatorSet(const ComparatorSet& from);
+
+  inline ComparatorSet& operator=(const ComparatorSet& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ComparatorSet& default_instance();
+
+  void Swap(ComparatorSet* other);
+
+  // implements Message ----------------------------------------------
+
+  ComparatorSet* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ComparatorSet& from);
+  void MergeFrom(const ComparatorSet& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .Proto.LmComparatorSet lmComparatorSet = 1;
+  inline int lmcomparatorset_size() const;
+  inline void clear_lmcomparatorset();
+  static const int kLmComparatorSetFieldNumber = 1;
+  inline const ::Proto::LmComparatorSet& lmcomparatorset(int index) const;
+  inline ::Proto::LmComparatorSet* mutable_lmcomparatorset(int index);
+  inline ::Proto::LmComparatorSet* add_lmcomparatorset();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::LmComparatorSet >&
+      lmcomparatorset() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::LmComparatorSet >*
+      mutable_lmcomparatorset();
+
+  // @@protoc_insertion_point(class_scope:Proto.ComparatorSet)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Proto::LmComparatorSet > lmcomparatorset_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static ComparatorSet* default_instance_;
 };
 // ===================================================================
 
@@ -31186,6 +31694,696 @@ inline ::google::protobuf::int32 Bus::manualbussize() const {
 inline void Bus::set_manualbussize(::google::protobuf::int32 value) {
   set_has_manualbussize();
   manualbussize_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ComparatorSignal
+
+// optional bool isConst = 1 [default = true];
+inline bool ComparatorSignal::has_isconst() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ComparatorSignal::set_has_isconst() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ComparatorSignal::clear_has_isconst() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ComparatorSignal::clear_isconst() {
+  isconst_ = true;
+  clear_has_isconst();
+}
+inline bool ComparatorSignal::isconst() const {
+  return isconst_;
+}
+inline void ComparatorSignal::set_isconst(bool value) {
+  set_has_isconst();
+  isconst_ = value;
+}
+
+// optional double constValue = 2 [default = 0];
+inline bool ComparatorSignal::has_constvalue() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ComparatorSignal::set_has_constvalue() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ComparatorSignal::clear_has_constvalue() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ComparatorSignal::clear_constvalue() {
+  constvalue_ = 0;
+  clear_has_constvalue();
+}
+inline double ComparatorSignal::constvalue() const {
+  return constvalue_;
+}
+inline void ComparatorSignal::set_constvalue(double value) {
+  set_has_constvalue();
+  constvalue_ = value;
+}
+
+// optional string appSignalId = 3;
+inline bool ComparatorSignal::has_appsignalid() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ComparatorSignal::set_has_appsignalid() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ComparatorSignal::clear_has_appsignalid() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ComparatorSignal::clear_appsignalid() {
+  if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
+    appsignalid_->clear();
+  }
+  clear_has_appsignalid();
+}
+inline const ::std::string& ComparatorSignal::appsignalid() const {
+  return *appsignalid_;
+}
+inline void ComparatorSignal::set_appsignalid(const ::std::string& value) {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  appsignalid_->assign(value);
+}
+inline void ComparatorSignal::set_appsignalid(const char* value) {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  appsignalid_->assign(value);
+}
+inline void ComparatorSignal::set_appsignalid(const char* value, size_t size) {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  appsignalid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ComparatorSignal::mutable_appsignalid() {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  return appsignalid_;
+}
+inline ::std::string* ComparatorSignal::release_appsignalid() {
+  clear_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = appsignalid_;
+    appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ComparatorSignal::set_allocated_appsignalid(::std::string* appsignalid) {
+  if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
+    delete appsignalid_;
+  }
+  if (appsignalid) {
+    set_has_appsignalid();
+    appsignalid_ = appsignalid;
+  } else {
+    clear_has_appsignalid();
+    appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional bool isAcquired = 4 [default = false];
+inline bool ComparatorSignal::has_isacquired() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void ComparatorSignal::set_has_isacquired() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void ComparatorSignal::clear_has_isacquired() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void ComparatorSignal::clear_isacquired() {
+  isacquired_ = false;
+  clear_has_isacquired();
+}
+inline bool ComparatorSignal::isacquired() const {
+  return isacquired_;
+}
+inline void ComparatorSignal::set_isacquired(bool value) {
+  set_has_isacquired();
+  isacquired_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// Comparator
+
+// optional int32 cmpType = 1 [default = 1];
+inline bool Comparator::has_cmptype() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void Comparator::set_has_cmptype() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void Comparator::clear_has_cmptype() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void Comparator::clear_cmptype() {
+  cmptype_ = 1;
+  clear_has_cmptype();
+}
+inline ::google::protobuf::int32 Comparator::cmptype() const {
+  return cmptype_;
+}
+inline void Comparator::set_cmptype(::google::protobuf::int32 value) {
+  set_has_cmptype();
+  cmptype_ = value;
+}
+
+// optional int32 inAnalogSignalFormat = 2 [default = 1];
+inline bool Comparator::has_inanalogsignalformat() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void Comparator::set_has_inanalogsignalformat() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void Comparator::clear_has_inanalogsignalformat() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void Comparator::clear_inanalogsignalformat() {
+  inanalogsignalformat_ = 1;
+  clear_has_inanalogsignalformat();
+}
+inline ::google::protobuf::int32 Comparator::inanalogsignalformat() const {
+  return inanalogsignalformat_;
+}
+inline void Comparator::set_inanalogsignalformat(::google::protobuf::int32 value) {
+  set_has_inanalogsignalformat();
+  inanalogsignalformat_ = value;
+}
+
+// optional .Proto.ComparatorSignal input = 3;
+inline bool Comparator::has_input() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void Comparator::set_has_input() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void Comparator::clear_has_input() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void Comparator::clear_input() {
+  if (input_ != NULL) input_->::Proto::ComparatorSignal::Clear();
+  clear_has_input();
+}
+inline const ::Proto::ComparatorSignal& Comparator::input() const {
+  return input_ != NULL ? *input_ : *default_instance_->input_;
+}
+inline ::Proto::ComparatorSignal* Comparator::mutable_input() {
+  set_has_input();
+  if (input_ == NULL) input_ = new ::Proto::ComparatorSignal;
+  return input_;
+}
+inline ::Proto::ComparatorSignal* Comparator::release_input() {
+  clear_has_input();
+  ::Proto::ComparatorSignal* temp = input_;
+  input_ = NULL;
+  return temp;
+}
+inline void Comparator::set_allocated_input(::Proto::ComparatorSignal* input) {
+  delete input_;
+  input_ = input;
+  if (input) {
+    set_has_input();
+  } else {
+    clear_has_input();
+  }
+}
+
+// optional .Proto.ComparatorSignal compare = 4;
+inline bool Comparator::has_compare() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void Comparator::set_has_compare() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void Comparator::clear_has_compare() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void Comparator::clear_compare() {
+  if (compare_ != NULL) compare_->::Proto::ComparatorSignal::Clear();
+  clear_has_compare();
+}
+inline const ::Proto::ComparatorSignal& Comparator::compare() const {
+  return compare_ != NULL ? *compare_ : *default_instance_->compare_;
+}
+inline ::Proto::ComparatorSignal* Comparator::mutable_compare() {
+  set_has_compare();
+  if (compare_ == NULL) compare_ = new ::Proto::ComparatorSignal;
+  return compare_;
+}
+inline ::Proto::ComparatorSignal* Comparator::release_compare() {
+  clear_has_compare();
+  ::Proto::ComparatorSignal* temp = compare_;
+  compare_ = NULL;
+  return temp;
+}
+inline void Comparator::set_allocated_compare(::Proto::ComparatorSignal* compare) {
+  delete compare_;
+  compare_ = compare;
+  if (compare) {
+    set_has_compare();
+  } else {
+    clear_has_compare();
+  }
+}
+
+// optional .Proto.ComparatorSignal hysteresis = 5;
+inline bool Comparator::has_hysteresis() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void Comparator::set_has_hysteresis() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void Comparator::clear_has_hysteresis() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void Comparator::clear_hysteresis() {
+  if (hysteresis_ != NULL) hysteresis_->::Proto::ComparatorSignal::Clear();
+  clear_has_hysteresis();
+}
+inline const ::Proto::ComparatorSignal& Comparator::hysteresis() const {
+  return hysteresis_ != NULL ? *hysteresis_ : *default_instance_->hysteresis_;
+}
+inline ::Proto::ComparatorSignal* Comparator::mutable_hysteresis() {
+  set_has_hysteresis();
+  if (hysteresis_ == NULL) hysteresis_ = new ::Proto::ComparatorSignal;
+  return hysteresis_;
+}
+inline ::Proto::ComparatorSignal* Comparator::release_hysteresis() {
+  clear_has_hysteresis();
+  ::Proto::ComparatorSignal* temp = hysteresis_;
+  hysteresis_ = NULL;
+  return temp;
+}
+inline void Comparator::set_allocated_hysteresis(::Proto::ComparatorSignal* hysteresis) {
+  delete hysteresis_;
+  hysteresis_ = hysteresis;
+  if (hysteresis) {
+    set_has_hysteresis();
+  } else {
+    clear_has_hysteresis();
+  }
+}
+
+// optional .Proto.ComparatorSignal output = 6;
+inline bool Comparator::has_output() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void Comparator::set_has_output() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void Comparator::clear_has_output() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void Comparator::clear_output() {
+  if (output_ != NULL) output_->::Proto::ComparatorSignal::Clear();
+  clear_has_output();
+}
+inline const ::Proto::ComparatorSignal& Comparator::output() const {
+  return output_ != NULL ? *output_ : *default_instance_->output_;
+}
+inline ::Proto::ComparatorSignal* Comparator::mutable_output() {
+  set_has_output();
+  if (output_ == NULL) output_ = new ::Proto::ComparatorSignal;
+  return output_;
+}
+inline ::Proto::ComparatorSignal* Comparator::release_output() {
+  clear_has_output();
+  ::Proto::ComparatorSignal* temp = output_;
+  output_ = NULL;
+  return temp;
+}
+inline void Comparator::set_allocated_output(::Proto::ComparatorSignal* output) {
+  delete output_;
+  output_ = output;
+  if (output) {
+    set_has_output();
+  } else {
+    clear_has_output();
+  }
+}
+
+// optional bool allSignalsIsAcquired = 7 [default = false];
+inline bool Comparator::has_allsignalsisacquired() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void Comparator::set_has_allsignalsisacquired() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void Comparator::clear_has_allsignalsisacquired() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void Comparator::clear_allsignalsisacquired() {
+  allsignalsisacquired_ = false;
+  clear_has_allsignalsisacquired();
+}
+inline bool Comparator::allsignalsisacquired() const {
+  return allsignalsisacquired_;
+}
+inline void Comparator::set_allsignalsisacquired(bool value) {
+  set_has_allsignalsisacquired();
+  allsignalsisacquired_ = value;
+}
+
+// optional int32 precision = 8 [default = 2];
+inline bool Comparator::has_precision() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void Comparator::set_has_precision() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void Comparator::clear_has_precision() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void Comparator::clear_precision() {
+  precision_ = 2;
+  clear_has_precision();
+}
+inline ::google::protobuf::int32 Comparator::precision() const {
+  return precision_;
+}
+inline void Comparator::set_precision(::google::protobuf::int32 value) {
+  set_has_precision();
+  precision_ = value;
+}
+
+// optional string label = 9;
+inline bool Comparator::has_label() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void Comparator::set_has_label() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void Comparator::clear_has_label() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void Comparator::clear_label() {
+  if (label_ != &::google::protobuf::internal::kEmptyString) {
+    label_->clear();
+  }
+  clear_has_label();
+}
+inline const ::std::string& Comparator::label() const {
+  return *label_;
+}
+inline void Comparator::set_label(const ::std::string& value) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(value);
+}
+inline void Comparator::set_label(const char* value) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(value);
+}
+inline void Comparator::set_label(const char* value, size_t size) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Comparator::mutable_label() {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  return label_;
+}
+inline ::std::string* Comparator::release_label() {
+  clear_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = label_;
+    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Comparator::set_allocated_label(::std::string* label) {
+  if (label_ != &::google::protobuf::internal::kEmptyString) {
+    delete label_;
+  }
+  if (label) {
+    set_has_label();
+    label_ = label;
+  } else {
+    clear_has_label();
+    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string schemaId = 10;
+inline bool Comparator::has_schemaid() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void Comparator::set_has_schemaid() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void Comparator::clear_has_schemaid() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void Comparator::clear_schemaid() {
+  if (schemaid_ != &::google::protobuf::internal::kEmptyString) {
+    schemaid_->clear();
+  }
+  clear_has_schemaid();
+}
+inline const ::std::string& Comparator::schemaid() const {
+  return *schemaid_;
+}
+inline void Comparator::set_schemaid(const ::std::string& value) {
+  set_has_schemaid();
+  if (schemaid_ == &::google::protobuf::internal::kEmptyString) {
+    schemaid_ = new ::std::string;
+  }
+  schemaid_->assign(value);
+}
+inline void Comparator::set_schemaid(const char* value) {
+  set_has_schemaid();
+  if (schemaid_ == &::google::protobuf::internal::kEmptyString) {
+    schemaid_ = new ::std::string;
+  }
+  schemaid_->assign(value);
+}
+inline void Comparator::set_schemaid(const char* value, size_t size) {
+  set_has_schemaid();
+  if (schemaid_ == &::google::protobuf::internal::kEmptyString) {
+    schemaid_ = new ::std::string;
+  }
+  schemaid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Comparator::mutable_schemaid() {
+  set_has_schemaid();
+  if (schemaid_ == &::google::protobuf::internal::kEmptyString) {
+    schemaid_ = new ::std::string;
+  }
+  return schemaid_;
+}
+inline ::std::string* Comparator::release_schemaid() {
+  clear_has_schemaid();
+  if (schemaid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = schemaid_;
+    schemaid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Comparator::set_allocated_schemaid(::std::string* schemaid) {
+  if (schemaid_ != &::google::protobuf::internal::kEmptyString) {
+    delete schemaid_;
+  }
+  if (schemaid) {
+    set_has_schemaid();
+    schemaid_ = schemaid;
+  } else {
+    clear_has_schemaid();
+    schemaid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional .Proto.Uuid schemaItemUuid = 11;
+inline bool Comparator::has_schemaitemuuid() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void Comparator::set_has_schemaitemuuid() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void Comparator::clear_has_schemaitemuuid() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void Comparator::clear_schemaitemuuid() {
+  if (schemaitemuuid_ != NULL) schemaitemuuid_->::Proto::Uuid::Clear();
+  clear_has_schemaitemuuid();
+}
+inline const ::Proto::Uuid& Comparator::schemaitemuuid() const {
+  return schemaitemuuid_ != NULL ? *schemaitemuuid_ : *default_instance_->schemaitemuuid_;
+}
+inline ::Proto::Uuid* Comparator::mutable_schemaitemuuid() {
+  set_has_schemaitemuuid();
+  if (schemaitemuuid_ == NULL) schemaitemuuid_ = new ::Proto::Uuid;
+  return schemaitemuuid_;
+}
+inline ::Proto::Uuid* Comparator::release_schemaitemuuid() {
+  clear_has_schemaitemuuid();
+  ::Proto::Uuid* temp = schemaitemuuid_;
+  schemaitemuuid_ = NULL;
+  return temp;
+}
+inline void Comparator::set_allocated_schemaitemuuid(::Proto::Uuid* schemaitemuuid) {
+  delete schemaitemuuid_;
+  schemaitemuuid_ = schemaitemuuid;
+  if (schemaitemuuid) {
+    set_has_schemaitemuuid();
+  } else {
+    clear_has_schemaitemuuid();
+  }
+}
+
+// -------------------------------------------------------------------
+
+// LmComparatorSet
+
+// optional string lmEquipmentID = 1;
+inline bool LmComparatorSet::has_lmequipmentid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void LmComparatorSet::set_has_lmequipmentid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void LmComparatorSet::clear_has_lmequipmentid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void LmComparatorSet::clear_lmequipmentid() {
+  if (lmequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_->clear();
+  }
+  clear_has_lmequipmentid();
+}
+inline const ::std::string& LmComparatorSet::lmequipmentid() const {
+  return *lmequipmentid_;
+}
+inline void LmComparatorSet::set_lmequipmentid(const ::std::string& value) {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
+  }
+  lmequipmentid_->assign(value);
+}
+inline void LmComparatorSet::set_lmequipmentid(const char* value) {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
+  }
+  lmequipmentid_->assign(value);
+}
+inline void LmComparatorSet::set_lmequipmentid(const char* value, size_t size) {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
+  }
+  lmequipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* LmComparatorSet::mutable_lmequipmentid() {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
+  }
+  return lmequipmentid_;
+}
+inline ::std::string* LmComparatorSet::release_lmequipmentid() {
+  clear_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = lmequipmentid_;
+    lmequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void LmComparatorSet::set_allocated_lmequipmentid(::std::string* lmequipmentid) {
+  if (lmequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete lmequipmentid_;
+  }
+  if (lmequipmentid) {
+    set_has_lmequipmentid();
+    lmequipmentid_ = lmequipmentid;
+  } else {
+    clear_has_lmequipmentid();
+    lmequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// repeated .Proto.Comparator comparator = 2;
+inline int LmComparatorSet::comparator_size() const {
+  return comparator_.size();
+}
+inline void LmComparatorSet::clear_comparator() {
+  comparator_.Clear();
+}
+inline const ::Proto::Comparator& LmComparatorSet::comparator(int index) const {
+  return comparator_.Get(index);
+}
+inline ::Proto::Comparator* LmComparatorSet::mutable_comparator(int index) {
+  return comparator_.Mutable(index);
+}
+inline ::Proto::Comparator* LmComparatorSet::add_comparator() {
+  return comparator_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::Comparator >&
+LmComparatorSet::comparator() const {
+  return comparator_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::Comparator >*
+LmComparatorSet::mutable_comparator() {
+  return &comparator_;
+}
+
+// -------------------------------------------------------------------
+
+// ComparatorSet
+
+// repeated .Proto.LmComparatorSet lmComparatorSet = 1;
+inline int ComparatorSet::lmcomparatorset_size() const {
+  return lmcomparatorset_.size();
+}
+inline void ComparatorSet::clear_lmcomparatorset() {
+  lmcomparatorset_.Clear();
+}
+inline const ::Proto::LmComparatorSet& ComparatorSet::lmcomparatorset(int index) const {
+  return lmcomparatorset_.Get(index);
+}
+inline ::Proto::LmComparatorSet* ComparatorSet::mutable_lmcomparatorset(int index) {
+  return lmcomparatorset_.Mutable(index);
+}
+inline ::Proto::LmComparatorSet* ComparatorSet::add_lmcomparatorset() {
+  return lmcomparatorset_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::LmComparatorSet >&
+ComparatorSet::lmcomparatorset() const {
+  return lmcomparatorset_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::LmComparatorSet >*
+ComparatorSet::mutable_lmcomparatorset() {
+  return &lmcomparatorset_;
 }
 
 

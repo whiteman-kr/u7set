@@ -151,7 +151,7 @@ namespace Builder
 		m_connections = appLogicCompiler.connectionStorage();
 		m_optoModuleStorage = appLogicCompiler.opticModuleStorage();
 		m_tuningDataStorage = appLogicCompiler.tuningDataStorage();
-		m_cmpStorage = appLogicCompiler.comparatorStorage();
+		m_cmpSet = appLogicCompiler.comparatorSet();
 	}
 
 	ModuleLogicCompiler::~ModuleLogicCompiler()
@@ -208,7 +208,7 @@ namespace Builder
 			PROC_TO_CALL(ModuleLogicCompiler::appendAfbsForAnalogInOutSignalsConversion),
 			PROC_TO_CALL(ModuleLogicCompiler::setOutputSignalsAsComputed),
 			PROC_TO_CALL(ModuleLogicCompiler::setOptoRawInSignalsAsComputed),
-			PROC_TO_CALL(ModuleLogicCompiler::fillComparatorStorage),
+			PROC_TO_CALL(ModuleLogicCompiler::fillComparatorSet),
 		};
 
 		bool result = runProcs(procs);
@@ -3340,14 +3340,13 @@ namespace Builder
 
 		if (loopbackUalSignal == nullptr)
 		{
-			// LoopbackSource is not exists for LoopbackTarget with ID %1 (Logic schema %2).
+			// This is a critical error!
+			// Loopback source signal is't connected to any signal source (is not initialized)
 			//
-			// this error should be detected early, during loopbacks preprocessing
+			// Corresponding message will display during execution createUalSignalFromSignal(...) on pass 2.
+			// So, to continue compilation we return TRUE here!
 			//
-			assert(false);
-			LOG_INTERNAL_ERROR_MSG(m_log, QString("LB ID = %1 target %2 schema %3").
-								   arg(loopbackID).arg(loopbackTargetItem->label()).arg(loopbackTargetItem->schemaID()));
-			return false;
+			return true;
 		}
 
 		const std::vector<LogicPin>& outputs = loopbackTargetItem->outputs();
@@ -6502,7 +6501,7 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::fillComparatorStorage()
+	bool ModuleLogicCompiler::fillComparatorSet()
 	{
 		bool result = true;
 
@@ -6510,7 +6509,7 @@ namespace Builder
 		{
 			TEST_PTR_CONTINUE(ualAfb);
 
-			result &= addToComparatorStorage(ualAfb);
+			result &= addToComparatorSet(ualAfb);
 		}
 
 		return result;
@@ -9112,7 +9111,7 @@ namespace Builder
 		return false;
 	}
 
-	bool ModuleLogicCompiler::addToComparatorStorage(const UalAfb* appFb)
+	bool ModuleLogicCompiler::addToComparatorSet(const UalAfb* appFb)
 	{
 		if (appFb == nullptr)
 		{
@@ -9132,25 +9131,188 @@ namespace Builder
 
 		RETURN_IF_FALSE(result);
 
-		m_cmpStorage->insert(lmEquipmentID(), cmp);
+		m_cmpSet->insert(lmEquipmentID(), cmp);
 
 		return true;
 	}
 
 	bool ModuleLogicCompiler::initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* appFb)
 	{
-		Q_UNUSED(cmp);
+		TEST_PTR_RETURN_FALSE(appFb);
 
-		bool result = true;
+		// set compare type of value
+		//
+		cmp->compare().setIsConst(appFb->isConstComaparator());
+		cmp->hysteresis().setIsConst(!appFb->caption().contains("dh"));
 
-		if (appFb->isConstComaparator() == true)
+		//	set comparator type, compare-value, hysteresis-value
+		//
+		for(Afb::AfbParam pv : appFb->logicFb().params())
 		{
+			if (pv.opName() == "i_conf") // set comparator type: =(1(SI)), > (2(SI)), < (3(SI)), ≠ (4(SI)),= (5(FP)), > (6(FP)), < (7(FP)), ≠ (8(FP))
+			{
+				switch (pv.value().toInt())
+				{
+					case 1:
+					case 5:			cmp->setCmpType(Comparator::CmpType::Equ);		break;
+					case 2:
+					case 6:			cmp->setCmpType(Comparator::CmpType::Greate);	break;
+					case 3:
+					case 7:			cmp->setCmpType(Comparator::CmpType::Less);		break;
+					case 4:
+					case 8:			cmp->setCmpType(Comparator::CmpType::NotEqu);	break;
+				}
+			}
 
+			if (pv.opName() == "i_sp_s" && cmp->compare().isConst() == true) // set compare-value
+			{
+				switch (pv.dataFormat())
+				{
+					case E::DataFormat::Float :			cmp->compare().setConstValue(pv.value().toDouble());	cmp->setInAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);		break;
+					case E::DataFormat::SignedInt :		cmp->compare().setConstValue(pv.value().toInt());		cmp->setInAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);	break;
+					case E::DataFormat::UnsignedInt :	cmp->compare().setConstValue(pv.value().toInt());		cmp->setInAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);	break;
+					default:							assert(0);
+				}
+			}
+
+			if (pv.opName() == "hysteresis" && cmp->hysteresis().isConst() == true) // set hysteresis-value
+			{
+				switch (pv.dataFormat())
+				{
+					case E::DataFormat::Float :			cmp->hysteresis().setConstValue(pv.value().toDouble());		break;
+					case E::DataFormat::SignedInt :		cmp->hysteresis().setConstValue(pv.value().toInt());		break;
+					case E::DataFormat::UnsignedInt :	cmp->hysteresis().setConstValue(pv.value().toInt());		break;
+					default:							assert(0);
+				}
+			}
 		}
 
-		///////
+		// set comparator signals
+		//
+		for(const LogicPin& pin : appFb->inputs())
+		{
 
-		return result;
+			UalSignal* ualSignal = m_ualSignals.get(pin.guid());
+
+			if (ualSignal == nullptr)
+			{
+				continue;
+			}
+
+			if (ualSignal->isAnalog() == false)
+			{
+				continue;
+			}
+
+			// input Signal
+			//
+			if (pin.caption() == "in")
+			{
+				cmp->input().setAppSignalID(ualSignal->appSignalID());
+				cmp->input().setIsAcquired(ualSignal->isAcquired());
+			}
+
+			// compare Signal
+			//
+			if (pin.caption() == "set" && cmp->compare().isConst() == false) //
+			{
+				if (ualSignal->isConst() == true)
+				{
+					cmp->compare().setIsConst(true);
+					cmp->compare().setConstValue(ualSignal->constValue());
+					cmp->compare().setIsAcquired(false);
+				}
+				else
+				{
+					cmp->compare().setAppSignalID(ualSignal->appSignalID());
+					cmp->compare().setIsAcquired(ualSignal->isAcquired());
+				}
+			}
+
+			// hysteresis Signal
+			//
+			if ((pin.caption() == "hyst" || pin.caption() == "db") && cmp->hysteresis().isConst() == false)
+			{
+				if (ualSignal->isConst() == true)
+				{
+					cmp->hysteresis().setIsConst(true);
+					cmp->hysteresis().setConstValue(ualSignal->constValue());
+					cmp->hysteresis().setIsAcquired(false);
+				}
+				else
+				{
+					cmp->hysteresis().setAppSignalID(ualSignal->appSignalID());
+					cmp->hysteresis().setIsAcquired(ualSignal->isAcquired());
+				}
+			}
+		}
+
+		for(const LogicPin& pin : appFb->outputs())
+		{
+			UalSignal* ualSignal = m_ualSignals.get(pin.guid());
+
+			if (ualSignal == nullptr)
+			{
+				continue;
+			}
+
+			if (ualSignal->isDiscrete() == false)
+			{
+				continue;
+			}
+
+			// output Signal
+			//
+			if (pin.caption() == "out")
+			{
+				cmp->output().setAppSignalID(ualSignal->appSignalID());
+				cmp->output().setIsAcquired(ualSignal->isAcquired());
+			}
+		}
+
+		//
+		//
+		cmp->setLabel(appFb->label());
+		cmp->setPrecision(appFb->logicFb().precision());
+		cmp->setSchemaID(appFb->schemaID());
+		cmp->setSchemaItemUuid(appFb->guid());
+
+		// tests
+		//
+		if (cmp->input().appSignalID().isEmpty() == true)
+		{
+			assert(false);
+			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty input signal").arg(appFb->caption()).arg(appFb->schemaID());
+			LOG_INTERNAL_ERROR_MSG(m_log, strError);
+			qDebug() << strError;
+			return false;
+		}
+
+		//		if (cmp->output().appSignalID().isEmpty() == true)
+		//		{
+		//			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty output signal").arg(appFb->caption()).arg(appFb->schemaID());
+		//			LOG_INTERNAL_ERROR_MSG(m_log, strError);
+		//			qDebug() << strError;
+		//			return false;
+		//		}
+
+		if (cmp->compare().isConst() == false && cmp->compare().appSignalID().isEmpty() == true)
+		{
+			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty cmp signal").arg(appFb->caption()).arg(appFb->schemaID());
+			LOG_INTERNAL_ERROR_MSG(m_log, strError);
+			qDebug() << strError;
+			return false;
+		}
+
+		if (cmp->hysteresis().isConst() == false && cmp->hysteresis().appSignalID().isEmpty() == true)
+		{
+			QString strError = QString("Error of comparator: %1 , schema: %2 - Empty hysteresis signal").arg(appFb->caption()).arg(appFb->schemaID());
+			LOG_INTERNAL_ERROR_MSG(m_log, strError);
+			qDebug() << strError;
+			return false;
+		}
+
+		return true;
 	}
 
 	bool ModuleLogicCompiler::copyAcquiredAnalogOptoSignalsToRegBuf(CodeSnippet* code)

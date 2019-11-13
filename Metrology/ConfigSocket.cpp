@@ -4,10 +4,8 @@
 
 #include "Options.h"
 #include "SignalBase.h"
-#include "TuningSignalBase.h"
 
 #include "../lib/ServiceSettings.h"
-
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -153,7 +151,12 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 
 		if (bfi.ID == CFG_FILE_ID_APP_SIGNAL_SET)
 		{
-			result &= readAppSignalSet(fileData);					// fill AppSignalSets
+			result &= readAppSignalSet(fileData);					// fill AppSignalSet
+		}
+
+		if (bfi.ID == CFG_FILE_ID_COMPARATOR_SET)
+		{
+			result &= readComparatorSet(fileData);					// fill ComparatorSet
 		}
 
 		if (bfi.ID == CFG_FILE_ID_METROLOGY_SIGNALS)
@@ -209,6 +212,31 @@ bool ConfigSocket::readAppSignalSet(const QByteArray& fileData)
 	}
 
 	qDebug() << __FUNCTION__ << "Signals were loaded" << theSignalBase.signalCount() << " Time for load: " << responseTime.elapsed() << " ms";
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool ConfigSocket::readComparatorSet(const QByteArray& fileData)
+{
+	::Proto::ComparatorSet protoComparatorSet;
+
+	QTime responseTime;
+	responseTime.start();
+
+	bool result = protoComparatorSet.ParseFromArray(fileData.constData(), fileData.size());
+	if (result == false)
+	{
+		return false;
+	}
+
+	Builder::ComparatorSet comparatorSet;
+	comparatorSet.serializeFrom(protoComparatorSet);
+
+	theSignalBase.loadComparators(comparatorSet);
+
+	qDebug() << __FUNCTION__ << "Comparators were loaded" << comparatorSet.comparatorCount() << " Time for load: " << responseTime.elapsed() << " ms";
 
 	return true;
 }

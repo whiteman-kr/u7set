@@ -60,6 +60,7 @@ private slots:
 
 	bool				readConfiguration(const QByteArray& fileData);
 	bool				readAppSignalSet(const QByteArray& fileData);
+	bool				readComparatorSet(const QByteArray& fileData);
 	bool				readMetrologySignals(const QByteArray& fileData);
 
 	bool				readRacks(const QByteArray& fileData, int fileVersion);

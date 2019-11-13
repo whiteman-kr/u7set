@@ -22,6 +22,7 @@
 #include "FindMeasurePanel.h"
 #include "StatisticPanel.h"
 #include "SignalInfoPanel.h"
+#include "ComparatorInfoPanel.h"
 #include "Calculator.h"
 
 // ==============================================================================================
@@ -115,7 +116,7 @@ private:
 	FindMeasurePanel*		m_pFindMeasurePanel = nullptr;
 	StatisticPanel*			m_pStatisticPanel = nullptr;
 	SignalInfoPanel*		m_pSignalInfoPanel = nullptr;
-	QDockWidget*			m_pComparatorInfoPanel = nullptr;
+	ComparatorInfoPanel*	m_pComparatorInfoPanel = nullptr;
 	QTableView*				m_pComparatorInfoView = nullptr;
 
 	// Elements of interface - StatusBar
@@ -221,7 +222,7 @@ private slots:
 	void					calibrators();
 	void					showRackList();
 	void					showSignalList();
-	void					showComparatorsList() {}
+	void					showComparatorsList();
 	void					showOutputSignalList();
 	void					showTuningSignalList();
 	void					showCalculator();

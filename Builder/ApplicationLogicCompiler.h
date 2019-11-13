@@ -3,7 +3,7 @@
 #include "../lib/Subsystem.h"
 #include "../VFrame30/Bus.h"
 #include "ModuleLogicCompiler.h"
-#include "ComparatorStorage.h"
+#include "ComparatorSet.h"
 
 
 namespace Builder
@@ -34,7 +34,7 @@ namespace Builder
 		LmDescriptionSet* lmDescriptions();
 		AppLogicData* appLogicData();
 		Tuning::TuningDataStorage* tuningDataStorage();
-		ComparatorStorage* comparatorStorage();
+		ComparatorSet* comparatorSet();
 		BuildResultWriter* buildResultWriter();
 		Hardware::ConnectionStorage* connectionStorage();
 		const VFrame30::BusSet* busSet();
@@ -62,6 +62,7 @@ namespace Builder
 		bool writeOptoModulesReport();
 
 		bool writeAppSignalSetFile();
+		bool writeComparatorSetFile();
 		bool writeSubsystemsXml();
 
 		void clear();

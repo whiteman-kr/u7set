@@ -21,6 +21,7 @@
 #include "ExportData.h"
 #include "RackList.h"
 #include "SignalList.h"
+#include "ComparatorList.h"
 #include "TuningSignalList.h"
 #include "OutputSignalList.h"
 
@@ -591,17 +592,12 @@ void MainWindow::createPanels()
 
 	// Panel comparator information
 	//
-	m_pComparatorInfoPanel = new QDockWidget(tr("Panel comparator information"), this);
+	m_pComparatorInfoPanel = new ComparatorInfoPanel(this);
 	m_pComparatorInfoPanel->setObjectName("Panel comparator information");
 	if (m_pComparatorInfoPanel != nullptr)
 	{
 		m_pComparatorInfoPanel->setAllowedAreas(Qt::BottomDockWidgetArea);
 
-		m_pComparatorInfoView = new QTableView;
-		if (m_pComparatorInfoView != nullptr)
-		{
-			m_pComparatorInfoPanel->setWidget(m_pComparatorInfoView);
-		}
 		addDockWidget(Qt::BottomDockWidgetArea, m_pComparatorInfoPanel);
 
 		if (m_pViewPanelMenu != nullptr)
@@ -1210,6 +1206,14 @@ void MainWindow::showSignalList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::showComparatorsList()
+{
+	ComparatorListDialog dialog(this);
+	dialog.exec();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::showOutputSignalList()
 {
 	OutputSignalDialog dialog(this);
@@ -1578,7 +1582,7 @@ void MainWindow::configSocketConfigurationLoaded()
 
 	HostAddressPort configSocketAddress = m_pConfigSocket->address();
 
-	QString connectedState = tr("Connected: %1 : %2\n").arg(configSocketAddress.addressStr()).arg(configSocketAddress.port());
+	QString connectedState = tr("Connected: %1 : %2\n\n").arg(configSocketAddress.addressStr()).arg(configSocketAddress.port());
 
 	int filesCount = m_pConfigSocket->loadedFiles().count();
 
@@ -1589,7 +1593,7 @@ void MainWindow::configSocketConfigurationLoaded()
 		connectedState.append("\n" + m_pConfigSocket->loadedFiles().at(f));
 	}
 
-	connectedState.append(tr("\nLoaded signals: %1").arg(theSignalBase.signalCount()));
+	connectedState.append(tr("\n\nLoaded signals: %1").arg(theSignalBase.signalCount()));
 
 	if (CFG_FILE_VER_METROLOGY_SIGNALS != theOptions.projectInfo().cfgFileVersion())
 	{
@@ -1665,7 +1669,7 @@ void MainWindow::tuningSocketConnected()
 
 	HostAddressPort tuningSocketAddress = theOptions.socket().client(SOCKET_TYPE_TUNING).address(serverType);
 
-	QString connectedState = tr("Connected: %1 : %2").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port());
+	QString connectedState = tr("Connected: %1 : %2\n").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port());
 
 	connectedState.append(tr("\nTuning sources: %1").arg(theSignalBase.tuning().Sources().count()));
 	connectedState.append(tr("\nTuning signals: %1").arg(theSignalBase.tuning().Signals().count()));
@@ -1717,7 +1721,7 @@ void MainWindow::tuningSignalsCreated()
 
 	HostAddressPort tuningSocketAddress = theOptions.socket().client(SOCKET_TYPE_TUNING).address(serverType);
 
-	QString connectedState = tr("Connected: %1 : %2").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port());
+	QString connectedState = tr("Connected: %1 : %2\n").arg(tuningSocketAddress.addressStr()).arg(tuningSocketAddress.port());
 
 	connectedState.append(tr("\nTuning sources: %1").arg(theSignalBase.tuning().Sources().count()));
 	connectedState.append(tr("\nTuning signals: %1").arg(theSignalBase.tuning().Signals().count()));

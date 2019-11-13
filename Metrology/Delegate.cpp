@@ -188,7 +188,7 @@ void StatisticsStateDelegate::paint(QPainter *painter, const QStyleOptionViewIte
 	{
 		case Metrology::StatisticStateFailed:
 			painter->fillRect(option.rect, theOptions.measureView().colorErrorLimit());
-			painter->drawImage(QPointF(option.rect.right() - 20, option.rect.top()), QImage(":/icons/CheckRed.png"));
+			//painter->drawImage(QPointF(option.rect.right() - 20, option.rect.top()), QImage(":/icons/CheckRed.png"));
 			break;
 		case Metrology::StatisticStateSuccess:
 			painter->fillRect(option.rect, theOptions.measureView().colorNotError());

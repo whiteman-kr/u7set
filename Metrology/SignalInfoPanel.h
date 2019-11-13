@@ -62,6 +62,10 @@ const int					SignalInfoColumnWidth[SIGNAL_INFO_COLUMN_COUNT] =
 
 // ==============================================================================================
 
+const int					SIGNAL_INFO_UPDATE_TIMER		= 250;	//	250 ms
+
+// ==============================================================================================
+
 class SignalInfoTable : public QAbstractTableModel
 {
 	Q_OBJECT
@@ -99,10 +103,6 @@ private slots:
 
 	void					updateSignalParam(const QString& appSignalID);
 };
-
-// ==============================================================================================
-
-#define						SIGNAL_INFO_OPTIONS_KEY		"Options/SignalInfo/"
 
 // ==============================================================================================
 

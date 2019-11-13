@@ -113,7 +113,6 @@ SOURCES += \
     UalItems.cpp \
     ApplicationLogicCode.cpp \
     LmMemoryMap.cpp \
-    ComparatorStorage.cpp \
     ConfigurationBuilder.cpp \
     ApplicationLogicCompiler.cpp \
     ModuleLogicCompiler.cpp \
@@ -145,7 +144,8 @@ SOURCES += \
     ../lib/UnitsConvertor.cpp \
     ../lib/UnitsConvertorTable.cpp \
     Context.cpp \
-    ../lib/AppSignalStateFlags.cpp
+    ../lib/AppSignalStateFlags.cpp \
+    ComparatorSet.cpp
 
 HEADERS += \
     ../lib/OutputLog.h \
@@ -201,7 +201,6 @@ HEADERS += \
     UalItems.h \
     ApplicationLogicCode.h \
     LmMemoryMap.h \
-    ComparatorStorage.h \
     TuningBuilder.h \
     ConfigurationBuilder.h \
     ApplicationLogicCompiler.h \
@@ -232,7 +231,8 @@ HEADERS += \
     ../lib/UnitsConvertor.h \
     ../lib/UnitsConvertorTable.h \
     Context.h \
-    ../lib/AppSignalStateFlags.h
+    ../lib/AppSignalStateFlags.h \
+    ComparatorSet.h
 
 unix {
     target.path = /usr/lib

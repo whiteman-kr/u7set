@@ -409,7 +409,7 @@ void SignalInfoTable::updateSignalParam(const QString& appSignalID)
 SignalInfoPanel::SignalInfoPanel(QWidget* parent) :
 	QDockWidget(parent)
 {
-	setWindowTitle("Panel signal information");
+	setWindowTitle(tr("Panel signal information"));
 	setObjectName(windowTitle());
 
 	createInterface();
@@ -554,7 +554,7 @@ void SignalInfoPanel::startSignalStateTimer()
 		connect(m_updateSignalStateTimer, &QTimer::timeout, this, &SignalInfoPanel::updateSignalState);
 	}
 
-	m_updateSignalStateTimer->start(100); //	100 ms
+	m_updateSignalStateTimer->start(SIGNAL_INFO_UPDATE_TIMER);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
