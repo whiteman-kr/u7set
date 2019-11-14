@@ -317,6 +317,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0297.sql", "Upgrade to version 297, If TuningEnable/AppDataEnable/DiagDataEnable flag in LM is false, IP address is zero"},
 	{":/DatabaseUpgrade/Upgrade0298.sql", "Upgrade to version 298, Added descriptions of LmNumberCount and UniqueID in bts file"},
 	{":/DatabaseUpgrade/Upgrade0299.sql", "Upgrade to version 299, be_to_le_16si->be_to_le_16ui, le_to_be_16si->le_to_be_16ui"},
+	{":/DatabaseUpgrade/Upgrade0300.sql", "Upgrade to version 300, Added Certificate property to all presets"},
 };
 
 int DbWorker::counter = 0;
