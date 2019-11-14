@@ -24,6 +24,7 @@
 #include "ComparatorList.h"
 #include "TuningSignalList.h"
 #include "SignalConnectionList.h"
+#include "ObjectProperties.h"
 
 #include "../lib/Ui/DialogAbout.h"
 
@@ -189,14 +190,6 @@ void MainWindow::createActions()
 
 	// View
 	//
-
-	// Tools
-	//
-	m_pCalibratorsAction = new QAction(tr("&Calibrations ..."), this);
-	m_pCalibratorsAction->setIcon(QIcon(":/icons/Calibrators.png"));
-	m_pCalibratorsAction->setToolTip(tr("Connecting and configuring calibrators"));
-	connect(m_pCalibratorsAction, &QAction::triggered, this, &MainWindow::calibrators);
-
 	m_pShowRackListAction = new QAction(tr("Racks ..."), this);
 	m_pShowRackListAction->setIcon(QIcon(":/icons/Signals.png"));
 	m_pShowRackListAction->setToolTip("");
@@ -222,6 +215,18 @@ void MainWindow::createActions()
 	m_pShowSignalConnectionListAction->setToolTip("");
 	connect(m_pShowSignalConnectionListAction, &QAction::triggered, this, &MainWindow::showSignalConnectionList);
 
+	m_pShowStatisticAction = new QAction(tr("Sta&tistics ..."), this);
+	m_pShowStatisticAction->setIcon(QIcon(":/icons/Statistics.png"));
+	m_pShowStatisticAction->setToolTip("");
+	connect(m_pShowStatisticAction, &QAction::triggered, this, &MainWindow::showStatistic);
+
+	// Tools
+	//
+	m_pCalibratorsAction = new QAction(tr("&Calibrations ..."), this);
+	m_pCalibratorsAction->setIcon(QIcon(":/icons/Calibrators.png"));
+	m_pCalibratorsAction->setToolTip(tr("Connecting and configuring calibrators"));
+	connect(m_pCalibratorsAction, &QAction::triggered, this, &MainWindow::showCalibrators);
+
 	m_pShowCalculatorAction = new QAction(tr("Metrological &calculator ..."), this);
 	m_pShowCalculatorAction->setShortcut(Qt::ALT + Qt::Key_C);
 	m_pShowCalculatorAction->setIcon(QIcon(":/icons/Calculator.png"));
@@ -236,13 +241,8 @@ void MainWindow::createActions()
 
 	// ?
 	//
-	m_pShowStatisticAction = new QAction(tr("Sta&tistics ..."), this);
-	m_pShowStatisticAction->setIcon(QIcon(":/icons/Statistics.png"));
-	m_pShowStatisticAction->setToolTip("");
-	connect(m_pShowStatisticAction, &QAction::triggered, this, &MainWindow::showStatistic);
-
 	m_pAboutConnectionAction = new QAction(tr("About connect to server ..."), this);
-	m_pAboutConnectionAction->setIcon(QIcon(":/icons/About connection.png"));
+	m_pAboutConnectionAction->setIcon(QIcon(":/icons/About Сonnection.png"));
 	m_pAboutConnectionAction->setToolTip("");
 	connect(m_pAboutConnectionAction, &QAction::triggered, this, &MainWindow::aboutConnection);
 
@@ -262,6 +262,8 @@ void MainWindow::createMenu()
 		return;
 	}
 
+	// Measure
+	//
 	m_pMeasureMenu = pMenuBar->addMenu(tr("&Measure"));
 
 	m_pMeasureMenu->addAction(m_pStartMeasureAction);
@@ -269,7 +271,8 @@ void MainWindow::createMenu()
 	m_pMeasureMenu->addSeparator();
 	m_pMeasureMenu->addAction(m_pExportMeasureAction);
 
-
+	// Edit
+	//
 	m_pEditMenu = pMenuBar->addMenu(tr("&Edit"));
 
 	m_pEditMenu->addAction(m_pCopyMeasureAction);
@@ -278,35 +281,36 @@ void MainWindow::createMenu()
 	m_pEditMenu->addAction(m_pSelectAllMeasureAction);
 	m_pEditMenu->addSeparator();
 
-
+	// View
+	//
 	m_pViewMenu = pMenuBar->addMenu(tr("&View"));
 	m_pViewPanelMenu = new QMenu("&Panels", m_pViewMenu);
 
 	m_pViewMenu->addMenu(m_pViewPanelMenu);
+	m_pViewMenu->addSeparator();
+	m_pViewMenu->addAction(m_pShowRackListAction);
+	m_pViewMenu->addAction(m_pShowSignalListAction);
+	m_pViewMenu->addAction(m_pShowComparatorsListAction);
+	m_pViewMenu->addAction(m_pShowTuningSignalListAction);
+	m_pViewMenu->addSeparator();
+	m_pViewMenu->addAction(m_pShowSignalConnectionListAction);
+	m_pViewMenu->addSeparator();
+	m_pViewMenu->addAction(m_pShowStatisticAction);
 
-
+	// Tools
+	//
 	m_pToolsMenu = pMenuBar->addMenu(tr("&Tools"));
-	m_pToolsListsMenu = new QMenu("&Lists", m_pViewMenu);
 
 	m_pToolsMenu->addAction(m_pCalibratorsAction);
-	m_pToolsMenu->addSeparator();
-	m_pToolsListsMenu->addAction(m_pShowRackListAction);
-	m_pToolsListsMenu->addAction(m_pShowSignalListAction);
-	m_pToolsListsMenu->addAction(m_pShowComparatorsListAction);
-	m_pToolsListsMenu->addAction(m_pShowTuningSignalListAction);
-	m_pToolsListsMenu->addSeparator();
-	m_pToolsListsMenu->addAction(m_pShowSignalConnectionListAction);
-	m_pToolsMenu->addMenu(m_pToolsListsMenu);
 	m_pToolsMenu->addSeparator();
 	m_pToolsMenu->addAction(m_pShowCalculatorAction);
 	m_pToolsMenu->addSeparator();
 	m_pToolsMenu->addAction(m_pOptionsAction);
 
-
+	// ?
+	//
 	m_pInfoMenu = pMenuBar->addMenu(tr("&?"));
 
-	m_pInfoMenu->addAction(m_pShowStatisticAction);
-	m_pInfoMenu->addSeparator();
 	m_pInfoMenu->addAction(m_pAboutConnectionAction);
 	m_pInfoMenu->addAction(m_pAboutAppAction);
 }
@@ -1193,9 +1197,27 @@ void MainWindow::selectAllMeasure()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::calibrators()
+void MainWindow::showRackList()
 {
-	theCalibratorBase.showInitDialog();
+	RackListDialog dialog(this);
+	if (dialog.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	theSignalBase.updateRackParam();
+
+	if (theSignalBase.racks().groups().save() == false)
+	{
+		QMessageBox::information(this, windowTitle(), tr("Attempt to save rack groups was unsuccessfully!"));
+		return;
+	}
+
+	if (theOptions.toolBar().measureKind() == MEASURE_KIND_MULTI_RACK)
+	{
+		updateRacksOnToolBar();
+		updateSignalsOnToolBar();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1241,27 +1263,21 @@ void MainWindow::showSignalConnectionList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::showRackList()
+void MainWindow::showStatistic()
 {
-	RackListDialog dialog(this);
-	if (dialog.exec() != QDialog::Accepted)
+	if (m_pStatisticPanel == nullptr)
 	{
 		return;
 	}
 
-	theSignalBase.updateRackParam();
+	m_pStatisticPanel->show();
+}
 
-	if (theSignalBase.racks().groups().save() == false)
-	{
-		QMessageBox::information(this, windowTitle(), tr("Attempt to save rack groups was unsuccessfully!"));
-		return;
-	}
+// -------------------------------------------------------------------------------------------------------------------
 
-	if (theOptions.toolBar().measureKind() == MEASURE_KIND_MULTI_RACK)
-	{
-		updateRacksOnToolBar();
-		updateSignalsOnToolBar();
-	}
+void MainWindow::showCalibrators()
+{
+	theCalibratorBase.showInitDialog();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1317,14 +1333,10 @@ void MainWindow::showOptions()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::showStatistic()
+void MainWindow::aboutConnection()
 {
-	if (m_pStatisticPanel == nullptr)
-	{
-		return;
-	}
-
-	m_pStatisticPanel->show();
+	ProjectPropertyDialog dialog(theOptions.projectInfo());
+	dialog.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

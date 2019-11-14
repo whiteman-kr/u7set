@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>icons/empty.png</file>
         <file>icons/About Application.png</file>
-        <file>icons/About connection.png</file>
         <file>icons/Calculator.png</file>
         <file>icons/Calibrators.png</file>
         <file>icons/Cut.png</file>
@@ -38,5 +37,6 @@
         <file>Images/logo.png</file>
         <file>icons/CheckGreen.png</file>
         <file>icons/CheckRed.png</file>
+        <file>icons/About Сonnection.png</file>
     </qresource>
 </RCC>
