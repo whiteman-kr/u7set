@@ -33,26 +33,26 @@ const char* const			StatisticColumn[] =
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Engeneering range"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Measure count"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "State"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Output type"),
+							QT_TRANSLATE_NOOP("StatisticDialog.h", "Signal connection"),
 };
 
-const int					STATISTIC_COLUMN_COUNT			= sizeof(StatisticColumn)/sizeof(StatisticColumn[0]);
+const int					STATISTIC_COLUMN_COUNT				= sizeof(StatisticColumn)/sizeof(StatisticColumn[0]);
 
-const int					STATISTIC_COLUMN_APP_ID			= 0,
-							STATISTIC_COLUMN_CUSTOM_ID		= 1,
-							STATISTIC_COLUMN_EQUIPMENT_ID	= 2,
-							STATISTIC_COLUMN_CAPTION		= 3,
-							STATISTIC_COLUMN_RACK			= 4,
-							STATISTIC_COLUMN_CHASSIS		= 5,
-							STATISTIC_COLUMN_MODULE			= 6,
-							STATISTIC_COLUMN_PLACE			= 7,
-							STATISTIC_COLUMN_ADC			= 8,
-							STATISTIC_COLUMN_EL_RANGE		= 9,
-							STATISTIC_COLUMN_PH_RANGE		= 10,
-							STATISTIC_COLUMN_EN_RANGE		= 11,
-							STATISTIC_COLUMN_MEASURE_COUNT	= 12,
-							STATISTIC_COLUMN_STATE			= 13,
-							STATISTIC_COLUMN_OUTPUT_TYPE	= 14;
+const int					STATISTIC_COLUMN_APP_ID				= 0,
+							STATISTIC_COLUMN_CUSTOM_ID			= 1,
+							STATISTIC_COLUMN_EQUIPMENT_ID		= 2,
+							STATISTIC_COLUMN_CAPTION			= 3,
+							STATISTIC_COLUMN_RACK				= 4,
+							STATISTIC_COLUMN_CHASSIS			= 5,
+							STATISTIC_COLUMN_MODULE				= 6,
+							STATISTIC_COLUMN_PLACE				= 7,
+							STATISTIC_COLUMN_ADC				= 8,
+							STATISTIC_COLUMN_EL_RANGE			= 9,
+							STATISTIC_COLUMN_PH_RANGE			= 10,
+							STATISTIC_COLUMN_EN_RANGE			= 11,
+							STATISTIC_COLUMN_MEASURE_COUNT		= 12,
+							STATISTIC_COLUMN_STATE				= 13,
+							STATISTIC_COLUMN_SIGNAL_CONNECTION	= 14;
 
 const int					StatisticColumnWidth[STATISTIC_COLUMN_COUNT] =
 {
@@ -70,7 +70,7 @@ const int					StatisticColumnWidth[STATISTIC_COLUMN_COUNT] =
 							150,	// STATISTIC_COLUMN_IN_EN_RANGE
 							100,	// STATISTIC_COLUMN_MEASURE_COUNT
 							100,	// STATISTIC_COLUMN_MEASURE_STATE
-							100,	// STATISTIC_COLUMN_OUTPUT_TYPE
+							100,	// STATISTIC_COLUMN_SIGNAL_CONNECTION
 };
 
 // ==============================================================================================
@@ -173,7 +173,7 @@ protected:
 public slots:
 
 	void					changedMeasureType(int type);
-	void					changedOutputSignalType(int type);
+	void					changedSignalConnectionType(int type);
 
 	void					activeSignalChanged(const MeasureSignal& activeSignal);	// slot informs that signal for measure was selected
 

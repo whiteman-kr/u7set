@@ -101,8 +101,8 @@ LinearityMeasurement::LinearityMeasurement(const IoSignalParam &ioParam)
 		return;
 	}
 
-	int outputSignalType = ioParam.outputSignalType();
-	if (outputSignalType < 0 || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
+	int signalConnectionType = ioParam.signalConnectionType();
+	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		assert(0);
 		return;
@@ -114,12 +114,12 @@ LinearityMeasurement::LinearityMeasurement(const IoSignalParam &ioParam)
 		return;
 	}
 
-	switch (outputSignalType)
+	switch (signalConnectionType)
 	{
-		case OUTPUT_SIGNAL_TYPE_UNUSED:			fill_measure_input(ioParam, ioParam.isNegativeRange());	break;
-		case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
-		case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	fill_measure_output(ioParam);							break;
-		default:								assert(0);
+		case SIGNAL_CONNECTION_TYPE_UNUSED:			fill_measure_input(ioParam, ioParam.isNegativeRange());	break;
+		case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
+		case SIGNAL_CONNECTION_TYPE_FROM_TUNING:	fill_measure_output(ioParam);							break;
+		default:									assert(0);
 	}
 }
 
@@ -313,8 +313,8 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 		return;
 	}
 
-	int outputSignalType = ioParam.outputSignalType();
-	if (outputSignalType < 0 || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
+	int signalConnectionType = ioParam.signalConnectionType();
+	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		assert(0);
 		return;

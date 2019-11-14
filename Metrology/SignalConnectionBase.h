@@ -1,5 +1,5 @@
-#ifndef OUTPUTSIGNALBASE_H
-#define OUTPUTSIGNALBASE_H
+#ifndef SIGNALCONNECTIONBASE_H
+#define SIGNALCONNECTIONBASE_H
 
 #include "../lib/Hash.h"
 #include "../lib/MetrologySignal.h"
@@ -8,8 +8,8 @@
 
 const char* const			MeasureIoSignalType[] =
 {
-							QT_TRANSLATE_NOOP("SignalBase.h", "Input"),
-							QT_TRANSLATE_NOOP("SignalBase.h", "Output"),
+							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Input"),
+							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Output"),
 };
 
 const int					MEASURE_IO_SIGNAL_TYPE_COUNT = sizeof(MeasureIoSignalType)/sizeof(MeasureIoSignalType[0]);
@@ -20,28 +20,28 @@ const int					MEASURE_IO_SIGNAL_TYPE_UNKNOWN	= -1,
 
 // ==============================================================================================
 
-const char* const			OutputSignalType[] =
+const char* const			SignalConnectionType[] =
 {
-							QT_TRANSLATE_NOOP("SignalBase.h", "Not output"),
-							QT_TRANSLATE_NOOP("SignalBase.h", "Input → Output"),
-							QT_TRANSLATE_NOOP("SignalBase.h", "Tuning → Output"),
+							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "No connections"),
+							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Input → Output"),
+							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Tuning → Output"),
 };
 
-const int					OUTPUT_SIGNAL_TYPE_COUNT = sizeof(OutputSignalType)/sizeof(OutputSignalType[0]);
+const int					SIGNAL_CONNECTION_TYPE_COUNT = sizeof(SignalConnectionType)/sizeof(SignalConnectionType[0]);
 
-const int					OUTPUT_SIGNAL_TYPE_UNUSED		= 0,
-							OUTPUT_SIGNAL_TYPE_FROM_INPUT	= 1,
-							OUTPUT_SIGNAL_TYPE_FROM_TUNING	= 2;
+const int					SIGNAL_CONNECTION_TYPE_UNUSED		= 0,
+							SIGNAL_CONNECTION_TYPE_FROM_INPUT	= 1,
+							SIGNAL_CONNECTION_TYPE_FROM_TUNING	= 2;
 
 // ==============================================================================================
 
-class OutputSignal
+class SignalConnection
 {
 public:
 
-	OutputSignal();
-	OutputSignal(const OutputSignal& from);
-	virtual ~OutputSignal() {}
+	SignalConnection();
+	SignalConnection(const SignalConnection& from);
+	virtual ~SignalConnection() {}
 
 private:
 
@@ -52,7 +52,7 @@ private:
 	QString					m_appSignalID[MEASURE_IO_SIGNAL_TYPE_COUNT];
 	Hash					m_hash = UNDEFINED_HASH;						// calcHash form m_appSignalID
 
-	int						m_type = OUTPUT_SIGNAL_TYPE_UNUSED;
+	int						m_type = SIGNAL_CONNECTION_TYPE_UNUSED;
 
 	Metrology::Signal*		m_pSignal[MEASURE_IO_SIGNAL_TYPE_COUNT];
 
@@ -78,24 +78,24 @@ public:
 	void					setMetrologySignal(int type, Metrology::Signal* pSignal);
 	void					initMetrologySignal();		// set Metrology::Signal* from SignalBase by signalHash
 
-	OutputSignal&			operator=(const OutputSignal& from);
+	SignalConnection&		operator=(const SignalConnection& from);
 };
 
 // ==============================================================================================
 
-class OutputSignalBase : public QObject
+class SignalConnectionBase : public QObject
 {
 	Q_OBJECT
 
 public:
 
-	explicit OutputSignalBase(QObject *parent = nullptr);
-	virtual ~OutputSignalBase() {}
+	explicit SignalConnectionBase(QObject *parent = nullptr);
+	virtual ~SignalConnectionBase() {}
 
 private:
 
-	mutable QMutex			m_signalMutex;
-	QVector<OutputSignal>	m_signalList;
+	mutable QMutex			m_connectionMutex;
+	QVector<SignalConnection>	m_connectionList;
 
 public:
 
@@ -109,17 +109,17 @@ public:
 	void					init();										// set all Metrology::Signal* from SignalBase by signalHash
 	void					empty();									// set all Metrology::Signal* value nullptr
 
-	int						append(const OutputSignal& signal);
+	int						append(const SignalConnection& connection);
 
-	OutputSignal			signal(int index) const;
-	void					setSignal(int index, const OutputSignal& signal);
+	SignalConnection		connection(int index) const;
+	void					setSignal(int index, const SignalConnection& connection);
 
 	void					remove(int index);
 
-	int						findIndex(int outputSignalType, int measureIoType, Metrology::Signal* pSignal);
-	int						findIndex(const OutputSignal& signal);
+	int						findIndex(int signalConnectionType, int measureIoType, Metrology::Signal* pSignal);
+	int						findIndex(const SignalConnection& connection);
 
-	OutputSignalBase&		operator=(const OutputSignalBase& from);
+	SignalConnectionBase&	operator=(const SignalConnectionBase& from);
 
 signals:
 
@@ -129,4 +129,4 @@ public slots:
 
 // ==============================================================================================
 
-#endif // OUTPUTSIGNALBASE_H
+#endif // SIGNALCONNECTIONBASE_H

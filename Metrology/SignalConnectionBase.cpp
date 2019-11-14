@@ -1,4 +1,4 @@
-#include "OutputSignalBase.h"
+#include "SignalConnectionBase.h"
 
 #include "Database.h"
 #include "SignalBase.h"
@@ -7,7 +7,7 @@
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-OutputSignal::OutputSignal() :
+SignalConnection::SignalConnection() :
 	m_hash(0)
 {
 	clear();
@@ -15,14 +15,14 @@ OutputSignal::OutputSignal() :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-OutputSignal::OutputSignal(const OutputSignal& from)
+SignalConnection::SignalConnection(const SignalConnection& from)
 {
 	*this = from;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool OutputSignal::isValid() const
+bool SignalConnection::isValid() const
 {
 	if (m_hash == UNDEFINED_HASH)
 	{
@@ -34,7 +34,7 @@ bool OutputSignal::isValid() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OutputSignal::clear()
+void SignalConnection::clear()
 {
 	m_signalMutex.lock();
 
@@ -48,7 +48,7 @@ void OutputSignal::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OutputSignal::setHash()
+void SignalConnection::setHash()
 {
 	QString strID;
 
@@ -69,19 +69,19 @@ void OutputSignal::setHash()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString OutputSignal::typeStr() const
+QString SignalConnection::typeStr() const
 {
-	if (m_type < 0 || m_type >= OUTPUT_SIGNAL_TYPE_COUNT)
+	if (m_type < 0 || m_type >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		return QString();
 	}
 
-	return OutputSignalType[m_type];
+	return SignalConnectionType[m_type];
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString OutputSignal::appSignalID(int type) const
+QString SignalConnection::appSignalID(int type) const
 {
 	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
@@ -101,7 +101,7 @@ QString OutputSignal::appSignalID(int type) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OutputSignal::setAppSignalID(int type, const QString& appSignalID)
+void SignalConnection::setAppSignalID(int type, const QString& appSignalID)
 {
 	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
@@ -119,7 +119,7 @@ void OutputSignal::setAppSignalID(int type, const QString& appSignalID)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Metrology::Signal* OutputSignal::metrologySignal(int type) const
+Metrology::Signal* SignalConnection::metrologySignal(int type) const
 {
 	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
@@ -139,7 +139,7 @@ Metrology::Signal* OutputSignal::metrologySignal(int type) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OutputSignal::setMetrologySignal(int type, Metrology::Signal* pSignal)
+void SignalConnection::setMetrologySignal(int type, Metrology::Signal* pSignal)
 {
 	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
@@ -170,7 +170,7 @@ void OutputSignal::setMetrologySignal(int type, Metrology::Signal* pSignal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OutputSignal::initMetrologySignal()
+void SignalConnection::initMetrologySignal()
 {
 	m_signalMutex.lock();
 
@@ -195,7 +195,7 @@ void OutputSignal::initMetrologySignal()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-OutputSignal& OutputSignal::operator=(const OutputSignal& from)
+SignalConnection& SignalConnection::operator=(const SignalConnection& from)
 {
 	m_signalMutex.lock();
 
@@ -220,47 +220,47 @@ OutputSignal& OutputSignal::operator=(const OutputSignal& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-OutputSignalBase::OutputSignalBase(QObject *parent) :
+SignalConnectionBase::SignalConnectionBase(QObject *parent) :
 	QObject(parent)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OutputSignalBase::clear()
+void SignalConnectionBase::clear()
 {
-	m_signalMutex.lock();
+	m_connectionMutex.lock();
 
-		m_signalList.clear();
+		m_connectionList.clear();
 
-	m_signalMutex.unlock();
+	m_connectionMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int OutputSignalBase::count() const
+int SignalConnectionBase::count() const
 {
 	int count = 0;
 
-	m_signalMutex.lock();
+	m_connectionMutex.lock();
 
-		count = m_signalList.count();
+		count = m_connectionList.count();
 
-	m_signalMutex.unlock();
+	m_connectionMutex.unlock();
 
 	return count;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OutputSignalBase::sort()
+void SignalConnectionBase::sort()
 {
 
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int OutputSignalBase::load()
+int SignalConnectionBase::load()
 {
 	if (thePtrDB == nullptr)
 	{
@@ -270,7 +270,7 @@ int OutputSignalBase::load()
 	QTime responseTime;
 	responseTime.start();
 
-	SqlTable* table = thePtrDB->openTable(SQL_TABLE_OUTPUT_SIGNAL);
+	SqlTable* table = thePtrDB->openTable(SQL_TABLE_SIGNAL_CONNECTION);
 	if (table == nullptr)
 	{
 		return false;
@@ -278,31 +278,31 @@ int OutputSignalBase::load()
 
 	int readedRecordCount = 0;
 
-	m_signalMutex.lock();
+	m_connectionMutex.lock();
 
-		m_signalList.resize(table->recordCount());
+		m_connectionList.resize(table->recordCount());
 
-		readedRecordCount = table->read(m_signalList.data());
+		readedRecordCount = table->read(m_connectionList.data());
 
-	m_signalMutex.unlock();
+	m_connectionMutex.unlock();
 
 	table->close();
 
-	qDebug() << "OutputSignalBase::load() - Loaded output signals: " << readedRecordCount << ", Time for load: " << responseTime.elapsed() << " ms";
+	qDebug() << "SignalConnectionBase::load() - Loaded signal connections: " << readedRecordCount << ", Time for load: " << responseTime.elapsed() << " ms";
 
 	return readedRecordCount;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool OutputSignalBase::save()
+bool SignalConnectionBase::save()
 {
 	if (thePtrDB == nullptr)
 	{
 		return false;
 	}
 
-	SqlTable* table = thePtrDB->openTable(SQL_TABLE_OUTPUT_SIGNAL);
+	SqlTable* table = thePtrDB->openTable(SQL_TABLE_SIGNAL_CONNECTION);
 	if (table == nullptr)
 	{
 		return false;
@@ -316,11 +316,11 @@ bool OutputSignalBase::save()
 
 	int writtenRecordCount = 0;
 
-	m_signalMutex.lock();
+	m_connectionMutex.lock();
 
-		writtenRecordCount = table->write(m_signalList.data(), m_signalList.count());
+		writtenRecordCount = table->write(m_connectionList.data(), m_connectionList.count());
 
-	m_signalMutex.unlock();
+	m_connectionMutex.unlock();
 
 	table->close();
 
@@ -329,109 +329,109 @@ bool OutputSignalBase::save()
 		return false;
 	}
 
-	qDebug() << "OutputSignalBase::save() - Written output signals: " << writtenRecordCount;
+	qDebug() << "SignalConnectionBase::save() - Written signal Connections: " << writtenRecordCount;
 
 	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OutputSignalBase::init()
+void SignalConnectionBase::init()
 {
-	m_signalMutex.lock();
+	m_connectionMutex.lock();
 
-		int count = m_signalList.count();
+		int count = m_connectionList.count();
 		for(int i = 0; i < count; i++)
 		{
-			m_signalList[i].initMetrologySignal();
+			m_connectionList[i].initMetrologySignal();
 		}
 
-	m_signalMutex.unlock();
+	m_connectionMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OutputSignalBase::empty()
+void SignalConnectionBase::empty()
 {
-	m_signalMutex.lock();
+	m_connectionMutex.lock();
 
-		int count = m_signalList.count();
+		int count = m_connectionList.count();
 		for(int i = 0; i < count; i++)
 		{
-			m_signalList[i].clear();
+			m_connectionList[i].clear();
 		}
 
-	m_signalMutex.unlock();
+	m_connectionMutex.unlock();
 }
 
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int OutputSignalBase::append(const OutputSignal& signal)
+int SignalConnectionBase::append(const SignalConnection& connection)
 {
 	int index = -1;
 
-	m_signalMutex.lock();
+	m_connectionMutex.lock();
 
-		m_signalList.append(signal);
-		index = m_signalList.count() - 1;
+		m_connectionList.append(connection);
+		index = m_connectionList.count() - 1;
 
-	m_signalMutex.unlock();
+	m_connectionMutex.unlock();
 
 	return index;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-OutputSignal OutputSignalBase::signal(int index) const
+SignalConnection SignalConnectionBase::connection(int index) const
 {
-	OutputSignal signal;
+	SignalConnection signal;
 
-	m_signalMutex.lock();
+	m_connectionMutex.lock();
 
-		if (index >= 0 && index < m_signalList.count())
+		if (index >= 0 && index < m_connectionList.count())
 		{
-			signal = m_signalList[index];
+			signal = m_connectionList[index];
 		}
 
-	m_signalMutex.unlock();
+	m_connectionMutex.unlock();
 
 	return signal;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OutputSignalBase::setSignal(int index, const OutputSignal& signal)
+void SignalConnectionBase::setSignal(int index, const SignalConnection& connection)
 {
-	m_signalMutex.lock();
+	m_connectionMutex.lock();
 
-		if (index >= 0 && index < m_signalList.count())
+		if (index >= 0 && index < m_connectionList.count())
 		{
-			m_signalList[index] = signal;
+			m_connectionList[index] = connection;
 		}
 
-	m_signalMutex.unlock();
+	m_connectionMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void OutputSignalBase::remove(int index)
+void SignalConnectionBase::remove(int index)
 {
-	m_signalMutex.lock();
+	m_connectionMutex.lock();
 
-		if (index >= 0 && index < m_signalList.count())
+		if (index >= 0 && index < m_connectionList.count())
 		{
-			m_signalList.remove(index);
+			m_connectionList.remove(index);
 		}
 
-	m_signalMutex.unlock();
+	m_connectionMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int OutputSignalBase::findIndex(int outputSignalType, int measureIoType, Metrology::Signal* pSignal)
+int SignalConnectionBase::findIndex(int signalConnectionType, int measureIoType, Metrology::Signal* pSignal)
 {
-	if (outputSignalType < 0 || outputSignalType >= OUTPUT_SIGNAL_TYPE_COUNT)
+	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		assert(0);
 		return -1;
@@ -451,18 +451,18 @@ int OutputSignalBase::findIndex(int outputSignalType, int measureIoType, Metrolo
 
 	int foundIndex = -1;
 
-	m_signalMutex.lock();
+	m_connectionMutex.lock();
 
-		int count = m_signalList.count();
+		int count = m_connectionList.count();
 
 		for(int i = 0; i < count; i ++)
 		{
-			if (m_signalList[i].type() != outputSignalType)
+			if (m_connectionList[i].type() != signalConnectionType)
 			{
 				continue;
 			}
 
-			if (m_signalList[i].metrologySignal(measureIoType) != pSignal)
+			if (m_connectionList[i].metrologySignal(measureIoType) != pSignal)
 			{
 				continue;
 			}
@@ -472,24 +472,24 @@ int OutputSignalBase::findIndex(int outputSignalType, int measureIoType, Metrolo
 			break;
 		}
 
-	m_signalMutex.unlock();
+	m_connectionMutex.unlock();
 
 	return foundIndex;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int OutputSignalBase::findIndex(const OutputSignal& signal)
+int SignalConnectionBase::findIndex(const SignalConnection& signal)
 {
 	int foundIndex = -1;
 
-		m_signalMutex.lock();
+		m_connectionMutex.lock();
 
-		int count = m_signalList.count();
+		int count = m_connectionList.count();
 
 		for(int i = 0; i < count; i ++)
 		{
-			if (m_signalList[i].hash() == signal.hash())
+			if (m_connectionList[i].hash() == signal.hash())
 			{
 				foundIndex = i;
 
@@ -497,20 +497,20 @@ int OutputSignalBase::findIndex(const OutputSignal& signal)
 			}
 		 }
 
-	m_signalMutex.unlock();
+	m_connectionMutex.unlock();
 
 	return foundIndex;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-OutputSignalBase& OutputSignalBase::operator=(const OutputSignalBase& from)
+SignalConnectionBase& SignalConnectionBase::operator=(const SignalConnectionBase& from)
 {
-	m_signalMutex.lock();
+	m_connectionMutex.lock();
 
-		m_signalList = from.m_signalList;
+		m_connectionList = from.m_connectionList;
 
-	m_signalMutex.unlock();
+	m_connectionMutex.unlock();
 
 	return *this;
 }

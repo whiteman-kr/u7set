@@ -95,11 +95,11 @@ bool MeasureThread::signalIsMeasured(const MeasureSignal& activeSignal, QString&
 {
 	MultiChannelSignal signal;
 
-	switch (theOptions.toolBar().outputSignalType())
+	switch (theOptions.toolBar().signalConnectionType())
 	{
-		case OUTPUT_SIGNAL_TYPE_UNUSED:			signal = activeSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);		break;
-		case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
-		case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	signal = activeSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
+		case SIGNAL_CONNECTION_TYPE_UNUSED:			signal = activeSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);		break;
+		case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
+		case SIGNAL_CONNECTION_TYPE_FROM_TUNING:	signal = activeSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
 		default:								assert(0);
 	}
 
@@ -195,7 +195,7 @@ bool MeasureThread::setActiveSignalParam(const MeasureSignal& activeSignal)
 			}
 
 			ioParam.setParam(type, param);
-			ioParam.setOutputSignalType(activeSignal.outputSignalType());
+			ioParam.setSignalConnectionType(activeSignal.signalConnectionType());
 			ioParam.setCalibratorManager(pCalibratorManager);
 		}
 
@@ -226,11 +226,11 @@ bool MeasureThread::inputsOfmoduleIsSame()
 			continue;
 		}
 
-		switch (theOptions.toolBar().outputSignalType())
+		switch (theOptions.toolBar().signalConnectionType())
 		{
-			case OUTPUT_SIGNAL_TYPE_UNUSED:			signalParam = m_activeIoParamList[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
-			case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
-			case OUTPUT_SIGNAL_TYPE_FROM_TUNING:	signalParam = m_activeIoParamList[c].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
+			case SIGNAL_CONNECTION_TYPE_UNUSED:			signalParam = m_activeIoParamList[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
+			case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
+			case SIGNAL_CONNECTION_TYPE_FROM_TUNING:	signalParam = m_activeIoParamList[c].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
 			default:								assert(0);
 		}
 
@@ -383,10 +383,10 @@ bool MeasureThread::setCalibratorUnit()
 						continue;
 					}
 
-					switch (m_activeIoParamList[c].outputSignalType())
+					switch (m_activeIoParamList[c].signalConnectionType())
 					{
-						case OUTPUT_SIGNAL_TYPE_UNUSED:
-						case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
+						case SIGNAL_CONNECTION_TYPE_UNUSED:
+						case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
 							{
 								Metrology::SignalParam inParam = m_activeIoParamList[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 								if (inParam.isValid() == false)
@@ -418,7 +418,7 @@ bool MeasureThread::setCalibratorUnit()
 							}
 							break;
 
-						case OUTPUT_SIGNAL_TYPE_FROM_TUNING:
+						case SIGNAL_CONNECTION_TYPE_FROM_TUNING:
 							{
 
 								Metrology::SignalParam outParam = m_activeIoParamList[c].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
@@ -684,10 +684,10 @@ void MeasureThread::measureLinearity()
 
 			// set electric value
 			//
-			switch (m_activeIoParamList[c].outputSignalType())
+			switch (m_activeIoParamList[c].signalConnectionType())
 			{
-				case OUTPUT_SIGNAL_TYPE_UNUSED:
-				case OUTPUT_SIGNAL_TYPE_FROM_INPUT:
+				case SIGNAL_CONNECTION_TYPE_UNUSED:
+				case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
 					{
 						// at the beginning we need get engeneering value because if range is not Linear (for instance Ohm or mV)
 						// then by engeneering value we may get electric value
@@ -700,7 +700,7 @@ void MeasureThread::measureLinearity()
 						pCalibratorManager->setValue(m_activeIoParamList[c].isNegativeRange() ? -electricVal : electricVal);
 					}
 					break;
-				case OUTPUT_SIGNAL_TYPE_FROM_TUNING:
+				case SIGNAL_CONNECTION_TYPE_FROM_TUNING:
 					{
 						double tuningVal = (point.percent() * (param.tuningHighBound().toDouble() - param.tuningLowBound().toDouble()) / 100) + param.tuningLowBound().toDouble();
 
@@ -792,7 +792,7 @@ void MeasureThread::signalSocketDisconnected()
 
 void MeasureThread::tuningSocketDisconnected()
 {
-	if (theOptions.toolBar().outputSignalType() != OUTPUT_SIGNAL_TYPE_FROM_TUNING)
+	if (theOptions.toolBar().signalConnectionType() != SIGNAL_CONNECTION_TYPE_FROM_TUNING)
 	{
 		return;
 	}
@@ -804,7 +804,7 @@ void MeasureThread::tuningSocketDisconnected()
 
 void MeasureThread::saveStateTunSignals()
 {
-	if (theOptions.toolBar().outputSignalType() != OUTPUT_SIGNAL_TYPE_FROM_TUNING)
+	if (theOptions.toolBar().signalConnectionType() != SIGNAL_CONNECTION_TYPE_FROM_TUNING)
 	{
 		return;
 	}
@@ -831,7 +831,7 @@ void MeasureThread::saveStateTunSignals()
 
 void MeasureThread::restoreStateTunSignals()
 {
-	if (theOptions.toolBar().outputSignalType() != OUTPUT_SIGNAL_TYPE_FROM_TUNING)
+	if (theOptions.toolBar().signalConnectionType() != SIGNAL_CONNECTION_TYPE_FROM_TUNING)
 	{
 		return;
 	}

@@ -9168,9 +9168,9 @@ namespace Builder
 			{
 				switch (pv.dataFormat())
 				{
-					case E::DataFormat::Float :			cmp->compare().setConstValue(pv.value().toDouble());	cmp->setInAnalogSignalFormat(E::AnalogAppSignalFormat::Float32);		break;
-					case E::DataFormat::SignedInt :		cmp->compare().setConstValue(pv.value().toInt());		cmp->setInAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);	break;
-					case E::DataFormat::UnsignedInt :	cmp->compare().setConstValue(pv.value().toInt());		cmp->setInAnalogSignalFormat(E::AnalogAppSignalFormat::SignedInt32);	break;
+					case E::DataFormat::Float :			cmp->compare().setConstValue(pv.value().toDouble());	break;
+					case E::DataFormat::SignedInt :		cmp->compare().setConstValue(pv.value().toInt());		break;
+					case E::DataFormat::UnsignedInt :	cmp->compare().setConstValue(pv.value().toInt());		break;
 					default:							assert(0);
 				}
 			}
@@ -9179,9 +9179,9 @@ namespace Builder
 			{
 				switch (pv.dataFormat())
 				{
-					case E::DataFormat::Float :			cmp->hysteresis().setConstValue(pv.value().toDouble());		break;
-					case E::DataFormat::SignedInt :		cmp->hysteresis().setConstValue(pv.value().toInt());		break;
-					case E::DataFormat::UnsignedInt :	cmp->hysteresis().setConstValue(pv.value().toInt());		break;
+					case E::DataFormat::Float :			cmp->hysteresis().setConstValue(pv.value().toDouble());	break;
+					case E::DataFormat::SignedInt :		cmp->hysteresis().setConstValue(pv.value().toInt());	break;
+					case E::DataFormat::UnsignedInt :	cmp->hysteresis().setConstValue(pv.value().toInt());	break;
 					default:							assert(0);
 				}
 			}
@@ -9208,6 +9208,7 @@ namespace Builder
 			//
 			if (pin.caption() == "in")
 			{
+				cmp->setInAnalogSignalFormat(ualSignal->analogSignalFormat());
 				cmp->input().setAppSignalID(ualSignal->appSignalID());
 				cmp->input().setIsAcquired(ualSignal->isAcquired());
 			}

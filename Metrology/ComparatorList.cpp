@@ -146,9 +146,17 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Builder::
 		default:										compareValue = "??? ";	assert(0);	break;
 	}
 
+	int precision = comparator->precision();
+	switch (comparator->intAnalogSignalFormat())
+	{
+		case E::AnalogAppSignalFormat::Float32:		precision = comparator->precision();	break;
+		case E::AnalogAppSignalFormat::SignedInt32:	precision = 0;							break;
+		default:									assert(0);
+	}
+
 	if (comparator->compare().isConst() == true)
 	{
-		compareValue += QString::number(comparator->compare().constValue(), 10, comparator->precision());
+		compareValue += QString::number(comparator->compare().constValue(), 10, precision);
 	}
 	else
 	{
@@ -159,7 +167,7 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Builder::
 
 	if (comparator->hysteresis().isConst() == true)
 	{
-		hysteresisValue = QString::number(comparator->hysteresis().constValue(), 10, comparator->precision());
+		hysteresisValue = QString::number(comparator->hysteresis().constValue(), 10, precision);
 	}
 	else
 	{
