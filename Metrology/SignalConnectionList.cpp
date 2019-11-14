@@ -320,7 +320,7 @@ SignalConnectionItemDialog::~SignalConnectionItemDialog()
 void SignalConnectionItemDialog::createInterface()
 {
 	setWindowFlags(Qt::Dialog);
-	setWindowIcon(QIcon(":/icons/InOut.png"));
+	setWindowIcon(QIcon(":/icons/Connection.png"));
 
 	if (m_signalConnection.isValid() == false)
 	{
@@ -635,7 +635,7 @@ SignalConnectionDialog::~SignalConnectionDialog()
 void SignalConnectionDialog::createInterface()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/InOut.png"));
+	setWindowIcon(QIcon(":/icons/Connection.png"));
 	setWindowTitle(tr("Signal connections"));
 	resize(QApplication::desktop()->availableGeometry().width() - 700, 500);
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());

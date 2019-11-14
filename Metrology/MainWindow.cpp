@@ -191,12 +191,12 @@ void MainWindow::createActions()
 	// View
 	//
 	m_pShowRackListAction = new QAction(tr("Racks ..."), this);
-	m_pShowRackListAction->setIcon(QIcon(":/icons/Signals.png"));
+	m_pShowRackListAction->setIcon(QIcon(":/icons/Rack.png"));
 	m_pShowRackListAction->setToolTip("");
 	connect(m_pShowRackListAction, &QAction::triggered, this, &MainWindow::showRackList);
 
 	m_pShowSignalListAction = new QAction(tr("&Signals ..."), this);
-	m_pShowSignalListAction->setIcon(QIcon(":/icons/Signals.png"));
+	m_pShowSignalListAction->setIcon(QIcon(":/icons/Signal.png"));
 	m_pShowSignalListAction->setToolTip("");
 	connect(m_pShowSignalListAction, &QAction::triggered, this, &MainWindow::showSignalList);
 
@@ -206,12 +206,12 @@ void MainWindow::createActions()
 	connect(m_pShowComparatorsListAction, &QAction::triggered, this, &MainWindow::showComparatorsList);
 
 	m_pShowTuningSignalListAction = new QAction(tr("Tuning signals ..."), this);
-	m_pShowTuningSignalListAction->setIcon(QIcon(":/icons/InOut.png"));
+	m_pShowTuningSignalListAction->setIcon(QIcon(":/icons/Tuning.png"));
 	m_pShowTuningSignalListAction->setToolTip("");
 	connect(m_pShowTuningSignalListAction, &QAction::triggered, this, &MainWindow::showTuningSignalList);
 
 	m_pShowSignalConnectionListAction = new QAction(tr("Signal connections ..."), this);
-	m_pShowSignalConnectionListAction->setIcon(QIcon(":/icons/InOut.png"));
+	m_pShowSignalConnectionListAction->setIcon(QIcon(":/icons/Connection.png"));
 	m_pShowSignalConnectionListAction->setToolTip("");
 	connect(m_pShowSignalConnectionListAction, &QAction::triggered, this, &MainWindow::showSignalConnectionList);
 
