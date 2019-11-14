@@ -60,10 +60,11 @@ namespace VFrame30
 		guidProp->setExpert(true);
 
 		addProperty<bool, SchemaItem, &SchemaItem::commented, &SchemaItem::setCommented>(PropertyNames::commented, PropertyNames::functionalCategory, true);
-
 		addProperty<bool, SchemaItem, &SchemaItem::isLocked, &SchemaItem::setLocked>(PropertyNames::locked, PropertyNames::appearanceCategory, true);
-
 		addProperty<bool, SchemaItem, &SchemaItem::acceptClick, &SchemaItem::setAcceptClick>(PropertyNames::acceptClick, PropertyNames::scriptsCategory, true);
+
+		addProperty<QString, SchemaItem, &SchemaItem::label, nullptr>(PropertyNames::label, PropertyNames::functionalCategory, true);
+		addProperty<E::TextPos, SchemaItem, &SchemaItem::labelPos, &FblItemRect::setLabelPos>(PropertyNames::labelPos, PropertyNames::functionalCategory, true);
 
 		auto clickScriptProp = addProperty<QString, SchemaItem, &SchemaItem::clickScript, &SchemaItem::setClickScript>(PropertyNames::clickScript, PropertyNames::scriptsCategory, true);
 		clickScriptProp->setIsScript(true);
@@ -91,6 +92,9 @@ namespace VFrame30
 		schemaItem->set_iscommented(m_commented);
 		schemaItem->set_itemunit(static_cast<Proto::SchemaUnit>(m_itemUnit));
 
+		schemaItem->set_label(m_label.toStdString());
+		schemaItem->set_labelpos(static_cast<::google::protobuf::int32>(m_labelPos));
+
 		schemaItem->set_acceptclick(m_acceptClick);
 		schemaItem->set_clickscript(m_clickScript.toStdString());
 		schemaItem->set_predrawscript(m_preDrawScript.toStdString());
@@ -115,6 +119,9 @@ namespace VFrame30
 		m_locked = schemaitem.islocked();
 		m_commented = schemaitem.iscommented();
 		m_itemUnit = static_cast<SchemaUnit>(schemaitem.itemunit());
+
+		m_label = QString::fromStdString(schemaitem.label());
+		m_labelPos = static_cast<E::TextPos>(schemaitem.labelpos());
 
 		m_acceptClick = schemaitem.acceptclick();
 		m_clickScript = QString::fromStdString(schemaitem.clickscript());
@@ -802,6 +809,26 @@ namespace VFrame30
 	{
 		assert(value == SchemaUnit::Display || value == SchemaUnit::Inch);
 		m_itemUnit = value;
+	}
+
+	QString SchemaItem::label() const
+	{
+		return m_label;
+	}
+
+	void SchemaItem::setLabel(const QString& value)
+	{
+		m_label = value;
+	}
+
+	E::TextPos SchemaItem::labelPos() const
+	{
+		return m_labelPos;
+	}
+
+	void SchemaItem::setLabelPos(const E::TextPos& value)
+	{
+		m_labelPos = value;
 	}
 
 	// AcceptClick property

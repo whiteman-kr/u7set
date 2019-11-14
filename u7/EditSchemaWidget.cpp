@@ -3525,11 +3525,7 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 
 				newItem->setNewGuid();
 
-				if (newItem->isFblItemRect() == true)
 				{
-					VFrame30::FblItemRect* fblItemRect = newItem->toFblItemRect();
-					assert(fblItemRect);
-
 					int counterValue = 0;
 					bool nextValRes = dbc->nextCounterValue(&counterValue);
 					if (nextValRes == false)
@@ -3537,7 +3533,7 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 						return;
 					}
 
-					fblItemRect->setLabel(s->schemaId() + "_" + QString::number(counterValue));
+					newItem->setLabel(s->schemaId() + "_" + QString::number(counterValue));
 				}
 
 				newItem->MoveItem(xdif, ydif);
@@ -4768,13 +4764,9 @@ void EditSchemaWidget::addItem(SchemaItemPtr newItem)
 
 	editSchemaView()->m_newItem = newItem;
 
-	// If items is FblItemRect, set label to it
+	// Set label to it
 	//
-	if (newItem->isFblItemRect() == true)
 	{
-		VFrame30::FblItemRect* fblItemRect = newItem->toFblItemRect();
-		assert(fblItemRect);
-
 		int counterValue = 0;
 		bool nextValRes = db()->nextCounterValue(&counterValue);
 		if (nextValRes == false)
@@ -4782,7 +4774,7 @@ void EditSchemaWidget::addItem(SchemaItemPtr newItem)
 			return;
 		}
 
-		fblItemRect->setLabel(schema()->schemaId() + "_" + QString::number(counterValue));
+		newItem->setLabel(schema()->schemaId() + "_" + QString::number(counterValue));
 	}
 
 	// --
@@ -7614,13 +7606,9 @@ void EditSchemaWidget::editPaste()
 				schemaItemInOutIsPresent = true;
 			}
 
-			if (schemaItem->isFblItemRect() == true)
 			{
-				// If items is FblItemRect set label to it
+				// set label to it
 				//
-				VFrame30::FblItemRect* fblItemRect = schemaItem->toFblItemRect();
-				assert(fblItemRect);
-
 				int counterValue = 0;
 				bool nextValRes = db()->nextCounterValue(&counterValue);
 				if (nextValRes == false)
@@ -7628,7 +7616,7 @@ void EditSchemaWidget::editPaste()
 					return;
 				}
 
-				fblItemRect->setLabel(schema()->schemaId() + "_" + QString::number(counterValue));
+				schemaItem->setLabel(schema()->schemaId() + "_" + QString::number(counterValue));
 			}
 		}
 
@@ -8000,9 +7988,10 @@ void EditSchemaWidget::compareSchemaItem()
 	DbChangesetObject dbObject;	// Fake object, need to fill only name
 
 	QString title;
-	if (selectedItem->isFblItem() == true)
+
+	if (selectedItem->label().isEmpty() == false)
 	{
-		title = selectedItem->metaObject()->className() + QString(" ") + selectedItem->toFblItemRect()->label();
+		title = selectedItem->metaObject()->className() + QString(" ") + selectedItem->label();
 		title = title.remove("VFrame30::SchemaItem");
 	}
 	else

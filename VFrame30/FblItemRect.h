@@ -160,12 +160,6 @@ namespace VFrame30
 
 		DECLARE_FONT_PROPERTIES(Font);
 
-		QString label() const;
-		void setLabel(const QString& value);
-
-		E::TextPos labelPos() const;
-		void setLabelPos(const E::TextPos& value);
-
 		QString userText() const;
 		void setUserText(const QString& value);
 
@@ -185,9 +179,6 @@ namespace VFrame30
 		QRgb m_fillColor;
 		QRgb m_textColor;
 		FontParam m_font;
-
-		QString m_label;
-		E::TextPos m_labelPos = E::TextPos::RightTop;
 
 		QString m_userText;
 		E::TextPos m_userTextPos = E::TextPos::Top;

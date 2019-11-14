@@ -49,6 +49,8 @@ namespace Builder
 		static bool loadAllSchemas(Context* context);
 		static void clearStaticData();
 
+		static bool writeSchemaScriptProperties(VFrame30::Schema* schema, QString dir, BuildResultWriter* buildResultWriter);
+
 		virtual bool generateConfiguration() = 0;
 
 		void initSubsystemKeyMap(SubsystemKeyMap* subsystemKeyMap, const Hardware::SubsystemStorage* subsystems);

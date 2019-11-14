@@ -253,6 +253,12 @@ namespace VFrame30
 		SchemaUnit itemUnit() const;
 		void setItemUnit(SchemaUnit value);
 
+		QString label() const;
+		void setLabel(const QString& value);
+
+		E::TextPos labelPos() const;
+		void setLabelPos(const E::TextPos& value);
+
 		bool acceptClick() const;
 		void setAcceptClick(const bool& value);
 
@@ -283,6 +289,9 @@ namespace VFrame30
 		bool m_commented = false;
 		QUuid m_guid;
 		SchemaUnit m_itemUnit;		// Item position unit, can be inches or pixels
+
+		QString m_label;
+		E::TextPos m_labelPos = E::TextPos::RightTop;
 
 		bool m_acceptClick = false;	// The SchemaItem accept mouse Left button click and runs script
 		QString m_clickScript;		// Qt script on mouse left button click

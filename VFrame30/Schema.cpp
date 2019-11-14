@@ -756,8 +756,23 @@ namespace VFrame30
 
 	QStringList Schema::getLabels() const
 	{
-		QStringList result;
-		return result;
+		QStringList labels;
+		labels.reserve(1024);
+
+		for (std::shared_ptr<SchemaLayer> layer : Layers)
+		{
+			for (const SchemaItemPtr& item : layer->Items)
+			{
+				QString itemLabel = item->label();
+
+				if (itemLabel.isEmpty() == false)
+				{
+					labels.append(itemLabel);
+				}
+			}
+		}
+
+		return labels;
 	}
 
 	std::vector<QUuid> Schema::getGuids() const

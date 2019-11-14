@@ -131,20 +131,14 @@ namespace VFrame30
 		//
 		for (std::shared_ptr<SchemaLayer> layer : Layers)
 		{
-			assert(layer);
+			Q_ASSERT(layer);
 
 			for (std::shared_ptr<SchemaItem> item : layer->Items)
 			{
-				if (item->isFblItemRect() == true)
+				if (item->label().isEmpty() == true)
 				{
-					VFrame30::FblItemRect* fblItemRect = item->toFblItemRect();
-					assert(fblItemRect);
-
-					if (fblItemRect->label().isEmpty() == true)
-					{
-						int labelCounter = this->nextCounterValue();
-						fblItemRect->setLabel(schemaId() + "_" + QString::number(labelCounter));
-					}
+					int labelCounter = this->nextCounterValue();
+					item->setLabel(schemaId() + "_" + QString::number(labelCounter));
 				}
 			}
 		}
@@ -225,28 +219,6 @@ namespace VFrame30
 		}
 
 		return result;
-	}
-
-	QStringList LogicSchema::getLabels() const
-	{
-		QStringList labels;	// signal ids can be duplicated, std::set removes dupilcates
-		labels.reserve(256);
-
-		for (std::shared_ptr<SchemaLayer> layer : Layers)
-		{
-			for (std::shared_ptr<SchemaItem> item : layer->Items)
-			{
-				if (item->isFblItemRect() == true)
-				{
-					const VFrame30::FblItemRect* f = item->toType<VFrame30::FblItemRect>();
-					assert(f);
-
-					labels.append(f->label());
-				}
-			}
-		}
-
-		return labels;
 	}
 
 	QString LogicSchema::equipmentIds() const

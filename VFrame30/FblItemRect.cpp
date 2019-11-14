@@ -57,9 +57,6 @@ namespace VFrame30
 		addProperty<bool, FblItemRect, &FblItemRect::getFontBold, &FblItemRect::setFontBold>(PropertyNames::fontBold, PropertyNames::appearanceCategory, true);
 		addProperty<bool, FblItemRect, &FblItemRect::getFontItalic, &FblItemRect::setFontItalic>(PropertyNames::fontItalic, PropertyNames::appearanceCategory, true);
 
-		addProperty<QString, FblItemRect, &FblItemRect::label, nullptr>(PropertyNames::label, PropertyNames::functionalCategory, true);
-		addProperty<E::TextPos, FblItemRect, &FblItemRect::labelPos, &FblItemRect::setLabelPos>(PropertyNames::labelPos, PropertyNames::functionalCategory, true);
-
 		addProperty<QString, FblItemRect, &FblItemRect::userText, &FblItemRect::setUserText>(PropertyNames::userText, PropertyNames::textCategory, true);
 		addProperty<E::TextPos, FblItemRect, &FblItemRect::userTextPos, &FblItemRect::setUserTextPos>(PropertyNames::userTextPos, PropertyNames::textCategory, true);
 
@@ -98,8 +95,8 @@ namespace VFrame30
 
 		m_font.SaveData(itemMessage->mutable_font());
 
-		itemMessage->set_label(m_label.toStdString());
-		itemMessage->set_labelpos(static_cast<::google::protobuf::int32>(m_labelPos));
+		//itemMessage->set_label(m_label.toStdString());
+		//itemMessage->set_labelpos(static_cast<::google::protobuf::int32>(m_labelPos));
 
 		itemMessage->set_usertext(m_userText.toStdString());
 		itemMessage->set_usertextpos(static_cast<::google::protobuf::int32>(m_userTextPos));
@@ -144,8 +141,18 @@ namespace VFrame30
 
 		m_font.LoadData(itemMessage.font());
 
-		m_label = QString::fromStdString(itemMessage.label());
-		m_labelPos = static_cast<E::TextPos>(itemMessage.labelpos());
+		QString label = QString::fromStdString(itemMessage.obsoletelabel());
+		if (label.isEmpty() == false)
+		{
+			setLabel(label);
+		}
+
+		int labelPos = itemMessage.obsoletelabelpos();
+		if (labelPos != -1)
+		{
+			setLabelPos(static_cast<E::TextPos>(labelPos));
+		}
+
 
 		m_userText = QString::fromStdString(itemMessage.usertext());
 		m_userTextPos = static_cast<E::TextPos>(itemMessage.usertextpos());
@@ -1135,26 +1142,6 @@ namespace VFrame30
 	void FblItemRect::setTextColor(QRgb color)
 	{
 		m_textColor = color;
-	}
-
-	QString FblItemRect::label() const
-	{
-		return m_label;
-	}
-
-	void FblItemRect::setLabel(const QString& value)
-	{
-		m_label = value;
-	}
-
-	E::TextPos FblItemRect::labelPos() const
-	{
-		return m_labelPos;
-	}
-
-	void FblItemRect::setLabelPos(const E::TextPos& value)
-	{
-		m_labelPos = value;
 	}
 
 	QString FblItemRect::userText() const

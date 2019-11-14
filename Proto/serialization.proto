@@ -373,6 +373,10 @@ message SchemaItem
 	optional string clickScript = 7;
 	optional bool isCommented = 8 [default = false];
 	optional string objectName = 9;
+
+    optional string label = 14;
+	optional int32  labelPos = 15 [default = 2];		// enum E::UserTextPos, 2 - RightTop
+
 	optional string preDrawScript = 30;
 
 	// Inherited from SchmeItem
@@ -605,10 +609,10 @@ message FblItemRect
 	required uint32 fillColor = 3;
 	required uint32 textColor = 4;
 	required FontParam font = 5;
-	optional string label = 6;
+	optional string obsoleteLabel = 6;		// Obsolote, moved to SchemaItem buf for compatibility left here also
 	optional string userText = 7;
 	optional int32 userTextPos = 8 [default = 1];			// enum E::UserTextPos, 1 - Top
-	optional int32 labelPos = 9 [default = 2];				// enum E::UserTextPos, 2 - RightTop
+	optional int32  obsoleteLabelPos = 9 [default = -1];	// enum E::UserTextPos, 2 - RightTop	// Obsolote, moved to SchemaItem buf for compatibility left here also
 }
 
 

@@ -231,13 +231,9 @@ namespace VFrame30
 
 				newItem->setNewGuid();		// generate new guids for item and its pins
 
-				if (FblItemRect* fblItemRect = newItem->toType<FblItemRect>();
-					fblItemRect != nullptr)
-				{
-					// From new label for FblItemRect: SchemaID_FblItemRectLabel
-					//
-					fblItemRect->setLabel(destSchema->schemaId() + "_" + fblItemRect->label());
-				}
+				// Form new label for SchemaItem: SchemaID_FblItemRectLabel
+				//
+				newItem->setLabel(destSchema->schemaId() + "_" + newItem->label());
 
 				// Insert newItem to destionation schema layer
 				//
