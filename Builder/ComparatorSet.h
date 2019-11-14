@@ -87,7 +87,7 @@ namespace Builder
 		void serializeFrom(const Proto::Comparator& c);
 
 	private:
-		E::CmpType m_cmpType = E::CmpType::Equ;
+		E::CmpType m_cmpType = E::CmpType::Equal;
 		E::AnalogAppSignalFormat m_inAnalogSignalFormat = E::AnalogAppSignalFormat::SignedInt32;
 
 		ComparatorSignal m_inputSignal;
