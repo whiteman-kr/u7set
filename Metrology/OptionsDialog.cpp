@@ -511,14 +511,14 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 				QtProperty *errorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Metrological error"));
 
 					item = manager->addProperty(QVariant::Double, ComparatorParamName[CO_PARAM_ERROR_LIMIT]);
-					item->setValue(m_options.comparator().m_errorValue);
+					item->setValue(m_options.comparator().errorLimit());
 					item->setAttribute(QLatin1String("singleStep"), 0.1);
 					item->setAttribute(QLatin1String("decimals"), 3);
 					appendProperty(item, page, CO_PARAM_ERROR_LIMIT);
 					errorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Double, ComparatorParamName[CO_PARAM_START_VALUE]);
-					item->setValue(m_options.comparator().m_startValue);
+					item->setValue(m_options.comparator().startValue());
 					item->setAttribute(QLatin1String("singleStep"), 0.1);
 					item->setAttribute(QLatin1String("decimals"), 3);
 					appendProperty(item, page, CO_PARAM_START_VALUE);
@@ -531,32 +531,35 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 						errorTypeList.append(MeasureErrorType[e]);
 					}
 					item->setAttribute(QLatin1String("enumNames"), errorTypeList);
-					item->setValue(m_options.comparator().m_errorType);
+					item->setValue(m_options.comparator().errorType());
 					appendProperty(item, page, CO_PARAM_ERROR_TYPE);
 					errorGroup->addSubProperty(item);
 
+				QtProperty *permissionsGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Permissions"));
+
 					item = manager->addProperty(QVariant::Bool, ComparatorParamName[CO_PARAM_ENABLE_HYSTERESIS]);
-					item->setValue(m_options.comparator().m_enableMeasureHysteresis);
+					item->setValue(m_options.comparator().enableMeasureHysteresis());
 					appendProperty(item, page, CO_PARAM_ENABLE_HYSTERESIS);
-					errorGroup->addSubProperty(item);
+					permissionsGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Int, ComparatorParamName[CO_PARAM_COMPARATOR_INDEX]);
-					item->setValue(m_options.comparator().m_startComparatorIndex);
+					item->setValue(m_options.comparator().startComparatorIndex());
 					item->setAttribute(QLatin1String("minimum"), 1);
-					item->setAttribute(QLatin1String("maximum"), 16);
+					item->setAttribute(QLatin1String("maximum"), 32);
 					item->setAttribute(QLatin1String("singleStep"), 1);
 					appendProperty(item, page, CO_PARAM_COMPARATOR_INDEX);
-					errorGroup->addSubProperty(item);
+					permissionsGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Bool, ComparatorParamName[CO_PARAM_ADDITIONAL_CHECK]);
-					item->setValue(m_options.comparator().m_additionalCheck);
+					item->setValue(m_options.comparator().enableAdditionalCheck());
 					appendProperty(item, page, CO_PARAM_ADDITIONAL_CHECK);
-					errorGroup->addSubProperty(item);
+					permissionsGroup->addSubProperty(item);
 
 
 				editor->setFactoryForManager(manager, factory);
 
 				editor->addProperty(errorGroup);
+				editor->addProperty(permissionsGroup);
 			}
 			break;
 
@@ -1130,12 +1133,12 @@ void OptionsDialog::applyProperty()
 			{
 				switch(param)
 				{
-					case CO_PARAM_ERROR_LIMIT:			m_options.comparator().m_errorValue = value.toDouble();				break;
-					case CO_PARAM_START_VALUE:			m_options.comparator().m_startValue = value.toDouble();				break;
-					case CO_PARAM_ERROR_TYPE:			m_options.comparator().m_errorType = value.toInt();					break;
-					case CO_PARAM_ENABLE_HYSTERESIS:	m_options.comparator().m_enableMeasureHysteresis = value.toBool();	break;
-					case CO_PARAM_COMPARATOR_INDEX:		m_options.comparator().m_startComparatorIndex = value.toInt();		break;
-					case CO_PARAM_ADDITIONAL_CHECK:		m_options.comparator().m_additionalCheck = value.toBool();			break;
+					case CO_PARAM_ERROR_LIMIT:			m_options.comparator().setErrorLimit(value.toDouble());				break;
+					case CO_PARAM_START_VALUE:			m_options.comparator().setStartValue(value.toDouble());				break;
+					case CO_PARAM_ERROR_TYPE:			m_options.comparator().setErrorType(value.toInt());					break;
+					case CO_PARAM_ENABLE_HYSTERESIS:	m_options.comparator().setEnableMeasureHysteresis(value.toBool());	break;
+					case CO_PARAM_COMPARATOR_INDEX:		m_options.comparator().setStartComparatorIndex(value.toInt());		break;
+					case CO_PARAM_ADDITIONAL_CHECK:		m_options.comparator().setEnableAdditionalCheck(value.toBool());	break;
 					default:							assert(0);
 				}
 			}

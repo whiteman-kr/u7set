@@ -1120,13 +1120,13 @@ void ComparatorOption::load()
 {
 	QSettings s;
 
-	m_errorValue = s.value(QString("%1ErrorValue").arg(COMPARATOR_OPTIONS_KEY), 0.2).toDouble();
+	m_errorLimit = s.value(QString("%1ErrorLimit").arg(COMPARATOR_OPTIONS_KEY), 0.2).toDouble();
 	m_startValue = s.value(QString("%1StartValue").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
 	m_errorType = s.value(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
 
 	m_enableMeasureHysteresis = s.value(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), false).toBool();
 	m_startComparatorIndex = s.value(QString("%1StartSettingNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
-	m_additionalCheck = s.value(QString("%1AdditionalCheck").arg(COMPARATOR_OPTIONS_KEY), true).toBool();
+	m_enableAdditionalCheck = s.value(QString("%1EnableAdditionalCheck").arg(COMPARATOR_OPTIONS_KEY), true).toBool();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1135,26 +1135,26 @@ void ComparatorOption::save()
 {
 	QSettings s;
 
-	s.setValue(QString("%1ErrorValue").arg(COMPARATOR_OPTIONS_KEY), m_errorValue);
+	s.setValue(QString("%1ErrorLimit").arg(COMPARATOR_OPTIONS_KEY), m_errorLimit);
 	s.setValue(QString("%1StartValue").arg(COMPARATOR_OPTIONS_KEY), m_startValue);
 	s.setValue(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), m_errorType);
 
 	s.setValue(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), m_enableMeasureHysteresis);
 	s.setValue(QString("%1StartSettingNo").arg(COMPARATOR_OPTIONS_KEY), m_startComparatorIndex);
-	s.setValue(QString("%1AdditionalCheck").arg(COMPARATOR_OPTIONS_KEY), m_additionalCheck);
+	s.setValue(QString("%1EnableAdditionalCheck").arg(COMPARATOR_OPTIONS_KEY), m_enableAdditionalCheck);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 ComparatorOption& ComparatorOption::operator=(const ComparatorOption& from)
 {
-	m_errorValue = from.m_errorValue;
+	m_errorLimit = from.m_errorLimit;
 	m_startValue = from.m_startValue;
 	m_errorType = from.m_errorType;
 
 	m_enableMeasureHysteresis = from.m_enableMeasureHysteresis;
 	m_startComparatorIndex = from.m_startComparatorIndex;
-	m_additionalCheck = from.m_additionalCheck;
+	m_enableAdditionalCheck = from.m_enableAdditionalCheck;
 
 	return *this;
 }
@@ -1348,23 +1348,6 @@ Options::~Options()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int Options::channelCount()
-{
-	int count = 0;
-
-	switch(m_toolBar.measureKind())
-	{
-		case MEASURE_KIND_ONE_RACK:		count = 1;							break;
-		case MEASURE_KIND_ONE_MODULE:	count = Metrology::InputCount;		break;
-		case MEASURE_KIND_MULTI_RACK:	count = Metrology::ChannelCount;	break;
-		default:						assert(0);
-	}
-
-	return count;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void Options::load()
 {
 	m_toolBar.load();
@@ -1380,9 +1363,10 @@ void Options::load()
 	m_database.load();
 	m_database.create();
 
-	m_module.load();
+
 	m_linearity.load();
 	m_comparator.load();
+	m_module.load();
 
 	m_backup.load();
 	m_backup.createBackupOnStart();
@@ -1405,9 +1389,9 @@ void Options::save()
 
 	m_database.save();
 
-	m_module.save();
 	m_linearity.save();
 	m_comparator.save();
+	m_module.save();
 
 	m_backup.save();
 }
@@ -1472,9 +1456,9 @@ Options& Options::operator=(const Options& from)
 		m_signalInfo = from.m_signalInfo;
 		m_сomparatorInfo = from.m_сomparatorInfo;
 		m_database = from.m_database;
-		m_module = from.m_module;
 		m_linearity = from.m_linearity;
 		m_comparator = from.m_comparator;
+		m_module = from.m_module;
 		m_backup = from.m_backup;
 
 	m_mutex.unlock();
