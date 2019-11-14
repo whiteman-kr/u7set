@@ -1,6 +1,7 @@
 #include "ObjectProperties.h"
 
 #include "Options.h"
+#include "Conversion.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -412,6 +413,499 @@ void SignalPropertyDialog::onOk()
 
 	theSignalBase.setSignalParam(m_param.hash(), m_param);
 
+	accept();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+bool ComparatorPropertyDialog::m_showGroupHeader[COMPARATOR_PROPERTY_GROUP_COUNT] =
+{
+	true,	//	COMPARATOR_PROPERTY_GROUP_INPUT
+	false,	//	COMPARATOR_PROPERTY_GROUP_COMPARE
+	false,	//	COMPARATOR_PROPERTY_GROUP_HYSTERESIS
+	false,	//	COMPARATOR_PROPERTY_GROUP_OUTPUT
+};
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ComparatorPropertyDialog::ComparatorPropertyDialog(const Builder::Comparator& comparator, QWidget *parent) :
+	QDialog(parent)
+{
+	m_comparator = comparator;
+
+	createPropertyList();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ComparatorPropertyDialog::~ComparatorPropertyDialog()
+{
+	if (m_pManager != nullptr)
+	{
+		delete m_pManager;
+		m_pManager = nullptr;
+	}
+
+	if (m_pFactory != nullptr)
+	{
+		delete m_pFactory;
+		m_pFactory = nullptr;
+	}
+
+	if (m_pEditor != nullptr)
+	{
+		delete m_pEditor;
+		m_pEditor = nullptr;
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorPropertyDialog::createPropertyList()
+{
+	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
+	setWindowIcon(QIcon(":/icons/Property.png"));
+	setWindowTitle(tr("Properties"));
+	setMinimumSize(600, 300);
+	move(QApplication::desktop()->availableGeometry().center() - rect().center());
+
+	setWindowTitle(tr("Properties"));
+	//setWindowTitle(tr("Properties - %1").arg(m_comparator.appSignalID()));
+
+	Metrology::Signal* pInputSignal = theSignalBase.signalPtr(calcHash(m_comparator.input().appSignalID()));
+
+	int precision = m_comparator.precision();
+	switch (m_comparator.intAnalogSignalFormat())
+	{
+		case E::AnalogAppSignalFormat::Float32:		precision = m_comparator.precision();	break;
+		case E::AnalogAppSignalFormat::SignedInt32:	precision = 0;							break;
+		default:									assert(0);
+	}
+
+	QMetaEnum meu = QMetaEnum::fromType<E::CmpType>();
+	QStringList cmpTypeList;
+	for(int u = 0; u < meu.keyCount(); u++)
+	{
+		cmpTypeList.append(meu.key(u));
+	}
+
+	QVBoxLayout *mainLayout = new QVBoxLayout;
+
+	// create property list
+	//
+
+	QtVariantProperty *item = nullptr;
+
+	m_pManager = new QtVariantPropertyManager;
+	m_pFactory = new QtVariantEditorFactory;
+	m_pEditor = new QtTreePropertyBrowser;
+
+	// create property groups
+	//
+
+		// input group
+
+		QtProperty *inputGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Input"));
+
+			if (pInputSignal == nullptr)
+			{
+				item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
+				item->setValue(m_comparator.input().appSignalID());
+				item->setAttribute(QLatin1String("readOnly"), true);
+				inputGroup->addSubProperty(item);
+			}
+			else
+			{
+				item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
+				item->setValue(pInputSignal->param().appSignalID());
+				item->setAttribute(QLatin1String("readOnly"), true);
+				inputGroup->addSubProperty(item);
+
+				item = m_pManager->addProperty(QVariant::String, tr("CustomAppSignalID"));
+				item->setValue(pInputSignal->param().customAppSignalID());
+				item->setAttribute(QLatin1String("readOnly"), true);
+				inputGroup->addSubProperty(item);
+
+				item = m_pManager->addProperty(QVariant::String, tr("EquipmentID"));
+				item->setValue(pInputSignal->param().equipmentID());
+				item->setAttribute(QLatin1String("readOnly"), true);
+				inputGroup->addSubProperty(item);
+
+				item = m_pManager->addProperty(QVariant::String, tr("Caption"));
+				item->setValue(pInputSignal->param().caption());
+				item->setAttribute(QLatin1String("readOnly"), true);
+				inputGroup->addSubProperty(item);
+
+				if (pInputSignal->param().isInput() == true)
+				{
+					item = m_pManager->addProperty(QVariant::String, tr("Electric range"));
+					item->setValue(pInputSignal->param().electricRangeStr());
+					item->setAttribute(QLatin1String("readOnly"), true);
+					inputGroup->addSubProperty(item);
+				}
+
+				item = m_pManager->addProperty(QVariant::String, tr("Engeneering range"));
+				item->setValue(pInputSignal->param().engeneeringRangeStr());
+				item->setAttribute(QLatin1String("readOnly"), true);
+				inputGroup->addSubProperty(item);
+			}
+
+		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
+
+		// compare group
+
+		QtProperty *compareGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), comparator().compare().isConst() == true ? tr("Compare - const") : tr("Compare - dynamic"));
+
+			item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Type"));
+			item->setAttribute(QLatin1String("enumNames"), cmpTypeList);
+			item->setValue(static_cast<int>(m_comparator.cmpType()));
+			m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_CMP_TYPE);
+			compareGroup->addSubProperty(item);
+
+			if (comparator().compare().isConst() == true)
+			{
+				if (pInputSignal != nullptr && pInputSignal->param().isValid() == true && pInputSignal->param().isInput() == true)
+				{
+					item = m_pManager->addProperty(QVariant::Double, tr("Electric value, ") + pInputSignal->param().electricUnitStr());
+					item->setValue(conversion(m_comparator.compare().constValue(), CT_ENGENEER_TO_ELECTRIC, pInputSignal->param()));
+					item->setAttribute(QLatin1String("decimals"), pInputSignal->param().electricPrecision());
+					m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE);
+					compareGroup->addSubProperty(item);
+				}
+
+				item = m_pManager->addProperty(QVariant::Double, tr("Engeneering value, %1").arg(pInputSignal == nullptr ? QString() : pInputSignal->param().unit()));
+				item->setValue(m_comparator.compare().constValue());
+				item->setAttribute(QLatin1String("decimals"), precision);
+				m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE);
+				compareGroup->addSubProperty(item);
+			}
+			else
+			{
+				Metrology::Signal* pCompareSignal = theSignalBase.signalPtr(calcHash(m_comparator.compare().appSignalID()));
+				if (pCompareSignal == nullptr)
+				{
+					item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
+					item->setValue(m_comparator.compare().appSignalID());
+					item->setAttribute(QLatin1String("readOnly"), true);
+					compareGroup->addSubProperty(item);
+				}
+				else
+				{
+					item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
+					item->setValue(pCompareSignal->param().appSignalID());
+					item->setAttribute(QLatin1String("readOnly"), true);
+					compareGroup->addSubProperty(item);
+
+					item = m_pManager->addProperty(QVariant::String, tr("CustomAppSignalID"));
+					item->setValue(pCompareSignal->param().customAppSignalID());
+					item->setAttribute(QLatin1String("readOnly"), true);
+					compareGroup->addSubProperty(item);
+
+					item = m_pManager->addProperty(QVariant::String, tr("EquipmentID"));
+					item->setValue(pCompareSignal->param().equipmentID());
+					item->setAttribute(QLatin1String("readOnly"), true);
+					compareGroup->addSubProperty(item);
+
+					item = m_pManager->addProperty(QVariant::String, tr("Caption"));
+					item->setValue(pCompareSignal->param().caption());
+					item->setAttribute(QLatin1String("readOnly"), true);
+					compareGroup->addSubProperty(item);
+
+					if (pCompareSignal->param().isInput() == true)
+					{
+						item = m_pManager->addProperty(QVariant::String, tr("Electric range"));
+						item->setValue(pCompareSignal->param().electricRangeStr());
+						item->setAttribute(QLatin1String("readOnly"), true);
+						compareGroup->addSubProperty(item);
+					}
+
+					item = m_pManager->addProperty(QVariant::String, tr("Engeneering range"));
+					item->setValue(pCompareSignal->param().engeneeringRangeStr());
+					item->setAttribute(QLatin1String("readOnly"), true);
+					compareGroup->addSubProperty(item);
+				}
+			}
+
+		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
+
+		// hysteresis group
+
+		QtProperty *hysteresisGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), comparator().hysteresis().isConst() == true ? tr("Hysteresis - const") : tr("Hysteresis - dynamic"));
+
+			if (comparator().hysteresis().isConst() == true)
+			{
+				if (pInputSignal != nullptr && pInputSignal->param().isValid() == true && pInputSignal->param().isInput() == true)
+				{
+					item = m_pManager->addProperty(QVariant::Double, tr("Electric value, ") + pInputSignal->param().electricUnitStr());
+					item->setValue(conversion(m_comparator.hysteresis().constValue(), CT_ENGENEER_TO_ELECTRIC, pInputSignal->param()));
+					item->setAttribute(QLatin1String("decimals"), pInputSignal->param().electricPrecision());
+					m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE);
+					hysteresisGroup->addSubProperty(item);
+				}
+
+				item = m_pManager->addProperty(QVariant::Double, tr("Engeneering value, %1").arg(pInputSignal == nullptr ? QString() : pInputSignal->param().unit()));
+				item->setValue(m_comparator.hysteresis().constValue());
+				item->setAttribute(QLatin1String("decimals"), precision);
+				m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE);
+				hysteresisGroup->addSubProperty(item);
+			}
+			else
+			{
+				Metrology::Signal* pHysteresisSignal = theSignalBase.signalPtr(calcHash(m_comparator.hysteresis().appSignalID()));
+				if (pHysteresisSignal == nullptr)
+				{
+					item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
+					item->setValue(m_comparator.hysteresis().appSignalID());
+					item->setAttribute(QLatin1String("readOnly"), true);
+					hysteresisGroup->addSubProperty(item);
+				}
+				else
+				{
+					item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
+					item->setValue(pHysteresisSignal->param().appSignalID());
+					item->setAttribute(QLatin1String("readOnly"), true);
+					hysteresisGroup->addSubProperty(item);
+
+					item = m_pManager->addProperty(QVariant::String, tr("CustomAppSignalID"));
+					item->setValue(pHysteresisSignal->param().customAppSignalID());
+					item->setAttribute(QLatin1String("readOnly"), true);
+					hysteresisGroup->addSubProperty(item);
+
+					item = m_pManager->addProperty(QVariant::String, tr("EquipmentID"));
+					item->setValue(pHysteresisSignal->param().equipmentID());
+					item->setAttribute(QLatin1String("readOnly"), true);
+					hysteresisGroup->addSubProperty(item);
+
+					item = m_pManager->addProperty(QVariant::String, tr("Caption"));
+					item->setValue(pHysteresisSignal->param().caption());
+					item->setAttribute(QLatin1String("readOnly"), true);
+					hysteresisGroup->addSubProperty(item);
+
+					if (pHysteresisSignal->param().isInput() == true)
+					{
+						item = m_pManager->addProperty(QVariant::String, tr("Electric range"));
+						item->setValue(pHysteresisSignal->param().electricRangeStr());
+						item->setAttribute(QLatin1String("readOnly"), true);
+						hysteresisGroup->addSubProperty(item);
+					}
+
+					item = m_pManager->addProperty(QVariant::String, tr("Engeneering range"));
+					item->setValue(pHysteresisSignal->param().engeneeringRangeStr());
+					item->setAttribute(QLatin1String("readOnly"), true);
+					hysteresisGroup->addSubProperty(item);
+				}
+			}
+
+		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
+
+		// output group
+
+		QtProperty *outputGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Output"));
+
+		Metrology::Signal* pOutputSignal = theSignalBase.signalPtr(calcHash(m_comparator.output().appSignalID()));
+		if (pOutputSignal == nullptr)
+		{
+			item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
+			item->setValue(m_comparator.output().appSignalID());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			outputGroup->addSubProperty(item);
+		}
+		else
+		{
+			item = m_pManager->addProperty(QVariant::String, tr("AppSignalID"));
+			item->setValue(pOutputSignal->param().appSignalID());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			outputGroup->addSubProperty(item);
+
+			item = m_pManager->addProperty(QVariant::String, tr("CustomAppSignalID"));
+			item->setValue(pOutputSignal->param().customAppSignalID());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			outputGroup->addSubProperty(item);
+
+			item = m_pManager->addProperty(QVariant::String, tr("EquipmentID"));
+			item->setValue(pOutputSignal->param().equipmentID());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			outputGroup->addSubProperty(item);
+
+			item = m_pManager->addProperty(QVariant::String, tr("Caption"));
+			item->setValue(pOutputSignal->param().caption());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			outputGroup->addSubProperty(item);
+		}
+
+		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
+
+	// show or hide property groups
+	//
+
+	m_browserItemList[COMPARATOR_PROPERTY_GROUP_INPUT] = m_pEditor->addProperty(inputGroup);
+	m_browserItemList[COMPARATOR_PROPERTY_GROUP_COMPARE] = m_pEditor->addProperty(compareGroup);
+	m_browserItemList[COMPARATOR_PROPERTY_GROUP_HYSTERESIS] = m_pEditor->addProperty(hysteresisGroup);
+	m_browserItemList[COMPARATOR_PROPERTY_GROUP_OUTPUT] = m_pEditor->addProperty(outputGroup);
+
+
+	for(int g = 0; g < COMPARATOR_PROPERTY_GROUP_COUNT; g++)
+	{
+		if (m_browserItemList[g] == nullptr)
+		{
+			continue;
+		}
+
+		m_pEditor->setExpanded(m_browserItemList[g], m_showGroupHeader[g]);
+	}
+
+	//
+	//
+	m_pEditor->setPropertiesWithoutValueMarked(true);
+	m_pEditor->setRootIsDecorated(false);
+
+	connect(m_pManager, &QtVariantPropertyManager::valueChanged, this, &ComparatorPropertyDialog::onPropertyValueChanged);
+	connect(m_pEditor, &QtTreePropertyBrowser::expanded, this, &ComparatorPropertyDialog::onPropertyExpanded);
+
+	// create buttons ok and cancel
+	//
+	m_buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel, this);
+
+	connect(m_buttonBox, &QDialogButtonBox::accepted, this, &ComparatorPropertyDialog::onOk);
+	connect(m_buttonBox, &QDialogButtonBox::rejected, this, &ComparatorPropertyDialog::reject);
+
+	// add layouts
+	//
+	mainLayout->addWidget(m_pEditor);
+	mainLayout->addWidget(m_buttonBox);
+
+	setLayout(mainLayout);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, const QVariant &value)
+{
+	if (property == nullptr)
+	{
+		return;
+	}
+
+	if (m_propertyMap.contains(property) == false)
+	{
+		return;
+	}
+
+	int index = m_propertyMap[property];
+	if (index < 0 || index >= COMPARATOR_PROPERTY_ITEM_COUNT)
+	{
+		return;
+	}
+
+	Metrology::Signal* pInputSignal = theSignalBase.signalPtr(calcHash(m_comparator.input().appSignalID()));
+	if (pInputSignal == nullptr || pInputSignal->param().isValid() == false)
+	{
+		return;
+	}
+
+	int groupIndex = -1;
+
+	switch(index)
+	{
+		// comapre
+		//
+		case COMPARATOR_PROPERTY_ITEM_CMP_TYPE:
+			{
+				m_comparator.setCmpType((static_cast<E::CmpType>(value.toInt())));
+				groupIndex = COMPARATOR_PROPERTY_GROUP_COMPARE;
+			}
+			break;
+
+		case COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE:
+			{
+				m_comparator.compare().setConstValue(conversion(value.toDouble(), CT_ELECTRIC_TO_ENGENEER, pInputSignal->param()));
+				groupIndex = COMPARATOR_PROPERTY_GROUP_COMPARE;
+
+				QtVariantProperty *propertyEn = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE));
+				if (propertyEn != nullptr)
+				{
+					propertyEn->setValue(m_comparator.compare().constValue());
+				}
+			}
+			break;
+
+		case COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE:
+			{
+				m_comparator.compare().setConstValue(value.toDouble());
+				groupIndex = COMPARATOR_PROPERTY_GROUP_COMPARE;
+
+				QtVariantProperty *propertyEl = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE));
+				if (propertyEl != nullptr && pInputSignal->param().isInput() == true)
+				{
+					propertyEl->setValue(conversion(m_comparator.compare().constValue(), CT_ENGENEER_TO_ELECTRIC, pInputSignal->param()));
+				}
+			}
+			break;
+
+		// hysteresis
+		//
+		case COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE:
+			{
+				m_comparator.hysteresis().setConstValue(conversion(value.toDouble(), CT_ELECTRIC_TO_ENGENEER, pInputSignal->param()));
+				groupIndex = COMPARATOR_PROPERTY_GROUP_HYSTERESIS;
+
+				QtVariantProperty *propertyEn = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE));
+				if (propertyEn != nullptr)
+				{
+					propertyEn->setValue(m_comparator.hysteresis().constValue());
+				}
+			}
+			break;
+
+		case COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE:
+			{
+				m_comparator.hysteresis().setConstValue(value.toDouble());
+				groupIndex = COMPARATOR_PROPERTY_GROUP_HYSTERESIS;
+
+				QtVariantProperty *propertyEl = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE));
+				if (propertyEl != nullptr && pInputSignal->param().isInput() == true)
+				{
+					propertyEl->setValue(conversion(m_comparator.hysteresis().constValue(), CT_ENGENEER_TO_ELECTRIC, pInputSignal->param()));
+				}
+			}
+			break;
+	}
+
+	if (groupIndex < 0 || groupIndex >= COMPARATOR_PROPERTY_GROUP_COUNT)
+	{
+		return;
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorPropertyDialog::onPropertyExpanded(QtBrowserItem *item)
+{
+	if (item == nullptr)
+	{
+		return;
+	}
+
+	if (m_pEditor == nullptr)
+	{
+		return;
+	}
+
+	for(int g = 0; g < COMPARATOR_PROPERTY_GROUP_COUNT; g++)
+	{
+		if (m_browserItemList[g] == item)
+		{
+			m_showGroupHeader[g] = m_pEditor->isExpanded(item);
+		}
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorPropertyDialog::onOk()
+{
 	accept();
 }
 

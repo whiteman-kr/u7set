@@ -385,7 +385,7 @@ const char* const		SignalInfoParam[] =
 						QT_TRANSLATE_NOOP("Options.h", "Color flag no validity"),
 						QT_TRANSLATE_NOOP("Options.h", "Color flag overflow"),
 						QT_TRANSLATE_NOOP("Options.h", "Color flag underflow"),
-						QT_TRANSLATE_NOOP("Options.h", "Time for updating state of signal, ms"),
+						QT_TRANSLATE_NOOP("Options.h", "Time for updating state of signal (ms)"),
 };
 
 const int				SIO_PARAM_COUNT					= sizeof(SignalInfoParam)/sizeof(SignalInfoParam[0]);
@@ -395,7 +395,7 @@ const int				SIO_PARAM_FONT					= 0,
 						SIO_PARAM_COLOR_FLAG_VALID		= 2,
 						SIO_PARAM_COLOR_FLAG_OVERFLOW	= 3,
 						SIO_PARAM_COLOR_FLAG_UNDERFLOW	= 4,
-						SIO_PARAM_TIME_FOR_UPDATE			= 5;
+						SIO_PARAM_TIME_FOR_UPDATE		= 5;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -734,15 +734,15 @@ public:
 
 const char* const		LinearityParamName[] =
 {
-						QT_TRANSLATE_NOOP("Options.h", "Limit of error"),
+						QT_TRANSLATE_NOOP("Options.h", "Limit of error (%)"),
 						QT_TRANSLATE_NOOP("Options.h", "Type of error"),
 						QT_TRANSLATE_NOOP("Options.h", "Show error from limit"),
-						QT_TRANSLATE_NOOP("Options.h", "Measure time in a point, (sec)"),
+						QT_TRANSLATE_NOOP("Options.h", "Measure time in a point (sec)"),
 						QT_TRANSLATE_NOOP("Options.h", "Count of measurements in a point"),
 						QT_TRANSLATE_NOOP("Options.h", "Division of the measure range"),
 						QT_TRANSLATE_NOOP("Options.h", "Count of points"),
-						QT_TRANSLATE_NOOP("Options.h", "Lower limit of the measure range, (%)"),
-						QT_TRANSLATE_NOOP("Options.h", "High limit of the measure range, (%)"),
+						QT_TRANSLATE_NOOP("Options.h", "Lower limit of the measure range (%)"),
+						QT_TRANSLATE_NOOP("Options.h", "High limit of the measure range (%)"),
 						QT_TRANSLATE_NOOP("Options.h", "Points of range"),
 						QT_TRANSLATE_NOOP("Options.h", "Type of measurements list"),
 						QT_TRANSLATE_NOOP("Options.h", "Show columns of engineering values"),
@@ -876,10 +876,10 @@ public:
 
 const char* const		ComparatorParamName[] =
 {
-						QT_TRANSLATE_NOOP("Options.h", "Limit of error"),
-						QT_TRANSLATE_NOOP("Options.h", "Start value"),
+						QT_TRANSLATE_NOOP("Options.h", "Limit of error (%)"),
+						QT_TRANSLATE_NOOP("Options.h", "Start value (%)"),
 						QT_TRANSLATE_NOOP("Options.h", "Error type"),
-						QT_TRANSLATE_NOOP("Options.h", "Enable measure hysteresis"),
+						QT_TRANSLATE_NOOP("Options.h", "Enable to measure hysteresis"),
 						QT_TRANSLATE_NOOP("Options.h", "Start measurement from the сomparator"),
 						QT_TRANSLATE_NOOP("Options.h", "Additional check on the switch сomparator"),
 };

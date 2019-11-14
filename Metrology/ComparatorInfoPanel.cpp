@@ -126,8 +126,6 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 		{
 			return theOptions.comparatorInfo().colorStateFalse();
 		}
-
-		return QVariant();
 	}
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
@@ -151,10 +149,10 @@ QString ComparatorInfoTable::text(std::shared_ptr<::Builder::Comparator> pCompar
 
 	switch (pComparator->cmpType())
 	{
-		case ::Builder::Comparator::CmpType::Equ:		stateStr = "= ";		break;
-		case ::Builder::Comparator::CmpType::Greate:	stateStr = "> ";		break;
-		case ::Builder::Comparator::CmpType::Less:		stateStr = "< ";		break;
-		case ::Builder::Comparator::CmpType::NotEqu:	stateStr = "≠ ";		break;
+		case E::CmpType::Equ:		stateStr = "= ";		break;
+		case E::CmpType::Greate:	stateStr = "> ";		break;
+		case E::CmpType::Less:		stateStr = "< ";		break;
+		case E::CmpType::NotEqu:	stateStr = "≠ ";		break;
 	}
 
 	int precision = pComparator->precision();
@@ -503,24 +501,32 @@ void ComparatorInfoPanel::comparatorProperty()
 		return;
 	}
 
-//	Metrology::SignalParam param;
+	Metrology::Signal* pSignal = m_comparatorTable.signal(index);
+	if (pSignal == nullptr ||  pSignal->param().isValid() == false)
+	{
+		return;
+	}
 
-//	if (theOptions.toolBar().signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNUSED)
-//	{
-//		param = m_comparatorParamTable.signal(index).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
-//	}
-//	else
-//	{
-//		param = m_comparatorParamTable.signal(index).param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
-//	}
+	int indexComparator = m_pView->currentIndex().column();
+	if (indexComparator < 0 || indexComparator >= pSignal->comparatorCount())
+	{
+		return;
+	}
 
-//	if (param.isValid() == false)
-//	{
-//		return;
-//	}
+	std::shared_ptr<Builder::Comparator> pComparator = pSignal->comparator(indexComparator);
+	if (pComparator == nullptr)
+	{
+		return;
+	}
 
-//	SignalPropertyDialog dialog(param);
-//	dialog.exec();
+	ComparatorPropertyDialog dialog(*pComparator);
+	int result = dialog.exec();
+	if (result != QDialog::Accepted)
+	{
+		return;
+	}
+
+	*pComparator = dialog.comparator();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

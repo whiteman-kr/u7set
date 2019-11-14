@@ -256,9 +256,9 @@ PropertyPage* OptionsDialog::createPage(int page)
 		case OPTION_PAGE_CONFIG_SOCKET:
 		case OPTION_PAGE_SIGNAL_SOCKET:
 		case OPTION_PAGE_TUNING_SOCKET:
-		case OPTION_PAGE_MODULE_MEASURE:
 		case OPTION_PAGE_LINEARITY_MEASURE:
 		case OPTION_PAGE_COMPARATOR_MEASURE:
+		case OPTION_PAGE_MODULE_MEASURE:
 		case OPTION_PAGE_MEASURE_VIEW_TEXT:
 		case OPTION_PAGE_SIGNAL_INFO:
 		case OPTION_PAGE_COMPARATOR_INFO:
@@ -369,31 +369,6 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					editor->addProperty(serverGroup2);
 				}
 
-			}
-			break;
-
-		case OPTION_PAGE_MODULE_MEASURE:
-			{
-				QtProperty *measuremoduleGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measuring of module"));
-
-					item = manager->addProperty(QVariant::Bool, ModuleParamName[MO_PARAM_MEASURE_ENTIRE_MODULE]);
-					item->setValue(m_options.module().measureEntireModule());
-					appendProperty(item, page, MO_PARAM_MEASURE_ENTIRE_MODULE);
-					measuremoduleGroup->addSubProperty(item);
-
-					item = manager->addProperty(QVariant::Bool, ModuleParamName[MO_PARAM_WARN_IF_MEASURED]);
-					item->setValue(m_options.module().warningIfMeasured());
-					appendProperty(item, page, MO_PARAM_WARN_IF_MEASURED);
-					measuremoduleGroup->addSubProperty(item);
-
-					item = manager->addProperty(VariantManager::folerPathTypeId(), ModuleParamName[MO_PARAM_SUFFIX_SN]);
-					item->setValue(m_options.module().suffixSN());
-					appendProperty(item, page, MO_PARAM_SUFFIX_SN);
-					measuremoduleGroup->addSubProperty(item);
-
-				editor->setFactoryForManager(manager, factory);
-
-				editor->addProperty(measuremoduleGroup);
 			}
 			break;
 
@@ -582,6 +557,31 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 				editor->setFactoryForManager(manager, factory);
 
 				editor->addProperty(errorGroup);
+			}
+			break;
+
+		case OPTION_PAGE_MODULE_MEASURE:
+			{
+				QtProperty *measuremoduleGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measuring of module"));
+
+					item = manager->addProperty(QVariant::Bool, ModuleParamName[MO_PARAM_MEASURE_ENTIRE_MODULE]);
+					item->setValue(m_options.module().measureEntireModule());
+					appendProperty(item, page, MO_PARAM_MEASURE_ENTIRE_MODULE);
+					measuremoduleGroup->addSubProperty(item);
+
+					item = manager->addProperty(QVariant::Bool, ModuleParamName[MO_PARAM_WARN_IF_MEASURED]);
+					item->setValue(m_options.module().warningIfMeasured());
+					appendProperty(item, page, MO_PARAM_WARN_IF_MEASURED);
+					measuremoduleGroup->addSubProperty(item);
+
+					item = manager->addProperty(VariantManager::folerPathTypeId(), ModuleParamName[MO_PARAM_SUFFIX_SN]);
+					item->setValue(m_options.module().suffixSN());
+					appendProperty(item, page, MO_PARAM_SUFFIX_SN);
+					measuremoduleGroup->addSubProperty(item);
+
+				editor->setFactoryForManager(manager, factory);
+
+				editor->addProperty(measuremoduleGroup);
 			}
 			break;
 
@@ -1094,18 +1094,6 @@ void OptionsDialog::applyProperty()
 			}
 			break;
 
-		case OPTION_PAGE_MODULE_MEASURE:
-			{
-				switch(param)
-				{
-					case MO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.module().setMeasureEntireModule(value.toBool());		break;
-					case MO_PARAM_WARN_IF_MEASURED:			m_options.module().setWarningIfMeasured(value.toBool());		break;
-					case MO_PARAM_SUFFIX_SN:				m_options.module().setSuffixSN(value.toString());				break;
-					default:								assert(0);
-				}
-			}
-			break;
-
 		case OPTION_PAGE_LINEARITY_MEASURE:
 			{
 				switch(param)
@@ -1149,6 +1137,18 @@ void OptionsDialog::applyProperty()
 					case CO_PARAM_COMPARATOR_INDEX:		m_options.comparator().m_startComparatorIndex = value.toInt();		break;
 					case CO_PARAM_ADDITIONAL_CHECK:		m_options.comparator().m_additionalCheck = value.toBool();			break;
 					default:							assert(0);
+				}
+			}
+			break;
+
+		case OPTION_PAGE_MODULE_MEASURE:
+			{
+				switch(param)
+				{
+					case MO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.module().setMeasureEntireModule(value.toBool());		break;
+					case MO_PARAM_WARN_IF_MEASURED:			m_options.module().setWarningIfMeasured(value.toBool());		break;
+					case MO_PARAM_SUFFIX_SN:				m_options.module().setSuffixSN(value.toString());				break;
+					default:								assert(0);
 				}
 			}
 			break;

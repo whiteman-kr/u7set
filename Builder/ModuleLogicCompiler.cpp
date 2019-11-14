@@ -9154,13 +9154,13 @@ namespace Builder
 				switch (pv.value().toInt())
 				{
 					case 1:
-					case 5:			cmp->setCmpType(Comparator::CmpType::Equ);		break;
+					case 5:			cmp->setCmpType(E::CmpType::Equ);		break;
 					case 2:
-					case 6:			cmp->setCmpType(Comparator::CmpType::Greate);	break;
+					case 6:			cmp->setCmpType(E::CmpType::Greate);	break;
 					case 3:
-					case 7:			cmp->setCmpType(Comparator::CmpType::Less);		break;
+					case 7:			cmp->setCmpType(E::CmpType::Less);		break;
 					case 4:
-					case 8:			cmp->setCmpType(Comparator::CmpType::NotEqu);	break;
+					case 8:			cmp->setCmpType(E::CmpType::NotEqu);	break;
 				}
 			}
 
