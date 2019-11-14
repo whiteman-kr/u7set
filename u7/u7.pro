@@ -6,6 +6,17 @@
 
 QT       += core gui widgets sql network xmlpatterns qml svg serialport xml testlib
 
+# --
+# In Qt 5 using testlib module adds a console option via the MODULE_CONFIG mechanism.
+# This forces a /SUBSYSTEM: CONSOLE onto the linker command line no matter what global
+# options you specify, even if you use CONFIG -= console.
+# The console configuration is given in the testlib module configuration within
+# qtbase/src/testlib/testlib.pro. This means that it ends up in QT.testlib.CONFIG variable.
+
+QT.testlib.CONFIG -= console
+
+# --
+
 TARGET = u7
 TEMPLATE = app
 
@@ -529,5 +540,4 @@ win32 {
 unix {
     LIBS += -lSimulator
 }
-
 
