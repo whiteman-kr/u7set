@@ -89,7 +89,7 @@ namespace VFrame30
 
 	// Drawing Functions
 	//
-	void SchemaItemFrame::Draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
+	void SchemaItemFrame::draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
 	{
 		QPainter* p = drawParam->painter();
 
@@ -244,7 +244,7 @@ namespace VFrame30
 
 					// Direct copy, with shifting itmes to destRect
 					//
-					newItem->MoveItem(destRect.left(), destRect.top());
+					newItem->moveItem(destRect.left(), destRect.top());
 				}
 				else
 				{
@@ -258,7 +258,7 @@ namespace VFrame30
 					newItem->setLeft(newItem->left() * scaleFactorHorz);
 					newItem->setTop(newItem->top() * scaleFactorVert);
 
-					newItem->MoveItem(destRect.left(), destRect.top());
+					newItem->moveItem(destRect.left(), destRect.top());
 
 					// Set new width and height
 					//

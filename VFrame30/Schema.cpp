@@ -250,14 +250,14 @@ namespace VFrame30
 
 		// Draw items by layers which has Show flag
 		//
-		double clipX = static_cast<double>(clipRect.left());
-		double clipY = static_cast<double>(clipRect.top());
-		double clipWidth = static_cast<double>(clipRect.width());
-		double clipHeight = static_cast<double>(clipRect.height());
+		double clipX = clipRect.left();
+		double clipY = clipRect.top();
+		double clipWidth = clipRect.width();
+		double clipHeight = clipRect.height();
 
 		for (auto layer : Layers)
 		{
-			assert(layer);
+			Q_ASSERT(layer);
 
 			if (layer->show() == false)
 			{
@@ -273,32 +273,37 @@ namespace VFrame30
 			for (auto vi = layer->Items.cbegin(); vi != layer->Items.cend(); ++vi)
 			{
 				const std::shared_ptr<SchemaItem>& item = *vi;
-				assert(item);
+				Q_ASSERT(item);
 
 				item->setDrawParam(drawParam);
 
-				if (item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
+				if (item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 				{
 					if (drawParam->isMonitorMode() == true)
 					{
 						ClientSchemaView* view = drawParam->clientSchemaView();
-						assert(view);
+						Q_ASSERT(view);
 
 						item->preDrawEvent(view->globalScript(), view->jsEngine());
 					}
 
-					item->Draw(drawParam, this, layer.get());
+					item->draw(drawParam, this, layer.get());	// Drawing item is here
 
 					if (item->isCommented() == true)
 					{
 						item->drawCommentDim(drawParam);
 					}
 
+					if (drawParam->infoMode() == true)
+					{
+						item->drawLabel(drawParam);
+					}
+
 					// Draw lastScriptError after drawing item
 					//
 					if (item->lastScriptError().isEmpty() == false)
 					{
-						item->DrawScriptError(drawParam);
+						item->drawScriptError(drawParam);
 					}
 				}
 
@@ -340,7 +345,7 @@ namespace VFrame30
 			{
 				const std::shared_ptr<SchemaItem>& item = *vi;
 
-				if (item->acceptClick() == true && item->IsIntersectPoint(x, y) == true && item->clickScript().isEmpty() == false)
+				if (item->acceptClick() == true && item->isIntersectPoint(x, y) == true && item->clickScript().isEmpty() == false)
 				{
 					RunClickScript(item/*, pVideoFrameWidgetAgent*/);
 					stop = true;

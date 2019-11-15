@@ -95,7 +95,7 @@ namespace VFrame30
 
 	// Drawing Functions
 	//
-	void SchemaItemImage::Draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
+	void SchemaItemImage::draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
 	{
 		QRectF rect = boundingRectInDocPt(drawParam);
 

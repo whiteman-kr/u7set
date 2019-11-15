@@ -159,7 +159,7 @@ namespace VFrame30
 	// Action Functions
 	//
 
-	void SchemaItem::MoveItem(double /*horzOffsetDocPt*/, double /*vertOffsetDocPt*/)
+	void SchemaItem::moveItem(double /*horzOffsetDocPt*/, double /*vertOffsetDocPt*/)
 	{
 		assert(false);	// Implement in child classes
 	}
@@ -499,43 +499,47 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void SchemaItem::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItem::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
 		Q_UNUSED(drawParam)
 		Q_UNUSED(schema)
 		Q_UNUSED(layer)
 	}
 
-	// Рисование элемента при его создании изменении
-	//
-	void SchemaItem::DrawOutline(CDrawParam* ) const
+	void SchemaItem::drawLabel(CDrawParam* /*drawParam*/) const
 	{
 	}
 
-	void SchemaItem::DrawOutline(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<SchemaItem>>& items)
+	// Рисование элемента при его создании изменении
+	//
+	void SchemaItem::drawOutline(CDrawParam* ) const
 	{
-		if (pDrawParam == nullptr)
+	}
+
+	void SchemaItem::drawOutline(CDrawParam* drawParam, const std::vector<std::shared_ptr<SchemaItem>>& items)
+	{
+		if (drawParam == nullptr)
 		{
-			assert(pDrawParam != nullptr);
+			Q_ASSERT(drawParam != nullptr);
 			return;
 		}
 
-		for (auto vi = items.cbegin(); vi != items.cend(); ++vi)
+		for (const SchemaItemPtr& vi : items)
 		{
-			vi->get()->DrawOutline(pDrawParam);
+			vi->drawOutline(drawParam);
 		}
 	}
 
-	void SchemaItem::DrawIssue(CDrawParam* /*drawParam*/, OutputMessageLevel /*issue*/) const
+	void SchemaItem::drawIssue(CDrawParam* /*drawParam*/, OutputMessageLevel /*issue*/) const
 	{
 		assert(false);
 	}
 
-	void SchemaItem::DrawDebugInfo(CDrawParam*, const QString&) const
+	void SchemaItem::drawDebugInfo(CDrawParam*, const QString&) const
 	{
 	}
 
-	void SchemaItem::DrawScriptError(CDrawParam* drawParam) const
+	void SchemaItem::drawScriptError(CDrawParam* drawParam) const
 	{
 		if (m_lastScriptError.isEmpty() == true)
 		{
@@ -560,22 +564,24 @@ namespace VFrame30
 		return;
 	}
 
-	void SchemaItem::DrawSelection(CDrawParam*, bool) const
+	void SchemaItem::drawSelection(CDrawParam*, bool) const
 	{
 	}
 
-	void SchemaItem::DrawSelection(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<SchemaItem>>& items, bool drawSizeBar)
+	void SchemaItem::drawSelection(CDrawParam* drawParam, const std::vector<std::shared_ptr<SchemaItem>>& items, bool drawSizeBar)
 	{
-		if (pDrawParam == nullptr)
+		if (drawParam == nullptr)
 		{
-			assert(pDrawParam != nullptr);
+			Q_ASSERT(drawParam != nullptr);
 			return;
 		}
 
-		for (auto vi = items.cbegin(); vi != items.cend(); ++vi)
+		for (const SchemaItemPtr& vi : items)
 		{
-			vi->get()->DrawSelection(pDrawParam, drawSizeBar);
+			vi->drawSelection(drawParam, drawSizeBar);
 		}
+
+		return;
 	}
 
 	void SchemaItem::drawCompareAction(CDrawParam* /*drawParam*/, QColor /*color*/) const
@@ -584,29 +590,28 @@ namespace VFrame30
 
 	void SchemaItem::drawCommentDim(CDrawParam* /*drawParam*/) const
 	{
-
 	}
 
 	// Определение, входит ли точка в элемент, x и y в дюймах или в пикселях
 	//
-	bool SchemaItem::IsIntersectPoint(double x, double y) const
+	bool SchemaItem::isIntersectPoint(double x, double y) const
 	{
 		if (itemUnit() == SchemaUnit::Display)
 		{
-			return IsIntersectRect(x, y, 1, 1);
+			return isIntersectRect(x, y, 1, 1);
 		}
 		else
 		{
 			// Из точки делается прямоугольник 0.5мм на 0.5мм (0.02 in )
 			//
-			return IsIntersectRect(x - 0.01, y - 0.01, 0.02, 0.02);
+			return isIntersectRect(x - 0.01, y - 0.01, 0.02, 0.02);
 		}
 	}
 
 	// Определение, пересекает ли элемент указанный прямоугольник (использовать для выделения),
 	// координаты и размер прямоугольника заданы в дюймах или пикселях
 	//
-	bool SchemaItem::IsIntersectRect(double x, double y, double width, double height) const
+	bool SchemaItem::isIntersectRect(double x, double y, double width, double height) const
 	{
 		x = x; y = y; width = width; height = height;		// убираю unreferenced warning
 		assert(false);

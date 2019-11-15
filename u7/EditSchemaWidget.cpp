@@ -197,7 +197,7 @@ void EditSchemaView::paintEvent(QPaintEvent* /*pe*/)
 	//
 	if (m_selectedItems.empty() == false)
 	{
-		VFrame30::SchemaItem::DrawSelection(&drawParam, m_selectedItems, m_selectedItems.size() == 1);
+		VFrame30::SchemaItem::drawSelection(&drawParam, m_selectedItems, m_selectedItems.size() == 1);
 	}
 
 	// Draw Edit Connection lines outlines
@@ -276,11 +276,11 @@ void EditSchemaView::drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF cli
 				 issue == OutputMessageLevel::Warning1 ||
 				 issue == OutputMessageLevel::Warning2 ||
 				 issue == OutputMessageLevel::Error) &&
-				item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
+			    item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 			{
 				// Draw item issue
 				//
-				item->DrawIssue(drawParam, issue);
+				item->drawIssue(drawParam, issue);
 			}
 		}
 	}
@@ -327,7 +327,7 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 			QString orderIndexText;
 			orderIndexText.reserve(32);
 
-			if (item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
+			if (item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 			{
 				orderIndexText = "?";
 
@@ -401,7 +401,7 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 					}
 				}
 
-				item->DrawDebugInfo(drawParam, orderIndexText);
+				item->drawDebugInfo(drawParam, orderIndexText);
 			}
 		}
 	}
@@ -445,7 +445,7 @@ void EditSchemaView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 	std::vector<SchemaItemPtr> outlines;
 	outlines.push_back(m_newItem);
 
-	VFrame30::SchemaItem::DrawOutline(drawParam, outlines);
+	VFrame30::SchemaItem::drawOutline(drawParam, outlines);
 
 	// Draw ruler for newItem
 	//
@@ -576,13 +576,13 @@ void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 			if (si->isLocked() == false ||
 				(si->isLocked() == true && ctrlIsPressed == true))
 			{
-				si->MoveItem(xdif, ydif);
+				si->moveItem(xdif, ydif);
 			}
 		});
 
 	// Draw outline
 	//
-	VFrame30::SchemaItem::DrawOutline(drawParam, m_selectedItems);
+	VFrame30::SchemaItem::drawOutline(drawParam, m_selectedItems);
 
 	// Get bounding rect
 	//
@@ -638,7 +638,7 @@ void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 			if (si->isLocked() == false ||
 				(si->isLocked() == true && ctrlIsPressed == true))
 			{
-				si->MoveItem(-xdif, -ydif);
+				si->moveItem(-xdif, -ydif);
 			}
 		});
 
@@ -781,7 +781,7 @@ void EditSchemaView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 
 	// Draw item outline
 	//
-	VFrame30::SchemaItem::DrawOutline(drawParam, m_selectedItems);
+	VFrame30::SchemaItem::drawOutline(drawParam, m_selectedItems);
 
 	// restore position
 	//
@@ -873,7 +873,7 @@ void EditSchemaView::drawMovingLinePoint(VFrame30::CDrawParam* drawParam)
 
 	// Draw outline
 	//
-	VFrame30::SchemaItem::DrawOutline(drawParam, m_selectedItems);
+	VFrame30::SchemaItem::drawOutline(drawParam, m_selectedItems);
 
 	// Resotore points
 	//
@@ -1019,7 +1019,7 @@ void EditSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, const 
 			}
 
 			if (compareAction != CompareAction::Unmodified &&
-				item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
+			    item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 			{
 				// Draw item issue
 				//
@@ -1152,7 +1152,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 
 		// If inside the rect then SchemaItemAction.MoveItem
 		//
-		if (schemaItem->IsIntersectPoint(point.x(), point.y()) == true)
+		if (schemaItem->isIntersectPoint(point.x(), point.y()) == true)
 		{
 			if (schemaItem->isLocked() == false ||
 				(schemaItem->isLocked() == true && ctrlIsPressed == true))
@@ -1233,7 +1233,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 
 		// ���� ������ �� �����, �� SchemaItemAction.MoveItem
 		//
-		if (schemaItem->IsIntersectPoint(point.x(), point.y()) == true)
+		if (schemaItem->isIntersectPoint(point.x(), point.y()) == true)
 		{
 			if (schemaItem->isLocked() == false ||
 				(schemaItem->isLocked() == true && ctrlIsPressed == true))
@@ -3536,7 +3536,7 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 					newItem->setLabel(s->schemaId() + "_" + QString::number(counterValue));
 				}
 
-				newItem->MoveItem(xdif, ydif);
+				newItem->moveItem(xdif, ydif);
 
 				newItems.push_back(newItem);
 				return;

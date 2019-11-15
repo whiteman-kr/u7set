@@ -989,7 +989,7 @@ namespace Builder
 						return false;
 					}
 
-					item->MoveItem(schemaRect.left(), schemaRect.top());
+					item->moveItem(schemaRect.left(), schemaRect.top());
 				}
 			}
 		}
@@ -1057,7 +1057,7 @@ namespace Builder
 
 				// Insert newItem to destionation schema layer
 				//
-				newItem->MoveItem(pannelRect.left(), pannelRect.top());
+				newItem->moveItem(pannelRect.left(), pannelRect.top());
 
 				// --
 				//

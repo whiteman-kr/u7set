@@ -311,7 +311,7 @@ namespace VFrame30
 
 	// Drawing Functions
 	//
-	void FblItemRect::Draw(CDrawParam* drawParam, const Schema*, const SchemaLayer* layer) const
+	void FblItemRect::draw(CDrawParam* drawParam, const Schema*, const SchemaLayer* layer) const
 	{
 		QPainter* p = drawParam->painter();
 		p->setBrush(Qt::NoBrush);
@@ -344,7 +344,6 @@ namespace VFrame30
 		r.setTopRight(drawParam->gridToDpi(r.topRight()));
 		r.setBottomLeft(drawParam->gridToDpi(r.bottomLeft()));
 
-		QRectF labelRect{r};	// save rect for future use
 		QRectF userTextRect{r};	// save rect for future use
 
 		// Draw main rect
@@ -588,57 +587,10 @@ namespace VFrame30
 			DrawHelper::drawText(p, smallFont, itemUnit(), userText(), userTextRect, Qt::TextDontClip | alignFlags);
 		}
 
-		// Draw Label
-		//
-		if (drawParam->infoMode() == true)
-		{
-			int alignFlags = Qt::AlignmentFlag::AlignCenter;
-			switch (labelPos())
-			{
-			case E::TextPos::LeftTop:
-				labelRect.moveBottomRight(labelRect.topLeft());
-				alignFlags = Qt::AlignRight | Qt::AlignBottom;
-				break;
-			case E::TextPos::Top:
-				labelRect.moveBottom(labelRect.top());
-				alignFlags = Qt::AlignHCenter | Qt::AlignBottom;
-				break;
-			case E::TextPos::RightTop:
-				labelRect.moveBottomLeft(labelRect.topRight());
-				alignFlags = Qt::AlignLeft | Qt::AlignBottom;
-				break;
-			case E::TextPos::Right:
-				labelRect.moveLeft(labelRect.right());
-				alignFlags = Qt::AlignLeft | Qt::AlignVCenter;
-				break;
-			case E::TextPos::RightBottom:
-				labelRect.moveTopLeft(labelRect.bottomRight());
-				alignFlags = Qt::AlignLeft | Qt::AlignTop;
-				break;
-			case E::TextPos::Bottom:
-				labelRect.moveTop(labelRect.bottom());
-				alignFlags = Qt::AlignHCenter | Qt::AlignTop;
-				break;
-			case E::TextPos::LeftBottom:
-				labelRect.moveTopRight(labelRect.bottomLeft());
-				alignFlags = Qt::AlignRight | Qt::AlignTop;
-				break;
-			case E::TextPos::Left:
-				labelRect.moveRight(labelRect.left());
-				alignFlags = Qt::AlignRight | Qt::AlignVCenter;
-				break;
-			default:
-				assert(false);
-			}
-
-			p->setPen(Qt::darkGray);
-			DrawHelper::drawText(p, smallFont, itemUnit(), label(), labelRect, Qt::TextDontClip | alignFlags);
-		}
-
 		return;
 	}
 
-	void FblItemRect::DrawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const
+	void FblItemRect::drawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const
 	{
 		QPainter* p = drawParam->painter();
 

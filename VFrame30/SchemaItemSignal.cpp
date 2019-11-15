@@ -165,7 +165,7 @@ namespace VFrame30
 	}
 
 
-	void SchemaItemSignal::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemSignal::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
 		if (multiChannel() == true)
 		{
@@ -185,7 +185,7 @@ namespace VFrame30
 			}
 		}
 
-		FblItemRect::Draw(drawParam, schema, layer);
+		FblItemRect::draw(drawParam, schema, layer);
 
 		if (drawParam->isMonitorMode() == true)
 		{

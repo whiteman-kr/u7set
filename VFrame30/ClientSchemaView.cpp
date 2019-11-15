@@ -281,7 +281,7 @@ namespace VFrame30
 				const SchemaItemPtr& item = *vi;
 
 				if (item->acceptClick() == true &&
-					item->IsIntersectPoint(x, y) == true &&
+				    item->isIntersectPoint(x, y) == true &&
 					item->clickScript().isEmpty() == false)
 				{
 					// Remember this item
@@ -341,7 +341,7 @@ namespace VFrame30
 					if (item == m_leftClickOverItem &&
 						item->acceptClick() == true &&
 						item->clickScript().trimmed().isEmpty() == false &&
-						item->IsIntersectPoint(x, y) == true &&
+					    item->isIntersectPoint(x, y) == true &&
 						item->clickScript().isEmpty() == false)
 					{
 						// Run script
