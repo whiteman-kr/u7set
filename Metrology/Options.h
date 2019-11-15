@@ -601,62 +601,6 @@ public:
 
 // ==============================================================================================
 
-#define					MODULE_OPTIONS_KEY			"Options/Module/"
-
-// ----------------------------------------------------------------------------------------------
-
-const char* const		ModuleParamName[] =
-{
-						QT_TRANSLATE_NOOP("Options.h", "Measure all signals of module in series"),
-						QT_TRANSLATE_NOOP("Options.h", "Show warning if signal is already measured"),
-						QT_TRANSLATE_NOOP("Options.h", "Suffix to identify signal of module serial number"),
-};
-
-const int				MO_PARAM_COUNT					= sizeof(ModuleParamName)/sizeof(ModuleParamName[0]);
-
-const int				MO_PARAM_MEASURE_ENTIRE_MODULE	= 0,
-						MO_PARAM_WARN_IF_MEASURED		= 1,
-						MO_PARAM_SUFFIX_SN				= 2;
-
-// ----------------------------------------------------------------------------------------------
-
-class ModuleOption : public QObject
-{
-	Q_OBJECT
-
-public:
-
-	explicit ModuleOption(QObject *parent = nullptr);
-	explicit ModuleOption(const ModuleOption& from, QObject *parent = nullptr);
-	virtual ~ModuleOption();
-
-private:
-
-	bool				m_measureEntireModule = false;								// measure all inputs of module in series
-	bool				m_warningIfMeasured = true;									// show warning if signal is already measured
-	QString				m_suffixSN;													// suffix to identify the signal of module serial number
-
-public:
-
-	bool				measureEntireModule() const { return m_measureEntireModule; }
-	void				setMeasureEntireModule(bool measure) { m_measureEntireModule = measure; }
-
-	bool				warningIfMeasured() const { return m_warningIfMeasured; }
-	void				setWarningIfMeasured(bool enable) { m_warningIfMeasured = enable; }
-
-	QString				suffixSN() const { return m_suffixSN; }
-	void				setSuffixSN(const QString& suffixSN) { m_suffixSN = suffixSN; }
-
-public:
-
-	void				load();
-	void				save();
-
-	ModuleOption&		operator=(const ModuleOption& from);
-};
-
-// ==============================================================================================
-
 const char* const		LinearityPointSensor[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "%"),
@@ -908,20 +852,95 @@ public:
 //private:
 public:
 
-	double				m_errorValue = 0.2;								// permissible error is given by specified documents
+	double				m_errorLimit = 0.2;								// permissible error is given by specified documents
 	double				m_startValue = 0.1;								// start value is given by metrologists
 	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;		// type of error absolute or reduced
 
 	bool				m_enableMeasureHysteresis = false;				// enable flag to measure hysteresis of сomparator
 	int					m_startComparatorIndex = 0;						// start the measurement with the сomparators under the number ...
-	bool				m_additionalCheck = true;						// additional check on the stitch сomparator
+	bool				m_enableAdditionalCheck = true;					// additional check on the stitch сomparator
+
+public:
+
+	double				errorLimit() const { return m_errorLimit; }
+	void				setErrorLimit(double errorLimit) { m_errorLimit = errorLimit; }
+
+	double				startValue() const { return m_startValue; }
+	void				setStartValue(double value) { m_startValue = value; }
+
+	int					errorType() const { return m_errorType; }
+	void				setErrorType(int type) { m_errorType = type; }
+
+
+	bool				enableMeasureHysteresis() const { return m_enableMeasureHysteresis; }
+	void				setEnableMeasureHysteresis(bool enable) { m_enableMeasureHysteresis = enable; }
+
+	int					startComparatorIndex() const { return m_startComparatorIndex; }
+	void				setStartComparatorIndex(int index) { m_startComparatorIndex = index; }
+
+	bool				enableAdditionalCheck() const { return m_enableAdditionalCheck; }
+	void				setEnableAdditionalCheck(bool enable) { m_enableAdditionalCheck = enable; }
+
+	void				load();
+	void				save();
+
+	ComparatorOption&	operator=(const ComparatorOption& from);
+};
+
+// ==============================================================================================
+
+#define					MODULE_OPTIONS_KEY			"Options/Module/"
+
+// ----------------------------------------------------------------------------------------------
+
+const char* const		ModuleParamName[] =
+{
+						QT_TRANSLATE_NOOP("Options.h", "Measure all signals of module in series"),
+						QT_TRANSLATE_NOOP("Options.h", "Show warning if signal is already measured"),
+						QT_TRANSLATE_NOOP("Options.h", "Suffix to identify signal of module serial number"),
+};
+
+const int				MO_PARAM_COUNT					= sizeof(ModuleParamName)/sizeof(ModuleParamName[0]);
+
+const int				MO_PARAM_MEASURE_ENTIRE_MODULE	= 0,
+						MO_PARAM_WARN_IF_MEASURED		= 1,
+						MO_PARAM_SUFFIX_SN				= 2;
+
+// ----------------------------------------------------------------------------------------------
+
+class ModuleOption : public QObject
+{
+	Q_OBJECT
+
+public:
+
+	explicit ModuleOption(QObject *parent = nullptr);
+	explicit ModuleOption(const ModuleOption& from, QObject *parent = nullptr);
+	virtual ~ModuleOption();
+
+private:
+
+	bool				m_measureEntireModule = false;								// measure all inputs of module in series
+	bool				m_warningIfMeasured = true;									// show warning if signal is already measured
+	QString				m_suffixSN;													// suffix to identify the signal of module serial number
+
+public:
+
+	bool				measureEntireModule() const { return m_measureEntireModule; }
+	void				setMeasureEntireModule(bool measure) { m_measureEntireModule = measure; }
+
+	bool				warningIfMeasured() const { return m_warningIfMeasured; }
+	void				setWarningIfMeasured(bool enable) { m_warningIfMeasured = enable; }
+
+	QString				suffixSN() const { return m_suffixSN; }
+	void				setSuffixSN(const QString& suffixSN) { m_suffixSN = suffixSN; }
 
 public:
 
 	void				load();
 	void				save();
 
-	ComparatorOption&	operator=(const ComparatorOption& from);
+	ModuleOption&		operator=(const ModuleOption& from);
 };
 
 // ==============================================================================================
@@ -999,8 +1018,6 @@ public:
 
 	bool					m_updateColumnView[MEASURE_TYPE_COUNT];			 // determined the need to update the view after changing settings
 
-	int						channelCount();
-
 private:
 
 	QMutex					m_mutex;
@@ -1012,9 +1029,9 @@ private:
 	SignalInfoOption		m_signalInfo;
 	ComparatorInfoOption	m_сomparatorInfo;
 	DatabaseOption			m_database;
-	ModuleOption			m_module;
 	LinearityOption			m_linearity;
 	ComparatorOption		m_comparator;
+	ModuleOption			m_module;
 	BackupOption			m_backup;
 
 public:
@@ -1040,14 +1057,14 @@ public:
 	DatabaseOption&			database() { return m_database; }
 	void					setDatabase(const DatabaseOption& database) { m_database = database; }
 
-	ModuleOption&			module() { return m_module; }
-	void					setModule(const ModuleOption& module) { m_module = module; }
-
 	LinearityOption&		linearity() { return m_linearity; }
 	void					setLinearity(const LinearityOption& linearity) { m_linearity = linearity; }
 
 	ComparatorOption&		comparator() { return m_comparator; }
 	void					setComparator(const ComparatorOption& comparator) { m_comparator = comparator; }
+
+	ModuleOption&			module() { return m_module; }
+	void					setModule(const ModuleOption& module) { m_module = module; }
 
 	BackupOption&			backup() { return m_backup; }
 	void					etBackup(const BackupOption& backup) { m_backup = backup; }

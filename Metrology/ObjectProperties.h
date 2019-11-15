@@ -20,8 +20,206 @@
 #include "../qtpropertybrowser/src/qtvariantproperty.h"
 #include "../qtpropertybrowser/src/qttreepropertybrowser.h"
 
+#include "Options.h"
 #include "SignalBase.h"
 
+// Project property
+//
+// ==============================================================================================
+
+const char* const				ProjectPropertyGroup[] =
+{
+								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Project"),
+								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Host"),
+								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "File version"),
+};
+
+const int						PROJECT_PROPERTY_GROUP_COUNT			= sizeof(ProjectPropertyGroup)/sizeof(ProjectPropertyGroup[0]);
+
+const int						PROJECT_PROPERTY_GROUP_INFO				= 0,
+								PROJECT_PROPERTY_GROUP_HOST				= 1,
+								PROJECT_PROPERTY_GROUP_VERSION			= 2;
+
+
+// ----------------------------------------------------------------------------------------------
+
+class ProjectPropertyDialog : public QDialog
+{
+	Q_OBJECT
+
+public:
+
+	explicit ProjectPropertyDialog(const ProjectInfo& info, QWidget *parent = nullptr);
+	virtual ~ProjectPropertyDialog();
+
+private:
+
+	ProjectInfo					m_info;
+
+	// Property list
+	//
+	QtVariantPropertyManager*	m_pManager = nullptr;
+	QtVariantEditorFactory*		m_pFactory = nullptr;
+	QtTreePropertyBrowser*		m_pEditor = nullptr;
+
+	static bool					m_showGroupHeader[PROJECT_PROPERTY_GROUP_COUNT];
+	QtBrowserItem*				m_browserItemList[PROJECT_PROPERTY_GROUP_COUNT];
+
+	QMap<QtProperty*,int>		m_propertyMap;
+
+	QtProperty*					m_propertyGroupList[PROJECT_PROPERTY_GROUP_COUNT];
+
+	void						createPropertyList();
+
+};
+
+
+// Rack property
+//
+// ==============================================================================================
+
+const int						RACK_PROPERTY_ITEM_ID		= 0,
+								RACK_PROPERTY_ITEM_CAPTION	= 1,
+								RACK_PROPERTY_ITEM_GROUP	= 2,
+								RACK_PROPERTY_ITEM_CHANNEL	= 3;
+
+const int						RACK_PROPERTY_ITEM_COUNT	= 4;
+
+// ----------------------------------------------------------------------------------------------
+
+class RackPropertyDialog : public QDialog
+{
+	Q_OBJECT
+
+public:
+
+	RackPropertyDialog(const Metrology::RackParam& rack, const RackBase& rackBase, QWidget *parent = nullptr);
+	virtual ~RackPropertyDialog();
+
+private:
+
+	Metrology::RackParam		m_rack;
+	RackBase					m_rackBase;
+
+	// Property list
+	//
+	QtVariantPropertyManager*	m_pManager = nullptr;
+	QtVariantEditorFactory*		m_pFactory = nullptr;
+	QtTreePropertyBrowser*		m_pEditor = nullptr;
+
+	// buttons
+	//
+	QDialogButtonBox*			m_buttonBox = nullptr;
+
+	QMap<QtProperty*,int>		m_propertyMap;
+
+	void						createPropertyList();
+
+	bool						foundDuplicateGroups();
+
+public:
+
+	Metrology::RackParam		rack() const { return m_rack; }
+
+signals:
+
+private slots:
+
+	void						onPropertyValueChanged(QtProperty *property, const QVariant &value);
+
+	void						onOk();
+};
+
+
+// Rack group property
+//
+// ==============================================================================================
+
+const int						RACK_GROUP_COLUMN_CAPTION = 0;
+
+// ----------------------------------------------------------------------------------------------
+
+class RackGroupPropertyDialog : public QDialog
+{
+	Q_OBJECT
+
+public:
+
+	explicit RackGroupPropertyDialog(const RackBase& rackBase, QWidget *parent = nullptr);
+	virtual ~RackGroupPropertyDialog();
+
+private:
+
+	RackBase					m_rackBase;
+	RackGroupBase				m_groupBase;
+
+	//
+	//
+	QMenuBar*					m_pMenuBar = nullptr;
+	QMenu*						m_pGroupMenu = nullptr;
+	QMenu*						m_pContextMenu = nullptr;
+
+	QAction*					m_pAppendGroupAction = nullptr;
+	QAction*					m_pRemoveGroupAction = nullptr;
+
+	// Group list
+	//
+	QTableWidget*				m_pGroupView = nullptr;
+
+	void						updateGroupList();
+
+	// Property list
+	//
+	QtVariantPropertyManager*	m_pManager = nullptr;
+	QtVariantEditorFactory*		m_pFactory = nullptr;
+	QtTreePropertyBrowser*		m_pEditor = nullptr;
+
+	void						createPropertyList();
+
+	void						updateRackList();
+
+	// buttons
+	//
+	QDialogButtonBox*			m_buttonBox = nullptr;
+
+	QMap<QtProperty*,int>		m_propertyMap;
+
+	bool						foundDuplicateRacks();
+
+public:
+
+	RackGroupBase&				rackGroups() { return m_groupBase; }
+
+protected:
+
+	bool						event(QEvent* e);
+
+signals:
+
+private slots:
+
+	// slots of menu
+	//
+	void						appendGroup();
+	void						removeGroup();
+
+	// slots of property list
+	//
+	void						onPropertyValueChanged(QtProperty *property, const QVariant &value);
+
+	// slot of view
+	//
+	void						onContextMenu(QPoint);
+	void						captionGroupChanged(int row, int column);
+	void						groupSelected();
+
+	// slots of buttons
+	//
+	void						onOk();
+};
+
+// Signal property
+//
 // ==============================================================================================
 
 const char* const				SignalPropertyGroup[] =
@@ -108,6 +306,8 @@ private slots:
 	void						onOk();
 };
 
+// Comparator property
+//
 // ==============================================================================================
 
 const char* const				ComparatorPropertyGroup[] =
@@ -182,145 +382,6 @@ private slots:
 	void						onPropertyValueChanged(QtProperty *property, const QVariant &value);
 	void						onPropertyExpanded(QtBrowserItem *item);
 
-	void						onOk();
-};
-
-// ==============================================================================================
-
-const int						RACK_PROPERTY_ITEM_ID		= 0,
-								RACK_PROPERTY_ITEM_CAPTION	= 1,
-								RACK_PROPERTY_ITEM_GROUP	= 2,
-								RACK_PROPERTY_ITEM_CHANNEL	= 3;
-
-const int						RACK_PROPERTY_ITEM_COUNT	= 4;
-
-// ----------------------------------------------------------------------------------------------
-
-class RackPropertyDialog : public QDialog
-{
-	Q_OBJECT
-
-public:
-
-	RackPropertyDialog(const Metrology::RackParam& rack, const RackBase& rackBase, QWidget *parent = nullptr);
-	virtual ~RackPropertyDialog();
-
-private:
-
-	Metrology::RackParam		m_rack;
-	RackBase					m_rackBase;
-
-	// Property list
-	//
-	QtVariantPropertyManager*	m_pManager = nullptr;
-	QtVariantEditorFactory*		m_pFactory = nullptr;
-	QtTreePropertyBrowser*		m_pEditor = nullptr;
-
-	// buttons
-	//
-	QDialogButtonBox*			m_buttonBox = nullptr;
-
-	QMap<QtProperty*,int>		m_propertyMap;
-
-	void						createPropertyList();
-
-	bool						foundDuplicateGroups();
-
-public:
-
-	Metrology::RackParam		rack() const { return m_rack; }
-
-signals:
-
-private slots:
-
-	void						onPropertyValueChanged(QtProperty *property, const QVariant &value);
-
-	void						onOk();
-};
-
-// ==============================================================================================
-
-const int						RACK_GROUP_COLUMN_CAPTION = 0;
-
-// ----------------------------------------------------------------------------------------------
-
-class RackGroupPropertyDialog : public QDialog
-{
-	Q_OBJECT
-
-public:
-
-	explicit RackGroupPropertyDialog(const RackBase& rackBase, QWidget *parent = nullptr);
-	virtual ~RackGroupPropertyDialog();
-
-private:
-
-	RackBase					m_rackBase;
-	RackGroupBase				m_groupBase;
-
-	//
-	//
-	QMenuBar*					m_pMenuBar = nullptr;
-	QMenu*						m_pGroupMenu = nullptr;
-	QMenu*						m_pContextMenu = nullptr;
-
-	QAction*					m_pAppendGroupAction = nullptr;
-	QAction*					m_pRemoveGroupAction = nullptr;
-
-	// Group list
-	//
-	QTableWidget*				m_pGroupView = nullptr;
-
-	void						updateGroupList();
-
-	// Property list
-	//
-	QtVariantPropertyManager*	m_pManager = nullptr;
-	QtVariantEditorFactory*		m_pFactory = nullptr;
-	QtTreePropertyBrowser*		m_pEditor = nullptr;
-
-	void						createPropertyList();
-
-	void						updateRackList();
-
-	// buttons
-	//
-	QDialogButtonBox*			m_buttonBox = nullptr;
-
-	QMap<QtProperty*,int>		m_propertyMap;
-
-	bool						foundDuplicateRacks();
-
-public:
-
-	RackGroupBase&				rackGroups() { return m_groupBase; }
-
-protected:
-
-	bool						event(QEvent* e);
-
-signals:
-
-private slots:
-
-	// slots of menu
-	//
-	void						appendGroup();
-	void						removeGroup();
-
-	// slots of property list
-	//
-	void						onPropertyValueChanged(QtProperty *property, const QVariant &value);
-
-	// slot of view
-	//
-	void						onContextMenu(QPoint);
-	void						captionGroupChanged(int row, int column);
-	void						groupSelected();
-
-	// slots of buttons
-	//
 	void						onOk();
 };
 

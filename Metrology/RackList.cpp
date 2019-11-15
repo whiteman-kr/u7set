@@ -282,7 +282,7 @@ RackListDialog::~RackListDialog()
 void RackListDialog::createInterface()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/Signals.png"));
+	setWindowIcon(QIcon(":/icons/Rack.png"));
 	setWindowTitle(tr("Racks"));
 	resize(700, 600);
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());

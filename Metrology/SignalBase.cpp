@@ -1979,8 +1979,18 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 
 	// determine the number of channels for a multi-channel signal
 	//
+	int channelCount = 0;
+
+	switch(measureKind)
+	{
+		case MEASURE_KIND_ONE_RACK:		channelCount = 1;							break;
+		case MEASURE_KIND_ONE_MODULE:	channelCount = Metrology::InputCount;		break;
+		case MEASURE_KIND_MULTI_RACK:	channelCount = Metrology::ChannelCount;	break;
+		default:						assert(0);
+	}
+
 	MeasureSignal measureSignal;
-	measureSignal.setChannelCount(theOptions.channelCount());
+	measureSignal.setChannelCount(channelCount);
 
 	// find all signals for selected rack or group and create Measure Signal List map for ToolBar
 	//

@@ -149,10 +149,10 @@ QString ComparatorInfoTable::text(std::shared_ptr<::Builder::Comparator> pCompar
 
 	switch (pComparator->cmpType())
 	{
-		case E::CmpType::Equ:		stateStr = "= ";		break;
+		case E::CmpType::Equal:		stateStr = "= ";		break;
 		case E::CmpType::Greate:	stateStr = "> ";		break;
 		case E::CmpType::Less:		stateStr = "< ";		break;
-		case E::CmpType::NotEqu:	stateStr = "≠ ";		break;
+		case E::CmpType::NotEqual:	stateStr = "≠ ";		break;
 	}
 
 	int precision = pComparator->precision();

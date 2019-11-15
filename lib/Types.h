@@ -443,10 +443,10 @@ public:
 
 	enum class CmpType
 	{
-		Equ,
+		Equal,
 		Greate,
 		Less,
-		NotEqu
+		NotEqual
 	};
 	Q_ENUM(CmpType)
 

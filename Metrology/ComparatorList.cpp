@@ -159,10 +159,10 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Builder::
 
 	switch (pComparator->cmpType())
 	{
-		case E::CmpType::Equ:		compareValue = "= ";	break;
+		case E::CmpType::Equal:		compareValue = "= ";	break;
 		case E::CmpType::Greate:	compareValue = "> ";	break;
 		case E::CmpType::Less:		compareValue = "< ";	break;
-		case E::CmpType::NotEqu:	compareValue = "≠ ";	break;
+		case E::CmpType::NotEqual:	compareValue = "≠ ";	break;
 		default:					compareValue = "??? ";	assert(0);	break;
 	}
 

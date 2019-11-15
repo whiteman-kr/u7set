@@ -57,21 +57,21 @@ private:
 
 							// menu - View
 							//
-
-							// menu - Tools
-							//
-	QAction*				m_pCalibratorsAction = nullptr;
 	QAction*				m_pShowRackListAction = nullptr;
 	QAction*				m_pShowSignalListAction = nullptr;
 	QAction*				m_pShowComparatorsListAction = nullptr;
 	QAction*				m_pShowTuningSignalListAction = nullptr;
 	QAction*				m_pShowSignalConnectionListAction = nullptr;
+	QAction*				m_pShowStatisticAction = nullptr;
+
+							// menu - Tools
+							//
+	QAction*				m_pCalibratorsAction = nullptr;
 	QAction*				m_pShowCalculatorAction = nullptr;
 	QAction*				m_pOptionsAction;
 
 							// menu - ?
 							//
-	QAction*				m_pShowStatisticAction = nullptr;
 	QAction*				m_pAboutConnectionAction = nullptr;
 	QAction*				m_pAboutAppAction = nullptr;
 
@@ -86,7 +86,6 @@ private:
 	QMenu*					m_pViewMenu = nullptr;
 	QMenu*					m_pViewPanelMenu = nullptr;
 	QMenu*					m_pToolsMenu = nullptr;
-	QMenu*					m_pToolsListsMenu = nullptr;
 	QMenu*					m_pInfoMenu = nullptr;
 
 	// Elements of interface - ToolBar
@@ -217,22 +216,22 @@ private slots:
 
 	// menu - View
 	//
-
-	// menu - Tools
-	//
-	void					calibrators();
 	void					showRackList();
 	void					showSignalList();
 	void					showComparatorsList();
 	void					showTuningSignalList();
 	void					showSignalConnectionList();
+	void					showStatistic();
+
+	// menu - Tools
+	//
+	void					showCalibrators();
 	void					showCalculator();
 	void					showOptions();
 
 	// menu - ?
 	//
-	void					showStatistic();
-	void					aboutConnection() {}
+	void					aboutConnection();
 	void					aboutApp();
 
 	// Slots of tab -- page measure type
