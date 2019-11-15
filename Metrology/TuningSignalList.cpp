@@ -673,7 +673,7 @@ TuningSignalListDialog::~TuningSignalListDialog()
 void TuningSignalListDialog::createInterface()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/InOut.png"));
+	setWindowIcon(QIcon(":/icons/Tuning.png"));
 	setWindowTitle(tr("Tuning signals"));
 	resize(1000, 600);
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());
@@ -1192,7 +1192,7 @@ TuningSignalStateDialog::~TuningSignalStateDialog()
 void TuningSignalStateDialog::createInterface()
 {
 	setWindowFlags(Qt::Window  | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/InOut.png"));
+	setWindowIcon(QIcon(":/icons/Tuning.png"));
 	setWindowTitle(tr("Signal state"));
 
 	if (m_param.isValid() == false)

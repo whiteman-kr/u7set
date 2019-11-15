@@ -62,7 +62,7 @@ namespace VFrame30
 		// Action Functions
 		//
 	public:
-		virtual void MoveItem(double horzOffsetDocPt, double vertOffsetDocPt) override;
+		virtual void moveItem(double horzOffsetDocPt, double vertOffsetDocPt) override;
 
 		virtual void snapToGrid(double gridSize) override;
 
@@ -80,17 +80,21 @@ namespace VFrame30
 	public:
 		void drawHighlightRect(CDrawParam* drawParam, const QRectF& rect) const;
 
+		// Draw item's label
+		//
+		virtual void drawLabel(CDrawParam* drawParam) const override;
+
 		// Рисование элемента при его создании изменении
 		//
-		virtual void DrawOutline(CDrawParam* drawParam) const override;
+		virtual void drawOutline(CDrawParam* drawParam) const override;
 
 		// Draw item issue
 		//
-		virtual void DrawIssue(CDrawParam* drawParam, OutputMessageLevel issue) const override;
+		virtual void drawIssue(CDrawParam* drawParam, OutputMessageLevel issue) const override;
 
 		// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 		//
-		virtual void DrawSelection(CDrawParam* drawParam, bool drawSizeBar) const override;
+		virtual void drawSelection(CDrawParam* drawParam, bool drawSizeBar) const override;
 
 		virtual void drawCompareAction(CDrawParam* drawParam, QColor color) const override;
 
@@ -104,7 +108,7 @@ namespace VFrame30
 		// Определение, пересекает ли элемент указанный прямоугольник (использовать для выделения),
 		// координаты и размер прямоугольника заданы в дюймах или пикселях
 		// 
-		virtual bool IsIntersectRect(double x, double y, double width, double height) const override;
+		virtual bool isIntersectRect(double x, double y, double width, double height) const override;
 
 		// Get SchemaItem bounding rectangle in itemUnit()
 		//

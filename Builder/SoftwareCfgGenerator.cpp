@@ -155,6 +155,13 @@ namespace Builder
 			return false;
 		}
 
+		// Project property Generate Extra debug Info
+		//
+		bool generateExtraDebugIno = false;
+		db.getProjectProperty(Db::ProjectProperty::GenerateExtraDebugInfo, &generateExtraDebugIno, nullptr);
+
+		// --
+		//
 		DbFileTree filesTree;									// Filed in loadAllSchemas
 
 		if (bool ok = db.getFileListTree(&filesTree, db.schemaFileId(), "%", true, nullptr);
@@ -390,8 +397,21 @@ namespace Builder
 			if (bool ok = context->m_buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schemaTags.join(";"), file->data(), false);
 				ok == false)
 			{
-				returnResult = false;
+
 				continue;
+			}
+
+			// Write schema scripts
+			//
+			if (generateExtraDebugIno == true)
+			{
+				bool writeScriptOk = writeSchemaScriptProperties(schema.get(), subDir + "/Scripts/" + schema->schemaId(), context->m_buildResultWriter.get());
+
+				if (writeScriptOk == false)
+				{
+					returnResult = false;
+					continue;
+				}
 			}
 
 			// --
@@ -412,161 +432,59 @@ namespace Builder
 			}
 		}
 
-			// Look for SchemaItemFrame
-			//
-//			for (std::shared_ptr<VFrame30::SchemaLayer> layer :  schema->Layers)
-//			{
-//				if (layer == nullptr)
-//				{
-//					Q_ASSERT(layer);
-//					log->errINT1000(tr("Layer is nullptr for schema %1: ").arg(schemaId) + Q_FUNC_INFO);
-//					return false;
-//				}
-
-//				for (SchemaItemPtr& item :  layer->Items)
-//				{
-//					if (item == nullptr)
-//					{
-//						Q_ASSERT(item);
-//						log->errINT1000(tr("SchemaItem is nullptr for schema %1: ").arg(schemaId) + Q_FUNC_INFO);
-//						return false;
-//					}
-
-//					if (item->isCommented() == true)
-//					{
-//						continue;
-//					}
-
-					// Frame item is found, make the substitude of schema items
-					//
-//					if (VFrame30::SchemaItemFrame* frameItem = item->toType<VFrame30::SchemaItemFrame>();
-//						frameItem != nullptr)
-//					{
-//						using namespace VFrame30;
-
-//						auto sourceSchemaIt = schemaMap.find(frameItem->schemaId());
-
-//						if (sourceSchemaIt == schemaMap.end())
-//						{
-//							// Source schema is not found
-//							//
-//							log->errALP4080(schemaId, frameItem->schemaId(), frameItem->guid());
-
-//							returnResult = false;
-//							continue;
-//						}
-
-//						const VFrame30::Schema* sourceSchema = sourceSchemaIt->second.schema.get();
-//						Q_ASSERT(sourceSchema);
-
-//						SchemaItemFrame::ErrorCode resultCode = frameItem->setSchemaToFrame(schema.get(), sourceSchema);
-
-//						switch (resultCode)
-//						{
-//						case SchemaItemFrame::ErrorCode::Ok:	// All is Ok))
-//							break;
-
-//						case SchemaItemFrame::ErrorCode::ParamError:
-//							log->errINT1001("Input params error SchemaItemFrame::ErrorCode SchemaItemFrame::setSchemaToFrame(VFrame30::Schema*, VFrame30::Schema*), report to developers.", schema->schemaId(), frameItem->guid());
-//							break;
-
-//						case SchemaItemFrame::ErrorCode::InternalError:
-//							log->errINT1001("Internal error in SchemaItemFrame::setSchemaToFrame(VFrame30::Schema*, VFrame30::Schema*), report to developers.", schema->schemaId(), frameItem->guid());
-//							break;
-
-//						case SchemaItemFrame::ErrorCode::SourceSchemaHasSameId:
-//							log->errALP4081(frameItem->schemaId(), frameItem->guid());
-//							break;
-
-//						case SchemaItemFrame::ErrorCode::SchemasHasDiffrenetUnits:
-//							log->errALP4082(schemaId, frameItem->schemaId(), frameItem->guid());
-//							break;
-
-//						default:
-//							Q_ASSERT(false);
-//							log->errINT1000(tr("Processing item SchemaItemFrame on Schema %1, SchemaItemFrame.SchemaID = %2, function SchemaItemFrame::setSchemaToFrame returned unknows error code %3.")
-//												.arg(schemaId)
-//												.arg(frameItem->schemaId())
-//												.arg(static_cast<int>(resultCode)));
-//						}
-//					}
-//				}		// for (SchemaItemPtr& item :  layer->Items)
-
-//				// Remove all frames form the layes
-//				//
-//				layer->Items.remove_if([](const auto& item){	return item->isType<VFrame30::SchemaItemFrame>();	});
-
-//			}		// for (std::shared_ptr<VFrame30::SchemaLayer> layer :  schema->Layers)
-
-//			//
-//			// Add file to build result
-//			//
-//			QString subDir = "Schemas." + file->extension();
-//			QStringList schemaTags = schema->tagsAsList();
-
-//			if (schemaItemFrameWasProcessed == true)
-//			{
-//				QByteArray ba;
-//				schema->saveToByteArray(&ba);
-
-//				file->setData(std::move(ba));
-//			}
-
-//			if (bool ok = context->m_buildResultWriter->addFile(subDir, file->fileName(), schema->schemaId(), schemaTags.join(";"), file->data(), false);
-//				ok == false)
-//			{
-//				returnResult = false;
-//				continue;
-//			}
-
-//			// --
-//			//
-//			std::shared_ptr<SchemaFile> schemaFile = std::make_shared<SchemaFile>(schema->schemaId(), file->fileName(), subDir, group, "");
-
-//			if (bool parseOk = schemaFile->details.parseDetails(schema->details());
-//				parseOk == false)
-//			{
-//				log->errINT1001(tr("Parse schema detais error."), schema->schemaId());
-//				returnResult = false;
-//				continue;
-//			}
-
-//			for (const QString& t : schemaTags)
-//			{
-//				m_schemaTagToFile.insert({t.toLower(), schemaFile});
-//			}
-
-//		}		// for (auto& [schemaId, schema] : schemas)
-
 		return returnResult;
 	}
 
+	bool SoftwareCfgGenerator::writeSchemaScriptProperties(VFrame30::Schema* schema, QString dir, BuildResultWriter* buildResultWriter)
+	{
+		Q_ASSERT(schema);
+		Q_ASSERT(buildResultWriter);
 
-//	bool SoftwareCfgGenerator::writeAppLogicSchemasDetails(const QList<SchemaFile>& schemaFiles, BuildResultWriter* buildResultWriter, QString dir, IssueLogger* log)
-//	{
-//		if (buildResultWriter == nullptr ||
-//			log == nullptr)
-//		{
-//			assert(false);
-//			return false;
-//		}
+		bool result = true;
 
-//		bool result = true;
+		for (std::shared_ptr<VFrame30::SchemaLayer> layer : schema->Layers)
+		{
+			for (const SchemaItemPtr& item : layer->Items)
+			{
+				std::vector<std::shared_ptr<Property>> props = item->properties();
 
-//		VFrame30::SchemaDetailsSet sds;
-//		for (const SchemaFile& sf : schemaFiles)
-//		{
-//			std::shared_ptr<VFrame30::SchemaDetails> details = std::make_shared<VFrame30::SchemaDetails>(sf.details);
-//			sds.add(details);
-//		}
+				for (const std::shared_ptr<Property>& property : props)
+				{
+					if (property->isScript() == true)
+					{
+						QString script = property->value().toString().trimmed();
 
-//		QByteArray fileData;
-//		sds.saveToByteArray(&fileData);
+						if (script.isEmpty() == false)
+						{
+							QString fileName;
 
-//		buildResultWriter->addFile(dir, "SchemaDetails.pbuf", fileData, false);
+							if (item->label().isEmpty() == false)
+							{
+								fileName = item->label() + "." + property->caption() + ".js";
+							}
+							else
+							{
+								fileName += QString("%1 - %2")
+												.arg(QString(item->metaObject()->className()).remove(QStringLiteral("VFrame30::")))
+												.arg(item->guid().toString())
+											+ "." + property->caption()
+											+ ".js";
+							}
 
-//		return result;
-//	}
+							BuildFile* file = buildResultWriter->addFile(dir, fileName, property->value().toString());
+
+							if (file == nullptr)
+							{
+								result = false;
+							}
+						}
+					}
+				}
+			}
+		}
+
+		return result;
+	}
 
 	void SoftwareCfgGenerator::clearStaticData()
 	{
@@ -1071,7 +989,7 @@ namespace Builder
 						return false;
 					}
 
-					item->MoveItem(schemaRect.left(), schemaRect.top());
+					item->moveItem(schemaRect.left(), schemaRect.top());
 				}
 			}
 		}
@@ -1133,17 +1051,13 @@ namespace Builder
 
 				newItem->setNewGuid();		// generate new guids for item and its pins
 
-				if (VFrame30::FblItemRect* fblItemRect = newItem->toType<VFrame30::FblItemRect>();
-					fblItemRect != nullptr)
-				{
-					// From new label for FblItemRect: SchemaID_FblItemRectLabel
-					//
-					fblItemRect->setLabel(schema->schemaId() + "_" + fblItemRect->label());
-				}
+				// From new label for SchemaItem: SchemaID_FblItemRectLabel
+				//
+				newItem->setLabel(schema->schemaId() + "_" + newItem->label());
 
 				// Insert newItem to destionation schema layer
 				//
-				newItem->MoveItem(pannelRect.left(), pannelRect.top());
+				newItem->moveItem(pannelRect.left(), pannelRect.top());
 
 				// --
 				//

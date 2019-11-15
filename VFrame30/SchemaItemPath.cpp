@@ -90,7 +90,7 @@ namespace VFrame30
 	// Рисование элемента, выполняется в 100% масштабе.
 	// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 	//
-	void SchemaItemPath::Draw(CDrawParam* drawParam, const Schema*, const SchemaLayer*) const
+	void SchemaItemPath::draw(CDrawParam* drawParam, const Schema*, const SchemaLayer*) const
 	{
 		if (drawParam == nullptr)
 		{

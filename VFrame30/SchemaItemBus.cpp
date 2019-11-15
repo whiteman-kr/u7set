@@ -78,9 +78,9 @@ namespace VFrame30
 		return true;
 	}
 
-	void SchemaItemBus::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemBus::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
-		FblItemRect::Draw(drawParam, schema, layer);
+		FblItemRect::draw(drawParam, schema, layer);
 
 		QPainter* painter = drawParam->painter();
 		QRectF r = itemRectPinIndent(drawParam);
@@ -196,9 +196,9 @@ namespace VFrame30
 		return true;
 	}
 
-	void SchemaItemBusComposer::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemBusComposer::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
-		SchemaItemBus::Draw(drawParam, schema, layer);
+		SchemaItemBus::draw(drawParam, schema, layer);
 
 		QPainter* painter = drawParam->painter();
 
@@ -427,9 +427,9 @@ namespace VFrame30
 		return true;
 	}
 
-	void SchemaItemBusExtractor::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemBusExtractor::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
-		SchemaItemBus::Draw(drawParam, schema, layer);
+		SchemaItemBus::draw(drawParam, schema, layer);
 
 		QPainter* painter = drawParam->painter();
 

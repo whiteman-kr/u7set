@@ -2099,7 +2099,11 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 
 	// Debugging .... parentObject->setChildRestriction("function(device) { return device.Place >=0 && device.Place < 16; }");
 
-	assert(parentObject != nullptr);
+	if (parentObject == nullptr)
+	{
+		Q_ASSERT(parentObject != nullptr);
+		return {};
+	}
 
 	//  Set presetName, parent object should contain it
 	//

@@ -27,7 +27,6 @@ namespace VFrame30
 
 		std::set<QString> getSignalMap() const;
 		virtual QStringList getSignalList() const override;
-		virtual QStringList getLabels() const override;
 
 		// Properties
 		//

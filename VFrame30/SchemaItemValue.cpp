@@ -174,7 +174,7 @@ namespace VFrame30
 
 	// Drawing Functions
 	//
-	void SchemaItemValue::Draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
+	void SchemaItemValue::draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
 	{
 		QPainter* p = drawParam->painter();
 

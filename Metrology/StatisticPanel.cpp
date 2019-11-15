@@ -98,22 +98,22 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 
 		switch (column)
 		{
-			case STATISTIC_COLUMN_APP_ID:			result = Qt::AlignLeft;		break;
-			case STATISTIC_COLUMN_CUSTOM_ID:		result = Qt::AlignLeft;		break;
-			case STATISTIC_COLUMN_EQUIPMENT_ID:		result = Qt::AlignLeft;		break;
-			case STATISTIC_COLUMN_CAPTION:			result = Qt::AlignLeft;		break;
-			case STATISTIC_COLUMN_RACK:				result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_CHASSIS:			result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_MODULE:			result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_PLACE:			result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_ADC:				result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_EL_RANGE:			result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_PH_RANGE:			result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_EN_RANGE:			result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_MEASURE_COUNT:	result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_STATE:			result = Qt::AlignCenter;	break;
-			case STATISTIC_COLUMN_SIGNAL_CONNECTION:		result = Qt::AlignCenter;	break;
-			default:								assert(0);
+			case STATISTIC_COLUMN_APP_ID:				result = Qt::AlignLeft;		break;
+			case STATISTIC_COLUMN_CUSTOM_ID:			result = Qt::AlignLeft;		break;
+			case STATISTIC_COLUMN_EQUIPMENT_ID:			result = Qt::AlignLeft;		break;
+			case STATISTIC_COLUMN_CAPTION:				result = Qt::AlignLeft;		break;
+			case STATISTIC_COLUMN_RACK:					result = Qt::AlignCenter;	break;
+			case STATISTIC_COLUMN_CHASSIS:				result = Qt::AlignCenter;	break;
+			case STATISTIC_COLUMN_MODULE:				result = Qt::AlignCenter;	break;
+			case STATISTIC_COLUMN_PLACE:				result = Qt::AlignCenter;	break;
+			case STATISTIC_COLUMN_ADC:					result = Qt::AlignCenter;	break;
+			case STATISTIC_COLUMN_EL_RANGE:				result = Qt::AlignCenter;	break;
+			case STATISTIC_COLUMN_PH_RANGE:				result = Qt::AlignCenter;	break;
+			case STATISTIC_COLUMN_EN_RANGE:				result = Qt::AlignCenter;	break;
+			case STATISTIC_COLUMN_MEASURE_COUNT:		result = Qt::AlignCenter;	break;
+			case STATISTIC_COLUMN_STATE:				result = Qt::AlignCenter;	break;
+			case STATISTIC_COLUMN_SIGNAL_CONNECTION:	result = Qt::AlignCenter;	break;
+			default:									assert(0);
 		}
 
 		return result;
@@ -241,22 +241,22 @@ QString StatisticTable::text(int row, int column, Metrology::Signal* pSignal) co
 
 	switch (column)
 	{
-		case STATISTIC_COLUMN_APP_ID:			result = param.appSignalID();						break;
-		case STATISTIC_COLUMN_CUSTOM_ID:		result = param.customAppSignalID();					break;
-		case STATISTIC_COLUMN_EQUIPMENT_ID:		result = param.location().equipmentID();			break;
-		case STATISTIC_COLUMN_CAPTION:			result = param.caption();							break;
-		case STATISTIC_COLUMN_RACK:				result = param.location().rack().caption();			break;
-		case STATISTIC_COLUMN_CHASSIS:			result = param.location().chassisStr();				break;
-		case STATISTIC_COLUMN_MODULE:			result = param.location().moduleStr();				break;
-		case STATISTIC_COLUMN_PLACE:			result = param.location().placeStr();				break;
-		case STATISTIC_COLUMN_ADC:				result = param.adcRangeStr(true);					break;
-		case STATISTIC_COLUMN_EL_RANGE:			result = param.electricRangeStr();					break;
-		case STATISTIC_COLUMN_PH_RANGE:			result = param.physicalRangeStr();					break;
-		case STATISTIC_COLUMN_EN_RANGE:			result = param.engeneeringRangeStr();				break;
-		case STATISTIC_COLUMN_MEASURE_COUNT:	result = pSignal->statistic().measureCountStr();	break;
-		case STATISTIC_COLUMN_STATE:			result = pSignal->statistic().stateStr();			break;
-		case STATISTIC_COLUMN_SIGNAL_CONNECTION:		result.clear();										break;
-		default:								assert(0);
+		case STATISTIC_COLUMN_APP_ID:				result = param.appSignalID();						break;
+		case STATISTIC_COLUMN_CUSTOM_ID:			result = param.customAppSignalID();					break;
+		case STATISTIC_COLUMN_EQUIPMENT_ID:			result = param.location().equipmentID();			break;
+		case STATISTIC_COLUMN_CAPTION:				result = param.caption();							break;
+		case STATISTIC_COLUMN_RACK:					result = param.location().rack().caption();			break;
+		case STATISTIC_COLUMN_CHASSIS:				result = param.location().chassisStr();				break;
+		case STATISTIC_COLUMN_MODULE:				result = param.location().moduleStr();				break;
+		case STATISTIC_COLUMN_PLACE:				result = param.location().placeStr();				break;
+		case STATISTIC_COLUMN_ADC:					result = param.adcRangeStr(true);					break;
+		case STATISTIC_COLUMN_EL_RANGE:				result = param.electricRangeStr();					break;
+		case STATISTIC_COLUMN_PH_RANGE:				result = param.physicalRangeStr();					break;
+		case STATISTIC_COLUMN_EN_RANGE:				result = param.engeneeringRangeStr();				break;
+		case STATISTIC_COLUMN_MEASURE_COUNT:		result = pSignal->statistic().measureCountStr();	break;
+		case STATISTIC_COLUMN_STATE:				result = pSignal->statistic().stateStr();			break;
+		case STATISTIC_COLUMN_SIGNAL_CONNECTION:	result.clear();										break;
+		default:									assert(0);
 	}
 
 	return result;

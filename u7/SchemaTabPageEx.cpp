@@ -3287,11 +3287,8 @@ void SchemaControlTabPageEx::cloneFile()
 		{
 			item->setNewGuid();
 
-			if (item->isFblItemRect() == true)
-			{
-				globalCounter = db()->nextCounterValue();
-				item->toFblItemRect()->setLabel(schema->schemaId() + "_" + QString::number(globalCounter));
-			}
+			globalCounter = db()->nextCounterValue();
+			item->setLabel(schema->schemaId() + "_" + QString::number(globalCounter));
 		}
 	}
 

@@ -360,11 +360,8 @@ void CreateSchemaDialog::accept()
 			{
 				item->setNewGuid();
 
-				if (item->isFblItemRect() == true)
-				{
-					int counterValue = m_db->nextCounterValue();
-					item->toFblItemRect()->setLabel(strID + "_" + QString::number(counterValue));
-				}
+				int counterValue = m_db->nextCounterValue();
+				item->setLabel(strID + "_" + QString::number(counterValue));
 			}
 		}
 	}
