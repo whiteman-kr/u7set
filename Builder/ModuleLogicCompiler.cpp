@@ -726,19 +726,19 @@ namespace Builder
 			// UAL items that can generate signals
 			//
 			case E::UalItemType::Signal:
-				result = createUalSignalFromSignal(ualItem, 1);
+				result &= createUalSignalFromSignal(ualItem, 1);
 				break;
 
 			case E::UalItemType::Const:
-				result = createUalSignalFromConst(ualItem);
+				result &= createUalSignalFromConst(ualItem);
 				break;
 
 			case E::UalItemType::Afb:
-				result = createUalSignalsFromAfbOuts(ualItem);
+				result &= createUalSignalsFromAfbOuts(ualItem);
 				break;
 
 			case E::UalItemType::BusExtractor:
-				result = linkUalSignalsFromBusExtractor(ualItem);
+				result &= linkUalSignalsFromBusExtractor(ualItem);
 				break;
 
 			// UAL items already processed
@@ -762,9 +762,9 @@ namespace Builder
 				LOG_INTERNAL_ERROR(m_log);
 				result = false;
 			}
-
-			RETURN_IF_FALSE(result);
 		}
+
+		RETURN_IF_FALSE(result);
 
 		result &= linkLoopbackTargets();
 
@@ -5583,6 +5583,9 @@ namespace Builder
 
 			"scale_fp_16ui",				// FB_SCALE_FP_16UI_INDEX
 			"scale_si_16ui",				// FB_SCALE_SI_16UI_INDEX
+
+			"tconv_fp_si",					// FB_TCONV_FP_SI_INDEX
+			"tconv_si_fp",					// FB_TCONV_SI_FP_INDEX
 		};
 
 		const char* const FB_SCALE_X1_OPNAME = "x1";
@@ -5604,6 +5607,8 @@ namespace Builder
 					continue;
 				}
 
+				bool isScaleAfb = QString(fbCaption).startsWith("scale_");
+
 				fbFound = true;
 
 				FbScal fb;
@@ -5613,57 +5618,58 @@ namespace Builder
 
 				int index = 0;
 
-				for(const Afb::AfbParam& afbParam : afbElement->params())
+				if (isScaleAfb == true)
 				{
-					if (afbParam.opName() == FB_SCALE_X1_OPNAME)
+					for(const Afb::AfbParam& afbParam : afbElement->params())
 					{
-						fb.x1ParamIndex = index;
+						if (afbParam.opName() == FB_SCALE_X1_OPNAME)
+						{
+							fb.x1ParamIndex = index;
+						}
+
+						if (afbParam.opName() == FB_SCALE_X2_OPNAME)
+						{
+							fb.x2ParamIndex = index;
+						}
+
+						if (afbParam.opName() == FB_SCALE_Y1_OPNAME)
+						{
+							fb.y1ParamIndex = index;
+						}
+
+						if (afbParam.opName() == FB_SCALE_Y2_OPNAME)
+						{
+							fb.y2ParamIndex = index;
+						}
+
+						index++;
 					}
 
-					if (afbParam.opName() == FB_SCALE_X2_OPNAME)
+					if (fb.x1ParamIndex == -1)
 					{
-						fb.x2ParamIndex = index;
+						// Required parameter %1 of AFB %2 is missing.
+						//
+						m_log->errALC5045(FB_SCALE_X1_OPNAME, fbCaption, QUuid());
+						result = false;
 					}
 
-					if (afbParam.opName() == FB_SCALE_Y1_OPNAME)
+					if (fb.x2ParamIndex == -1)
 					{
-						fb.y1ParamIndex = index;
+						m_log->errALC5045(FB_SCALE_X2_OPNAME, fbCaption, QUuid());
+						result = false;
 					}
 
-					if (afbParam.opName() == FB_SCALE_Y2_OPNAME)
+					if (fb.y1ParamIndex == -1)
 					{
-						fb.y2ParamIndex = index;
+						m_log->errALC5045(FB_SCALE_Y1_OPNAME, fbCaption, QUuid());
+						result = false;
 					}
 
-					index++;
-				}
-
-				if (fb.x1ParamIndex == -1)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Required parameter 'InputLow' of AFB %1 is not found")).arg(fb.caption))
-					result = false;
-				}
-
-				if (fb.x2ParamIndex == -1)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Required parameter 'InputHigh' of AFB %1 is not found")).arg(fb.caption))
-					result = false;
-				}
-
-				if (fb.y1ParamIndex == -1)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Required parameter 'OutputLow' of AFB %1 is not found")).arg(fb.caption))
-					result = false;
-				}
-
-				if (fb.y2ParamIndex == -1)
-				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Required parameter 'OutputHigh' of AFB %1 is not found")).arg(fb.caption))
-					result = false;
+					if (fb.y2ParamIndex == -1)
+					{
+						m_log->errALC5045(FB_SCALE_Y2_OPNAME, fbCaption, QUuid());
+						result = false;
+					}
 				}
 
 				if (result == false)
@@ -5682,9 +5688,9 @@ namespace Builder
 
 				if (fb.inputSignalIndex == -1)
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Required input signal %1 of AFB %2 is not found")).
-							  arg(FB_SCALE_INPUT_SIGNAL_CAPTION).arg(fb.caption))
+					// Required signal %1 of AFB %2 is missing.
+					//
+					m_log->errALC5173(FB_SCALE_INPUT_SIGNAL_CAPTION, fbCaption, QUuid());
 					result = false;
 					break;
 				}
@@ -5700,9 +5706,9 @@ namespace Builder
 
 				if (fb.outputSignalIndex == -1)
 				{
-					LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-							  QString(tr("Required output signal %1 of AFB %2 is not found")).
-							  arg(FB_SCALE_OUTPUT_SIGNAL_CAPTION).arg(fb.caption))
+					// Required signal %1 of AFB %2 is missing.
+					//
+					m_log->errALC5173(FB_SCALE_INPUT_SIGNAL_CAPTION, fbCaption, QUuid());
 					result = false;
 					break;
 				}
@@ -5712,8 +5718,9 @@ namespace Builder
 
 			if (fbFound == false)
 			{
-				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-						  QString(tr("Required AFB %1 is not found")).arg(fbCaption));
+				// Required AFB %1 is missing.
+				//
+				m_log->errALC5174(fbCaption, QUuid());
 				result = false;
 				break;
 			}
@@ -5724,11 +5731,8 @@ namespace Builder
 
 	bool ModuleLogicCompiler::createAfbForAnalogInputSignalConversion(const Signal& signal, UalItem* appItem, bool* needConversion)
 	{
-		if (appItem == nullptr || needConversion == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
+		TEST_PTR_LOG_RETURN_FALSE(appItem, log());
+		TEST_PTR_LOG_RETURN_FALSE(needConversion, log());
 
 		assert(signal.isAnalog());
 		assert(signal.isInput());
@@ -5764,80 +5768,148 @@ namespace Builder
 
 		*needConversion = true;
 
-		if (deviceSignal->format() != E::DataFormat::UnsignedInt || deviceSignal->size() != SIZE_16BIT)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  QString(tr("Unknown conversion for signal %1, analogSignalFormat %2")).
-					  arg(signal.appSignalID()).arg(static_cast<int>(signal.analogSignalFormat())));
-			return false;
-		}
-
-		int x1 = signal.lowADC();
-		int x2 = signal.highADC();
-
-		if (x2 - x1 == 0)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  QString(tr("Low and High ADC values of signal %1 are equal (= %2)")).arg(signal.appSignalID()).arg(x1));
-			return false;
-		}
-
-		double y1 = signal.lowEngeneeringUnits();
-		double y2 = signal.highEngeneeringUnits();
-
+		bool conversionIsKnown = false;
 		QString errorMsg;
+		bool result = true;
 
-		bool result = false;
+		QString inFormat = getFormatStr(deviceSignal);
+		QString outFormat = getFormatStr(signal);
 
-		switch(signal.analogSignalFormat())
+		if (deviceSignal->format() == E::DataFormat::UnsignedInt && deviceSignal->size() == SIZE_16BIT)
 		{
-		case E::AnalogAppSignalFormat::Float32:
+			// Unsigned Int 16 bit conversion
+			//
+			int x1 = signal.lowADC();
+			int x2 = signal.highADC();
+
+			if (x2 - x1 == 0)
 			{
-				FbScal fb = m_fbScal[FB_SCALE_16UI_FP_INDEX];
-
-				fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1));
-				fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2));
-
-				fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1));
-				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2));
-
-				result = appItem->init(fb.pointer, errorMsg);
-				appItem->setLabel(signal.appSignalID());
-
-				if (errorMsg.isEmpty() == false)
-				{
-					LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
-					result = false;
-				}
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+						  QString(tr("Low and High ADC values of signal %1 are equal (= %2)")).arg(signal.appSignalID()).arg(x1));
+				return false;
 			}
 
-			break;
+			double y1 = signal.lowEngeneeringUnits();
+			double y2 = signal.highEngeneeringUnits();
 
-		case E::AnalogAppSignalFormat::SignedInt32:
+			switch(signal.analogSignalFormat())
 			{
-				FbScal& fb = m_fbScal[FB_SCALE_16UI_SI_INDEX];
-
-				fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1));
-				fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2));
-
-				fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
-				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
-
-				result = appItem->init(fb.pointer, errorMsg);
-				appItem->setLabel(signal.appSignalID());
-
-				if (errorMsg.isEmpty() == false)
+			case E::AnalogAppSignalFormat::Float32:
 				{
-					LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
-					result = false;
+					conversionIsKnown = true;
+
+					FbScal fb = m_fbScal[FB_SCALE_16UI_FP_INDEX];
+
+					fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1));
+					fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2));
+
+					fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1));
+					fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2));
+
+					result &= appItem->init(fb.pointer, errorMsg);
+					appItem->setLabel(signal.appSignalID());
+
+					if (errorMsg.isEmpty() == false)
+					{
+						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						result = false;
+					}
 				}
+
+				break;
+
+			case E::AnalogAppSignalFormat::SignedInt32:
+				{
+					conversionIsKnown = true;
+
+					FbScal& fb = m_fbScal[FB_SCALE_16UI_SI_INDEX];
+
+					fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1));
+					fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2));
+
+					fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
+					fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
+
+					result &= appItem->init(fb.pointer, errorMsg);
+					appItem->setLabel(signal.appSignalID());
+
+					if (errorMsg.isEmpty() == false)
+					{
+						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						result = false;
+					}
+				}
+
+				break;
+
+			default:
+				assert(false);
 			}
+		}
 
-			break;
+		if (deviceSignal->format() == E::DataFormat::Float && deviceSignal->size() == SIZE_32BIT)
+		{
+			// Float 32 conversion
+			//
+			switch(signal.analogSignalFormat())
+			{
+			case E::AnalogAppSignalFormat::SignedInt32:
+				{
+					conversionIsKnown = true;
 
-		default:
-			LOG_INTERNAL_ERROR_MSG(m_log, QString(tr("Unknown conversion for signal %1, analogSignalFormat %2")).
-										arg(signal.appSignalID()).arg(static_cast<int>(signal.analogSignalFormat())));
+					FbScal& fb = m_fbScal[FB_TCONV_FP_SI_INDEX];
+
+					result &= appItem->init(fb.pointer, errorMsg);
+					appItem->setLabel(signal.appSignalID());
+
+					if (errorMsg.isEmpty() == false)
+					{
+						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						result = false;
+					}
+				}
+
+				break;
+
+			default:
+				assert(false);
+			}
+		}
+
+		if (deviceSignal->format() == E::DataFormat::SignedInt && deviceSignal->size() == SIZE_32BIT)
+		{
+			// SignedInt 32 conversion
+			//
+			switch(signal.analogSignalFormat())
+			{
+			case E::AnalogAppSignalFormat::Float32:
+				{
+					conversionIsKnown = true;
+
+					FbScal& fb = m_fbScal[FB_TCONV_SI_FP_INDEX];
+
+					result &= appItem->init(fb.pointer, errorMsg);
+					appItem->setLabel(signal.appSignalID());
+
+					if (errorMsg.isEmpty() == false)
+					{
+						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						result = false;
+					}
+				}
+
+				break;
+
+			default:
+				assert(false);
+			}
+		}
+
+		if (conversionIsKnown == false)
+		{
+			// Unknown conversion of signal %1 from %2 to %3 format.
+			//
+			m_log->errALC5175(signal.appSignalID(), inFormat, outFormat);
 			result = false;
 		}
 
@@ -5880,80 +5952,146 @@ namespace Builder
 
 		*needConversion = true;
 
-		if (deviceSignal->format() != E::DataFormat::UnsignedInt || deviceSignal->size() != SIZE_16BIT)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  QString(tr("Unknown conversion for signal %1, analogSignalFormat %2")).
-					  arg(signal.appSignalID()).arg(static_cast<int>(signal.analogSignalFormat())));
-			return false;
-		}
-
-		double x1 = signal.lowEngeneeringUnits();
-		double x2 = signal.highEngeneeringUnits();
-
-		if (x2 - x1 == 0.0)
-		{
-			LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
-					  QString(tr("Low and High Limit values of signal %1 are equal (= %2)")).arg(signal.appSignalID()).arg(x1));
-			return false;
-		}
-
-		int y1 = signal.lowDAC();
-		int y2 = signal.highDAC();
-
+		bool conversionIsKnown = false;
 		QString errorMsg;
+		bool result = true;
 
-		bool result = false;
+		QString inFormat = getFormatStr(signal);
+		QString outFormat = getFormatStr(deviceSignal);
 
-		switch(signal.analogSignalFormat())
+		if (deviceSignal->format() == E::DataFormat::UnsignedInt && deviceSignal->size() == SIZE_16BIT)
 		{
-		case E::AnalogAppSignalFormat::Float32:
+			double x1 = signal.lowEngeneeringUnits();
+			double x2 = signal.highEngeneeringUnits();
+
+			if (x2 - x1 == 0.0)
 			{
-				FbScal& fb = m_fbScal[FB_SCALE_FP_16UI_INDEX];
-
-				fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1));
-				fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2));
-
-				fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
-				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
-
-				result = appItem->init(fb.pointer, errorMsg);
-				appItem->setLabel(signal.appSignalID());
-
-				if (errorMsg.isEmpty() == false)
-				{
-					LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
-					result = false;
-				}
+				LOG_ERROR_OBSOLETE(m_log, Builder::IssueType::NotDefined,
+						  QString(tr("Low and High Limit values of signal %1 are equal (= %2)")).arg(signal.appSignalID()).arg(x1));
+				return false;
 			}
 
-			break;
+			int y1 = signal.lowDAC();
+			int y2 = signal.highDAC();
 
-		case E::AnalogAppSignalFormat::SignedInt32:
+			switch(signal.analogSignalFormat())
 			{
-				FbScal& fb = m_fbScal[FB_SCALE_SI_16UI_INDEX];
-
-				fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1).toInt());
-				fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2).toInt());
-
-				fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
-				fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
-
-				result = appItem->init(fb.pointer, errorMsg);
-				appItem->setLabel(signal.appSignalID());
-
-				if (errorMsg.isEmpty() == false)
+			case E::AnalogAppSignalFormat::Float32:
 				{
-					LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
-					result = false;
+					conversionIsKnown = true;
+
+					FbScal& fb = m_fbScal[FB_SCALE_FP_16UI_INDEX];
+
+					fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1));
+					fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2));
+
+					fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
+					fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
+
+					result = appItem->init(fb.pointer, errorMsg);
+					appItem->setLabel(signal.appSignalID());
+
+					if (errorMsg.isEmpty() == false)
+					{
+						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						result = false;
+					}
 				}
+
+				break;
+
+			case E::AnalogAppSignalFormat::SignedInt32:
+				{
+					conversionIsKnown = true;
+
+					FbScal& fb = m_fbScal[FB_SCALE_SI_16UI_INDEX];
+
+					fb.pointer->params()[fb.x1ParamIndex].setValue(QVariant(x1).toInt());
+					fb.pointer->params()[fb.x2ParamIndex].setValue(QVariant(x2).toInt());
+
+					fb.pointer->params()[fb.y1ParamIndex].setValue(QVariant(y1).toInt());
+					fb.pointer->params()[fb.y2ParamIndex].setValue(QVariant(y2).toInt());
+
+					result = appItem->init(fb.pointer, errorMsg);
+					appItem->setLabel(signal.appSignalID());
+
+					if (errorMsg.isEmpty() == false)
+					{
+						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						result = false;
+					}
+				}
+
+				break;
+
+			default:
+				assert(false);
 			}
+		}
 
-			break;
+		if (deviceSignal->format() == E::DataFormat::Float && deviceSignal->size() == SIZE_32BIT)
+		{
+			// Float 32 conversion
+			//
+			switch(signal.analogSignalFormat())
+			{
+			case E::AnalogAppSignalFormat::SignedInt32:
+				{
+					conversionIsKnown = true;
 
-		default:
-			LOG_INTERNAL_ERROR_MSG(m_log, QString(tr("Unknown conversion for signal %1, analogSignalFormat %2")).
-												arg(signal.appSignalID()).arg(static_cast<int>(signal.analogSignalFormat())));
+					FbScal& fb = m_fbScal[FB_TCONV_FP_SI_INDEX];
+
+					result &= appItem->init(fb.pointer, errorMsg);
+					appItem->setLabel(signal.appSignalID());
+
+					if (errorMsg.isEmpty() == false)
+					{
+						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						result = false;
+					}
+				}
+
+				break;
+
+			default:
+				assert(false);
+			}
+		}
+
+		if (deviceSignal->format() == E::DataFormat::SignedInt && deviceSignal->size() == SIZE_32BIT)
+		{
+			// Signed Int 32 conversion
+			//
+			switch(signal.analogSignalFormat())
+			{
+			case E::AnalogAppSignalFormat::Float32:
+				{
+					conversionIsKnown = true;
+
+					FbScal& fb = m_fbScal[FB_TCONV_SI_FP_INDEX];
+
+					result &= appItem->init(fb.pointer, errorMsg);
+					appItem->setLabel(signal.appSignalID());
+
+					if (errorMsg.isEmpty() == false)
+					{
+						LOG_INTERNAL_ERROR_MSG(m_log, errorMsg);
+						result = false;
+					}
+				}
+
+				break;
+
+			default:
+				assert(false);
+			}
+		}
+
+		if (conversionIsKnown == false)
+		{
+			// Unknown conversion of signal %1 from %2 to %3 format.
+			//
+			m_log->errALC5175(signal.appSignalID(), inFormat, outFormat);
 			result = false;
 		}
 
@@ -7311,6 +7449,8 @@ namespace Builder
 				ASSERT_RETURN_FALSE;
 			}
 
+			bool isTconvAfb = appFb->caption().startsWith("tconv_");
+
 			FbScal fbScal;
 
 			switch(s->analogSignalFormat())
@@ -7320,7 +7460,14 @@ namespace Builder
 				break;
 
 			case E::AnalogAppSignalFormat::SignedInt32:
-				fbScal = m_fbScal[FB_SCALE_16UI_SI_INDEX];
+				if (isTconvAfb == true)
+				{
+					fbScal = m_fbScal[FB_TCONV_FP_SI_INDEX];
+				}
+				else
+				{
+					fbScal = m_fbScal[FB_SCALE_16UI_SI_INDEX];
+				}
 				break;
 
 			default:
@@ -7331,8 +7478,17 @@ namespace Builder
 			assert(s->ioBufAddr().isValid() == true);
 			assert(s->ualAddr().isValid() == true);
 
-			cmd.writeFuncBlock(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
-							   s->ioBufAddr().offset(), appFb->caption());
+			if (isTconvAfb == true)
+			{
+				cmd.writeFuncBlock32(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
+								   s->ioBufAddr().offset(), appFb->caption());
+			}
+			else
+			{
+				cmd.writeFuncBlock(appFb->opcode(), appFb->instance(), fbScal.inputSignalIndex,
+								   s->ioBufAddr().offset(), appFb->caption());
+			}
+
 			cmd.setComment(QString(tr("conversion of analog input %1")).arg(s->appSignalID()));
 			code->append(cmd);
 
@@ -10193,6 +10349,8 @@ namespace Builder
 
 			TEST_PTR_CONTINUE(appFb);
 
+			bool isTconvAfb = appFb->caption().startsWith("tconv_");
+
 			FbScal fbScal;
 
 			switch(s->analogSignalFormat())
@@ -10203,8 +10361,14 @@ namespace Builder
 				break;
 
 			case E::AnalogAppSignalFormat::SignedInt32:
-
-				fbScal = m_fbScal[FB_SCALE_SI_16UI_INDEX];
+				if (isTconvAfb == true)
+				{
+					fbScal = m_fbScal[FB_TCONV_SI_FP_INDEX];
+				}
+				else
+				{
+					fbScal = m_fbScal[FB_SCALE_SI_16UI_INDEX];
+				}
 				break;
 
 			default:
@@ -10242,9 +10406,18 @@ namespace Builder
 			cmd.clearComment();
 			code->append(cmd);
 
-			cmd.readFuncBlock(s->ioBufAddr().offset(),
-							  appFb->opcode(), appFb->instance(),
-							  fbScal.outputSignalIndex, appFb->caption());
+			if (isTconvAfb == true)
+			{
+				cmd.readFuncBlock32(s->ioBufAddr().offset(),
+								  appFb->opcode(), appFb->instance(),
+								  fbScal.outputSignalIndex, appFb->caption());
+			}
+			else
+			{
+				cmd.readFuncBlock(s->ioBufAddr().offset(),
+								  appFb->opcode(), appFb->instance(),
+								  fbScal.outputSignalIndex, appFb->caption());
+			}
 			code->append(cmd);
 			code->newLine();
 		}
