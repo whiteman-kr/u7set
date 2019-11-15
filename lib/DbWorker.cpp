@@ -1056,12 +1056,15 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	project.setVersion(DbWorker::databaseVersion());	// Other project version just cannot be opened
 
 	QString projectDescription;
+	QString projectSafetyProject;
 	QString projectUppercaseAppSignalId;
 
 	getProjectProperty_worker(Db::ProjectProperty::Description, &projectDescription);
+	getProjectProperty_worker(Db::ProjectProperty::SafetyProject, &projectSafetyProject);
 	getProjectProperty_worker(Db::ProjectProperty::UppercaseAppSignalId, &projectUppercaseAppSignalId);
 
 	project.setDescription(projectDescription);
+	project.setSafetyProject(projectSafetyProject.compare("true", Qt::CaseInsensitive) == 0 ? true : false);
 	project.setUppercaseAppSignalId(projectUppercaseAppSignalId.compare("true", Qt::CaseInsensitive) == 0 ? true : false);
 
 	setCurrentProject(project);

@@ -37,7 +37,17 @@ bool ProjectPropertiesForm::show(QWidget* parent, DbController* db)
 	}
 	else
 	{
-		assert(prop);
+		Q_ASSERT(prop);
+	}
+
+	if (auto prop = propertyObject->propertyByCaption(Db::ProjectProperty::SafetyProject);
+		prop != nullptr)
+	{
+		prop->setReadOnly(!db->currentUser().isAdminstrator());
+	}
+	else
+	{
+		Q_ASSERT(prop);
 	}
 
 	// Only Administrator can edit @SuppressWarnings@
@@ -49,7 +59,7 @@ bool ProjectPropertiesForm::show(QWidget* parent, DbController* db)
 	}
 	else
 	{
-		assert(prop);
+		Q_ASSERT(prop);
 	}
 
 	// Only Administrator can edit @UppercaseAppSignalID@
