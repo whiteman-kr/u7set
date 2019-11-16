@@ -2424,7 +2424,7 @@ void EquipmentView::addLogicSchemaToLm()
 
 			if (lmDescriptioFile != thisModuleLmDescriprtionFile)
 			{
-				assert(false);	// How is it possible, it should be fileterd om nenu level
+				Q_ASSERT(false);	// How is it possible, it should be fileterd om nenu level
 				return;
 			}
 
@@ -2432,7 +2432,7 @@ void EquipmentView::addLogicSchemaToLm()
 		}
 		else
 		{
-			assert(false);	// How is it possible, it should be fileterd om nenu level
+			Q_ASSERT(false);	// How is it possible, it should be fileterd om nenu level
 			return;
 		}
 	}
