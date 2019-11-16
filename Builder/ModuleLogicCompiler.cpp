@@ -235,6 +235,8 @@ namespace Builder
 
 		ProcsToCallArray procs =
 		{
+			PROC_TO_CALL(ModuleLogicCompiler::initComparatorSignals),
+
 			PROC_TO_CALL(ModuleLogicCompiler::finalizeOptoConnectionsProcessing),
 			PROC_TO_CALL(ModuleLogicCompiler::setOptoUalSignalsAddresses),
 			PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),
@@ -302,6 +304,13 @@ namespace Builder
 	bool ModuleLogicCompiler::expertMode() const
 	{
 		return m_context->m_expertMode;
+	}
+
+	void ModuleLogicCompiler::setModuleCompilersRef(const QVector<ModuleLogicCompiler*>* moduleCompilers)
+	{
+		TEST_PTR_LOG_RETURN(moduleCompilers, log());
+
+		m_moduleCompilers = moduleCompilers;
 	}
 
 	bool ModuleLogicCompiler::loadLMSettings()
@@ -6513,6 +6522,11 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::initComparatorSignals()
+	{
+		return true;
 	}
 
 	bool ModuleLogicCompiler::finalizeOptoConnectionsProcessing()

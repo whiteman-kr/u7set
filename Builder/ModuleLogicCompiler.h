@@ -195,6 +195,8 @@ namespace Builder
 
 		const ResourcesUsageInfo& resourcesUsageInfo() { return m_resourcesUsageInfo; }
 
+		void setModuleCompilersRef(const QVector<ModuleLogicCompiler*>* moduleCompilers);
+
 	private:
 		// pass #1 compilation functions
 		//
@@ -397,6 +399,7 @@ namespace Builder
 
 		// pass #2 compilation functions
 		//
+		bool initComparatorSignals();
 		bool finalizeOptoConnectionsProcessing();
 		bool setOptoUalSignalsAddresses();
 
@@ -687,6 +690,8 @@ namespace Builder
 		QHash<QString, UalAfb*> m_inOutSignalsToScalAppFbMap;
 
 		Tuning::TuningData* m_tuningData = nullptr;
+
+		const QVector<ModuleLogicCompiler*>* m_moduleCompilers = nullptr;
 	};
 
 }
