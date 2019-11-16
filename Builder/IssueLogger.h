@@ -197,12 +197,12 @@ namespace Builder
 		void errALP4018(QString schema, QString equipmentId, QString schemaLmDecriptionFile1, QString moduleLmDecriptionFile2);
 		void errALP4019(QString schema, QString schemaItem, QString ufbElement, QUuid itemUuid, QString UfbLmDecriptionFile, QString schemaLmDecriptionFile);
 
-		void errALP4020(QString logicModule);
+		void errALP4020(QString logicModule);									// There is no any input element in applictaion logic for Logic Module %1.
 		void errALP4021(QString logicModule, QString schema1, QString schema2, QString schemaItem1, QString schemaItem2, QString signalStrID, const std::vector<QUuid>& itemsUuids);
-		void errALP4022(QString schema);
-		void errALP4023(QString schema, QString pinCaption, QUuid itemUuid);
-		void errALP4024(QString fileName, QString details);
-		void errALP4025(QString schema);
+		void errALP4022(QString schema);										// Schema does not have logic layer (Schema %1).
+		void errALP4023(QString schema, QString pinCaption, QUuid itemUuid);	// UFB schema has duplicate pins %1 (UFB schema %2).
+		void errALP4024(QString fileName, QString details);						// Schema details parsing error, filename %1, details string %2.
+		void errALP4025(QString schema);										// Duplicate SchemaIDs %1, all schemas (including Monitor, Tuning, etc) must have unique SchemaIDs.
 
 		void errALP4040(QString schema, QString schemaItem, QString busTypeId, QUuid itemUuid);		// Bus Related
 		void errALP4041(QString schema, QString schemaItem, QUuid itemUuid);						// Bus Related
@@ -463,16 +463,19 @@ namespace Builder
 		void errEQP6104(QString appSignalID, int inOutType);		// Signal %1 has wrong input/output type: %2.
 		void errEQP6105(QString appSignalID, int byteOrder);		// Signal %1 has wrong order of byte: %2.
 
-		void errEQP6106(QString schemaId, QString tuningClientEquipmentId);	//Schema %1 specified in Tuning Client %2 does not exist.
-		void errEQP6107(QString property, QString softwareEquipmentId);							//Error parsing property %1 specified in software %2.
-		void errEQP6108(QString appSignalId, QString filter, QString tuningClientEquipmentId);		//Signal %1 specified in filter %2 in Tuning Client %3 does not exist.
-		void errEQP6109(QString equipmentId, QString tuningClientEquipmentId);	//Tuning Source %1 specified in Tuning Client %2 does not exist.
+		void errEQP6106(QString schemaId, QString tuningClientEquipmentId);						// Schema %1 specified in Tuning Client %2 does not exist.
+		void errEQP6107(QString property, QString softwareEquipmentId);							// Error parsing property %1 specified in software %2.
+		void errEQP6108(QString appSignalId, QString filter, QString tuningClientEquipmentId);	// Signal %1 specified in filter %2 in Tuning Client %3 does not exist.
+		void errEQP6109(QString equipmentId, QString tuningClientEquipmentId);					// Tuning Source %1 specified in Tuning Client %2 does not exist.
 
 		void errEQP6110(QString appSignalID);												//  Signal %1 has wrong physical low Limit
 		void errEQP6111(QString appSignalID);												//  Signal %1 has wrong physical high Limit
 		void errEQP6112(QString appSignalID, QString wrongValue, QString correctValue);		//  Signal %1 - engeneering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3
 		void errEQP6113(QString appSignalID, QString wrongValue, QString correctValue);		//  Signal %1 - engeneering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3
 		void errEQP6114(QString appSignalID);												//  Signal %1 has wrong R0 (ThermoResistor)
+
+
+		void errEQP6200(QString monotorId);							// Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behaviour in menu Project->Project Properties...->Safety Project.
 
 	public:
 		void addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids);

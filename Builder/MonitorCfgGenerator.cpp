@@ -7,10 +7,8 @@
 namespace Builder
 {
 	MonitorCfgGenerator::MonitorCfgGenerator(Context* context, Hardware::Software* software) :
-		SoftwareCfgGenerator(context, software),
-		m_context(context)
+		SoftwareCfgGenerator(context, software)
 	{
-		assert(m_context);
 	}
 
 	MonitorCfgGenerator::~MonitorCfgGenerator()
@@ -25,11 +23,11 @@ namespace Builder
 			m_cfgXml == nullptr ||
 			m_buildResultWriter == nullptr)
 		{
-			assert(m_software);
-			assert(m_software->type() == E::SoftwareType::Monitor);
-			assert(m_equipment);
-			assert(m_cfgXml);
-			assert(m_buildResultWriter);
+			Q_ASSERT(m_software);
+			Q_ASSERT(m_software->type() == E::SoftwareType::Monitor);
+			Q_ASSERT(m_equipment);
+			Q_ASSERT(m_cfgXml);
+			Q_ASSERT(m_buildResultWriter);
 			return false;
 		}
 
@@ -563,6 +561,16 @@ namespace Builder
 			return false;
 		}
 
+		if (m_tuningEnabled == true &&
+			m_dbController->currentProject().safetyProject() == true)
+		{
+			// Tuning for Monitor is forbiden for Safety Projects
+			// Stupid decision but not mine
+			//
+			m_log->errEQP6200(m_software->equipmentIdTemplate());
+			return false;
+		}
+
 		QString tuningSources;
 		Hardware::Software* tuningServiceObject = nullptr;
 		TuningServiceSettings tuningServiceSettings;
@@ -711,7 +719,7 @@ namespace Builder
 	{
 		if (m_tuningSources.empty() == true)
 		{
-			//assert(m_tuningSources.empty() == false);
+			//Q_ASSERT(m_tuningSources.empty() == false);
 			return false;
 		}
 

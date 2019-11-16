@@ -7407,6 +7407,28 @@ namespace Builder
 				  );
 	}
 
+
+	/// IssueCode: EQP6200
+	///
+	/// IssueType: Error
+	///
+	/// Title: Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behaviour in menu Project->Project Properties...->Safety Project.
+	///
+	/// Parameters:
+	///		%1 Monitor EquipmentID
+	///
+	/// Description:
+	///		Monitor cannot be used for tuning in Safety Project. To avoid error clear option in %1.TuningEnable or override behaviour in menu Project->Project Properties...->Safety Project set to false.
+	///
+	void IssueLogger::errEQP6200(QString monotorId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6200,
+				  tr("Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behaviour in menu Project->Project Properties...->Safety Project.")
+				  .arg(monotorId));
+	}
+
+
 	// --
 	//
 	void IssueLogger::addItemsIssues(OutputMessageLevel level, int issueCode, const std::vector<QUuid>& itemsUuids)

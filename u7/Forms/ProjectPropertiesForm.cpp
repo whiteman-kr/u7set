@@ -81,7 +81,18 @@ bool ProjectPropertiesForm::show(QWidget* parent, DbController* db)
 	//
 	PropertyEditorDialog dialog(parent);
 
+	dialog.setWindowTitle(QString("Project Properties"));
 	dialog.setObject(propertyObject);
+
+	QSize resizeTo = dialog.size();
+	QRect screen = QDesktopWidget().availableGeometry(parent);
+
+	resizeTo.setWidth(static_cast<int>(screen.size().width() * 0.30));
+	resizeTo.setHeight(static_cast<int>(screen.size().width() * 0.20));
+
+	dialog.resize(resizeTo);
+
+	dialog.setSplitterPosition(resizeTo.width() / 2);
 
 	int result = dialog.exec();
 
