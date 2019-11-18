@@ -6456,6 +6456,74 @@ namespace Builder
 						arg(inputCaption).arg(itemLabel).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5173
+	///
+	/// IssueType: Error
+	///
+	/// Title: Required signal %1 of AFB %2 is missing.
+	///
+	/// Parameters:
+	///		%1 functional block signal caption
+	///		%2 functional block caption
+	///		%3 application logic item Uuid
+	///
+	/// Description:
+	///		Required signal of specified AFB is missing. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5173(QString signalCaption, QString fbCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5173, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5173,
+				  QString(tr("Required signal %1 of AFB %2 is missing.")).
+				  arg(signalCaption).arg(fbCaption));
+	}
+
+	/// IssueCode: ALC5174
+	///
+	/// IssueType: Error
+	///
+	/// Title: Required AFB %1 is missing.
+	///
+	/// Parameters:
+	///		%1 functional block caption
+	///		%2 application logic item Uuid
+	///
+	/// Description:
+	///		Required AFB is missing. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5174(QString fbCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5174, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5174,
+				  QString(tr("Required AFB %1 is missing.")).arg(fbCaption));
+	}
+
+	/// IssueCode: ALC5175
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Unknown conversion of signal %1 from %2 to %3 format.
+	///
+	/// Parameters:
+	///		%1 application signalID
+	///		%2 input format
+	///		%3 output format
+	///
+	/// Description:
+	///		Signal conversion between specified formats is not implemented. Change signal format or contact RPCT developers.
+	///
+	void IssueLogger::errALC5175(QString signalID, QString inFormat, QString outFormat)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5175,
+				  QString(tr("Unknown conversion of signal %1 from %2 to %3 format.")).
+							arg(signalID).arg(inFormat).arg(outFormat));
+	}
+
 	//
 
 	/// IssueCode: ALC5186
