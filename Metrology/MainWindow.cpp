@@ -915,7 +915,7 @@ void MainWindow::updateSignalsOnToolBar()
 			continue;
 		}
 
-		MultiChannelSignal signal = measureSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		MultiChannelSignal signal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
 		if (signal.isEmpty() == true)
 		{
 			continue;
@@ -1454,7 +1454,7 @@ void MainWindow::setMeasureSignal(int index)
 
 	theSignalBase.setActiveSignal(measureSignal);
 
-	MultiChannelSignal signal = measureSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	MultiChannelSignal signal = measureSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);
 	if (signal.isEmpty() == true)
 	{
 		return;
@@ -1889,8 +1889,8 @@ void MainWindow::setNextMeasureSignal(bool& signalIsSelected)
 
 	// if module numbers not equal then disabling selection of next input
 	//
-	if (	currActiveSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() != nextActiveSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() ||
-			currActiveSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module() != nextActiveSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module())
+	if (	currActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() != nextActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().chassis() ||
+			currActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module() != nextActiveSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).location().module())
 	{
 		return;
 	}

@@ -137,7 +137,7 @@ private:
 
 public:
 
-	SignalConnection		сonnection() const { return m_signalConnection; }
+	SignalConnection		connection() const { return m_signalConnection; }
 
 signals:
 
@@ -184,11 +184,11 @@ private:
 	QAction*				m_pShowCustomIDAction = nullptr;
 
 	QTableView*				m_pView = nullptr;
-	SignalConnectionTable	m_сonnectionTable;
+	SignalConnectionTable	m_connectionTable;
 
 	QDialogButtonBox*		m_buttonBox = nullptr;
 
-	SignalConnectionBase	m_сonnectionBase;
+	SignalConnectionBase	m_connectionBase;
 
 	void					createInterface();
 	void					createContextMenu();

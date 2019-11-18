@@ -211,7 +211,7 @@ QString SignalInfoTable::text(int column, const IoSignalParam& ioParam) const
 			if (outParam.isValid() == true)
 			{
 				Metrology::SignalState outState = theSignalBase.signalState(outParam.hash());
-				stateStr += MultiTextDivider + signalStateStr(outParam, outState);
+				stateStr += MULTI_TEXT_DEVIDER + signalStateStr(outParam, outState);
 			}
 		}
 	}
@@ -627,7 +627,7 @@ void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
 		{
-			Metrology::Signal* pSignal = activeSignal.multiSignal(type).metrologySignal(c);
+			Metrology::Signal* pSignal = activeSignal.multiChannelSignal(type).metrologySignal(c);
 			if (pSignal == nullptr)
 			{
 				continue;

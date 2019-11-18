@@ -197,7 +197,7 @@ namespace VFrame30
 			const SchemaItemPtr& item = *it;
 
 			if (qobject_cast<SchemaItemType>(item.get()) != nullptr &&
-				item->IsIntersectPoint(x, y) == true)
+				item->isIntersectPoint(x, y) == true)
 			{
 				return std::dynamic_pointer_cast<SchemaItemType>(item);
 			}

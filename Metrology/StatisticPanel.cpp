@@ -353,7 +353,7 @@ void StatisticPanel::createInterface()
 	//
 	//
 	m_pMenuBar = new QMenuBar(m_pStatisticWindow);
-	m_pSignalMenu = new QMenu(tr("&Signal"), m_pStatisticWindow);
+	m_pSignalMenu = new QMenu(tr("&Results"), m_pStatisticWindow);
 	m_pEditMenu = new QMenu(tr("&Edit"), m_pStatisticWindow);
 	m_pViewMenu = new QMenu(tr("&View"), m_pStatisticWindow);
 
@@ -421,16 +421,11 @@ void StatisticPanel::createInterface()
 	StatisticsStateDelegate* stateDelegate = new StatisticsStateDelegate(m_pStatisticWindow);
 	m_pView->setItemDelegateForColumn(STATISTIC_COLUMN_APP_ID, stateDelegate);
 
-
 	m_pStatisticWindow->setCentralWidget(m_pView);
 
-	//
-	//
-	createStatusBar();
-
-	//
-	//
 	setWidget(m_pStatisticWindow);
+
+	createStatusBar();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -578,16 +573,16 @@ void StatisticPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 		return;
 	}
 
-	activeSignal.multiSignal(0).metrologySignal(Metrology::Channel_0);
+	activeSignal.multiChannelSignal(0).metrologySignal(Metrology::Channel_0);
 
 	Metrology::Signal* pSignal = nullptr;
 
 	switch (theOptions.toolBar().signalConnectionType())
 	{
-		case SIGNAL_CONNECTION_TYPE_UNUSED:			pSignal = activeSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).firstMetrologySignal();	break;
+		case SIGNAL_CONNECTION_TYPE_UNUSED:			pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).firstMetrologySignal();		break;
 		case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
-		case SIGNAL_CONNECTION_TYPE_FROM_TUNING:	pSignal = activeSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).firstMetrologySignal();	break;
-		default:								assert(0);																					break;
+		case SIGNAL_CONNECTION_TYPE_FROM_TUNING:	pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT).firstMetrologySignal();	break;
+		default:									assert(0);																							break;
 	}
 
 	if (pSignal == nullptr)

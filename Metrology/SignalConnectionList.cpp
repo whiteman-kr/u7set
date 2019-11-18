@@ -618,7 +618,7 @@ SignalConnectionDialog::SignalConnectionDialog(QWidget *parent) :
 		connect(pMainWindow->configSocket(), &ConfigSocket::configurationLoaded, this, &SignalConnectionDialog::updateList, Qt::QueuedConnection);
 	}
 
-	m_сonnectionBase = theSignalBase.signalConnections();
+	m_connectionBase = theSignalBase.signalConnections();
 
 	createInterface();
 	updateList();
@@ -682,7 +682,7 @@ void SignalConnectionDialog::createInterface()
 
 	m_pShowCustomIDAction = m_pViewMenu->addAction(tr("Show Custom ID"));
 	m_pShowCustomIDAction->setCheckable(true);
-	m_pShowCustomIDAction->setChecked(m_сonnectionTable.showCustomID());
+	m_pShowCustomIDAction->setChecked(m_connectionTable.showCustomID());
 	m_pShowCustomIDAction->setShortcut(Qt::CTRL + Qt::Key_Tab);
 
 	m_pMenuBar->addMenu(m_pSignalMenu);
@@ -703,7 +703,7 @@ void SignalConnectionDialog::createInterface()
 
 
 	m_pView = new QTableView(this);
-	m_pView->setModel(&m_сonnectionTable);
+	m_pView->setModel(&m_connectionTable);
 	QSize cellSize = QFontMetrics(theOptions.measureView().font()).size(Qt::TextSingleLine,"A");
 	m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 
@@ -756,16 +756,16 @@ void SignalConnectionDialog::createContextMenu()
 
 void SignalConnectionDialog::updateList()
 {
-	m_сonnectionTable.clear();
+	m_connectionTable.clear();
 
-	m_сonnectionBase.sort();
+	m_connectionBase.sort();
 
 	QList<SignalConnection> connectionList;
 
-	int count = m_сonnectionBase.count();
+	int count = m_connectionBase.count();
 	for(int i = 0; i < count; i++)
 	{
-		SignalConnection signalConnection = m_сonnectionBase.connection(i);
+		SignalConnection signalConnection = m_connectionBase.connection(i);
 		if (signalConnection.isValid() == false)
 		{
 			continue;
@@ -774,7 +774,7 @@ void SignalConnectionDialog::updateList()
 		connectionList.append(signalConnection);
 	}
 
-	m_сonnectionTable.set(connectionList);
+	m_connectionTable.set(connectionList);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -787,26 +787,26 @@ void SignalConnectionDialog::addConnection()
 		return;
 	}
 
-	SignalConnection connection = dialog.сonnection();
+	SignalConnection connection = dialog.connection();
 	if (connection.isValid() == false)
 	{
 		return;
 	}
 
-	int foundIndex = m_сonnectionBase.findIndex(connection);
+	int foundIndex = m_connectionBase.findIndex(connection);
 	if (foundIndex != -1)
 	{
-		m_pView->setCurrentIndex(m_сonnectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
+		m_pView->setCurrentIndex(m_connectionTable.index(foundIndex, SIGNAL_CONNECTION_COLUMN_TYPE));
 
 		QMessageBox::information(this, windowTitle(), tr("Signal already exist!"));
 		return;
 	}
 
-	m_сonnectionBase.append(connection);
+	m_connectionBase.append(connection);
 
 	updateList();
 
-	m_pView->setCurrentIndex(m_сonnectionTable.index(m_сonnectionBase.count() - 1, SIGNAL_CONNECTION_COLUMN_TYPE));
+	m_pView->setCurrentIndex(m_connectionTable.index(m_connectionBase.count() - 1, SIGNAL_CONNECTION_COLUMN_TYPE));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -814,13 +814,13 @@ void SignalConnectionDialog::addConnection()
 void SignalConnectionDialog::editConnection()
 {
 	int index = m_pView->currentIndex().row();
-	if (index < 0 || index >= m_сonnectionTable.connectionCount())
+	if (index < 0 || index >= m_connectionTable.connectionCount())
 	{
 		QMessageBox::information(this, windowTitle(), tr("Please, select signal for edit!"));
 		return;
 	}
 
-	SignalConnection connection = m_сonnectionTable.at(index);
+	SignalConnection connection = m_connectionTable.at(index);
 
 	SignalConnectionItemDialog dialog(connection);
 	if (dialog.exec() != QDialog::Accepted)
@@ -828,17 +828,17 @@ void SignalConnectionDialog::editConnection()
 		return;
 	}
 
-	connection = dialog.сonnection();
+	connection = dialog.connection();
 	if (connection.isValid() == false)
 	{
 		return;
 	}
 
-	m_сonnectionBase.setSignal(index, connection);
+	m_connectionBase.setSignal(index, connection);
 
 	updateList();
 
-	m_pView->setCurrentIndex(m_сonnectionTable.index(index, SIGNAL_CONNECTION_COLUMN_TYPE));
+	m_pView->setCurrentIndex(m_connectionTable.index(index, SIGNAL_CONNECTION_COLUMN_TYPE));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -857,14 +857,14 @@ void SignalConnectionDialog::removeConnection()
 		return;
 	}
 
-	int count = m_сonnectionTable.connectionCount();
+	int count = m_connectionTable.connectionCount();
 	for(int index = count - 1; index >= 0; index --)
 	{
 		if (m_pView->selectionModel()->isRowSelected(index, QModelIndex()) == true)
 		{
-			if (index >= 0 && index < m_сonnectionTable.connectionCount())
+			if (index >= 0 && index < m_connectionTable.connectionCount())
 			{
-				m_сonnectionBase.remove(index);
+				m_connectionBase.remove(index);
 			}
 		}
 	}
@@ -931,7 +931,7 @@ void SignalConnectionDialog::copy()
 
 void SignalConnectionDialog::showCustomID()
 {
-	m_сonnectionTable.setShowCustomID(m_pShowCustomIDAction->isChecked());
+	m_connectionTable.setShowCustomID(m_pShowCustomIDAction->isChecked());
 
 	updateList();
 }
@@ -947,7 +947,7 @@ void SignalConnectionDialog::onContextMenu(QPoint)
 
 void SignalConnectionDialog::onOk()
 {
-	theSignalBase.signalConnections() = m_сonnectionBase;
+	theSignalBase.signalConnections() = m_connectionBase;
 
 	accept();
 }

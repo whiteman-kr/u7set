@@ -475,11 +475,11 @@ void ComparatorListDialog::updateList()
 			continue;
 		}
 
-		int comparatorCount = pSignal->comparatorCount();
+		int comparatorCount = pSignal->param().comparatorCount();
 		for (int c = 0; c < comparatorCount; c++)
 		{
-			std::shared_ptr<::Builder::Comparator> comparator = pSignal->comparator(c);
-			comparatorList.append(pSignal->comparator(c));
+			std::shared_ptr<::Builder::Comparator> comparator = pSignal->param().comparator(c);
+			comparatorList.append(pSignal->param().comparator(c));
 		}
 	}
 

@@ -97,10 +97,10 @@ bool MeasureThread::signalIsMeasured(const MeasureSignal& activeSignal, QString&
 
 	switch (theOptions.toolBar().signalConnectionType())
 	{
-		case SIGNAL_CONNECTION_TYPE_UNUSED:			signal = activeSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);		break;
+		case SIGNAL_CONNECTION_TYPE_UNUSED:			signal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT);		break;
 		case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
-		case SIGNAL_CONNECTION_TYPE_FROM_TUNING:	signal = activeSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
-		default:								assert(0);
+		case SIGNAL_CONNECTION_TYPE_FROM_TUNING:	signal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
+		default:									assert(0);
 	}
 
 	if (signal.isEmpty() == true)
@@ -125,9 +125,9 @@ bool MeasureThread::signalIsMeasured(const MeasureSignal& activeSignal, QString&
 
 	bool isMeasured = false;
 
-	for(int c = 0; c < activeSignal.channelCount(); c++)
+	for(int ch = 0; ch < activeSignal.channelCount(); ch++)
 	{
-		Metrology::Signal* pMetrologySignal = signal.metrologySignal(c);
+		Metrology::Signal* pMetrologySignal = signal.metrologySignal(ch);
 		if (pMetrologySignal == nullptr)
 		{
 			continue;
@@ -160,13 +160,13 @@ bool MeasureThread::setActiveSignalParam(const MeasureSignal& activeSignal)
 
 	// create param list for measure
 	//
-	for(int c = 0; c < activeSignal.channelCount(); c ++)
+	for(int ch = 0; ch < activeSignal.channelCount(); ch ++)
 	{
 		IoSignalParam ioParam;
 
 		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
 		{
-			Metrology::Signal* pSignal = activeSignal.multiSignal(type).metrologySignal(c);
+			Metrology::Signal* pSignal = activeSignal.multiChannelSignal(type).metrologySignal(ch);
 			if (pSignal == nullptr)
 			{
 				continue;
@@ -188,7 +188,7 @@ bool MeasureThread::setActiveSignalParam(const MeasureSignal& activeSignal)
 //				continue;
 //			}
 
-			CalibratorManager* pCalibratorManager = theCalibratorBase.calibratorForMeasure(c);
+			CalibratorManager* pCalibratorManager = theCalibratorBase.calibratorForMeasure(ch);
 			if (calibratorIsValid(pCalibratorManager) == false)
 			{
 				continue;
@@ -219,19 +219,19 @@ bool MeasureThread::inputsOfmoduleIsSame()
 	Metrology::SignalParam signalParam;
 
 	int channelCount = m_activeIoParamList.count();
-	for(int c = 0; c < channelCount; c ++)
+	for(int ch = 0; ch < channelCount; ch ++)
 	{
-		if (m_activeIoParamList[c].isValid() == false)
+		if (m_activeIoParamList[ch].isValid() == false)
 		{
 			continue;
 		}
 
 		switch (theOptions.toolBar().signalConnectionType())
 		{
-			case SIGNAL_CONNECTION_TYPE_UNUSED:			signalParam = m_activeIoParamList[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
+			case SIGNAL_CONNECTION_TYPE_UNUSED:			signalParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
 			case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
-			case SIGNAL_CONNECTION_TYPE_FROM_TUNING:	signalParam = m_activeIoParamList[c].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
-			default:								assert(0);
+			case SIGNAL_CONNECTION_TYPE_FROM_TUNING:	signalParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
+			default:									assert(0);
 		}
 
 		if (eltalonIsFound == false)
@@ -321,9 +321,9 @@ bool MeasureThread::hasConnectedCalibrators()
 	int connectedCalibratorCount = 0;
 
 	int channelCount = m_activeIoParamList.count();
-	for(int c = 0; c < channelCount; c ++)
+	for(int ch = 0; ch < channelCount; ch ++)
 	{
-		CalibratorManager* pCalibratorManager = m_activeIoParamList[c].calibratorManager();
+		CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 		if (calibratorIsValid(pCalibratorManager) == false)
 		{
 			continue;
@@ -370,25 +370,25 @@ bool MeasureThread::setCalibratorUnit()
 					channelCount = 1;
 				}
 
-				for(int c = 0; c < channelCount; c ++)
+				for(int ch = 0; ch < channelCount; ch ++)
 				{
-					if (m_activeIoParamList[c].isValid() == false)
+					if (m_activeIoParamList[ch].isValid() == false)
 					{
 						continue;
 					}
 
-					CalibratorManager* pCalibratorManager = m_activeIoParamList[c].calibratorManager();
+					CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 					if (calibratorIsValid(pCalibratorManager) == false)
 					{
 						continue;
 					}
 
-					switch (m_activeIoParamList[c].signalConnectionType())
+					switch (m_activeIoParamList[ch].signalConnectionType())
 					{
 						case SIGNAL_CONNECTION_TYPE_UNUSED:
 						case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
 							{
-								Metrology::SignalParam inParam = m_activeIoParamList[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+								Metrology::SignalParam inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 								if (inParam.isValid() == false)
 								{
 									continue;
@@ -399,7 +399,7 @@ bool MeasureThread::setCalibratorUnit()
 									emit msgBox(QMessageBox::Information, QString("Calibrator: %1 - can not set source mode.").arg(pCalibratorManager->calibratorPort()));
 								}
 
-								Metrology::SignalParam outParam = m_activeIoParamList[c].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+								Metrology::SignalParam outParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 								if (outParam.isValid() == false)
 								{
 									continue;
@@ -421,7 +421,7 @@ bool MeasureThread::setCalibratorUnit()
 						case SIGNAL_CONNECTION_TYPE_FROM_TUNING:
 							{
 
-								Metrology::SignalParam outParam = m_activeIoParamList[c].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+								Metrology::SignalParam outParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 								if (outParam.isValid() == false)
 								{
 									continue;
@@ -560,22 +560,6 @@ void MeasureThread::run()
 		return;
 	}
 
-	switch (m_measureType)
-	{
-		case MEASURE_TYPE_LINEARITY:				// test - have programm measure points
-
-			if (theOptions.linearity().points().count() == 0)
-			{
-				emit msgBox(QMessageBox::Information, tr("No points for measure"));
-				return;
-			}
-
-			break;
-
-		case MEASURE_TYPE_COMPARATOR:	break;		// test - have signals of comporators
-		default:						return;
-	}
-
 	// set command for exit (stop measure) in state = FALSE
 	//
 	m_cmdStopMeasure = false;
@@ -638,19 +622,27 @@ void MeasureThread::run()
 
 void MeasureThread::measureLinearity()
 {
+	// test - have programm measure points
+	//
+	if (theOptions.linearity().points().count() == 0)
+	{
+		emit msgBox(QMessageBox::Information, tr("No points for measure"));
+		return;
+	}
+
 	saveStateTunSignals();
 
 	int pointCount = theOptions.linearity().points().count();
-	for(int p = 0; p < pointCount; p++)
+	for(int pt = 0; pt < pointCount; pt++)
 	{
 		if (hasConnectedCalibrators() == false)
 		{
 			break;
 		}
 
-		LinearityPoint point = theOptions.linearity().points().at(p);
+		LinearityPoint point = theOptions.linearity().points().at(pt);
 
-		emit measureInfo(tr("Set point %1 / %2 ").arg(p + 1).arg(pointCount));
+		emit measureInfo(tr("Set point %1 / %2 ").arg(pt + 1).arg(pointCount));
 
 		// set electric value on calibrators, depend from point value
 		//
@@ -661,30 +653,30 @@ void MeasureThread::measureLinearity()
 			channelCount = 1;
 		}
 
-		for(int c = 0; c < channelCount; c ++)
+		for(int ch = 0; ch < channelCount; ch ++)
 		{
-			if (m_activeIoParamList[c].isValid() == false)
-			{
-				continue;
-			}
-
-			CalibratorManager* pCalibratorManager = m_activeIoParamList[c].calibratorManager();
+			CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 			if (calibratorIsValid(pCalibratorManager) == false)
 			{
 				continue;
 			}
 
-			Metrology::SignalParam param = m_activeIoParamList[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
-			if (param.isValid() == false)
+			if (m_activeIoParamList[ch].isValid() == false)
 			{
 				continue;
 			}
 
-			m_activeIoParamList[c].setPercent(point.percent());
+			const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+			if (inParam.isValid() == false)
+			{
+				continue;
+			}
+
+			m_activeIoParamList[ch].setPercent(point.percent());
 
 			// set electric value
 			//
-			switch (m_activeIoParamList[c].signalConnectionType())
+			switch (m_activeIoParamList[ch].signalConnectionType())
 			{
 				case SIGNAL_CONNECTION_TYPE_UNUSED:
 				case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
@@ -692,19 +684,19 @@ void MeasureThread::measureLinearity()
 						// at the beginning we need get engeneering value because if range is not Linear (for instance Ohm or mV)
 						// then by engeneering value we may get electric value
 						//
-						double engeneeringVal = (point.percent() * (param.highEngeneeringUnits() - param.lowEngeneeringUnits()) / 100) + param.lowEngeneeringUnits();
-						double electricVal = conversion(engeneeringVal, CT_ENGENEER_TO_ELECTRIC, param);
+						double engeneeringVal = (point.percent() * (inParam.highEngeneeringUnits() - inParam.lowEngeneeringUnits()) / 100) + inParam.lowEngeneeringUnits();
+						double electricVal = conversion(engeneeringVal, CT_ENGENEER_TO_ELECTRIC, inParam);
 
-						polarityTest(electricVal, m_activeIoParamList[c]);	// polarity test
+						polarityTest(electricVal, m_activeIoParamList[ch]);	// polarity test
 
-						pCalibratorManager->setValue(m_activeIoParamList[c].isNegativeRange() ? -electricVal : electricVal);
+						pCalibratorManager->setValue(m_activeIoParamList[ch].isNegativeRange() ? -electricVal : electricVal);
 					}
 					break;
 				case SIGNAL_CONNECTION_TYPE_FROM_TUNING:
 					{
-						double tuningVal = (point.percent() * (param.tuningHighBound().toDouble() - param.tuningLowBound().toDouble()) / 100) + param.tuningLowBound().toDouble();
+						double tuningVal = (point.percent() * (inParam.tuningHighBound().toDouble() - inParam.tuningLowBound().toDouble()) / 100) + inParam.tuningLowBound().toDouble();
 
-						theSignalBase.tuning().appendCmdFowWrite(param.hash(), param.tuningValueType(), tuningVal);
+						theSignalBase.tuning().appendCmdFowWrite(inParam.hash(), inParam.tuningValueType(), tuningVal);
 					}
 					break;
 				default:
@@ -715,9 +707,9 @@ void MeasureThread::measureLinearity()
 		// wait ready all calibrators,
 		// wait until all calibrators will has fixed electric value
 		//
-		for(int c = 0; c < channelCount; c ++)
+		for(int ch = 0; ch < channelCount; ch ++)
 		{
-			CalibratorManager* pCalibratorManager = m_activeIoParamList[c].calibratorManager();
+			CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 			if (calibratorIsValid(pCalibratorManager) == false)
 			{
 				continue;
@@ -736,7 +728,7 @@ void MeasureThread::measureLinearity()
 
 		// wait timeout for measure
 		//
-		emit measureInfo(tr("Wait timeout %1 / %2 ").arg(p + 1).arg(pointCount));
+		emit measureInfo(tr("Wait timeout %1 / %2 ").arg(pt + 1).arg(pointCount));
 		waitMeasureTimeout();
 
 		// save measurement
@@ -744,20 +736,20 @@ void MeasureThread::measureLinearity()
 		emit measureInfo(tr("Save measurement "));
 
 		channelCount = m_activeIoParamList.count();
-		for(int c = 0; c < channelCount; c ++)
+		for(int ch = 0; ch < channelCount; ch ++)
 		{
-			if (m_activeIoParamList[c].isValid() == false)
-			{
-				continue;
-			}
-
-			CalibratorManager* pCalibratorManager = m_activeIoParamList[c].calibratorManager();
+			CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 			if (calibratorIsValid(pCalibratorManager) == false)
 			{
 				continue;
 			}
 
-			LinearityMeasurement* pMeasurement = new LinearityMeasurement(m_activeIoParamList[c]);
+			if (m_activeIoParamList[ch].isValid() == false)
+			{
+				continue;
+			}
+
+			LinearityMeasurement* pMeasurement = new LinearityMeasurement(m_activeIoParamList[ch]);
 			if (pMeasurement == nullptr)
 			{
 				continue;
@@ -778,7 +770,412 @@ void MeasureThread::measureComprators()
 {
 	emit measureInfo(tr("Comprators"));
 
-	waitMeasureTimeout();
+	quint64 currentStateComparatorsInAllChannels = 0;
+	quint64 COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_0 = 0;
+	quint64 COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_1 = 0;
+
+	int maxComparatorCount = 0;
+
+	int channelCount = m_activeIoParamList.count();
+	for(int ch = 0; ch < channelCount; ch++)
+	{
+		COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_1 |= (0x1 << ch);
+
+		const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		if (inParam.isValid() == false)
+		{
+			continue;
+		}
+
+		if (maxComparatorCount < inParam.comparatorCount())
+		{
+			maxComparatorCount = inParam.comparatorCount();
+		}
+	}
+
+	if (maxComparatorCount == 0)
+	{
+		emit msgBox(QMessageBox::Information, tr("Selected signal has no comparators"));
+		return;
+	}
+
+	// starting from startComparatorIndex
+	//
+	int startComparatorIndex = theOptions.comparator().startComparatorIndex();
+
+	// iterate over all the comparators from one to maxComparatorCount
+	//
+	for (int cmp = startComparatorIndex; cmp < maxComparatorCount; cmp++)
+	{
+		// phases
+		// 1 - phase of preparation
+		// 2 - phase of measuring
+		// 3 - phase of saving results
+
+		// phase of preparation started
+		// switching the all comparators to logical 0
+		//
+		do
+		{
+			// for every comparator
+			// Goal of preparations for switching the comparator to logical 0
+			// 1 - go below return zone to switch comparator to logical 0 state
+			// 2 - set the starting value, which will be as close as possible to the state of logical 1, but not reach it in a few steps
+			//
+			for (int pr = 0; pr < MEASURE_THREAD_CMP_PREPARE_COUNT; pr++)
+			{
+				emit measureInfo(tr("Comparator %1, Prepare %2").arg(cmp + 1).arg(pr + 1));
+
+				// set electric value on calibrators, depend from comparator value
+				//
+				for(int ch = 0; ch < channelCount; ch ++)
+				{
+					CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+					if (calibratorIsValid(pCalibratorManager) == false)
+					{
+						continue;
+					}
+
+					const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+					if (inParam.isValid() == false)
+					{
+						continue;
+					}
+
+					if (inParam.comparatorCount() == 0)
+					{
+						continue;
+					}
+
+					std::shared_ptr<::Builder::Comparator> pComparator = inParam.comparator(cmp);
+					if (pComparator == nullptr)
+					{
+						continue;
+					}
+
+					// get compare value
+					//
+					double compareVal = 0;
+
+					if (pComparator->compare().isConst() == true)
+					{
+						compareVal = pComparator->compare().constValue();
+					}
+					else
+					{
+						if (pComparator->compare().appSignalID().isEmpty() == false)
+						{
+							Metrology::Signal* pComareSignal = theSignalBase.signalPtr(pComparator->compare().appSignalID());
+							if (pComareSignal == nullptr)
+							{
+								continue;
+							}
+							else
+							{
+								compareVal = pComareSignal->state().value();
+							}
+						}
+						else
+						{
+							continue;
+						}
+					}
+
+					// get hysteresis value
+					//
+					double hysteresisVal = 0;
+
+					if (pComparator->hysteresis().isConst() == true)
+					{
+						hysteresisVal = pComparator->hysteresis().constValue();
+					}
+					else
+					{
+						if (pComparator->hysteresis().appSignalID().isEmpty() == false)
+						{
+							Metrology::Signal* pHysteresisSignal = theSignalBase.signalPtr(pComparator->hysteresis().appSignalID());
+							if (pHysteresisSignal == nullptr)
+							{
+								continue;
+							}
+							else
+							{
+								hysteresisVal = pHysteresisSignal->state().value();
+							}
+						}
+						else
+						{
+							continue;
+						}
+					}
+
+					// calc start value for comaprator
+					//
+					double startValueForComapre = ((inParam.highEngeneeringUnits() - inParam.lowEngeneeringUnits()) * theOptions.comparator().startValueForCompare()) / 100.0 ;
+
+					//
+					//
+					double deltaVal = 0;
+
+					switch (pr)
+					{
+						case MEASURE_THREAD_CMP_PREAPRE_1:	deltaVal = hysteresisVal * 2;		break;	// 1 - go below return zone to switch comparator to logical 0 state
+						case MEASURE_THREAD_CMP_PREAPRE_2:	deltaVal = startValueForComapre;	break;	// 2 - set the starting value, which will be as close as possible to the state of logical 1, but not reach it in a few steps
+						default:							continue;
+					}
+
+					double engeneeringVal = 0;
+
+					switch (pComparator->cmpType())
+					{
+						case E::CmpType::Equal:		engeneeringVal = compareVal - deltaVal;		break;
+						case E::CmpType::Greate:	engeneeringVal = compareVal - deltaVal;		break;
+						case E::CmpType::Less:		engeneeringVal = compareVal + deltaVal;		break;
+						case E::CmpType::NotEqual:	engeneeringVal = compareVal;				break;
+						default:					continue;
+					}
+
+					double electricVal = conversion(engeneeringVal, CT_ENGENEER_TO_ELECTRIC, inParam);
+
+					if (electricVal < inParam.electricLowLimit())
+					{
+						electricVal = inParam.electricLowLimit();
+					}
+					if (electricVal > inParam.electricHighLimit())
+					{
+						electricVal = inParam.electricHighLimit();
+					}
+
+					polarityTest(electricVal, m_activeIoParamList[ch]);	// polarity test
+
+					pCalibratorManager->setValue(m_activeIoParamList[ch].isNegativeRange() ? -electricVal : electricVal);
+				}
+
+				// wait ready all calibrators,
+				// wait until all calibrators will has fixed electric value
+				//
+				for(int ch = 0; ch < channelCount; ch ++)
+				{
+					CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+					if (calibratorIsValid(pCalibratorManager) == false)
+					{
+						continue;
+					}
+
+					while(pCalibratorManager->isReadyForManage() != true)
+					{
+						if (m_cmdStopMeasure == true)
+						{
+							break;
+						}
+
+						msleep(1);
+					}
+				}
+
+				// wait timeout for preparation
+				//
+				waitMeasureTimeout();
+			}
+
+			// option "additionally check" decides to go through preparations again or not
+			// if state of all comparstors != logical 0, go to measure
+			//
+			if (theOptions.comparator().enableAdditionalCheck()  == false)
+			{
+				break;
+			}
+
+			currentStateComparatorsInAllChannels = COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_1;
+
+			//
+			//
+			QString strInvalidComaprators = tr("Comparstor %1\n").arg(cmp + 1);
+
+			for(int ch = 0; ch < channelCount; ch ++)
+			{
+				CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+				if (calibratorIsValid(pCalibratorManager) == false)
+				{
+					currentStateComparatorsInAllChannels &= ~(0x1 << ch);
+					continue;
+				}
+
+				const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+				if (inParam.isValid() == false)
+				{
+					currentStateComparatorsInAllChannels &= ~(0x1 << ch);
+					continue;
+				}
+
+				if (inParam.comparatorCount() == 0)
+				{
+					currentStateComparatorsInAllChannels &= ~(0x1 << ch);
+					continue;
+				}
+
+				std::shared_ptr<::Builder::Comparator> pComparator = inParam.comparator(cmp);
+				if (pComparator == nullptr)
+				{
+					currentStateComparatorsInAllChannels &= ~(0x1 << ch);
+					continue;
+				}
+
+				if (pComparator->output().appSignalID().isEmpty() == true)
+				{
+					currentStateComparatorsInAllChannels &= ~(0x1 << ch);
+					continue;
+				}
+
+				Metrology::Signal* pOutputSignal = pOutputSignal = theSignalBase.signalPtr(pComparator->output().appSignalID());
+				if (pOutputSignal == nullptr)
+				{
+					currentStateComparatorsInAllChannels &= ~(0x1 << ch);
+					continue;
+				}
+
+				// if  state of comparator = logical 0, then you do not need to wait
+				//
+				if (pOutputSignal->state().value() == 0.0)
+				{
+					currentStateComparatorsInAllChannels &= ~(0x1 << ch);
+				}
+				else
+				{
+					strInvalidComaprators.append(tr("Signal: %1\n").arg(inParam.customAppSignalID()));
+				}
+			}
+
+			// if state of all comparstors = logical 0, go to measure
+			// else repeat preparation
+			//
+			if (currentStateComparatorsInAllChannels == COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_0)
+			{
+				break;
+			}
+
+			strInvalidComaprators.append(tr("is (are) already in logical state \"1\"\n\n"));
+			strInvalidComaprators.append(tr("Do you want to repeat the preparation process in order to switch the comparator to logical \"0\" state?"));
+
+			int result = QMessageBox::NoButton;
+			emit msgBox(QMessageBox::Question, strInvalidComaprators, &result);
+			if (result == QMessageBox::No)
+			{
+				break;
+			}
+
+		} while(m_cmdStopMeasure == false);
+		//
+		// phase of preparation is over
+
+
+		// phase of measuring started
+		// Okey - go
+		//
+		int step = 0;
+
+		currentStateComparatorsInAllChannels = 0;
+
+		while (currentStateComparatorsInAllChannels != COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_1)
+		{
+			for(int ch = 0; ch < channelCount; ch ++)
+			{
+				const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+				if (inParam.isValid() == false)
+				{
+					currentStateComparatorsInAllChannels |= (0x1 << ch);
+					continue;
+				}
+
+				CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+				if (calibratorIsValid(pCalibratorManager) == false)
+				{
+					currentStateComparatorsInAllChannels |= (0x1 << ch);
+					continue;
+				}
+
+				if (inParam.comparatorCount() == 0)
+				{
+					currentStateComparatorsInAllChannels |= (0x1 << ch);
+					continue;
+				}
+
+				std::shared_ptr<::Builder::Comparator> pComparator = inParam.comparator(cmp);
+				if (pComparator == nullptr)
+				{
+					currentStateComparatorsInAllChannels |= (0x1 << ch);
+					continue;
+				}
+
+				if (pComparator->output().appSignalID().isEmpty() == true)
+				{
+					currentStateComparatorsInAllChannels |= (0x1 << ch);
+					continue;
+				}
+
+				Metrology::Signal* pOutputSignal = theSignalBase.signalPtr(pComparator->output().appSignalID());
+				if (pOutputSignal == nullptr)
+				{
+					currentStateComparatorsInAllChannels |= (0x1 << ch);
+					continue;
+				}
+
+				// if state of comparator = logical 1, then skip it
+				// if state of comparator = logical 0, take a step
+				//
+				if (pOutputSignal->state().value() == 0.0)
+				{
+					switch (pComparator->cmpType())
+					{
+						case E::CmpType::Equal:		m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepUp()	:	pCalibratorManager->stepDown(); break;
+						case E::CmpType::Greate:	m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepUp()	:	pCalibratorManager->stepDown(); break;
+						case E::CmpType::Less:		m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepDown() :	pCalibratorManager->stepUp(); 	break;
+						case E::CmpType::NotEqual:	m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepDown()	:	pCalibratorManager->stepUp();	break;
+						default:					continue;
+					}
+
+					emit measureInfo(tr("Comparator %1, Step %2").arg(cmp + 1).arg(step + 1));
+				}
+				else
+				{
+					currentStateComparatorsInAllChannels |= (0x1 << ch);
+					continue;
+				}
+			}
+
+			step++;
+
+			// wait ready all calibrators,
+			// wait until all calibrators will has fixed electric value
+			//
+			for(int ch = 0; ch < channelCount; ch ++)
+			{
+				CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+				if (calibratorIsValid(pCalibratorManager) == false)
+				{
+					continue;
+				}
+
+				while(pCalibratorManager->isReadyForManage() != true)
+				{
+					if (m_cmdStopMeasure == true)
+					{
+						break;
+					}
+
+					msleep(1);
+				}
+			}
+
+			// wait timeout for measure
+			//
+			waitMeasureTimeout();
+		}
+		//
+		// phase of measuring is over
+
+
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -810,20 +1207,20 @@ void MeasureThread::saveStateTunSignals()
 	}
 
 	int channelCount = m_activeIoParamList.count();
-	for(int c = 0; c < channelCount; c ++)
+	for(int ch = 0; ch < channelCount; ch ++)
 	{
-		if (m_activeIoParamList[c].isValid() == false)
+		if (m_activeIoParamList[ch].isValid() == false)
 		{
 			continue;
 		}
 
-		Metrology::SignalParam tunParam = m_activeIoParamList[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		Metrology::SignalParam tunParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 		if (tunParam.isValid() == false)
 		{
 			continue;
 		}
 
-		m_activeIoParamList[c].setTunSignalState(theSignalBase.signalState(tunParam.hash()).value());
+		m_activeIoParamList[ch].setTunSignalState(theSignalBase.signalState(tunParam.hash()).value());
 	}
 }
 
@@ -837,20 +1234,20 @@ void MeasureThread::restoreStateTunSignals()
 	}
 
 	int channelCount = m_activeIoParamList.count();
-	for(int c = 0; c < channelCount; c ++)
+	for(int ch = 0; ch < channelCount; ch ++)
 	{
-		if (m_activeIoParamList[c].isValid() == false)
+		if (m_activeIoParamList[ch].isValid() == false)
 		{
 			continue;
 		}
 
-		Metrology::SignalParam tunParam = m_activeIoParamList[c].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		Metrology::SignalParam tunParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 		if (tunParam.isValid() == false)
 		{
 			continue;
 		}
 
-		theSignalBase.tuning().appendCmdFowWrite(tunParam.hash(), tunParam.tuningValueType(), m_activeIoParamList[c].tunSignalState());
+		theSignalBase.tuning().appendCmdFowWrite(tunParam.hash(), tunParam.tuningValueType(), m_activeIoParamList[ch].tunSignalState());
 	}
 }
 
@@ -865,13 +1262,13 @@ void MeasureThread::updateSignalParam(const QString& appSignalID)
 	}
 
 	int channelCount = m_activeIoParamList.count();
-	for(int c = 0; c < channelCount; c ++)
+	for(int ch = 0; ch < channelCount; ch ++)
 	{
 		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
 		{
-			if (m_activeIoParamList[c].param(type).appSignalID() == appSignalID)
+			if (m_activeIoParamList[ch].param(type).appSignalID() == appSignalID)
 			{
-				m_activeIoParamList[c].setParam(type, theSignalBase.signalParam(appSignalID));
+				m_activeIoParamList[ch].setParam(type, theSignalBase.signalParam(appSignalID));
 			}
 		}
 	}

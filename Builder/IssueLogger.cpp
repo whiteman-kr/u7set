@@ -7496,6 +7496,26 @@ namespace Builder
 				  .arg(monotorId));
 	}
 
+	/// IssueCode: EQP6201
+	///
+	/// IssueType: Error
+	///
+	/// Title: uningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behaviour in menu Project->Project Properties...->Safety Project.
+	///
+	/// Parameters:
+	///		%1 TuningService EquipmentID
+	///
+	/// Description:
+	///		TuningService cannot be used for multi LM control in Safety Projects. To avoid error turn On option SingleLmControl of TuningService or override behaviour in menu Project->Project Properties...->Safety Project.
+	///
+	void IssueLogger::errEQP6201(QString tuningServiceId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6201,
+				  tr("TuningService (%1) cannot be used for multi LM control in Safety Project. "
+					"Turn On option %1.SingleLmControl or override behaviour in menu Project->Project Properties...->Safety Project.").
+						arg(tuningServiceId));
+	}
 
 	// --
 	//
