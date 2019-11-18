@@ -46,9 +46,20 @@ namespace Builder
 
 	bool TuningServiceCfgGenerator::writeSettings()
 	{
+		TEST_PTR_RETURN_FALSE(m_log);
+		TEST_PTR_LOG_RETURN_FALSE(m_context, m_log);
+
 		bool result = m_settings.readFromDevice(m_software, m_log);
 
 		RETURN_IF_FALSE(result);
+
+		if (m_context->m_projectProperties.safetyProject() == true && m_settings.singleLmControl == false)
+		{
+			// TuningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behaviour in menu Project->Project Properties...->Safety Project.
+			//
+			m_log->errEQP6201(equipmentID());
+			return false;
+		}
 
 		XmlWriteHelper xml(m_cfgXml->xmlWriter());
 
