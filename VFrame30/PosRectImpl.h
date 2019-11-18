@@ -38,6 +38,11 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		Q_PROPERTY(double Top READ top WRITE setTop)
+		Q_PROPERTY(double Left READ left WRITE setLeft)
+		Q_PROPERTY(double Width READ width WRITE setWidth)
+		Q_PROPERTY(double Height READ height WRITE setHeight)
+
 	protected:
 		PosRectImpl(void);
 		virtual ~PosRectImpl(void) = default;

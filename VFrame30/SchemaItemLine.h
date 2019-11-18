@@ -8,6 +8,9 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		Q_PROPERTY(double LineWeight READ weight WRITE setWeight)
+		Q_PROPERTY(QColor LineColor READ lineColor WRITE setLineColor)
+
 	public:
 		SchemaItemLine(void);
 		explicit SchemaItemLine(SchemaUnit unit);

@@ -15,6 +15,8 @@ namespace VFrame30
 		Q_OBJECT
 
 		Q_PROPERTY(QStringList SignalIDs READ signalIds WRITE setSignalIds)
+		Q_PROPERTY(QStringList AppSignalIDs READ signalIds WRITE setSignalIds)
+
 		Q_PROPERTY(QString CurrentImageID READ currentImageId WRITE setCurrentImageId)
 
 		Q_PROPERTY(double LineWeight READ lineWeight WRITE setLineWeight)

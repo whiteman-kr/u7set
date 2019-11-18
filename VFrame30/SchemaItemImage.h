@@ -9,6 +9,11 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		Q_PROPERTY(double AllowScale READ allowScale WRITE setAllowScale)
+		Q_PROPERTY(double KeepAspectRatio READ keepAspectRatio WRITE setKeepAspectRatio)
+
+		Q_PROPERTY(QString Svg READ svgData WRITE setSvgData)
+
 	public:
 		SchemaItemImage(void);
 		explicit SchemaItemImage(SchemaUnit unit);

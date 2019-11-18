@@ -131,6 +131,7 @@ namespace VFrame30
 		static const QString dataType;
 		static const QString units;
 
+		static const QString signalIDs;
 		static const QString appSignalIDs;
 		static const QString appSignalIDsValidator;
 		static const QString appSignalId;

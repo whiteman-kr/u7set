@@ -12,6 +12,29 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		Q_PROPERTY(double LineWeight READ weight WRITE setWeight)
+
+		Q_PROPERTY(QColor LineColor READ lineColor WRITE setLineColor)
+		Q_PROPERTY(QColor FillColor READ fillColor WRITE setFillColor)
+
+		Q_PROPERTY(double Fill READ fill WRITE setFill)
+		Q_PROPERTY(double DrawRect READ drawRect WRITE setDrawRect)
+
+		// Text Category Properties
+
+		Q_PROPERTY(QColor TextColor READ textColor WRITE setTextColor)
+
+		Q_PROPERTY(QString Text READ text WRITE setText)
+
+		Q_PROPERTY(E::HorzAlign AlignHorz READ horzAlign WRITE setHorzAlign)
+		Q_PROPERTY(E::VertAlign AlignVert READ vertAlign WRITE setVertAlign)
+
+		Q_PROPERTY(QString FontName READ getFontName WRITE setFontName)
+		Q_PROPERTY(double FontSize READ getFontSize WRITE setFontSize)
+		Q_PROPERTY(bool FontBold READ getFontBold WRITE setFontBold)
+		Q_PROPERTY(bool FontItalic READ getFontItalic WRITE setFontItalic)
+
+
 	public:
 		SchemaItemRect(void);
 		explicit SchemaItemRect(SchemaUnit unit);
