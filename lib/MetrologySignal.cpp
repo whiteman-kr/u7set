@@ -675,9 +675,9 @@ namespace Metrology
 		return type;
 	}
 
-	void SignalParam::setComparatorList(QList<std::shared_ptr<::Builder::Comparator>>& comparatorList)
+	void SignalParam::setComparatorList(const QVector<std::shared_ptr<::Builder::Comparator>>& comparators)
 	{
-		m_comparatorList = comparatorList;
+		m_comparatorList = comparators;
 		m_comparatorCount = m_comparatorList.count();
 	}
 

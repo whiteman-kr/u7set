@@ -184,7 +184,7 @@ namespace Metrology
 		double					m_physicalLowLimit = 0;
 		double					m_physicalHighLimit = 0;
 
-		QList<std::shared_ptr<::Builder::Comparator>> m_comparatorList;
+		QVector<std::shared_ptr<::Builder::Comparator>> m_comparatorList;
 		int						m_comparatorCount = 0;
 
 	public:
@@ -249,7 +249,7 @@ namespace Metrology
 		QString					tuningRangeStr() const;
 		TuningValueType			tuningValueType() const;
 
-		void					setComparatorList(QList<std::shared_ptr<::Builder::Comparator>>& comparatorList);
+		void					setComparatorList(const QVector<std::shared_ptr<::Builder::Comparator>>& comparators);
 		int						comparatorCount() const { return m_comparatorCount; }
 		std::shared_ptr<::Builder::Comparator> comparator(int index) const;
 

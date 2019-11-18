@@ -2387,38 +2387,24 @@ void SignalBase::clearActiveSignal()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SignalBase::loadComparators(const ::Builder::ComparatorSet& comparatorSet)
+bool SignalBase::loadComparatorsInSignal(const ::Builder::ComparatorSet& comparatorSet)
 {
-	int count = signalCount();
-	for(int i = 0; i < count; i ++)
+	QStringList appSignalIDList = comparatorSet.inputSignalIDs();
+
+	for(const QString& appSignalID : appSignalIDList)
 	{
-		Metrology::Signal* pInputSignal = signalPtr(i);
-		if (pInputSignal == nullptr)
+		if (appSignalID.isEmpty() == true)
 		{
 			continue;
 		}
 
-		if (pInputSignal->param().isValid() == false)
+		Metrology::Signal* pInputSignal = signalPtr(appSignalID);
+		if (pInputSignal == nullptr || pInputSignal->param().isValid() == false)
 		{
 			continue;
 		}
 
-		// only analog signals
-		//
-		if (pInputSignal->param().isAnalog() == false)
-		{
-			continue;
-		}
-
-		// only analog-input or analog-internal signals
-		//
-		if (pInputSignal->param().isOutput() == true)
-		{
-			continue;
-		}
-
-		QList<std::shared_ptr<Builder::Comparator>> list = comparatorSet.getByInputSignalID(pInputSignal->param().appSignalID());
-		pInputSignal->param().setComparatorList(list);
+		pInputSignal->param().setComparatorList(comparatorSet.getByInputSignalID(appSignalID));
 	}
 
 	return true;
