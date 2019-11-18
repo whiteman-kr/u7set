@@ -441,6 +441,14 @@ public:
 
 	static const size_t IndicatorTypeCount = 2;
 
+	enum class CmpType
+	{
+		Equal,
+		Greate,
+		Less,
+		NotEqual
+	};
+	Q_ENUM(CmpType)
 
 public:
 	template <typename ENUM_TYPE>

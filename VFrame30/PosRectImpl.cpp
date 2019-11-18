@@ -115,7 +115,7 @@ namespace VFrame30
 
 	// Action Functions
 	//
-	void PosRectImpl::MoveItem(double horzOffsetDocPt, double vertOffsetDocPt)
+	void PosRectImpl::moveItem(double horzOffsetDocPt, double vertOffsetDocPt)
 	{ 
 		setLeftDocPt(leftDocPt() + horzOffsetDocPt);
 		setTopDocPt(topDocPt() + vertOffsetDocPt);
@@ -189,9 +189,84 @@ namespace VFrame30
 		return;
 	}
 
+	void PosRectImpl::drawLabel(CDrawParam* drawParam) const
+	{
+		if (drawParam == nullptr)
+		{
+			Q_ASSERT(drawParam);
+			return;
+		}
+
+		QPainter* p = drawParam->painter();
+
+		// --
+		//
+		QRectF labelRect{leftDocPt(), topDocPt(), widthDocPt(), heightDocPt()};
+
+		if (std::abs(labelRect.left() - labelRect.right()) < 0.000001)
+		{
+			labelRect.setRight(labelRect.left() + 0.000001);
+		}
+
+		if (std::abs(labelRect.bottom() - labelRect.top()) < 0.000001)
+		{
+			labelRect.setBottom(labelRect.top() + 0.000001);
+		}
+
+		// --
+		//
+		int alignFlags = Qt::AlignmentFlag::AlignCenter;
+
+		switch (labelPos())
+		{
+		case E::TextPos::LeftTop:
+			labelRect.moveBottomRight(labelRect.topLeft());
+			alignFlags = Qt::AlignRight | Qt::AlignBottom;
+			break;
+
+		case E::TextPos::Top:
+			labelRect.moveBottom(labelRect.top());
+			alignFlags = Qt::AlignHCenter | Qt::AlignBottom;
+			break;
+		case E::TextPos::RightTop:
+			labelRect.moveBottomLeft(labelRect.topRight());
+			alignFlags = Qt::AlignLeft | Qt::AlignBottom;
+			break;
+		case E::TextPos::Right:
+			labelRect.moveLeft(labelRect.right());
+			alignFlags = Qt::AlignLeft | Qt::AlignVCenter;
+			break;
+		case E::TextPos::RightBottom:
+			labelRect.moveTopLeft(labelRect.bottomRight());
+			alignFlags = Qt::AlignLeft | Qt::AlignTop;
+			break;
+		case E::TextPos::Bottom:
+			labelRect.moveTop(labelRect.bottom());
+			alignFlags = Qt::AlignHCenter | Qt::AlignTop;
+			break;
+		case E::TextPos::LeftBottom:
+			labelRect.moveTopRight(labelRect.bottomLeft());
+			alignFlags = Qt::AlignRight | Qt::AlignTop;
+			break;
+		case E::TextPos::Left:
+			labelRect.moveRight(labelRect.left());
+			alignFlags = Qt::AlignRight | Qt::AlignVCenter;
+			break;
+		default:
+			Q_ASSERT(false);
+		}
+
+		FontParam font("Sans", drawParam->gridSize() * 1.75, false, false);
+		p->setPen(Qt::darkGray);
+
+		DrawHelper::drawText(p, font, itemUnit(), label(), labelRect, Qt::TextDontClip | alignFlags);
+
+		return;
+	}
+
 	// Рисование элемента при его создании изменении
 	//
-	void PosRectImpl::DrawOutline(CDrawParam* drawParam) const
+	void PosRectImpl::drawOutline(CDrawParam* drawParam) const
 	{
 		QPainter* p = drawParam->painter();
 
@@ -233,7 +308,7 @@ namespace VFrame30
 		return;
 	}
 
-	void PosRectImpl::DrawIssue(CDrawParam* drawParam, OutputMessageLevel issue) const
+	void PosRectImpl::drawIssue(CDrawParam* drawParam, OutputMessageLevel issue) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -258,7 +333,7 @@ namespace VFrame30
 			color = SchemaItem::warningColor;
 			break;
 		default:
-			assert(false);
+			Q_ASSERT(false);
 		}
 
 		QPen pen(color);
@@ -288,7 +363,7 @@ namespace VFrame30
 	
 	// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 	//
-	void PosRectImpl::DrawSelection(CDrawParam* drawParam, bool drawSizeBar) const
+	void PosRectImpl::drawSelection(CDrawParam* drawParam, bool drawSizeBar) const
 	{
 		QPainter* p = drawParam->painter();
 
@@ -445,7 +520,7 @@ namespace VFrame30
 	// Определение, пересекает ли элемент указанный прямоугольник (использовать для выделения),
 	// координаты и размер прямоугольника заданы в дюймах или пикселях
 	//
-	bool PosRectImpl::IsIntersectRect(double x, double y, double width, double height) const
+	bool PosRectImpl::isIntersectRect(double x, double y, double width, double height) const
 	{
 		QRectF itemRect(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
 		QRectF detRect(x, y, width, height);

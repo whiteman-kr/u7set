@@ -73,9 +73,9 @@ namespace VFrame30
 		return true;
 	}
 
-	void SchemaItemConnection::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemConnection::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
-		FblItemRect::Draw(drawParam, schema, layer);
+		FblItemRect::draw(drawParam, schema, layer);
 		return;
 	}
 
@@ -194,9 +194,9 @@ namespace VFrame30
 		return true;
 	}
 
-	void SchemaItemTransmitter::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemTransmitter::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
-		SchemaItemConnection::Draw(drawParam, schema, layer);
+		SchemaItemConnection::draw(drawParam, schema, layer);
 
 		// Custom draw
 		//
@@ -439,9 +439,9 @@ namespace VFrame30
 		return true;
 	}
 
-	void SchemaItemReceiver::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemReceiver::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
-		SchemaItemConnection::Draw(drawParam, schema, layer);
+		SchemaItemConnection::draw(drawParam, schema, layer);
 
 		// Custom draw
 		//

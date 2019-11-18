@@ -256,9 +256,9 @@ PropertyPage* OptionsDialog::createPage(int page)
 		case OPTION_PAGE_CONFIG_SOCKET:
 		case OPTION_PAGE_SIGNAL_SOCKET:
 		case OPTION_PAGE_TUNING_SOCKET:
-		case OPTION_PAGE_MODULE_MEASURE:
 		case OPTION_PAGE_LINEARITY_MEASURE:
 		case OPTION_PAGE_COMPARATOR_MEASURE:
+		case OPTION_PAGE_MODULE_MEASURE:
 		case OPTION_PAGE_MEASURE_VIEW_TEXT:
 		case OPTION_PAGE_SIGNAL_INFO:
 		case OPTION_PAGE_COMPARATOR_INFO:
@@ -369,31 +369,6 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					editor->addProperty(serverGroup2);
 				}
 
-			}
-			break;
-
-		case OPTION_PAGE_MODULE_MEASURE:
-			{
-				QtProperty *measuremoduleGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measuring of module"));
-
-					item = manager->addProperty(QVariant::Bool, ModuleParamName[MO_PARAM_MEASURE_ENTIRE_MODULE]);
-					item->setValue(m_options.module().measureEntireModule());
-					appendProperty(item, page, MO_PARAM_MEASURE_ENTIRE_MODULE);
-					measuremoduleGroup->addSubProperty(item);
-
-					item = manager->addProperty(QVariant::Bool, ModuleParamName[MO_PARAM_WARN_IF_MEASURED]);
-					item->setValue(m_options.module().warningIfMeasured());
-					appendProperty(item, page, MO_PARAM_WARN_IF_MEASURED);
-					measuremoduleGroup->addSubProperty(item);
-
-					item = manager->addProperty(VariantManager::folerPathTypeId(), ModuleParamName[MO_PARAM_SUFFIX_SN]);
-					item->setValue(m_options.module().suffixSN());
-					appendProperty(item, page, MO_PARAM_SUFFIX_SN);
-					measuremoduleGroup->addSubProperty(item);
-
-				editor->setFactoryForManager(manager, factory);
-
-				editor->addProperty(measuremoduleGroup);
 			}
 			break;
 
@@ -536,14 +511,14 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 				QtProperty *errorGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Metrological error"));
 
 					item = manager->addProperty(QVariant::Double, ComparatorParamName[CO_PARAM_ERROR_LIMIT]);
-					item->setValue(m_options.comparator().m_errorValue);
+					item->setValue(m_options.comparator().errorLimit());
 					item->setAttribute(QLatin1String("singleStep"), 0.1);
 					item->setAttribute(QLatin1String("decimals"), 3);
 					appendProperty(item, page, CO_PARAM_ERROR_LIMIT);
 					errorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Double, ComparatorParamName[CO_PARAM_START_VALUE]);
-					item->setValue(m_options.comparator().m_startValue);
+					item->setValue(m_options.comparator().startValue());
 					item->setAttribute(QLatin1String("singleStep"), 0.1);
 					item->setAttribute(QLatin1String("decimals"), 3);
 					appendProperty(item, page, CO_PARAM_START_VALUE);
@@ -556,32 +531,60 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 						errorTypeList.append(MeasureErrorType[e]);
 					}
 					item->setAttribute(QLatin1String("enumNames"), errorTypeList);
-					item->setValue(m_options.comparator().m_errorType);
+					item->setValue(m_options.comparator().errorType());
 					appendProperty(item, page, CO_PARAM_ERROR_TYPE);
 					errorGroup->addSubProperty(item);
 
+				QtProperty *permissionsGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Permissions"));
+
 					item = manager->addProperty(QVariant::Bool, ComparatorParamName[CO_PARAM_ENABLE_HYSTERESIS]);
-					item->setValue(m_options.comparator().m_enableMeasureHysteresis);
+					item->setValue(m_options.comparator().enableMeasureHysteresis());
 					appendProperty(item, page, CO_PARAM_ENABLE_HYSTERESIS);
-					errorGroup->addSubProperty(item);
+					permissionsGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Int, ComparatorParamName[CO_PARAM_COMPARATOR_INDEX]);
-					item->setValue(m_options.comparator().m_startComparatorIndex);
+					item->setValue(m_options.comparator().startComparatorIndex());
 					item->setAttribute(QLatin1String("minimum"), 1);
-					item->setAttribute(QLatin1String("maximum"), 16);
+					item->setAttribute(QLatin1String("maximum"), 32);
 					item->setAttribute(QLatin1String("singleStep"), 1);
 					appendProperty(item, page, CO_PARAM_COMPARATOR_INDEX);
-					errorGroup->addSubProperty(item);
+					permissionsGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Bool, ComparatorParamName[CO_PARAM_ADDITIONAL_CHECK]);
-					item->setValue(m_options.comparator().m_additionalCheck);
+					item->setValue(m_options.comparator().enableAdditionalCheck());
 					appendProperty(item, page, CO_PARAM_ADDITIONAL_CHECK);
-					errorGroup->addSubProperty(item);
+					permissionsGroup->addSubProperty(item);
 
 
 				editor->setFactoryForManager(manager, factory);
 
 				editor->addProperty(errorGroup);
+				editor->addProperty(permissionsGroup);
+			}
+			break;
+
+		case OPTION_PAGE_MODULE_MEASURE:
+			{
+				QtProperty *measuremoduleGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Measuring of module"));
+
+					item = manager->addProperty(QVariant::Bool, ModuleParamName[MO_PARAM_MEASURE_ENTIRE_MODULE]);
+					item->setValue(m_options.module().measureEntireModule());
+					appendProperty(item, page, MO_PARAM_MEASURE_ENTIRE_MODULE);
+					measuremoduleGroup->addSubProperty(item);
+
+					item = manager->addProperty(QVariant::Bool, ModuleParamName[MO_PARAM_WARN_IF_MEASURED]);
+					item->setValue(m_options.module().warningIfMeasured());
+					appendProperty(item, page, MO_PARAM_WARN_IF_MEASURED);
+					measuremoduleGroup->addSubProperty(item);
+
+					item = manager->addProperty(VariantManager::folerPathTypeId(), ModuleParamName[MO_PARAM_SUFFIX_SN]);
+					item->setValue(m_options.module().suffixSN());
+					appendProperty(item, page, MO_PARAM_SUFFIX_SN);
+					measuremoduleGroup->addSubProperty(item);
+
+				editor->setFactoryForManager(manager, factory);
+
+				editor->addProperty(measuremoduleGroup);
 			}
 			break;
 
@@ -1094,18 +1097,6 @@ void OptionsDialog::applyProperty()
 			}
 			break;
 
-		case OPTION_PAGE_MODULE_MEASURE:
-			{
-				switch(param)
-				{
-					case MO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.module().setMeasureEntireModule(value.toBool());		break;
-					case MO_PARAM_WARN_IF_MEASURED:			m_options.module().setWarningIfMeasured(value.toBool());		break;
-					case MO_PARAM_SUFFIX_SN:				m_options.module().setSuffixSN(value.toString());				break;
-					default:								assert(0);
-				}
-			}
-			break;
-
 		case OPTION_PAGE_LINEARITY_MEASURE:
 			{
 				switch(param)
@@ -1142,13 +1133,25 @@ void OptionsDialog::applyProperty()
 			{
 				switch(param)
 				{
-					case CO_PARAM_ERROR_LIMIT:			m_options.comparator().m_errorValue = value.toDouble();				break;
-					case CO_PARAM_START_VALUE:			m_options.comparator().m_startValue = value.toDouble();				break;
-					case CO_PARAM_ERROR_TYPE:			m_options.comparator().m_errorType = value.toInt();					break;
-					case CO_PARAM_ENABLE_HYSTERESIS:	m_options.comparator().m_enableMeasureHysteresis = value.toBool();	break;
-					case CO_PARAM_COMPARATOR_INDEX:		m_options.comparator().m_startComparatorIndex = value.toInt();		break;
-					case CO_PARAM_ADDITIONAL_CHECK:		m_options.comparator().m_additionalCheck = value.toBool();			break;
+					case CO_PARAM_ERROR_LIMIT:			m_options.comparator().setErrorLimit(value.toDouble());				break;
+					case CO_PARAM_START_VALUE:			m_options.comparator().setStartValue(value.toDouble());				break;
+					case CO_PARAM_ERROR_TYPE:			m_options.comparator().setErrorType(value.toInt());					break;
+					case CO_PARAM_ENABLE_HYSTERESIS:	m_options.comparator().setEnableMeasureHysteresis(value.toBool());	break;
+					case CO_PARAM_COMPARATOR_INDEX:		m_options.comparator().setStartComparatorIndex(value.toInt());		break;
+					case CO_PARAM_ADDITIONAL_CHECK:		m_options.comparator().setEnableAdditionalCheck(value.toBool());	break;
 					default:							assert(0);
+				}
+			}
+			break;
+
+		case OPTION_PAGE_MODULE_MEASURE:
+			{
+				switch(param)
+				{
+					case MO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.module().setMeasureEntireModule(value.toBool());		break;
+					case MO_PARAM_WARN_IF_MEASURED:			m_options.module().setWarningIfMeasured(value.toBool());		break;
+					case MO_PARAM_SUFFIX_SN:				m_options.module().setSuffixSN(value.toString());				break;
+					default:								assert(0);
 				}
 			}
 			break;

@@ -235,6 +235,8 @@ namespace Builder
 
 		ProcsToCallArray procs =
 		{
+			PROC_TO_CALL(ModuleLogicCompiler::initComparatorSignals),
+
 			PROC_TO_CALL(ModuleLogicCompiler::finalizeOptoConnectionsProcessing),
 			PROC_TO_CALL(ModuleLogicCompiler::setOptoUalSignalsAddresses),
 			PROC_TO_CALL(ModuleLogicCompiler::writeSignalLists),
@@ -302,6 +304,13 @@ namespace Builder
 	bool ModuleLogicCompiler::expertMode() const
 	{
 		return m_context->m_expertMode;
+	}
+
+	void ModuleLogicCompiler::setModuleCompilersRef(const QVector<ModuleLogicCompiler*>* moduleCompilers)
+	{
+		TEST_PTR_LOG_RETURN(moduleCompilers, log());
+
+		m_moduleCompilers = moduleCompilers;
 	}
 
 	bool ModuleLogicCompiler::loadLMSettings()
@@ -6515,6 +6524,11 @@ namespace Builder
 		return result;
 	}
 
+	bool ModuleLogicCompiler::initComparatorSignals()
+	{
+		return true;
+	}
+
 	bool ModuleLogicCompiler::finalizeOptoConnectionsProcessing()
 	{
 		bool result = true;
@@ -9154,13 +9168,13 @@ namespace Builder
 				switch (pv.value().toInt())
 				{
 					case 1:
-					case 5:			cmp->setCmpType(Comparator::CmpType::Equ);		break;
+					case 5:			cmp->setCmpType(E::CmpType::Equal);		break;
 					case 2:
-					case 6:			cmp->setCmpType(Comparator::CmpType::Greate);	break;
+					case 6:			cmp->setCmpType(E::CmpType::Greate);	break;
 					case 3:
-					case 7:			cmp->setCmpType(Comparator::CmpType::Less);		break;
+					case 7:			cmp->setCmpType(E::CmpType::Less);		break;
 					case 4:
-					case 8:			cmp->setCmpType(Comparator::CmpType::NotEqu);	break;
+					case 8:			cmp->setCmpType(E::CmpType::NotEqual);	break;
 				}
 			}
 

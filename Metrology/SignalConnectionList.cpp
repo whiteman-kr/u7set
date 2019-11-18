@@ -320,17 +320,17 @@ SignalConnectionItemDialog::~SignalConnectionItemDialog()
 void SignalConnectionItemDialog::createInterface()
 {
 	setWindowFlags(Qt::Dialog);
-	setWindowIcon(QIcon(":/icons/InOut.png"));
+	setWindowIcon(QIcon(":/icons/Connection.png"));
 
 	if (m_signalConnection.isValid() == false)
 	{
 		setWindowIcon(QIcon(":/icons/Add.png"));
-		setWindowTitle(tr("Append output signal"));
+		setWindowTitle(tr("Append connection"));
 	}
 	else
 	{
 		setWindowIcon(QIcon(":/icons/Edit.png"));
-		setWindowTitle(tr("Edit output signal"));
+		setWindowTitle(tr("Edit connection"));
 	}
 
 	// signal connection type
@@ -635,8 +635,8 @@ SignalConnectionDialog::~SignalConnectionDialog()
 void SignalConnectionDialog::createInterface()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/InOut.png"));
-	setWindowTitle(tr("Output signals"));
+	setWindowIcon(QIcon(":/icons/Connection.png"));
+	setWindowTitle(tr("Signal connections"));
 	resize(QApplication::desktop()->availableGeometry().width() - 700, 500);
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());
 
@@ -760,7 +760,7 @@ void SignalConnectionDialog::updateList()
 
 	m_сonnectionBase.sort();
 
-	QList<SignalConnection> сonnectionList;
+	QList<SignalConnection> connectionList;
 
 	int count = m_сonnectionBase.count();
 	for(int i = 0; i < count; i++)
@@ -771,10 +771,10 @@ void SignalConnectionDialog::updateList()
 			continue;
 		}
 
-		сonnectionList.append(signalConnection);
+		connectionList.append(signalConnection);
 	}
 
-	m_сonnectionTable.set(сonnectionList);
+	m_сonnectionTable.set(connectionList);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

@@ -26,7 +26,7 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* pLayer) const final;
+		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* pLayer) const final;
 
 		// Serialization
 		//

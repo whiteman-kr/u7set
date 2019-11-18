@@ -191,6 +191,7 @@ void ProjectsTabPage::createProject()
 					if (result == true)
 					{
 						dbController()->setProjectProperty(Db::ProjectProperty::Description, dialog.projectDescription, this);
+						dbController()->setProjectProperty(Db::ProjectProperty::SafetyProject, true, this);
 						dbController()->setProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, true, this);
 						dbController()->closeProject(this);
 					}

@@ -37,7 +37,17 @@ bool ProjectPropertiesForm::show(QWidget* parent, DbController* db)
 	}
 	else
 	{
-		assert(prop);
+		Q_ASSERT(prop);
+	}
+
+	if (auto prop = propertyObject->propertyByCaption(Db::ProjectProperty::SafetyProject);
+		prop != nullptr)
+	{
+		prop->setReadOnly(!db->currentUser().isAdminstrator());
+	}
+	else
+	{
+		Q_ASSERT(prop);
 	}
 
 	// Only Administrator can edit @SuppressWarnings@
@@ -49,7 +59,7 @@ bool ProjectPropertiesForm::show(QWidget* parent, DbController* db)
 	}
 	else
 	{
-		assert(prop);
+		Q_ASSERT(prop);
 	}
 
 	// Only Administrator can edit @UppercaseAppSignalID@
@@ -71,7 +81,18 @@ bool ProjectPropertiesForm::show(QWidget* parent, DbController* db)
 	//
 	PropertyEditorDialog dialog(parent);
 
+	dialog.setWindowTitle(QString("Project Properties"));
 	dialog.setObject(propertyObject);
+
+	QSize resizeTo = dialog.size();
+	QRect screen = QDesktopWidget().availableGeometry(parent);
+
+	resizeTo.setWidth(static_cast<int>(screen.size().width() * 0.30));
+	resizeTo.setHeight(static_cast<int>(screen.size().width() * 0.20));
+
+	dialog.resize(resizeTo);
+
+	dialog.setSplitterPosition(resizeTo.width() / 2);
 
 	int result = dialog.exec();
 

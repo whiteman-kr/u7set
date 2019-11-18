@@ -2,7 +2,6 @@
     <qresource prefix="/">
         <file>icons/empty.png</file>
         <file>icons/About Application.png</file>
-        <file>icons/About connection.png</file>
         <file>icons/Calculator.png</file>
         <file>icons/Calibrators.png</file>
         <file>icons/Cut.png</file>
@@ -17,7 +16,6 @@
         <file>icons/Statistics.png</file>
         <file>icons/Stop.png</file>
         <file>icons/OutRange.png</file>
-        <file>icons/Signals.png</file>
         <file>icons/Metrology.ico</file>
         <file>icons/Settings.png</file>
         <file>icons/Manage.png</file>
@@ -33,10 +31,14 @@
         <file>icons/Add.png</file>
         <file>icons/Copy.png</file>
         <file>icons/Comparator.png</file>
-        <file>icons/InOut.png</file>
         <file>icons/Logo.png</file>
         <file>Images/logo.png</file>
         <file>icons/CheckGreen.png</file>
         <file>icons/CheckRed.png</file>
+        <file>icons/About Сonnection.png</file>
+        <file>icons/Connection.png</file>
+        <file>icons/Tuning.png</file>
+        <file>icons/Rack.png</file>
+        <file>icons/Signal.png</file>
     </qresource>
 </RCC>

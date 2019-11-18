@@ -354,7 +354,7 @@ SignalListDialog::~SignalListDialog()
 void SignalListDialog::createInterface(bool hasButtons)
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/Signals.png"));
+	setWindowIcon(QIcon(":/icons/Signal.png"));
 	setWindowTitle(tr("Signals"));
 	resize(QApplication::desktop()->availableGeometry().width() - 200, 500);
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());

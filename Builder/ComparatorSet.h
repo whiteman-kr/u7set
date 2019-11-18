@@ -52,19 +52,11 @@ namespace Builder
 	class Comparator
 	{
 	public:
-		enum CmpType
-		{
-			Equ,
-			Greate,
-			Less,
-			NotEqu
-		};
-
 		Comparator();
 		virtual ~Comparator();
 
-		CmpType cmpType() const;
-		void setCmpType(CmpType cmpType);
+		E::CmpType cmpType() const;
+		void setCmpType(E::CmpType cmpType);
 
 		E::AnalogAppSignalFormat intAnalogSignalFormat() const;
 		void setInAnalogSignalFormat(E::AnalogAppSignalFormat intAnalogSignalFormat);
@@ -95,7 +87,7 @@ namespace Builder
 		void serializeFrom(const Proto::Comparator& c);
 
 	private:
-		CmpType m_cmpType= CmpType::Equ;
+		E::CmpType m_cmpType = E::CmpType::Equal;
 		E::AnalogAppSignalFormat m_inAnalogSignalFormat = E::AnalogAppSignalFormat::SignedInt32;
 
 		ComparatorSignal m_inputSignal;

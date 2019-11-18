@@ -57,9 +57,6 @@ namespace VFrame30
 		addProperty<bool, FblItemRect, &FblItemRect::getFontBold, &FblItemRect::setFontBold>(PropertyNames::fontBold, PropertyNames::appearanceCategory, true);
 		addProperty<bool, FblItemRect, &FblItemRect::getFontItalic, &FblItemRect::setFontItalic>(PropertyNames::fontItalic, PropertyNames::appearanceCategory, true);
 
-		addProperty<QString, FblItemRect, &FblItemRect::label, nullptr>(PropertyNames::label, PropertyNames::functionalCategory, true);
-		addProperty<E::TextPos, FblItemRect, &FblItemRect::labelPos, &FblItemRect::setLabelPos>(PropertyNames::labelPos, PropertyNames::functionalCategory, true);
-
 		addProperty<QString, FblItemRect, &FblItemRect::userText, &FblItemRect::setUserText>(PropertyNames::userText, PropertyNames::textCategory, true);
 		addProperty<E::TextPos, FblItemRect, &FblItemRect::userTextPos, &FblItemRect::setUserTextPos>(PropertyNames::userTextPos, PropertyNames::textCategory, true);
 
@@ -98,8 +95,8 @@ namespace VFrame30
 
 		m_font.SaveData(itemMessage->mutable_font());
 
-		itemMessage->set_label(m_label.toStdString());
-		itemMessage->set_labelpos(static_cast<::google::protobuf::int32>(m_labelPos));
+		//itemMessage->set_label(m_label.toStdString());
+		//itemMessage->set_labelpos(static_cast<::google::protobuf::int32>(m_labelPos));
 
 		itemMessage->set_usertext(m_userText.toStdString());
 		itemMessage->set_usertextpos(static_cast<::google::protobuf::int32>(m_userTextPos));
@@ -144,8 +141,18 @@ namespace VFrame30
 
 		m_font.LoadData(itemMessage.font());
 
-		m_label = QString::fromStdString(itemMessage.label());
-		m_labelPos = static_cast<E::TextPos>(itemMessage.labelpos());
+		QString label = QString::fromStdString(itemMessage.obsoletelabel());
+		if (label.isEmpty() == false)
+		{
+			setLabel(label);
+		}
+
+		int labelPos = itemMessage.obsoletelabelpos();
+		if (labelPos != -1)
+		{
+			setLabelPos(static_cast<E::TextPos>(labelPos));
+		}
+
 
 		m_userText = QString::fromStdString(itemMessage.usertext());
 		m_userTextPos = static_cast<E::TextPos>(itemMessage.usertextpos());
@@ -304,7 +311,7 @@ namespace VFrame30
 
 	// Drawing Functions
 	//
-	void FblItemRect::Draw(CDrawParam* drawParam, const Schema*, const SchemaLayer* layer) const
+	void FblItemRect::draw(CDrawParam* drawParam, const Schema*, const SchemaLayer* layer) const
 	{
 		QPainter* p = drawParam->painter();
 		p->setBrush(Qt::NoBrush);
@@ -337,7 +344,6 @@ namespace VFrame30
 		r.setTopRight(drawParam->gridToDpi(r.topRight()));
 		r.setBottomLeft(drawParam->gridToDpi(r.bottomLeft()));
 
-		QRectF labelRect{r};	// save rect for future use
 		QRectF userTextRect{r};	// save rect for future use
 
 		// Draw main rect
@@ -581,57 +587,10 @@ namespace VFrame30
 			DrawHelper::drawText(p, smallFont, itemUnit(), userText(), userTextRect, Qt::TextDontClip | alignFlags);
 		}
 
-		// Draw Label
-		//
-		if (drawParam->infoMode() == true)
-		{
-			int alignFlags = Qt::AlignmentFlag::AlignCenter;
-			switch (labelPos())
-			{
-			case E::TextPos::LeftTop:
-				labelRect.moveBottomRight(labelRect.topLeft());
-				alignFlags = Qt::AlignRight | Qt::AlignBottom;
-				break;
-			case E::TextPos::Top:
-				labelRect.moveBottom(labelRect.top());
-				alignFlags = Qt::AlignHCenter | Qt::AlignBottom;
-				break;
-			case E::TextPos::RightTop:
-				labelRect.moveBottomLeft(labelRect.topRight());
-				alignFlags = Qt::AlignLeft | Qt::AlignBottom;
-				break;
-			case E::TextPos::Right:
-				labelRect.moveLeft(labelRect.right());
-				alignFlags = Qt::AlignLeft | Qt::AlignVCenter;
-				break;
-			case E::TextPos::RightBottom:
-				labelRect.moveTopLeft(labelRect.bottomRight());
-				alignFlags = Qt::AlignLeft | Qt::AlignTop;
-				break;
-			case E::TextPos::Bottom:
-				labelRect.moveTop(labelRect.bottom());
-				alignFlags = Qt::AlignHCenter | Qt::AlignTop;
-				break;
-			case E::TextPos::LeftBottom:
-				labelRect.moveTopRight(labelRect.bottomLeft());
-				alignFlags = Qt::AlignRight | Qt::AlignTop;
-				break;
-			case E::TextPos::Left:
-				labelRect.moveRight(labelRect.left());
-				alignFlags = Qt::AlignRight | Qt::AlignVCenter;
-				break;
-			default:
-				assert(false);
-			}
-
-			p->setPen(Qt::darkGray);
-			DrawHelper::drawText(p, smallFont, itemUnit(), label(), labelRect, Qt::TextDontClip | alignFlags);
-		}
-
 		return;
 	}
 
-	void FblItemRect::DrawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const
+	void FblItemRect::drawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const
 	{
 		QPainter* p = drawParam->painter();
 
@@ -1135,26 +1094,6 @@ namespace VFrame30
 	void FblItemRect::setTextColor(QRgb color)
 	{
 		m_textColor = color;
-	}
-
-	QString FblItemRect::label() const
-	{
-		return m_label;
-	}
-
-	void FblItemRect::setLabel(const QString& value)
-	{
-		m_label = value;
-	}
-
-	E::TextPos FblItemRect::labelPos() const
-	{
-		return m_labelPos;
-	}
-
-	void FblItemRect::setLabelPos(const E::TextPos& value)
-	{
-		m_labelPos = value;
 	}
 
 	QString FblItemRect::userText() const

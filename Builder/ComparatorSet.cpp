@@ -94,12 +94,12 @@ namespace Builder
 	{
 	}
 
-	Comparator::CmpType Comparator::cmpType() const
+	E::CmpType Comparator::cmpType() const
 	{
 		return m_cmpType;
 	}
 
-	void Comparator::setCmpType(Comparator::CmpType cmpType)
+	void Comparator::setCmpType(E::CmpType cmpType)
 	{
 		m_cmpType = cmpType;
 	}
@@ -218,7 +218,7 @@ namespace Builder
 
 	void Comparator::serializeFrom(const Proto::Comparator& c)
 	{
-		m_cmpType = static_cast<Comparator::CmpType>(c.cmptype());
+		m_cmpType = static_cast<E::CmpType>(c.cmptype());
 		m_inAnalogSignalFormat = static_cast<E::AnalogAppSignalFormat>(c.inanalogsignalformat());
 
 		m_inputSignal.serializeFrom(c.input());

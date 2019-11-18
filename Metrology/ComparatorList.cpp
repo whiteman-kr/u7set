@@ -123,8 +123,13 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString ComparatorListTable::text(int row, int column, std::shared_ptr<Builder::Comparator> comparator) const
+QString ComparatorListTable::text(int row, int column, std::shared_ptr<Builder::Comparator> pComparator) const
 {
+	if (pComparator == nullptr)
+	{
+		return QString();
+	}
+
 	if (row < 0 || row >= comparatorCount())
 	{
 		return QString();
@@ -135,54 +140,69 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Builder::
 		return QString();
 	}
 
-	QString compareValue;
+	QString inputAppSignalID = pComparator->input().appSignalID();
 
-	switch (comparator->cmpType())
+	int prevRow = row - 1;
+	if (prevRow >= 0 && prevRow < comparatorCount())
 	{
-		case ::Builder::Comparator::CmpType::Equ:		compareValue = "= ";	break;
-		case ::Builder::Comparator::CmpType::Greate:	compareValue = "> ";	break;
-		case ::Builder::Comparator::CmpType::Less:		compareValue = "< ";	break;
-		case ::Builder::Comparator::CmpType::NotEqu:	compareValue = "≠ ";	break;
-		default:										compareValue = "??? ";	assert(0);	break;
+		std::shared_ptr<Builder::Comparator> pPrevComparator = comparator(prevRow);
+		if (pPrevComparator != nullptr)
+		{
+			if (pPrevComparator->input().appSignalID() == inputAppSignalID)
+			{
+				inputAppSignalID.clear();
+			}
+		}
 	}
 
-	int precision = comparator->precision();
-	switch (comparator->intAnalogSignalFormat())
+	QString compareValue;
+
+	switch (pComparator->cmpType())
 	{
-		case E::AnalogAppSignalFormat::Float32:		precision = comparator->precision();	break;
+		case E::CmpType::Equal:		compareValue = "= ";	break;
+		case E::CmpType::Greate:	compareValue = "> ";	break;
+		case E::CmpType::Less:		compareValue = "< ";	break;
+		case E::CmpType::NotEqual:	compareValue = "≠ ";	break;
+		default:					compareValue = "??? ";	assert(0);	break;
+	}
+
+	int precision = pComparator->precision();
+	switch (pComparator->intAnalogSignalFormat())
+	{
+		case E::AnalogAppSignalFormat::Float32:		precision = pComparator->precision();	break;
 		case E::AnalogAppSignalFormat::SignedInt32:	precision = 0;							break;
 		default:									assert(0);
 	}
 
-	if (comparator->compare().isConst() == true)
+	if (pComparator->compare().isConst() == true)
 	{
-		compareValue += QString::number(comparator->compare().constValue(), 10, precision);
+		compareValue += QString::number(pComparator->compare().constValue(), 10, precision);
 	}
 	else
 	{
-		compareValue += comparator->compare().appSignalID();
+		compareValue += pComparator->compare().appSignalID();
 	}
 
 	QString hysteresisValue;
 
-	if (comparator->hysteresis().isConst() == true)
+	if (pComparator->hysteresis().isConst() == true)
 	{
-		hysteresisValue = QString::number(comparator->hysteresis().constValue(), 10, precision);
+		hysteresisValue = QString::number(pComparator->hysteresis().constValue(), 10, precision);
 	}
 	else
 	{
-		hysteresisValue = comparator->hysteresis().appSignalID();
+		hysteresisValue = pComparator->hysteresis().appSignalID();
 	}
 
 	QString result;
 
 	switch (column)
 	{
-		case COMPARATOR_LIST_COLUMN_INPUT:				result = comparator->input().appSignalID();		break;
+		case COMPARATOR_LIST_COLUMN_INPUT:				result = inputAppSignalID;						break;
 		case COMPARATOR_LIST_COLUMN_VALUE:				result = compareValue;							break;
 		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = hysteresisValue;						break;
-		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparator->output().appSignalID();	break;
-		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparator->schemaID();				break;
+		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = pComparator->output().appSignalID();	break;
+		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = pComparator->schemaID();				break;
 		default:										assert(0);
 	}
 
@@ -299,7 +319,7 @@ void ComparatorListDialog::createInterface()
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Comparator.png"));
 	setWindowTitle(tr("Comparators"));
-	resize(QApplication::desktop()->availableGeometry().width() - 200, 500);
+	resize(QApplication::desktop()->availableGeometry().width() - 850, 500);
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());
 	installEventFilter(this);
 
@@ -580,20 +600,20 @@ void ComparatorListDialog::comparatorProperties()
 		return;
 	}
 
-//	Metrology::Signal* pSignal = m_signalTable.signal(index);
-//	if (pSignal == nullptr)
-//	{
-//		return;
-//	}
+	std::shared_ptr<Builder::Comparator> pComparator = m_comparatorTable.comparator(index);
+	if (pComparator == nullptr)
+	{
+		return;
+	}
 
-//	Metrology::SignalParam& param = pSignal->param();
-//	if (param.isValid() == false)
-//	{
-//		return;
-//	}
+	ComparatorPropertyDialog dialog(*pComparator);
+	int result = dialog.exec();
+	if (result != QDialog::Accepted)
+	{
+		return;
+	}
 
-//	SignalPropertyDialog dialog(param);
-//	dialog.exec();
+	*pComparator = dialog.comparator();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
