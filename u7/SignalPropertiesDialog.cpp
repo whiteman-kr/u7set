@@ -325,7 +325,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 				}
 			}
 		}
-		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(appSignal);
+		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(appSignal, true);
 
 		if (readOnly == true)
 		{
@@ -338,6 +338,8 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		int precision = appSignal.decimalPlaces();
 
 		SignalPropertyManager& manager = SignalsModel::instance()->signalPropertyManager();
+		manager.detectNewProperties(appSignal);
+		manager.loadNotSpecificProperties(*signalProperties);
 		manager.reloadPropertyBehaviour(dbController, parent);
 
 		for (auto property : signalProperties->properties())
