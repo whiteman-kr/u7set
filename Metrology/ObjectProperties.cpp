@@ -280,9 +280,9 @@ void RackPropertyDialog::createPropertyList()
 		item = m_pManager->addProperty(QtVariantPropertyManager::enumTypeId(), tr("Channel"));
 		QStringList channelList;
 		channelList.append(QString());
-		for(int c = 0; c < Metrology::ChannelCount; c++)
+		for(int ch = 0; ch < Metrology::ChannelCount; ch++)
 		{
-			channelList.append(QString::number(c + 1));
+			channelList.append(QString::number(ch + 1));
 		}
 		item->setAttribute(QLatin1String("enumNames"), channelList);
 		item->setValue(m_rack.channel() + 1);
@@ -1595,14 +1595,14 @@ void ComparatorPropertyDialog::createPropertyList()
 
 			if (comparator().hysteresis().isConst() == true)
 			{
-				if (pInputSignal != nullptr && pInputSignal->param().isValid() == true && pInputSignal->param().isInput() == true)
-				{
-					item = m_pManager->addProperty(QVariant::Double, tr("Electric value, ") + pInputSignal->param().electricUnitStr());
-					item->setValue(conversion(m_comparator.hysteresis().constValue(), CT_ENGENEER_TO_ELECTRIC, pInputSignal->param()));
-					item->setAttribute(QLatin1String("decimals"), pInputSignal->param().electricPrecision());
-					m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE);
-					hysteresisGroup->addSubProperty(item);
-				}
+//				if (pInputSignal != nullptr && pInputSignal->param().isValid() == true && pInputSignal->param().isInput() == true)
+//				{
+//					item = m_pManager->addProperty(QVariant::Double, tr("Electric value, ") + pInputSignal->param().electricUnitStr());
+//					item->setValue(conversion(m_comparator.hysteresis().constValue(), CT_ENGENEER_TO_ELECTRIC, pInputSignal->param()));
+//					item->setAttribute(QLatin1String("decimals"), pInputSignal->param().electricPrecision());
+//					m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE);
+//					hysteresisGroup->addSubProperty(item);
+//				}
 
 				item = m_pManager->addProperty(QVariant::Double, tr("Engeneering value, %1").arg(pInputSignal == nullptr ? QString() : pInputSignal->param().unit()));
 				item->setValue(m_comparator.hysteresis().constValue());

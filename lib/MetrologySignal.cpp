@@ -653,7 +653,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	TuningValueType	SignalParam::tuningValueType()
+	TuningValueType	SignalParam::tuningValueType() const
 	{
 		TuningValueType type = TuningValueType::Float;
 
@@ -673,6 +673,22 @@ namespace Metrology
 		}
 
 		return type;
+	}
+
+	void SignalParam::setComparatorList(QList<std::shared_ptr<::Builder::Comparator>>& comparatorList)
+	{
+		m_comparatorList = comparatorList;
+		m_comparatorCount = m_comparatorList.count();
+	}
+
+	std::shared_ptr<::Builder::Comparator> SignalParam::comparator(int index) const
+	{
+		if (index < 0 || index >= m_comparatorCount)
+		{
+			return nullptr;
+		}
+
+		return m_comparatorList[index];
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -704,26 +720,6 @@ namespace Metrology
 		}
 
 		return StatisticState[m_state];
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-	// -------------------------------------------------------------------------------------------------------------------
-	// -------------------------------------------------------------------------------------------------------------------
-
-	void Signal::setComparatorList(QList<std::shared_ptr<::Builder::Comparator>>& comparatorList)
-	{
-		m_comparatorList = comparatorList;
-		m_comparatorCount = m_comparatorList.count();
-	}
-
-	std::shared_ptr<::Builder::Comparator> Signal::comparator(int index) const
-	{
-		if (index < 0 || index >= m_comparatorCount)
-		{
-			return nullptr;
-		}
-
-		return m_comparatorList[index];
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

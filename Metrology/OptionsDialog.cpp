@@ -518,7 +518,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					errorGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Double, ComparatorParamName[CO_PARAM_START_VALUE]);
-					item->setValue(m_options.comparator().startValue());
+					item->setValue(m_options.comparator().startValueForCompare());
 					item->setAttribute(QLatin1String("singleStep"), 0.1);
 					item->setAttribute(QLatin1String("decimals"), 3);
 					appendProperty(item, page, CO_PARAM_START_VALUE);
@@ -543,9 +543,9 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					permissionsGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Int, ComparatorParamName[CO_PARAM_COMPARATOR_INDEX]);
-					item->setValue(m_options.comparator().startComparatorIndex());
+					item->setValue(m_options.comparator().startComparatorIndex() + 1);
 					item->setAttribute(QLatin1String("minimum"), 1);
-					item->setAttribute(QLatin1String("maximum"), 32);
+					item->setAttribute(QLatin1String("maximum"), Metrology::ComparatorCount);
 					item->setAttribute(QLatin1String("singleStep"), 1);
 					appendProperty(item, page, CO_PARAM_COMPARATOR_INDEX);
 					permissionsGroup->addSubProperty(item);
@@ -1134,10 +1134,10 @@ void OptionsDialog::applyProperty()
 				switch(param)
 				{
 					case CO_PARAM_ERROR_LIMIT:			m_options.comparator().setErrorLimit(value.toDouble());				break;
-					case CO_PARAM_START_VALUE:			m_options.comparator().setStartValue(value.toDouble());				break;
+					case CO_PARAM_START_VALUE:			m_options.comparator().setStartValueForCompare(value.toDouble());	break;
 					case CO_PARAM_ERROR_TYPE:			m_options.comparator().setErrorType(value.toInt());					break;
 					case CO_PARAM_ENABLE_HYSTERESIS:	m_options.comparator().setEnableMeasureHysteresis(value.toBool());	break;
-					case CO_PARAM_COMPARATOR_INDEX:		m_options.comparator().setStartComparatorIndex(value.toInt());		break;
+					case CO_PARAM_COMPARATOR_INDEX:		m_options.comparator().setStartComparatorIndex(value.toInt() - 1);	break;
 					case CO_PARAM_ADDITIONAL_CHECK:		m_options.comparator().setEnableAdditionalCheck(value.toBool());	break;
 					default:							assert(0);
 				}

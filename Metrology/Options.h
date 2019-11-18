@@ -853,7 +853,7 @@ public:
 public:
 
 	double				m_errorLimit = 0.2;								// permissible error is given by specified documents
-	double				m_startValue = 0.1;								// start value is given by metrologists
+	double				m_startValueForCompare = 0.1;					// start value is given by metrologists
 	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;		// type of error absolute or reduced
 
 	bool				m_enableMeasureHysteresis = false;				// enable flag to measure hysteresis of сomparator
@@ -865,8 +865,8 @@ public:
 	double				errorLimit() const { return m_errorLimit; }
 	void				setErrorLimit(double errorLimit) { m_errorLimit = errorLimit; }
 
-	double				startValue() const { return m_startValue; }
-	void				setStartValue(double value) { m_startValue = value; }
+	double				startValueForCompare() const { return m_startValueForCompare; }
+	void				setStartValueForCompare(double value) { m_startValueForCompare = value; }
 
 	int					errorType() const { return m_errorType; }
 	void				setErrorType(int type) { m_errorType = type; }

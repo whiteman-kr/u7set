@@ -10465,7 +10465,7 @@ namespace Builder
 
 		qSort(sortedWriteAddress);
 
-		int wordAccAddr = m_memoryMap.wordAccumulatorAddress();
+		int bitAccAddr = m_memoryMap.bitAccumulatorAddress();
 
 		for(int writeAddr : sortedWriteAddress)
 		{
@@ -10482,7 +10482,7 @@ namespace Builder
 
 			CodeItem cmd;
 
-			cmd.movConst(wordAccAddr, 0);
+			cmd.movConst(bitAccAddr, 0);
 			code->append(cmd);
 
 			for(const std::pair<int, Signal*>& pair: sortedWriteSignals)
@@ -10511,7 +10511,7 @@ namespace Builder
 
 				if (ualSignal->isConst() == true)
 				{
-					cmd.movBitConst(wordAccAddr, s->ioBufAddr().bit(), ualSignal->constDiscreteValue());
+					cmd.movBitConst(bitAccAddr, s->ioBufAddr().bit(), ualSignal->constDiscreteValue());
 				}
 				else
 				{
@@ -10523,7 +10523,7 @@ namespace Builder
 						continue;
 					}
 
-					cmd.movBit(wordAccAddr, s->ioBufAddr().bit(), s->ualAddr().offset(), s->ualAddr().bit());
+					cmd.movBit(bitAccAddr, s->ioBufAddr().bit(), s->ualAddr().offset(), s->ualAddr().bit());
 				}
 
 				cmd.setComment(s->appSignalID());
@@ -10531,7 +10531,7 @@ namespace Builder
 				code->append(cmd);
 			}
 
-			cmd.mov(writeAddr, wordAccAddr);
+			cmd.mov(writeAddr, bitAccAddr);
 			cmd.clearComment();
 			code->append(cmd);
 			code->newLine();

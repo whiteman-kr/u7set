@@ -1121,11 +1121,11 @@ void ComparatorOption::load()
 	QSettings s;
 
 	m_errorLimit = s.value(QString("%1ErrorLimit").arg(COMPARATOR_OPTIONS_KEY), 0.2).toDouble();
-	m_startValue = s.value(QString("%1StartValue").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
+	m_startValueForCompare = s.value(QString("%1StartValueForCompare").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
 	m_errorType = s.value(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
 
 	m_enableMeasureHysteresis = s.value(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), false).toBool();
-	m_startComparatorIndex = s.value(QString("%1StartSettingNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
+	m_startComparatorIndex = s.value(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
 	m_enableAdditionalCheck = s.value(QString("%1EnableAdditionalCheck").arg(COMPARATOR_OPTIONS_KEY), true).toBool();
 }
 
@@ -1136,11 +1136,11 @@ void ComparatorOption::save()
 	QSettings s;
 
 	s.setValue(QString("%1ErrorLimit").arg(COMPARATOR_OPTIONS_KEY), m_errorLimit);
-	s.setValue(QString("%1StartValue").arg(COMPARATOR_OPTIONS_KEY), m_startValue);
+	s.setValue(QString("%1StartValueForCompare").arg(COMPARATOR_OPTIONS_KEY), m_startValueForCompare);
 	s.setValue(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), m_errorType);
 
 	s.setValue(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), m_enableMeasureHysteresis);
-	s.setValue(QString("%1StartSettingNo").arg(COMPARATOR_OPTIONS_KEY), m_startComparatorIndex);
+	s.setValue(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), m_startComparatorIndex);
 	s.setValue(QString("%1EnableAdditionalCheck").arg(COMPARATOR_OPTIONS_KEY), m_enableAdditionalCheck);
 }
 
@@ -1149,7 +1149,7 @@ void ComparatorOption::save()
 ComparatorOption& ComparatorOption::operator=(const ComparatorOption& from)
 {
 	m_errorLimit = from.m_errorLimit;
-	m_startValue = from.m_startValue;
+	m_startValueForCompare = from.m_startValueForCompare;
 	m_errorType = from.m_errorType;
 
 	m_enableMeasureHysteresis = from.m_enableMeasureHysteresis;
