@@ -1027,7 +1027,7 @@ private:
 	SocketOption			m_socket;
 	MeasureViewOption		m_measureView;
 	SignalInfoOption		m_signalInfo;
-	ComparatorInfoOption	m_сomparatorInfo;
+	ComparatorInfoOption	m_comparatorInfo;
 	DatabaseOption			m_database;
 	LinearityOption			m_linearity;
 	ComparatorOption		m_comparator;
@@ -1051,8 +1051,8 @@ public:
 	SignalInfoOption&		signalInfo() { return m_signalInfo; }
 	void					setSignalInfo(const SignalInfoOption& signalInfo) { m_signalInfo = signalInfo; }
 
-	ComparatorInfoOption&	comparatorInfo() { return m_сomparatorInfo; }
-	void					setComparatorInfo(const ComparatorInfoOption& сomparatorInfo) { m_сomparatorInfo = сomparatorInfo; }
+	ComparatorInfoOption&	comparatorInfo() { return m_comparatorInfo; }
+	void					setComparatorInfo(const ComparatorInfoOption& comparatorInfo) { m_comparatorInfo = comparatorInfo; }
 
 	DatabaseOption&			database() { return m_database; }
 	void					setDatabase(const DatabaseOption& database) { m_database = database; }

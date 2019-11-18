@@ -1358,7 +1358,7 @@ void Options::load()
 	m_measureView.load();
 
 	m_signalInfo.load();
-	m_сomparatorInfo.load();
+	m_comparatorInfo.load();
 
 	m_database.load();
 	m_database.create();
@@ -1385,7 +1385,7 @@ void Options::save()
 	m_measureView.save();
 
 	m_signalInfo.save();
-	m_сomparatorInfo.save();
+	m_comparatorInfo.save();
 
 	m_database.save();
 
@@ -1454,7 +1454,7 @@ Options& Options::operator=(const Options& from)
 		m_socket = from.m_socket;
 		m_measureView = from.m_measureView;
 		m_signalInfo = from.m_signalInfo;
-		m_сomparatorInfo = from.m_сomparatorInfo;
+		m_comparatorInfo = from.m_comparatorInfo;
 		m_database = from.m_database;
 		m_linearity = from.m_linearity;
 		m_comparator = from.m_comparator;
