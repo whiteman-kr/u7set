@@ -554,6 +554,10 @@ namespace Builder
 
 		UalSignalsMap& ualSignals() { return m_ualSignals; }
 
+		QString getFormatStr(const Hardware::DeviceSignal& ds);
+		QString getFormatStr(const Signal& s);
+		QString getFormatStr(E::SignalType signalType, E::DataFormat dataFormat, int dataSizeBits, E::ByteOrder byteOrder);
+
 	private:
 		// input parameters
 		//

@@ -5722,7 +5722,6 @@ namespace Builder
 				//
 				m_log->errALC5174(fbCaption, QUuid());
 				result = false;
-				break;
 			}
 		}
 
@@ -5772,7 +5771,7 @@ namespace Builder
 		QString errorMsg;
 		bool result = true;
 
-		QString inFormat = getFormatStr(deviceSignal);
+		QString inFormat = getFormatStr(*deviceSignal);
 		QString outFormat = getFormatStr(signal);
 
 		if (deviceSignal->format() == E::DataFormat::UnsignedInt && deviceSignal->size() == SIZE_16BIT)
@@ -5957,7 +5956,7 @@ namespace Builder
 		bool result = true;
 
 		QString inFormat = getFormatStr(signal);
-		QString outFormat = getFormatStr(deviceSignal);
+		QString outFormat = getFormatStr(*deviceSignal);
 
 		if (deviceSignal->format() == E::DataFormat::UnsignedInt && deviceSignal->size() == SIZE_16BIT)
 		{
@@ -13033,6 +13032,82 @@ namespace Builder
 		}
 
 		return cmd;
+	}
+
+	QString ModuleLogicCompiler::getFormatStr(const Hardware::DeviceSignal& ds)
+	{
+		return getFormatStr(ds.type(), ds.format(), ds.size(), ds.byteOrder());
+	}
+
+	QString ModuleLogicCompiler::getFormatStr(const Signal& s)
+	{
+		switch(s.signalType())
+		{
+		case E::SignalType::Discrete:
+			 return getFormatStr(s.signalType(), E::DataFormat::UnsignedInt, DISCRETE_SIZE, s.byteOrder());
+
+		case E::SignalType::Analog:
+			{
+				switch(s.analogSignalFormat())
+				{
+				case E::AnalogAppSignalFormat::Float32:
+					return getFormatStr(s.signalType(), E::DataFormat::Float, s.dataSize(), s.byteOrder());
+
+				case E::AnalogAppSignalFormat::SignedInt32:
+					return getFormatStr(s.signalType(), E::DataFormat::SignedInt, s.dataSize(), s.byteOrder());
+
+				default:
+					assert(false);
+				}
+			}
+			break;
+
+		case E::SignalType::Bus:
+			return getFormatStr(s.signalType(), E::DataFormat::UnsignedInt /* don't matter */, s.dataSize(), s.byteOrder()  /* don't matter */);
+
+		default:
+			assert(false);
+
+		}
+
+		return QString("???");
+	}
+
+	QString ModuleLogicCompiler::getFormatStr(E::SignalType signalType, E::DataFormat dataFormat, int dataSizeBits, E::ByteOrder byteOrder)
+	{
+		QString formatStr("???");
+		QString be_le("??");
+
+		switch(byteOrder)
+		{
+		case E::ByteOrder::BigEndian:
+			be_le = "BE";
+			break;
+
+		case E::ByteOrder::LittleEndian:
+			be_le = "LE";
+			break;
+
+		default:
+			assert(false);
+		}
+
+		switch(signalType)
+		{
+		case E::SignalType::Discrete:
+		case E::SignalType::Analog:
+			formatStr = QString("%1 %2 bit(s) %3").arg(E::valueToString<E::DataFormat>(dataFormat)).arg(dataSizeBits).arg(be_le);
+			break;
+
+		case E::SignalType::Bus:
+			formatStr = QString("Bus %1 bits").arg(dataSizeBits);
+			break;
+
+		default:
+			assert(false);
+		}
+
+		return formatStr;
 	}
 
 	// ---------------------------------------------------------------------------------------
