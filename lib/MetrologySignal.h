@@ -240,7 +240,7 @@ namespace Metrology
 		bool					physicalRangeIsValid() const;
 		QString					physicalRangeStr() const;
 
-		bool					engeneeringRangeIsValid() const;
+		bool					engineeringRangeIsValid() const;
 		QString					engeneeringRangeStr() const;
 
 		QString					enableTuningStr() const;

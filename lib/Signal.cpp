@@ -349,24 +349,24 @@ void Signal::setHighDAC(int highDAC)
 	setSpecPropInt(SignalProperties::highDACCaption, highDAC);
 }
 
-double Signal::lowEngeneeringUnits() const
+double Signal::lowEngineeringUnits() const
 {
-	return getSpecPropDouble(SignalProperties::lowEngeneeringUnitsCaption);
+	return getSpecPropDouble(SignalProperties::lowEngineeringUnitsCaption);
 }
 
-void Signal::setLowEngeneeringUnits(double lowEngeneeringUnits)
+void Signal::setLowEngineeringUnits(double lowEngineeringUnits)
 {
-	setSpecPropDouble(SignalProperties::lowEngeneeringUnitsCaption, lowEngeneeringUnits);
+	setSpecPropDouble(SignalProperties::lowEngineeringUnitsCaption, lowEngineeringUnits);
 }
 
-double Signal::highEngeneeringUnits() const
+double Signal::highEngineeringUnits() const
 {
-	return getSpecPropDouble(SignalProperties::highEngeneeringUnitsCaption);
+	return getSpecPropDouble(SignalProperties::highEngineeringUnitsCaption);
 }
 
-void Signal::setHighEngeneeringUnits(double highEngeneeringUnits)
+void Signal::setHighEngineeringUnits(double highEngineeringUnits)
 {
-	setSpecPropDouble(SignalProperties::highEngeneeringUnitsCaption, highEngeneeringUnits);
+	setSpecPropDouble(SignalProperties::highEngineeringUnitsCaption, highEngineeringUnits);
 }
 
 double Signal::lowValidRange() const
@@ -633,8 +633,8 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeIntAttribute("DataSize", dataSize());
 	xml.writeIntAttribute("LowADC", lowADC());
 	xml.writeIntAttribute("HighADC", highADC());
-	xml.writeDoubleAttribute("LowEngeneeringUnits", lowEngeneeringUnits());
-	xml.writeDoubleAttribute("HighEngeneeringUnits", highEngeneeringUnits());
+	xml.writeDoubleAttribute("LowEngineeringUnits", lowEngineeringUnits());
+	xml.writeDoubleAttribute("HighEngineeringUnits", highEngineeringUnits());
 	xml.writeIntAttribute("UnitID", 0);
 	xml.writeDoubleAttribute("LowValidRange", lowValidRange());
 	xml.writeDoubleAttribute("HighValidRange", highValidRange());
@@ -734,8 +734,8 @@ bool Signal::readFromXml(XmlReadHelper& xml)
 	result &= xml.readIntAttribute("LowADC", &intSpecPropValue);
 	result &= xml.readIntAttribute("HighADC", &intSpecPropValue);
 
-	result &= xml.readDoubleAttribute("LowEngeneeringUnits", &doubleSpecPropValue);
-	result &= xml.readDoubleAttribute("HighEngeneeringUnits", &doubleSpecPropValue);
+	result &= xml.readDoubleAttribute("LowEngineeringUnits", &doubleSpecPropValue);
+	result &= xml.readDoubleAttribute("HighEngineeringUnits", &doubleSpecPropValue);
 
 	result &= xml.readIntAttribute("UnitID", &intValue);
 
@@ -1212,8 +1212,8 @@ void Signal::initTuningValues()
 	switch (signalType())
 	{
 	case E::SignalType::Analog:
-		m_tuningLowBound.setValue(m_tuningLowBound.type(), static_cast<qint64>(lowEngeneeringUnits()), lowEngeneeringUnits());
-		m_tuningHighBound.setValue(m_tuningHighBound.type(), static_cast<qint64>(highEngeneeringUnits()), highEngeneeringUnits());
+		m_tuningLowBound.setValue(m_tuningLowBound.type(), static_cast<qint64>(lowEngineeringUnits()), lowEngineeringUnits());
+		m_tuningHighBound.setValue(m_tuningHighBound.type(), static_cast<qint64>(highEngineeringUnits()), highEngineeringUnits());
 		break;
 
 	case E::SignalType::Discrete:

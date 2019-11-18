@@ -1161,28 +1161,28 @@ void SignalPropertyDialog::createPropertyList()
 
 		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
 
-		// engeneering range group
+		// engineering range group
 
-		QtProperty *engeneeringRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EN_RANGE] + m_param.engeneeringRangeStr());
+		QtProperty *engineeringRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EN_RANGE] + m_param.engeneeringRangeStr());
 
 			item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
-			item->setValue(m_param.lowEngeneeringUnits());
+			item->setValue(m_param.lowEngineeringUnits());
 			item->setAttribute(QLatin1String("singleStep"), 0.001);
 			item->setAttribute(QLatin1String("decimals"), m_param.decimalPlaces());
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW);
-			engeneeringRangeGroup->addSubProperty(item);
+			engineeringRangeGroup->addSubProperty(item);
 
 			item = m_pManager->addProperty(QVariant::Double, tr("High limit"));
-			item->setValue(m_param.highEngeneeringUnits());
+			item->setValue(m_param.highEngineeringUnits());
 			item->setAttribute(QLatin1String("singleStep"), 0.001);
 			item->setAttribute(QLatin1String("decimals"), m_param.decimalPlaces());
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EN_RANGE_HIGH);
-			engeneeringRangeGroup->addSubProperty(item);
+			engineeringRangeGroup->addSubProperty(item);
 
 			item = m_pManager->addProperty(QVariant::String, tr("Unit"));
 			item->setValue(m_param.unit());
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EN_RANGE_UNIT);
-			engeneeringRangeGroup->addSubProperty(item);
+			engineeringRangeGroup->addSubProperty(item);
 
 			item = m_pManager->addProperty(QVariant::Int, tr("Precision"));
 			item->setValue(m_param.decimalPlaces());
@@ -1190,7 +1190,7 @@ void SignalPropertyDialog::createPropertyList()
 			item->setAttribute(QLatin1String("maximum"), 10);
 			item->setAttribute(QLatin1String("singleStep"), 1);
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_EN_RANGE_PRECISION);
-			engeneeringRangeGroup->addSubProperty(item);
+			engineeringRangeGroup->addSubProperty(item);
 
 		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
 
@@ -1209,13 +1209,13 @@ void SignalPropertyDialog::createPropertyList()
 
 
 				m_browserItemList[SIGNAL_PROPERTY_GROUP_EL_RANGE] = m_pEditor->addProperty(electricRangeGroup);
-				m_browserItemList[SIGNAL_PROPERTY_GROUP_EN_RANGE] = m_pEditor->addProperty(engeneeringRangeGroup);
+				m_browserItemList[SIGNAL_PROPERTY_GROUP_EN_RANGE] = m_pEditor->addProperty(engineeringRangeGroup);
 
 				break;
 
 			case E::SignalInOutType::Internal:
 
-				m_browserItemList[SIGNAL_PROPERTY_GROUP_EN_RANGE] = m_pEditor->addProperty(engeneeringRangeGroup);
+				m_browserItemList[SIGNAL_PROPERTY_GROUP_EN_RANGE] = m_pEditor->addProperty(engineeringRangeGroup);
 
 				break;
 
@@ -1295,8 +1295,8 @@ void SignalPropertyDialog::onPropertyValueChanged(QtProperty *property, const QV
 
 		// engeneering limit
 		//
-		case SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW:			m_param.setLowEngeneeringUnits(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
-		case SIGNAL_PROPERTY_ITEM_EN_RANGE_HIGH:		m_param.setHighEngeneeringUnits(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW:			m_param.setLowEngineeringUnits(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
+		case SIGNAL_PROPERTY_ITEM_EN_RANGE_HIGH:		m_param.setHighEngineeringUnits(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EN_RANGE_UNIT:		m_param.setUnit(value.toString());													groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EN_RANGE_PRECISION:	m_param.setDecimalPlaces(value.toInt());											groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
 	}

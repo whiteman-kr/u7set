@@ -542,9 +542,9 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	bool SignalParam::engeneeringRangeIsValid() const
+	bool SignalParam::engineeringRangeIsValid() const
 	{
-		if (lowEngeneeringUnits() == 0.0 && highEngeneeringUnits() == 0.0)
+		if (lowEngineeringUnits() == 0.0 && highEngineeringUnits() == 0.0)
 		{
 			return false;
 		}
@@ -560,7 +560,7 @@ namespace Metrology
 
 		formatStr.sprintf("%%.%df", decimalPlaces());
 
-		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), lowEngeneeringUnits(), highEngeneeringUnits());
+		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), lowEngineeringUnits(), highEngineeringUnits());
 
 		if (unit().isEmpty() == false)
 		{

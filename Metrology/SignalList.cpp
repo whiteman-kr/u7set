@@ -170,7 +170,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 
 			case SIGNAL_LIST_COLUMN_EN_RANGE:
 
-				if (pSignal->param().engeneeringRangeIsValid() == false)
+			    if (pSignal->param().engineeringRangeIsValid() == false)
 				{
 					return QColor(0xFF, 0xA0, 0xA0);
 				}

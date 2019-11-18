@@ -236,12 +236,12 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam, bool
 	//
 
 	double electric = isNegativeRange ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();
-	double engeneering = conversion(electric, CT_ELECTRIC_TO_ENGENEER, inParam);
+	double engineering = conversion(electric, CT_ELECTRIC_TO_ENGENEER, inParam);
 
-	setPercent(((engeneering - inParam.lowEngeneeringUnits()) * 100)/(inParam.highEngeneeringUnits() - inParam.lowEngeneeringUnits()));
+	setPercent(((engineering - inParam.lowEngineeringUnits()) * 100)/(inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()));
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
-	setNominal(MEASURE_LIMIT_TYPE_ENGENEER, engeneering);
+	setNominal(MEASURE_LIMIT_TYPE_ENGINEER, engineering);
 
 	// measure
 	//
@@ -263,7 +263,7 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam, bool
 		double enVal = signalState.value();
 
 		setMeasureItemArray(MEASURE_LIMIT_TYPE_ELECTRIC, index, elVal);
-		setMeasureItemArray(MEASURE_LIMIT_TYPE_ENGENEER, index, enVal);
+		setMeasureItemArray(MEASURE_LIMIT_TYPE_ENGINEER, index, enVal);
 
 		averageElVal += elVal;
 		averageEnVal += enVal;
@@ -275,7 +275,7 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam, bool
 	averageEnVal /= measureCount;
 
 	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, averageElVal);
-	setMeasure(MEASURE_LIMIT_TYPE_ENGENEER, averageEnVal);
+	setMeasure(MEASURE_LIMIT_TYPE_ENGINEER, averageEnVal);
 
 	// limits
 	//
@@ -287,7 +287,7 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam, bool
 
 	// calc additional parameters
 	//
-	calcAdditionalParam(MEASURE_LIMIT_TYPE_ENGENEER);
+	calcAdditionalParam(MEASURE_LIMIT_TYPE_ENGINEER);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -354,13 +354,13 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 	// nominal
 	//
 
-	double engeneering = (ioParam.percent() * (outParam.highEngeneeringUnits() - outParam.lowEngeneeringUnits()) / 100) + outParam.lowEngeneeringUnits();
-	double electric = conversion(engeneering, CT_ENGENEER_TO_ELECTRIC, outParam);
+	double engineering = (ioParam.percent() * (outParam.highEngineeringUnits() - outParam.lowEngineeringUnits()) / 100) + outParam.lowEngineeringUnits();
+	double electric = conversion(engineering, CT_ENGENEER_TO_ELECTRIC, outParam);
 
 	setPercent(ioParam.percent());
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
-	setNominal(MEASURE_LIMIT_TYPE_ENGENEER, engeneering);
+	setNominal(MEASURE_LIMIT_TYPE_ENGINEER, engineering);
 
 	// measure
 	//
@@ -388,7 +388,7 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 		}
 
 		setMeasureItemArray(MEASURE_LIMIT_TYPE_ELECTRIC, index, elVal);
-		setMeasureItemArray(MEASURE_LIMIT_TYPE_ENGENEER, index, enVal);
+		setMeasureItemArray(MEASURE_LIMIT_TYPE_ENGINEER, index, enVal);
 
 		averageElVal += elVal;
 		averagePhVal += enVal;
@@ -400,7 +400,7 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 	averagePhVal /= measureCount;
 
 	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, averageElVal);
-	setMeasure(MEASURE_LIMIT_TYPE_ENGENEER, averagePhVal);
+	setMeasure(MEASURE_LIMIT_TYPE_ENGINEER, averagePhVal);
 
 	// limits
 	//
@@ -425,10 +425,10 @@ void LinearityMeasurement::setLimits(const Metrology::SignalParam& param)
 	setUnit(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricUnitStr());
 	setLimitPrecision(MEASURE_LIMIT_TYPE_ELECTRIC, param.electricPrecision());
 
-	setLowLimit(MEASURE_LIMIT_TYPE_ENGENEER, param.lowEngeneeringUnits());
-	setHighLimit(MEASURE_LIMIT_TYPE_ENGENEER, param.highEngeneeringUnits());
-	setUnit(MEASURE_LIMIT_TYPE_ENGENEER, param.unit());
-	setLimitPrecision(MEASURE_LIMIT_TYPE_ENGENEER, param.decimalPlaces());
+	setLowLimit(MEASURE_LIMIT_TYPE_ENGINEER, param.lowEngineeringUnits());
+	setHighLimit(MEASURE_LIMIT_TYPE_ENGINEER, param.highEngineeringUnits());
+	setUnit(MEASURE_LIMIT_TYPE_ENGINEER, param.unit());
+	setLimitPrecision(MEASURE_LIMIT_TYPE_ENGINEER, param.decimalPlaces());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1350,7 +1350,7 @@ int MeasureBase::load(int measureType)
 					switch(subTable.tableType)
 					{
 						case SQL_TABLE_LINEARITY_20_EL:			static_cast<LinearityMeasurement*>(pMainMeasure)->updateMeasureArray(MEASURE_LIMIT_TYPE_ELECTRIC, pSubMeasure);	break;
-						case SQL_TABLE_LINEARITY_20_EN:			static_cast<LinearityMeasurement*>(pMainMeasure)->updateMeasureArray(MEASURE_LIMIT_TYPE_ENGENEER, pSubMeasure);	break;
+						case SQL_TABLE_LINEARITY_20_EN:			static_cast<LinearityMeasurement*>(pMainMeasure)->updateMeasureArray(MEASURE_LIMIT_TYPE_ENGINEER, pSubMeasure);	break;
 						case SQL_TABLE_LINEARITY_ADD_VAL:		static_cast<LinearityMeasurement*>(pMainMeasure)->updateAdditionalParam(pSubMeasure);							break;
 						case SQL_TABLE_COMPARATOR_HYSTERESIS:	static_cast<ComparatorMeasurement*>(pMainMeasure)->updateHysteresis(pSubMeasure);								break;
 					}

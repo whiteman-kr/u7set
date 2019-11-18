@@ -447,8 +447,8 @@ namespace  Tuning
 				crc.add(signal->appSignalID());
 				crc.add(signal->equipmentID());
 				crc.add(signal->tuningDefaultValue().toDouble());		// real tuning value type does not matter
-				crc.add(signal->lowEngeneeringUnits());
-				crc.add(signal->highEngeneeringUnits());
+				crc.add(signal->lowEngineeringUnits());
+				crc.add(signal->highEngineeringUnits());
 			}
 		}
 

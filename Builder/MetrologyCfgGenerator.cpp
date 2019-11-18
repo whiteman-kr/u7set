@@ -450,29 +450,29 @@ namespace Builder
 					}
 
 
-					if (physicalLowLimit.toDouble() != signal.lowEngeneeringUnits())
+					if (physicalLowLimit.toDouble() != signal.lowEngineeringUnits())
 					{
 						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.lowEngeneeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
+						double elVal = uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricLowLimit()) +  meu.key(signal.electricUnit());
 						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
 
-						// Signal %1 has wrong engeneering low Limit
+						// Signal %1 has wrong engineering low Limit
 						//
 						m_log->errEQP6112(signal.customAppSignalID(), nowElValStr, newElValStr);
 						return false;
 					}
 
-					if (physicalHighLimit.toDouble() != signal.highEngeneeringUnits())
+					if (physicalHighLimit.toDouble() != signal.highEngineeringUnits())
 					{
 						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.highEngeneeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
+						double elVal = uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricHighLimit()) +  meu.key(signal.electricUnit());
 						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
 
-						// Signal %1 has wrong engeneering high Limit
+						// Signal %1 has wrong engineering high Limit
 						//
 						m_log->errEQP6113(signal.customAppSignalID(), nowElValStr, newElValStr);
 						return false;
@@ -537,29 +537,29 @@ namespace Builder
 						return false;
 					}
 
-					if (physicalLowLimit.toDouble() != signal.lowEngeneeringUnits())
+					if (physicalLowLimit.toDouble() != signal.lowEngineeringUnits())
 					{
 						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.lowEngeneeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), r0);
+						double elVal = uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), r0);
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricLowLimit()) +  meu.key(signal.electricUnit());
 						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
 
-						// Signal %1 - engeneering low Limit mismatch electrical low Limit
+						// Signal %1 - engineering low Limit mismatch electrical low Limit
 						//
 						m_log->errEQP6112(signal.customAppSignalID(), nowElValStr, newElValStr);
 						return false;
 					}
 
-					if (physicalHighLimit.toDouble() != signal.highEngeneeringUnits())
+					if (physicalHighLimit.toDouble() != signal.highEngineeringUnits())
 					{
 						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.highEngeneeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), r0);
+						double elVal = uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), r0);
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricHighLimit()) +  meu.key(signal.electricUnit());
 						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
 
-						// SSignal %1 - engeneering high Limit mismatch electrical high Limit
+						// SSignal %1 - engineering high Limit mismatch electrical high Limit
 						//
 						m_log->errEQP6113(signal.customAppSignalID(), nowElValStr, newElValStr);
 						return false;

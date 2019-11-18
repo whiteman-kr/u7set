@@ -2003,8 +2003,8 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 		SignalProperties::typeCaption,
 		SignalProperties::inOutTypeCaption,
 		SignalProperties::equipmentIDCaption,
-		SignalProperties::lowEngeneeringUnitsCaption,
-		SignalProperties::highEngeneeringUnitsCaption,
+		SignalProperties::lowEngineeringUnitsCaption,
+		SignalProperties::highEngineeringUnitsCaption,
 	};
 
 	for (const QString& columnName : defaultSignalPropertyVisibility)

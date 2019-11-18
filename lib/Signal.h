@@ -137,11 +137,11 @@ public:
 	int highDAC() const;
 	void setHighDAC(int highDAC);
 
-	double lowEngeneeringUnits() const;
-	void setLowEngeneeringUnits(double lowEngeneeringUnits);
+	double lowEngineeringUnits() const;
+	void setLowEngineeringUnits(double lowEngineeringUnits);
 
-	double highEngeneeringUnits() const;
-	void setHighEngeneeringUnits(double highEngeneeringUnits);
+	double highEngineeringUnits() const;
+	void setHighEngineeringUnits(double highEngineeringUnits);
 
 	double lowValidRange() const;
 	void setLowValidRange(double lowValidRange);

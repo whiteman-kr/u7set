@@ -133,8 +133,8 @@ public:
 	static const QString highADCCaption;
 	static const QString lowDACCaption;
 	static const QString highDACCaption;
-	static const QString lowEngeneeringUnitsCaption;
-	static const QString highEngeneeringUnitsCaption;
+	static const QString lowEngineeringUnitsCaption;
+	static const QString highEngineeringUnitsCaption;
 	static const QString unitCaption;
 	static const QString lowValidRangeCaption;
 	static const QString highValidRangeCaption;
@@ -194,8 +194,8 @@ public:
 	Q_INVOKABLE int dataSize() const { return m_signal.dataSize(); }
 	Q_INVOKABLE int lowADC() const { return m_signal.lowADC(); }
 	Q_INVOKABLE int highADC() const { return m_signal.highADC(); }
-	Q_INVOKABLE double lowEngeneeringUnits() const { return m_signal.lowEngeneeringUnits(); }
-	Q_INVOKABLE double highEngeneeringUnits() const { return m_signal.highEngeneeringUnits(); }
+	Q_INVOKABLE double lowEngeneeringUnits() const { return m_signal.lowEngineeringUnits(); }
+	Q_INVOKABLE double highEngeneeringUnits() const { return m_signal.highEngineeringUnits(); }
 	Q_INVOKABLE double lowValidRange() const { return m_signal.lowValidRange(); }
 	Q_INVOKABLE double highValidRange() const { return m_signal.highValidRange(); }
 	Q_INVOKABLE double inputLowLimit() const { return m_signal.electricLowLimit(); }

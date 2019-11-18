@@ -94,7 +94,7 @@ QString PS::Signal::engeneeringRangeStr() const
 		default:									assert(0);										break;
 	}
 
-	range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), lowEngeneeringUnits(), highEngeneeringUnits());
+	range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), lowEngineeringUnits(), highEngineeringUnits());
 
 	if (unit().isEmpty() == false)
 	{
@@ -998,7 +998,7 @@ void SignalStateDialog::onOk()
 
 	double state = m_stateEdit->text().toDouble();
 
-	if (state < m_pSignal->lowEngeneeringUnits()|| state > m_pSignal->highEngeneeringUnits())
+	if (state < m_pSignal->lowEngineeringUnits() || state > m_pSignal->highEngineeringUnits())
 	{
 		QString str, formatStr;
 

@@ -231,8 +231,8 @@ private:
 
 	double m_lowValidRange = 0;
 	double m_highValidRange = 100;
-	double m_lowEngeneeringUnits = 0;
-	double m_highEngeneeringUnits = 100;
+	double m_lowEngineeringUnits = 0;
+	double m_highEngineeringUnits = 100;
 
 	double m_electricLowLimit = 0;									// low electric value for input range
 	double m_electricHighLimit = 0;									// high electric value for input range

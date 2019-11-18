@@ -381,8 +381,8 @@ namespace Builder
 			newSignal->setLowADC(static_cast<int>(busSignal.inbusAnalogLowLimit));
 			newSignal->setHighADC(static_cast<int>(busSignal.inbusAnalogHighLimit));
 
-			newSignal->setLowEngeneeringUnits(busSignal.busAnalogLowLimit);
-			newSignal->setHighEngeneeringUnits(busSignal.busAnalogHighLimit);
+			newSignal->setLowEngineeringUnits(busSignal.busAnalogLowLimit);
+			newSignal->setHighEngineeringUnits(busSignal.busAnalogHighLimit);
 
 			newSignal->setLowValidRange(busSignal.busAnalogLowLimit);
 			newSignal->setHighValidRange(busSignal.busAnalogHighLimit);
@@ -476,8 +476,8 @@ namespace Builder
 
 		bool result = true;
 
-		result &= checkSignalPropertyRanges(s, SignalProperties::lowEngeneeringUnitsCaption);
-		result &= checkSignalPropertyRanges(s, SignalProperties::highEngeneeringUnitsCaption);
+		result &= checkSignalPropertyRanges(s, SignalProperties::lowEngineeringUnitsCaption);
+		result &= checkSignalPropertyRanges(s, SignalProperties::highEngineeringUnitsCaption);
 		result &= checkSignalPropertyRanges(s, SignalProperties::lowValidRangeCaption);
 		result &= checkSignalPropertyRanges(s, SignalProperties::highValidRangeCaption);
 

@@ -473,8 +473,8 @@ namespace Builder
 
 		void errEQP6110(QString appSignalID);												//  Signal %1 has wrong physical low Limit
 		void errEQP6111(QString appSignalID);												//  Signal %1 has wrong physical high Limit
-		void errEQP6112(QString appSignalID, QString wrongValue, QString correctValue);		//  Signal %1 - engeneering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3
-		void errEQP6113(QString appSignalID, QString wrongValue, QString correctValue);		//  Signal %1 - engeneering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3
+		void errEQP6112(QString appSignalID, QString wrongValue, QString correctValue);		//  Signal %1 - engineering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3
+		void errEQP6113(QString appSignalID, QString wrongValue, QString correctValue);		//  Signal %1 - engineering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3
 		void errEQP6114(QString appSignalID);												//  Signal %1 has wrong R0 (ThermoResistor)
 
 
