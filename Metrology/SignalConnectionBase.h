@@ -116,8 +116,8 @@ public:
 
 	void					remove(int index);
 
-	int						findIndex(int signalConnectionType, int measureIoType, Metrology::Signal* pSignal);
-	int						findIndex(const SignalConnection& connection);
+	int						findIndex(int signalConnectionType, int measureIoType, Metrology::Signal* pSignal) const;
+	int						findIndex(const SignalConnection& connection) const;
 
 	SignalConnectionBase&	operator=(const SignalConnectionBase& from);
 

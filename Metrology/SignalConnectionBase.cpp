@@ -429,7 +429,7 @@ void SignalConnectionBase::remove(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalConnectionBase::findIndex(int signalConnectionType, int measureIoType, Metrology::Signal* pSignal)
+int SignalConnectionBase::findIndex(int signalConnectionType, int measureIoType, Metrology::Signal* pSignal) const
 {
 	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
@@ -479,7 +479,7 @@ int SignalConnectionBase::findIndex(int signalConnectionType, int measureIoType,
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalConnectionBase::findIndex(const SignalConnection& signal)
+int SignalConnectionBase::findIndex(const SignalConnection& signal) const
 {
 	int foundIndex = -1;
 
