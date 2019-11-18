@@ -12,45 +12,16 @@
 #include "StatisticBase.h"
 
 // ==============================================================================================
+// IoSignalParam for :
+//						MeasureThread
+//						SignalInfoPanel
+//						MeasureBase
+//
+//
 
-class MultiChannelSignal
-{
-public:
+// ----------------------------------------------------------------------------------------------
 
-	explicit MultiChannelSignal();
-	MultiChannelSignal(const MultiChannelSignal& from);
-	virtual ~MultiChannelSignal() {}
-
-private:
-
-	mutable QMutex				m_mutex;
-	int							m_channelCount = 0;
-	QVector<Metrology::Signal*>	m_pSignalList;
-
-	Metrology::SignalLocation	m_location;
-	QString						m_strID;		// depend from SignalLocation and measureKind
-
-public:
-
-	void						clear();
-	bool						isEmpty() const;
-
-	int							channelCount() const { return m_channelCount; }
-	void						setChannelCount(int count);
-
-	Metrology::Signal*			metrologySignal(int channel) const;
-	bool						setMetrologySignal(int measureKind, int channel, Metrology::Signal* pSignal);
-	Metrology::Signal*			firstMetrologySignal() const;
-
-	Metrology::SignalLocation	location() const { return m_location; }
-	QString						strID() const { return m_strID; }
-
-	MultiChannelSignal&			operator=(const MultiChannelSignal& from);
-};
-
-// ==============================================================================================
-
-#define						MultiTextDivider	"\n"
+#define						MULTI_TEXT_DEVIDER	"\n"
 
 // ----------------------------------------------------------------------------------------------
 
@@ -115,9 +86,50 @@ public:
 };
 
 // ==============================================================================================
-// class MeasureSignal consists of two classes multi-channel signals: input and output
 //
+// MeasureSignal --- MultiChannelSignal[MEASURE_IO_SIGNAL_TYPE_COUNT]--- Metrology::Signal[Metrology::ChannelCount]
+//
+// ==============================================================================================
+// class MultiChannelSignal consists list of Metrology::Signal
+//
+class MultiChannelSignal
+{
+public:
 
+	explicit MultiChannelSignal();
+	MultiChannelSignal(const MultiChannelSignal& from);
+	virtual ~MultiChannelSignal() {}
+
+private:
+
+	mutable QMutex				m_mutex;
+	int							m_channelCount = 0;
+	QVector<Metrology::Signal*>	m_pSignalList;
+
+	Metrology::SignalLocation	m_location;
+	QString						m_strID;		// depend from SignalLocation and measureKind
+
+public:
+
+	void						clear();
+	bool						isEmpty() const;
+
+	int							channelCount() const { return m_channelCount; }
+	void						setChannelCount(int count);
+
+	Metrology::Signal*			metrologySignal(int channel) const;
+	bool						setMetrologySignal(int measureKind, int channel, Metrology::Signal* pSignal);
+	Metrology::Signal*			firstMetrologySignal() const;
+
+	Metrology::SignalLocation	location() const { return m_location; }
+	QString						strID() const { return m_strID; }
+
+	MultiChannelSignal&			operator=(const MultiChannelSignal& from);
+};
+
+// ==============================================================================================
+// class MeasureSignal consists array of two classes MultiChannelSignal: input and output
+//
 class MeasureSignal
 {
 public:
@@ -145,11 +157,11 @@ public:
 	int						channelCount() const { return m_channelCount; }
 	void					setChannelCount(int count);
 
-	MultiChannelSignal		multiSignal(int type) const;
+	MultiChannelSignal		multiChannelSignal(int type) const;
 	bool					setMultiSignal(int type, const MultiChannelSignal& signal);
 
 	Metrology::Signal*		metrologySignal(int type, int channel) const;
-	bool					setMetrologySignal(int measureKind, int signalConnectionType, int channel, Metrology::Signal* pSignal);
+	bool					setMetrologySignal(int measureKind, const SignalConnectionBase& signalConnections, int signalConnectionType, int channel, Metrology::Signal* pSignal);
 
 	bool					contains(Metrology::Signal* pSignal);
 

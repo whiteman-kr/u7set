@@ -10,7 +10,14 @@
 
 // ==============================================================================================
 
-const int				   MEASURE_THREAD_TIMEOUT_STEP = 100; // 100 milliseconds
+const int				MEASURE_THREAD_TIMEOUT_STEP			= 100; // 100 milliseconds
+
+// ==============================================================================================
+
+const int				MEASURE_THREAD_CMP_PREAPRE_1		= 0,
+						MEASURE_THREAD_CMP_PREAPRE_2		= 1;
+
+const int				MEASURE_THREAD_CMP_PREPARE_COUNT	= 2;
 
 // ==============================================================================================
 

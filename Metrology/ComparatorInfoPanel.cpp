@@ -18,6 +18,7 @@
 
 ComparatorInfoTable::ComparatorInfoTable(QObject*)
 {
+	connect(&theSignalBase, &SignalBase::updatedSignalParam, this, &ComparatorInfoTable::updateSignalParam, Qt::QueuedConnection);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -30,7 +31,7 @@ ComparatorInfoTable::~ComparatorInfoTable()
 
 int ComparatorInfoTable::columnCount(const QModelIndex&) const
 {
-	return COMPARATOR_INFO_COLUMN_COUNT;
+	return Metrology::ComparatorCount;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -53,7 +54,7 @@ QVariant ComparatorInfoTable::headerData(int section, Qt::Orientation orientatio
 
 	if (orientation == Qt::Horizontal)
 	{
-		if (section >= 0 && section < COMPARATOR_INFO_COLUMN_COUNT)
+		if (section >= 0 && section < Metrology::ComparatorCount)
 		{
 			result = QString("Comparator %1").arg(section + 1);
 		}
@@ -83,23 +84,24 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 	}
 
 	int column = index.column();
-	if (column < 0 || column >= COMPARATOR_INFO_COLUMN_COUNT)
+	if (column < 0 || column >= Metrology::ComparatorCount)
 	{
 		return QVariant();
 	}
 
-	Metrology::Signal* pInputSignal = signal(row);
-	if (pInputSignal == nullptr || pInputSignal->param().isValid() == false)
+	Metrology::SignalParam inParam = signalParam(row).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	if (inParam.isValid() == false)
 	{
 		return QVariant();
 	}
 
-	if (column >= pInputSignal->comparatorCount())
+
+	if (column >= inParam.comparatorCount())
 	{
 		return QVariant();
 	}
 
-	std::shared_ptr<::Builder::Comparator> pComparator = pInputSignal->comparator(column);
+	std::shared_ptr<::Builder::Comparator> pComparator = inParam.comparator(column);
 	if (pComparator == nullptr)
 	{
 		return QVariant();
@@ -203,32 +205,32 @@ QString ComparatorInfoTable::text(std::shared_ptr<::Builder::Comparator> pCompar
 
 void ComparatorInfoTable::updateState()
 {
-	emit dataChanged(index(0, 0), index(m_signalCount - 1, COMPARATOR_INFO_COLUMN_COUNT - 1), QVector<int>() << Qt::DisplayRole);
+	emit dataChanged(index(0, 0), index(m_signalCount - 1, Metrology::ComparatorCount - 1), QVector<int>() << Qt::DisplayRole);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Metrology::Signal* ComparatorInfoTable::signal(int index) const
+IoSignalParam ComparatorInfoTable::signalParam(int index) const
 {
 	if (index < 0 || index >= m_signalCount)
 	{
-		return nullptr;
+		return IoSignalParam();
 	}
 
-	Metrology::Signal* pSignal = nullptr;
+	IoSignalParam param;
 
 	m_signalMutex.lock();
 
-		pSignal = m_signalList[index];
+		param = m_signalList[index];
 
 	m_signalMutex.unlock();
 
-	return pSignal;
+	return param;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorInfoTable::set(const QVector<Metrology::Signal*>& signalList)
+void ComparatorInfoTable::set(const QVector<IoSignalParam>& signalList)
 {
 	int signalCount = signalList.count();
 	if (signalCount == 0)
@@ -267,6 +269,33 @@ void ComparatorInfoTable::clear()
 		m_signalMutex.unlock();
 
 	endRemoveRows();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorInfoTable::updateSignalParam(const QString& appSignalID)
+{
+	if (appSignalID.isEmpty() == true)
+	{
+		assert(0);
+		return;
+	}
+
+	m_signalMutex.lock();
+
+		int signalCount = m_signalList.count();
+		for(int c = 0; c < signalCount; c ++)
+		{
+			for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
+			{
+				if (m_signalList[c].param(type).appSignalID() == appSignalID)
+				{
+					m_signalList[c].setParam(type, theSignalBase.signalParam(appSignalID));
+				}
+			}
+		}
+
+	m_signalMutex.unlock();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -309,7 +338,7 @@ void ComparatorInfoPanel::createInterface()
 
 	m_pComparatorInfoWindow->setCentralWidget(m_pView);
 
-	for(int column = 0; column < COMPARATOR_INFO_COLUMN_COUNT; column++)
+	for(int column = 0; column < Metrology::ComparatorCount; column++)
 	{
 		m_pView->setColumnWidth(column, COMPARATOR_INFO_COLUMN_WIDTH);
 	}
@@ -344,7 +373,7 @@ void ComparatorInfoPanel::createContextMenu()
 
 void ComparatorInfoPanel::hideColumn(int column, bool hide)
 {
-	if (column < 0 || column >= COMPARATOR_INFO_COLUMN_COUNT)
+	if (column < 0 || column >= Metrology::ComparatorCount)
 	{
 		return;
 	}
@@ -433,32 +462,31 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	int maxComparatorCount = 0;
 
-	QVector<Metrology::Signal*> signalList;
+	QVector<IoSignalParam> ioParamList;
 
 	for(int c = 0; c < signalCount; c ++)
 	{
-		Metrology::Signal* pSignal = activeSignal.multiSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).metrologySignal(c);
-		if (pSignal == nullptr)
+		IoSignalParam ioParam;
+
+		Metrology::Signal* pSignal = activeSignal.multiChannelSignal(MEASURE_IO_SIGNAL_TYPE_INPUT).metrologySignal(c);
+		if (pSignal != nullptr && pSignal->param().isValid() == true)
 		{
-			continue;
+			if (maxComparatorCount < pSignal->param().comparatorCount())
+			{
+				maxComparatorCount = pSignal->param().comparatorCount();
+			}
+
+			ioParam.setParam(MEASURE_IO_SIGNAL_TYPE_INPUT, pSignal->param());
+			ioParam.setSignalConnectionType(activeSignal.signalConnectionType());
+			ioParam.setCalibratorManager(theCalibratorBase.calibratorForMeasure(c));
 		}
 
-		if (pSignal->param().isValid() == false)
-		{
-			continue;
-		}
-
-		if (pSignal->comparatorCount() > maxComparatorCount)
-		{
-			maxComparatorCount = pSignal->comparatorCount();
-		}
-
-		signalList.append(pSignal);
+		ioParamList.append(ioParam);
 	}
 
-	m_comparatorTable.set(signalList);
+	m_comparatorTable.set(ioParamList);
 
-	for(int c = 0; c < COMPARATOR_INFO_COLUMN_COUNT; c ++)
+	for(int c = 0; c < Metrology::ComparatorCount; c ++)
 	{
 		if (c < maxComparatorCount)
 		{
@@ -501,19 +529,19 @@ void ComparatorInfoPanel::comparatorProperty()
 		return;
 	}
 
-	Metrology::Signal* pSignal = m_comparatorTable.signal(index);
-	if (pSignal == nullptr ||  pSignal->param().isValid() == false)
+	Metrology::SignalParam inParam = m_comparatorTable.signalParam(index).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	if (inParam.isValid() == false)
 	{
 		return;
 	}
 
 	int indexComparator = m_pView->currentIndex().column();
-	if (indexComparator < 0 || indexComparator >= pSignal->comparatorCount())
+	if (indexComparator < 0 || indexComparator >= inParam.comparatorCount())
 	{
 		return;
 	}
 
-	std::shared_ptr<Builder::Comparator> pComparator = pSignal->comparator(indexComparator);
+	std::shared_ptr<Builder::Comparator> pComparator = inParam.comparator(indexComparator);
 	if (pComparator == nullptr)
 	{
 		return;

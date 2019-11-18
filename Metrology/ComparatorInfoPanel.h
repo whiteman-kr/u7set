@@ -10,8 +10,6 @@
 
 // ==============================================================================================
 
-const int					COMPARATOR_INFO_COLUMN_COUNT		= 32;
-
 const int					COMPARATOR_INFO_COLUMN_WIDTH		= 120;
 
 // ==============================================================================================
@@ -33,7 +31,7 @@ private:
 
 	mutable QMutex			m_signalMutex;
 	int						m_signalCount = 0;
-	QVector<Metrology::Signal*>	m_signalList;
+	QVector<IoSignalParam>	m_signalList;
 
 	int						columnCount(const QModelIndex &parent) const;
 	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -44,13 +42,17 @@ private:
 public:
 
 	int						signalCount() const { return m_signalCount; }
-	Metrology::Signal*		signal(int index) const;
-	void					set(const QVector<Metrology::Signal*>& signalList);
+	IoSignalParam			signalParam(int index) const;
+	void					set(const QVector<IoSignalParam>& signalList);
 	void					clear();
 
 	QString					text(std::shared_ptr<::Builder::Comparator> pComparator) const;
 
 	void					updateState();
+
+private slots:
+
+	void					updateSignalParam(const QString& appSignalID);
 };
 
 // ==============================================================================================
