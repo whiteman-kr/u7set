@@ -5,6 +5,7 @@
 
 #include <QUuid>
 #include <QMutex>
+#include <QVector>
 
 namespace Builder
 {
@@ -101,6 +102,7 @@ namespace Builder
 		QUuid m_schemaItemUuid;
 	};
 
+
 	// ------------------------------------------------------------------------------------------------
 	//
 	//	LmComparatorSet class declaration
@@ -111,23 +113,21 @@ namespace Builder
 	{
 	public:
 		LmComparatorSet();
+		LmComparatorSet(const QString& lmID, std::shared_ptr<Comparator> omparator);
 		virtual ~LmComparatorSet();
 
 		void clear();
+		void append(std::shared_ptr<Comparator> comparator);
 
 		QString	lmID() const;
 		void setLmID(const QString& lmID);
 
-		int comparatorCount() const;
-		std::shared_ptr<Comparator> comparator(int index) const;
-
-		void insert(std::shared_ptr<Comparator> comparator);
+		const QVector<std::shared_ptr<Comparator>>& comparators();
 
 	private:
-		mutable QMutex m_mutex;
 
 		QString m_lmID;
-		QList<std::shared_ptr<Comparator>> m_comparatorList;
+		QVector<std::shared_ptr<Comparator>> m_comparatorList;
 	};
 
 	// ------------------------------------------------------------------------------------------------
@@ -143,25 +143,28 @@ namespace Builder
 		virtual ~ComparatorSet();
 
 		void clear();
+		void insert(const QString& lmID, std::shared_ptr<Comparator> comparator);					// insert comparator
 
-		int lmCount() const;
-		std::shared_ptr<LmComparatorSet> lmComparatorSet(int index) const;
-		std::shared_ptr<LmComparatorSet> lmComparatorSet(const QString& lmID) const;
+		// get comparators of signal
+		//
+		QStringList inputSignalIDs() const;															// return list all AppSignalID of signals that contains compartors
+		QVector<std::shared_ptr<Comparator>> getByInputSignalID(const QString& appSignalID) const;	// return vector all comparators by AppSignalID of signal
 
-		int comparatorCount() const;
-		QList<std::shared_ptr<Comparator>> getByInputSignalID(const QString& appSignalID) const;
+		// get comparators of LM
+		//
+		QStringList lmIDs() const;																	// return list all EquipmentID of LMs that contains compartors
+		QVector<std::shared_ptr<Comparator>> getByLmID(const QString& equipmentID) const;			// return vector all comparators by EquipmentID of LM
 
-		void insert(const QString& lmID, std::shared_ptr<Comparator> comparator);	// insert Comparator
-
+		// serialize
+		//
 		void serializeTo(Proto::ComparatorSet* set);
 		void serializeFrom(const Proto::ComparatorSet& set);
+		void serializeFrom(const QByteArray& fileData);
 
 	private:
 		mutable QMutex m_mutex;
 
-		QMap<QString, std::shared_ptr<LmComparatorSet>> m_setMap;
-		QList<std::shared_ptr<LmComparatorSet>> m_lmList;
-
-		QHash<QString, std::shared_ptr<Comparator>> m_bySignal;
+		QHash<QString, QVector<std::shared_ptr<Comparator>>> m_bySignal;
+		QHash<QString, std::shared_ptr<LmComparatorSet>> m_byLm;
 	};
 }
