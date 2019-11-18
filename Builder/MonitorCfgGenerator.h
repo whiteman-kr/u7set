@@ -38,8 +38,6 @@ namespace Builder
 		bool writeTuningSignals();
 
 	private:
-		Context* m_context = nullptr;
-
 		bool m_tuningEnabled = false;
 		QStringList m_tuningSources;
 

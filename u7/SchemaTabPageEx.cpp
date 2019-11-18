@@ -2854,6 +2854,15 @@ void SchemaControlTabPageEx::addLogicSchema(QStringList deviceStrIds, QString lm
 		logicSchema->setPropertyValue(Hardware::PropertyNames::lmDescriptionFile, QVariant(lmDescriptionFile));
 	}
 
+	// Show Schema Properties
+	//
+	CreateSchemaDialog propertiesDialog(schema, db(), this);
+
+	if (propertiesDialog.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
 	// --
 	//
 	addSchemaFile(schema, Db::File::AlFileExtension, parentFile.fileId());
@@ -3287,11 +3296,8 @@ void SchemaControlTabPageEx::cloneFile()
 		{
 			item->setNewGuid();
 
-			if (item->isFblItemRect() == true)
-			{
-				globalCounter = db()->nextCounterValue();
-				item->toFblItemRect()->setLabel(schema->schemaId() + "_" + QString::number(globalCounter));
-			}
+			globalCounter = db()->nextCounterValue();
+			item->setLabel(schema->schemaId() + "_" + QString::number(globalCounter));
 		}
 	}
 

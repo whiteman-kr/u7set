@@ -204,7 +204,7 @@ namespace VFrame30
 			{
 				const SchemaItemPtr& item = *vi;
 
-				if (item->IsIntersectPoint(x, y) == true)
+				if (item->isIntersectPoint(x, y) == true)
 				{
 					result.push_back(item);
 				}

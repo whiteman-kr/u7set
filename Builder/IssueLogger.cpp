@@ -6456,6 +6456,74 @@ namespace Builder
 						arg(inputCaption).arg(itemLabel).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5173
+	///
+	/// IssueType: Error
+	///
+	/// Title: Required signal %1 of AFB %2 is missing.
+	///
+	/// Parameters:
+	///		%1 functional block signal caption
+	///		%2 functional block caption
+	///		%3 application logic item Uuid
+	///
+	/// Description:
+	///		Required signal of specified AFB is missing. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5173(QString signalCaption, QString fbCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5173, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5173,
+				  QString(tr("Required signal %1 of AFB %2 is missing.")).
+				  arg(signalCaption).arg(fbCaption));
+	}
+
+	/// IssueCode: ALC5174
+	///
+	/// IssueType: Error
+	///
+	/// Title: Required AFB %1 is missing.
+	///
+	/// Parameters:
+	///		%1 functional block caption
+	///		%2 application logic item Uuid
+	///
+	/// Description:
+	///		Required AFB is missing. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5174(QString fbCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5174, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5174,
+				  QString(tr("Required AFB %1 is missing.")).arg(fbCaption));
+	}
+
+	/// IssueCode: ALC5175
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Unknown conversion of signal %1 from %2 to %3 format.
+	///
+	/// Parameters:
+	///		%1 application signalID
+	///		%2 input format
+	///		%3 output format
+	///
+	/// Description:
+	///		Signal conversion between specified formats is not implemented. Change signal format or contact RPCT developers.
+	///
+	void IssueLogger::errALC5175(QString signalID, QString inFormat, QString outFormat)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5175,
+				  QString(tr("Unknown conversion of signal %1 from %2 to %3 format.")).
+							arg(signalID).arg(inFormat).arg(outFormat));
+	}
+
 	//
 
 	/// IssueCode: ALC5186
@@ -7405,6 +7473,48 @@ namespace Builder
 				  tr("Signal %1 has wrong R0 (ThermoResistor).")
 				  .arg(appSignalID)
 				  );
+	}
+
+
+	/// IssueCode: EQP6200
+	///
+	/// IssueType: Error
+	///
+	/// Title: Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behaviour in menu Project->Project Properties...->Safety Project.
+	///
+	/// Parameters:
+	///		%1 Monitor EquipmentID
+	///
+	/// Description:
+	///		Monitor cannot be used for tuning in Safety Project. To avoid error clear option in %1.TuningEnable or override behaviour in menu Project->Project Properties...->Safety Project set to false.
+	///
+	void IssueLogger::errEQP6200(QString monotorId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6200,
+				  tr("Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behaviour in menu Project->Project Properties...->Safety Project.")
+				  .arg(monotorId));
+	}
+
+	/// IssueCode: EQP6201
+	///
+	/// IssueType: Error
+	///
+	/// Title: uningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behaviour in menu Project->Project Properties...->Safety Project.
+	///
+	/// Parameters:
+	///		%1 TuningService EquipmentID
+	///
+	/// Description:
+	///		TuningService cannot be used for multi LM control in Safety Projects. To avoid error turn On option SingleLmControl of TuningService or override behaviour in menu Project->Project Properties...->Safety Project.
+	///
+	void IssueLogger::errEQP6201(QString tuningServiceId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6201,
+				  tr("TuningService (%1) cannot be used for multi LM control in Safety Project. "
+					"Turn On option %1.SingleLmControl or override behaviour in menu Project->Project Properties...->Safety Project.").
+						arg(tuningServiceId));
 	}
 
 	// --

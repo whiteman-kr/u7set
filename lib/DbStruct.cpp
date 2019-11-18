@@ -149,6 +149,16 @@ void DbProject::setDescription(const QString& description)
 	m_description = description;
 }
 
+bool DbProject::safetyProject() const
+{
+	return m_safetyProject;
+}
+
+void DbProject::setSafetyProject(bool value)
+{
+	m_safetyProject = value;
+}
+
 int DbProject::version() const
 {
 	return m_version;
@@ -174,25 +184,31 @@ void DbProject::setUppercaseAppSignalId(bool value)
 //
 DbProjectProperties::DbProjectProperties()
 {
-	auto p1 = ADD_PROPERTY_GETTER_SETTER(QString, Db::ProjectProperty::Description, true, DbProjectProperties::description, DbProjectProperties::setDescription);
-	p1->setCategory("Project");
-	p1->setDescription("Project description");
+	Property* p = nullptr;
 
-	auto p2 = ADD_PROPERTY_GETTER_SETTER(QString, Db::ProjectProperty::SuppressWarnings, true, DbProjectProperties::suppressWarningsAsString, DbProjectProperties::setSuppressWarnings);
-	p2->setCategory("Build");
-	p2->setDescription("Comma separated suppress warning list. Example: 4004, 4005, 2000");
+	p = ADD_PROPERTY_GETTER_SETTER(QString, Db::ProjectProperty::Description, true, DbProjectProperties::description, DbProjectProperties::setDescription);
+	p->setCategory("Project");
+	p->setDescription("Project description");
 
-	auto p3 = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::UppercaseAppSignalId, true, DbProjectProperties::uppercaseAppSignalId, DbProjectProperties::setUppercaseAppSignalId);
-	p3->setCategory("Editor");
-	p3->setDescription("Uppercase AppSignalIDs, to apply option reopen project is required");
+	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::SafetyProject, true, DbProjectProperties::safetyProject, DbProjectProperties::setSafetyProject);
+	p->setCategory("Project");
+	p->setDescription("Safety Propject");
 
-	auto p4 = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateAppSignalsXml, true, DbProjectProperties::generateAppSignalsXml, DbProjectProperties::setGenerateAppSignalsXml);
-	p4->setCategory("Build");
-	p4->setDescription("Generate file AppSignals.xml on build");
+	p = ADD_PROPERTY_GETTER_SETTER(QString, Db::ProjectProperty::SuppressWarnings, true, DbProjectProperties::suppressWarningsAsString, DbProjectProperties::setSuppressWarnings);
+	p->setCategory("Build");
+	p->setDescription("Comma separated suppress warning list. Example: 4004, 4005, 2000");
 
-	auto p5 = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateExtraDebugInfo, true, DbProjectProperties::generateExtraDebugInfo, DbProjectProperties::setGenerateExtraDebugInfo);
-	p5->setCategory("Build");
-	p5->setDescription("Generate extra debug information on build");
+	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::UppercaseAppSignalId, true, DbProjectProperties::uppercaseAppSignalId, DbProjectProperties::setUppercaseAppSignalId);
+	p->setCategory("Editor");
+	p->setDescription("Uppercase AppSignalIDs, to apply option reopen project is required");
+
+	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateAppSignalsXml, true, DbProjectProperties::generateAppSignalsXml, DbProjectProperties::setGenerateAppSignalsXml);
+	p->setCategory("Build");
+	p->setDescription("Generate file AppSignals.xml on build");
+
+	p = ADD_PROPERTY_GETTER_SETTER(bool, Db::ProjectProperty::GenerateExtraDebugInfo, true, DbProjectProperties::generateExtraDebugInfo, DbProjectProperties::setGenerateExtraDebugInfo);
+	p->setCategory("Build");
+	p->setDescription("Generate extra debug information on build");
 
 	return;
 }
@@ -205,6 +221,16 @@ QString DbProjectProperties::description() const
 void DbProjectProperties::setDescription(const QString& value)
 {
 	m_description = value;
+}
+
+bool DbProjectProperties::safetyProject() const
+{
+	return m_safetyProject;
+}
+
+void DbProjectProperties::setSafetyProject(bool value)
+{
+	m_safetyProject = value;
 }
 
 std::vector<int> DbProjectProperties::suppressWarnings() const
@@ -278,6 +304,7 @@ void DbProjectProperties::setGenerateExtraDebugInfo(bool value)
 {
 	m_generateExtraDebugInfo = value;
 }
+
 
 //
 //

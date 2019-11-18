@@ -318,6 +318,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0298.sql", "Upgrade to version 298, Added descriptions of LmNumberCount and UniqueID in bts file"},
 	{":/DatabaseUpgrade/Upgrade0299.sql", "Upgrade to version 299, be_to_le_16si->be_to_le_16ui, le_to_be_16si->le_to_be_16ui"},
 	{":/DatabaseUpgrade/Upgrade0300.sql", "Upgrade to version 300, Added Certificate property to all presets"},
+	{":/DatabaseUpgrade/Upgrade0301.sql", "Upgrade to version 301, FSC Chassis preset has LM compatibility table"},
 };
 
 int DbWorker::counter = 0;
@@ -1056,12 +1057,15 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 	project.setVersion(DbWorker::databaseVersion());	// Other project version just cannot be opened
 
 	QString projectDescription;
+	QString projectSafetyProject;
 	QString projectUppercaseAppSignalId;
 
 	getProjectProperty_worker(Db::ProjectProperty::Description, &projectDescription);
+	getProjectProperty_worker(Db::ProjectProperty::SafetyProject, &projectSafetyProject);
 	getProjectProperty_worker(Db::ProjectProperty::UppercaseAppSignalId, &projectUppercaseAppSignalId);
 
 	project.setDescription(projectDescription);
+	project.setSafetyProject(projectSafetyProject.compare("true", Qt::CaseInsensitive) == 0 ? true : false);
 	project.setUppercaseAppSignalId(projectUppercaseAppSignalId.compare("true", Qt::CaseInsensitive) == 0 ? true : false);
 
 	setCurrentProject(project);

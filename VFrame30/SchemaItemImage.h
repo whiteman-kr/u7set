@@ -9,6 +9,11 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		Q_PROPERTY(double AllowScale READ allowScale WRITE setAllowScale)
+		Q_PROPERTY(double KeepAspectRatio READ keepAspectRatio WRITE setKeepAspectRatio)
+
+		Q_PROPERTY(QString Svg READ svgData WRITE setSvgData)
+
 	public:
 		SchemaItemImage(void);
 		explicit SchemaItemImage(SchemaUnit unit);
@@ -27,7 +32,7 @@ namespace VFrame30
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
-		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
+		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
 
 	protected:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const final;

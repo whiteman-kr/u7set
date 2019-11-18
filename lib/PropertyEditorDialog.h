@@ -13,7 +13,6 @@ public:
 	~PropertyEditorDialog();
 
 	void setObjects(QList<std::shared_ptr<PropertyObject>> objects);
-
 	void setObject(std::shared_ptr<PropertyObject> object);
 
 	void setReadOnly(bool readOnly);
@@ -28,7 +27,6 @@ private slots:
     void onOk();
 
 private:
-
 	QList<std::shared_ptr<PropertyObject>> m_objects;
 
 	bool m_readOnly = false;

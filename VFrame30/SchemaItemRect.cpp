@@ -147,7 +147,7 @@ namespace VFrame30
 	// Ğèñîâàíèå ıëåìåíòà, âûïîëíÿåòñÿ â 100% ìàñøòàáå.
 	// Graphcis äîëæåí èìåòü ıêğàííóş êîîğäèíàòíóş ñèñòåìó (0, 0 - ëåâûé âåğõíèé óãîë, âíèç è âïğàâî - ïîëîæèòåëüíûå êîîğäèíàòû)
 	//
-	void SchemaItemRect::Draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
+	void SchemaItemRect::draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
 	{
 		QPainter* p = drawParam->painter();
 

@@ -195,6 +195,8 @@ namespace Builder
 
 		const ResourcesUsageInfo& resourcesUsageInfo() { return m_resourcesUsageInfo; }
 
+		void setModuleCompilersRef(const QVector<ModuleLogicCompiler*>* moduleCompilers);
+
 	private:
 		// pass #1 compilation functions
 		//
@@ -397,6 +399,7 @@ namespace Builder
 
 		// pass #2 compilation functions
 		//
+		bool initComparatorSignals();
 		bool finalizeOptoConnectionsProcessing();
 		bool setOptoUalSignalsAddresses();
 
@@ -551,6 +554,10 @@ namespace Builder
 
 		UalSignalsMap& ualSignals() { return m_ualSignals; }
 
+		QString getFormatStr(const Hardware::DeviceSignal& ds);
+		QString getFormatStr(const Signal& s);
+		QString getFormatStr(E::SignalType signalType, E::DataFormat dataFormat, int dataSizeBits, E::ByteOrder byteOrder);
+
 	private:
 		// input parameters
 		//
@@ -673,6 +680,8 @@ namespace Builder
 		static const int FB_SCALE_16UI_SI_INDEX = 1;
 		static const int FB_SCALE_FP_16UI_INDEX = 2;
 		static const int FB_SCALE_SI_16UI_INDEX = 3;
+		static const int FB_TCONV_FP_SI_INDEX = 4;
+		static const int FB_TCONV_SI_FP_INDEX = 5;
 
 		static const char* INPUT_CONTROLLER_SUFFIX;
 		static const char* OUTPUT_CONTROLLER_SUFFIX;
@@ -687,6 +696,8 @@ namespace Builder
 		QHash<QString, UalAfb*> m_inOutSignalsToScalAppFbMap;
 
 		Tuning::TuningData* m_tuningData = nullptr;
+
+		const QVector<ModuleLogicCompiler*>* m_moduleCompilers = nullptr;
 	};
 
 }

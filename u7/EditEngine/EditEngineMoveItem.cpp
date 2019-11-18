@@ -30,7 +30,7 @@ namespace EditEngine
 
 		for (SchemaItemPtr item : m_items)
 		{
-			item->MoveItem(m_xdiff, m_ydiff);
+			item->moveItem(m_xdiff, m_ydiff);
 
 			if (m_snapToGrid)
 			{
@@ -47,7 +47,7 @@ namespace EditEngine
 
 		for (SchemaItemPtr item : m_items)
 		{
-			item->MoveItem(-m_xdiff, -m_ydiff);
+			item->moveItem(-m_xdiff, -m_ydiff);
 
 			if (m_snapToGrid)
 			{

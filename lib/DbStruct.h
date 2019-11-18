@@ -21,6 +21,7 @@ namespace Db
 
 	public:
 		constexpr static const char* Description = "Description";
+		constexpr static const char* SafetyProject = "Safety Project";
 		constexpr static const char* SuppressWarnings = "SuppressWarnings";					// A list of suppressed warnings on build
 		constexpr static const char* UppercaseAppSignalId = "UppercaseAppSignalID";
 		constexpr static const char* GenerateAppSignalsXml = "Generate AppSignals.xml";		// Generate file AppSignals.xml on build
@@ -183,6 +184,9 @@ public:
 	QString description() const;
 	void setDescription(const QString& description);
 
+	bool safetyProject() const;
+	void setSafetyProject(bool value);
+
 	int version() const;
 	void setVersion(int value);
 
@@ -193,6 +197,7 @@ protected:
 	QString m_databaseName;
 	QString m_projectName;
 	QString m_description;
+	bool m_safetyProject = true;
 	int m_version = 0;
 	bool m_uppercaseAppSignalId = true;
 };
@@ -215,6 +220,9 @@ public:
 	QString description() const;
 	void setDescription(const QString& value);
 
+	bool safetyProject() const;
+	void setSafetyProject(bool value);
+
 	std::vector<int> suppressWarnings() const;
 	QString suppressWarningsAsString() const;
 	void setSuppressWarnings(const QString& value);
@@ -230,6 +238,7 @@ public:
 
 private:
 	QString m_description;
+	bool m_safetyProject = true;
 	std::vector<int> m_suppressWarnings;
 	bool m_uppercaseAppSignalId = true;
 	bool m_generateAppSignalsXml = false;

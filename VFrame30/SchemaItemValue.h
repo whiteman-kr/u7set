@@ -17,14 +17,32 @@ namespace VFrame30
 		Q_OBJECT
 
 		Q_PROPERTY(QStringList SignalIDs READ signalIds WRITE setSignalIds)
-		Q_PROPERTY(QString Text READ text WRITE setText)
+		Q_PROPERTY(QStringList AppSignalIDs READ signalIds WRITE setSignalIds)
+
+		// Appearance
+		//
 
 		Q_PROPERTY(double LineWeight READ lineWeight WRITE setLineWeight)
-		Q_PROPERTY(bool DrawRect READ drawRect WRITE setDrawRect)
 
 		Q_PROPERTY(QColor LineColor READ lineColor WRITE setLineColor)
 		Q_PROPERTY(QColor FillColor READ fillColor WRITE setFillColor)
 		Q_PROPERTY(QColor TextColor READ textColor WRITE setTextColor)
+
+		Q_PROPERTY(bool DrawRect READ drawRect WRITE setDrawRect)
+
+		// Text Category Properties
+		//
+
+		Q_PROPERTY(E::HorzAlign AlignHorz READ horzAlign WRITE setHorzAlign)
+		Q_PROPERTY(E::VertAlign AlignVert READ vertAlign WRITE setVertAlign)
+
+		Q_PROPERTY(QString FontName READ getFontName WRITE setFontName)
+		Q_PROPERTY(double FontSize READ getFontSize WRITE setFontSize)
+		Q_PROPERTY(bool FontBold READ getFontBold WRITE setFontBold)
+		Q_PROPERTY(bool FontItalic READ getFontItalic WRITE setFontItalic)
+
+		Q_PROPERTY(QString Text READ text WRITE setText)
+		Q_PROPERTY(int Precision READ precision WRITE setPrecision)
 
 	public:
 		SchemaItemValue(void);
@@ -40,7 +58,7 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
+		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
 
 	protected:
 		void initDrawingResources() const;

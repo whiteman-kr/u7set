@@ -326,6 +326,13 @@ namespace Builder
 			}
 		}
 
+		for(ModuleLogicCompiler* mc : m_moduleCompilers)
+		{
+			TEST_PTR_CONTINUE(mc);
+
+			mc->setModuleCompilersRef(&m_moduleCompilers);
+		}
+
 		return result;
 	}
 

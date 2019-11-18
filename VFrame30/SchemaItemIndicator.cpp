@@ -939,7 +939,7 @@ namespace VFrame30
 
 	// Drawing Functions
 	//
-	void SchemaItemIndicator::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemIndicator::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
 		QPainter* p = drawParam->painter();
 		Q_ASSERT(p);

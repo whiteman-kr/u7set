@@ -15,6 +15,8 @@ namespace VFrame30
 		Q_OBJECT
 
 		Q_PROPERTY(QStringList SignalIDs READ signalIds WRITE setSignalIds)
+		Q_PROPERTY(QStringList AppSignalIDs READ signalIds WRITE setSignalIds)
+
 		Q_PROPERTY(QString CurrentImageID READ currentImageId WRITE setCurrentImageId)
 
 		Q_PROPERTY(double LineWeight READ lineWeight WRITE setLineWeight)
@@ -39,7 +41,7 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
+		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
 
 	protected:
 		void initDrawingResources() const;
