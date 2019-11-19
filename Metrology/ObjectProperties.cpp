@@ -1389,7 +1389,7 @@ bool ComparatorPropertyDialog::m_showGroupHeader[COMPARATOR_PROPERTY_GROUP_COUNT
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorPropertyDialog::ComparatorPropertyDialog(const Builder::Comparator& comparator, QWidget *parent) :
+ComparatorPropertyDialog::ComparatorPropertyDialog(const Comparator& comparator, QWidget *parent) :
 	QDialog(parent)
 {
 	m_comparator = comparator;

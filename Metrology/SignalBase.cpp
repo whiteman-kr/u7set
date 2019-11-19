@@ -2290,7 +2290,7 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 				int comparatorCount = pSignal->param().comparatorCount();
 				for (int c = 0; c < comparatorCount; c++)
 				{
-					std::shared_ptr<::Builder::Comparator> comparator = pSignal->param().comparator(c);
+					std::shared_ptr<Comparator> comparator = pSignal->param().comparator(c);
 
 					if (comparator->compare().isConst() == false && comparator->compare().appSignalID().isEmpty() == false)
 					{
@@ -2339,7 +2339,7 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 				comparatorCount = pSignal->param().comparatorCount();
 				for (int c = 0; c < comparatorCount; c++)
 				{
-					std::shared_ptr<::Builder::Comparator> comparator = pSignal->param().comparator(c);
+					std::shared_ptr<Comparator> comparator = pSignal->param().comparator(c);
 
 					if (comparator->compare().isConst() == false && comparator->compare().appSignalID().isEmpty() == false)
 					{
@@ -2387,7 +2387,7 @@ void SignalBase::clearActiveSignal()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool SignalBase::loadComparatorsInSignal(const ::Builder::ComparatorSet& comparatorSet)
+bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 {
 	QStringList appSignalIDList = comparatorSet.inputSignalIDs();
 

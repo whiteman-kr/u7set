@@ -223,7 +223,7 @@ bool ConfigSocket::readComparatorSet(const QByteArray& fileData)
 	QTime responseTime;
 	responseTime.start();
 
-	Builder::ComparatorSet comparatorSet;
+	ComparatorSet comparatorSet;
 	comparatorSet.serializeFrom(fileData);
 
 	theSignalBase.loadComparatorsInSignal(comparatorSet);

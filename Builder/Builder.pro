@@ -145,7 +145,7 @@ SOURCES += \
     ../lib/UnitsConvertorTable.cpp \
     Context.cpp \
     ../lib/AppSignalStateFlags.cpp \
-    ComparatorSet.cpp
+    ../lib/ComparatorSet.cpp
 
 HEADERS += \
     ../lib/OutputLog.h \
@@ -232,7 +232,7 @@ HEADERS += \
     ../lib/UnitsConvertorTable.h \
     Context.h \
     ../lib/AppSignalStateFlags.h \
-    ComparatorSet.h
+    ../lib/ComparatorSet.h
 
 unix {
     target.path = /usr/lib

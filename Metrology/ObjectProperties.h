@@ -345,12 +345,12 @@ class ComparatorPropertyDialog : public QDialog
 
 public:
 
-	explicit ComparatorPropertyDialog(const Builder::Comparator& comparator, QWidget *parent = nullptr);
+	explicit ComparatorPropertyDialog(const Comparator& comparator, QWidget *parent = nullptr);
 	virtual ~ComparatorPropertyDialog();
 
 private:
 
-	Builder::Comparator			m_comparator;
+	Comparator			m_comparator;
 
 	// Property list
 	//
@@ -373,7 +373,7 @@ private:
 
 public:
 
-	Builder::Comparator			comparator() const { return m_comparator; }
+	Comparator			comparator() const { return m_comparator; }
 
 signals:
 

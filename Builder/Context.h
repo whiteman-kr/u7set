@@ -13,7 +13,7 @@
 #include "BuildResultWriter.h"
 #include "LmDescriptionSet.h"
 #include "OptoModule.h"
-#include "ComparatorSet.h"
+#include "../lib/ComparatorSet.h"
 
 
 namespace Builder

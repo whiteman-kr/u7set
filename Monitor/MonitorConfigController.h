@@ -127,6 +127,9 @@ private:
 
 	mutable QMutex m_confugurationMutex;		// for access only to m_configuration
 	ConfigSettings m_configuration;
+
+//	mutable QMutex m_setPointsMutext;		// for access only to m_configuration
+//	SetPO
 };
 
 #endif // MONITORCONFIGTHREAD_H

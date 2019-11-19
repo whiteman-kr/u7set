@@ -10,7 +10,7 @@
 #include "BuildResultWriter.h"
 #include "OptoModule.h"
 #include "LmMemoryMap.h"
-#include "ComparatorSet.h"
+#include "../lib/ComparatorSet.h"
 #include "UalItems.h"
 #include "MemWriteMap.h"
 

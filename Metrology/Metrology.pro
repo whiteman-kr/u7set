@@ -108,7 +108,7 @@ SOURCES += \
     ../lib/UnitsConvertorTable.cpp \
     StatisticBase.cpp \
     StatisticPanel.cpp \
-    ../Builder/ComparatorSet.cpp \
+    ../lib/ComparatorSet.cpp \
     ComparatorList.cpp \
     ComparatorInfoPanel.cpp \
     SignalConnectionList.cpp \
@@ -191,7 +191,7 @@ HEADERS  += \
 #../lib/ExcelHelper.h
     StatisticBase.h \
     StatisticPanel.h \
-    ../Builder/ComparatorSet.h \
+    ../lib/ComparatorSet.h \
     ComparatorList.h \
     ComparatorInfoPanel.h \
     SignalConnectionList.h \

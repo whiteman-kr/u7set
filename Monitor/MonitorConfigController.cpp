@@ -430,13 +430,15 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	qDebug() << "ArchiveService1 (id, ip, port): " << readSettings.archiveService1.equipmentId() << ", " << readSettings.archiveService1.ip() << ", " << readSettings.archiveService1.port();
 	qDebug() << "ArchiveService2 (id, ip, port): " << readSettings.archiveService2.equipmentId() << ", " << readSettings.archiveService2.ip() << ", " << readSettings.archiveService2.port();
 
-	// Emit signal to inform everybody about new configuration
+	// --
 	//
 	{
 		QMutexLocker locker(&m_confugurationMutex);
 		m_configuration = readSettings;
 	}
 
+	// Emit signal to inform everybody about new configuration
+	//
 	emit configurationArrived(readSettings);
 
 	return;

@@ -6,7 +6,7 @@
 #include "../lib/XmlHelper.h"
 #include "../lib/UnitsConvertor.h"
 #include "../Builder/CfgFiles.h"
-#include "../Builder/ComparatorSet.h"
+#include "../lib/ComparatorSet.h"
 
 // Attention !!!
 // If you want to change any function writeToXml you must change CFG_FILE_VER_METROLOGY_SIGNALS
@@ -184,7 +184,7 @@ namespace Metrology
 		double					m_physicalLowLimit = 0;
 		double					m_physicalHighLimit = 0;
 
-		QVector<std::shared_ptr<::Builder::Comparator>> m_comparatorList;
+		QVector<std::shared_ptr<Comparator>> m_comparatorList;
 		int						m_comparatorCount = 0;
 
 	public:
@@ -249,9 +249,9 @@ namespace Metrology
 		QString					tuningRangeStr() const;
 		TuningValueType			tuningValueType() const;
 
-		void					setComparatorList(const QVector<std::shared_ptr<::Builder::Comparator>>& comparators);
+		void					setComparatorList(const QVector<std::shared_ptr<Comparator>>& comparators);
 		int						comparatorCount() const { return m_comparatorCount; }
-		std::shared_ptr<::Builder::Comparator> comparator(int index) const;
+		std::shared_ptr<Comparator> comparator(int index) const;
 
 		bool					readFromXml(XmlReadHelper& xml);
 		void					writeToXml(XmlWriteHelper& xml);

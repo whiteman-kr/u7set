@@ -847,7 +847,7 @@ void MeasureThread::measureComprators()
 						continue;
 					}
 
-					std::shared_ptr<::Builder::Comparator> pComparator = inParam.comparator(cmp);
+					std::shared_ptr<Comparator> pComparator = inParam.comparator(cmp);
 					if (pComparator == nullptr)
 					{
 						continue;
@@ -1014,7 +1014,7 @@ void MeasureThread::measureComprators()
 					continue;
 				}
 
-				std::shared_ptr<::Builder::Comparator> pComparator = inParam.comparator(cmp);
+				std::shared_ptr<Comparator> pComparator = inParam.comparator(cmp);
 				if (pComparator == nullptr)
 				{
 					currentStateComparatorsInAllChannels &= ~(0x1 << ch);
@@ -1100,7 +1100,7 @@ void MeasureThread::measureComprators()
 					continue;
 				}
 
-				std::shared_ptr<::Builder::Comparator> pComparator = inParam.comparator(cmp);
+				std::shared_ptr<Comparator> pComparator = inParam.comparator(cmp);
 				if (pComparator == nullptr)
 				{
 					//currentStateComparatorsInAllChannels |= (0x1 << ch);

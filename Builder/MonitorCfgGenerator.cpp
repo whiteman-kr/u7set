@@ -56,6 +56,19 @@ namespace Builder
 			result &= writeTuningSignals();
 		}
 
+		// Add link to FILE_COMPARATORS_SET (Common/Comparator.set)
+		//
+		//if (BuildFile* compBuildFile = m_buildResultWriter->getBuildFile(QString("%1\\%2").arg(DIR_COMMON).arg(FILE_COMPARATORS_SET));
+		if (BuildFile* compBuildFile = m_buildResultWriter->getBuildFileByID(DIR_COMMON, CFG_FILE_ID_COMPARATOR_SET);
+			compBuildFile != nullptr)
+		{
+			m_cfgXml->addLinkToFile(compBuildFile);
+		}
+		else
+		{
+			result = false;
+		}
+
 		return result;
 	}
 
