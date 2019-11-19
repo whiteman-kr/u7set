@@ -331,11 +331,12 @@ const int						COMPARATOR_PROPERTY_ITEM_CMP_TYPE			= 0,
 
 								COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE		= 1,
 								COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE		= 2,
+								COMPARATOR_PROPERTY_ITEM_CMP_PRECESION		= 3,
 
-								COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE		= 3,
-								COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE		= 4;
+								COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE		= 4,
+								COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE		= 5;
 
-const int						COMPARATOR_PROPERTY_ITEM_COUNT				= 5;
+const int						COMPARATOR_PROPERTY_ITEM_COUNT				= 6;
 
 // ----------------------------------------------------------------------------------------------
 

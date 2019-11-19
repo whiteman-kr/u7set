@@ -1585,7 +1585,13 @@ void ComparatorPropertyDialog::createPropertyList()
 					item->setAttribute(QLatin1String("readOnly"), true);
 					compareGroup->addSubProperty(item);
 				}
+
 			}
+
+			item = m_pManager->addProperty(QVariant::Int, tr("Precision"));
+			item->setValue(m_comparator.precision());
+			m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_CMP_PRECESION);
+			compareGroup->addSubProperty(item);
 
 		m_pEditor->setFactoryForManager(m_pManager, m_pFactory);
 
@@ -1800,6 +1806,12 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 				{
 					propertyEl->setValue(conversion(m_comparator.compare().constValue(), CT_ENGENEER_TO_ELECTRIC, pInputSignal->param()));
 				}
+			}
+			break;
+
+		case COMPARATOR_PROPERTY_ITEM_CMP_PRECESION:
+			{
+				m_comparator.setPrecision(value.toInt());
 			}
 			break;
 
