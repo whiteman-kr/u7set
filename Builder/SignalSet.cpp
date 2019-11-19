@@ -495,6 +495,11 @@ namespace Builder
 			return true;
 		}
 
+		if (s.isSpecPropExists(propertyName) == false)
+		{
+			return true;
+		}
+
 		double properyValue = s.getSpecPropDouble(propertyName);
 
 		bool result = true;

@@ -6524,6 +6524,27 @@ namespace Builder
 							arg(signalID).arg(inFormat).arg(outFormat));
 	}
 
+	/// IssueCode: ALC5176
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Specific property %1 is not exists in signal %2
+	///
+	/// Parameters:
+	///		%1 specific property name
+	///		%2 application signal ID
+	///
+	/// Description:
+	///		Specific property is not exists in application signal. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5176(QString signalID, QString propertyName)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5176,
+				  QString(tr("Specific property %1 is not exists in signal %2.")).
+							arg(propertyName).arg(signalID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186

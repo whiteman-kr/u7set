@@ -231,7 +231,7 @@ QString SignalInfoTable::text(int column, const IoSignalParam& ioParam) const
 		case SIGNAL_INFO_COLUMN_PLACE:			result = ioParam.placeStr();			break;
 		case SIGNAL_INFO_COLUMN_EL_RANGE:		result = ioParam.electricRangeStr();	break;
 		case SIGNAL_INFO_COLUMN_EL_SENSOR:		result = ioParam.electricSensorStr();	break;
-		case SIGNAL_INFO_COLUMN_EN_RANGE:		result = ioParam.engeneeringRangeStr();	break;
+		case SIGNAL_INFO_COLUMN_EN_RANGE:		result = ioParam.engineeringRangeStr();	break;
 		case SIGNAL_INFO_COLUMN_CALIBRATOR:		result = ioParam.calibratorStr();		break;
 		default:								assert(0);
 	}

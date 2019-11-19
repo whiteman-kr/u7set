@@ -493,7 +493,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					showcolumnGroup->addSubProperty(item);
 
 					item = manager->addProperty(QVariant::Bool, LinearityParamName[LO_PARAM_SHOW_ENGINEERING_VALUE]);
-					item->setValue(m_options.linearity().showEngeneeringValueColumn());
+					item->setValue(m_options.linearity().showEngineeringValueColumn());
 					appendProperty(item, page, LO_PARAM_SHOW_ENGINEERING_VALUE);
 					showcolumnGroup->addSubProperty(item);
 

@@ -10,8 +10,8 @@ TuningHighBound			; True			; Hide		; Hide		; Write			; Hide		; Hide			; Write			
 BusTypeID			; False			; Hide		; Hide		; Hide			; Hide		; Hide			; Hide			; Write		; Write		; Write
 LowValidRange			; True			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
 HighValidRange			; True			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-LowEngeneeringUnits		; True			; Write		; Write		; Write			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
-HighEngeneeringUnits		; True			; Write		; Write		; Write			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
+LowEngineeringUnits		; True			; Write		; Write		; Write			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
+HighEngineeringUnits		; True			; Write		; Write		; Write			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
 FilteringTime			; False			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
 SpreadTolerance			; False			; Write		; Hide		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide
 ElectricLowLimit		; False			; Write		; Write		; Hide			; Hide		; Hide			; Hide			; Hide		; Hide		; Hide

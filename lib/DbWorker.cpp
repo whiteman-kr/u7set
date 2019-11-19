@@ -319,7 +319,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0299.sql", "Upgrade to version 299, be_to_le_16si->be_to_le_16ui, le_to_be_16si->le_to_be_16ui"},
 	{":/DatabaseUpgrade/Upgrade0300.sql", "Upgrade to version 300, Added Certificate property to all presets"},
 	{":/DatabaseUpgrade/Upgrade0301.sql", "Upgrade to version 301, FSC Chassis preset has LM compatibility table"},
-	{":/DatabaseUpgrade/Upgrade0302.sql", "Upgrade to version 302, fixing misprint EngEneeringUnits -> EngIneeringUnits "},
+//	{":/DatabaseUpgrade/Upgrade0302.sql", "Upgrade to version 302, fixing misprint EngEneeringUnits -> EngIneeringUnits "},
 };
 
 int DbWorker::counter = 0;

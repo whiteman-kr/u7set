@@ -554,7 +554,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString SignalParam::engeneeringRangeStr() const
+	QString SignalParam::engineeringRangeStr() const
 	{
 		QString range, formatStr;
 

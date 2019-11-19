@@ -16,6 +16,11 @@ class QXmlStreamAttributes;
 class XmlWriteHelper;
 class XmlReadHelper;
 
+namespace Builder
+{
+	class IssueLogger;
+}
+
 const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
 
 class SignalSpecPropValues;
@@ -227,6 +232,7 @@ public:
 	unsigned int getSpecPropUInt(const QString& name) const;
 	int getSpecPropEnum(const QString& name) const;
 	bool getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum) const;
+	bool isSpecPropExists(const QString& name) const;
 
 	bool setSpecPropDouble(const QString& name, double value);
 	bool setSpecPropInt(const QString& name, int value);
@@ -303,6 +309,8 @@ public:
 	//
 
 	void writeToXml(XmlWriteHelper& xml);
+	void writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString());
+	void writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString());
 	void writeTuningValuesToXml(XmlWriteHelper& xml);
 
 	bool readFromXml(XmlReadHelper& xml);
@@ -318,6 +326,8 @@ public:
 	bool hasStateFlagsSignals() const { return m_stateFlagsSignals.count(); }
 
 	void initTuningValues();
+
+	void setLog(Builder::IssueLogger* log) { m_log = log; }
 
 private:
 	// Private setters for fields, witch can't be changed outside DB engine
@@ -440,6 +450,7 @@ private:
 	bool m_needConversion = false;
 
 	std::shared_ptr<Hardware::DeviceModule> m_lm;		// valid in compile-time only
+	Builder::IssueLogger* m_log = nullptr;
 };
 
 typedef PtrOrderedHash<int, Signal> SignalPtrOrderedHash;
@@ -479,10 +490,14 @@ public:
 
 	void replaceOrAppendIfNotExists(int signalID, const Signal& s);
 
+	void setLog(Builder::IssueLogger* log);
+
 private:
 	QMultiHash<int, int> m_groupSignals;
 	QHash<QString, int> m_strID2IndexMap;
 
 	int m_maxID = -1;
+
+	Builder::IssueLogger* m_log = nullptr;
 };
 

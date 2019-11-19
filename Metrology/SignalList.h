@@ -30,7 +30,7 @@ const char* const			SignalListColumn[] =
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Electric range"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Electric sensor"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Physical range"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Engeneering range"),
+							QT_TRANSLATE_NOOP("SignalListDialog.h", "Engineering range"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Tuning"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Default value"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Tuning range"),

@@ -7,7 +7,9 @@
 #include "WUtils.h"
 #include "SignalProperties.h"
 
+#include "../Builder/IssueLogger.h"
 #include "../Proto/serialization.pb.h"
+
 
 // --------------------------------------------------------------------------------------------------------
 //
@@ -496,7 +498,13 @@ void Signal::cacheSpecPropValues()
 		m_cachedSpecPropValues = std::make_shared<SignalSpecPropValues>();
 	}
 
-	m_cachedSpecPropValues->parseValuesFromArray(m_protoSpecPropValues);
+	bool res = m_cachedSpecPropValues->parseValuesFromArray(m_protoSpecPropValues);
+
+	if (res == false && m_log != nullptr)
+	{
+		LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal %1 specific properties values parsing error").arg(appSignalID()));
+	}
+
 }
 
 void Signal::saveProtoData(QByteArray* protoDataArray) const
@@ -631,31 +639,34 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeStringAttribute("EquipmentID", equipmentID());
 	xml.writeIntAttribute("DataFormat", analogSignalFormatInt());
 	xml.writeIntAttribute("DataSize", dataSize());
-	xml.writeIntAttribute("LowADC", lowADC());
-	xml.writeIntAttribute("HighADC", highADC());
-	xml.writeDoubleAttribute("LowEngineeringUnits", lowEngineeringUnits());
-	xml.writeDoubleAttribute("HighEngineeringUnits", highEngineeringUnits());
+
+	writeIntSpecPropAttribute(xml, SignalProperties::lowADCCaption);
+	writeIntSpecPropAttribute(xml, SignalProperties::highADCCaption);
+	writeDoubleSpecPropAttribute(xml, SignalProperties::lowEngineeringUnitsCaption);
+	writeDoubleSpecPropAttribute(xml, SignalProperties::highEngineeringUnitsCaption);
 	xml.writeIntAttribute("UnitID", 0);
-	xml.writeDoubleAttribute("LowValidRange", lowValidRange());
-	xml.writeDoubleAttribute("HighValidRange", highValidRange());
+	writeDoubleSpecPropAttribute(xml, SignalProperties::lowValidRangeCaption);
+	writeDoubleSpecPropAttribute(xml, SignalProperties::highValidRangeCaption);
 	xml.writeDoubleAttribute("UnbalanceLimit", 1);
-	xml.writeDoubleAttribute("InputLowLimit", electricLowLimit());
-	xml.writeDoubleAttribute("InputHighLimit", electricHighLimit());
-	xml.writeIntAttribute("InputUnitID", TO_INT(electricUnit()));
-	xml.writeIntAttribute("InputSensorID", TO_INT(sensorType()));
-	xml.writeDoubleAttribute("OutputLowLimit", electricLowLimit());
-	xml.writeDoubleAttribute("OutputHighLimit", electricHighLimit());
-	xml.writeIntAttribute("OutputUnitID", TO_INT(electricUnit()));
-	xml.writeIntAttribute("OutputMode", TO_INT(outputMode()));
-	xml.writeIntAttribute("OutputSensorID", TO_INT(sensorType()));
+	writeDoubleSpecPropAttribute(xml, SignalProperties::electricLowLimitCaption, "InputLowLimit");
+	writeDoubleSpecPropAttribute(xml, SignalProperties::electricHighLimitCaption, "InputHighLimit");
+	writeIntSpecPropAttribute(xml, SignalProperties::electricUnitCaption);
+	writeIntSpecPropAttribute(xml, SignalProperties::sensorTypeCaption, "InputSensorID");
+	writeDoubleSpecPropAttribute(xml, SignalProperties::electricLowLimitCaption, "OutputLowLimit");
+	writeDoubleSpecPropAttribute(xml, SignalProperties::electricHighLimitCaption, "OutputHighLimit");
+	writeIntSpecPropAttribute(xml, SignalProperties::electricUnitCaption, "OutputUnitID");
+
+	writeIntSpecPropAttribute(xml, SignalProperties::outputModeCaption);
+
+	writeIntSpecPropAttribute(xml, SignalProperties::sensorTypeCaption, "OutputSensorID");
 	xml.writeBoolAttribute("Acquire", acquire());
 	xml.writeBoolAttribute("Calculated", false);
 	xml.writeIntAttribute("NormalState", 0);
 	xml.writeIntAttribute("DecimalPlaces", decimalPlaces());
 	xml.writeDoubleAttribute("Aperture", coarseAperture());
 	xml.writeIntAttribute("InOutType", inOutTypeInt());
-	xml.writeDoubleAttribute("FilteringTime", filteringTime());
-	xml.writeDoubleAttribute("SpreadTolerance", spreadTolerance());
+	writeDoubleSpecPropAttribute(xml, SignalProperties::filteringTimeCaption);
+	writeDoubleSpecPropAttribute(xml, SignalProperties::spreadToleranceCaption);
 	xml.writeIntAttribute("ByteOrder", byteOrderInt());
 
 	writeTuningValuesToXml(xml);
@@ -679,6 +690,38 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeStringAttribute("SpecPropValues", QString(protoSpecPropValues().toHex()));
 
 	xml.writeEndElement();				// </Signal>
+}
+
+void Signal::writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName)
+{
+	QVariant v;
+	bool isEnum = false;
+	bool res = getSpecPropValue(propName, &v, &isEnum);
+
+	if (res == true)
+	{
+		xml.writeDoubleAttribute(attributeName.isEmpty() == true ? propName : attributeName, v.toDouble());
+	}
+	else
+	{
+		xml.writeDoubleAttribute(attributeName.isEmpty() == true ? propName : attributeName, 0);
+	}
+}
+
+void Signal::writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName)
+{
+	QVariant v;
+	bool isEnum = false;
+	bool res = getSpecPropValue(propName, &v, &isEnum);
+
+	if (res == true)
+	{
+		xml.writeIntAttribute(attributeName.isEmpty() == true ? propName : attributeName, v.toInt());
+	}
+	else
+	{
+		xml.writeIntAttribute(attributeName.isEmpty() == true ? propName : attributeName, 0);
+	}
 }
 
 void Signal::writeTuningValuesToXml(XmlWriteHelper& xml)
@@ -1288,6 +1331,13 @@ double Signal::getSpecPropDouble(const QString& name) const
 
 	if (result == false)
 	{
+		if (m_log != nullptr)
+		{
+			// Specific property %1 is not exists in signal %2
+			//
+			m_log->errALC5176(appSignalID(), name);
+		}
+
 		return 0;
 	}
 
@@ -1305,6 +1355,13 @@ int Signal::getSpecPropInt(const QString& name) const
 
 	if (result == false)
 	{
+		if (m_log != nullptr)
+		{
+			// Specific property %1 is not exists in signal %2
+			//
+			m_log->errALC5176(appSignalID(), name);
+		}
+
 		return 0;
 	}
 
@@ -1322,6 +1379,13 @@ unsigned int Signal::getSpecPropUInt(const QString& name) const
 
 	if (result == false)
 	{
+		if (m_log != nullptr)
+		{
+			// Specific property %1 is not exists in signal %2
+			//
+			m_log->errALC5176(appSignalID(), name);
+		}
+
 		return 0;
 	}
 
@@ -1340,6 +1404,13 @@ int Signal::getSpecPropEnum(const QString& name) const
 
 	if (result == false)
 	{
+		if (m_log != nullptr)
+		{
+			// Specific property %1 is not exists in signal %2
+			//
+			m_log->errALC5176(appSignalID(), name);
+		}
+
 		return 0;
 	}
 
@@ -1353,9 +1424,41 @@ bool Signal::getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum) c
 	TEST_PTR_RETURN_FALSE(qv);
 	TEST_PTR_RETURN_FALSE(isEnum);
 
+	bool result = false;
+
 	if (m_cachedSpecPropValues != nullptr)
 	{
-		return m_cachedSpecPropValues->getValue(name, qv, isEnum);
+		result = m_cachedSpecPropValues->getValue(name, qv, isEnum);
+	}
+	else
+	{
+		SignalSpecPropValues spv;
+
+		bool res = spv.parseValuesFromArray(m_protoSpecPropValues);
+
+		if (res == false)
+		{
+			if (m_log != nullptr)
+			{
+				LOG_INTERNAL_ERROR_MSG(m_log, QString("Signal %1 specific properties values parsing error").arg(appSignalID()));
+			}
+
+			result = false;
+		}
+		else
+		{
+			result &= spv.getValue(name, qv, isEnum);
+		}
+	}
+
+	return result;
+}
+
+bool Signal::isSpecPropExists(const QString& name) const
+{
+	if (m_cachedSpecPropValues != nullptr)
+	{
+		return m_cachedSpecPropValues->isExists(name);
 	}
 
 	SignalSpecPropValues spv;
@@ -1368,7 +1471,7 @@ bool Signal::getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum) c
 		return false;
 	}
 
-	return spv.getValue(name, qv, isEnum);
+	return spv.isExists(name);
 }
 
 bool Signal::setSpecPropDouble(const QString& name, double value)
@@ -1703,3 +1806,20 @@ void SignalSet::replaceOrAppendIfNotExists(int signalID, const Signal& s)
 		append(signalID, new Signal(s));
 	}
 }
+
+void SignalSet::setLog(Builder::IssueLogger* log)
+{
+	TEST_PTR_RETURN(log);
+
+	m_log = log;
+
+	int signalCount = count();
+
+	for(int i = 0; i < signalCount; i++)
+	{
+		Signal& s = (*this)[i];
+
+		s.setLog(log);
+	}
+}
+

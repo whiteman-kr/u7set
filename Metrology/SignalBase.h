@@ -67,7 +67,7 @@ public:
 	QString					electricRangeStr() const;
 	QString					electricSensorStr() const;
 	QString					physicalRangeStr() const;
-	QString					engeneeringRangeStr() const;
+	QString					engineeringRangeStr() const;
 
 	CalibratorManager*		calibratorManager() const { return m_pCalibratorManager; }
 	QString					calibratorStr() const;

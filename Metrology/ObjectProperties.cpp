@@ -1163,7 +1163,7 @@ void SignalPropertyDialog::createPropertyList()
 
 		// engineering range group
 
-		QtProperty *engineeringRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EN_RANGE] + m_param.engeneeringRangeStr());
+		QtProperty *engineeringRangeGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), SignalPropertyGroup[SIGNAL_PROPERTY_GROUP_EN_RANGE] + m_param.engineeringRangeStr());
 
 			item = m_pManager->addProperty(QVariant::Double, tr("Low limit"));
 			item->setValue(m_param.lowEngineeringUnits());
@@ -1293,7 +1293,7 @@ void SignalPropertyDialog::onPropertyValueChanged(QtProperty *property, const QV
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_R0:			m_param.setElectricR0(value.toDouble());											groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EL_RANGE_PRECISION:	m_param.setElectricPrecision(value.toInt());										groupIndex = SIGNAL_PROPERTY_GROUP_EL_RANGE;	break;
 
-		// engeneering limit
+		// engineering limit
 		//
 		case SIGNAL_PROPERTY_ITEM_EN_RANGE_LOW:			m_param.setLowEngineeringUnits(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
 		case SIGNAL_PROPERTY_ITEM_EN_RANGE_HIGH:		m_param.setHighEngineeringUnits(value.toDouble());									groupIndex = SIGNAL_PROPERTY_GROUP_EN_RANGE;	break;
@@ -1330,7 +1330,7 @@ void SignalPropertyDialog::updateGroupHeader(int index)
 	{
 		case SIGNAL_PROPERTY_GROUP_ID:			header = tr("Signal ID");												break;
 		case SIGNAL_PROPERTY_GROUP_EL_RANGE:	header = SignalPropertyGroup[index] + m_param.electricRangeStr();		break;
-		case SIGNAL_PROPERTY_GROUP_EN_RANGE:	header = SignalPropertyGroup[index] + m_param.engeneeringRangeStr();	break;
+		case SIGNAL_PROPERTY_GROUP_EN_RANGE:	header = SignalPropertyGroup[index] + m_param.engineeringRangeStr();	break;
 		default:								assert(0);
 	}
 
@@ -1505,8 +1505,8 @@ void ComparatorPropertyDialog::createPropertyList()
 					inputGroup->addSubProperty(item);
 				}
 
-				item = m_pManager->addProperty(QVariant::String, tr("Engeneering range"));
-				item->setValue(pInputSignal->param().engeneeringRangeStr());
+				item = m_pManager->addProperty(QVariant::String, tr("Engineering range"));
+				item->setValue(pInputSignal->param().engineeringRangeStr());
 				item->setAttribute(QLatin1String("readOnly"), true);
 				inputGroup->addSubProperty(item);
 			}
@@ -1534,7 +1534,7 @@ void ComparatorPropertyDialog::createPropertyList()
 					compareGroup->addSubProperty(item);
 				}
 
-				item = m_pManager->addProperty(QVariant::Double, tr("Engeneering value, %1").arg(pInputSignal == nullptr ? QString() : pInputSignal->param().unit()));
+				item = m_pManager->addProperty(QVariant::Double, tr("Engineering value, %1").arg(pInputSignal == nullptr ? QString() : pInputSignal->param().unit()));
 				item->setValue(m_comparator.compare().constValue());
 				item->setAttribute(QLatin1String("decimals"), precision);
 				m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE);
@@ -1580,8 +1580,8 @@ void ComparatorPropertyDialog::createPropertyList()
 						compareGroup->addSubProperty(item);
 					}
 
-					item = m_pManager->addProperty(QVariant::String, tr("Engeneering range"));
-					item->setValue(pCompareSignal->param().engeneeringRangeStr());
+					item = m_pManager->addProperty(QVariant::String, tr("Engineering range"));
+					item->setValue(pCompareSignal->param().engineeringRangeStr());
 					item->setAttribute(QLatin1String("readOnly"), true);
 					compareGroup->addSubProperty(item);
 				}
@@ -1604,7 +1604,7 @@ void ComparatorPropertyDialog::createPropertyList()
 //					hysteresisGroup->addSubProperty(item);
 //				}
 
-				item = m_pManager->addProperty(QVariant::Double, tr("Engeneering value, %1").arg(pInputSignal == nullptr ? QString() : pInputSignal->param().unit()));
+				item = m_pManager->addProperty(QVariant::Double, tr("Engineering value, %1").arg(pInputSignal == nullptr ? QString() : pInputSignal->param().unit()));
 				item->setValue(m_comparator.hysteresis().constValue());
 				item->setAttribute(QLatin1String("decimals"), precision);
 				m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE);
@@ -1650,8 +1650,8 @@ void ComparatorPropertyDialog::createPropertyList()
 						hysteresisGroup->addSubProperty(item);
 					}
 
-					item = m_pManager->addProperty(QVariant::String, tr("Engeneering range"));
-					item->setValue(pHysteresisSignal->param().engeneeringRangeStr());
+					item = m_pManager->addProperty(QVariant::String, tr("Engineering range"));
+					item->setValue(pHysteresisSignal->param().engineeringRangeStr());
 					item->setAttribute(QLatin1String("readOnly"), true);
 					hysteresisGroup->addSubProperty(item);
 				}

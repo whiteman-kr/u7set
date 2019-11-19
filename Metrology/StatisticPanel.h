@@ -30,7 +30,7 @@ const char* const			StatisticColumn[] =
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "ADC range"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Electric range"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Physical range"),
-							QT_TRANSLATE_NOOP("StatisticDialog.h", "Engeneering range"),
+							QT_TRANSLATE_NOOP("StatisticDialog.h", "Engineering range"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Measure count"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "State"),
 							QT_TRANSLATE_NOOP("StatisticDialog.h", "Signal connection"),

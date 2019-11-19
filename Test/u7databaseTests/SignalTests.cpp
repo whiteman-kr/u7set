@@ -23,8 +23,8 @@ QString SignalTests::SF_UNIT("Unit");
 
 QString SignalTests::SF_LOW_ADC("LowADC");
 QString SignalTests::SF_HIGH_ADC("HighADC");
-QString SignalTests::SF_LOW_ENGENEERING_UNITS("LowEngineeringUnits");
-QString SignalTests::SF_HIGH_ENGENEERING_UNITS("HighEngineeringUnits");
+QString SignalTests::SF_LOW_ENGINEERING_UNITS("LowEngineeringUnits");
+QString SignalTests::SF_HIGH_ENGINEERING_UNITS("HighEngineeringUnits");
 QString SignalTests::SF_LOW_VALID_RANGE("LowValidRange");
 QString SignalTests::SF_HIGH_VALID_RANGE("HighValidRange");
 QString SignalTests::SF_FILTERING_TIME("FilteringTime");
@@ -2576,8 +2576,8 @@ bool SignalTests::readSignalFromQuery(const QSqlQuery& q, Signal& s, quint64 exc
 
 	s.setLowADC(q.value(SF_LOW_ADC).toInt());
 	s.setHighADC(q.value(SF_HIGH_ADC).toInt());
-	s.setLowEngineeringUnits(q.value(SF_LOW_ENGENEERING_UNITS).toDouble());
-	s.setHighEngineeringUnits(q.value(SF_HIGH_ENGENEERING_UNITS).toDouble());
+	s.setLowEngineeringUnits(q.value(SF_LOW_ENGINEERING_UNITS).toDouble());
+	s.setHighEngineeringUnits(q.value(SF_HIGH_ENGINEERING_UNITS).toDouble());
 	s.setLowValidRange(q.value(SF_LOW_VALID_RANGE).toDouble());
 	s.setHighValidRange(q.value(SF_HIGH_VALID_RANGE).toDouble());
 	s.setFilteringTime(q.value(SF_FILTERING_TIME).toDouble());
@@ -2685,8 +2685,8 @@ void SignalTests::verifyQueryAndSignal(const QSqlQuery& q, Signal& s, quint64 ex
 
 	QVERIFY2(q.value(SF_LOW_ADC).toInt() == s.lowADC(), "Error: lowADC is wrong");
 	QVERIFY2(q.value(SF_HIGH_ADC).toInt() == s.highADC(), "Error: highADC is wrong");
-	QVERIFY2(q.value(SF_LOW_ENGENEERING_UNITS).toDouble() == s.lowEngineeringUnits(), "Error: lowEngineeringUnits is wrong");
-	QVERIFY2(q.value(SF_HIGH_ENGENEERING_UNITS).toDouble() == s.highEngineeringUnits(), "Error: highEngineeringUnits is wrong");
+	QVERIFY2(q.value(SF_LOW_ENGINEERING_UNITS).toDouble() == s.lowEngineeringUnits(), "Error: lowEngineeringUnits is wrong");
+	QVERIFY2(q.value(SF_HIGH_ENGINEERING_UNITS).toDouble() == s.highEngineeringUnits(), "Error: highEngineeringUnits is wrong");
 	QVERIFY2(q.value(SF_LOW_VALID_RANGE).toDouble() == s.lowValidRange(), "Error: lowValidRange is wrong");
 	QVERIFY2(q.value(SF_HIGH_VALID_RANGE).toDouble() == s.highValidRange(), "Error: highValidRange is wrong");
 	QVERIFY2(q.value(SF_FILTERING_TIME).toDouble() == s.filteringTime(), "Error: filteringTime is wrong");

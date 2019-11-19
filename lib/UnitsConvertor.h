@@ -160,8 +160,8 @@ enum class UnitsConvertType
 {
 	ElectricToPhysical = 0,
 	PhysicalToElectric = 1,
-	ElectricToEngeneering = 2,
-	EngeneeringToElectric = 3,
+	ElectricToEngineering = 2,
+	EngineeringToElectric = 3,
 };
 
 // ==============================================================================================

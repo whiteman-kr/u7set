@@ -619,7 +619,7 @@ QString IoSignalParam::physicalRangeStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString IoSignalParam::engeneeringRangeStr() const
+QString IoSignalParam::engineeringRangeStr() const
 {
 	QString result;
 
@@ -632,7 +632,7 @@ QString IoSignalParam::engeneeringRangeStr() const
 					const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 					if (param.isValid() == true)
 					{
-						result = param.engeneeringRangeStr();
+						result = param.engineeringRangeStr();
 					}
 				}
 				break;
@@ -642,19 +642,19 @@ QString IoSignalParam::engeneeringRangeStr() const
 					const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 					if (inParam.isValid() == true)
 					{
-						result = inParam.engeneeringRangeStr() + MULTI_TEXT_DEVIDER;
+						result = inParam.engineeringRangeStr() + MULTI_TEXT_DEVIDER;
 					}
 
 					const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
 					if (outParam.isValid() == true)
 					{
-						if (inParam.engeneeringRangeStr() != outParam.engeneeringRangeStr())
+						if (inParam.engineeringRangeStr() != outParam.engineeringRangeStr())
 						{
-							result += outParam.engeneeringRangeStr();
+							result += outParam.engineeringRangeStr();
 						}
 						else
 						{
-							result = outParam.engeneeringRangeStr();
+							result = outParam.engineeringRangeStr();
 						}
 					}
 				}
@@ -673,11 +673,11 @@ QString IoSignalParam::engeneeringRangeStr() const
 					{
 						if (inParam.tuningLowBound().toDouble() != outParam.lowEngineeringUnits() || inParam.tuningHighBound().toDouble() != outParam.highEngineeringUnits())
 						{
-							result += outParam.engeneeringRangeStr();
+							result += outParam.engineeringRangeStr();
 						}
 						else
 						{
-							result = outParam.engeneeringRangeStr();
+							result = outParam.engineeringRangeStr();
 						}
 					}
 				}

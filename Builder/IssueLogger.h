@@ -415,6 +415,7 @@ namespace Builder
 		void errALC5173(QString signalCaption, QString fbCaption, QUuid itemUuid);		// Required signal %1 of AFB %2 is missing.
 		void errALC5174(QString fbCaption, QUuid itemUuid);								// Required AFB %1 is missing.
 		void errALC5175(QString signalID, QString inFormat, QString outFormat);			// Unknown conversion of signal %1 from %2 to %3 format.
+		void errALC5176(QString signalID, QString propertyName);						// Specific property %1 is not exists in signal %2
 
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.

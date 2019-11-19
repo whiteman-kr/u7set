@@ -141,102 +141,6 @@ void DbControllerSignalTests::addSignalTest()
 	QVERIFY2(query.value("enableTuning").toBool() == newSignal.enableTuning(), qPrintable(QString("Error: enableTuning is wrong")));
 	//QVERIFY2(query.value("tuningDefaultValue").toDouble() == newSignal.tuningDefaultValue(), qPrintable(QString("Error: tuningDefaultValue is wrong")));
 
-	// Test signal creation with special symbols
-	//
-
-/*	signalsToAdd.clear();
-
-	newSignal.setCaption("\\'\"testCaption\\'\"");
-	newSignal.setAcquire(true);
-	newSignal.setAperture(0.3);
-	newSignal.setAppSignalID("\\'\"testAppSignal\\'\"");
-	newSignal.setByteOrder(E::ByteOrder::LittleEndian);
-	newSignal.setCalculated(true);
-	newSignal.setCustomAppSignalID("\\'\"testCustomAppSignal\\'\"");
-	newSignal.setDataFormat(E::DataFormat::Float);
-	newSignal.setDataSize(30);
-	newSignal.setDecimalPlaces(3);
-	newSignal.setEnableTuning(true);
-	newSignal.setEquipmentID("\\'\"testEquipmentId\\'\"");
-	newSignal.setFilteringTime(7.3);
-	newSignal.setHighADC(500);
-	newSignal.setHighEngeneeringUnits(3245.6);
-	newSignal.setHighValidRange(3546.4);
-	newSignal.setInOutType(E::SignalInOutType::Input);
-	newSignal.setElectricHighLimit(2345.3);
-	newSignal.setElectricLowLimit(134.4);
-	newSignal.setInputSensorID(5345);
-	newSignal.setElectricUnit(1);
-	newSignal.setLowADC(1234);
-	newSignal.setLowEngeneeringUnits(345.1);
-	newSignal.setLowValidRange(134.9);
-	newSignal.setNormalState(1234);
-	newSignal.setObjectName("\\'\"testObjectName\\'\"");
-	newSignal.setOutputHighLimit(85678.5);
-	newSignal.setOutputLowLimit(12536.5);
-	newSignal.setOutputMode(E::OutputMode::Plus0_Plus5_mA);
-	newSignal.setOutputSensorID(13443);
-	newSignal.setOutputunit(1);
-	//	newSignal.setReadOnly(false);
-	newSignal.setSpreadTolerance(35634.6);
-	newSignal.setType(E::SignalType::Discrete);
-	newSignal.setUnbalanceLimit(98769.3);
-	newSignal.setunit(1);
-
-	signalsToAdd.push_back(newSignal);
-
-	ok = m_dbController->addSignal(E::SignalType::Discrete, &signalsToAdd, 0);
-	QVERIFY2(ok == true, qPrintable(m_dbController->lastError()));
-
-	ok = query.exec("SELECT * FROM get_signals_ids(1, true) ORDER BY get_signals_ids DESC");
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-
-	ok = query.exec(QString("SELECT * FROM signal WHERE signalId = %1").arg(query.value(0).toInt()));
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-
-	checkedOutInstanceId = query.value("checkedOutInstanceId").toInt();
-
-	ok = query.exec(QString("SELECT * FROM signalInstance WHERE signalInstanceId  = %1").arg(checkedOutInstanceId));
-	QVERIFY2(ok == true, qPrintable(query.lastError().databaseText()));
-	QVERIFY2(query.first() == true, qPrintable(query.lastError().databaseText()));
-
-	qDebug() << query.value("appSignalID").toString() << ":::" << newSignal.appSignalID();
-	qDebug() << query.value("caption").toString() << ":::" << newSignal.caption();
-	qDebug() << query.value("customAppSignalID").toString() << ":::" << newSignal.customAppSignalID();
-	qDebug() << query.value("equipmentID").toString() << ":::" << newSignal.equipmentID();
-
-	QVERIFY2(query.value("changeSetId").toInt() == newSignal.changesetID(), qPrintable(QString("Error: changeSetId is wrong")));
-	QVERIFY2(query.value("appSignalID").toString() == newSignal.appSignalID(), qPrintable(QString("Error: strId is wrong")));
-	QVERIFY2(query.value("customAppSignalID").toString() == newSignal.customAppSignalID(), qPrintable(QString("Error: extStrId is wrong")));
-	QVERIFY2(query.value("caption").toString() == newSignal.caption(), qPrintable(QString("Error: caption is wrong")));
-	QVERIFY2(query.value("analogSignalFormat").toInt() == newSignal.dataFormatInt(), qPrintable(QString("Error: analogSignalFormat is wrong")));
-	QVERIFY2(query.value("dataSize").toInt() == newSignal.dataSize(), qPrintable(QString("Error: dataSize is wrong")));
-	QVERIFY2(query.value("lowAdc").toInt() == newSignal.lowADC(), qPrintable(QString("Error: lowAdc is wrong")));
-	QVERIFY2(query.value("highAdc").toInt() == newSignal.highADC(), qPrintable(QString("Error: highAdc is wrong")));
-	QVERIFY2(query.value("unit").toInt() == newSignal.unit(), qPrintable(QString("Error: unit is wrong")));
-	QVERIFY2(query.value("unbalanceLimit").toDouble() == newSignal.unbalanceLimit(), qPrintable(QString("Error: unbalanceLimit is wrong")));
-	QVERIFY2(query.value("inputLowLimit").toDouble() == newSignal.inputLowLimit(), qPrintable(QString("Error: inputLowLimit is wrong")));
-	QVERIFY2(query.value("electricHighLimit").toDouble() == newSignal.electricHighLimit(), qPrintable(QString("Error: electricHighLimit is wrong")));
-	QVERIFY2(query.value("electricUnit").toInt() == newSignal.electricUnit(), qPrintable(QString("Error: electricUnit is wrong")));
-	QVERIFY2(query.value("inputSensorId").toInt() == newSignal.inputSensorID(), qPrintable(QString("Error: inputSensorId is wrong")));
-	QVERIFY2(query.value("outputLowLimit").toDouble() == newSignal.outputLowLimit(), qPrintable(QString("Error: outputLowLimit is wrong")));
-	QVERIFY2(query.value("outputHighLimit").toDouble() == newSignal.outputHighLimit(), qPrintable(QString("Error: outputHighLimit is wrong")));
-	QVERIFY2(query.value("outputunit").toInt() == newSignal.outputunit(), qPrintable(QString("Error: outputunit is wrong")));
-	QVERIFY2(query.value("outputSensorId").toInt() == newSignal.outputSensorID(), qPrintable(QString("Error: outputSensorId is wrong")));
-	QVERIFY2(query.value("acquire").toBool() == newSignal.acquire(), qPrintable(QString("Error: acquire is wrong")));
-	QVERIFY2(query.value("calculated").toBool() == newSignal.calculated(), qPrintable(QString("Error: calculated is wrong")));
-	QVERIFY2(query.value("normalState").toInt() == newSignal.normalState(), qPrintable(QString("Error: normalState is wrong")));
-	QVERIFY2(query.value("decimalPlaces").toInt() == newSignal.decimalPlaces(), qPrintable(QString("Error: decimalPlaces is wrong")));
-	QVERIFY2(query.value("aperture").toDouble() == newSignal.aperture(), qPrintable(QString("Error: aperture is wrong")));
-	QVERIFY2(query.value("inOutType").toInt() == int(newSignal.inOutType()), qPrintable(QString("Error: inOutType is wrong")));
-	QVERIFY2(query.value("equipmentID").toString() == newSignal.equipmentID(), qPrintable(QString("Error: deviceStrId is wrong")));
-	QVERIFY2(query.value("filteringTime").toDouble() == newSignal.filteringTime(), qPrintable(QString("Error: filteringTime is wrong")));
-	QVERIFY2(query.value("byteOrder").toInt() == newSignal.byteOrder(), qPrintable(QString("Error: byteOrder is wrong")));
-	QVERIFY2(query.value("enableTuning").toBool() == newSignal.enableTuning(), qPrintable(QString("Error: enableTuning is wrong")));
-	QVERIFY2(query.value("tuningDefaultValue").toDouble() == newSignal.tuningDefaultValue(), qPrintable(QString("Error: tuningDefaultValue is wrong")));*/
-
 	db.close();
 }
 
@@ -1121,8 +1025,6 @@ void DbControllerSignalTests::getSpecificSignalsTest()
 		QVERIFY2(query.value("dataSize").toInt() == currentSignal.dataSize(), qPrintable(QString("Error: value dataSize is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("dataSize").toInt()).arg(currentSignal.dataSize())));
 		QVERIFY2(query.value("lowAdc").toInt() == currentSignal.lowADC(), qPrintable(QString("Error: value lowAdc is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("lowAdc").toInt()).arg(currentSignal.lowADC())));
 		QVERIFY2(query.value("highAdc").toInt() == currentSignal.highADC(), qPrintable(QString("Error: value highAdc is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("highAdc").toInt()).arg(currentSignal.highADC())));
-		QVERIFY2(query.value("lowengeneeringunits").toInt() == currentSignal.lowEngineeringUnits(), qPrintable(QString("Error: value lowengeneeringunits is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("lowengeneeringunits").toInt()).arg(currentSignal.lowEngineeringUnits())));
-		QVERIFY2(query.value("highengeneeringunits").toInt() == currentSignal.highEngineeringUnits(), qPrintable(QString("Error: value highengeneeringunits is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("highengeneeringunits").toInt()).arg(currentSignal.highEngineeringUnits())));
 		QVERIFY2(query.value("unit").toString() == currentSignal.unit(), qPrintable(QString("Error: value unit is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("unit").toString()).arg(currentSignal.unit())));
 		QVERIFY2(query.value("lowvalidrange").toInt() == currentSignal.lowValidRange(), qPrintable(QString("Error: value lowvalidrange is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("lowvalidrange").toInt()).arg(currentSignal.lowValidRange())));
 		QVERIFY2(query.value("highvalidrange").toInt() == currentSignal.highValidRange(), qPrintable(QString("Error: value highvalidrange is not match (Database: %1, DbControllerFunction: %2)").arg(query.value("highvalidrange").toInt()).arg(currentSignal.highValidRange())));

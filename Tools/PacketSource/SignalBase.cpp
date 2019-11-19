@@ -78,7 +78,7 @@ QString PS::Signal::signalInOutTypeStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString PS::Signal::engeneeringRangeStr() const
+QString PS::Signal::engineeringRangeStr() const
 {
 	if(signalType() != E::SignalType::Analog)
 	{
@@ -768,7 +768,7 @@ QString SignalTable::text(int row, int column, PS::Signal* pSignal) const
 		case SIGNAL_LIST_COLUMN_STATE:			result = pSignal->stateStr();					break;
 		case SIGNAL_LIST_COLUMN_ADB:			result = pSignal->signalTypeStr();				break;
 		case SIGNAL_LIST_COLUMN_INOUT:			result = pSignal->signalInOutTypeStr();			break;
-		case SIGNAL_LIST_COLUMN_EN_RANGE:		result = pSignal->engeneeringRangeStr();		break;
+		case SIGNAL_LIST_COLUMN_EN_RANGE:		result = pSignal->engineeringRangeStr();		break;
 		case SIGNAL_LIST_COLUMN_FORMAT:			result = pSignal->signalFormatStr();			break;
 		case SIGNAL_LIST_COLUMN_STATE_OFFSET:	result = pSignal->stateOffsetStr();				break;
 		case SIGNAL_LIST_COLUMN_STATE_BIT:		result = pSignal->stateBitStr();				break;
@@ -930,7 +930,7 @@ void SignalStateDialog::createInterface()
 				m_stateEdit->setAlignment(Qt::AlignHCenter);
 				m_stateEdit->setValidator(validator);
 
-				QLabel* rangeLabel = new QLabel(m_pSignal->engeneeringRangeStr());
+				QLabel* rangeLabel = new QLabel(m_pSignal->engineeringRangeStr());
 				rangeLabel->setAlignment(Qt::AlignHCenter);
 
 				// buttons
@@ -1005,7 +1005,7 @@ void SignalStateDialog::onOk()
 		formatStr.sprintf("%%.%df", m_pSignal->decimalPlaces());
 
 		str.sprintf("Failed input value: " + formatStr.toLocal8Bit(), state);
-		str += tr("\nRange of signal: %1").arg(m_pSignal->engeneeringRangeStr());
+		str += tr("\nRange of signal: %1").arg(m_pSignal->engineeringRangeStr());
 
 		QMessageBox::critical(this, windowTitle(), str);
 		return;

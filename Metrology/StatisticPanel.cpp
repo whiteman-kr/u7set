@@ -252,7 +252,7 @@ QString StatisticTable::text(int row, int column, Metrology::Signal* pSignal) co
 		case STATISTIC_COLUMN_ADC:					result = param.adcRangeStr(true);					break;
 		case STATISTIC_COLUMN_EL_RANGE:				result = param.electricRangeStr();					break;
 		case STATISTIC_COLUMN_PH_RANGE:				result = param.physicalRangeStr();					break;
-		case STATISTIC_COLUMN_EN_RANGE:				result = param.engeneeringRangeStr();				break;
+		case STATISTIC_COLUMN_EN_RANGE:				result = param.engineeringRangeStr();				break;
 		case STATISTIC_COLUMN_MEASURE_COUNT:		result = pSignal->statistic().measureCountStr();	break;
 		case STATISTIC_COLUMN_STATE:				result = pSignal->statistic().stateStr();			break;
 		case STATISTIC_COLUMN_SIGNAL_CONNECTION:	result.clear();										break;
