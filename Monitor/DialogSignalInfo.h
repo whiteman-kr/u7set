@@ -31,7 +31,7 @@ public:
 
 
 public:
-	SignalFlagsWidget(QWidget* parent = 0);
+	SignalFlagsWidget(QWidget* parent = nullptr);
 
 	void updateControl(AppSignalStateFlags flags);
 

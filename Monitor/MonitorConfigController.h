@@ -3,6 +3,7 @@
 
 #include "../lib/CfgServerLoader.h"
 #include "../lib/SocketIO.h"
+#include "../lib/ComparatorSet.h"
 #include "../VFrame30/Schema.h"
 
 
@@ -128,8 +129,7 @@ private:
 	mutable QMutex m_confugurationMutex;		// for access only to m_configuration
 	ConfigSettings m_configuration;
 
-//	mutable QMutex m_setPointsMutext;		// for access only to m_configuration
-//	SetPO
+	ComparatorSet m_setPoints;					// ComparatorSet is thread safe in loading new file
 };
 
 #endif // MONITORCONFIGTHREAD_H
