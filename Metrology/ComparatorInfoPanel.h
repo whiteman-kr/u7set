@@ -46,7 +46,7 @@ public:
 	void					set(const QVector<IoSignalParam>& signalList);
 	void					clear();
 
-	QString					text(std::shared_ptr<::Builder::Comparator> pComparator) const;
+	QString					text(std::shared_ptr<Comparator> pComparator) const;
 
 	void					updateState();
 

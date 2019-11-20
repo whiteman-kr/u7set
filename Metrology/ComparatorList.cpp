@@ -89,7 +89,7 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	std::shared_ptr<::Builder::Comparator> pComparator = comparator(row);
+	std::shared_ptr<Comparator> pComparator = comparator(row);
 
 	if (role == Qt::TextAlignmentRole)
 	{
@@ -123,7 +123,7 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString ComparatorListTable::text(int row, int column, std::shared_ptr<Builder::Comparator> pComparator) const
+QString ComparatorListTable::text(int row, int column, std::shared_ptr<Comparator> pComparator) const
 {
 	if (pComparator == nullptr)
 	{
@@ -145,7 +145,7 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Builder::
 	int prevRow = row - 1;
 	if (prevRow >= 0 && prevRow < comparatorCount())
 	{
-		std::shared_ptr<Builder::Comparator> pPrevComparator = comparator(prevRow);
+		std::shared_ptr<Comparator> pPrevComparator = comparator(prevRow);
 		if (pPrevComparator != nullptr)
 		{
 			if (pPrevComparator->input().appSignalID() == inputAppSignalID)
@@ -162,7 +162,7 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Builder::
 		case E::CmpType::Equal:		compareValue = "= ";	break;
 		case E::CmpType::Greate:	compareValue = "> ";	break;
 		case E::CmpType::Less:		compareValue = "< ";	break;
-		case E::CmpType::NotEqual:	compareValue = "â‰  ";	break;
+		case E::CmpType::NotEqual:	compareValue = "â‰  ";	break;
 		default:					compareValue = "??? ";	assert(0);	break;
 	}
 
@@ -226,9 +226,9 @@ int ComparatorListTable::comparatorCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-std::shared_ptr<Builder::Comparator> ComparatorListTable::comparator(int index) const
+std::shared_ptr<Comparator> ComparatorListTable::comparator(int index) const
 {
-	std::shared_ptr<::Builder::Comparator> comparator;
+	std::shared_ptr<Comparator> comparator;
 
 	m_comparatorMutex.lock();
 
@@ -244,7 +244,7 @@ std::shared_ptr<Builder::Comparator> ComparatorListTable::comparator(int index) 
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorListTable::set(const QList<std::shared_ptr<::Builder::Comparator>> list_add)
+void ComparatorListTable::set(const QList<std::shared_ptr<Comparator>> list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -453,7 +453,7 @@ void ComparatorListDialog::updateList()
 
 	m_comparatorTable.clear();
 
-	QList<std::shared_ptr<::Builder::Comparator>> comparatorList;
+	QList<std::shared_ptr<Comparator>> comparatorList;
 
 	int count = theSignalBase.signalCount();
 	for(int i = 0; i < count; i++)
@@ -478,7 +478,7 @@ void ComparatorListDialog::updateList()
 		int comparatorCount = pSignal->param().comparatorCount();
 		for (int c = 0; c < comparatorCount; c++)
 		{
-			std::shared_ptr<::Builder::Comparator> comparator = pSignal->param().comparator(c);
+			std::shared_ptr<Comparator> comparator = pSignal->param().comparator(c);
 			comparatorList.append(pSignal->param().comparator(c));
 		}
 	}
@@ -600,7 +600,7 @@ void ComparatorListDialog::comparatorProperties()
 		return;
 	}
 
-	std::shared_ptr<Builder::Comparator> pComparator = m_comparatorTable.comparator(index);
+	std::shared_ptr<Comparator> pComparator = m_comparatorTable.comparator(index);
 	if (pComparator == nullptr)
 	{
 		return;

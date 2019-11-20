@@ -779,7 +779,7 @@ void MeasureThread::measureComprators()
 	int channelCount = m_activeIoParamList.count();
 	for(int ch = 0; ch < channelCount; ch++)
 	{
-		COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_1 |= (0x1 << ch);
+		//COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_1 |= (0x1 << ch);
 
 		const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 		if (inParam.isValid() == false)
@@ -847,7 +847,7 @@ void MeasureThread::measureComprators()
 						continue;
 					}
 
-					std::shared_ptr<::Builder::Comparator> pComparator = inParam.comparator(cmp);
+					std::shared_ptr<Comparator> pComparator = inParam.comparator(cmp);
 					if (pComparator == nullptr)
 					{
 						continue;
@@ -1014,7 +1014,7 @@ void MeasureThread::measureComprators()
 					continue;
 				}
 
-				std::shared_ptr<::Builder::Comparator> pComparator = inParam.comparator(cmp);
+				std::shared_ptr<Comparator> pComparator = inParam.comparator(cmp);
 				if (pComparator == nullptr)
 				{
 					currentStateComparatorsInAllChannels &= ~(0x1 << ch);
@@ -1083,40 +1083,40 @@ void MeasureThread::measureComprators()
 				const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 				if (inParam.isValid() == false)
 				{
-					currentStateComparatorsInAllChannels |= (0x1 << ch);
+					//currentStateComparatorsInAllChannels |= (0x1 << ch);
 					continue;
 				}
 
 				CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
 				if (calibratorIsValid(pCalibratorManager) == false)
 				{
-					currentStateComparatorsInAllChannels |= (0x1 << ch);
+					//currentStateComparatorsInAllChannels |= (0x1 << ch);
 					continue;
 				}
 
 				if (inParam.comparatorCount() == 0)
 				{
-					currentStateComparatorsInAllChannels |= (0x1 << ch);
+					//currentStateComparatorsInAllChannels |= (0x1 << ch);
 					continue;
 				}
 
-				std::shared_ptr<::Builder::Comparator> pComparator = inParam.comparator(cmp);
+				std::shared_ptr<Comparator> pComparator = inParam.comparator(cmp);
 				if (pComparator == nullptr)
 				{
-					currentStateComparatorsInAllChannels |= (0x1 << ch);
+					//currentStateComparatorsInAllChannels |= (0x1 << ch);
 					continue;
 				}
 
 				if (pComparator->output().appSignalID().isEmpty() == true)
 				{
-					currentStateComparatorsInAllChannels |= (0x1 << ch);
+					//currentStateComparatorsInAllChannels |= (0x1 << ch);
 					continue;
 				}
 
 				Metrology::Signal* pOutputSignal = theSignalBase.signalPtr(pComparator->output().appSignalID());
 				if (pOutputSignal == nullptr)
 				{
-					currentStateComparatorsInAllChannels |= (0x1 << ch);
+					//currentStateComparatorsInAllChannels |= (0x1 << ch);
 					continue;
 				}
 
@@ -1138,7 +1138,7 @@ void MeasureThread::measureComprators()
 				}
 				else
 				{
-					currentStateComparatorsInAllChannels |= (0x1 << ch);
+					//currentStateComparatorsInAllChannels |= (0x1 << ch);
 					continue;
 				}
 			}

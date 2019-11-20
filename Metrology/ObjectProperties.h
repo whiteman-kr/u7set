@@ -331,11 +331,12 @@ const int						COMPARATOR_PROPERTY_ITEM_CMP_TYPE			= 0,
 
 								COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE		= 1,
 								COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE		= 2,
+								COMPARATOR_PROPERTY_ITEM_CMP_PRECESION		= 3,
 
-								COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE		= 3,
-								COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE		= 4;
+								COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE		= 4,
+								COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE		= 5;
 
-const int						COMPARATOR_PROPERTY_ITEM_COUNT				= 5;
+const int						COMPARATOR_PROPERTY_ITEM_COUNT				= 6;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -345,12 +346,12 @@ class ComparatorPropertyDialog : public QDialog
 
 public:
 
-	explicit ComparatorPropertyDialog(const Builder::Comparator& comparator, QWidget *parent = nullptr);
+	explicit ComparatorPropertyDialog(const Comparator& comparator, QWidget *parent = nullptr);
 	virtual ~ComparatorPropertyDialog();
 
 private:
 
-	Builder::Comparator			m_comparator;
+	Comparator			m_comparator;
 
 	// Property list
 	//
@@ -373,7 +374,7 @@ private:
 
 public:
 
-	Builder::Comparator			comparator() const { return m_comparator; }
+	Comparator			comparator() const { return m_comparator; }
 
 signals:
 

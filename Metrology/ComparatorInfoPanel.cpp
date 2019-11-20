@@ -101,7 +101,7 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	std::shared_ptr<::Builder::Comparator> pComparator = inParam.comparator(column);
+	std::shared_ptr<Comparator> pComparator = inParam.comparator(column);
 	if (pComparator == nullptr)
 	{
 		return QVariant();
@@ -140,7 +140,7 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString ComparatorInfoTable::text(std::shared_ptr<::Builder::Comparator> pComparator) const
+QString ComparatorInfoTable::text(std::shared_ptr<Comparator> pComparator) const
 {
 	if (pComparator == nullptr)
 	{
@@ -154,7 +154,7 @@ QString ComparatorInfoTable::text(std::shared_ptr<::Builder::Comparator> pCompar
 		case E::CmpType::Equal:		stateStr = "= ";		break;
 		case E::CmpType::Greate:	stateStr = "> ";		break;
 		case E::CmpType::Less:		stateStr = "< ";		break;
-		case E::CmpType::NotEqual:	stateStr = "â‰  ";		break;
+		case E::CmpType::NotEqual:	stateStr = "â‰  ";		break;
 	}
 
 	int precision = pComparator->precision();
@@ -541,7 +541,7 @@ void ComparatorInfoPanel::comparatorProperty()
 		return;
 	}
 
-	std::shared_ptr<Builder::Comparator> pComparator = inParam.comparator(indexComparator);
+	std::shared_ptr<Comparator> pComparator = inParam.comparator(indexComparator);
 	if (pComparator == nullptr)
 	{
 		return;

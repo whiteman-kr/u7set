@@ -59,6 +59,7 @@ CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
 SOURCES += main.cpp \
+    ../lib/ComparatorSet.cpp \
     MonitorMainWindow.cpp \
 	MonitorCentralWidget.cpp \
 	Settings.cpp \
@@ -126,6 +127,7 @@ SOURCES += main.cpp \
     ../lib/OutputLog.cpp
 
 HEADERS  += \
+    ../lib/ComparatorSet.h \
     MonitorMainWindow.h \
     MonitorCentralWidget.h \
 	Stable.h \

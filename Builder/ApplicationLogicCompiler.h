@@ -3,7 +3,7 @@
 #include "../lib/Subsystem.h"
 #include "../VFrame30/Bus.h"
 #include "ModuleLogicCompiler.h"
-#include "ComparatorSet.h"
+#include "../lib/ComparatorSet.h"
 
 
 namespace Builder

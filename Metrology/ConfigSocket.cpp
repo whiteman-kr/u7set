@@ -220,23 +220,15 @@ bool ConfigSocket::readAppSignalSet(const QByteArray& fileData)
 
 bool ConfigSocket::readComparatorSet(const QByteArray& fileData)
 {
-	::Proto::ComparatorSet protoComparatorSet;
-
 	QTime responseTime;
 	responseTime.start();
 
-	bool result = protoComparatorSet.ParseFromArray(fileData.constData(), fileData.size());
-	if (result == false)
-	{
-		return false;
-	}
+	ComparatorSet comparatorSet;
+	comparatorSet.serializeFrom(fileData);
 
-	Builder::ComparatorSet comparatorSet;
-	comparatorSet.serializeFrom(protoComparatorSet);
+	theSignalBase.loadComparatorsInSignal(comparatorSet);
 
-	theSignalBase.loadComparators(comparatorSet);
-
-	qDebug() << __FUNCTION__ << "Comparators were loaded" << comparatorSet.comparatorCount() << " Time for load: " << responseTime.elapsed() << " ms";
+	qDebug() << __FUNCTION__ << "Comparators were loaded" << " Time for load: " << responseTime.elapsed() << " ms";
 
 	return true;
 }

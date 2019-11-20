@@ -298,7 +298,7 @@ public:
 	
 	// comparators
 	//
-	bool					loadComparators(const ::Builder::ComparatorSet& comparatorSet);
+	bool					loadComparatorsInSignal(const ComparatorSet& comparatorSet);
 	
 signals:
 
