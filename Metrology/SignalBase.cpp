@@ -671,7 +671,7 @@ QString IoSignalParam::engeneeringRangeStr() const
 					const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
 					if (outParam.isValid() == true)
 					{
-						if (inParam.tuningLowBound().toDouble() != outParam.lowEngeneeringUnits() || inParam.tuningHighBound().toDouble() != outParam.highEngeneeringUnits())
+						if (compareFloat(inParam.tuningLowBound().toDouble(), outParam.lowEngeneeringUnits()) == false || compareFloat(inParam.tuningHighBound().toDouble(), outParam.highEngeneeringUnits()) == false)
 						{
 							result += outParam.engeneeringRangeStr();
 						}

@@ -550,12 +550,6 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					appendProperty(item, page, CO_PARAM_COMPARATOR_INDEX);
 					permissionsGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Bool, ComparatorParamName[CO_PARAM_ADDITIONAL_CHECK]);
-					item->setValue(m_options.comparator().enableAdditionalCheck());
-					appendProperty(item, page, CO_PARAM_ADDITIONAL_CHECK);
-					permissionsGroup->addSubProperty(item);
-
-
 				editor->setFactoryForManager(manager, factory);
 
 				editor->addProperty(errorGroup);
@@ -1138,7 +1132,6 @@ void OptionsDialog::applyProperty()
 					case CO_PARAM_ERROR_TYPE:			m_options.comparator().setErrorType(value.toInt());					break;
 					case CO_PARAM_ENABLE_HYSTERESIS:	m_options.comparator().setEnableMeasureHysteresis(value.toBool());	break;
 					case CO_PARAM_COMPARATOR_INDEX:		m_options.comparator().setStartComparatorIndex(value.toInt() - 1);	break;
-					case CO_PARAM_ADDITIONAL_CHECK:		m_options.comparator().setEnableAdditionalCheck(value.toBool());	break;
 					default:							assert(0);
 				}
 			}

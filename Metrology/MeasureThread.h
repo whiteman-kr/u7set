@@ -44,7 +44,7 @@ private:
 	// calibrators
 	//
 	bool					calibratorIsValid(CalibratorManager* pCalibratorManager);
-	bool					hasConnectedCalibrators();
+	int						getConnectedCalibrators();
 	bool					setCalibratorUnit();
 	bool					prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit);
 	void					polarityTest(double electricVal, IoSignalParam& ioParam);
@@ -66,7 +66,7 @@ public:
 	bool					enableMesureIsSignal();
 	bool					signalIsMeasured(const MeasureSignal& activeSignal, QString& signalID);
 	bool					setActiveSignalParam(const MeasureSignal& activeSignal);
-	bool					inputsOfmoduleIsSame();
+	bool					inputsOfmoduleIsSame();														// only for mode "Simaple module"
 
 	void					stop() { m_cmdStopMeasure = true; }
 

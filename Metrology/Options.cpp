@@ -1126,7 +1126,6 @@ void ComparatorOption::load()
 
 	m_enableMeasureHysteresis = s.value(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), false).toBool();
 	m_startComparatorIndex = s.value(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
-	m_enableAdditionalCheck = s.value(QString("%1EnableAdditionalCheck").arg(COMPARATOR_OPTIONS_KEY), true).toBool();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1141,7 +1140,6 @@ void ComparatorOption::save()
 
 	s.setValue(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), m_enableMeasureHysteresis);
 	s.setValue(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), m_startComparatorIndex);
-	s.setValue(QString("%1EnableAdditionalCheck").arg(COMPARATOR_OPTIONS_KEY), m_enableAdditionalCheck);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1154,7 +1152,6 @@ ComparatorOption& ComparatorOption::operator=(const ComparatorOption& from)
 
 	m_enableMeasureHysteresis = from.m_enableMeasureHysteresis;
 	m_startComparatorIndex = from.m_startComparatorIndex;
-	m_enableAdditionalCheck = from.m_enableAdditionalCheck;
 
 	return *this;
 }
@@ -1321,6 +1318,20 @@ BackupOption& BackupOption::operator=(const BackupOption& from)
 	m_path = from.m_path;
 
 	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+bool compareFloat(float lFloat, float rFloat)
+{
+	return std::nextafter(lFloat, std::numeric_limits<float>::lowest()) <= rFloat && std::nextafter(lFloat, std::numeric_limits<float>::max()) >= rFloat;
+}
+
+bool compareFloat(double lDouble, double rDouble)
+{
+	return std::nextafter(lDouble, std::numeric_limits<double>::lowest()) <= rDouble && std::nextafter(lDouble, std::numeric_limits<double>::max()) >= rDouble;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

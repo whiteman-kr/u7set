@@ -825,7 +825,6 @@ const char* const		ComparatorParamName[] =
 						QT_TRANSLATE_NOOP("Options.h", "Error type"),
 						QT_TRANSLATE_NOOP("Options.h", "Enable to measure hysteresis"),
 						QT_TRANSLATE_NOOP("Options.h", "Start measurement from the сomparator"),
-						QT_TRANSLATE_NOOP("Options.h", "Additional check on the switch сomparator"),
 };
 
 const int				CO_PARAM_COUNT				= sizeof(ComparatorParamName)/sizeof(ComparatorParamName[0]);
@@ -834,8 +833,7 @@ const int				CO_PARAM_ERROR_LIMIT		= 0,
 						CO_PARAM_START_VALUE		= 1,
 						CO_PARAM_ERROR_TYPE			= 2,
 						CO_PARAM_ENABLE_HYSTERESIS	= 3,
-						CO_PARAM_COMPARATOR_INDEX	= 4,
-						CO_PARAM_ADDITIONAL_CHECK	= 5;
+						CO_PARAM_COMPARATOR_INDEX	= 4;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -858,7 +856,6 @@ public:
 
 	bool				m_enableMeasureHysteresis = false;				// enable flag to measure hysteresis of сomparator
 	int					m_startComparatorIndex = 0;						// start the measurement with the сomparators under the number ...
-	bool				m_enableAdditionalCheck = true;					// additional check on the stitch сomparator
 
 public:
 
@@ -877,9 +874,6 @@ public:
 
 	int					startComparatorIndex() const { return m_startComparatorIndex; }
 	void				setStartComparatorIndex(int index) { m_startComparatorIndex = index; }
-
-	bool				enableAdditionalCheck() const { return m_enableAdditionalCheck; }
-	void				setEnableAdditionalCheck(bool enable) { m_enableAdditionalCheck = enable; }
 
 	void				load();
 	void				save();
@@ -1001,6 +995,11 @@ public:
 
 	BackupOption&		operator=(const BackupOption& from);
 };
+
+// ==============================================================================================
+
+bool compareFloat(float lFloat, float rFloat);
+bool compareFloat(double lDouble, double rDouble);
 
 // ==============================================================================================
 

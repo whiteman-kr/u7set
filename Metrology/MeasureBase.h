@@ -317,7 +317,7 @@ class ComparatorMeasurement : public Measurement
 public:
 
 	ComparatorMeasurement();
-	explicit ComparatorMeasurement(Calibrator* pCalibrator);
+	explicit ComparatorMeasurement(const IoSignalParam& ioParam);
 	virtual ~ComparatorMeasurement();
 
 private:
@@ -327,6 +327,10 @@ private:
 	QString			m_caption;
 
 public:
+
+	void			virtual clear();
+
+	void			fill_measure_input(const IoSignalParam& ioParam, bool isNegativeRange);
 
 	QString			appSignalID() const { return m_appSignalID; }
 	void			setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; }

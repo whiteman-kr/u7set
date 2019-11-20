@@ -96,6 +96,12 @@ LinearityMeasurement::LinearityMeasurement(const IoSignalParam &ioParam)
 {
 	clear();
 
+	if (ioParam.calibratorManager() == nullptr)
+	{
+		assert(0);
+		return;
+	}
+
 	if (ioParam.isValid() == false)
 	{
 		return;
@@ -103,12 +109,6 @@ LinearityMeasurement::LinearityMeasurement(const IoSignalParam &ioParam)
 
 	int signalConnectionType = ioParam.signalConnectionType();
 	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
-	{
-		assert(0);
-		return;
-	}
-
-	if (ioParam.calibratorManager() == nullptr)
 	{
 		assert(0);
 		return;
@@ -182,12 +182,6 @@ void LinearityMeasurement::clear()
 
 void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam, bool isNegativeRange)
 {
-	if (ioParam.isValid() == false)
-	{
-		assert(false);
-		return;
-	}
-
 	if (ioParam.calibratorManager() == nullptr)
 	{
 		assert(0);
@@ -196,6 +190,12 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam, bool
 
 	Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
 	if (pCalibrator == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	if (ioParam.isValid() == false)
 	{
 		assert(false);
 		return;
@@ -294,12 +294,6 @@ void LinearityMeasurement::fill_measure_input(const IoSignalParam &ioParam, bool
 
 void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 {
-	if (ioParam.isValid() == false)
-	{
-		assert(false);
-		return;
-	}
-
 	if (ioParam.calibratorManager() == nullptr)
 	{
 		assert(0);
@@ -308,6 +302,12 @@ void LinearityMeasurement::fill_measure_output(const IoSignalParam &ioParam)
 
 	Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
 	if (pCalibrator == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	if (ioParam.isValid() == false)
 	{
 		assert(false);
 		return;
@@ -1148,26 +1148,90 @@ ComparatorMeasurement::ComparatorMeasurement() :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ComparatorMeasurement::ComparatorMeasurement(Calibrator* pCalibrator)
+ComparatorMeasurement::ComparatorMeasurement(const IoSignalParam& ioParam)
 {
-	if (pCalibrator == nullptr)
+	clear();
+
+	if (ioParam.calibratorManager() == nullptr)
+	{
+		assert(0);
+		return;
+	}
+
+	if (ioParam.isValid() == false)
 	{
 		return;
 	}
 
-	setMeasureType(MEASURE_TYPE_COMPARATOR);
+	fill_measure_input(ioParam, ioParam.isNegativeRange());
 
-	// features
-	//
-	setAppSignalID(QString());
-	setCustomAppSignalID(QString());
-	setCaption(QString());
+//	int signalConnectionType = ioParam.signalConnectionType();
+//	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+//	{
+//		assert(0);
+//		return;
+//	}
+
+//	switch (signalConnectionType)
+//	{
+//		case SIGNAL_CONNECTION_TYPE_UNUSED:			fill_measure_input(ioParam, ioParam.isNegativeRange());	break;
+//		case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
+//		case SIGNAL_CONNECTION_TYPE_FROM_TUNING:	fill_measure_output(ioParam);							break;
+//		default:									assert(0);
+//	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 ComparatorMeasurement::~ComparatorMeasurement()
 {
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorMeasurement::clear()
+{
+	setMeasureType(MEASURE_TYPE_COMPARATOR);
+
+	m_appSignalID.clear();
+	m_customAppSignalID.clear();
+	m_caption.clear();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam, bool isNegativeRange)
+{
+	if (ioParam.calibratorManager() == nullptr)
+	{
+		assert(0);
+		return;
+	}
+
+	Calibrator* pCalibrator = ioParam.calibratorManager()->calibrator();
+	if (pCalibrator == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	if (ioParam.isValid() == false)
+	{
+		assert(false);
+		return;
+	}
+
+	Metrology::SignalParam inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+	if (inParam.isValid() == false)
+	{
+		assert(false);
+		return;
+	}
+
+	//
+	//
+	setMeasureType(MEASURE_TYPE_COMPARATOR);
+	setSignalHash(inParam.hash());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
