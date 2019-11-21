@@ -132,6 +132,7 @@ windows build job:
   artifacts:
     name: "u7set_0.8.%CI_PIPELINE_ID%_%CI_BUILD_REF_SLUG%_%CI_COMMIT_SHA%"
     paths:
+      - bin/*.exe
       - bin/release/*.exe
       - bin/release/*.dll
       - bin/release/bearer/*.dll
