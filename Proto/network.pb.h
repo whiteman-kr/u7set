@@ -1938,12 +1938,12 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 receivedpacketcount() const;
   inline void set_receivedpacketcount(::google::protobuf::int64 value);
 
-  // optional int64 lostedPacketCount = 11 [default = 0];
-  inline bool has_lostedpacketcount() const;
-  inline void clear_lostedpacketcount();
-  static const int kLostedPacketCountFieldNumber = 11;
-  inline ::google::protobuf::int64 lostedpacketcount() const;
-  inline void set_lostedpacketcount(::google::protobuf::int64 value);
+  // optional int64 lostPacketCount = 11 [default = 0];
+  inline bool has_lostpacketcount() const;
+  inline void clear_lostpacketcount();
+  static const int kLostPacketCountFieldNumber = 11;
+  inline ::google::protobuf::int64 lostpacketcount() const;
+  inline void set_lostpacketcount(::google::protobuf::int64 value);
 
   // optional bool dataProcessingEnabled = 12 [default = false];
   inline bool has_dataprocessingenabled() const;
@@ -2098,8 +2098,8 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline void clear_has_receivedframescount();
   inline void set_has_receivedpacketcount();
   inline void clear_has_receivedpacketcount();
-  inline void set_has_lostedpacketcount();
-  inline void clear_has_lostedpacketcount();
+  inline void set_has_lostpacketcount();
+  inline void clear_has_lostpacketcount();
   inline void set_has_dataprocessingenabled();
   inline void clear_has_dataprocessingenabled();
   inline void set_has_processedpacketcount();
@@ -2151,7 +2151,7 @@ class AppDataSourceState : public ::google::protobuf::Message {
   bool datareceives_;
   bool dataprocessingenabled_;
   ::google::protobuf::uint32 rupframenumerator_;
-  ::google::protobuf::int64 lostedpacketcount_;
+  ::google::protobuf::int64 lostpacketcount_;
   ::google::protobuf::int64 processedpacketcount_;
   ::google::protobuf::int64 lastpacketsystemtime_;
   ::google::protobuf::int64 rupframeplanttime_;
@@ -9018,26 +9018,26 @@ inline void AppDataSourceState::set_receivedpacketcount(::google::protobuf::int6
   receivedpacketcount_ = value;
 }
 
-// optional int64 lostedPacketCount = 11 [default = 0];
-inline bool AppDataSourceState::has_lostedpacketcount() const {
+// optional int64 lostPacketCount = 11 [default = 0];
+inline bool AppDataSourceState::has_lostpacketcount() const {
   return (_has_bits_[0] & 0x00000400u) != 0;
 }
-inline void AppDataSourceState::set_has_lostedpacketcount() {
+inline void AppDataSourceState::set_has_lostpacketcount() {
   _has_bits_[0] |= 0x00000400u;
 }
-inline void AppDataSourceState::clear_has_lostedpacketcount() {
+inline void AppDataSourceState::clear_has_lostpacketcount() {
   _has_bits_[0] &= ~0x00000400u;
 }
-inline void AppDataSourceState::clear_lostedpacketcount() {
-  lostedpacketcount_ = GOOGLE_LONGLONG(0);
-  clear_has_lostedpacketcount();
+inline void AppDataSourceState::clear_lostpacketcount() {
+  lostpacketcount_ = GOOGLE_LONGLONG(0);
+  clear_has_lostpacketcount();
 }
-inline ::google::protobuf::int64 AppDataSourceState::lostedpacketcount() const {
-  return lostedpacketcount_;
+inline ::google::protobuf::int64 AppDataSourceState::lostpacketcount() const {
+  return lostpacketcount_;
 }
-inline void AppDataSourceState::set_lostedpacketcount(::google::protobuf::int64 value) {
-  set_has_lostedpacketcount();
-  lostedpacketcount_ = value;
+inline void AppDataSourceState::set_lostpacketcount(::google::protobuf::int64 value) {
+  set_has_lostpacketcount();
+  lostpacketcount_ = value;
 }
 
 // optional bool dataProcessingEnabled = 12 [default = false];

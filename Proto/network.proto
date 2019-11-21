@@ -154,7 +154,7 @@ message AppDataSourceState
     optional int64 receivedDataSize = 8 [default = 0];	    //
     optional int64 receivedFramesCount = 9 [default = 0];
     optional int64 receivedPacketCount = 10 [default = 0];
-    optional int64 lostedPacketCount = 11 [default = 0];
+	optional int64 lostPacketCount = 11 [default = 0];
     optional bool dataProcessingEnabled = 12 [default = false];
     optional int64 processedPacketCount = 13 [default = 0];
     optional int64 lastPacketSystemTime = 14 [default = 0];

@@ -45,7 +45,7 @@ DSC_ACQUIRED_SIGNALS_COUNT = 32,
 DSC_ERROR_PROTOCOL_VERSION = 33,
 DSC_ERROR_FRAMES_QUANTITY = 34,
 DSC_ERROR_FRAME_NOMBER = 35,
-DSC_LOSTED_FRAMES_COUNT = 36,
+DSC_LOST_PACKET_COUNT = 36,
 DSC_ERROR_DATA_ID = 37,
 DSC_ERROR_BAD_FRAME_SIZE = 38,
 DSC_ERROR_DUPLICATE_PLANT_TIME = 39,
@@ -61,7 +61,7 @@ const int dataSourceStateColumn[] =
 	DSC_ERROR_PROTOCOL_VERSION,
 	DSC_ERROR_FRAMES_QUANTITY,
 	DSC_ERROR_FRAME_NOMBER,
-	DSC_LOSTED_FRAMES_COUNT,
+	DSC_LOST_PACKET_COUNT,
 };
 
 const int DATA_SOURCE_STATE_COLUMN_COUNT = sizeof(dataSourceStateColumn) / sizeof(dataSourceStateColumn[0]);
@@ -106,7 +106,7 @@ const char* const dataSourceColumnStr[] =
 	"Error Protocol version",
 	"Error Frames quantity",
 	"Error Frame nomber",
-	"Losted frames count",
+	"Lost packet count",
 	"Error Data ID",
 	"Error Bad frame size",
 	"Error Duplicate plant time",
@@ -322,7 +322,7 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_ERROR_PROTOCOL_VERSION: return source.errorProtocolVersion();
 				case DSC_ERROR_FRAMES_QUANTITY: return source.errorFramesQuantity();
 				case DSC_ERROR_FRAME_NOMBER: return source.errorFrameNo();
-				case DSC_LOSTED_FRAMES_COUNT: return source.lostedPacketCount();
+				case DSC_LOST_PACKET_COUNT: return source.lostPacketCount();
 				case DSC_ERROR_DATA_ID: return source.errorDataID();
 				case DSC_ERROR_BAD_FRAME_SIZE: return source.errorFrameSize();
 				case DSC_ERROR_DUPLICATE_PLANT_TIME: return source.errorDuplicatePlantTime();

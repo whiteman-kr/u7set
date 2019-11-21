@@ -186,7 +186,7 @@ bool AppDataSource::getState(Network::AppDataSourceState* proto) const
 	proto->set_receiveddatasize(receivedDataSize());
 	proto->set_receivedframescount(receivedFramesCount());
 	proto->set_receivedpacketcount(receivedPacketCount());
-	proto->set_lostedpacketcount(lostedPacketCount());
+	proto->set_lostpacketcount(lostPacketCount());
 	proto->set_dataprocessingenabled(dataProcessingEnabled());
 	proto->set_processedpacketcount(processedPacketCount());
 	proto->set_lastpacketsystemtime(lastPacketSystemTime());
@@ -221,7 +221,7 @@ void AppDataSource::setState(const Network::AppDataSourceState& proto)
 	setReceivedDataSize(proto.receiveddatasize());
 	setReceivedFramesCount(proto.receivedframescount());
 	setReceivedPacketCount(proto.receivedpacketcount());
-	setLostedPacketCount(proto.lostedpacketcount());
+	setLostPacketCount(proto.lostpacketcount());
 	setDataProcessingEnabled(proto.dataprocessingenabled());
 	setProcessedPacketCount(proto.processedpacketcount());
 	setLastPacketSystemTime(proto.lastpacketsystemtime());

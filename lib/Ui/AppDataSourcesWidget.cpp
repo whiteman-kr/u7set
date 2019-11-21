@@ -208,7 +208,7 @@ void DialogAppDataSourceInfo::updateData()
 	setDataItemNumber("ReceivedDataSize", ds.state.receiveddatasize());
 	setDataItemNumber("ReceivedFramesCount", ds.state.receivedframescount());
 	setDataItemNumber("ReceivedPacketCount", ds.state.receivedpacketcount());
-	setDataItemNumber("LostPacketCount", ds.state.lostedpacketcount());
+	setDataItemNumber("LostPacketCount", ds.state.lostpacketcount());
 	setDataItemText("DataProcessingEnabled", ds.state.dataprocessingenabled() ? "Yes" : "No");
 	setDataItemNumber("ProcessedPacketCount", ds.state.processedpacketcount());
 

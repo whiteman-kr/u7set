@@ -317,8 +317,8 @@ public:
 	qint64 receivedPacketCount() const { return m_receivedPacketCount; }
 	void setReceivedPacketCount(qint64 packetCount) { m_receivedPacketCount = packetCount; }
 
-	qint64 lostedPacketCount() const { return m_lostedPacketCount; }
-	void setLostedPacketCount(qint64 packetCount) { m_lostedPacketCount = packetCount; }
+	qint64 lostPacketCount() const { return m_lostPacketCount; }
+	void setLostPacketCount(qint64 packetCount) { m_lostPacketCount = packetCount; }
 
 	qint64 processedPacketCount() const { return m_processedPacketCount; }
 	void setProcessedPacketCount(qint64 packetCount) { m_processedPacketCount = packetCount; }
@@ -396,7 +396,7 @@ private:
 	qint64 m_receivedDataSize = 0;
 	qint64 m_receivedFramesCount = 0;
 	qint64 m_receivedPacketCount = 0;
-	qint64 m_lostedPacketCount = 0;
+	qint64 m_lostPacketCount = 0;
 	qint64 m_processedPacketCount = 0;
 
 	bool m_dataRecevingTimeout = false;
