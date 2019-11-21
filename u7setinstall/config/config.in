@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Installer>
+    <Name>Radiy Platform Configuration Tool</Name>
+    <Version>1.0.0</Version>
+    <Title>Radiy Platform Configuration Tool</Title>
+    <Publisher>RPC Radiy</Publisher>
+    <ProductUrl>http://www.radiy.com</ProductUrl>
+    <StartMenuDir>Radiy Platform Configuration Tool</StartMenuDir>
+    <TargetDir>@ApplicationsDirX64@/Radiy/Radiy Platform Configuration Tool @Version@</TargetDir>
+    <ControlScript>controlScript.qs</ControlScript>
+</Installer>
