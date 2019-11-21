@@ -42,6 +42,7 @@ private:
 
 	CalibratorManager*		m_pCalibratorManager = nullptr;
 	double					m_percent = 0;
+	int						m_comparatorIndex = -1;
 	bool					m_negativeRange = false;
 	double					m_tunSignalState = 0;			// for restore tun value after measuring
 
@@ -75,6 +76,10 @@ public:
 
 	double					percent() const { return m_percent; }
 	void					setPercent(double percent) { m_percent = percent; }
+
+	int						comparatorIndex() const { return m_comparatorIndex; }
+	void					setComparatorIndex(int index) { m_comparatorIndex = index; }
+
 
 	bool					isNegativeRange() const { return m_negativeRange; }
 	void					setNegativeRange(bool negativeRange) { m_negativeRange = negativeRange; }

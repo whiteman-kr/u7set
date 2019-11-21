@@ -67,6 +67,7 @@ void IoSignalParam::clear()
 
 		m_pCalibratorManager = nullptr;
 		m_percent = 0;
+		m_comparatorIndex = -1;
 		m_negativeRange = false;
 		m_tunSignalState = 0;
 
@@ -716,6 +717,7 @@ IoSignalParam& IoSignalParam::operator=(const IoSignalParam& from)
 
 		m_pCalibratorManager = from.m_pCalibratorManager;
 		m_percent = from.m_percent;
+		m_comparatorIndex = from.m_comparatorIndex;
 		m_negativeRange  = from.m_negativeRange;
 		m_tunSignalState = from.m_tunSignalState;
 

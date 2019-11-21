@@ -823,17 +823,21 @@ const char* const		ComparatorParamName[] =
 						QT_TRANSLATE_NOOP("Options.h", "Limit of error (%)"),
 						QT_TRANSLATE_NOOP("Options.h", "Start value (%)"),
 						QT_TRANSLATE_NOOP("Options.h", "Error type"),
+						QT_TRANSLATE_NOOP("Options.h", "Show error from limit"),
 						QT_TRANSLATE_NOOP("Options.h", "Enable to measure hysteresis"),
 						QT_TRANSLATE_NOOP("Options.h", "Start measurement from the сomparator"),
+						QT_TRANSLATE_NOOP("Options.h", "Show columns of engineering values"),
 };
 
-const int				CO_PARAM_COUNT				= sizeof(ComparatorParamName)/sizeof(ComparatorParamName[0]);
+const int				CO_PARAM_COUNT					= sizeof(ComparatorParamName)/sizeof(ComparatorParamName[0]);
 
-const int				CO_PARAM_ERROR_LIMIT		= 0,
-						CO_PARAM_START_VALUE		= 1,
-						CO_PARAM_ERROR_TYPE			= 2,
-						CO_PARAM_ENABLE_HYSTERESIS	= 3,
-						CO_PARAM_COMPARATOR_INDEX	= 4;
+const int				CO_PARAM_ERROR_LIMIT			= 0,
+						CO_PARAM_START_VALUE			= 1,
+						CO_PARAM_ERROR_TYPE				= 2,
+						CO_PARAM_SHOW_ERROR_FROM_LIMIT	= 3,
+						CO_PARAM_ENABLE_HYSTERESIS		= 4,
+						CO_PARAM_COMPARATOR_INDEX		= 5,
+						CO_PARAM_SHOW_ENGINEERING_VALUE	= 6;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -850,12 +854,15 @@ public:
 //private:
 public:
 
-	double				m_errorLimit = 0.2;								// permissible error is given by specified documents
-	double				m_startValueForCompare = 0.1;					// start value is given by metrologists
-	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;		// type of error absolute or reduced
+	double				m_errorLimit = 0.2;										// permissible error is given by specified documents
+	double				m_startValueForCompare = 0.1;							// start value is given by metrologists
+	int					m_errorType = MEASURE_ERROR_TYPE_REDUCE;				// type of error absolute or reduced
+	int					m_showErrorFromLimit = MEASURE_LIMIT_TYPE_ELECTRIC;		// type of displaing error denend on limit
 
-	bool				m_enableMeasureHysteresis = false;				// enable flag to measure hysteresis of сomparator
-	int					m_startComparatorIndex = 0;						// start the measurement with the сomparators under the number ...
+	bool				m_enableMeasureHysteresis = false;						// enable flag to measure hysteresis of сomparator
+	int					m_startComparatorIndex = 0;								// start the measurement with the сomparators under the number ...
+
+	bool				m_showEngeneeringValueColumn = true;					// show columns of engeneering values
 
 public:
 
@@ -868,12 +875,17 @@ public:
 	int					errorType() const { return m_errorType; }
 	void				setErrorType(int type) { m_errorType = type; }
 
+	int					showErrorFromLimit() const { return m_showErrorFromLimit; }
+	void				setShowErrorFromLimit(int type) { m_showErrorFromLimit = type; }
 
 	bool				enableMeasureHysteresis() const { return m_enableMeasureHysteresis; }
 	void				setEnableMeasureHysteresis(bool enable) { m_enableMeasureHysteresis = enable; }
 
 	int					startComparatorIndex() const { return m_startComparatorIndex; }
 	void				setStartComparatorIndex(int index) { m_startComparatorIndex = index; }
+
+	bool				showEngeneeringValueColumn() const { return m_showEngeneeringValueColumn; }
+	void				setShowPhyscalValueColumn(bool show) { m_showEngeneeringValueColumn = show; }
 
 	void				load();
 	void				save();

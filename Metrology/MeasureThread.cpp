@@ -667,8 +667,6 @@ void MeasureThread::measureLinearity()
 				continue;
 			}
 
-			m_activeIoParamList[ch].setPercent(point.percent());
-
 			// set electric value
 			//
 			switch (m_activeIoParamList[ch].signalConnectionType())
@@ -743,6 +741,8 @@ void MeasureThread::measureLinearity()
 			{
 				continue;
 			}
+
+			m_activeIoParamList[ch].setPercent(point.percent());
 
 			LinearityMeasurement* pMeasurement = new LinearityMeasurement(m_activeIoParamList[ch]);
 			if (pMeasurement == nullptr)
@@ -1191,6 +1191,8 @@ void MeasureThread::measureComprators()
 			{
 				continue;
 			}
+
+			m_activeIoParamList[ch].setComparatorIndex(cmp);
 
 			ComparatorMeasurement* pMeasurement = new ComparatorMeasurement(m_activeIoParamList[ch]);
 			if (pMeasurement == nullptr)
