@@ -381,7 +381,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 
 		if (result == false)
 		{
-			readSettings.errorMessage += errorString + "\n";
+			readSettings.errorMessage += errorString + QStringLiteral("\n");
 		}
 		else
 		{
@@ -397,7 +397,7 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 		QString parsingError;
 
 		QByteArray ba;
-		QString fileName = "/" + theSettings.instanceStrId() + "/SchemaDetails.pbuf";
+		QString fileName = "/" + theSettings.instanceStrId() + QStringLiteral("/SchemaDetails.pbuf");
 		bool ok = m_cfgLoaderThread->getFileBlocked(fileName, &ba, &parsingError);
 
 		if (ok == false)
@@ -435,6 +435,29 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 	{
 		QMutexLocker locker(&m_confugurationMutex);
 		m_configuration = readSettings;
+	}
+
+	// New set points
+	//
+	{
+		QByteArray data;
+		QString errorString;
+
+		bool result = getFileBlockedById(CFG_FILE_ID_COMPARATOR_SET, &data, &errorString);
+
+		if (result == false)
+		{
+			readSettings.errorMessage += errorString + QStringLiteral("\n");
+		}
+		else
+		{
+			bool readOk = m_setPoints.serializeFrom(data);
+
+			if (readOk == false)
+			{
+				readSettings.errorMessage += tr("Serialize set point list file error") + QStringLiteral("\n");
+			}
+		}
 	}
 
 	// Emit signal to inform everybody about new configuration

@@ -334,7 +334,9 @@ void ComparatorSet::insert(const QString& lmID, std::shared_ptr<Comparator> comp
 	//
 	if(m_bySignal.contains(comparator->input().appSignalID()) == false)
 	{
-		QVector<std::shared_ptr<Comparator>> comparatorVector(1, comparator) ;
+		QVector<std::shared_ptr<Comparator>> comparatorVector;
+		comparatorVector.reserve(4);
+		comparatorVector.push_back(comparator);
 
 		m_bySignal.insert(comparator->input().appSignalID(), comparatorVector);
 	}

@@ -55,7 +55,7 @@ static const QList<dynamicPropertyFieldDefinition> dynamicPropertiesFieldList {
 	{ QStringLiteral("Error Protocol version"), [](const DataSourceOnline& source) { return source.errorProtocolVersion(); } },
 	{ QStringLiteral("Error Frames quantity"), [](const DataSourceOnline& source) { return source.errorFramesQuantity(); } },
 	{ QStringLiteral("Error Frame nomber"), [](const DataSourceOnline& source) { return source.errorFrameNo(); } },
-	{ QStringLiteral("Losted frames count"), [](const DataSourceOnline& source) { return source.lostedPacketCount(); } },
+	{ QStringLiteral("Lost packet count"), [](const DataSourceOnline& source) { return source.lostPacketCount(); } },
 	{ QStringLiteral("Error Data ID"), [](const DataSourceOnline& source) { return source.errorDataID(); } },
 	{ QStringLiteral("Error Bad frame size"), [](const DataSourceOnline& source) { return source.errorFrameSize(); } },
 

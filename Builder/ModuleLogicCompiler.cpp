@@ -6038,7 +6038,7 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal& fb = m_fbScal[FB_TCONV_FP_SI_INDEX];
+					FbScal& fb = m_fbScal[FB_TCONV_SI_FP_INDEX];
 
 					result &= appItem->init(fb.pointer, errorMsg);
 					appItem->setLabel(signal.appSignalID());
@@ -6067,7 +6067,7 @@ namespace Builder
 				{
 					conversionIsKnown = true;
 
-					FbScal& fb = m_fbScal[FB_TCONV_SI_FP_INDEX];
+					FbScal& fb = m_fbScal[FB_TCONV_FP_SI_INDEX];
 
 					result &= appItem->init(fb.pointer, errorMsg);
 					appItem->setLabel(signal.appSignalID());
