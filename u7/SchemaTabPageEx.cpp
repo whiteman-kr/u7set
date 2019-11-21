@@ -4370,16 +4370,27 @@ void SchemaControlTabPageEx::showFileProperties()
 
 	d.setLayout(layout);
 
+	if (QSize s = QSettings().value("SchemaFileProperties/size").toSize();
+		s.isValid() == true)
+	{
+		d.resize(s);
+	}
+	else
+	{
+		d.resize(d.sizeHint() * 2);
+	}
+
 	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
-
-	d.resize(d.sizeHint() * 1.5);
 
 	// Show proprties dialog
 	// and save result on accept
 	//
-	if (int result = d.exec();
-		result == QDialog::Accepted)
+	int result = d.exec();
+
+	QSettings().setValue("SchemaFileProperties/size", d.size());
+
+	if (result == QDialog::Accepted)
 	{
 		std::vector<std::shared_ptr<DbFile>> filesToSave;
 		filesToSave.reserve(schemas.size());
