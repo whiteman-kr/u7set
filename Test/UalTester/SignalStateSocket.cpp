@@ -18,17 +18,17 @@ SignalStateSocket::~SignalStateSocket()
 
 void SignalStateSocket::onClientThreadStarted()
 {
-	 //qDebug() << "SignalStateSocket::onClientThreadStarted()";
+	 //std::cout << "SignalStateSocket::onClientThreadStarted()\n";
 }
 
 void SignalStateSocket::onClientThreadFinished()
 {
-	 //qDebug() << "SignalStateSocket::onClientThreadFinished()";
+	 //std::cout << "SignalStateSocket::onClientThreadFinished()\n";
 }
 
 void SignalStateSocket::onConnection()
 {
-	//qDebug() << "SignalStateSocket::onConnection()";
+	//std::cout << "SignalStateSocket::onConnection()\n";
 
 	emit socketConnected();
 
@@ -39,7 +39,7 @@ void SignalStateSocket::onConnection()
 
 void SignalStateSocket::onDisconnection()
 {
-	//qDebug() << "SignalStateSocket::onDisconnection";
+	//std::cout << "SignalStateSocket::onDisconnection\n";
 
 	emit socketDisconnected();
 }
@@ -115,10 +115,10 @@ void SignalStateSocket::replySignalState(const char* replyData, quint32 replyDat
 		return;
 	}
 
-	bool result = m_getSignalStateReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_getSignalStateReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
 	if (result == false)
 	{
-		qDebug() << "SignalStateSocket::replySignalState - error: ParseFromArray";
+		std::cout << "SignalStateSocket::replySignalState - error: ParseFromArray\n";
 		assert(result);
 		requestSignalState();
 		return;
@@ -126,7 +126,7 @@ void SignalStateSocket::replySignalState(const char* replyData, quint32 replyDat
 
 	if (m_getSignalStateReply.error() != 0)
 	{
-		qDebug() << "SignalStateSocket::replySignalState - error: " << m_getSignalStateReply.error();
+		std::cout << "SignalStateSocket::replySignalState - error: " << m_getSignalStateReply.error() << "\n";
 		assert(m_getSignalStateReply.error() != 0);
 		requestSignalState();
 		return;

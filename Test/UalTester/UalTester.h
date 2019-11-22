@@ -63,7 +63,7 @@ private:
 	bool readAppSignals(const QByteArray& cfgFileData);
 
 	TestFile m_testfile;
-	bool parseTestFile();
+	bool parseTestFile(const QString& testFileName);
 
 	SignalStateSocket* m_pSignalStateSocket = nullptr;
 	SimpleThread* m_pSignalStateSocketThread = nullptr;
