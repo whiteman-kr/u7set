@@ -18,17 +18,17 @@ TuningSocket::~TuningSocket()
 
 void TuningSocket::onClientThreadStarted()
 {
-	//qDebug() << "TuningSocket::onClientThreadStarted()";
+	//std::cout << "TuningSocket::onClientThreadStarted()\n";
 }
 
 void TuningSocket::onClientThreadFinished()
 {
-	//qDebug() << "TuningSocket::onClientThreadFinished()";
+	//std::cout << "TuningSocket::onClientThreadFinished()\n";
 }
 
 void TuningSocket::onConnection()
 {
-	//qDebug() << "TuningSocket::onConnection()";
+	//std::cout << "TuningSocket::onConnection()\n";
 
 	emit socketConnected();
 
@@ -37,7 +37,7 @@ void TuningSocket::onConnection()
 
 void TuningSocket::onDisconnection()
 {
-	//qDebug() << "TuningSocket::onDisconnection";
+	//std::cout << "TuningSocket::onDisconnection\n";
 
 	emit socketDisconnected();
 }
@@ -96,10 +96,10 @@ void TuningSocket::replyTuningSourcesInfo(const char* replyData, quint32 replyDa
 		return;
 	}
 
-	bool result = m_tuningDataSourcesInfoReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_tuningDataSourcesInfoReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
 	if (result == false)
 	{
-		qDebug() << "TuningSocket::replyTuningSourcesInfo - error: ParseFromArray";
+		std::cout << "TuningSocket::replyTuningSourcesInfo - error: ParseFromArray\n";
 		assert(result);
 		requestTuningSourcesInfo();
 		return;
@@ -107,7 +107,7 @@ void TuningSocket::replyTuningSourcesInfo(const char* replyData, quint32 replyDa
 
 	if (m_tuningDataSourcesInfoReply.error() != 0)
 	{
-		qDebug() << "TuningSocket::replyTuningSourcesInfo - error: " << m_tuningDataSourcesInfoReply.error();
+		std::cout << "TuningSocket::replyTuningSourcesInfo - error: " << m_tuningDataSourcesInfoReply.error() << "\n";
 		assert(m_tuningDataSourcesInfoReply.error() != 0);
 		requestTuningSourcesInfo();
 		return;
@@ -115,7 +115,7 @@ void TuningSocket::replyTuningSourcesInfo(const char* replyData, quint32 replyDa
 
 	if (m_pTuningBase == nullptr)
 	{
-		qDebug() << "TuningSocket::replyTuningSourcesInfo - error: failed TuningBase";;
+		std::cout << "TuningSocket::replyTuningSourcesInfo - error: failed TuningBase\n";
 		assert(false);
 		requestTuningSourcesInfo();
 		return;
@@ -124,7 +124,7 @@ void TuningSocket::replyTuningSourcesInfo(const char* replyData, quint32 replyDa
 	int sourceCount = m_tuningDataSourcesInfoReply.datasourceinfo_size();
 	if (sourceCount == 0)
 	{
-		qDebug() << "Error : Tuning sources count: " << sourceCount;
+		std::cout << "Error : Tuning sources count: " << sourceCount << "\n";
 	}
 
 	for (int i = 0; i < sourceCount; i++)
@@ -132,8 +132,8 @@ void TuningSocket::replyTuningSourcesInfo(const char* replyData, quint32 replyDa
 		const ::Network::DataSourceInfo& dsi = m_tuningDataSourcesInfoReply.datasourceinfo(i);
 		m_pTuningBase->Sources().append(TuningSource(dsi));
 
-		//qDebug() << "TuningSocket::replyTuningSourcesInfo - : " << i << ". SubSystem:" << dsi.lmsubsystem().c_str() << ", EquipmentID:" << dsi.lmequipmentid().c_str() << ", IP:" << dsi.lmip().c_str();
-		qDebug() << "TuningSource:" << dsi.lmequipmentid().c_str() << ", IP:" << dsi.lmip().c_str();
+		//std::cout << "TuningSocket::replyTuningSourcesInfo - : " << i << ". SubSystem:" << dsi.lmsubsystem().c_str() << ", EquipmentID:" << dsi.lmequipmentid().c_str() << ", IP:" << dsi.lmip().c_str() << "\n";
+		std::cout << "TuningSource:" << dsi.lmequipmentid().c_str() << ", IP:" << dsi.lmip().c_str() << "\n";
 	}
 
 	m_pTuningBase->Sources().sortByID();
@@ -163,10 +163,10 @@ void TuningSocket::replyTuningSourcesState(const char* replyData, quint32 replyD
 		return;
 	}
 
-	bool result = m_tuningDataSourcesStatesReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_tuningDataSourcesStatesReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
 	if (result == false)
 	{
-		qDebug() << "TuningSocket::replyTuningSourcesState - error: ParseFromArray";
+		std::cout << "TuningSocket::replyTuningSourcesState - error: ParseFromArray\n";
 		assert(result);
 		requestTuningSourcesState();
 		return;
@@ -174,7 +174,7 @@ void TuningSocket::replyTuningSourcesState(const char* replyData, quint32 replyD
 
 	if (m_tuningDataSourcesStatesReply.error() != 0)
 	{
-		qDebug() << "TuningSocket::replyTuningSourcesState - error: " << m_tuningDataSourcesStatesReply.error();
+		std::cout << "TuningSocket::replyTuningSourcesState - error: " << m_tuningDataSourcesStatesReply.error() << "\n";
 		assert(m_tuningDataSourcesStatesReply.error() != 0);
 		requestTuningSourcesState();
 		return;
@@ -182,7 +182,7 @@ void TuningSocket::replyTuningSourcesState(const char* replyData, quint32 replyD
 
 	if (m_pTuningBase == nullptr)
 	{
-		qDebug() << "TuningSocket::replyTuningSourcesState - error: failed TuningBase";;
+		std::cout << "TuningSocket::replyTuningSourcesState - error: failed TuningBase\n";
 		assert(false);
 		requestTuningSourcesState();
 		return;
@@ -207,7 +207,7 @@ void TuningSocket::requestReadTuningSignals()
 
 	if (m_pTuningBase == nullptr)
 	{
-		qDebug() << "TuningSocket::requestReadTuningSignals - error: failed TuningBase";;
+		std::cout << "TuningSocket::requestReadTuningSignals - error: failed TuningBase\n";
 		assert(false);
 		requestTuningSourcesState();
 		return;
@@ -263,10 +263,10 @@ void TuningSocket::replyReadTuningSignals(const char* replyData, quint32 replyDa
 		return;
 	}
 
-	bool result = m_readTuningSignalsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_readTuningSignalsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
 	if (result == false)
 	{
-		qDebug() << "TuningSocket::replyReadTuningSignals - error: ParseFromArray";
+		std::cout << "TuningSocket::replyReadTuningSignals - error: ParseFromArray\n";
 		assert(result);
 		requestTuningSourcesState();
 		return;
@@ -274,7 +274,7 @@ void TuningSocket::replyReadTuningSignals(const char* replyData, quint32 replyDa
 
 	if (m_readTuningSignalsReply.error() != 0)
 	{
-		qDebug() << "TuningSocket::replyReadTuningSignals - error: " << m_readTuningSignalsReply.error();
+		std::cout << "TuningSocket::replyReadTuningSignals - error: " << m_readTuningSignalsReply.error() << "\n";
 		assert(m_readTuningSignalsReply.error() != 0);
 		requestTuningSourcesState();
 		return;
@@ -282,7 +282,7 @@ void TuningSocket::replyReadTuningSignals(const char* replyData, quint32 replyDa
 
 	if (m_pTuningBase == nullptr)
 	{
-		qDebug() << "TuningSocket::replyReadTuning - error: failed TuningBase";;
+		std::cout << "TuningSocket::replyReadTuning - error: failed TuningBase\n";
 		assert(false);
 		requestTuningSourcesState();
 		return;
@@ -306,7 +306,7 @@ void TuningSocket::requestWriteTuningSignals()
 
 	if (m_pTuningBase == nullptr)
 	{
-		qDebug() << "TuningSocket::requestWriteTuningSignals - error: failed TuningBase";;
+		std::cout << "TuningSocket::requestWriteTuningSignals - error: failed TuningBase\n";
 		assert(false);
 		requestTuningSourcesState();
 		return;
@@ -375,10 +375,10 @@ void TuningSocket::replyWriteTuningSignals(const char* replyData, quint32 replyD
 		return;
 	}
 
-	bool result = m_writeTuningSignalsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), replyDataSize);
+	bool result = m_writeTuningSignalsReply.ParseFromArray(reinterpret_cast<const void*>(replyData), static_cast<int>(replyDataSize));
 	if (result == false)
 	{
-		//qDebug() << "TuningSocket::replyWriteTuningSignals - error: ParseFromArray";
+		//std::cout << "TuningSocket::replyWriteTuningSignals - error: ParseFromArray\n";
 		assert(result);
 		requestTuningSourcesState();
 		return;
@@ -386,7 +386,7 @@ void TuningSocket::replyWriteTuningSignals(const char* replyData, quint32 replyD
 
 	if (m_writeTuningSignalsReply.error() != 0)
 	{
-		//qDebug() << "TuningSocket::replyWriteTuningSignals - error: " << m_writeTuningSignalsReply.error();
+		//std::cout << "TuningSocket::replyWriteTuningSignals - error: " << m_writeTuningSignalsReply.error() + "\n";
 		requestTuningSourcesState();
 		return;
 	}

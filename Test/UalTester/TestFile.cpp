@@ -1382,7 +1382,7 @@ void TestItem::appendResult(const QString& str, bool printDebugMsg)
 
 	if (printDebugMsg == true)
 	{
-		qDebug() << str;
+		std::cout << str.toLocal8Bit().constData() << "\n";
 	}
 }
 
@@ -1429,7 +1429,7 @@ void TestFile::printErrorlist()
 	int errorCount = m_errorList.count();
 	for(int i = 0; i < errorCount; i++)
 	{
-		qDebug() << m_errorList[i];
+		std::cout << m_errorList[i].toLocal8Bit().constData() << "\n";
 	}
 }
 
@@ -1437,21 +1437,21 @@ bool TestFile::parse(const QString& fileName, SignalBase* pSignalBase)
 {
 	if (fileName.isEmpty() == true)
 	{
-		qDebug() << "Error: Test file name is empty";
+		std::cout << "Error: Test file name is empty\n";
 		return false;
 	}
 
 	if (pSignalBase == nullptr)
 	{
-		qDebug() << "Error: Failed SignalBase";
+		std::cout << "Error: Failed SignalBase\n";
 		return false;
 	}
 
 	m_file.setFileName(fileName);
 	if (m_file.open(QIODevice::ReadOnly) == false)
 	{
-		qDebug() << "Error: Test file" << m_fileName << "is not open";
-		m_errorList.append("Error: Test file" + m_fileName + "is not open");
+		std::cout << "Error: Test file " << m_fileName.toLocal8Bit().constData() << " is not open\n";
+		m_errorList.append("Error: Test file " + m_fileName + " is not open\n");
 		return false;
 	}
 

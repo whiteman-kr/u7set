@@ -165,6 +165,51 @@ int SqlFieldBase::init(int objectType, int)
 			append("ObjectID",						QVariant::Int);
 			append("MeasureID",						QVariant::Int);
 
+			append("Filter",						QVariant::Bool);
+			append("Valid",							QVariant::Bool);
+
+			append("AppSignalID",					QVariant::String, 64);
+			append("CustomAppSignalID",				QVariant::String, 64);
+			append("Caption",						QVariant::String, 256);
+
+			append("ModuleSN",						QVariant::Int);
+			append("EquipmentID",					QVariant::String, 256);
+			append("RackIndex",						QVariant::Int);
+			append("RackCaption",					QVariant::String, 64);
+			append("Channel",						QVariant::Int);
+			append("Chassis",						QVariant::Int);
+			append("Module",						QVariant::Int);
+			append("Place",							QVariant::Int);
+
+			append("CmpType",						QVariant::Int);
+
+			append("ElectricNominal",				QVariant::Double);
+			append("ElectricMeasure",				QVariant::Double);
+
+			append("EngeneeringNominal",			QVariant::Double);
+			append("EngeneeringMeasure",			QVariant::Double);
+
+			append("ElectricLowLimit",				QVariant::Double);
+			append("ElectricHighLimit",				QVariant::Double);
+			append("ElectricUnit",					QVariant::String, 32);
+			append("ElectricPrecision",				QVariant::Int);
+
+			append("EngeneeringLowLimit",			QVariant::Double);
+			append("EngeneeringHighLimit",			QVariant::Double);
+			append("EngeneeringUnit",				QVariant::String, 32);
+			append("EngeneeringPrecision",			QVariant::Int);
+
+			append("ElectricErrorAbsolute",			QVariant::Double);
+			append("ElectricErrorReduce",			QVariant::Double);
+			append("ElectricLimitErrorAbsolute",	QVariant::Double);
+			append("ElectricLimitErrorReduce",		QVariant::Double);
+
+			append("EngeneeringErrorAbsolute",		QVariant::Double);
+			append("EngeneeringErrorReduce",		QVariant::Double);
+			append("EngeneeringLimitErrorAbsolute",	QVariant::Double);
+			append("EngeneeringLimitErrorReduce",	QVariant::Double);
+
+			append("MeasureTime",					QVariant::String, 64);
 			break;
 
 		case SQL_TABLE_COMPARATOR_HYSTERESIS:
@@ -700,6 +745,10 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 			case SQL_TABLE_DATABASE_INFO:
 				{
 					SqlObjectInfo* info = static_cast<SqlObjectInfo*> (pRecord) + readedCount;
+					if (info == nullptr)
+					{
+						break;
+					}
 
 					info->setObjectID(query.value(field++).toInt());
 					info->setCaption(query.value(field++).toString());
@@ -710,6 +759,10 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 			case SQL_TABLE_HISTORY:
 				{
 					SqlHistoryDatabase* history = static_cast<SqlHistoryDatabase*> (pRecord) + readedCount;
+					if (history == nullptr)
+					{
+						break;
+					}
 
 					history->setObjectID(objectID);
 					history->setVersion(query.value(field++).toInt());
@@ -721,6 +774,10 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 			case SQL_TABLE_LINEARITY:
 				{
 					LinearityMeasurement* measure = static_cast<LinearityMeasurement*> (pRecord) + readedCount;
+					if (measure == nullptr)
+					{
+						break;
+					}
 
 					measure->setMeasureID(query.value(field++).toInt());
 
@@ -790,6 +847,10 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 					}
 
 					LinearityMeasurement* measure = static_cast<LinearityMeasurement*> (pRecord) + readedCount;
+					if (measure == nullptr)
+					{
+						break;
+					}
 
 					measure->setMeasureID(query.value(field++).toInt());
 
@@ -821,6 +882,10 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 			case SQL_TABLE_LINEARITY_ADD_VAL:
 				{
 					LinearityMeasurement* measure = static_cast<LinearityMeasurement*> (pRecord) + readedCount;
+					if (measure == nullptr)
+					{
+						break;
+					}
 
 					measure->setMeasureID(query.value(field++).toInt());
 
@@ -836,6 +901,10 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 			case SQL_TABLE_LINEARITY_POINT:
 				{
 					LinearityPoint* point = static_cast<LinearityPoint*> (pRecord) + readedCount;
+					if (point == nullptr)
+					{
+						break;
+					}
 
 					point->setIndex(query.value(field++).toInt());
 					point->setPercent(query.value(field++).toDouble());
@@ -844,6 +913,59 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
 			case SQL_TABLE_COMPARATOR:
 				{
+					ComparatorMeasurement* measure = static_cast<ComparatorMeasurement*> (pRecord) + readedCount;
+					if (measure == nullptr)
+					{
+						break;
+					}
+
+					measure->setMeasureID(query.value(field++).toInt());
+
+					measure->setFilter(query.value(field++).toBool());
+					measure->setSignalValid(query.value(field++).toBool());
+
+					measure->setAppSignalID(query.value(field++).toString());
+					measure->setCustomAppSignalID(query.value(field++).toString());
+					measure->setCaption(query.value(field++).toString());
+
+					measure->setModuleSerialNo(query.value(field++).toInt());
+					measure->location().setEquipmentID(query.value(field++).toString());
+					measure->location().rack().setIndex(query.value(field++).toInt());
+					measure->location().rack().setCaption(query.value(field++).toString());
+					measure->location().rack().setChannel(query.value(field++).toInt());
+					measure->location().setChassis(query.value(field++).toInt());
+					measure->location().setModule(query.value(field++).toInt());
+					measure->location().setPlace(query.value(field++).toInt());
+
+					measure->setCmpTypeInt(query.value(field++).toInt());
+
+					measure->setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, query.value(field++).toDouble());
+					measure->setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, query.value(field++).toDouble());
+
+					measure->setNominal(MEASURE_LIMIT_TYPE_ENGENEER, query.value(field++).toDouble());
+					measure->setMeasure(MEASURE_LIMIT_TYPE_ENGENEER, query.value(field++).toDouble());
+
+					measure->setLowLimit(MEASURE_LIMIT_TYPE_ELECTRIC, query.value(field++).toDouble());
+					measure->setHighLimit(MEASURE_LIMIT_TYPE_ELECTRIC, query.value(field++).toDouble());
+					measure->setUnit(MEASURE_LIMIT_TYPE_ELECTRIC, query.value(field++).toString());
+					measure->setLimitPrecision(MEASURE_LIMIT_TYPE_ELECTRIC, query.value(field++).toInt());
+
+					measure->setLowLimit(MEASURE_LIMIT_TYPE_ENGENEER, query.value(field++).toDouble());
+					measure->setHighLimit(MEASURE_LIMIT_TYPE_ENGENEER, query.value(field++).toDouble());
+					measure->setUnit(MEASURE_LIMIT_TYPE_ENGENEER, query.value(field++).toString());
+					measure->setLimitPrecision(MEASURE_LIMIT_TYPE_ENGENEER, query.value(field++).toInt());
+
+					measure->setError(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
+					measure->setError(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
+					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+
+					measure->setError(MEASURE_LIMIT_TYPE_ENGENEER, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
+					measure->setError(MEASURE_LIMIT_TYPE_ENGENEER, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ENGENEER, MEASURE_ERROR_TYPE_ABSOLUTE, query.value(field++).toDouble());
+					measure->setErrorLimit(MEASURE_LIMIT_TYPE_ENGENEER, MEASURE_ERROR_TYPE_REDUCE, query.value(field++).toDouble());
+
+					measure->setMeasureTime(QDateTime::fromString(query.value(field++).toString(), MEASURE_TIME_FORMAT));
 				}
 				break;
 
@@ -881,6 +1003,10 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 			case SQL_TABLE_RACK_GROUP:
 				{
 					RackGroup* group = static_cast<RackGroup*> (pRecord) + readedCount;
+					if (group == nullptr)
+					{
+						break;
+					}
 
 					group->setIndex(query.value(field++).toInt());
 					group->setCaption(query.value(field++).toString());
@@ -897,6 +1023,10 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 			case SQL_TABLE_SIGNAL_CONNECTION:
 				{
 					SignalConnection* signal = static_cast<SignalConnection*> (pRecord) + readedCount;
+					if (signal == nullptr)
+					{
+						break;
+					}
 
 					signal->setIndex(query.value(field++).toInt());
 
@@ -1015,6 +1145,10 @@ int SqlTable::write(void* pRecord, int count, int* key)
 			case SQL_TABLE_DATABASE_INFO:
 				{
 					SqlObjectInfo* info = static_cast<SqlObjectInfo*> (pRecord) + r;
+					if (info == nullptr)
+					{
+						break;
+					}
 
 					query.bindValue(field++, info->objectID());
 					query.bindValue(field++, info->caption());
@@ -1025,6 +1159,10 @@ int SqlTable::write(void* pRecord, int count, int* key)
 			case SQL_TABLE_HISTORY:
 				{
 					SqlHistoryDatabase* history = static_cast<SqlHistoryDatabase*> (pRecord) + r;
+					if (history == nullptr)
+					{
+						break;
+					}
 
 					query.bindValue(field++, history->version());
 					query.bindValue(field++, history->event());
@@ -1035,6 +1173,10 @@ int SqlTable::write(void* pRecord, int count, int* key)
 			case SQL_TABLE_LINEARITY:
 				{
 					LinearityMeasurement* measure = static_cast<LinearityMeasurement*> (pRecord) + r;
+					if (measure == nullptr)
+					{
+						break;
+					}
 
 					measure->setMeasureID(lastKey() + 1);
 
@@ -1087,7 +1229,6 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					measure->setMeasureTime(QDateTime::currentDateTime());
 
 					query.bindValue(field++, measure->measureTimeStr());
-
 				}
 				break;
 
@@ -1109,6 +1250,10 @@ int SqlTable::write(void* pRecord, int count, int* key)
 					}
 
 					LinearityMeasurement* measure = static_cast<LinearityMeasurement*> (pRecord) + r;
+					if (measure == nullptr)
+					{
+						break;
+					}
 
 					query.bindValue(field++, measure->measureID());
 
@@ -1140,6 +1285,10 @@ int SqlTable::write(void* pRecord, int count, int* key)
 			case SQL_TABLE_LINEARITY_ADD_VAL:
 				{
 					LinearityMeasurement* measure = static_cast<LinearityMeasurement*> (pRecord) + r;
+					if (measure == nullptr)
+					{
+						break;
+					}
 
 					query.bindValue(field++, measure->measureID());
 
@@ -1167,6 +1316,10 @@ int SqlTable::write(void* pRecord, int count, int* key)
 			case SQL_TABLE_LINEARITY_POINT:
 				{
 					LinearityPoint* point = static_cast<LinearityPoint*> (pRecord) + r;
+					if (point == nullptr)
+					{
+						break;
+					}
 
 					query.bindValue(field++, point->Index());
 					query.bindValue(field++, point->percent());
@@ -1175,6 +1328,63 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
 			case SQL_TABLE_COMPARATOR:
 				{
+					ComparatorMeasurement* measure = static_cast<ComparatorMeasurement*> (pRecord) + r;
+					if (measure == nullptr)
+					{
+						break;
+					}
+
+					measure->setMeasureID(lastKey() + 1);
+
+					query.bindValue(field++, measure->measureID());
+
+					query.bindValue(field++, measure->filter());
+					query.bindValue(field++, measure->isSignalValid());
+
+					query.bindValue(field++, measure->appSignalID());
+					query.bindValue(field++, measure->customAppSignalID());
+					query.bindValue(field++, measure->caption());
+
+					query.bindValue(field++, measure->moduleSerialNo());
+					query.bindValue(field++, measure->location().equipmentID());
+					query.bindValue(field++, measure->location().rack().index());
+					query.bindValue(field++, measure->location().rack().caption());
+					query.bindValue(field++, measure->location().rack().channel());
+					query.bindValue(field++, measure->location().chassis());
+					query.bindValue(field++, measure->location().module());
+					query.bindValue(field++, measure->location().place());
+
+					query.bindValue(field++, measure->cmpTypeInt());
+
+					query.bindValue(field++, measure->nominal(MEASURE_LIMIT_TYPE_ELECTRIC));
+					query.bindValue(field++, measure->measure(MEASURE_LIMIT_TYPE_ELECTRIC));
+
+					query.bindValue(field++, measure->nominal(MEASURE_LIMIT_TYPE_ENGENEER));
+					query.bindValue(field++, measure->measure(MEASURE_LIMIT_TYPE_ENGENEER));
+
+					query.bindValue(field++, measure->lowLimit(MEASURE_LIMIT_TYPE_ELECTRIC));
+					query.bindValue(field++, measure->highLimit(MEASURE_LIMIT_TYPE_ELECTRIC));
+					query.bindValue(field++, measure->unit(MEASURE_LIMIT_TYPE_ELECTRIC));
+					query.bindValue(field++, measure->limitPrecision(MEASURE_LIMIT_TYPE_ELECTRIC));
+
+					query.bindValue(field++, measure->lowLimit(MEASURE_LIMIT_TYPE_ENGENEER));
+					query.bindValue(field++, measure->highLimit(MEASURE_LIMIT_TYPE_ENGENEER));
+					query.bindValue(field++, measure->unit(MEASURE_LIMIT_TYPE_ENGENEER));
+					query.bindValue(field++, measure->limitPrecision(MEASURE_LIMIT_TYPE_ENGENEER));
+
+					query.bindValue(field++, measure->error(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE));
+					query.bindValue(field++, measure->error(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE));
+					query.bindValue(field++, measure->errorLimit(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_ABSOLUTE));
+					query.bindValue(field++, measure->errorLimit(MEASURE_LIMIT_TYPE_ELECTRIC, MEASURE_ERROR_TYPE_REDUCE));
+
+					query.bindValue(field++, measure->error(MEASURE_LIMIT_TYPE_ENGENEER, MEASURE_ERROR_TYPE_ABSOLUTE));
+					query.bindValue(field++, measure->error(MEASURE_LIMIT_TYPE_ENGENEER, MEASURE_ERROR_TYPE_REDUCE));
+					query.bindValue(field++, measure->errorLimit(MEASURE_LIMIT_TYPE_ENGENEER, MEASURE_ERROR_TYPE_ABSOLUTE));
+					query.bindValue(field++, measure->errorLimit(MEASURE_LIMIT_TYPE_ENGENEER, MEASURE_ERROR_TYPE_REDUCE));
+
+					measure->setMeasureTime(QDateTime::currentDateTime());
+
+					query.bindValue(field++, measure->measureTimeStr());
 				}
 				break;
 
@@ -1212,6 +1422,10 @@ int SqlTable::write(void* pRecord, int count, int* key)
 			case SQL_TABLE_RACK_GROUP:
 				{
 					RackGroup* group = static_cast<RackGroup*> (pRecord) + r;
+					if (group == nullptr)
+					{
+						break;
+					}
 
 					query.bindValue(field++, group->Index());
 					query.bindValue(field++, group->caption());
@@ -1228,6 +1442,10 @@ int SqlTable::write(void* pRecord, int count, int* key)
 			case SQL_TABLE_SIGNAL_CONNECTION:
 				{
 					SignalConnection* signal = static_cast<SignalConnection*> (pRecord) + r;
+					if (signal == nullptr)
+					{
+						break;
+					}
 
 					signal->setIndex(lastKey() + 1);
 					query.bindValue(field++, signal->index());

@@ -1597,7 +1597,7 @@ void ComparatorPropertyDialog::createPropertyList()
 
 		// hysteresis group
 
-		QtProperty *hysteresisGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), comparator().hysteresis().isConst() == true ? tr("Hysteresis - const") : tr("Hysteresis - dynamic"));
+		QtProperty *hysteresisGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), comparator().hysteresis().isConst() == true ? tr("Hysteresis (deadband) - const") : tr("Hysteresis (deadband) - dynamic"));
 
 			if (comparator().hysteresis().isConst() == true)
 			{

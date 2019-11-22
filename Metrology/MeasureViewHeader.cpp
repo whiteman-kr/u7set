@@ -83,27 +83,27 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
 	// Measurements of comparators
 
 	{
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
-		MeasureViewColumn(),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Index"), 100, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Module SN"), 100, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "AppSignalID"), 150, MVC_CMN_SHOW, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "CustomAppSignalID"), 150, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "EquipmentID"), 150, MVC_CMN_HIDE, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Caption"), 200, MVC_CMN_SHOW, Qt::AlignLeft, MVC_CMN_DISABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Rack"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Chassis"), 60, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Module"), 60, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Place"), 60, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Engeneering range"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Electric range"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Type"), 30, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Electric nominal"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Engeneering nominal"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Electric measure"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Engeneering measure"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Error"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Limit of error"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Result"), 100, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Measurement time"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(),
 		MeasureViewColumn(),
 		MeasureViewColumn(),
@@ -389,6 +389,14 @@ void MeasureViewHeader::updateColumnState()
 			break;
 
 		case MEASURE_TYPE_COMPARATOR:
+			{
+				// show columns of engeneering value
+				//
+				bool visibleEngeneering = theOptions.comparator().showEngeneeringValueColumn();
+
+				setColumnVisible(MVC_CMN_C_EN_NOMINAL, visibleEngeneering);
+				setColumnVisible(MVC_CMN_C_EN_MEASURE, visibleEngeneering);
+			}
 			break;
 
 		default:

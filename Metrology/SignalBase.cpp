@@ -67,6 +67,7 @@ void IoSignalParam::clear()
 
 		m_pCalibratorManager = nullptr;
 		m_percent = 0;
+		m_comparatorIndex = -1;
 		m_negativeRange = false;
 		m_tunSignalState = 0;
 
@@ -671,7 +672,7 @@ QString IoSignalParam::engeneeringRangeStr() const
 					const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
 					if (outParam.isValid() == true)
 					{
-						if (inParam.tuningLowBound().toDouble() != outParam.lowEngeneeringUnits() || inParam.tuningHighBound().toDouble() != outParam.highEngeneeringUnits())
+						if (compareFloat(inParam.tuningLowBound().toDouble(), outParam.lowEngeneeringUnits()) == false || compareFloat(inParam.tuningHighBound().toDouble(), outParam.highEngeneeringUnits()) == false)
 						{
 							result += outParam.engeneeringRangeStr();
 						}
@@ -716,6 +717,7 @@ IoSignalParam& IoSignalParam::operator=(const IoSignalParam& from)
 
 		m_pCalibratorManager = from.m_pCalibratorManager;
 		m_percent = from.m_percent;
+		m_comparatorIndex = from.m_comparatorIndex;
 		m_negativeRange  = from.m_negativeRange;
 		m_tunSignalState = from.m_tunSignalState;
 
