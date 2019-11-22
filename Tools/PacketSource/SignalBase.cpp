@@ -684,7 +684,8 @@ QVariant SignalTable::headerData(int section, Qt::Orientation orientation, int r
 
 	if (orientation == Qt::Vertical)
 	{
-		result = QString("%1").arg(section + 1);
+		//result = QString("%1").arg(section + 1);
+		result = QString();
 	}
 
 	return result;
