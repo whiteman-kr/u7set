@@ -389,6 +389,13 @@ void SignalPropertyManager::reloadPropertyBehaviour(DbController* dbController, 
 
 	for (QString row : rows)
 	{
+		row = row.trimmed();
+
+		if (row.isEmpty() == true)
+		{
+			continue;
+		}
+
 		QStringList fields = row.split(';', QString::KeepEmptyParts);
 		trimm(fields);
 

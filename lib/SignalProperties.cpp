@@ -74,6 +74,7 @@ const QString SignalProperties::tuningDefaultValueCaption("TuningDefaultValue");
 const QString SignalProperties::tuningLowBoundCaption("TuningLowBound");
 const QString SignalProperties::tuningHighBoundCaption("TuningHighBound");
 const QString SignalProperties::specificPropertiesStructCaption("SpecificPropertiesStruct");
+const QString SignalProperties::tagsCaption("Tags");
 
 const QString SignalProperties::categoryIdentification("1 Identification");
 const QString SignalProperties::categorySignalType("2 Signal type");
@@ -295,6 +296,9 @@ void SignalProperties::initProperties(bool savePropertyDescription)
 
 	auto byteOrderProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(E::ByteOrder, byteOrderCaption, true, Signal::byteOrder, Signal::setByteOrder, m_signal);
 	byteOrderProperty->setCategory(categoryDataFormat);
+
+	auto tagsProperty = ADD_SIGNAL_PROPERTY_GETTER_SETTER(QString, tagsCaption, true, Signal::tagsStr, Signal::setTagsStr, m_signal);
+	tagsProperty->setCategory(categoryOnlineMonitoringSystem);
 
 	// append signal specific properties
 	//
@@ -826,6 +830,23 @@ bool SignalSpecPropValues::parseValuesFromArray(const QByteArray& protoData)
 void SignalSpecPropValues::append(const SignalSpecPropValue& value)
 {
 	m_specPropValues.append(value);
+}
+
+bool SignalSpecPropValues::replaceName(const QString& oldName, const QString& newName)
+{
+	bool replacingIsOccured = false;
+
+	for(SignalSpecPropValue& specPropValue : m_specPropValues)
+	{
+		if (specPropValue.name() == oldName)
+		{
+			specPropValue.setName(newName);
+			replacingIsOccured = true;
+			break;
+		}
+	}
+
+	return replacingIsOccured;
 }
 
 void SignalSpecPropValues::buildPropNamesMap()

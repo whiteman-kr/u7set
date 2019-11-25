@@ -31,3 +31,5 @@ AdaptiveAperture		; False			; Write		; Write		; Write			; Hide		; Hide			; Hide	
 CoarseAperture			; False			; Write		; Write		; Write			; Hide		; Hide			; Hide			; Hide		; Hide          ; Hide
 FineAperture			; False			; Write		; Write		; Write			; Hide		; Hide			; Hide			; Hide		; Hide          ; Hide
 DecimalPlaces			; False			; Write		; Write		; Write			; Hide		; Hide			; Hide			; Hide		; Hide          ; Hide
+Tags				; False			; Write		; Write		; Write			; Write		; Write			; Write                 ; Write		; Write 	; Write
+UserSpecificPropertiesStruct	; False			; Hide		; Hide		; Hide			; Hide		; Hide			; Hide                  ; Hide          ; Hide          ; Hide

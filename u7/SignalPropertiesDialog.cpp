@@ -264,6 +264,13 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 
 		for (QString row : rows)
 		{
+			row = row.trimmed();
+
+			if (row.isEmpty() == true)
+			{
+				continue;
+			}
+
 			QStringList&& fields = row.split(';', QString::KeepEmptyParts);
 
 			for (QString& field : fields)

@@ -2,6 +2,7 @@
 
 #include <QString>
 #include <QMultiHash>
+#include <set>
 
 #include "Types.h"
 #include "DbStruct.h"
@@ -242,6 +243,30 @@ public:
 
 	//
 
+	QStringList tags() const;
+	std::set<QString> tagsSet() const { return m_tags; }
+	QString tagsStr() const { return tags().join(QChar::LineFeed); }
+
+	void setTags(const QStringList& tags);
+	void setTags(const std::set<QString>& tags) { m_tags = tags; }
+	void setTagsStr(const QString& tagsStr) { setTags(tagsStr.split(QRegExp("\\W+"), QString::SkipEmptyParts)); }
+
+	bool hasTags() const { return m_tags.size() > 0; }
+	bool hasTag(const QString& tag) const { return m_tags.find(tag.toLower().trimmed()) != m_tags.end(); }
+	int tagsCount() const { return static_cast<int>(m_tags.size()); }
+
+	void appendTag(const QString& tag);
+	void appendTags(const QStringList& tags);
+	void appendTags(const std::set<QString>& tags);
+
+	void removeTag(const QString& tag);
+	void removeTags(const QStringList& tags);
+	void removeTags(const std::set<QString>& tags);
+
+	void clearTags();
+
+	//
+
 	void saveProtoData(QByteArray* protoDataArray) const;
 	void saveProtoData(Proto::ProtoAppSignalData* protoData) const;
 
@@ -405,6 +430,8 @@ private:
 	QByteArray m_protoSpecPropValues;					// serialized protobuf message Proto::PropertyValues
 
 	std::shared_ptr<SignalSpecPropValues> m_cachedSpecPropValues;
+
+	std::set<QString> m_tags;
 
 	// Signal fields from database
 	//

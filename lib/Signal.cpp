@@ -549,6 +549,10 @@ void Signal::saveProtoData(Proto::ProtoAppSignalData* protoData) const
 	protoData->set_coarseaperture(m_coarseAperture);
 	protoData->set_fineaperture(m_fineAperture);
 	protoData->set_adaptiveaperture(m_adaptiveAperture);
+
+	//
+
+	protoData->set_tags(tagsStr().toStdString());
 }
 
 void Signal::loadProtoData(const QByteArray& protoDataArray)
@@ -599,6 +603,10 @@ void Signal::loadProtoData(const Proto::ProtoAppSignalData& protoData)
 	m_coarseAperture = protoData.coarseaperture();
 	m_fineAperture = protoData.fineaperture();
 	m_adaptiveAperture = protoData.adaptiveaperture();
+
+	//
+
+	setTagsStr(QString::fromStdString(protoData.tags()));
 }
 
 void Signal::resetAddresses()
@@ -1532,6 +1540,71 @@ bool Signal::setSpecPropValue(const QString& name, const QVariant& qv, bool isEn
 	spv.serializeValuesToArray(&m_protoSpecPropValues);
 
 	return true;
+}
+
+QStringList Signal::tags() const
+{
+	QStringList list;
+
+	for(const QString& tag : m_tags)
+	{
+		list.append(tag);
+	}
+
+	return list;
+}
+
+void Signal::setTags(const QStringList& tags)
+{
+	clearTags();
+	appendTags(tags);
+}
+
+void Signal::appendTag(const QString& tag)
+{
+	m_tags.insert(tag.toLower().trimmed());
+}
+
+void Signal::appendTags(const QStringList& tags)
+{
+	for(const QString& tag : tags)
+	{
+		appendTag(tag);
+	}
+}
+
+void Signal::appendTags(const std::set<QString>& tags)
+{
+	for(const QString& tag : tags)
+	{
+		appendTag(tag);
+	}
+}
+
+void Signal::removeTag(const QString& tag)
+{
+	m_tags.erase(tag.toLower().trimmed());
+}
+
+void Signal::removeTags(const QStringList& tags)
+{
+	for(const QString& tag : tags)
+	{
+		removeTag(tag);
+	}
+}
+
+void Signal::removeTags(const std::set<QString>& tags)
+{
+	for(const QString& tag : tags)
+	{
+		removeTag(tag);
+	}
+}
+
+void Signal::clearTags()
+{
+	m_tags.clear();
 }
 
 // --------------------------------------------------------------------------------------------------------

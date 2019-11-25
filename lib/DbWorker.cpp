@@ -319,7 +319,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0299.sql", "Upgrade to version 299, be_to_le_16si->be_to_le_16ui, le_to_be_16si->le_to_be_16ui"},
 	{":/DatabaseUpgrade/Upgrade0300.sql", "Upgrade to version 300, Added Certificate property to all presets"},
 	{":/DatabaseUpgrade/Upgrade0301.sql", "Upgrade to version 301, FSC Chassis preset has LM compatibility table"},
-//	{":/DatabaseUpgrade/Upgrade0302.sql", "Upgrade to version 302, fixing misprint EngEneeringUnits -> EngIneeringUnits "},
+	{":/DatabaseUpgrade/Upgrade0302.sql", "Upgrade to version 302, fixing misprint EngEneeringUnits -> EngIneeringUnits "},
 };
 
 int DbWorker::counter = 0;
@@ -6997,6 +6997,9 @@ bool DbWorker::processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersi
 	{
 	case 215:
 		return processingAfterDatabaseUpgrade0215(db, errorMessage);
+
+	case 302:
+		return processingAfterDatabaseUpgrade0302(db, errorMessage);
 	}
 
 	return true;
@@ -7289,3 +7292,92 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 
 	return result;
 }
+
+bool DbWorker::processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* errorMessage)
+{
+	TEST_PTR_RETURN_FALSE(errorMessage);
+
+	QSqlQuery q(db);
+
+	bool result = q.exec(QString("SELECT SignalInstanceID, SpecPropValues FROM SignalInstance"));
+
+	if (result == false)
+	{
+		*errorMessage = QString(tr("Can't retrieve signal instances specific properties values data."));
+		return false;
+	}
+
+	int parseErrorCount = 0;
+	int updateErrorCount = 0;
+
+	while(q.next() == true)
+	{
+		int signalInstanceID = q.value(0).toInt();
+		QByteArray specPropValuesData = q.value(1).toByteArray();
+
+		if (specPropValuesData.isEmpty() == true)
+		{
+			continue;
+		}
+
+		SignalSpecPropValues spv;
+
+		bool res = spv.parseValuesFromArray(specPropValuesData);
+
+		if (res == false)
+		{
+			if (parseErrorCount < 10)
+			{
+				*errorMessage += QString(tr("SignalInstance %1 specPropValues data parsing error\n"));
+			}
+
+			parseErrorCount++;
+			continue;
+		}
+
+		bool replacingIsOccured = spv.replaceName("HighEngeneeringUnits", "HighEngineeringUnits");
+		replacingIsOccured |= spv.replaceName("LowEngeneeringUnits", "LowEngineeringUnits");
+
+		if (replacingIsOccured == true)
+		{
+			QByteArray newSpecPropValuesData;
+
+			spv.serializeValuesToArray(&newSpecPropValuesData);
+
+			QString queryStr = QString("UPDATE SignalInstance SET SpecPropValues = %1 WHERE SignalInstanceID = %2").
+																arg(toSqlByteaStr(newSpecPropValuesData)).arg(signalInstanceID);
+			QSqlQuery update(db);
+
+			bool updateRes = update.exec(queryStr);
+
+			if (updateRes == false)
+			{
+				if (updateErrorCount < 10)
+				{
+					*errorMessage += QString(tr("SignalInstance %1 specPropValues updating error\n"));
+				}
+
+				updateErrorCount++;
+				continue;
+			}
+		}
+	}
+
+	if (parseErrorCount > 0)
+	{
+		*errorMessage += QString(tr("Total parsing errors: %1\n")).arg(parseErrorCount);
+
+		result = false;
+	}
+
+	if (updateErrorCount > 0)
+	{
+
+		*errorMessage += QString(tr("Total updating errors: %1\n")).arg(updateErrorCount);
+
+		result = false;
+	}
+
+	return result;
+}
+

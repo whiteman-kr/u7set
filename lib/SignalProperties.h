@@ -19,6 +19,8 @@ public:
 	bool setAnyValue(const QString& name, const QVariant& value);
 
 	QString name() const { return m_name; }
+	void setName(const QString& name) { m_name = name; }
+
 	QVariant::Type type() const { return m_value.type(); }
 	QVariant value() const { return m_value; }
 	bool isEnum() const {return m_isEnum; }
@@ -65,6 +67,8 @@ public:
 	const QVector<SignalSpecPropValue>& values() const { return m_specPropValues; }
 
 	void append(const SignalSpecPropValue& value);
+
+	bool replaceName(const QString& oldName, const QString& newName);			// returns true if replacing is occured
 
 private:
 	void buildPropNamesMap();
@@ -158,6 +162,7 @@ public:
 	static const QString tuningLowBoundCaption;
 	static const QString tuningHighBoundCaption;
 	static const QString specificPropertiesStructCaption;
+	static const QString tagsCaption;
 
 	static const QString categoryIdentification;
 	static const QString categorySignalType;
