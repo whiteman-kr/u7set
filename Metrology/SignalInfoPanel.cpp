@@ -270,7 +270,7 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 	{
 		if (param.isInput() == true || param.isOutput() == true)
 		{
-			double electric = conversion(state.value(), CT_ENGENEER_TO_ELECTRIC, param);
+			double electric = conversion(state.value(), CT_ENGINEER_TO_ELECTRIC, param);
 			stateStr.append(" = " + QString::number(electric, 10, param.electricPrecision()));
 
 			if (param.electricUnitStr().isEmpty() == false)

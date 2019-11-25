@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>RadICS Platform Support Software</DisplayName>
+    <Description>Install RadICS Platform Support Software</Description>
+    <ReleaseDate>2019-11-19</ReleaseDate>
+    <Version>1.0.0</Version>
+    <Checkable>false</Checkable>
+    <Script>installscript.qs</Script>
+</Package>

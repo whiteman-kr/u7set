@@ -143,12 +143,30 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::FontRole)
 	{
-		if (	indexColumn == MVC_CMN_L_APP_ID || indexColumn == MVC_CMN_L_ERROR_RESULT)
+		switch(m_measureType)
 		{
-			return theOptions.measureView().fontBold();
-		}
+			case MEASURE_TYPE_LINEARITY:
 
-		return theOptions.measureView().font();
+				if (indexColumn == MVC_CMN_L_APP_ID || indexColumn == MVC_CMN_L_ERROR_RESULT)
+				{
+					return theOptions.measureView().fontBold();
+				}
+
+				break;
+
+			case MEASURE_TYPE_COMPARATOR:
+
+				if (indexColumn == MVC_CMN_C_APP_ID || indexColumn == MVC_CMN_C_ERROR_RESULT)
+				{
+					return theOptions.measureView().fontBold();
+				}
+
+				break;
+
+			default:
+				return theOptions.measureView().font();
+				break;
+		}
 	}
 
 	if (role == Qt::TextColorRole)
@@ -158,10 +176,30 @@ QVariant MeasureTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::BackgroundColorRole)
 	{
-		if (indexColumn == MVC_CMN_L_ERROR_RESULT)
+		switch(m_measureType)
 		{
-			return backgroundColor(indexRow, indexColumn);
+			case MEASURE_TYPE_LINEARITY:
+
+				if (indexColumn == MVC_CMN_L_ERROR_RESULT)
+				{
+					return backgroundColor(indexRow, indexColumn);
+				}
+
+				break;
+
+			case MEASURE_TYPE_COMPARATOR:
+
+				if (indexColumn == MVC_CMN_C_ERROR_RESULT)
+				{
+					return backgroundColor(indexRow, indexColumn);
+				}
+
+				break;
+
+			default:
+				return QVariant();
 		}
+
 	}
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
@@ -182,15 +220,15 @@ QColor MeasureTable::backgroundColor(int row, int column) const
 		return result;
 	}
 
-	if (column != MVC_CMN_L_ERROR_RESULT)
-	{
-		return result;
-	}
-
 	switch(m_measureType)
 	{
 		case MEASURE_TYPE_LINEARITY:
 			{
+				if (column != MVC_CMN_L_ERROR_RESULT)
+				{
+					break;
+				}
+
 				LinearityMeasurement* pLinearityMeasurement = static_cast<LinearityMeasurement*> (m_measureBase.measurement(row));
 				if (pLinearityMeasurement == nullptr)
 				{
@@ -213,7 +251,31 @@ QColor MeasureTable::backgroundColor(int row, int column) const
 			break;
 
 		case MEASURE_TYPE_COMPARATOR:
+			{
+				if (column != MVC_CMN_C_ERROR_RESULT)
+				{
+					break;
+				}
 
+				ComparatorMeasurement* pComparatorMeasurement = static_cast<ComparatorMeasurement*> (m_measureBase.measurement(row));
+				if (pComparatorMeasurement == nullptr)
+				{
+					break;
+				}
+
+				if (pComparatorMeasurement->isSignalValid() == false)
+				{
+					result = theOptions.measureView().colorErrorLimit();
+					break;
+				}
+
+				if (pComparatorMeasurement->errorResult() != MEASURE_ERROR_RESULT_OK)
+				{
+					result = theOptions.measureView().colorErrorLimit();
+					break;
+				}
+
+			}
 			break;
 
 		default:
@@ -383,7 +445,13 @@ QString MeasureTable::textComparator(int row, int column) const
 		return QString();
 	}
 
-	Measurement* m = m_measureBase.measurement(row);
+	MeasureViewColumn* pColumn = m_header.column(column);
+	if (pColumn == nullptr)
+	{
+		return QString();
+	}
+
+	ComparatorMeasurement* m = static_cast<ComparatorMeasurement*> (m_measureBase.measurement(row));
 	if (m == nullptr)
 	{
 		return QString();
@@ -393,13 +461,52 @@ QString MeasureTable::textComparator(int row, int column) const
 
 	switch(column)
 	{
-		case 0:
+		case MVC_CMN_C_INDEX:					result = QString::number(m->measureID()); break;
 
-			break;
+		case MVC_CMN_C_MODULE_SN:				result = m->moduleSerialNoStr(); break;
+		case MVC_CMN_C_APP_ID:					result = m->appSignalID(); break;
+		case MVC_CMN_C_CUSTOM_ID:				result = m->customAppSignalID(); break;
+		case MVC_CMN_C_EQUIPMENT_ID:			result = m->location().equipmentID(); break;
+		case MVC_CMN_C_NAME:					result = m->caption(); break;
 
-		default:
-			result.clear();
-			break;
+		case MVC_CMN_C_RACK:					result = m->location().rack().caption(); break;
+		case MVC_CMN_C_CHASSIS:					result = m->location().chassisStr(); break;
+		case MVC_CMN_C_MODULE:					result = m->location().moduleStr(); break;
+		case MVC_CMN_C_PLACE:					result = m->location().placeStr(); break;
+
+		case MVC_CMN_C_CMP_TYPE:				result = m->cmpTypeStr(); break;
+
+		case MVC_CMN_C_EL_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
+	    case MVC_CMN_C_EN_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_ENGINEER); break;
+
+		case MVC_CMN_C_EL_MEASURE:				result = m->measureStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
+	    case MVC_CMN_C_EN_MEASURE:				result = m->measureStr(MEASURE_LIMIT_TYPE_ENGINEER); break;
+
+		case MVC_CMN_C_EL_RANGE:				result = m->limitStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
+	    case MVC_CMN_C_EN_RANGE:				result = m->limitStr(MEASURE_LIMIT_TYPE_ENGINEER); break;
+
+		case MVC_CMN_C_ERROR:					result = m->errorStr(); break;
+		case MVC_CMN_C_ERROR_LIMIT:				result = m->errorLimitStr(); break;
+		case MVC_CMN_C_ERROR_RESULT:			result = m->errorResultStr(); break;
+
+		case MVC_CMN_C_MEASUREMENT_TIME:		result = m->measureTimeStr(); break;
+
+		default:								result.clear(); break;
+	}
+
+	if (row > 0)
+	{
+		Measurement* prev_m = m_measureBase.measurement(row - 1);
+		if (prev_m != nullptr)
+		{
+			if (prev_m->signalHash() == m->signalHash())
+			{
+				if (pColumn->enableDuplicate() == false)
+				{
+					result.clear();
+				}
+			}
+		}
 	}
 
 	return result;

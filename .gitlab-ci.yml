@@ -122,10 +122,17 @@ windows build job:
     - "del /F /Q bin\\release\\SimulatorConsole.exe"
     - "del /F /Q bin\\release\\TuningIPEN.exe"
     - "del /F /Q bin\\release\\u7databasetests.exe"
+
+#Build Installer
+    - "echo ----------------------------------------------"
+    - "echo               Build Installer"
+    - "echo ----------------------------------------------"
+    - "call u7setinstall\\createinstall.bat"
   
   artifacts:
     name: "u7set_0.8.%CI_PIPELINE_ID%_%CI_BUILD_REF_SLUG%_%CI_COMMIT_SHA%"
     paths:
+      - bin/*.exe
       - bin/release/*.exe
       - bin/release/*.dll
       - bin/release/bearer/*.dll

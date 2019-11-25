@@ -535,6 +535,17 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					appendProperty(item, page, CO_PARAM_ERROR_TYPE);
 					errorGroup->addSubProperty(item);
 
+					item = manager->addProperty(QtVariantPropertyManager::enumTypeId(), ComparatorParamName[CO_PARAM_SHOW_ERROR_FROM_LIMIT]);
+					QStringList showErrorFromLimitList;
+					for(int t = 0; t < MEASURE_LIMIT_TYPE_COUNT; t++)
+					{
+						showErrorFromLimitList.append(MeasureLimitType[t]);
+					}
+					item->setAttribute(QLatin1String("enumNames"), showErrorFromLimitList);
+					item->setValue(m_options.comparator().showErrorFromLimit());
+					appendProperty(item, page, CO_PARAM_SHOW_ERROR_FROM_LIMIT);
+					errorGroup->addSubProperty(item);
+
 				QtProperty *permissionsGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Permissions"));
 
 					item = manager->addProperty(QVariant::Bool, ComparatorParamName[CO_PARAM_ENABLE_HYSTERESIS]);
@@ -550,16 +561,19 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					appendProperty(item, page, CO_PARAM_COMPARATOR_INDEX);
 					permissionsGroup->addSubProperty(item);
 
-					item = manager->addProperty(QVariant::Bool, ComparatorParamName[CO_PARAM_ADDITIONAL_CHECK]);
-					item->setValue(m_options.comparator().enableAdditionalCheck());
-					appendProperty(item, page, CO_PARAM_ADDITIONAL_CHECK);
-					permissionsGroup->addSubProperty(item);
 
+				QtProperty *showcolumnGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Type of displaying measurement list"));
+
+					item = manager->addProperty(QVariant::Bool, ComparatorParamName[CO_PARAM_SHOW_ENGINEERING_VALUE]);
+					item->setValue(m_options.comparator().showEngeneeringValueColumn());
+					appendProperty(item, page, CO_PARAM_SHOW_ENGINEERING_VALUE);
+					showcolumnGroup->addSubProperty(item);
 
 				editor->setFactoryForManager(manager, factory);
 
 				editor->addProperty(errorGroup);
 				editor->addProperty(permissionsGroup);
+				editor->addProperty(showcolumnGroup);
 			}
 			break;
 
@@ -1067,10 +1081,10 @@ void OptionsDialog::applyProperty()
 
 				switch (page)
 				{
-					case OPTION_PAGE_CONFIG_SOCKET: socketType = SOCKET_TYPE_CONFIG;	break;
-					case OPTION_PAGE_SIGNAL_SOCKET: socketType = SOCKET_TYPE_SIGNAL;	break;
-					case OPTION_PAGE_TUNING_SOCKET: socketType = SOCKET_TYPE_TUNING;	break;
-					default:						socketType = -1;					break;
+					case OPTION_PAGE_CONFIG_SOCKET: socketType = SOCKET_TYPE_CONFIG;											break;
+					case OPTION_PAGE_SIGNAL_SOCKET: socketType = SOCKET_TYPE_SIGNAL;											break;
+					case OPTION_PAGE_TUNING_SOCKET: socketType = SOCKET_TYPE_TUNING;											break;
+					default:						socketType = -1;															break;
 				}
 
 				if (socketType < 0 || socketType >= SOCKET_TYPE_COUNT)
@@ -1101,29 +1115,29 @@ void OptionsDialog::applyProperty()
 			{
 				switch(param)
 				{
-					case LO_PARAM_ERROR_LIMIT:				m_options.linearity().setErrorLimit(value.toDouble());			break;
+					case LO_PARAM_ERROR_LIMIT:				m_options.linearity().setErrorLimit(value.toDouble());				break;
 					case LO_PARAM_ERROR_TYPE:				m_options.linearity().setErrorType(value.toInt());
-															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;	break;
+															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;		break;
 					case LO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.linearity().setShowErrorFromLimit(value.toInt());
-															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;	break;
-					case LO_PARAM_MEASURE_TIME:				m_options.linearity().setMeasureTimeInPoint(value.toInt());		break;
-					case LO_PARAM_MEASURE_IN_POINT:			m_options.linearity().setMeasureCountInPoint(value.toInt());	break;
+															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;		break;
+					case LO_PARAM_MEASURE_TIME:				m_options.linearity().setMeasureTimeInPoint(value.toInt());			break;
+					case LO_PARAM_MEASURE_IN_POINT:			m_options.linearity().setMeasureCountInPoint(value.toInt());		break;
 					case LO_PARAM_RANGE_TYPE:				m_options.linearity().setRangeType(value.toInt());
 															m_options.linearity().recalcPoints();
-															updateLinearityPage(false);										break;
+															updateLinearityPage(false);											break;
 					case LO_PARAM_POINT_COUNT:				m_options.linearity().recalcPoints(value.toInt());
-															updateLinearityPage(false);										break;
+															updateLinearityPage(false);											break;
 					case LO_PARAM_LOW_RANGE:				m_options.linearity().setLowLimitRange(value.toDouble());
 															m_options.linearity().recalcPoints();
-															updateLinearityPage(false);										break;
+															updateLinearityPage(false);											break;
 					case LO_PARAM_HIGH_RANGE:				m_options.linearity().setHighLimitRange(value.toDouble());
 															m_options.linearity().recalcPoints();
-															updateLinearityPage(false);										break;
-					case LO_PARAM_VALUE_POINTS:				setActivePage(OPTION_PAGE_LINEARITY_POINT);						break;
+															updateLinearityPage(false);											break;
+					case LO_PARAM_VALUE_POINTS:				setActivePage(OPTION_PAGE_LINEARITY_POINT);							break;
 					case LO_PARAM_LIST_TYPE:				m_options.linearity().setViewType(value.toInt());
-															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;	break;
+															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;		break;
 					case LO_PARAM_SHOW_ENGINEERING_VALUE:	m_options.linearity().setShowPhyscalValueColumn(value.toBool());
-															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;	break;
+															m_options.m_updateColumnView[MEASURE_TYPE_LINEARITY] = true;		break;
 					default:								assert(0);
 				}
 			}
@@ -1133,13 +1147,16 @@ void OptionsDialog::applyProperty()
 			{
 				switch(param)
 				{
-					case CO_PARAM_ERROR_LIMIT:			m_options.comparator().setErrorLimit(value.toDouble());				break;
-					case CO_PARAM_START_VALUE:			m_options.comparator().setStartValueForCompare(value.toDouble());	break;
-					case CO_PARAM_ERROR_TYPE:			m_options.comparator().setErrorType(value.toInt());					break;
-					case CO_PARAM_ENABLE_HYSTERESIS:	m_options.comparator().setEnableMeasureHysteresis(value.toBool());	break;
-					case CO_PARAM_COMPARATOR_INDEX:		m_options.comparator().setStartComparatorIndex(value.toInt() - 1);	break;
-					case CO_PARAM_ADDITIONAL_CHECK:		m_options.comparator().setEnableAdditionalCheck(value.toBool());	break;
-					default:							assert(0);
+					case CO_PARAM_ERROR_LIMIT:				m_options.comparator().setErrorLimit(value.toDouble());				break;
+					case CO_PARAM_START_VALUE:				m_options.comparator().setStartValueForCompare(value.toDouble());	break;
+					case CO_PARAM_ERROR_TYPE:				m_options.comparator().setErrorType(value.toInt());					break;
+					case CO_PARAM_SHOW_ERROR_FROM_LIMIT:	m_options.comparator().setShowErrorFromLimit(value.toInt());
+															m_options.m_updateColumnView[MEASURE_TYPE_COMPARATOR] = true;		break;
+					case CO_PARAM_ENABLE_HYSTERESIS:		m_options.comparator().setEnableMeasureHysteresis(value.toBool());	break;
+					case CO_PARAM_COMPARATOR_INDEX:			m_options.comparator().setStartComparatorIndex(value.toInt() - 1);	break;
+					case CO_PARAM_SHOW_ENGINEERING_VALUE:	m_options.comparator().setShowPhyscalValueColumn(value.toBool());
+															m_options.m_updateColumnView[MEASURE_TYPE_COMPARATOR] = true;		break;
+					default:								assert(0);
 				}
 			}
 			break;
@@ -1148,9 +1165,9 @@ void OptionsDialog::applyProperty()
 			{
 				switch(param)
 				{
-					case MO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.module().setMeasureEntireModule(value.toBool());		break;
-					case MO_PARAM_WARN_IF_MEASURED:			m_options.module().setWarningIfMeasured(value.toBool());		break;
-					case MO_PARAM_SUFFIX_SN:				m_options.module().setSuffixSN(value.toString());				break;
+					case MO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.module().setMeasureEntireModule(value.toBool());			break;
+					case MO_PARAM_WARN_IF_MEASURED:			m_options.module().setWarningIfMeasured(value.toBool());			break;
+					case MO_PARAM_SUFFIX_SN:				m_options.module().setSuffixSN(value.toString());					break;
 					default:								assert(0);
 				}
 			}
@@ -1197,12 +1214,12 @@ void OptionsDialog::applyProperty()
 
 			switch(param)
 			{
-				case CIO_PARAM_FONT:					m_options.comparatorInfo().font().fromString(value.toString());				break;
-				case CIO_PARAM_DISPLAYING_STATE_FALSE:	m_options.comparatorInfo().setDisplayingStateFalse(value.toString());		break;
-				case CIO_PARAM_DISPLAYING_STATE_TRUE:	m_options.comparatorInfo().setDisplayingStateTrue(value.toString());		break;
-				case CIO_PARAM_COLOR_STATE_FALSE:		m_options.comparatorInfo().setColorStateFalse(QColor(value.toString()));	break;
-				case CIO_PARAM_COLOR_STATE_TRUE:		m_options.comparatorInfo().setColorStateTrue(QColor(value.toString()));		break;
-				case CIO_PARAM_TIME_FOR_UPDATE:			m_options.comparatorInfo().setTimeForUpdate(value.toInt());					break;
+				case CIO_PARAM_FONT:					m_options.comparatorInfo().font().fromString(value.toString());			break;
+				case CIO_PARAM_DISPLAYING_STATE_FALSE:	m_options.comparatorInfo().setDisplayingStateFalse(value.toString());	break;
+				case CIO_PARAM_DISPLAYING_STATE_TRUE:	m_options.comparatorInfo().setDisplayingStateTrue(value.toString());	break;
+				case CIO_PARAM_COLOR_STATE_FALSE:		m_options.comparatorInfo().setColorStateFalse(QColor(value.toString()));break;
+				case CIO_PARAM_COLOR_STATE_TRUE:		m_options.comparatorInfo().setColorStateTrue(QColor(value.toString()));	break;
+				case CIO_PARAM_TIME_FOR_UPDATE:			m_options.comparatorInfo().setTimeForUpdate(value.toInt());				break;
 				default:								assert(0);
 			}
 
@@ -1212,8 +1229,8 @@ void OptionsDialog::applyProperty()
 			{
 				switch(param)
 				{
-					case DBO_PARAM_PATH:				m_options.database().setPath(value.toString());		break;
-					case DBO_PARAM_TYPE:				m_options.database().setType(value.toBool());		break;
+					case DBO_PARAM_PATH:				m_options.database().setPath(value.toString());							break;
+					case DBO_PARAM_TYPE:				m_options.database().setType(value.toBool());							break;
 					default:							assert(0);
 				}
 			}
@@ -1223,9 +1240,9 @@ void OptionsDialog::applyProperty()
 			{
 				switch(param)
 				{
-					case BUO_PARAM_ON_START:			m_options.backup().setOnStart(value.toBool());		break;
-					case BUO_PARAM_ON_EXIT:				m_options.backup().setOnExit(value.toBool());		break;
-					case BUO_PARAM_PATH:				m_options.backup().setPath(value.toString());		break;
+					case BUO_PARAM_ON_START:			m_options.backup().setOnStart(value.toBool());							break;
+					case BUO_PARAM_ON_EXIT:				m_options.backup().setOnExit(value.toBool());							break;
+					case BUO_PARAM_PATH:				m_options.backup().setPath(value.toString());							break;
 					default:							assert(0);
 				}
 			}

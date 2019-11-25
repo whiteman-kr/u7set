@@ -1,4 +1,4 @@
-#include "FindSignalTextPanel.h"
+#include "FindSignalPanel.h"
 
 #include <QApplication>
 #include <QSettings>
@@ -9,6 +9,7 @@
 #include <QClipboard>
 
 #include "MainWindow.h"
+#include "SignalMask.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -21,12 +22,10 @@ FindItem::FindItem()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-FindItem::FindItem(int row, int column, const QString& text, int beginPos, int endPos) :
+FindItem::FindItem(int row, int column, const QString& text) :
 	m_row (row) ,
 	m_column (column) ,
-	m_text (text) ,
-	m_beginPos (beginPos) ,
-	m_endPos (endPos)
+	m_text (text)
 {
 
 }
@@ -40,9 +39,6 @@ FindItem& FindItem::operator=(const FindItem& from)
 
 	m_text = from.m_text;
 
-	m_beginPos = from.m_beginPos;
-	m_endPos = from.m_endPos;
-
 	return *this;
 }
 
@@ -50,79 +46,34 @@ FindItem& FindItem::operator=(const FindItem& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-FindTextDelegate::FindTextDelegate(QObject *parent) :
-	QStyledItemDelegate(parent)
+FindSignalTable::FindSignalTable(QObject*)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindTextDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
-{
-	QRect textRect = option.rect;
-	QRect selectTextRect;
-	textRect.adjust(6, 1, 0, -1);
-
-	FindItem item = qvariant_cast<FindItem>(index.data(Qt::UserRole));
-
-	if ((option.state & QStyle::State_Selected) != 0)
-	{
-//			if ((option.state & QStyle::State_HasFocus) != 0)
-//			{
-			painter->fillRect(option.rect, option.palette.highlight());
-//			}
-//			else
-//			{
-//				painter->fillRect(option.rect, option.palette.window());
-//			}
-	}
-
-	QString offerText = item.text().left(item.beginPos());
-	QString selectText = item.text().mid(item.beginPos(), item.endPos() - item.beginPos());
-
-	QSize offerTextSize = option.fontMetrics.size(Qt::TextSingleLine, offerText);
-	QSize selectTextSize = option.fontMetrics.size(Qt::TextSingleLine, selectText);
-
-	selectTextRect.setRect(option.rect.left() + offerTextSize.width() + 6, option.rect.top() + 2, selectTextSize.width() + 1, selectTextSize.height() - 2);
-	painter->fillRect(selectTextRect, QColor(0xFF, 0xF0, 0x0F));
-
-	painter->setRenderHint(QPainter::TextAntialiasing);
-	painter->setPen(option.palette.text().color());
-	painter->drawText(textRect, Qt::AlignLeft, item.text());
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
-FindSignalTextTable::FindSignalTextTable(QObject*)
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-FindSignalTextTable::~FindSignalTextTable()
+FindSignalTable::~FindSignalTable()
 {
 	m_findItemList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int FindSignalTextTable::columnCount(const QModelIndex&) const
+int FindSignalTable::columnCount(const QModelIndex&) const
 {
-	return FIND_SIGNAL_TEXT_COLUMN_COUNT;
+	return FIND_SIGNAL_COLUMN_COUNT;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int FindSignalTextTable::rowCount(const QModelIndex&) const
+int FindSignalTable::rowCount(const QModelIndex&) const
 {
 	return m_findItemList.count();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QVariant FindSignalTextTable::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant FindSignalTable::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (role != Qt::DisplayRole)
 	{
@@ -133,7 +84,7 @@ QVariant FindSignalTextTable::headerData(int section, Qt::Orientation orientatio
 
 	if (orientation == Qt::Horizontal)
 	{
-		if (section >= 0 && section < FIND_SIGNAL_TEXT_COLUMN_COUNT)
+		if (section >= 0 && section < FIND_SIGNAL_COLUMN_COUNT)
 		{
 			result = FindSignalTextColumn[section];
 		}
@@ -149,7 +100,7 @@ QVariant FindSignalTextTable::headerData(int section, Qt::Orientation orientatio
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QVariant FindSignalTextTable::data(const QModelIndex &index, int role) const
+QVariant FindSignalTable::data(const QModelIndex &index, int role) const
 {
 	if (index.isValid() == false)
 	{
@@ -163,7 +114,7 @@ QVariant FindSignalTextTable::data(const QModelIndex &index, int role) const
 	}
 
 	int column = index.column();
-	if (column < 0 || column > FIND_SIGNAL_TEXT_COLUMN_COUNT)
+	if (column < 0 || column > FIND_SIGNAL_COLUMN_COUNT)
 	{
 		return QVariant();
 	}
@@ -175,7 +126,7 @@ QVariant FindSignalTextTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::TextColorRole)
 	{
-		if (column == FIND_SIGNAL_TEXT_COLUMN_ROW)
+		if (column == FIND_SIGNAL_COLUMN_ROW)
 		{
 			return QColor(Qt::lightGray);
 		}
@@ -200,14 +151,14 @@ QVariant FindSignalTextTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString FindSignalTextTable::text(int row, int column) const
+QString FindSignalTable::text(int row, int column) const
 {
 	if (row < 0 || row >= m_findItemList.count())
 	{
 		return QString();
 	}
 
-	if (column < 0 || column > FIND_SIGNAL_TEXT_COLUMN_COUNT)
+	if (column < 0 || column > FIND_SIGNAL_COLUMN_COUNT)
 	{
 		return QString();
 	}
@@ -218,8 +169,8 @@ QString FindSignalTextTable::text(int row, int column) const
 
 	switch (column)
 	{
-		case FIND_SIGNAL_TEXT_COLUMN_ROW:	result = QString::number(item.row() + 1);	break;
-		case FIND_SIGNAL_TEXT_COLUMN_TEXT:	result = item.text();						break;
+		case FIND_SIGNAL_COLUMN_ROW:	result = QString::number(item.row() + 1);	break;
+		case FIND_SIGNAL_COLUMN_TEXT:	result = item.text();						break;
 		default:						assert(0);
 	}
 
@@ -229,7 +180,7 @@ QString FindSignalTextTable::text(int row, int column) const
 // -------------------------------------------------------------------------------------------------------------------
 
 
-FindItem FindSignalTextTable::at(int index) const
+FindItem FindSignalTable::at(int index) const
 {
 	if (index < 0 || index >= count())
 	{
@@ -241,7 +192,7 @@ FindItem FindSignalTextTable::at(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindSignalTextTable::set(const QList<FindItem> list_add)
+void FindSignalTable::set(const QList<FindItem> list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -258,7 +209,7 @@ void FindSignalTextTable::set(const QList<FindItem> list_add)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindSignalTextTable::clear()
+void FindSignalTable::clear()
 {
 	int count = m_findItemList.count();
 	if (count == 0)
@@ -277,7 +228,7 @@ void FindSignalTextTable::clear()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-FindSignalTextPanel::FindSignalTextPanel(QWidget* parent) :
+FindSignalPanel::FindSignalPanel(QWidget* parent) :
 	QDockWidget(parent)
 {
 	m_pMainWindow = dynamic_cast<QMainWindow*> (parent);
@@ -286,7 +237,7 @@ FindSignalTextPanel::FindSignalTextPanel(QWidget* parent) :
 		return;
 	}
 
-	setWindowTitle("Search signal text panel");
+	setWindowTitle("Search signal panel");
 	setObjectName(windowTitle());
 	loadSettings();
 
@@ -296,13 +247,13 @@ FindSignalTextPanel::FindSignalTextPanel(QWidget* parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-FindSignalTextPanel::~FindSignalTextPanel()
+FindSignalPanel::~FindSignalPanel()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindSignalTextPanel::createInterface()
+void FindSignalPanel::createInterface()
 {
 	m_pFindWindow = new QMainWindow;
 
@@ -314,7 +265,7 @@ void FindSignalTextPanel::createInterface()
 	toolBar->addWidget(label);
 	toolBar->addWidget(m_findTextEdit);
 	QAction* action = toolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
-	connect(action, &QAction::triggered, this, &FindSignalTextPanel::find);
+	connect(action, &QAction::triggered, this, &FindSignalPanel::find);
 
 	toolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
 	toolBar->setWindowTitle(tr("Search signal text ToolBar"));
@@ -327,13 +278,10 @@ void FindSignalTextPanel::createInterface()
 
 	m_pFindWindow->setCentralWidget(m_pView);
 
-	m_pView->setColumnWidth(FIND_SIGNAL_TEXT_COLUMN_ROW, FIND_SIGNAL_TEXT_COLUMN_ROW_WIDTH);
+	m_pView->setColumnWidth(FIND_SIGNAL_COLUMN_ROW, FIND_SIGNAL_COLUMN_ROW_WIDTH);
 
-	connect(m_pView, &QTableView::clicked, this, &FindSignalTextPanel::selectItemInSignalView);
+	connect(m_pView, &QTableView::clicked, this, &FindSignalPanel::selectItemInSignalView);
 	m_pView->installEventFilter(this);
-
-	FindTextDelegate* textDelegate = new FindTextDelegate(this);
-	m_pView->setItemDelegateForColumn(FIND_SIGNAL_TEXT_COLUMN_TEXT, textDelegate);
 
 	m_pView->horizontalHeader()->hide();
 	m_pView->verticalHeader()->hide();
@@ -350,7 +298,7 @@ void FindSignalTextPanel::createInterface()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindSignalTextPanel::createContextMenu()
+void FindSignalPanel::createContextMenu()
 {
 	// create context menu
 	//
@@ -366,18 +314,18 @@ void FindSignalTextPanel::createContextMenu()
 	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
 	m_pSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
 
-	connect(m_pCopyAction, &QAction::triggered, this, &FindSignalTextPanel::copy);
-	connect(m_pSelectAllAction, &QAction::triggered, this, &FindSignalTextPanel::selectAll);
+	connect(m_pCopyAction, &QAction::triggered, this, &FindSignalPanel::copy);
+	connect(m_pSelectAllAction, &QAction::triggered, this, &FindSignalPanel::selectAll);
 
 	// init context menu
 	//
 	m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &FindSignalTextPanel::onContextMenu);
+	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &FindSignalPanel::onContextMenu);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool FindSignalTextPanel::event(QEvent* e)
+bool FindSignalPanel::event(QEvent* e)
 {
 	if (e->type() == QEvent::Hide)
 	{
@@ -398,7 +346,7 @@ bool FindSignalTextPanel::event(QEvent* e)
 	{
 		QResizeEvent* resizeEvent = static_cast<QResizeEvent*>(e);
 
-		m_pView->setColumnWidth(FIND_SIGNAL_TEXT_COLUMN_TEXT, resizeEvent->size().width() - FIND_SIGNAL_TEXT_COLUMN_ROW_WIDTH - 20);
+		m_pView->setColumnWidth(FIND_SIGNAL_COLUMN_TEXT, resizeEvent->size().width() - FIND_SIGNAL_COLUMN_ROW_WIDTH - 20);
 
 	}
 
@@ -407,7 +355,7 @@ bool FindSignalTextPanel::event(QEvent* e)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool FindSignalTextPanel::eventFilter(QObject* object, QEvent* e)
+bool FindSignalPanel::eventFilter(QObject* object, QEvent* e)
 {
 	if (e->type() == QEvent::KeyRelease)
 	{
@@ -424,7 +372,7 @@ bool FindSignalTextPanel::eventFilter(QObject* object, QEvent* e)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindSignalTextPanel::find()
+void FindSignalPanel::find()
 {
 	m_findText = m_findTextEdit->text();
 	if (m_findText.isEmpty() == true)
@@ -461,14 +409,18 @@ void FindSignalTextPanel::find()
 			}
 
 			QString text = pSignalView->model()->data(pSignalView->model()->index(row, column)).toString();
-
-			int pos = text.indexOf(m_findText);
-			if (pos == -1)
+			if (text.isEmpty() == true)
 			{
 				continue;
 			}
 
-			findItemList.append(FindItem(row, column, text, pos, pos + m_findText.count()));
+
+			if (processSignalMask(m_findText, text) == false)
+			{
+				continue;
+			}
+
+			findItemList.append(FindItem(row, column, text));
 		}
 	}
 
@@ -490,7 +442,7 @@ void FindSignalTextPanel::find()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindSignalTextPanel::selectItemInSignalView()
+void FindSignalPanel::selectItemInSignalView()
 {
 	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
 	if (pMainWindow == nullptr)
@@ -530,14 +482,14 @@ void FindSignalTextPanel::selectItemInSignalView()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindSignalTextPanel::onContextMenu(QPoint)
+void FindSignalPanel::onContextMenu(QPoint)
 {
 	m_pContextMenu->exec(QCursor::pos());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindSignalTextPanel::copy()
+void FindSignalPanel::copy()
 {
 	QString textClipboard;
 
@@ -570,20 +522,20 @@ void FindSignalTextPanel::copy()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindSignalTextPanel::loadSettings()
+void FindSignalPanel::loadSettings()
 {
 	QSettings s;
 
-	m_findText = s.value(QString("%1/FindText").arg(FIND_SIGNAL_TEXT_OPTIONS_KEY), QString()).toString();
+	m_findText = s.value(QString("%1/FindText").arg(FIND_SIGNAL_OPTIONS_KEY), QString()).toString();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindSignalTextPanel::saveSettings()
+void FindSignalPanel::saveSettings()
 {
 	QSettings s;
 
-	s.setValue(QString("%1/FindText").arg(FIND_SIGNAL_TEXT_OPTIONS_KEY), m_findText);
+	s.setValue(QString("%1/FindText").arg(FIND_SIGNAL_OPTIONS_KEY), m_findText);
 }
 
 // -------------------------------------------------------------------------------------------------------------------

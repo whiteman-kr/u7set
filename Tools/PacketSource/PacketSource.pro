@@ -65,9 +65,9 @@ SourceBase.cpp \
     ../../lib/SimpleMutex.cpp \
     ../../lib/Times.cpp \
     PathOptionDialog.cpp \
-    FindSignalTextPanel.cpp \
-    FindData.cpp \
-    ../../lib/MemLeaksDetection.cpp
+    ../../lib/MemLeaksDetection.cpp \
+    FindSignalPanel.cpp \
+    SignalMask.cpp
 
 
 HEADERS += \
@@ -110,10 +110,10 @@ SourceBase.h \
     ../../lib/SimpleMutex.h \
     ../../lib/Times.h \
     PathOptionDialog.h \
-    FindSignalTextPanel.h \
-    FindData.h \
     Stable.h \
-    ../../lib/MemLeaksDetection.h
+    ../../lib/MemLeaksDetection.h \
+    FindSignalPanel.h \
+    SignalMask.h
 
 RESOURCES += \
 resources.qrc

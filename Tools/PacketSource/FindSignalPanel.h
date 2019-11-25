@@ -1,5 +1,5 @@
-#ifndef FINDSIGNALTEXTPANEL_H
-#define FINDSIGNALTEXTPANEL_H
+#ifndef FINDSIGNALPANEL_H
+#define FINDSIGNALPANEL_H
 
 #include <QDockWidget>
 #include <QMenu>
@@ -20,7 +20,7 @@ class FindItem
 public:
 
 	FindItem();
-	FindItem(int row, int column, const QString& text, int beginPos, int endPos);
+	FindItem(int row, int column, const QString& text);
 	virtual ~FindItem() {}
 
 private:
@@ -29,9 +29,6 @@ private:
 	int					m_column = -1;
 
 	QString				m_text;
-
-	int					m_beginPos = -1;
-	int					m_endPos = -1;
 
 public:
 
@@ -46,14 +43,6 @@ public:
 	QString				text() const { return m_text; }
 	void				setText(const QString& text) { m_text = text; }
 
-	int					beginPos() const { return m_beginPos; }
-	void				setBeginPos(int pos) { m_beginPos = pos; }
-
-	int					endPos() const { return m_endPos; }
-	void				setEndPos(int pos) { m_endPos = pos; }
-
-	void				setPos(int beginPos, int endPos) { m_beginPos = beginPos; m_endPos = endPos; }
-
 	FindItem&			operator=(const FindItem& from);
 };
 
@@ -63,44 +52,31 @@ Q_DECLARE_METATYPE(FindItem)	// for type QVariant
 
 // ==============================================================================================
 
-class FindTextDelegate : public QStyledItemDelegate
-{
-	Q_OBJECT
-
-public:
-
-	FindTextDelegate(QObject *parent);
-
-	void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-};
-
-// ==============================================================================================
-
 const char* const		FindSignalTextColumn[] =
 {
 						QT_TRANSLATE_NOOP("FindSignalTextPanel.h", "Row"),
 						QT_TRANSLATE_NOOP("FindSignalTextPanel.h", "Text"),
 };
 
-const int				FIND_SIGNAL_TEXT_COLUMN_COUNT		= sizeof(FindSignalTextColumn)/sizeof(FindSignalTextColumn[0]);
+const int				FIND_SIGNAL_COLUMN_COUNT		= sizeof(FindSignalTextColumn)/sizeof(FindSignalTextColumn[0]);
 
-const int				FIND_SIGNAL_TEXT_COLUMN_ROW			= 0,
-						FIND_SIGNAL_TEXT_COLUMN_TEXT		= 1;
-
-// ==============================================================================================
-
-const int				FIND_SIGNAL_TEXT_COLUMN_ROW_WIDTH	= 50;
+const int				FIND_SIGNAL_COLUMN_ROW			= 0,
+						FIND_SIGNAL_COLUMN_TEXT		= 1;
 
 // ==============================================================================================
 
-class FindSignalTextTable : public QAbstractTableModel
+const int				FIND_SIGNAL_COLUMN_ROW_WIDTH	= 50;
+
+// ==============================================================================================
+
+class FindSignalTable : public QAbstractTableModel
 {
 	Q_OBJECT
 
 public:
 
-	explicit FindSignalTextTable(QObject* parent = nullptr);
-	virtual ~FindSignalTextTable();
+	explicit FindSignalTable(QObject* parent = nullptr);
+	virtual ~FindSignalTable();
 
 private:
 
@@ -125,18 +101,18 @@ public:
 
 // ==============================================================================================
 
-#define				 FIND_SIGNAL_TEXT_OPTIONS_KEY		"Options/FindSignalText/"
+#define				 FIND_SIGNAL_OPTIONS_KEY		"Options/FindSignalText/"
 
 // ==============================================================================================
 
-class FindSignalTextPanel : public QDockWidget
+class FindSignalPanel : public QDockWidget
 {
 	Q_OBJECT
 
 public:
 
-	explicit FindSignalTextPanel(QWidget* parent = nullptr);
-	virtual ~FindSignalTextPanel();
+	explicit FindSignalPanel(QWidget* parent = nullptr);
+	virtual ~FindSignalPanel();
 
 private:
 
@@ -148,7 +124,7 @@ private:
 	QLineEdit*			m_findTextEdit  = nullptr;
 	QTableView*			m_pView = nullptr;
 	QLabel*				m_statusLabel = nullptr;
-	FindSignalTextTable	m_table;
+	FindSignalTable	m_table;
 
 	QMenu*				m_pContextMenu = nullptr;
 	QAction*			m_pCopyAction = nullptr;
@@ -183,4 +159,4 @@ private slots:
 
 // ==============================================================================================
 
-#endif // FINDSIGNALTEXTPANEL_H
+#endif // FINDSIGNALPANEL_H

@@ -1528,7 +1528,7 @@ void ComparatorPropertyDialog::createPropertyList()
 				if (pInputSignal != nullptr && pInputSignal->param().isValid() == true && pInputSignal->param().isInput() == true)
 				{
 					item = m_pManager->addProperty(QVariant::Double, tr("Electric value, ") + pInputSignal->param().electricUnitStr());
-					item->setValue(conversion(m_comparator.compare().constValue(), CT_ENGENEER_TO_ELECTRIC, pInputSignal->param()));
+					item->setValue(conversion(m_comparator.compare().constValue(), CT_ENGINEER_TO_ELECTRIC, pInputSignal->param()));
 					item->setAttribute(QLatin1String("decimals"), pInputSignal->param().electricPrecision());
 					m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE);
 					compareGroup->addSubProperty(item);
@@ -1597,7 +1597,7 @@ void ComparatorPropertyDialog::createPropertyList()
 
 		// hysteresis group
 
-		QtProperty *hysteresisGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), comparator().hysteresis().isConst() == true ? tr("Hysteresis - const") : tr("Hysteresis - dynamic"));
+		QtProperty *hysteresisGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), comparator().hysteresis().isConst() == true ? tr("Hysteresis (deadband) - const") : tr("Hysteresis (deadband) - dynamic"));
 
 			if (comparator().hysteresis().isConst() == true)
 			{
@@ -1785,7 +1785,7 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 
 		case COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE:
 			{
-				m_comparator.compare().setConstValue(conversion(value.toDouble(), CT_ELECTRIC_TO_ENGENEER, pInputSignal->param()));
+				m_comparator.compare().setConstValue(conversion(value.toDouble(), CT_ELECTRIC_TO_ENGINEER, pInputSignal->param()));
 				groupIndex = COMPARATOR_PROPERTY_GROUP_COMPARE;
 
 				QtVariantProperty *propertyEn = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_CMP_EN_VALUE));
@@ -1804,7 +1804,7 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 				QtVariantProperty *propertyEl = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_CMP_EL_VALUE));
 				if (propertyEl != nullptr && pInputSignal->param().isInput() == true)
 				{
-					propertyEl->setValue(conversion(m_comparator.compare().constValue(), CT_ENGENEER_TO_ELECTRIC, pInputSignal->param()));
+					propertyEl->setValue(conversion(m_comparator.compare().constValue(), CT_ENGINEER_TO_ELECTRIC, pInputSignal->param()));
 				}
 			}
 			break;
@@ -1819,7 +1819,7 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 		//
 		case COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE:
 			{
-				m_comparator.hysteresis().setConstValue(conversion(value.toDouble(), CT_ELECTRIC_TO_ENGENEER, pInputSignal->param()));
+				m_comparator.hysteresis().setConstValue(conversion(value.toDouble(), CT_ELECTRIC_TO_ENGINEER, pInputSignal->param()));
 				groupIndex = COMPARATOR_PROPERTY_GROUP_HYSTERESIS;
 
 				QtVariantProperty *propertyEn = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_HYST_EN_VALUE));
@@ -1838,7 +1838,7 @@ void ComparatorPropertyDialog::onPropertyValueChanged(QtProperty *property, cons
 				QtVariantProperty *propertyEl = dynamic_cast<QtVariantProperty*>(m_propertyMap.key(COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE));
 				if (propertyEl != nullptr && pInputSignal->param().isInput() == true)
 				{
-					propertyEl->setValue(conversion(m_comparator.hysteresis().constValue(), CT_ENGENEER_TO_ELECTRIC, pInputSignal->param()));
+					propertyEl->setValue(conversion(m_comparator.hysteresis().constValue(), CT_ENGINEER_TO_ELECTRIC, pInputSignal->param()));
 				}
 			}
 			break;
