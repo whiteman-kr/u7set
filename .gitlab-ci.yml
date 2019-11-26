@@ -128,6 +128,15 @@ windows build job:
     - "echo               Build Installer"
     - "echo ----------------------------------------------"
     - "call u7setinstall\\createinstall.bat"
+    
+#Signing Files
+    - "echo ----------------------------------------------"
+    - "echo               Sign Files"
+    - "echo ----------------------------------------------"
+    - "signtool.exe sign /t http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT_PASSWORD% bin\\release\\*.dll"
+    - "signtool.exe sign /t http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT_PASSWORD% bin\\release\\*.exe"
+    - "signtool.exe sign /t http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT_PASSWORD% *.exe"
+
   
   artifacts:
     name: "u7set_0.8.%CI_PIPELINE_ID%_%CI_BUILD_REF_SLUG%_%CI_COMMIT_SHA%"
