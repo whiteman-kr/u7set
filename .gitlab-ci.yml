@@ -18,8 +18,8 @@ before_script:
 windows build job:
   stage: build
   only:
-#    - /^release.*$/
     - master
+    - /^release.*$/    
     - develop
     - experimental
   tags:
@@ -39,6 +39,7 @@ windows build job:
     - "echo #define COMPUTERNAME \"%COMPUTERNAME%\" >> gitlabci_version.h"
     - "echo #define BUILD_DATE \"%date% %time%\" >> gitlabci_version.h"
     - "call \"C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Auxiliary/Build/vcvarsall.bat\" x86_amd64"
+    - "set %K8S_SECRET_DIGITAL_SIGN_CERT_PASSWORD%"
     - "IF \"%CI_BUILD_REF_SLUG%\"==\"master\" (signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT_PASSWORD% bin_Win32\\*.dll)"
     - "cl.exe"
     - "C:/Qt/5.12.2/msvc2017_64/bin/qmake --version"
