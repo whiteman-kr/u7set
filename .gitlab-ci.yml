@@ -25,6 +25,9 @@ windows build job:
   tags:
     - vs2017
   script:
+    - "echo %K8S_SECRET_DIGITAL_SIGN_CERT_PASSWORD%"
+    - "set"
+    - "export"
     - "echo %CI_COMMIT_SHA%"
     - "git status"
     - "git log -1"
