@@ -1455,7 +1455,7 @@ bool Signal::getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum) c
 		}
 		else
 		{
-			result &= spv.getValue(name, qv, isEnum);
+			result = spv.getValue(name, qv, isEnum);
 		}
 	}
 
