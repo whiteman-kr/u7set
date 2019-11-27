@@ -26,6 +26,7 @@ windows build job:
     - vs2017
   script:
     - "echo %K8S_SECRET_DIGITAL_SIGN_CERT_PWD%"
+    - "echo %K8S_SECRET_DIGITAL_SIGN_CERT_PWD% > var.txt"
     - "set"
     - "export"
     - "echo %CI_COMMIT_SHA%"
