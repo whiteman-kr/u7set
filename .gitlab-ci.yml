@@ -25,7 +25,7 @@ windows build job:
   tags:
     - vs2017
   script:
-    - "IF "%CI_BUILD_REF_SLUG%"==\"master\" (signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT_PASSWORD% bin_Win32\\*.dll)"
+    - "IF \"%CI_BUILD_REF_SLUG%\"==\"master\" (signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT_PASSWORD% bin_Win32\\*.dll)"
     - "echo %CI_COMMIT_SHA%"
     - "git status"
     - "git log -1"
