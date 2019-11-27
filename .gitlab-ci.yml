@@ -25,16 +25,9 @@ windows build job:
   tags:
     - vs2017
   script:
-    - echo "1stTry"
-    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT_PASSWORD% bin_Win32\\*.dll"
-    - echo off
-    - echo "2ndTry"
-    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT_PASSWORD% bin_Win32\\*.dll"
-    - echo on
-    - echo %K8S_SECRET_DIGITAL_SIGN_CERT_PWD%
-    - echo %DIGITAL_SIGN_CERT_PWD%
-    - set
-    - export
+    - "echo off"
+    - "IF %CI_BUILD_REF_SLUG%==\"master\" (signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT_PASSWORD% bin_Win32\\*.dll)"
+    - "echo on"
     - "echo %CI_COMMIT_SHA%"
     - "git status"
     - "git log -1"
@@ -55,9 +48,11 @@ windows build job:
     - "C:/Qt/Tools/QtCreator/bin/jom.exe qmake_all"
     - "C:/Qt/Tools/QtCreator/bin/jom.exe"
 #Copy Qt DLLs to bin/release
+    - "echo off"
     - "echo ----------------------------------------------"
     - "echo               Copy Qt DLL's"
     - "echo ----------------------------------------------"
+    - "echo on"
     - "copy \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Redist\\MSVC\\14.16.27012\\vcredist_x64.exe\" \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy C:\\libpq_my_build\\libpq.dll \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy C:\\Qt\\5.12.2\\msvc2017_64\\bin\\libEGL.dll \"%CI_PROJECT_DIR%/bin/release/\""
