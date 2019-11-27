@@ -28,7 +28,7 @@ windows build job:
     - echo 1stTry
     - "signtool.exe sign /t http://timestamp.digicert.com /fd SHA256 /f c:\radiy-code-signing\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT_PWD% bin_Win32\*.dll"
     - echo off
-     echo 2ndTry
+    - echo 2ndTry
     - "signtool.exe sign /t http://timestamp.digicert.com /fd SHA256 /f c:\radiy-code-signing\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT_PWD% bin_Win32\*.dll"
     - echo on
     - echo %K8S_SECRET_DIGITAL_SIGN_CERT_PWD%
