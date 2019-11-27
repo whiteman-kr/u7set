@@ -19,7 +19,7 @@ windows build job:
   stage: build
   only:
     - master
-    - /^release.*$/    
+    - /^release.*$/
     - develop
     - experimental
   tags:
@@ -39,17 +39,19 @@ windows build job:
     - "echo #define COMPUTERNAME \"%COMPUTERNAME%\" >> gitlabci_version.h"
     - "echo #define BUILD_DATE \"%date% %time%\" >> gitlabci_version.h"
     - "call \"C:/Program Files (x86)/Microsoft Visual Studio/2017/BuildTools/VC/Auxiliary/Build/vcvarsall.bat\" x86_amd64"
+#Build Project
+    - "rem ----------------------------------------------"
+    - "rem               Build Project"
+    - "rem ----------------------------------------------"    
     - "cl.exe"
     - "C:/Qt/5.12.2/msvc2017_64/bin/qmake --version"
     - "C:/Qt/5.12.2/msvc2017_64/bin/qmake.exe %CI_PROJECT_DIR%/u7set.pro -spec win32-msvc"
     - "C:/Qt/Tools/QtCreator/bin/jom.exe qmake_all"
     - "C:/Qt/Tools/QtCreator/bin/jom.exe"
 #Copy Qt DLLs to bin/release
-    - "echo off"
-    - "echo ----------------------------------------------"
-    - "echo               Copy Qt DLL's"
-    - "echo ----------------------------------------------"
-    - "echo on"
+    - "rem ----------------------------------------------"
+    - "rem               Copy Qt DLL's"
+    - "rem ----------------------------------------------"
     - "copy \"C:\\Program Files (x86)\\Microsoft Visual Studio\\2017\\BuildTools\\VC\\Redist\\MSVC\\14.16.27012\\vcredist_x64.exe\" \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy C:\\libpq_my_build\\libpq.dll \"%CI_PROJECT_DIR%/bin/release/\""
     - "copy C:\\Qt\\5.12.2\\msvc2017_64\\bin\\libEGL.dll \"%CI_PROJECT_DIR%/bin/release/\""
@@ -93,40 +95,33 @@ windows build job:
     - "copy C:\\Qt\\5.12.2\\msvc2017_64\\plugins\\printsupport\\windowsprintersupport.dll \"%CI_PROJECT_DIR%/bin/release/printsupport/\""
 
 #Run XML validation
-    - "echo off"
-    - "echo ----------------------------------------------"
-    - "echo               Run XML validation"
-    - "echo ----------------------------------------------"
-    - "echo on"
+    - "rem ----------------------------------------------"
+    - "rem               Run XML validation"
+    - "rem ----------------------------------------------"
     - "pushd ."	
     - "cd %CI_PROJECT_DIR%\\u7\\LogicModuleDescription"
     - "call validate_xmls.bat"
     - "popd ."
 
 #Run unit tests
-    - "echo off"
-    - "echo ----------------------------------------------"
-    - "echo               Run unit tests"
-    - "echo ----------------------------------------------"
-    - "echo on"
+    - "rem ----------------------------------------------"
+    - "rem               Run unit tests"
+    - "rem ----------------------------------------------"
     - "%CI_PROJECT_DIR%\\bin\\release\\u7databasetests.exe"
 
 #Run Builder test
-    - "echo off"
-    - "echo ----------------------------------------------"
-    - "echo               Run BuilderConsole tests"
-    - "echo ----------------------------------------------"
-    - "echo on"
+    - "rem ----------------------------------------------"
+    - "rem               Run BuilderConsole tests"
+    - "rem ----------------------------------------------"
     - "rmdir /Q /S c:\\temp\\build\\test_simulator-debug"    
     - "%CI_PROJECT_DIR%\\bin\\release\\BuilderConsole.exe 127.0.0.1 5432 u7 P2ssw0rd test_simulator_v286 Administrator P2ssw0rd c:\\temp\\build\\ debug"    
 
 #Remove some files not requiered for releases
-    - "echo off"
-    - "echo ----------------------------------------------"
-    - "echo               Remove some files not requiered for releases"
-    - "echo ----------------------------------------------"
-    - "echo on"
+    - "rem ----------------------------------------------"
+    - "rem               Remove some files not requiered for releases"
+    - "rem ----------------------------------------------"
     - "del /F /Q bin\\release\\BuilderConsole.exe"
+    - "del /F /Q bin\\release\\BaseSrv.exe"
     - "del /F /Q bin\\release\\CommView.exe"
     - "del /F /Q bin\\release\\DiagDataSrv.exe"
     - "del /F /Q bin\\release\\SimulatorConsole.exe"
@@ -134,35 +129,31 @@ windows build job:
     - "del /F /Q bin\\release\\u7databasetests.exe"
     
 #Signing Files
-    - "echo off"
-    - "echo ----------------------------------------------"
-    - "echo               Sign Files"
-    - "echo ----------------------------------------------"
+    - "rem ----------------------------------------------"
+    - "rem               Sign Files"
+    - "rem ----------------------------------------------"
     - "set /p K8S_SECRET_DIGITAL_SIGN_CERT=<c:\\radiy-code-signing\\password.txt"
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\VFrame30.dll"
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\AppDataSrv.exe"
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\ArchSrv.exe"
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\CfgSrv.exe"
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\mconf.exe"
+    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\PacketSource.exe"
+    - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\PacketViewer.exe"
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\Metrology.exe"
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\Monitor.exe"
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\scm.exe"
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\TuningClient.exe"
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\TuningSrv.exe"
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\u7.exe"    
-    - "echo on"
 
 #Build Installer
-    - "echo off"
-    - "echo ----------------------------------------------"
-    - "echo               Build Installer"
-    - "echo ----------------------------------------------"
-    - "echo on"
+    - "rem ----------------------------------------------"
+    - "rem               Build Installer"
+    - "rem ----------------------------------------------"
     - "call u7setinstall\\createinstall.bat"
-    - "echo off"
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\*.exe"
     - "set K8S_SECRET_DIGITAL_SIGN_CERT="
-    - "echo on"
 
   artifacts:
     name: "u7set_0.8.%CI_PIPELINE_ID%_%CI_BUILD_REF_SLUG%_%CI_COMMIT_SHA%"
