@@ -26,13 +26,23 @@ namespace VFrame30
 	};
 
 
+	/*! \class PosLineImpl
+		\brief PosLineImpl
+	*/
 	class VFRAME30LIBSHARED_EXPORT PosLineImpl : public SchemaItem, public IPosLine
 	{
 		Q_OBJECT
 
+		/// \brief Top position
 		Q_PROPERTY(double Top READ top WRITE setTop)
+
+		/// \brief Left position
 		Q_PROPERTY(double Left READ left WRITE setLeft)
+
+		/// \brief Width
 		Q_PROPERTY(double Width READ width WRITE setWidth)
+
+		/// \brief Height
 		Q_PROPERTY(double Height READ height WRITE setHeight)
 
 	protected:

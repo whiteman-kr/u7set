@@ -53,22 +53,14 @@ namespace ExtWidgets
 
 		// Help description functions
 
-		void setScriptHelp(QFile& file);
-
-		void setScriptHelp(const QString& text);
-		QString scriptHelp() const;
-
-		QPoint scriptHelpWindowPos() const;
-		void setScriptHelpWindowPos(const QPoint& value);
-
-		QByteArray scriptHelpWindowGeometry() const;
-		void setScriptHelpWindowGeometry(const QByteArray& value);
+		void setScriptHelpFile(const QString& scriptHelpFile);
+		QString scriptHelpFile() const;
 
 	private:
 		bool m_expertMode = false;
 		bool m_readOnly = false;
 
-		QString m_scriptHelp;
+		QString m_scriptHelpFile;
 		QPoint m_scriptHelpWindowPos = QPoint(-1, -1);
 		QByteArray m_scriptHelpWindowGeometry;
 	};
@@ -622,9 +614,6 @@ namespace ExtWidgets
 		// Ide Property Editor Options
 		//
 		double m_propertyEditorFontScaleFactor = 1.0;
-
-		QPoint m_scriptHelpWindowPos;
-		QByteArray m_scriptHelpWindowGeometry;
 
 		void restore(QSettings& s);
 		void store(QSettings& s);

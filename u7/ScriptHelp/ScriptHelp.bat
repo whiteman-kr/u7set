@@ -1,0 +1,1 @@
+doxygen ScriptHelp.cfg

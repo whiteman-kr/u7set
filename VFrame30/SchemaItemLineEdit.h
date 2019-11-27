@@ -6,9 +6,184 @@ class QLineEdit;
 
 namespace VFrame30
 {
+	/*! \class SchemaItemLineEdit
+		\ingroup controlSchemaItems
+		\brief This class is used to create input fields
+
+		SchemaItemLineEdit class implement input fields on schemas.
+		Line edits generate events when user interacts with them.
+
+		<b>Handling line edit events</b>
+
+		Push button can generate following events:
+		- <b>"created"</b> event, handler in <b>AfterCreate</b> property;
+		- <b>"editingFinished"</b> event, handler in <b>EditingFinished</b> property;
+		- <b>"returnPressed"</b> event, handler in <b>ReturnPressed</b> property;
+		- <b>"textChanged"</b> event, handler in <b>TextChanged</b> property.
+
+		To implement an event handler, project designer should write a function in corresponding property. Each event handler has the same protype:
+
+		\code
+		function(schemaItem, lineEditWidget, text)
+		\endcode
+
+		Function parameters:
+
+		<b>schemaItem</b> - a handle to schema item, type: SchemaItemLineEdit;<br>
+		<b>lineEditWidget</b> - a handle to line edit widget, type: QLineEdit;<br>
+		<b>text</b> - text in the control, type: QString.<br>
+
+		<b>Accessing line edit widget</b>
+
+		Line edit widget is used to read or modify edit control properties. For example, script can modify Enabled property to enable/disable input
+		or Text property to modify text.
+
+		Line edit widget can be accessed by lineEditWidget parameter or requested by findWidget function of ScriptSchemaView class.
+
+		<b>Example:</b>
+
+		Tunable signal value should be taken from line edit and written to logic module after pressing Enter key.
+		If signal does not exist or its value is not valid, line edit should be disabled.
+
+		\warning <b>ObjectName</b> property of line edit schema item should have unique name.
+
+		<b>GlobalScript</b> functions:
+
+		\code
+		// Function writes new value to tunable signal <b>signalId</b> specified in <b>text</b>
+		//
+		function setValueByText(signalId, text)
+		{
+			// Get current signal parameters and state
+			//
+			var param = tuning.signalParam(signalId);
+			var state = tuning.signalState(signalId);
+
+			// Check if signal exists
+			//
+			if (param == undefined || state == undefined)
+			{
+				view.errorMessageBox("Signal does not exist!");
+				return;
+			}
+
+			// Check signal validity
+			//
+			if (state.Valid == false)
+			{
+				view.errorMessageBox("Signal is not valid!");
+				return;
+			}
+
+			// Convert text value to number
+			//
+			var x = Number(text);
+
+			if (isNaN(x) == true)
+			{
+				view.errorMessageBox("Invalid number format - '" + text + "'!");
+				return;
+			}
+
+			// Check if new value is out of range
+			//
+			if (param.IsAnalog == true)
+			{
+				var lowLimit = param.TuningLowBound;
+				var highLimit = param.TuningHighBound;
+
+				if (x < lowLimit || x > highLimit)
+				{
+					view.errorMessageBox("Input value is out of range! Valid range is " + lowLimit + "..." + highLimit + "!");
+					return;
+				}
+			}
+
+			// Show warning message
+			//
+			if (view.questionMessageBox("Are you sure you want to set value '" + x + "' ?") == false)
+			{
+				return;
+			}
+
+			// Write new value
+			//
+			if (tuning.writeValue(signalId, x) == false)
+			{
+				view.errorMessageBox("Value set error!");
+				return;
+			}
+		}
+
+		// Function enables or disables widget with <b>ObjectName</b> specified in <b>objectName</b> parameter depending on signal with <b>signalId</b> identifier
+		//
+		function enableControlBySignal(objectName, signalId)
+		{
+			// Find widget by its ObjectName
+			//
+			var widget = view.findWidget(objectName);
+			if (widget == null)
+			{
+				return;
+			}
+
+			var enabled = true;
+
+			// Get signal state and set enabled to false if signal does not exist or is not valid
+			//
+			var state = tuning.signalState(signalId);
+			if (state == undefined || state.Valid == false)
+			{
+				enabled = false;
+			}
+
+			// Enable/disable the widget
+			//
+			if (widget.enabled != enabled)
+			{
+				widget.enabled = enabled;
+			}
+		}
+		\endcode
+
+		<b>PreDrawScript</b> event handler:
+
+		\code
+		(function(schemaItem)
+		{
+			// Enable this widget depending on signal "APPSIGNALID002" state
+			//
+			enableControlBySignal(schemaItem.ObjectName, "#APPSIGNALID002");
+		})
+		\endcode
+
+		<b>ReturnPressed</b> event handler:
+
+		\code
+		(function(schemaItem, lineEditWidget, text)
+		{
+			// Set application signal "#APPSIGNALID002" to value from text parameter
+			//
+			setValueByText("#APPSIGNALID002", text);
+		})
+		\endcode
+	*/
+
 	class VFRAME30LIBSHARED_EXPORT SchemaItemLineEdit : public SchemaItemControl
 	{
 		Q_OBJECT
+
+		/// \brief Script called when schema item is created
+		Q_PROPERTY(QString AfterCreate READ scriptAfterCreate)
+
+		/// \brief Script called when editing is finished, e.g. focus is moved to other control
+		Q_PROPERTY(QString EditingFinished READ scriptEditingFinished)
+
+		/// \brief Script called when Enter key is pressed
+		Q_PROPERTY(QString ReturnPressed READ scriptReturnPressed)
+
+		/// \brief Script called when text is modified
+		Q_PROPERTY(QString TextChanged READ scriptTextChanged)
 
 	public:
 		SchemaItemLineEdit(void);

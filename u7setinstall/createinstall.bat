@@ -7,6 +7,7 @@ echo --------------- Creating data folders ------------------
 
 md u7setinstall\packages\u7set\data
 md u7setinstall\packages\u7set.rpct\data
+md u7setinstall\packages\u7set.rpct\data\scripthelp
 md u7setinstall\packages\u7set.srv\data
 md u7setinstall\packages\u7set.monitor\data
 md u7setinstall\packages\u7set.tuning\data
@@ -17,6 +18,7 @@ echo --------------- Copying Source Files ------------------
 xcopy bin\release\*.dll u7setinstall\packages\u7set\data /sy
 copy bin\release\vcredist_x64.exe u7setinstall\packages\u7set\data
 
+rem xcopy bin\release\scripthelp\html u7setinstall\packages\u7set.rpct\data\scripthelp /sy
 copy bin\release\u7.exe u7setinstall\packages\u7set.rpct\data
 copy bin\release\mconf.exe u7setinstall\packages\u7set.rpct\data
 

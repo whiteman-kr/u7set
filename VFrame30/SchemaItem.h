@@ -62,6 +62,11 @@ namespace VFrame30
 	};
 
 
+	/*! \class SchemaItem
+		\brief Base class for all items displayed on schemas.
+
+		Base class for all items displayed on schemas.
+	*/
 	class VFRAME30LIBSHARED_EXPORT SchemaItem :
 		public PropertyObject,
 		public ISchemaItemPropertiesPos,
@@ -71,8 +76,24 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		/// \brief Object name
 		Q_PROPERTY(QString ObjectName READ objectName)
+
+		/// \brief Blining phase. This value is inverted each time schema is being redrawn
 		Q_PROPERTY(bool BlinkPhase READ blinkPhase)
+
+		/// \brief Turns <b>ClickScript</b> script call when user clicks on schema item
+		Q_PROPERTY(bool AcceptClick READ acceptClick WRITE setAcceptClick)
+
+		/*! \brief Contains mouse click event handler code.
+		Click event is generated each time when user clicks mouse button on the item and <b>AcceptClick</b> property is set to true.
+		*/
+		Q_PROPERTY(QString ClickScript READ clickScript)
+
+		/*! \brief Contains pre-draw event handler code. Pre-draw event is generated each time before item is redrawn.
+		In most cases, this code is used to change visual apperance of an item before drawing.
+		*/
+		Q_PROPERTY(QString PreDrawScript READ preDrawScript)
 
 	protected:
 		SchemaItem();

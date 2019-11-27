@@ -1,0 +1,77 @@
+
+/** \mainpage
+Using scripts, project designer can customize appearance of MATS schema items and implement advanced logic 
+in MATS user interface. 
+
+For example, scripts allow to change colors, text messages, and other properties 
+of schema items. Also using scripts developer can request signal values and parameters, process them by 
+required logic, set tunable signal values. Using special schema items like push buttons and line editors 
+project designer can create interactive schemas.
+
+Scripts are written in JavaScript language.
+
+MATS schema items emit events on different user and system actions. The set of events depends on item's type.
+
+Dynamic schema items like 
+\ref VFrame30::SchemaItemValue "SchemaItemValue" 
+or 
+\ref VFrame30::SchemaItemImageValue "SchemaItemImageValue" 
+usually process pre-draw event to define item apperance depending on some signals values.
+
+Properties of static schema items like 
+\ref VFrame30::SchemaItemLine "SchemaItemLine",
+\ref VFrame30::SchemaItemRect "SchemaItemRect",
+\ref VFrame30::SchemaItemImage "SchemaItemImage"
+can be changed by pre-draw event too.
+
+Control schema items have additional events. 
+\ref VFrame30::SchemaItemPushButton "SchemaItemPushButton" emits additional events when user pushes and releases the button. 
+\ref VFrame30::SchemaItemLineEdit "SchemaItemLineEdit" emits an event when user changes its text, etc.
+
+All MATS schema items have special properties to store script code for different event handlers of this item.
+
+<b>Monitor</b> and <b>TuningClient</b> equipment presets have special <b>GlobalScript</b> property that stores library script functions 
+defined by user. Library functions are available to all schema items displayed by appropriate software. 
+For example, if many schema items have scripts with same logic (maybe with own signal identifiers), this logic 
+can be described in global script function and called from items scripts with different arguments.
+
+Script event handlers have predefined function prototypes. They are described in corresponding items descriptions 
+and examples in this document.
+
+A few global classes can be accessed by scripts:
+
+- \ref VFrame30::ScriptSchemaView "ScriptSchemaView" class (<b>view</b> object) is used to access schema items and variables, 
+switch between schemas, display message boxes;
+
+- \ref VFrame30::ScriptAppSignalController "ScriptAppSignalController" class (<b>signals</b> object) is used to access 
+signal parameters (AppSignalParam) and values (AppSignalState) received from <b>ApplicationDataService</b>;
+
+- \ref VFrame30::TuningController "TuningController" class (<b>tuning</b> object) is used to access tunable 
+signal parameters (AppSignalParam), requesting and setting tunable values (TuningSignalState) using <b>TuningService</b>.
+
+Script code error messages are displayed directly on appropriate schema item when script is executed.
+*/
+
+/**
+ *  @defgroup view Schema View
+ */
+
+/**
+ *  @defgroup controllers Controllers
+ */
+
+/**
+ *  @defgroup staticSchemaItems Static Items
+ */
+
+/**
+ *  @defgroup dynamicSchemaItems Dynamic Items
+ */
+
+/**
+ *  @defgroup controlSchemaItems Control Items
+ */
+
+/**
+ *  @defgroup groupParamsStates Signal Parameters and States
+ */
