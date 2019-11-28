@@ -1995,6 +1995,7 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	m_signalsView->setModel(m_signalsProxyModel);
 	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight | Qt::AlignVCenter);
 	m_signalsView->verticalHeader()->setFixedWidth(DEFAULT_COLUMN_WIDTH);
+	m_signalsView->verticalHeader()->hide();
 	SignalsDelegate* delegate = m_signalsModel->createDelegate(m_signalsProxyModel);
 	m_signalsView->setItemDelegate(delegate);
 
