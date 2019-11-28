@@ -23,11 +23,15 @@ AppDataReceiverThread::~AppDataReceiverThread()
 {
 }
 
-void AppDataReceiverThread::fillAppDataReceiveState(Network::AppDataReceiveState *adrs)
+void AppDataReceiverThread::fillAppDataReceiveState(Network::AppDataReceiveState* adrs)
 {
-	adrs->set_receivedframescount(m_receivedFramesCount);
+	adrs->set_receivingrate(m_receivingRate);
+	adrs->set_udpreceivingrate(m_udpReceivingRate);
+	adrs->set_rupframesreceivingrate(m_rupFramesReceivingRate);
 
+	adrs->set_rupframescount(m_rupFramesCount);
 	adrs->set_simframescount(m_simFramesCount);
+
 	adrs->set_errdatagramsize(m_errDatagramSize);
 	adrs->set_errsimversion(m_errSimVersion);
 	adrs->set_errunknownappdatasourceip(m_errUnknownAppDataSourceIP);
@@ -125,11 +129,25 @@ void AppDataReceiverThread::receivePackets()
 	qint64 prevServerTime = QDateTime::currentMSecsSinceEpoch();
 	qint64 lastPacketTime = prevServerTime;
 
-	qint64 prevReceivedFramesCount = 0;
-
 	while(isQuitRequested() == false)
 	{
 		qint64 serverTime = QDateTime::currentMSecsSinceEpoch();
+
+		if (serverTime - prevServerTime > 1000)
+		{
+			prevServerTime = serverTime;
+
+			m_receivingRate = m_receivedPerSecond;
+			m_receivedPerSecond = 0;
+
+			m_udpReceivingRate = m_udpReceivedPerSecond;
+			m_udpReceivedPerSecond = 0;
+
+			m_rupFramesReceivingRate = m_rupFramesReceivedPerSecond;
+			m_rupFramesReceivedPerSecond = 0;
+
+			qDebug() << C_STR(QString("Receive RUP frames %1").arg(m_rupFramesReceivingRate));
+		}
 
 		qint64 size = m_socket->pendingDatagramSize();
 
@@ -145,6 +163,9 @@ void AppDataReceiverThread::receivePackets()
 			msleep(5);
 			continue;
 		}
+
+		m_udpReceivedPerSecond++;
+		m_receivedPerSecond += static_cast<int>(size);
 
 		lastPacketTime = serverTime;
 
@@ -202,6 +223,9 @@ void AppDataReceiverThread::receivePackets()
 			continue;
 		}
 
+		m_rupFramesReceivedPerSecond++;
+		m_rupFramesCount++;
+
 		AppDataSourceShared dataSource = m_appDataSourcesIP.value(ip, nullptr);
 
 		if (dataSource == nullptr)
@@ -216,19 +240,6 @@ void AppDataReceiverThread::receivePackets()
 			continue;
 		}
 
-		m_receivedFramesCount++;
-
 		dataSource->pushRupFrame(serverTime, simFrame.rupFrame, m_thisThread);
-
-		//
-
-		if (serverTime - prevServerTime > 1000)
-		{
-			prevServerTime = serverTime;
-
-			qDebug() << C_STR(QString("Receive RUP frames %1/s").arg(m_receivedFramesCount - prevReceivedFramesCount));
-
-			prevReceivedFramesCount = m_receivedFramesCount;
-		}
 	}
 }
