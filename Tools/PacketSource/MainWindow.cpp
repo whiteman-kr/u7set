@@ -10,7 +10,6 @@
 #include "../../lib/Ui/DialogAbout.h"
 
 #include "PathOptionDialog.h"
-#include "FindData.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -39,6 +38,7 @@ bool MainWindow::createInterface()
 	createActions();
 	createMenu();
 	createToolBars();
+	createPanels();
 	createViews();
 	createContextMenu();
 	createHeaderContexMenu();
@@ -78,12 +78,6 @@ void MainWindow::createActions()
 	m_sourceSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
 	m_sourceSelectAllAction->setToolTip(tr("Select all sources"));
 	connect(m_sourceSelectAllAction, &QAction::triggered, this, &MainWindow::selectAllSource);
-
-	m_findAction = new QAction(tr("&Find ..."), this);
-	m_findAction->setShortcut(Qt::CTRL + Qt::Key_F);
-	m_findAction->setIcon(QIcon(":/icons/Find.png"));
-	m_findAction->setToolTip(tr("Find text in list of signals"));
-	connect(m_findAction, &QAction::triggered, this, &MainWindow::findTextSignal);
 
 	m_optionAction = new QAction(tr("&Options"), this);
 	m_optionAction->setShortcut(Qt::CTRL + Qt::Key_O);
@@ -128,10 +122,14 @@ void MainWindow::createMenu()
 	m_sourceMenu->addAction(m_sourceStartAction);
 	m_sourceMenu->addAction(m_sourceStopAction);
 	m_sourceMenu->addSeparator();
-	m_sourceMenu->addAction(m_sourceSelectAllAction);
-	m_sourceMenu->addSeparator();
-	m_sourceMenu->addAction(m_findAction);
 	m_sourceMenu->addAction(m_optionAction);
+
+	// Edit
+	//
+	m_pEditMenu = pMenuBar->addMenu(tr("&Edit"));
+
+	m_pEditMenu->addAction(m_sourceSelectAllAction);
+	m_pEditMenu->addSeparator();
 
 	//
 	//
@@ -161,47 +159,50 @@ bool MainWindow::createToolBars()
 	m_mainToolBar->addAction(m_sourceStartAction);
 	m_mainToolBar->addAction(m_sourceStopAction);
 	m_mainToolBar->addSeparator();
-	m_mainToolBar->addAction(m_optionAction);
 
 	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::createPanels()
+{
+	// Search measurements panel
+	//
+	m_pFindSignalPanel = new FindSignalPanel(this);
+	if (m_pFindSignalPanel != nullptr)
+	{
+		m_pFindSignalPanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+
+		addDockWidget(Qt::LeftDockWidgetArea, m_pFindSignalPanel);
+
+		m_pFindSignalPanel->hide();
+
+		QAction* findAction = m_pFindSignalPanel->toggleViewAction();
+		if (findAction != nullptr)
+		{
+			findAction->setText(tr("&Find ..."));
+			findAction->setShortcut(Qt::CTRL + Qt::Key_F);
+			findAction->setIcon(QIcon(":/icons/Find.png"));
+			findAction->setToolTip(tr("Find signal"));
+
+			if (m_pEditMenu != nullptr)
+			{
+				m_pEditMenu->addAction(findAction);
+			}
+
+			if (m_mainToolBar != nullptr)
+			{
+				m_mainToolBar->addAction(findAction);
+			}
+		}
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::createViews()
 {
-	// Search signal text panel
-	//
-//	m_pFindSignalTextPanel = new FindSignalTextPanel(this);
-//	if (m_pFindSignalTextPanel != nullptr)
-//	{
-//		m_pFindSignalTextPanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
-
-//		addDockWidget(Qt::RightDockWidgetArea, m_pFindSignalTextPanel);
-
-//		m_pFindSignalTextPanel->hide();
-
-//		QAction* findAction = m_pFindSignalTextPanel->toggleViewAction();
-//		if (findAction != nullptr)
-//		{
-//			findAction->setText(tr("&Find ..."));
-//			findAction->setShortcut(Qt::CTRL + Qt::Key_F);
-//			findAction->setIcon(QIcon(":/icons/Find.png"));
-//			findAction->setToolTip(tr("Find text in list of signals"));
-
-//			if (m_sourceMenu != nullptr)
-//			{
-//				m_sourceMenu->addAction(findAction);
-//			}
-
-//			if (m_mainToolBar != nullptr)
-//			{
-//				m_mainToolBar->addAction(findAction);
-//			}
-//		}
-//	}
-
-
 	// View of sources
 	//
 	m_pSourceView = new QTableView(this);
@@ -368,7 +369,6 @@ void MainWindow::createHeaderContexMenu()
 		}
 	}
 
-	hideSignalColumn(SIGNAL_LIST_COLUMN_APP_ID, true);
 	hideSignalColumn(SIGNAL_LIST_COLUMN_FORMAT, true);
 	hideSignalColumn(SIGNAL_LIST_COLUMN_STATE_OFFSET, true);
 	hideSignalColumn(SIGNAL_LIST_COLUMN_STATE_BIT, true);
@@ -588,14 +588,6 @@ void MainWindow::stopSource()
 void MainWindow::selectAllSource()
 {
 	m_pSourceView->selectAll();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::findTextSignal()
-{
-	FindData* dialog = new FindData(m_pSignalView);
-	dialog->exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
