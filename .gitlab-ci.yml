@@ -147,13 +147,25 @@ windows build job:
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\TuningSrv.exe"
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\release\\u7.exe"    
 
+#Generate ScriptHelp
+    - "rem ----------------------------------------------"
+    - "rem               Generate ScriptHelp"
+    - "rem ----------------------------------------------"
+    - "pushd ."	
+    - "cd %CI_PROJECT_DIR%\\u7\\ScriptHelp"
+    - "call ScriptHelp.bat"
+    - "popd ."
+
 #Build Installer
     - "rem ----------------------------------------------"
     - "rem               Build Installer"
     - "rem ----------------------------------------------"
-    - "call u7setinstall\\createinstall.bat"
+    - "pushd ."	
+    - "cd %CI_PROJECT_DIR%\\u7setinstall"
+    - "call createinstall.bat"
     - "signtool.exe sign /tr http://timestamp.digicert.com /fd SHA256 /f c:\\radiy-code-signing\\radiy-code-signing.pfx /p %K8S_SECRET_DIGITAL_SIGN_CERT% bin\\*.exe"
     - "set K8S_SECRET_DIGITAL_SIGN_CERT="
+    - "pushd ."	
 
   artifacts:
     name: "u7set_0.8.%CI_PIPELINE_ID%_%CI_BUILD_REF_SLUG%_%CI_COMMIT_SHA%"
@@ -167,6 +179,8 @@ windows build job:
       - bin/release/platforms/*.dll
       - bin/release/sqldrivers/*.dll
       - bin/release/printsupport/*.dll
+      - bin/release/scripthelp/*.*
+      - bin/release/scripthelp/search/*.*
 
 #deploy job:
 #  stage: deploy
