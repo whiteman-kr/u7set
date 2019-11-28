@@ -124,7 +124,12 @@ void AppDataReceiverThread::receivePackets()
 	}
 
 	QHostAddress from;
-	Rup::SimFrame simFrame;
+
+	const int BUFFER_SIZE = sizeof(Rup::SimFrame) + 1;
+
+	char receiveBuffer[BUFFER_SIZE];
+
+	Rup::SimFrame& simFrame = *reinterpret_cast<Rup::SimFrame*>(receiveBuffer);
 
 	qint64 prevServerTime = QDateTime::currentMSecsSinceEpoch();
 	qint64 lastPacketTime = prevServerTime;
@@ -149,7 +154,7 @@ void AppDataReceiverThread::receivePackets()
 			qDebug() << C_STR(QString("Receive RUP frames %1").arg(m_rupFramesReceivingRate));
 		}
 
-		qint64 size = m_socket->pendingDatagramSize();
+		qint64 size = m_socket->readDatagram(receiveBuffer, BUFFER_SIZE, &from);
 
 		if (size == -1)
 		{
@@ -168,25 +173,6 @@ void AppDataReceiverThread::receivePackets()
 		m_receivedPerSecond += static_cast<int>(size);
 
 		lastPacketTime = serverTime;
-
-		if (size > sizeof(Rup::SimFrame))
-		{
-			// received datagram too large, skip this datagram
-			//
-			m_socket->readDatagram(reinterpret_cast<char*>(&simFrame), size, &from);
-			m_errDatagramSize++;
-			continue;
-		}
-
-		size = m_socket->readDatagram(reinterpret_cast<char*>(&simFrame), size, &from);
-
-		if (size == -1)
-		{
-			DEBUG_LOG_ERR(m_log, QString("AppDataReceiver %1 read socket error %2.").
-								arg(m_dataReceivingIP.addressPortStr()).arg(m_socket->error()));
-			closeSocket();
-			return;
-		}
 
 		quint32 ip = 0;
 
@@ -212,6 +198,8 @@ void AppDataReceiverThread::receivePackets()
 			}
 			else
 			{
+				// received datagram  has unknown size, skip this datagram
+				//
 				m_errDatagramSize++;
 				continue;
 			}
