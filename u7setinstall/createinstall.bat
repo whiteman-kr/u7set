@@ -36,6 +36,6 @@ copy ..\bin\release\Metrology.exe packages\u7set.metrology\data
 
 echo --------------- Building the installer ------------------
 
-binarycreator.exe --offline-only -c config\config.xml -p packages bin\u7setinstall_%RPCT_VERSION%_%CI_BUILD_REF_SLUG%_%CI_COMMIT_SHA%.exe
+binarycreator.exe --offline-only -c config\config.xml -p packages ..\bin\u7setinstall_%RPCT_VERSION%_%CI_BUILD_REF_SLUG%_%CI_COMMIT_SHA%.exe
 
 echo --------------- Done ------------------
