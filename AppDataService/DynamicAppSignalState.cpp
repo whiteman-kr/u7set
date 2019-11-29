@@ -313,7 +313,7 @@ bool DynamicAppSignalState::setState(const Times& time,
 	{
 		curState.flags.autoPoint = 1;
 
-		qDebug() << "auto" << appSignalID();
+//		qDebug() << "auto" << appSignalID();
 	}
 
 	curState.flags.updateArchivingReasonFlags(prevState.flags);

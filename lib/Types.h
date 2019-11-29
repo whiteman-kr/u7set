@@ -6,6 +6,7 @@
 #include <QMetaEnum>
 #include <QVariant>
 
+/*! \brief Contains enumerations used in RPCT*/
 class E : public QObject
 {
 	Q_OBJECT
@@ -281,14 +282,28 @@ public:
 	};
 	Q_ENUM(SignalInOutType)
 
-	// Channel
-	//
+	/** \brief This enum describes logic module and signal channel.
+	 *
+	This enum describes logic module and signal channel.\n\n
+	<b>Example</b>
+	\code
+	var ChannelA = 0;
+	var ChannelB = 1;
+	var ChannelC = 2;
+	var ChannelD = 3;
+	...
+	if (param.Channel == ChannelA)
+	{
+		...
+	}
+	\endcode
+	 */
 	enum class Channel
 	{
-		A = 0,
-		B = 1,
-		C = 2,
-		D = 3
+		A = 0, /**< Channel A = 0*/
+		B = 1, /**< Channel B = 1*/
+		C = 2, /**< Channel C = 2 */
+		D = 3  /**< Channel D = 3 */
 	};
 	Q_ENUM(Channel)
 
