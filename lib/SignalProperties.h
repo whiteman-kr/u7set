@@ -271,7 +271,15 @@ private:
 
 		newProperty.type = static_cast<QVariant::Type>(qMetaTypeId<TYPE>());
 
-		newProperty.valueGetter = [getter](const Signal* s){ return QVariant::fromValue<TYPE>(getter(*s)); };
+		newProperty.valueGetter = [getter](const Signal* s)
+		{
+			QVariant value = QVariant::fromValue<TYPE>(getter(*s));
+			if (value.type() == QVariant::String)
+			{
+				value = QVariant::fromValue<QString>(value.toString().replace(QChar::LineFeed, QChar::Space));
+			}
+			return value;
+		};
 		if (setter == nullptr)
 		{
 			newProperty.valueSetter = [](Signal*, const QVariant&){};

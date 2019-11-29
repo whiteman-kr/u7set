@@ -1484,6 +1484,7 @@ void SignalsModel::addSignal()
 				for (int i = 0; i < signalVector.count(); i++)
 				{
 					resultSignalVector.append(signalVector[i]);
+					m_propertyManager.detectNewProperties(signalVector[i]);
 				}
 			}
 		}
