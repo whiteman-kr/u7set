@@ -8,5 +8,6 @@
         <file>Images/logo.png</file>
         <file>icons/Find.png</file>
         <file>icons/PacketSource.ico</file>
+        <file>icons/Search.png</file>
     </qresource>
 </RCC>

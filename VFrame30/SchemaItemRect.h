@@ -8,30 +8,104 @@ class QBrush;
 
 namespace VFrame30
 {
+	/*! \class SchemaItemRect
+		\ingroup staticSchemaItems
+		\brief This item is used to display rectangles and text messages
+
+		This item is used to display rectangles and text messages.
+
+		<b>ClickScript example:</b>
+		\code
+		(function(schemaItem)
+		{
+			// Switch to schema with "CONTENTS" identifier
+			//
+			view.setSchema("CONTENTS");
+		})
+		\endcode
+
+		<b>PreDrawScript example 1:</b>
+		\code
+		(function(schemaItem)
+		{
+			// Set item's text, background color and fill color
+			//
+			schemaItem.Text = "Hello World";
+			schemaItem.FillColor = "red";
+			schemaItem.BackColor = "#000000";
+		})
+		\endcode
+
+		<b>PreDrawScript example 2:</b>
+		\code
+		(function(schemaItem)
+		{
+			// Get the state of the signal "#APPSIGNALID01"
+			//
+			var state = signals.signalState("#APPSIGNALID01");
+
+			if (state == undefined || state.Valid == false)
+			{
+				// If signal does not exist or not valid - display blinking black/white "Alert" text on blinking red/black foreground
+				//
+				schemaItem.Text = "Alert";
+				schemaItem.FillColor = schemaItem.BlinkPhase ? "red" : "black";
+				schemaItem.TextColor = schemaItem.BlinkPhase ? "black" : "white";
+			}
+			else
+			{
+				// Signal is OK - display "OK" black text on white background
+				//
+				schemaItem.Text = "OK";
+				schemaItem.FillColor = "white";
+				schemaItem.TextColor = "black";
+			}
+		})
+		\endcode
+	*/
 	class VFRAME30LIBSHARED_EXPORT SchemaItemRect : public PosRectImpl
 	{
 		Q_OBJECT
 
+		/// \brief Border line weight, in pixels
 		Q_PROPERTY(double LineWeight READ weight WRITE setWeight)
 
+		/// \brief Border line color name
 		Q_PROPERTY(QColor LineColor READ lineColor WRITE setLineColor)
+
+		/// \brief Rectangle fill color name
 		Q_PROPERTY(QColor FillColor READ fillColor WRITE setFillColor)
 
+		/// \brief Switches rectangle filling
 		Q_PROPERTY(double Fill READ fill WRITE setFill)
+
+		/// \brief Switches rectangle border drawing
 		Q_PROPERTY(double DrawRect READ drawRect WRITE setDrawRect)
 
 		// Text Category Properties
 
+		/// \brief Text color name
 		Q_PROPERTY(QColor TextColor READ textColor WRITE setTextColor)
 
+		/// \brief Rectangle text
 		Q_PROPERTY(QString Text READ text WRITE setText)
 
+		/// \brief Horizontal text alignment
 		Q_PROPERTY(E::HorzAlign AlignHorz READ horzAlign WRITE setHorzAlign)
+
+		/// \brief Vertical text alignment
 		Q_PROPERTY(E::VertAlign AlignVert READ vertAlign WRITE setVertAlign)
 
+		/// \brief Font name
 		Q_PROPERTY(QString FontName READ getFontName WRITE setFontName)
+
+		/// \brief Font size
 		Q_PROPERTY(double FontSize READ getFontSize WRITE setFontSize)
+
+		/// \brief Font bold
 		Q_PROPERTY(bool FontBold READ getFontBold WRITE setFontBold)
+
+		/// \brief Font italic
 		Q_PROPERTY(bool FontItalic READ getFontItalic WRITE setFontItalic)
 
 

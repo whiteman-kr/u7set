@@ -44,14 +44,14 @@ void SourceWorker::process()
 		return;
 	}
 
-	if (pSocket->bind(QHostAddress(theOptions.path().localIP()), PS::UDP_PORT + static_cast<quint16>(pSource->info().index)) == false)
+/*	if (pSocket->bind(QHostAddress(theOptions.path().localIP()), PS::UDP_PORT + static_cast<quint16>(pSource->info().index)) == false)
 	{
 		pSocket->close();
 		delete pSocket;
 
 		emit finished();
 		return;
-	}
+	}*/
 
 	int currentFrameIndex = 0;
 
@@ -105,7 +105,11 @@ void SourceWorker::process()
 
 			// send udp
 			//
-			pSocket->writeDatagram(reinterpret_cast<char*>(&m_simFrame), sizeof(m_simFrame), pSource->info().serverAddress.address(), pSource->info().serverAddress.port());
+			QHostAddress serverAddress = pSource->info().serverAddress.address();
+
+			qDebug() << serverAddress.toString();
+
+			qint64 res = pSocket->writeDatagram(reinterpret_cast<char*>(&m_simFrame), sizeof(m_simFrame), serverAddress, pSource->info().serverAddress.port());
 
 			// timeout
 			//

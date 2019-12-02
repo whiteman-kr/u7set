@@ -8,6 +8,7 @@
 #include <QColorDialog>
 #include <QTextBrowser>
 #include <QPlainTextEdit>
+#include <QDesktopServices>
 
 namespace ExtWidgets
 {
@@ -18,12 +19,6 @@ namespace ExtWidgets
 
 	PropertyEditorBase::PropertyEditorBase()
 	{
-		//
-
-		setScriptHelpWindowPos(thePropertyEditorSettings.m_scriptHelpWindowPos);
-
-		setScriptHelpWindowGeometry(thePropertyEditorSettings.m_scriptHelpWindowGeometry);
-
 	}
 
 	PropertyEditor* PropertyEditorBase::createChildPropertyEditor(QWidget* parent)
@@ -632,48 +627,14 @@ namespace ExtWidgets
 		return editor;
 	}
 
-	void PropertyEditorBase::setScriptHelp(QFile& file)
+	void PropertyEditorBase::setScriptHelpFile(const QString& scriptHelpFile)
 	{
-		// Set script help data
-		//
-		if (file.open(QIODevice::ReadOnly) == true)
-		{
-			QByteArray data = file.readAll();
-			if (data.size() > 0)
-			{
-				setScriptHelp(QString::fromUtf8(data));
-			}
-		}
+		m_scriptHelpFile = scriptHelpFile;
 	}
 
-	void PropertyEditorBase::setScriptHelp(const QString& text)
+	QString PropertyEditorBase::scriptHelpFile() const
 	{
-		m_scriptHelp = text;
-	}
-
-	QString PropertyEditorBase::scriptHelp() const
-	{
-		return m_scriptHelp;
-	}
-
-	QPoint PropertyEditorBase::scriptHelpWindowPos() const
-	{
-		return m_scriptHelpWindowPos;
-	}
-
-	void PropertyEditorBase::setScriptHelpWindowPos(const QPoint& value)
-	{
-		m_scriptHelpWindowPos = value;
-	}
-
-	QByteArray PropertyEditorBase::scriptHelpWindowGeometry() const
-	{
-		return m_scriptHelpWindowGeometry;
-
-	}
-	void PropertyEditorBase::setScriptHelpWindowGeometry(const QByteArray& value)
-	{
-		m_scriptHelpWindowGeometry = value;
+		return m_scriptHelpFile;
 	}
 
 	//
@@ -2250,7 +2211,7 @@ namespace ExtWidgets
 
 		// Property Editor help
 
-		if (p->isScript() && m_propertyEditorBase->scriptHelp().isEmpty() == false)
+		if (p->isScript() && m_propertyEditorBase->scriptHelpFile().isEmpty() == false)
 		{
 			QPushButton* helpButton = new QPushButton("?", this);
 
@@ -2258,44 +2219,17 @@ namespace ExtWidgets
 
 			connect(helpButton, &QPushButton::clicked, [this] ()
 			{
-				if (m_propertyEditorHelp == nullptr)
+				QString scriptHelpFile = m_propertyEditorBase->scriptHelpFile();
+
+				QFile f(scriptHelpFile);
+				if (f.exists() == true)
 				{
-					m_propertyEditorHelp = new PropertyEditorHelpDialog(tr("Script Help"), m_propertyEditorBase->scriptHelp(), this);
-					m_propertyEditorHelp->show();
-
-					if (m_propertyEditorBase->scriptHelpWindowPos().x() != -1 && m_propertyEditorBase->scriptHelpWindowPos().y() != -1)
-					{
-						m_propertyEditorHelp->move(m_propertyEditorBase->scriptHelpWindowPos());
-						m_propertyEditorHelp->restoreGeometry(m_propertyEditorBase->scriptHelpWindowGeometry());
-					}
-					else
-					{
-						// put the window at the right side of the screen
-
-						QDesktopWidget* screen = QApplication::desktop();
-						QRect screenGeometry = screen->availableGeometry();
-
-						int screenHeight = screenGeometry.height();
-						int screenWidth = screenGeometry.width();
-
-						int defaultWidth = screenWidth / 4;
-
-						// height must exclude the window header size
-
-						int defaultHeight = screenHeight - (m_propertyEditorHelp->geometry().y() - m_propertyEditorHelp->y());
-
-						m_propertyEditorHelp->move(screenWidth - defaultWidth, 0);
-						m_propertyEditorHelp->resize(defaultWidth, defaultHeight);
-					}
-
-					connect(m_propertyEditorHelp, &PropertyEditorHelpDialog::destroyed, [this] (QObject*)
-					{
-						m_propertyEditorBase->setScriptHelpWindowPos(m_propertyEditorHelp->pos());
-						m_propertyEditorBase->setScriptHelpWindowGeometry(m_propertyEditorHelp->saveGeometry());
-
-						m_propertyEditorHelp = nullptr;
-
-					});
+					QUrl url = QUrl::fromLocalFile(scriptHelpFile);
+					QDesktopServices::openUrl(url);
+				}
+				else
+				{
+					QMessageBox::critical(this, qAppName(), tr("Help file '%1' does not exist!").arg(scriptHelpFile));
 				}
 			});
 
@@ -3513,8 +3447,6 @@ namespace ExtWidgets
 			m_propertyEditorFontScaleFactor = 1.0;
 		}
 
-		m_scriptHelpWindowPos = s.value("PropertyEditor/scriptHelpPos", QPoint(-1, -1)).toPoint();
-		m_scriptHelpWindowGeometry = s.value("PropertyEditor/scriptHelpGeometry").toByteArray();
 	}
 
 	void PropertyEditorSettings::store(QSettings& s)
@@ -3528,8 +3460,6 @@ namespace ExtWidgets
 		s.setValue("PropertyEditor/multiLinePropertyEditorGeometry", m_multiLinePropertyEditorGeometry);
 
 		s.setValue("PropertyEditor/fontScaleFactor", m_propertyEditorFontScaleFactor);
-		s.setValue("PropertyEditor/scriptHelpPos", m_scriptHelpWindowPos);
-		s.setValue("PropertyEditor/scriptHelpGeometry", m_scriptHelpWindowGeometry);
 	}
 
 	//
@@ -3554,8 +3484,6 @@ namespace ExtWidgets
 		connect(m_propertyVariantManager, &MultiVariantPropertyManager::valueChanged, this, &PropertyEditor::onValueChanged);
 
 		connect(this, &PropertyEditor::showErrorMessage, this, &PropertyEditor::onShowErrorMessage, Qt::QueuedConnection);
-
-		setScriptHelp(tr("<h1>This is a sample script help!</h1>"));
 
 		//
 

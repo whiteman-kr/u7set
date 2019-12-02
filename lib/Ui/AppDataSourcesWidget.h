@@ -74,9 +74,8 @@ private:
 
 		State,
 		Uptime,
-		DataReceivingRate,
 		ReceivedPacketCount,
-		ProcessedPacketCount,
+		DataReceivingRate,
 
 		ColumnCount
 	};
