@@ -137,7 +137,7 @@ private slots:
 	void					startSource();
 	void					stopSource();
 	void					selectAllSource();
-	void					optionSource();
+	void					onOptions();
 	void					copyText(QTableView* pView);
 	void					copySourceText();
 	void					copySignalText();

@@ -66,8 +66,7 @@ SourceBase.cpp \
     ../../lib/Times.cpp \
     PathOptionDialog.cpp \
     ../../lib/MemLeaksDetection.cpp \
-    FindSignalPanel.cpp \
-    SignalMask.cpp
+    FindSignalPanel.cpp
 
 
 HEADERS += \
@@ -112,8 +111,7 @@ SourceBase.h \
     PathOptionDialog.h \
     Stable.h \
     ../../lib/MemLeaksDetection.h \
-    FindSignalPanel.h \
-    SignalMask.h
+    FindSignalPanel.h
 
 RESOURCES += \
 resources.qrc

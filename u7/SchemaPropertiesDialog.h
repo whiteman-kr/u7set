@@ -24,8 +24,10 @@ public:
 	explicit SchemaPropertiesDialog(EditEngine::EditEngine* editEngine, QWidget* parent);
 	virtual ~SchemaPropertiesDialog();
 
-public:
 	void setSchema(std::shared_ptr<VFrame30::Schema> schema);
+
+protected:
+	virtual void resizeEvent(QResizeEvent* event) override;
 
 private:
 	Ui::SchemaPropertiesDialog *ui;

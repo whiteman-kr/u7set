@@ -61,6 +61,9 @@ OTHER_FILES += \
     ../Proto/proto_compile.sh
 
 HEADERS += VFrame30Lib_global.h \
+    Indicator.h \
+    IndicatorArrowIndicator.h \
+    IndicatorHistogramVert.h \
     SchemaItemFrame.h \
     SchemaItemIndicator.h \
     Stable.h \
@@ -141,6 +144,9 @@ HEADERS += VFrame30Lib_global.h \
     ImageItem.h
 
 SOURCES += \
+    Indicator.cpp \
+    IndicatorArrowIndicator.cpp \
+    IndicatorHistogramVert.cpp \
     SchemaItemFrame.cpp \
     SchemaItemIndicator.cpp \
     Settings.cpp \

@@ -44,6 +44,9 @@ bool MainWindow::createInterface()
 	createHeaderContexMenu();
 	createStatusBar();
 
+	connect(&m_sourceBase, &SourceBase::sourcesLoaded, this, &MainWindow::loadSignals, Qt::QueuedConnection);
+	connect(&m_signalBase, &SignalBase::signalsLoaded, this, &MainWindow::initSignalsInSources, Qt::QueuedConnection);
+
 	loadSources();
 
 	if (Rup::VERSION != PS::SUPPORT_VERSION)
@@ -83,7 +86,7 @@ void MainWindow::createActions()
 	m_optionAction->setShortcut(Qt::CTRL + Qt::Key_O);
 	m_optionAction->setIcon(QIcon(":/icons/Options.png"));
 	m_optionAction->setToolTip(tr("Options of sources"));
-	connect(m_optionAction, &QAction::triggered, this, &MainWindow::optionSource);
+	connect(m_optionAction, &QAction::triggered, this, &MainWindow::onOptions);
 
 	// ?
 	//
@@ -398,8 +401,6 @@ void MainWindow::createStatusBar()
 
 void MainWindow::loadSources()
 {
-	connect(&m_sourceBase, &SourceBase::sourcesLoaded, this, &MainWindow::loadSignals, Qt::QueuedConnection);
-
 	QVector<PS::Source*> ptrSourceList;
 
 	int sourceCount = m_sourceBase.readFromFile(theOptions.path().sourcePath());
@@ -418,8 +419,6 @@ void MainWindow::loadSources()
 
 void MainWindow::loadSignals()
 {
-	connect(&m_signalBase, &SignalBase::signalsLoaded, this, &MainWindow::initSignalsInSources, Qt::QueuedConnection);
-
 	int signalCount = m_signalBase.readFromFile(theOptions.path().signalPath());
 	if (signalCount == 0)
 	{
@@ -592,13 +591,16 @@ void MainWindow::selectAllSource()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::optionSource()
+void MainWindow::onOptions()
 {
 	PathOptionDialog dialog(this);
 	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}
+
+	m_signalTable.clear();
+	m_frameDataTable.clear();
 
 	m_sourceBase.stopAllSoureces();
 

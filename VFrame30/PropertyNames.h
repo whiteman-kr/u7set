@@ -30,7 +30,10 @@ namespace VFrame30
 		static const QString fontBold;
 		static const QString fontItalic;
 
+		static const QString color;
+
 		static const QString type;
+		static const QString value;
 		static const QString valueInteger;
 		static const QString valueFloat;
 		static const QString valueDiscrete;
@@ -75,6 +78,12 @@ namespace VFrame30
 		static const QString indicatorSignalColors;
 		static const QString indicatorType;
 		static const QString indicatorSettings;
+
+		static const QString indicatorSetpointType;
+		static const QString indicatorSchemaItemLabel;
+		static const QString indicatorOutputAppSignalId;
+		static const QString indicatorStaticValue;
+		static const QString indicatorStaticCompareType;
 
 		static const QString indicatorStartValue;
 		static const QString indicatorEndValue;
@@ -145,6 +154,8 @@ namespace VFrame30
 		static const QString adaptiveAperture;
 
 		static const QString loopbackId;
+
+		static const QString compareType;
 
 		static const QString busTypeId;
 		static const QString busTypeFileName;
