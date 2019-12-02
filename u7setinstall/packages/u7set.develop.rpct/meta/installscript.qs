@@ -12,11 +12,5 @@ Component.prototype.createOperations = function()
 
         component.addOperation("CreateShortcut", "@TargetDir@/u7.exe", "@DesktopDir@/RPCT (@Version@)/u7.lnk",
             "workingDirectory=@TargetDir@");
- 
-       component.addOperation("CreateShortcut", "@TargetDir@/mconf.exe", "@StartMenuDir@/mconf.lnk",
-            "workingDirectory=@TargetDir@");
-
-        component.addOperation("CreateShortcut", "@TargetDir@/mconf.exe", "@DesktopDir@/RPCT (@Version@)/mconf.lnk",
-            "workingDirectory=@TargetDir@");
     }
 }

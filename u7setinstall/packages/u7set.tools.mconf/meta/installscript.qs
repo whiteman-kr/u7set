@@ -7,10 +7,10 @@ Component.prototype.createOperations = function()
     component.createOperations();
 
     if (systemInfo.productType === "windows") {
-        component.addOperation("CreateShortcut", "@TargetDir@/Monitor.exe", "@StartMenuDir@/Monitor.lnk",
+       component.addOperation("CreateShortcut", "@TargetDir@/mconf.exe", "@StartMenuDir@/mconf.lnk",
             "workingDirectory=@TargetDir@");
 
-        component.addOperation("CreateShortcut", "@TargetDir@/Monitor.exe", "@DesktopDir@/RPCT (@Version@)/Monitor.lnk",
+        component.addOperation("CreateShortcut", "@TargetDir@/mconf.exe", "@DesktopDir@/RPCT (@Version@)/mconf.lnk",
             "workingDirectory=@TargetDir@");
     }
 }
