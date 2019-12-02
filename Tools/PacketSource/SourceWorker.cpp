@@ -96,11 +96,12 @@ void SourceWorker::process()
 
 			// send udp
 			//
-			QHostAddress serverAddress = pSource->info().serverAddress.address();
+			qint64 sentBytes = pSocket->writeDatagram(reinterpret_cast<char*>(&m_simFrame), sizeof(m_simFrame), pSource->info().serverAddress.address(), pSource->info().serverAddress.port());
 
-			qDebug() << serverAddress.toString();
-
-			qint64 res = pSocket->writeDatagram(reinterpret_cast<char*>(&m_simFrame), sizeof(m_simFrame), serverAddress, pSource->info().serverAddress.port());
+			if (sentBytes != sizeof(m_simFrame))
+			{
+				qDebug() << "Error:" << __FUNCTION__ << ", Size of frame (bytes):" << sizeof(m_simFrame) << ", but sent (bytes):" << sentBytes;
+			}
 
 			// timeout
 			//
