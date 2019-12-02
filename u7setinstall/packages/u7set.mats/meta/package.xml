@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package>
+    <DisplayName>Monitoring and Tuning System</DisplayName>
+    <Description>Install Monitoring and Tuning System</Description>
+    <Version>1.0.0</Version>
+    <ReleaseDate>2019-11-19</ReleaseDate>
+    <Default>false</Default>
+    <SortingPriority>20</SortingPriority>
+</Package>
