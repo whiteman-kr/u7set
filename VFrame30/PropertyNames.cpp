@@ -22,7 +22,10 @@ namespace VFrame30
 	const QString PropertyNames::fontBold{"FontBold"};
 	const QString PropertyNames::fontItalic{"FontItalic"};
 
+	const QString PropertyNames::color{"Color"};
+
 	const QString PropertyNames::type{"Type"};
+	const QString PropertyNames::value{"Value"};
 	const QString PropertyNames::valueInteger{"ValueInteger"};
 	const QString PropertyNames::valueFloat{"ValueFloat"};
 	const QString PropertyNames::valueDiscrete{"ValueDiscrete"};
@@ -67,6 +70,12 @@ namespace VFrame30
 	const QString PropertyNames::indicatorSignalColors{"SignalColors"};
 	const QString PropertyNames::indicatorType{"IndicatorType"};
 	const QString PropertyNames::indicatorSettings{"IndicatorSettings"};
+
+	const QString PropertyNames::indicatorSetpointType{"SetpointType"};
+	const QString PropertyNames::indicatorSchemaItemLabel{"SchemaItemLabel"};
+	const QString PropertyNames::indicatorOutputAppSignalId{"OutputAppSignalId"};
+	const QString PropertyNames::indicatorStaticValue{"StaticValue"};
+	const QString PropertyNames::indicatorStaticCompareType{"StaticCompareType"};
 
 	const QString PropertyNames::indicatorStartValue{"StartValue"};
 	const QString PropertyNames::indicatorEndValue{"EndValue"};
@@ -143,6 +152,8 @@ namespace VFrame30
 	const QString PropertyNames::adaptiveAperture{"AdaptiveAperture"};
 
 	const QString PropertyNames::loopbackId{"LoopbackID"};
+
+	const QString PropertyNames::compareType{"ÑompareType"};
 
 	const QString PropertyNames::busTypeId{"BusTypeID"};
 	const QString PropertyNames::busTypeFileName{"FileName"};
