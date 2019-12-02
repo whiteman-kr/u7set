@@ -44,15 +44,6 @@ void SourceWorker::process()
 		return;
 	}
 
-/*	if (pSocket->bind(QHostAddress(theOptions.path().localIP()), PS::UDP_PORT + static_cast<quint16>(pSource->info().index)) == false)
-	{
-		pSocket->close();
-		delete pSocket;
-
-		emit finished();
-		return;
-	}*/
-
 	int currentFrameIndex = 0;
 
 	while(m_finishThread == false)

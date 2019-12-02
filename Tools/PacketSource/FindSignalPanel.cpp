@@ -9,7 +9,6 @@
 #include <QClipboard>
 
 #include "MainWindow.h"
-#include "SignalMask.h"
 #include "Options.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -380,6 +379,9 @@ void FindSignalPanel::find()
 		return;
 	}
 
+	QRegExp rx(m_findText);
+	rx.setPatternSyntax(QRegExp::Wildcard);
+
 	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
 	if (pMainWindow == nullptr)
 	{
@@ -414,8 +416,7 @@ void FindSignalPanel::find()
 				continue;
 			}
 
-
-			if (processSignalMask(m_findText, text) == false)
+			if(rx.exactMatch(text) == false)
 			{
 				continue;
 			}

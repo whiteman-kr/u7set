@@ -16,6 +16,17 @@ SchemaPropertiesDialog::SchemaPropertiesDialog(EditEngine::EditEngine* editEngin
 	m_propertyEditor->setReadOnly(editEngine->readOnly());
 
 	ui->horizontalLayout->addWidget(m_propertyEditor);
+
+	if (QSize s = QSettings().value("SchemaPropertiesDialog/size").toSize();
+		s.isValid() == true)
+	{
+		resize(s);
+	}
+	else
+	{
+		resize(sizeHint() * 2);
+	}
+
 	return;
 }
 
@@ -35,6 +46,12 @@ void SchemaPropertiesDialog::setSchema(std::shared_ptr<VFrame30::Schema> schema)
 	m_propertyEditor->resizeColumnToContents(0);
 
 	return;
+}
+
+void SchemaPropertiesDialog::resizeEvent(QResizeEvent* event)
+{
+	QDialog::resizeEvent(event);
+	QSettings().setValue("SchemaPropertiesDialog/size", event->size());
 }
 
 //

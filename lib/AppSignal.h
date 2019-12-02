@@ -67,7 +67,26 @@ class AppSignalState
 	/// \brief Contains a unique 64-bit hash of a signal identifier
 	Q_PROPERTY(Hash Hash READ hash)
 
-	/// \brief Contains current signal value
+	/*! \brief Contains current signal value
+
+		Contains current signal value. For discrete signals <b>"False"</b> is equal to <b>0</b>, <b>"True"</b> is equal to <b>1</b>.
+
+		\warning Be careful when comparing values. Remember that <b>double</b> can't be compared directly,
+		because doubles and floats cannot express every numerical value. They are using approximations to represent the value.
+		It is recommended to make comparsions as follows, especially analog values:
+
+		\code
+		var a = state.Value;
+		var b = 1.5;
+
+		var threshold = 0.0000001;
+
+		if (Math.abs(a - b) <= threshold)
+		{
+		...
+		}
+		\endcode
+	*/
 	Q_PROPERTY(double Value READ value)
 
 	/// \brief Contains signal validity flag

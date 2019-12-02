@@ -387,6 +387,7 @@ void SignalBase::clear()
 	m_signalMutex.lock();
 
 		m_signalList.clear();
+		m_signalHashMap.clear();
 
 	m_signalMutex.unlock();
 }
@@ -494,13 +495,13 @@ int SignalBase::append(const PS::Signal& signal)
 
 	m_signalMutex.lock();
 
-	if (m_signalHashMap.contains(signal.hash()) == false)
-	{
-		m_signalList.append(signal);
-		index = m_signalList.count() - 1;
+		if (m_signalHashMap.contains(signal.hash()) == false)
+		{
+			m_signalList.append(signal);
+			index = m_signalList.count() - 1;
 
-		m_signalHashMap.insert(signal.hash(), index);
-	}
+			m_signalHashMap.insert(signal.hash(), index);
+		}
 
 	m_signalMutex.unlock();
 

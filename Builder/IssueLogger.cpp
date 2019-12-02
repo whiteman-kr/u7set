@@ -615,7 +615,7 @@ namespace Builder
 				  QString(tr("Opening project %1 error (%2).")).arg(projectName).arg(dbLastError));
 	}
 
-	/// IssueCode: PDB2020B
+	/// IssueCode: PDB2020
 	///
 	/// IssueType: Error
 	///
@@ -6747,7 +6747,7 @@ namespace Builder
 
 
 
-	/// IssueCode: wrnALC5800
+	/// IssueCode: ALC5800
 	///
 	/// IssueType: Warning
 	///
@@ -6768,7 +6768,7 @@ namespace Builder
 								arg(subsystemID).arg(QString::number(uartId, 16)));
 	}
 
-	/// IssueCode: errALC5801
+	/// IssueCode: ALC5801
 	///
 	/// IssueType: Error
 	///

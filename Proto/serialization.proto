@@ -515,6 +515,22 @@ message SchemaItemFrame
 }
 
 //
+// VFrameSetPoint
+//
+message VFrameSetPoint
+{
+    optional int32 setpointType = 2 [default = 0];		// Is mapped to enum E::IndicatorSetpointType, 0 is IndicatorSetpointType::Static
+	optional uint32 color = 3;
+
+    optional string schemaItemLabel = 10;
+
+    optional string outputAppSignalId = 20;
+
+    optional double staticValue = 30;
+	optional int32 staticCompareType = 31;
+}
+
+//
 // SchemaItemIndicator
 //
 message IndicatorHistogramVert
@@ -538,6 +554,10 @@ message IndicatorHistogramVert
 	optional bool drawGridValueUnits = 44 [default = true];
 	optional double gridMainStep = 50 [default = 50.0];
 	optional double gridSmallStep = 51 [default = 10.0];
+
+    optional bool drawAutoSetpoints = 70;
+	optional bool drawCustomSetpoints = 71;
+	repeated IndicatorHistogramVert customSetPoints = 72;
 }
 
 message IndicatorArrowIndicator
