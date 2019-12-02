@@ -151,7 +151,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 				break;
 		}
 
-		if (column == STATISTIC_COLUMN_STATE && pSignal->statistic().measureCount() == 0)
+		if (column == STATISTIC_COLUMN_STATE && pSignal->statistic().isMeasured() == false)
 		{
 			return QColor(Qt::lightGray);
 		}
@@ -163,12 +163,12 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 	{
 		if (column == STATISTIC_COLUMN_CUSTOM_ID || column == STATISTIC_COLUMN_EQUIPMENT_ID || column == STATISTIC_COLUMN_STATE)
 		{
-			if (pSignal->statistic().measureCount() != 0)
+			if (pSignal->statistic().isMeasured() == true)
 			{
 				switch (pSignal->statistic().state())
 				{
-					case Metrology::StatisticStateFailed:	return theOptions.measureView().colorErrorLimit();	break;
-					case Metrology::StatisticStateSuccess:	return theOptions.measureView().colorNotError();	break;
+					case Metrology::SignalStatistic::State::Failed:		return theOptions.measureView().colorErrorLimit();	break;
+					case Metrology::SignalStatistic::State::Success:	return theOptions.measureView().colorNotError();	break;
 				}
 			}
 		}
@@ -1033,7 +1033,7 @@ void StatisticPanel::gotoNextNotMeasured()
 			continue;
 		}
 
-		if (pSignal->statistic().measureCount() == 0)
+		if (pSignal->statistic().isMeasured() == false)
 		{
 			foundIndex = i;
 
@@ -1080,7 +1080,7 @@ void StatisticPanel::gotoNextInvalid()
 			continue;
 		}
 
-		if (pSignal->statistic().state() == Metrology::StatisticStateFailed)
+		if (pSignal->statistic().state() == Metrology::SignalStatistic::State::Failed)
 		{
 			foundIndex = i;
 

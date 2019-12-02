@@ -2291,11 +2291,11 @@ Metrology::SignalStatistic MeasureBase::getSignalStatistic(const Hash& signalHas
 							break;
 						}
 
-						si.measureCount()++;
+						si.setMeasureCount(si.measureCount() + 1);
 
 						if (pLinearityMeasurement->error(limitType, errorType) > pLinearityMeasurement->errorLimit(limitType, errorType))
 						{
-							si.setState(Metrology::StatisticStateFailed);
+							si.setState(Metrology::SignalStatistic::State::Failed);
 						}
 					}
 					break;

@@ -714,12 +714,16 @@ namespace Metrology
 			return QString("Not measured");
 		}
 
-		if (m_state < 0 || m_state >= StatisticStateCount)
+		QString state;
+
+		switch (m_state)
 		{
-			return QString();
+			case State::Failed:		state = "Failed";	break;
+			case State::Success:	state = "Ok";		break;
+			default:				assert(0);			break;
 		}
 
-		return StatisticState[m_state];
+		return state;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

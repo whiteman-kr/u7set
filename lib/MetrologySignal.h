@@ -270,39 +270,27 @@ namespace Metrology
 
 	private:
 
-		double					m_value = 0;
+		double m_value = 0;
 
-		AppSignalStateFlags		m_flags;
+		AppSignalStateFlags m_flags;
 
 	public:
 
-		void					setState(const AppSignalState& state) { m_value = state.m_value; m_flags = state.m_flags; }
+		void setState(const AppSignalState& state) { m_value = state.m_value; m_flags = state.m_flags; }
 
-		double					value() const { return m_value; }
-		void					setValue(double value) { m_value = value; }
+		double value() const { return m_value; }
+		void setValue(double value) { m_value = value; }
 
-		AppSignalStateFlags		flags() const { return m_flags; }
-		void					setFlags(const AppSignalStateFlags& flags) { m_flags = flags; }
+		AppSignalStateFlags flags() { return m_flags; }
+		const AppSignalStateFlags& flags() const { return m_flags; }
+		void setFlags(const AppSignalStateFlags& flags) { m_flags = flags; }
 
-		bool					valid() const { return m_flags.valid; }
-		void					setValid(bool valid) { m_flags.valid = valid; }
+		bool valid() const { return m_flags.valid; }
+		void setValid(bool valid) { m_flags.valid = valid; }
 	};
 
 
 	// ==============================================================================================
-
-	const char* const StatisticState[] =
-	{
-				QT_TRANSLATE_NOOP("MetrologySignal.h", "Failed"),
-				QT_TRANSLATE_NOOP("MetrologySignal.h", "Ok"),
-	};
-
-	const int	StatisticStateCount		= sizeof(StatisticState)/sizeof(StatisticState[0]);
-
-	const int	StatisticStateFailed	= 0,
-				StatisticStateSuccess	= 1;
-
-	// ----------------------------------------------------------------------------------------------
 
 	class SignalStatistic
 	{
@@ -312,24 +300,33 @@ namespace Metrology
 		explicit SignalStatistic(const Hash& signalHash) : m_signalHash (signalHash) {}
 		virtual ~SignalStatistic() {}
 
+		enum State
+		{
+			Failed,
+			Success,
+		};
+
 	private:
 
-		Hash					m_signalHash = 0;
+		Hash m_signalHash = UNDEFINED_HASH;
 
-		int						m_measureCount = 0;
-		int						m_state = StatisticStateSuccess;
+		int m_measureCount = 0;
+		State m_state = State::Success;
 
 	public:
 
-		Hash					signalHash() const { return m_signalHash; }
-		void					setSignalHash(const Hash& hash) { m_signalHash = hash; }
+		Hash signalHash() const { return m_signalHash; }
+		void setSignalHash(const Hash& hash) { m_signalHash = hash; }
 
-		int&					measureCount() { return m_measureCount; }
-		QString					measureCountStr() const;
+		int measureCount() const { return m_measureCount; }
+		void setMeasureCount(int count) { m_measureCount = count; }
+		QString measureCountStr() const;
 
-		int						state() const { return m_state; }
-		QString					stateStr() const;
-		void					setState(bool state) { m_state = state; }
+		State state() const { return m_state; }
+		void setState(State state) { m_state = state; }
+		QString stateStr() const;
+
+		bool isMeasured() const { return m_measureCount != 0; }
 	};
 
 	// ==============================================================================================
@@ -344,22 +341,24 @@ namespace Metrology
 
 	private:
 
-		SignalParam				m_param;
-		SignalState				m_state;
+		SignalParam m_param;
+		SignalState m_state;
 
-		SignalStatistic			m_statistic;
+		SignalStatistic m_statistic;
 
 	public:
 
-		SignalParam&			param() { return m_param; }
-		void					setParam(const Metrology::SignalParam& param) { m_param = param; }
+		SignalParam& param() { return m_param; }
+		const SignalParam& param() const { return m_param; }
+		void setParam(const Metrology::SignalParam& param) { m_param = param; }
 
-		SignalState&			state() { return m_state; }
-		void					setState(const Metrology::SignalState& state) { m_state = state; }
+		SignalState& state() { return m_state; }
+		const SignalState& state() const { return m_state; }
+		void setState(const Metrology::SignalState& state) { m_state = state; }
 
-		SignalStatistic&		statistic() { return m_statistic; }
-		void					setStatistic(const SignalStatistic& statistic) { m_statistic = statistic; }
-
+		SignalStatistic& statistic() { return m_statistic; }
+		const SignalStatistic& statistic() const { return m_statistic; }
+		void setStatistic(const SignalStatistic& statistic) { m_statistic = statistic; }
 	};
 
 	// ==============================================================================================
