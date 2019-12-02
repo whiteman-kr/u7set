@@ -2,6 +2,7 @@
 #include "../lib/MetrologySignal.h"
 #include "../lib/ServiceSettings.h"
 #include "../lib/DeviceObject.h"
+#include "../lib/SignalProperties.h"
 
 namespace Builder
 {
@@ -318,45 +319,32 @@ namespace Builder
 
 					bool hasWrongField = false;
 
-					if (E::contains<E::SensorType>(signal.sensorType()) == false)
+					if (signal.isAnalog() == true && signal.isInput() == true)
 					{
-						// Signal %1 has wrong type of sensor: %2.
-						//
-						m_log->errEQP6102(signal.appSignalID(), signal.sensorType());
-						hasWrongField = true;
-					}
-
-					if (signal.isInput() == true)
-					{
-						switch (signal.electricUnit())
+						if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == true)
 						{
-							case E::ElectricUnit::mV:
+							switch (signal.electricUnit())
+							{
+								case E::ElectricUnit::mV:
 
-								if (testElectricRange_ThermoCouple(signal) == false)
-								{
-									hasWrongField = true;
-								}
-								break;
+									if (testElectricRange_ThermoCouple(signal) == false)
+									{
+										hasWrongField = true;
+									}
+									break;
 
-							case E::ElectricUnit::Ohm:
+								case E::ElectricUnit::Ohm:
 
-								if (testElectricRange_ThermoResistor(signal) == false)
-								{
-									hasWrongField = true;
-								}
-								break;
+									if (testElectricRange_ThermoResistor(signal) == false)
+									{
+										hasWrongField = true;
+									}
+									break;
+							}
 						}
 					}
 
-					if (E::contains<E::OutputMode>(signal.outputMode()) == false)
-					{
-						// Signal %1 has wrong type of output range mode: %2.
-						//
-						m_log->errEQP6103(signal.appSignalID(), signal.outputMode());
-						hasWrongField = true;
-					}
-
-					if (hasWrongField)
+					if (hasWrongField == true)
 					{
 						continue;
 					}
@@ -408,6 +396,21 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testElectricRange_ThermoCouple(const Signal& signal)
 	{
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false || signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return true;
+		}
+
 		if (signal.electricUnit() != E::ElectricUnit::mV)
 		{
 			return false;
@@ -486,6 +489,21 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testElectricRange_ThermoResistor(const Signal& signal)
 	{
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false || signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return true;
+		}
+
 		if (signal.electricUnit() != E::ElectricUnit::Ohm)
 		{
 			return false;
@@ -495,9 +513,12 @@ namespace Builder
 		bool isEnum;
 		double r0 = 0;
 
-		if (signal.getSpecPropValue("R0_Ohm", &qv, &isEnum) == true)
+		if (signal.isSpecPropExists(SignalProperties::R0_OhmCaption) == true)
 		{
-			r0 = qv.toDouble();
+			if (signal.getSpecPropValue(SignalProperties::R0_OhmCaption, &qv, &isEnum) == true)
+			{
+				r0 = qv.toDouble();
+			}
 		}
 
 		if (r0 == 0.0 && signal.sensorType() != E::SensorType::Ohm_Raw)

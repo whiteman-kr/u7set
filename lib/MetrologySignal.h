@@ -5,8 +5,9 @@
 #include "../lib/DeviceObject.h"
 #include "../lib/XmlHelper.h"
 #include "../lib/UnitsConvertor.h"
-#include "../Builder/CfgFiles.h"
 #include "../lib/ComparatorSet.h"
+#include "../lib/SignalProperties.h"
+#include "../Builder/CfgFiles.h"
 
 // Attention !!!
 // If you want to change any function writeToXml you must change CFG_FILE_VER_METROLOGY_SIGNALS

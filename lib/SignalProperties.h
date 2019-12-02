@@ -146,6 +146,7 @@ public:
 	static const QString electricHighLimitCaption;
 	static const QString electricUnitCaption;
 	static const QString sensorTypeCaption;
+	static const QString R0_OhmCaption;
 	static const QString outputModeCaption;
 	static const QString acquireCaption;
 	static const QString archiveCaption;
