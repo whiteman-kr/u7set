@@ -415,6 +415,7 @@ namespace Builder
 		void errALC5173(QString signalCaption, QString fbCaption, QUuid itemUuid);		// Required signal %1 of AFB %2 is missing.
 		void errALC5174(QString fbCaption, QUuid itemUuid);								// Required AFB %1 is missing.
 		void errALC5175(QString signalID, QString inFormat, QString outFormat);			// Unknown conversion of signal %1 from %2 to %3 format.
+		void errALC5176(QString signalID, QString propertyName);						// Specific property %1 is not exists in signal %2
 
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.
@@ -473,8 +474,8 @@ namespace Builder
 
 		void errEQP6110(QString appSignalID);												//  Signal %1 has wrong physical low Limit
 		void errEQP6111(QString appSignalID);												//  Signal %1 has wrong physical high Limit
-		void errEQP6112(QString appSignalID, QString wrongValue, QString correctValue);		//  Signal %1 - engeneering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3
-		void errEQP6113(QString appSignalID, QString wrongValue, QString correctValue);		//  Signal %1 - engeneering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3
+		void errEQP6112(QString appSignalID, QString wrongValue, QString correctValue);		//  Signal %1 - engineering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3
+		void errEQP6113(QString appSignalID, QString wrongValue, QString correctValue);		//  Signal %1 - engineering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3
 		void errEQP6114(QString appSignalID);												//  Signal %1 has wrong R0 (ThermoResistor)
 
 

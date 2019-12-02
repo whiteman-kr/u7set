@@ -347,7 +347,7 @@ QString MeasureTable::textLinearity(int row, int column) const
 
 	if (theOptions.linearity().viewType() == LO_VIEW_TYPE_DETAIL_ENGINEERING)
 	{
-		detailLimitType = MEASURE_LIMIT_TYPE_ENGENEER;
+		detailLimitType = MEASURE_LIMIT_TYPE_ENGINEER;
 	}
 
 	QString result;
@@ -368,15 +368,15 @@ QString MeasureTable::textLinearity(int row, int column) const
 		case MVC_CMN_L_PLACE:					result = m->location().placeStr(); break;
 
 		case MVC_CMN_L_EL_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
-		case MVC_CMN_L_EN_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_ENGENEER); break;
+	    case MVC_CMN_L_EN_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_ENGINEER); break;
 
 		case MVC_CMN_L_PERCENT:					result = QString::number(m->percent(), 10, 2); break;
 
 		case MVC_CMN_L_EL_MEASURE:				result = m->measureStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
-		case MVC_CMN_L_EN_MEASURE:				result = m->measureStr(MEASURE_LIMIT_TYPE_ENGENEER); break;
+	    case MVC_CMN_L_EN_MEASURE:				result = m->measureStr(MEASURE_LIMIT_TYPE_ENGINEER); break;
 
 		case MVC_CMN_L_EL_RANGE:				result = m->limitStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
-		case MVC_CMN_L_EN_RANGE:				result = m->limitStr(MEASURE_LIMIT_TYPE_ENGENEER); break;
+	    case MVC_CMN_L_EN_RANGE:				result = m->limitStr(MEASURE_LIMIT_TYPE_ENGINEER); break;
 
 		case MVC_CMN_L_VALUE_COUNT:				result = QString::number(m->measureCount()); break;
 		case MVC_CMN_L_VALUE_0:					result = m->measureItemStr(detailLimitType, 0); break;
@@ -477,13 +477,13 @@ QString MeasureTable::textComparator(int row, int column) const
 		case MVC_CMN_C_CMP_TYPE:				result = m->cmpTypeStr(); break;
 
 		case MVC_CMN_C_EL_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
-		case MVC_CMN_C_EN_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_ENGENEER); break;
+	    case MVC_CMN_C_EN_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_ENGINEER); break;
 
 		case MVC_CMN_C_EL_MEASURE:				result = m->measureStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
-		case MVC_CMN_C_EN_MEASURE:				result = m->measureStr(MEASURE_LIMIT_TYPE_ENGENEER); break;
+	    case MVC_CMN_C_EN_MEASURE:				result = m->measureStr(MEASURE_LIMIT_TYPE_ENGINEER); break;
 
 		case MVC_CMN_C_EL_RANGE:				result = m->limitStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
-		case MVC_CMN_C_EN_RANGE:				result = m->limitStr(MEASURE_LIMIT_TYPE_ENGENEER); break;
+	    case MVC_CMN_C_EN_RANGE:				result = m->limitStr(MEASURE_LIMIT_TYPE_ENGINEER); break;
 
 		case MVC_CMN_C_ERROR:					result = m->errorStr(); break;
 		case MVC_CMN_C_ERROR_LIMIT:				result = m->errorLimitStr(); break;

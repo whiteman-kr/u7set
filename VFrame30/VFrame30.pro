@@ -141,7 +141,9 @@ HEADERS += VFrame30Lib_global.h \
     TuningSchema.h \
     SchemaItemImage.h \
     SchemaItemImageValue.h \
-    ImageItem.h
+    ImageItem.h \
+    ../Builder/IssueLogger.h \
+    ../lib/OutputLog.h
 
 SOURCES += \
     Indicator.cpp \
@@ -215,7 +217,9 @@ SOURCES += \
     TuningSchema.cpp \
     SchemaItemImage.cpp \
     SchemaItemImageValue.cpp \
-    ImageItem.cpp
+    ImageItem.cpp \
+    ../Builder/IssueLogger.cpp \
+    ../lib/OutputLog.cpp
 
 DEFINES += VFRAME30LIB_LIBRARY
 CONFIG(debug, debug|release): DEFINES += Q_DEBUG

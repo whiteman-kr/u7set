@@ -184,7 +184,7 @@ bool MeasureThread::setActiveSignalParam(const MeasureSignal& activeSignal)
 				continue;
 			}
 
-//			if (param.physicalRangeIsValid() == false || param.engeneeringRangeIsValid() == false || param.electricRangeIsValid() == false)
+//			if (param.physicalRangeIsValid() == false || param.engineeringRangeIsValid() == false || param.electricRangeIsValid() == false)
 //			{
 //				continue;
 //			}
@@ -674,11 +674,11 @@ void MeasureThread::measureLinearity()
 				case SIGNAL_CONNECTION_TYPE_UNUSED:
 				case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
 					{
-						// at the beginning we need get engeneering value because if range is not Linear (for instance Ohm or mV)
-						// then by engeneering value we may get electric value
+						// at the beginning we need get engineering value because if range is not Linear (for instance Ohm or mV)
+						// then by engineering value we may get electric value
 						//
-						double engeneeringVal = (point.percent() * (inParam.highEngeneeringUnits() - inParam.lowEngeneeringUnits()) / 100) + inParam.lowEngeneeringUnits();
-						double electricVal = conversion(engeneeringVal, CT_ENGENEER_TO_ELECTRIC, inParam);
+						double engineeringVal = (point.percent() * (inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) / 100) + inParam.lowEngineeringUnits();
+						double electricVal = conversion(engineeringVal, CT_ENGINEER_TO_ELECTRIC, inParam);
 
 						polarityTest(electricVal, m_activeIoParamList[ch]);	// polarity test
 
@@ -904,7 +904,7 @@ void MeasureThread::measureComprators()
 
 					// calc start value for comaprator
 					//
-					double startValueForComapre = ((inParam.highEngeneeringUnits() - inParam.lowEngeneeringUnits()) * theOptions.comparator().startValueForCompare()) / 100.0 ;
+					double startValueForComapre = ((inParam.highEngineeringUnits() - inParam.lowEngineeringUnits()) * theOptions.comparator().startValueForCompare()) / 100.0 ;
 
 					//
 					//
@@ -917,18 +917,18 @@ void MeasureThread::measureComprators()
 						default:							continue;
 					}
 
-					double engeneeringVal = 0;
+					double engineeringVal = 0;
 
 					switch (pComparator->cmpType())
 					{
-						case E::CmpType::Equal:		engeneeringVal = compareVal - deltaVal;		break;
-						case E::CmpType::Greate:	engeneeringVal = compareVal - deltaVal;		break;
-						case E::CmpType::Less:		engeneeringVal = compareVal + deltaVal;		break;
-						case E::CmpType::NotEqual:	engeneeringVal = compareVal;				break;
+						case E::CmpType::Equal:		engineeringVal = compareVal - deltaVal;		break;
+						case E::CmpType::Greate:	engineeringVal = compareVal - deltaVal;		break;
+						case E::CmpType::Less:		engineeringVal = compareVal + deltaVal;		break;
+						case E::CmpType::NotEqual:	engineeringVal = compareVal;				break;
 						default:					continue;
 					}
 
-					double electricVal = conversion(engeneeringVal, CT_ENGENEER_TO_ELECTRIC, inParam);
+					double electricVal = conversion(engineeringVal, CT_ENGINEER_TO_ELECTRIC, inParam);
 
 					if (electricVal < inParam.electricLowLimit())
 					{

@@ -21,6 +21,7 @@
 #include <QSplitter>
 #include <QScrollBar>
 #include <QStandardItemModel>
+#include <QAbstractItemModelTester>
 
 
 const int DEFAULT_COLUMN_WIDTH = 50;
@@ -389,6 +390,13 @@ void SignalPropertyManager::reloadPropertyBehaviour(DbController* dbController, 
 
 	for (QString row : rows)
 	{
+		row = row.trimmed();
+
+		if (row.isEmpty() == true)
+		{
+			continue;
+		}
+
 		QStringList fields = row.split(';', QString::KeepEmptyParts);
 		trimm(fields);
 
@@ -855,13 +863,21 @@ SignalsModel::~SignalsModel()
 }
 
 
-int SignalsModel::rowCount(const QModelIndex &) const
+int SignalsModel::rowCount(const QModelIndex& parentIndex) const
 {
+	if (parentIndex.isValid())
+	{
+		return 0;
+	}
 	return m_signalSet.count();
 }
 
-int SignalsModel::columnCount(const QModelIndex &) const
+int SignalsModel::columnCount(const QModelIndex& parentIndex) const
 {
+	if (parentIndex.isValid())
+	{
+		return 0;
+	}
 	return m_propertyManager.count() + 1;	// Usual properties and "Last change user"
 }
 
@@ -1206,6 +1222,10 @@ bool SignalsModel::setData(const QModelIndex &index, const QVariant &value, int 
 
 Qt::ItemFlags SignalsModel::flags(const QModelIndex &index) const
 {
+	if (index.isValid() == false)
+	{
+		return QAbstractTableModel::flags(index);
+	}
 	int row = index.row();
 	int column = index.column();
 
@@ -1464,6 +1484,7 @@ void SignalsModel::addSignal()
 				for (int i = 0; i < signalVector.count(); i++)
 				{
 					resultSignalVector.append(signalVector[i]);
+					m_propertyManager.detectNewProperties(signalVector[i]);
 				}
 			}
 		}
@@ -1738,6 +1759,12 @@ void SignalsModel::initLazyLoadSignals()
 	QVector<ID_AppSignalID> signalIds;
 	dbController()->getSignalsIDAppSignalID(&signalIds, m_parentWindow);
 
+	if (signalIds.count() == 0)
+	{
+		return;
+	}
+
+	beginResetModel();
 	for (const ID_AppSignalID& id : signalIds)
 	{
 		m_signalSet.replaceOrAppendIfNotExists(id.ID, Signal(id));
@@ -1772,13 +1799,8 @@ void SignalsModel::initLazyLoadSignals()
 		}
 
 		loadNotSpecificProperties(signalsArray[0]);
-
-		if (m_signalSet.count() > 0)
-		{
-			beginInsertRows(QModelIndex(), 0, m_signalSet.count() - 1);
-			endInsertRows();
-		}
 	}
+	endResetModel();
 }
 
 void SignalsModel::finishLoadSignals()
@@ -1812,7 +1834,8 @@ void SignalsModel::finishLoadSignals()
 
 	m_partialLoading = false;
 
-	emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, columnCount() - 1), QVector<int>() << Qt::EditRole << Qt::DisplayRole);
+	beginResetModel();
+	endResetModel();
 	emit signalsLoadingFinished();
 }
 
@@ -1967,11 +1990,13 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 	// Property View
 	//
 	m_signalsModel = new SignalsModel(dbcontroller, this);
+	//new QAbstractItemModelTester(m_signalsModel, QAbstractItemModelTester::FailureReportingMode::Fatal, this);
 	m_signalsProxyModel = new SignalsProxyModel(m_signalsModel, this);
 	m_signalsView = new QTableView(this);
 	m_signalsView->setModel(m_signalsProxyModel);
 	m_signalsView->verticalHeader()->setDefaultAlignment(Qt::AlignRight | Qt::AlignVCenter);
 	m_signalsView->verticalHeader()->setFixedWidth(DEFAULT_COLUMN_WIDTH);
+	m_signalsView->verticalHeader()->hide();
 	SignalsDelegate* delegate = m_signalsModel->createDelegate(m_signalsProxyModel);
 	m_signalsView->setItemDelegate(delegate);
 
@@ -2003,8 +2028,8 @@ SignalsTabPage::SignalsTabPage(DbController* dbcontroller, QWidget* parent) :
 		SignalProperties::typeCaption,
 		SignalProperties::inOutTypeCaption,
 		SignalProperties::equipmentIDCaption,
-		SignalProperties::lowEngeneeringUnitsCaption,
-		SignalProperties::highEngeneeringUnitsCaption,
+		SignalProperties::lowEngineeringUnitsCaption,
+		SignalProperties::highEngineeringUnitsCaption,
 	};
 
 	for (const QString& columnName : defaultSignalPropertyVisibility)
@@ -3305,7 +3330,6 @@ bool SignalsProxyModel::lessThan(const QModelIndex &source_left, const QModelInd
 
 void SignalsProxyModel::setSignalTypeFilter(int signalType)
 {
-
 	if (m_signalType != signalType)
 	{
 		m_signalType = signalType;

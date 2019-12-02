@@ -24,13 +24,13 @@ MeasureViewColumn MeasureViewHeader::m_column[MEASURE_TYPE_COUNT][MEASURE_VIEW_C
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Chassis"), 60, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Module"), 60, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Place"), 60, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_DISABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Engeneering range"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Engineering range"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Electric range"), 150, MVC_CMN_HIDE, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Electric nominal"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Engeneering nominal"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Engineering nominal"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Value to %"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Electric measure"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
-		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Engeneering measure"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
+		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Engineering measure"), 130, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "System error"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Standard deviation"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
 		MeasureViewColumn(QT_TRANSLATE_NOOP("MeasureViewHeader", "Borders"), 80, MVC_CMN_SHOW, Qt::AlignHCenter, MVC_CMN_ENABLE_DUPLICATE),
@@ -313,12 +313,12 @@ void MeasureViewHeader::updateColumnState()
 	{
 		case MEASURE_TYPE_LINEARITY:
 			{
-				// show columns of engeneering value
+				// show columns of engineering value
 				//
-				bool visibleEngeneering = theOptions.linearity().showEngeneeringValueColumn();
+				bool visibleEngineering = theOptions.linearity().showEngineeringValueColumn();
 
-				setColumnVisible(MVC_CMN_L_EN_NOMINAL, visibleEngeneering);
-				setColumnVisible(MVC_CMN_L_EN_MEASURE, visibleEngeneering);
+				setColumnVisible(MVC_CMN_L_EN_NOMINAL, visibleEngineering);
+				setColumnVisible(MVC_CMN_L_EN_MEASURE, visibleEngineering);
 
 				// list type
 				//

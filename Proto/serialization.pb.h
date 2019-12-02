@@ -11181,6 +11181,22 @@ class AppSignal : public ::google::protobuf::Message {
   inline ::std::string* release_specpropvalues();
   inline void set_allocated_specpropvalues(::std::string* specpropvalues);
 
+  // repeated string tags = 92;
+  inline int tags_size() const;
+  inline void clear_tags();
+  static const int kTagsFieldNumber = 92;
+  inline const ::std::string& tags(int index) const;
+  inline ::std::string* mutable_tags(int index);
+  inline void set_tags(int index, const ::std::string& value);
+  inline void set_tags(int index, const char* value);
+  inline void set_tags(int index, const char* value, size_t size);
+  inline ::std::string* add_tags();
+  inline void add_tags(const ::std::string& value);
+  inline void add_tags(const char* value);
+  inline void add_tags(const char* value, size_t size);
+  inline const ::google::protobuf::RepeatedPtrField< ::std::string>& tags() const;
+  inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_tags();
+
   // optional .Proto.AppSignalDbField dbField = 120;
   inline bool has_dbfield() const;
   inline void clear_dbfield();
@@ -11285,12 +11301,13 @@ class AppSignal : public ::google::protobuf::Message {
   double fineaperture_;
   ::std::string* specpropstruct_;
   ::std::string* specpropvalues_;
+  ::google::protobuf::RepeatedPtrField< ::std::string> tags_;
   ::Proto::AppSignalDbField* dbfield_;
   ::Proto::AppSignalCalculatedParam* calcparam_;
   bool adaptiveaperture_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(28 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(29 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -11587,6 +11604,42 @@ class ProtoAppSignalData : public ::google::protobuf::Message {
   inline bool excludefrombuild() const;
   inline void set_excludefrombuild(bool value);
 
+  // optional string tags = 19;
+  inline bool has_tags() const;
+  inline void clear_tags();
+  static const int kTagsFieldNumber = 19;
+  inline const ::std::string& tags() const;
+  inline void set_tags(const ::std::string& value);
+  inline void set_tags(const char* value);
+  inline void set_tags(const char* value, size_t size);
+  inline ::std::string* mutable_tags();
+  inline ::std::string* release_tags();
+  inline void set_allocated_tags(::std::string* tags);
+
+  // optional string userSpecPropStruct = 20;
+  inline bool has_userspecpropstruct() const;
+  inline void clear_userspecpropstruct();
+  static const int kUserSpecPropStructFieldNumber = 20;
+  inline const ::std::string& userspecpropstruct() const;
+  inline void set_userspecpropstruct(const ::std::string& value);
+  inline void set_userspecpropstruct(const char* value);
+  inline void set_userspecpropstruct(const char* value, size_t size);
+  inline ::std::string* mutable_userspecpropstruct();
+  inline ::std::string* release_userspecpropstruct();
+  inline void set_allocated_userspecpropstruct(::std::string* userspecpropstruct);
+
+  // optional bytes userSpecPropValues = 21;
+  inline bool has_userspecpropvalues() const;
+  inline void clear_userspecpropvalues();
+  static const int kUserSpecPropValuesFieldNumber = 21;
+  inline const ::std::string& userspecpropvalues() const;
+  inline void set_userspecpropvalues(const ::std::string& value);
+  inline void set_userspecpropvalues(const char* value);
+  inline void set_userspecpropvalues(const void* value, size_t size);
+  inline ::std::string* mutable_userspecpropvalues();
+  inline ::std::string* release_userspecpropvalues();
+  inline void set_allocated_userspecpropvalues(::std::string* userspecpropvalues);
+
   // @@protoc_insertion_point(class_scope:Proto.ProtoAppSignalData)
  private:
   inline void set_has_bustypeid();
@@ -11625,6 +11678,12 @@ class ProtoAppSignalData : public ::google::protobuf::Message {
   inline void clear_has_adaptiveaperture();
   inline void set_has_excludefrombuild();
   inline void clear_has_excludefrombuild();
+  inline void set_has_tags();
+  inline void clear_has_tags();
+  inline void set_has_userspecpropstruct();
+  inline void clear_has_userspecpropstruct();
+  inline void set_has_userspecpropvalues();
+  inline void clear_has_userspecpropvalues();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -11645,10 +11704,13 @@ class ProtoAppSignalData : public ::google::protobuf::Message {
   ::google::protobuf::int32 decimalplaces_;
   double coarseaperture_;
   double fineaperture_;
+  ::std::string* tags_;
+  ::std::string* userspecpropstruct_;
+  ::std::string* userspecpropvalues_;
   bool excludefrombuild_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(18 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(21 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -29103,15 +29165,59 @@ inline void AppSignal::set_allocated_specpropvalues(::std::string* specpropvalue
   }
 }
 
+// repeated string tags = 92;
+inline int AppSignal::tags_size() const {
+  return tags_.size();
+}
+inline void AppSignal::clear_tags() {
+  tags_.Clear();
+}
+inline const ::std::string& AppSignal::tags(int index) const {
+  return tags_.Get(index);
+}
+inline ::std::string* AppSignal::mutable_tags(int index) {
+  return tags_.Mutable(index);
+}
+inline void AppSignal::set_tags(int index, const ::std::string& value) {
+  tags_.Mutable(index)->assign(value);
+}
+inline void AppSignal::set_tags(int index, const char* value) {
+  tags_.Mutable(index)->assign(value);
+}
+inline void AppSignal::set_tags(int index, const char* value, size_t size) {
+  tags_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* AppSignal::add_tags() {
+  return tags_.Add();
+}
+inline void AppSignal::add_tags(const ::std::string& value) {
+  tags_.Add()->assign(value);
+}
+inline void AppSignal::add_tags(const char* value) {
+  tags_.Add()->assign(value);
+}
+inline void AppSignal::add_tags(const char* value, size_t size) {
+  tags_.Add()->assign(reinterpret_cast<const char*>(value), size);
+}
+inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
+AppSignal::tags() const {
+  return tags_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::std::string>*
+AppSignal::mutable_tags() {
+  return &tags_;
+}
+
 // optional .Proto.AppSignalDbField dbField = 120;
 inline bool AppSignal::has_dbfield() const {
-  return (_has_bits_[0] & 0x04000000u) != 0;
+  return (_has_bits_[0] & 0x08000000u) != 0;
 }
 inline void AppSignal::set_has_dbfield() {
-  _has_bits_[0] |= 0x04000000u;
+  _has_bits_[0] |= 0x08000000u;
 }
 inline void AppSignal::clear_has_dbfield() {
-  _has_bits_[0] &= ~0x04000000u;
+  _has_bits_[0] &= ~0x08000000u;
 }
 inline void AppSignal::clear_dbfield() {
   if (dbfield_ != NULL) dbfield_->::Proto::AppSignalDbField::Clear();
@@ -29143,13 +29249,13 @@ inline void AppSignal::set_allocated_dbfield(::Proto::AppSignalDbField* dbfield)
 
 // optional .Proto.AppSignalCalculatedParam calcParam = 121;
 inline bool AppSignal::has_calcparam() const {
-  return (_has_bits_[0] & 0x08000000u) != 0;
+  return (_has_bits_[0] & 0x10000000u) != 0;
 }
 inline void AppSignal::set_has_calcparam() {
-  _has_bits_[0] |= 0x08000000u;
+  _has_bits_[0] |= 0x10000000u;
 }
 inline void AppSignal::clear_has_calcparam() {
-  _has_bits_[0] &= ~0x08000000u;
+  _has_bits_[0] &= ~0x10000000u;
 }
 inline void AppSignal::clear_calcparam() {
   if (calcparam_ != NULL) calcparam_->::Proto::AppSignalCalculatedParam::Clear();
@@ -29798,6 +29904,216 @@ inline bool ProtoAppSignalData::excludefrombuild() const {
 inline void ProtoAppSignalData::set_excludefrombuild(bool value) {
   set_has_excludefrombuild();
   excludefrombuild_ = value;
+}
+
+// optional string tags = 19;
+inline bool ProtoAppSignalData::has_tags() const {
+  return (_has_bits_[0] & 0x00040000u) != 0;
+}
+inline void ProtoAppSignalData::set_has_tags() {
+  _has_bits_[0] |= 0x00040000u;
+}
+inline void ProtoAppSignalData::clear_has_tags() {
+  _has_bits_[0] &= ~0x00040000u;
+}
+inline void ProtoAppSignalData::clear_tags() {
+  if (tags_ != &::google::protobuf::internal::kEmptyString) {
+    tags_->clear();
+  }
+  clear_has_tags();
+}
+inline const ::std::string& ProtoAppSignalData::tags() const {
+  return *tags_;
+}
+inline void ProtoAppSignalData::set_tags(const ::std::string& value) {
+  set_has_tags();
+  if (tags_ == &::google::protobuf::internal::kEmptyString) {
+    tags_ = new ::std::string;
+  }
+  tags_->assign(value);
+}
+inline void ProtoAppSignalData::set_tags(const char* value) {
+  set_has_tags();
+  if (tags_ == &::google::protobuf::internal::kEmptyString) {
+    tags_ = new ::std::string;
+  }
+  tags_->assign(value);
+}
+inline void ProtoAppSignalData::set_tags(const char* value, size_t size) {
+  set_has_tags();
+  if (tags_ == &::google::protobuf::internal::kEmptyString) {
+    tags_ = new ::std::string;
+  }
+  tags_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ProtoAppSignalData::mutable_tags() {
+  set_has_tags();
+  if (tags_ == &::google::protobuf::internal::kEmptyString) {
+    tags_ = new ::std::string;
+  }
+  return tags_;
+}
+inline ::std::string* ProtoAppSignalData::release_tags() {
+  clear_has_tags();
+  if (tags_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = tags_;
+    tags_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ProtoAppSignalData::set_allocated_tags(::std::string* tags) {
+  if (tags_ != &::google::protobuf::internal::kEmptyString) {
+    delete tags_;
+  }
+  if (tags) {
+    set_has_tags();
+    tags_ = tags;
+  } else {
+    clear_has_tags();
+    tags_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string userSpecPropStruct = 20;
+inline bool ProtoAppSignalData::has_userspecpropstruct() const {
+  return (_has_bits_[0] & 0x00080000u) != 0;
+}
+inline void ProtoAppSignalData::set_has_userspecpropstruct() {
+  _has_bits_[0] |= 0x00080000u;
+}
+inline void ProtoAppSignalData::clear_has_userspecpropstruct() {
+  _has_bits_[0] &= ~0x00080000u;
+}
+inline void ProtoAppSignalData::clear_userspecpropstruct() {
+  if (userspecpropstruct_ != &::google::protobuf::internal::kEmptyString) {
+    userspecpropstruct_->clear();
+  }
+  clear_has_userspecpropstruct();
+}
+inline const ::std::string& ProtoAppSignalData::userspecpropstruct() const {
+  return *userspecpropstruct_;
+}
+inline void ProtoAppSignalData::set_userspecpropstruct(const ::std::string& value) {
+  set_has_userspecpropstruct();
+  if (userspecpropstruct_ == &::google::protobuf::internal::kEmptyString) {
+    userspecpropstruct_ = new ::std::string;
+  }
+  userspecpropstruct_->assign(value);
+}
+inline void ProtoAppSignalData::set_userspecpropstruct(const char* value) {
+  set_has_userspecpropstruct();
+  if (userspecpropstruct_ == &::google::protobuf::internal::kEmptyString) {
+    userspecpropstruct_ = new ::std::string;
+  }
+  userspecpropstruct_->assign(value);
+}
+inline void ProtoAppSignalData::set_userspecpropstruct(const char* value, size_t size) {
+  set_has_userspecpropstruct();
+  if (userspecpropstruct_ == &::google::protobuf::internal::kEmptyString) {
+    userspecpropstruct_ = new ::std::string;
+  }
+  userspecpropstruct_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ProtoAppSignalData::mutable_userspecpropstruct() {
+  set_has_userspecpropstruct();
+  if (userspecpropstruct_ == &::google::protobuf::internal::kEmptyString) {
+    userspecpropstruct_ = new ::std::string;
+  }
+  return userspecpropstruct_;
+}
+inline ::std::string* ProtoAppSignalData::release_userspecpropstruct() {
+  clear_has_userspecpropstruct();
+  if (userspecpropstruct_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = userspecpropstruct_;
+    userspecpropstruct_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ProtoAppSignalData::set_allocated_userspecpropstruct(::std::string* userspecpropstruct) {
+  if (userspecpropstruct_ != &::google::protobuf::internal::kEmptyString) {
+    delete userspecpropstruct_;
+  }
+  if (userspecpropstruct) {
+    set_has_userspecpropstruct();
+    userspecpropstruct_ = userspecpropstruct;
+  } else {
+    clear_has_userspecpropstruct();
+    userspecpropstruct_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional bytes userSpecPropValues = 21;
+inline bool ProtoAppSignalData::has_userspecpropvalues() const {
+  return (_has_bits_[0] & 0x00100000u) != 0;
+}
+inline void ProtoAppSignalData::set_has_userspecpropvalues() {
+  _has_bits_[0] |= 0x00100000u;
+}
+inline void ProtoAppSignalData::clear_has_userspecpropvalues() {
+  _has_bits_[0] &= ~0x00100000u;
+}
+inline void ProtoAppSignalData::clear_userspecpropvalues() {
+  if (userspecpropvalues_ != &::google::protobuf::internal::kEmptyString) {
+    userspecpropvalues_->clear();
+  }
+  clear_has_userspecpropvalues();
+}
+inline const ::std::string& ProtoAppSignalData::userspecpropvalues() const {
+  return *userspecpropvalues_;
+}
+inline void ProtoAppSignalData::set_userspecpropvalues(const ::std::string& value) {
+  set_has_userspecpropvalues();
+  if (userspecpropvalues_ == &::google::protobuf::internal::kEmptyString) {
+    userspecpropvalues_ = new ::std::string;
+  }
+  userspecpropvalues_->assign(value);
+}
+inline void ProtoAppSignalData::set_userspecpropvalues(const char* value) {
+  set_has_userspecpropvalues();
+  if (userspecpropvalues_ == &::google::protobuf::internal::kEmptyString) {
+    userspecpropvalues_ = new ::std::string;
+  }
+  userspecpropvalues_->assign(value);
+}
+inline void ProtoAppSignalData::set_userspecpropvalues(const void* value, size_t size) {
+  set_has_userspecpropvalues();
+  if (userspecpropvalues_ == &::google::protobuf::internal::kEmptyString) {
+    userspecpropvalues_ = new ::std::string;
+  }
+  userspecpropvalues_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ProtoAppSignalData::mutable_userspecpropvalues() {
+  set_has_userspecpropvalues();
+  if (userspecpropvalues_ == &::google::protobuf::internal::kEmptyString) {
+    userspecpropvalues_ = new ::std::string;
+  }
+  return userspecpropvalues_;
+}
+inline ::std::string* ProtoAppSignalData::release_userspecpropvalues() {
+  clear_has_userspecpropvalues();
+  if (userspecpropvalues_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = userspecpropvalues_;
+    userspecpropvalues_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ProtoAppSignalData::set_allocated_userspecpropvalues(::std::string* userspecpropvalues) {
+  if (userspecpropvalues_ != &::google::protobuf::internal::kEmptyString) {
+    delete userspecpropvalues_;
+  }
+  if (userspecpropvalues) {
+    set_has_userspecpropvalues();
+    userspecpropvalues_ = userspecpropvalues;
+  } else {
+    clear_has_userspecpropvalues();
+    userspecpropvalues_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------

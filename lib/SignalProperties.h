@@ -19,6 +19,8 @@ public:
 	bool setAnyValue(const QString& name, const QVariant& value);
 
 	QString name() const { return m_name; }
+	void setName(const QString& name) { m_name = name; }
+
 	QVariant::Type type() const { return m_value.type(); }
 	QVariant value() const { return m_value; }
 	bool isEnum() const {return m_isEnum; }
@@ -65,6 +67,8 @@ public:
 	const QVector<SignalSpecPropValue>& values() const { return m_specPropValues; }
 
 	void append(const SignalSpecPropValue& value);
+
+	bool replaceName(const QString& oldName, const QString& newName);			// returns true if replacing is occured
 
 private:
 	void buildPropNamesMap();
@@ -133,8 +137,8 @@ public:
 	static const QString highADCCaption;
 	static const QString lowDACCaption;
 	static const QString highDACCaption;
-	static const QString lowEngeneeringUnitsCaption;
-	static const QString highEngeneeringUnitsCaption;
+	static const QString lowEngineeringUnitsCaption;
+	static const QString highEngineeringUnitsCaption;
 	static const QString unitCaption;
 	static const QString lowValidRangeCaption;
 	static const QString highValidRangeCaption;
@@ -142,6 +146,7 @@ public:
 	static const QString electricHighLimitCaption;
 	static const QString electricUnitCaption;
 	static const QString sensorTypeCaption;
+	static const QString R0_OhmCaption;
 	static const QString outputModeCaption;
 	static const QString acquireCaption;
 	static const QString archiveCaption;
@@ -158,6 +163,7 @@ public:
 	static const QString tuningLowBoundCaption;
 	static const QString tuningHighBoundCaption;
 	static const QString specificPropertiesStructCaption;
+	static const QString tagsCaption;
 
 	static const QString categoryIdentification;
 	static const QString categorySignalType;
@@ -194,8 +200,8 @@ public:
 	Q_INVOKABLE int dataSize() const { return m_signal.dataSize(); }
 	Q_INVOKABLE int lowADC() const { return m_signal.lowADC(); }
 	Q_INVOKABLE int highADC() const { return m_signal.highADC(); }
-	Q_INVOKABLE double lowEngeneeringUnits() const { return m_signal.lowEngeneeringUnits(); }
-	Q_INVOKABLE double highEngeneeringUnits() const { return m_signal.highEngeneeringUnits(); }
+	Q_INVOKABLE double lowEngeneeringUnits() const { return m_signal.lowEngineeringUnits(); }
+	Q_INVOKABLE double highEngeneeringUnits() const { return m_signal.highEngineeringUnits(); }
 	Q_INVOKABLE double lowValidRange() const { return m_signal.lowValidRange(); }
 	Q_INVOKABLE double highValidRange() const { return m_signal.highValidRange(); }
 	Q_INVOKABLE double inputLowLimit() const { return m_signal.electricLowLimit(); }
@@ -266,7 +272,15 @@ private:
 
 		newProperty.type = static_cast<QVariant::Type>(qMetaTypeId<TYPE>());
 
-		newProperty.valueGetter = [getter](const Signal* s){ return QVariant::fromValue<TYPE>(getter(*s)); };
+		newProperty.valueGetter = [getter](const Signal* s)
+		{
+			QVariant value = QVariant::fromValue<TYPE>(getter(*s));
+			if (value.type() == QVariant::String)
+			{
+				value = QVariant::fromValue<QString>(value.toString().replace(QChar::LineFeed, QChar::Space));
+			}
+			return value;
+		};
 		if (setter == nullptr)
 		{
 			newProperty.valueSetter = [](Signal*, const QVariant&){};

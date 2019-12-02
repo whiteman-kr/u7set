@@ -6524,6 +6524,27 @@ namespace Builder
 							arg(signalID).arg(inFormat).arg(outFormat));
 	}
 
+	/// IssueCode: ALC5176
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Specific property %1 is not exists in signal %2
+	///
+	/// Parameters:
+	///		%1 specific property name
+	///		%2 application signal ID
+	///
+	/// Description:
+	///		Specific property is not exists in application signal. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5176(QString signalID, QString propertyName)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5176,
+				  QString(tr("Specific property %1 is not exists in signal %2.")).
+							arg(propertyName).arg(signalID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186
@@ -7408,7 +7429,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 - engeneering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3
+	/// Title: Signal %1 - engineering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -7416,13 +7437,13 @@ namespace Builder
 	///		%3 Correct electrical low Limit
 	///
 	/// Description:
-	///		Only ThermoCouple and ThermoResistor. Engeneering low Limit mismatch electrical low Limit.
+	///		Only ThermoCouple and ThermoResistor. Engineering low Limit mismatch electrical low Limit.
 	///
 	void IssueLogger::errEQP6112(QString appSignalID, QString wrongValue, QString correctValue)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6112,
-				  tr("Signal %1 - engeneering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3.")
+				  tr("Signal %1 - engineering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3.")
 				  .arg(appSignalID)
 				  .arg(wrongValue)
 				  .arg(correctValue)
@@ -7433,7 +7454,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 - engeneering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3
+	/// Title: Signal %1 - engineering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -7441,13 +7462,13 @@ namespace Builder
 	///		%3 Correct electrical low Limit
 	///
 	/// Description:
-	///		 Only ThermoCouple and ThermoResistor. Engeneering high Limit mismatch electrical high Limit. Only ThermoCouple and ThermoResistor.
+	///		 Only ThermoCouple and ThermoResistor. Engineering high Limit mismatch electrical high Limit. Only ThermoCouple and ThermoResistor.
 	///
 	void IssueLogger::errEQP6113(QString appSignalID, QString wrongValue, QString correctValue)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6113,
-				  tr("Signal %1 - engeneering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3.")
+				  tr("Signal %1 - engineering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3.")
 				  .arg(appSignalID)
 				  .arg(wrongValue)
 				  .arg(correctValue)

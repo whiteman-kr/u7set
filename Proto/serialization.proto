@@ -1173,6 +1173,8 @@ message AppSignal
     optional string specPropStruct = 90;
     optional bytes specPropValues = 91;				// serialized message Proto::SignalSpecPropValues
 
+    repeated string tags = 92;
+
     // Signal fields from database
 
     optional AppSignalDbField dbField = 120;
@@ -1215,8 +1217,12 @@ message ProtoAppSignalData
 	optional double fineAperture = 16 [default = 0.5];
 	optional bool adaptiveAperture = 17 [default = false];
 	optional bool excludefromBuild = 18 [default = false];
-}
 
+    optional string tags = 19;
+
+    optional string userSpecPropStruct = 20;
+	optional bytes userSpecPropValues = 21;				// serialized message Proto::SignalSpecPropValues
+}
 
 // Data structs
 //

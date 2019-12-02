@@ -227,7 +227,7 @@ const char* const				SignalPropertyGroup[] =
 								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Signal ID"),
 								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Position"),
 								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Electric range: "),
-								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Engeneering range: "),
+								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Engineering range: "),
 };
 
 const int						SIGNAL_PROPERTY_GROUP_COUNT				= sizeof(SignalPropertyGroup)/sizeof(SignalPropertyGroup[0]);
@@ -315,7 +315,7 @@ const char* const				ComparatorPropertyGroup[] =
 								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Signal ID"),
 								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Position"),
 								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Electric range: "),
-								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Engeneering range: "),
+								QT_TRANSLATE_NOOP("ObjectPropertyDialog.h", "Engineering range: "),
 };
 
 const int						COMPARATOR_PROPERTY_GROUP_COUNT				= sizeof(ComparatorPropertyGroup)/sizeof(ComparatorPropertyGroup[0]);

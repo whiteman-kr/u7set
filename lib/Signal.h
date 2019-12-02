@@ -2,6 +2,7 @@
 
 #include <QString>
 #include <QMultiHash>
+#include <set>
 
 #include "Types.h"
 #include "DbStruct.h"
@@ -15,6 +16,11 @@
 class QXmlStreamAttributes;
 class XmlWriteHelper;
 class XmlReadHelper;
+
+namespace Builder
+{
+	class IssueLogger;
+}
 
 const QString DATE_TIME_FORMAT_STR("yyyy-MM-ddTHH:mm:ss");
 
@@ -137,11 +143,11 @@ public:
 	int highDAC() const;
 	void setHighDAC(int highDAC);
 
-	double lowEngeneeringUnits() const;
-	void setLowEngeneeringUnits(double lowEngeneeringUnits);
+	double lowEngineeringUnits() const;
+	void setLowEngineeringUnits(double lowEngineeringUnits);
 
-	double highEngeneeringUnits() const;
-	void setHighEngeneeringUnits(double highEngeneeringUnits);
+	double highEngineeringUnits() const;
+	void setHighEngineeringUnits(double highEngineeringUnits);
 
 	double lowValidRange() const;
 	void setLowValidRange(double lowValidRange);
@@ -227,12 +233,37 @@ public:
 	unsigned int getSpecPropUInt(const QString& name) const;
 	int getSpecPropEnum(const QString& name) const;
 	bool getSpecPropValue(const QString& name, QVariant* qv, bool* isEnum) const;
+	bool isSpecPropExists(const QString& name) const;
 
 	bool setSpecPropDouble(const QString& name, double value);
 	bool setSpecPropInt(const QString& name, int value);
 	bool setSpecPropUInt(const QString& name, unsigned int value);
 	bool setSpecPropEnum(const QString& name, int enumValue);
 	bool setSpecPropValue(const QString& name, const QVariant& qv, bool isEnum);
+
+	//
+
+	QStringList tags() const;
+	std::set<QString> tagsSet() const { return m_tags; }
+	QString tagsStr() const { return tags().join(QChar::LineFeed); }
+
+	void setTags(const QStringList& tags);
+	void setTags(const std::set<QString>& tags) { m_tags = tags; }
+	void setTagsStr(const QString& tagsStr) { setTags(tagsStr.split(QRegExp("\\W+"), QString::SkipEmptyParts)); }
+
+	bool hasTags() const { return m_tags.size() > 0; }
+	bool hasTag(const QString& tag) const { return m_tags.find(tag.toLower().trimmed()) != m_tags.end(); }
+	int tagsCount() const { return static_cast<int>(m_tags.size()); }
+
+	void appendTag(const QString& tag);
+	void appendTags(const QStringList& tags);
+	void appendTags(const std::set<QString>& tags);
+
+	void removeTag(const QString& tag);
+	void removeTags(const QStringList& tags);
+	void removeTags(const std::set<QString>& tags);
+
+	void clearTags();
 
 	//
 
@@ -303,6 +334,8 @@ public:
 	//
 
 	void writeToXml(XmlWriteHelper& xml);
+	void writeDoubleSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString());
+	void writeIntSpecPropAttribute(XmlWriteHelper& xml, const QString& propName, const QString& attributeName = QString());
 	void writeTuningValuesToXml(XmlWriteHelper& xml);
 
 	bool readFromXml(XmlReadHelper& xml);
@@ -318,6 +351,8 @@ public:
 	bool hasStateFlagsSignals() const { return m_stateFlagsSignals.count(); }
 
 	void initTuningValues();
+
+	void setLog(Builder::IssueLogger* log) { m_log = log; }
 
 private:
 	// Private setters for fields, witch can't be changed outside DB engine
@@ -396,6 +431,8 @@ private:
 
 	std::shared_ptr<SignalSpecPropValues> m_cachedSpecPropValues;
 
+	std::set<QString> m_tags;
+
 	// Signal fields from database
 	//
 	int m_ID = 0;
@@ -440,6 +477,7 @@ private:
 	bool m_needConversion = false;
 
 	std::shared_ptr<Hardware::DeviceModule> m_lm;		// valid in compile-time only
+	Builder::IssueLogger* m_log = nullptr;
 };
 
 typedef PtrOrderedHash<int, Signal> SignalPtrOrderedHash;
@@ -479,10 +517,14 @@ public:
 
 	void replaceOrAppendIfNotExists(int signalID, const Signal& s);
 
+	void setLog(Builder::IssueLogger* log);
+
 private:
 	QMultiHash<int, int> m_groupSignals;
 	QHash<QString, int> m_strID2IndexMap;
 
 	int m_maxID = -1;
+
+	Builder::IssueLogger* m_log = nullptr;
 };
 

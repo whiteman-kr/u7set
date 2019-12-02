@@ -5788,8 +5788,8 @@ namespace Builder
 				return false;
 			}
 
-			double y1 = signal.lowEngeneeringUnits();
-			double y2 = signal.highEngeneeringUnits();
+			double y1 = signal.lowEngineeringUnits();
+			double y2 = signal.highEngineeringUnits();
 
 			switch(signal.analogSignalFormat())
 			{
@@ -5960,8 +5960,8 @@ namespace Builder
 
 		if (deviceSignal->format() == E::DataFormat::UnsignedInt && deviceSignal->size() == SIZE_16BIT)
 		{
-			double x1 = signal.lowEngeneeringUnits();
-			double x2 = signal.highEngeneeringUnits();
+			double x1 = signal.lowEngineeringUnits();
+			double x2 = signal.highEngineeringUnits();
 
 			if (x2 - x1 == 0.0)
 			{

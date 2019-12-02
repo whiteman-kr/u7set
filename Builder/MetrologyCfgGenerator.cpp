@@ -2,6 +2,7 @@
 #include "../lib/MetrologySignal.h"
 #include "../lib/ServiceSettings.h"
 #include "../lib/DeviceObject.h"
+#include "../lib/SignalProperties.h"
 
 namespace Builder
 {
@@ -318,45 +319,32 @@ namespace Builder
 
 					bool hasWrongField = false;
 
-					if (E::contains<E::SensorType>(signal.sensorType()) == false)
+					if (signal.isAnalog() == true && signal.isInput() == true)
 					{
-						// Signal %1 has wrong type of sensor: %2.
-						//
-						m_log->errEQP6102(signal.appSignalID(), signal.sensorType());
-						hasWrongField = true;
-					}
-
-					if (signal.isInput() == true)
-					{
-						switch (signal.electricUnit())
+						if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == true)
 						{
-							case E::ElectricUnit::mV:
+							switch (signal.electricUnit())
+							{
+								case E::ElectricUnit::mV:
 
-								if (testElectricRange_ThermoCouple(signal) == false)
-								{
-									hasWrongField = true;
-								}
-								break;
+									if (testElectricRange_ThermoCouple(signal) == false)
+									{
+										hasWrongField = true;
+									}
+									break;
 
-							case E::ElectricUnit::Ohm:
+								case E::ElectricUnit::Ohm:
 
-								if (testElectricRange_ThermoResistor(signal) == false)
-								{
-									hasWrongField = true;
-								}
-								break;
+									if (testElectricRange_ThermoResistor(signal) == false)
+									{
+										hasWrongField = true;
+									}
+									break;
+							}
 						}
 					}
 
-					if (E::contains<E::OutputMode>(signal.outputMode()) == false)
-					{
-						// Signal %1 has wrong type of output range mode: %2.
-						//
-						m_log->errEQP6103(signal.appSignalID(), signal.outputMode());
-						hasWrongField = true;
-					}
-
-					if (hasWrongField)
+					if (hasWrongField == true)
 					{
 						continue;
 					}
@@ -408,6 +396,21 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testElectricRange_ThermoCouple(const Signal& signal)
 	{
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false || signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return true;
+		}
+
 		if (signal.electricUnit() != E::ElectricUnit::mV)
 		{
 			return false;
@@ -450,29 +453,29 @@ namespace Builder
 					}
 
 
-					if (physicalLowLimit.toDouble() != signal.lowEngeneeringUnits())
+					if (physicalLowLimit.toDouble() != signal.lowEngineeringUnits())
 					{
 						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.lowEngeneeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
+						double elVal = uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricLowLimit()) +  meu.key(signal.electricUnit());
 						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
 
-						// Signal %1 has wrong engeneering low Limit
+						// Signal %1 has wrong engineering low Limit
 						//
 						m_log->errEQP6112(signal.customAppSignalID(), nowElValStr, newElValStr);
 						return false;
 					}
 
-					if (physicalHighLimit.toDouble() != signal.highEngeneeringUnits())
+					if (physicalHighLimit.toDouble() != signal.highEngineeringUnits())
 					{
 						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.highEngeneeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
+						double elVal = uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricHighLimit()) +  meu.key(signal.electricUnit());
 						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
 
-						// Signal %1 has wrong engeneering high Limit
+						// Signal %1 has wrong engineering high Limit
 						//
 						m_log->errEQP6113(signal.customAppSignalID(), nowElValStr, newElValStr);
 						return false;
@@ -486,6 +489,21 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testElectricRange_ThermoResistor(const Signal& signal)
 	{
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false || signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return true;
+		}
+
 		if (signal.electricUnit() != E::ElectricUnit::Ohm)
 		{
 			return false;
@@ -495,9 +513,12 @@ namespace Builder
 		bool isEnum;
 		double r0 = 0;
 
-		if (signal.getSpecPropValue("R0_Ohm", &qv, &isEnum) == true)
+		if (signal.isSpecPropExists(SignalProperties::R0_OhmCaption) == true)
 		{
-			r0 = qv.toDouble();
+			if (signal.getSpecPropValue(SignalProperties::R0_OhmCaption, &qv, &isEnum) == true)
+			{
+				r0 = qv.toDouble();
+			}
 		}
 
 		if (r0 == 0.0 && signal.sensorType() != E::SensorType::Ohm_Raw)
@@ -537,29 +558,29 @@ namespace Builder
 						return false;
 					}
 
-					if (physicalLowLimit.toDouble() != signal.lowEngeneeringUnits())
+					if (physicalLowLimit.toDouble() != signal.lowEngineeringUnits())
 					{
 						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.lowEngeneeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), r0);
+						double elVal = uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), r0);
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricLowLimit()) +  meu.key(signal.electricUnit());
 						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
 
-						// Signal %1 - engeneering low Limit mismatch electrical low Limit
+						// Signal %1 - engineering low Limit mismatch electrical low Limit
 						//
 						m_log->errEQP6112(signal.customAppSignalID(), nowElValStr, newElValStr);
 						return false;
 					}
 
-					if (physicalHighLimit.toDouble() != signal.highEngeneeringUnits())
+					if (physicalHighLimit.toDouble() != signal.highEngineeringUnits())
 					{
 						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.highEngeneeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), r0);
+						double elVal = uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), r0);
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricHighLimit()) +  meu.key(signal.electricUnit());
 						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
 
-						// SSignal %1 - engeneering high Limit mismatch electrical high Limit
+						// SSignal %1 - engineering high Limit mismatch electrical high Limit
 						//
 						m_log->errEQP6113(signal.customAppSignalID(), nowElValStr, newElValStr);
 						return false;

@@ -1041,7 +1041,7 @@ void LinearityOption::load()
 	m_highLimitRange = s.value(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), 100).toDouble();
 
 	m_viewType = s.value(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), LO_VIEW_TYPE_SIMPLE).toInt();
-	m_showEngeneeringValueColumn = s.value(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), true).toBool();
+	m_showEngineeringValueColumn = s.value(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), true).toBool();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1062,7 +1062,7 @@ void LinearityOption::save()
 	s.setValue(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), m_highLimitRange);
 
 	s.setValue(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), m_viewType);
-	s.setValue(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), m_showEngeneeringValueColumn);
+	s.setValue(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), m_showEngineeringValueColumn);
 
 	m_pointBase.saveData(SQL_TABLE_LINEARITY_POINT);
 }
@@ -1085,7 +1085,7 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 	m_highLimitRange = from.m_highLimitRange;
 
 	m_viewType = from.m_viewType;
-	m_showEngeneeringValueColumn = from.m_showEngeneeringValueColumn;
+	m_showEngineeringValueColumn = from.m_showEngineeringValueColumn;
 
 	return *this;
 }

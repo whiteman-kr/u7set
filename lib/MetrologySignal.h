@@ -5,8 +5,9 @@
 #include "../lib/DeviceObject.h"
 #include "../lib/XmlHelper.h"
 #include "../lib/UnitsConvertor.h"
-#include "../Builder/CfgFiles.h"
 #include "../lib/ComparatorSet.h"
+#include "../lib/SignalProperties.h"
+#include "../Builder/CfgFiles.h"
 
 // Attention !!!
 // If you want to change any function writeToXml you must change CFG_FILE_VER_METROLOGY_SIGNALS
@@ -18,7 +19,7 @@ const int			CFG_FILE_VER_METROLOGY_SIGNALS	= 5;
 //
 // version 1 - it is base version
 // version 2 - deleted a few fields SignalParam::writeToXml (story about removing redundant ranges)
-// version 3 - append fields: EngeneeringUnits
+// version 3 - append fields: EngineeringUnits
 // version 4 - append fields: TuningBounds
 // version 5 - append fields: electricR0
 //
@@ -240,8 +241,8 @@ namespace Metrology
 		bool					physicalRangeIsValid() const;
 		QString					physicalRangeStr() const;
 
-		bool					engeneeringRangeIsValid() const;
-		QString					engeneeringRangeStr() const;
+		bool					engineeringRangeIsValid() const;
+		QString					engineeringRangeStr() const;
 
 		QString					enableTuningStr() const;
 		QString					tuningDefaultValueStr() const;

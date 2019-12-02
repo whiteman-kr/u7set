@@ -23,7 +23,7 @@ const char* const			SignalInfoColumn[] =
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Place"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Electric range"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Electric sensor"),
-							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Engeneering range"),
+							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Engineering range"),
 							QT_TRANSLATE_NOOP("SignalInfoMeasure.h", "Calibrator"),
 };
 

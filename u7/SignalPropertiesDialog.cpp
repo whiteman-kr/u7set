@@ -188,8 +188,8 @@ void initNewSignal(Signal& signal)
 		}
 	};
 
-	setter(SignalProperties::lowEngeneeringUnitsCaption, 0.0);
-	setter(SignalProperties::highEngeneeringUnitsCaption, 100.0);
+	setter(SignalProperties::lowEngineeringUnitsCaption, 0.0);
+	setter(SignalProperties::highEngineeringUnitsCaption, 100.0);
 
 	for (int i = 0; i < propertyManager.count(); i++)
 	{
@@ -264,6 +264,13 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 
 		for (QString row : rows)
 		{
+			row = row.trimmed();
+
+			if (row.isEmpty() == true)
+			{
+				continue;
+			}
+
 			QStringList&& fields = row.split(';', QString::KeepEmptyParts);
 
 			for (QString& field : fields)

@@ -766,7 +766,7 @@ private:
 	double				m_highLimitRange = 100;										// high limit of the range for automatic division
 
 	int					m_viewType = LO_VIEW_TYPE_SIMPLE;							// type of measurements list extended or simple
-	bool				m_showEngeneeringValueColumn = true;						// show columns of engeneering values
+	bool				m_showEngineeringValueColumn = true;						// show columns of engineering values
 
 public:
 
@@ -799,8 +799,8 @@ public:
 	int					viewType() const { return m_viewType; }
 	void				setViewType(int type) { m_viewType = type; }
 
-	bool				showEngeneeringValueColumn() const { return m_showEngeneeringValueColumn; }
-	void				setShowPhyscalValueColumn(bool show) { m_showEngeneeringValueColumn = show; }
+	bool				showEngineeringValueColumn() const { return m_showEngineeringValueColumn; }
+	void				setShowPhyscalValueColumn(bool show) { m_showEngineeringValueColumn = show; }
 
 public:
 
