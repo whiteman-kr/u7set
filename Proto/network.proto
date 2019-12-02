@@ -131,13 +131,17 @@ message GetDataSourcesInfoReply
 
 message AppDataReceiveState
 {
-    optional int64 receivedFramesCount = 1 [default = 0];
-    optional int64 framesReceivedPerSecond = 2 [default = 0];
-    optional int64 simFramesCount = 3 [default = 0];
-    optional int64 errDatagramSize = 4 [default = 0];
-    optional int64 errSimVersion = 5 [default = 0];
-    optional int64 errUnknownAppDataSourceIP = 6 [default = 0];
-	optional int64 errRupFrameCRC = 7 [default = 0];
+    optional int32 receivingRate = 1 [default = 0];
+	optional int32 udpReceivingRate = 2 [default = 0];
+	optional int32 rupFramesReceivingRate = 3 [default = 0];
+
+    optional int64 rupFramesCount = 4 [default = 0];
+	optional int64 simFramesCount = 5 [default = 0];
+
+    optional int64 errDatagramSize = 6 [default = 0];
+	optional int64 errSimVersion = 7 [default = 0];
+	optional int64 errUnknownAppDataSourceIP = 8 [default = 0];
+	optional int64 errRupFrameCRC = 9 [default = 0];
 }
 
 // Getting Application Data Sources states

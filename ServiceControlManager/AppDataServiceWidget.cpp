@@ -406,7 +406,7 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, qui
 {
 	connect(this, &BaseServiceStateWidget::connectionStatisticChanged, this, &AppDataServiceWidget::updateStateInfo);
 
-	setStateTabMaxRowQuantity(14);
+	setStateTabMaxRowQuantity(17);
 	setClientQuantityRowIndexOnStateTab(5);
 
 	// Data Sources
@@ -472,12 +472,17 @@ void AppDataServiceWidget::updateServiceState()
 
 	auto state = m_tcpClientSocket->serviceState().appdatareceivestate();
 
-	stateTabModel()->setData(stateTabModel()->index(8, 1), static_cast<qint64>(state.receivedframescount()));
-	stateTabModel()->setData(stateTabModel()->index(9, 1), static_cast<qint64>(state.simframescount()));
-	stateTabModel()->setData(stateTabModel()->index(10, 1), static_cast<qint64>(state.errdatagramsize()));
-	stateTabModel()->setData(stateTabModel()->index(11, 1), static_cast<qint64>(state.errsimversion()));
-	stateTabModel()->setData(stateTabModel()->index(12, 1), static_cast<qint64>(state.errunknownappdatasourceip()));
-	stateTabModel()->setData(stateTabModel()->index(13, 1), static_cast<qint64>(state.errrupframecrc()));
+	stateTabModel()->setData(stateTabModel()->index(8, 1), static_cast<qint64>(state.receivingrate()));
+	stateTabModel()->setData(stateTabModel()->index(9, 1), static_cast<qint64>(state.udpreceivingrate()));
+	stateTabModel()->setData(stateTabModel()->index(10, 1), static_cast<qint64>(state.rupframesreceivingrate()));
+
+	stateTabModel()->setData(stateTabModel()->index(11, 1), static_cast<qint64>(state.rupframescount()));
+	stateTabModel()->setData(stateTabModel()->index(12, 1), static_cast<qint64>(state.simframescount()));
+
+	stateTabModel()->setData(stateTabModel()->index(13, 1), static_cast<qint64>(state.errdatagramsize()));
+	stateTabModel()->setData(stateTabModel()->index(14, 1), static_cast<qint64>(state.errsimversion()));
+	stateTabModel()->setData(stateTabModel()->index(15, 1), static_cast<qint64>(state.errunknownappdatasourceip()));
+	stateTabModel()->setData(stateTabModel()->index(16, 1), static_cast<qint64>(state.errrupframecrc()));
 }
 
 void AppDataServiceWidget::updateStateInfo()
@@ -488,12 +493,17 @@ void AppDataServiceWidget::updateStateInfo()
 		stateTabModel()->setData(stateTabModel()->index(6, 0), "Connected to CfgService");
 		stateTabModel()->setData(stateTabModel()->index(7, 0), "Connected to ArchiveService");
 
-		stateTabModel()->setData(stateTabModel()->index(8, 0), "Received frames count");
-		stateTabModel()->setData(stateTabModel()->index(9, 0), "Simulated frames count");
-		stateTabModel()->setData(stateTabModel()->index(10, 0), "Datagram size errors");
-		stateTabModel()->setData(stateTabModel()->index(11, 0), "Simulation version errors");
-		stateTabModel()->setData(stateTabModel()->index(12, 0), "Unknown AppDataSource IP errors");
-		stateTabModel()->setData(stateTabModel()->index(13, 0), "RUP frames CRC errors");
+		stateTabModel()->setData(stateTabModel()->index(8, 0), "Receiving rate");
+		stateTabModel()->setData(stateTabModel()->index(9, 0), "UDP receiving rate");
+		stateTabModel()->setData(stateTabModel()->index(10, 0), "RUP frames receiving rate");
+
+		stateTabModel()->setData(stateTabModel()->index(11, 0), "RUP frames count");
+		stateTabModel()->setData(stateTabModel()->index(12, 0), "Simulated frames count");
+
+		stateTabModel()->setData(stateTabModel()->index(13, 0), "Datagram size errors");
+		stateTabModel()->setData(stateTabModel()->index(14, 0), "Simulation version errors");
+		stateTabModel()->setData(stateTabModel()->index(15, 0), "Unknown AppDataSource IP errors");
+		stateTabModel()->setData(stateTabModel()->index(16, 0), "RUP frames CRC errors");
 
 		if (m_tcpClientSocket == nullptr || m_tcpClientSocket->stateIsReady() == false)
 		{
