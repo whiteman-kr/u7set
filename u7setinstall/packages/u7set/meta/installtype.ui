@@ -185,7 +185,7 @@
     </sizepolicy>
    </property>
    <property name="text">
-    <string>Server Components (MATS Services and Clients) will be installed.</string>
+    <string>Server Installation (MATS Services and Clients will be installed).</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_3">
@@ -223,7 +223,7 @@
     </sizepolicy>
    </property>
    <property name="text">
-    <string>Radiy Plaform Configuration Tool (u7 and mconf) will be installed.</string>
+    <string>Radiy Plaform Configuration Tool will be installed.</string>
    </property>
   </widget>
   <widget class="QLabel" name="label_7">
@@ -242,7 +242,7 @@
     </sizepolicy>
    </property>
    <property name="text">
-    <string>Client Installation (MATS Clients) will be installed.</string>
+    <string>Client Installation (MATS Clients will be installed).</string>
    </property>
   </widget>
   <widget class="QRadioButton" name="clientInstall">
