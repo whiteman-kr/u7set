@@ -346,7 +346,6 @@ bool FindSignalPanel::event(QEvent* e)
 		QResizeEvent* resizeEvent = static_cast<QResizeEvent*>(e);
 
 		m_pView->setColumnWidth(FIND_SIGNAL_COLUMN_TEXT, resizeEvent->size().width() - FIND_SIGNAL_COLUMN_ROW_WIDTH - 20);
-
 	}
 
 	return QDockWidget::event(e);

@@ -61,7 +61,7 @@ const char* const		FindSignalTextColumn[] =
 const int				FIND_SIGNAL_COLUMN_COUNT		= sizeof(FindSignalTextColumn)/sizeof(FindSignalTextColumn[0]);
 
 const int				FIND_SIGNAL_COLUMN_ROW			= 0,
-						FIND_SIGNAL_COLUMN_TEXT		= 1;
+						FIND_SIGNAL_COLUMN_TEXT			= 1;
 
 // ==============================================================================================
 

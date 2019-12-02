@@ -9,5 +9,6 @@
         <file>icons/Find.png</file>
         <file>icons/PacketSource.ico</file>
         <file>icons/Search.png</file>
+        <file>icons/FrameData.png</file>
     </qresource>
 </RCC>

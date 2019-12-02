@@ -170,6 +170,37 @@ bool MainWindow::createToolBars()
 
 void MainWindow::createPanels()
 {
+	// Frame of data panel
+	//
+	m_pFrameDataPanel = new FrameDataPanel(this);
+	if (m_pFrameDataPanel != nullptr)
+	{
+		m_pFrameDataPanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+
+		addDockWidget(Qt::RightDockWidgetArea, m_pFrameDataPanel);
+
+		m_pFrameDataPanel->hide();
+
+		QAction* findAction = m_pFrameDataPanel->toggleViewAction();
+		if (findAction != nullptr)
+		{
+			findAction->setText(tr("&Frame of data ..."));
+			findAction->setShortcut(Qt::CTRL + Qt::Key_D);
+			findAction->setIcon(QIcon(":/icons/FrameData.png"));
+			findAction->setToolTip(tr("Frame of data"));
+
+			if (m_pEditMenu != nullptr)
+			{
+				m_pEditMenu->addAction(findAction);
+			}
+
+			if (m_mainToolBar != nullptr)
+			{
+				m_mainToolBar->addAction(findAction);
+			}
+		}
+	}
+
 	// Search measurements panel
 	//
 	m_pFindSignalPanel = new FindSignalPanel(this);
@@ -177,7 +208,7 @@ void MainWindow::createPanels()
 	{
 		m_pFindSignalPanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
 
-		addDockWidget(Qt::LeftDockWidgetArea, m_pFindSignalPanel);
+		addDockWidget(Qt::RightDockWidgetArea, m_pFindSignalPanel);
 
 		m_pFindSignalPanel->hide();
 
@@ -256,27 +287,6 @@ void MainWindow::createViews()
 
 	connect(m_pSignalView, &QTableView::doubleClicked , this, &MainWindow::onSignalListDoubleClicked);
 
-	// View of Frame Data
-	//
-	m_pFrameDataView = new QTableView(this);
-	if (m_pFrameDataView == nullptr)
-	{
-		return;
-	}
-
-	m_pFrameDataView->setModel(&m_frameDataTable);
-	m_pFrameDataView->verticalHeader()->setDefaultSectionSize(22);
-
-	for(int column = 0; column < FRAME_LIST_COLUMN_COUNT; column++)
-	{
-		m_pFrameDataView->setColumnWidth(column, FrameListColumnWidth[column]);
-	}
-
-	m_pFrameDataView->setSelectionBehavior(QAbstractItemView::SelectRows);
-	m_pFrameDataView->setMaximumWidth(180);
-
-	connect(m_pFrameDataView, &QTableView::doubleClicked , this, &MainWindow::onFrameDataListDoubleClicked);
-
 	// Layouts
 	//
 
@@ -288,8 +298,6 @@ void MainWindow::createViews()
 	QHBoxLayout *mainLayout = new QHBoxLayout;
 
 	mainLayout->addLayout(ssLayout);
-	mainLayout->addWidget(m_pFrameDataView);
-
 
 	QWidget* pWidget = new QWidget(this);
 	pWidget->setLayout(mainLayout);
@@ -600,7 +608,11 @@ void MainWindow::onOptions()
 	}
 
 	m_signalTable.clear();
-	m_frameDataTable.clear();
+
+	if (m_pFrameDataPanel != nullptr)
+	{
+		m_pFrameDataPanel->clear();
+	}
 
 	m_sourceBase.stopAllSoureces();
 
@@ -683,9 +695,14 @@ void MainWindow::updateFrameDataList(PS::Source* pSource)
 		return;
 	}
 
+	if (m_pFrameDataPanel == nullptr)
+	{
+		return;
+	}
+
 	QVector<PS::FrameData*> frameDataList;
 
-	m_frameDataTable.clear();
+	m_pFrameDataPanel->clear();
 
 	int count = pSource->frameBase().count();
 	for(int i = 0; i < count; i++)
@@ -699,7 +716,7 @@ void MainWindow::updateFrameDataList(PS::Source* pSource)
 		frameDataList.append(pFrameData);
 	}
 
-	m_frameDataTable.set(frameDataList);
+	m_pFrameDataPanel->set(frameDataList);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -867,27 +884,6 @@ void MainWindow::onSignalListDoubleClicked(const QModelIndex& index)
 	}
 
 	pSignal->setState(dialog.state());
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::onFrameDataListDoubleClicked(const QModelIndex& index)
-{
-	int byteIndex = index.row();
-	if (byteIndex < 0 || byteIndex >= m_frameDataTable.dataSize())
-	{
-		return;
-	}
-
-	quint8 byte = m_frameDataTable.byte(byteIndex);
-
-	FrameDataStateDialog dialog(byte);
-	if (dialog.exec() != QDialog::Accepted)
-	{
-		return;
-	}
-
-	m_frameDataTable.setByte(byteIndex, dialog.byte());
 }
 
 // -------------------------------------------------------------------------------------------------------------------

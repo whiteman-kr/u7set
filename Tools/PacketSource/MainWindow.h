@@ -15,6 +15,7 @@
 #include <QTimer>
 
 #include "SourceBase.h"
+#include "FrameDataPanel.h"
 #include "FindSignalPanel.h"
 
 // ==============================================================================================
@@ -59,6 +60,7 @@ private:
 
 	// Elements of interface - Panels
 	//
+	FrameDataPanel*			m_pFrameDataPanel = nullptr;
 	FindSignalPanel*		m_pFindSignalPanel = nullptr;
 
 	// Elements of interface - StatusBar
@@ -102,9 +104,6 @@ private:
 
 	void					hideSignalColumn(int column, bool hide);
 
-	QTableView*				m_pFrameDataView = nullptr;
-	FrameDataTable			m_frameDataTable;
-
 	// update timers
 	//
 	QTimer*					m_updateSourceListTimer = nullptr;
@@ -120,7 +119,6 @@ public:
 
 	QTableView*				sourceView() { return m_pSourceView; }
 	QTableView*				signalView() { return m_pSignalView; }
-	QTableView*				frameDataView() { return m_pFrameDataView; }
 
 protected:
 
@@ -169,7 +167,6 @@ private slots:
 
 	void					onSourceListClicked(const QModelIndex& index);
 	void					onSignalListDoubleClicked(const QModelIndex& index);
-	void					onFrameDataListDoubleClicked(const QModelIndex& index);
 };
 
 // ==============================================================================================
