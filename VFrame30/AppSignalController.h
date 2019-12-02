@@ -53,8 +53,8 @@ namespace VFrame30
 		\warning
 		It is highly recommended to check function return values, because errors can occur. For example,
 		connection to ApplicationDataService can be down, or signal with specified identifier could not exist.
-		\n
 
+		\n
 		<b>Example:</b>
 
 		\code

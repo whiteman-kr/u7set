@@ -66,26 +66,27 @@ namespace VFrame30
 
 			// Choose the required image
 			//
-			if (activeSignalState.Value == 1)
+
+			if (activeSignalState.Value == 0)
 			{
-				if (upSignalState.Value == 1)
+				if (upSignalState.Value == 0)
 				{
-					schemaItem.CurrentImageID = "UP_ACTIVE";
+					schemaItem.CurrentImageID = "DOWN_NOACTIVE";
 				}
 				else
 				{
-					schemaItem.CurrentImageID = "DOWN_ACTIVE";
+					schemaItem.CurrentImageID = "UP_NOACTIVE";
 				}
 			}
 			else
 			{
-				if (upSignalState.Value == 1)
+				if (upSignalState.Value == 0)
 				{
-					schemaItem.CurrentImageID = "UP_NOACTIVE";
+					schemaItem.CurrentImageID = "DOWN_ACTIVE";
 				}
 				else
 				{
-					schemaItem.CurrentImageID = "DOWN_NOACTIVE";
+					schemaItem.CurrentImageID = "UP_ACTIVE";
 				}
 			}
 
