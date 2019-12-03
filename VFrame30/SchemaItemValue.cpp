@@ -25,10 +25,7 @@ namespace VFrame30
 
 		// Functional
 		//
-		//auto strIdProperty = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true, SchemaItemValue::signalIdsString, SchemaItemValue::setSignalIdsString);
-		auto strIdProperty = ADD_PROPERTY_GET_SET_CAT(QStringList, PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true, SchemaItemValue::signalIds, SchemaItemValue::setSignalIds);
-		strIdProperty->setValidator(PropertyNames::appSignalIDsValidator);
-
+		ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::appSignalIDs, PropertyNames::functionalCategory, true, SchemaItemValue::signalIdsString, SchemaItemValue::setSignalIdsString);
 		ADD_PROPERTY_GET_SET_CAT(E::SignalSource, PropertyNames::signalSource, PropertyNames::functionalCategory, true, SchemaItemValue::signalSource, SchemaItemValue::setSignalSource);
 
 		// Appearance
@@ -177,7 +174,7 @@ namespace VFrame30
 
 	// Drawing Functions
 	//
-	void SchemaItemValue::Draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
+	void SchemaItemValue::draw(CDrawParam* drawParam, const Schema* /*schema*/, const SchemaLayer* /*layer*/) const
 	{
 		QPainter* p = drawParam->painter();
 
@@ -427,16 +424,16 @@ namespace VFrame30
 			appSignalState == nullptr ||
 			tuningSignalState == nullptr)
 		{
-			assert(drawParam);
-			assert(signalParam);
-			assert(appSignalState);
-			assert(tuningSignalState);
+			Q_ASSERT(drawParam);
+			Q_ASSERT(signalParam);
+			Q_ASSERT(appSignalState);
+			Q_ASSERT(tuningSignalState);
 			return false;
 		}
 
 		if (drawParam->isMonitorMode() == false)
 		{
-			assert(drawParam->isMonitorMode());
+			Q_ASSERT(drawParam->isMonitorMode());
 			return false;
 		}
 
@@ -471,7 +468,7 @@ namespace VFrame30
 			break;
 
 		default:
-			assert(false);
+			Q_ASSERT(false);
 			ok = false;
 		}
 

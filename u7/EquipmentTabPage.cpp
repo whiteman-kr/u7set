@@ -1511,7 +1511,7 @@ void EquipmentView::addPreset()
 {
 	if (isConfigurationMode() == false)
 	{
-		assert(isConfigurationMode() == true);
+		Q_ASSERT(isConfigurationMode() == true);
 		return;
 	}
 
@@ -1524,7 +1524,7 @@ void EquipmentView::addPreset()
 		Hardware::DeviceObject* selectedObject = equipmentModel()->deviceObject(singleSelectedIndex);
 		if (selectedObject == nullptr)
 		{
-			assert(selectedObject != nullptr);
+			Q_ASSERT(selectedObject != nullptr);
 			return;
 		}
 
@@ -2099,7 +2099,11 @@ QModelIndex EquipmentView::addDeviceObject(std::shared_ptr<Hardware::DeviceObjec
 
 	// Debugging .... parentObject->setChildRestriction("function(device) { return device.Place >=0 && device.Place < 16; }");
 
-	assert(parentObject != nullptr);
+	if (parentObject == nullptr)
+	{
+		Q_ASSERT(parentObject != nullptr);
+		return {};
+	}
 
 	//  Set presetName, parent object should contain it
 	//
@@ -2420,7 +2424,7 @@ void EquipmentView::addLogicSchemaToLm()
 
 			if (lmDescriptioFile != thisModuleLmDescriprtionFile)
 			{
-				assert(false);	// How is it possible, it should be fileterd om nenu level
+				Q_ASSERT(false);	// How is it possible, it should be fileterd om nenu level
 				return;
 			}
 
@@ -2428,7 +2432,7 @@ void EquipmentView::addLogicSchemaToLm()
 		}
 		else
 		{
-			assert(false);	// How is it possible, it should be fileterd om nenu level
+			Q_ASSERT(false);	// How is it possible, it should be fileterd om nenu level
 			return;
 		}
 	}

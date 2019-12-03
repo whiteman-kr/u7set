@@ -65,8 +65,8 @@ private:
 
 	static QString SF_LOW_ADC;
 	static QString SF_HIGH_ADC;
-	static QString SF_LOW_ENGENEERING_UNITS;
-	static QString SF_HIGH_ENGENEERING_UNITS;
+	static QString SF_LOW_ENGINEERING_UNITS;
+	static QString SF_HIGH_ENGINEERING_UNITS;
 	static QString SF_LOW_VALID_RANGE;
 	static QString SF_HIGH_VALID_RANGE;
 	static QString SF_FILTERING_TIME;

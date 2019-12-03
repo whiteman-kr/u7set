@@ -356,15 +356,12 @@ void CreateSchemaDialog::accept()
 		{
 			layer->setGuid(QUuid::createUuid());
 
-			for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+			for (SchemaItemPtr& item : layer->Items)
 			{
 				item->setNewGuid();
 
-				if (item->isFblItemRect() == true)
-				{
-					int counterValue = m_db->nextCounterValue();
-					item->toFblItemRect()->setLabel(strID + "_" + QString::number(counterValue));
-				}
+				int counterValue = m_db->nextCounterValue();
+				item->setLabel(strID + "_" + QString::number(counterValue));
 			}
 		}
 	}

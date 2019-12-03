@@ -91,10 +91,10 @@ DialogAppDataSourceInfo::DialogAppDataSourceInfo(TcpAppSourcesState* tcpClient, 
 	createDataItem(stateItem, "LastPacketSystemTime");
 	createDataItem(stateItem, "RupFramePlantTime");
 	createDataItem(stateItem, "RupFrameNumerator");
-	createDataItem(stateItem, "RupFramesQueueSize");
-	createDataItem(stateItem, "RupFramesQueueMaxSize");
-	createDataItem(stateItem, "SignalStatesQueueSize");
-	createDataItem(stateItem, "SignalStatesQueueMaxSize");
+	createDataItem(stateItem, "RupFramesQueueCurSize");
+	createDataItem(stateItem, "RupFramesQueueCurMaxSize");
+	createDataItem(stateItem, "SignalStatesQueueCurSize");
+	createDataItem(stateItem, "SignalStatesQueueCurMaxSize");
 	createDataItem(stateItem, "AcquiredSignalsCount");
 
 	m_treeWidget->addTopLevelItem(stateItem);
@@ -204,11 +204,12 @@ void DialogAppDataSourceInfo::updateData()
 	setDataItemNumber("ReceivedDataID", ds.state.receiveddataid());
 	setDataItemNumber("RupFramesQueueCurSize", ds.state.rupframesqueuecursize());
 	setDataItemNumber("RupFramesQueueCurMaxSize", ds.state.rupframesqueuecurmaxsize());
-	setDataItemNumber("DataReceivingRate", static_cast<qint64>(ds.state.datareceivingrate() / 1024.0));
+	double datareceivingrate = ds.state.datareceivingrate();
+	setDataItemText("DataReceivingRate", QString::number(datareceivingrate / 1024.0, 'f', 1));
 	setDataItemNumber("ReceivedDataSize", ds.state.receiveddatasize());
 	setDataItemNumber("ReceivedFramesCount", ds.state.receivedframescount());
 	setDataItemNumber("ReceivedPacketCount", ds.state.receivedpacketcount());
-	setDataItemNumber("LostPacketCount", ds.state.lostedpacketcount());
+	setDataItemNumber("LostPacketCount", ds.state.lostpacketcount());
 	setDataItemText("DataProcessingEnabled", ds.state.dataprocessingenabled() ? "Yes" : "No");
 	setDataItemNumber("ProcessedPacketCount", ds.state.processedpacketcount());
 
@@ -419,9 +420,9 @@ void AppDataSourcesWidget::update(bool refreshOnly)
 		int h = time % 24; time /= 24;
 
 		item->setText(static_cast<int>(Columns::Uptime), QString("%1d %2:%3:%4").arg(time).arg(h).arg(m, 2, 10, QChar('0')).arg(s, 2, 10, QChar('0')));
-		item->setText(static_cast<int>(Columns::DataReceivingRate), QString::number(adsState.state.datareceivingrate() / 1024.0));
 		item->setText(static_cast<int>(Columns::ReceivedPacketCount), QString::number(adsState.state.receivedpacketcount()));
-		item->setText(static_cast<int>(Columns::ProcessedPacketCount), QString::number(adsState.state.processedpacketcount()));
+		double datareceivingrate = adsState.state.datareceivingrate();
+		item->setText(static_cast<int>(Columns::DataReceivingRate), QString::number(datareceivingrate, 'f', 1));
 
 		if (adsState.valid() == false)
 		{

@@ -40,15 +40,17 @@ const int	MeasureTimeoutCount = sizeof(MeasureTimeout)/sizeof(MeasureTimeout[0])
 
 const char* const	MeasureKind[] =
 {
-			QT_TRANSLATE_NOOP("MeasureBase.h", " in one rack"),
-			QT_TRANSLATE_NOOP("MeasureBase.h", " in several racks"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", " Single channel"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", " Single module"),
+			QT_TRANSLATE_NOOP("MeasureBase.h", " Multi channel"),
 };
 
 const int	MEASURE_KIND_COUNT		= sizeof(MeasureKind)/sizeof(MeasureKind[0]);
 
 const int	MEASURE_KIND_UNKNOWN	= -1,
-			MEASURE_KIND_ONE		= 0,
-			MEASURE_KIND_MULTI		= 1;
+			MEASURE_KIND_ONE_RACK	= 0,
+			MEASURE_KIND_ONE_MODULE	= 1,
+			MEASURE_KIND_MULTI_RACK	= 2;
 
 // ==============================================================================================
 
@@ -62,7 +64,7 @@ const int	MEASURE_LIMIT_TYPE_COUNT		= sizeof(MeasureLimitType)/sizeof(MeasureLim
 
 const int	MEASURE_LIMIT_TYPE_UNDEFINED	= -1,
 			MEASURE_LIMIT_TYPE_ELECTRIC		= 0,
-			MEASURE_LIMIT_TYPE_ENGENEER		= 1;
+			MEASURE_LIMIT_TYPE_ENGINEER		= 1;
 
 // ==============================================================================================
 
@@ -189,7 +191,7 @@ class LinearityMeasurement : public Measurement
 public:
 
 	LinearityMeasurement();
-	LinearityMeasurement(const MeasureMultiParam& measureParam);
+	LinearityMeasurement(const IoSignalParam& ioParam);
 	virtual ~LinearityMeasurement();
 
 private:
@@ -226,8 +228,8 @@ public:
 
 	void			virtual clear();
 
-	void			fill_measure_input(const MeasureMultiParam& measureParam, bool isNegativeRange);
-	void			fill_measure_output(const MeasureMultiParam& measureParam);
+	void			fill_measure_input(const IoSignalParam& ioParam);
+	void			fill_measure_output(const IoSignalParam& ioParam);
 
 	void			setLimits(const Metrology::SignalParam& param);
 	void			calcError();
@@ -315,7 +317,7 @@ class ComparatorMeasurement : public Measurement
 public:
 
 	ComparatorMeasurement();
-	explicit ComparatorMeasurement(Calibrator* pCalibrator);
+	explicit ComparatorMeasurement(const IoSignalParam& ioParam);
 	virtual ~ComparatorMeasurement();
 
 private:
@@ -324,18 +326,91 @@ private:
 	QString			m_customAppSignalID;
 	QString			m_caption;
 
+	int				m_moduleSerialNo = 0;
+	Metrology::SignalLocation m_location;
+
+	E::CmpType		m_cmpType = E::CmpType::Equal;
+
+	double			m_nominal[MEASURE_LIMIT_TYPE_COUNT];
+	double			m_measure[MEASURE_LIMIT_TYPE_COUNT];
+
+	double			m_lowLimit[MEASURE_LIMIT_TYPE_COUNT];
+	double			m_highLimit[MEASURE_LIMIT_TYPE_COUNT];
+	QString			m_unit[MEASURE_LIMIT_TYPE_COUNT];
+	int				m_limitPrecision[MEASURE_LIMIT_TYPE_COUNT];
+
+	double			m_adjustment = 0;
+
+	double			m_error[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
+	double			m_errorLimit[MEASURE_LIMIT_TYPE_COUNT][MEASURE_ERROR_TYPE_COUNT];
+
 public:
 
+	void			virtual clear();
+
+	void			fill_measure_input(const IoSignalParam& ioParam);
+
+	void			setLimits(const Metrology::SignalParam& param);
+	void			calcError();
+
 	QString			appSignalID() const { return m_appSignalID; }
-	void			setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; }
+	void			setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; setSignalHash(m_appSignalID); }
 
 	QString			customAppSignalID() const { return m_customAppSignalID; }
 	void			setCustomAppSignalID(const QString& customAppSignalID) { m_customAppSignalID = customAppSignalID; }
 
-	QString			caption() const { return m_caption; }
-	void			setCaption(const QString& name) { m_caption = name; }
+	QString			signalID(int type) const;
 
-	void			updateHysteresis(Measurement* pMeasurement);
+	QString			caption() const { return m_caption; }
+	void			setCaption(const QString& caption) { m_caption = caption; }
+
+	int				moduleSerialNo() const { return m_moduleSerialNo; }
+	QString			moduleSerialNoStr() const;
+	void			setModuleSerialNo(int serialNo) { m_moduleSerialNo = serialNo; }
+
+	Metrology::SignalLocation& location() { return m_location; }
+	void			setLocation(const Metrology::SignalLocation& location) { m_location = location; }
+
+	E::CmpType		cmpType() const { return m_cmpType; }
+	int				cmpTypeInt() const { return TO_INT(m_cmpType); }
+	QString			cmpTypeStr() const;
+	void			setCmpType(E::CmpType cmpType) { m_cmpType = cmpType; }
+	void			setCmpTypeInt(int cmpType) { m_cmpType = static_cast<E::CmpType>(cmpType); }
+
+	double			nominal(int limitType) const;
+	QString			nominalStr(int limitType) const;
+	void			setNominal(int limitType, double value);
+
+	double			measure(int limitType) const;
+	QString			measureStr(int limitType) const;
+	void			setMeasure(int limitType, double value);
+
+	double			lowLimit(int limitType) const;
+	void			setLowLimit(int limitType, double lowLimit);
+
+	double			highLimit(int limitType) const;
+	void			setHighLimit(int limitType, double highLimit);
+
+	QString			unit(int limitType) const;
+	void			setUnit(int limitType, QString unit);
+
+	int				limitPrecision(int limitType) const;
+	void			setLimitPrecision(int limitType, int precision);
+
+	QString			limitStr(int limitType) const;
+
+	double			error(int limitType, int errotType) const;
+	QString			errorStr() const;
+	void			setError(int limitType, int errotType, double value);
+
+	double			errorLimit(int limitType, int errotType) const;
+	QString			errorLimitStr() const;
+	void			setErrorLimit(int limitType, int errotType, double value);
+
+	int				errorResult() const;
+	QString			errorResultStr() const;
+
+	ComparatorMeasurement& operator=(const ComparatorMeasurement& from);
 };
 
 // ==============================================================================================
@@ -346,7 +421,7 @@ class MeasureBase : public QObject
 
 public:
 
-	explicit MeasureBase(QObject *parent = 0);
+	explicit MeasureBase(QObject *parent = nullptr);
 	virtual ~MeasureBase();
 
 private:
@@ -367,12 +442,12 @@ public:
 	Measurement*				measurement(int index) const;
 	bool						remove(int index, bool removeData = true);
 
-	Metrology::SignalStatistic	statistic(const Hash& signalHash);
+	Metrology::SignalStatistic	getSignalStatistic(const Hash& signalHash);
+
+signals:
+
+	void						updatedMeasureBase(Hash signalHash);
 };
-
-// ==============================================================================================
-
-extern MeasureBase theMeasureBase;
 
 // ==============================================================================================
 

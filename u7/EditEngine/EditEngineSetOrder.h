@@ -11,7 +11,7 @@ namespace EditEngine
 	public:
 		SetOrderCommand(EditSchemaView* schemaView,
 						SetOrder setOrder,
-						const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
+						const std::vector<SchemaItemPtr>& items,
 						std::shared_ptr<VFrame30::SchemaLayer> layer,
 						QScrollBar* hScrollBar,
 						QScrollBar* vScrollBar);
@@ -20,23 +20,22 @@ namespace EditEngine
 		// Check if the setOrder command will really change items order in the layer
 		// it is used to void the unnecessary operation
 		//
-		static bool checkIfCommandChangesOrder(
-				SetOrder setOrder,
-				const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
-				const std::list<std::shared_ptr<VFrame30::SchemaItem>>& layerItems);
+		static bool checkIfCommandChangesOrder(SetOrder setOrder,
+				const std::vector<SchemaItemPtr>& items,
+				const std::list<SchemaItemPtr>& layerItems);
 
 	protected:
-		virtual void executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect) override;
-		virtual void unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect) override;
+		virtual void executeCommand(std::vector<SchemaItemPtr>* itemsToSelect) override;
+		virtual void unExecuteCommand(std::vector<SchemaItemPtr>* itemsToSelect) override;
 
 		// Data
 		//
 	private:
 		SetOrder m_setOrder = SetOrder::BringForward;
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> m_items;
+		std::vector<SchemaItemPtr> m_items;
 		std::shared_ptr<VFrame30::SchemaLayer> m_layer;
 
-		std::list<std::shared_ptr<VFrame30::SchemaItem>> m_oldOrder;
+		std::list<SchemaItemPtr> m_oldOrder;
 	};
 
 }

@@ -9,9 +9,9 @@ namespace VFrame30
 	{
 		qDebug() << "UfbSchema::UfbSchema(void)";
 
-		ADD_PROPERTY_GETTER_SETTER(QString, "Description", true, UfbSchema::description, UfbSchema::setDescription)
-		ADD_PROPERTY_GETTER(int, "Version", true, UfbSchema::version)
-		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::lmDescriptionFile, true, UfbSchema::lmDescriptionFile, UfbSchema::setLmDescriptionFile)
+		ADD_PROPERTY_GETTER_SETTER(QString, "Description", true, UfbSchema::description, UfbSchema::setDescription);
+		ADD_PROPERTY_GETTER(int, "Version", true, UfbSchema::version);
+		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::lmDescriptionFile, true, UfbSchema::lmDescriptionFile, UfbSchema::setLmDescriptionFile);
 
 		setUnit(SchemaUnit::Inch);
 

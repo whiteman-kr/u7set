@@ -276,19 +276,17 @@ namespace Metrology
 	{
 		m_location = location;
 
-		// electricUnits
+		// init empty electricUnits
 		//
-
-		m_electricLowLimit = signal.electricLowLimit();
-		m_electricHighLimit = signal.electricHighLimit();
-		m_electricUnitID = signal.electricUnit();
-		m_electricSensorType = signal.sensorType();
+		m_electricLowLimit = 0;
+		m_electricHighLimit = 0;
+		m_electricUnitID = E::ElectricUnit::NoUnit;
+		m_electricSensorType = E::SensorType::NoSensor;
 		m_electricR0 = 0;
-		m_electricPrecision = 4;
+		m_electricPrecision = 0;
 
-		// physicalUnits
+		// set electricUnits and physicalUnits
 		//
-
 		m_physicalLowLimit = 0;
 		m_physicalHighLimit = 0;
 
@@ -302,6 +300,23 @@ namespace Metrology
 			switch (signal.inOutType())
 			{
 				case E::SignalInOutType::Input:
+
+					if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+					{
+						break;
+					}
+
+					m_electricLowLimit = signal.electricLowLimit();
+					m_electricHighLimit = signal.electricHighLimit();
+					m_electricPrecision = 4;
+
+					if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false || signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+					{
+						break;
+					}
+
+					m_electricUnitID = signal.electricUnit();
+					m_electricSensorType = signal.sensorType();
 
 					switch (signal.electricUnit())
 					{
@@ -324,9 +339,13 @@ namespace Metrology
 							{
 								QVariant qv;
 								bool isEnum;
-								if (signal.getSpecPropValue("R0_Ohm", &qv, &isEnum) == true)
+
+								if (signal.isSpecPropExists(SignalProperties::R0_OhmCaption) == true)
 								{
-									m_electricR0 = qv.toDouble();
+									if (signal.getSpecPropValue(SignalProperties::R0_OhmCaption, &qv, &isEnum) == true)
+									{
+										m_electricR0 = qv.toDouble();
+									}
 								}
 
 								qpl = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, m_electricSensorType, m_electricR0);
@@ -339,8 +358,29 @@ namespace Metrology
 
 				case E::SignalInOutType::Output:
 
-					qpl = uc.electricToPhysical_Output(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.outputMode());
-					qph = uc.electricToPhysical_Output(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.outputMode());
+					if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+					{
+						break;
+					}
+
+					m_electricLowLimit = signal.electricLowLimit();
+					m_electricHighLimit = signal.electricHighLimit();
+					m_electricPrecision = 4;
+
+					if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false)
+					{
+						break;
+					}
+
+					m_electricUnitID = signal.electricUnit();
+
+					if (signal.isSpecPropExists(SignalProperties::outputModeCaption) == false)
+					{
+						break;
+					}
+
+					qpl = uc.electricToPhysical_Output(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, signal.outputMode());
+					qph = uc.electricToPhysical_Output(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), m_electricUnitID, signal.outputMode());
 
 					break;
 			}
@@ -542,9 +582,9 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	bool SignalParam::engeneeringRangeIsValid() const
+	bool SignalParam::engineeringRangeIsValid() const
 	{
-		if (lowEngeneeringUnits() == 0.0 && highEngeneeringUnits() == 0.0)
+		if (lowEngineeringUnits() == 0.0 && highEngineeringUnits() == 0.0)
 		{
 			return false;
 		}
@@ -554,13 +594,13 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	QString SignalParam::engeneeringRangeStr() const
+	QString SignalParam::engineeringRangeStr() const
 	{
 		QString range, formatStr;
 
 		formatStr.sprintf("%%.%df", decimalPlaces());
 
-		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), lowEngeneeringUnits(), highEngeneeringUnits());
+		range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), lowEngineeringUnits(), highEngineeringUnits());
 
 		if (unit().isEmpty() == false)
 		{
@@ -653,7 +693,7 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	TuningValueType	SignalParam::tuningValueType()
+	TuningValueType	SignalParam::tuningValueType() const
 	{
 		TuningValueType type = TuningValueType::Float;
 
@@ -673,6 +713,22 @@ namespace Metrology
 		}
 
 		return type;
+	}
+
+	void SignalParam::setComparatorList(const QVector<std::shared_ptr<Comparator>>& comparators)
+	{
+		m_comparatorList = comparators;
+		m_comparatorCount = m_comparatorList.count();
+	}
+
+	std::shared_ptr<Comparator> SignalParam::comparator(int index) const
+	{
+		if (index < 0 || index >= m_comparatorCount)
+		{
+			return nullptr;
+		}
+
+		return m_comparatorList[index];
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -698,12 +754,16 @@ namespace Metrology
 			return QString("Not measured");
 		}
 
-		if (m_state < 0 || m_state >= StatisticStateCount)
+		QString state;
+
+		switch (m_state)
 		{
-			return QString();
+			case State::Failed:		state = "Failed";	break;
+			case State::Success:	state = "Ok";		break;
+			default:				assert(0);			break;
 		}
 
-		return StatisticState[m_state];
+		return state;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

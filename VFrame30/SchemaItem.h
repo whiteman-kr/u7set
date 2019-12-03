@@ -17,6 +17,7 @@ namespace VFrame30
 {
 	class Schema;
 	class SchemaLayer;
+	class SchemaItem;
 	class SchemaItemAfb;
 	class SchemaItemSignal;
 	class SchemaView;
@@ -26,6 +27,8 @@ namespace VFrame30
 
 	class CDrawParam;
 }
+
+using SchemaItemPtr = std::shared_ptr<VFrame30::SchemaItem>;
 
 namespace VFrame30
 {
@@ -59,6 +62,11 @@ namespace VFrame30
 	};
 
 
+	/*! \class SchemaItem
+		\brief Base class for all items displayed on schemas.
+
+		Base class for all items displayed on schemas.
+	*/
 	class VFRAME30LIBSHARED_EXPORT SchemaItem :
 		public PropertyObject,
 		public ISchemaItemPropertiesPos,
@@ -68,8 +76,24 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
+		/// \brief Object name
 		Q_PROPERTY(QString ObjectName READ objectName)
+
+		/// \brief Blining phase. This value is inverted each time schema is being redrawn
 		Q_PROPERTY(bool BlinkPhase READ blinkPhase)
+
+		/// \brief Turns <b>ClickScript</b> script call when user clicks on schema item
+		Q_PROPERTY(bool AcceptClick READ acceptClick WRITE setAcceptClick)
+
+		/*! \brief Contains mouse click event handler code.
+		Click event is generated each time when user clicks mouse button on the item and <b>AcceptClick</b> property is set to true.
+		*/
+		Q_PROPERTY(QString ClickScript READ clickScript)
+
+		/*! \brief Contains pre-draw event handler code. Pre-draw event is generated each time before item is redrawn.
+		In most cases, this code is used to change visual apperance of an item before drawing.
+		*/
+		Q_PROPERTY(QString PreDrawScript READ preDrawScript)
 
 	protected:
 		SchemaItem();
@@ -97,7 +121,7 @@ namespace VFrame30
 		// Action Functions
 		//
 	public:
-		virtual void MoveItem(double horzOffsetDocPt, double vertOffsetDocPt);
+		virtual void moveItem(double horzOffsetDocPt, double vertOffsetDocPt);
 
 		virtual void snapToGrid(double gridSize);
 
@@ -130,30 +154,35 @@ namespace VFrame30
 		// Draw Functions
 		//
 
-		// Рисование элемента, выполняется в 100% масштабе.
-		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
+		// Drawing item is in 100% scale
+		// Graphcis must have sceen coordinate system (0, 0 - left up corner, down and right - positive coordinate values)
 		//
-		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const;
+		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const;
+
 
 	public:
+		// Draw item's label
+		//
+		virtual void drawLabel(CDrawParam* drawParam) const;
+
 		// Draw item outline, while creation or changing
 		//
-		virtual void DrawOutline(CDrawParam* pDrawParam) const;
-		static void DrawOutline(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<SchemaItem>>& items);
+		virtual void drawOutline(CDrawParam* pDrawParam) const;
+		static void drawOutline(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<SchemaItem>>& items);
 
 		// Draw item issue
 		//
-		virtual void DrawIssue(CDrawParam* drawParam, OutputMessageLevel issue) const;
+		virtual void drawIssue(CDrawParam* drawParam, OutputMessageLevel issue) const;
 
 		// Draw debug info
 		//
-		virtual void DrawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const;
-		virtual void DrawScriptError(CDrawParam* drawParam) const;
+		virtual void drawDebugInfo(CDrawParam* drawParam, const QString& runOrderIndex) const;
+		virtual void drawScriptError(CDrawParam* drawParam) const;
 
-		// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
+		// Draw item selection depending on position interface
 		//
-		virtual void DrawSelection(CDrawParam* pDrawParam, bool drawSizeBar) const;
-		static void DrawSelection(CDrawParam* pDrawParam, const std::vector<std::shared_ptr<SchemaItem>>& items, bool drawSizeBar);
+		virtual void drawSelection(CDrawParam* pDrawParam, bool drawSizeBar) const;
+		static void drawSelection(CDrawParam* drawParam, const std::vector<std::shared_ptr<SchemaItem>>& items, bool drawSizeBar);
 
 		virtual void drawCompareAction(CDrawParam* drawParam, QColor color) const;
 
@@ -163,15 +192,15 @@ namespace VFrame30
 
 		// Determine and Calculation Functions
 		//
-	public:	
+	public:
 		// Определение, входит ли точка в элемент, x и y в дюймах или в пикселях
-		// 
-		virtual bool IsIntersectPoint(double x, double y) const;
+		//
+		virtual bool isIntersectPoint(double x, double y) const;
 
 		// Определение, пересекает ли элемент указанный прямоугольник (использовать для выделения),
 		// координаты и размер прямоугольника заданы в дюймах или пикселях
-		// 
-		virtual bool IsIntersectRect(double x, double y, double width, double height) const;
+		//
+		virtual bool isIntersectRect(double x, double y, double width, double height) const;
 
 		static double penDeviceWidth(const QPaintDevice* device, double penWidth);
 
@@ -250,6 +279,12 @@ namespace VFrame30
 		SchemaUnit itemUnit() const;
 		void setItemUnit(SchemaUnit value);
 
+		QString label() const;
+		void setLabel(const QString& value);
+
+		E::TextPos labelPos() const;
+		void setLabelPos(const E::TextPos& value);
+
 		bool acceptClick() const;
 		void setAcceptClick(const bool& value);
 
@@ -281,6 +316,9 @@ namespace VFrame30
 		QUuid m_guid;
 		SchemaUnit m_itemUnit;		// Item position unit, can be inches or pixels
 
+		QString m_label;
+		E::TextPos m_labelPos = E::TextPos::RightTop;
+
 		bool m_acceptClick = false;	// The SchemaItem accept mouse Left button click and runs script
 		QString m_clickScript;		// Qt script on mouse left button click
 		QString m_preDrawScript;
@@ -308,5 +346,3 @@ namespace VFrame30
 #endif
 
 }
-
-

@@ -5,7 +5,7 @@ namespace EditEngine
 {
 
 	NopItemCommand::NopItemCommand(EditSchemaView* schemaView,
-			const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
+			const std::vector<SchemaItemPtr>& items,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
 		EditCommand(schemaView, hScrollBar, vScrollBar),
@@ -16,13 +16,13 @@ namespace EditEngine
 		return;
 	}
 
-	void NopItemCommand::executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void NopItemCommand::executeCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		*itemsToSelect = m_items;
 		return;
 	}
 
-	void NopItemCommand::unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void NopItemCommand::unExecuteCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		*itemsToSelect = m_items;
 		return;

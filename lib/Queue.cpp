@@ -49,7 +49,7 @@ bool QueueBase::push(const char* item)
 	{
 		m_readIndex++;				// lost last item in queue
 		m_size--;
-		m_lostedCount++;
+		m_lostCount++;
 	}
 
 	memcpy(m_buffer + m_writeIndex() * m_itemSize, item, m_itemSize);
@@ -121,7 +121,7 @@ char* QueueBase::beginPush()
 	{
 		m_readIndex++;				// lost last item in queue
 		m_size--;
-		m_lostedCount++;
+		m_lostCount++;
 	}
 
 	return m_buffer + m_writeIndex() * m_itemSize;
@@ -189,7 +189,7 @@ void QueueBase::resize(int newQueueSize)
 	m_size = 0;
 	m_maxSize = 0;
 	m_queueSize = newQueueSize;
-	m_lostedCount = 0;
+	m_lostCount = 0;
 
 	m_buffer = new char [m_itemSize * m_queueSize];
 
@@ -239,7 +239,7 @@ bool LockFreeQueueBase::push(const char* item)
 
 	if (curSize >= m_queueSize)
 	{
-		m_lostedCount++;					// item will not be queued (losted item)
+		m_lostCount++;					// item will not be queued (lost item)
 		return false;
 	}
 
@@ -291,7 +291,7 @@ char* LockFreeQueueBase::beginPush()
 
 	if (curSize == m_queueSize)
 	{
-		m_lostedCount++;					// item will not be queued (losted item)
+		m_lostCount++;					// item will not be queued (lost item)
 		return nullptr;
 	}
 

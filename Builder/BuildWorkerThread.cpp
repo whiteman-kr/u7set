@@ -228,7 +228,7 @@ namespace Builder
 			// Compile application logic
 			//
 			m_context->m_tuningDataStorage = std::make_shared<Tuning::TuningDataStorage>();
-			m_context->m_comparatorStorage = std::make_shared<ComparatorStorage>();
+			m_context->m_comparatorSet = std::make_shared<ComparatorSet>();
 
 			ok = compileApplicationLogic();
 
@@ -897,16 +897,15 @@ namespace Builder
 
 	bool BuildWorkerThread::loadSignals(SignalSet* signalSet, Hardware::EquipmentSet* equipment)
 	{
-		if (signalSet == nullptr ||
-			equipment == nullptr)
-		{
-			assert(false);
-			return false;
-		}
+		IssueLogger* log = m_context->m_log;
 
-		LOG_EMPTY_LINE(m_context->m_log);
+		TEST_PTR_RETURN_FALSE(log);
+		TEST_PTR_LOG_RETURN_FALSE(signalSet, log);
+		TEST_PTR_LOG_RETURN_FALSE(equipment, log);
 
-		LOG_MESSAGE(m_context->m_log, tr("Loading application signals"));
+		LOG_EMPTY_LINE(log);
+
+		LOG_MESSAGE(log, tr("Loading application signals"));
 
 		bool result = m_context->m_db.getSignals(signalSet, true, nullptr);
 
@@ -917,6 +916,8 @@ namespace Builder
 			m_context->m_log->errPDB2003();
 			return false;
 		}
+
+		signalSet->setLog(log);
 
 		signalSet->findAndRemoveExcludedFromBuildSignals();
 
@@ -942,7 +943,7 @@ namespace Builder
 
 		signalSet->initCalculatedSignalsProperties();
 
-		LOG_SUCCESS(m_context->m_log, tr("Ok"));
+		LOG_SUCCESS(log, tr("Ok"));
 
 		return true;
 	}

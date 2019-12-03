@@ -22,7 +22,7 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
+		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
 		void drawAfbHelp(QPainter* painter, const QRect& drawRect) const;
 
 		// Serialization

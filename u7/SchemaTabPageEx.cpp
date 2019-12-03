@@ -2854,6 +2854,15 @@ void SchemaControlTabPageEx::addLogicSchema(QStringList deviceStrIds, QString lm
 		logicSchema->setPropertyValue(Hardware::PropertyNames::lmDescriptionFile, QVariant(lmDescriptionFile));
 	}
 
+	// Show Schema Properties
+	//
+	CreateSchemaDialog propertiesDialog(schema, db(), this);
+
+	if (propertiesDialog.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
 	// --
 	//
 	addSchemaFile(schema, Db::File::AlFileExtension, parentFile.fileId());
@@ -3283,15 +3292,12 @@ void SchemaControlTabPageEx::cloneFile()
 	{
 		layer->setGuid(QUuid::createUuid());
 
-		for (std::shared_ptr<VFrame30::SchemaItem> item : layer->Items)
+		for (SchemaItemPtr item : layer->Items)
 		{
 			item->setNewGuid();
 
-			if (item->isFblItemRect() == true)
-			{
-				globalCounter = db()->nextCounterValue();
-				item->toFblItemRect()->setLabel(schema->schemaId() + "_" + QString::number(globalCounter));
-			}
+			globalCounter = db()->nextCounterValue();
+			item->setLabel(schema->schemaId() + "_" + QString::number(globalCounter));
 		}
 	}
 
@@ -4004,11 +4010,11 @@ void SchemaControlTabPageEx::compareObject(DbChangesetObject object, CompareData
 
 	for (std::shared_ptr<VFrame30::SchemaLayer> targetLayer : target->Layers)
 	{
-		for (std::shared_ptr<VFrame30::SchemaItem> targetItem : targetLayer->Items)
+		for (SchemaItemPtr targetItem : targetLayer->Items)
 		{
 			// Look for this item in source
 			//
-			std::shared_ptr<VFrame30::SchemaItem> sourceItem = source->getItemById(targetItem->guid());
+			SchemaItemPtr sourceItem = source->getItemById(targetItem->guid());
 
 			if (sourceItem != nullptr)
 			{
@@ -4058,11 +4064,11 @@ void SchemaControlTabPageEx::compareObject(DbChangesetObject object, CompareData
 	//
 	for (std::shared_ptr<VFrame30::SchemaLayer> sourceLayer : source->Layers)
 	{
-		for (std::shared_ptr<VFrame30::SchemaItem> sourceItem : sourceLayer->Items)
+		for (SchemaItemPtr sourceItem : sourceLayer->Items)
 		{
 			// Look for this item in source
 			//
-			std::shared_ptr<VFrame30::SchemaItem> targetItem = target->getItemById(sourceItem->guid());
+			SchemaItemPtr targetItem = target->getItemById(sourceItem->guid());
 
 			if (targetItem == nullptr)
 			{
@@ -4364,16 +4370,27 @@ void SchemaControlTabPageEx::showFileProperties()
 
 	d.setLayout(layout);
 
+	if (QSize s = QSettings().value("SchemaFileProperties/size").toSize();
+		s.isValid() == true)
+	{
+		d.resize(s);
+	}
+	else
+	{
+		d.resize(d.sizeHint() * 2);
+	}
+
 	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
-
-	d.resize(d.sizeHint() * 1.5);
 
 	// Show proprties dialog
 	// and save result on accept
 	//
-	if (int result = d.exec();
-		result == QDialog::Accepted)
+	int result = d.exec();
+
+	QSettings().setValue("SchemaFileProperties/size", d.size());
+
+	if (result == QDialog::Accepted)
 	{
 		std::vector<std::shared_ptr<DbFile>> filesToSave;
 		filesToSave.reserve(schemas.size());

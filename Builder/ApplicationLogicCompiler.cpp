@@ -42,7 +42,7 @@ namespace Builder
 			lmDescriptions() == nullptr ||
 			appLogicData() == nullptr ||
 			tuningDataStorage() == nullptr ||
-			comparatorStorage() == nullptr ||
+			comparatorSet() == nullptr ||
 			buildResultWriter() == nullptr ||
 			connectionStorage() == nullptr ||
 			busSet() == nullptr)
@@ -66,6 +66,7 @@ namespace Builder
 //			&ApplicationLogicCompiler::writeOptoModulesReport,
 			&ApplicationLogicCompiler::writeOptoVhdFiles,
 			&ApplicationLogicCompiler::writeAppSignalSetFile,
+			&ApplicationLogicCompiler::writeComparatorSetFile,
 			&ApplicationLogicCompiler::writeSubsystemsXml,
 		};
 
@@ -136,9 +137,9 @@ namespace Builder
 		return m_context->m_tuningDataStorage.get();
 	}
 
-	ComparatorStorage* ApplicationLogicCompiler::comparatorStorage()
+	ComparatorSet* ApplicationLogicCompiler::comparatorSet()
 	{
-		return m_context->m_comparatorStorage.get();
+		return m_context->m_comparatorSet.get();
 	}
 
 	BuildResultWriter* ApplicationLogicCompiler::buildResultWriter()
@@ -323,6 +324,13 @@ namespace Builder
 				result = false;
 				break;
 			}
+		}
+
+		for(ModuleLogicCompiler* mc : m_moduleCompilers)
+		{
+			TEST_PTR_CONTINUE(mc);
+
+			mc->setModuleCompilersRef(&m_moduleCompilers);
 		}
 
 		return result;
@@ -1197,6 +1205,30 @@ namespace Builder
 		BuildFile* appSignalSetFile = buildResultWriter()->addFile(Builder::DIR_COMMON, FILE_APP_SIGNALS_ASGS, CFG_FILE_ID_APP_SIGNAL_SET, "", data, true);
 
 		return appSignalSetFile != nullptr;
+	}
+
+	bool ApplicationLogicCompiler::writeComparatorSetFile()
+	{
+		if (comparatorSet() == nullptr)
+		{
+			assert(false);
+			return false;
+		}
+
+		::Proto::ComparatorSet protoComparatorSet;
+		comparatorSet()->serializeTo(&protoComparatorSet);
+
+		int dataSize = protoComparatorSet.ByteSize();
+
+		QByteArray data;
+
+		data.resize(dataSize);
+
+		protoComparatorSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
+
+		BuildFile* comparatorSetFile = buildResultWriter()->addFile(Builder::DIR_COMMON, FILE_COMPARATORS_SET, CFG_FILE_ID_COMPARATOR_SET, "", data, true);
+
+		return comparatorSetFile != nullptr;
 	}
 
 	bool ApplicationLogicCompiler::writeSubsystemsXml()

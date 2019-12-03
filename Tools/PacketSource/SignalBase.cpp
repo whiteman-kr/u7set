@@ -78,7 +78,7 @@ QString PS::Signal::signalInOutTypeStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString PS::Signal::engeneeringRangeStr() const
+QString PS::Signal::engineeringRangeStr() const
 {
 	if(signalType() != E::SignalType::Analog)
 	{
@@ -94,7 +94,7 @@ QString PS::Signal::engeneeringRangeStr() const
 		default:									assert(0);										break;
 	}
 
-	range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), lowEngeneeringUnits(), highEngeneeringUnits());
+	range.sprintf(formatStr.toLocal8Bit() + " .. " + formatStr.toLocal8Bit(), lowEngineeringUnits(), highEngineeringUnits());
 
 	if (unit().isEmpty() == false)
 	{
@@ -387,6 +387,7 @@ void SignalBase::clear()
 	m_signalMutex.lock();
 
 		m_signalList.clear();
+		m_signalHashMap.clear();
 
 	m_signalMutex.unlock();
 }
@@ -494,13 +495,13 @@ int SignalBase::append(const PS::Signal& signal)
 
 	m_signalMutex.lock();
 
-	if (m_signalHashMap.contains(signal.hash()) == false)
-	{
-		m_signalList.append(signal);
-		index = m_signalList.count() - 1;
+		if (m_signalHashMap.contains(signal.hash()) == false)
+		{
+			m_signalList.append(signal);
+			index = m_signalList.count() - 1;
 
-		m_signalHashMap.insert(signal.hash(), index);
-	}
+			m_signalHashMap.insert(signal.hash(), index);
+		}
 
 	m_signalMutex.unlock();
 
@@ -684,7 +685,8 @@ QVariant SignalTable::headerData(int section, Qt::Orientation orientation, int r
 
 	if (orientation == Qt::Vertical)
 	{
-		result = QString("%1").arg(section + 1);
+		//result = QString("%1").arg(section + 1);
+		result = QString();
 	}
 
 	return result;
@@ -768,7 +770,7 @@ QString SignalTable::text(int row, int column, PS::Signal* pSignal) const
 		case SIGNAL_LIST_COLUMN_STATE:			result = pSignal->stateStr();					break;
 		case SIGNAL_LIST_COLUMN_ADB:			result = pSignal->signalTypeStr();				break;
 		case SIGNAL_LIST_COLUMN_INOUT:			result = pSignal->signalInOutTypeStr();			break;
-		case SIGNAL_LIST_COLUMN_EN_RANGE:		result = pSignal->engeneeringRangeStr();		break;
+		case SIGNAL_LIST_COLUMN_EN_RANGE:		result = pSignal->engineeringRangeStr();		break;
 		case SIGNAL_LIST_COLUMN_FORMAT:			result = pSignal->signalFormatStr();			break;
 		case SIGNAL_LIST_COLUMN_STATE_OFFSET:	result = pSignal->stateOffsetStr();				break;
 		case SIGNAL_LIST_COLUMN_STATE_BIT:		result = pSignal->stateBitStr();				break;
@@ -930,7 +932,7 @@ void SignalStateDialog::createInterface()
 				m_stateEdit->setAlignment(Qt::AlignHCenter);
 				m_stateEdit->setValidator(validator);
 
-				QLabel* rangeLabel = new QLabel(m_pSignal->engeneeringRangeStr());
+				QLabel* rangeLabel = new QLabel(m_pSignal->engineeringRangeStr());
 				rangeLabel->setAlignment(Qt::AlignHCenter);
 
 				// buttons
@@ -998,14 +1000,14 @@ void SignalStateDialog::onOk()
 
 	double state = m_stateEdit->text().toDouble();
 
-	if (state < m_pSignal->lowEngeneeringUnits()|| state > m_pSignal->highEngeneeringUnits())
+	if (state < m_pSignal->lowEngineeringUnits() || state > m_pSignal->highEngineeringUnits())
 	{
 		QString str, formatStr;
 
 		formatStr.sprintf("%%.%df", m_pSignal->decimalPlaces());
 
 		str.sprintf("Failed input value: " + formatStr.toLocal8Bit(), state);
-		str += tr("\nRange of signal: %1").arg(m_pSignal->engeneeringRangeStr());
+		str += tr("\nRange of signal: %1").arg(m_pSignal->engineeringRangeStr());
 
 		QMessageBox::critical(this, windowTitle(), str);
 		return;

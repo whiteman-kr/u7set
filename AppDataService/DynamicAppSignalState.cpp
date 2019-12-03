@@ -85,8 +85,8 @@ void DynamicAppSignalState::setSignalParams(const Signal* signal, const AppSigna
 	m_coarseAperture = signal->coarseAperture();
 	m_fineAperture = signal->fineAperture();
 
-	m_lowLimit = signal->lowEngeneeringUnits();
-	m_highLimit = signal->highEngeneeringUnits();
+	m_lowLimit = signal->lowEngineeringUnits();
+	m_highLimit = signal->highEngineeringUnits();
 	m_adaptiveAperture = signal->adaptiveAperture();
 
 	if (m_adaptiveAperture == false)
@@ -252,8 +252,8 @@ bool DynamicAppSignalState::setState(const Times& time,
 					}
 				}
 
-				curState.flags.aboveHighLimit = (curState.value > m_signal->highEngeneeringUnits() ? 1 : 0);
-				curState.flags.belowLowLimit = (curState.value < m_signal->lowEngeneeringUnits() ? 1 : 0);
+				curState.flags.aboveHighLimit = (curState.value > m_signal->highEngineeringUnits() ? 1 : 0);
+				curState.flags.belowLowLimit = (curState.value < m_signal->lowEngineeringUnits() ? 1 : 0);
 
 				break;
 
@@ -313,7 +313,7 @@ bool DynamicAppSignalState::setState(const Times& time,
 	{
 		curState.flags.autoPoint = 1;
 
-		qDebug() << "auto" << appSignalID();
+//		qDebug() << "auto" << appSignalID();
 	}
 
 	curState.flags.updateArchivingReasonFlags(prevState.flags);
@@ -551,6 +551,8 @@ void DynamicAppSignalState::rtSessionsProcessing(const SimpleAppSignalState& sta
 
 bool DynamicAppSignalState::getValue(const char* rupData, int rupDataSize, double& value)
 {
+	Q_UNUSED(rupDataSize);
+
 	// get double signal value from rupData buffer using parseInfo
 	//
 	int valueOffset = m_valueAddr.offset() * 2;		// offset in Words => offset in Bytes

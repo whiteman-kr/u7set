@@ -165,7 +165,7 @@ namespace VFrame30
 	}
 
 
-	void SchemaItemSignal::Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
+	void SchemaItemSignal::draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const
 	{
 		if (multiChannel() == true)
 		{
@@ -185,7 +185,7 @@ namespace VFrame30
 			}
 		}
 
-		FblItemRect::Draw(drawParam, schema, layer);
+		FblItemRect::draw(drawParam, schema, layer);
 
 		if (drawParam->isMonitorMode() == true)
 		{
@@ -595,11 +595,12 @@ namespace VFrame30
 							textRect.setLeft(textRect.left() + m_font.drawSize() / 8.0);
 							textRect.setRight(textRect.right() - m_font.drawSize() / 8.0);
 
-							painter->setPen(textColor());
-
-							QRectF boundingRect = rect.intersected(textRect);
-
-							DrawHelper::drawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
+							if (textRect.width() > m_font.drawSize() / 8.0)
+							{
+								painter->setPen(textColor());
+								QRectF boundingRect = rect.intersected(textRect);
+								DrawHelper::drawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
+							}
 						}
 					}
 					else
@@ -623,11 +624,12 @@ namespace VFrame30
 							textRect.setLeft(textRect.left() + m_font.drawSize() / 8.0);
 							textRect.setRight(textRect.right() - m_font.drawSize() / 8.0);
 
-							painter->setPen(textColor());
-
-							QRectF boundingRect = rect.intersected(textRect);
-
-							DrawHelper::drawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
+							if (textRect.width() > m_font.drawSize() / 8.0)
+							{
+								painter->setPen(textColor());
+								QRectF boundingRect = rect.intersected(textRect);
+								DrawHelper::drawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
+							}
 						}
 					}
 				}
@@ -646,11 +648,12 @@ namespace VFrame30
 					textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
 					textRect.setRight(textRect.right() - m_font.drawSize() / 4.0);
 
-					painter->setPen(textColor());
-
-					QRectF boundingRect = rect.intersected(textRect);
-
-					DrawHelper::drawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
+					if (textRect.width() > m_font.drawSize() / 4.0)
+					{
+						painter->setPen(textColor());
+						QRectF boundingRect = rect.intersected(textRect);
+						DrawHelper::drawText(painter, m_font, itemUnit(), text, boundingRect, column.horzAlign | Qt::AlignVCenter);
+					}
 				}
 
 				// --
@@ -771,9 +774,6 @@ namespace VFrame30
 
 		QRectF rect = itemRectPinIndent(drawParam);
 
-		rect.setLeft(rect.left() + m_font.drawSize() / 4.0);
-		rect.setRight(rect.right() - m_font.drawSize() / 4.0);
-
 		double startOffset = 0;
 
 		// Get AppSignal
@@ -835,9 +835,11 @@ namespace VFrame30
 			textRect.setLeft(textRect.left() + m_font.drawSize() / 4.0);
 			textRect.setRight(textRect.right() - m_font.drawSize() / 4.0);
 
-			painter->setPen(textColor());
-
-			DrawHelper::drawText(painter, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop);
+			if (textRect.width() > 0)
+			{
+				painter->setPen(textColor());
+				DrawHelper::drawText(painter, m_font, itemUnit(), text, textRect, c.horzAlign | Qt::AlignTop);
+			}
 
 			// --
 			//
@@ -976,23 +978,23 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 		return str;
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> SchemaItemSignal::transformIntoInput()
+	SchemaItemPtr SchemaItemSignal::transformIntoInput()
 	{
 		return transformIntoType<VFrame30::SchemaItemInput>();
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> SchemaItemSignal::transformIntoInOut()
+	SchemaItemPtr SchemaItemSignal::transformIntoInOut()
 	{
 		return transformIntoType<VFrame30::SchemaItemInOut>();
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> SchemaItemSignal::transformIntoOutput()
+	SchemaItemPtr SchemaItemSignal::transformIntoOutput()
 	{
 		return transformIntoType<VFrame30::SchemaItemOutput>();
 	}
 
 	template <typename TYPE>
-	std::shared_ptr<VFrame30::SchemaItem> SchemaItemSignal::transformIntoType()
+	SchemaItemPtr SchemaItemSignal::transformIntoType()
 	{
 		Proto::Envelope message;
 		SaveData(&message);

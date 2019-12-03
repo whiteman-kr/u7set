@@ -10,7 +10,7 @@
 #include "BuildResultWriter.h"
 #include "OptoModule.h"
 #include "LmMemoryMap.h"
-#include "ComparatorStorage.h"
+#include "../lib/ComparatorSet.h"
 #include "UalItems.h"
 #include "MemWriteMap.h"
 
@@ -194,6 +194,8 @@ namespace Builder
 		bool expertMode() const;
 
 		const ResourcesUsageInfo& resourcesUsageInfo() { return m_resourcesUsageInfo; }
+
+		void setModuleCompilersRef(const QVector<ModuleLogicCompiler*>* moduleCompilers);
 
 	private:
 		// pass #1 compilation functions
@@ -393,8 +395,11 @@ namespace Builder
 
 		bool setOptoRawInSignalsAsComputed();
 
+		bool fillComparatorSet();
+
 		// pass #2 compilation functions
 		//
+		bool initComparatorSignals();
 		bool finalizeOptoConnectionsProcessing();
 		bool setOptoUalSignalsAddresses();
 
@@ -457,7 +462,7 @@ namespace Builder
 
 		bool isConnectedToTerminator(const LogicPin& outPin);
 
-		bool addToComparatorStorage(const UalAfb *appFb);
+		bool addToComparatorSet(const UalAfb *appFb);
 		bool initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* appFb);
 
 		bool copyAcquiredAnalogOptoSignalsToRegBuf(CodeSnippet* code);
@@ -549,6 +554,10 @@ namespace Builder
 
 		UalSignalsMap& ualSignals() { return m_ualSignals; }
 
+		QString getFormatStr(const Hardware::DeviceSignal& ds);
+		QString getFormatStr(const Signal& s);
+		QString getFormatStr(E::SignalType signalType, E::DataFormat dataFormat, int dataSizeBits, E::ByteOrder byteOrder);
+
 	private:
 		// input parameters
 		//
@@ -562,7 +571,7 @@ namespace Builder
 		Hardware::OptoModuleStorage* m_optoModuleStorage = nullptr;
 		SignalSet* m_signals = nullptr;
 		Tuning::TuningDataStorage* m_tuningDataStorage = nullptr;
-		ComparatorStorage* m_cmpStorage = nullptr;
+		ComparatorSet* m_cmpSet = nullptr;
 
 		std::shared_ptr<LmDescription> m_lmDescription;
 		AppLogicData* m_appLogicData = nullptr;
@@ -671,6 +680,8 @@ namespace Builder
 		static const int FB_SCALE_16UI_SI_INDEX = 1;
 		static const int FB_SCALE_FP_16UI_INDEX = 2;
 		static const int FB_SCALE_SI_16UI_INDEX = 3;
+		static const int FB_TCONV_FP_SI_INDEX = 4;
+		static const int FB_TCONV_SI_FP_INDEX = 5;
 
 		static const char* INPUT_CONTROLLER_SUFFIX;
 		static const char* OUTPUT_CONTROLLER_SUFFIX;
@@ -685,6 +696,8 @@ namespace Builder
 		QHash<QString, UalAfb*> m_inOutSignalsToScalAppFbMap;
 
 		Tuning::TuningData* m_tuningData = nullptr;
+
+		const QVector<ModuleLogicCompiler*>* m_moduleCompilers = nullptr;
 	};
 
 }

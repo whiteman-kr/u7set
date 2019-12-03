@@ -29,7 +29,7 @@ namespace EditEngine
 		return;
 	}
 
-	void SetSchemaPropertyCommand::executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void SetSchemaPropertyCommand::executeCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		m_schema->setPropertyValue(m_propertyName, m_newValue);
 
@@ -37,7 +37,7 @@ namespace EditEngine
 		return;
 	}
 
-	void SetSchemaPropertyCommand::unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void SetSchemaPropertyCommand::unExecuteCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		m_schema->setPropertyValue(m_propertyName, m_oldValue);
 

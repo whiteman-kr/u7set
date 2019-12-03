@@ -12,7 +12,7 @@ class DialogChoosePreset : public QDialog
 	Q_OBJECT
 
 public:
-	DialogChoosePreset(QWidget *parent, DbController* db, Hardware::DeviceType selectedType, bool limitToSelectedType);
+	DialogChoosePreset(QWidget* parent, DbController* db, Hardware::DeviceType selectedType, bool limitToSelectedType);
 	~DialogChoosePreset();
 
 protected:
@@ -30,9 +30,9 @@ private slots:
 private:
 	Ui::DialogChoosePreset *ui;
 
-	DbController* m_db;
+	DbController* m_db = nullptr;
 
-	std::vector<std::shared_ptr<Hardware::DeviceObject>> presets;
+	std::vector<std::shared_ptr<Hardware::DeviceObject>> m_presets;
 
 	static int m_lastSortColumn;
 	static QString m_lastSelectedPreset;

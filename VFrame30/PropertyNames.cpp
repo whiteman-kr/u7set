@@ -22,7 +22,10 @@ namespace VFrame30
 	const QString PropertyNames::fontBold{"FontBold"};
 	const QString PropertyNames::fontItalic{"FontItalic"};
 
+	const QString PropertyNames::color{"Color"};
+
 	const QString PropertyNames::type{"Type"};
+	const QString PropertyNames::value{"Value"};
 	const QString PropertyNames::valueInteger{"ValueInteger"};
 	const QString PropertyNames::valueFloat{"ValueFloat"};
 	const QString PropertyNames::valueDiscrete{"ValueDiscrete"};
@@ -36,6 +39,7 @@ namespace VFrame30
 	const QString PropertyNames::lineColor{"LineColor"};
 	const QString PropertyNames::lineWeight{"LineWeight"};
 	const QString PropertyNames::fillColor{"FillColor"};
+	const QString PropertyNames::backgroundColor{"BackgroundColor"};
 	const QString PropertyNames::fill{"Fill"};
 	const QString PropertyNames::drawRect{"DrawRect"};
 	const QString PropertyNames::textColor{"TextColor"};
@@ -54,6 +58,36 @@ namespace VFrame30
 	const QString PropertyNames::images{"Images"};
 	const QString PropertyNames::svg{"Svg"};
 	const QString PropertyNames::currentImageId{"CurrentImageID"};
+
+	const QString PropertyNames::drawGrid{"DrawGrid"};
+	const QString PropertyNames::drawGridForAllBars{"DrawGridForAllBars"};
+	const QString PropertyNames::drawGridValues{"DrawGridValues"};
+	const QString PropertyNames::drawGridValueForAllBars{"DrawGridValueForAllBars"};
+	const QString PropertyNames::drawGridValueUnits{"DrawGridValueUnits"};
+	const QString PropertyNames::gridMainStep{"GridMainStep"};
+	const QString PropertyNames::gridSmallStep{"GridSmallStep"};
+
+	const QString PropertyNames::indicatorSignalColors{"SignalColors"};
+	const QString PropertyNames::indicatorType{"IndicatorType"};
+	const QString PropertyNames::indicatorSettings{"IndicatorSettings"};
+
+	const QString PropertyNames::indicatorSetpointType{"SetpointType"};
+	const QString PropertyNames::indicatorSchemaItemLabel{"SchemaItemLabel"};
+	const QString PropertyNames::indicatorOutputAppSignalId{"OutputAppSignalId"};
+	const QString PropertyNames::indicatorStaticValue{"StaticValue"};
+	const QString PropertyNames::indicatorStaticCompareType{"StaticCompareType"};
+
+	const QString PropertyNames::indicatorStartValue{"StartValue"};
+	const QString PropertyNames::indicatorEndValue{"EndValue"};
+	const QString PropertyNames::indicatorBarWidth{"BarWidth"};
+	const QString PropertyNames::indicatorDrawBarRect{"DrawBarRect"};
+	const QString PropertyNames::indicatorStartAngle{"StartAngle"};
+	const QString PropertyNames::indicatorSpanAngle{"SpanAngle"};
+
+	const QString PropertyNames::indicatorMargingLeft{"MarginLeft"};
+	const QString PropertyNames::indicatorMargingTop{"MarginTop"};
+	const QString PropertyNames::indicatorMargingRight{"MarginRight"};
+	const QString PropertyNames::indicatorMargingBottom{"MarginBottom"};
 
 	// SchemaItemValue Colors
 	//
@@ -104,6 +138,7 @@ namespace VFrame30
 	const QString PropertyNames::dataType{"DataType"};
 	const QString PropertyNames::units{"Units"};
 
+	const QString PropertyNames::signalIDs{"SignalIDs"};
 	const QString PropertyNames::appSignalIDs{"AppSignalIDs"};
 	const QString PropertyNames::appSignalIDsValidator{"^[#]?([A-Za-z\\d_]+((;[#]?)?\\r?(\\n[#]?)?))+$"};
 	const QString PropertyNames::appSignalId{"AppSignalID"};
@@ -117,6 +152,8 @@ namespace VFrame30
 	const QString PropertyNames::adaptiveAperture{"AdaptiveAperture"};
 
 	const QString PropertyNames::loopbackId{"LoopbackID"};
+
+	const QString PropertyNames::compareType{"ÑompareType"};
 
 	const QString PropertyNames::busTypeId{"BusTypeID"};
 	const QString PropertyNames::busTypeFileName{"FileName"};

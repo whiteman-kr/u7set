@@ -10,7 +10,6 @@
 #include "../../lib/Ui/DialogAbout.h"
 
 #include "PathOptionDialog.h"
-#include "FindData.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -32,7 +31,6 @@ MainWindow::~MainWindow()
 
 bool MainWindow::createInterface()
 {
-	setWindowIcon(QIcon(":/icons/PacketSource.png"));
 	setWindowTitle(tr("Packet Source"));
 	resize(1000, 700);
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());
@@ -40,10 +38,14 @@ bool MainWindow::createInterface()
 	createActions();
 	createMenu();
 	createToolBars();
+	createPanels();
 	createViews();
 	createContextMenu();
 	createHeaderContexMenu();
 	createStatusBar();
+
+	connect(&m_sourceBase, &SourceBase::sourcesLoaded, this, &MainWindow::loadSignals, Qt::QueuedConnection);
+	connect(&m_signalBase, &SignalBase::signalsLoaded, this, &MainWindow::initSignalsInSources, Qt::QueuedConnection);
 
 	loadSources();
 
@@ -80,17 +82,11 @@ void MainWindow::createActions()
 	m_sourceSelectAllAction->setToolTip(tr("Select all sources"));
 	connect(m_sourceSelectAllAction, &QAction::triggered, this, &MainWindow::selectAllSource);
 
-	m_findAction = new QAction(tr("&Find ..."), this);
-	m_findAction->setShortcut(Qt::CTRL + Qt::Key_F);
-	m_findAction->setIcon(QIcon(":/icons/Find.png"));
-	m_findAction->setToolTip(tr("Find text in list of signals"));
-	connect(m_findAction, &QAction::triggered, this, &MainWindow::findTextSignal);
-
 	m_optionAction = new QAction(tr("&Options"), this);
 	m_optionAction->setShortcut(Qt::CTRL + Qt::Key_O);
 	m_optionAction->setIcon(QIcon(":/icons/Options.png"));
 	m_optionAction->setToolTip(tr("Options of sources"));
-	connect(m_optionAction, &QAction::triggered, this, &MainWindow::optionSource);
+	connect(m_optionAction, &QAction::triggered, this, &MainWindow::onOptions);
 
 	// ?
 	//
@@ -129,10 +125,14 @@ void MainWindow::createMenu()
 	m_sourceMenu->addAction(m_sourceStartAction);
 	m_sourceMenu->addAction(m_sourceStopAction);
 	m_sourceMenu->addSeparator();
-	m_sourceMenu->addAction(m_sourceSelectAllAction);
-	m_sourceMenu->addSeparator();
-	m_sourceMenu->addAction(m_findAction);
 	m_sourceMenu->addAction(m_optionAction);
+
+	// Edit
+	//
+	m_pEditMenu = pMenuBar->addMenu(tr("&Edit"));
+
+	m_pEditMenu->addAction(m_sourceSelectAllAction);
+	m_pEditMenu->addSeparator();
 
 	//
 	//
@@ -162,47 +162,81 @@ bool MainWindow::createToolBars()
 	m_mainToolBar->addAction(m_sourceStartAction);
 	m_mainToolBar->addAction(m_sourceStopAction);
 	m_mainToolBar->addSeparator();
-	m_mainToolBar->addAction(m_optionAction);
 
 	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::createPanels()
+{
+	// Frame of data panel
+	//
+	m_pFrameDataPanel = new FrameDataPanel(this);
+	if (m_pFrameDataPanel != nullptr)
+	{
+		m_pFrameDataPanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+
+		addDockWidget(Qt::RightDockWidgetArea, m_pFrameDataPanel);
+
+		m_pFrameDataPanel->hide();
+
+		QAction* findAction = m_pFrameDataPanel->toggleViewAction();
+		if (findAction != nullptr)
+		{
+			findAction->setText(tr("&Frame of data ..."));
+			findAction->setShortcut(Qt::CTRL + Qt::Key_D);
+			findAction->setIcon(QIcon(":/icons/FrameData.png"));
+			findAction->setToolTip(tr("Frame of data"));
+
+			if (m_pEditMenu != nullptr)
+			{
+				m_pEditMenu->addAction(findAction);
+			}
+
+			if (m_mainToolBar != nullptr)
+			{
+				m_mainToolBar->addAction(findAction);
+			}
+		}
+	}
+
+	// Search measurements panel
+	//
+	m_pFindSignalPanel = new FindSignalPanel(this);
+	if (m_pFindSignalPanel != nullptr)
+	{
+		m_pFindSignalPanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
+
+		addDockWidget(Qt::RightDockWidgetArea, m_pFindSignalPanel);
+
+		m_pFindSignalPanel->hide();
+
+		QAction* findAction = m_pFindSignalPanel->toggleViewAction();
+		if (findAction != nullptr)
+		{
+			findAction->setText(tr("&Find ..."));
+			findAction->setShortcut(Qt::CTRL + Qt::Key_F);
+			findAction->setIcon(QIcon(":/icons/Find.png"));
+			findAction->setToolTip(tr("Find signal"));
+
+			if (m_pEditMenu != nullptr)
+			{
+				m_pEditMenu->addAction(findAction);
+			}
+
+			if (m_mainToolBar != nullptr)
+			{
+				m_mainToolBar->addAction(findAction);
+			}
+		}
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::createViews()
 {
-	// Search signal text panel
-	//
-//	m_pFindSignalTextPanel = new FindSignalTextPanel(this);
-//	if (m_pFindSignalTextPanel != nullptr)
-//	{
-//		m_pFindSignalTextPanel->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea | Qt::BottomDockWidgetArea);
-
-//		addDockWidget(Qt::RightDockWidgetArea, m_pFindSignalTextPanel);
-
-//		m_pFindSignalTextPanel->hide();
-
-//		QAction* findAction = m_pFindSignalTextPanel->toggleViewAction();
-//		if (findAction != nullptr)
-//		{
-//			findAction->setText(tr("&Find ..."));
-//			findAction->setShortcut(Qt::CTRL + Qt::Key_F);
-//			findAction->setIcon(QIcon(":/icons/Find.png"));
-//			findAction->setToolTip(tr("Find text in list of signals"));
-
-//			if (m_sourceMenu != nullptr)
-//			{
-//				m_sourceMenu->addAction(findAction);
-//			}
-
-//			if (m_mainToolBar != nullptr)
-//			{
-//				m_mainToolBar->addAction(findAction);
-//			}
-//		}
-//	}
-
-
 	// View of sources
 	//
 	m_pSourceView = new QTableView(this);
@@ -253,27 +287,6 @@ void MainWindow::createViews()
 
 	connect(m_pSignalView, &QTableView::doubleClicked , this, &MainWindow::onSignalListDoubleClicked);
 
-	// View of Frame Data
-	//
-	m_pFrameDataView = new QTableView(this);
-	if (m_pFrameDataView == nullptr)
-	{
-		return;
-	}
-
-	m_pFrameDataView->setModel(&m_frameDataTable);
-	m_pFrameDataView->verticalHeader()->setDefaultSectionSize(22);
-
-	for(int column = 0; column < FRAME_LIST_COLUMN_COUNT; column++)
-	{
-		m_pFrameDataView->setColumnWidth(column, FrameListColumnWidth[column]);
-	}
-
-	m_pFrameDataView->setSelectionBehavior(QAbstractItemView::SelectRows);
-	m_pFrameDataView->setMaximumWidth(180);
-
-	connect(m_pFrameDataView, &QTableView::doubleClicked , this, &MainWindow::onFrameDataListDoubleClicked);
-
 	// Layouts
 	//
 
@@ -285,8 +298,6 @@ void MainWindow::createViews()
 	QHBoxLayout *mainLayout = new QHBoxLayout;
 
 	mainLayout->addLayout(ssLayout);
-	mainLayout->addWidget(m_pFrameDataView);
-
 
 	QWidget* pWidget = new QWidget(this);
 	pWidget->setLayout(mainLayout);
@@ -369,7 +380,6 @@ void MainWindow::createHeaderContexMenu()
 		}
 	}
 
-	hideSignalColumn(SIGNAL_LIST_COLUMN_APP_ID, true);
 	hideSignalColumn(SIGNAL_LIST_COLUMN_FORMAT, true);
 	hideSignalColumn(SIGNAL_LIST_COLUMN_STATE_OFFSET, true);
 	hideSignalColumn(SIGNAL_LIST_COLUMN_STATE_BIT, true);
@@ -399,8 +409,6 @@ void MainWindow::createStatusBar()
 
 void MainWindow::loadSources()
 {
-	connect(&m_sourceBase, &SourceBase::sourcesLoaded, this, &MainWindow::loadSignals, Qt::QueuedConnection);
-
 	QVector<PS::Source*> ptrSourceList;
 
 	int sourceCount = m_sourceBase.readFromFile(theOptions.path().sourcePath());
@@ -419,8 +427,6 @@ void MainWindow::loadSources()
 
 void MainWindow::loadSignals()
 {
-	connect(&m_signalBase, &SignalBase::signalsLoaded, this, &MainWindow::initSignalsInSources, Qt::QueuedConnection);
-
 	int signalCount = m_signalBase.readFromFile(theOptions.path().signalPath());
 	if (signalCount == 0)
 	{
@@ -593,20 +599,19 @@ void MainWindow::selectAllSource()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::findTextSignal()
-{
-	FindData* dialog = new FindData(m_pSignalView);
-	dialog->exec();
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::optionSource()
+void MainWindow::onOptions()
 {
 	PathOptionDialog dialog(this);
 	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
+	}
+
+	m_signalTable.clear();
+
+	if (m_pFrameDataPanel != nullptr)
+	{
+		m_pFrameDataPanel->clear();
 	}
 
 	m_sourceBase.stopAllSoureces();
@@ -690,9 +695,14 @@ void MainWindow::updateFrameDataList(PS::Source* pSource)
 		return;
 	}
 
+	if (m_pFrameDataPanel == nullptr)
+	{
+		return;
+	}
+
 	QVector<PS::FrameData*> frameDataList;
 
-	m_frameDataTable.clear();
+	m_pFrameDataPanel->clear();
 
 	int count = pSource->frameBase().count();
 	for(int i = 0; i < count; i++)
@@ -706,7 +716,7 @@ void MainWindow::updateFrameDataList(PS::Source* pSource)
 		frameDataList.append(pFrameData);
 	}
 
-	m_frameDataTable.set(frameDataList);
+	m_pFrameDataPanel->set(frameDataList);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -874,27 +884,6 @@ void MainWindow::onSignalListDoubleClicked(const QModelIndex& index)
 	}
 
 	pSignal->setState(dialog.state());
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void MainWindow::onFrameDataListDoubleClicked(const QModelIndex& index)
-{
-	int byteIndex = index.row();
-	if (byteIndex < 0 || byteIndex >= m_frameDataTable.dataSize())
-	{
-		return;
-	}
-
-	quint8 byte = m_frameDataTable.byte(byteIndex);
-
-	FrameDataStateDialog dialog(byte);
-	if (dialog.exec() != QDialog::Accepted)
-	{
-		return;
-	}
-
-	m_frameDataTable.setByte(byteIndex, dialog.byte());
 }
 
 // -------------------------------------------------------------------------------------------------------------------

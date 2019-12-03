@@ -197,7 +197,7 @@ void EditSchemaView::paintEvent(QPaintEvent* /*pe*/)
 	//
 	if (m_selectedItems.empty() == false)
 	{
-		VFrame30::SchemaItem::DrawSelection(&drawParam, m_selectedItems, m_selectedItems.size() == 1);
+		VFrame30::SchemaItem::drawSelection(&drawParam, m_selectedItems, m_selectedItems.size() == 1);
 	}
 
 	// Draw Edit Connection lines outlines
@@ -268,7 +268,7 @@ void EditSchemaView::drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF cli
 
 		for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
 		{
-			const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
+			const SchemaItemPtr& item = *vi;
 
 			OutputMessageLevel issue = GlobalMessanger::instance().issueForSchemaItem(item->guid());
 
@@ -276,11 +276,11 @@ void EditSchemaView::drawBuildIssues(VFrame30::CDrawParam* drawParam, QRectF cli
 				 issue == OutputMessageLevel::Warning1 ||
 				 issue == OutputMessageLevel::Warning2 ||
 				 issue == OutputMessageLevel::Error) &&
-				item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
+			    item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 			{
 				// Draw item issue
 				//
-				item->DrawIssue(drawParam, issue);
+				item->drawIssue(drawParam, issue);
 			}
 		}
 	}
@@ -322,12 +322,12 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 
 		for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
 		{
-			const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
+			const SchemaItemPtr& item = *vi;
 
 			QString orderIndexText;
 			orderIndexText.reserve(32);
 
-			if (item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
+			if (item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 			{
 				orderIndexText = "?";
 
@@ -401,7 +401,7 @@ void EditSchemaView::drawRunOrder(VFrame30::CDrawParam* drawParam, QRectF clipRe
 					}
 				}
 
-				item->DrawDebugInfo(drawParam, orderIndexText);
+				item->drawDebugInfo(drawParam, orderIndexText);
 			}
 		}
 	}
@@ -442,10 +442,10 @@ void EditSchemaView::drawNewItemOutline(QPainter* p, VFrame30::CDrawParam* drawP
 
 	// Draw
 	//
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> outlines;
+	std::vector<SchemaItemPtr> outlines;
 	outlines.push_back(m_newItem);
 
-	VFrame30::SchemaItem::DrawOutline(drawParam, outlines);
+	VFrame30::SchemaItem::drawOutline(drawParam, outlines);
 
 	// Draw ruler for newItem
 	//
@@ -571,18 +571,18 @@ void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 	bool ctrlIsPressed = QApplication::keyboardModifiers().testFlag(Qt::ControlModifier);
 
 	std::for_each(m_selectedItems.begin(), m_selectedItems.end(),
-		[xdif, ydif, ctrlIsPressed](std::shared_ptr<VFrame30::SchemaItem> si)
+		[xdif, ydif, ctrlIsPressed](SchemaItemPtr si)
 		{
 			if (si->isLocked() == false ||
 				(si->isLocked() == true && ctrlIsPressed == true))
 			{
-				si->MoveItem(xdif, ydif);
+				si->moveItem(xdif, ydif);
 			}
 		});
 
 	// Draw outline
 	//
-	VFrame30::SchemaItem::DrawOutline(drawParam, m_selectedItems);
+	VFrame30::SchemaItem::drawOutline(drawParam, m_selectedItems);
 
 	// Get bounding rect
 	//
@@ -593,7 +593,7 @@ void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 
 	for (auto it = std::begin(m_selectedItems); it != std::end(m_selectedItems); it++)
 	{
-		std::shared_ptr<VFrame30::SchemaItem> si = *it;
+		SchemaItemPtr si = *it;
 
 		if ((si->isLocked() == true && ctrlIsPressed == false) ||
 			si->isLocked() == true)
@@ -633,12 +633,12 @@ void EditSchemaView::drawMovingItems(VFrame30::CDrawParam* drawParam)
 	// Shift position back
 	//
 	std::for_each(m_selectedItems.begin(), m_selectedItems.end(),
-		[xdif, ydif, ctrlIsPressed](std::shared_ptr<VFrame30::SchemaItem> si)
+		[xdif, ydif, ctrlIsPressed](SchemaItemPtr si)
 		{
 			if (si->isLocked() == false ||
 				(si->isLocked() == true && ctrlIsPressed == true))
 			{
-				si->MoveItem(-xdif, -ydif);
+				si->moveItem(-xdif, -ydif);
 			}
 		});
 
@@ -781,7 +781,7 @@ void EditSchemaView::drawRectSizing(VFrame30::CDrawParam* drawParam)
 
 	// Draw item outline
 	//
-	VFrame30::SchemaItem::DrawOutline(drawParam, m_selectedItems);
+	VFrame30::SchemaItem::drawOutline(drawParam, m_selectedItems);
 
 	// restore position
 	//
@@ -873,7 +873,7 @@ void EditSchemaView::drawMovingLinePoint(VFrame30::CDrawParam* drawParam)
 
 	// Draw outline
 	//
-	VFrame30::SchemaItem::DrawOutline(drawParam, m_selectedItems);
+	VFrame30::SchemaItem::drawOutline(drawParam, m_selectedItems);
 
 	// Resotore points
 	//
@@ -987,7 +987,7 @@ void EditSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, const 
 
 		for (auto vi = pLayer->Items.cbegin(); vi != pLayer->Items.cend(); ++vi)
 		{
-			const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
+			const SchemaItemPtr& item = *vi;
 
 			auto actionIt = m_itemsActions.find(item->guid());
 			if (actionIt == m_itemsActions.end())
@@ -1019,7 +1019,7 @@ void EditSchemaView::drawCompareOutlines(VFrame30::CDrawParam* drawParam, const 
 			}
 
 			if (compareAction != CompareAction::Unmodified &&
-				item->IsIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
+			    item->isIntersectRect(clipX, clipY, clipWidth, clipHeight) == true)
 			{
 				// Draw item issue
 				//
@@ -1152,7 +1152,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 
 		// If inside the rect then SchemaItemAction.MoveItem
 		//
-		if (schemaItem->IsIntersectPoint(point.x(), point.y()) == true)
+		if (schemaItem->isIntersectPoint(point.x(), point.y()) == true)
 		{
 			if (schemaItem->isLocked() == false ||
 				(schemaItem->isLocked() == true && ctrlIsPressed == true))
@@ -1233,7 +1233,7 @@ SchemaItemAction EditSchemaView::getPossibleAction(VFrame30::SchemaItem* schemaI
 
 		// ���� ������ �� �����, �� SchemaItemAction.MoveItem
 		//
-		if (schemaItem->IsIntersectPoint(point.x(), point.y()) == true)
+		if (schemaItem->isIntersectPoint(point.x(), point.y()) == true)
 		{
 			if (schemaItem->isLocked() == false ||
 				(schemaItem->isLocked() == true && ctrlIsPressed == true))
@@ -1496,17 +1496,17 @@ void EditSchemaView::setMouseState(MouseState state)
 	m_mouseState = state;
 }
 
-const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& EditSchemaView::selectedItems() const
+const std::vector<SchemaItemPtr>& EditSchemaView::selectedItems() const
 {
 	return m_selectedItems;
 }
 
-std::vector<std::shared_ptr<VFrame30::SchemaItem>> EditSchemaView::selectedNonLockedItems() const
+std::vector<SchemaItemPtr> EditSchemaView::selectedNonLockedItems() const
 {
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> result;
+	std::vector<SchemaItemPtr> result;
 	result.reserve(m_selectedItems.size());
 
-	for (std::shared_ptr<VFrame30::SchemaItem> si : m_selectedItems)
+	for (const SchemaItemPtr& si : m_selectedItems)
 	{
 		if (si->isLocked() == false)
 		{
@@ -1518,9 +1518,9 @@ std::vector<std::shared_ptr<VFrame30::SchemaItem>> EditSchemaView::selectedNonLo
 }
 
 
-void EditSchemaView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items)
+void EditSchemaView::setSelectedItems(const std::vector<SchemaItemPtr>& items)
 {
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> uniqueItems;
+	std::vector<SchemaItemPtr> uniqueItems;
 	uniqueItems.reserve(16);
 
 	// In some cases items can be duplicated (batch command), make them unique
@@ -1567,7 +1567,7 @@ void EditSchemaView::setSelectedItems(const std::vector<std::shared_ptr<VFrame30
 	return;
 }
 
-void EditSchemaView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::SchemaItem>>& items)
+void EditSchemaView::setSelectedItems(const std::list<SchemaItemPtr>& items)
 {
 	// Check if the selected items are the same, don't do anything and don't emit selectionCanged
 	//
@@ -1601,7 +1601,7 @@ void EditSchemaView::setSelectedItems(const std::list<std::shared_ptr<VFrame30::
 	return;
 }
 
-void EditSchemaView::setSelectedItem(const std::shared_ptr<VFrame30::SchemaItem>& item)
+void EditSchemaView::setSelectedItem(const SchemaItemPtr& item)
 {
 	if (m_selectedItems.size() == 1 && item == m_selectedItems.back())
 	{
@@ -1616,7 +1616,7 @@ void EditSchemaView::setSelectedItem(const std::shared_ptr<VFrame30::SchemaItem>
 	return;
 }
 
-void EditSchemaView::addSelection(const std::shared_ptr<VFrame30::SchemaItem>& item, bool emitSectionChanged)
+void EditSchemaView::addSelection(const SchemaItemPtr& item, bool emitSectionChanged)
 {
 	auto fp = std::find(std::begin(m_selectedItems), std::end(m_selectedItems), item);
 
@@ -1646,7 +1646,7 @@ void EditSchemaView::clearSelection()
 	return;
 }
 
-bool EditSchemaView::removeFromSelection(const std::shared_ptr<VFrame30::SchemaItem>& item, bool emitSectionChanged)
+bool EditSchemaView::removeFromSelection(const SchemaItemPtr& item, bool emitSectionChanged)
 {
 	auto findResult = std::find(m_selectedItems.begin(), m_selectedItems.end(), item);
 
@@ -1669,7 +1669,7 @@ bool EditSchemaView::removeFromSelection(const std::shared_ptr<VFrame30::SchemaI
 	return false;
 }
 
-bool EditSchemaView::isItemSelected(const std::shared_ptr<VFrame30::SchemaItem>& item)
+bool EditSchemaView::isItemSelected(const SchemaItemPtr& item)
 {
 	auto findResult = std::find(m_selectedItems.begin(), m_selectedItems.end(), item);
 	return findResult != m_selectedItems.end();
@@ -2131,6 +2131,8 @@ void EditSchemaWidget::createActions()
 		auto item = std::make_shared<VFrame30::SchemaItemIndicator>(schema()->unit());
 		addItem(item);
 	});
+
+	m_addIndicatorAction->setVisible(false);	// REMOVE IT LATER !!!!!!!!!!!!!!!!!!!!!!
 
 	//
 	// Edit
@@ -2662,7 +2664,7 @@ bool EditSchemaWidget::event(QEvent* event)
 		// Get item under cursor
 		//
 		QPointF docPoint = widgetPointToDocument(he->pos(), false);
-		std::shared_ptr<VFrame30::SchemaItem> itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPoint);
+		SchemaItemPtr itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPoint);
 
 		if (itemUnderPoint != nullptr)
 		{
@@ -3125,7 +3127,7 @@ void EditSchemaWidget::mouseLeftDown_None(QMouseEvent* me)
 			double gridSize = schema()->gridSize();
 			double pinGridStep = static_cast<double>(schema()->pinGridStep());
 
-			for (std::shared_ptr<VFrame30::SchemaItem> item : activeLayer()->Items)
+			for (SchemaItemPtr item : activeLayer()->Items)
 			{
 				VFrame30::FblItemRect* fbRect = dynamic_cast<VFrame30::FblItemRect*>(item.get());
 				VFrame30::SchemaItemLink* link = dynamic_cast<VFrame30::SchemaItemLink*>(item.get());
@@ -3470,7 +3472,7 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 	{
 		// Move items
 		//
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsForMove;
+		std::vector<SchemaItemPtr> itemsForMove;
 		itemsForMove.reserve(selected.size());
 
 		for (auto& item : selected)
@@ -3497,13 +3499,13 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 	{
 		// Copy SchemaItems and move copied items
 		//
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> newItems;
+		std::vector<SchemaItemPtr> newItems;
 
 		DbController* dbc = db();
 		auto s = schema();
 
 		std::for_each(selected.begin(), selected.end(),
-			[xdif, ydif, &newItems, dbc, s](const std::shared_ptr<VFrame30::SchemaItem>& si)
+			[xdif, ydif, &newItems, dbc, s](const SchemaItemPtr& si)
 			{
 				QByteArray data;
 				bool result = si->saveToByteArray(&data);
@@ -3515,7 +3517,7 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 					return;
 				}
 
-				std::shared_ptr<VFrame30::SchemaItem> newItem = VFrame30::SchemaItem::Create(data);
+				SchemaItemPtr newItem = VFrame30::SchemaItem::Create(data);
 
 				if (newItem == nullptr)
 				{
@@ -3525,11 +3527,7 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 
 				newItem->setNewGuid();
 
-				if (newItem->isFblItemRect() == true)
 				{
-					VFrame30::FblItemRect* fblItemRect = newItem->toFblItemRect();
-					assert(fblItemRect);
-
 					int counterValue = 0;
 					bool nextValRes = dbc->nextCounterValue(&counterValue);
 					if (nextValRes == false)
@@ -3537,10 +3535,10 @@ void EditSchemaWidget::mouseLeftUp_Moving(QMouseEvent* event)
 						return;
 					}
 
-					fblItemRect->setLabel(s->schemaId() + "_" + QString::number(counterValue));
+					newItem->setLabel(s->schemaId() + "_" + QString::number(counterValue));
 				}
 
-				newItem->MoveItem(xdif, ydif);
+				newItem->moveItem(xdif, ydif);
 
 				newItems.push_back(newItem);
 				return;
@@ -3814,19 +3812,19 @@ void EditSchemaWidget::mouseLeftUp_AddSchemaPosConnectionNextPoint(QMouseEvent* 
 		bool endPointAddedToOther = false;		// ����� ������� ��� ����������� � ������������� (�������� ����� ����� �� ����� ���������)
 
 
-		std::list<std::shared_ptr<VFrame30::SchemaItem>> linksUnderStartPoint =
+		std::list<SchemaItemPtr> linksUnderStartPoint =
 				activeLayer()->getItemListUnderPoint(QPointF(startPoint.X, startPoint.Y), editSchemaView()->m_newItem->metaObject()->className());
 
-		std::list<std::shared_ptr<VFrame30::SchemaItem>> linksUnderEndPoint =
+		std::list<SchemaItemPtr> linksUnderEndPoint =
 				activeLayer()->getItemListUnderPoint(QPointF(endPoint.X, endPoint.Y), editSchemaView()->m_newItem->metaObject()->className());
 
-		std::shared_ptr<VFrame30::SchemaItem> linkUnderStartPoint = linksUnderStartPoint.size() == 1 ? linksUnderStartPoint.front() : std::shared_ptr<VFrame30::SchemaItem>();
-		std::shared_ptr<VFrame30::SchemaItem> linkUnderEndPoint = linksUnderEndPoint.size() == 1 ? linksUnderEndPoint.front() : std::shared_ptr<VFrame30::SchemaItem>();
+		SchemaItemPtr linkUnderStartPoint = linksUnderStartPoint.size() == 1 ? linksUnderStartPoint.front() : SchemaItemPtr();
+		SchemaItemPtr linkUnderEndPoint = linksUnderEndPoint.size() == 1 ? linksUnderEndPoint.front() : SchemaItemPtr();
 
-		std::shared_ptr<VFrame30::SchemaItem> fblRectUnderStartPoint =
+		SchemaItemPtr fblRectUnderStartPoint =
 			activeLayer()->findPinUnderPoint(startPoint, schema()->gridSize(), schema()->pinGridStep());
 
-		std::shared_ptr<VFrame30::SchemaItem> fblRectUnderEndPoint =
+		SchemaItemPtr fblRectUnderEndPoint =
 			activeLayer()->findPinUnderPoint(endPoint, schema()->gridSize(), schema()->pinGridStep());
 
 		if (linkUnderStartPoint != nullptr &&
@@ -4585,12 +4583,12 @@ const std::shared_ptr<VFrame30::LogicSchema> EditSchemaWidget::logicSchema() con
 	return logicSchema;
 }
 
-const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& EditSchemaWidget::selectedItems() const
+const std::vector<SchemaItemPtr>& EditSchemaWidget::selectedItems() const
 {
 	return editSchemaView()->m_selectedItems;
 }
 
-std::vector<std::shared_ptr<VFrame30::SchemaItem>> EditSchemaWidget::selectedNonLockedItems() const
+std::vector<SchemaItemPtr> EditSchemaWidget::selectedNonLockedItems() const
 {
 	return editSchemaView()->selectedNonLockedItems();
 }
@@ -4758,7 +4756,7 @@ bool EditSchemaWidget::updateBussesForSchema()
 }
 
 
-void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
+void EditSchemaWidget::addItem(SchemaItemPtr newItem)
 {
 	if (newItem == nullptr)
 	{
@@ -4768,13 +4766,9 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 
 	editSchemaView()->m_newItem = newItem;
 
-	// If items is FblItemRect, set label to it
+	// Set label to it
 	//
-	if (newItem->isFblItemRect() == true)
 	{
-		VFrame30::FblItemRect* fblItemRect = newItem->toFblItemRect();
-		assert(fblItemRect);
-
 		int counterValue = 0;
 		bool nextValRes = db()->nextCounterValue(&counterValue);
 		if (nextValRes == false)
@@ -4782,7 +4776,7 @@ void EditSchemaWidget::addItem(std::shared_ptr<VFrame30::SchemaItem> newItem)
 			return;
 		}
 
-		fblItemRect->setLabel(schema()->schemaId() + "_" + QString::number(counterValue));
+		newItem->setLabel(schema()->schemaId() + "_" + QString::number(counterValue));
 	}
 
 	// --
@@ -4862,7 +4856,7 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 
 		if (selectedItems().empty() == true)
 		{
-			std::shared_ptr<VFrame30::SchemaItem> itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPos);
+			SchemaItemPtr itemUnderPoint = editSchemaView()->activeLayer()->getItemUnderPoint(docPos);
 
 			// ���� ������� �� �������, �� ��� ����� ������ ����������
 			//
@@ -4874,7 +4868,7 @@ void EditSchemaWidget::setMouseCursor(QPoint mousePos)
 			}
 		}
 
-		for (std::shared_ptr<VFrame30::SchemaItem> si : editSchemaView()->selectedItems())
+		for (SchemaItemPtr si : editSchemaView()->selectedItems())
 		{
 			SchemaItemAction possibleAction = editSchemaView()->getPossibleAction(si.get(), docPos, &movingEdgePointIndex);
 
@@ -4970,7 +4964,7 @@ QPointF EditSchemaWidget::magnetPointToPin(QPointF docPoint)
 	std::vector<VFrame30::AfbPin> itemPins;
 	itemPins.reserve(64);
 
-	for (const std::shared_ptr<VFrame30::SchemaItem>& item : activeLayer()->Items)
+	for (const SchemaItemPtr& item : activeLayer()->Items)
 	{
 		VFrame30::FblItemRect* fblItemRect = dynamic_cast<VFrame30::FblItemRect*>(item.get());
 
@@ -5006,7 +5000,7 @@ QPointF EditSchemaWidget::magnetPointToPin(QPointF docPoint)
 	return docPoint;
 }
 
-void EditSchemaWidget::movePosConnectionEndPoint(std::shared_ptr<VFrame30::SchemaItem> schemaItem,  EditConnectionLine* ecl, QPointF toPoint)
+void EditSchemaWidget::movePosConnectionEndPoint(SchemaItemPtr schemaItem,  EditConnectionLine* ecl, QPointF toPoint)
 {
 	assert(schemaItem);
 	assert(ecl);
@@ -5023,10 +5017,10 @@ void EditSchemaWidget::initMoveAfbsConnectionLinks(MouseState mouseState)
 
 	// Go over all selected itmes pins, and add data to m_editConnectionLines
 	//
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selected = selectedNonLockedItems();
+	std::vector<SchemaItemPtr> selected = selectedNonLockedItems();
 	std::multiset<std::shared_ptr<VFrame30::SchemaItemLink>> commonLinks;
 
-	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	for (SchemaItemPtr item : selected)
 	{
 		if (item->isFblItemRect() == false)
 		{
@@ -5076,12 +5070,12 @@ void EditSchemaWidget::initMoveAfbsConnectionLinks(MouseState mouseState)
 		{
 			VFrame30::SchemaPoint pinPos = pin.point();
 
-			std::list<std::shared_ptr<VFrame30::SchemaItem>> linksUnderPin =
+			std::list<SchemaItemPtr> linksUnderPin =
 					activeLayer()->getItemListUnderPoint(pinPos, "VFrame30::SchemaItemLink");
 
 			// Check if pin on the Start or End point
 			//
-			for (std::shared_ptr<VFrame30::SchemaItem> foundLinkItem : linksUnderPin)
+			for (SchemaItemPtr foundLinkItem : linksUnderPin)
 			{
 				std::shared_ptr<VFrame30::SchemaItemLink> link = std::dynamic_pointer_cast<VFrame30::SchemaItemLink>(foundLinkItem);
 				assert(link);
@@ -5270,7 +5264,7 @@ void EditSchemaWidget::finishMoveAfbsConnectionLinks()
 	}
 
 	std::vector<std::vector<VFrame30::SchemaPoint>> commandPoints;
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> commandItems;
+	std::vector<SchemaItemPtr> commandItems;
 
 	for (EditConnectionLine& ecl : editSchemaView()->m_editConnectionLines)
 	{
@@ -5742,7 +5736,7 @@ void EditSchemaWidget::contextMenu(const QPoint& pos)
 	{
 		if (selectedItems().size() == 1)
 		{
-			std::shared_ptr<VFrame30::SchemaItem> selected = selectedItems().front();
+			SchemaItemPtr selected = selectedItems().front();
 
 			auto itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(selected.get());
 
@@ -5919,7 +5913,7 @@ void EditSchemaWidget::appSignalsProperties(QStringList strIds)
 	// As in this loop runSetProperty is called and selection vector is changed,
 	// and this loop will crash if it is not a copy
 	//
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selected = selectedItems();
+	std::vector<SchemaItemPtr> selected = selectedItems();
 
 	for (auto item : selected)
 	{
@@ -5952,7 +5946,7 @@ void EditSchemaWidget::appSignalsProperties(QStringList strIds)
 					oneStringIds += s + QChar::LineFeed;
 				}
 
-				std::shared_ptr<VFrame30::SchemaItem> itemPtrCopy(item);
+				SchemaItemPtr itemPtrCopy(item);
 
 				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(oneStringIds), itemPtrCopy);
 			}
@@ -5999,7 +5993,7 @@ void EditSchemaWidget::appSignalsProperties(QStringList strIds)
 					oneStringIds += s + QChar::LineFeed;
 				}
 
-				std::shared_ptr<VFrame30::SchemaItem> itemPtrCopy(item);
+				SchemaItemPtr itemPtrCopy(item);
 
 				m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalId, QVariant(oneStringIds), itemPtrCopy);
 			}
@@ -6019,7 +6013,7 @@ void EditSchemaWidget::addNewAppSignalSelected()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> selected = selectedItems().front();
+	SchemaItemPtr selected = selectedItems().front();
 	auto itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(selected.get());
 
 	if (itemSignal == nullptr)
@@ -6032,18 +6026,15 @@ void EditSchemaWidget::addNewAppSignalSelected()
 	return addNewAppSignal(selected);
 }
 
-void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> schemaItem)
+void EditSchemaWidget::addNewAppSignal(SchemaItemPtr schemaItem)
 {
-	qDebug() << "RPCT-2286 log: " << "void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> schemaItem)";
-
 	if (isLogicSchema() == false ||
 		schemaItem == nullptr ||
 		dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get()) == nullptr)
 	{
-		assert(isLogicSchema() == false);
-		assert(schemaItem);
-		assert(dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get()) != nullptr);
-		qDebug() << "RPCT-2286 log: return condition 1";
+		Q_ASSERT(isLogicSchema() == false);
+		Q_ASSERT(schemaItem);
+		Q_ASSERT(dynamic_cast<VFrame30::SchemaItemSignal*>(schemaItem.get()) != nullptr);
 		return;
 	}
 
@@ -6051,7 +6042,6 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 	if (equipmentIdList.isEmpty() == true)
 	{
 		QMessageBox::critical(this, qAppName(), tr("Cannot create Application Signal as schema property EquipmentIDs is empty."));
-		qDebug() << "RPCT-2286 log: return condition 2";
 		return;
 	}
 
@@ -6067,11 +6057,9 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 		// This is just created signal item
 		//
 		itemsAppSignals.clear();				// clear - means generate new AppSignalIds
-		qDebug() << "RPCT-2286 log: Check point 1";
 	}
 	else
 	{
-		qDebug() << "RPCT-2286 log: Check point 2";
 	}
 
 	m_createSignalDialoOptions.init(schema()->schemaId(),
@@ -6079,16 +6067,10 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 									equipmentIdList,
 									itemsAppSignals);
 
-	qDebug() << "RPCT-2286 log: Check point 3";
-
 	QStringList signalsIds = CreateSignalDialog::showDialog(db(), &m_createSignalDialoOptions, this);
-
-	qDebug() << "RPCT-2286 log: Check point 4";
 
 	if (signalsIds.isEmpty() == false)
 	{
-		qDebug() << "RPCT-2286 log: Check point 5 signalsIds: " << signalsIds.join(", ");
-
 		// Set value
 		//
 		QString oneStringIds;
@@ -6097,12 +6079,8 @@ void EditSchemaWidget::addNewAppSignal(std::shared_ptr<VFrame30::SchemaItem> sch
 			oneStringIds += s + QChar::LineFeed;
 		}
 
-		qDebug() << "RPCT-2286 log: Check point 6";
 		m_editEngine->runSetProperty(VFrame30::PropertyNames::appSignalIDs, QVariant(oneStringIds), schemaItem);
-		qDebug() << "RPCT-2286 log: Check point 7";
 	}
-
-	qDebug() << "RPCT-2286 log: Check point 8";
 
 	//--------------------------------------------------
 //	QStringList equipmentIdList = logicSchema()->equipmentIdList();
@@ -6180,13 +6158,13 @@ void EditSchemaWidget::f2Key()
 		return;
 	}
 
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	const std::vector<SchemaItemPtr>& selected = selectedItems();
 	if (selected.size() != 1)
 	{
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> item = selected.at(0);
+	SchemaItemPtr item = selected.at(0);
 	if (item == nullptr)
 	{
 		assert(item);
@@ -6250,18 +6228,18 @@ void EditSchemaWidget::f2Key()
 	return;
 }
 
-void EditSchemaWidget::f2KeyForRect(std::shared_ptr<VFrame30::SchemaItem> item)
+void EditSchemaWidget::f2KeyForRect(SchemaItemPtr item)
 {
 	if (item == nullptr)
 	{
-		assert(item);
+		Q_ASSERT(item);
 		return;
 	}
 
 	VFrame30::SchemaItemRect* rectItem = dynamic_cast<VFrame30::SchemaItemRect*>(item.get());
 	if (rectItem == nullptr)
 	{
-		assert(rectItem);
+		Q_ASSERT(rectItem);
 		return;
 	}
 
@@ -6269,32 +6247,52 @@ void EditSchemaWidget::f2KeyForRect(std::shared_ptr<VFrame30::SchemaItem> item)
 
 	// Show input dialog
 	//
-	bool ok;
-	QString newValue = QInputDialog::getMultiLineText(this, tr("Set text"),
-													  tr("Text:"), text, &ok);
-	if (ok == true &&
-		newValue.isEmpty() == false &&
-		newValue != text)
+	QInputDialog dialog{this};
+	dialog.setWindowFlags((dialog.windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	dialog.setWindowTitle(tr("Set text"));
+	dialog.setLabelText(tr("Text:"));
+	dialog.setInputMode(QInputDialog::TextInput);
+	dialog.setOption(QInputDialog::UsePlainTextEditForTextInput, true);
+	dialog.setTextValue(text);
+
+	int width = QSettings().value("f2KeyForRect\\width").toInt();
+	int height = QSettings().value("f2KeyForRect\\height").toInt();
+	dialog.resize(width, height);
+
+	if (int result = dialog.exec();
+		result == QDialog::Accepted)
 	{
-		m_editEngine->runSetProperty(VFrame30::PropertyNames::text, QVariant(newValue), item);
-		editSchemaView()->update();
+		QString newValue = dialog.textValue();
+
+		if (newValue.isEmpty() == false && newValue != text)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::text, QVariant(newValue), item);
+			editSchemaView()->update();
+		}
 	}
+
+	QSettings().setValue("f2KeyForRect\\width", dialog.width());
+	QSettings().setValue("f2KeyForRect\\height", dialog.height());
 
 	return;
 }
 
-bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> item, bool setViaEditEngine)
+bool EditSchemaWidget::f2KeyForReceiver(SchemaItemPtr item, bool setViaEditEngine)
 {
 	if (item == nullptr)
 	{
-		assert(item);
+		Q_ASSERT(item);
 		return false;
 	}
 
 	VFrame30::SchemaItemReceiver* receiver = dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get());
 	if (receiver == nullptr)
 	{
-		assert(receiver);
+		Q_ASSERT(receiver);
 		return false;
 	}
 
@@ -6314,10 +6312,10 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 		return false;
 	}
 
-	auto ls = logicSchema();
+	std::shared_ptr<VFrame30::LogicSchema> ls = logicSchema();
 	if (ls == nullptr)
 	{
-		assert(ls);
+		Q_ASSERT(ls);
 		return false;
 	}
 
@@ -6389,9 +6387,16 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
 
+	int width = QSettings().value("f2KeyForReceiver\\width").toInt();
+	int height = QSettings().value("f2KeyForReceiver\\height").toInt();
+	d.resize(width, height);
+
 	// --
 	//
 	int result = d.exec();
+
+	QSettings().setValue("f2KeyForReceiver\\width", d.width());
+	QSettings().setValue("f2KeyForReceiver\\height", d.height());
 
 	if (result == QDialog::Accepted)
 	{
@@ -6427,18 +6432,18 @@ bool EditSchemaWidget::f2KeyForReceiver(std::shared_ptr<VFrame30::SchemaItem> it
 	return false;
 }
 
-bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem> item, bool setViaEditEngine)
+bool EditSchemaWidget::f2KeyForTransmitter(SchemaItemPtr item, bool setViaEditEngine)
 {
 	if (item == nullptr)
 	{
-		assert(item);
+		Q_ASSERT(item);
 		return false;
 	}
 
 	VFrame30::SchemaItemTransmitter* transmitter = dynamic_cast<VFrame30::SchemaItemTransmitter*>(item.get());
 	if (transmitter == nullptr)
 	{
-		assert(transmitter);
+		Q_ASSERT(transmitter);
 		return false;
 	}
 
@@ -6460,7 +6465,7 @@ bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem>
 	auto ls = logicSchema();
 	if (ls == nullptr)
 	{
-		assert(ls);
+		Q_ASSERT(ls);
 		return false;
 	}
 
@@ -6509,9 +6514,16 @@ bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem>
 	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
 
+	int width = QSettings().value("f2KeyForTransmitter\\width").toInt();
+	int height = QSettings().value("f2KeyForTransmitter\\height").toInt();
+	d.resize(width, height);
+
 	// --
 	//
 	int result = d.exec();
+
+	QSettings().setValue("f2KeyForTransmitter\\width", d.width());
+	QSettings().setValue("f2KeyForTransmitter\\height", d.height());
 
 	if (result == QDialog::Accepted)
 	{
@@ -6536,7 +6548,7 @@ bool EditSchemaWidget::f2KeyForTransmitter(std::shared_ptr<VFrame30::SchemaItem>
 	return false;
 }
 
-void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
+void EditSchemaWidget::f2KeyForConst(SchemaItemPtr item)
 {
 	if (item == nullptr)
 	{
@@ -6694,6 +6706,10 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 				}
 			});
 
+	int width = QSettings().value("f2KeyForConst\\width").toInt();
+	int height = QSettings().value("f2KeyForConst\\height").toInt();
+	d.resize(width, height);
+
 	// --
 	//
 	int result = d.exec();
@@ -6730,10 +6746,13 @@ void EditSchemaWidget::f2KeyForConst(std::shared_ptr<VFrame30::SchemaItem> item)
 		editSchemaView()->update();
 	}
 
+	QSettings().setValue("f2KeyForConst\\width", d.width());
+	QSettings().setValue("f2KeyForConst\\height", d.height());
+
 	return;
 }
 
-void EditSchemaWidget::f2KeyForSignal(std::shared_ptr<VFrame30::SchemaItem> item)
+void EditSchemaWidget::f2KeyForSignal(SchemaItemPtr item)
 {
 	if (item == nullptr)
 	{
@@ -6845,19 +6864,18 @@ void EditSchemaWidget::f2KeyForSignal(std::shared_ptr<VFrame30::SchemaItem> item
 	return;
 }
 
-void EditSchemaWidget::f2KeyForLoopback(std::shared_ptr<VFrame30::SchemaItem> item)
+void EditSchemaWidget::f2KeyForLoopback(SchemaItemPtr item)
 {
 	if (item == nullptr)
 	{
-		assert(item);
+		Q_ASSERT(item);
 		return;
 	}
 
 	VFrame30::SchemaItemLoopback* loopbackItem = dynamic_cast<VFrame30::SchemaItemLoopback*>(item.get());
-
 	if (loopbackItem == nullptr)
 	{
-		assert(loopbackItem);
+		Q_ASSERT(loopbackItem);
 		return;
 	}
 
@@ -6865,28 +6883,43 @@ void EditSchemaWidget::f2KeyForLoopback(std::shared_ptr<VFrame30::SchemaItem> it
 
 	// Show input dialog
 	//
-	bool ok = false;
-	QString newValue = QInputDialog::getText(this,
-											 tr("Set LoopbackID"),
-											 tr("LoopbackID:"),
-											 QLineEdit::Normal,
-											 loopbackId,
-											 &ok).trimmed();
+	QInputDialog d{this};
 
-	if (ok == true &&
-		newValue.isEmpty() == false &&
-		newValue != loopbackId)
+	d.setWindowFlags((d.windowFlags() &
+					~Qt::WindowMinimizeButtonHint &
+					~Qt::WindowMaximizeButtonHint &
+					~Qt::WindowContextHelpButtonHint) | Qt::CustomizeWindowHint);
+
+	d.setWindowTitle(tr("Set LoopbackID"));
+	d.setLabelText(tr("LoopbackID:"));
+	d.setInputMode(QInputDialog::TextInput);
+	d.setTextValue(loopbackId);
+
+	int width = QSettings().value("f2KeyForLoopback\\width").toInt();
+	int height = QSettings().value("f2KeyForLoopback\\height").toInt();
+	d.resize(width, height);
+
+	if (int result = d.exec();
+		result == QDialog::Accepted)
 	{
-		m_editEngine->runSetProperty(VFrame30::PropertyNames::loopbackId, QVariant(newValue), item);
-		editSchemaView()->update();
+		QString newValue = d.textValue();
 
-		EditSchemaWidget::m_lastUsedLoopbackId = newValue;
+		if (newValue.isEmpty() == false && newValue != loopbackId)
+		{
+			m_editEngine->runSetProperty(VFrame30::PropertyNames::loopbackId, QVariant(newValue), item);
+			editSchemaView()->update();
+
+			EditSchemaWidget::m_lastUsedLoopbackId = newValue;
+		}
 	}
+
+	QSettings().setValue("f2KeyForLoopback\\width", d.width());
+	QSettings().setValue("f2KeyForLoopback\\height", d.height());
 
 	return;
 }
 
-void EditSchemaWidget::f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item)
+void EditSchemaWidget::f2KeyForValue(SchemaItemPtr item)
 {
 	if (item == nullptr)
 	{
@@ -7039,7 +7072,7 @@ void EditSchemaWidget::f2KeyForValue(std::shared_ptr<VFrame30::SchemaItem> item)
 	return;
 }
 
-void EditSchemaWidget::f2KeyForImageValue(std::shared_ptr<VFrame30::SchemaItem> item)
+void EditSchemaWidget::f2KeyForImageValue(SchemaItemPtr item)
 {
 	if (item == nullptr)
 	{
@@ -7190,7 +7223,7 @@ void EditSchemaWidget::f2KeyForImageValue(std::shared_ptr<VFrame30::SchemaItem> 
 }
 
 
-void EditSchemaWidget::f2KeyForBus(std::shared_ptr<VFrame30::SchemaItem> item)
+void EditSchemaWidget::f2KeyForBus(SchemaItemPtr item)
 {
 	if (item == nullptr)
 	{
@@ -7245,6 +7278,11 @@ void EditSchemaWidget::f2KeyForBus(std::shared_ptr<VFrame30::SchemaItem> item)
 		busTypeCombo->setCurrentIndex(dataIndex);
 	}
 
+	// Spacer
+	//
+	QWidget* spacer = new QWidget;
+	spacer->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding);
+
 	// --
 	//
 	QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -7253,12 +7291,17 @@ void EditSchemaWidget::f2KeyForBus(std::shared_ptr<VFrame30::SchemaItem> item)
 
 	layout->addWidget(busTypeLabel);
 	layout->addWidget(busTypeCombo);
+	layout->addWidget(spacer);
 	layout->addWidget(buttonBox);
 
 	d.setLayout(layout);
 
 	connect(buttonBox, &QDialogButtonBox::accepted, &d, &QDialog::accept);
 	connect(buttonBox, &QDialogButtonBox::rejected, &d, &QDialog::reject);
+
+	int width = QSettings().value("f2KeyForBus\\width").toInt();
+	int height = QSettings().value("f2KeyForBus\\height").toInt();
+	d.resize(width, height);
 
 	// --
 	//
@@ -7288,6 +7331,8 @@ void EditSchemaWidget::f2KeyForBus(std::shared_ptr<VFrame30::SchemaItem> item)
 		editSchemaView()->update();
 	}
 
+	QSettings().setValue("f2KeyForBus\\width", d.width());
+	QSettings().setValue("f2KeyForBus\\height", d.height());
 
 	return;
 }
@@ -7354,7 +7399,7 @@ void EditSchemaWidget::selectAll()
 {
 	editSchemaView()->clearSelection();
 
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+	std::vector<SchemaItemPtr> items;
 	items.assign(editSchemaView()->activeLayer()->Items.begin(), editSchemaView()->activeLayer()->Items.end());
 
 	editSchemaView()->setSelectedItems(items);
@@ -7363,11 +7408,11 @@ void EditSchemaWidget::selectAll()
 	return;
 }
 
-void EditSchemaWidget::selectItem(std::shared_ptr<VFrame30::SchemaItem> item)
+void EditSchemaWidget::selectItem(SchemaItemPtr item)
 {
 	editSchemaView()->clearSelection();
 
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+	std::vector<SchemaItemPtr> items;
 	items.push_back(item);
 	editSchemaView()->setSelectedItems(items);
 
@@ -7375,7 +7420,7 @@ void EditSchemaWidget::selectItem(std::shared_ptr<VFrame30::SchemaItem> item)
 	return;
 }
 
-void EditSchemaWidget::selectItems(std::vector<std::shared_ptr<VFrame30::SchemaItem>> items)
+void EditSchemaWidget::selectItems(std::vector<SchemaItemPtr> items)
 {
 	editSchemaView()->clearSelection();
 	editSchemaView()->setSelectedItems(items);
@@ -7392,12 +7437,12 @@ void EditSchemaWidget::editCut()
 		return;
 	}
 
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>> selected = selectedNonLockedItems();
+	const std::vector<SchemaItemPtr> selected = selectedNonLockedItems();
 
 	// Save to protobuf message
 	//
 	::Proto::EnvelopeSet message;
-	for (std::shared_ptr<VFrame30::SchemaItem> si : selected)
+	for (SchemaItemPtr si : selected)
 	{
 		::Proto::Envelope* protoSchemaItem = message.add_items();
 		si->Save(protoSchemaItem);
@@ -7444,13 +7489,13 @@ void EditSchemaWidget::editCopy()
 		return;
 	}
 
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	const std::vector<SchemaItemPtr>& selected = selectedItems();
 
 	// Save to protobuf message
 	//
 	::Proto::EnvelopeSet message;
 	message.mutable_items()->Reserve(static_cast<int>(selected.size()));
-	for (std::shared_ptr<VFrame30::SchemaItem> si : selected)
+	for (SchemaItemPtr si : selected)
 	{
 		::Proto::Envelope* protoSchemaItem = message.add_items();
 		si->Save(protoSchemaItem);
@@ -7518,7 +7563,7 @@ void EditSchemaWidget::editPaste()
 			return;
 		}
 
-		std::list<std::shared_ptr<VFrame30::SchemaItem>> itemList;
+		std::list<SchemaItemPtr> itemList;
 
 		bool schemaItemAfbIsPresent = false;
 		bool schemaItemUfbIsPresent = false;
@@ -7530,7 +7575,7 @@ void EditSchemaWidget::editPaste()
 		{
 			const ::Proto::Envelope& schemaItemMessage = message.items(i);
 
-			std::shared_ptr<VFrame30::SchemaItem> schemaItem = VFrame30::SchemaItem::Create(schemaItemMessage);
+			SchemaItemPtr schemaItem = VFrame30::SchemaItem::Create(schemaItemMessage);
 
 			if (schemaItem != nullptr)
 			{
@@ -7563,13 +7608,9 @@ void EditSchemaWidget::editPaste()
 				schemaItemInOutIsPresent = true;
 			}
 
-			if (schemaItem->isFblItemRect() == true)
 			{
-				// If items is FblItemRect set label to it
+				// set label to it
 				//
-				VFrame30::FblItemRect* fblItemRect = schemaItem->toFblItemRect();
-				assert(fblItemRect);
-
 				int counterValue = 0;
 				bool nextValRes = db()->nextCounterValue(&counterValue);
 				if (nextValRes == false)
@@ -7577,7 +7618,7 @@ void EditSchemaWidget::editPaste()
 					return;
 				}
 
-				fblItemRect->setLabel(schema()->schemaId() + "_" + QString::number(counterValue));
+				schemaItem->setLabel(schema()->schemaId() + "_" + QString::number(counterValue));
 			}
 		}
 
@@ -7618,7 +7659,7 @@ void EditSchemaWidget::editPaste()
 
 	// Specific pastes
 	//
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
+	const std::vector<SchemaItemPtr>& selected = editSchemaView()->selectedItems();
 
 	// --
 	//
@@ -7633,7 +7674,7 @@ void EditSchemaWidget::editPaste()
 	{
 		bool allItemsAreImages = true;
 
-		for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+		for (SchemaItemPtr item : selected)
 		{
 			VFrame30::SchemaItemImage* imageItem = dynamic_cast<VFrame30::SchemaItemImage*>(item.get());
 
@@ -7648,7 +7689,7 @@ void EditSchemaWidget::editPaste()
 		{
 			QImage image = qvariant_cast<QImage>(mimeData->imageData());
 
-			for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+			for (SchemaItemPtr item : selected)
 			{
 				VFrame30::SchemaItemImage* imageItem = dynamic_cast<VFrame30::SchemaItemImage*>(item.get());
 				Q_ASSERT(imageItem);
@@ -7680,16 +7721,16 @@ void EditSchemaWidget::editPaste()
 		double constFloat = mimeData->text().toDouble(&okFloat);
 		int constDiscrete = mimeData->text().toInt(&okDiscrete);
 
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> constIntItems;
+		std::vector<SchemaItemPtr> constIntItems;
 		constIntItems.reserve(selected.size());
 
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> constFloatItems;
+		std::vector<SchemaItemPtr> constFloatItems;
 		constFloatItems.reserve(selected.size());
 
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> constDiscreteItems;
+		std::vector<SchemaItemPtr> constDiscreteItems;
 		constDiscreteItems.reserve(selected.size());
 
-		for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+		for (SchemaItemPtr item : selected)
 		{
 			VFrame30::SchemaItemConst* constItem = dynamic_cast<VFrame30::SchemaItemConst*>(item.get());
 
@@ -7751,7 +7792,7 @@ void EditSchemaWidget::editPaste()
 	//
 	{
 		bool allItemsAreRects = true;
-		for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+		for (SchemaItemPtr item : selected)
 		{
 			if (dynamic_cast<VFrame30::SchemaItemRect*>(item.get()) == nullptr)
 			{
@@ -7770,7 +7811,7 @@ void EditSchemaWidget::editPaste()
 	//
 	{
 		bool allItemsAreSignals = true;
-		for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+		for (SchemaItemPtr item : selected)
 		{
 			if (dynamic_cast<VFrame30::SchemaItemSignal*>(item.get()) == nullptr)
 			{
@@ -7790,7 +7831,7 @@ void EditSchemaWidget::editPaste()
 	//
 	{
 		bool allItemsAreReceivers = true;
-		for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+		for (SchemaItemPtr item : selected)
 		{
 			if (dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get()) == nullptr)
 			{
@@ -7810,7 +7851,7 @@ void EditSchemaWidget::editPaste()
 	//
 	{
 		bool allItemsAreLoopbacks = true;
-		for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+		for (SchemaItemPtr item : selected)
 		{
 			if (dynamic_cast<VFrame30::SchemaItemLoopback*>(item.get()) == nullptr)
 			{
@@ -7830,7 +7871,7 @@ void EditSchemaWidget::editPaste()
 	//
 	{
 		bool allItemsAreValues = true;
-		for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+		for (SchemaItemPtr item : selected)
 		{
 			if (dynamic_cast<VFrame30::SchemaItemValue*>(item.get()) == nullptr)
 			{
@@ -7850,7 +7891,7 @@ void EditSchemaWidget::editPaste()
 	//
 	{
 		bool allItemsAreImageValues = true;
-		for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+		for (SchemaItemPtr item : selected)
 		{
 			if (dynamic_cast<VFrame30::SchemaItemImageValue*>(item.get()) == nullptr)
 			{
@@ -7930,15 +7971,15 @@ void EditSchemaWidget::compareSchemaItem()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> selectedItem = selectedItems().front();
+	SchemaItemPtr selectedItem = selectedItems().front();
 	if (selectedItem == nullptr)
 	{
 		assert(selectedItem);
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> sourceItem = editSchemaView()->m_compareSourceSchema->getItemById(selectedItem->guid());
-	std::shared_ptr<VFrame30::SchemaItem> targetItem = editSchemaView()->m_compareTargetSchema->getItemById(selectedItem->guid());
+	SchemaItemPtr sourceItem = editSchemaView()->m_compareSourceSchema->getItemById(selectedItem->guid());
+	SchemaItemPtr targetItem = editSchemaView()->m_compareTargetSchema->getItemById(selectedItem->guid());
 
 	if (sourceItem == nullptr ||
 		targetItem == nullptr)
@@ -7949,9 +7990,10 @@ void EditSchemaWidget::compareSchemaItem()
 	DbChangesetObject dbObject;	// Fake object, need to fill only name
 
 	QString title;
-	if (selectedItem->isFblItem() == true)
+
+	if (selectedItem->label().isEmpty() == false)
 	{
-		title = selectedItem->metaObject()->className() + QString(" ") + selectedItem->toFblItemRect()->label();
+		title = selectedItem->metaObject()->className() + QString(" ") + selectedItem->label();
 		title = title.remove("VFrame30::SchemaItem");
 	}
 	else
@@ -7980,7 +8022,7 @@ void EditSchemaWidget::selectionChanged()
 	m_itemsPropertiesDialog->setReadOnly(m_editEngine->readOnly());
 	m_itemsPropertiesDialog->ensureVisible();
 
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = selectedItems();
+	const std::vector<SchemaItemPtr>& selected = selectedItems();
 	auto selectectNotLocked = selectedNonLockedItems();
 
 	// Edit Menu
@@ -8000,9 +8042,9 @@ void EditSchemaWidget::selectionChanged()
 
 	// Size
 	//
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selectedFiltered;
+	std::vector<SchemaItemPtr> selectedFiltered;
 
-	for (std::shared_ptr<VFrame30::SchemaItem> item : selectectNotLocked)
+	for (SchemaItemPtr item : selectectNotLocked)
 	{
 		if (dynamic_cast<VFrame30::PosLineImpl*>(item.get()) != nullptr ||
 			dynamic_cast<VFrame30::PosRectImpl*>(item.get()) != nullptr)
@@ -8115,7 +8157,7 @@ void EditSchemaWidget::selectionChanged()
 	{
 		if (selectedItems().size() == 1)
 		{
-			std::shared_ptr<VFrame30::SchemaItem> selectedFrontItem = selectedItems().front();
+			SchemaItemPtr selectedFrontItem = selectedItems().front();
 
 			auto itemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(selectedFrontItem.get());
 
@@ -8168,7 +8210,7 @@ void EditSchemaWidget::clipboardDataChanged()
 
 	// Specific items cases
 	//
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& selected = editSchemaView()->selectedItems();
+	const std::vector<SchemaItemPtr>& selected = editSchemaView()->selectedItems();
 
 	if (selected.empty() == true)
 	{
@@ -8179,7 +8221,7 @@ void EditSchemaWidget::clipboardDataChanged()
 	// if SchemaItemImage is(are) selected and Image is in the clipboard
 	//
 	bool allItemsAreImages = true;
-	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	for (SchemaItemPtr item : selected)
 	{
 		if (dynamic_cast<VFrame30::SchemaItemImage*>(item.get()) == nullptr)
 		{
@@ -8205,16 +8247,16 @@ void EditSchemaWidget::clipboardDataChanged()
 	mimeData->text().toInt(&okInteger);
 	mimeData->text().toDouble(&okFloat);
 
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> constIntItems;
+	std::vector<SchemaItemPtr> constIntItems;
 	constIntItems.reserve(selected.size());
 
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> constFloatItems;
+	std::vector<SchemaItemPtr> constFloatItems;
 	constFloatItems.reserve(selected.size());
 
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> constDiscreteItems;
+	std::vector<SchemaItemPtr> constDiscreteItems;
 	constDiscreteItems.reserve(selected.size());
 
-	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	for (SchemaItemPtr item : selected)
 	{
 		VFrame30::SchemaItemConst* constItem = dynamic_cast<VFrame30::SchemaItemConst*>(item.get());
 
@@ -8266,7 +8308,7 @@ void EditSchemaWidget::clipboardDataChanged()
 	// if SchemaItemRect is selected and Text is in the clipboard
 	//
 	bool allItemsAreRects = true;
-	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	for (SchemaItemPtr item : selected)
 	{
 		if (dynamic_cast<VFrame30::SchemaItemRect*>(item.get()) == nullptr)
 		{
@@ -8285,7 +8327,7 @@ void EditSchemaWidget::clipboardDataChanged()
 	// if Any SchemaItemSignal is selected and AppSignalID is in the clipboard
 	//
 	bool allItemsAreSignals = true;
-	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	for (SchemaItemPtr item : selected)
 	{
 		if (dynamic_cast<VFrame30::SchemaItemSignal*>(item.get()) == nullptr)
 		{
@@ -8305,7 +8347,7 @@ void EditSchemaWidget::clipboardDataChanged()
 	// if Any SchemaItemReceiver is selected and AppSignalID is in the clipboard
 	//
 	bool allItemsAreReceivers = true;
-	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	for (SchemaItemPtr item : selected)
 	{
 		if (dynamic_cast<VFrame30::SchemaItemReceiver*>(item.get()) == nullptr)
 		{
@@ -8325,7 +8367,7 @@ void EditSchemaWidget::clipboardDataChanged()
 	// if Any SchemaItemLoopback is selected and Text is in the clipboard
 	//
 	bool allItemsAreLoopbacks = true;
-	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	for (SchemaItemPtr item : selected)
 	{
 		if (dynamic_cast<VFrame30::SchemaItemLoopback*>(item.get()) == nullptr)
 		{
@@ -8344,7 +8386,7 @@ void EditSchemaWidget::clipboardDataChanged()
 	// if Any SchemaItemValue is selected and AppSignalID is in the clipboard
 	//
 	bool allItemsAreValues = true;
-	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	for (SchemaItemPtr item : selected)
 	{
 		if (dynamic_cast<VFrame30::SchemaItemValue*>(item.get()) == nullptr)
 		{
@@ -8365,7 +8407,7 @@ void EditSchemaWidget::clipboardDataChanged()
 	//
 	{
 		bool allItemsAreImageValues = true;
-		for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+		for (SchemaItemPtr item : selected)
 		{
 			if (dynamic_cast<VFrame30::SchemaItemImageValue*>(item.get()) == nullptr)
 			{
@@ -8616,7 +8658,7 @@ void EditSchemaWidget::onLeftKey(QKeyEvent* e)
 		return;
 	}
 
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsForMove;
+	std::vector<SchemaItemPtr> itemsForMove;
 	itemsForMove.reserve(selected.size());
 
 	for (auto& item : selected)
@@ -8665,7 +8707,7 @@ void EditSchemaWidget::onRightKey(QKeyEvent* e)
 		return;
 	}
 
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsForMove;
+	std::vector<SchemaItemPtr> itemsForMove;
 	itemsForMove.reserve(selected.size());
 
 	for (auto& item : selected)
@@ -8713,7 +8755,7 @@ void EditSchemaWidget::onUpKey(QKeyEvent* e)
 		return;
 	}
 
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsForMove;
+	std::vector<SchemaItemPtr> itemsForMove;
 	itemsForMove.reserve(selected.size());
 
 	for (auto& item : selected)
@@ -8761,7 +8803,7 @@ void EditSchemaWidget::onDownKey(QKeyEvent* e)
 		return;
 	}
 
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> itemsForMove;
+	std::vector<SchemaItemPtr> itemsForMove;
 	itemsForMove.reserve(selected.size());
 
 	for (auto& item : selected)
@@ -8802,7 +8844,7 @@ bool EditSchemaWidget::selectNextLeftItem(NextSelectionItem switchToLeftItem)
 		return false;
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> selectedItem;
+	SchemaItemPtr selectedItem;
 
 	if (switchToLeftItem.isNull() == false)
 	{
@@ -8886,7 +8928,7 @@ bool EditSchemaWidget::selectNextLeftItem(NextSelectionItem switchToLeftItem)
 	// Decay all other items to points
 	//
 	double minDistance = DBL_MAX;
-	std::shared_ptr<VFrame30::SchemaItem> minDistanceItem;
+	SchemaItemPtr minDistanceItem;
 
 	auto calcDistance = [&minDistance, &minDistanceItem, &point, VertFactor](double x, double y, auto schemaItem)
 		{
@@ -8907,7 +8949,7 @@ bool EditSchemaWidget::selectNextLeftItem(NextSelectionItem switchToLeftItem)
 		};
 
 
-	for (std::shared_ptr<VFrame30::SchemaItem> item : editSchemaView()->activeLayer()->Items)
+	for (SchemaItemPtr item : editSchemaView()->activeLayer()->Items)
 	{
 		if (item == selectedItem ||
 			item == m_nextSelectionFromLeft.schemaItem ||
@@ -9008,7 +9050,7 @@ bool EditSchemaWidget::selectNextRightItem(NextSelectionItem switchToRightItem)
 		return false;
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> selectedItem;
+	SchemaItemPtr selectedItem;
 
 	if (switchToRightItem.isNull() == false)
 	{
@@ -9094,7 +9136,7 @@ bool EditSchemaWidget::selectNextRightItem(NextSelectionItem switchToRightItem)
 	// Decay all other items to points
 	//
 	double minDistance = DBL_MAX;
-	std::shared_ptr<VFrame30::SchemaItem> minDistanceItem;
+	SchemaItemPtr minDistanceItem;
 
 	auto calcDistance = [&minDistance, &minDistanceItem, &point, VertFactor](double x, double y, auto schemaItem)
 		{
@@ -9115,7 +9157,7 @@ bool EditSchemaWidget::selectNextRightItem(NextSelectionItem switchToRightItem)
 		};
 
 
-	for (std::shared_ptr<VFrame30::SchemaItem> item : editSchemaView()->activeLayer()->Items)
+	for (SchemaItemPtr item : editSchemaView()->activeLayer()->Items)
 	{
 		if (item == selectedItem ||
 			item == m_nextSelectionFromLeft.schemaItem ||
@@ -9215,7 +9257,7 @@ void EditSchemaWidget::selectNextUpItem()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> selectedItem = selectedItems().front();
+	SchemaItemPtr selectedItem = selectedItems().front();
 
 	// Get selected item pos
 	//
@@ -9319,7 +9361,7 @@ void EditSchemaWidget::selectNextUpItem()
 	// Decay all other items to points
 	//
 	double minDistance = DBL_MAX;
-	std::shared_ptr<VFrame30::SchemaItem> minDistanceItem;
+	SchemaItemPtr minDistanceItem;
 
 	auto calcDistance = [&minDistance, &minDistanceItem, &point, HorzFactor](double x, double y, auto schemaItem)
 		{
@@ -9340,7 +9382,7 @@ void EditSchemaWidget::selectNextUpItem()
 		};
 
 
-	for (std::shared_ptr<VFrame30::SchemaItem> item : editSchemaView()->activeLayer()->Items)
+	for (SchemaItemPtr item : editSchemaView()->activeLayer()->Items)
 	{
 		if (item == selectedItem)
 		{
@@ -9438,7 +9480,7 @@ void EditSchemaWidget::selectNextDownItem()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> selectedItem = selectedItems().front();
+	SchemaItemPtr selectedItem = selectedItems().front();
 
 	// Get selected item pos
 	//
@@ -9542,7 +9584,7 @@ void EditSchemaWidget::selectNextDownItem()
 	// Decay all other items to points
 	//
 	double minDistance = DBL_MAX;
-	std::shared_ptr<VFrame30::SchemaItem> minDistanceItem;
+	SchemaItemPtr minDistanceItem;
 
 	auto calcDistance = [&minDistance, &minDistanceItem, &point, HorzFactor](double x, double y, auto schemaItem)
 		{
@@ -9563,7 +9605,7 @@ void EditSchemaWidget::selectNextDownItem()
 		};
 
 
-	for (std::shared_ptr<VFrame30::SchemaItem> item : editSchemaView()->activeLayer()->Items)
+	for (SchemaItemPtr item : editSchemaView()->activeLayer()->Items)
 	{
 		if (item == selectedItem)
 		{
@@ -9616,7 +9658,7 @@ void EditSchemaWidget::sameWidth()
 
 	// Same Width/Height works only for usual lines and rectangles,filter connection line
 	//
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selectedFiltered;
+	std::vector<SchemaItemPtr> selectedFiltered;
 
 	for (auto item : selected)
 	{
@@ -9633,7 +9675,7 @@ void EditSchemaWidget::sameWidth()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> firstItem = selectedFiltered.at(0);
+	SchemaItemPtr firstItem = selectedFiltered.at(0);
 
 	// find the most left and most right points
 	//
@@ -9666,7 +9708,7 @@ void EditSchemaWidget::sameWidth()
 	// get new points for all items
 	//
 	std::vector<std::vector<VFrame30::SchemaPoint>> newPoints;
-	for (std::shared_ptr<VFrame30::SchemaItem> item : selectedFiltered)
+	for (SchemaItemPtr item : selectedFiltered)
 	{
 		std::vector<VFrame30::SchemaPoint> points = item->getPointList();
 		assert(points.empty() == false);
@@ -9714,7 +9756,7 @@ void EditSchemaWidget::sameHeight()
 
 	// Same Width/Height works only for usual lines and rectangles,filter connection line
 	//
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selectedFiltered;
+	std::vector<SchemaItemPtr> selectedFiltered;
 
 	for (auto item : selected)
 	{
@@ -9731,7 +9773,7 @@ void EditSchemaWidget::sameHeight()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> firstItem = selectedFiltered.at(0);
+	SchemaItemPtr firstItem = selectedFiltered.at(0);
 
 	// find the top and bottom points
 	//
@@ -9764,7 +9806,7 @@ void EditSchemaWidget::sameHeight()
 	// get new points for all items
 	//
 	std::vector<std::vector<VFrame30::SchemaPoint>> newPoints;
-	for (std::shared_ptr<VFrame30::SchemaItem> item : selectedFiltered)
+	for (SchemaItemPtr item : selectedFiltered)
 	{
 		std::vector<VFrame30::SchemaPoint> points = item->getPointList();
 		assert(points.empty() == false);
@@ -9812,7 +9854,7 @@ void EditSchemaWidget::sameSize()
 
 	// Same Width/Height works only for usual lines and rectangles,filter connection line
 	//
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> selectedFiltered;
+	std::vector<SchemaItemPtr> selectedFiltered;
 
 	for (auto item : selected)
 	{
@@ -9829,7 +9871,7 @@ void EditSchemaWidget::sameSize()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> firstItem = selectedFiltered.at(0);
+	SchemaItemPtr firstItem = selectedFiltered.at(0);
 
 	// find the most left and most right points
 	//
@@ -9876,7 +9918,7 @@ void EditSchemaWidget::sameSize()
 	// get new points for all items
 	//
 	std::vector<std::vector<VFrame30::SchemaPoint>> newPoints;
-	for (std::shared_ptr<VFrame30::SchemaItem> item : selectedFiltered)
+	for (SchemaItemPtr item : selectedFiltered)
 	{
 		std::vector<VFrame30::SchemaPoint> points = item->getPointList();
 		assert(points.empty() == false);
@@ -9939,7 +9981,7 @@ void EditSchemaWidget::alignLeft()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> firstItem = selected.at(0);
+	SchemaItemPtr firstItem = selected.at(0);
 
 	// find the most left point
 	//
@@ -9963,7 +10005,7 @@ void EditSchemaWidget::alignLeft()
 	// get new points for all items
 	//
 	std::vector<std::vector<VFrame30::SchemaPoint>> newPoints;
-	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	for (SchemaItemPtr item : selected)
 	{
 		std::vector<VFrame30::SchemaPoint> points = item->getPointList();
 		assert(points.empty() == false);
@@ -10004,7 +10046,7 @@ void EditSchemaWidget::alignRight()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> firstItem = selected.at(0);
+	SchemaItemPtr firstItem = selected.at(0);
 
 	// find the most right point
 	//
@@ -10028,7 +10070,7 @@ void EditSchemaWidget::alignRight()
 	// get new points for all items
 	//
 	std::vector<std::vector<VFrame30::SchemaPoint>> newPoints;
-	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	for (SchemaItemPtr item : selected)
 	{
 		std::vector<VFrame30::SchemaPoint> points = item->getPointList();
 		assert(points.empty() == false);
@@ -10069,7 +10111,7 @@ void EditSchemaWidget::alignTop()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> firstItem = selected.at(0);
+	SchemaItemPtr firstItem = selected.at(0);
 
 	// find the most top point
 	//
@@ -10093,7 +10135,7 @@ void EditSchemaWidget::alignTop()
 	// get new points for all items
 	//
 	std::vector<std::vector<VFrame30::SchemaPoint>> newPoints;
-	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	for (SchemaItemPtr item : selected)
 	{
 		std::vector<VFrame30::SchemaPoint> points = item->getPointList();
 		assert(points.empty() == false);
@@ -10134,7 +10176,7 @@ void EditSchemaWidget::alignBottom()
 		return;
 	}
 
-	std::shared_ptr<VFrame30::SchemaItem> firstItem = selected.at(0);
+	SchemaItemPtr firstItem = selected.at(0);
 
 	// find the most bottom point
 	//
@@ -10158,7 +10200,7 @@ void EditSchemaWidget::alignBottom()
 	// get new points for all items
 	//
 	std::vector<std::vector<VFrame30::SchemaPoint>> newPoints;
-	for (std::shared_ptr<VFrame30::SchemaItem> item : selected)
+	for (SchemaItemPtr item : selected)
 	{
 		std::vector<VFrame30::SchemaPoint> points = item->getPointList();
 		assert(points.empty() == false);
@@ -10253,8 +10295,8 @@ void EditSchemaWidget::transformIntoInput()
 		}
 	}
 
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>> selected = selectedItems();
-	std::list<std::shared_ptr<VFrame30::SchemaItem>> newItems;
+	const std::vector<SchemaItemPtr> selected = selectedItems();
+	std::list<SchemaItemPtr> newItems;
 
 	for (auto item : selected)
 	{
@@ -10295,8 +10337,8 @@ void EditSchemaWidget::transformIntoInOut()
 		}
 	}
 
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>> selected = selectedItems();
-	std::list<std::shared_ptr<VFrame30::SchemaItem>> newItems;
+	const std::vector<SchemaItemPtr> selected = selectedItems();
+	std::list<SchemaItemPtr> newItems;
 
 	for (auto item : selected)
 	{
@@ -10337,8 +10379,8 @@ void EditSchemaWidget::transformIntoOutput()
 		}
 	}
 
-	const std::vector<std::shared_ptr<VFrame30::SchemaItem>> selected = selectedItems();
-	std::list<std::shared_ptr<VFrame30::SchemaItem>> newItems;
+	const std::vector<SchemaItemPtr> selected = selectedItems();
+	std::list<SchemaItemPtr> newItems;
 
 	for (auto item : selected)
 	{
@@ -10398,7 +10440,7 @@ void EditSchemaWidget::toggleComment()
 	{
 		// Comment all
 		//
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+		std::vector<SchemaItemPtr> items;
 		items.reserve(selected.size());
 
 		for (auto& selItem : selected)
@@ -10417,7 +10459,7 @@ void EditSchemaWidget::toggleComment()
 	{
 		// Uncomment all
 		//
-		std::vector<std::shared_ptr<VFrame30::SchemaItem>> items;
+		std::vector<SchemaItemPtr> items;
 		items.reserve(selected.size());
 
 		for (auto& selItem : selected)
@@ -10570,7 +10612,7 @@ void EditSchemaWidget::findNext(Qt::CaseSensitivity cs)
 	//
 	for (auto it = searchStartIterator; it != layer->Items.end(); ++it)
 	{
-		std::shared_ptr<VFrame30::SchemaItem> item = *it;
+		SchemaItemPtr item = *it;
 
 		auto result = item->searchTextByProps(searchText, cs);
 
@@ -10586,7 +10628,7 @@ void EditSchemaWidget::findNext(Qt::CaseSensitivity cs)
 	//
 	for (auto it = layer->Items.begin(); it != searchStartIterator; ++it)
 	{
-		std::shared_ptr<VFrame30::SchemaItem> item = *it;
+		SchemaItemPtr item = *it;
 
 		auto result = item->searchTextByProps(searchText, cs);
 
@@ -10678,7 +10720,7 @@ void EditSchemaWidget::findPrev(Qt::CaseSensitivity cs)
 	//
 	for (auto it = searchStartIterator; it != layer->Items.rend(); ++it)
 	{
-		std::shared_ptr<VFrame30::SchemaItem> item = *it;
+		SchemaItemPtr item = *it;
 
 		auto result = item->searchTextByProps(searchText, cs);
 
@@ -10694,7 +10736,7 @@ void EditSchemaWidget::findPrev(Qt::CaseSensitivity cs)
 	//
 	for (auto it = layer->Items.rbegin(); it != searchStartIterator; ++it)
 	{
-		std::shared_ptr<VFrame30::SchemaItem> item = *it;
+		SchemaItemPtr item = *it;
 
 		auto result = item->searchTextByProps(searchText, cs);
 
@@ -10720,7 +10762,7 @@ void EditSchemaWidget::findPrev(Qt::CaseSensitivity cs)
 	return;
 }
 
-int EditSchemaWidget::replace(std::shared_ptr<VFrame30::SchemaItem> item, QString findText, QString replaceWith, Qt::CaseSensitivity cs)
+int EditSchemaWidget::replace(SchemaItemPtr item, QString findText, QString replaceWith, Qt::CaseSensitivity cs)
 {
 	if (item == nullptr)
 	{
@@ -10795,7 +10837,7 @@ void EditSchemaWidget::replaceAndFind(QString findText, QString replaceWith, Qt:
 
 	for (auto it = searchStartIterator; it != layer->Items.end(); ++it)
 	{
-		std::shared_ptr<VFrame30::SchemaItem> item = *it;
+		SchemaItemPtr item = *it;
 
 		auto result = item->searchTextByProps(findText, cs);
 
@@ -10815,7 +10857,7 @@ void EditSchemaWidget::replaceAndFind(QString findText, QString replaceWith, Qt:
 	//
 	for (auto it = layer->Items.begin(); it != searchStartIterator; ++it)
 	{
-		std::shared_ptr<VFrame30::SchemaItem> item = *it;
+		SchemaItemPtr item = *it;
 
 		auto result = item->searchTextByProps(findText, cs);
 
@@ -10864,7 +10906,7 @@ void EditSchemaWidget::replaceAll(QString findText, QString replaceWith, Qt::Cas
 	// If there are selected items, then replace only in selected
 	// else relace in all layer's items
 	//
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> items = selectedItems();
+	std::vector<SchemaItemPtr> items = selectedItems();
 	if (items.empty() == true)
 	{
 		items.assign(layer->Items.begin(), layer->Items.end());
@@ -10874,10 +10916,10 @@ void EditSchemaWidget::replaceAll(QString findText, QString replaceWith, Qt::Cas
 	//
 	int count = 0;
 
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> replacedInItems;
+	std::vector<SchemaItemPtr> replacedInItems;
 	replacedInItems.reserve(items.size());
 
-	for(std::shared_ptr<VFrame30::SchemaItem> item : items)
+	for(SchemaItemPtr item : items)
 	{
 		int itemReplaces = replace(item, findText, replaceWith, cs);
 
@@ -11229,7 +11271,7 @@ void SchemaFindDialog::updateCompleter()
 	}
 }
 
-void SchemaFindDialog::updateFoundInformation(std::shared_ptr<VFrame30::SchemaItem> item,
+void SchemaFindDialog::updateFoundInformation(SchemaItemPtr item,
 											  const std::list<std::pair<QString, QString>>& foundProps,
 											  QString /*searchText*/,
 											  Qt::CaseSensitivity /*cs*/)

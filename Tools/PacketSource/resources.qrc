@@ -4,9 +4,11 @@
         <file>icons/About.png</file>
         <file>icons/Start.png</file>
         <file>icons/Stop.png</file>
-        <file>icons/PacketSource.png</file>
         <file>icons/SelectAll.png</file>
         <file>Images/logo.png</file>
         <file>icons/Find.png</file>
+        <file>icons/PacketSource.ico</file>
+        <file>icons/Search.png</file>
+        <file>icons/FrameData.png</file>
     </qresource>
 </RCC>

@@ -64,7 +64,8 @@ namespace VFrame30
 		double gridToDpiX(double pos) const;
 		double gridToDpiY(double pos) const;
 		QPointF gridToDpi(double x, double y) const;
-		QPointF gridToDpi(QPointF pos) const;
+		QPointF gridToDpi(const QPointF& pos) const;
+		QRectF gridToDpi(const QRectF& rect) const;
 
 		bool isEditMode() const;
 		void setEditMode(bool value);

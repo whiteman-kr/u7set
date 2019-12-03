@@ -278,10 +278,10 @@ namespace VFrame30
 
 			for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
 			{
-				const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
+				const SchemaItemPtr& item = *vi;
 
 				if (item->acceptClick() == true &&
-					item->IsIntersectPoint(x, y) == true &&
+				    item->isIntersectPoint(x, y) == true &&
 					item->clickScript().isEmpty() == false)
 				{
 					// Remember this item
@@ -336,12 +336,12 @@ namespace VFrame30
 
 				for (auto vi = pLayer->Items.crbegin(); vi != pLayer->Items.crend(); vi++)
 				{
-					const std::shared_ptr<VFrame30::SchemaItem>& item = *vi;
+					const SchemaItemPtr& item = *vi;
 
 					if (item == m_leftClickOverItem &&
 						item->acceptClick() == true &&
 						item->clickScript().trimmed().isEmpty() == false &&
-						item->IsIntersectPoint(x, y) == true &&
+					    item->isIntersectPoint(x, y) == true &&
 						item->clickScript().isEmpty() == false)
 					{
 						// Run script

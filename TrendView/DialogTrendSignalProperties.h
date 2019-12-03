@@ -18,7 +18,7 @@ public:
 								E::TimeType timeType,
 								E::TrendMode trendMode,
 								QWidget* parent);
-	~DialogTrendSignalProperties();
+	virtual ~DialogTrendSignalProperties();
 
 	const TrendLib::TrendSignalParam& trendSignal() const;		// result
 
@@ -41,7 +41,7 @@ private:
 	TrendLib::TrendSignalParam m_trendSignal;
 
 	// Parameters needed for points dialog
-
+	//
 	TrendLib::TrendSignalSet* m_trendSignalSet = nullptr;
 	QString m_appSignalId;
 	E::TimeType m_timeType = E::TimeType::Plant;
@@ -49,6 +49,7 @@ private:
 
 	//
 };
+
 
 class ChooseColorWidget : public QLabel
 {

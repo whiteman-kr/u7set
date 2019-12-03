@@ -104,7 +104,7 @@ protected:
 	QueueIndex m_writeIndex;
 	QueueIndex m_readIndex;
 
-	int m_lostedCount = 0;
+	int m_lostCount = 0;
 };
 
 
@@ -149,7 +149,7 @@ private:
 
 	QueueIndex m_writeIndex;
 	std::atomic<int> m_maxSize = { 0 };								// can be read from another thread
-	int m_lostedCount = 0;
+	int m_lostCount = 0;
 
 	// var modified by Reader only
 
@@ -392,7 +392,7 @@ private:
 	QueueIndex m_readIndex;
 	int m_size = 0;								// current queue size
 
-	qint64 m_lostedCount = 0;
+	qint64 m_lostCount = 0;
 	int m_maxSize = 0;
 
 	bool m_pushIsBegan = false;
@@ -440,7 +440,7 @@ void FastThreadSafeQueue<T>::push(const T& item, const QThread* thread, int* cur
 	{
 		// first queued item will be lost here
 		//
-		m_lostedCount++;
+		m_lostCount++;
 
 		m_readIndex++;
 		m_size--;
@@ -575,7 +575,7 @@ T* FastThreadSafeQueue<T>::beginPush(const QThread* thread)
 	{
 		// first queued item will be lost here
 		//
-		m_lostedCount++;
+		m_lostCount++;
 
 		m_readIndex++;
 		m_size--;
@@ -780,7 +780,7 @@ void FastThreadSafeQueue<T>::nonDestructiveResize(int newQueueSize, const QThrea
 
 	m_queueSize = newQueueSize;
 	m_maxSize = m_size;
-	m_lostedCount = 0;
+	m_lostCount = 0;
 }
 
 template <typename T>
@@ -838,7 +838,7 @@ void FastThreadSafeQueue<T>::clear(const QThread* thread)
 	m_writeIndex.reset();
 	m_size = 0;
 	m_maxSize = 0;
-	m_lostedCount = 0;
+	m_lostCount = 0;
 }
 
 template <typename T>
@@ -862,5 +862,5 @@ void FastThreadSafeQueue<T>::nonLockResizing(int newSize)
 
 	m_size = 0;
 	m_maxSize = 0;
-	m_lostedCount = 0;
+	m_lostCount = 0;
 }

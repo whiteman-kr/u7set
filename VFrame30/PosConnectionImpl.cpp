@@ -114,7 +114,7 @@ namespace VFrame30
 
 	// Action Functions
 	//
-	void PosConnectionImpl::MoveItem(double horzOffsetDocPt, double vertOffsetDocPt)
+	void PosConnectionImpl::moveItem(double horzOffsetDocPt, double vertOffsetDocPt)
 	{
 		for(auto pt = points.begin(); pt != points.end(); ++pt)
 		{
@@ -198,7 +198,7 @@ namespace VFrame30
 
 	// Рисование элемента при его создании изменении
 	//
-	void PosConnectionImpl::DrawOutline(CDrawParam* drawParam) const
+	void PosConnectionImpl::drawOutline(CDrawParam* drawParam) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -250,7 +250,7 @@ namespace VFrame30
 		return;
 	}
 
-	void PosConnectionImpl::DrawIssue(CDrawParam* drawParam, OutputMessageLevel issue) const
+	void PosConnectionImpl::drawIssue(CDrawParam* drawParam, OutputMessageLevel issue) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -300,7 +300,7 @@ namespace VFrame30
 
 	// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 	//
-	void PosConnectionImpl::DrawSelection(CDrawParam* drawParam, bool drawSizeBar) const
+	void PosConnectionImpl::drawSelection(CDrawParam* drawParam, bool drawSizeBar) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -430,7 +430,7 @@ namespace VFrame30
 	// Определение, пересекает ли элемент указанный прямоугольник (использовать для выделения),
 	// координаты и размер прямоугольника заданы в дюймах или пикселях
 	// 
-	bool PosConnectionImpl::IsIntersectRect(double x, double y, double width, double height) const
+	bool PosConnectionImpl::isIntersectRect(double x, double y, double width, double height) const
 	{
 		// Проверить, пересекает ли хоть одна прямая intersectRectangleIn
 		//

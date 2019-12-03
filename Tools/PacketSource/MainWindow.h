@@ -15,7 +15,8 @@
 #include <QTimer>
 
 #include "SourceBase.h"
-#include "FindSignalTextPanel.h"
+#include "FrameDataPanel.h"
+#include "FindSignalPanel.h"
 
 // ==============================================================================================
 
@@ -33,6 +34,7 @@ private:
 	// Elements of interface - Menu
 	//
 	QMenu*					m_sourceMenu = nullptr;
+	QMenu*					m_pEditMenu = nullptr;
 	QMenu*					m_sourceContextMenu = nullptr;
 	QMenu*					m_signalContextMenu = nullptr;
 	QMenu*					m_infoMenu = nullptr;
@@ -44,7 +46,6 @@ private:
 	QAction*				m_sourceStartAction = nullptr;
 	QAction*				m_sourceStopAction = nullptr;
 	QAction*				m_sourceSelectAllAction = nullptr;
-	QAction*				m_findAction = nullptr;
 	QAction*				m_optionAction = nullptr;
 	QAction*				m_sourceTextCopyAction = nullptr;
 	QAction*				m_signalTextCopyAction = nullptr;
@@ -59,7 +60,8 @@ private:
 
 	// Elements of interface - Panels
 	//
-	FindSignalTextPanel*	m_pFindSignalTextPanel = nullptr;
+	FrameDataPanel*			m_pFrameDataPanel = nullptr;
+	FindSignalPanel*		m_pFindSignalPanel = nullptr;
 
 	// Elements of interface - StatusBar
 	//
@@ -75,6 +77,7 @@ private:
 	void					createActions();
 	void					createMenu();
 	bool					createToolBars();
+	void					createPanels();
 	void					createViews();
 	void					createContextMenu();
 	void					createHeaderContexMenu();
@@ -101,9 +104,6 @@ private:
 
 	void					hideSignalColumn(int column, bool hide);
 
-	QTableView*				m_pFrameDataView = nullptr;
-	FrameDataTable			m_frameDataTable;
-
 	// update timers
 	//
 	QTimer*					m_updateSourceListTimer = nullptr;
@@ -119,7 +119,6 @@ public:
 
 	QTableView*				sourceView() { return m_pSourceView; }
 	QTableView*				signalView() { return m_pSignalView; }
-	QTableView*				frameDataView() { return m_pFrameDataView; }
 
 protected:
 
@@ -136,8 +135,7 @@ private slots:
 	void					startSource();
 	void					stopSource();
 	void					selectAllSource();
-	void					findTextSignal();
-	void					optionSource();
+	void					onOptions();
 	void					copyText(QTableView* pView);
 	void					copySourceText();
 	void					copySignalText();
@@ -169,7 +167,6 @@ private slots:
 
 	void					onSourceListClicked(const QModelIndex& index);
 	void					onSignalListDoubleClicked(const QModelIndex& index);
-	void					onFrameDataListDoubleClicked(const QModelIndex& index);
 };
 
 // ==============================================================================================

@@ -18,11 +18,11 @@
 
 const char* const			SignalListColumn[] =
 {
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Rack"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "AppSignalID"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "CustomSignalID"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "EquipmentID"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Caption"),
+							QT_TRANSLATE_NOOP("SignalListDialog.h", "Rack"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Chassis"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Module"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Place"),
@@ -30,7 +30,7 @@ const char* const			SignalListColumn[] =
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Electric range"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Electric sensor"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Physical range"),
-							QT_TRANSLATE_NOOP("SignalListDialog.h", "Engeneering range"),
+							QT_TRANSLATE_NOOP("SignalListDialog.h", "Engineering range"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Tuning"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Default value"),
 							QT_TRANSLATE_NOOP("SignalListDialog.h", "Tuning range"),
@@ -38,11 +38,11 @@ const char* const			SignalListColumn[] =
 
 const int					SIGNAL_LIST_COLUMN_COUNT			= sizeof(SignalListColumn)/sizeof(SignalListColumn[0]);
 
-const int					SIGNAL_LIST_COLUMN_RACK				= 0,
-							SIGNAL_LIST_COLUMN_APP_ID			= 1,
-							SIGNAL_LIST_COLUMN_CUSTOM_ID		= 2,
-							SIGNAL_LIST_COLUMN_EQUIPMENT_ID		= 3,
-							SIGNAL_LIST_COLUMN_CAPTION			= 4,
+const int					SIGNAL_LIST_COLUMN_APP_ID			= 0,
+							SIGNAL_LIST_COLUMN_CUSTOM_ID		= 1,
+							SIGNAL_LIST_COLUMN_EQUIPMENT_ID		= 2,
+							SIGNAL_LIST_COLUMN_CAPTION			= 3,
+							SIGNAL_LIST_COLUMN_RACK				= 4,
 							SIGNAL_LIST_COLUMN_CHASSIS			= 5,
 							SIGNAL_LIST_COLUMN_MODULE			= 6,
 							SIGNAL_LIST_COLUMN_PLACE			= 7,
@@ -57,11 +57,11 @@ const int					SIGNAL_LIST_COLUMN_RACK				= 0,
 
 const int					SignalListColumnWidth[SIGNAL_LIST_COLUMN_COUNT] =
 {
-							100,	// SIGNAL_LIST_COLUMN_RACK
 							250,	// SIGNAL_LIST_COLUMN_APP_ID
 							250,	// SIGNAL_LIST_COLUMN_CUSTOM_ID
 							250,	// SIGNAL_LIST_COLUMN_EQUIPMENT_ID
 							150,	// SIGNAL_LIST_COLUMN_CAPTION
+							100,	// SIGNAL_LIST_COLUMN_RACK
 							 60,	// SIGNAL_LIST_COLUMN_CHASSIS
 							 60,	// SIGNAL_LIST_COLUMN_MODULE
 							 60,	// SIGNAL_LIST_COLUMN_PLACE

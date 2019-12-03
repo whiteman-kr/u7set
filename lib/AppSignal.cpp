@@ -52,12 +52,12 @@ static const TimeStamp dummy;
 	return dummy;
 }
 
-double AppSignalState::value() const
+double AppSignalState::value() const  noexcept
 {
 	return m_value;
 }
 
-bool AppSignalState::isValid() const
+bool AppSignalState::isValid() const  noexcept
 {
 	return m_flags.valid;
 }
@@ -223,8 +223,8 @@ bool AppSignalParam::load(const ::Proto::AppSignal& message)
 
 	m_lowValidRange = s.lowValidRange();
 	m_highValidRange = s.highValidRange();
-	m_lowEngeneeringUnits = s.lowEngeneeringUnits();
-	m_highEngeneeringUnits = s.highEngeneeringUnits();
+	m_lowEngineeringUnits = s.lowEngineeringUnits();
+	m_highEngineeringUnits = s.highEngineeringUnits();
 
 	m_electricLowLimit = s.electricLowLimit();
 	m_electricHighLimit = s.electricHighLimit();
@@ -462,22 +462,22 @@ double AppSignalParam::highValidRange() const
 
 double AppSignalParam::lowEngineeringUnits() const
 {
-	return m_lowEngeneeringUnits;
+	return m_lowEngineeringUnits;
 }
 
 void AppSignalParam::setLowEngineeringUnits(double value)
 {
-	m_lowEngeneeringUnits = value;
+	m_lowEngineeringUnits = value;
 }
 
 double AppSignalParam::highEngineeringUnits() const
 {
-	return m_highEngeneeringUnits;
+	return m_highEngineeringUnits;
 }
 
 void AppSignalParam::setHighEngineeringUnits(double value)
 {
-	m_highEngeneeringUnits = value;
+	m_highEngineeringUnits = value;
 }
 
 double AppSignalParam::inputLowLimit() const

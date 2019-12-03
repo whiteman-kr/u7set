@@ -7,65 +7,44 @@
 
 #include "CalibratorManager.h"
 #include "RackBase.h"
-#include "OutputSignalBase.h"
+#include "SignalConnectionBase.h"
 #include "TuningSignalBase.h"
+#include "StatisticBase.h"
 
 // ==============================================================================================
-
-class MetrologyMultiSignal
-{
-public:
-
-	MetrologyMultiSignal();
-	MetrologyMultiSignal(const MetrologyMultiSignal& from);
-	virtual ~MetrologyMultiSignal() {}
-
-private:
-
-	mutable QMutex				m_mutex;
-	Metrology::Signal*			m_pSignal[Metrology::ChannelCount];
-
-	Metrology::SignalLocation	m_location;
-	QString						m_strID;		// depend from SignalLocation and measureKind
-
-public:
-
-	bool						isEmpty() const;
-	void						clear();
-
-	Metrology::Signal*			metrologySignal(int channel) const;
-	bool						setMetrologySignal(int measureKind, int channel, Metrology::Signal* pSignal);
-
-	Metrology::SignalLocation	location() const { return m_location; }
-	QString						strID() const { return m_strID; }
-
-	MetrologyMultiSignal&		operator=(const MetrologyMultiSignal& from);
-};
-
-// ==============================================================================================
-
-#define						MultiTextDivider	"\n"
+// IoSignalParam for :
+//						MeasureThread
+//						SignalInfoPanel
+//						MeasureBase
+//
+//
 
 // ----------------------------------------------------------------------------------------------
 
-class MeasureMultiParam
+#define						MULTI_TEXT_DEVIDER	"\n"
+
+// ----------------------------------------------------------------------------------------------
+
+class IoSignalParam
 {
 public:
 
-	MeasureMultiParam();
-	MeasureMultiParam(const MeasureMultiParam& from);
-	virtual~MeasureMultiParam() {}
+	IoSignalParam();
+	IoSignalParam(const IoSignalParam& from);
+	virtual~IoSignalParam() {}
 
 private:
 
 	mutable QMutex			m_mutex;
 
 	Metrology::SignalParam	m_param[MEASURE_IO_SIGNAL_TYPE_COUNT];
-	int						m_outputSignalType = OUTPUT_SIGNAL_TYPE_UNUSED;
+	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNUSED;
 
 	CalibratorManager*		m_pCalibratorManager = nullptr;
 	double					m_percent = 0;
+	int						m_comparatorIndex = -1;
 	bool					m_negativeRange = false;
+	double					m_tunSignalState = 0;			// for restore tun value after measuring
 
 public:
 
@@ -75,8 +54,8 @@ public:
 	Metrology::SignalParam	param(int type) const;
 	bool					setParam(int type, const Metrology::SignalParam& param);
 
-	int						outputSignalType() const { return m_outputSignalType; }
-	void					setOutputSignalType(int type) { m_outputSignalType = type; }
+	int						signalConnectionType() const { return m_signalConnectionType; }
+	void					setSignalConnectionType(int type) { m_signalConnectionType = type; }
 
 	QString					rackCaption() const;
 	QString					appSignalID() const;
@@ -89,7 +68,7 @@ public:
 	QString					electricRangeStr() const;
 	QString					electricSensorStr() const;
 	QString					physicalRangeStr() const;
-	QString					engeneeringRangeStr() const;
+	QString					engineeringRangeStr() const;
 
 	CalibratorManager*		calibratorManager() const { return m_pCalibratorManager; }
 	QString					calibratorStr() const;
@@ -98,14 +77,64 @@ public:
 	double					percent() const { return m_percent; }
 	void					setPercent(double percent) { m_percent = percent; }
 
+	int						comparatorIndex() const { return m_comparatorIndex; }
+	void					setComparatorIndex(int index) { m_comparatorIndex = index; }
+
+
 	bool					isNegativeRange() const { return m_negativeRange; }
 	void					setNegativeRange(bool negativeRange) { m_negativeRange = negativeRange; }
 
-	MeasureMultiParam&		operator=(const MeasureMultiParam& from);
+	double					tunSignalState() const { return m_tunSignalState; }
+	void					setTunSignalState(double state) { m_tunSignalState = state; }
+
+	IoSignalParam&			operator=(const IoSignalParam& from);
 };
 
 // ==============================================================================================
+//
+// MeasureSignal --- MultiChannelSignal[MEASURE_IO_SIGNAL_TYPE_COUNT]--- Metrology::Signal[Metrology::ChannelCount]
+//
+// ==============================================================================================
+// class MultiChannelSignal consists list of Metrology::Signal
+//
+class MultiChannelSignal
+{
+public:
 
+	explicit MultiChannelSignal();
+	MultiChannelSignal(const MultiChannelSignal& from);
+	virtual ~MultiChannelSignal() {}
+
+private:
+
+	mutable QMutex				m_mutex;
+	int							m_channelCount = 0;
+	QVector<Metrology::Signal*>	m_pSignalList;
+
+	Metrology::SignalLocation	m_location;
+	QString						m_strID;		// depend from SignalLocation and measureKind
+
+public:
+
+	void						clear();
+	bool						isEmpty() const;
+
+	int							channelCount() const { return m_channelCount; }
+	void						setChannelCount(int count);
+
+	Metrology::Signal*			metrologySignal(int channel) const;
+	bool						setMetrologySignal(int measureKind, int channel, Metrology::Signal* pSignal);
+	Metrology::Signal*			firstMetrologySignal() const;
+
+	Metrology::SignalLocation	location() const { return m_location; }
+	QString						strID() const { return m_strID; }
+
+	MultiChannelSignal&			operator=(const MultiChannelSignal& from);
+};
+
+// ==============================================================================================
+// class MeasureSignal consists array of two classes MultiChannelSignal: input and output
+//
 class MeasureSignal
 {
 public:
@@ -118,22 +147,26 @@ private:
 
 	mutable QMutex			m_mutex;
 
-	int						m_outputSignalType = OUTPUT_SIGNAL_TYPE_UNUSED;
+	int						m_signalConnectionType = SIGNAL_CONNECTION_TYPE_UNUSED;
 
-	MetrologyMultiSignal	m_signal[MEASURE_IO_SIGNAL_TYPE_COUNT];
+	int						m_channelCount = 0;
+	MultiChannelSignal		m_signal[MEASURE_IO_SIGNAL_TYPE_COUNT];
 
 public:
 
 	void					clear();
 	bool					isEmpty() const;
 
-	int						outputSignalType() const { return m_outputSignalType; }
+	int						signalConnectionType() const { return m_signalConnectionType; }
 
-	MetrologyMultiSignal	signal(int type) const;
-	bool					setSignal(int type, const MetrologyMultiSignal& signal);
+	int						channelCount() const { return m_channelCount; }
+	void					setChannelCount(int count);
+
+	MultiChannelSignal		multiChannelSignal(int type) const;
+	bool					setMultiSignal(int type, const MultiChannelSignal& signal);
 
 	Metrology::Signal*		metrologySignal(int type, int channel) const;
-	bool					setMetrologySignal(int measureKind, int outputSignalType, int channel, Metrology::Signal* pSignal);
+	bool					setMetrologySignal(int measureKind, const SignalConnectionBase& signalConnections, int signalConnectionType, int channel, Metrology::Signal* pSignal);
 
 	bool					contains(Metrology::Signal* pSignal);
 
@@ -187,13 +220,9 @@ private:
 	mutable QMutex			m_activeSignalMutex;
 	MeasureSignal			m_activeSignal;
 
-	// output signals
-	//
-	OutputSignalBase		m_outputSignalBase;
-
-	// sources and signals of tuning
-	//
-	TuningBase				m_tuningBase;
+	SignalConnectionBase	m_signalConnectionBase;	// signal connections
+	TuningBase				m_tuningBase;			// sources and signals of tuning
+	StatisticBase			m_statisticBase;		// statistics of measured signals
 
 public:
 
@@ -239,7 +268,7 @@ public:
 	//
 	RackBase&				racks() { return m_rackBase; }
 
-	int						createRackListForMeasure(int outputSignalType);
+	int						createRackListForMeasure(int signalConnectionType);
 	void					clearRackListForMeasure();
 
 	int						rackCountForMeasure() const;
@@ -247,14 +276,14 @@ public:
 
 	// module
 	//
-	QString					getSerialNoSignalID(const QString& moduleID);
+	QString					findAppSignalIDforSerialNo(const QString& moduleID);
 
 	// signals for measure
 	//
 	void					initSignals();
 	void					updateRackParam();
 
-	int						createSignalListForMeasure(int measureKind, int outputSignalType, int rackIndex);
+	int						createSignalListForMeasure(int measureKind, int signalConnectionType, int rackIndex);
 	void					clearSignalListForMeasure();
 
 	int						signalForMeasureCount() const;
@@ -268,9 +297,14 @@ public:
 
 	// other bases
 	//
-	OutputSignalBase&		outputSignals() { return m_outputSignalBase; }		// output signals
-	TuningBase&				tuning() { return m_tuningBase; }					// sources and signals of tuning
-
+	SignalConnectionBase&	signalConnections() { return m_signalConnectionBase; }	// signal connections
+	TuningBase&				tuning() { return m_tuningBase; }						// sources and signals of tuning
+	StatisticBase&			statistic() { return m_statisticBase; }					// statistics of measured signals
+	
+	// comparators
+	//
+	bool					loadComparatorsInSignal(const ComparatorSet& comparatorSet);
+	
 signals:
 
 	void					updatedSignalParam(const QString& appSignalID);

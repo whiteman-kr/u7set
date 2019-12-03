@@ -16,6 +16,7 @@
 //	#pragma warning(disable : 4996)		// You will see C4996 if you are using members of the <hash_map> and <hash_set> header files in the std namespace.
 //#endif
 
+#include <array>
 #include <iostream>
 #include <fstream>
 #include <list>
@@ -30,6 +31,7 @@
 #include <utility>
 #include <string>
 #include <optional>
+#include <variant>
 #include <algorithm>
 #include <functional>
 #include <optional>

@@ -155,8 +155,8 @@ namespace TuningIPEN
 						}
 					}
 					break;
-					case ORIGINAL_LOW_LIMIT_COLUMN: return signal.lowEngeneeringUnits();
-					case ORIGINAL_HIGH_LIMIT_COLUMN: return signal.highEngeneeringUnits();
+					case ORIGINAL_LOW_LIMIT_COLUMN: return signal.lowEngineeringUnits();
+					case ORIGINAL_HIGH_LIMIT_COLUMN: return signal.highEngineeringUnits();
 					case RECEIVED_LOW_LIMIT_COLUMN:
 					{
 						double value = state.lowLimit;
@@ -288,9 +288,9 @@ namespace TuningIPEN
 			}
 		}
 
-		if (newValue < signal.lowEngeneeringUnits() || newValue > signal.highEngeneeringUnits())
+		if (newValue < signal.lowEngineeringUnits() || newValue > signal.highEngineeringUnits())
 		{
-			QMessageBox::critical(parentWidget, "Not valid input", QString("Please, enter number between %1 and %2").arg(signal.lowEngeneeringUnits()).arg(signal.highEngeneeringUnits()));
+			QMessageBox::critical(parentWidget, "Not valid input", QString("Please, enter number between %1 and %2").arg(signal.lowEngineeringUnits()).arg(signal.highEngineeringUnits()));
 			return false;
 		}
 

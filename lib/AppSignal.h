@@ -18,27 +18,99 @@ struct AppSignalParamMimeType
 	static const char* value;	// = "application/x-appsignalparam";	Data in format ::Proto::AppSiagnalParamSet
 };
 
-
 namespace Proto
 {
 	class AppSignalState;
 	class AppSignal;
 }
 
+
+/*! \class AppSignalState
+	\ingroup groupParamsStates
+	\brief Describes signal state in Monitor application
+
+	AppSignalState class describes signal state in Monitor application.	This state is received from ApplicationDataService.
+	\ref VFrame30::ScriptAppSignalController "ScriptAppSignalController" class accesed by global <b>signals</b> object is used for requesting signal states.
+
+	\warning
+	After requesting signal state it is highly recommended to check function return values, because errors can occur. For example,
+	connection to ApplicationDataService can be down, or signal with specified identifier could not exist.
+
+	<b>Example:</b>
+
+	\code
+	// Request signal state by identifier "#APPSIGNALID"
+	//
+	var state = signals.signalState("#APPSIGNALID");
+
+	if (state == undefined)
+	{
+		// No state was received for this signal
+		//
+		return;
+	}
+
+	// Check signal validity
+	//
+	if (state.Valid == true)
+	{
+		// Put signal value to a schema item
+		//
+		schemaItemValue.Text = signalState.Value;
+	}
+	\endcode
+*/
 class AppSignalState
 {
 	Q_GADGET
 
+	/// \brief Contains a unique 64-bit hash of a signal identifier
 	Q_PROPERTY(Hash Hash READ hash)
+
+	/*! \brief Contains current signal value
+
+		Contains current signal value. For discrete signals <b>"False"</b> is equal to <b>0</b>, <b>"True"</b> is equal to <b>1</b>.
+
+		\warning Be careful when comparing values. Remember that <b>double</b> can't be compared directly,
+		because doubles and floats cannot express every numerical value. They are using approximations to represent the value.
+		It is recommended to make comparsions as follows, especially analog values:
+
+		\code
+		var a = state.Value;
+		var b = 1.5;
+
+		var threshold = 0.0000001;
+
+		if (Math.abs(a - b) <= threshold)
+		{
+		...
+		}
+		\endcode
+	*/
 	Q_PROPERTY(double Value READ value)
 
+	/// \brief Contains signal validity flag
 	Q_PROPERTY(bool Valid READ isValid)
+
+	/// \brief Signal value is received from Application Data Service
 	Q_PROPERTY(bool StateAvailable READ isStateAvailable)
+
+	/// \brief Signal value simulated flag (see AFB simlock)
 	Q_PROPERTY(bool Simulated READ isSimulated)
+
+	/// \brief Signal value blocked flag (see AFB simlock)
 	Q_PROPERTY(bool Blocked READ isBlocked)
+
+	/// \brief Signal value mismatch flag (see AFB mismatch)
 	Q_PROPERTY(bool Mismatch READ isMismatch)
+
+	/// \brief Signal value is above high limit
 	Q_PROPERTY(bool AboveHighLimit READ isAboveHighLimit)
+
+	/// \brief Signal value is below low limit
 	Q_PROPERTY(bool BelowLowLimit READ isBelowLowLimit)
+
+	/// \brief Signal value is out of limits
 	Q_PROPERTY(bool OutOfLimits READ isOutOfLimits)
 
 public:
@@ -57,9 +129,9 @@ public:
 	Hash hash() const;
 	const Times& time() const;
 	const TimeStamp& time(E::TimeType timeType) const;
-	double value() const;
+	double value() const noexcept;
 
-	bool isValid() const;
+	bool isValid() const noexcept;
 	bool isStateAvailable() const;
 	bool isSimulated() const;
 	bool isBlocked() const;
@@ -83,32 +155,121 @@ public:
 Q_DECLARE_METATYPE(AppSignalState)
 
 
+/*! \class AppSignalParam
+	\ingroup groupParamsStates
+	\brief Describes signal parameters in Monitor and TuningClient applications.
+
+	AppSignalParam class describes signal parmeters in Monitor and TuningClient applications. This state is received from ApplicationDataService by Monitor or
+	from TuningService by Monitor or TuningClient.
+
+	\ref VFrame30::ScriptAppSignalController "ScriptAppSignalController" class accesed by global <b>signals</b> object is used for
+	requesting signal parameters from Application Data Service.
+
+	\ref VFrame30::TuningController "TuningController" class accesed by global <b>tuning</b> object is used for
+	requesting signal parameters from Tuning Service.
+
+	\warning
+	TuningController is always available in TuningClient. In Monitor it is available only in non-safety projects when Tuning function is enabled.
+
+	\n
+	\warning
+	After requesting signal state it is highly recommended to check function return values, because errors can occur. For example,
+	connection to a service can be down, or signal with specified identifier could not exist.
+
+	<b>Example:</b>
+
+	\code
+	var appSignalIdA = "#APPSIGNAL01";	// Signal A
+	var appSignalIdB = "#APPSIGNAL02";	// Signal B
+
+	// Get parameters from Application Data Service
+	//
+	var param1 = signals.signalParam(appSignalIdA);
+
+	// Get parameters from Tuning Service
+	//
+	var param2 = tuning.signalParam(appSignalIdB);
+
+	if (param1 == undefined || param2 == undefined)
+	{
+		// Some signals do not exist or getting their parameters failed
+		//
+		return;
+	}
+
+	// Output parameters of signal A
+	//
+	schemaItemValue.Text = param1.Caption;
+
+	// Check if signal B is analog and input
+	//
+	if (param2.IsAnalog)
+	{
+		if (param2.IsInput)
+		{
+			// Create a string with template "Caption, Units"
+			//
+			var units = param2.Unit;
+
+			var text = param2.Caption + ", " + units;
+			...
+		}
+	}
+	\endcode
+*/
 class AppSignalParam
 {
 	Q_GADGET
 
+	/// \brief Contains a 64-bit hash of a signal
 	Q_PROPERTY(Hash Hash READ hash)
+
+	/// \brief Application Signal Identifier
 	Q_PROPERTY(QString AppSignalID READ appSignalId)
+
+	/// \brief Custom Application Signal Identifier
 	Q_PROPERTY(QString CustomSignalID READ customSignalId)
+
+	/// \brief Signal Caption
 	Q_PROPERTY(QString Caption READ caption)
+
+	/// \brief Signal Equipment ID
 	Q_PROPERTY(QString EquipmentID READ equipmentId)
 
+	/// \brief Signal Measure Units
 	Q_PROPERTY(QString Unit READ unit)
+
+	/// \brief Signal precision (digits after point)
 	Q_PROPERTY(int Precision READ precision)
 
+	/// \brief Signal channel
 	Q_PROPERTY(E::Channel Channel READ channel)
 
+	/// \brief Signal is tunable
 	Q_PROPERTY(bool EnableTuning READ enableTuning)
 
+	/// \brief Default value of tunable signal
 	Q_PROPERTY(QVariant TuningDefaultValue READ tuningDefaultValueToVariant)
+
+	/// \brief Low tuning limit of the signal
 	Q_PROPERTY(QVariant TuningLowBound READ tuningLowBoundToVariant)
+
+	/// \brief High tuning limit of the signal
 	Q_PROPERTY(QVariant TuningHighBound READ tuningHighBoundToVariant)
 
+	/// \brief Signal is input
 	Q_PROPERTY(bool IsInput READ isInput)
+
+	/// \brief Signal is output
 	Q_PROPERTY(bool IsOutput READ isOutput)
+
+	/// \brief Signal is internal
 	Q_PROPERTY(bool IsInternal READ isInternal)
 
+	/// \brief Signal is analog
 	Q_PROPERTY(bool IsAnalog READ isAnalog)
+
+	/// \brief Signal is discrete
 	Q_PROPERTY(bool IsDiscrete READ isDiscrete)
 
 public:
@@ -231,8 +392,8 @@ private:
 
 	double m_lowValidRange = 0;
 	double m_highValidRange = 100;
-	double m_lowEngeneeringUnits = 0;
-	double m_highEngeneeringUnits = 100;
+	double m_lowEngineeringUnits = 0;
+	double m_highEngineeringUnits = 100;
 
 	double m_electricLowLimit = 0;									// low electric value for input range
 	double m_electricHighLimit = 0;									// high electric value for input range

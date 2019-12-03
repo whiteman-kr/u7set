@@ -105,11 +105,11 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 
 		switch (column)
 		{
-			case SIGNAL_LIST_COLUMN_RACK:				result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_APP_ID:				result = Qt::AlignLeft;		break;
 			case SIGNAL_LIST_COLUMN_CUSTOM_ID:			result = Qt::AlignLeft;		break;
 			case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:		result = Qt::AlignLeft;		break;
 			case SIGNAL_LIST_COLUMN_CAPTION:			result = Qt::AlignLeft;		break;
+			case SIGNAL_LIST_COLUMN_RACK:				result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_CHASSIS:			result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_MODULE:				result = Qt::AlignCenter;	break;
 			case SIGNAL_LIST_COLUMN_PLACE:				result = Qt::AlignCenter;	break;
@@ -170,7 +170,7 @@ QVariant SignalListTable::data(const QModelIndex &index, int role) const
 
 			case SIGNAL_LIST_COLUMN_EN_RANGE:
 
-				if (pSignal->param().engeneeringRangeIsValid() == false)
+			    if (pSignal->param().engineeringRangeIsValid() == false)
 				{
 					return QColor(0xFF, 0xA0, 0xA0);
 				}
@@ -223,11 +223,11 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 
 	switch (column)
 	{
-		case SIGNAL_LIST_COLUMN_RACK:				result = param.location().rack().caption();	break;
 		case SIGNAL_LIST_COLUMN_APP_ID:				result = param.appSignalID();				break;
 		case SIGNAL_LIST_COLUMN_CUSTOM_ID:			result = param.customAppSignalID();			break;
 		case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:		result = param.location().equipmentID();	break;
 		case SIGNAL_LIST_COLUMN_CAPTION:			result = param.caption();					break;
+		case SIGNAL_LIST_COLUMN_RACK:				result = param.location().rack().caption();	break;
 		case SIGNAL_LIST_COLUMN_CHASSIS:			result = param.location().chassisStr();		break;
 		case SIGNAL_LIST_COLUMN_MODULE:				result = param.location().moduleStr();		break;
 		case SIGNAL_LIST_COLUMN_PLACE:				result = param.location().placeStr();		break;
@@ -235,7 +235,7 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 		case SIGNAL_LIST_COLUMN_EL_RANGE:			result = param.electricRangeStr();			break;
 		case SIGNAL_LIST_COLUMN_EL_SENSOR:			result = param.electricSensorTypeStr();		break;
 		case SIGNAL_LIST_COLUMN_PH_RANGE:			result = param.physicalRangeStr();			break;
-		case SIGNAL_LIST_COLUMN_EN_RANGE:			result = param.engeneeringRangeStr();		break;
+		case SIGNAL_LIST_COLUMN_EN_RANGE:			result = param.engineeringRangeStr();		break;
 		case SIGNAL_LIST_COLUMN_TUN_SIGNAL:			result = param.enableTuningStr();			break;
 		case SIGNAL_LIST_COLUMN_TUN_DEFAULT_VAL:	result = param.tuningDefaultValueStr();		break;
 		case SIGNAL_LIST_COLUMN_TUN_RANGE:			result = param.tuningRangeStr();			break;
@@ -354,7 +354,7 @@ SignalListDialog::~SignalListDialog()
 void SignalListDialog::createInterface(bool hasButtons)
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/Signals.png"));
+	setWindowIcon(QIcon(":/icons/Signal.png"));
 	setWindowTitle(tr("Signals"));
 	resize(QApplication::desktop()->availableGeometry().width() - 200, 500);
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());
@@ -509,10 +509,10 @@ void SignalListDialog::createContextMenu()
 	//
 	m_pContextMenu = new QMenu(tr(""), this);
 
-	m_pContextMenu->addAction(m_pCopyAction);
-	m_pContextMenu->addSeparator();
 	m_pContextMenu->addMenu(m_pViewTypeADMenu);
 	m_pContextMenu->addMenu(m_pViewTypeIOMenu);
+	m_pContextMenu->addSeparator();
+	m_pContextMenu->addAction(m_pCopyAction);
 	m_pContextMenu->addSeparator();
 	m_pContextMenu->addAction(m_pSignalPropertyAction);
 

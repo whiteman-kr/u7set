@@ -112,7 +112,7 @@ namespace VFrame30
 
 	// Action Functions
 	//
-	void PosLineImpl::MoveItem(double horzOffsetDocPt, double vertOffsetDocPt)
+	void PosLineImpl::moveItem(double horzOffsetDocPt, double vertOffsetDocPt)
 	{ 
 		setStartXDocPt(startXDocPt() + horzOffsetDocPt);
 		setStartYDocPt(startYDocPt() + vertOffsetDocPt);
@@ -182,7 +182,7 @@ namespace VFrame30
 
 	// Рисование элемента при его создании изменении
 	//
-	void PosLineImpl::DrawOutline(CDrawParam* drawParam) const
+	void PosLineImpl::drawOutline(CDrawParam* drawParam) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -213,7 +213,7 @@ namespace VFrame30
 
 	// Нарисовать выделение объекта, в зависимости от используемого интрефейса расположения.
 	//
-	void PosLineImpl::DrawSelection(CDrawParam* drawParam, bool drawSizeBar) const
+	void PosLineImpl::drawSelection(CDrawParam* drawParam, bool drawSizeBar) const
 	{
 		if (drawParam == nullptr)
 		{
@@ -293,7 +293,7 @@ namespace VFrame30
 		return;
 	}
 
-	bool PosLineImpl::IsIntersectRect(double x, double y, double width, double height) const
+	bool PosLineImpl::isIntersectRect(double x, double y, double width, double height) const
 	{
 		double ax1 = startXDocPt();
 		double ay1 = startYDocPt();

@@ -29,8 +29,8 @@ void DynamicAppSignalState::setSignalParams(int index, Signal* signal)
 	m_coarseAperture = signal->coarseAperture();
 	m_fineAperture = signal->fineAperture();
 
-	m_lowLimit = signal->lowEngeneeringUnits();
-	m_highLimit = signal->highEngeneeringUnits();
+	m_lowLimit = signal->lowEngineeringUnits();
+	m_highLimit = signal->highEngineeringUnits();
 	m_adaptiveAperture = signal->adaptiveAperture();
 
 	if (m_adaptiveAperture == false)

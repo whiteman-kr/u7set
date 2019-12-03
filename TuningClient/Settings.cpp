@@ -3,6 +3,8 @@
 #include "../lib/PropertyEditor.h"
 
 
+QColor redColor = QColor(192, 0, 0);
+
 //
 // ConfigConnection
 //

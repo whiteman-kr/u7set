@@ -5,6 +5,8 @@
 #include "../lib/DeviceObject.h"
 #include "../lib/XmlHelper.h"
 #include "../lib/UnitsConvertor.h"
+#include "../lib/ComparatorSet.h"
+#include "../lib/SignalProperties.h"
 #include "../Builder/CfgFiles.h"
 
 // Attention !!!
@@ -17,14 +19,13 @@ const int			CFG_FILE_VER_METROLOGY_SIGNALS	= 5;
 //
 // version 1 - it is base version
 // version 2 - deleted a few fields SignalParam::writeToXml (story about removing redundant ranges)
-// version 3 - append fields: EngeneeringUnits
+// version 3 - append fields: EngineeringUnits
 // version 4 - append fields: TuningBounds
 // version 5 - append fields: electricR0
 //
 
 namespace Metrology
 {
-
 	// ==============================================================================================
 
 	const char* const ChannelLetter [] = {"A", "B", "C", "D", "E", "F"};
@@ -44,6 +45,12 @@ namespace Metrology
 				Channel_3		= 3,
 				Channel_4		= 4,
 				Channel_5		= 5;
+
+	// ==============================================================================================
+
+	const int	InputCount	= 32;
+
+	const int	ComparatorCount	= 32;
 
 	// ==============================================================================================
 
@@ -178,6 +185,9 @@ namespace Metrology
 		double					m_physicalLowLimit = 0;
 		double					m_physicalHighLimit = 0;
 
+		QVector<std::shared_ptr<Comparator>> m_comparatorList;
+		int						m_comparatorCount = 0;
+
 	public:
 
 		bool					isValid() const;
@@ -231,14 +241,18 @@ namespace Metrology
 		bool					physicalRangeIsValid() const;
 		QString					physicalRangeStr() const;
 
-		bool					engeneeringRangeIsValid() const;
-		QString					engeneeringRangeStr() const;
+		bool					engineeringRangeIsValid() const;
+		QString					engineeringRangeStr() const;
 
 		QString					enableTuningStr() const;
 		QString					tuningDefaultValueStr() const;
 		bool					tuningRangeIsValid() const;
 		QString					tuningRangeStr() const;
-		TuningValueType			tuningValueType();
+		TuningValueType			tuningValueType() const;
+
+		void					setComparatorList(const QVector<std::shared_ptr<Comparator>>& comparators);
+		int						comparatorCount() const { return m_comparatorCount; }
+		std::shared_ptr<Comparator> comparator(int index) const;
 
 		bool					readFromXml(XmlReadHelper& xml);
 		void					writeToXml(XmlWriteHelper& xml);
@@ -257,38 +271,27 @@ namespace Metrology
 
 	private:
 
-		double					m_value = 0;
+		double m_value = 0;
 
-		AppSignalStateFlags		m_flags;
+		AppSignalStateFlags m_flags;
 
 	public:
 
-		void					setState(const AppSignalState& state) { m_value = state.m_value; m_flags = state.m_flags; }
+		void setState(const AppSignalState& state) { m_value = state.m_value; m_flags = state.m_flags; }
 
-		double					value() const { return m_value; }
-		void					setValue(double value) { m_value = value; }
+		double value() const { return m_value; }
+		void setValue(double value) { m_value = value; }
 
-		AppSignalStateFlags		flags() const { return m_flags; }
-		void					setFlags(const AppSignalStateFlags& flags) { m_flags = flags; }
+		AppSignalStateFlags flags() { return m_flags; }
+		const AppSignalStateFlags& flags() const { return m_flags; }
+		void setFlags(const AppSignalStateFlags& flags) { m_flags = flags; }
 
-		bool					valid() const { return m_flags.valid; }
-		void					setValid(bool valid) { m_flags.valid = valid; }
+		bool valid() const { return m_flags.valid; }
+		void setValid(bool valid) { m_flags.valid = valid; }
 	};
+
 
 	// ==============================================================================================
-
-	const char* const StatisticState[] =
-	{
-				QT_TRANSLATE_NOOP("MetrologySignal.h", "Failed"),
-				QT_TRANSLATE_NOOP("MetrologySignal.h", "Ok"),
-	};
-
-	const int	StatisticStateCount		= sizeof(StatisticState)/sizeof(StatisticState[0]);
-
-	const int	StatisticStateFailed	= 0,
-				StatisticStateSuccess	= 1;
-
-	// ----------------------------------------------------------------------------------------------
 
 	class SignalStatistic
 	{
@@ -298,24 +301,33 @@ namespace Metrology
 		explicit SignalStatistic(const Hash& signalHash) : m_signalHash (signalHash) {}
 		virtual ~SignalStatistic() {}
 
+		enum State
+		{
+			Failed,
+			Success,
+		};
+
 	private:
 
-		Hash					m_signalHash = 0;
+		Hash m_signalHash = UNDEFINED_HASH;
 
-		int						m_measureCount = 0;
-		int						m_state = StatisticStateSuccess;
+		int m_measureCount = 0;
+		State m_state = State::Success;
 
 	public:
 
-		Hash					signalHash() const { return m_signalHash; }
-		void					setSignalHash(const Hash& hash) { m_signalHash = hash; }
+		Hash signalHash() const { return m_signalHash; }
+		void setSignalHash(const Hash& hash) { m_signalHash = hash; }
 
-		int&					measureCount() { return m_measureCount; }
-		QString					measureCountStr() const;
+		int measureCount() const { return m_measureCount; }
+		void setMeasureCount(int count) { m_measureCount = count; }
+		QString measureCountStr() const;
 
-		int						state() const { return m_state; }
-		QString					stateStr() const;
-		void					setState(bool state) { m_state = state; }
+		State state() const { return m_state; }
+		void setState(State state) { m_state = state; }
+		QString stateStr() const;
+
+		bool isMeasured() const { return m_measureCount != 0; }
 	};
 
 	// ==============================================================================================
@@ -330,21 +342,24 @@ namespace Metrology
 
 	private:
 
-		SignalParam				m_param;
-		SignalState				m_state;
+		SignalParam m_param;
+		SignalState m_state;
 
-		SignalStatistic			m_statistic;
+		SignalStatistic m_statistic;
 
 	public:
 
-		SignalParam&			param() { return m_param; }
-		void					setParam(const Metrology::SignalParam& param) { m_param = param; }
+		SignalParam& param() { return m_param; }
+		const SignalParam& param() const { return m_param; }
+		void setParam(const Metrology::SignalParam& param) { m_param = param; }
 
-		SignalState&			state() { return m_state; }
-		void					setState(const Metrology::SignalState& state) { m_state = state; }
+		SignalState& state() { return m_state; }
+		const SignalState& state() const { return m_state; }
+		void setState(const Metrology::SignalState& state) { m_state = state; }
 
-		SignalStatistic&		statistic() { return m_statistic; }
-		void					setStatistic(const SignalStatistic& statistic) { m_statistic = statistic; }
+		SignalStatistic& statistic() { return m_statistic; }
+		const SignalStatistic& statistic() const { return m_statistic; }
+		void setStatistic(const SignalStatistic& statistic) { m_statistic = statistic; }
 	};
 
 	// ==============================================================================================

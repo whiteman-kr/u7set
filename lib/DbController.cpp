@@ -404,6 +404,7 @@ bool DbController::getProjectProperty(QString propertyName, bool* out, QWidget* 
 	if (out == nullptr)
 	{
 		assert(out);
+		return false;
 	}
 
 	QString propValueStr;
@@ -463,12 +464,14 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 	bool ok = true;
 
 	QString description;
+	bool safetyProject = true;
 	QString suppressWarningsStr;
 	bool uppercaseAppSignalId = true;
 	bool generateAppSignalXml = false;
 	bool generateExtarDebugInfo = false;
 
 	ok &= getProjectProperty(Db::ProjectProperty::Description, &description, parentWidget);
+	ok &= getProjectProperty(Db::ProjectProperty::SafetyProject, &safetyProject, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::SuppressWarnings, &suppressWarningsStr, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, &uppercaseAppSignalId, parentWidget);
 	ok &= getProjectProperty(Db::ProjectProperty::GenerateAppSignalsXml, &generateAppSignalXml, parentWidget);
@@ -482,6 +485,7 @@ bool DbController::getProjectProperties(DbProjectProperties* out, QWidget* paren
 	}
 
 	out->setDescription(description);
+	out->setSafetyProject(safetyProject);
 	out->setSuppressWarnings(suppressWarningsStr);
 	out->setUppercaseAppSignalId(uppercaseAppSignalId);
 	out->setGenerateAppSignalsXml(generateAppSignalXml);
@@ -500,6 +504,7 @@ bool DbController::setProjectProperties(const DbProjectProperties& in, QWidget* 
 	bool ok = true;
 
 	ok &= setProjectProperty(Db::ProjectProperty::Description, in.description(), parentWidget);
+	ok &= setProjectProperty(Db::ProjectProperty::SafetyProject, in.safetyProject(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::SuppressWarnings, in.suppressWarningsAsString(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::UppercaseAppSignalId, in.uppercaseAppSignalId(), parentWidget);
 	ok &= setProjectProperty(Db::ProjectProperty::GenerateAppSignalsXml, in.generateAppSignalsXml(), parentWidget);
