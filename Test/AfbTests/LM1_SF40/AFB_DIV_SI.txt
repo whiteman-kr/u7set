@@ -1,0 +1,29 @@
+test AFB_DIV_SI, AFB tests for AFB_DIV_SI element
+schema AFB_DIV_SI
+compatible MODULE_LM1SF00
+set #TUN_IN_SI1= 4 , #TUN_IN_SI2 = 2
+check #OUT_DIV_SI001 ==  2
+
+set #TUN_IN_SI1= -4 , #TUN_IN_SI2 = 2
+check #OUT_DIV_SI001 == -2
+
+set #TUN_IN_SI1= 2840 , #TUN_IN_SI2 = 287
+check #OUT_DIV_SI001 == 9 
+
+set #TUN_IN_SI1= 0 , #TUN_IN_SI2 = 2
+check #OUT_DIV_SI001 ==  0
+check #OUT_ZERO_DIV_SI001 == 1
+
+set #TUN_IN_SI1= 0 , #TUN_IN_SI2 = 0
+check #OUT_DIV_BY_ZERO_DIV_SI001 ==1
+
+set #TUN_IN_SI1= -12 , #TUN_IN_SI2 = 0
+check #OUT_DIV_BY_ZERO_DIV_SI001 == 1
+
+set #TUN_IN_SI1= 1 , #TUN_IN_SI2 = 0
+check #OUT_DIV_BY_ZERO_DIV_SI001 == 1 
+
+set #TUN_IN_SI1= 199 , #TUN_IN_SI2 = 0
+check #OUT_DIV_BY_ZERO_DIV_SI001 == 1 
+
+endtest

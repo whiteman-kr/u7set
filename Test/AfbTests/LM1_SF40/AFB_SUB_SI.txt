@@ -1,0 +1,22 @@
+test AFB_SUB_SI, AFB tests for AFB_SUB_SI element
+schema AFB_SUB_SI
+compatible MODULE_LM1SF00
+set #TUN_IN_SI1 = 2 , #TUN_IN_SI2 = 1
+check #OUT_SUB_SI001 == 1
+set #TUN_IN_SI1 = 20 , #TUN_IN_SI2 = 10
+check #OUT_SUB_SI001 == 10
+set #TUN_IN_SI1 = 2556 , #TUN_IN_SI2 = 4580
+check #OUT_SUB_SI001 == -2024
+set #TUN_IN_SI1 = 150, #TUN_IN_SI2 = 150
+check #OUT_SUB_SI001 == 0
+check #OUT_ZERO_SUB_SI001 == 1
+set #TUN_IN_SI1 = 0, #TUN_IN_SI2 = 0
+check #OUT_SUB_SI001 == 0
+check #OUT_ZERO_SUB_SI001 == 1
+
+//set #TUN_IN_SI1 = ±∞ , #TUN_IN_SI2 = ±∞  // верно задать значения
+// check #OUT_SUB_SI001 == число
+// check #OVERFLOW_SUB_SI001 ==1
+//set #TUN_IN_SI1 = NAN , #TUN_IN_SI2 == NAN
+// check #OUT_NAN_SUB_SI001 == 1
+endtest 

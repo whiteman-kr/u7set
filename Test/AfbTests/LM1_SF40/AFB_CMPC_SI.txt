@@ -1,0 +1,463 @@
+test AFB_CMPС_SI_EQ_0, AFB tests for CMPС_SI_EQ element
+schema AFB_CMPС_SI
+compatible MODULE_LM1SF00
+//const int SETPOINT = 0   // Added a constant with the value of SETPOINT, the same value is set on the scheme
+//const int DEAD_BAND = 100 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
+// set - hys <= in <= set + hys ; IMPORTRANT hys = hys / 2  // c RPCT hys передается уже посчитанный как hys = hys / 2  //  правило рабочее для динамических компараторов EQ и NE
+set #TUN_IN_SI1 = -78
+check #OUT_CMPC_SI_EQ001 == 0
+set #TUN_IN_SI1 = -51
+check #OUT_CMPC_SI_EQ001 == 0
+set #TUN_IN_SI1 = -50
+check #OUT_CMPC_SI_EQ001 == 1
+set #TUN_IN_SI1 = -49
+check #OUT_CMPC_SI_EQ001 == 1 
+set #TUN_IN_SI1 = 1
+check #OUT_CMPC_SI_EQ001 == 1
+set #TUN_IN_SI1 = 1
+check #OUT_CMPC_SI_EQ001 == 1
+set #TUN_IN_SI1 = 49
+check #OUT_CMPC_SI_EQ001 == 1
+set #TUN_IN_SI1 = 50
+check #OUT_CMPC_SI_EQ001 == 1
+set #TUN_IN_SI1 = 51
+check #OUT_CMPC_SI_EQ001 == 0
+set #TUN_IN_SI1 = 100
+check #OUT_CMPC_SI_EQ001 == 0
+set #TUN_IN_SI1 = 50
+check #OUT_CMPC_SI_EQ001 == 1
+endtest
+
+test AFB_CMPС_SI_EQ_24, AFB tests for CMPС_SI_EQ element
+schema AFB_CMPС_SI
+compatible MODULE_LM1SF00
+//const int SETPOINT = 24   // Added a constant with the value of SETPOINT, the same value is set on the scheme
+//const int DEAD_BAND = 100 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
+// set - hys <= in <= set + hys ; IMPORTRANT hys = hys / 2  // c RPCT hys передается уже посчитанный как hys = hys / 2  //  правило рабочее для динамических компараторов EQ и NE
+set #TUN_IN_SI2 = -100
+check #OUT_CMPC_SI_EQ002 == 0
+set #TUN_IN_SI2 = -99
+check #OUT_CMPC_SI_EQ002 ==  0
+set #TUN_IN_SI2 = -26
+check #OUT_CMPC_SI_EQ002 == 1
+set #TUN_IN_SI2 = 0
+check #OUT_CMPC_SI_EQ002 == 1
+set #TUN_IN_SI2 = 25
+check #OUT_CMPC_SI_EQ002 == 1
+set #TUN_IN_SI2 = 76
+check #OUT_CMPC_SI_EQ002 == 0
+set #TUN_IN_SI2 = 77
+check #OUT_CMPC_SI_EQ002 == 0
+set #TUN_IN_SI2 = 9999
+check #OUT_CMPC_SI_EQ002 == 0
+set #TUN_IN_SI2 = 100
+check #OUT_CMPC_SI_EQ002 == 0
+set #TUN_IN_SI2 = 77
+check #OUT_CMPC_SI_EQ002 == 0
+set #TUN_IN_SI2 = 76
+check #OUT_CMPC_SI_EQ002 == 0
+set #TUN_IN_SI2 = 75
+check #OUT_CMPC_SI_EQ002 == 0
+set #TUN_IN_SI2 = 0
+check #OUT_CMPC_SI_EQ002 == 1
+set #TUN_IN_SI2 = -26
+check #OUT_CMPC_SI_EQ002 == 1
+endtest
+
+test AFB_CMPС_SI_EQ_-24, AFB tests for CMPС_SI_EQ element
+schema AFB_CMPС_SI
+compatible MODULE_LM1SF00
+//const int SETPOINT = 0   // Added a constant with the value of SETPOINT, the same value is set on the scheme
+//const int DEAD_BAND = 100 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
+// set - hys <= in <= set + hys ; IMPORTRANT hys = hys / 2  // c RPCT hys передается уже посчитанный как hys = hys / 2  //  правило рабочее для динамических компараторов EQ и NE
+set #TUN_IN_SI3 = -78
+check #OUT_CMPC_SI_EQ003 == 0
+set #TUN_IN_SI3 = -74
+check #OUT_CMPC_SI_EQ003 == 1
+set #TUN_IN_SI3 = -49
+check #OUT_CMPC_SI_EQ003 == 1
+set #TUN_IN_SI3 = 1
+check #OUT_CMPC_SI_EQ003 == 1
+set #TUN_IN_SI3 = 1
+check #OUT_CMPC_SI_EQ003 == 1
+set #TUN_IN_SI3 = 25
+check #OUT_CMPC_SI_EQ003 == 1
+set #TUN_IN_SI3 = 26
+check #OUT_CMPC_SI_EQ003 == 1
+set #TUN_IN_SI3 = 27
+check #OUT_CMPC_SI_EQ003 == 0
+set #TUN_IN_SI3 = 26
+check #OUT_CMPC_SI_EQ003 == 1
+set #TUN_IN_SI3 = 1
+check #OUT_CMPC_SI_EQ003 == 1
+set #TUN_IN_SI3 = 51
+check #OUT_CMPC_SI_EQ003 == 0
+set #TUN_IN_SI3 = -74
+check #OUT_CMPC_SI_EQ003 == 1
+set #TUN_IN_SI3 = -75
+check #OUT_CMPC_SI_EQ003 == 0
+endtest
+
+
+test AFB_CMPС_SI_GR_0, AFB tests for CMPС_SI_GR element
+schema AFB_CMPС_SI
+compatible MODULE_LM1SF00
+const int SETPOINT = 0
+const int HYSTERESIS = 21
+set #TUN_IN_SI1 = 100
+check #OUT_CMPC_SI_GR001 == 1
+set #TUN_IN_SI1 = 75
+check #OUT_CMPC_SI_GR001 == 1
+set #TUN_IN_SI1 = 50
+check #OUT_CMPC_SI_GR001 == 1
+set #TUN_IN_SI1 = 25
+check #OUT_CMPC_SI_GR001 == 1
+set #TUN_IN_SI1 = 1
+check #OUT_CMPC_SI_GR001 == 1
+set #TUN_IN_SI1 = 0
+check #OUT_CMPC_SI_GR001 == 1
+set #TUN_IN_SI1 = -1
+check #OUT_CMPC_SI_GR001 == 1
+set #TUN_IN_SI1 = -10
+check #OUT_CMPC_SI_GR001 == 1
+set #TUN_IN_SI1 = -20
+check #OUT_CMPC_SI_GR001 == 1
+set #TUN_IN_SI1 = -21
+check #OUT_CMPC_SI_GR001 == 0
+set #TUN_IN_SI1 = -25
+check #OUT_CMPC_SI_GR001 == 0
+set #TUN_IN_SI1 = -26
+check #OUT_CMPC_SI_GR001 == 0
+set #TUN_IN_SI1 = -74
+check #OUT_CMPC_SI_GR001 == 0
+set #TUN_IN_SI1 = -75
+check #OUT_CMPC_SI_GR001 == 0
+set #TUN_IN_SI1 = -76
+check #OUT_CMPC_SI_GR001 == 0
+set #TUN_IN_SI1 = -99
+check #OUT_CMPC_SI_GR001 == 0
+set #TUN_IN_SI1 = -100
+check #OUT_CMPC_SI_GR001 == 0
+set #TUN_IN_SI1 = -101 
+check #OUT_CMPC_SI_GR001 == 0
+set #TUN_IN_SI1 = -100
+check #OUT_CMPC_SI_GR001 == 0
+endtest
+
+test AFB_CMPС_SI_GR_11, AFB tests for CMPС_SI_GR element
+schema AFB_CMPС_SI
+compatible MODULE_LM1SF00
+//const int SETPOINT = 11
+//const int HYSTERESIS = 21
+set #TUN_IN_SI2 = 100
+check #OUT_CMPC_SI_GR002 == 1
+set #TUN_IN_SI2 = 75
+check #OUT_CMPC_SI_GR002 == 1
+set #TUN_IN_SI2 = 50
+check #OUT_CMPC_SI_GR002 == 1
+set #TUN_IN_SI2 = 25
+check #OUT_CMPC_SI_GR002 == 1
+set #TUN_IN_SI2 = 11
+check #OUT_CMPC_SI_GR002 == 1
+set #TUN_IN_SI2 = 0
+check #OUT_CMPC_SI_GR002 == 1
+set #TUN_IN_SI2 = -1
+check #OUT_CMPC_SI_GR002 == 1
+set #TUN_IN_SI2 = -10
+check #OUT_CMPC_SI_GR002 == 0
+set #TUN_IN_SI2 = -11
+check #OUT_CMPC_SI_GR002 == 0
+set #TUN_IN_SI2 = -210
+check #OUT_CMPC_SI_GR002 == 0
+set #TUN_IN_SI2 = -20
+check #OUT_CMPC_SI_GR002 == 0
+set #TUN_IN_SI2 = -11
+check #OUT_CMPC_SI_GR002 == 0
+set #TUN_IN_SI2 = 0
+check #OUT_CMPC_SI_GR002 == 0
+set #TUN_IN_SI2 = 11
+check #OUT_CMPC_SI_GR002 == 0
+set #TUN_IN_SI2 = 12
+check #OUT_CMPC_SI_GR002 == 1
+set #TUN_IN_SI2 = 25
+check #OUT_CMPC_SI_GR002 == 1
+set #TUN_IN_SI2 = 100
+check #OUT_CMPC_SI_GR002 == 1
+set #TUN_IN_SI2 = 9999 
+check #OUT_CMPC_SI_GR002 == 1
+set #TUN_IN_SI2 = 99988899
+check #OUT_CMPC_SI_GR002 == 1
+endtest
+
+test AFB_CMPС_SI_GR_-11, AFB tests for CMPС_SI_GR element
+schema AFB_CMPС_SI
+compatible MODULE_LM1SF00
+//const int SETPOINT = -11
+//const int HYSTERESIS = 21
+set #TUN_IN_SI3 = 100
+check #OUT_CMPC_SI_GR003 == 1
+set #TUN_IN_SI3 = 75
+check #OUT_CMPC_SI_GR003 == 1
+set #TUN_IN_SI3 = 50
+check #OUT_CMPC_SI_GR003 == 1
+set #TUN_IN_SI3 = 25
+check #OUT_CMPC_SI_GR003 == 1
+set #TUN_IN_SI3 = 11
+check #OUT_CMPC_SI_GR003 == 1
+set #TUN_IN_SI3 = 0
+check #OUT_CMPC_SI_GR003 == 1
+set #TUN_IN_SI3 = -1
+check #OUT_CMPC_SI_GR003 == 1
+set #TUN_IN_SI3 = -31
+check #OUT_CMPC_SI_GR003 == 1
+set #TUN_IN_SI3 = -32
+check #OUT_CMPC_SI_GR003 == 0
+set #TUN_IN_SI3 = -210
+check #OUT_CMPC_SI_GR003 == 0
+set #TUN_IN_SI3 = -33
+check #OUT_CMPC_SI_GR003 == 0
+set #TUN_IN_SI3 = -32
+check #OUT_CMPC_SI_GR003 == 0
+set #TUN_IN_SI3 = -11
+check #OUT_CMPC_SI_GR003 == 0
+set #TUN_IN_SI3 = 11
+check #OUT_CMPC_SI_GR003 == 1
+set #TUN_IN_SI3 = 12
+check #OUT_CMPC_SI_GR003 == 1
+set #TUN_IN_SI3 = 25
+check #OUT_CMPC_SI_GR003 == 1
+set #TUN_IN_SI3 = 100
+check #OUT_CMPC_SI_GR003 == 1
+set #TUN_IN_SI3 = 9999 
+check #OUT_CMPC_SI_GR003 == 1
+set #TUN_IN_SI3 = 99988899
+check #OUT_CMPC_SI_GR003 == 1
+endtest
+
+test AFB_CMPС_SI_LS_0, AFB tests for CMPС_SI_LS element
+schema AFB_CMPС_SI
+compatible MODULE_LM1SF00
+//const int SETPOINT = 0
+//const int HYSTERESIS = 21
+//If IN < Set  out =1 (Set not include), IF IN => Set + hys  out = 0  else  out = previous state result value
+set #TUN_IN_SI1 = 100
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = 75
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = 50
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = 25
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = 1
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = 0
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = -1
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = -10
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = -20
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = -21
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = -25
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = -26
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = -74
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = -75
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = -76
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = -99
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = -100
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = -101 
+check #OUT_CMPC_SI_LS001 == 1
+set #TUN_IN_SI1 = -100
+check #OUT_CMPC_SI_LS001 == 1
+endtest
+
+test AFB_CMPС_SI_LS_11, AFB tests for CMPС_SI_LS element
+schema AFB_CMPС_SI
+compatible MODULE_LM1SF00
+//const int SETPOINT = 11
+//const int HYSTERESIS = 21
+set #TUN_IN_SI2 = -100
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = -75
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = -50
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = -1
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = 0
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = 1
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = 21
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = 22
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = 40
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = 22
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = 21
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = 1
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = 0
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = -1
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = -10
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = -25
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = -100
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = -9999 
+check #OUT_CMPC_SI_LS002 == 1
+set #TUN_IN_SI2 = -99988899
+check #OUT_CMPC_SI_LS002 == 1
+endtest
+
+test AFB_CMPС_SI_LS_-11, AFB tests for CMPС_SI_LS element
+schema AFB_CMPС_SI
+compatible MODULE_LM1SF00
+//const int SETPOINT = -11
+//const int HYSTERESIS = 21
+set #TUN_IN_SI3 = -100
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = -75
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = -50
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = -33
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = -32
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = -100
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = -99
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = -33
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = -12
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = -11
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = -10
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = -1
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = 0
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = 11
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = 12
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = 25
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = 100
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = 9999 
+check #OUT_CMPC_SI_LS003 == 0
+set #TUN_IN_SI3 = 99988899
+check #OUT_CMPC_SI_LS003 == 0
+endtest
+
+test AFB_CMPС_SI_NE_0, AFB tests for CMPС_SI_NE element
+schema AFB_CMPС_SI
+compatible MODULE_LM1SF00
+//const int SETPOINT = 0   // Added a constant with the value of SETPOINT, the same value is set on the scheme
+//const int DEAD_BAND = 100 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
+// set - hys/2 <= in <= set + hys/2  out = 0; //  правило рабочее для динамических компараторов EQ и NE
+set #TUN_IN_SI1 = 1500
+check #OUT_CMPC_SI_NE001 == 1
+set #TUN_IN_SI1 = 1300
+check #OUT_CMPC_SI_NE001 == 1
+set #TUN_IN_SI1 = 1250
+check #OUT_CMPC_SI_NE001 == 0
+set #TUN_IN_SI1 = 1249
+check #OUT_CMPC_SI_NE001 == 0 
+set #TUN_IN_SI1 = 100
+check #OUT_CMPC_SI_NE001 == 0
+set #TUN_IN_SI1 = 1
+check #OUT_CMPC_SI_NE001 == 0
+set #TUN_IN_SI1 = 0
+check #OUT_CMPC_SI_NE001 == 0
+set #TUN_IN_SI1 = -1
+check #OUT_CMPC_SI_NE001 == 0
+set #TUN_IN_SI1 = -1249
+check #OUT_CMPC_SI_NE001 == 0
+set #TUN_IN_SI1 = -1250
+check #OUT_CMPC_SI_NE001 == 0
+set #TUN_IN_SI1 = -1251
+check #OUT_CMPC_SI_NE001 == 1
+endtest
+
+test AFB_CMPС_SI_NE_800, AFB tests for CMPС_SI_NE element
+schema AFB_CMPС_SI
+compatible MODULE_LM1SF00
+//const int SETPOINT = 800  // Added a constant with the value of SETPOINT, the same value is set on the scheme
+//const int DEAD_BAND = 2500 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
+// set - hys/2 <= in <= set + hys/2  out = 0; //  правило рабочее для динамических компараторов EQ и NE
+set #TUN_IN_SI2 = 3000
+check #OUT_CMPC_SI_NE002 == 1
+set #TUN_IN_SI2 = 2500
+check #OUT_CMPC_SI_NE002 == 1
+set #TUN_IN_SI2 = 2051
+check #OUT_CMPC_SI_NE002 == 1
+set #TUN_IN_SI2 = 2050
+check #OUT_CMPC_SI_NE002 == 0 
+set #TUN_IN_SI2 = 2049
+check #OUT_CMPC_SI_NE002 == 0
+set #TUN_IN_SI2 = 100
+check #OUT_CMPC_SI_NE002 == 0
+set #TUN_IN_SI2 = 1
+check #OUT_CMPC_SI_NE002 == 0
+set #TUN_IN_SI2 = 0
+check #OUT_CMPC_SI_NE002 == 0
+set #TUN_IN_SI2 = -1
+check #OUT_CMPC_SI_NE002 == 0
+set #TUN_IN_SI2 = -449
+check #OUT_CMPC_SI_NE002 == 0
+set #TUN_IN_SI2 = -450
+check #OUT_CMPC_SI_NE002 == 0
+endtest
+
+test AFB_CMPС_SI_NE_-800, AFB tests for CMPС_SI_NE element
+schema AFB_CMPС_SI
+compatible MODULE_LM1SF00
+//const int SETPOINT = -800  // Added a constant with the value of SETPOINT, the same value is set on the scheme
+//const int DEAD_BAND = 2500 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
+// set - hys/2 <= in <= set + hys/2  out = 0; //  правило рабочее для динамических компараторов EQ и NE
+set #TUN_IN_SI3 = 3000
+check #OUT_CMPC_SI_NE003 == 1
+set #TUN_IN_SI3 = 1000
+check #OUT_CMPC_SI_NE003 == 1
+set #TUN_IN_SI3 = 451
+check #OUT_CMPC_SI_NE003 == 1
+set #TUN_IN_SI3 = 450
+check #OUT_CMPC_SI_NE003 == 0 
+set #TUN_IN_SI3 = 449
+check #OUT_CMPC_SI_NE003 == 0
+set #TUN_IN_SI3 = 1
+check #OUT_CMPC_SI_NE003 == 0
+set #TUN_IN_SI3 = 0
+check #OUT_CMPC_SI_NE003 == 0
+set #TUN_IN_SI3 = -1
+check #OUT_CMPC_SI_NE003 == 0
+set #TUN_IN_SI3 = -100
+check #OUT_CMPC_SI_NE003 == 0
+set #TUN_IN_SI3 = -2049
+check #OUT_CMPC_SI_NE003 == 0
+set #TUN_IN_SI3 = -2050
+check #OUT_CMPC_SI_NE003 == 0
+set #TUN_IN_SI3 = -2051
+check #OUT_CMPC_SI_NE003 == 1
+endtest

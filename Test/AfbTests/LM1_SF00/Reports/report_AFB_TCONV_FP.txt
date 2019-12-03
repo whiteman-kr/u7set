@@ -1,0 +1,128 @@
+Report from: 20-11-2019 11:02:53
+
+Test File: AFB_TCONV_FP.txt
+
+Test AFB_TCONV_FP1, AFB tests for AFB_TCONV_FP element
+    Set #TUN_IN_FP1=0.0
+    Check #OUT_TCONV_FP_SI1=0 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    Set #TUN_IN_FP1=1.1
+    Check #OUT_TCONV_FP_SI1=1 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    Set #TUN_IN_FP1=1.399
+    Check #OUT_TCONV_FP_SI1=1 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    Set #TUN_IN_FP1=1.4
+    Check #OUT_TCONV_FP_SI1=1 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    Set #TUN_IN_FP1=1.41
+    Check #OUT_TCONV_FP_SI1=1 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    Set #TUN_IN_FP1=1.499
+    Check #OUT_TCONV_FP_SI1=1 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    Set #TUN_IN_FP1=1.5
+    Check #OUT_TCONV_FP_SI1=2 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    Set #TUN_IN_FP1=1.9
+    Check #OUT_TCONV_FP_SI1=2 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    Set #TUN_IN_FP1=2.2
+    Check #OUT_TCONV_FP_SI1=2 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    Set #TUN_IN_FP1=2.5
+    Check #OUT_TCONV_FP_SI1=2 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    Set #TUN_IN_FP1=2.55
+    Check #OUT_TCONV_FP_SI1=3 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    Set #TUN_IN_FP1=2.99
+    Check #OUT_TCONV_FP_SI1=3 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    Set #TUN_IN_FP1=100.99
+    Check #OUT_TCONV_FP_SI1=101 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    Set #TUN_IN_FP1=0.99
+    Check #OUT_TCONV_FP_SI1=1 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    // UF
+    Set #TUN_IN_FP1=0.333
+    Check #OUT_TCONV_FP_SI1=0 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=1 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    Set #TUN_IN_FP1=0.1
+    Check #OUT_TCONV_FP_SI1=0 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=1 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    Set #TUN_IN_FP1=0.268
+    Check #OUT_TCONV_FP_SI1=0 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=1 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    // -
+    Set #TUN_IN_FP1=-0.333
+    Check #OUT_TCONV_FP_SI1=0 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=1 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    Set #TUN_IN_FP1=-1.99
+    Check #OUT_TCONV_FP_SI1=-2 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    Set #TUN_IN_FP1=-255.65
+    Check #OUT_TCONV_FP_SI1=-256 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    // Nan
+    // 2**31
+    Set #TUN_IN_FP1=-2147483648.0
+    Check #OUT_TCONV_FP_SI1=-2147483648 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    //!!!
+    Set #TUN_IN_FP1=2147483648.0
+    Check #OUT_TCONV_FP_SI1=2147483646 - Fail    [ received: 2147483647 ]
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=0 - Fail    [ received: 1 ]
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+    //!!!
+    Set #TUN_IN_FP1=2147483648.0
+    Check #OUT_TCONV_FP_SI1=2147483647 - Ok
+    Check #OUT_OVER_FLOW_TCONV_FP_SI=1 - Ok
+    Check #OUT_UNDERFLOW_FP_SI=0 - Ok
+    Check #OUT_NAN_TCONV_FP_SI=0 - Ok
+Endtest AFB_TCONV_FP1 - error(s): 2
+

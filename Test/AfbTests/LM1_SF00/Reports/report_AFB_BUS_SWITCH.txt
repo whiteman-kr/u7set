@@ -1,0 +1,54 @@
+Report from: 20-11-2019 12:14:06
+
+Test File: AFB_BUS_SWITCH.txt
+
+Test AFB_BUS_SWITCH1, AFB tests for BUS_SWITCH element
+    Set #TUN_ANALOG_BUS_01_INP01=0.0
+    Set #TUN_ANALOG_BUS_02_INP01=0.0
+    Set #TUN_ANALOG_BUS_03_INP01=0.0
+    Set #TUN_ANALOG_BUS_04_INP01=0.0
+    Set #TUN_ANALOG_BUS_05_INP01=0.0
+    //
+    Set #TUN_ANALOG_BUS_01_INP02=0.0
+    Set #TUN_ANALOG_BUS_02_INP02=0.0
+    Set #TUN_ANALOG_BUS_03_INP02=0.0
+    Set #TUN_ANALOG_BUS_04_INP02=0.0
+    Set #TUN_ANALOG_BUS_05_INP02=0.0
+    //
+    Set #TUN_ANALOG_BUS_01_INP03=1.1
+    Set #TUN_ANALOG_BUS_02_INP03=1.0
+    Set #TUN_ANALOG_BUS_03_INP03=1.0
+    Set #TUN_ANALOG_BUS_04_INP03=1.0
+    Set #TUN_ANALOG_BUS_05_INP03=1.0
+    Check #OUT_BUS_SWITCH_01=0.0 - Fail    [ received: 1.1 ]
+    Check #OUT_BUS_SWITCH_02=0.0 - Fail    [ received: 1.0 ]
+    Check #OUT_BUS_SWITCH_03=0.0 - Fail    [ received: 1.0 ]
+    Check #OUT_BUS_SWITCH_04=0.0 - Fail    [ received: 1.0 ]
+    Check #OUT_BUS_SWITCH_05=0.0 - Fail    [ received: 1.0 ]
+Endtest AFB_BUS_SWITCH1 - error(s): 5
+
+Test AFB_BUS_SWITCH2, AFB tests for BUS_SWITCH element
+    Set #TUN_ANALOG_BUS_01_INP01=1.0
+    Set #TUN_ANALOG_BUS_02_INP01=1.0
+    Set #TUN_ANALOG_BUS_03_INP01=1.0
+    Set #TUN_ANALOG_BUS_04_INP01=1.0
+    Set #TUN_ANALOG_BUS_05_INP01=1.0
+    //
+    Set #TUN_ANALOG_BUS_01_INP02=0.0
+    Set #TUN_ANALOG_BUS_02_INP02=0.0
+    Set #TUN_ANALOG_BUS_03_INP02=0.0
+    Set #TUN_ANALOG_BUS_04_INP02=0.0
+    Set #TUN_ANALOG_BUS_05_INP02=0.0
+    //
+    Set #TUN_ANALOG_BUS_01_INP03=1.0
+    Set #TUN_ANALOG_BUS_02_INP03=1.0
+    Set #TUN_ANALOG_BUS_03_INP03=1.0
+    Set #TUN_ANALOG_BUS_04_INP03=1.0
+    Set #TUN_ANALOG_BUS_05_INP03=1.0
+    Check #OUT_BUS_SWITCH_01=1.0 - Ok
+    Check #OUT_BUS_SWITCH_02=1.0 - Ok
+    Check #OUT_BUS_SWITCH_03=1.0 - Ok
+    Check #OUT_BUS_SWITCH_04=1.0 - Ok
+    Check #OUT_BUS_SWITCH_05=1.0 - Ok
+Endtest AFB_BUS_SWITCH2 - Ok
+

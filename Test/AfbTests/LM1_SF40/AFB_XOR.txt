@@ -1,0 +1,78 @@
+test AFB_2XOR, 2XOR function test // The rule is: for binary addition, the result is 0 if both operands are equal; in all other cases, the result is 1
+schema AFB_XOR
+compatible MODULE_LM1SF00
+set #TUN_DSCR1 = 0, #TUN_DSCR2 = 0
+check #2XOR_OUT == 0
+set #TUN_DSCR1 = 1, #TUN_DSCR2 = 0
+check #2XOR_OUT == 1
+set #TUN_DSCR1 = 0, #TUN_DSCR2 = 1
+check #2XOR_OUT == 1
+set #TUN_DSCR1 = 1, #TUN_DSCR2 = 1
+check #2XOR_OUT == 0
+endtest
+
+//test AFB_3XOR, 3XOR function test // The rule: for ternary addition, the result is 0 if there are no operands equal to 1, or their even number.
+//schema AFB_XOR
+//compatible MODULE_LM1SF00
+//set #TUN_DSCR1 = 0, #TUN_DSCR2 = 0,#TUN_DSCR3 = 0
+//check #3XOR_OUT == 0
+//set #TUN_DSCR1 = 0, #TUN_DSCR2 = 0,#TUN_DSCR3 = 1
+//check #3XOR_OUT == 1
+//set #TUN_DSCR1 = 0, #TUN_DSCR2 = 1,#TUN_DSCR3 = 0
+//check #3XOR_OUT == 1
+//set #TUN_DSCR1 = 1, #TUN_DSCR2 = 0,#TUN_DSCR3 = 0
+//check #3XOR_OUT == 1
+//endtest
+
+test AFB_4XOR, 4XOR function test // The rule: for ternary addition, the result is 0 if there are no operands equal to 1, or their even number.
+schema AFB_XOR
+compatible MODULE_LM1SF00
+set #TUN_DSCR1 = 0, #TUN_DSCR2 = 0,#TUN_DSCR3 = 0, #TUN_DSCR4 = 0
+check #4XOR_OUT == 0
+set #TUN_DSCR1 = 1, #TUN_DSCR2 = 0,#TUN_DSCR3 = 0, #TUN_DSCR4 = 0
+check #4XOR_OUT == 1
+set #TUN_DSCR1 = 1, #TUN_DSCR2 = 1,#TUN_DSCR3 = 0, #TUN_DSCR4 = 0
+check #4XOR_OUT == 0
+set #TUN_DSCR1 = 1, #TUN_DSCR2 = 1,#TUN_DSCR3 = 1, #TUN_DSCR4 = 0
+check #4XOR_OUT == 1
+set #TUN_DSCR1 = 1, #TUN_DSCR2 = 1,#TUN_DSCR3 = 1, #TUN_DSCR4 = 1
+check #4XOR_OUT == 0
+endtest
+
+test AFB_7XOR, 7XOR function test 
+schema AFB_XOR
+compatible MODULE_LM1SF00
+set #TUN_DSCR1 = 0, #TUN_DSCR2 = 0,#TUN_DSCR3 = 0, #TUN_DSCR4 = 0, #TUN_DSCR5 = 0,#TUN_DSCR6 = 0, #TUN_DSCR7 = 0
+check #7XOR_OUT == 0
+set #TUN_DSCR1 = 1, #TUN_DSCR2 = 1,#TUN_DSCR3 = 1, #TUN_DSCR4 = 1, #TUN_DSCR5 = 1,#TUN_DSCR6 = 1, #TUN_DSCR7 = 1
+check #7XOR_OUT == 1
+set #TUN_DSCR1 = 1, #TUN_DSCR2 = 0,#TUN_DSCR3 = 1, #TUN_DSCR4 = 0, #TUN_DSCR5 = 1,#TUN_DSCR6 = 0, #TUN_DSCR7 = 1
+check #7XOR_OUT == 0
+set #TUN_DSCR1 = 0, #TUN_DSCR2 = 1,#TUN_DSCR3 = 0, #TUN_DSCR4 = 1, #TUN_DSCR5 = 0,#TUN_DSCR6 = 1, #TUN_DSCR7 = 0
+check #7XOR_OUT == 1
+set #TUN_DSCR1 = 1, #TUN_DSCR2 = 0,#TUN_DSCR3 = 0, #TUN_DSCR4 = 0, #TUN_DSCR5 = 0,#TUN_DSCR6 = 0 , #TUN_DSCR7 = 1
+check #7XOR_OUT == 0
+set #TUN_DSCR1 = 0, #TUN_DSCR2 = 1,#TUN_DSCR3 = 1, #TUN_DSCR4 = 1, #TUN_DSCR5 = 1,#TUN_DSCR6 = 0 , #TUN_DSCR7 = 0
+check #7XOR_OUT == 0
+set #TUN_DSCR1 = 1, #TUN_DSCR2 = 1,#TUN_DSCR3 = 1, #TUN_DSCR4 = 1, #TUN_DSCR5 = 1,#TUN_DSCR6 = 1 , #TUN_DSCR7 = 0
+check #7XOR_OUT == 0
+set #TUN_DSCR1 = 0, #TUN_DSCR2 = 0,#TUN_DSCR3 = 0, #TUN_DSCR4 = 0, #TUN_DSCR5 = 0,#TUN_DSCR6 = 0 , #TUN_DSCR7 = 1
+check #7XOR_OUT == 1
+endtest
+
+test AFB_16XOR, 16XOR function test 
+schema AFB_XOR
+compatible MODULE_LM1SF00
+set #TUN_DSCR1 = 0, #TUN_DSCR2 = 0,#TUN_DSCR3 = 0, #TUN_DSCR4 = 0, #TUN_DSCR5 = 0,#TUN_DSCR6 = 0, #TUN_DSCR7 = 0,#TUN_DSCR8 = 0, #TUN_DSCR9 = 0,#TUN_DSCR10 = 0, #TUN_DSCR11 = 0, #TUN_DSCR12 = 0, #TUN_DSCR13 = 0, #TUN_DSCR14 = 0, #TUN_DSCR15 = 0, #TUN_DSCR16 = 0
+check #16XOR_OUT == 0
+set #TUN_DSCR1 = 1, #TUN_DSCR2 = 0,#TUN_DSCR3 = 0, #TUN_DSCR4 = 0, #TUN_DSCR5 = 0,#TUN_DSCR6 = 0, #TUN_DSCR7 = 0,#TUN_DSCR8 = 0, #TUN_DSCR9 = 0,#TUN_DSCR10 = 0, #TUN_DSCR11 = 0, #TUN_DSCR12 = 0, #TUN_DSCR13 = 0, #TUN_DSCR14 = 0, #TUN_DSCR15 = 0, #TUN_DSCR16 = 0
+check #16XOR_OUT == 1
+set #TUN_DSCR1 = 1, #TUN_DSCR2 = 1,#TUN_DSCR3 = 1, #TUN_DSCR4 = 1, #TUN_DSCR5 = 1,#TUN_DSCR6 = 1, #TUN_DSCR7 = 1,#TUN_DSCR8 = 1, #TUN_DSCR9 = 1,#TUN_DSCR10 = 1, #TUN_DSCR11 = 1, #TUN_DSCR12 = 1, #TUN_DSCR13 = 1, #TUN_DSCR14 = 1, #TUN_DSCR15 = 1, #TUN_DSCR16 = 0
+check #16XOR_OUT == 1
+set #TUN_DSCR1 = 1, #TUN_DSCR2 = 0,#TUN_DSCR3 = 0, #TUN_DSCR4 = 0, #TUN_DSCR5 = 0,#TUN_DSCR6 = 0, #TUN_DSCR7 = 0,#TUN_DSCR8 = 0, #TUN_DSCR9 = 0,#TUN_DSCR10 = 0, #TUN_DSCR11 = 0, #TUN_DSCR12 = 0, #TUN_DSCR13 = 0, #TUN_DSCR14 = 0, #TUN_DSCR15 = 0, #TUN_DSCR16 = 1
+check #16XOR_OUT == 0
+set #TUN_DSCR1 = 1, #TUN_DSCR2 = 0,#TUN_DSCR3 = 0, #TUN_DSCR4 = 0, #TUN_DSCR5 = 1,#TUN_DSCR6 = 1, #TUN_DSCR7 = 0,#TUN_DSCR8 = 0, #TUN_DSCR9 = 0,#TUN_DSCR10 = 0, #TUN_DSCR11 = 0, #TUN_DSCR12 = 1, #TUN_DSCR13 = 0, #TUN_DSCR14 = 0, #TUN_DSCR15 = 0, #TUN_DSCR16 = 0
+check #16XOR_OUT == 0
+set #TUN_DSCR1 = 0, #TUN_DSCR2 = 0,#TUN_DSCR3 = 0, #TUN_DSCR4 = 0, #TUN_DSCR5 = 0,#TUN_DSCR6 = 0, #TUN_DSCR7 = 0,#TUN_DSCR8 = 0, #TUN_DSCR9 = 0,#TUN_DSCR10 = 0, #TUN_DSCR11 = 0, #TUN_DSCR12 = 1, #TUN_DSCR13 = 1, #TUN_DSCR14 = 1, #TUN_DSCR15 = 1, #TUN_DSCR16 = 1
+check #16XOR_OUT == 1
+endtest

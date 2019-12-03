@@ -1,0 +1,291 @@
+Report from: 22-11-2019 15:00:32
+
+Test AFB_2AND, 2AND function test (MODULE_LM1SF00)
+    Set #TUN_DSCR1=0
+    Set #TUN_DSCR2=0
+    Check #2AND_OUT=0 - Ok
+    Set #TUN_DSCR1=1
+    Set #TUN_DSCR2=0
+    Check #2AND_OUT=0 - Ok
+    Set #TUN_DSCR1=0
+    Set #TUN_DSCR2=1
+    Check #2AND_OUT=0 - Ok
+    Set #TUN_DSCR1=1
+    Set #TUN_DSCR2=1
+    Check #2AND_OUT=1 - Ok
+Endtest AFB_2AND - Ok
+
+Test AFB_7AND, 7AND function test (MODULE_LM1SF00)
+    Set #TUN_DSCR1=0
+    Set #TUN_DSCR2=0
+    Set #TUN_DSCR3=0
+    Set #TUN_DSCR4=0
+    Set #TUN_DSCR5=0
+    Set #TUN_DSCR6=0
+    Set #TUN_DSCR7=0
+    Check #7AND_OUT=0 - Ok
+    Set #TUN_DSCR1=1
+    Set #TUN_DSCR2=1
+    Set #TUN_DSCR3=0
+    Set #TUN_DSCR4=0
+    Set #TUN_DSCR5=0
+    Set #TUN_DSCR6=0
+    Set #TUN_DSCR7=0
+    Check #7AND_OUT=0 - Ok
+    Set #TUN_DSCR1=0
+    Set #TUN_DSCR2=0
+    Set #TUN_DSCR3=0
+    Set #TUN_DSCR4=0
+    Set #TUN_DSCR5=0
+    Set #TUN_DSCR6=0
+    Set #TUN_DSCR7=1
+    Check #7AND_OUT=0 - Ok
+    Set #TUN_DSCR1=1
+    Set #TUN_DSCR2=1
+    Set #TUN_DSCR3=1
+    Set #TUN_DSCR4=1
+    Set #TUN_DSCR5=1
+    Set #TUN_DSCR6=1
+    Set #TUN_DSCR7=0
+    Check #7AND_OUT=0 - Ok
+    Set #TUN_DSCR1=0
+    Set #TUN_DSCR2=0
+    Set #TUN_DSCR3=0
+    Set #TUN_DSCR4=0
+    Set #TUN_DSCR5=1
+    Set #TUN_DSCR6=1
+    Set #TUN_DSCR7=1
+    Check #7AND_OUT=0 - Ok
+    Set #TUN_DSCR1=1
+    Set #TUN_DSCR2=1
+    Set #TUN_DSCR3=1
+    Set #TUN_DSCR4=1
+    Set #TUN_DSCR5=1
+    Set #TUN_DSCR6=1
+    Set #TUN_DSCR7=1
+    Check #7AND_OUT=1 - Ok
+Endtest AFB_7AND - Ok
+
+Test AFB_11AND, 11AND function test (MODULE_LM1SF00)
+    Set #TUN_DSCR1=0
+    Set #TUN_DSCR2=0
+    Set #TUN_DSCR3=0
+    Set #TUN_DSCR4=0
+    Set #TUN_DSCR5=0
+    Set #TUN_DSCR6=0
+    Set #TUN_DSCR7=0
+    Set #TUN_DSCR8=0
+    Set #TUN_DSCR9=0
+    Set #TUN_DSCR10=0
+    Set #TUN_DSCR11=0
+    // на все 11 входов подается 0
+    Check #11AND_OUT=0 - Ok
+    Set #TUN_DSCR1=1
+    Set #TUN_DSCR2=1
+    Set #TUN_DSCR3=1
+    Set #TUN_DSCR4=1
+    Set #TUN_DSCR5=1
+    Set #TUN_DSCR6=0
+    Set #TUN_DSCR7=0
+    Set #TUN_DSCR8=0
+    Set #TUN_DSCR9=0
+    Set #TUN_DSCR10=0
+    Set #TUN_DSCR11=0
+    // на первые 5 из 11 входов подается 1
+    Check #11AND_OUT=0 - Ok
+    Set #TUN_DSCR1=0
+    Set #TUN_DSCR2=0
+    Set #TUN_DSCR3=0
+    Set #TUN_DSCR4=0
+    Set #TUN_DSCR5=0
+    Set #TUN_DSCR6=0
+    Set #TUN_DSCR7=0
+    Set #TUN_DSCR8=1
+    Set #TUN_DSCR9=1
+    Set #TUN_DSCR10=1
+    Set #TUN_DSCR11=1
+    // подаем 0 на входы 1-6 подаем 1 на входы 7-11
+    Check #11AND_OUT=0 - Ok
+    Set #TUN_DSCR1=1
+    Set #TUN_DSCR2=1
+    Set #TUN_DSCR3=1
+    Set #TUN_DSCR4=1
+    Set #TUN_DSCR5=1
+    Set #TUN_DSCR6=1
+    Set #TUN_DSCR7=1
+    Set #TUN_DSCR8=1
+    Set #TUN_DSCR9=1
+    Set #TUN_DSCR10=1
+    Set #TUN_DSCR11=0
+    // на 10 из 11 входов подается 1
+    Check #11AND_OUT=0 - Ok
+    Set #TUN_DSCR1=1
+    Set #TUN_DSCR2=0
+    Set #TUN_DSCR3=1
+    Set #TUN_DSCR4=0
+    Set #TUN_DSCR5=1
+    Set #TUN_DSCR6=0
+    Set #TUN_DSCR7=1
+    Set #TUN_DSCR8=0
+    Set #TUN_DSCR9=1
+    Set #TUN_DSCR10=0
+    Set #TUN_DSCR11=1
+    // подаем 1 на каждый нечетный вход
+    Check #11AND_OUT=0 - Ok
+    Set #TUN_DSCR1=0
+    Set #TUN_DSCR2=1
+    Set #TUN_DSCR3=0
+    Set #TUN_DSCR4=1
+    Set #TUN_DSCR5=0
+    Set #TUN_DSCR6=1
+    Set #TUN_DSCR7=0
+    Set #TUN_DSCR8=1
+    Set #TUN_DSCR9=0
+    Set #TUN_DSCR10=1
+    Set #TUN_DSCR11=0
+    // подаем 1 на каждый четный вход
+    Check #11AND_OUT=0 - Ok
+    Set #TUN_DSCR1=1
+    Set #TUN_DSCR2=1
+    Set #TUN_DSCR3=1
+    Set #TUN_DSCR4=1
+    Set #TUN_DSCR5=1
+    Set #TUN_DSCR6=1
+    Set #TUN_DSCR7=1
+    Set #TUN_DSCR8=1
+    Set #TUN_DSCR9=1
+    Set #TUN_DSCR10=1
+    Set #TUN_DSCR11=1
+    // подаем 1 на каждый вход
+    Check #11AND_OUT=1 - Ok
+Endtest AFB_11AND - Ok
+
+Test AFB_16AND, 16AND function test (MODULE_LM1SF00)
+    Set #TUN_DSCR1=0
+    Set #TUN_DSCR2=0
+    Set #TUN_DSCR3=0
+    Set #TUN_DSCR4=0
+    Set #TUN_DSCR5=0
+    Set #TUN_DSCR6=0
+    Set #TUN_DSCR7=0
+    Set #TUN_DSCR8=0
+    Set #TUN_DSCR9=0
+    Set #TUN_DSCR10=0
+    Set #TUN_DSCR11=0
+    Set #TUN_DSCR12=0
+    Set #TUN_DSCR13=0
+    Set #TUN_DSCR14=0
+    Set #TUN_DSCR15=0
+    Set #TUN_DSCR16=0
+    // на все 16 входов подается 0
+    Check #16AND_OUT=0 - Ok
+    Set #TUN_DSCR1=1
+    Set #TUN_DSCR2=1
+    Set #TUN_DSCR3=1
+    Set #TUN_DSCR4=1
+    Set #TUN_DSCR5=1
+    Set #TUN_DSCR6=1
+    Set #TUN_DSCR7=1
+    Set #TUN_DSCR8=0
+    Set #TUN_DSCR9=0
+    Set #TUN_DSCR10=0
+    Set #TUN_DSCR11=0
+    Set #TUN_DSCR12=0
+    Set #TUN_DSCR13=0
+    Set #TUN_DSCR14=0
+    Set #TUN_DSCR15=0
+    Set #TUN_DSCR16=0
+    // на первые 8 из 16 входов подается 1
+    Check #16AND_OUT=0 - Ok
+    Set #TUN_DSCR1=0
+    Set #TUN_DSCR2=0
+    Set #TUN_DSCR3=0
+    Set #TUN_DSCR4=0
+    Set #TUN_DSCR5=0
+    Set #TUN_DSCR6=0
+    Set #TUN_DSCR7=0
+    Set #TUN_DSCR8=1
+    Set #TUN_DSCR9=1
+    Set #TUN_DSCR10=0
+    Set #TUN_DSCR11=1
+    Set #TUN_DSCR12=1
+    Set #TUN_DSCR13=1
+    Set #TUN_DSCR14=1
+    Set #TUN_DSCR15=1
+    Set #TUN_DSCR16=1
+    // подаем 0 на входы 1-8 подаем 1 на входы 7-16
+    Check #16AND_OUT=0 - Ok
+    Set #TUN_DSCR1=1
+    Set #TUN_DSCR2=1
+    Set #TUN_DSCR3=1
+    Set #TUN_DSCR4=1
+    Set #TUN_DSCR5=1
+    Set #TUN_DSCR6=1
+    Set #TUN_DSCR7=1
+    Set #TUN_DSCR8=1
+    Set #TUN_DSCR9=1
+    Set #TUN_DSCR10=1
+    Set #TUN_DSCR11=1
+    Set #TUN_DSCR12=1
+    Set #TUN_DSCR13=1
+    Set #TUN_DSCR14=1
+    Set #TUN_DSCR15=1
+    Set #TUN_DSCR16=0
+    // на 15 из 16 входов подаем 1
+    Check #16AND_OUT=0 - Ok
+    Set #TUN_DSCR1=1
+    Set #TUN_DSCR2=0
+    Set #TUN_DSCR3=1
+    Set #TUN_DSCR4=0
+    Set #TUN_DSCR5=1
+    Set #TUN_DSCR6=0
+    Set #TUN_DSCR7=1
+    Set #TUN_DSCR8=0
+    Set #TUN_DSCR9=1
+    Set #TUN_DSCR10=0
+    Set #TUN_DSCR11=1
+    Set #TUN_DSCR12=0
+    Set #TUN_DSCR13=1
+    Set #TUN_DSCR14=0
+    Set #TUN_DSCR15=1
+    Set #TUN_DSCR16=0
+    // подаем 1 на каждый нечетный вход
+    Check #16AND_OUT=0 - Ok
+    Set #TUN_DSCR1=0
+    Set #TUN_DSCR2=1
+    Set #TUN_DSCR3=0
+    Set #TUN_DSCR4=1
+    Set #TUN_DSCR5=0
+    Set #TUN_DSCR6=1
+    Set #TUN_DSCR7=0
+    Set #TUN_DSCR8=1
+    Set #TUN_DSCR9=0
+    Set #TUN_DSCR10=1
+    Set #TUN_DSCR11=0
+    Set #TUN_DSCR12=1
+    Set #TUN_DSCR13=0
+    Set #TUN_DSCR14=1
+    Set #TUN_DSCR15=0
+    Set #TUN_DSCR16=1
+    // подаем 1 на каждый четный вход
+    Check #16AND_OUT=0 - Ok
+    Set #TUN_DSCR1=1
+    Set #TUN_DSCR2=1
+    Set #TUN_DSCR3=1
+    Set #TUN_DSCR4=1
+    Set #TUN_DSCR5=1
+    Set #TUN_DSCR6=1
+    Set #TUN_DSCR7=1
+    Set #TUN_DSCR8=1
+    Set #TUN_DSCR9=1
+    Set #TUN_DSCR10=1
+    Set #TUN_DSCR11=1
+    Set #TUN_DSCR12=1
+    Set #TUN_DSCR13=1
+    Set #TUN_DSCR14=1
+    Set #TUN_DSCR15=1
+    Set #TUN_DSCR16=1
+    // подаем 1 на каждый вход
+    Check #16AND_OUT=1 - Ok
+Endtest AFB_16AND - Ok
+
