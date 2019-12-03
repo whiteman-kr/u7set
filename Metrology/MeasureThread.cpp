@@ -139,7 +139,7 @@ bool MeasureThread::signalIsMeasured(const MeasureSignal& activeSignal, QString&
 		}
 
 		Metrology::SignalStatistic ss = pMeasureView->table().m_measureBase.getSignalStatistic(pMetrologySignal->param().hash());
-		if (ss.measureCount() != 0)
+		if (ss.isMeasured() == true)
 		{
 			signalID.append(pMetrologySignal->param().customAppSignalID() + "\n");
 

@@ -166,7 +166,7 @@ void StatisticsStateDelegate::paint(QPainter *painter, const QStyleOptionViewIte
 		return;
 	}
 
-	if (pSignal->statistic().measureCount() == 0)
+	if (pSignal->statistic().isMeasured() == false)
 	{
 		QStyledItemDelegate::paint(painter, option, index);
 		return;
@@ -186,11 +186,11 @@ void StatisticsStateDelegate::paint(QPainter *painter, const QStyleOptionViewIte
 
 	switch (pSignal->statistic().state())
 	{
-		case Metrology::StatisticStateFailed:
+		case Metrology::SignalStatistic::State::Failed:
 			painter->fillRect(option.rect, theOptions.measureView().colorErrorLimit());
 			//painter->drawImage(QPointF(option.rect.right() - 20, option.rect.top()), QImage(":/icons/CheckRed.png"));
 			break;
-		case Metrology::StatisticStateSuccess:
+		case Metrology::SignalStatistic::State::Success:
 			painter->fillRect(option.rect, theOptions.measureView().colorNotError());
 			painter->drawImage(QPointF(option.rect.right() - 20, option.rect.top()), QImage(":/icons/CheckGreen.png"));
 			break;

@@ -139,12 +139,12 @@ void StatisticBase::updateSignalsState(QTableView* pView)
 			Metrology::SignalStatistic ss = pMeasureView->table().m_measureBase.getSignalStatistic(pSignal->param().hash());
 			pSignal->setStatistic(ss);
 
-			if (pSignal->statistic().measureCount() != 0)
+			if (pSignal->statistic().isMeasured() == true)
 			{
 				m_measuredCount++;
 			}
 
-			if (pSignal->statistic().state() == Metrology::StatisticStateFailed)
+			if (pSignal->statistic().state() == Metrology::SignalStatistic::State::Failed)
 			{
 				m_invalidMeasureCount ++;
 			}
@@ -193,12 +193,12 @@ void StatisticBase::updateSignalState(QTableView* pView, Hash signalHash)
 				continue;
 			}
 
-			if (pSignal->statistic().measureCount() != 0)
+			if (pSignal->statistic().isMeasured() == true)
 			{
 				m_measuredCount++;
 			}
 
-			if (pSignal->statistic().state() == Metrology::StatisticStateFailed)
+			if (pSignal->statistic().state() == Metrology::SignalStatistic::State::Failed)
 			{
 				m_invalidMeasureCount ++;
 			}
