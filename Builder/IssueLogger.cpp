@@ -3598,29 +3598,6 @@ namespace Builder
 				  QString(tr("Connection with ID %1 is not found.")).arg(connectionID));
 	}
 
-	/// IssueCode: ALC5041
-	///
-	/// IssueType: Error
-	///
-	/// Title: Signal %1 exists in LM %2. No receivers needed.
-	///
-	/// Parameters:
-	///		%1 application signal ID
-	///		%2 LM's equipmentID
-	///
-	/// Description:
-	///		The signal already exists in specified LM. No receivers is needed. Use iput or output items.
-	///
-	void IssueLogger::errALC5041(QString appSignalID, QString lmID, QUuid receiverUuid)
-	{
-		addItemsIssues(OutputMessageLevel::Error, 5041, receiverUuid);
-
-		LOG_ERROR(IssueType::AlCompiler,
-				  5041,
-				  QString(tr("Signal %1 exists in LM %2. No receivers needed.")).
-				  arg(appSignalID).arg(lmID));
-	}
-
 	/// IssueCode: ALC5042
 	///
 	/// IssueType: Error

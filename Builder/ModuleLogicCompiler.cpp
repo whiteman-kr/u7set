@@ -1613,6 +1613,8 @@ namespace Builder
 
 		if (isSinglePortConnection == true)
 		{
+			// in single port connection receiving signals should be native for LM that receive
+			//
 			compatibleConnectedSignal = receivedSignal;
 		}
 		else
@@ -1657,6 +1659,7 @@ namespace Builder
 					m_log->errALC5100(receivedSignal->busTypeID(), ualItem->guid(), ualItem->schemaID());
 					return false;
 				}
+
 				if (compatibleConnectedSignal != nullptr && compatibleConnectedSignal->isBus() == false)
 				{
 					assert(false);
@@ -1683,7 +1686,7 @@ namespace Builder
 
 		if (ualSignal == nullptr)
 		{
-			LOG_INTERNAL_ERROR(m_log);
+			LOG_INTERNAL_ERROR_MSG(m_log, QString("Receiver %1 schema %2").arg(ualItem->label()).arg(ualItem->schemaID()));
 			return false;
 		}
 

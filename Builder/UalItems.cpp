@@ -2392,6 +2392,22 @@ namespace Builder
 	{
 		// s can bee nullptr!!!
 		//
+		if (s != nullptr)
+		{
+			UalSignal* ualSignal = m_idToSignalMap.value(s->appSignalID(), nullptr);
+
+			if (ualSignal != nullptr)
+			{
+				// signal already in map
+				//
+				assert(m_pinToSignalMap.contains(outPinUuid) == false);
+
+				appendPinRefToSignal(outPinUuid, ualSignal);
+
+				return ualSignal;
+			}
+		}
+
 		UalSignal* busParentSignal = new UalSignal;
 
 		Signal* autoSignalPtr = nullptr;
@@ -2402,6 +2418,7 @@ namespace Builder
 		{
 			DELETE_IF_NOT_NULL(autoSignalPtr);
 			delete busParentSignal;
+			LOG_INTERNAL_ERROR(m_log);
 			return nullptr;
 		}
 
@@ -2411,6 +2428,7 @@ namespace Builder
 		{
 			DELETE_IF_NOT_NULL(autoSignalPtr);
 			delete busParentSignal;
+			LOG_INTERNAL_ERROR(m_log);
 			return nullptr;
 		}
 
@@ -2457,6 +2475,7 @@ namespace Builder
 		{
 			DELETE_IF_NOT_NULL(autoSignalPtr);
 			delete busParentSignal;
+			LOG_INTERNAL_ERROR(m_log);
 			return nullptr;
 		}
 
@@ -2790,7 +2809,7 @@ namespace Builder
 
 		if (QHash<UalSignal*, UalSignal*>::contains(newUalSignal) == true)
 		{
-			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
@@ -2800,19 +2819,19 @@ namespace Builder
 
 		if (m_idToSignalMap.contains(signalID) == true)
 		{
-			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
 		if (pinUuid.isNull() == false && m_pinToSignalMap.contains(pinUuid) == true)
 		{
-			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
 		if (m_ptrToSignalMap.contains(s) == true)
 		{
-			assert(false);
+			LOG_INTERNAL_ERROR(m_log);
 			return false;
 		}
 
