@@ -52,7 +52,7 @@ public:
 	Signal();
 	Signal(const Signal& s);
 	Signal(const ID_AppSignalID& ids);
-	Signal(const Hardware::DeviceSignal& deviceSignal);
+	Signal(const Hardware::DeviceSignal& deviceSignal, QString* errMsg);
 	virtual ~Signal();
 
 	void initSpecificProperties();

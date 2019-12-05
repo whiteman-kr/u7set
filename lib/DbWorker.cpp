@@ -5605,11 +5605,7 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 {
 	AUTO_COMPLETE
 
-	if (deviceSignals == nullptr)
-	{
-		assert(deviceSignals != nullptr);
-		return;
-	}
+	TEST_PTR_RETURN(deviceSignals);
 
 	if (addedSignals != nullptr)
 	{
@@ -5637,7 +5633,15 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 		{
 			if (isSignalWithEquipmentIDExists(deviceSignal->equipmentIdTemplate()) == false)
 			{
-				Signal signal(*deviceSignal);
+				QString errMsg;
+
+				Signal signal(*deviceSignal, &errMsg);
+
+				if (errMsg.isEmpty() == false)
+				{
+					emitError(QSqlDatabase::database(projectConnectionName()), errMsg);
+					return;
+				}
 
 				QVector<Signal> newSignals;
 
@@ -7335,8 +7339,11 @@ bool DbWorker::processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* err
 			continue;
 		}
 
-		bool replacingIsOccured = spv.replaceName("HighEngeneeringUnits", "HighEngineeringUnits");
-		replacingIsOccured |= spv.replaceName("LowEngeneeringUnits", "LowEngineeringUnits");
+		bool replacingIsOccured = spv.replaceName(SignalProperties::MISPRINT_highEngineeringUnitsCaption,
+												  SignalProperties::lowEngineeringUnitsCaption);
+
+		replacingIsOccured |= spv.replaceName(SignalProperties::MISPRINT_lowEngineeringUnitsCaption,
+											  SignalProperties::lowEngineeringUnitsCaption);
 
 		if (replacingIsOccured == true)
 		{

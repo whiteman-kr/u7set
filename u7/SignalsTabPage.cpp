@@ -2119,14 +2119,25 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 	{
 		TEST_PTR_CONTINUE(deviceSignal)
 
+		QString deviceSignalSpecPropStruct = deviceSignal->signalSpecPropsStruc();
+
+		if (	deviceSignalSpecPropStruct.contains(SignalProperties::MISPRINT_lowEngineeringUnitsCaption) ||
+				deviceSignalSpecPropStruct.contains(SignalProperties::MISPRINT_highEngineeringUnitsCaption))
+		{
+			QMessageBox::critical(m_instance,
+						  QApplication::applicationName(),
+						  QString(tr("Misprinted signal specific properties HighEngEneeringUnits/LowEngEneeringUnits has detected in device signal %1. \n\n"
+									 "Update module preset first. \n\nUpdating from preset is aborted!")).
+											arg(deviceSignal->equipmentId()));
+			return false;
+		}
+
 		QList<int> signalIDs = signalIDsMap.values(deviceSignal->equipmentId());
 
 		if (signalIDs.count() == 0)
 		{
 			continue;
 		}
-
-		QString deviceSignalSpecPropStruct = deviceSignal->signalSpecPropsStruc();
 
 		for(int signalID : signalIDs)
 		{
