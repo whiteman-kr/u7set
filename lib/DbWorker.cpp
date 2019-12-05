@@ -7341,7 +7341,7 @@ bool DbWorker::processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* err
 		}
 
 		bool replacingIsOccured = spv.replaceName(SignalProperties::MISPRINT_highEngineeringUnitsCaption,
-												  SignalProperties::lowEngineeringUnitsCaption);
+												  SignalProperties::highEngineeringUnitsCaption);
 
 		replacingIsOccured |= spv.replaceName(SignalProperties::MISPRINT_lowEngineeringUnitsCaption,
 											  SignalProperties::lowEngineeringUnitsCaption);

@@ -857,6 +857,8 @@ void SignalSpecPropValues::buildPropNamesMap()
 {
 	m_propNamesMap.clear();
 
+	m_propNamesMap.reserve(static_cast<int>(m_specPropValues.size() * 1.2));
+
 	int index = 0;
 
 	for(const SignalSpecPropValue& specPropValue : m_specPropValues)
