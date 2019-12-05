@@ -993,7 +993,8 @@ message DeviceSignal
 
     optional string validitySignalId = 20;					// RPCT-1660
 
-    optional string signalSpecPropsStruc = 40;
+    optional string signalSpecPropsStruct = 40;
+	optional bool signalSpecPropsStructWasFixed = 41 [default = false];		// The sign that signalSpecPropsStruct already got replaced EngEneered -> EngIneered
 }
 
 message Workstation

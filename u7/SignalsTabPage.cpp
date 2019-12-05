@@ -2119,7 +2119,7 @@ bool SignalsTabPage::updateSignalsSpecProps(DbController* dbc, const QVector<Har
 	{
 		TEST_PTR_CONTINUE(deviceSignal)
 
-		QString deviceSignalSpecPropStruct = deviceSignal->signalSpecPropsStruc();
+		QString deviceSignalSpecPropStruct = deviceSignal->signalSpecPropsStruct();
 
 		if (	deviceSignalSpecPropStruct.contains(SignalProperties::MISPRINT_lowEngineeringUnitsCaption) ||
 				deviceSignalSpecPropStruct.contains(SignalProperties::MISPRINT_highEngineeringUnitsCaption))
