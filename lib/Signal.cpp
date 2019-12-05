@@ -43,8 +43,10 @@ Signal::Signal(const ID_AppSignalID& ids)
 	m_isLoaded = false;
 }
 
-Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
+Signal::Signal(const Hardware::DeviceSignal& deviceSignal, QString* errMsg)
 {
+	TEST_PTR_RETURN(errMsg);
+
 	if (deviceSignal.isDiagSignal() == true)
 	{
 		assert(false);
@@ -101,6 +103,15 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal)
 	// specific properties processing
 	//
 	m_specPropStruct = deviceSignal.signalSpecPropsStruc();
+
+	if (m_specPropStruct.contains(SignalProperties::MISPRINT_lowEngineeringUnitsCaption) ||
+		m_specPropStruct.contains(SignalProperties::MISPRINT_highEngineeringUnitsCaption))
+	{
+		*errMsg = QString("Misprinted signal specific properties HighEngEneeringUnits/LowEngEneeringUnits has detected in device signal %1. \n\n"
+					 "Update module preset first. \n\nApplication signal creation is aborted!").
+										arg(deviceSignal.equipmentIdTemplate());
+		return;
+	}
 
 	SignalSpecPropValues spv;
 

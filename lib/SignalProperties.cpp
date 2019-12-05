@@ -77,6 +77,9 @@ const QString SignalProperties::tuningHighBoundCaption("TuningHighBound");
 const QString SignalProperties::specificPropertiesStructCaption("SpecificPropertiesStruct");
 const QString SignalProperties::tagsCaption("Tags");
 
+const QString SignalProperties::MISPRINT_lowEngineeringUnitsCaption("LowEngeneeringUnits");
+const QString SignalProperties::MISPRINT_highEngineeringUnitsCaption("HighEngeneeringUnits");
+
 const QString SignalProperties::categoryIdentification("1 Identification");
 const QString SignalProperties::categorySignalType("2 Signal type");
 const QString SignalProperties::categoryDataFormat("3 Data Format");

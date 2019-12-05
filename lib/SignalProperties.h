@@ -165,6 +165,9 @@ public:
 	static const QString specificPropertiesStructCaption;
 	static const QString tagsCaption;
 
+	static const QString MISPRINT_lowEngineeringUnitsCaption;
+	static const QString MISPRINT_highEngineeringUnitsCaption;
+
 	static const QString categoryIdentification;
 	static const QString categorySignalType;
 	static const QString categoryDataFormat;
@@ -222,8 +225,6 @@ public:
 	Q_INVOKABLE float tuningDefaultValue() const { return m_signal.tuningDefaultValue().toFloat(); }
 	Q_INVOKABLE float tuningLowBound() const { return m_signal.tuningLowBound().toFloat(); }
 	Q_INVOKABLE float tuningHighBound() const { return m_signal.tuningHighBound().toFloat(); }
-
-
 
 private:
 	void initProperties(bool savePropertyDescription = false);
