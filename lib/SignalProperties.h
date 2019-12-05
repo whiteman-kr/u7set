@@ -200,8 +200,8 @@ public:
 	Q_INVOKABLE int dataSize() const { return m_signal.dataSize(); }
 	Q_INVOKABLE int lowADC() const { return m_signal.lowADC(); }
 	Q_INVOKABLE int highADC() const { return m_signal.highADC(); }
-	Q_INVOKABLE double lowEngeneeringUnits() const { return m_signal.lowEngineeringUnits(); }
-	Q_INVOKABLE double highEngeneeringUnits() const { return m_signal.highEngineeringUnits(); }
+	Q_INVOKABLE double lowEngineeringUnits() const { return m_signal.lowEngineeringUnits(); }
+	Q_INVOKABLE double highEngineeringUnits() const { return m_signal.highEngineeringUnits(); }
 	Q_INVOKABLE double lowValidRange() const { return m_signal.lowValidRange(); }
 	Q_INVOKABLE double highValidRange() const { return m_signal.highValidRange(); }
 	Q_INVOKABLE double inputLowLimit() const { return m_signal.electricLowLimit(); }
