@@ -260,6 +260,8 @@ namespace Hardware
 		void findChildObjectsByMask(const QString& mask, std::vector<DeviceObject*>& list);
 		Q_INVOKABLE QObject* jsFindChildObjectByMask(const QString& mask);
 
+		static QString replaceObsoleteData(const QString& data);
+
 		// Props
 		//
 	public:

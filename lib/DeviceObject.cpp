@@ -1439,6 +1439,16 @@ namespace Hardware
 		return c;
 	}
 
+	QString DeviceObject::replaceObsoleteData(const QString& data)
+	{
+		QString result = data;
+
+		result.replace("engeneering", "engineering", Qt::CaseSensitive);
+		result.replace("Engeneering", "Engineering", Qt::CaseSensitive);
+
+		return result;
+	}
+
 	int DeviceObject::fileId() const
 	{
 		return fileInfo().fileId();
@@ -2070,6 +2080,9 @@ R"DELIM({
 		m_customModuleFamily = static_cast<uint16_t>(modulemessage.custommodulefamily());
 
 		m_configurationScript = QString::fromStdString(modulemessage.configurationscript());
+
+		m_configurationScript = replaceObsoleteData(m_configurationScript);
+
 		m_rawDataDescription = QString::fromStdString(modulemessage.rawdatadescription());
 
 		return true;
@@ -2519,6 +2532,8 @@ R"DELIM({
 		m_appSignalDataFormat = static_cast<E::AnalogAppSignalFormat>(signalMessage.appsignaldataformat());
 
 		m_signalSpecPropsStruc = QString::fromStdString(signalMessage.signalspecpropsstruc());
+
+		m_signalSpecPropsStruc = replaceObsoleteData(m_signalSpecPropsStruc);
 
 		if (m_preset == true)
 		{
