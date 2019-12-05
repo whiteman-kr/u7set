@@ -102,7 +102,7 @@ Signal::Signal(const Hardware::DeviceSignal& deviceSignal, QString* errMsg)
 
 	// specific properties processing
 	//
-	m_specPropStruct = deviceSignal.signalSpecPropsStruc();
+	m_specPropStruct = deviceSignal.signalSpecPropsStruct();
 
 	if (m_specPropStruct.contains(SignalProperties::MISPRINT_lowEngineeringUnitsCaption) ||
 		m_specPropStruct.contains(SignalProperties::MISPRINT_highEngineeringUnitsCaption))
