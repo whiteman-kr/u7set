@@ -669,7 +669,7 @@ void Signal::writeToXml(XmlWriteHelper& xml)
 	xml.writeDoubleAttribute("UnbalanceLimit", 1);
 	writeDoubleSpecPropAttribute(xml, SignalProperties::electricLowLimitCaption, "InputLowLimit");
 	writeDoubleSpecPropAttribute(xml, SignalProperties::electricHighLimitCaption, "InputHighLimit");
-	writeIntSpecPropAttribute(xml, SignalProperties::electricUnitCaption);
+	writeIntSpecPropAttribute(xml, SignalProperties::electricUnitCaption, "InputUnitID");
 	writeIntSpecPropAttribute(xml, SignalProperties::sensorTypeCaption, "InputSensorID");
 	writeDoubleSpecPropAttribute(xml, SignalProperties::electricLowLimitCaption, "OutputLowLimit");
 	writeDoubleSpecPropAttribute(xml, SignalProperties::electricHighLimitCaption, "OutputHighLimit");
