@@ -63,6 +63,7 @@ void Settings::writeUserScope() const
 
 	s.setValue("DialogSignalInfo/pos", m_signalInfoPos);
 	s.setValue("DialogSignalInfo/geometry", m_signalInfoGeometry);
+	s.setValue("DialogSignalInfo/treeSetpointsState", m_signalInfoTreeSetpointsState);
 
 	s.setValue("DialogSignalSearch/pos", m_signalSearchPos);
 	s.setValue("DialogSignalSearch/geometry", m_signalSearchGeometry);
@@ -106,6 +107,7 @@ void Settings::loadUserScope()
 
 	m_signalInfoPos = s.value("DialogSignalInfo/pos", QPoint(-1, -1)).toPoint();
 	m_signalInfoGeometry = s.value("DialogSignalInfo/geometry").toByteArray();
+	m_signalInfoTreeSetpointsState = s.value("DialogSignalInfo/treeSetpointsState").toByteArray();
 
 	m_signalSearchPos = s.value("DialogSignalSearch/pos", QPoint(-1, -1)).toPoint();
 	m_signalSearchGeometry = s.value("DialogSignalSearch/geometry").toByteArray();

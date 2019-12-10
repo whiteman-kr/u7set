@@ -214,7 +214,10 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& signalList)
 
 void MonitorSchemaWidget::signalInfo(QString appSignalId)
 {
-	DialogSignalInfo::showDialog(appSignalId, theMonitorMainWindow->configController(), theMonitorMainWindow->monitorCentralWidget());
+	DialogSignalInfo::showDialog(appSignalId,
+	                             theMonitorMainWindow->configController(),
+	                             theMonitorMainWindow->tcpSignalClient(),
+	                             theMonitorMainWindow->monitorCentralWidget());
 
 	return;
 }

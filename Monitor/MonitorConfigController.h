@@ -111,6 +111,8 @@ public:
 
 	QStringList schemasByAppSignalId(const QString& appSignalId) const;
 
+	QVector<std::shared_ptr<Comparator>> getByInputSignalID(const QString& appSignalID) const;
+
 	ConfigSettings configuration() const;
 	QString configurationStartSchemaId() const;
 

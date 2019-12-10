@@ -101,6 +101,8 @@ public:
 public:
 	SignalSnapshotModel(QObject *parent);
 
+	void setSignals(std::vector<AppSignalParam>& signalList);
+
 public:
 	// Properties
 
@@ -170,6 +172,7 @@ public:
 
 protected slots:
 	void headerColumnContextMenuRequested(const QPoint& pos);
+
 	void headerColumnToggled(bool checked);
 
 private slots:
@@ -179,6 +182,8 @@ private slots:
 
 	void on_tableView_doubleClicked(const QModelIndex &index);
 
+	void sortIndicatorChanged(int column, Qt::SortOrder order);
+
 	void on_typeCombo_currentIndexChanged(int index);
 
 	void on_buttonMaskApply_clicked();
@@ -187,11 +192,7 @@ private slots:
 
 	void on_buttonMaskInfo_clicked();
 
-	void sortIndicatorChanged(int column, Qt::SortOrder order);
-
 	void tcpSignalClient_signalParamAndUnitsArrived();
-
-	void tcpSignalClient_connectionReset();
 
 	void configController_configurationArrived(ConfigSettings configuration);
 
