@@ -1399,3 +1399,46 @@ message ComparatorSet
 {
     repeated LmComparatorSet lmComparatorSet = 1;
 }
+
+//
+// Metrology signals
+//
+
+message MetrologySignalLocation
+{
+    optional string rackID = 1;
+
+    optional string chassisID = 2;
+	optional int32 chassis = 3 [default = -1];
+
+    optional string moduleID = 4;
+	optional int32 module = 5 [default = -1];
+
+    optional int32 place = 6 [default = -1];
+	optional string contact = 7;
+}
+
+message MetrologySignal
+{
+    optional AppSignal appSignal = 1;
+
+    optional MetrologySignalLocation location = 2;
+
+    optional double electricLowLimit = 3 [default = 0.0];
+	optional double electricHighLimit = 4 [default = 0.0];
+	optional int32 electricUnitID = 5 [default = 1];			// E::ElectricUnit::NoUnit;
+	optional int32 electricSensorType = 6 [default = 1];		// E::SensorType::NoSensor;
+	optional double electricR0 = 7 [default = 0];;
+	optional int32 electricPrecision = 8 [default = 4];
+
+    optional double physicalLowLimit = 9 [default = 0.0];
+	optional double physicalHighLimit = 10 [default = 0.0];
+}
+
+message MetrologySignalSet
+{
+    repeated MetrologySignal metrologySignal = 1;
+}
+
+
+

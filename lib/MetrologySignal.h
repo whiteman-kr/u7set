@@ -8,20 +8,18 @@
 #include "../lib/ComparatorSet.h"
 #include "../lib/SignalProperties.h"
 #include "../Builder/CfgFiles.h"
+#include "../Proto/serialization.pb.h"
+#include "../lib/ProtoSerialization.h"
 
 // Attention !!!
-// If you want to change any function writeToXml you must change CFG_FILE_VER_METROLOGY_SIGNALS
+// If you want to change any function writeToXml you must change CFG_FILE_VER_METROLOGY_ITEMS
 // and write log history about changing
 
-const int			CFG_FILE_VER_METROLOGY_SIGNALS	= 5;
+const int			CFG_FILE_VER_METROLOGY_ITEMS_XML	= 1;
 
 // Historty of version
 //
 // version 1 - it is base version
-// version 2 - deleted a few fields SignalParam::writeToXml (story about removing redundant ranges)
-// version 3 - append fields: EngineeringUnits
-// version 4 - append fields: TuningBounds
-// version 5 - append fields: electricR0
 //
 
 namespace Metrology
@@ -50,7 +48,7 @@ namespace Metrology
 
 	const int	InputCount	= 32;
 
-	const int	ComparatorCount	= 32;
+	const int	ComparatorCount	= 16;
 
 	// ==============================================================================================
 
@@ -96,6 +94,9 @@ namespace Metrology
 			QString				channelStr() const;
 			void				setChannel(int channel) { m_channel = channel; }
 
+			// serialize
+			//
+
 			bool				readFromXml(XmlReadHelper& xml);
 			void				writeToXml(XmlWriteHelper& xml);
 	};
@@ -106,21 +107,24 @@ namespace Metrology
 	{
 		public:
 			SignalLocation() {}
-			SignalLocation(const QString& appSignalID, Hardware::DeviceObject* pDeviceObject);
+			SignalLocation(Hardware::DeviceObject* pDeviceObject);
 			virtual ~SignalLocation() {}
 
 		private:
 
-			QString				m_appSignalID;
-			QString				m_equipmentID;
+			RackParam			m_rack;					// rack EquipmentID
 
+			QString				m_chassisID;			// chassis EquipmentID
+			int					m_chassis = -1;			// number of chassis
 
-			RackParam			m_rack;
-			int					m_chassis = -1;
-			QString				m_moduleID;
-			int					m_module = -1;
-			int					m_place = -1;
+			QString				m_moduleID;				// module EquipmentID
+			int					m_module = -1;			// number of module
+
+			int					m_place = -1;			// number of place
 			QString				m_contact;				// for input: _IN00A or _IN00B, for output: only _OUT00
+
+			QString				m_moduleSerialNoID;		// AppSignalID serial number of module	- write online
+			int					m_moduleSerialNo = 0;	// serial number of module				- write online
 
 			void				getParentObject(Hardware::DeviceObject* pDeviceObject);
 
@@ -128,15 +132,12 @@ namespace Metrology
 
 			void				clear();
 
-			QString				appSignalID() const { return m_appSignalID; }
-			void				setAppSignalID(const QString& appSignalID) { m_appSignalID = appSignalID; }
-
-			QString				equipmentID() const { return m_equipmentID; }
-			void				setEquipmentID(const QString& equipmentID) { m_equipmentID = equipmentID; }
-
 			RackParam&			rack() { return m_rack; }
 			QString				rackCaption(bool showIndex = false) const;
 			void				setRack(const RackParam& rack) { m_rack = rack; }
+
+			QString				chassisID() const { return m_chassisID; }
+			void				setChassisID(const QString& chassisID) { m_chassisID = chassisID; }
 
 			int					chassis() const { return m_chassis; }
 			QString				chassisStr() const;
@@ -156,8 +157,17 @@ namespace Metrology
 			QString				contact() const { return m_contact; }
 			void				setContact(const QString& contact) { m_contact = contact; }
 
-			bool				readFromXml(XmlReadHelper& xml);
-			void				writeToXml(XmlWriteHelper& xml);
+			QString				moduleSerialNoID() const { return m_moduleSerialNoID; }
+			void				setModuleSerialNoID(const QString& appSignalID) { m_moduleSerialNoID = appSignalID; }
+
+			int					moduleSerialNo() const { return m_moduleSerialNo; }
+			QString				moduleSerialNoStr() const;
+			void				setModuleSerialNo(int serialNo) { m_moduleSerialNo = serialNo; }
+
+			// serialize
+			//
+			void				serializeTo(Proto::MetrologySignalLocation *l) const;
+			bool				serializeFrom(const Proto::MetrologySignalLocation& l);
 	};
 
 	// ==============================================================================================
@@ -167,18 +177,19 @@ namespace Metrology
 	public:
 
 		SignalParam() {}
-		SignalParam(const Signal& signal, const SignalLocation& location) { setParam(signal, location); }
+		SignalParam(const Signal& signal, const SignalLocation& location);
 		virtual ~SignalParam() {}
 
 	private:
 
-		QString					m_moduleSerialNoID;
 		SignalLocation			m_location;
 
 		double					m_electricLowLimit = 0;
 		double					m_electricHighLimit = 0;
+
 		E::ElectricUnit			m_electricUnitID = E::ElectricUnit::NoUnit;
 		E::SensorType			m_electricSensorType = E::SensorType::NoSensor;
+
 		double					m_electricR0 = 0;
 		int						m_electricPrecision = 4;
 
@@ -192,14 +203,11 @@ namespace Metrology
 
 		bool					isValid() const;
 
-		void					setParam(const ::Signal& signal, const SignalLocation& location);
-		void					updateParam(const SignalParam& param);
+		void					setParam(const Signal& signal, const SignalLocation& location);
 
 		void					setAppSignalID(const QString& appSignalID);
 
-		QString					moduleSerialNoID() const { return m_moduleSerialNoID; }
-		void					setModuleSerialNoID(const QString& appSignalID) { m_moduleSerialNoID = appSignalID; }
-
+		SignalLocation&			location() { return m_location; }
 		SignalLocation			location() const { return m_location; }
 		void					setLocation(const SignalLocation& location) { m_location = location; }
 
@@ -244,18 +252,25 @@ namespace Metrology
 		bool					engineeringRangeIsValid() const;
 		QString					engineeringRangeStr() const;
 
+		// tuning
+		//
 		QString					enableTuningStr() const;
 		QString					tuningDefaultValueStr() const;
 		bool					tuningRangeIsValid() const;
 		QString					tuningRangeStr() const;
 		TuningValueType			tuningValueType() const;
 
+		// comparators
+		//
+		std::shared_ptr<Comparator> comparator(int index) const;
 		void					setComparatorList(const QVector<std::shared_ptr<Comparator>>& comparators);
 		int						comparatorCount() const { return m_comparatorCount; }
-		std::shared_ptr<Comparator> comparator(int index) const;
+		bool					hasComparators() const { return m_comparatorCount != 0; }
 
-		bool					readFromXml(XmlReadHelper& xml);
-		void					writeToXml(XmlWriteHelper& xml);
+		// serialize
+		//
+		void					serializeTo(Proto::MetrologySignal *ms) const;
+		bool					serializeFrom(const Proto::MetrologySignal& ms);
 	};
 
 	// ==============================================================================================
@@ -298,7 +313,7 @@ namespace Metrology
 	public:
 
 		SignalStatistic() {}
-		explicit SignalStatistic(const Hash& signalHash) : m_signalHash (signalHash) {}
+		explicit SignalStatistic(const Hash& signalHash);
 		virtual ~SignalStatistic() {}
 
 		enum State
@@ -337,7 +352,7 @@ namespace Metrology
 	public:
 
 		Signal() {}
-		explicit Signal(const SignalParam& param) { setParam(param); }
+		explicit Signal(const SignalParam& param);
 		virtual ~Signal() {}
 
 	private:

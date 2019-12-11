@@ -102,11 +102,6 @@ public:
 	void					updateSignal(Hash signalHash);
 };
 
-
-// ==============================================================================================
-
-#define						SIGNAL_INFO_OPTIONS_KEY		"Options/SignalInfo/"
-
 // ==============================================================================================
 
 class StatisticPanel : public QDockWidget

@@ -835,7 +835,7 @@ void MeasureThread::measureComprators()
 						continue;
 					}
 
-					if (inParam.comparatorCount() == 0)
+					if (inParam.hasComparators() == false)
 					{
 						continue;
 					}
@@ -995,7 +995,7 @@ void MeasureThread::measureComprators()
 					continue;
 				}
 
-				if (inParam.comparatorCount() == 0)
+				if (inParam.hasComparators() == false)
 				{
 					currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
 					continue;
@@ -1083,7 +1083,7 @@ void MeasureThread::measureComprators()
 					continue;
 				}
 
-				if (inParam.comparatorCount() == 0)
+				if (inParam.hasComparators() == false)
 				{
 					currentStateComparatorsInAllChannels |= (0x1ULL << ch);
 					continue;
@@ -1181,7 +1181,7 @@ void MeasureThread::measureComprators()
 				continue;
 			}
 
-			if (inParam.comparatorCount() == 0)
+			if (inParam.hasComparators() == false)
 			{
 				continue;
 			}

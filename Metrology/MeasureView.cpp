@@ -356,10 +356,10 @@ QString MeasureTable::textLinearity(int row, int column) const
 	{
 		case MVC_CMN_L_INDEX:					result = QString::number(m->measureID()); break;
 
-		case MVC_CMN_L_MODULE_SN:				result = m->moduleSerialNoStr(); break;
+		case MVC_CMN_L_MODULE_SN:				result = m->location().moduleSerialNoStr(); break;
 		case MVC_CMN_L_APP_ID:					result = m->appSignalID(); break;
 		case MVC_CMN_L_CUSTOM_ID:				result = m->customAppSignalID(); break;
-		case MVC_CMN_L_EQUIPMENT_ID:			result = m->location().equipmentID(); break;
+		case MVC_CMN_L_EQUIPMENT_ID:			result = m->equipmentID(); break;
 		case MVC_CMN_L_NAME:					result = m->caption(); break;
 
 		case MVC_CMN_L_RACK:					result = m->location().rack().caption(); break;
@@ -463,10 +463,10 @@ QString MeasureTable::textComparator(int row, int column) const
 	{
 		case MVC_CMN_C_INDEX:					result = QString::number(m->measureID()); break;
 
-		case MVC_CMN_C_MODULE_SN:				result = m->moduleSerialNoStr(); break;
+		case MVC_CMN_C_MODULE_SN:				result = m->location().moduleSerialNoStr(); break;
 		case MVC_CMN_C_APP_ID:					result = m->appSignalID(); break;
 		case MVC_CMN_C_CUSTOM_ID:				result = m->customAppSignalID(); break;
-		case MVC_CMN_C_EQUIPMENT_ID:			result = m->location().equipmentID(); break;
+		case MVC_CMN_C_EQUIPMENT_ID:			result = m->equipmentID(); break;
 		case MVC_CMN_C_NAME:					result = m->caption(); break;
 
 		case MVC_CMN_C_RACK:					result = m->location().rack().caption(); break;

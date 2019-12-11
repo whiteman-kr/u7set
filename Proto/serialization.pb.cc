@@ -322,6 +322,15 @@ const ::google::protobuf::internal::GeneratedMessageReflection*
 const ::google::protobuf::Descriptor* ComparatorSet_descriptor_ = NULL;
 const ::google::protobuf::internal::GeneratedMessageReflection*
   ComparatorSet_reflection_ = NULL;
+const ::google::protobuf::Descriptor* MetrologySignalLocation_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  MetrologySignalLocation_reflection_ = NULL;
+const ::google::protobuf::Descriptor* MetrologySignal_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  MetrologySignal_reflection_ = NULL;
+const ::google::protobuf::Descriptor* MetrologySignalSet_descriptor_ = NULL;
+const ::google::protobuf::internal::GeneratedMessageReflection*
+  MetrologySignalSet_reflection_ = NULL;
 const ::google::protobuf::EnumDescriptor* SchemaUnit_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* ConnectionDirrection_descriptor_ = NULL;
 const ::google::protobuf::EnumDescriptor* FblSignalType_descriptor_ = NULL;
@@ -2251,6 +2260,66 @@ void protobuf_AssignDesc_serialization_2eproto() {
       ::google::protobuf::DescriptorPool::generated_pool(),
       ::google::protobuf::MessageFactory::generated_factory(),
       sizeof(ComparatorSet));
+  MetrologySignalLocation_descriptor_ = file->message_type(97);
+  static const int MetrologySignalLocation_offsets_[7] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalLocation, rackid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalLocation, chassisid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalLocation, chassis_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalLocation, moduleid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalLocation, module_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalLocation, place_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalLocation, contact_),
+  };
+  MetrologySignalLocation_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      MetrologySignalLocation_descriptor_,
+      MetrologySignalLocation::default_instance_,
+      MetrologySignalLocation_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalLocation, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalLocation, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(MetrologySignalLocation));
+  MetrologySignal_descriptor_ = file->message_type(98);
+  static const int MetrologySignal_offsets_[10] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, appsignal_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, location_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, electriclowlimit_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, electrichighlimit_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, electricunitid_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, electricsensortype_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, electricr0_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, electricprecision_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, physicallowlimit_),
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, physicalhighlimit_),
+  };
+  MetrologySignal_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      MetrologySignal_descriptor_,
+      MetrologySignal::default_instance_,
+      MetrologySignal_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignal, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(MetrologySignal));
+  MetrologySignalSet_descriptor_ = file->message_type(99);
+  static const int MetrologySignalSet_offsets_[1] = {
+    GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalSet, metrologysignal_),
+  };
+  MetrologySignalSet_reflection_ =
+    new ::google::protobuf::internal::GeneratedMessageReflection(
+      MetrologySignalSet_descriptor_,
+      MetrologySignalSet::default_instance_,
+      MetrologySignalSet_offsets_,
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalSet, _has_bits_[0]),
+      GOOGLE_PROTOBUF_GENERATED_MESSAGE_FIELD_OFFSET(MetrologySignalSet, _unknown_fields_),
+      -1,
+      ::google::protobuf::DescriptorPool::generated_pool(),
+      ::google::protobuf::MessageFactory::generated_factory(),
+      sizeof(MetrologySignalSet));
   SchemaUnit_descriptor_ = file->enum_type(0);
   ConnectionDirrection_descriptor_ = file->enum_type(1);
   FblSignalType_descriptor_ = file->enum_type(2);
@@ -2461,6 +2530,12 @@ void protobuf_RegisterTypes(const ::std::string&) {
     LmComparatorSet_descriptor_, &LmComparatorSet::default_instance());
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
     ComparatorSet_descriptor_, &ComparatorSet::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    MetrologySignalLocation_descriptor_, &MetrologySignalLocation::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    MetrologySignal_descriptor_, &MetrologySignal::default_instance());
+  ::google::protobuf::MessageFactory::InternalRegisterGeneratedMessage(
+    MetrologySignalSet_descriptor_, &MetrologySignalSet::default_instance());
 }
 
 }  // namespace
@@ -2663,6 +2738,12 @@ void protobuf_ShutdownFile_serialization_2eproto() {
   delete LmComparatorSet_reflection_;
   delete ComparatorSet::default_instance_;
   delete ComparatorSet_reflection_;
+  delete MetrologySignalLocation::default_instance_;
+  delete MetrologySignalLocation_reflection_;
+  delete MetrologySignal::default_instance_;
+  delete MetrologySignal_reflection_;
+  delete MetrologySignalSet::default_instance_;
+  delete MetrologySignalSet_reflection_;
 }
 
 void protobuf_AddDesc_serialization_2eproto() {
@@ -3102,12 +3183,26 @@ void protobuf_AddDesc_serialization_2eproto() {
     "Set\022\025\n\rlmEquipmentID\030\001 \001(\t\022%\n\ncomparator"
     "\030\002 \003(\0132\021.Proto.Comparator\"@\n\rComparatorS"
     "et\022/\n\017lmComparatorSet\030\001 \003(\0132\026.Proto.LmCo"
-    "mparatorSet*3\n\nSchemaUnit\022\013\n\007Display\020\000\022\016"
-    "\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024ConnectionDi"
-    "rrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\rFblSi"
-    "gnalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*:\n\rFb"
-    "lDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSignedIn"
-    "t\020\001\022\t\n\005Float\020\002", 17414);
+    "mparatorSet\"\233\001\n\027MetrologySignalLocation\022"
+    "\016\n\006rackID\030\001 \001(\t\022\021\n\tchassisID\030\002 \001(\t\022\023\n\007ch"
+    "assis\030\003 \001(\005:\002-1\022\020\n\010moduleID\030\004 \001(\t\022\022\n\006mod"
+    "ule\030\005 \001(\005:\002-1\022\021\n\005place\030\006 \001(\005:\002-1\022\017\n\007cont"
+    "act\030\007 \001(\t\"\315\002\n\017MetrologySignal\022#\n\tappSign"
+    "al\030\001 \001(\0132\020.Proto.AppSignal\0220\n\010location\030\002"
+    " \001(\0132\036.Proto.MetrologySignalLocation\022\033\n\020"
+    "electricLowLimit\030\003 \001(\001:\0010\022\034\n\021electricHig"
+    "hLimit\030\004 \001(\001:\0010\022\031\n\016electricUnitID\030\005 \001(\005:"
+    "\0011\022\035\n\022electricSensorType\030\006 \001(\005:\0011\022\025\n\nele"
+    "ctricR0\030\007 \001(\001:\0010\022\034\n\021electricPrecision\030\010 "
+    "\001(\005:\0014\022\033\n\020physicalLowLimit\030\t \001(\001:\0010\022\034\n\021p"
+    "hysicalHighLimit\030\n \001(\001:\0010\"E\n\022MetrologySi"
+    "gnalSet\022/\n\017metrologySignal\030\001 \003(\0132\026.Proto"
+    ".MetrologySignal*3\n\nSchemaUnit\022\013\n\007Displa"
+    "y\020\000\022\016\n\nMillimeter\020\001\022\010\n\004Inch\020\002*-\n\024Connect"
+    "ionDirrection\022\t\n\005Input\020\000\022\n\n\006Output\020\001*)\n\r"
+    "FblSignalType\022\n\n\006Analog\020\000\022\014\n\010Discrete\020\001*"
+    ":\n\rFblDataFormat\022\017\n\013UnsignedInt\020\000\022\r\n\tSig"
+    "nedInt\020\001\022\t\n\005Float\020\002", 17979);
   ::google::protobuf::MessageFactory::InternalRegisterGeneratedFile(
     "serialization.proto", &protobuf_RegisterTypes);
   Uuid::default_instance_ = new Uuid();
@@ -3213,6 +3308,9 @@ void protobuf_AddDesc_serialization_2eproto() {
   Comparator::default_instance_ = new Comparator();
   LmComparatorSet::default_instance_ = new LmComparatorSet();
   ComparatorSet::default_instance_ = new ComparatorSet();
+  MetrologySignalLocation::default_instance_ = new MetrologySignalLocation();
+  MetrologySignal::default_instance_ = new MetrologySignal();
+  MetrologySignalSet::default_instance_ = new MetrologySignalSet();
   Uuid::default_instance_->InitAsDefaultInstance();
   qvariant::default_instance_->InitAsDefaultInstance();
   wstring::default_instance_->InitAsDefaultInstance();
@@ -3310,6 +3408,9 @@ void protobuf_AddDesc_serialization_2eproto() {
   Comparator::default_instance_->InitAsDefaultInstance();
   LmComparatorSet::default_instance_->InitAsDefaultInstance();
   ComparatorSet::default_instance_->InitAsDefaultInstance();
+  MetrologySignalLocation::default_instance_->InitAsDefaultInstance();
+  MetrologySignal::default_instance_->InitAsDefaultInstance();
+  MetrologySignalSet::default_instance_->InitAsDefaultInstance();
   ::google::protobuf::internal::OnShutdown(&protobuf_ShutdownFile_serialization_2eproto);
 }
 
@@ -44405,6 +44506,1305 @@ void ComparatorSet::Swap(ComparatorSet* other) {
   ::google::protobuf::Metadata metadata;
   metadata.descriptor = ComparatorSet_descriptor_;
   metadata.reflection = ComparatorSet_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int MetrologySignalLocation::kRackIDFieldNumber;
+const int MetrologySignalLocation::kChassisIDFieldNumber;
+const int MetrologySignalLocation::kChassisFieldNumber;
+const int MetrologySignalLocation::kModuleIDFieldNumber;
+const int MetrologySignalLocation::kModuleFieldNumber;
+const int MetrologySignalLocation::kPlaceFieldNumber;
+const int MetrologySignalLocation::kContactFieldNumber;
+#endif  // !_MSC_VER
+
+MetrologySignalLocation::MetrologySignalLocation()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void MetrologySignalLocation::InitAsDefaultInstance() {
+}
+
+MetrologySignalLocation::MetrologySignalLocation(const MetrologySignalLocation& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void MetrologySignalLocation::SharedCtor() {
+  _cached_size_ = 0;
+  rackid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  chassisid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  chassis_ = -1;
+  moduleid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  module_ = -1;
+  place_ = -1;
+  contact_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+MetrologySignalLocation::~MetrologySignalLocation() {
+  SharedDtor();
+}
+
+void MetrologySignalLocation::SharedDtor() {
+  if (rackid_ != &::google::protobuf::internal::kEmptyString) {
+    delete rackid_;
+  }
+  if (chassisid_ != &::google::protobuf::internal::kEmptyString) {
+    delete chassisid_;
+  }
+  if (moduleid_ != &::google::protobuf::internal::kEmptyString) {
+    delete moduleid_;
+  }
+  if (contact_ != &::google::protobuf::internal::kEmptyString) {
+    delete contact_;
+  }
+  if (this != default_instance_) {
+  }
+}
+
+void MetrologySignalLocation::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* MetrologySignalLocation::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return MetrologySignalLocation_descriptor_;
+}
+
+const MetrologySignalLocation& MetrologySignalLocation::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+MetrologySignalLocation* MetrologySignalLocation::default_instance_ = NULL;
+
+MetrologySignalLocation* MetrologySignalLocation::New() const {
+  return new MetrologySignalLocation;
+}
+
+void MetrologySignalLocation::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (has_rackid()) {
+      if (rackid_ != &::google::protobuf::internal::kEmptyString) {
+        rackid_->clear();
+      }
+    }
+    if (has_chassisid()) {
+      if (chassisid_ != &::google::protobuf::internal::kEmptyString) {
+        chassisid_->clear();
+      }
+    }
+    chassis_ = -1;
+    if (has_moduleid()) {
+      if (moduleid_ != &::google::protobuf::internal::kEmptyString) {
+        moduleid_->clear();
+      }
+    }
+    module_ = -1;
+    place_ = -1;
+    if (has_contact()) {
+      if (contact_ != &::google::protobuf::internal::kEmptyString) {
+        contact_->clear();
+      }
+    }
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool MetrologySignalLocation::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional string rackID = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_rackid()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->rackid().data(), this->rackid().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_chassisID;
+        break;
+      }
+
+      // optional string chassisID = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_chassisID:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_chassisid()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->chassisid().data(), this->chassisid().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(24)) goto parse_chassis;
+        break;
+      }
+
+      // optional int32 chassis = 3 [default = -1];
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_chassis:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &chassis_)));
+          set_has_chassis();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(34)) goto parse_moduleID;
+        break;
+      }
+
+      // optional string moduleID = 4;
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_moduleID:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_moduleid()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->moduleid().data(), this->moduleid().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(40)) goto parse_module;
+        break;
+      }
+
+      // optional int32 module = 5 [default = -1];
+      case 5: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_module:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &module_)));
+          set_has_module();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(48)) goto parse_place;
+        break;
+      }
+
+      // optional int32 place = 6 [default = -1];
+      case 6: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_place:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &place_)));
+          set_has_place();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(58)) goto parse_contact;
+        break;
+      }
+
+      // optional string contact = 7;
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_contact:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadString(
+                input, this->mutable_contact()));
+          ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+            this->contact().data(), this->contact().length(),
+            ::google::protobuf::internal::WireFormat::PARSE);
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void MetrologySignalLocation::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional string rackID = 1;
+  if (has_rackid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->rackid().data(), this->rackid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      1, this->rackid(), output);
+  }
+
+  // optional string chassisID = 2;
+  if (has_chassisid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->chassisid().data(), this->chassisid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      2, this->chassisid(), output);
+  }
+
+  // optional int32 chassis = 3 [default = -1];
+  if (has_chassis()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(3, this->chassis(), output);
+  }
+
+  // optional string moduleID = 4;
+  if (has_moduleid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->moduleid().data(), this->moduleid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      4, this->moduleid(), output);
+  }
+
+  // optional int32 module = 5 [default = -1];
+  if (has_module()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->module(), output);
+  }
+
+  // optional int32 place = 6 [default = -1];
+  if (has_place()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(6, this->place(), output);
+  }
+
+  // optional string contact = 7;
+  if (has_contact()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->contact().data(), this->contact().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    ::google::protobuf::internal::WireFormatLite::WriteString(
+      7, this->contact(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* MetrologySignalLocation::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional string rackID = 1;
+  if (has_rackid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->rackid().data(), this->rackid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        1, this->rackid(), target);
+  }
+
+  // optional string chassisID = 2;
+  if (has_chassisid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->chassisid().data(), this->chassisid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        2, this->chassisid(), target);
+  }
+
+  // optional int32 chassis = 3 [default = -1];
+  if (has_chassis()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(3, this->chassis(), target);
+  }
+
+  // optional string moduleID = 4;
+  if (has_moduleid()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->moduleid().data(), this->moduleid().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        4, this->moduleid(), target);
+  }
+
+  // optional int32 module = 5 [default = -1];
+  if (has_module()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->module(), target);
+  }
+
+  // optional int32 place = 6 [default = -1];
+  if (has_place()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(6, this->place(), target);
+  }
+
+  // optional string contact = 7;
+  if (has_contact()) {
+    ::google::protobuf::internal::WireFormat::VerifyUTF8String(
+      this->contact().data(), this->contact().length(),
+      ::google::protobuf::internal::WireFormat::SERIALIZE);
+    target =
+      ::google::protobuf::internal::WireFormatLite::WriteStringToArray(
+        7, this->contact(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int MetrologySignalLocation::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional string rackID = 1;
+    if (has_rackid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->rackid());
+    }
+
+    // optional string chassisID = 2;
+    if (has_chassisid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->chassisid());
+    }
+
+    // optional int32 chassis = 3 [default = -1];
+    if (has_chassis()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->chassis());
+    }
+
+    // optional string moduleID = 4;
+    if (has_moduleid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->moduleid());
+    }
+
+    // optional int32 module = 5 [default = -1];
+    if (has_module()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->module());
+    }
+
+    // optional int32 place = 6 [default = -1];
+    if (has_place()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->place());
+    }
+
+    // optional string contact = 7;
+    if (has_contact()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::StringSize(
+          this->contact());
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void MetrologySignalLocation::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const MetrologySignalLocation* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const MetrologySignalLocation*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void MetrologySignalLocation::MergeFrom(const MetrologySignalLocation& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_rackid()) {
+      set_rackid(from.rackid());
+    }
+    if (from.has_chassisid()) {
+      set_chassisid(from.chassisid());
+    }
+    if (from.has_chassis()) {
+      set_chassis(from.chassis());
+    }
+    if (from.has_moduleid()) {
+      set_moduleid(from.moduleid());
+    }
+    if (from.has_module()) {
+      set_module(from.module());
+    }
+    if (from.has_place()) {
+      set_place(from.place());
+    }
+    if (from.has_contact()) {
+      set_contact(from.contact());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void MetrologySignalLocation::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void MetrologySignalLocation::CopyFrom(const MetrologySignalLocation& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool MetrologySignalLocation::IsInitialized() const {
+
+  return true;
+}
+
+void MetrologySignalLocation::Swap(MetrologySignalLocation* other) {
+  if (other != this) {
+    std::swap(rackid_, other->rackid_);
+    std::swap(chassisid_, other->chassisid_);
+    std::swap(chassis_, other->chassis_);
+    std::swap(moduleid_, other->moduleid_);
+    std::swap(module_, other->module_);
+    std::swap(place_, other->place_);
+    std::swap(contact_, other->contact_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata MetrologySignalLocation::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = MetrologySignalLocation_descriptor_;
+  metadata.reflection = MetrologySignalLocation_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int MetrologySignal::kAppSignalFieldNumber;
+const int MetrologySignal::kLocationFieldNumber;
+const int MetrologySignal::kElectricLowLimitFieldNumber;
+const int MetrologySignal::kElectricHighLimitFieldNumber;
+const int MetrologySignal::kElectricUnitIDFieldNumber;
+const int MetrologySignal::kElectricSensorTypeFieldNumber;
+const int MetrologySignal::kElectricR0FieldNumber;
+const int MetrologySignal::kElectricPrecisionFieldNumber;
+const int MetrologySignal::kPhysicalLowLimitFieldNumber;
+const int MetrologySignal::kPhysicalHighLimitFieldNumber;
+#endif  // !_MSC_VER
+
+MetrologySignal::MetrologySignal()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void MetrologySignal::InitAsDefaultInstance() {
+  appsignal_ = const_cast< ::Proto::AppSignal*>(&::Proto::AppSignal::default_instance());
+  location_ = const_cast< ::Proto::MetrologySignalLocation*>(&::Proto::MetrologySignalLocation::default_instance());
+}
+
+MetrologySignal::MetrologySignal(const MetrologySignal& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void MetrologySignal::SharedCtor() {
+  _cached_size_ = 0;
+  appsignal_ = NULL;
+  location_ = NULL;
+  electriclowlimit_ = 0;
+  electrichighlimit_ = 0;
+  electricunitid_ = 1;
+  electricsensortype_ = 1;
+  electricr0_ = 0;
+  electricprecision_ = 4;
+  physicallowlimit_ = 0;
+  physicalhighlimit_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+MetrologySignal::~MetrologySignal() {
+  SharedDtor();
+}
+
+void MetrologySignal::SharedDtor() {
+  if (this != default_instance_) {
+    delete appsignal_;
+    delete location_;
+  }
+}
+
+void MetrologySignal::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* MetrologySignal::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return MetrologySignal_descriptor_;
+}
+
+const MetrologySignal& MetrologySignal::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+MetrologySignal* MetrologySignal::default_instance_ = NULL;
+
+MetrologySignal* MetrologySignal::New() const {
+  return new MetrologySignal;
+}
+
+void MetrologySignal::Clear() {
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (has_appsignal()) {
+      if (appsignal_ != NULL) appsignal_->::Proto::AppSignal::Clear();
+    }
+    if (has_location()) {
+      if (location_ != NULL) location_->::Proto::MetrologySignalLocation::Clear();
+    }
+    electriclowlimit_ = 0;
+    electrichighlimit_ = 0;
+    electricunitid_ = 1;
+    electricsensortype_ = 1;
+    electricr0_ = 0;
+    electricprecision_ = 4;
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    physicallowlimit_ = 0;
+    physicalhighlimit_ = 0;
+  }
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool MetrologySignal::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // optional .Proto.AppSignal appSignal = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_appsignal()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(18)) goto parse_location;
+        break;
+      }
+
+      // optional .Proto.MetrologySignalLocation location = 2;
+      case 2: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_location:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+               input, mutable_location()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(25)) goto parse_electricLowLimit;
+        break;
+      }
+
+      // optional double electricLowLimit = 3 [default = 0];
+      case 3: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_electricLowLimit:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &electriclowlimit_)));
+          set_has_electriclowlimit();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(33)) goto parse_electricHighLimit;
+        break;
+      }
+
+      // optional double electricHighLimit = 4 [default = 0];
+      case 4: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_electricHighLimit:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &electrichighlimit_)));
+          set_has_electrichighlimit();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(40)) goto parse_electricUnitID;
+        break;
+      }
+
+      // optional int32 electricUnitID = 5 [default = 1];
+      case 5: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_electricUnitID:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &electricunitid_)));
+          set_has_electricunitid();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(48)) goto parse_electricSensorType;
+        break;
+      }
+
+      // optional int32 electricSensorType = 6 [default = 1];
+      case 6: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_electricSensorType:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &electricsensortype_)));
+          set_has_electricsensortype();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(57)) goto parse_electricR0;
+        break;
+      }
+
+      // optional double electricR0 = 7 [default = 0];
+      case 7: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_electricR0:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &electricr0_)));
+          set_has_electricr0();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(64)) goto parse_electricPrecision;
+        break;
+      }
+
+      // optional int32 electricPrecision = 8 [default = 4];
+      case 8: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
+         parse_electricPrecision:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
+                 input, &electricprecision_)));
+          set_has_electricprecision();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(73)) goto parse_physicalLowLimit;
+        break;
+      }
+
+      // optional double physicalLowLimit = 9 [default = 0];
+      case 9: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_physicalLowLimit:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &physicallowlimit_)));
+          set_has_physicallowlimit();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(81)) goto parse_physicalHighLimit;
+        break;
+      }
+
+      // optional double physicalHighLimit = 10 [default = 0];
+      case 10: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_FIXED64) {
+         parse_physicalHighLimit:
+          DO_((::google::protobuf::internal::WireFormatLite::ReadPrimitive<
+                   double, ::google::protobuf::internal::WireFormatLite::TYPE_DOUBLE>(
+                 input, &physicalhighlimit_)));
+          set_has_physicalhighlimit();
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void MetrologySignal::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // optional .Proto.AppSignal appSignal = 1;
+  if (has_appsignal()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, this->appsignal(), output);
+  }
+
+  // optional .Proto.MetrologySignalLocation location = 2;
+  if (has_location()) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      2, this->location(), output);
+  }
+
+  // optional double electricLowLimit = 3 [default = 0];
+  if (has_electriclowlimit()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(3, this->electriclowlimit(), output);
+  }
+
+  // optional double electricHighLimit = 4 [default = 0];
+  if (has_electrichighlimit()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(4, this->electrichighlimit(), output);
+  }
+
+  // optional int32 electricUnitID = 5 [default = 1];
+  if (has_electricunitid()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(5, this->electricunitid(), output);
+  }
+
+  // optional int32 electricSensorType = 6 [default = 1];
+  if (has_electricsensortype()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(6, this->electricsensortype(), output);
+  }
+
+  // optional double electricR0 = 7 [default = 0];
+  if (has_electricr0()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(7, this->electricr0(), output);
+  }
+
+  // optional int32 electricPrecision = 8 [default = 4];
+  if (has_electricprecision()) {
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(8, this->electricprecision(), output);
+  }
+
+  // optional double physicalLowLimit = 9 [default = 0];
+  if (has_physicallowlimit()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(9, this->physicallowlimit(), output);
+  }
+
+  // optional double physicalHighLimit = 10 [default = 0];
+  if (has_physicalhighlimit()) {
+    ::google::protobuf::internal::WireFormatLite::WriteDouble(10, this->physicalhighlimit(), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* MetrologySignal::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // optional .Proto.AppSignal appSignal = 1;
+  if (has_appsignal()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        1, this->appsignal(), target);
+  }
+
+  // optional .Proto.MetrologySignalLocation location = 2;
+  if (has_location()) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        2, this->location(), target);
+  }
+
+  // optional double electricLowLimit = 3 [default = 0];
+  if (has_electriclowlimit()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(3, this->electriclowlimit(), target);
+  }
+
+  // optional double electricHighLimit = 4 [default = 0];
+  if (has_electrichighlimit()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(4, this->electrichighlimit(), target);
+  }
+
+  // optional int32 electricUnitID = 5 [default = 1];
+  if (has_electricunitid()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(5, this->electricunitid(), target);
+  }
+
+  // optional int32 electricSensorType = 6 [default = 1];
+  if (has_electricsensortype()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(6, this->electricsensortype(), target);
+  }
+
+  // optional double electricR0 = 7 [default = 0];
+  if (has_electricr0()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(7, this->electricr0(), target);
+  }
+
+  // optional int32 electricPrecision = 8 [default = 4];
+  if (has_electricprecision()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteInt32ToArray(8, this->electricprecision(), target);
+  }
+
+  // optional double physicalLowLimit = 9 [default = 0];
+  if (has_physicallowlimit()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(9, this->physicallowlimit(), target);
+  }
+
+  // optional double physicalHighLimit = 10 [default = 0];
+  if (has_physicalhighlimit()) {
+    target = ::google::protobuf::internal::WireFormatLite::WriteDoubleToArray(10, this->physicalhighlimit(), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int MetrologySignal::ByteSize() const {
+  int total_size = 0;
+
+  if (_has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    // optional .Proto.AppSignal appSignal = 1;
+    if (has_appsignal()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->appsignal());
+    }
+
+    // optional .Proto.MetrologySignalLocation location = 2;
+    if (has_location()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+          this->location());
+    }
+
+    // optional double electricLowLimit = 3 [default = 0];
+    if (has_electriclowlimit()) {
+      total_size += 1 + 8;
+    }
+
+    // optional double electricHighLimit = 4 [default = 0];
+    if (has_electrichighlimit()) {
+      total_size += 1 + 8;
+    }
+
+    // optional int32 electricUnitID = 5 [default = 1];
+    if (has_electricunitid()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->electricunitid());
+    }
+
+    // optional int32 electricSensorType = 6 [default = 1];
+    if (has_electricsensortype()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->electricsensortype());
+    }
+
+    // optional double electricR0 = 7 [default = 0];
+    if (has_electricr0()) {
+      total_size += 1 + 8;
+    }
+
+    // optional int32 electricPrecision = 8 [default = 4];
+    if (has_electricprecision()) {
+      total_size += 1 +
+        ::google::protobuf::internal::WireFormatLite::Int32Size(
+          this->electricprecision());
+    }
+
+  }
+  if (_has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    // optional double physicalLowLimit = 9 [default = 0];
+    if (has_physicallowlimit()) {
+      total_size += 1 + 8;
+    }
+
+    // optional double physicalHighLimit = 10 [default = 0];
+    if (has_physicalhighlimit()) {
+      total_size += 1 + 8;
+    }
+
+  }
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void MetrologySignal::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const MetrologySignal* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const MetrologySignal*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void MetrologySignal::MergeFrom(const MetrologySignal& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  if (from._has_bits_[0 / 32] & (0xffu << (0 % 32))) {
+    if (from.has_appsignal()) {
+      mutable_appsignal()->::Proto::AppSignal::MergeFrom(from.appsignal());
+    }
+    if (from.has_location()) {
+      mutable_location()->::Proto::MetrologySignalLocation::MergeFrom(from.location());
+    }
+    if (from.has_electriclowlimit()) {
+      set_electriclowlimit(from.electriclowlimit());
+    }
+    if (from.has_electrichighlimit()) {
+      set_electrichighlimit(from.electrichighlimit());
+    }
+    if (from.has_electricunitid()) {
+      set_electricunitid(from.electricunitid());
+    }
+    if (from.has_electricsensortype()) {
+      set_electricsensortype(from.electricsensortype());
+    }
+    if (from.has_electricr0()) {
+      set_electricr0(from.electricr0());
+    }
+    if (from.has_electricprecision()) {
+      set_electricprecision(from.electricprecision());
+    }
+  }
+  if (from._has_bits_[8 / 32] & (0xffu << (8 % 32))) {
+    if (from.has_physicallowlimit()) {
+      set_physicallowlimit(from.physicallowlimit());
+    }
+    if (from.has_physicalhighlimit()) {
+      set_physicalhighlimit(from.physicalhighlimit());
+    }
+  }
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void MetrologySignal::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void MetrologySignal::CopyFrom(const MetrologySignal& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool MetrologySignal::IsInitialized() const {
+
+  if (has_appsignal()) {
+    if (!this->appsignal().IsInitialized()) return false;
+  }
+  return true;
+}
+
+void MetrologySignal::Swap(MetrologySignal* other) {
+  if (other != this) {
+    std::swap(appsignal_, other->appsignal_);
+    std::swap(location_, other->location_);
+    std::swap(electriclowlimit_, other->electriclowlimit_);
+    std::swap(electrichighlimit_, other->electrichighlimit_);
+    std::swap(electricunitid_, other->electricunitid_);
+    std::swap(electricsensortype_, other->electricsensortype_);
+    std::swap(electricr0_, other->electricr0_);
+    std::swap(electricprecision_, other->electricprecision_);
+    std::swap(physicallowlimit_, other->physicallowlimit_);
+    std::swap(physicalhighlimit_, other->physicalhighlimit_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata MetrologySignal::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = MetrologySignal_descriptor_;
+  metadata.reflection = MetrologySignal_reflection_;
+  return metadata;
+}
+
+
+// ===================================================================
+
+#ifndef _MSC_VER
+const int MetrologySignalSet::kMetrologySignalFieldNumber;
+#endif  // !_MSC_VER
+
+MetrologySignalSet::MetrologySignalSet()
+  : ::google::protobuf::Message() {
+  SharedCtor();
+}
+
+void MetrologySignalSet::InitAsDefaultInstance() {
+}
+
+MetrologySignalSet::MetrologySignalSet(const MetrologySignalSet& from)
+  : ::google::protobuf::Message() {
+  SharedCtor();
+  MergeFrom(from);
+}
+
+void MetrologySignalSet::SharedCtor() {
+  _cached_size_ = 0;
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+}
+
+MetrologySignalSet::~MetrologySignalSet() {
+  SharedDtor();
+}
+
+void MetrologySignalSet::SharedDtor() {
+  if (this != default_instance_) {
+  }
+}
+
+void MetrologySignalSet::SetCachedSize(int size) const {
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+}
+const ::google::protobuf::Descriptor* MetrologySignalSet::descriptor() {
+  protobuf_AssignDescriptorsOnce();
+  return MetrologySignalSet_descriptor_;
+}
+
+const MetrologySignalSet& MetrologySignalSet::default_instance() {
+  if (default_instance_ == NULL) protobuf_AddDesc_serialization_2eproto();
+  return *default_instance_;
+}
+
+MetrologySignalSet* MetrologySignalSet::default_instance_ = NULL;
+
+MetrologySignalSet* MetrologySignalSet::New() const {
+  return new MetrologySignalSet;
+}
+
+void MetrologySignalSet::Clear() {
+  metrologysignal_.Clear();
+  ::memset(_has_bits_, 0, sizeof(_has_bits_));
+  mutable_unknown_fields()->Clear();
+}
+
+bool MetrologySignalSet::MergePartialFromCodedStream(
+    ::google::protobuf::io::CodedInputStream* input) {
+#define DO_(EXPRESSION) if (!(EXPRESSION)) return false
+  ::google::protobuf::uint32 tag;
+  while ((tag = input->ReadTag()) != 0) {
+    switch (::google::protobuf::internal::WireFormatLite::GetTagFieldNumber(tag)) {
+      // repeated .Proto.MetrologySignal metrologySignal = 1;
+      case 1: {
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_LENGTH_DELIMITED) {
+         parse_metrologySignal:
+          DO_(::google::protobuf::internal::WireFormatLite::ReadMessageNoVirtual(
+                input, add_metrologysignal()));
+        } else {
+          goto handle_uninterpreted;
+        }
+        if (input->ExpectTag(10)) goto parse_metrologySignal;
+        if (input->ExpectAtEnd()) return true;
+        break;
+      }
+
+      default: {
+      handle_uninterpreted:
+        if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
+            ::google::protobuf::internal::WireFormatLite::WIRETYPE_END_GROUP) {
+          return true;
+        }
+        DO_(::google::protobuf::internal::WireFormat::SkipField(
+              input, tag, mutable_unknown_fields()));
+        break;
+      }
+    }
+  }
+  return true;
+#undef DO_
+}
+
+void MetrologySignalSet::SerializeWithCachedSizes(
+    ::google::protobuf::io::CodedOutputStream* output) const {
+  // repeated .Proto.MetrologySignal metrologySignal = 1;
+  for (int i = 0; i < this->metrologysignal_size(); i++) {
+    ::google::protobuf::internal::WireFormatLite::WriteMessageMaybeToArray(
+      1, this->metrologysignal(i), output);
+  }
+
+  if (!unknown_fields().empty()) {
+    ::google::protobuf::internal::WireFormat::SerializeUnknownFields(
+        unknown_fields(), output);
+  }
+}
+
+::google::protobuf::uint8* MetrologySignalSet::SerializeWithCachedSizesToArray(
+    ::google::protobuf::uint8* target) const {
+  // repeated .Proto.MetrologySignal metrologySignal = 1;
+  for (int i = 0; i < this->metrologysignal_size(); i++) {
+    target = ::google::protobuf::internal::WireFormatLite::
+      WriteMessageNoVirtualToArray(
+        1, this->metrologysignal(i), target);
+  }
+
+  if (!unknown_fields().empty()) {
+    target = ::google::protobuf::internal::WireFormat::SerializeUnknownFieldsToArray(
+        unknown_fields(), target);
+  }
+  return target;
+}
+
+int MetrologySignalSet::ByteSize() const {
+  int total_size = 0;
+
+  // repeated .Proto.MetrologySignal metrologySignal = 1;
+  total_size += 1 * this->metrologysignal_size();
+  for (int i = 0; i < this->metrologysignal_size(); i++) {
+    total_size +=
+      ::google::protobuf::internal::WireFormatLite::MessageSizeNoVirtual(
+        this->metrologysignal(i));
+  }
+
+  if (!unknown_fields().empty()) {
+    total_size +=
+      ::google::protobuf::internal::WireFormat::ComputeUnknownFieldsSize(
+        unknown_fields());
+  }
+  GOOGLE_SAFE_CONCURRENT_WRITES_BEGIN();
+  _cached_size_ = total_size;
+  GOOGLE_SAFE_CONCURRENT_WRITES_END();
+  return total_size;
+}
+
+void MetrologySignalSet::MergeFrom(const ::google::protobuf::Message& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  const MetrologySignalSet* source =
+    ::google::protobuf::internal::dynamic_cast_if_available<const MetrologySignalSet*>(
+      &from);
+  if (source == NULL) {
+    ::google::protobuf::internal::ReflectionOps::Merge(from, this);
+  } else {
+    MergeFrom(*source);
+  }
+}
+
+void MetrologySignalSet::MergeFrom(const MetrologySignalSet& from) {
+  GOOGLE_CHECK_NE(&from, this);
+  metrologysignal_.MergeFrom(from.metrologysignal_);
+  mutable_unknown_fields()->MergeFrom(from.unknown_fields());
+}
+
+void MetrologySignalSet::CopyFrom(const ::google::protobuf::Message& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+void MetrologySignalSet::CopyFrom(const MetrologySignalSet& from) {
+  if (&from == this) return;
+  Clear();
+  MergeFrom(from);
+}
+
+bool MetrologySignalSet::IsInitialized() const {
+
+  for (int i = 0; i < metrologysignal_size(); i++) {
+    if (!this->metrologysignal(i).IsInitialized()) return false;
+  }
+  return true;
+}
+
+void MetrologySignalSet::Swap(MetrologySignalSet* other) {
+  if (other != this) {
+    metrologysignal_.Swap(&other->metrologysignal_);
+    std::swap(_has_bits_[0], other->_has_bits_[0]);
+    _unknown_fields_.Swap(&other->_unknown_fields_);
+    std::swap(_cached_size_, other->_cached_size_);
+  }
+}
+
+::google::protobuf::Metadata MetrologySignalSet::GetMetadata() const {
+  protobuf_AssignDescriptorsOnce();
+  ::google::protobuf::Metadata metadata;
+  metadata.descriptor = MetrologySignalSet_descriptor_;
+  metadata.reflection = MetrologySignalSet_reflection_;
   return metadata;
 }
 

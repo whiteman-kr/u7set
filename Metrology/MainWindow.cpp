@@ -215,7 +215,7 @@ void MainWindow::createActions()
 	m_pShowSignalConnectionListAction->setToolTip("");
 	connect(m_pShowSignalConnectionListAction, &QAction::triggered, this, &MainWindow::showSignalConnectionList);
 
-	m_pShowStatisticAction = new QAction(tr("Sta&tistics ..."), this);
+	m_pShowStatisticAction = new QAction(tr("Sta&tistics (Checklist) ..."), this);
 	m_pShowStatisticAction->setIcon(QIcon(":/icons/Statistics.png"));
 	m_pShowStatisticAction->setToolTip("");
 	connect(m_pShowStatisticAction, &QAction::triggered, this, &MainWindow::showStatistic);
@@ -1619,11 +1619,11 @@ void MainWindow::configSocketConfigurationLoaded()
 
 	connectedState.append(tr("\n\nLoaded signals: %1").arg(theSignalBase.signalCount()));
 
-	if (CFG_FILE_VER_METROLOGY_SIGNALS != theOptions.projectInfo().cfgFileVersion())
+	if (CFG_FILE_VER_METROLOGY_ITEMS_XML != theOptions.projectInfo().cfgFileVersion())
 	{
 		connectedState.append(tr("\n\nFailed version of %1. Current version: %2. Received version: %3 ")
-								.arg(Builder::FILE_METROLOGY_SIGNALS_XML)
-								.arg(CFG_FILE_VER_METROLOGY_SIGNALS)
+								.arg(Builder::FILE_METROLOGY_ITEMS_XML)
+								.arg(CFG_FILE_VER_METROLOGY_ITEMS_XML)
 								.arg(theOptions.projectInfo().cfgFileVersion()));
 	}
 

@@ -1067,6 +1067,11 @@ void SignalPropertyDialog::createPropertyList()
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_CUSTOM_ID);
 			signalIdGroup->addSubProperty(item);
 
+			item = m_pManager->addProperty(QVariant::String, tr("EquipmentID"));
+			item->setValue(m_param.equipmentID());
+			item->setAttribute(QLatin1String("readOnly"), true);
+			signalIdGroup->addSubProperty(item);
+
 			item = m_pManager->addProperty(QVariant::String, tr("Caption"));
 			item->setValue(m_param.caption());
 			m_propertyMap.insert(item, SIGNAL_PROPERTY_ITEM_CAPTION);
@@ -1077,11 +1082,6 @@ void SignalPropertyDialog::createPropertyList()
 		// position group
 
 		QtProperty *positionGroup = m_pManager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Position"));
-
-			item = m_pManager->addProperty(QVariant::String, tr("EquipmentID"));
-			item->setValue(m_param.location().equipmentID());
-			item->setAttribute(QLatin1String("readOnly"), true);
-			positionGroup->addSubProperty(item);
 
 			item = m_pManager->addProperty(QVariant::String, tr("Rack"));
 			item->setValue(m_param.location().rack().caption());
