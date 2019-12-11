@@ -116,12 +116,12 @@ public:
 
 	// Functions accessed if ok() is true
 
+	bool isEqual(double value) const;
 	double toDouble() const;
 
 	// Functions accessed if ok() is false
 
 	int errorCode() const;
-
 	QString errorMessage() const;
 
 	double expectedLowValidRange() const;

@@ -470,7 +470,7 @@ namespace Builder
 					}
 
 
-					if (physicalLowLimit.toDouble() != signal.lowEngineeringUnits())
+					if (physicalLowLimit.isEqual(signal.lowEngineeringUnits()) == false)
 					{
 						QString nowElValStr, newElValStr;
 						double elVal = uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
@@ -484,7 +484,7 @@ namespace Builder
 						return false;
 					}
 
-					if (physicalHighLimit.toDouble() != signal.highEngineeringUnits())
+					if (physicalHighLimit.isEqual(signal.highEngineeringUnits()) == false)
 					{
 						QString nowElValStr, newElValStr;
 						double elVal = uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
@@ -570,7 +570,7 @@ namespace Builder
 						return false;
 					}
 
-					if (physicalLowLimit.toDouble() != signal.lowEngineeringUnits())
+					if (physicalLowLimit.isEqual(signal.lowEngineeringUnits()) == false)
 					{
 						QString nowElValStr, newElValStr;
 						double elVal = uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), r0);
@@ -584,7 +584,7 @@ namespace Builder
 						return false;
 					}
 
-					if (physicalHighLimit.toDouble() != signal.highEngineeringUnits())
+					if (physicalHighLimit.isEqual(signal.highEngineeringUnits()) == false)
 					{
 						QString nowElValStr, newElValStr;
 						double elVal = uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), r0);
