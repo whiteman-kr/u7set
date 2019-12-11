@@ -67,28 +67,28 @@ int SqlFieldBase::init(int objectType, int)
 			append("ElectricNominal",				QVariant::Double);
 			append("ElectricMeasure",				QVariant::Double);
 
-			append("EngeneeringNominal",			QVariant::Double);
-			append("EngeneeringMeasure",			QVariant::Double);
+			append("EngineeringNominal",			QVariant::Double);
+			append("EngineeringMeasure",			QVariant::Double);
 
 			append("ElectricLowLimit",				QVariant::Double);
 			append("ElectricHighLimit",				QVariant::Double);
 			append("ElectricUnit",					QVariant::String, 32);
 			append("ElectricPrecision",				QVariant::Int);
 
-			append("EngeneeringLowLimit",			QVariant::Double);
-			append("EngeneeringHighLimit",			QVariant::Double);
-			append("EngeneeringUnit",				QVariant::String, 32);
-			append("EngeneeringPrecision",			QVariant::Int);
+			append("EngineeringLowLimit",			QVariant::Double);
+			append("EngineeringHighLimit",			QVariant::Double);
+			append("EngineeringUnit",				QVariant::String, 32);
+			append("EngineeringPrecision",			QVariant::Int);
 
 			append("ElectricErrorAbsolute",			QVariant::Double);
 			append("ElectricErrorReduce",			QVariant::Double);
 			append("ElectricLimitErrorAbsolute",	QVariant::Double);
 			append("ElectricLimitErrorReduce",		QVariant::Double);
 
-			append("EngeneeringErrorAbsolute",		QVariant::Double);
-			append("EngeneeringErrorReduce",		QVariant::Double);
-			append("EngeneeringLimitErrorAbsolute",	QVariant::Double);
-			append("EngeneeringLimitErrorReduce",	QVariant::Double);
+			append("EngineeringErrorAbsolute",		QVariant::Double);
+			append("EngineeringErrorReduce",		QVariant::Double);
+			append("EngineeringLimitErrorAbsolute",	QVariant::Double);
+			append("EngineeringLimitErrorReduce",	QVariant::Double);
 
 			append("MeasureTime",					QVariant::String, 64);
 
@@ -186,28 +186,28 @@ int SqlFieldBase::init(int objectType, int)
 			append("ElectricNominal",				QVariant::Double);
 			append("ElectricMeasure",				QVariant::Double);
 
-			append("EngeneeringNominal",			QVariant::Double);
-			append("EngeneeringMeasure",			QVariant::Double);
+			append("EngineeringNominal",			QVariant::Double);
+			append("EngineeringMeasure",			QVariant::Double);
 
 			append("ElectricLowLimit",				QVariant::Double);
 			append("ElectricHighLimit",				QVariant::Double);
 			append("ElectricUnit",					QVariant::String, 32);
 			append("ElectricPrecision",				QVariant::Int);
 
-			append("EngeneeringLowLimit",			QVariant::Double);
-			append("EngeneeringHighLimit",			QVariant::Double);
-			append("EngeneeringUnit",				QVariant::String, 32);
-			append("EngeneeringPrecision",			QVariant::Int);
+			append("EngineeringLowLimit",			QVariant::Double);
+			append("EngineeringHighLimit",			QVariant::Double);
+			append("EngineeringUnit",				QVariant::String, 32);
+			append("EngineeringPrecision",			QVariant::Int);
 
 			append("ElectricErrorAbsolute",			QVariant::Double);
 			append("ElectricErrorReduce",			QVariant::Double);
 			append("ElectricLimitErrorAbsolute",	QVariant::Double);
 			append("ElectricLimitErrorReduce",		QVariant::Double);
 
-			append("EngeneeringErrorAbsolute",		QVariant::Double);
-			append("EngeneeringErrorReduce",		QVariant::Double);
-			append("EngeneeringLimitErrorAbsolute",	QVariant::Double);
-			append("EngeneeringLimitErrorReduce",	QVariant::Double);
+			append("EngineeringErrorAbsolute",		QVariant::Double);
+			append("EngineeringErrorReduce",		QVariant::Double);
+			append("EngineeringLimitErrorAbsolute",	QVariant::Double);
+			append("EngineeringLimitErrorReduce",	QVariant::Double);
 
 			append("MeasureTime",					QVariant::String, 64);
 			break;

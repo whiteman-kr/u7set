@@ -1274,11 +1274,11 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 
 	setCmpType(pComparator->cmpType());
 
-	double engeneering = 0;
+	double engineering = 0;
 
 	if (pComparator->compare().isConst() == true)
 	{
-		engeneering = pComparator->compare().constValue();
+		engineering = pComparator->compare().constValue();
 	}
 	else
 	{
@@ -1287,15 +1287,15 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 			Metrology::Signal* pComareSignal = theSignalBase.signalPtr(pComparator->compare().appSignalID());
 			if (pComareSignal != nullptr)
 			{
-				engeneering = pComareSignal->state().value();
+				engineering = pComareSignal->state().value();
 			}
 		}
 	}
 
-	double electric = conversion(engeneering, CT_ENGINEER_TO_ELECTRIC, inParam);
+	double electric = conversion(engineering, CT_ENGINEER_TO_ELECTRIC, inParam);
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
-	setNominal(MEASURE_LIMIT_TYPE_ENGINEER, engeneering);
+	setNominal(MEASURE_LIMIT_TYPE_ENGINEER, engineering);
 
 	// measure
 	//
@@ -1304,10 +1304,10 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	setSignalValid(true);
 
 	electric = ioParam.isNegativeRange() ? -pCalibrator->sourceValue() : pCalibrator->sourceValue();
-	engeneering = conversion(electric, CT_ELECTRIC_TO_ENGINEER, inParam);
+	engineering = conversion(electric, CT_ELECTRIC_TO_ENGINEER, inParam);
 
 	setMeasure(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
-	setMeasure(MEASURE_LIMIT_TYPE_ENGINEER, engeneering);
+	setMeasure(MEASURE_LIMIT_TYPE_ENGINEER, engineering);
 
 	// limits
 	//

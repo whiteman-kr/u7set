@@ -1604,7 +1604,7 @@ void ComparatorPropertyDialog::createPropertyList()
 //				if (pInputSignal != nullptr && pInputSignal->param().isValid() == true && pInputSignal->param().isInput() == true)
 //				{
 //					item = m_pManager->addProperty(QVariant::Double, tr("Electric value, ") + pInputSignal->param().electricUnitStr());
-//					item->setValue(conversion(m_comparator.hysteresis().constValue(), CT_ENGENEER_TO_ELECTRIC, pInputSignal->param()));
+//					item->setValue(conversion(m_comparator.hysteresis().constValue(), CT_ENGINEER_TO_ELECTRIC, pInputSignal->param()));
 //					item->setAttribute(QLatin1String("decimals"), pInputSignal->param().electricPrecision());
 //					m_propertyMap.insert(item, COMPARATOR_PROPERTY_ITEM_HYST_EL_VALUE);
 //					hysteresisGroup->addSubProperty(item);
