@@ -451,6 +451,8 @@ void MonitorConfigController::slot_configurationReady(const QByteArray configura
 		}
 		else
 		{
+			m_setPoints.clear();
+
 			bool readOk = m_setPoints.serializeFrom(data);
 
 			if (readOk == false)
@@ -729,6 +731,10 @@ QStringList MonitorConfigController::schemasByAppSignalId(const QString& appSign
 	return m_schemaDetailsSet.schemasByAppSignalId(appSignalId);
 }
 
+QVector<std::shared_ptr<Comparator>> MonitorConfigController::getByInputSignalID(const QString& appSignalID) const
+{
+	return m_setPoints.getByInputSignalID(appSignalID);
+}
 
 ConfigSettings MonitorConfigController::configuration() const
 {

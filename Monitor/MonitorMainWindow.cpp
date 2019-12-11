@@ -1093,6 +1093,16 @@ const MonitorConfigController* MonitorMainWindow::configController() const
 	return &m_configController;
 }
 
+TcpSignalClient* MonitorMainWindow::tcpSignalClient()
+{
+	return m_tcpSignalClient;
+}
+
+const TcpSignalClient* MonitorMainWindow::tcpSignalClient() const
+{
+	return m_tcpSignalClient;
+}
+
 MonitorToolBar::MonitorToolBar(const QString& tittle, QWidget* parent) :
 	QToolBar(tittle, parent)
 {

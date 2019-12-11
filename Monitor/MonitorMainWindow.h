@@ -103,6 +103,9 @@ public:
 	MonitorConfigController* configController();
 	const MonitorConfigController* configController() const;
 
+	TcpSignalClient* tcpSignalClient();
+	const TcpSignalClient* tcpSignalClient() const;
+
 protected:
 
 	// Data

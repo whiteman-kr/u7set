@@ -70,6 +70,7 @@ public:
 	//
 	QPoint m_signalInfoPos;
 	QByteArray m_signalInfoGeometry;
+	QByteArray m_signalInfoTreeSetpointsState;
 
 	// Signal Seacrh dialog
 	//
