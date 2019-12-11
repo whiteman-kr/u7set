@@ -19,6 +19,9 @@ win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
 include(../warnings.pri)
 
+#Application icon
+win32:RC_ICONS += icons/CommView.ico
+
 # DESTDIR
 #
 win32 {

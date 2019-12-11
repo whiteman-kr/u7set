@@ -41,7 +41,6 @@ MainWindow::~MainWindow()
 
 bool MainWindow::createInterface()
 {
-	setWindowIcon(QIcon(":/icons/CommView.png"));
 	setWindowTitle(tr("CommView"));
 	resize(700, 750);
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());
