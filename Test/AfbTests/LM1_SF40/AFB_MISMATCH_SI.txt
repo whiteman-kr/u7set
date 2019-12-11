@@ -1,6 +1,6 @@
 test AFB_SWITCH_SI01_value0, AFB tests for AFB_SWITCH_SI element
 schema AFB_SWITCH_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_IN_FP1 = 1, #TUN_IN_FP2 = 1
 check #OUTPUT_SI01 == 0
 check #OUTPUT_SI02 == 0
@@ -29,7 +29,7 @@ endtest
 
 test AFB_SWITCH_SI01_value25, AFB tests for AFB_SWITCH_SI element
 schema AFB_SWITCH_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_IN_FP1 = 0, #TUN_IN_FP2 = 0, #TUN_IN_FP3 = 0
 check #OUTPUT_SI03 == 0
 check #OUTPUT_SI04 == 0

@@ -1,6 +1,6 @@
 test AFB_FF_D_FRONT_1, AFB tests for AFB_FF_D_FRONT element
 schema AFB_FF_D_FRONT
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_DSCR1 = 1 , #TUN_DSCR2 = 1
 check #OUT_FF_D_FRONT == 1
 set #TUN_DSCR1 = 1 , #TUN_DSCR2 = 0 // Yt=Yt-1

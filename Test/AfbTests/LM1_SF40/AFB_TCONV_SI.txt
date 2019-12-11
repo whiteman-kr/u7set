@@ -1,6 +1,6 @@
 test AFB_TCONV_SI1, AFB tests for AFB_TCONV_SI element
 schema AFB_TCONV_SI
-compatible MODULE_LMSF00,LMSF40
+compatible MODULE_LMSF40,LMSF40
 set #TUN_IN_SI1 = 0
 check #OUT_TCONV_SI_FP1  == 0.0
 set #TUN_IN_SI1 = 1

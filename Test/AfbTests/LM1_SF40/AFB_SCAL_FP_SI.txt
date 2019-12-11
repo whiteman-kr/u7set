@@ -6,7 +6,7 @@
 //
 test AFB_SCALE_FP_SI_01, AFB tests for AFB_SCALE_FP_SI element
 schema AFB_SCALE_FP_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_IN_FP1 = 0
 check #OUT_SCALE_FP_SI01 == 0
 check #OVERFLOW_SCALE_FP_SI01 == 0

@@ -1,6 +1,6 @@
 test AFB_DIV_FP, AFB tests for AFB_DIV_FP element
 schema AFB_DIV_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 
 //
 set #TUN_IN_FP1 = 0, #TUN_IN_FP2 = 0, #TUN_IN_CTRL1 = 0

@@ -1,6 +1,6 @@
 test AFB_INV_FP, AFB tests for AFB_INV_FP element
 schema AFB_INV_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_IN_FP1 = 0
 check #OUT_INV_FP001 == inf
 check #OUT_DIV_DY_ZERO_INV_FP001 == 1

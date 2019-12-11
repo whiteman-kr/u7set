@@ -1,6 +1,6 @@
 test AFB_BUS_SWITCH1, AFB tests for BUS_SWITCH element
 schema AFB_BUS_SWITCH
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_ANALOG_BUS_01_INP01 = 0
 set #TUN_ANALOG_BUS_02_INP01 = 0
 set #TUN_ANALOG_BUS_03_INP01 = 0
@@ -29,7 +29,7 @@ endtest
 
 test AFB_BUS_SWITCH2, AFB tests for BUS_SWITCH element
 schema AFB_BUS_SWITCH
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_ANALOG_BUS_01_INP01 = 1
 set #TUN_ANALOG_BUS_02_INP01 = 1
 set #TUN_ANALOG_BUS_03_INP01 = 1

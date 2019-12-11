@@ -1,6 +1,6 @@
 test AFB_DAMP_SI, AFB tests for AFB_DAMP_SI element
 schema AFB_DAMP_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_IN_SI1 = 0, #TUN_DSCR1 = 0, #TUN_IN_SI2 = 0
 check #OUT_DAMP_SI1 == 0 
 check #OUT_ZERO_DAMP_SI ==0 

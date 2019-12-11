@@ -1,6 +1,6 @@
 test AFB_MUL_SI, AFB tests for AFB_MUL_SI element
 schema AFB_MUL_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //multiplication
 set #TUN_IN_SI1 = 2 , #TUN_IN_SI2 = 2
 check #OUT_MUL_SI001 == 4

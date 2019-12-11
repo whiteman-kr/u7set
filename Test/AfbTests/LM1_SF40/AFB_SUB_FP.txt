@@ -1,6 +1,6 @@
 test AFB_SUB_FP, AFB tests for AFB_SUB_FP element
 schema AFB_SUB_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_IN_FP1 = 2.1 , #TUN_IN_FP2 = 1.1
 check #OUT_SUB_FP001 == 1.0
 set #TUN_IN_FP1 = 20.5 , #TUN_IN_FP2 = 10.5
