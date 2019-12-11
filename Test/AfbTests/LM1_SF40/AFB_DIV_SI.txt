@@ -1,6 +1,6 @@
 test AFB_DIV_SI, AFB tests for AFB_DIV_SI element
 schema AFB_DIV_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_IN_SI1= 4 , #TUN_IN_SI2 = 2
 check #OUT_DIV_SI001 ==  2
 

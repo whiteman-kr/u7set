@@ -1,6 +1,6 @@
 test AFB_LATCH_DECAY_SI01, AFB tests for AFB_LATCH_SI element
 schema AFB_LATCH_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 
 set #TUN_IN_SI1 = 0, #SET01 = 0, #RESET01 = 0
 check #OUT_LATCH_DECAY_SI01 == 0
@@ -24,7 +24,7 @@ endtest
 
 test AFB_LATCH_FRONT_SI01, AFB tests for AFB_LATCH_SI element
 schema AFB_LATCH_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 
 set #TUN_IN_SI2 = 0, #SET02 = 0, #RESET02 = 1
 check #OUT_LATCH_FRONT_SI01 == 0
@@ -51,7 +51,7 @@ endtest
 
 test AFB_LATCH_STATE_SI01, AFB tests for AFB_LATCH_SI element
 schema AFB_LATCH_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 
 set #TUN_IN_SI3 = 0, #SET03 = 0, #RESET03 = 1
 check #OUT_LATCH_STATE_SI01 == 0

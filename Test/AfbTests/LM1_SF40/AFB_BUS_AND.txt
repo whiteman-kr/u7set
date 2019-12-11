@@ -1,6 +1,6 @@
 test AFB_BUS_AND_1, BUS_2AND function test
 schema AFB_BUS_AND
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 
 set #TUN_DSCR_BUS_01_INP01 = 0
 set #TUN_DSCR_BUS_01_INP02 = 0
@@ -27,7 +27,7 @@ endtest
 
 test AFB_BUS_AND_2, BUS_2AND function test
 schema AFB_BUS_AND
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_DSCR_BUS_01_INP01 = 1
 set #TUN_DSCR_BUS_01_INP02 = 1
 

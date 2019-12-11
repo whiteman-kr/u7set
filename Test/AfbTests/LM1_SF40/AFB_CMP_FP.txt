@@ -1,6 +1,6 @@
 ﻿test AFB_CMP_FP_EQ_1, AFB tests for CMP_FP_EQ element
 schema AFB_CMP_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT 0
 //DEAD_BAND = 10
 // set - hys/2 <= in <= set + hys/2
@@ -84,7 +84,7 @@ endtest
 
 test AFB_CMP_FP_EQ_2, AFB tests for CMP_FP_EQ element
 schema AFB_CMP_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT 1
 //const int DEAD_BAND = 10 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
 // set - hys/2 <= in <= set + hys/2
@@ -130,6 +130,7 @@ endtest
 
 test AFB_CMP_FP_EQ_3, AFB tests for CMP_FP_EQ element
 schema AFB_CMP_FP
+compatible MODULE_LM1SF40
 //SETPOINT -1
 //const int DEAD_BAND = 10 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
 // set - hys/2 <= in <= set + hys/2
@@ -179,7 +180,7 @@ endtest
 
 test AFB_CMP_FP_GR_1, AFB tests for CMP_FP_GR element
 schema AFB_CMP_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT = 0
 //HYSTERESIS = 10
 //If IN > Set =1 (Set not include), IF IN <= Set - hys  = 0  else  out = previous state result value
@@ -217,7 +218,7 @@ endtest
 
 test AFB_CMP_FP_GR_2, AFB tests for CMPС_FP_GR element
 schema AFB_CMP_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT = 1
 //HYSTERESIS = 10 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
 //If IN > Set =1 (Set not include), IF IN <= Set - hys  = 0  else  out = previous state result value
@@ -263,7 +264,7 @@ endtest
 
 test AFB_CMPС_FP_GR_3, AFB tests for CMPС_FP_GR element
 schema AFB_CMP_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT = -1
 //HYSTERESIS = 10
 //If IN > Set =1 (Set not include), IF IN <= Set - hys  = 0  else  out = previous state result value
@@ -302,7 +303,7 @@ endtest
 
 test AFB_CMPС_FP_LS_1, AFB tests for CMPС_FP_LS element
 schema AFB_CMP_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT = 0
 //HYSTERESIS = 10
 //If IN < Set  out =1 (Set not include), IF IN => Set + hys  out = 0  else  out = previous state result value
@@ -342,7 +343,7 @@ endtest
 
 test AFB_CMP_FP_LS_2, AFB tests for CMP_FP_LS element
 schema AFB_CMP_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT = 1
 //HYSTERESIS = 10 
 //If IN < Set  out =1 (Set not include), IF IN => Set + hys  out = 0  else  out = previous state result value
@@ -388,7 +389,7 @@ endtest
 
 test AFB_CMP_FP_LS_3, AFB tests for CMP_FP_LS element
 schema AFB_CMP_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT = -1 
 //HYSTERESIS = 10 
 //If IN < Set  out =1 (Set not include), IF IN => Set + hys  out = 0  else  out = previous state result value
@@ -436,7 +437,7 @@ endtest
 
 test AFB_CMP_FP_NE_1, AFB tests for CMP_FP_NE element
 schema AFB_CMP_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT = 0 
 //DEAD_BAND = 10
 // set - hys <= in <= set + hys  out = 1 ; IMPORTRANT hys = hys / 2  // c RPCT hys передается уже посчитанный как hys = hys / 2  //  правило рабочее для динамических компараторов EQ и NE
@@ -466,7 +467,7 @@ endtest
 
 test AFB_CMP_FP_NE_2, AFB tests for CMP_FP_NE element
 schema AFB_CMP_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT = 1
 //DEAD_BAND = 10
 // set - hys/2 <= in <= set + hys/2  out = 1 

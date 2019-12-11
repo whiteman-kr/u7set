@@ -1,6 +1,6 @@
 ﻿test AFB_SQRT_FP, AFB tests for AFB_SQRT_FP element
 schema AFB_SQRT_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 // in > = 0, out= sqrt(in)
 set #TUN_IN_FP1 = 4
 check #OUT_SQRT_FP001 == 2

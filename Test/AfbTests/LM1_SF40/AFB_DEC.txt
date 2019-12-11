@@ -1,6 +1,6 @@
 test AFB_DEC_1, AFB tests for AFB_DEC element
 schema AFB_DEC
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_IN_SI1 = 0
 check #OUT_1DEC001 == 1
 set #TUN_IN_SI1 = 1

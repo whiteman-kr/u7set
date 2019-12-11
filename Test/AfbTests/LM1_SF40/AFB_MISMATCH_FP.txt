@@ -1,6 +1,6 @@
 test AFB_SWITCH_FP01_value0, AFB tests for AFB_SWITCH_FP element
 schema AFB_SWITCH_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_IN_FP1 = 1, #TUN_IN_FP2 = 1, #TUN_IN_FP3 = 1,#TUN_IN_FP4 = 1
 check #OUTPUT1 == 0
 check #OUTPUT2 == 0
@@ -59,7 +59,7 @@ endtest
 
 test AFB_SWITCH_FP01_value1.23, AFB tests for AFB_SWITCH_FP element
 schema AFB_SWITCH_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_IN_FP1 = 1.23, #TUN_IN_FP2 = 1, #TUN_IN_FP3 = 1,#TUN_IN_FP4 = 1
 check #OUTPUT1_1 == 0
 check #OUTPUT2_2 == 0

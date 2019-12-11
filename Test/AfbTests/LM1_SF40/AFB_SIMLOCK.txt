@@ -1,6 +1,6 @@
 test AFB_SIMLOCK1, AFB tests for AFB_SIMLOCK element
 schema AFB_SIMLOCK
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_DSCR_BUS_01_INP01 = 0
 set #TUN_DSCR_BUS_02_INP01 = 0
 set #TUN_DSCR_BUS_03_INP01 = 0
@@ -30,7 +30,7 @@ endtest
 
 test AFB_SIMLOCK2, AFB tests for AFB_SIMLOCK element
 schema AFB_SIMLOCK
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_DSCR_BUS_01_INP01 = 1
 set #TUN_DSCR_BUS_02_INP01 = 1
 set #TUN_DSCR_BUS_03_INP01 = 1

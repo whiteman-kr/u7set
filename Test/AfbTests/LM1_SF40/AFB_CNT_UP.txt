@@ -1,6 +1,6 @@
 test AFB_CNT_UP1, AFB tests for AFB_CNT_UP element
 schema AFB_CNT_UP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =1
 check #OUT_CNT_UP1 == 0
 set #TUN_DSCR1 = 0, #TUN_DSCR_RESET1 =0

@@ -1,8 +1,6 @@
-Report from: 18-11-2019 12:16:21
+Report from: 11-12-2019 15:44:56
 
-Test File: AFB_BUS_NOT.txt
-
-Test AFB_BUS_NOT_1, BUS_NOT function test
+Test AFB_BUS_NOT_1, BUS_NOT function test (MODULE_LM1SF00)
     Set #TUN_DSCR_BUS_01_INP01=0
     Set #TUN_DSCR_BUS_02_INP01=0
     Set #TUN_DSCR_BUS_03_INP01=0
@@ -15,7 +13,7 @@ Test AFB_BUS_NOT_1, BUS_NOT function test
     Check #OUT_BUS_NOT_05=1 - Ok
 Endtest AFB_BUS_NOT_1 - Ok
 
-Test AFB_BUS_NOT_2, BUS_NOT function test
+Test AFB_BUS_NOT_2, BUS_NOT function test (MODULE_LM1SF00)
     Set #TUN_DSCR_BUS_01_INP01=1
     Set #TUN_DSCR_BUS_02_INP01=1
     Set #TUN_DSCR_BUS_03_INP01=1
@@ -28,7 +26,7 @@ Test AFB_BUS_NOT_2, BUS_NOT function test
     Check #OUT_BUS_NOT_05=0 - Ok
 Endtest AFB_BUS_NOT_2 - Ok
 
-Test AFB_BUS_NOT_3, BUS_NOT function test
+Test AFB_BUS_NOT_3, BUS_NOT function test (MODULE_LM1SF00)
     Set #TUN_DSCR_BUS_01_INP01=1
     Set #TUN_DSCR_BUS_02_INP01=0
     Set #TUN_DSCR_BUS_03_INP01=1

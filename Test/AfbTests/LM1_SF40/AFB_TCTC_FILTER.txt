@@ -1,6 +1,6 @@
 test AFB_TCTC_FILTER_1, AFB tests for TCTC_FILTER element
 schema TCTC_FILTER
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //time 1000
 set #TUN_DSCR1 = 0
 delay 1000

@@ -1,6 +1,6 @@
 test AFB_ABS_SI, AFB tests for AFB_ABS_SI element
 schema AFB_ABS_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 
 set #TUN_IN_FP1 = 0
 check #OUT_ABS_SI001  == 0

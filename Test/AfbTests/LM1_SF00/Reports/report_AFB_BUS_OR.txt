@@ -1,8 +1,6 @@
-Report from: 18-11-2019 12:17:27
+Report from: 11-12-2019 15:45:39
 
-Test File: AFB_BUS_OR.txt
-
-Test AFB_BUS_OR_1, BUS_2OR function test
+Test AFB_BUS_OR_1, BUS_2OR function test (MODULE_LM1SF00)
     Set #TUN_DSCR_BUS_01_INP01=0
     Set #TUN_DSCR_BUS_01_INP02=0
     Set #TUN_DSCR_BUS_02_INP01=1
@@ -20,7 +18,7 @@ Test AFB_BUS_OR_1, BUS_2OR function test
     Check #OUT_BUS_2OR_05=1 - Ok
 Endtest AFB_BUS_OR_1 - Ok
 
-Test AFB_BUS_OR_2, BUS_2OR function test
+Test AFB_BUS_OR_2, BUS_2OR function test (MODULE_LM1SF00)
     Set #TUN_DSCR_BUS_01_INP01=1
     Set #TUN_DSCR_BUS_01_INP02=1
     Set #TUN_DSCR_BUS_02_INP01=1
@@ -38,7 +36,7 @@ Test AFB_BUS_OR_2, BUS_2OR function test
     Check #OUT_BUS_2OR_05=1 - Ok
 Endtest AFB_BUS_OR_2 - Ok
 
-Test AFB_BUS_OR_3, BUS_2OR function test
+Test AFB_BUS_OR_3, BUS_2OR function test (MODULE_LM1SF00)
     Set #TUN_DSCR_BUS_01_INP01=0
     Set #TUN_DSCR_BUS_01_INP02=0
     Set #TUN_DSCR_BUS_02_INP01=0

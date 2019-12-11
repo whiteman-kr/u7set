@@ -1,0 +1,495 @@
+﻿test AFB_CMP_FP_EQ_1, AFB tests for CMP_FP_EQ element
+schema AFB_CMP_FP
+compatible MODULE_LM1SF40
+//SETPOINT 0
+//DEAD_BAND = 10
+// set - hys/2 <= in <= set + hys/2
+
+// nan check
+set #TUN_IN_FP1 = nan, #TUN_SET_CMP_FP_EQ001 = nan
+check #OUT_CMP_FP_EQ001 == 0
+check #NAN_CMP_FP_EQ001 == 1
+
+// nan check
+set #TUN_IN_FP1 = nan, #TUN_SET_CMP_FP_EQ001 = 22.5
+check #OUT_CMP_FP_EQ001 == 0
+check #NAN_CMP_FP_EQ001 == 1
+
+// nan check
+set #TUN_IN_FP1 = nan, #TUN_SET_CMP_FP_EQ001 = -99.65
+check #OUT_CMP_FP_EQ001 == 0
+check #NAN_CMP_FP_EQ001 == 1
+
+
+
+set #TUN_IN_FP1 = 0 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 1
+set #TUN_IN_FP1 = 0.1 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 1
+set #TUN_IN_FP1 = 4.99 , #TUN_SET_CMP_FP_EQ001 = 0  
+check #OUT_CMP_FP_EQ001 == 1
+set #TUN_IN_FP1 = 5.0  , #TUN_SET_CMP_FP_EQ001 = 0  
+check #OUT_CMP_FP_EQ001 == 1
+set #TUN_IN_FP1 = 5.09  , #TUN_SET_CMP_FP_EQ001 = 0  
+check #OUT_CMP_FP_EQ001 == 0
+
+set #TUN_IN_FP1 = 5.1 , #TUN_SET_CMP_FP_EQ001 = 0 //!
+check #OUT_CMP_FP_EQ001 == 0
+//
+set #TUN_IN_FP1 = 5.9 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 0 
+
+set #TUN_IN_FP1 = 8.5 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 0 
+set #TUN_IN_FP1 = 9 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 0 
+set #TUN_IN_FP1 = 9.5 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 0 
+set #TUN_IN_FP1 = 10 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 0 
+set #TUN_IN_FP1 = 11 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 0
+
+set #TUN_IN_FP1 = 5.1 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 0 
+set #TUN_IN_FP1 = 5.0  , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 1
+set #TUN_IN_FP1 = 4.99 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 1
+set #TUN_IN_FP1 = 0 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 1
+set #TUN_IN_FP1 = -0.1 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 1
+set #TUN_IN_FP1 = -1 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 1
+set #TUN_IN_FP1 = -4.99 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 1
+set #TUN_IN_FP1 = -5 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 1
+set #TUN_IN_FP1 = -5.1 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 0
+set #TUN_IN_FP1 = -200 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 0
+set #TUN_IN_FP1 = -5.25 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 0
+set #TUN_IN_FP1 = -5.01 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 0
+set #TUN_IN_FP1 = -5 , #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 1	
+//NaN check
+set #TUN_IN_FP1 = nan, #TUN_SET_CMP_FP_EQ001 = 0
+check #OUT_CMP_FP_EQ001 == 0
+check #NAN_CMP_FP_EQ001 == 1
+endtest
+
+test AFB_CMP_FP_EQ_2, AFB tests for CMP_FP_EQ element
+schema AFB_CMP_FP
+compatible MODULE_LM1SF00
+//SETPOINT 1
+//const int DEAD_BAND = 10 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
+// set - hys/2 <= in <= set + hys/2
+set #TUN_IN_FP2 = -6 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 0
+set #TUN_IN_FP2 = -4.01 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 0
+set #TUN_IN_FP2 = -4 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 1
+set #TUN_IN_FP2 = -3.99 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 1
+set #TUN_IN_FP2 = -1.01 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 1
+set #TUN_IN_FP2 = 0 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 1
+set #TUN_IN_FP2 = 1 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 1
+set #TUN_IN_FP2 = -4 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 1
+set #TUN_IN_FP2 = -1 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 1
+set #TUN_IN_FP2 = 0 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 1
+set #TUN_IN_FP2 = 1 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 1
+set #TUN_IN_FP2 = 5.99 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 1
+set #TUN_IN_FP2 = 6 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 1
+set #TUN_IN_FP2 = 6.01 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 0
+set #TUN_IN_FP2 = 1506.8 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 0
+set #TUN_IN_FP2 = 6.01 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 0
+set #TUN_IN_FP2 = 6 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 1
+set #TUN_IN_FP2 = 5.99 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 1
+set #TUN_IN_FP2 = 0 , #TUN_SET_CMP_FP_EQ002 = 1
+	check #OUT_CMP_FP_EQ002 == 1
+endtest
+
+test AFB_CMP_FP_EQ_3, AFB tests for CMP_FP_EQ element
+schema AFB_CMP_FP
+//SETPOINT -1
+//const int DEAD_BAND = 10 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
+// set - hys/2 <= in <= set + hys/2
+set #TUN_IN_FP3 = 0 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 1
+set #TUN_IN_FP3 = -0.99 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 1
+set #TUN_IN_FP3 = -0.1 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 1
+set #TUN_IN_FP3 = -5.99 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 1
+set #TUN_IN_FP3 = -6 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 1
+set #TUN_IN_FP3 = -6.01 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 0
+set #TUN_IN_FP3 = -258554 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 0
+set #TUN_IN_FP3 = -6.01 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 0
+set #TUN_IN_FP3 =  -6 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 1
+set #TUN_IN_FP3 = -5.99 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 1
+set #TUN_IN_FP3 = -3 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 1
+set #TUN_IN_FP3 = 0 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 1
+set #TUN_IN_FP3 = 2.5 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 1
+set #TUN_IN_FP3 = 3.99 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 1
+set #TUN_IN_FP3 = 4 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 1
+set #TUN_IN_FP3 = 4.01 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 0
+set #TUN_IN_FP3 = 1458.9 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 0
+set #TUN_IN_FP3 = 4.1 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 0 
+set #TUN_IN_FP3 = 4 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 1
+set #TUN_IN_FP3 = 3.99 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 1
+set #TUN_IN_FP3 = 0.1 , #TUN_SET_CMP_FP_EQ003 = -1
+	check #OUT_CMP_FP_EQ003 == 1
+endtest
+
+test AFB_CMP_FP_GR_1, AFB tests for CMP_FP_GR element
+schema AFB_CMP_FP
+compatible MODULE_LM1SF00
+//SETPOINT = 0
+//HYSTERESIS = 10
+//If IN > Set =1 (Set not include), IF IN <= Set - hys  = 0  else  out = previous state result value
+set #TUN_IN_FP1 = 0, #TUN_SET_CMP_FP_GR001 = 0
+	check #OUT_CMP_FP_GR001 == 0
+set #TUN_IN_FP1 = 0.01 , #TUN_SET_CMP_FP_GR001 = 0
+	check #OUT_CMP_FP_GR001 == 1
+set #TUN_IN_FP1 = 0.1 , #TUN_SET_CMP_FP_GR001 = 0
+	check #OUT_CMP_FP_GR001 == 1
+set #TUN_IN_FP1 = 0.99 , #TUN_SET_CMP_FP_GR001 = 0
+	check #OUT_CMP_FP_GR001 == 1
+set #TUN_IN_FP1 = 1 , #TUN_SET_CMP_FP_GR001 = 0
+	check #OUT_CMP_FP_GR001 == 1
+set #TUN_IN_FP1 = 9999 , #TUN_SET_CMP_FP_GR001 = 0
+	check #OUT_CMP_FP_GR001 == 1
+set #TUN_IN_FP1 = 5 , #TUN_SET_CMP_FP_GR001 = 0
+	check #OUT_CMP_FP_GR001 == 1
+set #TUN_IN_FP1 = 0 , #TUN_SET_CMP_FP_GR001 = 0 
+	check #OUT_CMP_FP_GR001 == 1
+set #TUN_IN_FP1 = 1 , #TUN_SET_CMP_FP_GR001 = 0
+	check #OUT_CMP_FP_GR001 == 1 
+set #TUN_IN_FP1 = 2 , #TUN_SET_CMP_FP_GR001 = 0
+	check #OUT_CMP_FP_GR001 == 1
+set #TUN_IN_FP1 = 2.2 , #TUN_SET_CMP_FP_GR001 = 0
+	check #OUT_CMP_FP_GR001 == 1
+set #TUN_IN_FP1 = -10 , #TUN_SET_CMP_FP_GR001 = 0 
+	check #OUT_CMP_FP_GR001 == 0
+set #TUN_IN_FP1 = -9.99 , #TUN_SET_CMP_FP_GR001 = 0	
+	check #OUT_CMP_FP_GR001 == 0
+set #TUN_IN_FP1 = -8.56 , #TUN_SET_CMP_FP_GR001 = 0
+	check #OUT_CMP_FP_GR001 == 0
+set #TUN_IN_FP1 = 0 , #TUN_SET_CMP_FP_GR001 = 0
+	check #OUT_CMP_FP_GR001 == 0
+endtest
+
+test AFB_CMP_FP_GR_2, AFB tests for CMPС_FP_GR element
+schema AFB_CMP_FP
+compatible MODULE_LM1SF00
+//SETPOINT = 1
+//HYSTERESIS = 10 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
+//If IN > Set =1 (Set not include), IF IN <= Set - hys  = 0  else  out = previous state result value
+set #TUN_IN_FP2 = -9 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 0
+set #TUN_IN_FP2 = -5.8 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 0
+set #TUN_IN_FP2 = -0.1 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 0
+set #TUN_IN_FP2 = 0 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 0
+set #TUN_IN_FP2 = 1 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 0
+set #TUN_IN_FP2 = 1.01 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 1
+set #TUN_IN_FP2 = 127.0101 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 1
+set #TUN_IN_FP2 = 1 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 1
+set #TUN_IN_FP2 = 0 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 1
+set #TUN_IN_FP2 = -5.58 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 1	
+set #TUN_IN_FP2 = -9 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 0
+set #TUN_IN_FP2 = -25.7 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 0
+set #TUN_IN_FP2 = -8.99 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 0
+set #TUN_IN_FP2 = -9 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 0
+set #TUN_IN_FP2 = -5.5 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 0
+set #TUN_IN_FP2 = 0 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 0
+set #TUN_IN_FP2 = 0.99 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 0
+set #TUN_IN_FP2 = 1 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 0
+set #TUN_IN_FP2 = 1.01 , #TUN_SET_CMP_FP_GR002 = 1
+	check #OUT_CMP_FP_GR002 == 1
+endtest
+
+test AFB_CMPС_FP_GR_3, AFB tests for CMPС_FP_GR element
+schema AFB_CMP_FP
+compatible MODULE_LM1SF00
+//SETPOINT = -1
+//HYSTERESIS = 10
+//If IN > Set =1 (Set not include), IF IN <= Set - hys  = 0  else  out = previous state result value
+set #TUN_IN_FP3 = -12 , #TUN_SET_CMP_FP_GR003 = -1
+	check #OUT_CMP_FP_GR003 == 0
+set #TUN_IN_FP3 = -11 , #TUN_SET_CMP_FP_GR003 = -1
+	check #OUT_CMP_FP_GR003 == 0
+set #TUN_IN_FP3 = 0 , #TUN_SET_CMP_FP_GR003 = -1
+	check #OUT_CMP_FP_GR003 == 1
+set #TUN_IN_FP3 = 1 , #TUN_SET_CMP_FP_GR003 = -1
+	check #OUT_CMP_FP_GR003 == 1
+set #TUN_IN_FP3 = 1.01 , #TUN_SET_CMP_FP_GR003 = -1
+	check #OUT_CMP_FP_GR003 == 1
+set #TUN_IN_FP3 = 12.56 , #TUN_SET_CMP_FP_GR003 = -1
+	check #OUT_CMP_FP_GR003 == 1
+set #TUN_IN_FP3 = 225554.99 , #TUN_SET_CMP_FP_GR003 = -1
+	check #OUT_CMP_FP_GR003 == 1
+set #TUN_IN_FP3 = 16.4 , #TUN_SET_CMP_FP_GR003 = -1
+	check #OUT_CMP_FP_GR003 == 1
+set #TUN_IN_FP3 = 9 , #TUN_SET_CMP_FP_GR003 = -1
+	check #OUT_CMP_FP_GR003 == 1
+set #TUN_IN_FP3 = 8.8 , #TUN_SET_CMP_FP_GR003 = -1
+	check #OUT_CMP_FP_GR003 == 1
+set #TUN_IN_FP3 = 1 , #TUN_SET_CMP_FP_GR003 = -1
+	check #OUT_CMP_FP_GR003 == 1
+set #TUN_IN_FP3 = 0 , #TUN_SET_CMP_FP_GR003 = -1
+	check #OUT_CMP_FP_GR003 == 1	
+set #TUN_IN_FP3 = -11 , #TUN_SET_CMP_FP_GR003 = -1
+	check #OUT_CMP_FP_GR003 == 0
+set #TUN_IN_FP3 = -11.01 , #TUN_SET_CMP_FP_GR003 = -1
+	check #OUT_CMP_FP_GR003 == 0
+set #TUN_IN_FP3 = -25.4 , #TUN_SET_CMP_FP_GR003 = -1
+	check #OUT_CMP_FP_GR003 == 0
+endtest
+
+
+test AFB_CMPС_FP_LS_1, AFB tests for CMPС_FP_LS element
+schema AFB_CMP_FP
+compatible MODULE_LM1SF00
+//SETPOINT = 0
+//HYSTERESIS = 10
+//If IN < Set  out =1 (Set not include), IF IN => Set + hys  out = 0  else  out = previous state result value
+set #TUN_IN_FP1 = -154.8 , #TUN_SET_CMP_FP_LS001 = 0
+	check #OUT_CMP_FP_LS001 == 1
+set #TUN_IN_FP1 = -1 , #TUN_SET_CMP_FP_LS001 = 0 
+	check #OUT_CMP_FP_LS001 == 1
+set #TUN_IN_FP1 = -0.1 , #TUN_SET_CMP_FP_LS001 = 0
+	check #OUT_CMP_FP_LS001 == 1
+set #TUN_IN_FP1 = 0 , #TUN_SET_CMP_FP_LS001 = 0 
+	check #OUT_CMP_FP_LS001 == 1
+set #TUN_IN_FP1 = 0.1 , #TUN_SET_CMP_FP_LS001 = 0 
+	check #OUT_CMP_FP_LS001 == 1
+set #TUN_IN_FP1 = 9.99 , #TUN_SET_CMP_FP_LS001 = 0 
+	check #OUT_CMP_FP_LS001 == 1
+set #TUN_IN_FP1 = 10 , #TUN_SET_CMP_FP_LS001 = 0 
+	check #OUT_CMP_FP_LS001 == 0
+set #TUN_IN_FP1 = 10.01 , #TUN_SET_CMP_FP_LS001 = 0 
+	check #OUT_CMP_FP_LS001 == 0
+set #TUN_IN_FP1 = 1254.6 , #TUN_SET_CMP_FP_LS001 = 0 
+	check #OUT_CMP_FP_LS001 == 0
+set #TUN_IN_FP1 = 256.6 , #TUN_SET_CMP_FP_LS001 = 0 
+	check #OUT_CMP_FP_LS001 == 0
+set #TUN_IN_FP1 = 9.99 , #TUN_SET_CMP_FP_LS001 = 0 
+	check #OUT_CMP_FP_LS001 == 0
+set #TUN_IN_FP1 = 10 , #TUN_SET_CMP_FP_LS001 = 0 
+	check #OUT_CMP_FP_LS001 == 0
+set #TUN_IN_FP1 = 0 , #TUN_SET_CMP_FP_LS001 = 0 
+	check #OUT_CMP_FP_LS001 == 0
+set #TUN_IN_FP1 = -0.01 , #TUN_SET_CMP_FP_LS001 = 0 
+	check #OUT_CMP_FP_LS001 == 1
+set #TUN_IN_FP1 = -0.001 , #TUN_SET_CMP_FP_LS001 = 0 
+	check #OUT_CMP_FP_LS001 == 1
+set #TUN_IN_FP1 = -9999.9 , #TUN_SET_CMP_FP_LS001 = 0 
+	check #OUT_CMP_FP_LS001 == 1
+endtest
+
+test AFB_CMP_FP_LS_2, AFB tests for CMP_FP_LS element
+schema AFB_CMP_FP
+compatible MODULE_LM1SF00
+//SETPOINT = 1
+//HYSTERESIS = 10 
+//If IN < Set  out =1 (Set not include), IF IN => Set + hys  out = 0  else  out = previous state result value
+set #TUN_IN_FP2 = -154.8 , #TUN_SET_CMP_FP_LS002 = 1 
+	check #OUT_CMP_FP_LS002 == 1
+set #TUN_IN_FP2 = -10.5 , #TUN_SET_CMP_FP_LS002 = 1 
+	check #OUT_CMP_FP_LS002 == 1
+set #TUN_IN_FP2 = -10.5 , #TUN_SET_CMP_FP_LS002 = 1
+	check #OUT_CMP_FP_LS002 == 1	
+set #TUN_IN_FP2 = 1 , #TUN_SET_CMP_FP_LS002 = 1
+	check #OUT_CMP_FP_LS002 == 1	
+set #TUN_IN_FP2 = 0 , #TUN_SET_CMP_FP_LS002 = 1
+	check #OUT_CMP_FP_LS002 == 1
+set #TUN_IN_FP2 = 1.1 , #TUN_SET_CMP_FP_LS002 = 1
+	check #OUT_CMP_FP_LS002 == 1
+set #TUN_IN_FP2 = 10.99 , #TUN_SET_CMP_FP_LS002 = 1
+	check #OUT_CMP_FP_LS002 == 1
+set #TUN_IN_FP2 = 11 , #TUN_SET_CMP_FP_LS002 = 1
+	check #OUT_CMP_FP_LS002 == 0
+set #TUN_IN_FP2 = 11.01 , #TUN_SET_CMP_FP_LS002 = 1
+	check #OUT_CMP_FP_LS002 == 0
+set #TUN_IN_FP2 = 124 , #TUN_SET_CMP_FP_LS002 = 1
+	check #OUT_CMP_FP_LS002 == 0
+set #TUN_IN_FP2 = 99999.99 , #TUN_SET_CMP_FP_LS002 = 1
+	check #OUT_CMP_FP_LS002 == 0
+set #TUN_IN_FP2 = 11.1 , #TUN_SET_CMP_FP_LS002 = 1
+	check #OUT_CMP_FP_LS002 == 0
+set #TUN_IN_FP2 = 11 , #TUN_SET_CMP_FP_LS002 = 1
+	check #OUT_CMP_FP_LS002 == 0
+set #TUN_IN_FP2 = 10.999 , #TUN_SET_CMP_FP_LS002 = 1
+	check #OUT_CMP_FP_LS002 == 0
+set #TUN_IN_FP2 = 0.99 , #TUN_SET_CMP_FP_LS002 = 1
+	check #OUT_CMP_FP_LS002 == 0 //!!!!
+set #TUN_IN_FP2 = 1 , #TUN_SET_CMP_FP_LS002 = 1
+	check #OUT_CMP_FP_LS002 == 1
+set #TUN_IN_FP2 = 0 , #TUN_SET_CMP_FP_LS002 = 1
+	check #OUT_CMP_FP_LS002 == 1
+set #TUN_IN_FP2 = -0.1 , #TUN_SET_CMP_FP_LS002 = 1
+	check #OUT_CMP_FP_LS002 == 1
+set #TUN_IN_FP2 = -99.9 , #TUN_SET_CMP_FP_LS002 = 1
+	check #OUT_CMP_FP_LS002 == 1	
+endtest
+
+test AFB_CMP_FP_LS_3, AFB tests for CMP_FP_LS element
+schema AFB_CMP_FP
+compatible MODULE_LM1SF00
+//SETPOINT = -1 
+//HYSTERESIS = 10 
+//If IN < Set  out =1 (Set not include), IF IN => Set + hys  out = 0  else  out = previous state result value
+set #TUN_IN_FP3 = -999.9 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 1
+set #TUN_IN_FP3 = -256.78 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 1
+set #TUN_IN_FP3 = -1 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 1	
+set #TUN_IN_FP3 = -0.1 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 1	
+set #TUN_IN_FP3 = 0 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 1
+set #TUN_IN_FP3 = 0.1 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 1
+set #TUN_IN_FP3 = 5.99 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 1
+set #TUN_IN_FP3 = 8.99 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 1
+set #TUN_IN_FP3 = 9 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 0
+set #TUN_IN_FP3 = 9.99 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 0
+set #TUN_IN_FP3 = 10.12 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 0
+set #TUN_IN_FP3 = 12578.9 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 0
+set #TUN_IN_FP3 = 222.3 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 0
+set #TUN_IN_FP3 = 9.99 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 0
+set #TUN_IN_FP3 = 9.01 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 0
+set #TUN_IN_FP3 = 9 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 0
+set #TUN_IN_FP3 = 9.01 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 0
+set #TUN_IN_FP3 = 9.1 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 0
+set #TUN_IN_FP3 = -1 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 0
+set #TUN_IN_FP3 = -1.01 , #TUN_SET_CMP_FP_LS003 = -1
+	check #OUT_CMP_FP_LS003 == 1	
+endtest
+
+test AFB_CMP_FP_NE_1, AFB tests for CMP_FP_NE element
+schema AFB_CMP_FP
+compatible MODULE_LM1SF00
+//SETPOINT = 0 
+//DEAD_BAND = 10
+// set - hys <= in <= set + hys  out = 1 ; IMPORTRANT hys = hys / 2  // c RPCT hys передается уже посчитанный как hys = hys / 2  //  правило рабочее для динамических компараторов EQ и NE
+set #TUN_IN_FP1 = -125.7 , #TUN_SET_CMP_FP_NE001 = 0
+check #OUT_CMP_FP_NE001 == 1
+set #TUN_IN_FP1 = -5.5 , #TUN_SET_CMP_FP_NE001 = 0
+check #OUT_CMP_FP_NE001 == 1
+set #TUN_IN_FP1 = -5.01 , #TUN_SET_CMP_FP_NE001 = 0   
+check #OUT_CMP_FP_NE001 == 1
+set #TUN_IN_FP1 = -5.0 , #TUN_SET_CMP_FP_NE001 = 0   
+check #OUT_CMP_FP_NE001 == 0
+set #TUN_IN_FP1 = 0 , #TUN_SET_CMP_FP_NE001 = 0
+check #OUT_CMP_FP_NE001 == 0 
+set #TUN_IN_FP1 = 4.99 , #TUN_SET_CMP_FP_NE001 = 0
+check #OUT_CMP_FP_NE001 == 0 
+set #TUN_IN_FP1 = 5.0 , #TUN_SET_CMP_FP_NE001 = 0 
+check #OUT_CMP_FP_NE001 == 0
+set #TUN_IN_FP1 = 4.99 , #TUN_SET_CMP_FP_NE001 = 0
+check #OUT_CMP_FP_NE001 == 0
+set #TUN_IN_FP1 = 5.01 , #TUN_SET_CMP_FP_NE001 = 0
+check #OUT_CMP_FP_NE001 == 1
+set #TUN_IN_FP1 = 12.99 , #TUN_SET_CMP_FP_NE001 = 0
+check #OUT_CMP_FP_NE001 == 1
+set #TUN_IN_FP1 = -1 , #TUN_SET_CMP_FP_NE001 = 0
+check #OUT_CMP_FP_NE001 == 1	
+endtest
+
+test AFB_CMP_FP_NE_2, AFB tests for CMP_FP_NE element
+schema AFB_CMP_FP
+compatible MODULE_LM1SF00
+//SETPOINT = 1
+//DEAD_BAND = 10
+// set - hys/2 <= in <= set + hys/2  out = 1 
+set #TUN_IN_FP2 = -125.7 , #TUN_SET_CMP_FP_NE002 = 1
+check #OUT_CMP_FP_NE002 == 1
+set #TUN_IN_FP2 = -5.5 , #TUN_SET_CMP_FP_NE002 = 1
+check #OUT_CMP_FP_NE002 == 1
+set #TUN_IN_FP2 = -5.01  , #TUN_SET_CMP_FP_NE002 = 1  
+check #OUT_CMP_FP_NE002 == 1
+set #TUN_IN_FP2 = -5.0  , #TUN_SET_CMP_FP_NE002 = 1  
+check #OUT_CMP_FP_NE002 == 1
+set #TUN_IN_FP2 = 0 , #TUN_SET_CMP_FP_NE002 = 1
+check #OUT_CMP_FP_NE002 == 0 
+set #TUN_IN_FP2 = 4.99 , #TUN_SET_CMP_FP_NE002 = 1
+check #OUT_CMP_FP_NE002 == 0 
+set #TUN_IN_FP2 = 5.0 , #TUN_SET_CMP_FP_NE002 = 1  
+check #OUT_CMP_FP_NE002 == 0
+set #TUN_IN_FP2 = 4.99 , #TUN_SET_CMP_FP_NE002 = 1
+check #OUT_CMP_FP_NE002 == 0
+set #TUN_IN_FP2 = 5.01 , #TUN_SET_CMP_FP_NE002 = 1
+check #OUT_CMP_FP_NE002 == 0
+set #TUN_IN_FP2 = 12.99 , #TUN_SET_CMP_FP_NE002 = 1
+check #OUT_CMP_FP_NE002 == 1
+set #TUN_IN_FP2 = -1 , #TUN_SET_CMP_FP_NE002 = 1
+check #OUT_CMP_FP_NE002 == 0	
+endtest

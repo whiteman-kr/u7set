@@ -1,6 +1,6 @@
 test AFB_DERIV1, AFB tests for AFB_DERIV element
 schema AFB_DERIV
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //0<td<5 RPCT NO action, Sets PARAM_ERR 
 set #TUN_IN_FP1 = 10 , #TUN_RESET1 = 0, #TUN_PAUSE1 = 0, #TUN_KD1 = 1  , #TUN_TD1 = 5
 check #OUT_DERIV1 == 0

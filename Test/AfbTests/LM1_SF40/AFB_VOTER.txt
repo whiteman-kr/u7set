@@ -1,6 +1,6 @@
 test AFB_VOTER_in3, AFB tests for AFB_VOTER element
 schema AFB_VOTER
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_DSCR1 = 0, #TUN_DSCR2 = 0, #TUN_DSCR3 = 0
 check #OUT_VOTER003 == 0
 check #OUT_VOTER_ERR_MS003 == 0
@@ -30,7 +30,7 @@ endtest
 
 test AFB_VOTER_in4, AFB tests for AFB_VOTER element
 schema AFB_VOTER
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_DSCR1 = 0, #TUN_DSCR2 = 0, #TUN_DSCR3 = 0, #TUN_DSCR4 = 0
 check #OUT_VOTER004 == 0
 check #OUT_VOTER_ERR_MS004 == 0
@@ -64,7 +64,7 @@ endtest
 
 test AFB_VOTER_in7, AFB tests for AFB_VOTER element
 schema AFB_VOTER
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_DSCR1 = 0, #TUN_DSCR2 = 0, #TUN_DSCR3 = 0, #TUN_DSCR4 = 0, #TUN_DSCR5 = 0, #TUN_DSCR6 = 0, #TUN_DSCR7 = 0
 check #OUT_VOTER007 == 0
 check #OUT_VOTER_ERR_MS007 == 0
@@ -108,7 +108,7 @@ endtest
 
 test AFB_VOTER_in16, AFB tests for AFB_VOTER element
 schema AFB_VOTER
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_DSCR1 = 0, #TUN_DSCR2 = 0, #TUN_DSCR3 = 0, #TUN_DSCR4 = 0, #TUN_DSCR5 = 0, #TUN_DSCR6 = 0, #TUN_DSCR7 = 0, #TUN_DSCR8 = 0, #TUN_DSCR9 = 0, #TUN_DSCR10 = 0, #TUN_DSCR11 = 0, #TUN_DSCR12 = 0, #TUN_DSCR13 = 0, #TUN_DSCR14 = 0, #TUN_DSCR15 = 0, #TUN_DSCR16 = 0
 check #OUT_VOTER016 == 0
 check #OUT_VOTER_ERR_MS016 == 0

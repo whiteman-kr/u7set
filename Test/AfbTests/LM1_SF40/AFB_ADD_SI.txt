@@ -1,6 +1,6 @@
 test AFB_ADD_SI, AFB tests for AFB_ADD_SI element
 schema AFB_ADD_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF4
 
 set #TUN_IN_SI1 = 0 , #TUN_IN_SI2 = 0
 check #OUT_ADD_SI001 == 0

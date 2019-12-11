@@ -1,6 +1,6 @@
 test AFB_LIM_FP01, AFB tests for AFB_LIM_FP element
 schema AFB_LIM_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_IN_FP1 = 1, #TUN_IN_FP2 = 0, #TUN_IN_FP3 = 0
 check #OUT_LIM_FP01 == 0
 check #NAN_LIM_FP01 == 0

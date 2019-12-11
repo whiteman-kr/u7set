@@ -1,6 +1,6 @@
 test AFB_CMPС_SI_EQ_0, AFB tests for CMPС_SI_EQ element
 schema AFB_CMPС_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //const int SETPOINT = 0   // Added a constant with the value of SETPOINT, the same value is set on the scheme
 //const int DEAD_BAND = 100 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
 // set - hys <= in <= set + hys ; IMPORTRANT hys = hys / 2  // c RPCT hys передается уже посчитанный как hys = hys / 2  //  правило рабочее для динамических компараторов EQ и NE
@@ -30,7 +30,7 @@ endtest
 
 test AFB_CMPС_SI_EQ_24, AFB tests for CMPС_SI_EQ element
 schema AFB_CMPС_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //const int SETPOINT = 24   // Added a constant with the value of SETPOINT, the same value is set on the scheme
 //const int DEAD_BAND = 100 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
 // set - hys <= in <= set + hys ; IMPORTRANT hys = hys / 2  // c RPCT hys передается уже посчитанный как hys = hys / 2  //  правило рабочее для динамических компараторов EQ и NE
@@ -66,7 +66,7 @@ endtest
 
 test AFB_CMPС_SI_EQ_-24, AFB tests for CMPС_SI_EQ element
 schema AFB_CMPС_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //const int SETPOINT = 0   // Added a constant with the value of SETPOINT, the same value is set on the scheme
 //const int DEAD_BAND = 100 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
 // set - hys <= in <= set + hys ; IMPORTRANT hys = hys / 2  // c RPCT hys передается уже посчитанный как hys = hys / 2  //  правило рабочее для динамических компараторов EQ и NE
@@ -101,7 +101,7 @@ endtest
 
 test AFB_CMPС_SI_GR_0, AFB tests for CMPС_SI_GR element
 schema AFB_CMPС_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 const int SETPOINT = 0
 const int HYSTERESIS = 21
 set #TUN_IN_SI1 = 100
@@ -146,7 +146,7 @@ endtest
 
 test AFB_CMPС_SI_GR_11, AFB tests for CMPС_SI_GR element
 schema AFB_CMPС_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //const int SETPOINT = 11
 //const int HYSTERESIS = 21
 set #TUN_IN_SI2 = 100
@@ -191,7 +191,7 @@ endtest
 
 test AFB_CMPС_SI_GR_-11, AFB tests for CMPС_SI_GR element
 schema AFB_CMPС_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //const int SETPOINT = -11
 //const int HYSTERESIS = 21
 set #TUN_IN_SI3 = 100
@@ -236,7 +236,7 @@ endtest
 
 test AFB_CMPС_SI_LS_0, AFB tests for CMPС_SI_LS element
 schema AFB_CMPС_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //const int SETPOINT = 0
 //const int HYSTERESIS = 21
 //If IN < Set  out =1 (Set not include), IF IN => Set + hys  out = 0  else  out = previous state result value
@@ -282,7 +282,7 @@ endtest
 
 test AFB_CMPС_SI_LS_11, AFB tests for CMPС_SI_LS element
 schema AFB_CMPС_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //const int SETPOINT = 11
 //const int HYSTERESIS = 21
 set #TUN_IN_SI2 = -100
@@ -327,7 +327,7 @@ endtest
 
 test AFB_CMPС_SI_LS_-11, AFB tests for CMPС_SI_LS element
 schema AFB_CMPС_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //const int SETPOINT = -11
 //const int HYSTERESIS = 21
 set #TUN_IN_SI3 = -100
@@ -372,7 +372,7 @@ endtest
 
 test AFB_CMPС_SI_NE_0, AFB tests for CMPС_SI_NE element
 schema AFB_CMPС_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //const int SETPOINT = 0   // Added a constant with the value of SETPOINT, the same value is set on the scheme
 //const int DEAD_BAND = 100 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
 // set - hys/2 <= in <= set + hys/2  out = 0; //  правило рабочее для динамических компараторов EQ и NE
@@ -402,7 +402,7 @@ endtest
 
 test AFB_CMPС_SI_NE_800, AFB tests for CMPС_SI_NE element
 schema AFB_CMPС_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //const int SETPOINT = 800  // Added a constant with the value of SETPOINT, the same value is set on the scheme
 //const int DEAD_BAND = 2500 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
 // set - hys/2 <= in <= set + hys/2  out = 0; //  правило рабочее для динамических компараторов EQ и NE
@@ -432,7 +432,7 @@ endtest
 
 test AFB_CMPС_SI_NE_-800, AFB tests for CMPС_SI_NE element
 schema AFB_CMPС_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //const int SETPOINT = -800  // Added a constant with the value of SETPOINT, the same value is set on the scheme
 //const int DEAD_BAND = 2500 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
 // set - hys/2 <= in <= set + hys/2  out = 0; //  правило рабочее для динамических компараторов EQ и NE

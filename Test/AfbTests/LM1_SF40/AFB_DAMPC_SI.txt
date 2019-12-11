@@ -1,6 +1,6 @@
 test AFB_DAMPC_SI_1, AFB tests for AFB_DAMP_SI element
 schema AFB_DAMP_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //dtime = 5ms
 set #TUN_IN_SI1 = 0
 check #OUT_DAMPC_SI1 == 0
