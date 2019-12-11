@@ -370,7 +370,7 @@ QString MeasureTable::textLinearity(int row, int column) const
 		case MVC_CMN_L_EL_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
 	    case MVC_CMN_L_EN_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_ENGINEER); break;
 
-		case MVC_CMN_L_PERCENT:					result = QString::number(m->percent(), 10, 2); break;
+		case MVC_CMN_L_PERCENT:					result = QString::number(m->percent(), 'f', 2); break;
 
 		case MVC_CMN_L_EL_MEASURE:				result = m->measureStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
 	    case MVC_CMN_L_EN_MEASURE:				result = m->measureStr(MEASURE_LIMIT_TYPE_ENGINEER); break;
@@ -554,7 +554,7 @@ bool MeasureTable::append(Measurement* pMeasurement)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureTable::remove(const QList<int> removeIndexList)
+bool MeasureTable::remove(const QVector<int>& removeIndexList)
 {
 	if (thePtrDB == nullptr)
 	{
@@ -795,7 +795,7 @@ void MeasureView::removeMeasure()
 	}
 
 	bool removeMeasure;
-	QList<int> removeIndexList;
+	QVector<int> removeIndexList;
 
 	for(int index = 0; index < measureCount; index++)
 	{

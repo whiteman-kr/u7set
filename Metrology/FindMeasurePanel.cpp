@@ -199,7 +199,7 @@ FindItem FindMeasureTable::at(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindMeasureTable::set(const QList<FindItem> list_add)
+void FindMeasureTable::set(const QVector<FindItem>& list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -409,7 +409,7 @@ void FindMeasurePanel::find()
 		return;
 	}
 
-	QList<FindItem> findItemList;
+	QVector<FindItem> findItemList;
 
 	m_table.clear();
 

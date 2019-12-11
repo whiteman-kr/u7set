@@ -552,7 +552,7 @@ QString LinearityMeasurement::nominalStr(int limitType) const
 		return QString();
 	}
 
-	return QString("%1 %2").arg(QString::number(m_nominal[limitType], 10, m_limitPrecision[limitType])).arg(m_unit[limitType]);
+	return QString("%1 %2").arg(QString::number(m_nominal[limitType], 'f', m_limitPrecision[limitType])).arg(m_unit[limitType]);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -596,7 +596,7 @@ QString LinearityMeasurement::measureStr(int limitType) const
 		return QString();
 	}
 
-	return QString("%1 %2").arg(QString::number(m_measure[limitType], 10, m_limitPrecision[limitType])).arg(m_unit[limitType]);
+	return QString("%1 %2").arg(QString::number(m_measure[limitType], 'f', m_limitPrecision[limitType])).arg(m_unit[limitType]);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -726,8 +726,8 @@ QString LinearityMeasurement::limitStr(int limitType) const
 		return QString();
 	}
 
-	QString low = QString::number(m_lowLimit[limitType], 10, m_limitPrecision[limitType]);
-	QString high = QString::number(m_highLimit[limitType], 10, m_limitPrecision[limitType]);
+	QString low = QString::number(m_lowLimit[limitType], 'f', m_limitPrecision[limitType]);
+	QString high = QString::number(m_highLimit[limitType], 'f', m_limitPrecision[limitType]);
 
 	return QString("%1 .. %2 %3").arg(low).arg(high).arg(m_unit[limitType]);;
 }
@@ -778,8 +778,8 @@ QString LinearityMeasurement::errorStr() const
 
 	switch(errorType)
 	{
-		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_error[limitType][errorType], 10, m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
-		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_error[limitType][errorType], 10, 3) + " %" ;												break;
+		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_error[limitType][errorType], 'f', m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
+		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_error[limitType][errorType], 'f', 3) + " %" ;												break;
 		default:							assert(0);
 	}
 
@@ -846,8 +846,8 @@ QString LinearityMeasurement::errorLimitStr() const
 
 	switch(errorType)
 	{
-		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_errorLimit[limitType][errorType], 10, m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
-		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_errorLimit[limitType][errorType], 10, 3) + " %";												break;
+		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_errorLimit[limitType][errorType], 'f', m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
+		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_errorLimit[limitType][errorType], 'f', 3) + " %";												break;
 		default:							assert(0);
 	}
 
@@ -957,7 +957,7 @@ QString LinearityMeasurement::measureItemStr(int limitType, int index) const
 		return QString();
 	}
 
-	return QString::number(m_measureArray[limitType][index], 10, m_limitPrecision[limitType]);
+	return QString::number(m_measureArray[limitType][index], 'f', m_limitPrecision[limitType]);
 }
 
 
@@ -1008,7 +1008,7 @@ QString LinearityMeasurement::additionalParamStr(int paramType) const
 		return QString();
 	}
 
-	return QString::number(m_additionalParam[paramType], 10, 2);
+	return QString::number(m_additionalParam[paramType], 'f', 2);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1406,7 +1406,7 @@ QString ComparatorMeasurement::nominalStr(int limitType) const
 		return QString();
 	}
 
-	return QString("%1 %2").arg(QString::number(m_nominal[limitType], 10, m_limitPrecision[limitType])).arg(m_unit[limitType]);
+	return QString("%1 %2").arg(QString::number(m_nominal[limitType], 'f', m_limitPrecision[limitType])).arg(m_unit[limitType]);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1450,7 +1450,7 @@ QString ComparatorMeasurement::measureStr(int limitType) const
 		return QString();
 	}
 
-	return QString("%1 %2").arg(QString::number(m_measure[limitType], 10, m_limitPrecision[limitType])).arg(m_unit[limitType]);
+	return QString("%1 %2").arg(QString::number(m_measure[limitType], 'f', m_limitPrecision[limitType])).arg(m_unit[limitType]);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1580,8 +1580,8 @@ QString ComparatorMeasurement::limitStr(int limitType) const
 		return QString();
 	}
 
-	QString low = QString::number(m_lowLimit[limitType], 10, m_limitPrecision[limitType]);
-	QString high = QString::number(m_highLimit[limitType], 10, m_limitPrecision[limitType]);
+	QString low = QString::number(m_lowLimit[limitType], 'f', m_limitPrecision[limitType]);
+	QString high = QString::number(m_highLimit[limitType], 'f', m_limitPrecision[limitType]);
 
 	return QString("%1 .. %2 %3").arg(low).arg(high).arg(m_unit[limitType]);;
 }
@@ -1632,8 +1632,8 @@ QString ComparatorMeasurement::errorStr() const
 
 	switch(errorType)
 	{
-		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_error[limitType][errorType], 10, m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
-		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_error[limitType][errorType], 10, 3) + " %" ;												break;
+		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_error[limitType][errorType], 'f', m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
+		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_error[limitType][errorType], 'f', 3) + " %" ;												break;
 		default:							assert(0);
 	}
 
@@ -1700,8 +1700,8 @@ QString ComparatorMeasurement::errorLimitStr() const
 
 	switch(errorType)
 	{
-		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_errorLimit[limitType][errorType], 10, m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
-		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_errorLimit[limitType][errorType], 10, 3) + " %";												break;
+		case MEASURE_ERROR_TYPE_ABSOLUTE:	str = QString::number(m_errorLimit[limitType][errorType], 'f', m_limitPrecision[limitType]) + " " + m_unit[limitType];	break;
+		case MEASURE_ERROR_TYPE_REDUCE:		str = QString::number(m_errorLimit[limitType][errorType], 'f', 3) + " %";												break;
 		default:							assert(0);
 	}
 

@@ -89,7 +89,7 @@ public:
 private:
 
 	mutable QMutex			m_signalMutex;
-	QList<Metrology::Signal*> m_signalList;
+	QVector<Metrology::Signal*> m_signalList;
 
 	static bool				m_showADCInHex;
 
@@ -103,7 +103,7 @@ public:
 
 	int						signalCount() const;
 	Metrology::Signal*		signal(int index) const;
-	void					set(const QList<Metrology::Signal*> list_add);
+	void					set(const QVector<Metrology::Signal*>& list_add);
 	void					clear();
 
 	QString					text(int row, int column, Metrology::Signal* pSignal) const;

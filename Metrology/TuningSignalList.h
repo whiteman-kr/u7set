@@ -72,7 +72,7 @@ public:
 private:
 
 	mutable QMutex			m_sourceMutex;
-	QList<TuningSource>		m_sourceIdList;
+	QVector<TuningSource>	m_sourceIdList;
 
 	int						columnCount(const QModelIndex &parent) const;
 	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -84,7 +84,7 @@ public:
 
 	int						sourceCount() const;
 	TuningSource			source(int index) const;
-	void					set(const QList<TuningSource> list_add);
+	void					set(const QVector<TuningSource>& list_add);
 	void					clear();
 
 	QString					text(int row, int column, const TuningSource& source, const TuningSourceState& state) const;
@@ -145,7 +145,7 @@ public:
 private:
 
 	mutable QMutex			m_signalMutex;
-	QList<Metrology::Signal*>	m_signalList;
+	QVector<Metrology::Signal*>	m_signalList;
 
 	int						columnCount(const QModelIndex &parent) const;
 	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -157,7 +157,7 @@ public:
 
 	int						signalCount() const;
 	Metrology::Signal*		signal(int index) const;
-	void					set(const QList<Metrology::Signal*> list_add);
+	void					set(const QVector<Metrology::Signal*>& list_add);
 	void					clear();
 
 	QString					text(int row, int column, Metrology::Signal* pSignal) const;

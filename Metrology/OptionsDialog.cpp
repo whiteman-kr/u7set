@@ -154,7 +154,7 @@ QHBoxLayout* OptionsDialog::createPages()
 	m_pPageTree->setHeaderHidden(true);
 	m_pPageTree->setFixedWidth(200);
 
-	QList<QTreeWidgetItem*> groupList;
+	QVector<QTreeWidgetItem*> groupList;
 
 	for(int group = 0; group < OPTION_GROUP_COUNT; group++)
 	{

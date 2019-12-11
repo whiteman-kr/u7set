@@ -486,20 +486,20 @@ void CalibratorManager::updateValue()
 
 	if (measureUnit < 0 || measureUnit >= CALIBRATOR_UNIT_COUNT)
 	{
-		measureValue = QString::number(m_pCalibrator->measureValue(), 10, 3);
+		measureValue = QString::number(m_pCalibrator->measureValue(), 'f', 3);
 	}
 	else
 	{
-		measureValue = QString::number(m_pCalibrator->measureValue(), 10, 3) + " " + CalibratorUnit[ measureUnit ];
+		measureValue = QString::number(m_pCalibrator->measureValue(), 'f', 3) + " " + CalibratorUnit[ measureUnit ];
 	}
 
 	if (sourceUnit < 0 || sourceUnit >= CALIBRATOR_UNIT_COUNT)
 	{
-		sourceValue = QString::number(m_pCalibrator->sourceValue(), 10, 3);
+		sourceValue = QString::number(m_pCalibrator->sourceValue(), 'f', 3);
 	}
 	else
 	{
-		sourceValue = QString::number(m_pCalibrator->sourceValue(), 10, 3) + " " + CalibratorUnit[ sourceUnit ];
+		sourceValue = QString::number(m_pCalibrator->sourceValue(), 'f', 3) + " " + CalibratorUnit[ sourceUnit ];
 	}
 
 	m_pMeasureEdit->setText(measureValue);

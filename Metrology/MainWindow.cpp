@@ -367,10 +367,10 @@ bool MainWindow::createToolBars()
 
 		for(int t = 0; t < MeasureTimeoutCount; t++)
 		{
-			measureTimeoutList->addItem(QString::number(MeasureTimeout[t], 10, 1));
+			measureTimeoutList->addItem(QString::number(MeasureTimeout[t], 'f', 1));
 		}
 
-		measureTimeoutList->setCurrentText(QString::number(double(theOptions.toolBar().measureTimeout()) / 1000, 10, 1));
+		measureTimeoutList->setCurrentText(QString::number(double(theOptions.toolBar().measureTimeout()) / 1000, 'f', 1));
 
 		measureTimeoutUnitLabel->setText(tr(" sec."));
 		measureTimeoutUnitLabel->setEnabled(false);

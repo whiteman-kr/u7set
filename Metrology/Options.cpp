@@ -896,7 +896,7 @@ QString LinearityPointBase::text()
 		for(int index = 0; index < pointCount; index++)
 		{
 			LinearityPoint point = at(index);
-			result.append(QString("%1%").arg(QString::number(point.percent(), 10, 1)));
+			result.append(QString("%1%").arg(QString::number(point.percent(), 'f', 1)));
 
 			if (index != pointCount - 1)
 			{

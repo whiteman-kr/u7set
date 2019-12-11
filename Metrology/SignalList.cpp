@@ -280,7 +280,7 @@ Metrology::Signal* SignalListTable::signal(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListTable::set(const QList<Metrology::Signal*> list_add)
+void SignalListTable::set(const QVector<Metrology::Signal*>& list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -530,7 +530,7 @@ void SignalListDialog::updateList()
 
 	m_signalTable.clear();
 
-	QList<Metrology::Signal*> signalList;
+	QVector<Metrology::Signal*> signalList;
 
 	int count = theSignalBase.signalCount();
 	for(int i = 0; i < count; i++)

@@ -167,7 +167,7 @@ QString ComparatorInfoTable::text(std::shared_ptr<Comparator> pComparator) const
 
 	if (pComparator->compare().isConst() == true)
 	{
-		stateStr += QString::number(pComparator->compare().constValue(), 10, precision);
+		stateStr += QString::number(pComparator->compare().constValue(), 'f', precision);
 	}
 	else
 	{
@@ -183,7 +183,7 @@ QString ComparatorInfoTable::text(std::shared_ptr<Comparator> pComparator) const
 		}
 
 		Metrology::SignalState compareState = theSignalBase.signalState(pCompareSignal->param().hash());
-		stateStr += QString::number(compareState.value(), 10, precision);
+		stateStr += QString::number(compareState.value(), 'f', precision);
 	}
 
 	stateStr += " : ";

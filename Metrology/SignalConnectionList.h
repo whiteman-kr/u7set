@@ -77,7 +77,7 @@ public:
 private:
 
 	mutable QMutex			m_connectionMutex;
-	QList<SignalConnection>	m_connectionList;
+	QVector<SignalConnection> m_connectionList;
 
 	static bool				m_showCustomID;
 
@@ -91,7 +91,7 @@ public:
 
 	int						connectionCount() const;
 	SignalConnection		at(int index) const;
-	void					set(const QList<SignalConnection> list_add);
+	void					set(const QVector<SignalConnection>& list_add);
 	void					clear();
 
 	QString					text(int row, int column, const SignalConnection& signal) const;

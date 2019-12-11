@@ -4,7 +4,6 @@
 #include <QDialog>
 #include <QTreeWidget>
 #include <QTreeWidgetItem>
-#include <QList>
 #include <QMap>
 #include <QHBoxLayout>
 #include <QLabel>
@@ -192,7 +191,7 @@ private:
 
 	QHBoxLayout*				createButtons();
 
-	QList<PropertyPage*>		m_pageList;
+	QVector<PropertyPage*>		m_pageList;
 
 	PropertyPage*				createPage(int page);
 	PropertyPage*				createPropertyList(int page);
