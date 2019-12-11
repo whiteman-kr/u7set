@@ -526,16 +526,11 @@ namespace Builder
 			return false;
 		}
 
-		QVariant qv;
-		bool isEnum;
 		double r0 = 0;
 
 		if (signal.isSpecPropExists(SignalProperties::R0_OhmCaption) == true)
 		{
-			if (signal.getSpecPropValue(SignalProperties::R0_OhmCaption, &qv, &isEnum) == true)
-			{
-				r0 = qv.toDouble();
-			}
+			r0 = signal.r0_Ohm();
 
 			if (r0 == 0.0 && signal.sensorType() != E::SensorType::Ohm_Raw)
 			{

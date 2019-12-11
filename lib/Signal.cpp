@@ -472,6 +472,16 @@ void Signal::setOutputMode(E::OutputMode outputMode)
 	setSpecPropEnum(SignalProperties::outputModeCaption, static_cast<int>(outputMode));
 }
 
+double Signal::r0_Ohm() const
+{
+	return getSpecPropDouble(SignalProperties::R0_OhmCaption);
+}
+
+void Signal::setR0_Ohm(double r0_Ohm)
+{
+	setSpecPropDouble(SignalProperties::R0_OhmCaption, r0_Ohm);
+}
+
 bool Signal::createSpecPropValues()
 {
 	PropertyObject propObject;
