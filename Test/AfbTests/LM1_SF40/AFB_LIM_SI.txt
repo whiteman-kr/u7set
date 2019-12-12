@@ -1,6 +1,6 @@
 test AFB_LIM_SI01, AFB tests for AFB_LIM_SI element
 schema AFB_LIM_SI
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_IN_SI1 = 1, #TUN_IN_SI2 = 3, #TUN_IN_SI3 = 2
 check #OUT_LIM_SI01 == 2
 check #OUT_MAX_LIM_SI01 ==  0

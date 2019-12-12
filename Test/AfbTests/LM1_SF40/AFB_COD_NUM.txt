@@ -1,6 +1,6 @@
 test AFB_COD_NUM_1, AFB tests for AFB_COD_NUM element
 schema AFB_COD_NUM
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_DSCR1 = 0
 check #OUT_COD_NUM_SI001 == 0
 set #TUN_DSCR1 = 1

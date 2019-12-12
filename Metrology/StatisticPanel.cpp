@@ -243,7 +243,7 @@ QString StatisticTable::text(int row, int column, Metrology::Signal* pSignal) co
 	{
 		case STATISTIC_COLUMN_APP_ID:				result = param.appSignalID();						break;
 		case STATISTIC_COLUMN_CUSTOM_ID:			result = param.customAppSignalID();					break;
-		case STATISTIC_COLUMN_EQUIPMENT_ID:			result = param.location().equipmentID();			break;
+		case STATISTIC_COLUMN_EQUIPMENT_ID:			result = param.equipmentID();						break;
 		case STATISTIC_COLUMN_CAPTION:				result = param.caption();							break;
 		case STATISTIC_COLUMN_RACK:					result = param.location().rack().caption();			break;
 		case STATISTIC_COLUMN_CHASSIS:				result = param.location().chassisStr();				break;
@@ -324,7 +324,7 @@ StatisticPanel::StatisticPanel(QWidget* parent) :
 		return;
 	}
 
-	setWindowTitle("Panel statistics");
+	setWindowTitle("Panel statistics (Checklist)");
 	setObjectName(windowTitle());
 
 	createInterface();

@@ -1,6 +1,6 @@
 test AFB_NOT, NOT element function test
 schema AFB_NOT
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_DSCR1 = 0
 check #OUT_NOT == 1
 set #TUN_DSCR1 = 1

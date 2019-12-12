@@ -862,7 +862,7 @@ public:
 	bool				m_enableMeasureHysteresis = false;						// enable flag to measure hysteresis of сomparator
 	int					m_startComparatorIndex = 0;								// start the measurement with the сomparators under the number ...
 
-	bool				m_showEngeneeringValueColumn = true;					// show columns of engeneering values
+	bool				m_showEngineeringValueColumn = true;					// show columns of engineering values
 
 public:
 
@@ -884,8 +884,8 @@ public:
 	int					startComparatorIndex() const { return m_startComparatorIndex; }
 	void				setStartComparatorIndex(int index) { m_startComparatorIndex = index; }
 
-	bool				showEngeneeringValueColumn() const { return m_showEngeneeringValueColumn; }
-	void				setShowPhyscalValueColumn(bool show) { m_showEngeneeringValueColumn = show; }
+	bool				showEngineeringValueColumn() const { return m_showEngineeringValueColumn; }
+	void				setShowPhyscalValueColumn(bool show) { m_showEngineeringValueColumn = show; }
 
 	void				load();
 	void				save();

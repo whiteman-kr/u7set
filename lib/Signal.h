@@ -178,6 +178,9 @@ public:
 	E::OutputMode outputMode() const;
 	void setOutputMode(E::OutputMode outputMode);
 
+	double r0_Ohm() const;
+	void setR0_Ohm(double r0_Ohm);
+
 	// Tuning signal properties
 
 	bool enableTuning() const { return m_enableTuning; }

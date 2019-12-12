@@ -245,7 +245,7 @@ QString IoSignalParam::equipmentID() const
 			const Metrology::SignalParam& param = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (param.isValid() == true)
 			{
-				result = param.location().equipmentID();
+				result = param.equipmentID();
 			}
 		}
 		else
@@ -253,19 +253,19 @@ QString IoSignalParam::equipmentID() const
 			const Metrology::SignalParam& inParam = m_param[MEASURE_IO_SIGNAL_TYPE_INPUT];
 			if (inParam.isValid() == true)
 			{
-				result = inParam.location().equipmentID() + MULTI_TEXT_DEVIDER;
+				result = inParam.equipmentID() + MULTI_TEXT_DEVIDER;
 			}
 
 			const Metrology::SignalParam& outParam = m_param[MEASURE_IO_SIGNAL_TYPE_OUTPUT];
 			if (outParam.isValid() == true)
 			{
-				if (inParam.location().equipmentID() != outParam.location().equipmentID())
+				if (inParam.equipmentID() != outParam.equipmentID())
 				{
-					result += outParam.location().equipmentID();
+					result += outParam.equipmentID();
 				}
 				else
 				{
-					result = outParam.location().equipmentID();
+					result = outParam.equipmentID();
 				}
 			}
 		}
@@ -1718,7 +1718,7 @@ QString SignalBase::findAppSignalIDforSerialNo(const QString& moduleID)
 			continue;
 		}
 
-		appSignalID = signal.param().location().appSignalID();
+		appSignalID = signal.param().appSignalID();
 
 		break;
 	}
@@ -2283,10 +2283,10 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 				// append hash of signal that contains ID of module for input signal - Serial Number
 				//
 				QString appSignalID_of_SerialNo = findAppSignalIDforSerialNo(pSignal->param().location().moduleID());
-				pSignal->param().setModuleSerialNoID(appSignalID_of_SerialNo);
-				if (pSignal->param().moduleSerialNoID().isEmpty() == false)
+				if (appSignalID_of_SerialNo.isEmpty() == false)
 				{
-					m_requestStateList.append(calcHash(pSignal->param().moduleSerialNoID()));
+					pSignal->param().location().setModuleSerialNoID(appSignalID_of_SerialNo);
+					m_requestStateList.append(calcHash(appSignalID_of_SerialNo));
 				}
 
 				// append hash of comparators input signal
@@ -2332,10 +2332,10 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 				// append hash of signal that contains ID of module for output signal
 				//
 				appSignalID_of_SerialNo = findAppSignalIDforSerialNo(pSignal->param().location().moduleID());
-				pSignal->param().setModuleSerialNoID(appSignalID_of_SerialNo);
-				if (pSignal->param().moduleSerialNoID().isEmpty() == false)
+				if (appSignalID_of_SerialNo.isEmpty() == false)
 				{
-					m_requestStateList.append(calcHash(pSignal->param().moduleSerialNoID()));
+					pSignal->param().location().setModuleSerialNoID(appSignalID_of_SerialNo);
+					m_requestStateList.append(calcHash(appSignalID_of_SerialNo));
 				}
 
 				// append hash of comparators output signal

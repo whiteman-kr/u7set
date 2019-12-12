@@ -1,6 +1,6 @@
 test AFB_CMP_DH_FP_EQ1, AFB tests for CMP_DH_FP_EQ element
 schema AFB_CMP_DH
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT 0
 //DEAD_BAND = 10
 // set - hys/2 <= in <= set + hys/2
@@ -32,7 +32,7 @@ endtest
 
 test AFB_CMP_DH_FP_EQ2, AFB tests for CMP_DH_FP_EQ element
 schema AFB_CMP_DH
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT 1
 //DEAD_BAND = 10
 set #TUN_IN_FP1 = -5 , #TUN_SET_CMP_DH_FP_EQ001 = 1 , #TUN_IN_DB_CMP_DH_FP_EQ001 = 10
@@ -65,7 +65,7 @@ endtest
 
 test AFB_CMP_DH_FP_EQ3, AFB tests for CMP_DH_FP_EQ element
 schema AFB_CMP_DH
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT -1
 //DEAD_BAND = 10
 set #TUN_IN_FP1 = -7 , #TUN_SET_CMP_DH_FP_EQ001 = -1 , #TUN_IN_DB_CMP_DH_FP_EQ001 = 10
@@ -100,7 +100,7 @@ endtest
 
 test AFB_CMP_DH_FP_GR_1, AFB tests for CMP_DH_FP_GR element
 schema AFB_CMP_DH_FP_GR
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT = 0
 //HYSTERESIS = 10
 //If IN > Set =1 (Set not include), IF IN <= Set - hys  = 0 else out = previous state result value
@@ -138,7 +138,7 @@ endtest
 
 test AFB_CMP_DH_FP_GR_2, AFB tests for CMP_DH_FP_GR element
 schema AFB_CMP_DH_FP_GR
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT = 1
 //HYSTERESIS = 10 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
 //If IN > Set =1 (Set not include), IF IN <= Set - hys  = 0  else  out = previous state result value
@@ -184,7 +184,7 @@ endtest
 
 test AFB_CMP_DH_FP_GR_3, AFB tests for CMP_DH_FP_GR element
 schema AFB_CMP_DH
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT = -1
 //HYSTERESIS = 10 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
 //If IN < Set =1 (Set not include), IF IN >= Set + hys  = 0  else  out = previous state result value
@@ -222,7 +222,7 @@ endtest
 
 test AFB_CMP_DH_FP_LS_1, AFB tests for CMP_DH_FP_LS element
 schema AFB_CMP_DH_FP_LS
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT = 0
 //HYSTERESIS = 10 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
 //If IN > Set =1 (Set not include), IF IN <= Set - hys  = 0  else  out = previous state result value
@@ -260,7 +260,7 @@ endtest
 
 test AFB_CMP_DH_FP_LS_2, AFB tests for CMP_DH_FP_LS element
 schema AFB_CMP_DH_FP_LS
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT = 1
 //HYSTERESIS = 10 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
 //If IN > Set =1 (Set not include), IF IN <= Set - hys  = 0  else  out = previous state result value
@@ -324,7 +324,7 @@ endtest
 
 test AFB_CMP_DH_FP_LS_3, AFB tests for CMP_DH_FP_LS element
 schema AFB_CMP_DH_FP_LS
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT = -1
 //HYSTERESIS = 10 // Added a constant with the value of DEAD_BAND, the same value is set on the scheme
 //If IN > Set =1 (Set not include), IF IN <= Set - hys  = 0  else  out = previous state result value
@@ -370,7 +370,7 @@ endtest
 
 test AFB_CMP_DH_FP_NE1, AFB tests for CMP_DH_FP_NE element
 schema AFB_CMP_DH
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT 0
 //DEAD_BAND = 10
 // set - hys/2 <= in <= set + hys/2
@@ -402,7 +402,7 @@ endtest
 
 test AFB_CMP_DH_FP_NE2, AFB tests for CMP_DH_FP_NE element
 schema AFB_CMP_DH
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT 1
 //DEAD_BAND = 10
 set #TUN_IN_FP1 = -5 , #TUN_SET_CMP_DH_FP_NE001 = 1 , #TUN_IN_DB_CMP_DH_FP_NE001 = 10
@@ -435,7 +435,7 @@ endtest
 
 test AFB_CMP_DH_FP_NE3, AFB tests for CMP_DH_FP_NE element
 schema AFB_CMP_DH
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //SETPOINT -1
 //DEAD_BAND = 10
 set #TUN_IN_FP1 = -7 , #TUN_SET_CMP_DH_FP_NE001 = -1 , #TUN_IN_DB_CMP_DH_FP_NE001 = 10

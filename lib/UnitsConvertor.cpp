@@ -55,14 +55,19 @@ bool UnitsConvertResult::ok() const
 	return m_ok;
 }
 
-int UnitsConvertResult::errorCode() const
+bool UnitsConvertResult::isEqual(double value) const
 {
-	return static_cast<int>(m_errorCode);
+	return std::nextafter(m_result, std::numeric_limits<double>::lowest()) <= value && std::nextafter(m_result, std::numeric_limits<double>::max()) >= value;
 }
 
 double UnitsConvertResult::toDouble() const
 {
 	return m_result;
+}
+
+int UnitsConvertResult::errorCode() const
+{
+	return static_cast<int>(m_errorCode);
 }
 
 QString UnitsConvertResult::errorMessage() const

@@ -1,6 +1,6 @@
 test AFB_MUL_FP01, AFB tests for AFB_MUL_FP element
 schema AFB_MUL_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 
 set #TUN_IN_FP1 = 2 , #TUN_IN_FP2 = 2
 check #OUT_MUL_FP001 == 4

@@ -356,10 +356,10 @@ QString MeasureTable::textLinearity(int row, int column) const
 	{
 		case MVC_CMN_L_INDEX:					result = QString::number(m->measureID()); break;
 
-		case MVC_CMN_L_MODULE_SN:				result = m->moduleSerialNoStr(); break;
+		case MVC_CMN_L_MODULE_SN:				result = m->location().moduleSerialNoStr(); break;
 		case MVC_CMN_L_APP_ID:					result = m->appSignalID(); break;
 		case MVC_CMN_L_CUSTOM_ID:				result = m->customAppSignalID(); break;
-		case MVC_CMN_L_EQUIPMENT_ID:			result = m->location().equipmentID(); break;
+		case MVC_CMN_L_EQUIPMENT_ID:			result = m->equipmentID(); break;
 		case MVC_CMN_L_NAME:					result = m->caption(); break;
 
 		case MVC_CMN_L_RACK:					result = m->location().rack().caption(); break;
@@ -370,7 +370,7 @@ QString MeasureTable::textLinearity(int row, int column) const
 		case MVC_CMN_L_EL_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
 	    case MVC_CMN_L_EN_NOMINAL:				result = m->nominalStr(MEASURE_LIMIT_TYPE_ENGINEER); break;
 
-		case MVC_CMN_L_PERCENT:					result = QString::number(m->percent(), 10, 2); break;
+		case MVC_CMN_L_PERCENT:					result = QString::number(m->percent(), 'f', 2); break;
 
 		case MVC_CMN_L_EL_MEASURE:				result = m->measureStr(MEASURE_LIMIT_TYPE_ELECTRIC); break;
 	    case MVC_CMN_L_EN_MEASURE:				result = m->measureStr(MEASURE_LIMIT_TYPE_ENGINEER); break;
@@ -463,10 +463,10 @@ QString MeasureTable::textComparator(int row, int column) const
 	{
 		case MVC_CMN_C_INDEX:					result = QString::number(m->measureID()); break;
 
-		case MVC_CMN_C_MODULE_SN:				result = m->moduleSerialNoStr(); break;
+		case MVC_CMN_C_MODULE_SN:				result = m->location().moduleSerialNoStr(); break;
 		case MVC_CMN_C_APP_ID:					result = m->appSignalID(); break;
 		case MVC_CMN_C_CUSTOM_ID:				result = m->customAppSignalID(); break;
-		case MVC_CMN_C_EQUIPMENT_ID:			result = m->location().equipmentID(); break;
+		case MVC_CMN_C_EQUIPMENT_ID:			result = m->equipmentID(); break;
 		case MVC_CMN_C_NAME:					result = m->caption(); break;
 
 		case MVC_CMN_C_RACK:					result = m->location().rack().caption(); break;
@@ -554,7 +554,7 @@ bool MeasureTable::append(Measurement* pMeasurement)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool MeasureTable::remove(const QList<int> removeIndexList)
+bool MeasureTable::remove(const QVector<int>& removeIndexList)
 {
 	if (thePtrDB == nullptr)
 	{
@@ -795,7 +795,7 @@ void MeasureView::removeMeasure()
 	}
 
 	bool removeMeasure;
-	QList<int> removeIndexList;
+	QVector<int> removeIndexList;
 
 	for(int index = 0; index < measureCount; index++)
 	{

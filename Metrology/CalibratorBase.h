@@ -8,7 +8,6 @@
 //
 
 #include <QObject>
-#include <QList>
 #include <QThread>
 #include <QEvent>
 #include <QDialog>

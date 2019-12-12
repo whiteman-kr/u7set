@@ -23,7 +23,8 @@ namespace Builder
 		bool result = true;
 
 		result &= writeSettings();
-		result &= writeMetrologySignalsXml();
+		result &= writeMetrologyItemsXml();
+		result &= writeMetrologySignalSet();
 
 		return result;
 	}
@@ -185,29 +186,10 @@ namespace Builder
 			xmlWriter.writeEndElement(); // </TuningService>
 		} // </Settings>
 
-
-		bool result = m_cfgXml->addLinkToFile(DIR_COMMON, FILE_APP_SIGNALS_ASGS);
-		if (result == false)
-		{
-			// Can't link build file %1 into /%2/configuration.xml.
-			//
-			m_log->errCMN0018(QString("%1\\%2").arg(DIR_COMMON).arg(FILE_APP_SIGNALS_ASGS), equipmentID());
-			return false;
-		}
-
-		result = m_cfgXml->addLinkToFile(DIR_COMMON, FILE_COMPARATORS_SET);
-		if (result == false)
-		{
-			// Can't link build file %1 into /%2/configuration.xml.
-			//
-			m_log->errCMN0018(QString("%1\\%2").arg(DIR_COMMON).arg(FILE_COMPARATORS_SET), equipmentID());
-			return false;
-		}
-
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::writeMetrologySignalsXml()
+	bool MetrologyCfgGenerator::writeMetrologyItemsXml()
 	{
 		QByteArray data;
 		XmlWriteHelper xml(&data);
@@ -215,10 +197,10 @@ namespace Builder
 		xml.setAutoFormatting(true);
 		xml.writeStartDocument();
 		{
-			xml.writeStartElement("MetrologySignals");
+			xml.writeStartElement("MetrologyItems");
 			{
 				xml.writeIntAttribute("buildID", m_buildResultWriter->buildInfo().id);
-				xml.writeIntAttribute("Version", CFG_FILE_VER_METROLOGY_SIGNALS);			// version of MetrologySignal file
+				xml.writeIntAttribute("Version", CFG_FILE_VER_METROLOGY_ITEMS_XML);			// version of MetrologyItems file
 
 
 				// Creating rack list from equipment tree
@@ -307,75 +289,13 @@ namespace Builder
 					}
 				}
 				xml.writeEndElement();
-
-				// Creating signal list
-				//
-				QVector<Metrology::SignalParam> signalsToWrite;
-
-				int signalCount = m_signalSet->count();
-				for(int i = 0; i < signalCount; i++)
-				{
-					Signal& signal = (*m_signalSet)[i];
-
-					bool hasWrongField = false;
-
-					if (signal.isAnalog() == true && signal.isInput() == true)
-					{
-						if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == true)
-						{
-							switch (signal.electricUnit())
-							{
-								case E::ElectricUnit::mV:
-
-									if (testElectricRange_ThermoCouple(signal) == false)
-									{
-										hasWrongField = true;
-									}
-									break;
-
-								case E::ElectricUnit::Ohm:
-
-									if (testElectricRange_ThermoResistor(signal) == false)
-									{
-										hasWrongField = true;
-									}
-									break;
-							}
-						}
-					}
-
-					if (hasWrongField == true)
-					{
-						continue;
-					}
-
-					// find location of signal in the equipment Tree by signal equipmentID
-					//
-					Metrology::SignalLocation location(signal.appSignalID(), m_equipment->deviceObject(signal.equipmentID()));
-
-					// append signal into list
-					//
-					signalsToWrite.append(Metrology::SignalParam(signal, location));
-				}
-
-				// Writing signals
-				//
-				xml.writeStartElement("Signals");
-				{
-					xml.writeIntAttribute("Count", signalsToWrite.count());
-
-					for(Metrology::SignalParam signal : signalsToWrite)
-					{
-						signal.writeToXml(xml);
-					}
-				}
-				xml.writeEndElement();	// </Signals>
 			}
-			xml.writeEndElement();	// </MetrologySignals>
+			xml.writeEndElement();	// </MetrologyItems>
+
 		}
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_METROLOGY_SIGNALS_XML, CFG_FILE_ID_METROLOGY_SIGNALS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_METROLOGY_ITEMS_XML, CFG_FILE_ID_METROLOGY_ITEMS, "",  data);
 
 		if (buildFile == nullptr)
 		{
@@ -385,9 +305,106 @@ namespace Builder
 		bool result = m_cfgXml->addLinkToFile(buildFile);
 		if (result == false)
 		{
-			// Can't link build file %1 into /%2/configuration.xml.
+			// Can't link build file %1 into /%2/MetrologySignals.xml.
 			//
-			m_log->errCMN0018(QString("%1").arg(FILE_METROLOGY_SIGNALS_XML), equipmentID());
+			m_log->errCMN0018(QString("%1").arg(FILE_METROLOGY_ITEMS_XML), equipmentID());
+			return false;
+		}
+
+		return true;
+	}
+
+	bool MetrologyCfgGenerator::writeMetrologySignalSet()
+	{
+		// Creating signal list
+		//
+		QVector<Metrology::SignalParam> signalsToWrite;
+
+		int signalCount = m_signalSet->count();
+		for(int i = 0; i < signalCount; i++)
+		{
+			Signal& signal = (*m_signalSet)[i];
+
+			bool hasWrongField = false;
+
+			if (signal.isAnalog() == true && signal.isInput() == true)
+			{
+				if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == true)
+				{
+					switch (signal.electricUnit())
+					{
+						case E::ElectricUnit::mV:
+
+							if (testElectricRange_ThermoCouple(signal) == false)
+							{
+								hasWrongField = true;
+							}
+							break;
+
+						case E::ElectricUnit::Ohm:
+
+							if (testElectricRange_ThermoResistor(signal) == false)
+							{
+								hasWrongField = true;
+							}
+							break;
+					}
+				}
+			}
+
+			if (hasWrongField == true)
+			{
+				continue;
+			}
+
+			// find location of signal in the equipment Tree by signal equipmentID
+			//
+			Metrology::SignalLocation location(m_equipment->deviceObject(signal.equipmentID()));
+
+			// append signal into list
+			//
+			signalsToWrite.append(Metrology::SignalParam(signal, location));
+		}
+
+		// Writing signals
+		//
+		::Proto::MetrologySignalSet protoMetrologySignalSet;
+
+		for(Metrology::SignalParam signal : signalsToWrite)
+		{
+			::Proto::MetrologySignal* protoMetrologySignal = protoMetrologySignalSet.add_metrologysignal();
+			signal.serializeTo(protoMetrologySignal);
+		}
+
+		int dataSize = protoMetrologySignalSet.ByteSize();
+
+		QByteArray data;
+
+		data.resize(dataSize);
+
+		protoMetrologySignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
+
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_METROLOGY_SIGNAL_SET, CFG_FILE_ID_METROLOGY_SIGNAL_SET, "",  data);
+		if (buildFile == nullptr)
+		{
+			return false;
+		}
+
+		bool result = m_cfgXml->addLinkToFile(buildFile);
+		if (result == false)
+		{
+			// Can't link build file %1 into /%2/MetrologySignals.set.
+			//
+			m_log->errCMN0018(QString("%1").arg(FILE_METROLOGY_SIGNAL_SET), equipmentID());
+			return false;
+		}
+
+		result = m_cfgXml->addLinkToFile(DIR_COMMON, FILE_COMPARATORS_SET);
+		if (result == false)
+		{
+			// Can't link build file %1 into /%2/Comparators.set.xml.
+			//
+			m_log->errCMN0018(QString("%1\\%2").arg(DIR_COMMON).arg(FILE_COMPARATORS_SET), equipmentID());
 			return false;
 		}
 
@@ -453,7 +470,7 @@ namespace Builder
 					}
 
 
-					if (physicalLowLimit.toDouble() != signal.lowEngineeringUnits())
+					if (physicalLowLimit.isEqual(signal.lowEngineeringUnits()) == false)
 					{
 						QString nowElValStr, newElValStr;
 						double elVal = uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
@@ -467,7 +484,7 @@ namespace Builder
 						return false;
 					}
 
-					if (physicalHighLimit.toDouble() != signal.highEngineeringUnits())
+					if (physicalHighLimit.isEqual(signal.highEngineeringUnits()) == false)
 					{
 						QString nowElValStr, newElValStr;
 						double elVal = uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
@@ -509,24 +526,19 @@ namespace Builder
 			return false;
 		}
 
-		QVariant qv;
-		bool isEnum;
 		double r0 = 0;
 
 		if (signal.isSpecPropExists(SignalProperties::R0_OhmCaption) == true)
 		{
-			if (signal.getSpecPropValue(SignalProperties::R0_OhmCaption, &qv, &isEnum) == true)
-			{
-				r0 = qv.toDouble();
-			}
-		}
+			r0 = signal.r0_Ohm();
 
-		if (r0 == 0.0 && signal.sensorType() != E::SensorType::Ohm_Raw)
-		{
-			// Signal %1 has wrong R0 (ThermoResistor)
-			//
-			m_log->errEQP6114(signal.customAppSignalID());
-			return false;
+			if (r0 == 0.0 && signal.sensorType() != E::SensorType::Ohm_Raw)
+			{
+				// Signal %1 has wrong R0 (ThermoResistor)
+				//
+				m_log->errEQP6114(signal.customAppSignalID());
+				return false;
+			}
 		}
 
 		UnitsConvertor uc;
@@ -558,7 +570,7 @@ namespace Builder
 						return false;
 					}
 
-					if (physicalLowLimit.toDouble() != signal.lowEngineeringUnits())
+					if (physicalLowLimit.isEqual(signal.lowEngineeringUnits()) == false)
 					{
 						QString nowElValStr, newElValStr;
 						double elVal = uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), r0);
@@ -572,7 +584,7 @@ namespace Builder
 						return false;
 					}
 
-					if (physicalHighLimit.toDouble() != signal.highEngineeringUnits())
+					if (physicalHighLimit.isEqual(signal.highEngineeringUnits()) == false)
 					{
 						QString nowElValStr, newElValStr;
 						double elVal = uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), r0);

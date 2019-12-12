@@ -176,7 +176,7 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Comparato
 
 	if (pComparator->compare().isConst() == true)
 	{
-		compareValue += QString::number(pComparator->compare().constValue(), 10, precision);
+		compareValue += QString::number(pComparator->compare().constValue(), 'f', precision);
 	}
 	else
 	{
@@ -187,7 +187,7 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Comparato
 
 	if (pComparator->hysteresis().isConst() == true)
 	{
-		hysteresisValue = QString::number(pComparator->hysteresis().constValue(), 10, precision);
+		hysteresisValue = QString::number(pComparator->hysteresis().constValue(), 'f', precision);
 	}
 	else
 	{
@@ -244,7 +244,7 @@ std::shared_ptr<Comparator> ComparatorListTable::comparator(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorListTable::set(const QList<std::shared_ptr<Comparator>> list_add)
+void ComparatorListTable::set(const QVector<std::shared_ptr<Comparator> >& list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -453,7 +453,7 @@ void ComparatorListDialog::updateList()
 
 	m_comparatorTable.clear();
 
-	QList<std::shared_ptr<Comparator>> comparatorList;
+	QVector<std::shared_ptr<Comparator>> comparatorList;
 
 	int count = theSignalBase.signalCount();
 	for(int i = 0; i < count; i++)

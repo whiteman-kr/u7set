@@ -6,7 +6,7 @@
 //
 test AFB_SCALE_FP_FP_01, AFB tests for AFB_SCALE_FP_FP element
 schema AFB_SCALE_FP_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_IN_FP1 = 0
 check #OUT_SCALE_FP_FP01 == 0
 check #ZERO_SCALE_FP_FP01 == 1
@@ -47,7 +47,7 @@ endtest
 //
 test AFB_SCALE_FP_FP_02, AFB tests for AFB_SCALE_FP_FP element
 schema AFB_SCALE_FP_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_IN_FP2 = 0
 check #OUT_SCALE_FP_FP02 == 0
 check #ZERO_SCALE_FP_FP02 == 1

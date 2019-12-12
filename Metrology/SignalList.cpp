@@ -225,7 +225,7 @@ QString SignalListTable::text(int row, int column, Metrology::Signal* pSignal) c
 	{
 		case SIGNAL_LIST_COLUMN_APP_ID:				result = param.appSignalID();				break;
 		case SIGNAL_LIST_COLUMN_CUSTOM_ID:			result = param.customAppSignalID();			break;
-		case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:		result = param.location().equipmentID();	break;
+		case SIGNAL_LIST_COLUMN_EQUIPMENT_ID:		result = param.equipmentID();				break;
 		case SIGNAL_LIST_COLUMN_CAPTION:			result = param.caption();					break;
 		case SIGNAL_LIST_COLUMN_RACK:				result = param.location().rack().caption();	break;
 		case SIGNAL_LIST_COLUMN_CHASSIS:			result = param.location().chassisStr();		break;
@@ -280,7 +280,7 @@ Metrology::Signal* SignalListTable::signal(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalListTable::set(const QList<Metrology::Signal*> list_add)
+void SignalListTable::set(const QVector<Metrology::Signal*>& list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -530,7 +530,7 @@ void SignalListDialog::updateList()
 
 	m_signalTable.clear();
 
-	QList<Metrology::Signal*> signalList;
+	QVector<Metrology::Signal*> signalList;
 
 	int count = theSignalBase.signalCount();
 	for(int i = 0; i < count; i++)

@@ -527,8 +527,8 @@ bool Calibrator::setValue(double value)
 
 	switch(m_type)
 	{
-		case CALIBRATOR_TYPE_TRXII:		cmdSetValue = QString("%1%2").arg(TRXII_SET_VALUE, QString::number(value, 10, 3));		break;
-		case CALIBRATOR_TYPE_CALYS75:	cmdSetValue = QString("%1%2").arg(CALYS75_SET_VALUE, QString::number(value, 10, 5));	break;
+		case CALIBRATOR_TYPE_TRXII:		cmdSetValue = QString("%1%2").arg(TRXII_SET_VALUE, QString::number(value, 'f', 3));		break;
+		case CALIBRATOR_TYPE_CALYS75:	cmdSetValue = QString("%1%2").arg(CALYS75_SET_VALUE, QString::number(value, 'f', 5));	break;
 		default:						assert(false);
 	}
 
@@ -596,8 +596,8 @@ bool Calibrator::stepDown()
 
 	switch(m_type)
 	{
-		case CALIBRATOR_TYPE_TRXII:		cmdKeyDown = QString("%1%2").arg(TRXII_SET_VALUE,QString::number(m_sourceValue, 10, 3));	break;
-		case CALIBRATOR_TYPE_CALYS75:	cmdKeyDown = QString("%1%2").arg(CALYS75_SET_VALUE,QString::number(m_sourceValue, 10, 5));	break;
+		case CALIBRATOR_TYPE_TRXII:		cmdKeyDown = QString("%1%2").arg(TRXII_SET_VALUE,QString::number(m_sourceValue, 'f', 3));	break;
+		case CALIBRATOR_TYPE_CALYS75:	cmdKeyDown = QString("%1%2").arg(CALYS75_SET_VALUE,QString::number(m_sourceValue, 'f', 5));	break;
 		default:						assert(false);
 	}
 
@@ -665,8 +665,8 @@ bool Calibrator::stepUp()
 
 	switch(m_type)
 	{
-		case CALIBRATOR_TYPE_TRXII:		cmdKeyUp = QString("%1%2").arg(TRXII_SET_VALUE,QString::number(m_sourceValue, 10, 3));		break;
-		case CALIBRATOR_TYPE_CALYS75:	cmdKeyUp = QString("%1%2").arg(CALYS75_SET_VALUE,QString::number(m_sourceValue, 10, 5));	break;
+		case CALIBRATOR_TYPE_TRXII:		cmdKeyUp = QString("%1%2").arg(TRXII_SET_VALUE,QString::number(m_sourceValue, 'f', 3));		break;
+		case CALIBRATOR_TYPE_CALYS75:	cmdKeyUp = QString("%1%2").arg(CALYS75_SET_VALUE,QString::number(m_sourceValue, 'f', 5));	break;
 		default:						assert(false);
 	}
 

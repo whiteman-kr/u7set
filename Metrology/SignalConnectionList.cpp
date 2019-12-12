@@ -242,7 +242,7 @@ SignalConnection SignalConnectionTable::at(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalConnectionTable::set(const QList<SignalConnection> list_add)
+void SignalConnectionTable::set(const QVector<SignalConnection>& list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -760,7 +760,7 @@ void SignalConnectionDialog::updateList()
 
 	m_connectionBase.sort();
 
-	QList<SignalConnection> connectionList;
+	QVector<SignalConnection> connectionList;
 
 	int count = m_connectionBase.count();
 	for(int i = 0; i < count; i++)

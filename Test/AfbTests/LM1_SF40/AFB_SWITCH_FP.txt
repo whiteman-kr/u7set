@@ -1,6 +1,6 @@
 test AFB_SWITCH_FP01, AFB tests for AFB_SWITCH_FP element
 schema AFB_SWITCH_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_DSCR1 = 0, #TUN_IN_FP1 = 2.6 , #TUN_IN_FP2 = 1.0
 check #OUT_SWITCH_FP1 == 2.6
 set #TUN_DSCR1 = 0, #TUN_IN_FP1 = 999.99 , #TUN_IN_FP2 = 777.77

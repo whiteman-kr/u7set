@@ -1,6 +1,6 @@
 test AFB_POLY_1, AFB tests for AFB_POLY element
 schema AFB_POLY
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 // 2 parameters
 set #TUN_IN_FP1 = 0
 check #OUT_POLY001 == 2
@@ -27,7 +27,7 @@ endtest
 
 test AFB_POLY_2, AFB tests for AFB_POLY element
 schema AFB_POLY
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 // 5 parameters
 set #TUN_IN_FP2 = 1
 check #OUT_POLY002  == 23.0
@@ -47,7 +47,7 @@ endtest
 
 test AFB_POLY_3, AFB tests for AFB_POLY element
 schema AFB_POLY
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 // 7 parameters
 
 set #TUN_IN_FP3 = 1
@@ -68,7 +68,7 @@ endtest
 
 test AFB_POLY_4, AFB tests for AFB_POLY element
 schema AFB_POLY
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 // 9 parameters
 
 set #TUN_IN_FP4 = 0

@@ -59,13 +59,12 @@ private slots:
 	void				slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray);
 
 	bool				readConfiguration(const QByteArray& fileData);
-	bool				readAppSignalSet(const QByteArray& fileData);
+	bool				readMetrologyItems(const QByteArray& fileData);
+	bool				readMetrologySignalSet(const QByteArray& fileData);
 	bool				readComparatorSet(const QByteArray& fileData);
-	bool				readMetrologySignals(const QByteArray& fileData);
 
 	bool				readRacks(const QByteArray& fileData, int fileVersion);
 	bool				readTuningSources(const QByteArray& fileData, int fileVersion);
-	bool				readSignals(const QByteArray& fileData, int fileVersion);
 
 signals:
 

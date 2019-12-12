@@ -51,10 +51,10 @@ int SqlFieldBase::init(int objectType, int)
 
 			append("AppSignalID",					QVariant::String, 64);
 			append("CustomAppSignalID",				QVariant::String, 64);
+			append("EquipmentID",					QVariant::String, 256);
 			append("Caption",						QVariant::String, 256);
 
 			append("ModuleSN",						QVariant::Int);
-			append("EquipmentID",					QVariant::String, 256);
 			append("RackIndex",						QVariant::Int);
 			append("RackCaption",					QVariant::String, 64);
 			append("Channel",						QVariant::Int);
@@ -67,28 +67,28 @@ int SqlFieldBase::init(int objectType, int)
 			append("ElectricNominal",				QVariant::Double);
 			append("ElectricMeasure",				QVariant::Double);
 
-			append("EngeneeringNominal",			QVariant::Double);
-			append("EngeneeringMeasure",			QVariant::Double);
+			append("EngineeringNominal",			QVariant::Double);
+			append("EngineeringMeasure",			QVariant::Double);
 
 			append("ElectricLowLimit",				QVariant::Double);
 			append("ElectricHighLimit",				QVariant::Double);
 			append("ElectricUnit",					QVariant::String, 32);
 			append("ElectricPrecision",				QVariant::Int);
 
-			append("EngeneeringLowLimit",			QVariant::Double);
-			append("EngeneeringHighLimit",			QVariant::Double);
-			append("EngeneeringUnit",				QVariant::String, 32);
-			append("EngeneeringPrecision",			QVariant::Int);
+			append("EngineeringLowLimit",			QVariant::Double);
+			append("EngineeringHighLimit",			QVariant::Double);
+			append("EngineeringUnit",				QVariant::String, 32);
+			append("EngineeringPrecision",			QVariant::Int);
 
 			append("ElectricErrorAbsolute",			QVariant::Double);
 			append("ElectricErrorReduce",			QVariant::Double);
 			append("ElectricLimitErrorAbsolute",	QVariant::Double);
 			append("ElectricLimitErrorReduce",		QVariant::Double);
 
-			append("EngeneeringErrorAbsolute",		QVariant::Double);
-			append("EngeneeringErrorReduce",		QVariant::Double);
-			append("EngeneeringLimitErrorAbsolute",	QVariant::Double);
-			append("EngeneeringLimitErrorReduce",	QVariant::Double);
+			append("EngineeringErrorAbsolute",		QVariant::Double);
+			append("EngineeringErrorReduce",		QVariant::Double);
+			append("EngineeringLimitErrorAbsolute",	QVariant::Double);
+			append("EngineeringLimitErrorReduce",	QVariant::Double);
 
 			append("MeasureTime",					QVariant::String, 64);
 
@@ -170,10 +170,10 @@ int SqlFieldBase::init(int objectType, int)
 
 			append("AppSignalID",					QVariant::String, 64);
 			append("CustomAppSignalID",				QVariant::String, 64);
+			append("EquipmentID",					QVariant::String, 256);
 			append("Caption",						QVariant::String, 256);
 
 			append("ModuleSN",						QVariant::Int);
-			append("EquipmentID",					QVariant::String, 256);
 			append("RackIndex",						QVariant::Int);
 			append("RackCaption",					QVariant::String, 64);
 			append("Channel",						QVariant::Int);
@@ -186,28 +186,28 @@ int SqlFieldBase::init(int objectType, int)
 			append("ElectricNominal",				QVariant::Double);
 			append("ElectricMeasure",				QVariant::Double);
 
-			append("EngeneeringNominal",			QVariant::Double);
-			append("EngeneeringMeasure",			QVariant::Double);
+			append("EngineeringNominal",			QVariant::Double);
+			append("EngineeringMeasure",			QVariant::Double);
 
 			append("ElectricLowLimit",				QVariant::Double);
 			append("ElectricHighLimit",				QVariant::Double);
 			append("ElectricUnit",					QVariant::String, 32);
 			append("ElectricPrecision",				QVariant::Int);
 
-			append("EngeneeringLowLimit",			QVariant::Double);
-			append("EngeneeringHighLimit",			QVariant::Double);
-			append("EngeneeringUnit",				QVariant::String, 32);
-			append("EngeneeringPrecision",			QVariant::Int);
+			append("EngineeringLowLimit",			QVariant::Double);
+			append("EngineeringHighLimit",			QVariant::Double);
+			append("EngineeringUnit",				QVariant::String, 32);
+			append("EngineeringPrecision",			QVariant::Int);
 
 			append("ElectricErrorAbsolute",			QVariant::Double);
 			append("ElectricErrorReduce",			QVariant::Double);
 			append("ElectricLimitErrorAbsolute",	QVariant::Double);
 			append("ElectricLimitErrorReduce",		QVariant::Double);
 
-			append("EngeneeringErrorAbsolute",		QVariant::Double);
-			append("EngeneeringErrorReduce",		QVariant::Double);
-			append("EngeneeringLimitErrorAbsolute",	QVariant::Double);
-			append("EngeneeringLimitErrorReduce",	QVariant::Double);
+			append("EngineeringErrorAbsolute",		QVariant::Double);
+			append("EngineeringErrorReduce",		QVariant::Double);
+			append("EngineeringLimitErrorAbsolute",	QVariant::Double);
+			append("EngineeringLimitErrorReduce",	QVariant::Double);
 
 			append("MeasureTime",					QVariant::String, 64);
 			break;
@@ -786,10 +786,10 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
 					measure->setAppSignalID(query.value(field++).toString());
 					measure->setCustomAppSignalID(query.value(field++).toString());
+					measure->setEquipmentID(query.value(field++).toString());
 					measure->setCaption(query.value(field++).toString());
 
-					measure->setModuleSerialNo(query.value(field++).toInt());
-					measure->location().setEquipmentID(query.value(field++).toString());
+					measure->location().setModuleSerialNo(query.value(field++).toInt());
 					measure->location().rack().setIndex(query.value(field++).toInt());
 					measure->location().rack().setCaption(query.value(field++).toString());
 					measure->location().rack().setChannel(query.value(field++).toInt());
@@ -926,10 +926,10 @@ int SqlTable::read(void* pRecord, int* key, int keyCount)
 
 					measure->setAppSignalID(query.value(field++).toString());
 					measure->setCustomAppSignalID(query.value(field++).toString());
+					measure->setEquipmentID(query.value(field++).toString());
 					measure->setCaption(query.value(field++).toString());
 
-					measure->setModuleSerialNo(query.value(field++).toInt());
-					measure->location().setEquipmentID(query.value(field++).toString());
+					measure->location().setModuleSerialNo(query.value(field++).toInt());
 					measure->location().rack().setIndex(query.value(field++).toInt());
 					measure->location().rack().setCaption(query.value(field++).toString());
 					measure->location().rack().setChannel(query.value(field++).toInt());
@@ -1187,10 +1187,10 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
 					query.bindValue(field++, measure->appSignalID());
 					query.bindValue(field++, measure->customAppSignalID());
+					query.bindValue(field++, measure->equipmentID());
 					query.bindValue(field++, measure->caption());
 
-					query.bindValue(field++, measure->moduleSerialNo());
-					query.bindValue(field++, measure->location().equipmentID());
+					query.bindValue(field++, measure->location().moduleSerialNo());
 					query.bindValue(field++, measure->location().rack().index());
 					query.bindValue(field++, measure->location().rack().caption());
 					query.bindValue(field++, measure->location().rack().channel());
@@ -1343,10 +1343,10 @@ int SqlTable::write(void* pRecord, int count, int* key)
 
 					query.bindValue(field++, measure->appSignalID());
 					query.bindValue(field++, measure->customAppSignalID());
+					query.bindValue(field++, measure->equipmentID());
 					query.bindValue(field++, measure->caption());
 
-					query.bindValue(field++, measure->moduleSerialNo());
-					query.bindValue(field++, measure->location().equipmentID());
+					query.bindValue(field++, measure->location().moduleSerialNo());
 					query.bindValue(field++, measure->location().rack().index());
 					query.bindValue(field++, measure->location().rack().caption());
 					query.bindValue(field++, measure->location().rack().channel());

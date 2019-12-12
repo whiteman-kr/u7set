@@ -154,7 +154,7 @@ QHBoxLayout* OptionsDialog::createPages()
 	m_pPageTree->setHeaderHidden(true);
 	m_pPageTree->setFixedWidth(200);
 
-	QList<QTreeWidgetItem*> groupList;
+	QVector<QTreeWidgetItem*> groupList;
 
 	for(int group = 0; group < OPTION_GROUP_COUNT; group++)
 	{
@@ -565,7 +565,7 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 				QtProperty *showcolumnGroup = manager->addProperty(QtVariantPropertyManager::groupTypeId(), tr("Type of displaying measurement list"));
 
 					item = manager->addProperty(QVariant::Bool, ComparatorParamName[CO_PARAM_SHOW_ENGINEERING_VALUE]);
-					item->setValue(m_options.comparator().showEngeneeringValueColumn());
+					item->setValue(m_options.comparator().showEngineeringValueColumn());
 					appendProperty(item, page, CO_PARAM_SHOW_ENGINEERING_VALUE);
 					showcolumnGroup->addSubProperty(item);
 

@@ -4,9 +4,9 @@
         <file>icons/Reconnect.png</file>
         <file>icons/toHex.png</file>
         <file>icons/toWord.png</file>
-        <file>icons/CommView.png</file>
         <file>icons/About.png</file>
         <file>icons/toFloat.png</file>
         <file>icons/Start.png</file>
+        <file>icons/CommView.ico</file>
     </qresource>
 </RCC>

@@ -341,7 +341,7 @@ void Calculator::conversionTr()
 		double val = conversion(m_pTrDegreeEdit->text().toDouble(), CT_PHYSICAL_TO_ELECTRIC, E::ElectricUnit::Ohm, sensorType, m_pTrR0Edit->text().toDouble());
 
 		m_pTrDegreeEdit->setReadOnly(false);
-		m_pTrElectricEdit->setText(QString::number(val, 10, 4));
+		m_pTrElectricEdit->setText(QString::number(val, 'f', 4));
 		m_pTrElectricEdit->setReadOnly(true);
 	}
 
@@ -350,7 +350,7 @@ void Calculator::conversionTr()
 		double val = conversion(m_pTrElectricEdit->text().toDouble(), CT_ELECTRIC_TO_PHYSICAL, E::ElectricUnit::Ohm, sensorType, m_pTrR0Edit->text().toDouble());
 
 		m_pTrElectricEdit->setReadOnly(false);
-		m_pTrDegreeEdit->setText(QString::number(val, 10, 4));
+		m_pTrDegreeEdit->setText(QString::number(val, 'f', 4));
 		m_pTrDegreeEdit->setReadOnly(true);
 	}
 }
@@ -373,7 +373,7 @@ void Calculator::conversionTc()
 
 		m_pTcDegreeEdit->setFocus();
 		m_pTcDegreeEdit->setReadOnly(false);
-		m_pTcElectricEdit->setText(QString::number(val, 10, 4));
+		m_pTcElectricEdit->setText(QString::number(val, 'f', 4));
 		m_pTcElectricEdit->setReadOnly(true);
 	}
 
@@ -383,7 +383,7 @@ void Calculator::conversionTc()
 
 		m_pTcElectricEdit->setFocus();
 		m_pTcElectricEdit->setReadOnly(false);
-		m_pTcDegreeEdit->setText(QString::number(val, 10, 4));
+		m_pTcDegreeEdit->setText(QString::number(val, 'f', 4));
 		m_pTcDegreeEdit->setReadOnly(true);
 	}
 }
@@ -402,7 +402,7 @@ void Calculator::conversionLin()
 		double val = (m_pLinInValEdit->text().toDouble() - irl)*(orh-orl)/(irh-irl)+orl;
 
 		m_pLinInValEdit->setReadOnly(false);
-		m_pLinOutValEdit->setText(QString::number(val, 10, 4));
+		m_pLinOutValEdit->setText(QString::number(val, 'f', 4));
 		m_pLinOutValEdit->setReadOnly(true);
 	}
 
@@ -411,7 +411,7 @@ void Calculator::conversionLin()
 		double val = (m_pLinOutValEdit->text().toDouble() - orl)*(irh-irl)/(orh-orl)+irl;
 
 		m_pLinOutValEdit->setReadOnly(false);
-		m_pLinInValEdit->setText(QString::number(val, 10, 4));
+		m_pLinInValEdit->setText(QString::number(val, 'f', 4));
 		m_pLinInValEdit->setReadOnly(true);
 	}
 }

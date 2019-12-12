@@ -140,7 +140,7 @@ void OptionsMeasureViewHeaderDialog::updateList()
 
 		m_columnList->setItem(index, MVH_COLUMN_VISIBLE, cell);
 
-		cell = new QTableWidgetItem(QString::number(column.width(), 10, 0));
+		cell = new QTableWidgetItem(QString::number(column.width(), 'f', 0));
 		cell->setTextAlignment(Qt::AlignHCenter);
 		if (visible == false)
 		{

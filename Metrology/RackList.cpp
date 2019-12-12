@@ -210,7 +210,7 @@ Metrology::RackParam* RackListTable::rack(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackListTable::set(const QList<Metrology::RackParam*> list_add)
+void RackListTable::set(const QVector<Metrology::RackParam*>& list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -389,7 +389,7 @@ void RackListDialog::updateList()
 {
 	m_rackTable.clear();
 
-	QList<Metrology::RackParam*> rackList;
+	QVector<Metrology::RackParam*> rackList;
 
 	int count = m_rackBase.count();
 	for(int i = 0; i < count; i++)

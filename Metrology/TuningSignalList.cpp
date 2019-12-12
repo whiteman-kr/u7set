@@ -254,7 +254,7 @@ TuningSource TuningSourceTable::source(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSourceTable::set(const QList<TuningSource> list_add)
+void TuningSourceTable::set(const QVector<TuningSource>& list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -470,7 +470,7 @@ QString TuningSignalTable::text(int row, int column, Metrology::Signal* pSignal)
 		case TUN_SIGNAL_LIST_COLUMN_RACK:			result = param.location().rack().caption();	break;
 		case TUN_SIGNAL_LIST_COLUMN_APP_ID:			result = param.appSignalID();				break;
 		case TUN_SIGNAL_LIST_COLUMN_CUSTOM_ID:		result = param.customAppSignalID();			break;
-		case TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID:	result = param.location().equipmentID();	break;
+		case TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID:	result = param.equipmentID();				break;
 		case TUN_SIGNAL_LIST_COLUMN_CAPTION:		result = param.caption();					break;
 		case TUN_SIGNAL_LIST_COLUMN_STATE:			result = signalStateStr(pSignal);			break;
 		case TUN_SIGNAL_LIST_COLUMN_DEFAULT:		result = param.tuningDefaultValueStr();		break;
@@ -587,7 +587,7 @@ Metrology::Signal* TuningSignalTable::signal(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalTable::set(const QList<Metrology::Signal*> list_add)
+void TuningSignalTable::set(const QVector<Metrology::Signal*>& list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -842,7 +842,7 @@ void TuningSignalListDialog::updateSourceList()
 	//
 	m_sourceTable.clear();
 
-	QList<TuningSource> sourceList;
+	QVector<TuningSource> sourceList;
 
 	int souceCount = theSignalBase.tuning().Sources().count();
 	for(int i = 0; i < souceCount; i++)
@@ -869,7 +869,7 @@ void TuningSignalListDialog::updateSignalList()
 
 	m_signalTable.clear();
 
-	QList<Metrology::Signal*> signalList;
+	QVector<Metrology::Signal*> signalList;
 
 	int signalCount = theSignalBase.tuning().Signals().count();
 	for(int i = 0; i < signalCount; i++)

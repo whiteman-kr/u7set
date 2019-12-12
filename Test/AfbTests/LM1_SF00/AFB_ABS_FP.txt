@@ -1,6 +1,6 @@
 test AFB_ABS_FP, AFB tests for AFB_ABS_FP element
 schema AFB_ABS_FP
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 set #TUN_IN_FP1 = 1.01
 check #OUT_ABS_FP001  == 1.01
 set #TUN_IN_FP1 = 2.1

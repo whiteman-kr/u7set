@@ -204,8 +204,8 @@ void OptionsPointsDialog::updateRangeType()
 			m_downButton->hide();
 
 			m_pointCountEdit->setText(QString::number(m_linearity.points().count()));
-			m_lowRangeEdit->setText(QString::number(m_linearity.lowLimitRange(), 10, 2));
-			m_highRangeEdit->setText(QString::number(m_linearity.highLimitRange(), 10, 2));
+			m_lowRangeEdit->setText(QString::number(m_linearity.lowLimitRange(), 'f', 2));
+			m_highRangeEdit->setText(QString::number(m_linearity.highLimitRange(), 'f', 2));
 
 			break;
 
@@ -242,7 +242,7 @@ void OptionsPointsDialog::updateList()
 
 		for(int sensor = 0; sensor < POINT_SENSOR_COUNT; sensor++)
 		{
-			cell = new QTableWidgetItem(QString::number(point.sensorValue(sensor), 10, 3));
+			cell = new QTableWidgetItem(QString::number(point.sensorValue(sensor), 'f', 3));
 			cell->setTextAlignment(Qt::AlignHCenter);
 			m_pointList->setItem(index, sensor, cell);
 

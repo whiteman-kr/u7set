@@ -131,6 +131,9 @@ class ComparatorSignal;
 class Comparator;
 class LmComparatorSet;
 class ComparatorSet;
+class MetrologySignalLocation;
+class MetrologySignal;
+class MetrologySignalSet;
 
 enum SchemaUnit {
   Display = 0,
@@ -13657,6 +13660,429 @@ class ComparatorSet : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static ComparatorSet* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class MetrologySignalLocation : public ::google::protobuf::Message {
+ public:
+  MetrologySignalLocation();
+  virtual ~MetrologySignalLocation();
+
+  MetrologySignalLocation(const MetrologySignalLocation& from);
+
+  inline MetrologySignalLocation& operator=(const MetrologySignalLocation& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const MetrologySignalLocation& default_instance();
+
+  void Swap(MetrologySignalLocation* other);
+
+  // implements Message ----------------------------------------------
+
+  MetrologySignalLocation* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const MetrologySignalLocation& from);
+  void MergeFrom(const MetrologySignalLocation& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string rackID = 1;
+  inline bool has_rackid() const;
+  inline void clear_rackid();
+  static const int kRackIDFieldNumber = 1;
+  inline const ::std::string& rackid() const;
+  inline void set_rackid(const ::std::string& value);
+  inline void set_rackid(const char* value);
+  inline void set_rackid(const char* value, size_t size);
+  inline ::std::string* mutable_rackid();
+  inline ::std::string* release_rackid();
+  inline void set_allocated_rackid(::std::string* rackid);
+
+  // optional string chassisID = 2;
+  inline bool has_chassisid() const;
+  inline void clear_chassisid();
+  static const int kChassisIDFieldNumber = 2;
+  inline const ::std::string& chassisid() const;
+  inline void set_chassisid(const ::std::string& value);
+  inline void set_chassisid(const char* value);
+  inline void set_chassisid(const char* value, size_t size);
+  inline ::std::string* mutable_chassisid();
+  inline ::std::string* release_chassisid();
+  inline void set_allocated_chassisid(::std::string* chassisid);
+
+  // optional int32 chassis = 3 [default = -1];
+  inline bool has_chassis() const;
+  inline void clear_chassis();
+  static const int kChassisFieldNumber = 3;
+  inline ::google::protobuf::int32 chassis() const;
+  inline void set_chassis(::google::protobuf::int32 value);
+
+  // optional string moduleID = 4;
+  inline bool has_moduleid() const;
+  inline void clear_moduleid();
+  static const int kModuleIDFieldNumber = 4;
+  inline const ::std::string& moduleid() const;
+  inline void set_moduleid(const ::std::string& value);
+  inline void set_moduleid(const char* value);
+  inline void set_moduleid(const char* value, size_t size);
+  inline ::std::string* mutable_moduleid();
+  inline ::std::string* release_moduleid();
+  inline void set_allocated_moduleid(::std::string* moduleid);
+
+  // optional int32 module = 5 [default = -1];
+  inline bool has_module() const;
+  inline void clear_module();
+  static const int kModuleFieldNumber = 5;
+  inline ::google::protobuf::int32 module() const;
+  inline void set_module(::google::protobuf::int32 value);
+
+  // optional int32 place = 6 [default = -1];
+  inline bool has_place() const;
+  inline void clear_place();
+  static const int kPlaceFieldNumber = 6;
+  inline ::google::protobuf::int32 place() const;
+  inline void set_place(::google::protobuf::int32 value);
+
+  // optional string contact = 7;
+  inline bool has_contact() const;
+  inline void clear_contact();
+  static const int kContactFieldNumber = 7;
+  inline const ::std::string& contact() const;
+  inline void set_contact(const ::std::string& value);
+  inline void set_contact(const char* value);
+  inline void set_contact(const char* value, size_t size);
+  inline ::std::string* mutable_contact();
+  inline ::std::string* release_contact();
+  inline void set_allocated_contact(::std::string* contact);
+
+  // @@protoc_insertion_point(class_scope:Proto.MetrologySignalLocation)
+ private:
+  inline void set_has_rackid();
+  inline void clear_has_rackid();
+  inline void set_has_chassisid();
+  inline void clear_has_chassisid();
+  inline void set_has_chassis();
+  inline void clear_has_chassis();
+  inline void set_has_moduleid();
+  inline void clear_has_moduleid();
+  inline void set_has_module();
+  inline void clear_has_module();
+  inline void set_has_place();
+  inline void clear_has_place();
+  inline void set_has_contact();
+  inline void clear_has_contact();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* rackid_;
+  ::std::string* chassisid_;
+  ::std::string* moduleid_;
+  ::google::protobuf::int32 chassis_;
+  ::google::protobuf::int32 module_;
+  ::std::string* contact_;
+  ::google::protobuf::int32 place_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static MetrologySignalLocation* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class MetrologySignal : public ::google::protobuf::Message {
+ public:
+  MetrologySignal();
+  virtual ~MetrologySignal();
+
+  MetrologySignal(const MetrologySignal& from);
+
+  inline MetrologySignal& operator=(const MetrologySignal& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const MetrologySignal& default_instance();
+
+  void Swap(MetrologySignal* other);
+
+  // implements Message ----------------------------------------------
+
+  MetrologySignal* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const MetrologySignal& from);
+  void MergeFrom(const MetrologySignal& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .Proto.AppSignal appSignal = 1;
+  inline bool has_appsignal() const;
+  inline void clear_appsignal();
+  static const int kAppSignalFieldNumber = 1;
+  inline const ::Proto::AppSignal& appsignal() const;
+  inline ::Proto::AppSignal* mutable_appsignal();
+  inline ::Proto::AppSignal* release_appsignal();
+  inline void set_allocated_appsignal(::Proto::AppSignal* appsignal);
+
+  // optional .Proto.MetrologySignalLocation location = 2;
+  inline bool has_location() const;
+  inline void clear_location();
+  static const int kLocationFieldNumber = 2;
+  inline const ::Proto::MetrologySignalLocation& location() const;
+  inline ::Proto::MetrologySignalLocation* mutable_location();
+  inline ::Proto::MetrologySignalLocation* release_location();
+  inline void set_allocated_location(::Proto::MetrologySignalLocation* location);
+
+  // optional double electricLowLimit = 3 [default = 0];
+  inline bool has_electriclowlimit() const;
+  inline void clear_electriclowlimit();
+  static const int kElectricLowLimitFieldNumber = 3;
+  inline double electriclowlimit() const;
+  inline void set_electriclowlimit(double value);
+
+  // optional double electricHighLimit = 4 [default = 0];
+  inline bool has_electrichighlimit() const;
+  inline void clear_electrichighlimit();
+  static const int kElectricHighLimitFieldNumber = 4;
+  inline double electrichighlimit() const;
+  inline void set_electrichighlimit(double value);
+
+  // optional int32 electricUnitID = 5 [default = 1];
+  inline bool has_electricunitid() const;
+  inline void clear_electricunitid();
+  static const int kElectricUnitIDFieldNumber = 5;
+  inline ::google::protobuf::int32 electricunitid() const;
+  inline void set_electricunitid(::google::protobuf::int32 value);
+
+  // optional int32 electricSensorType = 6 [default = 1];
+  inline bool has_electricsensortype() const;
+  inline void clear_electricsensortype();
+  static const int kElectricSensorTypeFieldNumber = 6;
+  inline ::google::protobuf::int32 electricsensortype() const;
+  inline void set_electricsensortype(::google::protobuf::int32 value);
+
+  // optional double electricR0 = 7 [default = 0];
+  inline bool has_electricr0() const;
+  inline void clear_electricr0();
+  static const int kElectricR0FieldNumber = 7;
+  inline double electricr0() const;
+  inline void set_electricr0(double value);
+
+  // optional int32 electricPrecision = 8 [default = 4];
+  inline bool has_electricprecision() const;
+  inline void clear_electricprecision();
+  static const int kElectricPrecisionFieldNumber = 8;
+  inline ::google::protobuf::int32 electricprecision() const;
+  inline void set_electricprecision(::google::protobuf::int32 value);
+
+  // optional double physicalLowLimit = 9 [default = 0];
+  inline bool has_physicallowlimit() const;
+  inline void clear_physicallowlimit();
+  static const int kPhysicalLowLimitFieldNumber = 9;
+  inline double physicallowlimit() const;
+  inline void set_physicallowlimit(double value);
+
+  // optional double physicalHighLimit = 10 [default = 0];
+  inline bool has_physicalhighlimit() const;
+  inline void clear_physicalhighlimit();
+  static const int kPhysicalHighLimitFieldNumber = 10;
+  inline double physicalhighlimit() const;
+  inline void set_physicalhighlimit(double value);
+
+  // @@protoc_insertion_point(class_scope:Proto.MetrologySignal)
+ private:
+  inline void set_has_appsignal();
+  inline void clear_has_appsignal();
+  inline void set_has_location();
+  inline void clear_has_location();
+  inline void set_has_electriclowlimit();
+  inline void clear_has_electriclowlimit();
+  inline void set_has_electrichighlimit();
+  inline void clear_has_electrichighlimit();
+  inline void set_has_electricunitid();
+  inline void clear_has_electricunitid();
+  inline void set_has_electricsensortype();
+  inline void clear_has_electricsensortype();
+  inline void set_has_electricr0();
+  inline void clear_has_electricr0();
+  inline void set_has_electricprecision();
+  inline void clear_has_electricprecision();
+  inline void set_has_physicallowlimit();
+  inline void clear_has_physicallowlimit();
+  inline void set_has_physicalhighlimit();
+  inline void clear_has_physicalhighlimit();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::Proto::AppSignal* appsignal_;
+  ::Proto::MetrologySignalLocation* location_;
+  double electriclowlimit_;
+  double electrichighlimit_;
+  ::google::protobuf::int32 electricunitid_;
+  ::google::protobuf::int32 electricsensortype_;
+  double electricr0_;
+  double physicallowlimit_;
+  double physicalhighlimit_;
+  ::google::protobuf::int32 electricprecision_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static MetrologySignal* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class MetrologySignalSet : public ::google::protobuf::Message {
+ public:
+  MetrologySignalSet();
+  virtual ~MetrologySignalSet();
+
+  MetrologySignalSet(const MetrologySignalSet& from);
+
+  inline MetrologySignalSet& operator=(const MetrologySignalSet& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const MetrologySignalSet& default_instance();
+
+  void Swap(MetrologySignalSet* other);
+
+  // implements Message ----------------------------------------------
+
+  MetrologySignalSet* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const MetrologySignalSet& from);
+  void MergeFrom(const MetrologySignalSet& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .Proto.MetrologySignal metrologySignal = 1;
+  inline int metrologysignal_size() const;
+  inline void clear_metrologysignal();
+  static const int kMetrologySignalFieldNumber = 1;
+  inline const ::Proto::MetrologySignal& metrologysignal(int index) const;
+  inline ::Proto::MetrologySignal* mutable_metrologysignal(int index);
+  inline ::Proto::MetrologySignal* add_metrologysignal();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::MetrologySignal >&
+      metrologysignal() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::MetrologySignal >*
+      mutable_metrologysignal();
+
+  // @@protoc_insertion_point(class_scope:Proto.MetrologySignalSet)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Proto::MetrologySignal > metrologysignal_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static MetrologySignalSet* default_instance_;
 };
 // ===================================================================
 
@@ -33326,6 +33752,641 @@ ComparatorSet::lmcomparatorset() const {
 inline ::google::protobuf::RepeatedPtrField< ::Proto::LmComparatorSet >*
 ComparatorSet::mutable_lmcomparatorset() {
   return &lmcomparatorset_;
+}
+
+// -------------------------------------------------------------------
+
+// MetrologySignalLocation
+
+// optional string rackID = 1;
+inline bool MetrologySignalLocation::has_rackid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void MetrologySignalLocation::set_has_rackid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void MetrologySignalLocation::clear_has_rackid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void MetrologySignalLocation::clear_rackid() {
+  if (rackid_ != &::google::protobuf::internal::kEmptyString) {
+    rackid_->clear();
+  }
+  clear_has_rackid();
+}
+inline const ::std::string& MetrologySignalLocation::rackid() const {
+  return *rackid_;
+}
+inline void MetrologySignalLocation::set_rackid(const ::std::string& value) {
+  set_has_rackid();
+  if (rackid_ == &::google::protobuf::internal::kEmptyString) {
+    rackid_ = new ::std::string;
+  }
+  rackid_->assign(value);
+}
+inline void MetrologySignalLocation::set_rackid(const char* value) {
+  set_has_rackid();
+  if (rackid_ == &::google::protobuf::internal::kEmptyString) {
+    rackid_ = new ::std::string;
+  }
+  rackid_->assign(value);
+}
+inline void MetrologySignalLocation::set_rackid(const char* value, size_t size) {
+  set_has_rackid();
+  if (rackid_ == &::google::protobuf::internal::kEmptyString) {
+    rackid_ = new ::std::string;
+  }
+  rackid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* MetrologySignalLocation::mutable_rackid() {
+  set_has_rackid();
+  if (rackid_ == &::google::protobuf::internal::kEmptyString) {
+    rackid_ = new ::std::string;
+  }
+  return rackid_;
+}
+inline ::std::string* MetrologySignalLocation::release_rackid() {
+  clear_has_rackid();
+  if (rackid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = rackid_;
+    rackid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void MetrologySignalLocation::set_allocated_rackid(::std::string* rackid) {
+  if (rackid_ != &::google::protobuf::internal::kEmptyString) {
+    delete rackid_;
+  }
+  if (rackid) {
+    set_has_rackid();
+    rackid_ = rackid;
+  } else {
+    clear_has_rackid();
+    rackid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string chassisID = 2;
+inline bool MetrologySignalLocation::has_chassisid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void MetrologySignalLocation::set_has_chassisid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void MetrologySignalLocation::clear_has_chassisid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void MetrologySignalLocation::clear_chassisid() {
+  if (chassisid_ != &::google::protobuf::internal::kEmptyString) {
+    chassisid_->clear();
+  }
+  clear_has_chassisid();
+}
+inline const ::std::string& MetrologySignalLocation::chassisid() const {
+  return *chassisid_;
+}
+inline void MetrologySignalLocation::set_chassisid(const ::std::string& value) {
+  set_has_chassisid();
+  if (chassisid_ == &::google::protobuf::internal::kEmptyString) {
+    chassisid_ = new ::std::string;
+  }
+  chassisid_->assign(value);
+}
+inline void MetrologySignalLocation::set_chassisid(const char* value) {
+  set_has_chassisid();
+  if (chassisid_ == &::google::protobuf::internal::kEmptyString) {
+    chassisid_ = new ::std::string;
+  }
+  chassisid_->assign(value);
+}
+inline void MetrologySignalLocation::set_chassisid(const char* value, size_t size) {
+  set_has_chassisid();
+  if (chassisid_ == &::google::protobuf::internal::kEmptyString) {
+    chassisid_ = new ::std::string;
+  }
+  chassisid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* MetrologySignalLocation::mutable_chassisid() {
+  set_has_chassisid();
+  if (chassisid_ == &::google::protobuf::internal::kEmptyString) {
+    chassisid_ = new ::std::string;
+  }
+  return chassisid_;
+}
+inline ::std::string* MetrologySignalLocation::release_chassisid() {
+  clear_has_chassisid();
+  if (chassisid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = chassisid_;
+    chassisid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void MetrologySignalLocation::set_allocated_chassisid(::std::string* chassisid) {
+  if (chassisid_ != &::google::protobuf::internal::kEmptyString) {
+    delete chassisid_;
+  }
+  if (chassisid) {
+    set_has_chassisid();
+    chassisid_ = chassisid;
+  } else {
+    clear_has_chassisid();
+    chassisid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 chassis = 3 [default = -1];
+inline bool MetrologySignalLocation::has_chassis() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void MetrologySignalLocation::set_has_chassis() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void MetrologySignalLocation::clear_has_chassis() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void MetrologySignalLocation::clear_chassis() {
+  chassis_ = -1;
+  clear_has_chassis();
+}
+inline ::google::protobuf::int32 MetrologySignalLocation::chassis() const {
+  return chassis_;
+}
+inline void MetrologySignalLocation::set_chassis(::google::protobuf::int32 value) {
+  set_has_chassis();
+  chassis_ = value;
+}
+
+// optional string moduleID = 4;
+inline bool MetrologySignalLocation::has_moduleid() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void MetrologySignalLocation::set_has_moduleid() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void MetrologySignalLocation::clear_has_moduleid() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void MetrologySignalLocation::clear_moduleid() {
+  if (moduleid_ != &::google::protobuf::internal::kEmptyString) {
+    moduleid_->clear();
+  }
+  clear_has_moduleid();
+}
+inline const ::std::string& MetrologySignalLocation::moduleid() const {
+  return *moduleid_;
+}
+inline void MetrologySignalLocation::set_moduleid(const ::std::string& value) {
+  set_has_moduleid();
+  if (moduleid_ == &::google::protobuf::internal::kEmptyString) {
+    moduleid_ = new ::std::string;
+  }
+  moduleid_->assign(value);
+}
+inline void MetrologySignalLocation::set_moduleid(const char* value) {
+  set_has_moduleid();
+  if (moduleid_ == &::google::protobuf::internal::kEmptyString) {
+    moduleid_ = new ::std::string;
+  }
+  moduleid_->assign(value);
+}
+inline void MetrologySignalLocation::set_moduleid(const char* value, size_t size) {
+  set_has_moduleid();
+  if (moduleid_ == &::google::protobuf::internal::kEmptyString) {
+    moduleid_ = new ::std::string;
+  }
+  moduleid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* MetrologySignalLocation::mutable_moduleid() {
+  set_has_moduleid();
+  if (moduleid_ == &::google::protobuf::internal::kEmptyString) {
+    moduleid_ = new ::std::string;
+  }
+  return moduleid_;
+}
+inline ::std::string* MetrologySignalLocation::release_moduleid() {
+  clear_has_moduleid();
+  if (moduleid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = moduleid_;
+    moduleid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void MetrologySignalLocation::set_allocated_moduleid(::std::string* moduleid) {
+  if (moduleid_ != &::google::protobuf::internal::kEmptyString) {
+    delete moduleid_;
+  }
+  if (moduleid) {
+    set_has_moduleid();
+    moduleid_ = moduleid;
+  } else {
+    clear_has_moduleid();
+    moduleid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 module = 5 [default = -1];
+inline bool MetrologySignalLocation::has_module() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void MetrologySignalLocation::set_has_module() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void MetrologySignalLocation::clear_has_module() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void MetrologySignalLocation::clear_module() {
+  module_ = -1;
+  clear_has_module();
+}
+inline ::google::protobuf::int32 MetrologySignalLocation::module() const {
+  return module_;
+}
+inline void MetrologySignalLocation::set_module(::google::protobuf::int32 value) {
+  set_has_module();
+  module_ = value;
+}
+
+// optional int32 place = 6 [default = -1];
+inline bool MetrologySignalLocation::has_place() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void MetrologySignalLocation::set_has_place() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void MetrologySignalLocation::clear_has_place() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void MetrologySignalLocation::clear_place() {
+  place_ = -1;
+  clear_has_place();
+}
+inline ::google::protobuf::int32 MetrologySignalLocation::place() const {
+  return place_;
+}
+inline void MetrologySignalLocation::set_place(::google::protobuf::int32 value) {
+  set_has_place();
+  place_ = value;
+}
+
+// optional string contact = 7;
+inline bool MetrologySignalLocation::has_contact() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void MetrologySignalLocation::set_has_contact() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void MetrologySignalLocation::clear_has_contact() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void MetrologySignalLocation::clear_contact() {
+  if (contact_ != &::google::protobuf::internal::kEmptyString) {
+    contact_->clear();
+  }
+  clear_has_contact();
+}
+inline const ::std::string& MetrologySignalLocation::contact() const {
+  return *contact_;
+}
+inline void MetrologySignalLocation::set_contact(const ::std::string& value) {
+  set_has_contact();
+  if (contact_ == &::google::protobuf::internal::kEmptyString) {
+    contact_ = new ::std::string;
+  }
+  contact_->assign(value);
+}
+inline void MetrologySignalLocation::set_contact(const char* value) {
+  set_has_contact();
+  if (contact_ == &::google::protobuf::internal::kEmptyString) {
+    contact_ = new ::std::string;
+  }
+  contact_->assign(value);
+}
+inline void MetrologySignalLocation::set_contact(const char* value, size_t size) {
+  set_has_contact();
+  if (contact_ == &::google::protobuf::internal::kEmptyString) {
+    contact_ = new ::std::string;
+  }
+  contact_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* MetrologySignalLocation::mutable_contact() {
+  set_has_contact();
+  if (contact_ == &::google::protobuf::internal::kEmptyString) {
+    contact_ = new ::std::string;
+  }
+  return contact_;
+}
+inline ::std::string* MetrologySignalLocation::release_contact() {
+  clear_has_contact();
+  if (contact_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = contact_;
+    contact_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void MetrologySignalLocation::set_allocated_contact(::std::string* contact) {
+  if (contact_ != &::google::protobuf::internal::kEmptyString) {
+    delete contact_;
+  }
+  if (contact) {
+    set_has_contact();
+    contact_ = contact;
+  } else {
+    clear_has_contact();
+    contact_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// MetrologySignal
+
+// optional .Proto.AppSignal appSignal = 1;
+inline bool MetrologySignal::has_appsignal() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void MetrologySignal::set_has_appsignal() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void MetrologySignal::clear_has_appsignal() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void MetrologySignal::clear_appsignal() {
+  if (appsignal_ != NULL) appsignal_->::Proto::AppSignal::Clear();
+  clear_has_appsignal();
+}
+inline const ::Proto::AppSignal& MetrologySignal::appsignal() const {
+  return appsignal_ != NULL ? *appsignal_ : *default_instance_->appsignal_;
+}
+inline ::Proto::AppSignal* MetrologySignal::mutable_appsignal() {
+  set_has_appsignal();
+  if (appsignal_ == NULL) appsignal_ = new ::Proto::AppSignal;
+  return appsignal_;
+}
+inline ::Proto::AppSignal* MetrologySignal::release_appsignal() {
+  clear_has_appsignal();
+  ::Proto::AppSignal* temp = appsignal_;
+  appsignal_ = NULL;
+  return temp;
+}
+inline void MetrologySignal::set_allocated_appsignal(::Proto::AppSignal* appsignal) {
+  delete appsignal_;
+  appsignal_ = appsignal;
+  if (appsignal) {
+    set_has_appsignal();
+  } else {
+    clear_has_appsignal();
+  }
+}
+
+// optional .Proto.MetrologySignalLocation location = 2;
+inline bool MetrologySignal::has_location() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void MetrologySignal::set_has_location() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void MetrologySignal::clear_has_location() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void MetrologySignal::clear_location() {
+  if (location_ != NULL) location_->::Proto::MetrologySignalLocation::Clear();
+  clear_has_location();
+}
+inline const ::Proto::MetrologySignalLocation& MetrologySignal::location() const {
+  return location_ != NULL ? *location_ : *default_instance_->location_;
+}
+inline ::Proto::MetrologySignalLocation* MetrologySignal::mutable_location() {
+  set_has_location();
+  if (location_ == NULL) location_ = new ::Proto::MetrologySignalLocation;
+  return location_;
+}
+inline ::Proto::MetrologySignalLocation* MetrologySignal::release_location() {
+  clear_has_location();
+  ::Proto::MetrologySignalLocation* temp = location_;
+  location_ = NULL;
+  return temp;
+}
+inline void MetrologySignal::set_allocated_location(::Proto::MetrologySignalLocation* location) {
+  delete location_;
+  location_ = location;
+  if (location) {
+    set_has_location();
+  } else {
+    clear_has_location();
+  }
+}
+
+// optional double electricLowLimit = 3 [default = 0];
+inline bool MetrologySignal::has_electriclowlimit() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void MetrologySignal::set_has_electriclowlimit() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void MetrologySignal::clear_has_electriclowlimit() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void MetrologySignal::clear_electriclowlimit() {
+  electriclowlimit_ = 0;
+  clear_has_electriclowlimit();
+}
+inline double MetrologySignal::electriclowlimit() const {
+  return electriclowlimit_;
+}
+inline void MetrologySignal::set_electriclowlimit(double value) {
+  set_has_electriclowlimit();
+  electriclowlimit_ = value;
+}
+
+// optional double electricHighLimit = 4 [default = 0];
+inline bool MetrologySignal::has_electrichighlimit() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void MetrologySignal::set_has_electrichighlimit() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void MetrologySignal::clear_has_electrichighlimit() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void MetrologySignal::clear_electrichighlimit() {
+  electrichighlimit_ = 0;
+  clear_has_electrichighlimit();
+}
+inline double MetrologySignal::electrichighlimit() const {
+  return electrichighlimit_;
+}
+inline void MetrologySignal::set_electrichighlimit(double value) {
+  set_has_electrichighlimit();
+  electrichighlimit_ = value;
+}
+
+// optional int32 electricUnitID = 5 [default = 1];
+inline bool MetrologySignal::has_electricunitid() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void MetrologySignal::set_has_electricunitid() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void MetrologySignal::clear_has_electricunitid() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void MetrologySignal::clear_electricunitid() {
+  electricunitid_ = 1;
+  clear_has_electricunitid();
+}
+inline ::google::protobuf::int32 MetrologySignal::electricunitid() const {
+  return electricunitid_;
+}
+inline void MetrologySignal::set_electricunitid(::google::protobuf::int32 value) {
+  set_has_electricunitid();
+  electricunitid_ = value;
+}
+
+// optional int32 electricSensorType = 6 [default = 1];
+inline bool MetrologySignal::has_electricsensortype() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void MetrologySignal::set_has_electricsensortype() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void MetrologySignal::clear_has_electricsensortype() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void MetrologySignal::clear_electricsensortype() {
+  electricsensortype_ = 1;
+  clear_has_electricsensortype();
+}
+inline ::google::protobuf::int32 MetrologySignal::electricsensortype() const {
+  return electricsensortype_;
+}
+inline void MetrologySignal::set_electricsensortype(::google::protobuf::int32 value) {
+  set_has_electricsensortype();
+  electricsensortype_ = value;
+}
+
+// optional double electricR0 = 7 [default = 0];
+inline bool MetrologySignal::has_electricr0() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void MetrologySignal::set_has_electricr0() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void MetrologySignal::clear_has_electricr0() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void MetrologySignal::clear_electricr0() {
+  electricr0_ = 0;
+  clear_has_electricr0();
+}
+inline double MetrologySignal::electricr0() const {
+  return electricr0_;
+}
+inline void MetrologySignal::set_electricr0(double value) {
+  set_has_electricr0();
+  electricr0_ = value;
+}
+
+// optional int32 electricPrecision = 8 [default = 4];
+inline bool MetrologySignal::has_electricprecision() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void MetrologySignal::set_has_electricprecision() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void MetrologySignal::clear_has_electricprecision() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void MetrologySignal::clear_electricprecision() {
+  electricprecision_ = 4;
+  clear_has_electricprecision();
+}
+inline ::google::protobuf::int32 MetrologySignal::electricprecision() const {
+  return electricprecision_;
+}
+inline void MetrologySignal::set_electricprecision(::google::protobuf::int32 value) {
+  set_has_electricprecision();
+  electricprecision_ = value;
+}
+
+// optional double physicalLowLimit = 9 [default = 0];
+inline bool MetrologySignal::has_physicallowlimit() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void MetrologySignal::set_has_physicallowlimit() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void MetrologySignal::clear_has_physicallowlimit() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void MetrologySignal::clear_physicallowlimit() {
+  physicallowlimit_ = 0;
+  clear_has_physicallowlimit();
+}
+inline double MetrologySignal::physicallowlimit() const {
+  return physicallowlimit_;
+}
+inline void MetrologySignal::set_physicallowlimit(double value) {
+  set_has_physicallowlimit();
+  physicallowlimit_ = value;
+}
+
+// optional double physicalHighLimit = 10 [default = 0];
+inline bool MetrologySignal::has_physicalhighlimit() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void MetrologySignal::set_has_physicalhighlimit() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void MetrologySignal::clear_has_physicalhighlimit() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void MetrologySignal::clear_physicalhighlimit() {
+  physicalhighlimit_ = 0;
+  clear_has_physicalhighlimit();
+}
+inline double MetrologySignal::physicalhighlimit() const {
+  return physicalhighlimit_;
+}
+inline void MetrologySignal::set_physicalhighlimit(double value) {
+  set_has_physicalhighlimit();
+  physicalhighlimit_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// MetrologySignalSet
+
+// repeated .Proto.MetrologySignal metrologySignal = 1;
+inline int MetrologySignalSet::metrologysignal_size() const {
+  return metrologysignal_.size();
+}
+inline void MetrologySignalSet::clear_metrologysignal() {
+  metrologysignal_.Clear();
+}
+inline const ::Proto::MetrologySignal& MetrologySignalSet::metrologysignal(int index) const {
+  return metrologysignal_.Get(index);
+}
+inline ::Proto::MetrologySignal* MetrologySignalSet::mutable_metrologysignal(int index) {
+  return metrologysignal_.Mutable(index);
+}
+inline ::Proto::MetrologySignal* MetrologySignalSet::add_metrologysignal() {
+  return metrologysignal_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::MetrologySignal >&
+MetrologySignalSet::metrologysignal() const {
+  return metrologysignal_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::MetrologySignal >*
+MetrologySignalSet::mutable_metrologysignal() {
+  return &metrologysignal_;
 }
 
 
