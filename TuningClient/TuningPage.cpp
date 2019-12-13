@@ -1043,6 +1043,11 @@ void TuningPage::fillObjectsList()
 		{
 			// Modify the default value from selected tree filter
 			//
+			if (m_treeFilter == nullptr)
+			{
+				Q_ASSERT(m_treeFilter);
+				continue;
+			}
 
 			if (m_treeFilter->filterSignalExists(hash) == true)
 			{
@@ -1068,7 +1073,7 @@ void TuningPage::fillObjectsList()
 			{
 				// Modify the default value from page filter
 				//
-				if (m_treeFilter->filterSignalExists(hash) == true)
+				if (m_pageFilter->filterSignalExists(hash) == true)
 				{
 					TuningFilterSignal filterSignal;
 
