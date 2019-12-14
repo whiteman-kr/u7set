@@ -325,6 +325,11 @@ namespace Builder
 		{
 			Signal& signal = (*m_signalSet)[i];
 
+			if (signal.isAcquired() == false)
+			{
+				continue;
+			}
+
 			bool hasWrongField = false;
 
 			if (signal.isAnalog() == true && signal.isInput() == true)
@@ -526,21 +531,6 @@ namespace Builder
 			return false;
 		}
 
-		double r0 = 0;
-
-		if (signal.isSpecPropExists(SignalProperties::R0_OhmCaption) == true)
-		{
-			r0 = signal.r0_Ohm();
-
-			if (r0 == 0.0 && signal.sensorType() != E::SensorType::Ohm_Raw)
-			{
-				// Signal %1 has wrong R0 (ThermoResistor)
-				//
-				m_log->errEQP6114(signal.customAppSignalID());
-				return false;
-			}
-		}
-
 		UnitsConvertor uc;
 
 		switch (signal.sensorType())
@@ -551,8 +541,16 @@ namespace Builder
 			case E::SensorType::Ohm_Cu_a_426:
 			case E::SensorType::Ohm_Ni_a_617:
 				{
-					UnitsConvertResult physicalLowLimit = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), r0);
-					UnitsConvertResult physicalHighLimit = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), r0);
+					if (signal.r0_Ohm() == 0.0)
+					{
+						// Signal %1 has wrong R0 (ThermoResistor)
+						//
+						m_log->errEQP6114(signal.customAppSignalID());
+						return false;
+					}
+
+					UnitsConvertResult physicalLowLimit = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), signal.r0_Ohm());
+					UnitsConvertResult physicalHighLimit = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), signal.r0_Ohm());
 
 					if (physicalLowLimit.ok() == false)
 					{
@@ -573,7 +571,7 @@ namespace Builder
 					if (physicalLowLimit.isEqual(signal.lowEngineeringUnits()) == false)
 					{
 						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), r0);
+						double elVal = uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), signal.r0_Ohm());
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricLowLimit()) +  meu.key(signal.electricUnit());
 						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
@@ -587,7 +585,7 @@ namespace Builder
 					if (physicalHighLimit.isEqual(signal.highEngineeringUnits()) == false)
 					{
 						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), r0);
+						double elVal = uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), signal.r0_Ohm());
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricHighLimit()) +  meu.key(signal.electricUnit());
 						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
