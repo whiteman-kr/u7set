@@ -78,6 +78,9 @@ void Settings::StoreSystem()
 	s.setValue("m_configuratorPort2", m_configuratorPort2);
 
 	s.setValue("m_enableSimulation", m_enableSimulation);
+
+	s.setValue("m_filtersCustomFile", m_filtersCustomFile);
+	s.setValue("m_useFiltersCustomFile", m_useFiltersCustomFile);
 }
 
 void Settings::RestoreSystem()
@@ -132,10 +135,10 @@ void Settings::RestoreSystem()
 		dir.mkpath(m_localAppDataPath);
 	}
 
-	m_userFiltersFile = QDir::toNativeSeparators(m_localAppDataPath + "/UserFilters.xml");
+	m_filtersDefaultFile = QDir::toNativeSeparators(m_localAppDataPath + "/UserFilters.xml");
 
-
-
+	m_filtersCustomFile = s.value("m_filtersCustomFile", m_filtersDefaultFile).toString();
+	m_useFiltersCustomFile = s.value("m_useFiltersCustomFile", m_useFiltersCustomFile).toBool();
 
 }
 
@@ -308,9 +311,35 @@ QString Settings::localAppDataPath()
 	return m_localAppDataPath;
 }
 
+// Returns default of custom file depending on useCustom flag
+//
 QString Settings::userFiltersFile()
 {
-	return m_userFiltersFile;
+	if (useCustomFiltersFile() == true)
+	{
+		return customFiltersFile();
+	}
+	return m_filtersDefaultFile;
+}
+
+bool Settings::useCustomFiltersFile()
+{
+	return m_useFiltersCustomFile;
+}
+
+void Settings::setUseCustomFiltersFile(bool value)
+{
+	m_useFiltersCustomFile = value;
+}
+
+QString Settings::customFiltersFile()
+{
+	return m_filtersCustomFile;
+}
+
+void Settings::setCustomFiltersFile(const QString& value)
+{
+	m_filtersCustomFile = value;
 }
 
 Settings theSettings;
