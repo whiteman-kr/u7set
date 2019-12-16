@@ -1693,6 +1693,11 @@ QString SignalBase::findAppSignalIDforSerialNo(const QString& moduleID)
 	{
 		Metrology::Signal& signal = m_signalList[i];
 
+		if (signal.param().isInput() == false)
+		{
+			continue;
+		}
+
 		if (signal.param().isAnalog() == false)
 		{
 			continue;

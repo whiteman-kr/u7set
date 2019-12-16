@@ -810,9 +810,9 @@ void MeasureThread::measureComprators()
 		//
 		do
 		{
-			// for every comparator
-			// Goal of preparations for switching the comparator to logical 0
-			// 1 - go below return zone to switch comparator to logical 0 state
+			// Two preparations
+			// The purpose of preparations for switching the comparator to logical 0, and go to starting value
+			// 1 - go below return zone to switch comparator to logical 0
 			// 2 - set the starting value, which will be as close as possible to the state of logical 1, but not reach it in a few steps
 			//
 			for (int pr = 0; pr < MEASURE_THREAD_CMP_PREPARE_COUNT; pr++)
@@ -969,10 +969,91 @@ void MeasureThread::measureComprators()
 				// wait timeout for preparation
 				//
 				waitMeasureTimeout();
+
+				// additional delay = 10 sec
+				// before starting the measure test, all comparators must be in logical 0
+				// maybe for someone the comparator did not have enough damper time to switch to logical 0
+				//
+				if (pr == MEASURE_THREAD_CMP_PREAPRE_1)
+				{
+					emit measureInfo(tr("Comparator %1, additional delay").arg(cmp + 1));
+
+					int timeoutStep = theOptions.toolBar().measureTimeout() / 100;
+
+					currentStateComparatorsInAllChannels = COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_1;
+
+					for (int t = 0; t < 100; t++ )
+					{
+						for(int ch = 0; ch < channelCount; ch ++)
+						{
+							CalibratorManager* pCalibratorManager = m_activeIoParamList[ch].calibratorManager();
+							if (calibratorIsValid(pCalibratorManager) == false)
+							{
+								currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
+								continue;
+							}
+
+							const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+							if (inParam.isValid() == false)
+							{
+								currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
+								continue;
+							}
+
+							if (inParam.hasComparators() == false)
+							{
+								currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
+								continue;
+							}
+
+							std::shared_ptr<Comparator> pComparator = inParam.comparator(cmp);
+							if (pComparator == nullptr)
+							{
+								currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
+								continue;
+							}
+
+							if (pComparator->output().appSignalID().isEmpty() == true)
+							{
+								currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
+								continue;
+							}
+
+							Metrology::Signal* pOutputSignal = pOutputSignal = theSignalBase.signalPtr(pComparator->output().appSignalID());
+							if (pOutputSignal == nullptr)
+							{
+								currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
+								continue;
+							}
+
+							// if  state of comparator = logical 0, then you do not need to wait
+							//
+							if (pOutputSignal->state().value() == 0.0)
+							{
+								currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
+							}
+						}
+
+						// if state of all comparstors = logical 0, go to measure
+						//
+						if (currentStateComparatorsInAllChannels == COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_0)
+						{
+							break;
+						}
+
+						QThread::msleep(MEASURE_THREAD_TIMEOUT_STEP);
+
+						emit measureInfo((t+1) * timeoutStep);
+					}
+
+					emit measureInfo(0);
+				}
 			}
 
-			// if state of all comparstors != logical 0, thеn finish phase of preparations and go to measure
-			// looking for comparators that did not switch to the logical state 1
+			// before starting the test, all comparators must be in a logical 0
+			// if state of all comparstors = logical 0, thеn finish phase of preparations and go to measure
+			// looking for comparators that did not switch to logical 1
+			// if at least one of the comparators did not switch to logical 0, then we issue messages and repeat the preparations
 			//
 			currentStateComparatorsInAllChannels = COMPARATORS_IN_ALL_CHANNELS_IN_LOGICAL_1;
 			//

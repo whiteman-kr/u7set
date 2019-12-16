@@ -40,6 +40,9 @@ void FindData::createInterface(QTableView *pView)
 	m_pFindDialog->setWindowIcon(QIcon(":/icons/Find.png"));
 
 		m_pFindTextEdit = new QLineEdit(m_findText, m_pFindDialog);
+		m_pFindTextEdit->setPlaceholderText(tr("Search Text"));
+		m_pFindTextEdit->setClearButtonEnabled(true);
+
 		m_findNextButton = new QPushButton(tr("Find Next"), m_pFindDialog);
 
 		QHBoxLayout *mainLayout = new QHBoxLayout ;
