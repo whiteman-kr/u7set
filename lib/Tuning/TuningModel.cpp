@@ -398,6 +398,8 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 
 				QString appSignalId = asp.appSignalId();
 
+				hashChannel = -1;
+
 				for (int c = 0; c < channelCount; c++)
 				{
 					const QStringList& channelSuffxes = m_valueColumnAppSignalIdSuffixes[c];
@@ -448,6 +450,11 @@ void TuningModel::setHashes(std::vector<Hash>& hashes)
 
 						}
 
+						break;
+					}
+
+					if (hashChannel != -1)
+					{
 						break;
 					}
 				}

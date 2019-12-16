@@ -3,6 +3,8 @@
 #include "Settings.h"
 #include "MainWindow.h"
 
+#include <QFileDialog>
+
 DialogSettings::DialogSettings(QWidget* parent) :
 	QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowCloseButtonHint),
 	ui(new Ui::DialogSettings)
@@ -18,6 +20,13 @@ DialogSettings::DialogSettings(QWidget* parent) :
 	ui->m_IP2->setText(theSettings.configuratorAddress2().addressStr());
 	ui->m_port2->setText(QString::number(theSettings.configuratorAddress2().port()));
 
+	ui->m_useCustomFilters->blockSignals(true);
+	ui->m_useCustomFilters->setChecked(theSettings.useCustomFiltersFile() == true);
+	ui->m_useCustomFilters->blockSignals(false);
+
+	ui->m_customFiltersEdit->setText(theSettings.customFiltersFile());
+	ui->m_customFiltersEdit->setEnabled(theSettings.useCustomFiltersFile());
+
 #ifdef USE_ADMIN_REGISTRY_AREA
 	if (theSettings.admin() == false)
 	{
@@ -26,6 +35,9 @@ DialogSettings::DialogSettings(QWidget* parent) :
 		ui->m_port1->setEnabled(false);
 		ui->m_IP2->setEnabled(false);
 		ui->m_port2->setEnabled(false);
+
+		ui->m_useCustomFilters->setEnabled(false);
+		ui->m_customFiltersEdit->setEnabled(false);
 
 	}
 #endif
@@ -116,6 +128,9 @@ void DialogSettings::on_DialogSettings_accepted()
 		QMessageBox::warning(this, tr("TuningClient"), tr("Language has been changed, please restart the application."));
 	}
 
+	theSettings.setUseCustomFiltersFile(ui->m_useCustomFilters->isChecked() == true);
+	theSettings.setCustomFiltersFile(ui->m_customFiltersEdit->text());
+
 	//
 
 #ifdef USE_ADMIN_REGISTRY_AREA
@@ -126,5 +141,27 @@ void DialogSettings::on_DialogSettings_accepted()
 #else
 	theSettings.StoreSystem();
 #endif
+
+}
+
+void DialogSettings::on_m_useCustomFilters_stateChanged(int arg1)
+{
+	Q_UNUSED(arg1);
+
+	ui->m_customFiltersEdit->setEnabled(ui->m_useCustomFilters->isChecked() == true);
+}
+
+void DialogSettings::on_m_filtersBrowse_clicked()
+{
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Filters File"),
+													QString(),
+													tr("Filter Files (*.xml)"));
+
+	if (fileName.isNull() == true)
+	{
+		return;
+	}
+
+	ui->m_customFiltersEdit->setText(QDir::toNativeSeparators(fileName));
 
 }

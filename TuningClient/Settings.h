@@ -142,7 +142,13 @@ public:
 
 	QString localAppDataPath();
 
-	QString userFiltersFile();
+	QString userFiltersFile();	// Returns default of custom file depending on useCustom flag
+
+	bool useCustomFiltersFile();
+	void setUseCustomFiltersFile(bool value);
+
+	QString customFiltersFile();
+	void setCustomFiltersFile(const QString& value);
 
 public:
 
@@ -215,8 +221,10 @@ private:
 
 	QString m_localAppDataPath;
 
-	QString m_userFiltersFile;
+	QString m_filtersDefaultFile;
 
+	bool m_useFiltersCustomFile = false;
+	QString m_filtersCustomFile;
 
 	QMutex m;
 

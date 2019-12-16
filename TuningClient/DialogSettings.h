@@ -18,6 +18,10 @@ public:
 private slots:
 	void on_DialogSettings_accepted();
 
+	void on_m_useCustomFilters_stateChanged(int arg1);
+
+	void on_m_filtersBrowse_clicked();
+
 private:
 	void createLanguagesList();
 
