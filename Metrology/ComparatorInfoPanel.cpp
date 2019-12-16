@@ -31,7 +31,7 @@ ComparatorInfoTable::~ComparatorInfoTable()
 
 int ComparatorInfoTable::columnCount(const QModelIndex&) const
 {
-	return Metrology::ComparatorCount;
+	return theOptions.module().maxComparatorCount();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -54,7 +54,7 @@ QVariant ComparatorInfoTable::headerData(int section, Qt::Orientation orientatio
 
 	if (orientation == Qt::Horizontal)
 	{
-		if (section >= 0 && section < Metrology::ComparatorCount)
+		if (section >= 0 && section < theOptions.module().maxComparatorCount())
 		{
 			result = QString("Comparator %1").arg(section + 1);
 		}
@@ -84,7 +84,7 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 	}
 
 	int column = index.column();
-	if (column < 0 || column >= Metrology::ComparatorCount)
+	if (column < 0 || column >= theOptions.module().maxComparatorCount())
 	{
 		return QVariant();
 	}
@@ -95,21 +95,20 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-
 	if (column >= inParam.comparatorCount())
 	{
 		return QVariant();
 	}
 
-	std::shared_ptr<Comparator> pComparator = inParam.comparator(column);
-	if (pComparator == nullptr)
+	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = inParam.comparator(column);
+	if (comparatorEx == nullptr)
 	{
 		return QVariant();
 	}
 
-	if (role == Qt::TextAlignmentRole)
+	if (comparatorEx->signalsIsValid() == false)
 	{
-		return Qt::AlignLeft;
+		return QVariant();
 	}
 
 	if (role == Qt::FontRole)
@@ -119,8 +118,7 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::BackgroundColorRole)
 	{
-		Metrology::SignalState state = theSignalBase.signalState(pComparator->output().appSignalID());
-		if (state.value() != 0.0)
+		if (comparatorEx->outputState() == true)
 		{
 			return theOptions.comparatorInfo().colorStateTrue();
 		}
@@ -132,7 +130,7 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		return text(pComparator);
+		return text(comparatorEx);
 	}
 
 	return QVariant();
@@ -140,63 +138,25 @@ QVariant ComparatorInfoTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString ComparatorInfoTable::text(std::shared_ptr<Comparator> pComparator) const
+QString ComparatorInfoTable::text(std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const
 {
-	if (pComparator == nullptr)
+	if (comparatorEx == nullptr)
+	{
+		return QString();
+	}
+
+	if (comparatorEx->signalsIsValid() == false)
 	{
 		return QString();
 	}
 
 	QString stateStr;
 
-	switch (pComparator->cmpType())
-	{
-		case E::CmpType::Equal:		stateStr = "= ";	break;
-		case E::CmpType::Greate:	stateStr = "> ";	break;
-		case E::CmpType::Less:		stateStr = "< ";	break;
-		case E::CmpType::NotEqual:	stateStr = "!=";	break;
-	}
-
-	int precision = pComparator->precision();
-	switch (pComparator->intAnalogSignalFormat())
-	{
-		case E::AnalogAppSignalFormat::Float32:		precision = pComparator->precision();	break;
-		case E::AnalogAppSignalFormat::SignedInt32:	precision = 0;							break;
-		default:									assert(0);
-	}
-
-	if (pComparator->compare().isConst() == true)
-	{
-		stateStr += QString::number(pComparator->compare().constValue(), 'f', precision);
-	}
-	else
-	{
-		if (pComparator->compare().appSignalID().isEmpty() == true)
-		{
-			return QString();
-		}
-
-		Metrology::Signal* pCompareSignal = theSignalBase.signalPtr(calcHash(pComparator->compare().appSignalID()));
-		if(pCompareSignal == nullptr || pCompareSignal->param().isValid() == false)
-		{
-			return QString();
-		}
-
-		Metrology::SignalState compareState = theSignalBase.signalState(pCompareSignal->param().hash());
-		stateStr += QString::number(compareState.value(), 'f', precision);
-	}
-
+	stateStr += comparatorEx->cmpTypeStr();
+	stateStr += " ";
+	stateStr += comparatorEx->compareValueStr();
 	stateStr += " : ";
-
-	Metrology::SignalState outputState = theSignalBase.signalState(pComparator->output().appSignalID());
-	if (outputState.value() == 0.0)
-	{
-		stateStr += theOptions.comparatorInfo().displayingStateFalse();
-	}
-	else
-	{
-		stateStr += theOptions.comparatorInfo().displayingStateTrue();
-	}
+	stateStr += comparatorEx->outputStateStr(theOptions.comparatorInfo().displayingStateTrue(), theOptions.comparatorInfo().displayingStateFalse());
 
 	return stateStr;
 }
@@ -205,7 +165,7 @@ QString ComparatorInfoTable::text(std::shared_ptr<Comparator> pComparator) const
 
 void ComparatorInfoTable::updateState()
 {
-	emit dataChanged(index(0, 0), index(m_signalCount - 1, Metrology::ComparatorCount - 1), QVector<int>() << Qt::DisplayRole);
+	emit dataChanged(index(0, 0), index(m_signalCount - 1, theOptions.module().maxComparatorCount() - 1), QVector<int>() << Qt::DisplayRole);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -338,12 +298,10 @@ void ComparatorInfoPanel::createInterface()
 
 	m_pComparatorInfoWindow->setCentralWidget(m_pView);
 
-	for(int column = 0; column < Metrology::ComparatorCount; column++)
+	for(int column = 0; column < theOptions.module().maxComparatorCount(); column++)
 	{
 		m_pView->setColumnWidth(column, COMPARATOR_INFO_COLUMN_WIDTH);
 	}
-
-	//m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
 	connect(m_pView, &QTableView::doubleClicked , this, &ComparatorInfoPanel::onListDoubleClicked);
 
@@ -373,7 +331,7 @@ void ComparatorInfoPanel::createContextMenu()
 
 void ComparatorInfoPanel::hideColumn(int column, bool hide)
 {
-	if (column < 0 || column >= Metrology::ComparatorCount)
+	if (column < 0 || column >= theOptions.module().maxComparatorCount())
 	{
 		return;
 	}
@@ -486,7 +444,7 @@ void ComparatorInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 
 	m_comparatorTable.set(ioParamList);
 
-	for(int c = 0; c < Metrology::ComparatorCount; c ++)
+	for(int c = 0; c < theOptions.module().maxComparatorCount(); c ++)
 	{
 		if (c < maxComparatorCount)
 		{
@@ -541,20 +499,20 @@ void ComparatorInfoPanel::comparatorProperty()
 		return;
 	}
 
-	std::shared_ptr<Comparator> pComparator = inParam.comparator(indexComparator);
-	if (pComparator == nullptr)
+	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = inParam.comparator(indexComparator);
+	if (comparatorEx == nullptr)
 	{
 		return;
 	}
 
-	ComparatorPropertyDialog dialog(*pComparator);
+	ComparatorPropertyDialog dialog(*comparatorEx);
 	int result = dialog.exec();
 	if (result != QDialog::Accepted)
 	{
 		return;
 	}
 
-	*pComparator = dialog.comparator();
+	*comparatorEx = dialog.comparator();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

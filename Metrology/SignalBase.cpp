@@ -1992,9 +1992,9 @@ int SignalBase::createSignalListForMeasure(int measureKind, int signalConnection
 
 	switch(measureKind)
 	{
-		case MEASURE_KIND_ONE_RACK:		channelCount = 1;						break;
-		case MEASURE_KIND_ONE_MODULE:	channelCount = Metrology::InputCount;	break;
-		case MEASURE_KIND_MULTI_RACK:	channelCount = Metrology::ChannelCount;	break;
+		case MEASURE_KIND_ONE_RACK:		channelCount = 1;									break;
+		case MEASURE_KIND_ONE_MODULE:	channelCount = theOptions.module().maxInputCount();	break;
+		case MEASURE_KIND_MULTI_RACK:	channelCount = Metrology::ChannelCount;				break;
 		default:						assert(0);
 	}
 
@@ -2299,22 +2299,28 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 				int comparatorCount = pSignal->param().comparatorCount();
 				for (int c = 0; c < comparatorCount; c++)
 				{
-					std::shared_ptr<Comparator> comparator = pSignal->param().comparator(c);
-
-					if (comparator->compare().isConst() == false && comparator->compare().appSignalID().isEmpty() == false)
+					std::shared_ptr<Metrology::ComparatorEx> comparatorEx = pSignal->param().comparator(c);
+					if (comparatorEx == nullptr)
 					{
-						m_requestStateList.append(calcHash(comparator->compare().appSignalID()));
+						continue;
 					}
 
-					if (comparator->hysteresis().isConst() == false && comparator->hysteresis().appSignalID().isEmpty() == false)
+					if (comparatorEx->signalsIsValid() == false)
 					{
-						m_requestStateList.append(calcHash(comparator->hysteresis().appSignalID()));
+						continue;
 					}
 
-					if (comparator->output().isAcquired() == true)
+					if (comparatorEx->compare().isConst() == false)
 					{
-						m_requestStateList.append(calcHash(comparator->output().appSignalID()));
+						m_requestStateList.append(comparatorEx->compareSignal()->param().hash());
 					}
+
+					if (comparatorEx->hysteresis().isConst() == false)
+					{
+						m_requestStateList.append(comparatorEx->hysteresisSignal()->param().hash());
+					}
+
+					m_requestStateList.append(comparatorEx->outputSignal()->param().hash());
 				}
 
 				// if input has not output signals got to next channel
@@ -2348,22 +2354,28 @@ void SignalBase::setActiveSignal(const MeasureSignal& signal)
 				comparatorCount = pSignal->param().comparatorCount();
 				for (int c = 0; c < comparatorCount; c++)
 				{
-					std::shared_ptr<Comparator> comparator = pSignal->param().comparator(c);
-
-					if (comparator->compare().isConst() == false && comparator->compare().appSignalID().isEmpty() == false)
+					std::shared_ptr<Metrology::ComparatorEx> comparatorEx = pSignal->param().comparator(c);
+					if (comparatorEx == nullptr)
 					{
-						m_requestStateList.append(calcHash(comparator->compare().appSignalID()));
+						continue;
 					}
 
-					if (comparator->hysteresis().isConst() == false && comparator->hysteresis().appSignalID().isEmpty() == false)
+					if (comparatorEx->signalsIsValid() == false)
 					{
-						m_requestStateList.append(calcHash(comparator->hysteresis().appSignalID()));
+						continue;
 					}
 
-					if (comparator->output().isAcquired() == true)
+					if (comparatorEx->compare().isConst() == false)
 					{
-						m_requestStateList.append(calcHash(comparator->output().appSignalID()));
+						m_requestStateList.append(comparatorEx->compareSignal()->param().hash());
 					}
+
+					if (comparatorEx->hysteresis().isConst() == false)
+					{
+						m_requestStateList.append(comparatorEx->hysteresisSignal()->param().hash());
+					}
+
+					m_requestStateList.append(comparatorEx->outputSignal()->param().hash());
 				}
 
 			}
@@ -2413,10 +2425,58 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 			continue;
 		}
 
-		pInputSignal->param().setComparatorList(comparatorSet.getByInputSignalID(appSignalID));
+		QVector<std::shared_ptr<Metrology::ComparatorEx>> metrologyComparatorList;
+
+		QVector<std::shared_ptr<Comparator>> comparatorList = comparatorSet.getByInputSignalID(appSignalID);
+		for(std::shared_ptr<Comparator> comparator : comparatorList)
+		{
+			std::shared_ptr<Metrology::ComparatorEx> comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+			initComparatorSignals(comparatorEx.get());
+
+			metrologyComparatorList.append(comparatorEx);
+
+			if (metrologyComparatorList.count() >= theOptions.module().maxComparatorCount())
+			{
+				break;
+			}
+		}
+
+		pInputSignal->param().setComparatorList(metrologyComparatorList);
 	}
 
 	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool SignalBase::initComparatorSignals(Metrology::ComparatorEx* pComparatorEx)
+{
+	if (pComparatorEx == nullptr)
+	{
+		return false;
+	}
+
+	if (pComparatorEx->input().appSignalID().isEmpty() == false)
+	{
+		pComparatorEx->SetInputSignal(signalPtr(pComparatorEx->input().appSignalID()));
+	}
+
+	if (pComparatorEx->compare().isConst() == false && pComparatorEx->compare().appSignalID().isEmpty() == false)
+	{
+		pComparatorEx->SetCompareSignal(signalPtr(pComparatorEx->compare().appSignalID()));
+	}
+
+	if (pComparatorEx->hysteresis().isConst() == false && pComparatorEx->hysteresis().appSignalID().isEmpty() == false)
+	{
+		pComparatorEx->SetHysteresisSignal(signalPtr(pComparatorEx->hysteresis().appSignalID()));
+	}
+
+	if (pComparatorEx->output().appSignalID().isEmpty() == false)
+	{
+		pComparatorEx->SetOutputSignal(signalPtr(pComparatorEx->output().appSignalID()));
+	}
+
+	return pComparatorEx->signalsIsValid();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

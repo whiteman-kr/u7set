@@ -5,6 +5,8 @@
 #include <QMenu>
 #include <QAction>
 #include <QTableView>
+#include <QEvent>
+#include <QKeyEvent>
 
 #include "SignalBase.h"
 
@@ -46,7 +48,7 @@ public:
 	void					set(const QVector<IoSignalParam>& signalList);
 	void					clear();
 
-	QString					text(std::shared_ptr<Comparator> pComparator) const;
+	QString					text(std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const;
 
 	void					updateState();
 

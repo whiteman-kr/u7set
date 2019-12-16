@@ -15,10 +15,9 @@
 // IoSignalParam for :
 //						MeasureThread
 //						SignalInfoPanel
+//						ComparatorInfoPanel
 //						MeasureBase
 //
-//
-
 // ----------------------------------------------------------------------------------------------
 
 #define						MULTI_TEXT_DEVIDER	"\n"
@@ -91,10 +90,6 @@ public:
 };
 
 // ==============================================================================================
-//
-// MeasureSignal --- MultiChannelSignal[MEASURE_IO_SIGNAL_TYPE_COUNT]--- Metrology::Signal[Metrology::ChannelCount]
-//
-// ==============================================================================================
 // class MultiChannelSignal consists list of Metrology::Signal
 //
 class MultiChannelSignal
@@ -134,6 +129,8 @@ public:
 
 // ==============================================================================================
 // class MeasureSignal consists array of two classes MultiChannelSignal: input and output
+//
+// MeasureSignal --- MultiChannelSignal[MEASURE_IO_SIGNAL_TYPE_COUNT] --- Metrology::Signal[Metrology::ChannelCount]
 //
 class MeasureSignal
 {
@@ -304,6 +301,7 @@ public:
 	// comparators
 	//
 	bool					loadComparatorsInSignal(const ComparatorSet& comparatorSet);
+	bool					initComparatorSignals(Metrology::ComparatorEx* pComparatorEx);
 	
 signals:
 

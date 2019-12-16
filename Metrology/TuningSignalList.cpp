@@ -684,8 +684,8 @@ void TuningSignalListDialog::createInterface()
 	m_pEditMenu = new QMenu(tr("&Edit"), this);
 	m_pViewMenu = new QMenu(tr("&View"), this);
 
-	m_pChangeStateAction = m_pSignalMenu->addAction(tr("&Change state ..."));
-	m_pChangeStateAction->setIcon(QIcon(":/icons/ChangeState.png"));
+	m_pSetValueAction = m_pSignalMenu->addAction(tr("&Set value ..."));
+	m_pSetValueAction->setIcon(QIcon(":/icons/ChangeState.png"));
 	//m_pChangeStateAction->setShortcut(Qt::CTRL + Qt::Key_Enter);
 
 	m_pSignalMenu->addSeparator();
@@ -735,7 +735,7 @@ void TuningSignalListDialog::createInterface()
 	m_pMenuBar->addMenu(m_pEditMenu);
 	m_pMenuBar->addMenu(m_pViewMenu);
 
-	connect(m_pChangeStateAction, &QAction::triggered, this, &TuningSignalListDialog::changeSignalState);
+	connect(m_pSetValueAction, &QAction::triggered, this, &TuningSignalListDialog::setSignalState);
 	connect(m_pExportAction, &QAction::triggered, this, &TuningSignalListDialog::exportSignal);
 
 	connect(m_pFindAction, &QAction::triggered, this, &TuningSignalListDialog::find);
@@ -776,6 +776,7 @@ void TuningSignalListDialog::createInterface()
 		m_pSignalView->setColumnWidth(column, TuningSignalColumnWidth[column]);
 	}
 
+	m_pSignalView->setSelectionMode(QAbstractItemView::SingleSelection);
 	m_pSignalView->setSelectionBehavior(QAbstractItemView::SelectRows);
 
 	connect(m_pSignalView, &QTableView::doubleClicked , this, &TuningSignalListDialog::onSignalListDoubleClicked);
@@ -824,6 +825,8 @@ void TuningSignalListDialog::createContextMenu()
 	//
 	m_pContextMenu = new QMenu(tr(""), this);
 
+	m_pContextMenu->addAction(m_pSetValueAction);
+	m_pContextMenu->addSeparator();
 	m_pContextMenu->addMenu(m_pViewTypeADMenu);
 	m_pContextMenu->addSeparator();
 	m_pContextMenu->addAction(m_pCopyAction);
@@ -994,7 +997,7 @@ bool TuningSignalListDialog::eventFilter(QObject *object, QEvent *event)
 
 		if (keyEvent->key() == Qt::Key_Return)
 		{
-			qDebug() << "attempt";
+			setSignalState();
 		}
 	}
 
@@ -1003,7 +1006,7 @@ bool TuningSignalListDialog::eventFilter(QObject *object, QEvent *event)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::changeSignalState()
+void TuningSignalListDialog::setSignalState()
 {
 	int index = m_pSignalView->currentIndex().row();
 	if (index < 0 || index >= m_signalTable.signalCount())
@@ -1167,7 +1170,7 @@ void TuningSignalListDialog::onColumnAction(QAction* action)
 
 void TuningSignalListDialog::onSignalListDoubleClicked(const QModelIndex&)
 {
-	changeSignalState();
+	setSignalState();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

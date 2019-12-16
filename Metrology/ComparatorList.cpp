@@ -89,23 +89,20 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	std::shared_ptr<Comparator> pComparator = comparator(row);
-
-	if (role == Qt::TextAlignmentRole)
+	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = comparator(row);
+	if (comparatorEx == nullptr)
 	{
-		int result = Qt::AlignLeft;
+		return QVariant();
+	}
 
-		switch (column)
+	if (role == Qt::TextColorRole)
+	{
+		if (comparatorEx->signalsIsValid()  == false)
 		{
-			case COMPARATOR_LIST_COLUMN_INPUT:				result = Qt::AlignLeft;		break;
-			case COMPARATOR_LIST_COLUMN_VALUE:				result = Qt::AlignLeft;		break;
-			case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = Qt::AlignLeft;		break;
-			case COMPARATOR_LIST_COLUMN_OUTPUT:				result = Qt::AlignLeft;		break;
-			case COMPARATOR_LIST_COLUMN_SCHEMA:				result = Qt::AlignLeft;		break;
-			default:										assert(0);
+			return QColor(Qt::red);
 		}
 
-		return result;
+		return QVariant();
 	}
 
 	if (role == Qt::FontRole)
@@ -115,7 +112,7 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		return text(row, column, pComparator);
+		return text(row, column, comparatorEx);
 	}
 
 	return QVariant();
@@ -123,13 +120,8 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString ComparatorListTable::text(int row, int column, std::shared_ptr<Comparator> pComparator) const
+QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const
 {
-	if (pComparator == nullptr)
-	{
-		return QString();
-	}
-
 	if (row < 0 || row >= comparatorCount())
 	{
 		return QString();
@@ -140,15 +132,21 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Comparato
 		return QString();
 	}
 
-	QString inputAppSignalID = pComparator->input().appSignalID();
+	if (comparatorEx == nullptr)
+	{
+		return QString();
+	}
+
+	QString inputAppSignalID = comparatorEx->input().appSignalID();
 
 	int prevRow = row - 1;
 	if (prevRow >= 0 && prevRow < comparatorCount())
 	{
-		std::shared_ptr<Comparator> pPrevComparator = comparator(prevRow);
-		if (pPrevComparator != nullptr)
+		std::shared_ptr<Metrology::ComparatorEx> prevComparatorEx = comparator(prevRow);
+		if (prevComparatorEx != nullptr)
 		{
-			if (pPrevComparator->input().appSignalID() == inputAppSignalID)
+
+			if (prevComparatorEx->input().appSignalID() == inputAppSignalID)
 			{
 				inputAppSignalID.clear();
 			}
@@ -157,41 +155,26 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Comparato
 
 	QString compareValue;
 
-	switch (pComparator->cmpType())
-	{
-		case E::CmpType::Equal:		compareValue = "= ";		break;
-		case E::CmpType::Greate:	compareValue = "> ";		break;
-		case E::CmpType::Less:		compareValue = "< ";		break;
-		case E::CmpType::NotEqual:	compareValue = "!=";		break;
-		default:					compareValue = "??? ";	assert(0);	break;
-	}
+	compareValue += comparatorEx->cmpTypeStr();
 
-	int precision = pComparator->precision();
-	switch (pComparator->intAnalogSignalFormat())
+	if (comparatorEx->compare().isConst() == true)
 	{
-		case E::AnalogAppSignalFormat::Float32:		precision = pComparator->precision();	break;
-		case E::AnalogAppSignalFormat::SignedInt32:	precision = 0;							break;
-		default:									assert(0);
-	}
-
-	if (pComparator->compare().isConst() == true)
-	{
-		compareValue += QString::number(pComparator->compare().constValue(), 'f', precision);
+		compareValue += QString::number(comparatorEx->compare().constValue(), 'f', comparatorEx->valuePrecision());
 	}
 	else
 	{
-		compareValue += pComparator->compare().appSignalID();
+		compareValue += comparatorEx->compare().appSignalID();
 	}
 
 	QString hysteresisValue;
 
-	if (pComparator->hysteresis().isConst() == true)
+	if (comparatorEx->hysteresis().isConst() == true)
 	{
-		hysteresisValue = QString::number(pComparator->hysteresis().constValue(), 'f', precision);
+		hysteresisValue = QString::number(comparatorEx->hysteresis().constValue(), 'f', comparatorEx->valuePrecision());
 	}
 	else
 	{
-		hysteresisValue = pComparator->hysteresis().appSignalID();
+		hysteresisValue = comparatorEx->hysteresis().appSignalID();
 	}
 
 	QString result;
@@ -201,8 +184,8 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Comparato
 		case COMPARATOR_LIST_COLUMN_INPUT:				result = inputAppSignalID;						break;
 		case COMPARATOR_LIST_COLUMN_VALUE:				result = compareValue;							break;
 		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = hysteresisValue;						break;
-		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = pComparator->output().appSignalID();	break;
-		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = pComparator->schemaID();				break;
+		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->output().appSignalID();	break;
+		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparatorEx->schemaID();				break;
 		default:										assert(0);
 	}
 
@@ -226,25 +209,25 @@ int ComparatorListTable::comparatorCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-std::shared_ptr<Comparator> ComparatorListTable::comparator(int index) const
+std::shared_ptr<Metrology::ComparatorEx> ComparatorListTable::comparator(int index) const
 {
-	std::shared_ptr<Comparator> comparator;
+	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = nullptr;
 
 	m_comparatorMutex.lock();
 
 		if (index >= 0 && index < m_comparatorList.count())
 		{
-			 comparator = m_comparatorList[index];
+			 comparatorEx = m_comparatorList[index];
 		}
 
 	m_comparatorMutex.unlock();
 
-	return comparator;
+	return comparatorEx;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ComparatorListTable::set(const QVector<std::shared_ptr<Comparator> >& list_add)
+void ComparatorListTable::set(const QVector<std::shared_ptr<Metrology::ComparatorEx>>& list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -453,7 +436,7 @@ void ComparatorListDialog::updateList()
 
 	m_comparatorTable.clear();
 
-	QVector<std::shared_ptr<Comparator>> comparatorList;
+	QVector<std::shared_ptr<Metrology::ComparatorEx>> comparatorList;
 
 	int count = theSignalBase.signalCount();
 	for(int i = 0; i < count; i++)
@@ -470,6 +453,11 @@ void ComparatorListDialog::updateList()
 			continue;
 		}
 
+		if (param.isAnalog() == false)
+		{
+			continue;
+		}
+
 		if (param.inOutType() != m_typeIO)
 		{
 			continue;
@@ -478,7 +466,12 @@ void ComparatorListDialog::updateList()
 		int comparatorCount = pSignal->param().comparatorCount();
 		for (int c = 0; c < comparatorCount; c++)
 		{
-			std::shared_ptr<Comparator> comparator = pSignal->param().comparator(c);
+			std::shared_ptr<Metrology::ComparatorEx> comparatorEx = pSignal->param().comparator(c);
+			if (comparatorEx == nullptr)
+			{
+				continue;
+			}
+
 			comparatorList.append(pSignal->param().comparator(c));
 		}
 	}
@@ -600,20 +593,20 @@ void ComparatorListDialog::comparatorProperties()
 		return;
 	}
 
-	std::shared_ptr<Comparator> pComparator = m_comparatorTable.comparator(index);
-	if (pComparator == nullptr)
+	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = m_comparatorTable.comparator(index);
+	if (comparatorEx == nullptr)
 	{
 		return;
 	}
 
-	ComparatorPropertyDialog dialog(*pComparator);
+	ComparatorPropertyDialog dialog(*comparatorEx);
 	int result = dialog.exec();
 	if (result != QDialog::Accepted)
 	{
 		return;
 	}
 
-	*pComparator = dialog.comparator();
+	*comparatorEx = dialog.comparator();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

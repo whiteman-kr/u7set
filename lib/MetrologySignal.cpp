@@ -250,7 +250,7 @@ namespace Metrology
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 
-	SignalParam::SignalParam(const Signal& signal, const SignalLocation& location)
+	SignalParam::SignalParam(const ::Signal& signal, const SignalLocation& location)
 	{
 		setParam(signal, location);
 	}
@@ -284,9 +284,11 @@ namespace Metrology
 
 	// -------------------------------------------------------------------------------------------------------------------
 
-	void SignalParam::setParam(const Signal& signal, const SignalLocation& location)
+	void SignalParam::setParam(const ::Signal& signal, const SignalLocation& location)
 	{
-		Signal* pSignal = dynamic_cast<Signal*>(this);
+		// init AppSignal
+		//
+		::Signal* pSignal = dynamic_cast<::Signal*>(this);
 		if (pSignal == nullptr)
 		{
 			assert(false);
@@ -295,6 +297,8 @@ namespace Metrology
 
 		*pSignal = signal;
 
+		// init location of signal
+		//
 		m_location = location;
 
 		// init empty electricUnits
@@ -721,13 +725,9 @@ namespace Metrology
 		return type;
 	}
 
-	void SignalParam::setComparatorList(const QVector<std::shared_ptr<Comparator>>& comparators)
-	{
-		m_comparatorList = comparators;
-		m_comparatorCount = m_comparatorList.count();
-	}
+	// -------------------------------------------------------------------------------------------------------------------
 
-	std::shared_ptr<Comparator> SignalParam::comparator(int index) const
+	std::shared_ptr<ComparatorEx> SignalParam::comparator(int index) const
 	{
 		if (index < 0 || index >= m_comparatorCount)
 		{
@@ -735,6 +735,14 @@ namespace Metrology
 		}
 
 		return m_comparatorList[index];
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void SignalParam::setComparatorList(const QVector<std::shared_ptr<ComparatorEx>>& comparators)
+	{
+		m_comparatorList = comparators;
+		m_comparatorCount = m_comparatorList.count();
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -786,6 +794,205 @@ namespace Metrology
 	Signal::Signal(const SignalParam& param)
 	{
 		setParam(param);
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------------------------------------------------
+	// -------------------------------------------------------------------------------------------------------------------
+
+	ComparatorEx::ComparatorEx(::Comparator* pComparator)
+	{
+		if (pComparator == nullptr)
+		{
+			return;
+		}
+
+		::Comparator* pBaseComparator =  dynamic_cast<::Comparator*>(this);
+		if (pBaseComparator == nullptr)
+		{
+			return;
+		}
+
+		*pBaseComparator = *pComparator;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	void ComparatorEx::clear()
+	{
+		m_inputSignal = nullptr;
+		m_compareSignal = nullptr;
+		m_hysteresisSignal = nullptr;
+		m_outputSignal = nullptr;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	bool ComparatorEx::signalsIsValid() const
+	{
+		if (m_inputSignal == nullptr || m_inputSignal->param().isValid() == false)
+		{
+			return false;
+		}
+
+		if (compare().isConst() == false)
+		{
+			if (m_compareSignal == nullptr || m_compareSignal->param().isValid() == false)
+			{
+				return false;
+			}
+		}
+
+		if (hysteresis().isConst() == false)
+		{
+			if (m_hysteresisSignal == nullptr || m_hysteresisSignal->param().isValid() == false)
+			{
+				return false;
+			}
+		}
+
+		if (m_outputSignal == nullptr || m_outputSignal->param().isValid() == false)
+		{
+			return false;
+		}
+
+		return true;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString ComparatorEx::cmpTypeStr() const
+	{
+		QString typeStr;
+
+		switch (cmpType())
+		{
+			case E::CmpType::Equal:		typeStr = "= ";	break;
+			case E::CmpType::Greate:	typeStr = "> ";	break;
+			case E::CmpType::Less:		typeStr = "< ";	break;
+			case E::CmpType::NotEqual:	typeStr = "!=";	break;
+		}
+
+		return typeStr;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	int ComparatorEx::valuePrecision() const
+	{
+		int result = 0;
+
+		switch (intAnalogSignalFormat())
+		{
+			case E::AnalogAppSignalFormat::Float32:		result = precision();	break;
+			case E::AnalogAppSignalFormat::SignedInt32:	result = 0;				break;
+		}
+
+		return result;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	double ComparatorEx::compareValue() const
+	{
+		double value = 0;
+
+		if (compare().isConst() == true)
+		{
+			value = compare().constValue();
+		}
+		else
+		{
+			if (m_compareSignal != nullptr)
+			{
+				if (m_compareSignal->param().isValid() == true && m_compareSignal->state().valid() == true)
+				{
+					value =  m_compareSignal->state().value();
+				}
+			}
+		}
+
+		return value;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString ComparatorEx::compareValueStr() const
+	{
+		return QString::number(compareValue(), 'f', valuePrecision());
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	double ComparatorEx::hysteresisValue() const
+	{
+		double value = 0;
+
+		if (hysteresis().isConst() == true)
+		{
+			value = hysteresis().constValue();
+		}
+		else
+		{
+			if (m_hysteresisSignal != nullptr)
+			{
+				if (m_hysteresisSignal->param().isValid() == true && m_hysteresisSignal->state().valid() == true)
+				{
+					value =  m_hysteresisSignal->state().value();
+				}
+			}
+		}
+
+		return value;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString ComparatorEx::hysteresisValueStr() const
+	{
+		return QString::number(hysteresisValue(), 'f', valuePrecision());
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	bool ComparatorEx::outputState() const
+	{
+		bool value = false;
+
+		if (m_outputSignal != nullptr)
+		{
+			if (m_outputSignal->param().isValid() == true && m_outputSignal->state().valid() == true)
+			{
+				value = m_outputSignal->state().value() != 0.0;
+			}
+		}
+
+		return value;
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString ComparatorEx::outputStateStr() const
+	{
+		return outputStateStr("True", "False");
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString ComparatorEx::outputStateStr(const QString& forTrue, const QString& forFalse) const
+	{
+		QString stateStr;
+
+		if (outputState() == true)
+		{
+			stateStr = forTrue;
+		}
+		else
+		{
+			stateStr = forFalse;
+		}
+
+		return stateStr;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

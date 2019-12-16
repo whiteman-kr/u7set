@@ -830,77 +830,21 @@ void MeasureThread::measureComprators()
 					}
 
 					const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
-					if (inParam.isValid() == false)
+					if (inParam.isValid() == false || inParam.hasComparators() == false)
 					{
 						continue;
 					}
 
-					if (inParam.hasComparators() == false)
+					std::shared_ptr<Metrology::ComparatorEx> comparatorEx = inParam.comparator(cmp);
+					if (comparatorEx == nullptr || comparatorEx->signalsIsValid() == false)
 					{
 						continue;
 					}
 
-					std::shared_ptr<Comparator> pComparator = inParam.comparator(cmp);
-					if (pComparator == nullptr)
-					{
-						continue;
-					}
-
-					// get compare value
 					//
-					double compareVal = 0;
-
-					if (pComparator->compare().isConst() == true)
-					{
-						compareVal = pComparator->compare().constValue();
-					}
-					else
-					{
-						if (pComparator->compare().appSignalID().isEmpty() == false)
-						{
-							Metrology::Signal* pComareSignal = theSignalBase.signalPtr(pComparator->compare().appSignalID());
-							if (pComareSignal == nullptr)
-							{
-								continue;
-							}
-							else
-							{
-								compareVal = pComareSignal->state().value();
-							}
-						}
-						else
-						{
-							continue;
-						}
-					}
-
-					// get hysteresis value
 					//
-					double hysteresisVal = 0;
-
-					if (pComparator->hysteresis().isConst() == true)
-					{
-						hysteresisVal = pComparator->hysteresis().constValue();
-					}
-					else
-					{
-						if (pComparator->hysteresis().appSignalID().isEmpty() == false)
-						{
-							Metrology::Signal* pHysteresisSignal = theSignalBase.signalPtr(pComparator->hysteresis().appSignalID());
-							if (pHysteresisSignal == nullptr)
-							{
-								continue;
-							}
-							else
-							{
-								hysteresisVal = pHysteresisSignal->state().value();
-							}
-						}
-						else
-						{
-							continue;
-						}
-					}
+					double compareVal = comparatorEx->compareValue();			// get compare value
+					double hysteresisVal = comparatorEx->hysteresisValue();		// get hysteresis value
 
 					// calc start value for comaprator
 					//
@@ -919,7 +863,7 @@ void MeasureThread::measureComprators()
 
 					double engineeringVal = 0;
 
-					switch (pComparator->cmpType())
+					switch (comparatorEx->cmpType())
 					{
 						case E::CmpType::Equal:		engineeringVal = compareVal - deltaVal;		break;
 						case E::CmpType::Greate:	engineeringVal = compareVal - deltaVal;		break;
@@ -994,33 +938,14 @@ void MeasureThread::measureComprators()
 							}
 
 							const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
-							if (inParam.isValid() == false)
+							if (inParam.isValid() == false || inParam.hasComparators() == false)
 							{
 								currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
 								continue;
 							}
 
-							if (inParam.hasComparators() == false)
-							{
-								currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
-								continue;
-							}
-
-							std::shared_ptr<Comparator> pComparator = inParam.comparator(cmp);
-							if (pComparator == nullptr)
-							{
-								currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
-								continue;
-							}
-
-							if (pComparator->output().appSignalID().isEmpty() == true)
-							{
-								currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
-								continue;
-							}
-
-							Metrology::Signal* pOutputSignal = pOutputSignal = theSignalBase.signalPtr(pComparator->output().appSignalID());
-							if (pOutputSignal == nullptr)
+							std::shared_ptr<Metrology::ComparatorEx> comparatorEx = inParam.comparator(cmp);
+							if (comparatorEx == nullptr || comparatorEx->signalsIsValid() == false)
 							{
 								currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
 								continue;
@@ -1028,7 +953,7 @@ void MeasureThread::measureComprators()
 
 							// if  state of comparator = logical 0, then you do not need to wait
 							//
-							if (pOutputSignal->state().value() == 0.0)
+							if (comparatorEx->outputState() == false)
 							{
 								currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
 							}
@@ -1070,33 +995,14 @@ void MeasureThread::measureComprators()
 				}
 
 				const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
-				if (inParam.isValid() == false)
+				if (inParam.isValid() == false || inParam.hasComparators() == false)
 				{
 					currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
 					continue;
 				}
 
-				if (inParam.hasComparators() == false)
-				{
-					currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
-					continue;
-				}
-
-				std::shared_ptr<Comparator> pComparator = inParam.comparator(cmp);
-				if (pComparator == nullptr)
-				{
-					currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
-					continue;
-				}
-
-				if (pComparator->output().appSignalID().isEmpty() == true)
-				{
-					currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
-					continue;
-				}
-
-				Metrology::Signal* pOutputSignal = pOutputSignal = theSignalBase.signalPtr(pComparator->output().appSignalID());
-				if (pOutputSignal == nullptr)
+				std::shared_ptr<Metrology::ComparatorEx> comparatorEx = inParam.comparator(cmp);
+				if (comparatorEx == nullptr || comparatorEx->signalsIsValid() == false)
 				{
 					currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
 					continue;
@@ -1104,7 +1010,7 @@ void MeasureThread::measureComprators()
 
 				// if  state of comparator = logical 0, then you do not need to wait
 				//
-				if (pOutputSignal->state().value() == 0.0)
+				if (comparatorEx->outputState() == false)
 				{
 					currentStateComparatorsInAllChannels &= ~(0x1ULL << ch);
 				}
@@ -1158,33 +1064,14 @@ void MeasureThread::measureComprators()
 				}
 
 				const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
-				if (inParam.isValid() == false)
+				if (inParam.isValid() == false || inParam.hasComparators() == false)
 				{
 					currentStateComparatorsInAllChannels |= (0x1ULL << ch);
 					continue;
 				}
 
-				if (inParam.hasComparators() == false)
-				{
-					currentStateComparatorsInAllChannels |= (0x1ULL << ch);
-					continue;
-				}
-
-				std::shared_ptr<Comparator> pComparator = inParam.comparator(cmp);
-				if (pComparator == nullptr)
-				{
-					currentStateComparatorsInAllChannels |= (0x1ULL << ch);
-					continue;
-				}
-
-				if (pComparator->output().appSignalID().isEmpty() == true)
-				{
-					currentStateComparatorsInAllChannels |= (0x1ULL << ch);
-					continue;
-				}
-
-				Metrology::Signal* pOutputSignal = theSignalBase.signalPtr(pComparator->output().appSignalID());
-				if (pOutputSignal == nullptr)
+				std::shared_ptr<Metrology::ComparatorEx> comparatorEx = inParam.comparator(cmp);
+				if (comparatorEx == nullptr || comparatorEx->signalsIsValid() == false)
 				{
 					currentStateComparatorsInAllChannels |= (0x1ULL << ch);
 					continue;
@@ -1193,9 +1080,9 @@ void MeasureThread::measureComprators()
 				// if state of comparator = logical 1, then skip it
 				// if state of comparator = logical 0, take a step
 				//
-				if (pOutputSignal->state().value() == 0.0)
+				if (comparatorEx->outputState() == false)
 				{
-					switch (pComparator->cmpType())
+					switch (comparatorEx->cmpType())
 					{
 						case E::CmpType::Equal:		m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepUp()	:	pCalibratorManager->stepDown(); break;
 						case E::CmpType::Greate:	m_activeIoParamList[ch].isNegativeRange() == false ? pCalibratorManager->stepUp()	:	pCalibratorManager->stepDown(); break;
@@ -1257,18 +1144,13 @@ void MeasureThread::measureComprators()
 			}
 
 			const Metrology::SignalParam& inParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);
-			if (inParam.isValid() == false)
+			if (inParam.isValid() == false || inParam.hasComparators() == false)
 			{
 				continue;
 			}
 
-			if (inParam.hasComparators() == false)
-			{
-				continue;
-			}
-
-			std::shared_ptr<Comparator> pComparator = inParam.comparator(cmp);
-			if (pComparator == nullptr)
+			std::shared_ptr<Metrology::ComparatorEx> comparatorEx = inParam.comparator(cmp);
+			if (comparatorEx == nullptr || comparatorEx->signalsIsValid() == false)
 			{
 				continue;
 			}

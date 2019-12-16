@@ -58,7 +58,7 @@ public:
 private:
 
 	mutable QMutex			m_comparatorMutex;
-	QVector<std::shared_ptr<Comparator>> m_comparatorList;
+	QVector<std::shared_ptr<Metrology::ComparatorEx>> m_comparatorList;
 
 	int						columnCount(const QModelIndex &parent) const;
 	int						rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -69,11 +69,11 @@ private:
 public:
 
 	int						comparatorCount() const;
-	std::shared_ptr<Comparator>	comparator(int index) const;
-	void					set(const QVector<std::shared_ptr<Comparator> >& list_add);
+	std::shared_ptr<Metrology::ComparatorEx> comparator(int index) const;
+	void					set(const QVector<std::shared_ptr<Metrology::ComparatorEx> >& list_add);
 	void					clear();
 
-	QString					text(int row, int column, std::shared_ptr<Comparator> comparator) const;
+	QString					text(int row, int column, std::shared_ptr<Metrology::ComparatorEx> comparatorEx) const;
 };
 
 // ==============================================================================================
