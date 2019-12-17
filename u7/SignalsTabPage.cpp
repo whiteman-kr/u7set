@@ -1800,6 +1800,12 @@ void SignalsModel::initLazyLoadSignals()
 
 		loadNotSpecificProperties(signalsArray[0]);
 	}
+	else
+	{
+		Signal signal;
+		loadNotSpecificProperties(signal);
+	}
+
 	endResetModel();
 }
 
