@@ -1022,8 +1022,7 @@ public:
 
 // ==============================================================================================
 
-bool compareFloat(float lFloat, float rFloat);
-bool compareFloat(double lDouble, double rDouble);
+bool compareDouble(double lDouble, double rDouble);
 
 // ==============================================================================================
 

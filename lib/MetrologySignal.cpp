@@ -749,13 +749,6 @@ namespace Metrology
 	// -------------------------------------------------------------------------------------------------------------------
 	// -------------------------------------------------------------------------------------------------------------------
 
-	SignalStatistic::SignalStatistic(const Hash& signalHash)
-		: m_signalHash (signalHash)
-	{
-	}
-
-	// -------------------------------------------------------------------------------------------------------------------
-
 	QString SignalStatistic::measureCountStr() const
 	{
 		if (m_measureCount == 0)
@@ -867,10 +860,10 @@ namespace Metrology
 
 		switch (cmpType())
 		{
-			case E::CmpType::Equal:		typeStr = "= ";	break;
-			case E::CmpType::Greate:	typeStr = "> ";	break;
-			case E::CmpType::Less:		typeStr = "< ";	break;
-			case E::CmpType::NotEqual:	typeStr = "!=";	break;
+			case E::CmpType::Equal:		typeStr = QChar('=');		break;
+			case E::CmpType::Greate:	typeStr = QChar('>');		break;
+			case E::CmpType::Less:		typeStr = QChar('<');		break;
+			case E::CmpType::NotEqual:	typeStr = QChar(0x2260);	break;
 		}
 
 		return typeStr;
@@ -919,7 +912,7 @@ namespace Metrology
 
 	QString ComparatorEx::compareValueStr() const
 	{
-		return QString::number(compareValue(), 'f', valuePrecision());
+		return QString::number(compareValue(), 'g', valuePrecision());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -950,7 +943,7 @@ namespace Metrology
 
 	QString ComparatorEx::hysteresisValueStr() const
 	{
-		return QString::number(hysteresisValue(), 'f', valuePrecision());
+		return QString::number(hysteresisValue(), 'g', valuePrecision());
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------

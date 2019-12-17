@@ -93,6 +93,64 @@ void StatisticBase::createSignalList()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void StatisticBase::createComparatorList()
+{
+	QTime responseTime;
+	responseTime.start();
+
+	m_signalMutex.lock();
+
+		int count = theSignalBase.signalCount();
+		for(int i = 0; i < count; i++)
+		{
+			Metrology::Signal* pSignal = theSignalBase.signalPtr(i);
+			if (pSignal == nullptr)
+			{
+				continue;
+			}
+
+			Metrology::SignalParam& param = pSignal->param();
+			if (param.isValid() == false || param.hasComparators() == false)
+			{
+				continue;
+			}
+
+			if (param.isAnalog() == false)
+			{
+				continue;
+			}
+
+			if (param.isOutput() == true)
+			{
+				continue;
+			}
+
+			if (param.isInput() == true)
+			{
+				if (param.electricUnitID() == E::ElectricUnit::NoUnit)
+				{
+					continue;
+				}
+			}
+
+			if (param.location().chassis() == -1 || param.location().module() == -1 || param.location().place() == -1)
+			{
+				continue;
+			}
+
+			m_comparatorList.append(pSignal);
+		}
+
+		m_comparatorCount = m_comparatorList.count();
+
+	m_signalMutex.unlock();
+
+	qDebug() << __FUNCTION__ << " Time for create: " << responseTime.elapsed() << " ms";
+}
+
+
+// -------------------------------------------------------------------------------------------------------------------
+
 Metrology::Signal* StatisticBase::signal(int index) const
 {
 	Metrology::Signal* pSignal = nullptr;

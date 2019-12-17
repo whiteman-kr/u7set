@@ -34,6 +34,24 @@ bool SignalConnection::isValid() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
+bool SignalConnection::signalsIsValid() const
+{
+	bool result = true;
+
+	for(int t = 0; t < MEASURE_IO_SIGNAL_TYPE_COUNT; t++)
+	{
+		if (m_pSignal[t] == nullptr)
+		{
+			result = false;
+			break;
+		}
+	}
+
+	return result;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void SignalConnection::clear()
 {
 	m_signalMutex.lock();
@@ -81,6 +99,20 @@ QString SignalConnection::typeStr() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void SignalConnection::setType(const QString& typeStr)
+{
+	for (int t = 0; t < SIGNAL_CONNECTION_TYPE_COUNT; t++)
+	{
+		if (SignalConnectionType[t] == typeStr)
+		{
+			m_type = t;
+			break;
+		}
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 QString SignalConnection::appSignalID(int type) const
 {
 	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
@@ -119,7 +151,7 @@ void SignalConnection::setAppSignalID(int type, const QString& appSignalID)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-Metrology::Signal* SignalConnection::metrologySignal(int type) const
+Metrology::Signal* SignalConnection::signal(int type) const
 {
 	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
@@ -139,7 +171,7 @@ Metrology::Signal* SignalConnection::metrologySignal(int type) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalConnection::setMetrologySignal(int type, Metrology::Signal* pSignal)
+void SignalConnection::setSignal(int type, Metrology::Signal* pSignal)
 {
 	if (type < 0 || type >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
@@ -170,7 +202,7 @@ void SignalConnection::setMetrologySignal(int type, Metrology::Signal* pSignal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalConnection::initMetrologySignal()
+bool SignalConnection::initSignals()
 {
 	m_signalMutex.lock();
 
@@ -181,16 +213,12 @@ void SignalConnection::initMetrologySignal()
 				continue;
 			}
 
-			Hash signalHash = calcHash(m_appSignalID[type]);
-			if (signalHash == 0)
-			{
-				continue;
-			}
-
-			m_pSignal[type] = theSignalBase.signalPtr(signalHash);
+			m_pSignal[type] = theSignalBase.signalPtr(m_appSignalID[type]);
 		}
 
 	m_signalMutex.unlock();
+
+	return signalsIsValid();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -288,7 +316,7 @@ int SignalConnectionBase::load()
 
 	table->close();
 
-	qDebug() << "SignalConnectionBase::load() - Loaded signal connections: " << readedRecordCount << ", Time for load: " << responseTime.elapsed() << " ms";
+	qDebug() << __FUNCTION__ << "Loaded signal connections: " << readedRecordCount << ", Time for load: " << responseTime.elapsed() << " ms";
 
 	return readedRecordCount;
 }
@@ -329,7 +357,7 @@ bool SignalConnectionBase::save()
 		return false;
 	}
 
-	qDebug() << "SignalConnectionBase::save() - Written signal Connections: " << writtenRecordCount;
+	qDebug() << __FUNCTION__ << "Written signal Connections: " << writtenRecordCount;
 
 	return true;
 }
@@ -343,7 +371,7 @@ void SignalConnectionBase::init()
 		int count = m_connectionList.count();
 		for(int i = 0; i < count; i++)
 		{
-			m_connectionList[i].initMetrologySignal();
+			m_connectionList[i].initSignals();
 		}
 
 	m_connectionMutex.unlock();
@@ -429,15 +457,15 @@ void SignalConnectionBase::remove(int index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalConnectionBase::findIndex(int signalConnectionType, int measureIoType, Metrology::Signal* pSignal) const
+int SignalConnectionBase::findIndex(int connectionType, int ioType, Metrology::Signal* pSignal) const
 {
-	if (signalConnectionType < 0 || signalConnectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
+	if (connectionType < 0 || connectionType >= SIGNAL_CONNECTION_TYPE_COUNT)
 	{
 		assert(0);
 		return -1;
 	}
 
-	if (measureIoType < 0 || measureIoType >= MEASURE_IO_SIGNAL_TYPE_COUNT)
+	if (ioType < 0 || ioType >= MEASURE_IO_SIGNAL_TYPE_COUNT)
 	{
 		assert(0);
 		return -1;
@@ -445,7 +473,7 @@ int SignalConnectionBase::findIndex(int signalConnectionType, int measureIoType,
 
 	if (pSignal == nullptr)
 	{
-		assert(pSignal != nullptr);
+		assert(0);
 		return -1;
 	}
 
@@ -457,12 +485,12 @@ int SignalConnectionBase::findIndex(int signalConnectionType, int measureIoType,
 
 		for(int i = 0; i < count; i ++)
 		{
-			if (m_connectionList[i].type() != signalConnectionType)
+			if (m_connectionList[i].type() != connectionType)
 			{
 				continue;
 			}
 
-			if (m_connectionList[i].metrologySignal(measureIoType) != pSignal)
+			if (m_connectionList[i].signal(ioType) != pSignal)
 			{
 				continue;
 			}
@@ -479,7 +507,7 @@ int SignalConnectionBase::findIndex(int signalConnectionType, int measureIoType,
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalConnectionBase::findIndex(const SignalConnection& signal) const
+int SignalConnectionBase::findIndex(const SignalConnection& connection) const
 {
 	int foundIndex = -1;
 
@@ -489,7 +517,7 @@ int SignalConnectionBase::findIndex(const SignalConnection& signal) const
 
 		for(int i = 0; i < count; i ++)
 		{
-			if (m_connectionList[i].hash() == signal.hash())
+			if (m_connectionList[i].hash() == connection.hash())
 			{
 				foundIndex = i;
 

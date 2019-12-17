@@ -253,11 +253,7 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 		return tr("No valid");
 	}
 
-	QString stateStr, formatStr;
-
-	formatStr.sprintf(("%%.%df"), param.decimalPlaces());
-
-	stateStr.sprintf(formatStr.toAscii(), state.value());
+	QString stateStr = QString::number(state.value(), 'g', param.decimalPlaces());
 
 	if (param.unit().isEmpty() == false)
 	{

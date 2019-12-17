@@ -23,8 +23,8 @@ const int					MEASURE_IO_SIGNAL_TYPE_UNKNOWN	= -1,
 const char* const			SignalConnectionType[] =
 {
 							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "No connections"),
-							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Input → Output"),
-							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Tuning → Output"),
+							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Input -> Output"),
+							QT_TRANSLATE_NOOP("SignalConnectionBase.h", "Tuning -> Output"),
 };
 
 const int					SIGNAL_CONNECTION_TYPE_COUNT = sizeof(SignalConnectionType)/sizeof(SignalConnectionType[0]);
@@ -59,6 +59,7 @@ private:
 public:
 
 	bool					isValid() const;
+	bool					signalsIsValid() const;
 	void					clear();
 
 	int						index() const { return m_index; }
@@ -70,13 +71,14 @@ public:
 	int						type() const { return m_type; }
 	QString					typeStr() const;
 	void					setType(int type) { m_type = type; }
+	void					setType(const QString& typeStr);
 
 	QString					appSignalID(int type) const;
 	void					setAppSignalID(int type, const QString& appSignalID);
 
-	Metrology::Signal*		metrologySignal(int type) const;
-	void					setMetrologySignal(int type, Metrology::Signal* pSignal);
-	void					initMetrologySignal();		// set Metrology::Signal* from SignalBase by signalHash
+	Metrology::Signal*		signal(int type) const;
+	void					setSignal(int type, Metrology::Signal* pSignal);
+	bool					initSignals();										// set Metrology::Signal* from SignalBase by signalHash
 
 	SignalConnection&		operator=(const SignalConnection& from);
 };
@@ -116,7 +118,7 @@ public:
 
 	void					remove(int index);
 
-	int						findIndex(int signalConnectionType, int measureIoType, Metrology::Signal* pSignal) const;
+	int						findIndex(int connectionType, int ioType, Metrology::Signal* pSignal) const;
 	int						findIndex(const SignalConnection& connection) const;
 
 	SignalConnectionBase&	operator=(const SignalConnectionBase& from);

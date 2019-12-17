@@ -2180,7 +2180,7 @@ Metrology::SignalStatistic MeasureBase::getSignalStatistic(const Hash& signalHas
 		return Metrology::SignalStatistic();
 	}
 
-	Metrology::SignalStatistic si(signalHash);
+	Metrology::SignalStatistic si;
 
 	m_measureMutex.lock();
 
@@ -2218,9 +2218,25 @@ Metrology::SignalStatistic MeasureBase::getSignalStatistic(const Hash& signalHas
 					break;
 
 				case MEASURE_TYPE_COMPARATOR:
+					{
+						ComparatorMeasurement* pComparatorMeasurement = dynamic_cast<ComparatorMeasurement*>(pMeasurement);
+						if (pComparatorMeasurement == nullptr)
+						{
+							break;
+						}
 
-					// dynamic_cast<ComparatorMeasurement*> (pMeasurement); for future realese
+//						if (compareFloat(pComparatorMeasurement->nominal(limitType), cmpValue) == false)
+//						{
+//							break;
+//						}
 
+						si.setMeasureCount(si.measureCount() + 1);
+
+						if (pComparatorMeasurement->error(limitType, errorType) > pComparatorMeasurement->errorLimit(limitType, errorType))
+						{
+							si.setState(Metrology::SignalStatistic::State::Failed);
+						}
+					}
 					break;
 
 				default:

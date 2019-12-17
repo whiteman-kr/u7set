@@ -110,6 +110,7 @@ QVariant StatisticTable::data(const QModelIndex &index, int role) const
 			case STATISTIC_COLUMN_EL_RANGE:				result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_PH_RANGE:				result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_EN_RANGE:				result = Qt::AlignCenter;	break;
+			case STATISTIC_COLUMN_CMP_VALUE:			result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_MEASURE_COUNT:		result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_STATE:				result = Qt::AlignCenter;	break;
 			case STATISTIC_COLUMN_SIGNAL_CONNECTION:	result = Qt::AlignCenter;	break;
@@ -253,6 +254,7 @@ QString StatisticTable::text(int row, int column, Metrology::Signal* pSignal) co
 		case STATISTIC_COLUMN_EL_RANGE:				result = param.electricRangeStr();					break;
 		case STATISTIC_COLUMN_PH_RANGE:				result = param.physicalRangeStr();					break;
 		case STATISTIC_COLUMN_EN_RANGE:				result = param.engineeringRangeStr();				break;
+		case STATISTIC_COLUMN_CMP_VALUE:			result = QString();									break;
 		case STATISTIC_COLUMN_MEASURE_COUNT:		result = pSignal->statistic().measureCountStr();	break;
 		case STATISTIC_COLUMN_STATE:				result = pSignal->statistic().stateStr();			break;
 		case STATISTIC_COLUMN_SIGNAL_CONNECTION:	result.clear();										break;
@@ -720,6 +722,7 @@ void StatisticPanel::updateVisibleColunm()
 	hideColumn(STATISTIC_COLUMN_ADC, true);
 	hideColumn(STATISTIC_COLUMN_PH_RANGE, true);
 	hideColumn(STATISTIC_COLUMN_EL_RANGE, true);
+	hideColumn(STATISTIC_COLUMN_CMP_VALUE, m_measureType != MEASURE_TYPE_COMPARATOR);
 	hideColumn(STATISTIC_COLUMN_SIGNAL_CONNECTION, true);
 }
 

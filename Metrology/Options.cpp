@@ -1339,12 +1339,7 @@ BackupOption& BackupOption::operator=(const BackupOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-bool compareFloat(float lFloat, float rFloat)
-{
-	return std::nextafter(lFloat, std::numeric_limits<float>::lowest()) <= rFloat && std::nextafter(lFloat, std::numeric_limits<float>::max()) >= rFloat;
-}
-
-bool compareFloat(double lDouble, double rDouble)
+bool compareDouble(double lDouble, double rDouble)
 {
 	return std::nextafter(lDouble, std::numeric_limits<double>::lowest()) <= rDouble && std::nextafter(lDouble, std::numeric_limits<double>::max()) >= rDouble;
 }

@@ -23,6 +23,9 @@ private:
 	QVector<Metrology::Signal*>	m_signalList;
 	int							m_signalCount = 0;
 
+	QVector<Metrology::Signal*>	m_comparatorList;
+	int							m_comparatorCount = 0;
+
 	int							m_measuredCount = 0;
 	int							m_invalidMeasureCount = 0;
 
@@ -38,6 +41,7 @@ public:
 	void						clear();
 
 	void						createSignalList();
+	void						createComparatorList();
 
 	Metrology::Signal*			signal(int index) const;
 

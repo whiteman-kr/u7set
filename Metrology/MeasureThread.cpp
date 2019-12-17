@@ -217,7 +217,7 @@ bool MeasureThread::inputsOfmoduleIsSame()
 	E::ElectricUnit		electricUnitID = E::ElectricUnit::NoUnit;
 	E::SensorType		electricSensorType = E::SensorType::NoSensor;
 
-	Metrology::SignalParam signalParam;
+	Metrology::SignalParam param;
 
 	int channelCount = m_activeIoParamList.count();
 	for(int ch = 0; ch < channelCount; ch ++)
@@ -229,9 +229,9 @@ bool MeasureThread::inputsOfmoduleIsSame()
 
 		switch (theOptions.toolBar().signalConnectionType())
 		{
-			case SIGNAL_CONNECTION_TYPE_UNUSED:			signalParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
+			case SIGNAL_CONNECTION_TYPE_UNUSED:			param = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_INPUT);	break;
 			case SIGNAL_CONNECTION_TYPE_FROM_INPUT:
-			case SIGNAL_CONNECTION_TYPE_FROM_TUNING:	signalParam = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
+			case SIGNAL_CONNECTION_TYPE_FROM_TUNING:	param = m_activeIoParamList[ch].param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);	break;
 			default:									assert(0);
 		}
 
@@ -239,17 +239,17 @@ bool MeasureThread::inputsOfmoduleIsSame()
 		{
 			eltalonIsFound = true;
 
-			electricLowLimit = signalParam.electricLowLimit();
-			electricHighLimit = signalParam.electricHighLimit();
-			electricUnitID = signalParam.electricUnitID();
-			electricSensorType = signalParam.electricSensorType();
+			electricLowLimit = param.electricLowLimit();
+			electricHighLimit = param.electricHighLimit();
+			electricUnitID = param.electricUnitID();
+			electricSensorType = param.electricSensorType();
 		}
 		else
 		{
-			if (compareFloat(electricLowLimit, signalParam.electricLowLimit()) == false ||
-				compareFloat(electricHighLimit, signalParam.electricHighLimit()) == false ||
-				electricUnitID != signalParam.electricUnitID() ||
-				electricSensorType != signalParam.electricSensorType())
+			if (compareDouble(electricLowLimit, param.electricLowLimit()) == false ||
+				compareDouble(electricHighLimit, param.electricHighLimit()) == false ||
+				electricUnitID != param.electricUnitID() ||
+				electricSensorType != param.electricSensorType())
 			{
 				return false;
 			}

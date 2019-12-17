@@ -318,7 +318,6 @@ namespace Metrology
 	public:
 
 		SignalStatistic() {}
-		explicit SignalStatistic(const Hash& signalHash);
 		virtual ~SignalStatistic() {}
 
 		enum State
@@ -329,15 +328,10 @@ namespace Metrology
 
 	private:
 
-		Hash m_signalHash = UNDEFINED_HASH;
-
 		int m_measureCount = 0;
 		State m_state = State::Success;
 
 	public:
-
-		Hash signalHash() const { return m_signalHash; }
-		void setSignalHash(const Hash& hash) { m_signalHash = hash; }
 
 		int measureCount() const { return m_measureCount; }
 		void setMeasureCount(int count) { m_measureCount = count; }

@@ -673,8 +673,8 @@ QString IoSignalParam::engineeringRangeStr() const
 
 					if (outParam.isValid() == true)
 					{
-						if (compareFloat(inParam.tuningLowBound().toDouble(), outParam.lowEngineeringUnits()) == false ||
-								compareFloat(inParam.tuningHighBound().toDouble(), outParam.highEngineeringUnits()) == false)
+						if (compareDouble(inParam.tuningLowBound().toDouble(), outParam.lowEngineeringUnits()) == false ||
+								compareDouble(inParam.tuningHighBound().toDouble(), outParam.highEngineeringUnits()) == false)
 						{
 							result += outParam.engineeringRangeStr();
 						}
@@ -1109,7 +1109,7 @@ bool MeasureSignal::setMetrologySignal(int measureKind, const SignalConnectionBa
 
 					for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
 					{
-						Metrology::Signal* pSignalFromConnection = signalConnection.metrologySignal(type);
+						Metrology::Signal* pSignalFromConnection = signalConnection.signal(type);
 						if (pSignalFromConnection == nullptr || pSignalFromConnection->param().isValid() == false)
 						{
 							result = false;
@@ -2443,6 +2443,8 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 
 		pInputSignal->param().setComparatorList(metrologyComparatorList);
 	}
+
+	//statistic().createComparatorList();
 
 	return true;
 }

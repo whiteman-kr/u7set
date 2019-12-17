@@ -155,11 +155,11 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 
 	QString compareValue;
 
-	compareValue += comparatorEx->cmpTypeStr();
+	compareValue += comparatorEx->cmpTypeStr() + " ";
 
 	if (comparatorEx->compare().isConst() == true)
 	{
-		compareValue += QString::number(comparatorEx->compare().constValue(), 'f', comparatorEx->valuePrecision());
+		compareValue += QString::number(comparatorEx->compare().constValue(), 'g', comparatorEx->valuePrecision());
 	}
 	else
 	{
@@ -170,7 +170,7 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 
 	if (comparatorEx->hysteresis().isConst() == true)
 	{
-		hysteresisValue = QString::number(comparatorEx->hysteresis().constValue(), 'f', comparatorEx->valuePrecision());
+		hysteresisValue = QString::number(comparatorEx->hysteresis().constValue(), 'g', comparatorEx->valuePrecision());
 	}
 	else
 	{
