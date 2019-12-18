@@ -164,6 +164,7 @@ private slots:
 
 	// slots for updating
 	//
+	void					configurationLoaded();
 	void					updateList();
 
 	// slots of menu

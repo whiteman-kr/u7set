@@ -1239,12 +1239,13 @@ void SignalBase::clearSignalList()
 {
 	m_signalMutex.lock();
 
-	m_signalConnectionBase.empty();		// set all signal connection value nullptr
-	m_tuningBase.Signals().clear();		// remove all tuning signals
-	m_statisticBase.clear();
+		m_rackBase.clear();
+		m_signalConnectionBase.clearSignals();		// set all signal of connection in nullptr, but don't remove these signals
+		m_tuningBase.clear();
+		m_statisticBase.clear();
 
-	m_signalHashMap.clear();
-	m_signalList.clear();
+		m_signalHashMap.clear();
+		m_signalList.clear();
 
 	m_signalMutex.unlock();
 }
@@ -1887,7 +1888,7 @@ void SignalBase::initSignals()
 
 	updateRackParam();
 
-	m_signalConnectionBase.init();
+	m_signalConnectionBase.initSignals();
 
 	m_tuningBase.Signals().createSignalList();
 

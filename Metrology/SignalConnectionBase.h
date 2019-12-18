@@ -108,8 +108,8 @@ public:
 	int						load();
 	bool					save();
 
-	void					init();										// set all Metrology::Signal* from SignalBase by signalHash
-	void					empty();									// set all Metrology::Signal* value nullptr
+	void					initSignals();									// set all Metrology::Signal* from SignalBase by signalHash
+	void					clearSignals();									// set all Metrology::Signal* value nullptr
 
 	int						append(const SignalConnection& connection);
 

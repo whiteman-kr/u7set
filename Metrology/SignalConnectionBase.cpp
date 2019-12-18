@@ -364,7 +364,7 @@ bool SignalConnectionBase::save()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalConnectionBase::init()
+void SignalConnectionBase::initSignals()
 {
 	m_connectionMutex.lock();
 
@@ -379,7 +379,7 @@ void SignalConnectionBase::init()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalConnectionBase::empty()
+void SignalConnectionBase::clearSignals()
 {
 	m_connectionMutex.lock();
 

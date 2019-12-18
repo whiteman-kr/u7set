@@ -8,17 +8,14 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSocket::TuningSocket(const SoftwareInfo& softwareInfo,
-						   const HostAddressPort& serverAddressPort) :
+TuningSocket::TuningSocket(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort) :
 	Tcp::Client(softwareInfo, serverAddressPort, "TuningSocket")
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-TuningSocket::TuningSocket(const SoftwareInfo& softwareInfo,
-						   const HostAddressPort& serverAddressPort1,
-						   const HostAddressPort& serverAddressPort2) :
+TuningSocket::TuningSocket(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2) :
 	Tcp::Client(softwareInfo, serverAddressPort1, serverAddressPort2, "TuningSocket")
 {
 }

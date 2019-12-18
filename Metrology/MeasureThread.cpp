@@ -604,7 +604,7 @@ void MeasureThread::run()
 			// suspend MeasureThread
 			// select next active analog signal
 			//
-			emit setNextMeasureSignal(signalIsSelected); // call signal how - Qt::BlockingQueuedConnection
+			emit setNextMeasureSignal(signalIsSelected); // call signal how - Qt::BlockingQueuedConnection and return signalIsSelected, if it == true - enable measure next signal, if it == false - dont measure next signal
 			//
 			// resume MeasureThread
 		}

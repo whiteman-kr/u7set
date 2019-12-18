@@ -505,7 +505,7 @@ SignalConnectionDialog::SignalConnectionDialog(QWidget *parent) :
 	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (parent);
 	if (pMainWindow != nullptr && pMainWindow->configSocket() != nullptr)
 	{
-		connect(pMainWindow->configSocket(), &ConfigSocket::configurationLoaded, this, &SignalConnectionDialog::updateList, Qt::QueuedConnection);
+		connect(pMainWindow->configSocket(), &ConfigSocket::configurationLoaded, this, &SignalConnectionDialog::configurationLoaded, Qt::QueuedConnection);
 	}
 
 	m_connectionBase = theSignalBase.signalConnections();
@@ -631,6 +631,14 @@ void SignalConnectionDialog::createContextMenu()
 	//
 	m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &SignalConnectionDialog::onContextMenu);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalConnectionDialog::configurationLoaded()
+{
+	m_connectionBase.initSignals();
+	updateList();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
