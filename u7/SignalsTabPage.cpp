@@ -494,9 +494,11 @@ void SignalPropertyManager::addNewProperty(const SignalPropertyDescription& newP
 		assert(false);
 		return;
 	}
+	int propertyIndex = static_cast<int>(m_propertyDescription.size());
+	emit beginAddProperty(propertyIndex);
 	m_propertyDescription.push_back(newProperty);
-	int propertyIndex = static_cast<int>(m_propertyDescription.size() - 1);
 	m_propertyName2IndexMap.insert(newProperty.name, propertyIndex);
+	emit endAddProperty();
 
 	for (size_t i = 0; i < m_propertyBehaviorDescription.size(); i++)
 	{
@@ -855,6 +857,8 @@ SignalsModel::SignalsModel(DbController* dbController, SignalsTabPage* parent) :
 	m_dbController(dbController)
 {
 	m_instance = this;
+	connect(&m_propertyManager, &SignalPropertyManager::beginAddProperty, this, &SignalsModel::beginAddProperty, Qt::DirectConnection);
+	connect(&m_propertyManager, &SignalPropertyManager::endAddProperty, this, &SignalsModel::endAddProperty, Qt::DirectConnection);
 }
 
 SignalsModel::~SignalsModel()
@@ -1263,19 +1267,21 @@ void SignalsModel::loadSignals()
 
 	loadUsers();
 
-	if (!dbController()->getSignals(&m_signalSet, false, m_parentWindow))
+	SignalSet temporarySignalSet;
+	if (!dbController()->getSignals(&temporarySignalSet, false, m_parentWindow))
 	{
 		QMessageBox::warning(m_parentWindow, tr("Warning"), tr("Could not load signals"));
 	}
 
-	for (int i = 0; i < m_signalSet.count(); i++)
+	for (int i = 0; i < temporarySignalSet.count(); i++)
 	{
-		detectNewProperties(m_signalSet[i]);
+		detectNewProperties(temporarySignalSet[i]);
 	}
 
-	if (m_signalSet.count() > 0)
+	if (temporarySignalSet.count() > 0)
 	{
-		beginInsertRows(QModelIndex(), 0, m_signalSet.count() - 1);
+		beginInsertRows(QModelIndex(), 0, temporarySignalSet.count() - 1);
+		std::swap(m_signalSet, temporarySignalSet);
 		endInsertRows();
 
 		if (signalsCleared)
@@ -1518,6 +1524,16 @@ void SignalsModel::showError(QString message)
 	}
 }
 
+void SignalsModel::beginAddProperty(int propertyIndex)
+{
+	beginInsertColumns(QModelIndex(), propertyIndex, propertyIndex);
+}
+
+void SignalsModel::endAddProperty()
+{
+	endInsertColumns();
+}
+
 void SignalsModel::detectNewProperties(const Signal& signal)
 {
 	int oldColumnCount = columnCount();
@@ -1526,9 +1542,6 @@ void SignalsModel::detectNewProperties(const Signal& signal)
 
 	if (oldColumnCount < columnCount())
 	{
-		beginInsertColumns(QModelIndex(), oldColumnCount, columnCount() - 1);
-		endInsertColumns();
-
 		emit updateColumnList();
 	}
 }
@@ -1543,9 +1556,6 @@ void SignalsModel::loadNotSpecificProperties(Signal& signal)
 
 	if (oldColumnCount < columnCount())
 	{
-		beginInsertColumns(QModelIndex(), oldColumnCount, columnCount() - 1);
-		endInsertColumns();
-
 		emit updateColumnList();
 	}
 }
@@ -1761,6 +1771,9 @@ void SignalsModel::initLazyLoadSignals()
 
 	if (signalIds.count() == 0)
 	{
+		Signal signal;
+		loadNotSpecificProperties(signal);
+
 		return;
 	}
 
@@ -1799,11 +1812,6 @@ void SignalsModel::initLazyLoadSignals()
 		}
 
 		loadNotSpecificProperties(signalsArray[0]);
-	}
-	else
-	{
-		Signal signal;
-		loadNotSpecificProperties(signal);
 	}
 
 	endResetModel();
