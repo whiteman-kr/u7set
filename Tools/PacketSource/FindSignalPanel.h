@@ -80,7 +80,7 @@ public:
 
 private:
 
-	QList<FindItem>		m_findItemList;
+	QVector<FindItem>	m_findItemList;
 
 	int					columnCount(const QModelIndex &parent) const;
 	int					rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -92,7 +92,7 @@ public:
 
 	int					count() const { return m_findItemList.count(); }
 	FindItem			at(int index) const;
-	void				set(const QList<FindItem> list_add);
+	void				set(const QVector<FindItem>& list_add);
 	void				clear();
 
 	QString				text(int row, int column) const;

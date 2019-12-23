@@ -191,7 +191,7 @@ FindItem FindSignalTable::at(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindSignalTable::set(const QList<FindItem> list_add)
+void FindSignalTable::set(const QVector<FindItem>& list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -258,10 +258,10 @@ void FindSignalPanel::createInterface()
 
 	QToolBar *toolBar = new QToolBar(m_pFindWindow);
 
-	QLabel* label = new QLabel(tr("Input text: "), toolBar);
 	m_findTextEdit = new QLineEdit(m_findText, toolBar);
+	m_findTextEdit->setPlaceholderText(tr("Search Text"));
+	m_findTextEdit->setClearButtonEnabled(true);
 
-	toolBar->addWidget(label);
 	toolBar->addWidget(m_findTextEdit);
 	QAction* action = toolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
 	connect(action, &QAction::triggered, this, &FindSignalPanel::find);
@@ -299,6 +299,11 @@ void FindSignalPanel::createInterface()
 
 void FindSignalPanel::createContextMenu()
 {
+	if (m_pFindWindow == nullptr)
+	{
+		return;
+	}
+
 	// create context menu
 	//
 	m_pContextMenu = new QMenu(tr("&Signal text"), m_pFindWindow);
@@ -393,7 +398,7 @@ void FindSignalPanel::find()
 		return;
 	}
 
-	QList<FindItem> findItemList;
+	QVector<FindItem> findItemList;
 
 	m_table.clear();
 
@@ -484,6 +489,11 @@ void FindSignalPanel::selectItemInSignalView()
 
 void FindSignalPanel::onContextMenu(QPoint)
 {
+	if (m_pContextMenu == nullptr)
+	{
+		return;
+	}
+
 	m_pContextMenu->exec(QCursor::pos());
 }
 

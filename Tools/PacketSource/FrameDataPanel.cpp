@@ -366,10 +366,6 @@ void FrameDataStateDialog::onOk()
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-// -------------------------------------------------------------------------------------------------------------------
-
 FrameDataPanel::FrameDataPanel(QWidget* parent) :
 	QDockWidget(parent)
 {
@@ -383,6 +379,7 @@ FrameDataPanel::FrameDataPanel(QWidget* parent) :
 	setObjectName(windowTitle());
 
 	createInterface();
+	createContextMenu();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -409,15 +406,35 @@ void FrameDataPanel::createInterface()
 	}
 
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
-	m_pView->setMaximumWidth(180);
 
-	connect(m_pView, &QTableView::doubleClicked , this, &FrameDataPanel::onFrameDataListDoubleClicked);
+	connect(m_pView, &QTableView::doubleClicked , this, &FrameDataPanel::onListDoubleClicked);
 	m_pView->installEventFilter(this);
-
-
 
 	setWidget(m_pFrameWindow);
 }
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void FrameDataPanel::createContextMenu()
+{
+	if (m_pFrameWindow == nullptr)
+	{
+		return;
+	}
+
+	// create context menu
+	//
+	m_pContextMenu = new QMenu(tr("&Signal state"), m_pFrameWindow);
+
+	m_pSetStateAction = m_pContextMenu->addAction(tr("Set state ..."));
+	connect(m_pSetStateAction, &QAction::triggered, this, &FrameDataPanel::onSetStateAction);
+
+	// init context menu
+	//
+	m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
+	connect(m_pView, &QTableWidget::customContextMenuRequested, this, &FrameDataPanel::onContextMenu);
+}
+
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -436,14 +453,22 @@ void FrameDataPanel::set(const QVector<PS::FrameData*>& list_add)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FrameDataPanel::changeState()
+void FrameDataPanel::setState()
 {
 	if (m_pView == nullptr)
 	{
 		return;
 	}
 
-	int byteIndex = m_pView->currentIndex().row();
+	QModelIndexList rows = m_pView->selectionModel()->selectedRows();
+
+	int rowCount = rows.count();
+	if (rowCount <= 0)
+	{
+		return;
+	}
+
+	int byteIndex = rows.first().row();
 	if (byteIndex < 0 || byteIndex >= m_frameDataTable.dataSize())
 	{
 		return;
@@ -457,7 +482,16 @@ void FrameDataPanel::changeState()
 		return;
 	}
 
-	m_frameDataTable.setByte(byteIndex, dialog.byte());
+	for (int r = 0; r < rowCount; r++)
+	{
+		int byteIndex = rows[r].row();
+		if (byteIndex < 0 || byteIndex >= m_frameDataTable.dataSize())
+		{
+			continue;
+		}
+
+		m_frameDataTable.setByte(byteIndex, dialog.byte());
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -470,17 +504,7 @@ bool FrameDataPanel::event(QEvent* e)
 
 		if (keyEvent->key() == Qt::Key_Return)
 		{
-			changeState();
-		}
-	}
-
-	if (e->type() == QEvent::Resize)
-	{
-		QResizeEvent* resizeEvent = static_cast<QResizeEvent*>(e);
-
-		if (m_pView != nullptr)
-		{
-			m_pView->resize(resizeEvent->size().width(), m_pView->height());
+			setState();
 		}
 	}
 
@@ -489,11 +513,30 @@ bool FrameDataPanel::event(QEvent* e)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FrameDataPanel::onFrameDataListDoubleClicked(const QModelIndex& index)
+void FrameDataPanel::onContextMenu(QPoint)
+{
+	if (m_pContextMenu == nullptr)
+	{
+		return;
+	}
+
+	m_pContextMenu->exec(QCursor::pos());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void FrameDataPanel::onSetStateAction()
+{
+	setState();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void FrameDataPanel::onListDoubleClicked(const QModelIndex& index)
 {
 	Q_UNUSED(index);
 
-	changeState();
+	setState();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
