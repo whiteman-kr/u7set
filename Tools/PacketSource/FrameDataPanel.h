@@ -125,21 +125,28 @@ private:
 	QTableView*			m_pView = nullptr;
 	FrameDataTable		m_frameDataTable;
 
+	QMenu*				m_pContextMenu = nullptr;
+	QAction*			m_pSetStateAction = nullptr;
+
 	void				createInterface();
+	void				createContextMenu();
 
 public:
 
 	void				clear();
 	void				set(const QVector<PS::FrameData*>& list_add);
 
-	void				changeState();
+	void				setState();
 protected:
 
 	bool				event(QEvent* e);
 
 private slots:
 
-	void				onFrameDataListDoubleClicked(const QModelIndex& index);
+	void				onContextMenu(QPoint);
+
+	void				onSetStateAction();
+	void				onListDoubleClicked(const QModelIndex& index);
 };
 // ==============================================================================================
 

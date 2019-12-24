@@ -1236,8 +1236,14 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 		return;
 	}
 
-	std::shared_ptr<Comparator> pComparator = inParam.comparator(comparatorIndex);
-	if (pComparator == nullptr)
+	std::shared_ptr<Metrology::ComparatorEx> comparatorEx = inParam.comparator(comparatorIndex);
+	if (comparatorEx == nullptr)
+	{
+		assert(false);
+		return;
+	}
+
+	if (comparatorEx->signalsIsValid() == false)
 	{
 		assert(false);
 		return;
@@ -1272,26 +1278,9 @@ void ComparatorMeasurement::fill_measure_input(const IoSignalParam &ioParam)
 	// nominal
 	//
 
-	setCmpType(pComparator->cmpType());
+	setCmpType(comparatorEx->cmpType());
 
-	double engineering = 0;
-
-	if (pComparator->compare().isConst() == true)
-	{
-		engineering = pComparator->compare().constValue();
-	}
-	else
-	{
-		if (pComparator->compare().appSignalID().isEmpty() == false)
-		{
-			Metrology::Signal* pComareSignal = theSignalBase.signalPtr(pComparator->compare().appSignalID());
-			if (pComareSignal != nullptr)
-			{
-				engineering = pComareSignal->state().value();
-			}
-		}
-	}
-
+	double engineering = comparatorEx->compareValue();
 	double electric = conversion(engineering, CT_ENGINEER_TO_ELECTRIC, inParam);
 
 	setNominal(MEASURE_LIMIT_TYPE_ELECTRIC, electric);
@@ -2191,7 +2180,7 @@ Metrology::SignalStatistic MeasureBase::getSignalStatistic(const Hash& signalHas
 		return Metrology::SignalStatistic();
 	}
 
-	Metrology::SignalStatistic si(signalHash);
+	Metrology::SignalStatistic si;
 
 	m_measureMutex.lock();
 
@@ -2229,9 +2218,25 @@ Metrology::SignalStatistic MeasureBase::getSignalStatistic(const Hash& signalHas
 					break;
 
 				case MEASURE_TYPE_COMPARATOR:
+					{
+						ComparatorMeasurement* pComparatorMeasurement = dynamic_cast<ComparatorMeasurement*>(pMeasurement);
+						if (pComparatorMeasurement == nullptr)
+						{
+							break;
+						}
 
-					// dynamic_cast<ComparatorMeasurement*> (pMeasurement); for future realese
+//						if (compareFloat(pComparatorMeasurement->nominal(limitType), cmpValue) == false)
+//						{
+//							break;
+//						}
 
+						si.setMeasureCount(si.measureCount() + 1);
+
+						if (pComparatorMeasurement->error(limitType, errorType) > pComparatorMeasurement->errorLimit(limitType, errorType))
+						{
+							si.setState(Metrology::SignalStatistic::State::Failed);
+						}
+					}
 					break;
 
 				default:

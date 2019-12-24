@@ -77,19 +77,29 @@ void MainWindow::createActions()
 	connect(m_sourceStopAction, &QAction::triggered, this, &MainWindow::stopSource);
 
 	m_sourceSelectAllAction = new QAction(tr("Select all"), this);
-	m_sourceSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
 	m_sourceSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
 	m_sourceSelectAllAction->setToolTip(tr("Select all sources"));
-	connect(m_sourceSelectAllAction, &QAction::triggered, this, &MainWindow::selectAllSource);
+	connect(m_sourceSelectAllAction, &QAction::triggered, this, &MainWindow::selectAllSources);
 
+	// Signals
+	//
+	m_signalSetStateAction = new QAction(tr("Set state ..."), this);
+	m_signalSetStateAction->setToolTip(tr("Set signal state"));
+	connect(m_signalSetStateAction, &QAction::triggered, this, &MainWindow::setSignalState);
+
+	m_signalSelectAllAction = new QAction(tr("Select all"), this);
+	m_signalSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
+	m_signalSelectAllAction->setToolTip(tr("Select all signals"));
+	connect(m_signalSelectAllAction, &QAction::triggered, this, &MainWindow::selectAllSignals);
+
+	// ?
+	//
 	m_optionAction = new QAction(tr("&Options"), this);
 	m_optionAction->setShortcut(Qt::CTRL + Qt::Key_O);
 	m_optionAction->setIcon(QIcon(":/icons/Options.png"));
 	m_optionAction->setToolTip(tr("Options of sources"));
 	connect(m_optionAction, &QAction::triggered, this, &MainWindow::onOptions);
 
-	// ?
-	//
 	m_pAboutAppAction = new QAction(tr("About ..."), this);
 	m_pAboutAppAction->setIcon(QIcon(":/icons/About.png"));
 	m_pAboutAppAction->setToolTip("");
@@ -100,12 +110,10 @@ void MainWindow::createActions()
 	m_sourceTextCopyAction = new QAction(tr("&Copy"), this);
 	connect(m_sourceTextCopyAction, &QAction::triggered, this, &MainWindow::copySourceText);
 
-
 	// signal contex menu
 	//
 	m_signalTextCopyAction = new QAction(tr("&Copy"), this);
 	connect(m_signalTextCopyAction, &QAction::triggered, this, &MainWindow::copySignalText);
-
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -118,26 +126,27 @@ void MainWindow::createMenu()
 		return;
 	}
 
+	// Sources
 	//
-	//
-	m_sourceMenu = pMenuBar->addMenu(tr("&Sources"));
+	m_sourceMenu = pMenuBar->addMenu(tr("Sources"));
 
 	m_sourceMenu->addAction(m_sourceStartAction);
 	m_sourceMenu->addAction(m_sourceStopAction);
 	m_sourceMenu->addSeparator();
-	m_sourceMenu->addAction(m_optionAction);
+	m_sourceMenu->addAction(m_sourceSelectAllAction);
 
-	// Edit
+	// Signals
 	//
-	m_pEditMenu = pMenuBar->addMenu(tr("&Edit"));
+	m_signalMenu = pMenuBar->addMenu(tr("Signals"));
 
-	m_pEditMenu->addAction(m_sourceSelectAllAction);
-	m_pEditMenu->addSeparator();
+	m_signalMenu->addAction(m_signalSelectAllAction);
 
+	// ?
 	//
-	//
-	m_infoMenu = pMenuBar->addMenu(tr("&?"));
+	m_infoMenu = pMenuBar->addMenu(tr("?"));
 
+	m_infoMenu->addAction(m_optionAction);
+	m_infoMenu->addSeparator();
 	m_infoMenu->addAction(m_pAboutAppAction);
 }
 
@@ -181,22 +190,22 @@ void MainWindow::createPanels()
 
 		m_pFrameDataPanel->hide();
 
-		QAction* findAction = m_pFrameDataPanel->toggleViewAction();
-		if (findAction != nullptr)
+		QAction* dataAction = m_pFrameDataPanel->toggleViewAction();
+		if (dataAction != nullptr)
 		{
-			findAction->setText(tr("&Frame of data ..."));
-			findAction->setShortcut(Qt::CTRL + Qt::Key_D);
-			findAction->setIcon(QIcon(":/icons/FrameData.png"));
-			findAction->setToolTip(tr("Frame of data"));
+			dataAction->setText(tr("&Frame of data ..."));
+			dataAction->setShortcut(Qt::CTRL + Qt::Key_D);
+			dataAction->setIcon(QIcon(":/icons/FrameData.png"));
+			dataAction->setToolTip(tr("Frame of data"));
 
-			if (m_pEditMenu != nullptr)
+			if (m_signalMenu != nullptr)
 			{
-				m_pEditMenu->addAction(findAction);
+				m_signalMenu->insertAction(m_signalSelectAllAction, dataAction);
 			}
 
 			if (m_mainToolBar != nullptr)
 			{
-				m_mainToolBar->addAction(findAction);
+				m_mainToolBar->addAction(dataAction);
 			}
 		}
 	}
@@ -220,9 +229,10 @@ void MainWindow::createPanels()
 			findAction->setIcon(QIcon(":/icons/Find.png"));
 			findAction->setToolTip(tr("Find signal"));
 
-			if (m_pEditMenu != nullptr)
+			if (m_signalMenu != nullptr)
 			{
-				m_pEditMenu->addAction(findAction);
+				m_signalMenu->insertAction(m_signalSelectAllAction, findAction);
+				m_signalMenu->insertSection(m_signalSelectAllAction, QString());
 			}
 
 			if (m_mainToolBar != nullptr)
@@ -324,10 +334,6 @@ void MainWindow::createContextMenu()
 
 	// View of signals
 	//
-	m_signalContextMenu = new QMenu(this);
-
-	m_signalContextMenu->addAction(m_signalTextCopyAction);
-
 	m_pSignalView->setContextMenuPolicy(Qt::CustomContextMenu);
 	connect(m_pSignalView, &QTableView::customContextMenuRequested, this, &MainWindow::onSignalContextMenu);
 }
@@ -592,9 +598,132 @@ void MainWindow::stopSource()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::selectAllSource()
+void MainWindow::selectAllSources()
 {
+	if(m_pSourceView == nullptr)
+	{
+		return;
+	}
+
 	m_pSourceView->selectAll();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::setSignalState()
+{
+	if(m_pSignalView == nullptr)
+	{
+		return;
+	}
+
+	QSortFilterProxyModel* pSignalProxyModel = dynamic_cast<QSortFilterProxyModel*>(m_pSignalView->model());
+	if(pSignalProxyModel == nullptr)
+	{
+		return;
+	}
+
+	//
+	//
+	QModelIndexList rows = m_pSignalView->selectionModel()->selectedRows();
+
+	PS::Signal* pFirstSignal = nullptr;
+	bool signalIsReady = false;
+
+	if (rows.count() > 0)
+	{
+		int signalIndex = pSignalProxyModel->mapToSource(rows.first()).row();
+		if (signalIndex >= 0 && signalIndex < m_signalTable.signalCount())
+		{
+			pFirstSignal = m_signalTable.signalPtr(signalIndex);
+			if (pFirstSignal != nullptr)
+			{
+				if (pFirstSignal->regValueAddr().offset() != BAD_ADDRESS && pFirstSignal->regValueAddr().bit() != BAD_ADDRESS)
+				{
+					if (pFirstSignal->valueData() != nullptr)
+					{
+						signalIsReady = true;
+					}
+				}
+			}
+		}
+	}
+
+	//
+	//
+	if (pFirstSignal == nullptr || signalIsReady == false)
+	{
+		return;
+	}
+
+	//
+	//
+	SignalStateDialog dialog(pFirstSignal);
+	if (dialog.exec() != QDialog::Accepted)
+	{
+		return;
+	}
+
+	//
+	//
+	int rowCount = rows.count();
+	for (int r = 0; r < rowCount; r++)
+	{
+		int signalIndex = pSignalProxyModel->mapToSource(rows[r]).row();
+		if (signalIndex < 0 || signalIndex >= m_signalTable.signalCount())
+		{
+			continue;
+		}
+
+		PS::Signal* pSignal = m_signalTable.signalPtr(signalIndex);
+		if (pSignal == nullptr)
+		{
+			continue;
+		}
+
+		if (pSignal->regValueAddr().offset() == BAD_ADDRESS || pSignal->regValueAddr().bit() == BAD_ADDRESS)
+		{
+			continue;
+		}
+
+		if (pSignal->valueData() == nullptr)
+		{
+			continue;
+		}
+
+		if (pSignal->signalType() != pFirstSignal->signalType())
+		{
+			continue;
+		}
+
+		if (pSignal->isAnalog() == true)
+		{
+			if (compareDouble(pSignal->lowEngineeringUnits(), pFirstSignal->lowEngineeringUnits()) == false || compareDouble(pSignal->highEngineeringUnits(), pFirstSignal->highEngineeringUnits()) == false)
+			{
+				continue;
+			}
+
+			if (pSignal->unit() != pFirstSignal->unit())
+			{
+				continue;
+			}
+		}
+
+		pSignal->setState(dialog.state());
+	}
+
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::selectAllSignals()
+{
+	if (m_pSignalView == nullptr)
+	{
+		return;
+	}
+
+	m_pSignalView->selectAll();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -723,6 +852,11 @@ void MainWindow::updateFrameDataList(PS::Source* pSource)
 
 void MainWindow::onSourceContextMenu(QPoint)
 {
+	if (m_sourceContextMenu == nullptr)
+	{
+		return;
+	}
+
 	m_sourceContextMenu->exec(QCursor::pos());
 }
 
@@ -760,7 +894,133 @@ void MainWindow::onSourceColumnAction(QAction* action)
 
 void MainWindow::onSignalContextMenu(QPoint)
 {
+	if(m_pSignalView == nullptr)
+	{
+		return;
+	}
+
+	QSortFilterProxyModel* pSignalProxyModel = dynamic_cast<QSortFilterProxyModel*>(m_pSignalView->model());
+	if(pSignalProxyModel == nullptr)
+	{
+		return;
+	}
+
+	m_signalContextMenu = new QMenu(this);
+	if (m_signalContextMenu == nullptr)
+	{
+		return;
+	}
+
+	//
+	//
+	QModelIndexList rows = m_pSignalView->selectionModel()->selectedRows();
+
+	PS::Signal* pFirstSignal = nullptr;
+	bool appendMenuItem = false;
+
+	if (rows.count() > 0)
+	{
+		int signalIndex = pSignalProxyModel->mapToSource(rows.first()).row();
+		if (signalIndex >= 0 && signalIndex < m_signalTable.signalCount())
+		{
+			pFirstSignal = m_signalTable.signalPtr(signalIndex);
+			if (pFirstSignal != nullptr)
+			{
+				if (pFirstSignal->regValueAddr().offset() != BAD_ADDRESS && pFirstSignal->regValueAddr().bit() != BAD_ADDRESS)
+				{
+					if (pFirstSignal->valueData() != nullptr)
+					{
+						appendMenuItem = true;
+					}
+				}
+			}
+		}
+	}
+
+	if (pFirstSignal != nullptr)
+	{
+		int rowCount = rows.count();
+		for (int r = 1; r < rowCount; r++)
+		{
+			int signalIndex = pSignalProxyModel->mapToSource(rows[r]).row();
+			if (signalIndex < 0 || signalIndex >= m_signalTable.signalCount())
+			{
+				appendMenuItem = false;
+				continue;
+			}
+
+			PS::Signal* pSignal = m_signalTable.signalPtr(signalIndex);
+			if (pSignal == nullptr)
+			{
+				appendMenuItem = false;
+				continue;
+			}
+
+			if (pSignal->regValueAddr().offset() == BAD_ADDRESS || pSignal->regValueAddr().bit() == BAD_ADDRESS)
+			{
+				appendMenuItem = false;
+				continue;
+			}
+
+			if (pSignal->valueData() == nullptr)
+			{
+				appendMenuItem = false;
+				continue;
+			}
+
+			if (pSignal->signalType() != pFirstSignal->signalType())
+			{
+				appendMenuItem = false;
+				continue;
+			}
+
+			if (pSignal->isAnalog() == true)
+			{
+				if (compareDouble(pSignal->lowEngineeringUnits(), pFirstSignal->lowEngineeringUnits()) == false || compareDouble(pSignal->highEngineeringUnits(), pFirstSignal->highEngineeringUnits()) == false)
+				{
+					appendMenuItem = false;
+					continue;
+				}
+
+				if (pSignal->unit() != pFirstSignal->unit() )
+				{
+					appendMenuItem = false;
+					continue;
+				}
+			}
+		}
+	}
+
+	//
+	//
+	if (appendMenuItem == true)
+	{
+		if (rows.count() == 1)
+		{
+			m_signalSetStateAction->setText( tr("Set state of signal: %1 ...").arg(pFirstSignal->customAppSignalID()));
+		}
+		else
+		{
+			m_signalSetStateAction->setText( tr("Set state for %1 signals ...").arg(rows.count()));
+		}
+
+		m_signalContextMenu->addAction(m_signalSetStateAction);
+		m_signalContextMenu->addSeparator();
+	}
+	m_signalContextMenu->addAction(m_signalTextCopyAction);
+
+	//
+	//
 	m_signalContextMenu->exec(QCursor::pos());
+
+	//
+	//
+	m_signalSetStateAction->setText("Set state ...");
+
+	//
+	//
+	delete m_signalContextMenu;
+	m_signalContextMenu = nullptr;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -844,46 +1104,9 @@ void MainWindow::onSourceListClicked(const QModelIndex& index)
 
 void MainWindow::onSignalListDoubleClicked(const QModelIndex& index)
 {
-	if(m_pSignalView == nullptr)
-	{
-		return;
-	}
+	Q_UNUSED(index);
 
-	QSortFilterProxyModel* pSignalProxyModel = dynamic_cast<QSortFilterProxyModel*>(m_pSignalView->model());
-	if(pSignalProxyModel == nullptr)
-	{
-		return;
-	}
-
-	int signalIndex = pSignalProxyModel->mapToSource(index).row();
-	if (signalIndex < 0 || signalIndex >= m_signalTable.signalCount())
-	{
-		return;
-	}
-
-	PS::Signal* pSignal = m_signalTable.signalPtr(signalIndex);
-	if (pSignal == nullptr)
-	{
-		return;
-	}
-
-	if (pSignal->regValueAddr().offset() == BAD_ADDRESS || pSignal->regValueAddr().bit() == BAD_ADDRESS)
-	{
-		return;
-	}
-
-	if (pSignal->valueData() == nullptr)
-	{
-		return;
-	}
-
-	SignalStateDialog dialog(pSignal);
-	if (dialog.exec() != QDialog::Accepted)
-	{
-		return;
-	}
-
-	pSignal->setState(dialog.state());
+	setSignalState();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

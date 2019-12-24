@@ -2,97 +2,40 @@
 
 #include <assert.h>
 
-#include "Options.h"
 #include "SignalBase.h"
 
 #include "../lib/ServiceSettings.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort, const SoftwareInfo& softwareInfo)
+ConfigSocket::ConfigSocket(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort)
+	: m_softwareInfo(softwareInfo)
+	, m_serverAddressPort1(serverAddressPort)
+	, m_serverAddressPort2(HostAddressPort(QString("127.0.0.1"), PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST))
+
 {
-	// use only SOCKET_SERVER_TYPE_PRIMARY
-	//
-	QString equipmentID = theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY);
-	if (equipmentID.isEmpty() == true)
-	{
-		return;
-	}
-
-	HostAddressPort serverAddressPort2(QString("127.0.0.1"), PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
-
-	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo,
-											1,
-											serverAddressPort,
-											serverAddressPort2,
-											false,
-											nullptr);
-
-	if (m_cfgLoaderThread == nullptr)
-	{
-		return;
-	}
-
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
-
-	startConnectionStateTimer();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort1,
-						   const HostAddressPort& serverAddressPort2,
-						   const SoftwareInfo& softwareInfo)
+ConfigSocket::ConfigSocket(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2)
+	: m_softwareInfo(softwareInfo)
+	, m_serverAddressPort1(serverAddressPort1)
+	, m_serverAddressPort2(serverAddressPort2)
 {
-	// use only SOCKET_SERVER_TYPE_PRIMARY
-	//
-	QString equipmentID = theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY);
-
-	if (equipmentID.isEmpty() == true)
-	{
-		return;
-	}
-
-	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo,
-											1,
-											serverAddressPort1,
-											serverAddressPort2,
-											false,
-											nullptr);
-
-	if (m_cfgLoaderThread == nullptr)
-	{
-		return;
-	}
-
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
-
-	startConnectionStateTimer();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 ConfigSocket::~ConfigSocket()
 {
-	if (m_cfgLoaderThread == nullptr)
-	{
-		return;
-	}
-
-	m_cfgLoaderThread->quit();
-	delete m_cfgLoaderThread;
-	m_cfgLoaderThread = nullptr;
-
-	stopConnectionStateTimer();
+	quit();
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void ConfigSocket::clearConfiguration()
 {
-	m_loadedFiles.clear();
-
 	theSignalBase.clear();
 }
 
@@ -100,14 +43,65 @@ void ConfigSocket::clearConfiguration()
 
 void ConfigSocket::start()
 {
+	m_cfgLoaderThread = new CfgLoaderThread(m_softwareInfo,
+											1,
+											m_serverAddressPort1,
+											m_serverAddressPort2,
+											false,
+											nullptr);
+
 	if (m_cfgLoaderThread == nullptr)
 	{
 		assert(m_cfgLoaderThread);
 		return;
 	}
 
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
+
 	m_cfgLoaderThread->start();
 	m_cfgLoaderThread->enableDownloadConfiguration();
+
+	startConnectionStateTimer();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ConfigSocket::quit()
+{
+	stopConnectionStateTimer();
+
+	if (m_cfgLoaderThread == nullptr)
+	{
+		return;
+	}
+
+	disconnect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
+
+	m_cfgLoaderThread->quit();
+	delete m_cfgLoaderThread;
+	m_cfgLoaderThread = nullptr;
+
+	m_connected = false;
+	m_address.clear();
+
+	emit socketDisconnected();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ConfigSocket::reconncect(const QString& equipmentID, const HostAddressPort& serverAddressPort)
+{
+	if (equipmentID.isEmpty() == true)
+	{
+		return;
+	}
+
+	m_softwareInfo.setEquipmentID(equipmentID);
+	m_serverAddressPort1 = serverAddressPort;
+	m_serverAddressPort2 = HostAddressPort(QString("127.0.0.1"), PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
+
+	quit();
+	start();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -124,6 +118,7 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 	QTime responseTime;
 	responseTime.start();
 
+	m_loadedFiles.clear();
 	clearConfiguration();
 
 	bool result = false;

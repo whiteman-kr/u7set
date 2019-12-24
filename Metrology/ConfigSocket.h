@@ -2,9 +2,8 @@
 #define CONFIGSOCKET_H
 
 // This class is designed to receive signals from CfgSrv
-//
-// Algorithm:
-//
+
+#include "Options.h"
 
 #include "../lib/CfgServerLoader.h"
 
@@ -20,20 +19,25 @@ class ConfigSocket : public QObject
 
 public:
 
-	ConfigSocket(const HostAddressPort& serverAddressPort,
-				 const SoftwareInfo& softwareInfo);
+	ConfigSocket(const SoftwareInfo& softwareInfo,
+				 const HostAddressPort& serverAddressPort);
 
-	ConfigSocket(const HostAddressPort& serverAddressPort1,
-				 const HostAddressPort& serverAddressPort2,
-				 const SoftwareInfo& softwareInfo);
+	ConfigSocket(const SoftwareInfo& softwareInfo,
+				 const HostAddressPort& serverAddressPort1,
+				 const HostAddressPort& serverAddressPort2);
 
 	virtual ~ConfigSocket();
 
 private:
 
-	CfgLoaderThread*	m_cfgLoaderThread = nullptr;
-
 	void				clearConfiguration();
+
+	SoftwareInfo		m_softwareInfo;
+	HostAddressPort		m_serverAddressPort1;
+	HostAddressPort		m_serverAddressPort2;
+
+
+	CfgLoaderThread*	m_cfgLoaderThread = nullptr;
 
 	QTimer*				m_connectionStateTimer = nullptr;
 	void				startConnectionStateTimer();
@@ -51,6 +55,9 @@ public:
 	HostAddressPort		address() { return m_address; }
 
 	void				start();
+	void				quit();
+
+	void				reconncect(const QString& equipmentID, const HostAddressPort& serverAddressPort);
 
 	QStringList&		loadedFiles() { return m_loadedFiles; }
 

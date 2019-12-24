@@ -131,15 +131,27 @@ private:
 
 private:
 
+	SoftwareInfo			m_softwareInfo;
+
 	ConfigSocket*			m_pConfigSocket = nullptr;
+	void					runConfigSocket();
+	void					stopConfigSocket();
 
 	SignalSocket*			m_pSignalSocket = nullptr;
 	SimpleThread*			m_pSignalSocketThread = nullptr;
+	void					runSignalSocket();
+	void					stopSignalSocket();
 
 	TuningSocket*			m_pTuningSocket = nullptr;
 	SimpleThread*			m_pTuningSocketThread = nullptr;
+	void					runTuningSocket();
+	void					stopTuningSocket();
 
 	MeasureThread			m_measureThread;
+	void					runMeasureThread();
+	void					stopMeasureThread();
+
+private:
 
 	Calculator*				m_pCalculator = nullptr;
 

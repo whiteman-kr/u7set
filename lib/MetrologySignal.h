@@ -52,6 +52,10 @@ namespace Metrology
 
 	// ==============================================================================================
 
+	class ComparatorEx;
+
+	// ==============================================================================================
+
 	class RackParam
 	{
 		public:
@@ -172,12 +176,12 @@ namespace Metrology
 
 	// ==============================================================================================
 
-	class SignalParam : public Signal
+	class SignalParam : public ::Signal
 	{
 	public:
 
 		SignalParam() {}
-		SignalParam(const Signal& signal, const SignalLocation& location);
+		SignalParam(const ::Signal& signal, const SignalLocation& location);
 		virtual ~SignalParam() {}
 
 	private:
@@ -196,14 +200,14 @@ namespace Metrology
 		double					m_physicalLowLimit = 0;
 		double					m_physicalHighLimit = 0;
 
-		QVector<std::shared_ptr<Comparator>> m_comparatorList;
+		QVector<std::shared_ptr<ComparatorEx>> m_comparatorList;
 		int						m_comparatorCount = 0;
 
 	public:
 
 		bool					isValid() const;
 
-		void					setParam(const Signal& signal, const SignalLocation& location);
+		void					setParam(const ::Signal& signal, const SignalLocation& location);
 
 		void					setAppSignalID(const QString& appSignalID);
 
@@ -262,8 +266,9 @@ namespace Metrology
 
 		// comparators
 		//
-		std::shared_ptr<Comparator> comparator(int index) const;
-		void					setComparatorList(const QVector<std::shared_ptr<Comparator>>& comparators);
+
+		std::shared_ptr<ComparatorEx> comparator(int index) const;
+		void					setComparatorList(const QVector<std::shared_ptr<ComparatorEx>>& comparators);
 		int						comparatorCount() const { return m_comparatorCount; }
 		bool					hasComparators() const { return m_comparatorCount != 0; }
 
@@ -313,7 +318,6 @@ namespace Metrology
 	public:
 
 		SignalStatistic() {}
-		explicit SignalStatistic(const Hash& signalHash);
 		virtual ~SignalStatistic() {}
 
 		enum State
@@ -324,15 +328,10 @@ namespace Metrology
 
 	private:
 
-		Hash m_signalHash = UNDEFINED_HASH;
-
 		int m_measureCount = 0;
 		State m_state = State::Success;
 
 	public:
-
-		Hash signalHash() const { return m_signalHash; }
-		void setSignalHash(const Hash& hash) { m_signalHash = hash; }
 
 		int measureCount() const { return m_measureCount; }
 		void setMeasureCount(int count) { m_measureCount = count; }
@@ -376,6 +375,56 @@ namespace Metrology
 		const SignalStatistic& statistic() const { return m_statistic; }
 		void setStatistic(const SignalStatistic& statistic) { m_statistic = statistic; }
 	};
+
+	// ==============================================================================================
+
+	class ComparatorEx : public ::Comparator
+	{
+	public:
+
+		ComparatorEx() {}
+		explicit ComparatorEx(Comparator* pComparator);
+		virtual ~ComparatorEx() {}
+
+	private:
+
+		Metrology::Signal* m_inputSignal = nullptr;
+		Metrology::Signal* m_compareSignal = nullptr;
+		Metrology::Signal* m_hysteresisSignal = nullptr;
+		Metrology::Signal* m_outputSignal = nullptr;
+
+	public:
+
+		void clear();
+		bool signalsIsValid() const;
+
+		Metrology::Signal* inputSignal() const { return m_inputSignal; }
+		void SetInputSignal(Metrology::Signal* pSignal) { m_inputSignal = pSignal; }
+
+		Metrology::Signal* compareSignal() const { return m_compareSignal; }
+		void SetCompareSignal(Metrology::Signal* pSignal) { m_compareSignal = pSignal; }
+
+		Metrology::Signal* hysteresisSignal() const { return m_hysteresisSignal; }
+		void SetHysteresisSignal(Metrology::Signal* pSignal) { m_hysteresisSignal = pSignal; }
+
+		Metrology::Signal* outputSignal() const { return m_outputSignal; }
+		void SetOutputSignal(Metrology::Signal* pSignal) { m_outputSignal = pSignal; }
+
+		QString cmpTypeStr() const;
+
+		int valuePrecision() const;
+
+		double compareValue() const;
+		QString compareValueStr() const;
+
+		double hysteresisValue() const;
+		QString hysteresisValueStr() const;
+
+		bool outputState() const;
+		QString outputStateStr() const;
+		QString outputStateStr(const QString& forTrue, const QString& forFalse) const;
+	};
+
 
 	// ==============================================================================================
 }

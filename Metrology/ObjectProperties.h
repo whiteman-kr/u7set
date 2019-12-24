@@ -346,12 +346,12 @@ class ComparatorPropertyDialog : public QDialog
 
 public:
 
-	explicit ComparatorPropertyDialog(const Comparator& comparator, QWidget *parent = nullptr);
+	explicit ComparatorPropertyDialog(const Metrology::ComparatorEx& comparator, QWidget *parent = nullptr);
 	virtual ~ComparatorPropertyDialog();
 
 private:
 
-	Comparator			m_comparator;
+	Metrology::ComparatorEx		m_comparatorEx;
 
 	// Property list
 	//
@@ -374,7 +374,7 @@ private:
 
 public:
 
-	Comparator			comparator() const { return m_comparator; }
+	Metrology::ComparatorEx		comparator() const { return m_comparatorEx; }
 
 signals:
 

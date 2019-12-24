@@ -30,8 +30,9 @@
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent) :
-	QMainWindow(parent)
+MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent)
+	: QMainWindow(parent)
+	, m_softwareInfo(softwareInfo)
 {
 	// init calibration base
 	//
@@ -46,74 +47,12 @@ MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget *parent) :
 	connect(&theSignalBase, &SignalBase::activeSignalChanged, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
 	connect(&theSignalBase.tuning().Signals(), &TuningSignalBase::signalsCreated, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
 
-	// init interface
 	//
-	createInterface();
-
-	// init measure thread
 	//
-	connect(&m_measureThread, &MeasureThread::started, this, &MainWindow::measureThreadStarted, Qt::QueuedConnection);
-	connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::measureThreadStoped, Qt::QueuedConnection);
-	connect(&m_measureThread, &MeasureThread::started, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
-	connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
-	connect(&m_measureThread, static_cast<void (MeasureThread::*)(QString)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(QString)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection);
-	connect(&m_measureThread, static_cast<void (MeasureThread::*)(int)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(int)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection);
-	connect(&m_measureThread, &MeasureThread::msgBox, this, &MainWindow::measureThreadMsgBox, Qt::BlockingQueuedConnection);
-	connect(&m_measureThread, &MeasureThread::setNextMeasureSignal, this, &MainWindow::setNextMeasureSignal, Qt::BlockingQueuedConnection);
-	connect(&m_measureThread, &MeasureThread::measureComplite, this, &MainWindow::measureComplite, Qt::QueuedConnection);
+	createInterface();		// init interface
 
-	m_measureThread.init(this);
-
-	// init config socket thread
-	//
-	HostAddressPort configSocketAddress = theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY);
-	m_pConfigSocket = new ConfigSocket(configSocketAddress, softwareInfo);
-
-	connect(m_pConfigSocket, &ConfigSocket::socketConnected, this, &MainWindow::configSocketConnected, Qt::QueuedConnection);
-	connect(m_pConfigSocket, &ConfigSocket::socketDisconnected, this, &MainWindow::configSocketDisconnected, Qt::QueuedConnection);
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pStatisticPanel, &StatisticPanel::updateList);
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &MainWindow::configSocketConfigurationLoaded);
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, &theSignalBase.statistic(), &StatisticBase::signalLoaded);
-
-	m_pConfigSocket->start();
-
-	// init signal socket thread
-	//
-	HostAddressPort signalSocketAddress1 = theOptions.socket().client(SOCKET_TYPE_SIGNAL).address(SOCKET_SERVER_TYPE_PRIMARY);
-	HostAddressPort signalSocketAddress2 = theOptions.socket().client(SOCKET_TYPE_SIGNAL).address(SOCKET_SERVER_TYPE_RESERVE);
-
-	m_pSignalSocket = new SignalSocket(softwareInfo, signalSocketAddress1, signalSocketAddress2);
-	m_pSignalSocketThread = new SimpleThread(m_pSignalSocket);
-
-	connect(m_pSignalSocket, &SignalSocket::socketConnected, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
-	connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
-	connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
-	connect(m_pSignalSocket, &SignalSocket::socketDisconnected, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pSignalSocket, &SignalSocket::configurationLoaded, Qt::QueuedConnection);
-
-	m_pSignalSocketThread->start();
-
-	// init tuning socket thread
-	//
-	HostAddressPort tuningSocketAddress = theOptions.socket().client(SOCKET_TYPE_TUNING).address(SOCKET_SERVER_TYPE_PRIMARY);
-
-	m_pTuningSocket = new TuningSocket(softwareInfo, tuningSocketAddress);
-	m_pTuningSocketThread = new SimpleThread(m_pTuningSocket);
-
-	connect(m_pTuningSocket, &TuningSocket::sourcesLoaded, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
-	connect(m_pTuningSocket, &TuningSocket::socketConnected, this, &MainWindow::tuningSocketConnected, Qt::QueuedConnection);
-	connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::tuningSocketDisconnected, Qt::QueuedConnection);
-	connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
-	connect(m_pTuningSocket, &TuningSocket::socketDisconnected, &m_measureThread, &MeasureThread::tuningSocketDisconnected, Qt::QueuedConnection);
-	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pTuningSocket, &TuningSocket::configurationLoaded, Qt::QueuedConnection);
-
-	m_pTuningSocketThread->start();
-
-	measureThreadStoped();
-
-	// calculator
-	//
-	m_pCalculator = new Calculator(this);
+	runMeasureThread();		// init measure thread
+	runConfigSocket();		// init config socket thread
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -140,6 +79,8 @@ bool MainWindow::createInterface()
 	loadSettings();
 
 	setMeasureType(MEASURE_TYPE_LINEARITY);
+
+	m_pCalculator = new Calculator(this);	// calculator
 
 	return true;
 }
@@ -1296,8 +1237,23 @@ void MainWindow::showCalculator()
 
 void MainWindow::showOptions()
 {
+	SocketClientOption sco = theOptions.socket().client(SOCKET_TYPE_CONFIG);
+
 	OptionsDialog dialog(this);
 	dialog.exec();
+
+	if (sco.equipmentID(SOCKET_SERVER_TYPE_PRIMARY) != theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY) ||
+		sco.address(SOCKET_SERVER_TYPE_PRIMARY) != theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY))
+	{
+		stopSignalSocket();
+		stopTuningSocket();
+
+		if (m_pConfigSocket != nullptr)
+		{
+			sco = theOptions.socket().client(SOCKET_TYPE_CONFIG);
+			m_pConfigSocket->reconncect(sco.equipmentID(SOCKET_SERVER_TYPE_PRIMARY), sco.address(SOCKET_SERVER_TYPE_PRIMARY));
+		}
+	}
 
 	for(int type = 0; type < MEASURE_TYPE_COUNT; type++)
 	{
@@ -1638,6 +1594,11 @@ void MainWindow::configSocketConfigurationLoaded()
 
 	updateRacksOnToolBar();
 	updateSignalsOnToolBar();
+
+	//
+	//
+	runSignalSocket();
+	runTuningSocket();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1959,6 +1920,135 @@ void MainWindow::updateStartStopActions()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::runConfigSocket()
+{
+	// init config socket thread
+	//
+	HostAddressPort configSocketAddress = theOptions.socket().client(SOCKET_TYPE_CONFIG).address(SOCKET_SERVER_TYPE_PRIMARY);
+	m_softwareInfo.setEquipmentID(theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY));
+	m_pConfigSocket = new ConfigSocket(m_softwareInfo, configSocketAddress);
+
+	connect(m_pConfigSocket, &ConfigSocket::socketConnected, this, &MainWindow::configSocketConnected, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::socketDisconnected, this, &MainWindow::configSocketDisconnected, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pStatisticPanel, &StatisticPanel::updateList);
+	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, this, &MainWindow::configSocketConfigurationLoaded);
+	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, &theSignalBase.statistic(), &StatisticBase::signalLoaded);
+
+	m_pConfigSocket->start();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::stopConfigSocket()
+{
+	if (m_pConfigSocket == nullptr)
+	{
+		return;
+	}
+
+	delete m_pConfigSocket;
+	m_pConfigSocket = nullptr;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::runSignalSocket()
+{
+	// init signal socket thread
+	//
+	HostAddressPort signalSocketAddress1 = theOptions.socket().client(SOCKET_TYPE_SIGNAL).address(SOCKET_SERVER_TYPE_PRIMARY);
+	HostAddressPort signalSocketAddress2 = theOptions.socket().client(SOCKET_TYPE_SIGNAL).address(SOCKET_SERVER_TYPE_RESERVE);
+	m_softwareInfo.setEquipmentID(theOptions.socket().client(SOCKET_TYPE_SIGNAL).equipmentID(SOCKET_SERVER_TYPE_PRIMARY));
+
+	m_pSignalSocket = new SignalSocket(m_softwareInfo, signalSocketAddress1, signalSocketAddress2);
+	m_pSignalSocketThread = new SimpleThread(m_pSignalSocket);
+
+	connect(m_pSignalSocket, &SignalSocket::socketConnected, this, &MainWindow::signalSocketConnected, Qt::QueuedConnection);
+	connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::signalSocketDisconnected, Qt::QueuedConnection);
+	connect(m_pSignalSocket, &SignalSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
+	connect(m_pSignalSocket, &SignalSocket::socketDisconnected, &m_measureThread, &MeasureThread::signalSocketDisconnected, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pSignalSocket, &SignalSocket::configurationLoaded, Qt::QueuedConnection);
+
+	m_pSignalSocketThread->start();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::stopSignalSocket()
+{
+	if (m_pSignalSocketThread == nullptr)
+	{
+		return;
+	}
+
+	m_pSignalSocketThread->quitAndWait(10000);
+	delete m_pSignalSocketThread;
+	m_pSignalSocketThread = nullptr;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::runTuningSocket()
+{
+	// init tuning socket thread
+	//
+	HostAddressPort tuningSocketAddress = theOptions.socket().client(SOCKET_TYPE_TUNING).address(SOCKET_SERVER_TYPE_PRIMARY);
+	m_softwareInfo.setEquipmentID(theOptions.socket().client(SOCKET_TYPE_TUNING).equipmentID(SOCKET_SERVER_TYPE_PRIMARY));
+
+	m_pTuningSocket = new TuningSocket(m_softwareInfo, tuningSocketAddress);
+	m_pTuningSocketThread = new SimpleThread(m_pTuningSocket);
+
+	connect(m_pTuningSocket, &TuningSocket::sourcesLoaded, this, &MainWindow::tuningSignalsCreated, Qt::QueuedConnection);
+	connect(m_pTuningSocket, &TuningSocket::socketConnected, this, &MainWindow::tuningSocketConnected, Qt::QueuedConnection);
+	connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::tuningSocketDisconnected, Qt::QueuedConnection);
+	connect(m_pTuningSocket, &TuningSocket::socketDisconnected, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
+	connect(m_pTuningSocket, &TuningSocket::socketDisconnected, &m_measureThread, &MeasureThread::tuningSocketDisconnected, Qt::QueuedConnection);
+	connect(m_pConfigSocket, &ConfigSocket::configurationLoaded, m_pTuningSocket, &TuningSocket::configurationLoaded, Qt::QueuedConnection);
+
+	m_pTuningSocketThread->start();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::runMeasureThread()
+{
+	connect(&m_measureThread, &MeasureThread::started, this, &MainWindow::measureThreadStarted, Qt::QueuedConnection);
+	connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::measureThreadStoped, Qt::QueuedConnection);
+	connect(&m_measureThread, &MeasureThread::started, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
+	connect(&m_measureThread, &MeasureThread::finished, this, &MainWindow::updateStartStopActions, Qt::QueuedConnection);
+	connect(&m_measureThread, static_cast<void (MeasureThread::*)(QString)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(QString)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection);
+	connect(&m_measureThread, static_cast<void (MeasureThread::*)(int)>(&MeasureThread::measureInfo), this, static_cast<void (MainWindow::*)(int)>(&MainWindow::setMeasureThreadInfo), Qt::QueuedConnection);
+	connect(&m_measureThread, &MeasureThread::msgBox, this, &MainWindow::measureThreadMsgBox, Qt::BlockingQueuedConnection);
+	connect(&m_measureThread, &MeasureThread::setNextMeasureSignal, this, &MainWindow::setNextMeasureSignal, Qt::BlockingQueuedConnection);
+	connect(&m_measureThread, &MeasureThread::measureComplite, this, &MainWindow::measureComplite, Qt::QueuedConnection);
+
+	m_measureThread.init(this);
+
+	measureThreadStoped();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::stopMeasureThread()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::stopTuningSocket()
+{
+	if (m_pTuningSocketThread == nullptr)
+	{
+		return;
+	}
+
+	m_pTuningSocketThread->quitAndWait(10000);
+	delete m_pTuningSocketThread;
+	m_pTuningSocketThread = nullptr;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::loadSettings()
 {
 	QSettings s;
@@ -1997,28 +2087,11 @@ void MainWindow::closeEvent(QCloseEvent* e)
 		return;
 	}
 
-	if (m_pTuningSocketThread != nullptr)
-	{
-		m_pTuningSocketThread->quitAndWait(10000);
-		delete m_pTuningSocketThread;
-		m_pTuningSocketThread = nullptr;
-	}
-
-	if (m_pSignalSocketThread != nullptr)
-	{
-		m_pSignalSocketThread->quitAndWait(10000);
-		delete m_pSignalSocketThread;
-		m_pSignalSocketThread = nullptr;
-	}
-
-	if (m_pConfigSocket != nullptr)
-	{
-		delete m_pConfigSocket;
-		m_pConfigSocket = nullptr;
-	}
+	stopConfigSocket();
+	stopSignalSocket();
+	stopTuningSocket();
 
 	theSignalBase.clear();
-
 	theCalibratorBase.clear();
 
 	saveSettings();
