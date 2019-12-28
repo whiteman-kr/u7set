@@ -45,6 +45,8 @@ signals:
 protected:
 	void timerEvent(QTimerEvent* event);
 
+	virtual bool login();	// Override this function to ask password before activating/deactivating sources
+
 private slots:
 	void slot_tuningSourcesArrived();
 

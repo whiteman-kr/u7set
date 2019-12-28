@@ -44,8 +44,9 @@ const int	FI_ANY = 0,
 			FI_CAPTION = 4;
 
 
-class SignalPropertyManager
+class SignalPropertyManager : public QObject
 {
+	Q_OBJECT
 public:
 	struct PropertyBehaviourDescription
 	{
@@ -57,6 +58,10 @@ public:
 	};
 
 	static const E::PropertyBehaviourType defaultBehaviour = E::PropertyBehaviourType::Write;
+
+signals:
+	void beginAddProperty(int propertyIndex);
+	void endAddProperty();
 
 public:
 	SignalPropertyManager();
@@ -254,6 +259,8 @@ public slots:
 	void loadSignal(int signalId, bool updateView = true);
 	void addSignal();
 	void showError(QString message);
+	void beginAddProperty(int propertyIndex);
+	void endAddProperty();
 
 private:
 	void detectNewProperties(const Signal& signal);
