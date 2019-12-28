@@ -388,6 +388,8 @@ namespace Metrology
 
 	private:
 
+		int m_index = -1;
+
 		Metrology::Signal* m_inputSignal = nullptr;
 		Metrology::Signal* m_compareSignal = nullptr;
 		Metrology::Signal* m_hysteresisSignal = nullptr;
@@ -398,17 +400,20 @@ namespace Metrology
 		void clear();
 		bool signalsIsValid() const;
 
+		int index() const { return m_index; }
+		void setIndex(int index) { m_index = index; }
+
 		Metrology::Signal* inputSignal() const { return m_inputSignal; }
-		void SetInputSignal(Metrology::Signal* pSignal) { m_inputSignal = pSignal; }
+		void setInputSignal(Metrology::Signal* pSignal) { m_inputSignal = pSignal; }
 
 		Metrology::Signal* compareSignal() const { return m_compareSignal; }
-		void SetCompareSignal(Metrology::Signal* pSignal) { m_compareSignal = pSignal; }
+		void setCompareSignal(Metrology::Signal* pSignal) { m_compareSignal = pSignal; }
 
 		Metrology::Signal* hysteresisSignal() const { return m_hysteresisSignal; }
-		void SetHysteresisSignal(Metrology::Signal* pSignal) { m_hysteresisSignal = pSignal; }
+		void setHysteresisSignal(Metrology::Signal* pSignal) { m_hysteresisSignal = pSignal; }
 
 		Metrology::Signal* outputSignal() const { return m_outputSignal; }
-		void SetOutputSignal(Metrology::Signal* pSignal) { m_outputSignal = pSignal; }
+		void setOutputSignal(Metrology::Signal* pSignal) { m_outputSignal = pSignal; }
 
 		QString cmpTypeStr() const;
 
@@ -416,9 +421,11 @@ namespace Metrology
 
 		double compareValue() const;
 		QString compareValueStr() const;
+		QString compareDefaultValueStr() const;
 
 		double hysteresisValue() const;
 		QString hysteresisValueStr() const;
+		QString hysteresisDefaultValueStr() const;
 
 		bool outputState() const;
 		QString outputStateStr() const;

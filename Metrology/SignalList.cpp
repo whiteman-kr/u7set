@@ -451,6 +451,7 @@ void SignalListDialog::createInterface(bool hasButtons)
 	}
 
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_pView->setWordWrap(false);
 
 	connect(m_pView, &QTableView::doubleClicked , this, &SignalListDialog::onListDoubleClicked);
 

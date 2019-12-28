@@ -153,39 +153,15 @@ QString ComparatorListTable::text(int row, int column, std::shared_ptr<Metrology
 		}
 	}
 
-	QString compareValue;
-
-	compareValue += comparatorEx->cmpTypeStr() + " ";
-
-	if (comparatorEx->compare().isConst() == true)
-	{
-		compareValue += QString::number(comparatorEx->compare().constValue(), 'g', comparatorEx->valuePrecision());
-	}
-	else
-	{
-		compareValue += comparatorEx->compare().appSignalID();
-	}
-
-	QString hysteresisValue;
-
-	if (comparatorEx->hysteresis().isConst() == true)
-	{
-		hysteresisValue = QString::number(comparatorEx->hysteresis().constValue(), 'g', comparatorEx->valuePrecision());
-	}
-	else
-	{
-		hysteresisValue = comparatorEx->hysteresis().appSignalID();
-	}
-
 	QString result;
 
 	switch (column)
 	{
-		case COMPARATOR_LIST_COLUMN_INPUT:				result = inputAppSignalID;						break;
-		case COMPARATOR_LIST_COLUMN_VALUE:				result = compareValue;							break;
-		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = hysteresisValue;						break;
-		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->output().appSignalID();	break;
-		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparatorEx->schemaID();				break;
+		case COMPARATOR_LIST_COLUMN_INPUT:				result = inputAppSignalID;							break;
+		case COMPARATOR_LIST_COLUMN_VALUE:				result = comparatorEx->compareDefaultValueStr();	break;
+		case COMPARATOR_LIST_COLUMN_HYSTERESIS:			result = comparatorEx->hysteresisDefaultValueStr();	break;
+		case COMPARATOR_LIST_COLUMN_OUTPUT:				result = comparatorEx->output().appSignalID();		break;
+		case COMPARATOR_LIST_COLUMN_SCHEMA:				result = comparatorEx->schemaID();					break;
 		default:										assert(0);
 	}
 
@@ -327,7 +303,6 @@ void ComparatorListDialog::createInterface()
 
 	m_pSelectAllAction = m_pEditMenu->addAction(tr("Select &All"));
 	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
-	m_pSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
 
 	m_pEditMenu->addSeparator();
 
@@ -369,7 +344,7 @@ void ComparatorListDialog::createInterface()
 	}
 
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
-	m_pView->setSelectionMode(QAbstractItemView::SingleSelection);
+	m_pView->setWordWrap(false);
 
 	connect(m_pView, &QTableView::doubleClicked , this, &ComparatorListDialog::onListDoubleClicked);
 

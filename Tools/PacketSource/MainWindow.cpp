@@ -294,6 +294,7 @@ void MainWindow::createViews()
 	}
 
 	m_pSignalView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_pSignalView->setWordWrap(false);
 
 	connect(m_pSignalView, &QTableView::doubleClicked , this, &MainWindow::onSignalListDoubleClicked);
 

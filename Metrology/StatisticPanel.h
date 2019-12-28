@@ -146,7 +146,6 @@ private:
 	QLabel*					m_statusMeasureInavlid = nullptr;
 	QLabel*					m_statusMeasured = nullptr;
 
-
 	QTableView*				m_pView = nullptr;
 	StatisticTable			m_signalTable;
 

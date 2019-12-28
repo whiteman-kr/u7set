@@ -2432,6 +2432,8 @@ bool SignalBase::loadComparatorsInSignal(const ComparatorSet& comparatorSet)
 		for(std::shared_ptr<Comparator> comparator : comparatorList)
 		{
 			std::shared_ptr<Metrology::ComparatorEx> comparatorEx = std::make_shared<Metrology::ComparatorEx>(comparator.get());
+
+			comparatorEx->setIndex(metrologyComparatorList.count());
 			initComparatorSignals(comparatorEx.get());
 
 			metrologyComparatorList.append(comparatorEx);
@@ -2461,22 +2463,22 @@ bool SignalBase::initComparatorSignals(Metrology::ComparatorEx* pComparatorEx)
 
 	if (pComparatorEx->input().appSignalID().isEmpty() == false)
 	{
-		pComparatorEx->SetInputSignal(signalPtr(pComparatorEx->input().appSignalID()));
+		pComparatorEx->setInputSignal(signalPtr(pComparatorEx->input().appSignalID()));
 	}
 
 	if (pComparatorEx->compare().isConst() == false && pComparatorEx->compare().appSignalID().isEmpty() == false)
 	{
-		pComparatorEx->SetCompareSignal(signalPtr(pComparatorEx->compare().appSignalID()));
+		pComparatorEx->setCompareSignal(signalPtr(pComparatorEx->compare().appSignalID()));
 	}
 
 	if (pComparatorEx->hysteresis().isConst() == false && pComparatorEx->hysteresis().appSignalID().isEmpty() == false)
 	{
-		pComparatorEx->SetHysteresisSignal(signalPtr(pComparatorEx->hysteresis().appSignalID()));
+		pComparatorEx->setHysteresisSignal(signalPtr(pComparatorEx->hysteresis().appSignalID()));
 	}
 
 	if (pComparatorEx->output().appSignalID().isEmpty() == false)
 	{
-		pComparatorEx->SetOutputSignal(signalPtr(pComparatorEx->output().appSignalID()));
+		pComparatorEx->setOutputSignal(signalPtr(pComparatorEx->output().appSignalID()));
 	}
 
 	return pComparatorEx->signalsIsValid();

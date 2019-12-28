@@ -303,6 +303,8 @@ void ComparatorInfoPanel::createInterface()
 		m_pView->setColumnWidth(column, COMPARATOR_INFO_COLUMN_WIDTH);
 	}
 
+	m_pView->setWordWrap(false);
+
 	connect(m_pView, &QTableView::doubleClicked , this, &ComparatorInfoPanel::onListDoubleClicked);
 
 	setWidget(m_pComparatorInfoWindow);

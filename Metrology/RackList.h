@@ -97,7 +97,6 @@ private:
 	QMenu*					m_pContextMenu = nullptr;
 
 	QAction*				m_pRackGroupsAction = nullptr;
-	QAction*				m_pImportAction = nullptr;
 	QAction*				m_pExportAction = nullptr;
 
 	QAction*				m_pFindAction = nullptr;
@@ -133,8 +132,7 @@ private slots:
 							// Rack
 							//
 	void					rackGroups();
-	void					importRack();
-	void					exportRack();
+	void					exportRacks();
 
 							// Edit
 							//

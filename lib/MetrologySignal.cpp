@@ -813,6 +813,8 @@ namespace Metrology
 
 	void ComparatorEx::clear()
 	{
+		m_index = -1;
+
 		m_inputSignal = nullptr;
 		m_compareSignal = nullptr;
 		m_hysteresisSignal = nullptr;
@@ -912,7 +914,35 @@ namespace Metrology
 
 	QString ComparatorEx::compareValueStr() const
 	{
-		return QString::number(compareValue(), 'g', valuePrecision());
+		return QString::number(compareValue(), 'f', valuePrecision());
+	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString ComparatorEx::compareDefaultValueStr() const
+	{
+		QString value;
+
+		value += cmpTypeStr() + " ";
+
+		if (compare().isConst() == true)
+		{
+			value += QString::number(compare().constValue(), 'f', valuePrecision());
+		}
+		else
+		{
+			value += compare().appSignalID();
+
+			if (m_compareSignal != nullptr && m_compareSignal->param().isValid() == true)
+			{
+				if (m_compareSignal->param().enableTuning() == true)
+				{
+					value += " - " + QString::number(m_compareSignal->param().tuningDefaultValue().toDouble(), 'f', valuePrecision());
+				}
+			}
+		}
+
+		return value;
 	}
 
 	// -------------------------------------------------------------------------------------------------------------------
@@ -931,7 +961,7 @@ namespace Metrology
 			{
 				if (m_hysteresisSignal->param().isValid() == true && m_hysteresisSignal->state().valid() == true)
 				{
-					value =  m_hysteresisSignal->state().value();
+					value = m_hysteresisSignal->state().value();
 				}
 			}
 		}
@@ -943,8 +973,35 @@ namespace Metrology
 
 	QString ComparatorEx::hysteresisValueStr() const
 	{
-		return QString::number(hysteresisValue(), 'g', valuePrecision());
+		return QString::number(hysteresisValue(), 'f', valuePrecision());
 	}
+
+	// -------------------------------------------------------------------------------------------------------------------
+
+	QString ComparatorEx::hysteresisDefaultValueStr() const
+	{
+		QString value;
+
+		if (hysteresis().isConst() == true)
+		{
+			value = QString::number(hysteresis().constValue(), 'f', valuePrecision());
+		}
+		else
+		{
+			value = hysteresis().appSignalID();
+
+			if (m_hysteresisSignal != nullptr && m_hysteresisSignal->param().isValid() == true)
+			{
+				if (m_hysteresisSignal->param().enableTuning() == true)
+				{
+					value += " - " + QString::number(m_hysteresisSignal->param().tuningDefaultValue().toDouble(), 'f', valuePrecision());
+				}
+			}
+		}
+
+		return value;
+	}
+
 
 	// -------------------------------------------------------------------------------------------------------------------
 

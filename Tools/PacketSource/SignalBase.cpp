@@ -730,6 +730,17 @@ QVariant SignalTable::data(const QModelIndex &index, int role) const
 		{
 			return QColor(0xD0, 0xD0, 0xD0);
 		}
+
+		if(pSignal->isDiscrete() == true)
+		{
+			return QColor(0x00, 0x00, 0xFF);
+		}
+		return QVariant();
+	}
+
+	if (role == Qt::BackgroundRole)
+	{
+		return QVariant();
 	}
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
