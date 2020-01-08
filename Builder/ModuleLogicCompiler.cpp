@@ -9485,6 +9485,20 @@ namespace Builder
 			return false;
 		}
 
+		if(cmp->cmpType() == E::CmpType::Equal || cmp->cmpType() == E::CmpType::NotEqual)
+		{
+			if (cmp->inAnalogSignalFormat() == E::AnalogAppSignalFormat::Float32)
+			{
+				if (cmp->hysteresis().isConst() == true && cmp->hysteresis().constValue() == 0.0)
+				{
+					QString strError = QString("Error of comparator: %1 , schema: %2 - Deadband of comparator = 0").arg(appFb->caption()).arg(appFb->schemaID());
+					LOG_INTERNAL_ERROR_MSG(m_log, strError);
+					qDebug() << strError;
+					return false;
+				}
+			}
+		}
+
 		return true;
 	}
 

@@ -877,7 +877,7 @@ namespace Metrology
 	{
 		int result = 0;
 
-		switch (intAnalogSignalFormat())
+		switch (inAnalogSignalFormat())
 		{
 			case E::AnalogAppSignalFormat::Float32:		result = precision();	break;
 			case E::AnalogAppSignalFormat::SignedInt32:	result = 0;				break;

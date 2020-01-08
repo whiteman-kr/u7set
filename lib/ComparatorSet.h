@@ -54,8 +54,8 @@ public:
 	E::CmpType cmpType() const;
 	void setCmpType(E::CmpType cmpType);
 
-	E::AnalogAppSignalFormat intAnalogSignalFormat() const;
-	void setInAnalogSignalFormat(E::AnalogAppSignalFormat intAnalogSignalFormat);
+	E::AnalogAppSignalFormat inAnalogSignalFormat() const;
+	void setInAnalogSignalFormat(E::AnalogAppSignalFormat inAnalogSignalFormat);
 
 	ComparatorSignal& input();
 	ComparatorSignal& compare();
