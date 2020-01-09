@@ -82,6 +82,12 @@ public:
 	void serializeTo(Proto::Comparator* c) const;
 	bool serializeFrom(const Proto::Comparator& c);
 
+	void setHysteresisPinCaption(const QString& pinCaption) { m_hysteresisPinCaption = pinCaption; }
+	QString hysteresisPinCaption() const { return m_hysteresisPinCaption; }
+
+	void setHysteresisIsConstSignal(bool isConstSignal) { m_hysteresisIsConstSignal = isConstSignal; }
+	bool hysteresisIsConstSignal() const { return m_hysteresisIsConstSignal; }
+
 private:
 	E::CmpType m_cmpType = E::CmpType::Equal;
 	E::AnalogAppSignalFormat m_inAnalogSignalFormat = E::AnalogAppSignalFormat::SignedInt32;
@@ -95,6 +101,11 @@ private:
 	QString m_label;
 	QString m_schemaID;
 	QUuid m_schemaItemUuid;
+
+	// fields not for serialization
+	//
+	bool m_hysteresisIsConstSignal = false;
+	QString m_hysteresisPinCaption;
 };
 
 
