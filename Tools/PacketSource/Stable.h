@@ -89,8 +89,10 @@
 #include <QAction>
 
 #include <QCheckBox>
+#include <QClipboard>
 #include <QCloseEvent>
 
+#include <QDesktopWidget>
 #include <QErrorMessage>
 
 #include <QFileDialog>
@@ -117,13 +119,18 @@
 
 #include <QScrollArea>
 #include <QScrollBar>
+#include <QSortFilterProxyModel>
 #include <QSplitter>
 #include <QStatusBar>
 
+#include <QTableView>
 #include <QTableWidget>
 #include <QTabWidget>
 #include <QTextEdit>
+#include <QToolBar>
 #include <QTreeWidget>
+
+#include <QVBoxLayout>
 
 #ifdef _MSC_VER
 	#pragma warning(pop)
