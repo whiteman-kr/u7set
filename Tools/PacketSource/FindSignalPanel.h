@@ -70,6 +70,10 @@ const int				FIND_SIGNAL_COLUMN_ROW_WIDTH	= 50;
 
 // ==============================================================================================
 
+const int				FIND_SIGNAL_ALL_COLUMNS			= 0;
+
+// ==============================================================================================
+
 class FindSignalTable : public QAbstractTableModel
 {
 	Q_OBJECT

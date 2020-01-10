@@ -6,6 +6,8 @@
 #include <QClipboard>
 #include <QCloseEvent>
 #include <QSortFilterProxyModel>
+#include <QFileDialog>
+#include <QFile>
 
 #include "../../lib/Ui/DialogAbout.h"
 
@@ -98,6 +100,18 @@ void MainWindow::createActions()
 	m_signalSelectAllAction->setToolTip(tr("Select all signals"));
 	connect(m_signalSelectAllAction, &QAction::triggered, this, &MainWindow::selectAllSignals);
 
+	m_signalSaveStatesAction = new QAction(tr("Save signals state ..."), this);
+	m_signalSaveStatesAction->setShortcut(Qt::CTRL + Qt::Key_S);
+	m_signalSaveStatesAction->setIcon(QIcon(":/icons/Import.png"));
+	m_signalSaveStatesAction->setToolTip(tr("Save signals state"));
+	connect(m_signalSaveStatesAction, &QAction::triggered, this, &MainWindow::saveSignalsState);
+
+	m_signalRestoreStatesAction = new QAction(tr("Restore signals state ..."), this);
+	m_signalRestoreStatesAction->setShortcut(Qt::CTRL + Qt::Key_R);
+	m_signalRestoreStatesAction->setIcon(QIcon(":/icons/Export.png"));
+	m_signalRestoreStatesAction->setToolTip(tr("Restore signals state"));
+	connect(m_signalRestoreStatesAction, &QAction::triggered, this, &MainWindow::restoreSignalsState);
+
 	// ?
 	//
 	m_optionAction = new QAction(tr("&Options"), this);
@@ -148,6 +162,9 @@ void MainWindow::createMenu()
 	m_signalMenu->addAction(m_signalInitAction);
 	m_signalMenu->addSeparator();
 	m_signalMenu->addAction(m_signalSelectAllAction);
+	m_signalMenu->addSeparator();
+	m_signalMenu->addAction(m_signalSaveStatesAction);
+	m_signalMenu->addAction(m_signalRestoreStatesAction);
 
 	// ?
 	//
@@ -783,6 +800,115 @@ void MainWindow::selectAllSignals()
 	}
 
 	m_pSignalView->selectAll();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::saveSignalsState()
+{
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save signals state"), "SignalState.csv", tr("CSV files (*.csv)"));
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	QFile file;
+	file.setFileName(fileName);
+	if (file.open(QIODevice::WriteOnly) == false)
+	{
+		return;
+	}
+
+	int sourceCount = m_sourceBase.count();
+	for (int s = 0; s < sourceCount; s++)
+	{
+		PS::Source*	pSource = m_sourceBase.sourcePtr(s);
+		if (pSource == nullptr)
+		{
+			continue;
+		}
+
+		int sigalCount = pSource->signalList().count();
+		for(int i = 0; i < sigalCount; i++)
+		{
+			PS::Signal* pSignal = &pSource->signalList()[i];
+			if ( pSignal == nullptr)
+			{
+				continue;
+			}
+
+			if (pSignal->regValueAddr().offset() == BAD_ADDRESS || pSignal->regValueAddr().bit() == BAD_ADDRESS)
+			{
+				continue;
+			}
+
+			file.write(pSignal->appSignalID().toLocal8Bit());
+			file.write(";");
+
+			file.write(QString::number(pSignal->state(), 'f', 10).toLocal8Bit());
+			file.write(";");
+
+			file.write("\n");
+		}
+	}
+
+	file.close();
+
+	QMessageBox::information(this, windowTitle(), tr("Save completed"));
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::restoreSignalsState()
+{
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Open signals state"), "SignalState.csv", "CSV files (*.csv);;All files (*.*)");
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	if (fileName.isEmpty() == true)
+	{
+		QMessageBox::critical(this, tr("Error"), tr("Could not open file: Empty file name"));
+		return;
+	}
+
+	if (QFile::exists(fileName) == false)
+	{
+		QMessageBox::critical(this, tr("Error"), tr("Could not open file: %1\nfile is not found!").arg(fileName));
+		return;
+	}
+
+	QFile file(fileName);
+	if (file.open(QIODevice::ReadOnly) == false)
+	{
+		QMessageBox::critical(this, tr("Error"), tr("Could not open file"));
+		return;
+	}
+
+	// read data
+	//
+	QTextStream in(&file);
+	while (in.atEnd() == false)
+	{
+		QStringList line = in.readLine().split(";");
+		if (line.count() < 2)
+		{
+			continue;
+		}
+
+		PS::Signal* pSignal = m_signalBase.signalPtr(line[0]);
+		if (pSignal == nullptr)
+		{
+			continue;
+		}
+
+		pSignal->setState(line[1].toDouble());
+	}
+
+	file.close();
+
+	QMessageBox::information(this, windowTitle(), tr("Restore completed"));
 }
 
 // -------------------------------------------------------------------------------------------------------------------

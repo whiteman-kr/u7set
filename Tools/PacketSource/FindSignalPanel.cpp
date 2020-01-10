@@ -405,15 +405,13 @@ bool FindSignalPanel::eventFilter(QObject* object, QEvent* e)
 
 void FindSignalPanel::find()
 {
+	m_table.clear();
+
 	m_findText = m_findTextEdit->text();
 	if (m_findText.isEmpty() == true)
 	{
 		return;
 	}
-
-	QRegExp rx(m_findText);
-	rx.setPatternSyntax(QRegExp::Wildcard);
-	rx.setCaseSensitivity(Qt::CaseInsensitive);
 
 	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
 	if (pMainWindow == nullptr)
@@ -438,9 +436,11 @@ void FindSignalPanel::find()
 		return;
 	}
 
-	QVector<FindItem> findItemList;
+	QRegExp rx(m_findText);
+	rx.setPatternSyntax(QRegExp::Wildcard);
+	rx.setCaseSensitivity(Qt::CaseInsensitive);
 
-	m_table.clear();
+	QVector<FindItem> findItemList;
 
 	int rowCount = pSignalView->model()->rowCount();
 	int columnCount = pSignalView->model()->columnCount();
@@ -449,7 +449,7 @@ void FindSignalPanel::find()
 	{
 		for(int column = 0; column < columnCount; column++)
 		{
-			if (selectedColumn != 0)
+			if (selectedColumn != FIND_SIGNAL_ALL_COLUMNS)
 			{
 				if (selectedColumn - 1 != column)
 				{
