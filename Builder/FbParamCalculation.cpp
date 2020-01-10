@@ -450,8 +450,14 @@ namespace Builder
 				// Value of parameter '%1.%2' must be greater or equal to 0.
 				//
 				m_log->errALC5043(caption(), hysteresisParam.caption(), guid());
-
 				return false;
+			}
+
+			if ((iConf == BCOMP_32FP_EQU || iConf == BCOMP_32FP_NOT_EQU) && hysteresis == 0)
+			{
+				// Using value 0.0 for parameter %1.%2 is not recommend.
+				//
+				m_log->wrnALC5177(caption(), hysteresisParam.caption(), guid(), schemaID());
 			}
 
 			switch(iConf)
@@ -1377,6 +1383,13 @@ namespace Builder
 					m_log->errALC5043(caption(), hysteresisParam.caption(), guid());
 
 					return false;
+				}
+
+				if ((iConf == CMP_32FP_EQU || iConf == CMP_32FP_NOT_EQU) && hysteresis == 0)
+				{
+					// Using value 0.0 for parameter %1.%2 is not recommend.
+					//
+					m_log->wrnALC5177(caption(), hysteresisParam.caption(), guid(), schemaID());
 				}
 			}
 

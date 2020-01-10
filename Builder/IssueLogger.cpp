@@ -6522,6 +6522,30 @@ namespace Builder
 							arg(propertyName).arg(signalID));
 	}
 
+	/// IssueCode: ALC5177
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Using value 0.0 for parameter %1.%2 is not recommend.
+	///
+	/// Parameters:
+	///		%1 functional block caption
+	///		%2 parameter caption
+	///		%3 application logic item Uuid
+	///
+	/// Description:
+	///		Using value 0.0 for specified parameter is not recommend.
+	///
+	void IssueLogger::wrnALC5177(QString fbCaption, QString paramCaption, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Warning0, 5177, itemUuid);
+
+		LOG_WARNING0(IssueType::AlCompiler,
+				  5177,
+				  QString(tr("Using value 0.0 for parameter %1.%2 is not recommend (Logic schema %3).")).
+				  arg(fbCaption).arg(paramCaption).arg(schemaID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186
