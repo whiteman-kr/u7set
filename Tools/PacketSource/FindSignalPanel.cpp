@@ -242,6 +242,7 @@ FindSignalPanel::FindSignalPanel(QWidget* parent) :
 
 	createInterface();
 	createContextMenu();
+	updateColumnsCombo();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -256,20 +257,25 @@ void FindSignalPanel::createInterface()
 {
 	m_pFindWindow = new QMainWindow;
 
-	QToolBar *toolBar = new QToolBar(m_pFindWindow);
+	QToolBar *findToolBar = new QToolBar(m_pFindWindow);
 
-	m_findTextEdit = new QLineEdit(m_findText, toolBar);
+	findToolBar->setAllowedAreas(Qt::TopToolBarArea);
+	findToolBar->setWindowTitle(tr("Search signal text"));
+	findToolBar->setMovable(false);
+
+	m_findColumnCombo = new QComboBox(findToolBar);
+	m_findTextEdit = new QLineEdit(m_findText, findToolBar);
 	m_findTextEdit->setPlaceholderText(tr("Search Text"));
 	m_findTextEdit->setClearButtonEnabled(true);
 
-	toolBar->addWidget(m_findTextEdit);
-	QAction* action = toolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
+	findToolBar->addWidget(m_findColumnCombo);
+	findToolBar->addWidget(m_findTextEdit);
+	QAction* action = findToolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
 	connect(action, &QAction::triggered, this, &FindSignalPanel::find);
 
-	toolBar->setAllowedAreas(Qt::TopToolBarArea | Qt::BottomToolBarArea);
-	toolBar->setWindowTitle(tr("Search signal text ToolBar"));
 	m_pFindWindow->addToolBarBreak(Qt::TopToolBarArea);
-	m_pFindWindow->addToolBar(toolBar);
+	m_pFindWindow->addToolBar(findToolBar);
+	m_pFindWindow->addToolBarBreak(Qt::TopToolBarArea);
 
 	m_pView = new QTableView(m_pFindWindow);
 	m_pView->setModel(&m_table);
@@ -329,6 +335,25 @@ void FindSignalPanel::createContextMenu()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void FindSignalPanel::updateColumnsCombo()
+{
+	if(m_findColumnCombo == nullptr)
+	{
+		return;
+	}
+
+	m_findColumnCombo->addItem(tr("All columns"));
+
+	for (int c = 0; c < SIGNAL_LIST_COLUMN_COUNT; c++)
+	{
+		m_findColumnCombo->addItem(SignalListColumn[c]);
+	}
+
+	connect(m_findColumnCombo, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), this, &FindSignalPanel::find);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 bool FindSignalPanel::event(QEvent* e)
 {
 	if (e->type() == QEvent::Hide)
@@ -350,7 +375,10 @@ bool FindSignalPanel::event(QEvent* e)
 	{
 		QResizeEvent* resizeEvent = static_cast<QResizeEvent*>(e);
 
-		m_pView->setColumnWidth(FIND_SIGNAL_COLUMN_TEXT, resizeEvent->size().width() - FIND_SIGNAL_COLUMN_ROW_WIDTH - 20);
+		if (m_pView != nullptr)
+		{
+			m_pView->setColumnWidth(FIND_SIGNAL_COLUMN_TEXT, resizeEvent->size().width() - FIND_SIGNAL_COLUMN_ROW_WIDTH - 20);
+		}
 	}
 
 	return QDockWidget::event(e);
@@ -385,6 +413,7 @@ void FindSignalPanel::find()
 
 	QRegExp rx(m_findText);
 	rx.setPatternSyntax(QRegExp::Wildcard);
+	rx.setCaseSensitivity(Qt::CaseInsensitive);
 
 	MainWindow* pMainWindow = dynamic_cast<MainWindow*> (m_pMainWindow);
 	if (pMainWindow == nullptr)
@@ -394,6 +423,17 @@ void FindSignalPanel::find()
 
 	QTableView* pSignalView = pMainWindow->signalView();
 	if (pSignalView == nullptr)
+	{
+		return;
+	}
+
+	if(m_findColumnCombo == nullptr)
+	{
+		return;
+	}
+
+	int selectedColumn = m_findColumnCombo->currentIndex();
+	if (selectedColumn == -1)
 	{
 		return;
 	}
@@ -409,6 +449,14 @@ void FindSignalPanel::find()
 	{
 		for(int column = 0; column < columnCount; column++)
 		{
+			if (selectedColumn != 0)
+			{
+				if (selectedColumn - 1 != column)
+				{
+					continue;
+				}
+			}
+
 			if (pSignalView->isColumnHidden(column) == true)
 			{
 				continue;

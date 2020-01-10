@@ -8,6 +8,7 @@
 #include <QList>
 #include <QLabel>
 #include <QLineEdit>
+#include <QComboBox>
 #include <QTableView>
 #include <QTableWidget>
 #include <QStyledItemDelegate>
@@ -121,6 +122,7 @@ private:
 	QString				m_findText;
 
 	QMainWindow*		m_pFindWindow = nullptr;
+	QComboBox*			m_findColumnCombo  = nullptr;
 	QLineEdit*			m_findTextEdit  = nullptr;
 	QTableView*			m_pView = nullptr;
 	QLabel*				m_statusLabel = nullptr;
@@ -132,6 +134,7 @@ private:
 
 	void				createInterface();
 	void				createContextMenu();
+	void				updateColumnsCombo();
 
 	void				loadSettings();
 	void				saveSettings();
@@ -145,9 +148,12 @@ protected:
 	bool				event(QEvent* e);
 	bool				eventFilter(QObject* object, QEvent* e);
 
-private slots:
+
+public slots:
 
 	void				find();
+
+private slots:
 
 	void				selectItemInSignalView();
 

@@ -47,6 +47,7 @@ private:
 	QAction*				m_sourceStopAction = nullptr;
 	QAction*				m_sourceSelectAllAction = nullptr;
 	QAction*				m_signalSetStateAction = nullptr;
+	QAction*				m_signalInitAction = nullptr;
 	QAction*				m_signalSelectAllAction = nullptr;
 	QAction*				m_optionAction = nullptr;
 	QAction*				m_sourceTextCopyAction = nullptr;
@@ -138,6 +139,7 @@ private slots:
 	void					stopSource();
 	void					selectAllSources();
 	void					setSignalState();
+	void					initSignalsState();
 	void					selectAllSignals();
 	void					onOptions();
 	void					copyText(QTableView* pView);

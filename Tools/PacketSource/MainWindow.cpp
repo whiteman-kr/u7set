@@ -87,6 +87,12 @@ void MainWindow::createActions()
 	m_signalSetStateAction->setToolTip(tr("Set signal state"));
 	connect(m_signalSetStateAction, &QAction::triggered, this, &MainWindow::setSignalState);
 
+	m_signalInitAction = new QAction(tr("Initialization"), this);
+	m_signalInitAction->setShortcut(Qt::CTRL + Qt::Key_I);
+	m_signalInitAction->setIcon(QIcon(":/icons/Init.png"));
+	m_signalInitAction->setToolTip(tr("Initialization all signals"));
+	connect(m_signalInitAction, &QAction::triggered, this, &MainWindow::initSignalsState);
+
 	m_signalSelectAllAction = new QAction(tr("Select all"), this);
 	m_signalSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
 	m_signalSelectAllAction->setToolTip(tr("Select all signals"));
@@ -139,6 +145,8 @@ void MainWindow::createMenu()
 	//
 	m_signalMenu = pMenuBar->addMenu(tr("Signals"));
 
+	m_signalMenu->addAction(m_signalInitAction);
+	m_signalMenu->addSeparator();
 	m_signalMenu->addAction(m_signalSelectAllAction);
 
 	// ?
@@ -459,6 +467,8 @@ void MainWindow::initSignalsInSources()
 
 		pSource->initSignals(m_signalBase);
 	}
+
+	initSignalsState();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -712,7 +722,48 @@ void MainWindow::setSignalState()
 
 		pSignal->setState(dialog.state());
 	}
+}
 
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::initSignalsState()
+{
+	int sourceCount = m_sourceBase.count();
+	for (int s = 0; s < sourceCount; s++)
+	{
+		PS::Source*	pSource = m_sourceBase.sourcePtr(s);
+		if (pSource == nullptr)
+		{
+			continue;
+		}
+
+		int sigalCount = pSource->signalList().count();
+		for(int i = 0; i < sigalCount; i++)
+		{
+			PS::Signal* pSignal = &pSource->signalList()[i];
+			if ( pSignal == nullptr)
+			{
+				continue;
+			}
+
+			if (pSignal->isDiscrete() == true && pSignal->equipmentID().endsWith("VALID") == true)
+			{
+				pSignal->setState(true);
+			}
+
+			if (pSignal->isAnalog() == true)
+			{
+				pSignal->setState(pSignal->lowEngineeringUnits());
+			}
+
+			if (pSignal->enableTuning() == true)
+			{
+				pSignal->setState(pSignal->tuningDefaultValue().toDouble());
+			}
+		}
+	}
+
+	//QMessageBox::information(this, windowTitle(), tr("Signal initialization complete!"));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -760,15 +811,28 @@ void MainWindow::copyText(QTableView* pView)
 
 	QString textClipboard;
 
-	int row = pView->selectionModel()->currentIndex().row();
-	int column = pView->selectionModel()->currentIndex().column();
+	int rowCount = pView->model()->rowCount();
+	int columnCount = pView->model()->columnCount();
 
-	if (row == -1 || column == -1)
+	for(int row = 0; row < rowCount; row++)
 	{
-		return;
-	}
+		if (pView->selectionModel()->isRowSelected(row, QModelIndex()) == false)
+		{
+			continue;
+		}
 
-	textClipboard = pView->model()->data(pView->model()->index(row, column)).toString();
+		for(int column = 0; column < columnCount; column++)
+		{
+			if (pView->isColumnHidden(column) == true)
+			{
+				continue;
+			}
+
+			textClipboard.append(pView->model()->data(pView->model()->index(row, column)).toString() + "\t");
+		}
+
+		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
+	}
 
 	QClipboard *clipboard = QApplication::clipboard();
 	clipboard->setText(textClipboard);
@@ -1099,6 +1163,11 @@ void MainWindow::onSourceListClicked(const QModelIndex& index)
 
 	updateSignalList(pSource);
 	updateFrameDataList(pSource);
+
+	if(m_pFindSignalPanel !=nullptr)
+	{
+		m_pFindSignalPanel->find();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
