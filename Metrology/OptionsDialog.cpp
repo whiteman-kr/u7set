@@ -591,6 +591,12 @@ PropertyPage* OptionsDialog::createPropertyList(int page)
 					appendProperty(item, page, MO_PARAM_WARN_IF_MEASURED);
 					measuremoduleGroup->addSubProperty(item);
 
+
+					item = manager->addProperty(QVariant::Bool, ModuleParamName[MO_PARAM_SHOW_NO_VALID]);
+					item->setValue(m_options.module().showNoValid());
+					appendProperty(item, page, MO_PARAM_SHOW_NO_VALID);
+					measuremoduleGroup->addSubProperty(item);
+
 					item = manager->addProperty(VariantManager::folerPathTypeId(), ModuleParamName[MO_PARAM_SUFFIX_SN]);
 					item->setValue(m_options.module().suffixSN());
 					appendProperty(item, page, MO_PARAM_SUFFIX_SN);
@@ -1177,6 +1183,7 @@ void OptionsDialog::applyProperty()
 				{
 					case MO_PARAM_MEASURE_ENTIRE_MODULE:	m_options.module().setMeasureEntireModule(value.toBool());			break;
 					case MO_PARAM_WARN_IF_MEASURED:			m_options.module().setWarningIfMeasured(value.toBool());			break;
+					case MO_PARAM_SHOW_NO_VALID:			m_options.module().setShowNoValid(value.toBool());					break;
 					case MO_PARAM_SUFFIX_SN:				m_options.module().setSuffixSN(value.toString());					break;
 					case MO_PARAM_MAX_IMPUT_COUNT:			m_options.module().setMaxInputCount(value.toInt());					break;
 					case MO_PARAM_MAX_CMP_COUNT:			m_options.module().setMaxComparatorCount(value.toInt());			break;
