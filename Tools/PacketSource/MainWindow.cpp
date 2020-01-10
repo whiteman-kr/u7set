@@ -746,9 +746,16 @@ void MainWindow::initSignalsState()
 				continue;
 			}
 
-			if (pSignal->isDiscrete() == true && pSignal->equipmentID().endsWith("VALID") == true)
+			if (pSignal->isDiscrete() == true)
 			{
-				pSignal->setState(true);
+				if (pSignal->equipmentID().endsWith("VALID") == true)
+				{
+					pSignal->setState(true);
+				}
+				else
+				{
+					pSignal->setState(false);
+				}
 			}
 
 			if (pSignal->isAnalog() == true)
