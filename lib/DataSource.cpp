@@ -517,6 +517,18 @@ bool DataSourceOnline::init()
 	return true;
 }
 
+void DataSourceOnline::updateUptime()
+{
+	if (m_firstPacketSystemTime == 0 || m_lastPacketSystemTime == 0)
+	{
+		m_uptime = 0;
+	}
+	else
+	{
+		m_uptime = (m_lastPacketSystemTime - m_firstPacketSystemTime) / 1000;
+	}
+}
+
 bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 {
 	// rupFrameTime.rupFrame.header already reverseByted !
@@ -549,7 +561,7 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 
 	if (frameNumber == 0)
 	{
-		m_firstFrameServerTime = rupFrameTime.serverTime;
+		m_frame0ServerTime = rupFrameTime.serverTime;
 	}
 
 	// copy RUP frame header
@@ -594,9 +606,9 @@ bool DataSourceOnline::collect(const RupFrameTime& rupFrameTime)
 	plantTime.setTime(QTime(timeStamp.hour, timeStamp.minute, timeStamp.second, timeStamp.millisecond));
 
 	m_rupDataTimes.plant.timeStamp = plantTime.toMSecsSinceEpoch();
-	m_rupDataTimes.system.timeStamp = m_firstFrameServerTime;
+	m_rupDataTimes.system.timeStamp = m_frame0ServerTime;
 
-	QDateTime localTime = QDateTime::fromMSecsSinceEpoch(m_firstFrameServerTime);
+	QDateTime localTime = QDateTime::fromMSecsSinceEpoch(m_frame0ServerTime);
 
 	// don't delete this to prevent localTime conversion from Local to UTC time during call localTime.toMSecsSinceEpoch()!!!
 	//
@@ -750,6 +762,11 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 					m_dataRecevingTimeout = true;
 					m_dataReceives = false;
 					m_dataReadyToParsing = true;
+
+					m_firstPacketSystemTime = 0;
+					m_lastPacketSystemTime = 0;
+
+					updateUptime();
 				}
 			}
 
@@ -758,7 +775,15 @@ bool DataSourceOnline::processRupFrameTimeQueue(const QThread* thread)
 					// m_rupFrameTimeQueue.completePop is not required
 		}
 
-		m_lastPacketSystemTime = QDateTime::currentMSecsSinceEpoch();
+		m_lastPacketSystemTime = rupFrameTime->serverTime;
+
+		if (m_firstPacketSystemTime == 0)
+		{
+			m_firstPacketSystemTime = m_lastPacketSystemTime;
+		}
+
+		updateUptime();
+
 		m_state = E::DataSourceState::ReceiveData;
 
 		m_dataRecevingTimeout = false;

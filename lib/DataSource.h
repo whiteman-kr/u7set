@@ -283,6 +283,7 @@ public:
 
 	qint64 uptime() const { return m_uptime; }
 	void setUptime(qint64 uptime) { m_uptime = uptime; }
+	void updateUptime();
 
 	quint64 receivedDataID() const { return m_receivedDataID; }
 	void setReceivedDataID(quint64 dataID) { m_receivedDataID = dataID; }
@@ -382,7 +383,7 @@ private:
 	// dynamic state information
 	//
 	E::DataSourceState m_state = E::DataSourceState::NoData;
-	qint64 m_uptime = 0;
+	qint64 m_uptime = 0;										// in seconds!
 	quint64 m_receivedDataID = 0;
 
 	qint32 m_rupFramesQueueSize = 0;
@@ -415,6 +416,7 @@ private:
 
 	//
 
+	qint64 m_firstPacketSystemTime = 0;
 	qint64 m_lastPacketSystemTime = 0;
 	bool m_firstRupFrame = true;
 
@@ -431,8 +433,7 @@ private:
 	quint32 m_framesQuantityAllocated = 0;
 	Rup::Header* m_rupFramesHeaders = nullptr;
 	Rup::Data* m_rupFramesData = nullptr;
-
-	qint64 m_firstFrameServerTime = 0;
+	qint64 m_frame0ServerTime = 0;
 
 	// result variables
 
