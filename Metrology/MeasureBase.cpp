@@ -585,9 +585,12 @@ double LinearityMeasurement::measure(int limitType) const
 
 QString LinearityMeasurement::measureStr(int limitType) const
 {
-	if (isSignalValid() == false)
+	if (theOptions.module().showNoValid() == false)
 	{
-		return SignalNoValidStr;
+		if (isSignalValid() == false)
+		{
+			return SignalNoValidStr;
+		}
 	}
 
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
@@ -755,9 +758,12 @@ double LinearityMeasurement::error(int limitType, int errotType) const
 
 QString LinearityMeasurement::errorStr() const
 {
-	if (isSignalValid() == false)
+	if (theOptions.module().showNoValid() == false)
 	{
-		return SignalNoValidStr;
+		if (isSignalValid() == false)
+		{
+			return SignalNoValidStr;
+		}
 	}
 
 	int limitType = theOptions.linearity().showErrorFromLimit();
@@ -903,9 +909,12 @@ int LinearityMeasurement::errorResult() const
 
 QString LinearityMeasurement::errorResultStr() const
 {
-	if (isSignalValid() == false)
+	if (theOptions.module().showNoValid() == false)
 	{
-		return SignalNoValidStr;
+		if (isSignalValid() == false)
+		{
+			return SignalNoValidStr;
+		}
 	}
 
 	int errResult = errorResult();
@@ -940,9 +949,12 @@ double LinearityMeasurement::measureItemArray(int limitType, int index) const
 
 QString LinearityMeasurement::measureItemStr(int limitType, int index) const
 {
-	if (isSignalValid() == false)
+	if (theOptions.module().showNoValid() == false)
 	{
-		return SignalNoValidStr;
+		if (isSignalValid() == false)
+		{
+			return SignalNoValidStr;
+		}
 	}
 
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
@@ -997,9 +1009,12 @@ double LinearityMeasurement::additionalParam(int paramType) const
 
 QString LinearityMeasurement::additionalParamStr(int paramType) const
 {
-	if (isSignalValid() == false)
+	if (theOptions.module().showNoValid() == false)
 	{
-		return SignalNoValidStr;
+		if (isSignalValid() == false)
+		{
+			return SignalNoValidStr;
+		}
 	}
 
 	if (paramType < 0 || paramType >= MEASURE_ADDITIONAL_PARAM_COUNT)
@@ -1428,9 +1443,12 @@ double ComparatorMeasurement::measure(int limitType) const
 
 QString ComparatorMeasurement::measureStr(int limitType) const
 {
-	if (isSignalValid() == false)
+	if (theOptions.module().showNoValid() == false)
 	{
-		return SignalNoValidStr;
+		if (isSignalValid() == false)
+		{
+			return SignalNoValidStr;
+		}
 	}
 
 	if (limitType < 0 || limitType >= MEASURE_LIMIT_TYPE_COUNT)
@@ -1598,9 +1616,12 @@ double ComparatorMeasurement::error(int limitType, int errotType) const
 
 QString ComparatorMeasurement::errorStr() const
 {
-	if (isSignalValid() == false)
+	if (theOptions.module().showNoValid() == false)
 	{
-		return SignalNoValidStr;
+		if (isSignalValid() == false)
+		{
+			return SignalNoValidStr;
+		}
 	}
 
 	int limitType = theOptions.comparator().showErrorFromLimit();
@@ -1746,9 +1767,12 @@ int ComparatorMeasurement::errorResult() const
 
 QString ComparatorMeasurement::errorResultStr() const
 {
-	if (isSignalValid() == false)
+	if (theOptions.module().showNoValid() == false)
 	{
-		return SignalNoValidStr;
+		if (isSignalValid() == false)
+		{
+			return SignalNoValidStr;
+		}
 	}
 
 	int errResult = errorResult();

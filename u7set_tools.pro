@@ -4,7 +4,7 @@ CONFIG += ordered
 
 win32:SUBDIRS += Protobuf
 SUBDIRS += ./Tools/PacketSource \
-	   ./PacketSource
+	   ./Test/UalTester
 
 
 

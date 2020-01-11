@@ -1019,9 +1019,14 @@ void SignalStateDialog::onOk()
 
 		str.sprintf("Failed input value: " + formatStr.toLocal8Bit(), state);
 		str += tr("\nRange of signal: %1").arg(m_pSignal->engineeringRangeStr());
+		str += tr("\nDo you want to change the signal state?");
 
-		QMessageBox::critical(this, windowTitle(), str);
-		return;
+		QMessageBox::StandardButton reply = QMessageBox::question(this, windowTitle(), str, QMessageBox::Yes|QMessageBox::No);
+		if (reply == QMessageBox::No)
+		{
+			reject();
+			return;
+		}
 	}
 
 	m_state = state;

@@ -105,6 +105,22 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
+	if (role == Qt::BackgroundRole)
+	{
+		if (column == COMPARATOR_LIST_COLUMN_HYSTERESIS)
+		{
+			if (comparatorEx->cmpType() == E::CmpType::Equal || comparatorEx->cmpType() == E::CmpType::NotEqual)
+			{
+				if (comparatorEx->hysteresis().isConst() == true && comparatorEx->hysteresis().constValue() == 0.0)
+				{
+					return QColor(Qt::yellow);
+				}
+			}
+		}
+
+		return QVariant();
+	}
+
 	if (role == Qt::FontRole)
 	{
 		return theOptions.measureView().font();
