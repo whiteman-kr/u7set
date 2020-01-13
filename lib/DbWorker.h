@@ -252,6 +252,7 @@ private:
 
 	bool processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersion, QString* errorMessage);
 	bool processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* errorMessage);
+	bool processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* errorMessage);
 //	void getSignalDataAfterDatabaseUpdate0211(QSqlQuery& q, Signal& s);
 
 

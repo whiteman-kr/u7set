@@ -16,7 +16,10 @@ TEMPLATE = app
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
-include(../warnings.pri)
+include(../../warnings.pri)
+
+#Application icon
+win32:RC_ICONS += icons/UalTester.ico
 
 # DESTDIR
 #
@@ -114,6 +117,9 @@ HEADERS += \
 
 CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
+
+RESOURCES += \
+    Resources.qrc
 
 
 # Remove Protobuf 4996 warning, Can't remove it in sources, don't know why

@@ -615,7 +615,7 @@ namespace Builder
 				  QString(tr("Opening project %1 error (%2).")).arg(projectName).arg(dbLastError));
 	}
 
-	/// IssueCode: PDB2020B
+	/// IssueCode: PDB2020
 	///
 	/// IssueType: Error
 	///
@@ -3598,29 +3598,6 @@ namespace Builder
 				  QString(tr("Connection with ID %1 is not found.")).arg(connectionID));
 	}
 
-	/// IssueCode: ALC5041
-	///
-	/// IssueType: Error
-	///
-	/// Title: Signal %1 exists in LM %2. No receivers needed.
-	///
-	/// Parameters:
-	///		%1 application signal ID
-	///		%2 LM's equipmentID
-	///
-	/// Description:
-	///		The signal already exists in specified LM. No receivers is needed. Use iput or output items.
-	///
-	void IssueLogger::errALC5041(QString appSignalID, QString lmID, QUuid receiverUuid)
-	{
-		addItemsIssues(OutputMessageLevel::Error, 5041, receiverUuid);
-
-		LOG_ERROR(IssueType::AlCompiler,
-				  5041,
-				  QString(tr("Signal %1 exists in LM %2. No receivers needed.")).
-				  arg(appSignalID).arg(lmID));
-	}
-
 	/// IssueCode: ALC5042
 	///
 	/// IssueType: Error
@@ -6456,6 +6433,119 @@ namespace Builder
 						arg(inputCaption).arg(itemLabel).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5173
+	///
+	/// IssueType: Error
+	///
+	/// Title: Required signal %1 of AFB %2 is missing.
+	///
+	/// Parameters:
+	///		%1 functional block signal caption
+	///		%2 functional block caption
+	///		%3 application logic item Uuid
+	///
+	/// Description:
+	///		Required signal of specified AFB is missing. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5173(QString signalCaption, QString fbCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5173, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5173,
+				  QString(tr("Required signal %1 of AFB %2 is missing.")).
+				  arg(signalCaption).arg(fbCaption));
+	}
+
+	/// IssueCode: ALC5174
+	///
+	/// IssueType: Error
+	///
+	/// Title: Required AFB %1 is missing.
+	///
+	/// Parameters:
+	///		%1 functional block caption
+	///		%2 application logic item Uuid
+	///
+	/// Description:
+	///		Required AFB is missing. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5174(QString fbCaption, QUuid itemUuid)
+	{
+		addItemsIssues(OutputMessageLevel::Error, 5174, itemUuid);
+
+		LOG_ERROR(IssueType::AlCompiler,
+				  5174,
+				  QString(tr("Required AFB %1 is missing.")).arg(fbCaption));
+	}
+
+	/// IssueCode: ALC5175
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Unknown conversion of signal %1 from %2 to %3 format.
+	///
+	/// Parameters:
+	///		%1 application signalID
+	///		%2 input format
+	///		%3 output format
+	///
+	/// Description:
+	///		Signal conversion between specified formats is not implemented. Change signal format or contact RPCT developers.
+	///
+	void IssueLogger::errALC5175(QString signalID, QString inFormat, QString outFormat)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5175,
+				  QString(tr("Unknown conversion of signal %1 from %2 to %3 format.")).
+							arg(signalID).arg(inFormat).arg(outFormat));
+	}
+
+	/// IssueCode: ALC5176
+	///
+	/// IssueType: Error
+	///
+	/// Title:	   Specific property %1 is not exists in signal %2
+	///
+	/// Parameters:
+	///		%1 specific property name
+	///		%2 application signal ID
+	///
+	/// Description:
+	///		Specific property is not exists in application signal. Contact to RPCT developers.
+	///
+	void IssueLogger::errALC5176(QString signalID, QString propertyName)
+	{
+		LOG_ERROR(IssueType::AlCompiler,
+				  5176,
+				  QString(tr("Specific property %1 is not exists in signal %2.")).
+							arg(propertyName).arg(signalID));
+	}
+
+	/// IssueCode: ALC5177
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Using value 0.0 for parameter %1.%2 is not recommend.
+	///
+	/// Parameters:
+	///		%1 functional block caption
+	///		%2 parameter caption
+	///		%3 application logic item Uuid
+	///
+	/// Description:
+	///		Using value 0.0 for specified parameter is not recommend.
+	///
+	void IssueLogger::wrnALC5177(QString fbCaption, QString paramCaption, QUuid itemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Warning0, 5177, itemUuid);
+
+		LOG_WARNING0(IssueType::AlCompiler,
+				  5177,
+				  QString(tr("Using value 0.0 for parameter %1.%2 is not recommend (Logic schema %3).")).
+				  arg(fbCaption).arg(paramCaption).arg(schemaID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186
@@ -6658,7 +6748,7 @@ namespace Builder
 
 
 
-	/// IssueCode: wrnALC5800
+	/// IssueCode: ALC5800
 	///
 	/// IssueType: Warning
 	///
@@ -6679,7 +6769,7 @@ namespace Builder
 								arg(subsystemID).arg(QString::number(uartId, 16)));
 	}
 
-	/// IssueCode: errALC5801
+	/// IssueCode: ALC5801
 	///
 	/// IssueType: Error
 	///
@@ -7275,20 +7365,20 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Equipment ID %1 specified in TuningSourceEquipmentID property of Tuning Client %2 does not exist.
+	/// Title: Equipment ID %1 specified in TuningSourceEquipmentID property of client %2 does not exist.
 	///
 	/// Parameters:
 	///		%1 Tuning Source Equipment ID
-	///		%2 TuningClient Equipment ID
+	///		%2 Software Equipment ID
 	///
 	/// Description:
-	///		Equipment object that is specified in TuningSourceEquipmentID property of the Tuning Client does not exist.
+	///		Equipment object that is specified in TuningSourceEquipmentID property does not exist.
 	///
 	void IssueLogger::errEQP6109(QString equipmentId, QString tuningClientEquipmentId)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6109,
-				  tr("Equipment ID %1 specified in TuningSourceEquipmentID property of Tuning Client %2 does not exist.")
+				  tr("Equipment ID %1 specified in TuningSourceEquipmentID property of client %2 does not exist.")
 				  .arg(equipmentId)
 				  .arg(tuningClientEquipmentId)
 				  );
@@ -7340,7 +7430,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 - engeneering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3
+	/// Title: Signal %1 - engineering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -7348,13 +7438,13 @@ namespace Builder
 	///		%3 Correct electrical low Limit
 	///
 	/// Description:
-	///		Only ThermoCouple and ThermoResistor. Engeneering low Limit mismatch electrical low Limit.
+	///		Only ThermoCouple and ThermoResistor. Engineering low Limit mismatch electrical low Limit.
 	///
 	void IssueLogger::errEQP6112(QString appSignalID, QString wrongValue, QString correctValue)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6112,
-				  tr("Signal %1 - engeneering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3.")
+				  tr("Signal %1 - engineering low Limit mismatch electrical low Limit: %2, set electrical low Limit: %3.")
 				  .arg(appSignalID)
 				  .arg(wrongValue)
 				  .arg(correctValue)
@@ -7365,7 +7455,7 @@ namespace Builder
 	///
 	/// IssueType: Error
 	///
-	/// Title: Signal %1 - engeneering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3
+	/// Title: Signal %1 - engineering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3
 	///
 	/// Parameters:
 	///		%1 Application signal ID
@@ -7373,13 +7463,13 @@ namespace Builder
 	///		%3 Correct electrical low Limit
 	///
 	/// Description:
-	///		 Only ThermoCouple and ThermoResistor. Engeneering high Limit mismatch electrical high Limit. Only ThermoCouple and ThermoResistor.
+	///		 Only ThermoCouple and ThermoResistor. Engineering high Limit mismatch electrical high Limit. Only ThermoCouple and ThermoResistor.
 	///
 	void IssueLogger::errEQP6113(QString appSignalID, QString wrongValue, QString correctValue)
 	{
 		LOG_ERROR(IssueType::Equipment,
 				  6113,
-				  tr("Signal %1 - engeneering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3.")
+				  tr("Signal %1 - engineering high Limit mismatch electrical high Limit: %2, set electrical high Limit: %3.")
 				  .arg(appSignalID)
 				  .arg(wrongValue)
 				  .arg(correctValue)
@@ -7405,6 +7495,48 @@ namespace Builder
 				  tr("Signal %1 has wrong R0 (ThermoResistor).")
 				  .arg(appSignalID)
 				  );
+	}
+
+
+	/// IssueCode: EQP6200
+	///
+	/// IssueType: Error
+	///
+	/// Title: Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behaviour in menu Project->Project Properties...->Safety Project.
+	///
+	/// Parameters:
+	///		%1 Monitor EquipmentID
+	///
+	/// Description:
+	///		Monitor cannot be used for tuning in Safety Project. To avoid error clear option in %1.TuningEnable or override behaviour in menu Project->Project Properties...->Safety Project set to false.
+	///
+	void IssueLogger::errEQP6200(QString monotorId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6200,
+				  tr("Monitor (%1) cannot be used for tuning in Safety Project. Clear option in %1.TuningEnable or override behaviour in menu Project->Project Properties...->Safety Project.")
+				  .arg(monotorId));
+	}
+
+	/// IssueCode: EQP6201
+	///
+	/// IssueType: Error
+	///
+	/// Title: uningService (%1) cannot be used for multi LM control in Safety Project. Turn On option %1.SingleLmControl or override behaviour in menu Project->Project Properties...->Safety Project.
+	///
+	/// Parameters:
+	///		%1 TuningService EquipmentID
+	///
+	/// Description:
+	///		TuningService cannot be used for multi LM control in Safety Projects. To avoid error turn On option SingleLmControl of TuningService or override behaviour in menu Project->Project Properties...->Safety Project.
+	///
+	void IssueLogger::errEQP6201(QString tuningServiceId)
+	{
+		LOG_ERROR(IssueType::Equipment,
+				  6201,
+				  tr("TuningService (%1) cannot be used for multi LM control in Safety Project. "
+					"Turn On option %1.SingleLmControl or override behaviour in menu Project->Project Properties...->Safety Project.").
+						arg(tuningServiceId));
 	}
 
 	// --

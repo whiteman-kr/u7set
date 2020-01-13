@@ -50,7 +50,7 @@ namespace PS
 
 		QString				signalTypeStr() const;
 		QString				signalInOutTypeStr() const;
-		QString				engeneeringRangeStr() const;
+		QString				engineeringRangeStr() const;
 		QString				signalFormatStr() const;
 		QString				stateOffsetStr() const;
 		QString				stateBitStr() const;

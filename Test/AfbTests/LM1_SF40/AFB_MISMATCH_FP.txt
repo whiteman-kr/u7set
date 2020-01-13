@@ -1,0 +1,139 @@
+test AFB_SWITCH_FP01_value0, AFB tests for AFB_SWITCH_FP element
+schema AFB_SWITCH_FP
+compatible MODULE_LM1SF40
+set #TUN_IN_FP1 = 1, #TUN_IN_FP2 = 1, #TUN_IN_FP3 = 1,#TUN_IN_FP4 = 1
+check #OUTPUT1 == 0
+check #OUTPUT2 == 0
+check #OUTPUT3 == 0
+check #OUTPUT4 == 0
+check #PARAM_ERR_MISMATCH_FP == 0
+check #OVERFLOW_MISMATCH_FP == 0
+check #UNDERFLOW_MISMATCH_FP ==0
+check #ZERO_MISMATCH_FP == 1
+check #NAN_MISMATCH_FP == 0
+
+set #TUN_IN_FP1 = 0, #TUN_IN_FP2 = 0, #TUN_IN_FP3 = 0,#TUN_IN_FP4 = 0
+check #OUTPUT1 == 0
+check #OUTPUT2 == 0
+check #OUTPUT3 == 0
+check #OUTPUT4 == 0
+check #PARAM_ERR_MISMATCH_FP == 0
+check #OVERFLOW_MISMATCH_FP == 0
+check #UNDERFLOW_MISMATCH_FP ==0
+check #ZERO_MISMATCH_FP == 1
+check #NAN_MISMATCH_FP == 0
+
+set #TUN_IN_FP1 = 0, #TUN_IN_FP2 = 1, #TUN_IN_FP3 = 0,#TUN_IN_FP4 = 1
+check #OUTPUT1 == 1
+check #OUTPUT2 == 1
+check #OUTPUT3 == 1
+check #OUTPUT4 == 1
+check #PARAM_ERR_MISMATCH_FP == 0
+check #OVERFLOW_MISMATCH_FP == 0
+check #UNDERFLOW_MISMATCH_FP ==0
+check #ZERO_MISMATCH_FP == 1
+check #NAN_MISMATCH_FP == 0
+
+set #TUN_IN_FP1 = 1, #TUN_IN_FP2 = 1, #TUN_IN_FP3 = 0,#TUN_IN_FP4 = 1
+check #OUTPUT1 == 0
+check #OUTPUT2 == 0
+check #OUTPUT3 == 1
+check #OUTPUT4 == 0
+check #PARAM_ERR_MISMATCH_FP == 0
+check #OVERFLOW_MISMATCH_FP == 0
+check #UNDERFLOW_MISMATCH_FP ==0
+check #ZERO_MISMATCH_FP == 1
+check #NAN_MISMATCH_FP == 0
+
+set #TUN_IN_FP1 = -1, #TUN_IN_FP2 = 1, #TUN_IN_FP3 = 0,#TUN_IN_FP4 = 0
+check #OUTPUT1 == 1
+check #OUTPUT2 == 1
+check #OUTPUT3 == 1
+check #OUTPUT4 == 1
+check #PARAM_ERR_MISMATCH_FP == 0
+check #OVERFLOW_MISMATCH_FP == 0
+check #UNDERFLOW_MISMATCH_FP ==0
+check #ZERO_MISMATCH_FP == 1
+check #NAN_MISMATCH_FP == 0
+endtest
+
+test AFB_SWITCH_FP01_value1.23, AFB tests for AFB_SWITCH_FP element
+schema AFB_SWITCH_FP
+compatible MODULE_LM1SF40
+set #TUN_IN_FP1 = 1.23, #TUN_IN_FP2 = 1, #TUN_IN_FP3 = 1,#TUN_IN_FP4 = 1
+check #OUTPUT1_1 == 0
+check #OUTPUT2_2 == 0
+check #OUTPUT3_3 == 0
+check #OUTPUT4_4 == 0
+check #PARAM_ERR_MISMATCH_FP02 == 0
+check #OVERFLOW_MISMATCH_FP02 == 0
+check #UNDERFLOW_MISMATCH_FP02 ==0
+check #ZERO_MISMATCH_FP02 == 1
+check #NAN_MISMATCH_FP02 == 0
+
+set #TUN_IN_FP1 = 1.23, #TUN_IN_FP2 = 0, #TUN_IN_FP3 = 0,#TUN_IN_FP4 = 0
+check #OUTPUT1_1 == 0
+check #OUTPUT2_2 == 0
+check #OUTPUT3_3 == 0
+check #OUTPUT4_4 == 0
+check #PARAM_ERR_MISMATCH_FP02 == 0
+check #OVERFLOW_MISMATCH_FP02 == 0
+check #UNDERFLOW_MISMATCH_FP02 ==0
+check #ZERO_MISMATCH_FP02 == 1
+check #NAN_MISMATCH_FP02 == 0
+
+set #TUN_IN_FP1 = 1.23, #TUN_IN_FP2 = 1.23, #TUN_IN_FP3 = 0,#TUN_IN_FP4 = 0
+check #OUTPUT1_1 == 0
+check #OUTPUT2_2 == 0
+check #OUTPUT3_3 == 0
+check #OUTPUT4_4 == 0
+check #PARAM_ERR_MISMATCH_FP02 == 0
+check #OVERFLOW_MISMATCH_FP02 == 0
+check #UNDERFLOW_MISMATCH_FP02 ==0
+check #ZERO_MISMATCH_FP02 == 1
+check #NAN_MISMATCH_FP02 == 0
+
+set #TUN_IN_FP1 = 1.23, #TUN_IN_FP2 = 1.23, #TUN_IN_FP3 = 1.23,#TUN_IN_FP4 = 0
+check #OUTPUT1_1 == 0
+check #OUTPUT2_2 == 0
+check #OUTPUT3_3 == 0
+check #OUTPUT4_4 == 0
+check #PARAM_ERR_MISMATCH_FP02 == 0
+check #OVERFLOW_MISMATCH_FP02 == 0
+check #UNDERFLOW_MISMATCH_FP02 ==0
+check #ZERO_MISMATCH_FP02 == 1
+check #NAN_MISMATCH_FP02 == 0
+
+set #TUN_IN_FP1 = 1.23, #TUN_IN_FP2 = 1.23, #TUN_IN_FP3 = 1.23,#TUN_IN_FP4 = 1.23
+check #OUTPUT1_1 == 0
+check #OUTPUT2_2 == 0
+check #OUTPUT3_3 == 0
+check #OUTPUT4_4 == 0
+check #PARAM_ERR_MISMATCH_FP02 == 0
+check #OVERFLOW_MISMATCH_FP02 == 0
+check #UNDERFLOW_MISMATCH_FP02 ==0
+check #ZERO_MISMATCH_FP02 == 1
+check #NAN_MISMATCH_FP02 == 0
+
+set #TUN_IN_FP1 = -1.23, #TUN_IN_FP2 = 1.23, #TUN_IN_FP3 = 1.23,#TUN_IN_FP4 = 1.23
+check #OUTPUT1_1 == 1
+check #OUTPUT2_2 == 0
+check #OUTPUT3_3 == 0
+check #OUTPUT4_4 == 0
+check #PARAM_ERR_MISMATCH_FP02 == 0
+check #OVERFLOW_MISMATCH_FP02 == 0
+check #UNDERFLOW_MISMATCH_FP02 ==0
+check #ZERO_MISMATCH_FP02 == 1
+check #NAN_MISMATCH_FP02 == 0
+
+set #TUN_IN_FP1 = -1.23, #TUN_IN_FP2 = 0, #TUN_IN_FP3 = 999.9,#TUN_IN_FP4 = 0
+check #OUTPUT1_1 == 0
+check #OUTPUT2_2 == 0
+check #OUTPUT3_3 == 1
+check #OUTPUT4_4 == 0
+check #PARAM_ERR_MISMATCH_FP02 == 0
+check #OVERFLOW_MISMATCH_FP02 == 0
+check #UNDERFLOW_MISMATCH_FP02 ==0
+check #ZERO_MISMATCH_FP02 == 1
+check #NAN_MISMATCH_FP02 == 0
+endtest

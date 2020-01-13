@@ -17,8 +17,8 @@ const double RESISTOR_V_0_5 = 0.25;	 // 250 Ohm
 const double V_0_5_LOW_LIMIT = 0;
 const double V_0_5_HIGH_LIMIT = 5.1;
 
-const double V_m10_p10_LOW_LIMIT = -11.5;
-const double V_m10_p10_HIGH_LIMIT = 11.5;
+const double V_m10_p10_LOW_LIMIT = -11;
+const double V_m10_p10_HIGH_LIMIT = 11;
 
 // limits for otput signals
 //
@@ -116,12 +116,12 @@ public:
 
 	// Functions accessed if ok() is true
 
+	bool isEqual(double value) const;
 	double toDouble() const;
 
 	// Functions accessed if ok() is false
 
 	int errorCode() const;
-
 	QString errorMessage() const;
 
 	double expectedLowValidRange() const;
@@ -160,8 +160,8 @@ enum class UnitsConvertType
 {
 	ElectricToPhysical = 0,
 	PhysicalToElectric = 1,
-	ElectricToEngeneering = 2,
-	EngeneeringToElectric = 3,
+	ElectricToEngineering = 2,
+	EngineeringToElectric = 3,
 };
 
 // ==============================================================================================

@@ -50,7 +50,7 @@ public slots:
 	void serviceNotFound();
 
 protected:
-	virtual void createTcpConnection(quint32 ip, quint16 port) { Q_UNUSED(ip); assert(port > std::numeric_limits<quint16>::lowest() && port < std::numeric_limits<quint16>::max()); }
+	virtual void createTcpConnection(quint32 ip, quint16 port);
 	virtual void dropTcpConnection() {}
 
 	UdpSocketThread* m_socketThread = nullptr;

@@ -7,7 +7,7 @@ namespace EditEngine
 	MoveItemCommand::MoveItemCommand(EditSchemaView* schemaView,
 			double xdiff,
 			double ydiff,
-			const std::vector<std::shared_ptr<VFrame30::SchemaItem>>& items,
+			const std::vector<SchemaItemPtr>& items,
 			bool snapToGrid,
 			QScrollBar* hScrollBar,
 			QScrollBar* vScrollBar) :
@@ -24,13 +24,13 @@ namespace EditEngine
 		return;
 	}
 
-	void MoveItemCommand::executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void MoveItemCommand::executeCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		*itemsToSelect = m_items;
 
-		for (std::shared_ptr<VFrame30::SchemaItem> item : m_items)
+		for (SchemaItemPtr item : m_items)
 		{
-			item->MoveItem(m_xdiff, m_ydiff);
+			item->moveItem(m_xdiff, m_ydiff);
 
 			if (m_snapToGrid)
 			{
@@ -41,13 +41,13 @@ namespace EditEngine
 		return;
 	}
 
-	void MoveItemCommand::unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect)
+	void MoveItemCommand::unExecuteCommand(std::vector<SchemaItemPtr>* itemsToSelect)
 	{
 		*itemsToSelect = m_items;
 
-		for (std::shared_ptr<VFrame30::SchemaItem> item : m_items)
+		for (SchemaItemPtr item : m_items)
 		{
-			item->MoveItem(-m_xdiff, -m_ydiff);
+			item->moveItem(-m_xdiff, -m_ydiff);
 
 			if (m_snapToGrid)
 			{

@@ -39,7 +39,7 @@ class PropertyObject;
 #define ADD_PROPERTY_GETTER_SETTER(TYPE, NAME, VISIBLE, GETTER, SETTER) \
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
 	(std::function<TYPE(void)>)std::bind(&GETTER, this), \
-	std::bind(&SETTER, this, std::placeholders::_1));
+	std::bind(&SETTER, this, std::placeholders::_1))
 
 #define ADD_PROPERTY_GETTER_SETTER_INDIRECT(TYPE, NAME, VISIBLE, GETTER, SETTER, OWNER) \
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
@@ -55,6 +55,16 @@ class PropertyObject;
 	VISIBLE,\
 	(std::function<TYPE(void)>)std::bind(&GETTER, this), \
 	std::bind(&SETTER, this, std::placeholders::_1))
+
+// Add property which has dirrect access to the variable, by creating lambdas fo getter and setter
+//
+#define ADD_PROPERTY_CAT_VAR(TYPE, NAME, CATEGORY, VISIBLE, VARNAME) \
+	addProperty<TYPE>(\
+	NAME, \
+	CATEGORY,\
+	VISIBLE,\
+	[this](){return VARNAME;}, \
+	[this](const auto& v){VARNAME = v;})
 
 // Add property which has getter and setter
 //
@@ -98,119 +108,131 @@ public:
 	{
 		return m_caption;
 	}
-	void setCaption(const QString& value) noexcept
+	Property& setCaption(const QString& value) noexcept
 	{
 		m_caption = value;
+		return *this;
 	}
 
 	QString description() const noexcept
 	{
 		return m_description;
 	}
-	void setDescription(const QString& value) noexcept
+	Property& setDescription(const QString& value) noexcept
 	{
 		m_description = value;
+		return *this;
 	}
 
 	QString category() const noexcept
 	{
 		return m_category;
 	}
-	void setCategory(const QString& value) noexcept
+	Property& setCategory(const QString& value) noexcept
 	{
 		m_category = value;
+		return *this;
 	}
 
 	QString validator() const noexcept
 	{
 		return m_validator;
 	}
-	void setValidator(const QString& value) noexcept
+	Property& setValidator(const QString& value) noexcept
 	{
 		m_validator = value;
+		return *this;
 	}
 
 	bool readOnly() const noexcept
 	{
 		return m_readOnly;
 	}
-	void setReadOnly(bool value) noexcept
+	Property& setReadOnly(bool value) noexcept
 	{
 		m_readOnly = value;
+		return *this;
 	}
 
 	bool updateFromPreset() const noexcept
 	{
 		return m_updateFromPreset;
 	}
-	void setUpdateFromPreset(bool value) noexcept
+	Property& setUpdateFromPreset(bool value) noexcept
 	{
 		m_updateFromPreset = value;
+		return *this;
 	}
 
 	bool specific() const noexcept
 	{
 		return m_specific;
 	}
-	void setSpecific(bool value) noexcept
+	Property& setSpecific(bool value) noexcept
 	{
 		m_specific = value;
+		return *this;
 	}
 
 	bool visible() const noexcept
 	{
 		return m_visible;
 	}
-	void setVisible(bool value) noexcept
+	Property& setVisible(bool value) noexcept
 	{
 		m_visible = value;
+		return *this;
 	}
 
 	bool expert() const noexcept
 	{
 		return m_expert;
 	}
-	void setExpert(bool value) noexcept
+	Property& setExpert(bool value) noexcept
 	{
 		m_expert = value;
+		return *this;
 	}
 
 	bool essential() const noexcept
 	{
 		return m_essential;
 	}
-	void setEssential(bool value) noexcept
+	Property& setEssential(bool value) noexcept
 	{
 		m_essential = value;
+		return *this;
 	}
 
 	bool disableTableEditor() const noexcept
 	{
 		return m_disableTableEditor;
 	}
-	void setDisableTableEditor(bool value) noexcept
+	Property& setDisableTableEditor(bool value) noexcept
 	{
 		m_disableTableEditor = value;
+		return *this;
 	}
-
 
 	E::PropertySpecificEditor specificEditor() noexcept
 	{
 		return m_specificEditor;
 	}
 
-	void setSpecificEditor(E::PropertySpecificEditor value) noexcept
+	Property& setSpecificEditor(E::PropertySpecificEditor value) noexcept
 	{
 		m_specificEditor = value;
+		return *this;
 	}
 
 	bool password() const noexcept
 	{
 		return m_specificEditor == E::PropertySpecificEditor::Password;
 	}
-	void setPassword(bool value) noexcept
+	Property& setPassword(bool value) noexcept
 	{
 		m_specificEditor = value ? E::PropertySpecificEditor::Password : E::PropertySpecificEditor::None;
+		return *this;
 	}
 
 	bool isScript() const noexcept
@@ -218,27 +240,30 @@ public:
 		return m_specificEditor == E::PropertySpecificEditor::Script ||
 				caption().contains("Script") == true;
 	}
-	void setIsScript(bool value) noexcept
+	Property& setIsScript(bool value) noexcept
 	{
 		m_specificEditor = value ? E::PropertySpecificEditor::Script : E::PropertySpecificEditor::None;
+		return *this;
 	}
 
 	int precision() const noexcept
 	{
 		return m_precision;
 	}
-	void setPrecision(int value) noexcept
+	Property& setPrecision(int value) noexcept
 	{
 		m_precision = std::clamp<qint16>(static_cast<qint16>(value), 0, 128);
+		return *this;
 	}
 
 	int viewOrder() const noexcept
 	{
 		return m_viewOrder;
 	}
-	void setViewOrder(int value) noexcept
+	Property& setViewOrder(int value) noexcept
 	{
 		m_viewOrder = static_cast<quint16>(value);
+		return *this;
 	}
 
 	virtual QVariant value() const noexcept = 0;
@@ -1763,6 +1788,33 @@ public:
 		}
 	}
 
+	// Delete all properties in category
+	//
+	void removeCategoryProperties(const QString& category)
+	{
+		bool someRemoved = false;
+
+		for(auto it = m_properties.begin(); it != m_properties.end();)
+		{
+			if(it.value()->category() == category)
+			{
+				it = m_properties.erase(it);
+				someRemoved = true;
+			}
+			else
+			{
+				++it;
+			}
+		}
+
+		if (someRemoved == true)
+		{
+			emit propertyListChanged();
+		}
+
+		return;
+	}
+
 	// Delete all specific properties
 	//
 	void removeSpecificProperties()
@@ -3033,6 +3085,7 @@ inline PropertyVectorBase<PropertyObject>* variantToPropertyVector(QVariant& v)
 	// It is Undefined Behavior
 	// It' is better to create another vector and copy ther ptr's
 	// Now leave it as is
+	// Update: in c++20 coming something line reinterpret cast for shared pointers, it will not help, but...
 	//
 	return reinterpret_cast<PropertyVectorBase<PropertyObject>*>(v.data());
 }

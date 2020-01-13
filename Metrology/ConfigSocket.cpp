@@ -2,99 +2,40 @@
 
 #include <assert.h>
 
-#include "Options.h"
 #include "SignalBase.h"
-#include "TuningSignalBase.h"
 
 #include "../lib/ServiceSettings.h"
 
-
 // -------------------------------------------------------------------------------------------------------------------
 
-ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort, const SoftwareInfo& softwareInfo)
+ConfigSocket::ConfigSocket(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort)
+	: m_softwareInfo(softwareInfo)
+	, m_serverAddressPort1(serverAddressPort)
+	, m_serverAddressPort2(HostAddressPort(QString("127.0.0.1"), PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST))
+
 {
-	// use only SOCKET_SERVER_TYPE_PRIMARY
-	//
-	QString equipmentID = theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY);
-	if (equipmentID.isEmpty() == true)
-	{
-		return;
-	}
-
-	HostAddressPort serverAddressPort2(QString("127.0.0.1"), PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
-
-	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo,
-											1,
-											serverAddressPort,
-											serverAddressPort2,
-											false,
-											nullptr);
-
-	if (m_cfgLoaderThread == nullptr)
-	{
-		return;
-	}
-
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
-
-	startConnectionStateTimer();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-ConfigSocket::ConfigSocket(const HostAddressPort& serverAddressPort1,
-						   const HostAddressPort& serverAddressPort2,
-						   const SoftwareInfo& softwareInfo)
+ConfigSocket::ConfigSocket(const SoftwareInfo& softwareInfo, const HostAddressPort& serverAddressPort1, const HostAddressPort& serverAddressPort2)
+	: m_softwareInfo(softwareInfo)
+	, m_serverAddressPort1(serverAddressPort1)
+	, m_serverAddressPort2(serverAddressPort2)
 {
-	// use only SOCKET_SERVER_TYPE_PRIMARY
-	//
-	QString equipmentID = theOptions.socket().client(SOCKET_TYPE_CONFIG).equipmentID(SOCKET_SERVER_TYPE_PRIMARY);
-
-	if (equipmentID.isEmpty() == true)
-	{
-		return;
-	}
-
-	m_cfgLoaderThread = new CfgLoaderThread(softwareInfo,
-											1,
-											serverAddressPort1,
-											serverAddressPort2,
-											false,
-											nullptr);
-
-	if (m_cfgLoaderThread == nullptr)
-	{
-		return;
-	}
-
-	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
-
-	startConnectionStateTimer();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 ConfigSocket::~ConfigSocket()
 {
-	if (m_cfgLoaderThread == nullptr)
-	{
-		return;
-	}
-
-	m_cfgLoaderThread->quit();
-	delete m_cfgLoaderThread;
-	m_cfgLoaderThread = nullptr;
-
-	stopConnectionStateTimer();
+	quit();
 }
-
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void ConfigSocket::clearConfiguration()
 {
-	m_loadedFiles.clear();
-
 	theSignalBase.clear();
 }
 
@@ -102,27 +43,82 @@ void ConfigSocket::clearConfiguration()
 
 void ConfigSocket::start()
 {
+	m_cfgLoaderThread = new CfgLoaderThread(m_softwareInfo,
+											1,
+											m_serverAddressPort1,
+											m_serverAddressPort2,
+											false,
+											nullptr);
+
 	if (m_cfgLoaderThread == nullptr)
 	{
 		assert(m_cfgLoaderThread);
 		return;
 	}
 
+	connect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
+
 	m_cfgLoaderThread->start();
 	m_cfgLoaderThread->enableDownloadConfiguration();
+
+	startConnectionStateTimer();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+void ConfigSocket::quit()
 {
-	qDebug() << "ConfigSocket::slot_configurationReady - file count: " << buildFileInfoArray.count();
+	stopConnectionStateTimer();
 
 	if (m_cfgLoaderThread == nullptr)
 	{
 		return;
 	}
 
+	disconnect(m_cfgLoaderThread, &CfgLoaderThread::signal_configurationReady, this, &ConfigSocket::slot_configurationReady);
+
+	m_cfgLoaderThread->quit();
+	delete m_cfgLoaderThread;
+	m_cfgLoaderThread = nullptr;
+
+	m_connected = false;
+	m_address.clear();
+
+	emit socketDisconnected();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ConfigSocket::reconncect(const QString& equipmentID, const HostAddressPort& serverAddressPort)
+{
+	if (equipmentID.isEmpty() == true)
+	{
+		return;
+	}
+
+	m_softwareInfo.setEquipmentID(equipmentID);
+	m_serverAddressPort1 = serverAddressPort;
+	m_serverAddressPort2 = HostAddressPort(QString("127.0.0.1"), PORT_CONFIGURATION_SERVICE_CLIENT_REQUEST);
+
+	quit();
+	start();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData, const BuildFileInfoArray buildFileInfoArray)
+{
+	qDebug() << __FUNCTION__ << "File count: " << buildFileInfoArray.count();
+
+	if (m_cfgLoaderThread == nullptr)
+	{
+		return;
+	}
+
+	QTime responseTime;
+	responseTime.start();
+
+	m_loadedFiles.clear();
 	clearConfiguration();
 
 	bool result = false;
@@ -148,18 +144,25 @@ void ConfigSocket::slot_configurationReady(const QByteArray configurationXmlData
 
 		result = true;
 
-		if (bfi.ID == CFG_FILE_ID_APP_SIGNAL_SET)
+		if (bfi.ID == CFG_FILE_ID_METROLOGY_ITEMS)
 		{
-			result &= readAppSignalSet(fileData);					// fill AppSignalSets
+			result &= readMetrologyItems(fileData);					// fill MetrologyItems
 		}
 
-		if (bfi.ID == CFG_FILE_ID_METROLOGY_SIGNALS)
+		if (bfi.ID == CFG_FILE_ID_METROLOGY_SIGNAL_SET)
 		{
-			result &= readMetrologySignals(fileData);				// fill MetrologySignals
+			result &= readMetrologySignalSet(fileData);				// fill MetrologySignalSet
+		}
+
+		if (bfi.ID == CFG_FILE_ID_COMPARATOR_SET)
+		{
+			result &= readComparatorSet(fileData);					// fill ComparatorSet
 		}
 
 		m_loadedFiles.append(bfi.pathFileName);
 	}
+
+	qDebug() << __FUNCTION__ << " Time for read: " << responseTime.elapsed() << " ms";
 
 	emit configurationLoaded();
 
@@ -172,50 +175,22 @@ bool ConfigSocket::readConfiguration(const QByteArray& fileData)
 {
 	bool result = theOptions.readFromXml(fileData);
 
-	qDebug() << "ConfigSocket::readConfiguration - " << (result == true ? "OK" : "ERROR!");
+	qDebug() << __FUNCTION__ << (result == true ? "OK" : "ERROR!");
 
 	return result;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-bool ConfigSocket::readAppSignalSet(const QByteArray& fileData)
-{
-	::Proto::AppSignalSet protoAppSignalSet;
-
-	bool result = protoAppSignalSet.ParseFromArray(fileData.constData(), fileData.size());
-	if (result == false)
-	{
-		return false;
-	}
-
-	int signalCount = protoAppSignalSet.appsignal_size();
-	for(int i = 0; i < signalCount; i++)
-	{
-		const ::Proto::AppSignal& protoAppSignal = protoAppSignalSet.appsignal(i);
-
-		Metrology::SignalParam param;
-		param.serializeFrom(protoAppSignal);
-
-		theSignalBase.appendSignal(param);
-	}
-
-	qDebug() << "ConfigSocket::readAppSignalSet - Signals were loaded" << theSignalBase.signalCount();
-
-	return true;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool ConfigSocket::readMetrologySignals(const QByteArray& fileData)
+bool ConfigSocket::readMetrologyItems(const QByteArray& fileData)
 {
 	bool result = true;
 
 	XmlReadHelper xml(fileData);
 
-	if (xml.findElement("MetrologySignals") == false)
+	if (xml.findElement("MetrologyItems") == false)
 	{
-		qDebug() << "ConfigSocket::readMetrologySignals - section Version not found";
+		qDebug() << __FUNCTION__ << "Section Version not found";
 		return false;
 	}
 
@@ -223,25 +198,79 @@ bool ConfigSocket::readMetrologySignals(const QByteArray& fileData)
 	result &= xml.readIntAttribute("Version", &fileVersion);
 	if (result == false || fileVersion == 0)
 	{
-		qDebug() << "ConfigSocket::readMetrologySignals - file version undefined";
+		qDebug() << __FUNCTION__ << "File version undefined";
 		return false;
 	}
 
 	theOptions.projectInfo().setCfgFileVersion(fileVersion);
 
-	if (fileVersion != CFG_FILE_VER_METROLOGY_SIGNALS)
+	if (fileVersion != CFG_FILE_VER_METROLOGY_ITEMS_XML)
 	{
-		qDebug() << tr("ConfigSocket::readMetrologySignals - failed fileVersion, waited:") << CFG_FILE_VER_METROLOGY_SIGNALS << tr(", recieved:") << fileVersion;
+		qDebug() << __FUNCTION__ << "Failed fileVersion, waited:" << CFG_FILE_VER_METROLOGY_ITEMS_XML << ", recieved:" << fileVersion;
 		return false;
 	}
 
+	QTime responseTime;
+	responseTime.start();
+
 	result &= readRacks(fileData, fileVersion);
 	result &= readTuningSources(fileData, fileVersion);
-	result &= readSignals(fileData, fileVersion);
+
+	qDebug() << __FUNCTION__ << " Time for read: " << responseTime.elapsed() << " ms";
 
 	return result;
 }
 
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool ConfigSocket::readMetrologySignalSet(const QByteArray& fileData)
+{
+	::Proto::MetrologySignalSet protoMetrologySignalSet;
+
+	QTime responseTime;
+	responseTime.start();
+
+	bool result = protoMetrologySignalSet.ParseFromArray(fileData.constData(), fileData.size());
+	if (result == false)
+	{
+		return false;
+	}
+
+	int signalCount = protoMetrologySignalSet.metrologysignal_size();
+	for(int i = 0; i < signalCount; i++)
+	{
+		const ::Proto::MetrologySignal& protoAppSignal = protoMetrologySignalSet.metrologysignal(i);
+
+		Metrology::SignalParam param;
+		param.serializeFrom(protoAppSignal);
+
+		theSignalBase.appendSignal(param);
+	}
+
+	theSignalBase.initSignals();
+
+	qDebug() << __FUNCTION__ << "Signals were loaded" << theSignalBase.signalCount() << " Time for load: " << responseTime.elapsed() << " ms";
+
+	return true;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool ConfigSocket::readComparatorSet(const QByteArray& fileData)
+{
+	QTime responseTime;
+	responseTime.start();
+
+	ComparatorSet comparatorSet;
+	comparatorSet.serializeFrom(fileData);
+
+	theSignalBase.loadComparatorsInSignal(comparatorSet);
+
+	qDebug() << __FUNCTION__ << "Comparators were loaded" << " Time for load: " << responseTime.elapsed() << " ms";
+
+	return true;
+}
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -255,7 +284,7 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 
 	if (xml.findElement("Racks") == false)
 	{
-		qDebug() << "ConfigSocket::readRacks - Racks section not found";
+		qDebug() << __FUNCTION__ << "Racks section not found";
 		return false;
 	}
 
@@ -283,12 +312,12 @@ bool ConfigSocket::readRacks(const QByteArray& fileData, int fileVersion)
 
 	if (theSignalBase.racks().count() != rackCount)
 	{
-		qDebug() << "ConfigSocket::readRacks - Racks loading error, loaded: " << theSignalBase.racks().count() << " from " << rackCount;
+		qDebug() << __FUNCTION__ << "Racks loading error, loaded: " << theSignalBase.racks().count() << " from " << rackCount;
 		assert(false);
 		return false;
 	}
 
-	qDebug() << "ConfigSocket::readRacks - Racks were loaded: " << theSignalBase.racks().count();
+	qDebug() << __FUNCTION__ << "Racks were loaded: " << theSignalBase.racks().count();
 
 	theSignalBase.racks().updateParamFromGroups();
 
@@ -307,7 +336,7 @@ bool ConfigSocket::readTuningSources(const QByteArray& fileData, int fileVersion
 
 	if (xml.findElement("TuningSources") == false)
 	{
-		qDebug() << "ConfigSocket::readTuningSources - TuningSources section not found";
+		qDebug() << __FUNCTION__ << "TuningSources section not found";
 		return false;
 	}
 
@@ -331,61 +360,12 @@ bool ConfigSocket::readTuningSources(const QByteArray& fileData, int fileVersion
 
 	if (tuningSourceCount != theSignalBase.tuning().Sources().sourceEquipmentID().count())
 	{
-		qDebug() << "ConfigSocket::readTuningSources - Tuning sources loading error, loaded: " << theSignalBase.tuning().Sources().sourceEquipmentID().count() << " from " << tuningSourceCount;
+		qDebug() << __FUNCTION__ << "Tuning sources loading error, loaded: " << theSignalBase.tuning().Sources().sourceEquipmentID().count() << " from " << tuningSourceCount;
 		assert(false);
 		return false;
 	}
 
-	qDebug() << "ConfigSocket::readTuningSources - Tuning sources were loaded: " << theSignalBase.tuning().Sources().sourceEquipmentID().count();
-
-	return result;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool ConfigSocket::readSignals(const QByteArray& fileData, int fileVersion)
-{
-	Q_UNUSED(fileVersion);
-
-	bool result = true;
-
-	XmlReadHelper xml(fileData);
-
-	if (xml.findElement("Signals") == false)
-	{
-		qDebug() << "ConfigSocket::readSignals - Signals section not found";
-		return false;
-	}
-
-	Metrology::SignalParam param;
-
-	int signalCount = 0;
-	result &= xml.readIntAttribute("Count", &signalCount);
-
-	for(int s = 0; s < signalCount; s++)
-	{
-		if (xml.findElement("Signal") == false)
-		{
-			result = false;
-			break;
-		}
-
-		bool res = param.readFromXml(xml);
-		if (res == true)
-		{
-			Metrology::Signal* pSignal = theSignalBase.signalPtr(param.location().appSignalID());
-			if (pSignal == nullptr)
-			{
-				continue;
-			}
-
-			pSignal->param().updateParam(param);
-		}
-
-		result &= res;
-	}
-
-	theSignalBase.initSignals();
+	qDebug() << __FUNCTION__ << "Tuning sources were loaded: " << theSignalBase.tuning().Sources().sourceEquipmentID().count();
 
 	return result;
 }

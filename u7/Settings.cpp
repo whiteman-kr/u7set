@@ -1,6 +1,11 @@
 #include "../u7/Settings.h"
-#include "../Tools/qtkeychain-0.8/keychain.h"
 #include "../lib/PropertyEditor.h"
+
+#ifdef _WIN32
+#include "keychain.h"
+#else
+#include <qtkeychain/keychain.h>
+#endif
 
 Settings theSettings;
 

@@ -8,6 +8,7 @@
 #include <QColorDialog>
 #include <QTextBrowser>
 #include <QPlainTextEdit>
+#include <QDesktopServices>
 
 namespace ExtWidgets
 {
@@ -18,12 +19,6 @@ namespace ExtWidgets
 
 	PropertyEditorBase::PropertyEditorBase()
 	{
-		//
-
-		setScriptHelpWindowPos(thePropertyEditorSettings.m_scriptHelpWindowPos);
-
-		setScriptHelpWindowGeometry(thePropertyEditorSettings.m_scriptHelpWindowGeometry);
-
 	}
 
 	PropertyEditor* PropertyEditorBase::createChildPropertyEditor(QWidget* parent)
@@ -104,7 +99,7 @@ namespace ExtWidgets
 
 			if (val.length() > TextMaxLength)
 			{
-				val = QObject::tr("StringList [%1 items]").arg(static_cast<int>(strings.size()));
+				val = QObject::tr("QStringList [%1 items]").arg(static_cast<int>(strings.size()));
 			}
 
 			val.remove(QChar::LineFeed);
@@ -115,6 +110,12 @@ namespace ExtWidgets
 
 		Q_ASSERT(false);
 		return QString();
+	}
+
+	QString PropertyEditorBase::colorVectorText(QVariant& value)
+	{
+		QVector<QColor> v = value.value<QVector<QColor>>();
+		return QString("QVector<QColor> [%1 items]").arg(static_cast<int>(v.size()));
 	}
 
 	QString PropertyEditorBase::propertyValueText(Property* p, int row)
@@ -157,6 +158,11 @@ namespace ExtWidgets
 		{
 			TuningValue t = value.value<TuningValue>();
 			return t.toString(p->precision());
+		}
+
+		if (type == qMetaTypeId<QVector<QColor>>())
+		{
+			return colorVectorText(value);
 		}
 
 		char numberFormat = p->precision() > 5 ? 'g' : 'f';
@@ -232,12 +238,8 @@ namespace ExtWidgets
 		case QVariant::Color:
 		{
 			QColor color = value.value<QColor>();
-			QString val = QString("[%1;%2;%3;%4]").
-					arg(color.red()).
-					arg(color.green()).
-					arg(color.blue()).
-					arg(color.alpha());
-			return val;
+
+			return PropertyEditorBase::colorToText(color);
 		}
 			break;
 
@@ -267,6 +269,51 @@ namespace ExtWidgets
 		}
 
 		return QString();
+	}
+
+	QString PropertyEditorBase::colorToText(QColor color)
+	{
+		return QString("[%1;%2;%3;%4]").
+				arg(color.red()).
+				arg(color.green()).
+				arg(color.blue()).
+				arg(color.alpha());
+	}
+
+	QColor PropertyEditorBase::colorFromText(const QString& t)
+	{
+		if (t.isEmpty() == true)
+		{
+			return QColor();
+		}
+
+		QString text = t;
+		text.remove(QRegExp("[\\[,\\]]"));
+
+		QStringList l = text.split(";");
+		if (l.count() != 4)
+		{
+			return QColor();
+		}
+
+		int r = l[0].toInt();
+		int g = l[1].toInt();
+		int b = l[2].toInt();
+		int a = l[3].toInt();
+
+		if (r < 0 || r > 255)
+			r = 255;
+
+		if (g < 0 || g > 255)
+			g = 255;
+
+		if (b < 0 || b > 255)
+			b = 255;
+
+		if (a < 0 || a > 255)
+			a = 255;
+
+		return QColor(r, g, b, a);
 	}
 
 	QIcon PropertyEditorBase::drawCheckBox(int state, bool enabled)
@@ -499,6 +546,19 @@ namespace ExtWidgets
 				break;
 			}
 
+			if (propertyPtr->value().userType() == qMetaTypeId<QVector<QColor>>())
+			{
+				MultiArrayEdit* m_editor = new MultiArrayEdit(this, parent, propertyPtr, readOnly);
+				editor = m_editor;
+
+				if (sameValue == true)
+				{
+					m_editor->setValue(propertyPtr, readOnly);
+				}
+
+				break;
+			}
+
 			switch(propertyPtr->value().userType())
 			{
 			case QVariant::Bool:
@@ -567,48 +627,14 @@ namespace ExtWidgets
 		return editor;
 	}
 
-	void PropertyEditorBase::setScriptHelp(QFile& file)
+	void PropertyEditorBase::setScriptHelpFile(const QString& scriptHelpFile)
 	{
-		// Set script help data
-		//
-		if (file.open(QIODevice::ReadOnly) == true)
-		{
-			QByteArray data = file.readAll();
-			if (data.size() > 0)
-			{
-				setScriptHelp(QString::fromUtf8(data));
-			}
-		}
+		m_scriptHelpFile = scriptHelpFile;
 	}
 
-	void PropertyEditorBase::setScriptHelp(const QString& text)
+	QString PropertyEditorBase::scriptHelpFile() const
 	{
-		m_scriptHelp = text;
-	}
-
-	QString PropertyEditorBase::scriptHelp() const
-	{
-		return m_scriptHelp;
-	}
-
-	QPoint PropertyEditorBase::scriptHelpWindowPos() const
-	{
-		return m_scriptHelpWindowPos;
-	}
-
-	void PropertyEditorBase::setScriptHelpWindowPos(const QPoint& value)
-	{
-		m_scriptHelpWindowPos = value;
-	}
-
-	QByteArray PropertyEditorBase::scriptHelpWindowGeometry() const
-	{
-		return m_scriptHelpWindowGeometry;
-
-	}
-	void PropertyEditorBase::setScriptHelpWindowGeometry(const QByteArray& value)
-	{
-		m_scriptHelpWindowGeometry = value;
+		return m_scriptHelpFile;
 	}
 
 	//
@@ -1158,18 +1184,26 @@ namespace ExtWidgets
 	}
 
 	//
-	// ------------ StringListEditorDialog ------------
+	// ------------ VectorEditorDialog ------------
 	//
-	StringListEditorDialog::StringListEditorDialog(QWidget* parent, const QString& propertyName, const QVariant& value):
-		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint)
+	VectorEditorDialog::VectorEditorDialog(QWidget* parent, const QString& propertyName, const QVariant& value):
+		QDialog(parent, Qt::Dialog | Qt::WindowTitleHint | Qt::WindowSystemMenuHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint),
+		m_valueType(value.userType())
 	{
-		if (value.userType() != QVariant::StringList)
+		if (isValueColorVector() == false && isValueStringList() == false)
 		{
 			Q_ASSERT(false);
 			return;
 		}
 
-		m_strings = value.toStringList();
+		if (isValueStringList())
+		{
+			m_strings = value.toStringList();
+		}
+		if (isValueColorVector())
+		{
+			m_colors = value.value<QVector<QColor>>();
+		}
 
 		setWindowTitle(propertyName);
 
@@ -1180,8 +1214,17 @@ namespace ExtWidgets
 		// Create Editor
 
 		m_treeWidget = new QTreeWidget();
+
 		QStringList headerLabels;
-		headerLabels << tr("Strings");
+
+		if (isValueStringList())
+		{
+			headerLabels << tr("Strings");
+		}
+		if (isValueColorVector())
+		{
+			headerLabels << tr("Colors");
+		}
 
 		m_treeWidget->setColumnCount(headerLabels.size());
 		m_treeWidget->setHeaderLabels(headerLabels);
@@ -1190,26 +1233,26 @@ namespace ExtWidgets
 
 		m_treeWidget->header()->hide();
 
-		connect (m_treeWidget, &QTreeWidget::itemChanged, this, &StringListEditorDialog::itemChanged);
+		connect (m_treeWidget, &QTreeWidget::itemChanged, this, &VectorEditorDialog::itemChanged);
 
 		// Buttons
 
 		QVBoxLayout* buttonsLayout = new QVBoxLayout();
 
 		QPushButton* b = new QPushButton(tr("Add"));
-		connect(b, &QPushButton::clicked, this, &StringListEditorDialog::onAdd);
+		connect(b, &QPushButton::clicked, this, &VectorEditorDialog::onAdd);
 		buttonsLayout->addWidget(b);
 
 		b = new QPushButton(tr("Remove"));
-		connect(b, &QPushButton::clicked, this, &StringListEditorDialog::onRemove);
+		connect(b, &QPushButton::clicked, this, &VectorEditorDialog::onRemove);
 		buttonsLayout->addWidget(b);
 
 		b = new QPushButton(tr("Up"));
-		connect(b, &QPushButton::clicked, this, &StringListEditorDialog::onMoveUp);
+		connect(b, &QPushButton::clicked, this, &VectorEditorDialog::onMoveUp);
 		buttonsLayout->addWidget(b);
 
 		b = new QPushButton(tr("Down"));
-		connect(b, &QPushButton::clicked, this, &StringListEditorDialog::onMoveDown);
+		connect(b, &QPushButton::clicked, this, &VectorEditorDialog::onMoveDown);
 		buttonsLayout->addWidget(b);
 
 		buttonsLayout->addStretch();
@@ -1244,41 +1287,51 @@ namespace ExtWidgets
 
 		setLayout(mainLayout);
 
-		updateStrings();
+		updateVectorData();
 
 		if (m_treeWidget->topLevelItemCount() > 0)
 		{
 			m_treeWidget->topLevelItem(0)->setSelected(true);
 		}
 
-		if (thePropertyEditorSettings.m_stringListEditorSize != QSize(-1, -1))
+		if (thePropertyEditorSettings.m_vectorEditorSize != QSize(-1, -1))
 		{
-			resize(thePropertyEditorSettings.m_stringListEditorSize);
+			resize(thePropertyEditorSettings.m_vectorEditorSize);
 		}
 
 	}
 
-	StringListEditorDialog::~StringListEditorDialog()
+	VectorEditorDialog::~VectorEditorDialog()
 	{
-		thePropertyEditorSettings.m_stringListEditorSize = size();
+		thePropertyEditorSettings.m_vectorEditorSize = size();
 	}
 
-	QVariant StringListEditorDialog::value()
+	QVariant VectorEditorDialog::value()
 	{
-		return m_strings;
+		if (isValueStringList())
+		{
+			return m_strings;
+		}
+		if (isValueColorVector())
+		{
+			return QVariant::fromValue(m_colors);
+		}
+
+		Q_ASSERT(false);
+		return QVariant();
 	}
 
-	void StringListEditorDialog::onMoveUp()
+	void VectorEditorDialog::onMoveUp()
 	{
 		moveItems(false);
 	}
 
-	void StringListEditorDialog::onMoveDown()
+	void VectorEditorDialog::onMoveDown()
 	{
 		moveItems(true);
 	}
 
-	void StringListEditorDialog::onAdd()
+	void VectorEditorDialog::onAdd()
 	{
 		if (m_treeWidget == nullptr)
 		{
@@ -1286,13 +1339,22 @@ namespace ExtWidgets
 			return;
 		}
 
-		// Create new string
+		// Create new item
 
-		m_strings.push_back(tr("String - %1").arg(m_strings.size() + 1));
+		if (isValueStringList())
+		{
+			m_strings.push_back(tr("String - %1").arg(m_strings.size() + 1));
+		}
+
+		if (isValueColorVector())
+		{
+			QColor color = Qt::black;
+			m_colors.push_back(color);
+		}
 
 		m_treeWidget->clearSelection();
 
-		updateStrings();
+		updateVectorData();
 
 		QTreeWidgetItem* item = m_treeWidget->topLevelItem(m_treeWidget->topLevelItemCount() - 1);
 		if (item == nullptr)
@@ -1306,7 +1368,7 @@ namespace ExtWidgets
 		return;
 	}
 
-	void StringListEditorDialog::onRemove()
+	void VectorEditorDialog::onRemove()
 	{
 		if (m_treeWidget == nullptr)
 		{
@@ -1338,21 +1400,34 @@ namespace ExtWidgets
 			}
 			delete item;
 
-			if (row < 0 || row >= static_cast<int>(m_strings.size()))
+			if (isValueStringList())
 			{
-				Q_ASSERT(false);
-				return;
-			}
+				if (row < 0 || row >= static_cast<int>(m_strings.size()))
+				{
+					Q_ASSERT(false);
+					return;
+				}
 
-			m_strings.removeAt(row);
+				m_strings.removeAt(row);
+			}
+			if (isValueColorVector())
+			{
+				if (row < 0 || row >= static_cast<int>(m_colors.size()))
+				{
+					Q_ASSERT(false);
+					return;
+				}
+
+				m_colors.removeAt(row);
+			}
 		}
 
-		updateStrings();
+		updateVectorData();
 
 		return;
 	}
 
-	void StringListEditorDialog::itemChanged(QTreeWidgetItem *item, int column)
+	void VectorEditorDialog::itemChanged(QTreeWidgetItem *item, int column)
 	{
 		Q_UNUSED(column);
 
@@ -1363,30 +1438,63 @@ namespace ExtWidgets
 		}
 
 		int index = m_treeWidget->indexOfTopLevelItem(item);
-		if (index < 0 || index >= static_cast<int>(m_strings.size()))
-		{
-			Q_ASSERT(false);
-			return;
-		}
 
-		m_strings[index] = item->text(0);
+		if (isValueStringList())
+		{
+			if (index < 0 || index >= static_cast<int>(m_strings.size()))
+			{
+				Q_ASSERT(false);
+				return;
+			}
+
+			m_strings[index] = item->text(0);
+		}
+		if (isValueColorVector())
+		{
+			if (index < 0 || index >= static_cast<int>(m_colors.size()))
+			{
+				Q_ASSERT(false);
+				return;
+			}
+
+			QColor color = PropertyEditorBase::colorFromText(item->text(0));
+			if (color.isValid() == false)
+			{
+				return;
+			}
+
+			m_colors[index] = color;
+
+			m_treeWidget->blockSignals(true);
+			item->setText(0, PropertyEditorBase::colorToText(color));
+			item->setIcon(0, PropertyEditorBase::drawColorBox(color));
+			m_treeWidget->blockSignals(false);
+		}
 
 		return;
 	}
 
-	void StringListEditorDialog::updateStrings()
+	void VectorEditorDialog::updateVectorData()
 	{
 		m_treeWidget->blockSignals(true);
 
-		int index = 0;
+		int count = 0;
+		if (isValueStringList())
+		{
+			count = static_cast<int>(m_strings.size());
+		}
+		if (isValueColorVector())
+		{
+			count = static_cast<int>(m_colors.size());
+		}
 
-		for (const QString& s : m_strings)
+		for (int i = 0; i < count; i++)
 		{
 			QTreeWidgetItem* twi = nullptr;
 
-			if (m_treeWidget->topLevelItemCount() > index)
+			if (m_treeWidget->topLevelItemCount() > i)
 			{
-				twi = m_treeWidget->topLevelItem(index);
+				twi = m_treeWidget->topLevelItem(i);
 			}
 			else
 			{
@@ -1396,8 +1504,17 @@ namespace ExtWidgets
 
 			}
 
-			twi->setText(0, s);
-			index++;
+			if (isValueStringList())
+			{
+				twi->setText(0, m_strings[i]);
+			}
+			if (isValueColorVector())
+			{
+				QColor color = m_colors[i];
+
+				twi->setText(0, PropertyEditorBase::colorToText(color));
+				twi->setIcon(0, PropertyEditorBase::drawColorBox(color));
+			}
 		}
 
 		m_treeWidget->blockSignals(false);
@@ -1405,7 +1522,7 @@ namespace ExtWidgets
 		return;
 	}
 
-	void StringListEditorDialog::moveItems(bool forward)
+	void VectorEditorDialog::moveItems(bool forward)
 	{
 		int direction = forward ? 1 : -1;
 
@@ -1432,6 +1549,16 @@ namespace ExtWidgets
 			std::sort(selectedRows.begin(), selectedRows.end(), std::greater<int>());
 		}
 
+		int count = 0;
+		if (isValueStringList())
+		{
+			count = static_cast<int>(m_strings.size());
+		}
+		if (isValueColorVector())
+		{
+			count = static_cast<int>(m_colors.size());
+		}
+
 		for (int row : selectedRows)
 		{
 			int row2 = row + direction;
@@ -1440,14 +1567,21 @@ namespace ExtWidgets
 				break;
 			}
 
-			if (row < 0 || row >= static_cast<int>(m_strings.size()) ||
-				row2 < 0 || row2 >= static_cast<int>(m_strings.size()))
+			if (row < 0 || row >= count ||
+					row2 < 0 || row2 >= count)
 			{
 				Q_ASSERT(false);
 				return;
 			}
 
-			std::swap(m_strings[row], m_strings[row2]);
+			if (isValueStringList())
+			{
+				std::swap(m_strings[row], m_strings[row2]);
+			}
+			if (isValueColorVector())
+			{
+				std::swap(m_colors[row], m_colors[row2]);
+			}
 
 			QTreeWidgetItem* item1 = m_treeWidget->topLevelItem(row);
 			item1->setSelected(false);
@@ -1456,9 +1590,19 @@ namespace ExtWidgets
 			item2->setSelected(true);
 		}
 
-		updateStrings();
+		updateVectorData();
 
 		return;
+	}
+
+	bool VectorEditorDialog::isValueStringList() const
+	{
+		return m_valueType == QVariant::StringList;
+	}
+
+	bool VectorEditorDialog::isValueColorVector() const
+	{
+		return m_valueType == qMetaTypeId<QVector<QColor>>();
 	}
 
 	//
@@ -1951,17 +2095,14 @@ namespace ExtWidgets
 	void MultiColorEdit::onButtonPressed()
 	{
 		QString t = m_lineEdit->text();
-		QColor color = colorFromText(t);
+		QColor color = PropertyEditorBase::colorFromText(t);
 
 		QColorDialog dialog(color, this);
 		if (dialog.exec() == QDialog::Accepted)
 		{
 			QColor selectedColor = dialog.selectedColor();
-            QString str = QString("[%1;%2;%3;%4]").
-						  arg(selectedColor.red()).
-						  arg(selectedColor.green()).
-						  arg(selectedColor.blue()).
-						  arg(selectedColor.alpha());
+
+			QString str = PropertyEditorBase::colorToText(selectedColor);
 
 			if (selectedColor != m_oldColor)
             {
@@ -1982,11 +2123,8 @@ namespace ExtWidgets
 		}
 
         QColor color = property->value().value<QColor>();
-        QString str = QString("[%1;%2;%3;%4]").
-					  arg(color.red()).
-					  arg(color.green()).
-					  arg(color.blue()).
-					  arg(color.alpha());
+
+		QString str = PropertyEditorBase::colorToText(color);
 
 		m_oldColor = color;
 
@@ -2001,7 +2139,7 @@ namespace ExtWidgets
 		if (m_escape == false)
 		{
             QString t = m_lineEdit->text();
-            QColor color = colorFromText(t);
+			QColor color = PropertyEditorBase::colorFromText(t);
 
             if (color != m_oldColor)
 			{
@@ -2009,42 +2147,6 @@ namespace ExtWidgets
                 emit valueChanged(color);
 			}
 		}
-	}
-
-	QColor MultiColorEdit::colorFromText(const QString& t)
-	{
-		if (t.isEmpty() == true)
-		{
-			return QColor();
-		}
-
-		QString text = t;
-		text.remove(QRegExp("[\\[,\\]]"));
-
-		QStringList l = text.split(";");
-		if (l.count() != 4)
-		{
-			return QColor();
-		}
-
-		int r = l[0].toInt();
-		int g = l[1].toInt();
-		int b = l[2].toInt();
-		int a = l[3].toInt();
-
-		if (r < 0 || r > 255)
-			r = 255;
-
-		if (g < 0 || g > 255)
-			g = 255;
-
-		if (b < 0 || b > 255)
-			b = 255;
-
-		if (a < 0 || a > 255)
-			a = 255;
-
-		return QColor(r, g, b, a);
 	}
 
 	//
@@ -2109,7 +2211,7 @@ namespace ExtWidgets
 
 		// Property Editor help
 
-		if (p->isScript() && m_propertyEditorBase->scriptHelp().isEmpty() == false)
+		if (p->isScript() && m_propertyEditorBase->scriptHelpFile().isEmpty() == false)
 		{
 			QPushButton* helpButton = new QPushButton("?", this);
 
@@ -2117,44 +2219,17 @@ namespace ExtWidgets
 
 			connect(helpButton, &QPushButton::clicked, [this] ()
 			{
-				if (m_propertyEditorHelp == nullptr)
+				QString scriptHelpFile = m_propertyEditorBase->scriptHelpFile();
+
+				QFile f(scriptHelpFile);
+				if (f.exists() == true)
 				{
-					m_propertyEditorHelp = new PropertyEditorHelpDialog(tr("Script Help"), m_propertyEditorBase->scriptHelp(), this);
-					m_propertyEditorHelp->show();
-
-					if (m_propertyEditorBase->scriptHelpWindowPos().x() != -1 && m_propertyEditorBase->scriptHelpWindowPos().y() != -1)
-					{
-						m_propertyEditorHelp->move(m_propertyEditorBase->scriptHelpWindowPos());
-						m_propertyEditorHelp->restoreGeometry(m_propertyEditorBase->scriptHelpWindowGeometry());
-					}
-					else
-					{
-						// put the window at the right side of the screen
-
-						QDesktopWidget* screen = QApplication::desktop();
-						QRect screenGeometry = screen->availableGeometry();
-
-						int screenHeight = screenGeometry.height();
-						int screenWidth = screenGeometry.width();
-
-						int defaultWidth = screenWidth / 4;
-
-						// height must exclude the window header size
-
-						int defaultHeight = screenHeight - (m_propertyEditorHelp->geometry().y() - m_propertyEditorHelp->y());
-
-						m_propertyEditorHelp->move(screenWidth - defaultWidth, 0);
-						m_propertyEditorHelp->resize(defaultWidth, defaultHeight);
-					}
-
-					connect(m_propertyEditorHelp, &PropertyEditorHelpDialog::destroyed, [this] (QObject*)
-					{
-						m_propertyEditorBase->setScriptHelpWindowPos(m_propertyEditorHelp->pos());
-						m_propertyEditorBase->setScriptHelpWindowGeometry(m_propertyEditorHelp->saveGeometry());
-
-						m_propertyEditorHelp = nullptr;
-
-					});
+					QUrl url = QUrl::fromLocalFile(scriptHelpFile);
+					QDesktopServices::openUrl(url);
+				}
+				else
+				{
+					QMessageBox::critical(this, qAppName(), tr("Help file '%1' does not exist!").arg(scriptHelpFile));
 				}
 			});
 
@@ -2730,6 +2805,11 @@ namespace ExtWidgets
 			m_lineEdit->setText("<StringList>");
 		}
 
+		if (m_currentValue.userType() == qMetaTypeId<QVector<QColor>>())
+		{
+			m_lineEdit->setText("QColor [0 items]");
+		}
+
 		m_button = new QToolButton(parent);
 		m_button->setText("...");
 
@@ -2758,6 +2838,12 @@ namespace ExtWidgets
 			return;
 		}
 
+		if (m_currentValue.userType() == qMetaTypeId<QVector<QColor>>())
+		{
+			m_lineEdit->setText(PropertyEditorBase::colorVectorText(m_currentValue));
+			return;
+		}
+
 		if (variantIsPropertyVector(m_currentValue) == true || variantIsPropertyList(m_currentValue) == true)
 		{
 			m_lineEdit->setText(PropertyEditorBase::propertyVectorText(m_currentValue));
@@ -2772,7 +2858,8 @@ namespace ExtWidgets
 	{
 		if (variantIsPropertyVector(m_currentValue) == false &&
 				variantIsPropertyList(m_currentValue) == false &&
-				m_currentValue.userType() != QVariant::StringList)
+				m_currentValue.userType() != QVariant::StringList &&
+				m_currentValue.userType() != qMetaTypeId<QVector<QColor>>())
 		{
 			Q_ASSERT(false);
 			return;
@@ -2790,9 +2877,9 @@ namespace ExtWidgets
 			newValue = d.value();
 		}
 
-		if (m_currentValue.userType() == QVariant::StringList)
+		if (m_currentValue.userType() == QVariant::StringList || m_currentValue.userType() == qMetaTypeId<QVector<QColor>>())
 		{
-			StringListEditorDialog d(this, m_property->caption(), m_currentValue);
+			VectorEditorDialog d(this, m_property->caption(), m_currentValue);
 			if (d.exec() != QDialog::Accepted)
 			{
 				return;
@@ -2817,7 +2904,16 @@ namespace ExtWidgets
 			{
 				m_lineEdit->setText(PropertyEditorBase::stringListText(m_currentValue));
 			}
+			else
+			{
+				if ( m_currentValue.userType() == qMetaTypeId<QVector<QColor>>())
+				{
+					m_lineEdit->setText(PropertyEditorBase::colorVectorText(m_currentValue));
+				}
+			}
 		}
+
+		return;
 	}
 
 	//
@@ -3340,7 +3436,7 @@ namespace ExtWidgets
 		m_arrayPropertyEditorSplitterState = s.value("PropertyEditor/arrayPropertyEditorSplitterState").toByteArray();
 		m_arrayPropertyEditorSize = s.value("PropertyEditor/arrayPropertyEditorSize").toSize();
 
-		m_stringListEditorSize = s.value("PropertyEditor/m_stringListEditorSize").toSize();
+		m_vectorEditorSize = s.value("PropertyEditor/m_vectorEditorSize").toSize();
 
 		m_multiLinePropertyEditorWindowPos = s.value("PropertyEditor/multiLinePropertyEditorWindowPos", QPoint(-1, -1)).toPoint();
 		m_multiLinePropertyEditorGeometry = s.value("PropertyEditor/multiLinePropertyEditorGeometry").toByteArray();
@@ -3351,8 +3447,6 @@ namespace ExtWidgets
 			m_propertyEditorFontScaleFactor = 1.0;
 		}
 
-		m_scriptHelpWindowPos = s.value("PropertyEditor/scriptHelpPos", QPoint(-1, -1)).toPoint();
-		m_scriptHelpWindowGeometry = s.value("PropertyEditor/scriptHelpGeometry").toByteArray();
 	}
 
 	void PropertyEditorSettings::store(QSettings& s)
@@ -3360,14 +3454,12 @@ namespace ExtWidgets
 		s.setValue("PropertyEditor/arrayPropertyEditorSplitterState", m_arrayPropertyEditorSplitterState);
 		s.setValue("PropertyEditor/arrayPropertyEditorSize", m_arrayPropertyEditorSize);
 
-		s.setValue("PropertyEditor/m_stringListEditorSize", m_stringListEditorSize);
+		s.setValue("PropertyEditor/m_vectorEditorSize", m_vectorEditorSize);
 
 		s.setValue("PropertyEditor/multiLinePropertyEditorWindowPos", m_multiLinePropertyEditorWindowPos);
 		s.setValue("PropertyEditor/multiLinePropertyEditorGeometry", m_multiLinePropertyEditorGeometry);
 
 		s.setValue("PropertyEditor/fontScaleFactor", m_propertyEditorFontScaleFactor);
-		s.setValue("PropertyEditor/scriptHelpPos", m_scriptHelpWindowPos);
-		s.setValue("PropertyEditor/scriptHelpGeometry", m_scriptHelpWindowGeometry);
 	}
 
 	//
@@ -3392,8 +3484,6 @@ namespace ExtWidgets
 		connect(m_propertyVariantManager, &MultiVariantPropertyManager::valueChanged, this, &PropertyEditor::onValueChanged);
 
 		connect(this, &PropertyEditor::showErrorMessage, this, &PropertyEditor::onShowErrorMessage, Qt::QueuedConnection);
-
-		setScriptHelp(tr("<h1>This is a sample script help!</h1>"));
 
 		//
 

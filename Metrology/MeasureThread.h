@@ -10,7 +10,14 @@
 
 // ==============================================================================================
 
-const int				   MEASURE_THREAD_TIMEOUT_STEP = 100; // 100 milliseconds
+const int				MEASURE_THREAD_TIMEOUT_STEP			= 100; // 100 milliseconds
+
+// ==============================================================================================
+
+const int				MEASURE_THREAD_CMP_PREAPRE_1		= 0,
+						MEASURE_THREAD_CMP_PREAPRE_2		= 1;
+
+const int				MEASURE_THREAD_CMP_PREPARE_COUNT	= 2;
 
 // ==============================================================================================
 
@@ -30,19 +37,17 @@ private:
 	int						m_measureType = MEASURE_TYPE_UNKNOWN;
 	bool					m_cmdStopMeasure = true;
 
-	MeasureMultiParam		m_activeSignalParam[Metrology::ChannelCount];
-
-	double					m_tunSignalState[Metrology::ChannelCount];
+	QVector<IoSignalParam>	m_activeIoParamList;
 
 	void					waitMeasureTimeout();
 
 	// calibrators
 	//
 	bool					calibratorIsValid(CalibratorManager* pCalibratorManager);
-	bool					hasConnectedCalibrators();
+	int						getConnectedCalibrators();
 	bool					setCalibratorUnit();
 	bool					prepareCalibrator(CalibratorManager* pCalibratorManager, int calibratorMode, E::ElectricUnit signalUnit, double electricHighLimit);
-	void					polarityTest(double electricVal, MeasureMultiParam& param);
+	void					polarityTest(double electricVal, IoSignalParam& ioParam);
 
 	// function of measure
 	//
@@ -59,8 +64,9 @@ public:
 	void					init(QWidget* parent = nullptr);
 	void					setMeasureType(int measureType) { m_measureType = measureType; }
 	bool					enableMesureIsSignal();
-	bool					signalIsMeasured(QString& signalID);
-	bool					setActiveSignalParam();
+	bool					signalIsMeasured(const MeasureSignal& activeSignal, QString& signalID);
+	bool					setActiveSignalParam(const MeasureSignal& activeSignal);
+	bool					inputsOfmoduleIsSame();														// only for mode "Simaple module"
 
 	void					stop() { m_cmdStopMeasure = true; }
 

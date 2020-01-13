@@ -431,20 +431,6 @@ TuningSourcesWidget::TuningSourcesWidget(TuningTcpClient* tcpClient, bool hasAct
 	m_treeWidget->setSortingEnabled(true);
 	m_treeWidget->sortByColumn(0, Qt::AscendingOrder);// sort by EquipmentID
 
-	if (m_hasActivationControls == true)
-	{
-		if (m_btnEnableControl == nullptr || m_btnDisableControl == nullptr || m_labelSingleControlMode == nullptr)
-		{
-			assert(m_btnEnableControl);
-			assert(m_btnDisableControl);
-			assert(m_labelSingleControlMode);
-			return;
-		}
-
-		m_btnEnableControl->setEnabled(false);
-		m_btnDisableControl->setEnabled(false);
-	}
-
 	connect(m_tuningTcpClient, &TuningTcpClient::tuningSourcesArrived, this, &TuningSourcesWidget::slot_tuningSourcesArrived);
 
 	m_updateStateTimerId = startTimer(250);
@@ -479,6 +465,11 @@ void TuningSourcesWidget::timerEvent(QTimerEvent* event)
 	{
 		update(true);
 	}
+}
+
+bool TuningSourcesWidget::login()
+{
+	return true;
 }
 
 void TuningSourcesWidget::slot_tuningSourcesArrived()
@@ -554,11 +545,17 @@ void TuningSourcesWidget::update(bool refreshOnly)
 
 				m_labelSingleControlMode->setText(m_singleControlMode == true ? m_singleLmControlEnabledString : m_singleLmControlDisabledString);
 
-				m_btnEnableControl->setEnabled(m_singleControlMode == true);
-				m_btnDisableControl->setEnabled(m_singleControlMode == true);
+				m_btnEnableControl->setEnabled(false);
+				m_btnDisableControl->setEnabled(false);
 			}
 		}
 	}
+
+	// Refresh
+	//
+
+	bool currentControlIsSelected = false;
+	bool currentControlIsEnabled = false;
 
 	for (int i = 0; i < count; i++)
 	{
@@ -574,44 +571,58 @@ void TuningSourcesWidget::update(bool refreshOnly)
 
 		TuningSource ts;
 
-		if (m_tuningTcpClient->tuningSourceInfo(hash, &ts) == true)
+		if (m_tuningTcpClient->tuningSourceInfo(hash, &ts) == false)
 		{
-			if (ts.state.controlisactive() == true)
+			continue;
+		}
+
+		if (item->isSelected() == true)
+		{
+			currentControlIsSelected = true;
+			currentControlIsEnabled = ts.state.controlisactive();
+		}
+
+		if (ts.state.controlisactive() == true)
+		{
+			if (ts.state.isreply() == false)
 			{
-				if (ts.state.isreply() == false)
-				{
-					item->setForeground(static_cast<int>(Columns::State), QBrush(DialogSourceInfo::dataItemErrorColor));
+				item->setForeground(static_cast<int>(Columns::State), QBrush(DialogSourceInfo::dataItemErrorColor));
 
-					item->setText(static_cast<int>(Columns::State), tr("No Reply"));
-				}
-				else
-				{
-					int errorsCount = ts.getErrorsCount();
-
-					if (errorsCount == 0)
-					{
-						item->setForeground(static_cast<int>(Columns::State), QBrush(Qt::black));
-
-						item->setText(static_cast<int>(Columns::State), tr("Active"));
-					}
-					else
-					{
-						item->setForeground(static_cast<int>(Columns::State), QBrush(DialogSourceInfo::dataItemErrorColor));
-
-						item->setText(static_cast<int>(Columns::State), tr("E: %1").arg(errorsCount));
-					}
-				}
+				item->setText(static_cast<int>(Columns::State), tr("No Reply"));
 			}
 			else
 			{
-				item->setText(static_cast<int>(Columns::State), tr("Inactive"));
-			}
+				int errorsCount = ts.getErrorsCount();
 
-			item->setText(static_cast<int>(Columns::IsActive), ts.state.controlisactive() ? tr("Yes") : tr("No"));
-			item->setText(static_cast<int>(Columns::HasUnappliedParams), ts.state.hasunappliedparams() ? tr("Yes") : tr("No"));
-			item->setText(static_cast<int>(Columns::RequestCount), QString::number(ts.state.requestcount()));
-			item->setText(static_cast<int>(Columns::ReplyCount), QString::number(ts.state.replycount()));
+				if (errorsCount == 0)
+				{
+					item->setForeground(static_cast<int>(Columns::State), QBrush(Qt::black));
+
+					item->setText(static_cast<int>(Columns::State), tr("Active"));
+				}
+				else
+				{
+					item->setForeground(static_cast<int>(Columns::State), QBrush(DialogSourceInfo::dataItemErrorColor));
+
+					item->setText(static_cast<int>(Columns::State), tr("E: %1").arg(errorsCount));
+				}
+			}
 		}
+		else
+		{
+			item->setText(static_cast<int>(Columns::State), tr("Inactive"));
+		}
+
+		item->setText(static_cast<int>(Columns::IsActive), ts.state.controlisactive() ? tr("Yes") : tr("No"));
+		item->setText(static_cast<int>(Columns::HasUnappliedParams), ts.state.hasunappliedparams() ? tr("Yes") : tr("No"));
+		item->setText(static_cast<int>(Columns::RequestCount), QString::number(ts.state.requestcount()));
+		item->setText(static_cast<int>(Columns::ReplyCount), QString::number(ts.state.replycount()));
+	}
+
+	if (m_hasActivationControls == true && m_singleControlMode == true && currentControlIsSelected == true)
+	{
+		m_btnEnableControl->setEnabled(currentControlIsEnabled == false);
+		m_btnDisableControl->setEnabled(currentControlIsEnabled == true);
 	}
 }
 
@@ -662,10 +673,10 @@ void TuningSourcesWidget::on_treeWidget_itemSelectionChanged()
 
 	m_btnDetails->setEnabled(item != nullptr);
 
+	// Single control mode controls
+	//
 	if (m_hasActivationControls == true)
 	{
-		// Single control mode controls
-
 		if (m_btnEnableControl == nullptr || m_btnDisableControl == nullptr || m_labelSingleControlMode == nullptr)
 		{
 			assert(m_btnEnableControl);
@@ -673,15 +684,32 @@ void TuningSourcesWidget::on_treeWidget_itemSelectionChanged()
 			assert(m_labelSingleControlMode);
 			return;
 		}
-		if (item == nullptr)
+
+		if (m_singleControlMode == false)
 		{
 			m_btnEnableControl->setEnabled(false);
 			m_btnDisableControl->setEnabled(false);
 		}
 		else
 		{
-			m_btnEnableControl->setEnabled(m_singleControlMode);
-			m_btnDisableControl->setEnabled(m_singleControlMode);
+			if (item == nullptr)
+			{
+				m_btnEnableControl->setEnabled(false);
+				m_btnDisableControl->setEnabled(false);
+			}
+			else
+			{
+
+				Hash hash = item->data(columnIndex_Hash, Qt::UserRole).value<Hash>();
+
+				TuningSource ts;
+
+				if (m_tuningTcpClient->tuningSourceInfo(hash, &ts) == true)
+				{
+					m_btnEnableControl->setEnabled(ts.state.controlisactive() == false);
+					m_btnDisableControl->setEnabled(ts.state.controlisactive() == true);
+				}
+			}
 		}
 	}
 }
@@ -729,6 +757,11 @@ void TuningSourcesWidget::activateControl(bool enable)
 	if (items.size() != 1)
 	{
 		QMessageBox::warning(this, qAppName(), tr("Please select a tuning source!"));
+		return;
+	}
+
+	if (login() == false)
+	{
 		return;
 	}
 

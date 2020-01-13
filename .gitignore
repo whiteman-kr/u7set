@@ -11,7 +11,7 @@ GetGitProjectVersion
 .svn
 .vscode
 Scripts/out
-Test/build-u7database*/**
+Test/build-*/**
 Test/bin/**
 Metrology/Metrology.db
 Tools/build-*/**

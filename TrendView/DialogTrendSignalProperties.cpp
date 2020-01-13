@@ -41,6 +41,10 @@ DialogTrendSignalProperties::DialogTrendSignalProperties(const TrendLib::TrendSi
 		ui->viewLowEdit->setText(QString::number(m_trendSignal.viewLowLimit(), 'f', trendSignal.precision()));
 	}
 
+
+	ui->viewLineWeightEdit->setValidator(new QIntValidator(0, 10,ui->viewLineWeightEdit));
+	ui->viewLineWeightEdit->setText(QString::number(static_cast<int>(m_trendSignal.lineWeight())));
+
 	if (m_trendSignal.type() == E::SignalType::Discrete)
 	{
 		ui->limitsEdit->setText(tr("0 - 1"));
@@ -102,6 +106,13 @@ bool DialogTrendSignalProperties::applyProperties()
 {
 	bool ok = false;
 
+	int lineWeight = ui->viewLineWeightEdit->text().toInt(&ok);
+	if (ok == false)
+	{
+		ui->viewLineWeightEdit->setFocus();
+		return false;
+	}
+
 	double viewHighValue = ui->viewHighEdit->text().toDouble(&ok);
 	if (ok == false)
 	{
@@ -116,6 +127,7 @@ bool DialogTrendSignalProperties::applyProperties()
 		return false;
 	}
 
+	m_trendSignal.setLineWeight(lineWeight);
 	m_trendSignal.setViewHighLimit(qMax(viewHighValue, viewLowValue));
 	m_trendSignal.setViewLowLimit(qMin(viewHighValue, viewLowValue));
 	m_trendSignal.setColor(ui->colorWidget->color());

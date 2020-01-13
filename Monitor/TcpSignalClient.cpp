@@ -289,6 +289,8 @@ void TcpSignalClient::requestSignalParam(int startIndex)
 
 	if (startIndex >= m_signalList.size())
 	{
+		emit signalParamAndUnitsArrived();
+
 		resetToGetState(true);	// END OF RECEIVING SIGNALS PARAMS,
 								// Here the new loop starts!!!
 		return;

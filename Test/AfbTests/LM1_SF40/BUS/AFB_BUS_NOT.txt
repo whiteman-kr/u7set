@@ -1,0 +1,51 @@
+test AFB_BUS_NOT_1, BUS_NOT function test
+schema AFB_BUS_NOT
+compatible MODULE_LM1SF40
+set #TUN_DSCR_BUS_01_INP01 = 0
+set #TUN_DSCR_BUS_02_INP01 = 0
+set #TUN_DSCR_BUS_03_INP01 = 0
+set #TUN_DSCR_BUS_04_INP01 = 0
+set #TUN_DSCR_BUS_05_INP01 = 0
+
+check #OUT_BUS_NOT_01 == 1
+check #OUT_BUS_NOT_02 == 1
+check #OUT_BUS_NOT_03 == 1
+check #OUT_BUS_NOT_04 == 1
+check #OUT_BUS_NOT_05 == 1
+
+endtest
+
+test AFB_BUS_NOT_2, BUS_NOT function test
+schema AFB_BUS_NOT
+compatible MODULE_LM1SF00
+
+set #TUN_DSCR_BUS_01_INP01 = 1
+set #TUN_DSCR_BUS_02_INP01 = 1
+set #TUN_DSCR_BUS_03_INP01 = 1
+set #TUN_DSCR_BUS_04_INP01 = 1
+set #TUN_DSCR_BUS_05_INP01 = 1
+
+check #OUT_BUS_NOT_01 == 0
+check #OUT_BUS_NOT_02 == 0
+check #OUT_BUS_NOT_03 == 0
+check #OUT_BUS_NOT_04 == 0
+check #OUT_BUS_NOT_05 == 0
+endtest
+
+test AFB_BUS_NOT_3, BUS_NOT function test
+schema AFB_BUS_NOT
+compatible MODULE_LM1SF00
+
+set #TUN_DSCR_BUS_01_INP01 = 1
+set #TUN_DSCR_BUS_02_INP01 = 0
+set #TUN_DSCR_BUS_03_INP01 = 1
+set #TUN_DSCR_BUS_04_INP01 = 0
+set #TUN_DSCR_BUS_05_INP01 = 1
+
+check #OUT_BUS_NOT_01 == 0
+check #OUT_BUS_NOT_02 == 1
+check #OUT_BUS_NOT_03 == 0
+check #OUT_BUS_NOT_04 == 1
+check #OUT_BUS_NOT_05 == 0
+endtest
+

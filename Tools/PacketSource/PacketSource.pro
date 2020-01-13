@@ -14,7 +14,9 @@ TEMPLATE = app
 gcc:CONFIG += c++1z
 win32:QMAKE_CXXFLAGS += /std:c++17		#CONFIG += c++17 has no effect yet
 
-include(../warnings.pri)
+include(../../warnings.pri)
+
+win32:RC_ICONS += icons/PacketSource.ico
 
 # DESTDIR
 #
@@ -63,9 +65,9 @@ SourceBase.cpp \
     ../../lib/SimpleMutex.cpp \
     ../../lib/Times.cpp \
     PathOptionDialog.cpp \
-    FindSignalTextPanel.cpp \
-    FindData.cpp \
-    ../../lib/MemLeaksDetection.cpp
+    ../../lib/MemLeaksDetection.cpp \
+    FindSignalPanel.cpp \
+    FrameDataPanel.cpp
 
 
 HEADERS += \
@@ -108,10 +110,10 @@ SourceBase.h \
     ../../lib/SimpleMutex.h \
     ../../lib/Times.h \
     PathOptionDialog.h \
-    FindSignalTextPanel.h \
-    FindData.h \
     Stable.h \
-    ../../lib/MemLeaksDetection.h
+    ../../lib/MemLeaksDetection.h \
+    FindSignalPanel.h \
+    FrameDataPanel.h
 
 RESOURCES += \
 resources.qrc

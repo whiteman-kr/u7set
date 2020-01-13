@@ -254,7 +254,7 @@ TuningSource TuningSourceTable::source(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSourceTable::set(const QList<TuningSource> list_add)
+void TuningSourceTable::set(const QVector<TuningSource>& list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -470,7 +470,7 @@ QString TuningSignalTable::text(int row, int column, Metrology::Signal* pSignal)
 		case TUN_SIGNAL_LIST_COLUMN_RACK:			result = param.location().rack().caption();	break;
 		case TUN_SIGNAL_LIST_COLUMN_APP_ID:			result = param.appSignalID();				break;
 		case TUN_SIGNAL_LIST_COLUMN_CUSTOM_ID:		result = param.customAppSignalID();			break;
-		case TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID:	result = param.location().equipmentID();	break;
+		case TUN_SIGNAL_LIST_COLUMN_EQUIPMENT_ID:	result = param.equipmentID();				break;
 		case TUN_SIGNAL_LIST_COLUMN_CAPTION:		result = param.caption();					break;
 		case TUN_SIGNAL_LIST_COLUMN_STATE:			result = signalStateStr(pSignal);			break;
 		case TUN_SIGNAL_LIST_COLUMN_DEFAULT:		result = param.tuningDefaultValueStr();		break;
@@ -587,7 +587,7 @@ Metrology::Signal* TuningSignalTable::signal(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalTable::set(const QList<Metrology::Signal*> list_add)
+void TuningSignalTable::set(const QVector<Metrology::Signal*>& list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -673,7 +673,7 @@ TuningSignalListDialog::~TuningSignalListDialog()
 void TuningSignalListDialog::createInterface()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/InOut.png"));
+	setWindowIcon(QIcon(":/icons/Tuning.png"));
 	setWindowTitle(tr("Tuning signals"));
 	resize(1000, 600);
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());
@@ -684,8 +684,8 @@ void TuningSignalListDialog::createInterface()
 	m_pEditMenu = new QMenu(tr("&Edit"), this);
 	m_pViewMenu = new QMenu(tr("&View"), this);
 
-	m_pChangeStateAction = m_pSignalMenu->addAction(tr("&Change state ..."));
-	m_pChangeStateAction->setIcon(QIcon(":/icons/ChangeState.png"));
+	m_pSetValueAction = m_pSignalMenu->addAction(tr("&Set value ..."));
+	m_pSetValueAction->setIcon(QIcon(":/icons/ChangeState.png"));
 	//m_pChangeStateAction->setShortcut(Qt::CTRL + Qt::Key_Enter);
 
 	m_pSignalMenu->addSeparator();
@@ -735,7 +735,7 @@ void TuningSignalListDialog::createInterface()
 	m_pMenuBar->addMenu(m_pEditMenu);
 	m_pMenuBar->addMenu(m_pViewMenu);
 
-	connect(m_pChangeStateAction, &QAction::triggered, this, &TuningSignalListDialog::changeSignalState);
+	connect(m_pSetValueAction, &QAction::triggered, this, &TuningSignalListDialog::setSignalState);
 	connect(m_pExportAction, &QAction::triggered, this, &TuningSignalListDialog::exportSignal);
 
 	connect(m_pFindAction, &QAction::triggered, this, &TuningSignalListDialog::find);
@@ -776,7 +776,9 @@ void TuningSignalListDialog::createInterface()
 		m_pSignalView->setColumnWidth(column, TuningSignalColumnWidth[column]);
 	}
 
+	m_pSignalView->setSelectionMode(QAbstractItemView::SingleSelection);
 	m_pSignalView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_pSignalView->setWordWrap(false);
 
 	connect(m_pSignalView, &QTableView::doubleClicked , this, &TuningSignalListDialog::onSignalListDoubleClicked);
 
@@ -824,9 +826,11 @@ void TuningSignalListDialog::createContextMenu()
 	//
 	m_pContextMenu = new QMenu(tr(""), this);
 
-	m_pContextMenu->addAction(m_pCopyAction);
+	m_pContextMenu->addAction(m_pSetValueAction);
 	m_pContextMenu->addSeparator();
 	m_pContextMenu->addMenu(m_pViewTypeADMenu);
+	m_pContextMenu->addSeparator();
+	m_pContextMenu->addAction(m_pCopyAction);
 
 	// init context menu
 	//
@@ -842,7 +846,7 @@ void TuningSignalListDialog::updateSourceList()
 	//
 	m_sourceTable.clear();
 
-	QList<TuningSource> sourceList;
+	QVector<TuningSource> sourceList;
 
 	int souceCount = theSignalBase.tuning().Sources().count();
 	for(int i = 0; i < souceCount; i++)
@@ -869,7 +873,7 @@ void TuningSignalListDialog::updateSignalList()
 
 	m_signalTable.clear();
 
-	QList<Metrology::Signal*> signalList;
+	QVector<Metrology::Signal*> signalList;
 
 	int signalCount = theSignalBase.tuning().Signals().count();
 	for(int i = 0; i < signalCount; i++)
@@ -994,7 +998,7 @@ bool TuningSignalListDialog::eventFilter(QObject *object, QEvent *event)
 
 		if (keyEvent->key() == Qt::Key_Return)
 		{
-			qDebug() << "attempt";
+			setSignalState();
 		}
 	}
 
@@ -1003,7 +1007,7 @@ bool TuningSignalListDialog::eventFilter(QObject *object, QEvent *event)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void TuningSignalListDialog::changeSignalState()
+void TuningSignalListDialog::setSignalState()
 {
 	int index = m_pSignalView->currentIndex().row();
 	if (index < 0 || index >= m_signalTable.signalCount())
@@ -1167,7 +1171,7 @@ void TuningSignalListDialog::onColumnAction(QAction* action)
 
 void TuningSignalListDialog::onSignalListDoubleClicked(const QModelIndex&)
 {
-	changeSignalState();
+	setSignalState();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1192,7 +1196,7 @@ TuningSignalStateDialog::~TuningSignalStateDialog()
 void TuningSignalStateDialog::createInterface()
 {
 	setWindowFlags(Qt::Window  | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/InOut.png"));
+	setWindowIcon(QIcon(":/icons/Tuning.png"));
 	setWindowTitle(tr("Signal state"));
 
 	if (m_param.isValid() == false)

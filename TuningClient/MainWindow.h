@@ -146,7 +146,5 @@ extern MainWindow* theMainWindow;
 
 extern Log::LogFile* theLogFile;
 
-extern QColor redColor;
-
 #endif // MAINWINDOW_H
 

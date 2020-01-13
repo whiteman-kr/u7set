@@ -1439,6 +1439,16 @@ namespace Hardware
 		return c;
 	}
 
+	QString DeviceObject::replaceEngeneeringToEngineering(const QString& data)
+	{
+		QString result = data;
+
+		result.replace(QLatin1Literal("engeneering"), QLatin1Literal("engineering"), Qt::CaseSensitive);
+		result.replace(QLatin1Literal("Engeneering"), QLatin1Literal("Engineering"), Qt::CaseSensitive);
+
+		return result;
+	}
+
 	int DeviceObject::fileId() const
 	{
 		return fileInfo().fileId();
@@ -1837,7 +1847,7 @@ R"DELIM({
 	DeviceChassis::DeviceChassis(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, "Type", true, DeviceChassis::type, DeviceChassis::setType)
+		auto typeProp = ADD_PROPERTY_GETTER_SETTER(int, "Type", true, DeviceChassis::type, DeviceChassis::setType);
 		typeProp->setUpdateFromPreset(true);
 		typeProp->setExpert(true);
 
@@ -1962,20 +1972,20 @@ R"DELIM({
 	DeviceModule::DeviceModule(bool preset /*= false*/) :
 		DeviceObject(preset)
 	{
-		auto familyTypeProp = ADD_PROPERTY_GETTER_SETTER(DeviceModule::FamilyType, "ModuleFamily", true, DeviceModule::moduleFamily, DeviceModule::setModuleFamily)
+		auto familyTypeProp = ADD_PROPERTY_GETTER_SETTER(DeviceModule::FamilyType, "ModuleFamily", true, DeviceModule::moduleFamily, DeviceModule::setModuleFamily);
 		familyTypeProp->setExpert(true);
 
-		auto moduleVersionProp = ADD_PROPERTY_GETTER_SETTER(int, "ModuleVersion", true, DeviceModule::moduleVersion, DeviceModule::setModuleVersion)
+		auto moduleVersionProp = ADD_PROPERTY_GETTER_SETTER(int, "ModuleVersion", true, DeviceModule::moduleVersion, DeviceModule::setModuleVersion);
 		moduleVersionProp->setExpert(true);
 
-		auto configScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, "ConfigurationScript", true, DeviceModule::configurationScript, DeviceModule::setConfigurationScript)
+		auto configScriptProp = ADD_PROPERTY_GETTER_SETTER(QString, "ConfigurationScript", true, DeviceModule::configurationScript, DeviceModule::setConfigurationScript);
 		configScriptProp->setExpert(true);
 		configScriptProp->setIsScript(true);
 
-		auto rawDataDescrProp = ADD_PROPERTY_GETTER_SETTER(QString, "RawDataDescription", true, DeviceModule::rawDataDescription, DeviceModule::setRawDataDescription)
+		auto rawDataDescrProp = ADD_PROPERTY_GETTER_SETTER(QString, "RawDataDescription", true, DeviceModule::rawDataDescription, DeviceModule::setRawDataDescription);
 		rawDataDescrProp->setExpert(true);
 
-		auto customFamilyTypeProp = ADD_PROPERTY_GETTER_SETTER(int, "CustomModuleFamily", true, DeviceModule::customModuleFamily, DeviceModule::setCustomModuleFamily)
+		auto customFamilyTypeProp = ADD_PROPERTY_GETTER_SETTER(int, "CustomModuleFamily", true, DeviceModule::customModuleFamily, DeviceModule::setCustomModuleFamily);
 		customFamilyTypeProp->setExpert(true);
 
 		familyTypeProp->setUpdateFromPreset(true);
@@ -2070,6 +2080,9 @@ R"DELIM({
 		m_customModuleFamily = static_cast<uint16_t>(modulemessage.custommodulefamily());
 
 		m_configurationScript = QString::fromStdString(modulemessage.configurationscript());
+		m_configurationScript = replaceEngeneeringToEngineering(m_configurationScript);		// Shit happens. We had a situaltion when misprinting was detected (EngEneering vs EngIneering).
+																				// To avoid manual replacement of this typo for non platform modules, the replace just made.
+
 		m_rawDataDescription = QString::fromStdString(modulemessage.rawdatadescription());
 
 		return true;
@@ -2355,7 +2368,7 @@ R"DELIM({
 
 		auto validitySignalId = addProperty<QString, DeviceSignal, &DeviceSignal::validitySignalId, &DeviceSignal::setValiditySignalId>(PropertyNames::validitySignalId, QLatin1String(), true);
 
-		auto signalSpecPropsStrucProp = addProperty<QString, DeviceSignal, &DeviceSignal::signalSpecPropsStruc, &DeviceSignal::setSignalSpecPropsStruc>(PropertyNames::signalSpecificProperties, QLatin1String(), true);
+		auto signalSpecPropsStructProp = addProperty<QString, DeviceSignal, &DeviceSignal::signalSpecPropsStruct, &DeviceSignal::setSignalSpecPropsStruct>(PropertyNames::signalSpecificProperties, QLatin1String(), true);
 
 		typeProp->setUpdateFromPreset(true);
 		typeProp->setExpert(m_preset);
@@ -2384,9 +2397,9 @@ R"DELIM({
 		valueBitProp->setUpdateFromPreset(true);
 		valueBitProp->setExpert(m_preset);
 
-		signalSpecPropsStrucProp->setUpdateFromPreset(true);
-		signalSpecPropsStrucProp->setExpert(m_preset);
-		signalSpecPropsStrucProp->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
+		signalSpecPropsStructProp->setUpdateFromPreset(true);
+		signalSpecPropsStructProp->setExpert(m_preset);
+		signalSpecPropsStructProp->setSpecificEditor(E::PropertySpecificEditor::SpecificPropertyStruct);
 
 		return;
 	}
@@ -2427,7 +2440,8 @@ R"DELIM({
 
 		signalMessage->set_appsignaldataformat(static_cast<int>(m_appSignalDataFormat));
 
-		signalMessage->set_signalspecpropsstruc(m_signalSpecPropsStruc.toUtf8());
+		signalMessage->set_signalspecpropsstruct(m_signalSpecPropsStruct.toUtf8());
+		signalMessage->set_signalspecpropsstructwasfixed(true);		// m_signalSpecPropsStruct was fixed on loading
 
 		return true;
 	}
@@ -2518,7 +2532,16 @@ R"DELIM({
 
 		m_appSignalDataFormat = static_cast<E::AnalogAppSignalFormat>(signalMessage.appsignaldataformat());
 
-		m_signalSpecPropsStruc = QString::fromStdString(signalMessage.signalspecpropsstruc());
+		m_signalSpecPropsStruct = QString::fromStdString(signalMessage.signalspecpropsstruct());
+
+		if (signalMessage.signalspecpropsstructwasfixed() == false)
+		{
+			// RPCT-2622, RPCT-2621
+			// Shit happens. We had a situaltion when misprinting was detected (EngEneering vs EngIneering).
+			// To avoid manual replacement of this typo for non platform modules, the replace just made.
+			//
+			m_signalSpecPropsStruct = replaceEngeneeringToEngineering(m_signalSpecPropsStruct);
+		}
 
 		if (m_preset == true)
 		{
@@ -2813,14 +2836,14 @@ R"DELIM({
 		m_appSignalDataFormat = value;
 	}
 
-	QString DeviceSignal::signalSpecPropsStruc() const
+	QString DeviceSignal::signalSpecPropsStruct() const
 	{
-		return m_signalSpecPropsStruc;
+		return m_signalSpecPropsStruct;
 	}
 
-	void DeviceSignal::setSignalSpecPropsStruc(const QString& value)
+	void DeviceSignal::setSignalSpecPropsStruct(const QString& value)
 	{
-		m_signalSpecPropsStruc = value;
+		m_signalSpecPropsStruct = value;
 	}
 
 	//

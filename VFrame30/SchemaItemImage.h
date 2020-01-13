@@ -5,9 +5,43 @@
 
 namespace VFrame30
 {
+	/*! \class SchemaItemImage
+		\ingroup staticSchemaItems
+		\brief This item is used to display static images
+
+		This item is used to display static images.
+	*/
+
 	class VFRAME30LIBSHARED_EXPORT SchemaItemImage : public PosRectImpl
 	{
 		Q_OBJECT
+
+		/// \brief Allow image scaling
+		Q_PROPERTY(bool AllowScale READ allowScale WRITE setAllowScale)
+
+		/// \brief Keep aspect ratio
+		Q_PROPERTY(bool KeepAspectRatio READ keepAspectRatio WRITE setKeepAspectRatio)
+
+		/*! \brief Image displayed by the item
+
+		This property specifies bitmap image displayed by the schema item. Image is loaded from external file and is stored in schema.
+		The image is displayed only if <b>Svg</b> property is empty.
+		*/
+		Q_PROPERTY(QImage Image READ image WRITE setImage)
+
+		/*! \brief SVG data for image
+
+		Image can be described by SVG (Scalable Vector Graphic) code. If this property is empty, SchemaItemImage displays
+		image specified by <b>Image</b> property, otherwise displays image specified by <b>Svg</b> property.
+
+		// Example:
+		\code
+		<svg>
+		<line x1="0" y1="0" x2="200" y2="200" stroke-width="1" stroke="rgb(0,0,0)"/>
+		</svg>
+		\endcode
+		*/
+		Q_PROPERTY(QString Svg READ svgData WRITE setSvgData)
 
 	public:
 		SchemaItemImage(void);
@@ -27,7 +61,7 @@ namespace VFrame30
 		// Рисование элемента, выполняется в 100% масштабе.
 		// Graphcis должен иметь экранную координатную систему (0, 0 - левый верхний угол, вниз и вправо - положительные координаты)
 		//
-		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
+		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
 
 	protected:
 		virtual double minimumPossibleHeightDocPt(double gridSize, int pinGridStep) const final;

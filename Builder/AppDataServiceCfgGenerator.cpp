@@ -1,5 +1,6 @@
 #include "AppDataServiceCfgGenerator.h"
 #include "Builder.h"
+#include "../lib/SignalProperties.h"
 
 class DataSource;
 
@@ -174,7 +175,7 @@ namespace Builder
 
 			bool hasWrongField = false;
 
-			if (E::contains<E::OutputMode>(signal.outputMode()) == false)
+			if (signal.isSpecPropExists(SignalProperties::outputModeCaption) == true && E::contains<E::OutputMode>(signal.outputMode()) == false)
 			{
 				LOG_WARNING_OBSOLETE(m_log, IssuePrexif::NotDefined, QString("Signal %1 has wrong outputRangeMode field").arg(signal.appSignalID()));
 				hasWrongField = true;

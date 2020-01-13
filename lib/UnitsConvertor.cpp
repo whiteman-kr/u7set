@@ -55,14 +55,19 @@ bool UnitsConvertResult::ok() const
 	return m_ok;
 }
 
-int UnitsConvertResult::errorCode() const
+bool UnitsConvertResult::isEqual(double value) const
 {
-	return static_cast<int>(m_errorCode);
+	return std::nextafter(m_result, std::numeric_limits<double>::lowest()) <= value && std::nextafter(m_result, std::numeric_limits<double>::max()) >= value;
 }
 
 double UnitsConvertResult::toDouble() const
 {
 	return m_result;
+}
+
+int UnitsConvertResult::errorCode() const
+{
+	return static_cast<int>(m_errorCode);
 }
 
 QString UnitsConvertResult::errorMessage() const
@@ -450,16 +455,24 @@ UnitsConvertResult UnitsConvertor::electricToPhysical_ThermoResistor(double elVa
 		return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect unitID for Ohm"));
 	}
 
-	if (sensorType != E::SensorType::Ohm_Raw)
+	switch(sensorType)
 	{
-		if (r0 == 0.0)
-		{
-			return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect R0 for Ohm"));
-		}
+		case E::SensorType::Ohm_Pt_a_391:
+		case E::SensorType::Ohm_Pt_a_385:
+		case E::SensorType::Ohm_Cu_a_428:
+		case E::SensorType::Ohm_Cu_a_426:
+		case E::SensorType::Ohm_Ni_a_617:
 
-		elVal = elVal / r0 * 100;
-		electricLowLimit = electricLowLimit / r0 * 100;
-		electricHighLimit = electricHighLimit / r0 * 100;
+			if (r0 == 0.0)
+			{
+				return UnitsConvertResult(UnitsConvertResultError::Generic, tr("Incorrect R0 for Ohm"));
+			}
+
+			elVal = elVal / r0 * 100;
+			electricLowLimit = electricLowLimit / r0 * 100;
+			electricHighLimit = electricHighLimit / r0 * 100;
+
+			break;
 	}
 
 	double phVal = 0;

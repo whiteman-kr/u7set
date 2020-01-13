@@ -35,7 +35,7 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
+		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const override;
 
 		static QString getCoulumnText(CDrawParam* drawParam,
 									  const E::ColumnData& data,
@@ -62,12 +62,12 @@ namespace VFrame30
 	public:
 		virtual QString toolTipText(int dpiX, int dpiY) const override;
 
-		std::shared_ptr<VFrame30::SchemaItem> transformIntoInput();
-		std::shared_ptr<VFrame30::SchemaItem> transformIntoInOut();
-		std::shared_ptr<VFrame30::SchemaItem> transformIntoOutput();
+		SchemaItemPtr transformIntoInput();
+		SchemaItemPtr transformIntoInOut();
+		SchemaItemPtr transformIntoOutput();
 
 		template <typename TYPE>
-		std::shared_ptr<VFrame30::SchemaItem> transformIntoType();
+		SchemaItemPtr transformIntoType();
 
 		// Properties
 		//

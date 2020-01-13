@@ -3,6 +3,7 @@
 
 #include <QObject>
 
+#include "../../lib/CommandLineParser.h"
 #include "../../lib/HostAddressPort.h"
 
 #include "TestFile.h"
@@ -19,19 +20,28 @@ public:
 
 protected:
 
+	// main keys
+	//
 	static const char* const SETTING_CFG_SERVICE_IP1;
 	static const char* const SETTING_CFG_SERVICE_IP2;
 	static const char* const SETTING_EQUIPMENT_ID;
 	static const char* const SETTING_TEST_FILE_NAME;
 
+	// optional keys
+	//
 	static const char* const SETTING_ERROR_IGNORE;
 	static const char* const SETTING_TEST_ID;
 	static const char* const SETTING_FROM_TEST_ID;
 	static const char* const SETTING_TRACE;
-	static const char* const SETTING_REPORT;
+	static const char* const SETTING_REPORT_FILENAME;
 	static const char* const SETTING_PRESET_LM;
+	static const char* const SETTING_OPTION_FILENAME;
+
+	static const char* const REQUIRED_OPTIONS;
 
 private:
+
+	CommandLineParser m_cmdLineParser;
 
 	HostAddressPort m_cfgSocketAddress1;
 	HostAddressPort m_cfgSocketAddress2;
@@ -39,19 +49,24 @@ private:
 	QString m_cfgServiceIP1;
 	QString m_cfgServiceIP2;
 	QString m_equipmentID;
-	QString m_testFileName;
+	QStringList m_testFileNameList;
 
+	// optional keys
+	//
 	QString m_errorIngnoreStr;
 	QString m_testID;
 	QString m_fromTestID;
 	QString m_traceStr;
 	QString m_reportFileName;
 	QString m_presetLM;
+	QString m_optionFileName;
 
 	bool m_errorIngnore = true;
 	bool m_enableTrace = false;
 
 	bool m_enableContinueTest = true;
+
+	void updateTestFilesParam(QString& cmdLine);
 
 	QString currentTimeStr();
 
@@ -60,7 +75,7 @@ public:
 	HostAddressPort cfgSocketAddress1() const { return m_cfgSocketAddress1; }
 	HostAddressPort cfgSocketAddress2() const { return m_cfgSocketAddress2; }
 	QString equipmentID() const { return m_equipmentID; }
-	QString testFileName() const { return m_testFileName; }
+	const QStringList& testFileNameList() const { return m_testFileNameList; }
 
 	bool errorIngnore() const { return m_errorIngnore; }
 	QString testID() const { return m_testID; }

@@ -400,10 +400,6 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	theConfigSettings = readSettings;
 
-	// Modify logon mode
-
-	theMainWindow->userManager()->setConfiguration(theConfigSettings.usersAccounts, theConfigSettings.logonMode, theConfigSettings.loginSessionLength);
-
 	// Emit signals to inform everybody about new configuration
 	//
 
@@ -414,6 +410,10 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 
 	if (someFilesUpdated == true || apperanceUpdated == true)
 	{
+		// Modify logon mode
+
+		theMainWindow->userManager()->setConfiguration(theConfigSettings.usersAccounts, theConfigSettings.logonMode, theConfigSettings.loginSessionLength);
+
 		emit configurationArrived();
 	}
 

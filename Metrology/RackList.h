@@ -51,7 +51,7 @@ public:
 private:
 
 	mutable QMutex			m_rackMutex;
-	QList<Metrology::RackParam*> m_rackList;
+	QVector<Metrology::RackParam*> m_rackList;
 
 	RackGroupBase			m_rackGroups;
 
@@ -65,7 +65,7 @@ public:
 
 	int						rackCount() const;
 	Metrology::RackParam*	rack(int index) const;
-	void					set(const QList<Metrology::RackParam*> list_add);
+	void					set(const QVector<Metrology::RackParam*>& list_add);
 	void					clear();
 
 	QString					text(int row, int column, const Metrology::RackParam* pRack) const;
@@ -97,7 +97,6 @@ private:
 	QMenu*					m_pContextMenu = nullptr;
 
 	QAction*				m_pRackGroupsAction = nullptr;
-	QAction*				m_pImportAction = nullptr;
 	QAction*				m_pExportAction = nullptr;
 
 	QAction*				m_pFindAction = nullptr;
@@ -133,8 +132,7 @@ private slots:
 							// Rack
 							//
 	void					rackGroups();
-	void					importRack();
-	void					exportRack();
+	void					exportRacks();
 
 							// Edit
 							//

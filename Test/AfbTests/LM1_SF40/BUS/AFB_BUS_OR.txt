@@ -1,0 +1,75 @@
+test AFB_BUS_OR_1, BUS_2OR function test
+schema AFB_BUS_OR
+compatible MODULE_LM1SF40
+set #TUN_DSCR_BUS_01_INP01 = 0
+set #TUN_DSCR_BUS_01_INP02 = 0
+
+set #TUN_DSCR_BUS_02_INP01 = 1
+set #TUN_DSCR_BUS_02_INP02 = 0
+
+set #TUN_DSCR_BUS_03_INP01 = 1
+set #TUN_DSCR_BUS_03_INP02 = 1
+
+set #TUN_DSCR_BUS_04_INP01 = 0
+set #TUN_DSCR_BUS_04_INP02 = 1
+
+set #TUN_DSCR_BUS_05_INP01 = 1
+set #TUN_DSCR_BUS_05_INP02 = 1
+
+check #OUT_BUS_2OR_01 == 0
+check #OUT_BUS_2OR_02 == 1
+check #OUT_BUS_2OR_03 == 1
+check #OUT_BUS_2OR_04 == 1
+check #OUT_BUS_2OR_05 == 1
+
+endtest
+
+test AFB_BUS_OR_2, BUS_2OR function test
+schema AFB_BUS_OR
+compatible MODULE_LM1SF00
+set #TUN_DSCR_BUS_01_INP01 = 1
+set #TUN_DSCR_BUS_01_INP02 = 1
+
+set #TUN_DSCR_BUS_02_INP01 = 1
+set #TUN_DSCR_BUS_02_INP02 = 1
+
+set #TUN_DSCR_BUS_03_INP01 = 1
+set #TUN_DSCR_BUS_03_INP02 = 1
+
+set #TUN_DSCR_BUS_04_INP01 = 1
+set #TUN_DSCR_BUS_04_INP02 = 1
+
+set #TUN_DSCR_BUS_05_INP01 = 1
+set #TUN_DSCR_BUS_05_INP02 = 1
+
+check #OUT_BUS_2OR_01 == 1
+check #OUT_BUS_2OR_02 == 1
+check #OUT_BUS_2OR_03 == 1
+check #OUT_BUS_2OR_04 == 1
+check #OUT_BUS_2OR_05 == 1
+endtest
+
+test AFB_BUS_OR_3, BUS_2OR function test
+schema AFB_BUS_OR
+compatible MODULE_LM1SF00
+set #TUN_DSCR_BUS_01_INP01 = 0
+set #TUN_DSCR_BUS_01_INP02 = 0
+
+set #TUN_DSCR_BUS_02_INP01 = 0
+set #TUN_DSCR_BUS_02_INP02 = 0
+
+set #TUN_DSCR_BUS_03_INP01 = 0
+set #TUN_DSCR_BUS_03_INP02 = 0
+
+set #TUN_DSCR_BUS_04_INP01 = 0
+set #TUN_DSCR_BUS_04_INP02 = 0
+
+set #TUN_DSCR_BUS_05_INP01 = 0
+set #TUN_DSCR_BUS_05_INP02 = 0
+
+check #OUT_BUS_2OR_01 == 0
+check #OUT_BUS_2OR_02 == 0
+check #OUT_BUS_2OR_03 == 0
+check #OUT_BUS_2OR_04 == 0
+check #OUT_BUS_2OR_05 == 0
+endtest

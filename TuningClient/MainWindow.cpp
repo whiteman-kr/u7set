@@ -19,8 +19,6 @@
 #include "TuningClientFilterStorage.h"
 #include "TuningSchemaManager.h"
 
-QColor redColor = QColor(192, 0, 0);
-
 MainWindow::MainWindow(const SoftwareInfo& softwareInfo, QWidget* parent) :
 	QMainWindow(parent),
 	m_configController(softwareInfo, theSettings.configuratorAddress1(), theSettings.configuratorAddress2(), this)

@@ -16,10 +16,9 @@ OptionsMeasureViewHeaderDialog::OptionsMeasureViewHeaderDialog(const MeasureView
 
 	QHBoxLayout* measureTypeLayout = new QHBoxLayout;
 
-	m_measureTypeLabel = new QLabel;
-	m_measureTypeLabel->setText(tr("Measure type: "));
+	m_measureTypeLabel = new QLabel(tr("Measure type: "), this);
 
-	m_measureTypeList = new QComboBox;
+	m_measureTypeList = new QComboBox(this);
 
 	for(int t = 0; t < MEASURE_TYPE_COUNT; t++)
 	{
@@ -141,21 +140,14 @@ void OptionsMeasureViewHeaderDialog::updateList()
 
 		m_columnList->setItem(index, MVH_COLUMN_VISIBLE, cell);
 
-		cell = new QTableWidgetItem(QString::number(column.width(), 10, 0));
+		cell = new QTableWidgetItem(QString::number(column.width(), 'f', 0));
 		cell->setTextAlignment(Qt::AlignHCenter);
 		if (visible == false)
 		{
 			cell->setTextColor(Qt::lightGray);
 		}
+
 		m_columnList->setItem(index, MVH_COLUMN_WIDTH, cell);
-
-		cell = new QTableWidgetItem("");
-
-		cell->setTextAlignment(Qt::AlignHCenter);
-		if (visible == false)
-		{
-			cell->setTextColor(Qt::lightGray);
-		}
 	}
 
 	m_columnList->setVerticalHeaderLabels(verticalHeaderLabels);

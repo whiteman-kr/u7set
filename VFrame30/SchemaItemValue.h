@@ -12,19 +12,127 @@ class TuningSignalState;
 
 namespace VFrame30
 {
+	/*! \class SchemaItemValue
+		\ingroup dynamicSchemaItems
+		\brief This item is used to display signal values
+
+		This item is used to display signal values.
+
+		Information displayed by this item is fully customizable by scripts. Script code can receive signal parameters and states from data services,
+		set text, colors, font size to any values depending on customers requirements.
+
+		Signal identidiers set to the schema item are stored in <b>SignalIDs</b> array property.
+
+		To modify contents of the item, set <b>Text</b>, <b>TextColor</b>, <b>FillColor</b>, <b>LineColor</b> properties etc.
+
+		<b>PreDrawScript example:</b>
+
+		\code
+		(function(schemaItemValue)
+		{
+			// Check for signals number
+			//
+			if (schemaItemValue.SignalIDs.length != 1)
+			{
+				schemaItemValue.Text = "No Signals!";
+				return;
+			}
+
+			// Take first signal identifier
+			//
+			var appSignalId = schemaItemValue.SignalIDs[0];
+
+			// Get data from TuningService
+			//
+			var signalParam = tuning.signalParam(appSignalId);
+			var signalState = tuning.signalState(appSignalId);
+
+			if (signalState == undefined)
+			{
+				// Signal was not found
+				//
+				schemaItemValue.Text = appSignalId;
+			}
+			else
+			{
+				// Get signal state
+				//
+				if (signalState.Valid == true)
+				{
+					// Signal state is valid
+					//
+					schemaItemValue.Text = signalState.Value;
+					schemaItemValue.TextColor = "black";
+					schemaItemValue.FillColor = "white";
+					schemaItemValue.LineColor = "#000000";
+				}
+				else
+				{
+					// Signal state is not valid
+					//
+					schemaItemValue.Text = "?";
+					schemaItemValue.TextColor = schemaItemValue.BlinkPhase ? "white" : "black";
+					schemaItemValue.FillColor = schemaItemValue.BlinkPhase ? "black" : "#A00000";
+					schemaItemValue.LineColor = "#A00000";
+				}
+			}
+		})
+		\endcode
+	*/
 	class VFRAME30LIBSHARED_EXPORT SchemaItemValue : public PosRectImpl
 	{
 		Q_OBJECT
 
+		/// \brief Application signal identifiers array. Use <b>AppSignalIDs.length</b> to get number of identifiers
 		Q_PROPERTY(QStringList SignalIDs READ signalIds WRITE setSignalIds)
-		Q_PROPERTY(QString Text READ text WRITE setText)
 
+		/// \brief Application signal identifiers array. Use <b>AppSignalIDs.length</b> to get number of identifiers
+		Q_PROPERTY(QStringList AppSignalIDs READ signalIds WRITE setSignalIds)
+
+		// Appearance
+		//
+
+		/// \brief Border line weight, in pixels
 		Q_PROPERTY(double LineWeight READ lineWeight WRITE setLineWeight)
+
+		/// \brief Border line color name
+		Q_PROPERTY(QColor LineColor READ lineColor WRITE setLineColor)
+
+		/// \brief Rectangle fill color name
+		Q_PROPERTY(QColor FillColor READ fillColor WRITE setFillColor)
+
+		/// \brief Text color name
+		Q_PROPERTY(QColor TextColor READ textColor WRITE setTextColor)
+
+		/// \brief Bounding rectangle drawing
 		Q_PROPERTY(bool DrawRect READ drawRect WRITE setDrawRect)
 
-		Q_PROPERTY(QColor LineColor READ lineColor WRITE setLineColor)
-		Q_PROPERTY(QColor FillColor READ fillColor WRITE setFillColor)
-		Q_PROPERTY(QColor TextColor READ textColor WRITE setTextColor)
+		// Text Category Properties
+		//
+
+		/// \brief Horizontal text alignment
+		Q_PROPERTY(E::HorzAlign AlignHorz READ horzAlign WRITE setHorzAlign)
+
+		/// \brief Vertical text alignment
+		Q_PROPERTY(E::VertAlign AlignVert READ vertAlign WRITE setVertAlign)
+
+		/// \brief Font name
+		Q_PROPERTY(QString FontName READ getFontName WRITE setFontName)
+
+		/// \brief Font size
+		Q_PROPERTY(double FontSize READ getFontSize WRITE setFontSize)
+
+		/// \brief Font bold
+		Q_PROPERTY(bool FontBold READ getFontBold WRITE setFontBold)
+
+		/// \brief Font italic
+		Q_PROPERTY(bool FontItalic READ getFontItalic WRITE setFontItalic)
+
+		/// \brief Text
+		Q_PROPERTY(QString Text READ text WRITE setText)
+
+		/// \brief Precision
+		Q_PROPERTY(int Precision READ precision WRITE setPrecision)
 
 	public:
 		SchemaItemValue(void);
@@ -40,7 +148,7 @@ namespace VFrame30
 		// Draw Functions
 		//
 	public:
-		virtual void Draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
+		virtual void draw(CDrawParam* drawParam, const Schema* schema, const SchemaLayer* layer) const final;
 
 	protected:
 		void initDrawingResources() const;

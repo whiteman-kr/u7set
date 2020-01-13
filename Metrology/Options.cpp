@@ -447,8 +447,8 @@ void ToolBarOption::load()
 	QSettings s;
 
 	m_measureTimeout = s.value(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), 0).toInt();
-	m_measureKind = s.value(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MEASURE_KIND_ONE).toInt();
-	m_outputSignalType = s.value(QString("%1OutputSignalType").arg(TOOLBAR_OPTIONS_KEY), OUTPUT_SIGNAL_TYPE_UNUSED).toInt();
+	m_measureKind = s.value(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), MEASURE_KIND_ONE_RACK).toInt();
+	m_signalConnectionType = s.value(QString("%1SignalConnectionType").arg(TOOLBAR_OPTIONS_KEY), SIGNAL_CONNECTION_TYPE_UNUSED).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -459,7 +459,7 @@ void ToolBarOption::save()
 
 	s.setValue(QString("%1MeasureTimeout").arg(TOOLBAR_OPTIONS_KEY), m_measureTimeout);
 	s.setValue(QString("%1MeasureKind").arg(TOOLBAR_OPTIONS_KEY), m_measureKind);
-	s.setValue(QString("%1OutputSignalType").arg(TOOLBAR_OPTIONS_KEY), m_outputSignalType);
+	s.setValue(QString("%1SignalConnectionType").arg(TOOLBAR_OPTIONS_KEY), m_signalConnectionType);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -468,7 +468,7 @@ ToolBarOption& ToolBarOption::operator=(const ToolBarOption& from)
 {
 	m_measureTimeout = from.m_measureTimeout;
 	m_measureKind = from.m_measureKind;
-	m_outputSignalType = from.m_outputSignalType;
+	m_signalConnectionType = from.m_signalConnectionType;
 
 	return *this;
 }
@@ -544,9 +544,9 @@ void MeasureViewOption::load()
 	m_fontBold = m_font;
 	m_fontBold.setBold(true);
 
-	m_colorNotError = s.value(QString("%1ColorNotError").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_NOT_ERROR.rgb()).toInt();
-	m_colorErrorLimit = s.value(QString("%1ColorErrorLimit").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_LIMIT_ERROR.rgb()).toInt();
-	m_colorErrorControl = s.value(QString("%1ColorErrorControl").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_CONTROL_ERROR.rgb()).toInt();
+	m_colorNotError = s.value(QString("%1ColorNotError").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_NOT_ERROR.rgb()).toUInt();
+	m_colorErrorLimit = s.value(QString("%1ColorErrorLimit").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_LIMIT_ERROR.rgb()).toUInt();
+	m_colorErrorControl = s.value(QString("%1ColorErrorControl").arg(MEASURE_VIEW_OPTIONS_KEY), COLOR_OVER_CONTROL_ERROR.rgb()).toUInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -634,9 +634,11 @@ void SignalInfoOption::load()
 
 	m_showElectricState = s.value(QString("%1ShowElectricState").arg(SIGNAL_INFO_OPTIONS_KEY), false).toBool();
 
-	m_colorFlagValid = s.value(QString("%1ColorFlagValid").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_VALID.rgb()).toInt();
-	m_colorFlagOverflow = s.value(QString("%1ColorFlagOverflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERFLOW.rgb()).toInt();
-	m_colorFlagUnderflow = s.value(QString("%1ColorFlagUnderflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERBREAK.rgb()).toInt();
+	m_colorFlagValid = s.value(QString("%1ColorFlagValid").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_VALID.rgb()).toUInt();
+	m_colorFlagOverflow = s.value(QString("%1ColorFlagOverflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERFLOW.rgb()).toUInt();
+	m_colorFlagUnderflow = s.value(QString("%1ColorFlagUnderflow").arg(SIGNAL_INFO_OPTIONS_KEY), COLOR_FLAG_OVERBREAK.rgb()).toUInt();
+
+	m_timeForUpdate = s.value(QString("%1TimeForUpdate").arg(SIGNAL_INFO_OPTIONS_KEY), 250).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -652,6 +654,8 @@ void SignalInfoOption::save()
 	s.setValue(QString("%1ColorFlagValid").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagValid.rgb());
 	s.setValue(QString("%1ColorFlagOverflow").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagOverflow.rgb());
 	s.setValue(QString("%1ColorFlagUnderflow").arg(SIGNAL_INFO_OPTIONS_KEY), m_colorFlagUnderflow.rgb());
+
+	s.setValue(QString("%1TimeForUpdate").arg(SIGNAL_INFO_OPTIONS_KEY), m_timeForUpdate);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -665,6 +669,83 @@ SignalInfoOption& SignalInfoOption::operator=(const SignalInfoOption& from)
 	m_colorFlagValid = from.m_colorFlagValid;
 	m_colorFlagOverflow = from.m_colorFlagOverflow;
 	m_colorFlagUnderflow = from.m_colorFlagUnderflow;
+
+	m_timeForUpdate = from.m_timeForUpdate;
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+ComparatorInfoOption::ComparatorInfoOption(QObject *parent) :
+	QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ComparatorInfoOption::ComparatorInfoOption(const ComparatorInfoOption& from, QObject *parent) :
+	QObject(parent)
+{
+	*this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+
+ComparatorInfoOption::~ComparatorInfoOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorInfoOption::load()
+{
+	QSettings s;
+
+	m_font.fromString(s.value(QString("%1Font").arg(COMPARATOR_INFO_OPTIONS_KEY), "Segoe UI, 10").toString());
+
+	m_displayingStateFalse = s.value(QString("%1DisplayingStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), "False").toString();
+	m_displayingStateTrue = s.value(QString("%1DisplayingStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), "True").toString();
+
+	m_colorStateFalse = s.value(QString("%1ColorStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), COLOR_COMPARATOR_STATE_FALSE.rgb()).toUInt();
+	m_colorStateTrue = s.value(QString("%1ColorStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), COLOR_COMPARATOR_STATE_TRUE.rgb()).toUInt();
+
+	m_timeForUpdate = s.value(QString("%1TimeForUpdate").arg(COMPARATOR_INFO_OPTIONS_KEY), 250).toInt();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void ComparatorInfoOption::save()
+{
+	QSettings s;
+
+	s.setValue(QString("%1Font").arg(COMPARATOR_INFO_OPTIONS_KEY), m_font.toString());
+
+	s.setValue(QString("%1DisplayingStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), m_displayingStateFalse);
+	s.setValue(QString("%1DisplayingStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), m_displayingStateTrue);
+
+	s.setValue(QString("%1ColorStateFalse").arg(COMPARATOR_INFO_OPTIONS_KEY), m_colorStateFalse.rgb());
+	s.setValue(QString("%1ColorStateTrue").arg(COMPARATOR_INFO_OPTIONS_KEY), m_colorStateTrue.rgb());
+
+	s.setValue(QString("%1TimeForUpdate").arg(COMPARATOR_INFO_OPTIONS_KEY), m_timeForUpdate);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+ComparatorInfoOption& ComparatorInfoOption::operator=(const ComparatorInfoOption& from)
+{
+	m_font.fromString(from.m_font.toString());
+
+	m_displayingStateFalse = from.m_displayingStateFalse;
+	m_displayingStateTrue = from.m_displayingStateTrue;
+
+	m_colorStateFalse = from.m_colorStateFalse;
+	m_colorStateTrue = from.m_colorStateTrue;
+
+	m_timeForUpdate = from.m_timeForUpdate;
 
 	return *this;
 }
@@ -815,7 +896,7 @@ QString LinearityPointBase::text()
 		for(int index = 0; index < pointCount; index++)
 		{
 			LinearityPoint point = at(index);
-			result.append(QString("%1%").arg(QString::number(point.percent(), 10, 1)));
+			result.append(QString("%1%").arg(QString::number(point.percent(), 'f', 1)));
 
 			if (index != pointCount - 1)
 			{
@@ -960,7 +1041,7 @@ void LinearityOption::load()
 	m_highLimitRange = s.value(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), 100).toDouble();
 
 	m_viewType = s.value(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), LO_VIEW_TYPE_SIMPLE).toInt();
-	m_showEngeneeringValueColumn = s.value(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), true).toBool();
+	m_showEngineeringValueColumn = s.value(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), true).toBool();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -981,7 +1062,7 @@ void LinearityOption::save()
 	s.setValue(QString("%1HighLimitRange").arg(LINEARITY_OPTIONS_KEY), m_highLimitRange);
 
 	s.setValue(QString("%1ViewType").arg(LINEARITY_OPTIONS_KEY), m_viewType);
-	s.setValue(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), m_showEngeneeringValueColumn);
+	s.setValue(QString("%1ShowPhyscalValueColumn").arg(LINEARITY_OPTIONS_KEY), m_showEngineeringValueColumn);
 
 	m_pointBase.saveData(SQL_TABLE_LINEARITY_POINT);
 }
@@ -1004,7 +1085,7 @@ LinearityOption& LinearityOption::operator=(const LinearityOption& from)
 	m_highLimitRange = from.m_highLimitRange;
 
 	m_viewType = from.m_viewType;
-	m_showEngeneeringValueColumn = from.m_showEngeneeringValueColumn;
+	m_showEngineeringValueColumn = from.m_showEngineeringValueColumn;
 
 	return *this;
 }
@@ -1039,13 +1120,15 @@ void ComparatorOption::load()
 {
 	QSettings s;
 
-	m_errorValue = s.value(QString("%1ErrorValue").arg(COMPARATOR_OPTIONS_KEY), 0.2).toDouble();
-	m_startValue = s.value(QString("%1StartValue").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
+	m_errorLimit = s.value(QString("%1ErrorLimit").arg(COMPARATOR_OPTIONS_KEY), 0.2).toDouble();
+	m_startValueForCompare = s.value(QString("%1StartValueForCompare").arg(COMPARATOR_OPTIONS_KEY), 0.1).toDouble();
 	m_errorType = s.value(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), MEASURE_ERROR_TYPE_REDUCE).toInt();
+	m_showErrorFromLimit = s.value(QString("%1ShowErrorFromLimit").arg(COMPARATOR_OPTIONS_KEY), MEASURE_LIMIT_TYPE_ELECTRIC).toInt();
 
 	m_enableMeasureHysteresis = s.value(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), false).toBool();
-	m_startComparatorIndex = s.value(QString("%1StartSettingNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
-	m_additionalCheck = s.value(QString("%1AdditionalCheck").arg(COMPARATOR_OPTIONS_KEY), true).toBool();
+	m_startComparatorIndex = s.value(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), 0).toInt();
+
+	m_showEngineeringValueColumn = s.value(QString("%1ShowPhyscalValueColumn").arg(COMPARATOR_OPTIONS_KEY), true).toBool();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1054,26 +1137,30 @@ void ComparatorOption::save()
 {
 	QSettings s;
 
-	s.setValue(QString("%1ErrorValue").arg(COMPARATOR_OPTIONS_KEY), m_errorValue);
-	s.setValue(QString("%1StartValue").arg(COMPARATOR_OPTIONS_KEY), m_startValue);
+	s.setValue(QString("%1ErrorLimit").arg(COMPARATOR_OPTIONS_KEY), m_errorLimit);
+	s.setValue(QString("%1StartValueForCompare").arg(COMPARATOR_OPTIONS_KEY), m_startValueForCompare);
 	s.setValue(QString("%1ErrorType").arg(COMPARATOR_OPTIONS_KEY), m_errorType);
+	s.setValue(QString("%1ShowErrorFromLimit").arg(COMPARATOR_OPTIONS_KEY), m_showErrorFromLimit);
 
 	s.setValue(QString("%1EnableMeasureHysteresis").arg(COMPARATOR_OPTIONS_KEY), m_enableMeasureHysteresis);
-	s.setValue(QString("%1StartSettingNo").arg(COMPARATOR_OPTIONS_KEY), m_startComparatorIndex);
-	s.setValue(QString("%1AdditionalCheck").arg(COMPARATOR_OPTIONS_KEY), m_additionalCheck);
+	s.setValue(QString("%1StartComparatorNo").arg(COMPARATOR_OPTIONS_KEY), m_startComparatorIndex);
+
+	s.setValue(QString("%1ShowPhyscalValueColumn").arg(COMPARATOR_OPTIONS_KEY), m_showEngineeringValueColumn);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 ComparatorOption& ComparatorOption::operator=(const ComparatorOption& from)
 {
-	m_errorValue = from.m_errorValue;
-	m_startValue = from.m_startValue;
+	m_errorLimit = from.m_errorLimit;
+	m_startValueForCompare = from.m_startValueForCompare;
 	m_errorType = from.m_errorType;
+	m_showErrorFromLimit = from.m_showErrorFromLimit;
 
 	m_enableMeasureHysteresis = from.m_enableMeasureHysteresis;
 	m_startComparatorIndex = from.m_startComparatorIndex;
-	m_additionalCheck = from.m_additionalCheck;
+
+	m_showEngineeringValueColumn = from.m_showEngineeringValueColumn;
 
 	return *this;
 }
@@ -1109,7 +1196,10 @@ void ModuleOption::load()
 
 	m_measureEntireModule = s.value(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), false).toBool();
 	m_warningIfMeasured = s.value(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), true).toBool();
+	m_showNoValid = s.value(QString("%1ShowNoValid").arg(MODULE_OPTIONS_KEY), false).toBool();
 	m_suffixSN = s.value(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), "_SERIALNO").toString();
+	m_maxInputCount = s.value(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), Metrology::InputCount).toInt();
+	m_maxComparatorCount = s.value(QString("%1MaxComparatorCount").arg(MODULE_OPTIONS_KEY), Metrology::ComparatorCount).toInt();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1120,7 +1210,10 @@ void ModuleOption::save()
 
 	s.setValue(QString("%1MeasureEntireModule").arg(MODULE_OPTIONS_KEY), m_measureEntireModule);
 	s.setValue(QString("%1WarningIfMeasured").arg(MODULE_OPTIONS_KEY), m_warningIfMeasured);
+	s.setValue(QString("%1ShowNoValid").arg(MODULE_OPTIONS_KEY), m_showNoValid);
 	s.setValue(QString("%1SuffixSN").arg(MODULE_OPTIONS_KEY), m_suffixSN);
+	s.setValue(QString("%1MaxInputCount").arg(MODULE_OPTIONS_KEY), m_maxInputCount);
+	s.setValue(QString("%1MaxComparatorCount").arg(MODULE_OPTIONS_KEY), m_maxComparatorCount);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1129,7 +1222,10 @@ ModuleOption& ModuleOption::operator=(const ModuleOption& from)
 {
 	m_measureEntireModule = from.m_measureEntireModule;
 	m_warningIfMeasured = from.m_warningIfMeasured;
+	m_showNoValid = from.m_showNoValid;
 	m_suffixSN = from.m_suffixSN;
+	m_maxInputCount = from.m_maxInputCount;
+	m_maxComparatorCount = from.m_maxComparatorCount;
 
 	return *this;
 }
@@ -1246,6 +1342,15 @@ BackupOption& BackupOption::operator=(const BackupOption& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
+bool compareDouble(double lDouble, double rDouble)
+{
+	return std::nextafter(lDouble, std::numeric_limits<double>::lowest()) <= rDouble && std::nextafter(lDouble, std::numeric_limits<double>::max()) >= rDouble;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
 Options::Options(QObject *parent) :
 	QObject(parent)
 {
@@ -1267,22 +1372,6 @@ Options::~Options()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int Options::channelCount()
-{
-	int count = 0;
-
-	switch(m_toolBar.measureKind())
-	{
-		case MEASURE_KIND_ONE:		count = 1;							break;
-		case MEASURE_KIND_MULTI:	count = Metrology::ChannelCount;	break;
-		default:					assert(0);
-	}
-
-	return count;
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
 void Options::load()
 {
 	m_toolBar.load();
@@ -1293,13 +1382,15 @@ void Options::load()
 	m_measureView.load();
 
 	m_signalInfo.load();
+	m_comparatorInfo.load();
 
 	m_database.load();
 	m_database.create();
 
-	m_module.load();
+
 	m_linearity.load();
 	m_comparator.load();
+	m_module.load();
 
 	m_backup.load();
 	m_backup.createBackupOnStart();
@@ -1318,12 +1409,13 @@ void Options::save()
 	m_measureView.save();
 
 	m_signalInfo.save();
+	m_comparatorInfo.save();
 
 	m_database.save();
 
-	m_module.save();
 	m_linearity.save();
 	m_comparator.save();
+	m_module.save();
 
 	m_backup.save();
 }
@@ -1386,10 +1478,11 @@ Options& Options::operator=(const Options& from)
 		m_socket = from.m_socket;
 		m_measureView = from.m_measureView;
 		m_signalInfo = from.m_signalInfo;
+		m_comparatorInfo = from.m_comparatorInfo;
 		m_database = from.m_database;
-		m_module = from.m_module;
 		m_linearity = from.m_linearity;
 		m_comparator = from.m_comparator;
+		m_module = from.m_module;
 		m_backup = from.m_backup;
 
 	m_mutex.unlock();

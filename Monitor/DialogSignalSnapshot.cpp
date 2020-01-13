@@ -279,12 +279,52 @@ SignalSnapshotModel::SignalSnapshotModel(QObject* parent)
 	m_columnsNames << tr("Mismatch");
 	m_columnsNames << tr("OutOfLimits");
 
-	// Copy signals to model
-
-	m_allSignals = theSignals.signalList();
-	m_allStates.resize(m_allSignals.size());
-
 	return;
+}
+
+void SignalSnapshotModel::setSignals(std::vector<AppSignalParam>& signalList)
+{
+	m_allSignals.swap(signalList);
+	m_allStates.resize(m_allSignals.size());
+}
+
+QStringList SignalSnapshotModel::columnsNames() const
+{
+	return m_columnsNames;
+}
+
+QModelIndex SignalSnapshotModel::index(int row, int column, const QModelIndex &parent) const
+{
+	Q_UNUSED(parent);
+	return createIndex(row, column);
+}
+
+int SignalSnapshotModel::columnCount(const QModelIndex &parent) const
+{
+	Q_UNUSED(parent);
+	return static_cast<int>(SnapshotColumns::ColumnCount);
+
+}
+
+int SignalSnapshotModel::rowCount(const QModelIndex &parent) const
+{
+	Q_UNUSED(parent);
+	return static_cast<int>(m_filteredSignals.size());
+}
+
+void SignalSnapshotModel::setSignalType(SignalType type)
+{
+	m_signalType = type;
+}
+
+void SignalSnapshotModel::setMasks(const QStringList& masks)
+{
+	m_masks = masks;
+}
+
+void SignalSnapshotModel::setSchemaAppSignals(std::set<QString> schemaAppSignals)
+{
+	m_schemaAppSignals = schemaAppSignals;
 }
 
 void SignalSnapshotModel::fillSignals()
@@ -442,26 +482,6 @@ void SignalSnapshotModel::fillSignals()
 	//
 }
 
-QStringList SignalSnapshotModel::columnsNames() const
-{
-	return m_columnsNames;
-}
-
-void SignalSnapshotModel::setSignalType(SignalType type)
-{
-	m_signalType = type;
-}
-
-void SignalSnapshotModel::setMasks(const QStringList& masks)
-{
-	m_masks = masks;
-}
-
-void SignalSnapshotModel::setSchemaAppSignals(std::set<QString> schemaAppSignals)
-{
-	m_schemaAppSignals = schemaAppSignals;
-}
-
 void SignalSnapshotModel::updateStates(int from, int to)
 {
 	if (m_filteredSignals.size() == 0)
@@ -522,31 +542,27 @@ void SignalSnapshotModel::updateStates(int from, int to)
 	return;
 }
 
-QModelIndex SignalSnapshotModel::index(int row, int column, const QModelIndex &parent) const
+void SignalSnapshotModel::sort(int column, Qt::SortOrder sortOrder)
 {
-	Q_UNUSED(parent);
-	return createIndex(row, column);
-}
+	if (m_filteredSignals.empty() == true)
+	{
+		return;
+	}
 
-QModelIndex SignalSnapshotModel::parent(const QModelIndex &index) const
-{
-	Q_UNUSED(index);
-	return QModelIndex();
+	updateStates(0, static_cast<int>(m_filteredSignals.size() - 1));
 
-}
+	int sortColumn = column;
 
-int SignalSnapshotModel::columnCount(const QModelIndex &parent) const
-{
-	Q_UNUSED(parent);
-	return static_cast<int>(SnapshotColumns::ColumnCount);
+	std::sort(m_filteredSignals.begin(), m_filteredSignals.end(), SignalSnapshotSorter(sortColumn, this));
 
-}
+	if (sortOrder == Qt::DescendingOrder)
+	{
+		std::reverse(std::begin(m_filteredSignals), std::end(m_filteredSignals));
+	}
 
-int SignalSnapshotModel::rowCount(const QModelIndex &parent) const
-{
-	Q_UNUSED(parent);
-	return static_cast<int>(m_filteredSignals.size());
+	emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
 
+	return;
 }
 
 AppSignalParam SignalSnapshotModel::signalParam(int rowIndex, bool* found)
@@ -593,27 +609,10 @@ AppSignalState SignalSnapshotModel::signalState(int rowIndex, bool* found)
 	return m_allStates[si];
 }
 
-void SignalSnapshotModel::sort(int column, Qt::SortOrder sortOrder)
+QModelIndex SignalSnapshotModel::parent(const QModelIndex &index) const
 {
-	if (m_filteredSignals.empty() == true)
-	{
-		return;
-	}
-
-	updateStates(0, static_cast<int>(m_filteredSignals.size() - 1));
-
-	int sortColumn = column;
-
-	std::sort(m_filteredSignals.begin(), m_filteredSignals.end(), SignalSnapshotSorter(sortColumn, this));
-
-	if (sortOrder == Qt::DescendingOrder)
-	{
-		std::reverse(std::begin(m_filteredSignals), std::end(m_filteredSignals));
-	}
-
-	emit dataChanged(index(0, 0), index(rowCount() - 1, columnCount() - 1));
-
-	return;
+	Q_UNUSED(index);
+	return QModelIndex();
 }
 
 QVariant SignalSnapshotModel::data(const QModelIndex &index, int role) const
@@ -864,6 +863,9 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	//
 	m_model = new SignalSnapshotModel(this);
 
+	std::vector<AppSignalParam> allSignals = theSignals.signalList();
+	m_model->setSignals(allSignals);
+
 	m_model->setSignalType(static_cast<SignalSnapshotModel::SignalType>(theSettings.m_signalSnapshotSignalType));
 
 	// Table view setup
@@ -970,7 +972,6 @@ DialogSignalSnapshot::DialogSignalSnapshot(MonitorConfigController *configContro
 	//
 
 	connect(m_tcpSignalClient, &TcpSignalClient::signalParamAndUnitsArrived, this, &DialogSignalSnapshot::tcpSignalClient_signalParamAndUnitsArrived);
-	connect(m_tcpSignalClient, &TcpSignalClient::connectionReset, this, &DialogSignalSnapshot::tcpSignalClient_connectionReset);
 	connect(m_configController, &MonitorConfigController::configurationArrived, this, &DialogSignalSnapshot::configController_configurationArrived);
 
 	// Fill the data
@@ -1066,48 +1067,7 @@ void DialogSignalSnapshot::headerColumnToggled(bool checked)
 	return;
 }
 
-void DialogSignalSnapshot::fillSchemas()
-{
-	ui->schemaCombo->blockSignals(true);
 
-	// Fill schemas
-	//
-	QString currentStrId;
-
-	QVariant data = ui->schemaCombo->currentData();
-	if (data.isValid() == true)
-	{
-		currentStrId = data.toString();
-	}
-
-	ui->schemaCombo->clear();
-	ui->schemaCombo->addItem("All Schemas", "");
-
-	int index = 0;
-
-	std::vector<VFrame30::SchemaDetails> schemasDetails = m_configController->schemasDetails();
-
-	for (const VFrame30::SchemaDetails& schema : schemasDetails )
-	{
-		ui->schemaCombo->addItem(schema.m_schemaId + " - " + schema.m_caption, schema.m_schemaId);
-
-		if (currentStrId == schema.m_schemaId )
-		{
-			ui->schemaCombo->setCurrentIndex(index);
-		}
-
-		index++;
-	}
-
-	ui->schemaCombo->blockSignals(false);
-}
-
-void DialogSignalSnapshot::fillSignals()
-{
-	m_model->fillSignals();
-
-	ui->tableView->sortByColumn(theSettings.m_signalSnapshotSortColumn, theSettings.m_signalSnapshotSortOrder);
-}
 
 void DialogSignalSnapshot::on_DialogSignalSnapshot_finished(int result)
 {
@@ -1156,6 +1116,8 @@ void DialogSignalSnapshot::contextMenuRequested(const QPoint& pos)
 
 	cw->currentTab()->signalContextMenu(QStringList() << s.appSignalId());
 }
+
+
 
 void DialogSignalSnapshot::timerEvent(QTimerEvent* event)
 {
@@ -1231,6 +1193,53 @@ void DialogSignalSnapshot::maskChanged()
 	}
 
 	m_model->setMasks(masks);
+}
+
+void DialogSignalSnapshot::fillSchemas()
+{
+	ui->schemaCombo->blockSignals(true);
+
+	// Fill schemas
+	//
+	QString currentStrId;
+
+	QVariant data = ui->schemaCombo->currentData();
+	if (data.isValid() == true)
+	{
+		currentStrId = data.toString();
+	}
+
+	ui->schemaCombo->clear();
+
+	ui->schemaCombo->addItem("All Schemas", "");
+
+	int selectedIndex = -1;
+
+	std::vector<VFrame30::SchemaDetails> schemasDetails = m_configController->schemasDetails();
+
+	for (const VFrame30::SchemaDetails& schema : schemasDetails )
+	{
+		ui->schemaCombo->addItem(schema.m_schemaId + " - " + schema.m_caption, schema.m_schemaId);
+
+		if (currentStrId == schema.m_schemaId )
+		{
+			selectedIndex = ui->schemaCombo->count() - 1;
+		}
+	}
+
+	if (selectedIndex != -1)
+	{
+		ui->schemaCombo->setCurrentIndex(selectedIndex);
+	}
+
+	ui->schemaCombo->blockSignals(false);
+}
+
+void DialogSignalSnapshot::fillSignals()
+{
+	m_model->fillSignals();
+
+	ui->tableView->sortByColumn(theSettings.m_signalSnapshotSortColumn, theSettings.m_signalSnapshotSortOrder);
 }
 
 void DialogSignalSnapshot::on_tableView_doubleClicked(const QModelIndex &index)
@@ -1311,21 +1320,30 @@ void DialogSignalSnapshot::on_buttonMaskInfo_clicked()
 
 void DialogSignalSnapshot::tcpSignalClient_signalParamAndUnitsArrived()
 {
-//	m_signalsHashes = theSignals.signalHashes();
-//	m_model->fillSignals();
-//	ui->tableView->resizeColumnsToContents();
-}
+	// Set new signals to the model
+	//
+	std::vector<AppSignalParam> allSignals = theSignals.signalList();
+	m_model->setSignals(allSignals);
 
-void DialogSignalSnapshot::tcpSignalClient_connectionReset()
-{
-//	m_signalsHashes.clear();
-//	m_model->fillSignals();
+	// Refresh signals list
+	//
+
+	fillSignals();
+
+	return;
 }
 
 void DialogSignalSnapshot::configController_configurationArrived(ConfigSettings /*configuration*/)
 {
-//	fillSchemas();
-//	m_model->fillSignals();
+	// Refresh schemas combo
+	//
+	fillSchemas();
+
+	// Refresh filtered signals list
+	//
+	on_schemaCombo_currentIndexChanged(QString());
+
+	return;
 }
 
 void DialogSignalSnapshot::on_schemaCombo_currentIndexChanged(const QString&/* arg1*/)
@@ -1363,7 +1381,6 @@ void DialogSignalSnapshot::on_comboMaskType_currentIndexChanged(int index)
 	}
 
 	fillSignals();
-
 }
 
 void DialogSignalSnapshot::on_buttonExport_clicked()

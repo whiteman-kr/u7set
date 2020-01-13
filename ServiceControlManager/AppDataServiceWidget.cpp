@@ -45,7 +45,7 @@ DSC_ACQUIRED_SIGNALS_COUNT = 32,
 DSC_ERROR_PROTOCOL_VERSION = 33,
 DSC_ERROR_FRAMES_QUANTITY = 34,
 DSC_ERROR_FRAME_NOMBER = 35,
-DSC_LOSTED_FRAMES_COUNT = 36,
+DSC_LOST_PACKET_COUNT = 36,
 DSC_ERROR_DATA_ID = 37,
 DSC_ERROR_BAD_FRAME_SIZE = 38,
 DSC_ERROR_DUPLICATE_PLANT_TIME = 39,
@@ -61,7 +61,7 @@ const int dataSourceStateColumn[] =
 	DSC_ERROR_PROTOCOL_VERSION,
 	DSC_ERROR_FRAMES_QUANTITY,
 	DSC_ERROR_FRAME_NOMBER,
-	DSC_LOSTED_FRAMES_COUNT,
+	DSC_LOST_PACKET_COUNT,
 };
 
 const int DATA_SOURCE_STATE_COLUMN_COUNT = sizeof(dataSourceStateColumn) / sizeof(dataSourceStateColumn[0]);
@@ -106,7 +106,7 @@ const char* const dataSourceColumnStr[] =
 	"Error Protocol version",
 	"Error Frames quantity",
 	"Error Frame nomber",
-	"Losted frames count",
+	"Lost packet count",
 	"Error Data ID",
 	"Error Bad frame size",
 	"Error Duplicate plant time",
@@ -322,7 +322,7 @@ QVariant DataSourcesStateModel::data(const QModelIndex& index, int role) const
 				case DSC_ERROR_PROTOCOL_VERSION: return source.errorProtocolVersion();
 				case DSC_ERROR_FRAMES_QUANTITY: return source.errorFramesQuantity();
 				case DSC_ERROR_FRAME_NOMBER: return source.errorFrameNo();
-				case DSC_LOSTED_FRAMES_COUNT: return source.lostedPacketCount();
+				case DSC_LOST_PACKET_COUNT: return source.lostPacketCount();
 				case DSC_ERROR_DATA_ID: return source.errorDataID();
 				case DSC_ERROR_BAD_FRAME_SIZE: return source.errorFrameSize();
 				case DSC_ERROR_DUPLICATE_PLANT_TIME: return source.errorDuplicatePlantTime();
@@ -406,7 +406,7 @@ AppDataServiceWidget::AppDataServiceWidget(const SoftwareInfo& softwareInfo, qui
 {
 	connect(this, &BaseServiceStateWidget::connectionStatisticChanged, this, &AppDataServiceWidget::updateStateInfo);
 
-	setStateTabMaxRowQuantity(14);
+	setStateTabMaxRowQuantity(17);
 	setClientQuantityRowIndexOnStateTab(5);
 
 	// Data Sources
@@ -472,12 +472,17 @@ void AppDataServiceWidget::updateServiceState()
 
 	auto state = m_tcpClientSocket->serviceState().appdatareceivestate();
 
-	stateTabModel()->setData(stateTabModel()->index(8, 1), static_cast<qint64>(state.receivedframescount()));
-	stateTabModel()->setData(stateTabModel()->index(9, 1), static_cast<qint64>(state.simframescount()));
-	stateTabModel()->setData(stateTabModel()->index(10, 1), static_cast<qint64>(state.errdatagramsize()));
-	stateTabModel()->setData(stateTabModel()->index(11, 1), static_cast<qint64>(state.errsimversion()));
-	stateTabModel()->setData(stateTabModel()->index(12, 1), static_cast<qint64>(state.errunknownappdatasourceip()));
-	stateTabModel()->setData(stateTabModel()->index(13, 1), static_cast<qint64>(state.errrupframecrc()));
+	stateTabModel()->setData(stateTabModel()->index(8, 1), static_cast<qint64>(state.receivingrate()));
+	stateTabModel()->setData(stateTabModel()->index(9, 1), static_cast<qint64>(state.udpreceivingrate()));
+	stateTabModel()->setData(stateTabModel()->index(10, 1), static_cast<qint64>(state.rupframesreceivingrate()));
+
+	stateTabModel()->setData(stateTabModel()->index(11, 1), static_cast<qint64>(state.rupframescount()));
+	stateTabModel()->setData(stateTabModel()->index(12, 1), static_cast<qint64>(state.simframescount()));
+
+	stateTabModel()->setData(stateTabModel()->index(13, 1), static_cast<qint64>(state.errdatagramsize()));
+	stateTabModel()->setData(stateTabModel()->index(14, 1), static_cast<qint64>(state.errsimversion()));
+	stateTabModel()->setData(stateTabModel()->index(15, 1), static_cast<qint64>(state.errunknownappdatasourceip()));
+	stateTabModel()->setData(stateTabModel()->index(16, 1), static_cast<qint64>(state.errrupframecrc()));
 }
 
 void AppDataServiceWidget::updateStateInfo()
@@ -488,12 +493,17 @@ void AppDataServiceWidget::updateStateInfo()
 		stateTabModel()->setData(stateTabModel()->index(6, 0), "Connected to CfgService");
 		stateTabModel()->setData(stateTabModel()->index(7, 0), "Connected to ArchiveService");
 
-		stateTabModel()->setData(stateTabModel()->index(8, 0), "Received frames count");
-		stateTabModel()->setData(stateTabModel()->index(9, 0), "Simulated frames count");
-		stateTabModel()->setData(stateTabModel()->index(10, 0), "Datagram size errors");
-		stateTabModel()->setData(stateTabModel()->index(11, 0), "Simulation version errors");
-		stateTabModel()->setData(stateTabModel()->index(12, 0), "Unknown AppDataSource IP errors");
-		stateTabModel()->setData(stateTabModel()->index(13, 0), "RUP frames CRC errors");
+		stateTabModel()->setData(stateTabModel()->index(8, 0), "Receiving rate");
+		stateTabModel()->setData(stateTabModel()->index(9, 0), "UDP receiving rate");
+		stateTabModel()->setData(stateTabModel()->index(10, 0), "RUP frames receiving rate");
+
+		stateTabModel()->setData(stateTabModel()->index(11, 0), "RUP frames count");
+		stateTabModel()->setData(stateTabModel()->index(12, 0), "Simulated frames count");
+
+		stateTabModel()->setData(stateTabModel()->index(13, 0), "Datagram size errors");
+		stateTabModel()->setData(stateTabModel()->index(14, 0), "Simulation version errors");
+		stateTabModel()->setData(stateTabModel()->index(15, 0), "Unknown AppDataSource IP errors");
+		stateTabModel()->setData(stateTabModel()->index(16, 0), "RUP frames CRC errors");
 
 		if (m_tcpClientSocket == nullptr || m_tcpClientSocket->stateIsReady() == false)
 		{

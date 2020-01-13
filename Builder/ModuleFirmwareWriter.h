@@ -92,6 +92,7 @@ namespace Hardware
 
 		Q_INVOKABLE void jsSetDescriptionFields(int descriptionVersion, QString fields);
 
+		Q_INVOKABLE void jsInsertDescription(int index, int channel, QString descriptionCSV);
 		Q_INVOKABLE void jsAddDescription(int channel, QString descriptionCSV);
 
 		Q_INVOKABLE void jsSetUniqueID(int lmNumber, quint64 uniqueID);
@@ -101,7 +102,8 @@ namespace Hardware
 		// Script execution log
 		//
 		Q_INVOKABLE void writeLog(QString logString);
-		const QByteArray& scriptLog(const QString& subsysId) const;
+		void replaceLog(const QString& subsysId, const QString& oldString, const QString& newString);
+		QByteArray scriptLog(const QString& subsysId) const;
 
 		// Functions that are used to calculate Unique ID
 		//
@@ -119,7 +121,7 @@ namespace Hardware
 
 		// Script execution log, key is Subsystem ID
 		//
-		std::map<QString, QByteArray> m_scriptLog;
+		std::map<QString, QStringList> m_scriptLog;
 
 		// Pointers to firmware and data currently processed by script, used by script functions
 		//

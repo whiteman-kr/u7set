@@ -44,15 +44,6 @@ void SourceWorker::process()
 		return;
 	}
 
-	if (pSocket->bind(QHostAddress(theOptions.path().localIP()), PS::UDP_PORT + static_cast<quint16>(pSource->info().index)) == false)
-	{
-		pSocket->close();
-		delete pSocket;
-
-		emit finished();
-		return;
-	}
-
 	int currentFrameIndex = 0;
 
 	while(m_finishThread == false)
@@ -65,7 +56,7 @@ void SourceWorker::process()
 			header.frameSize = Socket::ENTIRE_UDP_SIZE;
 			header.protocolVersion = PS::SUPPORT_VERSION;
 			header.flags.appData = 1;
-			header.dataId = static_cast<quint16>(pSource->info().dataID);
+			header.dataId = static_cast<quint32>(pSource->info().dataID);
 			header.moduleType = static_cast<quint16>(pSource->info().moduleType);
 			header.numerator = static_cast<quint16>(m_numerator);
 			header.framesQuantity = static_cast<quint16>(pSource->info().frameCount);
@@ -105,7 +96,12 @@ void SourceWorker::process()
 
 			// send udp
 			//
-			pSocket->writeDatagram(reinterpret_cast<char*>(&m_simFrame), sizeof(m_simFrame), pSource->info().serverAddress.address(), pSource->info().serverAddress.port());
+			qint64 sentBytes = pSocket->writeDatagram(reinterpret_cast<char*>(&m_simFrame), sizeof(m_simFrame), pSource->info().serverAddress.address(), pSource->info().serverAddress.port());
+
+			if (sentBytes != sizeof(m_simFrame))
+			{
+				qDebug() << "Error:" << __FUNCTION__ << ", Size of frame (bytes):" << sizeof(m_simFrame) << ", but sent (bytes):" << sentBytes;
+			}
 
 			// timeout
 			//

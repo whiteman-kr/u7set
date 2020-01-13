@@ -67,8 +67,8 @@ IdePropertyEditor::IdePropertyEditor(QWidget* parent, DbController* dbController
 	PropertyEditor(parent),
 	m_dbController(dbController)
 {
-	QFile file(":/ScriptHelp/scripthelp.html");
-	setScriptHelp(file);
+	QString docPath = QApplication::applicationDirPath()+"/scripthelp/index.html";
+	setScriptHelpFile(docPath);
 }
 
 IdePropertyEditor::~IdePropertyEditor()
@@ -93,8 +93,8 @@ IdePropertyTable::IdePropertyTable(QWidget* parent, DbController* dbController):
 	PropertyTable(parent),
 	m_dbController(dbController)
 {
-	QFile file(":/ScriptHelp/scripthelp.html");
-	setScriptHelp(file);
+	QString docPath = QApplication::applicationDirPath()+"/scripthelp/index.html";
+	setScriptHelpFile(docPath);
 }
 
 IdePropertyTable::~IdePropertyTable()

@@ -313,6 +313,14 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0293.sql", "Upgrade to version 293, RIM configuration corrections, AIM/AOM/TIM/RIM/WAIM configuration does not return false on first error"},
 	{":/DatabaseUpgrade/Upgrade0294.sql", "Upgrade to version 294, Set MaxInstCount from 256 to 1024 for AFB FLIP_FLOP in LM1_SR03"},
 	{":/DatabaseUpgrade/Upgrade0295.sql", "Upgrade to version 295, Set inputs and outputs BusDataFormat to Mixed for AFB bus_switch (for all LMs)"},
+	{":/DatabaseUpgrade/Upgrade0296.sql", "Upgrade to version 296, RIM FilteringTime has range (0.1 .. 131.07 s)"},
+	{":/DatabaseUpgrade/Upgrade0297.sql", "Upgrade to version 297, If TuningEnable/AppDataEnable/DiagDataEnable flag in LM is false, IP address is zero"},
+	{":/DatabaseUpgrade/Upgrade0298.sql", "Upgrade to version 298, Added descriptions of LmNumberCount and UniqueID in bts file"},
+	{":/DatabaseUpgrade/Upgrade0299.sql", "Upgrade to version 299, be_to_le_16si->be_to_le_16ui, le_to_be_16si->le_to_be_16ui"},
+	{":/DatabaseUpgrade/Upgrade0300.sql", "Upgrade to version 300, Added Certificate property to all presets"},
+	{":/DatabaseUpgrade/Upgrade0301.sql", "Upgrade to version 301, FSC Chassis preset has LM compatibility table"},
+	{":/DatabaseUpgrade/Upgrade0302.sql", "Upgrade to version 302, fixing misprint EngEneeringUnits -> EngIneeringUnits "},
+	{":/DatabaseUpgrade/Upgrade0303.sql", "Upgrade to version 303, fixing misprint EngEneeringUnits -> EngIneeringUnits in presets"},
 };
 
 int DbWorker::counter = 0;
@@ -1048,14 +1056,18 @@ void DbWorker::slot_openProject(QString projectName, QString username, QString p
 
 	project.setDatabaseName(databaseName);
 	project.setProjectName(projectName);
+	project.setVersion(DbWorker::databaseVersion());	// Other project version just cannot be opened
 
 	QString projectDescription;
+	QString projectSafetyProject;
 	QString projectUppercaseAppSignalId;
 
 	getProjectProperty_worker(Db::ProjectProperty::Description, &projectDescription);
+	getProjectProperty_worker(Db::ProjectProperty::SafetyProject, &projectSafetyProject);
 	getProjectProperty_worker(Db::ProjectProperty::UppercaseAppSignalId, &projectUppercaseAppSignalId);
 
 	project.setDescription(projectDescription);
+	project.setSafetyProject(projectSafetyProject.compare("true", Qt::CaseInsensitive) == 0 ? true : false);
 	project.setUppercaseAppSignalId(projectUppercaseAppSignalId.compare("true", Qt::CaseInsensitive) == 0 ? true : false);
 
 	setCurrentProject(project);
@@ -5594,11 +5606,7 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 {
 	AUTO_COMPLETE
 
-	if (deviceSignals == nullptr)
-	{
-		assert(deviceSignals != nullptr);
-		return;
-	}
+	TEST_PTR_RETURN(deviceSignals);
 
 	if (addedSignals != nullptr)
 	{
@@ -5626,7 +5634,15 @@ void DbWorker::slot_autoAddSignals(const std::vector<Hardware::DeviceSignal*>* d
 		{
 			if (isSignalWithEquipmentIDExists(deviceSignal->equipmentIdTemplate()) == false)
 			{
-				Signal signal(*deviceSignal);
+				QString errMsg;
+
+				Signal signal(*deviceSignal, &errMsg);
+
+				if (errMsg.isEmpty() == false)
+				{
+					emitError(QSqlDatabase::database(projectConnectionName()), errMsg);
+					return;
+				}
 
 				QVector<Signal> newSignals;
 
@@ -6986,6 +7002,9 @@ bool DbWorker::processingAfterDatabaseUpgrade(QSqlDatabase& db, int currentVersi
 	{
 	case 215:
 		return processingAfterDatabaseUpgrade0215(db, errorMessage);
+
+	case 302:
+		return processingAfterDatabaseUpgrade0302(db, errorMessage);
 	}
 
 	return true;
@@ -7015,8 +7034,8 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 
 	const int SD_LOW_ADC = 12;
 	const int SD_HIGH_ADC = 13;
-	const int SD_LOW_ENGENEERING_UNITS = 14;
-	const int SD_HIGH_ENGENEERING_UNITS = 15;
+	const int SD_LOW_ENGINEERING_UNITS = 14;
+	const int SD_HIGH_ENGINEERING_UNITS = 15;
 	const int SD_LOW_VALID_RANGE = 16;
 	const int SD_HIGH_VALID_RANGE = 17;
 	const int SD_FILTERING_TIME = 18;
@@ -7180,8 +7199,8 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 
 		uint lowADC = q.value(SD_LOW_ADC).toUInt();
 		uint highADC = q.value(SD_HIGH_ADC).toUInt();
-		double lowEngeneeringUnits = q.value(SD_LOW_ENGENEERING_UNITS).toDouble();
-		double highEngeneeringUnits = q.value(SD_HIGH_ENGENEERING_UNITS).toDouble();
+		double lowEngineeringUnits = q.value(SD_LOW_ENGINEERING_UNITS).toDouble();
+		double highEngineeringUnits = q.value(SD_HIGH_ENGINEERING_UNITS).toDouble();
 		double lowValidRange = q.value(SD_LOW_VALID_RANGE).toDouble();
 		double highValidRange = q.value(SD_HIGH_VALID_RANGE).toDouble();
 		double filteringTime = q.value(SD_FILTERING_TIME).toDouble();
@@ -7202,8 +7221,8 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 			result &= inputSpecPropValues.setValue(SignalProperties::lowADCCaption, lowADC);
 			result &= inputSpecPropValues.setValue(SignalProperties::highADCCaption, highADC);
 
-			result &= inputSpecPropValues.setValue(SignalProperties::lowEngeneeringUnitsCaption, lowEngeneeringUnits);
-			result &= inputSpecPropValues.setValue(SignalProperties::highEngeneeringUnitsCaption, highEngeneeringUnits);
+			result &= inputSpecPropValues.setValue(SignalProperties::lowEngineeringUnitsCaption, lowEngineeringUnits);
+			result &= inputSpecPropValues.setValue(SignalProperties::highEngineeringUnitsCaption, highEngineeringUnits);
 
 			result &= inputSpecPropValues.setValue(SignalProperties::lowValidRangeCaption, lowValidRange);
 			result &= inputSpecPropValues.setValue(SignalProperties::highValidRangeCaption, highValidRange);
@@ -7227,8 +7246,8 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 			result &= outputSpecPropValues.setValue(SignalProperties::lowDACCaption, lowADC);
 			result &= outputSpecPropValues.setValue(SignalProperties::highDACCaption, highADC);
 
-			result &= outputSpecPropValues.setValue(SignalProperties::lowEngeneeringUnitsCaption, lowEngeneeringUnits);
-			result &= outputSpecPropValues.setValue(SignalProperties::highEngeneeringUnitsCaption, highEngeneeringUnits);
+			result &= outputSpecPropValues.setValue(SignalProperties::lowEngineeringUnitsCaption, lowEngineeringUnits);
+			result &= outputSpecPropValues.setValue(SignalProperties::highEngineeringUnitsCaption, highEngineeringUnits);
 
 			result &= inputSpecPropValues.setValue(SignalProperties::electricLowLimitCaption, electricLowLimit);
 			result &= inputSpecPropValues.setValue(SignalProperties::electricHighLimitCaption, electricHighLimit);
@@ -7244,8 +7263,8 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 
 		case E::SignalInOutType::Internal:
 
-			result &= internalSpecPropValues.setValue(SignalProperties::lowEngeneeringUnitsCaption, lowEngeneeringUnits);
-			result &= internalSpecPropValues.setValue(SignalProperties::highEngeneeringUnitsCaption, highEngeneeringUnits);
+			result &= internalSpecPropValues.setValue(SignalProperties::lowEngineeringUnitsCaption, lowEngineeringUnits);
+			result &= internalSpecPropValues.setValue(SignalProperties::highEngineeringUnitsCaption, highEngineeringUnits);
 
 			specPropStruct = SignalProperties::defaultInternalAnalogSpecPropStruct;
 			internalSpecPropValues.serializeValuesToArray(&protoDataArray);
@@ -7279,166 +7298,94 @@ bool DbWorker::processingAfterDatabaseUpgrade0215(QSqlDatabase& db, QString* err
 	return result;
 }
 
-/*
-void DbWorker::getSignalDataAfterDatabaseUpdate0211(QSqlQuery& q, Signal& s)
+bool DbWorker::processingAfterDatabaseUpgrade0302(QSqlDatabase& db, QString* errorMessage)
 {
-	// indexes of SignalData's fields
-	//
-	const int SD_APP_SIGNAL_ID = 0;
-	const int SD_CUSTOM_APP_SIGNAL_ID = 1;
-	const int SD_CAPTION = 2;
-	const int SD_EQUIPMENT_ID = 3;
-	const int SD_BUS_TYPE_ID = 4;
-	const int SD_CHANNEL = 5;
+	TEST_PTR_RETURN_FALSE(errorMessage);
 
-	const int SD_SIGNAL_TYPE = 6;
-	const int SD_IN_OUT_TYPE = 7;
+	QSqlQuery q(db);
 
-	const int SD_DATA_SIZE = 8;
-	const int SD_BYTE_ORDER = 9;
+	bool result = q.exec(QString("SELECT SignalInstanceID, SpecPropValues FROM SignalInstance"));
 
-	const int SD_ANALOG_SIGNAL_FORMAT = 10;
-	const int SD_UNIT = 11;
-
-	const int SD_LOW_ADC = 12;
-	const int SD_HIGH_ADC = 13;
-	const int SD_LOW_ENGENEERING_UNITS = 14;
-	const int SD_HIGH_ENGENEERING_UNITS = 15;
-	const int SD_LOW_VALID_RANGE = 16;
-	const int SD_HIGH_VALID_RANGE = 17;
-	const int SD_FILTERING_TIME = 18;
-	const int SD_SPREADTOLERANCE = 19;
-
-	const int SD_ELECTRIC_LOW_LIMIT = 20;
-	const int SD_ELECTRIC_HIGH_LIMIT = 21;
-	const int SD_ELECTRIC_UNIT = 22;
-	const int SD_SENSOR_TYPE = 23;
-	const int SD_OUTPUT_MODE = 24;
-
-	const int SD_ENABLE_TUNING = 25;
-
-	const int SD_TUNING_DEFAULT_DOUBLE = 26;
-	const int SD_TUNING_LOW_BOUND_DOUBLE = 27;
-	const int SD_TUNING_HIGH_BOUND_DOUBLE = 28;
-
-	const int SD_TUNING_DEFAULT_INT = 29;
-	const int SD_TUNING_LOW_BOUND_INT = 30;
-	const int SD_TUNING_HIGH_BOUND_INT = 31;
-
-	const int SD_ACQUIRE = 32;
-	const int SD_ARCHIVE = 33;
-
-	const int SD_DECIMAL_PLACES = 34;
-	const int SD_COARSE_APERTURE = 35;
-	const int SD_FINE_APERTURE = 36;
-	const int SD_ADAPTIVE_APERTURE = 37;
-
-	const int SD_SIGNAL_ID = 38;
-	const int SD_SIGNAL_GROUP_ID = 39;
-	const int SD_SIGNAL_INSTANCE_ID = 40;
-	const int SD_CHANGESET_ID = 41;
-	const int SD_CHECKEDOUT = 42;
-	const int SD_USER_ID = 43;
-	const int SD_CREATED = 44;
-	const int SD_DELETED = 45;
-	const int SD_INSTANCE_CREATED = 46;
-	const int SD_INSTANCE_ACTION = 47;
-
-	// read fields
-	//
-	s.setAppSignalID(q.value(SD_APP_SIGNAL_ID).toString());
-	s.setCustomAppSignalID(q.value(SD_CUSTOM_APP_SIGNAL_ID).toString());
-
-	s.setCaption(q.value(SD_CAPTION).toString());
-	s.setEquipmentID(q.value(SD_EQUIPMENT_ID).toString());
-	s.setBusTypeID(q.value(SD_BUS_TYPE_ID).toString());
-	s.setChannel(static_cast<E::Channel>(q.value(SD_CHANNEL).toInt()));
-
-	s.setSignalType(static_cast<E::SignalType>(q.value(SD_SIGNAL_TYPE).toInt()));
-	s.setInOutType(static_cast<E::SignalInOutType>(q.value(SD_IN_OUT_TYPE).toInt()));
-
-	s.setDataSize(q.value(SD_DATA_SIZE).toInt());
-	s.setByteOrder(static_cast<E::ByteOrder>(q.value(SD_BYTE_ORDER).toInt()));
-
-	int f = q.value(SD_ANALOG_SIGNAL_FORMAT).toInt();
-
-	if (f == TO_INT(E::DataFormat::UnsignedInt))
+	if (result == false)
 	{
-		// Convert data format from E::DataFormat::UnsignedInt to E::AnalogAppSignalFormat::SignedInt32
-		//
-		f = TO_INT(E::AnalogAppSignalFormat::SignedInt32);
+		*errorMessage = QString(tr("Can't retrieve signal instances specific properties values data."));
+		return false;
 	}
-	s.setAnalogSignalFormat(static_cast<E::AnalogAppSignalFormat>(f));
-	s.setUnit(q.value(SD_UNIT).toString());
 
-	s.setLowADC(q.value(SD_LOW_ADC).toInt());
-	s.setHighADC(q.value(SD_HIGH_ADC).toInt());
-	s.setLowEngeneeringUnits(q.value(SD_LOW_ENGENEERING_UNITS).toDouble());
-	s.setHighEngeneeringUnits(q.value(SD_HIGH_ENGENEERING_UNITS).toDouble());
-	s.setLowValidRange(q.value(SD_LOW_VALID_RANGE).toDouble());
-	s.setHighValidRange(q.value(SD_HIGH_VALID_RANGE).toDouble());
-	s.setFilteringTime(q.value(SD_FILTERING_TIME).toDouble());
-	s.setSpreadTolerance(q.value(SD_SPREADTOLERANCE).toDouble());
+	int parseErrorCount = 0;
+	int updateErrorCount = 0;
 
-	s.setElectricLowLimit(q.value(SD_ELECTRIC_LOW_LIMIT).toDouble());
-	s.setElectricHighLimit(q.value(SD_ELECTRIC_HIGH_LIMIT).toDouble());
-	s.setElectricUnit(static_cast<E::ElectricUnit>(q.value(SD_ELECTRIC_UNIT).toInt()));
-	s.setSensorType(static_cast<E::SensorType>(q.value(SD_SENSOR_TYPE).toInt()));
-	s.setOutputMode(static_cast<E::OutputMode>(q.value(SD_OUTPUT_MODE).toInt()));
+	while(q.next() == true)
+	{
+		int signalInstanceID = q.value(0).toInt();
+		QByteArray specPropValuesData = q.value(1).toByteArray();
 
-	s.setEnableTuning(q.value(SD_ENABLE_TUNING).toBool());
+		if (specPropValuesData.isEmpty() == true)
+		{
+			continue;
+		}
 
-	TuningValue tv;
+		SignalSpecPropValues spv;
 
-	tv.setValue(s.signalType(),
-		   s.analogSignalFormat(),
-		   q.value(SD_TUNING_DEFAULT_INT).toLongLong(),
-		   q.value(SD_TUNING_DEFAULT_DOUBLE).toDouble());
+		bool res = spv.parseValuesFromArray(specPropValuesData);
 
-	s.setTuningDefaultValue(tv);
+		if (res == false)
+		{
+			if (parseErrorCount < 10)
+			{
+				*errorMessage += QString(tr("SignalInstance %1 specPropValues data parsing error\n"));
+			}
 
-	tv.setValue(s.signalType(),
-		   s.analogSignalFormat(),
-		   q.value(SD_TUNING_LOW_BOUND_INT).toLongLong(),
-		   q.value(SD_TUNING_LOW_BOUND_DOUBLE).toDouble());
+			parseErrorCount++;
+			continue;
+		}
 
-	s.setTuningLowBound(tv);
+		bool replacingIsOccured = spv.replaceName(SignalProperties::MISPRINT_highEngineeringUnitsCaption,
+												  SignalProperties::highEngineeringUnitsCaption);
 
-	tv.setValue(s.signalType(),
-		   s.analogSignalFormat(),
-		   q.value(SD_TUNING_HIGH_BOUND_INT).toLongLong(),
-		   q.value(SD_TUNING_HIGH_BOUND_DOUBLE).toDouble());
+		replacingIsOccured |= spv.replaceName(SignalProperties::MISPRINT_lowEngineeringUnitsCaption,
+											  SignalProperties::lowEngineeringUnitsCaption);
 
-	s.setTuningHighBound(tv);
+		if (replacingIsOccured == true)
+		{
+			QByteArray newSpecPropValuesData;
 
-	s.setAcquire(q.value(SD_ACQUIRE).toBool());
-	s.setArchive(q.value(SD_ARCHIVE).toBool());
+			spv.serializeValuesToArray(&newSpecPropValuesData);
 
-	s.setDecimalPlaces(q.value(SD_DECIMAL_PLACES).toInt());
-	s.setCoarseAperture(q.value(SD_COARSE_APERTURE).toDouble());
-	s.setFineAperture(q.value(SD_FINE_APERTURE).toDouble());
-	s.setAdaptiveAperture(q.value(SD_ADAPTIVE_APERTURE).toBool());
+			QString queryStr = QString("UPDATE SignalInstance SET SpecPropValues = %1 WHERE SignalInstanceID = %2").
+																arg(toSqlByteaStr(newSpecPropValuesData)).arg(signalInstanceID);
+			QSqlQuery update(db);
 
-	s.setID(q.value(SD_SIGNAL_ID).toInt());
-	s.setSignalGroupID(q.value(SD_SIGNAL_GROUP_ID).toInt());
-	s.setSignalInstanceID(q.value(SD_SIGNAL_INSTANCE_ID).toInt());
-	s.setChangesetID(q.value(SD_CHANGESET_ID).toInt());
-	s.setCheckedOut(q.value(SD_CHECKEDOUT).toBool());
-	s.setUserID(q.value(SD_USER_ID).toInt());
-	s.setCreated(q.value(SD_CREATED).toDateTime());
-	s.setDeleted(q.value(SD_DELETED).toBool());
-	s.setInstanceCreated(q.value(SD_INSTANCE_CREATED).toDateTime());
-	s.setInstanceAction(static_cast<VcsItemAction::VcsItemActionType>(q.value(SD_INSTANCE_ACTION).toInt()));
+			bool updateRes = update.exec(queryStr);
+
+			if (updateRes == false)
+			{
+				if (updateErrorCount < 10)
+				{
+					*errorMessage += QString(tr("SignalInstance %1 specPropValues updating error\n"));
+				}
+
+				updateErrorCount++;
+				continue;
+			}
+		}
+	}
+
+	if (parseErrorCount > 0)
+	{
+		*errorMessage += QString(tr("Total parsing errors: %1\n")).arg(parseErrorCount);
+
+		result = false;
+	}
+
+	if (updateErrorCount > 0)
+	{
+
+		*errorMessage += QString(tr("Total updating errors: %1\n")).arg(updateErrorCount);
+
+		result = false;
+	}
+
+	return result;
 }
-*/
-
-
-
-
-
-
-
-
-
-
 

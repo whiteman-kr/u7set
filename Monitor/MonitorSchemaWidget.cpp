@@ -83,11 +83,11 @@ void MonitorSchemaWidget::contextMenuRequested(const QPoint& pos)
 
 	// Signals items
 	//
-	std::vector<std::shared_ptr<VFrame30::SchemaItem>> items = itemsUnderCursor(pos);
+	std::vector<SchemaItemPtr> items = itemsUnderCursor(pos);
 
 	if (items.empty() == false)
 	{
-		for (const std::shared_ptr<VFrame30::SchemaItem>& item : items)
+		for (const SchemaItemPtr& item : items)
 		{
 			if (VFrame30::SchemaItemSignal* schemaItemSignal = dynamic_cast<VFrame30::SchemaItemSignal*>(item.get());
 				schemaItemSignal != nullptr)
@@ -214,7 +214,10 @@ void MonitorSchemaWidget::signalContextMenu(const QStringList& signalList)
 
 void MonitorSchemaWidget::signalInfo(QString appSignalId)
 {
-	DialogSignalInfo::showDialog(appSignalId, theMonitorMainWindow->configController(), theMonitorMainWindow->monitorCentralWidget());
+	DialogSignalInfo::showDialog(appSignalId,
+	                             theMonitorMainWindow->configController(),
+	                             theMonitorMainWindow->tcpSignalClient(),
+	                             theMonitorMainWindow->monitorCentralWidget());
 
 	return;
 }

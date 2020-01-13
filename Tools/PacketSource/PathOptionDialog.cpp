@@ -26,7 +26,7 @@ bool PathOptionDialog::createInterface()
 	setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Options.png"));
 	setWindowTitle(tr("Options"));
-	setFixedSize(400, 240);
+//	setFixedSize(800, 240);
 
 	// Signal Path
 	//

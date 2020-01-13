@@ -16,6 +16,46 @@ namespace VFrame30
 
 	// Proxy class for using in scripts
 	//
+	/*! \class ScriptSchemaView
+		\ingroup view
+		\brief Represents an class that contains schemas displayed on the screen. Used for switching schemas, searching items and displaying message boxes.
+
+		Represents an class that contains schemas displayed on the screen. In scripts this object is accessed by global <b>view</b> object.
+
+		Implements following functons:
+
+		- schemas switching;
+		- items and widgets searching;
+		- setting and reading variables;
+		- displaying message boxes.
+
+		\warning
+		Items and widgets searching is performed by objects name. In order to find certain item, an item should have an unique <b>ObjectName</b> property value within the schema.
+
+		<b>Examples:</b>
+
+		\code
+		// Set another schema
+		//
+		view.setSchema("MYSCHEMA");
+
+		...
+
+		// Display information in the message box
+		//
+		view.infoMessageBox(“Hello world!”);
+
+		...
+
+		// Display a question
+		//
+		if (view.questionMessageBox(“Are you sure?”) == true)
+		{
+			// User pressed "Yes"
+			....
+		}
+		\endcode
+	*/
 	class ScriptSchemaView : public QObject
 	{
 		Q_OBJECT
@@ -29,25 +69,40 @@ namespace VFrame30
 	public slots:
 		void debugOutput(QString str);					// Debug output to qDebug
 
+		/// \brief Sets the active schema specified in schemaId parameter.
 		void setSchema(QString schemaId);				// Set schema by SchemaID
 
+		/// \brief Finds a schema item by its name (ObjectName property). Return value has SchemaItem type or undefined if item is not found.
 		QObject* findSchemaItem(QString objectName);	// Find SchemaItem by ObjectName
+
+		/// \brief Finds a schema control widget (edit control, button, etc...) by its name (ObjectName property). Return value has QWidget type or undefined if item is not found.
 		QObject* findWidget(QString objectName);		// Find Widget associated with SchemaItem
 
 		void update();									// Update (redraw) schema view
 
 		// Message Box functions
 		//
+		/// \brief Displays a warning message box with specified text.
 		void warningMessageBox(QString text);
+
+		/// \brief Displays an error message box with specified text.
 		void errorMessageBox(QString text);
+
+		/// \brief Displays an information message box with specified text.
 		void infoMessageBox(QString text);
+
+		/// \brief Displays a question message box with specified text. If user clicked "Yes", returns true, otherwise returns false.
 		bool questionMessageBox(QString text);
 
 		// Variables functions
 		//
+		/// \brief Returns true if variable specified by name exists, otherwise returns false.
 		bool variableExists(QString name) const;
 
+		/// \brief Retrieves a value of the variable specified by name.
 		QVariant variable(QString name);
+
+		/// \brief Sets the value of the variable specified by name
 		void setVariable(QString name, const QVariant& value);
 
 		// Data

@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QList>
 #include <QToolBar>
 #include <QTabWidget>
 #include <QTableView>
@@ -20,7 +19,9 @@
 #include "TuningSocket.h"
 #include "MeasureThread.h"
 #include "FindMeasurePanel.h"
+#include "StatisticPanel.h"
 #include "SignalInfoPanel.h"
+#include "ComparatorInfoPanel.h"
 #include "Calculator.h"
 
 // ==============================================================================================
@@ -55,21 +56,21 @@ private:
 
 							// menu - View
 							//
+	QAction*				m_pShowRackListAction = nullptr;
+	QAction*				m_pShowSignalListAction = nullptr;
+	QAction*				m_pShowComparatorsListAction = nullptr;
+	QAction*				m_pShowTuningSignalListAction = nullptr;
+	QAction*				m_pShowSignalConnectionListAction = nullptr;
+	QAction*				m_pShowStatisticAction = nullptr;
 
 							// menu - Tools
 							//
 	QAction*				m_pCalibratorsAction = nullptr;
-	QAction*				m_pShowRackListAction = nullptr;
-	QAction*				m_pShowSignalListAction = nullptr;
-	QAction*				m_pShowComparatorsListAction = nullptr;
-	QAction*				m_pShowOutputSignalListAction = nullptr;
-	QAction*				m_pShowTuningSignalListAction = nullptr;
 	QAction*				m_pShowCalculatorAction = nullptr;
 	QAction*				m_pOptionsAction;
 
 							// menu - ?
 							//
-	QAction*				m_pShowStatisticAction = nullptr;
 	QAction*				m_pAboutConnectionAction = nullptr;
 	QAction*				m_pAboutAppAction = nullptr;
 
@@ -83,7 +84,7 @@ private:
 	QMenu*					m_pEditMenu = nullptr;
 	QMenu*					m_pViewMenu = nullptr;
 	QMenu*					m_pViewPanelMenu = nullptr;
-	QMenu*					m_pSettingMenu = nullptr;
+	QMenu*					m_pToolsMenu = nullptr;
 	QMenu*					m_pInfoMenu = nullptr;
 
 	// Elements of interface - ToolBar
@@ -91,13 +92,13 @@ private:
 	QToolBar*				m_pMeasureControlToolBar = nullptr;
 	QToolBar*				m_pMeasureTimeout = nullptr;
 	QToolBar*				m_pMeasureKind = nullptr;
-	QToolBar*				m_pOutputSignalToolBar = nullptr;
+	QToolBar*				m_pSignalConnectionToolBar = nullptr;
 	QToolBar*				m_pAnalogSignalToolBar = nullptr;
 
 	// Elements of interface - Items of ToolBars
 	//
 	QComboBox*				m_measureKindList = nullptr;
-	QComboBox*				m_outputSignalTypeList = nullptr;
+	QComboBox*				m_signalConnectionTypeList = nullptr;
 
 	QComboBox*				m_asRackCombo = nullptr;
 	QComboBox*				m_asSignalCombo = nullptr;
@@ -112,8 +113,9 @@ private:
 	// Elements of interface - Panels
 	//
 	FindMeasurePanel*		m_pFindMeasurePanel = nullptr;
+	StatisticPanel*			m_pStatisticPanel = nullptr;
 	SignalInfoPanel*		m_pSignalInfoPanel = nullptr;
-	QDockWidget*			m_pComparatorInfoPanel = nullptr;
+	ComparatorInfoPanel*	m_pComparatorInfoPanel = nullptr;
 	QTableView*				m_pComparatorInfoView = nullptr;
 
 	// Elements of interface - StatusBar
@@ -129,15 +131,27 @@ private:
 
 private:
 
+	SoftwareInfo			m_softwareInfo;
+
 	ConfigSocket*			m_pConfigSocket = nullptr;
+	void					runConfigSocket();
+	void					stopConfigSocket();
 
 	SignalSocket*			m_pSignalSocket = nullptr;
 	SimpleThread*			m_pSignalSocketThread = nullptr;
+	void					runSignalSocket();
+	void					stopSignalSocket();
 
 	TuningSocket*			m_pTuningSocket = nullptr;
 	SimpleThread*			m_pTuningSocketThread = nullptr;
+	void					runTuningSocket();
+	void					stopTuningSocket();
 
 	MeasureThread			m_measureThread;
+	void					runMeasureThread();
+	void					stopMeasureThread();
+
+private:
 
 	Calculator*				m_pCalculator = nullptr;
 
@@ -153,17 +167,13 @@ public:
 	void					createActions();
 	void					createMenu();
 	bool					createToolBars();
-	void					createMeasureViews();
 	void					createPanels();
+	void					createMeasureViews();
 	void					createStatusBar();
 	void					createContextMenu();
 
 	void					updateRacksOnToolBar();
 	void					updateSignalsOnToolBar();
-	void					updateSignalPositionOnToolBar();
-	void					updateChassisOnToolBar(const Metrology::SignalLocation& location);
-	void					updateModuleOnToolBar(const Metrology::SignalLocation& location);
-	void					updatePlaceOnToolBar(const Metrology::SignalLocation& location);
 
 	QComboBox*				rackCombo() { return m_asRackCombo; }
 	QComboBox*				signalCombo() { return m_asSignalCombo; }
@@ -171,6 +181,7 @@ public:
 	MeasureView*			activeMeasureView() { return measureView(m_measureType); }
 	MeasureView*			measureView(int measureType);
 	void					appendMeasureView(int measureType, MeasureView* pView);
+	StatisticPanel*			statisticPanel() { return m_pStatisticPanel; }
 
 	ConfigSocket*			configSocket() { return m_pConfigSocket; }
 	SignalSocket*			signalSocket() { return m_pSignalSocket; }
@@ -188,6 +199,13 @@ protected:
 
 signals:
 
+
+	//
+	void					changedMeasureType(int type);			// appear when changing the type of measurement
+	void					changedSignalConnectionType(int type);	// appear when changing the SignalConnectionType
+
+	// from measureComplite
+	//
 	void					appendMeasure(Measurement*);
 
 private slots:
@@ -209,22 +227,22 @@ private slots:
 
 	// menu - View
 	//
+	void					showRackList();
+	void					showSignalList();
+	void					showComparatorsList();
+	void					showTuningSignalList();
+	void					showSignalConnectionList();
+	void					showStatistic();
 
 	// menu - Tools
 	//
-	void					calibrators();
-	void					showRackList();
-	void					showSignalList();
-	void					showComparatorsList() {}
-	void					showOutputSignalList();
-	void					showTuningSignalList();
+	void					showCalibrators();
 	void					showCalculator();
-	void					options();
+	void					showOptions();
 
 	// menu - ?
 	//
-	void					showStatistic();
-	void					aboutConnection() {}
+	void					aboutConnection();
 	void					aboutApp();
 
 	// Slots of tab -- page measure type
@@ -235,7 +253,7 @@ private slots:
 	//
 	void					setMeasureKind(int index);
 	void					setMeasureTimeout(QString value);
-	void					setOutputSignalType(int index);
+	void					setSignalConnectionType(int index);
 
 	// Slots of analog signal toolbar
 	//

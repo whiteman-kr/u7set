@@ -1,0 +1,24 @@
+test AFB_SCALE_SI_SI01, AFB tests for AFB_SCALE_SI_SI element
+schema AFB_SCALE_SI_SI
+compatible MODULE_LM1SF40
+
+//
+set #TUN_IN_SI1 = 0
+check #OUT_SCALE_SI_SI01 == 0
+check #OVERFLOW_SCALE_SI_SI01 == 0
+check #ZERO_SCALE_SI_SI01 ==1
+
+//
+set #TUN_IN_SI1 = 1
+check #OUT_SCALE_SI_SI01 == 1
+check #OVERFLOW_SCALE_SI_SI01 == 0
+check #ZERO_SCALE_SI_SI01 ==0
+
+//
+set #TUN_IN_SI1 = 100
+check #OUT_SCALE_SI_SI01 == 100
+check #OVERFLOW_SCALE_SI_SI01 == 0
+check #ZERO_SCALE_SI_SI01 ==0
+
+
+endtest

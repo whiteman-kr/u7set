@@ -101,6 +101,7 @@ function runConfigScript(configScript, confFirmware, ioModule, LMNumber, frame, 
 "use strict";
 var FamilyLMID = 0x1100;
 var UartID = 0;
+var LMNumberCount = 0;
 //var configScriptVersion = 1;		// first logged version
 //var configScriptVersion = 2;		// TuningDataSize in LM port has been changed to 716 (1432 / 2)
 //var configScriptVersion = 3;		// AIM and AOM signal are now found not by place but by identifier, findSignalByPlace is not used.
@@ -135,14 +136,20 @@ var UartID = 0;
 //var configScriptVersion: number = 34;		// Changes in LmNumberCount calculation
 //var configScriptVersion: number = 35;		// Add Software type checking
 //var configScriptVersion: number = 36;		// Changes in App/DiagDataService processing
-var configScriptVersion = 37; // Add setDataFloat function
+//var configScriptVersion: number = 37;		// Add setDataFloat function
+//var configScriptVersion: number = 38;		// If TuningEnable/AppDataEnable/DiagDataEnable flag is false, IP address is zero
+var configScriptVersion = 39; // Description is added for LmNumberCount and UniqueID
 //
 function main(builder, root, logicModules, confFirmware, log, signalSet, subsystemStorage, opticModuleStorage, logicModuleDescription) {
     if (logicModules.length != 0) {
         var subSysID = logicModules[0].jsPropertyString("SubsystemID");
         log.writeMessage("Subsystem " + subSysID + ", configuration script: " + logicModuleDescription.jsConfigurationStringFile() + ", version: " + configScriptVersion + ", logic modules count: " + logicModules.length);
     }
-    var LMNumberCount = 0;
+    for (var i = 0; i < logicModules.length; i++) {
+        if (logicModules[i].jsPropertyInt("ModuleFamily") == FamilyLMID) {
+            LMNumberCount++;
+        }
+    }
     for (var i = 0; i < logicModules.length; i++) {
         if (logicModules[i].jsPropertyInt("ModuleFamily") != FamilyLMID) {
             continue;
@@ -151,19 +158,10 @@ function main(builder, root, logicModules, confFirmware, log, signalSet, subsyst
         if (result == false) {
             return false;
         }
-        LMNumberCount++;
         if (builder.jsIsInterruptRequested() == true) {
             return true;
         }
     }
-    // LMNumberCount
-    //
-    var frameStorageConfig = 1;
-    var ptr = 14;
-    if (setData16(confFirmware, log, -1, "", frameStorageConfig, ptr, "LMNumberCount", LMNumberCount) == false) {
-        return false;
-    }
-    confFirmware.writeLog("Subsystem " + subSysID + ", frame " + frameStorageConfig + ", offset " + ptr + ": LMNumberCount = " + LMNumberCount + "\r\n");
     return true;
 }
 function setData8(confFirmware, log, channel, equpmentID, frameIndex, offset, caption, data) {
@@ -366,7 +364,10 @@ function generate_lm_1_rev3(builder, module, root, confFirmware, log, signalSet,
     ptr += 2;
     // reserved
     ptr += 4;
-    // write LMNumberCount
+    if (setData16(confFirmware, log, LMNumber, equipmentID, frameStorageConfig, ptr, "LMNumberCount", LMNumberCount) == false) {
+        return false;
+    }
+    confFirmware.writeLog("    [" + frameStorageConfig + ":" + ptr + "] LMNumberCount = " + LMNumberCount + "\r\n");
     ptr += 2;
     var configIndexOffset = ptr + (LMNumber - 1) * (2 /*offset*/ + 4 /*reserved*/);
     var configFrame = configStartFrames + configFrameCount * (LMNumber - 1);
@@ -389,13 +390,8 @@ function generate_lm_1_rev3(builder, module, root, confFirmware, log, signalSet,
     }
     confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] uartId = " + uartId + "\r\n");
     ptr += 2;
-    //var hashString = storeHash64(confFirmware, log, LMNumber, equipmentID, frameServiceConfig, ptr, "SubSystemID Hash", subSysID);
-    //if (hashString == "")
-    //{
-    //		return false;
-    //}
-    //confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] subSysID HASH-64 = 0x" + hashString + "\r\n");
-    //Hash (UniqueID) will be counted later
+    //Hash (UniqueID) will be counted later, write zero for future replacement
+    confFirmware.writeLog("    [" + frameServiceConfig + ":" + ptr + "] UniqueID = 0\r\n");
     ptr += 8;
     // I/O Modules configuration
     //
@@ -469,21 +465,15 @@ function generate_lm_1_rev3(builder, module, root, confFirmware, log, signalSet,
     confFirmware.writeLog("    Ethernet Controller " + equipmentID + ethernetcontrollerID + "\r\n");
     // Controller
     var tuningWordsCount = 716;
-    var tuningIP = ethernetController.jsPropertyIP("TuningIP");
-    var tuningPort = ethernetController.jsPropertyInt("TuningPort");
-    if (tuningIP == 0) {
-        log.errCFG3011("TuningIP", tuningIP, ethernetController.jsPropertyString("EquipmentID"));
-        return false;
-    }
-    if (tuningPort == 0) {
-        log.errCFG3012("TuningPort", tuningPort, ethernetController.jsPropertyString("EquipmentID"));
-        return false;
-    }
+    var tuningIP = 0;
+    var tuningPort = 0;
     // Service
     var tuningServiceIP = 0;
     var tuningServicePort = 0;
     var serviceID = ethernetController.jsPropertyString("TuningServiceID");
     if (ethernetController.jsPropertyBool("TuningEnable") == true) {
+        tuningIP = ethernetController.jsPropertyIP("TuningIP");
+        tuningPort = ethernetController.jsPropertyInt("TuningPort");
         var service = root.jsFindChildObjectByMask(serviceID);
         if (service == null) {
             log.wrnCFG3008(serviceID, module.jsPropertyString("EquipmentID"));
@@ -525,10 +515,6 @@ function generate_lm_1_rev3(builder, module, root, confFirmware, log, signalSet,
     // REG / DIAG
     //
     for (var i = 0; i < 2; i++) {
-        var ip = [0, 0];
-        var port = [0, 0];
-        var serviceIP = [0, 0];
-        var servicePort = [0, 0];
         ethernetcontrollerID = "_ETHERNET0" + (i + 2);
         ethernetController = module.jsFindChildObjectByMask(equipmentID + ethernetcontrollerID);
         if (ethernetController == null) {
@@ -546,21 +532,16 @@ function generate_lm_1_rev3(builder, module, root, confFirmware, log, signalSet,
         }
         confFirmware.writeLog("    Ethernet Controller " + equipmentID + ethernetcontrollerID + "\r\n");
         var servicesName = ["App", "Diag"];
+        var ip = [0, 0];
+        var port = [0, 0];
+        var serviceIP = [0, 0];
+        var servicePort = [0, 0];
         for (var s = 0; s < 2; s++) {
-            // Controller
-            ip[s] = ethernetController.jsPropertyIP(servicesName[s] + "DataIP");
-            port[s] = ethernetController.jsPropertyInt(servicesName[s] + "DataPort");
-            if (ip[s] == 0) {
-                log.errCFG3011(servicesName[s] + "DataIP", ip[s], ethernetController.jsPropertyString("EquipmentID"));
-                return false;
-            }
-            if (port[s] == 0) {
-                log.errCFG3012(servicesName[s] + "DataPort", port[s], ethernetController.jsPropertyString("EquipmentID"));
-                return false;
-            }
             // Service
             var serviceID = ethernetController.jsPropertyString(servicesName[s] + "DataServiceID");
             if (ethernetController.jsPropertyBool(servicesName[s] + "DataEnable") == true) {
+                ip[s] = ethernetController.jsPropertyIP(servicesName[s] + "DataIP");
+                port[s] = ethernetController.jsPropertyInt(servicesName[s] + "DataPort");
                 var service = root.jsFindChildObjectByMask(serviceID);
                 if (service == null) {
                     log.wrnCFG3008(serviceID, module.jsPropertyString("EquipmentID"));

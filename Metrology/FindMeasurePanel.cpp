@@ -199,7 +199,7 @@ FindItem FindMeasureTable::at(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void FindMeasureTable::set(const QList<FindItem> list_add)
+void FindMeasureTable::set(const QVector<FindItem>& list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -266,10 +266,10 @@ void FindMeasurePanel::createInterface()
 
 	QToolBar *toolBar = new QToolBar(m_pFindWindow);
 
-	QLabel* label = new QLabel(tr("Input text: "), toolBar);
 	m_findTextEdit = new QLineEdit(m_findText, toolBar);
+	m_findTextEdit->setPlaceholderText(tr("Search Text"));
+	m_findTextEdit->setClearButtonEnabled(true);
 
-	toolBar->addWidget(label);
 	toolBar->addWidget(m_findTextEdit);
 	QAction* action = toolBar->addAction(QIcon(":/icons/Search.png"), tr("Find text"));
 	connect(action, &QAction::triggered, this, &FindMeasurePanel::find);
@@ -317,13 +317,11 @@ void FindMeasurePanel::createContextMenu()
 
 	m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
 	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
-	m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
 
 	m_pContextMenu->addSeparator();
 
 	m_pSelectAllAction = m_pContextMenu->addAction(tr("Select &All"));
 	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
-	m_pSelectAllAction->setShortcut(Qt::CTRL + Qt::Key_A);
 
 	connect(m_pCopyAction, &QAction::triggered, this, &FindMeasurePanel::copy);
 	connect(m_pSelectAllAction, &QAction::triggered, this, &FindMeasurePanel::selectAll);
@@ -411,7 +409,7 @@ void FindMeasurePanel::find()
 		return;
 	}
 
-	QList<FindItem> findItemList;
+	QVector<FindItem> findItemList;
 
 	m_table.clear();
 

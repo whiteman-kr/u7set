@@ -3,7 +3,6 @@
 
 #include <QTableView>
 #include <QMenu>
-#include <QList>
 
 #include "MeasureViewHeader.h"
 #include "MeasureBase.h"
@@ -36,6 +35,8 @@ private:
 
 public:
 
+	MeasureBase			m_measureBase;
+
 	int					measureType() const { return m_measureType; }
 	void				setMeasureType(int measureType);
 
@@ -46,12 +47,10 @@ public:
 	bool				columnIsVisible(int column);
 
 	bool				append(Measurement* pMeasurement);
-	bool				remove(const QList<int> removeIndexList);
+	bool				remove(const QVector<int>& removeIndexList);
 
 	QColor				backgroundColor(int row, int column) const;
 	QString				text(int row, int column) const;
-
-	MeasureBase		m_measureBase;
 };
 
 // ==============================================================================================
@@ -71,7 +70,7 @@ private:
 	MeasureTable		m_table;
 
 	QMenu*				m_headerContextMenu = nullptr;
-	QList<QAction*>		m_actionList;
+	QVector<QAction*>	m_actionList;
 
 	void				createContextMenu();
 

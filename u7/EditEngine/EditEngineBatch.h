@@ -14,8 +14,8 @@ namespace EditEngine
 		bool addCommand();
 
 	protected:
-		virtual void executeCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect) override;
-		virtual void unExecuteCommand(std::vector<std::shared_ptr<VFrame30::SchemaItem>>* itemsToSelect) override;
+		virtual void executeCommand(std::vector<SchemaItemPtr>* itemsToSelect) override;
+		virtual void unExecuteCommand(std::vector<SchemaItemPtr>* itemsToSelect) override;
 
 		// Data
 		//

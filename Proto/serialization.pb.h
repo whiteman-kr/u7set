@@ -62,6 +62,9 @@ class SchemaItemLine;
 class SchemaItemPath;
 class SchemaItemImage;
 class SchemaItemFrame;
+class VFrameSetPoint;
+class IndicatorHistogramVert;
+class IndicatorArrowIndicator;
 class SchemaItemIndicator;
 class FblConnectionPoint;
 class FblItem;
@@ -124,6 +127,13 @@ class ArchSignal;
 class ArchSignals;
 class BusSignal;
 class Bus;
+class ComparatorSignal;
+class Comparator;
+class LmComparatorSet;
+class ComparatorSet;
+class MetrologySignalLocation;
+class MetrologySignal;
+class MetrologySignalSet;
 
 enum SchemaUnit {
   Display = 0,
@@ -2920,6 +2930,25 @@ class SchemaItem : public ::google::protobuf::Message {
   inline ::std::string* release_objectname();
   inline void set_allocated_objectname(::std::string* objectname);
 
+  // optional string label = 14;
+  inline bool has_label() const;
+  inline void clear_label();
+  static const int kLabelFieldNumber = 14;
+  inline const ::std::string& label() const;
+  inline void set_label(const ::std::string& value);
+  inline void set_label(const char* value);
+  inline void set_label(const char* value, size_t size);
+  inline ::std::string* mutable_label();
+  inline ::std::string* release_label();
+  inline void set_allocated_label(::std::string* label);
+
+  // optional int32 labelPos = 15 [default = 2];
+  inline bool has_labelpos() const;
+  inline void clear_labelpos();
+  static const int kLabelPosFieldNumber = 15;
+  inline ::google::protobuf::int32 labelpos() const;
+  inline void set_labelpos(::google::protobuf::int32 value);
+
   // optional string preDrawScript = 30;
   inline bool has_predrawscript() const;
   inline void clear_predrawscript();
@@ -3265,6 +3294,10 @@ class SchemaItem : public ::google::protobuf::Message {
   inline void clear_has_iscommented();
   inline void set_has_objectname();
   inline void clear_has_objectname();
+  inline void set_has_label();
+  inline void clear_has_label();
+  inline void set_has_labelpos();
+  inline void clear_has_labelpos();
   inline void set_has_predrawscript();
   inline void clear_has_predrawscript();
   inline void set_has_posrectimpl();
@@ -3348,6 +3381,7 @@ class SchemaItem : public ::google::protobuf::Message {
   bool iscommented_;
   ::std::string* clickscript_;
   ::std::string* objectname_;
+  ::std::string* label_;
   ::std::string* predrawscript_;
   ::Proto::PosRectImpl* posrectimpl_;
   ::Proto::PosLineImpl* poslineimpl_;
@@ -3384,9 +3418,10 @@ class SchemaItem : public ::google::protobuf::Message {
   ::Proto::SchemaItemControl* control_;
   ::Proto::SchemaItemPushButton* pushbutton_;
   ::Proto::SchemaItemLineEdit* lineedit_;
+  ::google::protobuf::int32 labelpos_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(44 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(46 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -4258,6 +4293,515 @@ class SchemaItemFrame : public ::google::protobuf::Message {
 };
 // -------------------------------------------------------------------
 
+class VFrameSetPoint : public ::google::protobuf::Message {
+ public:
+  VFrameSetPoint();
+  virtual ~VFrameSetPoint();
+
+  VFrameSetPoint(const VFrameSetPoint& from);
+
+  inline VFrameSetPoint& operator=(const VFrameSetPoint& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const VFrameSetPoint& default_instance();
+
+  void Swap(VFrameSetPoint* other);
+
+  // implements Message ----------------------------------------------
+
+  VFrameSetPoint* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const VFrameSetPoint& from);
+  void MergeFrom(const VFrameSetPoint& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 setpointType = 2 [default = 0];
+  inline bool has_setpointtype() const;
+  inline void clear_setpointtype();
+  static const int kSetpointTypeFieldNumber = 2;
+  inline ::google::protobuf::int32 setpointtype() const;
+  inline void set_setpointtype(::google::protobuf::int32 value);
+
+  // optional uint32 color = 3;
+  inline bool has_color() const;
+  inline void clear_color();
+  static const int kColorFieldNumber = 3;
+  inline ::google::protobuf::uint32 color() const;
+  inline void set_color(::google::protobuf::uint32 value);
+
+  // optional string schemaItemLabel = 10;
+  inline bool has_schemaitemlabel() const;
+  inline void clear_schemaitemlabel();
+  static const int kSchemaItemLabelFieldNumber = 10;
+  inline const ::std::string& schemaitemlabel() const;
+  inline void set_schemaitemlabel(const ::std::string& value);
+  inline void set_schemaitemlabel(const char* value);
+  inline void set_schemaitemlabel(const char* value, size_t size);
+  inline ::std::string* mutable_schemaitemlabel();
+  inline ::std::string* release_schemaitemlabel();
+  inline void set_allocated_schemaitemlabel(::std::string* schemaitemlabel);
+
+  // optional string outputAppSignalId = 20;
+  inline bool has_outputappsignalid() const;
+  inline void clear_outputappsignalid();
+  static const int kOutputAppSignalIdFieldNumber = 20;
+  inline const ::std::string& outputappsignalid() const;
+  inline void set_outputappsignalid(const ::std::string& value);
+  inline void set_outputappsignalid(const char* value);
+  inline void set_outputappsignalid(const char* value, size_t size);
+  inline ::std::string* mutable_outputappsignalid();
+  inline ::std::string* release_outputappsignalid();
+  inline void set_allocated_outputappsignalid(::std::string* outputappsignalid);
+
+  // optional double staticValue = 30;
+  inline bool has_staticvalue() const;
+  inline void clear_staticvalue();
+  static const int kStaticValueFieldNumber = 30;
+  inline double staticvalue() const;
+  inline void set_staticvalue(double value);
+
+  // optional int32 staticCompareType = 31;
+  inline bool has_staticcomparetype() const;
+  inline void clear_staticcomparetype();
+  static const int kStaticCompareTypeFieldNumber = 31;
+  inline ::google::protobuf::int32 staticcomparetype() const;
+  inline void set_staticcomparetype(::google::protobuf::int32 value);
+
+  // @@protoc_insertion_point(class_scope:Proto.VFrameSetPoint)
+ private:
+  inline void set_has_setpointtype();
+  inline void clear_has_setpointtype();
+  inline void set_has_color();
+  inline void clear_has_color();
+  inline void set_has_schemaitemlabel();
+  inline void clear_has_schemaitemlabel();
+  inline void set_has_outputappsignalid();
+  inline void clear_has_outputappsignalid();
+  inline void set_has_staticvalue();
+  inline void clear_has_staticvalue();
+  inline void set_has_staticcomparetype();
+  inline void clear_has_staticcomparetype();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 setpointtype_;
+  ::google::protobuf::uint32 color_;
+  ::std::string* schemaitemlabel_;
+  ::std::string* outputappsignalid_;
+  double staticvalue_;
+  ::google::protobuf::int32 staticcomparetype_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(6 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static VFrameSetPoint* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class IndicatorHistogramVert : public ::google::protobuf::Message {
+ public:
+  IndicatorHistogramVert();
+  virtual ~IndicatorHistogramVert();
+
+  IndicatorHistogramVert(const IndicatorHistogramVert& from);
+
+  inline IndicatorHistogramVert& operator=(const IndicatorHistogramVert& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const IndicatorHistogramVert& default_instance();
+
+  void Swap(IndicatorHistogramVert* other);
+
+  // implements Message ----------------------------------------------
+
+  IndicatorHistogramVert* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const IndicatorHistogramVert& from);
+  void MergeFrom(const IndicatorHistogramVert& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional double startValue = 1;
+  inline bool has_startvalue() const;
+  inline void clear_startvalue();
+  static const int kStartValueFieldNumber = 1;
+  inline double startvalue() const;
+  inline void set_startvalue(double value);
+
+  // optional double endValue = 2;
+  inline bool has_endvalue() const;
+  inline void clear_endvalue();
+  static const int kEndValueFieldNumber = 2;
+  inline double endvalue() const;
+  inline void set_endvalue(double value);
+
+  // optional double barWidth = 16;
+  inline bool has_barwidth() const;
+  inline void clear_barwidth();
+  static const int kBarWidthFieldNumber = 16;
+  inline double barwidth() const;
+  inline void set_barwidth(double value);
+
+  // optional double leftMargin = 20;
+  inline bool has_leftmargin() const;
+  inline void clear_leftmargin();
+  static const int kLeftMarginFieldNumber = 20;
+  inline double leftmargin() const;
+  inline void set_leftmargin(double value);
+
+  // optional double topMargin = 21;
+  inline bool has_topmargin() const;
+  inline void clear_topmargin();
+  static const int kTopMarginFieldNumber = 21;
+  inline double topmargin() const;
+  inline void set_topmargin(double value);
+
+  // optional double rightMargin = 22;
+  inline bool has_rightmargin() const;
+  inline void clear_rightmargin();
+  static const int kRightMarginFieldNumber = 22;
+  inline double rightmargin() const;
+  inline void set_rightmargin(double value);
+
+  // optional double bottomMargin = 23;
+  inline bool has_bottommargin() const;
+  inline void clear_bottommargin();
+  static const int kBottomMarginFieldNumber = 23;
+  inline double bottommargin() const;
+  inline void set_bottommargin(double value);
+
+  // optional bool drawBarRect = 32 [default = true];
+  inline bool has_drawbarrect() const;
+  inline void clear_drawbarrect();
+  static const int kDrawBarRectFieldNumber = 32;
+  inline bool drawbarrect() const;
+  inline void set_drawbarrect(bool value);
+
+  // optional bool drawGrid = 40 [default = true];
+  inline bool has_drawgrid() const;
+  inline void clear_drawgrid();
+  static const int kDrawGridFieldNumber = 40;
+  inline bool drawgrid() const;
+  inline void set_drawgrid(bool value);
+
+  // optional bool drawGridForAllBars = 41 [default = false];
+  inline bool has_drawgridforallbars() const;
+  inline void clear_drawgridforallbars();
+  static const int kDrawGridForAllBarsFieldNumber = 41;
+  inline bool drawgridforallbars() const;
+  inline void set_drawgridforallbars(bool value);
+
+  // optional bool drawGridValues = 42 [default = true];
+  inline bool has_drawgridvalues() const;
+  inline void clear_drawgridvalues();
+  static const int kDrawGridValuesFieldNumber = 42;
+  inline bool drawgridvalues() const;
+  inline void set_drawgridvalues(bool value);
+
+  // optional bool drawGridValueForAllBars = 43 [default = false];
+  inline bool has_drawgridvalueforallbars() const;
+  inline void clear_drawgridvalueforallbars();
+  static const int kDrawGridValueForAllBarsFieldNumber = 43;
+  inline bool drawgridvalueforallbars() const;
+  inline void set_drawgridvalueforallbars(bool value);
+
+  // optional bool drawGridValueUnits = 44 [default = true];
+  inline bool has_drawgridvalueunits() const;
+  inline void clear_drawgridvalueunits();
+  static const int kDrawGridValueUnitsFieldNumber = 44;
+  inline bool drawgridvalueunits() const;
+  inline void set_drawgridvalueunits(bool value);
+
+  // optional double gridMainStep = 50 [default = 50];
+  inline bool has_gridmainstep() const;
+  inline void clear_gridmainstep();
+  static const int kGridMainStepFieldNumber = 50;
+  inline double gridmainstep() const;
+  inline void set_gridmainstep(double value);
+
+  // optional double gridSmallStep = 51 [default = 10];
+  inline bool has_gridsmallstep() const;
+  inline void clear_gridsmallstep();
+  static const int kGridSmallStepFieldNumber = 51;
+  inline double gridsmallstep() const;
+  inline void set_gridsmallstep(double value);
+
+  // optional bool drawAutoSetpoints = 70;
+  inline bool has_drawautosetpoints() const;
+  inline void clear_drawautosetpoints();
+  static const int kDrawAutoSetpointsFieldNumber = 70;
+  inline bool drawautosetpoints() const;
+  inline void set_drawautosetpoints(bool value);
+
+  // optional bool drawCustomSetpoints = 71;
+  inline bool has_drawcustomsetpoints() const;
+  inline void clear_drawcustomsetpoints();
+  static const int kDrawCustomSetpointsFieldNumber = 71;
+  inline bool drawcustomsetpoints() const;
+  inline void set_drawcustomsetpoints(bool value);
+
+  // repeated .Proto.IndicatorHistogramVert customSetPoints = 72;
+  inline int customsetpoints_size() const;
+  inline void clear_customsetpoints();
+  static const int kCustomSetPointsFieldNumber = 72;
+  inline const ::Proto::IndicatorHistogramVert& customsetpoints(int index) const;
+  inline ::Proto::IndicatorHistogramVert* mutable_customsetpoints(int index);
+  inline ::Proto::IndicatorHistogramVert* add_customsetpoints();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::IndicatorHistogramVert >&
+      customsetpoints() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::IndicatorHistogramVert >*
+      mutable_customsetpoints();
+
+  // @@protoc_insertion_point(class_scope:Proto.IndicatorHistogramVert)
+ private:
+  inline void set_has_startvalue();
+  inline void clear_has_startvalue();
+  inline void set_has_endvalue();
+  inline void clear_has_endvalue();
+  inline void set_has_barwidth();
+  inline void clear_has_barwidth();
+  inline void set_has_leftmargin();
+  inline void clear_has_leftmargin();
+  inline void set_has_topmargin();
+  inline void clear_has_topmargin();
+  inline void set_has_rightmargin();
+  inline void clear_has_rightmargin();
+  inline void set_has_bottommargin();
+  inline void clear_has_bottommargin();
+  inline void set_has_drawbarrect();
+  inline void clear_has_drawbarrect();
+  inline void set_has_drawgrid();
+  inline void clear_has_drawgrid();
+  inline void set_has_drawgridforallbars();
+  inline void clear_has_drawgridforallbars();
+  inline void set_has_drawgridvalues();
+  inline void clear_has_drawgridvalues();
+  inline void set_has_drawgridvalueforallbars();
+  inline void clear_has_drawgridvalueforallbars();
+  inline void set_has_drawgridvalueunits();
+  inline void clear_has_drawgridvalueunits();
+  inline void set_has_gridmainstep();
+  inline void clear_has_gridmainstep();
+  inline void set_has_gridsmallstep();
+  inline void clear_has_gridsmallstep();
+  inline void set_has_drawautosetpoints();
+  inline void clear_has_drawautosetpoints();
+  inline void set_has_drawcustomsetpoints();
+  inline void clear_has_drawcustomsetpoints();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  double startvalue_;
+  double endvalue_;
+  double barwidth_;
+  double leftmargin_;
+  double topmargin_;
+  double rightmargin_;
+  double bottommargin_;
+  bool drawbarrect_;
+  bool drawgrid_;
+  bool drawgridforallbars_;
+  bool drawgridvalues_;
+  bool drawgridvalueforallbars_;
+  bool drawgridvalueunits_;
+  bool drawautosetpoints_;
+  bool drawcustomsetpoints_;
+  double gridmainstep_;
+  double gridsmallstep_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::IndicatorHistogramVert > customsetpoints_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(18 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static IndicatorHistogramVert* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class IndicatorArrowIndicator : public ::google::protobuf::Message {
+ public:
+  IndicatorArrowIndicator();
+  virtual ~IndicatorArrowIndicator();
+
+  IndicatorArrowIndicator(const IndicatorArrowIndicator& from);
+
+  inline IndicatorArrowIndicator& operator=(const IndicatorArrowIndicator& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const IndicatorArrowIndicator& default_instance();
+
+  void Swap(IndicatorArrowIndicator* other);
+
+  // implements Message ----------------------------------------------
+
+  IndicatorArrowIndicator* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const IndicatorArrowIndicator& from);
+  void MergeFrom(const IndicatorArrowIndicator& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional double startValue = 1;
+  inline bool has_startvalue() const;
+  inline void clear_startvalue();
+  static const int kStartValueFieldNumber = 1;
+  inline double startvalue() const;
+  inline void set_startvalue(double value);
+
+  // optional double endValue = 2;
+  inline bool has_endvalue() const;
+  inline void clear_endvalue();
+  static const int kEndValueFieldNumber = 2;
+  inline double endvalue() const;
+  inline void set_endvalue(double value);
+
+  // optional double startAngle = 16;
+  inline bool has_startangle() const;
+  inline void clear_startangle();
+  static const int kStartAngleFieldNumber = 16;
+  inline double startangle() const;
+  inline void set_startangle(double value);
+
+  // optional double spanAngle = 17;
+  inline bool has_spanangle() const;
+  inline void clear_spanangle();
+  static const int kSpanAngleFieldNumber = 17;
+  inline double spanangle() const;
+  inline void set_spanangle(double value);
+
+  // @@protoc_insertion_point(class_scope:Proto.IndicatorArrowIndicator)
+ private:
+  inline void set_has_startvalue();
+  inline void clear_has_startvalue();
+  inline void set_has_endvalue();
+  inline void clear_has_endvalue();
+  inline void set_has_startangle();
+  inline void clear_has_startangle();
+  inline void set_has_spanangle();
+  inline void clear_has_spanangle();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  double startvalue_;
+  double endvalue_;
+  double startangle_;
+  double spanangle_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static IndicatorArrowIndicator* default_instance_;
+};
+// -------------------------------------------------------------------
+
 class SchemaItemIndicator : public ::google::protobuf::Message {
  public:
   SchemaItemIndicator();
@@ -4312,24 +4856,158 @@ class SchemaItemIndicator : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional uint32 type = 1 [default = 0];
+  // optional string signalIds = 1;
+  inline bool has_signalids() const;
+  inline void clear_signalids();
+  static const int kSignalIdsFieldNumber = 1;
+  inline const ::std::string& signalids() const;
+  inline void set_signalids(const ::std::string& value);
+  inline void set_signalids(const char* value);
+  inline void set_signalids(const char* value, size_t size);
+  inline ::std::string* mutable_signalids();
+  inline ::std::string* release_signalids();
+  inline void set_allocated_signalids(::std::string* signalids);
+
+  // optional int32 signalSource = 2 [default = 0];
+  inline bool has_signalsource() const;
+  inline void clear_signalsource();
+  static const int kSignalSourceFieldNumber = 2;
+  inline ::google::protobuf::int32 signalsource() const;
+  inline void set_signalsource(::google::protobuf::int32 value);
+
+  // optional int32 precision = 3 [default = 2];
+  inline bool has_precision() const;
+  inline void clear_precision();
+  static const int kPrecisionFieldNumber = 3;
+  inline ::google::protobuf::int32 precision() const;
+  inline void set_precision(::google::protobuf::int32 value);
+
+  // optional int32 analogFormat = 4 [default = 102];
+  inline bool has_analogformat() const;
+  inline void clear_analogformat();
+  static const int kAnalogFormatFieldNumber = 4;
+  inline ::google::protobuf::int32 analogformat() const;
+  inline void set_analogformat(::google::protobuf::int32 value);
+
+  // optional .Proto.FontParam font = 9;
+  inline bool has_font() const;
+  inline void clear_font();
+  static const int kFontFieldNumber = 9;
+  inline const ::Proto::FontParam& font() const;
+  inline ::Proto::FontParam* mutable_font();
+  inline ::Proto::FontParam* release_font();
+  inline void set_allocated_font(::Proto::FontParam* font);
+
+  // optional bool drawRect = 10 [default = false];
+  inline bool has_drawrect() const;
+  inline void clear_drawrect();
+  static const int kDrawRectFieldNumber = 10;
+  inline bool drawrect() const;
+  inline void set_drawrect(bool value);
+
+  // optional double lineWeight = 11 [default = 0];
+  inline bool has_lineweight() const;
+  inline void clear_lineweight();
+  static const int kLineWeightFieldNumber = 11;
+  inline double lineweight() const;
+  inline void set_lineweight(double value);
+
+  // optional uint32 backgroundColor = 16;
+  inline bool has_backgroundcolor() const;
+  inline void clear_backgroundcolor();
+  static const int kBackgroundColorFieldNumber = 16;
+  inline ::google::protobuf::uint32 backgroundcolor() const;
+  inline void set_backgroundcolor(::google::protobuf::uint32 value);
+
+  // optional uint32 lineColor = 17;
+  inline bool has_linecolor() const;
+  inline void clear_linecolor();
+  static const int kLineColorFieldNumber = 17;
+  inline ::google::protobuf::uint32 linecolor() const;
+  inline void set_linecolor(::google::protobuf::uint32 value);
+
+  // repeated uint32 signalColors = 18;
+  inline int signalcolors_size() const;
+  inline void clear_signalcolors();
+  static const int kSignalColorsFieldNumber = 18;
+  inline ::google::protobuf::uint32 signalcolors(int index) const;
+  inline void set_signalcolors(int index, ::google::protobuf::uint32 value);
+  inline void add_signalcolors(::google::protobuf::uint32 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >&
+      signalcolors() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
+      mutable_signalcolors();
+
+  // optional uint32 type = 32 [default = 0];
   inline bool has_type() const;
   inline void clear_type();
-  static const int kTypeFieldNumber = 1;
+  static const int kTypeFieldNumber = 32;
   inline ::google::protobuf::uint32 type() const;
   inline void set_type(::google::protobuf::uint32 value);
 
+  // optional .Proto.IndicatorHistogramVert indicatorHistogramVert = 48;
+  inline bool has_indicatorhistogramvert() const;
+  inline void clear_indicatorhistogramvert();
+  static const int kIndicatorHistogramVertFieldNumber = 48;
+  inline const ::Proto::IndicatorHistogramVert& indicatorhistogramvert() const;
+  inline ::Proto::IndicatorHistogramVert* mutable_indicatorhistogramvert();
+  inline ::Proto::IndicatorHistogramVert* release_indicatorhistogramvert();
+  inline void set_allocated_indicatorhistogramvert(::Proto::IndicatorHistogramVert* indicatorhistogramvert);
+
+  // optional .Proto.IndicatorArrowIndicator indicatorArrowIndicator = 49;
+  inline bool has_indicatorarrowindicator() const;
+  inline void clear_indicatorarrowindicator();
+  static const int kIndicatorArrowIndicatorFieldNumber = 49;
+  inline const ::Proto::IndicatorArrowIndicator& indicatorarrowindicator() const;
+  inline ::Proto::IndicatorArrowIndicator* mutable_indicatorarrowindicator();
+  inline ::Proto::IndicatorArrowIndicator* release_indicatorarrowindicator();
+  inline void set_allocated_indicatorarrowindicator(::Proto::IndicatorArrowIndicator* indicatorarrowindicator);
+
   // @@protoc_insertion_point(class_scope:Proto.SchemaItemIndicator)
  private:
+  inline void set_has_signalids();
+  inline void clear_has_signalids();
+  inline void set_has_signalsource();
+  inline void clear_has_signalsource();
+  inline void set_has_precision();
+  inline void clear_has_precision();
+  inline void set_has_analogformat();
+  inline void clear_has_analogformat();
+  inline void set_has_font();
+  inline void clear_has_font();
+  inline void set_has_drawrect();
+  inline void clear_has_drawrect();
+  inline void set_has_lineweight();
+  inline void clear_has_lineweight();
+  inline void set_has_backgroundcolor();
+  inline void clear_has_backgroundcolor();
+  inline void set_has_linecolor();
+  inline void clear_has_linecolor();
   inline void set_has_type();
   inline void clear_has_type();
+  inline void set_has_indicatorhistogramvert();
+  inline void clear_has_indicatorhistogramvert();
+  inline void set_has_indicatorarrowindicator();
+  inline void clear_has_indicatorarrowindicator();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
+  ::std::string* signalids_;
+  ::google::protobuf::int32 signalsource_;
+  ::google::protobuf::int32 precision_;
+  ::Proto::FontParam* font_;
+  ::google::protobuf::int32 analogformat_;
+  bool drawrect_;
+  double lineweight_;
+  ::google::protobuf::uint32 backgroundcolor_;
+  ::google::protobuf::uint32 linecolor_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::uint32 > signalcolors_;
+  ::Proto::IndicatorHistogramVert* indicatorhistogramvert_;
+  ::Proto::IndicatorArrowIndicator* indicatorarrowindicator_;
   ::google::protobuf::uint32 type_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -4670,17 +5348,17 @@ class FblItemRect : public ::google::protobuf::Message {
   inline ::Proto::FontParam* release_font();
   inline void set_allocated_font(::Proto::FontParam* font);
 
-  // optional string label = 6;
-  inline bool has_label() const;
-  inline void clear_label();
-  static const int kLabelFieldNumber = 6;
-  inline const ::std::string& label() const;
-  inline void set_label(const ::std::string& value);
-  inline void set_label(const char* value);
-  inline void set_label(const char* value, size_t size);
-  inline ::std::string* mutable_label();
-  inline ::std::string* release_label();
-  inline void set_allocated_label(::std::string* label);
+  // optional string obsoleteLabel = 6;
+  inline bool has_obsoletelabel() const;
+  inline void clear_obsoletelabel();
+  static const int kObsoleteLabelFieldNumber = 6;
+  inline const ::std::string& obsoletelabel() const;
+  inline void set_obsoletelabel(const ::std::string& value);
+  inline void set_obsoletelabel(const char* value);
+  inline void set_obsoletelabel(const char* value, size_t size);
+  inline ::std::string* mutable_obsoletelabel();
+  inline ::std::string* release_obsoletelabel();
+  inline void set_allocated_obsoletelabel(::std::string* obsoletelabel);
 
   // optional string userText = 7;
   inline bool has_usertext() const;
@@ -4701,12 +5379,12 @@ class FblItemRect : public ::google::protobuf::Message {
   inline ::google::protobuf::int32 usertextpos() const;
   inline void set_usertextpos(::google::protobuf::int32 value);
 
-  // optional int32 labelPos = 9 [default = 2];
-  inline bool has_labelpos() const;
-  inline void clear_labelpos();
-  static const int kLabelPosFieldNumber = 9;
-  inline ::google::protobuf::int32 labelpos() const;
-  inline void set_labelpos(::google::protobuf::int32 value);
+  // optional int32 obsoleteLabelPos = 9 [default = -1];
+  inline bool has_obsoletelabelpos() const;
+  inline void clear_obsoletelabelpos();
+  static const int kObsoleteLabelPosFieldNumber = 9;
+  inline ::google::protobuf::int32 obsoletelabelpos() const;
+  inline void set_obsoletelabelpos(::google::protobuf::int32 value);
 
   // @@protoc_insertion_point(class_scope:Proto.FblItemRect)
  private:
@@ -4720,14 +5398,14 @@ class FblItemRect : public ::google::protobuf::Message {
   inline void clear_has_textcolor();
   inline void set_has_font();
   inline void clear_has_font();
-  inline void set_has_label();
-  inline void clear_has_label();
+  inline void set_has_obsoletelabel();
+  inline void clear_has_obsoletelabel();
   inline void set_has_usertext();
   inline void clear_has_usertext();
   inline void set_has_usertextpos();
   inline void clear_has_usertextpos();
-  inline void set_has_labelpos();
-  inline void clear_has_labelpos();
+  inline void set_has_obsoletelabelpos();
+  inline void clear_has_obsoletelabelpos();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -4735,11 +5413,11 @@ class FblItemRect : public ::google::protobuf::Message {
   ::google::protobuf::uint32 linecolor_;
   ::google::protobuf::uint32 fillcolor_;
   ::Proto::FontParam* font_;
-  ::std::string* label_;
+  ::std::string* obsoletelabel_;
   ::google::protobuf::uint32 textcolor_;
   ::google::protobuf::int32 usertextpos_;
   ::std::string* usertext_;
-  ::google::protobuf::int32 labelpos_;
+  ::google::protobuf::int32 obsoletelabelpos_;
 
   mutable int _cached_size_;
   ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
@@ -8549,17 +9227,24 @@ class DeviceSignal : public ::google::protobuf::Message {
   inline ::std::string* release_validitysignalid();
   inline void set_allocated_validitysignalid(::std::string* validitysignalid);
 
-  // optional string signalSpecPropsStruc = 40;
-  inline bool has_signalspecpropsstruc() const;
-  inline void clear_signalspecpropsstruc();
-  static const int kSignalSpecPropsStrucFieldNumber = 40;
-  inline const ::std::string& signalspecpropsstruc() const;
-  inline void set_signalspecpropsstruc(const ::std::string& value);
-  inline void set_signalspecpropsstruc(const char* value);
-  inline void set_signalspecpropsstruc(const char* value, size_t size);
-  inline ::std::string* mutable_signalspecpropsstruc();
-  inline ::std::string* release_signalspecpropsstruc();
-  inline void set_allocated_signalspecpropsstruc(::std::string* signalspecpropsstruc);
+  // optional string signalSpecPropsStruct = 40;
+  inline bool has_signalspecpropsstruct() const;
+  inline void clear_signalspecpropsstruct();
+  static const int kSignalSpecPropsStructFieldNumber = 40;
+  inline const ::std::string& signalspecpropsstruct() const;
+  inline void set_signalspecpropsstruct(const ::std::string& value);
+  inline void set_signalspecpropsstruct(const char* value);
+  inline void set_signalspecpropsstruct(const char* value, size_t size);
+  inline ::std::string* mutable_signalspecpropsstruct();
+  inline ::std::string* release_signalspecpropsstruct();
+  inline void set_allocated_signalspecpropsstruct(::std::string* signalspecpropsstruct);
+
+  // optional bool signalSpecPropsStructWasFixed = 41 [default = false];
+  inline bool has_signalspecpropsstructwasfixed() const;
+  inline void clear_signalspecpropsstructwasfixed();
+  static const int kSignalSpecPropsStructWasFixedFieldNumber = 41;
+  inline bool signalspecpropsstructwasfixed() const;
+  inline void set_signalspecpropsstructwasfixed(bool value);
 
   // @@protoc_insertion_point(class_scope:Proto.DeviceSignal)
  private:
@@ -8593,8 +9278,10 @@ class DeviceSignal : public ::google::protobuf::Message {
   inline void clear_has_appsignaldataformat();
   inline void set_has_validitysignalid();
   inline void clear_has_validitysignalid();
-  inline void set_has_signalspecpropsstruc();
-  inline void clear_has_signalspecpropsstruc();
+  inline void set_has_signalspecpropsstruct();
+  inline void clear_has_signalspecpropsstruct();
+  inline void set_has_signalspecpropsstructwasfixed();
+  inline void clear_has_signalspecpropsstructwasfixed();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -8613,10 +9300,11 @@ class DeviceSignal : public ::google::protobuf::Message {
   ::google::protobuf::int32 appsignaldataformat_;
   double appsignalhighengunits_;
   ::std::string* validitysignalid_;
-  ::std::string* signalspecpropsstruc_;
+  ::std::string* signalspecpropsstruct_;
+  bool signalspecpropsstructwasfixed_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(16 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(17 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -10506,6 +11194,22 @@ class AppSignal : public ::google::protobuf::Message {
   inline ::std::string* release_specpropvalues();
   inline void set_allocated_specpropvalues(::std::string* specpropvalues);
 
+  // repeated string tags = 92;
+  inline int tags_size() const;
+  inline void clear_tags();
+  static const int kTagsFieldNumber = 92;
+  inline const ::std::string& tags(int index) const;
+  inline ::std::string* mutable_tags(int index);
+  inline void set_tags(int index, const ::std::string& value);
+  inline void set_tags(int index, const char* value);
+  inline void set_tags(int index, const char* value, size_t size);
+  inline ::std::string* add_tags();
+  inline void add_tags(const ::std::string& value);
+  inline void add_tags(const char* value);
+  inline void add_tags(const char* value, size_t size);
+  inline const ::google::protobuf::RepeatedPtrField< ::std::string>& tags() const;
+  inline ::google::protobuf::RepeatedPtrField< ::std::string>* mutable_tags();
+
   // optional .Proto.AppSignalDbField dbField = 120;
   inline bool has_dbfield() const;
   inline void clear_dbfield();
@@ -10610,12 +11314,13 @@ class AppSignal : public ::google::protobuf::Message {
   double fineaperture_;
   ::std::string* specpropstruct_;
   ::std::string* specpropvalues_;
+  ::google::protobuf::RepeatedPtrField< ::std::string> tags_;
   ::Proto::AppSignalDbField* dbfield_;
   ::Proto::AppSignalCalculatedParam* calcparam_;
   bool adaptiveaperture_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(28 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(29 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -10912,6 +11617,42 @@ class ProtoAppSignalData : public ::google::protobuf::Message {
   inline bool excludefrombuild() const;
   inline void set_excludefrombuild(bool value);
 
+  // optional string tags = 19;
+  inline bool has_tags() const;
+  inline void clear_tags();
+  static const int kTagsFieldNumber = 19;
+  inline const ::std::string& tags() const;
+  inline void set_tags(const ::std::string& value);
+  inline void set_tags(const char* value);
+  inline void set_tags(const char* value, size_t size);
+  inline ::std::string* mutable_tags();
+  inline ::std::string* release_tags();
+  inline void set_allocated_tags(::std::string* tags);
+
+  // optional string userSpecPropStruct = 20;
+  inline bool has_userspecpropstruct() const;
+  inline void clear_userspecpropstruct();
+  static const int kUserSpecPropStructFieldNumber = 20;
+  inline const ::std::string& userspecpropstruct() const;
+  inline void set_userspecpropstruct(const ::std::string& value);
+  inline void set_userspecpropstruct(const char* value);
+  inline void set_userspecpropstruct(const char* value, size_t size);
+  inline ::std::string* mutable_userspecpropstruct();
+  inline ::std::string* release_userspecpropstruct();
+  inline void set_allocated_userspecpropstruct(::std::string* userspecpropstruct);
+
+  // optional bytes userSpecPropValues = 21;
+  inline bool has_userspecpropvalues() const;
+  inline void clear_userspecpropvalues();
+  static const int kUserSpecPropValuesFieldNumber = 21;
+  inline const ::std::string& userspecpropvalues() const;
+  inline void set_userspecpropvalues(const ::std::string& value);
+  inline void set_userspecpropvalues(const char* value);
+  inline void set_userspecpropvalues(const void* value, size_t size);
+  inline ::std::string* mutable_userspecpropvalues();
+  inline ::std::string* release_userspecpropvalues();
+  inline void set_allocated_userspecpropvalues(::std::string* userspecpropvalues);
+
   // @@protoc_insertion_point(class_scope:Proto.ProtoAppSignalData)
  private:
   inline void set_has_bustypeid();
@@ -10950,6 +11691,12 @@ class ProtoAppSignalData : public ::google::protobuf::Message {
   inline void clear_has_adaptiveaperture();
   inline void set_has_excludefrombuild();
   inline void clear_has_excludefrombuild();
+  inline void set_has_tags();
+  inline void clear_has_tags();
+  inline void set_has_userspecpropstruct();
+  inline void clear_has_userspecpropstruct();
+  inline void set_has_userspecpropvalues();
+  inline void clear_has_userspecpropvalues();
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
@@ -10970,10 +11717,13 @@ class ProtoAppSignalData : public ::google::protobuf::Message {
   ::google::protobuf::int32 decimalplaces_;
   double coarseaperture_;
   double fineaperture_;
+  ::std::string* tags_;
+  ::std::string* userspecpropstruct_;
+  ::std::string* userspecpropvalues_;
   bool excludefrombuild_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(18 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(21 + 31) / 32];
 
   friend void  protobuf_AddDesc_serialization_2eproto();
   friend void protobuf_AssignDesc_serialization_2eproto();
@@ -12406,6 +13156,933 @@ class Bus : public ::google::protobuf::Message {
 
   void InitAsDefaultInstance();
   static Bus* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ComparatorSignal : public ::google::protobuf::Message {
+ public:
+  ComparatorSignal();
+  virtual ~ComparatorSignal();
+
+  ComparatorSignal(const ComparatorSignal& from);
+
+  inline ComparatorSignal& operator=(const ComparatorSignal& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ComparatorSignal& default_instance();
+
+  void Swap(ComparatorSignal* other);
+
+  // implements Message ----------------------------------------------
+
+  ComparatorSignal* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ComparatorSignal& from);
+  void MergeFrom(const ComparatorSignal& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional bool isConst = 1 [default = true];
+  inline bool has_isconst() const;
+  inline void clear_isconst();
+  static const int kIsConstFieldNumber = 1;
+  inline bool isconst() const;
+  inline void set_isconst(bool value);
+
+  // optional double constValue = 2 [default = 0];
+  inline bool has_constvalue() const;
+  inline void clear_constvalue();
+  static const int kConstValueFieldNumber = 2;
+  inline double constvalue() const;
+  inline void set_constvalue(double value);
+
+  // optional string appSignalId = 3;
+  inline bool has_appsignalid() const;
+  inline void clear_appsignalid();
+  static const int kAppSignalIdFieldNumber = 3;
+  inline const ::std::string& appsignalid() const;
+  inline void set_appsignalid(const ::std::string& value);
+  inline void set_appsignalid(const char* value);
+  inline void set_appsignalid(const char* value, size_t size);
+  inline ::std::string* mutable_appsignalid();
+  inline ::std::string* release_appsignalid();
+  inline void set_allocated_appsignalid(::std::string* appsignalid);
+
+  // optional bool isAcquired = 4 [default = false];
+  inline bool has_isacquired() const;
+  inline void clear_isacquired();
+  static const int kIsAcquiredFieldNumber = 4;
+  inline bool isacquired() const;
+  inline void set_isacquired(bool value);
+
+  // @@protoc_insertion_point(class_scope:Proto.ComparatorSignal)
+ private:
+  inline void set_has_isconst();
+  inline void clear_has_isconst();
+  inline void set_has_constvalue();
+  inline void clear_has_constvalue();
+  inline void set_has_appsignalid();
+  inline void clear_has_appsignalid();
+  inline void set_has_isacquired();
+  inline void clear_has_isacquired();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  double constvalue_;
+  ::std::string* appsignalid_;
+  bool isconst_;
+  bool isacquired_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(4 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static ComparatorSignal* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class Comparator : public ::google::protobuf::Message {
+ public:
+  Comparator();
+  virtual ~Comparator();
+
+  Comparator(const Comparator& from);
+
+  inline Comparator& operator=(const Comparator& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const Comparator& default_instance();
+
+  void Swap(Comparator* other);
+
+  // implements Message ----------------------------------------------
+
+  Comparator* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const Comparator& from);
+  void MergeFrom(const Comparator& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional int32 cmpType = 1 [default = 1];
+  inline bool has_cmptype() const;
+  inline void clear_cmptype();
+  static const int kCmpTypeFieldNumber = 1;
+  inline ::google::protobuf::int32 cmptype() const;
+  inline void set_cmptype(::google::protobuf::int32 value);
+
+  // optional int32 inAnalogSignalFormat = 2 [default = 1];
+  inline bool has_inanalogsignalformat() const;
+  inline void clear_inanalogsignalformat();
+  static const int kInAnalogSignalFormatFieldNumber = 2;
+  inline ::google::protobuf::int32 inanalogsignalformat() const;
+  inline void set_inanalogsignalformat(::google::protobuf::int32 value);
+
+  // optional .Proto.ComparatorSignal input = 3;
+  inline bool has_input() const;
+  inline void clear_input();
+  static const int kInputFieldNumber = 3;
+  inline const ::Proto::ComparatorSignal& input() const;
+  inline ::Proto::ComparatorSignal* mutable_input();
+  inline ::Proto::ComparatorSignal* release_input();
+  inline void set_allocated_input(::Proto::ComparatorSignal* input);
+
+  // optional .Proto.ComparatorSignal compare = 4;
+  inline bool has_compare() const;
+  inline void clear_compare();
+  static const int kCompareFieldNumber = 4;
+  inline const ::Proto::ComparatorSignal& compare() const;
+  inline ::Proto::ComparatorSignal* mutable_compare();
+  inline ::Proto::ComparatorSignal* release_compare();
+  inline void set_allocated_compare(::Proto::ComparatorSignal* compare);
+
+  // optional .Proto.ComparatorSignal hysteresis = 5;
+  inline bool has_hysteresis() const;
+  inline void clear_hysteresis();
+  static const int kHysteresisFieldNumber = 5;
+  inline const ::Proto::ComparatorSignal& hysteresis() const;
+  inline ::Proto::ComparatorSignal* mutable_hysteresis();
+  inline ::Proto::ComparatorSignal* release_hysteresis();
+  inline void set_allocated_hysteresis(::Proto::ComparatorSignal* hysteresis);
+
+  // optional .Proto.ComparatorSignal output = 6;
+  inline bool has_output() const;
+  inline void clear_output();
+  static const int kOutputFieldNumber = 6;
+  inline const ::Proto::ComparatorSignal& output() const;
+  inline ::Proto::ComparatorSignal* mutable_output();
+  inline ::Proto::ComparatorSignal* release_output();
+  inline void set_allocated_output(::Proto::ComparatorSignal* output);
+
+  // optional bool allSignalsIsAcquired = 7 [default = false];
+  inline bool has_allsignalsisacquired() const;
+  inline void clear_allsignalsisacquired();
+  static const int kAllSignalsIsAcquiredFieldNumber = 7;
+  inline bool allsignalsisacquired() const;
+  inline void set_allsignalsisacquired(bool value);
+
+  // optional int32 precision = 8 [default = 2];
+  inline bool has_precision() const;
+  inline void clear_precision();
+  static const int kPrecisionFieldNumber = 8;
+  inline ::google::protobuf::int32 precision() const;
+  inline void set_precision(::google::protobuf::int32 value);
+
+  // optional string label = 9;
+  inline bool has_label() const;
+  inline void clear_label();
+  static const int kLabelFieldNumber = 9;
+  inline const ::std::string& label() const;
+  inline void set_label(const ::std::string& value);
+  inline void set_label(const char* value);
+  inline void set_label(const char* value, size_t size);
+  inline ::std::string* mutable_label();
+  inline ::std::string* release_label();
+  inline void set_allocated_label(::std::string* label);
+
+  // optional string schemaId = 10;
+  inline bool has_schemaid() const;
+  inline void clear_schemaid();
+  static const int kSchemaIdFieldNumber = 10;
+  inline const ::std::string& schemaid() const;
+  inline void set_schemaid(const ::std::string& value);
+  inline void set_schemaid(const char* value);
+  inline void set_schemaid(const char* value, size_t size);
+  inline ::std::string* mutable_schemaid();
+  inline ::std::string* release_schemaid();
+  inline void set_allocated_schemaid(::std::string* schemaid);
+
+  // optional .Proto.Uuid schemaItemUuid = 11;
+  inline bool has_schemaitemuuid() const;
+  inline void clear_schemaitemuuid();
+  static const int kSchemaItemUuidFieldNumber = 11;
+  inline const ::Proto::Uuid& schemaitemuuid() const;
+  inline ::Proto::Uuid* mutable_schemaitemuuid();
+  inline ::Proto::Uuid* release_schemaitemuuid();
+  inline void set_allocated_schemaitemuuid(::Proto::Uuid* schemaitemuuid);
+
+  // @@protoc_insertion_point(class_scope:Proto.Comparator)
+ private:
+  inline void set_has_cmptype();
+  inline void clear_has_cmptype();
+  inline void set_has_inanalogsignalformat();
+  inline void clear_has_inanalogsignalformat();
+  inline void set_has_input();
+  inline void clear_has_input();
+  inline void set_has_compare();
+  inline void clear_has_compare();
+  inline void set_has_hysteresis();
+  inline void clear_has_hysteresis();
+  inline void set_has_output();
+  inline void clear_has_output();
+  inline void set_has_allsignalsisacquired();
+  inline void clear_has_allsignalsisacquired();
+  inline void set_has_precision();
+  inline void clear_has_precision();
+  inline void set_has_label();
+  inline void clear_has_label();
+  inline void set_has_schemaid();
+  inline void clear_has_schemaid();
+  inline void set_has_schemaitemuuid();
+  inline void clear_has_schemaitemuuid();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::int32 cmptype_;
+  ::google::protobuf::int32 inanalogsignalformat_;
+  ::Proto::ComparatorSignal* input_;
+  ::Proto::ComparatorSignal* compare_;
+  ::Proto::ComparatorSignal* hysteresis_;
+  ::Proto::ComparatorSignal* output_;
+  bool allsignalsisacquired_;
+  ::google::protobuf::int32 precision_;
+  ::std::string* label_;
+  ::std::string* schemaid_;
+  ::Proto::Uuid* schemaitemuuid_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(11 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static Comparator* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class LmComparatorSet : public ::google::protobuf::Message {
+ public:
+  LmComparatorSet();
+  virtual ~LmComparatorSet();
+
+  LmComparatorSet(const LmComparatorSet& from);
+
+  inline LmComparatorSet& operator=(const LmComparatorSet& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const LmComparatorSet& default_instance();
+
+  void Swap(LmComparatorSet* other);
+
+  // implements Message ----------------------------------------------
+
+  LmComparatorSet* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const LmComparatorSet& from);
+  void MergeFrom(const LmComparatorSet& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string lmEquipmentID = 1;
+  inline bool has_lmequipmentid() const;
+  inline void clear_lmequipmentid();
+  static const int kLmEquipmentIDFieldNumber = 1;
+  inline const ::std::string& lmequipmentid() const;
+  inline void set_lmequipmentid(const ::std::string& value);
+  inline void set_lmequipmentid(const char* value);
+  inline void set_lmequipmentid(const char* value, size_t size);
+  inline ::std::string* mutable_lmequipmentid();
+  inline ::std::string* release_lmequipmentid();
+  inline void set_allocated_lmequipmentid(::std::string* lmequipmentid);
+
+  // repeated .Proto.Comparator comparator = 2;
+  inline int comparator_size() const;
+  inline void clear_comparator();
+  static const int kComparatorFieldNumber = 2;
+  inline const ::Proto::Comparator& comparator(int index) const;
+  inline ::Proto::Comparator* mutable_comparator(int index);
+  inline ::Proto::Comparator* add_comparator();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::Comparator >&
+      comparator() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::Comparator >*
+      mutable_comparator();
+
+  // @@protoc_insertion_point(class_scope:Proto.LmComparatorSet)
+ private:
+  inline void set_has_lmequipmentid();
+  inline void clear_has_lmequipmentid();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* lmequipmentid_;
+  ::google::protobuf::RepeatedPtrField< ::Proto::Comparator > comparator_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(2 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static LmComparatorSet* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class ComparatorSet : public ::google::protobuf::Message {
+ public:
+  ComparatorSet();
+  virtual ~ComparatorSet();
+
+  ComparatorSet(const ComparatorSet& from);
+
+  inline ComparatorSet& operator=(const ComparatorSet& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const ComparatorSet& default_instance();
+
+  void Swap(ComparatorSet* other);
+
+  // implements Message ----------------------------------------------
+
+  ComparatorSet* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const ComparatorSet& from);
+  void MergeFrom(const ComparatorSet& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .Proto.LmComparatorSet lmComparatorSet = 1;
+  inline int lmcomparatorset_size() const;
+  inline void clear_lmcomparatorset();
+  static const int kLmComparatorSetFieldNumber = 1;
+  inline const ::Proto::LmComparatorSet& lmcomparatorset(int index) const;
+  inline ::Proto::LmComparatorSet* mutable_lmcomparatorset(int index);
+  inline ::Proto::LmComparatorSet* add_lmcomparatorset();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::LmComparatorSet >&
+      lmcomparatorset() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::LmComparatorSet >*
+      mutable_lmcomparatorset();
+
+  // @@protoc_insertion_point(class_scope:Proto.ComparatorSet)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Proto::LmComparatorSet > lmcomparatorset_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static ComparatorSet* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class MetrologySignalLocation : public ::google::protobuf::Message {
+ public:
+  MetrologySignalLocation();
+  virtual ~MetrologySignalLocation();
+
+  MetrologySignalLocation(const MetrologySignalLocation& from);
+
+  inline MetrologySignalLocation& operator=(const MetrologySignalLocation& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const MetrologySignalLocation& default_instance();
+
+  void Swap(MetrologySignalLocation* other);
+
+  // implements Message ----------------------------------------------
+
+  MetrologySignalLocation* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const MetrologySignalLocation& from);
+  void MergeFrom(const MetrologySignalLocation& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional string rackID = 1;
+  inline bool has_rackid() const;
+  inline void clear_rackid();
+  static const int kRackIDFieldNumber = 1;
+  inline const ::std::string& rackid() const;
+  inline void set_rackid(const ::std::string& value);
+  inline void set_rackid(const char* value);
+  inline void set_rackid(const char* value, size_t size);
+  inline ::std::string* mutable_rackid();
+  inline ::std::string* release_rackid();
+  inline void set_allocated_rackid(::std::string* rackid);
+
+  // optional string chassisID = 2;
+  inline bool has_chassisid() const;
+  inline void clear_chassisid();
+  static const int kChassisIDFieldNumber = 2;
+  inline const ::std::string& chassisid() const;
+  inline void set_chassisid(const ::std::string& value);
+  inline void set_chassisid(const char* value);
+  inline void set_chassisid(const char* value, size_t size);
+  inline ::std::string* mutable_chassisid();
+  inline ::std::string* release_chassisid();
+  inline void set_allocated_chassisid(::std::string* chassisid);
+
+  // optional int32 chassis = 3 [default = -1];
+  inline bool has_chassis() const;
+  inline void clear_chassis();
+  static const int kChassisFieldNumber = 3;
+  inline ::google::protobuf::int32 chassis() const;
+  inline void set_chassis(::google::protobuf::int32 value);
+
+  // optional string moduleID = 4;
+  inline bool has_moduleid() const;
+  inline void clear_moduleid();
+  static const int kModuleIDFieldNumber = 4;
+  inline const ::std::string& moduleid() const;
+  inline void set_moduleid(const ::std::string& value);
+  inline void set_moduleid(const char* value);
+  inline void set_moduleid(const char* value, size_t size);
+  inline ::std::string* mutable_moduleid();
+  inline ::std::string* release_moduleid();
+  inline void set_allocated_moduleid(::std::string* moduleid);
+
+  // optional int32 module = 5 [default = -1];
+  inline bool has_module() const;
+  inline void clear_module();
+  static const int kModuleFieldNumber = 5;
+  inline ::google::protobuf::int32 module() const;
+  inline void set_module(::google::protobuf::int32 value);
+
+  // optional int32 place = 6 [default = -1];
+  inline bool has_place() const;
+  inline void clear_place();
+  static const int kPlaceFieldNumber = 6;
+  inline ::google::protobuf::int32 place() const;
+  inline void set_place(::google::protobuf::int32 value);
+
+  // optional string contact = 7;
+  inline bool has_contact() const;
+  inline void clear_contact();
+  static const int kContactFieldNumber = 7;
+  inline const ::std::string& contact() const;
+  inline void set_contact(const ::std::string& value);
+  inline void set_contact(const char* value);
+  inline void set_contact(const char* value, size_t size);
+  inline ::std::string* mutable_contact();
+  inline ::std::string* release_contact();
+  inline void set_allocated_contact(::std::string* contact);
+
+  // @@protoc_insertion_point(class_scope:Proto.MetrologySignalLocation)
+ private:
+  inline void set_has_rackid();
+  inline void clear_has_rackid();
+  inline void set_has_chassisid();
+  inline void clear_has_chassisid();
+  inline void set_has_chassis();
+  inline void clear_has_chassis();
+  inline void set_has_moduleid();
+  inline void clear_has_moduleid();
+  inline void set_has_module();
+  inline void clear_has_module();
+  inline void set_has_place();
+  inline void clear_has_place();
+  inline void set_has_contact();
+  inline void clear_has_contact();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::std::string* rackid_;
+  ::std::string* chassisid_;
+  ::std::string* moduleid_;
+  ::google::protobuf::int32 chassis_;
+  ::google::protobuf::int32 module_;
+  ::std::string* contact_;
+  ::google::protobuf::int32 place_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static MetrologySignalLocation* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class MetrologySignal : public ::google::protobuf::Message {
+ public:
+  MetrologySignal();
+  virtual ~MetrologySignal();
+
+  MetrologySignal(const MetrologySignal& from);
+
+  inline MetrologySignal& operator=(const MetrologySignal& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const MetrologySignal& default_instance();
+
+  void Swap(MetrologySignal* other);
+
+  // implements Message ----------------------------------------------
+
+  MetrologySignal* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const MetrologySignal& from);
+  void MergeFrom(const MetrologySignal& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // optional .Proto.AppSignal appSignal = 1;
+  inline bool has_appsignal() const;
+  inline void clear_appsignal();
+  static const int kAppSignalFieldNumber = 1;
+  inline const ::Proto::AppSignal& appsignal() const;
+  inline ::Proto::AppSignal* mutable_appsignal();
+  inline ::Proto::AppSignal* release_appsignal();
+  inline void set_allocated_appsignal(::Proto::AppSignal* appsignal);
+
+  // optional .Proto.MetrologySignalLocation location = 2;
+  inline bool has_location() const;
+  inline void clear_location();
+  static const int kLocationFieldNumber = 2;
+  inline const ::Proto::MetrologySignalLocation& location() const;
+  inline ::Proto::MetrologySignalLocation* mutable_location();
+  inline ::Proto::MetrologySignalLocation* release_location();
+  inline void set_allocated_location(::Proto::MetrologySignalLocation* location);
+
+  // optional double electricLowLimit = 3 [default = 0];
+  inline bool has_electriclowlimit() const;
+  inline void clear_electriclowlimit();
+  static const int kElectricLowLimitFieldNumber = 3;
+  inline double electriclowlimit() const;
+  inline void set_electriclowlimit(double value);
+
+  // optional double electricHighLimit = 4 [default = 0];
+  inline bool has_electrichighlimit() const;
+  inline void clear_electrichighlimit();
+  static const int kElectricHighLimitFieldNumber = 4;
+  inline double electrichighlimit() const;
+  inline void set_electrichighlimit(double value);
+
+  // optional int32 electricUnitID = 5 [default = 1];
+  inline bool has_electricunitid() const;
+  inline void clear_electricunitid();
+  static const int kElectricUnitIDFieldNumber = 5;
+  inline ::google::protobuf::int32 electricunitid() const;
+  inline void set_electricunitid(::google::protobuf::int32 value);
+
+  // optional int32 electricSensorType = 6 [default = 1];
+  inline bool has_electricsensortype() const;
+  inline void clear_electricsensortype();
+  static const int kElectricSensorTypeFieldNumber = 6;
+  inline ::google::protobuf::int32 electricsensortype() const;
+  inline void set_electricsensortype(::google::protobuf::int32 value);
+
+  // optional double electricR0 = 7 [default = 0];
+  inline bool has_electricr0() const;
+  inline void clear_electricr0();
+  static const int kElectricR0FieldNumber = 7;
+  inline double electricr0() const;
+  inline void set_electricr0(double value);
+
+  // optional int32 electricPrecision = 8 [default = 4];
+  inline bool has_electricprecision() const;
+  inline void clear_electricprecision();
+  static const int kElectricPrecisionFieldNumber = 8;
+  inline ::google::protobuf::int32 electricprecision() const;
+  inline void set_electricprecision(::google::protobuf::int32 value);
+
+  // optional double physicalLowLimit = 9 [default = 0];
+  inline bool has_physicallowlimit() const;
+  inline void clear_physicallowlimit();
+  static const int kPhysicalLowLimitFieldNumber = 9;
+  inline double physicallowlimit() const;
+  inline void set_physicallowlimit(double value);
+
+  // optional double physicalHighLimit = 10 [default = 0];
+  inline bool has_physicalhighlimit() const;
+  inline void clear_physicalhighlimit();
+  static const int kPhysicalHighLimitFieldNumber = 10;
+  inline double physicalhighlimit() const;
+  inline void set_physicalhighlimit(double value);
+
+  // @@protoc_insertion_point(class_scope:Proto.MetrologySignal)
+ private:
+  inline void set_has_appsignal();
+  inline void clear_has_appsignal();
+  inline void set_has_location();
+  inline void clear_has_location();
+  inline void set_has_electriclowlimit();
+  inline void clear_has_electriclowlimit();
+  inline void set_has_electrichighlimit();
+  inline void clear_has_electrichighlimit();
+  inline void set_has_electricunitid();
+  inline void clear_has_electricunitid();
+  inline void set_has_electricsensortype();
+  inline void clear_has_electricsensortype();
+  inline void set_has_electricr0();
+  inline void clear_has_electricr0();
+  inline void set_has_electricprecision();
+  inline void clear_has_electricprecision();
+  inline void set_has_physicallowlimit();
+  inline void clear_has_physicallowlimit();
+  inline void set_has_physicalhighlimit();
+  inline void clear_has_physicalhighlimit();
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::Proto::AppSignal* appsignal_;
+  ::Proto::MetrologySignalLocation* location_;
+  double electriclowlimit_;
+  double electrichighlimit_;
+  ::google::protobuf::int32 electricunitid_;
+  ::google::protobuf::int32 electricsensortype_;
+  double electricr0_;
+  double physicallowlimit_;
+  double physicalhighlimit_;
+  ::google::protobuf::int32 electricprecision_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(10 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static MetrologySignal* default_instance_;
+};
+// -------------------------------------------------------------------
+
+class MetrologySignalSet : public ::google::protobuf::Message {
+ public:
+  MetrologySignalSet();
+  virtual ~MetrologySignalSet();
+
+  MetrologySignalSet(const MetrologySignalSet& from);
+
+  inline MetrologySignalSet& operator=(const MetrologySignalSet& from) {
+    CopyFrom(from);
+    return *this;
+  }
+
+  inline const ::google::protobuf::UnknownFieldSet& unknown_fields() const {
+    return _unknown_fields_;
+  }
+
+  inline ::google::protobuf::UnknownFieldSet* mutable_unknown_fields() {
+    return &_unknown_fields_;
+  }
+
+  static const ::google::protobuf::Descriptor* descriptor();
+  static const MetrologySignalSet& default_instance();
+
+  void Swap(MetrologySignalSet* other);
+
+  // implements Message ----------------------------------------------
+
+  MetrologySignalSet* New() const;
+  void CopyFrom(const ::google::protobuf::Message& from);
+  void MergeFrom(const ::google::protobuf::Message& from);
+  void CopyFrom(const MetrologySignalSet& from);
+  void MergeFrom(const MetrologySignalSet& from);
+  void Clear();
+  bool IsInitialized() const;
+
+  int ByteSize() const;
+  bool MergePartialFromCodedStream(
+      ::google::protobuf::io::CodedInputStream* input);
+  void SerializeWithCachedSizes(
+      ::google::protobuf::io::CodedOutputStream* output) const;
+  ::google::protobuf::uint8* SerializeWithCachedSizesToArray(::google::protobuf::uint8* output) const;
+  int GetCachedSize() const { return _cached_size_; }
+  private:
+  void SharedCtor();
+  void SharedDtor();
+  void SetCachedSize(int size) const;
+  public:
+
+  ::google::protobuf::Metadata GetMetadata() const;
+
+  // nested types ----------------------------------------------------
+
+  // accessors -------------------------------------------------------
+
+  // repeated .Proto.MetrologySignal metrologySignal = 1;
+  inline int metrologysignal_size() const;
+  inline void clear_metrologysignal();
+  static const int kMetrologySignalFieldNumber = 1;
+  inline const ::Proto::MetrologySignal& metrologysignal(int index) const;
+  inline ::Proto::MetrologySignal* mutable_metrologysignal(int index);
+  inline ::Proto::MetrologySignal* add_metrologysignal();
+  inline const ::google::protobuf::RepeatedPtrField< ::Proto::MetrologySignal >&
+      metrologysignal() const;
+  inline ::google::protobuf::RepeatedPtrField< ::Proto::MetrologySignal >*
+      mutable_metrologysignal();
+
+  // @@protoc_insertion_point(class_scope:Proto.MetrologySignalSet)
+ private:
+
+  ::google::protobuf::UnknownFieldSet _unknown_fields_;
+
+  ::google::protobuf::RepeatedPtrField< ::Proto::MetrologySignal > metrologysignal_;
+
+  mutable int _cached_size_;
+  ::google::protobuf::uint32 _has_bits_[(1 + 31) / 32];
+
+  friend void  protobuf_AddDesc_serialization_2eproto();
+  friend void protobuf_AssignDesc_serialization_2eproto();
+  friend void protobuf_ShutdownFile_serialization_2eproto();
+
+  void InitAsDefaultInstance();
+  static MetrologySignalSet* default_instance_;
 };
 // ===================================================================
 
@@ -16433,15 +18110,107 @@ inline void SchemaItem::set_allocated_objectname(::std::string* objectname) {
   }
 }
 
-// optional string preDrawScript = 30;
-inline bool SchemaItem::has_predrawscript() const {
+// optional string label = 14;
+inline bool SchemaItem::has_label() const {
   return (_has_bits_[0] & 0x00000100u) != 0;
 }
-inline void SchemaItem::set_has_predrawscript() {
+inline void SchemaItem::set_has_label() {
   _has_bits_[0] |= 0x00000100u;
 }
-inline void SchemaItem::clear_has_predrawscript() {
+inline void SchemaItem::clear_has_label() {
   _has_bits_[0] &= ~0x00000100u;
+}
+inline void SchemaItem::clear_label() {
+  if (label_ != &::google::protobuf::internal::kEmptyString) {
+    label_->clear();
+  }
+  clear_has_label();
+}
+inline const ::std::string& SchemaItem::label() const {
+  return *label_;
+}
+inline void SchemaItem::set_label(const ::std::string& value) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(value);
+}
+inline void SchemaItem::set_label(const char* value) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(value);
+}
+inline void SchemaItem::set_label(const char* value, size_t size) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItem::mutable_label() {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  return label_;
+}
+inline ::std::string* SchemaItem::release_label() {
+  clear_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = label_;
+    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItem::set_allocated_label(::std::string* label) {
+  if (label_ != &::google::protobuf::internal::kEmptyString) {
+    delete label_;
+  }
+  if (label) {
+    set_has_label();
+    label_ = label;
+  } else {
+    clear_has_label();
+    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 labelPos = 15 [default = 2];
+inline bool SchemaItem::has_labelpos() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void SchemaItem::set_has_labelpos() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void SchemaItem::clear_has_labelpos() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void SchemaItem::clear_labelpos() {
+  labelpos_ = 2;
+  clear_has_labelpos();
+}
+inline ::google::protobuf::int32 SchemaItem::labelpos() const {
+  return labelpos_;
+}
+inline void SchemaItem::set_labelpos(::google::protobuf::int32 value) {
+  set_has_labelpos();
+  labelpos_ = value;
+}
+
+// optional string preDrawScript = 30;
+inline bool SchemaItem::has_predrawscript() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void SchemaItem::set_has_predrawscript() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void SchemaItem::clear_has_predrawscript() {
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline void SchemaItem::clear_predrawscript() {
   if (predrawscript_ != &::google::protobuf::internal::kEmptyString) {
@@ -16505,13 +18274,13 @@ inline void SchemaItem::set_allocated_predrawscript(::std::string* predrawscript
 
 // optional .Proto.PosRectImpl PosRectImpl = 10;
 inline bool SchemaItem::has_posrectimpl() const {
-  return (_has_bits_[0] & 0x00000200u) != 0;
+  return (_has_bits_[0] & 0x00000800u) != 0;
 }
 inline void SchemaItem::set_has_posrectimpl() {
-  _has_bits_[0] |= 0x00000200u;
+  _has_bits_[0] |= 0x00000800u;
 }
 inline void SchemaItem::clear_has_posrectimpl() {
-  _has_bits_[0] &= ~0x00000200u;
+  _has_bits_[0] &= ~0x00000800u;
 }
 inline void SchemaItem::clear_posrectimpl() {
   if (posrectimpl_ != NULL) posrectimpl_->::Proto::PosRectImpl::Clear();
@@ -16543,13 +18312,13 @@ inline void SchemaItem::set_allocated_posrectimpl(::Proto::PosRectImpl* posrecti
 
 // optional .Proto.PosLineImpl PosLineImpl = 11;
 inline bool SchemaItem::has_poslineimpl() const {
-  return (_has_bits_[0] & 0x00000400u) != 0;
+  return (_has_bits_[0] & 0x00001000u) != 0;
 }
 inline void SchemaItem::set_has_poslineimpl() {
-  _has_bits_[0] |= 0x00000400u;
+  _has_bits_[0] |= 0x00001000u;
 }
 inline void SchemaItem::clear_has_poslineimpl() {
-  _has_bits_[0] &= ~0x00000400u;
+  _has_bits_[0] &= ~0x00001000u;
 }
 inline void SchemaItem::clear_poslineimpl() {
   if (poslineimpl_ != NULL) poslineimpl_->::Proto::PosLineImpl::Clear();
@@ -16581,13 +18350,13 @@ inline void SchemaItem::set_allocated_poslineimpl(::Proto::PosLineImpl* poslinei
 
 // optional .Proto.PosConnectionImpl PosConnectionImpl = 12;
 inline bool SchemaItem::has_posconnectionimpl() const {
-  return (_has_bits_[0] & 0x00000800u) != 0;
+  return (_has_bits_[0] & 0x00002000u) != 0;
 }
 inline void SchemaItem::set_has_posconnectionimpl() {
-  _has_bits_[0] |= 0x00000800u;
+  _has_bits_[0] |= 0x00002000u;
 }
 inline void SchemaItem::clear_has_posconnectionimpl() {
-  _has_bits_[0] &= ~0x00000800u;
+  _has_bits_[0] &= ~0x00002000u;
 }
 inline void SchemaItem::clear_posconnectionimpl() {
   if (posconnectionimpl_ != NULL) posconnectionimpl_->::Proto::PosConnectionImpl::Clear();
@@ -16619,13 +18388,13 @@ inline void SchemaItem::set_allocated_posconnectionimpl(::Proto::PosConnectionIm
 
 // optional .Proto.FblItem FblItem = 106;
 inline bool SchemaItem::has_fblitem() const {
-  return (_has_bits_[0] & 0x00001000u) != 0;
+  return (_has_bits_[0] & 0x00004000u) != 0;
 }
 inline void SchemaItem::set_has_fblitem() {
-  _has_bits_[0] |= 0x00001000u;
+  _has_bits_[0] |= 0x00004000u;
 }
 inline void SchemaItem::clear_has_fblitem() {
-  _has_bits_[0] &= ~0x00001000u;
+  _has_bits_[0] &= ~0x00004000u;
 }
 inline void SchemaItem::clear_fblitem() {
   if (fblitem_ != NULL) fblitem_->::Proto::FblItem::Clear();
@@ -16657,13 +18426,13 @@ inline void SchemaItem::set_allocated_fblitem(::Proto::FblItem* fblitem) {
 
 // optional .Proto.FblItemRect FblItemRect = 107;
 inline bool SchemaItem::has_fblitemrect() const {
-  return (_has_bits_[0] & 0x00002000u) != 0;
+  return (_has_bits_[0] & 0x00008000u) != 0;
 }
 inline void SchemaItem::set_has_fblitemrect() {
-  _has_bits_[0] |= 0x00002000u;
+  _has_bits_[0] |= 0x00008000u;
 }
 inline void SchemaItem::clear_has_fblitemrect() {
-  _has_bits_[0] &= ~0x00002000u;
+  _has_bits_[0] &= ~0x00008000u;
 }
 inline void SchemaItem::clear_fblitemrect() {
   if (fblitemrect_ != NULL) fblitemrect_->::Proto::FblItemRect::Clear();
@@ -16695,13 +18464,13 @@ inline void SchemaItem::set_allocated_fblitemrect(::Proto::FblItemRect* fblitemr
 
 // optional .Proto.FblItemLine FblItemLine = 108;
 inline bool SchemaItem::has_fblitemline() const {
-  return (_has_bits_[0] & 0x00004000u) != 0;
+  return (_has_bits_[0] & 0x00010000u) != 0;
 }
 inline void SchemaItem::set_has_fblitemline() {
-  _has_bits_[0] |= 0x00004000u;
+  _has_bits_[0] |= 0x00010000u;
 }
 inline void SchemaItem::clear_has_fblitemline() {
-  _has_bits_[0] &= ~0x00004000u;
+  _has_bits_[0] &= ~0x00010000u;
 }
 inline void SchemaItem::clear_fblitemline() {
   if (fblitemline_ != NULL) fblitemline_->::Proto::FblItemLine::Clear();
@@ -16733,13 +18502,13 @@ inline void SchemaItem::set_allocated_fblitemline(::Proto::FblItemLine* fbliteml
 
 // optional .Proto.SchemaItemRect Rect = 116;
 inline bool SchemaItem::has_rect() const {
-  return (_has_bits_[0] & 0x00008000u) != 0;
+  return (_has_bits_[0] & 0x00020000u) != 0;
 }
 inline void SchemaItem::set_has_rect() {
-  _has_bits_[0] |= 0x00008000u;
+  _has_bits_[0] |= 0x00020000u;
 }
 inline void SchemaItem::clear_has_rect() {
-  _has_bits_[0] &= ~0x00008000u;
+  _has_bits_[0] &= ~0x00020000u;
 }
 inline void SchemaItem::clear_rect() {
   if (rect_ != NULL) rect_->::Proto::SchemaItemRect::Clear();
@@ -16771,13 +18540,13 @@ inline void SchemaItem::set_allocated_rect(::Proto::SchemaItemRect* rect) {
 
 // optional .Proto.SchemaItemLine Line = 117;
 inline bool SchemaItem::has_line() const {
-  return (_has_bits_[0] & 0x00010000u) != 0;
+  return (_has_bits_[0] & 0x00040000u) != 0;
 }
 inline void SchemaItem::set_has_line() {
-  _has_bits_[0] |= 0x00010000u;
+  _has_bits_[0] |= 0x00040000u;
 }
 inline void SchemaItem::clear_has_line() {
-  _has_bits_[0] &= ~0x00010000u;
+  _has_bits_[0] &= ~0x00040000u;
 }
 inline void SchemaItem::clear_line() {
   if (line_ != NULL) line_->::Proto::SchemaItemLine::Clear();
@@ -16809,13 +18578,13 @@ inline void SchemaItem::set_allocated_line(::Proto::SchemaItemLine* line) {
 
 // optional .Proto.SchemaItemPath Path = 118;
 inline bool SchemaItem::has_path() const {
-  return (_has_bits_[0] & 0x00020000u) != 0;
+  return (_has_bits_[0] & 0x00080000u) != 0;
 }
 inline void SchemaItem::set_has_path() {
-  _has_bits_[0] |= 0x00020000u;
+  _has_bits_[0] |= 0x00080000u;
 }
 inline void SchemaItem::clear_has_path() {
-  _has_bits_[0] &= ~0x00020000u;
+  _has_bits_[0] &= ~0x00080000u;
 }
 inline void SchemaItem::clear_path() {
   if (path_ != NULL) path_->::Proto::SchemaItemPath::Clear();
@@ -16847,13 +18616,13 @@ inline void SchemaItem::set_allocated_path(::Proto::SchemaItemPath* path) {
 
 // optional .Proto.SchemaItemImage Image = 119;
 inline bool SchemaItem::has_image() const {
-  return (_has_bits_[0] & 0x00040000u) != 0;
+  return (_has_bits_[0] & 0x00100000u) != 0;
 }
 inline void SchemaItem::set_has_image() {
-  _has_bits_[0] |= 0x00040000u;
+  _has_bits_[0] |= 0x00100000u;
 }
 inline void SchemaItem::clear_has_image() {
-  _has_bits_[0] &= ~0x00040000u;
+  _has_bits_[0] &= ~0x00100000u;
 }
 inline void SchemaItem::clear_image() {
   if (image_ != NULL) image_->::Proto::SchemaItemImage::Clear();
@@ -16885,13 +18654,13 @@ inline void SchemaItem::set_allocated_image(::Proto::SchemaItemImage* image) {
 
 // optional .Proto.SchemaItemFrame Frame = 120;
 inline bool SchemaItem::has_frame() const {
-  return (_has_bits_[0] & 0x00080000u) != 0;
+  return (_has_bits_[0] & 0x00200000u) != 0;
 }
 inline void SchemaItem::set_has_frame() {
-  _has_bits_[0] |= 0x00080000u;
+  _has_bits_[0] |= 0x00200000u;
 }
 inline void SchemaItem::clear_has_frame() {
-  _has_bits_[0] &= ~0x00080000u;
+  _has_bits_[0] &= ~0x00200000u;
 }
 inline void SchemaItem::clear_frame() {
   if (frame_ != NULL) frame_->::Proto::SchemaItemFrame::Clear();
@@ -16923,13 +18692,13 @@ inline void SchemaItem::set_allocated_frame(::Proto::SchemaItemFrame* frame) {
 
 // optional .Proto.SchemaItemIndicator Indicator = 121;
 inline bool SchemaItem::has_indicator() const {
-  return (_has_bits_[0] & 0x00100000u) != 0;
+  return (_has_bits_[0] & 0x00400000u) != 0;
 }
 inline void SchemaItem::set_has_indicator() {
-  _has_bits_[0] |= 0x00100000u;
+  _has_bits_[0] |= 0x00400000u;
 }
 inline void SchemaItem::clear_has_indicator() {
-  _has_bits_[0] &= ~0x00100000u;
+  _has_bits_[0] &= ~0x00400000u;
 }
 inline void SchemaItem::clear_indicator() {
   if (indicator_ != NULL) indicator_->::Proto::SchemaItemIndicator::Clear();
@@ -16961,13 +18730,13 @@ inline void SchemaItem::set_allocated_indicator(::Proto::SchemaItemIndicator* in
 
 // optional .Proto.SchemaItemSignal Signal = 124;
 inline bool SchemaItem::has_signal() const {
-  return (_has_bits_[0] & 0x00200000u) != 0;
+  return (_has_bits_[0] & 0x00800000u) != 0;
 }
 inline void SchemaItem::set_has_signal() {
-  _has_bits_[0] |= 0x00200000u;
+  _has_bits_[0] |= 0x00800000u;
 }
 inline void SchemaItem::clear_has_signal() {
-  _has_bits_[0] &= ~0x00200000u;
+  _has_bits_[0] &= ~0x00800000u;
 }
 inline void SchemaItem::clear_signal() {
   if (signal_ != NULL) signal_->::Proto::SchemaItemSignal::Clear();
@@ -16999,13 +18768,13 @@ inline void SchemaItem::set_allocated_signal(::Proto::SchemaItemSignal* signal) 
 
 // optional .Proto.SchemaItemInput InputSignal = 125;
 inline bool SchemaItem::has_inputsignal() const {
-  return (_has_bits_[0] & 0x00400000u) != 0;
+  return (_has_bits_[0] & 0x01000000u) != 0;
 }
 inline void SchemaItem::set_has_inputsignal() {
-  _has_bits_[0] |= 0x00400000u;
+  _has_bits_[0] |= 0x01000000u;
 }
 inline void SchemaItem::clear_has_inputsignal() {
-  _has_bits_[0] &= ~0x00400000u;
+  _has_bits_[0] &= ~0x01000000u;
 }
 inline void SchemaItem::clear_inputsignal() {
   if (inputsignal_ != NULL) inputsignal_->::Proto::SchemaItemInput::Clear();
@@ -17037,13 +18806,13 @@ inline void SchemaItem::set_allocated_inputsignal(::Proto::SchemaItemInput* inpu
 
 // optional .Proto.SchemaItemOutput OutputSignal = 126;
 inline bool SchemaItem::has_outputsignal() const {
-  return (_has_bits_[0] & 0x00800000u) != 0;
+  return (_has_bits_[0] & 0x02000000u) != 0;
 }
 inline void SchemaItem::set_has_outputsignal() {
-  _has_bits_[0] |= 0x00800000u;
+  _has_bits_[0] |= 0x02000000u;
 }
 inline void SchemaItem::clear_has_outputsignal() {
-  _has_bits_[0] &= ~0x00800000u;
+  _has_bits_[0] &= ~0x02000000u;
 }
 inline void SchemaItem::clear_outputsignal() {
   if (outputsignal_ != NULL) outputsignal_->::Proto::SchemaItemOutput::Clear();
@@ -17075,13 +18844,13 @@ inline void SchemaItem::set_allocated_outputsignal(::Proto::SchemaItemOutput* ou
 
 // optional .Proto.SchemaItemLink Link = 127;
 inline bool SchemaItem::has_link() const {
-  return (_has_bits_[0] & 0x01000000u) != 0;
+  return (_has_bits_[0] & 0x04000000u) != 0;
 }
 inline void SchemaItem::set_has_link() {
-  _has_bits_[0] |= 0x01000000u;
+  _has_bits_[0] |= 0x04000000u;
 }
 inline void SchemaItem::clear_has_link() {
-  _has_bits_[0] &= ~0x01000000u;
+  _has_bits_[0] &= ~0x04000000u;
 }
 inline void SchemaItem::clear_link() {
   if (link_ != NULL) link_->::Proto::SchemaItemLink::Clear();
@@ -17113,13 +18882,13 @@ inline void SchemaItem::set_allocated_link(::Proto::SchemaItemLink* link) {
 
 // optional .Proto.SchemaItemAfb Afb = 128;
 inline bool SchemaItem::has_afb() const {
-  return (_has_bits_[0] & 0x02000000u) != 0;
+  return (_has_bits_[0] & 0x08000000u) != 0;
 }
 inline void SchemaItem::set_has_afb() {
-  _has_bits_[0] |= 0x02000000u;
+  _has_bits_[0] |= 0x08000000u;
 }
 inline void SchemaItem::clear_has_afb() {
-  _has_bits_[0] &= ~0x02000000u;
+  _has_bits_[0] &= ~0x08000000u;
 }
 inline void SchemaItem::clear_afb() {
   if (afb_ != NULL) afb_->::Proto::SchemaItemAfb::Clear();
@@ -17151,13 +18920,13 @@ inline void SchemaItem::set_allocated_afb(::Proto::SchemaItemAfb* afb) {
 
 // optional .Proto.SchemaItemConst ConstItem = 129;
 inline bool SchemaItem::has_constitem() const {
-  return (_has_bits_[0] & 0x04000000u) != 0;
+  return (_has_bits_[0] & 0x10000000u) != 0;
 }
 inline void SchemaItem::set_has_constitem() {
-  _has_bits_[0] |= 0x04000000u;
+  _has_bits_[0] |= 0x10000000u;
 }
 inline void SchemaItem::clear_has_constitem() {
-  _has_bits_[0] &= ~0x04000000u;
+  _has_bits_[0] &= ~0x10000000u;
 }
 inline void SchemaItem::clear_constitem() {
   if (constitem_ != NULL) constitem_->::Proto::SchemaItemConst::Clear();
@@ -17189,13 +18958,13 @@ inline void SchemaItem::set_allocated_constitem(::Proto::SchemaItemConst* consti
 
 // optional .Proto.SchemaItemConnection ConnectionItem = 130;
 inline bool SchemaItem::has_connectionitem() const {
-  return (_has_bits_[0] & 0x08000000u) != 0;
+  return (_has_bits_[0] & 0x20000000u) != 0;
 }
 inline void SchemaItem::set_has_connectionitem() {
-  _has_bits_[0] |= 0x08000000u;
+  _has_bits_[0] |= 0x20000000u;
 }
 inline void SchemaItem::clear_has_connectionitem() {
-  _has_bits_[0] &= ~0x08000000u;
+  _has_bits_[0] &= ~0x20000000u;
 }
 inline void SchemaItem::clear_connectionitem() {
   if (connectionitem_ != NULL) connectionitem_->::Proto::SchemaItemConnection::Clear();
@@ -17227,13 +18996,13 @@ inline void SchemaItem::set_allocated_connectionitem(::Proto::SchemaItemConnecti
 
 // optional .Proto.SchemaItemTransmitter TransmitterItem = 131;
 inline bool SchemaItem::has_transmitteritem() const {
-  return (_has_bits_[0] & 0x10000000u) != 0;
+  return (_has_bits_[0] & 0x40000000u) != 0;
 }
 inline void SchemaItem::set_has_transmitteritem() {
-  _has_bits_[0] |= 0x10000000u;
+  _has_bits_[0] |= 0x40000000u;
 }
 inline void SchemaItem::clear_has_transmitteritem() {
-  _has_bits_[0] &= ~0x10000000u;
+  _has_bits_[0] &= ~0x40000000u;
 }
 inline void SchemaItem::clear_transmitteritem() {
   if (transmitteritem_ != NULL) transmitteritem_->::Proto::SchemaItemTransmitter::Clear();
@@ -17265,13 +19034,13 @@ inline void SchemaItem::set_allocated_transmitteritem(::Proto::SchemaItemTransmi
 
 // optional .Proto.SchemaItemReceiver ReceiverItem = 132;
 inline bool SchemaItem::has_receiveritem() const {
-  return (_has_bits_[0] & 0x20000000u) != 0;
+  return (_has_bits_[0] & 0x80000000u) != 0;
 }
 inline void SchemaItem::set_has_receiveritem() {
-  _has_bits_[0] |= 0x20000000u;
+  _has_bits_[0] |= 0x80000000u;
 }
 inline void SchemaItem::clear_has_receiveritem() {
-  _has_bits_[0] &= ~0x20000000u;
+  _has_bits_[0] &= ~0x80000000u;
 }
 inline void SchemaItem::clear_receiveritem() {
   if (receiveritem_ != NULL) receiveritem_->::Proto::SchemaItemReceiver::Clear();
@@ -17303,13 +19072,13 @@ inline void SchemaItem::set_allocated_receiveritem(::Proto::SchemaItemReceiver* 
 
 // optional .Proto.SchemaItemInOut InOutSignal = 133;
 inline bool SchemaItem::has_inoutsignal() const {
-  return (_has_bits_[0] & 0x40000000u) != 0;
+  return (_has_bits_[1] & 0x00000001u) != 0;
 }
 inline void SchemaItem::set_has_inoutsignal() {
-  _has_bits_[0] |= 0x40000000u;
+  _has_bits_[1] |= 0x00000001u;
 }
 inline void SchemaItem::clear_has_inoutsignal() {
-  _has_bits_[0] &= ~0x40000000u;
+  _has_bits_[1] &= ~0x00000001u;
 }
 inline void SchemaItem::clear_inoutsignal() {
   if (inoutsignal_ != NULL) inoutsignal_->::Proto::SchemaItemInOut::Clear();
@@ -17341,13 +19110,13 @@ inline void SchemaItem::set_allocated_inoutsignal(::Proto::SchemaItemInOut* inou
 
 // optional .Proto.SchemaItemUfb ufb = 134;
 inline bool SchemaItem::has_ufb() const {
-  return (_has_bits_[0] & 0x80000000u) != 0;
+  return (_has_bits_[1] & 0x00000002u) != 0;
 }
 inline void SchemaItem::set_has_ufb() {
-  _has_bits_[0] |= 0x80000000u;
+  _has_bits_[1] |= 0x00000002u;
 }
 inline void SchemaItem::clear_has_ufb() {
-  _has_bits_[0] &= ~0x80000000u;
+  _has_bits_[1] &= ~0x00000002u;
 }
 inline void SchemaItem::clear_ufb() {
   if (ufb_ != NULL) ufb_->::Proto::SchemaItemUfb::Clear();
@@ -17379,13 +19148,13 @@ inline void SchemaItem::set_allocated_ufb(::Proto::SchemaItemUfb* ufb) {
 
 // optional .Proto.SchemaItemTerminator terminator = 135;
 inline bool SchemaItem::has_terminator() const {
-  return (_has_bits_[1] & 0x00000001u) != 0;
+  return (_has_bits_[1] & 0x00000004u) != 0;
 }
 inline void SchemaItem::set_has_terminator() {
-  _has_bits_[1] |= 0x00000001u;
+  _has_bits_[1] |= 0x00000004u;
 }
 inline void SchemaItem::clear_has_terminator() {
-  _has_bits_[1] &= ~0x00000001u;
+  _has_bits_[1] &= ~0x00000004u;
 }
 inline void SchemaItem::clear_terminator() {
   if (terminator_ != NULL) terminator_->::Proto::SchemaItemTerminator::Clear();
@@ -17417,13 +19186,13 @@ inline void SchemaItem::set_allocated_terminator(::Proto::SchemaItemTerminator* 
 
 // optional .Proto.SchemaItemValue Value = 136;
 inline bool SchemaItem::has_value() const {
-  return (_has_bits_[1] & 0x00000002u) != 0;
+  return (_has_bits_[1] & 0x00000008u) != 0;
 }
 inline void SchemaItem::set_has_value() {
-  _has_bits_[1] |= 0x00000002u;
+  _has_bits_[1] |= 0x00000008u;
 }
 inline void SchemaItem::clear_has_value() {
-  _has_bits_[1] &= ~0x00000002u;
+  _has_bits_[1] &= ~0x00000008u;
 }
 inline void SchemaItem::clear_value() {
   if (value_ != NULL) value_->::Proto::SchemaItemValue::Clear();
@@ -17455,13 +19224,13 @@ inline void SchemaItem::set_allocated_value(::Proto::SchemaItemValue* value) {
 
 // optional .Proto.SchemaItemImageValue ImageValue = 137;
 inline bool SchemaItem::has_imagevalue() const {
-  return (_has_bits_[1] & 0x00000004u) != 0;
+  return (_has_bits_[1] & 0x00000010u) != 0;
 }
 inline void SchemaItem::set_has_imagevalue() {
-  _has_bits_[1] |= 0x00000004u;
+  _has_bits_[1] |= 0x00000010u;
 }
 inline void SchemaItem::clear_has_imagevalue() {
-  _has_bits_[1] &= ~0x00000004u;
+  _has_bits_[1] &= ~0x00000010u;
 }
 inline void SchemaItem::clear_imagevalue() {
   if (imagevalue_ != NULL) imagevalue_->::Proto::SchemaItemImageValue::Clear();
@@ -17493,13 +19262,13 @@ inline void SchemaItem::set_allocated_imagevalue(::Proto::SchemaItemImageValue* 
 
 // optional .Proto.SchemaItemBus BusItem = 150;
 inline bool SchemaItem::has_busitem() const {
-  return (_has_bits_[1] & 0x00000008u) != 0;
+  return (_has_bits_[1] & 0x00000020u) != 0;
 }
 inline void SchemaItem::set_has_busitem() {
-  _has_bits_[1] |= 0x00000008u;
+  _has_bits_[1] |= 0x00000020u;
 }
 inline void SchemaItem::clear_has_busitem() {
-  _has_bits_[1] &= ~0x00000008u;
+  _has_bits_[1] &= ~0x00000020u;
 }
 inline void SchemaItem::clear_busitem() {
   if (busitem_ != NULL) busitem_->::Proto::SchemaItemBus::Clear();
@@ -17531,13 +19300,13 @@ inline void SchemaItem::set_allocated_busitem(::Proto::SchemaItemBus* busitem) {
 
 // optional .Proto.SchemaItemBusComposer BusComposer = 151;
 inline bool SchemaItem::has_buscomposer() const {
-  return (_has_bits_[1] & 0x00000010u) != 0;
+  return (_has_bits_[1] & 0x00000040u) != 0;
 }
 inline void SchemaItem::set_has_buscomposer() {
-  _has_bits_[1] |= 0x00000010u;
+  _has_bits_[1] |= 0x00000040u;
 }
 inline void SchemaItem::clear_has_buscomposer() {
-  _has_bits_[1] &= ~0x00000010u;
+  _has_bits_[1] &= ~0x00000040u;
 }
 inline void SchemaItem::clear_buscomposer() {
   if (buscomposer_ != NULL) buscomposer_->::Proto::SchemaItemBusComposer::Clear();
@@ -17569,13 +19338,13 @@ inline void SchemaItem::set_allocated_buscomposer(::Proto::SchemaItemBusComposer
 
 // optional .Proto.SchemaItemBusExtractor BusExtractor = 152;
 inline bool SchemaItem::has_busextractor() const {
-  return (_has_bits_[1] & 0x00000020u) != 0;
+  return (_has_bits_[1] & 0x00000080u) != 0;
 }
 inline void SchemaItem::set_has_busextractor() {
-  _has_bits_[1] |= 0x00000020u;
+  _has_bits_[1] |= 0x00000080u;
 }
 inline void SchemaItem::clear_has_busextractor() {
-  _has_bits_[1] &= ~0x00000020u;
+  _has_bits_[1] &= ~0x00000080u;
 }
 inline void SchemaItem::clear_busextractor() {
   if (busextractor_ != NULL) busextractor_->::Proto::SchemaItemBusExtractor::Clear();
@@ -17607,13 +19376,13 @@ inline void SchemaItem::set_allocated_busextractor(::Proto::SchemaItemBusExtract
 
 // optional .Proto.SchemaItemLoopback LoopbackItem = 155;
 inline bool SchemaItem::has_loopbackitem() const {
-  return (_has_bits_[1] & 0x00000040u) != 0;
+  return (_has_bits_[1] & 0x00000100u) != 0;
 }
 inline void SchemaItem::set_has_loopbackitem() {
-  _has_bits_[1] |= 0x00000040u;
+  _has_bits_[1] |= 0x00000100u;
 }
 inline void SchemaItem::clear_has_loopbackitem() {
-  _has_bits_[1] &= ~0x00000040u;
+  _has_bits_[1] &= ~0x00000100u;
 }
 inline void SchemaItem::clear_loopbackitem() {
   if (loopbackitem_ != NULL) loopbackitem_->::Proto::SchemaItemLoopback::Clear();
@@ -17645,13 +19414,13 @@ inline void SchemaItem::set_allocated_loopbackitem(::Proto::SchemaItemLoopback* 
 
 // optional .Proto.SchemaItemLoopbackSource loopbackSource = 156;
 inline bool SchemaItem::has_loopbacksource() const {
-  return (_has_bits_[1] & 0x00000080u) != 0;
+  return (_has_bits_[1] & 0x00000200u) != 0;
 }
 inline void SchemaItem::set_has_loopbacksource() {
-  _has_bits_[1] |= 0x00000080u;
+  _has_bits_[1] |= 0x00000200u;
 }
 inline void SchemaItem::clear_has_loopbacksource() {
-  _has_bits_[1] &= ~0x00000080u;
+  _has_bits_[1] &= ~0x00000200u;
 }
 inline void SchemaItem::clear_loopbacksource() {
   if (loopbacksource_ != NULL) loopbacksource_->::Proto::SchemaItemLoopbackSource::Clear();
@@ -17683,13 +19452,13 @@ inline void SchemaItem::set_allocated_loopbacksource(::Proto::SchemaItemLoopback
 
 // optional .Proto.SchemaItemLoopbackTarget loopbackTarget = 157;
 inline bool SchemaItem::has_loopbacktarget() const {
-  return (_has_bits_[1] & 0x00000100u) != 0;
+  return (_has_bits_[1] & 0x00000400u) != 0;
 }
 inline void SchemaItem::set_has_loopbacktarget() {
-  _has_bits_[1] |= 0x00000100u;
+  _has_bits_[1] |= 0x00000400u;
 }
 inline void SchemaItem::clear_has_loopbacktarget() {
-  _has_bits_[1] &= ~0x00000100u;
+  _has_bits_[1] &= ~0x00000400u;
 }
 inline void SchemaItem::clear_loopbacktarget() {
   if (loopbacktarget_ != NULL) loopbacktarget_->::Proto::SchemaItemLoopbackTarget::Clear();
@@ -17721,13 +19490,13 @@ inline void SchemaItem::set_allocated_loopbacktarget(::Proto::SchemaItemLoopback
 
 // optional .Proto.SchemaItemControl control = 200;
 inline bool SchemaItem::has_control() const {
-  return (_has_bits_[1] & 0x00000200u) != 0;
+  return (_has_bits_[1] & 0x00000800u) != 0;
 }
 inline void SchemaItem::set_has_control() {
-  _has_bits_[1] |= 0x00000200u;
+  _has_bits_[1] |= 0x00000800u;
 }
 inline void SchemaItem::clear_has_control() {
-  _has_bits_[1] &= ~0x00000200u;
+  _has_bits_[1] &= ~0x00000800u;
 }
 inline void SchemaItem::clear_control() {
   if (control_ != NULL) control_->::Proto::SchemaItemControl::Clear();
@@ -17759,13 +19528,13 @@ inline void SchemaItem::set_allocated_control(::Proto::SchemaItemControl* contro
 
 // optional .Proto.SchemaItemPushButton pushButton = 210;
 inline bool SchemaItem::has_pushbutton() const {
-  return (_has_bits_[1] & 0x00000400u) != 0;
+  return (_has_bits_[1] & 0x00001000u) != 0;
 }
 inline void SchemaItem::set_has_pushbutton() {
-  _has_bits_[1] |= 0x00000400u;
+  _has_bits_[1] |= 0x00001000u;
 }
 inline void SchemaItem::clear_has_pushbutton() {
-  _has_bits_[1] &= ~0x00000400u;
+  _has_bits_[1] &= ~0x00001000u;
 }
 inline void SchemaItem::clear_pushbutton() {
   if (pushbutton_ != NULL) pushbutton_->::Proto::SchemaItemPushButton::Clear();
@@ -17797,13 +19566,13 @@ inline void SchemaItem::set_allocated_pushbutton(::Proto::SchemaItemPushButton* 
 
 // optional .Proto.SchemaItemLineEdit lineEdit = 211;
 inline bool SchemaItem::has_lineedit() const {
-  return (_has_bits_[1] & 0x00000800u) != 0;
+  return (_has_bits_[1] & 0x00002000u) != 0;
 }
 inline void SchemaItem::set_has_lineedit() {
-  _has_bits_[1] |= 0x00000800u;
+  _has_bits_[1] |= 0x00002000u;
 }
 inline void SchemaItem::clear_has_lineedit() {
-  _has_bits_[1] &= ~0x00000800u;
+  _has_bits_[1] &= ~0x00002000u;
 }
 inline void SchemaItem::clear_lineedit() {
   if (lineedit_ != NULL) lineedit_->::Proto::SchemaItemLineEdit::Clear();
@@ -18560,17 +20329,1031 @@ inline void SchemaItemFrame::set_keepaspectratio(bool value) {
 
 // -------------------------------------------------------------------
 
-// SchemaItemIndicator
+// VFrameSetPoint
 
-// optional uint32 type = 1 [default = 0];
-inline bool SchemaItemIndicator::has_type() const {
+// optional int32 setpointType = 2 [default = 0];
+inline bool VFrameSetPoint::has_setpointtype() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void SchemaItemIndicator::set_has_type() {
+inline void VFrameSetPoint::set_has_setpointtype() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void SchemaItemIndicator::clear_has_type() {
+inline void VFrameSetPoint::clear_has_setpointtype() {
   _has_bits_[0] &= ~0x00000001u;
+}
+inline void VFrameSetPoint::clear_setpointtype() {
+  setpointtype_ = 0;
+  clear_has_setpointtype();
+}
+inline ::google::protobuf::int32 VFrameSetPoint::setpointtype() const {
+  return setpointtype_;
+}
+inline void VFrameSetPoint::set_setpointtype(::google::protobuf::int32 value) {
+  set_has_setpointtype();
+  setpointtype_ = value;
+}
+
+// optional uint32 color = 3;
+inline bool VFrameSetPoint::has_color() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void VFrameSetPoint::set_has_color() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void VFrameSetPoint::clear_has_color() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void VFrameSetPoint::clear_color() {
+  color_ = 0u;
+  clear_has_color();
+}
+inline ::google::protobuf::uint32 VFrameSetPoint::color() const {
+  return color_;
+}
+inline void VFrameSetPoint::set_color(::google::protobuf::uint32 value) {
+  set_has_color();
+  color_ = value;
+}
+
+// optional string schemaItemLabel = 10;
+inline bool VFrameSetPoint::has_schemaitemlabel() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void VFrameSetPoint::set_has_schemaitemlabel() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void VFrameSetPoint::clear_has_schemaitemlabel() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void VFrameSetPoint::clear_schemaitemlabel() {
+  if (schemaitemlabel_ != &::google::protobuf::internal::kEmptyString) {
+    schemaitemlabel_->clear();
+  }
+  clear_has_schemaitemlabel();
+}
+inline const ::std::string& VFrameSetPoint::schemaitemlabel() const {
+  return *schemaitemlabel_;
+}
+inline void VFrameSetPoint::set_schemaitemlabel(const ::std::string& value) {
+  set_has_schemaitemlabel();
+  if (schemaitemlabel_ == &::google::protobuf::internal::kEmptyString) {
+    schemaitemlabel_ = new ::std::string;
+  }
+  schemaitemlabel_->assign(value);
+}
+inline void VFrameSetPoint::set_schemaitemlabel(const char* value) {
+  set_has_schemaitemlabel();
+  if (schemaitemlabel_ == &::google::protobuf::internal::kEmptyString) {
+    schemaitemlabel_ = new ::std::string;
+  }
+  schemaitemlabel_->assign(value);
+}
+inline void VFrameSetPoint::set_schemaitemlabel(const char* value, size_t size) {
+  set_has_schemaitemlabel();
+  if (schemaitemlabel_ == &::google::protobuf::internal::kEmptyString) {
+    schemaitemlabel_ = new ::std::string;
+  }
+  schemaitemlabel_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* VFrameSetPoint::mutable_schemaitemlabel() {
+  set_has_schemaitemlabel();
+  if (schemaitemlabel_ == &::google::protobuf::internal::kEmptyString) {
+    schemaitemlabel_ = new ::std::string;
+  }
+  return schemaitemlabel_;
+}
+inline ::std::string* VFrameSetPoint::release_schemaitemlabel() {
+  clear_has_schemaitemlabel();
+  if (schemaitemlabel_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = schemaitemlabel_;
+    schemaitemlabel_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void VFrameSetPoint::set_allocated_schemaitemlabel(::std::string* schemaitemlabel) {
+  if (schemaitemlabel_ != &::google::protobuf::internal::kEmptyString) {
+    delete schemaitemlabel_;
+  }
+  if (schemaitemlabel) {
+    set_has_schemaitemlabel();
+    schemaitemlabel_ = schemaitemlabel;
+  } else {
+    clear_has_schemaitemlabel();
+    schemaitemlabel_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string outputAppSignalId = 20;
+inline bool VFrameSetPoint::has_outputappsignalid() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void VFrameSetPoint::set_has_outputappsignalid() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void VFrameSetPoint::clear_has_outputappsignalid() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void VFrameSetPoint::clear_outputappsignalid() {
+  if (outputappsignalid_ != &::google::protobuf::internal::kEmptyString) {
+    outputappsignalid_->clear();
+  }
+  clear_has_outputappsignalid();
+}
+inline const ::std::string& VFrameSetPoint::outputappsignalid() const {
+  return *outputappsignalid_;
+}
+inline void VFrameSetPoint::set_outputappsignalid(const ::std::string& value) {
+  set_has_outputappsignalid();
+  if (outputappsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    outputappsignalid_ = new ::std::string;
+  }
+  outputappsignalid_->assign(value);
+}
+inline void VFrameSetPoint::set_outputappsignalid(const char* value) {
+  set_has_outputappsignalid();
+  if (outputappsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    outputappsignalid_ = new ::std::string;
+  }
+  outputappsignalid_->assign(value);
+}
+inline void VFrameSetPoint::set_outputappsignalid(const char* value, size_t size) {
+  set_has_outputappsignalid();
+  if (outputappsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    outputappsignalid_ = new ::std::string;
+  }
+  outputappsignalid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* VFrameSetPoint::mutable_outputappsignalid() {
+  set_has_outputappsignalid();
+  if (outputappsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    outputappsignalid_ = new ::std::string;
+  }
+  return outputappsignalid_;
+}
+inline ::std::string* VFrameSetPoint::release_outputappsignalid() {
+  clear_has_outputappsignalid();
+  if (outputappsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = outputappsignalid_;
+    outputappsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void VFrameSetPoint::set_allocated_outputappsignalid(::std::string* outputappsignalid) {
+  if (outputappsignalid_ != &::google::protobuf::internal::kEmptyString) {
+    delete outputappsignalid_;
+  }
+  if (outputappsignalid) {
+    set_has_outputappsignalid();
+    outputappsignalid_ = outputappsignalid;
+  } else {
+    clear_has_outputappsignalid();
+    outputappsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional double staticValue = 30;
+inline bool VFrameSetPoint::has_staticvalue() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void VFrameSetPoint::set_has_staticvalue() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void VFrameSetPoint::clear_has_staticvalue() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void VFrameSetPoint::clear_staticvalue() {
+  staticvalue_ = 0;
+  clear_has_staticvalue();
+}
+inline double VFrameSetPoint::staticvalue() const {
+  return staticvalue_;
+}
+inline void VFrameSetPoint::set_staticvalue(double value) {
+  set_has_staticvalue();
+  staticvalue_ = value;
+}
+
+// optional int32 staticCompareType = 31;
+inline bool VFrameSetPoint::has_staticcomparetype() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void VFrameSetPoint::set_has_staticcomparetype() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void VFrameSetPoint::clear_has_staticcomparetype() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void VFrameSetPoint::clear_staticcomparetype() {
+  staticcomparetype_ = 0;
+  clear_has_staticcomparetype();
+}
+inline ::google::protobuf::int32 VFrameSetPoint::staticcomparetype() const {
+  return staticcomparetype_;
+}
+inline void VFrameSetPoint::set_staticcomparetype(::google::protobuf::int32 value) {
+  set_has_staticcomparetype();
+  staticcomparetype_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// IndicatorHistogramVert
+
+// optional double startValue = 1;
+inline bool IndicatorHistogramVert::has_startvalue() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_startvalue() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void IndicatorHistogramVert::clear_has_startvalue() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void IndicatorHistogramVert::clear_startvalue() {
+  startvalue_ = 0;
+  clear_has_startvalue();
+}
+inline double IndicatorHistogramVert::startvalue() const {
+  return startvalue_;
+}
+inline void IndicatorHistogramVert::set_startvalue(double value) {
+  set_has_startvalue();
+  startvalue_ = value;
+}
+
+// optional double endValue = 2;
+inline bool IndicatorHistogramVert::has_endvalue() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_endvalue() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void IndicatorHistogramVert::clear_has_endvalue() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void IndicatorHistogramVert::clear_endvalue() {
+  endvalue_ = 0;
+  clear_has_endvalue();
+}
+inline double IndicatorHistogramVert::endvalue() const {
+  return endvalue_;
+}
+inline void IndicatorHistogramVert::set_endvalue(double value) {
+  set_has_endvalue();
+  endvalue_ = value;
+}
+
+// optional double barWidth = 16;
+inline bool IndicatorHistogramVert::has_barwidth() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_barwidth() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void IndicatorHistogramVert::clear_has_barwidth() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void IndicatorHistogramVert::clear_barwidth() {
+  barwidth_ = 0;
+  clear_has_barwidth();
+}
+inline double IndicatorHistogramVert::barwidth() const {
+  return barwidth_;
+}
+inline void IndicatorHistogramVert::set_barwidth(double value) {
+  set_has_barwidth();
+  barwidth_ = value;
+}
+
+// optional double leftMargin = 20;
+inline bool IndicatorHistogramVert::has_leftmargin() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_leftmargin() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void IndicatorHistogramVert::clear_has_leftmargin() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void IndicatorHistogramVert::clear_leftmargin() {
+  leftmargin_ = 0;
+  clear_has_leftmargin();
+}
+inline double IndicatorHistogramVert::leftmargin() const {
+  return leftmargin_;
+}
+inline void IndicatorHistogramVert::set_leftmargin(double value) {
+  set_has_leftmargin();
+  leftmargin_ = value;
+}
+
+// optional double topMargin = 21;
+inline bool IndicatorHistogramVert::has_topmargin() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_topmargin() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void IndicatorHistogramVert::clear_has_topmargin() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void IndicatorHistogramVert::clear_topmargin() {
+  topmargin_ = 0;
+  clear_has_topmargin();
+}
+inline double IndicatorHistogramVert::topmargin() const {
+  return topmargin_;
+}
+inline void IndicatorHistogramVert::set_topmargin(double value) {
+  set_has_topmargin();
+  topmargin_ = value;
+}
+
+// optional double rightMargin = 22;
+inline bool IndicatorHistogramVert::has_rightmargin() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_rightmargin() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void IndicatorHistogramVert::clear_has_rightmargin() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void IndicatorHistogramVert::clear_rightmargin() {
+  rightmargin_ = 0;
+  clear_has_rightmargin();
+}
+inline double IndicatorHistogramVert::rightmargin() const {
+  return rightmargin_;
+}
+inline void IndicatorHistogramVert::set_rightmargin(double value) {
+  set_has_rightmargin();
+  rightmargin_ = value;
+}
+
+// optional double bottomMargin = 23;
+inline bool IndicatorHistogramVert::has_bottommargin() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_bottommargin() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void IndicatorHistogramVert::clear_has_bottommargin() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void IndicatorHistogramVert::clear_bottommargin() {
+  bottommargin_ = 0;
+  clear_has_bottommargin();
+}
+inline double IndicatorHistogramVert::bottommargin() const {
+  return bottommargin_;
+}
+inline void IndicatorHistogramVert::set_bottommargin(double value) {
+  set_has_bottommargin();
+  bottommargin_ = value;
+}
+
+// optional bool drawBarRect = 32 [default = true];
+inline bool IndicatorHistogramVert::has_drawbarrect() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_drawbarrect() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void IndicatorHistogramVert::clear_has_drawbarrect() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void IndicatorHistogramVert::clear_drawbarrect() {
+  drawbarrect_ = true;
+  clear_has_drawbarrect();
+}
+inline bool IndicatorHistogramVert::drawbarrect() const {
+  return drawbarrect_;
+}
+inline void IndicatorHistogramVert::set_drawbarrect(bool value) {
+  set_has_drawbarrect();
+  drawbarrect_ = value;
+}
+
+// optional bool drawGrid = 40 [default = true];
+inline bool IndicatorHistogramVert::has_drawgrid() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_drawgrid() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void IndicatorHistogramVert::clear_has_drawgrid() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void IndicatorHistogramVert::clear_drawgrid() {
+  drawgrid_ = true;
+  clear_has_drawgrid();
+}
+inline bool IndicatorHistogramVert::drawgrid() const {
+  return drawgrid_;
+}
+inline void IndicatorHistogramVert::set_drawgrid(bool value) {
+  set_has_drawgrid();
+  drawgrid_ = value;
+}
+
+// optional bool drawGridForAllBars = 41 [default = false];
+inline bool IndicatorHistogramVert::has_drawgridforallbars() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_drawgridforallbars() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void IndicatorHistogramVert::clear_has_drawgridforallbars() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void IndicatorHistogramVert::clear_drawgridforallbars() {
+  drawgridforallbars_ = false;
+  clear_has_drawgridforallbars();
+}
+inline bool IndicatorHistogramVert::drawgridforallbars() const {
+  return drawgridforallbars_;
+}
+inline void IndicatorHistogramVert::set_drawgridforallbars(bool value) {
+  set_has_drawgridforallbars();
+  drawgridforallbars_ = value;
+}
+
+// optional bool drawGridValues = 42 [default = true];
+inline bool IndicatorHistogramVert::has_drawgridvalues() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_drawgridvalues() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void IndicatorHistogramVert::clear_has_drawgridvalues() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void IndicatorHistogramVert::clear_drawgridvalues() {
+  drawgridvalues_ = true;
+  clear_has_drawgridvalues();
+}
+inline bool IndicatorHistogramVert::drawgridvalues() const {
+  return drawgridvalues_;
+}
+inline void IndicatorHistogramVert::set_drawgridvalues(bool value) {
+  set_has_drawgridvalues();
+  drawgridvalues_ = value;
+}
+
+// optional bool drawGridValueForAllBars = 43 [default = false];
+inline bool IndicatorHistogramVert::has_drawgridvalueforallbars() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_drawgridvalueforallbars() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void IndicatorHistogramVert::clear_has_drawgridvalueforallbars() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void IndicatorHistogramVert::clear_drawgridvalueforallbars() {
+  drawgridvalueforallbars_ = false;
+  clear_has_drawgridvalueforallbars();
+}
+inline bool IndicatorHistogramVert::drawgridvalueforallbars() const {
+  return drawgridvalueforallbars_;
+}
+inline void IndicatorHistogramVert::set_drawgridvalueforallbars(bool value) {
+  set_has_drawgridvalueforallbars();
+  drawgridvalueforallbars_ = value;
+}
+
+// optional bool drawGridValueUnits = 44 [default = true];
+inline bool IndicatorHistogramVert::has_drawgridvalueunits() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_drawgridvalueunits() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void IndicatorHistogramVert::clear_has_drawgridvalueunits() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void IndicatorHistogramVert::clear_drawgridvalueunits() {
+  drawgridvalueunits_ = true;
+  clear_has_drawgridvalueunits();
+}
+inline bool IndicatorHistogramVert::drawgridvalueunits() const {
+  return drawgridvalueunits_;
+}
+inline void IndicatorHistogramVert::set_drawgridvalueunits(bool value) {
+  set_has_drawgridvalueunits();
+  drawgridvalueunits_ = value;
+}
+
+// optional double gridMainStep = 50 [default = 50];
+inline bool IndicatorHistogramVert::has_gridmainstep() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_gridmainstep() {
+  _has_bits_[0] |= 0x00002000u;
+}
+inline void IndicatorHistogramVert::clear_has_gridmainstep() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline void IndicatorHistogramVert::clear_gridmainstep() {
+  gridmainstep_ = 50;
+  clear_has_gridmainstep();
+}
+inline double IndicatorHistogramVert::gridmainstep() const {
+  return gridmainstep_;
+}
+inline void IndicatorHistogramVert::set_gridmainstep(double value) {
+  set_has_gridmainstep();
+  gridmainstep_ = value;
+}
+
+// optional double gridSmallStep = 51 [default = 10];
+inline bool IndicatorHistogramVert::has_gridsmallstep() const {
+  return (_has_bits_[0] & 0x00004000u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_gridsmallstep() {
+  _has_bits_[0] |= 0x00004000u;
+}
+inline void IndicatorHistogramVert::clear_has_gridsmallstep() {
+  _has_bits_[0] &= ~0x00004000u;
+}
+inline void IndicatorHistogramVert::clear_gridsmallstep() {
+  gridsmallstep_ = 10;
+  clear_has_gridsmallstep();
+}
+inline double IndicatorHistogramVert::gridsmallstep() const {
+  return gridsmallstep_;
+}
+inline void IndicatorHistogramVert::set_gridsmallstep(double value) {
+  set_has_gridsmallstep();
+  gridsmallstep_ = value;
+}
+
+// optional bool drawAutoSetpoints = 70;
+inline bool IndicatorHistogramVert::has_drawautosetpoints() const {
+  return (_has_bits_[0] & 0x00008000u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_drawautosetpoints() {
+  _has_bits_[0] |= 0x00008000u;
+}
+inline void IndicatorHistogramVert::clear_has_drawautosetpoints() {
+  _has_bits_[0] &= ~0x00008000u;
+}
+inline void IndicatorHistogramVert::clear_drawautosetpoints() {
+  drawautosetpoints_ = false;
+  clear_has_drawautosetpoints();
+}
+inline bool IndicatorHistogramVert::drawautosetpoints() const {
+  return drawautosetpoints_;
+}
+inline void IndicatorHistogramVert::set_drawautosetpoints(bool value) {
+  set_has_drawautosetpoints();
+  drawautosetpoints_ = value;
+}
+
+// optional bool drawCustomSetpoints = 71;
+inline bool IndicatorHistogramVert::has_drawcustomsetpoints() const {
+  return (_has_bits_[0] & 0x00010000u) != 0;
+}
+inline void IndicatorHistogramVert::set_has_drawcustomsetpoints() {
+  _has_bits_[0] |= 0x00010000u;
+}
+inline void IndicatorHistogramVert::clear_has_drawcustomsetpoints() {
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline void IndicatorHistogramVert::clear_drawcustomsetpoints() {
+  drawcustomsetpoints_ = false;
+  clear_has_drawcustomsetpoints();
+}
+inline bool IndicatorHistogramVert::drawcustomsetpoints() const {
+  return drawcustomsetpoints_;
+}
+inline void IndicatorHistogramVert::set_drawcustomsetpoints(bool value) {
+  set_has_drawcustomsetpoints();
+  drawcustomsetpoints_ = value;
+}
+
+// repeated .Proto.IndicatorHistogramVert customSetPoints = 72;
+inline int IndicatorHistogramVert::customsetpoints_size() const {
+  return customsetpoints_.size();
+}
+inline void IndicatorHistogramVert::clear_customsetpoints() {
+  customsetpoints_.Clear();
+}
+inline const ::Proto::IndicatorHistogramVert& IndicatorHistogramVert::customsetpoints(int index) const {
+  return customsetpoints_.Get(index);
+}
+inline ::Proto::IndicatorHistogramVert* IndicatorHistogramVert::mutable_customsetpoints(int index) {
+  return customsetpoints_.Mutable(index);
+}
+inline ::Proto::IndicatorHistogramVert* IndicatorHistogramVert::add_customsetpoints() {
+  return customsetpoints_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::IndicatorHistogramVert >&
+IndicatorHistogramVert::customsetpoints() const {
+  return customsetpoints_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::IndicatorHistogramVert >*
+IndicatorHistogramVert::mutable_customsetpoints() {
+  return &customsetpoints_;
+}
+
+// -------------------------------------------------------------------
+
+// IndicatorArrowIndicator
+
+// optional double startValue = 1;
+inline bool IndicatorArrowIndicator::has_startvalue() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void IndicatorArrowIndicator::set_has_startvalue() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void IndicatorArrowIndicator::clear_has_startvalue() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void IndicatorArrowIndicator::clear_startvalue() {
+  startvalue_ = 0;
+  clear_has_startvalue();
+}
+inline double IndicatorArrowIndicator::startvalue() const {
+  return startvalue_;
+}
+inline void IndicatorArrowIndicator::set_startvalue(double value) {
+  set_has_startvalue();
+  startvalue_ = value;
+}
+
+// optional double endValue = 2;
+inline bool IndicatorArrowIndicator::has_endvalue() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void IndicatorArrowIndicator::set_has_endvalue() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void IndicatorArrowIndicator::clear_has_endvalue() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void IndicatorArrowIndicator::clear_endvalue() {
+  endvalue_ = 0;
+  clear_has_endvalue();
+}
+inline double IndicatorArrowIndicator::endvalue() const {
+  return endvalue_;
+}
+inline void IndicatorArrowIndicator::set_endvalue(double value) {
+  set_has_endvalue();
+  endvalue_ = value;
+}
+
+// optional double startAngle = 16;
+inline bool IndicatorArrowIndicator::has_startangle() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void IndicatorArrowIndicator::set_has_startangle() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void IndicatorArrowIndicator::clear_has_startangle() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void IndicatorArrowIndicator::clear_startangle() {
+  startangle_ = 0;
+  clear_has_startangle();
+}
+inline double IndicatorArrowIndicator::startangle() const {
+  return startangle_;
+}
+inline void IndicatorArrowIndicator::set_startangle(double value) {
+  set_has_startangle();
+  startangle_ = value;
+}
+
+// optional double spanAngle = 17;
+inline bool IndicatorArrowIndicator::has_spanangle() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void IndicatorArrowIndicator::set_has_spanangle() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void IndicatorArrowIndicator::clear_has_spanangle() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void IndicatorArrowIndicator::clear_spanangle() {
+  spanangle_ = 0;
+  clear_has_spanangle();
+}
+inline double IndicatorArrowIndicator::spanangle() const {
+  return spanangle_;
+}
+inline void IndicatorArrowIndicator::set_spanangle(double value) {
+  set_has_spanangle();
+  spanangle_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// SchemaItemIndicator
+
+// optional string signalIds = 1;
+inline bool SchemaItemIndicator::has_signalids() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void SchemaItemIndicator::set_has_signalids() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void SchemaItemIndicator::clear_has_signalids() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void SchemaItemIndicator::clear_signalids() {
+  if (signalids_ != &::google::protobuf::internal::kEmptyString) {
+    signalids_->clear();
+  }
+  clear_has_signalids();
+}
+inline const ::std::string& SchemaItemIndicator::signalids() const {
+  return *signalids_;
+}
+inline void SchemaItemIndicator::set_signalids(const ::std::string& value) {
+  set_has_signalids();
+  if (signalids_ == &::google::protobuf::internal::kEmptyString) {
+    signalids_ = new ::std::string;
+  }
+  signalids_->assign(value);
+}
+inline void SchemaItemIndicator::set_signalids(const char* value) {
+  set_has_signalids();
+  if (signalids_ == &::google::protobuf::internal::kEmptyString) {
+    signalids_ = new ::std::string;
+  }
+  signalids_->assign(value);
+}
+inline void SchemaItemIndicator::set_signalids(const char* value, size_t size) {
+  set_has_signalids();
+  if (signalids_ == &::google::protobuf::internal::kEmptyString) {
+    signalids_ = new ::std::string;
+  }
+  signalids_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* SchemaItemIndicator::mutable_signalids() {
+  set_has_signalids();
+  if (signalids_ == &::google::protobuf::internal::kEmptyString) {
+    signalids_ = new ::std::string;
+  }
+  return signalids_;
+}
+inline ::std::string* SchemaItemIndicator::release_signalids() {
+  clear_has_signalids();
+  if (signalids_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = signalids_;
+    signalids_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void SchemaItemIndicator::set_allocated_signalids(::std::string* signalids) {
+  if (signalids_ != &::google::protobuf::internal::kEmptyString) {
+    delete signalids_;
+  }
+  if (signalids) {
+    set_has_signalids();
+    signalids_ = signalids;
+  } else {
+    clear_has_signalids();
+    signalids_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 signalSource = 2 [default = 0];
+inline bool SchemaItemIndicator::has_signalsource() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void SchemaItemIndicator::set_has_signalsource() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void SchemaItemIndicator::clear_has_signalsource() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void SchemaItemIndicator::clear_signalsource() {
+  signalsource_ = 0;
+  clear_has_signalsource();
+}
+inline ::google::protobuf::int32 SchemaItemIndicator::signalsource() const {
+  return signalsource_;
+}
+inline void SchemaItemIndicator::set_signalsource(::google::protobuf::int32 value) {
+  set_has_signalsource();
+  signalsource_ = value;
+}
+
+// optional int32 precision = 3 [default = 2];
+inline bool SchemaItemIndicator::has_precision() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void SchemaItemIndicator::set_has_precision() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void SchemaItemIndicator::clear_has_precision() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void SchemaItemIndicator::clear_precision() {
+  precision_ = 2;
+  clear_has_precision();
+}
+inline ::google::protobuf::int32 SchemaItemIndicator::precision() const {
+  return precision_;
+}
+inline void SchemaItemIndicator::set_precision(::google::protobuf::int32 value) {
+  set_has_precision();
+  precision_ = value;
+}
+
+// optional int32 analogFormat = 4 [default = 102];
+inline bool SchemaItemIndicator::has_analogformat() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void SchemaItemIndicator::set_has_analogformat() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void SchemaItemIndicator::clear_has_analogformat() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void SchemaItemIndicator::clear_analogformat() {
+  analogformat_ = 102;
+  clear_has_analogformat();
+}
+inline ::google::protobuf::int32 SchemaItemIndicator::analogformat() const {
+  return analogformat_;
+}
+inline void SchemaItemIndicator::set_analogformat(::google::protobuf::int32 value) {
+  set_has_analogformat();
+  analogformat_ = value;
+}
+
+// optional .Proto.FontParam font = 9;
+inline bool SchemaItemIndicator::has_font() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void SchemaItemIndicator::set_has_font() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void SchemaItemIndicator::clear_has_font() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void SchemaItemIndicator::clear_font() {
+  if (font_ != NULL) font_->::Proto::FontParam::Clear();
+  clear_has_font();
+}
+inline const ::Proto::FontParam& SchemaItemIndicator::font() const {
+  return font_ != NULL ? *font_ : *default_instance_->font_;
+}
+inline ::Proto::FontParam* SchemaItemIndicator::mutable_font() {
+  set_has_font();
+  if (font_ == NULL) font_ = new ::Proto::FontParam;
+  return font_;
+}
+inline ::Proto::FontParam* SchemaItemIndicator::release_font() {
+  clear_has_font();
+  ::Proto::FontParam* temp = font_;
+  font_ = NULL;
+  return temp;
+}
+inline void SchemaItemIndicator::set_allocated_font(::Proto::FontParam* font) {
+  delete font_;
+  font_ = font;
+  if (font) {
+    set_has_font();
+  } else {
+    clear_has_font();
+  }
+}
+
+// optional bool drawRect = 10 [default = false];
+inline bool SchemaItemIndicator::has_drawrect() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void SchemaItemIndicator::set_has_drawrect() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void SchemaItemIndicator::clear_has_drawrect() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void SchemaItemIndicator::clear_drawrect() {
+  drawrect_ = false;
+  clear_has_drawrect();
+}
+inline bool SchemaItemIndicator::drawrect() const {
+  return drawrect_;
+}
+inline void SchemaItemIndicator::set_drawrect(bool value) {
+  set_has_drawrect();
+  drawrect_ = value;
+}
+
+// optional double lineWeight = 11 [default = 0];
+inline bool SchemaItemIndicator::has_lineweight() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void SchemaItemIndicator::set_has_lineweight() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void SchemaItemIndicator::clear_has_lineweight() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void SchemaItemIndicator::clear_lineweight() {
+  lineweight_ = 0;
+  clear_has_lineweight();
+}
+inline double SchemaItemIndicator::lineweight() const {
+  return lineweight_;
+}
+inline void SchemaItemIndicator::set_lineweight(double value) {
+  set_has_lineweight();
+  lineweight_ = value;
+}
+
+// optional uint32 backgroundColor = 16;
+inline bool SchemaItemIndicator::has_backgroundcolor() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void SchemaItemIndicator::set_has_backgroundcolor() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void SchemaItemIndicator::clear_has_backgroundcolor() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void SchemaItemIndicator::clear_backgroundcolor() {
+  backgroundcolor_ = 0u;
+  clear_has_backgroundcolor();
+}
+inline ::google::protobuf::uint32 SchemaItemIndicator::backgroundcolor() const {
+  return backgroundcolor_;
+}
+inline void SchemaItemIndicator::set_backgroundcolor(::google::protobuf::uint32 value) {
+  set_has_backgroundcolor();
+  backgroundcolor_ = value;
+}
+
+// optional uint32 lineColor = 17;
+inline bool SchemaItemIndicator::has_linecolor() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void SchemaItemIndicator::set_has_linecolor() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void SchemaItemIndicator::clear_has_linecolor() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void SchemaItemIndicator::clear_linecolor() {
+  linecolor_ = 0u;
+  clear_has_linecolor();
+}
+inline ::google::protobuf::uint32 SchemaItemIndicator::linecolor() const {
+  return linecolor_;
+}
+inline void SchemaItemIndicator::set_linecolor(::google::protobuf::uint32 value) {
+  set_has_linecolor();
+  linecolor_ = value;
+}
+
+// repeated uint32 signalColors = 18;
+inline int SchemaItemIndicator::signalcolors_size() const {
+  return signalcolors_.size();
+}
+inline void SchemaItemIndicator::clear_signalcolors() {
+  signalcolors_.Clear();
+}
+inline ::google::protobuf::uint32 SchemaItemIndicator::signalcolors(int index) const {
+  return signalcolors_.Get(index);
+}
+inline void SchemaItemIndicator::set_signalcolors(int index, ::google::protobuf::uint32 value) {
+  signalcolors_.Set(index, value);
+}
+inline void SchemaItemIndicator::add_signalcolors(::google::protobuf::uint32 value) {
+  signalcolors_.Add(value);
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >&
+SchemaItemIndicator::signalcolors() const {
+  return signalcolors_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::uint32 >*
+SchemaItemIndicator::mutable_signalcolors() {
+  return &signalcolors_;
+}
+
+// optional uint32 type = 32 [default = 0];
+inline bool SchemaItemIndicator::has_type() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void SchemaItemIndicator::set_has_type() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void SchemaItemIndicator::clear_has_type() {
+  _has_bits_[0] &= ~0x00000400u;
 }
 inline void SchemaItemIndicator::clear_type() {
   type_ = 0u;
@@ -18582,6 +21365,82 @@ inline ::google::protobuf::uint32 SchemaItemIndicator::type() const {
 inline void SchemaItemIndicator::set_type(::google::protobuf::uint32 value) {
   set_has_type();
   type_ = value;
+}
+
+// optional .Proto.IndicatorHistogramVert indicatorHistogramVert = 48;
+inline bool SchemaItemIndicator::has_indicatorhistogramvert() const {
+  return (_has_bits_[0] & 0x00000800u) != 0;
+}
+inline void SchemaItemIndicator::set_has_indicatorhistogramvert() {
+  _has_bits_[0] |= 0x00000800u;
+}
+inline void SchemaItemIndicator::clear_has_indicatorhistogramvert() {
+  _has_bits_[0] &= ~0x00000800u;
+}
+inline void SchemaItemIndicator::clear_indicatorhistogramvert() {
+  if (indicatorhistogramvert_ != NULL) indicatorhistogramvert_->::Proto::IndicatorHistogramVert::Clear();
+  clear_has_indicatorhistogramvert();
+}
+inline const ::Proto::IndicatorHistogramVert& SchemaItemIndicator::indicatorhistogramvert() const {
+  return indicatorhistogramvert_ != NULL ? *indicatorhistogramvert_ : *default_instance_->indicatorhistogramvert_;
+}
+inline ::Proto::IndicatorHistogramVert* SchemaItemIndicator::mutable_indicatorhistogramvert() {
+  set_has_indicatorhistogramvert();
+  if (indicatorhistogramvert_ == NULL) indicatorhistogramvert_ = new ::Proto::IndicatorHistogramVert;
+  return indicatorhistogramvert_;
+}
+inline ::Proto::IndicatorHistogramVert* SchemaItemIndicator::release_indicatorhistogramvert() {
+  clear_has_indicatorhistogramvert();
+  ::Proto::IndicatorHistogramVert* temp = indicatorhistogramvert_;
+  indicatorhistogramvert_ = NULL;
+  return temp;
+}
+inline void SchemaItemIndicator::set_allocated_indicatorhistogramvert(::Proto::IndicatorHistogramVert* indicatorhistogramvert) {
+  delete indicatorhistogramvert_;
+  indicatorhistogramvert_ = indicatorhistogramvert;
+  if (indicatorhistogramvert) {
+    set_has_indicatorhistogramvert();
+  } else {
+    clear_has_indicatorhistogramvert();
+  }
+}
+
+// optional .Proto.IndicatorArrowIndicator indicatorArrowIndicator = 49;
+inline bool SchemaItemIndicator::has_indicatorarrowindicator() const {
+  return (_has_bits_[0] & 0x00001000u) != 0;
+}
+inline void SchemaItemIndicator::set_has_indicatorarrowindicator() {
+  _has_bits_[0] |= 0x00001000u;
+}
+inline void SchemaItemIndicator::clear_has_indicatorarrowindicator() {
+  _has_bits_[0] &= ~0x00001000u;
+}
+inline void SchemaItemIndicator::clear_indicatorarrowindicator() {
+  if (indicatorarrowindicator_ != NULL) indicatorarrowindicator_->::Proto::IndicatorArrowIndicator::Clear();
+  clear_has_indicatorarrowindicator();
+}
+inline const ::Proto::IndicatorArrowIndicator& SchemaItemIndicator::indicatorarrowindicator() const {
+  return indicatorarrowindicator_ != NULL ? *indicatorarrowindicator_ : *default_instance_->indicatorarrowindicator_;
+}
+inline ::Proto::IndicatorArrowIndicator* SchemaItemIndicator::mutable_indicatorarrowindicator() {
+  set_has_indicatorarrowindicator();
+  if (indicatorarrowindicator_ == NULL) indicatorarrowindicator_ = new ::Proto::IndicatorArrowIndicator;
+  return indicatorarrowindicator_;
+}
+inline ::Proto::IndicatorArrowIndicator* SchemaItemIndicator::release_indicatorarrowindicator() {
+  clear_has_indicatorarrowindicator();
+  ::Proto::IndicatorArrowIndicator* temp = indicatorarrowindicator_;
+  indicatorarrowindicator_ = NULL;
+  return temp;
+}
+inline void SchemaItemIndicator::set_allocated_indicatorarrowindicator(::Proto::IndicatorArrowIndicator* indicatorarrowindicator) {
+  delete indicatorarrowindicator_;
+  indicatorarrowindicator_ = indicatorarrowindicator;
+  if (indicatorarrowindicator) {
+    set_has_indicatorarrowindicator();
+  } else {
+    clear_has_indicatorarrowindicator();
+  }
 }
 
 // -------------------------------------------------------------------
@@ -18985,73 +21844,73 @@ inline void FblItemRect::set_allocated_font(::Proto::FontParam* font) {
   }
 }
 
-// optional string label = 6;
-inline bool FblItemRect::has_label() const {
+// optional string obsoleteLabel = 6;
+inline bool FblItemRect::has_obsoletelabel() const {
   return (_has_bits_[0] & 0x00000020u) != 0;
 }
-inline void FblItemRect::set_has_label() {
+inline void FblItemRect::set_has_obsoletelabel() {
   _has_bits_[0] |= 0x00000020u;
 }
-inline void FblItemRect::clear_has_label() {
+inline void FblItemRect::clear_has_obsoletelabel() {
   _has_bits_[0] &= ~0x00000020u;
 }
-inline void FblItemRect::clear_label() {
-  if (label_ != &::google::protobuf::internal::kEmptyString) {
-    label_->clear();
+inline void FblItemRect::clear_obsoletelabel() {
+  if (obsoletelabel_ != &::google::protobuf::internal::kEmptyString) {
+    obsoletelabel_->clear();
   }
-  clear_has_label();
+  clear_has_obsoletelabel();
 }
-inline const ::std::string& FblItemRect::label() const {
-  return *label_;
+inline const ::std::string& FblItemRect::obsoletelabel() const {
+  return *obsoletelabel_;
 }
-inline void FblItemRect::set_label(const ::std::string& value) {
-  set_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    label_ = new ::std::string;
+inline void FblItemRect::set_obsoletelabel(const ::std::string& value) {
+  set_has_obsoletelabel();
+  if (obsoletelabel_ == &::google::protobuf::internal::kEmptyString) {
+    obsoletelabel_ = new ::std::string;
   }
-  label_->assign(value);
+  obsoletelabel_->assign(value);
 }
-inline void FblItemRect::set_label(const char* value) {
-  set_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    label_ = new ::std::string;
+inline void FblItemRect::set_obsoletelabel(const char* value) {
+  set_has_obsoletelabel();
+  if (obsoletelabel_ == &::google::protobuf::internal::kEmptyString) {
+    obsoletelabel_ = new ::std::string;
   }
-  label_->assign(value);
+  obsoletelabel_->assign(value);
 }
-inline void FblItemRect::set_label(const char* value, size_t size) {
-  set_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    label_ = new ::std::string;
+inline void FblItemRect::set_obsoletelabel(const char* value, size_t size) {
+  set_has_obsoletelabel();
+  if (obsoletelabel_ == &::google::protobuf::internal::kEmptyString) {
+    obsoletelabel_ = new ::std::string;
   }
-  label_->assign(reinterpret_cast<const char*>(value), size);
+  obsoletelabel_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* FblItemRect::mutable_label() {
-  set_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
-    label_ = new ::std::string;
+inline ::std::string* FblItemRect::mutable_obsoletelabel() {
+  set_has_obsoletelabel();
+  if (obsoletelabel_ == &::google::protobuf::internal::kEmptyString) {
+    obsoletelabel_ = new ::std::string;
   }
-  return label_;
+  return obsoletelabel_;
 }
-inline ::std::string* FblItemRect::release_label() {
-  clear_has_label();
-  if (label_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* FblItemRect::release_obsoletelabel() {
+  clear_has_obsoletelabel();
+  if (obsoletelabel_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = label_;
-    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = obsoletelabel_;
+    obsoletelabel_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void FblItemRect::set_allocated_label(::std::string* label) {
-  if (label_ != &::google::protobuf::internal::kEmptyString) {
-    delete label_;
+inline void FblItemRect::set_allocated_obsoletelabel(::std::string* obsoletelabel) {
+  if (obsoletelabel_ != &::google::protobuf::internal::kEmptyString) {
+    delete obsoletelabel_;
   }
-  if (label) {
-    set_has_label();
-    label_ = label;
+  if (obsoletelabel) {
+    set_has_obsoletelabel();
+    obsoletelabel_ = obsoletelabel;
   } else {
-    clear_has_label();
-    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_obsoletelabel();
+    obsoletelabel_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
 }
 
@@ -19147,26 +22006,26 @@ inline void FblItemRect::set_usertextpos(::google::protobuf::int32 value) {
   usertextpos_ = value;
 }
 
-// optional int32 labelPos = 9 [default = 2];
-inline bool FblItemRect::has_labelpos() const {
+// optional int32 obsoleteLabelPos = 9 [default = -1];
+inline bool FblItemRect::has_obsoletelabelpos() const {
   return (_has_bits_[0] & 0x00000100u) != 0;
 }
-inline void FblItemRect::set_has_labelpos() {
+inline void FblItemRect::set_has_obsoletelabelpos() {
   _has_bits_[0] |= 0x00000100u;
 }
-inline void FblItemRect::clear_has_labelpos() {
+inline void FblItemRect::clear_has_obsoletelabelpos() {
   _has_bits_[0] &= ~0x00000100u;
 }
-inline void FblItemRect::clear_labelpos() {
-  labelpos_ = 2;
-  clear_has_labelpos();
+inline void FblItemRect::clear_obsoletelabelpos() {
+  obsoletelabelpos_ = -1;
+  clear_has_obsoletelabelpos();
 }
-inline ::google::protobuf::int32 FblItemRect::labelpos() const {
-  return labelpos_;
+inline ::google::protobuf::int32 FblItemRect::obsoletelabelpos() const {
+  return obsoletelabelpos_;
 }
-inline void FblItemRect::set_labelpos(::google::protobuf::int32 value) {
-  set_has_labelpos();
-  labelpos_ = value;
+inline void FblItemRect::set_obsoletelabelpos(::google::protobuf::int32 value) {
+  set_has_obsoletelabelpos();
+  obsoletelabelpos_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -23850,74 +26709,96 @@ inline void DeviceSignal::set_allocated_validitysignalid(::std::string* validity
   }
 }
 
-// optional string signalSpecPropsStruc = 40;
-inline bool DeviceSignal::has_signalspecpropsstruc() const {
+// optional string signalSpecPropsStruct = 40;
+inline bool DeviceSignal::has_signalspecpropsstruct() const {
   return (_has_bits_[0] & 0x00008000u) != 0;
 }
-inline void DeviceSignal::set_has_signalspecpropsstruc() {
+inline void DeviceSignal::set_has_signalspecpropsstruct() {
   _has_bits_[0] |= 0x00008000u;
 }
-inline void DeviceSignal::clear_has_signalspecpropsstruc() {
+inline void DeviceSignal::clear_has_signalspecpropsstruct() {
   _has_bits_[0] &= ~0x00008000u;
 }
-inline void DeviceSignal::clear_signalspecpropsstruc() {
-  if (signalspecpropsstruc_ != &::google::protobuf::internal::kEmptyString) {
-    signalspecpropsstruc_->clear();
+inline void DeviceSignal::clear_signalspecpropsstruct() {
+  if (signalspecpropsstruct_ != &::google::protobuf::internal::kEmptyString) {
+    signalspecpropsstruct_->clear();
   }
-  clear_has_signalspecpropsstruc();
+  clear_has_signalspecpropsstruct();
 }
-inline const ::std::string& DeviceSignal::signalspecpropsstruc() const {
-  return *signalspecpropsstruc_;
+inline const ::std::string& DeviceSignal::signalspecpropsstruct() const {
+  return *signalspecpropsstruct_;
 }
-inline void DeviceSignal::set_signalspecpropsstruc(const ::std::string& value) {
-  set_has_signalspecpropsstruc();
-  if (signalspecpropsstruc_ == &::google::protobuf::internal::kEmptyString) {
-    signalspecpropsstruc_ = new ::std::string;
+inline void DeviceSignal::set_signalspecpropsstruct(const ::std::string& value) {
+  set_has_signalspecpropsstruct();
+  if (signalspecpropsstruct_ == &::google::protobuf::internal::kEmptyString) {
+    signalspecpropsstruct_ = new ::std::string;
   }
-  signalspecpropsstruc_->assign(value);
+  signalspecpropsstruct_->assign(value);
 }
-inline void DeviceSignal::set_signalspecpropsstruc(const char* value) {
-  set_has_signalspecpropsstruc();
-  if (signalspecpropsstruc_ == &::google::protobuf::internal::kEmptyString) {
-    signalspecpropsstruc_ = new ::std::string;
+inline void DeviceSignal::set_signalspecpropsstruct(const char* value) {
+  set_has_signalspecpropsstruct();
+  if (signalspecpropsstruct_ == &::google::protobuf::internal::kEmptyString) {
+    signalspecpropsstruct_ = new ::std::string;
   }
-  signalspecpropsstruc_->assign(value);
+  signalspecpropsstruct_->assign(value);
 }
-inline void DeviceSignal::set_signalspecpropsstruc(const char* value, size_t size) {
-  set_has_signalspecpropsstruc();
-  if (signalspecpropsstruc_ == &::google::protobuf::internal::kEmptyString) {
-    signalspecpropsstruc_ = new ::std::string;
+inline void DeviceSignal::set_signalspecpropsstruct(const char* value, size_t size) {
+  set_has_signalspecpropsstruct();
+  if (signalspecpropsstruct_ == &::google::protobuf::internal::kEmptyString) {
+    signalspecpropsstruct_ = new ::std::string;
   }
-  signalspecpropsstruc_->assign(reinterpret_cast<const char*>(value), size);
+  signalspecpropsstruct_->assign(reinterpret_cast<const char*>(value), size);
 }
-inline ::std::string* DeviceSignal::mutable_signalspecpropsstruc() {
-  set_has_signalspecpropsstruc();
-  if (signalspecpropsstruc_ == &::google::protobuf::internal::kEmptyString) {
-    signalspecpropsstruc_ = new ::std::string;
+inline ::std::string* DeviceSignal::mutable_signalspecpropsstruct() {
+  set_has_signalspecpropsstruct();
+  if (signalspecpropsstruct_ == &::google::protobuf::internal::kEmptyString) {
+    signalspecpropsstruct_ = new ::std::string;
   }
-  return signalspecpropsstruc_;
+  return signalspecpropsstruct_;
 }
-inline ::std::string* DeviceSignal::release_signalspecpropsstruc() {
-  clear_has_signalspecpropsstruc();
-  if (signalspecpropsstruc_ == &::google::protobuf::internal::kEmptyString) {
+inline ::std::string* DeviceSignal::release_signalspecpropsstruct() {
+  clear_has_signalspecpropsstruct();
+  if (signalspecpropsstruct_ == &::google::protobuf::internal::kEmptyString) {
     return NULL;
   } else {
-    ::std::string* temp = signalspecpropsstruc_;
-    signalspecpropsstruc_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    ::std::string* temp = signalspecpropsstruct_;
+    signalspecpropsstruct_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
     return temp;
   }
 }
-inline void DeviceSignal::set_allocated_signalspecpropsstruc(::std::string* signalspecpropsstruc) {
-  if (signalspecpropsstruc_ != &::google::protobuf::internal::kEmptyString) {
-    delete signalspecpropsstruc_;
+inline void DeviceSignal::set_allocated_signalspecpropsstruct(::std::string* signalspecpropsstruct) {
+  if (signalspecpropsstruct_ != &::google::protobuf::internal::kEmptyString) {
+    delete signalspecpropsstruct_;
   }
-  if (signalspecpropsstruc) {
-    set_has_signalspecpropsstruc();
-    signalspecpropsstruc_ = signalspecpropsstruc;
+  if (signalspecpropsstruct) {
+    set_has_signalspecpropsstruct();
+    signalspecpropsstruct_ = signalspecpropsstruct;
   } else {
-    clear_has_signalspecpropsstruc();
-    signalspecpropsstruc_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    clear_has_signalspecpropsstruct();
+    signalspecpropsstruct_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
+}
+
+// optional bool signalSpecPropsStructWasFixed = 41 [default = false];
+inline bool DeviceSignal::has_signalspecpropsstructwasfixed() const {
+  return (_has_bits_[0] & 0x00010000u) != 0;
+}
+inline void DeviceSignal::set_has_signalspecpropsstructwasfixed() {
+  _has_bits_[0] |= 0x00010000u;
+}
+inline void DeviceSignal::clear_has_signalspecpropsstructwasfixed() {
+  _has_bits_[0] &= ~0x00010000u;
+}
+inline void DeviceSignal::clear_signalspecpropsstructwasfixed() {
+  signalspecpropsstructwasfixed_ = false;
+  clear_has_signalspecpropsstructwasfixed();
+}
+inline bool DeviceSignal::signalspecpropsstructwasfixed() const {
+  return signalspecpropsstructwasfixed_;
+}
+inline void DeviceSignal::set_signalspecpropsstructwasfixed(bool value) {
+  set_has_signalspecpropsstructwasfixed();
+  signalspecpropsstructwasfixed_ = value;
 }
 
 // -------------------------------------------------------------------
@@ -26742,15 +29623,59 @@ inline void AppSignal::set_allocated_specpropvalues(::std::string* specpropvalue
   }
 }
 
+// repeated string tags = 92;
+inline int AppSignal::tags_size() const {
+  return tags_.size();
+}
+inline void AppSignal::clear_tags() {
+  tags_.Clear();
+}
+inline const ::std::string& AppSignal::tags(int index) const {
+  return tags_.Get(index);
+}
+inline ::std::string* AppSignal::mutable_tags(int index) {
+  return tags_.Mutable(index);
+}
+inline void AppSignal::set_tags(int index, const ::std::string& value) {
+  tags_.Mutable(index)->assign(value);
+}
+inline void AppSignal::set_tags(int index, const char* value) {
+  tags_.Mutable(index)->assign(value);
+}
+inline void AppSignal::set_tags(int index, const char* value, size_t size) {
+  tags_.Mutable(index)->assign(
+    reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* AppSignal::add_tags() {
+  return tags_.Add();
+}
+inline void AppSignal::add_tags(const ::std::string& value) {
+  tags_.Add()->assign(value);
+}
+inline void AppSignal::add_tags(const char* value) {
+  tags_.Add()->assign(value);
+}
+inline void AppSignal::add_tags(const char* value, size_t size) {
+  tags_.Add()->assign(reinterpret_cast<const char*>(value), size);
+}
+inline const ::google::protobuf::RepeatedPtrField< ::std::string>&
+AppSignal::tags() const {
+  return tags_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::std::string>*
+AppSignal::mutable_tags() {
+  return &tags_;
+}
+
 // optional .Proto.AppSignalDbField dbField = 120;
 inline bool AppSignal::has_dbfield() const {
-  return (_has_bits_[0] & 0x04000000u) != 0;
+  return (_has_bits_[0] & 0x08000000u) != 0;
 }
 inline void AppSignal::set_has_dbfield() {
-  _has_bits_[0] |= 0x04000000u;
+  _has_bits_[0] |= 0x08000000u;
 }
 inline void AppSignal::clear_has_dbfield() {
-  _has_bits_[0] &= ~0x04000000u;
+  _has_bits_[0] &= ~0x08000000u;
 }
 inline void AppSignal::clear_dbfield() {
   if (dbfield_ != NULL) dbfield_->::Proto::AppSignalDbField::Clear();
@@ -26782,13 +29707,13 @@ inline void AppSignal::set_allocated_dbfield(::Proto::AppSignalDbField* dbfield)
 
 // optional .Proto.AppSignalCalculatedParam calcParam = 121;
 inline bool AppSignal::has_calcparam() const {
-  return (_has_bits_[0] & 0x08000000u) != 0;
+  return (_has_bits_[0] & 0x10000000u) != 0;
 }
 inline void AppSignal::set_has_calcparam() {
-  _has_bits_[0] |= 0x08000000u;
+  _has_bits_[0] |= 0x10000000u;
 }
 inline void AppSignal::clear_has_calcparam() {
-  _has_bits_[0] &= ~0x08000000u;
+  _has_bits_[0] &= ~0x10000000u;
 }
 inline void AppSignal::clear_calcparam() {
   if (calcparam_ != NULL) calcparam_->::Proto::AppSignalCalculatedParam::Clear();
@@ -27437,6 +30362,216 @@ inline bool ProtoAppSignalData::excludefrombuild() const {
 inline void ProtoAppSignalData::set_excludefrombuild(bool value) {
   set_has_excludefrombuild();
   excludefrombuild_ = value;
+}
+
+// optional string tags = 19;
+inline bool ProtoAppSignalData::has_tags() const {
+  return (_has_bits_[0] & 0x00040000u) != 0;
+}
+inline void ProtoAppSignalData::set_has_tags() {
+  _has_bits_[0] |= 0x00040000u;
+}
+inline void ProtoAppSignalData::clear_has_tags() {
+  _has_bits_[0] &= ~0x00040000u;
+}
+inline void ProtoAppSignalData::clear_tags() {
+  if (tags_ != &::google::protobuf::internal::kEmptyString) {
+    tags_->clear();
+  }
+  clear_has_tags();
+}
+inline const ::std::string& ProtoAppSignalData::tags() const {
+  return *tags_;
+}
+inline void ProtoAppSignalData::set_tags(const ::std::string& value) {
+  set_has_tags();
+  if (tags_ == &::google::protobuf::internal::kEmptyString) {
+    tags_ = new ::std::string;
+  }
+  tags_->assign(value);
+}
+inline void ProtoAppSignalData::set_tags(const char* value) {
+  set_has_tags();
+  if (tags_ == &::google::protobuf::internal::kEmptyString) {
+    tags_ = new ::std::string;
+  }
+  tags_->assign(value);
+}
+inline void ProtoAppSignalData::set_tags(const char* value, size_t size) {
+  set_has_tags();
+  if (tags_ == &::google::protobuf::internal::kEmptyString) {
+    tags_ = new ::std::string;
+  }
+  tags_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ProtoAppSignalData::mutable_tags() {
+  set_has_tags();
+  if (tags_ == &::google::protobuf::internal::kEmptyString) {
+    tags_ = new ::std::string;
+  }
+  return tags_;
+}
+inline ::std::string* ProtoAppSignalData::release_tags() {
+  clear_has_tags();
+  if (tags_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = tags_;
+    tags_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ProtoAppSignalData::set_allocated_tags(::std::string* tags) {
+  if (tags_ != &::google::protobuf::internal::kEmptyString) {
+    delete tags_;
+  }
+  if (tags) {
+    set_has_tags();
+    tags_ = tags;
+  } else {
+    clear_has_tags();
+    tags_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string userSpecPropStruct = 20;
+inline bool ProtoAppSignalData::has_userspecpropstruct() const {
+  return (_has_bits_[0] & 0x00080000u) != 0;
+}
+inline void ProtoAppSignalData::set_has_userspecpropstruct() {
+  _has_bits_[0] |= 0x00080000u;
+}
+inline void ProtoAppSignalData::clear_has_userspecpropstruct() {
+  _has_bits_[0] &= ~0x00080000u;
+}
+inline void ProtoAppSignalData::clear_userspecpropstruct() {
+  if (userspecpropstruct_ != &::google::protobuf::internal::kEmptyString) {
+    userspecpropstruct_->clear();
+  }
+  clear_has_userspecpropstruct();
+}
+inline const ::std::string& ProtoAppSignalData::userspecpropstruct() const {
+  return *userspecpropstruct_;
+}
+inline void ProtoAppSignalData::set_userspecpropstruct(const ::std::string& value) {
+  set_has_userspecpropstruct();
+  if (userspecpropstruct_ == &::google::protobuf::internal::kEmptyString) {
+    userspecpropstruct_ = new ::std::string;
+  }
+  userspecpropstruct_->assign(value);
+}
+inline void ProtoAppSignalData::set_userspecpropstruct(const char* value) {
+  set_has_userspecpropstruct();
+  if (userspecpropstruct_ == &::google::protobuf::internal::kEmptyString) {
+    userspecpropstruct_ = new ::std::string;
+  }
+  userspecpropstruct_->assign(value);
+}
+inline void ProtoAppSignalData::set_userspecpropstruct(const char* value, size_t size) {
+  set_has_userspecpropstruct();
+  if (userspecpropstruct_ == &::google::protobuf::internal::kEmptyString) {
+    userspecpropstruct_ = new ::std::string;
+  }
+  userspecpropstruct_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ProtoAppSignalData::mutable_userspecpropstruct() {
+  set_has_userspecpropstruct();
+  if (userspecpropstruct_ == &::google::protobuf::internal::kEmptyString) {
+    userspecpropstruct_ = new ::std::string;
+  }
+  return userspecpropstruct_;
+}
+inline ::std::string* ProtoAppSignalData::release_userspecpropstruct() {
+  clear_has_userspecpropstruct();
+  if (userspecpropstruct_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = userspecpropstruct_;
+    userspecpropstruct_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ProtoAppSignalData::set_allocated_userspecpropstruct(::std::string* userspecpropstruct) {
+  if (userspecpropstruct_ != &::google::protobuf::internal::kEmptyString) {
+    delete userspecpropstruct_;
+  }
+  if (userspecpropstruct) {
+    set_has_userspecpropstruct();
+    userspecpropstruct_ = userspecpropstruct;
+  } else {
+    clear_has_userspecpropstruct();
+    userspecpropstruct_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional bytes userSpecPropValues = 21;
+inline bool ProtoAppSignalData::has_userspecpropvalues() const {
+  return (_has_bits_[0] & 0x00100000u) != 0;
+}
+inline void ProtoAppSignalData::set_has_userspecpropvalues() {
+  _has_bits_[0] |= 0x00100000u;
+}
+inline void ProtoAppSignalData::clear_has_userspecpropvalues() {
+  _has_bits_[0] &= ~0x00100000u;
+}
+inline void ProtoAppSignalData::clear_userspecpropvalues() {
+  if (userspecpropvalues_ != &::google::protobuf::internal::kEmptyString) {
+    userspecpropvalues_->clear();
+  }
+  clear_has_userspecpropvalues();
+}
+inline const ::std::string& ProtoAppSignalData::userspecpropvalues() const {
+  return *userspecpropvalues_;
+}
+inline void ProtoAppSignalData::set_userspecpropvalues(const ::std::string& value) {
+  set_has_userspecpropvalues();
+  if (userspecpropvalues_ == &::google::protobuf::internal::kEmptyString) {
+    userspecpropvalues_ = new ::std::string;
+  }
+  userspecpropvalues_->assign(value);
+}
+inline void ProtoAppSignalData::set_userspecpropvalues(const char* value) {
+  set_has_userspecpropvalues();
+  if (userspecpropvalues_ == &::google::protobuf::internal::kEmptyString) {
+    userspecpropvalues_ = new ::std::string;
+  }
+  userspecpropvalues_->assign(value);
+}
+inline void ProtoAppSignalData::set_userspecpropvalues(const void* value, size_t size) {
+  set_has_userspecpropvalues();
+  if (userspecpropvalues_ == &::google::protobuf::internal::kEmptyString) {
+    userspecpropvalues_ = new ::std::string;
+  }
+  userspecpropvalues_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ProtoAppSignalData::mutable_userspecpropvalues() {
+  set_has_userspecpropvalues();
+  if (userspecpropvalues_ == &::google::protobuf::internal::kEmptyString) {
+    userspecpropvalues_ = new ::std::string;
+  }
+  return userspecpropvalues_;
+}
+inline ::std::string* ProtoAppSignalData::release_userspecpropvalues() {
+  clear_has_userspecpropvalues();
+  if (userspecpropvalues_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = userspecpropvalues_;
+    userspecpropvalues_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ProtoAppSignalData::set_allocated_userspecpropvalues(::std::string* userspecpropvalues) {
+  if (userspecpropvalues_ != &::google::protobuf::internal::kEmptyString) {
+    delete userspecpropvalues_;
+  }
+  if (userspecpropvalues) {
+    set_has_userspecpropvalues();
+    userspecpropvalues_ = userspecpropvalues;
+  } else {
+    clear_has_userspecpropvalues();
+    userspecpropvalues_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
 }
 
 // -------------------------------------------------------------------
@@ -29927,6 +33062,1331 @@ inline ::google::protobuf::int32 Bus::manualbussize() const {
 inline void Bus::set_manualbussize(::google::protobuf::int32 value) {
   set_has_manualbussize();
   manualbussize_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// ComparatorSignal
+
+// optional bool isConst = 1 [default = true];
+inline bool ComparatorSignal::has_isconst() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void ComparatorSignal::set_has_isconst() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void ComparatorSignal::clear_has_isconst() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void ComparatorSignal::clear_isconst() {
+  isconst_ = true;
+  clear_has_isconst();
+}
+inline bool ComparatorSignal::isconst() const {
+  return isconst_;
+}
+inline void ComparatorSignal::set_isconst(bool value) {
+  set_has_isconst();
+  isconst_ = value;
+}
+
+// optional double constValue = 2 [default = 0];
+inline bool ComparatorSignal::has_constvalue() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void ComparatorSignal::set_has_constvalue() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void ComparatorSignal::clear_has_constvalue() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void ComparatorSignal::clear_constvalue() {
+  constvalue_ = 0;
+  clear_has_constvalue();
+}
+inline double ComparatorSignal::constvalue() const {
+  return constvalue_;
+}
+inline void ComparatorSignal::set_constvalue(double value) {
+  set_has_constvalue();
+  constvalue_ = value;
+}
+
+// optional string appSignalId = 3;
+inline bool ComparatorSignal::has_appsignalid() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void ComparatorSignal::set_has_appsignalid() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void ComparatorSignal::clear_has_appsignalid() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void ComparatorSignal::clear_appsignalid() {
+  if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
+    appsignalid_->clear();
+  }
+  clear_has_appsignalid();
+}
+inline const ::std::string& ComparatorSignal::appsignalid() const {
+  return *appsignalid_;
+}
+inline void ComparatorSignal::set_appsignalid(const ::std::string& value) {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  appsignalid_->assign(value);
+}
+inline void ComparatorSignal::set_appsignalid(const char* value) {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  appsignalid_->assign(value);
+}
+inline void ComparatorSignal::set_appsignalid(const char* value, size_t size) {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  appsignalid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* ComparatorSignal::mutable_appsignalid() {
+  set_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    appsignalid_ = new ::std::string;
+  }
+  return appsignalid_;
+}
+inline ::std::string* ComparatorSignal::release_appsignalid() {
+  clear_has_appsignalid();
+  if (appsignalid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = appsignalid_;
+    appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void ComparatorSignal::set_allocated_appsignalid(::std::string* appsignalid) {
+  if (appsignalid_ != &::google::protobuf::internal::kEmptyString) {
+    delete appsignalid_;
+  }
+  if (appsignalid) {
+    set_has_appsignalid();
+    appsignalid_ = appsignalid;
+  } else {
+    clear_has_appsignalid();
+    appsignalid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional bool isAcquired = 4 [default = false];
+inline bool ComparatorSignal::has_isacquired() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void ComparatorSignal::set_has_isacquired() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void ComparatorSignal::clear_has_isacquired() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void ComparatorSignal::clear_isacquired() {
+  isacquired_ = false;
+  clear_has_isacquired();
+}
+inline bool ComparatorSignal::isacquired() const {
+  return isacquired_;
+}
+inline void ComparatorSignal::set_isacquired(bool value) {
+  set_has_isacquired();
+  isacquired_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// Comparator
+
+// optional int32 cmpType = 1 [default = 1];
+inline bool Comparator::has_cmptype() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void Comparator::set_has_cmptype() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void Comparator::clear_has_cmptype() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void Comparator::clear_cmptype() {
+  cmptype_ = 1;
+  clear_has_cmptype();
+}
+inline ::google::protobuf::int32 Comparator::cmptype() const {
+  return cmptype_;
+}
+inline void Comparator::set_cmptype(::google::protobuf::int32 value) {
+  set_has_cmptype();
+  cmptype_ = value;
+}
+
+// optional int32 inAnalogSignalFormat = 2 [default = 1];
+inline bool Comparator::has_inanalogsignalformat() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void Comparator::set_has_inanalogsignalformat() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void Comparator::clear_has_inanalogsignalformat() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void Comparator::clear_inanalogsignalformat() {
+  inanalogsignalformat_ = 1;
+  clear_has_inanalogsignalformat();
+}
+inline ::google::protobuf::int32 Comparator::inanalogsignalformat() const {
+  return inanalogsignalformat_;
+}
+inline void Comparator::set_inanalogsignalformat(::google::protobuf::int32 value) {
+  set_has_inanalogsignalformat();
+  inanalogsignalformat_ = value;
+}
+
+// optional .Proto.ComparatorSignal input = 3;
+inline bool Comparator::has_input() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void Comparator::set_has_input() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void Comparator::clear_has_input() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void Comparator::clear_input() {
+  if (input_ != NULL) input_->::Proto::ComparatorSignal::Clear();
+  clear_has_input();
+}
+inline const ::Proto::ComparatorSignal& Comparator::input() const {
+  return input_ != NULL ? *input_ : *default_instance_->input_;
+}
+inline ::Proto::ComparatorSignal* Comparator::mutable_input() {
+  set_has_input();
+  if (input_ == NULL) input_ = new ::Proto::ComparatorSignal;
+  return input_;
+}
+inline ::Proto::ComparatorSignal* Comparator::release_input() {
+  clear_has_input();
+  ::Proto::ComparatorSignal* temp = input_;
+  input_ = NULL;
+  return temp;
+}
+inline void Comparator::set_allocated_input(::Proto::ComparatorSignal* input) {
+  delete input_;
+  input_ = input;
+  if (input) {
+    set_has_input();
+  } else {
+    clear_has_input();
+  }
+}
+
+// optional .Proto.ComparatorSignal compare = 4;
+inline bool Comparator::has_compare() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void Comparator::set_has_compare() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void Comparator::clear_has_compare() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void Comparator::clear_compare() {
+  if (compare_ != NULL) compare_->::Proto::ComparatorSignal::Clear();
+  clear_has_compare();
+}
+inline const ::Proto::ComparatorSignal& Comparator::compare() const {
+  return compare_ != NULL ? *compare_ : *default_instance_->compare_;
+}
+inline ::Proto::ComparatorSignal* Comparator::mutable_compare() {
+  set_has_compare();
+  if (compare_ == NULL) compare_ = new ::Proto::ComparatorSignal;
+  return compare_;
+}
+inline ::Proto::ComparatorSignal* Comparator::release_compare() {
+  clear_has_compare();
+  ::Proto::ComparatorSignal* temp = compare_;
+  compare_ = NULL;
+  return temp;
+}
+inline void Comparator::set_allocated_compare(::Proto::ComparatorSignal* compare) {
+  delete compare_;
+  compare_ = compare;
+  if (compare) {
+    set_has_compare();
+  } else {
+    clear_has_compare();
+  }
+}
+
+// optional .Proto.ComparatorSignal hysteresis = 5;
+inline bool Comparator::has_hysteresis() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void Comparator::set_has_hysteresis() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void Comparator::clear_has_hysteresis() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void Comparator::clear_hysteresis() {
+  if (hysteresis_ != NULL) hysteresis_->::Proto::ComparatorSignal::Clear();
+  clear_has_hysteresis();
+}
+inline const ::Proto::ComparatorSignal& Comparator::hysteresis() const {
+  return hysteresis_ != NULL ? *hysteresis_ : *default_instance_->hysteresis_;
+}
+inline ::Proto::ComparatorSignal* Comparator::mutable_hysteresis() {
+  set_has_hysteresis();
+  if (hysteresis_ == NULL) hysteresis_ = new ::Proto::ComparatorSignal;
+  return hysteresis_;
+}
+inline ::Proto::ComparatorSignal* Comparator::release_hysteresis() {
+  clear_has_hysteresis();
+  ::Proto::ComparatorSignal* temp = hysteresis_;
+  hysteresis_ = NULL;
+  return temp;
+}
+inline void Comparator::set_allocated_hysteresis(::Proto::ComparatorSignal* hysteresis) {
+  delete hysteresis_;
+  hysteresis_ = hysteresis;
+  if (hysteresis) {
+    set_has_hysteresis();
+  } else {
+    clear_has_hysteresis();
+  }
+}
+
+// optional .Proto.ComparatorSignal output = 6;
+inline bool Comparator::has_output() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void Comparator::set_has_output() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void Comparator::clear_has_output() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void Comparator::clear_output() {
+  if (output_ != NULL) output_->::Proto::ComparatorSignal::Clear();
+  clear_has_output();
+}
+inline const ::Proto::ComparatorSignal& Comparator::output() const {
+  return output_ != NULL ? *output_ : *default_instance_->output_;
+}
+inline ::Proto::ComparatorSignal* Comparator::mutable_output() {
+  set_has_output();
+  if (output_ == NULL) output_ = new ::Proto::ComparatorSignal;
+  return output_;
+}
+inline ::Proto::ComparatorSignal* Comparator::release_output() {
+  clear_has_output();
+  ::Proto::ComparatorSignal* temp = output_;
+  output_ = NULL;
+  return temp;
+}
+inline void Comparator::set_allocated_output(::Proto::ComparatorSignal* output) {
+  delete output_;
+  output_ = output;
+  if (output) {
+    set_has_output();
+  } else {
+    clear_has_output();
+  }
+}
+
+// optional bool allSignalsIsAcquired = 7 [default = false];
+inline bool Comparator::has_allsignalsisacquired() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void Comparator::set_has_allsignalsisacquired() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void Comparator::clear_has_allsignalsisacquired() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void Comparator::clear_allsignalsisacquired() {
+  allsignalsisacquired_ = false;
+  clear_has_allsignalsisacquired();
+}
+inline bool Comparator::allsignalsisacquired() const {
+  return allsignalsisacquired_;
+}
+inline void Comparator::set_allsignalsisacquired(bool value) {
+  set_has_allsignalsisacquired();
+  allsignalsisacquired_ = value;
+}
+
+// optional int32 precision = 8 [default = 2];
+inline bool Comparator::has_precision() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void Comparator::set_has_precision() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void Comparator::clear_has_precision() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void Comparator::clear_precision() {
+  precision_ = 2;
+  clear_has_precision();
+}
+inline ::google::protobuf::int32 Comparator::precision() const {
+  return precision_;
+}
+inline void Comparator::set_precision(::google::protobuf::int32 value) {
+  set_has_precision();
+  precision_ = value;
+}
+
+// optional string label = 9;
+inline bool Comparator::has_label() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void Comparator::set_has_label() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void Comparator::clear_has_label() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void Comparator::clear_label() {
+  if (label_ != &::google::protobuf::internal::kEmptyString) {
+    label_->clear();
+  }
+  clear_has_label();
+}
+inline const ::std::string& Comparator::label() const {
+  return *label_;
+}
+inline void Comparator::set_label(const ::std::string& value) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(value);
+}
+inline void Comparator::set_label(const char* value) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(value);
+}
+inline void Comparator::set_label(const char* value, size_t size) {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  label_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Comparator::mutable_label() {
+  set_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    label_ = new ::std::string;
+  }
+  return label_;
+}
+inline ::std::string* Comparator::release_label() {
+  clear_has_label();
+  if (label_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = label_;
+    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Comparator::set_allocated_label(::std::string* label) {
+  if (label_ != &::google::protobuf::internal::kEmptyString) {
+    delete label_;
+  }
+  if (label) {
+    set_has_label();
+    label_ = label;
+  } else {
+    clear_has_label();
+    label_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string schemaId = 10;
+inline bool Comparator::has_schemaid() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void Comparator::set_has_schemaid() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void Comparator::clear_has_schemaid() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void Comparator::clear_schemaid() {
+  if (schemaid_ != &::google::protobuf::internal::kEmptyString) {
+    schemaid_->clear();
+  }
+  clear_has_schemaid();
+}
+inline const ::std::string& Comparator::schemaid() const {
+  return *schemaid_;
+}
+inline void Comparator::set_schemaid(const ::std::string& value) {
+  set_has_schemaid();
+  if (schemaid_ == &::google::protobuf::internal::kEmptyString) {
+    schemaid_ = new ::std::string;
+  }
+  schemaid_->assign(value);
+}
+inline void Comparator::set_schemaid(const char* value) {
+  set_has_schemaid();
+  if (schemaid_ == &::google::protobuf::internal::kEmptyString) {
+    schemaid_ = new ::std::string;
+  }
+  schemaid_->assign(value);
+}
+inline void Comparator::set_schemaid(const char* value, size_t size) {
+  set_has_schemaid();
+  if (schemaid_ == &::google::protobuf::internal::kEmptyString) {
+    schemaid_ = new ::std::string;
+  }
+  schemaid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* Comparator::mutable_schemaid() {
+  set_has_schemaid();
+  if (schemaid_ == &::google::protobuf::internal::kEmptyString) {
+    schemaid_ = new ::std::string;
+  }
+  return schemaid_;
+}
+inline ::std::string* Comparator::release_schemaid() {
+  clear_has_schemaid();
+  if (schemaid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = schemaid_;
+    schemaid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void Comparator::set_allocated_schemaid(::std::string* schemaid) {
+  if (schemaid_ != &::google::protobuf::internal::kEmptyString) {
+    delete schemaid_;
+  }
+  if (schemaid) {
+    set_has_schemaid();
+    schemaid_ = schemaid;
+  } else {
+    clear_has_schemaid();
+    schemaid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional .Proto.Uuid schemaItemUuid = 11;
+inline bool Comparator::has_schemaitemuuid() const {
+  return (_has_bits_[0] & 0x00000400u) != 0;
+}
+inline void Comparator::set_has_schemaitemuuid() {
+  _has_bits_[0] |= 0x00000400u;
+}
+inline void Comparator::clear_has_schemaitemuuid() {
+  _has_bits_[0] &= ~0x00000400u;
+}
+inline void Comparator::clear_schemaitemuuid() {
+  if (schemaitemuuid_ != NULL) schemaitemuuid_->::Proto::Uuid::Clear();
+  clear_has_schemaitemuuid();
+}
+inline const ::Proto::Uuid& Comparator::schemaitemuuid() const {
+  return schemaitemuuid_ != NULL ? *schemaitemuuid_ : *default_instance_->schemaitemuuid_;
+}
+inline ::Proto::Uuid* Comparator::mutable_schemaitemuuid() {
+  set_has_schemaitemuuid();
+  if (schemaitemuuid_ == NULL) schemaitemuuid_ = new ::Proto::Uuid;
+  return schemaitemuuid_;
+}
+inline ::Proto::Uuid* Comparator::release_schemaitemuuid() {
+  clear_has_schemaitemuuid();
+  ::Proto::Uuid* temp = schemaitemuuid_;
+  schemaitemuuid_ = NULL;
+  return temp;
+}
+inline void Comparator::set_allocated_schemaitemuuid(::Proto::Uuid* schemaitemuuid) {
+  delete schemaitemuuid_;
+  schemaitemuuid_ = schemaitemuuid;
+  if (schemaitemuuid) {
+    set_has_schemaitemuuid();
+  } else {
+    clear_has_schemaitemuuid();
+  }
+}
+
+// -------------------------------------------------------------------
+
+// LmComparatorSet
+
+// optional string lmEquipmentID = 1;
+inline bool LmComparatorSet::has_lmequipmentid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void LmComparatorSet::set_has_lmequipmentid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void LmComparatorSet::clear_has_lmequipmentid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void LmComparatorSet::clear_lmequipmentid() {
+  if (lmequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_->clear();
+  }
+  clear_has_lmequipmentid();
+}
+inline const ::std::string& LmComparatorSet::lmequipmentid() const {
+  return *lmequipmentid_;
+}
+inline void LmComparatorSet::set_lmequipmentid(const ::std::string& value) {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
+  }
+  lmequipmentid_->assign(value);
+}
+inline void LmComparatorSet::set_lmequipmentid(const char* value) {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
+  }
+  lmequipmentid_->assign(value);
+}
+inline void LmComparatorSet::set_lmequipmentid(const char* value, size_t size) {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
+  }
+  lmequipmentid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* LmComparatorSet::mutable_lmequipmentid() {
+  set_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    lmequipmentid_ = new ::std::string;
+  }
+  return lmequipmentid_;
+}
+inline ::std::string* LmComparatorSet::release_lmequipmentid() {
+  clear_has_lmequipmentid();
+  if (lmequipmentid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = lmequipmentid_;
+    lmequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void LmComparatorSet::set_allocated_lmequipmentid(::std::string* lmequipmentid) {
+  if (lmequipmentid_ != &::google::protobuf::internal::kEmptyString) {
+    delete lmequipmentid_;
+  }
+  if (lmequipmentid) {
+    set_has_lmequipmentid();
+    lmequipmentid_ = lmequipmentid;
+  } else {
+    clear_has_lmequipmentid();
+    lmequipmentid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// repeated .Proto.Comparator comparator = 2;
+inline int LmComparatorSet::comparator_size() const {
+  return comparator_.size();
+}
+inline void LmComparatorSet::clear_comparator() {
+  comparator_.Clear();
+}
+inline const ::Proto::Comparator& LmComparatorSet::comparator(int index) const {
+  return comparator_.Get(index);
+}
+inline ::Proto::Comparator* LmComparatorSet::mutable_comparator(int index) {
+  return comparator_.Mutable(index);
+}
+inline ::Proto::Comparator* LmComparatorSet::add_comparator() {
+  return comparator_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::Comparator >&
+LmComparatorSet::comparator() const {
+  return comparator_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::Comparator >*
+LmComparatorSet::mutable_comparator() {
+  return &comparator_;
+}
+
+// -------------------------------------------------------------------
+
+// ComparatorSet
+
+// repeated .Proto.LmComparatorSet lmComparatorSet = 1;
+inline int ComparatorSet::lmcomparatorset_size() const {
+  return lmcomparatorset_.size();
+}
+inline void ComparatorSet::clear_lmcomparatorset() {
+  lmcomparatorset_.Clear();
+}
+inline const ::Proto::LmComparatorSet& ComparatorSet::lmcomparatorset(int index) const {
+  return lmcomparatorset_.Get(index);
+}
+inline ::Proto::LmComparatorSet* ComparatorSet::mutable_lmcomparatorset(int index) {
+  return lmcomparatorset_.Mutable(index);
+}
+inline ::Proto::LmComparatorSet* ComparatorSet::add_lmcomparatorset() {
+  return lmcomparatorset_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::LmComparatorSet >&
+ComparatorSet::lmcomparatorset() const {
+  return lmcomparatorset_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::LmComparatorSet >*
+ComparatorSet::mutable_lmcomparatorset() {
+  return &lmcomparatorset_;
+}
+
+// -------------------------------------------------------------------
+
+// MetrologySignalLocation
+
+// optional string rackID = 1;
+inline bool MetrologySignalLocation::has_rackid() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void MetrologySignalLocation::set_has_rackid() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void MetrologySignalLocation::clear_has_rackid() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void MetrologySignalLocation::clear_rackid() {
+  if (rackid_ != &::google::protobuf::internal::kEmptyString) {
+    rackid_->clear();
+  }
+  clear_has_rackid();
+}
+inline const ::std::string& MetrologySignalLocation::rackid() const {
+  return *rackid_;
+}
+inline void MetrologySignalLocation::set_rackid(const ::std::string& value) {
+  set_has_rackid();
+  if (rackid_ == &::google::protobuf::internal::kEmptyString) {
+    rackid_ = new ::std::string;
+  }
+  rackid_->assign(value);
+}
+inline void MetrologySignalLocation::set_rackid(const char* value) {
+  set_has_rackid();
+  if (rackid_ == &::google::protobuf::internal::kEmptyString) {
+    rackid_ = new ::std::string;
+  }
+  rackid_->assign(value);
+}
+inline void MetrologySignalLocation::set_rackid(const char* value, size_t size) {
+  set_has_rackid();
+  if (rackid_ == &::google::protobuf::internal::kEmptyString) {
+    rackid_ = new ::std::string;
+  }
+  rackid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* MetrologySignalLocation::mutable_rackid() {
+  set_has_rackid();
+  if (rackid_ == &::google::protobuf::internal::kEmptyString) {
+    rackid_ = new ::std::string;
+  }
+  return rackid_;
+}
+inline ::std::string* MetrologySignalLocation::release_rackid() {
+  clear_has_rackid();
+  if (rackid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = rackid_;
+    rackid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void MetrologySignalLocation::set_allocated_rackid(::std::string* rackid) {
+  if (rackid_ != &::google::protobuf::internal::kEmptyString) {
+    delete rackid_;
+  }
+  if (rackid) {
+    set_has_rackid();
+    rackid_ = rackid;
+  } else {
+    clear_has_rackid();
+    rackid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional string chassisID = 2;
+inline bool MetrologySignalLocation::has_chassisid() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void MetrologySignalLocation::set_has_chassisid() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void MetrologySignalLocation::clear_has_chassisid() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void MetrologySignalLocation::clear_chassisid() {
+  if (chassisid_ != &::google::protobuf::internal::kEmptyString) {
+    chassisid_->clear();
+  }
+  clear_has_chassisid();
+}
+inline const ::std::string& MetrologySignalLocation::chassisid() const {
+  return *chassisid_;
+}
+inline void MetrologySignalLocation::set_chassisid(const ::std::string& value) {
+  set_has_chassisid();
+  if (chassisid_ == &::google::protobuf::internal::kEmptyString) {
+    chassisid_ = new ::std::string;
+  }
+  chassisid_->assign(value);
+}
+inline void MetrologySignalLocation::set_chassisid(const char* value) {
+  set_has_chassisid();
+  if (chassisid_ == &::google::protobuf::internal::kEmptyString) {
+    chassisid_ = new ::std::string;
+  }
+  chassisid_->assign(value);
+}
+inline void MetrologySignalLocation::set_chassisid(const char* value, size_t size) {
+  set_has_chassisid();
+  if (chassisid_ == &::google::protobuf::internal::kEmptyString) {
+    chassisid_ = new ::std::string;
+  }
+  chassisid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* MetrologySignalLocation::mutable_chassisid() {
+  set_has_chassisid();
+  if (chassisid_ == &::google::protobuf::internal::kEmptyString) {
+    chassisid_ = new ::std::string;
+  }
+  return chassisid_;
+}
+inline ::std::string* MetrologySignalLocation::release_chassisid() {
+  clear_has_chassisid();
+  if (chassisid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = chassisid_;
+    chassisid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void MetrologySignalLocation::set_allocated_chassisid(::std::string* chassisid) {
+  if (chassisid_ != &::google::protobuf::internal::kEmptyString) {
+    delete chassisid_;
+  }
+  if (chassisid) {
+    set_has_chassisid();
+    chassisid_ = chassisid;
+  } else {
+    clear_has_chassisid();
+    chassisid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 chassis = 3 [default = -1];
+inline bool MetrologySignalLocation::has_chassis() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void MetrologySignalLocation::set_has_chassis() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void MetrologySignalLocation::clear_has_chassis() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void MetrologySignalLocation::clear_chassis() {
+  chassis_ = -1;
+  clear_has_chassis();
+}
+inline ::google::protobuf::int32 MetrologySignalLocation::chassis() const {
+  return chassis_;
+}
+inline void MetrologySignalLocation::set_chassis(::google::protobuf::int32 value) {
+  set_has_chassis();
+  chassis_ = value;
+}
+
+// optional string moduleID = 4;
+inline bool MetrologySignalLocation::has_moduleid() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void MetrologySignalLocation::set_has_moduleid() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void MetrologySignalLocation::clear_has_moduleid() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void MetrologySignalLocation::clear_moduleid() {
+  if (moduleid_ != &::google::protobuf::internal::kEmptyString) {
+    moduleid_->clear();
+  }
+  clear_has_moduleid();
+}
+inline const ::std::string& MetrologySignalLocation::moduleid() const {
+  return *moduleid_;
+}
+inline void MetrologySignalLocation::set_moduleid(const ::std::string& value) {
+  set_has_moduleid();
+  if (moduleid_ == &::google::protobuf::internal::kEmptyString) {
+    moduleid_ = new ::std::string;
+  }
+  moduleid_->assign(value);
+}
+inline void MetrologySignalLocation::set_moduleid(const char* value) {
+  set_has_moduleid();
+  if (moduleid_ == &::google::protobuf::internal::kEmptyString) {
+    moduleid_ = new ::std::string;
+  }
+  moduleid_->assign(value);
+}
+inline void MetrologySignalLocation::set_moduleid(const char* value, size_t size) {
+  set_has_moduleid();
+  if (moduleid_ == &::google::protobuf::internal::kEmptyString) {
+    moduleid_ = new ::std::string;
+  }
+  moduleid_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* MetrologySignalLocation::mutable_moduleid() {
+  set_has_moduleid();
+  if (moduleid_ == &::google::protobuf::internal::kEmptyString) {
+    moduleid_ = new ::std::string;
+  }
+  return moduleid_;
+}
+inline ::std::string* MetrologySignalLocation::release_moduleid() {
+  clear_has_moduleid();
+  if (moduleid_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = moduleid_;
+    moduleid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void MetrologySignalLocation::set_allocated_moduleid(::std::string* moduleid) {
+  if (moduleid_ != &::google::protobuf::internal::kEmptyString) {
+    delete moduleid_;
+  }
+  if (moduleid) {
+    set_has_moduleid();
+    moduleid_ = moduleid;
+  } else {
+    clear_has_moduleid();
+    moduleid_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// optional int32 module = 5 [default = -1];
+inline bool MetrologySignalLocation::has_module() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void MetrologySignalLocation::set_has_module() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void MetrologySignalLocation::clear_has_module() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void MetrologySignalLocation::clear_module() {
+  module_ = -1;
+  clear_has_module();
+}
+inline ::google::protobuf::int32 MetrologySignalLocation::module() const {
+  return module_;
+}
+inline void MetrologySignalLocation::set_module(::google::protobuf::int32 value) {
+  set_has_module();
+  module_ = value;
+}
+
+// optional int32 place = 6 [default = -1];
+inline bool MetrologySignalLocation::has_place() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void MetrologySignalLocation::set_has_place() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void MetrologySignalLocation::clear_has_place() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void MetrologySignalLocation::clear_place() {
+  place_ = -1;
+  clear_has_place();
+}
+inline ::google::protobuf::int32 MetrologySignalLocation::place() const {
+  return place_;
+}
+inline void MetrologySignalLocation::set_place(::google::protobuf::int32 value) {
+  set_has_place();
+  place_ = value;
+}
+
+// optional string contact = 7;
+inline bool MetrologySignalLocation::has_contact() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void MetrologySignalLocation::set_has_contact() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void MetrologySignalLocation::clear_has_contact() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void MetrologySignalLocation::clear_contact() {
+  if (contact_ != &::google::protobuf::internal::kEmptyString) {
+    contact_->clear();
+  }
+  clear_has_contact();
+}
+inline const ::std::string& MetrologySignalLocation::contact() const {
+  return *contact_;
+}
+inline void MetrologySignalLocation::set_contact(const ::std::string& value) {
+  set_has_contact();
+  if (contact_ == &::google::protobuf::internal::kEmptyString) {
+    contact_ = new ::std::string;
+  }
+  contact_->assign(value);
+}
+inline void MetrologySignalLocation::set_contact(const char* value) {
+  set_has_contact();
+  if (contact_ == &::google::protobuf::internal::kEmptyString) {
+    contact_ = new ::std::string;
+  }
+  contact_->assign(value);
+}
+inline void MetrologySignalLocation::set_contact(const char* value, size_t size) {
+  set_has_contact();
+  if (contact_ == &::google::protobuf::internal::kEmptyString) {
+    contact_ = new ::std::string;
+  }
+  contact_->assign(reinterpret_cast<const char*>(value), size);
+}
+inline ::std::string* MetrologySignalLocation::mutable_contact() {
+  set_has_contact();
+  if (contact_ == &::google::protobuf::internal::kEmptyString) {
+    contact_ = new ::std::string;
+  }
+  return contact_;
+}
+inline ::std::string* MetrologySignalLocation::release_contact() {
+  clear_has_contact();
+  if (contact_ == &::google::protobuf::internal::kEmptyString) {
+    return NULL;
+  } else {
+    ::std::string* temp = contact_;
+    contact_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+    return temp;
+  }
+}
+inline void MetrologySignalLocation::set_allocated_contact(::std::string* contact) {
+  if (contact_ != &::google::protobuf::internal::kEmptyString) {
+    delete contact_;
+  }
+  if (contact) {
+    set_has_contact();
+    contact_ = contact;
+  } else {
+    clear_has_contact();
+    contact_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
+  }
+}
+
+// -------------------------------------------------------------------
+
+// MetrologySignal
+
+// optional .Proto.AppSignal appSignal = 1;
+inline bool MetrologySignal::has_appsignal() const {
+  return (_has_bits_[0] & 0x00000001u) != 0;
+}
+inline void MetrologySignal::set_has_appsignal() {
+  _has_bits_[0] |= 0x00000001u;
+}
+inline void MetrologySignal::clear_has_appsignal() {
+  _has_bits_[0] &= ~0x00000001u;
+}
+inline void MetrologySignal::clear_appsignal() {
+  if (appsignal_ != NULL) appsignal_->::Proto::AppSignal::Clear();
+  clear_has_appsignal();
+}
+inline const ::Proto::AppSignal& MetrologySignal::appsignal() const {
+  return appsignal_ != NULL ? *appsignal_ : *default_instance_->appsignal_;
+}
+inline ::Proto::AppSignal* MetrologySignal::mutable_appsignal() {
+  set_has_appsignal();
+  if (appsignal_ == NULL) appsignal_ = new ::Proto::AppSignal;
+  return appsignal_;
+}
+inline ::Proto::AppSignal* MetrologySignal::release_appsignal() {
+  clear_has_appsignal();
+  ::Proto::AppSignal* temp = appsignal_;
+  appsignal_ = NULL;
+  return temp;
+}
+inline void MetrologySignal::set_allocated_appsignal(::Proto::AppSignal* appsignal) {
+  delete appsignal_;
+  appsignal_ = appsignal;
+  if (appsignal) {
+    set_has_appsignal();
+  } else {
+    clear_has_appsignal();
+  }
+}
+
+// optional .Proto.MetrologySignalLocation location = 2;
+inline bool MetrologySignal::has_location() const {
+  return (_has_bits_[0] & 0x00000002u) != 0;
+}
+inline void MetrologySignal::set_has_location() {
+  _has_bits_[0] |= 0x00000002u;
+}
+inline void MetrologySignal::clear_has_location() {
+  _has_bits_[0] &= ~0x00000002u;
+}
+inline void MetrologySignal::clear_location() {
+  if (location_ != NULL) location_->::Proto::MetrologySignalLocation::Clear();
+  clear_has_location();
+}
+inline const ::Proto::MetrologySignalLocation& MetrologySignal::location() const {
+  return location_ != NULL ? *location_ : *default_instance_->location_;
+}
+inline ::Proto::MetrologySignalLocation* MetrologySignal::mutable_location() {
+  set_has_location();
+  if (location_ == NULL) location_ = new ::Proto::MetrologySignalLocation;
+  return location_;
+}
+inline ::Proto::MetrologySignalLocation* MetrologySignal::release_location() {
+  clear_has_location();
+  ::Proto::MetrologySignalLocation* temp = location_;
+  location_ = NULL;
+  return temp;
+}
+inline void MetrologySignal::set_allocated_location(::Proto::MetrologySignalLocation* location) {
+  delete location_;
+  location_ = location;
+  if (location) {
+    set_has_location();
+  } else {
+    clear_has_location();
+  }
+}
+
+// optional double electricLowLimit = 3 [default = 0];
+inline bool MetrologySignal::has_electriclowlimit() const {
+  return (_has_bits_[0] & 0x00000004u) != 0;
+}
+inline void MetrologySignal::set_has_electriclowlimit() {
+  _has_bits_[0] |= 0x00000004u;
+}
+inline void MetrologySignal::clear_has_electriclowlimit() {
+  _has_bits_[0] &= ~0x00000004u;
+}
+inline void MetrologySignal::clear_electriclowlimit() {
+  electriclowlimit_ = 0;
+  clear_has_electriclowlimit();
+}
+inline double MetrologySignal::electriclowlimit() const {
+  return electriclowlimit_;
+}
+inline void MetrologySignal::set_electriclowlimit(double value) {
+  set_has_electriclowlimit();
+  electriclowlimit_ = value;
+}
+
+// optional double electricHighLimit = 4 [default = 0];
+inline bool MetrologySignal::has_electrichighlimit() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void MetrologySignal::set_has_electrichighlimit() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void MetrologySignal::clear_has_electrichighlimit() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void MetrologySignal::clear_electrichighlimit() {
+  electrichighlimit_ = 0;
+  clear_has_electrichighlimit();
+}
+inline double MetrologySignal::electrichighlimit() const {
+  return electrichighlimit_;
+}
+inline void MetrologySignal::set_electrichighlimit(double value) {
+  set_has_electrichighlimit();
+  electrichighlimit_ = value;
+}
+
+// optional int32 electricUnitID = 5 [default = 1];
+inline bool MetrologySignal::has_electricunitid() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void MetrologySignal::set_has_electricunitid() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void MetrologySignal::clear_has_electricunitid() {
+  _has_bits_[0] &= ~0x00000010u;
+}
+inline void MetrologySignal::clear_electricunitid() {
+  electricunitid_ = 1;
+  clear_has_electricunitid();
+}
+inline ::google::protobuf::int32 MetrologySignal::electricunitid() const {
+  return electricunitid_;
+}
+inline void MetrologySignal::set_electricunitid(::google::protobuf::int32 value) {
+  set_has_electricunitid();
+  electricunitid_ = value;
+}
+
+// optional int32 electricSensorType = 6 [default = 1];
+inline bool MetrologySignal::has_electricsensortype() const {
+  return (_has_bits_[0] & 0x00000020u) != 0;
+}
+inline void MetrologySignal::set_has_electricsensortype() {
+  _has_bits_[0] |= 0x00000020u;
+}
+inline void MetrologySignal::clear_has_electricsensortype() {
+  _has_bits_[0] &= ~0x00000020u;
+}
+inline void MetrologySignal::clear_electricsensortype() {
+  electricsensortype_ = 1;
+  clear_has_electricsensortype();
+}
+inline ::google::protobuf::int32 MetrologySignal::electricsensortype() const {
+  return electricsensortype_;
+}
+inline void MetrologySignal::set_electricsensortype(::google::protobuf::int32 value) {
+  set_has_electricsensortype();
+  electricsensortype_ = value;
+}
+
+// optional double electricR0 = 7 [default = 0];
+inline bool MetrologySignal::has_electricr0() const {
+  return (_has_bits_[0] & 0x00000040u) != 0;
+}
+inline void MetrologySignal::set_has_electricr0() {
+  _has_bits_[0] |= 0x00000040u;
+}
+inline void MetrologySignal::clear_has_electricr0() {
+  _has_bits_[0] &= ~0x00000040u;
+}
+inline void MetrologySignal::clear_electricr0() {
+  electricr0_ = 0;
+  clear_has_electricr0();
+}
+inline double MetrologySignal::electricr0() const {
+  return electricr0_;
+}
+inline void MetrologySignal::set_electricr0(double value) {
+  set_has_electricr0();
+  electricr0_ = value;
+}
+
+// optional int32 electricPrecision = 8 [default = 4];
+inline bool MetrologySignal::has_electricprecision() const {
+  return (_has_bits_[0] & 0x00000080u) != 0;
+}
+inline void MetrologySignal::set_has_electricprecision() {
+  _has_bits_[0] |= 0x00000080u;
+}
+inline void MetrologySignal::clear_has_electricprecision() {
+  _has_bits_[0] &= ~0x00000080u;
+}
+inline void MetrologySignal::clear_electricprecision() {
+  electricprecision_ = 4;
+  clear_has_electricprecision();
+}
+inline ::google::protobuf::int32 MetrologySignal::electricprecision() const {
+  return electricprecision_;
+}
+inline void MetrologySignal::set_electricprecision(::google::protobuf::int32 value) {
+  set_has_electricprecision();
+  electricprecision_ = value;
+}
+
+// optional double physicalLowLimit = 9 [default = 0];
+inline bool MetrologySignal::has_physicallowlimit() const {
+  return (_has_bits_[0] & 0x00000100u) != 0;
+}
+inline void MetrologySignal::set_has_physicallowlimit() {
+  _has_bits_[0] |= 0x00000100u;
+}
+inline void MetrologySignal::clear_has_physicallowlimit() {
+  _has_bits_[0] &= ~0x00000100u;
+}
+inline void MetrologySignal::clear_physicallowlimit() {
+  physicallowlimit_ = 0;
+  clear_has_physicallowlimit();
+}
+inline double MetrologySignal::physicallowlimit() const {
+  return physicallowlimit_;
+}
+inline void MetrologySignal::set_physicallowlimit(double value) {
+  set_has_physicallowlimit();
+  physicallowlimit_ = value;
+}
+
+// optional double physicalHighLimit = 10 [default = 0];
+inline bool MetrologySignal::has_physicalhighlimit() const {
+  return (_has_bits_[0] & 0x00000200u) != 0;
+}
+inline void MetrologySignal::set_has_physicalhighlimit() {
+  _has_bits_[0] |= 0x00000200u;
+}
+inline void MetrologySignal::clear_has_physicalhighlimit() {
+  _has_bits_[0] &= ~0x00000200u;
+}
+inline void MetrologySignal::clear_physicalhighlimit() {
+  physicalhighlimit_ = 0;
+  clear_has_physicalhighlimit();
+}
+inline double MetrologySignal::physicalhighlimit() const {
+  return physicalhighlimit_;
+}
+inline void MetrologySignal::set_physicalhighlimit(double value) {
+  set_has_physicalhighlimit();
+  physicalhighlimit_ = value;
+}
+
+// -------------------------------------------------------------------
+
+// MetrologySignalSet
+
+// repeated .Proto.MetrologySignal metrologySignal = 1;
+inline int MetrologySignalSet::metrologysignal_size() const {
+  return metrologysignal_.size();
+}
+inline void MetrologySignalSet::clear_metrologysignal() {
+  metrologysignal_.Clear();
+}
+inline const ::Proto::MetrologySignal& MetrologySignalSet::metrologysignal(int index) const {
+  return metrologysignal_.Get(index);
+}
+inline ::Proto::MetrologySignal* MetrologySignalSet::mutable_metrologysignal(int index) {
+  return metrologysignal_.Mutable(index);
+}
+inline ::Proto::MetrologySignal* MetrologySignalSet::add_metrologysignal() {
+  return metrologysignal_.Add();
+}
+inline const ::google::protobuf::RepeatedPtrField< ::Proto::MetrologySignal >&
+MetrologySignalSet::metrologysignal() const {
+  return metrologysignal_;
+}
+inline ::google::protobuf::RepeatedPtrField< ::Proto::MetrologySignal >*
+MetrologySignalSet::mutable_metrologysignal() {
+  return &metrologysignal_;
 }
 
 

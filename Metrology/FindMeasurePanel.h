@@ -5,7 +5,6 @@
 #include <QMenu>
 #include <QAction>
 #include <QKeyEvent>
-#include <QList>
 #include <QLabel>
 #include <QLineEdit>
 #include <QTableView>
@@ -90,7 +89,7 @@ public:
 
 private:
 
-	QList<FindItem>		m_findItemList;
+	QVector<FindItem>	m_findItemList;
 
 	int					columnCount(const QModelIndex &parent) const;
 	int					rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -102,7 +101,7 @@ public:
 
 	int					count() const { return m_findItemList.count(); }
 	FindItem			at(int index) const;
-	void				set(const QList<FindItem> list_add);
+	void				set(const QVector<FindItem>& list_add);
 	void				clear();
 
 	QString				text(int row, int column) const;
@@ -126,7 +125,7 @@ public:
 
 private:
 
-	QMainWindow*		m_pMainWindow;
+	QMainWindow*		m_pMainWindow = nullptr;
 
 	int					m_measureType = MEASURE_TYPE_UNKNOWN;
 
@@ -148,14 +147,15 @@ private:
 	void				loadSettings();
 	void				saveSettings();
 
-public:
-
-	void				clear() { m_table.clear(); m_statusLabel->setText(QString()); }
-
 protected:
 
 	bool				event(QEvent* e);
 	bool				eventFilter(QObject* object, QEvent* e);
+
+public slots:
+
+	void				clear()	{ m_table.clear(); m_statusLabel->setText(QString()); }
+
 
 private slots:
 

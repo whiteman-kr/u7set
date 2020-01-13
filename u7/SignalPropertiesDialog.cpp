@@ -188,8 +188,8 @@ void initNewSignal(Signal& signal)
 		}
 	};
 
-	setter(SignalProperties::lowEngeneeringUnitsCaption, 0.0);
-	setter(SignalProperties::highEngeneeringUnitsCaption, 100.0);
+	setter(SignalProperties::lowEngineeringUnitsCaption, 0.0);
+	setter(SignalProperties::highEngineeringUnitsCaption, 100.0);
 
 	for (int i = 0; i < propertyManager.count(); i++)
 	{
@@ -206,6 +206,11 @@ void initNewSignal(Signal& signal)
 		}
 
 		QVariant::Type type = propertyManager.type(i);
+		if (type == QVariant::String && propertyManager.value(&signal, i).toString().isEmpty() == false)
+		{
+			continue;
+		}
+
 		if (value.canConvert(type) && value.convert(type))
 		{
 			propertyManager.setValue(&signal, i, value);
@@ -259,6 +264,13 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 
 		for (QString row : rows)
 		{
+			row = row.trimmed();
+
+			if (row.isEmpty() == true)
+			{
+				continue;
+			}
+
 			QStringList&& fields = row.split(';', QString::KeepEmptyParts);
 
 			for (QString& field : fields)
@@ -320,7 +332,7 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 				}
 			}
 		}
-		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(appSignal);
+		std::shared_ptr<SignalProperties> signalProperties = std::make_shared<SignalProperties>(appSignal, true);
 
 		if (readOnly == true)
 		{
@@ -333,6 +345,8 @@ SignalPropertiesDialog::SignalPropertiesDialog(DbController* dbController, QVect
 		int precision = appSignal.decimalPlaces();
 
 		SignalPropertyManager& manager = SignalsModel::instance()->signalPropertyManager();
+		manager.detectNewProperties(appSignal);
+		manager.loadNotSpecificProperties(*signalProperties);
 		manager.reloadPropertyBehaviour(dbController, parent);
 
 		for (auto property : signalProperties->properties())

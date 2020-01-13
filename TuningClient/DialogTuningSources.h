@@ -4,6 +4,20 @@
 #include "../lib/Tuning/TuningTcpClient.h"
 #include "../lib/Ui/TuningSourcesWidget.h"
 
+class ClientTuningSourcesWidget : public TuningSourcesWidget
+{
+	Q_OBJECT
+public:
+
+	explicit ClientTuningSourcesWidget(TuningTcpClient* tcpClient, bool hasActivationControls, bool hasCloseButton, QWidget* parent);
+	virtual ~ClientTuningSourcesWidget();
+
+protected:
+
+	virtual bool login() override;
+};
+
+
 //
 // DialogTuningSources
 //
@@ -23,7 +37,7 @@ signals:
 	void dialogClosed();
 
 private:
-	TuningSourcesWidget* m_tuningSourcesWidget = nullptr;
+	ClientTuningSourcesWidget* m_tuningSourcesWidget = nullptr;
 
 
 };

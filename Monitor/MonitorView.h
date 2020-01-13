@@ -12,6 +12,9 @@ public:
 	explicit MonitorView(MonitorSchemaManager* schemaManager, QWidget* parent = nullptr);
 	virtual ~MonitorView();
 
+protected:
+	virtual void paintEvent(QPaintEvent* event) override;
+
 	// Properties
 	//
 public:

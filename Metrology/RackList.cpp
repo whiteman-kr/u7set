@@ -210,7 +210,7 @@ Metrology::RackParam* RackListTable::rack(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackListTable::set(const QList<Metrology::RackParam*> list_add)
+void RackListTable::set(const QVector<Metrology::RackParam*>& list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -282,7 +282,7 @@ RackListDialog::~RackListDialog()
 void RackListDialog::createInterface()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
-	setWindowIcon(QIcon(":/icons/Signals.png"));
+	setWindowIcon(QIcon(":/icons/Rack.png"));
 	setWindowTitle(tr("Racks"));
 	resize(700, 600);
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());
@@ -295,10 +295,6 @@ void RackListDialog::createInterface()
 	m_pRackGroupsAction = m_pRackMenu->addAction(tr("&Groups ..."));
 
 	m_pRackMenu->addSeparator();
-
-	m_pImportAction = m_pRackMenu->addAction(tr("&Import ..."));
-	m_pImportAction->setIcon(QIcon(":/icons/Import.png"));
-	m_pImportAction->setShortcut(Qt::CTRL + Qt::Key_I);
 
 	m_pExportAction = m_pRackMenu->addAction(tr("&Export ..."));
 	m_pExportAction->setIcon(QIcon(":/icons/Export.png"));
@@ -327,8 +323,7 @@ void RackListDialog::createInterface()
 	m_pMenuBar->addMenu(m_pEditMenu);
 
 	connect(m_pRackGroupsAction, &QAction::triggered, this, &RackListDialog::rackGroups);
-	connect(m_pImportAction, &QAction::triggered, this, &RackListDialog::importRack);
-	connect(m_pExportAction, &QAction::triggered, this, &RackListDialog::exportRack);
+	connect(m_pExportAction, &QAction::triggered, this, &RackListDialog::exportRacks);
 
 	connect(m_pFindAction, &QAction::triggered, this, &RackListDialog::find);
 	connect(m_pCopyAction, &QAction::triggered, this, &RackListDialog::copy);
@@ -346,6 +341,7 @@ void RackListDialog::createInterface()
 	}
 
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_pView->setWordWrap(false);
 
 	connect(m_pView, &QTableView::doubleClicked , this, &RackListDialog::onListDoubleClicked);
 
@@ -389,7 +385,7 @@ void RackListDialog::updateList()
 {
 	m_rackTable.clear();
 
-	QList<Metrology::RackParam*> rackList;
+	QVector<Metrology::RackParam*> rackList;
 
 	int count = m_rackBase.count();
 	for(int i = 0; i < count; i++)
@@ -443,14 +439,7 @@ void RackListDialog::rackGroups()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void RackListDialog::importRack()
-{
-
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-void RackListDialog::exportRack()
+void RackListDialog::exportRacks()
 {
 	ExportData* dialog = new ExportData(m_pView, tr("Racks"));
 	dialog->exec();

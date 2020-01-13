@@ -139,12 +139,12 @@ namespace  TuningIPEN
 					data.append(QVariant(*defaultValuePtr));
 
 					float* lowBoundValuePtr = reinterpret_cast<float*>(m_framesData + writeOffsetBytes + m_tuningFrameSizeBytes);
-					*lowBoundValuePtr = static_cast<float>(signal->lowEngeneeringUnits());
+					*lowBoundValuePtr = static_cast<float>(signal->lowEngineeringUnits());
 
 					data.append(QVariant(*lowBoundValuePtr));
 
 					float* highBoundValuePtr = reinterpret_cast<float*>(m_framesData + writeOffsetBytes + m_tuningFrameSizeBytes * 2);
-					*highBoundValuePtr = static_cast<float>(signal->highEngeneeringUnits());
+					*highBoundValuePtr = static_cast<float>(signal->highEngineeringUnits());
 
 					data.append(QVariant(*highBoundValuePtr));
 				}
@@ -164,12 +164,12 @@ namespace  TuningIPEN
 					data.append(QVariant(*defaultValuePtr));
 
 					qint32* lowBoundValuePtr = reinterpret_cast<qint32*>(m_framesData + writeOffsetBytes + m_tuningFrameSizeBytes);
-					*lowBoundValuePtr = static_cast<qint32>(signal->lowEngeneeringUnits());
+					*lowBoundValuePtr = static_cast<qint32>(signal->lowEngineeringUnits());
 
 					data.append(QVariant(*lowBoundValuePtr));
 
 					qint32* highBoundValuePtr = reinterpret_cast<qint32*>(m_framesData + writeOffsetBytes + m_tuningFrameSizeBytes * 2);
-					*highBoundValuePtr = static_cast<qint32>(signal->highEngeneeringUnits());
+					*highBoundValuePtr = static_cast<qint32>(signal->highEngineeringUnits());
 
 					data.append(QVariant(*highBoundValuePtr));
 				}

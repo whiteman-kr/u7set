@@ -6,6 +6,7 @@
 #include <QMetaEnum>
 #include <QVariant>
 
+/*! \brief Contains enumerations used in RPCT*/
 class E : public QObject
 {
 	Q_OBJECT
@@ -281,14 +282,28 @@ public:
 	};
 	Q_ENUM(SignalInOutType)
 
-	// Channel
-	//
+	/** \brief This enum describes logic module and signal channel.
+	 *
+	This enum describes logic module and signal channel.\n\n
+	<b>Example</b>
+	\code
+	var ChannelA = 0;
+	var ChannelB = 1;
+	var ChannelC = 2;
+	var ChannelD = 3;
+	...
+	if (param.Channel == ChannelA)
+	{
+		...
+	}
+	\endcode
+	 */
 	enum class Channel
 	{
-		A = 0,
-		B = 1,
-		C = 2,
-		D = 3
+		A = 0, /**< Channel A = 0*/
+		B = 1, /**< Channel B = 1*/
+		C = 2, /**< Channel C = 2 */
+		D = 3  /**< Channel D = 3 */
 	};
 	Q_ENUM(Channel)
 
@@ -429,15 +444,37 @@ public:
 
 	// SchemaItemIndicator Type
 	//
-	enum class IndicatorType
+	enum class IndicatorType	// MUST BE SEQUENTIAL, AS VALUE IS A VECTOR INDEX
 	{
 		HistogramVert,
 		ArrowIndicator,
-		Trend,
-		CustomDraw
+		//Trend,
+		//CustomDraw
+		// !!!! COUNT IS DEFINED IN THE NEXT FUNCTION IndicatorTypeCount !!!
 	};
 	Q_ENUM(IndicatorType)
 
+	static const size_t IndicatorTypeCount = 2;
+
+	enum class CmpType
+	{
+		Equal,
+		Greate,
+		Less,
+		NotEqual
+	};
+	Q_ENUM(CmpType)
+
+
+	enum class IndicatorSetpointType
+	{
+		Static,					// Just show some value with CmpType and color, no real setpoint is involved
+		AutoBySchemaItemLabel,	// Get setpoint by (Comparator) SchemaItem Label, all data (values, type) are taken from setpoint storage
+								// Color is taken from output AppSignal.AlertColor (UserSpecificProperties), or from m_color if property is not exists
+		AutoByOutAppSignalId	// Get setpoint by output AppSignalID (internal), all data are taken from setpoint storage
+								// Color is taken from output AppSignal.AlertColor (UserSpecificProperties), or from m_color if property is not exists
+	};
+	Q_ENUM(IndicatorSetpointType)
 
 public:
 	template <typename ENUM_TYPE>

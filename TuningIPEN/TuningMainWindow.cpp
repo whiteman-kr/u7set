@@ -164,8 +164,8 @@ namespace TuningIPEN
 		if (signal != nullptr)
 		{
 			label = signal->caption().trimmed() + "\n" + signal->customAppSignalID().trimmed();
-			lowLimit = signal->lowEngeneeringUnits();
-			highLimit = signal->highEngeneeringUnits();
+			lowLimit = signal->lowEngineeringUnits();
+			highLimit = signal->highEngineeringUnits();
 		}
 
 		auto setter = new AnalogSignalSetter(id, lowLimit, highLimit, m_service, this);

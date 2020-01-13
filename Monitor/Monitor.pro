@@ -59,6 +59,7 @@ CONFIG += precompile_header
 PRECOMPILED_HEADER = Stable.h
 
 SOURCES += main.cpp \
+    ../lib/ComparatorSet.cpp \
     MonitorMainWindow.cpp \
 	MonitorCentralWidget.cpp \
 	Settings.cpp \
@@ -121,9 +122,12 @@ SOURCES += main.cpp \
     ../lib/Ui/AppDataSourcesWidget.cpp \
     DialogDataSources.cpp \
     ../lib/TcpClientsStatistics.cpp \
-    ../lib/ExportPrint.cpp
+    ../lib/ExportPrint.cpp \
+    ../Builder/IssueLogger.cpp \
+    ../lib/OutputLog.cpp
 
 HEADERS  += \
+    ../lib/ComparatorSet.h \
     MonitorMainWindow.h \
     MonitorCentralWidget.h \
 	Stable.h \
@@ -190,8 +194,9 @@ HEADERS  += \
     ../lib/Ui/AppDataSourcesWidget.h \
     DialogDataSources.h \
     ../lib/TcpClientsStatistics.h \
-    ../lib/ExportPrint.h
-
+    ../lib/ExportPrint.h \
+    ../Builder/IssueLogger.h \
+    ../lib/OutputLog.h
 
 FORMS    += \
     DialogSettings.ui \

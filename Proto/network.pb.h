@@ -1726,61 +1726,79 @@ class AppDataReceiveState : public ::google::protobuf::Message {
 
   // accessors -------------------------------------------------------
 
-  // optional int64 receivedFramesCount = 1 [default = 0];
-  inline bool has_receivedframescount() const;
-  inline void clear_receivedframescount();
-  static const int kReceivedFramesCountFieldNumber = 1;
-  inline ::google::protobuf::int64 receivedframescount() const;
-  inline void set_receivedframescount(::google::protobuf::int64 value);
+  // optional int32 receivingRate = 1 [default = 0];
+  inline bool has_receivingrate() const;
+  inline void clear_receivingrate();
+  static const int kReceivingRateFieldNumber = 1;
+  inline ::google::protobuf::int32 receivingrate() const;
+  inline void set_receivingrate(::google::protobuf::int32 value);
 
-  // optional int64 framesReceivedPerSecond = 2 [default = 0];
-  inline bool has_framesreceivedpersecond() const;
-  inline void clear_framesreceivedpersecond();
-  static const int kFramesReceivedPerSecondFieldNumber = 2;
-  inline ::google::protobuf::int64 framesreceivedpersecond() const;
-  inline void set_framesreceivedpersecond(::google::protobuf::int64 value);
+  // optional int32 udpReceivingRate = 2 [default = 0];
+  inline bool has_udpreceivingrate() const;
+  inline void clear_udpreceivingrate();
+  static const int kUdpReceivingRateFieldNumber = 2;
+  inline ::google::protobuf::int32 udpreceivingrate() const;
+  inline void set_udpreceivingrate(::google::protobuf::int32 value);
 
-  // optional int64 simFramesCount = 3 [default = 0];
+  // optional int32 rupFramesReceivingRate = 3 [default = 0];
+  inline bool has_rupframesreceivingrate() const;
+  inline void clear_rupframesreceivingrate();
+  static const int kRupFramesReceivingRateFieldNumber = 3;
+  inline ::google::protobuf::int32 rupframesreceivingrate() const;
+  inline void set_rupframesreceivingrate(::google::protobuf::int32 value);
+
+  // optional int64 rupFramesCount = 4 [default = 0];
+  inline bool has_rupframescount() const;
+  inline void clear_rupframescount();
+  static const int kRupFramesCountFieldNumber = 4;
+  inline ::google::protobuf::int64 rupframescount() const;
+  inline void set_rupframescount(::google::protobuf::int64 value);
+
+  // optional int64 simFramesCount = 5 [default = 0];
   inline bool has_simframescount() const;
   inline void clear_simframescount();
-  static const int kSimFramesCountFieldNumber = 3;
+  static const int kSimFramesCountFieldNumber = 5;
   inline ::google::protobuf::int64 simframescount() const;
   inline void set_simframescount(::google::protobuf::int64 value);
 
-  // optional int64 errDatagramSize = 4 [default = 0];
+  // optional int64 errDatagramSize = 6 [default = 0];
   inline bool has_errdatagramsize() const;
   inline void clear_errdatagramsize();
-  static const int kErrDatagramSizeFieldNumber = 4;
+  static const int kErrDatagramSizeFieldNumber = 6;
   inline ::google::protobuf::int64 errdatagramsize() const;
   inline void set_errdatagramsize(::google::protobuf::int64 value);
 
-  // optional int64 errSimVersion = 5 [default = 0];
+  // optional int64 errSimVersion = 7 [default = 0];
   inline bool has_errsimversion() const;
   inline void clear_errsimversion();
-  static const int kErrSimVersionFieldNumber = 5;
+  static const int kErrSimVersionFieldNumber = 7;
   inline ::google::protobuf::int64 errsimversion() const;
   inline void set_errsimversion(::google::protobuf::int64 value);
 
-  // optional int64 errUnknownAppDataSourceIP = 6 [default = 0];
+  // optional int64 errUnknownAppDataSourceIP = 8 [default = 0];
   inline bool has_errunknownappdatasourceip() const;
   inline void clear_errunknownappdatasourceip();
-  static const int kErrUnknownAppDataSourceIPFieldNumber = 6;
+  static const int kErrUnknownAppDataSourceIPFieldNumber = 8;
   inline ::google::protobuf::int64 errunknownappdatasourceip() const;
   inline void set_errunknownappdatasourceip(::google::protobuf::int64 value);
 
-  // optional int64 errRupFrameCRC = 7 [default = 0];
+  // optional int64 errRupFrameCRC = 9 [default = 0];
   inline bool has_errrupframecrc() const;
   inline void clear_errrupframecrc();
-  static const int kErrRupFrameCRCFieldNumber = 7;
+  static const int kErrRupFrameCRCFieldNumber = 9;
   inline ::google::protobuf::int64 errrupframecrc() const;
   inline void set_errrupframecrc(::google::protobuf::int64 value);
 
   // @@protoc_insertion_point(class_scope:Network.AppDataReceiveState)
  private:
-  inline void set_has_receivedframescount();
-  inline void clear_has_receivedframescount();
-  inline void set_has_framesreceivedpersecond();
-  inline void clear_has_framesreceivedpersecond();
+  inline void set_has_receivingrate();
+  inline void clear_has_receivingrate();
+  inline void set_has_udpreceivingrate();
+  inline void clear_has_udpreceivingrate();
+  inline void set_has_rupframesreceivingrate();
+  inline void clear_has_rupframesreceivingrate();
+  inline void set_has_rupframescount();
+  inline void clear_has_rupframescount();
   inline void set_has_simframescount();
   inline void clear_has_simframescount();
   inline void set_has_errdatagramsize();
@@ -1794,16 +1812,18 @@ class AppDataReceiveState : public ::google::protobuf::Message {
 
   ::google::protobuf::UnknownFieldSet _unknown_fields_;
 
-  ::google::protobuf::int64 receivedframescount_;
-  ::google::protobuf::int64 framesreceivedpersecond_;
+  ::google::protobuf::int32 receivingrate_;
+  ::google::protobuf::int32 udpreceivingrate_;
+  ::google::protobuf::int64 rupframescount_;
   ::google::protobuf::int64 simframescount_;
   ::google::protobuf::int64 errdatagramsize_;
   ::google::protobuf::int64 errsimversion_;
   ::google::protobuf::int64 errunknownappdatasourceip_;
   ::google::protobuf::int64 errrupframecrc_;
+  ::google::protobuf::int32 rupframesreceivingrate_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(7 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(9 + 31) / 32];
 
   friend void  protobuf_AddDesc_network_2eproto();
   friend void protobuf_AssignDesc_network_2eproto();
@@ -1938,12 +1958,12 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline ::google::protobuf::int64 receivedpacketcount() const;
   inline void set_receivedpacketcount(::google::protobuf::int64 value);
 
-  // optional int64 lostedPacketCount = 11 [default = 0];
-  inline bool has_lostedpacketcount() const;
-  inline void clear_lostedpacketcount();
-  static const int kLostedPacketCountFieldNumber = 11;
-  inline ::google::protobuf::int64 lostedpacketcount() const;
-  inline void set_lostedpacketcount(::google::protobuf::int64 value);
+  // optional int64 lostPacketCount = 11 [default = 0];
+  inline bool has_lostpacketcount() const;
+  inline void clear_lostpacketcount();
+  static const int kLostPacketCountFieldNumber = 11;
+  inline ::google::protobuf::int64 lostpacketcount() const;
+  inline void set_lostpacketcount(::google::protobuf::int64 value);
 
   // optional bool dataProcessingEnabled = 12 [default = false];
   inline bool has_dataprocessingenabled() const;
@@ -2098,8 +2118,8 @@ class AppDataSourceState : public ::google::protobuf::Message {
   inline void clear_has_receivedframescount();
   inline void set_has_receivedpacketcount();
   inline void clear_has_receivedpacketcount();
-  inline void set_has_lostedpacketcount();
-  inline void clear_has_lostedpacketcount();
+  inline void set_has_lostpacketcount();
+  inline void clear_has_lostpacketcount();
   inline void set_has_dataprocessingenabled();
   inline void clear_has_dataprocessingenabled();
   inline void set_has_processedpacketcount();
@@ -2151,7 +2171,7 @@ class AppDataSourceState : public ::google::protobuf::Message {
   bool datareceives_;
   bool dataprocessingenabled_;
   ::google::protobuf::uint32 rupframenumerator_;
-  ::google::protobuf::int64 lostedpacketcount_;
+  ::google::protobuf::int64 lostpacketcount_;
   ::google::protobuf::int64 processedpacketcount_;
   ::google::protobuf::int64 lastpacketsystemtime_;
   ::google::protobuf::int64 rupframeplanttime_;
@@ -8640,59 +8660,103 @@ GetDataSourcesInfoReply::mutable_datasourceinfo() {
 
 // AppDataReceiveState
 
-// optional int64 receivedFramesCount = 1 [default = 0];
-inline bool AppDataReceiveState::has_receivedframescount() const {
+// optional int32 receivingRate = 1 [default = 0];
+inline bool AppDataReceiveState::has_receivingrate() const {
   return (_has_bits_[0] & 0x00000001u) != 0;
 }
-inline void AppDataReceiveState::set_has_receivedframescount() {
+inline void AppDataReceiveState::set_has_receivingrate() {
   _has_bits_[0] |= 0x00000001u;
 }
-inline void AppDataReceiveState::clear_has_receivedframescount() {
+inline void AppDataReceiveState::clear_has_receivingrate() {
   _has_bits_[0] &= ~0x00000001u;
 }
-inline void AppDataReceiveState::clear_receivedframescount() {
-  receivedframescount_ = GOOGLE_LONGLONG(0);
-  clear_has_receivedframescount();
+inline void AppDataReceiveState::clear_receivingrate() {
+  receivingrate_ = 0;
+  clear_has_receivingrate();
 }
-inline ::google::protobuf::int64 AppDataReceiveState::receivedframescount() const {
-  return receivedframescount_;
+inline ::google::protobuf::int32 AppDataReceiveState::receivingrate() const {
+  return receivingrate_;
 }
-inline void AppDataReceiveState::set_receivedframescount(::google::protobuf::int64 value) {
-  set_has_receivedframescount();
-  receivedframescount_ = value;
+inline void AppDataReceiveState::set_receivingrate(::google::protobuf::int32 value) {
+  set_has_receivingrate();
+  receivingrate_ = value;
 }
 
-// optional int64 framesReceivedPerSecond = 2 [default = 0];
-inline bool AppDataReceiveState::has_framesreceivedpersecond() const {
+// optional int32 udpReceivingRate = 2 [default = 0];
+inline bool AppDataReceiveState::has_udpreceivingrate() const {
   return (_has_bits_[0] & 0x00000002u) != 0;
 }
-inline void AppDataReceiveState::set_has_framesreceivedpersecond() {
+inline void AppDataReceiveState::set_has_udpreceivingrate() {
   _has_bits_[0] |= 0x00000002u;
 }
-inline void AppDataReceiveState::clear_has_framesreceivedpersecond() {
+inline void AppDataReceiveState::clear_has_udpreceivingrate() {
   _has_bits_[0] &= ~0x00000002u;
 }
-inline void AppDataReceiveState::clear_framesreceivedpersecond() {
-  framesreceivedpersecond_ = GOOGLE_LONGLONG(0);
-  clear_has_framesreceivedpersecond();
+inline void AppDataReceiveState::clear_udpreceivingrate() {
+  udpreceivingrate_ = 0;
+  clear_has_udpreceivingrate();
 }
-inline ::google::protobuf::int64 AppDataReceiveState::framesreceivedpersecond() const {
-  return framesreceivedpersecond_;
+inline ::google::protobuf::int32 AppDataReceiveState::udpreceivingrate() const {
+  return udpreceivingrate_;
 }
-inline void AppDataReceiveState::set_framesreceivedpersecond(::google::protobuf::int64 value) {
-  set_has_framesreceivedpersecond();
-  framesreceivedpersecond_ = value;
+inline void AppDataReceiveState::set_udpreceivingrate(::google::protobuf::int32 value) {
+  set_has_udpreceivingrate();
+  udpreceivingrate_ = value;
 }
 
-// optional int64 simFramesCount = 3 [default = 0];
-inline bool AppDataReceiveState::has_simframescount() const {
+// optional int32 rupFramesReceivingRate = 3 [default = 0];
+inline bool AppDataReceiveState::has_rupframesreceivingrate() const {
   return (_has_bits_[0] & 0x00000004u) != 0;
 }
-inline void AppDataReceiveState::set_has_simframescount() {
+inline void AppDataReceiveState::set_has_rupframesreceivingrate() {
   _has_bits_[0] |= 0x00000004u;
 }
-inline void AppDataReceiveState::clear_has_simframescount() {
+inline void AppDataReceiveState::clear_has_rupframesreceivingrate() {
   _has_bits_[0] &= ~0x00000004u;
+}
+inline void AppDataReceiveState::clear_rupframesreceivingrate() {
+  rupframesreceivingrate_ = 0;
+  clear_has_rupframesreceivingrate();
+}
+inline ::google::protobuf::int32 AppDataReceiveState::rupframesreceivingrate() const {
+  return rupframesreceivingrate_;
+}
+inline void AppDataReceiveState::set_rupframesreceivingrate(::google::protobuf::int32 value) {
+  set_has_rupframesreceivingrate();
+  rupframesreceivingrate_ = value;
+}
+
+// optional int64 rupFramesCount = 4 [default = 0];
+inline bool AppDataReceiveState::has_rupframescount() const {
+  return (_has_bits_[0] & 0x00000008u) != 0;
+}
+inline void AppDataReceiveState::set_has_rupframescount() {
+  _has_bits_[0] |= 0x00000008u;
+}
+inline void AppDataReceiveState::clear_has_rupframescount() {
+  _has_bits_[0] &= ~0x00000008u;
+}
+inline void AppDataReceiveState::clear_rupframescount() {
+  rupframescount_ = GOOGLE_LONGLONG(0);
+  clear_has_rupframescount();
+}
+inline ::google::protobuf::int64 AppDataReceiveState::rupframescount() const {
+  return rupframescount_;
+}
+inline void AppDataReceiveState::set_rupframescount(::google::protobuf::int64 value) {
+  set_has_rupframescount();
+  rupframescount_ = value;
+}
+
+// optional int64 simFramesCount = 5 [default = 0];
+inline bool AppDataReceiveState::has_simframescount() const {
+  return (_has_bits_[0] & 0x00000010u) != 0;
+}
+inline void AppDataReceiveState::set_has_simframescount() {
+  _has_bits_[0] |= 0x00000010u;
+}
+inline void AppDataReceiveState::clear_has_simframescount() {
+  _has_bits_[0] &= ~0x00000010u;
 }
 inline void AppDataReceiveState::clear_simframescount() {
   simframescount_ = GOOGLE_LONGLONG(0);
@@ -8706,15 +8770,15 @@ inline void AppDataReceiveState::set_simframescount(::google::protobuf::int64 va
   simframescount_ = value;
 }
 
-// optional int64 errDatagramSize = 4 [default = 0];
+// optional int64 errDatagramSize = 6 [default = 0];
 inline bool AppDataReceiveState::has_errdatagramsize() const {
-  return (_has_bits_[0] & 0x00000008u) != 0;
+  return (_has_bits_[0] & 0x00000020u) != 0;
 }
 inline void AppDataReceiveState::set_has_errdatagramsize() {
-  _has_bits_[0] |= 0x00000008u;
+  _has_bits_[0] |= 0x00000020u;
 }
 inline void AppDataReceiveState::clear_has_errdatagramsize() {
-  _has_bits_[0] &= ~0x00000008u;
+  _has_bits_[0] &= ~0x00000020u;
 }
 inline void AppDataReceiveState::clear_errdatagramsize() {
   errdatagramsize_ = GOOGLE_LONGLONG(0);
@@ -8728,15 +8792,15 @@ inline void AppDataReceiveState::set_errdatagramsize(::google::protobuf::int64 v
   errdatagramsize_ = value;
 }
 
-// optional int64 errSimVersion = 5 [default = 0];
+// optional int64 errSimVersion = 7 [default = 0];
 inline bool AppDataReceiveState::has_errsimversion() const {
-  return (_has_bits_[0] & 0x00000010u) != 0;
+  return (_has_bits_[0] & 0x00000040u) != 0;
 }
 inline void AppDataReceiveState::set_has_errsimversion() {
-  _has_bits_[0] |= 0x00000010u;
+  _has_bits_[0] |= 0x00000040u;
 }
 inline void AppDataReceiveState::clear_has_errsimversion() {
-  _has_bits_[0] &= ~0x00000010u;
+  _has_bits_[0] &= ~0x00000040u;
 }
 inline void AppDataReceiveState::clear_errsimversion() {
   errsimversion_ = GOOGLE_LONGLONG(0);
@@ -8750,15 +8814,15 @@ inline void AppDataReceiveState::set_errsimversion(::google::protobuf::int64 val
   errsimversion_ = value;
 }
 
-// optional int64 errUnknownAppDataSourceIP = 6 [default = 0];
+// optional int64 errUnknownAppDataSourceIP = 8 [default = 0];
 inline bool AppDataReceiveState::has_errunknownappdatasourceip() const {
-  return (_has_bits_[0] & 0x00000020u) != 0;
+  return (_has_bits_[0] & 0x00000080u) != 0;
 }
 inline void AppDataReceiveState::set_has_errunknownappdatasourceip() {
-  _has_bits_[0] |= 0x00000020u;
+  _has_bits_[0] |= 0x00000080u;
 }
 inline void AppDataReceiveState::clear_has_errunknownappdatasourceip() {
-  _has_bits_[0] &= ~0x00000020u;
+  _has_bits_[0] &= ~0x00000080u;
 }
 inline void AppDataReceiveState::clear_errunknownappdatasourceip() {
   errunknownappdatasourceip_ = GOOGLE_LONGLONG(0);
@@ -8772,15 +8836,15 @@ inline void AppDataReceiveState::set_errunknownappdatasourceip(::google::protobu
   errunknownappdatasourceip_ = value;
 }
 
-// optional int64 errRupFrameCRC = 7 [default = 0];
+// optional int64 errRupFrameCRC = 9 [default = 0];
 inline bool AppDataReceiveState::has_errrupframecrc() const {
-  return (_has_bits_[0] & 0x00000040u) != 0;
+  return (_has_bits_[0] & 0x00000100u) != 0;
 }
 inline void AppDataReceiveState::set_has_errrupframecrc() {
-  _has_bits_[0] |= 0x00000040u;
+  _has_bits_[0] |= 0x00000100u;
 }
 inline void AppDataReceiveState::clear_has_errrupframecrc() {
-  _has_bits_[0] &= ~0x00000040u;
+  _has_bits_[0] &= ~0x00000100u;
 }
 inline void AppDataReceiveState::clear_errrupframecrc() {
   errrupframecrc_ = GOOGLE_LONGLONG(0);
@@ -9018,26 +9082,26 @@ inline void AppDataSourceState::set_receivedpacketcount(::google::protobuf::int6
   receivedpacketcount_ = value;
 }
 
-// optional int64 lostedPacketCount = 11 [default = 0];
-inline bool AppDataSourceState::has_lostedpacketcount() const {
+// optional int64 lostPacketCount = 11 [default = 0];
+inline bool AppDataSourceState::has_lostpacketcount() const {
   return (_has_bits_[0] & 0x00000400u) != 0;
 }
-inline void AppDataSourceState::set_has_lostedpacketcount() {
+inline void AppDataSourceState::set_has_lostpacketcount() {
   _has_bits_[0] |= 0x00000400u;
 }
-inline void AppDataSourceState::clear_has_lostedpacketcount() {
+inline void AppDataSourceState::clear_has_lostpacketcount() {
   _has_bits_[0] &= ~0x00000400u;
 }
-inline void AppDataSourceState::clear_lostedpacketcount() {
-  lostedpacketcount_ = GOOGLE_LONGLONG(0);
-  clear_has_lostedpacketcount();
+inline void AppDataSourceState::clear_lostpacketcount() {
+  lostpacketcount_ = GOOGLE_LONGLONG(0);
+  clear_has_lostpacketcount();
 }
-inline ::google::protobuf::int64 AppDataSourceState::lostedpacketcount() const {
-  return lostedpacketcount_;
+inline ::google::protobuf::int64 AppDataSourceState::lostpacketcount() const {
+  return lostpacketcount_;
 }
-inline void AppDataSourceState::set_lostedpacketcount(::google::protobuf::int64 value) {
-  set_has_lostedpacketcount();
-  lostedpacketcount_ = value;
+inline void AppDataSourceState::set_lostpacketcount(::google::protobuf::int64 value) {
+  set_has_lostpacketcount();
+  lostpacketcount_ = value;
 }
 
 // optional bool dataProcessingEnabled = 12 [default = false];

@@ -7,6 +7,8 @@
 // Enable the next line to access the admin functions
 //#define USE_ADMIN_REGISTRY_AREA
 
+extern QColor redColor;
+
 //
 // ConfigConnection
 //
@@ -101,6 +103,7 @@ struct ConfigSettings
 	BuildInfo buildInfo;
 
 	QString errorMessage;				// Parsing error message, empty if no errors
+
 };
 
 //
@@ -139,7 +142,13 @@ public:
 
 	QString localAppDataPath();
 
-	QString userFiltersFile();
+	QString userFiltersFile();	// Returns default of custom file depending on useCustom flag
+
+	bool useCustomFiltersFile();
+	void setUseCustomFiltersFile(bool value);
+
+	QString customFiltersFile();
+	void setCustomFiltersFile(const QString& value);
 
 public:
 
@@ -179,6 +188,20 @@ public:
 	int m_switchPresetsPageButtonsHeight = 100;
 	QByteArray m_switchPresetsPageSplitterPosition;
 
+	// Columns Color settings
+
+	QColor m_columnErrorBackColor = redColor;
+	QColor m_columnErrorTextColor = Qt::white;
+
+	QColor m_columnDisabledBackColor = Qt::white;
+	QColor m_columnDisabledTextColor = Qt::darkGray;
+
+	QColor m_columnUnappliedBackColor = Qt::gray;
+	QColor m_columnUnappliedTextColor = Qt::white;
+
+	QColor m_columnDefaultMismatchBackColor = Qt::yellow;
+	QColor m_columnDefaultMismatchTextColor = Qt::black;
+
 private:
 
 #ifdef USE_ADMIN_REGISTRY_AREA
@@ -198,7 +221,10 @@ private:
 
 	QString m_localAppDataPath;
 
-	QString m_userFiltersFile;
+	QString m_filtersDefaultFile;
+
+	bool m_useFiltersCustomFile = false;
+	QString m_filtersCustomFile;
 
 	QMutex m;
 

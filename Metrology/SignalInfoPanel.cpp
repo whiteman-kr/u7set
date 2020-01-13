@@ -38,7 +38,7 @@ int SignalInfoTable::columnCount(const QModelIndex&) const
 
 int SignalInfoTable::rowCount(const QModelIndex&) const
 {
-	return Metrology::ChannelCount;
+	return m_signalCount;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -78,7 +78,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 	}
 
 	int row = index.row();
-	if (row < 0 || row >= Metrology::ChannelCount)
+	if (row < 0 || row >= m_signalCount)
 	{
 		return QVariant();
 	}
@@ -89,8 +89,8 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 		return QVariant();
 	}
 
-	MeasureMultiParam measureParam = signalParam(row);
-	if (measureParam.isValid() == false)
+	IoSignalParam ioParam = signalParam(row);
+	if (ioParam.isValid() == false)
 	{
 		return QVariant();
 	}
@@ -101,15 +101,15 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 
 		switch (column)
 		{
-			case SIGNAL_INFO_COLUMN_RACK:			result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_APP_ID:			result = Qt::AlignLeft;		break;
 			case SIGNAL_INFO_COLUMN_CUSTOM_ID:		result = Qt::AlignLeft;		break;
 			case SIGNAL_INFO_COLUMN_EQUIPMENT_ID:	result = Qt::AlignLeft;		break;
+			case SIGNAL_INFO_COLUMN_CAPTION:		result = Qt::AlignLeft;		break;
 			case SIGNAL_INFO_COLUMN_STATE:			result = Qt::AlignCenter;	break;
+			case SIGNAL_INFO_COLUMN_RACK:			result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_CHASSIS:		result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_MODULE:			result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_PLACE:			result = Qt::AlignCenter;	break;
-			case SIGNAL_INFO_COLUMN_CAPTION:		result = Qt::AlignLeft;		break;
 			case SIGNAL_INFO_COLUMN_EL_RANGE:		result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_EL_SENSOR:		result = Qt::AlignCenter;	break;
 			case SIGNAL_INFO_COLUMN_EN_RANGE:		result = Qt::AlignCenter;	break;
@@ -129,7 +129,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 	{
 		if (column == SIGNAL_INFO_COLUMN_CALIBRATOR)
 		{
-			if (measureParam.calibratorManager() == nullptr || measureParam.calibratorManager()->calibratorIsConnected() == false)
+			if (ioParam.calibratorManager() == nullptr || ioParam.calibratorManager()->calibratorIsConnected() == false)
 			{
 				return QColor(Qt::lightGray);
 			}
@@ -144,13 +144,13 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 		{
 			Metrology::SignalState state;
 
-			if (measureParam.outputSignalType() == OUTPUT_SIGNAL_TYPE_UNUSED)
+			if (ioParam.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNUSED)
 			{
-				state = theSignalBase.signalState(measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT).hash());
+				state = theSignalBase.signalState(ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT).hash());
 			}
 			else
 			{
-				state = theSignalBase.signalState(measureParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT).hash());
+				state = theSignalBase.signalState(ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT).hash());
 			}
 
 			if (state.flags().valid == false)
@@ -174,7 +174,7 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
 	{
-		return text(row, column, measureParam);
+		return text(column, ioParam);
 	}
 
 	return QVariant();
@@ -182,19 +182,14 @@ QVariant SignalInfoTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalInfoTable::text(int row, int column, const MeasureMultiParam& measureParam) const
+QString SignalInfoTable::text(int column, const IoSignalParam& ioParam) const
 {
-	if (row < 0 || row >= Metrology::ChannelCount)
-	{
-		return QString();
-	}
-
 	if (column < 0 || column > SIGNAL_INFO_COLUMN_COUNT)
 	{
 		return QString();
 	}
 
-	if (measureParam.isValid() == false)
+	if (ioParam.isValid() == false)
 	{
 		return QString();
 	}
@@ -203,20 +198,20 @@ QString SignalInfoTable::text(int row, int column, const MeasureMultiParam& meas
 
 	if (column == SIGNAL_INFO_COLUMN_STATE)
 	{
-		Metrology::SignalParam inParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
+		Metrology::SignalParam inParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 		if (inParam.isValid() == true)
 		{
 			Metrology::SignalState inState = theSignalBase.signalState(inParam.hash());
 			stateStr = signalStateStr(inParam, inState);
 		}
 
-		if (measureParam.outputSignalType() != OUTPUT_SIGNAL_TYPE_UNUSED)
+		if (ioParam.signalConnectionType() != SIGNAL_CONNECTION_TYPE_UNUSED)
 		{
-			Metrology::SignalParam outParam = measureParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
+			Metrology::SignalParam outParam = ioParam.param(MEASURE_IO_SIGNAL_TYPE_OUTPUT);
 			if (outParam.isValid() == true)
 			{
 				Metrology::SignalState outState = theSignalBase.signalState(outParam.hash());
-				stateStr += MultiTextDivider + signalStateStr(outParam, outState);
+				stateStr += MULTI_TEXT_DEVIDER + signalStateStr(outParam, outState);
 			}
 		}
 	}
@@ -225,19 +220,19 @@ QString SignalInfoTable::text(int row, int column, const MeasureMultiParam& meas
 
 	switch (column)
 	{
-		case SIGNAL_INFO_COLUMN_RACK:			result = measureParam.rackCaption();			break;
-		case SIGNAL_INFO_COLUMN_APP_ID:			result = measureParam.appSignalID();			break;
-		case SIGNAL_INFO_COLUMN_CUSTOM_ID:		result = measureParam.customSignalID();			break;
-		case SIGNAL_INFO_COLUMN_EQUIPMENT_ID:	result = measureParam.equipmentID();			break;
-		case SIGNAL_INFO_COLUMN_STATE:			result = stateStr;								break;
-		case SIGNAL_INFO_COLUMN_CHASSIS:		result = measureParam.chassisStr();				break;
-		case SIGNAL_INFO_COLUMN_MODULE:			result = measureParam.moduleStr();				break;
-		case SIGNAL_INFO_COLUMN_PLACE:			result = measureParam.placeStr();				break;
-		case SIGNAL_INFO_COLUMN_CAPTION:		result = measureParam.caption();				break;
-		case SIGNAL_INFO_COLUMN_EL_RANGE:		result = measureParam.electricRangeStr();		break;
-		case SIGNAL_INFO_COLUMN_EL_SENSOR:		result = measureParam.electricSensorStr();		break;
-		case SIGNAL_INFO_COLUMN_EN_RANGE:		result = measureParam.engeneeringRangeStr();	break;
-		case SIGNAL_INFO_COLUMN_CALIBRATOR:		result = measureParam.calibratorStr();			break;
+		case SIGNAL_INFO_COLUMN_APP_ID:			result = ioParam.appSignalID();			break;
+		case SIGNAL_INFO_COLUMN_CUSTOM_ID:		result = ioParam.customSignalID();		break;
+		case SIGNAL_INFO_COLUMN_EQUIPMENT_ID:	result = ioParam.equipmentID();			break;
+		case SIGNAL_INFO_COLUMN_CAPTION:		result = ioParam.caption();				break;
+		case SIGNAL_INFO_COLUMN_STATE:			result = stateStr;						break;
+		case SIGNAL_INFO_COLUMN_RACK:			result = ioParam.rackCaption();			break;
+		case SIGNAL_INFO_COLUMN_CHASSIS:		result = ioParam.chassisStr();			break;
+		case SIGNAL_INFO_COLUMN_MODULE:			result = ioParam.moduleStr();			break;
+		case SIGNAL_INFO_COLUMN_PLACE:			result = ioParam.placeStr();			break;
+		case SIGNAL_INFO_COLUMN_EL_RANGE:		result = ioParam.electricRangeStr();	break;
+		case SIGNAL_INFO_COLUMN_EL_SENSOR:		result = ioParam.electricSensorStr();	break;
+		case SIGNAL_INFO_COLUMN_EN_RANGE:		result = ioParam.engineeringRangeStr();	break;
+		case SIGNAL_INFO_COLUMN_CALIBRATOR:		result = ioParam.calibratorStr();		break;
 		default:								assert(0);
 	}
 
@@ -258,11 +253,7 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 		return tr("No valid");
 	}
 
-	QString stateStr, formatStr;
-
-	formatStr.sprintf(("%%.%df"), param.decimalPlaces());
-
-	stateStr.sprintf(formatStr.toAscii(), state.value());
+	QString stateStr = QString::number(state.value(), 'f', param.decimalPlaces());
 
 	if (param.unit().isEmpty() == false)
 	{
@@ -275,8 +266,8 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 	{
 		if (param.isInput() == true || param.isOutput() == true)
 		{
-			double electric = conversion(state.value(), CT_ENGENEER_TO_ELECTRIC, param);
-			stateStr.append(" = " + QString::number(electric, 10, param.electricPrecision()));
+			double electric = conversion(state.value(), CT_ENGINEER_TO_ELECTRIC, param);
+			stateStr.append(" = " + QString::number(electric, 'f', param.electricPrecision()));
 
 			if (param.electricUnitStr().isEmpty() == false)
 			{
@@ -309,7 +300,7 @@ void SignalInfoTable::updateColumn(int column)
 		return;
 	}
 
-	for (int row = 0; row < Metrology::ChannelCount; row ++)
+	for (int row = 0; row < m_signalCount; row ++)
 	{
 		QModelIndex cellIndex = index(row, column);
 
@@ -319,60 +310,40 @@ void SignalInfoTable::updateColumn(int column)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-MeasureMultiParam SignalInfoTable::signalParam(int index) const
+IoSignalParam SignalInfoTable::signalParam(int index) const
 {
-	if (index < 0 || index >= Metrology::ChannelCount)
+	if (index < 0 || index >= m_signalCount)
 	{
-		return MeasureMultiParam();
+		return IoSignalParam();
 	}
 
-	MeasureMultiParam param;
+	IoSignalParam ioParam;
 
 	m_signalMutex.lock();
 
-		param = m_activeSignalParam[index];
+		ioParam = m_ioParamList[index];
 
 	m_signalMutex.unlock();
 
-	return param;
+	return ioParam;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoTable::set(const MeasureSignal &activeSignal)
+void SignalInfoTable::set(const QVector<IoSignalParam>& ioParamList)
 {
-	if (activeSignal.isEmpty() == true)
+	int signalCount = ioParamList.count();
+	if (signalCount == 0)
 	{
 		return;
 	}
 
-	beginInsertRows(QModelIndex(), 0, Metrology::ChannelCount - 1);
+	beginInsertRows(QModelIndex(), 0, signalCount - 1);
 
 		m_signalMutex.lock();
 
-			for(int c = 0; c < Metrology::ChannelCount; c ++)
-			{
-				m_activeSignalParam[c].clear();
-
-				for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
-				{
-					Metrology::Signal* pSignal = activeSignal.signal(type).metrologySignal(c);
-					if (pSignal == nullptr)
-					{
-						continue;
-					}
-
-					Metrology::SignalParam& param = pSignal->param();
-					if (param.isValid() == false)
-					{
-						continue;
-					}
-
-					m_activeSignalParam[c].setParam(type, param);
-					m_activeSignalParam[c].setOutputSignalType(activeSignal.outputSignalType());
-					m_activeSignalParam[c].setCalibratorManager(theCalibratorBase.calibratorForMeasure(c));
-				}
-			}
+			m_ioParamList = ioParamList;
+			m_signalCount = signalCount;
 
 		m_signalMutex.unlock();
 
@@ -383,14 +354,17 @@ void SignalInfoTable::set(const MeasureSignal &activeSignal)
 
 void SignalInfoTable::clear()
 {
-	beginRemoveRows(QModelIndex(), 0, Metrology::ChannelCount - 1);
+	if (m_signalCount == 0)
+	{
+		return;
+	}
+
+	beginRemoveRows(QModelIndex(), 0, m_signalCount - 1);
 
 		m_signalMutex.lock();
 
-			for(int c = 0; c < Metrology::ChannelCount; c ++)
-			{
-				m_activeSignalParam[c].clear();
-			}
+			m_signalCount = 0;
+			m_ioParamList.clear();
 
 		m_signalMutex.unlock();
 
@@ -409,13 +383,14 @@ void SignalInfoTable::updateSignalParam(const QString& appSignalID)
 
 	m_signalMutex.lock();
 
-		for(int c = 0; c < Metrology::ChannelCount; c ++)
+		int signalCount = m_ioParamList.count();
+		for(int c = 0; c < signalCount; c ++)
 		{
 			for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
 			{
-				if (m_activeSignalParam[c].param(type).appSignalID() == appSignalID)
+				if (m_ioParamList[c].param(type).appSignalID() == appSignalID)
 				{
-					m_activeSignalParam[c].setParam(type, theSignalBase.signalParam(appSignalID));
+					m_ioParamList[c].setParam(type, theSignalBase.signalParam(appSignalID));
 				}
 			}
 		}
@@ -430,7 +405,7 @@ void SignalInfoTable::updateSignalParam(const QString& appSignalID)
 SignalInfoPanel::SignalInfoPanel(QWidget* parent) :
 	QDockWidget(parent)
 {
-	setWindowTitle("Panel signal information");
+	setWindowTitle(tr("Panel signal information"));
 	setObjectName(windowTitle());
 
 	createInterface();
@@ -441,6 +416,7 @@ SignalInfoPanel::SignalInfoPanel(QWidget* parent) :
 
 	hideColumn(SIGNAL_INFO_COLUMN_CUSTOM_ID, true);
 	hideColumn(SIGNAL_INFO_COLUMN_EQUIPMENT_ID, true);
+	hideColumn(SIGNAL_INFO_COLUMN_RACK, true);
 	hideColumn(SIGNAL_INFO_COLUMN_CHASSIS, true);
 	hideColumn(SIGNAL_INFO_COLUMN_MODULE, true);
 	hideColumn(SIGNAL_INFO_COLUMN_PLACE, true);
@@ -477,6 +453,7 @@ void SignalInfoPanel::createInterface()
 	}
 
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_pView->setWordWrap(false);
 
 	connect(m_pView, &QTableView::doubleClicked , this, &SignalInfoPanel::onListDoubleClicked);
 
@@ -515,11 +492,6 @@ void SignalInfoPanel::createContextMenu()
 	//
 	m_pContextMenu = new QMenu(tr(""), m_pSignalInfoWindow);
 
-	m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
-	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
-
-	m_pContextMenu->addSeparator();
-
 	m_pShowMenu = new QMenu(tr("Show"), m_pSignalInfoWindow);
 
 	m_pShowElectricValueAction = m_pShowMenu->addAction(tr("Electrical state"));
@@ -530,11 +502,16 @@ void SignalInfoPanel::createContextMenu()
 
 	m_pContextMenu->addSeparator();
 
+	m_pCopyAction = m_pContextMenu->addAction(tr("&Copy"));
+	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
+
+	m_pContextMenu->addSeparator();
+
 	m_pSignalPropertyAction = m_pContextMenu->addAction(tr("Properties ..."));
 	m_pSignalPropertyAction->setIcon(QIcon(":/icons/Property.png"));
 
-	connect(m_pCopyAction, &QAction::triggered, this, &SignalInfoPanel::copy);
 	connect(m_pShowElectricValueAction, &QAction::triggered, this, &SignalInfoPanel::showElectricValue);
+	connect(m_pCopyAction, &QAction::triggered, this, &SignalInfoPanel::copy);
 	connect(m_pSignalPropertyAction, &QAction::triggered, this, &SignalInfoPanel::signalProperty);
 
 	// init context menu
@@ -574,7 +551,7 @@ void SignalInfoPanel::startSignalStateTimer()
 		connect(m_updateSignalStateTimer, &QTimer::timeout, this, &SignalInfoPanel::updateSignalState);
 	}
 
-	m_updateSignalStateTimer->start(100); //	100 ms
+	m_updateSignalStateTimer->start(theOptions.signalInfo().timeForUpdate());
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -585,6 +562,14 @@ void SignalInfoPanel::stopSignalStateTimer()
 	{
 		m_updateSignalStateTimer->stop();
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalInfoPanel::restartSignalStateTimer()
+{
+	stopSignalStateTimer();
+	startSignalStateTimer();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -615,20 +600,57 @@ bool SignalInfoPanel::eventFilter(QObject *object, QEvent *event)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalInfoPanel::activeSignalChanged(const MeasureSignal& signal)
+void SignalInfoPanel::activeSignalChanged(const MeasureSignal& activeSignal)
 {
 	clear();
 
-	if (signal.isEmpty() == true)
+	if (activeSignal.isEmpty() == true)
 	{
 		return;
 	}
 
-	m_signalParamTable.set(signal);
+	int signalCount = activeSignal.channelCount();
+	if (signalCount == 0)
+	{
+		return;
+	}
 
+	QVector<IoSignalParam> ioParamList;
+
+	for(int c = 0; c < signalCount; c ++)
+	{
+
+		IoSignalParam ioParam;
+
+		for(int type = 0; type < MEASURE_IO_SIGNAL_TYPE_COUNT; type ++)
+		{
+			Metrology::Signal* pSignal = activeSignal.multiChannelSignal(type).metrologySignal(c);
+			if (pSignal == nullptr)
+			{
+				continue;
+			}
+
+			Metrology::SignalParam& param = pSignal->param();
+			if (param.isValid() == false)
+			{
+				continue;
+			}
+
+			ioParam.setParam(type, param);
+			ioParam.setSignalConnectionType(activeSignal.signalConnectionType());
+			ioParam.setCalibratorManager(theCalibratorBase.calibratorForMeasure(c));
+		}
+
+		ioParamList.append(ioParam);
+	}
+
+	m_signalParamTable.set(ioParamList);
+
+	//
+	//
 	QSize cellSize = QFontMetrics(theOptions.signalInfo().font()).size(Qt::TextSingleLine,"A");
 
-	if (signal.outputSignalType() == OUTPUT_SIGNAL_TYPE_UNUSED)
+	if (activeSignal.signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNUSED)
 	{
 		m_pView->verticalHeader()->setDefaultSectionSize(cellSize.height());
 	}
@@ -697,7 +719,7 @@ void SignalInfoPanel::signalProperty()
 
 	Metrology::SignalParam param;
 
-	if (theOptions.toolBar().outputSignalType() == OUTPUT_SIGNAL_TYPE_UNUSED)
+	if (theOptions.toolBar().signalConnectionType() == SIGNAL_CONNECTION_TYPE_UNUSED)
 	{
 		param = m_signalParamTable.signalParam(index).param(MEASURE_IO_SIGNAL_TYPE_INPUT);
 	}

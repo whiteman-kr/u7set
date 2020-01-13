@@ -2,6 +2,7 @@
 #include "../lib/MetrologySignal.h"
 #include "../lib/ServiceSettings.h"
 #include "../lib/DeviceObject.h"
+#include "../lib/SignalProperties.h"
 
 namespace Builder
 {
@@ -22,7 +23,8 @@ namespace Builder
 		bool result = true;
 
 		result &= writeSettings();
-		result &= writeMetrologySignalsXml();
+		result &= writeMetrologyItemsXml();
+		result &= writeMetrologySignalSet();
 
 		return result;
 	}
@@ -184,20 +186,10 @@ namespace Builder
 			xmlWriter.writeEndElement(); // </TuningService>
 		} // </Settings>
 
-
-		bool result = m_cfgXml->addLinkToFile(DIR_COMMON, FILE_APP_SIGNALS_ASGS);
-		if (result == false)
-		{
-			// Can't link build file %1 into /%2/configuration.xml.
-			//
-			m_log->errCMN0018(QString("%1\\%2").arg(DIR_COMMON).arg(FILE_APP_SIGNALS_ASGS), equipmentID());
-			return false;
-		}
-
 		return true;
 	}
 
-	bool MetrologyCfgGenerator::writeMetrologySignalsXml()
+	bool MetrologyCfgGenerator::writeMetrologyItemsXml()
 	{
 		QByteArray data;
 		XmlWriteHelper xml(&data);
@@ -205,10 +197,10 @@ namespace Builder
 		xml.setAutoFormatting(true);
 		xml.writeStartDocument();
 		{
-			xml.writeStartElement("MetrologySignals");
+			xml.writeStartElement("MetrologyItems");
 			{
 				xml.writeIntAttribute("buildID", m_buildResultWriter->buildInfo().id);
-				xml.writeIntAttribute("Version", CFG_FILE_VER_METROLOGY_SIGNALS);			// version of MetrologySignal file
+				xml.writeIntAttribute("Version", CFG_FILE_VER_METROLOGY_ITEMS_XML);			// version of MetrologyItems file
 
 
 				// Creating rack list from equipment tree
@@ -297,88 +289,13 @@ namespace Builder
 					}
 				}
 				xml.writeEndElement();
-
-				// Creating signal list
-				//
-				QVector<Metrology::SignalParam> signalsToWrite;
-
-				int signalCount = m_signalSet->count();
-				for(int i = 0; i < signalCount; i++)
-				{
-					Signal& signal = (*m_signalSet)[i];
-
-					bool hasWrongField = false;
-
-					if (E::contains<E::SensorType>(signal.sensorType()) == false)
-					{
-						// Signal %1 has wrong type of sensor: %2.
-						//
-						m_log->errEQP6102(signal.appSignalID(), signal.sensorType());
-						hasWrongField = true;
-					}
-
-					if (signal.isInput() == true)
-					{
-						switch (signal.electricUnit())
-						{
-							case E::ElectricUnit::mV:
-
-								if (testElectricRange_ThermoCouple(signal) == false)
-								{
-									hasWrongField = true;
-								}
-								break;
-
-							case E::ElectricUnit::Ohm:
-
-								if (testElectricRange_ThermoResistor(signal) == false)
-								{
-									hasWrongField = true;
-								}
-								break;
-						}
-					}
-
-					if (E::contains<E::OutputMode>(signal.outputMode()) == false)
-					{
-						// Signal %1 has wrong type of output range mode: %2.
-						//
-						m_log->errEQP6103(signal.appSignalID(), signal.outputMode());
-						hasWrongField = true;
-					}
-
-					if (hasWrongField)
-					{
-						continue;
-					}
-
-					// find location of signal in the equipment Tree by signal equipmentID
-					//
-					Metrology::SignalLocation location(signal.appSignalID(), m_equipment->deviceObject(signal.equipmentID()));
-
-					// append signal into list
-					//
-					signalsToWrite.append(Metrology::SignalParam(signal, location));
-				}
-
-				// Writing signals
-				//
-				xml.writeStartElement("Signals");
-				{
-					xml.writeIntAttribute("Count", signalsToWrite.count());
-
-					for(Metrology::SignalParam signal : signalsToWrite)
-					{
-						signal.writeToXml(xml);
-					}
-				}
-				xml.writeEndElement();	// </Signals>
 			}
-			xml.writeEndElement();	// </MetrologySignals>
+			xml.writeEndElement();	// </MetrologyItems>
+
 		}
 		xml.writeEndDocument();
 
-		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_METROLOGY_SIGNALS_XML, CFG_FILE_ID_METROLOGY_SIGNALS, "",  data);
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_METROLOGY_ITEMS_XML, CFG_FILE_ID_METROLOGY_ITEMS, "",  data);
 
 		if (buildFile == nullptr)
 		{
@@ -388,9 +305,111 @@ namespace Builder
 		bool result = m_cfgXml->addLinkToFile(buildFile);
 		if (result == false)
 		{
-			// Can't link build file %1 into /%2/configuration.xml.
+			// Can't link build file %1 into /%2/MetrologySignals.xml.
 			//
-			m_log->errCMN0018(QString("%1").arg(FILE_METROLOGY_SIGNALS_XML), equipmentID());
+			m_log->errCMN0018(QString("%1").arg(FILE_METROLOGY_ITEMS_XML), equipmentID());
+			return false;
+		}
+
+		return true;
+	}
+
+	bool MetrologyCfgGenerator::writeMetrologySignalSet()
+	{
+		// Creating signal list
+		//
+		QVector<Metrology::SignalParam> signalsToWrite;
+
+		int signalCount = m_signalSet->count();
+		for(int i = 0; i < signalCount; i++)
+		{
+			Signal& signal = (*m_signalSet)[i];
+
+			if (signal.isAcquired() == false)
+			{
+				continue;
+			}
+
+			bool hasWrongField = false;
+
+			if (signal.isAnalog() == true && signal.isInput() == true)
+			{
+				if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == true)
+				{
+					switch (signal.electricUnit())
+					{
+						case E::ElectricUnit::mV:
+
+							if (testElectricRange_ThermoCouple(signal) == false)
+							{
+								hasWrongField = true;
+							}
+							break;
+
+						case E::ElectricUnit::Ohm:
+
+							if (testElectricRange_ThermoResistor(signal) == false)
+							{
+								hasWrongField = true;
+							}
+							break;
+					}
+				}
+			}
+
+			if (hasWrongField == true)
+			{
+				continue;
+			}
+
+			// find location of signal in the equipment Tree by signal equipmentID
+			//
+			Metrology::SignalLocation location(m_equipment->deviceObject(signal.equipmentID()));
+
+			// append signal into list
+			//
+			signalsToWrite.append(Metrology::SignalParam(signal, location));
+		}
+
+		// Writing signals
+		//
+		::Proto::MetrologySignalSet protoMetrologySignalSet;
+
+		for(Metrology::SignalParam signal : signalsToWrite)
+		{
+			::Proto::MetrologySignal* protoMetrologySignal = protoMetrologySignalSet.add_metrologysignal();
+			signal.serializeTo(protoMetrologySignal);
+		}
+
+		int dataSize = protoMetrologySignalSet.ByteSize();
+
+		QByteArray data;
+
+		data.resize(dataSize);
+
+		protoMetrologySignalSet.SerializeWithCachedSizesToArray(reinterpret_cast<::google::protobuf::uint8*>(data.data()));
+
+		BuildFile* buildFile = m_buildResultWriter->addFile(m_subDir, FILE_METROLOGY_SIGNAL_SET, CFG_FILE_ID_METROLOGY_SIGNAL_SET, "",  data);
+		if (buildFile == nullptr)
+		{
+			return false;
+		}
+
+		bool result = m_cfgXml->addLinkToFile(buildFile);
+		if (result == false)
+		{
+			// Can't link build file %1 into /%2/MetrologySignals.set.
+			//
+			m_log->errCMN0018(QString("%1").arg(FILE_METROLOGY_SIGNAL_SET), equipmentID());
+			return false;
+		}
+
+		result = m_cfgXml->addLinkToFile(DIR_COMMON, FILE_COMPARATORS_SET);
+		if (result == false)
+		{
+			// Can't link build file %1 into /%2/Comparators.set.xml.
+			//
+			m_log->errCMN0018(QString("%1\\%2").arg(DIR_COMMON).arg(FILE_COMPARATORS_SET), equipmentID());
 			return false;
 		}
 
@@ -399,6 +418,21 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testElectricRange_ThermoCouple(const Signal& signal)
 	{
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false || signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return true;
+		}
+
 		if (signal.electricUnit() != E::ElectricUnit::mV)
 		{
 			return false;
@@ -441,29 +475,29 @@ namespace Builder
 					}
 
 
-					if (physicalLowLimit.toDouble() != signal.lowEngeneeringUnits())
+					if (physicalLowLimit.isEqual(signal.lowEngineeringUnits()) == false)
 					{
 						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.lowEngeneeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
+						double elVal = uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricLowLimit()) +  meu.key(signal.electricUnit());
 						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
 
-						// Signal %1 has wrong engeneering low Limit
+						// Signal %1 has wrong engineering low Limit
 						//
 						m_log->errEQP6112(signal.customAppSignalID(), nowElValStr, newElValStr);
 						return false;
 					}
 
-					if (physicalHighLimit.toDouble() != signal.highEngeneeringUnits())
+					if (physicalHighLimit.isEqual(signal.highEngineeringUnits()) == false)
 					{
 						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.highEngeneeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
+						double elVal = uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType());
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricHighLimit()) +  meu.key(signal.electricUnit());
 						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
 
-						// Signal %1 has wrong engeneering high Limit
+						// Signal %1 has wrong engineering high Limit
 						//
 						m_log->errEQP6113(signal.customAppSignalID(), nowElValStr, newElValStr);
 						return false;
@@ -477,25 +511,23 @@ namespace Builder
 
 	bool MetrologyCfgGenerator::testElectricRange_ThermoResistor(const Signal& signal)
 	{
+		if (signal.isSpecPropExists(SignalProperties::electricUnitCaption) == false || signal.isSpecPropExists(SignalProperties::sensorTypeCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::electricLowLimitCaption) == false || signal.isSpecPropExists(SignalProperties::electricHighLimitCaption) == false)
+		{
+			return true;
+		}
+
+		if (signal.isSpecPropExists(SignalProperties::lowEngineeringUnitsCaption) == false || signal.isSpecPropExists(SignalProperties::highEngineeringUnitsCaption) == false)
+		{
+			return true;
+		}
+
 		if (signal.electricUnit() != E::ElectricUnit::Ohm)
 		{
-			return false;
-		}
-
-		QVariant qv;
-		bool isEnum;
-		double r0 = 0;
-
-		if (signal.getSpecPropValue("R0_Ohm", &qv, &isEnum) == true)
-		{
-			r0 = qv.toDouble();
-		}
-
-		if (r0 == 0.0 && signal.sensorType() != E::SensorType::Ohm_Raw)
-		{
-			// Signal %1 has wrong R0 (ThermoResistor)
-			//
-			m_log->errEQP6114(signal.customAppSignalID());
 			return false;
 		}
 
@@ -509,8 +541,16 @@ namespace Builder
 			case E::SensorType::Ohm_Cu_a_426:
 			case E::SensorType::Ohm_Ni_a_617:
 				{
-					UnitsConvertResult physicalLowLimit = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), r0);
-					UnitsConvertResult physicalHighLimit = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), r0);
+					if (signal.r0_Ohm() == 0.0)
+					{
+						// Signal %1 has wrong R0 (ThermoResistor)
+						//
+						m_log->errEQP6114(signal.customAppSignalID());
+						return false;
+					}
+
+					UnitsConvertResult physicalLowLimit = uc.electricToPhysical_ThermoResistor(signal.electricLowLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), signal.r0_Ohm());
+					UnitsConvertResult physicalHighLimit = uc.electricToPhysical_ThermoResistor(signal.electricHighLimit(), signal.electricLowLimit(), signal.electricHighLimit(), signal.electricUnit(), signal.sensorType(), signal.r0_Ohm());
 
 					if (physicalLowLimit.ok() == false)
 					{
@@ -528,29 +568,29 @@ namespace Builder
 						return false;
 					}
 
-					if (physicalLowLimit.toDouble() != signal.lowEngeneeringUnits())
+					if (physicalLowLimit.isEqual(signal.lowEngineeringUnits()) == false)
 					{
 						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.lowEngeneeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), r0);
+						double elVal = uc.conversion(signal.lowEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), signal.r0_Ohm());
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricLowLimit()) +  meu.key(signal.electricUnit());
 						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
 
-						// Signal %1 - engeneering low Limit mismatch electrical low Limit
+						// Signal %1 - engineering low Limit mismatch electrical low Limit
 						//
 						m_log->errEQP6112(signal.customAppSignalID(), nowElValStr, newElValStr);
 						return false;
 					}
 
-					if (physicalHighLimit.toDouble() != signal.highEngeneeringUnits())
+					if (physicalHighLimit.isEqual(signal.highEngineeringUnits()) == false)
 					{
 						QString nowElValStr, newElValStr;
-						double elVal = uc.conversion(signal.highEngeneeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), r0);
+						double elVal = uc.conversion(signal.highEngineeringUnits(), UnitsConvertType::PhysicalToElectric, signal.electricUnit(), signal.sensorType(), signal.r0_Ohm());
 						QMetaEnum meu = QMetaEnum::fromType<E::ElectricUnit>();
 						nowElValStr = newElValStr.sprintf("%0.4f ", signal.electricHighLimit()) +  meu.key(signal.electricUnit());
 						newElValStr = newElValStr.sprintf("%0.4f ", elVal) +  meu.key(signal.electricUnit());
 
-						// SSignal %1 - engeneering high Limit mismatch electrical high Limit
+						// SSignal %1 - engineering high Limit mismatch electrical high Limit
 						//
 						m_log->errEQP6113(signal.customAppSignalID(), nowElValStr, newElValStr);
 						return false;

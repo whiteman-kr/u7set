@@ -20,7 +20,8 @@ namespace Builder
 	private:
 
 		bool writeSettings();
-		bool writeMetrologySignalsXml();
+		bool writeMetrologyItemsXml();
+		bool writeMetrologySignalSet();
 
 		bool testElectricRange_ThermoCouple(const Signal& signal);
 		bool testElectricRange_ThermoResistor(const Signal& signal);

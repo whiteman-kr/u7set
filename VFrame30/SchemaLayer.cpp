@@ -194,10 +194,10 @@ namespace VFrame30
 
 		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
 		{
-			const std::shared_ptr<VFrame30::SchemaItem>& item = *it;
+			const SchemaItemPtr& item = *it;
 
 			if (qobject_cast<SchemaItemType>(item.get()) != nullptr &&
-				item->IsIntersectPoint(x, y) == true)
+				item->isIntersectPoint(x, y) == true)
 			{
 				return std::dynamic_pointer_cast<SchemaItemType>(item);
 			}
@@ -213,9 +213,9 @@ namespace VFrame30
 
 		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
 		{
-			const std::shared_ptr<VFrame30::SchemaItem>& item = *it;
+			const SchemaItemPtr& item = *it;
 
-			if (item->IsIntersectPoint(x, y) == true)
+			if (item->isIntersectPoint(x, y) == true)
 			{
 				if ((className.isEmpty() == true) ||
 					(className == item->metaObject()->className()))
@@ -237,9 +237,9 @@ namespace VFrame30
 
 		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
 		{
-			const std::shared_ptr<VFrame30::SchemaItem>& item = *it;
+			const SchemaItemPtr& item = *it;
 
-			if (item->IsIntersectPoint(x, y) == true)
+			if (item->isIntersectPoint(x, y) == true)
 			{
 				if ((className.isEmpty() == true) ||
 					(className == item->metaObject()->className()))
@@ -259,7 +259,7 @@ namespace VFrame30
 		std::copy_if(Items.begin(), Items.end(), std::back_inserter(out),
 				[&rect](std::shared_ptr<SchemaItem> item)
 				{
-					return item->IsIntersectRect(rect.x(), rect.y(), rect.width(), rect.height());
+			        return item->isIntersectRect(rect.x(), rect.y(), rect.width(), rect.height());
 				}
 			);
 
@@ -273,10 +273,10 @@ namespace VFrame30
 
 		for (auto it = Items.rbegin(); it != Items.rend(); it ++)
 		{
-			const std::shared_ptr<VFrame30::SchemaItem>& item = *it;
+			const SchemaItemPtr& item = *it;
 
 			if (dynamic_cast<VFrame30::FblItemRect*>(item.get()) != nullptr &&
-				item->IsIntersectPoint(x, y) == true)
+			    item->isIntersectPoint(x, y) == true)
 			{
 				VFrame30::FblItemRect* fbl = dynamic_cast<VFrame30::FblItemRect*>(item.get());
 
