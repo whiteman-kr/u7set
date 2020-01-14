@@ -266,7 +266,6 @@ namespace Metrology
 
 		// comparators
 		//
-
 		std::shared_ptr<ComparatorEx> comparator(int index) const;
 		void					setComparatorList(const QVector<std::shared_ptr<ComparatorEx>>& comparators);
 		int						comparatorCount() const { return m_comparatorCount; }
@@ -378,6 +377,9 @@ namespace Metrology
 
 	// ==============================================================================================
 
+
+
+	// ----------------------------------------------------------------------------------------------
 	class ComparatorEx : public ::Comparator
 	{
 	public:
@@ -385,6 +387,13 @@ namespace Metrology
 		ComparatorEx() {}
 		explicit ComparatorEx(Comparator* pComparator);
 		virtual ~ComparatorEx() {}
+
+		enum DeviationType
+		{
+			NoUsed,
+			Down,
+			Up,
+		};
 
 	private:
 
@@ -394,6 +403,8 @@ namespace Metrology
 		Metrology::Signal* m_compareSignal = nullptr;
 		Metrology::Signal* m_hysteresisSignal = nullptr;
 		Metrology::Signal* m_outputSignal = nullptr;
+
+		DeviationType m_deviationType = DeviationType::NoUsed;		// for comparators Equal and NotEqual; for comparators Less and Greate deviationType = DeviationType::NoUsed
 
 	public:
 
@@ -415,17 +426,21 @@ namespace Metrology
 		Metrology::Signal* outputSignal() const { return m_outputSignal; }
 		void setOutputSignal(Metrology::Signal* pSignal) { m_outputSignal = pSignal; }
 
+		DeviationType deviation() const { return m_deviationType; }
+		void setDeviation(DeviationType type) { m_deviationType = type; }
+
 		QString cmpTypeStr() const;
 
 		int valuePrecision() const;
 
-		double compareValue() const;
-		QString compareValueStr() const;
-		QString compareDefaultValueStr() const;
+		double compareOnlineValue() const;				// current online (run time) value
+		QString compareOnlineValueStr() const;			// str current oline (run time) value
+		double compareConstValue() const;				// default offine value
+		QString compareDefaultValueStr() const;			// str default offine value
 
-		double hysteresisValue() const;
-		QString hysteresisValueStr() const;
-		QString hysteresisDefaultValueStr() const;
+		double hysteresisOnlineValue() const;			// current oline (run time) value
+		QString hysteresisOnlineValueStr() const;		// str current oline (run time) value
+		QString hysteresisDefaultValueStr() const;		// str default offine value
 
 		bool outputState() const;
 		QString outputStateStr() const;

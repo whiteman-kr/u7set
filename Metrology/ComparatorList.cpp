@@ -101,19 +101,13 @@ QVariant ComparatorListTable::data(const QModelIndex &index, int role) const
 		{
 			return QColor(Qt::red);
 		}
-
-		return QVariant();
-	}
-
-	if (role == Qt::BackgroundRole)
-	{
-		if (column == COMPARATOR_LIST_COLUMN_HYSTERESIS)
+		else
 		{
-			if (comparatorEx->cmpType() == E::CmpType::Equal || comparatorEx->cmpType() == E::CmpType::NotEqual)
+			if (column == COMPARATOR_LIST_COLUMN_HYSTERESIS)
 			{
-				if (comparatorEx->hysteresis().isConst() == true && comparatorEx->hysteresis().constValue() == 0.0)
+				if (comparatorEx->deviation() != Metrology::ComparatorEx::DeviationType::NoUsed)
 				{
-					return QColor(Qt::yellow);
+					return QColor(Qt::lightGray);
 				}
 			}
 		}
