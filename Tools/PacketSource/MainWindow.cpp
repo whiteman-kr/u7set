@@ -1,16 +1,5 @@
 #include "MainWindow.h"
-
-#include <QApplication>
-#include <QDesktopWidget>
-#include <QDebug>
-#include <QClipboard>
-#include <QCloseEvent>
-#include <QSortFilterProxyModel>
-#include <QFileDialog>
-#include <QFile>
-
 #include "../../lib/Ui/DialogAbout.h"
-
 #include "PathOptionDialog.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -51,10 +40,16 @@ bool MainWindow::createInterface()
 
 	loadSources();
 
-	if (Rup::VERSION != PS::SUPPORT_VERSION)
-	{
-		QMessageBox::information(this, windowTitle(), tr("Attention!\n%1 transmits RUP packages of version %2\nLast version of RUP packages is %3").arg(windowTitle()).arg(PS::SUPPORT_VERSION).arg(Rup::VERSION));
-	}
+#if RUP_VERSION != PS_SUPPORT_VERSION
+
+#error Current version of Rup packets is unknown
+
+//	if (Rup::VERSION != PS::SUPPORT_VERSION)
+//	{
+//		QMessageBox::information(this, windowTitle(), tr("Attention!\n%1 transmits RUP packages of version %2\nLast known version of RUP packages is %3").arg(windowTitle()).arg(PS::SUPPORT_VERSION).arg(Rup::VERSION));
+//	}
+
+#endif
 
 	return true;
 }

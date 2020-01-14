@@ -1,18 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
-
-#include <QMainWindow>
-
-#include <QAction>
-#include <QMenuBar>
-#include <QToolBar>
-#include <QStatusBar>
-#include <QLabel>
-#include <QTableView>
-#include <QHeaderView>
-#include <QVBoxLayout>
-#include <QMessageBox>
-#include <QTimer>
+#pragma once
 
 #include "SourceBase.h"
 #include "FrameDataPanel.h"
@@ -178,7 +164,3 @@ private slots:
 	void					onSourceListClicked(const QModelIndex& index);
 	void					onSignalListDoubleClicked(const QModelIndex& index);
 };
-
-// ==============================================================================================
-
-#endif // MAINWINDOW_H

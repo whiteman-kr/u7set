@@ -19,9 +19,11 @@ namespace PS
 	//
 	//
 
-	const int SUPPORT_VERSION		= 5;		// last version of Rup::VERSION
+	#define PS_SUPPORT_VERSION		5
 
-	const int SIM_FRAME_VERSION		= 1;		// last version of SimFrame
+	const int SUPPORT_VERSION		= PS_SUPPORT_VERSION;		// last known version of Rup::VERSION
+
+	const int SIM_FRAME_VERSION		= 1;						// last version of SimFrame
 
 	const int UDP_PORT				= 10000;
 
