@@ -10,5 +10,8 @@
         <file>icons/PacketSource.ico</file>
         <file>icons/Search.png</file>
         <file>icons/FrameData.png</file>
+        <file>icons/Init.png</file>
+        <file>icons/Export.png</file>
+        <file>icons/Import.png</file>
     </qresource>
 </RCC>

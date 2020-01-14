@@ -45,8 +45,8 @@ public:
 
 	Metrology::Signal*			signal(int index) const;
 
-	void						updateSignalsState(QTableView* pView);
 	void						updateSignalState(QTableView* pView, Hash signalHash);
+	void						updateSignalsState(QTableView* pView);
 
 public slots:
 

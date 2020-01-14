@@ -9310,12 +9310,12 @@ namespace Builder
 
 	bool ModuleLogicCompiler::initComparator(std::shared_ptr<Comparator> cmp, const UalAfb* appFb)
 	{
-		TEST_PTR_RETURN_FALSE(appFb);
+		TEST_PTR_LOG_RETURN_FALSE(appFb, log());
 
 		// set compare type of value
 		//
 		cmp->compare().setIsConst(appFb->isConstComaparator());
-		cmp->hysteresis().setIsConst(!appFb->caption().contains("dh"));
+		cmp->hysteresis().setIsConst(!appFb->caption().contains("_dh_"));
 
 		//	set comparator type, compare-value, hysteresis-value
 		//
@@ -9406,6 +9406,8 @@ namespace Builder
 			//
 			if ((pin.caption() == "hyst" || pin.caption() == "db") && cmp->hysteresis().isConst() == false)
 			{
+				cmp->setHysteresisPinCaption(pin.caption());
+
 				if (ualSignal->isConst() == true)
 				{
 					cmp->hysteresis().setIsConst(true);
@@ -9417,6 +9419,8 @@ namespace Builder
 					cmp->hysteresis().setAppSignalID(ualSignal->appSignalID());
 					cmp->hysteresis().setIsAcquired(ualSignal->isAcquired());
 				}
+
+				cmp->setHysteresisIsConstSignal(ualSignal->isConst());
 			}
 		}
 
@@ -9483,6 +9487,17 @@ namespace Builder
 			LOG_INTERNAL_ERROR_MSG(m_log, strError);
 			qDebug() << strError;
 			return false;
+		}
+
+		if (cmp->cmpType() == E::CmpType::Equal || cmp->cmpType() == E::CmpType::NotEqual)
+		{
+			if (cmp->inAnalogSignalFormat() == E::AnalogAppSignalFormat::Float32)
+			{
+				if (cmp->hysteresisIsConstSignal() == true && cmp->hysteresis().constValue() == 0.0)
+				{
+					log()->wrnALC5177(appFb->caption(), cmp->hysteresisPinCaption(), appFb->guid(), appFb->schemaID());
+				}
+			}
 		}
 
 		return true;

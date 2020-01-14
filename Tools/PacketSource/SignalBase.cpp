@@ -730,6 +730,17 @@ QVariant SignalTable::data(const QModelIndex &index, int role) const
 		{
 			return QColor(0xD0, 0xD0, 0xD0);
 		}
+
+		if(pSignal->isDiscrete() == true)
+		{
+			return QColor(0x00, 0x00, 0xFF);
+		}
+		return QVariant();
+	}
+
+	if (role == Qt::BackgroundRole)
+	{
+		return QVariant();
 	}
 
 	if (role == Qt::DisplayRole || role == Qt::EditRole)
@@ -1008,9 +1019,14 @@ void SignalStateDialog::onOk()
 
 		str.sprintf("Failed input value: " + formatStr.toLocal8Bit(), state);
 		str += tr("\nRange of signal: %1").arg(m_pSignal->engineeringRangeStr());
+		str += tr("\nDo you want to change the signal state?");
 
-		QMessageBox::critical(this, windowTitle(), str);
-		return;
+		QMessageBox::StandardButton reply = QMessageBox::question(this, windowTitle(), str, QMessageBox::Yes|QMessageBox::No);
+		if (reply == QMessageBox::No)
+		{
+			reject();
+			return;
+		}
 	}
 
 	m_state = state;

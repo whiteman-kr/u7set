@@ -903,6 +903,7 @@ const char* const		ModuleParamName[] =
 {
 						QT_TRANSLATE_NOOP("Options.h", "Measure all signals of module in series"),
 						QT_TRANSLATE_NOOP("Options.h", "Show warning if signal is already measured"),
+						QT_TRANSLATE_NOOP("Options.h", "Show measuring value if signal is not valid"),
 						QT_TRANSLATE_NOOP("Options.h", "Suffix to identify signal of module serial number"),
 						QT_TRANSLATE_NOOP("Options.h", "Maximum number of inputs for mofule"),
 						QT_TRANSLATE_NOOP("Options.h", "Maximum number of comparators for signal"),
@@ -912,9 +913,10 @@ const int				MO_PARAM_COUNT					= sizeof(ModuleParamName)/sizeof(ModuleParamName
 
 const int				MO_PARAM_MEASURE_ENTIRE_MODULE	= 0,
 						MO_PARAM_WARN_IF_MEASURED		= 1,
-						MO_PARAM_SUFFIX_SN				= 2,
-						MO_PARAM_MAX_IMPUT_COUNT		= 3,
-						MO_PARAM_MAX_CMP_COUNT			= 4;
+						MO_PARAM_SHOW_NO_VALID			= 2,
+						MO_PARAM_SUFFIX_SN				= 3,
+						MO_PARAM_MAX_IMPUT_COUNT		= 4,
+						MO_PARAM_MAX_CMP_COUNT			= 5;
 
 // ----------------------------------------------------------------------------------------------
 
@@ -932,6 +934,7 @@ private:
 
 	bool				m_measureEntireModule = false;								// measure all inputs of module in series
 	bool				m_warningIfMeasured = true;									// show warning if signal is already measured
+	bool				m_showNoValid = false;										// show measuring value if signal is not valid
 	QString				m_suffixSN;													// suffix to identify the signal of module serial number
 	int					m_maxInputCount = Metrology::InputCount;					// Maximum number of inputs for mofule
 	int					m_maxComparatorCount = Metrology::ComparatorCount;			// Maximum number of comparators for signal
@@ -943,6 +946,9 @@ public:
 
 	bool				warningIfMeasured() const { return m_warningIfMeasured; }
 	void				setWarningIfMeasured(bool enable) { m_warningIfMeasured = enable; }
+
+	bool				showNoValid() const { return m_showNoValid; }
+	void				setShowNoValid(bool enable) { m_showNoValid = enable; }
 
 	QString				suffixSN() const { return m_suffixSN; }
 	void				setSuffixSN(const QString& suffixSN) { m_suffixSN = suffixSN; }

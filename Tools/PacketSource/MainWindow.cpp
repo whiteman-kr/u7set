@@ -1,14 +1,5 @@
 #include "MainWindow.h"
-
-#include <QApplication>
-#include <QDesktopWidget>
-#include <QDebug>
-#include <QClipboard>
-#include <QCloseEvent>
-#include <QSortFilterProxyModel>
-
 #include "../../lib/Ui/DialogAbout.h"
-
 #include "PathOptionDialog.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -49,10 +40,16 @@ bool MainWindow::createInterface()
 
 	loadSources();
 
-	if (Rup::VERSION != PS::SUPPORT_VERSION)
-	{
-		QMessageBox::information(this, windowTitle(), tr("Attention!\n%1 transmits RUP packages of version %2\nLast version of RUP packages is %3").arg(windowTitle()).arg(PS::SUPPORT_VERSION).arg(Rup::VERSION));
-	}
+#if RUP_VERSION != PS_SUPPORT_VERSION
+
+#error Current version of Rup packets is unknown
+
+//	if (Rup::VERSION != PS::SUPPORT_VERSION)
+//	{
+//		QMessageBox::information(this, windowTitle(), tr("Attention!\n%1 transmits RUP packages of version %2\nLast known version of RUP packages is %3").arg(windowTitle()).arg(PS::SUPPORT_VERSION).arg(Rup::VERSION));
+//	}
+
+#endif
 
 	return true;
 }
@@ -87,10 +84,28 @@ void MainWindow::createActions()
 	m_signalSetStateAction->setToolTip(tr("Set signal state"));
 	connect(m_signalSetStateAction, &QAction::triggered, this, &MainWindow::setSignalState);
 
+	m_signalInitAction = new QAction(tr("Initialization"), this);
+	m_signalInitAction->setShortcut(Qt::CTRL + Qt::Key_I);
+	m_signalInitAction->setIcon(QIcon(":/icons/Init.png"));
+	m_signalInitAction->setToolTip(tr("Initialization all signals"));
+	connect(m_signalInitAction, &QAction::triggered, this, &MainWindow::initSignalsState);
+
 	m_signalSelectAllAction = new QAction(tr("Select all"), this);
 	m_signalSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
 	m_signalSelectAllAction->setToolTip(tr("Select all signals"));
 	connect(m_signalSelectAllAction, &QAction::triggered, this, &MainWindow::selectAllSignals);
+
+	m_signalSaveStatesAction = new QAction(tr("Save signals state ..."), this);
+	m_signalSaveStatesAction->setShortcut(Qt::CTRL + Qt::Key_S);
+	m_signalSaveStatesAction->setIcon(QIcon(":/icons/Import.png"));
+	m_signalSaveStatesAction->setToolTip(tr("Save signals state"));
+	connect(m_signalSaveStatesAction, &QAction::triggered, this, &MainWindow::saveSignalsState);
+
+	m_signalRestoreStatesAction = new QAction(tr("Restore signals state ..."), this);
+	m_signalRestoreStatesAction->setShortcut(Qt::CTRL + Qt::Key_R);
+	m_signalRestoreStatesAction->setIcon(QIcon(":/icons/Export.png"));
+	m_signalRestoreStatesAction->setToolTip(tr("Restore signals state"));
+	connect(m_signalRestoreStatesAction, &QAction::triggered, this, &MainWindow::restoreSignalsState);
 
 	// ?
 	//
@@ -139,7 +154,12 @@ void MainWindow::createMenu()
 	//
 	m_signalMenu = pMenuBar->addMenu(tr("Signals"));
 
+	m_signalMenu->addAction(m_signalInitAction);
+	m_signalMenu->addSeparator();
 	m_signalMenu->addAction(m_signalSelectAllAction);
+	m_signalMenu->addSeparator();
+	m_signalMenu->addAction(m_signalSaveStatesAction);
+	m_signalMenu->addAction(m_signalRestoreStatesAction);
 
 	// ?
 	//
@@ -294,6 +314,7 @@ void MainWindow::createViews()
 	}
 
 	m_pSignalView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_pSignalView->setWordWrap(false);
 
 	connect(m_pSignalView, &QTableView::doubleClicked , this, &MainWindow::onSignalListDoubleClicked);
 
@@ -458,6 +479,8 @@ void MainWindow::initSignalsInSources()
 
 		pSource->initSignals(m_signalBase);
 	}
+
+	initSignalsState();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -711,7 +734,55 @@ void MainWindow::setSignalState()
 
 		pSignal->setState(dialog.state());
 	}
+}
 
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::initSignalsState()
+{
+	int sourceCount = m_sourceBase.count();
+	for (int s = 0; s < sourceCount; s++)
+	{
+		PS::Source*	pSource = m_sourceBase.sourcePtr(s);
+		if (pSource == nullptr)
+		{
+			continue;
+		}
+
+		int sigalCount = pSource->signalList().count();
+		for(int i = 0; i < sigalCount; i++)
+		{
+			PS::Signal* pSignal = &pSource->signalList()[i];
+			if ( pSignal == nullptr)
+			{
+				continue;
+			}
+
+			if (pSignal->isDiscrete() == true)
+			{
+				if (pSignal->equipmentID().endsWith("VALID") == true)
+				{
+					pSignal->setState(true);
+				}
+				else
+				{
+					pSignal->setState(false);
+				}
+			}
+
+			if (pSignal->isAnalog() == true)
+			{
+				pSignal->setState(pSignal->lowEngineeringUnits());
+			}
+
+			if (pSignal->enableTuning() == true)
+			{
+				pSignal->setState(pSignal->tuningDefaultValue().toDouble());
+			}
+		}
+	}
+
+	//QMessageBox::information(this, windowTitle(), tr("Signal initialization complete!"));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -724,6 +795,115 @@ void MainWindow::selectAllSignals()
 	}
 
 	m_pSignalView->selectAll();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::saveSignalsState()
+{
+	QString fileName = QFileDialog::getSaveFileName(this, tr("Save signals state"), "SignalState.csv", tr("CSV files (*.csv)"));
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	QFile file;
+	file.setFileName(fileName);
+	if (file.open(QIODevice::WriteOnly) == false)
+	{
+		return;
+	}
+
+	int sourceCount = m_sourceBase.count();
+	for (int s = 0; s < sourceCount; s++)
+	{
+		PS::Source*	pSource = m_sourceBase.sourcePtr(s);
+		if (pSource == nullptr)
+		{
+			continue;
+		}
+
+		int sigalCount = pSource->signalList().count();
+		for(int i = 0; i < sigalCount; i++)
+		{
+			PS::Signal* pSignal = &pSource->signalList()[i];
+			if ( pSignal == nullptr)
+			{
+				continue;
+			}
+
+			if (pSignal->regValueAddr().offset() == BAD_ADDRESS || pSignal->regValueAddr().bit() == BAD_ADDRESS)
+			{
+				continue;
+			}
+
+			file.write(pSignal->appSignalID().toLocal8Bit());
+			file.write(";");
+
+			file.write(QString::number(pSignal->state(), 'f', 10).toLocal8Bit());
+			file.write(";");
+
+			file.write("\n");
+		}
+	}
+
+	file.close();
+
+	QMessageBox::information(this, windowTitle(), tr("Save completed"));
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::restoreSignalsState()
+{
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Open signals state"), "SignalState.csv", "CSV files (*.csv);;All files (*.*)");
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	if (fileName.isEmpty() == true)
+	{
+		QMessageBox::critical(this, tr("Error"), tr("Could not open file: Empty file name"));
+		return;
+	}
+
+	if (QFile::exists(fileName) == false)
+	{
+		QMessageBox::critical(this, tr("Error"), tr("Could not open file: %1\nfile is not found!").arg(fileName));
+		return;
+	}
+
+	QFile file(fileName);
+	if (file.open(QIODevice::ReadOnly) == false)
+	{
+		QMessageBox::critical(this, tr("Error"), tr("Could not open file"));
+		return;
+	}
+
+	// read data
+	//
+	QTextStream in(&file);
+	while (in.atEnd() == false)
+	{
+		QStringList line = in.readLine().split(";");
+		if (line.count() < 2)
+		{
+			continue;
+		}
+
+		PS::Signal* pSignal = m_signalBase.signalPtr(line[0]);
+		if (pSignal == nullptr)
+		{
+			continue;
+		}
+
+		pSignal->setState(line[1].toDouble());
+	}
+
+	file.close();
+
+	QMessageBox::information(this, windowTitle(), tr("Restore completed"));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -759,15 +939,28 @@ void MainWindow::copyText(QTableView* pView)
 
 	QString textClipboard;
 
-	int row = pView->selectionModel()->currentIndex().row();
-	int column = pView->selectionModel()->currentIndex().column();
+	int rowCount = pView->model()->rowCount();
+	int columnCount = pView->model()->columnCount();
 
-	if (row == -1 || column == -1)
+	for(int row = 0; row < rowCount; row++)
 	{
-		return;
-	}
+		if (pView->selectionModel()->isRowSelected(row, QModelIndex()) == false)
+		{
+			continue;
+		}
 
-	textClipboard = pView->model()->data(pView->model()->index(row, column)).toString();
+		for(int column = 0; column < columnCount; column++)
+		{
+			if (pView->isColumnHidden(column) == true)
+			{
+				continue;
+			}
+
+			textClipboard.append(pView->model()->data(pView->model()->index(row, column)).toString() + "\t");
+		}
+
+		textClipboard.replace(textClipboard.length() - 1, 1, "\n");
+	}
 
 	QClipboard *clipboard = QApplication::clipboard();
 	clipboard->setText(textClipboard);
@@ -1098,6 +1291,11 @@ void MainWindow::onSourceListClicked(const QModelIndex& index)
 
 	updateSignalList(pSource);
 	updateFrameDataList(pSource);
+
+	if(m_pFindSignalPanel !=nullptr)
+	{
+		m_pFindSignalPanel->find();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------

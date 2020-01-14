@@ -253,7 +253,7 @@ QString SignalInfoTable::signalStateStr(const Metrology::SignalParam& param, con
 		return tr("No valid");
 	}
 
-	QString stateStr = QString::number(state.value(), 'g', param.decimalPlaces());
+	QString stateStr = QString::number(state.value(), 'f', param.decimalPlaces());
 
 	if (param.unit().isEmpty() == false)
 	{
@@ -453,6 +453,7 @@ void SignalInfoPanel::createInterface()
 	}
 
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_pView->setWordWrap(false);
 
 	connect(m_pView, &QTableView::doubleClicked , this, &SignalInfoPanel::onListDoubleClicked);
 

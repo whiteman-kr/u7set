@@ -11,9 +11,12 @@
 //
 // ----------------------------------------------------------------------------
 
+
 namespace Rup
 {
-	const int VERSION = 5;
+	#define RUP_VERSION 5
+
+	const int VERSION = RUP_VERSION;
 
 	union Flags
 	{

@@ -778,6 +778,7 @@ void TuningSignalListDialog::createInterface()
 
 	m_pSignalView->setSelectionMode(QAbstractItemView::SingleSelection);
 	m_pSignalView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_pSignalView->setWordWrap(false);
 
 	connect(m_pSignalView, &QTableView::doubleClicked , this, &TuningSignalListDialog::onSignalListDoubleClicked);
 

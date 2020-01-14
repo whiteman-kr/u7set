@@ -100,14 +100,14 @@ void Comparator::setCmpType(E::CmpType cmpType)
 	m_cmpType = cmpType;
 }
 
-E::AnalogAppSignalFormat Comparator::intAnalogSignalFormat() const
+E::AnalogAppSignalFormat Comparator::inAnalogSignalFormat() const
 {
 	return m_inAnalogSignalFormat;
 }
 
-void Comparator::setInAnalogSignalFormat(E::AnalogAppSignalFormat analogSignalFormat)
+void Comparator::setInAnalogSignalFormat(E::AnalogAppSignalFormat inAnalogSignalFormat)
 {
-	m_inAnalogSignalFormat = analogSignalFormat;
+	m_inAnalogSignalFormat = inAnalogSignalFormat;
 }
 
 ComparatorSignal& Comparator::input()

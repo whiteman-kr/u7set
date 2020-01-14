@@ -369,6 +369,7 @@ void StatisticPanel::createInterface()
 
 	m_pCopyAction = m_pEditMenu->addAction(tr("&Copy"));
 	m_pCopyAction->setIcon(QIcon(":/icons/Copy.png"));
+	m_pCopyAction->setShortcut(Qt::CTRL + Qt::Key_C);
 
 	m_pSelectAllAction = m_pEditMenu->addAction(tr("Select &All"));
 	m_pSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
@@ -416,6 +417,7 @@ void StatisticPanel::createInterface()
 	}
 
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_pView->setWordWrap(false);
 
 	connect(m_pView, &QTableView::doubleClicked , this, &StatisticPanel::onListDoubleClicked);
 
@@ -506,8 +508,8 @@ void StatisticPanel::createStatusBar()
 	m_statusMeasureInavlid = new QLabel(m_pStatusBar);
 	m_statusMeasured = new QLabel(m_pStatusBar);
 
-	m_pStatusBar->addWidget(m_statusMeasureInavlid);
 	m_pStatusBar->addWidget(m_statusMeasured);
+	m_pStatusBar->addWidget(m_statusMeasureInavlid);
 	m_pStatusBar->addWidget(m_statusEmpty);
 
 	m_statusMeasureInavlid->setFixedWidth(100);
@@ -695,15 +697,16 @@ void StatisticPanel::updateSignalInList(Hash signalHash)
 
 void StatisticPanel::updateStatusBar()
 {
-	m_statusMeasured->setText(tr(" Measured: %1 / %2").arg(theSignalBase.statistic().measuredCount()).arg(theSignalBase.statistic().signalCount()));
 	m_statusMeasureInavlid->setText(tr(" Invalid: %1").arg(theSignalBase.statistic().invalidMeasureCount()));
+	m_statusMeasured->setText(tr(" Measured: %1 / %2").arg(theSignalBase.statistic().measuredCount()).arg(theSignalBase.statistic().signalCount()));
 
 	if (theSignalBase.statistic().invalidMeasureCount() == 0)
 	{
-		m_statusMeasureInavlid->setStyleSheet("background-color: rgb(0xFF, 0xFF, 0xFF);");
+		m_statusMeasureInavlid->hide();
 	}
 	else
 	{
+		m_statusMeasureInavlid->show();
 		m_statusMeasureInavlid->setStyleSheet("background-color: rgb(255, 160, 160);");
 	}
 }

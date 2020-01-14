@@ -105,7 +105,7 @@ QDialog(parent, Qt::WindowSystemMenuHint | Qt::WindowTitleHint | Qt::WindowClose
 
 	s += "<br>";
 
-	switch(c->intAnalogSignalFormat())
+	switch(c->inAnalogSignalFormat())
 	{
 		case E::AnalogAppSignalFormat::Float32:
 		{

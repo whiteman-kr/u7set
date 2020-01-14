@@ -1,18 +1,4 @@
-#ifndef MAINWINDOW_H
-#define MAINWINDOW_H
-
-#include <QMainWindow>
-
-#include <QAction>
-#include <QMenuBar>
-#include <QToolBar>
-#include <QStatusBar>
-#include <QLabel>
-#include <QTableView>
-#include <QHeaderView>
-#include <QVBoxLayout>
-#include <QMessageBox>
-#include <QTimer>
+#pragma once
 
 #include "SourceBase.h"
 #include "FrameDataPanel.h"
@@ -47,7 +33,10 @@ private:
 	QAction*				m_sourceStopAction = nullptr;
 	QAction*				m_sourceSelectAllAction = nullptr;
 	QAction*				m_signalSetStateAction = nullptr;
+	QAction*				m_signalInitAction = nullptr;
 	QAction*				m_signalSelectAllAction = nullptr;
+	QAction*				m_signalSaveStatesAction = nullptr;
+	QAction*				m_signalRestoreStatesAction = nullptr;
 	QAction*				m_optionAction = nullptr;
 	QAction*				m_sourceTextCopyAction = nullptr;
 	QAction*				m_signalTextCopyAction = nullptr;
@@ -138,7 +127,10 @@ private slots:
 	void					stopSource();
 	void					selectAllSources();
 	void					setSignalState();
+	void					initSignalsState();
 	void					selectAllSignals();
+	void					saveSignalsState();
+	void					restoreSignalsState();
 	void					onOptions();
 	void					copyText(QTableView* pView);
 	void					copySourceText();
@@ -172,7 +164,3 @@ private slots:
 	void					onSourceListClicked(const QModelIndex& index);
 	void					onSignalListDoubleClicked(const QModelIndex& index);
 };
-
-// ==============================================================================================
-
-#endif // MAINWINDOW_H

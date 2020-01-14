@@ -594,6 +594,7 @@ void SignalConnectionDialog::createInterface()
 	}
 
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
+	m_pView->setWordWrap(false);
 
 	connect(m_pView, &QTableView::doubleClicked , this, &SignalConnectionDialog::onListDoubleClicked);
 
