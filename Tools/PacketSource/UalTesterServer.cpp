@@ -112,7 +112,6 @@ void UalTesterServer::onTuningSignalsWriteRequest(const char *requestData, quint
 	m_tuningSignalsWriteReply.Clear();
 
 	bool result = m_tuningSignalsWriteRequest.ParseFromArray(requestData, static_cast<int>(requestDataSize));
-
 	if (result == false)
 	{
 		m_tuningSignalsWriteReply.set_error(TO_INT(NetworkError::ParseRequestError));
@@ -126,23 +125,23 @@ void UalTesterServer::onTuningSignalsWriteRequest(const char *requestData, quint
 		Network::TuningWriteCommand wrCmd = m_tuningSignalsWriteRequest.commands(i);
 		TuningValue value(wrCmd.value());
 
-		if (m_signalBase != nullptr)
+		if (m_signalBase == nullptr)
 		{
-			m_signalBase->signalPtr(wrCmd.signalhash());
+			continue;
+		}
 
-			PS::Signal* pSignal = m_signalBase->signalPtr(wrCmd.signalhash());
-			if (pSignal == nullptr)
-			{
-				continue;
-			}
+		PS::Signal* pSignal = m_signalBase->signalPtr(wrCmd.signalhash());
+		if (pSignal == nullptr)
+		{
+			continue;
+		}
 
-			double prevState = pSignal->state();
+		double prevState = pSignal->state();										// get prev state of signal
 
-			bool result = pSignal->setState(value.toDouble());
-			if (result == true)
-			{
-				emit signalStateChanged(pSignal->hash(), prevState, pSignal->state());
-			}
+		result = pSignal->setState(value.toDouble());								// set new state of signal
+		if (result == true)
+		{
+			emit signalStateChanged(pSignal->hash(), prevState, pSignal->state());	// write to history log
 		}
 	}
 
