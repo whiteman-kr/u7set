@@ -34,7 +34,8 @@ private:
 	QLineEdit*				m_sourcePathEdit = nullptr;
 	QPushButton*			m_selectSourcePathBtn = nullptr;
 
-	QLineEdit*				m_localIPEdit = nullptr;
+	QLineEdit*				m_appDataSrvIPEdit = nullptr;
+	QLineEdit*				m_ualTesterIPEdit = nullptr;
 
 	QDialogButtonBox*		m_buttonBox = nullptr;
 

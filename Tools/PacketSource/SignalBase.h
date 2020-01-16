@@ -11,8 +11,6 @@
 #include <QPushButton>
 #include <QValidator>
 
-//#include "Options.h"
-
 #include "../../lib/Signal.h"
 
 // ==============================================================================================
@@ -57,7 +55,7 @@ namespace PS
 
 		QString				stateStr() const;
 		double				state() const;
-		void				setState(double state);
+		bool				setState(double state);
 
 		quint8*				valueData() { return m_pValueData; }
 		void				setValueData(quint8* pData) { m_pValueData = pData; }
@@ -99,9 +97,9 @@ public:
 
 	PS::Signal*				signalPtr(const QString& appSignalID) const;
 	PS::Signal*				signalPtr(const Hash& hash) const;
-	PS::Signal				signal(const Hash& hash) const;
-
 	PS::Signal*				signalPtr(int index) const;
+
+	PS::Signal				signal(const Hash& hash) const;
 	PS::Signal				signal(int index) const;
 
 	void					setSignal(int index, const PS::Signal& signal);

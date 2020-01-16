@@ -44,6 +44,19 @@ void SourceWorker::process()
 		return;
 	}
 
+	if (theOptions.path().appDataSrvIP().isEmpty() == true)
+	{
+		emit finished();
+		return;
+	}
+
+	QHostAddress appDataReceivingIP;
+	if (appDataReceivingIP.setAddress(theOptions.path().appDataSrvIP()) == false)
+	{
+		emit finished();
+		return;
+	}
+
 	int currentFrameIndex = 0;
 
 	while(m_finishThread == false)
@@ -94,9 +107,9 @@ void SourceWorker::process()
 			//
 			m_simFrame.rupFrame.calcCRC64();
 
-			// send udp
+			// send udp to AppDataReceivingIP of AppDataSrv
 			//
-			qint64 sentBytes = pSocket->writeDatagram(reinterpret_cast<char*>(&m_simFrame), sizeof(m_simFrame), pSource->info().serverAddress.address(), pSource->info().serverAddress.port());
+			qint64 sentBytes = pSocket->writeDatagram(reinterpret_cast<char*>(&m_simFrame), sizeof(m_simFrame), appDataReceivingIP, pSource->info().serverAddress.port());
 
 			if (sentBytes != sizeof(m_simFrame))
 			{

@@ -36,7 +36,8 @@ void PathOption::clear()
 {
 	m_signalPath.clear();
 	m_sourcePath.clear();
-	m_localIP.clear();
+	m_appDataSrvIP.clear();
+	m_ualTesterIP.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -47,7 +48,8 @@ void PathOption::load()
 
 	m_signalPath = s.value(QString("%1SignalPath").arg(SOURCE_REG_KEY), QString()).toString();
 	m_sourcePath = s.value(QString("%1SourcePath").arg(SOURCE_REG_KEY), QString()).toString();
-	m_localIP = s.value(QString("%1LocalIP").arg(SOURCE_REG_KEY), QString("127.0.0.1")).toString();
+	m_appDataSrvIP = s.value(QString("%1AppDataSrvIP").arg(SOURCE_REG_KEY), QString("127.0.0.1")).toString();
+	m_ualTesterIP = s.value(QString("%1UalTesterIP").arg(SOURCE_REG_KEY), QString("127.0.0.1")).toString();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -58,7 +60,8 @@ void PathOption::save()
 
 	s.setValue(QString("%1SignalPath").arg(SOURCE_REG_KEY), m_signalPath);
 	s.setValue(QString("%1SourcePath").arg(SOURCE_REG_KEY), m_sourcePath);
-	s.setValue(QString("%1LocalIP").arg(SOURCE_REG_KEY), m_localIP);
+	s.setValue(QString("%1AppDataSrvIP").arg(SOURCE_REG_KEY), m_appDataSrvIP);
+	s.setValue(QString("%1UalTesterIP").arg(SOURCE_REG_KEY), m_ualTesterIP);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -67,7 +70,8 @@ PathOption& PathOption::operator=(const PathOption& from)
 {
 	m_signalPath = from.m_signalPath;
 	m_sourcePath = from.m_sourcePath;
-	m_localIP = from.m_localIP;
+	m_appDataSrvIP = from.m_appDataSrvIP;
+	m_ualTesterIP = from.m_ualTesterIP;
 
 	return *this;
 }

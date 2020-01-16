@@ -13,5 +13,7 @@
         <file>icons/Init.png</file>
         <file>icons/Export.png</file>
         <file>icons/Import.png</file>
+        <file>icons/History.png</file>
+        <file>icons/Copy.png</file>
     </qresource>
 </RCC>

@@ -484,7 +484,7 @@ void FrameDataPanel::setState()
 
 	for (int r = 0; r < rowCount; r++)
 	{
-		int byteIndex = rows[r].row();
+		byteIndex = rows[r].row();
 		if (byteIndex < 0 || byteIndex >= m_frameDataTable.dataSize())
 		{
 			continue;

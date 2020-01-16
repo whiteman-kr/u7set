@@ -26,7 +26,6 @@ bool PathOptionDialog::createInterface()
 	setWindowFlags(Qt::Dialog | Qt::WindowSystemMenuHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/Options.png"));
 	setWindowTitle(tr("Options"));
-//	setFixedSize(800, 240);
 
 	// Signal Path
 	//
@@ -58,15 +57,37 @@ bool PathOptionDialog::createInterface()
 
 	groupSourcePath->setLayout(sourcePathLayout);
 
-	// Local IP
+
+	// IP
 	//
-	QGroupBox* groupLocalIP = new QGroupBox(tr("Local IP"));
-	QHBoxLayout *localIPLayout = new QHBoxLayout;
+	QGroupBox* groupLocalIP = new QGroupBox(tr("IP-address"));
+	QVBoxLayout *localIPLayout = new QVBoxLayout;
 
-	m_localIPEdit = new QLineEdit(theOptions.path().localIP(), this);
+	// appDataSrv IP
+	//
+	QHBoxLayout *appDataSrvIPLayout = new QHBoxLayout;
 
-	localIPLayout->addWidget(m_localIPEdit);
+	QLabel* appDataSrvIPLabel = new QLabel(tr("AppDataSrv IP"), this);
+	m_appDataSrvIPEdit = new QLineEdit(theOptions.path().appDataSrvIP(), this);
 
+	appDataSrvIPLayout->addWidget(appDataSrvIPLabel);
+	appDataSrvIPLayout->addStretch();
+	appDataSrvIPLayout->addWidget(m_appDataSrvIPEdit);
+
+	// UalTester IP
+	//
+	QHBoxLayout *ualTesterIPLayout = new QHBoxLayout;
+
+	QLabel* ualTesterIPLabel = new QLabel(tr("UalTester IP"), this);
+	m_ualTesterIPEdit = new QLineEdit(theOptions.path().ualTesterIP(), this);
+
+	ualTesterIPLayout->addWidget(ualTesterIPLabel);
+	ualTesterIPLayout->addStretch();
+	ualTesterIPLayout->addWidget(m_ualTesterIPEdit);
+
+
+	localIPLayout->addLayout(appDataSrvIPLayout);
+	localIPLayout->addLayout(ualTesterIPLayout);
 	groupLocalIP->setLayout(localIPLayout);
 
 	// buttons
@@ -139,7 +160,7 @@ void PathOptionDialog::onSelectSourcePath()
 
 void PathOptionDialog::onOk()
 {
-	QString signalPath, sourcePath, localIP;
+	QString signalPath, sourcePath, appDataSrvIP, ualTesterIP;
 
 	// signal path
 
@@ -171,12 +192,21 @@ void PathOptionDialog::onOk()
 		return;
 	}
 
-	// source path
+	//
 
-	localIP = m_localIPEdit->text();
-	if (localIP.isEmpty() == true)
+	appDataSrvIP = m_appDataSrvIPEdit->text();
+	if (appDataSrvIP.isEmpty() == true)
 	{
-		QMessageBox::information(this, windowTitle(), tr("Please, input local IP!"));
+		QMessageBox::information(this, windowTitle(), tr("Please, input AppDataSrv IP!"));
+		return;
+	}
+
+	//
+
+	ualTesterIP = m_ualTesterIPEdit->text();
+	if (ualTesterIP.isEmpty() == true)
+	{
+		QMessageBox::information(this, windowTitle(), tr("Please, input UalTester IP!"));
 		return;
 	}
 
@@ -184,7 +214,8 @@ void PathOptionDialog::onOk()
 
 	theOptions.path().setSignalPath(signalPath);
 	theOptions.path().setSourcePath(sourcePath);
-	theOptions.path().setLocalIP(localIP);
+	theOptions.path().setAppDataSrvIP(appDataSrvIP);
+	theOptions.path().setUalTesterIP(ualTesterIP);
 
 	theOptions.path().save();
 

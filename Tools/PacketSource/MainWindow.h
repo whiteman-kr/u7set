@@ -1,8 +1,27 @@
 #pragma once
 
+#include <QMainWindow>
+#include <QDesktopWidget>
+#include <QSettings>
+#include <QMessageBox>
+#include <QMenuBar>
+#include <QToolBar>
+#include <QStatusBar>
+#include <QTabWidget>
+#include <QTableView>
+#include <QHeaderView>
+#include <QDockWidget>
+#include <QCloseEvent>
+#include <QFileDialog>
+#include <QSortFilterProxyModel>
+#include <QClipboard>
+
+#include "UalTesterServer.h"
+#include "SignalBase.h"
 #include "SourceBase.h"
 #include "FrameDataPanel.h"
 #include "FindSignalPanel.h"
+#include "SignalStateLog.h"
 
 // ==============================================================================================
 
@@ -34,9 +53,10 @@ private:
 	QAction*				m_sourceSelectAllAction = nullptr;
 	QAction*				m_signalSetStateAction = nullptr;
 	QAction*				m_signalInitAction = nullptr;
-	QAction*				m_signalSelectAllAction = nullptr;
+	QAction*				m_signalHistoryAction = nullptr;
 	QAction*				m_signalSaveStatesAction = nullptr;
 	QAction*				m_signalRestoreStatesAction = nullptr;
+	QAction*				m_signalSelectAllAction = nullptr;
 	QAction*				m_optionAction = nullptr;
 	QAction*				m_sourceTextCopyAction = nullptr;
 	QAction*				m_signalTextCopyAction = nullptr;
@@ -57,7 +77,7 @@ private:
 	// Elements of interface - StatusBar
 	//
 	QLabel*					m_statusEmpty = nullptr;
-	QLabel*					m_statusServer = nullptr;
+	QLabel*					m_statusUalTesterClient = nullptr;
 
 private:
 
@@ -75,9 +95,17 @@ private:
 	void					createStatusBar();
 
 	//
+	//
+	UalTesterServer*		m_ualTesterSever = nullptr;
+	UalTesterServerThread*	m_ualTesterServerThread = nullptr;
+	void					runUalTesterServerThread();
+	void					stopUalTesterServerThread();
 
+	//
+	//
 	SignalBase				m_signalBase;
 	SourceBase				m_sourceBase;
+	SignalStateLog			m_signalSateLog;
 
 	// update lists
 	//
@@ -102,7 +130,7 @@ private:
 	void					stopUpdateSourceListTimer();
 
 	//
-
+	//
 	void					updateSignalList(PS::Source* pSource);
 	void					updateFrameDataList(PS::Source* pSource);
 
@@ -128,9 +156,10 @@ private slots:
 	void					selectAllSources();
 	void					setSignalState();
 	void					initSignalsState();
-	void					selectAllSignals();
+	void					history();
 	void					saveSignalsState();
 	void					restoreSignalsState();
+	void					selectAllSignals();
 	void					onOptions();
 	void					copyText(QTableView* pView);
 	void					copySourceText();
@@ -163,4 +192,9 @@ private slots:
 
 	void					onSourceListClicked(const QModelIndex& index);
 	void					onSignalListDoubleClicked(const QModelIndex& index);
+
+	// slot of UalTesterServer
+	//
+	void					ualTesterSocketConnect(bool isConnect);
+	void					signalStateChanged(Hash hash, double prevState, double state);
 };

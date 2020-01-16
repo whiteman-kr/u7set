@@ -35,6 +35,8 @@ bool MainWindow::createInterface()
 	createHeaderContexMenu();
 	createStatusBar();
 
+	runUalTesterServerThread();
+
 	connect(&m_sourceBase, &SourceBase::sourcesLoaded, this, &MainWindow::loadSignals, Qt::QueuedConnection);
 	connect(&m_signalBase, &SignalBase::signalsLoaded, this, &MainWindow::initSignalsInSources, Qt::QueuedConnection);
 
@@ -90,10 +92,11 @@ void MainWindow::createActions()
 	m_signalInitAction->setToolTip(tr("Initialization all signals"));
 	connect(m_signalInitAction, &QAction::triggered, this, &MainWindow::initSignalsState);
 
-	m_signalSelectAllAction = new QAction(tr("Select all"), this);
-	m_signalSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
-	m_signalSelectAllAction->setToolTip(tr("Select all signals"));
-	connect(m_signalSelectAllAction, &QAction::triggered, this, &MainWindow::selectAllSignals);
+	m_signalHistoryAction = new QAction(tr("History ..."), this);
+	m_signalHistoryAction->setShortcut(Qt::CTRL + Qt::Key_H);
+	m_signalHistoryAction->setIcon(QIcon(":/icons/History.png"));
+	m_signalHistoryAction->setToolTip(tr("Hystory of signals state"));
+	connect(m_signalHistoryAction, &QAction::triggered, this, &MainWindow::history);
 
 	m_signalSaveStatesAction = new QAction(tr("Save signals state ..."), this);
 	m_signalSaveStatesAction->setShortcut(Qt::CTRL + Qt::Key_S);
@@ -106,6 +109,12 @@ void MainWindow::createActions()
 	m_signalRestoreStatesAction->setIcon(QIcon(":/icons/Export.png"));
 	m_signalRestoreStatesAction->setToolTip(tr("Restore signals state"));
 	connect(m_signalRestoreStatesAction, &QAction::triggered, this, &MainWindow::restoreSignalsState);
+
+
+	m_signalSelectAllAction = new QAction(tr("Select all"), this);
+	m_signalSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
+	m_signalSelectAllAction->setToolTip(tr("Select all signals"));
+	connect(m_signalSelectAllAction, &QAction::triggered, this, &MainWindow::selectAllSignals);
 
 	// ?
 	//
@@ -123,11 +132,13 @@ void MainWindow::createActions()
 	// source contex menu
 	//
 	m_sourceTextCopyAction = new QAction(tr("&Copy"), this);
+	m_sourceTextCopyAction->setIcon(QIcon(":/icons/Copy.png"));
 	connect(m_sourceTextCopyAction, &QAction::triggered, this, &MainWindow::copySourceText);
 
 	// signal contex menu
 	//
 	m_signalTextCopyAction = new QAction(tr("&Copy"), this);
+	m_signalTextCopyAction->setIcon(QIcon(":/icons/Copy.png"));
 	connect(m_signalTextCopyAction, &QAction::triggered, this, &MainWindow::copySignalText);
 }
 
@@ -156,10 +167,12 @@ void MainWindow::createMenu()
 
 	m_signalMenu->addAction(m_signalInitAction);
 	m_signalMenu->addSeparator();
-	m_signalMenu->addAction(m_signalSelectAllAction);
+	m_signalMenu->addAction(m_signalHistoryAction);
 	m_signalMenu->addSeparator();
 	m_signalMenu->addAction(m_signalSaveStatesAction);
 	m_signalMenu->addAction(m_signalRestoreStatesAction);
+	m_signalMenu->addSeparator();
+	m_signalMenu->addAction(m_signalSelectAllAction);
 
 	// ?
 	//
@@ -220,7 +233,7 @@ void MainWindow::createPanels()
 
 			if (m_signalMenu != nullptr)
 			{
-				m_signalMenu->insertAction(m_signalSelectAllAction, dataAction);
+				m_signalMenu->insertAction(m_signalHistoryAction, dataAction);
 			}
 
 			if (m_mainToolBar != nullptr)
@@ -251,8 +264,8 @@ void MainWindow::createPanels()
 
 			if (m_signalMenu != nullptr)
 			{
-				m_signalMenu->insertAction(m_signalSelectAllAction, findAction);
-				m_signalMenu->insertSection(m_signalSelectAllAction, QString());
+				m_signalMenu->insertAction(m_signalHistoryAction, findAction);
+				m_signalMenu->insertSection(m_signalHistoryAction, QString());
 			}
 
 			if (m_mainToolBar != nullptr)
@@ -423,13 +436,59 @@ void MainWindow::createStatusBar()
 	}
 
 	m_statusEmpty = new QLabel(m_statusBar);
-	m_statusServer = new QLabel(m_statusBar);
-	m_statusBar->addWidget(m_statusServer);
+	m_statusUalTesterClient = new QLabel(m_statusBar);
+	m_statusBar->addWidget(m_statusUalTesterClient);
 	m_statusBar->addWidget(m_statusEmpty);
 
 	m_statusBar->setLayoutDirection(Qt::RightToLeft);
 
 	m_statusEmpty->setText(QString());
+
+	m_statusUalTesterClient->setText(tr(" UalTester: off "));
+	m_statusUalTesterClient->setStyleSheet("color: rgb(160, 160, 160);");
+
+	m_statusEmpty->setText(QString());
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::runUalTesterServerThread()
+{
+	SoftwareInfo si;
+	si.init(E::SoftwareType::TestClient, "TEST_SERVER_ID", 1, 0);
+
+	m_ualTesterSever = new UalTesterServer(si, &m_signalBase);
+	if (m_ualTesterSever == nullptr)
+	{
+		return;
+	}
+
+	HostAddressPort ualTesterIP = HostAddressPort(theOptions.path().ualTesterIP(), PORT_TUNING_SERVICE_CLIENT_REQUEST);
+
+	m_ualTesterServerThread = new UalTesterServerThread(ualTesterIP, m_ualTesterSever, nullptr);
+	if (m_ualTesterServerThread == nullptr)
+	{
+		return;
+	}
+
+	connect(m_ualTesterSever, &UalTesterServer::connectionChanged, this, &MainWindow::ualTesterSocketConnect, Qt::QueuedConnection);
+	connect(m_ualTesterSever, &UalTesterServer::signalStateChanged, this, &MainWindow::signalStateChanged, Qt::QueuedConnection);
+
+	m_ualTesterServerThread->start();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::stopUalTesterServerThread()
+{
+	if (m_ualTesterServerThread == nullptr)
+	{
+		return;
+	}
+
+	m_ualTesterServerThread->quitAndWait();
+	delete m_ualTesterServerThread;
+	m_ualTesterServerThread = nullptr;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -732,7 +791,12 @@ void MainWindow::setSignalState()
 			}
 		}
 
-		pSignal->setState(dialog.state());
+		double prevState = pSignal->state();
+		bool result = pSignal->setState(dialog.state());
+		if (result == true)
+		{
+			m_signalSateLog.append( SignalForLog(pSignal, prevState, pSignal->state()) );
+		}
 	}
 }
 
@@ -787,14 +851,10 @@ void MainWindow::initSignalsState()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::selectAllSignals()
+void MainWindow::history()
 {
-	if (m_pSignalView == nullptr)
-	{
-		return;
-	}
-
-	m_pSignalView->selectAll();
+	SignalStateLogDialog dialog(&m_signalSateLog, this);
+	dialog.exec();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -908,6 +968,18 @@ void MainWindow::restoreSignalsState()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::selectAllSignals()
+{
+	if (m_pSignalView == nullptr)
+	{
+		return;
+	}
+
+	m_pSignalView->selectAll();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::onOptions()
 {
 	PathOptionDialog dialog(this);
@@ -926,6 +998,9 @@ void MainWindow::onOptions()
 	m_sourceBase.stopAllSoureces();
 
 	loadSources();
+
+	stopUalTesterServerThread();
+	runUalTesterServerThread();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1309,9 +1384,45 @@ void MainWindow::onSignalListDoubleClicked(const QModelIndex& index)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::ualTesterSocketConnect(bool isConnect)
+{
+	if (isConnect == true)
+	{
+		m_statusUalTesterClient->setText(tr(" UalTester: on "));
+		m_statusUalTesterClient->setStyleSheet("color: rgb(0, 0, 0);");
+	}
+	else
+	{
+		m_statusUalTesterClient->setText(tr(" UalTester: off "));
+		m_statusUalTesterClient->setStyleSheet("color: rgb(160, 160, 160);");
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::signalStateChanged(Hash hash, double prevState, double state)
+{
+	if (hash == UNDEFINED_HASH)
+	{
+		return;
+	}
+
+	PS::Signal* pSignal = m_signalBase.signalPtr(hash);
+	if (pSignal == nullptr)
+	{
+		return;
+	}
+
+	m_signalSateLog.append( SignalForLog(pSignal, prevState, state) );
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::closeEvent(QCloseEvent* e)
 {
 	stopUpdateSourceListTimer();
+
+	stopUalTesterServerThread();
 
 	m_sourceBase.stopAllSoureces();
 

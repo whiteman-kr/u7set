@@ -420,7 +420,7 @@ void FindSignalPanel::find()
 	}
 
 	QTableView* pSignalView = pMainWindow->signalView();
-	if (pSignalView == nullptr)
+	if (pSignalView == nullptr || pSignalView->model() == nullptr)
 	{
 		return;
 	}
@@ -481,7 +481,7 @@ void FindSignalPanel::find()
 
 	if (findItemList.count() == 0)
 	{
-		QMessageBox::information(this, windowTitle(), tr("Text \"%1\" was not found!").arg(m_findText));
+		//QMessageBox::information(this, windowTitle(), tr("Text \"%1\" was not found!").arg(m_findText));
 		return;
 	}
 

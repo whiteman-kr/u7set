@@ -170,7 +170,7 @@ QString PS::Signal::stateStr() const
 
 		case E::SignalType::Discrete:
 
-			str = state() == 0.0 ? "No" : "Yes";
+			str = state() == 0.0 ? "No (0)" : "Yes (1)";
 
 			break;
 	}
@@ -265,17 +265,19 @@ double PS::Signal::state() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PS::Signal::setState(double state)
+bool PS::Signal::setState(double state)
 {
 	if (regBufAddr().offset() == BAD_ADDRESS || regBufAddr().bit() == BAD_ADDRESS)
 	{
-		return;
+		return false;
 	}
 
 	if (m_pValueData == nullptr)
 	{
-		return;
+		return false;
 	}
+
+	bool signalChanged = false;
 
 	switch (signalType())
 	{
@@ -293,6 +295,8 @@ void PS::Signal::setState(double state)
 
 						quint32 iState = reverseUint32(static_cast<quint32>(state));
 						*pDataPtr = iState;
+
+						signalChanged = true;
 					}
 					break;
 
@@ -306,6 +310,8 @@ void PS::Signal::setState(double state)
 
 						float fState = reverseFloat(static_cast<float>(state));
 						memcpy(pDataPtr, &fState, sizeof(float));
+
+						signalChanged = true;
 					}
 
 					break;
@@ -341,9 +347,13 @@ void PS::Signal::setState(double state)
 					case 0: *pDataPtr &= ~(0x1 << bitNo);		break;
 					case 1: *pDataPtr |= (0x1 << bitNo);		break;
 				}
+
+				signalChanged = true;
 			}
 			break;
 	}
+
+	return signalChanged;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -510,6 +520,19 @@ int SignalBase::append(const PS::Signal& signal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+PS::Signal* SignalBase::signalPtr(const QString& appSignalID) const
+{
+	if (appSignalID.isEmpty() == true)
+	{
+		assert(false);
+		return nullptr;
+	}
+
+	return signalPtr(calcHash(appSignalID));
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 PS::Signal* SignalBase::signalPtr(const Hash& hash) const
 {
 	if (hash == UNDEFINED_HASH)
@@ -538,16 +561,22 @@ PS::Signal* SignalBase::signalPtr(const Hash& hash) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalBase& SignalBase::operator=(const SignalBase& from)
+PS::Signal* SignalBase::signalPtr(int index) const
 {
+	PS::Signal* pSignal = nullptr;
+
 	m_signalMutex.lock();
 
-		m_signalList = from.m_signalList;
+		if (index >= 0 && index < m_signalList.count())
+		{
+			pSignal = (PS::Signal*) &m_signalList[index];
+		}
 
 	m_signalMutex.unlock();
 
-	return *this;
+	return pSignal;
 }
+
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -568,23 +597,6 @@ PS::Signal SignalBase::signal(const Hash& hash) const
 	return signal;
 }
 
-// -------------------------------------------------------------------------------------------------------------------
-
-PS::Signal* SignalBase::signalPtr(int index) const
-{
-	PS::Signal* pSignal = nullptr;
-
-	m_signalMutex.lock();
-
-		if (index >= 0 && index < m_signalList.count())
-		{
-			pSignal = (PS::Signal*) &m_signalList[index];
-		}
-
-	m_signalMutex.unlock();
-
-	return pSignal;
-}
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -604,6 +616,8 @@ PS::Signal SignalBase::signal(int index) const
 	return signal;
 }
 
+
+
 // -------------------------------------------------------------------------------------------------------------------
 
 void SignalBase::setSignal(int index, const PS::Signal &signal)
@@ -620,15 +634,15 @@ void SignalBase::setSignal(int index, const PS::Signal &signal)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PS::Signal* SignalBase::signalPtr(const QString& appSignalID) const
+SignalBase& SignalBase::operator=(const SignalBase& from)
 {
-	if (appSignalID.isEmpty() == true)
-	{
-		assert(false);
-		return nullptr;
-	}
+	m_signalMutex.lock();
 
-	return signalPtr(calcHash(appSignalID));
+		m_signalList = from.m_signalList;
+
+	m_signalMutex.unlock();
+
+	return *this;
 }
 
 // -------------------------------------------------------------------------------------------------------------------

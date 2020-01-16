@@ -24,7 +24,9 @@ private:
 
 	QString				m_signalPath;
 	QString				m_sourcePath;
-	QString				m_localIP;
+
+	QString				m_appDataSrvIP;
+	QString				m_ualTesterIP;
 
 public:
 
@@ -36,8 +38,11 @@ public:
 	QString				sourcePath() const { return m_sourcePath; }
 	void				setSourcePath(const QString& path) { m_sourcePath = path; }
 
-	QString				localIP() const { return m_localIP; }
-	void				setLocalIP(const QString& ip) { m_localIP = ip; }
+	QString				appDataSrvIP() const { return m_appDataSrvIP; }
+	void				setAppDataSrvIP(const QString& ip) { m_appDataSrvIP = ip; }
+
+	QString				ualTesterIP() const { return m_ualTesterIP; }
+	void				setUalTesterIP(const QString& ip) { m_ualTesterIP = ip; }
 
 	void				load();
 	void				save();

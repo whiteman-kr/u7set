@@ -161,9 +161,6 @@ bool PS::Source::createWorker()
 
 	connect(m_pThread, &QThread::started, m_pWorker, &SourceWorker::process);	// on start thread run method process()
 	connect(m_pWorker, &SourceWorker::finished, m_pThread, &QThread::quit);		// on finish() run slot quit()
-
-	//connect(m_pThread, SIGNAL(finished()), m_pThread, SLOT(deleteLater()));
-	//connect(pWorker, SIGNAL(finished()), pWorker, SLOT(deleteLater()));
 	connect(m_pWorker, &SourceWorker::finished, this, &Source::deleteWorker);
 
 	m_pThread->start();														// run thread that runs process()
