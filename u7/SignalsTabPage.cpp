@@ -2367,8 +2367,9 @@ void SignalsTabPage::CreateActions(QToolBar *toolBar)
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
-	action = new QAction(QIcon(":/Images/Images/Search.svg"), tr("Search"), this);
-	connect(action, &QAction::triggered, this, &SignalsTabPage::findOrReplaceSignal);
+	action = new QAction(QIcon(":/Images/Images/Find.svg"), tr("Find"), this);
+	action->setShortcuts(QList<QKeySequence>() << QKeySequence::Find << QKeySequence::Replace);
+	connect(action, &QAction::triggered, this, &SignalsTabPage::findAndReplaceSignal);
 	m_signalsView->addAction(action);
 	toolBar->addAction(action);
 
@@ -2460,7 +2461,7 @@ void SignalsTabPage::onTabPageChanged()
 	{
 		if (tabWidget->currentWidget() == this)
 		{
-			findOrReplaceSignal();
+			findAndReplaceSignal();
 		}
 		else
 		{
@@ -2583,7 +2584,7 @@ void SignalsTabPage::deleteSignal()
 	m_signalsModel->deleteSignals(deletedSignalIDs);
 }
 
-void SignalsTabPage::findOrReplaceSignal()
+void SignalsTabPage::findAndReplaceSignal()
 {
 	if (m_findSignalDialog == nullptr)
 	{
@@ -3643,10 +3644,12 @@ FindSignalDialog::FindSignalDialog(int currentUserId, bool currentUserIsAdmin, Q
 	m_replaceAndFindNextButton(new QPushButton("Replace and Find", this)),
 	m_findPreviousButton(new QPushButton("Find Previous", this)),
 	m_findNextButton(new QPushButton("Find Next", this)),
+	m_replaceableSignalQuantityBlinkTimer(new QTimer(this)),
 	m_regExp4Id(SignalProperties::cacheValidator),
 	m_currentUserId(currentUserId),
 	m_currentUserIsAdmin(currentUserIsAdmin)
 {
+	setWindowTitle("Find and Replace");
 	m_signalProxyModel = dynamic_cast<SignalsProxyModel*>(m_signalTable->model());
 	if (m_signalProxyModel == nullptr)
 	{
@@ -3706,18 +3709,26 @@ FindSignalDialog::FindSignalDialog(int currentUserId, bool currentUserIsAdmin, Q
 
 	form->addRow("Find:", m_findString);
 	form->addRow("Replace with:", m_replaceString);
-	form->addRow("Search in:", m_searchInPropertyList);
+
+	QHBoxLayout* searchSettingsRow = new QHBoxLayout;
+	searchSettingsRow->addWidget(m_searchInPropertyList);
+	searchSettingsRow->addWidget(m_caseSensitive);
+	searchSettingsRow->addWidget(m_wholeWords);
+	searchSettingsRow->addWidget(m_searchInSelected);
+	searchSettingsRow->addStretch();
+
+	form->addRow("Search in:", searchSettingsRow);
+
+	QHBoxLayout* resultRow = new QHBoxLayout;
+	resultRow->addWidget(m_signalsQuantityLabel);
+	resultRow->addWidget(m_canBeReplacedQuantityLabel);
+	resultRow->addStretch();
+
+	connect(m_replaceableSignalQuantityBlinkTimer, &QTimer::timeout, this, &FindSignalDialog::blinkReplaceableSignalQuantity);
+
+	form->addRow(resultRow);
 
 	QVBoxLayout* vLayout = new QVBoxLayout;
-	vLayout->addLayout(form);
-
-	vLayout->addWidget(m_searchInSelected);
-	vLayout->addWidget(m_caseSensitive);
-	vLayout->addWidget(m_wholeWords);
-
-	form = new QFormLayout;
-	form->addRow("Found signals:", m_signalsQuantityLabel);
-	form->addRow("Can be replaced:", m_canBeReplacedQuantityLabel);
 	vLayout->addLayout(form);
 
 	vLayout->addWidget(m_foundList);
@@ -3811,8 +3822,8 @@ void FindSignalDialog::generateListIfNeeded()
 		}
 	}
 
-	m_signalsQuantityLabel->setText(QString::number(m_totalSignalQuantity));
-	m_canBeReplacedQuantityLabel->setText(QString::number(m_replaceableSignalQuantity));
+	updateCounters();
+
 	m_isMatchToCurrentSignalSet = true;
 }
 
@@ -3829,7 +3840,7 @@ void FindSignalDialog::updateAllReplacement()
 
 	markFistInstancesIfItTheyNotUnique();
 
-	m_canBeReplacedQuantityLabel->setText(QString::number(m_replaceableSignalQuantity));
+	updateCounters();
 }
 
 void FindSignalDialog::updateReplacement(int row)
@@ -4163,6 +4174,23 @@ void FindSignalDialog::markFistInstancesIfItTheyNotUnique()
 	}
 }
 
+void FindSignalDialog::updateCounters()
+{
+	m_signalsQuantityLabel->setText(QString("Found signals (%1) / ").arg(m_totalSignalQuantity, 3, 10, QLatin1Char('0')));
+	m_canBeReplacedQuantityLabel->setText(QString("Can be replaced:(%1)").arg(m_replaceableSignalQuantity, 3, 10, QLatin1Char('0')));
+
+	if (m_totalSignalQuantity != m_replaceableSignalQuantity)
+	{
+		blinkReplaceableSignalQuantity();
+		m_replaceableSignalQuantityBlinkTimer->start(500);
+	}
+	else
+	{
+		m_replaceableSignalQuantityBlinkTimer->stop();
+		m_canBeReplacedQuantityLabel->setStyleSheet("");
+	}
+}
+
 void FindSignalDialog::saveDialogGeometry()
 {
 	saveWindowPosition(this, "FindSignalDialog");
@@ -4271,4 +4299,18 @@ void FindSignalDialog::selectCurrentSignalOnAppSignalsTab()
 		int signalId = m_foundListModel->data(m_foundListModel->index(index.row(), 0), Qt::UserRole).toInt();
 		emit signalSelected(signalId);
 	}
+}
+
+void FindSignalDialog::blinkReplaceableSignalQuantity()
+{
+	if (m_replaceableSignalQuantityBlinkIsOn)
+	{
+		m_canBeReplacedQuantityLabel->setStyleSheet("QLabel {background-color : red; color : yellow;}");
+	}
+	else
+	{
+		m_canBeReplacedQuantityLabel->setStyleSheet("QLabel {background-color : yellow; color : red;}");
+	}
+
+	m_replaceableSignalQuantityBlinkIsOn = !m_replaceableSignalQuantityBlinkIsOn;
 }

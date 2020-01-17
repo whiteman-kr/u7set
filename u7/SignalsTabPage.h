@@ -455,6 +455,8 @@ private:
 	void reloadCurrentIdsMap();
 	void markFistInstancesIfItTheyNotUnique();
 
+	void updateCounters();
+
 	void saveDialogGeometry();
 
 private slots:
@@ -467,6 +469,7 @@ private slots:
 	void findPrevious();
 	void findNext();
 	void selectCurrentSignalOnAppSignalsTab();
+	void blinkReplaceableSignalQuantity();
 
 private:
 	QTableView* m_signalTable = nullptr;
@@ -487,6 +490,8 @@ private:
 	int m_totalSignalQuantity = 0;
 	int m_replaceableSignalQuantity = 0;
 	bool m_checkCorrectnessOfId = false;
+	QTimer* m_replaceableSignalQuantityBlinkTimer = nullptr;
+	bool m_replaceableSignalQuantityBlinkIsOn = false;
 
 	QTableView* m_foundList = nullptr;
 	QStandardItemModel* m_foundListModel = nullptr;
@@ -539,7 +544,7 @@ public slots:
 	void editSignal();
 	void cloneSignal();
 	void deleteSignal();
-	void findOrReplaceSignal();
+	void findAndReplaceSignal();
 	void updateFindOrReplaceDialog();
 
 	void undoSignalChanges();
