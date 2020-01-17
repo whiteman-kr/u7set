@@ -6546,6 +6546,28 @@ namespace Builder
 				  arg(fbCaption).arg(paramCaption).arg(schemaID));
 	}
 
+	/// IssueCode: ALC5178
+	///
+	/// IssueType: Warning
+	///
+	/// Title: Setting of flags to a constant signal (Logic schema %1).
+	///
+	/// Parameters:
+	///		%1 logic schema ID
+	///
+	/// Description:
+	///		Setting of flags to a constant signal looks strange.
+	///
+	void IssueLogger::wrnALC5178(QUuid constSignalItemUuid, QUuid setFalgsItemUuid, QString schemaID)
+	{
+		addItemsIssues(OutputMessageLevel::Warning1, 5178, constSignalItemUuid);
+		addItemsIssues(OutputMessageLevel::Warning1, 5178, setFalgsItemUuid);
+
+		LOG_WARNING1(IssueType::AlCompiler,
+				  5178,
+				  QString(tr("Setting of flags to a constant signal (Logic schema %1).")).arg(schemaID));
+	}
+
 	//
 
 	/// IssueCode: ALC5186
