@@ -13,9 +13,13 @@
 #define LOG_WARNING1(type, code, message)	writeWarning1(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 #define LOG_WARNING2(type, code, message)	writeWarning2(issuePTypeToString(type), code, message, __FILE__, __LINE__, SHORT_FUNC_INFO);
 
-#define LOG_INTERNAL_ERROR(logObject)					logObject->errALC5998(__FILE__, __LINE__, Q_FUNC_INFO);
-#define LOG_INTERNAL_ERROR_MSG(logObject, errorMsg)		logObject->errALC5996(errorMsg, __FILE__, __LINE__, Q_FUNC_INFO);
-#define LOG_NULLPTR_ERROR(logObject)					logObject->errALC5997(__FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_INTERNAL_ERROR(logObject)								logObject->errALC5998(__FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_INTERNAL_ERROR_MSG(logObject, errorMsg)					logObject->errALC5996(errorMsg, __FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(result, logObject)	if (result == false) { logObject->errALC5998(__FILE__, __LINE__, Q_FUNC_INFO); return false; }
+
+#define LOG_NULLPTR_ERROR(logObject)							logObject->errALC5997(__FILE__, __LINE__, Q_FUNC_INFO);
+#define LOG_IF_NULLPTR_RETURN_FALSE(ptr, logObject)				if (ptr == nullptr) { logObject->errALC5997(__FILE__, __LINE__, Q_FUNC_INFO); return false; }
+
 
 namespace Builder
 {
@@ -417,6 +421,7 @@ namespace Builder
 		void errALC5175(QString signalID, QString inFormat, QString outFormat);			// Unknown conversion of signal %1 from %2 to %3 format.
 		void errALC5176(QString signalID, QString propertyName);						// Specific property %1 is not exists in signal %2
 		void wrnALC5177(QString fbCaption, QString paramCaption, QUuid itemUuid, QString schemaID);		// Using value 0.0 for parameter %1.%2 is not recommend.
+		void wrnALC5178(QUuid constSignalItemUuid, QUuid setFalgsItemUuid, QString schemaID);		// Setting of flags to a constant signal (Logic schema %1).
 
 		void errALC5186(QString appSignalID, QString portEquipmentID);					// Signal %1 is not found (opto port %2 raw data description).
 		void errALC5187(QString port1ID, QString port2ID);								// Tx data memory areas of ports %1 and %2 are overlapped.
