@@ -200,10 +200,10 @@ namespace VFrame30
 				p->save();
 				p->resetMatrix();
 
-				QRectF textRect(rect.left() * p->device()->physicalDpiX(),
-								   rect.top() * p->device()->physicalDpiY(),
-								   rect.width() * p->device()->physicalDpiX(),
-								   rect.height() * p->device()->physicalDpiY());
+				QRectF textRect(rect.left() * p->device()->logicalDpiX(),
+								   rect.top() * p->device()->logicalDpiY(),
+								   rect.width() * p->device()->logicalDpiX(),
+								   rect.height() * p->device()->logicalDpiY());
 
 				p->drawText(textRect, flags, text);
 				p->restore();
@@ -246,17 +246,17 @@ namespace VFrame30
 
 		// set DPI independent draw
 		//
-		p->scale(p->device()->physicalDpiX(), p->device()->physicalDpiY());
+		p->scale(p->device()->logicalDpiX(), p->device()->logicalDpiY());
 
 		const double intend = 1.0 / 4.0;
 		const double pinWdith = 2.0 / 4.0;
-		const double pinHeight = static_cast<double>(p->fontInfo().pixelSize()) / p->device()->physicalDpiY() * 1.25;
+		const double pinHeight = static_cast<double>(p->fontInfo().pixelSize()) / p->device()->logicalDpiY() * 1.25;
 		const double typeWidth = 2.0 / 4.0;
 
-		QRectF rect(static_cast<double>(drawRect.left()) / p->device()->physicalDpiX(),
-					static_cast<double>(drawRect.top()) / p->device()->physicalDpiY(),
-					static_cast<double>(drawRect.width()) / p->device()->physicalDpiX(),
-					static_cast<double>(drawRect.height()) / p->device()->physicalDpiY());
+		QRectF rect(static_cast<double>(drawRect.left()) / p->device()->logicalDpiX(),
+					static_cast<double>(drawRect.top()) / p->device()->logicalDpiY(),
+					static_cast<double>(drawRect.width()) / p->device()->logicalDpiX(),
+					static_cast<double>(drawRect.height()) / p->device()->logicalDpiY());
 
 		// --
 		//

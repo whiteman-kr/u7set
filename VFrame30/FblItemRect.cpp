@@ -676,7 +676,7 @@ namespace VFrame30
 		}
 
 		QRectF r(leftDocPt(), topDocPt(), widthDocPt(), heightDocPt());
-		double pinWidth = GetPinWidth(itemUnit(), drawParam->device()->physicalDpiX());
+		double pinWidth = GetPinWidth(itemUnit(), drawParam->device()->logicalDpiX());
 
 		if (inputsCount() > 0)
 		{

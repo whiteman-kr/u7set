@@ -1089,8 +1089,8 @@ void EditSchemaView::drawGrid(QPainter* p)
 
 	QRegion visiblePart = visibleRegion();
 
-	double dpiX = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->physicalDpiX();
-	double dpiY = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->physicalDpiY();
+	double dpiX = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->logicalDpiX();
+	double dpiY = unit == VFrame30::SchemaUnit::Display ? 1.0 : p->device()->logicalDpiY();
 
 	std::vector<QPointF> points;
 	points.reserve(1024);
@@ -2668,7 +2668,7 @@ bool EditSchemaWidget::event(QEvent* event)
 
 		if (itemUnderPoint != nullptr)
 		{
-			QString toolTip = itemUnderPoint->toolTipText(this->physicalDpiX(), this->physicalDpiY());
+			QString toolTip = itemUnderPoint->toolTipText(this->logicalDpiX(), this->logicalDpiY());
 			setToolTip(toolTip);
 		}
 		else
