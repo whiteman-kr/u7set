@@ -214,6 +214,8 @@ bool OptionsDialog::loadBuildDirPath(const QString& buildDirPath)
 	m_signalsFileEdit->setText(signalsFile);
 	m_sourceCfgFileEdit->setText(sourceCfgFile);
 	m_sourcesFileEdit->setText(sourcesFile);
+
+	return true;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
