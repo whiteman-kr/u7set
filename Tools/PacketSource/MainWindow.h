@@ -21,7 +21,7 @@
 #include "SourceBase.h"
 #include "FrameDataPanel.h"
 #include "FindSignalPanel.h"
-#include "SignalStateLog.h"
+#include "History.h"
 
 // ==============================================================================================
 
@@ -106,7 +106,7 @@ private:
 	//
 	SignalBase				m_signalBase;
 	SourceBase				m_sourceBase;
-	SignalStateLog			m_signalSateLog;
+	SignalHistory			m_signalHistory;
 
 	// update lists
 	//

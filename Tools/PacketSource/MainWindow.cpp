@@ -863,7 +863,7 @@ void MainWindow::setSignalState()
 		bool result = pSignal->setState(dialog.state());
 		if (result == true)
 		{
-			m_signalSateLog.append( SignalForLog(pSignal, prevState, pSignal->state()) );
+			m_signalHistory.append( SignalForLog(pSignal, prevState, pSignal->state()) );
 		}
 	}
 }
@@ -889,7 +889,7 @@ void MainWindow::initSignalsState()
 
 void MainWindow::history()
 {
-	SignalStateLogDialog dialog(&m_signalSateLog, this);
+	SignalHistoryDialog dialog(&m_signalHistory, this);
 	dialog.exec();
 }
 
@@ -1447,7 +1447,7 @@ void MainWindow::signalStateChanged(Hash hash, double prevState, double state)
 		return;
 	}
 
-	m_signalSateLog.append( SignalForLog(pSignal, prevState, state) );
+	m_signalHistory.append( SignalForLog(pSignal, prevState, state) );
 }
 
 // -------------------------------------------------------------------------------------------------------------------

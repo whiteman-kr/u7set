@@ -76,8 +76,8 @@ SourceBase.cpp \
     ../../lib/CircularLogger.cpp \
     ../../lib/Tcp.cpp \
     UalTesterServer.cpp \
-    SignalStateLog.cpp \
-    OptionsDialog.cpp
+    OptionsDialog.cpp \
+    History.cpp
 
 
 HEADERS += \
@@ -127,8 +127,8 @@ SourceBase.h \
     ../../lib/CircularLogger.h \
     ../../lib/Tcp.h \
     UalTesterServer.h \
-    SignalStateLog.h \
-    OptionsDialog.h
+    OptionsDialog.h \
+    History.h
 
 RESOURCES += \
     resources.qrc

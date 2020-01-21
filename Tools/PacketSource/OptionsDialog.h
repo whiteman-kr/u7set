@@ -41,6 +41,8 @@ private:
 
 	bool					createInterface();
 
+	bool					loadBuildDirPath(const QString& buildDirPath);
+
 	void					saveWindowState();
 	void					restoreWindowState();
 

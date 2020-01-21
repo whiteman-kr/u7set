@@ -1,5 +1,5 @@
-#ifndef SIGNALSTATELOG_H
-#define SIGNALSTATELOG_H
+#ifndef SIGNALHISTORY_H
+#define SIGNALHISTORY_H
 
 #include <QAbstractTableModel>
 #include <QColor>
@@ -72,14 +72,14 @@ public:
 
 // ==============================================================================================
 
-class SignalStateLog : public QObject
+class SignalHistory : public QObject
 {
 	Q_OBJECT
 
 public:
 
-	explicit SignalStateLog(QObject *parent = nullptr);
-	virtual ~SignalStateLog();
+	explicit SignalHistory(QObject *parent = nullptr);
+	virtual ~SignalHistory();
 
 private:
 
@@ -97,7 +97,7 @@ public:
 	SignalForLog*			signalPtr(int index) const;
 	SignalForLog			signal(int index) const;
 
-	SignalStateLog&			operator=(const SignalStateLog& from);
+	SignalHistory&			operator=(const SignalHistory& from);
 
 signals:
 
@@ -108,51 +108,51 @@ public slots:
 
 // ==============================================================================================
 
-const char* const			SignalStateLogListColumn[] =
+const char* const			SignalHistoryListColumn[] =
 {
-							QT_TRANSLATE_NOOP("SignalList.h", "Time"),
-							QT_TRANSLATE_NOOP("SignalList.h", "CustomAppSignalID"),
-							QT_TRANSLATE_NOOP("SignalList.h", "EquipmentID"),
-							QT_TRANSLATE_NOOP("SignalList.h", "AppSignalID"),
-							QT_TRANSLATE_NOOP("SignalList.h", "Caption"),
-							QT_TRANSLATE_NOOP("SignalList.h", "Prev. state"),
-							QT_TRANSLATE_NOOP("SignalList.h", "State"),
-							QT_TRANSLATE_NOOP("SignalList.h", "Eng. range"),
+							QT_TRANSLATE_NOOP("SignalHistory.h", "Time"),
+							QT_TRANSLATE_NOOP("SignalHistory.h", "CustomAppSignalID"),
+							QT_TRANSLATE_NOOP("SignalHistory.h", "EquipmentID"),
+							QT_TRANSLATE_NOOP("SignalHistory.h", "AppSignalID"),
+							QT_TRANSLATE_NOOP("SignalHistory.h", "Caption"),
+							QT_TRANSLATE_NOOP("SignalHistory.h", "Prev. state"),
+							QT_TRANSLATE_NOOP("SignalHistory.h", "State"),
+							QT_TRANSLATE_NOOP("SignalHistory.h", "Eng. range"),
 };
 
-const int					SIGNAL_STATE_LOG_LIST_COLUMN_COUNT			= sizeof(SignalStateLogListColumn)/sizeof(SignalStateLogListColumn[0]);
+const int					SIGNAL_HISTORY_LIST_COLUMN_COUNT		= sizeof(SignalHistoryListColumn)/sizeof(SignalHistoryListColumn[0]);
 
-const int					SIGNAL_STATE_LOG_LIST_COLUMN_TIME			= 0,
-							SIGNAL_STATE_LOG_LIST_COLUMN_CUSTOM_ID		= 1,
-							SIGNAL_STATE_LOG_LIST_COLUMN_EQUIPMENT_ID	= 2,
-							SIGNAL_STATE_LOG_LIST_COLUMN_APP_ID			= 3,
-							SIGNAL_STATE_LOG_LIST_COLUMN_CAPTION		= 4,
-							SIGNAL_STATE_LOG_LIST_COLUMN_PREV_STATE		= 5,
-							SIGNAL_STATE_LOG_LIST_COLUMN_STATE			= 6,
-							SIGNAL_STATE_LOG_LIST_COLUMN_EN_RANGE		= 7;
+const int					SIGNAL_HISTORY_LIST_COLUMN_TIME			= 0,
+							SIGNAL_HISTORY_LIST_COLUMN_CUSTOM_ID	= 1,
+							SIGNAL_HISTORY_LIST_COLUMN_EQUIPMENT_ID	= 2,
+							SIGNAL_HISTORY_LIST_COLUMN_APP_ID		= 3,
+							SIGNAL_HISTORY_LIST_COLUMN_CAPTION		= 4,
+							SIGNAL_HISTORY_LIST_COLUMN_PREV_STATE	= 5,
+							SIGNAL_HISTORY_LIST_COLUMN_STATE		= 6,
+							SIGNAL_HISTORY_LIST_COLUMN_EN_RANGE		= 7;
 
-const int					SignalStateLogListColumnWidth[SIGNAL_STATE_LOG_LIST_COLUMN_COUNT] =
+const int					SignalHistoryListColumnWidth[SIGNAL_HISTORY_LIST_COLUMN_COUNT] =
 {
-							150, //	SIGNAL_STATE_LOG_LIST_COLUMN_TIME
-							200, //	SIGNAL_STATE_LOG_LIST_COLUMN_CUSTOM_ID
-							200, //	SIGNAL_STATE_LOG_LIST_COLUMN_EQUIPMENT_ID
-							200, //	SIGNAL_STATE_LOG_LIST_COLUMN_APP_ID
-							150, //	SIGNAL_STATE_LOG_LIST_COLUMN_CAPTION
-							100, //	SIGNAL_STATE_LOG_LIST_COLUMN_PREV_STATE
-							100, //	SIGNAL_STATE_LOG_LIST_COLUMN_STATE
-							150, //	SIGNAL_STATE_LOG_LIST_COLUMN_EN_RANGE
+							150, //	SIGNAL_HISTORY_LIST_COLUMN_TIME
+							200, //	SIGNAL_HISTORY_LIST_COLUMN_CUSTOM_ID
+							200, //	SIGNAL_HISTORY_LIST_COLUMN_EQUIPMENT_ID
+							200, //	SIGNAL_HISTORY_LIST_COLUMN_APP_ID
+							150, //	SIGNAL_HISTORY_LIST_COLUMN_CAPTION
+							100, //	SIGNAL_HISTORY_LIST_COLUMN_PREV_STATE
+							100, //	SIGNAL_HISTORY_LIST_COLUMN_STATE
+							150, //	SIGNAL_HISTORY_LIST_COLUMN_EN_RANGE
 };
 
 // ==============================================================================================
 
-class SignalStateLogTable : public QAbstractTableModel
+class SignalHistoryTable : public QAbstractTableModel
 {
 	Q_OBJECT
 
 public:
 
-	explicit SignalStateLogTable(QObject* parent = nullptr);
-	virtual ~SignalStateLogTable();
+	explicit SignalHistoryTable(QObject* parent = nullptr);
+	virtual ~SignalHistoryTable();
 
 private:
 
@@ -179,18 +179,18 @@ public:
 
 // ==============================================================================================
 
-class SignalStateLogDialog : public QDialog
+class SignalHistoryDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit SignalStateLogDialog(SignalStateLog* pLog, QWidget *parent = nullptr);
-	virtual ~SignalStateLogDialog();
+	explicit SignalHistoryDialog(SignalHistory* pLog, QWidget *parent = nullptr);
+	virtual ~SignalHistoryDialog();
 
 private:
 
-	SignalStateLog*			m_pLog = nullptr;
+	SignalHistory*			m_pLog = nullptr;
 
 	QMenuBar*				m_pMenuBar = nullptr;
 	QMenu*					m_pEditMenu = nullptr;
@@ -200,9 +200,9 @@ private:
 	QAction*				m_pSelectAllAction = nullptr;
 
 	QTableView*				m_pView = nullptr;
-	SignalStateLogTable		m_signalTable;
+	SignalHistoryTable		m_signalTable;
 
-	QAction*				m_pColumnAction[SIGNAL_STATE_LOG_LIST_COLUMN_COUNT];
+	QAction*				m_pColumnAction[SIGNAL_HISTORY_LIST_COLUMN_COUNT];
 	QMenu*					m_headerContextMenu = nullptr;
 
 	void					createInterface();
@@ -237,4 +237,4 @@ private slots:
 
 // ==============================================================================================
 
-#endif // SIGNALSTATELOG_H
+#endif // SIGNALHISTORY_H

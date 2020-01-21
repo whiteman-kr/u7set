@@ -126,10 +126,20 @@ void OptionsDialog::onSelectBuildDirPath()
 	}
 
 	QString buildDirPath = QFileDialog::getExistingDirectory(this, tr("Select build directory"), defaultDir);
+	if (loadBuildDirPath(buildDirPath) == true)
+	{
+		return;
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool OptionsDialog::loadBuildDirPath(const QString& buildDirPath)
+{
 	if (buildDirPath.isEmpty() == true)
 	{
 		QMessageBox::information(nullptr, windowTitle(), tr("Build directory path is empty!"));
-		return;
+		return false;
 	}
 
 
@@ -137,7 +147,7 @@ void OptionsDialog::onSelectBuildDirPath()
 	if (QFile::exists(signalsFile) == false)
 	{
 		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(signalsFile));
-		return;
+		return false;
 	}
 
 
@@ -183,21 +193,21 @@ void OptionsDialog::onSelectBuildDirPath()
 	if (appDataSrvDirPath.isEmpty() == true)
 	{
 		QMessageBox::information(nullptr, windowTitle(), tr("AppDataSrv directory is not found!"));
-		return;
+		return false;
 	}
 
 	QString sourceCfgFile = appDataSrvDirPath + "/" + Builder::FILE_CONFIGURATION_XML;
 	if (QFile::exists(signalsFile) == false)
 	{
 		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(sourceCfgFile));
-		return;
+		return false;
 	}
 
 	QString sourcesFile = appDataSrvDirPath + "/" + Builder::FILE_APP_DATA_SOURCES_XML;
 	if (QFile::exists(signalsFile) == false)
 	{
 		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(sourcesFile));
-		return;
+		return false;
 	}
 
 	m_buildDirPathEdit->setText(buildDirPath);
@@ -239,9 +249,8 @@ void OptionsDialog::onOk()
 	// build dir path
 	//
 	QString buildDirPath = m_buildDirPathEdit->text();
-	if (buildDirPath.isEmpty() == true)
+	if (loadBuildDirPath(buildDirPath) == false)
 	{
-		QMessageBox::information(this, windowTitle(), tr("Please, input build path!"));
 		return;
 	}
 

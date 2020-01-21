@@ -1,4 +1,4 @@
-#include "SignalStateLog.h"
+#include "History.h"
 
 #include <assert.h>
 
@@ -120,7 +120,7 @@ SignalForLog& SignalForLog::operator=(const SignalForLog& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalStateLog::SignalStateLog(QObject *parent) :
+SignalHistory::SignalHistory(QObject *parent) :
 	QObject(parent)
 {
 }
@@ -128,13 +128,13 @@ SignalStateLog::SignalStateLog(QObject *parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalStateLog::~SignalStateLog()
+SignalHistory::~SignalHistory()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalStateLog::clear()
+void SignalHistory::clear()
 {
 	m_signalMutex.lock();
 
@@ -147,7 +147,7 @@ void SignalStateLog::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalStateLog::count() const
+int SignalHistory::count() const
 {
 	int count = 0;
 
@@ -162,7 +162,7 @@ int SignalStateLog::count() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalStateLog::append(const SignalForLog& signalLog)
+int SignalHistory::append(const SignalForLog& signalLog)
 {
 	PS::Signal* pSignal = signalLog.signalPtr();
 	if (pSignal == nullptr)
@@ -193,7 +193,7 @@ int SignalStateLog::append(const SignalForLog& signalLog)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalForLog* SignalStateLog::signalPtr(int index) const
+SignalForLog* SignalHistory::signalPtr(int index) const
 {
 	SignalForLog* pSignal = nullptr;
 
@@ -211,7 +211,7 @@ SignalForLog* SignalStateLog::signalPtr(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalForLog SignalStateLog::signal(int index) const
+SignalForLog SignalHistory::signal(int index) const
 {
 	SignalForLog signal;
 
@@ -229,7 +229,7 @@ SignalForLog SignalStateLog::signal(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalStateLog& SignalStateLog::operator=(const SignalStateLog& from)
+SignalHistory& SignalHistory::operator=(const SignalHistory& from)
 {
 	m_signalMutex.lock();
 
@@ -244,13 +244,13 @@ SignalStateLog& SignalStateLog::operator=(const SignalStateLog& from)
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalStateLogTable::SignalStateLogTable(QObject*)
+SignalHistoryTable::SignalHistoryTable(QObject*)
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalStateLogTable::~SignalStateLogTable()
+SignalHistoryTable::~SignalHistoryTable()
 {
 	m_signalMutex.lock();
 
@@ -261,21 +261,21 @@ SignalStateLogTable::~SignalStateLogTable()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalStateLogTable::columnCount(const QModelIndex&) const
+int SignalHistoryTable::columnCount(const QModelIndex&) const
 {
-	return SIGNAL_STATE_LOG_LIST_COLUMN_COUNT;
+	return SIGNAL_HISTORY_LIST_COLUMN_COUNT;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalStateLogTable::rowCount(const QModelIndex&) const
+int SignalHistoryTable::rowCount(const QModelIndex&) const
 {
 	return signalCount();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QVariant SignalStateLogTable::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant SignalHistoryTable::headerData(int section, Qt::Orientation orientation, int role) const
 {
 	if (role != Qt::DisplayRole)
 	{
@@ -286,9 +286,9 @@ QVariant SignalStateLogTable::headerData(int section, Qt::Orientation orientatio
 
 	if (orientation == Qt::Horizontal)
 	{
-		if (section >= 0 && section < SIGNAL_STATE_LOG_LIST_COLUMN_COUNT)
+		if (section >= 0 && section < SIGNAL_HISTORY_LIST_COLUMN_COUNT)
 		{
-			result = SignalStateLogListColumn[section];
+			result = SignalHistoryListColumn[section];
 		}
 	}
 
@@ -302,7 +302,7 @@ QVariant SignalStateLogTable::headerData(int section, Qt::Orientation orientatio
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QVariant SignalStateLogTable::data(const QModelIndex &index, int role) const
+QVariant SignalHistoryTable::data(const QModelIndex &index, int role) const
 {
 	if (index.isValid() == false)
 	{
@@ -316,7 +316,7 @@ QVariant SignalStateLogTable::data(const QModelIndex &index, int role) const
 	}
 
 	int column = index.column();
-	if (column < 0 || column > SIGNAL_STATE_LOG_LIST_COLUMN_COUNT)
+	if (column < 0 || column > SIGNAL_HISTORY_LIST_COLUMN_COUNT)
 	{
 		return QVariant();
 	}
@@ -333,14 +333,14 @@ QVariant SignalStateLogTable::data(const QModelIndex &index, int role) const
 
 		switch (column)
 		{
-			case SIGNAL_STATE_LOG_LIST_COLUMN_TIME:			result = Qt::AlignLeft;		break;
-			case SIGNAL_STATE_LOG_LIST_COLUMN_CUSTOM_ID:	result = Qt::AlignLeft;		break;
-			case SIGNAL_STATE_LOG_LIST_COLUMN_EQUIPMENT_ID:	result = Qt::AlignLeft;		break;
-			case SIGNAL_STATE_LOG_LIST_COLUMN_APP_ID:		result = Qt::AlignLeft;		break;
-			case SIGNAL_STATE_LOG_LIST_COLUMN_CAPTION:		result = Qt::AlignLeft;		break;
-			case SIGNAL_STATE_LOG_LIST_COLUMN_PREV_STATE:	result = Qt::AlignCenter;	break;
-			case SIGNAL_STATE_LOG_LIST_COLUMN_STATE:		result = Qt::AlignCenter;	break;
-			case SIGNAL_STATE_LOG_LIST_COLUMN_EN_RANGE:		result = Qt::AlignCenter;	break;
+			case SIGNAL_HISTORY_LIST_COLUMN_TIME:			result = Qt::AlignLeft;		break;
+			case SIGNAL_HISTORY_LIST_COLUMN_CUSTOM_ID:	result = Qt::AlignLeft;		break;
+			case SIGNAL_HISTORY_LIST_COLUMN_EQUIPMENT_ID:	result = Qt::AlignLeft;		break;
+			case SIGNAL_HISTORY_LIST_COLUMN_APP_ID:		result = Qt::AlignLeft;		break;
+			case SIGNAL_HISTORY_LIST_COLUMN_CAPTION:		result = Qt::AlignLeft;		break;
+			case SIGNAL_HISTORY_LIST_COLUMN_PREV_STATE:	result = Qt::AlignCenter;	break;
+			case SIGNAL_HISTORY_LIST_COLUMN_STATE:		result = Qt::AlignCenter;	break;
+			case SIGNAL_HISTORY_LIST_COLUMN_EN_RANGE:		result = Qt::AlignCenter;	break;
 			default:										assert(0);
 		}
 
@@ -349,7 +349,7 @@ QVariant SignalStateLogTable::data(const QModelIndex &index, int role) const
 
 	if (role == Qt::TextColorRole)
 	{
-		if (column == SIGNAL_STATE_LOG_LIST_COLUMN_TIME || column == SIGNAL_STATE_LOG_LIST_COLUMN_PREV_STATE)
+		if (column == SIGNAL_HISTORY_LIST_COLUMN_TIME || column == SIGNAL_HISTORY_LIST_COLUMN_PREV_STATE)
 		{
 			return QColor(Qt::gray);
 		}
@@ -372,14 +372,14 @@ QVariant SignalStateLogTable::data(const QModelIndex &index, int role) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-QString SignalStateLogTable::text(int row, int column, SignalForLog* pSignalLog) const
+QString SignalHistoryTable::text(int row, int column, SignalForLog* pSignalLog) const
 {
 	if (row < 0 || row >= signalCount())
 	{
 		return QString();
 	}
 
-	if (column < 0 || column > SIGNAL_STATE_LOG_LIST_COLUMN_COUNT)
+	if (column < 0 || column > SIGNAL_HISTORY_LIST_COLUMN_COUNT)
 	{
 		return QString();
 	}
@@ -399,14 +399,14 @@ QString SignalStateLogTable::text(int row, int column, SignalForLog* pSignalLog)
 
 	switch (column)
 	{
-		case SIGNAL_STATE_LOG_LIST_COLUMN_TIME:			result = pSignalLog->time();							break;
-		case SIGNAL_STATE_LOG_LIST_COLUMN_CUSTOM_ID:	result = pSignal->customAppSignalID();					break;
-		case SIGNAL_STATE_LOG_LIST_COLUMN_EQUIPMENT_ID:	result = pSignal->equipmentID();						break;
-		case SIGNAL_STATE_LOG_LIST_COLUMN_APP_ID:		result = pSignal->appSignalID();						break;
-		case SIGNAL_STATE_LOG_LIST_COLUMN_CAPTION:		result = pSignal->caption();							break;
-		case SIGNAL_STATE_LOG_LIST_COLUMN_PREV_STATE:	result = pSignalLog->stateStr(pSignalLog->prevState());	break;
-		case SIGNAL_STATE_LOG_LIST_COLUMN_STATE:		result = pSignalLog->stateStr(pSignalLog->state());		break;
-		case SIGNAL_STATE_LOG_LIST_COLUMN_EN_RANGE:		result = pSignal->engineeringRangeStr();				break;
+		case SIGNAL_HISTORY_LIST_COLUMN_TIME:			result = pSignalLog->time();							break;
+		case SIGNAL_HISTORY_LIST_COLUMN_CUSTOM_ID:	result = pSignal->customAppSignalID();					break;
+		case SIGNAL_HISTORY_LIST_COLUMN_EQUIPMENT_ID:	result = pSignal->equipmentID();						break;
+		case SIGNAL_HISTORY_LIST_COLUMN_APP_ID:		result = pSignal->appSignalID();						break;
+		case SIGNAL_HISTORY_LIST_COLUMN_CAPTION:		result = pSignal->caption();							break;
+		case SIGNAL_HISTORY_LIST_COLUMN_PREV_STATE:	result = pSignalLog->stateStr(pSignalLog->prevState());	break;
+		case SIGNAL_HISTORY_LIST_COLUMN_STATE:		result = pSignalLog->stateStr(pSignalLog->state());		break;
+		case SIGNAL_HISTORY_LIST_COLUMN_EN_RANGE:		result = pSignal->engineeringRangeStr();				break;
 		default:										assert(0);
 	}
 
@@ -415,9 +415,9 @@ QString SignalStateLogTable::text(int row, int column, SignalForLog* pSignalLog)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalStateLogTable::updateColumn(int column)
+void SignalHistoryTable::updateColumn(int column)
 {
-	if (column < 0 || column >= SIGNAL_STATE_LOG_LIST_COLUMN_COUNT)
+	if (column < 0 || column >= SIGNAL_HISTORY_LIST_COLUMN_COUNT)
 	{
 		return;
 	}
@@ -434,7 +434,7 @@ void SignalStateLogTable::updateColumn(int column)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalStateLogTable::signalCount() const
+int SignalHistoryTable::signalCount() const
 {
 	int count = 0;
 
@@ -449,7 +449,7 @@ int SignalStateLogTable::signalCount() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalForLog* SignalStateLogTable::signalPtr(int index) const
+SignalForLog* SignalHistoryTable::signalPtr(int index) const
 {
 	SignalForLog* pSignal = nullptr;
 
@@ -467,7 +467,7 @@ SignalForLog* SignalStateLogTable::signalPtr(int index) const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalStateLogTable::set(const QVector<SignalForLog*> list_add)
+void SignalHistoryTable::set(const QVector<SignalForLog*> list_add)
 {
 	int count = list_add.count();
 	if (count == 0)
@@ -488,7 +488,7 @@ void SignalStateLogTable::set(const QVector<SignalForLog*> list_add)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalStateLogTable::clear()
+void SignalHistoryTable::clear()
 {
 	int count = m_signalList.count();
 	if (count == 0)
@@ -513,13 +513,13 @@ void SignalStateLogTable::clear()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalStateLogDialog::SignalStateLogDialog(SignalStateLog* pLog, QWidget *parent) :
+SignalHistoryDialog::SignalHistoryDialog(SignalHistory* pLog, QWidget *parent) :
 	QDialog(parent),
 	m_pLog(pLog)
 {
 	if (m_pLog != nullptr)
 	{
-		connect(m_pLog, &SignalStateLog::signalCountChanged, this, &SignalStateLogDialog::updateList, Qt::QueuedConnection);
+		connect(m_pLog, &SignalHistory::signalCountChanged, this, &SignalHistoryDialog::updateList, Qt::QueuedConnection);
 	}
 
 	createInterface();
@@ -528,20 +528,20 @@ SignalStateLogDialog::SignalStateLogDialog(SignalStateLog* pLog, QWidget *parent
 
 // -------------------------------------------------------------------------------------------------------------------
 
-SignalStateLogDialog::~SignalStateLogDialog()
+SignalHistoryDialog::~SignalHistoryDialog()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalStateLogDialog::createInterface()
+void SignalHistoryDialog::createInterface()
 {
 	setWindowFlags(Qt::Window | Qt::WindowMaximizeButtonHint | Qt::WindowCloseButtonHint);
 	setWindowIcon(QIcon(":/icons/History.png"));
 	setWindowTitle(tr("History"));
 	resize(QApplication::desktop()->availableGeometry().width() - 900, 500);
 	move(QApplication::desktop()->availableGeometry().center() - rect().center());
-	installEventFilter(this);
+
 
 	m_pMenuBar = new QMenuBar(this);
 	m_pEditMenu = new QMenu(tr("&Edit"), this);
@@ -558,16 +558,16 @@ void SignalStateLogDialog::createInterface()
 
 	m_pMenuBar->addMenu(m_pEditMenu);
 
-	connect(m_pCopyAction, &QAction::triggered, this, &SignalStateLogDialog::copy);
-	connect(m_pSelectAllAction, &QAction::triggered, this, &SignalStateLogDialog::selectAll);
+	connect(m_pCopyAction, &QAction::triggered, this, &SignalHistoryDialog::copy);
+	connect(m_pSelectAllAction, &QAction::triggered, this, &SignalHistoryDialog::selectAll);
 
 	m_pView = new QTableView(this);
 	m_pView->setModel(&m_signalTable);
 	m_pView->verticalHeader()->setDefaultSectionSize(22);
 
-	for(int column = 0; column < SIGNAL_STATE_LOG_LIST_COLUMN_COUNT; column++)
+	for(int column = 0; column < SIGNAL_HISTORY_LIST_COLUMN_COUNT; column++)
 	{
-		m_pView->setColumnWidth(column, SignalStateLogListColumnWidth[column]);
+		m_pView->setColumnWidth(column, SignalHistoryListColumnWidth[column]);
 	}
 
 	m_pView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -586,35 +586,35 @@ void SignalStateLogDialog::createInterface()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalStateLogDialog::createHeaderContexMenu()
+void SignalHistoryDialog::createHeaderContexMenu()
 {
 	// init header context menu
 	//
 	m_pView->horizontalHeader()->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &SignalStateLogDialog::onHeaderContextMenu);
+	connect(m_pView->horizontalHeader(), &QHeaderView::customContextMenuRequested, this, &SignalHistoryDialog::onHeaderContextMenu);
 
 	m_headerContextMenu = new QMenu(m_pView);
 
-	for(int column = 0; column < SIGNAL_STATE_LOG_LIST_COLUMN_COUNT; column++)
+	for(int column = 0; column < SIGNAL_HISTORY_LIST_COLUMN_COUNT; column++)
 	{
-		m_pColumnAction[column] = m_headerContextMenu->addAction(SignalStateLogListColumn[column]);
+		m_pColumnAction[column] = m_headerContextMenu->addAction(SignalHistoryListColumn[column]);
 		if (m_pColumnAction[column] != nullptr)
 		{
 			m_pColumnAction[column]->setCheckable(true);
 			m_pColumnAction[column]->setChecked(true);
 
-			connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &SignalStateLogDialog::onColumnAction);
+			connect(m_headerContextMenu, static_cast<void (QMenu::*)(QAction*)>(&QMenu::triggered), this, &SignalHistoryDialog::onColumnAction);
 		}
 	}
 
-	hideColumn(SIGNAL_STATE_LOG_LIST_COLUMN_CAPTION, true);
-	hideColumn(SIGNAL_STATE_LOG_LIST_COLUMN_EN_RANGE, true);
+	hideColumn(SIGNAL_HISTORY_LIST_COLUMN_CAPTION, true);
+	hideColumn(SIGNAL_HISTORY_LIST_COLUMN_EN_RANGE, true);
 
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalStateLogDialog::createContextMenu()
+void SignalHistoryDialog::createContextMenu()
 {
 	// create context menu
 	//
@@ -625,12 +625,12 @@ void SignalStateLogDialog::createContextMenu()
 	// init context menu
 	//
 	m_pView->setContextMenuPolicy(Qt::CustomContextMenu);
-	connect(m_pView, &QTableView::customContextMenuRequested, this, &SignalStateLogDialog::onContextMenu);
+	connect(m_pView, &QTableView::customContextMenuRequested, this, &SignalHistoryDialog::onContextMenu);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalStateLogDialog::updateList()
+void SignalHistoryDialog::updateList()
 {
 	if (m_pLog == nullptr)
 	{
@@ -665,14 +665,14 @@ void SignalStateLogDialog::updateList()
 		return;
 	}
 
-	m_pView->setCurrentIndex(m_signalTable.index(m_signalTable.signalCount() - 1, SIGNAL_STATE_LOG_LIST_COLUMN_TIME));
+	m_pView->setCurrentIndex(m_signalTable.index(m_signalTable.signalCount() - 1, SIGNAL_HISTORY_LIST_COLUMN_TIME));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalStateLogDialog::hideColumn(int column, bool hide)
+void SignalHistoryDialog::hideColumn(int column, bool hide)
 {
-	if (column < 0 || column >= SIGNAL_STATE_LOG_LIST_COLUMN_COUNT)
+	if (column < 0 || column >= SIGNAL_HISTORY_LIST_COLUMN_COUNT)
 	{
 		return;
 	}
@@ -691,7 +691,7 @@ void SignalStateLogDialog::hideColumn(int column, bool hide)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalStateLogDialog::copy()
+void SignalHistoryDialog::copy()
 {
 	QString textClipboard;
 
@@ -724,7 +724,7 @@ void SignalStateLogDialog::copy()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalStateLogDialog::onContextMenu(QPoint)
+void SignalHistoryDialog::onContextMenu(QPoint)
 {
 	if (m_pContextMenu == nullptr)
 	{
@@ -736,7 +736,7 @@ void SignalStateLogDialog::onContextMenu(QPoint)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalStateLogDialog::onHeaderContextMenu(QPoint)
+void SignalHistoryDialog::onHeaderContextMenu(QPoint)
 {
 	if (m_headerContextMenu == nullptr)
 	{
@@ -748,14 +748,14 @@ void SignalStateLogDialog::onHeaderContextMenu(QPoint)
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void SignalStateLogDialog::onColumnAction(QAction* action)
+void SignalHistoryDialog::onColumnAction(QAction* action)
 {
 	if (action == nullptr)
 	{
 		return;
 	}
 
-	for(int column = 0; column < SIGNAL_STATE_LOG_LIST_COLUMN_COUNT; column++)
+	for(int column = 0; column < SIGNAL_HISTORY_LIST_COLUMN_COUNT; column++)
 	{
 		if (m_pColumnAction[column] == action)
 		{
