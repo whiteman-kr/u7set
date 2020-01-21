@@ -69,7 +69,6 @@ SourceBase.cpp \
     ../../lib/DeviceHelper.cpp \
     ../../lib/SimpleMutex.cpp \
     ../../lib/Times.cpp \
-    PathOptionDialog.cpp \
     ../../lib/MemLeaksDetection.cpp \
     FindSignalPanel.cpp \
     FrameDataPanel.cpp \
@@ -77,7 +76,8 @@ SourceBase.cpp \
     ../../lib/CircularLogger.cpp \
     ../../lib/Tcp.cpp \
     UalTesterServer.cpp \
-    SignalStateLog.cpp
+    SignalStateLog.cpp \
+    OptionsDialog.cpp
 
 
 HEADERS += \
@@ -119,7 +119,6 @@ SourceBase.h \
     ../../lib/DeviceHelper.h \
     ../../lib/SimpleMutex.h \
     ../../lib/Times.h \
-    PathOptionDialog.h \
     Stable.h \
     ../../lib/MemLeaksDetection.h \
     FindSignalPanel.h \
@@ -128,7 +127,8 @@ SourceBase.h \
     ../../lib/CircularLogger.h \
     ../../lib/Tcp.h \
     UalTesterServer.h \
-    SignalStateLog.h
+    SignalStateLog.h \
+    OptionsDialog.h
 
 RESOURCES += \
     resources.qrc

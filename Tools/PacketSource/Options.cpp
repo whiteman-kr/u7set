@@ -10,7 +10,7 @@ Options theOptions;
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
 
-PathOption::PathOption(QObject *parent) :
+BuildOption::BuildOption(QObject *parent) :
 	QObject(parent)
 {
 	clear();
@@ -18,7 +18,7 @@ PathOption::PathOption(QObject *parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PathOption::PathOption(const PathOption& from, QObject *parent) :
+BuildOption::BuildOption(const BuildOption& from, QObject *parent) :
 	QObject(parent)
 {
 	*this = from;
@@ -26,52 +26,130 @@ PathOption::PathOption(const PathOption& from, QObject *parent) :
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PathOption::~PathOption()
+BuildOption::~BuildOption()
 {
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PathOption::clear()
+void BuildOption::clear()
 {
-	m_signalPath.clear();
-	m_sourcePath.clear();
+	m_buildDirPath.clear();
+	m_signalsFilePath.clear();
+	m_sourceCfgFilePath.clear();
+	m_sourcesFilePath.clear();
+
 	m_appDataSrvIP.clear();
 	m_ualTesterIP.clear();
 }
 
+
 // -------------------------------------------------------------------------------------------------------------------
 
-void PathOption::load()
+void BuildOption::load()
 {
 	QSettings s;
 
-	m_signalPath = s.value(QString("%1SignalPath").arg(SOURCE_REG_KEY), QString()).toString();
-	m_sourcePath = s.value(QString("%1SourcePath").arg(SOURCE_REG_KEY), QString()).toString();
+	m_buildDirPath = s.value(QString("%1BuildDirPath").arg(SOURCE_REG_KEY), QString()).toString();
+	m_signalsFilePath = s.value(QString("%1SignalsFilePath").arg(SOURCE_REG_KEY), QString()).toString();
+	m_sourceCfgFilePath = s.value(QString("%1SourceCfgFilePath").arg(SOURCE_REG_KEY), QString()).toString();
+	m_sourcesFilePath = s.value(QString("%1SourcesFilePath").arg(SOURCE_REG_KEY), QString()).toString();
+
 	m_appDataSrvIP = s.value(QString("%1AppDataSrvIP").arg(SOURCE_REG_KEY), QString("127.0.0.1")).toString();
 	m_ualTesterIP = s.value(QString("%1UalTesterIP").arg(SOURCE_REG_KEY), QString("127.0.0.1")).toString();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void PathOption::save()
+void BuildOption::save()
 {
 	QSettings s;
 
-	s.setValue(QString("%1SignalPath").arg(SOURCE_REG_KEY), m_signalPath);
-	s.setValue(QString("%1SourcePath").arg(SOURCE_REG_KEY), m_sourcePath);
+	s.setValue(QString("%1BuildDirPath").arg(SOURCE_REG_KEY), m_buildDirPath);
+	s.setValue(QString("%1SignalsFilePath").arg(SOURCE_REG_KEY), m_signalsFilePath);
+	s.setValue(QString("%1SourceCfgFilePath").arg(SOURCE_REG_KEY), m_sourceCfgFilePath);
+	s.setValue(QString("%1SourcesFilePath").arg(SOURCE_REG_KEY), m_sourcesFilePath);
+
 	s.setValue(QString("%1AppDataSrvIP").arg(SOURCE_REG_KEY), m_appDataSrvIP);
 	s.setValue(QString("%1UalTesterIP").arg(SOURCE_REG_KEY), m_ualTesterIP);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
-PathOption& PathOption::operator=(const PathOption& from)
+BuildOption& BuildOption::operator=(const BuildOption& from)
 {
-	m_signalPath = from.m_signalPath;
-	m_sourcePath = from.m_sourcePath;
+	m_buildDirPath = from.m_buildDirPath;
+	m_signalsFilePath = from.m_signalsFilePath;
+	m_sourceCfgFilePath = from.m_sourceCfgFilePath;
+	m_sourcesFilePath = from.m_sourcesFilePath;
+
 	m_appDataSrvIP = from.m_appDataSrvIP;
 	m_ualTesterIP = from.m_ualTesterIP;
+
+	return *this;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+WindowsOption::WindowsOption(QObject *parent) :
+	QObject(parent)
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+WindowsOption::WindowsOption(const WindowsOption& from, QObject *parent) :
+	QObject(parent)
+{
+	*this = from;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+WindowsOption::~WindowsOption()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void WindowsOption::load()
+{
+	QSettings s;
+
+	m_mainWindowPos = s.value("MainWindow/pos", QPoint(-1, -1)).toPoint();
+	m_mainWindowGeometry = s.value("MainWindow/geometry").toByteArray();
+	m_mainWindowState = s.value("MainWindow/state").toByteArray();
+
+	m_optionsWindowPos = s.value("OptionsDialog/pos", QPoint(200, 200)).toPoint();
+	m_optionsWindowGeometry = s.value("OptionsDialog/geometry").toByteArray();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void WindowsOption::save()
+{
+	QSettings s;
+
+	s.setValue("MainWindow/pos", m_mainWindowPos);
+	s.setValue("MainWindow/geometry", m_mainWindowGeometry);
+	s.setValue("MainWindow/state", m_mainWindowState);
+
+	s.setValue("OptionsDialog/pos", m_optionsWindowPos);
+	s.setValue("OptionsDialog/geometry", m_optionsWindowGeometry);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+WindowsOption& WindowsOption::operator=(const WindowsOption& from)
+{
+	m_mainWindowPos = from.m_mainWindowPos;
+	m_mainWindowGeometry = from.m_mainWindowGeometry;
+	m_mainWindowState = from.m_mainWindowState;
+
+	m_optionsWindowPos = from.m_optionsWindowPos;
+	m_optionsWindowGeometry = from.m_optionsWindowGeometry;
 
 	return *this;
 }
@@ -112,14 +190,16 @@ Options::~Options()
 
 void Options::load()
 {
-	m_path.load();
+	m_windows.load();
+	m_build.load();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
 
 void Options::save()
 {
-	m_path.save();
+	m_windows.save();
+	m_build.save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -143,7 +223,7 @@ Options& Options::operator=(const Options& from)
 {
 	m_mutex.lock();
 
-		m_path = from.m_path;
+		m_build = from.m_build;
 
 	m_mutex.unlock();
 

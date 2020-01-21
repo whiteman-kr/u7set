@@ -5,6 +5,8 @@
 #include <QFile>
 #include <QProgressDialog>
 
+#include "Options.h"
+
 #include "../../lib/XmlHelper.h"
 #include "../../Builder/CfgFiles.h"
 #include "../../lib/DataProtocols.h"
@@ -419,33 +421,38 @@ int SignalBase::count() const
 
 // -------------------------------------------------------------------------------------------------------------------
 
-int SignalBase::readFromFile(const QString& path)
+int SignalBase::readFromFile()
 {
 	clear();
 
 	QString msgTitle = tr("Loading signals");
 
-	if (path.isEmpty() == true)
+	if (theOptions.build().buildDirPath().isEmpty() == true)
 	{
-		QMessageBox::information(nullptr, msgTitle, tr("Please, input path to signals directory!"));
+		QMessageBox::information(nullptr, msgTitle, tr("Please, input path to build directory!"));
 		return 0;
 	}
 
 	// read Signals
 	//
+	if (theOptions.build().signalsFilePath().isEmpty() == true)
+	{
+		QMessageBox::information(nullptr, msgTitle, tr("Signals file (%1) path is empty!").arg(Builder::FILE_APP_SIGNALS_ASGS));
+		return 0;
+	}
 
-	QString fileSignals = path + "/" + Builder::FILE_APP_SIGNALS_ASGS;
+	QString signalsfile = theOptions.build().signalsFilePath();
 
-	QFile fileSignalsAsgs(fileSignals);
+	QFile fileSignalsAsgs(signalsfile);
 	if (fileSignalsAsgs.exists() == false)
 	{
-		QMessageBox::information(nullptr, msgTitle, tr("File %1 is not found!").arg(Builder::FILE_APP_SIGNALS_ASGS));
+		QMessageBox::information(nullptr, msgTitle, tr("File \"%1\" is not found!").arg(signalsfile));
 		return 0;
 	}
 
 	if (fileSignalsAsgs.open(QIODevice::ReadOnly) == false)
 	{
-		QMessageBox::information(nullptr, msgTitle, tr("File %1 is not opened!").arg(Builder::FILE_APP_SIGNALS_ASGS));
+		QMessageBox::information(nullptr, msgTitle, tr("File \"%1\" is not opened!").arg(signalsfile));
 		return 0;
 	}
 
@@ -630,6 +637,42 @@ void SignalBase::setSignal(int index, const PS::Signal &signal)
 		}
 
 	m_signalMutex.unlock();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalBase::saveSignalState(PS::Signal* pSignal)
+{
+	if (pSignal == nullptr)
+	{
+		return;
+	}
+
+	SignalState ss;
+
+	ss.appSignalID = pSignal->appSignalID();
+	ss.state = pSignal->state();
+
+	m_signalStateList.append(ss);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void SignalBase::restoreSignalsState()
+{
+	int count = m_signalStateList.count();
+	for(int i = 0; i < count; i++)
+	{
+		PS::Signal* pSignal = signalPtr(m_signalStateList[i].appSignalID);
+		if (pSignal == nullptr)
+		{
+			continue;
+		}
+
+		pSignal->setState(m_signalStateList[i].state);
+	}
+
+	m_signalStateList.clear();
 }
 
 // -------------------------------------------------------------------------------------------------------------------

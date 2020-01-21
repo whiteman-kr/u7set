@@ -50,6 +50,7 @@ private:
 							//
 	QAction*				m_sourceStartAction = nullptr;
 	QAction*				m_sourceStopAction = nullptr;
+	QAction*				m_sourceReloadAction = nullptr;
 	QAction*				m_sourceSelectAllAction = nullptr;
 	QAction*				m_signalSetStateAction = nullptr;
 	QAction*				m_signalInitAction = nullptr;
@@ -113,6 +114,7 @@ private:
 	SourceTable				m_sourceTable;
 	QAction*				m_pSourceColumnAction[SOURCE_LIST_COLUMN_COUNT];
 	QMenu*					m_sourceHeaderContextMenu = nullptr;
+	QModelIndex				m_selectedSourceIndex;
 
 	void					hideSourceColumn(int column, bool hide);
 
@@ -134,6 +136,11 @@ private:
 	void					updateSignalList(PS::Source* pSource);
 	void					updateFrameDataList(PS::Source* pSource);
 
+	//
+	//
+	void					saveWindowState();
+	void					restoreWindowState();
+
 public:
 
 	QTableView*				sourceView() { return m_pSourceView; }
@@ -153,6 +160,7 @@ private slots:
 							//
 	void					startSource();
 	void					stopSource();
+	void					reloadSource();
 	void					selectAllSources();
 	void					setSignalState();
 	void					initSignalsState();
@@ -184,7 +192,7 @@ private slots:
 	//
 	void					loadSources();
 	void					loadSignals();
-	void					initSignalsInSources();
+	void					loadSignalsInSources();
 
 	// slot of lists
 	//

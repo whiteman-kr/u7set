@@ -15,24 +15,24 @@
 
 // ==============================================================================================
 
-class PathOptionDialog : public QDialog
+class OptionsDialog : public QDialog
 {
 	Q_OBJECT
 
 public:
 
-	explicit PathOptionDialog(QWidget *parent = nullptr);
-	virtual ~PathOptionDialog();
+	explicit OptionsDialog(QWidget *parent = nullptr);
+	virtual ~OptionsDialog();
 
 private:
 
-	PathOption				m_pathOption;
+	BuildOption				m_pathOption;
 
-	QLineEdit*				m_signalPathEdit = nullptr;
-	QPushButton*			m_selectSignalPathBtn = nullptr;
-
-	QLineEdit*				m_sourcePathEdit = nullptr;
-	QPushButton*			m_selectSourcePathBtn = nullptr;
+	QLineEdit*				m_buildDirPathEdit = nullptr;
+	QPushButton*			m_selectBuildPathBtn = nullptr;
+	QLineEdit*				m_signalsFileEdit = nullptr;
+	QLineEdit*				m_sourceCfgFileEdit = nullptr;
+	QLineEdit*				m_sourcesFileEdit = nullptr;
 
 	QLineEdit*				m_appDataSrvIPEdit = nullptr;
 	QLineEdit*				m_ualTesterIPEdit = nullptr;
@@ -41,9 +41,16 @@ private:
 
 	bool					createInterface();
 
+	void					saveWindowState();
+	void					restoreWindowState();
+
 public:
 
-	PathOption&				option() { return m_pathOption; }
+	BuildOption&			option() { return m_pathOption; }
+
+protected:
+
+	void					closeEvent(QCloseEvent* e);
 
 signals:
 
@@ -51,9 +58,9 @@ private slots:
 
 	// slots of buttons
 	//
-	void					onSelectSignalPath();
-	void					onSelectSourcePath();
+	void					onSelectBuildDirPath();
 	void					onOk();
+	void					onCancel();
 };
 
 // ==============================================================================================

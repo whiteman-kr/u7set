@@ -83,15 +83,26 @@ public:
 private:
 
 	mutable QMutex			m_signalMutex;
+
 	QVector<PS::Signal>		m_signalList;
 	QMap<Hash, int>			m_signalHashMap;
+
+	// for save and restore from buffer
+	//
+	struct SignalState
+	{
+		QString appSignalID;
+		double state = 0;
+	};
+
+	QVector<SignalState>	m_signalStateList;
 
 public:
 
 	void					clear();
 	int						count() const;
 
-	int						readFromFile(const QString& path);
+	int						readFromFile();
 
 	int						append(const PS::Signal& signal);
 
@@ -103,6 +114,11 @@ public:
 	PS::Signal				signal(int index) const;
 
 	void					setSignal(int index, const PS::Signal& signal);
+
+	//
+	//
+	void					saveSignalState(PS::Signal* pSignal);
+	void					restoreSignalsState();
 
 	SignalBase&				operator=(const SignalBase& from);
 

@@ -1,6 +1,6 @@
 #include "MainWindow.h"
 #include "../../lib/Ui/DialogAbout.h"
-#include "PathOptionDialog.h"
+#include "OptionsDialog.h"
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -8,37 +8,14 @@ MainWindow::MainWindow(QMainWindow* parent)
 	: QMainWindow(parent)
 {
 	createInterface();					// init interface
-
-	startUpdateSourceListTimer();		// run timers for update lists
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-MainWindow::~MainWindow()
-{
-}
-
-// -------------------------------------------------------------------------------------------------------------------
-
-bool MainWindow::createInterface()
-{
-	setWindowTitle(tr("Packet Source"));
-	resize(1000, 700);
-	move(QApplication::desktop()->availableGeometry().center() - rect().center());
-
-	createActions();
-	createMenu();
-	createToolBars();
-	createPanels();
-	createViews();
-	createContextMenu();
-	createHeaderContexMenu();
-	createStatusBar();
+	restoreWindowState();
 
 	runUalTesterServerThread();
 
 	connect(&m_sourceBase, &SourceBase::sourcesLoaded, this, &MainWindow::loadSignals, Qt::QueuedConnection);
-	connect(&m_signalBase, &SignalBase::signalsLoaded, this, &MainWindow::initSignalsInSources, Qt::QueuedConnection);
+	connect(&m_signalBase, &SignalBase::signalsLoaded, this, &MainWindow::loadSignalsInSources, Qt::QueuedConnection);
+
+	startUpdateSourceListTimer();		// run timers for update lists
 
 	loadSources();
 
@@ -52,6 +29,28 @@ bool MainWindow::createInterface()
 //	}
 
 #endif
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+MainWindow::~MainWindow()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+bool MainWindow::createInterface()
+{
+	setWindowTitle(tr("Packet Source"));
+
+	createActions();
+	createMenu();
+	createToolBars();
+	createPanels();
+	createViews();
+	createContextMenu();
+	createHeaderContexMenu();
+	createStatusBar();
 
 	return true;
 }
@@ -72,8 +71,12 @@ void MainWindow::createActions()
 	m_sourceStopAction->setShortcut(Qt::SHIFT + Qt::Key_F5);
 	m_sourceStopAction->setIcon(QIcon(":/icons/Stop.png"));
 	m_sourceStopAction->setToolTip(tr("Stop all sources"));
-	//m_sourceStopAction->setEnabled(false);
 	connect(m_sourceStopAction, &QAction::triggered, this, &MainWindow::stopSource);
+
+	m_sourceReloadAction = new QAction(tr("Reload"), this);
+	m_sourceReloadAction->setIcon(QIcon(":/icons/Reload.png"));
+	m_sourceReloadAction->setToolTip(tr("Reload all sources and signals"));
+	connect(m_sourceReloadAction, &QAction::triggered, this, &MainWindow::reloadSource);
 
 	m_sourceSelectAllAction = new QAction(tr("Select all"), this);
 	m_sourceSelectAllAction->setIcon(QIcon(":/icons/SelectAll.png"));
@@ -159,6 +162,8 @@ void MainWindow::createMenu()
 	m_sourceMenu->addAction(m_sourceStartAction);
 	m_sourceMenu->addAction(m_sourceStopAction);
 	m_sourceMenu->addSeparator();
+	m_sourceMenu->addAction(m_sourceReloadAction);
+	m_sourceMenu->addSeparator();
 	m_sourceMenu->addAction(m_sourceSelectAllAction);
 
 	// Signals
@@ -204,6 +209,9 @@ bool MainWindow::createToolBars()
 	m_mainToolBar->addAction(m_sourceStartAction);
 	m_mainToolBar->addAction(m_sourceStopAction);
 	m_mainToolBar->addSeparator();
+	m_mainToolBar->addAction(m_sourceReloadAction);
+	m_mainToolBar->addSeparator();
+	m_mainToolBar->addAction(m_optionAction);
 
 	return true;
 }
@@ -238,7 +246,7 @@ void MainWindow::createPanels()
 
 			if (m_mainToolBar != nullptr)
 			{
-				m_mainToolBar->addAction(dataAction);
+				m_mainToolBar->insertAction(m_optionAction, dataAction);
 			}
 		}
 	}
@@ -270,7 +278,8 @@ void MainWindow::createPanels()
 
 			if (m_mainToolBar != nullptr)
 			{
-				m_mainToolBar->addAction(findAction);
+				m_mainToolBar->insertAction(m_optionAction, findAction);
+				m_mainToolBar->insertSeparator(m_optionAction);
 			}
 		}
 	}
@@ -359,6 +368,8 @@ void MainWindow::createContextMenu()
 
 	m_sourceContextMenu->addAction(m_sourceStartAction);
 	m_sourceContextMenu->addAction(m_sourceStopAction);
+	m_sourceContextMenu->addSeparator();
+	m_sourceContextMenu->addAction(m_sourceReloadAction);
 	m_sourceContextMenu->addSeparator();
 	m_sourceContextMenu->addAction(m_sourceTextCopyAction);
 
@@ -463,7 +474,7 @@ void MainWindow::runUalTesterServerThread()
 		return;
 	}
 
-	HostAddressPort ualTesterIP = HostAddressPort(theOptions.path().ualTesterIP(), PORT_TUNING_SERVICE_CLIENT_REQUEST);
+	HostAddressPort ualTesterIP = HostAddressPort(theOptions.build().ualTesterIP(), PORT_TUNING_SERVICE_CLIENT_REQUEST);
 
 	m_ualTesterServerThread = new UalTesterServerThread(ualTesterIP, m_ualTesterSever, nullptr);
 	if (m_ualTesterServerThread == nullptr)
@@ -495,9 +506,23 @@ void MainWindow::stopUalTesterServerThread()
 
 void MainWindow::loadSources()
 {
+	// clear signals
+	//
+	m_signalTable.clear();
+	m_signalBase.clear();
+
+	// clear data
+	//
+	if (m_pFrameDataPanel != nullptr)
+	{
+		m_pFrameDataPanel->clear();
+	}
+
+	// load sources
+	//
 	QVector<PS::Source*> ptrSourceList;
 
-	int sourceCount = m_sourceBase.readFromFile(theOptions.path().sourcePath());
+	int sourceCount = m_sourceBase.readFromFile();
 	for(int i = 0; i < sourceCount; i++)
 	{
 		ptrSourceList.append(m_sourceBase.sourcePtr(i));
@@ -513,7 +538,7 @@ void MainWindow::loadSources()
 
 void MainWindow::loadSignals()
 {
-	int signalCount = m_signalBase.readFromFile(theOptions.path().signalPath());
+	int signalCount = m_signalBase.readFromFile();
 	if (signalCount == 0)
 	{
 		QMessageBox::information(this, windowTitle(), tr("No single uploaded!"));
@@ -525,7 +550,7 @@ void MainWindow::loadSignals()
 
 // -------------------------------------------------------------------------------------------------------------------
 
-void MainWindow::initSignalsInSources()
+void MainWindow::loadSignalsInSources()
 {
 	int sourceCount = m_sourceBase.count();
 	for(int i = 0; i < sourceCount; i++)
@@ -536,10 +561,14 @@ void MainWindow::initSignalsInSources()
 			continue;
 		}
 
-		pSource->initSignals(m_signalBase);
+		pSource->loadSignals(m_signalBase);
+		pSource->initSignalsState();
 	}
 
-	initSignalsState();
+	m_signalBase.restoreSignalsState();
+	m_sourceBase.restoreSourcesState();
+
+	onSourceListClicked(m_selectedSourceIndex);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -629,9 +658,6 @@ void MainWindow::startSource()
 		return;
 	}
 
-//	m_sourceStartAction->setEnabled(false);
-//	m_sourceStopAction->setEnabled(true);
-
 	int count = m_pSourceView->selectionModel()->selectedRows().count();
 	if (count == 0)
 	{
@@ -661,9 +687,6 @@ void MainWindow::stopSource()
 		return;
 	}
 
-//	m_sourceStartAction->setEnabled(true);
-//	m_sourceStopAction->setEnabled(false);
-
 	int count = m_pSourceView->selectionModel()->selectedRows().count();
 	if (count == 0)
 	{
@@ -676,6 +699,51 @@ void MainWindow::stopSource()
 		int sourceIndex = pSourceProxyModel->mapToSource(m_pSourceView->selectionModel()->selectedRows().at(i)).row();
 		m_sourceBase.stopSourece(sourceIndex);
 	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::reloadSource()
+{
+	// save states
+	//
+	int sourceCount = m_sourceBase.count();
+	for (int s = 0; s < sourceCount; s++)
+	{
+		PS::Source*	pSource = m_sourceBase.sourcePtr(s);
+		if (pSource == nullptr)
+		{
+			continue;
+		}
+
+		if(pSource->isRunning() == true)
+		{
+			m_sourceBase.saveSourceState(pSource);
+		}
+
+		int signalCount = pSource->signalList().count();
+		for(int i = 0; i < signalCount; i++)
+		{
+			PS::Signal* pSignal = &pSource->signalList()[i];
+			if ( pSignal == nullptr)
+			{
+				continue;
+			}
+
+			if (pSignal->regValueAddr().offset() == BAD_ADDRESS || pSignal->regValueAddr().bit() == BAD_ADDRESS)
+			{
+				continue;
+			}
+
+			m_signalBase.saveSignalState(pSignal);
+		}
+	}
+
+	// reload
+	//
+	loadSources();
+
+	m_pSourceView->setCurrentIndex(m_selectedSourceIndex);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -813,40 +881,8 @@ void MainWindow::initSignalsState()
 			continue;
 		}
 
-		int sigalCount = pSource->signalList().count();
-		for(int i = 0; i < sigalCount; i++)
-		{
-			PS::Signal* pSignal = &pSource->signalList()[i];
-			if ( pSignal == nullptr)
-			{
-				continue;
-			}
-
-			if (pSignal->isDiscrete() == true)
-			{
-				if (pSignal->equipmentID().endsWith("VALID") == true)
-				{
-					pSignal->setState(true);
-				}
-				else
-				{
-					pSignal->setState(false);
-				}
-			}
-
-			if (pSignal->isAnalog() == true)
-			{
-				pSignal->setState(pSignal->lowEngineeringUnits());
-			}
-
-			if (pSignal->enableTuning() == true)
-			{
-				pSignal->setState(pSignal->tuningDefaultValue().toDouble());
-			}
-		}
+		pSource->initSignalsState();
 	}
-
-	//QMessageBox::information(this, windowTitle(), tr("Signal initialization complete!"));
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -930,7 +966,7 @@ void MainWindow::restoreSignalsState()
 
 	if (QFile::exists(fileName) == false)
 	{
-		QMessageBox::critical(this, tr("Error"), tr("Could not open file: %1\nfile is not found!").arg(fileName));
+		QMessageBox::critical(this, tr("Error"), tr("Could not open file: \"%1\"\nfile is not found!").arg(fileName));
 		return;
 	}
 
@@ -982,25 +1018,21 @@ void MainWindow::selectAllSignals()
 
 void MainWindow::onOptions()
 {
-	PathOptionDialog dialog(this);
+	QString ualTesterIP = theOptions.build().ualTesterIP();
+
+	OptionsDialog dialog(this);
 	if (dialog.exec() != QDialog::Accepted)
 	{
 		return;
 	}
 
-	m_signalTable.clear();
-
-	if (m_pFrameDataPanel != nullptr)
-	{
-		m_pFrameDataPanel->clear();
-	}
-
-	m_sourceBase.stopAllSoureces();
-
 	loadSources();
 
-	stopUalTesterServerThread();
-	runUalTesterServerThread();
+	if (ualTesterIP != theOptions.build().ualTesterIP())
+	{
+		stopUalTesterServerThread();
+		runUalTesterServerThread();
+	}
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1371,6 +1403,8 @@ void MainWindow::onSourceListClicked(const QModelIndex& index)
 	{
 		m_pFindSignalPanel->find();
 	}
+
+	m_selectedSourceIndex = index;
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -1418,13 +1452,68 @@ void MainWindow::signalStateChanged(Hash hash, double prevState, double state)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::saveWindowState()
+{
+	theOptions.windows().m_mainWindowPos = pos();
+	theOptions.windows().m_mainWindowGeometry = saveGeometry();
+	theOptions.windows().m_mainWindowState = saveState();
+
+	theOptions.windows().save();
+
+	return;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::restoreWindowState()
+{
+	if (theOptions.windows().m_mainWindowPos.x() != -1 && theOptions.windows().m_mainWindowPos.y() != -1)
+	{
+		move(theOptions.windows().m_mainWindowPos);
+		restoreGeometry(theOptions.windows().m_mainWindowGeometry);
+		restoreState(theOptions.windows().m_mainWindowState);
+	}
+	else
+	{
+		resize(1024, 768);
+	}
+
+	// Ensure widget is visible
+	//
+	setVisible(true);	// Widget must be visible for correct work of QApplication::desktop()->screenGeometry
+
+	QRect screenRect  = QApplication::desktop()->availableGeometry(this);
+	QRect intersectRect = screenRect.intersected(frameGeometry());
+
+	if (isMaximized() == false &&
+		(intersectRect.width() < size().width() ||
+		intersectRect.height() < size().height()))
+	{
+		move(screenRect.topLeft());
+	}
+
+	if (isMaximized() == false &&
+		(frameGeometry().width() > screenRect.width() ||
+		frameGeometry().height() > screenRect.height()))
+	{
+		resize(static_cast<int>(screenRect.width() * 0.7),
+			   static_cast<int>(screenRect.height() * 0.7));
+	}
+
+	return;
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::closeEvent(QCloseEvent* e)
 {
 	stopUpdateSourceListTimer();
-
 	stopUalTesterServerThread();
 
-	m_sourceBase.stopAllSoureces();
+	m_signalBase.clear();
+	m_sourceBase.clear();
+
+	saveWindowState();
 
 	QMainWindow::closeEvent(e);
 }
