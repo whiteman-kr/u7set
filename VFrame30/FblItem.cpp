@@ -343,7 +343,7 @@ namespace VFrame30
 		}
 		else
 		{
-			dpi = device->physicalDpiX();
+			dpi = device->logicalDpiX();
 		}
 
 		double pinWidth = static_cast<float>(mm2in(3));	// 3 μμ!

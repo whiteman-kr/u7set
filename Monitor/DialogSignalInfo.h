@@ -50,9 +50,20 @@ public:
 
 protected:
 	void paintEvent(QPaintEvent *event);
+	void mouseMoveEvent(QMouseEvent *event);
+
+private:
+	QRect flag2Rect(int flagNo);
+	int point2Flag(const QPoint& pt);
 
 private:
 	AppSignalStateFlags m_flags;
+
+	const int m_colCount = 5;
+	const int m_rowCount = 2;
+
+	int m_lastFlagAbove = -1;
+
 };
 
 
@@ -78,11 +89,10 @@ private:
 
 	enum class SetpointsColumns
 	{
-		Index,
-		Type,
-		CompareTo,
+		Type,			// Contains user data index
+		CompareTo,		// Contains user data paramCompareTo(AppSignalParam)
 		CompareToValue,
-		Output,
+		Output,			// Contains user data paramOutput(AppSignalParam)
 		OutputValue,
 		SchemaId
 	};
