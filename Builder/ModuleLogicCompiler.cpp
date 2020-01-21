@@ -2453,42 +2453,55 @@ namespace Builder
 
 	bool ModuleLogicCompiler::linkSetFlagsItemInput(UalItem* srcItem, UalItem* setFlagsItem, QUuid inPinUuid, UalSignal* ualSignal)
 	{
-		if (srcItem == nullptr || setFlagsItem == nullptr || ualSignal == nullptr)
-		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
-		}
+		LOG_IF_NULLPTR_RETURN_FALSE(srcItem, m_log);
+		LOG_IF_NULLPTR_RETURN_FALSE(setFlagsItem, m_log);
+		LOG_IF_NULLPTR_RETURN_FALSE(ualSignal, m_log);
 
 		UalAfb* ualAfb = m_ualAfbs.value(setFlagsItem->guid(), nullptr);
 
-		if (ualAfb == nullptr)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
+		LOG_IF_NULLPTR_RETURN_FALSE(ualAfb, m_log);
 
-		if (ualAfb->isSetFlagsItem() == false)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
+		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(ualAfb->isSetFlagsItem(), m_log);
 
 		const LogicPin* inPin = ualAfb->getPin(inPinUuid);
 
-		if (inPin == nullptr)
+		LOG_IF_NULLPTR_RETURN_FALSE(inPin, m_log);
+
+		bool isInputPinOfSetFlagsItem = inPin->caption() == UalAfb::IN_PIN_CAPTION;
+
+		if (isInputPinOfSetFlagsItem == false)
 		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
+			// processing of link to 'flags' inputs
+			//
+			if (ualSignal->isDiscrete() == false)
+			{
+				// Uncompatible signals connection (Logic schema %1).
+				//
+				m_log->errALC5117(srcItem->guid(), srcItem->label(), setFlagsItem->guid(), setFlagsItem->label(), setFlagsItem->schemaID());
+
+				return false;
+			}
+
+			bool res = m_ualSignals.appendRefPin(setFlagsItem, inPin->guid(), ualSignal);
+
+			LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(res, m_log);
+
+			return true;
+		}
+
+		// processing of link to 'in' pin
+		//
+
+		if (ualSignal->isConst() == true)
+		{
+			// Setting of flags to a constant signal (Logic schema %1).
+			//
+			m_log->wrnALC5178(srcItem->guid(), setFlagsItem->guid(), setFlagsItem->schemaID());
 		}
 
 		bool result = m_ualSignals.appendRefPin(setFlagsItem, inPin->guid(), ualSignal);
 
-		QString inPinCaption = inPin->caption();
-
-		if (inPinCaption != UalAfb::IN_PIN_CAPTION)
-		{
-			return true;
-		}
+		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(result, m_log);
 
 		const std::vector<LogicPin>& outputs = ualAfb->outputs();
 
@@ -2506,9 +2519,11 @@ namespace Builder
 			return false;
 		}
 
-		result &= m_ualSignals.appendRefPin(setFlagsItem, outPin.guid(), ualSignal);
+		result = m_ualSignals.appendRefPin(setFlagsItem, outPin.guid(), ualSignal);
 
-		result &= linkConnectedItems(srcItem, outPin, ualSignal);
+		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(result, m_log);
+
+		result = linkConnectedItems(srcItem, outPin, ualSignal);
 
 		return result;
 	}
@@ -3293,7 +3308,11 @@ namespace Builder
 				continue;
 			}
 
-			file->append(QString("%1 flags:").arg(signalWithFlagsID));
+			UalSignal* ualSignal = m_ualSignals.get(signalWithFlagsID);
+
+			TEST_PTR_CONTINUE(ualSignal);
+
+			file->append(QString("%1 flags:").arg(ualSignal->refSignalIDsJoined()));
 
 			for(E::AppSignalStateFlagType flagType : flagTypes)
 			{

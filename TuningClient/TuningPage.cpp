@@ -1096,18 +1096,29 @@ void TuningPage::fillObjectsList()
 		// Value filter
 		//
 
-		if (filterValue != FilterType::All && asp.isDiscrete() == true)
+		if (filterValue != FilterType::All)
 		{
-			ok = false;
-
-			const TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
-
-			if (ok == true && state.valid() == true)
+			if (asp.isAnalog() == true)
 			{
+				continue;
+			}
+
+			if (asp.isDiscrete() == true)
+			{
+				ok = false;
+
+				const TuningSignalState state = m_tuningSignalManager->state(hash, &ok);
+
+				if (ok == false || state.valid() == false)
+				{
+					continue;
+				}
+
 				if (filterValue == FilterType::Zero && state.value().discreteValue() != 0)
 				{
 					continue;
 				}
+
 				if (filterValue == FilterType::One && state.value().discreteValue() != 1)
 				{
 					continue;
