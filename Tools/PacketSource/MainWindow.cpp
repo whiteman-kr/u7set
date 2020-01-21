@@ -1467,38 +1467,18 @@ void MainWindow::saveWindowState()
 
 void MainWindow::restoreWindowState()
 {
-	if (theOptions.windows().m_mainWindowPos.x() != -1 && theOptions.windows().m_mainWindowPos.y() != -1)
+	if (theOptions.windows().m_mainWindowPos.x() == -1 && theOptions.windows().m_mainWindowPos.y() == -1)
+	{
+		resize(1024, 768);
+	}
+	else
 	{
 		move(theOptions.windows().m_mainWindowPos);
 		restoreGeometry(theOptions.windows().m_mainWindowGeometry);
 		restoreState(theOptions.windows().m_mainWindowState);
 	}
-	else
-	{
-		resize(1024, 768);
-	}
 
-	// Ensure widget is visible
-	//
 	setVisible(true);	// Widget must be visible for correct work of QApplication::desktop()->screenGeometry
-
-	QRect screenRect  = QApplication::desktop()->availableGeometry(this);
-	QRect intersectRect = screenRect.intersected(frameGeometry());
-
-	if (isMaximized() == false &&
-		(intersectRect.width() < size().width() ||
-		intersectRect.height() < size().height()))
-	{
-		move(screenRect.topLeft());
-	}
-
-	if (isMaximized() == false &&
-		(frameGeometry().width() > screenRect.width() ||
-		frameGeometry().height() > screenRect.height()))
-	{
-		resize(static_cast<int>(screenRect.width() * 0.7),
-			   static_cast<int>(screenRect.height() * 0.7));
-	}
 
 	return;
 }
