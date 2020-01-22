@@ -1,5 +1,9 @@
 #include "MainWindow.h"
+
 #include "../../lib/Ui/DialogAbout.h"
+#include "../../lib/XmlHelper.h"
+#include "../../Builder/CfgFiles.h"
+
 #include "OptionsDialog.h"
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -76,6 +80,7 @@ void MainWindow::createActions()
 	m_sourceReloadAction = new QAction(tr("Reload"), this);
 	m_sourceReloadAction->setIcon(QIcon(":/icons/Reload.png"));
 	m_sourceReloadAction->setToolTip(tr("Reload all sources and signals"));
+	m_sourceReloadAction->setEnabled(!theOptions.build().enableReload());
 	connect(m_sourceReloadAction, &QAction::triggered, this, &MainWindow::reloadSource);
 
 	m_sourceSelectAllAction = new QAction(tr("Select all"), this);
@@ -569,6 +574,8 @@ void MainWindow::loadSignalsInSources()
 	m_sourceBase.restoreSourcesState();
 
 	onSourceListClicked(m_selectedSourceIndex);
+
+	startUpdateBuildFilesTimer();							// run timers for update build files
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -705,6 +712,10 @@ void MainWindow::stopSource()
 
 void MainWindow::reloadSource()
 {
+	//
+	//
+	stopUpdateBuildFilesTimer();
+
 	// save states
 	//
 	int sourceCount = m_sourceBase.count();
@@ -903,8 +914,7 @@ void MainWindow::saveSignalsState()
 		return;
 	}
 
-	QFile file;
-	file.setFileName(fileName);
+	QFile file(fileName);
 	if (file.open(QIODevice::WriteOnly) == false)
 	{
 		return;
@@ -945,6 +955,8 @@ void MainWindow::saveSignalsState()
 
 	file.close();
 
+	theOptions.build().setSignalsStatePath(fileName);
+
 	QMessageBox::information(this, windowTitle(), tr("Save completed"));
 }
 
@@ -952,7 +964,7 @@ void MainWindow::saveSignalsState()
 
 void MainWindow::restoreSignalsState()
 {
-	QString fileName = QFileDialog::getOpenFileName(this, tr("Open signals state"), "SignalState.csv", "CSV files (*.csv);;All files (*.*)");
+	QString fileName = QFileDialog::getOpenFileName(this, tr("Open signals state"), theOptions.build().signalsStatePath(), tr("CSV files (*.csv);;All files (*.*)"));
 	if (fileName.isEmpty() == true)
 	{
 		return;
@@ -1025,6 +1037,9 @@ void MainWindow::onOptions()
 	{
 		return;
 	}
+	stopUpdateBuildFilesTimer();
+
+	m_sourceReloadAction->setEnabled(!theOptions.build().enableReload());
 
 	loadSources();
 
@@ -1452,6 +1467,111 @@ void MainWindow::signalStateChanged(Hash hash, double prevState, double state)
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void MainWindow::startUpdateBuildFilesTimer()
+{
+	if (theOptions.build().enableReload() == false)
+	{
+		return;
+	}
+
+	if (m_updateBuildFilesTimer == nullptr)
+	{
+		m_updateBuildFilesTimer = new QTimer(this);
+		connect(m_updateBuildFilesTimer, &QTimer::timeout, this, &MainWindow::updateBuildFiles);
+	}
+
+	m_updateBuildFilesTimer->start(theOptions.build().timeoutReload() * 1000);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::stopUpdateBuildFilesTimer()
+{
+	if (m_updateBuildFilesTimer != nullptr)
+	{
+		m_updateBuildFilesTimer->stop();
+		delete m_updateBuildFilesTimer;
+		m_updateBuildFilesTimer = nullptr;
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void MainWindow::updateBuildFiles()
+{
+	QString fileName = theOptions.build().buildDirPath() + BUILD_FILE_SEPARATOR + "build.xml";
+	if (fileName.isEmpty() == true)
+	{
+		return;
+	}
+
+	if (QFile::exists(fileName) == false)
+	{
+		return;
+	}
+
+	QFile file(fileName);
+
+	if (file.size() == 0)
+	{
+		return;
+	}
+
+	if (file.open(QIODevice::ReadOnly) == false)
+	{
+		return;
+	}
+
+	QByteArray&& bulidData = file.readAll();
+
+	file.close();
+
+	bool reloadBuildFiles = false;
+
+	QXmlStreamReader m_xmlReader(bulidData);
+	Builder::BuildFileInfo buildFileInfo;
+
+	while(m_xmlReader.atEnd() == false)
+	{
+		if (m_xmlReader.readNextStartElement() == false)
+		{
+			continue;
+		}
+
+		if (m_xmlReader.name() == "File")
+		{
+			buildFileInfo.readFromXml(m_xmlReader);
+
+			for (int i = 0; i < BUILD_FILE_TYPE_COUNT; i ++)
+			{
+				if (buildFileInfo.pathFileName == theOptions.build().buildFile(i).fileName())
+				{
+					if (buildFileInfo.size != theOptions.build().buildFile(i).size())
+					{
+						reloadBuildFiles = true;
+						qDebug() << __FUNCTION__ << buildFileInfo.pathFileName << "size" << buildFileInfo.size << theOptions.build().buildFile(i).size();
+					}
+
+					if (buildFileInfo.md5 != theOptions.build().buildFile(i).md5())
+					{
+						reloadBuildFiles = true;
+						qDebug() << __FUNCTION__ << buildFileInfo.pathFileName << "md5" << buildFileInfo.md5 << theOptions.build().buildFile(i).md5();
+					}
+				}
+			}
+		}
+	}
+
+	if (reloadBuildFiles == true)
+	{
+		theOptions.build().load();
+
+		emit reloadSource();
+	}
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 void MainWindow::saveWindowState()
 {
 	theOptions.windows().m_mainWindowPos = pos();
@@ -1487,7 +1607,9 @@ void MainWindow::restoreWindowState()
 
 void MainWindow::closeEvent(QCloseEvent* e)
 {
+	stopUpdateBuildFilesTimer();
 	stopUpdateSourceListTimer();
+
 	stopUalTesterServerThread();
 
 	m_signalBase.clear();

@@ -435,13 +435,12 @@ int SignalBase::readFromFile()
 
 	// read Signals
 	//
-	if (theOptions.build().signalsFilePath().isEmpty() == true)
+	QString signalsfile = theOptions.build().buildFile(BUILD_FILE_TYPE_SIGNALS).path();
+	if (signalsfile.isEmpty() == true)
 	{
 		QMessageBox::information(nullptr, msgTitle, tr("Signals file (%1) path is empty!").arg(Builder::FILE_APP_SIGNALS_ASGS));
 		return 0;
 	}
-
-	QString signalsfile = theOptions.build().signalsFilePath();
 
 	QFile fileSignalsAsgs(signalsfile);
 	if (fileSignalsAsgs.exists() == false)

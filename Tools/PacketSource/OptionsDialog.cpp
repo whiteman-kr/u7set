@@ -31,20 +31,20 @@ bool OptionsDialog::createInterface()
 
 	// Build Path
 	//
-	QGroupBox* groupBuildPath = new QGroupBox(tr("Build path:"));
+	QGroupBox* groupBuildPath = new QGroupBox(tr("Build path"));
 	QVBoxLayout *buildFilesLayout = new QVBoxLayout;
 	QHBoxLayout *buildPathLayout = new QHBoxLayout;
 
 	m_buildDirPathEdit = new QLineEdit(theOptions.build().buildDirPath(), this);
 	m_selectBuildPathBtn = new QPushButton(tr("Select ..."), this);
 
-	m_signalsFileEdit = new QLineEdit(theOptions.build().signalsFilePath(), this);
+	m_signalsFileEdit = new QLineEdit(theOptions.build().buildFile(BUILD_FILE_TYPE_SIGNALS).path(), this);
 	m_signalsFileEdit->setReadOnly(true);
 	m_signalsFileEdit->setFrame(false);
-	m_sourceCfgFileEdit = new QLineEdit(theOptions.build().sourceCfgFilePath(), this);
+	m_sourceCfgFileEdit = new QLineEdit(theOptions.build().buildFile(BUILD_FILE_TYPE_SOURCE_CFG).path(), this);
 	m_sourceCfgFileEdit->setReadOnly(true);
 	m_sourceCfgFileEdit->setFrame(false);
-	m_sourcesFileEdit = new QLineEdit(theOptions.build().sourcesFilePath(), this);
+	m_sourcesFileEdit = new QLineEdit(theOptions.build().buildFile(BUILD_FILE_TYPE_SOURCES).path(), this);
 	m_sourcesFileEdit->setReadOnly(true);
 	m_sourcesFileEdit->setFrame(false);
 
@@ -59,6 +59,34 @@ bool OptionsDialog::createInterface()
 	buildFilesLayout->addWidget(m_sourcesFileEdit);
 
 	groupBuildPath->setLayout(buildFilesLayout);
+
+	// reload build
+	//
+	QGroupBox* groupReloadBuild = new QGroupBox(tr("Reload build files automatically"));
+	QVBoxLayout *reloadBuildLayout = new QVBoxLayout;
+	QHBoxLayout *timeoutReloadBuildLayout = new QHBoxLayout;
+
+	m_enableReloadCheck = new QCheckBox(tr("Enable reload build files automatically"), this);
+	m_enableReloadCheck->setCheckState(theOptions.build().enableReload() == true ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
+
+	connect(m_enableReloadCheck, &QCheckBox::clicked, this, &OptionsDialog::onEnableReload);
+
+	QLabel* timeoutReloadLabel = new QLabel(tr("Timeout for check new build files"), this);
+	m_timeoutReloadEdit = new QLineEdit(QString::number(theOptions.build().timeoutReload(), 10), this);
+	m_timeoutReloadEdit->setValidator( new QIntValidator(0, 1000, this) );
+	m_timeoutReloadEdit->setAlignment(Qt::AlignCenter);
+	m_timeoutReloadEdit->setEnabled(m_enableReloadCheck->checkState() == Qt::CheckState::Checked);
+	QLabel* timeoutSecLabel = new QLabel(tr("second(s)"), this);
+
+	timeoutReloadBuildLayout->addWidget(timeoutReloadLabel);
+	timeoutReloadBuildLayout->addWidget(m_timeoutReloadEdit);
+	timeoutReloadBuildLayout->addWidget(timeoutSecLabel);
+	timeoutReloadBuildLayout->addStretch();
+
+	reloadBuildLayout->addWidget(m_enableReloadCheck);
+	reloadBuildLayout->addLayout(timeoutReloadBuildLayout);
+
+	groupReloadBuild->setLayout(reloadBuildLayout);
 
 	// IP
 	//
@@ -87,7 +115,6 @@ bool OptionsDialog::createInterface()
 	ualTesterIPLayout->addStretch();
 	ualTesterIPLayout->addWidget(m_ualTesterIPEdit);
 
-
 	localIPLayout->addLayout(appDataSrvIPLayout);
 	localIPLayout->addLayout(ualTesterIPLayout);
 	groupLocalIP->setLayout(localIPLayout);
@@ -103,6 +130,7 @@ bool OptionsDialog::createInterface()
 	QVBoxLayout *mainLayout = new QVBoxLayout;
 
 	mainLayout->addWidget(groupBuildPath);
+	mainLayout->addWidget(groupReloadBuild);
 	mainLayout->addWidget(groupLocalIP);
 	mainLayout->addWidget(m_buttonBox);
 
@@ -134,6 +162,13 @@ void OptionsDialog::onSelectBuildDirPath()
 
 // -------------------------------------------------------------------------------------------------------------------
 
+void OptionsDialog::onEnableReload()
+{
+	m_timeoutReloadEdit->setEnabled(m_enableReloadCheck->checkState() == Qt::CheckState::Checked);
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
 bool OptionsDialog::loadBuildDirPath(const QString& buildDirPath)
 {
 	if (buildDirPath.isEmpty() == true)
@@ -143,7 +178,7 @@ bool OptionsDialog::loadBuildDirPath(const QString& buildDirPath)
 	}
 
 
-	QString signalsFile = buildDirPath + "/" + Builder::DIR_COMMON + "/" + Builder::FILE_APP_SIGNALS_ASGS;
+	QString signalsFile = buildDirPath + BUILD_FILE_SEPARATOR + Builder::DIR_COMMON + BUILD_FILE_SEPARATOR + Builder::FILE_APP_SIGNALS_ASGS;
 	if (QFile::exists(signalsFile) == false)
 	{
 		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(signalsFile));
@@ -159,7 +194,7 @@ bool OptionsDialog::loadBuildDirPath(const QString& buildDirPath)
 	QStringList listPathSubDirs = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
 	foreach (QString pathSubDir, listPathSubDirs)
 	{
-		QString fileCfg = buildDirPath + "/" + pathSubDir + "/" + Builder::FILE_CONFIGURATION_XML;
+		QString fileCfg = buildDirPath + BUILD_FILE_SEPARATOR + pathSubDir + BUILD_FILE_SEPARATOR + Builder::FILE_CONFIGURATION_XML;
 
 		QFile fileCfgXml(fileCfg);
 		if (fileCfgXml.open(QIODevice::ReadOnly) == false)
@@ -183,7 +218,7 @@ bool OptionsDialog::loadBuildDirPath(const QString& buildDirPath)
 
 		if (softwareType == E::SoftwareType::AppDataService)
 		{
-			appDataSrvDirPath = buildDirPath + "/" + pathSubDir;
+			appDataSrvDirPath = buildDirPath + BUILD_FILE_SEPARATOR + pathSubDir;
 			break;
 		}
 
@@ -196,14 +231,14 @@ bool OptionsDialog::loadBuildDirPath(const QString& buildDirPath)
 		return false;
 	}
 
-	QString sourceCfgFile = appDataSrvDirPath + "/" + Builder::FILE_CONFIGURATION_XML;
+	QString sourceCfgFile = appDataSrvDirPath + BUILD_FILE_SEPARATOR + Builder::FILE_CONFIGURATION_XML;
 	if (QFile::exists(signalsFile) == false)
 	{
 		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(sourceCfgFile));
 		return false;
 	}
 
-	QString sourcesFile = appDataSrvDirPath + "/" + Builder::FILE_APP_DATA_SOURCES_XML;
+	QString sourcesFile = appDataSrvDirPath + BUILD_FILE_SEPARATOR + Builder::FILE_APP_DATA_SOURCES_XML;
 	if (QFile::exists(signalsFile) == false)
 	{
 		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(sourcesFile));
@@ -263,6 +298,9 @@ void OptionsDialog::onOk()
 		return;
 	}
 
+	BuildFile signalsBuildFile = theOptions.build().buildFile(BUILD_FILE_TYPE_SIGNALS);
+	signalsBuildFile.setPath(signalsFile);
+
 	QString sourceCfgFile = m_sourceCfgFileEdit->text();
 	if (QFile::exists(sourceCfgFile) == false)
 	{
@@ -270,12 +308,31 @@ void OptionsDialog::onOk()
 		return;
 	}
 
+	BuildFile sourceCfgBuildFile = theOptions.build().buildFile(BUILD_FILE_TYPE_SOURCE_CFG);
+	sourceCfgBuildFile.setPath(sourceCfgFile);
+
 	QString sourcesFile = m_sourcesFileEdit->text();
 	if (QFile::exists(sourcesFile) == false)
 	{
 		QMessageBox::information(nullptr, windowTitle(), tr("File \"%1\" is not found!").arg(sourcesFile));
 		return;
 	}
+
+	BuildFile sourcesBuildFile = theOptions.build().buildFile(BUILD_FILE_TYPE_SOURCES);
+	sourcesBuildFile.setPath(sourcesFile);
+
+	// reload build
+	//
+
+	bool enableReload = m_enableReloadCheck->checkState() == Qt::CheckState::Checked;
+
+	QString timeoutReload = m_timeoutReloadEdit->text();
+	if (timeoutReload.isEmpty() == true)
+	{
+		QMessageBox::information(nullptr, windowTitle(), tr("Timeout for reload is empty!"));
+		return;
+	}
+
 
 	// IP
 	//
@@ -293,12 +350,17 @@ void OptionsDialog::onOk()
 		return;
 	}
 
+
 	// save
 	//
 	theOptions.build().setBuildDirPath(buildDirPath);
-	theOptions.build().setSignalsFilePath(signalsFile);
-	theOptions.build().setSourceCfgFilePath(sourceCfgFile);
-	theOptions.build().setSourcesFilePath(sourcesFile);
+	theOptions.build().setBuildFile(BUILD_FILE_TYPE_SIGNALS, signalsBuildFile);
+	theOptions.build().setBuildFile(BUILD_FILE_TYPE_SOURCE_CFG, sourceCfgBuildFile);
+	theOptions.build().setBuildFile(BUILD_FILE_TYPE_SOURCES, sourcesBuildFile);
+
+	theOptions.build().setEnableReload(enableReload);
+	theOptions.build().setTimeoutReload(timeoutReload.toInt());
+
 	theOptions.build().setAppDataSrvIP(appDataSrvIP);
 	theOptions.build().setUalTesterIP(ualTesterIP);
 

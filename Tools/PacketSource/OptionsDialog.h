@@ -8,6 +8,7 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QPushButton>
+#include <QCheckBox>
 #include <QDialogButtonBox>
 #include <QMessageBox>
 
@@ -33,6 +34,9 @@ private:
 	QLineEdit*				m_signalsFileEdit = nullptr;
 	QLineEdit*				m_sourceCfgFileEdit = nullptr;
 	QLineEdit*				m_sourcesFileEdit = nullptr;
+
+	QCheckBox*				m_enableReloadCheck = nullptr;
+	QLineEdit*				m_timeoutReloadEdit = nullptr;
 
 	QLineEdit*				m_appDataSrvIPEdit = nullptr;
 	QLineEdit*				m_ualTesterIPEdit = nullptr;
@@ -61,6 +65,8 @@ private slots:
 	// slots of buttons
 	//
 	void					onSelectBuildDirPath();
+	void					onEnableReload();
+
 	void					onOk();
 	void					onCancel();
 };

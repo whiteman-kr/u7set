@@ -1,10 +1,69 @@
 #include "Options.h"
 
 #include <QSettings>
+#include <QFile>
+#include <QCryptographicHash>
 
 // -------------------------------------------------------------------------------------------------------------------
 
 Options theOptions;
+
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+// -------------------------------------------------------------------------------------------------------------------
+
+BuildFile::BuildFile()
+{
+	clear();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+BuildFile::~BuildFile()
+{
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void BuildFile::clear()
+{
+	m_path.clear();
+	m_fileName.clear();
+	m_size = 0;
+	m_md5.clear();
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void BuildFile::setPath(const QString& path)
+{
+	m_path = path;
+
+	if (m_path.isEmpty() == true)
+	{
+		return;
+	}
+
+	QStringList list = m_path.split(BUILD_FILE_SEPARATOR);
+	if (list.count() >= 2)
+	{
+		m_fileName = BUILD_FILE_SEPARATOR + list[ list.count() - 2 ] + BUILD_FILE_SEPARATOR + list[ list.count() - 1 ];
+	}
+
+	QFile file(m_path);
+	if (file.open(QIODevice::ReadOnly) == false)
+	{
+		return;
+	}
+
+	m_size = file.size();
+
+	QCryptographicHash md5Generator(QCryptographicHash::Md5);
+	md5Generator.addData(&file);
+	m_md5 = md5Generator.result().toHex();
+
+	file.close();
+}
 
 // -------------------------------------------------------------------------------------------------------------------
 // -------------------------------------------------------------------------------------------------------------------
@@ -35,14 +94,44 @@ BuildOption::~BuildOption()
 void BuildOption::clear()
 {
 	m_buildDirPath.clear();
-	m_signalsFilePath.clear();
-	m_sourceCfgFilePath.clear();
-	m_sourcesFilePath.clear();
+	for (int i = 0; i < BUILD_FILE_TYPE_COUNT; i ++)
+	{
+		m_buildFile[i].clear();
+	}
+
+	m_enableReload = true;
+	m_timeoutReload = BUILD_FILE_RELOAD_TIMEOUT;
 
 	m_appDataSrvIP.clear();
 	m_ualTesterIP.clear();
+
+	m_signalsStatePath.clear();
+
 }
 
+// -------------------------------------------------------------------------------------------------------------------
+
+BuildFile BuildOption::buildFile(int type) const
+{
+	if (type < 0 || type >= BUILD_FILE_TYPE_COUNT)
+	{
+		return BuildFile();
+	}
+
+	return m_buildFile[type];
+}
+
+// -------------------------------------------------------------------------------------------------------------------
+
+void BuildOption::setBuildFile(int type, const BuildFile& buildFile)
+{
+	if (type < 0 || type >= BUILD_FILE_TYPE_COUNT)
+	{
+		return;
+	}
+
+	m_buildFile[type] = buildFile;
+}
 
 // -------------------------------------------------------------------------------------------------------------------
 
@@ -50,13 +139,21 @@ void BuildOption::load()
 {
 	QSettings s;
 
-	m_buildDirPath = s.value(QString("%1BuildDirPath").arg(SOURCE_REG_KEY), QString()).toString();
-	m_signalsFilePath = s.value(QString("%1SignalsFilePath").arg(SOURCE_REG_KEY), QString()).toString();
-	m_sourceCfgFilePath = s.value(QString("%1SourceCfgFilePath").arg(SOURCE_REG_KEY), QString()).toString();
-	m_sourcesFilePath = s.value(QString("%1SourcesFilePath").arg(SOURCE_REG_KEY), QString()).toString();
+	m_buildDirPath = s.value(QString("%1BuildDirPath").arg(BUILD_REG_KEY), QString()).toString();
 
-	m_appDataSrvIP = s.value(QString("%1AppDataSrvIP").arg(SOURCE_REG_KEY), QString("127.0.0.1")).toString();
-	m_ualTesterIP = s.value(QString("%1UalTesterIP").arg(SOURCE_REG_KEY), QString("127.0.0.1")).toString();
+	for (int i = 0; i < BUILD_FILE_TYPE_COUNT; i ++)
+	{
+		QString path = s.value(QString("%1%2").arg(BUILD_REG_KEY).arg(BuildFileRegKey[i]), QString()).toString();
+		m_buildFile[i].setPath(path);
+	}
+
+	m_enableReload = s.value(QString("%1EnableCheckBuildFiles").arg(BUILD_REG_KEY), true).toBool();
+	m_timeoutReload = s.value(QString("%1TimeoutCheckBuildFiles").arg(BUILD_REG_KEY), BUILD_FILE_RELOAD_TIMEOUT).toInt();
+
+	m_appDataSrvIP = s.value(QString("%1AppDataSrvIP").arg(BUILD_REG_KEY), QString("127.0.0.1")).toString();
+	m_ualTesterIP = s.value(QString("%1UalTesterIP").arg(BUILD_REG_KEY), QString("127.0.0.1")).toString();
+
+	m_signalsStatePath = s.value(QString("%1SignalsStatePath").arg(BUILD_REG_KEY), QString("127.0.0.1")).toString();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -65,13 +162,20 @@ void BuildOption::save()
 {
 	QSettings s;
 
-	s.setValue(QString("%1BuildDirPath").arg(SOURCE_REG_KEY), m_buildDirPath);
-	s.setValue(QString("%1SignalsFilePath").arg(SOURCE_REG_KEY), m_signalsFilePath);
-	s.setValue(QString("%1SourceCfgFilePath").arg(SOURCE_REG_KEY), m_sourceCfgFilePath);
-	s.setValue(QString("%1SourcesFilePath").arg(SOURCE_REG_KEY), m_sourcesFilePath);
+	s.setValue(QString("%1BuildDirPath").arg(BUILD_REG_KEY), m_buildDirPath);
 
-	s.setValue(QString("%1AppDataSrvIP").arg(SOURCE_REG_KEY), m_appDataSrvIP);
-	s.setValue(QString("%1UalTesterIP").arg(SOURCE_REG_KEY), m_ualTesterIP);
+	for (int i = 0; i < BUILD_FILE_TYPE_COUNT; i ++)
+	{
+		s.setValue(QString("%1%2").arg(BUILD_REG_KEY).arg(BuildFileRegKey[i]), m_buildFile[i].path());
+	}
+
+	s.setValue(QString("%1AppDataSrvIP").arg(BUILD_REG_KEY), m_appDataSrvIP);
+	s.setValue(QString("%1UalTesterIP").arg(BUILD_REG_KEY), m_ualTesterIP);
+
+	s.setValue(QString("%1EnableCheckBuildFiles").arg(BUILD_REG_KEY), m_enableReload);
+	s.setValue(QString("%1TimeoutCheckBuildFiles").arg(BUILD_REG_KEY), m_timeoutReload);
+
+	s.setValue(QString("%1SignalsStatePath").arg(BUILD_REG_KEY), m_signalsStatePath);
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -79,12 +183,18 @@ void BuildOption::save()
 BuildOption& BuildOption::operator=(const BuildOption& from)
 {
 	m_buildDirPath = from.m_buildDirPath;
-	m_signalsFilePath = from.m_signalsFilePath;
-	m_sourceCfgFilePath = from.m_sourceCfgFilePath;
-	m_sourcesFilePath = from.m_sourcesFilePath;
+	for (int i = 0; i < BUILD_FILE_TYPE_COUNT; i ++)
+	{
+		m_buildFile[i] = from.m_buildFile[i];
+	}
+
+	m_enableReload = from.m_enableReload;
+	m_timeoutReload = from.m_timeoutReload;
 
 	m_appDataSrvIP = from.m_appDataSrvIP;
 	m_ualTesterIP = from.m_ualTesterIP;
+
+	m_signalsStatePath = from.m_signalsStatePath;
 
 	return *this;
 }

@@ -125,7 +125,7 @@ private:
 
 	void					hideSignalColumn(int column, bool hide);
 
-	// update timers
+	//
 	//
 	QTimer*					m_updateSourceListTimer = nullptr;
 	void					startUpdateSourceListTimer();
@@ -138,8 +138,16 @@ private:
 
 	//
 	//
+	QTimer*					m_updateBuildFilesTimer = nullptr;
+	void					startUpdateBuildFilesTimer();
+	void					stopUpdateBuildFilesTimer();
+
+	//
+	//
 	void					saveWindowState();
 	void					restoreWindowState();
+
+
 
 public:
 
@@ -200,6 +208,10 @@ private slots:
 
 	void					onSourceListClicked(const QModelIndex& index);
 	void					onSignalListDoubleClicked(const QModelIndex& index);
+
+	//
+	//
+	void					updateBuildFiles();
 
 	// slot of UalTesterServer
 	//

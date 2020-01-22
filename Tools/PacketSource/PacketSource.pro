@@ -77,7 +77,8 @@ SourceBase.cpp \
     ../../lib/Tcp.cpp \
     UalTesterServer.cpp \
     OptionsDialog.cpp \
-    History.cpp
+    History.cpp \
+    ../../lib/BuildInfo.cpp
 
 
 HEADERS += \
@@ -128,7 +129,8 @@ SourceBase.h \
     ../../lib/Tcp.h \
     UalTesterServer.h \
     OptionsDialog.h \
-    History.h
+    History.h \
+    ../../lib/BuildInfo.h
 
 RESOURCES += \
     resources.qrc

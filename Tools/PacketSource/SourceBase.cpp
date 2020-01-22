@@ -342,13 +342,12 @@ int SourceBase::readFromFile()
 
 	// read Server IP and Server Port
 	//
-	if (theOptions.build().sourceCfgFilePath().isEmpty() == true)
+	QString fileCfg = theOptions.build().buildFile(BUILD_FILE_TYPE_SOURCE_CFG).path();
+	if (fileCfg.isEmpty() == true)
 	{
 		QMessageBox::information(nullptr, msgTitle, tr("Sources configuration file (%1) path is empty!").arg(Builder::FILE_CONFIGURATION_XML));
 		return 0;
 	}
-
-	QString fileCfg = theOptions.build().sourceCfgFilePath();
 
 	QFile cfgFileXml(fileCfg);
 	if (cfgFileXml.exists() == false)
@@ -379,13 +378,12 @@ int SourceBase::readFromFile()
 
 	// read Data Sources
 	//
-	if (theOptions.build().sourcesFilePath().isEmpty() == true)
+	QString sourcesFile = theOptions.build().buildFile(BUILD_FILE_TYPE_SOURCES).path();
+	if (sourcesFile.isEmpty() == true)
 	{
 		QMessageBox::information(nullptr, msgTitle, tr("Sources file (%1) path is empty!").arg(Builder::FILE_APP_DATA_SOURCES_XML));
 		return 0;
 	}
-
-	QString sourcesFile = theOptions.build().sourcesFilePath();
 
 	QFile sourcesFileXml(sourcesFile);
 	if (sourcesFileXml.exists() == false)
