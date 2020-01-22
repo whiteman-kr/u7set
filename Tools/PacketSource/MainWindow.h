@@ -40,9 +40,10 @@ private:
 	//
 	QMenu*					m_sourceMenu = nullptr;
 	QMenu*					m_signalMenu = nullptr;
+	QMenu*					m_toolsMenu = nullptr;
+	QMenu*					m_infoMenu = nullptr;
 	QMenu*					m_sourceContextMenu = nullptr;
 	QMenu*					m_signalContextMenu = nullptr;
-	QMenu*					m_infoMenu = nullptr;
 
 	// Actions of main menu
 	//

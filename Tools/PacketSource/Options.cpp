@@ -147,13 +147,13 @@ void BuildOption::load()
 		m_buildFile[i].setPath(path);
 	}
 
-	m_enableReload = s.value(QString("%1EnableCheckBuildFiles").arg(BUILD_REG_KEY), true).toBool();
-	m_timeoutReload = s.value(QString("%1TimeoutCheckBuildFiles").arg(BUILD_REG_KEY), BUILD_FILE_RELOAD_TIMEOUT).toInt();
+	m_enableReload = s.value(QString("%1EnableReloadBuildFiles").arg(BUILD_REG_KEY), true).toBool();
+	m_timeoutReload = s.value(QString("%1TimeoutReloadBuildFiles").arg(BUILD_REG_KEY), BUILD_FILE_RELOAD_TIMEOUT).toInt();
 
 	m_appDataSrvIP = s.value(QString("%1AppDataSrvIP").arg(BUILD_REG_KEY), QString("127.0.0.1")).toString();
 	m_ualTesterIP = s.value(QString("%1UalTesterIP").arg(BUILD_REG_KEY), QString("127.0.0.1")).toString();
 
-	m_signalsStatePath = s.value(QString("%1SignalsStatePath").arg(BUILD_REG_KEY), QString("127.0.0.1")).toString();
+	m_signalsStatePath = s.value(QString("%1SignalsStatePath").arg(BUILD_REG_KEY), QString("SignalStates.csv")).toString();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
@@ -172,8 +172,8 @@ void BuildOption::save()
 	s.setValue(QString("%1AppDataSrvIP").arg(BUILD_REG_KEY), m_appDataSrvIP);
 	s.setValue(QString("%1UalTesterIP").arg(BUILD_REG_KEY), m_ualTesterIP);
 
-	s.setValue(QString("%1EnableCheckBuildFiles").arg(BUILD_REG_KEY), m_enableReload);
-	s.setValue(QString("%1TimeoutCheckBuildFiles").arg(BUILD_REG_KEY), m_timeoutReload);
+	s.setValue(QString("%1EnableReloadBuildFiles").arg(BUILD_REG_KEY), m_enableReload);
+	s.setValue(QString("%1TimeoutReloadBuildFiles").arg(BUILD_REG_KEY), m_timeoutReload);
 
 	s.setValue(QString("%1SignalsStatePath").arg(BUILD_REG_KEY), m_signalsStatePath);
 }

@@ -184,12 +184,16 @@ void MainWindow::createMenu()
 	m_signalMenu->addSeparator();
 	m_signalMenu->addAction(m_signalSelectAllAction);
 
+	// Tools
+	//
+	m_toolsMenu = pMenuBar->addMenu(tr("Tools"));
+
+	m_toolsMenu->addAction(m_optionAction);
+
 	// ?
 	//
 	m_infoMenu = pMenuBar->addMenu(tr("?"));
 
-	m_infoMenu->addAction(m_optionAction);
-	m_infoMenu->addSeparator();
 	m_infoMenu->addAction(m_pAboutAppAction);
 }
 
@@ -213,8 +217,6 @@ bool MainWindow::createToolBars()
 
 	m_mainToolBar->addAction(m_sourceStartAction);
 	m_mainToolBar->addAction(m_sourceStopAction);
-	m_mainToolBar->addSeparator();
-	m_mainToolBar->addAction(m_sourceReloadAction);
 	m_mainToolBar->addSeparator();
 	m_mainToolBar->addAction(m_optionAction);
 
@@ -955,9 +957,10 @@ void MainWindow::saveSignalsState()
 
 	file.close();
 
-	theOptions.build().setSignalsStatePath(fileName);
-
 	QMessageBox::information(this, windowTitle(), tr("Save completed"));
+
+	theOptions.build().setSignalsStatePath(fileName);
+	theOptions.build().save();
 }
 
 // -------------------------------------------------------------------------------------------------------------------
