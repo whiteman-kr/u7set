@@ -45,6 +45,7 @@ public:
 	QString addressStr() const;
 
 	void clear();
+	bool isEmpty();
 
 	static bool isValidIPv4(const QString& ipAddressStr);
 	static bool isValidPort(const QString& portStr);
