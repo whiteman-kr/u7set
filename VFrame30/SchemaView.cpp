@@ -216,14 +216,14 @@ namespace VFrame30
 
 		// Calc size
 		//
-		int widthInPixel = schema()->GetDocumentWidth(p->device()->physicalDpiX(), zoom());
-		int heightInPixel = schema()->GetDocumentHeight(p->device()->physicalDpiY(), zoom());
+		int widthInPixel = schema()->GetDocumentWidth(p->device()->logicalDpiX(), zoom());
+		int heightInPixel = schema()->GetDocumentHeight(p->device()->logicalDpiY(), zoom());
 
 		// Clear device
 		//
 		p->fillRect(QRectF(0, 0, widthInPixel + 1, heightInPixel + 1), QColor(0xB0, 0xB0, 0xB0));
 
-		if (p->device()->physicalDpiX() <= 96)
+		if (p->device()->logicalDpiX() <= 96)
 		{
 			// If higher then 96 then most likely it is 4K display, no need to use Antialiasing
 			// Note, that font will be antialiased in anyway
@@ -252,8 +252,8 @@ namespace VFrame30
 		{
 			painter->translate(startX + 0.5, startY + 0.5);
 			painter->scale(
-				(double)painter->device()->physicalDpiX() * zoom / 100.0,
-				(double)painter->device()->physicalDpiY() * zoom / 100.0);
+				(double)painter->device()->logicalDpiX() * zoom / 100.0,
+				(double)painter->device()->logicalDpiY() * zoom / 100.0);
 		}
 		else
 		{
@@ -310,8 +310,8 @@ namespace VFrame30
 
 		// Calc size
 		//
-		int widthInPixel = schema()->GetDocumentWidth(p.device()->physicalDpiX(), 100.0);		// Export 100% zoom
-		int heightInPixel = schema()->GetDocumentHeight(p.device()->physicalDpiY(), 100.0);		// Export 100% zoom
+		int widthInPixel = schema()->GetDocumentWidth(p.device()->logicalDpiX(), 100.0);		// Export 100% zoom
+		int heightInPixel = schema()->GetDocumentHeight(p.device()->logicalDpiY(), 100.0);		// Export 100% zoom
 
 		// Clear device
 		//
@@ -353,8 +353,8 @@ namespace VFrame30
 		}
 		else
 		{
-			dpiX = dpiX == 0 ? physicalDpiX() : dpiX;
-			dpiY = dpiY == 0 ? physicalDpiY() : dpiY;
+			dpiX = dpiX == 0 ? logicalDpiX() : dpiX;
+			dpiY = dpiY == 0 ? logicalDpiY() : dpiY;
 
 			pDestDocPos->setX(x / (dpiX * (m_zoom / 100.0)));
 			pDestDocPos->setY(y / (dpiY * (m_zoom / 100.0)));
@@ -370,17 +370,64 @@ namespace VFrame30
 		return m_zoom;
 	}
 
-	void SchemaView::setZoom(double value, bool repaint /*= true*/, int dpiX /*= 0*/, int dpiY /*= 0*/)
+	double SchemaView::setZoom(double value, bool repaint /*= true*/, int dpiX /*= 0*/, int dpiY /*= 0*/)
 	{
-		value = value > 500 ? 500 : value;
-		value = value < 50 ? 50 : value;
-
-		m_zoom = value;
-
 		// Calc DPI
 		//
-		dpiX = (dpiX == 0) ? physicalDpiX() : dpiX;
-		dpiY = (dpiY == 0) ? physicalDpiY() : dpiY;
+		dpiX = (dpiX == 0) ? logicalDpiX() : dpiX;
+		dpiY = (dpiY == 0) ? logicalDpiY() : dpiY;
+
+		// if value is 0 then fit page into parent
+		//
+		if (value == 0)
+		{
+			QWidget* viewportWidget = this->parentWidget();		// Viewport can be real from QAbstractScrollArea or just any widget
+			QAbstractScrollArea* abstractScrollArea = qobject_cast<QAbstractScrollArea*>(viewportWidget->parentWidget());
+
+			if (viewportWidget == nullptr)
+			{
+				Q_ASSERT(viewportWidget);
+				value = 100;
+			}
+			else
+			{
+				QSize viewportSize;
+
+				if (abstractScrollArea != nullptr)
+				{
+					viewportSize = abstractScrollArea->maximumViewportSize();
+				}
+				else
+				{
+					viewportSize = viewportWidget->size();
+				}
+
+				// Scale to fit viewportWidget
+				//
+				double vertScaleFactor = 1.0;
+				double horzScaleFactor = 1.0;
+
+				if (schema()->unit() == SchemaUnit::Display)
+				{
+					horzScaleFactor = (viewportSize.width() * 0.99) / schema()->docWidth();
+					vertScaleFactor = (viewportSize.height() * 0.99) / schema()->docHeight();
+				}
+				else
+				{
+					horzScaleFactor = (viewportSize.width() * 0.99) / (schema()->docWidth() * dpiX);
+					vertScaleFactor = (viewportSize.height() * 0.99) / (schema()->docHeight() * dpiY);
+				}
+
+				value = std::min(vertScaleFactor, horzScaleFactor) * 100.0;
+			}
+		}
+		else
+		{
+			value = qBound(50.0, value, 500.0);
+			value = (static_cast<int>(value) / static_cast<int>(ZoomStep)) * static_cast<int>(ZoomStep);
+		}
+
+		m_zoom = value;
 
 		// resize widget
 		//
@@ -401,7 +448,7 @@ namespace VFrame30
 			this->repaint();
 		}
 
-		return;
+		return m_zoom;
 	}
 
 	const Session& SchemaView::session() const
