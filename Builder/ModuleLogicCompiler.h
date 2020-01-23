@@ -266,6 +266,8 @@ namespace Builder
 
 		bool checkBusProcessingItemsConnections();
 
+		void testNearest();
+
 		bool processSignalsWithFlags();
 		bool processAcquiredIOSignalsValidity();
 		bool processSimlockItems();
@@ -388,7 +390,10 @@ namespace Builder
 		bool processTransmitters();
 		bool processTransmitter(const UalItem* ualItem);
 		bool getConnectedSignals(const UalItem* transmitterItem, QVector<QPair<QString, UalSignal *>>* connectedSignals);
-		bool getNearestSignalID(const LogicPin& inPin, QString* nearestSignalID);
+
+		bool getDirectlyConnectedInSignalID(const LogicPin& inPin, QString* directlyConnectedInSignalID);
+		bool getNearestInSignalIDs(const LogicPin& inPin, QStringList* nearestSignalIDs);
+		bool getNearestInSignalID(const LogicPin& inPin, QString* nearestSignalID);
 
 		bool processSinglePortReceivers();
 		bool processSinglePortReceiver(const UalItem* item);

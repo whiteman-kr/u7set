@@ -2757,9 +2757,47 @@ namespace Builder
 		return result;
 	}
 
+	void ModuleLogicCompiler::testNearest()
+	{
+		for(UalItem* ualItem : m_ualItems)
+		{
+			TEST_PTR_CONTINUE(ualItem);
+
+			if (ualItem->label() != "APPSCHEMAID000001_115")
+			{
+				continue;
+			}
+
+			::std::vector<LogicPin> in = ualItem->inputs();
+
+			if (in.size() != 1)
+			{
+				assert(false);
+				continue;
+			}
+
+			QString directID;
+
+			getDirectlyConnectedInSignalID(in[0], &directID);
+
+			QString nearestID;
+
+			getNearestInSignalID(in[0], &nearestID);
+
+			QStringList nearestIDs;
+
+			getNearestInSignalIDs(in[0], &nearestIDs);
+
+			DEBUG_STOP
+		}
+	}
+
+
 	bool ModuleLogicCompiler::processSignalsWithFlags()
 	{
 		m_signalsWithFlags.clear();
+
+		testNearest();
 
 		bool result = true;
 
@@ -6449,7 +6487,7 @@ namespace Builder
 
 			QString nearestSignalID;
 
-			result &= getNearestSignalID(inPin, &nearestSignalID);
+			result &= getNearestInSignalID(inPin, &nearestSignalID);
 
 			connectedSignals->append(QPair<QString, UalSignal*>(nearestSignalID, ualSignal));
 		}
@@ -6457,16 +6495,41 @@ namespace Builder
 		return result;
 	}
 
-	bool ModuleLogicCompiler::getNearestSignalID(const LogicPin& inPin, QString* nearestSignalID)
+	bool ModuleLogicCompiler::getDirectlyConnectedInSignalID(const LogicPin& inPin, QString* directlyConnectedInSignalID)
 	{
-		if (nearestSignalID == nullptr)
+		TEST_PTR_LOG_RETURN_FALSE(directlyConnectedInSignalID, log());
+
+		directlyConnectedInSignalID->clear();
+
+		const std::vector<QUuid>& accosiatedOutputsUuids = inPin.associatedIOs();
+
+		for(QUuid outPinUuid : accosiatedOutputsUuids)
 		{
-			LOG_NULLPTR_ERROR(m_log);
-			return false;
+			UalItem* ualItem = m_pinParent.value(outPinUuid, nullptr);
+
+			TEST_PTR_CONTINUE(ualItem);
+
+			if (ualItem->isSignal() == true)
+			{
+				*directlyConnectedInSignalID = ualItem->strID();
+
+				// directly connected input signal can be only one!
+
+				return true;
+			}
 		}
 
-		nearestSignalID->clear();
+		return true;
+	}
 
+	bool ModuleLogicCompiler::getNearestInSignalIDs(const LogicPin& inPin, QStringList* nearestSignalIDs)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(nearestSignalIDs, log());
+
+		nearestSignalIDs->clear();
+
+		// searching of directly connected input signal
+		//
 		const std::vector<QUuid>& accosiatedOutputsUuids = inPin.associatedIOs();
 
 		for(QUuid outPinUuid : accosiatedOutputsUuids)
@@ -6481,17 +6544,27 @@ namespace Builder
 
 			if (ualItem->isSignal() == true)
 			{
-				*nearestSignalID = ualItem->strID();
+				nearestSignalIDs->append(ualItem->strID());
+
+				// directly connected input signal can be only one!
+
 				return true;
 			}
 		}
 
-		if (accosiatedOutputsUuids.size() != 1)
-		{
-			return true;
-		}
+		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(accosiatedOutputsUuids.size() == 1, log());
 
-		QUuid outPinUuid = accosiatedOutputsUuids[0];
+		// searching of nearest signal connected like this
+		//
+		//                +--[ nearestSignalID ]
+		//                |
+		//	+-------+     |                    +-------+
+		//	|  AFB1 |     |	             inPin |  AFB2 |
+		//	|	out	|-----+--------------------+       |
+		//	|       |                          |       |
+		//	+-------+                          +-------+
+
+		QUuid outPinUuid = accosiatedOutputsUuids[0];						// take out pin of AFB1 item
 
 		UalItem* ualItem = m_pinParent.value(outPinUuid, nullptr);
 
@@ -6523,12 +6596,29 @@ namespace Builder
 
 			if (nearestUalItem->isSignal() == true)
 			{
-				*nearestSignalID = nearestUalItem->strID();
-				return true;
+				nearestSignalIDs->append(nearestUalItem->strID());
 			}
 		}
 
 		return true;
+	}
+
+	bool ModuleLogicCompiler::getNearestInSignalID(const LogicPin& inPin, QString* nearestSignalID)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(nearestSignalID, log());
+
+		nearestSignalID->clear();
+
+		QStringList nearestSignalIDs;
+
+		bool result = getNearestInSignalIDs(inPin, &nearestSignalIDs);
+
+		if (nearestSignalIDs.size() > 0)
+		{
+			*nearestSignalID = nearestSignalIDs.first();
+		}
+
+		return result;
 	}
 
 	bool ModuleLogicCompiler::processSinglePortReceivers()
