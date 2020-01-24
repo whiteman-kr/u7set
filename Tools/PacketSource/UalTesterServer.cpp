@@ -130,7 +130,7 @@ void UalTesterServer::onTuningSignalsWriteRequest(const char *requestData, quint
 			continue;
 		}
 
-		PS::Signal* pSignal = m_signalBase->signalPtr(wrCmd.signalhash());
+		PS::Signal* pSignal = m_signalBase->signalPtr(static_cast<Hash>(wrCmd.signalhash()));
 		if (pSignal == nullptr)
 		{
 			continue;
