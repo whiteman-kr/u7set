@@ -19,7 +19,7 @@ namespace Builder
 		{
 		private:
 			Address16 m_address;
-			QString m_signalStrID;
+			QString m_signalID;
 			int m_sizeW = 0;
 			bool m_isDiscrete = false;
 
@@ -28,7 +28,7 @@ namespace Builder
 
 			SignalAddress16(const QString& strID, const Address16& address, int sizeW, bool isDiscrete) :
 				m_address(address),
-				m_signalStrID(strID),
+				m_signalID(strID),
 				m_sizeW(sizeW),
 				m_isDiscrete(isDiscrete)
 			{
@@ -36,14 +36,16 @@ namespace Builder
 
 			SignalAddress16(const SignalAddress16& sa)
 			{
-				m_signalStrID = sa.m_signalStrID;
+				m_signalID = sa.m_signalID;
 				m_address = sa.m_address;
 				m_sizeW = sa.m_sizeW;
 				m_isDiscrete = sa.m_isDiscrete;
 			}
 
-			void setSignalStrID(const QString& strID) { m_signalStrID = strID; }
-			QString signalStrID() const { return m_signalStrID; }
+			void setSignalStrID(const QString& strID) { m_signalID = strID; }
+			QString signalStrID() const { return m_signalID; }
+			void clearSignalID() { m_signalID.clear(); }
+			void appendSignalID(const QString &signalID);
 
 			void setAddress(const Address16& address) { m_address = address; }
 			Address16 address() const { return m_address; }
@@ -78,6 +80,7 @@ namespace Builder
 		bool hasSignals() const { return m_signals.size() > 0; }
 
 		QVector<SignalAddress16>& getSignals() { return m_signals; }
+		QVector<SignalAddress16> getSignalsJoined() const;
 
 		void appendUalRefSignals(const Address16& addr16, const UalSignal* ualSignal, bool appendAcquiredOnly);
 

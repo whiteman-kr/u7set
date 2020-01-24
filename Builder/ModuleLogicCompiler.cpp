@@ -2008,7 +2008,7 @@ namespace Builder
 
 		if (ualAfb->isSetFlagsItem() == true)
 		{
-			return true;			// signal creation isn't required
+			return true;			// set_flags item isn't create signal
 		}
 
 		bool result = true;
@@ -2424,11 +2424,6 @@ namespace Builder
 			return false;
 		}
 
-		if (ualAfb->isSetFlagsItem() == true)
-		{
-			return linkSetFlagsItemInput(srcItem, destItem, inPinUuid, ualSignal);
-		}
-
 		LogicAfbSignal inSignal;
 
 		bool result = ualAfb->getAfbSignalByPinUuid(inPinUuid, &inSignal);
@@ -2436,6 +2431,13 @@ namespace Builder
 		if (result == false)
 		{
 			return false;
+		}
+
+		if (ualAfb->isSetFlagsItem() == true && inSignal.caption() == UalAfb::IN_PIN_CAPTION)
+		{
+			// processing for set_flags item "in" pin is different
+			//
+			return linkSetFlagsItemInput(srcItem, destItem, inPinUuid, ualSignal);
 		}
 
 		result = ualSignal->isCompatible(*destItem, inSignal, log());
@@ -2457,6 +2459,13 @@ namespace Builder
 		LOG_IF_NULLPTR_RETURN_FALSE(setFlagsItem, m_log);
 		LOG_IF_NULLPTR_RETURN_FALSE(ualSignal, m_log);
 
+		// linking of set_flags item "in" pin differences:
+		//
+		// 1) signal type compatibility check is not required. Any type of signal can be connected to "in" of set_flags
+		// 2) "in" of set_flags item is directly connected to "out". So "out" set_flags item is not create new Ual signal.
+		//    Items connected to "out" also should be linked to "in"
+		//
+
 		UalAfb* ualAfb = m_ualAfbs.value(setFlagsItem->guid(), nullptr);
 
 		LOG_IF_NULLPTR_RETURN_FALSE(ualAfb, m_log);
@@ -2467,9 +2476,38 @@ namespace Builder
 
 		LOG_IF_NULLPTR_RETURN_FALSE(inPin, m_log);
 
-		bool isInputPinOfSetFlagsItem = inPin->caption() == UalAfb::IN_PIN_CAPTION;
+		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(inPin->caption() == UalAfb::IN_PIN_CAPTION, log());
 
-		if (isInputPinOfSetFlagsItem == false)
+		if (ualSignal->isConst() == true)
+		{
+			// Setting of flags to a constant signal (Logic schema %1).
+			//
+			m_log->wrnALC5178(srcItem->guid(), setFlagsItem->guid(), setFlagsItem->schemaID());
+		}
+
+		bool result = m_ualSignals.appendRefPin(setFlagsItem, inPin->guid(), ualSignal);
+
+		RETURN_IF_FALSE(result);
+
+		// linking items connected to "out"
+		//
+		const std::vector<LogicPin>& outputs = ualAfb->outputs();
+
+		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(outputs.size() == 1, log());
+
+		const LogicPin& outPin = outputs[0];
+
+		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(outPin.caption() == UalAfb::OUT_PIN_CAPTION, log());
+
+		result = m_ualSignals.appendRefPin(setFlagsItem, outPin.guid(), ualSignal);
+
+		RETURN_IF_FALSE(result);
+
+		result = linkConnectedItems(srcItem, outPin, ualSignal);
+
+		return result;
+
+/*		if (isInputPinOfSetFlagsItem == false)
 		{
 			// processing of link to 'flags' inputs
 			//
@@ -2492,12 +2530,6 @@ namespace Builder
 		// processing of link to 'in' pin
 		//
 
-		if (ualSignal->isConst() == true)
-		{
-			// Setting of flags to a constant signal (Logic schema %1).
-			//
-			m_log->wrnALC5178(srcItem->guid(), setFlagsItem->guid(), setFlagsItem->schemaID());
-		}
 
 		bool result = m_ualSignals.appendRefPin(setFlagsItem, inPin->guid(), ualSignal);
 
@@ -2523,9 +2555,7 @@ namespace Builder
 
 		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(result, m_log);
 
-		result = linkConnectedItems(srcItem, outPin, ualSignal);
-
-		return result;
+		result = linkConnectedItems(srcItem, outPin, ualSignal); */
 	}
 
 	bool ModuleLogicCompiler::linkBusComposerInput(UalItem* srcItem, UalItem* busComposerItem, QUuid inPinUuid, UalSignal* ualSignal)
@@ -2797,9 +2827,10 @@ namespace Builder
 	{
 		m_signalsWithFlags.clear();
 
-		testNearest();
-
 		bool result = true;
+
+/*		testNearest();
+
 
 		result &= processAcquiredIOSignalsValidity();
 		result &= processSimlockItems();
@@ -2810,7 +2841,7 @@ namespace Builder
 
 		result &= checkSignalsWithFlags();
 
-		RETURN_IF_FALSE(result);
+		RETURN_IF_FALSE(result);*/
 
 		writeSignalsWithFlagsReport();
 
