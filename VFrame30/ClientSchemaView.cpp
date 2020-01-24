@@ -152,6 +152,27 @@ namespace VFrame30
 		m_clientSchemaView->setVariable(name, value);
 	}
 
+	QString ScriptSchemaView::schemaId() const
+	{
+
+		return m_clientSchemaView->schema()->schemaId();
+	}
+
+	QString ScriptSchemaView::schemaCaption() const
+	{
+		return m_clientSchemaView->schema()->caption();
+	}
+
+	QObject* ScriptSchemaView::schema()
+	{
+		if (m_clientSchemaView == nullptr)
+		{
+			return nullptr;
+		}
+
+		return new ScriptSchema(m_clientSchemaView->schema());
+	}
+
 	//
 	// ClientSchemaView
 	//

@@ -21,6 +21,59 @@ namespace VFrame30
 {
 	Factory<VFrame30::Schema> SchemaFactory;
 
+	//
+	// ScriptSchema
+	//
+	ScriptSchema::ScriptSchema(std::shared_ptr<Schema> schema) :
+		m_schema(schema)
+	{
+		Q_ASSERT(m_schema);
+	}
+
+	ScriptSchema::~ScriptSchema()
+	{
+		qDebug() << "ScriptSchema::~ScriptSchema " << schemaId();
+	}
+
+	bool ScriptSchema::isLogicSchema() const
+	{
+		return m_schema ? m_schema->isLogicSchema() : false;
+	}
+
+	bool ScriptSchema::isUfbSchema() const
+	{
+		return m_schema ? m_schema->isUfbSchema() : false;
+	}
+
+	bool ScriptSchema::isMonitorSchema() const
+	{
+		return m_schema ? m_schema->isMonitorSchema() : false;
+	}
+
+
+	bool ScriptSchema::isTuningSchema() const
+	{
+		return m_schema ? m_schema->isTuningSchema() : false;
+	}
+
+	bool ScriptSchema::isDiagSchema() const
+	{
+		return m_schema ? m_schema->isDiagSchema() : false;
+	}
+
+	QString ScriptSchema::schemaId() const
+	{
+		return m_schema ? m_schema->schemaId() : QString{};
+	}
+
+	QString ScriptSchema::caption() const
+	{
+		return m_schema ? m_schema->caption() : QString{};
+	}
+
+	//
+	// Schema
+	//
 	Schema::Schema(void)
 	{
 		Init();

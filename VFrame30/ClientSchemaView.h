@@ -54,11 +54,27 @@ namespace VFrame30
 			// User pressed "Yes"
 			....
 		}
+
+		// This is an example how to set current schema caption to rectangle text on click event (ClickScript)/
+		//
+		(function(schemaItem)
+		{
+			schemaItem.Text = view.SchemaCaption;
+		})
 		\endcode
 	*/
 	class ScriptSchemaView : public QObject
 	{
 		Q_OBJECT
+
+		/// \brief Current schema unique identifier (SchemaID).
+		Q_PROPERTY(QString SchemaID READ schemaId)
+
+		/// \brief Current schema caption.
+		Q_PROPERTY(QString SchemaCaption READ schemaCaption)
+
+		/// \brief Get current ScriptSchema object. To get SchemaID or SchemaCaption for perfomance reason use appropriate properties of view <b>view.SchemaID</b> and <b>view.SchemaCaption</b>.
+		Q_PROPERTY(QObject* Schema READ schema)
 
 	public:
 		explicit ScriptSchemaView(ClientSchemaView* clientSchemaView, QObject* parent = nullptr);
@@ -102,8 +118,14 @@ namespace VFrame30
 		/// \brief Retrieves a value of the variable specified by name.
 		QVariant variable(QString name);
 
-		/// \brief Sets the value of the variable specified by name
+		/// \brief Sets the value of the variable specified by name.
 		void setVariable(QString name, const QVariant& value);
+
+	private:
+		QString schemaId() const;
+		QString schemaCaption() const;
+
+		QObject* schema();
 
 		// Data
 		//
