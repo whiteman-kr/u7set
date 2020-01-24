@@ -424,7 +424,6 @@ namespace VFrame30
 		else
 		{
 			value = qBound(50.0, value, 500.0);
-			value = (static_cast<int>(value) / static_cast<int>(ZoomStep)) * static_cast<int>(ZoomStep);
 		}
 
 		m_zoom = value;

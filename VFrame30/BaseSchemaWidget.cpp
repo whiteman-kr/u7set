@@ -266,13 +266,17 @@ namespace VFrame30
 
 	void BaseSchemaWidget::zoomIn()
 	{
-		setZoom(zoom() + ZoomStep, false);
+		double value = (static_cast<int>(zoom()) / static_cast<int>(ZoomStep)) * static_cast<int>(ZoomStep);
+		setZoom(value + ZoomStep, false);
+
 		return;
 	}
 
 	void BaseSchemaWidget::zoomOut()
 	{
-		setZoom(zoom() - ZoomStep, false);
+		double value = (static_cast<int>(zoom()) / static_cast<int>(ZoomStep)) * static_cast<int>(ZoomStep);
+		setZoom(value - ZoomStep, false);
+
 		return;
 	}
 
