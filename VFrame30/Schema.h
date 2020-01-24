@@ -36,10 +36,10 @@ namespace VFrame30
 	{
 		Q_OBJECT
 
-		/// \brief Schema unique identifier (SchemaID)
+		/// \brief Schema unique identifier (SchemaID).
 		Q_PROPERTY(QString SchemaID READ schemaId)
 
-		/// \brief Schema caption
+		/// \brief Schema caption.
 		Q_PROPERTY(QString Caption READ caption)
 
 	public:
@@ -47,19 +47,19 @@ namespace VFrame30
 		~ScriptSchema();
 
 	public slots:
-		/// \brief Return true if is ApplicationLogic schema
+		/// \brief Return true if is ApplicationLogic schema.
 		bool isLogicSchema() const;
 
-		/// \brief Return true if is UserFunctionalBlock schema
+		/// \brief Return true if is UserFunctionalBlock schema.
 		bool isUfbSchema() const;
 
-		/// \brief Return true if is Monitor schema
+		/// \brief Return true if is Monitor schema.
 		bool isMonitorSchema() const;
 
-		/// \brief Return true if is TuningClient schema
+		/// \brief Return true if is TuningClient schema.
 		bool isTuningSchema() const;
 
-		/// \brief Return true if is Diag schema
+		/// \brief Return true if is Diag schema.
 		bool isDiagSchema() const;
 
 	private:
