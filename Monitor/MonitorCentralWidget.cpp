@@ -93,6 +93,15 @@ void MonitorCentralWidget::slot_newTab()
 	}
 
 	slot_newSameTab(curTabWidget);
+
+	// Set zoom for new tab
+	//
+	if (auto newTabWidget = dynamic_cast<MonitorSchemaWidget*>(currentWidget());
+		newTabWidget != nullptr)
+	{
+		newTabWidget->clientSchemaView()->setZoom(0);
+	}
+
 	return;
 }
 
