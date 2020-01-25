@@ -481,8 +481,19 @@ namespace VFrame30
 			{
 				// Get signal description/state
 				//
-				appSignals[signalIndex] = drawParam->appSignalController()->signalParam(id, nullptr);
-				appSignalStates[signalIndex] = drawParam->appSignalController()->signalState(id, nullptr);
+
+				if (drawParam->schema()->isUfbSchema() == true)
+				{
+					appSignals[signalIndex] = AppSignalParam();
+					appSignalStates[signalIndex] = AppSignalState();
+
+					appSignals[signalIndex].setAppSignalId(id);		// If signal tot found it allows to show AppSignalID at least
+				}
+				else
+				{
+					appSignals[signalIndex] = drawParam->appSignalController()->signalParam(id, nullptr);
+					appSignalStates[signalIndex] = drawParam->appSignalController()->signalState(id, nullptr);
+				}
 			}
 
 			signalIndex ++;
@@ -788,8 +799,18 @@ namespace VFrame30
 
 		if (drawParam->isMonitorMode() == true && isCommented() == false)
 		{
-			signal = drawParam->appSignalController()->signalParam(appSignalId, nullptr);
-			signalState = drawParam->appSignalController()->signalState(appSignalId, nullptr);
+			if (drawParam->schema()->isUfbSchema() == true)
+			{
+				//signal = AppSignalParam();
+				//signalState = AppSignalState();
+
+				signal.setAppSignalId(appSignalId);		// If signal tot found it allows to show AppSignalID at least
+			}
+			else
+			{
+				signal = drawParam->appSignalController()->signalParam(appSignalId, nullptr);
+				signalState = drawParam->appSignalController()->signalState(appSignalId, nullptr);
+			}
 		}
 
 		// Get ImpactSignal
