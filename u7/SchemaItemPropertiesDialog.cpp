@@ -107,7 +107,7 @@ void SchemaItemPropertiesDialog::closeEvent(QCloseEvent*)
 void SchemaItemPropertiesDialog::done(int r)
 {
 	saveSettings();
-    QDialog::done(r);
+	QDialog::done(r);
 }
 
 void SchemaItemPropertiesDialog::saveSettings()
