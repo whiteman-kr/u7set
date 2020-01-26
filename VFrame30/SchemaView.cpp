@@ -103,6 +103,64 @@ namespace VFrame30
 		}
 	}
 
+	void SchemaView::deleteControlWidgets()
+	{
+		// Find all control items
+		//
+		std::map<QUuid, std::shared_ptr<VFrame30::SchemaItemControl>> controlItems;
+
+		for (std::shared_ptr<VFrame30::SchemaLayer> layer : schema()->Layers)
+		{
+			for (SchemaItemPtr& item : layer->Items)
+			{
+				if (item->isControl() == false)
+				{
+					continue;
+				}
+
+				VFrame30::SchemaItemControl* controlItem = item->toType<VFrame30::SchemaItemControl>();
+				if (controlItem == nullptr)
+				{
+					Q_ASSERT(controlItem);
+					continue;
+				}
+
+				controlItems[item->guid()] = std::dynamic_pointer_cast<SchemaItemControl>(item);
+			}
+		}
+
+		// Remove all control widgets
+		//
+		QObjectList childWidgets = children();							// Don't make childWidgets as a reference, as we change this list in the loop
+
+		for (QObject* childObject : childWidgets)
+		{
+			QWidget* childWidget = dynamic_cast<QWidget*>(childObject);
+
+			if (childWidget == nullptr)
+			{
+				assert(dynamic_cast<QWidget*>(childObject) != nullptr);
+				continue;
+			}
+
+			QString objectName{childWidget->objectName()};
+			QUuid widgetUuid{objectName};
+
+			if (widgetUuid.isNull() == true)
+			{
+				continue;
+			}
+
+			if (auto foundIt = controlItems.find(widgetUuid);
+				foundIt != controlItems.end())
+			{
+				delete childWidget;
+			}
+		}
+
+		return;
+	}
+
 	std::shared_ptr<Schema> SchemaView::schema()
 	{
 		return m_schema;

@@ -277,6 +277,10 @@ void MonitorCentralWidget::slot_resetSchema()
 		}
 
 		tabPage->setSchema(schemaToLoad);
+
+		tabPage->clientSchemaView()->deleteControlWidgets();		// deleteControlWidgets after loading new schema, as it will delete old widgets and later they will be created
+		tabPage->clientSchemaView()->updateControlWidgets(false);
+
 		tabPage->resetHistory();
 
 		if (i == currentIndex())

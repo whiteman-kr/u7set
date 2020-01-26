@@ -20,8 +20,9 @@ namespace VFrame30
 		explicit SchemaView(QWidget* parent = 0);
 		explicit SchemaView(std::shared_ptr<Schema> schema, QWidget* parent = 0);
 
-	protected:
+	public:
 		void updateControlWidgets(bool editMode);
+		void deleteControlWidgets();
 		
 		// Painting
 		//
