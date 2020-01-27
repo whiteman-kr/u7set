@@ -8,7 +8,7 @@ namespace VFrame30
 {
 	LogicSchema::LogicSchema(void)
 	{
-		qDebug() << "LogicSchema::LogicSchema(void)";
+		//qDebug() << "LogicSchema::LogicSchema(void)";
 
 		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::equipmentIds, true, LogicSchema::equipmentIds, LogicSchema::setEquipmentIds);
 		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::lmDescriptionFile, true, LogicSchema::lmDescriptionFile, LogicSchema::setLmDescriptionFile);
@@ -32,7 +32,7 @@ namespace VFrame30
 
 	LogicSchema ::~LogicSchema (void)
 	{
-		qDebug() << "LogicSchema::~LogicSchema(void)  SchemaID = " << schemaId();
+		//qDebug() << "LogicSchema::~LogicSchema(void)  SchemaID = " << schemaId();
 	}
 
 	bool LogicSchema::SaveData(Proto::Envelope* message) const
@@ -240,7 +240,7 @@ namespace VFrame30
 		return result;
 	}
 
-	QStringList LogicSchema::equipmentIdList() const
+	const QStringList& LogicSchema::equipmentIdList() const
 	{
 		return m_equipmentIds;
 	}

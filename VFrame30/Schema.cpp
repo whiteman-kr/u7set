@@ -190,6 +190,12 @@ namespace VFrame30
 
 	bool Schema::LoadData(const Proto::Envelope& message)
 	{
+//		qDebug() << Q_FUNC_INFO;
+//		qDebug() << "        Start loading Schema....";
+
+//		QTime t;
+//		t.start();
+
 		if (message.has_schema() == false)
 		{
 			assert(message.has_schema());
@@ -255,6 +261,9 @@ namespace VFrame30
 		// Load fake empty Afb Collection,
 		//
 		//m_afbCollection.LoadData(schema.afbs());
+
+//		int elapsed = t.elapsed();
+//		qDebug() << "        Schema " << schemaId() << " is loaded for " << elapsed << " ms";
 
 		return true;
 	}

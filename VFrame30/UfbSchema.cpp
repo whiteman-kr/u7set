@@ -7,7 +7,7 @@ namespace VFrame30
 {
 	UfbSchema::UfbSchema(void)
 	{
-		qDebug() << "UfbSchema::UfbSchema(void)";
+		//qDebug() << "UfbSchema::UfbSchema(void)";
 
 		ADD_PROPERTY_GETTER_SETTER(QString, "Description", true, UfbSchema::description, UfbSchema::setDescription);
 		ADD_PROPERTY_GETTER(int, "Version", true, UfbSchema::version);
@@ -31,7 +31,7 @@ namespace VFrame30
 
 	UfbSchema::~UfbSchema(void)
 	{
-		qDebug() << "UfbSchema::~UfbSchema(void)";
+		//qDebug() << "UfbSchema::~UfbSchema(void)";
 	}
 
 	bool UfbSchema::SaveData(Proto::Envelope* message) const
