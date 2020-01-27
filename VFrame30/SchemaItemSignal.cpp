@@ -931,20 +931,20 @@ static const QString column_horzAlign_caption[8] = {"Column_00_HorzAlign", "Colu
 			addProperty<double>(column_width_caption[i],
 								monitorColumnsCategory,
 								true,
-								std::bind(&SchemaItemSignal::columnWidth, this, static_cast<int>(i)),
-								std::bind(&SchemaItemSignal::setColumnWidth, this, std::placeholders::_1, static_cast<int>(i)));
+								[this, i](){return columnWidth(static_cast<int>(i));},
+								[this, i](auto value){return setColumnWidth(value, static_cast<int>(i));});
 
 			addProperty<E::ColumnData>(column_data_caption[i],
 									   monitorColumnsCategory,
 									   true,
-									   std::bind(&SchemaItemSignal::columnData, this, static_cast<int>(i)),
-									   std::bind(&SchemaItemSignal::setColumnData, this, std::placeholders::_1, static_cast<int>(i)));
+									   [this, i](){return columnData(static_cast<int>(i));},
+									   [this, i](auto value){return setColumnData(value, static_cast<int>(i));});
 
 			addProperty<E::HorzAlign>(column_horzAlign_caption[i],
 									  monitorColumnsCategory,
 									  true,
-									  std::bind(&SchemaItemSignal::columnHorzAlign, this, static_cast<int>(i)),
-									  std::bind(&SchemaItemSignal::setColumnHorzAlign, this, std::placeholders::_1, static_cast<int>(i)));
+									  [this, i](){return columnHorzAlign(static_cast<int>(i));},
+									  [this, i](auto value){return setColumnHorzAlign(value, static_cast<int>(i));});
 		}
 
 		// Allow signals and notify PropertyEditor that it can update property list now

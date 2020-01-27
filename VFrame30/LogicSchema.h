@@ -32,7 +32,7 @@ namespace VFrame30
 		//
 	public:
 		QString equipmentIds() const;
-		QStringList equipmentIdList() const;
+		const QStringList& equipmentIdList() const;
 		void setEquipmentIds(const QString& s);
 		void setEquipmentIdList(const QStringList& s);
 

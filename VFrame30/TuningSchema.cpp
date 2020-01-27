@@ -7,7 +7,7 @@ namespace VFrame30
 
 	TuningSchema::TuningSchema(void)
 	{
-		qDebug() << "TuningSchema::TuningSchema(void)";
+		//qDebug() << "TuningSchema::TuningSchema(void)";
 
 		setUnit(SchemaUnit::Display);
 
@@ -29,7 +29,7 @@ namespace VFrame30
 	
 	TuningSchema::~TuningSchema(void)
 	{
-		qDebug() << "TuningSchema::~TuningSchema(void)";
+		//qDebug() << "TuningSchema::~TuningSchema(void)";
 	}
 
 	QStringList TuningSchema::getSignalList() const
