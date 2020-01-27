@@ -85,7 +85,7 @@ namespace VFrame30
 		/// \brief Returns TuningSignalState structure or undefined if signal does not exist.
 		QVariant signalState(const QString& appSignalId);	// If no signal with specified appSignalID found, QVariant is undefined
 
-		/// \brief Writes value of tuning signal. If successful, returns true, otherwise returns false.
+		/// \brief Writes value of tuning signal. On success, returns true. Returns false if signal is not found, connection to TuningService is not established or value is out of range.
 		bool writeValue(QString appSignalId, QVariant value);
 
 	protected:
