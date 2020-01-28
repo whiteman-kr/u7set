@@ -152,9 +152,35 @@ namespace VFrame30
 		m_clientSchemaView->setVariable(name, value);
 	}
 
+	QObject* ScriptSchemaView::schemaByIndex(int schemaIndex)
+	{
+		if (schemaIndex < 0)
+		{
+			return nullptr;
+		}
+
+		auto s = m_clientSchemaView->schemaManager()->schemaByIndex(schemaIndex);
+
+		return s ? new ScriptSchema(s) : nullptr;
+	}
+
+	QString ScriptSchemaView::schemaCaptionById(const QString& schemaId) const
+	{
+		return m_clientSchemaView->schemaManager()->schemaCaptionById(schemaId);
+	}
+
+	QString ScriptSchemaView::schemaCaptionByIndex(int schemaIndex) const
+	{
+		return m_clientSchemaView->schemaManager()->schemaCaptionByIndex(schemaIndex);
+	}
+
+	QString ScriptSchemaView::schemaIdByIndex(int schemaIndex) const
+	{
+		return m_clientSchemaView->schemaManager()->schemaIdByIndex(schemaIndex);
+	}
+
 	QString ScriptSchemaView::schemaId() const
 	{
-
 		return m_clientSchemaView->schema()->schemaId();
 	}
 
@@ -172,6 +198,12 @@ namespace VFrame30
 
 		return new ScriptSchema(m_clientSchemaView->schema());
 	}
+
+	int ScriptSchemaView::schemaCount() const
+	{
+		return m_clientSchemaView->schemaManager()->schemaCount();
+	}
+
 
 	//
 	// ClientSchemaView

@@ -323,6 +323,11 @@ namespace VFrame30
 
 		QStringList schemasByAppSignalId(const QString& appSignalId) const;
 
+		int schemaCount() const;
+		QString schemaCaptionById(const QString& schemaId) const;
+		QString schemaCaptionByIndex(int schemaIndex) const;
+		QString schemaIdByIndex(int schemaIndex) const;
+
 	private:
 		std::map<QString, std::shared_ptr<SchemaDetails>> m_details;		// Key is schemaId
 	};

@@ -95,10 +95,6 @@ namespace VFrame30
 	public:
 		void drawHighlightRect(CDrawParam* drawParam, const QRectF& rect) const;
 
-		// Draw item's label
-		//
-		virtual void drawLabel(CDrawParam* drawParam) const override;
-
 		// Рисование элемента при его создании изменении
 		//
 		virtual void drawOutline(CDrawParam* drawParam) const override;

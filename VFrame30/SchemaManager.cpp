@@ -46,6 +46,36 @@ namespace VFrame30
 		return schema;
 	}
 
+	int SchemaManager::schemaCount() const
+	{
+		Q_ASSERT(false);		// "Must be implemented in derived class";
+		return 0;
+	}
+
+	std::shared_ptr<VFrame30::Schema> SchemaManager::schemaByIndex(int /*schemaIndex*/)
+	{
+		Q_ASSERT(false);		// "Must be implemented in derived class";
+		return {};
+	}
+
+	QString SchemaManager::schemaCaptionById(const QString& /*schemaId*/) const
+	{
+		Q_ASSERT(false);		// "Must be implemented in derived class";
+		return {};
+	}
+
+	QString SchemaManager::schemaCaptionByIndex(int /*schemaIndex*/) const
+	{
+		Q_ASSERT(false);		// "Must be implemented in derived class";
+		return {};
+	}
+
+	QString SchemaManager::schemaIdByIndex(int /*schemaIndex*/) const
+	{
+		Q_ASSERT(false);		// "Must be implemented in derived class";
+		return {};
+	}
+
 	// Load schema, must be overriden to perform loading schema appropriate to client.
 	//
 	std::shared_ptr<VFrame30::Schema> SchemaManager::loadSchema(QString schemaId)

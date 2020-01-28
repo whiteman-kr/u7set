@@ -76,6 +76,9 @@ namespace VFrame30
 		/// \brief Get current ScriptSchema object. To get SchemaID or SchemaCaption for perfomance reason use appropriate properties of view <b>view.SchemaID</b> and <b>view.SchemaCaption</b>.
 		Q_PROPERTY(QObject* Schema READ schema)
 
+		/// \brief Get schema count.
+		Q_PROPERTY(int SchemaCount READ schemaCount)
+
 	public:
 		explicit ScriptSchemaView(ClientSchemaView* clientSchemaView, QObject* parent = nullptr);
 		~ScriptSchemaView();
@@ -125,11 +128,27 @@ namespace VFrame30
 		/// \brief Sets the value of the variable specified by name.
 		void setVariable(QString name, const QVariant& value);
 
+		/// \brief Get schema by index. Avoid using this function for perfomance reason. To get schemas' identifiers and captions use schemaCaptionById, schemaCaptionByIndex, schemaIdByIndex
+		QObject* schemaByIndex(int schemaIndex);
+
+		/// \brief Get schema caption by schema identifier.
+		QString schemaCaptionById(const QString& schemaId) const;
+
+		// Not documented
+		//
+		QString schemaCaptionByIndex(int schemaIndex) const;
+
+		// Not documented
+		//
+		QString schemaIdByIndex(int schemaIndex) const;
+
 	private:
 		QString schemaId() const;
 		QString schemaCaption() const;
 
 		QObject* schema();
+
+		int schemaCount() const;
 
 		// Data
 		//

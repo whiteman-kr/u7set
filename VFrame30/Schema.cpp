@@ -1984,5 +1984,42 @@ namespace VFrame30
 		return result;
 	}
 
+	int SchemaDetailsSet::schemaCount() const
+	{
+		return static_cast<int>(m_details.size());
+	}
+
+	QString SchemaDetailsSet::schemaCaptionById(const QString& schemaId) const
+	{
+		auto it = m_details.find(schemaId);
+		return (it == m_details.end()) ? QString{} : it->second->m_caption;
+	}
+
+	QString SchemaDetailsSet::schemaCaptionByIndex(int schemaIndex) const
+	{
+		if (schemaIndex >=0 && schemaIndex < m_details.size())
+		{
+			auto it = m_details.begin();
+			std::advance(it, schemaIndex);
+
+			return (it == m_details.end()) ? QString{} : it->second->m_caption;
+		}
+
+		return {};
+	}
+
+	QString SchemaDetailsSet::schemaIdByIndex(int schemaIndex) const
+	{
+		if (schemaIndex >=0 && schemaIndex < m_details.size())
+		{
+			auto it = m_details.begin();
+			std::advance(it, schemaIndex);
+
+			return (it == m_details.end()) ? QString{} : it->second->m_schemaId;
+		}
+
+		return {};
+	}
+
 }
 
