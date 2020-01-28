@@ -18,6 +18,14 @@ public:
 protected:
 	virtual std::shared_ptr<VFrame30::Schema> loadSchema(QString schemaId) override;
 
+public:
+	virtual int schemaCount() const override;
+	virtual std::shared_ptr<VFrame30::Schema> schemaByIndex(int schemaIndex) override;
+
+	virtual QString schemaCaptionById(const QString& schemaId) const override;
+	virtual QString schemaCaptionByIndex(int schemaIndex) const override;
+	virtual QString schemaIdByIndex(int schemaIndex) const override;
+
 	// Slots
 	//
 protected slots:
