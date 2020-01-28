@@ -228,7 +228,9 @@ class AppSignalParam
 	Q_PROPERTY(QString AppSignalID READ appSignalId)
 
 	/// \brief Custom Application Signal Identifier
-	Q_PROPERTY(QString CustomSignalID READ customSignalId)
+	Q_PROPERTY(QString CustomAppSignalID READ customSignalId)
+
+	Q_PROPERTY(QString CustomSignalID READ customSignalId)	// same as CustomAppSignalID, for compatibility
 
 	/// \brief Signal Caption
 	Q_PROPERTY(QString Caption READ caption)

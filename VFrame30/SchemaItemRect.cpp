@@ -255,6 +255,11 @@ namespace VFrame30
 
 	void SchemaItemRect::setWeight(double weight)
 	{
+		if (weight < 0)
+		{
+			weight = 0;
+		}
+
 		if (itemUnit() == SchemaUnit::Display)
 		{
 			m_weight = CUtils::RoundDisplayPoint(weight);
