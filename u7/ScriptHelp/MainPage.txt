@@ -20,6 +20,7 @@ usually process pre-draw event to define item apperance depending on some signal
 
 Properties of static schema items like 
 \ref VFrame30::SchemaItemLine "SchemaItemLine",
+\ref VFrame30::SchemaItemPath "SchemaItemPath",
 \ref VFrame30::SchemaItemRect "SchemaItemRect",
 \ref VFrame30::SchemaItemImage "SchemaItemImage"
 can be changed by pre-draw event too.
@@ -75,5 +76,10 @@ Script code error messages are displayed directly on appropriate schema item whe
  */
 
 /**
+ *  @defgroup widgets Widgets
+ */
+
+/**
  *  @defgroup groupParamsStates Signal Parameters and States
  */
+

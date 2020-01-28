@@ -26,6 +26,23 @@ namespace VFrame30
 		To set an image to display, set <b>CurrentImageID</b> property to required item identifier depending on signal states.
 		Usually it is done by <b>PreDrawScript</b> event handler code.
 
+		<b>Event handlers</b>
+
+		To customize item's apperance and behaviour, event handler code is placed to following properties of the schema item using RPCT:
+
+		- <b>ClickScript</b> contains mouse click event handler code.
+		Click event is generated each time when user clicks mouse button on the item and <b>AcceptClick</b> property is set to true;<br>
+		-  <b>PreDrawScript</b> contains pre-draw event handler code. Pre-draw event is generated each time before item is redrawn.
+
+		<b>ClickScript</b> and <b>PreDrawScript</b> event handler function protypes:
+
+		\code
+		function(schemaItem)
+		\endcode
+
+		Parameters:<br>
+		<i>schemaItem</i> - a handle to schema item, type: SchemaItemImageValue.<br>
+
 		<b>Example:</b>
 
 		Assume schema item displays a limit switch of a control rod. Its state is described by two application signals:

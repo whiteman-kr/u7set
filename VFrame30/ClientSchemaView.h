@@ -91,7 +91,11 @@ namespace VFrame30
 		/// \brief Finds a schema item by its name (ObjectName property). Return value has SchemaItem type or undefined if item is not found.
 		QObject* findSchemaItem(QString objectName);	// Find SchemaItem by ObjectName
 
-		/// \brief Finds a schema control widget (edit control, button, etc...) by its name (ObjectName property). Return value has QWidget type or undefined if item is not found.
+		/// \brief Finds a schema control widget (edit control, button, etc...) by its name (ObjectName property).
+		///
+		/// Finds a schema control widget (edit control, button, etc...) by its name (ObjectName property).
+		/// Return value type depends on an object type and can be one of following: PushButtonWidget, LineEditWidget, etc.
+		/// Return value is undefined if item is not found.
 		QObject* findWidget(QString objectName);		// Find Widget associated with SchemaItem
 
 		void update();									// Update (redraw) schema view
