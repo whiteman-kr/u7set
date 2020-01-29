@@ -137,7 +137,8 @@ namespace Hardware
 		auto uuidProp = ADD_PROPERTY_GETTER(QUuid, PropertyNames::uuid, true, DeviceObject::uuid);
 		uuidProp->setExpert(true);
 
-		ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::equipmentIdTemplate, true, DeviceObject::equipmentIdTemplate, DeviceObject::setEquipmentIdTemplate);
+		auto equipmentIdTemplateProp = ADD_PROPERTY_GETTER_SETTER(QString, PropertyNames::equipmentIdTemplate, true, DeviceObject::equipmentIdTemplate, DeviceObject::setEquipmentIdTemplate);
+		equipmentIdTemplateProp->setValidator("^[a-zA-Z0-9#$_()]*$");
 
 		auto equipmentIdProp = ADD_PROPERTY_GETTER(QString, PropertyNames::equipmentId, true, DeviceObject::equipmentId);
 		equipmentIdProp->setReadOnly(true);
