@@ -4580,9 +4580,9 @@ function createOutputSignals(videoItemFblElement, afbElement)
 			</CommonScript>
 		</AFB>
 
-		<AFB id="#ff_sr_v1"        Caption="ff_sr"        Version="1.0006">
+		<AFB id="#ff_sr_v1"        Caption="ff_sr"        Version="1.0007">
 			<Properties>				
-				<Description>Set/Reset Block performs input data validity checking, sets or resets the input data to 1 or 0 state respectively and outputs the result. The Reset signal has the priority.</Description>
+				<Description>Set/Reset Block performs input data validity checking, sets or resets the input data to 1 or 0 state respectively and outputs the result. The Set signal has the priority.</Description>
 				<Category>FlipFlop</Category>
 				<OpCode>4</OpCode>
 				<HasRam>true</HasRam>				

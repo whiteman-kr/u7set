@@ -321,6 +321,7 @@ const UpgradeItem DbWorker::upgradeItems[] =
 	{":/DatabaseUpgrade/Upgrade0301.sql", "Upgrade to version 301, FSC Chassis preset has LM compatibility table"},
 	{":/DatabaseUpgrade/Upgrade0302.sql", "Upgrade to version 302, fixing misprint EngEneeringUnits -> EngIneeringUnits "},
 	{":/DatabaseUpgrade/Upgrade0303.sql", "Upgrade to version 303, fixing misprint EngEneeringUnits -> EngIneeringUnits in presets"},
+	{":/DatabaseUpgrade/Upgrade0304.sql", "Upgrade to version 304, Validity signals linked to outputs in AOM_4PH, AFB ff_sr description fix (The Set signal has the priority)"},
 };
 
 int DbWorker::counter = 0;
