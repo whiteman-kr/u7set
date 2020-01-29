@@ -162,6 +162,30 @@ QString ConfigController::getStateToolTip()
 	return result;
 }
 
+int ConfigController::schemaCount() const
+{
+	QMutexLocker l(&m_mutex);
+	return m_schemaDetailsSet.schemaCount();
+}
+
+QString ConfigController::schemaCaptionById(const QString& schemaId) const
+{
+	QMutexLocker l(&m_mutex);
+	return m_schemaDetailsSet.schemaCaptionById(schemaId);
+}
+
+QString ConfigController::schemaCaptionByIndex(int schemaIndex) const
+{
+	QMutexLocker l(&m_mutex);
+	return m_schemaDetailsSet.schemaCaptionByIndex(schemaIndex);
+}
+
+QString ConfigController::schemaIdByIndex(int schemaIndex) const
+{
+	QMutexLocker l(&m_mutex);
+	return m_schemaDetailsSet.schemaIdByIndex(schemaIndex);
+}
+
 void ConfigController::start()
 {
 	if (m_cfgLoaderThread == nullptr)
@@ -274,17 +298,23 @@ void ConfigController::slot_configurationReady(const QByteArray configurationXml
 		{
 			qDebug() << "ERROR: Cannot get " << fileName << ", " << parsingError;
 
+			QMutexLocker l(&m_mutex);
 			m_schemaDetailsSet.clear();
 		}
 		else
 		{
+			QMutexLocker l(&m_mutex);
 			m_schemaDetailsSet.clear();
 
 			m_schemaDetailsSet.Load(ba);
 		}
 	}
 
-	std::vector<VFrame30::SchemaDetails> schemasDetails = m_schemaDetailsSet.schemasDetails();
+	std::vector<VFrame30::SchemaDetails> schemasDetails;
+	{
+		QMutexLocker l(&m_mutex);
+		schemasDetails = m_schemaDetailsSet.schemasDetails();
+	}
 
 	for (const Builder::BuildFileInfo& f: buildFileInfoArray)
 	{
