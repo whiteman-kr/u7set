@@ -48,7 +48,7 @@ namespace Builder
 	//
 	// ---------------------------------------------------------------------------------
 
-	ModuleLogicCompiler::SignalsWithFlags::SignalsWithFlags(ModuleLogicCompiler& compiler) :
+/*	ModuleLogicCompiler::SignalsWithFlags::SignalsWithFlags(ModuleLogicCompiler& compiler) :
 		m_compiler(compiler)
 	{
 	}
@@ -63,8 +63,13 @@ namespace Builder
 		clear();
 	}
 
-	bool ModuleLogicCompiler::SignalsWithFlags::append(const QString& signalWithFlagID, E::AppSignalStateFlagType flagType, const QString& flagSignalID)
+	bool ModuleLogicCompiler::SignalsWithFlags::append(const QString& signalWithFlagID,
+													   E::AppSignalStateFlagType flagType,
+													   const QString& flagSignalID,
+													   const UalItem* setFlagsItem)
 	{
+		// setFlagsItem can be nullptr!
+		//
 		UalSignal* ualSignalWithFlag = m_compiler.ualSignals().get(signalWithFlagID);
 
 		if (ualSignalWithFlag == nullptr)
@@ -81,10 +86,6 @@ namespace Builder
 			return false;
 		}
 
-		bool res = ualSignalWithFlag->addStateFlagSignal(signalWithFlagID, flagType, ualFlagSignal, m_compiler.log());
-
-		RETURN_IF_FALSE(res);
-
 		AppSignalStateFlagsMap* signalFlagsMap = value(signalWithFlagID, nullptr);
 
 		if (signalFlagsMap == nullptr)
@@ -96,22 +97,40 @@ namespace Builder
 		if (signalFlagsMap->contains(flagType) == true)
 		{
 
-			// Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
-			//
-			m_compiler.log()->wrnALC5168(	flagSignalID,
-											E::valueToString<E::AppSignalStateFlagType>(flagType),
-											signalWithFlagID,
-											signalFlagsMap->value(flagType),
-											QUuid(),
-											QString());
+			if (setFlagsItem != nullptr)
+			{
+				// Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
+				//
+				m_compiler.log()->errALC5168(	flagSignalID,
+												E::valueToString<E::AppSignalStateFlagType>(flagType),
+												signalWithFlagID,
+												signalFlagsMap->value(flagType),
+												setFlagsItem->guid(),
+												setFlagsItem->schemaID());
+			}
+			else
+			{
+				// Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
+				//
+				m_compiler.log()->errALC5168(	flagSignalID,
+												E::valueToString<E::AppSignalStateFlagType>(flagType),
+												signalWithFlagID,
+												signalFlagsMap->value(flagType),
+												QUuid(), QString());
+
+			}
 
 			return true;	// replce with "return false;" after wrnALC5168 transform to Error
 		}
 
+		bool res = ualSignalWithFlag->addStateFlagSignal(signalWithFlagID, flagType, flagSignalID, m_compiler.log());
+
+		RETURN_IF_FALSE(res);
+
 		signalFlagsMap->insert(flagType, flagSignalID);
 
 		return true;
-	}
+	}*/
 
 	// ---------------------------------------------------------------------------------
 	//
@@ -133,8 +152,7 @@ namespace Builder
 		m_context(appLogicCompiler.context()),
 		m_lm(lm),
 		m_memoryMap(appLogicCompiler.log()),
-		m_ualSignals(*this, appLogicCompiler.log()),
-		m_signalsWithFlags(*this)
+		m_ualSignals(*this, appLogicCompiler.log())
 	{
 		m_equipmentSet = appLogicCompiler.equipmentSet();
 		m_deviceRoot = m_equipmentSet->root();
@@ -2506,56 +2524,6 @@ namespace Builder
 		result = linkConnectedItems(srcItem, outPin, ualSignal);
 
 		return result;
-
-/*		if (isInputPinOfSetFlagsItem == false)
-		{
-			// processing of link to 'flags' inputs
-			//
-			if (ualSignal->isDiscrete() == false)
-			{
-				// Uncompatible signals connection (Logic schema %1).
-				//
-				m_log->errALC5117(srcItem->guid(), srcItem->label(), setFlagsItem->guid(), setFlagsItem->label(), setFlagsItem->schemaID());
-
-				return false;
-			}
-
-			bool res = m_ualSignals.appendRefPin(setFlagsItem, inPin->guid(), ualSignal);
-
-			LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(res, m_log);
-
-			return true;
-		}
-
-		// processing of link to 'in' pin
-		//
-
-
-		bool result = m_ualSignals.appendRefPin(setFlagsItem, inPin->guid(), ualSignal);
-
-		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(result, m_log);
-
-		const std::vector<LogicPin>& outputs = ualAfb->outputs();
-
-		if (outputs.size() != 1)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		const LogicPin& outPin = outputs[0];
-
-		if (outPin.caption() != UalAfb::OUT_PIN_CAPTION)
-		{
-			LOG_INTERNAL_ERROR(m_log);
-			return false;
-		}
-
-		result = m_ualSignals.appendRefPin(setFlagsItem, outPin.guid(), ualSignal);
-
-		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(result, m_log);
-
-		result = linkConnectedItems(srcItem, outPin, ualSignal); */
 	}
 
 	bool ModuleLogicCompiler::linkBusComposerInput(UalItem* srcItem, UalItem* busComposerItem, QUuid inPinUuid, UalSignal* ualSignal)
@@ -2787,50 +2755,11 @@ namespace Builder
 		return result;
 	}
 
-	void ModuleLogicCompiler::testNearest()
-	{
-		for(UalItem* ualItem : m_ualItems)
-		{
-			TEST_PTR_CONTINUE(ualItem);
-
-			if (ualItem->label() != "APPSCHEMAID000001_115")
-			{
-				continue;
-			}
-
-			::std::vector<LogicPin> in = ualItem->inputs();
-
-			if (in.size() != 1)
-			{
-				assert(false);
-				continue;
-			}
-
-			QString directID;
-
-			getDirectlyConnectedInSignalID(in[0], &directID);
-
-			QString nearestID;
-
-			getNearestInSignalID(in[0], &nearestID);
-
-			QStringList nearestIDs;
-
-			getNearestInSignalIDs(in[0], &nearestIDs);
-
-			DEBUG_STOP
-		}
-	}
-
-
 	bool ModuleLogicCompiler::processSignalsWithFlags()
 	{
-		m_signalsWithFlags.clear();
+		m_signalsWithFlagsIDs.clear();
 
 		bool result = true;
-
-/*		testNearest();
-
 
 		result &= processAcquiredIOSignalsValidity();
 		result &= processSimlockItems();
@@ -2840,8 +2769,6 @@ namespace Builder
 		result &= setAcquiredForFlagSignals();
 
 		result &= checkSignalsWithFlags();
-
-		RETURN_IF_FALSE(result);*/
 
 		writeSignalsWithFlagsReport();
 
@@ -2923,9 +2850,10 @@ namespace Builder
 				m_ualSignals.createSignal(linkedValiditySignal);
 			}
 
-			bool res = m_signalsWithFlags.append(s->appSignalID(),
-												  E::AppSignalStateFlagType::Validity,
-												  linkedValiditySignal->appSignalID());
+			bool res = appendFlagToSignal(	s->appSignalID(),
+											E::AppSignalStateFlagType::Validity,
+											linkedValiditySignal->appSignalID(),
+											nullptr);
 			result &= res;
 		}
 
@@ -2967,20 +2895,15 @@ namespace Builder
 				continue;
 			}
 
-			UalSignal* outSignal = m_ualSignals.get(outPin->guid());
+			QStringList nearestSignalIDs;
 
-			if (outSignal == nullptr)
+			getNearestOutSignalIDs(*outPin, &nearestSignalIDs);
+
+			for(const QString& signalWithFlagID : nearestSignalIDs)
 			{
-				LOG_INTERNAL_ERROR(m_log);
-				result = false;
-				continue;
+				result &= appendFlagToSignalFromPin(ualItem, UalAfb::SIMLOCK_SIM_PIN_CAPTION, true, E::AppSignalStateFlagType::Simulated, signalWithFlagID, nullptr);
+				result &= appendFlagToSignalFromPin(ualItem, UalAfb::SIMLOCK_BLOCK_PIN_CAPTION, true, E::AppSignalStateFlagType::Blocked, signalWithFlagID, nullptr);
 			}
-
-			result &= setPinFlagSignal(ualItem, UalAfb::SIMLOCK_SIM_PIN_CAPTION, true,
-									   E::AppSignalStateFlagType::Simulated, outSignal, nullptr);
-
-			result &= setPinFlagSignal(ualItem, UalAfb::SIMLOCK_BLOCK_PIN_CAPTION, true,
-									   E::AppSignalStateFlagType::Blocked, outSignal, nullptr);
 		}
 
 		return result;
@@ -2988,8 +2911,6 @@ namespace Builder
 
 	bool ModuleLogicCompiler::processMismatchItems()
 	{
-		bool result = true;
-
 		const int MISMATCH_MIN_PIN_COUNT = 2;
 		const int MISMATCH_MAX_PIN_COUNT = 4;
 
@@ -3008,6 +2929,8 @@ namespace Builder
 			UalAfb::OUT_3_PIN_CAPTION,
 			UalAfb::OUT_4_PIN_CAPTION
 		};
+
+		bool result = true;
 
 		for(UalItem* ualItem : m_ualItems)
 		{
@@ -3029,34 +2952,35 @@ namespace Builder
 
 			Q_ASSERT(mismatchItem->isMismatchItem() == true);
 
-			int foundInputsCount = 0;
+			int foundPinsCount = 0;
 
-			for(const QString& inPinCaption : inPinCaptions)
+			for(int pinNo = 0; pinNo < MISMATCH_MAX_PIN_COUNT; pinNo++)
 			{
-				const QString& outPinCaption = outPinCaptions[foundInputsCount];
+				const QString& inPinCaption = inPinCaptions[pinNo];
+				const QString& outPinCaption = outPinCaptions[pinNo];
 
 				const LogicPin* inPin = mismatchItem->getPin(inPinCaption);
 
 				if (inPin == nullptr)
 				{
-					break;			// it is Ok, no more output pins
+					break;			// it is Ok, no more input pins
 				}
 
-				foundInputsCount++;
+				foundPinsCount++;
 
-				UalSignal* inSignal = m_ualSignals.get(inPin->guid());
+				QString signalWithFlagID;
 
-				if (inSignal == nullptr)
+				getDirectlyConnectedInSignalID(*inPin, &signalWithFlagID);
+
+				if (signalWithFlagID.isEmpty() == true)
 				{
-					LOG_INTERNAL_ERROR(m_log);
-					result = false;
 					continue;
 				}
 
-				result &= setPinFlagSignal(ualItem, outPinCaption, true, E::AppSignalStateFlagType::Mismatch, inSignal, nullptr);
+				result &= appendFlagToSignalFromPin(ualItem, outPinCaption, true, E::AppSignalStateFlagType::Mismatch, signalWithFlagID, nullptr);
 			}
 
-			if (foundInputsCount < MISMATCH_MIN_PIN_COUNT)
+			if (foundPinsCount < MISMATCH_MIN_PIN_COUNT)
 			{
 				LOG_INTERNAL_ERROR(m_log);
 				result = false;
@@ -3090,9 +3014,9 @@ namespace Builder
 
 			Q_ASSERT(setFlagsItem->isSetFlagsItem() == true);
 
-			const LogicPin* inPin = setFlagsItem->getPin(UalAfb::IN_PIN_CAPTION);
+			const LogicPin* outPin = setFlagsItem->getPin(UalAfb::OUT_PIN_CAPTION);
 
-			if (inPin == nullptr)
+			if (outPin == nullptr)
 			{
 				// Pin with caption %1 is not found in schema item (Logic schema %2).
 				//
@@ -3101,44 +3025,51 @@ namespace Builder
 				continue;
 			}
 
-			UalSignal* inSignal = m_ualSignals.get(inPin->guid());
+			QStringList outSignalIDs;
 
-			if (inSignal == nullptr)
+			getNearestOutSignalIDs(*outPin, &outSignalIDs);
+
+			for(const QString& signalWithFlagsID : outSignalIDs)
 			{
-				LOG_INTERNAL_ERROR(m_log);
-				result = false;
-				continue;
-			}
+				bool flagIsSet = false;
 
-			bool flagIsSet = false;
+				result &= appendFlagToSignalFromPin(ualItem, UalAfb::VALIDITY_PIN_CAPTION, false,
+													E::AppSignalStateFlagType::Validity, signalWithFlagsID, &flagIsSet);
 
-			result &= setPinFlagSignal(ualItem, UalAfb::VALIDITY_PIN_CAPTION, false, E::AppSignalStateFlagType::Validity, inSignal, &flagIsSet);
-			result &= setPinFlagSignal(ualItem, UalAfb::SIMULATED_PIN_CAPTION, false, E::AppSignalStateFlagType::Simulated, inSignal, &flagIsSet);
-			result &= setPinFlagSignal(ualItem, UalAfb::BLOCKED_PIN_CAPTION, false, E::AppSignalStateFlagType::Blocked, inSignal, &flagIsSet);
-			result &= setPinFlagSignal(ualItem, UalAfb::MISMATCH_PIN_CAPTION, false, E::AppSignalStateFlagType::Mismatch, inSignal, &flagIsSet);
-			result &= setPinFlagSignal(ualItem, UalAfb::HIGH_LIMIT_PIN_CAPTION, false, E::AppSignalStateFlagType::AboveHighLimit, inSignal, &flagIsSet);
-			result &= setPinFlagSignal(ualItem, UalAfb::LOW_LIMIT_PIN_CAPTION, false, E::AppSignalStateFlagType::BelowLowLimit, inSignal, &flagIsSet);
+				result &= appendFlagToSignalFromPin(ualItem, UalAfb::SIMULATED_PIN_CAPTION, false,
+													E::AppSignalStateFlagType::Simulated, signalWithFlagsID, &flagIsSet);
 
-			if (flagIsSet == false)
-			{
-				// No flags assiged on set_flags item %1 (Schema %2)
-				//
-				m_log->wrnALC5169(ualItem->label(), ualItem->guid(), ualItem->schemaID());
+				result &= appendFlagToSignalFromPin(ualItem, UalAfb::BLOCKED_PIN_CAPTION, false,
+													E::AppSignalStateFlagType::Blocked, signalWithFlagsID, &flagIsSet);
+
+				result &= appendFlagToSignalFromPin(ualItem, UalAfb::MISMATCH_PIN_CAPTION, false,
+													E::AppSignalStateFlagType::Mismatch, signalWithFlagsID, &flagIsSet);
+
+				result &= appendFlagToSignalFromPin(ualItem, UalAfb::HIGH_LIMIT_PIN_CAPTION, false,
+													E::AppSignalStateFlagType::AboveHighLimit, signalWithFlagsID, &flagIsSet);
+
+				result &= appendFlagToSignalFromPin(ualItem, UalAfb::LOW_LIMIT_PIN_CAPTION, false,
+													E::AppSignalStateFlagType::BelowLowLimit, signalWithFlagsID, &flagIsSet);
+				if (flagIsSet == false)
+				{
+					// No flags assiged on set_flags item %1 (Schema %2)
+					//
+					m_log->wrnALC5169(ualItem->label(), ualItem->guid(), ualItem->schemaID());
+				}
 			}
 		}
 
 		return result;
 	}
 
-	bool ModuleLogicCompiler::setPinFlagSignal(	const UalItem* ualItem,
+	bool ModuleLogicCompiler::appendFlagToSignalFromPin(const UalItem* ualItem,
 												const QString& pinCaption,
 												bool pinShouldBeExist,
 												E::AppSignalStateFlagType flagType,
-												UalSignal* inSignal,
+												const QString& signalWithFlagID,
 												bool* flagIsSet)
 	{
 		TEST_PTR_RETURN_FALSE(ualItem);
-		TEST_PTR_RETURN_FALSE(inSignal);
 
 		// flagIsSet can be == nullptr !
 
@@ -3164,17 +3095,24 @@ namespace Builder
 			return true;			// output is not used (connected to terminator only), it is Ok
 		}
 
-		UalSignal* flagSignal = m_ualSignals.get(pin->guid());
+		QString nearestID;
 
-		if (flagSignal == nullptr)
+		bool result = getNearestSignalID(*pin, &nearestID);
+
+		RETURN_IF_FALSE(result);
+
+		if (nearestID.isEmpty() == true)
 		{
-			// UalSignal is not found for pin %1 (Logic schema %2).
+			// has no signal item directly connected to pin
 			//
-			m_log->errALC5120(ualItem->guid(), ualItem->label(), pinCaption, ualItem->schemaID());
-			return false;
+			UalSignal* ualSignal = m_ualSignals.get(pin->guid());
+
+			LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(ualSignal != nullptr, log());
+
+			nearestID = ualSignal->appSignalID();
 		}
 
-		bool result = m_signalsWithFlags.append(inSignal->appSignalID(), flagType, flagSignal->appSignalID());
+		result = appendFlagToSignal(signalWithFlagID, flagType, nearestID, ualItem);
 
 		if (result == true && flagIsSet != nullptr)
 		{
@@ -3184,53 +3122,87 @@ namespace Builder
 		return result;
 	}
 
+	bool ModuleLogicCompiler::appendFlagToSignal(const QString& signalWithFlagID,
+												 E::AppSignalStateFlagType flagType,
+												 const QString& flagSignalID,
+												 const UalItem* setFlagsItem)
+	{
+		// setFlagsItem can be nullptr!
+		//
+		Signal* signalWithFlag = m_signals->getSignal(signalWithFlagID);
+
+		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(signalWithFlag != nullptr, m_log);
+
+		QString currentStateFlagSignalID = signalWithFlag->getFlagSignalID(flagType);
+
+		if (currentStateFlagSignalID.isEmpty() == false)
+		{
+			// Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
+			//
+			m_log->errALC5168(	flagSignalID,
+								E::valueToString<E::AppSignalStateFlagType>(flagType),
+								signalWithFlagID,
+								currentStateFlagSignalID,
+								(setFlagsItem == nullptr ? QUuid() : setFlagsItem->guid()),
+								(setFlagsItem == nullptr ? QString() : setFlagsItem->schemaID()));
+			return false;
+		}
+
+		signalWithFlag->addFlagSignalID(flagType, flagSignalID);
+
+		m_signalsWithFlagsIDs.insert(signalWithFlagID);
+
+		return true;
+	}
+
 	bool ModuleLogicCompiler::setAcquiredForFlagSignals()
 	{
-		QStringList signalsWithFlagsIDs = m_signalsWithFlags.keys();
+		bool result = true;
 
-		for(const QString& signalWithFlagsID : signalsWithFlagsIDs)
+		for(const QString& signalWithFlagsID : m_signalsWithFlagsIDs)
 		{
+			Signal* signalWithFlags = m_signals->getSignal(signalWithFlagsID);
+
+			TEST_PTR_CONTINUE(signalWithFlags);
+
+			if (signalWithFlags->isAcquired() == false)
+			{
+				continue;
+			}
+
 			UalSignal* ualSignalWithFlags = m_ualSignals.get(signalWithFlagsID);
 
 			TEST_PTR_CONTINUE(ualSignalWithFlags);
 
 			if (ualSignalWithFlags->isAcquired() == false)
 			{
+				Q_ASSERT(false);			// if signalWithFlagsID is Acquired, ualSignalWithFlags should be Acquired also!
+				LOG_INTERNAL_ERROR(m_log);
+				result = false;
 				continue;
 			}
 
-			const AppSignalStateFlagsMap* signalFlags = m_signalsWithFlags.value(signalWithFlagsID, nullptr);
+			QStringList flagSignalIDs = signalWithFlags->getFlagSignalsIDs();
 
-			TEST_PTR_CONTINUE(signalFlags);
+			Q_ASSERT(flagSignalIDs.size() > 0);
 
-			assert(signalFlags->isEmpty() == false);
-
-			QList<E::AppSignalStateFlagType> flags = signalFlags->keys();
-
-			for(E::AppSignalStateFlagType flagType : flags)
+			for(const QString& flagSignalID : flagSignalIDs)
 			{
-				QString flagSignalID = signalFlags->value(flagType, QString());
+				UalSignal* ualFlagSignal = m_ualSignals.get(flagSignalID);
 
-				if (flagSignalID.isEmpty() == true)
+				if (ualFlagSignal == nullptr)
 				{
-					assert(false);
+					Q_ASSERT(false);
+					LOG_INTERNAL_ERROR(m_log);
+					result = false;
 					continue;
 				}
 
-				UalSignal* ualSignal = m_ualSignals.get(flagSignalID);
-
-				if (ualSignal != nullptr)
-				{
-					ualSignal->setAcquired(true);
-				}
-				else
-				{
-					assert(false);
-				}
+				ualFlagSignal->setAcquired(true);
 			}
 		}
 
-		return true;
+		return result;
 	}
 
 	bool ModuleLogicCompiler::checkSignalsWithFlags()
@@ -3239,63 +3211,59 @@ namespace Builder
 
 		std::vector<E::AppSignalStateFlagType> flagTypes = E::values<E::AppSignalStateFlagType>();
 
-		QStringList signalsWithFlagsIDs = m_signalsWithFlags.keys();
-
-		for(const QString& signalWithFlagsID : signalsWithFlagsIDs)
+		for(const QString& signalWithFlagsID : m_signalsWithFlagsIDs)
 		{
-			UalSignal* ualSignal = m_ualSignals.get(signalWithFlagsID);
+			Signal* signalWithFlags = m_signals->getSignal(signalWithFlagsID);
 
-			if (ualSignal == nullptr)
+			if (signalWithFlags == nullptr)
+			{
+				LOG_INTERNAL_ERROR_MSG(log(), QString("Signal with flags %1 is not found in map m_signals").arg(signalWithFlagsID));
+				result = false;
+				continue;
+			}
+
+			UalSignal* ualSignalWithFlags = m_ualSignals.get(signalWithFlagsID);
+
+			if (ualSignalWithFlags == nullptr)
 			{
 				LOG_INTERNAL_ERROR_MSG(log(), QString("Signal with flags %1 is not found in map m_ualSignals").arg(signalWithFlagsID));
 				result = false;
+				continue;
 			}
 
-			if (ualSignal->isAcquired() == true)
+			bool signalWithFlagsIsAcquired = signalWithFlags->isAcquired();
+
+			if (signalWithFlagsIsAcquired == true && ualSignalWithFlags->isAcquired() == false)
 			{
-				if (m_signals->getSignal(signalWithFlagsID) == nullptr)
+				LOG_INTERNAL_ERROR(m_log);
+				continue;
+			}
+
+			QStringList flagSignalsIDs = signalWithFlags->getFlagSignalsIDs();
+
+			for(const QString& flagSignalID : flagSignalsIDs)
+			{
+				Signal* flagSignal = m_signals->getSignal(flagSignalID);
+
+				if (flagSignal == nullptr)
 				{
-					LOG_INTERNAL_ERROR_MSG(log(), QString("Signal with flags %1 is not found in map m_signals").arg(signalWithFlagsID));
+					LOG_INTERNAL_ERROR_MSG(log(), QString("Flag signal %1 is not found in map m_signals").arg(flagSignalID));
 					result = false;
-				}
-			}
-
-			const AppSignalStateFlagsMap* signalFlags = m_signalsWithFlags.value(signalWithFlagsID, nullptr);
-
-			if (signalFlags == nullptr)
-			{
-				LOG_INTERNAL_ERROR_MSG(log(), QString("Flag signals map is not exists for signal %1 in map m_signalsWithFlags").
-									   arg(signalWithFlagsID));
-				result = false;
-				continue;
-			}
-
-			if (signalFlags->count() == 0)
-			{
-				LOG_INTERNAL_ERROR_MSG(log(), QString("Flag signals map is empty for signal %1 in map m_signalsWithFlags").
-									   arg(signalWithFlagsID));
-				result = false;
-				continue;
-			}
-
-			for(E::AppSignalStateFlagType flagType : flagTypes)
-			{
-				QString flagSignalID = signalFlags->value(flagType, QString());
-
-				if (flagSignalID.isEmpty() == true)
-				{
 					continue;
 				}
 
-				if (m_ualSignals.get(flagSignalID) == nullptr)
+				UalSignal* ualFlagSignal = m_ualSignals.get(flagSignalID);
+
+				if (ualFlagSignal == nullptr)
 				{
 					LOG_INTERNAL_ERROR_MSG(log(), QString("Flag signal %1 is not found in map m_ualSignals").arg(flagSignalID));
 					result = false;
+					continue;
 				}
 
-				if (m_signals->getSignal(flagSignalID) == nullptr)
+				if (signalWithFlagsIsAcquired == true && ualFlagSignal->isAcquired() == false)
 				{
-					LOG_INTERNAL_ERROR_MSG(log(), QString("Flag signal %1 is not found in map m_signals").arg(flagSignalID));
+					LOG_INTERNAL_ERROR(m_log);
 					result = false;
 				}
 			}
@@ -3311,92 +3279,34 @@ namespace Builder
 			return;
 		}
 
-		if (m_signalsWithFlags.isEmpty() == true)
-		{
-			return;
-		}
-
-		QStringList signalsWithFlagsIDs = m_signalsWithFlags.keys();
-
-		QStringList acquiredSignalsWithFlags;
-		QStringList nonAcquiredSignalsWithFlags;
-
-		for(const QString& signalWithFlagsID : signalsWithFlagsIDs)
-		{
-			UalSignal* ualSignal = m_ualSignals.get(signalWithFlagsID);
-
-			TEST_PTR_CONTINUE(ualSignal);
-
-			if (ualSignal->isAcquired() == true)
-			{
-				acquiredSignalsWithFlags.append(signalWithFlagsID);
-			}
-			else
-			{
-				nonAcquiredSignalsWithFlags.append(signalWithFlagsID);
-			}
-		}
-
-		acquiredSignalsWithFlags.sort();
-		nonAcquiredSignalsWithFlags.sort();
-
 		QStringList file;
 
-		if (acquiredSignalsWithFlags.isEmpty() == false)
+		for(const QString& signalWithFlagsID : m_signalsWithFlagsIDs)
 		{
-			file.append(QString("--------------------------- Acquired signals with flags ---------------------------\n"));
+			Signal* signalWithFlags = m_signals->getSignal(signalWithFlagsID);
 
-			writeSignalsWithFlagsToReport(&file, acquiredSignalsWithFlags);
-		}
+			TEST_PTR_CONTINUE(signalWithFlags);
 
-		if (nonAcquiredSignalsWithFlags.isEmpty() == false)
-		{
-			file.append(QString("--------------------------- Non-acquired signals with flags ---------------------------\n"));
+			QString str = QString("%1:%2;").arg(signalWithFlags->isAcquired() ? "acquired" : "not_acquired").arg(signalWithFlagsID);
 
-			writeSignalsWithFlagsToReport(&file, nonAcquiredSignalsWithFlags);
-		}
-
-		m_resultWriter->addFile(QString("%1/%2").arg(m_lmSubsystemID).arg(lmEquipmentID()), "SignalsWithFlags.txt", file);
-	}
-
-	void ModuleLogicCompiler::writeSignalsWithFlagsToReport(QStringList* file, const QStringList& signalsWithFlagsIDs)
-	{
-		TEST_PTR_RETURN(file);
-
-		std::vector<E::AppSignalStateFlagType> flagTypes = E::values<E::AppSignalStateFlagType>();
-
-		for(const QString& signalWithFlagsID : signalsWithFlagsIDs)
-		{
-			const AppSignalStateFlagsMap* signalFlags = m_signalsWithFlags.value(signalWithFlagsID, nullptr);
-
-			TEST_PTR_CONTINUE(signalFlags);
-
-			if (signalFlags->count() == 0)
-			{
-				assert(false);
-				continue;
-			}
-
-			UalSignal* ualSignal = m_ualSignals.get(signalWithFlagsID);
-
-			TEST_PTR_CONTINUE(ualSignal);
-
-			file->append(QString("%1 flags:").arg(ualSignal->refSignalIDsJoined()));
+			std::vector<E::AppSignalStateFlagType> flagTypes = E::values<E::AppSignalStateFlagType>();
 
 			for(E::AppSignalStateFlagType flagType : flagTypes)
 			{
-				QString flagSignalID = signalFlags->value(flagType, QString());
+				QString flagSignalID = signalWithFlags->getFlagSignalID(flagType);
 
-				if (flagSignalID.isEmpty())
+				if (flagSignalID.isEmpty() == true)
 				{
 					continue;
 				}
 
-				file->append(QString("\t%1 - %2").arg(E::valueToString<E::AppSignalStateFlagType>(flagType)).arg(flagSignalID));
+				str += QString("%1:%2;").arg(E::valueToString<E::AppSignalStateFlagType>(flagType)).arg(flagSignalID);
 			}
 
-			file->append(QString("\n"));
+			file.append(str);
 		}
+
+		m_resultWriter->addFile(QString("%1/%2").arg(m_lmSubsystemID).arg(lmEquipmentID()), "SignalsWithFlags.csv", file);
 	}
 
 	bool ModuleLogicCompiler::sortUalSignals()
@@ -6650,6 +6560,66 @@ namespace Builder
 		}
 
 		return result;
+	}
+
+	bool ModuleLogicCompiler::getNearestOutSignalIDs(const LogicPin& outPin, QStringList* nearestSignalIDs)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(nearestSignalIDs, log());
+		LOG_INTERNAL_ERROR_IF_FALSE_RETURN_FALSE(outPin.IsOutput(), log());
+
+		nearestSignalIDs->clear();
+
+		::std::vector<QUuid> linkedPins = outPin.associatedIOs();
+
+		for(QUuid linkedPin : linkedPins)
+		{
+			UalItem* ualItem = m_pinParent.value(linkedPin, nullptr);
+
+			TEST_PTR_CONTINUE(ualItem);
+
+			if (ualItem->isSignal() == true)
+			{
+				nearestSignalIDs->append(ualItem->strID());
+			}
+		}
+
+		return true;
+	}
+
+	bool ModuleLogicCompiler::getNearestOutSignalID(const LogicPin& outPin, QString* nearestSignalID)
+	{
+		TEST_PTR_LOG_RETURN_FALSE(nearestSignalID, log());
+
+		nearestSignalID->clear();
+
+		QStringList nearestSignalIDs;
+
+		bool result = getNearestOutSignalIDs(outPin, &nearestSignalIDs);
+
+		if (nearestSignalIDs.size() > 0)
+		{
+			*nearestSignalID = nearestSignalIDs.first();
+		}
+
+		return result;
+	}
+
+	bool ModuleLogicCompiler::getNearestSignalID(const LogicPin& inOutPin, QString* nearestSignalID)
+	{
+		if (inOutPin.IsInput() == true)
+		{
+			return getNearestInSignalID(inOutPin, nearestSignalID);
+		}
+
+		if (inOutPin.IsOutput() == true)
+		{
+			return getNearestOutSignalID(inOutPin, nearestSignalID);
+		}
+
+		assert(false);
+		LOG_INTERNAL_ERROR(log());
+
+		return false;
 	}
 
 	bool ModuleLogicCompiler::processSinglePortReceivers()

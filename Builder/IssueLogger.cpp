@@ -6310,7 +6310,7 @@ namespace Builder
 
 	/// IssueCode: ALC5168
 	///
-	/// IssueType: Warning
+	/// IssueType: Error
 	///
 	/// Title: Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.
 	///
@@ -6323,7 +6323,7 @@ namespace Builder
 	/// Description:
 	///		Duplicate assigning of signal to flag of specified signal
 	///
-	void IssueLogger::wrnALC5168(	QString flagSignalID,
+	void IssueLogger::errALC5168(	QString flagSignalID,
 									QString flagTypeStr,
 									QString signalWithFlagID,
 									QString alreadyAssignedFlagSignalID,
@@ -6332,13 +6332,20 @@ namespace Builder
 	{
 		if (schemaID.isEmpty() == false)
 		{
-			addItemsIssues(OutputMessageLevel::Warning0, 5168, itemUuid, schemaID);
-		}
+			addItemsIssues(OutputMessageLevel::Error, 5168, itemUuid, schemaID);
 
-		LOG_WARNING0(IssueType::AlCompiler,
-				  5168,
-				  QString(tr("Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.")).
-						arg(flagSignalID).arg(flagTypeStr).arg(signalWithFlagID).arg(alreadyAssignedFlagSignalID));
+			LOG_ERROR(IssueType::AlCompiler,
+					  5168,
+					  QString(tr("Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag (Logic schema %5).")).
+							arg(flagSignalID).arg(flagTypeStr).arg(signalWithFlagID).arg(alreadyAssignedFlagSignalID).arg(schemaID));
+		}
+		else
+		{
+			LOG_ERROR(IssueType::AlCompiler,
+					  5168,
+					  QString(tr("Duplicate assigning of signal %1 to flag %2 of signal %3. Signal %4 already assigned to this flag.")).
+							arg(flagSignalID).arg(flagTypeStr).arg(signalWithFlagID).arg(alreadyAssignedFlagSignalID));
+		}
 	}
 
 	/// IssueCode: ALC5169

@@ -406,7 +406,7 @@ namespace Builder
 		void wrnALC5165(QString lmEquipmentID);											// Tuning is enabled for module %1 but tunable signals is not found.
 		void errALC5166(QString lmEquipmentID);											// Tunable signals is found in module %1 but tuning is not enabled.
 		void wrnALC5167(QString appSignalID);											// Signal %1 is excluded from build.
-		void wrnALC5168(QString flagSignalID,
+		void errALC5168(QString flagSignalID,
 						QString flagTypeStr,
 						QString signalWithFlagID,
 						QString alreadyAssignedFlagSignalID,

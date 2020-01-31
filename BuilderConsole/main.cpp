@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
 #endif
 
 	// Example:
-	//	BuilderConsoler DatabaseAddress DatabaseUserName DatabasePassword ProjectName ProjectUserName ProjectUserPassword
+	//	BuilderConsole DatabaseAddress DatabaseUserName DatabasePassword ProjectName ProjectUserName ProjectUserPassword
 	//
 	QStringList args = a.arguments();
 
@@ -48,7 +48,7 @@ int main(int argc, char *argv[])
 	{
 		std::cout << "Wrong argument count." << std::endl;
 		std::cout << "Arguments:" << std::endl;
-		std::cout << "\tBuilderConsoler DatabaseAddress DatabasePort DatabaseUserName DatabasePassword ProjectName ProjectUserName ProjectUserPassword [BuildOutputPath] [BuildType]" << std::endl;
+		std::cout << "\tBuilderConsole DatabaseAddress DatabasePort DatabaseUserName DatabasePassword ProjectName ProjectUserName ProjectUserPassword [BuildOutputPath] [BuildType]" << std::endl;
 		std::cout << "\tDatabaseAddress: Postgresql IP-address\n" <<
 					 "\tDatabasePort: Postgresql access port\n" <<
 					 "\tDatabaseUserName: Postgresql user name\n" <<

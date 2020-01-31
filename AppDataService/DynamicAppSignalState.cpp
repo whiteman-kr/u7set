@@ -30,13 +30,13 @@ void DynamicAppSignalState::setSignalParams(const Signal* signal, const AppSigna
 	m_byteOrder = signal->byteOrder();
 	m_dataSize = signal->dataSize();
 
-	if (signal->hasStateFlagsSignals() == true)
+	if (signal->hasFlagsSignals() == true)
 	{
 		static const std::vector<E::AppSignalStateFlagType> flagsTypes = E::values<E::AppSignalStateFlagType>();
 
 		for(E::AppSignalStateFlagType flagType : flagsTypes)
 		{
-			QString flagSignalID = signal->stateFlagSignal(flagType);
+			QString flagSignalID = signal->getFlagSignalID(flagType);
 
 			if (flagSignalID.isEmpty() == true)
 			{
