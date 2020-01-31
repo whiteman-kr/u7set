@@ -728,6 +728,7 @@ std::set<QString> MonitorConfigController::schemaAppSignals(const QString& schem
 
 QStringList MonitorConfigController::schemasByAppSignalId(const QString& appSignalId) const
 {
+	QMutexLocker l(&m_mutex);
 	return m_schemaDetailsSet.schemasByAppSignalId(appSignalId);
 }
 
@@ -746,4 +747,28 @@ QString MonitorConfigController::configurationStartSchemaId() const
 {
 	QMutexLocker locker(&m_confugurationMutex);
 	return m_configuration.startSchemaId;
+}
+
+int MonitorConfigController::schemaCount() const
+{
+	QMutexLocker l(&m_mutex);
+	return m_schemaDetailsSet.schemaCount();
+}
+
+QString MonitorConfigController::schemaCaptionById(const QString& schemaId) const
+{
+	QMutexLocker l(&m_mutex);
+	return m_schemaDetailsSet.schemaCaptionById(schemaId);
+}
+
+QString MonitorConfigController::schemaCaptionByIndex(int schemaIndex) const
+{
+	QMutexLocker l(&m_mutex);
+	return m_schemaDetailsSet.schemaCaptionByIndex(schemaIndex);
+}
+
+QString MonitorConfigController::schemaIdByIndex(int schemaIndex) const
+{
+	QMutexLocker l(&m_mutex);
+	return m_schemaDetailsSet.schemaIdByIndex(schemaIndex);
 }

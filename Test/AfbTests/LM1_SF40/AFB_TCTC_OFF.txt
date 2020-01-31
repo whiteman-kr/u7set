@@ -36,7 +36,7 @@ endtest
 
 test AFB_TCTC_OFF_2, AFB tests for TCTC_OFF element
 schema TCTC_OFF
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //time 5000
 set #TUN_DSCR2 = 0
 delay 5000
@@ -70,7 +70,7 @@ endtest
 
 test AFB_TCTC_OFF_3, AFB tests for TCTC_OFF element
 schema TCTC_OFF
-compatible MODULE_LM1SF00
+compatible MODULE_LM1SF40
 //time 10000
 set #TUN_DSCR3 = 0
 delay 10000

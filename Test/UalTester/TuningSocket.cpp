@@ -330,9 +330,9 @@ void TuningSocket::requestWriteTuningSignals()
 	{
 		TuningWriteCmd cmd = m_pTuningBase->cmdFowWrite();
 
-		if (cmd.signalHash() == 0)
+		if (cmd.signalHash() == UNDEFINED_HASH)
 		{
-			assert(cmd.signalHash() != 0);
+			assert(cmd.signalHash() != UNDEFINED_HASH);
 			continue;
 		}
 

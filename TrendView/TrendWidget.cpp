@@ -250,7 +250,7 @@ namespace TrendLib
 	void TrendWidget::updateWidget()
 	{
 		m_trendParam.setRect(rect());
-		m_trendParam.setDpi(physicalDpiX(), physicalDpiY());
+		m_trendParam.setDpi(logicalDpiX(), logicalDpiY());
 
 		m_thread.render(m_trendParam);
 	}

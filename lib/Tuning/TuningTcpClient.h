@@ -215,8 +215,11 @@ private:
 	std::vector<Hash> m_signalHashes;
 
 	bool m_singleLmControlMode = false;
+
+	mutable QMutex m_activeClientMutex;				// For access to m_activeClientId, m_activeClientIp
 	QString m_activeClientId;
 	QString m_activeClientIp;
+
 	bool m_currentClientIsActive = false;
 
 protected:

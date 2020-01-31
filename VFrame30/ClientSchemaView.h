@@ -29,18 +29,29 @@ namespace VFrame30
 		- setting and reading variables;
 		- displaying message boxes.
 
-		\warning
-		Items and widgets searching is performed by objects name. In order to find certain item, an item should have an unique <b>ObjectName</b> property value within the schema.
+		\warning Items and widgets searching is performed by objects name. In order to find certain item, an item should have an unique <b>ObjectName</b> property value within the schema.
 
-		<b>Examples:</b>
+		\n
+		\warning Do not call message box functions (<b>warningMessageBox, errorMessageBox, infoMessageBox and questionMessageBox</b>) from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers.
+		This can cause user interface hang.
+
+		<b>Schema Variables</b>
+
+		Schema variables are used to change schema contents dynamically. For example, one schema can display different set of signals.
+		Dynamic schema items (<b>SchemaItemValue</b>, <b>SchemaItemImageValue</b> etc.) can contain variable macros in signal properties
+		(<b>AppSignalIDs</b>) and display different application signals when variable changes. Variable values can be changed by script code.
+
+		<b>Example 1. Schema Switching</b>
 
 		\code
 		// Set another schema
 		//
 		view.setSchema("MYSCHEMA");
+		\endcode
 
-		...
+		<b>Example 2. Displaying Message Boxes</b>
 
+		\code
 		// Display information in the message box
 		//
 		view.infoMessageBox(“Hello world!”);
@@ -55,10 +66,61 @@ namespace VFrame30
 			....
 		}
 		\endcode
+
+		<b>Example 3. Set current schema caption to rectangle text on click event (ClickScript)</b>
+
+		\code
+		// This is an example how to set current schema caption to rectangle text on click event (ClickScript)
+		//
+		(function(schemaItem)
+		{
+			schemaItem.Text = view.SchemaCaption;
+		})
+		\endcode
+
+		<b>Example 4. Using schema variables</b>
+
+		Assume schema has SchemaItemValue with <b>AppSignalIDs</b> property set to <i>"#SIGNAL_0_$(Var01)"</i>. Also schema contains two buttons (SchemaItemPushButton)
+		with click event handlers.
+
+		On first button click, <i>"Var01"</i> variable is set to <i>"SIG001"</i>, on second button click is set to <i>"SIG002"</i>.
+
+		SchemaItemValue variable macro will be replaced to its value, so two different signal values (<i>SIGNAL_0_SIG001</i> or <i>SIGNAL_0_SIG002</i>) will be
+		displayed depending on what button was clicked.
+
+		\code
+		// SchemaItemPushButton 1 ClickScript handler
+		//
+		(function(schemaItem, pushButtonWidget, checked)
+		{
+			view.setVariable("Var01", "SIG001");
+			view.infoMessageBox("Variable is set to " + view.variable("Var01"));
+		})
+
+		// SchemaItemPushButton 2 ClickScript handler
+		//
+		(function(schemaItem, pushButtonWidget, checked)
+		{
+			view.setVariable("Var01", "SIG002");
+			view.infoMessageBox("Variable is set to " + view.variable("Var01"));
+		})
+		\endcode
 	*/
 	class ScriptSchemaView : public QObject
 	{
 		Q_OBJECT
+
+		/// \brief Current schema unique identifier (SchemaID).
+		Q_PROPERTY(QString SchemaID READ schemaId)
+
+		/// \brief Current schema caption.
+		Q_PROPERTY(QString SchemaCaption READ schemaCaption)
+
+		/// \brief Get current ScriptSchema object. To get SchemaID or SchemaCaption for perfomance reason use appropriate properties of view <b>view.SchemaID</b> and <b>view.SchemaCaption</b>.
+		Q_PROPERTY(QObject* Schema READ schema)
+
+		/// \brief Get schema count.
+		Q_PROPERTY(int SchemaCount READ schemaCount)
 
 	public:
 		explicit ScriptSchemaView(ClientSchemaView* clientSchemaView, QObject* parent = nullptr);
@@ -75,7 +137,11 @@ namespace VFrame30
 		/// \brief Finds a schema item by its name (ObjectName property). Return value has SchemaItem type or undefined if item is not found.
 		QObject* findSchemaItem(QString objectName);	// Find SchemaItem by ObjectName
 
-		/// \brief Finds a schema control widget (edit control, button, etc...) by its name (ObjectName property). Return value has QWidget type or undefined if item is not found.
+		/// \brief Finds a schema control widget (edit control, button, etc...) by its name (ObjectName property).
+		///
+		/// Finds a schema control widget (edit control, button, etc...) by its name (ObjectName property).
+		/// Return value type depends on an object type and can be one of following: PushButtonWidget, LineEditWidget, etc.
+		/// Return value is set to <i>undefined</i> if item is not found.
 		QObject* findWidget(QString objectName);		// Find Widget associated with SchemaItem
 
 		void update();									// Update (redraw) schema view
@@ -83,15 +149,31 @@ namespace VFrame30
 		// Message Box functions
 		//
 		/// \brief Displays a warning message box with specified text.
+		///
+		/// Displays a question message box with specified text. If user clicked "Yes", returns true, otherwise returns false.
+		///
+		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
 		void warningMessageBox(QString text);
 
 		/// \brief Displays an error message box with specified text.
+		///
+		/// Displays a question message box with specified text. If user clicked "Yes", returns true, otherwise returns false.
+		///
+		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
 		void errorMessageBox(QString text);
 
 		/// \brief Displays an information message box with specified text.
+		///
+		/// Displays a question message box with specified text. If user clicked "Yes", returns true, otherwise returns false.
+		///
+		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
 		void infoMessageBox(QString text);
 
 		/// \brief Displays a question message box with specified text. If user clicked "Yes", returns true, otherwise returns false.
+		///
+		/// Displays a question message box with specified text. If user clicked "Yes", returns true, otherwise returns false.
+		///
+		/// \warning Do not call this function from <b>PreDrawScript</b> and <b>AfterCreateScript</b> event handlers. This can cause user interface hang.
 		bool questionMessageBox(QString text);
 
 		// Variables functions
@@ -102,8 +184,30 @@ namespace VFrame30
 		/// \brief Retrieves a value of the variable specified by name.
 		QVariant variable(QString name);
 
-		/// \brief Sets the value of the variable specified by name
+		/// \brief Sets the value of the variable specified by name.
 		void setVariable(QString name, const QVariant& value);
+
+		/// \brief Get schema by index. Avoid using this function for perfomance reason. To get schemas' identifiers and captions use schemaCaptionById, schemaCaptionByIndex, schemaIdByIndex
+		QObject* schemaByIndex(int schemaIndex);
+
+		/// \brief Get schema caption by schema identifier.
+		QString schemaCaptionById(const QString& schemaId) const;
+
+		// Not documented
+		//
+		QString schemaCaptionByIndex(int schemaIndex) const;
+
+		// Not documented
+		//
+		QString schemaIdByIndex(int schemaIndex) const;
+
+	private:
+		QString schemaId() const;
+		QString schemaCaption() const;
+
+		QObject* schema();
+
+		int schemaCount() const;
 
 		// Data
 		//

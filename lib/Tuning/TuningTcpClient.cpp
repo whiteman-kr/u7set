@@ -603,12 +603,14 @@ void TuningTcpClient::processTuningSourcesState(const QByteArray& data)
 		}
 	}
 
-	m_activeClientId = m_tuningSourcesStatesReply.activeclientid().c_str();
-	m_activeClientIp = m_tuningSourcesStatesReply.activeclientip().c_str();
+	{
+		QMutexLocker l(&m_activeClientMutex);
+		m_activeClientId = m_tuningSourcesStatesReply.activeclientid().c_str();
+		m_activeClientIp = m_tuningSourcesStatesReply.activeclientip().c_str();
 
-	QString localAddress = localAddressPort().addressStr();
-
-	m_currentClientIsActive = (m_singleLmControlMode == false) || (m_activeClientId == m_instanceId && m_activeClientIp == localAddress);
+		QString localAddress = localAddressPort().addressStr();
+		m_currentClientIsActive = (m_singleLmControlMode == false) || (m_activeClientId == m_instanceId && m_activeClientIp == localAddress);
+	}
 
 	//
 
@@ -1132,11 +1134,13 @@ bool TuningTcpClient::singleLmControlMode() const
 
 QString TuningTcpClient::activeClientId() const
 {
+	QMutexLocker l(&m_activeClientMutex);
 	return m_activeClientId;
 }
 
 QString TuningTcpClient::activeClientIp() const
 {
+	QMutexLocker l(&m_activeClientMutex);
 	return m_activeClientIp;
 }
 

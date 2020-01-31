@@ -21,6 +21,59 @@ namespace VFrame30
 {
 	Factory<VFrame30::Schema> SchemaFactory;
 
+	//
+	// ScriptSchema
+	//
+	ScriptSchema::ScriptSchema(std::shared_ptr<Schema> schema) :
+		m_schema(schema)
+	{
+		Q_ASSERT(m_schema);
+	}
+
+	ScriptSchema::~ScriptSchema()
+	{
+		qDebug() << "ScriptSchema::~ScriptSchema " << schemaId();
+	}
+
+	bool ScriptSchema::isLogicSchema() const
+	{
+		return m_schema ? m_schema->isLogicSchema() : false;
+	}
+
+	bool ScriptSchema::isUfbSchema() const
+	{
+		return m_schema ? m_schema->isUfbSchema() : false;
+	}
+
+	bool ScriptSchema::isMonitorSchema() const
+	{
+		return m_schema ? m_schema->isMonitorSchema() : false;
+	}
+
+
+	bool ScriptSchema::isTuningSchema() const
+	{
+		return m_schema ? m_schema->isTuningSchema() : false;
+	}
+
+	bool ScriptSchema::isDiagSchema() const
+	{
+		return m_schema ? m_schema->isDiagSchema() : false;
+	}
+
+	QString ScriptSchema::schemaId() const
+	{
+		return m_schema ? m_schema->schemaId() : QString{};
+	}
+
+	QString ScriptSchema::caption() const
+	{
+		return m_schema ? m_schema->caption() : QString{};
+	}
+
+	//
+	// Schema
+	//
 	Schema::Schema(void)
 	{
 		Init();
@@ -137,6 +190,12 @@ namespace VFrame30
 
 	bool Schema::LoadData(const Proto::Envelope& message)
 	{
+//		qDebug() << Q_FUNC_INFO;
+//		qDebug() << "        Start loading Schema....";
+
+//		QTime t;
+//		t.start();
+
 		if (message.has_schema() == false)
 		{
 			assert(message.has_schema());
@@ -202,6 +261,9 @@ namespace VFrame30
 		// Load fake empty Afb Collection,
 		//
 		//m_afbCollection.LoadData(schema.afbs());
+
+//		int elapsed = t.elapsed();
+//		qDebug() << "        Schema " << schemaId() << " is loaded for " << elapsed << " ms";
 
 		return true;
 	}
@@ -1920,6 +1982,43 @@ namespace VFrame30
 		}
 
 		return result;
+	}
+
+	int SchemaDetailsSet::schemaCount() const
+	{
+		return static_cast<int>(m_details.size());
+	}
+
+	QString SchemaDetailsSet::schemaCaptionById(const QString& schemaId) const
+	{
+		auto it = m_details.find(schemaId);
+		return (it == m_details.end()) ? QString{} : it->second->m_caption;
+	}
+
+	QString SchemaDetailsSet::schemaCaptionByIndex(int schemaIndex) const
+	{
+		if (schemaIndex >=0 && schemaIndex < m_details.size())
+		{
+			auto it = m_details.begin();
+			std::advance(it, schemaIndex);
+
+			return (it == m_details.end()) ? QString{} : it->second->m_caption;
+		}
+
+		return {};
+	}
+
+	QString SchemaDetailsSet::schemaIdByIndex(int schemaIndex) const
+	{
+		if (schemaIndex >=0 && schemaIndex < m_details.size())
+		{
+			auto it = m_details.begin();
+			std::advance(it, schemaIndex);
+
+			return (it == m_details.end()) ? QString{} : it->second->m_schemaId;
+		}
+
+		return {};
 	}
 
 }

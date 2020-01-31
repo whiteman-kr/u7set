@@ -10,6 +10,31 @@ namespace VFrame30
 		\brief This item is used to display static images
 
 		This item is used to display static images.
+
+		<b>Event handlers</b>
+
+		To customize item's apperance and behaviour, event handler code is placed to following properties of the schema item using RPCT:
+
+		- <b>ClickScript</b> contains mouse click event handler code.
+		Click event is generated each time when user clicks mouse button on the item and <b>AcceptClick</b> property is set to true;<br>
+		-  <b>PreDrawScript</b> contains pre-draw event handler code. Pre-draw event is generated each time before item is redrawn.
+
+		<b>ClickScript</b> and <b>PreDrawScript</b> event handler function protypes:
+
+		\code
+		function(schemaItem)
+		\endcode
+
+		Parameters:<br>
+		<i>schemaItem</i> - a handle to schema item, type: SchemaItemImage.<br>
+
+		<b>PreDrawScript example:</b>
+		\code
+		(function(schemaItem)
+		{
+			schemaItem.Svg = "<line x1="0" y1="0" x2="200" y2="200" stroke-width="1" stroke="rgb(0,0,0)"/>";
+		})
+		\endcode
 	*/
 
 	class VFRAME30LIBSHARED_EXPORT SchemaItemImage : public PosRectImpl

@@ -39,6 +39,42 @@ std::shared_ptr<VFrame30::Schema> MonitorSchemaManager::loadSchema(QString schem
 	return schema;
 }
 
+int MonitorSchemaManager::schemaCount() const
+{
+	return m_configController->schemaCount();
+}
+
+std::shared_ptr<VFrame30::Schema> MonitorSchemaManager::schemaByIndex(int schemaIndex)
+{
+	if (schemaIndex < 0)
+	{
+		return {};
+	}
+
+	QString schemaId = schemaIdByIndex(schemaIndex);
+	if (schemaId.isEmpty() == true)
+	{
+		return {};
+	}
+
+	return schema(schemaId);
+}
+
+QString MonitorSchemaManager::schemaCaptionById(const QString& schemaId) const
+{
+	return m_configController->schemaCaptionById(schemaId);
+}
+
+QString MonitorSchemaManager::schemaCaptionByIndex(int schemaIndex) const
+{
+	return m_configController->schemaCaptionByIndex(schemaIndex);
+}
+
+QString MonitorSchemaManager::schemaIdByIndex(int schemaIndex) const
+{
+	return m_configController->schemaIdByIndex(schemaIndex);
+}
+
 void MonitorSchemaManager::slot_configurationArrived(ConfigSettings configuration)
 {
 	clear();

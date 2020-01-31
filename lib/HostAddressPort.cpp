@@ -198,6 +198,11 @@ void HostAddressPort::clear()
 	m_port = 0;
 }
 
+bool HostAddressPort::isEmpty()
+{
+	return m_hostAddress.toIPv4Address() == 0;
+}
+
 
 bool HostAddressPort::isValidIPv4(const QString& ipAddressStr)
 {

@@ -21,6 +21,8 @@ namespace VFrame30
 		p = ADD_PROPERTY_GET_SET_CAT(QString, PropertyNames::toolTip, PropertyNames::controlCategory, true, SchemaItemControl::toolTip, SchemaItemControl::setToolTip);
 		p->setDescription(PropertyNames::widgetPropToolTip);
 
+		// --
+		//
 		m_static = false;
 		setItemUnit(unit);
 	}

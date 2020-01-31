@@ -28,18 +28,25 @@ class PropertyObject;
 
 #define ADD_PROPERTY_GETTER(TYPE, NAME, VISIBLE, GETTER) \
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
-	(std::function<TYPE(void)>)std::bind(&GETTER, this));
+	[this](){return GETTER();});
+
 
 #define ADD_PROPERTY_GETTER_INDIRECT(TYPE, NAME, VISIBLE, GETTER, OWNER) \
-	addProperty<TYPE>(NAME, QString(), VISIBLE, \
-	(std::function<TYPE(void)>)std::bind(&GETTER, &OWNER));
+	{\
+		auto OWNER_PTR = &OWNER;\
+		addProperty<TYPE>(NAME, QString(), VISIBLE, \
+		[OWNER_PTR](){return OWNER_PTR->GETTER();});\
+	}
+	//(std::function<TYPE(void)>)std::bind(&GETTER, &OWNER));
+
 
 // Add property which has getter and setter
 //
 #define ADD_PROPERTY_GETTER_SETTER(TYPE, NAME, VISIBLE, GETTER, SETTER) \
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
-	(std::function<TYPE(void)>)std::bind(&GETTER, this), \
-	std::bind(&SETTER, this, std::placeholders::_1))
+	[this](){return GETTER();}, \
+	[this](const TYPE& value){return SETTER(value);})
+
 
 #define ADD_PROPERTY_GETTER_SETTER_INDIRECT(TYPE, NAME, VISIBLE, GETTER, SETTER, OWNER) \
 	addProperty<TYPE>(NAME, QString(), VISIBLE, \
@@ -53,8 +60,9 @@ class PropertyObject;
 	NAME, \
 	CATEGORY,\
 	VISIBLE,\
-	(std::function<TYPE(void)>)std::bind(&GETTER, this), \
-	std::bind(&SETTER, this, std::placeholders::_1))
+	[this](){return GETTER();}, \
+	[this](const TYPE& value){return SETTER(value);})
+
 
 // Add property which has dirrect access to the variable, by creating lambdas fo getter and setter
 //
@@ -70,8 +78,8 @@ class PropertyObject;
 //
 #define ADD_PROPERTY_DYNAMIC_ENUM(NAME, VISIBLE, ENUMVALUES, GETTER, SETTER) \
 	addDynamicEnumProperty(NAME, ENUMVALUES, VISIBLE, \
-	(std::function<int(void)>)std::bind(&GETTER, this), \
-	std::bind(&SETTER, this, std::placeholders::_1));
+	[this](){return GETTER();}, \
+	[this](const TYPE& value){return SETTER(value);});
 
 #define ADD_PROPERTY_DYNAMIC_ENUM_INDIRECT(NAME, VISIBLE, ENUMVALUES, GETTER, SETTER, OWNER) \
 	addDynamicEnumProperty(NAME, ENUMVALUES, VISIBLE, \

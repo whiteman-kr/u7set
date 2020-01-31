@@ -117,7 +117,7 @@ namespace VFrame30
 
 			if (m_painter != nullptr && m_painter->device() != nullptr)
 			{
-				mutable_this->m_dpiX = m_painter->device()->physicalDpiX();
+				mutable_this->m_dpiX = m_painter->device()->logicalDpiX();
 			}
 			else
 			{
@@ -137,7 +137,7 @@ namespace VFrame30
 
 			if (m_painter != nullptr && m_painter->device() != nullptr)
 			{
-				mutable_this->m_dpiY = m_painter->device()->physicalDpiY();
+				mutable_this->m_dpiY = m_painter->device()->logicalDpiY();
 			}
 			else
 			{
@@ -374,8 +374,8 @@ namespace VFrame30
 		QPaintDevice* pPaintDevice = painter->device();
 		if (pPaintDevice != nullptr)
 		{
-			dpiX = pPaintDevice->physicalDpiX();
-			dpiY = pPaintDevice->physicalDpiY();
+			dpiX = pPaintDevice->logicalDpiX();
+			dpiY = pPaintDevice->logicalDpiY();
 		}
 		else
 		{
@@ -435,8 +435,8 @@ namespace VFrame30
 		QPaintDevice* pPaintDevice = painter->device();
 		if (pPaintDevice != nullptr)
 		{
-			dpiX = pPaintDevice->physicalDpiX();
-			dpiY = pPaintDevice->physicalDpiY();
+			dpiX = pPaintDevice->logicalDpiX();
+			dpiY = pPaintDevice->logicalDpiY();
 		}
 		else
 		{

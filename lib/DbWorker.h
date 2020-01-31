@@ -217,8 +217,8 @@ public slots:
 	static bool db_dbFileInfo(const QSqlQuery& q, DbFileInfo* fileInfo);
 	static bool db_objectState(QSqlQuery& q, ObjectState* os);
 
-	bool db_dbChangeset(const QSqlQuery& q, DbChangeset* out);
-	bool db_dbChangesetObject(const QSqlQuery& q, DbChangesetDetails* destination);
+	static bool db_dbChangeset(const QSqlQuery& q, DbChangeset* out);
+	static bool db_dbChangesetObject(const QSqlQuery& q, DbChangesetDetails* destination);
 
     // Properties
     //
